@@ -29,6 +29,7 @@
   (this is the zlib license)
 */
 
+#ifdef __SSE__
 #ifndef SSE_MATHFUN_H_
 #define SSE_MATHFUN_H_
 
@@ -43,4 +44,5 @@ v4sf sin_ps(v4sf x);
 v4sf cos_ps(v4sf x);
 void sincos_ps(v4sf x, v4sf *s, v4sf *c);
 
+#endif
 #endif

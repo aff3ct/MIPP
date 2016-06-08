@@ -1595,7 +1595,7 @@
 
 	template <>
 	inline reg exp<double>(const reg v) {
-		return (reg) _mm_exp_pd((__m256d) v);
+		return (reg) _mm_exp_pd((__m128d) v);
 	}
 #else
 	template <>

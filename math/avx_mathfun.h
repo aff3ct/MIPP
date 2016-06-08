@@ -28,7 +28,7 @@
 
   (this is the zlib license)
 */
-
+#ifdef __AVX__
 #ifndef AVX_MATHFUN_H_
 #define AVX_MATHFUN_H_
 
@@ -43,4 +43,5 @@ v8sf sin256_ps(v8sf x);
 v8sf cos256_ps(v8sf x);
 void sincos256_ps(v8sf x, v8sf *s, v8sf *c);
 
+#endif
 #endif
