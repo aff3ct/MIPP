@@ -101,6 +101,27 @@ int main(int argc, char** argv)
 	std::cout << "int         = "; mipp::dump<int        >(out_32i); std::cout << std::endl;
 	std::cout << "short       = "; mipp::dump<short      >(out_16i); std::cout << std::endl;
 	std::cout << "signed char = "; mipp::dump<signed char>(out_8i ); std::cout << std::endl;
+	std::cout << std::endl;
+
+	std::cout << "=========================================================================" << std::endl << std::endl;
+
+	using type = float;
+
+	std::uniform_int_distribution<int> uniform_dist(-127,127);
+	auto vec_size = 32;
+	std::vector<type> vec(vec_size);
+
+	std::cout << "Input vec = [";
+	for (auto i = 0; i < vec_size; i++)
+	{
+		vec[i] = (type)uniform_dist(g);
+		std::cout << ", " << +vec[i];
+	}
+	std::cout << "]" << std::endl;
+
+	auto red = mipp::Reduction<type, mipp::add<type>>::apply(vec);
+	
+	std::cout << "Output reduction (add) = " << +red << std::endl;
 
 	return 0;
 }

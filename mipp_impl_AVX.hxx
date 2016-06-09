@@ -1754,7 +1754,7 @@
 
 	// ----------------------------------------------------------------------------------------------- Reduction::apply
 	template <red_op<double> OP>
-	struct Reduction<double,OP>
+	struct _Reduction<double,OP>
 	{
 		static reg apply(const reg v1) {
 			reg val = v1;
@@ -1765,7 +1765,7 @@
 	};
 
 	template <red_op<float> OP>
-	struct Reduction<float,OP>
+	struct _Reduction<float,OP>
 	{
 		static reg apply(const reg v1) {
 			reg val = v1;
@@ -1777,7 +1777,7 @@
 	};
 
 	template <red_op<int> OP>
-	struct Reduction<int,OP>
+	struct _Reduction<int,OP>
 	{
 		static reg apply(const reg v1) {
 			reg val = v1;
@@ -1790,7 +1790,7 @@
 
 #ifdef __AVX2__
 	template <red_op<short> OP>
-	struct Reduction<short,OP>
+	struct _Reduction<short,OP>
 	{
 		static reg apply(const reg v1) {
 			__m256i mask_16 = _mm256_set_epi8(29, 28, 31, 30, 25, 24, 27, 26, 21, 20, 23, 22, 17, 16, 19, 18, 13, 12, 15,
@@ -1808,7 +1808,7 @@
 
 #ifdef __AVX2__
 	template <red_op<signed char> OP>
-	struct Reduction<signed char,OP>
+	struct _Reduction<signed char,OP>
 	{
 		static reg apply(const reg v1) {
 			__m256i mask_16 = _mm256_set_epi8(29, 28, 31, 30, 25, 24, 27, 26, 21, 20, 23, 22, 17, 16, 19, 18, 13, 12, 15,

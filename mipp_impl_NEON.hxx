@@ -1119,7 +1119,7 @@
 
 	// ----------------------------------------------------------------------------------------------- Reduction::apply
 	template <red_op<float> OP>
-	struct Reduction<float,OP>
+	struct _Reduction<float,OP>
 	{
 		static reg apply(const reg v1) {
 			reg val = v1;
@@ -1136,7 +1136,7 @@
 	};
 
 	template <red_op<int> OP>
-	struct Reduction<int,OP>
+	struct _Reduction<int,OP>
 	{
 		static reg apply(const reg v1) {
 			reg val = v1;
@@ -1152,7 +1152,7 @@
 	};
 
 	template <red_op<short> OP>
-	struct Reduction<short,OP>
+	struct _Reduction<short,OP>
 	{
 		static reg apply(const reg v1) {
 			reg val = v1;
@@ -1172,7 +1172,7 @@
 	};
 
 	template <red_op<signed char> OP>
-	struct Reduction<signed char,OP>
+	struct _Reduction<signed char,OP>
 	{
 		static reg apply(const reg v1) {
 			reg val = v1;

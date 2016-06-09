@@ -70,6 +70,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 #include <iomanip>
 #include <cstddef>
+#include <cassert>
 #include <string>
 #include <vector>
 #include <map>
@@ -374,11 +375,53 @@ template <typename T>
 using red_op = reg (*)(const reg, const reg);
 
 template <typename T, red_op<T> OP>
-struct Reduction
+struct _Reduction
 {
 	static reg apply(const reg) {
-		errorMessage<T>("Reduction::apply");
+		errorMessage<T>("_Reduction::apply");
 		exit(-1); 
+	}
+};
+
+template <typename T, red_op<T> OP>
+struct Reduction
+{
+	static reg apply(const reg r) {
+		_Reduction<T,OP>::apply(r);
+	}
+
+	static T apply(const mipp::vector<T> &data) 
+	{
+		auto dataSize = data.size();
+		assert(dataSize > 0);
+		assert(dataSize % mipp::nElReg<T>() == 0);
+
+		auto rRed = mipp::load<T>(&data[0]);
+		for (auto i = mipp::nElReg<T>(); i < dataSize; i += mipp::nElReg<T>())
+			rRed = OP(rRed, mipp::load<T>(&data[i]));
+		rRed = Reduction<T,OP>::apply(rRed);
+
+		T tRed[mipp::nElReg<T>()];
+		mipp::store<T>(tRed, rRed);
+
+		return tRed[0];
+	}
+
+	static T apply(const std::vector<T> &data) 
+	{
+		auto dataSize = data.size();
+		assert(dataSize > 0);
+		assert(dataSize % mipp::nElReg<T>() == 0);
+
+		auto rRed = mipp::loadu<T>(&data[0]);
+		for (auto i = mipp::nElReg<T>(); i < dataSize; i += mipp::nElReg<T>())
+			rRed = OP(rRed, mipp::loadu<T>(&data[i]));
+		rRed = Reduction<T,OP>::apply(rRed);
+
+		T tRed[mipp::nElReg<T>()];
+		mipp::store<T>(tRed, rRed);
+
+		return tRed[0];
 	}
 };
 
