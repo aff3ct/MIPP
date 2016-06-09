@@ -370,6 +370,18 @@ inline reg pack(const reg, const reg) {
 	exit(-1); 
 }
 
+template <typename T>
+using red_op = reg (*)(const reg, const reg);
+
+template <typename T, red_op<T> OP>
+struct Reduction
+{
+	static reg apply(const reg) {
+		errorMessage<T>("Reduction::apply");
+		exit(-1); 
+	}
+};
+
 // --------------------------------------------------------------------------------------- myIntrinsics implementations
 // --------------------------------------------------------------------------------------------------------------------
 
