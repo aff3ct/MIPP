@@ -1126,8 +1126,8 @@
 
 			val = OP(val, (reg) vextq_f32(val, val, 2));
 
-			int32x2_t low1  = vrev64_f32(vget_low_f32 (val));
-			int32x2_t high1 = vrev64_f32(vget_high_f32(val));
+			float32x2_t low1  = vrev64_f32(vget_low_f32 (val));
+			float32x2_t high1 = vrev64_f32(vget_high_f32(val));
 			val = OP(val, vcombine_f32(low1, high1));
 
 			return val;
