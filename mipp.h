@@ -545,33 +545,33 @@ public:
 
 	inline Reg<T>& operator~  (               )       { r = mipp::notb<T>(r);                    return *this; }
 
-	inline Reg<T>& operator+= (const Reg<T> &v)       { r = mipp::add<T>(v.r, r);                return *this; }
-	inline Reg<T>  operator+  (      Reg<T>  v) const { v += (*this);                            return v;     }
-	inline Reg<T>  operator+  (      T*   data) const { auto v = Reg<T>(data); v += (*this);     return v;     }
+	inline Reg<T>& operator+= (const Reg<T> &v)       { r   = mipp::add<T>(r, v.r);              return *this; }
+	inline Reg<T>  operator+  (      Reg<T>  v) const { v.r = mipp::add<T>(r, v.r);              return v;     }
+	inline Reg<T>  operator+  (      T*   data) const { auto v = Reg<T>(data); v = (*this) + v;  return v;     }
 
-	inline Reg<T>& operator-= (const Reg<T> &v)       { r = mipp::sub<T>(v.r, r);                return *this; }
-	inline Reg<T>  operator-  (      Reg<T>  v) const { v -= (*this);                            return v;     }
-	inline Reg<T>  operator-  (      T*   data) const { auto v = Reg<T>(data); v -= (*this);     return v;     }
+	inline Reg<T>& operator-= (const Reg<T> &v)       { r   = mipp::sub<T>(r, v.r);              return *this; }
+	inline Reg<T>  operator-  (      Reg<T>  v) const { v.r = mipp::sub<T>(r, v.r);              return v;     }
+	inline Reg<T>  operator-  (      T*   data) const { auto v = Reg<T>(data); v = (*this) - v;  return v;     }
 
-	inline Reg<T>& operator*= (const Reg<T> &v)       { r = mipp::mul<T>(v.r, r);                return *this; }
-	inline Reg<T>  operator*  (      Reg<T>  v) const { v *= (*this);                            return v;     }
-	inline Reg<T>  operator*  (      T*   data) const { auto v = Reg<T>(data); v *= (*this);     return v;     }
+	inline Reg<T>& operator*= (const Reg<T> &v)       { r   = mipp::mul<T>(r, v.r);              return *this; }
+	inline Reg<T>  operator*  (      Reg<T>  v) const { v.r = mipp::mul<T>(r, v.r);              return v;     }
+	inline Reg<T>  operator*  (      T*   data) const { auto v = Reg<T>(data); v = (*this) * v;  return v;     }
 
-	inline Reg<T>& operator/= (const Reg<T> &v)       { r = mipp::div<T>(v.r, r);                return *this; }
-	inline Reg<T>  operator/  (      Reg<T>  v) const { v /= (*this);                            return v;     }
-	inline Reg<T>  operator/  (      T*   data) const { auto v = Reg<T>(data); v /= (*this);     return v;     }
+	inline Reg<T>& operator/= (const Reg<T> &v)       { r   = mipp::div<T>(r, v.r);              return *this; }
+	inline Reg<T>  operator/  (      Reg<T>  v) const { v.r = mipp::div<T>(r, v.r);              return v;     }
+	inline Reg<T>  operator/  (      T*   data) const { auto v = Reg<T>(data); v = (*this) / v;  return v;     }
 
-	inline Reg<T>& operator^= (const Reg<T> &v)       { r = mipp::xorb<T>(v.r, r);               return *this; }
-	inline Reg<T>  operator^  (      Reg<T>  v) const { v ^= (*this);                            return v;     }
-	inline Reg<T>  operator^  (      T*   data) const { auto v = Reg<T>(data); v ^= (*this);     return v;     }
+	inline Reg<T>& operator^= (const Reg<T> &v)       { r   = mipp::xorb<T>(r, v.r);             return *this; }
+	inline Reg<T>  operator^  (      Reg<T>  v) const { v.r = mipp::xorb<T>(r, v.r);             return v;     }
+	inline Reg<T>  operator^  (      T*   data) const { auto v = Reg<T>(data); v = (*this) ^ v;  return v;     }
 
-	inline Reg<T>& operator|= (const Reg<T> &v)       { r = mipp::orb<T>(v.r, r);                return *this; }
-	inline Reg<T>  operator|  (      Reg<T>  v) const { v |= (*this);                            return v;     }
-	inline Reg<T>  operator|  (      T*   data) const { auto v = Reg<T>(data); v |= (*this);     return v;     }
+	inline Reg<T>& operator|= (const Reg<T> &v)       { r   = mipp::orb<T>(r, v.r);              return *this; }
+	inline Reg<T>  operator|  (      Reg<T>  v) const { v.r = mipp::orb<T>(r, v.r);              return v;     }
+	inline Reg<T>  operator|  (      T*   data) const { auto v = Reg<T>(data); v = (*this) | v;  return v;     }
 
-	inline Reg<T>& operator&= (const Reg<T> &v)       { r = mipp::andb<T>(v.r, r);               return *this; }
-	inline Reg<T>  operator&  (      Reg<T>  v) const { v &= (*this);                            return v;     }
-	inline Reg<T>  operator&  (      T*   data) const { auto v = Reg<T>(data); v &= (*this);     return v;     }
+	inline Reg<T>& operator&= (const Reg<T> &v)       { r   = mipp::andb<T>(r, v.r);             return *this; }
+	inline Reg<T>  operator&  (      Reg<T>  v) const { v.r = mipp::andb<T>(r, v.r);             return v;     }
+	inline Reg<T>  operator&  (      T*   data) const { auto v = Reg<T>(data); v = (*this) & v;  return v;     }
 
 	inline Reg<T>& operator<<=(const int n    )       { r = mipp::lshift<T>(r, n);               return *this; }
 	inline Reg<T>  operator<< (const int n    ) const { Reg v = *this; v <<= n;                  return v;     }
