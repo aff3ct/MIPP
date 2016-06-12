@@ -395,34 +395,78 @@ void dump(const mipp::reg r, std::ostream &stream = std::cout, const int elmtWid
 
 // ---------------------------------------------------------------------------------------------------------- reduction
 
+template <typename T>
+class Reg;
 
 template <typename T>
 using red_op = reg (*)(const reg, const reg);
 
 template <typename T>
+using Red_op = Reg<T> (*)(const Reg<T>, const Reg<T>);
+
+template <typename T>
 using ld_op = reg (*)(const T*);
 
 template <typename T, red_op<T> OP>
-struct _Reduction
+struct _reduction
 {
 	static reg apply(const reg) {
+		errorMessage<T>("_reduction::apply");
+		exit(-1); 
+	}
+};
+
+template <typename T, Red_op<T> OP>
+struct _Reduction
+{
+	static Reg<T> apply(const Reg<T>) {
 		errorMessage<T>("_Reduction::apply");
 		exit(-1); 
 	}
 };
 
-template <typename T>
-class Reg;
-
 template <typename T, red_op<T> OP>
-struct Reduction
+struct reduction
 {
-	static reg apply(const Reg<T> r) 
+	static reg apply(const reg r) 
 	{
-		return _Reduction<T,OP>::apply(r.r);
+		return _reduction<T,OP>::apply(r);
 	}
 
-	static reg apply(const reg r) 
+	template <ld_op<T> LD = mipp::load<T>>
+	static T apply(const mipp::vector<T> &data)
+	{
+		return reduction<T,OP>::template apply<LD>(data.data(), data.size());
+	}
+
+	template <ld_op<T> LD = mipp::loadu<T>>
+	static T apply(const std::vector<T> &data)
+	{
+		return reduction<T,OP>::template apply<LD>(data.data(), data.size());
+	}
+
+	template <ld_op<T> LD = mipp::loadu<T>>
+	static T apply(const T *data, const int dataSize) 
+	{
+		assert(dataSize > 0);
+		assert(dataSize % mipp::nElReg<T>() == 0);
+
+		auto rRed = LD(&data[0]);
+		for (auto i = mipp::nElReg<T>(); i < dataSize; i += mipp::nElReg<T>())
+			rRed = OP(rRed, LD(&data[i]));
+		rRed = reduction<T,OP>::apply(rRed);
+
+		T tRed[mipp::nElReg<T>()];
+		mipp::store<T>(tRed, rRed);
+
+		return tRed[0];
+	}
+};
+
+template <typename T, Red_op<T> OP>
+struct Reduction
+{
+	static Reg<T> apply(const Reg<T> r) 
 	{
 		return _Reduction<T,OP>::apply(r);
 	}
@@ -445,13 +489,13 @@ struct Reduction
 		assert(dataSize > 0);
 		assert(dataSize % mipp::nElReg<T>() == 0);
 
-		auto rRed = LD(&data[0]);
+		auto rRed = Reg<T>(LD(&data[0]));
 		for (auto i = mipp::nElReg<T>(); i < dataSize; i += mipp::nElReg<T>())
-			rRed = OP(rRed, LD(&data[i]));
+			rRed = OP(rRed, Reg<T>(LD(&data[i])));
 		rRed = Reduction<T,OP>::apply(rRed);
 
 		T tRed[mipp::nElReg<T>()];
-		mipp::store<T>(tRed, rRed);
+		rRed.store(tRed);
 
 		return tRed[0];
 	}
@@ -459,15 +503,15 @@ struct Reduction
 
 // ------------------------------------------------------------------------- special reduction functions implementation
 
-template <typename T> inline reg sum (const reg v) { return Reduction<T,mipp::add<T>>::apply(v); }
-template <typename T> inline reg hadd(const reg v) { return Reduction<T,mipp::add<T>>::apply(v); }
-template <typename T> inline reg hmin(const reg v) { return Reduction<T,mipp::min<T>>::apply(v); }
-template <typename T> inline reg hmax(const reg v) { return Reduction<T,mipp::max<T>>::apply(v); }
+template <typename T> inline reg sum (const reg v) { return reduction<T,mipp::add<T>>::apply(v); }
+template <typename T> inline reg hadd(const reg v) { return reduction<T,mipp::add<T>>::apply(v); }
+template <typename T> inline reg hmin(const reg v) { return reduction<T,mipp::min<T>>::apply(v); }
+template <typename T> inline reg hmax(const reg v) { return reduction<T,mipp::max<T>>::apply(v); }
 
 // ------------------------------------------------------------------------------------------------- wrapper to objects
 
 template <typename T>
-struct Regx2;
+class Regx2;
 
 template <typename T>
 class Reg
@@ -475,15 +519,49 @@ class Reg
 public:
 	reg r;
 
-	Reg(              )                          {}
-	Reg(const reg r   ) : r(r)                   {}
-	Reg(const T   val ) : r(mipp::set1<T>(val))  {}
-	Reg(const T  *data) : r(mipp::load<T>(data)) {}
+	Reg(                              )                           {}
+	Reg(const reg r                   ) : r(r)                    {}
+	Reg(const T   val                 ) : r(mipp::set1 <T>(val))  {}
+	Reg(const T  *data                ) : r(mipp::load <T>(data)) {}
+	Reg(const T  *data, bool unaligned) : r(mipp::loadu<T>(data)) {}
 
 	~Reg() {}
 
-	static inline Reg<T> cmask (const int mask[nElReg<T>()])   { return mipp::cmask  <T>(mask); }
-	static inline Reg<T> cmask2(const int mask[nElReg<T>()/2]) { return mipp::cmask2 <T>(mask); }
+	static inline Reg<T> cmask (const int mask[nElReg<T>()])   { return mipp::cmask <T>(mask); }
+	static inline Reg<T> cmask2(const int mask[nElReg<T>()/2]) { return mipp::cmask2<T>(mask); }
+
+	static inline void transpose(Reg<T> regs[nElReg<T>()])
+	{
+		reg rs[nElReg<T>()];
+		for (auto i = 0; i < nElReg<T>(); i++) rs[i] = regs[i].r;
+		mipp::transpose<T>(rs);
+		for (auto i = 0; i < nElReg<T>(); i++) regs[i].r = rs[i];
+
+	}
+
+	static inline void transpose8x8(Reg<T> regs[8])
+	{
+		reg rs[8];
+		for (auto i = 0; i < 8; i++) rs[i] = regs[i].r;
+		mipp::transpose8x8<T>(rs);
+		for (auto i = 0; i < 8; i++) regs[i].r = rs[i];
+	}
+
+	static inline void transpose2(Reg<T> regs[nElReg<T>()/2])
+	{
+		reg rs[nElReg<T>()/2];
+		for (auto i = 0; i < nElReg<T>()/2; i++) rs[i] = regs[i].r;
+		mipp::transpose2<T>(rs);
+		for (auto i = 0; i < nElReg<T>()/2; i++) regs[i].r = rs[i];
+	}
+
+	static inline void transpose28x8(Reg<T> regs[8])
+	{
+		reg rs[8];
+		for (auto i = 0; i < 8; i++) rs[i] = regs[i].r;
+		mipp::transpose28x8<T>(rs);
+		for (auto i = 0; i < 8; i++) regs[i].r = rs[i];
+	}
 
 	inline void     set0         (               )                        { r = mipp::set0<T>();                          }
 	inline void     set1         (const T val    )                        { r = mipp::set1<T>(val);                       }
@@ -597,11 +675,11 @@ public:
 	inline Reg<T>  operator>= (      Reg<T>  v) const { v = mipp::cmpge<T>(r, v.r);              return v;     }
 	inline Reg<T>  operator>= (      T*   data) const { auto v = Reg<T>(data); v = (*this) >= v; return v;     }
 
-	// ----------------------------------------------------------------------------------------------------- reductions
-	inline Reg<T> sum () const { return mipp::sum <T>(r); }
-	inline Reg<T> hadd() const { return mipp::hadd<T>(r); }
-	inline Reg<T> hmin() const { return mipp::hmin<T>(r); }
-	inline Reg<T> hmax() const { return mipp::hmax<T>(r); }
+	// ------------------------------------------------------------------------------------------------------ reduction
+	inline Reg<T> sum () const { return Reduction<T,add>::apply(*this); }
+	inline Reg<T> hadd() const { return Reduction<T,add>::apply(*this); }
+	inline Reg<T> hmin() const { return Reduction<T,min>::apply(*this); }
+	inline Reg<T> hmax() const { return Reduction<T,max>::apply(*this); }
 };
 
 template <typename T>
@@ -611,9 +689,14 @@ std::ostream& operator<<(std::ostream& os, const Reg<T>& r)
 }
 
 template <typename T>
-struct Regx2 
-{ 
-	Reg<T> val[2]; 
+class Regx2 
+{
+public:
+	Reg<T> val[2];
+
+	Regx2(regx2 r2) : val({Reg<T>(r2.val[0]), Reg<T>(r2.val[1])}) {}
+
+	~Regx2() {}
 };
 
 template <typename T> inline Reg<T>   shuff        (const Reg<T> v1, const Reg<T> v2)                  { return v1.shuff(v2);         }
