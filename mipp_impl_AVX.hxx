@@ -16,6 +16,11 @@
 	}
 
 	template <>
+	inline reg load<long long>(const long long *mem_addr) {
+		return (__m256) _mm256_load_pd((const double*)mem_addr);
+	}
+
+	template <>
 	inline reg load<int>(const int *mem_addr) {
 		return _mm256_load_ps((const float*) mem_addr);
 	}
@@ -39,6 +44,11 @@
 	template <>
 	inline reg loadu<double>(const double *mem_addr) {
 		return (__m256) _mm256_loadu_pd(mem_addr);
+	}
+
+	template <>
+	inline reg loadu<long long>(const long long *mem_addr) {
+		return (__m256) _mm256_loadu_pd((const double*) mem_addr);
 	}
 
 	template <>
