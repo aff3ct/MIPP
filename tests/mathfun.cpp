@@ -19,8 +19,8 @@ int main(int argc, char** argv)
 	for (auto i = 0; i < mipp::nElReg<type>(); i++) t_2[i] = i+1;
 	std::shuffle(t_2, t_2 + mipp::nElReg<type>(), g);
 
-	mipp::Reg<type> in_1(t_1);
-	mipp::Reg<type> in_2(t_2);
+	mipp::Reg<type> in_1; in_1.loadu(t_1);
+	mipp::Reg<type> in_2; in_2.loadu(t_2);
 
 	std::cout << "Input vectors: " << std::endl;
 	std::cout << "in_1 = " << in_1 << std::endl;
