@@ -36,9 +36,14 @@ public:
 
 	Reg(const std::initializer_list<T> &l)
 	{
-		auto vec = mipp::vector<T>(mipp::nElReg<T>());
-		vec = l;
-		r = mipp::load<T>(vec.data());
+		if (l.size() >= (unsigned)mipp::nElReg<T>())
+			r = mipp::loadu<T>(l.begin());
+		else
+		{
+			auto vec = mipp::vector<T>(mipp::nElReg<T>());
+			vec = l;
+			r = mipp::load<T>(vec.data());
+		}
 	}
 
 	~Reg() {}
