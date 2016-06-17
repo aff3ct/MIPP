@@ -32,7 +32,7 @@ SOFTWARE.
 #ifndef MY_INTRINSICS_PLUS_PLUS_H_
 #define MY_INTRINSICS_PLUS_PLUS_H_
 
-#ifndef NO_INTRINSICS
+#ifndef MIPP_NO_INTRINSICS
 #if defined(__ARM_NEON__) || defined(__ARM_NEON)
 #include <arm_neon.h>
 #elif defined(__SSE__) || defined(__AVX__) || defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)
@@ -79,11 +79,11 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 {
 // ------------------------------------------------------------------------------------------ myIntrinsics vector sizes
 // --------------------------------------------------------------------------------------------------------------------
-#ifndef NO_INTRINSICS
+#ifndef MIPP_NO_INTRINSICS
 // ------------------------------------------------------------------------------------------------------- ARM NEON-128
 #if defined(__ARM_NEON__) || defined(__ARM_NEON)
-	#define REQUIRED_ALIGNMENT 16
-	constexpr int RequiredAlignment = REQUIRED_ALIGNMENT;
+	#define MIPP_REQUIRED_ALIGNMENT 16
+	constexpr int RequiredAlignment = MIPP_REQUIRED_ALIGNMENT;
 	constexpr int RegisterSizeBit = 128;
 
 	using reg = float32x4_t;
@@ -92,8 +92,8 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 
 // -------------------------------------------------------------------------------------------------------- X86 AVX-512
 #elif defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)
-	#define REQUIRED_ALIGNMENT 64
-	constexpr int RequiredAlignment = REQUIRED_ALIGNMENT;
+	#define MIPP_REQUIRED_ALIGNMENT 64
+	constexpr int RequiredAlignment = MIPP_REQUIRED_ALIGNMENT;
 	constexpr int RegisterSizeBit = 512;
 
 	using reg = __m512;
@@ -102,8 +102,8 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 
 // -------------------------------------------------------------------------------------------------------- X86 AVX-256
 #elif defined(__AVX__)
-	#define REQUIRED_ALIGNMENT 32
-	constexpr int RequiredAlignment = REQUIRED_ALIGNMENT;
+	#define MIPP_REQUIRED_ALIGNMENT 32
+	constexpr int RequiredAlignment = MIPP_REQUIRED_ALIGNMENT;
 	constexpr int RegisterSizeBit = 256;
 
 	using reg = __m256;
@@ -116,8 +116,8 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 
 // -------------------------------------------------------------------------------------------------------- X86 SSE-128
 #elif defined(__SSE__)
-	#define REQUIRED_ALIGNMENT 16
-	constexpr int RequiredAlignment = REQUIRED_ALIGNMENT;
+	#define MIPP_REQUIRED_ALIGNMENT 16
+	constexpr int RequiredAlignment = MIPP_REQUIRED_ALIGNMENT;
 	constexpr int RegisterSizeBit = 128;
 
 	using reg = __m128;
@@ -136,11 +136,11 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	const std::string IntructionsType = "x86 SSE1-128";
 #endif
 
-// ------------------------------------------------------------------------------------------------------ NO_INTRINSICS
+// ------------------------------------------------------------------------------------------------- MIPP_NO_INTRINSICS
 #else
-	#define NO_INTRINSICS
-	#define REQUIRED_ALIGNMENT 1
-	constexpr int RequiredAlignment = REQUIRED_ALIGNMENT;
+	#define MIPP_NO_INTRINSICS
+	#define MIPP_REQUIRED_ALIGNMENT 1
+	constexpr int RequiredAlignment = MIPP_REQUIRED_ALIGNMENT;
 	constexpr int RegisterSizeBit = 0;
 
 	using reg = int;
@@ -148,10 +148,10 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	const std::string IntructionsType = "NO INTRINSICS";
 #endif
 
-// ------------------------------------------------------------------------------------------------------ NO_INTRINSICS
+// ------------------------------------------------------------------------------------------------- MIPP_NO_INTRINSICS
 #else
-	#define REQUIRED_ALIGNMENT 1
-	constexpr int RequiredAlignment = REQUIRED_ALIGNMENT;
+	#define MIPP_REQUIRED_ALIGNMENT 1
+	constexpr int RequiredAlignment = MIPP_REQUIRED_ALIGNMENT;
 	constexpr int RegisterSizeBit = 0;
 
 	using reg = int;
@@ -165,7 +165,7 @@ typedef struct regx2 { reg val[2]; } regx2;
 template <typename T>
 constexpr int nElmtsPerRegister()
 {
-#ifdef NO_INTRINSICS
+#ifdef MIPP_NO_INTRINSICS
 	return 1;
 #else
 	return RegisterSizeBit / (8 * sizeof(T));
@@ -431,7 +431,7 @@ template <typename T, Red_op<T> OP>
 struct _Reduction
 {
 	static Reg<T> apply(const Reg<T> r) {
-#ifndef NO_INTRINSICS
+#ifndef MIPP_NO_INTRINSICS
 		errorMessage<T>("_Reduction::apply");
 		exit(-1);
 #else
@@ -504,13 +504,13 @@ struct Reduction
 		assert(dataSize > 0);
 		assert(dataSize % mipp::nElReg<T>() == 0);
 
-#ifndef NO_INTRINSICS
+#ifndef MIPP_NO_INTRINSICS
 		auto rRed = Reg<T>(LD(&data[0]));
 #else
 		auto rRed = Reg<T>(data[0]);
 #endif
 		for (auto i = mipp::nElReg<T>(); i < dataSize; i += mipp::nElReg<T>())
-#ifndef NO_INTRINSICS
+#ifndef MIPP_NO_INTRINSICS
 			rRed = OP(rRed, Reg<T>(LD(&data[i])));
 #else
 			rRed = OP(rRed, Reg<T>(data[i]));
@@ -537,7 +537,7 @@ template <typename T> inline reg hmax(const reg v) { return reduction<T,mipp::ma
 // ------------------------------------------------------------------------------------------------- wrapper to objects
 #include "mipp_object.hxx"
 
-#ifndef NO_INTRINSICS
+#ifndef MIPP_NO_INTRINSICS
 // ------------------------------------------------------------------------------------------------------- ARM NEON-128
 // --------------------------------------------------------------------------------------------------------------------
 #if defined(__ARM_NEON__) || defined(__ARM_NEON)

@@ -17,18 +17,22 @@ template <typename T>
 class Reg
 {
 public:
-#ifndef NO_INTRINSICS
+#ifndef MIPP_NO_INTRINSICS
 	reg r;
 #else
 	T r;
 #endif
 
-#ifndef NO_INTRINSICS
-	Reg(                              )                          {}
-	Reg(const reg r                   ) : r(r)                   {}
-	Reg(const T   val                 ) : r(mipp::set1 <T>(val)) {}
-	Reg(const T  *data                ) : r(mipp::load <T>(data)){}
-	Reg(const T  *data, bool unaligned) : r(mipp::loadu<T>(data)){}
+#ifndef MIPP_NO_INTRINSICS
+	Reg(              )                          {}
+	Reg(const reg r   ) : r(r)                   {}
+	Reg(const T   val ) : r(mipp::set1 <T>(val)) {}
+
+#ifdef MIPP_ALIGNED_LOADS
+	Reg(const T  *data) : r(mipp::load <T>(data)){}
+#else
+	Reg(const T  *data) : r(mipp::loadu<T>(data)){}
+#endif
 
 	Reg(const std::initializer_list<T> &l)
 	{
@@ -39,10 +43,9 @@ public:
 
 	~Reg() {}
 #else
-	Reg(                             )              {}
-	Reg(const T  val                 ) : r(val)     {}
-	Reg(const T *data                ) : r(data[0]) {}
-	Reg(const T *data, bool unaligned) : r(data[0]) {}
+	Reg(             )              {}
+	Reg(const T  val ) : r(val)     {}
+	Reg(const T *data) : r(data[0]) {}
 
 	Reg(const std::initializer_list<T> &l)
 	{
@@ -54,7 +57,7 @@ public:
 	~Reg() {}
 #endif
 
-#ifndef NO_INTRINSICS
+#ifndef MIPP_NO_INTRINSICS
 	static inline Reg<T> cmask (const int mask[nElReg<T>()  ]) { return mipp::cmask <T>(mask); }
 	static inline Reg<T> cmask2(const int mask[nElReg<T>()/2]) { return mipp::cmask2<T>(mask); }
 #else
@@ -64,7 +67,7 @@ public:
 
 	static inline void transpose(Reg<T> regs[nElReg<T>()])
 	{
-#ifndef NO_INTRINSICS
+#ifndef MIPP_NO_INTRINSICS
 		reg rs[nElReg<T>()];
 		for (auto i = 0; i < nElReg<T>(); i++) rs[i] = regs[i].r;
 		mipp::transpose<T>(rs);
@@ -74,7 +77,7 @@ public:
 
 	static inline void transpose8x8(Reg<T> regs[8])
 	{
-#ifndef NO_INTRINSICS
+#ifndef MIPP_NO_INTRINSICS
 		reg rs[8];
 		for (auto i = 0; i < 8; i++) rs[i] = regs[i].r;
 		mipp::transpose8x8<T>(rs);
@@ -87,7 +90,7 @@ public:
 
 	static inline void transpose2(Reg<T> regs[nElReg<T>()/2])
 	{
-#ifndef NO_INTRINSICS
+#ifndef MIPP_NO_INTRINSICS
 		reg rs[nElReg<T>()/2];
 		for (auto i = 0; i < nElReg<T>()/2; i++) rs[i] = regs[i].r;
 		mipp::transpose2<T>(rs);
@@ -100,7 +103,7 @@ public:
 
 	static inline void transpose28x8(Reg<T> regs[8])
 	{
-#ifndef NO_INTRINSICS
+#ifndef MIPP_NO_INTRINSICS
 		reg rs[8];
 		for (auto i = 0; i < 8; i++) rs[i] = regs[i].r;
 		mipp::transpose28x8<T>(rs);
@@ -111,7 +114,7 @@ public:
 #endif
 	}
 
-#ifndef NO_INTRINSICS
+#ifndef MIPP_NO_INTRINSICS
 	inline void     set0         (               )                        { r = mipp::set0<T>();                          }
 	inline void     set1         (const T val    )                        { r = mipp::set1<T>(val);                       }
 	inline void     load         (const T* data  )                        { r = mipp::load<T>(data);                      }
@@ -127,7 +130,7 @@ public:
 	inline void     storeu       (T* data        )                  const { data[0] = r;                                  }
 #endif
 
-#ifndef NO_INTRINSICS
+#ifndef MIPP_NO_INTRINSICS
 	inline Reg<T>   shuff        (const Reg<T> v_shu)               const { return mipp::shuff        <T>(r, v_shu.r);    }
 	inline Reg<T>   shuff2       (const Reg<T> v_shu)               const { return mipp::shuff2       <T>(r, v_shu.r);    }
 	inline Reg<T>   interleavelo (const Reg<T> v)                   const { return mipp::interleavelo <T>(r, v.r);        }
@@ -226,7 +229,7 @@ public:
 	inline Reg<T>   round        ()                                 const { return std::round(r);                         }
 #endif
 
-#ifndef NO_INTRINSICS
+#ifndef MIPP_NO_INTRINSICS
 	template <typename T2> inline Reg<T2> cvt ()               const { return mipp::cvt<T,T2>(r);       }
 	template <typename T2> inline Reg<T2> pack(const Reg<T> v) const { return mipp::pack<T,T2>(r, v.r); }
 #else
@@ -276,7 +279,7 @@ public:
 
 
 	// ------------------------------------------------------------------------------------------------------ reduction
-#ifndef NO_INTRINSICS
+#ifndef MIPP_NO_INTRINSICS
 	inline Reg<T> sum () const { return Reduction<T,mipp::add>::apply(*this); }
 	inline Reg<T> hadd() const { return Reduction<T,mipp::add>::apply(*this); }
 	inline Reg<T> hsub() const { return Reduction<T,mipp::sub>::apply(*this); }
@@ -303,14 +306,14 @@ public:
 
 	Regx2(                    )                                             {}
 	Regx2(Reg<T> r1, Reg<T> r2) : val({r1, r2})                             {}
-#ifndef NO_INTRINSICS
+#ifndef MIPP_NO_INTRINSICS
 	Regx2(regx2 r2            ) : val{Reg<T>(r2.val[0]), Reg<T>(r2.val[1])} {}
 #endif
 
 	~Regx2() {}
 };
 
-#ifndef NO_INTRINSICS
+#ifndef MIPP_NO_INTRINSICS
 template <typename T>
 std::ostream& operator<<(std::ostream& os, const Reg<T>& r)
 {
