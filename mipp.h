@@ -35,6 +35,7 @@ SOFTWARE.
 #ifndef MIPP_NO_INTRINSICS
 #if defined(__ARM_NEON__) || defined(__ARM_NEON)
 #include <arm_neon.h>
+#include "math/neon_mathfun.h"
 #elif defined(__SSE__) || defined(__AVX__) || defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)
 // header for special functions: log, exp, sin, cos
 #if !defined(__INTEL_COMPILER) && !defined(__ICL) && !defined(__ICC)
