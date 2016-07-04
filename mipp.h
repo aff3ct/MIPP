@@ -358,7 +358,11 @@ template <typename T> inline reg   neg          (const reg, const reg)          
 template <typename T> inline reg   abs          (const reg)                       { errorMessage<T>("abs");           exit(-1); }
 template <typename T> inline reg   sqrt         (const reg)                       { errorMessage<T>("sqrt");          exit(-1); }
 template <typename T> inline reg   rsqrt        (const reg)                       { errorMessage<T>("rsqrt");         exit(-1); }
+template <typename T> inline reg   log          (const reg)                       { errorMessage<T>("log");           exit(-1); }
 template <typename T> inline reg   exp          (const reg)                       { errorMessage<T>("exp");           exit(-1); }
+template <typename T> inline reg   sin          (const reg)                       { errorMessage<T>("sin");           exit(-1); }
+template <typename T> inline reg   cos          (const reg)                       { errorMessage<T>("cos");           exit(-1); }
+template <typename T> inline void  sincos       (const reg, reg&, reg&)           { errorMessage<T>("sincos");        exit(-1); }
 template <typename T> inline reg   fmadd        (const reg, const reg, const reg) { errorMessage<T>("fmadd");         exit(-1); }
 template <typename T> inline reg   fnmadd       (const reg, const reg, const reg) { errorMessage<T>("fnmadd");        exit(-1); }
 template <typename T> inline reg   fmsub        (const reg, const reg, const reg) { errorMessage<T>("fmsub");         exit(-1); }
