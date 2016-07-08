@@ -78,6 +78,11 @@
 	}
 
 	template <>
+	inline void store<long long>(long long *mem_addr, const reg v) {
+		_mm256_store_ps((float *)mem_addr, v);
+	}
+
+	template <>
 	inline void store<int>(int *mem_addr, const reg v) {
 		_mm256_store_ps((float *)mem_addr, v);
 	}
@@ -101,6 +106,11 @@
 	template <>
 	inline void storeu<double>(double *mem_addr, const reg v) {
 		_mm256_storeu_pd(mem_addr, (__m256d) v);
+	}
+
+	template <>
+	inline void storeu<long long>(long long *mem_addr, const reg v) {
+		_mm256_storeu_ps((float *)mem_addr, v);
 	}
 
 	template <>
@@ -1201,6 +1211,13 @@
 		return (__m256) _mm256_mul_pd((__m256d) v1, (__m256d) v2);
 	}
 
+#ifdef __AVX2__
+	template <>
+	inline reg mul<int>(const reg v1, const reg v2) {
+		return (__m256) _mm256_mul_epi32((__m256i) v1, (__m256i) v2);
+	}
+#endif
+
 	// ------------------------------------------------------------------------------------------------------------ div
 	template <>
 	inline reg div<float>(const reg v1, const reg v2) {
@@ -1766,6 +1783,11 @@
 	template <>
 	inline reg cvt<float,int>(const reg v) {
 		return (reg) _mm256_cvtps_epi32(v);
+	}
+
+	template <>
+	inline reg cvt<int,float>(const reg v) {
+		return (reg) _mm256_cvtepi32_ps((__m256i) v);
 	}
 
 	// ----------------------------------------------------------------------------------------------------------- pack

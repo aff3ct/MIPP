@@ -53,6 +53,11 @@
 	}
 
 	template <>
+	inline void store<long long>(long long *mem_addr, const reg v) {
+		vst1q_f32((float*) mem_addr, v);
+	}
+
+	template <>
 	inline void store<int>(int *mem_addr, const reg v) {
 		vst1q_f32((float*) mem_addr, v);
 	}
@@ -71,6 +76,11 @@
 	template <>
 	inline void storeu<float>(float *mem_addr, const reg v) {
 		vst1q_f32(mem_addr, v);
+	}
+
+	template <>
+	inline void storeu<long long>(long long *mem_addr, const reg v) {
+		vst1q_f32((float*) mem_addr, v);
 	}
 
 	template <>
@@ -473,6 +483,11 @@
 	}
 
 	template <>
+	inline reg andb<int>(const reg v1, const reg v2) {
+		return (reg) vandq_u32((uint32x4_t) v1, (uint32x4_t) v2);
+	}
+
+	template <>
 	inline reg andb<short>(const reg v1, const reg v2) {
 		return (reg) vandq_u16((uint16x8_t) v1, (uint16x8_t) v2);
 	}
@@ -771,6 +786,11 @@
 	template <>
 	inline reg mul<float>(const reg v1, const reg v2) {
 		return vmulq_f32(v1, v2);
+	}
+
+	template <>
+	inline reg mul<int>(const reg v1, const reg v2) {
+		return (reg) vmulq_s32((int32x4_t) v1, (int32x4_t) v2);
 	}
 
 	// ------------------------------------------------------------------------------------------------------------ div
