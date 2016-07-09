@@ -164,43 +164,43 @@
 	// ------------------------------------------------------------------------------------------------------------ low
 	template <>
 	inline reg_2 low<float>(const reg v) {
-		return (reg_2) vget_low_f32((float32x4_t) val));
+		return (reg_2) vget_low_f32((float32x4_t) v);
 	}
 
 	template <>
 	inline reg_2 low<int>(const reg v) {
-		return (reg_2) vget_low_f32((float32x4_t) val));
+		return (reg_2) vget_low_f32((float32x4_t) v);
 	}
 
 	template <>
 	inline reg_2 low<short>(const reg v) {
-		return (reg_2) vget_low_f32((float32x4_t) val));
+		return (reg_2) vget_low_f32((float32x4_t) v);
 	}
 
 	template <>
 	inline reg_2 low<signed char>(const reg v) {
-		return (reg_2) vget_low_f32((float32x4_t) val));
+		return (reg_2) vget_low_f32((float32x4_t) v);
 	}
 
 	// ----------------------------------------------------------------------------------------------------------- high
 	template <>
 	inline reg_2 high<float>(const reg v) {
-		return (reg_2) vget_high_f32((float32x4_t) val));
+		return (reg_2) vget_high_f32((float32x4_t) v);
 	}
 
 	template <>
 	inline reg_2 high<int>(const reg v) {
-		return (reg_2) vget_high_f32((float32x4_t) val));
+		return (reg_2) vget_high_f32((float32x4_t) v);
 	}
 
 	template <>
 	inline reg_2 high<short>(const reg v) {
-		return (reg_2) vget_high_f32((float32x4_t) val));
+		return (reg_2) vget_high_f32((float32x4_t) v);
 	}
 
 	template <>
 	inline reg_2 high<signed char>(const reg v) {
-		return (reg_2) vget_high_f32((float32x4_t) val));
+		return (reg_2) vget_high_f32((float32x4_t) v);
 	}
 
 	// ---------------------------------------------------------------------------------------------------------- cmask
@@ -1162,7 +1162,7 @@
 	}
 
 	template <>
-	inline reg cvt<signed char,short>(const reg_2 v) {
+	inline reg cvt<short,int>(const reg_2 v) {
 		return (reg) vmovl_s16((int16x4_t) v);
 	}
 
