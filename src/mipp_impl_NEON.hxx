@@ -2203,7 +2203,7 @@
 #ifdef __aarch64__
 	template <>
 	inline reg fnmadd<double>(const reg v1, const reg v2, const reg v3) {
-#ifdef __ARM_FEATURE_FMA && !defined(__clang__)
+#if defined(__ARM_FEATURE_FMA) && !defined(__clang__)
 		return (reg) vfmsq_f64((float64x2_t)v3, (float64x2_t)v1, (float64x2_t)v2);
 #else
  		return sub<double>(v3, mul<double>(v1, v2));
