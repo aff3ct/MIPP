@@ -166,24 +166,31 @@
 	// ----------------------------------------------------------------------------------------------------- set (mask)
 	template <>
 	inline msk set<4>(const bool vals[4]) {
-		return set<int32_t>({vals[3] ? 0xFFFFFFFF : 0, vals[2] ? 0xFFFFFFFF : 0,
-		                     vals[1] ? 0xFFFFFFFF : 0, vals[0] ? 0xFFFFFFFF : 0});
+		uint32_t v[4] = {vals[3] ? (uint32_t)0xFFFFFFFF : (uint32_t)0, vals[2] ? 0xFFFFFFFF : (uint32_t)0,
+		                 vals[1] ? (uint32_t)0xFFFFFFFF : (uint32_t)0, vals[0] ? 0xFFFFFFFF : (uint32_t)0};
+		return (msk) set<int32_t>((int32_t*)v);
 	}
 
 	template <>
 	inline msk set<8>(const bool vals[8]) {
-		return set<int16_t>({vals[ 7] ? 0xFFFF : 0, vals[ 6] ? 0xFFFF : 0,
-		                     vals[ 5] ? 0xFFFF : 0, vals[ 4] ? 0xFFFF : 0,
-		                     vals[ 3] ? 0xFFFF : 0, vals[ 2] ? 0xFFFF : 0,
-		                     vals[ 1] ? 0xFFFF : 0, vals[ 0] ? 0xFFFF : 0});
+		uint16_t v[8] = {vals[ 7] ? (uint16_t)0xFFFF : (uint16_t)0, vals[ 6] ? (uint16_t)0xFFFF : (uint16_t)0,
+		                 vals[ 5] ? (uint16_t)0xFFFF : (uint16_t)0, vals[ 4] ? (uint16_t)0xFFFF : (uint16_t)0,
+		                 vals[ 3] ? (uint16_t)0xFFFF : (uint16_t)0, vals[ 2] ? (uint16_t)0xFFFF : (uint16_t)0,
+		                 vals[ 1] ? (uint16_t)0xFFFF : (uint16_t)0, vals[ 0] ? (uint16_t)0xFFFF : (uint16_t)0};
+		return (msk) set<int16_t>((int16_t*)v);
 	}
 
 	template <>
 	inline msk set<16>(const bool vals[16]) {
-		return set<int8_t>({vals[15] ? 0xFF : 0, vals[14] ? 0xFF : 0, vals[13] ? 0xFF : 0, vals[12] ? 0xFF : 0,
-		                    vals[11] ? 0xFF : 0, vals[10] ? 0xFF : 0, vals[ 9] ? 0xFF : 0, vals[ 8] ? 0xFF : 0,
-		                    vals[ 7] ? 0xFF : 0, vals[ 6] ? 0xFF : 0, vals[ 5] ? 0xFF : 0, vals[ 4] ? 0xFF : 0,
-		                    vals[ 3] ? 0xFF : 0, vals[ 2] ? 0xFF : 0, vals[ 1] ? 0xFF : 0, vals[ 0] ? 0xFF : 0});
+		uint8_t v[16] = {vals[15] ? (uint8_t)0xFF : (uint8_t)0, vals[14] ? (uint8_t)0xFF : (uint8_t)0,
+		                 vals[13] ? (uint8_t)0xFF : (uint8_t)0, vals[12] ? (uint8_t)0xFF : (uint8_t)0,
+		                 vals[11] ? (uint8_t)0xFF : (uint8_t)0, vals[10] ? (uint8_t)0xFF : (uint8_t)0,
+		                 vals[ 9] ? (uint8_t)0xFF : (uint8_t)0, vals[ 8] ? (uint8_t)0xFF : (uint8_t)0,
+		                 vals[ 7] ? (uint8_t)0xFF : (uint8_t)0, vals[ 6] ? (uint8_t)0xFF : (uint8_t)0,
+		                 vals[ 5] ? (uint8_t)0xFF : (uint8_t)0, vals[ 4] ? (uint8_t)0xFF : (uint8_t)0,
+		                 vals[ 3] ? (uint8_t)0xFF : (uint8_t)0, vals[ 2] ? (uint8_t)0xFF : (uint8_t)0,
+		                 vals[ 1] ? (uint8_t)0xFF : (uint8_t)0, vals[ 0] ? (uint8_t)0xFF : (uint8_t)0}; 
+		return (msk) set<int8_t>((int8_t*)v);
 	}
 
 	// ----------------------------------------------------------------------------------------------------------- set1
@@ -210,17 +217,17 @@
 	// ---------------------------------------------------------------------------------------------------- set1 (mask)
 	template <>
 	inline msk set1<4>(const bool val) {
-		return vdupq_n_u32(val ? 0xFFFFFFFF : 0);
+		return (msk) vdupq_n_u32(val ? 0xFFFFFFFF : 0);
 	}
 
 	template <>
 	inline msk set1<8>(const bool val) {
-		return vdupq_n_u16(val ? 0xFFFF : 0);
+		return (msk) vdupq_n_u16(val ? 0xFFFF : 0);
 	}
 
 	template <>
 	inline msk set1<16>(const bool val) {
-		return vdupq_n_u8(val ? 0xFF : 0);
+		return (msk) vdupq_n_u8(val ? 0xFF : 0);
 	}
 
 	// ----------------------------------------------------------------------------------------------------------- set0
@@ -247,17 +254,17 @@
 	// ---------------------------------------------------------------------------------------------------- set0 (mask)
 	template <>
 	inline msk set0<4>() {
-		return vdupq_n_u32(0);
+		return (msk) vdupq_n_u32(0);
 	}
 
 	template <>
-	inline msk set0<8>(const bool val) {
-		return vdupq_n_u16(0);
+	inline msk set0<8>() {
+		return (msk) vdupq_n_u16(0);
 	}
 
 	template <>
-	inline msk set0<16>(const bool val) {
-		return vdupq_n_u8(0);
+	inline msk set0<16>() {
+		return (msk) vdupq_n_u8(0);
 	}
 
 	// ------------------------------------------------------------------------------------------------------------ low
@@ -790,17 +797,17 @@
 	// ---------------------------------------------------------------------------------------------------- xorb (mask)
 	template <>
 	inline msk xorb<4>(const msk v1, const msk v2) {
-		return (reg) veorq_u32((uint32x4_t) v1, (uint32x4_t) v2);
+		return (msk) veorq_u32((uint32x4_t) v1, (uint32x4_t) v2);
 	}
 
 	template <>
 	inline msk xorb<8>(const msk v1, const msk v2) {
-		return (reg) veorq_u16((uint16x8_t) v1, (uint16x8_t) v2);
+		return (msk) veorq_u16((uint16x8_t) v1, (uint16x8_t) v2);
 	}
 
 	template <>
 	inline msk xorb<16>(const msk v1, const msk v2) {
-		return (reg) veorq_u8((uint8x16_t) v1, (uint8x16_t) v2);
+		return (msk) veorq_u8((uint8x16_t) v1, (uint8x16_t) v2);
 	}
 
 	// --------------------------------------------------------------------------------------------------------- lshift
@@ -1200,7 +1207,7 @@
 	inline reg neg<int16_t>(const reg v1, const reg v2) {
 		reg neg_v1 = (reg) vqnegq_s16((int16x8_t) v1);
 		reg v2_2   = orb  <int16_t>(v2, set1<int16_t>(1)); // hack to avoid -0 case
-		reg mask   = cmplt<int16_t>(v2_2, set0<int16_t>());
+		reg mask   = cvt_msk_reg(cmplt<int16_t>(v2_2, set0<int16_t>()));
 		reg res1   = andb <int16_t>(mask, neg_v1);
 		reg res2   = andb <int16_t>((reg) vmvnq_s16((int16x8_t) mask), v1);
 		reg res    = orb  <int16_t>(res1, res2);
@@ -1216,7 +1223,7 @@
 	inline reg neg<int8_t>(const reg v1, const reg v2) {
 		reg neg_v1 = (reg) vqnegq_s8((int8x16_t) v1);
 		reg v2_2   = orb  <int8_t>(v2, set1<int8_t>(1)); // hack to avoid -0 case
-		reg mask   = cmplt<int8_t>(v2_2, set0<int8_t>());
+		reg mask   = cvt_msk_reg(cmplt<int8_t>(v2_2, set0<int8_t>()));
 		reg res1   = andb <int8_t>(mask, neg_v1);
 		reg res2   = andb <int8_t>((reg) vmvnq_s8((int8x16_t) mask), v1);
 		reg res    = orb  <int8_t>(res1, res2);

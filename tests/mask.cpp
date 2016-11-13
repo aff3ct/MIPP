@@ -9,7 +9,7 @@ int main(int argc, char** argv)
 	std::random_device rd;
 	std::mt19937 g(rd());
 
-	using T = short;
+	using T = float;
 	constexpr int N = mipp::N<T>();
 
 	T t_1[N];
