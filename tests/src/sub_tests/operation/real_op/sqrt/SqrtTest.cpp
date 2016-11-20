@@ -35,7 +35,12 @@ void SqrtTest::test_reg_sqrt()
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
 			T res = std::sqrt(inputs1[i]);
+#ifdef MIPP_NEON
+			T diff = std::abs(res - *((T*)&r2 +i));
+			CPPUNIT_ASSERT(diff < 0.01);
+#else
 			CPPUNIT_ASSERT_EQUAL(res, *((T*)&r2 +i));
+#endif
 		}
 	}
 	catch(std::exception &e)
@@ -64,7 +69,12 @@ void SqrtTest::test_Reg_sqrt()
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
 			T res = std::sqrt(inputs1[i]);
+#ifdef MIPP_NEON
+			T diff = std::abs(res - r2[i]);
+			CPPUNIT_ASSERT(diff < 0.01);
+#else
 			CPPUNIT_ASSERT_EQUAL(res, r2[i]);
+#endif
 		}
 	}
 	catch(std::exception &e)
@@ -103,7 +113,12 @@ void SqrtTest::test_reg_maskz_sqrt()
 			if (mask[i])
 			{
 				T res = std::sqrt(inputs1[i]);
+#ifdef MIPP_NEON
+				T diff = std::abs(res - *((T*)&r2 +i));
+				CPPUNIT_ASSERT(diff < 0.01);
+#else
 				CPPUNIT_ASSERT_EQUAL(res, *((T*)&r2 +i));
+#endif
 			}
 			else
 				CPPUNIT_ASSERT_EQUAL((T)0, *((T*)&r2 +i));
@@ -145,7 +160,12 @@ void SqrtTest::test_Reg_maskz_sqrt()
 			if (mask[i])
 			{
 				T res = std::sqrt(inputs1[i]);
+#ifdef MIPP_NEON
+				T diff = std::abs(res - r2[i]);
+				CPPUNIT_ASSERT(diff < 0.01);
+#else
 				CPPUNIT_ASSERT_EQUAL(res, r2[i]);
+#endif
 			}
 			else
 				CPPUNIT_ASSERT_EQUAL((T)0, r2[i]);
@@ -189,7 +209,12 @@ void SqrtTest::test_reg_mask_sqrt()
 			if (mask[i])
 			{
 				T res = std::sqrt(inputs1[i]);
+#ifdef MIPP_NEON
+				T diff = std::abs(res - *((T*)&r3 +i));
+				CPPUNIT_ASSERT(diff < 0.01);
+#else
 				CPPUNIT_ASSERT_EQUAL(res, *((T*)&r3 +i));
+#endif
 			}
 			else
 				CPPUNIT_ASSERT_EQUAL(inputs2[i], *((T*)&r3 +i));
@@ -233,10 +258,15 @@ void SqrtTest::test_Reg_mask_sqrt()
 			if (mask[i])
 			{
 				T res = std::sqrt(inputs1[i]);
-				CPPUNIT_ASSERT_EQUAL(res, *((T*)&r3 +i));
+#ifdef MIPP_NEON
+				T diff = std::abs(res - r3[i]);
+				CPPUNIT_ASSERT(diff < 0.01);
+#else
+				CPPUNIT_ASSERT_EQUAL(res, r3[i]);
+#endif
 			}
 			else
-				CPPUNIT_ASSERT_EQUAL(inputs2[i], *((T*)&r3 +i));
+				CPPUNIT_ASSERT_EQUAL(inputs2[i], r3[i]);
 		}
 	}
 	catch(std::exception &e)

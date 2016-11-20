@@ -26,24 +26,26 @@ void BlendTest::test_reg_blend()
 		constexpr int N = mipp::N<T>();
 		T inputs1[N], inputs2[N];
 		std::iota(inputs1, inputs1 + N, 0);
-		std::iota(inputs2, inputs2 + N, 0);
-
-		std::mt19937 g;
-		std::shuffle(inputs1, inputs1 + N, g);
-		std::shuffle(inputs2, inputs2 + N, g);
+		std::iota(inputs2, inputs2 + N, N);
 
 		bool mask[N];
 		std::fill(mask,       mask + N/2, true );
 		std::fill(mask + N/2, mask + N,   false);
 
-		mipp::reg r1 = mipp::load<T>(inputs1);
-		mipp::reg r2 = mipp::load<T>(inputs2);
-		mipp::msk m  = mipp::set <N>(mask   );
+		std::mt19937 g;
+		for (auto t = 0; t < 100; t++)
+		{
+			std::shuffle(mask, mask + N, g);
 
-		mipp::reg ri = mipp::blend<T>(r1, r2, m);
+			mipp::reg r1 = mipp::load<T>(inputs1);
+			mipp::reg r2 = mipp::load<T>(inputs2);
+			mipp::msk m  = mipp::set <N>(mask   );
 
-		for (auto i = 0; i < N; i++)
-			CPPUNIT_ASSERT_EQUAL(mask[i] ? inputs1[i] : inputs2[i], *((T*)&ri +i));
+			mipp::reg ri = mipp::blend<T>(r1, r2, m);
+
+			for (auto i = 0; i < N; i++)
+				CPPUNIT_ASSERT_EQUAL(mask[i] ? inputs1[i] : inputs2[i], *((T*)&ri +i));
+		}
 	}
 	catch(std::exception &e)
 	{
@@ -66,24 +68,26 @@ void BlendTest::test_Reg_blend()
 		constexpr int N = mipp::N<T>();
 		T inputs1[N], inputs2[N];
 		std::iota(inputs1, inputs1 + N, 0);
-		std::iota(inputs2, inputs2 + N, 0);
-
-		std::mt19937 g;
-		std::shuffle(inputs1, inputs1 + N, g);
-		std::shuffle(inputs2, inputs2 + N, g);
+		std::iota(inputs2, inputs2 + N, N);
 
 		bool mask[N];
 		std::fill(mask,       mask + N/2, true );
 		std::fill(mask + N/2, mask + N,   false);
 
-		mipp::Reg<T> r1 = inputs1;
-		mipp::Reg<T> r2 = inputs2;
-		mipp::Msk<N> m  = mask;
+		std::mt19937 g;
+		for (auto t = 0; t < 100; t++)
+		{
+			std::shuffle(mask, mask + N, g);
 
-		mipp::Reg<T> ri = mipp::blend(r1, r2, m);
+			mipp::Reg<T> r1 = inputs1;
+			mipp::Reg<T> r2 = inputs2;
+			mipp::Msk<N> m  = mask;
 
-		for (auto i = 0; i < N; i++)
-			CPPUNIT_ASSERT_EQUAL(mask[i] ? inputs1[i] : inputs2[i], ri[i]);
+			mipp::Reg<T> ri = mipp::blend(r1, r2, m);
+
+			for (auto i = 0; i < N; i++)
+				CPPUNIT_ASSERT_EQUAL(mask[i] ? inputs1[i] : inputs2[i], ri[i]);
+		}
 	}
 	catch(std::exception &e)
 	{

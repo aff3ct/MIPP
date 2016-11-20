@@ -37,7 +37,11 @@ void RsqrtTest::test_reg_rsqrt()
 			T res = (T)1 / std::sqrt(inputs1[i]);
 //			CPPUNIT_ASSERT_EQUAL(res, *((T*)&r2 +i));
 			T diff = std::abs(res - *((T*)&r2 +i));
-			CPPUNIT_ASSERT(diff < 0.001);
+#ifdef MIPP_NEON
+				CPPUNIT_ASSERT(diff < 0.01);
+#else
+				CPPUNIT_ASSERT(diff < 0.001);
+#endif
 		}
 	}
 	catch(std::exception &e)
@@ -68,7 +72,11 @@ void RsqrtTest::test_Reg_rsqrt()
 			T res = (T)1 / std::sqrt(inputs1[i]);
 //			CPPUNIT_ASSERT_EQUAL(res, r2[i]);
 			T diff = std::abs(res - *((T*)&r2 +i));
+#ifdef MIPP_NEON
+			CPPUNIT_ASSERT(diff < 0.01);
+#else
 			CPPUNIT_ASSERT(diff < 0.001);
+#endif
 		}
 	}
 	catch(std::exception &e)
@@ -109,7 +117,11 @@ void RsqrtTest::test_reg_maskz_rsqrt()
 				T res = (T)1 / std::sqrt(inputs1[i]);
 //				CPPUNIT_ASSERT_EQUAL(res, *((T*)&r2 +i));
 				T diff = std::abs(res - *((T*)&r2 +i));
+#ifdef MIPP_NEON
+				CPPUNIT_ASSERT(diff < 0.01);
+#else
 				CPPUNIT_ASSERT(diff < 0.001);
+#endif
 			}
 			else
 				CPPUNIT_ASSERT_EQUAL((T)0, *((T*)&r2 +i));
@@ -153,7 +165,11 @@ void RsqrtTest::test_Reg_maskz_rsqrt()
 				T res = (T)1 / std::sqrt(inputs1[i]);
 //				CPPUNIT_ASSERT_EQUAL(res, r2[i]);
 				T diff = std::abs(res - *((T*)&r2 +i));
+#ifdef MIPP_NEON
+				CPPUNIT_ASSERT(diff < 0.01);
+#else
 				CPPUNIT_ASSERT(diff < 0.001);
+#endif
 			}
 			else
 				CPPUNIT_ASSERT_EQUAL((T)0, r2[i]);
@@ -199,7 +215,11 @@ void RsqrtTest::test_reg_mask_rsqrt()
 				T res = (T)1 / std::sqrt(inputs1[i]);
 //				CPPUNIT_ASSERT_EQUAL(res, *((T*)&r3 +i));
 				T diff = std::abs(res - *((T*)&r3 +i));
+#ifdef MIPP_NEON
+				CPPUNIT_ASSERT(diff < 0.01);
+#else
 				CPPUNIT_ASSERT(diff < 0.001);
+#endif
 			}
 			else
 				CPPUNIT_ASSERT_EQUAL(inputs2[i], *((T*)&r3 +i));
@@ -245,7 +265,11 @@ void RsqrtTest::test_Reg_mask_rsqrt()
 				T res = (T)1 / std::sqrt(inputs1[i]);
 //				CPPUNIT_ASSERT_EQUAL(res, *((T*)&r3 +i));
 				T diff = std::abs(res - *((T*)&r3 +i));
+#ifdef MIPP_NEON
+				CPPUNIT_ASSERT(diff < 0.01);
+#else
 				CPPUNIT_ASSERT(diff < 0.001);
+#endif
 			}
 			else
 				CPPUNIT_ASSERT_EQUAL(inputs2[i], *((T*)&r3 +i));

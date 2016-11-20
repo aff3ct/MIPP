@@ -30,7 +30,7 @@ class HminTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_Reg_hmin_float);
 
 #if defined(MIPP_64BIT)
-#if !defined(MIPP_SSE) && !defined(MIPP_AVX)
+#if !defined(MIPP_SSE) && !defined(MIPP_AVX) && !defined(MIPP_NEON)
 	CPPUNIT_TEST(test_reg_hmin_int64);
 	CPPUNIT_TEST(test_Reg_hmin_int64);
 #endif

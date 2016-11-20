@@ -59,8 +59,8 @@ void FmaddTest::test_Reg_fmadd()
 	{
 		T inputs1[mipp::N<T>()], inputs2[mipp::N<T>()], inputs3[mipp::N<T>()];
 		std::iota(inputs1, inputs1 + mipp::N<T>(), 1);
-		std::iota(inputs2, inputs2 + mipp::N<T>(), 1);
-		std::iota(inputs3, inputs3 + mipp::N<T>(), 1);
+		std::iota(inputs2, inputs2 + mipp::N<T>(), 2);
+		std::iota(inputs3, inputs3 + mipp::N<T>(), 3);
 
 		std::mt19937 g;
 		std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
