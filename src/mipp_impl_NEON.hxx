@@ -547,6 +547,89 @@
 		return mipp::set<int8_t>(val_bis);
 	}
 
+	// --------------------------------------------------------------------------------------------------------- cmask2
+#ifdef __aarch64__
+	template <>
+	inline reg cmask2<double>(const uint32_t val[nElReg<double>()/2]) {
+		int8_t val_bis[nElReg<int8_t>()] = {(int8_t)(val[0]*8 + 0+0), (int8_t)(val[0]*8 + 1+0),
+		                                    (int8_t)(val[0]*8 + 2+0), (int8_t)(val[0]*8 + 3+0),
+		                                    (int8_t)(val[0]*8 + 4+0), (int8_t)(val[0]*8 + 5+0),
+		                                    (int8_t)(val[0]*8 + 6+0), (int8_t)(val[0]*8 + 7+0),
+		                                    (int8_t)(val[0]*8 + 0+8), (int8_t)(val[0]*8 + 1+8),
+		                                    (int8_t)(val[0]*8 + 2+8), (int8_t)(val[0]*8 + 3+8),
+		                                    (int8_t)(val[0]*8 + 4+8), (int8_t)(val[0]*8 + 5+8),
+		                                    (int8_t)(val[0]*8 + 6+8), (int8_t)(val[0]*8 + 7+8)};
+		return mipp::set<int8_t>(val_bis);
+	}
+#endif
+
+	template <>
+	inline reg cmask2<float>(const uint32_t val[nElReg<float>()/2]) {
+		int8_t val_bis[nElReg<int8_t>()] = {(int8_t)(val[0]*4 + 0+0), (int8_t)(val[0]*4 + 1+0),
+		                                    (int8_t)(val[0]*4 + 2+0), (int8_t)(val[0]*4 + 3+0),
+		                                    (int8_t)(val[1]*4 + 0+0), (int8_t)(val[1]*4 + 1+0),
+		                                    (int8_t)(val[1]*4 + 2+0), (int8_t)(val[1]*4 + 3+0),
+		                                    (int8_t)(val[0]*4 + 0+8), (int8_t)(val[0]*4 + 1+8),
+		                                    (int8_t)(val[0]*4 + 2+8), (int8_t)(val[0]*4 + 3+8),
+		                                    (int8_t)(val[1]*4 + 0+8), (int8_t)(val[1]*4 + 1+8),
+		                                    (int8_t)(val[1]*4 + 2+8), (int8_t)(val[1]*4 + 3+8)};
+		return mipp::set<int8_t>(val_bis);
+	}
+
+#ifdef __aarch64__
+	template <>
+	inline reg cmask2<int64_t>(const uint32_t val[nElReg<int64_t>()/2]) {
+		int8_t val_bis[nElReg<int8_t>()] = {(int8_t)(val[0]*8 + 0+0), (int8_t)(val[0]*8 + 1+0),
+		                                    (int8_t)(val[0]*8 + 2+0), (int8_t)(val[0]*8 + 3+0),
+		                                    (int8_t)(val[0]*8 + 4+0), (int8_t)(val[0]*8 + 5+0),
+		                                    (int8_t)(val[0]*8 + 6+0), (int8_t)(val[0]*8 + 7+0),
+		                                    (int8_t)(val[0]*8 + 0+8), (int8_t)(val[0]*8 + 1+8),
+		                                    (int8_t)(val[0]*8 + 2+8), (int8_t)(val[0]*8 + 3+8),
+		                                    (int8_t)(val[0]*8 + 4+8), (int8_t)(val[0]*8 + 5+8),
+		                                    (int8_t)(val[0]*8 + 6+8), (int8_t)(val[0]*8 + 7+8)};
+		return mipp::set<int8_t>(val_bis);
+	}
+#endif
+
+	template <>
+	inline reg cmask2<int32_t>(const uint32_t val[nElReg<int32_t>()/2]) {
+		int8_t val_bis[nElReg<int8_t>()] = {(int8_t)(val[0]*4 + 0+0), (int8_t)(val[0]*4 + 1+0),
+		                                    (int8_t)(val[0]*4 + 2+0), (int8_t)(val[0]*4 + 3+0),
+		                                    (int8_t)(val[1]*4 + 0+0), (int8_t)(val[1]*4 + 1+0),
+		                                    (int8_t)(val[1]*4 + 2+0), (int8_t)(val[1]*4 + 3+0),
+		                                    (int8_t)(val[0]*4 + 0+8), (int8_t)(val[0]*4 + 1+8),
+		                                    (int8_t)(val[0]*4 + 2+8), (int8_t)(val[0]*4 + 3+8),
+		                                    (int8_t)(val[1]*4 + 0+8), (int8_t)(val[1]*4 + 1+8),
+		                                    (int8_t)(val[1]*4 + 2+8), (int8_t)(val[1]*4 + 3+8)};
+		return mipp::set<int8_t>(val_bis);
+	}
+
+	template <>
+	inline reg cmask2<int16_t>(const uint32_t val[nElReg<int16_t>()/2]) {
+		int8_t val_bis[nElReg<int8_t>()] = {(int8_t)(val[0]*2 + 0+0), (int8_t)(val[0]*2 + 1+0),
+		                                    (int8_t)(val[1]*2 + 0+0), (int8_t)(val[1]*2 + 1+0),
+		                                    (int8_t)(val[2]*2 + 0+0), (int8_t)(val[2]*2 + 1+0),
+		                                    (int8_t)(val[3]*2 + 0+0), (int8_t)(val[3]*2 + 1+0),
+		                                    (int8_t)(val[0]*2 + 0+8), (int8_t)(val[0]*2 + 1+8),
+		                                    (int8_t)(val[1]*2 + 0+8), (int8_t)(val[1]*2 + 1+8),
+		                                    (int8_t)(val[2]*2 + 0+8), (int8_t)(val[2]*2 + 1+8),
+		                                    (int8_t)(val[3]*2 + 0+8), (int8_t)(val[3]*2 + 1+8)};
+		return mipp::set<int8_t>(val_bis);
+	}
+
+	template <>
+	inline reg cmask2<int8_t>(const uint32_t val[nElReg<int8_t>()/2]) {
+		int8_t val_bis[nElReg<int8_t>()] = {(int8_t)(val[ 0]+0), (int8_t)(val[ 1]+0),
+		                                    (int8_t)(val[ 2]+0), (int8_t)(val[ 3]+0),
+		                                    (int8_t)(val[ 4]+0), (int8_t)(val[ 5]+0),
+		                                    (int8_t)(val[ 6]+0), (int8_t)(val[ 7]+0),
+		                                    (int8_t)(val[ 0]+8), (int8_t)(val[ 1]+8),
+		                                    (int8_t)(val[ 2]+8), (int8_t)(val[ 3]+8),
+		                                    (int8_t)(val[ 4]+8), (int8_t)(val[ 5]+8),
+		                                    (int8_t)(val[ 6]+8), (int8_t)(val[ 7]+8)};
+		return mipp::set<int8_t>(val_bis);
+	}
+
 	// ---------------------------------------------------------------------------------------------------------- shuff
 	template <>
 	inline reg shuff<double>(const reg v, const reg cm) {
@@ -719,6 +802,73 @@
 		return (reg)vcombine_u8(res.val[0], res.val[1]);
 	}
 
+	// -------------------------------------------------------------------------------------------------- interleavelo2
+	template <>
+	inline reg interleavelo2<float>(const reg v1, const reg v2) {
+		uint32x2x2_t res1 = vzip_u32(vget_low_u32 ((uint32x4_t)v1), vget_low_u32 ((uint32x4_t)v2));
+		uint32x2x2_t res2 = vzip_u32(vget_high_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v2));
+
+		return (reg) vcombine_u32(res1.val[0], res2.val[0]);
+	}
+
+	template <>
+	inline reg interleavelo2<int32_t>(const reg v1, const reg v2) {
+		uint32x2x2_t res1 = vzip_u32(vget_low_u32 ((uint32x4_t)v1), vget_low_u32 ((uint32x4_t)v2));
+		uint32x2x2_t res2 = vzip_u32(vget_high_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v2));
+
+		return (reg)vcombine_u32(res1.val[0], res2.val[0]);
+	}
+
+	template <>
+	inline reg interleavelo2<int16_t>(const reg v1, const reg v2) {
+		uint16x4x2_t res1 = vzip_u16(vget_low_u16 ((uint16x8_t)v1), vget_low_u16 ((uint16x8_t)v2));
+		uint16x4x2_t res2 = vzip_u16(vget_high_u16((uint16x8_t)v1), vget_high_u16((uint16x8_t)v2));
+
+		return (reg)vcombine_u16(res1.val[0], res2.val[0]);
+	}
+
+	template <>
+	inline reg interleavelo2<int8_t>(const reg v1, const reg v2) {
+		uint8x8x2_t res1 = vzip_u8(vget_low_u8 ((uint8x16_t)v1), vget_low_u8 ((uint8x16_t)v2));
+		uint8x8x2_t res2 = vzip_u8(vget_high_u8((uint8x16_t)v1), vget_high_u8((uint8x16_t)v2));
+
+		return (reg)vcombine_u8(res1.val[0], res2.val[0]);
+	}
+
+	// -------------------------------------------------------------------------------------------------- interleavehi2
+	template <>
+	inline reg interleavehi2<float>(const reg v1, const reg v2) {
+		uint32x2x2_t res1 = vzip_u32(vget_low_u32 ((uint32x4_t)v1), vget_low_u32 ((uint32x4_t)v2));
+		uint32x2x2_t res2 = vzip_u32(vget_high_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v2));
+
+		return (reg) vcombine_u32(res1.val[1], res2.val[1]);
+	}
+
+	template <>
+	inline reg interleavehi2<int32_t>(const reg v1, const reg v2) {
+		uint32x2x2_t res1 = vzip_u32(vget_low_u32 ((uint32x4_t)v1), vget_low_u32 ((uint32x4_t)v2));
+		uint32x2x2_t res2 = vzip_u32(vget_high_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v2));
+
+		return (reg)vcombine_u32(res1.val[1], res2.val[1]);
+	}
+
+	template <>
+	inline reg interleavehi2<int16_t>(const reg v1, const reg v2) {
+		uint16x4x2_t res1 = vzip_u16(vget_low_u16 ((uint16x8_t)v1), vget_low_u16 ((uint16x8_t)v2));
+		uint16x4x2_t res2 = vzip_u16(vget_high_u16((uint16x8_t)v1), vget_high_u16((uint16x8_t)v2));
+
+		return (reg)vcombine_u16(res1.val[1], res2.val[1]);
+	}
+
+	template <>
+	inline reg interleavehi2<int8_t>(const reg v1, const reg v2) {
+		uint8x8x2_t res1 = vzip_u8(vget_low_u8 ((uint8x16_t)v1), vget_low_u8 ((uint8x16_t)v2));
+		uint8x8x2_t res2 = vzip_u8(vget_high_u8((uint8x16_t)v1), vget_high_u8((uint8x16_t)v2));
+
+		return (reg)vcombine_u8(res1.val[1], res2.val[1]);
+	}
+
+
 	// ----------------------------------------------------------------------------------------------------- interleave
 	template <>
 	inline regx2 interleave<double>(const reg v1, const reg v2) {
@@ -783,6 +933,51 @@
 		regx2 res = {{(reg)vcombine_u8(res0.val[0], res0.val[1]),
 		              (reg)vcombine_u8(res1.val[0], res1.val[1])}};
 		
+		return res;
+	}
+
+	// ---------------------------------------------------------------------------------------------------- interleave2
+	template <>
+	inline regx2 interleave2<float>(const reg v1, const reg v2) {
+		uint32x2x2_t res1 = vzip_u32(vget_low_u32 ((uint32x4_t)v1), vget_low_u32 ((uint32x4_t)v2));
+		uint32x2x2_t res2 = vzip_u32(vget_high_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v2));
+
+		regx2 res = {{(reg) vcombine_u32(res1.val[0], res2.val[0]),
+		              (reg) vcombine_u32(res1.val[1], res2.val[1])}};
+
+		return res;
+	}
+
+	template <>
+	inline regx2 interleave2<int32_t>(const reg v1, const reg v2) {
+		uint32x2x2_t res1 = vzip_u32(vget_low_u32 ((uint32x4_t)v1), vget_low_u32 ((uint32x4_t)v2));
+		uint32x2x2_t res2 = vzip_u32(vget_high_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v2));
+
+		regx2 res = {{(reg) vcombine_u32(res1.val[0], res2.val[0]),
+		              (reg) vcombine_u32(res1.val[1], res2.val[1])}};
+
+		return res;
+	}
+
+	template <>
+	inline regx2 interleave2<int16_t>(const reg v1, const reg v2) {
+		uint16x4x2_t res1 = vzip_u16(vget_low_u16 ((uint16x8_t)v1), vget_low_u16 ((uint16x8_t)v2));
+		uint16x4x2_t res2 = vzip_u16(vget_high_u16((uint16x8_t)v1), vget_high_u16((uint16x8_t)v2));
+
+		regx2 res = {{(reg) vcombine_u16(res1.val[0], res2.val[0]),
+		              (reg) vcombine_u16(res1.val[1], res2.val[1])}};
+
+		return res;
+	}
+
+	template <>
+	inline regx2 interleave2<int8_t>(const reg v1, const reg v2) {
+		uint8x8x2_t res1 = vzip_u8(vget_low_u8 ((uint8x16_t)v1), vget_low_u8 ((uint8x16_t)v2));
+		uint8x8x2_t res2 = vzip_u8(vget_high_u8((uint8x16_t)v1), vget_high_u8((uint8x16_t)v2));
+
+		regx2 res = {{(reg) vcombine_u8(res1.val[0], res2.val[0]),
+		              (reg) vcombine_u8(res1.val[1], res2.val[1])}};
+
 		return res;
 	}
 
