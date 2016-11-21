@@ -1909,42 +1909,42 @@
 #ifdef __aarch64__
 	template <>
 	inline reg fmadd<double>(const reg v1, const reg v2, const reg v3) {
-#if defined(__ARM_NEON_FP) && __ARM_NEON_FP >= 4
+// #if defined(__ARM_NEON_FP) && __ARM_NEON_FP >= 4
 		return (reg) vfmaq_f64((float64x2_t)v3, (float64x2_t)v1, (float64x2_t)v2);
-#else
-		return add<double>(mul<double>(v1, v2), v3);
-#endif
+// #else
+// 		return add<double>(mul<double>(v1, v2), v3);
+// #endif
 	}
 #endif
 
 	template <>
 	inline reg fmadd<float>(const reg v1, const reg v2, const reg v3) {
-#if defined(__ARM_NEON_FP) && __ARM_NEON_FP >= 4
+// #if defined(__ARM_NEON_FP) && __ARM_NEON_FP >= 4
 		return (reg) vfmaq_f32((float32x4_t)v3, (float32x4_t)v1, (float32x4_t)v2);
-#else
-		return add<float>(mul<float>(v1, v2), v3);
-#endif
+// #else
+// 		return add<float>(mul<float>(v1, v2), v3);
+// #endif
 	}
 
 	// --------------------------------------------------------------------------------------------------------- fnmadd
 #ifdef __aarch64__
 	template <>
 	inline reg fnmadd<double>(const reg v1, const reg v2, const reg v3) {
-#if defined(__ARM_NEON_FP) && __ARM_NEON_FP >= 4
+// #if defined(__ARM_NEON_FP) && __ARM_NEON_FP >= 4
 		return (reg) vfmsq_f64((float64x2_t)v3, (float64x2_t)v1, (float64x2_t)v2);
-#else
-		return sub<double>(mul<double>(v1, v2), v3);
-#endif
+// #else
+// 		return sub<double>(mul<double>(v1, v2), v3);
+// #endif
 	}
 #endif
 
 	template <>
 	inline reg fnmadd<float>(const reg v1, const reg v2, const reg v3) {
-#if defined(__ARM_NEON_FP) && __ARM_NEON_FP >= 4
+// #if defined(__ARM_NEON_FP) && __ARM_NEON_FP >= 4
 		return (reg) vfmsq_f32((float32x4_t)v3, (float32x4_t)v1, (float32x4_t)v2);
-#else
-		return sub<float>(mul<float>(v1, v2), v3);
-#endif
+// #else
+// 		return sub<float>(mul<float>(v1, v2), v3);
+// #endif
 	}
 
 	// ---------------------------------------------------------------------------------------------------------- fmsub
