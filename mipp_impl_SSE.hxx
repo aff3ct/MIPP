@@ -4,34 +4,6 @@
 // --------------------------------------------------------------------------------------------------------------------
 #if defined(__SSE__)
 
-	// ----------------------------------------------------------------------------------------------------------- load
-	template <>
-	inline reg load<float>(const float *mem_addr) {
-		return _mm_load_ps(mem_addr);
-	}
-
-#ifdef __SSE2__
-	template <>
-	inline reg load<double>(const double *mem_addr) {
-		return _mm_castpd_ps(_mm_load_pd(mem_addr));
-	}
-#endif
-
-	template <>
-	inline reg load<int>(const int *mem_addr) {
-		return _mm_load_ps((const float*) mem_addr);
-	}
-
-	template <>
-	inline reg load<short>(const short *mem_addr) {
-		return _mm_load_ps((const float*) mem_addr);
-	}
-
-	template <>
-	inline reg load<signed char>(const signed char *mem_addr) {
-		return _mm_load_ps((const float*) mem_addr);
-	}
-
 	// ---------------------------------------------------------------------------------------------------------- loadu
 	template <>
 	inline reg loadu<float>(const float *mem_addr) {
@@ -60,38 +32,65 @@
 		return _mm_loadu_ps((const float*) mem_addr);
 	}
 
-	// ---------------------------------------------------------------------------------------------------------- store
+	// ----------------------------------------------------------------------------------------------------------- load
+#ifdef MIPP_ALIGNED_LOADS
 	template <>
-	inline void store<float>(float *mem_addr, const reg v) {
-		_mm_store_ps(mem_addr, v);
+	inline reg load<float>(const float *mem_addr) {
+		return _mm_load_ps(mem_addr);
 	}
 
 #ifdef __SSE2__
 	template <>
-	inline void store<double>(double *mem_addr, const reg v) {
-		_mm_store_pd(mem_addr, _mm_castps_pd(v));
+	inline reg load<double>(const double *mem_addr) {
+		return _mm_castpd_ps(_mm_load_pd(mem_addr));
 	}
 #endif
 
 	template <>
-	inline void store<long long>(long long *mem_addr, const reg v) {
-		_mm_store_ps((float*) mem_addr, v);
+	inline reg load<int>(const int *mem_addr) {
+		return _mm_load_ps((const float*) mem_addr);
 	}
 
 	template <>
-	inline void store<int>(int *mem_addr, const reg v) {
-		_mm_store_ps((float*) mem_addr, v);
+	inline reg load<short>(const short *mem_addr) {
+		return _mm_load_ps((const float*) mem_addr);
 	}
 
 	template <>
-	inline void store<short>(short *mem_addr, const reg v) {
-		_mm_store_ps((float*) mem_addr, v);
+	inline reg load<signed char>(const signed char *mem_addr) {
+		return _mm_load_ps((const float*) mem_addr);
+	}
+#else
+	template <>
+	inline reg load<float>(const float *mem_addr) {
+		return mipp::loadu<float>(mem_addr);
 	}
 
 	template <>
-	inline void store<signed char>(signed char *mem_addr, const reg v) {
-		_mm_store_ps((float*) mem_addr, v);
+	inline reg load<double>(const double *mem_addr) {
+		return mipp::loadu<double>(mem_addr);
 	}
+
+	template <>
+	inline reg load<long long>(const long long *mem_addr) {
+		return mipp::loadu<long long>(mem_addr);
+	}
+
+	template <>
+	inline reg load<int>(const int *mem_addr) {
+		return mipp::loadu<int>(mem_addr);
+	}
+
+	template <>
+	inline reg load<short>(const short *mem_addr) {
+		return mipp::loadu<short>(mem_addr);
+	}
+
+	template <>
+	inline reg load<signed char>(const signed char *mem_addr) {
+		return mipp::loadu<signed char>(mem_addr);
+	}
+#endif
 
 	// --------------------------------------------------------------------------------------------------------- storeu
 	template <>
@@ -125,6 +124,71 @@
 	inline void storeu<signed char>(signed char *mem_addr, const reg v) {
 		_mm_storeu_ps((float*) mem_addr, v);
 	}
+
+	// ---------------------------------------------------------------------------------------------------------- store
+#ifdef MIPP_ALIGNED_LOADS
+	template <>
+	inline void store<float>(float *mem_addr, const reg v) {
+		_mm_store_ps(mem_addr, v);
+	}
+
+#ifdef __SSE2__
+	template <>
+	inline void store<double>(double *mem_addr, const reg v) {
+		_mm_store_pd(mem_addr, _mm_castps_pd(v));
+	}
+#endif
+
+	template <>
+	inline void store<long long>(long long *mem_addr, const reg v) {
+		_mm_store_ps((float*) mem_addr, v);
+	}
+
+	template <>
+	inline void store<int>(int *mem_addr, const reg v) {
+		_mm_store_ps((float*) mem_addr, v);
+	}
+
+	template <>
+	inline void store<short>(short *mem_addr, const reg v) {
+		_mm_store_ps((float*) mem_addr, v);
+	}
+
+	template <>
+	inline void store<signed char>(signed char *mem_addr, const reg v) {
+		_mm_store_ps((float*) mem_addr, v);
+	}
+#else
+	template <>
+	inline void store<float>(float *mem_addr, const reg v) {
+		mipp::storeu<float>(mem_addr, v);
+	}
+
+	template <>
+	inline void store<double>(double *mem_addr, const reg v) {
+		mipp::storeu<double>(mem_addr, v);
+	}
+
+	template <>
+	inline void store<long long>(long long *mem_addr, const reg v) {
+		mipp::storeu<long long>(mem_addr, v);
+	}
+
+	template <>
+	inline void store<int>(int *mem_addr, const reg v) {
+		mipp::storeu<int>(mem_addr, v);
+	}
+
+	template <>
+	inline void store<short>(short *mem_addr, const reg v) {
+		mipp::storeu<short>(mem_addr, v);
+	}
+
+	template <>
+	inline void store<signed char>(signed char *mem_addr, const reg v) {
+		mipp::storeu<signed char>(mem_addr, v);
+	}
+#endif
 
 	// ------------------------------------------------------------------------------------------------------------ set
 	template <>
@@ -391,7 +455,7 @@
 #endif
 
 	// ---------------------------------------------------------------------------------------------------------- shuff
-#ifdef __SSE3__
+#ifdef __SSSE3__
 	template <>
 	inline reg shuff<float>(const reg v, const reg cm) {
 		return _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v), _mm_castps_si128(cm)));
@@ -414,7 +478,7 @@
 #endif
 
 	// --------------------------------------------------------------------------------------------------------- shuff2
-#ifdef __SSE3__
+#ifdef __SSSE3__
 	template <>
 	inline reg shuff2<float>(const reg v, const reg cm) {
 		return mipp::shuff<float>(v, cm);
@@ -1597,6 +1661,37 @@
 	inline reg neg<signed char>(const reg v1, const reg v2) {
 		reg v2_2 = orb<signed char>(v2, set1<signed char>(1)); // hack to avoid -0 case
 		return _mm_castsi128_ps(_mm_sign_epi8(_mm_castps_si128(v1), _mm_castps_si128(v2_2)));
+	}
+#endif
+
+	// ------------------------------------------------------------------------------------------------------------ neg
+	template <>
+	inline reg neg<float>(const reg v) {
+		return xorb<int>(v, mipp::set1<int>(0x80000000));
+	}
+
+	template <>
+	inline reg neg<double>(const reg v) {
+		return xorb<long long>(v, mipp::set1<long long>(0x8000000000000000));
+	}
+
+#ifdef __SSSE3__
+	template <>
+	inline reg neg<int>(const reg v) {
+		reg tmp = set1<int>(-1);
+		return _mm_castsi128_ps(_mm_sign_epi32(_mm_castps_si128(v), _mm_castps_si128(tmp)));
+	}
+
+	template <>
+	inline reg neg<short>(const reg v) {
+		reg tmp = set1<short>(-1);
+		return _mm_castsi128_ps(_mm_sign_epi16(_mm_castps_si128(v), _mm_castps_si128(tmp)));
+	}
+
+	template <>
+	inline reg neg<signed char>(const reg v) {
+		reg tmp = set1<signed char>(-1);
+		return _mm_castsi128_ps(_mm_sign_epi8(_mm_castps_si128(v), _mm_castps_si128(tmp)));
 	}
 #endif
 
