@@ -16,13 +16,13 @@ You don't have to install MIPP because it is a simple C++ header file.
 Just include the header into your source files when the wrapper is needed.
 
 ```cpp
-#include "MIPP/mipp.h"
+#include "mipp.h"
 ```
 
 mipp.h use a C++ `namespace`: `mipp`, if you do not want to prefix all the MIPP calls by `mipp::` you can do that:
 
 ```cpp
-#include "MIPP/mipp.h"
+#include "mipp.h"
 using namespace mipp;
 ```
 
@@ -234,7 +234,7 @@ Of course there are many more available instructions in the MIPP wrapper and you
 
 ```cpp
 #include <cstdlib> // rand()
-#include "MIPP/mipp.h"
+#include "mipp.h"
 
 int main() 
 {
