@@ -226,7 +226,7 @@ r2 = mipp::rot(r1);       // r2 = | +2.0 | +1.0 | +0.0 | +3.0 |
 r1 = mipp::rot(r2);       // r1 = | +3.0 | +2.0 | +1.0 | +0.0 |
 ```
 
-Of course there are many more available instructions in the MIPP wrapper and you can find these instructions in the MIPP files .
+Of course there are many more available instructions in the MIPP wrapper and you can find these instructions in the MIPP files.
 
 ## Code examples
 
