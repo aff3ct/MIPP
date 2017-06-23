@@ -2,7 +2,7 @@
 #include <random>
 #include <algorithm>
 
-#include "../mipp.h"
+#include "../src/mipp.h"
 
 // int main(int argc, char** argv)
 // {
