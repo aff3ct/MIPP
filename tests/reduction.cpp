@@ -159,12 +159,12 @@ int main(int argc, char** argv)
 	std::shuffle(t_8i, t_8i + mipp::nElReg<signed char>(), g);
 
 #ifndef __ARM_NEON__
-	const auto in_64  = mipp::Reg<double     >(t_64 , true);
+	const auto in_64  = mipp::Reg<double     >(t_64 );
 #endif
-	const auto in_32  = mipp::Reg<float      >(t_32 , true);
-	const auto in_32i = mipp::Reg<int        >(t_32i, true);
-	const auto in_16i = mipp::Reg<short      >(t_16i, true);
-	const auto in_8i  = mipp::Reg<signed char>(t_8i , true);
+	const auto in_32  = mipp::Reg<float      >(t_32 );
+	const auto in_32i = mipp::Reg<int        >(t_32i);
+	const auto in_16i = mipp::Reg<short      >(t_16i);
+	const auto in_8i  = mipp::Reg<signed char>(t_8i );
 
 	std::cout << "Input vectors: " << std::endl;
 #ifndef __ARM_NEON__
