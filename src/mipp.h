@@ -261,6 +261,25 @@ template<class T> using vector = std::vector<T, AlignedAllocator<T>>;
 // -------------------------------------------------------------------------------------------- myIntrinsics prototypes
 // --------------------------------------------------------------------------------------------------------------------
 
+std::string get_back_trace()
+{
+	std::string bt_str;
+#if defined(MIPP_ENABLE_BACKTRACE) && defined(__GNUC__) && (defined(__linux__) || defined(__linux))
+	const int bt_max_depth = 32;
+	void *bt_array[bt_max_depth];
+
+	size_t size = backtrace(bt_array, bt_max_depth);
+	char** bt_symbs = backtrace_symbols(bt_array, size);
+
+	bt_str += "\nBacktrace:";
+	for (size_t i = 0; i < size; i++)
+		bt_str += "\n" + std::string(bt_symbs[i]);
+	free(bt_symbs);
+#endif
+
+	return bt_str;
+}
+
 template <typename T>
 static void errorMessage(std::string instr)
 {
@@ -277,23 +296,16 @@ static void errorMessage(std::string instr)
 	type_names[typeid(float)   ] = "float";
 	type_names[typeid(double)  ] = "double";
 
+	std::string message;
 	if (RegisterSizeBit == 0)
-		throw std::runtime_error("mipp: undefined type of instructions, try to add "
-		                         "-mfpu=neon, -msse4.2, -mavx, -march=native... at the compile time.");
+		message = "mipp: undefined type of instructions, try to add -mfpu=neon, -msse4.2, -mavx, -march=native... "
+		          "at the compile time.";
+	else
+		message = "mipp::" + instr + "<" + type_names[typeid(T)] + "> (" + IntructionsType + ") is undefined!";
 
-#if defined(MIPP_ENABLE_BACKTRACE) && defined(__GNUC__) && (defined(__linux__) || defined(__linux))
-	void *array[5];
-	size_t size;
+	message += get_back_trace();
 
-	// get void*'s for all entries on the stack
-	size = backtrace(array, 5);
-
-	std::cerr << "Backtrace:" << std::endl;
-	backtrace_symbols_fd(array, size, STDERR_FILENO);
-#endif
-
-	throw std::runtime_error("mipp::" + instr + "<" + type_names[typeid(T)] + "> (" +
-	                         IntructionsType + ") is undefined!");
+	throw std::runtime_error(message);
 }
 
 template <typename T1, typename T2>
@@ -312,23 +324,17 @@ static void errorMessage(std::string instr)
 	type_names[typeid(float   )] = "float";
 	type_names[typeid(double  )] = "double";
 
+	std::string message;
 	if (RegisterSizeBit == 0)
-		throw std::runtime_error("mipp: undefined type of instructions, try to add "
-		                         "-mfpu=neon, -msse4.2, -mavx, -march=native... at the compile time.");
+		message = "mipp: undefined type of instructions, try to add -mfpu=neon, -msse4.2, -mavx, -march=native... "
+		          "at the compile time.";
+	else
+		message = "mipp::" + instr + "<" + type_names[typeid(T1)] + "," + type_names[typeid(T2)] + "> (" +
+		          IntructionsType + ") is undefined!";
 
-#if defined(MIPP_ENABLE_BACKTRACE) && defined(__GNUC__) && (defined(__linux__) || defined(__linux))
-	void *array[5];
-	size_t size;
+	message += get_back_trace();
 
-	// get void*'s for all entries on the stack
-	size = backtrace(array, 5);
-
-	std::cerr << "Backtrace:" << std::endl;
-	backtrace_symbols_fd(array, size, STDERR_FILENO);
-#endif
-
-	throw std::runtime_error("mipp::" + instr + "<" + type_names[typeid(T1)] + "," + type_names[typeid(T2)] + "> (" +
-	                         IntructionsType + ") is undefined!");
+	throw std::runtime_error(message);
 }
 
 template <typename T> inline reg   load         (const T*)                        { errorMessage<T>("load");          exit(-1); }
