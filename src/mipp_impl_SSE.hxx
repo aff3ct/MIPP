@@ -1214,10 +1214,10 @@
 		return _mm_castsi128_ps(_mm_slli_epi16(_mm_castps_si128(v1), n));
 	}
 
-	template <>
-	inline reg lshift<int8_t>(const reg v1, uint32_t n) {
-		return _mm_castsi128_ps(_mm_slli_epi16(_mm_castps_si128(v1), n)); // TODO: Be careful this is not a shift 8 but a shift 16 bits...
-	}
+//	template <>
+//	inline reg lshift<int8_t>(const reg v1, uint32_t n) {
+//		return _mm_castsi128_ps(_mm_slli_epi16(_mm_castps_si128(v1), n)); // TODO: Be careful this is not a shift 8 but a shift 16 bits...
+//	}
 #endif
 
 	// --------------------------------------------------------------------------------------------------------- rshift
@@ -1232,10 +1232,10 @@
 		return _mm_castsi128_ps(_mm_srli_epi16(_mm_castps_si128(v1), n));
 	}
 
-	template <>
-	inline reg rshift<int8_t>(const reg v1, const uint32_t n) {
-		return _mm_castsi128_ps(_mm_srli_epi16(_mm_castps_si128(v1), n)); // TODO: Be careful this is not a shift 8 but a shift 16 bits...
-	}
+//	template <>
+//	inline reg rshift<int8_t>(const reg v1, const uint32_t n) {
+//		return _mm_castsi128_ps(_mm_srli_epi16(_mm_castps_si128(v1), n)); // TODO: Be careful this is not a shift 8 but a shift 16 bits...
+//	}
 #endif
 
 	// ---------------------------------------------------------------------------------------------------------- cmpeq

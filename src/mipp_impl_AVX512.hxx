@@ -386,10 +386,10 @@
 		return (reg) _mm512_slli_epi16 ((__m512i) v1, n);
 	}
 
-	template <>
-	inline reg lshift<int8_t>(const reg v1, const uint32_t n) {
-		return (reg) _mm512_slli_epi16 ((__m512i) v1, n); // TODO: be carefull here, this is a 16bit shift
-	}
+//	template <>
+//	inline reg lshift<int8_t>(const reg v1, const uint32_t n) {
+//		return (reg) _mm512_slli_epi16 ((__m512i) v1, n); // TODO: be carefull here, this is a 16bit shift
+//	}
 #endif
 
 	// --------------------------------------------------------------------------------------------------------- rshift
@@ -404,10 +404,10 @@
 		return (reg) _mm512_srli_epi16 ((__m512i) v1, n);
 	}
 
-	template <>
-	inline reg rshift<int8_t>(const reg v1, const uint32_t n) {
-		return (reg) _mm512_srli_epi16 ((__m512i) v1, n); // TODO: be carefull here, this is a 16bit shift
-	}
+//	template <>
+//	inline reg rshift<int8_t>(const reg v1, const uint32_t n) {
+//		return (reg) _mm512_srli_epi16 ((__m512i) v1, n); // TODO: be carefull here, this is a 16bit shift
+//	}
 #endif
 
 	// ---------------------------------------------------------------------------------------------------------- cmpeq
