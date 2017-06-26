@@ -17,17 +17,17 @@
 	}
 
 	template <>
-	inline reg loadu<int>(const int *mem_addr) {
+	inline reg loadu<int32_t>(const int32_t *mem_addr) {
 		return _mm512_loadu_ps((const float*) mem_addr);
 	}
 
 	template <>
-	inline reg loadu<short>(const short *mem_addr) {
+	inline reg loadu<int16_t>(const int16_t *mem_addr) {
 		return _mm512_loadu_ps((const float*) mem_addr);
 	}
 
 	template <>
-	inline reg loadu<signed char>(const signed char *mem_addr) {
+	inline reg loadu<int8_t>(const int8_t *mem_addr) {
 		return (__m512) _mm512_loadu_ps((const float*) mem_addr);
 	}
 #endif
@@ -45,17 +45,17 @@
 	}
 
 	template <>
-	inline reg load<int>(const int *mem_addr) {
+	inline reg load<int32_t>(const int32_t *mem_addr) {
 		return _mm512_load_ps((const float*) mem_addr);
 	}
 
 	template <>
-	inline reg load<short>(const short *mem_addr) {
+	inline reg load<int16_t>(const int16_t *mem_addr) {
 		return _mm512_load_ps((const float*) mem_addr);
 	}
 
 	template <>
-	inline reg load<signed char>(const signed char *mem_addr) {
+	inline reg load<int8_t>(const int8_t *mem_addr) {
 		return (__m512) _mm512_load_ps((const float*) mem_addr);
 	}
 #else
@@ -70,23 +70,23 @@
 	}
 
 	template <>
-	inline reg load<long long>(const long long *mem_addr) {
-		return mipp::loadu<long long>(mem_addr);
+	inline reg load<int64_t>(const int64_t *mem_addr) {
+		return mipp::loadu<int64_t>(mem_addr);
 	}
 
 	template <>
-	inline reg load<int>(const int *mem_addr) {
-		return mipp::loadu<int>(mem_addr);
+	inline reg load<int32_t>(const int32_t *mem_addr) {
+		return mipp::loadu<int32_t>(mem_addr);
 	}
 
 	template <>
-	inline reg load<short>(const short *mem_addr) {
-		return mipp::loadu<short>(mem_addr);
+	inline reg load<int16_t>(const int16_t *mem_addr) {
+		return mipp::loadu<int16_t>(mem_addr);
 	}
 
 	template <>
-	inline reg load<signed char>(const signed char *mem_addr) {
-		return mipp::loadu<signed char>(mem_addr);
+	inline reg load<int8_t>(const int8_t *mem_addr) {
+		return mipp::loadu<int8_t>(mem_addr);
 	}
 #endif
 
@@ -103,17 +103,17 @@
 	}
 
 	template <>
-	inline void storeu<int>(int *mem_addr, const reg v) {
+	inline void storeu<int32_t>(int32_t *mem_addr, const reg v) {
 		_mm512_storeu_ps((float *)mem_addr, v);
 	}
 
 	template <>
-	inline void storeu<short>(short *mem_addr, const reg v) {
+	inline void storeu<int16_t>(int16_t *mem_addr, const reg v) {
 		_mm512_storeu_ps((float *)mem_addr, v);
 	}
 
 	template <>
-	inline void storeu<signed char>(signed char *mem_addr, const reg v) {
+	inline void storeu<int8_t>(int8_t *mem_addr, const reg v) {
 		_mm512_storeu_ps((float *)mem_addr, v);
 	}
 #endif
@@ -131,17 +131,17 @@
 	}
 
 	template <>
-	inline void store<int>(int *mem_addr, const reg v) {
+	inline void store<int32_t>(int32_t *mem_addr, const reg v) {
 		_mm512_store_ps((float *)mem_addr, v);
 	}
 
 	template <>
-	inline void store<short>(short *mem_addr, const reg v) {
+	inline void store<int16_t>(int16_t *mem_addr, const reg v) {
 		_mm512_store_ps((float *)mem_addr, v);
 	}
 
 	template <>
-	inline void store<signed char>(signed char *mem_addr, const reg v) {
+	inline void store<int8_t>(int8_t *mem_addr, const reg v) {
 		_mm512_store_ps((float *)mem_addr, v);
 	}
 #else
@@ -156,23 +156,23 @@
 	}
 
 	template <>
-	inline void store<long long>(long long *mem_addr, const reg v) {
-		mipp::storeu<long long>(mem_addr, v);
+	inline void store<int64_t>(int64_t *mem_addr, const reg v) {
+		mipp::storeu<int64_t>(mem_addr, v);
 	}
 
 	template <>
-	inline void store<int>(int *mem_addr, const reg v) {
-		mipp::storeu<int>(mem_addr, v);
+	inline void store<int32_t>(int32_t *mem_addr, const reg v) {
+		mipp::storeu<int32_t>(mem_addr, v);
 	}
 
 	template <>
-	inline void store<short>(short *mem_addr, const reg v) {
-		mipp::storeu<short>(mem_addr, v);
+	inline void store<int16_t>(int16_t *mem_addr, const reg v) {
+		mipp::storeu<int16_t>(mem_addr, v);
 	}
 
 	template <>
-	inline void store<signed char>(signed char *mem_addr, const reg v) {
-		mipp::storeu<signed char>(mem_addr, v);
+	inline void store<int8_t>(int8_t *mem_addr, const reg v) {
+		mipp::storeu<int8_t>(mem_addr, v);
 	}
 #endif
 
@@ -189,22 +189,22 @@
 	}
 
 	template <>
-	inline reg set1<int>(const int val) {
+	inline reg set1<int32_t>(const int32_t val) {
 		return (reg) _mm512_set1_epi32(val);
 	}
 
 	template <>
-	inline reg set1<long long>(const long long val) {
+	inline reg set1<int64_t>(const int64_t val) {
 		return (reg) _mm512_set1_epi64(val);
 	}
 
 	template <>
-	inline reg set1<short>(const short val) {
+	inline reg set1<int16_t>(const int16_t val) {
 		return (reg) _mm512_set1_epi16(val);
 	}
 
 	template <>
-	inline reg set1<signed char>(const signed char val) {
+	inline reg set1<int8_t>(const int8_t val) {
 		return (reg) _mm512_set1_epi8(val);
 	}
 
@@ -223,16 +223,16 @@
 	}
 
 	template <>
-	inline reg set1<int>(const int val) {
-		int init[16] __attribute__((aligned(64))) = {val, val, val, val, val, val, val, val, 
+	inline reg set1<int32_t>(const int32_t val) {
+		int32_t init[16] __attribute__((aligned(64))) = {val, val, val, val, val, val, val, val,
 		                                             val, val, val, val, val, val, val, val};
-		return load<int>(init);
+		return load<int32_t>(init);
 	}
 
 	template <>
-	inline reg set1<long long>(const long long val) {
-		long long init[8] __attribute__((aligned(64))) = {val, val, val, val, val, val, val, val};
-		return load<long long>(init);
+	inline reg set1<int64_t>(const int64_t val) {
+		int64_t init[8] __attribute__((aligned(64))) = {val, val, val, val, val, val, val, val};
+		return load<int64_t>(init);
 	}
 #endif
 
@@ -249,17 +249,17 @@
 	}
 
 	template <>
-	inline reg set0<int>() {
+	inline reg set0<int32_t>() {
 		return (__m512) _mm512_setzero_si512();
 	}
 
 	template <>
-	inline reg set0<short>() {
+	inline reg set0<int16_t>() {
 		return (__m512) _mm512_setzero_si512();
 	}
 
 	template <>
-	inline reg set0<signed char>() {
+	inline reg set0<int8_t>() {
 		return (__m512) _mm512_setzero_si512();
 	}
 
@@ -275,8 +275,8 @@
 	}
 
 	template <>
-	inline reg set0<int>() {
-		return set1<int>(0);
+	inline reg set0<int32_t>() {
+		return set1<int32_t>(0);
 	}
 #endif
 
@@ -292,12 +292,12 @@
 	}
 
 	template <>
-	inline reg andb<short>(const reg v1, const reg v2) {
+	inline reg andb<int16_t>(const reg v1, const reg v2) {
 		return (__m512) _mm512_and_si512((__m512i) v1, (__m512i) v2);
 	}
 
 	template <>
-	inline reg andb<signed char>(const reg v1, const reg v2) {
+	inline reg andb<int8_t>(const reg v1, const reg v2) {
 		return (__m512) _mm512_and_si512((__m512i) v1, (__m512i) v2);
 	}
 
@@ -313,12 +313,12 @@
 	}
 
 	template <>
-	inline reg andnb<short>(const reg v1, const reg v2) {
+	inline reg andnb<int16_t>(const reg v1, const reg v2) {
 		return (__m512) _mm512_andnot_si512((__m512i) v1, (__m512i) v2);
 	}
 
 	template <>
-	inline reg andnb<signed char>(const reg v1, const reg v2) {
+	inline reg andnb<int8_t>(const reg v1, const reg v2) {
 		return (__m512) _mm512_andnot_si512((__m512i) v1, (__m512i) v2);
 	}
 
@@ -334,17 +334,17 @@
 	}
 
 	template <>
-	inline reg orb<int>(const reg v1, const reg v2) {
+	inline reg orb<int32_t>(const reg v1, const reg v2) {
 		return (reg) _mm512_or_si512((__m512i)v1, (__m512i)v2);
 	}
 
 	template <>
-	inline reg orb<short>(const reg v1, const reg v2) {
+	inline reg orb<int16_t>(const reg v1, const reg v2) {
 		return (reg) _mm512_or_si512((__m512i)v1, (__m512i)v2);
 	}
 
 	template <>
-	inline reg orb<signed char>(const reg v1, const reg v2) {
+	inline reg orb<int8_t>(const reg v1, const reg v2) {
 		return (reg) _mm512_or_si512((__m512i)v1, (__m512i)v2);
 	}
 
@@ -360,52 +360,52 @@
 	}
 
 	template <>
-	inline reg xorb<int>(const reg v1, const reg v2) {
+	inline reg xorb<int32_t>(const reg v1, const reg v2) {
 		return (reg) _mm512_xor_si512((__m512i) v1, (__m512i) v2);
 	}
 
 	template <>
-	inline reg xorb<short>(const reg v1, const reg v2) {
+	inline reg xorb<int16_t>(const reg v1, const reg v2) {
 		return (reg) _mm512_xor_si512((__m512i) v1, (__m512i) v2);
 	}
 
 	template <>
-	inline reg xorb<signed char>(const reg v1, const reg v2) {
+	inline reg xorb<int8_t>(const reg v1, const reg v2) {
 		return (reg) _mm512_xor_si512((__m512i) v1, (__m512i) v2);
 	}
 
 	// --------------------------------------------------------------------------------------------------------- lshift
 	template <>
-	inline reg lshift<int>(const reg v1, const int n) {
+	inline reg lshift<int32_t>(const reg v1, const uint32_t n) {
 		return (reg) _mm512_slli_epi32 ((__m512i) v1, n);
 	}
 
 #if defined(__AVX512BW__)
 	template <>
-	inline reg lshift<short>(const reg v1, const int n) {
+	inline reg lshift<int16_t>(const reg v1, const uint32_t n) {
 		return (reg) _mm512_slli_epi16 ((__m512i) v1, n);
 	}
 
 	template <>
-	inline reg lshift<signed char>(const reg v1, const int n) {
+	inline reg lshift<int8_t>(const reg v1, const uint32_t n) {
 		return (reg) _mm512_slli_epi16 ((__m512i) v1, n); // TODO: be carefull here, this is a 16bit shift
 	}
 #endif
 
 	// --------------------------------------------------------------------------------------------------------- rshift
 	template <>
-	inline reg rshift<int>(const reg v1, const int n) {
+	inline reg rshift<int32_t>(const reg v1, const uint32_t n) {
 		return (reg) _mm512_srli_epi32 ((__m512i) v1, n);
 	}
 
 #if defined(__AVX512BW__)
 	template <>
-	inline reg rshift<short>(const reg v1, const int n) {
+	inline reg rshift<int16_t>(const reg v1, const uint32_t n) {
 		return (reg) _mm512_srli_epi16 ((__m512i) v1, n);
 	}
 
 	template <>
-	inline reg rshift<signed char>(const reg v1, const int n) {
+	inline reg rshift<int8_t>(const reg v1, const uint32_t n) {
 		return (reg) _mm512_srli_epi16 ((__m512i) v1, n); // TODO: be carefull here, this is a 16bit shift
 	}
 #endif
@@ -423,18 +423,18 @@
 	}
 
 	template <>
-	inline reg cmpeq<int>(const reg v1, const reg v2) {
+	inline reg cmpeq<int32_t>(const reg v1, const reg v2) {
 		return (reg) _mm512_cmpeq_epi32_mask((__m512i) v1, (__m512i) v2); // TODO: this intrinsic return a mask...
 	}
 
 #if defined(__AVX512BW__)
 	template <>
-	inline reg cmpeq<short>(const reg v1, const reg v2) {
+	inline reg cmpeq<int16_t>(const reg v1, const reg v2) {
 		return (reg) _mm512_cmpeq_epi16_mask((__m512i) v1, (__m512i) v2); // TODO: this intrinsic return a mask...
 	}
 
 	template <>
-	inline reg cmpeq<signed char>(const reg v1, const reg v2) {
+	inline reg cmpeq<int8_t>(const reg v1, const reg v2) {
 		return (reg) _mm512_cmpeq_epi8_mask((__m512i) v1, (__m512i) v2); // TODO: this intrinsic return a mask...
 	}
 #endif
@@ -452,18 +452,18 @@
 	}
 
 	template <>
-	inline reg cmpneq<int>(const reg v1, const reg v2) {
+	inline reg cmpneq<int32_t>(const reg v1, const reg v2) {
 		return (reg) _mm512_cmpneq_epi32_mask((__m512i) v1, (__m512i) v2); // TODO: this intrinsic return a mask...
 	}
 
 #if defined(__AVX512BW__)
 	template <>
-	inline reg cmpneq<short>(const reg v1, const reg v2) {
+	inline reg cmpneq<int16_t>(const reg v1, const reg v2) {
 		return (reg) _mm512_cmpneq_epi16_mask((__m512i) v1, (__m512i) v2); // TODO: this intrinsic return a mask...
 	}
 
 	template <>
-	inline reg cmpneq<signed char>(const reg v1, const reg v2) {
+	inline reg cmpneq<int8_t>(const reg v1, const reg v2) {
 		return (reg) _mm512_cmpneq_epi8_mask((__m512i) v1, (__m512i) v2); // TODO: this intrinsic return a mask...
 	}
 #endif
@@ -481,18 +481,18 @@
 	}
 
 	template <>
-	inline reg cmple<int>(const reg v1, const reg v2) {
+	inline reg cmple<int32_t>(const reg v1, const reg v2) {
 		return (reg) _mm512_cmp_epi32_mask((__m512d) v1, (__m512d) v2, _CMP_LE_OS); // TODO: this intrinsic return a mask...
 	}
 
 #if defined(__AVX512BW__)
 	template <>
-	inline reg cmple<short>(const reg v1, const reg v2) {
+	inline reg cmple<int16_t>(const reg v1, const reg v2) {
 		return (reg) _mm512_cmp_epi16_mask((__m512d) v1, (__m512d) v2, _CMP_LE_OS); // TODO: this intrinsic return a mask...
 	}
 
 	template <>
-	inline reg cmple<signed char>(const reg v1, const reg v2) {
+	inline reg cmple<int8_t>(const reg v1, const reg v2) {
 		return (reg) _mm512_cmp_epi8_mask((__m512d) v1, (__m512d) v2, _CMP_LE_OS); // TODO: this intrinsic return a mask...
 	}
 #endif
@@ -509,18 +509,18 @@
 	}
 
 	template <>
-	inline reg add<int>(const reg v1, const reg v2) {
+	inline reg add<int32_t>(const reg v1, const reg v2) {
 		return (__m512) _mm512_add_epi32((__m512i) v1, (__m512i) v2);
 	}
 
 #if defined(__AVX512BW__)
 	template <>
-	inline reg add<short>(const reg v1, const reg v2) {
+	inline reg add<int16_t>(const reg v1, const reg v2) {
 		return (__m512) _mm512_adds_epi16((__m512i) v1, (__m512i) v2);
 	}
 
 	template <>
-	inline reg add<signed char>(const reg v1, const reg v2) {
+	inline reg add<int8_t>(const reg v1, const reg v2) {
 		return (__m512) _mm512_adds_epi16((__m512i) v1, (__m512i) v2);
 	}
 #endif
@@ -537,18 +537,18 @@
 	}
 
 	template <>
-	inline reg sub<int>(const reg v1, const reg v2) {
+	inline reg sub<int32_t>(const reg v1, const reg v2) {
 		return (__m512) _mm512_sub_epi32((__m512i) v1, (__m512i) v2);
 	}
 
 #if defined(__AVX512BW__)
 	template <>
-	inline reg sub<short>(const reg v1, const reg v2) {
+	inline reg sub<int16_t>(const reg v1, const reg v2) {
 		return (__m512) _mm512_subs_epi16((__m512i) v1, (__m512i) v2);
 	}
 
 	template <>
-	inline reg sub<signed char>(const reg v1, const reg v2) {
+	inline reg sub<int8_t>(const reg v1, const reg v2) {
 		return (__m512) _mm512_subs_epi8((__m512i) v1, (__m512i) v2);
 	}
 #endif
@@ -566,7 +566,7 @@
 
 #if defined(__AVX512F__)
 	template <>
-	inline reg mul<int>(const reg v1, const reg v2) {
+	inline reg mul<int32_t>(const reg v1, const reg v2) {
 		return (__m512) _mm512_mul_epi32((__m512i) v1, (__m512i) v2);
 	}
 #endif
@@ -597,18 +597,18 @@
 	}
 
 	template <>
-	inline reg min<int>(const reg v1, const reg v2) {
+	inline reg min<int32_t>(const reg v1, const reg v2) {
 		return (__m512) _mm512_min_epi32((__m512i) v1, (__m512i) v2);
 	}
 
 #if defined(__AVX512BW__)
 	template <>
-	inline reg min<short>(const reg v1, const reg v2) {
+	inline reg min<int16_t>(const reg v1, const reg v2) {
 		return (__m512) _mm512_min_epi16((__m512i) v1, (__m512i) v2);
 	}
 
 	template <>
-	inline reg min<signed char>(const reg v1, const reg v2) {
+	inline reg min<int8_t>(const reg v1, const reg v2) {
 		return (__m512) _mm512_min_epi8((__m512i) v1, (__m512i) v2);
 	}
 #endif
@@ -638,18 +638,18 @@
 	}
 
 	template <>
-	inline reg max<int>(const reg v1, const reg v2) {
+	inline reg max<int32_t>(const reg v1, const reg v2) {
 		return (__m512) _mm512_max_epi32((__m512i) v1, (__m512i) v2);
 	}
 
 #if defined(__AVX512BW__)
 	template <>
-	inline reg max<short>(const reg v1, const reg v2) {
+	inline reg max<int16_t>(const reg v1, const reg v2) {
 		return (__m512) _mm512_max_epi16((__m512i) v1, (__m512i) v2);
 	}
 
 	template <>
-	inline reg max<signed char>(const reg v1, const reg v2) {
+	inline reg max<int8_t>(const reg v1, const reg v2) {
 		return (__m512) _mm512_max_epi8((__m512i) v1, (__m512i) v2);
 	}
 #endif
@@ -670,7 +670,7 @@
 	template <>
 	inline reg sign<float>(const reg v1) {
 		// sign_mask = 10000000000000000000000000000000 // 32 bits
-		const reg sign_mask = set1<int>(0x80000000);
+		const reg sign_mask = set1<int32_t>(0x80000000);
 
 		// indices = 31 30 29 28 27 26 25 24 23 22 21 20 19 18 17 16 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
 		// mask    =  1  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
@@ -690,7 +690,7 @@
 	template <>
 	inline reg sign<double>(const reg v1) {
 		// sign_mask = 1000000000000000000000000000000000000000000000000000000000000000 // 64 bits
-		const reg sign_mask = set1<long long>(0x8000000000000000);
+		const reg sign_mask = set1<int64_t>(0x8000000000000000);
 
 		// indices = 63 62 61 60 59 58 57 56 55 54 53 52 51 50 49 48 47 46 45 44 43 42 41 40 39 38 37 36 35 34 33 32...
 		// mask    =  1  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0...
@@ -708,35 +708,35 @@
 	}
 
 	template <>
-	inline reg sign<short>(const reg v1) {
-		const reg sign_mask = set1<short>(0x8000);
-		return andb<short>(v1, sign_mask);
+	inline reg sign<int16_t>(const reg v1) {
+		const reg sign_mask = set1<int16_t>(0x8000);
+		return andb<int16_t>(v1, sign_mask);
 	}
 
 	template <>
-	inline reg sign<signed char>(const reg v1) {
+	inline reg sign<int8_t>(const reg v1) {
 		// sign_mask = 10000000 // 8 bits
-		const reg sign_mask = set1<signed char>(0x80);
+		const reg sign_mask = set1<int8_t>(0x80);
 
 		// indices = 7  6  5  4  3  2  1  0
 		// mask    = 1  0  0  0  0  0  0  0
 		// v1      = h  g  f  e  d  c  b  a
 		// res     = h  0  0  0  0  0  0  0
 		// res is the sign because the first bit is the sign bit (0 = positive, 1 = negative)
-		return andb<signed char>(v1, sign_mask);
+		return andb<int8_t>(v1, sign_mask);
 	}
 
 	template <>
-	inline reg sign<short>(const reg v1, const reg v2) {
-		reg sign_v1_v2 = xorb<short>(v1, v2);
-		    sign_v1_v2 = sign<short>(sign_v1_v2);
+	inline reg sign<int16_t>(const reg v1, const reg v2) {
+		reg sign_v1_v2 = xorb<int16_t>(v1, v2);
+		    sign_v1_v2 = sign<int16_t>(sign_v1_v2);
 		return sign_v1_v2;
 	}
 
 	template <>
-	inline reg sign<signed char>(const reg v1, const reg v2) {
-		reg sign_v1_v2 = xorb<signed char>(v1, v2);
-		    sign_v1_v2 = sign<signed char>(sign_v1_v2);
+	inline reg sign<int8_t>(const reg v1, const reg v2) {
+		reg sign_v1_v2 = xorb<int8_t>(v1, v2);
+		    sign_v1_v2 = sign<int8_t>(sign_v1_v2);
 		return sign_v1_v2;
 	}
 
@@ -754,12 +754,12 @@
 	// ------------------------------------------------------------------------------------------------------------ neg
 	template <>
 	inline reg neg<float>(const reg v) {
-		return xorb<int>(v, mipp::set1<int>(0x80000000));
+		return xorb<int32_t>(v, mipp::set1<int32_t>(0x80000000));
 	}
 
 	template <>
 	inline reg neg<double>(const reg v) {
-		return xorb<long long>(v, mipp::set1<long long>(0x8000000000000000));
+		return xorb<int64_t>(v, mipp::set1<int64_t>(0x8000000000000000));
 	}
 
 	// ------------------------------------------------------------------------------------------------------------ abs
@@ -850,22 +850,22 @@
 	}
 
 	template <>
-	inline reg div2<int>(const reg v1) {
+	inline reg div2<int32_t>(const reg v1) {
 		return (reg) _mm512_srai_epi32 ((__m512i) v1, 1);
 	}
 
 #if defined(__AVX512BW__)
 	template <>
-	inline reg div2<short>(const reg v1) {
+	inline reg div2<int16_t>(const reg v1) {
 		return (reg) _mm512_srai_epi16 ((__m512i) v1, 1);
 	}
 
 	template <>
-	inline reg div2<signed char>(const reg v1) {
-		reg abs_v1 = abs<signed char>(v1);
-		reg sh16 = rshift<short>(abs_v1, 1);
-		sh16 = andnb<signed char>(set1<signed char>(0x80), sh16);
-		reg sh8 = neg<signed char>(sh16, v1);
+	inline reg div2<int8_t>(const reg v1) {
+		reg abs_v1 = abs<int8_t>(v1);
+		reg sh16 = rshift<int16_t>(abs_v1, 1);
+		sh16 = andnb<int8_t>(set1<int8_t>(0x80), sh16);
+		reg sh8 = neg<int8_t>(sh16, v1);
 		return sh8;
 	}
 #endif
@@ -882,22 +882,22 @@
 	}
 
 	template <>
-	inline reg div4<int>(const reg v1) {
+	inline reg div4<int32_t>(const reg v1) {
 		return (reg) _mm512_srai_epi32 ((__m512i) v1, 2);
 	}
 
 #if defined(__AVX512BW__)
 	template <>
-	inline reg div4<short>(const reg v1) {
+	inline reg div4<int16_t>(const reg v1) {
 		return (reg) _mm512_srai_epi16 ((__m512i) v1, 2);
 	}
 
 	template <>
-	inline reg div4<signed char>(const reg v1) {
-		reg abs_v1 = abs<signed char>(v1);
-		reg sh16 = rshift<short>(abs_v1, 2);
-		sh16 = andnb<signed char>(set1<signed char>(0xc0), sh16);
-		reg sh8 = neg<signed char>(sh16, v1);
+	inline reg div4<int8_t>(const reg v1) {
+		reg abs_v1 = abs<int8_t>(v1);
+		reg sh16 = rshift<int16_t>(abs_v1, 2);
+		sh16 = andnb<int8_t>(set1<int8_t>(0xc0), sh16);
+		reg sh8 = neg<int8_t>(sh16, v1);
 		return sh8;
 	}
 #endif
@@ -914,17 +914,17 @@
 	}
 
 	template <>
-	inline reg sat<int>(const reg v1, int min, int max) {
-		return mipp::min<int>(mipp::max<int>(v1, set1<int>(min)), set1<int>(max));
+	inline reg sat<int32_t>(const reg v1, int32_t min, int32_t max) {
+		return mipp::min<int32_t>(mipp::max<int32_t>(v1, set1<int32_t>(min)), set1<int32_t>(max));
 	}
 
 	template <>
-	inline reg sat<short>(const reg v1, short min, short max) {
-		return mipp::min<short>(mipp::max<short>(v1, set1<short>(min)), set1<short>(max));
+	inline reg sat<int16_t>(const reg v1, int16_t min, int16_t max) {
+		return mipp::min<int16_t>(mipp::max<int16_t>(v1, set1<int16_t>(min)), set1<int16_t>(max));
 	}
 
 	template <>
-	inline reg sat<signed char>(const reg v1, signed char min, signed char max) {
-		return mipp::min<signed char>(mipp::max<signed char>(v1, set1<signed char>(min)), set1<signed char>(max));
+	inline reg sat<int8_t>(const reg v1, int8_t min, int8_t max) {
+		return mipp::min<int8_t>(mipp::max<int8_t>(v1, set1<int8_t>(min)), set1<int8_t>(max));
 	}
 #endif

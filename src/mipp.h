@@ -76,6 +76,7 @@ SOFTWARE.
 #include <iomanip>
 #include <cstddef>
 #include <cassert>
+#include <cstdint>
 #include <string>
 #include <vector>
 #include <cmath>
@@ -102,8 +103,8 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 // ------------------------------------------------------------------------------------------------------- ARM NEON-128
 #if defined(__ARM_NEON__) || defined(__ARM_NEON)
 	#define MIPP_REQUIRED_ALIGNMENT 16
-	constexpr int RequiredAlignment = MIPP_REQUIRED_ALIGNMENT;
-	constexpr int RegisterSizeBit = 128;
+	constexpr uint32_t RequiredAlignment = MIPP_REQUIRED_ALIGNMENT;
+	constexpr uint32_t RegisterSizeBit = 128;
 
 	using reg   = float32x4_t;
 	using reg_2 = float32x2_t; // half a full register
@@ -113,8 +114,8 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 // -------------------------------------------------------------------------------------------------------- X86 AVX-512
 #elif defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)
 	#define MIPP_REQUIRED_ALIGNMENT 64
-	constexpr int RequiredAlignment = MIPP_REQUIRED_ALIGNMENT;
-	constexpr int RegisterSizeBit = 512;
+	constexpr uint32_t RequiredAlignment = MIPP_REQUIRED_ALIGNMENT;
+	constexpr uint32_t RegisterSizeBit = 512;
 
 	using reg   = __m512;
 	using reg_2 = __m256; // half a full register
@@ -124,8 +125,8 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 // -------------------------------------------------------------------------------------------------------- X86 AVX-256
 #elif defined(__AVX__)
 	#define MIPP_REQUIRED_ALIGNMENT 32
-	constexpr int RequiredAlignment = MIPP_REQUIRED_ALIGNMENT;
-	constexpr int RegisterSizeBit = 256;
+	constexpr uint32_t RequiredAlignment = MIPP_REQUIRED_ALIGNMENT;
+	constexpr uint32_t RegisterSizeBit = 256;
 
 	using reg   = __m256;
 	using reg_2 = __m128; // half a full register
@@ -139,8 +140,8 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 // -------------------------------------------------------------------------------------------------------- X86 SSE-128
 #elif defined(__SSE__)
 	#define MIPP_REQUIRED_ALIGNMENT 16
-	constexpr int RequiredAlignment = MIPP_REQUIRED_ALIGNMENT;
-	constexpr int RegisterSizeBit = 128;
+	constexpr uint32_t RequiredAlignment = MIPP_REQUIRED_ALIGNMENT;
+	constexpr uint32_t RegisterSizeBit = 128;
 
 	using reg   = __m128;
 	using reg_2 = __m128i; // half a full register (information is in the lower part of the 128 bit register)
@@ -163,11 +164,11 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 #else
 	#define MIPP_NO_INTRINSICS
 	#define MIPP_REQUIRED_ALIGNMENT 1
-	constexpr int RequiredAlignment = MIPP_REQUIRED_ALIGNMENT;
-	constexpr int RegisterSizeBit = 0;
+	constexpr uint32_t RequiredAlignment = MIPP_REQUIRED_ALIGNMENT;
+	constexpr uint32_t RegisterSizeBit = 0;
 
-	using reg   = int;
-	using reg_2 = short;
+	using reg   = int32_t;
+	using reg_2 = int16_t;
 
 	const std::string IntructionsType = "NO INTRINSICS";
 #endif
@@ -175,11 +176,11 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 // ------------------------------------------------------------------------------------------------- MIPP_NO_INTRINSICS
 #else
 	#define MIPP_REQUIRED_ALIGNMENT 1
-	constexpr int RequiredAlignment = MIPP_REQUIRED_ALIGNMENT;
-	constexpr int RegisterSizeBit = 0;
+	constexpr uint32_t RequiredAlignment = MIPP_REQUIRED_ALIGNMENT;
+	constexpr uint32_t RegisterSizeBit = 0;
 
-	using reg   = int;
-	using reg_2 = short;
+	using reg   = int32_t;
+	using reg_2 = int16_t;
 
 	const std::string IntructionsType = "NO INTRINSICS";
 
@@ -188,7 +189,7 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 typedef struct regx2 { reg val[2]; } regx2;
 
 template <typename T>
-constexpr int nElmtsPerRegister()
+constexpr uint32_t nElmtsPerRegister()
 {
 #ifdef MIPP_NO_INTRINSICS
 	return 1;
@@ -198,7 +199,7 @@ constexpr int nElmtsPerRegister()
 }
 
 template <typename T>
-constexpr int nElReg() 
+constexpr uint32_t nElReg()
 { 
 #ifdef MIPP_NO_INTRINSICS
 	return 1;
@@ -210,7 +211,7 @@ constexpr int nElReg()
 // --------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------- memory allocator
 template <typename T>
-T* malloc(int nData)
+T* malloc(uint32_t nData)
 {
 	T* ptr = nullptr;
 
@@ -265,33 +266,16 @@ static void errorMessage(std::string instr)
 {
 	// define type names
 	std::unordered_map<std::type_index,std::string> type_names;
-	type_names[typeid(char)]                   = "char";
-	type_names[typeid(unsigned char)]          = "unsigned char";
-	type_names[typeid(signed char)]            = "signed char";
-	type_names[typeid(short)]                  = "short";
-	type_names[typeid(short int)]              = "short int";
-	type_names[typeid(unsigned short)]         = "unsigned short";
-	type_names[typeid(unsigned short int)]     = "unsigned short int";
-	type_names[typeid(signed short)]           = "signed short";
-	type_names[typeid(signed short int)]       = "signed short int";
-	type_names[typeid(int)]                    = "int";
-	type_names[typeid(unsigned)]               = "unsigned";
-	type_names[typeid(unsigned int)]           = "unsigned int";
-	type_names[typeid(signed int)]             = "signed int";
-	type_names[typeid(long)]                   = "long";
-	type_names[typeid(long int)]               = "long int";
-	type_names[typeid(unsigned long)]          = "unsigned long";
-	type_names[typeid(unsigned long int)]      = "unsigned long int";
-	type_names[typeid(signed long)]            = "signed long";
-	type_names[typeid(signed long int)]        = "signed long int";
-	type_names[typeid(long long)]              = "long long";
-	type_names[typeid(long long int)]          = "long long int";
-	type_names[typeid(unsigned long long)]     = "unsigned long long";
-	type_names[typeid(unsigned long long int)] = "unsigned long long int";
-	type_names[typeid(signed long long)]       = "signed long long";
-	type_names[typeid(signed long long int)]   = "signed long long int";
-	type_names[typeid(float)]                  = "float";
-	type_names[typeid(double)]                 = "double";
+	type_names[typeid(int8_t)  ] = "int8_t";
+	type_names[typeid(uint8_t) ] = "uint8_t";
+	type_names[typeid(int16_t) ] = "int16_t";
+	type_names[typeid(uint16_t)] = "uint16_t";
+	type_names[typeid(int32_t) ] = "int32_t";
+	type_names[typeid(uint32_t)] = "uint32_t";
+	type_names[typeid(int64_t) ] = "int64_t";
+	type_names[typeid(uint64_t)] = "uint64_t";
+	type_names[typeid(float)   ] = "float";
+	type_names[typeid(double)  ] = "double";
 
 	if (RegisterSizeBit == 0)
 		throw std::runtime_error("mipp: undefined type of instructions, try to add "
@@ -317,33 +301,16 @@ static void errorMessage(std::string instr)
 {
 	// define type names
 	std::unordered_map<std::type_index,std::string> type_names;
-	type_names[typeid(char)]                   = "char";
-	type_names[typeid(unsigned char)]          = "unsigned char";
-	type_names[typeid(signed char)]            = "signed char";
-	type_names[typeid(short)]                  = "short";
-	type_names[typeid(short int)]              = "short int";
-	type_names[typeid(unsigned short)]         = "unsigned short";
-	type_names[typeid(unsigned short int)]     = "unsigned short int";
-	type_names[typeid(signed short)]           = "signed short";
-	type_names[typeid(signed short int)]       = "signed short int";
-	type_names[typeid(int)]                    = "int";
-	type_names[typeid(unsigned)]               = "unsigned";
-	type_names[typeid(unsigned int)]           = "unsigned int";
-	type_names[typeid(signed int)]             = "signed int";
-	type_names[typeid(long)]                   = "long";
-	type_names[typeid(long int)]               = "long int";
-	type_names[typeid(unsigned long)]          = "unsigned long";
-	type_names[typeid(unsigned long int)]      = "unsigned long int";
-	type_names[typeid(signed long)]            = "signed long";
-	type_names[typeid(signed long int)]        = "signed long int";
-	type_names[typeid(long long)]              = "long long";
-	type_names[typeid(long long int)]          = "long long int";
-	type_names[typeid(unsigned long long)]     = "unsigned long long";
-	type_names[typeid(unsigned long long int)] = "unsigned long long int";
-	type_names[typeid(signed long long)]       = "signed long long";
-	type_names[typeid(signed long long int)]   = "signed long long int";
-	type_names[typeid(float)]                  = "float";
-	type_names[typeid(double)]                 = "double";
+	type_names[typeid(int8_t  )] = "int8_t";
+	type_names[typeid(uint8_t )] = "uint8_t";
+	type_names[typeid(int16_t )] = "int16_t";
+	type_names[typeid(uint16_t)] = "uint16_t";
+	type_names[typeid(int32_t )] = "int32_t";
+	type_names[typeid(uint32_t)] = "uint32_t";
+	type_names[typeid(int64_t )] = "int64_t";
+	type_names[typeid(uint64_t)] = "uint64_t";
+	type_names[typeid(float   )] = "float";
+	type_names[typeid(double  )] = "double";
 
 	if (RegisterSizeBit == 0)
 		throw std::runtime_error("mipp: undefined type of instructions, try to add "
@@ -373,8 +340,8 @@ template <typename T> inline reg   set1         (const T)                       
 template <typename T> inline reg   set0         ()                                { errorMessage<T>("set0");          exit(-1); }
 template <typename T> inline reg_2 low          (const reg)                       { errorMessage<T>("low");           exit(-1); }
 template <typename T> inline reg_2 high         (const reg)                       { errorMessage<T>("high");          exit(-1); }
-template <typename T> inline reg   cmask        (const int[nElReg<T>()])          { errorMessage<T>("cmask");         exit(-1); }
-template <typename T> inline reg   cmask2       (const int[nElReg<T>()/2])        { errorMessage<T>("cmask2");        exit(-1); }
+template <typename T> inline reg   cmask        (const uint32_t[nElReg<T>()])     { errorMessage<T>("cmask");         exit(-1); }
+template <typename T> inline reg   cmask2       (const uint32_t[nElReg<T>()/2])   { errorMessage<T>("cmask2");        exit(-1); }
 template <typename T> inline reg   shuff        (const reg, const reg)            { errorMessage<T>("shuff");         exit(-1); }
 template <typename T> inline reg   shuff2       (const reg, const reg)            { errorMessage<T>("shuff2");        exit(-1); }
 template <typename T> inline reg   interleavelo (const reg, const reg)            { errorMessage<T>("interleavelo");  exit(-1); }
@@ -396,8 +363,8 @@ template <typename T> inline reg   andnb        (const reg, const reg)          
 template <typename T> inline reg   notb         (const reg)                       { errorMessage<T>("notb");          exit(-1); }
 template <typename T> inline reg   orb          (const reg, const reg)            { errorMessage<T>("orb");           exit(-1); }
 template <typename T> inline reg   xorb         (const reg, const reg)            { errorMessage<T>("xorb");          exit(-1); }
-template <typename T> inline reg   lshift       (const reg, const int)            { errorMessage<T>("lshift");        exit(-1); }
-template <typename T> inline reg   rshift       (const reg, const int)            { errorMessage<T>("rshift");        exit(-1); }
+template <typename T> inline reg   lshift       (const reg, const uint32_t)       { errorMessage<T>("lshift");        exit(-1); }
+template <typename T> inline reg   rshift       (const reg, const uint32_t)       { errorMessage<T>("rshift");        exit(-1); }
 template <typename T> inline reg   cmpeq        (const reg, const reg)            { errorMessage<T>("cmpeq");         exit(-1); }
 template <typename T> inline reg   cmpneq       (const reg, const reg)            { errorMessage<T>("cmpneq");        exit(-1); }
 template <typename T> inline reg   cmplt        (const reg, const reg)            { errorMessage<T>("cmplt");         exit(-1); }
@@ -459,21 +426,14 @@ template <typename T> inline reg copysign(const reg r1, const reg r2) { return n
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename T>
-void dump(const mipp::reg r, std::ostream &stream = std::cout, const int elmtWidth = 6)
+void dump(const mipp::reg r, std::ostream &stream = std::cout, const uint32_t elmtWidth = 6)
 {
 	T dumpArray[mipp::nElReg<T>()];
 	mipp::storeu<T>(dumpArray, r);
 
 	stream << "[";
-	if (typeid(char) == typeid(T) || typeid(signed char) == typeid(T))
-		for (auto i = 0; i < mipp::nElReg<T>(); i++)
-			stream << std::setw(elmtWidth) << (int)dumpArray[i] << ((i < mipp::nElReg<T>()-1) ? ", " : "");
-	else if (typeid(unsigned char) == typeid(T))
-		for (auto i = 0; i < mipp::nElReg<T>(); i++)
-			stream << std::setw(elmtWidth) << (unsigned)dumpArray[i] << ((i < mipp::nElReg<T>()-1) ? ", " : "");
-	else
-		for (auto i = 0; i < mipp::nElReg<T>(); i++)
-			stream << std::setw(elmtWidth) << dumpArray[i] << ((i < mipp::nElReg<T>()-1) ? ", " : "");
+	for (auto i = 0; i < mipp::nElReg<T>(); i++)
+		stream << std::setw(elmtWidth) << +dumpArray[i] << ((i < mipp::nElReg<T>()-1) ? ", " : "");
 
 	stream << "]";
 }
@@ -535,7 +495,7 @@ struct reduction
 	}
 
 	template <ld_op<T> LD = mipp::loadu<T>>
-	static T apply(const T *data, const int dataSize) 
+	static T apply(const T *data, const uint32_t dataSize)
 	{
 		assert(dataSize > 0);
 		assert(dataSize % mipp::nElReg<T>() == 0);
@@ -573,7 +533,7 @@ struct Reduction
 	}
 
 	template <ld_op<T> LD = mipp::loadu<T>>
-	static T apply(const T *data, const int dataSize) 
+	static T apply(const T *data, const uint32_t dataSize)
 	{
 		assert(dataSize > 0);
 		assert(dataSize % mipp::nElReg<T>() == 0);
