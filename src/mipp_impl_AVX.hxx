@@ -1103,11 +1103,23 @@
 		return _mm256_castsi256_ps(_mm256_slli_epi16(_mm256_castps_si256(v1), n));
 	}
 
-//	template <>
-//	inline reg lshift<int8_t>(const reg v1, const uint32_t n) {
+	template <>
+	inline reg lshift<int8_t>(const reg v1, const uint32_t n) {
+		auto shu = _mm256_set_epi8(30,31,28,29,26,27,24,25,22,23,20,21,18,19,16,17,14,15,12,13,10,11,8,9,6,7,4,5,2,3,0,1);
+		reg v2 = _mm256_castsi256_ps(_mm256_shuffle_epi8(_mm256_castps_si256(v1), shu));
+		reg lsh1 = lshift<int16_t>(v1, n);
+		reg lsh2 = lshift<int16_t>(v2, n);
+		lsh2 = _mm256_castsi256_ps(_mm256_shuffle_epi8(_mm256_castps_si256(lsh2), shu));
+
+		reg msk = set1<int16_t>(0x00FF);
+		lsh1 = andb <int16_t>(msk, lsh1);
+		lsh2 = andnb<int16_t>(msk, lsh2);
+
+		return xorb<int16_t>(lsh1, lsh2);
+
 //		// TODO: Be careful this is not a shift 8 but a shift 16 bits...
 //		return _mm256_castsi256_ps(_mm256_slli_epi16(_mm256_castps_si256(v1), n));
-//	}
+	}
 #else
 	template <>
 	inline reg lshift<int32_t>(const reg v1, const uint32_t n) {
@@ -1154,11 +1166,23 @@
 		return _mm256_castsi256_ps(_mm256_srli_epi16(_mm256_castps_si256(v1), n));
 	}
 
-//	template <>
-//	inline reg rshift<int8_t>(const reg v1, const uint32_t n) {
+	template <>
+	inline reg rshift<int8_t>(const reg v1, const uint32_t n) {
+		auto shu = _mm256_set_epi8(30,31,28,29,26,27,24,25,22,23,20,21,18,19,16,17,14,15,12,13,10,11,8,9,6,7,4,5,2,3,0,1);
+		reg v2 = _mm256_castsi256_ps(_mm256_shuffle_epi8(_mm256_castps_si256(v1), shu));
+		reg rsh1 = rshift<int16_t>(v1, n);
+		reg rsh2 = rshift<int16_t>(v2, n);
+		rsh2 = _mm256_castsi256_ps(_mm256_shuffle_epi8(_mm256_castps_si256(rsh2), shu));
+
+		reg msk = set1<int16_t>(0xFF00);
+		rsh1 = andb <int16_t>(msk, rsh1);
+		rsh2 = andnb<int16_t>(msk, rsh2);
+
+		return xorb<int16_t>(rsh1, rsh2);
+
 //		// TODO: Be careful this is not a shift 8 but a shift 16 bits...
 //		return _mm256_castsi256_ps(_mm256_srli_epi16(_mm256_castps_si256(v1), n));
-//	}
+	}
 #else
 	template <>
 	inline reg rshift<int32_t>(const reg v1, const uint32_t n) {

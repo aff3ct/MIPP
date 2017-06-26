@@ -1213,11 +1213,26 @@
 	inline reg lshift<int16_t>(const reg v1, const uint32_t n) {
 		return _mm_castsi128_ps(_mm_slli_epi16(_mm_castps_si128(v1), n));
 	}
+#endif
 
-//	template <>
-//	inline reg lshift<int8_t>(const reg v1, uint32_t n) {
-//		return _mm_castsi128_ps(_mm_slli_epi16(_mm_castps_si128(v1), n)); // TODO: Be careful this is not a shift 8 but a shift 16 bits...
-//	}
+#ifdef __SSSE3__
+	template <>
+	inline reg lshift<int8_t>(const reg v1, uint32_t n) {
+		auto shu = _mm_set_epi8(14,15,12,13,10,11,8,9,6,7,4,5,2,3,0,1);
+		reg v2 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v1), shu));
+		reg lsh1 = lshift<int16_t>(v1, n);
+		reg lsh2 = lshift<int16_t>(v2, n);
+		lsh2 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(lsh2), shu));
+
+		reg msk = set1<int16_t>(0x00FF);
+		lsh1 = andb <int16_t>(msk, lsh1);
+		lsh2 = andnb<int16_t>(msk, lsh2);
+
+		return xorb<int16_t>(lsh1, lsh2);
+
+//		// TODO: Be careful this is not a shift 8 but a shift 16 bits...
+//		// return _mm_castsi128_ps(_mm_slli_epi16(_mm_castps_si128(v1), n));
+	}
 #endif
 
 	// --------------------------------------------------------------------------------------------------------- rshift
@@ -1231,11 +1246,26 @@
 	inline reg rshift<int16_t>(const reg v1, const uint32_t n) {
 		return _mm_castsi128_ps(_mm_srli_epi16(_mm_castps_si128(v1), n));
 	}
+#endif
 
-//	template <>
-//	inline reg rshift<int8_t>(const reg v1, const uint32_t n) {
-//		return _mm_castsi128_ps(_mm_srli_epi16(_mm_castps_si128(v1), n)); // TODO: Be careful this is not a shift 8 but a shift 16 bits...
-//	}
+#ifdef __SSSE3__
+	template <>
+	inline reg rshift<int8_t>(const reg v1, const uint32_t n) {
+		auto shu = _mm_set_epi8(14,15,12,13,10,11,8,9,6,7,4,5,2,3,0,1);
+		reg v2 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v1), shu));
+		reg rsh1 = rshift<int16_t>(v1, n);
+		reg rsh2 = rshift<int16_t>(v2, n);
+		rsh2 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(rsh2), shu));
+
+		reg msk = set1<int16_t>(0xFF00);
+		rsh1 = andb <int16_t>(msk, rsh1);
+		rsh2 = andnb<int16_t>(msk, rsh2);
+
+		return xorb<int16_t>(rsh1, rsh2);
+
+//		// TODO: Be careful this is not a shift 8 but a shift 16 bits...
+//		return _mm_castsi128_ps(_mm_srli_epi16(_mm_castps_si128(v1), n));
+	}
 #endif
 
 	// ---------------------------------------------------------------------------------------------------------- cmpeq
