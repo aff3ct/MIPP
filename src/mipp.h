@@ -189,7 +189,7 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 typedef struct regx2 { reg val[2]; } regx2;
 
 template <typename T>
-constexpr uint32_t nElmtsPerRegister()
+constexpr int32_t nElmtsPerRegister()
 {
 #ifdef MIPP_NO_INTRINSICS
 	return 1;
@@ -199,7 +199,7 @@ constexpr uint32_t nElmtsPerRegister()
 }
 
 template <typename T>
-constexpr uint32_t nElReg()
+constexpr int32_t nElReg()
 { 
 #ifdef MIPP_NO_INTRINSICS
 	return 1;
@@ -261,7 +261,7 @@ template<class T> using vector = std::vector<T, AlignedAllocator<T>>;
 // -------------------------------------------------------------------------------------------- myIntrinsics prototypes
 // --------------------------------------------------------------------------------------------------------------------
 
-std::string get_back_trace()
+static std::string get_back_trace()
 {
 	std::string bt_str;
 #if defined(MIPP_ENABLE_BACKTRACE) && defined(__GNUC__) && (defined(__linux__) || defined(__linux))
