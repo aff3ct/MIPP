@@ -1185,7 +1185,7 @@
 //
 //		return xorb<int16_t>(rsh1, rsh2);
 
-		auto msk = set1<int8_t>((1 << 8 -n) -1);
+		auto msk = set1<int8_t>((1 << (8 -n)) -1);
 		reg rsh = rshift<int16_t>(v1, n);
 		rsh = andb<int16_t>(msk, rsh);
 		return rsh;
