@@ -285,63 +285,63 @@
 	// ------------------------------------------------------------------------------------------------------------ low
 	template <>
 	inline reg_2 low<double>(const reg v) {
-		return _mm_castps_si128(v);
+		return _mm_castps_pd(v);
 	}
 
 	template <>
 	inline reg_2 low<float>(const reg v) {
-		return _mm_castps_si128(v);
+		return _mm_castps_pd(v);
 	}
 
 	template <>
 	inline reg_2 low<int64_t>(const reg v) {
-		return _mm_castps_si128(v);
+		return _mm_castps_pd(v);
 	}
 
 	template <>
 	inline reg_2 low<int32_t>(const reg v) {
-		return _mm_castps_si128(v);
+		return _mm_castps_pd(v);
 	}
 
 	template <>
 	inline reg_2 low<int16_t>(const reg v) {
-		return _mm_castps_si128(v);
+		return _mm_castps_pd(v);
 	}
 
 	template <>
 	inline reg_2 low<int8_t>(const reg v) {
-		return _mm_castps_si128(v);
+		return _mm_castps_pd(v);
 	}
 
 	// ----------------------------------------------------------------------------------------------------------- high
 	template <>
 	inline reg_2 high<double>(const reg v) {
-		return _mm_castps_si128(_mm_shuffle_ps(v, v, _MM_SHUFFLE(1, 0, 3, 2)));
+		return _mm_castps_pd(_mm_shuffle_ps(v, v, _MM_SHUFFLE(1, 0, 3, 2)));
 	}
 
 	template <>
 	inline reg_2 high<float>(const reg v) {
-		return _mm_castps_si128(_mm_shuffle_ps(v, v, _MM_SHUFFLE(1, 0, 3, 2)));
+		return _mm_castps_pd(_mm_shuffle_ps(v, v, _MM_SHUFFLE(1, 0, 3, 2)));
 	}
 
 	template <>
 	inline reg_2 high<int64_t>(const reg v) {
-		return _mm_castps_si128(_mm_shuffle_ps(v, v, _MM_SHUFFLE(1, 0, 3, 2)));
+		return _mm_castps_pd(_mm_shuffle_ps(v, v, _MM_SHUFFLE(1, 0, 3, 2)));
 	}
 
 	template <>
 	inline reg_2 high<int32_t>(const reg v) {
-		return _mm_castps_si128(_mm_shuffle_ps(v, v, _MM_SHUFFLE(1, 0, 3, 2)));
+		return _mm_castps_pd(_mm_shuffle_ps(v, v, _MM_SHUFFLE(1, 0, 3, 2)));
 	}
 
 	template <>
 	inline reg_2 high<int16_t>(const reg v) {
-		return _mm_castps_si128(_mm_shuffle_ps(v, v, _MM_SHUFFLE(1, 0, 3, 2)));
+		return _mm_castps_pd(_mm_shuffle_ps(v, v, _MM_SHUFFLE(1, 0, 3, 2)));
 	}
 
 	template <>
 	inline reg_2 high<int8_t>(const reg v) {
-		return _mm_castps_si128(_mm_shuffle_ps(v, v, _MM_SHUFFLE(1, 0, 3, 2)));
+		return _mm_castps_pd(_mm_shuffle_ps(v, v, _MM_SHUFFLE(1, 0, 3, 2)));
 	}
 
 	// ---------------------------------------------------------------------------------------------------------- cmask
@@ -2119,12 +2119,12 @@
 #ifdef __SSE4_1__
 	template <>
 	inline reg cvt<int8_t,int16_t>(const reg_2 v) {
-		return _mm_castsi128_ps(_mm_cvtepi8_epi16(v));
+		return _mm_castsi128_ps(_mm_cvtepi8_epi16(_mm_castpd_si128(v)));
 	}
 
 	template <>
 	inline reg cvt<int16_t,int32_t>(const reg_2 v) {
-		return _mm_castsi128_ps(_mm_cvtepi16_epi32(v));
+		return _mm_castsi128_ps(_mm_cvtepi16_epi32(_mm_castpd_si128(v)));
 	}
 #endif
 

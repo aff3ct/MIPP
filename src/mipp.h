@@ -106,6 +106,7 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	constexpr uint32_t RequiredAlignment = MIPP_REQUIRED_ALIGNMENT;
 	constexpr uint32_t RegisterSizeBit = 128;
 
+	using msk   = uint32x4_t;
 	using reg   = float32x4_t;
 	using reg_2 = float32x2_t; // half a full register
 
@@ -117,6 +118,11 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	constexpr uint32_t RequiredAlignment = MIPP_REQUIRED_ALIGNMENT;
 	constexpr uint32_t RegisterSizeBit = 512;
 
+#ifdef __AVX512BW__
+	using msk   = __mmask64;
+#else
+	using msk   = __mmask16;
+#endif
 	using reg   = __m512;
 	using reg_2 = __m256; // half a full register
 
@@ -128,6 +134,7 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	constexpr uint32_t RequiredAlignment = MIPP_REQUIRED_ALIGNMENT;
 	constexpr uint32_t RegisterSizeBit = 256;
 
+	using msk   = __m256i;
 	using reg   = __m256;
 	using reg_2 = __m128; // half a full register
 
@@ -143,8 +150,9 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	constexpr uint32_t RequiredAlignment = MIPP_REQUIRED_ALIGNMENT;
 	constexpr uint32_t RegisterSizeBit = 128;
 
+	using msk   = __m128i;
 	using reg   = __m128;
-	using reg_2 = __m128i; // half a full register (information is in the lower part of the 128 bit register)
+	using reg_2 = __m128d; // half a full register (information is in the lower part of the 128 bit register)
 
 #ifdef __SSE4_2__
 	const std::string IntructionsType = "x86 SSE4.2-128";
@@ -167,6 +175,7 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	constexpr uint32_t RequiredAlignment = MIPP_REQUIRED_ALIGNMENT;
 	constexpr uint32_t RegisterSizeBit = 0;
 
+	using msk   = uint8_t;
 	using reg   = int32_t;
 	using reg_2 = int16_t;
 
@@ -179,6 +188,7 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	constexpr uint32_t RequiredAlignment = MIPP_REQUIRED_ALIGNMENT;
 	constexpr uint32_t RegisterSizeBit = 0;
 
+	using msk   = uint8_t;
 	using reg   = int32_t;
 	using reg_2 = int16_t;
 
