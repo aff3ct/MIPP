@@ -671,7 +671,7 @@
 	// --------------------------------------------------------------------------------------------------------- lshift
 	template <>
 	inline reg lshift<int32_t>(const reg v1, const uint32_t n) {
-		return (reg) vshlq_u32((uint32x4_t) v1, (int32x4_t)mipp::set1<int>(n));
+		return (reg) vshlq_u32((uint32x4_t) v1, (int32x4_t)mipp::set1<int32_t>(n));
 	}
 
 	template <>
@@ -687,7 +687,7 @@
 	// --------------------------------------------------------------------------------------------------------- rshift
 	template <>
 	inline reg rshift<int32_t>(const reg v1, const uint32_t n) {
-		return (reg) vshlq_u32((uint32x4_t) v1, (int32x4_t)mipp::set1<int>(-n));
+		return (reg) vshlq_u32((uint32x4_t) v1, (int32x4_t)mipp::set1<int32_t>(-n));
 	}
 
 	template <>

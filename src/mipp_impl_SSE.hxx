@@ -851,14 +851,14 @@
 		// auto e47f47 = mipp::interleavehi<int16_t>(tab[4], tab[5]);
 		// auto g47h47 = mipp::interleavehi<int16_t>(tab[6], tab[7]);
 
-		// auto a01b01c01d01 = mipp::interleavelo<int>(a03b03, c03d03);
-		// auto a23b23c23d23 = mipp::interleavehi<int>(a03b03, c03d03);
-		// auto e01f01g01h01 = mipp::interleavelo<int>(e03f03, g03h03);
-		// auto e23f23g23h23 = mipp::interleavehi<int>(e03f03, g03h03);
-		// auto a45b45c45d45 = mipp::interleavelo<int>(a47b47, c47d47);
-		// auto a67b67c67d67 = mipp::interleavehi<int>(a47b47, c47d47);
-		// auto e45f45g45h45 = mipp::interleavelo<int>(e47f47, g47h47);
-		// auto e67f67g67h67 = mipp::interleavehi<int>(e47f47, g47h47);
+		// auto a01b01c01d01 = mipp::interleavelo<int32_t>(a03b03, c03d03);
+		// auto a23b23c23d23 = mipp::interleavehi<int32_t>(a03b03, c03d03);
+		// auto e01f01g01h01 = mipp::interleavelo<int32_t>(e03f03, g03h03);
+		// auto e23f23g23h23 = mipp::interleavehi<int32_t>(e03f03, g03h03);
+		// auto a45b45c45d45 = mipp::interleavelo<int32_t>(a47b47, c47d47);
+		// auto a67b67c67d67 = mipp::interleavehi<int32_t>(a47b47, c47d47);
+		// auto e45f45g45h45 = mipp::interleavelo<int32_t>(e47f47, g47h47);
+		// auto e67f67g67h67 = mipp::interleavehi<int32_t>(e47f47, g47h47);
 
 		// auto a0b0c0d0e0f0g0h0 = mipp::interleavelo<int64_t>(a01b01c01d01, e01f01g01h01);
 		// auto a1b1c1d1e1f1g1h1 = mipp::interleavehi<int64_t>(a01b01c01d01, e01f01g01h01);
