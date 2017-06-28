@@ -62,36 +62,36 @@ int main(int argc, char** argv)
 		std::cout << std::endl;
 	}
 
-	out = (in_1 == in_2);
+	auto msk = (in_1 == in_2);
 	std::cout << "Output vectors (in_1 == in_2): " << std::endl;
-	std::cout << "out  = " << out << std::endl;
+	std::cout << "msk  = " << msk << std::endl;
 	std::cout << std::endl;
 
-	out = (in_1 > in_2);
+	msk = (in_1 > in_2);
 	std::cout << "Output vectors (in_1 > in_2): " << std::endl;
-	std::cout << "out  = " << out << std::endl;
+	std::cout << "msk  = " << msk << std::endl;
 	std::cout << std::endl;
 
 	if (typeid(type) == typeid(double) || typeid(type) == typeid(float))
 	{
-		out = (in_1 != in_2);
+		msk = (in_1 != in_2);
 		std::cout << "Output vectors (in_1 != in_2): " << std::endl;
-		std::cout << "out  = " << out << std::endl;
+		std::cout << "msk  = " << msk << std::endl;
 		std::cout << std::endl;
 
-		out = (in_1 < in_2);
+		msk = (in_1 < in_2);
 		std::cout << "Output vectors (in_1 < in_2): " << std::endl;
-		std::cout << "out  = " << out << std::endl;
+		std::cout << "msk  = " << msk << std::endl;
 		std::cout << std::endl;
 
-		out = (in_1 <= in_2);
+		msk = (in_1 <= in_2);
 		std::cout << "Output vectors (in_1 <= in_2): " << std::endl;
-		std::cout << "out  = " << out << std::endl;
+		std::cout << "msk  = " << msk << std::endl;
 		std::cout << std::endl;
 
-		out = (in_1 >= in_2);
+		msk = (in_1 >= in_2);
 		std::cout << "Output vectors (in_1 >= in_2): " << std::endl;
-		std::cout << "out  = " << out << std::endl;
+		std::cout << "msk  = " << msk << std::endl;
 		std::cout << std::endl;
 
 		out = in_1 * in_2;

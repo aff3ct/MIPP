@@ -229,15 +229,64 @@
 		                                           (int8_t)vals[ 3], (int8_t)vals[ 2], (int8_t)vals[ 1], (int8_t)vals[ 0]));
 	}
 
-	// ----------------------------------------------------------------------------------------------------------- set1
+	// ----------------------------------------------------------------------------------------------------- set (mask)
 	template <>
-	inline reg set1<float>(const float val) {
-		return _mm256_set1_ps(val);
+	inline msk set<double>(const bool vals[nElReg<double>()]) {
+		return _mm256_set_epi64x(vals[3] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
+		                         vals[2] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
+		                         vals[1] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
+		                         vals[0] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0);
 	}
 
 	template <>
+	inline msk set<float>(const bool vals[nElReg<float>()]) {
+		return _mm256_set_epi32(vals[7] ? 0xFFFFFFFF : 0, vals[6] ? 0xFFFFFFFF : 0,
+		                        vals[5] ? 0xFFFFFFFF : 0, vals[4] ? 0xFFFFFFFF : 0,
+		                        vals[3] ? 0xFFFFFFFF : 0, vals[2] ? 0xFFFFFFFF : 0,
+		                        vals[1] ? 0xFFFFFFFF : 0, vals[0] ? 0xFFFFFFFF : 0);
+	}
+
+	template <>
+	inline msk set<int32_t>(const bool vals[nElReg<int32_t>()]) {
+		return _mm256_set_epi32(vals[7] ? 0xFFFFFFFF : 0, vals[6] ? 0xFFFFFFFF : 0,
+		                        vals[5] ? 0xFFFFFFFF : 0, vals[4] ? 0xFFFFFFFF : 0,
+		                        vals[3] ? 0xFFFFFFFF : 0, vals[2] ? 0xFFFFFFFF : 0,
+		                        vals[1] ? 0xFFFFFFFF : 0, vals[0] ? 0xFFFFFFFF : 0);
+	}
+
+	template <>
+	inline msk set<int16_t>(const bool vals[nElReg<int16_t>()]) {
+		return _mm256_set_epi16(vals[15] ? 0xFFFF : 0, vals[14] ? 0xFFFF : 0,
+		                        vals[13] ? 0xFFFF : 0, vals[12] ? 0xFFFF : 0,
+		                        vals[11] ? 0xFFFF : 0, vals[10] ? 0xFFFF : 0,
+		                        vals[ 9] ? 0xFFFF : 0, vals[ 8] ? 0xFFFF : 0,
+		                        vals[ 7] ? 0xFFFF : 0, vals[ 6] ? 0xFFFF : 0,
+		                        vals[ 5] ? 0xFFFF : 0, vals[ 4] ? 0xFFFF : 0,
+		                        vals[ 3] ? 0xFFFF : 0, vals[ 2] ? 0xFFFF : 0,
+		                        vals[ 1] ? 0xFFFF : 0, vals[ 0] ? 0xFFFF : 0);
+	}
+
+	template <>
+	inline msk set<int8_t>(const bool vals[nElReg<int8_t>()]) {
+		return _mm256_set_epi8(vals[31] ? 0xFF : 0, vals[30] ? 0xFF : 0, vals[29] ? 0xFF : 0, vals[28] ? 0xFF : 0,
+		                       vals[27] ? 0xFF : 0, vals[26] ? 0xFF : 0, vals[25] ? 0xFF : 0, vals[24] ? 0xFF : 0,
+		                       vals[23] ? 0xFF : 0, vals[22] ? 0xFF : 0, vals[21] ? 0xFF : 0, vals[20] ? 0xFF : 0,
+		                       vals[19] ? 0xFF : 0, vals[18] ? 0xFF : 0, vals[17] ? 0xFF : 0, vals[16] ? 0xFF : 0,
+		                       vals[15] ? 0xFF : 0, vals[14] ? 0xFF : 0, vals[13] ? 0xFF : 0, vals[12] ? 0xFF : 0,
+		                       vals[11] ? 0xFF : 0, vals[10] ? 0xFF : 0, vals[ 9] ? 0xFF : 0, vals[ 8] ? 0xFF : 0,
+		                       vals[ 7] ? 0xFF : 0, vals[ 6] ? 0xFF : 0, vals[ 5] ? 0xFF : 0, vals[ 4] ? 0xFF : 0,
+		                       vals[ 3] ? 0xFF : 0, vals[ 2] ? 0xFF : 0, vals[ 1] ? 0xFF : 0, vals[ 0] ? 0xFF : 0);
+	}
+
+	// ----------------------------------------------------------------------------------------------------------- set1
+	template <>
 	inline reg set1<double>(const double val) {
 		return _mm256_castpd_ps(_mm256_set1_pd(val));
+	}
+
+	template <>
+	inline reg set1<float>(const float val) {
+		return _mm256_set1_ps(val);
 	}
 
 	template <>
@@ -262,15 +311,49 @@
 	}
 #endif
 
-	// ----------------------------------------------------------------------------------------------------------- set0
+	// --------------------------------------------------------------------------------------------------- set1m (mask)
 	template <>
-	inline reg set0<float>() {
-		return _mm256_setzero_ps();
+	inline msk set1m<double>(const bool val) {
+		return _mm256_set1_epi64x(val ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0);
+	}
+
+
+	template <>
+	inline msk set1m<float>(const bool val) {
+		return _mm256_set1_epi32(val ? 0xFFFFFFFF : 0);
 	}
 
 	template <>
+	inline msk set1m<int32_t>(const bool val) {
+		return _mm256_set1_epi32(val ? 0xFFFFFFFF : 0);
+	}
+
+	template <>
+	inline msk set1m<int64_t>(const bool val) {
+		return _mm256_set1_epi64x(val ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0);
+	}
+
+#ifdef __AVX2__
+	template <>
+	inline msk set1m<int16_t>(const bool val) {
+		return _mm256_set1_epi16(val ? 0xFFFF : 0);
+	}
+
+	template <>
+	inline msk set1m<int8_t>(const bool val) {
+		return _mm256_set1_epi8(val ? 0xFF : 0);
+	}
+#endif
+
+	// ----------------------------------------------------------------------------------------------------------- set0
+	template <>
 	inline reg set0<double>() {
 		return _mm256_castpd_ps(_mm256_setzero_pd());
+	}
+
+	template <>
+	inline reg set0<float>() {
+		return _mm256_setzero_ps();
 	}
 
 	template <>
@@ -286,6 +369,32 @@
 	template <>
 	inline reg set0<int8_t>() {
 		return _mm256_castsi256_ps(_mm256_setzero_si256());
+	}
+
+	// --------------------------------------------------------------------------------------------------- set0m (mask)
+	template <>
+	inline msk set0m<double>() {
+		return _mm256_setzero_si256();
+	}
+
+	template <>
+	inline msk set0m<float>() {
+		return _mm256_setzero_si256();
+	}
+
+	template <>
+	inline msk set0m<int32_t>() {
+		return _mm256_setzero_si256();
+	}
+
+	template <>
+	inline msk set0m<int16_t>() {
+		return _mm256_setzero_si256();
+	}
+
+	template <>
+	inline msk set0m<int8_t>() {
+		return _mm256_setzero_si256();
 	}
 
 	// ------------------------------------------------------------------------------------------------------------ low
@@ -1224,107 +1333,107 @@
 
 	// ---------------------------------------------------------------------------------------------------------- cmpeq
 	template <>
-	inline reg cmpeq<float>(const reg v1, const reg v2) {
-		return _mm256_cmp_ps(v1, v2, _CMP_EQ_OQ);
+	inline msk cmpeq<float>(const reg v1, const reg v2) {
+		return _mm256_castps_si256(_mm256_cmp_ps(v1, v2, _CMP_EQ_OQ));
 	}
 
 	template <>
-	inline reg cmpeq<double>(const reg v1, const reg v2) {
-		return _mm256_castpd_ps(_mm256_cmp_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2), _CMP_EQ_OQ));
+	inline msk cmpeq<double>(const reg v1, const reg v2) {
+		return _mm256_castpd_si256(_mm256_cmp_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2), _CMP_EQ_OQ));
 	}
 
 #ifdef __AVX2__
 	template <>
-	inline reg cmpeq<int32_t>(const reg v1, const reg v2) {
-		return _mm256_castsi256_ps(_mm256_cmpeq_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	inline msk cmpeq<int32_t>(const reg v1, const reg v2) {
+		return _mm256_cmpeq_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2));
 	}
 
 	template <>
-	inline reg cmpeq<int16_t>(const reg v1, const reg v2) {
-		return _mm256_castsi256_ps(_mm256_cmpeq_epi16(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	inline msk cmpeq<int16_t>(const reg v1, const reg v2) {
+		return _mm256_cmpeq_epi16(_mm256_castps_si256(v1), _mm256_castps_si256(v2));
 	}
 
 	template <>
-	inline reg cmpeq<int8_t>(const reg v1, const reg v2) {
-		return _mm256_castsi256_ps(_mm256_cmpeq_epi8(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	inline msk cmpeq<int8_t>(const reg v1, const reg v2) {
+		return _mm256_cmpeq_epi8(_mm256_castps_si256(v1), _mm256_castps_si256(v2));
 	}
 #endif
 
 	// --------------------------------------------------------------------------------------------------------- cmpneq
 	template <>
-	inline reg cmpneq<float>(const reg v1, const reg v2) {
-		return _mm256_cmp_ps(v1, v2, _CMP_NEQ_OQ);
+	inline msk cmpneq<float>(const reg v1, const reg v2) {
+		return _mm256_castps_si256(_mm256_cmp_ps(v1, v2, _CMP_NEQ_OQ));
 	}
 
 	template <>
-	inline reg cmpneq<double>(const reg v1, const reg v2) {
-		return _mm256_castpd_ps(_mm256_cmp_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2), _CMP_NEQ_OQ));
+	inline msk cmpneq<double>(const reg v1, const reg v2) {
+		return _mm256_castpd_si256(_mm256_cmp_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2), _CMP_NEQ_OQ));
 	}
 
 	template <>
-	inline reg cmpneq<int32_t>(const reg v1, const reg v2) {
-		return _mm256_cmp_ps(v1, v2, _CMP_NEQ_OQ);
+	inline msk cmpneq<int32_t>(const reg v1, const reg v2) {
+		return _mm256_castps_si256(_mm256_cmp_ps(v1, v2, _CMP_NEQ_OQ));
 	}
 
 	// ---------------------------------------------------------------------------------------------------------- cmplt
 	template <>
-	inline reg cmplt<float>(const reg v1, const reg v2) {
-		return _mm256_cmp_ps(v1, v2, _CMP_LT_OS);
+	inline msk cmplt<float>(const reg v1, const reg v2) {
+		return _mm256_castps_si256(_mm256_cmp_ps(v1, v2, _CMP_LT_OS));
 	}
 
 	template <>
-	inline reg cmplt<double>(const reg v1, const reg v2) {
-		return _mm256_castpd_ps(_mm256_cmp_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2), _CMP_LT_OS));
+	inline msk cmplt<double>(const reg v1, const reg v2) {
+		return _mm256_castpd_si256(_mm256_cmp_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2), _CMP_LT_OS));
 	}
 
 	// ---------------------------------------------------------------------------------------------------------- cmple
 	template <>
-	inline reg cmple<float>(const reg v1, const reg v2) {
-		return _mm256_cmp_ps(v1, v2, _CMP_LE_OS);
+	inline msk cmple<float>(const reg v1, const reg v2) {
+		return _mm256_castps_si256(_mm256_cmp_ps(v1, v2, _CMP_LE_OS));
 	}
 
 	template <>
-	inline reg cmple<double>(const reg v1, const reg v2) {
-		return _mm256_castpd_ps(_mm256_cmp_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2), _CMP_LE_OS));
+	inline msk cmple<double>(const reg v1, const reg v2) {
+		return _mm256_castpd_si256(_mm256_cmp_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2), _CMP_LE_OS));
 	}
 
 	// ---------------------------------------------------------------------------------------------------------- cmpgt
 	template <>
-	inline reg cmpgt<float>(const reg v1, const reg v2) {
-		return _mm256_cmp_ps(v1, v2, _CMP_GT_OS);
+	inline msk cmpgt<float>(const reg v1, const reg v2) {
+		return _mm256_castps_si256(_mm256_cmp_ps(v1, v2, _CMP_GT_OS));
 	}
 
 	template <>
-	inline reg cmpgt<double>(const reg v1, const reg v2) {
-		return _mm256_castpd_ps(_mm256_cmp_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2), _CMP_GT_OS));
+	inline msk cmpgt<double>(const reg v1, const reg v2) {
+		return _mm256_castpd_si256(_mm256_cmp_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2), _CMP_GT_OS));
 	}
 
 #ifdef __AVX2__
 	template <>
-	inline reg cmpgt<int32_t>(const reg v1, const reg v2) {
-		return _mm256_castsi256_ps(_mm256_cmpgt_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	inline msk cmpgt<int32_t>(const reg v1, const reg v2) {
+		return _mm256_cmpgt_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2));
 	}
 
 	template <>
-	inline reg cmpgt<int16_t>(const reg v1, const reg v2) {
-		return _mm256_castsi256_ps(_mm256_cmpgt_epi16(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	inline msk cmpgt<int16_t>(const reg v1, const reg v2) {
+		return _mm256_cmpgt_epi16(_mm256_castps_si256(v1), _mm256_castps_si256(v2));
 	}
 
 	template <>
-	inline reg cmpgt<int8_t>(const reg v1, const reg v2) {
-		return _mm256_castsi256_ps(_mm256_cmpgt_epi8(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	inline msk cmpgt<int8_t>(const reg v1, const reg v2) {
+		return _mm256_cmpgt_epi8(_mm256_castps_si256(v1), _mm256_castps_si256(v2));
 	}
 #endif
 
 	// ---------------------------------------------------------------------------------------------------------- cmpge
 	template <>
-	inline reg cmpge<float>(const reg v1, const reg v2) {
-		return _mm256_cmp_ps(v1, v2, _CMP_GE_OS);
+	inline msk cmpge<float>(const reg v1, const reg v2) {
+		return _mm256_castps_si256(_mm256_cmp_ps(v1, v2, _CMP_GE_OS));
 	}
 
 	template <>
-	inline reg cmpge<double>(const reg v1, const reg v2) {
-		return _mm256_castpd_ps(_mm256_cmp_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2), _CMP_GE_OS));
+	inline msk cmpge<double>(const reg v1, const reg v2) {
+		return _mm256_castpd_si256(_mm256_cmp_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2), _CMP_GE_OS));
 	}
 
 	// ------------------------------------------------------------------------------------------------------------ add

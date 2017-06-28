@@ -110,6 +110,10 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	using reg   = float32x4_t;
 	using reg_2 = float32x2_t; // half a full register
 
+	inline reg cvt_msk_reg(const msk m) {
+		return (reg)m;
+	}
+
 	const std::string IntructionsType = "ARM NEONv1-128";
 
 // -------------------------------------------------------------------------------------------------------- X86 AVX-512
@@ -126,6 +130,10 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	using reg   = __m512;
 	using reg_2 = __m256; // half a full register
 
+	inline reg cvt_msk_reg(const msk m) {
+		// TODO
+	}
+
 	const std::string IntructionsType = "x86 AVX-512";
 
 // -------------------------------------------------------------------------------------------------------- X86 AVX-256
@@ -137,6 +145,10 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	using msk   = __m256i;
 	using reg   = __m256;
 	using reg_2 = __m128; // half a full register
+
+	inline reg cvt_msk_reg(const msk m) {
+		return _mm256_castsi256_ps(m);
+	}
 
 #ifdef __AVX2__
 	const std::string IntructionsType = "x86 AVX2-256";
@@ -153,6 +165,10 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	using msk   = __m128i;
 	using reg   = __m128;
 	using reg_2 = __m128d; // half a full register (information is in the lower part of the 128 bit register)
+
+	inline reg cvt_msk_reg(const msk m) {
+		return _mm_castsi128_ps(m);
+	}
 
 #ifdef __SSE4_2__
 	const std::string IntructionsType = "x86 SSE4.2-128";
@@ -179,6 +195,10 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	using reg   = int32_t;
 	using reg_2 = int16_t;
 
+	inline reg cvt_msk_reg(const msk m) {
+		return (reg)m;
+	}
+
 	const std::string IntructionsType = "NO INTRINSICS";
 #endif
 
@@ -191,6 +211,10 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	using msk   = uint8_t;
 	using reg   = int32_t;
 	using reg_2 = int16_t;
+
+	inline reg cvt_msk_reg(const msk m) {
+		return (reg)m;
+	}
 
 	const std::string IntructionsType = "NO INTRINSICS";
 
@@ -308,8 +332,8 @@ static void errorMessage(std::string instr)
 
 	std::string message;
 	if (RegisterSizeBit == 0)
-		message = "mipp: undefined type of instructions, try to add -mfpu=neon, -msse4.2, -mavx, -march=native... "
-		          "at the compile time.";
+		message = "mipp::" + instr + "<" + type_names[typeid(T)] + "> (" + IntructionsType + ") is undefined!, "
+		          "try to add -mfpu=neon, -msse4.2, -mavx, -march=native... at the compile time.";
 	else
 		message = "mipp::" + instr + "<" + type_names[typeid(T)] + "> (" + IntructionsType + ") is undefined!";
 
@@ -336,7 +360,8 @@ static void errorMessage(std::string instr)
 
 	std::string message;
 	if (RegisterSizeBit == 0)
-		message = "mipp: undefined type of instructions, try to add -mfpu=neon, -msse4.2, -mavx, -march=native... "
+		message = "mipp::" + instr + "<" + type_names[typeid(T1)] + "," + type_names[typeid(T2)] + "> (" +
+		          IntructionsType + ") is undefined!, try to add -mfpu=neon, -msse4.2, -mavx, -march=native... "
 		          "at the compile time.";
 	else
 		message = "mipp::" + instr + "<" + type_names[typeid(T1)] + "," + type_names[typeid(T2)] + "> (" +
@@ -351,9 +376,12 @@ template <typename T> inline reg   load         (const T*)                      
 template <typename T> inline reg   loadu        (const T*)                        { errorMessage<T>("loadu");         exit(-1); }
 template <typename T> inline void  store        (T*, const reg)                   { errorMessage<T>("store");         exit(-1); }
 template <typename T> inline void  storeu       (T*, const reg)                   { errorMessage<T>("storeu");        exit(-1); }
-template <typename T> inline reg   set          (const T[nElReg<T>()])            { errorMessage<T>("set");           exit(-1); }
+template <typename T> inline reg   set          (const T   [nElReg<T>()])         { errorMessage<T>("set");           exit(-1); }
+template <typename T> inline msk   set          (const bool[nElReg<T>()])         { errorMessage<T>("set");           exit(-1); }
 template <typename T> inline reg   set1         (const T)                         { errorMessage<T>("set1");          exit(-1); }
+template <typename T> inline msk   set1m        (const bool)                      { errorMessage<T>("set1");          exit(-1); }
 template <typename T> inline reg   set0         ()                                { errorMessage<T>("set0");          exit(-1); }
+template <typename T> inline msk   set0m        ()                                { errorMessage<T>("set0");          exit(-1); }
 template <typename T> inline reg_2 low          (const reg)                       { errorMessage<T>("low");           exit(-1); }
 template <typename T> inline reg_2 high         (const reg)                       { errorMessage<T>("high");          exit(-1); }
 template <typename T> inline reg   cmask        (const uint32_t[nElReg<T>()])     { errorMessage<T>("cmask");         exit(-1); }
@@ -375,18 +403,25 @@ template <typename T> inline void  transpose8x8 (      reg[8])                  
 template <typename T> inline void  transpose2   (      reg[nElReg<T>()/2])        { errorMessage<T>("transpose2");    exit(-1); }
 template <typename T> inline void  transpose28x8(      reg[8])                    { errorMessage<T>("transpose28x8"); exit(-1); }
 template <typename T> inline reg   andb         (const reg, const reg)            { errorMessage<T>("andb");          exit(-1); }
+template <typename T> inline msk   andb         (const msk, const msk)            { errorMessage<T>("andb");          exit(-1); }
 template <typename T> inline reg   andnb        (const reg, const reg)            { errorMessage<T>("andnb");         exit(-1); }
+template <typename T> inline msk   andnb        (const msk, const msk)            { errorMessage<T>("andnb");         exit(-1); }
 template <typename T> inline reg   notb         (const reg)                       { errorMessage<T>("notb");          exit(-1); }
+template <typename T> inline msk   notb         (const msk)                       { errorMessage<T>("notb");          exit(-1); }
 template <typename T> inline reg   orb          (const reg, const reg)            { errorMessage<T>("orb");           exit(-1); }
+template <typename T> inline msk   orb          (const msk, const msk)            { errorMessage<T>("orb");           exit(-1); }
 template <typename T> inline reg   xorb         (const reg, const reg)            { errorMessage<T>("xorb");          exit(-1); }
+template <typename T> inline msk   xorb         (const msk, const msk)            { errorMessage<T>("xorb");          exit(-1); }
 template <typename T> inline reg   lshift       (const reg, const uint32_t)       { errorMessage<T>("lshift");        exit(-1); }
+template <typename T> inline msk   lshift       (const msk, const uint32_t)       { errorMessage<T>("lshift");        exit(-1); }
 template <typename T> inline reg   rshift       (const reg, const uint32_t)       { errorMessage<T>("rshift");        exit(-1); }
-template <typename T> inline reg   cmpeq        (const reg, const reg)            { errorMessage<T>("cmpeq");         exit(-1); }
-template <typename T> inline reg   cmpneq       (const reg, const reg)            { errorMessage<T>("cmpneq");        exit(-1); }
-template <typename T> inline reg   cmplt        (const reg, const reg)            { errorMessage<T>("cmplt");         exit(-1); }
-template <typename T> inline reg   cmple        (const reg, const reg)            { errorMessage<T>("cmple");         exit(-1); }
-template <typename T> inline reg   cmpgt        (const reg, const reg)            { errorMessage<T>("cmpgt");         exit(-1); }
-template <typename T> inline reg   cmpge        (const reg, const reg)            { errorMessage<T>("cmpge");         exit(-1); }
+template <typename T> inline msk   rshift       (const msk, const uint32_t)       { errorMessage<T>("rshift");        exit(-1); }
+template <typename T> inline msk   cmpeq        (const reg, const reg)            { errorMessage<T>("cmpeq");         exit(-1); }
+template <typename T> inline msk   cmpneq       (const reg, const reg)            { errorMessage<T>("cmpneq");        exit(-1); }
+template <typename T> inline msk   cmplt        (const reg, const reg)            { errorMessage<T>("cmplt");         exit(-1); }
+template <typename T> inline msk   cmple        (const reg, const reg)            { errorMessage<T>("cmple");         exit(-1); }
+template <typename T> inline msk   cmpgt        (const reg, const reg)            { errorMessage<T>("cmpgt");         exit(-1); }
+template <typename T> inline msk   cmpge        (const reg, const reg)            { errorMessage<T>("cmpge");         exit(-1); }
 template <typename T> inline reg   add          (const reg, const reg)            { errorMessage<T>("add");           exit(-1); }
 template <typename T> inline reg   sub          (const reg, const reg)            { errorMessage<T>("sub");           exit(-1); }
 template <typename T> inline reg   mul          (const reg, const reg)            { errorMessage<T>("mul");           exit(-1); }
@@ -418,19 +453,19 @@ template <typename T> inline reg   round        (const reg)                     
 
 template <typename T1, typename T2> 
 inline reg cvt(const reg) {
-	errorMessage<T1,T2>("cvt");  
+	errorMessage<T1,T2>("cvt");
 	exit(-1); 
 }
 
 template <typename T1, typename T2> 
 inline reg cvt(const reg_2) {
-	errorMessage<T1,T2>("cvt");  
+	errorMessage<T1,T2>("cvt");
 	exit(-1);
 }
 
 template <typename T1, typename T2>
 inline reg pack(const reg, const reg) {
-	errorMessage<T1,T2>("pack");  
+	errorMessage<T1,T2>("pack");
 	exit(-1); 
 }
 
@@ -438,18 +473,98 @@ inline reg pack(const reg, const reg) {
 // --------------------------------------------------------------------------------------------------------------------
 template <typename T> inline reg copysign(const reg r1, const reg r2) { return neg<T>(r1, r2); }
 
+// ------------------------------------------------------------------------------------------------------------ masking
+// --------------------------------------------------------------------------------------------------------------------
+
+using proto_i1 = reg (*)(const reg a);
+
+using proto_i2 = reg (*)(const reg a, const reg b);
+
+using proto_i3 = reg (*)(const reg a, const reg b, const reg c);
+
+template <proto_i1 I1>
+inline reg mask(const msk m, const reg src, const reg a)
+{
+	auto m_reg = cvt_msk_reg(m);
+	auto src2 = andnb<int32_t>(m_reg, src);
+	auto a_modif = I1(a);
+	a_modif = andb<int32_t>(m_reg, a_modif);
+	return xorb<int32_t>(src2, a_modif);
+}
+
+template <proto_i2 I2>
+inline reg mask(const msk m, const reg src, const reg a, const reg b)
+{
+	auto m_reg = cvt_msk_reg(m);
+	auto src2 = andnb<int32_t>(m_reg, src);
+	auto a_modif = I2(a, b);
+	a_modif = andb<int32_t>(m_reg, a_modif);
+	return xorb<int32_t>(src2, a_modif);
+}
+
+template <proto_i3 I3>
+inline reg mask(const msk m, const reg src, const reg a, const reg b, const reg c)
+{
+	auto m_reg = cvt_msk_reg(m);
+	auto src2 = andnb<int32_t>(m_reg, src);
+	auto a_modif = I3(a, b, c);
+	a_modif = andb<int32_t>(m_reg, a_modif);
+	return xorb<int32_t>(src2, a_modif);
+}
+
+template <proto_i1 I1>
+inline reg maskz(const msk m, const reg a)
+{
+	auto m_reg = cvt_msk_reg(m);
+	auto a_modif = I1(a);
+	return andb<int32_t>(m_reg, a_modif);
+}
+
+template <proto_i2 I2>
+inline reg maskz(const msk m, const reg a, const reg b)
+{
+	auto m_reg = cvt_msk_reg(m);
+	auto a_modif = I2(a, b);
+	return andb<int32_t>(m_reg, a_modif);
+}
+
+template <proto_i3 I3>
+inline reg maskz(const msk m, const reg a, const reg b, const reg c)
+{
+	auto m_reg = cvt_msk_reg(m);
+	auto a_modif = I3(a, b, c);
+	return andb<int32_t>(m_reg, a_modif);
+}
+
 // --------------------------------------------------------------------------------------- myIntrinsics implementations
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename T>
 void dump(const mipp::reg r, std::ostream &stream = std::cout, const uint32_t elmtWidth = 6)
 {
-	T dumpArray[mipp::nElReg<T>()];
-	mipp::storeu<T>(dumpArray, r);
+//	const T* data = (T*)&r;
+	T data[mipp::nElReg<T>()];
+	store<T>(data, r);
 
 	stream << "[";
 	for (auto i = 0; i < mipp::nElReg<T>(); i++)
-		stream << std::setw(elmtWidth) << +dumpArray[i] << ((i < mipp::nElReg<T>()-1) ? ", " : "");
+		stream << std::setw(elmtWidth) << +data[i] << ((i < mipp::nElReg<T>()-1) ? ", " : "");
+
+	stream << "]";
+}
+
+template <typename T>
+void dump(const mipp::msk m, std::ostream &stream = std::cout, const uint32_t elmtWidth = 6)
+{
+	const auto r = cvt_msk_reg(m);
+
+//	const T* data = (T*)&r;
+	T data[mipp::nElReg<T>()];
+	store<T>(data, r);
+
+	stream << "[";
+	for (auto i = 0; i < mipp::nElReg<T>(); i++)
+		stream << std::setw(elmtWidth) << (data[i] ? 1 : 0) << ((i < mipp::nElReg<T>()-1) ? ", " : "");
 
 	stream << "]";
 }
