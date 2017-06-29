@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <cstdint>
 #include <iostream>
 
 #include "mipp_scalar_op.h"
