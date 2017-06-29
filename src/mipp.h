@@ -454,9 +454,11 @@ template <typename T> inline reg   mul          (const reg, const reg)          
 template <typename T> inline reg   div          (const reg, const reg)            { errorMessage<T>("div");           exit(-1); }
 template <typename T> inline reg   min          (const reg, const reg)            { errorMessage<T>("min");           exit(-1); }
 template <typename T> inline reg   max          (const reg, const reg)            { errorMessage<T>("max");           exit(-1); }
-template <typename T> inline reg   sign         (const reg)                       { errorMessage<T>("sign");          exit(-1); }
-template <typename T> inline reg   sign         (const reg, const reg)            { errorMessage<T>("sign");          exit(-1); }
+template <typename T> inline reg   msb          (const reg)                       { errorMessage<T>("msb");           exit(-1); }
+template <typename T> inline reg   msb          (const reg, const reg)            { errorMessage<T>("msb");           exit(-1); }
+template <typename T> inline msk   sign         (const reg)                       { errorMessage<T>("sign");          exit(-1); }
 template <typename T> inline reg   neg          (const reg, const reg)            { errorMessage<T>("neg");           exit(-1); }
+template <typename T> inline reg   neg          (const reg, const msk)            { errorMessage<T>("neg");           exit(-1); }
 template <typename T> inline reg   neg          (const reg)                       { errorMessage<T>("neg");           exit(-1); }
 template <typename T> inline reg   abs          (const reg)                       { errorMessage<T>("abs");           exit(-1); }
 template <typename T> inline reg   sqrt         (const reg)                       { errorMessage<T>("sqrt");          exit(-1); }
@@ -469,7 +471,7 @@ template <typename T> inline void  sincos       (const reg, reg&, reg&)         
 template <typename T> inline reg   fmadd        (const reg, const reg, const reg) { errorMessage<T>("fmadd");         exit(-1); }
 template <typename T> inline reg   fnmadd       (const reg, const reg, const reg) { errorMessage<T>("fnmadd");        exit(-1); }
 template <typename T> inline reg   fmsub        (const reg, const reg, const reg) { errorMessage<T>("fmsub");         exit(-1); }
-template <typename T> inline reg   blend        (const reg, const reg, const reg) { errorMessage<T>("blend");         exit(-1); }
+template <typename T> inline reg   blend        (const reg, const reg, const msk) { errorMessage<T>("blend");         exit(-1); }
 template <typename T> inline reg   rot          (const reg)                       { errorMessage<T>("rot");           exit(-1); }
 template <typename T> inline reg   rotr         (const reg)                       { errorMessage<T>("rotr");          exit(-1); }
 template <typename T> inline reg   div2         (const reg)                       { errorMessage<T>("div2");          exit(-1); }
@@ -498,6 +500,7 @@ inline reg pack(const reg, const reg) {
 // ------------------------------------------------------------------------------------------------------------ aliases
 // --------------------------------------------------------------------------------------------------------------------
 template <typename T> inline reg copysign(const reg r1, const reg r2) { return neg<T>(r1, r2); }
+template <typename T> inline reg copysign(const reg r1, const msk r2) { return neg<T>(r1, r2); }
 
 // ------------------------------------------------------------------------------------------------------------ masking
 // --------------------------------------------------------------------------------------------------------------------
@@ -508,58 +511,46 @@ using proto_i2 = reg (*)(const reg a, const reg b);
 
 using proto_i3 = reg (*)(const reg a, const reg b, const reg c);
 
-template <proto_i1 I1>
+template <proto_i1 I1, typename T>
 inline reg mask(const msk m, const reg src, const reg a)
 {
-	auto m_reg = cvt_msk_reg(m);
-	auto src2 = andnb<int32_t>(m_reg, src);
-	auto a_modif = I1(a);
-	a_modif = andb<int32_t>(m_reg, a_modif);
-	return xorb<int32_t>(src2, a_modif);
+	return blend<T>(I1(a), src, m);
 }
 
-template <proto_i2 I2>
+template <proto_i2 I2, typename T>
 inline reg mask(const msk m, const reg src, const reg a, const reg b)
 {
-	auto m_reg = cvt_msk_reg(m);
-	auto src2 = andnb<int32_t>(m_reg, src);
-	auto a_modif = I2(a, b);
-	a_modif = andb<int32_t>(m_reg, a_modif);
-	return xorb<int32_t>(src2, a_modif);
+	return blend<T>(I2(a, b), src, m);
 }
 
-template <proto_i3 I3>
+template <proto_i3 I3, typename T>
 inline reg mask(const msk m, const reg src, const reg a, const reg b, const reg c)
 {
-	auto m_reg = cvt_msk_reg(m);
-	auto src2 = andnb<int32_t>(m_reg, src);
-	auto a_modif = I3(a, b, c);
-	a_modif = andb<int32_t>(m_reg, a_modif);
-	return xorb<int32_t>(src2, a_modif);
+	return blend<T>(I3(a, b, c), src, m);
 }
 
-template <proto_i1 I1>
+template <proto_i1 I1, typename T>
 inline reg maskz(const msk m, const reg a)
 {
 	auto m_reg = cvt_msk_reg(m);
 	auto a_modif = I1(a);
-	return andb<int32_t>(m_reg, a_modif);
+	return andb<T>(m_reg, a_modif);
 }
 
-template <proto_i2 I2>
+template <proto_i2 I2, typename T>
 inline reg maskz(const msk m, const reg a, const reg b)
 {
 	auto m_reg = cvt_msk_reg(m);
 	auto a_modif = I2(a, b);
-	return andb<int32_t>(m_reg, a_modif);
+	return andb<T>(m_reg, a_modif);
 }
 
-template <proto_i3 I3>
+template <proto_i3 I3, typename T>
 inline reg maskz(const msk m, const reg a, const reg b, const reg c)
 {
 	auto m_reg = cvt_msk_reg(m);
 	auto a_modif = I3(a, b, c);
-	return andb<int32_t>(m_reg, a_modif);
+	return andb<T>(m_reg, a_modif);
 }
 
 // --------------------------------------------------------------------------------------- myIntrinsics implementations

@@ -1719,66 +1719,64 @@
 	}
 #endif
 
-	// ----------------------------------------------------------------------------------------------------------- sign
+	// ------------------------------------------------------------------------------------------------------------ msb
 	template <>
-	inline reg sign<float>(const reg v1) {
-		// sign_mask = 10000000000000000000000000000000 // 32 bits
-		const reg sign_mask = set1<int32_t>(0x80000000);
+	inline reg msb<float>(const reg v1) {
+		// msb_mask = 10000000000000000000000000000000 // 32 bits
+		const reg msb_mask = set1<int32_t>(0x80000000);
 
 		// indices = 31 30 29 28 27 26 25 24 23 22 21 20 19 18 17 16 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
 		// mask    =  1  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
 		// v1      =  ù  €  è  é  à  &  z  y  x  w  v  u  t  s  r  q  p  o  n  m  l  k  j  i  h  g  f  e  d  c  b  a
 		// res     =  ù  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
-		// res is the sign because the first bit is the sign bit (0 = positive, 1 = negative)
-		return andb<float>(v1, sign_mask);
+		return andb<float>(v1, msb_mask);
 	}
 
 	template <>
-	inline reg sign<float>(const reg v1, const reg v2) {
-		reg sign_v1_v2 = xorb<float>(v1, v2);
-		    sign_v1_v2 = sign<float>(sign_v1_v2);
-		return sign_v1_v2;
+	inline reg msb<float>(const reg v1, const reg v2) {
+		reg msb_v1_v2 = xorb<float>(v1, v2);
+		    msb_v1_v2 = msb<float>(msb_v1_v2);
+		return msb_v1_v2;
 	}
 
 	template <>
-	inline reg sign<double>(const reg v1) {
-		// sign_mask = 1000000000000000000000000000000000000000000000000000000000000000 // 64 bits
-		const reg sign_mask = set1<int64_t>(0x8000000000000000);
+	inline reg msb<double>(const reg v1) {
+		// msb_mask = 1000000000000000000000000000000000000000000000000000000000000000 // 64 bits
+		const reg msb_mask = set1<int64_t>(0x8000000000000000);
 
 		// indices = 63 62 61 60 59 58 57 56 55 54 53 52 51 50 49 48 47 46 45 44 43 42 41 40 39 38 37 36 35 34 33 32...
 		// mask    =  1  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0...
 		// v1      =  ù  €  è  é  à  &  z  y  x  w  v  u  t  s  r  q  p  o  n  m  l  k  j  i  h  g  f  e  d  c  b  a...
 		// res     =  ù  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0...
-		// res is the sign because the first bit is the sign bit (0 = positive, 1 = negative)
-		return andb<double>(v1, sign_mask);
+		return andb<double>(v1, msb_mask);
 	}
 
 	template <>
-	inline reg sign<double>(const reg v1, const reg v2) {
-		reg sign_v1_v2 = xorb<double>(v1, v2);
-		    sign_v1_v2 = sign<double>(sign_v1_v2);
-		return sign_v1_v2;
+	inline reg msb<double>(const reg v1, const reg v2) {
+		reg msb_v1_v2 = xorb<double>(v1, v2);
+		    msb_v1_v2 = msb<double>(msb_v1_v2);
+		return msb_v1_v2;
 	}
 
 	template <>
-	inline reg sign<int16_t>(const reg v1) {
+	inline reg msb<int16_t>(const reg v1) {
 #ifdef _MSC_VER
 #pragma warning( disable : 4309 )
 #endif
-		const reg sign_mask = set1<int16_t>(0x8000);
-		return andb<int16_t>(v1, sign_mask);
+		const reg msb_mask = set1<int16_t>(0x8000);
+		return andb<int16_t>(v1, msb_mask);
 #ifdef _MSC_VER
 #pragma warning( default : 4309 )
 #endif
 	}
 
 	template <>
-	inline reg sign<int8_t>(const reg v1) {
+	inline reg msb<int8_t>(const reg v1) {
 #ifdef _MSC_VER
 #pragma warning( disable : 4309 )
 #endif
-		// sign_mask = 10000000 // 8 bits
-		const reg sign_mask = set1<int8_t>(0x80);
+		// msb_mask = 10000000 // 8 bits
+		const reg msb_mask = set1<int8_t>(0x80);
 #ifdef _MSC_VER
 #pragma warning( default : 4309 )
 #endif
@@ -1786,34 +1784,71 @@
 		// mask    = 1  0  0  0  0  0  0  0
 		// v1      = h  g  f  e  d  c  b  a
 		// res     = h  0  0  0  0  0  0  0
-		// res is the sign because the first bit is the sign bit (0 = positive, 1 = negative)
-		return andb<int8_t>(v1, sign_mask);
+		return andb<int8_t>(v1, msb_mask);
 	}
 
 	template <>
-	inline reg sign<int16_t>(const reg v1, const reg v2) {
-		reg sign_v1_v2 = xorb<int16_t>(v1, v2);
-		    sign_v1_v2 = sign<int16_t>(sign_v1_v2);
-		return sign_v1_v2;
+	inline reg msb<int16_t>(const reg v1, const reg v2) {
+		reg msb_v1_v2 = xorb<int16_t>(v1, v2);
+		    msb_v1_v2 = msb<int16_t>(msb_v1_v2);
+		return msb_v1_v2;
 	}
 
 	template <>
-	inline reg sign<int8_t>(const reg v1, const reg v2) {
-		reg sign_v1_v2 = xorb<int8_t>(v1, v2);
-		    sign_v1_v2 = sign<int8_t>(sign_v1_v2);
-		return sign_v1_v2;
+	inline reg msb<int8_t>(const reg v1, const reg v2) {
+		reg msb_v1_v2 = xorb<int8_t>(v1, v2);
+		    msb_v1_v2 = msb<int8_t>(msb_v1_v2);
+		return msb_v1_v2;
+	}
+
+	// ----------------------------------------------------------------------------------------------------------- sign
+	template <>
+	inline msk sign<double>(const reg v1) {
+		return cmplt<double>(v1, set0<double>());
+	}
+
+	template <>
+	inline msk sign<float>(const reg v1) {
+		return cmplt<float>(v1, set0<float>());
+	}
+
+	template <>
+	inline msk sign<int32_t>(const reg v1) {
+		return cmpgt<int32_t>(set0<int32_t>(), v1);
+	}
+
+	template <>
+	inline msk sign<int16_t>(const reg v1) {
+		return cmpgt<int16_t>(set0<int16_t>(), v1);
+	}
+
+	template <>
+	inline msk sign<int8_t>(const reg v1) {
+		return cmpgt<int8_t>(set0<int8_t>(), v1);
 	}
 
 	// ------------------------------------------------------------------------------------------------------------ neg
 	template <>
 	inline reg neg<float>(const reg v1, const reg v2) {
-		return xorb<float>(v1, v2);
+		return xorb<float>(v1, msb<float>(v2));
 	}
 
 	template <>
-	inline reg neg<double>(const reg v1, const reg v2) {
-		return xorb<double>(v1, v2);
+	inline reg neg<float>(const reg v1, const msk v2) {
+		return neg<float>(v1, cvt_msk_reg(v2));
 	}
+
+#ifdef __SSE2__
+	template <>
+	inline reg neg<double>(const reg v1, const reg v2) {
+		return xorb<double>(v1, msb<double>(v2));
+	}
+
+	template <>
+	inline reg neg<double>(const reg v1, const msk v2) {
+		return neg<double>(v1, cvt_msk_reg(v2));
+	}
+#endif
 
 #ifdef __AVX2__
 	template <>
@@ -1823,15 +1858,30 @@
 	}
 
 	template <>
+	inline reg neg<int32_t>(const reg v1, const msk v2) {
+		return neg<int32_t>(v1, cvt_msk_reg(v2));
+	}
+
+	template <>
 	inline reg neg<int16_t>(const reg v1, const reg v2) {
 		reg v2_2 = orb<int16_t>(v2, set1<int16_t>(1)); // hack to avoid -0 case
 		return _mm256_castsi256_ps(_mm256_sign_epi16(_mm256_castps_si256(v1), _mm256_castps_si256(v2_2)));
 	}
 
 	template <>
+	inline reg neg<int16_t>(const reg v1, const msk v2) {
+		return neg<int16_t>(v1, cvt_msk_reg(v2));
+	}
+
+	template <>
 	inline reg neg<int8_t>(const reg v1, const reg v2) {
 		reg v2_2 = orb<int8_t>(v2, set1<int8_t>(1)); // hack to avoid -0 case
 		return _mm256_castsi256_ps(_mm256_sign_epi8(_mm256_castps_si256(v1), _mm256_castps_si256(v2_2)));
+	}
+
+	template <>
+	inline reg neg<int8_t>(const reg v1, const msk v2) {
+		return neg<int8_t>(v1, cvt_msk_reg(v2));
 	}
 #endif
 
@@ -2092,33 +2142,51 @@
 
 	// ---------------------------------------------------------------------------------------------------------- blend
 	template <>
-	inline reg blend<double>(const reg v1, const reg v2, const reg m) {
-		return _mm256_castpd_ps(_mm256_blendv_pd(_mm256_castps_pd(v2), _mm256_castps_pd(v1), _mm256_castps_pd(m)));
+	inline reg blend<double>(const reg v1, const reg v2, const msk m) {
+		return _mm256_castpd_ps(_mm256_blendv_pd(_mm256_castps_pd(v2), _mm256_castps_pd(v1), _mm256_castsi256_pd(m)));
 	}
 
 	template <>
-	inline reg blend<float>(const reg v1, const reg v2, const reg m) {
-		return _mm256_blendv_ps(v2, v1, m);
+	inline reg blend<float>(const reg v1, const reg v2, const msk m) {
+		return _mm256_blendv_ps(v2, v1, _mm256_castsi256_ps(m));
 	}
 
 	template <>
-	inline reg blend<int32_t>(const reg v1, const reg v2, const reg m) {
-		return _mm256_blendv_ps(v2, v1, m);
+	inline reg blend<int32_t>(const reg v1, const reg v2, const msk m) {
+		return _mm256_blendv_ps(v2, v1, _mm256_castsi256_ps(m));
 	}
 
 #ifdef __AVX2__
 	template <>
-	inline reg blend<int16_t>(const reg v1, const reg v2, const reg m) {
+	inline reg blend<int16_t>(const reg v1, const reg v2, const msk m) {
 		return _mm256_castsi256_ps(_mm256_blendv_epi8(_mm256_castps_si256(v2),
 		                                              _mm256_castps_si256(v1),
-		                                              _mm256_castps_si256(m )));
+		                                              m));
 	}
 
 	template <>
-	inline reg blend<int8_t>(const reg v1, const reg v2, const reg m) {
+	inline reg blend<int8_t>(const reg v1, const reg v2, const msk m) {
 		return _mm256_castsi256_ps(_mm256_blendv_epi8(_mm256_castps_si256(v2),
 		                                              _mm256_castps_si256(v1),
-		                                              _mm256_castps_si256(m )));
+		                                              m));
+	}
+#else
+	template <>
+	inline reg blend<int16_t>(const reg v1, const reg v2, const msk m) {
+		auto m_reg = cvt_msk_reg(m);
+		auto v1_2 = andb <int32_t>(m_reg, v1);
+		auto v2_2 = andnb<int32_t>(m_reg, v2);
+		auto blen = xorb <int32_t>(v1_2, v2_2);
+		return blen;
+	}
+
+	template <>
+	inline reg blend<int8_t>(const reg v1, const reg v2, const msk m) {
+		auto m_reg = cvt_msk_reg(m);
+		auto v1_2 = andb <int32_t>(m_reg, v1);
+		auto v2_2 = andnb<int32_t>(m_reg, v2);
+		auto blen = xorb <int32_t>(v1_2, v2_2);
+		return blen;
 	}
 #endif
 

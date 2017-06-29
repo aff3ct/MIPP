@@ -10,6 +10,9 @@ namespace mipp_scop // My Intrinsics Plus Plus SCalar OPerations
 	inline T xorb(const T val1, const T val2);
 
 	template <typename T>
+	inline T msb(const T val);
+
+	template <typename T>
 	inline T div2(const T val);
 
 	template <typename T>

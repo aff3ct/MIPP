@@ -9,7 +9,7 @@ int main(int argc, char** argv)
 	std::random_device rd;
 	std::mt19937 g(rd());
 
-	using T = float;
+	using T = short;
 	constexpr int N = mipp::N<T>();
 
 	T t_1[N];
@@ -44,8 +44,8 @@ int main(int argc, char** argv)
 	std::cout << "mout = " << mout << std::endl;
 	std::cout << std::endl;
 
-	auto out = mipp::maskz<mipp::add<T>>(m_1, in_1, in_2);
-	std::cout << "Output vector (m_1 & (in_1 + in_2)): " << std::endl;
+	auto out = mipp::maskz<mipp::sub<T>>(m_3, in_1, in_2);
+	std::cout << "Output vector (m_3 & (in_1 - in_2)): " << std::endl;
 	std::cout << "out  = " << out << std::endl;
 	std::cout << std::endl;
 
@@ -74,6 +74,31 @@ int main(int argc, char** argv)
 	std::cout << "mout = " << mout << std::endl;
 	std::cout << std::endl;
 
+	mout = ~mout;
+	std::cout << "Output vector (~mout): " << std::endl;
+	std::cout << "mout = " << mout << std::endl;
+	std::cout << std::endl;
+
+	auto out2 = in_1 - in_2;
+	std::cout << "Output vector (in_1 - in_2): " << std::endl;
+	std::cout << "out2 = " << out2 << std::endl;
+	std::cout << std::endl;
+
+	mout = mipp::sign(out2);
+	std::cout << "Output vector (mipp::sign(out2)): " << std::endl;
+	std::cout << "mout = " << mout << std::endl;
+	std::cout << std::endl;
+
+	out2 = mipp::neg(out2, mout);
+	std::cout << "Output vector (mipp::neg(out2, mout)): " << std::endl;
+	std::cout << "out2 = " << out2 << std::endl;
+	std::cout << std::endl;
+
+	mout = m_2 << 0;
+	std::cout << "Output vector (m_2 << 0): " << std::endl;
+	std::cout << "mout = " << mout << std::endl;
+	std::cout << std::endl;
+
 	mout = m_2 << 1;
 	std::cout << "Output vector (m_2 << 1): " << std::endl;
 	std::cout << "mout = " << mout << std::endl;
@@ -81,11 +106,6 @@ int main(int argc, char** argv)
 
 	mout = m_2 >> 2;
 	std::cout << "Output vector (m_2 >> 2): " << std::endl;
-	std::cout << "mout = " << mout << std::endl;
-	std::cout << std::endl;
-
-	mout = ~mout;
-	std::cout << "Output vector (~mout): " << std::endl;
 	std::cout << "mout = " << mout << std::endl;
 	std::cout << std::endl;
 
