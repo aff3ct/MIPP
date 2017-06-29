@@ -9,23 +9,24 @@ int main(int argc, char** argv)
 	std::random_device rd;
 	std::mt19937 g(rd());
 
-	using type = float;
+	using T = float;
+	constexpr int N = mipp::N<T>();
 
-	type t_1[mipp::nElReg<type>()];
-	for (auto i = 0; i < mipp::nElReg<type>(); i++) t_1[i] = i+1;
-	std::shuffle(t_1, t_1 + mipp::nElReg<type>(), g);
+	T t_1[N];
+	for (auto i = 0; i < N; i++) t_1[i] = i+1;
+	std::shuffle(t_1, t_1 + N, g);
 
-	type t_2[mipp::nElReg<type>()];
-	for (auto i = 0; i < mipp::nElReg<type>(); i++) t_2[i] = i+1;
-	std::shuffle(t_2, t_2 + mipp::nElReg<type>(), g);
+	T t_2[N];
+	for (auto i = 0; i < N; i++) t_2[i] = i+1;
+	std::shuffle(t_2, t_2 + N, g);
 
-	mipp::Reg<type> in_1 = t_1;
-	mipp::Reg<type> in_2 = t_2;
-	mipp::Reg<type> in_3 = (type)-1;
-	mipp::Msk<type> m_1  = 0;
-	mipp::Msk<type> m_2  = 1;
-	mipp::Msk<type> m_3  = {1,0,1,1,0,1,1,1,0,0,0,0,0,1,0,1,0,1,1,1,0,1,0,1,1,1,0,1,0,0,0,0};
-	mipp::Msk<type> m_4  = {0,1,0,0,1,0,0,0,1,1,1,1,1,0,1,0,1,0,0,0,1,0,1,0,0,0,1,0,1,1,1,1};
+	mipp::Reg<T> in_1 = t_1;
+	mipp::Reg<T> in_2 = t_2;
+	mipp::Reg<T> in_3 = (T)-1;
+	mipp::Msk<N> m_1  = 0;
+	mipp::Msk<N> m_2  = 1;
+	mipp::Msk<N> m_3  = {1,0,1,1,0,1,1,1,0,0,0,0,0,1,0,1,0,1,1,1,0,1,0,1,1,1,0,1,0,0,0,0};
+	mipp::Msk<N> m_4  = {0,1,0,0,1,0,0,0,1,1,1,1,1,0,1,0,1,0,0,0,1,0,1,0,0,0,1,0,1,1,1,1};
 
 	std::cout << "Input vectors: " << std::endl;
 	std::cout << "in_1 = " << in_1 << std::endl;
@@ -43,7 +44,7 @@ int main(int argc, char** argv)
 	std::cout << "mout = " << mout << std::endl;
 	std::cout << std::endl;
 
-	auto out = mipp::maskz<mipp::add<type>>(m_1, in_1, in_2);
+	auto out = mipp::maskz<mipp::add<T>>(m_1, in_1, in_2);
 	std::cout << "Output vector (m_1 & (in_1 + in_2)): " << std::endl;
 	std::cout << "out  = " << out << std::endl;
 	std::cout << std::endl;
@@ -53,9 +54,39 @@ int main(int argc, char** argv)
 	std::cout << "m_5  = " << m_5 << std::endl;
 	std::cout << std::endl;
 
-	out = mipp::mask<mipp::add<type>>(m_5, in_3, in_1, in_2);
+	out = mipp::mask<mipp::add<T>>(m_5, in_3, in_1, in_2);
 	std::cout << "Output vector ((m_5 & (in_1 + in_2)) | (~m_5 & in_3)): " << std::endl;
 	std::cout << "out  = " << out << std::endl;
+	std::cout << std::endl;
+
+	mout = m_3 | m_4;
+	std::cout << "Output vector (m_3 ^ m_4): " << std::endl;
+	std::cout << "mout = " << mout << std::endl;
+	std::cout << std::endl;
+
+	mout = m_3 ^ m_4;
+	std::cout << "Output vector (m_3 | m_4): " << std::endl;
+	std::cout << "mout = " << mout << std::endl;
+	std::cout << std::endl;
+
+	mout = m_3 & m_4;
+	std::cout << "Output vector (m_3 & m_4): " << std::endl;
+	std::cout << "mout = " << mout << std::endl;
+	std::cout << std::endl;
+
+	mout = m_2 << 1;
+	std::cout << "Output vector (m_2 << 1): " << std::endl;
+	std::cout << "mout = " << mout << std::endl;
+	std::cout << std::endl;
+
+	mout = m_2 >> 2;
+	std::cout << "Output vector (m_2 >> 2): " << std::endl;
+	std::cout << "mout = " << mout << std::endl;
+	std::cout << std::endl;
+
+	mout = ~mout;
+	std::cout << "Output vector (~mout): " << std::endl;
+	std::cout << "mout = " << mout << std::endl;
 	std::cout << std::endl;
 
 	return 0;

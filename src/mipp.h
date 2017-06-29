@@ -82,9 +82,10 @@ SOFTWARE.
 #include <cmath>
 #include <map>
 
-#if defined(__GNUC__) && (defined(__linux__) || defined(__linux))
+#if (defined(__GNUC__) || defined(__clang__) || defined(__llvm__)) && (defined(__linux__) || defined(__linux) || defined(__APPLE__))
 #include <execinfo.h>
 #include <unistd.h>
+#include <cstdlib>
 #endif
 
 #ifdef _MSC_VER
@@ -242,6 +243,16 @@ constexpr int32_t nElReg()
 #endif
 }
 
+template <typename T>
+constexpr int32_t N()
+{
+#ifndef MIPP_NO_INTRINSICS
+	return mipp::nElReg<T>();
+#else
+	return 1;
+#endif
+}
+
 // --------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------- memory allocator
 template <typename T>
@@ -298,7 +309,7 @@ template<class T> using vector = std::vector<T, AlignedAllocator<T>>;
 static std::string get_back_trace()
 {
 	std::string bt_str;
-#if defined(MIPP_ENABLE_BACKTRACE) && defined(__GNUC__) && (defined(__linux__) || defined(__linux))
+#if defined(MIPP_ENABLE_BACKTRACE) && (defined(__GNUC__) || defined(__clang__) || defined(__llvm__)) && (defined(__linux__) || defined(__linux) || defined(__APPLE__))
 	const int bt_max_depth = 32;
 	void *bt_array[bt_max_depth];
 
@@ -342,6 +353,21 @@ static void errorMessage(std::string instr)
 	throw std::runtime_error(message);
 }
 
+template <int N>
+static void errorMessage(std::string instr)
+{
+	std::string message;
+	if (RegisterSizeBit == 0)
+		message = "mipp::" + instr + "<" + std::to_string(N) + "> (" + IntructionsType + ") is undefined!, "
+		          "try to add -mfpu=neon, -msse4.2, -mavx, -march=native... at the compile time.";
+	else
+		message = "mipp::" + instr + "<" + std::to_string(N) + "> (" + IntructionsType + ") is undefined!";
+
+	message += get_back_trace();
+
+	throw std::runtime_error(message);
+}
+
 template <typename T1, typename T2>
 static void errorMessage(std::string instr)
 {
@@ -377,11 +403,11 @@ template <typename T> inline reg   loadu        (const T*)                      
 template <typename T> inline void  store        (T*, const reg)                   { errorMessage<T>("store");         exit(-1); }
 template <typename T> inline void  storeu       (T*, const reg)                   { errorMessage<T>("storeu");        exit(-1); }
 template <typename T> inline reg   set          (const T   [nElReg<T>()])         { errorMessage<T>("set");           exit(-1); }
-template <typename T> inline msk   set          (const bool[nElReg<T>()])         { errorMessage<T>("set");           exit(-1); }
+template <int      N> inline msk   set          (const bool[N          ])         { errorMessage<N>("set");           exit(-1); }
 template <typename T> inline reg   set1         (const T)                         { errorMessage<T>("set1");          exit(-1); }
-template <typename T> inline msk   set1m        (const bool)                      { errorMessage<T>("set1");          exit(-1); }
+template <int      N> inline msk   set1         (const bool)                      { errorMessage<N>("set1");          exit(-1); }
 template <typename T> inline reg   set0         ()                                { errorMessage<T>("set0");          exit(-1); }
-template <typename T> inline msk   set0m        ()                                { errorMessage<T>("set0");          exit(-1); }
+template <int      N> inline msk   set0         ()                                { errorMessage<N>("set0");          exit(-1); }
 template <typename T> inline reg_2 low          (const reg)                       { errorMessage<T>("low");           exit(-1); }
 template <typename T> inline reg_2 high         (const reg)                       { errorMessage<T>("high");          exit(-1); }
 template <typename T> inline reg   cmask        (const uint32_t[nElReg<T>()])     { errorMessage<T>("cmask");         exit(-1); }
@@ -403,19 +429,19 @@ template <typename T> inline void  transpose8x8 (      reg[8])                  
 template <typename T> inline void  transpose2   (      reg[nElReg<T>()/2])        { errorMessage<T>("transpose2");    exit(-1); }
 template <typename T> inline void  transpose28x8(      reg[8])                    { errorMessage<T>("transpose28x8"); exit(-1); }
 template <typename T> inline reg   andb         (const reg, const reg)            { errorMessage<T>("andb");          exit(-1); }
-template <typename T> inline msk   andb         (const msk, const msk)            { errorMessage<T>("andb");          exit(-1); }
+template <int      N> inline msk   andb         (const msk, const msk)            { errorMessage<N>("andb");          exit(-1); }
 template <typename T> inline reg   andnb        (const reg, const reg)            { errorMessage<T>("andnb");         exit(-1); }
-template <typename T> inline msk   andnb        (const msk, const msk)            { errorMessage<T>("andnb");         exit(-1); }
+template <int      N> inline msk   andnb        (const msk, const msk)            { errorMessage<N>("andnb");         exit(-1); }
 template <typename T> inline reg   notb         (const reg)                       { errorMessage<T>("notb");          exit(-1); }
-template <typename T> inline msk   notb         (const msk)                       { errorMessage<T>("notb");          exit(-1); }
+template <int      N> inline msk   notb         (const msk)                       { errorMessage<N>("notb");          exit(-1); }
 template <typename T> inline reg   orb          (const reg, const reg)            { errorMessage<T>("orb");           exit(-1); }
-template <typename T> inline msk   orb          (const msk, const msk)            { errorMessage<T>("orb");           exit(-1); }
+template <int      N> inline msk   orb          (const msk, const msk)            { errorMessage<N>("orb");           exit(-1); }
 template <typename T> inline reg   xorb         (const reg, const reg)            { errorMessage<T>("xorb");          exit(-1); }
-template <typename T> inline msk   xorb         (const msk, const msk)            { errorMessage<T>("xorb");          exit(-1); }
+template <int      N> inline msk   xorb         (const msk, const msk)            { errorMessage<N>("xorb");          exit(-1); }
 template <typename T> inline reg   lshift       (const reg, const uint32_t)       { errorMessage<T>("lshift");        exit(-1); }
-template <typename T> inline msk   lshift       (const msk, const uint32_t)       { errorMessage<T>("lshift");        exit(-1); }
+template <int      N> inline msk   lshift       (const msk, const uint32_t)       { errorMessage<N>("lshift");        exit(-1); }
 template <typename T> inline reg   rshift       (const reg, const uint32_t)       { errorMessage<T>("rshift");        exit(-1); }
-template <typename T> inline msk   rshift       (const msk, const uint32_t)       { errorMessage<T>("rshift");        exit(-1); }
+template <int      N> inline msk   rshift       (const msk, const uint32_t)       { errorMessage<N>("rshift");        exit(-1); }
 template <typename T> inline msk   cmpeq        (const reg, const reg)            { errorMessage<T>("cmpeq");         exit(-1); }
 template <typename T> inline msk   cmpneq       (const reg, const reg)            { errorMessage<T>("cmpneq");        exit(-1); }
 template <typename T> inline msk   cmplt        (const reg, const reg)            { errorMessage<T>("cmplt");         exit(-1); }
@@ -547,24 +573,96 @@ void dump(const mipp::reg r, std::ostream &stream = std::cout, const uint32_t el
 	store<T>(data, r);
 
 	stream << "[";
+#if defined(__AVX__)
+	for (auto i = 0; i < mipp::nElReg<T>()/2; i++)
+		stream << std::setw(elmtWidth) << +data[i] << ((i < mipp::nElReg<T>()/2-1) ? ", " : "");
+	stream << " | ";
+	for (auto i = mipp::nElReg<T>()/2; i < mipp::nElReg<T>(); i++)
+		stream << std::setw(elmtWidth) << +data[i] << ((i < mipp::nElReg<T>()-1) ? ", " : "");
+#else
 	for (auto i = 0; i < mipp::nElReg<T>(); i++)
 		stream << std::setw(elmtWidth) << +data[i] << ((i < mipp::nElReg<T>()-1) ? ", " : "");
+#endif
 
 	stream << "]";
 }
 
-template <typename T>
+template <int N>
 void dump(const mipp::msk m, std::ostream &stream = std::cout, const uint32_t elmtWidth = 6)
 {
+	constexpr int bits = mipp::RegisterSizeBit / N;
+
 	const auto r = cvt_msk_reg(m);
 
-//	const T* data = (T*)&r;
-	T data[mipp::nElReg<T>()];
-	store<T>(data, r);
-
 	stream << "[";
-	for (auto i = 0; i < mipp::nElReg<T>(); i++)
-		stream << std::setw(elmtWidth) << (data[i] ? 1 : 0) << ((i < mipp::nElReg<T>()-1) ? ", " : "");
+	if (bits == 8)
+	{
+		// const int8_t* data = (int8_t*)&r;
+		int8_t data[N];
+		store<int8_t>(data, r);
+
+#if defined(__AVX__)
+		for (auto i = 0; i < N/2; i++)
+			stream << std::setw(elmtWidth) << (data[i] ? 1 : 0) << ((i < N/2-1) ? ", " : "");
+		stream << " | ";
+		for (auto i = N/2; i < N; i++)
+			stream << std::setw(elmtWidth) << (data[i] ? 1 : 0) << ((i < N-1) ? ", " : "");
+#else
+		for (auto i = 0; i < N; i++)
+			stream << std::setw(elmtWidth) << (data[i] ? 1 : 0) << ((i < N-1) ? ", " : "");
+#endif
+	}
+	else if (bits == 16)
+	{
+		// const int16_t* data = (int16_t*)&r;
+		int16_t data[N];
+		store<int16_t>(data, r);
+
+#if defined(__AVX__)
+		for (auto i = 0; i < N/2; i++)
+			stream << std::setw(elmtWidth) << (data[i] ? 1 : 0) << ((i < N/2-1) ? ", " : "");
+		stream << " | ";
+		for (auto i = N/2; i < N; i++)
+			stream << std::setw(elmtWidth) << (data[i] ? 1 : 0) << ((i < N-1) ? ", " : "");
+#else
+		for (auto i = 0; i < N; i++)
+			stream << std::setw(elmtWidth) << (data[i] ? 1 : 0) << ((i < N-1) ? ", " : "");
+#endif
+	}
+	else if (bits == 32)
+	{
+		// const int32_t* data = (int32_t*)&r;
+		int32_t data[N];
+		store<int32_t>(data, r);
+
+#if defined(__AVX__)
+		for (auto i = 0; i < N/2; i++)
+			stream << std::setw(elmtWidth) << (data[i] ? 1 : 0) << ((i < N/2-1) ? ", " : "");
+		stream << " | ";
+		for (auto i = N/2; i < N; i++)
+			stream << std::setw(elmtWidth) << (data[i] ? 1 : 0) << ((i < N-1) ? ", " : "");
+#else
+		for (auto i = 0; i < N; i++)
+			stream << std::setw(elmtWidth) << (data[i] ? 1 : 0) << ((i < N-1) ? ", " : "");
+#endif
+	}
+	else if (bits == 64)
+	{
+		// const int64_t* data = (int64_t*)&r;
+		int64_t data[N];
+		store<int64_t>(data, r);
+
+#if defined(__AVX__)
+		for (auto i = 0; i < N/2; i++)
+			stream << std::setw(elmtWidth) << (data[i] ? 1 : 0) << ((i < N/2-1) ? ", " : "");
+		stream << " | ";
+		for (auto i = N/2; i < N; i++)
+			stream << std::setw(elmtWidth) << (data[i] ? 1 : 0) << ((i < N-1) ? ", " : "");
+#else
+		for (auto i = 0; i < N; i++)
+			stream << std::setw(elmtWidth) << (data[i] ? 1 : 0) << ((i < N-1) ? ", " : "");
+#endif
+	}
 
 	stream << "]";
 }

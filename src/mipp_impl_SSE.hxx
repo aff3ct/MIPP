@@ -191,17 +191,19 @@
 #endif
 
 	// ------------------------------------------------------------------------------------------------------------ set
+#ifdef __SSE2__
 	template <>
 	inline reg set<double>(const double vals[nElReg<double>()]) {
 		return _mm_castpd_ps(_mm_set_pd(vals[1], vals[0]));
 	}
+#endif
 
-#ifdef __SSE2__
 	template <>
 	inline reg set<float>(const float vals[nElReg<float>()]) {
 		return _mm_set_ps(vals[3], vals[2], vals[1], vals[0]);
 	}
 
+#ifdef __SSE2__
 	template <>
 	inline reg set<int32_t>(const int32_t vals[nElReg<int32_t>()]) {
 		return _mm_castsi128_ps(_mm_set_epi32(vals[3], vals[2], vals[1], vals[0]));
@@ -218,6 +220,37 @@
 		                                     (int8_t)vals[11], (int8_t)vals[10], (int8_t)vals[ 9], (int8_t)vals[ 8],
 		                                     (int8_t)vals[ 7], (int8_t)vals[ 6], (int8_t)vals[ 5], (int8_t)vals[ 4],
 		                                     (int8_t)vals[ 3], (int8_t)vals[ 2], (int8_t)vals[ 1], (int8_t)vals[ 0]));
+	}
+#endif
+
+	// ----------------------------------------------------------------------------------------------------- set (mask)
+#ifdef __SSE2__
+	template <>
+	inline msk set<2>(const bool vals[2]) {
+		return _mm_set_epi64x(vals[1] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
+		                      vals[0] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0);
+	}
+
+	template <>
+	inline msk set<4>(const bool vals[4]) {
+		return _mm_set_epi32(vals[3] ? 0xFFFFFFFF : 0, vals[2] ? 0xFFFFFFFF : 0,
+		                     vals[1] ? 0xFFFFFFFF : 0, vals[0] ? 0xFFFFFFFF : 0);
+	}
+
+	template <>
+	inline msk set<8>(const bool vals[8]) {
+		return _mm_set_epi16(vals[ 7] ? 0xFFFF : 0, vals[ 6] ? 0xFFFF : 0,
+		                     vals[ 5] ? 0xFFFF : 0, vals[ 4] ? 0xFFFF : 0,
+		                     vals[ 3] ? 0xFFFF : 0, vals[ 2] ? 0xFFFF : 0,
+		                     vals[ 1] ? 0xFFFF : 0, vals[ 0] ? 0xFFFF : 0);
+	}
+
+	template <>
+	inline msk set<16>(const bool vals[16]) {
+		return _mm_set_epi8(vals[15] ? 0xFF : 0, vals[14] ? 0xFF : 0, vals[13] ? 0xFF : 0, vals[12] ? 0xFF : 0,
+		                    vals[11] ? 0xFF : 0, vals[10] ? 0xFF : 0, vals[ 9] ? 0xFF : 0, vals[ 8] ? 0xFF : 0,
+		                    vals[ 7] ? 0xFF : 0, vals[ 6] ? 0xFF : 0, vals[ 5] ? 0xFF : 0, vals[ 4] ? 0xFF : 0,
+		                    vals[ 3] ? 0xFF : 0, vals[ 2] ? 0xFF : 0, vals[ 1] ? 0xFF : 0, vals[ 0] ? 0xFF : 0);
 	}
 #endif
 
@@ -254,6 +287,29 @@
 	}
 #endif
 
+	// ---------------------------------------------------------------------------------------------------- set1 (mask)
+#ifdef __SSE2__
+	template <>
+	inline msk set1<2>(const bool val) {
+		return _mm_set1_epi64x(val ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0);
+	}
+
+	template <>
+	inline msk set1<4>(const bool val) {
+		return _mm_set1_epi32(val ? 0xFFFFFFFF : 0);
+	}
+
+	template <>
+	inline msk set1<8>(const bool val) {
+		return _mm_set1_epi16(val ? 0xFFFF : 0);
+	}
+
+	template <>
+	inline msk set1<16>(const bool val) {
+		return _mm_set1_epi8(val ? 0xFF : 0);
+	}
+#endif
+
 	// ----------------------------------------------------------------------------------------------------------- set0
 	template <>
 	inline reg set0<float>() {
@@ -279,6 +335,29 @@
 	template <>
 	inline reg set0<int8_t>() {
 		return _mm_castsi128_ps(_mm_setzero_si128());
+	}
+#endif
+
+	// ---------------------------------------------------------------------------------------------------- set0 (mask)
+#ifdef __SSE2__
+	template <>
+	inline msk set0<2>() {
+		return _mm_setzero_si128();
+	}
+
+	template <>
+	inline msk set0<4>() {
+		return _mm_setzero_si128();
+	}
+
+	template <>
+	inline msk set0<8>() {
+		return _mm_setzero_si128();
+	}
+
+	template <>
+	inline msk set0<16>() {
+		return _mm_setzero_si128();
 	}
 #endif
 
@@ -1080,6 +1159,31 @@
 	}
 #endif
 
+	// ---------------------------------------------------------------------------------------------------- andb (mask)
+#ifdef __SSE2__
+	template <>
+	inline msk andb<2>(const msk v1, const msk v2) {
+		return _mm_castpd_si128(_mm_and_pd(_mm_castsi128_pd(v1), _mm_castsi128_pd(v2)));
+	}
+#endif
+
+	template <>
+	inline msk andb<4>(const msk v1, const msk v2) {
+		return _mm_castps_si128(_mm_and_ps(_mm_castsi128_ps(v1), _mm_castsi128_ps(v2)));
+	}
+
+#ifdef __SSE2__
+	template <>
+	inline msk andb<8>(const msk v1, const msk v2) {
+		return _mm_and_si128(v1, v2);
+	}
+
+	template <>
+	inline msk andb<16>(const msk v1, const msk v2) {
+		return _mm_and_si128(v1, v2);
+	}
+#endif
+
 	// ---------------------------------------------------------------------------------------------------------- andnb
 	template <>
 	inline reg andnb<float>(const reg v1, const reg v2) {
@@ -1105,6 +1209,31 @@
 	template <>
 	inline reg andnb<int8_t>(const reg v1, const reg v2) {
 		return _mm_castsi128_ps(_mm_andnot_si128(_mm_castps_si128(v1), _mm_castps_si128(v2)));
+	}
+#endif
+
+	// --------------------------------------------------------------------------------------------------- andnb (mask)
+#ifdef __SSE2__
+	template <>
+	inline msk andnb<2>(const msk v1, const msk v2) {
+		return _mm_castpd_si128(_mm_andnot_pd(_mm_castsi128_pd(v1), _mm_castsi128_pd(v2)));
+	}
+#endif
+
+	template <>
+	inline msk andnb<4>(const msk v1, const msk v2) {
+		return _mm_castps_si128(_mm_andnot_ps(_mm_castsi128_ps(v1), _mm_castsi128_ps(v2)));
+	}
+
+#ifdef __SSE2__
+	template <>
+	inline msk andnb<8>(const msk v1, const msk v2) {
+		return _mm_andnot_si128(v1, v2);
+	}
+
+	template <>
+	inline msk andnb<16>(const msk v1, const msk v2) {
+		return _mm_andnot_si128(v1, v2);
 	}
 #endif
 
@@ -1146,6 +1275,39 @@
 #endif
 	}
 
+	// ---------------------------------------------------------------------------------------------------- notb (mask)
+	template <>
+	inline msk notb<2>(const msk v) {
+		return andnb<2>(v, set1<2>(0xFFFFFFFFFFFFFFFF));
+	}
+
+	template <>
+	inline msk notb<4>(const msk v) {
+		return andnb<4>(v, set1<4>(0xFFFFFFFF));
+	}
+
+	template <>
+	inline msk notb<8>(const msk v) {
+#ifdef _MSC_VER
+#pragma warning( disable : 4309 )
+#endif
+		return andnb<8>(v, set1<8>(0xFFFF));
+#ifdef _MSC_VER
+#pragma warning( default : 4309 )
+#endif
+	}
+
+	template <>
+	inline msk notb<16>(const msk v) {
+#ifdef _MSC_VER
+#pragma warning( disable : 4309 )
+#endif
+		return andnb<16>(v, set1<16>(0xFF));
+#ifdef _MSC_VER
+#pragma warning( default : 4309 )
+#endif
+	}
+
 	// ------------------------------------------------------------------------------------------------------------ orb
 	template <>
 	inline reg orb<float>(const reg v1, const reg v2) {
@@ -1174,6 +1336,31 @@
 	}
 #endif
 
+	// ----------------------------------------------------------------------------------------------------- orb (mask)
+#ifdef __SSE2__
+	template <>
+	inline msk orb<2>(const msk v1, const msk v2) {
+		return _mm_castpd_si128(_mm_or_pd(_mm_castsi128_pd(v1), _mm_castsi128_pd(v2)));
+	}
+#endif
+
+	template <>
+	inline msk orb<4>(const msk v1, const msk v2) {
+		return _mm_castps_si128(_mm_or_ps(_mm_castsi128_ps(v1), _mm_castsi128_ps(v2)));
+	}
+
+#ifdef __SSE2__
+	template <>
+	inline msk orb<8>(const msk v1, const msk v2) {
+		return _mm_or_si128(v1, v2);
+	}
+
+	template <>
+	inline msk orb<16>(const msk v1, const msk v2) {
+		return _mm_or_si128(v1, v2);
+	}
+#endif
+
 	// ----------------------------------------------------------------------------------------------------------- xorb
 	template <>
 	inline reg xorb<float>(const reg v1, const reg v2) {
@@ -1199,6 +1386,31 @@
 	template <>
 	inline reg xorb<int8_t>(const reg v1, const reg v2) {
 		return _mm_castsi128_ps(_mm_xor_si128(_mm_castps_si128(v1), _mm_castps_si128(v2)));
+	}
+#endif
+
+	// ----------------------------------------------------------------------------------------------------- orb (mask)
+#ifdef __SSE2__
+	template <>
+	inline msk xorb<2>(const msk v1, const msk v2) {
+		return _mm_castpd_si128(_mm_xor_pd(_mm_castsi128_pd(v1), _mm_castsi128_pd(v2)));
+	}
+#endif
+
+	template <>
+	inline msk xorb<4>(const msk v1, const msk v2) {
+		return _mm_castps_si128(_mm_xor_ps(_mm_castsi128_ps(v1), _mm_castsi128_ps(v2)));
+	}
+
+#ifdef __SSE2__
+	template <>
+	inline msk xorb<8>(const msk v1, const msk v2) {
+		return _mm_xor_si128(v1, v2);
+	}
+
+	template <>
+	inline msk xorb<16>(const msk v1, const msk v2) {
+		return _mm_xor_si128(v1, v2);
 	}
 #endif
 
@@ -1238,6 +1450,29 @@
 	}
 #endif
 
+	// -------------------------------------------------------------------------------------------------- lshift (mask)
+#ifdef __SSE2__
+	template <>
+	inline msk lshift<2>(const msk v1, const uint32_t n) {
+		return _mm_slli_si128(v1, n * 8);
+	}
+
+	template <>
+	inline msk lshift<4>(const msk v1, const uint32_t n) {
+		return _mm_slli_si128(v1, n * 4);
+	}
+
+	template <>
+	inline msk lshift<8>(const msk v1, const uint32_t n) {
+		return _mm_slli_si128(v1, n * 2);
+	}
+
+	template <>
+	inline msk lshift<16>(const msk v1, const uint32_t n) {
+		return _mm_slli_si128(v1, n * 1);
+	}
+#endif
+
 	// --------------------------------------------------------------------------------------------------------- rshift
 #ifdef __SSE2__
 	template <>
@@ -1274,141 +1509,164 @@
 	}
 #endif
 
+	// -------------------------------------------------------------------------------------------------- rshift (mask)
+#ifdef __SSE2__
+	template <>
+	inline msk rshift<2>(const msk v1, const uint32_t n) {
+		return _mm_srli_si128(v1, n * 8);
+	}
+
+	template <>
+	inline msk rshift<4>(const msk v1, const uint32_t n) {
+		return _mm_srli_si128(v1, n * 4);
+	}
+
+	template <>
+	inline msk rshift<8>(const msk v1, const uint32_t n) {
+		return _mm_srli_si128(v1, n * 2);
+	}
+
+	template <>
+	inline msk rshift<16>(const msk v1, const uint32_t n) {
+		return _mm_srli_si128(v1, n * 1);
+	}
+#endif
+
 	// ---------------------------------------------------------------------------------------------------------- cmpeq
 	template <>
-	inline reg cmpeq<float>(const reg v1, const reg v2) {
-		return _mm_cmpeq_ps(v1, v2);
+	inline msk cmpeq<float>(const reg v1, const reg v2) {
+		return _mm_castps_si128(_mm_cmpeq_ps(v1, v2));
 	}
 
 #ifdef __SSE2__
 	template <>
-	inline reg cmpeq<double>(const reg v1, const reg v2) {
-		return _mm_castpd_ps(_mm_cmpeq_pd(_mm_castps_pd(v1), _mm_castps_pd(v2)));
+	inline msk cmpeq<double>(const reg v1, const reg v2) {
+		return _mm_castpd_si128(_mm_cmpeq_pd(_mm_castps_pd(v1), _mm_castps_pd(v2)));
 	}
 
 	template <>
-	inline reg cmpeq<int32_t>(const reg v1, const reg v2) {
-		return _mm_castsi128_ps(_mm_cmpeq_epi32(_mm_castps_si128(v1), _mm_castps_si128(v2)));
+	inline msk cmpeq<int32_t>(const reg v1, const reg v2) {
+		return _mm_cmpeq_epi32(_mm_castps_si128(v1), _mm_castps_si128(v2));
 	}
 
 	template <>
-	inline reg cmpeq<int16_t>(const reg v1, const reg v2) {
-		return _mm_castsi128_ps(_mm_cmpeq_epi16(_mm_castps_si128(v1), _mm_castps_si128(v2)));
+	inline msk cmpeq<int16_t>(const reg v1, const reg v2) {
+		return _mm_cmpeq_epi16(_mm_castps_si128(v1), _mm_castps_si128(v2));
 	}
 
 	template <>
-	inline reg cmpeq<int8_t>(const reg v1, const reg v2) {
-		return _mm_castsi128_ps(_mm_cmpeq_epi8(_mm_castps_si128(v1), _mm_castps_si128(v2)));
+	inline msk cmpeq<int8_t>(const reg v1, const reg v2) {
+		return _mm_cmpeq_epi8(_mm_castps_si128(v1), _mm_castps_si128(v2));
 	}
 #endif
 
 	// --------------------------------------------------------------------------------------------------------- cmpneq
 	template <>
-	inline reg cmpneq<float>(const reg v1, const reg v2) {
-		return _mm_cmpneq_ps(v1, v2);
+	inline msk cmpneq<float>(const reg v1, const reg v2) {
+		return _mm_castps_si128(_mm_cmpneq_ps(v1, v2));
 	}
 
 #ifdef __SSE2__
 	template <>
-	inline reg cmpneq<double>(const reg v1, const reg v2) {
-		return _mm_castpd_ps(_mm_cmpneq_pd(_mm_castps_pd(v1), _mm_castps_pd(v2)));
+	inline msk cmpneq<double>(const reg v1, const reg v2) {
+		return _mm_castpd_si128(_mm_cmpneq_pd(_mm_castps_pd(v1), _mm_castps_pd(v2)));
 	}
 
 	template <>
-	inline reg cmpneq<int32_t>(const reg v1, const reg v2) {
-		return _mm_cmpneq_ps(v1, v2);
+	inline msk cmpneq<int32_t>(const reg v1, const reg v2) {
+		return _mm_castps_si128(_mm_cmpneq_ps(v1, v2));
 	}
 
 	template <>
-	inline reg cmpneq<int16_t>(const reg v1, const reg v2) {
-		return andnb<int16_t>(cmpeq<int16_t>(v1, v2), set1<int32_t>(0xFFFFFFFF));
+	inline msk cmpneq<int16_t>(const reg v1, const reg v2) {
+		return andnb<N<int16_t>()>(cmpeq<int16_t>(v1, v2), set1<N<int16_t>()>(0xFFFFFFFF));
 	}
 
 	template <>
-	inline reg cmpneq<int8_t>(const reg v1, const reg v2) {
-		return andnb<int8_t>(cmpeq<int8_t>(v1, v2), set1<int32_t>(0xFFFFFFFF));
+	inline msk cmpneq<int8_t>(const reg v1, const reg v2) {
+		return andnb<N<int8_t>()>(cmpeq<int8_t>(v1, v2), set1<N<int8_t>()>(0xFFFFFFFF));
 	}
 #endif
 
 	// ---------------------------------------------------------------------------------------------------------- cmplt
 	template <>
-	inline reg cmplt<float>(const reg v1, const reg v2) {
-		return _mm_cmplt_ps(v1, v2);
+	inline msk cmplt<float>(const reg v1, const reg v2) {
+		return _mm_castps_si128(_mm_cmplt_ps(v1, v2));
 	}
 
 #ifdef __SSE2__
 	template <>
-	inline reg cmplt<double>(const reg v1, const reg v2) {
-		return _mm_castpd_ps(_mm_cmplt_pd(_mm_castps_pd(v1), _mm_castps_pd(v2)));
+	inline msk cmplt<double>(const reg v1, const reg v2) {
+		return _mm_castpd_si128(_mm_cmplt_pd(_mm_castps_pd(v1), _mm_castps_pd(v2)));
 	}
 
 	template <>
-	inline reg cmplt<int32_t>(const reg v1, const reg v2) {
-		return _mm_castsi128_ps(_mm_cmplt_epi32(_mm_castps_si128(v1), _mm_castps_si128(v2)));
+	inline msk cmplt<int32_t>(const reg v1, const reg v2) {
+		return _mm_cmplt_epi32(_mm_castps_si128(v1), _mm_castps_si128(v2));
 	}
 
 	template <>
-	inline reg cmplt<int16_t>(const reg v1, const reg v2) {
-		return _mm_castsi128_ps(_mm_cmplt_epi16(_mm_castps_si128(v1), _mm_castps_si128(v2)));
+	inline msk cmplt<int16_t>(const reg v1, const reg v2) {
+		return _mm_cmplt_epi16(_mm_castps_si128(v1), _mm_castps_si128(v2));
 	}
 
 	template <>
-	inline reg cmplt<int8_t>(const reg v1, const reg v2) {
-		return _mm_castsi128_ps(_mm_cmplt_epi8(_mm_castps_si128(v1), _mm_castps_si128(v2)));
+	inline msk cmplt<int8_t>(const reg v1, const reg v2) {
+		return _mm_cmplt_epi8(_mm_castps_si128(v1), _mm_castps_si128(v2));
 	}
 #endif
 
 	// ---------------------------------------------------------------------------------------------------------- cmple
 	template <>
-	inline reg cmple<float>(const reg v1, const reg v2) {
-		return _mm_cmple_ps(v1, v2);
+	inline msk cmple<float>(const reg v1, const reg v2) {
+		return _mm_castps_si128(_mm_cmple_ps(v1, v2));
 	}
 
 #ifdef __SSE2__
 	template <>
-	inline reg cmple<double>(const reg v1, const reg v2) {
-		return _mm_castpd_ps(_mm_cmple_pd(_mm_castps_pd(v1), _mm_castps_pd(v2)));
+	inline msk cmple<double>(const reg v1, const reg v2) {
+		return _mm_castpd_si128(_mm_cmple_pd(_mm_castps_pd(v1), _mm_castps_pd(v2)));
 	}
 #endif
 
 	// ---------------------------------------------------------------------------------------------------------- cmpgt
 	template <>
-	inline reg cmpgt<float>(const reg v1, const reg v2) {
-		return _mm_cmpgt_ps(v1, v2);
+	inline msk cmpgt<float>(const reg v1, const reg v2) {
+		return _mm_castps_si128(_mm_cmpgt_ps(v1, v2));
 	}
 
 #ifdef __SSE2__
 	template <>
-	inline reg cmpgt<double>(const reg v1, const reg v2) {
-		return _mm_castpd_ps(_mm_cmpgt_pd(_mm_castps_pd(v1), _mm_castps_pd(v2)));
+	inline msk cmpgt<double>(const reg v1, const reg v2) {
+		return _mm_castpd_si128(_mm_cmpgt_pd(_mm_castps_pd(v1), _mm_castps_pd(v2)));
 	}
 
 	template <>
-	inline reg cmpgt<int32_t>(const reg v1, const reg v2) {
-		return _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_castps_si128(v1), _mm_castps_si128(v2)));
+	inline msk cmpgt<int32_t>(const reg v1, const reg v2) {
+		return _mm_cmpgt_epi32(_mm_castps_si128(v1), _mm_castps_si128(v2));
 	}
 
 	template <>
-	inline reg cmpgt<int16_t>(const reg v1, const reg v2) {
-		return _mm_castsi128_ps(_mm_cmpgt_epi16(_mm_castps_si128(v1), _mm_castps_si128(v2)));
+	inline msk cmpgt<int16_t>(const reg v1, const reg v2) {
+		return _mm_cmpgt_epi16(_mm_castps_si128(v1), _mm_castps_si128(v2));
 	}
 
 	template <>
-	inline reg cmpgt<int8_t>(const reg v1, const reg v2) {
-		return _mm_castsi128_ps(_mm_cmpgt_epi8(_mm_castps_si128(v1), _mm_castps_si128(v2)));
+	inline msk cmpgt<int8_t>(const reg v1, const reg v2) {
+		return _mm_cmpgt_epi8(_mm_castps_si128(v1), _mm_castps_si128(v2));
 	}
 #endif
 
 	// ---------------------------------------------------------------------------------------------------------- cmpge
 	template <>
-	inline reg cmpge<float>(const reg v1, const reg v2) {
-		return _mm_cmpge_ps(v1, v2);
+	inline msk cmpge<float>(const reg v1, const reg v2) {
+		return _mm_castps_si128(_mm_cmpge_ps(v1, v2));
 	}
 
 #ifdef __SSE2__
 	template <>
-	inline reg cmpge<double>(const reg v1, const reg v2) {
-		return _mm_castpd_ps(_mm_cmpge_pd(_mm_castps_pd(v1), _mm_castps_pd(v2)));
+	inline msk cmpge<double>(const reg v1, const reg v2) {
+		return _mm_castpd_si128(_mm_cmpge_pd(_mm_castps_pd(v1), _mm_castps_pd(v2)));
 	}
 #endif
 

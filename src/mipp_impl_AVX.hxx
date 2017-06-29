@@ -231,7 +231,7 @@
 
 	// ----------------------------------------------------------------------------------------------------- set (mask)
 	template <>
-	inline msk set<double>(const bool vals[nElReg<double>()]) {
+	inline msk set<4>(const bool vals[4]) {
 		return _mm256_set_epi64x(vals[3] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
 		                         vals[2] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
 		                         vals[1] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
@@ -239,7 +239,7 @@
 	}
 
 	template <>
-	inline msk set<float>(const bool vals[nElReg<float>()]) {
+	inline msk set<8>(const bool vals[8]) {
 		return _mm256_set_epi32(vals[7] ? 0xFFFFFFFF : 0, vals[6] ? 0xFFFFFFFF : 0,
 		                        vals[5] ? 0xFFFFFFFF : 0, vals[4] ? 0xFFFFFFFF : 0,
 		                        vals[3] ? 0xFFFFFFFF : 0, vals[2] ? 0xFFFFFFFF : 0,
@@ -247,15 +247,7 @@
 	}
 
 	template <>
-	inline msk set<int32_t>(const bool vals[nElReg<int32_t>()]) {
-		return _mm256_set_epi32(vals[7] ? 0xFFFFFFFF : 0, vals[6] ? 0xFFFFFFFF : 0,
-		                        vals[5] ? 0xFFFFFFFF : 0, vals[4] ? 0xFFFFFFFF : 0,
-		                        vals[3] ? 0xFFFFFFFF : 0, vals[2] ? 0xFFFFFFFF : 0,
-		                        vals[1] ? 0xFFFFFFFF : 0, vals[0] ? 0xFFFFFFFF : 0);
-	}
-
-	template <>
-	inline msk set<int16_t>(const bool vals[nElReg<int16_t>()]) {
+	inline msk set<16>(const bool vals[16]) {
 		return _mm256_set_epi16(vals[15] ? 0xFFFF : 0, vals[14] ? 0xFFFF : 0,
 		                        vals[13] ? 0xFFFF : 0, vals[12] ? 0xFFFF : 0,
 		                        vals[11] ? 0xFFFF : 0, vals[10] ? 0xFFFF : 0,
@@ -267,7 +259,7 @@
 	}
 
 	template <>
-	inline msk set<int8_t>(const bool vals[nElReg<int8_t>()]) {
+	inline msk set<32>(const bool vals[32]) {
 		return _mm256_set_epi8(vals[31] ? 0xFF : 0, vals[30] ? 0xFF : 0, vals[29] ? 0xFF : 0, vals[28] ? 0xFF : 0,
 		                       vals[27] ? 0xFF : 0, vals[26] ? 0xFF : 0, vals[25] ? 0xFF : 0, vals[24] ? 0xFF : 0,
 		                       vals[23] ? 0xFF : 0, vals[22] ? 0xFF : 0, vals[21] ? 0xFF : 0, vals[20] ? 0xFF : 0,
@@ -311,36 +303,25 @@
 	}
 #endif
 
-	// --------------------------------------------------------------------------------------------------- set1m (mask)
+	// ---------------------------------------------------------------------------------------------------- set1 (mask)
 	template <>
-	inline msk set1m<double>(const bool val) {
+	inline msk set1<4>(const bool val) {
 		return _mm256_set1_epi64x(val ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0);
 	}
 
-
 	template <>
-	inline msk set1m<float>(const bool val) {
+	inline msk set1<8>(const bool val) {
 		return _mm256_set1_epi32(val ? 0xFFFFFFFF : 0);
-	}
-
-	template <>
-	inline msk set1m<int32_t>(const bool val) {
-		return _mm256_set1_epi32(val ? 0xFFFFFFFF : 0);
-	}
-
-	template <>
-	inline msk set1m<int64_t>(const bool val) {
-		return _mm256_set1_epi64x(val ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0);
 	}
 
 #ifdef __AVX2__
 	template <>
-	inline msk set1m<int16_t>(const bool val) {
+	inline msk set1<16>(const bool val) {
 		return _mm256_set1_epi16(val ? 0xFFFF : 0);
 	}
 
 	template <>
-	inline msk set1m<int8_t>(const bool val) {
+	inline msk set1<32>(const bool val) {
 		return _mm256_set1_epi8(val ? 0xFF : 0);
 	}
 #endif
@@ -371,29 +352,24 @@
 		return _mm256_castsi256_ps(_mm256_setzero_si256());
 	}
 
-	// --------------------------------------------------------------------------------------------------- set0m (mask)
+	// ---------------------------------------------------------------------------------------------------- set0 (mask)
 	template <>
-	inline msk set0m<double>() {
+	inline msk set0<4>() {
 		return _mm256_setzero_si256();
 	}
 
 	template <>
-	inline msk set0m<float>() {
+	inline msk set0<8>() {
 		return _mm256_setzero_si256();
 	}
 
 	template <>
-	inline msk set0m<int32_t>() {
+	inline msk set0<16>() {
 		return _mm256_setzero_si256();
 	}
 
 	template <>
-	inline msk set0m<int16_t>() {
-		return _mm256_setzero_si256();
-	}
-
-	template <>
-	inline msk set0m<int8_t>() {
+	inline msk set0<32>() {
 		return _mm256_setzero_si256();
 	}
 
@@ -981,14 +957,14 @@
 		//
 		// Input:
 		// ------
-		// tab[0] = [a0, a1, a2, a3, a4, a5, a6, a7,  A0, A1, A2, A3, A4, A5, A6, A7]        
-		// tab[1] = [b0, b1, b2, b3, b4, b5, b6, b7,  B0, B1, B2, B3, B4, B5, B6, B7]        
-		// tab[2] = [c0, c1, c2, c3, c4, c5, c6, c7,  C0, C1, C2, C3, C4, C5, C6, C7]        
-		// tab[3] = [d0, d1, d2, d3, d4, d5, d6, d7,  D0, D1, D2, D3, D4, D5, D6, D7]        
-		// tab[4] = [e0, e1, e2, e3, e4, e5, e6, e7,  E0, E1, E2, E3, E4, E5, E6, E7]   
-		// tab[5] = [f0, f1, f2, f3, f4, f5, f6, f7,  F0, F1, F2, F3, F4, F5, F6, F7]        
-		// tab[6] = [g0, g1, g2, g3, g4, g5, g6, g7,  G0, G1, G2, G3, G4, G5, G6, G7]        
-		// tab[7] = [h0, h1, h2, h3, h4, h5, h6, h7,  H0, H1, H2, H3, H4, H5, H6, H7]        
+		// tab[0] = [a0, a1, a2, a3, a4, a5, a6, a7,  A0, A1, A2, A3, A4, A5, A6, A7]
+		// tab[1] = [b0, b1, b2, b3, b4, b5, b6, b7,  B0, B1, B2, B3, B4, B5, B6, B7]
+		// tab[2] = [c0, c1, c2, c3, c4, c5, c6, c7,  C0, C1, C2, C3, C4, C5, C6, C7]
+		// tab[3] = [d0, d1, d2, d3, d4, d5, d6, d7,  D0, D1, D2, D3, D4, D5, D6, D7]
+		// tab[4] = [e0, e1, e2, e3, e4, e5, e6, e7,  E0, E1, E2, E3, E4, E5, E6, E7]
+		// tab[5] = [f0, f1, f2, f3, f4, f5, f6, f7,  F0, F1, F2, F3, F4, F5, F6, F7]
+		// tab[6] = [g0, g1, g2, g3, g4, g5, g6, g7,  G0, G1, G2, G3, G4, G5, G6, G7]
+		// tab[7] = [h0, h1, h2, h3, h4, h5, h6, h7,  H0, H1, H2, H3, H4, H5, H6, H7]
 		//
 		// Output:
 		// -------
@@ -1047,13 +1023,13 @@
 
 	// ----------------------------------------------------------------------------------------------------------- andb
 	template <>
-	inline reg andb<float>(const reg v1, const reg v2) {
-		return _mm256_and_ps(v1, v2);
+	inline reg andb<double>(const reg v1, const reg v2) {
+		return _mm256_castpd_ps(_mm256_and_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2)));
 	}
 
 	template <>
-	inline reg andb<double>(const reg v1, const reg v2) {
-		return _mm256_castpd_ps(_mm256_and_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2)));
+	inline reg andb<float>(const reg v1, const reg v2) {
+		return _mm256_and_ps(v1, v2);
 	}
 
 	template <>
@@ -1073,15 +1049,38 @@
 	}
 #endif
 
-	// ---------------------------------------------------------------------------------------------------------- andnb
+	// ---------------------------------------------------------------------------------------------------- andb (mask)
 	template <>
-	inline reg andnb<float>(const reg v1, const reg v2) {
-		return _mm256_andnot_ps(v1, v2);
+	inline msk andb<4>(const msk v1, const msk v2) {
+		return _mm256_castpd_si256(_mm256_and_pd(_mm256_castsi256_pd(v1), _mm256_castsi256_pd(v2)));
 	}
 
 	template <>
+	inline msk andb<8>(const msk v1, const msk v2) {
+		return _mm256_castps_si256(_mm256_and_ps(_mm256_castsi256_ps(v1), _mm256_castsi256_ps(v2)));
+	}
+
+#ifdef __AVX2__
+	template <>
+	inline msk andb<16>(const msk v1, const msk v2) {
+		return _mm256_and_si256(v1, v2);
+	}
+
+	template <>
+	inline msk andb<32>(const msk v1, const msk v2) {
+		return _mm256_and_si256(v1, v2);
+	}
+#endif
+
+	// ---------------------------------------------------------------------------------------------------------- andnb
+	template <>
 	inline reg andnb<double>(const reg v1, const reg v2) {
 		return _mm256_castpd_ps(_mm256_andnot_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2)));
+	}
+
+	template <>
+	inline reg andnb<float>(const reg v1, const reg v2) {
+		return _mm256_andnot_ps(v1, v2);
 	}
 
 	template <>
@@ -1098,6 +1097,29 @@
 	template <>
 	inline reg andnb<int8_t>(const reg v1, const reg v2) {
 		return _mm256_castsi256_ps(_mm256_andnot_si256(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	}
+#endif
+
+	// --------------------------------------------------------------------------------------------------- andnb (mask)
+	template <>
+	inline msk andnb<4>(const msk v1, const msk v2) {
+		return _mm256_castpd_si256(_mm256_andnot_pd(_mm256_castsi256_pd(v1), _mm256_castsi256_pd(v2)));
+	}
+
+	template <>
+	inline msk andnb<8>(const msk v1, const msk v2) {
+		return _mm256_castps_si256(_mm256_andnot_ps(_mm256_castsi256_ps(v1), _mm256_castsi256_ps(v2)));
+	}
+
+#ifdef __AVX2__
+	template <>
+	inline msk andnb<16>(const msk v1, const msk v2) {
+		return _mm256_andnot_si256(v1, v2);
+	}
+
+	template <>
+	inline msk andnb<32>(const msk v1, const msk v2) {
+		return _mm256_andnot_si256(v1, v2);
 	}
 #endif
 
@@ -1139,6 +1161,39 @@
 #endif
 	}
 
+	// ---------------------------------------------------------------------------------------------------- notb (mask)
+	template <>
+	inline msk notb<4>(const msk v) {
+		return andnb<4>(v, set1<4>(0xFFFFFFFFFFFFFFFF));
+	}
+
+	template <>
+	inline msk notb<8>(const msk v) {
+		return andnb<8>(v, set1<8>(0xFFFFFFFF));
+	}
+
+	template <>
+	inline msk notb<16>(const msk v) {
+#ifdef _MSC_VER
+#pragma warning( disable : 4309 )
+#endif
+		return andnb<16>(v, set1<16>(0xFFFF));
+#ifdef _MSC_VER
+#pragma warning( default : 4309 )
+#endif
+	}
+
+	template <>
+	inline msk notb<32>(const msk v) {
+#ifdef _MSC_VER
+#pragma warning( disable : 4309 )
+#endif
+		return andnb<32>(v, set1<32>(0xFF));
+#ifdef _MSC_VER
+#pragma warning( default : 4309 )
+#endif
+	}
+
 	// ------------------------------------------------------------------------------------------------------------ orb
 	template <>
 	inline reg orb<float>(const reg v1, const reg v2) {
@@ -1167,6 +1222,29 @@
 	}
 #endif
 
+	// ----------------------------------------------------------------------------------------------------- orb (mask)
+	template <>
+	inline msk orb<4>(const msk v1, const msk v2) {
+		return _mm256_castpd_si256(_mm256_or_pd(_mm256_castsi256_pd(v1), _mm256_castsi256_pd(v2)));
+	}
+
+	template <>
+	inline msk orb<8>(const msk v1, const msk v2) {
+		return _mm256_castps_si256(_mm256_or_ps(_mm256_castsi256_ps(v1), _mm256_castsi256_ps(v2)));
+	}
+
+#ifdef __AVX2__
+	template <>
+	inline msk orb<16>(const msk v1, const msk v2) {
+		return _mm256_or_si256(v1, v2);
+	}
+
+	template <>
+	inline msk orb<32>(const msk v1, const msk v2) {
+		return _mm256_or_si256(v1, v2);
+	}
+#endif
+
 	// ----------------------------------------------------------------------------------------------------------- xorb
 	template <>
 	inline reg xorb<float>(const reg v1, const reg v2) {
@@ -1192,6 +1270,29 @@
 	template <>
 	inline reg xorb<int8_t>(const reg v1, const reg v2) {
 		return _mm256_castsi256_ps(_mm256_xor_si256(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	}
+#endif
+
+	// ---------------------------------------------------------------------------------------------------- xorb (mask)
+	template <>
+	inline msk xorb<4>(const msk v1, const msk v2) {
+		return _mm256_castps_si256(_mm256_xor_ps(_mm256_castsi256_ps(v1), _mm256_castsi256_ps(v2)));
+	}
+
+	template <>
+	inline msk xorb<8>(const msk v1, const msk v2) {
+		return _mm256_castps_si256(_mm256_xor_ps(_mm256_castsi256_ps(v1), _mm256_castsi256_ps(v2)));
+	}
+
+#ifdef __AVX2__
+	template <>
+	inline msk xorb<16>(const msk v1, const msk v2) {
+		return _mm256_xor_si256(v1, v2);
+	}
+
+	template <>
+	inline msk xorb<32>(const msk v1, const msk v2) {
+		return _mm256_xor_si256(v1, v2);
 	}
 #endif
 
@@ -1263,6 +1364,29 @@
 	}
 #endif
 
+	// -------------------------------------------------------------------------------------------------- lshift (mask)
+#ifdef __AVX2__
+	template <>
+	inline msk lshift<4>(const msk v1, const uint32_t n) {
+		return _mm256_slli_si256(v1, n * 8); // TODO: this is not a complete shift, it's a shift by lane.
+	}
+
+	template <>
+	inline msk lshift<8>(const msk v1, const uint32_t n) {
+		return _mm256_slli_si256(v1, n * 4); // TODO: this is not a complete shift, it's a shift by lane.
+	}
+
+	template <>
+	inline msk lshift<16>(const msk v1, const uint32_t n) {
+		return _mm256_slli_si256(v1, n * 2); // TODO: this is not a complete shift, it's a shift by lane.
+	}
+
+	template <>
+	inline msk lshift<32>(const msk v1, const uint32_t n) {
+		return _mm256_slli_si256(v1, n * 1); // TODO: this is not a complete shift, it's a shift by lane.
+	}
+#endif
+
 	// --------------------------------------------------------------------------------------------------------- rshift
 #ifdef __AVX2__
 	template <>
@@ -1328,6 +1452,29 @@
 		res = _mm256_insertf128_ps(res, v1_lane1, 1);
 
 		return res;
+	}
+#endif
+
+	// -------------------------------------------------------------------------------------------------- rshift (mask)
+#ifdef __AVX2__
+	template <>
+	inline msk rshift<4>(const msk v1, const uint32_t n) {
+		return _mm256_srli_si256(v1, n * 8); // TODO: this is not a complete shift, it's a shift by lane.
+	}
+
+	template <>
+	inline msk rshift<8>(const msk v1, const uint32_t n) {
+		return _mm256_srli_si256(v1, n * 4); // TODO: this is not a complete shift, it's a shift by lane.
+	}
+
+	template <>
+	inline msk rshift<16>(const msk v1, const uint32_t n) {
+		return _mm256_srli_si256(v1, n * 2); // TODO: this is not a complete shift, it's a shift by lane.
+	}
+
+	template <>
+	inline msk rshift<32>(const msk v1, const uint32_t n) {
+		return _mm256_srli_si256(v1, n * 1); // TODO: this is not a complete shift, it's a shift by lane.
 	}
 #endif
 
