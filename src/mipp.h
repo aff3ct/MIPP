@@ -106,6 +106,7 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	#define MIPP_REQUIRED_ALIGNMENT 16
 	constexpr uint32_t RequiredAlignment = MIPP_REQUIRED_ALIGNMENT;
 	constexpr uint32_t RegisterSizeBit = 128;
+	constexpr uint32_t Lanes = 1;
 
 	using msk   = uint32x4_t;
 	using reg   = float32x4_t;
@@ -122,6 +123,7 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	#define MIPP_REQUIRED_ALIGNMENT 64
 	constexpr uint32_t RequiredAlignment = MIPP_REQUIRED_ALIGNMENT;
 	constexpr uint32_t RegisterSizeBit = 512;
+	constexpr uint32_t Lanes = 4;
 
 #ifdef __AVX512BW__
 	using msk   = __mmask64;
@@ -142,6 +144,7 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	#define MIPP_REQUIRED_ALIGNMENT 32
 	constexpr uint32_t RequiredAlignment = MIPP_REQUIRED_ALIGNMENT;
 	constexpr uint32_t RegisterSizeBit = 256;
+	constexpr uint32_t Lanes = 2;
 
 	using msk   = __m256i;
 	using reg   = __m256;
@@ -162,6 +165,7 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	#define MIPP_REQUIRED_ALIGNMENT 16
 	constexpr uint32_t RequiredAlignment = MIPP_REQUIRED_ALIGNMENT;
 	constexpr uint32_t RegisterSizeBit = 128;
+	constexpr uint32_t Lanes = 1;
 
 	using msk   = __m128i;
 	using reg   = __m128;
@@ -191,6 +195,7 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	#define MIPP_REQUIRED_ALIGNMENT 1
 	constexpr uint32_t RequiredAlignment = MIPP_REQUIRED_ALIGNMENT;
 	constexpr uint32_t RegisterSizeBit = 0;
+	constexpr uint32_t Lanes = 1;
 
 	using msk   = uint8_t;
 	using reg   = int32_t;
@@ -208,6 +213,7 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	#define MIPP_REQUIRED_ALIGNMENT 1
 	constexpr uint32_t RequiredAlignment = MIPP_REQUIRED_ALIGNMENT;
 	constexpr uint32_t RegisterSizeBit = 0;
+	constexpr uint32_t Lanes = 1;
 
 	using msk   = uint8_t;
 	using reg   = int32_t;
@@ -559,28 +565,26 @@ inline reg maskz(const msk m, const reg a, const reg b, const reg c)
 template <typename T>
 void dump(const mipp::reg r, std::ostream &stream = std::cout, const uint32_t elmtWidth = 6)
 {
+	constexpr int32_t lane_size = (int32_t)(mipp::N<T>() / mipp::Lanes);
+
 //	const T* data = (T*)&r;
 	T data[mipp::nElReg<T>()];
 	store<T>(data, r);
 
 	stream << "[";
-#if defined(__AVX__)
-	for (auto i = 0; i < mipp::nElReg<T>()/2; i++)
-		stream << std::setw(elmtWidth) << +data[i] << ((i < mipp::nElReg<T>()/2-1) ? ", " : "");
-	stream << " | ";
-	for (auto i = mipp::nElReg<T>()/2; i < mipp::nElReg<T>(); i++)
-		stream << std::setw(elmtWidth) << +data[i] << ((i < mipp::nElReg<T>()-1) ? ", " : "");
-#else
-	for (auto i = 0; i < mipp::nElReg<T>(); i++)
-		stream << std::setw(elmtWidth) << +data[i] << ((i < mipp::nElReg<T>()-1) ? ", " : "");
-#endif
-
+	for (auto l = 0; l < (int)mipp::Lanes; l++)
+	{
+		for (auto i = 0; i < lane_size; i++)
+			stream << std::setw(elmtWidth) << +data[l * lane_size +i] << ((i < lane_size -1) ? ", " : "");
+		stream << ((l < mipp::Lanes -1) ? " | " : "");
+	}
 	stream << "]";
 }
 
 template <int N>
 void dump(const mipp::msk m, std::ostream &stream = std::cout, const uint32_t elmtWidth = 6)
 {
+	constexpr int32_t lane_size = (int32_t)(N / mipp::Lanes);
 	constexpr int bits = mipp::RegisterSizeBit / N;
 
 	const auto r = cvt_msk_reg(m);
@@ -592,16 +596,12 @@ void dump(const mipp::msk m, std::ostream &stream = std::cout, const uint32_t el
 		int8_t data[N];
 		store<int8_t>(data, r);
 
-#if defined(__AVX__)
-		for (auto i = 0; i < N/2; i++)
-			stream << std::setw(elmtWidth) << (data[i] ? 1 : 0) << ((i < N/2-1) ? ", " : "");
-		stream << " | ";
-		for (auto i = N/2; i < N; i++)
-			stream << std::setw(elmtWidth) << (data[i] ? 1 : 0) << ((i < N-1) ? ", " : "");
-#else
-		for (auto i = 0; i < N; i++)
-			stream << std::setw(elmtWidth) << (data[i] ? 1 : 0) << ((i < N-1) ? ", " : "");
-#endif
+		for (auto l = 0; l < (int)mipp::Lanes; l++)
+		{
+			for (auto i = 0; i < lane_size; i++)
+				stream << std::setw(elmtWidth) << (data[i] ? 1 : 0) << ((i < lane_size -1) ? ", " : "");
+			stream << ((l < mipp::Lanes -1) ? " | " : "");
+		}
 	}
 	else if (bits == 16)
 	{
@@ -609,16 +609,12 @@ void dump(const mipp::msk m, std::ostream &stream = std::cout, const uint32_t el
 		int16_t data[N];
 		store<int16_t>(data, r);
 
-#if defined(__AVX__)
-		for (auto i = 0; i < N/2; i++)
-			stream << std::setw(elmtWidth) << (data[i] ? 1 : 0) << ((i < N/2-1) ? ", " : "");
-		stream << " | ";
-		for (auto i = N/2; i < N; i++)
-			stream << std::setw(elmtWidth) << (data[i] ? 1 : 0) << ((i < N-1) ? ", " : "");
-#else
-		for (auto i = 0; i < N; i++)
-			stream << std::setw(elmtWidth) << (data[i] ? 1 : 0) << ((i < N-1) ? ", " : "");
-#endif
+		for (auto l = 0; l < (int)mipp::Lanes; l++)
+		{
+			for (auto i = 0; i < lane_size; i++)
+				stream << std::setw(elmtWidth) << (data[i] ? 1 : 0) << ((i < lane_size -1) ? ", " : "");
+			stream << ((l < mipp::Lanes -1) ? " | " : "");
+		}
 	}
 	else if (bits == 32)
 	{
@@ -626,16 +622,12 @@ void dump(const mipp::msk m, std::ostream &stream = std::cout, const uint32_t el
 		int32_t data[N];
 		store<int32_t>(data, r);
 
-#if defined(__AVX__)
-		for (auto i = 0; i < N/2; i++)
-			stream << std::setw(elmtWidth) << (data[i] ? 1 : 0) << ((i < N/2-1) ? ", " : "");
-		stream << " | ";
-		for (auto i = N/2; i < N; i++)
-			stream << std::setw(elmtWidth) << (data[i] ? 1 : 0) << ((i < N-1) ? ", " : "");
-#else
-		for (auto i = 0; i < N; i++)
-			stream << std::setw(elmtWidth) << (data[i] ? 1 : 0) << ((i < N-1) ? ", " : "");
-#endif
+		for (auto l = 0; l < (int)mipp::Lanes; l++)
+		{
+			for (auto i = 0; i < lane_size; i++)
+				stream << std::setw(elmtWidth) << (data[i] ? 1 : 0) << ((i < lane_size -1) ? ", " : "");
+			stream << ((l < mipp::Lanes -1) ? " | " : "");
+		}
 	}
 	else if (bits == 64)
 	{
@@ -643,16 +635,12 @@ void dump(const mipp::msk m, std::ostream &stream = std::cout, const uint32_t el
 		int64_t data[N];
 		store<int64_t>(data, r);
 
-#if defined(__AVX__)
-		for (auto i = 0; i < N/2; i++)
-			stream << std::setw(elmtWidth) << (data[i] ? 1 : 0) << ((i < N/2-1) ? ", " : "");
-		stream << " | ";
-		for (auto i = N/2; i < N; i++)
-			stream << std::setw(elmtWidth) << (data[i] ? 1 : 0) << ((i < N-1) ? ", " : "");
-#else
-		for (auto i = 0; i < N; i++)
-			stream << std::setw(elmtWidth) << (data[i] ? 1 : 0) << ((i < N-1) ? ", " : "");
-#endif
+		for (auto l = 0; l < (int)mipp::Lanes; l++)
+		{
+			for (auto i = 0; i < lane_size; i++)
+				stream << std::setw(elmtWidth) << (data[i] ? 1 : 0) << ((i < lane_size -1) ? ", " : "");
+			stream << ((l < mipp::Lanes -1) ? " | " : "");
+		}
 	}
 
 	stream << "]";
