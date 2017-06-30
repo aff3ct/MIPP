@@ -196,6 +196,213 @@
 	}
 #endif
 
+	// ---------------------------------------------------------------------------------------------------------- cmpeq
+	template <>
+	inline msk cmpeq<double>(const reg v1, const reg v2) {
+		return (msk) _mm512_cmp_pd_mask(_mm512_castps_pd(v1), _mm512_castps_pd(v2), _CMP_EQ_OQ);
+	}
+
+	template <>
+	inline msk cmpeq<float>(const reg v1, const reg v2) {
+		return (msk) _mm512_cmp_ps_mask(v1, v2, _CMP_EQ_OQ);
+	}
+
+#if defined(__AVX512F__)
+	template <>
+	inline msk cmpeq<int64_t>(const reg v1, const reg v2) {
+		return (msk) _mm512_cmpeq_epi64_mask(_mm512_castps_si512(v1), _mm512_castps_si512(v2));
+	}
+#endif
+
+	template <>
+	inline msk cmpeq<int32_t>(const reg v1, const reg v2) {
+		return (msk) _mm512_cmpeq_epi32_mask(_mm512_castps_si512(v1), _mm512_castps_si512(v2));
+	}
+
+#if defined(__AVX512BW__)
+	template <>
+	inline msk cmpeq<int16_t>(const reg v1, const reg v2) {
+		return (msk) _mm512_cmpeq_epi16_mask(_mm512_castps_si512(v1), _mm512_castps_si512(v2));
+	}
+
+	template <>
+	inline msk cmpeq<int8_t>(const reg v1, const reg v2) {
+		return (msk) _mm512_cmpeq_epi8_mask(_mm512_castps_si512(v1), _mm512_castps_si512(v2));
+	}
+#endif
+
+
+	// ----------------------------------------------------------------------------------------------------------- set1
+#ifdef __AVX512F__
+	template <>
+	inline reg set1<float>(const float val) {
+		return _mm512_set1_ps(val);
+	}
+
+	template <>
+	inline reg set1<double>(const double val) {
+		return _mm512_castpd_ps(_mm512_set1_pd(val));
+	}
+
+	template <>
+	inline reg set1<int64_t>(const int64_t val) {
+		return _mm512_castsi512_ps(_mm512_set1_epi64(val));
+	}
+
+	template <>
+	inline reg set1<int32_t>(const int32_t val) {
+		return _mm512_castsi512_ps(_mm512_set1_epi32(val));
+	}
+
+	template <>
+	inline reg set1<int16_t>(const int16_t val) {
+		return _mm512_castsi512_ps(_mm512_set1_epi16(val));
+	}
+
+	template <>
+	inline reg set1<int8_t>(const int8_t val) {
+		return _mm512_castsi512_ps(_mm512_set1_epi8(val));
+	}
+
+#elif defined(__MIC__) || defined(__KNCNI__)
+	template <>
+	inline reg set1<double>(const double val) {
+		double init[8] __attribute__((aligned(64))) = {val, val, val, val, val, val, val, val};
+		return load<double>(init);
+	}
+
+	template <>
+	inline reg set1<float>(const float val) {
+		float init[16] __attribute__((aligned(64))) = {val, val, val, val, val, val, val, val, 
+		                                               val, val, val, val, val, val, val, val};
+		return load<float>(init);
+	}
+
+	template <>
+	inline reg set1<int64_t>(const int64_t val) {
+		int64_t init[8] __attribute__((aligned(64))) = {val, val, val, val, val, val, val, val};
+		return load<int64_t>(init);
+	}
+
+	template <>
+	inline reg set1<int32_t>(const int32_t val) {
+		int32_t init[16] __attribute__((aligned(64))) = {val, val, val, val, val, val, val, val,
+		                                                 val, val, val, val, val, val, val, val};
+		return load<int32_t>(init);
+	}
+#endif
+
+	// ---------------------------------------------------------------------------------------------------- set1 (mask)
+	template <>
+	inline msk set1<8>(const bool val) {
+		auto r1 = set1<int64_t>(val ? (uint64_t)0xFFFFFFFFFFFFFFFF : 0);
+		auto r2 = set1<int64_t>(      (uint64_t)0xFFFFFFFFFFFFFFFF    );
+
+		return (msk) cmpeq<int64_t>(r1, r2);
+	}
+
+	template <>
+	inline msk set1<16>(const bool val) {
+		auto r1 = set1<int32_t>(val ? 0xFFFFFFFF : 0);
+		auto r2 = set1<int32_t>(      0xFFFFFFFF    );
+
+		return (msk) cmpeq<int32_t>(r1, r2);
+	}
+
+	template <>
+	inline msk set1<32>(const bool val) {
+		auto r1 = set1<int16_t>(val ? 0xFFFF : 0);
+		auto r2 = set1<int16_t>(      0xFFFF    );
+
+		return (msk) cmpeq<int16_t>(r1, r2);
+	}
+
+	template <>
+	inline msk set1<64>(const bool val) {
+		auto r1 = set1<int8_t>(val ? 0xFF : 0);
+		auto r2 = set1<int8_t>(      0xFF    );
+
+		return (msk) cmpeq<int8_t>(r1, r2);
+	}
+
+	// ----------------------------------------------------------------------------------------------------------- set0
+#if defined(__AVX512F__)
+	template <>
+	inline reg set0<double>() {
+		return _mm512_castpd_ps(_mm512_setzero_pd());
+	}
+
+	template <>
+	inline reg set0<float>() {
+		return _mm512_setzero_ps();
+	}
+
+	template <>
+	inline reg set0<int32_t>() {
+		return _mm512_castsi512_ps(_mm512_setzero_si512());
+	}
+
+	template <>
+	inline reg set0<int16_t>() {
+		return _mm512_castsi512_ps(_mm512_setzero_si512());
+	}
+
+	template <>
+	inline reg set0<int8_t>() {
+		return _mm512_castsi512_ps(_mm512_setzero_si512());
+	}
+
+#elif defined(__MIC__) || defined(__KNCNI__)
+	template <>
+	inline reg set0<float>() {
+		return set1<float>(0.f);
+	}
+
+	template <>
+	inline reg set0<double>() {
+		return set1<double>(0.0);
+	}
+
+	template <>
+	inline reg set0<int32_t>() {
+		return set1<int32_t>(0);
+	}
+#endif
+
+	// ---------------------------------------------------------------------------------------------------- set0 (mask)
+	template <>
+	inline msk set0<8>() {
+		auto r1 = set0<int32_t>(          );
+		auto r2 = set1<int32_t>(0xFFFFFFFF);
+
+		return (msk) cmpeq<int32_t>(r1, r2);
+	}
+
+	template <>
+	inline msk set0<16>() {
+		auto r1 = set0<int32_t>(          );
+		auto r2 = set1<int32_t>(0xFFFFFFFF);
+
+		return (msk) cmpeq<int32_t>(r1, r2);
+	}
+
+	template <>
+	inline msk set0<32>() {
+		auto r1 = set0<int32_t>(          );
+		auto r2 = set1<int32_t>(0xFFFFFFFF);
+
+		return (msk) cmpeq<int32_t>(r1, r2);
+	}
+
+	template <>
+	inline msk set0<64>() {
+		auto r1 = set0<int32_t>(          );
+		auto r2 = set1<int32_t>(0xFFFFFFFF);
+
+		return (msk) cmpeq<int32_t>(r1, r2);
+	}
+
+
 	// ------------------------------------------------------------------------------------------------------------ set
 #if defined(__AVX512F__)
 	template <>
@@ -379,176 +586,6 @@
 		return (msk) cmpeq<int8_t>(r1, r2);
 	}
 #endif
-
-	// ----------------------------------------------------------------------------------------------------------- set1
-#ifdef __AVX512F__
-	template <>
-	inline reg set1<float>(const float val) {
-		return _mm512_set1_ps(val);
-	}
-
-	template <>
-	inline reg set1<double>(const double val) {
-		return _mm512_castpd_ps(_mm512_set1_pd(val));
-	}
-
-	template <>
-	inline reg set1<int64_t>(const int64_t val) {
-		return _mm512_castsi512_ps(_mm512_set1_epi64(val));
-	}
-
-	template <>
-	inline reg set1<int32_t>(const int32_t val) {
-		return _mm512_castsi512_ps(_mm512_set1_epi32(val));
-	}
-
-	template <>
-	inline reg set1<int16_t>(const int16_t val) {
-		return _mm512_castsi512_ps(_mm512_set1_epi16(val));
-	}
-
-	template <>
-	inline reg set1<int8_t>(const int8_t val) {
-		return _mm512_castsi512_ps(_mm512_set1_epi8(val));
-	}
-
-#elif defined(__MIC__) || defined(__KNCNI__)
-	template <>
-	inline reg set1<double>(const double val) {
-		double init[8] __attribute__((aligned(64))) = {val, val, val, val, val, val, val, val};
-		return load<double>(init);
-	}
-
-	template <>
-	inline reg set1<float>(const float val) {
-		float init[16] __attribute__((aligned(64))) = {val, val, val, val, val, val, val, val, 
-		                                               val, val, val, val, val, val, val, val};
-		return load<float>(init);
-	}
-
-	template <>
-	inline reg set1<int64_t>(const int64_t val) {
-		int64_t init[8] __attribute__((aligned(64))) = {val, val, val, val, val, val, val, val};
-		return load<int64_t>(init);
-	}
-
-	template <>
-	inline reg set1<int32_t>(const int32_t val) {
-		int32_t init[16] __attribute__((aligned(64))) = {val, val, val, val, val, val, val, val,
-		                                                 val, val, val, val, val, val, val, val};
-		return load<int32_t>(init);
-	}
-#endif
-
-	// ---------------------------------------------------------------------------------------------------- set1 (mask)
-	template <>
-	inline msk set1<8>(const bool val) {
-		auto r1 = set1<int64_t>((uint64_t)0xFFFFFFFFFFFFFFFF);
-		auto r2 = set1<int64_t>((uint64_t)0xFFFFFFFFFFFFFFFF);
-
-		return (msk) cmpeq<int64_t>(r1, r2);
-	}
-
-	template <>
-	inline msk set1<16>(const bool val) {
-		auto r1 = set1<int32_t>(0xFFFFFFFF);
-		auto r2 = set1<int32_t>(0xFFFFFFFF);
-
-		return (msk) cmpeq<int32_t>(r1, r2);
-	}
-
-	template <>
-	inline msk set1<32>(const bool val) {
-		auto r1 = set1<int16_t>(0xFFFF);
-		auto r2 = set1<int16_t>(0xFFFF);
-
-		return (msk) cmpeq<int16_t>(r1, r2);
-	}
-
-	template <>
-	inline msk set1<64>(const bool val) {
-		auto r1 = set1<int8_t>(0xFF);
-		auto r2 = set1<int8_t>(0xFF);
-
-		return (msk) cmpeq<int8_t>(r1, r2);
-	}
-
-	// ----------------------------------------------------------------------------------------------------------- set0
-#if defined(__AVX512F__)
-	template <>
-	inline reg set0<double>() {
-		return _mm512_castpd_ps(_mm512_setzero_pd());
-	}
-
-	template <>
-	inline reg set0<float>() {
-		return _mm512_setzero_ps();
-	}
-
-	template <>
-	inline reg set0<int32_t>() {
-		return _mm512_castsi512_ps(_mm512_setzero_si512());
-	}
-
-	template <>
-	inline reg set0<int16_t>() {
-		return _mm512_castsi512_ps(_mm512_setzero_si512());
-	}
-
-	template <>
-	inline reg set0<int8_t>() {
-		return _mm512_castsi512_ps(_mm512_setzero_si512());
-	}
-
-#elif defined(__MIC__) || defined(__KNCNI__)
-	template <>
-	inline reg set0<float>() {
-		return set1<float>(0.f);
-	}
-
-	template <>
-	inline reg set0<double>() {
-		return set1<double>(0.0);
-	}
-
-	template <>
-	inline reg set0<int32_t>() {
-		return set1<int32_t>(0);
-	}
-#endif
-
-	// ---------------------------------------------------------------------------------------------------- set0 (mask)
-	template <>
-	inline msk set0<8>() {
-		auto r1 = set0<int32_t>(          );
-		auto r2 = set1<int32_t>(0xFFFFFFFF);
-
-		return (msk) cmpeq<int32_t>(r1, r2);
-	}
-
-	template <>
-	inline msk set0<16>() {
-		auto r1 = set0<int32_t>(          );
-		auto r2 = set1<int32_t>(0xFFFFFFFF);
-
-		return (msk) cmpeq<int32_t>(r1, r2);
-	}
-
-	template <>
-	inline msk set0<32>() {
-		auto r1 = set0<int32_t>(          );
-		auto r2 = set1<int32_t>(0xFFFFFFFF);
-
-		return (msk) cmpeq<int32_t>(r1, r2);
-	}
-
-	template <>
-	inline msk set0<64>() {
-		auto r1 = set0<int32_t>(          );
-		auto r2 = set1<int32_t>(0xFFFFFFFF);
-
-		return (msk) cmpeq<int32_t>(r1, r2);
-	}
 
 	// ------------------------------------------------------------------------------------------------------------ low
 #if defined(__AVX512F__)
@@ -1161,41 +1198,6 @@
 #endif
 	*/
 
-	// ---------------------------------------------------------------------------------------------------------- cmpeq
-	template <>
-	inline msk cmpeq<double>(const reg v1, const reg v2) {
-		return (msk) _mm512_cmp_pd_mask(_mm512_castps_pd(v1), _mm512_castps_pd(v2), _CMP_EQ_OQ);
-	}
-
-	template <>
-	inline msk cmpeq<float>(const reg v1, const reg v2) {
-		return (msk) _mm512_cmp_ps_mask(v1, v2, _CMP_EQ_OQ);
-	}
-
-#if defined(__AVX512F__)
-	template <>
-	inline msk cmpeq<int64_t>(const reg v1, const reg v2) {
-		return (msk) _mm512_cmpeq_epi64_mask(_mm512_castps_si512(v1), _mm512_castps_si512(v2));
-	}
-#endif
-
-	template <>
-	inline msk cmpeq<int32_t>(const reg v1, const reg v2) {
-		return (msk) _mm512_cmpeq_epi32_mask(_mm512_castps_si512(v1), _mm512_castps_si512(v2));
-	}
-
-#if defined(__AVX512BW__)
-	template <>
-	inline msk cmpeq<int16_t>(const reg v1, const reg v2) {
-		return (msk) _mm512_cmpeq_epi16_mask(_mm512_castps_si512(v1), _mm512_castps_si512(v2));
-	}
-
-	template <>
-	inline msk cmpeq<int8_t>(const reg v1, const reg v2) {
-		return (msk) _mm512_cmpeq_epi8_mask(_mm512_castps_si512(v1), _mm512_castps_si512(v2));
-	}
-#endif
-
 	// --------------------------------------------------------------------------------------------------------- cmpneq
 	template <>
 	inline msk cmpneq<double>(const reg v1, const reg v2) {
@@ -1680,7 +1682,7 @@
 
 	template <>
 	inline reg neg<double>(const reg v1, const msk v2) {
-		return neg<double>(v1, cvt_msk_reg(v2));
+		return neg<double>(v1, cvt_msk_reg<8>(v2));
 	}
 
 	template <>
@@ -1690,7 +1692,7 @@
 
 	template <>
 	inline reg neg<float>(const reg v1, const msk v2) {
-		return neg<float>(v1, cvt_msk_reg(v2));
+		return neg<float>(v1, cvt_msk_reg<16>(v2));
 	}
 
 	// ------------------------------------------------------------------------------------------------------------ neg
@@ -1705,6 +1707,7 @@
 	}
 
 	// ------------------------------------------------------------------------------------------------------------ abs
+	/*
 	template <>
 	inline reg abs<double>(const reg v1) {
 		return _mm512_castpd_ps(_mm512_abs_pd(_mm512_castps_pd(v1)));
@@ -1738,6 +1741,7 @@
 		return _mm512_castsi512_ps(_mm512_abs_epi8(_mm512_castps_si512(v1)));
 	}
 #endif
+	*/
 
 	// ----------------------------------------------------------------------------------------------------------- sqrt
 #if defined(__AVX512F__)
@@ -2028,13 +2032,13 @@
 	template <>
 	inline reg round<float>(const reg v) {
 		// TODO: not sure if it works
-		return _mm512_roundscale_round_ps(v, 0,_MM_FROUND_TO_NEAREST_INT |_MM_FROUND_NO_EXC));
+		return _mm512_roundscale_round_ps(v, 0, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
 	}
 
 #elif defined(__MIC__) || defined(__KNCNI__)
 	template <>
 	inline reg round<float>(const reg v) {
-		return _mm512_round_ps(v, _MM_FROUND_TO_NEAREST_INT |_MM_FROUND_NO_EXC, _MM_EXPADJ_NONE);
+		return _mm512_round_ps(v, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC, _MM_EXPADJ_NONE);
 	}
 #endif
 
@@ -2067,4 +2071,40 @@
 
 	// ------------------------------------------------------------------------------------------------------ reduction
 
+	// ---------------------------------------------------------------------------------------------------- cvt_msk_reg
+	/*
+	template <>
+	inline reg cvt_msk_reg<8>(const msk m) {
+		auto one  = set1<int64_t>(((uint64_t)0xFFFFFFFFFFFFFFFF);
+		auto zero = set1<int64_t>(0);
+
+		return _mm512_castsi512_ps(blend<int64_t>(_mm512_castps_si512(one), _mm512_castps_si512(zero), (__mmask8)m));
+	}
+
+	template <>
+	inline reg cvt_msk_reg<16>(const msk m) {
+		auto one  = set1<int32_t>((0xFFFFFFFF);
+		auto zero = set1<int32_t>(0);
+
+		return _mm512_castsi512_ps(blend<int32_t>(_mm512_castps_si512(one), _mm512_castps_si512(zero), (__mmask16)m));
+	}
+
+#ifdef __AVX512BW__
+	template <>
+	inline reg cvt_msk_reg<32>(const msk m) {
+		auto one  = set1<int16_t>(0xFFFF);
+		auto zero = set1<int16_t>(0);
+
+		return _mm512_castsi512_ps(blend<int16_t>(_mm512_castps_si512(one), _mm512_castps_si512(zero), (__mmask32)m));
+	}
+
+	template <>
+	inline reg cvt_msk_reg<64>(const msk m) {
+		auto one  = set1<int8_t>((0xFF);
+		auto zero = set1<int8_t>(0);
+
+		return _mm512_castsi512_ps(blend<int8_t>(_mm512_castps_si512(one), _mm512_castps_si512(zero), (__mmask64)m));
+	}
+#endif
+	*/
 #endif

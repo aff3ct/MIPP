@@ -23,8 +23,8 @@ int main(int argc, char** argv)
 	mipp::Reg<T> in_1 = t_1;
 	mipp::Reg<T> in_2 = t_2;
 	mipp::Reg<T> in_3 = (T)-1;
-	mipp::Msk<N> m_1  = 0;
-	mipp::Msk<N> m_2  = 1;
+	mipp::Msk<N> m_1  = false;
+	mipp::Msk<N> m_2  = true;
 	mipp::Msk<N> m_3  = {1,0,1,1,0,1,1,1,0,0,0,0,0,1,0,1,0,1,1,1,0,1,0,1,1,1,0,1,0,0,0,0};
 	mipp::Msk<N> m_4  = {0,1,0,0,1,0,0,0,1,1,1,1,1,0,1,0,1,0,0,0,1,0,1,0,0,0,1,0,1,1,1,1};
 

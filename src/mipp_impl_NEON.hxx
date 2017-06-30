@@ -1200,14 +1200,14 @@
 
 	template <>
 	inline reg neg<float>(const reg v1, const msk v2) {
-		return neg<float>(v1, cvt_msk_reg(v2));
+		return neg<float>(v1, cvt_msk_reg<4>(v2));
 	}
 
 	template <>
 	inline reg neg<int16_t>(const reg v1, const reg v2) {
 		reg neg_v1 = (reg) vqnegq_s16((int16x8_t) v1);
 		reg v2_2   = orb  <int16_t>(v2, set1<int16_t>(1)); // hack to avoid -0 case
-		reg mask   = cvt_msk_reg(cmplt<int16_t>(v2_2, set0<int16_t>()));
+		reg mask   = cvt_msk_reg<8>(cmplt<int16_t>(v2_2, set0<int16_t>()));
 		reg res1   = andb <int16_t>(mask, neg_v1);
 		reg res2   = andb <int16_t>((reg) vmvnq_s16((int16x8_t) mask), v1);
 		reg res    = orb  <int16_t>(res1, res2);
@@ -1216,14 +1216,14 @@
 
 	template <>
 	inline reg neg<int16_t>(const reg v1, const msk v2) {
-		return neg<int16_t>(v1, cvt_msk_reg(v2));
+		return neg<int16_t>(v1, cvt_msk_reg<8>(v2));
 	}
 
 	template <>
 	inline reg neg<int8_t>(const reg v1, const reg v2) {
 		reg neg_v1 = (reg) vqnegq_s8((int8x16_t) v1);
 		reg v2_2   = orb  <int8_t>(v2, set1<int8_t>(1)); // hack to avoid -0 case
-		reg mask   = cvt_msk_reg(cmplt<int8_t>(v2_2, set0<int8_t>()));
+		reg mask   = cvt_msk_reg<16>(cmplt<int8_t>(v2_2, set0<int8_t>()));
 		reg res1   = andb <int8_t>(mask, neg_v1);
 		reg res2   = andb <int8_t>((reg) vmvnq_s8((int8x16_t) mask), v1);
 		reg res    = orb  <int8_t>(res1, res2);
@@ -1232,7 +1232,7 @@
 
 	template <>
 	inline reg neg<int8_t>(const reg v1, const msk v2) {
-		return neg<int8_t>(v1, cvt_msk_reg(v2));
+		return neg<int8_t>(v1, cvt_msk_reg<16>(v2));
 	}
 
 	// ------------------------------------------------------------------------------------------------------------ neg

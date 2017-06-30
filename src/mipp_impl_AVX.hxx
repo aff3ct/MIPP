@@ -1835,7 +1835,7 @@
 
 	template <>
 	inline reg neg<float>(const reg v1, const msk v2) {
-		return neg<float>(v1, cvt_msk_reg(v2));
+		return neg<float>(v1, cvt_msk_reg<8>(v2));
 	}
 
 #ifdef __SSE2__
@@ -1846,7 +1846,7 @@
 
 	template <>
 	inline reg neg<double>(const reg v1, const msk v2) {
-		return neg<double>(v1, cvt_msk_reg(v2));
+		return neg<double>(v1, cvt_msk_reg<4>(v2));
 	}
 #endif
 
@@ -1859,7 +1859,7 @@
 
 	template <>
 	inline reg neg<int32_t>(const reg v1, const msk v2) {
-		return neg<int32_t>(v1, cvt_msk_reg(v2));
+		return neg<int32_t>(v1, cvt_msk_reg<8>(v2));
 	}
 
 	template <>
@@ -1870,7 +1870,7 @@
 
 	template <>
 	inline reg neg<int16_t>(const reg v1, const msk v2) {
-		return neg<int16_t>(v1, cvt_msk_reg(v2));
+		return neg<int16_t>(v1, cvt_msk_reg<16>(v2));
 	}
 
 	template <>
@@ -1881,7 +1881,7 @@
 
 	template <>
 	inline reg neg<int8_t>(const reg v1, const msk v2) {
-		return neg<int8_t>(v1, cvt_msk_reg(v2));
+		return neg<int8_t>(v1, cvt_msk_reg<32>(v2));
 	}
 #endif
 
@@ -2173,7 +2173,7 @@
 #else
 	template <>
 	inline reg blend<int16_t>(const reg v1, const reg v2, const msk m) {
-		auto m_reg = cvt_msk_reg(m);
+		auto m_reg = cvt_msk_reg<16>(m);
 		auto v1_2 = andb <int32_t>(m_reg, v1);
 		auto v2_2 = andnb<int32_t>(m_reg, v2);
 		auto blen = xorb <int32_t>(v1_2, v2_2);
@@ -2182,7 +2182,7 @@
 
 	template <>
 	inline reg blend<int8_t>(const reg v1, const reg v2, const msk m) {
-		auto m_reg = cvt_msk_reg(m);
+		auto m_reg = cvt_msk_reg<32>(m);
 		auto v1_2 = andb <int32_t>(m_reg, v1);
 		auto v2_2 = andnb<int32_t>(m_reg, v2);
 		auto blen = xorb <int32_t>(v1_2, v2_2);
