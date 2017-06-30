@@ -569,6 +569,8 @@ inline reg maskz(const msk m, const reg a, const reg b, const reg c)
 // --------------------------------------------------------------------------------------- myIntrinsics implementations
 // --------------------------------------------------------------------------------------------------------------------
 
+// --------------------------------------------------------------------------------------------------------------- dump
+
 template <typename T>
 void dump(const mipp::reg r, std::ostream &stream = std::cout, const uint32_t elmtWidth = 6)
 {

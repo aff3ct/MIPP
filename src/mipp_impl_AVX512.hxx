@@ -2072,13 +2072,12 @@
 	// ------------------------------------------------------------------------------------------------------ reduction
 
 	// ---------------------------------------------------------------------------------------------------- cvt_msk_reg
-	/*
 	template <>
 	inline reg cvt_msk_reg<8>(const msk m) {
 		auto one  = set1<int64_t>(((uint64_t)0xFFFFFFFFFFFFFFFF);
 		auto zero = set1<int64_t>(0);
 
-		return _mm512_castsi512_ps(blend<int64_t>(_mm512_castps_si512(one), _mm512_castps_si512(zero), (__mmask8)m));
+		return blend<int64_t>(one, zero, m);
 	}
 
 	template <>
@@ -2086,7 +2085,7 @@
 		auto one  = set1<int32_t>((0xFFFFFFFF);
 		auto zero = set1<int32_t>(0);
 
-		return _mm512_castsi512_ps(blend<int32_t>(_mm512_castps_si512(one), _mm512_castps_si512(zero), (__mmask16)m));
+		return blend<int32_t>(one, zero, m);
 	}
 
 #ifdef __AVX512BW__
@@ -2095,7 +2094,7 @@
 		auto one  = set1<int16_t>(0xFFFF);
 		auto zero = set1<int16_t>(0);
 
-		return _mm512_castsi512_ps(blend<int16_t>(_mm512_castps_si512(one), _mm512_castps_si512(zero), (__mmask32)m));
+		return blend<int16_t>(one, zero, m);
 	}
 
 	template <>
@@ -2103,8 +2102,7 @@
 		auto one  = set1<int8_t>((0xFF);
 		auto zero = set1<int8_t>(0);
 
-		return _mm512_castsi512_ps(blend<int8_t>(_mm512_castps_si512(one), _mm512_castps_si512(zero), (__mmask64)m));
+		return blend<int8_t>(one, zero, m);
 	}
 #endif
-	*/
 #endif
