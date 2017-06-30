@@ -4,6 +4,35 @@
 // --------------------------------------------------------------------------------------------------------------------
 #if defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)
 
+	// ---------------------------------------------------------------------------------------------------------- blend
+	template <>
+	inline reg blend<double>(const reg v1, const reg v2, const msk m) {
+		return _mm512_castpd_ps(_mm512_mask_blend_pd((__mmask8)m, _mm512_castps_pd(v2), _mm512_castps_pd(v1)));
+	}
+
+	template <>
+	inline reg blend<float>(const reg v1, const reg v2, const msk m) {
+		return _mm512_mask_blend_ps((__mmask16)m, v2, v1);
+	}
+
+	template <>
+	inline reg blend<int32_t>(const reg v1, const reg v2, const msk m) {
+		return _mm512_castsi512_ps(_mm512_mask_blend_epi32((__mmask16)m, _mm512_castps_si512(v2), _mm512_castps_si512(v1)));
+	}
+
+#if defined(__AVX512BW__)
+	template <>
+	inline reg blend<int16_t>(const reg v1, const reg v2, const msk m) {
+		return _mm512_castsi512_ps(_mm512_mask_blend_epi16((__mmask32)m, _mm512_castps_si512(v2), _mm512_castps_si512(v1)));
+	}
+
+	template <>
+	inline reg blend<int8_t>(const reg v1, const reg v2, const msk m) {
+		return _mm512_castsi512_ps(_mm512_mask_blend_epi8((__mmask64)m, _mm512_castps_si512(v2), _mm512_castps_si512(v1)));
+	}
+#endif
+
+
 	// ---------------------------------------------------------------------------------------------------------- loadu
 #if defined(__AVX512F__)
 	template <>
@@ -402,7 +431,6 @@
 		return (msk) cmpeq<int32_t>(r1, r2);
 	}
 
-
 	// ------------------------------------------------------------------------------------------------------------ set
 #if defined(__AVX512F__)
 	template <>
@@ -586,6 +614,42 @@
 		return (msk) cmpeq<int8_t>(r1, r2);
 	}
 #endif
+
+	// ---------------------------------------------------------------------------------------------------- cvt_msk_reg
+	template <>
+	inline reg cvt_msk_reg<8>(const msk m) {
+		auto one  = set1<int64_t>((uint64_t)0xFFFFFFFFFFFFFFFF);
+		auto zero = set1<int64_t>(0);
+
+		return blend<int64_t>(one, zero, m);
+	}
+
+	template <>
+	inline reg cvt_msk_reg<16>(const msk m) {
+		auto one  = set1<int32_t>(0xFFFFFFFF);
+		auto zero = set1<int32_t>(0);
+
+		return blend<int32_t>(one, zero, m);
+	}
+
+#ifdef __AVX512BW__
+	template <>
+	inline reg cvt_msk_reg<32>(const msk m) {
+		auto one  = set1<int16_t>(0xFFFF);
+		auto zero = set1<int16_t>(0);
+
+		return blend<int16_t>(one, zero, m);
+	}
+
+	template <>
+	inline reg cvt_msk_reg<64>(const msk m) {
+		auto one  = set1<int8_t>(0xFF);
+		auto zero = set1<int8_t>(0);
+
+		return blend<int8_t>(one, zero, m);
+	}
+#endif
+
 
 	// ------------------------------------------------------------------------------------------------------------ low
 #if defined(__AVX512F__)
@@ -1901,34 +1965,6 @@
 		return _mm512_fmsub_ps(v1, v2, v3);
 	}
 
-	// ---------------------------------------------------------------------------------------------------------- blend
-	template <>
-	inline reg blend<double>(const reg v1, const reg v2, const msk m) {
-		return _mm512_castpd_ps(_mm512_mask_blend_pd((__mmask8)m, _mm512_castps_pd(v2), _mm512_castps_pd(v1)));
-	}
-
-	template <>
-	inline reg blend<float>(const reg v1, const reg v2, const msk m) {
-		return _mm512_mask_blend_ps((__mmask16)m, v2, v1);
-	}
-
-	template <>
-	inline reg blend<int32_t>(const reg v1, const reg v2, const msk m) {
-		return _mm512_castsi512_ps(_mm512_mask_blend_epi32((__mmask16)m, _mm512_castps_si512(v2), _mm512_castps_si512(v1)));
-	}
-
-#if defined(__AVX512BW__)
-	template <>
-	inline reg blend<int16_t>(const reg v1, const reg v2, const msk m) {
-		return _mm512_castsi512_ps(_mm512_mask_blend_epi16((__mmask32)m, _mm512_castps_si512(v2), _mm512_castps_si512(v1)));
-	}
-
-	template <>
-	inline reg blend<int8_t>(const reg v1, const reg v2, const msk m) {
-		return _mm512_castsi512_ps(_mm512_mask_blend_epi8((__mmask64)m, _mm512_castps_si512(v2), _mm512_castps_si512(v1)));
-	}
-#endif
-
 	// ------------------------------------------------------------------------------------------------------------ rot
 
 	// ----------------------------------------------------------------------------------------------------------- div2
@@ -2071,38 +2107,4 @@
 
 	// ------------------------------------------------------------------------------------------------------ reduction
 
-	// ---------------------------------------------------------------------------------------------------- cvt_msk_reg
-	template <>
-	inline reg cvt_msk_reg<8>(const msk m) {
-		auto one  = set1<int64_t>(((uint64_t)0xFFFFFFFFFFFFFFFF);
-		auto zero = set1<int64_t>(0);
-
-		return blend<int64_t>(one, zero, m);
-	}
-
-	template <>
-	inline reg cvt_msk_reg<16>(const msk m) {
-		auto one  = set1<int32_t>((0xFFFFFFFF);
-		auto zero = set1<int32_t>(0);
-
-		return blend<int32_t>(one, zero, m);
-	}
-
-#ifdef __AVX512BW__
-	template <>
-	inline reg cvt_msk_reg<32>(const msk m) {
-		auto one  = set1<int16_t>(0xFFFF);
-		auto zero = set1<int16_t>(0);
-
-		return blend<int16_t>(one, zero, m);
-	}
-
-	template <>
-	inline reg cvt_msk_reg<64>(const msk m) {
-		auto one  = set1<int8_t>((0xFF);
-		auto zero = set1<int8_t>(0);
-
-		return blend<int8_t>(one, zero, m);
-	}
-#endif
 #endif
