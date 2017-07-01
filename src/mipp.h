@@ -608,7 +608,7 @@ void dump(const mipp::msk m, std::ostream &stream = std::cout, const uint32_t el
 		for (auto l = 0; l < (int)mipp::Lanes; l++)
 		{
 			for (auto i = 0; i < lane_size; i++)
-				stream << std::setw(elmtWidth) << (data[i] ? 1 : 0) << ((i < lane_size -1) ? ", " : "");
+				stream << std::setw(elmtWidth) << (data[l * lane_size +i] ? 1 : 0) << ((i < lane_size -1) ? ", " : "");
 			stream << ((l < mipp::Lanes -1) ? " | " : "");
 		}
 	}
@@ -621,7 +621,7 @@ void dump(const mipp::msk m, std::ostream &stream = std::cout, const uint32_t el
 		for (auto l = 0; l < (int)mipp::Lanes; l++)
 		{
 			for (auto i = 0; i < lane_size; i++)
-				stream << std::setw(elmtWidth) << (data[i] ? 1 : 0) << ((i < lane_size -1) ? ", " : "");
+				stream << std::setw(elmtWidth) << (data[l * lane_size +i] ? 1 : 0) << ((i < lane_size -1) ? ", " : "");
 			stream << ((l < mipp::Lanes -1) ? " | " : "");
 		}
 	}
@@ -634,7 +634,7 @@ void dump(const mipp::msk m, std::ostream &stream = std::cout, const uint32_t el
 		for (auto l = 0; l < (int)mipp::Lanes; l++)
 		{
 			for (auto i = 0; i < lane_size; i++)
-				stream << std::setw(elmtWidth) << (data[i] ? 1 : 0) << ((i < lane_size -1) ? ", " : "");
+				stream << std::setw(elmtWidth) << (data[l * lane_size +i] ? 1 : 0) << ((i < lane_size -1) ? ", " : "");
 			stream << ((l < mipp::Lanes -1) ? " | " : "");
 		}
 	}
@@ -647,7 +647,7 @@ void dump(const mipp::msk m, std::ostream &stream = std::cout, const uint32_t el
 		for (auto l = 0; l < (int)mipp::Lanes; l++)
 		{
 			for (auto i = 0; i < lane_size; i++)
-				stream << std::setw(elmtWidth) << (data[i] ? 1 : 0) << ((i < lane_size -1) ? ", " : "");
+				stream << std::setw(elmtWidth) << (data[l * lane_size +i] ? 1 : 0) << ((i < lane_size -1) ? ", " : "");
 			stream << ((l < mipp::Lanes -1) ? " | " : "");
 		}
 	}

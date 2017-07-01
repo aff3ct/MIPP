@@ -16,6 +16,12 @@
 	}
 
 	template <>
+	inline reg blend<int64_t>(const reg v1, const reg v2, const msk m) {
+		return _mm512_castsi512_ps(_mm512_mask_blend_epi64((__mmask8)m, _mm512_castps_si512(v2), _mm512_castps_si512(v1)));
+	}
+
+
+	template <>
 	inline reg blend<int32_t>(const reg v1, const reg v2, const msk m) {
 		return _mm512_castsi512_ps(_mm512_mask_blend_epi32((__mmask16)m, _mm512_castps_si512(v2), _mm512_castps_si512(v1)));
 	}
@@ -495,33 +501,33 @@
 #elif defined(__MIC__) || defined(__KNCNI__)
 	template <>
 	inline reg set<double>(const double vals[nElReg<double>()]) {
-		double init[8] __attribute__((aligned(64))) = {vals[7], vals[6], vals[5], vals[4],
-		                                               vals[3], vals[2], vals[1], vals[0]};
+		double init[8] __attribute__((aligned(64))) = {vals[0], vals[1], vals[2], vals[3],
+		                                               vals[4], vals[5], vals[6], vals[7]};
 		return load<double>(init);
 	}
 
 	template <>
 	inline reg set<float>(const float vals[nElReg<float>()]) {
-		float init[16] __attribute__((aligned(64))) = {vals[15], vals[14], vals[13], vals[12],
-		                                               vals[11], vals[10], vals[ 9], vals[ 8],
-		                                               vals[ 7], vals[ 6], vals[ 5], vals[ 4],
-		                                               vals[ 3], vals[ 2], vals[ 1], vals[ 0]};
+		float init[16] __attribute__((aligned(64))) = {vals[ 0], vals[ 1], vals[ 2], vals[ 3],
+		                                               vals[ 4], vals[ 5], vals[ 6], vals[ 7],
+		                                               vals[ 8], vals[ 9], vals[10], vals[11],
+		                                               vals[12], vals[13], vals[14], vals[15]};
 		return load<float>(init);
 	}
 
 	template <>
 	inline reg set<int64_t>(const int64_t vals[nElReg<int64_t>()]) {
-		int64_t init[8] __attribute__((aligned(64))) = {vals[7], vals[6], vals[5], vals[4],
-		                                                vals[3], vals[2], vals[1], vals[0]};
+		int64_t init[8] __attribute__((aligned(64))) = {vals[0], vals[1], vals[2], vals[3],
+		                                                vals[4], vals[5], vals[6], vals[7]};
 		return load<int64_t>(init);
 	}
 
 	template <>
 	inline reg set<int32_t>(const int32_t vals[nElReg<int32_t>()]) {
-		int32_t init[16] __attribute__((aligned(64))) = {vals[15], vals[14], vals[13], vals[12],
-		                                                 vals[11], vals[10], vals[ 9], vals[ 8],
-		                                                 vals[ 7], vals[ 6], vals[ 5], vals[ 4],
-		                                                 vals[ 3], vals[ 2], vals[ 1], vals[ 0]};
+		int32_t init[16] __attribute__((aligned(64))) = {vals[ 0], vals[ 1], vals[ 2], vals[ 3],
+		                                                 vals[ 4], vals[ 5], vals[ 6], vals[ 7],
+		                                                 vals[ 8], vals[ 9], vals[10], vals[11],
+		                                                 vals[12], vals[13], vals[14], vals[15]};
 		return load<int32_t>(init);
 	}
 #endif
@@ -530,14 +536,14 @@
 #ifdef __AVX512F__
 	template <>
 	inline msk set<8>(const bool vals[8]) {
-		uint64_t v[8] = {vals[7] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
-		                 vals[6] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
-		                 vals[5] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
-		                 vals[4] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
-		                 vals[3] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
-		                 vals[2] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
+		uint64_t v[8] = {vals[0] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
 		                 vals[1] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
-		                 vals[0] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0};
+		                 vals[2] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
+		                 vals[3] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
+		                 vals[4] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
+		                 vals[5] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
+		                 vals[6] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
+		                 vals[7] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0};
 		auto r1 = set <int64_t>((int64_t*)v);
 		auto r2 = set1<int64_t>((uint64_t)0xFFFFFFFFFFFFFFFF);
 
@@ -548,14 +554,14 @@
 
 	template <>
 	inline msk set<16>(const bool vals[16]) {
-		uint32_t v[16] = {vals[15] ? 0xFFFFFFFF : 0, vals[14] ? 0xFFFFFFFF : 0,
-		                  vals[13] ? 0xFFFFFFFF : 0, vals[12] ? 0xFFFFFFFF : 0,
-		                  vals[11] ? 0xFFFFFFFF : 0, vals[10] ? 0xFFFFFFFF : 0,
-		                  vals[ 9] ? 0xFFFFFFFF : 0, vals[ 8] ? 0xFFFFFFFF : 0,
-		                  vals[ 7] ? 0xFFFFFFFF : 0, vals[ 6] ? 0xFFFFFFFF : 0,
-		                  vals[ 5] ? 0xFFFFFFFF : 0, vals[ 4] ? 0xFFFFFFFF : 0,
-		                  vals[ 3] ? 0xFFFFFFFF : 0, vals[ 2] ? 0xFFFFFFFF : 0,
-		                  vals[ 1] ? 0xFFFFFFFF : 0, vals[ 0] ? 0xFFFFFFFF : 0};
+		uint32_t v[16] = {vals[ 0] ? 0xFFFFFFFF : 0, vals[ 1] ? 0xFFFFFFFF : 0,
+		                  vals[ 2] ? 0xFFFFFFFF : 0, vals[ 3] ? 0xFFFFFFFF : 0,
+		                  vals[ 4] ? 0xFFFFFFFF : 0, vals[ 5] ? 0xFFFFFFFF : 0,
+		                  vals[ 6] ? 0xFFFFFFFF : 0, vals[ 7] ? 0xFFFFFFFF : 0,
+		                  vals[ 8] ? 0xFFFFFFFF : 0, vals[ 9] ? 0xFFFFFFFF : 0,
+		                  vals[10] ? 0xFFFFFFFF : 0, vals[11] ? 0xFFFFFFFF : 0,
+		                  vals[12] ? 0xFFFFFFFF : 0, vals[13] ? 0xFFFFFFFF : 0,
+		                  vals[14] ? 0xFFFFFFFF : 0, vals[15] ? 0xFFFFFFFF : 0};
 		auto r1 = set <int32_t>((int32_t*)v);
 		auto r2 = set1<int32_t>(0xFFFFFFFF);
 
@@ -566,22 +572,22 @@
 #ifdef __AVX512BW__
 	template <>
 	inline msk set<32>(const bool vals[32]) {
-		uint16_t v[32] = {vals[31] ? 0xFFFF : 0, vals[30] ? 0xFFFF : 0,
-		                  vals[29] ? 0xFFFF : 0, vals[28] ? 0xFFFF : 0,
-		                  vals[27] ? 0xFFFF : 0, vals[26] ? 0xFFFF : 0,
-		                  vals[25] ? 0xFFFF : 0, vals[24] ? 0xFFFF : 0,
-		                  vals[23] ? 0xFFFF : 0, vals[22] ? 0xFFFF : 0,
-		                  vals[21] ? 0xFFFF : 0, vals[20] ? 0xFFFF : 0,
-		                  vals[19] ? 0xFFFF : 0, vals[18] ? 0xFFFF : 0,
-		                  vals[17] ? 0xFFFF : 0, vals[16] ? 0xFFFF : 0,
-		                  vals[15] ? 0xFFFF : 0, vals[14] ? 0xFFFF : 0,
-		                  vals[13] ? 0xFFFF : 0, vals[12] ? 0xFFFF : 0,
-		                  vals[11] ? 0xFFFF : 0, vals[10] ? 0xFFFF : 0,
-		                  vals[ 9] ? 0xFFFF : 0, vals[ 8] ? 0xFFFF : 0,
-		                  vals[ 7] ? 0xFFFF : 0, vals[ 6] ? 0xFFFF : 0,
-		                  vals[ 5] ? 0xFFFF : 0, vals[ 4] ? 0xFFFF : 0,
-		                  vals[ 3] ? 0xFFFF : 0, vals[ 2] ? 0xFFFF : 0,
-		                  vals[ 1] ? 0xFFFF : 0, vals[ 0] ? 0xFFFF : 0}; 
+		uint16_t v[32] = {vals[ 0] ? 0xFFFF : 0, vals[ 1] ? 0xFFFF : 0,
+		                  vals[ 2] ? 0xFFFF : 0, vals[ 3] ? 0xFFFF : 0,
+		                  vals[ 4] ? 0xFFFF : 0, vals[ 5] ? 0xFFFF : 0,
+		                  vals[ 6] ? 0xFFFF : 0, vals[ 7] ? 0xFFFF : 0,
+		                  vals[ 8] ? 0xFFFF : 0, vals[ 9] ? 0xFFFF : 0,
+		                  vals[10] ? 0xFFFF : 0, vals[11] ? 0xFFFF : 0,
+		                  vals[12] ? 0xFFFF : 0, vals[13] ? 0xFFFF : 0,
+		                  vals[14] ? 0xFFFF : 0, vals[15] ? 0xFFFF : 0,
+		                  vals[16] ? 0xFFFF : 0, vals[17] ? 0xFFFF : 0,
+		                  vals[18] ? 0xFFFF : 0, vals[19] ? 0xFFFF : 0,
+		                  vals[20] ? 0xFFFF : 0, vals[21] ? 0xFFFF : 0,
+		                  vals[22] ? 0xFFFF : 0, vals[23] ? 0xFFFF : 0,
+		                  vals[24] ? 0xFFFF : 0, vals[25] ? 0xFFFF : 0,
+		                  vals[26] ? 0xFFFF : 0, vals[27] ? 0xFFFF : 0,
+		                  vals[28] ? 0xFFFF : 0, vals[29] ? 0xFFFF : 0,
+		                  vals[30] ? 0xFFFF : 0, vals[31] ? 0xFFFF : 0}; 
 		auto r1 = set <int16_t>((int16_t*)v);
 		auto r2 = set1<int16_t>(0xFFFF);
 
@@ -591,22 +597,22 @@
 
 	template <>
 	inline msk set<64>(const bool vals[64]) {
-		uint8_t v[64] = {vals[63] ? 0xFF : 0, vals[62] ? 0xFF : 0, vals[61] ? 0xFF : 0, vals[60] ? 0xFF : 0,
-		                 vals[59] ? 0xFF : 0, vals[58] ? 0xFF : 0, vals[57] ? 0xFF : 0, vals[56] ? 0xFF : 0,
-		                 vals[55] ? 0xFF : 0, vals[54] ? 0xFF : 0, vals[53] ? 0xFF : 0, vals[52] ? 0xFF : 0,
-		                 vals[51] ? 0xFF : 0, vals[50] ? 0xFF : 0, vals[49] ? 0xFF : 0, vals[48] ? 0xFF : 0,
-		                 vals[47] ? 0xFF : 0, vals[46] ? 0xFF : 0, vals[45] ? 0xFF : 0, vals[44] ? 0xFF : 0,
-		                 vals[43] ? 0xFF : 0, vals[42] ? 0xFF : 0, vals[41] ? 0xFF : 0, vals[40] ? 0xFF : 0,
-		                 vals[39] ? 0xFF : 0, vals[38] ? 0xFF : 0, vals[37] ? 0xFF : 0, vals[36] ? 0xFF : 0,
-		                 vals[35] ? 0xFF : 0, vals[34] ? 0xFF : 0, vals[33] ? 0xFF : 0, vals[32] ? 0xFF : 0,
-		                 vals[31] ? 0xFF : 0, vals[30] ? 0xFF : 0, vals[29] ? 0xFF : 0, vals[28] ? 0xFF : 0,
-		                 vals[27] ? 0xFF : 0, vals[26] ? 0xFF : 0, vals[25] ? 0xFF : 0, vals[24] ? 0xFF : 0,
-		                 vals[23] ? 0xFF : 0, vals[22] ? 0xFF : 0, vals[21] ? 0xFF : 0, vals[20] ? 0xFF : 0,
-		                 vals[19] ? 0xFF : 0, vals[18] ? 0xFF : 0, vals[17] ? 0xFF : 0, vals[16] ? 0xFF : 0,
-		                 vals[15] ? 0xFF : 0, vals[14] ? 0xFF : 0, vals[13] ? 0xFF : 0, vals[12] ? 0xFF : 0,
-		                 vals[11] ? 0xFF : 0, vals[10] ? 0xFF : 0, vals[ 9] ? 0xFF : 0, vals[ 8] ? 0xFF : 0,
-		                 vals[ 7] ? 0xFF : 0, vals[ 6] ? 0xFF : 0, vals[ 5] ? 0xFF : 0, vals[ 4] ? 0xFF : 0,
-		                 vals[ 3] ? 0xFF : 0, vals[ 2] ? 0xFF : 0, vals[ 1] ? 0xFF : 0, vals[ 0] ? 0xFF : 0};
+		uint8_t v[64] = {vals[ 0] ? 0xFF : 0, vals[ 1] ? 0xFF : 0, vals[ 2] ? 0xFF : 0, vals[ 3] ? 0xFF : 0,
+		                 vals[ 4] ? 0xFF : 0, vals[ 5] ? 0xFF : 0, vals[ 6] ? 0xFF : 0, vals[ 7] ? 0xFF : 0,
+		                 vals[ 8] ? 0xFF : 0, vals[ 9] ? 0xFF : 0, vals[10] ? 0xFF : 0, vals[11] ? 0xFF : 0,
+		                 vals[12] ? 0xFF : 0, vals[13] ? 0xFF : 0, vals[14] ? 0xFF : 0, vals[15] ? 0xFF : 0,
+		                 vals[16] ? 0xFF : 0, vals[17] ? 0xFF : 0, vals[18] ? 0xFF : 0, vals[19] ? 0xFF : 0,
+		                 vals[20] ? 0xFF : 0, vals[21] ? 0xFF : 0, vals[22] ? 0xFF : 0, vals[23] ? 0xFF : 0,
+		                 vals[24] ? 0xFF : 0, vals[25] ? 0xFF : 0, vals[26] ? 0xFF : 0, vals[27] ? 0xFF : 0,
+		                 vals[28] ? 0xFF : 0, vals[29] ? 0xFF : 0, vals[30] ? 0xFF : 0, vals[31] ? 0xFF : 0,
+		                 vals[32] ? 0xFF : 0, vals[33] ? 0xFF : 0, vals[34] ? 0xFF : 0, vals[35] ? 0xFF : 0,
+		                 vals[36] ? 0xFF : 0, vals[37] ? 0xFF : 0, vals[38] ? 0xFF : 0, vals[39] ? 0xFF : 0,
+		                 vals[40] ? 0xFF : 0, vals[41] ? 0xFF : 0, vals[42] ? 0xFF : 0, vals[43] ? 0xFF : 0,
+		                 vals[44] ? 0xFF : 0, vals[45] ? 0xFF : 0, vals[46] ? 0xFF : 0, vals[47] ? 0xFF : 0,
+		                 vals[48] ? 0xFF : 0, vals[49] ? 0xFF : 0, vals[50] ? 0xFF : 0, vals[51] ? 0xFF : 0,
+		                 vals[52] ? 0xFF : 0, vals[53] ? 0xFF : 0, vals[54] ? 0xFF : 0, vals[55] ? 0xFF : 0,
+		                 vals[56] ? 0xFF : 0, vals[57] ? 0xFF : 0, vals[58] ? 0xFF : 0, vals[59] ? 0xFF : 0,
+		                 vals[60] ? 0xFF : 0, vals[61] ? 0xFF : 0, vals[62] ? 0xFF : 0, vals[63] ? 0xFF : 0};
 		auto r1 = set <int8_t>((int8_t*)v);
 		auto r2 = set1<int8_t>(0xFF);
 
