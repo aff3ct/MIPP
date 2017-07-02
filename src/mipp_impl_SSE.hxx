@@ -18,6 +18,11 @@
 #endif
 
 	template <>
+	inline reg loadu<int64_t>(const int64_t *mem_addr) {
+		return _mm_loadu_ps((const float*) mem_addr);
+	}
+
+	template <>
 	inline reg loadu<int32_t>(const int32_t *mem_addr) {
 		return _mm_loadu_ps((const float*) mem_addr);
 	}
@@ -45,6 +50,11 @@
 		return _mm_castpd_ps(_mm_load_pd(mem_addr));
 	}
 #endif
+
+	template <>
+	inline reg load<int64_t>(const int64_t *mem_addr) {
+		return _mm_load_ps((const float*) mem_addr);
+	}
 
 	template <>
 	inline reg load<int32_t>(const int32_t *mem_addr) {
@@ -205,6 +215,11 @@
 
 #ifdef __SSE2__
 	template <>
+	inline reg set<int64_t>(const int64_t vals[nElReg<int64_t>()]) {
+		return _mm_castsi128_ps(_mm_set_epi64x(vals[1], vals[0]));
+	}
+
+	template <>
 	inline reg set<int32_t>(const int32_t vals[nElReg<int32_t>()]) {
 		return _mm_castsi128_ps(_mm_set_epi32(vals[3], vals[2], vals[1], vals[0]));
 	}
@@ -320,6 +335,11 @@
 	template <>
 	inline reg set0<double>() {
 		return _mm_castpd_ps(_mm_setzero_pd());
+	}
+
+	template <>
+	inline reg set0<int64_t>() {
+		return _mm_castsi128_ps(_mm_setzero_si128());
 	}
 
 	template <>

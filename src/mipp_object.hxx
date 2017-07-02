@@ -370,11 +370,11 @@ public:
 	msk m;
 
 	Msk(){}
+	Msk(const msk m) : m(m) {}
 
 #ifndef MIPP_NO_INTRINSICS
-	Msk(const msk  m  ) : m(m)                  {}
-	Msk(const bool val) : m(mipp::set1<N>(val)) {}
-
+	Msk(const bool val    ) : m(mipp::set1<N>(val) ) {}
+	Msk(const bool vals[N]) : m(mipp::set <N>(vals)) {}
 	Msk(const std::initializer_list<bool> &l)
 	{
 		if ((int)l.size() >= N)
@@ -384,8 +384,8 @@ public:
 	}
 
 #else
-	Msk(const bool val) : m(val ? ~0 : 0) {}
-
+	Msk(const bool val    ) : m(val     ? ~0 : 0) {}
+	Msk(const bool vals[N]) : m(vals[0] ? ~0 : 0) {}
 	Msk(const std::initializer_list<bool> &l)
 	{
 		auto vec = std::vector<bool>(N);
