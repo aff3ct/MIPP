@@ -608,7 +608,17 @@
 	// ---------------------------------------------------------------------------------------------------------- shuff
 #ifdef __SSSE3__
 	template <>
+	inline reg shuff<double>(const reg v, const reg cm) {
+		return _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v), _mm_castps_si128(cm)));
+	}
+
+	template <>
 	inline reg shuff<float>(const reg v, const reg cm) {
+		return _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v), _mm_castps_si128(cm)));
+	}
+
+	template <>
+	inline reg shuff<int64_t>(const reg v, const reg cm) {
 		return _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v), _mm_castps_si128(cm)));
 	}
 
@@ -631,8 +641,18 @@
 	// --------------------------------------------------------------------------------------------------------- shuff2
 #ifdef __SSSE3__
 	template <>
+	inline reg shuff2<double>(const reg v, const reg cm) {
+		return mipp::shuff<double>(v, cm);
+	}
+
+	template <>
 	inline reg shuff2<float>(const reg v, const reg cm) {
 		return mipp::shuff<float>(v, cm);
+	}
+
+	template <>
+	inline reg shuff2<int64_t>(const reg v, const reg cm) {
+		return mipp::shuff<int64_t>(v, cm);
 	}
 
 	template <>

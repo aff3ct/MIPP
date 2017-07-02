@@ -21,6 +21,20 @@ class CmaskTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_Reg_cmask_float);
 	CPPUNIT_TEST(test_Reg_cmask_double);
 
+	CPPUNIT_TEST(test_reg_cmask2_int8);
+	CPPUNIT_TEST(test_reg_cmask2_int16);
+	CPPUNIT_TEST(test_reg_cmask2_int32);
+	CPPUNIT_TEST(test_reg_cmask2_int64);
+	CPPUNIT_TEST(test_reg_cmask2_float);
+	CPPUNIT_TEST(test_reg_cmask2_double);
+
+	CPPUNIT_TEST(test_Reg_cmask2_int8);
+	CPPUNIT_TEST(test_Reg_cmask2_int16);
+	CPPUNIT_TEST(test_Reg_cmask2_int32);
+	CPPUNIT_TEST(test_Reg_cmask2_int64);
+	CPPUNIT_TEST(test_Reg_cmask2_float);
+	CPPUNIT_TEST(test_Reg_cmask2_double);
+
 	CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -44,6 +58,24 @@ public:
 	void test_Reg_cmask_int64();
 	void test_Reg_cmask_float();
 	void test_Reg_cmask_double();
+
+	template <typename T>
+	void test_reg_cmask2();
+	void test_reg_cmask2_int8();
+	void test_reg_cmask2_int16();
+	void test_reg_cmask2_int32();
+	void test_reg_cmask2_int64();
+	void test_reg_cmask2_float();
+	void test_reg_cmask2_double();
+
+	template <typename T>
+	void test_Reg_cmask2();
+	void test_Reg_cmask2_int8();
+	void test_Reg_cmask2_int16();
+	void test_Reg_cmask2_int32();
+	void test_Reg_cmask2_int64();
+	void test_Reg_cmask2_float();
+	void test_Reg_cmask2_double();
 };
 
 #endif  // CMASKTEST_HPP_
