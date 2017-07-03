@@ -2,23 +2,23 @@
 #include <algorithm>
 #include <mipp.h>
 
-#include "AddTest.hpp"
+#include "DivTest.hpp"
 
 // Registers the fixture into the 'registry'
-CPPUNIT_TEST_SUITE_REGISTRATION(AddTest);
+CPPUNIT_TEST_SUITE_REGISTRATION(DivTest);
 
 void 
-AddTest::setUp()
+DivTest::setUp()
 {
 }
 
 void 
-AddTest::tearDown()
+DivTest::tearDown()
 {
 }
 
 template <typename T>
-void AddTest::test_reg_add()
+void DivTest::test_reg_div()
 {
 	try
 	{
@@ -32,11 +32,11 @@ void AddTest::test_reg_add()
 
 		mipp::reg r1 = mipp::load<T>(inputs1);
 		mipp::reg r2 = mipp::load<T>(inputs2);
-		mipp::reg r3 = mipp::add <T>(r1, r2);
+		mipp::reg r3 = mipp::div <T>(r1, r2);
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
-			T res = inputs1[i] + inputs2[i];
+			T res = inputs1[i] / inputs2[i];
 			CPPUNIT_ASSERT_EQUAL(res, *((T*)&r3 +i));
 		}
 	}
@@ -46,15 +46,15 @@ void AddTest::test_reg_add()
 	}
 }
 
-void AddTest::test_reg_add_int8  () { test_reg_add<int8_t >(); }
-void AddTest::test_reg_add_int16 () { test_reg_add<int16_t>(); }
-void AddTest::test_reg_add_int32 () { test_reg_add<int32_t>(); }
-void AddTest::test_reg_add_int64 () { test_reg_add<int64_t>(); }
-void AddTest::test_reg_add_float () { test_reg_add<float  >(); }
-void AddTest::test_reg_add_double() { test_reg_add<double >(); }
+void DivTest::test_reg_div_int8  () { test_reg_div<int8_t >(); }
+void DivTest::test_reg_div_int16 () { test_reg_div<int16_t>(); }
+void DivTest::test_reg_div_int32 () { test_reg_div<int32_t>(); }
+void DivTest::test_reg_div_int64 () { test_reg_div<int64_t>(); }
+void DivTest::test_reg_div_float () { test_reg_div<float  >(); }
+void DivTest::test_reg_div_double() { test_reg_div<double >(); }
 
 template <typename T>
-void AddTest::test_Reg_add()
+void DivTest::test_Reg_div()
 {
 	try
 	{
@@ -68,11 +68,11 @@ void AddTest::test_Reg_add()
 
 		mipp::Reg<T> r1 = inputs1;
 		mipp::Reg<T> r2 = inputs2;
-		mipp::Reg<T> r3 = r1 + r2;
+		mipp::Reg<T> r3 = r1 / r2;
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
-			T res = inputs1[i] + inputs2[i];
+			T res = inputs1[i] / inputs2[i];
 			CPPUNIT_ASSERT_EQUAL(res, r3[i]);
 		}
 	}
@@ -82,15 +82,15 @@ void AddTest::test_Reg_add()
 	}
 }
 
-void AddTest::test_Reg_add_int8  () { test_Reg_add<int8_t >(); }
-void AddTest::test_Reg_add_int16 () { test_Reg_add<int16_t>(); }
-void AddTest::test_Reg_add_int32 () { test_Reg_add<int32_t>(); }
-void AddTest::test_Reg_add_int64 () { test_Reg_add<int64_t>(); }
-void AddTest::test_Reg_add_float () { test_Reg_add<float  >(); }
-void AddTest::test_Reg_add_double() { test_Reg_add<double >(); }
+void DivTest::test_Reg_div_int8  () { test_Reg_div<int8_t >(); }
+void DivTest::test_Reg_div_int16 () { test_Reg_div<int16_t>(); }
+void DivTest::test_Reg_div_int32 () { test_Reg_div<int32_t>(); }
+void DivTest::test_Reg_div_int64 () { test_Reg_div<int64_t>(); }
+void DivTest::test_Reg_div_float () { test_Reg_div<float  >(); }
+void DivTest::test_Reg_div_double() { test_Reg_div<double >(); }
 
 template <typename T>
-void AddTest::test_reg_maskz_add()
+void DivTest::test_reg_maskz_div()
 {
 	try
 	{
@@ -112,13 +112,13 @@ void AddTest::test_reg_maskz_add()
 		mipp::reg r2 = mipp::load<T>(inputs2);
 		mipp::msk m  = mipp::set <N>(mask   );
 
-		mipp::reg r3 = mipp::maskz<mipp::add<T>, T>(m, r1, r2);
+		mipp::reg r3 = mipp::maskz<mipp::div<T>, T>(m, r1, r2);
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
 			if (mask[i])
 			{
-				T res = inputs1[i] + inputs2[i];
+				T res = inputs1[i] / inputs2[i];
 				CPPUNIT_ASSERT_EQUAL(res, *((T*)&r3 +i));
 			}
 			else
@@ -131,15 +131,15 @@ void AddTest::test_reg_maskz_add()
 	}
 }
 
-void AddTest::test_reg_maskz_add_int8  () { test_reg_maskz_add<int8_t >(); }
-void AddTest::test_reg_maskz_add_int16 () { test_reg_maskz_add<int16_t>(); }
-void AddTest::test_reg_maskz_add_int32 () { test_reg_maskz_add<int32_t>(); }
-void AddTest::test_reg_maskz_add_int64 () { test_reg_maskz_add<int64_t>(); }
-void AddTest::test_reg_maskz_add_float () { test_reg_maskz_add<float  >(); }
-void AddTest::test_reg_maskz_add_double() { test_reg_maskz_add<double >(); }
+void DivTest::test_reg_maskz_div_int8  () { test_reg_maskz_div<int8_t >(); }
+void DivTest::test_reg_maskz_div_int16 () { test_reg_maskz_div<int16_t>(); }
+void DivTest::test_reg_maskz_div_int32 () { test_reg_maskz_div<int32_t>(); }
+void DivTest::test_reg_maskz_div_int64 () { test_reg_maskz_div<int64_t>(); }
+void DivTest::test_reg_maskz_div_float () { test_reg_maskz_div<float  >(); }
+void DivTest::test_reg_maskz_div_double() { test_reg_maskz_div<double >(); }
 
 template <typename T>
-void AddTest::test_Reg_maskz_add()
+void DivTest::test_Reg_maskz_div()
 {
 	try
 	{
@@ -161,13 +161,13 @@ void AddTest::test_Reg_maskz_add()
 		mipp::Reg<T> r2 = inputs2;
 		mipp::Msk<N> m  = mask;
 
-		mipp::Reg<T> r3 = mipp::maskz<mipp::add<T>>(m, r1, r2);
+		mipp::Reg<T> r3 = mipp::maskz<mipp::div<T>>(m, r1, r2);
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
 			if (mask[i])
 			{
-				T res = inputs1[i] + inputs2[i];
+				T res = inputs1[i] / inputs2[i];
 				CPPUNIT_ASSERT_EQUAL(res, r3[i]);
 			}
 			else
@@ -180,15 +180,15 @@ void AddTest::test_Reg_maskz_add()
 	}
 }
 
-void AddTest::test_Reg_maskz_add_int8  () { test_Reg_maskz_add<int8_t >(); }
-void AddTest::test_Reg_maskz_add_int16 () { test_Reg_maskz_add<int16_t>(); }
-void AddTest::test_Reg_maskz_add_int32 () { test_Reg_maskz_add<int32_t>(); }
-void AddTest::test_Reg_maskz_add_int64 () { test_Reg_maskz_add<int64_t>(); }
-void AddTest::test_Reg_maskz_add_float () { test_Reg_maskz_add<float  >(); }
-void AddTest::test_Reg_maskz_add_double() { test_Reg_maskz_add<double >(); }
+void DivTest::test_Reg_maskz_div_int8  () { test_Reg_maskz_div<int8_t >(); }
+void DivTest::test_Reg_maskz_div_int16 () { test_Reg_maskz_div<int16_t>(); }
+void DivTest::test_Reg_maskz_div_int32 () { test_Reg_maskz_div<int32_t>(); }
+void DivTest::test_Reg_maskz_div_int64 () { test_Reg_maskz_div<int64_t>(); }
+void DivTest::test_Reg_maskz_div_float () { test_Reg_maskz_div<float  >(); }
+void DivTest::test_Reg_maskz_div_double() { test_Reg_maskz_div<double >(); }
 
 template <typename T>
-void AddTest::test_reg_mask_add()
+void DivTest::test_reg_mask_div()
 {
 	try
 	{
@@ -212,13 +212,13 @@ void AddTest::test_reg_mask_add()
 		mipp::reg r3 = mipp::load<T>(inputs3);
 		mipp::msk m  = mipp::set <N>(mask   );
 
-		mipp::reg r4 = mipp::mask<mipp::add<T>, T>(m, r3, r1, r2);
+		mipp::reg r4 = mipp::mask<mipp::div<T>, T>(m, r3, r1, r2);
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
 			if (mask[i])
 			{
-				T res = inputs1[i] + inputs2[i];
+				T res = inputs1[i] / inputs2[i];
 				CPPUNIT_ASSERT_EQUAL(res, *((T*)&r4 +i));
 			}
 			else
@@ -231,15 +231,15 @@ void AddTest::test_reg_mask_add()
 	}
 }
 
-void AddTest::test_reg_mask_add_int8  () { test_reg_mask_add<int8_t >(); }
-void AddTest::test_reg_mask_add_int16 () { test_reg_mask_add<int16_t>(); }
-void AddTest::test_reg_mask_add_int32 () { test_reg_mask_add<int32_t>(); }
-void AddTest::test_reg_mask_add_int64 () { test_reg_mask_add<int64_t>(); }
-void AddTest::test_reg_mask_add_float () { test_reg_mask_add<float  >(); }
-void AddTest::test_reg_mask_add_double() { test_reg_mask_add<double >(); }
+void DivTest::test_reg_mask_div_int8  () { test_reg_mask_div<int8_t >(); }
+void DivTest::test_reg_mask_div_int16 () { test_reg_mask_div<int16_t>(); }
+void DivTest::test_reg_mask_div_int32 () { test_reg_mask_div<int32_t>(); }
+void DivTest::test_reg_mask_div_int64 () { test_reg_mask_div<int64_t>(); }
+void DivTest::test_reg_mask_div_float () { test_reg_mask_div<float  >(); }
+void DivTest::test_reg_mask_div_double() { test_reg_mask_div<double >(); }
 
 template <typename T>
-void AddTest::test_Reg_mask_add()
+void DivTest::test_Reg_mask_div()
 {
 	try
 	{
@@ -263,13 +263,13 @@ void AddTest::test_Reg_mask_add()
 		mipp::Reg<T> r3 = inputs3;
 		mipp::Msk<N> m  = mask;
 
-		mipp::Reg<T> r4 = mipp::mask<mipp::add<T>>(m, r3, r1, r2);
+		mipp::Reg<T> r4 = mipp::mask<mipp::div<T>>(m, r3, r1, r2);
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
 			if (mask[i])
 			{
-				T res = inputs1[i] + inputs2[i];
+				T res = inputs1[i] / inputs2[i];
 				CPPUNIT_ASSERT_EQUAL(res, *((T*)&r4 +i));
 			}
 			else
@@ -282,9 +282,9 @@ void AddTest::test_Reg_mask_add()
 	}
 }
 
-void AddTest::test_Reg_mask_add_int8  () { test_Reg_mask_add<int8_t >(); }
-void AddTest::test_Reg_mask_add_int16 () { test_Reg_mask_add<int16_t>(); }
-void AddTest::test_Reg_mask_add_int32 () { test_Reg_mask_add<int32_t>(); }
-void AddTest::test_Reg_mask_add_int64 () { test_Reg_mask_add<int64_t>(); }
-void AddTest::test_Reg_mask_add_float () { test_Reg_mask_add<float  >(); }
-void AddTest::test_Reg_mask_add_double() { test_Reg_mask_add<double >(); }
+void DivTest::test_Reg_mask_div_int8  () { test_Reg_mask_div<int8_t >(); }
+void DivTest::test_Reg_mask_div_int16 () { test_Reg_mask_div<int16_t>(); }
+void DivTest::test_Reg_mask_div_int32 () { test_Reg_mask_div<int32_t>(); }
+void DivTest::test_Reg_mask_div_int64 () { test_Reg_mask_div<int64_t>(); }
+void DivTest::test_Reg_mask_div_float () { test_Reg_mask_div<float  >(); }
+void DivTest::test_Reg_mask_div_double() { test_Reg_mask_div<double >(); }

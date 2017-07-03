@@ -10,14 +10,14 @@ class CmpgtTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_reg_cmpgt_int8);
 	CPPUNIT_TEST(test_reg_cmpgt_int16);
 	CPPUNIT_TEST(test_reg_cmpgt_int32);
-	CPPUNIT_TEST(test_reg_cmpgt_int64);
+//	CPPUNIT_TEST(test_reg_cmpgt_int64);
 	CPPUNIT_TEST(test_reg_cmpgt_float);
 	CPPUNIT_TEST(test_reg_cmpgt_double);
 
 	CPPUNIT_TEST(test_Reg_cmpgt_int8);
 	CPPUNIT_TEST(test_Reg_cmpgt_int16);
 	CPPUNIT_TEST(test_Reg_cmpgt_int32);
-	CPPUNIT_TEST(test_Reg_cmpgt_int64);
+//	CPPUNIT_TEST(test_Reg_cmpgt_int64);
 	CPPUNIT_TEST(test_Reg_cmpgt_float);
 	CPPUNIT_TEST(test_Reg_cmpgt_double);
 

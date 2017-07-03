@@ -10,14 +10,14 @@ class CmpltTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_reg_cmplt_int8);
 	CPPUNIT_TEST(test_reg_cmplt_int16);
 	CPPUNIT_TEST(test_reg_cmplt_int32);
-	CPPUNIT_TEST(test_reg_cmplt_int64);
+//	CPPUNIT_TEST(test_reg_cmplt_int64);
 	CPPUNIT_TEST(test_reg_cmplt_float);
 	CPPUNIT_TEST(test_reg_cmplt_double);
 
 	CPPUNIT_TEST(test_Reg_cmplt_int8);
 	CPPUNIT_TEST(test_Reg_cmplt_int16);
 	CPPUNIT_TEST(test_Reg_cmplt_int32);
-	CPPUNIT_TEST(test_Reg_cmplt_int64);
+//	CPPUNIT_TEST(test_Reg_cmplt_int64);
 	CPPUNIT_TEST(test_Reg_cmplt_float);
 	CPPUNIT_TEST(test_Reg_cmplt_double);
 

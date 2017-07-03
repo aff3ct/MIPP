@@ -183,6 +183,7 @@ public:
 	inline Reg<T>      fmadd        (const Reg<T> v1, const Reg<T> v2)     const { return mipp::fmadd        <T>(r, v1.r, v2.r); }
 	inline Reg<T>      fnmadd       (const Reg<T> v1, const Reg<T> v2)     const { return mipp::fnmadd       <T>(r, v1.r, v2.r); }
 	inline Reg<T>      fmsub        (const Reg<T> v1, const Reg<T> v2)     const { return mipp::fmsub        <T>(r, v1.r, v2.r); }
+	inline Reg<T>      fnmsub       (const Reg<T> v1, const Reg<T> v2)     const { return mipp::fnmsub       <T>(r, v1.r, v2.r); }
 	inline Reg<T>      blend        (const Reg<T> v1, const Msk<N<T>()> m) const { return mipp::blend        <T>(r, v1.r,  m.r); }
 	inline Reg<T>      rot          ()                                     const { return mipp::rot          <T>(r);             }
 	inline Reg<T>      rotr         ()                                     const { return mipp::rotr         <T>(r);             }
@@ -240,8 +241,9 @@ public:
 	inline Reg<T>      cos          ()                                     const { return (T)std::cos(r);                        }
 	inline void        sincos       (      Reg<T> &s,       Reg<T> &c)     const { s = std::sin(r); c = std::cos(r);             }
 	inline Reg<T>      fmadd        (const Reg<T> v1, const Reg<T> v2)     const { return   r * v1.r + v2.r;                     }
-	inline Reg<T>      fnmadd       (const Reg<T> v1, const Reg<T> v2)     const { return -(r * v1.r + v2.r);                    }
+	inline Reg<T>      fnmadd       (const Reg<T> v1, const Reg<T> v2)     const { return v2.r -(r * v1.r);                      }
 	inline Reg<T>      fmsub        (const Reg<T> v1, const Reg<T> v2)     const { return   r * v1.r - v2.r;                     }
+	inline Reg<T>      fnmsub       (const Reg<T> v1, const Reg<T> v2)     const { return -v2.r - (r * v1.r) ;                   }
 	inline Reg<T>      blend        (const Reg<T> v1, const Msk<N<T>()> m) const { return (m.r) ? r : v1.r;                      }
 	inline Reg<T>      rot          ()                                     const { return r;                                     }
 	inline Reg<T>      rotr         ()                                     const { return r;                                     }
@@ -574,6 +576,7 @@ template <typename T> inline void        sincos       (const Reg<T> x,        Re
 template <typename T> inline Reg<T>      fmadd        (const Reg<T> v1, const Reg<T> v2, const Reg<T> v3)     { return v1.fmadd(v2, v3);     }
 template <typename T> inline Reg<T>      fnmadd       (const Reg<T> v1, const Reg<T> v2, const Reg<T> v3)     { return v1.fnmadd(v2, v3);    }
 template <typename T> inline Reg<T>      fmsub        (const Reg<T> v1, const Reg<T> v2, const Reg<T> v3)     { return v1.fmsub(v2, v3);     }
+template <typename T> inline Reg<T>      fnmsub       (const Reg<T> v1, const Reg<T> v2, const Reg<T> v3)     { return v1.fnmsub(v2, v3);    }
 template <typename T> inline Reg<T>      blend        (const Reg<T> v1, const Reg<T> v2, const Msk<N<T>()> m) { return v1.blend(v2, m );     }
 template <typename T> inline Reg<T>      rot          (const Reg<T> v)                                        { return v.rot();              }
 template <typename T> inline Reg<T>      rotr         (const Reg<T> v)                                        { return v.rotr();             }
@@ -622,7 +625,7 @@ inline Reg<T> mask(const Msk<N<T>()> m, const Reg<T> src, const Reg<T> a, const 
 template <proto_i3 I3, typename T>
 inline Reg<T> mask(const Msk<N<T>()> m, const Reg<T> src, const Reg<T> a, const Reg<T> b, const Reg<T> c)
 {
-	return a.template mask<I3>(m, src, c);
+	return a.template mask<I3>(m, src, b, c);
 }
 
 template <proto_i1 I1, typename T>

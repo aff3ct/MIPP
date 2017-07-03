@@ -1706,7 +1706,7 @@
 
 	template <>
 	inline msk cmpneq<int64_t>(const reg v1, const reg v2) {
-		return _mm_castpd_si128(_mm_cmpneq_pd(_mm_castps_pd(v1), _mm_castps_pd(v2)));
+		return notb<N<int64_t>()>(cmpeq<int64_t>(v1, v2));
 	}
 
 	template <>
@@ -1734,11 +1734,6 @@
 #ifdef __SSE2__
 	template <>
 	inline msk cmplt<double>(const reg v1, const reg v2) {
-		return _mm_castpd_si128(_mm_cmplt_pd(_mm_castps_pd(v1), _mm_castps_pd(v2)));
-	}
-
-	template <>
-	inline msk cmplt<int64_t>(const reg v1, const reg v2) {
 		return _mm_castpd_si128(_mm_cmplt_pd(_mm_castps_pd(v1), _mm_castps_pd(v2)));
 	}
 
@@ -1804,11 +1799,6 @@
 	}
 
 	template <>
-	inline msk cmpgt<int64_t>(const reg v1, const reg v2) {
-		return _mm_castpd_si128(_mm_cmpgt_pd(_mm_castps_pd(v1), _mm_castps_pd(v2)));
-	}
-
-	template <>
 	inline msk cmpgt<int32_t>(const reg v1, const reg v2) {
 		return _mm_cmpgt_epi32(_mm_castps_si128(v1), _mm_castps_si128(v2));
 	}
@@ -1870,6 +1860,11 @@
 	}
 
 	template <>
+	inline reg add<int64_t>(const reg v1, const reg v2) {
+		return _mm_castsi128_ps(_mm_add_epi64(_mm_castps_si128(v1), _mm_castps_si128(v2)));
+	}
+
+	template <>
 	inline reg add<int32_t>(const reg v1, const reg v2) {
 		return _mm_castsi128_ps(_mm_add_epi32(_mm_castps_si128(v1), _mm_castps_si128(v2)));
 	}
@@ -1898,6 +1893,11 @@
 	}
 
 	template <>
+	inline reg sub<int64_t>(const reg v1, const reg v2) {
+		return _mm_castsi128_ps(_mm_sub_epi64(_mm_castps_si128(v1), _mm_castps_si128(v2)));
+	}
+
+	template <>
 	inline reg sub<int32_t>(const reg v1, const reg v2) {
 		return _mm_castsi128_ps(_mm_sub_epi32(_mm_castps_si128(v1), _mm_castps_si128(v2)));
 	}
@@ -1923,13 +1923,6 @@
 	template <>
 	inline reg mul<double>(const reg v1, const reg v2) {
 		return _mm_castpd_ps(_mm_mul_pd(_mm_castps_pd(v1), _mm_castps_pd(v2)));
-	}
-#endif
-
-#ifdef __SSE4_1__
-	template <>
-	inline reg mul<int32_t>(const reg v1, const reg v2) {
-		return _mm_castsi128_ps(_mm_mul_epi32(_mm_castps_si128(v1), _mm_castps_si128(v2)));
 	}
 #endif
 
@@ -2117,6 +2110,11 @@
 	template <>
 	inline msk sign<float>(const reg v1) {
 		return cmplt<float>(v1, set0<float>());
+	}
+
+	template <>
+	inline msk sign<int64_t>(const reg v1) {
+		return cmplt<int64_t>(v1, set0<int64_t>());
 	}
 
 	template <>
@@ -2418,6 +2416,17 @@
 		return sub<double>(mul<double>(v1, v2), v3);
 	}
 
+	// --------------------------------------------------------------------------------------------------------- fnmsub
+	template <>
+	inline reg fnmsub<float>(const reg v1, const reg v2, const reg v3) {
+		return sub<float>(sub<float>(set0<float>(), mul<float>(v1, v2)), v3);
+	}
+
+	template <>
+	inline reg fnmsub<double>(const reg v1, const reg v2, const reg v3) {
+		return sub<double>(sub<double>(set0<double>(), mul<double>(v1, v2)), v3);
+	}
+
 	// ---------------------------------------------------------------------------------------------------------- blend
 #ifdef __SSE4_1__
 	template <>
@@ -2428,6 +2437,11 @@
 	template <>
 	inline reg blend<float>(const reg v1, const reg v2, const msk m) {
 		return _mm_blendv_ps(v2, v1, _mm_castsi128_ps(m));
+	}
+
+	template <>
+	inline reg blend<int64_t>(const reg v1, const reg v2, const msk m) {
+		return _mm_castpd_ps(_mm_blendv_pd(_mm_castps_pd(v2), _mm_castps_pd(v1), _mm_castsi128_pd(m)));
 	}
 
 	template <>
