@@ -1672,6 +1672,11 @@
 	}
 
 	template <>
+	inline msk cmpeq<int64_t>(const reg v1, const reg v2) {
+		return _mm_cmpeq_epi64(_mm_castps_si128(v1), _mm_castps_si128(v2));
+	}
+
+	template <>
 	inline msk cmpeq<int32_t>(const reg v1, const reg v2) {
 		return _mm_cmpeq_epi32(_mm_castps_si128(v1), _mm_castps_si128(v2));
 	}
@@ -1696,6 +1701,11 @@
 #ifdef __SSE2__
 	template <>
 	inline msk cmpneq<double>(const reg v1, const reg v2) {
+		return _mm_castpd_si128(_mm_cmpneq_pd(_mm_castps_pd(v1), _mm_castps_pd(v2)));
+	}
+
+	template <>
+	inline msk cmpneq<int64_t>(const reg v1, const reg v2) {
 		return _mm_castpd_si128(_mm_cmpneq_pd(_mm_castps_pd(v1), _mm_castps_pd(v2)));
 	}
 
@@ -1728,6 +1738,11 @@
 	}
 
 	template <>
+	inline msk cmplt<int64_t>(const reg v1, const reg v2) {
+		return _mm_castpd_si128(_mm_cmplt_pd(_mm_castps_pd(v1), _mm_castps_pd(v2)));
+	}
+
+	template <>
 	inline msk cmplt<int32_t>(const reg v1, const reg v2) {
 		return _mm_cmplt_epi32(_mm_castps_si128(v1), _mm_castps_si128(v2));
 	}
@@ -1756,6 +1771,26 @@
 	}
 #endif
 
+	template <>
+	inline msk cmple<int64_t>(const reg v1, const reg v2) {
+		return mipp::orb<2>(mipp::cmplt<int64_t>(v1, v2), mipp::cmpeq<int64_t>(v1, v2));
+	}
+
+	template <>
+	inline msk cmple<int32_t>(const reg v1, const reg v2) {
+		return mipp::orb<4>(mipp::cmplt<int32_t>(v1, v2), mipp::cmpeq<int32_t>(v1, v2));
+	}
+
+	template <>
+	inline msk cmple<int16_t>(const reg v1, const reg v2) {
+		return mipp::orb<8>(mipp::cmplt<int16_t>(v1, v2), mipp::cmpeq<int16_t>(v1, v2));
+	}
+
+	template <>
+	inline msk cmple<int8_t>(const reg v1, const reg v2) {
+		return mipp::orb<16>(mipp::cmplt<int8_t>(v1, v2), mipp::cmpeq<int8_t>(v1, v2));
+	}
+
 	// ---------------------------------------------------------------------------------------------------------- cmpgt
 	template <>
 	inline msk cmpgt<float>(const reg v1, const reg v2) {
@@ -1765,6 +1800,11 @@
 #ifdef __SSE2__
 	template <>
 	inline msk cmpgt<double>(const reg v1, const reg v2) {
+		return _mm_castpd_si128(_mm_cmpgt_pd(_mm_castps_pd(v1), _mm_castps_pd(v2)));
+	}
+
+	template <>
+	inline msk cmpgt<int64_t>(const reg v1, const reg v2) {
 		return _mm_castpd_si128(_mm_cmpgt_pd(_mm_castps_pd(v1), _mm_castps_pd(v2)));
 	}
 
@@ -1796,6 +1836,26 @@
 		return _mm_castpd_si128(_mm_cmpge_pd(_mm_castps_pd(v1), _mm_castps_pd(v2)));
 	}
 #endif
+
+	template <>
+	inline msk cmpge<int64_t>(const reg v1, const reg v2) {
+		return mipp::orb<2>(mipp::cmpgt<int64_t>(v1, v2), mipp::cmpeq<int64_t>(v1, v2));
+	}
+
+	template <>
+	inline msk cmpge<int32_t>(const reg v1, const reg v2) {
+		return mipp::orb<4>(mipp::cmpgt<int32_t>(v1, v2), mipp::cmpeq<int32_t>(v1, v2));
+	}
+
+	template <>
+	inline msk cmpge<int16_t>(const reg v1, const reg v2) {
+		return mipp::orb<8>(mipp::cmpgt<int16_t>(v1, v2), mipp::cmpeq<int16_t>(v1, v2));
+	}
+
+	template <>
+	inline msk cmpge<int8_t>(const reg v1, const reg v2) {
+		return mipp::orb<16>(mipp::cmpgt<int8_t>(v1, v2), mipp::cmpeq<int8_t>(v1, v2));
+	}
 
 	// ------------------------------------------------------------------------------------------------------------ add
 	template <>
