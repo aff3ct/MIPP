@@ -71,7 +71,7 @@ void ShuffTest::test_Reg_shuff()
 		mipp::Reg<T> s = r.shuff(cm);
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
-			CPPUNIT_ASSERT_EQUAL(inputs[cm_inputs[i]], *((T*)&s.r +i));
+			CPPUNIT_ASSERT_EQUAL(inputs[cm_inputs[i]], s[i]);
 	}
 	catch(std::exception &e)
 	{
@@ -89,29 +89,32 @@ void ShuffTest::test_Reg_shuff_double() { test_Reg_shuff<double >(); }
 template <typename T>
 void ShuffTest::test_reg_shuff2()
 {
-	try
+	if (mipp::N<T>() > 2)
 	{
-		uint32_t cm2_inputs[mipp::N<T>()/2];
-		std::mt19937 g;
-		std::iota   (cm2_inputs, cm2_inputs + mipp::N<T>()/2, 0);
-		std::shuffle(cm2_inputs, cm2_inputs + mipp::N<T>()/2, g);
+		try
+		{
+			uint32_t cm2_inputs[mipp::N<T>()/2];
+			std::mt19937 g;
+			std::iota   (cm2_inputs, cm2_inputs + mipp::N<T>()/2, 0);
+			std::shuffle(cm2_inputs, cm2_inputs + mipp::N<T>()/2, g);
 
-		mipp::reg cm2 = mipp::cmask2<T>(cm2_inputs);
+			mipp::reg cm2 = mipp::cmask2<T>(cm2_inputs);
 
-		T inputs[mipp::N<T>()];
-		std::iota(inputs, inputs + mipp::N<T>(), 0);
+			T inputs[mipp::N<T>()];
+			std::iota(inputs, inputs + mipp::N<T>(), 0);
 
-		mipp::reg r = mipp::load<T>(inputs);
-		mipp::reg s = mipp::shuff2<T>(r, cm2);
+			mipp::reg r = mipp::load<T>(inputs);
+			mipp::reg s = mipp::shuff2<T>(r, cm2);
 
-		for (auto i = 0; i < mipp::N<T>()/2; i++)
-			CPPUNIT_ASSERT_EQUAL(inputs[cm2_inputs[i]], *((T*)&s +i));
-		for (auto i = 0; i < mipp::N<T>()/2; i++)
-			CPPUNIT_ASSERT_EQUAL(inputs[mipp::N<T>()/2 + cm2_inputs[i]], *((T*)&s + mipp::N<T>()/2 +i));
-	}
-	catch(std::exception &e)
-	{
-		CPPUNIT_FAIL(e.what());
+			for (auto i = 0; i < mipp::N<T>()/2; i++)
+				CPPUNIT_ASSERT_EQUAL(inputs[cm2_inputs[i]], *((T*)&s +i));
+			for (auto i = 0; i < mipp::N<T>()/2; i++)
+				CPPUNIT_ASSERT_EQUAL(inputs[mipp::N<T>()/2 + cm2_inputs[i]], *((T*)&s + mipp::N<T>()/2 +i));
+		}
+		catch(std::exception &e)
+		{
+			CPPUNIT_FAIL(e.what());
+		}
 	}
 }
 
@@ -125,29 +128,32 @@ void ShuffTest::test_reg_shuff2_double() { test_reg_shuff2<double >(); }
 template <typename T>
 void ShuffTest::test_Reg_shuff2()
 {
-	try
+	if (mipp::N<T>() > 2)
 	{
-		uint32_t cm2_inputs[mipp::N<T>()/2];
-		std::mt19937 g;
-		std::iota   (cm2_inputs, cm2_inputs + mipp::N<T>()/2, 0);
-		std::shuffle(cm2_inputs, cm2_inputs + mipp::N<T>()/2, g);
+		try
+		{
+			uint32_t cm2_inputs[mipp::N<T>()/2];
+			std::mt19937 g;
+			std::iota   (cm2_inputs, cm2_inputs + mipp::N<T>()/2, 0);
+			std::shuffle(cm2_inputs, cm2_inputs + mipp::N<T>()/2, g);
 
-		mipp::Reg<T> cm2 = mipp::Reg<T>::cmask2(cm2_inputs);
+			mipp::Reg<T> cm2 = mipp::Reg<T>::cmask2(cm2_inputs);
 
-		T inputs[mipp::N<T>()];
-		std::iota(inputs, inputs + mipp::N<T>(), 0);
+			T inputs[mipp::N<T>()];
+			std::iota(inputs, inputs + mipp::N<T>(), 0);
 
-		mipp::Reg<T> r = inputs;
-		mipp::Reg<T> s = r.shuff2(cm2);
+			mipp::Reg<T> r = inputs;
+			mipp::Reg<T> s = r.shuff2(cm2);
 
-		for (auto i = 0; i < mipp::N<T>()/2; i++)
-			CPPUNIT_ASSERT_EQUAL(inputs[cm2_inputs[i]], *((T*)&s.r +i));
-		for (auto i = 0; i < mipp::N<T>()/2; i++)
-			CPPUNIT_ASSERT_EQUAL(inputs[mipp::N<T>()/2 + cm2_inputs[i]], *((T*)&s.r + mipp::N<T>()/2 +i));
-	}
-	catch(std::exception &e)
-	{
-		CPPUNIT_FAIL(e.what());
+			for (auto i = 0; i < mipp::N<T>()/2; i++)
+				CPPUNIT_ASSERT_EQUAL(inputs[cm2_inputs[i]], s[i]);
+			for (auto i = 0; i < mipp::N<T>()/2; i++)
+				CPPUNIT_ASSERT_EQUAL(inputs[mipp::N<T>()/2 + cm2_inputs[i]], s[mipp::N<T>()/2 +i]);
+		}
+		catch(std::exception &e)
+		{
+			CPPUNIT_FAIL(e.what());
+		}
 	}
 }
 

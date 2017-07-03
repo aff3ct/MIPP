@@ -1,4 +1,5 @@
 #include <exception>
+#include <algorithm>
 #include <mipp.h>
 
 #include "LoadTest.hpp"
@@ -22,8 +23,7 @@ void LoadTest::test_reg_load()
 	try
 	{
 		T inputs[mipp::N<T>()];
-		for (auto i = 0; i < mipp::N<T>(); i++)
-			inputs[i] = (T)i;
+		std::iota(inputs, inputs + mipp::N<T>(), 0);
 
 		mipp::reg r = mipp::load<T>(inputs);
 
@@ -49,8 +49,7 @@ void LoadTest::test_reg_loadu()
 	try
 	{
 		T inputs[mipp::N<T>()];
-		for (auto i = 0; i < mipp::N<T>(); i++)
-			inputs[i] = (T)i;
+		std::iota(inputs, inputs + mipp::N<T>(), 0);
 
 		mipp::reg r = mipp::loadu<T>(inputs);
 
@@ -76,8 +75,7 @@ void LoadTest::test_Reg_load()
 	try
 	{
 		T inputs[mipp::N<T>()];
-		for (auto i = 0; i < mipp::N<T>(); i++)
-			inputs[i] = (T)i;
+		std::iota(inputs, inputs + mipp::N<T>(), 0);
 
 		mipp::Reg<T> r; r.load(inputs);
 
@@ -103,8 +101,7 @@ void LoadTest::test_Reg_loadu()
 	try
 	{
 		T inputs[mipp::N<T>()];
-		for (auto i = 0; i < mipp::N<T>(); i++)
-			inputs[i] = (T)i;
+		std::iota(inputs, inputs + mipp::N<T>(), 0);
 
 		mipp::Reg<T> r; r.loadu(inputs);
 

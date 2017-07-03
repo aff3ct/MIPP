@@ -464,6 +464,12 @@ public:
 #else
 	template <typename T2> inline Reg<T2> cvt () const { return (T2)r;              }
 #endif
+
+#ifndef MIPP_NO_INTRINSICS
+	inline const T& operator[](size_t index) const { return *((T*)&this->r + index); }
+#else
+	inline const T& operator[](size_t index) const { return r; }
+#endif
 };
 
 template <typename T>
@@ -477,6 +483,8 @@ public:
 #ifndef MIPP_NO_INTRINSICS
 	Regx2(regx2 r2            ) : val{Reg<T>(r2.val[0]), Reg<T>(r2.val[1])} {}
 #endif
+
+	inline const Reg<T>& operator[](size_t index) const { return val[index]; }
 
 	~Regx2() {}
 };

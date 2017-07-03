@@ -1,4 +1,5 @@
 #include <exception>
+#include <algorithm>
 #include <mipp.h>
 
 #include "SetTest.hpp"
@@ -66,8 +67,7 @@ void SetTest::test_reg_set()
 	try
 	{
 		T inputs[mipp::N<T>()];
-		for (auto i = 0; i < mipp::N<T>(); i++)
-			inputs[i] = i;
+		std::iota(inputs, inputs + mipp::N<T>(), 0);
 
 		mipp::reg r = mipp::set<T>(inputs);
 		for (auto i = 0; i < mipp::N<T>(); i++)
@@ -136,12 +136,11 @@ void SetTest::test_Reg_set()
 	try
 	{
 		T inputs[mipp::N<T>()];
-		for (auto i = 0; i < mipp::N<T>(); i++)
-			inputs[i] = i;
+		std::iota(inputs, inputs + mipp::N<T>(), 0);
 
 		mipp::Reg<T> r = inputs;
 		for (auto i = 0; i < mipp::N<T>(); i++)
-			CPPUNIT_ASSERT_EQUAL(inputs[i], *((T*)&r +i));
+			CPPUNIT_ASSERT_EQUAL(inputs[i], r[i]);
 	}
 	catch(std::exception &e)
 	{

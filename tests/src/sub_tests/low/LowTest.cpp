@@ -1,4 +1,5 @@
 #include <exception>
+#include <algorithm>
 #include <mipp.h>
 
 #include "LowTest.hpp"
@@ -22,8 +23,7 @@ void LowTest::test_reg_low()
 	try
 	{
 		T inputs[mipp::N<T>()];
-		for (auto i = 0; i < mipp::N<T>(); i++)
-			inputs[i] = (T)i;
+		std::iota(inputs, inputs + mipp::N<T>(), 0);
 
 		mipp::reg   r   = mipp::load<T>(inputs);
 		mipp::reg_2 r_2 = mipp::low <T>(r);
@@ -50,14 +50,13 @@ void LowTest::test_Reg_low()
 	try
 	{
 		T inputs[mipp::N<T>()];
-		for (auto i = 0; i < mipp::N<T>(); i++)
-			inputs[i] = (T)i;
+		std::iota(inputs, inputs + mipp::N<T>(), 0);
 
 		mipp::Reg  <T> r   = inputs;
 		mipp::Reg_2<T> r_2 = r.low();
 
 		for (auto i = 0; i < mipp::N<T>()/2; i++)
-			CPPUNIT_ASSERT_EQUAL(inputs[i], *((T*)&r_2.r +i));
+			CPPUNIT_ASSERT_EQUAL(inputs[i], r_2[i]);
 	}
 	catch(std::exception &e)
 	{

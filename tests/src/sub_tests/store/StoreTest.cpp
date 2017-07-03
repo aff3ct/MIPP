@@ -1,4 +1,5 @@
 #include <exception>
+#include <algorithm>
 #include <mipp.h>
 
 #include "StoreTest.hpp"
@@ -22,8 +23,7 @@ void StoreTest::test_reg_store()
 	try
 	{
 		T inputs[mipp::N<T>()], outputs[mipp::N<T>()];
-		for (auto i = 0; i < mipp::N<T>(); i++)
-			inputs[i] = (T)i;
+		std::iota(inputs, inputs + mipp::N<T>(), 0);
 
 		mipp::reg r = mipp::load<T>(inputs);
 		mipp::store<T>(outputs, r);
@@ -50,8 +50,7 @@ void StoreTest::test_reg_storeu()
 	try
 	{
 		T inputs[mipp::N<T>()], outputs[mipp::N<T>()];
-		for (auto i = 0; i < mipp::N<T>(); i++)
-			inputs[i] = (T)i;
+		std::iota(inputs, inputs + mipp::N<T>(), 0);
 
 		mipp::reg r = mipp::loadu<T>(inputs);
 		mipp::storeu<T>(outputs, r);
@@ -78,8 +77,7 @@ void StoreTest::test_Reg_store()
 	try
 	{
 		T inputs[mipp::N<T>()], outputs[mipp::N<T>()];
-		for (auto i = 0; i < mipp::N<T>(); i++)
-			inputs[i] = (T)i;
+		std::iota(inputs, inputs + mipp::N<T>(), 0);
 
 		mipp::Reg<T> r; r.load(inputs);
 		r.store(outputs);
@@ -106,8 +104,7 @@ void StoreTest::test_Reg_storeu()
 	try
 	{
 		T inputs[mipp::N<T>()], outputs[mipp::N<T>()];
-		for (auto i = 0; i < mipp::N<T>(); i++)
-			inputs[i] = (T)i;
+		std::iota(inputs, inputs + mipp::N<T>(), 0);
 
 		mipp::Reg<T> r; r.loadu(inputs);
 		r.storeu(outputs);
