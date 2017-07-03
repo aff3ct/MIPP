@@ -1236,6 +1236,11 @@
 	}
 
 	template <>
+	inline reg andb<int64_t>(const reg v1, const reg v2) {
+		return _mm_castsi128_ps(_mm_and_si128(_mm_castps_si128(v1), _mm_castps_si128(v2)));
+	}
+
+	template <>
 	inline reg andb<int32_t>(const reg v1, const reg v2) {
 		return _mm_castsi128_ps(_mm_and_si128(_mm_castps_si128(v1), _mm_castps_si128(v2)));
 	}
@@ -1289,6 +1294,11 @@
 	}
 
 	template <>
+	inline reg andnb<int64_t>(const reg v1, const reg v2) {
+		return _mm_castsi128_ps(_mm_andnot_si128(_mm_castps_si128(v1), _mm_castps_si128(v2)));
+	}
+
+	template <>
 	inline reg andnb<int32_t>(const reg v1, const reg v2) {
 		return _mm_castsi128_ps(_mm_andnot_si128(_mm_castps_si128(v1), _mm_castps_si128(v2)));
 	}
@@ -1331,13 +1341,18 @@
 
 	// ----------------------------------------------------------------------------------------------------------- notb
 	template <>
+	inline reg notb<double>(const reg v) {
+		return andnb<double>(v, set1<int64_t>(0xFFFFFFFFFFFFFFFF));
+	}
+
+	template <>
 	inline reg notb<float>(const reg v) {
 		return andnb<float>(v, set1<int32_t>(0xFFFFFFFF));
 	}
 
 	template <>
-	inline reg notb<double>(const reg v) {
-		return andnb<double>(v, set1<int64_t>(0xFFFFFFFFFFFFFFFF));
+	inline reg notb<int64_t>(const reg v) {
+		return andnb<int64_t>(v, set1<int64_t>(0xFFFFFFFFFFFFFFFF));
 	}
 
 	template <>
@@ -1413,6 +1428,11 @@
 	}
 
 	template <>
+	inline reg orb<int64_t>(const reg v1, const reg v2) {
+		return _mm_castsi128_ps(_mm_or_si128(_mm_castps_si128(v1), _mm_castps_si128(v2)));
+	}
+
+	template <>
 	inline reg orb<int32_t>(const reg v1, const reg v2) {
 		return _mm_castsi128_ps(_mm_or_si128(_mm_castps_si128(v1), _mm_castps_si128(v2)));
 	}
@@ -1466,6 +1486,11 @@
 	}
 
 	template <>
+	inline reg xorb<int64_t>(const reg v1, const reg v2) {
+		return _mm_castsi128_ps(_mm_xor_si128(_mm_castps_si128(v1), _mm_castps_si128(v2)));
+	}
+
+	template <>
 	inline reg xorb<int32_t>(const reg v1, const reg v2) {
 		return _mm_castsi128_ps(_mm_xor_si128(_mm_castps_si128(v1), _mm_castps_si128(v2)));
 	}
@@ -1508,6 +1533,11 @@
 
 	// --------------------------------------------------------------------------------------------------------- lshift
 #ifdef __SSE2__
+	template <>
+	inline reg lshift<int64_t>(const reg v1, const uint32_t n) {
+		return _mm_castsi128_ps(_mm_slli_epi64(_mm_castps_si128(v1), n));
+	}
+
 	template <>
 	inline reg lshift<int32_t>(const reg v1, const uint32_t n) {
 		return _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(v1), n));
@@ -1567,6 +1597,11 @@
 
 	// --------------------------------------------------------------------------------------------------------- rshift
 #ifdef __SSE2__
+	template <>
+	inline reg rshift<int64_t>(const reg v1, const uint32_t n) {
+		return _mm_castsi128_ps(_mm_srli_epi64(_mm_castps_si128(v1), n));
+	}
+
 	template <>
 	inline reg rshift<int32_t>(const reg v1, const uint32_t n) {
 		return _mm_castsi128_ps(_mm_srli_epi32(_mm_castps_si128(v1), n));
