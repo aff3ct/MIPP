@@ -2705,12 +2705,20 @@
 #ifdef __SSE2__
 	template <>
 	inline reg div2<int32_t>(const reg v1) {
-		return _mm_castsi128_ps(_mm_srai_epi32(_mm_castps_si128(v1), 1));
+//		return _mm_castsi128_ps(_mm_srai_epi32(_mm_castps_si128(v1), 1)); // seems to do not work
+		reg abs_v1 = abs<int32_t>(v1);
+		reg sh = rshift<int32_t>(abs_v1, 1);
+		sh = neg<int32_t>(sh, v1);
+		return sh;
 	}
 
 	template <>
 	inline reg div2<int16_t>(const reg v1) {
-		return _mm_castsi128_ps(_mm_srai_epi16(_mm_castps_si128(v1), 1));
+//		return _mm_castsi128_ps(_mm_srai_epi16(_mm_castps_si128(v1), 1)); // seems to do not work
+		reg abs_v1 = abs<int16_t>(v1);
+		reg sh = rshift<int16_t>(abs_v1, 1);
+		sh = neg<int16_t>(sh, v1);
+		return sh;
 	}
 
 	template <>
@@ -2743,12 +2751,20 @@
 #ifdef __SSE2__
 	template <>
 	inline reg div4<int32_t>(const reg v1) {
-		return _mm_castsi128_ps(_mm_srai_epi32(_mm_castps_si128(v1), 2));
+//		return _mm_castsi128_ps(_mm_srai_epi32(_mm_castps_si128(v1), 2)); // seems to do not work
+		reg abs_v1 = abs<int32_t>(v1);
+		reg sh = rshift<int32_t>(abs_v1, 2);
+		sh = neg<int32_t>(sh, v1);
+		return sh;
 	}
 
 	template <>
 	inline reg div4<int16_t>(const reg v1) {
-		return _mm_castsi128_ps(_mm_srai_epi16(_mm_castps_si128(v1), 2));
+//		return _mm_castsi128_ps(_mm_srai_epi16(_mm_castps_si128(v1), 2)); // seems to do not work
+		reg abs_v1 = abs<int16_t>(v1);
+		reg sh = rshift<int16_t>(abs_v1, 2);
+		sh = neg<int16_t>(sh, v1);
+		return sh;
 	}
 
 	template <>
