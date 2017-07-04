@@ -184,7 +184,7 @@ public:
 	inline Reg<T>      fnmadd       (const Reg<T> v1, const Reg<T> v2)     const { return mipp::fnmadd       <T>(r, v1.r, v2.r); }
 	inline Reg<T>      fmsub        (const Reg<T> v1, const Reg<T> v2)     const { return mipp::fmsub        <T>(r, v1.r, v2.r); }
 	inline Reg<T>      fnmsub       (const Reg<T> v1, const Reg<T> v2)     const { return mipp::fnmsub       <T>(r, v1.r, v2.r); }
-	inline Reg<T>      blend        (const Reg<T> v1, const Msk<N<T>()> m) const { return mipp::blend        <T>(r, v1.r,  m.r); }
+	inline Reg<T>      blend        (const Reg<T> v1, const Msk<N<T>()> m) const { return mipp::blend        <T>(r, v1.r,  m.m); }
 	inline Reg<T>      rot          ()                                     const { return mipp::rot          <T>(r);             }
 	inline Reg<T>      rotr         ()                                     const { return mipp::rotr         <T>(r);             }
 	inline Reg<T>      div2         ()                                     const { return mipp::div2         <T>(r);             }
