@@ -285,7 +285,7 @@ const std::string IntructionsFullName = "NEONv1-" + std::to_string(RegisterSizeB
 #elif defined(MIPP_NEON) && MIPP_INSTR_VERSION == 2
 const std::string IntructionsFullName = "NEONv2-" + std::to_string(RegisterSizeBit);
 #elif defined(MIPP_AVX512) && MIPP_INSTR_VERSION == 1
-const std::string IntructionsFullName = "AVX512-" + std::to_string(RegisterSizeBit);
+const std::string IntructionsFullName = "AVX512";
 #else
 const std::string IntructionsFullName = IntructionsName + std::to_string(IntructionsVersion) + "-" +
                                         std::to_string(RegisterSizeBit);

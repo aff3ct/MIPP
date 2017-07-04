@@ -2845,6 +2845,11 @@
 	inline reg cvt<int16_t,int32_t>(const reg_2 v) {
 		return _mm_castsi128_ps(_mm_cvtepi16_epi32(_mm_castpd_si128(v)));
 	}
+
+	template <>
+	inline reg cvt<int32_t,int64_t>(const reg_2 v) {
+		return _mm_castsi128_ps(_mm_cvtepi32_epi64(_mm_castpd_si128(v)));
+	}
 #endif
 
 	// ----------------------------------------------------------------------------------------------------------- pack
