@@ -1358,28 +1358,28 @@
 		return (float32x4_t)vbslq_u8((uint8x16_t)m, (uint8x16_t)v1, (uint8x16_t)v2);
 	}
 
-	// ------------------------------------------------------------------------------------------------------------ rot
+	// ----------------------------------------------------------------------------------------------------------- lrot
 	template <>
-	inline reg rot<float>(const reg v1) {
+	inline reg lrot<float>(const reg v1) {
 		// make a rotation in:[3, 2 , 1, 0] => out:[2, 1, 0, 3]
 		return vextq_f32(v1, v1, 3);
 	}
 
 	template <>
-	inline reg rot<int16_t>(const reg v1) {
+	inline reg lrot<int16_t>(const reg v1) {
 		// make a rotation in:[7, 6, 5, 4, 3, 2 , 1, 0] => out:[6, 5, 4, 3, 3, 1, 0, 7]
 		return (reg)vextq_u16((uint16x8_t)v1, (uint16x8_t)v1, 7);
 	}
 
-	// ----------------------------------------------------------------------------------------------------------- rotr
+	// ----------------------------------------------------------------------------------------------------------- rrot
 	template <>
-	inline reg rotr<float>(const reg v1) {
+	inline reg rrot<float>(const reg v1) {
 		// make a rotation in:[3, 2 , 1, 0] => out:[0, 3, 2, 1]
 		return vextq_f32(v1, v1, 1);
 	}
 
 	template <>
-	inline reg rotr<int16_t>(const reg v1) {
+	inline reg rrot<int16_t>(const reg v1) {
 		// make a rotation in:[7, 6, 5, 4, 3, 2 , 1, 0] => out:[0, 7, 6, 5, 4, 3, 2, 1]
 		return (reg)vextq_u16((uint16x8_t)v1, (uint16x8_t)v1, 1);
 	}

@@ -553,8 +553,8 @@ template <typename T> inline reg   fnmadd       (const reg, const reg, const reg
 template <typename T> inline reg   fmsub        (const reg, const reg, const reg) { errorMessage<T>("fmsub");         exit(-1); }
 template <typename T> inline reg   fnmsub       (const reg, const reg, const reg) { errorMessage<T>("fnmsub");        exit(-1); }
 template <typename T> inline reg   blend        (const reg, const reg, const msk) { errorMessage<T>("blend");         exit(-1); }
-template <typename T> inline reg   rot          (const reg)                       { errorMessage<T>("rot");           exit(-1); }
-template <typename T> inline reg   rotr         (const reg)                       { errorMessage<T>("rotr");          exit(-1); }
+template <typename T> inline reg   lrot         (const reg)                       { errorMessage<T>("lrot");          exit(-1); }
+template <typename T> inline reg   rrot         (const reg)                       { errorMessage<T>("rrot");          exit(-1); }
 template <typename T> inline reg   div2         (const reg)                       { errorMessage<T>("div2");          exit(-1); }
 template <typename T> inline reg   div4         (const reg)                       { errorMessage<T>("div4");          exit(-1); }
 template <typename T> inline reg   sat          (const reg, T, T)                 { errorMessage<T>("sat");           exit(-1); }

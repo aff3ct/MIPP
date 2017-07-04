@@ -185,8 +185,8 @@ public:
 	inline Reg<T>      fmsub        (const Reg<T> v1, const Reg<T> v2)     const { return mipp::fmsub        <T>(r, v1.r, v2.r); }
 	inline Reg<T>      fnmsub       (const Reg<T> v1, const Reg<T> v2)     const { return mipp::fnmsub       <T>(r, v1.r, v2.r); }
 	inline Reg<T>      blend        (const Reg<T> v1, const Msk<N<T>()> m) const { return mipp::blend        <T>(r, v1.r,  m.m); }
-	inline Reg<T>      rot          ()                                     const { return mipp::rot          <T>(r);             }
-	inline Reg<T>      rotr         ()                                     const { return mipp::rotr         <T>(r);             }
+	inline Reg<T>      lrot         ()                                     const { return mipp::lrot         <T>(r);             }
+	inline Reg<T>      rrot         ()                                     const { return mipp::rrot         <T>(r);             }
 	inline Reg<T>      div2         ()                                     const { return mipp::div2         <T>(r);             }
 	inline Reg<T>      div4         ()                                     const { return mipp::div4         <T>(r);             }
 	inline Reg<T>      sat          (T min, T max)                         const { return mipp::sat          <T>(r, min, max);   }
@@ -245,8 +245,8 @@ public:
 	inline Reg<T>      fmsub        (const Reg<T> v1, const Reg<T> v2)     const { return   r * v1.r - v2.r;                     }
 	inline Reg<T>      fnmsub       (const Reg<T> v1, const Reg<T> v2)     const { return -v2.r - (r * v1.r) ;                   }
 	inline Reg<T>      blend        (const Reg<T> v1, const Msk<N<T>()> m) const { return (m.r) ? r : v1.r;                      }
-	inline Reg<T>      rot          ()                                     const { return r;                                     }
-	inline Reg<T>      rotr         ()                                     const { return r;                                     }
+	inline Reg<T>      lrot         ()                                     const { return r;                                     }
+	inline Reg<T>      rrot         ()                                     const { return r;                                     }
 	inline Reg<T>      div2         ()                                     const { return mipp_scop::div2<T>(r);                 }
 	inline Reg<T>      div4         ()                                     const { return mipp_scop::div4<T>(r);                 }
 	inline Reg<T>      sat          (T min, T max)                         const { return std::min(std::max(r, min), max);       }
@@ -578,8 +578,8 @@ template <typename T> inline Reg<T>      fnmadd       (const Reg<T> v1, const Re
 template <typename T> inline Reg<T>      fmsub        (const Reg<T> v1, const Reg<T> v2, const Reg<T> v3)     { return v1.fmsub(v2, v3);     }
 template <typename T> inline Reg<T>      fnmsub       (const Reg<T> v1, const Reg<T> v2, const Reg<T> v3)     { return v1.fnmsub(v2, v3);    }
 template <typename T> inline Reg<T>      blend        (const Reg<T> v1, const Reg<T> v2, const Msk<N<T>()> m) { return v1.blend(v2, m );     }
-template <typename T> inline Reg<T>      rot          (const Reg<T> v)                                        { return v.rot();              }
-template <typename T> inline Reg<T>      rotr         (const Reg<T> v)                                        { return v.rotr();             }
+template <typename T> inline Reg<T>      lrot         (const Reg<T> v)                                        { return v.lrot();             }
+template <typename T> inline Reg<T>      rrot         (const Reg<T> v)                                        { return v.rrot();             }
 template <typename T> inline Reg<T>      div2         (const Reg<T> v)                                        { return v.div2();             }
 template <typename T> inline Reg<T>      div4         (const Reg<T> v)                                        { return v.div4();             }
 template <typename T> inline Reg<T>      sat          (const Reg<T> v, T min, T max)                          { return v.sat(min, max);      }

@@ -2190,22 +2190,22 @@
 	}
 #endif
 
-	// ------------------------------------------------------------------------------------------------------------ rot
+	// ----------------------------------------------------------------------------------------------------------- lrot
 #ifdef __AVX2__
 	template <>
-	inline reg rot<float>(const reg v1) {
+	inline reg lrot<float>(const reg v1) {
 		// make a rotation in:[7, 6, 5, 4, 3, 2 , 1, 0] => out:[0, 7, 6, 5, 4, 3, 2, 1]
 		return _mm256_permutevar8x32_ps(v1, _mm256_setr_epi32(7, 0, 1, 2, 3, 4, 5, 6));
 	}
 
 	template <>
-	inline reg rot<double>(const reg v1) {
+	inline reg lrot<double>(const reg v1) {
 		// make a rotation in:[3, 2 , 1, 0] => out:[0, 3, 2, 1]
 		return _mm256_castpd_ps(_mm256_permute4x64_pd(_mm256_castps_pd(v1), _MM_SHUFFLE(2 ,1, 0, 3)));
 	}
 #else
 	template <>
-	inline reg rot<float>(const reg v1) {
+	inline reg lrot<float>(const reg v1) {
 		// make a rotation in:[7, 6, 5, 4, 3, 2 , 1, 0] =>  out:[0, 7, 6, 5, 4, 3, 2, 1]
 		//
 		//   -> _mm256_permute_ps(a, _MM_SHUFFLE(0, 3, 2, 1)) # rotation per lane of 128 bits
@@ -2229,7 +2229,7 @@
 	}
 
 	template <>
-	inline reg rot<double>(const reg v1) {
+	inline reg lrot<double>(const reg v1) {
 		// make a rotation in:[3, 2 , 1, 0] => out:[0, 3, 2, 1]
 		//
 		//   -> _mm256_permute_pd(a, _MM_SHUFFLE(1, 1, 1, 1)) # rotation per lane of 128 bits
@@ -2253,6 +2253,8 @@
 		                                        _MM_SHUFFLE(0, 0, 2, 2)));
 	}
 #endif
+
+	// ----------------------------------------------------------------------------------------------------------- rrot
 
 	// ----------------------------------------------------------------------------------------------------------- div2
 	template <>
