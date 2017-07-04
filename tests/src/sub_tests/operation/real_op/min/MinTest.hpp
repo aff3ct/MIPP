@@ -7,47 +7,57 @@ class MinTest : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE(MinTest);
 
+#if defined(MIPP_BW)
+#if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
 	CPPUNIT_TEST(test_reg_min_int8);
-	CPPUNIT_TEST(test_reg_min_int16);
-	CPPUNIT_TEST(test_reg_min_int32);
-//	CPPUNIT_TEST(test_reg_min_int64);
-	CPPUNIT_TEST(test_reg_min_float);
-	CPPUNIT_TEST(test_reg_min_double);
-
 	CPPUNIT_TEST(test_Reg_min_int8);
-	CPPUNIT_TEST(test_Reg_min_int16);
-	CPPUNIT_TEST(test_Reg_min_int32);
-//	CPPUNIT_TEST(test_Reg_min_int64);
-	CPPUNIT_TEST(test_Reg_min_float);
-	CPPUNIT_TEST(test_Reg_min_double);
-
 	CPPUNIT_TEST(test_reg_maskz_min_int8);
-	CPPUNIT_TEST(test_reg_maskz_min_int16);
-	CPPUNIT_TEST(test_reg_maskz_min_int32);
-//	CPPUNIT_TEST(test_reg_maskz_min_int64);
-	CPPUNIT_TEST(test_reg_maskz_min_float);
-	CPPUNIT_TEST(test_reg_maskz_min_double);
-
 	CPPUNIT_TEST(test_Reg_maskz_min_int8);
-	CPPUNIT_TEST(test_Reg_maskz_min_int16);
-	CPPUNIT_TEST(test_Reg_maskz_min_int32);
-//	CPPUNIT_TEST(test_Reg_maskz_min_int64);
-	CPPUNIT_TEST(test_Reg_maskz_min_float);
-	CPPUNIT_TEST(test_Reg_maskz_min_double);
-
 	CPPUNIT_TEST(test_reg_mask_min_int8);
-	CPPUNIT_TEST(test_reg_mask_min_int16);
-	CPPUNIT_TEST(test_reg_mask_min_int32);
-//	CPPUNIT_TEST(test_reg_mask_min_int64);
-	CPPUNIT_TEST(test_reg_mask_min_float);
-	CPPUNIT_TEST(test_reg_mask_min_double);
-
 	CPPUNIT_TEST(test_Reg_mask_min_int8);
+#endif
+
+	CPPUNIT_TEST(test_reg_min_int16);
+	CPPUNIT_TEST(test_Reg_min_int16);
+	CPPUNIT_TEST(test_reg_maskz_min_int16);
+	CPPUNIT_TEST(test_Reg_maskz_min_int16);
+	CPPUNIT_TEST(test_reg_mask_min_int16);
 	CPPUNIT_TEST(test_Reg_mask_min_int16);
+#endif
+
+#if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
+	CPPUNIT_TEST(test_reg_min_int32);
+	CPPUNIT_TEST(test_Reg_min_int32);
+	CPPUNIT_TEST(test_reg_maskz_min_int32);
+	CPPUNIT_TEST(test_Reg_maskz_min_int32);
+	CPPUNIT_TEST(test_reg_mask_min_int32);
 	CPPUNIT_TEST(test_Reg_mask_min_int32);
-//	CPPUNIT_TEST(test_Reg_mask_min_int64);
+#endif
+
+	CPPUNIT_TEST(test_reg_min_float);
+	CPPUNIT_TEST(test_Reg_min_float);
+	CPPUNIT_TEST(test_reg_maskz_min_float);
+	CPPUNIT_TEST(test_Reg_maskz_min_float);
+	CPPUNIT_TEST(test_reg_mask_min_float);
 	CPPUNIT_TEST(test_Reg_mask_min_float);
+
+#if defined(MIPP_64BIT)
+#if !defined(MIPP_SSE) && !defined(MIPP_AVX)
+	CPPUNIT_TEST(test_reg_min_int64);
+	CPPUNIT_TEST(test_Reg_min_int64);
+	CPPUNIT_TEST(test_reg_maskz_min_int64);
+	CPPUNIT_TEST(test_Reg_maskz_min_int64);
+	CPPUNIT_TEST(test_reg_mask_min_int64);
+	CPPUNIT_TEST(test_Reg_mask_min_int64);
+#endif
+
+	CPPUNIT_TEST(test_reg_min_double);
+	CPPUNIT_TEST(test_Reg_min_double);
+	CPPUNIT_TEST(test_reg_maskz_min_double);
+	CPPUNIT_TEST(test_Reg_maskz_min_double);
+	CPPUNIT_TEST(test_reg_mask_min_double);
 	CPPUNIT_TEST(test_Reg_mask_min_double);
+#endif
 
 	CPPUNIT_TEST_SUITE_END();
 

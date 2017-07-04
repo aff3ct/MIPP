@@ -7,19 +7,29 @@ class CmpgeTest : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE(CmpgeTest);
 
+#if defined(MIPP_BW)
 	CPPUNIT_TEST(test_reg_cmpge_int8);
-	CPPUNIT_TEST(test_reg_cmpge_int16);
-	CPPUNIT_TEST(test_reg_cmpge_int32);
-//	CPPUNIT_TEST(test_reg_cmpge_int64);
-	CPPUNIT_TEST(test_reg_cmpge_float);
-	CPPUNIT_TEST(test_reg_cmpge_double);
-
 	CPPUNIT_TEST(test_Reg_cmpge_int8);
+
+	CPPUNIT_TEST(test_reg_cmpge_int16);
 	CPPUNIT_TEST(test_Reg_cmpge_int16);
+#endif
+
+	CPPUNIT_TEST(test_reg_cmpge_int32);
 	CPPUNIT_TEST(test_Reg_cmpge_int32);
-//	CPPUNIT_TEST(test_Reg_cmpge_int64);
+
+	CPPUNIT_TEST(test_reg_cmpge_float);
 	CPPUNIT_TEST(test_Reg_cmpge_float);
+
+#if defined(MIPP_64BIT)
+#if !defined(MIPP_SSE)
+	CPPUNIT_TEST(test_reg_cmpge_int64);
+	CPPUNIT_TEST(test_Reg_cmpge_int64);
+#endif
+
+	CPPUNIT_TEST(test_reg_cmpge_double);
 	CPPUNIT_TEST(test_Reg_cmpge_double);
+#endif
 
 	CPPUNIT_TEST_SUITE_END();
 

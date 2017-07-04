@@ -7,47 +7,51 @@ class AddTest : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE(AddTest);
 
+#if defined(MIPP_BW)
 	CPPUNIT_TEST(test_reg_add_int8);
-	CPPUNIT_TEST(test_reg_add_int16);
-	CPPUNIT_TEST(test_reg_add_int32);
-	CPPUNIT_TEST(test_reg_add_int64);
-	CPPUNIT_TEST(test_reg_add_float);
-	CPPUNIT_TEST(test_reg_add_double);
-
 	CPPUNIT_TEST(test_Reg_add_int8);
-	CPPUNIT_TEST(test_Reg_add_int16);
-	CPPUNIT_TEST(test_Reg_add_int32);
-	CPPUNIT_TEST(test_Reg_add_int64);
-	CPPUNIT_TEST(test_Reg_add_float);
-	CPPUNIT_TEST(test_Reg_add_double);
-
 	CPPUNIT_TEST(test_reg_maskz_add_int8);
-	CPPUNIT_TEST(test_reg_maskz_add_int16);
-	CPPUNIT_TEST(test_reg_maskz_add_int32);
-	CPPUNIT_TEST(test_reg_maskz_add_int64);
-	CPPUNIT_TEST(test_reg_maskz_add_float);
-	CPPUNIT_TEST(test_reg_maskz_add_double);
-
 	CPPUNIT_TEST(test_Reg_maskz_add_int8);
-	CPPUNIT_TEST(test_Reg_maskz_add_int16);
-	CPPUNIT_TEST(test_Reg_maskz_add_int32);
-	CPPUNIT_TEST(test_Reg_maskz_add_int64);
-	CPPUNIT_TEST(test_Reg_maskz_add_float);
-	CPPUNIT_TEST(test_Reg_maskz_add_double);
-
 	CPPUNIT_TEST(test_reg_mask_add_int8);
-	CPPUNIT_TEST(test_reg_mask_add_int16);
-	CPPUNIT_TEST(test_reg_mask_add_int32);
-	CPPUNIT_TEST(test_reg_mask_add_int64);
-	CPPUNIT_TEST(test_reg_mask_add_float);
-	CPPUNIT_TEST(test_reg_mask_add_double);
-
 	CPPUNIT_TEST(test_Reg_mask_add_int8);
+
+	CPPUNIT_TEST(test_reg_add_int16);
+	CPPUNIT_TEST(test_Reg_add_int16);
+	CPPUNIT_TEST(test_reg_maskz_add_int16);
+	CPPUNIT_TEST(test_Reg_maskz_add_int16);
+	CPPUNIT_TEST(test_reg_mask_add_int16);
 	CPPUNIT_TEST(test_Reg_mask_add_int16);
+#endif
+
+	CPPUNIT_TEST(test_reg_add_int32);
+	CPPUNIT_TEST(test_Reg_add_int32);
+	CPPUNIT_TEST(test_reg_maskz_add_int32);
+	CPPUNIT_TEST(test_Reg_maskz_add_int32);
+	CPPUNIT_TEST(test_reg_mask_add_int32);
 	CPPUNIT_TEST(test_Reg_mask_add_int32);
-	CPPUNIT_TEST(test_Reg_mask_add_int64);
+
+	CPPUNIT_TEST(test_reg_add_float);
+	CPPUNIT_TEST(test_Reg_add_float);
+	CPPUNIT_TEST(test_reg_maskz_add_float);
+	CPPUNIT_TEST(test_Reg_maskz_add_float);
+	CPPUNIT_TEST(test_reg_mask_add_float);
 	CPPUNIT_TEST(test_Reg_mask_add_float);
+
+#if defined(MIPP_64BIT)
+	CPPUNIT_TEST(test_reg_add_int64);
+	CPPUNIT_TEST(test_Reg_add_int64);
+	CPPUNIT_TEST(test_reg_maskz_add_int64);
+	CPPUNIT_TEST(test_Reg_maskz_add_int64);
+	CPPUNIT_TEST(test_reg_mask_add_int64);
+	CPPUNIT_TEST(test_Reg_mask_add_int64);
+
+	CPPUNIT_TEST(test_reg_add_double);
+	CPPUNIT_TEST(test_Reg_add_double);
+	CPPUNIT_TEST(test_reg_maskz_add_double);
+	CPPUNIT_TEST(test_Reg_maskz_add_double);
+	CPPUNIT_TEST(test_reg_mask_add_double);
 	CPPUNIT_TEST(test_Reg_mask_add_double);
+#endif
 
 	CPPUNIT_TEST_SUITE_END();
 

@@ -7,33 +7,39 @@ class InterleaveTest : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE(InterleaveTest);
 
+#if defined(MIPP_BW)
 	CPPUNIT_TEST(test_reg_interleave_int8);
-	CPPUNIT_TEST(test_reg_interleave_int16);
-	CPPUNIT_TEST(test_reg_interleave_int32);
-	CPPUNIT_TEST(test_reg_interleave_int64);
-	CPPUNIT_TEST(test_reg_interleave_float);
-	CPPUNIT_TEST(test_reg_interleave_double);
-
 	CPPUNIT_TEST(test_Reg_interleave_int8);
-	CPPUNIT_TEST(test_Reg_interleave_int16);
-	CPPUNIT_TEST(test_Reg_interleave_int32);
-	CPPUNIT_TEST(test_Reg_interleave_int64);
-	CPPUNIT_TEST(test_Reg_interleave_float);
-	CPPUNIT_TEST(test_Reg_interleave_double);
-
 	CPPUNIT_TEST(test_reg_interleave2_int8);
-	CPPUNIT_TEST(test_reg_interleave2_int16);
-	CPPUNIT_TEST(test_reg_interleave2_int32);
-	CPPUNIT_TEST(test_reg_interleave2_int64);
-	CPPUNIT_TEST(test_reg_interleave2_float);
-	CPPUNIT_TEST(test_reg_interleave2_double);
-
 	CPPUNIT_TEST(test_Reg_interleave2_int8);
+
+	CPPUNIT_TEST(test_reg_interleave_int16);
+	CPPUNIT_TEST(test_Reg_interleave_int16);
+	CPPUNIT_TEST(test_reg_interleave2_int16);
 	CPPUNIT_TEST(test_Reg_interleave2_int16);
+#endif
+
+	CPPUNIT_TEST(test_reg_interleave_int32);
+	CPPUNIT_TEST(test_Reg_interleave_int32);
+	CPPUNIT_TEST(test_reg_interleave2_int32);
 	CPPUNIT_TEST(test_Reg_interleave2_int32);
-	CPPUNIT_TEST(test_Reg_interleave2_int64);
+
+	CPPUNIT_TEST(test_reg_interleave_float);
+	CPPUNIT_TEST(test_Reg_interleave_float);
+	CPPUNIT_TEST(test_reg_interleave2_float);
 	CPPUNIT_TEST(test_Reg_interleave2_float);
+
+#if defined(MIPP_64BIT)
+	CPPUNIT_TEST(test_reg_interleave_int64);
+	CPPUNIT_TEST(test_Reg_interleave_int64);
+	CPPUNIT_TEST(test_reg_interleave2_int64);
+	CPPUNIT_TEST(test_Reg_interleave2_int64);
+
+	CPPUNIT_TEST(test_reg_interleave_double);
+	CPPUNIT_TEST(test_Reg_interleave_double);
+	CPPUNIT_TEST(test_reg_interleave2_double);
 	CPPUNIT_TEST(test_Reg_interleave2_double);
+#endif
 
 	CPPUNIT_TEST_SUITE_END();
 

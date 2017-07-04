@@ -7,19 +7,29 @@ class CmpleTest : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE(CmpleTest);
 
+#if defined(MIPP_BW)
 	CPPUNIT_TEST(test_reg_cmple_int8);
-	CPPUNIT_TEST(test_reg_cmple_int16);
-	CPPUNIT_TEST(test_reg_cmple_int32);
-//	CPPUNIT_TEST(test_reg_cmple_int64);
-	CPPUNIT_TEST(test_reg_cmple_float);
-	CPPUNIT_TEST(test_reg_cmple_double);
-
 	CPPUNIT_TEST(test_Reg_cmple_int8);
+
+	CPPUNIT_TEST(test_reg_cmple_int16);
 	CPPUNIT_TEST(test_Reg_cmple_int16);
+#endif
+
+	CPPUNIT_TEST(test_reg_cmple_int32);
 	CPPUNIT_TEST(test_Reg_cmple_int32);
-//	CPPUNIT_TEST(test_Reg_cmple_int64);
+
+	CPPUNIT_TEST(test_reg_cmple_float);
 	CPPUNIT_TEST(test_Reg_cmple_float);
+
+#if defined(MIPP_64BIT)
+#if !defined(MIPP_SSE)
+	CPPUNIT_TEST(test_reg_cmple_int64);
+	CPPUNIT_TEST(test_Reg_cmple_int64);
+#endif
+
+	CPPUNIT_TEST(test_reg_cmple_double);
 	CPPUNIT_TEST(test_Reg_cmple_double);
+#endif
 
 	CPPUNIT_TEST_SUITE_END();
 

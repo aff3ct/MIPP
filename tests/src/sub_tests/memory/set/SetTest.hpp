@@ -7,89 +7,87 @@ class SetTest : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE(SetTest);
 
+#if defined(MIPP_BW)
 	CPPUNIT_TEST(test_reg_set1_int8);
-	CPPUNIT_TEST(test_reg_set1_int16);
-	CPPUNIT_TEST(test_reg_set1_int32);
-	CPPUNIT_TEST(test_reg_set1_int64);
-	CPPUNIT_TEST(test_reg_set1_float);
-	CPPUNIT_TEST(test_reg_set1_double);
-
 	CPPUNIT_TEST(test_reg_set0_int8);
-	CPPUNIT_TEST(test_reg_set0_int16);
-	CPPUNIT_TEST(test_reg_set0_int32);
-	CPPUNIT_TEST(test_reg_set0_int64);
-	CPPUNIT_TEST(test_reg_set0_float);
-	CPPUNIT_TEST(test_reg_set0_double);
-
 	CPPUNIT_TEST(test_reg_set_int8);
-	CPPUNIT_TEST(test_reg_set_int16);
-	CPPUNIT_TEST(test_reg_set_int32);
-	CPPUNIT_TEST(test_reg_set_int64);
-	CPPUNIT_TEST(test_reg_set_float);
-	CPPUNIT_TEST(test_reg_set_double);
-
 	CPPUNIT_TEST(test_Reg_set1_int8);
-	CPPUNIT_TEST(test_Reg_set1_int16);
-	CPPUNIT_TEST(test_Reg_set1_int32);
-	CPPUNIT_TEST(test_Reg_set1_int64);
-	CPPUNIT_TEST(test_Reg_set1_float);
-	CPPUNIT_TEST(test_Reg_set1_double);
-
 	CPPUNIT_TEST(test_Reg_set0_int8);
-	CPPUNIT_TEST(test_Reg_set0_int16);
-	CPPUNIT_TEST(test_Reg_set0_int32);
-	CPPUNIT_TEST(test_Reg_set0_int64);
-	CPPUNIT_TEST(test_Reg_set0_float);
-	CPPUNIT_TEST(test_Reg_set0_double);
-
 	CPPUNIT_TEST(test_Reg_set_int8);
-	CPPUNIT_TEST(test_Reg_set_int16);
-	CPPUNIT_TEST(test_Reg_set_int32);
-	CPPUNIT_TEST(test_Reg_set_int64);
-	CPPUNIT_TEST(test_Reg_set_float);
-	CPPUNIT_TEST(test_Reg_set_double);
-
 	CPPUNIT_TEST(test_msk_set1_int8);
-	CPPUNIT_TEST(test_msk_set1_int16);
-	CPPUNIT_TEST(test_msk_set1_int32);
-	CPPUNIT_TEST(test_msk_set1_int64);
-	CPPUNIT_TEST(test_msk_set1_float);
-	CPPUNIT_TEST(test_msk_set1_double);
-
 	CPPUNIT_TEST(test_msk_set0_int8);
-	CPPUNIT_TEST(test_msk_set0_int16);
-	CPPUNIT_TEST(test_msk_set0_int32);
-	CPPUNIT_TEST(test_msk_set0_int64);
-	CPPUNIT_TEST(test_msk_set0_float);
-	CPPUNIT_TEST(test_msk_set0_double);
-
 	CPPUNIT_TEST(test_msk_set_int8);
-	CPPUNIT_TEST(test_msk_set_int16);
-	CPPUNIT_TEST(test_msk_set_int32);
-	CPPUNIT_TEST(test_msk_set_int64);
-	CPPUNIT_TEST(test_msk_set_float);
-	CPPUNIT_TEST(test_msk_set_double);
-
 	CPPUNIT_TEST(test_Msk_set1_int8);
-	CPPUNIT_TEST(test_Msk_set1_int16);
-	CPPUNIT_TEST(test_Msk_set1_int32);
-	CPPUNIT_TEST(test_Msk_set1_int64);
-	CPPUNIT_TEST(test_Msk_set1_float);
-	CPPUNIT_TEST(test_Msk_set1_double);
-
 	CPPUNIT_TEST(test_Msk_set0_int8);
-	CPPUNIT_TEST(test_Msk_set0_int16);
-	CPPUNIT_TEST(test_Msk_set0_int32);
-	CPPUNIT_TEST(test_Msk_set0_int64);
-	CPPUNIT_TEST(test_Msk_set0_float);
-	CPPUNIT_TEST(test_Msk_set0_double);
-
 	CPPUNIT_TEST(test_Msk_set_int8);
+
+	CPPUNIT_TEST(test_reg_set1_int16);
+	CPPUNIT_TEST(test_reg_set0_int16);
+	CPPUNIT_TEST(test_reg_set_int16);
+	CPPUNIT_TEST(test_Reg_set1_int16);
+	CPPUNIT_TEST(test_Reg_set0_int16);
+	CPPUNIT_TEST(test_Reg_set_int16);
+	CPPUNIT_TEST(test_msk_set1_int16);
+	CPPUNIT_TEST(test_msk_set0_int16);
+	CPPUNIT_TEST(test_msk_set_int16);
+	CPPUNIT_TEST(test_Msk_set1_int16);
+	CPPUNIT_TEST(test_Msk_set0_int16);
 	CPPUNIT_TEST(test_Msk_set_int16);
+#endif
+
+	CPPUNIT_TEST(test_reg_set1_int32);
+	CPPUNIT_TEST(test_reg_set0_int32);
+	CPPUNIT_TEST(test_reg_set_int32);
+	CPPUNIT_TEST(test_Reg_set1_int32);
+	CPPUNIT_TEST(test_Reg_set0_int32);
+	CPPUNIT_TEST(test_Reg_set_int32);
+	CPPUNIT_TEST(test_msk_set1_int32);
+	CPPUNIT_TEST(test_msk_set0_int32);
+	CPPUNIT_TEST(test_msk_set_int32);
+	CPPUNIT_TEST(test_Msk_set1_int32);
+	CPPUNIT_TEST(test_Msk_set0_int32);
 	CPPUNIT_TEST(test_Msk_set_int32);
-	CPPUNIT_TEST(test_Msk_set_int64);
+
+	CPPUNIT_TEST(test_reg_set1_float);
+	CPPUNIT_TEST(test_reg_set0_float);
+	CPPUNIT_TEST(test_reg_set_float);
+	CPPUNIT_TEST(test_Reg_set1_float);
+	CPPUNIT_TEST(test_Reg_set0_float);
+	CPPUNIT_TEST(test_Reg_set_float);
+	CPPUNIT_TEST(test_msk_set1_float);
+	CPPUNIT_TEST(test_msk_set0_float);
+	CPPUNIT_TEST(test_msk_set_float);
+	CPPUNIT_TEST(test_Msk_set1_float);
+	CPPUNIT_TEST(test_Msk_set0_float);
 	CPPUNIT_TEST(test_Msk_set_float);
+
+#if defined(MIPP_64BIT)
+	CPPUNIT_TEST(test_reg_set1_int64);
+	CPPUNIT_TEST(test_reg_set0_int64);
+	CPPUNIT_TEST(test_Reg_set1_int64);
+	CPPUNIT_TEST(test_reg_set_int64);
+	CPPUNIT_TEST(test_Reg_set0_int64);
+	CPPUNIT_TEST(test_Reg_set_int64);
+	CPPUNIT_TEST(test_msk_set1_int64);
+	CPPUNIT_TEST(test_msk_set0_int64);
+	CPPUNIT_TEST(test_msk_set_int64);
+	CPPUNIT_TEST(test_Msk_set1_int64);
+	CPPUNIT_TEST(test_Msk_set0_int64);
+	CPPUNIT_TEST(test_Msk_set_int64);
+
+	CPPUNIT_TEST(test_reg_set1_double);
+	CPPUNIT_TEST(test_reg_set0_double);
+	CPPUNIT_TEST(test_reg_set_double);
+	CPPUNIT_TEST(test_Reg_set1_double);
+	CPPUNIT_TEST(test_Reg_set0_double);
+	CPPUNIT_TEST(test_Reg_set_double);
+	CPPUNIT_TEST(test_msk_set1_double);
+	CPPUNIT_TEST(test_msk_set0_double);
+	CPPUNIT_TEST(test_msk_set_double);
+	CPPUNIT_TEST(test_Msk_set1_double);
+	CPPUNIT_TEST(test_Msk_set0_double);
 	CPPUNIT_TEST(test_Msk_set_double);
+#endif
 
 	CPPUNIT_TEST_SUITE_END();
 

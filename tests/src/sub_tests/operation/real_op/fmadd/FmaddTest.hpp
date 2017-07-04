@@ -8,22 +8,20 @@ class FmaddTest : public CppUnit::TestFixture
 	CPPUNIT_TEST_SUITE(FmaddTest);
 
 	CPPUNIT_TEST(test_reg_fmadd_float);
-	CPPUNIT_TEST(test_reg_fmadd_double);
-
 	CPPUNIT_TEST(test_Reg_fmadd_float);
-	CPPUNIT_TEST(test_Reg_fmadd_double);
-
 	CPPUNIT_TEST(test_reg_maskz_fmadd_float);
-	CPPUNIT_TEST(test_reg_maskz_fmadd_double);
-
 	CPPUNIT_TEST(test_Reg_maskz_fmadd_float);
-	CPPUNIT_TEST(test_Reg_maskz_fmadd_double);
-
 	CPPUNIT_TEST(test_reg_mask_fmadd_float);
-	CPPUNIT_TEST(test_reg_mask_fmadd_double);
-
 	CPPUNIT_TEST(test_Reg_mask_fmadd_float);
+
+#if defined(MIPP_64BIT)
+	CPPUNIT_TEST(test_reg_fmadd_double);
+	CPPUNIT_TEST(test_Reg_fmadd_double);
+	CPPUNIT_TEST(test_reg_maskz_fmadd_double);
+	CPPUNIT_TEST(test_Reg_maskz_fmadd_double);
+	CPPUNIT_TEST(test_reg_mask_fmadd_double);
 	CPPUNIT_TEST(test_Reg_mask_fmadd_double);
+#endif
 
 	CPPUNIT_TEST_SUITE_END();
 

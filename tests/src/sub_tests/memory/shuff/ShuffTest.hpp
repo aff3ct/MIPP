@@ -7,33 +7,41 @@ class ShuffTest : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE(ShuffTest);
 
+#if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 31)
+#if defined(MIPP_BW)
 	CPPUNIT_TEST(test_reg_shuff_int8);
-	CPPUNIT_TEST(test_reg_shuff_int16);
-	CPPUNIT_TEST(test_reg_shuff_int32);
-	CPPUNIT_TEST(test_reg_shuff_int64);
-	CPPUNIT_TEST(test_reg_shuff_float);
-	CPPUNIT_TEST(test_reg_shuff_double);
-
-	CPPUNIT_TEST(test_Reg_shuff_int8);
-	CPPUNIT_TEST(test_Reg_shuff_int16);
-	CPPUNIT_TEST(test_Reg_shuff_int32);
-	CPPUNIT_TEST(test_Reg_shuff_int64);
-	CPPUNIT_TEST(test_Reg_shuff_float);
-	CPPUNIT_TEST(test_Reg_shuff_double);
-
 	CPPUNIT_TEST(test_reg_shuff2_int8);
-	CPPUNIT_TEST(test_reg_shuff2_int16);
-	CPPUNIT_TEST(test_reg_shuff2_int32);
-	CPPUNIT_TEST(test_reg_shuff2_int64);
-	CPPUNIT_TEST(test_reg_shuff2_float);
-	CPPUNIT_TEST(test_reg_shuff2_double);
-
+	CPPUNIT_TEST(test_Reg_shuff_int8);
 	CPPUNIT_TEST(test_Reg_shuff2_int8);
+
+	CPPUNIT_TEST(test_reg_shuff_int16);
+	CPPUNIT_TEST(test_Reg_shuff_int16);
+	CPPUNIT_TEST(test_reg_shuff2_int16);
 	CPPUNIT_TEST(test_Reg_shuff2_int16);
+#endif
+
+	CPPUNIT_TEST(test_reg_shuff_int32);
+	CPPUNIT_TEST(test_Reg_shuff_int32);
+	CPPUNIT_TEST(test_reg_shuff2_int32);
 	CPPUNIT_TEST(test_Reg_shuff2_int32);
-	CPPUNIT_TEST(test_Reg_shuff2_int64);
+
+	CPPUNIT_TEST(test_reg_shuff_float);
+	CPPUNIT_TEST(test_Reg_shuff_float);
+	CPPUNIT_TEST(test_reg_shuff2_float);
 	CPPUNIT_TEST(test_Reg_shuff2_float);
+
+#if defined(MIPP_64BIT)
+	CPPUNIT_TEST(test_reg_shuff_int64);
+	CPPUNIT_TEST(test_Reg_shuff_int64);
+	CPPUNIT_TEST(test_reg_shuff2_int64);
+	CPPUNIT_TEST(test_Reg_shuff2_int64);
+
+	CPPUNIT_TEST(test_reg_shuff_double);
+	CPPUNIT_TEST(test_Reg_shuff_double);
+	CPPUNIT_TEST(test_reg_shuff2_double);
 	CPPUNIT_TEST(test_Reg_shuff2_double);
+#endif
+#endif
 
 	CPPUNIT_TEST_SUITE_END();
 

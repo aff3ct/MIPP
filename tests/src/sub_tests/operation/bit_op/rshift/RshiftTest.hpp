@@ -7,25 +7,29 @@ class RshiftTest : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE(RshiftTest);
 
+#if defined(MIPP_BW)
 	CPPUNIT_TEST(test_reg_rshift_int8);
-	CPPUNIT_TEST(test_reg_rshift_int16);
-	CPPUNIT_TEST(test_reg_rshift_int32);
-	CPPUNIT_TEST(test_reg_rshift_int64);
-
 	CPPUNIT_TEST(test_Reg_rshift_int8);
-	CPPUNIT_TEST(test_Reg_rshift_int16);
-	CPPUNIT_TEST(test_Reg_rshift_int32);
-	CPPUNIT_TEST(test_Reg_rshift_int64);
-
 	CPPUNIT_TEST(test_msk_rshift_int8);
-	CPPUNIT_TEST(test_msk_rshift_int16);
-	CPPUNIT_TEST(test_msk_rshift_int32);
-	CPPUNIT_TEST(test_msk_rshift_int64);
-
 	CPPUNIT_TEST(test_Msk_rshift_int8);
+
+	CPPUNIT_TEST(test_reg_rshift_int16);
+	CPPUNIT_TEST(test_Reg_rshift_int16);
+	CPPUNIT_TEST(test_msk_rshift_int16);
 	CPPUNIT_TEST(test_Msk_rshift_int16);
+#endif
+
+	CPPUNIT_TEST(test_reg_rshift_int32);
+	CPPUNIT_TEST(test_Reg_rshift_int32);
+	CPPUNIT_TEST(test_msk_rshift_int32);
 	CPPUNIT_TEST(test_Msk_rshift_int32);
+
+#if defined(MIPP_64BIT)
+	CPPUNIT_TEST(test_reg_rshift_int64);
+	CPPUNIT_TEST(test_Reg_rshift_int64);
+	CPPUNIT_TEST(test_msk_rshift_int64);
 	CPPUNIT_TEST(test_Msk_rshift_int64);
+#endif
 
 	CPPUNIT_TEST_SUITE_END();
 

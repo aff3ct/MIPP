@@ -7,19 +7,29 @@ class CmpgtTest : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE(CmpgtTest);
 
+#if defined(MIPP_BW)
 	CPPUNIT_TEST(test_reg_cmpgt_int8);
-	CPPUNIT_TEST(test_reg_cmpgt_int16);
-	CPPUNIT_TEST(test_reg_cmpgt_int32);
-//	CPPUNIT_TEST(test_reg_cmpgt_int64);
-	CPPUNIT_TEST(test_reg_cmpgt_float);
-	CPPUNIT_TEST(test_reg_cmpgt_double);
-
 	CPPUNIT_TEST(test_Reg_cmpgt_int8);
+
+	CPPUNIT_TEST(test_reg_cmpgt_int16);
 	CPPUNIT_TEST(test_Reg_cmpgt_int16);
+#endif
+
+	CPPUNIT_TEST(test_reg_cmpgt_int32);
 	CPPUNIT_TEST(test_Reg_cmpgt_int32);
-//	CPPUNIT_TEST(test_Reg_cmpgt_int64);
+
+	CPPUNIT_TEST(test_reg_cmpgt_float);
 	CPPUNIT_TEST(test_Reg_cmpgt_float);
+
+#if defined(MIPP_64BIT)
+#if !defined(MIPP_SSE)
+	CPPUNIT_TEST(test_reg_cmpgt_int64);
+	CPPUNIT_TEST(test_Reg_cmpgt_int64);
+#endif
+
+	CPPUNIT_TEST(test_reg_cmpgt_double);
 	CPPUNIT_TEST(test_Reg_cmpgt_double);
+#endif
 
 	CPPUNIT_TEST_SUITE_END();
 

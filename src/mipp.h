@@ -103,10 +103,20 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 #ifndef MIPP_NO_INTRINSICS
 // ------------------------------------------------------------------------------------------------------- ARM NEON-128
 #if defined(__ARM_NEON__) || defined(__ARM_NEON)
+	#define MIPP_INSTR_NAME "NEON"
+	#define MIPP_NEON
 	#define MIPP_REQUIRED_ALIGNMENT 16
-	constexpr uint32_t RequiredAlignment = MIPP_REQUIRED_ALIGNMENT;
-	constexpr uint32_t RegisterSizeBit = 128;
-	constexpr uint32_t Lanes = 1;
+#ifdef __aarch64__
+	#define MIPP_NEONV2
+	#define MIPP_INSTR_VERSION 2
+	#define MIPP_64BIT
+#else
+	#define MIPP_NEONV1
+	#define MIPP_INSTR_VERSION 1
+#endif
+	#define MIPP_BW
+	#define MIPP_REGISTER_SIZE 128
+	#define MIPP_LANES 1
 
 	using msk   = uint32x4_t;
 	using reg   = float32x4_t;
@@ -117,14 +127,21 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 		return (reg)m;
 	}
 
-	const std::string IntructionsType = "ARM NEONv1-128";
-
 // -------------------------------------------------------------------------------------------------------- X86 AVX-512
 #elif defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)
+	#define MIPP_INSTR_NAME "AVX512"
+	#define MIPP_AVX512
 	#define MIPP_REQUIRED_ALIGNMENT 64
-	constexpr uint32_t RequiredAlignment = MIPP_REQUIRED_ALIGNMENT;
-	constexpr uint32_t RegisterSizeBit = 512;
-	constexpr uint32_t Lanes = 4;
+	#define MIPP_64BIT
+#ifdef __AVX512BW__
+	#define MIPP_AVX512BW
+	#define MIPP_BW
+#else
+	#define MIPP_AVX512F
+#endif
+	#define MIPP_INSTR_VERSION 1
+	#define MIPP_REGISTER_SIZE 512
+	#define MIPP_LANES 4
 
 #ifdef __AVX512BW__
 	using msk   = __mmask64;
@@ -139,37 +156,62 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 		throw std::runtime_error("mipp: Invalid mask size 'N' = " + std::to_string(N) + ".");
 	}
 
-	const std::string IntructionsType = "x86 AVX-512";
-
 // -------------------------------------------------------------------------------------------------------- X86 AVX-256
 #elif defined(__AVX__)
+	#define MIPP_INSTR_NAME "AVX"
+	#define MIPP_AVX
 	#define MIPP_REQUIRED_ALIGNMENT 32
-	constexpr uint32_t RequiredAlignment = MIPP_REQUIRED_ALIGNMENT;
-	constexpr uint32_t RegisterSizeBit = 256;
-	constexpr uint32_t Lanes = 2;
+	#define MIPP_64BIT
+#ifdef __AVX2__
+	#define MIPP_AVX2
+	#define MIPP_INSTR_VERSION 2
+	#define MIPP_BW
+#else
+	#define MIPP_AVX1
+	#define MIPP_INSTR_VERSION 1
+#endif
+	#define MIPP_REGISTER_SIZE 256
+	#define MIPP_LANES 2
 
 	using msk   = __m256i;
 	using reg   = __m256;
 	using reg_2 = __m128; // half a full register
-
 	
 	template <int N>
 	inline reg cvt_msk_reg(const msk m) {
 		return _mm256_castsi256_ps(m);
 	}
 
-#ifdef __AVX2__
-	const std::string IntructionsType = "x86 AVX2-256";
-#else
-	const std::string IntructionsType = "x86 AVX1-256";
-#endif
-
 // -------------------------------------------------------------------------------------------------------- X86 SSE-128
 #elif defined(__SSE__)
+	#define MIPP_INSTR_NAME "SSE"
+	#define MIPP_SSE
 	#define MIPP_REQUIRED_ALIGNMENT 16
-	constexpr uint32_t RequiredAlignment = MIPP_REQUIRED_ALIGNMENT;
-	constexpr uint32_t RegisterSizeBit = 128;
-	constexpr uint32_t Lanes = 1;
+#ifdef __SSE2__
+	#define MIPP_64BIT
+	#define MIPP_BW
+#endif
+#ifdef __SSE4_2__
+	#define MIPP_SSE4_2
+	#define MIPP_INSTR_VERSION 42
+#elif defined(__SSE4_1__)
+	#define MIPP_SSE4_1
+	#define MIPP_INSTR_VERSION 41
+#elif defined(__SSSE3__)
+	#define MIPP_SSSE3
+	#define MIPP_INSTR_VERSION 31
+#elif defined(__SSE3__)
+	#define MIPP_SSE3
+	#define MIPP_INSTR_VERSION 3
+#elif defined(__SSE2__)
+	#define MIPP_SSE2
+	#define MIPP_INSTR_VERSION 2
+#else
+	#define MIPP_SSE1
+	#define MIPP_INSTR_VERSION 1
+#endif
+	#define MIPP_REGISTER_SIZE 128
+	#define MIPP_LANES 1
 
 	using msk   = __m128i;
 	using reg   = __m128;
@@ -180,27 +222,19 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 		return _mm_castsi128_ps(m);
 	}
 
-#ifdef __SSE4_2__
-	const std::string IntructionsType = "x86 SSE4.2-128";
-#elif defined(__SSE4_1__)
-	const std::string IntructionsType = "x86 SSE4.1-128";
-#elif defined(__SSSE3__)
-	const std::string IntructionsType = "x86 SSSE3-128";
-#elif defined(__SSE3__)
-	const std::string IntructionsType = "x86 SSE3-128";
-#elif defined(__SSE2__)
-	const std::string IntructionsType = "x86 SSE2-128";
-#else
-	const std::string IntructionsType = "x86 SSE1-128";
-#endif
-
 // ------------------------------------------------------------------------------------------------- MIPP_NO_INTRINSICS
 #else
+	#define MIPP_INSTR_NAME "NO"
+	#define MIPP_NO
 	#define MIPP_NO_INTRINSICS
 	#define MIPP_REQUIRED_ALIGNMENT 1
-	constexpr uint32_t RequiredAlignment = MIPP_REQUIRED_ALIGNMENT;
-	constexpr uint32_t RegisterSizeBit = 0;
-	constexpr uint32_t Lanes = 1;
+#if UINTPTR_MAX == 0xffffffffffffffff
+#define MIPP_64BIT
+#endif
+	#define MIPP_BW
+	#define MIPP_INSTR_VERSION 1
+	#define MIPP_REGISTER_SIZE 0
+	#define MIPP_LANES 1
 
 	using msk   = uint8_t;
 	using reg   = int32_t;
@@ -210,16 +244,20 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	inline reg cvt_msk_reg(const msk m) {
 		return (reg)m;
 	}
-
-	const std::string IntructionsType = "NO INTRINSICS";
 #endif
 
 // ------------------------------------------------------------------------------------------------- MIPP_NO_INTRINSICS
 #else
+	#define MIPP_INSTR_NAME "NO"
+	#define MIPP_NO
 	#define MIPP_REQUIRED_ALIGNMENT 1
-	constexpr uint32_t RequiredAlignment = MIPP_REQUIRED_ALIGNMENT;
-	constexpr uint32_t RegisterSizeBit = 0;
-	constexpr uint32_t Lanes = 1;
+#if UINTPTR_MAX == 0xffffffffffffffff
+#define MIPP_64BIT
+#endif
+	#define MIPP_BW
+	#define MIPP_INSTR_VERSION 1
+	#define MIPP_REGISTER_SIZE 0
+	#define MIPP_LANES 1
 
 	using msk   = uint8_t;
 	using reg   = int32_t;
@@ -229,9 +267,38 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	inline reg cvt_msk_reg(const msk m) {
 		return (reg)m;
 	}
+#endif
 
-	const std::string IntructionsType = "NO INTRINSICS";
-
+constexpr uint32_t    RequiredAlignment   = MIPP_REQUIRED_ALIGNMENT;
+constexpr uint32_t    RegisterSizeBit     = MIPP_REGISTER_SIZE;
+constexpr uint32_t    Lanes               = MIPP_LANES;
+constexpr uint32_t    IntructionsVersion  = MIPP_INSTR_VERSION;
+const std::string IntructionsName     = MIPP_INSTR_NAME;
+#if defined(MIPP_SSE) && MIPP_INSTR_VERSION == 31
+const std::string IntructionsFullName = "SSSE3-" + std::to_string(RegisterSizeBit);
+#elif defined(MIPP_SSE) && MIPP_INSTR_VERSION == 41
+const std::string IntructionsFullName = "SSE4.1-" + std::to_string(RegisterSizeBit);
+#elif defined(MIPP_SSE) && MIPP_INSTR_VERSION == 42
+const std::string IntructionsFullName = "SSE4.2-" + std::to_string(RegisterSizeBit);
+#elif defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
+const std::string IntructionsFullName = "NEONv1-" + std::to_string(RegisterSizeBit);
+#elif defined(MIPP_NEON) && MIPP_INSTR_VERSION == 2
+const std::string IntructionsFullName = "NEONv2-" + std::to_string(RegisterSizeBit);
+#elif defined(MIPP_AVX512) && MIPP_INSTR_VERSION == 1
+const std::string IntructionsFullName = "AVX512-" + std::to_string(RegisterSizeBit);
+#else
+const std::string IntructionsFullName = IntructionsName + std::to_string(IntructionsVersion) + "-" +
+                                        std::to_string(RegisterSizeBit);
+#endif
+#ifdef MIPP_64BIT
+const bool support64Bit = true;
+#else
+const bool support64Bit = false;
+#endif
+#ifdef MIPP_BW
+const bool supportByteWord = true;
+#else
+const bool supportByteWord = false;
 #endif
 
 typedef struct regx2 { reg val[2]; } regx2;
@@ -356,10 +423,10 @@ static void errorMessage(std::string instr)
 
 	std::string message;
 	if (RegisterSizeBit == 0)
-		message = "mipp::" + instr + "<" + type_names[typeid(T)] + "> (" + IntructionsType + ") is undefined!, "
+		message = "mipp::" + instr + "<" + type_names[typeid(T)] + "> (" + IntructionsFullName + ") is undefined!, "
 		          "try to add -mfpu=neon, -msse4.2, -mavx, -march=native... at the compile time.";
 	else
-		message = "mipp::" + instr + "<" + type_names[typeid(T)] + "> (" + IntructionsType + ") is undefined!";
+		message = "mipp::" + instr + "<" + type_names[typeid(T)] + "> (" + IntructionsFullName + ") is undefined!";
 
 	message += get_back_trace();
 
@@ -371,10 +438,10 @@ static void errorMessage(std::string instr)
 {
 	std::string message;
 	if (RegisterSizeBit == 0)
-		message = "mipp::" + instr + "<" + std::to_string(N) + "> (" + IntructionsType + ") is undefined!, "
+		message = "mipp::" + instr + "<" + std::to_string(N) + "> (" + IntructionsFullName + ") is undefined!, "
 		          "try to add -mfpu=neon, -msse4.2, -mavx, -march=native... at the compile time.";
 	else
-		message = "mipp::" + instr + "<" + std::to_string(N) + "> (" + IntructionsType + ") is undefined!";
+		message = "mipp::" + instr + "<" + std::to_string(N) + "> (" + IntructionsFullName + ") is undefined!";
 
 	message += get_back_trace();
 
@@ -400,11 +467,11 @@ static void errorMessage(std::string instr)
 	std::string message;
 	if (RegisterSizeBit == 0)
 		message = "mipp::" + instr + "<" + type_names[typeid(T1)] + "," + type_names[typeid(T2)] + "> (" +
-		          IntructionsType + ") is undefined!, try to add -mfpu=neon, -msse4.2, -mavx, -march=native... "
+		          IntructionsFullName + ") is undefined!, try to add -mfpu=neon, -msse4.2, -mavx, -march=native... "
 		          "at the compile time.";
 	else
 		message = "mipp::" + instr + "<" + type_names[typeid(T1)] + "," + type_names[typeid(T2)] + "> (" +
-		          IntructionsType + ") is undefined!";
+		          IntructionsFullName + ") is undefined!";
 
 	message += get_back_trace();
 

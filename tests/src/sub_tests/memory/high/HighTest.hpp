@@ -7,19 +7,27 @@ class HighTest : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE(HighTest);
 
+#if defined(MIPP_BW)
 	CPPUNIT_TEST(test_reg_high_int8);
-	CPPUNIT_TEST(test_reg_high_int16);
-	CPPUNIT_TEST(test_reg_high_int32);
-	CPPUNIT_TEST(test_reg_high_int64);
-	CPPUNIT_TEST(test_reg_high_float);
-	CPPUNIT_TEST(test_reg_high_double);
-
 	CPPUNIT_TEST(test_Reg_high_int8);
+
+	CPPUNIT_TEST(test_reg_high_int16);
 	CPPUNIT_TEST(test_Reg_high_int16);
+#endif
+
+	CPPUNIT_TEST(test_reg_high_int32);
 	CPPUNIT_TEST(test_Reg_high_int32);
-	CPPUNIT_TEST(test_Reg_high_int64);
+
+	CPPUNIT_TEST(test_reg_high_float);
 	CPPUNIT_TEST(test_Reg_high_float);
+
+#if defined(MIPP_64BIT)
+	CPPUNIT_TEST(test_reg_high_int64);
+	CPPUNIT_TEST(test_Reg_high_int64);
+
+	CPPUNIT_TEST(test_reg_high_double);
 	CPPUNIT_TEST(test_Reg_high_double);
+#endif
 
 	CPPUNIT_TEST_SUITE_END();
 

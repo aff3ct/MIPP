@@ -8,22 +8,20 @@ class RsqrtTest : public CppUnit::TestFixture
 	CPPUNIT_TEST_SUITE(RsqrtTest);
 
 	CPPUNIT_TEST(test_reg_rsqrt_float);
-	CPPUNIT_TEST(test_reg_rsqrt_double);
-
 	CPPUNIT_TEST(test_Reg_rsqrt_float);
-	CPPUNIT_TEST(test_Reg_rsqrt_double);
-
 	CPPUNIT_TEST(test_reg_maskz_rsqrt_float);
-	CPPUNIT_TEST(test_reg_maskz_rsqrt_double);
-
 	CPPUNIT_TEST(test_Reg_maskz_rsqrt_float);
-	CPPUNIT_TEST(test_Reg_maskz_rsqrt_double);
-
 	CPPUNIT_TEST(test_reg_mask_rsqrt_float);
-	CPPUNIT_TEST(test_reg_mask_rsqrt_double);
-
 	CPPUNIT_TEST(test_Reg_mask_rsqrt_float);
+
+#if defined(MIPP_64BIT)
+	CPPUNIT_TEST(test_reg_rsqrt_double);
+	CPPUNIT_TEST(test_Reg_rsqrt_double);
+	CPPUNIT_TEST(test_reg_maskz_rsqrt_double);
+	CPPUNIT_TEST(test_Reg_maskz_rsqrt_double);
+	CPPUNIT_TEST(test_reg_mask_rsqrt_double);
 	CPPUNIT_TEST(test_Reg_mask_rsqrt_double);
+#endif
 
 	CPPUNIT_TEST_SUITE_END();
 

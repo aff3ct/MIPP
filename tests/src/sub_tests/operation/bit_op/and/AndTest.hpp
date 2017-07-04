@@ -7,25 +7,29 @@ class AndTest : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE(AndTest);
 
+#if defined(MIPP_BW)
 	CPPUNIT_TEST(test_reg_and_int8);
-	CPPUNIT_TEST(test_reg_and_int16);
-	CPPUNIT_TEST(test_reg_and_int32);
-	CPPUNIT_TEST(test_reg_and_int64);
-
 	CPPUNIT_TEST(test_Reg_and_int8);
-	CPPUNIT_TEST(test_Reg_and_int16);
-	CPPUNIT_TEST(test_Reg_and_int32);
-	CPPUNIT_TEST(test_Reg_and_int64);
-
 	CPPUNIT_TEST(test_msk_and_int8);
-	CPPUNIT_TEST(test_msk_and_int16);
-	CPPUNIT_TEST(test_msk_and_int32);
-	CPPUNIT_TEST(test_msk_and_int64);
-
 	CPPUNIT_TEST(test_Msk_and_int8);
+
+	CPPUNIT_TEST(test_reg_and_int16);
+	CPPUNIT_TEST(test_Reg_and_int16);
+	CPPUNIT_TEST(test_msk_and_int16);
 	CPPUNIT_TEST(test_Msk_and_int16);
+#endif
+
+	CPPUNIT_TEST(test_reg_and_int32);
+	CPPUNIT_TEST(test_Reg_and_int32);
+	CPPUNIT_TEST(test_msk_and_int32);
 	CPPUNIT_TEST(test_Msk_and_int32);
+
+#if defined(MIPP_64BIT)
+	CPPUNIT_TEST(test_reg_and_int64);
+	CPPUNIT_TEST(test_Reg_and_int64);
+	CPPUNIT_TEST(test_msk_and_int64);
 	CPPUNIT_TEST(test_Msk_and_int64);
+#endif
 
 	CPPUNIT_TEST_SUITE_END();
 

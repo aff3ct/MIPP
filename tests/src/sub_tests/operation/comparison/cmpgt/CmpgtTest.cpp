@@ -1,9 +1,8 @@
-#include "CmpgtTest.hpp"
-
 #include <exception>
 #include <algorithm>
 #include <mipp.h>
 
+#include "CmpgtTest.hpp"
 
 // Registers the fixture into the 'registry'
 CPPUNIT_TEST_SUITE_REGISTRATION(CmpgtTest);

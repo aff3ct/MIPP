@@ -8,22 +8,20 @@ class SqrtTest : public CppUnit::TestFixture
 	CPPUNIT_TEST_SUITE(SqrtTest);
 
 	CPPUNIT_TEST(test_reg_sqrt_float);
-	CPPUNIT_TEST(test_reg_sqrt_double);
-
 	CPPUNIT_TEST(test_Reg_sqrt_float);
-	CPPUNIT_TEST(test_Reg_sqrt_double);
-
 	CPPUNIT_TEST(test_reg_maskz_sqrt_float);
-	CPPUNIT_TEST(test_reg_maskz_sqrt_double);
-
 	CPPUNIT_TEST(test_Reg_maskz_sqrt_float);
-	CPPUNIT_TEST(test_Reg_maskz_sqrt_double);
-
 	CPPUNIT_TEST(test_reg_mask_sqrt_float);
-	CPPUNIT_TEST(test_reg_mask_sqrt_double);
-
 	CPPUNIT_TEST(test_Reg_mask_sqrt_float);
+
+#if defined(MIPP_64BIT)
+	CPPUNIT_TEST(test_reg_sqrt_double);
+	CPPUNIT_TEST(test_Reg_sqrt_double);
+	CPPUNIT_TEST(test_reg_maskz_sqrt_double);
+	CPPUNIT_TEST(test_Reg_maskz_sqrt_double);
+	CPPUNIT_TEST(test_reg_mask_sqrt_double);
 	CPPUNIT_TEST(test_Reg_mask_sqrt_double);
+#endif
 
 	CPPUNIT_TEST_SUITE_END();
 

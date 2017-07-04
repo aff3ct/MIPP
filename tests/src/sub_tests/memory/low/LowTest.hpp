@@ -7,19 +7,27 @@ class LowTest : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE(LowTest);
 
+#if defined(MIPP_BW)
 	CPPUNIT_TEST(test_reg_low_int8);
-	CPPUNIT_TEST(test_reg_low_int16);
-	CPPUNIT_TEST(test_reg_low_int32);
-	CPPUNIT_TEST(test_reg_low_int64);
-	CPPUNIT_TEST(test_reg_low_float);
-	CPPUNIT_TEST(test_reg_low_double);
-
 	CPPUNIT_TEST(test_Reg_low_int8);
+
+	CPPUNIT_TEST(test_reg_low_int16);
 	CPPUNIT_TEST(test_Reg_low_int16);
+#endif
+
+	CPPUNIT_TEST(test_reg_low_int32);
 	CPPUNIT_TEST(test_Reg_low_int32);
-	CPPUNIT_TEST(test_Reg_low_int64);
+
+	CPPUNIT_TEST(test_reg_low_float);
 	CPPUNIT_TEST(test_Reg_low_float);
+
+#if defined(MIPP_64BIT)
+	CPPUNIT_TEST(test_reg_low_int64);
+	CPPUNIT_TEST(test_Reg_low_int64);
+
+	CPPUNIT_TEST(test_reg_low_double);
 	CPPUNIT_TEST(test_Reg_low_double);
+#endif
 
 	CPPUNIT_TEST_SUITE_END();
 
