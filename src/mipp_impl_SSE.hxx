@@ -1610,230 +1610,6 @@
 	}
 #endif
 
-	// ------------------------------------------------------------------------------------------------------ transpose
-	template <>
-	inline void transpose<int16_t>(reg tab[nElReg<int16_t>()]) {
-		// Transpose the 2x 8x8 matrix:
-		// -------------------------
-		// tab[0] = [a0, a1, a2, a3, a4, a5, a6, a7]        tab[0] = [a0, b0, c0, d0, e0, f0, g0, h0]
-		// tab[1] = [b0, b1, b2, b3, b4, b5, b6, b7]        tab[1] = [a1, b1, c1, d1, e1, f1, g1, h1]
-		// tab[2] = [c0, c1, c2, c3, c4, c5, c6, c7]        tab[2] = [a2, b2, c2, d2, e2, f2, g2, h2]
-		// tab[3] = [d0, d1, d2, d3, d4, d5, d6, d7]        tab[3] = [a3, b3, c3, d3, e3, f3, g3, h3]
-		// tab[4] = [e0, e1, e2, e3, e4, e5, e6, e7]   =>   tab[4] = [a4, b4, c4, d4, e4, f4, g4, h4]
-		// tab[5] = [f0, f1, f2, f3, f4, f5, f6, f7]        tab[5] = [a5, b5, c5, d5, e5, f5, g5, h5]
-		// tab[6] = [g0, g1, g2, g3, g4, g5, g6, g7]        tab[6] = [a6, b6, c6, d6, e6, f6, g6, h6]
-		// tab[7] = [h0, h1, h2, h3, h4, h5, h6, h7]        tab[7] = [a7, b7, c7, d7, e7, f7, g7, h7]
-
-		// auto a03b03 = mipp::interleavelo<int16_t>(tab[0], tab[1]);
-		// auto c03d03 = mipp::interleavelo<int16_t>(tab[2], tab[3]);
-		// auto e03f03 = mipp::interleavelo<int16_t>(tab[4], tab[5]);
-		// auto g03h03 = mipp::interleavelo<int16_t>(tab[6], tab[7]);
-		// auto a47b47 = mipp::interleavehi<int16_t>(tab[0], tab[1]);
-		// auto c47d47 = mipp::interleavehi<int16_t>(tab[2], tab[3]);
-		// auto e47f47 = mipp::interleavehi<int16_t>(tab[4], tab[5]);
-		// auto g47h47 = mipp::interleavehi<int16_t>(tab[6], tab[7]);
-
-		// auto a01b01c01d01 = mipp::interleavelo<int32_t>(a03b03, c03d03);
-		// auto a23b23c23d23 = mipp::interleavehi<int32_t>(a03b03, c03d03);
-		// auto e01f01g01h01 = mipp::interleavelo<int32_t>(e03f03, g03h03);
-		// auto e23f23g23h23 = mipp::interleavehi<int32_t>(e03f03, g03h03);
-		// auto a45b45c45d45 = mipp::interleavelo<int32_t>(a47b47, c47d47);
-		// auto a67b67c67d67 = mipp::interleavehi<int32_t>(a47b47, c47d47);
-		// auto e45f45g45h45 = mipp::interleavelo<int32_t>(e47f47, g47h47);
-		// auto e67f67g67h67 = mipp::interleavehi<int32_t>(e47f47, g47h47);
-
-		// auto a0b0c0d0e0f0g0h0 = mipp::interleavelo<int64_t>(a01b01c01d01, e01f01g01h01);
-		// auto a1b1c1d1e1f1g1h1 = mipp::interleavehi<int64_t>(a01b01c01d01, e01f01g01h01);
-		// auto a2b2c2d2e2f2g2h2 = mipp::interleavelo<int64_t>(a23b23c23d23, e23f23g23h23);
-		// auto a3b3c3d3e3f3g3h3 = mipp::interleavehi<int64_t>(a23b23c23d23, e23f23g23h23);
-		// auto a4b4c4d4e4f4g4h4 = mipp::interleavelo<int64_t>(a45b45c45d45, e45f45g45h45);
-		// auto a5b5c5d5e5f5g5h5 = mipp::interleavehi<int64_t>(a45b45c45d45, e45f45g45h45);
-		// auto a6b6c6d6e6f6g6h6 = mipp::interleavelo<int64_t>(a67b67c67d67, e67f67g67h67);
-		// auto a7b7c7d7e7f7g7h7 = mipp::interleavehi<int64_t>(a67b67c67d67, e67f67g67h67);
-
-		// tab[0] = (reg)a0b0c0d0e0f0g0h0;
-		// tab[1] = (reg)a1b1c1d1e1f1g1h1;
-		// tab[2] = (reg)a2b2c2d2e2f2g2h2;
-		// tab[3] = (reg)a3b3c3d3e3f3g3h3;
-		// tab[4] = (reg)a4b4c4d4e4f4g4h4;
-		// tab[5] = (reg)a5b5c5d5e5f5g5h5;
-		// tab[6] = (reg)a6b6c6d6e6f6g6h6;
-		// tab[7] = (reg)a7b7c7d7e7f7g7h7;
-
-		auto ab = mipp::interleave<int16_t>(tab[0], tab[1]);
-		auto cd = mipp::interleave<int16_t>(tab[2], tab[3]);
-		auto ef = mipp::interleave<int16_t>(tab[4], tab[5]);
-		auto gh = mipp::interleave<int16_t>(tab[6], tab[7]);
-
-		auto a03b03 = ab.val[0];
-		auto c03d03 = cd.val[0];
-		auto e03f03 = ef.val[0];
-		auto g03h03 = gh.val[0];
-		auto a47b47 = ab.val[1];
-		auto c47d47 = cd.val[1];
-		auto e47f47 = ef.val[1];
-		auto g47h47 = gh.val[1];
-
-		auto a03b03c03d03 = mipp::interleave<int32_t>(a03b03, c03d03);
-		auto e03f03g03h03 = mipp::interleave<int32_t>(e03f03, g03h03);
-		auto a47b47c47d47 = mipp::interleave<int32_t>(a47b47, c47d47);
-		auto e47f47g47h47 = mipp::interleave<int32_t>(e47f47, g47h47);
-
-		auto a01b01c01d01 = a03b03c03d03.val[0];
-		auto a23b23c23d23 = a03b03c03d03.val[1];
-		auto e01f01g01h01 = e03f03g03h03.val[0];
-		auto e23f23g23h23 = e03f03g03h03.val[1];
-		auto a45b45c45d45 = a47b47c47d47.val[0];
-		auto a67b67c67d67 = a47b47c47d47.val[1];
-		auto e45f45g45h45 = e47f47g47h47.val[0];
-		auto e67f67g67h67 = e47f47g47h47.val[1];
-
-		auto a01b01c01d01e01f01g01h01 = mipp::interleave<int64_t>(a01b01c01d01, e01f01g01h01);
-		auto a23b23c23d23e23f23g23h23 = mipp::interleave<int64_t>(a23b23c23d23, e23f23g23h23);
-		auto a45b45c45d45e45f45g45h45 = mipp::interleave<int64_t>(a45b45c45d45, e45f45g45h45);
-		auto a67b67c67d67e67f67g67h67 = mipp::interleave<int64_t>(a67b67c67d67, e67f67g67h67);
-
-		auto a0b0c0d0e0f0g0h0 = a01b01c01d01e01f01g01h01.val[0];
-		auto a1b1c1d1e1f1g1h1 = a01b01c01d01e01f01g01h01.val[1];
-		auto a2b2c2d2e2f2g2h2 = a23b23c23d23e23f23g23h23.val[0];
-		auto a3b3c3d3e3f3g3h3 = a23b23c23d23e23f23g23h23.val[1];
-		auto a4b4c4d4e4f4g4h4 = a45b45c45d45e45f45g45h45.val[0];
-		auto a5b5c5d5e5f5g5h5 = a45b45c45d45e45f45g45h45.val[1];
-		auto a6b6c6d6e6f6g6h6 = a67b67c67d67e67f67g67h67.val[0];
-		auto a7b7c7d7e7f7g7h7 = a67b67c67d67e67f67g67h67.val[1];
-
-		tab[0] = (reg)a0b0c0d0e0f0g0h0;
-		tab[1] = (reg)a1b1c1d1e1f1g1h1;
-		tab[2] = (reg)a2b2c2d2e2f2g2h2;
-		tab[3] = (reg)a3b3c3d3e3f3g3h3;
-		tab[4] = (reg)a4b4c4d4e4f4g4h4;
-		tab[5] = (reg)a5b5c5d5e5f5g5h5;
-		tab[6] = (reg)a6b6c6d6e6f6g6h6;
-		tab[7] = (reg)a7b7c7d7e7f7g7h7;
-	}
-
-	// --------------------------------------------------------------------------------------------------- transpose8x8
-	template <>
-	inline void transpose8x8<int8_t>(reg tab[8]) {
-		mipp::transpose<int16_t>(tab);
-	}
-
-	// ----------------------------------------------------------------------------------------------------- transpose2
-	template <>
-	inline void transpose2<int8_t>(reg tab[nElReg<int8_t>()/2]) {
-		// Transpose the 2x 8x8 matrix:
-		// -------------------------
-		//
-		// Input:
-		// ------
-		// tab[0] = [a0, a1, a2, a3, a4, a5, a6, a7,  A0, A1, A2, A3, A4, A5, A6, A7]
-		// tab[1] = [b0, b1, b2, b3, b4, b5, b6, b7,  B0, B1, B2, B3, B4, B5, B6, B7]
-		// tab[2] = [c0, c1, c2, c3, c4, c5, c6, c7,  C0, C1, C2, C3, C4, C5, C6, C7]
-		// tab[3] = [d0, d1, d2, d3, d4, d5, d6, d7,  D0, D1, D2, D3, D4, D5, D6, D7]
-		// tab[4] = [e0, e1, e2, e3, e4, e5, e6, e7,  E0, E1, E2, E3, E4, E5, E6, E7]
-		// tab[5] = [f0, f1, f2, f3, f4, f5, f6, f7,  F0, F1, F2, F3, F4, F5, F6, F7]
-		// tab[6] = [g0, g1, g2, g3, g4, g5, g6, g7,  G0, G1, G2, G3, G4, G5, G6, G7]
-		// tab[7] = [h0, h1, h2, h3, h4, h5, h6, h7,  H0, H1, H2, H3, H4, H5, H6, H7]
-		//
-		// Output:
-		// -------
-		// tab[0] = [a0, b0, c0, d0, e0, f0, g0, h0,  A0, B0, C0, D0, E0, F0, G0, H0]
-		// tab[1] = [a1, b1, c1, d1, e1, f1, g1, h1,  A1, B1, C1, D1, E1, F1, G1, H1]
-		// tab[2] = [a2, b2, c2, d2, e2, f2, g2, h2,  A2, B2, C2, D2, E2, F2, G2, H2]
-		// tab[3] = [a3, b3, c3, d3, e3, f3, g3, h3,  A3, B3, C3, D3, E3, F3, G3, H3]
-		// tab[4] = [a4, b4, c4, d4, e4, f4, g4, h4,  A4, B4, C4, D4, E4, F4, G4, H4]
-		// tab[5] = [a5, b5, c5, d5, e5, f5, g5, h5,  A5, B5, C5, D5, E5, F5, G5, H5]
-		// tab[6] = [a6, b6, c6, d6, e6, f6, g6, h6,  A6, B6, C6, D6, E6, F6, G6, H6]
-		// tab[7] = [a7, b7, c7, d7, e7, f7, g7, h7,  A7, B7, C7, D7, E7, F7, G7, H7]
-
-		// auto a03b03 = mipp::interleavelo2<int8_t>(tab[0], tab[1]);
-		// auto c03d03 = mipp::interleavelo2<int8_t>(tab[2], tab[3]);
-		// auto e03f03 = mipp::interleavelo2<int8_t>(tab[4], tab[5]);
-		// auto g03h03 = mipp::interleavelo2<int8_t>(tab[6], tab[7]);
-		// auto a47b47 = mipp::interleavehi2<int8_t>(tab[0], tab[1]);
-		// auto c47d47 = mipp::interleavehi2<int8_t>(tab[2], tab[3]);
-		// auto e47f47 = mipp::interleavehi2<int8_t>(tab[4], tab[5]);
-		// auto g47h47 = mipp::interleavehi2<int8_t>(tab[6], tab[7]);
-
-		// auto a01b01c01d01 = mipp::interleavelo2<int16_t>(a03b03, c03d03);
-		// auto a23b23c23d23 = mipp::interleavehi2<int16_t>(a03b03, c03d03);
-		// auto e01f01g01h01 = mipp::interleavelo2<int16_t>(e03f03, g03h03);
-		// auto e23f23g23h23 = mipp::interleavehi2<int16_t>(e03f03, g03h03);
-		// auto a45b45c45d45 = mipp::interleavelo2<int16_t>(a47b47, c47d47);
-		// auto a67b67c67d67 = mipp::interleavehi2<int16_t>(a47b47, c47d47);
-		// auto e45f45g45h45 = mipp::interleavelo2<int16_t>(e47f47, g47h47);
-		// auto e67f67g67h67 = mipp::interleavehi2<int16_t>(e47f47, g47h47);
-
-		// auto a0b0c0d0e0f0g0h0 = mipp::interleavelo2<int32_t>(a01b01c01d01, e01f01g01h01);
-		// auto a1b1c1d1e1f1g1h1 = mipp::interleavehi2<int32_t>(a01b01c01d01, e01f01g01h01);
-		// auto a2b2c2d2e2f2g2h2 = mipp::interleavelo2<int32_t>(a23b23c23d23, e23f23g23h23);
-		// auto a3b3c3d3e3f3g3h3 = mipp::interleavehi2<int32_t>(a23b23c23d23, e23f23g23h23);
-		// auto a4b4c4d4e4f4g4h4 = mipp::interleavelo2<int32_t>(a45b45c45d45, e45f45g45h45);
-		// auto a5b5c5d5e5f5g5h5 = mipp::interleavehi2<int32_t>(a45b45c45d45, e45f45g45h45);
-		// auto a6b6c6d6e6f6g6h6 = mipp::interleavelo2<int32_t>(a67b67c67d67, e67f67g67h67);
-		// auto a7b7c7d7e7f7g7h7 = mipp::interleavehi2<int32_t>(a67b67c67d67, e67f67g67h67);
-
-		// tab[0] = (reg)a0b0c0d0e0f0g0h0;
-		// tab[1] = (reg)a1b1c1d1e1f1g1h1;
-		// tab[2] = (reg)a2b2c2d2e2f2g2h2;
-		// tab[3] = (reg)a3b3c3d3e3f3g3h3;
-		// tab[4] = (reg)a4b4c4d4e4f4g4h4;
-		// tab[5] = (reg)a5b5c5d5e5f5g5h5;
-		// tab[6] = (reg)a6b6c6d6e6f6g6h6;
-		// tab[7] = (reg)a7b7c7d7e7f7g7h7;
-
-		auto ab = mipp::interleave2<int8_t>(tab[0], tab[1]);
-		auto cd = mipp::interleave2<int8_t>(tab[2], tab[3]);
-		auto ef = mipp::interleave2<int8_t>(tab[4], tab[5]);
-		auto gh = mipp::interleave2<int8_t>(tab[6], tab[7]);
-
-		auto a03b03 = ab.val[0];
-		auto c03d03 = cd.val[0];
-		auto e03f03 = ef.val[0];
-		auto g03h03 = gh.val[0];
-		auto a47b47 = ab.val[1];
-		auto c47d47 = cd.val[1];
-		auto e47f47 = ef.val[1];
-		auto g47h47 = gh.val[1];
-
-		auto a03b03c03d03 = mipp::interleave2<int16_t>(a03b03, c03d03);
-		auto e03f03g03h03 = mipp::interleave2<int16_t>(e03f03, g03h03);
-		auto a47b47c47d47 = mipp::interleave2<int16_t>(a47b47, c47d47);
-		auto e47f47g47h47 = mipp::interleave2<int16_t>(e47f47, g47h47);
-
-		auto a01b01c01d01 = a03b03c03d03.val[0];
-		auto a23b23c23d23 = a03b03c03d03.val[1];
-		auto e01f01g01h01 = e03f03g03h03.val[0];
-		auto e23f23g23h23 = e03f03g03h03.val[1];
-		auto a45b45c45d45 = a47b47c47d47.val[0];
-		auto a67b67c67d67 = a47b47c47d47.val[1];
-		auto e45f45g45h45 = e47f47g47h47.val[0];
-		auto e67f67g67h67 = e47f47g47h47.val[1];
-
-		auto a01b01c01d01e01f01g01h01 = mipp::interleave2<int32_t>(a01b01c01d01, e01f01g01h01);
-		auto a23b23c23d23e23f23g23h23 = mipp::interleave2<int32_t>(a23b23c23d23, e23f23g23h23);
-		auto a45b45c45d45e45f45g45h45 = mipp::interleave2<int32_t>(a45b45c45d45, e45f45g45h45);
-		auto a67b67c67d67e67f67g67h67 = mipp::interleave2<int32_t>(a67b67c67d67, e67f67g67h67);
-
-		auto a0b0c0d0e0f0g0h0 = a01b01c01d01e01f01g01h01.val[0];
-		auto a1b1c1d1e1f1g1h1 = a01b01c01d01e01f01g01h01.val[1];
-		auto a2b2c2d2e2f2g2h2 = a23b23c23d23e23f23g23h23.val[0];
-		auto a3b3c3d3e3f3g3h3 = a23b23c23d23e23f23g23h23.val[1];
-		auto a4b4c4d4e4f4g4h4 = a45b45c45d45e45f45g45h45.val[0];
-		auto a5b5c5d5e5f5g5h5 = a45b45c45d45e45f45g45h45.val[1];
-		auto a6b6c6d6e6f6g6h6 = a67b67c67d67e67f67g67h67.val[0];
-		auto a7b7c7d7e7f7g7h7 = a67b67c67d67e67f67g67h67.val[1];
-
-		tab[0] = (reg)a0b0c0d0e0f0g0h0;
-		tab[1] = (reg)a1b1c1d1e1f1g1h1;
-		tab[2] = (reg)a2b2c2d2e2f2g2h2;
-		tab[3] = (reg)a3b3c3d3e3f3g3h3;
-		tab[4] = (reg)a4b4c4d4e4f4g4h4;
-		tab[5] = (reg)a5b5c5d5e5f5g5h5;
-		tab[6] = (reg)a6b6c6d6e6f6g6h6;
-		tab[7] = (reg)a7b7c7d7e7f7g7h7;
-	}
-
 	// ---------------------------------------------------------------------------------------------------------- cmpeq
 	template <>
 	inline msk cmpeq<float>(const reg v1, const reg v2) {
@@ -2908,6 +2684,26 @@
 		}
 	};
 
+	template <red_op<int64_t> OP>
+	struct _reduction<int64_t,OP>
+	{
+		static reg apply(const reg v1) {
+			auto val = v1;
+			val = OP(val, _mm_shuffle_ps(val, val, _MM_SHUFFLE(1, 0, 3, 2)));
+			return val;
+		}
+	};
+
+	template <Red_op<int64_t> OP>
+	struct _Reduction<int64_t,OP>
+	{
+		static Reg<int64_t> apply(const Reg<int64_t> v1) {
+			auto val = v1;
+			val = OP(val, Reg<int64_t>(_mm_shuffle_ps(val.r, val.r, _MM_SHUFFLE(1, 0, 3, 2))));
+			return val;
+		}
+	};
+
 	template <red_op<int32_t> OP>
 	struct _reduction<int32_t,OP>
 	{
@@ -2993,4 +2789,228 @@
 		}
 	};
 #endif
+
+	// ------------------------------------------------------------------------------------------------------ transpose
+	template <>
+	inline void transpose<int16_t>(reg tab[nElReg<int16_t>()]) {
+		// Transpose the 2x 8x8 matrix:
+		// -------------------------
+		// tab[0] = [a0, a1, a2, a3, a4, a5, a6, a7]        tab[0] = [a0, b0, c0, d0, e0, f0, g0, h0]
+		// tab[1] = [b0, b1, b2, b3, b4, b5, b6, b7]        tab[1] = [a1, b1, c1, d1, e1, f1, g1, h1]
+		// tab[2] = [c0, c1, c2, c3, c4, c5, c6, c7]        tab[2] = [a2, b2, c2, d2, e2, f2, g2, h2]
+		// tab[3] = [d0, d1, d2, d3, d4, d5, d6, d7]        tab[3] = [a3, b3, c3, d3, e3, f3, g3, h3]
+		// tab[4] = [e0, e1, e2, e3, e4, e5, e6, e7]   =>   tab[4] = [a4, b4, c4, d4, e4, f4, g4, h4]
+		// tab[5] = [f0, f1, f2, f3, f4, f5, f6, f7]        tab[5] = [a5, b5, c5, d5, e5, f5, g5, h5]
+		// tab[6] = [g0, g1, g2, g3, g4, g5, g6, g7]        tab[6] = [a6, b6, c6, d6, e6, f6, g6, h6]
+		// tab[7] = [h0, h1, h2, h3, h4, h5, h6, h7]        tab[7] = [a7, b7, c7, d7, e7, f7, g7, h7]
+
+		// auto a03b03 = mipp::interleavelo<int16_t>(tab[0], tab[1]);
+		// auto c03d03 = mipp::interleavelo<int16_t>(tab[2], tab[3]);
+		// auto e03f03 = mipp::interleavelo<int16_t>(tab[4], tab[5]);
+		// auto g03h03 = mipp::interleavelo<int16_t>(tab[6], tab[7]);
+		// auto a47b47 = mipp::interleavehi<int16_t>(tab[0], tab[1]);
+		// auto c47d47 = mipp::interleavehi<int16_t>(tab[2], tab[3]);
+		// auto e47f47 = mipp::interleavehi<int16_t>(tab[4], tab[5]);
+		// auto g47h47 = mipp::interleavehi<int16_t>(tab[6], tab[7]);
+
+		// auto a01b01c01d01 = mipp::interleavelo<int32_t>(a03b03, c03d03);
+		// auto a23b23c23d23 = mipp::interleavehi<int32_t>(a03b03, c03d03);
+		// auto e01f01g01h01 = mipp::interleavelo<int32_t>(e03f03, g03h03);
+		// auto e23f23g23h23 = mipp::interleavehi<int32_t>(e03f03, g03h03);
+		// auto a45b45c45d45 = mipp::interleavelo<int32_t>(a47b47, c47d47);
+		// auto a67b67c67d67 = mipp::interleavehi<int32_t>(a47b47, c47d47);
+		// auto e45f45g45h45 = mipp::interleavelo<int32_t>(e47f47, g47h47);
+		// auto e67f67g67h67 = mipp::interleavehi<int32_t>(e47f47, g47h47);
+
+		// auto a0b0c0d0e0f0g0h0 = mipp::interleavelo<int64_t>(a01b01c01d01, e01f01g01h01);
+		// auto a1b1c1d1e1f1g1h1 = mipp::interleavehi<int64_t>(a01b01c01d01, e01f01g01h01);
+		// auto a2b2c2d2e2f2g2h2 = mipp::interleavelo<int64_t>(a23b23c23d23, e23f23g23h23);
+		// auto a3b3c3d3e3f3g3h3 = mipp::interleavehi<int64_t>(a23b23c23d23, e23f23g23h23);
+		// auto a4b4c4d4e4f4g4h4 = mipp::interleavelo<int64_t>(a45b45c45d45, e45f45g45h45);
+		// auto a5b5c5d5e5f5g5h5 = mipp::interleavehi<int64_t>(a45b45c45d45, e45f45g45h45);
+		// auto a6b6c6d6e6f6g6h6 = mipp::interleavelo<int64_t>(a67b67c67d67, e67f67g67h67);
+		// auto a7b7c7d7e7f7g7h7 = mipp::interleavehi<int64_t>(a67b67c67d67, e67f67g67h67);
+
+		// tab[0] = (reg)a0b0c0d0e0f0g0h0;
+		// tab[1] = (reg)a1b1c1d1e1f1g1h1;
+		// tab[2] = (reg)a2b2c2d2e2f2g2h2;
+		// tab[3] = (reg)a3b3c3d3e3f3g3h3;
+		// tab[4] = (reg)a4b4c4d4e4f4g4h4;
+		// tab[5] = (reg)a5b5c5d5e5f5g5h5;
+		// tab[6] = (reg)a6b6c6d6e6f6g6h6;
+		// tab[7] = (reg)a7b7c7d7e7f7g7h7;
+
+		auto ab = mipp::interleave<int16_t>(tab[0], tab[1]);
+		auto cd = mipp::interleave<int16_t>(tab[2], tab[3]);
+		auto ef = mipp::interleave<int16_t>(tab[4], tab[5]);
+		auto gh = mipp::interleave<int16_t>(tab[6], tab[7]);
+
+		auto a03b03 = ab.val[0];
+		auto c03d03 = cd.val[0];
+		auto e03f03 = ef.val[0];
+		auto g03h03 = gh.val[0];
+		auto a47b47 = ab.val[1];
+		auto c47d47 = cd.val[1];
+		auto e47f47 = ef.val[1];
+		auto g47h47 = gh.val[1];
+
+		auto a03b03c03d03 = mipp::interleave<int32_t>(a03b03, c03d03);
+		auto e03f03g03h03 = mipp::interleave<int32_t>(e03f03, g03h03);
+		auto a47b47c47d47 = mipp::interleave<int32_t>(a47b47, c47d47);
+		auto e47f47g47h47 = mipp::interleave<int32_t>(e47f47, g47h47);
+
+		auto a01b01c01d01 = a03b03c03d03.val[0];
+		auto a23b23c23d23 = a03b03c03d03.val[1];
+		auto e01f01g01h01 = e03f03g03h03.val[0];
+		auto e23f23g23h23 = e03f03g03h03.val[1];
+		auto a45b45c45d45 = a47b47c47d47.val[0];
+		auto a67b67c67d67 = a47b47c47d47.val[1];
+		auto e45f45g45h45 = e47f47g47h47.val[0];
+		auto e67f67g67h67 = e47f47g47h47.val[1];
+
+		auto a01b01c01d01e01f01g01h01 = mipp::interleave<int64_t>(a01b01c01d01, e01f01g01h01);
+		auto a23b23c23d23e23f23g23h23 = mipp::interleave<int64_t>(a23b23c23d23, e23f23g23h23);
+		auto a45b45c45d45e45f45g45h45 = mipp::interleave<int64_t>(a45b45c45d45, e45f45g45h45);
+		auto a67b67c67d67e67f67g67h67 = mipp::interleave<int64_t>(a67b67c67d67, e67f67g67h67);
+
+		auto a0b0c0d0e0f0g0h0 = a01b01c01d01e01f01g01h01.val[0];
+		auto a1b1c1d1e1f1g1h1 = a01b01c01d01e01f01g01h01.val[1];
+		auto a2b2c2d2e2f2g2h2 = a23b23c23d23e23f23g23h23.val[0];
+		auto a3b3c3d3e3f3g3h3 = a23b23c23d23e23f23g23h23.val[1];
+		auto a4b4c4d4e4f4g4h4 = a45b45c45d45e45f45g45h45.val[0];
+		auto a5b5c5d5e5f5g5h5 = a45b45c45d45e45f45g45h45.val[1];
+		auto a6b6c6d6e6f6g6h6 = a67b67c67d67e67f67g67h67.val[0];
+		auto a7b7c7d7e7f7g7h7 = a67b67c67d67e67f67g67h67.val[1];
+
+		tab[0] = (reg)a0b0c0d0e0f0g0h0;
+		tab[1] = (reg)a1b1c1d1e1f1g1h1;
+		tab[2] = (reg)a2b2c2d2e2f2g2h2;
+		tab[3] = (reg)a3b3c3d3e3f3g3h3;
+		tab[4] = (reg)a4b4c4d4e4f4g4h4;
+		tab[5] = (reg)a5b5c5d5e5f5g5h5;
+		tab[6] = (reg)a6b6c6d6e6f6g6h6;
+		tab[7] = (reg)a7b7c7d7e7f7g7h7;
+	}
+
+	// --------------------------------------------------------------------------------------------------- transpose8x8
+	template <>
+	inline void transpose8x8<int8_t>(reg tab[8]) {
+		mipp::transpose<int16_t>(tab);
+	}
+
+	// ----------------------------------------------------------------------------------------------------- transpose2
+	template <>
+	inline void transpose2<int8_t>(reg tab[nElReg<int8_t>()/2]) {
+		// Transpose the 2x 8x8 matrix:
+		// -------------------------
+		//
+		// Input:
+		// ------
+		// tab[0] = [a0, a1, a2, a3, a4, a5, a6, a7,  A0, A1, A2, A3, A4, A5, A6, A7]
+		// tab[1] = [b0, b1, b2, b3, b4, b5, b6, b7,  B0, B1, B2, B3, B4, B5, B6, B7]
+		// tab[2] = [c0, c1, c2, c3, c4, c5, c6, c7,  C0, C1, C2, C3, C4, C5, C6, C7]
+		// tab[3] = [d0, d1, d2, d3, d4, d5, d6, d7,  D0, D1, D2, D3, D4, D5, D6, D7]
+		// tab[4] = [e0, e1, e2, e3, e4, e5, e6, e7,  E0, E1, E2, E3, E4, E5, E6, E7]
+		// tab[5] = [f0, f1, f2, f3, f4, f5, f6, f7,  F0, F1, F2, F3, F4, F5, F6, F7]
+		// tab[6] = [g0, g1, g2, g3, g4, g5, g6, g7,  G0, G1, G2, G3, G4, G5, G6, G7]
+		// tab[7] = [h0, h1, h2, h3, h4, h5, h6, h7,  H0, H1, H2, H3, H4, H5, H6, H7]
+		//
+		// Output:
+		// -------
+		// tab[0] = [a0, b0, c0, d0, e0, f0, g0, h0,  A0, B0, C0, D0, E0, F0, G0, H0]
+		// tab[1] = [a1, b1, c1, d1, e1, f1, g1, h1,  A1, B1, C1, D1, E1, F1, G1, H1]
+		// tab[2] = [a2, b2, c2, d2, e2, f2, g2, h2,  A2, B2, C2, D2, E2, F2, G2, H2]
+		// tab[3] = [a3, b3, c3, d3, e3, f3, g3, h3,  A3, B3, C3, D3, E3, F3, G3, H3]
+		// tab[4] = [a4, b4, c4, d4, e4, f4, g4, h4,  A4, B4, C4, D4, E4, F4, G4, H4]
+		// tab[5] = [a5, b5, c5, d5, e5, f5, g5, h5,  A5, B5, C5, D5, E5, F5, G5, H5]
+		// tab[6] = [a6, b6, c6, d6, e6, f6, g6, h6,  A6, B6, C6, D6, E6, F6, G6, H6]
+		// tab[7] = [a7, b7, c7, d7, e7, f7, g7, h7,  A7, B7, C7, D7, E7, F7, G7, H7]
+
+		// auto a03b03 = mipp::interleavelo2<int8_t>(tab[0], tab[1]);
+		// auto c03d03 = mipp::interleavelo2<int8_t>(tab[2], tab[3]);
+		// auto e03f03 = mipp::interleavelo2<int8_t>(tab[4], tab[5]);
+		// auto g03h03 = mipp::interleavelo2<int8_t>(tab[6], tab[7]);
+		// auto a47b47 = mipp::interleavehi2<int8_t>(tab[0], tab[1]);
+		// auto c47d47 = mipp::interleavehi2<int8_t>(tab[2], tab[3]);
+		// auto e47f47 = mipp::interleavehi2<int8_t>(tab[4], tab[5]);
+		// auto g47h47 = mipp::interleavehi2<int8_t>(tab[6], tab[7]);
+
+		// auto a01b01c01d01 = mipp::interleavelo2<int16_t>(a03b03, c03d03);
+		// auto a23b23c23d23 = mipp::interleavehi2<int16_t>(a03b03, c03d03);
+		// auto e01f01g01h01 = mipp::interleavelo2<int16_t>(e03f03, g03h03);
+		// auto e23f23g23h23 = mipp::interleavehi2<int16_t>(e03f03, g03h03);
+		// auto a45b45c45d45 = mipp::interleavelo2<int16_t>(a47b47, c47d47);
+		// auto a67b67c67d67 = mipp::interleavehi2<int16_t>(a47b47, c47d47);
+		// auto e45f45g45h45 = mipp::interleavelo2<int16_t>(e47f47, g47h47);
+		// auto e67f67g67h67 = mipp::interleavehi2<int16_t>(e47f47, g47h47);
+
+		// auto a0b0c0d0e0f0g0h0 = mipp::interleavelo2<int32_t>(a01b01c01d01, e01f01g01h01);
+		// auto a1b1c1d1e1f1g1h1 = mipp::interleavehi2<int32_t>(a01b01c01d01, e01f01g01h01);
+		// auto a2b2c2d2e2f2g2h2 = mipp::interleavelo2<int32_t>(a23b23c23d23, e23f23g23h23);
+		// auto a3b3c3d3e3f3g3h3 = mipp::interleavehi2<int32_t>(a23b23c23d23, e23f23g23h23);
+		// auto a4b4c4d4e4f4g4h4 = mipp::interleavelo2<int32_t>(a45b45c45d45, e45f45g45h45);
+		// auto a5b5c5d5e5f5g5h5 = mipp::interleavehi2<int32_t>(a45b45c45d45, e45f45g45h45);
+		// auto a6b6c6d6e6f6g6h6 = mipp::interleavelo2<int32_t>(a67b67c67d67, e67f67g67h67);
+		// auto a7b7c7d7e7f7g7h7 = mipp::interleavehi2<int32_t>(a67b67c67d67, e67f67g67h67);
+
+		// tab[0] = (reg)a0b0c0d0e0f0g0h0;
+		// tab[1] = (reg)a1b1c1d1e1f1g1h1;
+		// tab[2] = (reg)a2b2c2d2e2f2g2h2;
+		// tab[3] = (reg)a3b3c3d3e3f3g3h3;
+		// tab[4] = (reg)a4b4c4d4e4f4g4h4;
+		// tab[5] = (reg)a5b5c5d5e5f5g5h5;
+		// tab[6] = (reg)a6b6c6d6e6f6g6h6;
+		// tab[7] = (reg)a7b7c7d7e7f7g7h7;
+
+		auto ab = mipp::interleave2<int8_t>(tab[0], tab[1]);
+		auto cd = mipp::interleave2<int8_t>(tab[2], tab[3]);
+		auto ef = mipp::interleave2<int8_t>(tab[4], tab[5]);
+		auto gh = mipp::interleave2<int8_t>(tab[6], tab[7]);
+
+		auto a03b03 = ab.val[0];
+		auto c03d03 = cd.val[0];
+		auto e03f03 = ef.val[0];
+		auto g03h03 = gh.val[0];
+		auto a47b47 = ab.val[1];
+		auto c47d47 = cd.val[1];
+		auto e47f47 = ef.val[1];
+		auto g47h47 = gh.val[1];
+
+		auto a03b03c03d03 = mipp::interleave2<int16_t>(a03b03, c03d03);
+		auto e03f03g03h03 = mipp::interleave2<int16_t>(e03f03, g03h03);
+		auto a47b47c47d47 = mipp::interleave2<int16_t>(a47b47, c47d47);
+		auto e47f47g47h47 = mipp::interleave2<int16_t>(e47f47, g47h47);
+
+		auto a01b01c01d01 = a03b03c03d03.val[0];
+		auto a23b23c23d23 = a03b03c03d03.val[1];
+		auto e01f01g01h01 = e03f03g03h03.val[0];
+		auto e23f23g23h23 = e03f03g03h03.val[1];
+		auto a45b45c45d45 = a47b47c47d47.val[0];
+		auto a67b67c67d67 = a47b47c47d47.val[1];
+		auto e45f45g45h45 = e47f47g47h47.val[0];
+		auto e67f67g67h67 = e47f47g47h47.val[1];
+
+		auto a01b01c01d01e01f01g01h01 = mipp::interleave2<int32_t>(a01b01c01d01, e01f01g01h01);
+		auto a23b23c23d23e23f23g23h23 = mipp::interleave2<int32_t>(a23b23c23d23, e23f23g23h23);
+		auto a45b45c45d45e45f45g45h45 = mipp::interleave2<int32_t>(a45b45c45d45, e45f45g45h45);
+		auto a67b67c67d67e67f67g67h67 = mipp::interleave2<int32_t>(a67b67c67d67, e67f67g67h67);
+
+		auto a0b0c0d0e0f0g0h0 = a01b01c01d01e01f01g01h01.val[0];
+		auto a1b1c1d1e1f1g1h1 = a01b01c01d01e01f01g01h01.val[1];
+		auto a2b2c2d2e2f2g2h2 = a23b23c23d23e23f23g23h23.val[0];
+		auto a3b3c3d3e3f3g3h3 = a23b23c23d23e23f23g23h23.val[1];
+		auto a4b4c4d4e4f4g4h4 = a45b45c45d45e45f45g45h45.val[0];
+		auto a5b5c5d5e5f5g5h5 = a45b45c45d45e45f45g45h45.val[1];
+		auto a6b6c6d6e6f6g6h6 = a67b67c67d67e67f67g67h67.val[0];
+		auto a7b7c7d7e7f7g7h7 = a67b67c67d67e67f67g67h67.val[1];
+
+		tab[0] = (reg)a0b0c0d0e0f0g0h0;
+		tab[1] = (reg)a1b1c1d1e1f1g1h1;
+		tab[2] = (reg)a2b2c2d2e2f2g2h2;
+		tab[3] = (reg)a3b3c3d3e3f3g3h3;
+		tab[4] = (reg)a4b4c4d4e4f4g4h4;
+		tab[5] = (reg)a5b5c5d5e5f5g5h5;
+		tab[6] = (reg)a6b6c6d6e6f6g6h6;
+		tab[7] = (reg)a7b7c7d7e7f7g7h7;
+	}
 #endif

@@ -310,21 +310,17 @@ public:
 
 	// ------------------------------------------------------------------------------------------------------ reduction
 #ifndef MIPP_NO_INTRINSICS
-	inline Reg<T> sum () const { return Reduction<T,mipp::add>::apply(*this); }
-	inline Reg<T> hadd() const { return Reduction<T,mipp::add>::apply(*this); }
-	inline Reg<T> hsub() const { return Reduction<T,mipp::sub>::apply(*this); }
-	inline Reg<T> hmul() const { return Reduction<T,mipp::mul>::apply(*this); }
-	inline Reg<T> hdiv() const { return Reduction<T,mipp::div>::apply(*this); }
-	inline Reg<T> hmin() const { return Reduction<T,mipp::min>::apply(*this); }
-	inline Reg<T> hmax() const { return Reduction<T,mipp::max>::apply(*this); }
+	inline T sum () const { return Reduction<T,mipp::add>::apply_v(*this); }
+	inline T hadd() const { return Reduction<T,mipp::add>::apply_v(*this); }
+	inline T hmul() const { return Reduction<T,mipp::mul>::apply_v(*this); }
+	inline T hmin() const { return Reduction<T,mipp::min>::apply_v(*this); }
+	inline T hmax() const { return Reduction<T,mipp::max>::apply_v(*this); }
 #else
-	inline Reg<T> sum () const { return *this; }
-	inline Reg<T> hadd() const { return *this; }
-	inline Reg<T> hsub() const { return *this; }
-	inline Reg<T> hmul() const { return *this; }
-	inline Reg<T> hdiv() const { return *this; }
-	inline Reg<T> hmin() const { return *this; }
-	inline Reg<T> hmax() const { return *this; }
+	inline T sum () const { return *this; }
+	inline T hadd() const { return *this; }
+	inline T hmul() const { return *this; }
+	inline T hmin() const { return *this; }
+	inline T hmax() const { return *this; }
 #endif
 
 	// -------------------------------------------------------------------------------------------------------- masking
@@ -584,10 +580,11 @@ template <typename T> inline Reg<T>      div2         (const Reg<T> v)          
 template <typename T> inline Reg<T>      div4         (const Reg<T> v)                                        { return v.div4();             }
 template <typename T> inline Reg<T>      sat          (const Reg<T> v, T min, T max)                          { return v.sat(min, max);      }
 template <typename T> inline Reg<T>      round        (const Reg<T> v)                                        { return v.round();            }
-template <typename T> inline Reg<T>      sum          (const Reg<T> v)                                        { return v.sum();              }
-template <typename T> inline Reg<T>      hadd         (const Reg<T> v)                                        { return v.hadd();             }
-template <typename T> inline Reg<T>      hmin         (const Reg<T> v)                                        { return v.hmin();             }
-template <typename T> inline Reg<T>      hmax         (const Reg<T> v)                                        { return v.hmax();             }
+template <typename T> inline     T       sum          (const Reg<T> v)                                        { return v.sum();              }
+template <typename T> inline     T       hadd         (const Reg<T> v)                                        { return v.hadd();             }
+template <typename T> inline     T       hmul         (const Reg<T> v)                                        { return v.hmul();             }
+template <typename T> inline     T       hmin         (const Reg<T> v)                                        { return v.hmin();             }
+template <typename T> inline     T       hmax         (const Reg<T> v)                                        { return v.hmax();             }
 
 template <typename T1, typename T2> 
 inline Reg<T2> cvt(const Reg<T1> v) {

@@ -767,6 +767,12 @@ struct reduction
 		return _reduction<T,OP>::apply(r);
 	}
 
+	static T apply_v(const reg r)
+	{
+		auto red = reduction<T,OP>::apply(r);
+		return *((T*)&red);
+	}
+
 	template <ld_op<T> LD = mipp::load<T>>
 	static T apply(const mipp::vector<T> &data)
 	{
@@ -803,6 +809,12 @@ struct Reduction
 	static Reg<T> apply(const Reg<T> r) 
 	{
 		return _Reduction<T,OP>::apply(r);
+	}
+
+	static T apply_v(const Reg<T> r)
+	{
+		auto red = Reduction<T,OP>::apply(r);
+		return red[0];
 	}
 
 	template <ld_op<T> LD = mipp::load<T>>
@@ -845,13 +857,11 @@ struct Reduction
 
 // ------------------------------------------------------------------------- special reduction functions implementation
 
-template <typename T> inline reg sum (const reg v) { return reduction<T,mipp::add<T>>::apply(v); }
-template <typename T> inline reg hadd(const reg v) { return reduction<T,mipp::add<T>>::apply(v); }
-template <typename T> inline reg hsub(const reg v) { return reduction<T,mipp::sub<T>>::apply(v); }
-template <typename T> inline reg hmul(const reg v) { return reduction<T,mipp::mul<T>>::apply(v); }
-template <typename T> inline reg hdiv(const reg v) { return reduction<T,mipp::div<T>>::apply(v); }
-template <typename T> inline reg hmin(const reg v) { return reduction<T,mipp::min<T>>::apply(v); }
-template <typename T> inline reg hmax(const reg v) { return reduction<T,mipp::max<T>>::apply(v); }
+template <typename T> inline T sum (const reg v) { return reduction<T,mipp::add<T>>::apply_v(v); }
+template <typename T> inline T hadd(const reg v) { return reduction<T,mipp::add<T>>::apply_v(v); }
+template <typename T> inline T hmul(const reg v) { return reduction<T,mipp::mul<T>>::apply_v(v); }
+template <typename T> inline T hmin(const reg v) { return reduction<T,mipp::min<T>>::apply_v(v); }
+template <typename T> inline T hmax(const reg v) { return reduction<T,mipp::max<T>>::apply_v(v); }
 
 // ------------------------------------------------------------------------------------------------- wrapper to objects
 #include "mipp_object.hxx"

@@ -28,13 +28,13 @@ void SatTest::test_reg_sat_int()
 		std::mt19937 g;
 		std::uniform_int_distribution<T> dis(std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
 
-		for (auto i = 0; i < N; i++)
-			inputs1[i] = dis(g);
-
-		mipp::reg r1 = mipp::load<T>(inputs1);
-
 		for (auto i = 0; i < 100; i++)
 		{
+			for (auto i = 0; i < N; i++)
+				inputs1[i] = dis(g);
+
+			mipp::reg r1 = mipp::load<T>(inputs1);
+
 			T n1 = dis(g);
 			T n2 = dis(g);
 
@@ -66,13 +66,13 @@ void SatTest::test_reg_sat_real()
 		std::mt19937 g;
 		std::uniform_real_distribution<T> dis(std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
 
-		for (auto i = 0; i < N; i++)
-			inputs1[i] = dis(g);
-
-		mipp::reg r1 = mipp::load<T>(inputs1);
-
 		for (auto i = 0; i < 100; i++)
 		{
+			for (auto i = 0; i < N; i++)
+				inputs1[i] = dis(g);
+
+			mipp::reg r1 = mipp::load<T>(inputs1);
+
 			T n1 = dis(g);
 			T n2 = dis(g);
 
@@ -111,13 +111,13 @@ void SatTest::test_Reg_sat_int()
 		std::mt19937 g;
 		std::uniform_int_distribution<T> dis(std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
 
-		for (auto i = 0; i < N; i++)
-			inputs1[i] = dis(g);
-
-		mipp::Reg<T> r1 = inputs1;
-
 		for (auto i = 0; i < 100; i++)
 		{
+			for (auto i = 0; i < N; i++)
+				inputs1[i] = dis(g);
+
+			mipp::Reg<T> r1 = inputs1;
+
 			T n1 = dis(g);
 			T n2 = dis(g);
 
@@ -149,13 +149,13 @@ void SatTest::test_Reg_sat_real()
 		std::mt19937 g;
 		std::uniform_real_distribution<T> dis(std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
 
-		for (auto i = 0; i < N; i++)
-			inputs1[i] = dis(g);
-
-		mipp::Reg<T> r1 = inputs1;
-
 		for (auto i = 0; i < 100; i++)
 		{
+			for (auto i = 0; i < N; i++)
+				inputs1[i] = dis(g);
+
+			mipp::Reg<T> r1 = inputs1;
+
 			T n1 = dis(g);
 			T n2 = dis(g);
 
