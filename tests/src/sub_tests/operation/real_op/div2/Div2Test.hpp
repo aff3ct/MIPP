@@ -40,7 +40,7 @@ class Div2Test : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_Reg_mask_div2_float);
 
 #if defined(MIPP_64BIT)
-#if !defined(MIPP_SSE)
+#if !defined(MIPP_SSE) && !defined(MIPP_AVX)
 	CPPUNIT_TEST(test_reg_div2_int64);
 	CPPUNIT_TEST(test_Reg_div2_int64);
 	CPPUNIT_TEST(test_reg_maskz_div2_int64);

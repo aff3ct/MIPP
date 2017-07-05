@@ -2387,12 +2387,12 @@
 //		return _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v1), _mm_set_epi8(13,12,11,10,9,8,7,6,5,4,3,2,1,0,15,14)));
 
 		// make a rotation in:[0, 1, 2, 3, 4, 5, 6, 7] => out:[1, 2, 3, 4, 5, 6, 7, 0]
-		return (__m128) _mm_shuffle_epi8((__m128i) v1, _mm_set_epi8(1,0,15,14,13,12,11,10,9,8,7,6,5,4,3,2));
+		return _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v1), _mm_set_epi8(1,0,15,14,13,12,11,10,9,8,7,6,5,4,3,2)));
 	}
 
 	template <>
 	inline reg lrot<int8_t>(const reg v1) {
-		return (__m128) _mm_shuffle_epi8((__m128i) v1, _mm_set_epi8(0,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1));
+		return _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v1), _mm_set_epi8(0,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1)));
 	}
 #endif
 
@@ -2432,7 +2432,7 @@
 
 	template <>
 	inline reg rrot<int8_t>(const reg v1) {
-		return (__m128) _mm_shuffle_epi8((__m128i) v1, _mm_set_epi8(14,13,12,11,10,9,8,7,6,5,4,3,2,1,0,15));
+		return _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v1), _mm_set_epi8(14,13,12,11,10,9,8,7,6,5,4,3,2,1,0,15)));
 	}
 #endif
 

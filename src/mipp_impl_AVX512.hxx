@@ -1765,17 +1765,6 @@
 		return neg<float>(v1, cvt_msk_reg<16>(v2));
 	}
 
-	// ------------------------------------------------------------------------------------------------------------ neg
-	template <>
-	inline reg neg<double>(const reg v) {
-		return xorb<int64_t>(v, mipp::set1<int64_t>(0x8000000000000000));
-	}
-
-	template <>
-	inline reg neg<float>(const reg v) {
-		return xorb<int32_t>(v, mipp::set1<int32_t>(0x80000000));
-	}
-
 	// ------------------------------------------------------------------------------------------------------------ abs
 	/*
 	template <>

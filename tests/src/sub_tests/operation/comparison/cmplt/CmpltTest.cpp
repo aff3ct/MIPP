@@ -27,21 +27,24 @@ void CmpltTest::test_reg_cmplt()
 		std::iota(inputs2, inputs2 + mipp::N<T>(), 1);
 
 		std::mt19937 g;
-		std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
-		std::shuffle(inputs2, inputs2 + mipp::N<T>(), g);
-
-		mipp::reg r1 = mipp::load<T>(inputs1);
-		mipp::reg r2 = mipp::load<T>(inputs2);
-		mipp::msk m  = mipp::cmplt<T>(r1, r2);
-
-		mipp::reg r3 = mipp::cvt_msk_reg<mipp::N<T>()>(m);
-
-		for (auto i = 0; i < mipp::N<T>(); i++)
+		for (auto t = 0; t < 100; t++)
 		{
-			if (inputs1[i] < inputs2[i])
-				CPPUNIT_ASSERT(*((T*)&r3 +i) != (T)0);
-			else
-				CPPUNIT_ASSERT_EQUAL((T)0, *((T*)&r3 +i));
+			std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
+			std::shuffle(inputs2, inputs2 + mipp::N<T>(), g);
+
+			mipp::reg r1 = mipp::load<T>(inputs1);
+			mipp::reg r2 = mipp::load<T>(inputs2);
+			mipp::msk m  = mipp::cmplt<T>(r1, r2);
+
+			mipp::reg r3 = mipp::cvt_msk_reg<mipp::N<T>()>(m);
+
+			for (auto i = 0; i < mipp::N<T>(); i++)
+			{
+				if (inputs1[i] < inputs2[i])
+					CPPUNIT_ASSERT(*((T*)&r3 +i) != (T)0);
+				else
+					CPPUNIT_ASSERT_EQUAL((T)0, *((T*)&r3 +i));
+			}
 		}
 	}
 	catch(std::exception &e)
@@ -67,21 +70,24 @@ void CmpltTest::test_Reg_cmplt()
 		std::iota(inputs2, inputs2 + mipp::N<T>(), 1);
 
 		std::mt19937 g;
-		std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
-		std::shuffle(inputs2, inputs2 + mipp::N<T>(), g);
-
-		mipp::Reg<T> r1 = inputs1;
-		mipp::Reg<T> r2 = inputs2;
-		mipp::Msk<mipp::N<T>()> m = r1 < r2;
-
-		mipp::reg r3 = mipp::cvt_msk_reg<mipp::N<T>()>(m.m);
-
-		for (auto i = 0; i < mipp::N<T>(); i++)
+		for (auto t = 0; t < 100; t++)
 		{
-			if (inputs1[i] < inputs2[i])
-				CPPUNIT_ASSERT(*((T*)&r3 +i) != (T)0);
-			else
-				CPPUNIT_ASSERT_EQUAL((T)0, *((T*)&r3 +i));
+			std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
+			std::shuffle(inputs2, inputs2 + mipp::N<T>(), g);
+
+			mipp::Reg<T> r1 = inputs1;
+			mipp::Reg<T> r2 = inputs2;
+			mipp::Msk<mipp::N<T>()> m = r1 < r2;
+
+			mipp::reg r3 = mipp::cvt_msk_reg<mipp::N<T>()>(m.m);
+
+			for (auto i = 0; i < mipp::N<T>(); i++)
+			{
+				if (inputs1[i] < inputs2[i])
+					CPPUNIT_ASSERT(*((T*)&r3 +i) != (T)0);
+				else
+					CPPUNIT_ASSERT_EQUAL((T)0, *((T*)&r3 +i));
+			}
 		}
 	}
 	catch(std::exception &e)

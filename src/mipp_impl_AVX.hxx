@@ -204,6 +204,11 @@
 	}
 
 	template <>
+	inline reg set<int64_t>(const int64_t vals[nElReg<int64_t>()]) {
+		return _mm256_castsi256_ps(_mm256_set_epi64x(vals[3], vals[2], vals[1], vals[0]));
+	}
+
+	template <>
 	inline reg set<int32_t>(const int32_t vals[nElReg<int32_t>()]) {
 		return _mm256_castsi256_ps(_mm256_set_epi32(vals[7], vals[6], vals[5], vals[4],
 		                                            vals[3], vals[2], vals[1], vals[0]));
@@ -282,13 +287,13 @@
 	}
 
 	template <>
-	inline reg set1<int32_t>(const int32_t val) {
-		return _mm256_castsi256_ps(_mm256_set1_epi32(val));
+	inline reg set1<int64_t>(const int64_t val) {
+		return _mm256_castsi256_ps(_mm256_set1_epi64x(val));
 	}
 
 	template <>
-	inline reg set1<int64_t>(const int64_t val) {
-		return _mm256_castsi256_ps(_mm256_set1_epi64x(val));
+	inline reg set1<int32_t>(const int32_t val) {
+		return _mm256_castsi256_ps(_mm256_set1_epi32(val));
 	}
 
 #ifdef __AVX2__
@@ -335,6 +340,11 @@
 	template <>
 	inline reg set0<float>() {
 		return _mm256_setzero_ps();
+	}
+
+	template <>
+	inline reg set0<int64_t>() {
+		return _mm256_castsi256_ps(_mm256_setzero_si256());
 	}
 
 	template <>
@@ -437,90 +447,75 @@
 
 	// ---------------------------------------------------------------------------------------------------------- cmask
 	template <>
+	inline reg cmask<double>(const uint32_t val[nElReg<double>()]) {
+		int64_t val_bis[nElReg<int64_t>()] = {(int64_t)val[0], (int64_t)val[1], (int64_t)val[2], (int64_t)val[3]};
+		return mipp::set<int64_t>(val_bis);
+	}
+
+	template <>
 	inline reg cmask<float>(const uint32_t val[nElReg<float>()]) {
-		int8_t val_bis[nElReg<int8_t>()] = {(int8_t)(val[0]*4 + 0), (int8_t)(val[0]*4 + 1),
-		                                    (int8_t)(val[0]*4 + 2), (int8_t)(val[0]*4 + 3),
-		                                    (int8_t)(val[1]*4 + 0), (int8_t)(val[1]*4 + 1),
-		                                    (int8_t)(val[1]*4 + 2), (int8_t)(val[1]*4 + 3),
-		                                    (int8_t)(val[2]*4 + 0), (int8_t)(val[2]*4 + 1),
-		                                    (int8_t)(val[2]*4 + 2), (int8_t)(val[2]*4 + 3),
-		                                    (int8_t)(val[3]*4 + 0), (int8_t)(val[3]*4 + 1),
-		                                    (int8_t)(val[3]*4 + 2), (int8_t)(val[3]*4 + 3),
-		                                    (int8_t)(val[4]*4 + 0), (int8_t)(val[4]*4 + 1),
-		                                    (int8_t)(val[4]*4 + 2), (int8_t)(val[4]*4 + 3),
-		                                    (int8_t)(val[5]*4 + 0), (int8_t)(val[5]*4 + 1),
-		                                    (int8_t)(val[5]*4 + 2), (int8_t)(val[5]*4 + 3),
-		                                    (int8_t)(val[6]*4 + 0), (int8_t)(val[6]*4 + 1),
-		                                    (int8_t)(val[6]*4 + 2), (int8_t)(val[6]*4 + 3),
-		                                    (int8_t)(val[7]*4 + 0), (int8_t)(val[7]*4 + 1),
-		                                    (int8_t)(val[7]*4 + 2), (int8_t)(val[7]*4 + 3)};
-		return mipp::set<int8_t>(val_bis);
+		int32_t val_bis[nElReg<int32_t>()] = {(int32_t)val[0], (int32_t)val[1], (int32_t)val[2], (int32_t)val[3],
+		                                      (int32_t)val[4], (int32_t)val[5], (int32_t)val[6], (int32_t)val[7]};
+		return mipp::set<int32_t>(val_bis);
+	}
+
+	template <>
+	inline reg cmask<int64_t>(const uint32_t val[nElReg<int64_t>()]) {
+		int64_t val_bis[nElReg<int64_t>()] = {(int64_t)val[0], (int64_t)val[1], (int64_t)val[2], (int64_t)val[3]};
+		return mipp::set<int64_t>(val_bis);
 	}
 
 	template <>
 	inline reg cmask<int32_t>(const uint32_t val[nElReg<int32_t>()]) {
-		int8_t val_bis[nElReg<int8_t>()] = {(int8_t)(val[0]*4 + 0), (int8_t)(val[0]*4 + 1),
-		                                    (int8_t)(val[0]*4 + 2), (int8_t)(val[0]*4 + 3),
-		                                    (int8_t)(val[1]*4 + 0), (int8_t)(val[1]*4 + 1),
-		                                    (int8_t)(val[1]*4 + 2), (int8_t)(val[1]*4 + 3),
-		                                    (int8_t)(val[2]*4 + 0), (int8_t)(val[2]*4 + 1),
-		                                    (int8_t)(val[2]*4 + 2), (int8_t)(val[2]*4 + 3),
-		                                    (int8_t)(val[3]*4 + 0), (int8_t)(val[3]*4 + 1),
-		                                    (int8_t)(val[3]*4 + 2), (int8_t)(val[3]*4 + 3),
-		                                    (int8_t)(val[4]*4 + 0), (int8_t)(val[4]*4 + 1),
-		                                    (int8_t)(val[4]*4 + 2), (int8_t)(val[4]*4 + 3),
-		                                    (int8_t)(val[5]*4 + 0), (int8_t)(val[5]*4 + 1),
-		                                    (int8_t)(val[5]*4 + 2), (int8_t)(val[5]*4 + 3),
-		                                    (int8_t)(val[6]*4 + 0), (int8_t)(val[6]*4 + 1),
-		                                    (int8_t)(val[6]*4 + 2), (int8_t)(val[6]*4 + 3),
-		                                    (int8_t)(val[7]*4 + 0), (int8_t)(val[7]*4 + 1),
-		                                    (int8_t)(val[7]*4 + 2), (int8_t)(val[7]*4 + 3)};
-		return mipp::set<int8_t>(val_bis);
+		int32_t val_bis[nElReg<int32_t>()] = {(int32_t)val[0], (int32_t)val[1], (int32_t)val[2], (int32_t)val[3],
+		                                      (int32_t)val[4], (int32_t)val[5], (int32_t)val[6], (int32_t)val[7]};
+		return mipp::set<int32_t>(val_bis);
 	}
 
 	template <>
 	inline reg cmask<int16_t>(const uint32_t val[nElReg<int16_t>()]) {
-		int8_t val_bis[nElReg<int8_t>()] = {(int8_t)(val[ 0]*2 + 0), (int8_t)(val[ 0]*2 + 1),
-		                                    (int8_t)(val[ 1]*2 + 0), (int8_t)(val[ 1]*2 + 1),
-		                                    (int8_t)(val[ 2]*2 + 0), (int8_t)(val[ 2]*2 + 1),
-		                                    (int8_t)(val[ 3]*2 + 0), (int8_t)(val[ 3]*2 + 1),
-		                                    (int8_t)(val[ 4]*2 + 0), (int8_t)(val[ 4]*2 + 1),
-		                                    (int8_t)(val[ 5]*2 + 0), (int8_t)(val[ 5]*2 + 1),
-		                                    (int8_t)(val[ 6]*2 + 0), (int8_t)(val[ 6]*2 + 1),
-		                                    (int8_t)(val[ 7]*2 + 0), (int8_t)(val[ 7]*2 + 1),
-		                                    (int8_t)(val[ 8]*2 + 0), (int8_t)(val[ 8]*2 + 1),
-		                                    (int8_t)(val[ 9]*2 + 0), (int8_t)(val[ 9]*2 + 1),
-		                                    (int8_t)(val[10]*2 + 0), (int8_t)(val[10]*2 + 1),
-		                                    (int8_t)(val[11]*2 + 0), (int8_t)(val[11]*2 + 1),
-		                                    (int8_t)(val[12]*2 + 0), (int8_t)(val[12]*2 + 1),
-		                                    (int8_t)(val[13]*2 + 0), (int8_t)(val[13]*2 + 1),
-		                                    (int8_t)(val[14]*2 + 0), (int8_t)(val[14]*2 + 1),
-		                                    (int8_t)(val[15]*2 + 0), (int8_t)(val[15]*2 + 1)};
-		return mipp::set<int8_t>(val_bis);
+		int16_t val_bis[nElReg<int16_t>()] = {(int16_t)val[ 0], (int16_t)val[ 1], (int16_t)val[ 2], (int16_t)val[3],
+		                                      (int16_t)val[ 4], (int16_t)val[ 5], (int16_t)val[ 6], (int16_t)val[7],
+		                                      (int16_t)val[ 8], (int16_t)val[ 9], (int16_t)val[10], (int16_t)val[11],
+		                                      (int16_t)val[12], (int16_t)val[13], (int16_t)val[14], (int16_t)val[15]};
+		return mipp::set<int16_t>(val_bis);
 	}
 
 	template <>
 	inline reg cmask<int8_t>(const uint32_t val[nElReg<int8_t>()]) {
-		int8_t val_bis[nElReg<int8_t>()] = {(int8_t)val[ 0], (int8_t)val[ 1],
-		                                    (int8_t)val[ 2], (int8_t)val[ 3],
-		                                    (int8_t)val[ 4], (int8_t)val[ 5],
-		                                    (int8_t)val[ 6], (int8_t)val[ 7],
-		                                    (int8_t)val[ 8], (int8_t)val[ 9],
-		                                    (int8_t)val[10], (int8_t)val[11],
-		                                    (int8_t)val[12], (int8_t)val[13],
-		                                    (int8_t)val[14], (int8_t)val[15],
-		                                    (int8_t)val[16], (int8_t)val[17],
-		                                    (int8_t)val[18], (int8_t)val[19],
-		                                    (int8_t)val[20], (int8_t)val[21],
-		                                    (int8_t)val[22], (int8_t)val[23],
-		                                    (int8_t)val[24], (int8_t)val[25],
-		                                    (int8_t)val[26], (int8_t)val[27],
-		                                    (int8_t)val[28], (int8_t)val[29],
-		                                    (int8_t)val[30], (int8_t)val[31]};
+		int8_t val_bis[nElReg<int8_t>()] = {(int8_t)val[ 0], (int8_t)val[ 1], (int8_t)val[ 2], (int8_t)val[ 3],
+		                                    (int8_t)val[ 4], (int8_t)val[ 5], (int8_t)val[ 6], (int8_t)val[ 7],
+		                                    (int8_t)val[ 8], (int8_t)val[ 9], (int8_t)val[10], (int8_t)val[11],
+		                                    (int8_t)val[12], (int8_t)val[13], (int8_t)val[14], (int8_t)val[15],
+		                                    (int8_t)val[16], (int8_t)val[17], (int8_t)val[18], (int8_t)val[19],
+		                                    (int8_t)val[20], (int8_t)val[21], (int8_t)val[22], (int8_t)val[23],
+		                                    (int8_t)val[24], (int8_t)val[25], (int8_t)val[26], (int8_t)val[27],
+		                                    (int8_t)val[28], (int8_t)val[29], (int8_t)val[30], (int8_t)val[31]};
 		return mipp::set<int8_t>(val_bis);
 	}
 
 	// --------------------------------------------------------------------------------------------------------- cmask2
+	template <>
+	inline reg cmask2<double>(const uint32_t val[nElReg<double>()/2]) {
+		int8_t val_bis[nElReg<int8_t>()] = {(int8_t)(val[0]*8 + 0), (int8_t)(val[0]*8 + 1),
+		                                    (int8_t)(val[0]*8 + 2), (int8_t)(val[0]*8 + 3),
+		                                    (int8_t)(val[0]*8 + 4), (int8_t)(val[0]*8 + 5),
+		                                    (int8_t)(val[0]*8 + 6), (int8_t)(val[0]*8 + 7),
+		                                    (int8_t)(val[1]*8 + 0), (int8_t)(val[1]*8 + 1),
+		                                    (int8_t)(val[1]*8 + 2), (int8_t)(val[1]*8 + 3),
+		                                    (int8_t)(val[1]*8 + 4), (int8_t)(val[1]*8 + 5),
+		                                    (int8_t)(val[1]*8 + 6), (int8_t)(val[1]*8 + 7),
+		                                    (int8_t)(val[0]*8 + 0), (int8_t)(val[0]*8 + 1),
+		                                    (int8_t)(val[0]*8 + 2), (int8_t)(val[0]*8 + 3),
+		                                    (int8_t)(val[0]*8 + 4), (int8_t)(val[0]*8 + 5),
+		                                    (int8_t)(val[0]*8 + 6), (int8_t)(val[0]*8 + 7),
+		                                    (int8_t)(val[1]*8 + 0), (int8_t)(val[1]*8 + 1),
+		                                    (int8_t)(val[1]*8 + 2), (int8_t)(val[1]*8 + 3),
+		                                    (int8_t)(val[1]*8 + 4), (int8_t)(val[1]*8 + 5),
+		                                    (int8_t)(val[1]*8 + 6), (int8_t)(val[1]*8 + 7)};
+		return mipp::set<int8_t>(val_bis);
+	}
+
 	template <>
 	inline reg cmask2<float>(const uint32_t val[nElReg<float>()/2]) {
 		int8_t val_bis[nElReg<int8_t>()] = {(int8_t)(val[0]*4 + 0), (int8_t)(val[0]*4 + 1),
@@ -539,6 +534,27 @@
 		                                    (int8_t)(val[2]*4 + 2), (int8_t)(val[2]*4 + 3),
 		                                    (int8_t)(val[3]*4 + 0), (int8_t)(val[3]*4 + 1),
 		                                    (int8_t)(val[3]*4 + 2), (int8_t)(val[3]*4 + 3)};
+		return mipp::set<int8_t>(val_bis);
+	}
+
+	template <>
+	inline reg cmask2<int64_t>(const uint32_t val[nElReg<int64_t>()/2]) {
+		int8_t val_bis[nElReg<int8_t>()] = {(int8_t)(val[0]*8 + 0), (int8_t)(val[0]*8 + 1),
+		                                    (int8_t)(val[0]*8 + 2), (int8_t)(val[0]*8 + 3),
+		                                    (int8_t)(val[0]*8 + 4), (int8_t)(val[0]*8 + 5),
+		                                    (int8_t)(val[0]*8 + 6), (int8_t)(val[0]*8 + 7),
+		                                    (int8_t)(val[1]*8 + 0), (int8_t)(val[1]*8 + 1),
+		                                    (int8_t)(val[1]*8 + 2), (int8_t)(val[1]*8 + 3),
+		                                    (int8_t)(val[1]*8 + 4), (int8_t)(val[1]*8 + 5),
+		                                    (int8_t)(val[1]*8 + 6), (int8_t)(val[1]*8 + 7),
+		                                    (int8_t)(val[0]*8 + 0), (int8_t)(val[0]*8 + 1),
+		                                    (int8_t)(val[0]*8 + 2), (int8_t)(val[0]*8 + 3),
+		                                    (int8_t)(val[0]*8 + 4), (int8_t)(val[0]*8 + 5),
+		                                    (int8_t)(val[0]*8 + 6), (int8_t)(val[0]*8 + 7),
+		                                    (int8_t)(val[1]*8 + 0), (int8_t)(val[1]*8 + 1),
+		                                    (int8_t)(val[1]*8 + 2), (int8_t)(val[1]*8 + 3),
+		                                    (int8_t)(val[1]*8 + 4), (int8_t)(val[1]*8 + 5),
+		                                    (int8_t)(val[1]*8 + 6), (int8_t)(val[1]*8 + 7)};
 		return mipp::set<int8_t>(val_bis);
 	}
 
@@ -607,24 +623,85 @@
 
 	// ---------------------------------------------------------------------------------------------------------- shuff
 	template <>
+	inline reg shuff<double>(const reg v, const reg cm) {
+		constexpr int N = mipp::N<double>();
+
+		double out[N];
+		for (auto i = 0; i < N; i++)
+			out[i] = *((double*)&v + (*((int64_t*)&cm +i)));
+
+		return mipp::loadu<double>(out);
+	}
+
+	template <>
 	inline reg shuff<float>(const reg v, const reg cm) {
-		int8_t control_mask[mipp::nElReg<float>()*sizeof(float)];
-		mipp::store<int8_t>(control_mask, cm);
+		constexpr int N = mipp::N<float>();
 
-		float v_in[mipp::nElReg<float>()], v_out[mipp::nElReg<float>()];
-		mipp::store<float>(v_in, v);
+		float out[N];
+		for (auto i = 0; i < N; i++)
+			out[i] = *((float*)&v + (*((int32_t*)&cm +i)));
 
-		for (auto i = 0; i < mipp::nElReg<float>(); i++)
-			v_out[i] = v_in[control_mask[i*sizeof(float)]/sizeof(float)];
-		auto res = mipp::load<float>(v_out);
+		return mipp::loadu<float>(out);
+	}
 
-		return res;
+	template <>
+	inline reg shuff<int64_t>(const reg v, const reg cm) {
+		constexpr int N = mipp::N<int64_t>();
+
+		int64_t out[N];
+		for (auto i = 0; i < N; i++)
+			out[i] = *((int64_t*)&v + (*((int64_t*)&cm +i)));
+
+		return mipp::loadu<int64_t>(out);
+	}
+
+	template <>
+	inline reg shuff<int32_t>(const reg v, const reg cm) {
+		constexpr int N = mipp::N<int32_t>();
+
+		int32_t out[N];
+		for (auto i = 0; i < N; i++)
+			out[i] = *((int32_t*)&v + (*((int32_t*)&cm +i)));
+
+		return mipp::loadu<int32_t>(out);
+	}
+
+	template <>
+	inline reg shuff<int16_t>(const reg v, const reg cm) {
+		constexpr int N = mipp::N<int16_t>();
+
+		int16_t out[N];
+		for (auto i = 0; i < N; i++)
+			out[i] = *((int16_t*)&v + (*((int16_t*)&cm +i)));
+
+		return mipp::loadu<int16_t>(out);
+	}
+
+	template <>
+	inline reg shuff<int8_t>(const reg v, const reg cm) {
+		constexpr int N = mipp::N<int8_t>();
+
+		int8_t out[N];
+		for (auto i = 0; i < N; i++)
+			out[i] = *((int8_t*)&v + (*((int8_t*)&cm +i)));
+
+		return mipp::loadu<int8_t>(out);
 	}
 
 	// --------------------------------------------------------------------------------------------------------- shuff2
 #ifdef __AVX2__
 	template <>
+	inline reg shuff2<double>(const reg v, const reg cm) {
+		return _mm256_castsi256_ps(_mm256_shuffle_epi8(_mm256_castps_si256(v), _mm256_castps_si256(cm)));
+	}
+
+	template <>
 	inline reg shuff2<float>(const reg v, const reg cm) {
+		return _mm256_castsi256_ps(_mm256_shuffle_epi8(_mm256_castps_si256(v), _mm256_castps_si256(cm)));
+	}
+
+	template <>
+	inline reg shuff2<int64_t>(const reg v, const reg cm) {
 		return _mm256_castsi256_ps(_mm256_shuffle_epi8(_mm256_castps_si256(v), _mm256_castps_si256(cm)));
 	}
 
@@ -652,15 +729,15 @@
 	}
 
 	template <>
-	inline reg interleavelo2<int64_t>(const reg v1, const reg v2) {
-		return _mm256_castsi256_ps(_mm256_unpacklo_epi64(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
-	}
-
-	template <>
 	inline reg interleavelo2<float>(const reg v1, const reg v2) {
 		// v1  = [a0, b0, c0, d0, e0, f0, g0, h0], v2 = [a1, b1, c1, d1, e1, f1, g1, h1]
 		// res = [a0, a1, b0, b1, e0, e1, f0, f1]
 		return _mm256_castsi256_ps(_mm256_unpacklo_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	}
+
+	template <>
+	inline reg interleavelo2<int64_t>(const reg v1, const reg v2) {
+		return _mm256_castsi256_ps(_mm256_unpacklo_epi64(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
 	}
 
 	template <>
@@ -689,15 +766,15 @@
 	}
 
 	template <>
-	inline reg interleavehi2<int64_t>(const reg v1, const reg v2) {
-		return _mm256_castsi256_ps(_mm256_unpackhi_epi64(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
-	}
-
-	template <>
 	inline reg interleavehi2<float>(const reg v1, const reg v2) {
 		// v1  = [a0, b0, c0, d0, e0, f0, g0, h0], v2 = [a1, b1, c1, d1, e1, f1, g1, h1]
 		// res = [c0, c1, d0, d1, g0, g1, h0, h1]
 		return _mm256_castsi256_ps(_mm256_unpackhi_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	}
+
+	template <>
+	inline reg interleavehi2<int64_t>(const reg v1, const reg v2) {
+		return _mm256_castsi256_ps(_mm256_unpackhi_epi64(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
 	}
 
 	template <>
@@ -780,17 +857,37 @@
 #endif
 
 	// ----------------------------------------------------------------------------------------------------- interleave
-#ifdef __AVX2__
 	template <>
-	inline reg interleave<int32_t>(const reg v) {
-		auto v_permute = _mm256_permute2f128_si256(_mm256_castps_si256(v), _mm256_castps_si256(v), _MM_SHUFFLE(0,0,0,3));
-		
-		auto lo = _mm256_unpacklo_epi32(_mm256_castps_si256(v), v_permute);
-		auto hi = _mm256_unpackhi_epi32(_mm256_castps_si256(v), v_permute);
+	inline reg interleave<double>(const reg v) {
+		auto v_permute = _mm256_permute2f128_pd(_mm256_castps_pd(v), _mm256_castps_pd(v), _MM_SHUFFLE(0,0,0,3));
 
-		return _mm256_castsi256_ps(_mm256_permute2f128_si256(lo, hi, _MM_SHUFFLE(0,2,0,0)));
+		auto lo = _mm256_unpacklo_pd(_mm256_castps_pd(v), v_permute);
+		auto hi = _mm256_unpackhi_pd(_mm256_castps_pd(v), v_permute);
+
+		return _mm256_castpd_ps(_mm256_permute2f128_pd(lo, hi, _MM_SHUFFLE(0,2,0,0)));
 	}
 
+	template <>
+	inline reg interleave<float>(const reg v) {
+		auto v_permute = _mm256_permute2f128_ps(v, v, _MM_SHUFFLE(0,0,0,3));
+
+		auto lo = _mm256_unpacklo_ps(v, v_permute);
+		auto hi = _mm256_unpackhi_ps(v, v_permute);
+
+		return _mm256_permute2f128_ps(lo, hi, _MM_SHUFFLE(0,2,0,0));
+	}
+
+	template <>
+	inline reg interleave<int64_t>(const reg v) {
+		return interleave<double>(v);
+	}
+
+	template <>
+	inline reg interleave<int32_t>(const reg v) {
+		return interleave<float>(v);
+	}
+
+#ifdef __AVX2__
 	template <>
 	inline reg interleave<int16_t>(const reg v) {
 		auto v_permute = _mm256_permute2f128_si256(_mm256_castps_si256(v), _mm256_castps_si256(v), _MM_SHUFFLE(0,0,0,3));
@@ -812,10 +909,96 @@
 	}
 #endif
 
+	// --------------------------------------------------------------------------------------------------- interleavelo
+	template <>
+	inline reg interleavelo<double>(const reg v1, const reg v2) {
+		auto rx2 = interleave<double>(v1, v2);
+		return rx2.val[0];
+	}
+
+	template <>
+	inline reg interleavelo<float>(const reg v1, const reg v2) {
+		auto rx2 = interleave<float>(v1, v2);
+		return rx2.val[0];
+	}
+
+	template <>
+	inline reg interleavelo<int64_t>(const reg v1, const reg v2) {
+		auto rx2 = interleave<int64_t>(v1, v2);
+		return rx2.val[0];
+	}
+
+	template <>
+	inline reg interleavelo<int32_t>(const reg v1, const reg v2) {
+		auto rx2 = interleave<int32_t>(v1, v2);
+		return rx2.val[0];
+	}
+
+	template <>
+	inline reg interleavelo<int16_t>(const reg v1, const reg v2) {
+		auto rx2 = interleave<int16_t>(v1, v2);
+		return rx2.val[0];
+	}
+
+	template <>
+	inline reg interleavelo<int8_t>(const reg v1, const reg v2) {
+		auto rx2 = interleave<int8_t>(v1, v2);
+		return rx2.val[0];
+	}
+
+	// --------------------------------------------------------------------------------------------------- interleavehi
+	template <>
+	inline reg interleavehi<double>(const reg v1, const reg v2) {
+		auto rx2 = interleave<double>(v1, v2);
+		return rx2.val[1];
+	}
+
+	template <>
+	inline reg interleavehi<int64_t>(const reg v1, const reg v2) {
+		auto rx2 = interleave<int64_t>(v1, v2);
+		return rx2.val[1];
+	}
+
+	template <>
+	inline reg interleavehi<float>(const reg v1, const reg v2) {
+		auto rx2 = interleave<float>(v1, v2);
+		return rx2.val[1];
+	}
+
+	template <>
+	inline reg interleavehi<int32_t>(const reg v1, const reg v2) {
+		auto rx2 = interleave<int32_t>(v1, v2);
+		return rx2.val[1];
+	}
+
+	template <>
+	inline reg interleavehi<int16_t>(const reg v1, const reg v2) {
+		auto rx2 = interleave<int16_t>(v1, v2);
+		return rx2.val[1];
+	}
+
+	template <>
+	inline reg interleavehi<int8_t>(const reg v1, const reg v2) {
+		auto rx2 = interleave<int8_t>(v1, v2);
+		return rx2.val[1];
+	}
+
 	// ---------------------------------------------------------------------------------------------------- interleave2
+	template <>
+	inline regx2 interleave2<double>(const reg v1, const reg v2) {
+		regx2 res = {{mipp::interleavelo2<double>(v1, v2), mipp::interleavehi2<double>(v1, v2)}};
+		return res;
+	}
+
 	template <>
 	inline regx2 interleave2<float>(const reg v1, const reg v2) {
 		regx2 res = {{mipp::interleavelo2<float>(v1, v2), mipp::interleavehi2<float>(v1, v2)}};
+		return res;
+	}
+
+	template <>
+	inline regx2 interleave2<int64_t>(const reg v1, const reg v2) {
+		regx2 res = {{mipp::interleavelo2<int64_t>(v1, v2), mipp::interleavehi2<int64_t>(v1, v2)}};
 		return res;
 	}
 
@@ -836,6 +1019,8 @@
 		regx2 res = {{mipp::interleavelo2<int8_t>(v1, v2), mipp::interleavehi2<int8_t>(v1, v2)}};
 		return res;
 	}
+
+
 
 	// --------------------------------------------------------------------------------------------------- interleavex2
 #ifdef __AVX2__
@@ -878,7 +1063,6 @@
 	inline reg interleavex16<int8_t>(const reg v) {
 		return mipp::interleave<int16_t>(v);
 	}
-
 
 	// ------------------------------------------------------------------------------------------------------ transpose
 #ifdef __AVX2__
@@ -1033,6 +1217,11 @@
 	}
 
 	template <>
+	inline reg andb<int64_t>(const reg v1, const reg v2) {
+		return _mm256_castpd_ps(_mm256_and_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2)));
+	}
+
+	template <>
 	inline reg andb<int32_t>(const reg v1, const reg v2) {
 		return _mm256_and_ps(v1, v2);
 	}
@@ -1084,6 +1273,11 @@
 	}
 
 	template <>
+	inline reg andnb<int64_t>(const reg v1, const reg v2) {
+		return _mm256_castpd_ps(_mm256_andnot_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2)));
+	}
+
+	template <>
 	inline reg andnb<int32_t>(const reg v1, const reg v2) {
 		return _mm256_andnot_ps(v1, v2);
 	}
@@ -1132,6 +1326,11 @@
 	template <>
 	inline reg notb<double>(const reg v) {
 		return andnb<double>(v, set1<int64_t>(0xFFFFFFFFFFFFFFFF));
+	}
+
+	template <>
+	inline reg notb<int64_t>(const reg v) {
+		return andnb<int64_t>(v, set1<int64_t>(0xFFFFFFFFFFFFFFFF));
 	}
 
 	template <>
@@ -1206,6 +1405,11 @@
 	}
 
 	template <>
+	inline reg orb<int64_t>(const reg v1, const reg v2) {
+		return _mm256_castpd_ps(_mm256_or_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2)));
+	}
+
+	template <>
 	inline reg orb<int32_t>(const reg v1, const reg v2) {
 		return _mm256_or_ps(v1, v2);
 	}
@@ -1253,6 +1457,11 @@
 
 	template <>
 	inline reg xorb<double>(const reg v1, const reg v2) {
+		return _mm256_castpd_ps(_mm256_xor_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2)));
+	}
+
+	template <>
+	inline reg xorb<int64_t>(const reg v1, const reg v2) {
 		return _mm256_castpd_ps(_mm256_xor_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2)));
 	}
 
@@ -1365,27 +1574,6 @@
 #endif
 
 	// -------------------------------------------------------------------------------------------------- lshift (mask)
-#ifdef __AVX2__
-	template <>
-	inline msk lshift<4>(const msk v1, const uint32_t n) {
-		return _mm256_slli_si256(v1, n * 8); // TODO: this is not a complete shift, it's a shift by lane.
-	}
-
-	template <>
-	inline msk lshift<8>(const msk v1, const uint32_t n) {
-		return _mm256_slli_si256(v1, n * 4); // TODO: this is not a complete shift, it's a shift by lane.
-	}
-
-	template <>
-	inline msk lshift<16>(const msk v1, const uint32_t n) {
-		return _mm256_slli_si256(v1, n * 2); // TODO: this is not a complete shift, it's a shift by lane.
-	}
-
-	template <>
-	inline msk lshift<32>(const msk v1, const uint32_t n) {
-		return _mm256_slli_si256(v1, n * 1); // TODO: this is not a complete shift, it's a shift by lane.
-	}
-#endif
 
 	// --------------------------------------------------------------------------------------------------------- rshift
 #ifdef __AVX2__
@@ -1456,27 +1644,6 @@
 #endif
 
 	// -------------------------------------------------------------------------------------------------- rshift (mask)
-#ifdef __AVX2__
-	template <>
-	inline msk rshift<4>(const msk v1, const uint32_t n) {
-		return _mm256_srli_si256(v1, n * 8); // TODO: this is not a complete shift, it's a shift by lane.
-	}
-
-	template <>
-	inline msk rshift<8>(const msk v1, const uint32_t n) {
-		return _mm256_srli_si256(v1, n * 4); // TODO: this is not a complete shift, it's a shift by lane.
-	}
-
-	template <>
-	inline msk rshift<16>(const msk v1, const uint32_t n) {
-		return _mm256_srli_si256(v1, n * 2); // TODO: this is not a complete shift, it's a shift by lane.
-	}
-
-	template <>
-	inline msk rshift<32>(const msk v1, const uint32_t n) {
-		return _mm256_srli_si256(v1, n * 1); // TODO: this is not a complete shift, it's a shift by lane.
-	}
-#endif
 
 	// ---------------------------------------------------------------------------------------------------------- cmpeq
 	template <>
@@ -1490,6 +1657,11 @@
 	}
 
 #ifdef __AVX2__
+	template <>
+	inline msk cmpeq<int64_t>(const reg v1, const reg v2) {
+		return _mm256_cmpeq_epi64(_mm256_castps_si256(v1), _mm256_castps_si256(v2));
+	}
+
 	template <>
 	inline msk cmpeq<int32_t>(const reg v1, const reg v2) {
 		return _mm256_cmpeq_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2));
@@ -1518,30 +1690,23 @@
 	}
 
 	template <>
+	inline msk cmpneq<int64_t>(const reg v1, const reg v2) {
+		return notb<N<int64_t>()>(cmpeq<int64_t>(v1, v2));
+	}
+
+	template <>
 	inline msk cmpneq<int32_t>(const reg v1, const reg v2) {
 		return _mm256_castps_si256(_mm256_cmp_ps(v1, v2, _CMP_NEQ_OQ));
 	}
 
-	// ---------------------------------------------------------------------------------------------------------- cmplt
 	template <>
-	inline msk cmplt<float>(const reg v1, const reg v2) {
-		return _mm256_castps_si256(_mm256_cmp_ps(v1, v2, _CMP_LT_OS));
+	inline msk cmpneq<int16_t>(const reg v1, const reg v2) {
+		return notb<N<int16_t>()>(cmpeq<int16_t>(v1, v2));
 	}
 
 	template <>
-	inline msk cmplt<double>(const reg v1, const reg v2) {
-		return _mm256_castpd_si256(_mm256_cmp_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2), _CMP_LT_OS));
-	}
-
-	// ---------------------------------------------------------------------------------------------------------- cmple
-	template <>
-	inline msk cmple<float>(const reg v1, const reg v2) {
-		return _mm256_castps_si256(_mm256_cmp_ps(v1, v2, _CMP_LE_OS));
-	}
-
-	template <>
-	inline msk cmple<double>(const reg v1, const reg v2) {
-		return _mm256_castpd_si256(_mm256_cmp_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2), _CMP_LE_OS));
+	inline msk cmpneq<int8_t>(const reg v1, const reg v2) {
+		return notb<N<int8_t>()>(cmpeq<int8_t>(v1, v2));
 	}
 
 	// ---------------------------------------------------------------------------------------------------------- cmpgt
@@ -1556,6 +1721,11 @@
 	}
 
 #ifdef __AVX2__
+	template <>
+	inline msk cmpgt<int64_t>(const reg v1, const reg v2) {
+		return _mm256_cmpgt_epi64(_mm256_castps_si256(v1), _mm256_castps_si256(v2));
+	}
+
 	template <>
 	inline msk cmpgt<int32_t>(const reg v1, const reg v2) {
 		return _mm256_cmpgt_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2));
@@ -1583,6 +1753,88 @@
 		return _mm256_castpd_si256(_mm256_cmp_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2), _CMP_GE_OS));
 	}
 
+	template <>
+	inline msk cmpge<int64_t>(const reg v1, const reg v2) {
+		return orb<N<int64_t>()>(cmpeq<int64_t>(v1, v2), cmpgt<int64_t>(v1, v2));
+	}
+
+	template <>
+	inline msk cmpge<int32_t>(const reg v1, const reg v2) {
+		return orb<N<int32_t>()>(cmpeq<int32_t>(v1, v2), cmpgt<int32_t>(v1, v2));
+	}
+
+	template <>
+	inline msk cmpge<int16_t>(const reg v1, const reg v2) {
+		return orb<N<int16_t>()>(cmpeq<int16_t>(v1, v2), cmpgt<int16_t>(v1, v2));
+	}
+
+	template <>
+	inline msk cmpge<int8_t>(const reg v1, const reg v2) {
+		return orb<N<int8_t>()>(cmpeq<int8_t>(v1, v2), cmpgt<int8_t>(v1, v2));
+	}
+
+	// ---------------------------------------------------------------------------------------------------------- cmple
+	template <>
+	inline msk cmple<float>(const reg v1, const reg v2) {
+		return _mm256_castps_si256(_mm256_cmp_ps(v1, v2, _CMP_LE_OS));
+	}
+
+	template <>
+	inline msk cmple<double>(const reg v1, const reg v2) {
+		return _mm256_castpd_si256(_mm256_cmp_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2), _CMP_LE_OS));
+	}
+
+	template <>
+	inline msk cmple<int64_t>(const reg v1, const reg v2) {
+		return notb<N<int64_t>()>(cmpgt<int64_t>(v1, v2));
+	}
+
+	template <>
+	inline msk cmple<int32_t>(const reg v1, const reg v2) {
+		return notb<N<int32_t>()>(cmpgt<int32_t>(v1, v2));
+	}
+
+	template <>
+	inline msk cmple<int16_t>(const reg v1, const reg v2) {
+		return notb<N<int16_t>()>(cmpgt<int16_t>(v1, v2));
+	}
+
+	template <>
+	inline msk cmple<int8_t>(const reg v1, const reg v2) {
+		return notb<N<int8_t>()>(cmpgt<int8_t>(v1, v2));
+	}
+
+	// ---------------------------------------------------------------------------------------------------------- cmplt
+	template <>
+	inline msk cmplt<float>(const reg v1, const reg v2) {
+		return _mm256_castps_si256(_mm256_cmp_ps(v1, v2, _CMP_LT_OS));
+	}
+
+	template <>
+	inline msk cmplt<double>(const reg v1, const reg v2) {
+		return _mm256_castpd_si256(_mm256_cmp_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2), _CMP_LT_OS));
+	}
+
+	template <>
+	inline msk cmplt<int64_t>(const reg v1, const reg v2) {
+		return notb<N<int64_t>()>(cmpge<int64_t>(v1, v2));
+	}
+
+	template <>
+	inline msk cmplt<int32_t>(const reg v1, const reg v2) {
+		return notb<N<int32_t>()>(cmpge<int32_t>(v1, v2));
+	}
+
+	template <>
+	inline msk cmplt<int16_t>(const reg v1, const reg v2) {
+		return notb<N<int16_t>()>(cmpge<int16_t>(v1, v2));
+	}
+
+	template <>
+	inline msk cmplt<int8_t>(const reg v1, const reg v2) {
+		return notb<N<int8_t>()>(cmpge<int8_t>(v1, v2));
+	}
+
 	// ------------------------------------------------------------------------------------------------------------ add
 	template <>
 	inline reg add<float>(const reg v1, const reg v2) {
@@ -1595,6 +1847,11 @@
 	}
 
 #ifdef __AVX2__
+	template <>
+	inline reg add<int64_t>(const reg v1, const reg v2) {
+		return _mm256_castsi256_ps(_mm256_add_epi64(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	}
+
 	template <>
 	inline reg add<int32_t>(const reg v1, const reg v2) {
 		return _mm256_castsi256_ps(_mm256_add_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
@@ -1623,6 +1880,16 @@
 	}
 
 #ifdef __AVX2__
+	template <>
+	inline reg sub<int64_t>(const reg v1, const reg v2) {
+		return _mm256_castsi256_ps(_mm256_sub_epi64(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	}
+
+	template <>
+	inline reg sub<int32_t>(const reg v1, const reg v2) {
+		return _mm256_castsi256_ps(_mm256_sub_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	}
+
 	template <>
 	inline reg sub<int16_t>(const reg v1, const reg v2) {
 		return _mm256_castsi256_ps(_mm256_subs_epi16(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
@@ -1813,6 +2080,11 @@
 	}
 
 	template <>
+	inline msk sign<int64_t>(const reg v1) {
+		return cmpgt<int64_t>(set0<int64_t>(), v1);
+	}
+
+	template <>
 	inline msk sign<int32_t>(const reg v1) {
 		return cmpgt<int32_t>(set0<int32_t>(), v1);
 	}
@@ -1885,37 +2157,6 @@
 	}
 #endif
 
-	// ------------------------------------------------------------------------------------------------------------ neg
-	template <>
-	inline reg neg<float>(const reg v) {
-		return xorb<int32_t>(v, mipp::set1<int32_t>(0x80000000));
-	}
-
-	template <>
-	inline reg neg<double>(const reg v) {
-		return xorb<int64_t>(v, mipp::set1<int64_t>(0x8000000000000000));
-	}
-
-#ifdef __AVX2__
-	template <>
-	inline reg neg<int32_t>(const reg v) {
-		reg tmp = set1<int32_t>(-1);
-		return _mm256_castsi256_ps(_mm256_sign_epi32(_mm256_castps_si256(v), _mm256_castps_si256(tmp)));
-	}
-
-	template <>
-	inline reg neg<int16_t>(const reg v) {
-		reg tmp = set1<int16_t>(-1);
-		return _mm256_castsi256_ps(_mm256_sign_epi16(_mm256_castps_si256(v), _mm256_castps_si256(tmp)));
-	}
-
-	template <>
-	inline reg neg<int8_t>(const reg v) {
-		reg tmp = set1<int8_t>(-1);
-		return _mm256_castsi256_ps(_mm256_sign_epi8(_mm256_castps_si256(v), _mm256_castps_si256(tmp)));
-	}
-#endif
-
 	// ------------------------------------------------------------------------------------------------------------ abs
 	template <>
 	inline reg abs<float>(const reg v1) {
@@ -1944,6 +2185,11 @@
 	}
 
 #ifdef __AVX2__
+	template <>
+	inline reg abs<int32_t>(const reg v1) {
+		return _mm256_castsi256_ps(_mm256_abs_epi32(_mm256_castps_si256(v1)));
+	}
+
 	template <>
 	inline reg abs<int16_t>(const reg v1) {
 		return _mm256_castsi256_ps(_mm256_abs_epi16(_mm256_castps_si256(v1)));
@@ -2140,6 +2386,29 @@
 	}
 #endif
 
+	// --------------------------------------------------------------------------------------------------------- fnmsub
+#ifdef __FMA__
+	template <>
+	inline reg fnmsub<float>(const reg v1, const reg v2, const reg v3) {
+		return _mm256_fnmsub_ps(v1, v2, v3);
+	}
+
+	template <>
+	inline reg fnmsub<double>(const reg v1, const reg v2, const reg v3) {
+		return _mm256_castpd_ps(_mm256_fnmsub_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2), _mm256_castps_pd(v3)));
+	}
+#else
+	template <>
+	inline reg fnmsub<float>(const reg v1, const reg v2, const reg v3) {
+		return sub<float>(sub<float>(set0<float>(), mul<float>(v1, v2)), v3);
+	}
+
+	template <>
+	inline reg fnmsub<double>(const reg v1, const reg v2, const reg v3) {
+		return sub<double>(sub<double>(set0<double>(), mul<double>(v1, v2)), v3);
+	}
+#endif
+
 	// ---------------------------------------------------------------------------------------------------------- blend
 	template <>
 	inline reg blend<double>(const reg v1, const reg v2, const msk m) {
@@ -2149,6 +2418,11 @@
 	template <>
 	inline reg blend<float>(const reg v1, const reg v2, const msk m) {
 		return _mm256_blendv_ps(v2, v1, _mm256_castsi256_ps(m));
+	}
+
+	template <>
+	inline reg blend<int64_t>(const reg v1, const reg v2, const msk m) {
+		return _mm256_castpd_ps(_mm256_blendv_pd(_mm256_castps_pd(v2), _mm256_castps_pd(v1), _mm256_castsi256_pd(m)));
 	}
 
 	template <>
@@ -2193,15 +2467,45 @@
 	// ----------------------------------------------------------------------------------------------------------- lrot
 #ifdef __AVX2__
 	template <>
-	inline reg lrot<float>(const reg v1) {
-		// make a rotation in:[7, 6, 5, 4, 3, 2 , 1, 0] => out:[0, 7, 6, 5, 4, 3, 2, 1]
-		return _mm256_permutevar8x32_ps(v1, _mm256_setr_epi32(7, 0, 1, 2, 3, 4, 5, 6));
+	inline reg lrot<double>(const reg v1) {
+		return _mm256_castpd_ps(_mm256_permute4x64_pd(_mm256_castps_pd(v1), _MM_SHUFFLE(0, 3, 2 ,1)));
 	}
 
 	template <>
-	inline reg lrot<double>(const reg v1) {
-		// make a rotation in:[3, 2 , 1, 0] => out:[0, 3, 2, 1]
-		return _mm256_castpd_ps(_mm256_permute4x64_pd(_mm256_castps_pd(v1), _MM_SHUFFLE(2 ,1, 0, 3)));
+	inline reg lrot<float>(const reg v1) {
+		return _mm256_permutevar8x32_ps(v1, _mm256_setr_epi32(1, 2, 3, 4, 5, 6, 7, 0));
+	}
+
+	template <>
+	inline reg lrot<int64_t>(const reg v1) {
+		return _mm256_castpd_ps(_mm256_permute4x64_pd(_mm256_castps_pd(v1), _MM_SHUFFLE(0, 3, 2 ,1)));
+	}
+
+	template <>
+	inline reg lrot<int32_t>(const reg v1) {
+		return _mm256_permutevar8x32_ps(v1, _mm256_setr_epi32(1, 2, 3, 4, 5, 6, 7, 0));
+	}
+
+	template <>
+	inline reg lrot<int16_t>(const reg v1) {
+		auto r = _mm256_castsi256_ps(_mm256_shuffle_epi8(_mm256_castps_si256(v1),
+		                                                 _mm256_set_epi8(1,0,31,30,29,28,27,26,25,24,23,22,21,20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2)));
+
+		const uint16_t mask[16] = {0,0,0,0,0,0,0,0xFFFF,0,0,0,0,0,0,0,0xFFFF};
+		auto m = set<int16_t>((int16_t*)mask);
+		auto r2 = _mm256_permutevar8x32_ps(r, _mm256_setr_epi32(0, 1, 2, 7, 4, 5, 6, 3));
+		return blend<int16_t>(r2, r, _mm256_castps_si256(m));
+	}
+
+	template <>
+	inline reg lrot<int8_t>(const reg v1) {
+		auto r = _mm256_castsi256_ps(_mm256_shuffle_epi8(_mm256_castps_si256(v1),
+		                                                 _mm256_set_epi8(0,31,30,29,28,27,26,25,24,23,22,21,20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1)));
+
+		const uint8_t mask[32] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0xFF,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0xFF};
+		auto m = set<int8_t>((int8_t*)mask);
+		auto r2 = _mm256_permutevar8x32_ps(r, _mm256_setr_epi32(0, 1, 2, 7, 4, 5, 6, 3));
+		return blend<int8_t>(r2, r, _mm256_castps_si256(m));
 	}
 #else
 	template <>
@@ -2255,6 +2559,49 @@
 #endif
 
 	// ----------------------------------------------------------------------------------------------------------- rrot
+#ifdef __AVX2__
+	template <>
+	inline reg rrot<double>(const reg v1) {
+		return _mm256_castpd_ps(_mm256_permute4x64_pd(_mm256_castps_pd(v1), _MM_SHUFFLE(2 ,1, 0, 3)));
+	}
+
+	template <>
+	inline reg rrot<float>(const reg v1) {
+		return _mm256_permutevar8x32_ps(v1, _mm256_setr_epi32(7, 0, 1, 2, 3, 4, 5, 6));
+	}
+
+	template <>
+	inline reg rrot<int64_t>(const reg v1) {
+		return _mm256_castpd_ps(_mm256_permute4x64_pd(_mm256_castps_pd(v1), _MM_SHUFFLE(2 ,1, 0, 3)));
+	}
+
+	template <>
+	inline reg rrot<int32_t>(const reg v1) {
+		return _mm256_permutevar8x32_ps(v1, _mm256_setr_epi32(7, 0, 1, 2, 3, 4, 5, 6));
+	}
+
+	template <>
+	inline reg rrot<int16_t>(const reg v1) {
+		auto r = _mm256_castsi256_ps(_mm256_shuffle_epi8(_mm256_castps_si256(v1),
+		                                                 _mm256_set_epi8(29,28,27,26,25,24,23,22,21,20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0,31,30)));
+
+		const uint16_t mask[16] = {0xFFFF,0,0,0,0,0,0,0,0xFFFF,0,0,0,0,0,0,0};
+		auto m = set<int16_t>((int16_t*)mask);
+		auto r2 = _mm256_permutevar8x32_ps(r, _mm256_setr_epi32(4, 1, 2, 3, 0, 5, 6, 7));
+		return blend<int16_t>(r2, r, _mm256_castps_si256(m));
+	}
+
+	template <>
+	inline reg rrot<int8_t>(const reg v1) {
+		auto r = _mm256_castsi256_ps(_mm256_shuffle_epi8(_mm256_castps_si256(v1),
+		                                                 _mm256_set_epi8(30,29,28,27,26,25,24,23,22,21,20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0,31)));
+
+		const uint8_t mask[32] = {0xFF,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0xFF,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+		auto m = set<int8_t>((int8_t*)mask);
+		auto r2 = _mm256_permutevar8x32_ps(r, _mm256_setr_epi32(4, 1, 2, 3, 0, 5, 6, 7));
+		return blend<int8_t>(r2, r, _mm256_castps_si256(m));
+	}
+#endif
 
 	// ----------------------------------------------------------------------------------------------------------- div2
 	template <>
@@ -2270,12 +2617,20 @@
 #ifdef __AVX2__
 	template <>
 	inline reg div2<int32_t>(const reg v1) {
-		return _mm256_castsi256_ps(_mm256_srai_epi32(_mm256_castps_si256(v1), 1));
+//		return _mm256_castsi256_ps(_mm256_srai_epi32(_mm256_castps_si256(v1), 1)); // seems to do not work
+		reg abs_v1 = abs<int32_t>(v1);
+		reg sh = rshift<int32_t>(abs_v1, 1);
+		sh = neg<int32_t>(sh, v1);
+		return sh;
 	}
 
 	template <>
 	inline reg div2<int16_t>(const reg v1) {
-		return _mm256_castsi256_ps(_mm256_srai_epi16(_mm256_castps_si256(v1), 1));
+//		return _mm256_castsi256_ps(_mm256_srai_epi16(_mm256_castps_si256(v1), 1)); // seems to do not work
+		reg abs_v1 = abs<int16_t>(v1);
+		reg sh = rshift<int16_t>(abs_v1, 1);
+		sh = neg<int16_t>(sh, v1);
+		return sh;
 	}
 
 	template <>
@@ -2308,12 +2663,20 @@
 #ifdef __AVX2__
 	template <>
 	inline reg div4<int32_t>(const reg v1) {
-		return _mm256_castsi256_ps(_mm256_srai_epi32(_mm256_castps_si256(v1), 2));
+//		return _mm256_castsi256_ps(_mm256_srai_epi32(_mm256_castps_si256(v1), 2)); // seems to do not work
+		reg abs_v1 = abs<int32_t>(v1);
+		reg sh = rshift<int32_t>(abs_v1, 2);
+		sh = neg<int32_t>(sh, v1);
+		return sh;
 	}
 
 	template <>
 	inline reg div4<int16_t>(const reg v1) {
-		return _mm256_castsi256_ps(_mm256_srai_epi16(_mm256_castps_si256(v1), 2));
+//		return _mm256_castsi256_ps(_mm256_srai_epi16(_mm256_castps_si256(v1), 2)); // seems to do not work
+		reg abs_v1 = abs<int16_t>(v1);
+		reg sh = rshift<int16_t>(abs_v1, 2);
+		sh = neg<int16_t>(sh, v1);
+		return sh;
 	}
 
 	template <>
@@ -2390,6 +2753,11 @@
 	inline reg cvt<int16_t,int32_t>(const reg_2 v) {
 		return _mm256_castsi256_ps(_mm256_cvtepi16_epi32(_mm_castps_si128(v)));
 	}
+
+	template <>
+	inline reg cvt<int32_t,int64_t>(const reg_2 v) {
+		return _mm256_castsi256_ps(_mm256_cvtepi32_epi64(_mm_castps_si128(v)));
+	}
 #endif
 
 	// ----------------------------------------------------------------------------------------------------------- pack
@@ -2452,6 +2820,28 @@
 			val = OP(val, Reg<float>(_mm256_permute2f128_ps(val.r, val.r, _MM_SHUFFLE(0,0,0,1))));
 			val = OP(val, Reg<float>(_mm256_shuffle_ps     (val.r, val.r, _MM_SHUFFLE(1,0,3,2))));
 			val = OP(val, Reg<float>(_mm256_shuffle_ps     (val.r, val.r, _MM_SHUFFLE(2,3,0,1))));
+			return val;
+		}
+	};
+
+	template <red_op<int64_t> OP>
+	struct _reduction<int64_t,OP>
+	{
+		static reg apply(const reg v1) {
+			auto val = v1;
+			val = OP(val, _mm256_permute2f128_ps(val, val, _MM_SHUFFLE(0,0,0,1)));
+			val = OP(val, _mm256_shuffle_ps     (val, val, _MM_SHUFFLE(1,0,3,2)));
+			return val;
+		}
+	};
+
+	template <Red_op<int64_t> OP>
+	struct _Reduction<int64_t,OP>
+	{
+		static const Reg<int64_t> apply(const Reg<int64_t> v1) {
+			auto val = v1;
+			val = OP(val, Reg<int64_t>(_mm256_permute2f128_ps(val.r, val.r, _MM_SHUFFLE(0,0,0,1))));
+			val = OP(val, Reg<int64_t>(_mm256_shuffle_ps     (val.r, val.r, _MM_SHUFFLE(1,0,3,2))));
 			return val;
 		}
 	};

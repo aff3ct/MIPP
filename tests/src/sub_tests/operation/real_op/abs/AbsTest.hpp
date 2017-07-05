@@ -40,7 +40,7 @@ class AbsTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_Reg_mask_abs_float);
 
 #if defined(MIPP_64BIT)
-#if !defined(MIPP_SSE)
+#if !defined(MIPP_SSE) && !defined(MIPP_AVX)
 	CPPUNIT_TEST(test_reg_abs_int64);
 	CPPUNIT_TEST(test_Reg_abs_int64);
 	CPPUNIT_TEST(test_reg_maskz_abs_int64);

@@ -1235,27 +1235,6 @@
 		return neg<int8_t>(v1, cvt_msk_reg<16>(v2));
 	}
 
-	// ------------------------------------------------------------------------------------------------------------ neg
-	template <>
-	inline reg neg<float>(const reg v) {
-		return xorb<int32_t>(v, mipp::set1<int32_t>(0x80000000));
-	}
-
-	template <>
-	inline reg neg<int32_t>(const reg v) {
-		return (reg) vqnegq_s32((int32x4_t) v);
-	}
-
-	template <>
-	inline reg neg<int16_t>(const reg v) {
-		return (reg) vqnegq_s16((int16x8_t) v);
-	}
-
-	template <>
-	inline reg neg<int8_t>(const reg v) {
-		return (reg) vqnegq_s8((int8x16_t) v);
-	}
-
 	// ------------------------------------------------------------------------------------------------------------ abs
 	template <>
 	inline reg abs<float>(const reg v1) {

@@ -29,7 +29,7 @@ class CvtTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_Reg_cvt_int32_int64);
 #endif
 
-#if !defined(MIPP_SSE)
+#if !defined(MIPP_SSE) && !defined(MIPP_AVX)
 	CPPUNIT_TEST(test_reg_cvt_int64_double);
 	CPPUNIT_TEST(test_Reg_cvt_int64_double);
 
