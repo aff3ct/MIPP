@@ -11,12 +11,13 @@ int main(int argc, char* argv[])
 	std::cout << "MIPP tests" << std::endl;
 	std::cout << "----------" << std::endl << std::endl;
 
-	std::cout << "Instr. type:        " << mipp::IntructionsName                  << std::endl;
-	std::cout << "Instr. version:     " << mipp::IntructionsVersion               << std::endl;
+	std::cout << "Instr. type:        " << mipp::InstructionType                  << std::endl;
+	std::cout << "Instr. full type:   " << mipp::InstructionFullType              << std::endl;
+	std::cout << "Instr. version:     " << mipp::InstructionVersion               << std::endl;
 	std::cout << "Instr. size (bits): " << mipp::RegisterSizeBit                  << std::endl;
 	std::cout << "Instr. lanes:       " << mipp::Lanes                            << std::endl;
-	std::cout << "64-bit support:     " << (mipp::support64Bit    ? "yes" : "no") << std::endl;
-	std::cout << "Byte words support: " << (mipp::supportByteWord ? "yes" : "no") << std::endl;
+	std::cout << "64-bit support:     " << (mipp::Support64Bit    ? "yes" : "no") << std::endl;
+	std::cout << "Byte/word support:  " << (mipp::SupportByteWord ? "yes" : "no") << std::endl;
 
 	std::cout << std::endl << "Running tests: ";
 

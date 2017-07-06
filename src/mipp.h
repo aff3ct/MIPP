@@ -103,14 +103,19 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 #ifndef MIPP_NO_INTRINSICS
 // ------------------------------------------------------------------------------------------------------- ARM NEON-128
 #if defined(__ARM_NEON__) || defined(__ARM_NEON)
-	#define MIPP_INSTR_NAME "NEON"
+	const std::string InstructionType = "NEON";
 	#define MIPP_NEON
+
 	#define MIPP_REQUIRED_ALIGNMENT 16
 #ifdef __aarch64__
+	const std::string InstructionFullType = InstructionType + "v2";
+	const std::string InstructionVersion  = "2";
 	#define MIPP_NEONV2
 	#define MIPP_INSTR_VERSION 2
 	#define MIPP_64BIT
 #else
+	const std::string InstructionFullType = InstructionType + "v1";
+	const std::string InstructionVersion  = "1";
 	#define MIPP_NEONV1
 	#define MIPP_INSTR_VERSION 1
 #endif
@@ -129,16 +134,50 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 
 // -------------------------------------------------------------------------------------------------------- X86 AVX-512
 #elif defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)
-	#define MIPP_INSTR_NAME "AVX512"
+	const std::string InstructionType = "AVX512";
 	#define MIPP_AVX512
+
 	#define MIPP_REQUIRED_ALIGNMENT 64
 	#define MIPP_64BIT
+
+	std::string InstructionSet = "(";
+#ifdef defined(__MIC__) || defined(__KNCNI__)
+	#define MIPP_AVX512KNC
+	InstructionSet += "KNC,";
+#endif
+#ifdef __AVX512F__
+	#define MIPP_AVX512F
+	InstructionSet += "F,";
+#endif
 #ifdef __AVX512BW__
 	#define MIPP_AVX512BW
-	#define MIPP_BW
-#else
-	#define MIPP_AVX512F
+	InstructionSet += "BW,";
 #endif
+#ifdef __AVX512CD__
+	#define MIPP_AVX512CD
+	InstructionSet += "CD,";
+#endif
+#ifdef __AVX512ER__
+	#define MIPP_AVX512ER
+	InstructionSet += "ER,";
+#endif
+#ifdef __AVX512PF__
+	#define MIPP_AVX512PF
+	InstructionSet += "PF,";
+#endif
+#ifdef __AVX512DQ__
+	#define MIPP_AVX512DQ
+	InstructionSet += "DQ,";
+#endif
+#ifdef __AVX512VL__
+	#define MIPP_AVX512VL
+	InstructionSet += "VL,";
+#endif
+	InstructionSet += ")";
+
+	const std::string InstructionFullType = InstructionType + " " + InstructionSet;
+	const std::string InstructionVersion  = "1";
+
 	#define MIPP_INSTR_VERSION 1
 	#define MIPP_REGISTER_SIZE 512
 	#define MIPP_LANES 4
@@ -158,15 +197,20 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 
 // -------------------------------------------------------------------------------------------------------- X86 AVX-256
 #elif defined(__AVX__)
-	#define MIPP_INSTR_NAME "AVX"
+	const std::string InstructionType = "AVX";
 	#define MIPP_AVX
+
 	#define MIPP_REQUIRED_ALIGNMENT 32
 	#define MIPP_64BIT
 #ifdef __AVX2__
+	const std::string InstructionFullType = InstructionType + "2";
+	const std::string InstructionVersion  = "2";
 	#define MIPP_AVX2
 	#define MIPP_INSTR_VERSION 2
 	#define MIPP_BW
 #else
+	const std::string InstructionFullType = InstructionType;
+	const std::string InstructionVersion  = "1";
 	#define MIPP_AVX1
 	#define MIPP_INSTR_VERSION 1
 #endif
@@ -184,29 +228,42 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 
 // -------------------------------------------------------------------------------------------------------- X86 SSE-128
 #elif defined(__SSE__)
-	#define MIPP_INSTR_NAME "SSE"
+	const std::string InstructionType = "SSE";
 	#define MIPP_SSE
+
 	#define MIPP_REQUIRED_ALIGNMENT 16
 #ifdef __SSE2__
 	#define MIPP_64BIT
 	#define MIPP_BW
 #endif
 #ifdef __SSE4_2__
+	const std::string InstructionFullType = InstructionType + "4.2";
+	const std::string InstructionVersion  = "4.2";
 	#define MIPP_SSE4_2
 	#define MIPP_INSTR_VERSION 42
 #elif defined(__SSE4_1__)
+	const std::string InstructionFullType = InstructionType + "4.1";
+	const std::string InstructionVersion  = "4.1";
 	#define MIPP_SSE4_1
 	#define MIPP_INSTR_VERSION 41
 #elif defined(__SSSE3__)
+	const std::string InstructionFullType = "SSSE3";
+	const std::string InstructionVersion  = "3";
 	#define MIPP_SSSE3
 	#define MIPP_INSTR_VERSION 31
 #elif defined(__SSE3__)
+	const std::string InstructionFullType = InstructionType + "3";
+	const std::string InstructionVersion  = "3";
 	#define MIPP_SSE3
 	#define MIPP_INSTR_VERSION 3
 #elif defined(__SSE2__)
+	const std::string InstructionFullType = InstructionType + "2";
+	const std::string InstructionVersion  = "2";
 	#define MIPP_SSE2
 	#define MIPP_INSTR_VERSION 2
 #else
+	const std::string InstructionFullType = InstructionType;
+	const std::string InstructionVersion  = "1";
 	#define MIPP_SSE1
 	#define MIPP_INSTR_VERSION 1
 #endif
@@ -224,8 +281,12 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 
 // ------------------------------------------------------------------------------------------------- MIPP_NO_INTRINSICS
 #else
-	#define MIPP_INSTR_NAME "NO"
+	const std::string InstructionType = "NO";
 	#define MIPP_NO
+
+	const std::string InstructionFullType = "NO_INTRINSICS";
+	const std::string InstructionVersion  = "1";
+
 	#define MIPP_NO_INTRINSICS
 	#define MIPP_REQUIRED_ALIGNMENT 1
 #if UINTPTR_MAX == 0xffffffffffffffff
@@ -248,8 +309,12 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 
 // ------------------------------------------------------------------------------------------------- MIPP_NO_INTRINSICS
 #else
-	#define MIPP_INSTR_NAME "NO"
+	const std::string InstructionType     = "NO";
 	#define MIPP_NO
+
+	const std::string InstructionFullType = "NO_INTRINSICS";
+	const std::string InstructionVersion  = "1";
+
 	#define MIPP_REQUIRED_ALIGNMENT 1
 #if UINTPTR_MAX == 0xffffffffffffffff
 #define MIPP_64BIT
@@ -267,38 +332,23 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	inline reg cvt_msk_reg(const msk m) {
 		return (reg)m;
 	}
+
+	constexpr std::string IntructionsFullName
 #endif
 
-constexpr uint32_t    RequiredAlignment   = MIPP_REQUIRED_ALIGNMENT;
-constexpr uint32_t    RegisterSizeBit     = MIPP_REGISTER_SIZE;
-constexpr uint32_t    Lanes               = MIPP_LANES;
-constexpr uint32_t    IntructionsVersion  = MIPP_INSTR_VERSION;
-const std::string IntructionsName     = MIPP_INSTR_NAME;
-#if defined(MIPP_SSE) && MIPP_INSTR_VERSION == 31
-const std::string IntructionsFullName = "SSSE3-" + std::to_string(RegisterSizeBit);
-#elif defined(MIPP_SSE) && MIPP_INSTR_VERSION == 41
-const std::string IntructionsFullName = "SSE4.1-" + std::to_string(RegisterSizeBit);
-#elif defined(MIPP_SSE) && MIPP_INSTR_VERSION == 42
-const std::string IntructionsFullName = "SSE4.2-" + std::to_string(RegisterSizeBit);
-#elif defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
-const std::string IntructionsFullName = "NEONv1-" + std::to_string(RegisterSizeBit);
-#elif defined(MIPP_NEON) && MIPP_INSTR_VERSION == 2
-const std::string IntructionsFullName = "NEONv2-" + std::to_string(RegisterSizeBit);
-#elif defined(MIPP_AVX512) && MIPP_INSTR_VERSION == 1
-const std::string IntructionsFullName = "AVX512";
-#else
-const std::string IntructionsFullName = IntructionsName + std::to_string(IntructionsVersion) + "-" +
-                                        std::to_string(RegisterSizeBit);
-#endif
+constexpr uint32_t RequiredAlignment  = MIPP_REQUIRED_ALIGNMENT;
+constexpr uint32_t RegisterSizeBit    = MIPP_REGISTER_SIZE;
+constexpr uint32_t Lanes              = MIPP_LANES;
+
 #ifdef MIPP_64BIT
-const bool support64Bit = true;
+const bool Support64Bit = true;
 #else
-const bool support64Bit = false;
+const bool Support64Bit = false;
 #endif
 #ifdef MIPP_BW
-const bool supportByteWord = true;
+const bool SupportByteWord = true;
 #else
-const bool supportByteWord = false;
+const bool SupportByteWord = false;
 #endif
 
 typedef struct regx2 { reg val[2]; } regx2;
@@ -423,10 +473,10 @@ static void errorMessage(std::string instr)
 
 	std::string message;
 	if (RegisterSizeBit == 0)
-		message = "mipp::" + instr + "<" + type_names[typeid(T)] + "> (" + IntructionsFullName + ") is undefined!, "
+		message = "mipp::" + instr + "<" + type_names[typeid(T)] + "> (" + InstructionFullType + ") is undefined!, "
 		          "try to add -mfpu=neon, -msse4.2, -mavx, -march=native... at the compile time.";
 	else
-		message = "mipp::" + instr + "<" + type_names[typeid(T)] + "> (" + IntructionsFullName + ") is undefined!";
+		message = "mipp::" + instr + "<" + type_names[typeid(T)] + "> (" + InstructionFullType + ") is undefined!";
 
 	message += get_back_trace();
 
@@ -438,10 +488,10 @@ static void errorMessage(std::string instr)
 {
 	std::string message;
 	if (RegisterSizeBit == 0)
-		message = "mipp::" + instr + "<" + std::to_string(N) + "> (" + IntructionsFullName + ") is undefined!, "
+		message = "mipp::" + instr + "<" + std::to_string(N) + "> (" + InstructionFullType + ") is undefined!, "
 		          "try to add -mfpu=neon, -msse4.2, -mavx, -march=native... at the compile time.";
 	else
-		message = "mipp::" + instr + "<" + std::to_string(N) + "> (" + IntructionsFullName + ") is undefined!";
+		message = "mipp::" + instr + "<" + std::to_string(N) + "> (" + InstructionFullType + ") is undefined!";
 
 	message += get_back_trace();
 
@@ -467,11 +517,11 @@ static void errorMessage(std::string instr)
 	std::string message;
 	if (RegisterSizeBit == 0)
 		message = "mipp::" + instr + "<" + type_names[typeid(T1)] + "," + type_names[typeid(T2)] + "> (" +
-		          IntructionsFullName + ") is undefined!, try to add -mfpu=neon, -msse4.2, -mavx, -march=native... "
+		          InstructionFullType + ") is undefined!, try to add -mfpu=neon, -msse4.2, -mavx, -march=native... "
 		          "at the compile time.";
 	else
 		message = "mipp::" + instr + "<" + type_names[typeid(T1)] + "," + type_names[typeid(T2)] + "> (" +
-		          IntructionsFullName + ") is undefined!";
+		          InstructionFullType + ") is undefined!";
 
 	message += get_back_trace();
 
