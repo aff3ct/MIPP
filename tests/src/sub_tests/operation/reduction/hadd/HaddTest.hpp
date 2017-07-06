@@ -17,15 +17,19 @@ class HaddTest : public CppUnit::TestFixture
 #endif
 #endif
 
+#if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 	CPPUNIT_TEST(test_reg_hadd_int32);
 	CPPUNIT_TEST(test_Reg_hadd_int32);
+#endif
 
 	CPPUNIT_TEST(test_reg_hadd_float);
 	CPPUNIT_TEST(test_Reg_hadd_float);
 
 #if defined(MIPP_64BIT)
+#if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 	CPPUNIT_TEST(test_reg_hadd_int64);
 	CPPUNIT_TEST(test_Reg_hadd_int64);
+#endif
 
 	CPPUNIT_TEST(test_reg_hadd_double);
 	CPPUNIT_TEST(test_Reg_hadd_double);

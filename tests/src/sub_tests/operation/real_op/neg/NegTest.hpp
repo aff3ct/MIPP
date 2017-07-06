@@ -7,6 +7,7 @@ class NegTest : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE(NegTest);
 
+#if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 31)
 #if defined(MIPP_BW)
 	CPPUNIT_TEST(test_reg_neg_int8);
@@ -30,6 +31,7 @@ class NegTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_Reg_maskz_neg_int32);
 	CPPUNIT_TEST(test_reg_mask_neg_int32);
 	CPPUNIT_TEST(test_Reg_mask_neg_int32);
+#endif
 #endif
 
 	CPPUNIT_TEST(test_reg_neg_float);

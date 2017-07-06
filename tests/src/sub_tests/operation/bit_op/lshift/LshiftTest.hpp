@@ -7,6 +7,7 @@ class LshiftTest : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE(LshiftTest);
 
+#if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 #if defined(MIPP_BW)
 	CPPUNIT_TEST(test_reg_lshift_int8);
 	CPPUNIT_TEST(test_Reg_lshift_int8);
@@ -36,6 +37,7 @@ class LshiftTest : public CppUnit::TestFixture
 #if !defined(MIPP_AVX) && !defined(MIPP_AVX512)
 	CPPUNIT_TEST(test_msk_lshift_int64);
 	CPPUNIT_TEST(test_Msk_lshift_int64);
+#endif
 #endif
 #endif
 

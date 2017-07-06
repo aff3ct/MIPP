@@ -7,6 +7,7 @@ class Div4Test : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE(Div4Test);
 
+#if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 31)
 #if defined(MIPP_BW)
 	CPPUNIT_TEST(test_reg_div4_int8);
@@ -30,6 +31,7 @@ class Div4Test : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_Reg_maskz_div4_int32);
 	CPPUNIT_TEST(test_reg_mask_div4_int32);
 	CPPUNIT_TEST(test_Reg_mask_div4_int32);
+#endif
 #endif
 
 	CPPUNIT_TEST(test_reg_div4_float);

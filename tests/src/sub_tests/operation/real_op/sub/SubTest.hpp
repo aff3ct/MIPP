@@ -23,12 +23,14 @@ class SubTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_Reg_mask_sub_int16);
 #endif
 
+#if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 	CPPUNIT_TEST(test_reg_sub_int32);
 	CPPUNIT_TEST(test_Reg_sub_int32);
 	CPPUNIT_TEST(test_reg_maskz_sub_int32);
 	CPPUNIT_TEST(test_Reg_maskz_sub_int32);
 	CPPUNIT_TEST(test_reg_mask_sub_int32);
 	CPPUNIT_TEST(test_Reg_mask_sub_int32);
+#endif
 
 	CPPUNIT_TEST(test_reg_sub_float);
 	CPPUNIT_TEST(test_Reg_sub_float);
@@ -38,12 +40,14 @@ class SubTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_Reg_mask_sub_float);
 
 #if defined(MIPP_64BIT)
+#if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 	CPPUNIT_TEST(test_reg_sub_int64);
 	CPPUNIT_TEST(test_Reg_sub_int64);
 	CPPUNIT_TEST(test_reg_maskz_sub_int64);
 	CPPUNIT_TEST(test_Reg_maskz_sub_int64);
 	CPPUNIT_TEST(test_reg_mask_sub_int64);
 	CPPUNIT_TEST(test_Reg_mask_sub_int64);
+#endif
 
 	CPPUNIT_TEST(test_reg_sub_double);
 	CPPUNIT_TEST(test_Reg_sub_double);

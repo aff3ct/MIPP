@@ -15,16 +15,20 @@ class CmpgtTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_Reg_cmpgt_int16);
 #endif
 
+#if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 	CPPUNIT_TEST(test_reg_cmpgt_int32);
 	CPPUNIT_TEST(test_Reg_cmpgt_int32);
+#endif
 
 	CPPUNIT_TEST(test_reg_cmpgt_float);
 	CPPUNIT_TEST(test_Reg_cmpgt_float);
 
 #if defined(MIPP_64BIT)
+#if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 #if !defined(MIPP_SSE)
 	CPPUNIT_TEST(test_reg_cmpgt_int64);
 	CPPUNIT_TEST(test_Reg_cmpgt_int64);
+#endif
 #endif
 
 	CPPUNIT_TEST(test_reg_cmpgt_double);

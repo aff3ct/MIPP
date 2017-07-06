@@ -7,6 +7,7 @@ class InterleavehiTest : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE(InterleavehiTest);
 
+#if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 #if defined(MIPP_BW)
 	CPPUNIT_TEST(test_reg_interleavehi_int8);
 	CPPUNIT_TEST(test_Reg_interleavehi_int8);
@@ -39,6 +40,7 @@ class InterleavehiTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_Reg_interleavehi_double);
 	CPPUNIT_TEST(test_reg_interleavehi2_double);
 	CPPUNIT_TEST(test_Reg_interleavehi2_double);
+#endif
 #endif
 
 	CPPUNIT_TEST_SUITE_END();

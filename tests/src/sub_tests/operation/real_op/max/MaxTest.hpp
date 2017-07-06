@@ -25,6 +25,7 @@ class MaxTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_Reg_mask_max_int16);
 #endif
 
+#if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
 	CPPUNIT_TEST(test_reg_max_int32);
 	CPPUNIT_TEST(test_Reg_max_int32);
@@ -32,6 +33,7 @@ class MaxTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_Reg_maskz_max_int32);
 	CPPUNIT_TEST(test_reg_mask_max_int32);
 	CPPUNIT_TEST(test_Reg_mask_max_int32);
+#endif
 #endif
 
 	CPPUNIT_TEST(test_reg_max_float);

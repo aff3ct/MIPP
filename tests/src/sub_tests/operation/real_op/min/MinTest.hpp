@@ -25,6 +25,7 @@ class MinTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_Reg_mask_min_int16);
 #endif
 
+#if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
 	CPPUNIT_TEST(test_reg_min_int32);
 	CPPUNIT_TEST(test_Reg_min_int32);
@@ -32,6 +33,7 @@ class MinTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_Reg_maskz_min_int32);
 	CPPUNIT_TEST(test_reg_mask_min_int32);
 	CPPUNIT_TEST(test_Reg_mask_min_int32);
+#endif
 #endif
 
 	CPPUNIT_TEST(test_reg_min_float);

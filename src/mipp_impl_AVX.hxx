@@ -2509,6 +2509,31 @@
 	}
 #else
 	template <>
+	inline reg lrot<double>(const reg v1) {
+		// make a rotation in:[3, 2 , 1, 0] => out:[0, 3, 2, 1]
+		//
+		//   -> _mm256_permute_pd(a, _MM_SHUFFLE(1, 1, 1, 1)) # rotation per lane of 128 bits
+		//      /!\ I think this is a wrong shuffle and the good one is: _MM_SHUFFLE(0, 1, 0, 1)
+		//           l0      l1
+		//       in[3, 2, | 1, 0] =>
+		//      out[2, 3, | 0, 1]
+		//
+		//   -> _mm256_permute2f128_pd(a, a, _MM_SHUFFLE(0, 0, 0, 1)) # switch lanes
+		//           l0     l1
+		//       in[3, 2, | 1, 0] =>
+		//      out[1, 0, | 3, 2]
+		//
+		//   -> _mm256_blend_pd(a, b, _MM_SHUFFLE(0, 0, 2, 2))
+		//      ina[3a, 2a, 1a, 0a] and inb[3b, 2b, 1b, 0b] => out[3b, 2a, 1b, 0a]
+		auto rTmp = _mm256_permute_pd(_mm256_castps_pd(v1), _MM_SHUFFLE(1, 1, 1, 1));
+		return _mm256_castpd_ps(_mm256_blend_pd(rTmp,
+		                                        _mm256_permute2f128_pd(rTmp,
+		                                                               rTmp,
+		                                                               _MM_SHUFFLE(0, 0, 0, 1)),
+		                                        _MM_SHUFFLE(0, 0, 2, 2)));
+	}
+
+	template <>
 	inline reg lrot<float>(const reg v1) {
 		// make a rotation in:[7, 6, 5, 4, 3, 2 , 1, 0] =>  out:[0, 7, 6, 5, 4, 3, 2, 1]
 		//
@@ -2533,28 +2558,13 @@
 	}
 
 	template <>
-	inline reg lrot<double>(const reg v1) {
-		// make a rotation in:[3, 2 , 1, 0] => out:[0, 3, 2, 1]
-		//
-		//   -> _mm256_permute_pd(a, _MM_SHUFFLE(1, 1, 1, 1)) # rotation per lane of 128 bits
-		//      /!\ I think this is a wrong shuffle and the good one is: _MM_SHUFFLE(0, 1, 0, 1)
-		//           l0      l1
-		//       in[3, 2, | 1, 0] =>
-		//      out[2, 3, | 0, 1]
-		//
-		//   -> _mm256_permute2f128_pd(a, a, _MM_SHUFFLE(0, 0, 0, 1)) # switch lanes
-		//           l0     l1
-		//       in[3, 2, | 1, 0] =>
-		//      out[1, 0, | 3, 2]
-		//
-		//   -> _mm256_blend_pd(a, b, _MM_SHUFFLE(0, 0, 2, 2))
-		//      ina[3a, 2a, 1a, 0a] and inb[3b, 2b, 1b, 0b] => out[3b, 2a, 1b, 0a]
-		auto rTmp = _mm256_permute_pd(_mm256_castps_pd(v1), _MM_SHUFFLE(1, 1, 1, 1));
-		return _mm256_castpd_ps(_mm256_blend_pd(rTmp,
-		                                        _mm256_permute2f128_pd(rTmp,
-		                                                               rTmp,
-		                                                               _MM_SHUFFLE(0, 0, 0, 1)),
-		                                        _MM_SHUFFLE(0, 0, 2, 2)));
+	inline reg lrot<int64_t>(const reg v1) {
+		return lrot<double>(v1);
+	}
+
+	template <>
+	inline reg lrot<int32_t>(const reg v1) {
+		return lrot<float>(v1);
 	}
 #endif
 
@@ -2600,6 +2610,34 @@
 		auto m = set<int8_t>((int8_t*)mask);
 		auto r2 = _mm256_permutevar8x32_ps(r, _mm256_setr_epi32(4, 1, 2, 3, 0, 5, 6, 7));
 		return blend<int8_t>(r2, r, _mm256_castps_si256(m));
+	}
+#else
+	template <>
+	inline reg rrot<double>(const reg v1) {
+		auto rTmp = _mm256_permute_pd(_mm256_castps_pd(v1), _MM_SHUFFLE(1, 1, 1, 1));
+		return _mm256_castpd_ps(_mm256_blend_pd(rTmp,
+		                                        _mm256_permute2f128_pd(rTmp,
+		                                                               rTmp,
+		                                                               _MM_SHUFFLE(0, 0, 0, 1)),
+		                                        _MM_SHUFFLE(0, 0, 1, 1)));
+	}
+
+	template <>
+	inline reg rrot<float>(const reg v1) {
+		auto rTmp = _mm256_permute_ps(v1, _MM_SHUFFLE(2, 1, 0, 3));
+		return _mm256_blend_ps(rTmp,
+		                       _mm256_permute2f128_ps(rTmp, rTmp, _MM_SHUFFLE(0, 0, 0, 1)),
+		                       _MM_SHUFFLE(0, 1, 0, 1));
+	}
+
+	template <>
+	inline reg rrot<int64_t>(const reg v1) {
+		return rrot<double>(v1);
+	}
+
+	template <>
+	inline reg rrot<int32_t>(const reg v1) {
+		return rrot<float>(v1);
 	}
 #endif
 

@@ -7,6 +7,7 @@ class CvtTest : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE(CvtTest);
 
+#if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
 #if defined(MIPP_BW)
 	CPPUNIT_TEST(test_reg_cvt_int8_int16);
@@ -16,6 +17,7 @@ class CvtTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_reg_cvt_int16_int32);
 	CPPUNIT_TEST(test_Reg_cvt_int16_int32);
 #endif
+#endif
 
 	CPPUNIT_TEST(test_reg_cvt_int32_float);
 	CPPUNIT_TEST(test_Reg_cvt_int32_float);
@@ -24,9 +26,11 @@ class CvtTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_Reg_cvt_float_int32);
 
 #if defined(MIPP_64BIT)
+#if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
 	CPPUNIT_TEST(test_reg_cvt_int32_int64);
 	CPPUNIT_TEST(test_Reg_cvt_int32_int64);
+#endif
 #endif
 
 #if !defined(MIPP_SSE) && !defined(MIPP_AVX)

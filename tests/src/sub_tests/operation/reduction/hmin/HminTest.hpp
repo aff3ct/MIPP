@@ -19,9 +19,11 @@ class HminTest : public CppUnit::TestFixture
 #endif
 #endif
 
+#if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
 	CPPUNIT_TEST(test_reg_hmin_int32);
 	CPPUNIT_TEST(test_Reg_hmin_int32);
+#endif
 #endif
 
 	CPPUNIT_TEST(test_reg_hmin_float);
