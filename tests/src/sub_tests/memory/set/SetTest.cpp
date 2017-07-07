@@ -1,5 +1,6 @@
 #include <exception>
 #include <algorithm>
+#include <numeric>
 #include <mipp.h>
 
 #include "SetTest.hpp"

@@ -1,5 +1,7 @@
 #include <exception>
 #include <algorithm>
+#include <numeric>
+#include <random>
 #include <mipp.h>
 
 #include "RshiftTest.hpp"
@@ -26,7 +28,7 @@ struct reg_rshift
 		try
 		{
 			T inputs1[mipp::N<T>()];
-			std::iota(inputs1, inputs1 + mipp::N<T>(), ((T)1 << (sizeof(T) * 8 -1)) - mipp::N<T>());
+			std::iota(inputs1, inputs1 + mipp::N<T>(), std::numeric_limits<T>::max() - mipp::N<T>());
 
 			std::mt19937 g;
 			std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
@@ -67,7 +69,7 @@ struct Reg_rshift
 		try
 		{
 			T inputs1[mipp::N<T>()];
-			std::iota(inputs1, inputs1 + mipp::N<T>(), ((T)1 << (sizeof(T) * 8 -1)) - mipp::N<T>());
+			std::iota(inputs1, inputs1 + mipp::N<T>(), std::numeric_limits<T>::max() - mipp::N<T>());
 
 			std::mt19937 g;
 			std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);

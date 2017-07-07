@@ -1,5 +1,7 @@
 #include <exception>
 #include <algorithm>
+#include <numeric>
+#include <random>
 #include <mipp.h>
 
 #include "DivTest.hpp"
