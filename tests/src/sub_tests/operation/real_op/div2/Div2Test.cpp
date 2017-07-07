@@ -34,7 +34,12 @@ void Div2Test::test_reg_div2()
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
 			T res = inputs1[i] / (T)2;
+#if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
+			T diff = std::abs(res - *((T*)&r2 +i));
+			CPPUNIT_ASSERT(diff < 0.01);
+#else
 			CPPUNIT_ASSERT_EQUAL(res, *((T*)&r2 +i));
+#endif
 		}
 	}
 	catch(std::exception &e)
@@ -67,7 +72,13 @@ void Div2Test::test_Reg_div2()
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
 			T res = inputs1[i] / (T)2;
+#if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
+			T diff = std::abs(res - r2[i]);
+			CPPUNIT_ASSERT(diff < 0.01);
+#else
 			CPPUNIT_ASSERT_EQUAL(res, r2[i]);
+#endif
+
 		}
 	}
 	catch(std::exception &e)
@@ -110,7 +121,13 @@ void Div2Test::test_reg_maskz_div2()
 			if (mask[i])
 			{
 				T res = inputs1[i] / (T)2;
+#if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
+				T diff = std::abs(res - *((T*)&r2 +i));
+				CPPUNIT_ASSERT(diff < 0.01);
+#else
 				CPPUNIT_ASSERT_EQUAL(res, *((T*)&r2 +i));
+#endif
+
 			}
 			else
 				CPPUNIT_ASSERT_EQUAL((T)0, *((T*)&r2 +i));
@@ -156,7 +173,13 @@ void Div2Test::test_Reg_maskz_div2()
 			if (mask[i])
 			{
 				T res = inputs1[i] / (T)2;
+#if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
+				T diff = std::abs(res - r2[i]);
+				CPPUNIT_ASSERT(diff < 0.01);
+#else
 				CPPUNIT_ASSERT_EQUAL(res, r2[i]);
+#endif
+
 			}
 			else
 				CPPUNIT_ASSERT_EQUAL((T)0, r2[i]);
@@ -204,7 +227,13 @@ void Div2Test::test_reg_mask_div2()
 			if (mask[i])
 			{
 				T res = inputs1[i] / (T)2;
+#if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
+				T diff = std::abs(res - *((T*)&r3 +i));
+				CPPUNIT_ASSERT(diff < 0.01);
+#else
 				CPPUNIT_ASSERT_EQUAL(res, *((T*)&r3 +i));
+#endif
+
 			}
 			else
 				CPPUNIT_ASSERT_EQUAL(inputs2[i], *((T*)&r3 +i));
@@ -252,7 +281,13 @@ void Div2Test::test_Reg_mask_div2()
 			if (mask[i])
 			{
 				T res = inputs1[i] / (T)2;
-				CPPUNIT_ASSERT_EQUAL(res, *((T*)&r3 +i));
+#if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
+				T diff = std::abs(res - r3[i]);
+				CPPUNIT_ASSERT(diff < 0.01);
+#else
+				CPPUNIT_ASSERT_EQUAL(res, r3[i]);
+#endif
+
 			}
 			else
 				CPPUNIT_ASSERT_EQUAL(inputs2[i], *((T*)&r3 +i));

@@ -37,7 +37,12 @@ void DivTest::test_reg_div()
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
 			T res = inputs1[i] / inputs2[i];
+#if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
+			T diff = std::abs(res - *((T*)&r3 +i));
+			CPPUNIT_ASSERT(diff < 0.01);
+#else
 			CPPUNIT_ASSERT_EQUAL(res, *((T*)&r3 +i));
+#endif
 		}
 	}
 	catch(std::exception &e)
@@ -73,7 +78,12 @@ void DivTest::test_Reg_div()
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
 			T res = inputs1[i] / inputs2[i];
+#if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
+			T diff = std::abs(res - r3[i]);
+			CPPUNIT_ASSERT(diff < 0.01);
+#else
 			CPPUNIT_ASSERT_EQUAL(res, r3[i]);
+#endif
 		}
 	}
 	catch(std::exception &e)
@@ -119,7 +129,12 @@ void DivTest::test_reg_maskz_div()
 			if (mask[i])
 			{
 				T res = inputs1[i] / inputs2[i];
+#if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
+				T diff = std::abs(res - *((T*)&r3 +i));
+				CPPUNIT_ASSERT(diff < 0.01);
+#else
 				CPPUNIT_ASSERT_EQUAL(res, *((T*)&r3 +i));
+#endif
 			}
 			else
 				CPPUNIT_ASSERT_EQUAL((T)0, *((T*)&r3 +i));
@@ -168,7 +183,12 @@ void DivTest::test_Reg_maskz_div()
 			if (mask[i])
 			{
 				T res = inputs1[i] / inputs2[i];
+#if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
+				T diff = std::abs(res - r3[i]);
+				CPPUNIT_ASSERT(diff < 0.01);
+#else
 				CPPUNIT_ASSERT_EQUAL(res, r3[i]);
+#endif
 			}
 			else
 				CPPUNIT_ASSERT_EQUAL((T)0, r3[i]);
@@ -219,7 +239,12 @@ void DivTest::test_reg_mask_div()
 			if (mask[i])
 			{
 				T res = inputs1[i] / inputs2[i];
+#if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
+				T diff = std::abs(res - *((T*)&r4 +i));
+				CPPUNIT_ASSERT(diff < 0.01);
+#else
 				CPPUNIT_ASSERT_EQUAL(res, *((T*)&r4 +i));
+#endif	
 			}
 			else
 				CPPUNIT_ASSERT_EQUAL(inputs3[i], *((T*)&r4 +i));
@@ -270,12 +295,17 @@ void DivTest::test_Reg_mask_div()
 			if (mask[i])
 			{
 				T res = inputs1[i] / inputs2[i];
-				CPPUNIT_ASSERT_EQUAL(res, *((T*)&r4 +i));
+#if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
+				T diff = std::abs(res - r4[i]);
+				CPPUNIT_ASSERT(diff < 0.01);
+#else
+				CPPUNIT_ASSERT_EQUAL(res, r4[i]);
+#endif
 			}
 			else
-				CPPUNIT_ASSERT_EQUAL(inputs3[i], *((T*)&r4 +i));
+				CPPUNIT_ASSERT_EQUAL(inputs3[i], r4[i]);
 		}
-	}
+	}	
 	catch(std::exception &e)
 	{
 		CPPUNIT_FAIL(e.what());
