@@ -1977,13 +1977,21 @@
 
 	template <>
 	inline reg div2<int32_t>(const reg v1) {
-		return _mm512_castsi512_ps(_mm512_srai_epi32(_mm512_castps_si512(v1), 1));
+		// return _mm512_castsi512_ps(_mm512_srai_epi32(_mm512_castps_si512(v1), 1)); // seems to do not work
+		reg abs_v1 = abs<int32_t>(v1);
+		reg sh = rshift<int32_t>(abs_v1, 1);
+		sh = neg<int32_t>(sh, v1);
+		return sh;
 	}
 
 #if defined(__AVX512BW__)
 	template <>
 	inline reg div2<int16_t>(const reg v1) {
-		return _mm512_castsi512_ps(_mm512_srai_epi16(_mm512_castps_si512(v1), 1));
+		// return _mm512_castsi512_ps(_mm512_srai_epi16(_mm512_castps_si512(v1), 1)); // seems to do not work
+		reg abs_v1 = abs<int16_t>(v1);
+		reg sh = rshift<int16_t>(abs_v1, 1);
+		sh = neg<int16_t>(sh, v1);
+		return sh;
 	}
 
 	template <>
@@ -2009,13 +2017,21 @@
 
 	template <>
 	inline reg div4<int32_t>(const reg v1) {
-		return _mm512_castsi512_ps(_mm512_srai_epi32(_mm512_castps_si512(v1), 2));
+		// return _mm512_castsi512_ps(_mm512_srai_epi32(_mm512_castps_si512(v1), 2)); // seems to do not work
+		reg abs_v1 = abs<int32_t>(v1);
+		reg sh = rshift<int32_t>(abs_v1, 2);
+		sh = neg<int32_t>(sh, v1);
+		return sh;
 	}
 
 #if defined(__AVX512BW__)
 	template <>
 	inline reg div4<int16_t>(const reg v1) {
-		return _mm512_castsi512_ps(_mm512_srai_epi16(_mm512_castps_si512(v1), 2));
+		// return _mm512_castsi512_ps(_mm512_srai_epi16(_mm512_castps_si512(v1), 2)); // seems to do not work
+		reg abs_v1 = abs<int16_t>(v1);
+		reg sh = rshift<int16_t>(abs_v1, 2);
+		sh = neg<int16_t>(sh, v1);
+		return sh;
 	}
 
 	template <>
