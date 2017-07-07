@@ -128,7 +128,7 @@ struct msk_rshift
 				for (auto i = 0; i < N - n; i++)
 					inputs2[i] = inputs1[i +n];
 
-				mipp::reg r = mipp::cvt_msk_reg<N>(m2);
+				mipp::reg r = mipp::cvt_reg<N>(m2);
 
 				for (auto i = 0; i < N; i++)
 				{
@@ -184,7 +184,7 @@ struct Msk_rshift
 				for (auto i = 0; i < N - n; i++)
 					inputs2[i] = inputs1[i +n];
 
-				mipp::reg r = mipp::cvt_msk_reg<N>(m2.m);
+				mipp::reg r = mipp::cvt_reg<N>(m2.m);
 
 				for (auto i = 0; i < N; i++)
 				{

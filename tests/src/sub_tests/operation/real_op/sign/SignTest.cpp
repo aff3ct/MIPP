@@ -33,7 +33,7 @@ void SignTest::test_reg_sign()
 
 		mipp::reg r1 = mipp::load<T>(inputs1);
 		mipp::msk m  = mipp::sign<T>(r1);
-		mipp::reg r2 = mipp::cvt_msk_reg<N>(m);
+		mipp::reg r2 = mipp::cvt_reg<N>(m);
 
 		for (auto i = 0; i < N; i++)
 		{
@@ -70,7 +70,7 @@ void SignTest::test_Reg_sign()
 
 		mipp::Reg<T> r1 = inputs1;
 		mipp::Msk<N> m  = mipp::sign(r1);
-		mipp::Reg<T> r2 = mipp::cvt_msk_reg<N>(m.m);
+		mipp::Reg<T> r2 = mipp::cvt_reg<N>(m.m);
 
 		for (auto i = 0; i < N; i++)
 		{
