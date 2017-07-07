@@ -81,15 +81,8 @@ void CmpeqTest::test_Reg_cmpeq()
 			mipp::Reg<T> r2 = inputs2;
 			mipp::Msk<mipp::N<T>()> m = r1 == r2;
 
-			mipp::reg r3 = mipp::cvt_msk_reg<mipp::N<T>()>(m.m);
-
 			for (auto i = 0; i < mipp::N<T>(); i++)
-			{
-				if (inputs1[i] == inputs2[i])
-					CPPUNIT_ASSERT(*((T*)&r3 +i) != (T)0);
-				else
-					CPPUNIT_ASSERT_EQUAL((T)0, *((T*)&r3 +i));
-			}
+				CPPUNIT_ASSERT_EQUAL(inputs1[i] == inputs2[i], m[i]);
 		}
 	}
 	catch(std::exception &e)

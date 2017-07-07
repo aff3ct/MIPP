@@ -856,7 +856,7 @@ void dump(const mipp::msk m, std::ostream &stream = std::cout, const uint32_t el
 		{
 			for (auto i = 0; i < lane_size; i++)
 				stream << std::setw(elmtWidth) << (data[l * lane_size +i] ? 1 : 0) << ((i < lane_size -1) ? ", " : "");
-			stream << ((l < mipp::Lanes -1) ? " | " : "");
+			stream << ((l < (int)mipp::Lanes -1) ? " | " : "");
 		}
 	}
 	else if (bits == 16)
@@ -869,7 +869,7 @@ void dump(const mipp::msk m, std::ostream &stream = std::cout, const uint32_t el
 		{
 			for (auto i = 0; i < lane_size; i++)
 				stream << std::setw(elmtWidth) << (data[l * lane_size +i] ? 1 : 0) << ((i < lane_size -1) ? ", " : "");
-			stream << ((l < mipp::Lanes -1) ? " | " : "");
+			stream << ((l < (int)mipp::Lanes -1) ? " | " : "");
 		}
 	}
 	else if (bits == 32)
@@ -882,7 +882,7 @@ void dump(const mipp::msk m, std::ostream &stream = std::cout, const uint32_t el
 		{
 			for (auto i = 0; i < lane_size; i++)
 				stream << std::setw(elmtWidth) << (data[l * lane_size +i] ? 1 : 0) << ((i < lane_size -1) ? ", " : "");
-			stream << ((l < mipp::Lanes -1) ? " | " : "");
+			stream << ((l < (int)mipp::Lanes -1) ? " | " : "");
 		}
 	}
 	else if (bits == 64)
@@ -895,7 +895,7 @@ void dump(const mipp::msk m, std::ostream &stream = std::cout, const uint32_t el
 		{
 			for (auto i = 0; i < lane_size; i++)
 				stream << std::setw(elmtWidth) << (data[l * lane_size +i] ? 1 : 0) << ((i < lane_size -1) ? ", " : "");
-			stream << ((l < mipp::Lanes -1) ? " | " : "");
+			stream << ((l < (int)mipp::Lanes -1) ? " | " : "");
 		}
 	}
 
