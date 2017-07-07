@@ -132,6 +132,12 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 		return (reg)m;
 	}
 
+	inline std::vector<std::string> InstructionExtensions()
+	{
+		std::vector<std::string> ext;
+		return ext;
+	}
+
 // -------------------------------------------------------------------------------------------------------- X86 AVX-512
 #elif defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)
 	const std::string InstructionType = "AVX512";
@@ -140,42 +146,32 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	#define MIPP_REQUIRED_ALIGNMENT 64
 	#define MIPP_64BIT
 
-	std::string InstructionSet = "(";
-#ifdef defined(__MIC__) || defined(__KNCNI__)
+#if defined(__MIC__) || defined(__KNCNI__)
 	#define MIPP_AVX512KNC
-	InstructionSet += "KNC,";
 #endif
 #ifdef __AVX512F__
 	#define MIPP_AVX512F
-	InstructionSet += "F,";
 #endif
 #ifdef __AVX512BW__
 	#define MIPP_AVX512BW
-	InstructionSet += "BW,";
 #endif
 #ifdef __AVX512CD__
 	#define MIPP_AVX512CD
-	InstructionSet += "CD,";
 #endif
 #ifdef __AVX512ER__
 	#define MIPP_AVX512ER
-	InstructionSet += "ER,";
 #endif
 #ifdef __AVX512PF__
 	#define MIPP_AVX512PF
-	InstructionSet += "PF,";
 #endif
 #ifdef __AVX512DQ__
 	#define MIPP_AVX512DQ
-	InstructionSet += "DQ,";
 #endif
 #ifdef __AVX512VL__
 	#define MIPP_AVX512VL
-	InstructionSet += "VL,";
 #endif
-	InstructionSet += ")";
 
-	const std::string InstructionFullType = InstructionType + " " + InstructionSet;
+	const std::string InstructionFullType = InstructionType;
 	const std::string InstructionVersion  = "1";
 
 	#define MIPP_INSTR_VERSION 1
@@ -193,6 +189,36 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	template <int N>
 	inline reg cvt_msk_reg(const msk m) {
 		throw std::runtime_error("mipp: Invalid mask size 'N' = " + std::to_string(N) + ".");
+	}
+
+	inline std::vector<std::string> InstructionExtensions()
+	{
+		std::vector<std::string> ext;
+#if defined(__MIC__) || defined(__KNCNI__)
+		ext.push_back("KNC");
+#endif
+#ifdef __AVX512F__
+		ext.push_back("F");
+#endif
+#ifdef __AVX512BW__
+		ext.push_back("BW");
+#endif
+#ifdef __AVX512CD__
+		ext.push_back("CD");
+#endif
+#ifdef __AVX512ER__
+		ext.push_back("ER");
+#endif
+#ifdef __AVX512PF__
+		ext.push_back("PF");
+#endif
+#ifdef __AVX512DQ__
+		ext.push_back("DQ");
+#endif
+#ifdef __AVX512VL__
+		ext.push_back("VL");
+#endif
+		return ext;
 	}
 
 // -------------------------------------------------------------------------------------------------------- X86 AVX-256
@@ -224,6 +250,15 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	template <int N>
 	inline reg cvt_msk_reg(const msk m) {
 		return _mm256_castsi256_ps(m);
+	}
+
+	inline std::vector<std::string> InstructionExtensions()
+	{
+		std::vector<std::string> ext;
+#ifdef __FMA__
+		ext.push_back("FMA");
+#endif
+		return ext;
 	}
 
 // -------------------------------------------------------------------------------------------------------- X86 SSE-128
@@ -279,6 +314,12 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 		return _mm_castsi128_ps(m);
 	}
 
+	inline std::vector<std::string> InstructionExtensions()
+	{
+		std::vector<std::string> ext;
+		return ext;
+	}
+
 // ------------------------------------------------------------------------------------------------- MIPP_NO_INTRINSICS
 #else
 	const std::string InstructionType = "NO";
@@ -304,6 +345,12 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	template <int N>
 	inline reg cvt_msk_reg(const msk m) {
 		return (reg)m;
+	}
+
+	inline std::vector<std::string> InstructionExtensions()
+	{
+		std::vector<std::string> ext;
+		return ext;
 	}
 #endif
 
@@ -331,6 +378,12 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	template <int N>
 	inline reg cvt_msk_reg(const msk m) {
 		return (reg)m;
+	}
+
+	inline std::vector<std::string> InstructionExtensions()
+	{
+		std::vector<std::string> ext;
+		return ext;
 	}
 #endif
 
