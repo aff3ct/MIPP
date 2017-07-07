@@ -128,7 +128,7 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	using reg_2 = float32x2_t; // half a full register
 
 	template <int N>
-	inline reg cvt_msk_reg(const msk m) {
+	inline reg cvt_reg(const msk m) {
 		return (reg)m;
 	}
 
@@ -187,7 +187,7 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	using reg_2 = __m256; // half a full register
 
 	template <int N>
-	inline reg cvt_msk_reg(const msk m) {
+	inline reg cvt_reg(const msk m) {
 		throw std::runtime_error("mipp: Invalid mask size 'N' = " + std::to_string(N) + ".");
 	}
 
@@ -248,7 +248,7 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	using reg_2 = __m128; // half a full register
 	
 	template <int N>
-	inline reg cvt_msk_reg(const msk m) {
+	inline reg cvt_reg(const msk m) {
 		return _mm256_castsi256_ps(m);
 	}
 
@@ -310,7 +310,7 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	using reg_2 = __m128d; // half a full register (information is in the lower part of the 128 bit register)
 
 	template <int N>
-	inline reg cvt_msk_reg(const msk m) {
+	inline reg cvt_reg(const msk m) {
 		return _mm_castsi128_ps(m);
 	}
 
@@ -343,7 +343,7 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	using reg_2 = uint16_t;
 
 	template <int N>
-	inline reg cvt_msk_reg(const msk m) {
+	inline reg cvt_reg(const msk m) {
 		return (reg)m;
 	}
 
@@ -376,7 +376,7 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	using reg_2 = uint16_t;
 
 	template <int N>
-	inline reg cvt_msk_reg(const msk m) {
+	inline reg cvt_reg(const msk m) {
 		return (reg)m;
 	}
 
@@ -711,7 +711,7 @@ inline reg mask(const msk m, const reg src, const reg a, const reg b, const reg 
 template <typename T, proto_i1<T> I1>
 inline reg maskz(const msk m, const reg a)
 {
-	auto m_reg = cvt_msk_reg<N<T>()>(m);
+	auto m_reg = cvt_reg<N<T>()>(m);
 	auto a_modif = I1(a);
 	return andb<T>(m_reg, a_modif);
 }
@@ -719,7 +719,7 @@ inline reg maskz(const msk m, const reg a)
 template <typename T, proto_i2<T> I2>
 inline reg maskz(const msk m, const reg a, const reg b)
 {
-	auto m_reg = cvt_msk_reg<N<T>()>(m);
+	auto m_reg = cvt_reg<N<T>()>(m);
 	auto a_modif = I2(a, b);
 	return andb<T>(m_reg, a_modif);
 }
@@ -727,7 +727,7 @@ inline reg maskz(const msk m, const reg a, const reg b)
 template <typename T, proto_i3<T> I3>
 inline reg maskz(const msk m, const reg a, const reg b, const reg c)
 {
-	auto m_reg = cvt_msk_reg<N<T>()>(m);
+	auto m_reg = cvt_reg<N<T>()>(m);
 	auto a_modif = I3(a, b, c);
 	return andb<T>(m_reg, a_modif);
 }
@@ -781,7 +781,7 @@ template <typename T, proto_I1<T> I1>
 inline Reg<T> maskz(const Msk<N<T>()> m, const Reg<T> a)
 {
 #ifndef MIPP_NO
-	auto m_reg = cvt_msk_reg<N<T>()>(m.m);
+	auto m_reg = cvt_reg<N<T>()>(m.m);
 	auto a_modif = I1(a);
 	return andb<T>(m_reg, a_modif);
 #else
@@ -793,7 +793,7 @@ template <typename T, proto_I2<T> I2>
 inline Reg<T> maskz(const Msk<N<T>()> m, const Reg<T> a, const Reg<T> b)
 {
 #ifndef MIPP_NO
-	auto m_reg = cvt_msk_reg<N<T>()>(m.m);
+	auto m_reg = cvt_reg<N<T>()>(m.m);
 	auto a_modif = I2(a, b);
 	return andb<T>(m_reg, a_modif);
 #else
@@ -805,7 +805,7 @@ template <typename T, proto_I3<T> I3>
 inline Reg<T> maskz(const Msk<N<T>()> m, const Reg<T> a, const Reg<T> b, const Reg<T> c)
 {
 #ifndef MIPP_NO
-	auto m_reg = cvt_msk_reg<N<T>()>(m.m);
+	auto m_reg = cvt_reg<N<T>()>(m.m);
 	auto a_modif = I3(a, b, c);
 	return andb<T>(m_reg, a_modif);
 #else
@@ -843,7 +843,7 @@ void dump(const mipp::msk m, std::ostream &stream = std::cout, const uint32_t el
 	constexpr int32_t lane_size = (int32_t)(N / mipp::Lanes);
 	constexpr int bits = mipp::RegisterSizeBit / N;
 
-	const auto r = cvt_msk_reg<N>(m);
+	const auto r = cvt_reg<N>(m);
 
 	stream << "[";
 	if (bits == 8)

@@ -159,6 +159,7 @@ public:
 	inline Reg<T>      neg          (const Reg<T> v)                       const { return mipp::neg          <T>(r, v.r);        }
 	inline Reg<T>      neg          (const Msk<N<T>()> v)                  const { return mipp::neg          <T>(r, v.m);        }
 	inline Reg<T>      copysign     (const Reg<T> v)                       const { return mipp::copysign     <T>(r, v.r);        }
+	inline Reg<T>      copysign     (const Msk<N<T>()> v)                  const { return mipp::copysign     <T>(r, v.m);        }
 	inline Reg<T>      abs          ()                                     const { return mipp::abs          <T>(r);             }
 	inline Reg<T>      sqrt         ()                                     const { return mipp::sqrt         <T>(r);             }
 	inline Reg<T>      rsqrt        ()                                     const { return mipp::rsqrt        <T>(r);             }
@@ -223,8 +224,8 @@ public:
 	inline Reg<T>      msb          (const Reg<T> v)                       const { return msb(Reg<T>(r ^ v.r));                  }
 	inline Msk<N<T>()> sign         ()                                     const { return r < 0;                                 }
 	inline Reg<T>      neg          (const Reg<T> v)                       const { return v.r >= 0 ? Reg<T>(r) : Reg<T>(-r);     }
-	inline Reg<T>      copysign     (const Reg<T> v)                       const { return this->neg(v);                          }
 	inline Reg<T>      neg          (const Msk<N<T>()> v)                  const { return v.m == 0 ? Reg<T>(r) : Reg<T>(-r);     }
+	inline Reg<T>      copysign     (const Reg<T> v)                       const { return this->neg(v);                          }
 	inline Reg<T>      copysign     (const Msk<N<T>()> v)                  const { return this->neg(v);                          }
 	inline Reg<T>      abs          ()                                     const { return std::abs(r);                           }
 	inline Reg<T>      sqrt         ()                                     const { return (T)std::sqrt(r);                       }
@@ -385,6 +386,22 @@ public:
 		m = vec[0] ? ~0 : 0;
 	}
 
+#endif
+
+
+#ifndef MIPP_NO_INTRINSICS
+	template <typename T>
+	inline Reg<T> cvt_reg() const
+	{
+		static_assert(mipp::N<T>() == N, "mipp::Msk<N>: T type is invalid.");
+		return Reg<T>(mipp::cvt_reg<N>(this->m));
+	}
+#else
+	template <typename T>
+	inline Reg<T> cvt_reg() const
+	{
+		return this->m ? ~(T)0 : (T)0;
+	}
 #endif
 
 	~Msk() {}
@@ -565,8 +582,8 @@ template <typename T> inline Reg<T>      msb          (const Reg<T> v)          
 template <typename T> inline Reg<T>      msb          (const Reg<T> v1, const Reg<T> v2)                      { return v1.msb(v2);           }
 template <typename T> inline Msk<N<T>()> sign         (const Reg<T> v)                                        { return v.sign();             }
 template <typename T> inline Reg<T>      neg          (const Reg<T> v1, const Reg<T> v2)                      { return v1.neg(v2);           }
-template <typename T> inline Reg<T>      copysign     (const Reg<T> v1, const Reg<T> v2)                      { return v1.copysign(v2);      }
 template <typename T> inline Reg<T>      neg          (const Reg<T> v1, const Msk<N<T>()> v2)                 { return v1.neg(v2);           }
+template <typename T> inline Reg<T>      copysign     (const Reg<T> v1, const Reg<T> v2)                      { return v1.copysign(v2);      }
 template <typename T> inline Reg<T>      copysign     (const Reg<T> v1, const Msk<N<T>()> v2)                 { return v1.copysign(v2);      }
 template <typename T> inline Reg<T>      abs          (const Reg<T> v)                                        { return v.abs();              }
 template <typename T> inline Reg<T>      sqrt         (const Reg<T> v)                                        { return v.sqrt();             }
@@ -592,6 +609,12 @@ template <typename T> inline     T       hadd         (const Reg<T> v)          
 template <typename T> inline     T       hmul         (const Reg<T> v)                                        { return v.hmul();             }
 template <typename T> inline     T       hmin         (const Reg<T> v)                                        { return v.hmin();             }
 template <typename T> inline     T       hmax         (const Reg<T> v)                                        { return v.hmax();             }
+
+template <typename T>
+inline Reg<T> cvt_reg(const Msk<N<T>()> m)
+{
+	return m.template cvt_reg<T>();
+}
 
 template <typename T1, typename T2> 
 inline Reg<T2> cvt(const Reg<T1> v) {

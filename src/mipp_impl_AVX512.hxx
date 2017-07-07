@@ -621,9 +621,9 @@
 	}
 #endif
 
-	// ---------------------------------------------------------------------------------------------------- cvt_msk_reg
+	// ------------------------------------------------------------------------------------------------------- cvt_reg
 	template <>
-	inline reg cvt_msk_reg<8>(const msk m) {
+	inline reg cvt_reg<8>(const msk m) {
 		auto one  = set1<int64_t>((uint64_t)0xFFFFFFFFFFFFFFFF);
 		auto zero = set1<int64_t>(0);
 
@@ -631,7 +631,7 @@
 	}
 
 	template <>
-	inline reg cvt_msk_reg<16>(const msk m) {
+	inline reg cvt_reg<16>(const msk m) {
 		auto one  = set1<int32_t>(0xFFFFFFFF);
 		auto zero = set1<int32_t>(0);
 
@@ -640,7 +640,7 @@
 
 #ifdef __AVX512BW__
 	template <>
-	inline reg cvt_msk_reg<32>(const msk m) {
+	inline reg cvt_reg<32>(const msk m) {
 		auto one  = set1<int16_t>(0xFFFF);
 		auto zero = set1<int16_t>(0);
 
@@ -648,7 +648,7 @@
 	}
 
 	template <>
-	inline reg cvt_msk_reg<64>(const msk m) {
+	inline reg cvt_reg<64>(const msk m) {
 		auto one  = set1<int8_t>(0xFF);
 		auto zero = set1<int8_t>(0);
 
@@ -1752,7 +1752,7 @@
 
 	template <>
 	inline reg neg<double>(const reg v1, const msk v2) {
-		return neg<double>(v1, cvt_msk_reg<8>(v2));
+		return neg<double>(v1, cvt_reg<8>(v2));
 	}
 
 	template <>
@@ -1762,7 +1762,7 @@
 
 	template <>
 	inline reg neg<float>(const reg v1, const msk v2) {
-		return neg<float>(v1, cvt_msk_reg<16>(v2));
+		return neg<float>(v1, cvt_reg<16>(v2));
 	}
 
 	// ------------------------------------------------------------------------------------------------------------ abs
