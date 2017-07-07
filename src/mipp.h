@@ -819,6 +819,7 @@ struct reduction
 	static T apply_v(const reg r)
 	{
 		auto red = reduction<T,OP>::apply(r);
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
 		return *((T*)&red);
 	}
 
