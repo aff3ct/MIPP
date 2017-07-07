@@ -7,19 +7,23 @@ class FmsubTest : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE(FmsubTest);
 
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_fmsub_float);
-	CPPUNIT_TEST(test_Reg_fmsub_float);
 	CPPUNIT_TEST(test_reg_maskz_fmsub_float);
-	CPPUNIT_TEST(test_Reg_maskz_fmsub_float);
 	CPPUNIT_TEST(test_reg_mask_fmsub_float);
+#endif
+	CPPUNIT_TEST(test_Reg_fmsub_float);
+	CPPUNIT_TEST(test_Reg_maskz_fmsub_float);
 	CPPUNIT_TEST(test_Reg_mask_fmsub_float);
 
 #if defined(MIPP_64BIT)
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_fmsub_double);
-	CPPUNIT_TEST(test_Reg_fmsub_double);
 	CPPUNIT_TEST(test_reg_maskz_fmsub_double);
-	CPPUNIT_TEST(test_Reg_maskz_fmsub_double);
 	CPPUNIT_TEST(test_reg_mask_fmsub_double);
+#endif
+	CPPUNIT_TEST(test_Reg_fmsub_double);
+	CPPUNIT_TEST(test_Reg_maskz_fmsub_double);
 	CPPUNIT_TEST(test_Reg_mask_fmsub_double);
 #endif
 

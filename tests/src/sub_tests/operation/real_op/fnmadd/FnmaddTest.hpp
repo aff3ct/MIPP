@@ -7,19 +7,23 @@ class FnmaddTest : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE(FnmaddTest);
 
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_fnmadd_float);
-	CPPUNIT_TEST(test_Reg_fnmadd_float);
 	CPPUNIT_TEST(test_reg_maskz_fnmadd_float);
-	CPPUNIT_TEST(test_Reg_maskz_fnmadd_float);
 	CPPUNIT_TEST(test_reg_mask_fnmadd_float);
+#endif
+	CPPUNIT_TEST(test_Reg_fnmadd_float);
+	CPPUNIT_TEST(test_Reg_maskz_fnmadd_float);
 	CPPUNIT_TEST(test_Reg_mask_fnmadd_float);
 
 #if defined(MIPP_64BIT)
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_fnmadd_double);
-	CPPUNIT_TEST(test_Reg_fnmadd_double);
 	CPPUNIT_TEST(test_reg_maskz_fnmadd_double);
-	CPPUNIT_TEST(test_Reg_maskz_fnmadd_double);
 	CPPUNIT_TEST(test_reg_mask_fnmadd_double);
+#endif
+	CPPUNIT_TEST(test_Reg_fnmadd_double);
+	CPPUNIT_TEST(test_Reg_maskz_fnmadd_double);
 	CPPUNIT_TEST(test_Reg_mask_fnmadd_double);
 #endif
 

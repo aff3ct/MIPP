@@ -20,6 +20,7 @@ PackTest::tearDown()
 template <typename T1, typename T2>
 void PackTest::test_reg_pack()
 {
+#ifndef MIPP_NO
 	try
 	{
 		constexpr int N1 = mipp::N<T1>();
@@ -57,6 +58,7 @@ void PackTest::test_reg_pack()
 	{
 		CPPUNIT_FAIL(e.what());
 	}
+#endif
 }
 
 void PackTest::test_reg_pack_int16_int8  () { test_reg_pack<int16_t,int8_t >(); };
@@ -65,6 +67,7 @@ void PackTest::test_reg_pack_int32_int16 () { test_reg_pack<int32_t,int16_t>(); 
 template <typename T1, typename T2>
 void PackTest::test_Reg_pack()
 {
+#ifndef MIPP_NO
 	try
 	{
 		constexpr int N1 = mipp::N<T1>();
@@ -102,6 +105,7 @@ void PackTest::test_Reg_pack()
 	{
 		CPPUNIT_FAIL(e.what());
 	}
+#endif
 }
 
 void PackTest::test_Reg_pack_int16_int8  () { test_Reg_pack<int16_t,int8_t >(); };

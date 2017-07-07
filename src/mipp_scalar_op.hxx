@@ -23,11 +23,13 @@ template <          > inline int16_t msb(const int16_t val) { return static_cast
 template <          > inline int8_t  msb(const int8_t  val) { return static_cast<int8_t >((static_cast<uint8_t >(val) >>  7) <<  7); }
 
 template <typename T> inline T       div2(const T       val) { return val * (T)0.5; }
+template <          > inline int64_t div2(const int64_t val) { return val >> 1;     }
 template <          > inline int32_t div2(const int32_t val) { return val >> 1;     }
 template <          > inline int16_t div2(const int16_t val) { return val >> 1;     }
 template <          > inline int8_t  div2(const int8_t  val) { return val >> 1;     }
 
 template <typename T> inline T       div4(const T       val) { return val * (T)0.25; }
+template <          > inline int64_t div4(const int64_t val) { return val >> 2;      }
 template <          > inline int32_t div4(const int32_t val) { return val >> 2;      }
 template <          > inline int16_t div4(const int16_t val) { return val >> 2;      }
 template <          > inline int8_t  div4(const int8_t  val) { return val >> 2;      }

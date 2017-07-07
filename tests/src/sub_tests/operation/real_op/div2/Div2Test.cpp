@@ -113,7 +113,7 @@ void Div2Test::test_reg_maskz_div2()
 		mipp::reg r1 = mipp::load<T>(inputs1);
 		mipp::msk m  = mipp::set <N>(mask   );
 
-		mipp::reg r2 = mipp::maskz<mipp::div2<T>, T>(m, r1);
+		mipp::reg r2 = mipp::maskz<T,mipp::div2<T>>(m, r1);
 
 		for (auto i = 0; i < N; i++)
 		{
@@ -164,7 +164,7 @@ void Div2Test::test_Reg_maskz_div2()
 		mipp::Reg<T> r1 = inputs1;
 		mipp::Msk<N> m  = mask;
 
-		mipp::Reg<T> r2 = mipp::maskz<mipp::div2<T>>(m, r1);
+		mipp::Reg<T> r2 = mipp::maskz<T,mipp::div2>(m, r1);
 
 		for (auto i = 0; i < N; i++)
 		{
@@ -217,7 +217,7 @@ void Div2Test::test_reg_mask_div2()
 		mipp::reg r2 = mipp::load<T>(inputs2);
 		mipp::msk m  = mipp::set <N>(mask   );
 
-		mipp::reg r3 = mipp::mask<mipp::div2<T>, T>(m, r2, r1);
+		mipp::reg r3 = mipp::mask<T,mipp::div2<T>>(m, r2, r1);
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
@@ -270,7 +270,7 @@ void Div2Test::test_Reg_mask_div2()
 		mipp::Reg<T> r2 = inputs2;
 		mipp::Msk<N> m  = mask;
 
-		mipp::Reg<T> r3 = mipp::mask<mipp::div2<T>>(m, r2, r1);
+		mipp::Reg<T> r3 = mipp::mask<T,mipp::div2>(m, r2, r1);
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{

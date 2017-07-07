@@ -109,30 +109,32 @@ struct msk_lshift
 		{
 			constexpr int N = mipp::N<T>();
 			bool inputs1[N], inputs2[N];
-			for (auto i = 0; i < N/2; i++)
-			{
-				inputs1[     i] = true;
-				inputs1[N/2 +i] = false;
-			}
-
 			std::mt19937 g;
-			std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
+			std::uniform_int_distribution<uint8_t> dis(0, 1);
 
-			mipp::msk m1 = mipp::set<N>(inputs1);
-			mipp::msk m2 = mipp::lshift<N>(m1, n);
-
-			std::fill(inputs2, inputs2 + N, 0);
-			for (auto i = 0; i < N - n; i++)
-				inputs2[i +n] = inputs1[i];
-
-			mipp::reg r = mipp::cvt_msk_reg<N>(m2);
-
-			for (auto i = 0; i < N; i++)
+			for (auto t = 0; t < 100; t++)
 			{
-				if (inputs2[i])
-					CPPUNIT_ASSERT(*((T*)&r +i) != (T)0);
-				else
-					CPPUNIT_ASSERT_EQUAL((T)0, *((T*)&r +i));
+				for (auto i = 0; i < N; i++)
+					inputs1[i] = dis(g) ? true : false;
+
+				std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
+
+				mipp::msk m1 = mipp::set<N>(inputs1);
+				mipp::msk m2 = mipp::lshift<N>(m1, n);
+
+				std::fill(inputs2, inputs2 + N, 0);
+				for (auto i = 0; i < N - n; i++)
+					inputs2[i +n] = inputs1[i];
+
+				mipp::reg r = mipp::cvt_msk_reg<N>(m2);
+
+				for (auto i = 0; i < N; i++)
+				{
+					if (inputs2[i])
+						CPPUNIT_ASSERT(*((T*)&r +i) != (T)0);
+					else
+						CPPUNIT_ASSERT_EQUAL((T)0, *((T*)&r +i));
+				}
 			}
 		}
 		catch(std::exception &e)
@@ -163,30 +165,32 @@ struct Msk_lshift
 		{
 			constexpr int N = mipp::N<T>();
 			bool inputs1[N], inputs2[N];
-			for (auto i = 0; i < N/2; i++)
-			{
-				inputs1[     i] = true;
-				inputs1[N/2 +i] = false;
-			}
-
 			std::mt19937 g;
-			std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
+			std::uniform_int_distribution<uint8_t> dis(0, 1);
 
-			mipp::Msk<N> m1 = inputs1;
-			mipp::Msk<N> m2 = m1 << n;
-
-			std::fill(inputs2, inputs2 + N, 0);
-			for (auto i = 0; i < N - n; i++)
-				inputs2[i +n] = inputs1[i];
-
-			mipp::reg r = mipp::cvt_msk_reg<N>(m2.m);
-
-			for (auto i = 0; i < N; i++)
+			for (auto t = 0; t < 100; t++)
 			{
-				if (inputs2[i])
-					CPPUNIT_ASSERT(*((T*)&r +i) != (T)0);
-				else
-					CPPUNIT_ASSERT_EQUAL((T)0, *((T*)&r +i));
+				for (auto i = 0; i < N; i++)
+					inputs1[i] = dis(g) ? true : false;
+
+				std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
+
+				mipp::Msk<N> m1 = inputs1;
+				mipp::Msk<N> m2 = m1 << n;
+
+				std::fill(inputs2, inputs2 + N, 0);
+				for (auto i = 0; i < N - n; i++)
+					inputs2[i +n] = inputs1[i];
+
+				mipp::reg r = mipp::cvt_msk_reg<N>(m2.m);
+
+				for (auto i = 0; i < N; i++)
+				{
+					if (inputs2[i])
+						CPPUNIT_ASSERT(*((T*)&r +i) != (T)0);
+					else
+						CPPUNIT_ASSERT_EQUAL((T)0, *((T*)&r +i));
+				}
 			}
 		}
 		catch(std::exception &e)

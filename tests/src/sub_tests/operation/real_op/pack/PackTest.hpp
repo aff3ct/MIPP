@@ -7,12 +7,14 @@ class PackTest : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE(PackTest);
 
+#ifndef MIPP_NO
 #if defined(MIPP_BW)
 	CPPUNIT_TEST(test_reg_pack_int16_int8);
 	CPPUNIT_TEST(test_Reg_pack_int16_int8);
 
 	CPPUNIT_TEST(test_reg_pack_int32_int16);
 	CPPUNIT_TEST(test_Reg_pack_int32_int16);
+#endif
 #endif
 
 	CPPUNIT_TEST_SUITE_END();

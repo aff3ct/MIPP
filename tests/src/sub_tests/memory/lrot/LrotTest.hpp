@@ -9,25 +9,37 @@ class LrotTest : public CppUnit::TestFixture
 
 #if defined(MIPP_BW)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 31)
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_lrot_int8);
+#endif
 	CPPUNIT_TEST(test_Reg_lrot_int8);
 
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_lrot_int16);
+#endif
 	CPPUNIT_TEST(test_Reg_lrot_int16);
 #endif
 #endif
 
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_lrot_int32);
+#endif
 	CPPUNIT_TEST(test_Reg_lrot_int32);
 
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_lrot_float);
+#endif
 	CPPUNIT_TEST(test_Reg_lrot_float);
 
 #if defined(MIPP_64BIT)
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_lrot_int64);
+#endif
 	CPPUNIT_TEST(test_Reg_lrot_int64);
 
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_lrot_double);
+#endif
 	CPPUNIT_TEST(test_Reg_lrot_double);
 #endif
 

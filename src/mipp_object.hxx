@@ -238,7 +238,7 @@ public:
 	inline Reg<T>      fnmadd       (const Reg<T> v1, const Reg<T> v2)     const { return v2.r -(r * v1.r);                      }
 	inline Reg<T>      fmsub        (const Reg<T> v1, const Reg<T> v2)     const { return   r * v1.r - v2.r;                     }
 	inline Reg<T>      fnmsub       (const Reg<T> v1, const Reg<T> v2)     const { return -v2.r - (r * v1.r) ;                   }
-	inline Reg<T>      blend        (const Reg<T> v1, const Msk<N<T>()> m) const { return (m.r) ? r : v1.r;                      }
+	inline Reg<T>      blend        (const Reg<T> v1, const Msk<N<T>()> m) const { return (m.m) ? r : v1.r;                      }
 	inline Reg<T>      lrot         ()                                     const { return r;                                     }
 	inline Reg<T>      rrot         ()                                     const { return r;                                     }
 	inline Reg<T>      div2         ()                                     const { return mipp_scop::div2<T>(r);                 }
@@ -252,7 +252,7 @@ public:
 	template <typename T2> inline Reg<T2> pack(const Reg<T> v) const { return mipp::pack<T,T2>(r, v.r); }
 	template <typename T2> inline Reg<T2> cast()               const { return Reg<T2>(this->r);         }
 #else
-	template <typename T2> inline Reg<T2> cvt ()               const { return (T2)r;                    }
+	template <typename T2> inline Reg<T2> cvt ()               const { return (T2)std::round(r);        }
 	template <typename T2> inline Reg<T2> pack(const Reg<T> v) const
 	{
 		throw std::runtime_error("mipp::Reg<T>::pack: non-sense in sequential mode.");
@@ -289,12 +289,12 @@ public:
 	inline Reg<T>& operator>>=(const uint32_t n)       { r =    this->rshift(n).r; return *this; }
 	inline Reg<T>  operator>> (const uint32_t n) const { return this->rshift(n);                 }
 
-	inline Msk<N<T>()> operator== (Reg<T> v) const { return this->cmpeq (v); }
-	inline Msk<N<T>()> operator!= (Reg<T> v) const { return this->cmpneq(v); }
-	inline Msk<N<T>()> operator<  (Reg<T> v) const { return this->cmplt (v); }
-	inline Msk<N<T>()> operator<= (Reg<T> v) const { return this->cmple (v); }
-	inline Msk<N<T>()> operator>  (Reg<T> v) const { return this->cmpgt (v); }
-	inline Msk<N<T>()> operator>= (Reg<T> v) const { return this->cmpge (v); }
+	inline Msk<N<T>()> operator==(Reg<T> v) const { return this->cmpeq (v); }
+	inline Msk<N<T>()> operator!=(Reg<T> v) const { return this->cmpneq(v); }
+	inline Msk<N<T>()> operator< (Reg<T> v) const { return this->cmplt (v); }
+	inline Msk<N<T>()> operator<=(Reg<T> v) const { return this->cmple (v); }
+	inline Msk<N<T>()> operator> (Reg<T> v) const { return this->cmpgt (v); }
+	inline Msk<N<T>()> operator>=(Reg<T> v) const { return this->cmpge (v); }
 
 #ifndef MIPP_NO_INTRINSICS
 	inline const T& operator[](size_t index) const { return *((T*)&this->r + index); }
@@ -310,48 +310,48 @@ public:
 	inline T hmin() const { return Reduction<T,mipp::min>::apply_v(*this); }
 	inline T hmax() const { return Reduction<T,mipp::max>::apply_v(*this); }
 #else
-	inline T sum () const { return *this; }
-	inline T hadd() const { return *this; }
-	inline T hmul() const { return *this; }
-	inline T hmin() const { return *this; }
-	inline T hmax() const { return *this; }
+	inline T sum () const { return this->r; }
+	inline T hadd() const { return this->r; }
+	inline T hmul() const { return this->r; }
+	inline T hmin() const { return this->r; }
+	inline T hmax() const { return this->r; }
 #endif
 
 	// -------------------------------------------------------------------------------------------------------- masking
-	template <proto_i1 I1>
+	template <proto_I1<T> I1>
 	inline Reg<T> mask(const Msk<N<T>()> m, const Reg<T> src) const
 	{
-		return mipp::mask<I1,T>(m.m, src.r, r);
+		return mipp::mask<T, I1>(m, src, *this);
 	}
 
-	template <proto_i2 I2>
+	template <proto_I2<T> I2>
 	inline Reg<T> mask(const Msk<N<T>()> m, const Reg<T> src, const Reg<T> b) const
 	{
-		return mipp::mask<I2,T>(m.m, src.r, r, b.r);
+		return mipp::mask<T, I2>(m, src, *this, b);
 	}
 
-	template <proto_i3 I3>
+	template <proto_I3<T> I3>
 	inline Reg<T> mask(const Msk<N<T>()> m, const Reg<T> src, const Reg<T> b, const Reg<T> c) const
 	{
-		return mipp::mask<I3,T>(m.m, src.r, r, b.r, c.r);
+		return mipp::mask<T, I3>(m, src, *this, b, c);
 	}
 
-	template <proto_i1 I1>
+	template <proto_I1<T> I1>
 	inline Reg<T> maskz(const Msk<N<T>()> m) const
 	{
-		return mipp::maskz<I1,T>(m.m, r);
+		return mipp::maskz<T, I1>(m, *this);
 	}
 
-	template <proto_i2 I2>
+	template <proto_I2<T> I2>
 	inline Reg<T> maskz(const Msk<N<T>()> m, const Reg<T> b) const
 	{
-		return mipp::maskz<I2,T>(m.m, r, b.r);
+		return mipp::maskz<T, I2>(m, *this, b);
 	}
 
-	template <proto_i3 I3>
+	template <proto_I3<T> I3>
 	inline Reg<T> maskz(const Msk<N<T>()> m, const Reg<T> b, const Reg<T> c) const
 	{
-		return mipp::maskz<I3,T>(m.m, r, b.r, c.r);
+		return mipp::maskz<T, I3>(m, *this, b, c);
 	}
 };
 
@@ -408,8 +408,8 @@ public:
 #else
 	inline Msk<N> andb  (const Msk<N> m2)  const { return mipp_scop::andb<msk>( m, m2.m);                 }
 	inline Msk<N> andnb (const Msk<N> m2)  const { return mipp_scop::andb<msk>(~m, m2.m);                 }
-	inline Msk<N> notb  ()                 const { return  ~m;                                            }
-	inline Msk<N> orb   (const Msk<N> m2)  const { return   m | m2.m;                                     }
+	inline Msk<N> notb  ()                 const { return (msk)~m;                                        }
+	inline Msk<N> orb   (const Msk<N> m2)  const { return (msk)(m | m2.m);                                }
 	inline Msk<N> xorb  (const Msk<N> m2)  const { return mipp_scop::xorb  <msk>(m, m2.m);                }
 	inline Msk<N> lshift(const uint32_t n) const { return mipp_scop::lshift<msk>(m, n * sizeof(msk) * 8); }
 	inline Msk<N> rshift(const uint32_t n) const { return mipp_scop::rshift<msk>(m, n * sizeof(msk) * 8); }
@@ -454,7 +454,7 @@ public:
 #ifndef MIPP_NO_INTRINSICS
 	template <typename T2> inline Reg<T2> cvt() const { return mipp::cvt<T,T2>(r); }
 #else
-	template <typename T2> inline Reg<T2> cvt() const { return (T2)r;              }
+	template <typename T2> inline Reg<T2> cvt() const { return (T2)std::round(r);  }
 #endif
 
 #ifndef MIPP_NO_INTRINSICS
@@ -598,40 +598,4 @@ template <typename T1, typename T2>
 inline Reg<T2> cast(const Reg<T1> v)
 {
 	return v.template cast<T2>();
-}
-
-template <proto_i1 I1, typename T>
-inline Reg<T> mask(const Msk<N<T>()> m, const Reg<T> src, const Reg<T> a)
-{
-	return a.template mask<I1>(m, src);
-}
-
-template <proto_i2 I2, typename T>
-inline Reg<T> mask(const Msk<N<T>()> m, const Reg<T> src, const Reg<T> a, const Reg<T> b)
-{
-	return a.template mask<I2>(m, src, b);
-}
-
-template <proto_i3 I3, typename T>
-inline Reg<T> mask(const Msk<N<T>()> m, const Reg<T> src, const Reg<T> a, const Reg<T> b, const Reg<T> c)
-{
-	return a.template mask<I3>(m, src, b, c);
-}
-
-template <proto_i1 I1, typename T>
-inline Reg<T> maskz(const Msk<N<T>()> m, const Reg<T> a)
-{
-	return a.template maskz<I1>(m);
-}
-
-template <proto_i2 I2, typename T>
-inline Reg<T> maskz(const Msk<N<T>()> m, const Reg<T> a, const Reg<T> b)
-{
-	return a.template maskz<I2>(m, b);
-}
-
-template <proto_i3 I3, typename T>
-inline Reg<T> maskz(const Msk<N<T>()> m, const Reg<T> a, const Reg<T> b, const Reg<T> c)
-{
-	return a.template maskz<I3>(m, b, c);
 }

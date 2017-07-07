@@ -8,26 +8,42 @@ class NotTest : public CppUnit::TestFixture
 	CPPUNIT_TEST_SUITE(NotTest);
 
 #if defined(MIPP_BW)
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_not_int8);
+#endif
 	CPPUNIT_TEST(test_Reg_not_int8);
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_msk_not_int8);
+#endif
 	CPPUNIT_TEST(test_Msk_not_int8);
 
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_not_int16);
+#endif
 	CPPUNIT_TEST(test_Reg_not_int16);
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_msk_not_int16);
+#endif
 	CPPUNIT_TEST(test_Msk_not_int16);
 #endif
 
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_not_int32);
+#endif
 	CPPUNIT_TEST(test_Reg_not_int32);
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_msk_not_int32);
+#endif
 	CPPUNIT_TEST(test_Msk_not_int32);
 
 #if defined(MIPP_64BIT)
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_not_int64);
+#endif
 	CPPUNIT_TEST(test_Reg_not_int64);
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_msk_not_int64);
+#endif
 	CPPUNIT_TEST(test_Msk_not_int64);
 #endif
 

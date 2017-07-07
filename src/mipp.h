@@ -298,8 +298,8 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	#define MIPP_LANES 1
 
 	using msk   = uint8_t;
-	using reg   = int32_t;
-	using reg_2 = int16_t;
+	using reg   = uint32_t;
+	using reg_2 = uint16_t;
 
 	template <int N>
 	inline reg cvt_msk_reg(const msk m) {
@@ -325,15 +325,13 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	#define MIPP_LANES 1
 
 	using msk   = uint8_t;
-	using reg   = int32_t;
-	using reg_2 = int16_t;
+	using reg   = uint32_t;
+	using reg_2 = uint16_t;
 
 	template <int N>
 	inline reg cvt_msk_reg(const msk m) {
 		return (reg)m;
 	}
-
-	constexpr std::string IntructionsFullName
 #endif
 
 constexpr uint32_t RequiredAlignment  = MIPP_REQUIRED_ALIGNMENT;
@@ -474,7 +472,7 @@ static void errorMessage(std::string instr)
 	std::string message;
 	if (RegisterSizeBit == 0)
 		message = "mipp::" + instr + "<" + type_names[typeid(T)] + "> (" + InstructionFullType + ") is undefined!, "
-		          "try to add -mfpu=neon, -msse4.2, -mavx, -march=native... at the compile time.";
+		          "try to add -mfpu=neon-vfpv4, -msse4.2, -mavx, -march=native... at the compile time.";
 	else
 		message = "mipp::" + instr + "<" + type_names[typeid(T)] + "> (" + InstructionFullType + ") is undefined!";
 
@@ -489,7 +487,7 @@ static void errorMessage(std::string instr)
 	std::string message;
 	if (RegisterSizeBit == 0)
 		message = "mipp::" + instr + "<" + std::to_string(N) + "> (" + InstructionFullType + ") is undefined!, "
-		          "try to add -mfpu=neon, -msse4.2, -mavx, -march=native... at the compile time.";
+		          "try to add -mfpu=neon-vfpv4, -msse4.2, -mavx, -march=native... at the compile time.";
 	else
 		message = "mipp::" + instr + "<" + std::to_string(N) + "> (" + InstructionFullType + ") is undefined!";
 
@@ -635,31 +633,29 @@ template <typename T> inline reg copysign(const reg r1, const msk r2) { return n
 // ------------------------------------------------------------------------------------------------------------ masking
 // --------------------------------------------------------------------------------------------------------------------
 
-using proto_i1 = reg (*)(const reg a);
+template <typename T> using proto_i1 = reg (*)(const reg a);
+template <typename T> using proto_i2 = reg (*)(const reg a, const reg b);
+template <typename T> using proto_i3 = reg (*)(const reg a, const reg b, const reg c);
 
-using proto_i2 = reg (*)(const reg a, const reg b);
-
-using proto_i3 = reg (*)(const reg a, const reg b, const reg c);
-
-template <proto_i1 I1, typename T>
+template <typename T, proto_i1<T> I1>
 inline reg mask(const msk m, const reg src, const reg a)
 {
 	return blend<T>(I1(a), src, m);
 }
 
-template <proto_i2 I2, typename T>
+template <typename T, proto_i2<T> I2>
 inline reg mask(const msk m, const reg src, const reg a, const reg b)
 {
 	return blend<T>(I2(a, b), src, m);
 }
 
-template <proto_i3 I3, typename T>
+template <typename T, proto_i3<T> I3>
 inline reg mask(const msk m, const reg src, const reg a, const reg b, const reg c)
 {
 	return blend<T>(I3(a, b, c), src, m);
 }
 
-template <proto_i1 I1, typename T>
+template <typename T, proto_i1<T> I1>
 inline reg maskz(const msk m, const reg a)
 {
 	auto m_reg = cvt_msk_reg<N<T>()>(m);
@@ -667,7 +663,7 @@ inline reg maskz(const msk m, const reg a)
 	return andb<T>(m_reg, a_modif);
 }
 
-template <proto_i2 I2, typename T>
+template <typename T, proto_i2<T> I2>
 inline reg maskz(const msk m, const reg a, const reg b)
 {
 	auto m_reg = cvt_msk_reg<N<T>()>(m);
@@ -675,12 +671,93 @@ inline reg maskz(const msk m, const reg a, const reg b)
 	return andb<T>(m_reg, a_modif);
 }
 
-template <proto_i3 I3, typename T>
+template <typename T, proto_i3<T> I3>
 inline reg maskz(const msk m, const reg a, const reg b, const reg c)
 {
 	auto m_reg = cvt_msk_reg<N<T>()>(m);
 	auto a_modif = I3(a, b, c);
 	return andb<T>(m_reg, a_modif);
+}
+
+// -------------------------------------------------------------------------------------------------------- obj masking
+
+template <typename T>
+class Reg;
+
+template <int N>
+class Msk;
+
+template <typename T> inline Reg<T> blend(const Reg<T> v1, const Reg<T> v2, const Msk<N<T>()> m);
+template <typename T> inline Reg<T> andb (const Reg<T> v1, const Reg<T> v2);
+
+template <typename T> using proto_I1 = Reg<T> (*)(const Reg<T> a);
+template <typename T> using proto_I2 = Reg<T> (*)(const Reg<T> a, const Reg<T> b);
+template <typename T> using proto_I3 = Reg<T> (*)(const Reg<T> a, const Reg<T> b, const Reg<T> c);
+
+template <typename T, proto_I1<T> I1>
+inline Reg<T> mask(const Msk<N<T>()> m, const Reg<T> src, const Reg<T> a)
+{
+#ifndef MIPP_NO
+	return blend<T>(I1(a), src, m);
+#else
+	return m.m ? I1(a) : src;
+#endif
+}
+
+template <typename T, proto_I2<T> I2>
+inline Reg<T> mask(const Msk<N<T>()> m, const Reg<T> src, const Reg<T> a, const Reg<T> b)
+{
+#ifndef MIPP_NO
+	return blend<T>(I2(a, b), src, m);
+#else
+	return m.m ? I2(a, b) : src;
+#endif
+}
+
+template <typename T, proto_I3<T> I3>
+inline Reg<T> mask(const Msk<N<T>()> m, const Reg<T> src, const Reg<T> a, const Reg<T> b, const Reg<T> c)
+{
+#ifndef MIPP_NO
+	return blend<T>(I3(a, b, c), src, m);
+#else
+	return m.m ? I3(a, b, c) : src;
+#endif
+}
+
+template <typename T, proto_I1<T> I1>
+inline Reg<T> maskz(const Msk<N<T>()> m, const Reg<T> a)
+{
+#ifndef MIPP_NO
+	auto m_reg = cvt_msk_reg<N<T>()>(m.m);
+	auto a_modif = I1(a);
+	return andb<T>(m_reg, a_modif);
+#else
+	return m.m ? I1(a) : Reg<T>((T)0);
+#endif
+}
+
+template <typename T, proto_I2<T> I2>
+inline Reg<T> maskz(const Msk<N<T>()> m, const Reg<T> a, const Reg<T> b)
+{
+#ifndef MIPP_NO
+	auto m_reg = cvt_msk_reg<N<T>()>(m.m);
+	auto a_modif = I2(a, b);
+	return andb<T>(m_reg, a_modif);
+#else
+	return m.m ? I2(a, b) : Reg<T>((T)0);
+#endif
+}
+
+template <typename T, proto_I3<T> I3>
+inline Reg<T> maskz(const Msk<N<T>()> m, const Reg<T> a, const Reg<T> b, const Reg<T> c)
+{
+#ifndef MIPP_NO
+	auto m_reg = cvt_msk_reg<N<T>()>(m.m);
+	auto a_modif = I3(a, b, c);
+	return andb<T>(m_reg, a_modif);
+#else
+	return m.m ? I3(a, b, c) : Reg<T>((T)0);
+#endif
 }
 
 // --------------------------------------------------------------------------------------- myIntrinsics implementations
@@ -773,9 +850,6 @@ void dump(const mipp::msk m, std::ostream &stream = std::cout, const uint32_t el
 }
 
 // ---------------------------------------------------------------------------------------------------------- reduction
-
-template <typename T>
-class Reg;
 
 template <typename T>
 using red_op = reg (*)(const reg, const reg);

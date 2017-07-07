@@ -112,7 +112,7 @@ void FnmsubTest::test_reg_maskz_fnmsub()
 		mipp::reg r3 = mipp::load<T>(inputs3);
 		mipp::msk m  = mipp::set <N>(mask   );
 
-		mipp::reg r4 = mipp::maskz<mipp::fnmsub<T>, T>(m, r1, r2, r3);
+		mipp::reg r4 = mipp::maskz<T,mipp::fnmsub<T>>(m, r1, r2, r3);
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
@@ -160,7 +160,7 @@ void FnmsubTest::test_Reg_maskz_fnmsub()
 		mipp::Reg<T> r3 = inputs3;
 		mipp::Msk<N> m  = mask;
 
-		mipp::Reg<T> r4 = mipp::maskz<mipp::fnmsub<T>>(m, r1, r2, r3);
+		mipp::Reg<T> r4 = mipp::maskz<T,mipp::fnmsub>(m, r1, r2, r3);
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
@@ -210,7 +210,7 @@ void FnmsubTest::test_reg_mask_fnmsub()
 		mipp::reg r4 = mipp::load<T>(inputs4);
 		mipp::msk m  = mipp::set <N>(mask   );
 
-		mipp::reg r5 = mipp::mask<mipp::fnmsub<T>, T>(m, r4, r1, r2, r3);
+		mipp::reg r5 = mipp::mask<T,mipp::fnmsub<T>>(m, r4, r1, r2, r3);
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
@@ -260,7 +260,7 @@ void FnmsubTest::test_Reg_mask_fnmsub()
 		mipp::Reg<T> r4 = inputs4;
 		mipp::Msk<N> m  = mask;
 
-		mipp::Reg<T> r5 = mipp::mask<mipp::fnmsub<T>>(m, r4, r1, r2, r3);
+		mipp::Reg<T> r5 = mipp::mask<T,mipp::fnmsub>(m, r4, r1, r2, r3);
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{

@@ -7,11 +7,15 @@ class HmulTest : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE(HmulTest);
 
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_hmul_float);
+#endif
 	CPPUNIT_TEST(test_Reg_hmul_float);
 
 #if defined(MIPP_64BIT)
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_hmul_double);
+#endif
 	CPPUNIT_TEST(test_Reg_hmul_double);
 #endif
 

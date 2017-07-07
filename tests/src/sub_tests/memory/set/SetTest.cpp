@@ -253,10 +253,18 @@ void SetTest::test_Msk_set1()
 		mipp::reg r1 = mipp::cvt_msk_reg<mipp::N<T>()>(m1.m);
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
+#ifndef MIPP_NO
 			CPPUNIT_ASSERT_EQUAL((T)0, *((T*)&r0 +i));
+#else
+			CPPUNIT_ASSERT_EQUAL((mipp::reg)0, r0);
+#endif
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
+#ifndef MIPP_NO
 			CPPUNIT_ASSERT((T)0 != *((T*)&r1 +i));
+#else
+			CPPUNIT_ASSERT((mipp::reg)0 != r1);
+#endif
 	}
 	catch(std::exception &e)
 	{

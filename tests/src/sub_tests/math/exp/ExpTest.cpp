@@ -100,7 +100,7 @@ void ExpTest::test_reg_maskz_exp()
 		mipp::reg r1 = mipp::load<T>(inputs1);
 		mipp::msk m  = mipp::set <N>(mask   );
 
-		mipp::reg r2 = mipp::maskz<mipp::exp<T>, T>(m, r1);
+		mipp::reg r2 = mipp::maskz<T,mipp::exp<T>>(m, r1);
 
 		for (auto i = 0; i < N; i++)
 		{
@@ -144,7 +144,7 @@ void ExpTest::test_Reg_maskz_exp()
 		mipp::Reg<T> r1 = inputs1;
 		mipp::Msk<N> m  = mask;
 
-		mipp::Reg<T> r2 = mipp::maskz<mipp::exp<T>>(m, r1);
+		mipp::Reg<T> r2 = mipp::maskz<T,mipp::exp>(m, r1);
 
 		for (auto i = 0; i < N; i++)
 		{
@@ -190,7 +190,7 @@ void ExpTest::test_reg_mask_exp()
 		mipp::reg r2 = mipp::load<T>(inputs2);
 		mipp::msk m  = mipp::set <N>(mask   );
 
-		mipp::reg r3 = mipp::mask<mipp::exp<T>, T>(m, r2, r1);
+		mipp::reg r3 = mipp::mask<T,mipp::exp<T>>(m, r2, r1);
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
@@ -236,7 +236,7 @@ void ExpTest::test_Reg_mask_exp()
 		mipp::Reg<T> r2 = inputs2;
 		mipp::Msk<N> m  = mask;
 
-		mipp::Reg<T> r3 = mipp::mask<mipp::exp<T>>(m, r2, r1);
+		mipp::Reg<T> r3 = mipp::mask<T,mipp::exp>(m, r2, r1);
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{

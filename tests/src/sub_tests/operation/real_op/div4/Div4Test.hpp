@@ -10,52 +10,64 @@ class Div4Test : public CppUnit::TestFixture
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 31)
 #if defined(MIPP_BW)
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_div4_int8);
-	CPPUNIT_TEST(test_Reg_div4_int8);
 	CPPUNIT_TEST(test_reg_maskz_div4_int8);
-	CPPUNIT_TEST(test_Reg_maskz_div4_int8);
 	CPPUNIT_TEST(test_reg_mask_div4_int8);
+#endif
+	CPPUNIT_TEST(test_Reg_div4_int8);
+	CPPUNIT_TEST(test_Reg_maskz_div4_int8);
 	CPPUNIT_TEST(test_Reg_mask_div4_int8);
 
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_div4_int16);
-	CPPUNIT_TEST(test_Reg_div4_int16);
 	CPPUNIT_TEST(test_reg_maskz_div4_int16);
-	CPPUNIT_TEST(test_Reg_maskz_div4_int16);
 	CPPUNIT_TEST(test_reg_mask_div4_int16);
+#endif
+	CPPUNIT_TEST(test_Reg_div4_int16);
+	CPPUNIT_TEST(test_Reg_maskz_div4_int16);
 	CPPUNIT_TEST(test_Reg_mask_div4_int16);
 #endif
 
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_div4_int32);
-	CPPUNIT_TEST(test_Reg_div4_int32);
 	CPPUNIT_TEST(test_reg_maskz_div4_int32);
-	CPPUNIT_TEST(test_Reg_maskz_div4_int32);
 	CPPUNIT_TEST(test_reg_mask_div4_int32);
+#endif
+	CPPUNIT_TEST(test_Reg_div4_int32);
+	CPPUNIT_TEST(test_Reg_maskz_div4_int32);
 	CPPUNIT_TEST(test_Reg_mask_div4_int32);
 #endif
 #endif
 
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_div4_float);
-	CPPUNIT_TEST(test_Reg_div4_float);
 	CPPUNIT_TEST(test_reg_maskz_div4_float);
-	CPPUNIT_TEST(test_Reg_maskz_div4_float);
 	CPPUNIT_TEST(test_reg_mask_div4_float);
+#endif
+	CPPUNIT_TEST(test_Reg_div4_float);
+	CPPUNIT_TEST(test_Reg_maskz_div4_float);
 	CPPUNIT_TEST(test_Reg_mask_div4_float);
 
 #if defined(MIPP_64BIT)
 #if !defined(MIPP_SSE) && !defined(MIPP_AVX)
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_div4_int64);
-	CPPUNIT_TEST(test_Reg_div4_int64);
 	CPPUNIT_TEST(test_reg_maskz_div4_int64);
-	CPPUNIT_TEST(test_Reg_maskz_div4_int64);
 	CPPUNIT_TEST(test_reg_mask_div4_int64);
+#endif
+	CPPUNIT_TEST(test_Reg_div4_int64);
+	CPPUNIT_TEST(test_Reg_maskz_div4_int64);
 	CPPUNIT_TEST(test_Reg_mask_div4_int64);
 #endif
 
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_div4_double);
-	CPPUNIT_TEST(test_Reg_div4_double);
 	CPPUNIT_TEST(test_reg_maskz_div4_double);
-	CPPUNIT_TEST(test_Reg_maskz_div4_double);
 	CPPUNIT_TEST(test_reg_mask_div4_double);
+#endif
+	CPPUNIT_TEST(test_Reg_div4_double);
+	CPPUNIT_TEST(test_Reg_maskz_div4_double);
 	CPPUNIT_TEST(test_Reg_mask_div4_double);
 #endif
 

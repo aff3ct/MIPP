@@ -86,28 +86,30 @@ void NotTest::test_msk_not()
 	{
 		constexpr int N = mipp::N<T>();
 		bool inputs1[N];
-		for (auto i = 0; i < N/2; i++)
-		{
-			inputs1[     i] = true;
-			inputs1[N/2 +i] = false;
-		}
-
 		std::mt19937 g;
-		std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
+		std::uniform_int_distribution<uint8_t> dis(0, 1);
 
-		mipp::msk m1 = mipp::set<N>(inputs1);
-		mipp::msk m2 = mipp::notb<N>(m1);
-
-		mipp::reg r = mipp::cvt_msk_reg<N>(m2);
-
-		for (auto i = 0; i < N; i++)
+		for (auto t = 0; t < 100; t++)
 		{
-			bool res = !inputs1[i];
+			for (auto i = 0; i < N; i++)
+				inputs1[i] = dis(g) ? true : false;
 
-			if (res)
-				CPPUNIT_ASSERT(*((T*)&r +i) != (T)0);
-			else
-				CPPUNIT_ASSERT_EQUAL((T)res, *((T*)&r +i));
+			std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
+
+			mipp::msk m1 = mipp::set<N>(inputs1);
+			mipp::msk m2 = mipp::notb<N>(m1);
+
+			mipp::reg r = mipp::cvt_msk_reg<N>(m2);
+
+			for (auto i = 0; i < N; i++)
+			{
+				bool res = !inputs1[i];
+
+				if (res)
+					CPPUNIT_ASSERT(*((T*)&r +i) != (T)0);
+				else
+					CPPUNIT_ASSERT_EQUAL((T)res, *((T*)&r +i));
+			}
 		}
 	}
 	catch(std::exception &e)
@@ -128,28 +130,30 @@ void NotTest::test_Msk_not()
 	{
 		constexpr int N = mipp::N<T>();
 		bool inputs1[N];
-		for (auto i = 0; i < N/2; i++)
-		{
-			inputs1[     i] = true;
-			inputs1[N/2 +i] = false;
-		}
-
 		std::mt19937 g;
-		std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
+		std::uniform_int_distribution<uint8_t> dis(0, 1);
 
-		mipp::Msk<N> m1 = inputs1;
-		mipp::Msk<N> m2 = ~m1;
-
-		mipp::reg r = mipp::cvt_msk_reg<N>(m2.m);
-
-		for (auto i = 0; i < N; i++)
+		for (auto t = 0; t < 100; t++)
 		{
-			bool res = !inputs1[i];
+			for (auto i = 0; i < N; i++)
+				inputs1[i] = dis(g) ? true : false;
 
-			if (res)
-				CPPUNIT_ASSERT(*((T*)&r +i) != (T)0);
-			else
-				CPPUNIT_ASSERT_EQUAL((T)res, *((T*)&r +i));
+			std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
+
+			mipp::Msk<N> m1 = inputs1;
+			mipp::Msk<N> m2 = ~m1;
+
+			mipp::reg r = mipp::cvt_msk_reg<N>(m2.m);
+
+			for (auto i = 0; i < N; i++)
+			{
+				bool res = !inputs1[i];
+
+				if (res)
+					CPPUNIT_ASSERT(*((T*)&r +i) != (T)0);
+				else
+					CPPUNIT_ASSERT_EQUAL((T)res, *((T*)&r +i));
+			}
 		}
 	}
 	catch(std::exception &e)

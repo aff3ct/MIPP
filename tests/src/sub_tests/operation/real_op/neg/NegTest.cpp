@@ -112,7 +112,7 @@ void NegTest::test_reg_maskz_neg()
 		mipp::reg r2 = mipp::load<T>(inputs2);
 		mipp::msk m  = mipp::set <N>(mask   );
 
-		mipp::reg r3 = mipp::maskz<mipp::neg<T>, T>(m, r1, r2);
+		mipp::reg r3 = mipp::maskz<T,mipp::neg<T>>(m, r1, r2);
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
@@ -161,7 +161,7 @@ void NegTest::test_Reg_maskz_neg()
 		mipp::Reg<T> r2 = inputs2;
 		mipp::Msk<N> m  = mask;
 
-		mipp::Reg<T> r3 = mipp::maskz<mipp::neg<T>>(m, r1, r2);
+		mipp::Reg<T> r3 = mipp::maskz<T,mipp::neg>(m, r1, r2);
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
@@ -212,7 +212,7 @@ void NegTest::test_reg_mask_neg()
 		mipp::reg r3 = mipp::load<T>(inputs3);
 		mipp::msk m  = mipp::set <N>(mask   );
 
-		mipp::reg r4 = mipp::mask<mipp::neg<T>, T>(m, r3, r1, r2);
+		mipp::reg r4 = mipp::mask<T,mipp::neg<T>>(m, r3, r1, r2);
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
@@ -263,7 +263,7 @@ void NegTest::test_Reg_mask_neg()
 		mipp::Reg<T> r3 = inputs3;
 		mipp::Msk<N> m  = mask;
 
-		mipp::Reg<T> r4 = mipp::mask<mipp::neg<T>>(m, r3, r1, r2);
+		mipp::Reg<T> r4 = mipp::mask<T,mipp::neg>(m, r3, r1, r2);
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{

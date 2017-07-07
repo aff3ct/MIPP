@@ -112,7 +112,7 @@ void MulTest::test_reg_maskz_mul()
 		mipp::reg r2 = mipp::load<T>(inputs2);
 		mipp::msk m  = mipp::set <N>(mask   );
 
-		mipp::reg r3 = mipp::maskz<mipp::mul<T>, T>(m, r1, r2);
+		mipp::reg r3 = mipp::maskz<T,mipp::mul<T>>(m, r1, r2);
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
@@ -161,7 +161,7 @@ void MulTest::test_Reg_maskz_mul()
 		mipp::Reg<T> r2 = inputs2;
 		mipp::Msk<N> m  = mask;
 
-		mipp::Reg<T> r3 = mipp::maskz<mipp::mul<T>>(m, r1, r2);
+		mipp::Reg<T> r3 = mipp::maskz<T,mipp::mul>(m, r1, r2);
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
@@ -212,7 +212,7 @@ void MulTest::test_reg_mask_mul()
 		mipp::reg r3 = mipp::load<T>(inputs3);
 		mipp::msk m  = mipp::set <N>(mask   );
 
-		mipp::reg r4 = mipp::mask<mipp::mul<T>, T>(m, r3, r1, r2);
+		mipp::reg r4 = mipp::mask<T,mipp::mul<T>>(m, r3, r1, r2);
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
@@ -263,7 +263,7 @@ void MulTest::test_Reg_mask_mul()
 		mipp::Reg<T> r3 = inputs3;
 		mipp::Msk<N> m  = mask;
 
-		mipp::Reg<T> r4 = mipp::mask<mipp::mul<T>>(m, r3, r1, r2);
+		mipp::Reg<T> r4 = mipp::mask<T,mipp::mul>(m, r3, r1, r2);
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{

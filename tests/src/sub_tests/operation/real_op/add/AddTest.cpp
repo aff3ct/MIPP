@@ -112,7 +112,7 @@ void AddTest::test_reg_maskz_add()
 		mipp::reg r2 = mipp::load<T>(inputs2);
 		mipp::msk m  = mipp::set <N>(mask   );
 
-		mipp::reg r3 = mipp::maskz<mipp::add<T>, T>(m, r1, r2);
+		mipp::reg r3 = mipp::maskz<T,mipp::add<T>>(m, r1, r2);
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
@@ -161,7 +161,7 @@ void AddTest::test_Reg_maskz_add()
 		mipp::Reg<T> r2 = inputs2;
 		mipp::Msk<N> m  = mask;
 
-		mipp::Reg<T> r3 = mipp::maskz<mipp::add<T>>(m, r1, r2);
+		mipp::Reg<T> r3 = mipp::maskz<T,mipp::add>(m, r1, r2);
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
@@ -212,7 +212,7 @@ void AddTest::test_reg_mask_add()
 		mipp::reg r3 = mipp::load<T>(inputs3);
 		mipp::msk m  = mipp::set <N>(mask   );
 
-		mipp::reg r4 = mipp::mask<mipp::add<T>, T>(m, r3, r1, r2);
+		mipp::reg r4 = mipp::mask<T,mipp::add<T>>(m, r3, r1, r2);
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
@@ -263,7 +263,7 @@ void AddTest::test_Reg_mask_add()
 		mipp::Reg<T> r3 = inputs3;
 		mipp::Msk<N> m  = mask;
 
-		mipp::Reg<T> r4 = mipp::mask<mipp::add<T>>(m, r3, r1, r2);
+		mipp::Reg<T> r4 = mipp::mask<T,mipp::add>(m, r3, r1, r2);
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{

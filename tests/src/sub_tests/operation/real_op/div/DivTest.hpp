@@ -8,48 +8,60 @@ class DivTest : public CppUnit::TestFixture
 	CPPUNIT_TEST_SUITE(DivTest);
 
 #if defined(MIPP_BW)
+//#ifndef MIPP_NO
 //	CPPUNIT_TEST(test_reg_div_int8);
-//	CPPUNIT_TEST(test_Reg_div_int8);
 //	CPPUNIT_TEST(test_reg_maskz_div_int8);
-//	CPPUNIT_TEST(test_Reg_maskz_div_int8);
 //	CPPUNIT_TEST(test_reg_mask_div_int8);
+//#endif
+//	CPPUNIT_TEST(test_Reg_div_int8);
+//	CPPUNIT_TEST(test_Reg_maskz_div_int8);
 //	CPPUNIT_TEST(test_Reg_mask_div_int8);
 
+//#ifndef MIPP_NO
 //	CPPUNIT_TEST(test_reg_div_int16);
-//	CPPUNIT_TEST(test_Reg_div_int16);
 //	CPPUNIT_TEST(test_reg_maskz_div_int16);
-//	CPPUNIT_TEST(test_Reg_maskz_div_int16);
 //	CPPUNIT_TEST(test_reg_mask_div_int16);
+//#endif
+//	CPPUNIT_TEST(test_Reg_div_int16);
+//	CPPUNIT_TEST(test_Reg_maskz_div_int16);
 //	CPPUNIT_TEST(test_Reg_mask_div_int16);
 #endif
 
+//#ifndef MIPP_NO
 //	CPPUNIT_TEST(test_reg_div_int32);
-//	CPPUNIT_TEST(test_Reg_div_int32);
 //	CPPUNIT_TEST(test_reg_maskz_div_int32);
-//	CPPUNIT_TEST(test_Reg_maskz_div_int32);
 //	CPPUNIT_TEST(test_reg_mask_div_int32);
+//#endif
+//	CPPUNIT_TEST(test_Reg_div_int32);
+//	CPPUNIT_TEST(test_Reg_maskz_div_int32);
 //	CPPUNIT_TEST(test_Reg_mask_div_int32);
 
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_div_float);
-	CPPUNIT_TEST(test_Reg_div_float);
 	CPPUNIT_TEST(test_reg_maskz_div_float);
-	CPPUNIT_TEST(test_Reg_maskz_div_float);
 	CPPUNIT_TEST(test_reg_mask_div_float);
+#endif
+	CPPUNIT_TEST(test_Reg_div_float);
+	CPPUNIT_TEST(test_Reg_maskz_div_float);
 	CPPUNIT_TEST(test_Reg_mask_div_float);
 
 #if defined(MIPP_64BIT)
+//#ifndef MIPP_NO
 //	CPPUNIT_TEST(test_reg_div_int64);
-//	CPPUNIT_TEST(test_Reg_div_int64);
 //	CPPUNIT_TEST(test_reg_maskz_div_int64);
-//	CPPUNIT_TEST(test_Reg_maskz_div_int64);
 //	CPPUNIT_TEST(test_reg_mask_div_int64);
+//#endif
+//	CPPUNIT_TEST(test_Reg_div_int64);
+//	CPPUNIT_TEST(test_Reg_maskz_div_int64);
 //	CPPUNIT_TEST(test_Reg_mask_div_int64);
 
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_div_double);
-	CPPUNIT_TEST(test_Reg_div_double);
 	CPPUNIT_TEST(test_reg_maskz_div_double);
-	CPPUNIT_TEST(test_Reg_maskz_div_double);
 	CPPUNIT_TEST(test_reg_mask_div_double);
+#endif
+	CPPUNIT_TEST(test_Reg_div_double);
+	CPPUNIT_TEST(test_Reg_maskz_div_double);
 	CPPUNIT_TEST(test_Reg_mask_div_double);
 #endif
 

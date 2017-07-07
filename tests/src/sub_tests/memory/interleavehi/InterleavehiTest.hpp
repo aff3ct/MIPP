@@ -9,36 +9,60 @@ class InterleavehiTest : public CppUnit::TestFixture
 
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 #if defined(MIPP_BW)
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_interleavehi_int8);
+#endif
 	CPPUNIT_TEST(test_Reg_interleavehi_int8);
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_interleavehi2_int8);
+#endif
 	CPPUNIT_TEST(test_Reg_interleavehi2_int8);
 
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_interleavehi_int16);
+#endif
 	CPPUNIT_TEST(test_Reg_interleavehi_int16);
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_interleavehi2_int16);
+#endif
 	CPPUNIT_TEST(test_Reg_interleavehi2_int16);
 #endif
 
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_interleavehi_int32);
+#endif
 	CPPUNIT_TEST(test_Reg_interleavehi_int32);
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_interleavehi2_int32);
+#endif
 	CPPUNIT_TEST(test_Reg_interleavehi2_int32);
 
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_interleavehi_float);
+#endif
 	CPPUNIT_TEST(test_Reg_interleavehi_float);
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_interleavehi2_float);
+#endif
 	CPPUNIT_TEST(test_Reg_interleavehi2_float);
 
 #if defined(MIPP_64BIT)
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_interleavehi_int64);
+#endif
 	CPPUNIT_TEST(test_Reg_interleavehi_int64);
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_interleavehi2_int64);
+#endif
 	CPPUNIT_TEST(test_Reg_interleavehi2_int64);
 
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_interleavehi_double);
+#endif
 	CPPUNIT_TEST(test_Reg_interleavehi_double);
+#ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_interleavehi2_double);
+#endif
 	CPPUNIT_TEST(test_Reg_interleavehi2_double);
 #endif
 #endif
