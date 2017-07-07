@@ -177,7 +177,6 @@ void Div4Test::test_Reg_maskz_div4()
 #else 
 				CPPUNIT_ASSERT_EQUAL(res, r2[i]);
 #endif
-
 			}
 			else
 				CPPUNIT_ASSERT_EQUAL((T)0, r2[i]);
@@ -284,7 +283,6 @@ void Div4Test::test_Reg_mask_div4()
 #else 
 				CPPUNIT_ASSERT_EQUAL(res, r3[i]);
 #endif
-
 			}
 			else
 				CPPUNIT_ASSERT_EQUAL(inputs2[i], *((T*)&r3 +i));

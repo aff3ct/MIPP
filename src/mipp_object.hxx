@@ -114,26 +114,14 @@ public:
 	}
 
 #ifndef MIPP_NO_INTRINSICS
-	inline void     set0         (               )                        { r = mipp::set0<T>();                          }
-	inline void     set1         (const T val    )                        { r = mipp::set1<T>(val);                       }
-	inline void     load         (const T* data  )                        { r = mipp::load<T>(data);                      }
-	inline void     loadu        (const T* data  )                        { r = mipp::loadu<T>(data);                     }
-	inline void     store        (T* data        )                  const { mipp::store<T>(data, r);                      }
-	inline void     storeu       (T* data        )                  const { mipp::storeu<T>(data, r);                     }
-	inline Reg_2<T> low          (               )                  const { return mipp::low <T>(r);                      }
-	inline Reg_2<T> high         (               )                  const { return mipp::high<T>(r);                      }
-#else
-	inline void     set0         (               )                        { r = 0;                                        }
-	inline void     set1         (const T val    )                        { r = val;                                      }
-	inline void     load         (const T* data  )                        { r = data[0];                                  }
-	inline void     loadu        (const T* data  )                        { r = data[0];                                  }
-	inline void     store        (T* data        )                  const { data[0] = r;                                  }
-	inline void     storeu       (T* data        )                  const { data[0] = r;                                  }
-	inline Reg_2<T> low          (               )                  const { return r;                                     }
-	inline Reg_2<T> high         (               )                  const { return r;                                     }
-#endif
-
-#ifndef MIPP_NO_INTRINSICS
+	inline void        set0         ()                                           { r = mipp::set0<T>();                          }
+	inline void        set1         (const T val)                                { r = mipp::set1<T>(val);                       }
+	inline void        load         (const T* data)                              { r = mipp::load<T>(data);                      }
+	inline void        loadu        (const T* data)                              { r = mipp::loadu<T>(data);                     }
+	inline void        store        (T* data)                              const { mipp::store<T>(data, r);                      }
+	inline void        storeu       (T* data)                              const { mipp::storeu<T>(data, r);                     }
+	inline Reg_2<T>    low          ()                                     const { return mipp::low <T>(r);                      }
+	inline Reg_2<T>    high         ()                                     const { return mipp::high<T>(r);                      }
 	inline Reg<T>      shuff        (const Reg<T> v_shu)                   const { return mipp::shuff        <T>(r, v_shu.r);    }
 	inline Reg<T>      shuff2       (const Reg<T> v_shu)                   const { return mipp::shuff2       <T>(r, v_shu.r);    }
 	inline Reg<T>      interleavelo (const Reg<T> v)                       const { return mipp::interleavelo <T>(r, v.r);        }
@@ -191,6 +179,14 @@ public:
 	inline Reg<T>      sat          (T min, T max)                         const { return mipp::sat          <T>(r, min, max);   }
 	inline Reg<T>      round        ()                                     const { return mipp::round        <T>(r);             }
 #else
+	inline void        set0         ()                                           { r = 0;                                        }
+	inline void        set1         (const T val)                                { r = val;                                      }
+	inline void        load         (const T* data)                              { r = data[0];                                  }
+	inline void        loadu        (const T* data)                              { r = data[0];                                  }
+	inline void        store        (T* data)                              const { data[0] = r;                                  }
+	inline void        storeu       (T* data)                              const { data[0] = r;                                  }
+	inline Reg_2<T>    low          ()                                     const { return r;                                     }
+	inline Reg_2<T>    high         ()                                     const { return r;                                     }
 	inline Reg<T>      shuff        (const Reg<T> v_shu)                   const { return *this;                                 }
 	inline Reg<T>      shuff2       (const Reg<T> v_shu)                   const { return *this;                                 }
 	inline Reg<T>      interleavelo (const Reg<T> v)                       const { return *this;                                 }
@@ -456,9 +452,9 @@ public:
 	virtual ~Reg_2() {}
 
 #ifndef MIPP_NO_INTRINSICS
-	template <typename T2> inline Reg<T2> cvt () const { return mipp::cvt<T,T2>(r); }
+	template <typename T2> inline Reg<T2> cvt() const { return mipp::cvt<T,T2>(r); }
 #else
-	template <typename T2> inline Reg<T2> cvt () const { return (T2)r;              }
+	template <typename T2> inline Reg<T2> cvt() const { return (T2)r;              }
 #endif
 
 #ifndef MIPP_NO_INTRINSICS

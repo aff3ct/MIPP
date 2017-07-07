@@ -244,7 +244,7 @@ void DivTest::test_reg_mask_div()
 				CPPUNIT_ASSERT(diff < 0.01);
 #else
 				CPPUNIT_ASSERT_EQUAL(res, *((T*)&r4 +i));
-#endif	
+#endif
 			}
 			else
 				CPPUNIT_ASSERT_EQUAL(inputs3[i], *((T*)&r4 +i));

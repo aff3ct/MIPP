@@ -78,7 +78,6 @@ void Div2Test::test_Reg_div2()
 #else
 			CPPUNIT_ASSERT_EQUAL(res, r2[i]);
 #endif
-
 		}
 	}
 	catch(std::exception &e)
@@ -127,7 +126,6 @@ void Div2Test::test_reg_maskz_div2()
 #else
 				CPPUNIT_ASSERT_EQUAL(res, *((T*)&r2 +i));
 #endif
-
 			}
 			else
 				CPPUNIT_ASSERT_EQUAL((T)0, *((T*)&r2 +i));
@@ -179,7 +177,6 @@ void Div2Test::test_Reg_maskz_div2()
 #else
 				CPPUNIT_ASSERT_EQUAL(res, r2[i]);
 #endif
-
 			}
 			else
 				CPPUNIT_ASSERT_EQUAL((T)0, r2[i]);
@@ -233,7 +230,6 @@ void Div2Test::test_reg_mask_div2()
 #else
 				CPPUNIT_ASSERT_EQUAL(res, *((T*)&r3 +i));
 #endif
-
 			}
 			else
 				CPPUNIT_ASSERT_EQUAL(inputs2[i], *((T*)&r3 +i));
@@ -287,7 +283,6 @@ void Div2Test::test_Reg_mask_div2()
 #else
 				CPPUNIT_ASSERT_EQUAL(res, r3[i]);
 #endif
-
 			}
 			else
 				CPPUNIT_ASSERT_EQUAL(inputs2[i], *((T*)&r3 +i));
