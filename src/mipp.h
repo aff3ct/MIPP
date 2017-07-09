@@ -135,6 +135,9 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	inline std::vector<std::string> InstructionExtensions()
 	{
 		std::vector<std::string> ext;
+#ifdef __ARM_FEATURE_FMA
+		ext.push_back("FMA");
+#endif
 		return ext;
 	}
 
