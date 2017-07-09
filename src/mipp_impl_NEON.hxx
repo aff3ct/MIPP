@@ -2128,7 +2128,7 @@
 #ifdef __ARM_FEATURE_FMA
 		return (reg) vfmsq_f64((float64x2_t)v3, (float64x2_t)v1, (float64x2_t)v2);
 #else
- 		return sub<double>(mul<double>(v1, v2), v3);
+ 		return sub<double>(v3, mul<double>(v1, v2));
 #endif
 	}
 #endif
@@ -2138,7 +2138,7 @@
 #ifdef __ARM_FEATURE_FMA
 		return (reg) vfmsq_f32((float32x4_t)v3, (float32x4_t)v1, (float32x4_t)v2);
 #else
- 		return sub<float>(mul<float>(v1, v2), v3);
+ 		return sub<float>(v3, mul<float>(v1, v2));
 #endif
 	}
 
