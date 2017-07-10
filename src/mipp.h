@@ -490,7 +490,7 @@ template<class T> using vector = std::vector<T, AlignedAllocator<T>>;
 // -------------------------------------------------------------------------------------------- myIntrinsics prototypes
 // --------------------------------------------------------------------------------------------------------------------
 
-static std::string get_back_trace()
+static inline std::string get_back_trace()
 {
 	std::string bt_str;
 #if defined(MIPP_ENABLE_BACKTRACE) && (defined(__GNUC__) || defined(__clang__) || defined(__llvm__)) && (defined(__linux__) || defined(__linux) || defined(__APPLE__))
@@ -510,7 +510,7 @@ static std::string get_back_trace()
 }
 
 template <typename T>
-static void errorMessage(std::string instr)
+static inline void errorMessage(std::string instr)
 {
 	// define type names
 	std::unordered_map<std::type_index,std::string> type_names;
@@ -538,7 +538,7 @@ static void errorMessage(std::string instr)
 }
 
 template <int N>
-static void errorMessage(std::string instr)
+static inline void errorMessage(std::string instr)
 {
 	std::string message;
 	if (RegisterSizeBit == 0)
@@ -553,7 +553,7 @@ static void errorMessage(std::string instr)
 }
 
 template <typename T1, typename T2>
-static void errorMessage(std::string instr)
+static inline void errorMessage(std::string instr)
 {
 	// define type names
 	std::unordered_map<std::type_index,std::string> type_names;
@@ -784,7 +784,7 @@ template <typename T, proto_I1<T> I1>
 inline Reg<T> maskz(const Msk<N<T>()> m, const Reg<T> a)
 {
 #ifndef MIPP_NO
-	auto m_reg = cvt_reg<N<T>()>(m.m);
+	auto m_reg = m.template cvt_reg<T>();
 	auto a_modif = I1(a);
 	return andb<T>(m_reg, a_modif);
 #else
@@ -796,7 +796,7 @@ template <typename T, proto_I2<T> I2>
 inline Reg<T> maskz(const Msk<N<T>()> m, const Reg<T> a, const Reg<T> b)
 {
 #ifndef MIPP_NO
-	auto m_reg = cvt_reg<N<T>()>(m.m);
+	auto m_reg = m.template cvt_reg<T>();
 	auto a_modif = I2(a, b);
 	return andb<T>(m_reg, a_modif);
 #else
@@ -808,7 +808,7 @@ template <typename T, proto_I3<T> I3>
 inline Reg<T> maskz(const Msk<N<T>()> m, const Reg<T> a, const Reg<T> b, const Reg<T> c)
 {
 #ifndef MIPP_NO
-	auto m_reg = cvt_reg<N<T>()>(m.m);
+	auto m_reg = m.template cvt_reg<T>();
 	auto a_modif = I3(a, b, c);
 	return andb<T>(m_reg, a_modif);
 #else
