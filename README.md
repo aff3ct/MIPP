@@ -1,5 +1,7 @@
 # MyIntrinsics++ (MIPP)
 
+![](mipp.jpg)
+
 ## Purpose
 
 MIPP is a portable and Open-source wrapper (MIT license) for vector intrinsic functions (SIMD) written in C++11. It works for SSE, AVX and ARM NEON instructions. 
