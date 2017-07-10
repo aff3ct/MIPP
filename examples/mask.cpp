@@ -25,8 +25,14 @@ int main(int argc, char** argv)
 	mipp::Reg<T> in_3 = (T)-1;
 	mipp::Msk<N> m_1  = false;
 	mipp::Msk<N> m_2  = true;
-	mipp::Msk<N> m_3  = {1,0,1,1,0,1,1,1,0,0,0,0,0,1,0,1,0,1,1,1,0,1,0,1,1,1,0,1,0,0,0,0};
-	mipp::Msk<N> m_4  = {0,1,0,0,1,0,0,0,1,1,1,1,1,0,1,0,1,0,0,0,1,0,1,0,0,0,1,0,1,1,1,1};
+	mipp::Msk<N> m_3  = {true, false,true, true, false,true ,true ,true ,
+	                     false,false,false,false,false,true ,false,true ,
+	                     false,true ,true ,true ,false,true ,false,true ,
+	                     true ,true ,false,true ,false,false,false,false};
+	mipp::Msk<N> m_4  = {false,true ,false,false,true ,false,false,false,
+	                     true ,true ,true ,true ,true ,false,true ,false,
+	                     true ,false,false,false,true ,false,true ,false,
+	                     false,false,true ,false,true ,true ,true ,true };
 
 	std::cout << "Input vectors: " << std::endl;
 	std::cout << "in_1 = " << in_1 << std::endl;
@@ -44,7 +50,7 @@ int main(int argc, char** argv)
 	std::cout << "mout = " << mout << std::endl;
 	std::cout << std::endl;
 
-	auto out = mipp::maskz<mipp::sub<T>>(m_3, in_1, in_2);
+	auto out = mipp::maskz<T,mipp::sub>(m_3, in_1, in_2);
 	std::cout << "Output vector (m_3 & (in_1 - in_2)): " << std::endl;
 	std::cout << "out  = " << out << std::endl;
 	std::cout << std::endl;
@@ -54,7 +60,7 @@ int main(int argc, char** argv)
 	std::cout << "m_5  = " << m_5 << std::endl;
 	std::cout << std::endl;
 
-	out = mipp::mask<mipp::add<T>>(m_5, in_3, in_1, in_2);
+	out = mipp::mask<T,mipp::add>(m_5, in_3, in_1, in_2);
 	std::cout << "Output vector ((m_5 & (in_1 + in_2)) | (~m_5 & in_3)): " << std::endl;
 	std::cout << "out  = " << out << std::endl;
 	std::cout << std::endl;

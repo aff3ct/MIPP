@@ -116,10 +116,8 @@ private:
 			const auto idx0 = mipp::Reg<int>(&tree_idx[2*j + 0*mipp::nElReg<T>()]); // load
 			const auto idx1 = mipp::Reg<int>(&tree_idx[2*j + 1*mipp::nElReg<T>()]); // load
 
-			const auto mask1 = val0 < val1;
-			const auto mask2 = mipp::Reg<int>(mask1.r);
-			const auto min   = mipp::min(val0, val1);
-			const auto idx   = mipp::blend(idx0, idx1, mask2);
+			const auto min  = mipp::min(val0, val1);
+			const auto idx  = mipp::blend(idx0, idx1, val0 < val1);
 
 			min.store(&values  [max_elmts +j]); // store
 			idx.store(&tree_idx[max_elmts +j]); // store
@@ -137,10 +135,8 @@ private:
 				const auto idx0 = mipp::Reg<int>(&tree_idx[offset + 2*j + 0*mipp::nElReg<T>()]); // load
 				const auto idx1 = mipp::Reg<int>(&tree_idx[offset + 2*j + 1*mipp::nElReg<T>()]); // load
 
-				const auto mask1 = val0 < val1;
-				const auto mask2 = mipp::Reg<int>(mask1.r);
-				const auto min   = mipp::min(val0, val1);
-				const auto idx   = mipp::blend(idx0, idx1, mask2);
+				const auto min  = mipp::min(val0, val1);
+				const auto idx  = mipp::blend(idx0, idx1, val0 < val1);
 
 				min.store(&values  [offset + n +j]); // store
 				idx.store(&tree_idx[offset + n +j]); // store
@@ -179,10 +175,8 @@ private:
 				const auto idx0 = mipp::Reg<int>(&tree_idx[2*j + 0*mipp::nElReg<T>()]); // load
 				const auto idx1 = mipp::Reg<int>(&tree_idx[2*j + 1*mipp::nElReg<T>()]); // load
 
-				const auto mask1 = val0 < val1;
-				const auto mask2 = mipp::Reg<int>(mask1.r);
-				const auto min   = mipp::min(val0, val1);
-				const auto idx   = mipp::blend(idx0, idx1, mask2);
+				const auto min  = mipp::min(val0, val1);
+				const auto idx  = mipp::blend(idx0, idx1, val0 < val1);
 
 				min.store(&values  [max_elmts +j]); // store
 				idx.store(&tree_idx[max_elmts +j]); // store
@@ -201,10 +195,8 @@ private:
 				const auto idx0 = mipp::Reg<int>(&tree_idx[offset + 2*j + 0*mipp::nElReg<T>()]); // load
 				const auto idx1 = mipp::Reg<int>(&tree_idx[offset + 2*j + 1*mipp::nElReg<T>()]); // load
 
-				const auto mask1 = val0 < val1;
-				const auto mask2 = mipp::Reg<int>(mask1.r);
-				const auto min   = mipp::min(val0, val1);
-				const auto idx   = mipp::blend(idx0, idx1, mask2);
+				const auto min  = mipp::min(val0, val1);
+				const auto idx  = mipp::blend(idx0, idx1, val0 < val1);
 
 				min.store(&values  [offset + n +j]); // store
 				idx.store(&tree_idx[offset + n +j]); // store
