@@ -4,9 +4,8 @@
 
 ## Purpose
 
-MIPP is a portable and Open-source wrapper (MIT license) for vector intrinsic functions (SIMD) written in C++11. It works for SSE, AVX and ARM NEON instructions. 
+MIPP is a portable and Open-source wrapper (MIT license) for vector intrinsic functions (SIMD) written in C++11. It works for SSE, AVX, AVX512 and ARM NEON instructions. 
 MIPP wrapper supports simple/double precision floating-point numbers and also signed integer arithmetic (32-bit, 16-bit and 8-bit). 
-On ARM NEON instructions the wrapper supports only simple precision floating-point numbers.
 
 With the MIPP wrapper you do not need to write a specific intrinsic code anymore. Just use provided functions and the wrapper will automatically generates the right intrisic calls for your specific architecture.
 
