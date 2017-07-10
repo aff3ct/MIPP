@@ -1696,7 +1696,7 @@
 
 	template <>
 	inline msk cmpneq<int32_t>(const reg v1, const reg v2) {
-		return _mm256_castps_si256(_mm256_cmp_ps(v1, v2, _CMP_NEQ_OQ));
+		return notb<N<int32_t>()>(cmpeq<int32_t>(v1, v2));
 	}
 
 	template <>

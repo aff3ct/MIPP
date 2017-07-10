@@ -1664,7 +1664,7 @@
 
 	template <>
 	inline msk cmpneq<int32_t>(const reg v1, const reg v2) {
-		return _mm_castps_si128(_mm_cmpneq_ps(v1, v2));
+		return notb<N<int32_t>()>(cmpeq<int32_t>(v1, v2));
 	}
 
 	template <>

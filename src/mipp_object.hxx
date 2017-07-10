@@ -471,7 +471,7 @@ public:
 	inline Msk<N>  operator>> (const uint32_t n) const { return this->rshift(n);                 }
 
 #ifndef MIPP_NO_INTRINSICS
-	inline const bool operator[](size_t index) const
+	inline bool operator[](size_t index) const
 	{
 #ifdef MIPP_AVX512
 		return (this->m >> index) & 0x1;
@@ -481,7 +481,7 @@ public:
 #endif
 	}
 #else
-	inline const bool operator[](size_t index) const { return m; }
+	inline bool operator[](size_t index) const { return m; }
 #endif
 };
 
