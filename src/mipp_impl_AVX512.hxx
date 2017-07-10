@@ -1444,37 +1444,169 @@
 #endif
 
 	// ------------------------------------------------------------------------------------------------------------ add
+	// ------------------ double
 	template <>
 	inline reg add<double>(const reg v1, const reg v2) {
 		return _mm512_castpd_ps(_mm512_add_pd(_mm512_castps_pd(v1), _mm512_castps_pd(v2)));
 	}
 
 	template <>
+	inline reg mask<double,add<double>>(const msk m, const reg src, const reg v1, const reg v2) {
+		return _mm512_castpd_ps(_mm512_mask_add_pd(_mm512_castps_pd(src), (__mmask8)m, _mm512_castps_pd(v1), _mm512_castps_pd(v2)));
+	}
+
+	template <>
+	inline Reg<double> mask<double,add<double>>(const Msk<8> m, const Reg<double> src, const Reg<double> v1, const Reg<double> v2) {
+		return mask<double,add<double>>(m.m, src.r, v1.r, v2.r);
+	}
+
+#if defined(__AVX512F__)
+	template <>
+	inline reg maskz<double,add<double>>(const msk m, const reg v1, const reg v2) {
+		return _mm512_castpd_ps(_mm512_maskz_add_pd((__mmask8)m, _mm512_castps_pd(v1), _mm512_castps_pd(v2)));
+	}
+
+	template <>
+	inline Reg<double> maskz<double,add<double>>(const Msk<8> m, const Reg<double> v1, const Reg<double> v2) {
+		return maskz<double,add<double>>(m.m, v1.r, v2.r);
+	}
+#endif
+
+	// ------------------ float
+	template <>
 	inline reg add<float>(const reg v1, const reg v2) {
 		return _mm512_add_ps(v1, v2);
 	}
 
+	template <>
+	inline reg mask<float,add<float>>(const msk m, const reg src, const reg v1, const reg v2) {
+		return _mm512_mask_add_ps(src, (__mmask16)m, v1, v2);
+	}
+
+	template <>
+	inline Reg<float> mask<float,add<float>>(const Msk<16> m, const Reg<float> src, const Reg<float> v1, const Reg<float> v2) {
+		return mask<float,add<float>>(m.m, src.r, v1.r, v2.r);
+	}
+
+#if defined(__AVX512F__)
+	template <>
+	inline reg maskz<float,add<float>>(const msk m, const reg v1, const reg v2) {
+		return _mm512_maskz_add_ps((__mmask16)m, v1, v2);
+	}
+
+	template <>
+	inline Reg<float> maskz<float,add<float>>(const Msk<16> m, const Reg<float> v1, const Reg<float> v2) {
+		return maskz<float,add<float>>(m.m, v1.r, v2.r);
+	}
+#endif
+
+	// ------------------ int64
 #if defined(__AVX512F__)
 	template <>
 	inline reg add<int64_t>(const reg v1, const reg v2) {
 		return _mm512_castsi512_ps(_mm512_add_epi64(_mm512_castps_si512(v1), _mm512_castps_si512(v2)));
 	}
+
+	template <>
+	inline reg mask<int64_t,add<int64_t>>(const msk m, const reg src, const reg v1, const reg v2) {
+		return _mm512_castsi512_ps(_mm512_mask_add_epi64(_mm512_castps_si512(src), (__mmask8)m, _mm512_castps_si512(v1), _mm512_castps_si512(v2)));
+	}
+
+	template <>
+	inline Reg<int64_t> mask<int64_t,add<int64_t>>(const Msk<8> m, const Reg<int64_t> src, const Reg<int64_t> v1, const Reg<int64_t> v2) {
+		return mask<int64_t,add<int64_t>>(m.m, src.r, v1.r, v2.r);
+	}
+
+	template <>
+	inline reg maskz<int64_t,add<int64_t>>(const msk m, const reg v1, const reg v2) {
+		return _mm512_castsi512_ps(_mm512_maskz_add_epi64((__mmask8)m, _mm512_castps_si512(v1), _mm512_castps_si512(v2)));
+	}
+
+	template <>
+	inline Reg<int64_t> maskz<int64_t,add<int64_t>>(const Msk<8> m, const Reg<int64_t> v1, const Reg<int64_t> v2) {
+		return maskz<int64_t,add<int64_t>>(m.m, v1.r, v2.r);
+	}
 #endif
 
+	// ------------------ int32
 	template <>
 	inline reg add<int32_t>(const reg v1, const reg v2) {
 		return _mm512_castsi512_ps(_mm512_add_epi32(_mm512_castps_si512(v1), _mm512_castps_si512(v2)));
 	}
 
+	template <>
+	inline reg mask<int32_t,add<int32_t>>(const msk m, const reg src, const reg v1, const reg v2) {
+		return _mm512_castsi512_ps(_mm512_mask_add_epi32(_mm512_castps_si512(src), (__mmask16)m, _mm512_castps_si512(v1), _mm512_castps_si512(v2)));
+	}
+
+	template <>
+	inline Reg<int32_t> mask<int32_t,add<int32_t>>(const Msk<16> m, const Reg<int32_t> src, const Reg<int32_t> v1, const Reg<int32_t> v2) {
+		return mask<int32_t,add<int32_t>>(m.m, src.r, v1.r, v2.r);
+	}
+
+#if defined(__AVX512F__)
+	template <>
+	inline reg maskz<int32_t,add<int32_t>>(const msk m, const reg v1, const reg v2) {
+		return _mm512_castsi512_ps(_mm512_maskz_add_epi32((__mmask16)m, _mm512_castps_si512(v1), _mm512_castps_si512(v2)));
+	}
+
+	template <>
+	inline Reg<int32_t> maskz<int32_t,add<int32_t>>(const Msk<16> m, const Reg<int32_t> v1, const Reg<int32_t> v2) {
+		return maskz<int32_t,add<int32_t>>(m.m, v1.r, v2.r);
+	}
+#endif
+
 #if defined(__AVX512BW__)
+	// ------------------ int16
 	template <>
 	inline reg add<int16_t>(const reg v1, const reg v2) {
 		return _mm512_castsi512_ps(_mm512_add_epi16(_mm512_castps_si512(v1), _mm512_castps_si512(v2)));
 	}
 
 	template <>
+	inline reg mask<int16_t,add<int16_t>>(const msk m, const reg src, const reg v1, const reg v2) {
+		return _mm512_castsi512_ps(_mm512_mask_add_epi16(_mm512_castps_si512(src), (__mmask32)m, _mm512_castps_si512(v1), _mm512_castps_si512(v2)));
+	}
+
+	template <>
+	inline Reg<int16_t> mask<int16_t,add<int16_t>>(const Msk<32> m, const Reg<int16_t> src, const Reg<int16_t> v1, const Reg<int16_t> v2) {
+		return mask<int16_t,add<int16_t>>(m.m, src.r, v1.r, v2.r);
+	}
+
+	template <>
+	inline reg maskz<int16_t,add<int16_t>>(const msk m, const reg v1, const reg v2) {
+		return _mm512_castsi512_ps(_mm512_maskz_add_epi16((__mmask32)m, _mm512_castps_si512(v1), _mm512_castps_si512(v2)));
+	}
+
+	template <>
+	inline Reg<int16_t> maskz<int16_t,add<int16_t>>(const Msk<32> m, const Reg<int16_t> v1, const Reg<int16_t> v2) {
+		return maskz<int16_t,add<int16_t>>(m.m, v1.r, v2.r);
+	}
+
+	// ------------------ int8
+	template <>
 	inline reg add<int8_t>(const reg v1, const reg v2) {
 		return _mm512_castsi512_ps(_mm512_add_epi8(_mm512_castps_si512(v1), _mm512_castps_si512(v2)));
+	}
+
+	template <>
+	inline reg mask<int8_t,add<int8_t>>(const msk m, const reg src, const reg v1, const reg v2) {
+		return _mm512_castsi512_ps(_mm512_mask_add_epi8(_mm512_castps_si512(src), (__mmask64)m, _mm512_castps_si512(v1), _mm512_castps_si512(v2)));
+	}
+
+	template <>
+	inline Reg<int8_t> mask<int8_t,add<int8_t>>(const Msk<64> m, const Reg<int8_t> src, const Reg<int8_t> v1, const Reg<int8_t> v2) {
+		return mask<int8_t,add<int8_t>>(m.m, src.r, v1.r, v2.r);
+	}
+
+	template <>
+	inline reg maskz<int8_t,add<int8_t>>(const msk m, const reg v1, const reg v2) {
+		return _mm512_castsi512_ps(_mm512_maskz_add_epi8((__mmask64)m, _mm512_castps_si512(v1), _mm512_castps_si512(v2)));
+	}
+
+	template <>
+	inline Reg<int8_t> maskz<int8_t,add<int8_t>>(const Msk<64> m, const Reg<int8_t> v1, const Reg<int8_t> v2) {
+		return maskz<int8_t,add<int8_t>>(m.m, v1.r, v2.r);
 	}
 #endif
 
