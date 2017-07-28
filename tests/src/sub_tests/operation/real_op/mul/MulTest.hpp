@@ -27,14 +27,14 @@ class MulTest : public CppUnit::TestFixture
 //	CPPUNIT_TEST(test_Reg_mask_mul_int16);
 #endif
 
-//#ifndef MIPP_NO
-//	CPPUNIT_TEST(test_reg_mul_int32);
-//	CPPUNIT_TEST(test_reg_maskz_mul_int32);
-//	CPPUNIT_TEST(test_reg_mask_mul_int32);
-//#endif
-//	CPPUNIT_TEST(test_Reg_mul_int32);
-//	CPPUNIT_TEST(test_Reg_maskz_mul_int32);
-//	CPPUNIT_TEST(test_Reg_mask_mul_int32);
+#ifndef MIPP_NO
+	CPPUNIT_TEST(test_reg_mul_int32);
+	CPPUNIT_TEST(test_reg_maskz_mul_int32);
+	CPPUNIT_TEST(test_reg_mask_mul_int32);
+#endif
+	CPPUNIT_TEST(test_Reg_mul_int32);
+	CPPUNIT_TEST(test_Reg_maskz_mul_int32);
+	CPPUNIT_TEST(test_Reg_mask_mul_int32);
 
 #ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_mul_float);

@@ -1915,7 +1915,7 @@
 #ifdef __AVX2__
 	template <>
 	inline reg mul<int32_t>(const reg v1, const reg v2) {
-		return _mm256_castsi256_ps(_mm256_mul_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+		return _mm256_castsi256_ps(_mm256_mullo_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
 	}
 #endif
 
