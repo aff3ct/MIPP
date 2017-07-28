@@ -1656,12 +1656,10 @@
 		return _mm512_mul_ps(v1, v2);
 	}
 
-#if defined(__AVX512F__)
 	template <>
 	inline reg mul<int32_t>(const reg v1, const reg v2) {
 		return _mm512_castsi512_ps(_mm512_mullo_epi32(_mm512_castps_si512(v1), _mm512_castps_si512(v2)));
 	}
-#endif
 
 	// ------------------------------------------------------------------------------------------------------------ div
 #if defined(__AVX512F__)
