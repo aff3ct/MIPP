@@ -605,12 +605,12 @@
 	// ---------------------------------------------------------------------------------------------------- notb (mask)
 	template <>
 	inline msk notb<2>(const msk v) {
-		return andnb<2>(v, set1<2>(0xFFFFFFFFFFFFFFFF));
+		return andnb<2>(v, _mm_castps_si128(set1<int64_t>(0xFFFFFFFFFFFFFFFF)));
 	}
 
 	template <>
 	inline msk notb<4>(const msk v) {
-		return andnb<4>(v, set1<4>(0xFFFFFFFF));
+		return andnb<4>(v, _mm_castps_si128(set1<int32_t>(0xFFFFFFFF)));
 	}
 
 	template <>
@@ -618,7 +618,7 @@
 #ifdef _MSC_VER
 #pragma warning( disable : 4309 )
 #endif
-		return andnb<8>(v, set1<8>(0xFFFF));
+		return andnb<8>(v, _mm_castps_si128(set1<int16_t>(0xFFFF)));
 #ifdef _MSC_VER
 #pragma warning( default : 4309 )
 #endif
@@ -629,7 +629,7 @@
 #ifdef _MSC_VER
 #pragma warning( disable : 4309 )
 #endif
-		return andnb<16>(v, set1<16>(0xFF));
+		return andnb<16>(v, _mm_castps_si128(set1<int8_t>(0xFF)));
 #ifdef _MSC_VER
 #pragma warning( default : 4309 )
 #endif
@@ -1669,12 +1669,12 @@
 
 	template <>
 	inline msk cmpneq<int16_t>(const reg v1, const reg v2) {
-		return andnb<N<int16_t>()>(cmpeq<int16_t>(v1, v2), set1<N<int16_t>()>(0xFFFFFFFF));
+		return andnb<N<int16_t>()>(cmpeq<int16_t>(v1, v2), _mm_castps_si128(set1<int16_t>(0xFFFF)));
 	}
 
 	template <>
 	inline msk cmpneq<int8_t>(const reg v1, const reg v2) {
-		return andnb<N<int8_t>()>(cmpeq<int8_t>(v1, v2), set1<N<int8_t>()>(0xFFFFFFFF));
+		return andnb<N<int8_t>()>(cmpeq<int8_t>(v1, v2), _mm_castps_si128(set1<int8_t>(0xFF)));
 	}
 #endif
 

@@ -390,9 +390,9 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	}
 #endif
 
-constexpr uint32_t RequiredAlignment  = MIPP_REQUIRED_ALIGNMENT;
-constexpr uint32_t RegisterSizeBit    = MIPP_REGISTER_SIZE;
-constexpr uint32_t Lanes              = MIPP_LANES;
+constexpr uint32_t RequiredAlignment = MIPP_REQUIRED_ALIGNMENT;
+constexpr uint32_t RegisterSizeBit   = MIPP_REGISTER_SIZE;
+constexpr uint32_t Lanes             = MIPP_LANES;
 
 #ifdef MIPP_64BIT
 const bool Support64Bit = true;
@@ -586,8 +586,12 @@ template <typename T> inline reg   load         (const T*)                      
 template <typename T> inline reg   loadu        (const T*)                        { errorMessage<T>("loadu");         exit(-1); }
 template <typename T> inline void  store        (T*, const reg)                   { errorMessage<T>("store");         exit(-1); }
 template <typename T> inline void  storeu       (T*, const reg)                   { errorMessage<T>("storeu");        exit(-1); }
-template <typename T> inline reg   set          (const T   [nElReg<T>()])         { errorMessage<T>("set");           exit(-1); }
-template <int      N> inline msk   set          (const bool[N          ])         { errorMessage<N>("set");           exit(-1); }
+template <typename T> inline reg   set          (const T[nElReg<T>()])            { errorMessage<T>("set");           exit(-1); }
+#ifdef _MSC_VER
+template <int      N> inline msk   set          (const bool[])                    { errorMessage<N>("set");           exit(-1); }
+#else
+template <int      N> inline msk   set          (const bool[N])                   { errorMessage<N>("set");           exit(-1); }
+#endif
 template <typename T> inline reg   set1         (const T)                         { errorMessage<T>("set1");          exit(-1); }
 template <int      N> inline msk   set1         (const bool)                      { errorMessage<N>("set1");          exit(-1); }
 template <typename T> inline reg   set0         ()                                { errorMessage<T>("set0");          exit(-1); }
@@ -949,8 +953,12 @@ struct reduction
 	static T apply_v(const reg r)
 	{
 		auto red = reduction<T,OP>::apply(r);
+#ifdef _MSC_VER
+		return *((T*)&red);
+#else
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 		return *((T*)&red);
+#endif
 	}
 
 	template <ld_op<T> LD = mipp::load<T>>

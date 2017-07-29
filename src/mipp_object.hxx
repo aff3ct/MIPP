@@ -398,7 +398,6 @@ public:
 
 #endif
 
-
 #ifndef MIPP_NO_INTRINSICS
 	template <typename T>
 	inline Reg<T> cvt_reg() const
@@ -410,7 +409,7 @@ public:
 	template <typename T>
 	inline Reg<T> cvt_reg() const
 	{
-		return this->m ? ~(T)0 : (T)0;
+		return this->m ? (T)1 : (T)0;
 	}
 #endif
 

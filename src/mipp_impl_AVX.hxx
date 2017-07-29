@@ -1363,12 +1363,12 @@
 	// ---------------------------------------------------------------------------------------------------- notb (mask)
 	template <>
 	inline msk notb<4>(const msk v) {
-		return andnb<4>(v, set1<4>(0xFFFFFFFFFFFFFFFF));
+		return andnb<4>(v, _mm256_castps_si256(set1<int64_t>(0xFFFFFFFFFFFFFFFF)));
 	}
 
 	template <>
 	inline msk notb<8>(const msk v) {
-		return andnb<8>(v, set1<8>(0xFFFFFFFF));
+		return andnb<8>(v, _mm256_castps_si256(set1<int32_t>(0xFFFFFFFF)));
 	}
 
 	template <>
@@ -1376,7 +1376,7 @@
 #ifdef _MSC_VER
 #pragma warning( disable : 4309 )
 #endif
-		return andnb<16>(v, set1<16>(0xFFFF));
+		return andnb<16>(v, _mm256_castps_si256(set1<int16_t>(0xFFFF)));
 #ifdef _MSC_VER
 #pragma warning( default : 4309 )
 #endif
@@ -1387,7 +1387,7 @@
 #ifdef _MSC_VER
 #pragma warning( disable : 4309 )
 #endif
-		return andnb<32>(v, set1<32>(0xFF));
+		return andnb<32>(v, _mm256_castps_si256(set1<int8_t>(0xFF)));
 #ifdef _MSC_VER
 #pragma warning( default : 4309 )
 #endif
