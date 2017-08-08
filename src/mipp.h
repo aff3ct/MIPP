@@ -464,11 +464,11 @@ void free(T* ptr)
 }
 
 template <class T>
-struct AlignedAllocator
+struct allocator
 {
 	typedef T value_type;
-	AlignedAllocator() { }
-	template <class C> AlignedAllocator(const AlignedAllocator<C>& other) { }
+	allocator() { }
+	template <class C> allocator(const allocator<C>& other) { }
 	T* allocate(std::size_t n) { return mipp::malloc<T>((int)n); }
 	void deallocate(T* p, std::size_t n) { mipp::free<T>(p); }
 };
@@ -476,13 +476,13 @@ struct AlignedAllocator
 // returns true if and only if storage allocated from ma1 can be deallocated from ma2, and vice versa.
 // always returns true for stateless allocators.
 template <class C1, class C2>
-bool operator==(const AlignedAllocator<C1>& ma1, const AlignedAllocator<C2>& ma2) { return true; }
+bool operator==(const allocator<C1>& ma1, const allocator<C2>& ma2) { return true; }
 
 template <class C1, class C2>
-bool operator!=(const AlignedAllocator<C1>& ma1, const AlignedAllocator<C2>& ma2) { return !(ma1 == ma2); }
+bool operator!=(const allocator<C1>& ma1, const allocator<C2>& ma2) { return !(ma1 == ma2); }
 
 // override vector type
-template<class T> using vector = std::vector<T, AlignedAllocator<T>>;
+template<class T> using vector = std::vector<T, allocator<T>>;
 
 // --------------------------------------------------------------------------------------------------- memory allocator
 // --------------------------------------------------------------------------------------------------------------------
