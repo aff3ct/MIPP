@@ -437,6 +437,16 @@ constexpr int32_t N()
 #endif
 }
 
+template <typename T>
+inline bool isAligned(const T *ptr)
+{
+#ifdef MIPP_ALIGNED_LOADS
+	return (((uintptr_t)ptr) % (RegisterSizeBit / 8)) == 0;
+#else
+	return true;
+#endif
+}
+
 // --------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------- memory allocator
 template <typename T>
