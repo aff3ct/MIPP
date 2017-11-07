@@ -101,7 +101,7 @@ void NotTest::test_msk_not()
 			mipp::msk m1 = mipp::set<N>(inputs1);
 			mipp::msk m2 = mipp::notb<N>(m1);
 
-			mipp::reg r = mipp::cvt_reg<N>(m2);
+			mipp::reg r = mipp::toreg<N>(m2);
 
 			for (auto i = 0; i < N; i++)
 			{
@@ -145,7 +145,7 @@ void NotTest::test_Msk_not()
 			mipp::Msk<N> m1 = inputs1;
 			mipp::Msk<N> m2 = ~m1;
 
-			mipp::reg r = mipp::cvt_reg<N>(m2.m);
+			mipp::reg r = mipp::toreg<N>(m2.m);
 
 			for (auto i = 0; i < N; i++)
 			{

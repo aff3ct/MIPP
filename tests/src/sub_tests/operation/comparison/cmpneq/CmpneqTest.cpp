@@ -38,7 +38,7 @@ void CmpneqTest::test_reg_cmpneq()
 			mipp::reg r2 = mipp::load<T>(inputs2);
 			mipp::msk m  = mipp::cmpneq<T>(r1, r2);
 
-			mipp::reg r3 = mipp::cvt_reg<mipp::N<T>()>(m);
+			mipp::reg r3 = mipp::toreg<mipp::N<T>()>(m);
 
 			for (auto i = 0; i < mipp::N<T>(); i++)
 			{

@@ -112,7 +112,7 @@ void XorTest::test_msk_xor()
 			mipp::msk m2 = mipp::set<N>(inputs2);
 			mipp::msk m3 = mipp::xorb<N>(m1, m2);
 
-			mipp::reg r = mipp::cvt_reg<N>(m3);
+			mipp::reg r = mipp::toreg<N>(m3);
 
 			for (auto i = 0; i < N; i++)
 			{
@@ -161,7 +161,7 @@ void XorTest::test_Msk_xor()
 			mipp::Msk<N> m2 = inputs2;
 			mipp::Msk<N> m3 = m1 ^ m2;
 
-			mipp::reg r = mipp::cvt_reg<N>(m3.m);
+			mipp::reg r = mipp::toreg<N>(m3.m);
 
 			for (auto i = 0; i < N; i++)
 			{

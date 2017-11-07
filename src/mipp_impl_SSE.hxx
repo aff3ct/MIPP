@@ -913,7 +913,7 @@
 #else
 	template <>
 	inline reg blend<double>(const reg v1, const reg v2, const msk m) {
-		auto m_reg = cvt_reg<2>(m);
+		auto m_reg = toreg<2>(m);
 		auto v1_2 = andb <int32_t>(m_reg, v1);
 		auto v2_2 = andnb<int32_t>(m_reg, v2);
 		auto blen = xorb <int32_t>(v1_2, v2_2);
@@ -2104,7 +2104,7 @@
 
 	template <>
 	inline reg neg<float>(const reg v1, const msk v2) {
-		return neg<float>(v1, cvt_reg<4>(v2));
+		return neg<float>(v1, toreg<4>(v2));
 	}
 
 #ifdef __SSE2__
@@ -2115,7 +2115,7 @@
 
 	template <>
 	inline reg neg<double>(const reg v1, const msk v2) {
-		return neg<double>(v1, cvt_reg<2>(v2));
+		return neg<double>(v1, toreg<2>(v2));
 	}
 #endif
 
@@ -2128,7 +2128,7 @@
 
 	template <>
 	inline reg neg<int32_t>(const reg v1, const msk v2) {
-		return neg<int32_t>(v1, cvt_reg<4>(v2));
+		return neg<int32_t>(v1, toreg<4>(v2));
 	}
 
 	template <>
@@ -2139,7 +2139,7 @@
 
 	template <>
 	inline reg neg<int16_t>(const reg v1, const msk v2) {
-		return neg<int16_t>(v1, cvt_reg<8>(v2));
+		return neg<int16_t>(v1, toreg<8>(v2));
 	}
 
 	template <>
@@ -2150,7 +2150,7 @@
 
 	template <>
 	inline reg neg<int8_t>(const reg v1, const msk v2) {
-		return neg<int8_t>(v1, cvt_reg<16>(v2));
+		return neg<int8_t>(v1, toreg<16>(v2));
 	}
 #endif
 
@@ -2764,6 +2764,100 @@
 			return val;
 		}
 	};
+#endif
+
+	// ---------------------------------------------------------------------------------------------------------- testz
+#ifdef __SSE4_1__
+	template <>
+	inline int testz<int64_t>(const reg v1, const reg v2) {
+		return _mm_testz_si128(_mm_castps_si128(v1), _mm_castps_si128(v2));
+	}
+
+	template <>
+	inline int testz<int32_t>(const reg v1, const reg v2) {
+		return _mm_testz_si128(_mm_castps_si128(v1), _mm_castps_si128(v2));
+	}
+
+	template <>
+	inline int testz<int16_t>(const reg v1, const reg v2) {
+		return _mm_testz_si128(_mm_castps_si128(v1), _mm_castps_si128(v2));
+	}
+
+	template <>
+	inline int testz<int8_t>(const reg v1, const reg v2) {
+		return _mm_testz_si128(_mm_castps_si128(v1), _mm_castps_si128(v2));
+	}
+#else
+	template <>
+	inline int testz<int64_t>(const reg v1, const reg v2) {
+		auto andvec = mipp::andb<int64_t>(v1, v2);
+		return mipp::reduction<int64_t, mipp::orb<int64_t>>::sapply(andvec) == 0;
+	}
+
+	template <>
+	inline int testz<int32_t>(const reg v1, const reg v2) {
+		auto andvec = mipp::andb<int32_t>(v1, v2);
+		return mipp::reduction<int32_t, mipp::orb<int32_t>>::sapply(andvec) == 0;
+	}
+
+	template <>
+	inline int testz<int16_t>(const reg v1, const reg v2) {
+		auto andvec = mipp::andb<int16_t>(v1, v2);
+		return mipp::reduction<int16_t, mipp::orb<int16_t>>::sapply(andvec) == 0;
+	}
+
+	template <>
+	inline int testz<int8_t>(const reg v1, const reg v2) {
+		auto andvec = mipp::andb<int8_t>(v1, v2);
+		return mipp::reduction<int8_t, mipp::orb<int8_t>>::sapply(andvec) == 0;
+	}
+#endif
+
+	// --------------------------------------------------------------------------------------------------- testz (mask)
+#ifdef __SSE4_1__
+	template <>
+	inline int testz<2>(const msk v1, const msk v2) {
+		return _mm_testz_si128(v1, v2);
+	}
+
+	template <>
+	inline int testz<4>(const msk v1, const msk v2) {
+		return _mm_testz_si128(v1, v2);
+	}
+
+	template <>
+	inline int testz<8>(const msk v1, const msk v2) {
+		return _mm_testz_si128(v1, v2);
+	}
+
+	template <>
+	inline int testz<16>(const msk v1, const msk v2) {
+		return _mm_testz_si128(v1, v2);
+	}
+#else
+	template <>
+	inline int testz<2>(const msk v1, const msk v2) {
+		auto andvec = mipp::andb<2>(v1, v2);
+		return mipp::reduction<int64_t, mipp::orb<int64_t>>::sapply(mipp::toreg<2>(andvec)) == 0;
+	}
+
+	template <>
+	inline int testz<4>(const msk v1, const msk v2) {
+		auto andvec = mipp::andb<4>(v1, v2);
+		return mipp::reduction<int32_t, mipp::orb<int32_t>>::sapply(mipp::toreg<4>(andvec)) == 0;
+	}
+
+	template <>
+	inline int testz<8>(const msk v1, const msk v2) {
+		auto andvec = mipp::andb<8>(v1, v2);
+		return mipp::reduction<int16_t, mipp::orb<int16_t>>::sapply(mipp::toreg<8>(andvec)) == 0;
+	}
+
+	template <>
+	inline int testz<16>(const msk v1, const msk v2) {
+		auto andvec = mipp::andb<16>(v1, v2);
+		return mipp::reduction<int8_t, mipp::orb<int8_t>>::sapply(mipp::toreg<16>(andvec)) == 0;
+	}
 #endif
 
 	// ------------------------------------------------------------------------------------------------------ transpose

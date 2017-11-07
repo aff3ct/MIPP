@@ -29,7 +29,7 @@ void HmaxTest::test_reg_hmax_int()
 		std::mt19937 g;
 		std::uniform_int_distribution<T> dis(std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
 
-		for (auto i = 0; i < 100; i++)
+		for (auto j = 0; j < 100; j++)
 		{
 			for (auto i = 0; i < N; i++)
 				inputs1[i] = dis(g);
@@ -60,7 +60,7 @@ void HmaxTest::test_reg_hmax_real()
 		std::mt19937 g;
 		std::uniform_real_distribution<T> dis(std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
 
-		for (auto i = 0; i < 100; i++)
+		for (auto j = 0; j < 100; j++)
 		{
 			for (auto i = 0; i < N; i++)
 				inputs1[i] = dis(g);
@@ -98,7 +98,7 @@ void HmaxTest::test_Reg_hmax_int()
 		std::mt19937 g;
 		std::uniform_int_distribution<T> dis(std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
 
-		for (auto i = 0; i < 100; i++)
+		for (auto j = 0; j < 100; j++)
 		{
 			for (auto i = 0; i < N; i++)
 				inputs1[i] = dis(g);
@@ -129,7 +129,7 @@ void HmaxTest::test_Reg_hmax_real()
 		std::mt19937 g;
 		std::uniform_real_distribution<T> dis(std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
 
-		for (auto i = 0; i < 100; i++)
+		for (auto j = 0; j < 100; j++)
 		{
 			for (auto i = 0; i < N; i++)
 				inputs1[i] = dis(g);

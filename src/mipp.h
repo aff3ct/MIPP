@@ -128,7 +128,7 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	using reg_2 = float32x2_t; // half a full register
 
 	template <int N>
-	inline reg cvt_reg(const msk m) {
+	inline reg toreg(const msk m) {
 		return (reg)m;
 	}
 
@@ -190,7 +190,7 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	using reg_2 = __m256; // half a full register
 
 	template <int N>
-	inline reg cvt_reg(const msk m) {
+	inline reg toreg(const msk m) {
 		throw std::runtime_error("mipp: Invalid mask size 'N' = " + std::to_string(N) + ".");
 	}
 
@@ -251,7 +251,7 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	using reg_2 = __m128; // half a full register
 	
 	template <int N>
-	inline reg cvt_reg(const msk m) {
+	inline reg toreg(const msk m) {
 		return _mm256_castsi256_ps(m);
 	}
 
@@ -313,7 +313,7 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	using reg_2 = __m128d; // half a full register (information is in the lower part of the 128 bit register)
 
 	template <int N>
-	inline reg cvt_reg(const msk m) {
+	inline reg toreg(const msk m) {
 		return _mm_castsi128_ps(m);
 	}
 
@@ -346,7 +346,7 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	using reg_2 = uint16_t;
 
 	template <int N>
-	inline reg cvt_reg(const msk m) {
+	inline reg toreg(const msk m) {
 		return (reg)m;
 	}
 
@@ -379,7 +379,7 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	using reg_2 = uint16_t;
 
 	template <int N>
-	inline reg cvt_reg(const msk m) {
+	inline reg toreg(const msk m) {
 		return (reg)m;
 	}
 
@@ -676,6 +676,8 @@ template <typename T> inline reg   div2         (const reg)                     
 template <typename T> inline reg   div4         (const reg)                       { errorMessage<T>("div4");          exit(-1); }
 template <typename T> inline reg   sat          (const reg, T, T)                 { errorMessage<T>("sat");           exit(-1); }
 template <typename T> inline reg   round        (const reg)                       { errorMessage<T>("round");         exit(-1); }
+template <typename T> inline int   testz        (const reg, const reg)            { errorMessage<T>("testz");         exit(-1); }
+template <int      N> inline int   testz        (const msk, const msk)            { errorMessage<N>("testz");         exit(-1); }
 
 template <typename T1, typename T2> 
 inline reg cvt(const reg) {
@@ -728,7 +730,7 @@ inline reg mask(const msk m, const reg src, const reg a, const reg b, const reg 
 template <typename T, proto_i1<T> I1>
 inline reg maskz(const msk m, const reg a)
 {
-	auto m_reg = cvt_reg<N<T>()>(m);
+	auto m_reg = toreg<N<T>()>(m);
 	auto a_modif = I1(a);
 	return andb<T>(m_reg, a_modif);
 }
@@ -736,7 +738,7 @@ inline reg maskz(const msk m, const reg a)
 template <typename T, proto_i2<T> I2>
 inline reg maskz(const msk m, const reg a, const reg b)
 {
-	auto m_reg = cvt_reg<N<T>()>(m);
+	auto m_reg = toreg<N<T>()>(m);
 	auto a_modif = I2(a, b);
 	return andb<T>(m_reg, a_modif);
 }
@@ -744,7 +746,7 @@ inline reg maskz(const msk m, const reg a, const reg b)
 template <typename T, proto_i3<T> I3>
 inline reg maskz(const msk m, const reg a, const reg b, const reg c)
 {
-	auto m_reg = cvt_reg<N<T>()>(m);
+	auto m_reg = toreg<N<T>()>(m);
 	auto a_modif = I3(a, b, c);
 	return andb<T>(m_reg, a_modif);
 }
@@ -798,7 +800,7 @@ template <typename T, proto_I1<T> I1>
 inline Reg<T> maskz(const Msk<N<T>()> m, const Reg<T> a)
 {
 #ifndef MIPP_NO
-	auto m_reg = m.template cvt_reg<T>();
+	auto m_reg = m.template toReg<T>();
 	auto a_modif = I1(a);
 	return andb<T>(m_reg, a_modif);
 #else
@@ -810,7 +812,7 @@ template <typename T, proto_I2<T> I2>
 inline Reg<T> maskz(const Msk<N<T>()> m, const Reg<T> a, const Reg<T> b)
 {
 #ifndef MIPP_NO
-	auto m_reg = m.template cvt_reg<T>();
+	auto m_reg = m.template toReg<T>();
 	auto a_modif = I2(a, b);
 	return andb<T>(m_reg, a_modif);
 #else
@@ -822,7 +824,7 @@ template <typename T, proto_I3<T> I3>
 inline Reg<T> maskz(const Msk<N<T>()> m, const Reg<T> a, const Reg<T> b, const Reg<T> c)
 {
 #ifndef MIPP_NO
-	auto m_reg = m.template cvt_reg<T>();
+	auto m_reg = m.template toReg<T>();
 	auto a_modif = I3(a, b, c);
 	return andb<T>(m_reg, a_modif);
 #else
@@ -860,7 +862,7 @@ void dump(const mipp::msk m, std::ostream &stream = std::cout, const uint32_t el
 	constexpr int32_t lane_size = (int32_t)(N / mipp::Lanes);
 	constexpr int bits = mipp::RegisterSizeBit / N;
 
-	const auto r = cvt_reg<N>(m);
+	const auto r = toreg<N>(m);
 
 	stream << "[";
 	if (bits == 8)
@@ -960,7 +962,7 @@ struct reduction
 		return _reduction<T,OP>::apply(r);
 	}
 
-	static T apply_v(const reg r)
+	static T sapply(const reg r)
 	{
 		auto red = reduction<T,OP>::apply(r);
 #ifdef _MSC_VER
@@ -1009,7 +1011,7 @@ struct Reduction
 		return _Reduction<T,OP>::apply(r);
 	}
 
-	static T apply_v(const Reg<T> r)
+	static T sapply(const Reg<T> r)
 	{
 		auto red = Reduction<T,OP>::apply(r);
 		return red[0];
@@ -1055,11 +1057,11 @@ struct Reduction
 
 // ------------------------------------------------------------------------- special reduction functions implementation
 
-template <typename T> inline T sum (const reg v) { return reduction<T,mipp::add<T>>::apply_v(v); }
-template <typename T> inline T hadd(const reg v) { return reduction<T,mipp::add<T>>::apply_v(v); }
-template <typename T> inline T hmul(const reg v) { return reduction<T,mipp::mul<T>>::apply_v(v); }
-template <typename T> inline T hmin(const reg v) { return reduction<T,mipp::min<T>>::apply_v(v); }
-template <typename T> inline T hmax(const reg v) { return reduction<T,mipp::max<T>>::apply_v(v); }
+template <typename T> inline T sum (const reg v) { return reduction<T,mipp::add<T>>::sapply(v); }
+template <typename T> inline T hadd(const reg v) { return reduction<T,mipp::add<T>>::sapply(v); }
+template <typename T> inline T hmul(const reg v) { return reduction<T,mipp::mul<T>>::sapply(v); }
+template <typename T> inline T hmin(const reg v) { return reduction<T,mipp::min<T>>::sapply(v); }
+template <typename T> inline T hmax(const reg v) { return reduction<T,mipp::max<T>>::sapply(v); }
 
 // ------------------------------------------------------------------------------------------------- wrapper to objects
 #include "mipp_object.hxx"

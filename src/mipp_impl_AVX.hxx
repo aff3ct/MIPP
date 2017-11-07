@@ -2107,7 +2107,7 @@
 
 	template <>
 	inline reg neg<float>(const reg v1, const msk v2) {
-		return neg<float>(v1, cvt_reg<8>(v2));
+		return neg<float>(v1, toreg<8>(v2));
 	}
 
 #ifdef __SSE2__
@@ -2118,7 +2118,7 @@
 
 	template <>
 	inline reg neg<double>(const reg v1, const msk v2) {
-		return neg<double>(v1, cvt_reg<4>(v2));
+		return neg<double>(v1, toreg<4>(v2));
 	}
 #endif
 
@@ -2131,7 +2131,7 @@
 
 	template <>
 	inline reg neg<int32_t>(const reg v1, const msk v2) {
-		return neg<int32_t>(v1, cvt_reg<8>(v2));
+		return neg<int32_t>(v1, toreg<8>(v2));
 	}
 
 	template <>
@@ -2142,7 +2142,7 @@
 
 	template <>
 	inline reg neg<int16_t>(const reg v1, const msk v2) {
-		return neg<int16_t>(v1, cvt_reg<16>(v2));
+		return neg<int16_t>(v1, toreg<16>(v2));
 	}
 
 	template <>
@@ -2153,7 +2153,7 @@
 
 	template <>
 	inline reg neg<int8_t>(const reg v1, const msk v2) {
-		return neg<int8_t>(v1, cvt_reg<32>(v2));
+		return neg<int8_t>(v1, toreg<32>(v2));
 	}
 #endif
 
@@ -2447,7 +2447,7 @@
 #else
 	template <>
 	inline reg blend<int16_t>(const reg v1, const reg v2, const msk m) {
-		auto m_reg = cvt_reg<16>(m);
+		auto m_reg = toreg<16>(m);
 		auto v1_2 = andb <int32_t>(m_reg, v1);
 		auto v2_2 = andnb<int32_t>(m_reg, v2);
 		auto blen = xorb <int32_t>(v1_2, v2_2);
@@ -2456,7 +2456,7 @@
 
 	template <>
 	inline reg blend<int8_t>(const reg v1, const reg v2, const msk m) {
-		auto m_reg = cvt_reg<32>(m);
+		auto m_reg = toreg<32>(m);
 		auto v1_2 = andb <int32_t>(m_reg, v1);
 		auto v2_2 = andnb<int32_t>(m_reg, v2);
 		auto blen = xorb <int32_t>(v1_2, v2_2);
@@ -2814,6 +2814,58 @@
 		                                                    _MM_SHUFFLE(3, 1, 2, 0)));
 	}
 #endif
+
+	// ---------------------------------------------------------------------------------------------------------- testz
+	template <>
+	inline int testz<float>(const reg v1, const reg v2) {
+		return _mm256_testz_ps(v1, v2);
+	}
+
+	template <>
+	inline int testz<double>(const reg v1, const reg v2) {
+		return _mm256_testz_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2));
+	}
+
+	template <>
+	inline int testz<int64_t>(const reg v1, const reg v2) {
+		return _mm256_testz_si256(_mm256_castps_si256(v1), _mm256_castps_si256(v2));
+	}
+
+	template <>
+	inline int testz<int32_t>(const reg v1, const reg v2) {
+		return _mm256_testz_si256(_mm256_castps_si256(v1), _mm256_castps_si256(v2));
+	}
+
+	template <>
+	inline int testz<int16_t>(const reg v1, const reg v2) {
+		return _mm256_testz_si256(_mm256_castps_si256(v1), _mm256_castps_si256(v2));
+	}
+
+	template <>
+	inline int testz<int8_t>(const reg v1, const reg v2) {
+		return _mm256_testz_si256(_mm256_castps_si256(v1), _mm256_castps_si256(v2));
+	}
+
+	// --------------------------------------------------------------------------------------------------- testz (mask)
+	template <>
+	inline int testz<4>(const msk v1, const msk v2) {
+		return _mm256_testz_si256(v1, v2);
+	}
+
+	template <>
+	inline int testz<8>(const msk v1, const msk v2) {
+		return _mm256_testz_si256(v1, v2);
+	}
+
+	template <>
+	inline int testz<16>(const msk v1, const msk v2) {
+		return _mm256_testz_si256(v1, v2);
+	}
+
+	template <>
+	inline int testz<32>(const msk v1, const msk v2) {
+		return _mm256_testz_si256(v1, v2);
+	}
 
 	// ------------------------------------------------------------------------------------------------------ reduction
 	template <red_op<double> OP>

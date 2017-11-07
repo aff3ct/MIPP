@@ -164,8 +164,8 @@ void SetTest::test_msk_set1()
 		mipp::msk m0 = mipp::set1<mipp::N<T>()>(false);
 		mipp::msk m1 = mipp::set1<mipp::N<T>()>(true );
 
-		mipp::reg r0 = mipp::cvt_reg<mipp::N<T>()>(m0);
-		mipp::reg r1 = mipp::cvt_reg<mipp::N<T>()>(m1);
+		mipp::reg r0 = mipp::toreg<mipp::N<T>()>(m0);
+		mipp::reg r1 = mipp::toreg<mipp::N<T>()>(m1);
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 			CPPUNIT_ASSERT_EQUAL((T)0, *((T*)&r0 +i));
@@ -192,7 +192,7 @@ void SetTest::test_msk_set0()
 	try
 	{
 		mipp::msk m0 = mipp::set0<mipp::N<T>()>();
-		mipp::reg r0 = mipp::cvt_reg<mipp::N<T>()>(m0);
+		mipp::reg r0 = mipp::toreg<mipp::N<T>()>(m0);
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 			CPPUNIT_ASSERT_EQUAL((T)0, *((T*)&r0 +i));
@@ -221,7 +221,7 @@ void SetTest::test_msk_set()
 			inputs[i] = i % 2 ? true : false;
 
 		mipp::msk m = mipp::set<mipp::N<T>()>(inputs);
-		mipp::reg r = mipp::cvt_reg<mipp::N<T>()>(m);
+		mipp::reg r = mipp::toreg<mipp::N<T>()>(m);
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 			if (!inputs[i])
@@ -250,8 +250,8 @@ void SetTest::test_Msk_set1()
 		mipp::Msk<mipp::N<T>()> m0 = false;
 		mipp::Msk<mipp::N<T>()> m1 = true;
 
-		mipp::reg r0 = mipp::cvt_reg<mipp::N<T>()>(m0.m);
-		mipp::reg r1 = mipp::cvt_reg<mipp::N<T>()>(m1.m);
+		mipp::reg r0 = mipp::toreg<mipp::N<T>()>(m0.m);
+		mipp::reg r1 = mipp::toreg<mipp::N<T>()>(m1.m);
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 #ifndef MIPP_NO
@@ -286,7 +286,7 @@ void SetTest::test_Msk_set0()
 	try
 	{
 		mipp::Msk<mipp::N<T>()> m0; m0.set0();
-		mipp::reg r0 = mipp::cvt_reg<mipp::N<T>()>(m0.m);
+		mipp::reg r0 = mipp::toreg<mipp::N<T>()>(m0.m);
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 			CPPUNIT_ASSERT_EQUAL((T)0, *((T*)&r0 +i));
@@ -315,7 +315,7 @@ void SetTest::test_Msk_set()
 			inputs[i] = i % 2 ? true : false;
 
 		mipp::Msk<mipp::N<T>()> m = inputs;
-		mipp::reg r = mipp::cvt_reg<mipp::N<T>()>(m.m);
+		mipp::reg r = mipp::toreg<mipp::N<T>()>(m.m);
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 			if (!inputs[i])

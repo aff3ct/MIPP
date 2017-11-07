@@ -27,6 +27,8 @@ class MulTest : public CppUnit::TestFixture
 //	CPPUNIT_TEST(test_Reg_mask_mul_int16);
 #endif
 
+#if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
+#if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
 #ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_mul_int32);
 	CPPUNIT_TEST(test_reg_maskz_mul_int32);
@@ -35,6 +37,8 @@ class MulTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_Reg_mul_int32);
 	CPPUNIT_TEST(test_Reg_maskz_mul_int32);
 	CPPUNIT_TEST(test_Reg_mask_mul_int32);
+#endif
+#endif
 
 #ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_mul_float);

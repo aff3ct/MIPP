@@ -1925,7 +1925,7 @@
 
 	template <>
 	inline reg neg<double>(const reg v1, const msk v2) {
-		return neg<double>(v1, cvt_reg<2>(v2));
+		return neg<double>(v1, toreg<2>(v2));
 	}
 #endif
 
@@ -1936,7 +1936,7 @@
 
 	template <>
 	inline reg neg<float>(const reg v1, const msk v2) {
-		return neg<float>(v1, cvt_reg<4>(v2));
+		return neg<float>(v1, toreg<4>(v2));
 	}
 
 #ifdef __aarch64__
@@ -1944,7 +1944,7 @@
 	inline reg neg<int64_t>(const reg v1, const reg v2) {
 		reg neg_v1 = (reg) vqnegq_s64((int64x2_t) v1);
 		reg v2_2   = orb  <int64_t>(v2, set1<int64_t>(1)); // hack to avoid -0 case
-		reg mask   = cvt_reg<2>(cmplt<int64_t>(v2_2, set0<int64_t>()));
+		reg mask   = toreg<2>(cmplt<int64_t>(v2_2, set0<int64_t>()));
 		reg res1   = andb <int64_t>(mask, neg_v1);
 		reg res2   = andb <int64_t>(notb<int64_t>(mask), v1);
 		reg res    = orb  <int64_t>(res1, res2);
@@ -1953,7 +1953,7 @@
 
 	template <>
 	inline reg neg<int64_t>(const reg v1, const msk v2) {
-		return neg<int64_t>(v1, cvt_reg<2>(v2));
+		return neg<int64_t>(v1, toreg<2>(v2));
 	}
 #endif
 
@@ -1961,7 +1961,7 @@
 	inline reg neg<int32_t>(const reg v1, const reg v2) {
 		reg neg_v1 = (reg) vqnegq_s32((int32x4_t) v1);
 		reg v2_2   = orb  <int32_t>(v2, set1<int32_t>(1)); // hack to avoid -0 case
-		reg mask   = cvt_reg<4>(cmplt<int32_t>(v2_2, set0<int32_t>()));
+		reg mask   = toreg<4>(cmplt<int32_t>(v2_2, set0<int32_t>()));
 		reg res1   = andb <int32_t>(mask, neg_v1);
 		reg res2   = andb <int32_t>(notb<int32_t>(mask), v1);
 		reg res    = orb  <int32_t>(res1, res2);
@@ -1970,14 +1970,14 @@
 
 	template <>
 	inline reg neg<int32_t>(const reg v1, const msk v2) {
-		return neg<int32_t>(v1, cvt_reg<4>(v2));
+		return neg<int32_t>(v1, toreg<4>(v2));
 	}
 
 	template <>
 	inline reg neg<int16_t>(const reg v1, const reg v2) {
 		reg neg_v1 = (reg) vqnegq_s16((int16x8_t) v1);
 		reg v2_2   = orb  <int16_t>(v2, set1<int16_t>(1)); // hack to avoid -0 case
-		reg mask   = cvt_reg<8>(cmplt<int16_t>(v2_2, set0<int16_t>()));
+		reg mask   = toreg<8>(cmplt<int16_t>(v2_2, set0<int16_t>()));
 		reg res1   = andb <int16_t>(mask, neg_v1);
 		reg res2   = andb <int16_t>(notb<int16_t>(mask), v1);
 		reg res    = orb  <int16_t>(res1, res2);
@@ -1986,14 +1986,14 @@
 
 	template <>
 	inline reg neg<int16_t>(const reg v1, const msk v2) {
-		return neg<int16_t>(v1, cvt_reg<8>(v2));
+		return neg<int16_t>(v1, toreg<8>(v2));
 	}
 
 	template <>
 	inline reg neg<int8_t>(const reg v1, const reg v2) {
 		reg neg_v1 = (reg) vqnegq_s8((int8x16_t) v1);
 		reg v2_2   = orb  <int8_t>(v2, set1<int8_t>(1)); // hack to avoid -0 case
-		reg mask   = cvt_reg<16>(cmplt<int8_t>(v2_2, set0<int8_t>()));
+		reg mask   = toreg<16>(cmplt<int8_t>(v2_2, set0<int8_t>()));
 		reg res1   = andb <int8_t>(mask, neg_v1);
 		reg res2   = andb <int8_t>(notb<int8_t>(mask), v1);
 		reg res    = orb  <int8_t>(res1, res2);
@@ -2002,7 +2002,7 @@
 
 	template <>
 	inline reg neg<int8_t>(const reg v1, const msk v2) {
-		return neg<int8_t>(v1, cvt_reg<16>(v2));
+		return neg<int8_t>(v1, toreg<16>(v2));
 	}
 
 	// ------------------------------------------------------------------------------------------------------------ abs
@@ -2631,6 +2631,61 @@
 		}
 	};
 
+	// ---------------------------------------------------------------------------------------------------------- testz
+#ifdef __aarch64__
+	template <>
+	inline int testz<int64_t>(const reg v1, const reg v2) {
+		auto andvec = mipp::andb<int64_t>(v1, v2);
+		return mipp::reduction<int64_t, mipp::orb<int64_t>>::sapply(andvec) == 0;
+	}
+#endif
+
+	template <>
+	inline int testz<int32_t>(const reg v1, const reg v2) {
+		auto andvec = mipp::andb<int32_t>(v1, v2);
+		return mipp::reduction<int32_t, mipp::orb<int32_t>>::sapply(andvec) == 0;
+	}
+
+	template <>
+	inline int testz<int16_t>(const reg v1, const reg v2) {
+		auto andvec = mipp::andb<int16_t>(v1, v2);
+		return mipp::reduction<int16_t, mipp::orb<int16_t>>::sapply(andvec) == 0;
+	}
+
+	template <>
+	inline int testz<int8_t>(const reg v1, const reg v2) {
+		auto andvec = mipp::andb<int8_t>(v1, v2);
+		return mipp::reduction<int8_t, mipp::orb<int8_t>>::sapply(andvec) == 0;
+	}
+
+	// --------------------------------------------------------------------------------------------------- testz (mask)
+#ifdef __aarch64__
+	template <>
+	inline int testz<2>(const msk v1, const msk v2) {
+		auto andvec = mipp::andb<2>(v1, v2);
+		return mipp::reduction<int64_t, mipp::orb<int64_t>>::sapply(mipp::toreg<2>(andvec)) == 0;
+	}
+#endif
+
+	template <>
+	inline int testz<4>(const msk v1, const msk v2) {
+		auto andvec = mipp::andb<4>(v1, v2);
+		return mipp::reduction<int32_t, mipp::orb<int32_t>>::sapply(mipp::toreg<4>(andvec)) == 0;
+	}
+
+	template <>
+	inline int testz<8>(const msk v1, const msk v2) {
+		auto andvec = mipp::andb<8>(v1, v2);
+		return mipp::reduction<int16_t, mipp::orb<int16_t>>::sapply(mipp::toreg<8>(andvec)) == 0;
+	}
+
+	template <>
+	inline int testz<16>(const msk v1, const msk v2) {
+		auto andvec = mipp::andb<16>(v1, v2);
+		return mipp::reduction<int8_t, mipp::orb<int8_t>>::sapply(mipp::toreg<16>(andvec)) == 0;
+	}
+#endif
+
 	// ------------------------------------------------------------------------------------------------------ transpose
 	template <>
 	inline void transpose<int16_t>(reg tab[nElReg<int16_t>()]) {
@@ -2704,4 +2759,3 @@
 	inline void transpose8x8<int8_t>(reg tab[8]) {
 		mipp::transpose<int16_t>(tab);
 	}
-#endif

@@ -29,7 +29,7 @@ void HaddTest::test_reg_hadd_int()
 		std::mt19937 g;
 		std::uniform_int_distribution<T> dis((T)-10, (T)10);
 
-		for (auto i = 0; i < 100; i++)
+		for (auto j = 0; j < 100; j++)
 		{
 			for (auto i = 0; i < N; i++)
 				inputs1[i] = dis(g);
@@ -60,7 +60,7 @@ void HaddTest::test_reg_hadd_real()
 		std::mt19937 g;
 		std::uniform_real_distribution<T> dis(-100, 100);
 
-		for (auto i = 0; i < 100; i++)
+		for (auto j = 0; j < 100; j++)
 		{
 			for (auto i = 0; i < N; i++)
 				inputs1[i] = dis(g);
@@ -99,7 +99,7 @@ void HaddTest::test_Reg_hadd_int()
 		std::mt19937 g;
 		std::uniform_int_distribution<T> dis((T)-10, (T)10);
 
-		for (auto i = 0; i < 100; i++)
+		for (auto j = 0; j < 100; j++)
 		{
 			for (auto i = 0; i < N; i++)
 				inputs1[i] = dis(g);
@@ -130,7 +130,7 @@ void HaddTest::test_Reg_hadd_real()
 		std::mt19937 g;
 		std::uniform_real_distribution<T> dis(-100, 100);
 
-		for (auto i = 0; i < 100; i++)
+		for (auto j = 0; j < 100; j++)
 		{
 			for (auto i = 0; i < N; i++)
 				inputs1[i] = dis(g);

@@ -621,9 +621,9 @@
 	}
 #endif
 
-	// ------------------------------------------------------------------------------------------------------- cvt_reg
+	// ---------------------------------------------------------------------------------------------------------- toreg
 	template <>
-	inline reg cvt_reg<8>(const msk m) {
+	inline reg toreg<8>(const msk m) {
 		auto one  = set1<int64_t>((uint64_t)0xFFFFFFFFFFFFFFFF);
 		auto zero = set1<int64_t>(0);
 
@@ -631,7 +631,7 @@
 	}
 
 	template <>
-	inline reg cvt_reg<16>(const msk m) {
+	inline reg toreg<16>(const msk m) {
 		auto one  = set1<int32_t>(0xFFFFFFFF);
 		auto zero = set1<int32_t>(0);
 
@@ -640,7 +640,7 @@
 
 #ifdef __AVX512BW__
 	template <>
-	inline reg cvt_reg<32>(const msk m) {
+	inline reg toreg<32>(const msk m) {
 		auto one  = set1<int16_t>(0xFFFF);
 		auto zero = set1<int16_t>(0);
 
@@ -648,7 +648,7 @@
 	}
 
 	template <>
-	inline reg cvt_reg<64>(const msk m) {
+	inline reg toreg<64>(const msk m) {
 		auto one  = set1<int8_t>(0xFF);
 		auto zero = set1<int8_t>(0);
 
@@ -1882,7 +1882,7 @@
 
 	template <>
 	inline reg neg<double>(const reg v1, const msk v2) {
-		return neg<double>(v1, cvt_reg<8>(v2));
+		return neg<double>(v1, toreg<8>(v2));
 	}
 
 	template <>
@@ -1892,7 +1892,7 @@
 
 	template <>
 	inline reg neg<float>(const reg v1, const msk v2) {
-		return neg<float>(v1, cvt_reg<16>(v2));
+		return neg<float>(v1, toreg<16>(v2));
 	}
 
 	// ------------------------------------------------------------------------------------------------------------ abs
@@ -2247,6 +2247,60 @@
 #endif
 
 	// ----------------------------------------------------------------------------------------------------------- pack
+
+	// ---------------------------------------------------------------------------------------------------------- testz
+#if defined(__AVX512F__) || defined(__MIC__) || defined(__KNCNI__)
+	template <>
+	inline int testz<int64_t>(const reg v1, const reg v2) {
+		auto msk = mipp::cmpneq<int64_t>(mipp::andb<int64_t>(v1, v2), mipp::set0<int64_t>();
+		return _mm512_kortestz(msk, mipp::set0<8>());
+	}
+
+	template <>
+	inline int testz<int32_t>(const reg v1, const reg v2) {
+		auto msk = mipp::cmpneq<int32_t>(mipp::andb<int32_t>(v1, v2), mipp::set0<int32_t>();
+		return _mm512_kortestz(msk, mipp::set0<16>());
+	}
+#endif
+
+#if defined(__AVX512BW__)
+	template <>
+	inline int testz<int16_t>(const reg v1, const reg v2) {
+		auto msk = mipp::cmpneq<int16_t>(mipp::andb<int16_t>(v1, v2), mipp::set0<int16_t>();
+		return _mm512_kortestz(msk, mipp::set0<32>());
+	}
+
+	template <>
+	inline int testz<int8_t>(const reg v1, const reg v2) {
+		auto msk = mipp::cmpneq<int8_t>(mipp::andb<int8_t>(v1, v2), mipp::set0<int8_t>();
+		return _mm512_kortestz(msk, mipp::set0<64>());
+	}
+#endif
+
+	// --------------------------------------------------------------------------------------------------- testz (mask)
+#if defined(__AVX512F__) || defined(__MIC__) || defined(__KNCNI__)
+	template <>
+	inline int testz<8>(const msk v1, const msk v2) {
+		return _mm512_kortestz(mipp::andb<8>(v1, v2), mipp::set0<8>());
+	}
+
+	template <>
+	inline int testz<16>(const msk v1, const msk v2) {
+		return _mm512_kortestz(mipp::andb<16>(v1, v2), mipp::set0<16>());
+	}
+#endif
+
+#if defined(__AVX512BW__)
+	template <>
+	inline int testz<32>(const msk v1, const msk v2) {
+		return _mm512_kortestz(mipp::andb<32>(v1, v2), mipp::set0<32>());
+	}
+
+	template <>
+	inline int testz<64>(const msk v1, const msk v2) {
+		return _mm512_kortestz(mipp::andb<64>(v1, v2), mipp::set0<64>());
+	}
+#endif
 
 	// ------------------------------------------------------------------------------------------------------ reduction
 
