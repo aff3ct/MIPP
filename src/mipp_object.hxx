@@ -62,9 +62,11 @@ public:
 #ifndef MIPP_NO_INTRINSICS
 	static inline Reg<T> cmask (const uint32_t mask[nElReg<T>()  ]) { return mipp::cmask <T>(mask); }
 	static inline Reg<T> cmask2(const uint32_t mask[nElReg<T>()/2]) { return mipp::cmask2<T>(mask); }
+	static inline Reg<T> cmask4(const uint32_t mask[nElReg<T>()/4]) { return mipp::cmask4<T>(mask); }
 #else
 	static inline Reg<T> cmask (const uint32_t mask[nElReg<T>()  ]) { return Reg<T>((T)0);          }
 	static inline Reg<T> cmask2(const uint32_t mask[nElReg<T>()/2]) { return Reg<T>((T)0);          }
+	static inline Reg<T> cmask4(const uint32_t mask[nElReg<T>()/4]) { return Reg<T>((T)0);          }
 #endif
 
 	static inline void transpose(Reg<T> regs[nElReg<T>()])
@@ -124,12 +126,16 @@ public:
 	inline Reg_2<T>    high         ()                                     const { return mipp::high<T>(r);                       }
 	inline Reg<T>      shuff        (const Reg<T> v_shu)                   const { return mipp::shuff        <T>(r, v_shu.r);     }
 	inline Reg<T>      shuff2       (const Reg<T> v_shu)                   const { return mipp::shuff2       <T>(r, v_shu.r);     }
+	inline Reg<T>      shuff4       (const Reg<T> v_shu)                   const { return mipp::shuff4       <T>(r, v_shu.r);     }
 	inline Reg<T>      interleavelo (const Reg<T> v)                       const { return mipp::interleavelo <T>(r, v.r);         }
 	inline Reg<T>      interleavehi (const Reg<T> v)                       const { return mipp::interleavehi <T>(r, v.r);         }
 	inline Reg<T>      interleavelo2(const Reg<T> v)                       const { return mipp::interleavelo2<T>(r, v.r);         }
 	inline Reg<T>      interleavehi2(const Reg<T> v)                       const { return mipp::interleavehi2<T>(r, v.r);         }
+	inline Reg<T>      interleavelo4(const Reg<T> v)                       const { return mipp::interleavelo4<T>(r, v.r);         }
+	inline Reg<T>      interleavehi4(const Reg<T> v)                       const { return mipp::interleavehi4<T>(r, v.r);         }
 	inline Regx2<T>    interleave   (const Reg<T> v)                       const { return mipp::interleave   <T>(r, v.r);         }
 	inline Regx2<T>    interleave2  (const Reg<T> v)                       const { return mipp::interleave2  <T>(r, v.r);         }
+	inline Regx2<T>    interleave4  (const Reg<T> v)                       const { return mipp::interleave4  <T>(r, v.r);         }
 	inline Reg<T>      interleave   ()                                     const { return mipp::interleave   <T>(r);              }
 	inline Regx2<T>    interleavex2 (const Reg<T> v)                       const { return mipp::interleavex2 <T>(r, v.r);         }
 	inline Reg<T>      interleavex4 ()                                     const { return mipp::interleavex4 <T>(r);              }
@@ -191,12 +197,16 @@ public:
 	inline Reg_2<T>    high         ()                                     const { return r;                                      }
 	inline Reg<T>      shuff        (const Reg<T> v_shu)                   const { return *this;                                  }
 	inline Reg<T>      shuff2       (const Reg<T> v_shu)                   const { return *this;                                  }
+	inline Reg<T>      shuff4       (const Reg<T> v_shu)                   const { return *this;                                  }
 	inline Reg<T>      interleavelo (const Reg<T> v)                       const { return *this;                                  }
 	inline Reg<T>      interleavehi (const Reg<T> v)                       const { return *this;                                  }
 	inline Reg<T>      interleavelo2(const Reg<T> v)                       const { return *this;                                  }
 	inline Reg<T>      interleavehi2(const Reg<T> v)                       const { return *this;                                  }
+	inline Reg<T>      interleavelo4(const Reg<T> v)                       const { return *this;                                  }
+	inline Reg<T>      interleavehi4(const Reg<T> v)                       const { return *this;                                  }
 	inline Regx2<T>    interleave   (const Reg<T> v)                       const { return Regx2<T>(*this, v);                     }
 	inline Regx2<T>    interleave2  (const Reg<T> v)                       const { return Regx2<T>(*this, v);                     }
+	inline Regx2<T>    interleave4  (const Reg<T> v)                       const { return Regx2<T>(*this, v);                     }
 	inline Reg<T>      interleave   ()                                     const { return *this;                                  }
 	inline Regx2<T>    interleavex2 (const Reg<T> v)                       const { return Regx2<T>(*this, v);                     }
 	inline Reg<T>      interleavex4 ()                                     const { return *this;                                  }
@@ -566,12 +576,16 @@ std::ostream& operator<<(std::ostream& os, const Msk<N>& m)
 
 template <typename T> inline Reg<T>      shuff        (const Reg<T> v1, const Reg<T> v2)                      { return v1.shuff(v2);         }
 template <typename T> inline Reg<T>      shuff2       (const Reg<T> v1, const Reg<T> v2)                      { return v1.shuff2(v2);        }
+template <typename T> inline Reg<T>      shuff4       (const Reg<T> v1, const Reg<T> v2)                      { return v1.shuff4(v2);        }
 template <typename T> inline Reg<T>      interleavelo (const Reg<T> v1, const Reg<T> v2)                      { return v1.interleavelo(v2);  }
 template <typename T> inline Reg<T>      interleavehi (const Reg<T> v1, const Reg<T> v2)                      { return v1.interleavehi(v2);  }
 template <typename T> inline Reg<T>      interleavelo2(const Reg<T> v1, const Reg<T> v2)                      { return v1.interleavelo2(v2); }
 template <typename T> inline Reg<T>      interleavehi2(const Reg<T> v1, const Reg<T> v2)                      { return v1.interleavehi2(v2); }
+template <typename T> inline Reg<T>      interleavelo4(const Reg<T> v1, const Reg<T> v2)                      { return v1.interleavelo4(v2); }
+template <typename T> inline Reg<T>      interleavehi4(const Reg<T> v1, const Reg<T> v2)                      { return v1.interleavehi4(v2); }
 template <typename T> inline Regx2<T>    interleave   (const Reg<T> v1, const Reg<T> v2)                      { return v1.interleave(v2);    }
 template <typename T> inline Regx2<T>    interleave2  (const Reg<T> v1, const Reg<T> v2)                      { return v1.interleave2(v2);   }
+template <typename T> inline Regx2<T>    interleave4  (const Reg<T> v1, const Reg<T> v2)                      { return v1.interleave4(v2);   }
 template <typename T> inline Reg<T>      interleave   (const Reg<T> v)                                        { return v.interleave();       }
 template <typename T> inline Regx2<T>    interleavex2 (const Reg<T> v1, const Reg<T> v2)                      { return v1.interleavex2(v2);  }
 template <typename T> inline Reg<T>      interleavex4 (const Reg<T> v)                                        { return v.interleavex4();     }

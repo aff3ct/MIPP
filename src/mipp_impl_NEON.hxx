@@ -630,6 +630,59 @@
 		return mipp::set<int8_t>(val_bis);
 	}
 
+	// --------------------------------------------------------------------------------------------------------- cmask4
+	template <>
+	inline reg cmask4<float>(const uint32_t val[nElReg<float>()/4]) {
+		int8_t val_bis[nElReg<int8_t>()] = {(int8_t)(val[0]*4 + 0+ 0), (int8_t)(val[0]*4 + 1+ 0),
+		                                    (int8_t)(val[0]*4 + 2+ 0), (int8_t)(val[0]*4 + 3+ 0),
+		                                    (int8_t)(val[0]*4 + 0+ 4), (int8_t)(val[0]*4 + 1+ 4),
+		                                    (int8_t)(val[0]*4 + 2+ 4), (int8_t)(val[0]*4 + 3+ 4),
+		                                    (int8_t)(val[0]*4 + 0+ 8), (int8_t)(val[0]*4 + 1+ 8),
+		                                    (int8_t)(val[0]*4 + 2+ 8), (int8_t)(val[0]*4 + 3+ 8),
+		                                    (int8_t)(val[0]*4 + 0+12), (int8_t)(val[0]*4 + 1+12),
+		                                    (int8_t)(val[0]*4 + 2+12), (int8_t)(val[0]*4 + 3+12)};
+		return mipp::set<int8_t>(val_bis);
+	}
+
+	template <>
+	inline reg cmask4<int32_t>(const uint32_t val[nElReg<int32_t>()/4]) {
+		int8_t val_bis[nElReg<int8_t>()] = {(int8_t)(val[0]*4 + 0+ 0), (int8_t)(val[0]*4 + 1+ 0),
+		                                    (int8_t)(val[0]*4 + 2+ 0), (int8_t)(val[0]*4 + 3+ 0),
+		                                    (int8_t)(val[0]*4 + 0+ 4), (int8_t)(val[0]*4 + 1+ 4),
+		                                    (int8_t)(val[0]*4 + 2+ 4), (int8_t)(val[0]*4 + 3+ 4),
+		                                    (int8_t)(val[0]*4 + 0+ 8), (int8_t)(val[0]*4 + 1+ 8),
+		                                    (int8_t)(val[0]*4 + 2+ 8), (int8_t)(val[0]*4 + 3+ 8),
+		                                    (int8_t)(val[0]*4 + 0+12), (int8_t)(val[0]*4 + 1+12),
+		                                    (int8_t)(val[0]*4 + 2+12), (int8_t)(val[0]*4 + 3+12)};
+		return mipp::set<int8_t>(val_bis);
+	}
+
+	template <>
+	inline reg cmask4<int16_t>(const uint32_t val[nElReg<int16_t>()/4]) {
+		int8_t val_bis[nElReg<int8_t>()] = {(int8_t)(val[0]*2 + 0+ 0), (int8_t)(val[0]*2 + 1+ 0),
+		                                    (int8_t)(val[1]*2 + 0+ 0), (int8_t)(val[1]*2 + 1+ 0),
+		                                    (int8_t)(val[0]*2 + 0+ 4), (int8_t)(val[0]*2 + 1+ 4),
+		                                    (int8_t)(val[1]*2 + 0+ 4), (int8_t)(val[1]*2 + 1+ 4),
+		                                    (int8_t)(val[0]*2 + 0+ 8), (int8_t)(val[0]*2 + 1+ 8),
+		                                    (int8_t)(val[1]*2 + 0+ 8), (int8_t)(val[1]*2 + 1+ 8),
+		                                    (int8_t)(val[0]*2 + 0+12), (int8_t)(val[0]*2 + 1+12),
+		                                    (int8_t)(val[1]*2 + 0+12), (int8_t)(val[1]*2 + 1+12)};
+		return mipp::set<int8_t>(val_bis);
+	}
+
+	template <>
+	inline reg cmask4<int8_t>(const uint32_t val[nElReg<int8_t>()/4]) {
+		int8_t val_bis[nElReg<int8_t>()] = {(int8_t)(val[ 0]+ 0), (int8_t)(val[ 1]+ 0),
+		                                    (int8_t)(val[ 2]+ 0), (int8_t)(val[ 3]+ 0),
+		                                    (int8_t)(val[ 0]+ 4), (int8_t)(val[ 1]+ 4),
+		                                    (int8_t)(val[ 2]+ 4), (int8_t)(val[ 3]+ 4),
+		                                    (int8_t)(val[ 0]+ 8), (int8_t)(val[ 1]+ 8),
+		                                    (int8_t)(val[ 2]+ 8), (int8_t)(val[ 3]+ 8),
+		                                    (int8_t)(val[ 0]+12), (int8_t)(val[ 1]+12),
+		                                    (int8_t)(val[ 2]+12), (int8_t)(val[ 3]+12)};
+		return mipp::set<int8_t>(val_bis);
+	}
+
 	// ---------------------------------------------------------------------------------------------------------- shuff
 	template <>
 	inline reg shuff<double>(const reg v, const reg cm) {
@@ -713,6 +766,27 @@
 
 	template <>
 	inline reg shuff2<int8_t>(const reg v, const reg cm) {
+		return mipp::shuff<int8_t>(v, cm);
+	}
+
+	// --------------------------------------------------------------------------------------------------------- shuff4
+	template <>
+	inline reg shuff4<float>(const reg v, const reg cm) {
+		return mipp::shuff<float>(v, cm);
+	}
+
+	template <>
+	inline reg shuff4<int32_t>(const reg v, const reg cm) {
+		return mipp::shuff<int32_t>(v, cm);
+	}
+
+	template <>
+	inline reg shuff4<int16_t>(const reg v, const reg cm) {
+		return mipp::shuff<int16_t>(v, cm);
+	}
+
+	template <>
+	inline reg shuff4<int8_t>(const reg v, const reg cm) {
 		return mipp::shuff<int8_t>(v, cm);
 	}
 

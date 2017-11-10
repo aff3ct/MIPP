@@ -18,6 +18,10 @@ class ShuffTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_Reg_shuff2_int8);
 #endif
 	CPPUNIT_TEST(test_reg_shuff2_int8);
+#ifndef MIPP_NO
+	CPPUNIT_TEST(test_Reg_shuff4_int8);
+#endif
+	CPPUNIT_TEST(test_reg_shuff4_int8);
 #endif
 
 #ifndef MIPP_NO
@@ -29,6 +33,10 @@ class ShuffTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_reg_shuff2_int16);
 #endif
 	CPPUNIT_TEST(test_Reg_shuff2_int16);
+#ifndef MIPP_NO
+	CPPUNIT_TEST(test_reg_shuff4_int16);
+#endif
+	CPPUNIT_TEST(test_Reg_shuff4_int16);
 #endif
 #endif
 
@@ -41,6 +49,10 @@ class ShuffTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_reg_shuff2_int32);
 #endif
 	CPPUNIT_TEST(test_Reg_shuff2_int32);
+#ifndef MIPP_NO
+	CPPUNIT_TEST(test_reg_shuff4_int32);
+#endif
+	CPPUNIT_TEST(test_Reg_shuff4_int32);
 #endif
 
 #ifndef MIPP_NO
@@ -52,6 +64,10 @@ class ShuffTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_reg_shuff2_float);
 #endif
 	CPPUNIT_TEST(test_Reg_shuff2_float);
+#ifndef MIPP_NO
+	CPPUNIT_TEST(test_reg_shuff4_float);
+#endif
+	CPPUNIT_TEST(test_Reg_shuff4_float);
 #endif
 
 #if defined(MIPP_64BIT)
@@ -64,6 +80,10 @@ class ShuffTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_reg_shuff2_int64);
 #endif
 	CPPUNIT_TEST(test_Reg_shuff2_int64);
+#ifndef MIPP_NO
+	CPPUNIT_TEST(test_reg_shuff4_int64);
+#endif
+	CPPUNIT_TEST(test_Reg_shuff4_int64);
 #endif
 
 #ifndef MIPP_NO
@@ -75,6 +95,10 @@ class ShuffTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_reg_shuff2_double);
 #endif
 	CPPUNIT_TEST(test_Reg_shuff2_double);
+#ifndef MIPP_NO
+	CPPUNIT_TEST(test_reg_shuff4_double);
+#endif
+	CPPUNIT_TEST(test_Reg_shuff4_double);
 #endif
 #endif
 #endif
@@ -120,6 +144,24 @@ public:
 	void test_Reg_shuff2_int64();
 	void test_Reg_shuff2_float();
 	void test_Reg_shuff2_double();
+
+	template <typename T>
+	void test_reg_shuff4();
+	void test_reg_shuff4_int8();
+	void test_reg_shuff4_int16();
+	void test_reg_shuff4_int32();
+	void test_reg_shuff4_int64();
+	void test_reg_shuff4_float();
+	void test_reg_shuff4_double();
+
+	template <typename T>
+	void test_Reg_shuff4();
+	void test_Reg_shuff4_int8();
+	void test_Reg_shuff4_int16();
+	void test_Reg_shuff4_int32();
+	void test_Reg_shuff4_int64();
+	void test_Reg_shuff4_float();
+	void test_Reg_shuff4_double();
 };
 
 #endif  // SUFFTEST_HPP_

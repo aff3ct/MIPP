@@ -610,14 +610,19 @@ template <typename T> inline reg_2 low          (const reg)                     
 template <typename T> inline reg_2 high         (const reg)                       { errorMessage<T>("high");          exit(-1); }
 template <typename T> inline reg   cmask        (const uint32_t[nElReg<T>()])     { errorMessage<T>("cmask");         exit(-1); }
 template <typename T> inline reg   cmask2       (const uint32_t[nElReg<T>()/2])   { errorMessage<T>("cmask2");        exit(-1); }
+template <typename T> inline reg   cmask4       (const uint32_t[nElReg<T>()/4])   { errorMessage<T>("cmask4");        exit(-1); }
 template <typename T> inline reg   shuff        (const reg, const reg)            { errorMessage<T>("shuff");         exit(-1); }
 template <typename T> inline reg   shuff2       (const reg, const reg)            { errorMessage<T>("shuff2");        exit(-1); }
+template <typename T> inline reg   shuff4       (const reg, const reg)            { errorMessage<T>("shuff4");        exit(-1); }
 template <typename T> inline reg   interleavelo (const reg, const reg)            { errorMessage<T>("interleavelo");  exit(-1); }
 template <typename T> inline reg   interleavehi (const reg, const reg)            { errorMessage<T>("interleavehi");  exit(-1); }
 template <typename T> inline reg   interleavelo2(const reg, const reg)            { errorMessage<T>("interleavelo2"); exit(-1); }
 template <typename T> inline reg   interleavehi2(const reg, const reg)            { errorMessage<T>("interleavehi2"); exit(-1); }
+template <typename T> inline reg   interleavelo4(const reg, const reg)            { errorMessage<T>("interleavelo4"); exit(-1); }
+template <typename T> inline reg   interleavehi4(const reg, const reg)            { errorMessage<T>("interleavehi4"); exit(-1); }
 template <typename T> inline regx2 interleave   (const reg, const reg)            { errorMessage<T>("interleave");    exit(-1); }
 template <typename T> inline regx2 interleave2  (const reg, const reg)            { errorMessage<T>("interleave2");   exit(-1); }
+template <typename T> inline regx2 interleave4  (const reg, const reg)            { errorMessage<T>("interleave4");   exit(-1); }
 template <typename T> inline reg   interleave   (const reg)                       { errorMessage<T>("interleave");    exit(-1); }
 template <typename T> inline regx2 interleavex2 (const reg, const reg)            { errorMessage<T>("interleavex2");  exit(-1); }
 template <typename T> inline reg   interleavex4 (const reg)                       { errorMessage<T>("interleavex4");  exit(-1); }
@@ -626,6 +631,8 @@ template <typename T> inline void  transpose    (      reg[nElReg<T>()])        
 template <typename T> inline void  transpose8x8 (      reg[8])                    { errorMessage<T>("transpose8x8");  exit(-1); }
 template <typename T> inline void  transpose2   (      reg[nElReg<T>()/2])        { errorMessage<T>("transpose2");    exit(-1); }
 template <typename T> inline void  transpose28x8(      reg[8])                    { errorMessage<T>("transpose28x8"); exit(-1); }
+template <typename T> inline void  transpose4   (      reg[nElReg<T>()/2])        { errorMessage<T>("transpose4");    exit(-1); }
+template <typename T> inline void  transpose48x8(      reg[8])                    { errorMessage<T>("transpose48x8"); exit(-1); }
 template <typename T> inline reg   andb         (const reg, const reg)            { errorMessage<T>("andb");          exit(-1); }
 template <int      N> inline msk   andb         (const msk, const msk)            { errorMessage<N>("andb");          exit(-1); }
 template <typename T> inline reg   andnb        (const reg, const reg)            { errorMessage<T>("andnb");         exit(-1); }

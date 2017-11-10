@@ -90,7 +90,7 @@ void ShuffTest::test_Reg_shuff_double() { test_Reg_shuff<double >(); }
 template <typename T>
 void ShuffTest::test_reg_shuff2()
 {
-	if (mipp::N<T>() > 2)
+	if (mipp::N<T>() >= 2)
 	{
 		try
 		{
@@ -129,7 +129,7 @@ void ShuffTest::test_reg_shuff2_double() { test_reg_shuff2<double >(); }
 template <typename T>
 void ShuffTest::test_Reg_shuff2()
 {
-	if (mipp::N<T>() > 2)
+	if (mipp::N<T>() >= 2)
 	{
 		try
 		{
@@ -164,3 +164,79 @@ void ShuffTest::test_Reg_shuff2_int32 () { test_Reg_shuff2<int32_t>(); }
 void ShuffTest::test_Reg_shuff2_int64 () { test_Reg_shuff2<int64_t>(); }
 void ShuffTest::test_Reg_shuff2_float () { test_Reg_shuff2<float  >(); }
 void ShuffTest::test_Reg_shuff2_double() { test_Reg_shuff2<double >(); }
+
+template <typename T>
+void ShuffTest::test_reg_shuff4()
+{
+	if (mipp::N<T>() >= 4)
+	{
+		try
+		{
+			uint32_t cm4_inputs[mipp::N<T>()/4];
+			std::mt19937 g;
+			std::iota   (cm4_inputs, cm4_inputs + mipp::N<T>()/4, 0);
+			std::shuffle(cm4_inputs, cm4_inputs + mipp::N<T>()/4, g);
+
+			mipp::reg cm4 = mipp::cmask4<T>(cm4_inputs);
+
+			T inputs[mipp::N<T>()];
+			std::iota(inputs, inputs + mipp::N<T>(), 0);
+
+			mipp::reg r = mipp::load<T>(inputs);
+			mipp::reg s = mipp::shuff4<T>(r, cm4);
+
+			for (auto j = 0; j < 4; j++)
+				for (auto i = 0; i < mipp::N<T>()/4; i++)
+					CPPUNIT_ASSERT_EQUAL(inputs[j*mipp::N<T>()/4 + cm4_inputs[i]], *((T*)&s + j*mipp::N<T>()/4 +i));
+		}
+		catch(std::exception &e)
+		{
+			CPPUNIT_FAIL(e.what());
+		}
+	}
+}
+
+void ShuffTest::test_reg_shuff4_int8  () { test_reg_shuff4<int8_t >(); }
+void ShuffTest::test_reg_shuff4_int16 () { test_reg_shuff4<int16_t>(); }
+void ShuffTest::test_reg_shuff4_int32 () { test_reg_shuff4<int32_t>(); }
+void ShuffTest::test_reg_shuff4_int64 () { test_reg_shuff4<int64_t>(); }
+void ShuffTest::test_reg_shuff4_float () { test_reg_shuff4<float  >(); }
+void ShuffTest::test_reg_shuff4_double() { test_reg_shuff4<double >(); }
+
+template <typename T>
+void ShuffTest::test_Reg_shuff4()
+{
+	if (mipp::N<T>() >= 4)
+	{
+		try
+		{
+			uint32_t cm4_inputs[mipp::N<T>()/4];
+			std::mt19937 g;
+			std::iota   (cm4_inputs, cm4_inputs + mipp::N<T>()/4, 0);
+			std::shuffle(cm4_inputs, cm4_inputs + mipp::N<T>()/4, g);
+
+			mipp::Reg<T> cm4 = mipp::Reg<T>::cmask4(cm4_inputs);
+
+			T inputs[mipp::N<T>()];
+			std::iota(inputs, inputs + mipp::N<T>(), 0);
+
+			mipp::Reg<T> r = inputs;
+			mipp::Reg<T> s = r.shuff4(cm4);
+
+			for (auto j = 0; j < 4; j++)
+				for (auto i = 0; i < mipp::N<T>()/4; i++)
+					CPPUNIT_ASSERT_EQUAL(inputs[j*mipp::N<T>()/4 + cm4_inputs[i]], s[j*mipp::N<T>()/4 +i]);
+		}
+		catch(std::exception &e)
+		{
+			CPPUNIT_FAIL(e.what());
+		}
+	}
+}
+
+void ShuffTest::test_Reg_shuff4_int8  () { test_Reg_shuff4<int8_t >(); }
+void ShuffTest::test_Reg_shuff4_int16 () { test_Reg_shuff4<int16_t>(); }
+void ShuffTest::test_Reg_shuff4_int32 () { test_Reg_shuff4<int32_t>(); }
+void ShuffTest::test_Reg_shuff4_int64 () { test_Reg_shuff4<int64_t>(); }
+void ShuffTest::test_Reg_shuff4_float () { test_Reg_shuff4<float  >(); }
+void ShuffTest::test_Reg_shuff4_double() { test_Reg_shuff4<double >(); }
