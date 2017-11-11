@@ -3332,8 +3332,58 @@
 		return neg<float>(v1, toreg<16>(v2));
 	}
 
+	template <>
+	inline reg neg<int64_t>(const reg v1, const reg v2) {
+		reg neg_v1 = mipp::sub<int64_t>(mipp::set0<int64_t>(), v1);
+		reg v2_2   = mipp::orb<int64_t>(v2, set1<int64_t>(1)); // hack to avoid -0 case
+		return mipp::blend<int64_t>(neg_v1, v1, mipp::cmplt<int64_t>(v2_2, set0<int64_t>()));
+	}
+
+	template <>
+	inline reg neg<int64_t>(const reg v1, const msk v2) {
+		return neg<int64_t>(v1, toreg<8>(v2));
+	}
+
+	template <>
+	inline reg neg<int32_t>(const reg v1, const reg v2) {
+		reg neg_v1 = mipp::sub<int32_t>(mipp::set0<int32_t>(), v1);
+		reg v2_2   = mipp::orb<int32_t>(v2, set1<int32_t>(1)); // hack to avoid -0 case
+		return mipp::blend<int32_t>(neg_v1, v1, mipp::cmplt<int32_t>(v2_2, set0<int32_t>()));
+	}
+
+	template <>
+	inline reg neg<int32_t>(const reg v1, const msk v2) {
+		return neg<int32_t>(v1, toreg<16>(v2));
+	}
+
+#if defined(__AVX512BW__)
+	template <>
+	inline reg neg<int16_t>(const reg v1, const reg v2) {
+		reg neg_v1 = mipp::sub<int16_t>(mipp::set0<int16_t>(), v1);
+		reg v2_2   = mipp::orb<int16_t>(v2, set1<int16_t>(1)); // hack to avoid -0 case
+		return mipp::blend<int16_t>(neg_v1, v1, mipp::cmplt<int16_t>(v2_2, set0<int16_t>()));
+	}
+
+	template <>
+	inline reg neg<int16_t>(const reg v1, const msk v2) {
+		return neg<int16_t>(v1, toreg<32>(v2));
+	}
+
+	template <>
+	inline reg neg<int8_t>(const reg v1, const reg v2) {
+		reg neg_v1 = mipp::sub<int8_t>(mipp::set0<int8_t>(), v1);
+		reg v2_2   = mipp::orb<int8_t>(v2, set1<int8_t>(1)); // hack to avoid -0 case
+		return mipp::blend<int8_t>(neg_v1, v1, mipp::cmplt<int8_t>(v2_2, set0<int8_t>()));
+	}
+
+	template <>
+	inline reg neg<int8_t>(const reg v1, const msk v2) {
+		return neg<int8_t>(v1, toreg<64>(v2));
+	}
+#endif
+
 	// ------------------------------------------------------------------------------------------------------------ abs
-	/*
+	/* there is a bug in the GNU compiler, _mm512_abs_pd and _mm512_abs_ps are not defined...
 	template <>
 	inline reg abs<double>(const reg v1) {
 		return _mm512_castpd_ps(_mm512_abs_pd(_mm512_castps_pd(v1)));
@@ -3342,6 +3392,33 @@
 	template <>
 	inline reg abs<float>(const reg v1) {
 		return _mm512_abs_ps(v1);
+	}
+	*/
+
+	template <>
+	inline reg abs<double>(const reg v1) {
+		// abs_mask = 0111111111111111111111111111111111111111111111111111111111111111 // 64 bits
+		const reg abs_mask = set1<int64_t>(0x7FFFFFFFFFFFFFFF);
+
+		// indices = 63 62 61 60 59 58 57 56 55 54 53 52 51 50 49 48 47 46 45 44 43 42 41 40 39 38 37 36 35 34 33 32...
+		// mask    =  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1...
+		// v1      =  ù  €  è  é  à  &  z  y  x  w  v  u  t  s  r  q  p  o  n  m  l  k  j  i  h  g  f  e  d  c  b  a...
+		// v1      =  0  €  è  é  à  &  z  y  x  w  v  u  t  s  r  q  p  o  n  m  l  k  j  i  h  g  f  e  d  c  b  a...
+		// res is the sign because the first bit is the sign bit (0 = positive, 1 = negative)
+		return andb<double>(v1, abs_mask);
+	}
+
+	template <>
+	inline reg abs<float>(const reg v1) {
+		// abs_mask = 01111111111111111111111111111111 // 32 bits
+		const reg abs_mask = set1<int32_t>(0x7FFFFFFF);
+
+		// indices = 31 30 29 28 27 26 25 24 23 22 21 20 19 18 17 16 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
+		// mask    =  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+		// v1      =  ù  €  è  é  à  &  z  y  x  w  v  u  t  s  r  q  p  o  n  m  l  k  j  i  h  g  f  e  d  c  b  a
+		// v1      =  0  €  è  é  à  &  z  y  x  w  v  u  t  s  r  q  p  o  n  m  l  k  j  i  h  g  f  e  d  c  b  a
+		// res is the sign because the first bit is the sign bit (0 = positive, 1 = negative)
+		return andb<float>(v1, abs_mask);
 	}
 
 #if defined(__AVX512F__)
@@ -3367,7 +3444,6 @@
 		return _mm512_castsi512_ps(_mm512_abs_epi8(_mm512_castps_si512(v1)));
 	}
 #endif
-	*/
 
 	// ----------------------------------------------------------------------------------------------------------- sqrt
 #if defined(__AVX512F__)
@@ -3629,8 +3705,17 @@
 	}
 
 	template <>
+	inline reg div2<int64_t>(const reg v1) {
+//		return _mm512_castsi512_ps(_mm512_srai_epi32(_mm512_castps_si512(v1), 1)); // seems to do not work
+		reg abs_v1 = abs<int64_t>(v1);
+		reg sh = rshift<int64_t>(abs_v1, 1);
+		sh = neg<int64_t>(sh, v1);
+		return sh;
+	}
+
+	template <>
 	inline reg div2<int32_t>(const reg v1) {
-		// return _mm512_castsi512_ps(_mm512_srai_epi32(_mm512_castps_si512(v1), 1)); // seems to do not work
+//		return _mm512_castsi512_ps(_mm512_srai_epi32(_mm512_castps_si512(v1), 1)); // seems to do not work
 		reg abs_v1 = abs<int32_t>(v1);
 		reg sh = rshift<int32_t>(abs_v1, 1);
 		sh = neg<int32_t>(sh, v1);
@@ -3640,7 +3725,7 @@
 #if defined(__AVX512BW__)
 	template <>
 	inline reg div2<int16_t>(const reg v1) {
-		// return _mm512_castsi512_ps(_mm512_srai_epi16(_mm512_castps_si512(v1), 1)); // seems to do not work
+//		return _mm512_castsi512_ps(_mm512_srai_epi16(_mm512_castps_si512(v1), 1)); // seems to do not work
 		reg abs_v1 = abs<int16_t>(v1);
 		reg sh = rshift<int16_t>(abs_v1, 1);
 		sh = neg<int16_t>(sh, v1);
@@ -3666,6 +3751,15 @@
 	template <>
 	inline reg div4<double>(const reg v1) {
 		return mul<double>(v1, set1<double>(0.25));
+	}
+
+	template <>
+	inline reg div4<int64_t>(const reg v1) {
+		// return _mm512_castsi512_ps(_mm512_srai_epi64(_mm512_castps_si512(v1), 2)); // seems to do not work
+		reg abs_v1 = abs<int64_t>(v1);
+		reg sh = rshift<int64_t>(abs_v1, 2);
+		sh = neg<int64_t>(sh, v1);
+		return sh;
 	}
 
 	template <>
@@ -3745,6 +3839,18 @@
 #endif
 
 	// ------------------------------------------------------------------------------------------------------------ cvt
+#ifdef __AVX512DQ__
+	template <>
+	inline reg cvt<double,int64_t>(const reg v) {
+		return _mm512_castsi512_ps(_mm512_cvtpd_epi64(_mm512_castps_pd(v)));
+	}
+
+	template <>
+	inline reg cvt<int64_t,double>(const reg v) {
+		return _mm512_castpd_ps(_mm512_cvtepi64_pd(_mm512_castps_si512(v)));
+	}
+#endif
+
 #ifdef __AVX512F__
 	template <>
 	inline reg cvt<float,int32_t>(const reg v) {
@@ -3759,6 +3865,11 @@
 	template <>
 	inline reg cvt<int16_t,int32_t>(const reg_2 v) {
 		return _mm512_castsi512_ps(_mm512_cvtepi16_epi32(_mm256_castps_si256(v)));
+	}
+
+	template <>
+	inline reg cvt<int32_t,int64_t>(const reg_2 v) {
+		return _mm512_castsi512_ps(_mm512_cvtepi32_epi64(_mm256_castps_si256(v)));
 	}
 #endif
 
