@@ -3528,8 +3528,94 @@
 	}
 
 	// ----------------------------------------------------------------------------------------------------------- lrot
+#ifdef __AVX512F__
+	template <>
+	inline reg lrot<double>(const reg v1) {
+		return _mm512_castpd_ps(_mm512_permutexvar_pd(_mm512_setr_epi64(1, 2, 3, 4, 5, 6, 7, 0), _mm512_castps_pd(v1)));
+	}
+
+	template <>
+	inline reg lrot<float>(const reg v1) {
+		return _mm512_permutexvar_ps(_mm512_setr_epi32(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0), v1);
+	}
+
+	template <>
+	inline reg lrot<int64_t>(const reg v1) {
+		return _mm512_castsi512_ps(_mm512_permutexvar_epi64(_mm512_setr_epi64(1, 2, 3, 4, 5, 6, 7, 0), _mm512_castps_si512(v1)));
+	}
+
+	template <>
+	inline reg lrot<int32_t>(const reg v1) {
+		return _mm512_castsi512_ps(_mm512_permutexvar_epi32(_mm512_setr_epi32(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0), _mm512_castps_si512(v1)));
+	}
+#endif
+
+#ifdef __AVX512BW__
+	template <>
+	inline reg lrot<int16_t>(const reg v1) {
+		return _mm512_castsi512_ps(_mm512_permutexvar_epi16(_mm512_setr_epi16( 1,  2,  3,  4,  5,  6,  7,  8,
+		                                                                       9, 10, 11, 12, 13, 14, 15, 16,
+		                                                                      17, 18, 19, 20, 21, 22, 23, 24,
+		                                                                      25, 26, 27, 28, 29, 30, 31,  0), _mm512_castps_si512(v1)));
+	}
+
+	template <>
+	inline reg lrot<int8_t>(const reg v1) {
+		return _mm512_castsi512_ps(_mm512_permutexvar_epi8(_mm512_setr_epi8( 1,  2,  3,  4,  5,  6,  7,  8,
+		                                                                     9, 10, 11, 12, 13, 14, 15, 16,
+		                                                                    17, 18, 19, 20, 21, 22, 23, 24,
+		                                                                    25, 26, 27, 28, 29, 30, 31, 32,
+		                                                                    33, 34, 35, 36, 37, 38, 39, 40,
+		                                                                    41, 42, 43, 44, 45, 46, 47, 48,
+		                                                                    49, 50, 51, 52, 53, 54, 55, 56,
+		                                                                    57, 58, 59, 60, 61, 62, 63,  0), _mm512_castps_si512(v1)));
+	}
+#endif
 
 	// ----------------------------------------------------------------------------------------------------------- rrot
+#ifdef __AVX512F__
+	template <>
+	inline reg rrot<double>(const reg v1) {
+		return _mm512_castpd_ps(_mm512_permutexvar_pd(_mm512_setr_epi64(7, 0, 1, 2, 3, 4, 5, 6), _mm512_castps_pd(v1)));
+	}
+
+	template <>
+	inline reg rrot<float>(const reg v1) {
+		return _mm512_permutexvar_ps(_mm512_setr_epi32(15, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14), v1);
+	}
+
+	template <>
+	inline reg rrot<int64_t>(const reg v1) {
+		return _mm512_castsi512_ps(_mm512_permutexvar_epi64(_mm512_setr_epi64(7, 0, 1, 2, 3, 4, 5, 6), _mm512_castps_si512(v1)));
+	}
+
+	template <>
+	inline reg rrot<int32_t>(const reg v1) {
+		return _mm512_castsi512_ps(_mm512_permutexvar_epi32(_mm512_setr_epi32(15, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14), _mm512_castps_si512(v1)));
+	}
+#endif
+
+#ifdef __AVX512BW__
+	template <>
+	inline reg rrot<int16_t>(const reg v1) {
+		return _mm512_castsi512_ps(_mm512_permutexvar_epi16(_mm512_setr_epi16(31,  0,  1,  2,  3,  4,  5,  6,
+		                                                                       7,  8,  9, 10, 11, 12, 13, 14,
+		                                                                      15, 16, 17, 18, 19, 20, 21, 22,
+		                                                                      23, 24, 25, 26, 27, 28, 29, 30), _mm512_castps_si512(v1)));
+	}
+
+	template <>
+	inline reg rrot<int8_t>(const reg v1) {
+		return _mm512_castsi512_ps(_mm512_permutexvar_epi8(_mm512_setr_epi8(63,  0,  1,  2,  3,  4,  5,  6,
+		                                                                     7,  8,  9, 10, 11, 12, 13, 14,
+		                                                                    15, 16, 17, 18, 19, 20, 21, 22,
+		                                                                    23, 24, 25, 26, 27, 28, 29, 30,
+		                                                                    31, 32, 33, 34, 35, 36, 37, 38,
+		                                                                    39, 40, 41, 42, 43, 44, 45, 46,
+		                                                                    47, 48, 49, 50, 51, 52, 53, 54,
+		                                                                    55, 56, 57, 58, 59, 60, 61, 62), _mm512_castps_si512(v1)));
+	}
+#endif
 
 	// ----------------------------------------------------------------------------------------------------------- div2
 	template <>
