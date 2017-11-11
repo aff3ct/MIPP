@@ -218,3 +218,99 @@ void InterleaveTest::test_Reg_interleave2_int32 () { test_Reg_interleave2<int32_
 void InterleaveTest::test_Reg_interleave2_int64 () { test_Reg_interleave2<int64_t>(); }
 void InterleaveTest::test_Reg_interleave2_float () { test_Reg_interleave2<float  >(); }
 void InterleaveTest::test_Reg_interleave2_double() { test_Reg_interleave2<double >(); }
+
+template <typename T>
+void InterleaveTest::test_reg_interleave4()
+{
+	if (mipp::N<T>() > 4)
+	{
+		try
+		{
+			T inputs1[mipp::N<T>()], inputs2[mipp::N<T>()];
+			std::mt19937 g;
+			std::iota   (inputs1, inputs1 + mipp::N<T>(), 0);
+			std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
+			std::iota   (inputs2, inputs2 + mipp::N<T>(), 0);
+			std::shuffle(inputs2, inputs2 + mipp::N<T>(), g);
+
+			mipp::reg r1 = mipp::load<T>(inputs1);
+			mipp::reg r2 = mipp::load<T>(inputs2);
+
+			mipp::regx2 ri = mipp::interleave4<T>(r1, r2);
+
+			for (auto j = 0; j < 4; j++)
+				for (auto i = 0; i < mipp::N<T>()/4; i++)
+					if (i % 2)
+						CPPUNIT_ASSERT_EQUAL(inputs2[j*mipp::N<T>()/4 + i/2], *((T*)&ri.val[0] + j*mipp::N<T>()/4 +i));
+					else
+						CPPUNIT_ASSERT_EQUAL(inputs1[j*mipp::N<T>()/4 + i/2], *((T*)&ri.val[0] + j*mipp::N<T>()/4 +i));
+
+			for (auto j = 0; j < 4; j++)
+				for (auto i = 0; i < mipp::N<T>()/4; i++)
+					if (i % 2)
+						CPPUNIT_ASSERT_EQUAL(inputs2[j*mipp::N<T>()/4 + mipp::N<T>()/8 + i/2],
+						                     *((T*)&ri.val[1] + j*mipp::N<T>()/4 +i));
+					else
+						CPPUNIT_ASSERT_EQUAL(inputs1[j*mipp::N<T>()/4 + mipp::N<T>()/8 + i/2],
+						                     *((T*)&ri.val[1] + j*mipp::N<T>()/4 +i));
+		}
+		catch(std::exception &e)
+		{
+			CPPUNIT_FAIL(e.what());
+		}
+	}
+}
+
+void InterleaveTest::test_reg_interleave4_int8  () { test_reg_interleave4<int8_t >(); }
+void InterleaveTest::test_reg_interleave4_int16 () { test_reg_interleave4<int16_t>(); }
+void InterleaveTest::test_reg_interleave4_int32 () { test_reg_interleave4<int32_t>(); }
+void InterleaveTest::test_reg_interleave4_int64 () { test_reg_interleave4<int64_t>(); }
+void InterleaveTest::test_reg_interleave4_float () { test_reg_interleave4<float  >(); }
+void InterleaveTest::test_reg_interleave4_double() { test_reg_interleave4<double >(); }
+
+template <typename T>
+void InterleaveTest::test_Reg_interleave4()
+{
+	if (mipp::N<T>() > 4)
+	{
+		try
+		{
+			T inputs1[mipp::N<T>()], inputs2[mipp::N<T>()];
+			std::mt19937 g;
+			std::iota   (inputs1, inputs1 + mipp::N<T>(), 0);
+			std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
+			std::iota   (inputs2, inputs2 + mipp::N<T>(), 0);
+			std::shuffle(inputs2, inputs2 + mipp::N<T>(), g);
+
+			mipp::Reg<T> r1 = inputs1;
+			mipp::Reg<T> r2 = inputs2;
+
+			mipp::Regx2<T> ri = mipp::interleave4(r1, r2);
+
+			for (auto j = 0; j < 4; j++)
+				for (auto i = 0; i < mipp::N<T>()/4; i++)
+					if (i % 2)
+						CPPUNIT_ASSERT_EQUAL(inputs2[j*mipp::N<T>()/4 + i/2], ri[0][j*mipp::N<T>()/4 +i]);
+					else
+						CPPUNIT_ASSERT_EQUAL(inputs1[j*mipp::N<T>()/4 + i/2], ri[0][j*mipp::N<T>()/4 +i]);
+
+			for (auto j = 0; j < 4; j++)
+				for (auto i = 0; i < mipp::N<T>()/4; i++)
+					if (i % 2)
+						CPPUNIT_ASSERT_EQUAL(inputs2[j*mipp::N<T>()/4 + mipp::N<T>()/8 + i/2], ri[1][j*mipp::N<T>()/4 +i]);
+					else
+						CPPUNIT_ASSERT_EQUAL(inputs1[j*mipp::N<T>()/4 + mipp::N<T>()/8 + i/2], ri[1][j*mipp::N<T>()/4 +i]);
+		}
+		catch(std::exception &e)
+		{
+			CPPUNIT_FAIL(e.what());
+		}
+	}
+}
+
+void InterleaveTest::test_Reg_interleave4_int8  () { test_Reg_interleave4<int8_t >(); }
+void InterleaveTest::test_Reg_interleave4_int16 () { test_Reg_interleave4<int16_t>(); }
+void InterleaveTest::test_Reg_interleave4_int32 () { test_Reg_interleave4<int32_t>(); }
+void InterleaveTest::test_Reg_interleave4_int64 () { test_Reg_interleave4<int64_t>(); }
+void InterleaveTest::test_Reg_interleave4_float () { test_Reg_interleave4<float  >(); }
+void InterleaveTest::test_Reg_interleave4_double() { test_Reg_interleave4<double >(); }

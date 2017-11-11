@@ -17,6 +17,12 @@ class InterleaveloTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_reg_interleavelo2_int8);
 #endif
 	CPPUNIT_TEST(test_Reg_interleavelo2_int8);
+#if defined(MIPP_AVX512)
+#ifndef MIPP_NO
+	CPPUNIT_TEST(test_reg_interleavelo4_int8);
+#endif
+	CPPUNIT_TEST(test_Reg_interleavelo4_int8);
+#endif
 
 #ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_interleavelo_int16);
@@ -26,6 +32,12 @@ class InterleaveloTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_reg_interleavelo2_int16);
 #endif
 	CPPUNIT_TEST(test_Reg_interleavelo2_int16);
+#if defined(MIPP_AVX512)
+#ifndef MIPP_NO
+	CPPUNIT_TEST(test_reg_interleavelo4_int16);
+#endif
+	CPPUNIT_TEST(test_Reg_interleavelo4_int16);
+#endif
 #endif
 
 #ifndef MIPP_NO
@@ -36,6 +48,12 @@ class InterleaveloTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_reg_interleavelo2_int32);
 #endif
 	CPPUNIT_TEST(test_Reg_interleavelo2_int32);
+#if defined(MIPP_AVX512)
+#ifndef MIPP_NO
+	CPPUNIT_TEST(test_reg_interleavelo4_int32);
+#endif
+	CPPUNIT_TEST(test_Reg_interleavelo4_int32);
+#endif
 
 #ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_interleavelo_float);
@@ -45,6 +63,12 @@ class InterleaveloTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_reg_interleavelo2_float);
 #endif
 	CPPUNIT_TEST(test_Reg_interleavelo2_float);
+#if defined(MIPP_AVX512)
+#ifndef MIPP_NO
+	CPPUNIT_TEST(test_reg_interleavelo4_float);
+#endif
+	CPPUNIT_TEST(test_Reg_interleavelo4_float);
+#endif
 
 #if defined(MIPP_64BIT)
 #ifndef MIPP_NO
@@ -55,6 +79,12 @@ class InterleaveloTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_reg_interleavelo2_int64);
 #endif
 	CPPUNIT_TEST(test_Reg_interleavelo2_int64);
+#if defined(MIPP_AVX512)
+#ifndef MIPP_NO
+	CPPUNIT_TEST(test_reg_interleavelo4_int64);
+#endif
+	CPPUNIT_TEST(test_Reg_interleavelo4_int64);
+#endif
 
 #ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_interleavelo_double);
@@ -64,6 +94,12 @@ class InterleaveloTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_reg_interleavelo2_double);
 #endif
 	CPPUNIT_TEST(test_Reg_interleavelo2_double);
+#if defined(MIPP_AVX512)
+#ifndef MIPP_NO
+	CPPUNIT_TEST(test_reg_interleavelo4_double);
+#endif
+	CPPUNIT_TEST(test_Reg_interleavelo4_double);
+#endif
 #endif
 #endif
 
@@ -108,6 +144,24 @@ public:
 	void test_Reg_interleavelo2_int64();
 	void test_Reg_interleavelo2_float();
 	void test_Reg_interleavelo2_double();
+
+	template <typename T>
+	void test_reg_interleavelo4();
+	void test_reg_interleavelo4_int8();
+	void test_reg_interleavelo4_int16();
+	void test_reg_interleavelo4_int32();
+	void test_reg_interleavelo4_int64();
+	void test_reg_interleavelo4_float();
+	void test_reg_interleavelo4_double();
+
+	template <typename T>
+	void test_Reg_interleavelo4();
+	void test_Reg_interleavelo4_int8();
+	void test_Reg_interleavelo4_int16();
+	void test_Reg_interleavelo4_int32();
+	void test_Reg_interleavelo4_int64();
+	void test_Reg_interleavelo4_float();
+	void test_Reg_interleavelo4_double();
 };
 
 #endif  // INTERLEAVELOTEST_HPP_
