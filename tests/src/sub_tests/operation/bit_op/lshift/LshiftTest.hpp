@@ -13,7 +13,7 @@ class LshiftTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_reg_lshift_int8);
 #endif
 	CPPUNIT_TEST(test_Reg_lshift_int8);
-#if !defined(MIPP_AVX) && !defined(MIPP_AVX512)
+#if !defined(MIPP_AVX)
 #ifndef MIPP_NO
 	CPPUNIT_TEST(test_msk_lshift_int8);
 #endif
@@ -24,7 +24,7 @@ class LshiftTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_reg_lshift_int16);
 #endif
 	CPPUNIT_TEST(test_Reg_lshift_int16);
-#if !defined(MIPP_AVX) && !defined(MIPP_AVX512)
+#if !defined(MIPP_AVX)
 #ifndef MIPP_NO
 	CPPUNIT_TEST(test_msk_lshift_int16);
 #endif
@@ -36,7 +36,7 @@ class LshiftTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_reg_lshift_int32);
 #endif
 	CPPUNIT_TEST(test_Reg_lshift_int32);
-#if !defined(MIPP_AVX) && !defined(MIPP_AVX512)
+#if !defined(MIPP_AVX)
 #ifndef MIPP_NO
 	CPPUNIT_TEST(test_msk_lshift_int32);
 #endif
@@ -48,7 +48,7 @@ class LshiftTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_reg_lshift_int64);
 #endif
 	CPPUNIT_TEST(test_Reg_lshift_int64);
-#if !defined(MIPP_AVX) && !defined(MIPP_AVX512)
+#if !defined(MIPP_AVX)
 #ifndef MIPP_NO
 	CPPUNIT_TEST(test_msk_lshift_int64);
 #endif

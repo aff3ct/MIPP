@@ -266,7 +266,6 @@
 	}
 #endif
 
-
 	// ----------------------------------------------------------------------------------------------------------- set1
 #ifdef __AVX512F__
 	template <>
@@ -1912,58 +1911,7 @@
 	}
 #endif
 
-//	// ----------------------------------------------------------------------------------------------------- interleave
-//	template <>
-//	inline reg interleave<double>(const reg v) {
-//		auto v_permute = _mm256_permute2f128_pd(_mm256_castps_pd(v), _mm256_castps_pd(v), _MM_SHUFFLE(0,0,0,3));
-//
-//		auto lo = _mm256_unpacklo_pd(_mm256_castps_pd(v), v_permute);
-//		auto hi = _mm256_unpackhi_pd(_mm256_castps_pd(v), v_permute);
-//
-//		return _mm256_castpd_ps(_mm256_permute2f128_pd(lo, hi, _MM_SHUFFLE(0,2,0,0)));
-//	}
-//
-//	template <>
-//	inline reg interleave<float>(const reg v) {
-//		auto v_permute = _mm256_permute2f128_ps(v, v, _MM_SHUFFLE(0,0,0,3));
-//
-//		auto lo = _mm256_unpacklo_ps(v, v_permute);
-//		auto hi = _mm256_unpackhi_ps(v, v_permute);
-//
-//		return _mm256_permute2f128_ps(lo, hi, _MM_SHUFFLE(0,2,0,0));
-//	}
-//
-//	template <>
-//	inline reg interleave<int64_t>(const reg v) {
-//		return interleave<double>(v);
-//	}
-//
-//	template <>
-//	inline reg interleave<int32_t>(const reg v) {
-//		return interleave<float>(v);
-//	}
-//
-//#ifdef __AVX2__
-//	template <>
-//	inline reg interleave<int16_t>(const reg v) {
-//		auto v_permute = _mm256_permute2f128_si256(_mm256_castps_si256(v), _mm256_castps_si256(v), _MM_SHUFFLE(0,0,0,3));
-//
-//		auto lo = _mm256_unpacklo_epi16(_mm256_castps_si256(v), v_permute);
-//		auto hi = _mm256_unpackhi_epi16(_mm256_castps_si256(v), v_permute);
-//
-//		return _mm256_castsi256_ps(_mm256_permute2f128_si256(lo, hi, _MM_SHUFFLE(0,2,0,0)));
-//	}
-//
-//	template <>
-//	inline reg interleave<int8_t>(const reg v) {
-//		auto v_permute = _mm256_permute2f128_si256(_mm256_castps_si256(v), _mm256_castps_si256(v), _MM_SHUFFLE(0,0,0,3));
-//
-//		auto lo = _mm256_unpacklo_epi8(_mm256_castps_si256(v), v_permute);
-//		auto hi = _mm256_unpackhi_epi8(_mm256_castps_si256(v), v_permute);
-//
-//		return _mm256_castsi256_ps(_mm256_permute2f128_si256(lo, hi, _MM_SHUFFLE(0,2,0,0)));
-//	}
-//#endif
+	// ----------------------------------------------------------------------------------------------------- interleave
 
 	// --------------------------------------------------------------------------------------------------- interleavelo
 #if defined(__AVX512F__)
@@ -2249,47 +2197,17 @@
 	}
 #endif
 
-//	// --------------------------------------------------------------------------------------------------- interleavex2
-//#ifdef __AVX2__
-//	template <>
-//	inline regx2 interleavex2<float>(const reg v1, const reg v2) {
-//		// v1         = [a, b, c, d,| e, f, g, h]
-//		// v2         = [A, B, C, D,| E, F, G, H]
-//		// =>
-//		// res.val[0] = [a, b, c, d,| A, B, C, D]
-//		// res.val[1] = [e, f, g, h,| E, F, G, H]
-//		auto lo = _mm256_castsi256_ps(_mm256_permute2f128_si256(_mm256_castps_si256(v1),
-//		                                                        _mm256_castps_si256(v2),
-//		                                                        _MM_SHUFFLE(0,2,0,0)));
-//		auto hi = _mm256_castsi256_ps(_mm256_permute2f128_si256(_mm256_castps_si256(v1),
-//		                                                        _mm256_castps_si256(v2),
-//		                                                        _MM_SHUFFLE(0,3,0,1)));
-//		regx2 res = {{lo, hi}};
-//		return res;
-//	}
-//#endif
-//
-//	// --------------------------------------------------------------------------------------------------- interleavex4
-//#ifdef __AVX2__
-//	template <>
-//	inline reg interleavex4<int16_t>(const reg v) {
-//		// [a, b, c, d,| e, f, g, h,| i, j, k, l,| m, n, o, p]
-//		// =>
-//		// [a, b, c, d,| i, j, k, l,| e, f, g, h,| m, n, o, p]
-//		return _mm256_castsi256_ps(_mm256_permute4x64_epi64(_mm256_castps_si256(v), _MM_SHUFFLE(3,1,2,0)));
-//	}
-//
-//	template <>
-//	inline reg interleavex4<int8_t>(const reg v) {
-//		return _mm256_castsi256_ps(_mm256_permute4x64_epi64(_mm256_castps_si256(v), _MM_SHUFFLE(3,1,2,0)));
-//	}
-//#endif
-//
-//	// -------------------------------------------------------------------------------------------------- interleavex16
-//	template <>
-//	inline reg interleavex16<int8_t>(const reg v) {
-//		return mipp::interleave<int16_t>(v);
-//	}
+	// --------------------------------------------------------------------------------------------------- interleavex2
+
+	// --------------------------------------------------------------------------------------------------- interleavex4
+
+	// -------------------------------------------------------------------------------------------------- interleavex16
+
+	// ------------------------------------------------------------------------------------------------------ transpose
+
+	// ----------------------------------------------------------------------------------------------------- transpose2
+
+	// -------------------------------------------------------------------------------------------------- transpose28x8
 
 	// ----------------------------------------------------------------------------------------------------------- andb
 	template <>
@@ -2614,30 +2532,27 @@
 #endif
 
 	// -------------------------------------------------------------------------------------------------- lshift (mask)
-	// TODO: write the corresponding assembly code (because the intrinsic does not exist). => KSHIFTL
-	/*
 	template <>
 	inline msk lshift<8>(const msk v1, const uint32_t n) {
-		return ???;
+		return v1 << n;
 	}
 
 	template <>
 	inline msk lshift<16>(const msk v1, const uint32_t n) {
-		return ???;
+		return v1 << n;
 	}
 
 #if defined(__AVX512BW__)
 	template <>
 	inline msk lshift<32>(const msk v1, const uint32_t n) {
-		return ???;
+		return v1 << n;
 	}
 
 	template <>
 	inline msk lshift<64>(const msk v1, const uint32_t n) {
-		return ???;
+		return v1 << n;
 	}
 #endif
-	*/
 
 	// --------------------------------------------------------------------------------------------------------- rshift
 #if defined(__AVX512F__)
@@ -2680,30 +2595,27 @@
 #endif
 
 	// -------------------------------------------------------------------------------------------------- rshift (mask)
-	// TODO: write the corresponding assembly code (because the intrinsic does not exist). => KSHIFTR
-	/*
 	template <>
 	inline msk rshift<8>(const msk v1, const uint32_t n) {
-		return ???;
+		return v1 >> n;
 	}
 
 	template <>
 	inline msk rshift<16>(const msk v1, const uint32_t n) {
-		return ???;
+		return v1 >> n;
 	}
 
 #if defined(__AVX512BW__)
 	template <>
 	inline msk rshift<32>(const msk v1, const uint32_t n) {
-		return ???;
+		return v1 >> n;
 	}
 
 	template <>
 	inline msk rshift<64>(const msk v1, const uint32_t n) {
-		return ???;
+		return v1 >> n;
 	}
 #endif
-	*/
 
 	// --------------------------------------------------------------------------------------------------------- cmpneq
 	template <>
@@ -3297,6 +3209,11 @@
 	}
 
 	template <>
+	inline msk sign<int64_t>(const reg v1) {
+		return cmpgt<int64_t>(set0<int64_t>(), v1);
+	}
+
+	template <>
 	inline msk sign<int32_t>(const reg v1) {
 		return cmpgt<int32_t>(set0<int32_t>(), v1);
 	}
@@ -3500,6 +3417,12 @@
 	inline reg log<float>(const reg v) {
 		return _mm512_log_ps(v);
 	}
+#else
+	template <>
+	inline reg log<float>(const reg v) {
+		auto v_bis = v;
+		return log512_ps(v_bis);
+	}
 #endif
 #endif
 
@@ -3514,6 +3437,12 @@
 	template <>
 	inline reg exp<float>(const reg v) {
 		return _mm512_exp_ps(v);
+	}
+#else
+	template <>
+	inline reg exp<float>(const reg v) {
+		auto v_bis = v;
+		return exp512_ps(v_bis);
 	}
 #endif
 #endif
@@ -3530,6 +3459,12 @@
 	inline reg sin<float>(const reg v) {
 		return _mm512_sin_ps(v);
 	}
+#else
+	template <>
+	inline reg sin<float>(const reg v) {
+		auto v_bis = v;
+		return sin512_ps(v_bis);
+	}
 #endif
 #endif
 
@@ -3545,6 +3480,12 @@
 	inline reg cos<float>(const reg v) {
 		return _mm512_cos_ps(v);
 	}
+#else
+	template <>
+	inline reg cos<float>(const reg v) {
+		auto v_bis = v;
+		return cos512_ps(v_bis);
+	}
 #endif
 #endif
 
@@ -3559,6 +3500,11 @@
 	template <>
 	inline void sincos<float>(const reg x, reg &s, reg &c) {
 		s = _mm512_sincos_ps(&c, x);
+	}
+#else
+	template <>
+	inline void sincos<float>(const reg x, reg &s, reg &c) {
+		sincos512_ps(x, &s, &c);
 	}
 #endif
 #endif
@@ -3601,6 +3547,17 @@
 	template <>
 	inline reg fmsub<float>(const reg v1, const reg v2, const reg v3) {
 		return _mm512_fmsub_ps(v1, v2, v3);
+	}
+
+	// --------------------------------------------------------------------------------------------------------- fnmsub
+	template <>
+	inline reg fnmsub<double>(const reg v1, const reg v2, const reg v3) {
+		return _mm512_castpd_ps(_mm512_fnmsub_pd(_mm512_castps_pd(v1), _mm512_castps_pd(v2), _mm512_castps_pd(v3)));
+	}
+
+	template <>
+	inline reg fnmsub<float>(const reg v1, const reg v2, const reg v3) {
+		return _mm512_fnmsub_ps(v1, v2, v3);
 	}
 
 	// ----------------------------------------------------------------------------------------------------------- lrot
@@ -3803,6 +3760,11 @@
 	}
 
 	template <>
+	inline reg sat<int64_t>(const reg v1, int64_t min, int64_t max) {
+		return mipp::min<int64_t>(mipp::max<int64_t>(v1, set1<int64_t>(min)), set1<int64_t>(max));
+	}
+
+	template <>
 	inline reg sat<int32_t>(const reg v1, int32_t min, int32_t max) {
 		return mipp::min<int32_t>(mipp::max<int32_t>(v1, set1<int32_t>(min)), set1<int32_t>(max));
 	}
@@ -3881,6 +3843,35 @@
 #endif
 
 	// ----------------------------------------------------------------------------------------------------------- pack
+#ifdef __AVX512BW__
+	template <>
+	inline reg pack<int32_t,int16_t>(const reg v1, const reg v2) {
+		auto mask =_mm512_set_epi16(31, 30, 29, 28,
+		                            23, 22, 21, 20,
+		                            15, 14, 13, 12,
+		                             7,  6,  5,  4,
+		                            27, 26, 25, 24,
+		                            19, 18, 17, 16,
+		                            11, 10,  9,  8,
+		                             3,  2,  1,  0);
+		return _mm512_castsi512_ps(_mm512_permutexvar_epi16(mask, _mm512_packs_epi32(_mm512_castps_si512(v1),
+		                                                                             _mm512_castps_si512(v2))));
+	}
+
+	template <>
+	inline reg pack<int16_t,int8_t>(const reg v1, const reg v2) {
+		auto mask =_mm512_set_epi16(63, 62, 61, 60, 59, 58, 57, 56,
+		                            47, 46, 45, 44, 43, 42, 41, 40,
+		                            31, 30, 29, 28, 27, 26, 25, 24,
+		                            15, 14, 13, 12, 11, 10,  9,  8,
+		                            55, 54, 53, 52, 51, 50, 49, 48,
+		                            39, 38, 37, 36, 35, 34, 33, 32,
+		                            23, 22, 21, 20, 19, 18, 17, 16,
+		                             7,  6,  5,  4,  3,  2,  1,  0);
+		return _mm512_castsi512_ps(_mm512_permutexvar_epi8(mask, _mm512_packs_epi32(_mm512_castps_si512(v1),
+		                                                                            _mm512_castps_si512(v2))));
+	}
+#endif
 
 	// ---------------------------------------------------------------------------------------------------------- testz
 #if defined(__AVX512F__) || defined(__MIC__) || defined(__KNCNI__)
@@ -4072,7 +4063,7 @@
 			val = OP(val, _mm512_castsi512_ps(_mm512_shuffle_epi32(_mm512_castps_si512(val), _MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2))))); // KNCI compatible
 //			val = OP(val, _mm512_permutexvar_ps(_mm512_set_epi32(14,15,12,13,10,11, 8, 9, 6, 7, 4, 5, 2, 3,0,1), val)); // only AVX512F
 			val = OP(val, _mm512_castsi512_ps(_mm512_shuffle_epi32(_mm512_castps_si512(val), _MM_PERM_ENUM(_MM_SHUFFLE(2,3,0,1))))); // KNCI compatible
-			val = OP(val, _mm512_castsi512_ps(_mm512_shuffle_epi8(_mm256_castps_si256(val), mask_16))); // only AVX512BW
+			val = OP(val, _mm512_castsi512_ps(_mm512_shuffle_epi8(_mm512_castps_si512(val), mask_16))); // only AVX512BW
 			return val;
 		}
 	};
@@ -4093,7 +4084,7 @@
 			val = OP(val, Reg<int16_t>(_mm512_castsi512_ps(_mm512_shuffle_epi32(_mm512_castps_si512(val.r), _MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)))))); // KNCI compatible
 //			val = OP(val, Reg<int16_t>(_mm512_permutexvar_ps(_mm512_set_epi32(14,15,12,13,10,11, 8, 9, 6, 7, 4, 5, 2, 3,0,1), val.r))); // only AVX512F
 			val = OP(val, Reg<int16_t>(_mm512_castsi512_ps(_mm512_shuffle_epi32(_mm512_castps_si512(val.r), _MM_PERM_ENUM(_MM_SHUFFLE(2,3,0,1)))))); // KNCI compatible
-			val = OP(val, Reg<int16_t>(_mm512_castsi512_ps(_mm512_shuffle_epi8(_mm256_castps_si256(val.r), mask_16)))); // only AVX512BW
+			val = OP(val, Reg<int16_t>(_mm512_castsi512_ps(_mm512_shuffle_epi8(_mm512_castps_si512(val.r), mask_16)))); // only AVX512BW
 			return val;
 		}
 	};
@@ -4119,8 +4110,8 @@
 			val = OP(val, _mm512_castsi512_ps(_mm512_shuffle_epi32(_mm512_castps_si512(val), _MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2))))); // KNCI compatible
 //			val = OP(val, _mm512_permutexvar_ps(_mm512_set_epi32(14,15,12,13,10,11, 8, 9, 6, 7, 4, 5, 2, 3,0,1), val)); // only AVX512F
 			val = OP(val, _mm512_castsi512_ps(_mm512_shuffle_epi32(_mm512_castps_si512(val), _MM_PERM_ENUM(_MM_SHUFFLE(2,3,0,1))))); // KNCI compatible
-			val = OP(val, _mm512_castsi512_ps(_mm512_shuffle_epi8(_mm256_castps_si256(val), mask_16))); // only AVX512BW
-			val = OP(val, _mm512_castsi512_ps(_mm512_shuffle_epi8(_mm256_castps_si256(val), mask_8))); // only AVX512BW
+			val = OP(val, _mm512_castsi512_ps(_mm512_shuffle_epi8(_mm512_castps_si512(val), mask_16))); // only AVX512BW
+			val = OP(val, _mm512_castsi512_ps(_mm512_shuffle_epi8(_mm512_castps_si512(val), mask_8))); // only AVX512BW
 			return val;
 		}
 	};
@@ -4146,8 +4137,8 @@
 			val = OP(val, Reg<int8_t>(_mm512_castsi512_ps(_mm512_shuffle_epi32(_mm512_castps_si512(val.r), _MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)))))); // KNCI compatible
 //			val = OP(val, Reg<int8_t>(_mm512_permutexvar_ps(_mm512_set_epi32(14,15,12,13,10,11, 8, 9, 6, 7, 4, 5, 2, 3,0,1), val.r))); // only AVX512F
 			val = OP(val, Reg<int8_t>(_mm512_castsi512_ps(_mm512_shuffle_epi32(_mm512_castps_si512(val.r), _MM_PERM_ENUM(_MM_SHUFFLE(2,3,0,1)))))); // KNCI compatible
-			val = OP(val, Reg<int8_t>(_mm512_castsi512_ps(_mm512_shuffle_epi8(_mm256_castps_si256(val.r), mask_16)))); // only AVX512BW
-			val = OP(val, Reg<int8_t>(_mm512_castsi512_ps(_mm512_shuffle_epi8(_mm256_castps_si256(val.r), mask_8)))); // only AVX512BW
+			val = OP(val, Reg<int8_t>(_mm512_castsi512_ps(_mm512_shuffle_epi8(_mm512_castps_si512(val.r), mask_16)))); // only AVX512BW
+			val = OP(val, Reg<int8_t>(_mm512_castsi512_ps(_mm512_shuffle_epi8(_mm512_castps_si512(val.r), mask_8)))); // only AVX512BW
 			return val;
 		}
 	};

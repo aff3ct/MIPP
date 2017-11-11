@@ -39,7 +39,9 @@ SOFTWARE.
 #elif defined(__SSE__) || defined(__AVX__) || defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)
 // header for special functions: log, exp, sin, cos
 #if !defined(__INTEL_COMPILER) && !defined(__ICL) && !defined(__ICC)
-#if defined(__AVX__)
+#if defined(__AVX512F__)
+#include "math/avx512_mathfun.h"
+#elif defined(__AVX__)
 #include "math/avx_mathfun.h"
 #elif defined(__SSE__)
 #include "math/sse_mathfun.h"

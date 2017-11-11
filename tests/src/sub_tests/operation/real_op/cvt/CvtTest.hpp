@@ -43,6 +43,7 @@ class CvtTest : public CppUnit::TestFixture
 #endif
 #endif
 
+#if !defined(MIPP_AVX512) || (defined(MIPP_AVX512) && defined(__AVX512DQ__))
 #if !defined(MIPP_SSE) && !defined(MIPP_AVX)
 #ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_cvt_int64_double);
@@ -53,6 +54,7 @@ class CvtTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_reg_cvt_double_int64);
 #endif
 	CPPUNIT_TEST(test_Reg_cvt_double_int64);
+#endif
 #endif
 #endif
 

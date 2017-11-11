@@ -36,10 +36,13 @@ void ExpTest::test_reg_exp()
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
-			T res = std::exp(inputs1[i]);
-//			CPPUNIT_ASSERT_EQUAL(res, *((T*)&r2 +i));
-			T diff = std::abs(res - *((T*)&r2 +i));
-			CPPUNIT_ASSERT(diff < 0.001);
+			if (std::abs(inputs1[i] < 8))
+			{
+				T res = std::exp(inputs1[i]);
+//				CPPUNIT_ASSERT_EQUAL(res, *((T*)&r2 +i));
+				T diff = std::abs(res - *((T*)&r2 +i));
+				CPPUNIT_ASSERT(diff < 0.001);
+			}
 		}
 	}
 	catch(std::exception &e)
@@ -67,10 +70,13 @@ void ExpTest::test_Reg_exp()
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
-			T res = std::exp(inputs1[i]);
-//			CPPUNIT_ASSERT_EQUAL(res, r2[i]);
-			T diff = std::abs(res - r2[i]);
-			CPPUNIT_ASSERT(diff < 0.001);
+			if (std::abs(inputs1[i] < 8))
+			{
+				T res = std::exp(inputs1[i]);
+//				CPPUNIT_ASSERT_EQUAL(res, r2[i]);
+				T diff = std::abs(res - r2[i]);
+				CPPUNIT_ASSERT(diff < 0.001);
+			}
 		}
 	}
 	catch(std::exception &e)
@@ -106,15 +112,18 @@ void ExpTest::test_reg_maskz_exp()
 
 		for (auto i = 0; i < N; i++)
 		{
-			if (mask[i])
+			if (std::abs(inputs1[i] < 8))
 			{
-				T res = std::exp(inputs1[i]);
-//				CPPUNIT_ASSERT_EQUAL(res, *((T*)&r2 +i));
-				T diff = std::abs(res - *((T*)&r2 +i));
-				CPPUNIT_ASSERT(diff < 0.001);
+				if (mask[i])
+				{
+					T res = std::exp(inputs1[i]);
+//					CPPUNIT_ASSERT_EQUAL(res, *((T*)&r2 +i));
+					T diff = std::abs(res - *((T*)&r2 +i));
+					CPPUNIT_ASSERT(diff < 0.001);
+				}
+				else
+					CPPUNIT_ASSERT_EQUAL((T)0, *((T*)&r2 +i));
 			}
-			else
-				CPPUNIT_ASSERT_EQUAL((T)0, *((T*)&r2 +i));
 		}
 	}
 	catch(std::exception &e)
@@ -150,15 +159,18 @@ void ExpTest::test_Reg_maskz_exp()
 
 		for (auto i = 0; i < N; i++)
 		{
-			if (mask[i])
+			if (std::abs(inputs1[i] < 8))
 			{
-				T res = std::exp(inputs1[i]);
-//				CPPUNIT_ASSERT_EQUAL(res, r2[i]);
-				T diff = std::abs(res - r2[i]);
-				CPPUNIT_ASSERT(diff < 0.001);
+				if (mask[i])
+				{
+					T res = std::exp(inputs1[i]);
+//					CPPUNIT_ASSERT_EQUAL(res, r2[i]);
+					T diff = std::abs(res - r2[i]);
+					CPPUNIT_ASSERT(diff < 0.001);
+				}
+				else
+					CPPUNIT_ASSERT_EQUAL((T)0, r2[i]);
 			}
-			else
-				CPPUNIT_ASSERT_EQUAL((T)0, r2[i]);
 		}
 	}
 	catch(std::exception &e)
@@ -196,15 +208,18 @@ void ExpTest::test_reg_mask_exp()
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
-			if (mask[i])
+			if (std::abs(inputs1[i] < 8))
 			{
-				T res = std::exp(inputs1[i]);
-//				CPPUNIT_ASSERT_EQUAL(res, *((T*)&r3 +i));
-				T diff = std::abs(res - *((T*)&r3 +i));
-				CPPUNIT_ASSERT(diff < 0.001);
+				if (mask[i])
+				{
+					T res = std::exp(inputs1[i]);
+//					CPPUNIT_ASSERT_EQUAL(res, *((T*)&r3 +i));
+					T diff = std::abs(res - *((T*)&r3 +i));
+					CPPUNIT_ASSERT(diff < 0.001);
+				}
+				else
+					CPPUNIT_ASSERT_EQUAL(inputs2[i], *((T*)&r3 +i));
 			}
-			else
-				CPPUNIT_ASSERT_EQUAL(inputs2[i], *((T*)&r3 +i));
 		}
 	}
 	catch(std::exception &e)
@@ -242,15 +257,18 @@ void ExpTest::test_Reg_mask_exp()
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
-			if (mask[i])
+			if (std::abs(inputs1[i] < 8))
 			{
-				T res = std::exp(inputs1[i]);
-//				CPPUNIT_ASSERT_EQUAL(res, *((T*)&r3 +i));
-				T diff = std::abs(res - r3[i]);
-				CPPUNIT_ASSERT(diff < 0.001);
+				if (mask[i])
+				{
+					T res = std::exp(inputs1[i]);
+//					CPPUNIT_ASSERT_EQUAL(res, *((T*)&r3 +i));
+					T diff = std::abs(res - r3[i]);
+					CPPUNIT_ASSERT(diff < 0.001);
+				}
+				else
+					CPPUNIT_ASSERT_EQUAL(inputs2[i], *((T*)&r3 +i));
 			}
-			else
-				CPPUNIT_ASSERT_EQUAL(inputs2[i], *((T*)&r3 +i));
 		}
 	}
 	catch(std::exception &e)
