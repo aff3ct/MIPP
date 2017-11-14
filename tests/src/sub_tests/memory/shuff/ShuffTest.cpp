@@ -199,9 +199,13 @@ void ShuffTest::test_reg_shuff4()
 void ShuffTest::test_reg_shuff4_int8  () { test_reg_shuff4<int8_t >(); }
 void ShuffTest::test_reg_shuff4_int16 () { test_reg_shuff4<int16_t>(); }
 void ShuffTest::test_reg_shuff4_int32 () { test_reg_shuff4<int32_t>(); }
+#if !defined(MIPP_SSE) && !defined(MIPP_NEON)
 void ShuffTest::test_reg_shuff4_int64 () { test_reg_shuff4<int64_t>(); }
+#endif
 void ShuffTest::test_reg_shuff4_float () { test_reg_shuff4<float  >(); }
+#if !defined(MIPP_SSE) && !defined(MIPP_NEON)
 void ShuffTest::test_reg_shuff4_double() { test_reg_shuff4<double >(); }
+#endif
 
 template <typename T>
 void ShuffTest::test_Reg_shuff4()
@@ -237,6 +241,10 @@ void ShuffTest::test_Reg_shuff4()
 void ShuffTest::test_Reg_shuff4_int8  () { test_Reg_shuff4<int8_t >(); }
 void ShuffTest::test_Reg_shuff4_int16 () { test_Reg_shuff4<int16_t>(); }
 void ShuffTest::test_Reg_shuff4_int32 () { test_Reg_shuff4<int32_t>(); }
+#if !defined(MIPP_SSE) && !defined(MIPP_NEON)
 void ShuffTest::test_Reg_shuff4_int64 () { test_Reg_shuff4<int64_t>(); }
+#endif
 void ShuffTest::test_Reg_shuff4_float () { test_Reg_shuff4<float  >(); }
+#if !defined(MIPP_SSE) && !defined(MIPP_NEON)
 void ShuffTest::test_Reg_shuff4_double() { test_Reg_shuff4<double >(); }
+#endif

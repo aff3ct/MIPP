@@ -80,10 +80,12 @@ class ShuffTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_reg_shuff2_int64);
 #endif
 	CPPUNIT_TEST(test_Reg_shuff2_int64);
+#if !defined(MIPP_SSE) && !defined(MIPP_NEON)
 #ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_shuff4_int64);
 #endif
 	CPPUNIT_TEST(test_Reg_shuff4_int64);
+#endif
 #endif
 
 #ifndef MIPP_NO
@@ -95,10 +97,12 @@ class ShuffTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_reg_shuff2_double);
 #endif
 	CPPUNIT_TEST(test_Reg_shuff2_double);
+#if !defined(MIPP_SSE) && !defined(MIPP_NEON)
 #ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_shuff4_double);
 #endif
 	CPPUNIT_TEST(test_Reg_shuff4_double);
+#endif
 #endif
 #endif
 #endif
@@ -150,18 +154,26 @@ public:
 	void test_reg_shuff4_int8();
 	void test_reg_shuff4_int16();
 	void test_reg_shuff4_int32();
+#if !defined(MIPP_SSE) && !defined(MIPP_NEON)
 	void test_reg_shuff4_int64();
+#endif
 	void test_reg_shuff4_float();
+#if !defined(MIPP_SSE) && !defined(MIPP_NEON)
 	void test_reg_shuff4_double();
+#endif
 
 	template <typename T>
 	void test_Reg_shuff4();
 	void test_Reg_shuff4_int8();
 	void test_Reg_shuff4_int16();
 	void test_Reg_shuff4_int32();
+#if !defined(MIPP_SSE) && !defined(MIPP_NEON)
 	void test_Reg_shuff4_int64();
+#endif
 	void test_Reg_shuff4_float();
+#if !defined(MIPP_SSE) && !defined(MIPP_NEON)
 	void test_Reg_shuff4_double();
+#endif
 };
 
 #endif  // SUFFTEST_HPP_

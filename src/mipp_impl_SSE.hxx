@@ -794,6 +794,7 @@
 
 	// -------------------------------------------------------------------------------------------------- lshift (mask)
 #ifdef __SSE2__
+#ifndef __clang__
 	template <>
 	inline msk lshift<2>(const msk v1, const uint32_t n) {
 		return _mm_slli_si128(v1, n * 8);
@@ -813,6 +814,7 @@
 	inline msk lshift<16>(const msk v1, const uint32_t n) {
 		return _mm_slli_si128(v1, n * 1);
 	}
+#endif
 #endif
 
 	// --------------------------------------------------------------------------------------------------------- rshift
@@ -858,6 +860,7 @@
 
 	// -------------------------------------------------------------------------------------------------- rshift (mask)
 #ifdef __SSE2__
+#ifndef __clang__
 	template <>
 	inline msk rshift<2>(const msk v1, const uint32_t n) {
 		return _mm_srli_si128(v1, n * 8);
@@ -877,6 +880,7 @@
 	inline msk rshift<16>(const msk v1, const uint32_t n) {
 		return _mm_srli_si128(v1, n * 1);
 	}
+#endif
 #endif
 
 	// ---------------------------------------------------------------------------------------------------------- blend
