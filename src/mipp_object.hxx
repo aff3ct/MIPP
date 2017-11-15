@@ -192,7 +192,7 @@ public:
 #else
 	inline void        set0         ()                                           { r = 0;                                         }
 	inline void        set1         (const T val)                                { r = val;                                       }
-	inline void        set          (const T val[1])                             { r = vals[0];                                   }
+	inline void        set          (const T vals[1])                            { r = vals[0];                                   }
 	inline void        load         (const T* data)                              { r = data[0];                                   }
 	inline void        loadu        (const T* data)                              { r = data[0];                                   }
 	inline void        store        (T* data)                              const { data[0] = r;                                   }
