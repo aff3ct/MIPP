@@ -32,6 +32,8 @@ SOFTWARE.
 #ifndef MY_INTRINSICS_PLUS_PLUS_H_
 #define MY_INTRINSICS_PLUS_PLUS_H_
 
+#define MIPP
+
 #ifndef MIPP_NO_INTRINSICS
 #if defined(__ARM_NEON__) || defined(__ARM_NEON)
 #include <arm_neon.h>
