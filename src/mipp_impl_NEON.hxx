@@ -2787,26 +2787,26 @@
 
 #ifdef __aarch64__
 	template <>
-	inline int testz<int64_t>(const msk v1) {
+	inline int testz<2>(const msk v1) {
 		uint32x2_t v2 = vorr_u32(vget_low_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v1));
 		return !(vget_lane_u32(vpmax_u32(v2, v2), 0));
 	}
 #endif
 
 	template <>
-	inline int testz<int32_t>(const msk v1) {
+	inline int testz<4>(const msk v1) {
 		uint32x2_t v2 = vorr_u32(vget_low_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v1));
 		return !(vget_lane_u32(vpmax_u32(v2, v2), 0));
 	}
 
 	template <>
-	inline int testz<int16_t>(const msk v1) {
+	inline int testz<8>(const msk v1) {
 		uint32x2_t v2 = vorr_u32(vget_low_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v1));
 		return !(vget_lane_u32(vpmax_u32(v2, v2), 0));
 	}
 
 	template <>
-	inline int testz<int8_t>(const msk v1) {
+	inline int testz<16>(const msk v1) {
 		uint32x2_t v2 = vorr_u32(vget_low_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v1));
 		return !(vget_lane_u32(vpmax_u32(v2, v2), 0));
 	}
