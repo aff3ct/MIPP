@@ -33,8 +33,8 @@ public:
 	Reg(                            )                         {}
 	Reg(const reg r                 ) : r(r)                  {}
 	Reg(const T   val               ) : r(mipp::set1<T>(val)) {}
-	Reg(const T   vals[mipp::N<T>()]) : r(mipp::set <T>(vals)){}
-//	Reg(const T  *data              ) : r(mipp::load<T>(data)){}
+//	Reg(const T   vals[mipp::N<T>()]) : r(mipp::set <T>(vals)){}
+	Reg(const T  *data              ) : r(mipp::load<T>(data)){}
 
 	Reg(const std::initializer_list<T> &l)
 	{
