@@ -2732,6 +2732,32 @@
 		return mipp::reduction<int8_t, mipp::orb<int8_t>>::sapply(andvec) == 0;
 	}
 
+#ifdef __aarch64__
+	template <>
+	inline int testz<int64_t>(const reg v1) {
+		uint32x2_t v2 = vorr_u32(vget_low_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v1));
+		return !(vget_lane_u32(vpmax_u32(v2, v2), 0));
+	}
+#endif
+
+	template <>
+	inline int testz<int32_t>(const reg v1) {
+		uint32x2_t v2 = vorr_u32(vget_low_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v1));
+		return !(vget_lane_u32(vpmax_u32(v2, v2), 0));
+	}
+
+	template <>
+	inline int testz<int16_t>(const reg v1) {
+		uint32x2_t v2 = vorr_u32(vget_low_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v1));
+		return !(vget_lane_u32(vpmax_u32(v2, v2), 0));
+	}
+
+	template <>
+	inline int testz<int8_t>(const reg v1) {
+		uint32x2_t v2 = vorr_u32(vget_low_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v1));
+		return !(vget_lane_u32(vpmax_u32(v2, v2), 0));
+	}
+
 	// --------------------------------------------------------------------------------------------------- testz (mask)
 #ifdef __aarch64__
 	template <>
@@ -2758,7 +2784,32 @@
 		auto andvec = mipp::andb<16>(v1, v2);
 		return mipp::reduction<int8_t, mipp::orb<int8_t>>::sapply(mipp::toreg<16>(andvec)) == 0;
 	}
+
+#ifdef __aarch64__
+	template <>
+	inline int testz<int64_t>(const msk v1) {
+		uint32x2_t v2 = vorr_u32(vget_low_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v1));
+		return !(vget_lane_u32(vpmax_u32(v2, v2), 0));
+	}
 #endif
+
+	template <>
+	inline int testz<int32_t>(const msk v1) {
+		uint32x2_t v2 = vorr_u32(vget_low_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v1));
+		return !(vget_lane_u32(vpmax_u32(v2, v2), 0));
+	}
+
+	template <>
+	inline int testz<int16_t>(const msk v1) {
+		uint32x2_t v2 = vorr_u32(vget_low_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v1));
+		return !(vget_lane_u32(vpmax_u32(v2, v2), 0));
+	}
+
+	template <>
+	inline int testz<int8_t>(const msk v1) {
+		uint32x2_t v2 = vorr_u32(vget_low_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v1));
+		return !(vget_lane_u32(vpmax_u32(v2, v2), 0));
+	}
 
 	// ------------------------------------------------------------------------------------------------------ transpose
 	template <>
@@ -2833,3 +2884,4 @@
 	inline void transpose8x8<int8_t>(reg tab[8]) {
 		mipp::transpose<int16_t>(tab);
 	}
+#endif

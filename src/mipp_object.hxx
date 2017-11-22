@@ -189,6 +189,7 @@ public:
 	inline Reg<T>      sat          (T min, T max)                         const { return mipp::sat          <T>(r, min, max);    }
 	inline Reg<T>      round        ()                                     const { return mipp::round        <T>(r);              }
 	inline int         testz        (const Reg<T> v)                       const { return mipp::testz        <T>(r, v.r);         }
+	inline int         testz        ()                                     const { return mipp::testz        <T>(r);              }
 #else
 	inline void        set0         ()                                           { r = 0;                                         }
 	inline void        set1         (const T val)                                { r = val;                                       }
@@ -262,6 +263,7 @@ public:
 	inline Reg<T>      sat          (T min, T max)                         const { return std::min(std::max(r, min), max);        }
 	inline Reg<T>      round        ()                                     const { return std::round(r);                          }
 	inline int         testz        (const Reg<T> v)                       const { return mipp_scop::andb<T>(r, v.r) == 0 ? 1 : 0;}
+	inline int         testz        ()                                     const { return !r;                                     }
 #endif
 	inline Reg<T>      andb         (const Msk<N<T>()> m)                  const { return this->andb (m.template toReg<T>().r); }
 	inline Reg<T>      andnb        (const Msk<N<T>()> m)                  const { return this->andnb(m.template toReg<T>().r); }
@@ -448,6 +450,7 @@ public:
 	inline Msk<N> lshift(const uint32_t n) const { return mipp::lshift<N>(m, n);   }
 	inline Msk<N> rshift(const uint32_t n) const { return mipp::rshift<N>(m, n);   }
 	inline int    testz (const Msk<N>   v) const { return mipp::testz <N>(m, v.m); }
+	inline int    testz ()                 const { return mipp::testz <N>(m);      }
 #else
 	inline Msk<N> andb  (const Msk<N>   v) const { return mipp_scop::andb<msk>( m, v.m);                  }
 	inline Msk<N> andnb (const Msk<N>   v) const { return mipp_scop::andb<msk>(~m, v.m);                  }
@@ -457,6 +460,7 @@ public:
 	inline Msk<N> lshift(const uint32_t n) const { return mipp_scop::lshift<msk>(m, n * sizeof(msk) * 8); }
 	inline Msk<N> rshift(const uint32_t n) const { return mipp_scop::rshift<msk>(m, n * sizeof(msk) * 8); }
 	inline int    testz (const Msk<N>   v) const { return mipp_scop::andb  <msk>(m, v.m) == 0 ? 1 : 0;    }
+	inline int    testz ()                 const { return !m;                                             }
 #endif
 
 	template <typename T> inline Reg<T> andb  (const Reg<T> v)  const { return this->toReg<T>().andb (v); }
@@ -670,6 +674,8 @@ template <typename T> inline Reg<T>      sat          (const Reg<T> v, T min, T 
 template <typename T> inline Reg<T>      round        (const Reg<T> v)                                        { return v.round();                }
 template <typename T> inline int         testz        (const Reg<T> v1, const Reg<T> v2)                      { return v1.testz(v2);             }
 template <int      N> inline int         testz        (const Msk<N> v1, const Msk<N> v2)                      { return v1.testz(v2);             }
+template <typename T> inline int         testz        (const Reg<T> v1)                                       { return v1.testz();               }
+template <int      N> inline int         testz        (const Msk<N> v1)                                       { return v1.testz();               }
 template <typename T> inline     T       sum          (const Reg<T> v)                                        { return v.sum();                  }
 template <typename T> inline     T       hadd         (const Reg<T> v)                                        { return v.hadd();                 }
 template <typename T> inline     T       hmul         (const Reg<T> v)                                        { return v.hmul();                 }

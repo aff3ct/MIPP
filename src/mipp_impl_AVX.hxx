@@ -3004,6 +3004,36 @@
 		return _mm256_testz_si256(_mm256_castps_si256(v1), _mm256_castps_si256(v2));
 	}
 
+	template <>
+	inline int testz<double>(const reg v1) {
+		return testz<double>(v1, mipp::set1<int64_t>(-1));
+	}
+
+	template <>
+	inline int testz<float>(const reg v1) {
+		return testz<float>(v1, mipp::set1<int32_t>(-1));
+	}
+
+	template <>
+	inline int testz<int64_t>(const reg v1) {
+		return testz<int64_t>(v1, mipp::set1<int64_t>(-1));
+	}
+
+	template <>
+	inline int testz<int32_t>(const reg v1) {
+		return testz<int32_t>(v1, mipp::set1<int32_t>(-1));
+	}
+
+	template <>
+	inline int testz<int16_t>(const reg v1) {
+		return testz<int16_t>(v1, mipp::set1<int16_t>(-1));
+	}
+
+	template <>
+	inline int testz<int8_t>(const reg v1) {
+		return testz<int8_t>(v1, mipp::set1<int8_t>(-1));
+	}
+
 	// --------------------------------------------------------------------------------------------------- testz (mask)
 	template <>
 	inline int testz<4>(const msk v1, const msk v2) {
@@ -3023,6 +3053,26 @@
 	template <>
 	inline int testz<32>(const msk v1, const msk v2) {
 		return _mm256_testz_si256(v1, v2);
+	}
+
+	template <>
+	inline int testz<4>(const msk v1) {
+		return testz<4>(v1, _mm256_castps_si256(mipp::set1<int64_t>(-1))));
+	}
+
+	template <>
+	inline int testz<8>(const msk v1) {
+		return testz<8>(v1, _mm256_castps_si256(mipp::set1<int32_t>(-1)));
+	}
+
+	template <>
+	inline int testz<16>(const msk v1) {
+		return testz<16>(v1, _mm256_castps_si256(mipp::set1<int16_t>(-1)));
+	}
+
+	template <>
+	inline int testz<32>(const msk v1) {
+		return testz<32>(v1, _mm256_castps_si256(mipp::set1<int8_t>(-1)));
 	}
 
 	// ------------------------------------------------------------------------------------------------------ reduction

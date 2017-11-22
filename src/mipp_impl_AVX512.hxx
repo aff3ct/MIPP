@@ -3886,6 +3886,18 @@
 		auto msk = mipp::cmpneq<int32_t>(mipp::andb<int32_t>(v1, v2), mipp::set0<int32_t>());
 		return _mm512_kortestz(msk, mipp::set0<16>());
 	}
+
+	template <>
+	inline int testz<int64_t>(const reg v1) {
+		auto msk = mipp::cmpneq<int64_t>(v1, mipp::set0<int64_t>());
+		return _mm512_kortestz(msk, mipp::set0<8>());
+	}
+
+	template <>
+	inline int testz<int32_t>(const reg v1) {
+		auto msk = mipp::cmpneq<int32_t>(v1, mipp::set0<int32_t>());
+		return _mm512_kortestz(msk, mipp::set0<16>());
+	}
 #endif
 
 #if defined(__AVX512BW__)
@@ -3898,6 +3910,18 @@
 	template <>
 	inline int testz<int8_t>(const reg v1, const reg v2) {
 		auto msk = mipp::cmpneq<int8_t>(mipp::andb<int8_t>(v1, v2), mipp::set0<int8_t>());
+		return _mm512_kortestz(msk, mipp::set0<64>());
+	}
+
+	template <>
+	inline int testz<int16_t>(const reg v1) {
+		auto msk = mipp::cmpneq<int16_t>(v1, mipp::set0<int16_t>());
+		return _mm512_kortestz(msk, mipp::set0<32>());
+	}
+
+	template <>
+	inline int testz<int8_t>(const reg v1) {
+		auto msk = mipp::cmpneq<int8_t>(v1, mipp::set0<int8_t>());
 		return _mm512_kortestz(msk, mipp::set0<64>());
 	}
 #endif
@@ -3913,6 +3937,16 @@
 	inline int testz<16>(const msk v1, const msk v2) {
 		return _mm512_kortestz(mipp::andb<16>(v1, v2), mipp::set0<16>());
 	}
+
+	template <>
+	inline int testz<8>(const msk v1) {
+		return _mm512_kortestz(v1, mipp::set0<8>());
+	}
+
+	template <>
+	inline int testz<16>(const msk v1) {
+		return _mm512_kortestz(v1, mipp::set0<16>());
+	}
 #endif
 
 #if defined(__AVX512BW__)
@@ -3924,6 +3958,16 @@
 	template <>
 	inline int testz<64>(const msk v1, const msk v2) {
 		return _mm512_kortestz(mipp::andb<64>(v1, v2), mipp::set0<64>());
+	}
+
+	template <>
+	inline int testz<32>(const msk v1) {
+		return _mm512_kortestz(v1, mipp::set0<32>());
+	}
+
+	template <>
+	inline int testz<64>(const msk v1) {
+		return _mm512_kortestz(v1, mipp::set0<64>());
 	}
 #endif
 
