@@ -2959,7 +2959,7 @@
 
 	template <>
 	inline int testz<2>(const msk v1) {
-		return testz<2>(v1, _mm_castps_si128(mipp::set1<int64_t>(-1))));
+		return testz<2>(v1, _mm_castps_si128(mipp::set1<int64_t>(-1)));
 	}
 
 	template <>
