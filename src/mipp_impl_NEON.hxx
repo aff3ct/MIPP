@@ -157,7 +157,7 @@
 
 #ifdef __aarch64__
 	template <>
-	inline void storeu<int64_t>(int64_t *mem_addr, const reg v) {
+	inline void store<int64_t>(int64_t *mem_addr, const reg v) {
 		vst1q_s64(mem_addr, (int64x2_t)v);
 	}
 #endif
@@ -2788,8 +2788,9 @@
 #ifdef __aarch64__
 	template <>
 	inline int testz<2>(const msk v1) {
-		uint32x2_t v2 = vorr_u32(vget_low_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v1));
-		return !(vget_lane_u32(vpmax_u32(v2, v2), 0));
+		auto tmp = vorrq_u64((uint64x2_t)v1, vextq_u64((uint64x2_t)v1, (uint64x2_t)v1, 1));
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
+		return !(int32_t)(*((int64_t*)&tmp));
 	}
 #endif
 
