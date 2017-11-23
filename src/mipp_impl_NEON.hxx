@@ -2735,11 +2735,28 @@
 #ifdef __aarch64__
 	template <>
 	inline int testz<int64_t>(const reg v1) {
-		uint32x2_t v2 = vorr_u32(vget_low_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v1));
-		return !(vget_lane_u32(vpmax_u32(v2, v2), 0));
+		auto tmp = vorr_u64(vget_low_u64((uint64x2_t)v1), vget_high_u64((uint64x2_t)v1));
+		return !(int32_t)(vget_lane_u64(tmp, 0));
 	}
-#endif
 
+	template <>
+	inline int testz<int32_t>(const reg v1) {
+		auto tmp = vorr_u64(vget_low_u64((uint64x2_t)v1), vget_high_u64((uint64x2_t)v1));
+		return !(int32_t)(vget_lane_u64(tmp, 0));
+	}
+
+	template <>
+	inline int testz<int16_t>(const reg v1) {
+		auto tmp = vorr_u64(vget_low_u64((uint64x2_t)v1), vget_high_u64((uint64x2_t)v1));
+		return !(int32_t)(vget_lane_u64(tmp, 0));
+	}
+
+	template <>
+	inline int testz<int8_t>(const reg v1) {
+		auto tmp = vorr_u64(vget_low_u64((uint64x2_t)v1), vget_high_u64((uint64x2_t)v1));
+		return !(int32_t)(vget_lane_u64(tmp, 0));
+	}
+#else
 	template <>
 	inline int testz<int32_t>(const reg v1) {
 		uint32x2_t v2 = vorr_u32(vget_low_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v1));
@@ -2757,6 +2774,7 @@
 		uint32x2_t v2 = vorr_u32(vget_low_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v1));
 		return !(vget_lane_u32(vpmax_u32(v2, v2), 0));
 	}
+#endif
 
 	// --------------------------------------------------------------------------------------------------- testz (mask)
 #ifdef __aarch64__
@@ -2788,12 +2806,28 @@
 #ifdef __aarch64__
 	template <>
 	inline int testz<2>(const msk v1) {
-		auto tmp = vorrq_u64((uint64x2_t)v1, vextq_u64((uint64x2_t)v1, (uint64x2_t)v1, 1));
-#pragma GCC diagnostic ignored "-Wstrict-aliasing"
-		return !(int32_t)(*((int64_t*)&tmp));
+		auto tmp = vorr_u64(vget_low_u64((uint64x2_t)v1), vget_high_u64((uint64x2_t)v1));
+		return !(int32_t)(vget_lane_u64(tmp, 0));
 	}
-#endif
 
+	template <>
+	inline int testz<4>(const msk v1) {
+		auto tmp = vorr_u64(vget_low_u64((uint64x2_t)v1), vget_high_u64((uint64x2_t)v1));
+		return !(int32_t)(vget_lane_u64(tmp, 0));
+	}
+
+		template <>
+	inline int testz<8>(const msk v1) {
+		auto tmp = vorr_u64(vget_low_u64((uint64x2_t)v1), vget_high_u64((uint64x2_t)v1));
+		return !(int32_t)(vget_lane_u64(tmp, 0));
+	}
+
+		template <>
+	inline int testz<16>(const msk v1) {
+		auto tmp = vorr_u64(vget_low_u64((uint64x2_t)v1), vget_high_u64((uint64x2_t)v1));
+		return !((int32_t)vget_lane_u64(tmp, 0));
+	}
+#else
 	template <>
 	inline int testz<4>(const msk v1) {
 		uint32x2_t v2 = vorr_u32(vget_low_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v1));
@@ -2811,6 +2845,7 @@
 		uint32x2_t v2 = vorr_u32(vget_low_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v1));
 		return !(vget_lane_u32(vpmax_u32(v2, v2), 0));
 	}
+#endif
 
 	// ------------------------------------------------------------------------------------------------------ transpose
 	template <>
