@@ -3013,7 +3013,6 @@
 
 	template <>
 	inline int testz<8>(const msk v1) {
-		auto andvec = mipp::andb<8>(v1, v2);
 		return mipp::reduction<int16_t, mipp::orb<int16_t>>::sapply(mipp::toreg<8>(v1)) == 0;
 	}
 
