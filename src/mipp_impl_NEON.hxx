@@ -2736,25 +2736,25 @@
 	template <>
 	inline int testz<int64_t>(const reg v1) {
 		auto tmp = vorr_u64(vget_low_u64((uint64x2_t)v1), vget_high_u64((uint64x2_t)v1));
-		return !(int32_t)(vget_lane_u64(tmp, 0));
+		return !vget_lane_u64(tmp, 0);
 	}
 
 	template <>
 	inline int testz<int32_t>(const reg v1) {
 		auto tmp = vorr_u64(vget_low_u64((uint64x2_t)v1), vget_high_u64((uint64x2_t)v1));
-		return !(int32_t)(vget_lane_u64(tmp, 0));
+		return !vget_lane_u64(tmp, 0);
 	}
 
 	template <>
 	inline int testz<int16_t>(const reg v1) {
 		auto tmp = vorr_u64(vget_low_u64((uint64x2_t)v1), vget_high_u64((uint64x2_t)v1));
-		return !(int32_t)(vget_lane_u64(tmp, 0));
+		return !vget_lane_u64(tmp, 0);
 	}
 
 	template <>
 	inline int testz<int8_t>(const reg v1) {
 		auto tmp = vorr_u64(vget_low_u64((uint64x2_t)v1), vget_high_u64((uint64x2_t)v1));
-		return !(int32_t)(vget_lane_u64(tmp, 0));
+		return !vget_lane_u64(tmp, 0);
 	}
 #else
 	template <>
@@ -2807,25 +2807,25 @@
 	template <>
 	inline int testz<2>(const msk v1) {
 		auto tmp = vorr_u64(vget_low_u64((uint64x2_t)v1), vget_high_u64((uint64x2_t)v1));
-		return !(int32_t)(vget_lane_u64(tmp, 0));
+		return !vget_lane_u64(tmp, 0);
 	}
 
 	template <>
 	inline int testz<4>(const msk v1) {
 		auto tmp = vorr_u64(vget_low_u64((uint64x2_t)v1), vget_high_u64((uint64x2_t)v1));
-		return !(int32_t)(vget_lane_u64(tmp, 0));
+		return !vget_lane_u64(tmp, 0);
 	}
 
-		template <>
+	template <>
 	inline int testz<8>(const msk v1) {
 		auto tmp = vorr_u64(vget_low_u64((uint64x2_t)v1), vget_high_u64((uint64x2_t)v1));
-		return !(int32_t)(vget_lane_u64(tmp, 0));
+		return !vget_lane_u64(tmp, 0);
 	}
 
-		template <>
+	template <>
 	inline int testz<16>(const msk v1) {
 		auto tmp = vorr_u64(vget_low_u64((uint64x2_t)v1), vget_high_u64((uint64x2_t)v1));
-		return !((int32_t)vget_lane_u64(tmp, 0));
+		return !vget_lane_u64(tmp, 0);
 	}
 #else
 	template <>
