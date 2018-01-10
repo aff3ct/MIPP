@@ -102,14 +102,14 @@ typedef union imm_xmm_union {
 } imm_xmm_union;
 
 #define COPY_IMM_TO_XMM(imm_, xmm0_, xmm1_) {    \
-    imm_xmm_union u __attribute__((aligned(32)));  \
+    ALIGN32_BEG imm_xmm_union u ALIGN32_END;  \
     u.imm = imm_;				   \
     xmm0_ = u.xmm[0];                            \
     xmm1_ = u.xmm[1];                            \
 }
 
 #define COPY_XMM_TO_IMM(xmm0_, xmm1_, imm_) {                       \
-    imm_xmm_union u __attribute__((aligned(32))); \
+    ALIGN32_BEG imm_xmm_union u ALIGN32_END; \
     u.xmm[0]=xmm0_; u.xmm[1]=xmm1_; imm_ = u.imm; \
   }
 
