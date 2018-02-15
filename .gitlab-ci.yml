@@ -28,16 +28,16 @@ build-linux-gcc:
    - linux
   cache:
     paths:
-      - ./build_gcc_nointr/
-      - ./build_gcc_sse2/
-      - ./build_gcc_sse3/
-      - ./build_gcc_ssse3/
-      - ./build_gcc_sse4_1/
-      - ./build_gcc_sse4_2/
-      - ./build_gcc_avx/
-      - ./build_gcc_avx2/
-      - ./build_gcc_avx2_fma/
-      - ./build_gcc_avx512f/
+      - ./tests/build_gcc_nointr/
+      - ./tests/build_gcc_sse2/
+      - ./tests/build_gcc_sse3/
+      - ./tests/build_gcc_ssse3/
+      - ./tests/build_gcc_sse4_1/
+      - ./tests/build_gcc_sse4_2/
+      - ./tests/build_gcc_avx/
+      - ./tests/build_gcc_avx2/
+      - ./tests/build_gcc_avx2_fma/
+      - ./tests/build_gcc_avx512f/
   script:
     - ./ci/build-linux-gcc.sh
 
@@ -47,35 +47,17 @@ build-linux-clang:
    - linux
   cache:
     paths:
-      - ./build_clang_nointr/
-      - ./build_clang_sse2/
-      - ./build_clang_sse3/
-      - ./build_clang_ssse3/
-      - ./build_clang_sse4_1/
-      - ./build_clang_sse4_2/
-      - ./build_clang_avx/
-      - ./build_clang_avx2/
-      - ./build_clang_avx2_fma/
+      - ./tests/build_clang_nointr/
+      - ./tests/build_clang_sse2/
+      - ./tests/build_clang_sse3/
+      - ./tests/build_clang_ssse3/
+      - ./tests/build_clang_sse4_1/
+      - ./tests/build_clang_sse4_2/
+      - ./tests/build_clang_avx/
+      - ./tests/build_clang_avx2/
+      - ./tests/build_clang_avx2_fma/
   script:
     - ./ci/build-linux-clang.sh
-
-build-linux-gcc-4.8:
-  stage: build
-  tags:
-   - linux
-  cache:
-    paths:
-      - ./build_gcc-4.8_nointr/
-      - ./build_gcc-4.8_sse2/
-      - ./build_gcc-4.8_sse3/
-      - ./build_gcc-4.8_ssse3/
-      - ./build_gcc-4.8_sse4_1/
-      - ./build_gcc-4.8_sse4_2/
-      - ./build_gcc-4.8_avx/
-      - ./build_gcc-4.8_avx2/
-      - ./build_gcc-4.8_avx2_fma/
-  script:
-    - ./ci/build-linux-gcc-4.8.sh
 
 build-linux-icpc:
   stage: build
@@ -83,16 +65,16 @@ build-linux-icpc:
    - linux
   cache:
     paths:
-      - ./build_icpc_nointr/
-      - ./build_icpc_sse2/
-      - ./build_icpc_sse3/
-      - ./build_icpc_ssse3/
-      - ./build_icpc_sse4_1/
-      - ./build_icpc_sse4_2/
-      - ./build_icpc_avx/
-      - ./build_icpc_avx2/
-      - ./build_icpc_avx2_fma/
-      - ./build_icpc_avx512f/
+      - ./tests/build_icpc_nointr/
+      - ./tests/build_icpc_sse2/
+      - ./tests/build_icpc_sse3/
+      - ./tests/build_icpc_ssse3/
+      - ./tests/build_icpc_sse4_1/
+      - ./tests/build_icpc_sse4_2/
+      - ./tests/build_icpc_avx/
+      - ./tests/build_icpc_avx2/
+      - ./tests/build_icpc_avx2_fma/
+      - ./tests/build_icpc_avx512f/
   script:
     - ./ci/build-linux-icpc.sh
 
@@ -102,12 +84,11 @@ test-linux-unit-nointr:
     - linux
   cache:
     paths:
-      - ./build_gcc_nointr/
-      - ./build_gcc-4.8_nointr/
-      - ./build_clang_nointr/
-      - ./build_icpc_nointr/
+      - ./tests/build_gcc_nointr/
+      - ./tests/build_clang_nointr/
+      - ./tests/build_icpc_nointr/
   script:
-    - ./ci/test-linux-unit.sh build_gcc_nointr build_gcc-4.8_nointr build_clang_nointr build_icpc_nointr
+    - ./ci/test-linux-unit.sh build_gcc_nointr build_clang_nointr build_icpc_nointr
 
 test-linux-unit-sse2:
   stage: test
@@ -115,12 +96,11 @@ test-linux-unit-sse2:
     - linux
   cache:
     paths:
-      - ./build_gcc_sse2/
-      - ./build_gcc-4.8_sse2/
-      - ./build_clang_sse2/
-      - ./build_icpc_sse2/
+      - ./tests/build_gcc_sse2/
+      - ./tests/build_clang_sse2/
+      - ./tests/build_icpc_sse2/
   script:
-    - ./ci/test-linux-unit.sh build_gcc_sse2 build_gcc-4.8_sse2 build_clang_sse2 build_icpc_sse2
+    - ./ci/test-linux-unit.sh build_gcc_sse2 build_clang_sse2 build_icpc_sse2
 
 test-linux-unit-sse3:
   stage: test
@@ -128,12 +108,11 @@ test-linux-unit-sse3:
     - linux
   cache:
     paths:
-      - ./build_gcc_sse3/
-      - ./build_gcc-4.8_sse3/
-      - ./build_clang_sse3/
-      - ./build_icpc_sse3/
+      - ./tests/build_gcc_sse3/
+      - ./tests/build_clang_sse3/
+      - ./tests/build_icpc_sse3/
   script:
-    - ./ci/test-linux-unit.sh build_gcc_sse3 build_gcc-4.8_sse3 build_clang_sse3 build_icpc_sse3
+    - ./ci/test-linux-unit.sh build_gcc_sse3 build_clang_sse3 build_icpc_sse3
 
 test-linux-unit-ssse3:
   stage: test
@@ -141,12 +120,11 @@ test-linux-unit-ssse3:
     - linux
   cache:
     paths:
-      - ./build_gcc_ssse3/
-      - ./build_gcc-4.8_ssse3/
-      - ./build_clang_ssse3/
-      - ./build_icpc_ssse3/
+      - ./tests/build_gcc_ssse3/
+      - ./tests/build_clang_ssse3/
+      - ./tests/build_icpc_ssse3/
   script:
-    - ./ci/test-linux-unit.sh build_gcc_ssse3 build_gcc-4.8_ssse3 build_clang_ssse3 build_icpc_ssse3
+    - ./ci/test-linux-unit.sh build_gcc_ssse3 build_clang_ssse3 build_icpc_ssse3
 
 test-linux-unit-sse4_1:
   stage: test
@@ -154,12 +132,11 @@ test-linux-unit-sse4_1:
     - linux
   cache:
     paths:
-      - ./build_gcc_sse4_1/
-      - ./build_gcc-4.8_sse4_1/
-      - ./build_clang_sse4_1/
-      - ./build_icpc_sse4_1/
+      - ./tests/build_gcc_sse4_1/
+      - ./tests/build_clang_sse4_1/
+      - ./tests/build_icpc_sse4_1/
   script:
-    - ./ci/test-linux-unit.sh build_gcc_sse4_1 build_gcc-4.8_sse4_1 build_clang_sse4_1 build_icpc_sse4_1
+    - ./ci/test-linux-unit.sh build_gcc_sse4_1 build_clang_sse4_1 build_icpc_sse4_1
 
 test-linux-unit-sse4_2:
   stage: test
@@ -167,12 +144,11 @@ test-linux-unit-sse4_2:
     - linux
   cache:
     paths:
-      - ./build_gcc_sse4_2/
-      - ./build_gcc-4.8_sse4_2/
-      - ./build_clang_sse4_2/
-      - ./build_icpc_sse4_2/
+      - ./tests/build_gcc_sse4_2/
+      - ./tests/build_clang_sse4_2/
+      - ./tests/build_icpc_sse4_2/
   script:
-    - ./ci/test-linux-unit.sh build_gcc_sse4_2 build_gcc-4.8_sse4_2 build_clang_sse4_2 build_icpc_sse4_2
+    - ./ci/test-linux-unit.sh build_gcc_sse4_2 build_clang_sse4_2 build_icpc_sse4_2
 
 # test-linux-unit-avx:
 #   stage: test
@@ -180,12 +156,11 @@ test-linux-unit-sse4_2:
 #     - linux
 #   cache:
 #     paths:
-#       - ./build_gcc_avx/
-#       - ./build_gcc-4.8_avx/
-#       - ./build_clang_avx/
-#       - ./build_icpc_avx/
+#       - ./tests/build_gcc_avx/
+#       - ./tests/build_clang_avx/
+#       - ./tests/build_icpc_avx/
 #   script:
-#     - ./ci/test-linux-unit.sh build_gcc_avx build_gcc-4.8_avx build_clang_avx build_icpc_avx
+#     - ./ci/test-linux-unit.sh build_gcc_avx build_clang_avx build_icpc_avx
 
 # test-linux-unit-avx2:
 #   stage: test
@@ -193,12 +168,11 @@ test-linux-unit-sse4_2:
 #     - linux
 #   cache:
 #     paths:
-#       - ./build_gcc_avx2/
-#       - ./build_gcc-4.8_avx2/
-#       - ./build_clang_avx2/
-#       - ./build_icpc_avx2/
+#       - ./tests/build_gcc_avx2/
+#       - ./tests/build_clang_avx2/
+#       - ./tests/build_icpc_avx2/
 #   script:
-#     - ./ci/test-linux-unit.sh build_gcc_avx2 build_gcc-4.8_avx2 build_clang_avx2 build_icpc_avx2
+#     - ./ci/test-linux-unit.sh build_gcc_avx2 build_clang_avx2 build_icpc_avx2
 
 # test-linux-unit-avx2_fma:
 #   stage: test
@@ -206,9 +180,8 @@ test-linux-unit-sse4_2:
 #     - linux
 #   cache:
 #     paths:
-#       - ./build_gcc_avx2_fma/
-#       - ./build_gcc-4.8_avx2_fma/
-#       - ./build_clang_avx2_fma/
-#       - ./build_icpc_avx2_fma/
+#       - ./tests/build_gcc_avx2_fma/
+#       - ./tests/build_clang_avx2_fma/
+#       - ./tests/build_icpc_avx2_fma/
 #   script:
-#     - ./ci/test-linux-unit.sh build_gcc_avx2_fma build_gcc-4.8_avx2_fma build_clang_avx2_fma build_icpc_avx2_fma
+#     - ./ci/test-linux-unit.sh build_gcc_avx2_fma build_clang_avx2_fma build_icpc_avx2_fma
