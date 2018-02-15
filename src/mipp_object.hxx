@@ -66,9 +66,9 @@ public:
 	static inline Reg<T> cmask2(const uint32_t mask[nElReg<T>()/2]) { return mipp::cmask2<T>(mask); }
 	static inline Reg<T> cmask4(const uint32_t mask[nElReg<T>()/4]) { return mipp::cmask4<T>(mask); }
 #else
-	static inline Reg<T> cmask (const uint32_t mask[nElReg<T>()  ]) { return Reg<T>((T)0);          }
-	static inline Reg<T> cmask2(const uint32_t mask[nElReg<T>()/2]) { return Reg<T>((T)0);          }
-	static inline Reg<T> cmask4(const uint32_t mask[nElReg<T>()/4]) { return Reg<T>((T)0);          }
+	static inline Reg<T> cmask (const uint32_t mask[1]) { return Reg<T>((T)0);          }
+	static inline Reg<T> cmask2(const uint32_t mask[1]) { return Reg<T>((T)0);          }
+	static inline Reg<T> cmask4(const uint32_t mask[1]) { return Reg<T>((T)0);          }
 #endif
 
 	static inline void transpose(Reg<T> regs[nElReg<T>()])
@@ -538,7 +538,7 @@ public:
 };
 
 template <typename T>
-class Regx2 
+class Regx2
 {
 public:
 	Reg<T> val[2];
@@ -688,12 +688,12 @@ inline Reg<T> toReg(const Msk<N<T>()> m)
 	return m.template toReg<T>();
 }
 
-template <typename T1, typename T2> 
+template <typename T1, typename T2>
 inline Reg<T2> cvt(const Reg<T1> v) {
 	return v.template cvt<T2>();
 }
 
-template <typename T1, typename T2> 
+template <typename T1, typename T2>
 inline Reg<T2> cvt(const Reg_2<T1> v) {
 	return v.template cvt<T2>();
 }

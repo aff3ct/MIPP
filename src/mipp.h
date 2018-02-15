@@ -253,7 +253,7 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	using msk   = __m256i;
 	using reg   = __m256;
 	using reg_2 = __m128; // half a full register
-	
+
 	template <int N>
 	inline reg toreg(const msk m) {
 		return _mm256_castsi256_ps(m);
@@ -423,7 +423,7 @@ constexpr int32_t nElmtsPerRegister()
 
 template <typename T>
 constexpr int32_t nElReg()
-{ 
+{
 #ifdef MIPP_NO_INTRINSICS
 	return 1;
 #else
@@ -612,9 +612,15 @@ template <typename T> inline reg   set0         ()                              
 template <int      N> inline msk   set0         ()                                { errorMessage<N>("set0");          exit(-1); }
 template <typename T> inline reg_2 low          (const reg)                       { errorMessage<T>("low");           exit(-1); }
 template <typename T> inline reg_2 high         (const reg)                       { errorMessage<T>("high");          exit(-1); }
+#ifdef MIPP_NO_INTRINSICS // tricks to avoid compiling errors with Clang...
+template <typename T> inline reg   cmask        (const uint32_t[1])               { errorMessage<T>("cmask");         exit(-1); }
+template <typename T> inline reg   cmask2       (const uint32_t[1])               { errorMessage<T>("cmask2");        exit(-1); }
+template <typename T> inline reg   cmask4       (const uint32_t[1])               { errorMessage<T>("cmask4");        exit(-1); }
+#else
 template <typename T> inline reg   cmask        (const uint32_t[nElReg<T>()])     { errorMessage<T>("cmask");         exit(-1); }
 template <typename T> inline reg   cmask2       (const uint32_t[nElReg<T>()/2])   { errorMessage<T>("cmask2");        exit(-1); }
 template <typename T> inline reg   cmask4       (const uint32_t[nElReg<T>()/4])   { errorMessage<T>("cmask4");        exit(-1); }
+#endif
 template <typename T> inline reg   shuff        (const reg, const reg)            { errorMessage<T>("shuff");         exit(-1); }
 template <typename T> inline reg   shuff2       (const reg, const reg)            { errorMessage<T>("shuff2");        exit(-1); }
 template <typename T> inline reg   shuff4       (const reg, const reg)            { errorMessage<T>("shuff4");        exit(-1); }
@@ -692,13 +698,13 @@ template <int      N> inline int   testz        (const msk, const msk)          
 template <typename T> inline int   testz        (const reg)                       { errorMessage<T>("testz");         exit(-1); }
 template <int      N> inline int   testz        (const msk)                       { errorMessage<N>("testz");         exit(-1); }
 
-template <typename T1, typename T2> 
+template <typename T1, typename T2>
 inline reg cvt(const reg) {
 	errorMessage<T1,T2>("cvt");
-	exit(-1); 
+	exit(-1);
 }
 
-template <typename T1, typename T2> 
+template <typename T1, typename T2>
 inline reg cvt(const reg_2) {
 	errorMessage<T1,T2>("cvt");
 	exit(-1);
@@ -707,7 +713,7 @@ inline reg cvt(const reg_2) {
 template <typename T1, typename T2>
 inline reg pack(const reg, const reg) {
 	errorMessage<T1,T2>("pack");
-	exit(-1); 
+	exit(-1);
 }
 
 // ------------------------------------------------------------------------------------------------------------ aliases
@@ -950,7 +956,7 @@ struct _reduction
 {
 	static reg apply(const reg) {
 		errorMessage<T>("_reduction::apply");
-		exit(-1); 
+		exit(-1);
 	}
 };
 
@@ -970,7 +976,7 @@ struct _Reduction
 template <typename T, red_op<T> OP>
 struct reduction
 {
-	static reg apply(const reg r) 
+	static reg apply(const reg r)
 	{
 		return _reduction<T,OP>::apply(r);
 	}
@@ -1019,7 +1025,7 @@ struct reduction
 template <typename T, Red_op<T> OP>
 struct Reduction
 {
-	static Reg<T> apply(const Reg<T> r) 
+	static Reg<T> apply(const Reg<T> r)
 	{
 		return _Reduction<T,OP>::apply(r);
 	}
@@ -1031,7 +1037,7 @@ struct Reduction
 	}
 
 	template <ld_op<T> LD = mipp::load<T>>
-	static T apply(const mipp::vector<T> &data) 
+	static T apply(const mipp::vector<T> &data)
 	{
 		return Reduction<T,OP>::template apply<LD>(data.data(), data.size());
 	}
