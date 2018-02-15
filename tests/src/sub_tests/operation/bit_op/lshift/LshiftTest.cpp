@@ -9,12 +9,12 @@
 // Registers the fixture into the 'registry'
 CPPUNIT_TEST_SUITE_REGISTRATION(LshiftTest);
 
-void 
+void
 LshiftTest::setUp()
 {
 }
 
-void 
+void
 LshiftTest::tearDown()
 {
 }
@@ -184,14 +184,9 @@ struct Msk_lshift
 				for (auto i = 0; i < N - n; i++)
 					inputs2[i +n] = inputs1[i];
 
-				mipp::reg r = mipp::toreg<N>(m2.m);
-
 				for (auto i = 0; i < N; i++)
 				{
-					if (inputs2[i])
-						CPPUNIT_ASSERT(*((T*)&r +i) != (T)0);
-					else
-						CPPUNIT_ASSERT_EQUAL((T)0, *((T*)&r +i));
+					CPPUNIT_ASSERT_EQUAL(inputs2[i], m2[i]);
 				}
 			}
 		}

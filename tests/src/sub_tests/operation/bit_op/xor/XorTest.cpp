@@ -9,12 +9,12 @@
 // Registers the fixture into the 'registry'
 CPPUNIT_TEST_SUITE_REGISTRATION(XorTest);
 
-void 
+void
 XorTest::setUp()
 {
 }
 
-void 
+void
 XorTest::tearDown()
 {
 }
@@ -161,16 +161,10 @@ void XorTest::test_Msk_xor()
 			mipp::Msk<N> m2 = inputs2;
 			mipp::Msk<N> m3 = m1 ^ m2;
 
-			mipp::reg r = mipp::toreg<N>(m3.m);
-
 			for (auto i = 0; i < N; i++)
 			{
 				bool res = inputs1[i] ^ inputs2[i];
-
-				if (res)
-					CPPUNIT_ASSERT(*((T*)&r +i) != (T)0);
-				else
-					CPPUNIT_ASSERT_EQUAL((T)res, *((T*)&r +i));
+				CPPUNIT_ASSERT_EQUAL(res, m3[i]);
 			}
 		}
 	}

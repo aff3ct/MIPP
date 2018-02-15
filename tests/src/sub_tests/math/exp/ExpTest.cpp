@@ -10,12 +10,12 @@
 // Registers the fixture into the 'registry'
 CPPUNIT_TEST_SUITE_REGISTRATION(ExpTest);
 
-void 
+void
 ExpTest::setUp()
 {
 }
 
-void 
+void
 ExpTest::tearDown()
 {
 }
@@ -36,7 +36,7 @@ void ExpTest::test_reg_exp()
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
-			if (std::abs(inputs1[i] < 8))
+			if (inputs1[i] < 8)
 			{
 				T res = std::exp(inputs1[i]);
 //				CPPUNIT_ASSERT_EQUAL(res, *((T*)&r2 +i));
@@ -70,7 +70,7 @@ void ExpTest::test_Reg_exp()
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
-			if (std::abs(inputs1[i] < 8))
+			if (inputs1[i] < 8)
 			{
 				T res = std::exp(inputs1[i]);
 //				CPPUNIT_ASSERT_EQUAL(res, r2[i]);
@@ -112,7 +112,7 @@ void ExpTest::test_reg_maskz_exp()
 
 		for (auto i = 0; i < N; i++)
 		{
-			if (std::abs(inputs1[i] < 8))
+			if (inputs1[i] < 8)
 			{
 				if (mask[i])
 				{
@@ -159,7 +159,7 @@ void ExpTest::test_Reg_maskz_exp()
 
 		for (auto i = 0; i < N; i++)
 		{
-			if (std::abs(inputs1[i] < 8))
+			if (inputs1[i] < 8)
 			{
 				if (mask[i])
 				{
@@ -208,7 +208,7 @@ void ExpTest::test_reg_mask_exp()
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
-			if (std::abs(inputs1[i] < 8))
+			if (inputs1[i] < 8)
 			{
 				if (mask[i])
 				{
@@ -257,7 +257,7 @@ void ExpTest::test_Reg_mask_exp()
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
-			if (std::abs(inputs1[i] < 8))
+			if (inputs1[i] < 8)
 			{
 				if (mask[i])
 				{
