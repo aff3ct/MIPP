@@ -1,0 +1,30 @@
+#!/bin/bash
+set -x
+
+THREADS=$(grep -c ^processor /proc/cpuinfo)
+
+function compile {
+	build=$1
+	mkdir $build
+	cd $build
+	cmake .. -G"Unix Makefiles" -DCMAKE_CXX_COMPILER=icpc -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-Wall -funroll-loops -finline-functions -std=c++11 $2"
+	rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
+	make -j $THREADS
+	rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
+	cd ..
+}
+
+source /opt/intel/vars-intel.sh
+cd tests
+
+build_root=build_icpc
+compile "${build_root}_nointr"   "-DMIPP_NO_INTRINSICS"
+compile "${build_root}_sse2"     "-msse2"
+compile "${build_root}_sse3"     "-msse3"
+compile "${build_root}_ssse3"    "-mssse3"
+compile "${build_root}_sse4_1"   "-msse4.1"
+compile "${build_root}_sse4_2"   "-msse4.2"
+compile "${build_root}_avx"      "-mavx"
+compile "${build_root}_avx2"     "-mavx2"
+compile "${build_root}_avx2_fma" "-mavx2 -mfma"
+compile "${build_root}_avx512f"  "-mavx512f"
