@@ -13,7 +13,7 @@ class RshiftTest : public CppUnit::TestFixture
 	CPPUNIT_TEST(test_reg_rshift_int8);
 #endif
 	CPPUNIT_TEST(test_Reg_rshift_int8);
-#if !defined(MIPP_AVX)
+#if !defined(MIPP_AVX) && !defined(__clang__)
 #ifndef MIPP_NO
 	CPPUNIT_TEST(test_msk_rshift_int8);
 #endif
