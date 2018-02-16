@@ -16,7 +16,7 @@ function compile {
 
 cd tests
 
-build_root=build_clang_x86
+build_root=build_linux_clang_x86
 compile "${build_root}_nointr"   "-DMIPP_NO_INTRINSICS"
 compile "${build_root}_sse2"     "-msse2"
 compile "${build_root}_sse3"     "-msse3"
