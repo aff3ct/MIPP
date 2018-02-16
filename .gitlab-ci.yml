@@ -13,10 +13,10 @@ before_script:
 analysis-cppcheck:
   stage: analysis
   artifacts:
-     name: analysis-cppcheck-logs
-     when: always
-     paths:
-       - cppcheck/
+    name: analysis-cppcheck-logs
+    when: always
+    paths:
+      - cppcheck/
   tags:
     - cppcheck
   script:
@@ -25,68 +25,72 @@ analysis-cppcheck:
 build-linux-gcc:
   stage: build
   tags:
-   - linux
-  cache:
+    - linux
+  artifacts:
+    untracked: true
     paths:
-      - ./tests/build_gcc_nointr/
-      - ./tests/build_gcc_sse2/
-      - ./tests/build_gcc_sse3/
-      - ./tests/build_gcc_ssse3/
-      - ./tests/build_gcc_sse4_1/
-      - ./tests/build_gcc_sse4_2/
-      - ./tests/build_gcc_avx/
-      - ./tests/build_gcc_avx2/
-      - ./tests/build_gcc_avx2_fma/
-      - ./tests/build_gcc_avx512f/
+      - ./tests/build_gcc_nointr/bin/
+      - ./tests/build_gcc_sse2/bin/
+      - ./tests/build_gcc_sse3/bin/
+      - ./tests/build_gcc_ssse3/bin/
+      - ./tests/build_gcc_sse4_1/bin/
+      - ./tests/build_gcc_sse4_2/bin/
+      - ./tests/build_gcc_avx/bin/
+      - ./tests/build_gcc_avx2/bin/
+      - ./tests/build_gcc_avx2_fma/bin/
+      - ./tests/build_gcc_avx512f/bin/
   script:
     - ./ci/build-linux-gcc.sh
 
 build-linux-clang:
   stage: build
   tags:
-   - linux
-  cache:
+    - linux
+  artifacts:
+    untracked: true
     paths:
-      - ./tests/build_clang_nointr/
-      - ./tests/build_clang_sse2/
-      - ./tests/build_clang_sse3/
-      - ./tests/build_clang_ssse3/
-      - ./tests/build_clang_sse4_1/
-      - ./tests/build_clang_sse4_2/
-      - ./tests/build_clang_avx/
-      - ./tests/build_clang_avx2/
-      - ./tests/build_clang_avx2_fma/
+      - ./tests/build_clang_nointr/bin/
+      - ./tests/build_clang_sse2/bin/
+      - ./tests/build_clang_sse3/bin/
+      - ./tests/build_clang_ssse3/bin/
+      - ./tests/build_clang_sse4_1/bin/
+      - ./tests/build_clang_sse4_2/bin/
+      - ./tests/build_clang_avx/bin/
+      - ./tests/build_clang_avx2/bin/
+      - ./tests/build_clang_avx2_fma/bin/
   script:
     - ./ci/build-linux-clang.sh
 
 build-linux-icpc:
   stage: build
   tags:
-   - linux
-  cache:
+    - linux
+  artifacts:
+    untracked: true
     paths:
-      - ./tests/build_icpc_nointr/
-      - ./tests/build_icpc_sse2/
-      - ./tests/build_icpc_sse3/
-      - ./tests/build_icpc_ssse3/
-      - ./tests/build_icpc_sse4_1/
-      - ./tests/build_icpc_sse4_2/
-      - ./tests/build_icpc_avx/
-      - ./tests/build_icpc_avx2/
-      - ./tests/build_icpc_avx2_fma/
-      - ./tests/build_icpc_avx512f/
+      - ./tests/build_icpc_nointr/bin/
+      - ./tests/build_icpc_sse2/bin/
+      - ./tests/build_icpc_sse3/bin/
+      - ./tests/build_icpc_ssse3/bin/
+      - ./tests/build_icpc_sse4_1/bin/
+      - ./tests/build_icpc_sse4_2/bin/
+      - ./tests/build_icpc_avx/bin/
+      - ./tests/build_icpc_avx2/bin/
+      - ./tests/build_icpc_avx2_fma/bin/
+      - ./tests/build_icpc_avx512f/bin/
   script:
     - ./ci/build-linux-icpc.sh
 
 test-linux-unit-nointr:
   stage: test
   tags:
-    - linux
-  cache:
+     - linux
+  artifacts:
+    untracked: true
     paths:
-      - ./tests/build_gcc_nointr/
-      - ./tests/build_clang_nointr/
-      - ./tests/build_icpc_nointr/
+      - ./tests/build_gcc_nointr/bin/
+      - ./tests/build_clang_nointr/bin/
+      - ./tests/build_icpc_nointr/bin/
   script:
     - ./ci/test-linux-unit.sh build_gcc_nointr build_clang_nointr build_icpc_nointr
 
@@ -94,11 +98,12 @@ test-linux-unit-sse2:
   stage: test
   tags:
     - linux
-  cache:
+  artifacts:
+    untracked: true
     paths:
-      - ./tests/build_gcc_sse2/
-      - ./tests/build_clang_sse2/
-      - ./tests/build_icpc_sse2/
+      - ./tests/build_gcc_sse2/bin/
+      - ./tests/build_clang_sse2/bin/
+      - ./tests/build_icpc_sse2/bin/
   script:
     - ./ci/test-linux-unit.sh build_gcc_sse2 build_clang_sse2 build_icpc_sse2
 
@@ -106,11 +111,12 @@ test-linux-unit-sse3:
   stage: test
   tags:
     - linux
-  cache:
+  artifacts:
+    untracked: true
     paths:
-      - ./tests/build_gcc_sse3/
-      - ./tests/build_clang_sse3/
-      - ./tests/build_icpc_sse3/
+      - ./tests/build_gcc_sse3/bin/
+      - ./tests/build_clang_sse3/bin/
+      - ./tests/build_icpc_sse3/bin/
   script:
     - ./ci/test-linux-unit.sh build_gcc_sse3 build_clang_sse3 build_icpc_sse3
 
@@ -118,11 +124,12 @@ test-linux-unit-ssse3:
   stage: test
   tags:
     - linux
-  cache:
+  artifacts:
+    untracked: true
     paths:
-      - ./tests/build_gcc_ssse3/
-      - ./tests/build_clang_ssse3/
-      - ./tests/build_icpc_ssse3/
+      - ./tests/build_gcc_ssse3/bin/
+      - ./tests/build_clang_ssse3/bin/
+      - ./tests/build_icpc_ssse3/bin/
   script:
     - ./ci/test-linux-unit.sh build_gcc_ssse3 build_clang_ssse3 build_icpc_ssse3
 
@@ -130,11 +137,12 @@ test-linux-unit-sse4_1:
   stage: test
   tags:
     - linux
-  cache:
+  artifacts:
+    untracked: true
     paths:
-      - ./tests/build_gcc_sse4_1/
-      - ./tests/build_clang_sse4_1/
-      - ./tests/build_icpc_sse4_1/
+      - ./tests/build_gcc_sse4_1/bin/
+      - ./tests/build_clang_sse4_1/bin/
+      - ./tests/build_icpc_sse4_1/bin/
   script:
     - ./ci/test-linux-unit.sh build_gcc_sse4_1 build_clang_sse4_1 build_icpc_sse4_1
 
@@ -142,11 +150,12 @@ test-linux-unit-sse4_2:
   stage: test
   tags:
     - linux
-  cache:
+  artifacts:
+    untracked: true
     paths:
-      - ./tests/build_gcc_sse4_2/
-      - ./tests/build_clang_sse4_2/
-      - ./tests/build_icpc_sse4_2/
+      - ./tests/build_gcc_sse4_2/bin/
+      - ./tests/build_clang_sse4_2/bin/
+      - ./tests/build_icpc_sse4_2/bin/
   script:
     - ./ci/test-linux-unit.sh build_gcc_sse4_2 build_clang_sse4_2 build_icpc_sse4_2
 
@@ -154,11 +163,12 @@ test-linux-unit-sse4_2:
 #   stage: test
 #   tags:
 #     - linux
-#   cache:
+#   artifacts:
+#     untracked: true
 #     paths:
-#       - ./tests/build_gcc_avx/
-#       - ./tests/build_clang_avx/
-#       - ./tests/build_icpc_avx/
+#       - ./tests/build_gcc_avx/bin/
+#       - ./tests/build_clang_avx/bin/
+#       - ./tests/build_icpc_avx/bin/
 #   script:
 #     - ./ci/test-linux-unit.sh build_gcc_avx build_clang_avx build_icpc_avx
 
@@ -166,11 +176,12 @@ test-linux-unit-sse4_2:
 #   stage: test
 #   tags:
 #     - linux
-#   cache:
+#   artifacts:
+#     untracked: true
 #     paths:
-#       - ./tests/build_gcc_avx2/
-#       - ./tests/build_clang_avx2/
-#       - ./tests/build_icpc_avx2/
+#       - ./tests/build_gcc_avx2/bin/
+#       - ./tests/build_clang_avx2/bin/
+#       - ./tests/build_icpc_avx2/bin/
 #   script:
 #     - ./ci/test-linux-unit.sh build_gcc_avx2 build_clang_avx2 build_icpc_avx2
 
@@ -178,10 +189,11 @@ test-linux-unit-sse4_2:
 #   stage: test
 #   tags:
 #     - linux
-#   cache:
+#   artifacts:
+#     untracked: true
 #     paths:
-#       - ./tests/build_gcc_avx2_fma/
-#       - ./tests/build_clang_avx2_fma/
-#       - ./tests/build_icpc_avx2_fma/
+#       - ./tests/build_gcc_avx2_fma/bin/
+#       - ./tests/build_clang_avx2_fma/bin/
+#       - ./tests/build_icpc_avx2_fma/bin/
 #   script:
 #     - ./ci/test-linux-unit.sh build_gcc_avx2_fma build_clang_avx2_fma build_icpc_avx2_fma
