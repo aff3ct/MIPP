@@ -8,12 +8,12 @@
 // Registers the fixture into the 'registry'
 CPPUNIT_TEST_SUITE_REGISTRATION(SetTest);
 
-void 
+void
 SetTest::setUp()
 {
 }
 
-void 
+void
 SetTest::tearDown()
 {
 }
@@ -250,22 +250,11 @@ void SetTest::test_Msk_set1()
 		mipp::Msk<mipp::N<T>()> m0 = false;
 		mipp::Msk<mipp::N<T>()> m1 = true;
 
-		mipp::reg r0 = mipp::toreg<mipp::N<T>()>(m0.m);
-		mipp::reg r1 = mipp::toreg<mipp::N<T>()>(m1.m);
+		for (auto i = 0; i < mipp::N<T>(); i++)
+			CPPUNIT_ASSERT_EQUAL(false, m0[i]);
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
-#ifndef MIPP_NO
-			CPPUNIT_ASSERT_EQUAL((T)0, *((T*)&r0 +i));
-#else
-			CPPUNIT_ASSERT_EQUAL((mipp::reg)0, r0);
-#endif
-
-		for (auto i = 0; i < mipp::N<T>(); i++)
-#ifndef MIPP_NO
-			CPPUNIT_ASSERT((T)0 != *((T*)&r1 +i));
-#else
-			CPPUNIT_ASSERT((mipp::reg)0 != r1);
-#endif
+			CPPUNIT_ASSERT_EQUAL(true, m1[i]);
 	}
 	catch(std::exception &e)
 	{
@@ -286,10 +275,9 @@ void SetTest::test_Msk_set0()
 	try
 	{
 		mipp::Msk<mipp::N<T>()> m0; m0.set0();
-		mipp::reg r0 = mipp::toreg<mipp::N<T>()>(m0.m);
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
-			CPPUNIT_ASSERT_EQUAL((T)0, *((T*)&r0 +i));
+			CPPUNIT_ASSERT_EQUAL(false, m0[i]);
 	}
 	catch(std::exception &e)
 	{
@@ -315,13 +303,9 @@ void SetTest::test_Msk_set()
 			inputs[i] = i % 2 ? true : false;
 
 		mipp::Msk<mipp::N<T>()> m = inputs;
-		mipp::reg r = mipp::toreg<mipp::N<T>()>(m.m);
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
-			if (!inputs[i])
-				CPPUNIT_ASSERT_EQUAL((T)0, *((T*)&r +i));
-			else
-				CPPUNIT_ASSERT((T)0 != *((T*)&r +i));
+			CPPUNIT_ASSERT_EQUAL(inputs[i], m[i]);
 	}
 	catch(std::exception &e)
 	{
