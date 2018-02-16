@@ -27,7 +27,6 @@ build-linux-gcc:
   tags:
     - linux
   artifacts:
-    untracked: true
     paths:
       - ./tests/build_gcc_nointr/bin/
       - ./tests/build_gcc_sse2/bin/
@@ -47,7 +46,6 @@ build-linux-clang:
   tags:
     - linux
   artifacts:
-    untracked: true
     paths:
       - ./tests/build_clang_nointr/bin/
       - ./tests/build_clang_sse2/bin/
@@ -66,7 +64,6 @@ build-linux-icpc:
   tags:
     - linux
   artifacts:
-    untracked: true
     paths:
       - ./tests/build_icpc_nointr/bin/
       - ./tests/build_icpc_sse2/bin/
@@ -86,7 +83,6 @@ test-linux-unit-nointr:
   tags:
      - linux
   artifacts:
-    untracked: true
     paths:
       - ./tests/build_gcc_nointr/bin/
       - ./tests/build_clang_nointr/bin/
@@ -99,7 +95,6 @@ test-linux-unit-sse2:
   tags:
     - linux
   artifacts:
-    untracked: true
     paths:
       - ./tests/build_gcc_sse2/bin/
       - ./tests/build_clang_sse2/bin/
@@ -112,7 +107,6 @@ test-linux-unit-sse3:
   tags:
     - linux
   artifacts:
-    untracked: true
     paths:
       - ./tests/build_gcc_sse3/bin/
       - ./tests/build_clang_sse3/bin/
@@ -125,7 +119,6 @@ test-linux-unit-ssse3:
   tags:
     - linux
   artifacts:
-    untracked: true
     paths:
       - ./tests/build_gcc_ssse3/bin/
       - ./tests/build_clang_ssse3/bin/
@@ -138,7 +131,6 @@ test-linux-unit-sse4_1:
   tags:
     - linux
   artifacts:
-    untracked: true
     paths:
       - ./tests/build_gcc_sse4_1/bin/
       - ./tests/build_clang_sse4_1/bin/
@@ -151,7 +143,6 @@ test-linux-unit-sse4_2:
   tags:
     - linux
   artifacts:
-    untracked: true
     paths:
       - ./tests/build_gcc_sse4_2/bin/
       - ./tests/build_clang_sse4_2/bin/
@@ -164,7 +155,6 @@ test-linux-unit-sse4_2:
 #   tags:
 #     - linux
 #   artifacts:
-#     untracked: true
 #     paths:
 #       - ./tests/build_gcc_avx/bin/
 #       - ./tests/build_clang_avx/bin/
@@ -177,7 +167,6 @@ test-linux-unit-sse4_2:
 #   tags:
 #     - linux
 #   artifacts:
-#     untracked: true
 #     paths:
 #       - ./tests/build_gcc_avx2/bin/
 #       - ./tests/build_clang_avx2/bin/
@@ -190,7 +179,6 @@ test-linux-unit-sse4_2:
 #   tags:
 #     - linux
 #   artifacts:
-#     untracked: true
 #     paths:
 #       - ./tests/build_gcc_avx2_fma/bin/
 #       - ./tests/build_clang_avx2_fma/bin/
