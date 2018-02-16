@@ -1,0 +1,9 @@
+.gitignore
+.cproject
+.project
+cppcheck/
+examples/a.out
+htdocs/
+.settings/
+src_files.txt
+tests/build*
