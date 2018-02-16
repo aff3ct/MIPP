@@ -22,166 +22,166 @@ analysis-cppcheck:
   script:
     - ./ci/analysis-cppcheck.sh
 
-build-linux-gcc:
+build-linux-x86-gcc:
   stage: build
   tags:
     - linux
   artifacts:
     paths:
-      - ./tests/build_gcc_nointr/bin/
-      - ./tests/build_gcc_sse2/bin/
-      - ./tests/build_gcc_sse3/bin/
-      - ./tests/build_gcc_ssse3/bin/
-      - ./tests/build_gcc_sse4_1/bin/
-      - ./tests/build_gcc_sse4_2/bin/
-      - ./tests/build_gcc_avx/bin/
-      - ./tests/build_gcc_avx2/bin/
-      - ./tests/build_gcc_avx2_fma/bin/
-      - ./tests/build_gcc_avx512f/bin/
+      - ./tests/build_gcc_x86_nointr/bin/
+      - ./tests/build_gcc_x86_sse2/bin/
+      - ./tests/build_gcc_x86_sse3/bin/
+      - ./tests/build_gcc_x86_ssse3/bin/
+      - ./tests/build_gcc_x86_sse4_1/bin/
+      - ./tests/build_gcc_x86_sse4_2/bin/
+      - ./tests/build_gcc_x86_avx/bin/
+      - ./tests/build_gcc_x86_avx2/bin/
+      - ./tests/build_gcc_x86_avx2_fma/bin/
+      - ./tests/build_gcc_x86_avx512f/bin/
   script:
-    - ./ci/build-linux-gcc.sh
+    - ./ci/build-linux-x86-gcc.sh
 
-build-linux-clang:
+build-linux-x86-clang:
   stage: build
   tags:
     - linux
   artifacts:
     paths:
-      - ./tests/build_clang_nointr/bin/
-      - ./tests/build_clang_sse2/bin/
-      - ./tests/build_clang_sse3/bin/
-      - ./tests/build_clang_ssse3/bin/
-      - ./tests/build_clang_sse4_1/bin/
-      - ./tests/build_clang_sse4_2/bin/
-      - ./tests/build_clang_avx/bin/
-      - ./tests/build_clang_avx2/bin/
-      - ./tests/build_clang_avx2_fma/bin/
+      - ./tests/build_clang_x86_nointr/bin/
+      - ./tests/build_clang_x86_sse2/bin/
+      - ./tests/build_clang_x86_sse3/bin/
+      - ./tests/build_clang_x86_ssse3/bin/
+      - ./tests/build_clang_x86_sse4_1/bin/
+      - ./tests/build_clang_x86_sse4_2/bin/
+      - ./tests/build_clang_x86_avx/bin/
+      - ./tests/build_clang_x86_avx2/bin/
+      - ./tests/build_clang_x86_avx2_fma/bin/
   script:
-    - ./ci/build-linux-clang.sh
+    - ./ci/build-linux-x86-clang.sh
 
-build-linux-icpc:
+build-linux-x86-icpc:
   stage: build
   tags:
     - linux
   artifacts:
     paths:
-      - ./tests/build_icpc_nointr/bin/
-      - ./tests/build_icpc_sse2/bin/
-      - ./tests/build_icpc_sse3/bin/
-      - ./tests/build_icpc_ssse3/bin/
-      - ./tests/build_icpc_sse4_1/bin/
-      - ./tests/build_icpc_sse4_2/bin/
-      - ./tests/build_icpc_avx/bin/
-      - ./tests/build_icpc_avx2/bin/
-      - ./tests/build_icpc_avx2_fma/bin/
-      - ./tests/build_icpc_avx512f/bin/
+      - ./tests/build_icpc_x86_nointr/bin/
+      - ./tests/build_icpc_x86_sse2/bin/
+      - ./tests/build_icpc_x86_sse3/bin/
+      - ./tests/build_icpc_x86_ssse3/bin/
+      - ./tests/build_icpc_x86_sse4_1/bin/
+      - ./tests/build_icpc_x86_sse4_2/bin/
+      - ./tests/build_icpc_x86_avx/bin/
+      - ./tests/build_icpc_x86_avx2/bin/
+      - ./tests/build_icpc_x86_avx2_fma/bin/
+      - ./tests/build_icpc_x86_avx512f/bin/
   script:
-    - ./ci/build-linux-icpc.sh
+    - ./ci/build-linux-x86-icpc.sh
 
-test-linux-unit-nointr:
+test-linux-x86-unit-nointr:
   stage: test
   tags:
      - linux
   artifacts:
     paths:
-      - ./tests/build_gcc_nointr/bin/
-      - ./tests/build_clang_nointr/bin/
-      - ./tests/build_icpc_nointr/bin/
+      - ./tests/build_gcc_x86_nointr/bin/
+      - ./tests/build_clang_x86_nointr/bin/
+      - ./tests/build_icpc_x86_nointr/bin/
   script:
-    - ./ci/test-linux-unit.sh build_gcc_nointr build_clang_nointr build_icpc_nointr
+    - ./ci/test-linux-mac-osx-unit.sh build_gcc_x86_nointr build_clang_x86_nointr build_icpc_x86_nointr
 
-test-linux-unit-sse2:
+test-linux-x86-unit-sse2:
   stage: test
   tags:
     - linux
   artifacts:
     paths:
-      - ./tests/build_gcc_sse2/bin/
-      - ./tests/build_clang_sse2/bin/
-      - ./tests/build_icpc_sse2/bin/
+      - ./tests/build_gcc_x86_sse2/bin/
+      - ./tests/build_clang_x86_sse2/bin/
+      - ./tests/build_icpc_x86_sse2/bin/
   script:
-    - ./ci/test-linux-unit.sh build_gcc_sse2 build_clang_sse2 build_icpc_sse2
+    - ./ci/test-linux-mac-osx-unit.sh build_gcc_x86_sse2 build_clang_x86_sse2 build_icpc_x86_sse2
 
-test-linux-unit-sse3:
+test-linux-x86-unit-sse3:
   stage: test
   tags:
     - linux
   artifacts:
     paths:
-      - ./tests/build_gcc_sse3/bin/
-      - ./tests/build_clang_sse3/bin/
-      - ./tests/build_icpc_sse3/bin/
+      - ./tests/build_gcc_x86_sse3/bin/
+      - ./tests/build_clang_x86_sse3/bin/
+      - ./tests/build_icpc_x86_sse3/bin/
   script:
-    - ./ci/test-linux-unit.sh build_gcc_sse3 build_clang_sse3 build_icpc_sse3
+    - ./ci/test-linux-mac-osx-unit.sh build_gcc_x86_sse3 build_clang_x86_sse3 build_icpc_x86_sse3
 
-test-linux-unit-ssse3:
+test-linux-x86-unit-ssse3:
   stage: test
   tags:
     - linux
   artifacts:
     paths:
-      - ./tests/build_gcc_ssse3/bin/
-      - ./tests/build_clang_ssse3/bin/
-      - ./tests/build_icpc_ssse3/bin/
+      - ./tests/build_gcc_x86_ssse3/bin/
+      - ./tests/build_clang_x86_ssse3/bin/
+      - ./tests/build_icpc_x86_ssse3/bin/
   script:
-    - ./ci/test-linux-unit.sh build_gcc_ssse3 build_clang_ssse3 build_icpc_ssse3
+    - ./ci/test-linux-mac-osx-unit.sh build_gcc_x86_ssse3 build_clang_x86_ssse3 build_icpc_x86_ssse3
 
-test-linux-unit-sse4_1:
+test-linux-x86-unit-sse4_1:
   stage: test
   tags:
     - linux
   artifacts:
     paths:
-      - ./tests/build_gcc_sse4_1/bin/
-      - ./tests/build_clang_sse4_1/bin/
-      - ./tests/build_icpc_sse4_1/bin/
+      - ./tests/build_gcc_x86_sse4_1/bin/
+      - ./tests/build_clang_x86_sse4_1/bin/
+      - ./tests/build_icpc_x86_sse4_1/bin/
   script:
-    - ./ci/test-linux-unit.sh build_gcc_sse4_1 build_clang_sse4_1 build_icpc_sse4_1
+    - ./ci/test-linux-mac-osx-unit.sh build_gcc_x86_sse4_1 build_clang_x86_sse4_1 build_icpc_x86_sse4_1
 
-test-linux-unit-sse4_2:
+test-linux-x86-unit-sse4_2:
   stage: test
   tags:
     - linux
   artifacts:
     paths:
-      - ./tests/build_gcc_sse4_2/bin/
-      - ./tests/build_clang_sse4_2/bin/
-      - ./tests/build_icpc_sse4_2/bin/
+      - ./tests/build_gcc_x86_sse4_2/bin/
+      - ./tests/build_clang_x86_sse4_2/bin/
+      - ./tests/build_icpc_x86_sse4_2/bin/
   script:
-    - ./ci/test-linux-unit.sh build_gcc_sse4_2 build_clang_sse4_2 build_icpc_sse4_2
+    - ./ci/test-linux-mac-osx-unit.sh build_gcc_x86_sse4_2 build_clang_x86_sse4_2 build_icpc_x86_sse4_2
 
-# test-linux-unit-avx:
+# test-linux-x86-unit-avx:
 #   stage: test
 #   tags:
 #     - linux
 #   artifacts:
 #     paths:
-#       - ./tests/build_gcc_avx/bin/
-#       - ./tests/build_clang_avx/bin/
-#       - ./tests/build_icpc_avx/bin/
+#       - ./tests/build_gcc_x86_avx/bin/
+#       - ./tests/build_clang_x86_avx/bin/
+#       - ./tests/build_icpc_x86_avx/bin/
 #   script:
-#     - ./ci/test-linux-unit.sh build_gcc_avx build_clang_avx build_icpc_avx
+#     - ./ci/test-linux-mac-osx-unit.sh build_gcc_x86_avx build_clang_x86_avx build_icpc_x86_avx
 
-# test-linux-unit-avx2:
+# test-linux-x86-unit-avx2:
 #   stage: test
 #   tags:
 #     - linux
 #   artifacts:
 #     paths:
-#       - ./tests/build_gcc_avx2/bin/
-#       - ./tests/build_clang_avx2/bin/
-#       - ./tests/build_icpc_avx2/bin/
+#       - ./tests/build_gcc_x86_avx2/bin/
+#       - ./tests/build_clang_x86_avx2/bin/
+#       - ./tests/build_icpc_x86_avx2/bin/
 #   script:
-#     - ./ci/test-linux-unit.sh build_gcc_avx2 build_clang_avx2 build_icpc_avx2
+#     - ./ci/test-linux-mac-osx-unit.sh build_gcc_x86_avx2 build_clang_x86_avx2 build_icpc_x86_avx2
 
-# test-linux-unit-avx2_fma:
+# test-linux-x86-unit-avx2_fma:
 #   stage: test
 #   tags:
 #     - linux
 #   artifacts:
 #     paths:
-#       - ./tests/build_gcc_avx2_fma/bin/
-#       - ./tests/build_clang_avx2_fma/bin/
-#       - ./tests/build_icpc_avx2_fma/bin/
+#       - ./tests/build_gcc_x86_avx2_fma/bin/
+#       - ./tests/build_clang_x86_avx2_fma/bin/
+#       - ./tests/build_icpc_x86_avx2_fma/bin/
 #   script:
-#     - ./ci/test-linux-unit.sh build_gcc_avx2_fma build_clang_avx2_fma build_icpc_avx2_fma
+#     - ./ci/test-linux-mac-osx-unit.sh build_gcc_x86_avx2_fma build_clang_x86_avx2_fma build_icpc_x86_avx2_fma
