@@ -349,7 +349,7 @@ build-linux-arm-gcc:
 build-linux-arm-clang:
   stage: build
   tags:
-    - linux-arm
+    - linux-arm32
   artifacts:
     paths:
       - ./tests/build_linux_arm_clang_nointr/bin/
