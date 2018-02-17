@@ -334,64 +334,64 @@ test-macosx-x86-unit-avx:
 
 # BUILDS --------------------------------------------------------------------------------------------------------------
 
-# build-linux-arm-gcc:
-#   stage: build
-#   tags:
-#     - linux-arm
-#   artifacts:
-#     paths:
-#       - ./tests/build_linux_arm_gcc_nointr/bin/
-#       - ./tests/build_linux_arm_gcc_neon32/bin/
-#       - ./tests/build_linux_arm_gcc_neon32_fma/bin/
-#   script:
-#     - ./ci/build-linux-arm-gcc.sh
+build-linux-arm-gcc:
+  stage: build
+  tags:
+    - linux-arm32
+  artifacts:
+    paths:
+      - ./tests/build_linux_arm_gcc_nointr/bin/
+      - ./tests/build_linux_arm_gcc_neon32/bin/
+      - ./tests/build_linux_arm_gcc_neon32_fma/bin/
+  script:
+    - ./ci/build-linux-arm-gcc.sh
 
-# build-linux-arm-clang:
-#   stage: build
-#   tags:
-#     - linux-arm
-#   artifacts:
-#     paths:
-#       - ./tests/build_linux_arm_clang_nointr/bin/
-#       - ./tests/build_linux_arm_clang_neon32/bin/
-#       - ./tests/build_linux_arm_clang_neon32_fma/bin/
-#   script:
-#     - ./ci/build-linux-arm-clang.sh
+build-linux-arm-clang:
+  stage: build
+  tags:
+    - linux-arm
+  artifacts:
+    paths:
+      - ./tests/build_linux_arm_clang_nointr/bin/
+      - ./tests/build_linux_arm_clang_neon32/bin/
+      - ./tests/build_linux_arm_clang_neon32_fma/bin/
+  script:
+    - ./ci/build-linux-arm-clang.sh
 
 # TESTS ---------------------------------------------------------------------------------------------------------------
 
-# test-linux-arm-unit-nointr:
-#   stage: test
-#   tags:
-#      - linux-arm
-#   artifacts:
-#     paths:
-#       - ./tests/build_linux_arm_gcc_nointr/bin/
-#       - ./tests/build_linux_arm_clang_nointr/bin/
-#   script:
-#     - ./ci/test-linux-macosx-unit.sh build_linux_arm_gcc_nointr build_linux_arm_clang_nointr
+test-linux-arm-unit-nointr:
+  stage: test
+  tags:
+     - linux-arm32
+  artifacts:
+    paths:
+      - ./tests/build_linux_arm_gcc_nointr/bin/
+      - ./tests/build_linux_arm_clang_nointr/bin/
+  script:
+    - ./ci/test-linux-macosx-unit.sh build_linux_arm_gcc_nointr build_linux_arm_clang_nointr
 
-# test-linux-arm-unit-neon32:
-#   stage: test
-#   tags:
-#     - linux-arm
-#   artifacts:
-#     paths:
-#       - ./tests/build_linux_arm_gcc_neon32/bin/
-#       - ./tests/build_linux_arm_clang_neon32/bin/
-#   script:
-#     - ./ci/test-linux-macosx-unit.sh build_linux_arm_gcc_neon32 build_linux_arm_clang_neon32
+test-linux-arm-unit-neon32:
+  stage: test
+  tags:
+    - linux-arm32
+  artifacts:
+    paths:
+      - ./tests/build_linux_arm_gcc_neon32/bin/
+      - ./tests/build_linux_arm_clang_neon32/bin/
+  script:
+    - ./ci/test-linux-macosx-unit.sh build_linux_arm_gcc_neon32 build_linux_arm_clang_neon32
 
-# test-linux-arm-unit-neon32-fma:
-#   stage: test
-#   tags:
-#     - linux-arm
-#   artifacts:
-#     paths:
-#       - ./tests/build_linux_arm_gcc_neon32_fma/bin/
-#       - ./tests/build_linux_arm_clang_neon32_fma/bin/
-#   script:
-#     - ./ci/test-linux-macosx-unit.sh build_linux_arm_gcc_neon32_fma build_linux_arm_clang_neon32_fma
+test-linux-arm-unit-neon32-fma:
+  stage: test
+  tags:
+    - linux-arm32
+  artifacts:
+    paths:
+      - ./tests/build_linux_arm_gcc_neon32_fma/bin/
+      - ./tests/build_linux_arm_clang_neon32_fma/bin/
+  script:
+    - ./ci/test-linux-macosx-unit.sh build_linux_arm_gcc_neon32_fma build_linux_arm_clang_neon32_fma
 
 # ---------------------------------------------------------------------------------------------------------------------
 # WINDOWS X86 ---------------------------------------------------------------------------------------------------------
