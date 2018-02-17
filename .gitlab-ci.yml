@@ -237,7 +237,7 @@ test-macosx-x86-unit-nointr:
     paths:
       - ./tests/build_macosx_x86_clang_nointr/bin/
   script:
-    - ./ci/test-macosx-macosx-unit.sh build_macosx_x86_clang_nointr
+    - ./ci/test-linux-macosx-unit.sh build_macosx_x86_clang_nointr
 
 test-macosx-x86-unit-sse2:
   stage: test
@@ -247,7 +247,7 @@ test-macosx-x86-unit-sse2:
     paths:
       - ./tests/build_macosx_x86_clang_sse2/bin/
   script:
-    - ./ci/test-macosx-macosx-unit.sh build_macosx_x86_clang_sse2
+    - ./ci/test-linux-macosx-unit.sh build_macosx_x86_clang_sse2
 
 test-macosx-x86-unit-sse3:
   stage: test
@@ -257,7 +257,7 @@ test-macosx-x86-unit-sse3:
     paths:
       - ./tests/build_macosx_x86_clang_sse3/bin/
   script:
-    - ./ci/test-macosx-macosx-unit.sh build_macosx_x86_clang_sse3
+    - ./ci/test-linux-macosx-unit.sh build_macosx_x86_clang_sse3
 
 test-macosx-x86-unit-ssse3:
   stage: test
@@ -267,7 +267,7 @@ test-macosx-x86-unit-ssse3:
     paths:
       - ./tests/build_macosx_x86_clang_ssse3/bin/
   script:
-    - ./ci/test-macosx-macosx-unit.sh build_macosx_x86_clang_ssse3
+    - ./ci/test-linux-macosx-unit.sh build_macosx_x86_clang_ssse3
 
 test-macosx-x86-unit-sse4_1:
   stage: test
@@ -277,7 +277,7 @@ test-macosx-x86-unit-sse4_1:
     paths:
       - ./tests/build_macosx_x86_clang_sse4_1/bin/
   script:
-    - ./ci/test-macosx-macosx-unit.sh build_macosx_x86_clang_sse4_1
+    - ./ci/test-linux-macosx-unit.sh build_macosx_x86_clang_sse4_1
 
 test-macosx-x86-unit-sse4_2:
   stage: test
@@ -287,7 +287,7 @@ test-macosx-x86-unit-sse4_2:
     paths:
       - ./tests/build_macosx_x86_clang_sse4_2/bin/
   script:
-    - ./ci/test-macosx-macosx-unit.sh build_macosx_x86_clang_sse4_2
+    - ./ci/test-linux-macosx-unit.sh build_macosx_x86_clang_sse4_2
 
 test-macosx-x86-unit-avx:
   stage: test
@@ -297,7 +297,7 @@ test-macosx-x86-unit-avx:
     paths:
       - ./tests/build_macosx_x86_clang_avx/bin/
   script:
-    - ./ci/test-macosx-macosx-unit.sh build_macosx_x86_clang_avx
+    - ./ci/test-linux-macosx-unit.sh build_macosx_x86_clang_avx
 
 # test-macosx-x86-unit-avx2:
 #   stage: test
@@ -307,7 +307,7 @@ test-macosx-x86-unit-avx:
 #     paths:
 #       - ./tests/build_macosx_x86_clang_avx2/bin/
 #   script:
-#     - ./ci/test-macosx-macosx-unit.sh build_macosx_x86_clang_avx2
+#     - ./ci/test-linux-macosx-unit.sh build_macosx_x86_clang_avx2
 
 # test-macosx-x86-unit-avx2-fma:
 #   stage: test
@@ -317,7 +317,7 @@ test-macosx-x86-unit-avx:
 #     paths:
 #       - ./tests/build_macosx_x86_clang_avx2_fma/bin/
 #   script:
-#     - ./ci/test-macosx-macosx-unit.sh build_macosx_x86_clang_avx2_fma
+#     - ./ci/test-linux-macosx-unit.sh build_macosx_x86_clang_avx2_fma
 
 # test-macosx-x86-unit-avx512f:
 #   stage: test
@@ -327,7 +327,7 @@ test-macosx-x86-unit-avx:
 #     paths:
 #       - ./tests/build_macosx_x86_clang_avx512f/bin/
 #   script:
-#     - ./ci/test-macosx-macosx-unit.sh build_macosx_x86_clang_avx512f
+#     - ./ci/test-linux-macosx-unit.sh build_macosx_x86_clang_avx512f
 
 # ---------------------------------------------------------------------------------------------------------------------
 # LINUX ARM -----------------------------------------------------------------------------------------------------------
