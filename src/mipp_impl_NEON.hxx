@@ -686,7 +686,7 @@
 	// ---------------------------------------------------------------------------------------------------------- shuff
 	template <>
 	inline reg shuff<double>(const reg v, const reg cm) {
-		uint8x8x2_t v2 = {vget_low_u8((uint8x16_t)v), vget_high_u8((uint8x16_t)v)};
+		uint8x8x2_t v2 = {{vget_low_u8((uint8x16_t)v), vget_high_u8((uint8x16_t)v)}};
 		uint8x8_t low  = vtbl2_u8(v2, vget_low_u8 ((uint8x16_t)cm));
 		uint8x8_t high = vtbl2_u8(v2, vget_high_u8((uint8x16_t)cm));
 
@@ -695,7 +695,7 @@
 
 	template <>
 	inline reg shuff<float>(const reg v, const reg cm) {
-		uint8x8x2_t v2 = {vget_low_u8((uint8x16_t)v), vget_high_u8((uint8x16_t)v)};
+		uint8x8x2_t v2 = {{vget_low_u8((uint8x16_t)v), vget_high_u8((uint8x16_t)v)}};
 		uint8x8_t low  = vtbl2_u8(v2, vget_low_u8 ((uint8x16_t)cm));
 		uint8x8_t high = vtbl2_u8(v2, vget_high_u8((uint8x16_t)cm));
 
@@ -704,7 +704,7 @@
 
 	template <>
 	inline reg shuff<int64_t>(const reg v, const reg cm) {
-		uint8x8x2_t v2 = {vget_low_u8((uint8x16_t)v), vget_high_u8((uint8x16_t)v)};
+		uint8x8x2_t v2 = {{vget_low_u8((uint8x16_t)v), vget_high_u8((uint8x16_t)v)}};
 		uint8x8_t low  = vtbl2_u8(v2, vget_low_u8 ((uint8x16_t)cm));
 		uint8x8_t high = vtbl2_u8(v2, vget_high_u8((uint8x16_t)cm));
 
@@ -713,7 +713,7 @@
 
 	template <>
 	inline reg shuff<int32_t>(const reg v, const reg cm) {
-		uint8x8x2_t v2 = {vget_low_u8((uint8x16_t)v), vget_high_u8((uint8x16_t)v)};
+		uint8x8x2_t v2 = {{vget_low_u8((uint8x16_t)v), vget_high_u8((uint8x16_t)v)}};
 		uint8x8_t low  = vtbl2_u8(v2, vget_low_u8 ((uint8x16_t)cm));
 		uint8x8_t high = vtbl2_u8(v2, vget_high_u8((uint8x16_t)cm));
 
@@ -722,7 +722,7 @@
 
 	template <>
 	inline reg shuff<int16_t>(const reg v, const reg cm) {
-		uint8x8x2_t v2 = {vget_low_u8((uint8x16_t)v), vget_high_u8((uint8x16_t)v)};
+		uint8x8x2_t v2 = {{vget_low_u8((uint8x16_t)v), vget_high_u8((uint8x16_t)v)}};
 		uint8x8_t low  = vtbl2_u8(v2, vget_low_u8 ((uint8x16_t)cm));
 		uint8x8_t high = vtbl2_u8(v2, vget_high_u8((uint8x16_t)cm));
 
@@ -731,7 +731,7 @@
 
 	template <>
 	inline reg shuff<int8_t>(const reg v, const reg cm) {
-		uint8x8x2_t v2 = {vget_low_u8((uint8x16_t)v), vget_high_u8((uint8x16_t)v)};
+		uint8x8x2_t v2 = {{vget_low_u8((uint8x16_t)v), vget_high_u8((uint8x16_t)v)}};
 		uint8x8_t low  = vtbl2_u8(v2, vget_low_u8 ((uint8x16_t)cm));
 		uint8x8_t high = vtbl2_u8(v2, vget_high_u8((uint8x16_t)cm));
 
@@ -1369,6 +1369,7 @@
 	}
 
 	// -------------------------------------------------------------------------------------------------- lshift (mask)
+#ifndef __clang__
 #ifdef __aarch64__
 	template <>
 	inline msk lshift<2>(const msk v1, const uint32_t n) {
@@ -1402,6 +1403,7 @@
 		else if (s >  15) return set0<16>();
 		else              return (msk)vextq_s8(vdupq_n_s8(0), (int8x16_t)v1, 16 - s);
 	}
+#endif
 
 	// --------------------------------------------------------------------------------------------------------- rshift
 #ifdef __aarch64__
@@ -1427,6 +1429,7 @@
 	}
 
 	// -------------------------------------------------------------------------------------------------- rshift (mask)
+#ifndef __clang__
 #ifdef __aarch64__
 	template <>
 	inline msk rshift<2>(const msk v1, const uint32_t n) {
@@ -1460,6 +1463,7 @@
 		else if (s > 15) return set0<16>();
 		else             return (msk)vextq_s8((int8x16_t)v1, vdupq_n_s8(0), s);
 	}
+#endif
 
 	// ---------------------------------------------------------------------------------------------------------- blend
 #ifdef __aarch64__
@@ -2199,7 +2203,7 @@
 #ifdef __aarch64__
 	template <>
 	inline reg fnmadd<double>(const reg v1, const reg v2, const reg v3) {
-#ifdef __ARM_FEATURE_FMA
+#ifdef __ARM_FEATURE_FMA && !defined(__clang__)
 		return (reg) vfmsq_f64((float64x2_t)v3, (float64x2_t)v1, (float64x2_t)v2);
 #else
  		return sub<double>(v3, mul<double>(v1, v2));
@@ -2209,7 +2213,7 @@
 
 	template <>
 	inline reg fnmadd<float>(const reg v1, const reg v2, const reg v3) {
-#ifdef __ARM_FEATURE_FMA
+#if defined(__ARM_FEATURE_FMA) && !defined(__clang__)
 		return (reg) vfmsq_f32((float32x4_t)v3, (float32x4_t)v1, (float32x4_t)v2);
 #else
  		return sub<float>(v3, mul<float>(v1, v2));
