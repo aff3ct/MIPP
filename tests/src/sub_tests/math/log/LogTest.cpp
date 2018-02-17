@@ -10,12 +10,12 @@
 // Registers the fixture into the 'registry'
 CPPUNIT_TEST_SUITE_REGISTRATION(LogTest);
 
-void 
+void
 LogTest::setUp()
 {
 }
 
-void 
+void
 LogTest::tearDown()
 {
 }
@@ -37,7 +37,9 @@ void LogTest::test_reg_log()
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
 			T res = std::log(inputs1[i]);
-			CPPUNIT_ASSERT_EQUAL(res, *((T*)&r2 +i));
+			// CPPUNIT_ASSERT_EQUAL(res, *((T*)&r2 +i));
+			T diff = std::abs(res - *((T*)&r2 +i));
+			CPPUNIT_ASSERT(diff < 0.001);
 		}
 	}
 	catch(std::exception &e)
@@ -66,7 +68,9 @@ void LogTest::test_Reg_log()
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
 			T res = std::log(inputs1[i]);
-			CPPUNIT_ASSERT_EQUAL(res, r2[i]);
+			// CPPUNIT_ASSERT_EQUAL(res, r2[i]);
+			T diff = std::abs(res - r2[i]);
+			CPPUNIT_ASSERT(diff < 0.001);
 		}
 	}
 	catch(std::exception &e)
@@ -105,7 +109,9 @@ void LogTest::test_reg_maskz_log()
 			if (mask[i])
 			{
 				T res = std::log(inputs1[i]);
-				CPPUNIT_ASSERT_EQUAL(res, *((T*)&r2 +i));
+				// CPPUNIT_ASSERT_EQUAL(res, *((T*)&r2 +i));
+				T diff = std::abs(res - *((T*)&r2 +i));
+				CPPUNIT_ASSERT(diff < 0.001);
 			}
 			else
 				CPPUNIT_ASSERT_EQUAL((T)0, *((T*)&r2 +i));
@@ -147,7 +153,9 @@ void LogTest::test_Reg_maskz_log()
 			if (mask[i])
 			{
 				T res = std::log(inputs1[i]);
-				CPPUNIT_ASSERT_EQUAL(res, r2[i]);
+				// CPPUNIT_ASSERT_EQUAL(res, r2[i]);
+				T diff = std::abs(res - r2[i]);
+				CPPUNIT_ASSERT(diff < 0.001);
 			}
 			else
 				CPPUNIT_ASSERT_EQUAL((T)0, r2[i]);
@@ -191,7 +199,9 @@ void LogTest::test_reg_mask_log()
 			if (mask[i])
 			{
 				T res = std::log(inputs1[i]);
-				CPPUNIT_ASSERT_EQUAL(res, *((T*)&r3 +i));
+				// CPPUNIT_ASSERT_EQUAL(res, *((T*)&r3 +i));
+				T diff = std::abs(res - *((T*)&r3 +i));
+				CPPUNIT_ASSERT(diff < 0.001);
 			}
 			else
 				CPPUNIT_ASSERT_EQUAL(inputs2[i], *((T*)&r3 +i));
@@ -235,7 +245,9 @@ void LogTest::test_Reg_mask_log()
 			if (mask[i])
 			{
 				T res = std::log(inputs1[i]);
-				CPPUNIT_ASSERT_EQUAL(res, *((T*)&r3 +i));
+				// CPPUNIT_ASSERT_EQUAL(res, *((T*)&r3 +i));
+				T diff = std::abs(res - r3[i]);
+				CPPUNIT_ASSERT(diff < 0.001);
 			}
 			else
 				CPPUNIT_ASSERT_EQUAL(inputs2[i], *((T*)&r3 +i));
