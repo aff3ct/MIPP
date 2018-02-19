@@ -15,10 +15,10 @@ With the MIPP wrapper you do not need to write a specific intrinsic code anymore
 
 At this time, MIPP has been tested on:
 
-	- the Intel compiler (`icpc` >= `16`),
-	- the GNU compiler (`g++` >= `4.8`),
-	- the Clang compiler (`clang++` >= `3.6`),
-	- the Microsoft compiler (`msvc` >= `14`).
+  - the Intel compiler (`icpc` >= `16`),
+  - the GNU compiler (`g++` >= `4.8`),
+  - the Clang compiler (`clang++` >= `3.6`),
+  - the Microsoft compiler (`msvc` >= `14`).
 
 ### Install and configure your code for MIPP
 
