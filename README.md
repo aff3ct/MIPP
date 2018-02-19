@@ -49,7 +49,7 @@ Just use the `mipp::Reg<T>` type.
 mipp:Reg<T> r1, r2, r3; // we have declared 3 vector registers
 ```
 
-But we do not know the number of elements per registers here. This number of elements can be obtained by calling the `mipp::N<T>()` function (`T` is a template parameter, it can be `double`, `float`, `int32_t`, `int16_t` or `int8_t` type).
+But we do not know the number of elements per registers here. This number of elements can be obtained by calling the `mipp::N<T>()` function (`T` is a template parameter, it can be `double`, `float`, `int64_t`, `int32_t`, `int16_t` or `int8_t` type).
 
 ```cpp
 for(int i = 0; i < n; i += mipp::N<float>()) {
