@@ -253,7 +253,7 @@ r2 = mipp::rot(r1);       // r2 = | +2.0 | +1.0 | +0.0 | +3.0 |
 r1 = mipp::rot(r2);       // r1 = | +3.0 | +2.0 | +1.0 | +0.0 |
 ```
 
-Of course there are many more available instructions in the MIPP wrapper and you can find these instructions in the MIPP files.
+Of course there are many more available instructions in the MIPP wrapper and you can find these instructions at the end of this page.
 
 ## Code examples
 
@@ -294,7 +294,7 @@ int main()
 
 ### Memory operations
 
-| Short name      | Prototype                                                           | Supported types                                              |
+| **Short name**  | **Prototype**                                                       | **Supported types**                                          |
 | :---            | :---                                                                | :---                                                         |
 | `load`          | `Reg  <T> load          (const T*)`                                 | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 | `loadu`         | `Reg  <T> loadu         (const T*)`                                 | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
@@ -329,71 +329,71 @@ int main()
 
 ### Bitwise operations
 
-| Short name    | Operator       | Prototype                                      | Supported types                                              |
-| :---          | :---           | :---                                           | :---                                                         |
-| `andb`        | `&` and `&=`   | `Reg<T> andb   (const Reg<T>, const Reg<T>)`   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `andb`        | `&` and `&=`   | `Msk<N> andb   (const Msk<N>, const Msk<N>)`   |                                                              |
-| `andnb`       |                | `Reg<T> andnb  (const Reg<T>, const Reg<T>)`   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `andnb`       |                | `Msk<N> andnb  (const Msk<N>, const Msk<N>)`   |                                                              |
-| `orb`         | `|` and `|=`   | `Reg<T> orb    (const Reg<T>, const Reg<T>)`   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `orb`         | `|` and `|=`   | `Msk<N> orb    (const Msk<N>, const Msk<N>)`   |                                                              |
-| `xorb`        | `^` and `^=`   | `Reg<T> xorb   (const Reg<T>, const Reg<T>)`   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `xorb`        | `^` and `^=`   | `Msk<N> xorb   (const Msk<N>, const Msk<N>)`   |                                                              |
-| `lshift`      | `<<` and `<<=` | `Reg<T> lshift (const Reg<T>, const uint32_t)` | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `lshift`      | `<<` and `<<=` | `Msk<N> lshift (const Msk<N>, const uint32_t)` |                                                              |
-| `rshift`      | `>>` and `>>=` | `Reg<T> rshift (const Reg<T>, const uint32_t)` | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `rshift`      | `>>` and `>>=` | `Msk<N> rshift (const Msk<N>, const uint32_t)` |                                                              |
-| `notb`        | `~`            | `Reg<T> not    (const Reg<T>)`                 | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `notb`        | `~`            | `Msk<N> not    (const Msk<N>)`                 |                                                              |
+| **Short name** | **Operator**                                   | **Prototype**                                  | **Supported types**                                          |
+| :---           | :---                                           | :---                                           | :---                                                         |
+| `andb`         | `&` and `&=`                                   | `Reg<T> andb   (const Reg<T>, const Reg<T>)`   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `andb`         | `&` and `&=`                                   | `Msk<N> andb   (const Msk<N>, const Msk<N>)`   |                                                              |
+| `andnb`        |                                                | `Reg<T> andnb  (const Reg<T>, const Reg<T>)`   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `andnb`        |                                                | `Msk<N> andnb  (const Msk<N>, const Msk<N>)`   |                                                              |
+| `orb`          | `<code>&#124</code>` and `<code>&#124</code>=` | `Reg<T> orb    (const Reg<T>, const Reg<T>)`   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `orb`          | `<code>&#124</code>` and `<code>&#124</code>=` | `Msk<N> orb    (const Msk<N>, const Msk<N>)`   |                                                              |
+| `xorb`         | `^` and `^=`                                   | `Reg<T> xorb   (const Reg<T>, const Reg<T>)`   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `xorb`         | `^` and `^=`                                   | `Msk<N> xorb   (const Msk<N>, const Msk<N>)`   |                                                              |
+| `lshift`       | `<<` and `<<=`                                 | `Reg<T> lshift (const Reg<T>, const uint32_t)` | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `lshift`       | `<<` and `<<=`                                 | `Msk<N> lshift (const Msk<N>, const uint32_t)` |                                                              |
+| `rshift`       | `>>` and `>>=`                                 | `Reg<T> rshift (const Reg<T>, const uint32_t)` | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `rshift`       | `>>` and `>>=`                                 | `Msk<N> rshift (const Msk<N>, const uint32_t)` |                                                              |
+| `notb`         | `~`                                            | `Reg<T> not    (const Reg<T>)`                 | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `notb`         | `~`                                            | `Msk<N> not    (const Msk<N>)`                 |                                                              |
 
 ### Comparisons
 
-| Short name    | Operator | Prototype                                    | Supported types                                              |
-| :---          | :---     | :---                                         | :---                                                         |
-| `cmpeq`       | `==`     | `Msk<N> cmpeq  (const Reg<T>, const Reg<T>)` | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `cmpneq`      | `!=`     | `Msk<N> cmpneq (const Reg<T>, const Reg<T>)` | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `cmpge`       | `>=`     | `Msk<N> cmpge  (const Reg<T>, const Reg<T>)` | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `cmpgt`       | `>`      | `Msk<N> cmpgt  (const Reg<T>, const Reg<T>)` | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `cmple`       | `<=`     | `Msk<N> cmple  (const Reg<T>, const Reg<T>)` | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `cmplt`       | `<`      | `Msk<N> cmplt  (const Reg<T>, const Reg<T>)` | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| **Short name** | **Operator** | **Prototype**                                | **Supported types**                                          |
+| :---           | :---         | :---                                         | :---                                                         |
+| `cmpeq`        | `==`         | `Msk<N> cmpeq  (const Reg<T>, const Reg<T>)` | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `cmpneq`       | `!=`         | `Msk<N> cmpneq (const Reg<T>, const Reg<T>)` | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `cmpge`        | `>=`         | `Msk<N> cmpge  (const Reg<T>, const Reg<T>)` | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `cmpgt`        | `>`          | `Msk<N> cmpgt  (const Reg<T>, const Reg<T>)` | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `cmple`        | `<=`         | `Msk<N> cmple  (const Reg<T>, const Reg<T>)` | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `cmplt`        | `<`          | `Msk<N> cmplt  (const Reg<T>, const Reg<T>)` | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 
 ### Conversions and packing
 
-| Short name | Prototype                                      | Supported types                                                 |
-| :---       | :---                                           | :---                                                            |
-| `toReg`    | `Reg<T>  toReg (const Msk<N>)`                 | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t`    |
-| `cvt`      | `Reg<T2> cvt   (const Reg<T1>)`                | `float -> int32_t`,                                             |
-| `cvt`      | `Reg<T2> cvt   (const Reg_2<T1>)`              | `int8_t -> int16_t`, `int16_t -> int32_t`, `int32_t -> int64_t` |
-| `pack`     | `Reg<T2> pack  (const Reg<T1>, const Reg<T1>)` | `int32_t -> int16_t`, `int16_t -> int8_t`                       |
+| **Short name** | **Prototype**                                  | **Supported types**                                             |
+| :---           | :---                                           | :---                                                            |
+| `toReg`        | `Reg<T>  toReg (const Msk<N>)`                 | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t`    |
+| `cvt`          | `Reg<T2> cvt   (const Reg<T1>)`                | `float -> int32_t`,                                             |
+| `cvt`          | `Reg<T2> cvt   (const Reg_2<T1>)`              | `int8_t -> int16_t`, `int16_t -> int32_t`, `int32_t -> int64_t` |
+| `pack`         | `Reg<T2> pack  (const Reg<T1>, const Reg<T1>)` | `int32_t -> int16_t`, `int16_t -> int8_t`                       |
 
 ### Arithmetic operations
 
-| Short name    | Operator     | Prototype                                                  | Supported types                                              |
-| :---          | :---         | :---                                                       | :---                                                         |
-| `add`         | `+` and `+=` | `Reg<T> add    (const Reg<T>, const Reg<T>)`               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `sub`         | `-` and `-=` | `Reg<T> sub    (const Reg<T>, const Reg<T>)`               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `mul`         | `*` and `*=` | `Reg<T> mul    (const Reg<T>, const Reg<T>)`               | `double`, `float`, `int32_t`, `int16_t`, `int8_t`            |
-| `div`         | `/` and `/=` | `Reg<T> mul    (const Reg<T>, const Reg<T>)`               | `double`, `float`                                            |
-| `fmadd`       |              | `Reg<T> fmadd  (const Reg<T>, const Reg<T>, const Reg<T>)` | `double`, `float`                                            |
-| `fnmadd`      |              | `Reg<T> fnmadd (const Reg<T>, const Reg<T>, const Reg<T>)` | `double`, `float`                                            |
-| `fmsub`       |              | `Reg<T> fmsub  (const Reg<T>, const Reg<T>, const Reg<T>)` | `double`, `float`                                            |
-| `fnmsub`      |              | `Reg<T> fnmsub (const Reg<T>, const Reg<T>, const Reg<T>)` | `double`, `float`                                            |
-| `min`         |              | `Reg<T> min    (const Reg<T>, const Reg<T>)`               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `max`         |              | `Reg<T> max    (const Reg<T>, const Reg<T>)`               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `div2`        |              | `Reg<T> div2   (const Reg<T>)`                             | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `div4`        |              | `Reg<T> div4   (const Reg<T>)`                             | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `abs`         |              | `Reg<T> abs    (const Reg<T>)`                             | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `sqrt`        |              | `Reg<T> sqrt   (const Reg<T>)`                             | `double`, `float`                                            |
-| `rsqrt`       |              | `Reg<T> rsqrt  (const Reg<T>)`                             | `double`, `float`                                            |
-| `sat`         |              | `Reg<T> sat    (const Reg<T>, const T, const T)`           | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `neg`         |              | `Reg<T> neg    (const Reg<T>, const Msk<N>)`               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `neg`         |              | `Reg<T> neg    (const Reg<T>, const Reg<T>)`               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `sign`        |              | `Msk<N> sign   (const Reg<T>)`                             | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `round`       |              | `Reg<T> round  (const Reg<T>)`                             | `double`, `float`                                            |
+| **Short name** | **Operator** | **Prototype**                                              | **Supported types**                                          |
+| :---           | :---         | :---                                                       | :---                                                         |
+| `add`          | `+` and `+=` | `Reg<T> add    (const Reg<T>, const Reg<T>)`               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `sub`          | `-` and `-=` | `Reg<T> sub    (const Reg<T>, const Reg<T>)`               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `mul`          | `*` and `*=` | `Reg<T> mul    (const Reg<T>, const Reg<T>)`               | `double`, `float`, `int32_t`, `int16_t`, `int8_t`            |
+| `div`          | `/` and `/=` | `Reg<T> mul    (const Reg<T>, const Reg<T>)`               | `double`, `float`                                            |
+| `fmadd`        |              | `Reg<T> fmadd  (const Reg<T>, const Reg<T>, const Reg<T>)` | `double`, `float`                                            |
+| `fnmadd`       |              | `Reg<T> fnmadd (const Reg<T>, const Reg<T>, const Reg<T>)` | `double`, `float`                                            |
+| `fmsub`        |              | `Reg<T> fmsub  (const Reg<T>, const Reg<T>, const Reg<T>)` | `double`, `float`                                            |
+| `fnmsub`       |              | `Reg<T> fnmsub (const Reg<T>, const Reg<T>, const Reg<T>)` | `double`, `float`                                            |
+| `min`          |              | `Reg<T> min    (const Reg<T>, const Reg<T>)`               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `max`          |              | `Reg<T> max    (const Reg<T>, const Reg<T>)`               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `div2`         |              | `Reg<T> div2   (const Reg<T>)`                             | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `div4`         |              | `Reg<T> div4   (const Reg<T>)`                             | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `abs`          |              | `Reg<T> abs    (const Reg<T>)`                             | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `sqrt`         |              | `Reg<T> sqrt   (const Reg<T>)`                             | `double`, `float`                                            |
+| `rsqrt`        |              | `Reg<T> rsqrt  (const Reg<T>)`                             | `double`, `float`                                            |
+| `sat`          |              | `Reg<T> sat    (const Reg<T>, const T, const T)`           | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `neg`          |              | `Reg<T> neg    (const Reg<T>, const Msk<N>)`               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `neg`          |              | `Reg<T> neg    (const Reg<T>, const Reg<T>)`               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `sign`         |              | `Msk<N> sign   (const Reg<T>)`                             | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `round`        |              | `Reg<T> round  (const Reg<T>)`                             | `double`, `float`                                            |
 
 ### Reductions (horizontal functions)
 
-| Short name        | Prototype                                                  | Supported types                                              |
+| **Short name**    | **Prototype**                                              | **Supported types**                                          |
 | :---              | :---                                                       | :---                                                         |
 | `hadd` or `sum`   | `T   hadd                    (const Reg<T>)`               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 | `hmul`            | `T   hmul                    (const Reg<T>)`               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
@@ -401,16 +401,16 @@ int main()
 | `hmax`            | `T   hmax                    (const Reg<T>)`               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 | `testz`           | `int testz                   (const Reg<T>, const Reg<T>)` | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 | `testz`           | `int testz                   (const Msk<N>, const Msk<N>)` |                                                              |
-| `testz`           | `int testz                   (const Reg<T>`                | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `testz`           | `int testz                   (const Reg<T>)`               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 | `testz`           | `int testz                   (const Msk<N>)`               |                                                              |
 | `Reduction<T,OP>` | `T   Reduction<T,OP>::sapply (const Reg<T>)`               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 
 ### Math functions
 
-| Short name | Prototype                                        | Supported types                    |
-| :---       | :---                                             | :---                               |
-| `exp`      | `Reg<T> exp    (const Reg<T>)`                   | `double` (only on `icpc`), `float` |
-| `log`      | `Reg<T> log    (const Reg<T>)`                   | `double` (only on `icpc`), `float` |
-| `sin`      | `Reg<T> sin    (const Reg<T>)`                   | `double` (only on `icpc`), `float` |
-| `cos`      | `Reg<T> cos    (const Reg<T>)`                   | `double` (only on `icpc`), `float` |
-| `sincos`   | `void   sincos (const Reg<T>, Reg<T>&, Reg<T>&)` | `double` (only on `icpc`), `float` |
+| **Short name** | **Prototype**                                    | **Supported types**                |
+| :---           | :---                                             | :---                               |
+| `exp`          | `Reg<T> exp    (const Reg<T>)`                   | `double` (only on `icpc`), `float` |
+| `log`          | `Reg<T> log    (const Reg<T>)`                   | `double` (only on `icpc`), `float` |
+| `sin`          | `Reg<T> sin    (const Reg<T>)`                   | `double` (only on `icpc`), `float` |
+| `cos`          | `Reg<T> cos    (const Reg<T>)`                   | `double` (only on `icpc`), `float` |
+| `sincos`       | `void   sincos (const Reg<T>, Reg<T>&, Reg<T>&)` | `double` (only on `icpc`), `float` |
