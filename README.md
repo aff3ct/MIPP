@@ -5,7 +5,7 @@
 ## Purpose
 
 MIPP is a portable and Open-source wrapper (MIT license) for vector intrinsic functions (SIMD) written in C++11. It works for SSE, AVX, AVX-512 and ARM NEON (32-bit and 64-bit) instructions.
-MIPP wrapper supports simple/double precision floating-point numbers and also signed integer arithmetic (32-bit, 16-bit and 8-bit).
+MIPP wrapper supports simple/double precision floating-point numbers and also signed integer arithmetic (64-bit, 32-bit, 16-bit and 8-bit).
 
 With the MIPP wrapper you do not need to write a specific intrinsic code anymore. Just use provided functions and the wrapper will automatically generates the right intrisic calls for your specific architecture.
 
@@ -13,14 +13,14 @@ With the MIPP wrapper you do not need to write a specific intrinsic code anymore
 
 ### Supported compilers
 
-At this time, MIPP has been tested on:
+At this time, MIPP has been tested on the following compilers:
 
-  - the Intel compiler (`icpc` >= `16`),
-  - the GNU compiler (`g++` >= `4.8`),
-  - the Clang compiler (`clang++` >= `3.6`),
-  - the Microsoft compiler (`msvc` >= `14`).
+  - `icpc` >= `16` (Intel),
+  - `g++` >= `4.8` (GNU),
+  - `clang++` >= `3.6` (Clang),
+  - `msvc` >= `14` (Microsoft: the performances are reduced compared to the other compilers, the compiler is not able to fully inline all the methods).
 
-### Install and configure your code for MIPP
+### Install and configure your code
 
 You don't have to install MIPP because it is a simple C++ header file.
 Just include the header into your source files when the wrapper is needed.
@@ -40,6 +40,17 @@ Before trying to compile, think to tell the compiler what kind of vector instruc
 For instance, if you are using GNU compiler (`g++`) you simply have to add the `-march=native` option for SSE and AVX CPUs compatible.
 For ARM CPUs with NEON instructions you have to add the `-mfpu=neon` option (since most of current NEON instructions are not IEEE-754 compatible).
 MIPP also use some nice features provided by the C++11 and so we have to add the `-std=c++11` flag to compile the code. Your are now ready to run your code with the mipp.h wrapper.
+
+### Sequential mode
+
+By default, MIPP try to recognize the instruction set from the preprocessor definitions.
+If MIPP can't match the instruction set (for instance when MIPP does not support the targeted instruction set), MIPP fall back on standard sequential instructions.
+In this mode, the vectorization is not guarantee anymore but the compiler can still perform auto-vectorization.
+
+It is possible to force MIPP to use the sequential mode with the following compiler definition: `-DMIPP_NO_INTRINSICS`.
+Sometime it can be useful for debugging or to bench a code.
+
+If you want to check the MIPP mode configuration, you can print the following global variable: `mipp::InstructionFullType` (`std::string`).
 
 ### Vector register declaration
 
@@ -61,18 +72,11 @@ The register size directly depends on the precision of the data we are working o
 
 ### Register load and store instructions
 
-Firstly, register loads or stores need to be aligned on the register size.
-To allocate aligned data you can use the MIPP predefined vector class: `mipp::vector`. This class is fully retro-compatible with the standard `std::vector` class and it can be use everywhere you can use `std::vector`.
-
-```cpp
-mipp::vector<float> myVector(n);
-```
-
-Now, if the data are correctly allocated we can perform a register loading from the vector:
+Loading memory from a vector into a register:
 
 ```cpp
 int n = mipp::N<float>() * 10;
-mipp::vector<float> myVector(n);
+std::vector<float> myVector(n);
 int i = 0;
 mipp::Reg<float> r1 = &myVector[i*mipp::N<float>()];
 ```
@@ -81,13 +85,26 @@ Store can be done with the `store(...)` method:
 
 ```cpp
 int n = mipp::N<float>() * 10;
-mipp::vector<float> myVector(n);
+std::vector<float> myVector(n);
 int i = 0;
 mipp::Reg<float> r1 = &myVector[i*mipp::N<float>()];
 
 // do something with r1
 
 r1.store(&myVector[(i+1)*mipp::N<float>()]);
+```
+
+By default the loads and stores work on **unaligned memory**.
+It is possible to control this behavior with the `-DMIPP_ALIGNED_LOADS` definition: when specified, the loads and stores work on **aligned memory** by default.
+In the **aligned memory** mode, it is still possible to perform unaligned memory operations with the `mipp::loadu` and `mipp::storeu` functions.
+However, it is not possible to perform aligned loads and stores in the **unaligned memory** mode.
+
+
+To allocate aligned data you can use the MIPP aligned memory allocator wrapped in the `mipp::vector` class: .
+`mipp::vector` is fully retro-compatible with the standard `std::vector` class and it can be use everywhere you can use `std::vector`.
+
+```cpp
+mipp::vector<float> myVector(n);
 ```
 
 ### Register initialization
