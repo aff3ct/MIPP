@@ -314,123 +314,123 @@ std::cout << ZMM4 << std::endl; // output: "[0, -3, 0, 0]"
 
 ### Memory operations
 
-| **Short name**  | **Prototype**                                                       | **Supported types**                                          |
-| :---            | :---                                                                | :---                                                         |
-| `load`          | `Reg  <T> load          (const T*)`                                 | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `loadu`         | `Reg  <T> loadu         (const T*)`                                 | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `store`         | `void     store         (T*, const Reg<T>)`                         | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `storeu`        | `void     storeu        (T*, const Reg<T>)`                         | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `set`           | `Reg  <T> set           (const T[N])`                               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `set`           | `Msk  <N> set           (const bool[N])`                            |                                                              |
-| `set1`          | `Reg  <T> set1          (const T)`                                  | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `set1`          | `Msk  <N> set1          (const bool)`                               |                                                              |
-| `set0`          | `Reg  <T> set0          ()`                                         | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `set0`          | `Msk  <N> set0          ()`                                         |                                                              |
-| `low`           | `Reg_2<T> low           ()`                                         | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `high`          | `Reg_2<T> high          ()`                                         | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `cmask`         | `Reg  <T> cmask         (const uint32_t[N  ])`                      | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `cmask2`        | `Reg  <T> cmask2        (const uint32_t[N/2])`                      | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `cmask4`        | `Reg  <T> cmask4        (const uint32_t[N/4])`                      | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `shuff`         | `Reg  <T> shuff         (const Reg<T>, const Reg<T> cm)`            | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `shuff2`        | `Reg  <T> shuff2        (const Reg<T>, const Reg<T> cm2)`           | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `shuff4`        | `Reg  <T> shuff4        (const Reg<T>, const Reg<T> cm4)`           | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `interleave`    | `Regx2<T> interleave    (const Reg<T>, const Reg<T>)`               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `interleave2`   | `Regx2<T> interleave2   (const Reg<T>, const Reg<T>)`               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `interleave4`   | `Regx2<T> interleave4   (const Reg<T>, const Reg<T>)`               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `interleavelo`  | `Reg  <T> interleavelo  (const Reg<T>, const Reg<T>)`               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `interleavelo2` | `Reg  <T> interleavelo2 (const Reg<T>, const Reg<T>)`               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `interleavelo4` | `Reg  <T> interleavelo4 (const Reg<T>, const Reg<T>)`               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `interleavehi`  | `Reg  <T> interleavehi  (const Reg<T>, const Reg<T>)`               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `interleavehi2` | `Reg  <T> interleavehi2 (const Reg<T>, const Reg<T>)`               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `interleavehi4` | `Reg  <T> interleavehi4 (const Reg<T>, const Reg<T>)`               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `lrot`          | `Reg  <T> lrot          (const Reg<T>)`                             | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `rrot`          | `Reg  <T> rrot          (const Reg<T>)`                             | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `blend`         | `Reg  <T> blend         (const Reg<T>, const Reg<T>, const Msk<N>)` | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| **Short name**  | **Prototype**                                                               | **Documentation**                                                                                       | **Supported types**                                          |
+| :---            | :---                                                                        | :---                                                                                                    | :---                                                         |
+| `load`          | `Reg  <T> load          (const T* mem)`                                     | Loads aligned data from `mem` to a register.                                                            | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `loadu`         | `Reg  <T> loadu         (const T* mem)`                                     | Loads unaligned data from `mem` to a register.                                                          | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `store`         | `void     store         (T* mem, const Reg<T> r)`                           | Stores the `r` register in the `mem` aligned data.                                                      | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `storeu`        | `void     storeu        (T* mem, const Reg<T> r)`                           | Stores the `r` register in the `mem` unaligned data.                                                    | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `set`           | `Reg  <T> set           (const T[N] vals)`                                  | Sets a register from the values in `vals`.                                                              | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `set`           | `Msk  <N> set           (const bool[N] bits)`                               | Sets a mask from the bits in `bits`.                                                                    |                                                              |
+| `set1`          | `Reg  <T> set1          (const T val)`                                      | Broadcasts `val` in a register.                                                                         | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `set1`          | `Msk  <N> set1          (const bool bit)`                                   | Broadcasts `bit` in a mask.                                                                             |                                                              |
+| `set0`          | `Reg  <T> set0          ()`                                                 | Initializes a register to zero.                                                                         | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `set0`          | `Msk  <N> set0          ()`                                                 | Initializes a mask to false.                                                                            |                                                              |
+| `low`           | `Reg_2<T> low           ()`                                                 | Gets the low part of a register.                                                                        | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `high`          | `Reg_2<T> high          ()`                                                 | Gets the high part of a register.                                                                       | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `cmask`         | `Reg  <T> cmask         (const uint32_t[N  ] ids)`                          | Creates a cmask from a indexes list.                                                                    | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `cmask2`        | `Reg  <T> cmask2        (const uint32_t[N/2] ids)`                          | Creates a cmask2 from a indexes list.                                                                   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `cmask4`        | `Reg  <T> cmask4        (const uint32_t[N/4] ids)`                          | Creates a cmask4 from a indexes list.                                                                   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `shuff`         | `Reg  <T> shuff         (const Reg<T> r, const Reg<T> cm)`                  | Shuffles the elements of `r` according to the cmask `cm`.                                               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `shuff2`        | `Reg  <T> shuff2        (const Reg<T> r, const Reg<T> cm2)`                 | Shuffles the elements of `r` according to the cmask2 `cm2` (same shuffle is applied in both lanes).     | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `shuff4`        | `Reg  <T> shuff4        (const Reg<T> r, const Reg<T> cm4)`                 | Shuffles the elements of `r` according to the cmask4 `cm4` (same shuffle is applied in the four lanes). | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `interleave`    | `Regx2<T> interleave    (const Reg<T> r1, const Reg<T> r2)`                 | Interleaves `r1` and `r2` : `[r1_1, r2_1, r1_2, r2_2, ..., r1_n, r2_n]`.                                | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `interleave2`   | `Regx2<T> interleave2   (const Reg<T> r1, const Reg<T> r2)`                 | Interleaves `r1` and `r2` considering two lanes.                                                        | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `interleave4`   | `Regx2<T> interleave4   (const Reg<T> r1, const Reg<T> r2)`                 | Interleaves `r1` and `r2` considering four lanes.                                                       | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `interleavelo`  | `Reg  <T> interleavelo  (const Reg<T> r1, const Reg<T> r2)`                 | Interleaves the low part of `r1` with the low part of `r2`.                                             | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `interleavelo2` | `Reg  <T> interleavelo2 (const Reg<T> r1, const Reg<T> r2)`                 | Interleaves the low part of `r1` with the low part of `r2` (considering two lanes).                     | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `interleavelo4` | `Reg  <T> interleavelo4 (const Reg<T> r1, const Reg<T> r2)`                 | Interleaves the low part of `r1` with the low part of `r2` (considering four lanes).                    | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `interleavehi`  | `Reg  <T> interleavehi  (const Reg<T> r1, const Reg<T> r2)`                 | Interleaves the high part of `r1` with the high part of `r2`.                                           | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `interleavehi2` | `Reg  <T> interleavehi2 (const Reg<T> r1, const Reg<T> r2)`                 | Interleaves the high part of `r1` with the high part of `r2` (considering two lanes).                   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `interleavehi4` | `Reg  <T> interleavehi4 (const Reg<T> r1, const Reg<T> r2)`                 | Interleaves the high part of `r1` with the high part of `r2` (considering four lanes).                  | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `lrot`          | `Reg  <T> lrot          (const Reg<T> r)`                                   | Rotates the `r` register from the left (cyclic permutation).                                            | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `rrot`          | `Reg  <T> rrot          (const Reg<T> r)`                                   | Rotates the `r` register from the right (cyclic permutation).                                           | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `blend`         | `Reg  <T> blend         (const Reg<T> r1, const Reg<T> r2, const Msk<N> m)` | Combines `r1` and `r2` register following the `m` mask values (`m_i ? r1_i : r2_i`).                    | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 
 ### Bitwise operations
 
-| **Short name** | **Operator**       | **Prototype**                                  | **Supported types**                                          |
-| :---           | :---               | :---                                           | :---                                                         |
-| `andb`         | `&` and `&=`       | `Reg<T> andb   (const Reg<T>, const Reg<T>)`   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `andb`         | `&` and `&=`       | `Msk<N> andb   (const Msk<N>, const Msk<N>)`   |                                                              |
-| `andnb`        |                    | `Reg<T> andnb  (const Reg<T>, const Reg<T>)`   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `andnb`        |                    | `Msk<N> andnb  (const Msk<N>, const Msk<N>)`   |                                                              |
-| `orb`          | `pipe` and `pipe=` | `Reg<T> orb    (const Reg<T>, const Reg<T>)`   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `orb`          | `pipe` and `pipe=` | `Msk<N> orb    (const Msk<N>, const Msk<N>)`   |                                                              |
-| `xorb`         | `^` and `^=`       | `Reg<T> xorb   (const Reg<T>, const Reg<T>)`   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `xorb`         | `^` and `^=`       | `Msk<N> xorb   (const Msk<N>, const Msk<N>)`   |                                                              |
-| `lshift`       | `<<` and `<<=`     | `Reg<T> lshift (const Reg<T>, const uint32_t)` | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `lshift`       | `<<` and `<<=`     | `Msk<N> lshift (const Msk<N>, const uint32_t)` |                                                              |
-| `rshift`       | `>>` and `>>=`     | `Reg<T> rshift (const Reg<T>, const uint32_t)` | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `rshift`       | `>>` and `>>=`     | `Msk<N> rshift (const Msk<N>, const uint32_t)` |                                                              |
-| `notb`         | `~`                | `Reg<T> not    (const Reg<T>)`                 | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `notb`         | `~`                | `Msk<N> not    (const Msk<N>)`                 |                                                              |
+| **Short name** | **Operator**       | **Prototype**                                      | **Documentation**                           | **Supported types**                                          |
+| :---           | :---               | :---                                               | :---                                        | :---                                                         |
+| `andb`         | `&` and `&=`       | `Reg<T> andb   (const Reg<T> r1, const Reg<T> r2)` | Computes the bitwise AND: `r1 & r2`.        | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `andb`         | `&` and `&=`       | `Msk<N> andb   (const Msk<N> m1, const Msk<N> m2)` | Computes the bitwise AND: `m1 & m2`.        |                                                              |
+| `andnb`        |                    | `Reg<T> andnb  (const Reg<T> r1, const Reg<T> r1)` | Computes the bitwise AND NOT: `~r1 & r2`.   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `andnb`        |                    | `Msk<N> andnb  (const Msk<N> m1, const Msk<N> m2)` | Computes the bitwise AND NOT: `~m1 & m2`.   |                                                              |
+| `orb`          | `pipe` and `pipe=` | `Reg<T> orb    (const Reg<T> r1, const Reg<T> r2)` | Computes the bitwise OR: `r1 pipe r2`.      | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `orb`          | `pipe` and `pipe=` | `Msk<N> orb    (const Msk<N> m1, const Msk<N> m2)` | Computes the bitwise OR: `m1 pipe m2`.      |                                                              |
+| `xorb`         | `^` and `^=`       | `Reg<T> xorb   (const Reg<T> r1, const Reg<T> r2)` | Computes the bitwise XOR: `r1 ^ r2`.        | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `xorb`         | `^` and `^=`       | `Msk<N> xorb   (const Msk<N> m1, const Msk<N> m2)` | Computes the bitwise XOR: `m1 ^ m2`.        |                                                              |
+| `lshift`       | `<<` and `<<=`     | `Reg<T> lshift (const Reg<T> r, const uint32_t n)` | Computes the bitwise LEFT SHIFT: `r << n`.  | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `lshift`       | `<<` and `<<=`     | `Msk<N> lshift (const Msk<N> m, const uint32_t n)` | Computes the bitwise LEFT SHIFT: `m << n`.  |                                                              |
+| `rshift`       | `>>` and `>>=`     | `Reg<T> rshift (const Reg<T> r, const uint32_t n)` | Computes the bitwise RIGHT SHIFT: `r >> n`. | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `rshift`       | `>>` and `>>=`     | `Msk<N> rshift (const Msk<N> m, const uint32_t n)` | Computes the bitwise RIGHT SHIFT: `m >> n`. |                                                              |
+| `notb`         | `~`                | `Reg<T> notb   (const Reg<T> r)`                   | Computes the bitwise NOT: `~r`.             | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `notb`         | `~`                | `Msk<N> notb   (const Msk<N> m)`                   | Computes the bitwise NOT: `~m`.             |                                                              |
 
-### Comparisons
+### Logical comparisons
 
-| **Short name** | **Operator** | **Prototype**                                | **Supported types**                                          |
-| :---           | :---         | :---                                         | :---                                                         |
-| `cmpeq`        | `==`         | `Msk<N> cmpeq  (const Reg<T>, const Reg<T>)` | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `cmpneq`       | `!=`         | `Msk<N> cmpneq (const Reg<T>, const Reg<T>)` | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `cmpge`        | `>=`         | `Msk<N> cmpge  (const Reg<T>, const Reg<T>)` | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `cmpgt`        | `>`          | `Msk<N> cmpgt  (const Reg<T>, const Reg<T>)` | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `cmple`        | `<=`         | `Msk<N> cmple  (const Reg<T>, const Reg<T>)` | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `cmplt`        | `<`          | `Msk<N> cmplt  (const Reg<T>, const Reg<T>)` | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| **Short name** | **Operator** | **Prototype**                                      | **Documentation**                          | **Supported types**                                          |
+| :---           | :---         | :---                                               | :---                                       | :---                                                         |
+| `cmpeq`        | `==`         | `Msk<N> cmpeq  (const Reg<T> r1, const Reg<T> r2)` | Compares if equal: `r1 == r2`.             | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `cmpneq`       | `!=`         | `Msk<N> cmpneq (const Reg<T> r1, const Reg<T> r2)` | Compares if not equal: `r1 != r2`.         | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `cmpge`        | `>=`         | `Msk<N> cmpge  (const Reg<T> r1, const Reg<T> r2)` | Compares if greater or equal : `r1 >= r2`. | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `cmpgt`        | `>`          | `Msk<N> cmpgt  (const Reg<T> r1, const Reg<T> r2)` | Compares if strictly greater: `r1 > r2`.   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `cmple`        | `<=`         | `Msk<N> cmple  (const Reg<T> r1, const Reg<T> r2)` | Compares if lower or equal: `r1 <= r2`.    | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `cmplt`        | `<`          | `Msk<N> cmplt  (const Reg<T> r1, const Reg<T> r2)` | Compares if strictly lower: `r1 < r2`.     | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 
 ### Conversions and packing
 
-| **Short name** | **Prototype**                                  | **Supported types**                                             |
-| :---           | :---                                           | :---                                                            |
-| `toReg`        | `Reg<T>  toReg (const Msk<N>)`                 | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t`    |
-| `cvt`          | `Reg<T2> cvt   (const Reg<T1>)`                | `float -> int32_t`,                                             |
-| `cvt`          | `Reg<T2> cvt   (const Reg_2<T1>)`              | `int8_t -> int16_t`, `int16_t -> int32_t`, `int32_t -> int64_t` |
-| `pack`         | `Reg<T2> pack  (const Reg<T1>, const Reg<T1>)` | `int32_t -> int16_t`, `int16_t -> int8_t`                       |
+| **Short name** | **Prototype**                                        | **Documentation**                                                                                                                   | **Supported types**                                                                                             |
+| :---           | :---                                                 | :---                                                                                                                                | :---                                                            |
+| `toReg`        | `Reg<T>  toReg (const Msk<N> m)`                     | Converts the mask `m` into a register of type `T`, the number of elements `N` has to be the same for the mask and the register.     | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t`    |
+| `cvt`          | `Reg<T2> cvt   (const Reg<T1> r)`                    | Converts the elements of `r` into an other representation (the new representation has the same size in bits than the original one). | `float -> int32_t`,                                             |
+| `cvt`          | `Reg<T2> cvt   (const Reg_2<T1> r)`                  | Converts smaller elements of `r` into bigger elements.                                                                              | `int8_t -> int16_t`, `int16_t -> int32_t`, `int32_t -> int64_t` |
+| `pack`         | `Reg<T2> pack  (const Reg<T1> r1, const Reg<T1> r2)` | Packs bigger elements of `r1` and `r2` into smaller elements (some information can be lose in the conversion).                      | `int32_t -> int16_t`, `int16_t -> int8_t`                       |
 
 ### Arithmetic operations
 
-| **Short name** | **Operator** | **Prototype**                                              | **Supported types**                                          |
-| :---           | :---         | :---                                                       | :---                                                         |
-| `add`          | `+` and `+=` | `Reg<T> add    (const Reg<T>, const Reg<T>)`               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `sub`          | `-` and `-=` | `Reg<T> sub    (const Reg<T>, const Reg<T>)`               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `mul`          | `*` and `*=` | `Reg<T> mul    (const Reg<T>, const Reg<T>)`               | `double`, `float`, `int32_t`, `int16_t`, `int8_t`            |
-| `div`          | `/` and `/=` | `Reg<T> mul    (const Reg<T>, const Reg<T>)`               | `double`, `float`                                            |
-| `fmadd`        |              | `Reg<T> fmadd  (const Reg<T>, const Reg<T>, const Reg<T>)` | `double`, `float`                                            |
-| `fnmadd`       |              | `Reg<T> fnmadd (const Reg<T>, const Reg<T>, const Reg<T>)` | `double`, `float`                                            |
-| `fmsub`        |              | `Reg<T> fmsub  (const Reg<T>, const Reg<T>, const Reg<T>)` | `double`, `float`                                            |
-| `fnmsub`       |              | `Reg<T> fnmsub (const Reg<T>, const Reg<T>, const Reg<T>)` | `double`, `float`                                            |
-| `min`          |              | `Reg<T> min    (const Reg<T>, const Reg<T>)`               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `max`          |              | `Reg<T> max    (const Reg<T>, const Reg<T>)`               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `div2`         |              | `Reg<T> div2   (const Reg<T>)`                             | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `div4`         |              | `Reg<T> div4   (const Reg<T>)`                             | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `abs`          |              | `Reg<T> abs    (const Reg<T>)`                             | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `sqrt`         |              | `Reg<T> sqrt   (const Reg<T>)`                             | `double`, `float`                                            |
-| `rsqrt`        |              | `Reg<T> rsqrt  (const Reg<T>)`                             | `double`, `float`                                            |
-| `sat`          |              | `Reg<T> sat    (const Reg<T>, const T, const T)`           | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `neg`          |              | `Reg<T> neg    (const Reg<T>, const Msk<N>)`               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `neg`          |              | `Reg<T> neg    (const Reg<T>, const Reg<T>)`               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `sign`         |              | `Msk<N> sign   (const Reg<T>)`                             | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `round`        |              | `Reg<T> round  (const Reg<T>)`                             | `double`, `float`                                            |
+| **Short name** | **Operator** | **Prototype**                                                       | **Documentation**                                                                                   | **Supported types**                                          |
+| :---           | :---         | :---                                                                | :---                                                                                                | :---                                                         |
+| `add`          | `+` and `+=` | `Reg<T> add    (const Reg<T> r1, const Reg<T> r2)`                  | Performs the arithmetic addition: `r1 + r2`.                                                        | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `sub`          | `-` and `-=` | `Reg<T> sub    (const Reg<T> r1, const Reg<T> r2)`                  | Performs the arithmetic subtraction: `r1 - r2`.                                                     | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `mul`          | `*` and `*=` | `Reg<T> mul    (const Reg<T> r1, const Reg<T> r2)`                  | Performs the arithmetic multiplication: `r1 * r2`.                                                  | `double`, `float`, `int32_t`, `int16_t`, `int8_t`            |
+| `div`          | `/` and `/=` | `Reg<T> div    (const Reg<T> r1, const Reg<T> r2)`                  | Performs the arithmetic division: `r1 / r2`.                                                        | `double`, `float`                                            |
+| `fmadd`        |              | `Reg<T> fmadd  (const Reg<T> r1, const Reg<T> r2, const Reg<T> r3)` | Performs the fused multiplication and addition: `r1 * r2 + r3`.                                     | `double`, `float`                                            |
+| `fnmadd`       |              | `Reg<T> fnmadd (const Reg<T> r1, const Reg<T> r2, const Reg<T> r3)` | Performs the negative fused multiplication and addition: `-(r1 * r2) + r3`.                         | `double`, `float`                                            |
+| `fmsub`        |              | `Reg<T> fmsub  (const Reg<T> r1, const Reg<T> r2, const Reg<T> r3)` | Performs the fused multiplication and subtraction: `r1 * r2 - r3`.                                  | `double`, `float`                                            |
+| `fnmsub`       |              | `Reg<T> fnmsub (const Reg<T> r1, const Reg<T> r2, const Reg<T> r3)` | Performs the negative fused multiplication and subtraction: `-(r1 * r2) - r3`.                      | `double`, `float`                                            |
+| `min`          |              | `Reg<T> min    (const Reg<T> r1, const Reg<T> r2)`                  | Selects the minimum: `r1_i < r2_i ? r1_i : r2_i`.                                                   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `max`          |              | `Reg<T> max    (const Reg<T> r1, const Reg<T> r2)`                  | Selects the maximum: `r1_i > r2_i ? r1_i : r2_i`.                                                   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `div2`         |              | `Reg<T> div2   (const Reg<T> r)`                                    | Performs the arithmetic division by two: `r / 2`.                                                   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `div4`         |              | `Reg<T> div4   (const Reg<T> r)`                                    | Performs the arithmetic division by four: `r / 4`.                                                  | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `abs`          |              | `Reg<T> abs    (const Reg<T> r)`                                    | Computes the absolute value of `r`.                                                                 | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `sqrt`         |              | `Reg<T> sqrt   (const Reg<T> r)`                                    | Computes the square root of `r`.                                                                    | `double`, `float`                                            |
+| `rsqrt`        |              | `Reg<T> rsqrt  (const Reg<T> r)`                                    | Computes the reciprocal square root of `r`: `1 / sqrt(r)`.                                          | `double`, `float`                                            |
+| `sat`          |              | `Reg<T> sat    (const Reg<T> r, const T minv, const T maxv)`        | Saturates the register values: `max(min(r, minv), maxv)`.                                           | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `neg`          |              | `Reg<T> neg    (const Reg<T> r, const Msk<N> m)`                    | Negates the register following the mask values: `m_i ? -r_i : r_i`.                                 | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `neg`          |              | `Reg<T> neg    (const Reg<T> r1, const Reg<T> r2)`                  | Negates the register following the last register values: `r2_i < 0 ? -r1_i : r1_i`.                 | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `sign`         |              | `Msk<N> sign   (const Reg<T> r)`                                    | Returns the sign: `r < 0`.                                                                          | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `round`        |              | `Reg<T> round  (const Reg<T> r)`                                    | Rounds the registers values: `fractional_part(r) >= 0.5 ? integral_part(r) + 1 : integral_part(r)`. | `double`, `float`                                            |
 
-### Reductions (horizontal functions)
+### Reductions (horizontal functions) :
 
-| **Short name**    | **Prototype**                                              | **Supported types**                                          |
-| :---              | :---                                                       | :---                                                         |
-| `hadd` or `sum`   | `T   hadd                    (const Reg<T>)`               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `hmul`            | `T   hmul                    (const Reg<T>)`               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `hmin`            | `T   hmin                    (const Reg<T>)`               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `hmax`            | `T   hmax                    (const Reg<T>)`               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `testz`           | `int testz                   (const Reg<T>, const Reg<T>)` | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `testz`           | `int testz                   (const Msk<N>, const Msk<N>)` |                                                              |
-| `testz`           | `int testz                   (const Reg<T>)`               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `testz`           | `int testz                   (const Msk<N>)`               |                                                              |
-| `Reduction<T,OP>` | `T   Reduction<T,OP>::sapply (const Reg<T>)`               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| **Short name**    | **Prototype**                                                     | **Documentation**                                                                                                  | **Supported types**                                          |
+| :---              | :---                                                              | :---                                                                                                               | :---                                                         |
+| `hadd` or `sum`   | `T    hadd                    (const Reg<T> r)`                   | Sums all the elements in the register `r`: `r_1 + r_2 + ... + r_n`.                                                | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `hmul`            | `T    hmul                    (const Reg<T> r)`                   | Multiplies all the elements in the register `r` : `r_1 * r_2 * ... * r_n`.                                         | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `hmin`            | `T    hmin                    (const Reg<T> r)`                   | Selects the minimum in the register `r` : `min(min(min(..., r_1), r_2), r_n)`.                                     | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `hmax`            | `T    hmax                    (const Reg<T> r)`                   | Selects the maximum in the register `r` : `max(max(max(..., r_1), r_2), r_n)`.                                     | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `testz`           | `bool testz                   (const Reg<T> r1, const Reg<T> r2)` | Mainly tests if all the elements of the registers are zeros: r = (r1 & r2); !(r_1 | r_2 | ... | r_n).              | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `testz`           | `bool testz                   (const Msk<N> m1, const Msk<N> m2)` | Mainly tests if all the elements of the masks are zeros: m = (m1 & m2); !(m_1 | m_2 | ... | m_n).                  |                                                              |
+| `testz`           | `bool testz                   (const Reg<T> r)`                   | Tests if all the elements of the register aren't zeros: !(r_1 | r_2 | ... | r_n).                                  | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `testz`           | `bool testz                   (const Msk<N> r)`                   | Tests if all the elements of the mask are zeros: !(m_1 | m_2 | ... | m_n).                                         |                                                              |
+| `Reduction<T,OP>` | `T    Reduction<T,OP>::sapply (const Reg<T> r)`                   | Generic reduction operation, can take a user defined operator `OP` and will performs the reduction with it on `r`. | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 
 ### Math functions
 
-| **Short name** | **Prototype**                                    | **Supported types**                |
-| :---           | :---                                             | :---                               |
-| `exp`          | `Reg<T> exp    (const Reg<T>)`                   | `double` (only on `icpc`), `float` |
-| `log`          | `Reg<T> log    (const Reg<T>)`                   | `double` (only on `icpc`), `float` |
-| `sin`          | `Reg<T> sin    (const Reg<T>)`                   | `double` (only on `icpc`), `float` |
-| `cos`          | `Reg<T> cos    (const Reg<T>)`                   | `double` (only on `icpc`), `float` |
-| `sincos`       | `void   sincos (const Reg<T>, Reg<T>&, Reg<T>&)` | `double` (only on `icpc`), `float` |
+| **Short name** | **Prototype**                                          | **Documentation**                                                    | **Supported types**                |
+| :---           | :---                                                   | :---                                                                 | :---                               |
+| `exp`          | `Reg<T> exp    (const Reg<T> r)`                       | Computes the exponential of `r`.                                     | `double` (only on `icpc`), `float` |
+| `log`          | `Reg<T> log    (const Reg<T> r)`                       | Computes the logarithm of `r`.                                       | `double` (only on `icpc`), `float` |
+| `sin`          | `Reg<T> sin    (const Reg<T> r)`                       | Computes the sines of `r`.                                           | `double` (only on `icpc`), `float` |
+| `cos`          | `Reg<T> cos    (const Reg<T> r)`                       | Computes the cosines of `r`.                                         | `double` (only on `icpc`), `float` |
+| `sincos`       | `void   sincos (const Reg<T> r, Reg<T>& s, Reg<T>& c)` | Computes at once the sines (in `s`) and the cosines (in `c`) of `r`. | `double` (only on `icpc`), `float` |
