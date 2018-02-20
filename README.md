@@ -241,16 +241,16 @@ r3 = mipp::max(r1, r2); // r3 = | +3.0 | +3.0 | +3.0 | +3.0 |
 
 ### Permutations
 
-The `rot(...)` method allows you to perform a **rotation** (a cyclic permutation) of the elements inside the register:
+The `lrot(...)` method allows you to perform a **left rotation** (a cyclic permutation) of the elements inside the register:
 
 ```cpp
 mipp::Reg<float> r1, r2;
 r1 = {3.0, 2.0, 1.0, 0.0} // r1 = | +3.0 | +2.0 | +1.0 | +0.0 |
 
-r2 = mipp::rot(r1);       // r2 = | +0.0 | +3.0 | +2.0 | +1.0 |
-r1 = mipp::rot(r2);       // r1 = | +1.0 | +0.0 | +3.0 | +2.0 |
-r2 = mipp::rot(r1);       // r2 = | +2.0 | +1.0 | +0.0 | +3.0 |
-r1 = mipp::rot(r2);       // r1 = | +3.0 | +2.0 | +1.0 | +0.0 |
+r2 = mipp::lrot(r1);       // r2 = | +0.0 | +3.0 | +2.0 | +1.0 |
+r1 = mipp::lrot(r2);       // r1 = | +1.0 | +0.0 | +3.0 | +2.0 |
+r2 = mipp::lrot(r1);       // r2 = | +2.0 | +1.0 | +0.0 | +3.0 |
+r1 = mipp::lrot(r2);       // r1 = | +3.0 | +2.0 | +1.0 | +0.0 |
 ```
 
 Of course there are many more available instructions in the MIPP wrapper and you can find these instructions at the end of this page.
@@ -329,22 +329,22 @@ int main()
 
 ### Bitwise operations
 
-| **Short name** | **Operator**                                   | **Prototype**                                  | **Supported types**                                          |
-| :---           | :---                                           | :---                                           | :---                                                         |
-| `andb`         | `&` and `&=`                                   | `Reg<T> andb   (const Reg<T>, const Reg<T>)`   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `andb`         | `&` and `&=`                                   | `Msk<N> andb   (const Msk<N>, const Msk<N>)`   |                                                              |
-| `andnb`        |                                                | `Reg<T> andnb  (const Reg<T>, const Reg<T>)`   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `andnb`        |                                                | `Msk<N> andnb  (const Msk<N>, const Msk<N>)`   |                                                              |
-| `orb`          | `<code>&#124</code>` and `<code>&#124</code>=` | `Reg<T> orb    (const Reg<T>, const Reg<T>)`   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `orb`          | `<code>&#124</code>` and `<code>&#124</code>=` | `Msk<N> orb    (const Msk<N>, const Msk<N>)`   |                                                              |
-| `xorb`         | `^` and `^=`                                   | `Reg<T> xorb   (const Reg<T>, const Reg<T>)`   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `xorb`         | `^` and `^=`                                   | `Msk<N> xorb   (const Msk<N>, const Msk<N>)`   |                                                              |
-| `lshift`       | `<<` and `<<=`                                 | `Reg<T> lshift (const Reg<T>, const uint32_t)` | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `lshift`       | `<<` and `<<=`                                 | `Msk<N> lshift (const Msk<N>, const uint32_t)` |                                                              |
-| `rshift`       | `>>` and `>>=`                                 | `Reg<T> rshift (const Reg<T>, const uint32_t)` | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `rshift`       | `>>` and `>>=`                                 | `Msk<N> rshift (const Msk<N>, const uint32_t)` |                                                              |
-| `notb`         | `~`                                            | `Reg<T> not    (const Reg<T>)`                 | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `notb`         | `~`                                            | `Msk<N> not    (const Msk<N>)`                 |                                                              |
+| **Short name** | **Operator**   | **Prototype**                                  | **Supported types**                                          |
+| :---           | :---           | :---                                           | :---                                                         |
+| `andb`         | `&` and `&=`   | `Reg<T> andb   (const Reg<T>, const Reg<T>)`   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `andb`         | `&` and `&=`   | `Msk<N> andb   (const Msk<N>, const Msk<N>)`   |                                                              |
+| `andnb`        |                | `Reg<T> andnb  (const Reg<T>, const Reg<T>)`   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `andnb`        |                | `Msk<N> andnb  (const Msk<N>, const Msk<N>)`   |                                                              |
+| `orb`          | `\|` and `\|=` | `Reg<T> orb    (const Reg<T>, const Reg<T>)`   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `orb`          | `\|` and `\|=` | `Msk<N> orb    (const Msk<N>, const Msk<N>)`   |                                                              |
+| `xorb`         | `^` and `^=`   | `Reg<T> xorb   (const Reg<T>, const Reg<T>)`   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `xorb`         | `^` and `^=`   | `Msk<N> xorb   (const Msk<N>, const Msk<N>)`   |                                                              |
+| `lshift`       | `<<` and `<<=` | `Reg<T> lshift (const Reg<T>, const uint32_t)` | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `lshift`       | `<<` and `<<=` | `Msk<N> lshift (const Msk<N>, const uint32_t)` |                                                              |
+| `rshift`       | `>>` and `>>=` | `Reg<T> rshift (const Reg<T>, const uint32_t)` | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `rshift`       | `>>` and `>>=` | `Msk<N> rshift (const Msk<N>, const uint32_t)` |                                                              |
+| `notb`         | `~`            | `Reg<T> not    (const Reg<T>)`                 | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `notb`         | `~`            | `Msk<N> not    (const Msk<N>)`                 |                                                              |
 
 ### Comparisons
 
