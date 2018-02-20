@@ -15,10 +15,10 @@ With the MIPP wrapper you do not need to write a specific intrinsic code anymore
 
 At this time, MIPP has been tested on the following compilers:
 
-  - `icpc` >= `16` (Intel),
-  - `g++` >= `4.8` (GNU),
-  - `clang++` >= `3.6` (Clang),
-  - `msvc` >= `14` (Microsoft: the performances are reduced compared to the other compilers, the compiler is not able to fully inline all the methods).
+  - Intel: `icpc` >= `16`,
+  - GNU: `g++` >= `4.8`,
+  - Clang: `clang++` >= `3.6`,
+  - Microsoft: `msvc` >= `14` (the performances are reduced compared to the other compilers, the compiler is not able to fully inline all the MIPP methods).
 
 ### Install and configure your code
 
@@ -100,7 +100,7 @@ In the **aligned memory** mode, it is still possible to perform unaligned memory
 However, it is not possible to perform aligned loads and stores in the **unaligned memory** mode.
 
 
-To allocate aligned data you can use the MIPP aligned memory allocator wrapped in the `mipp::vector` class: .
+To allocate aligned data you can use the MIPP aligned memory allocator wrapped into the `mipp::vector` class.
 `mipp::vector` is fully retro-compatible with the standard `std::vector` class and it can be use everywhere you can use `std::vector`.
 
 ```cpp
