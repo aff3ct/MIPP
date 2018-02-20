@@ -290,6 +290,26 @@ int main()
 }
 ```
 
+### Masked instructions
+
+MIPP comes with two generic and templatized masked functions (`mask` and `maskz`).
+Those functions allow you to benefit from the AVX-512 masked instructions.
+`mask` and `maskz` functions are retro compatible with older instruction sets.
+
+```cpp
+mipp::Reg<        float>  ZMM1 = {   40,  -30,    60,    80};
+mipp::Reg<        float>  ZMM2 = 0.1; // broadcast
+mipp::Msk<mipp::N<float>> k1   = {false, true, false, false};
+
+// ZMM3 = k1 ? ZMM1 * ZMM2 : ZMM1;
+auto ZMM3 = mipp::mask<float, mipp::mul>(k1, ZMM1, ZMM1, ZMM2);
+std::cout << ZMM3 << std::endl; // output: "[40, -3, 60, 80]"
+
+// ZMM4 = k1 ? ZMM1 * ZMM2 : 0;
+auto ZMM4 = mipp::maskz<float, mipp::mul>(k1, ZMM1, ZMM2);
+std::cout << ZMM4 << std::endl; // output: "[0, -3, 0, 0]"
+```
+
 ## List of MIPP functions
 
 ### Memory operations
@@ -335,7 +355,7 @@ int main()
 | `andb`         | `&` and `&=`   | `Msk<N> andb   (const Msk<N>, const Msk<N>)`   |                                                              |
 | `andnb`        |                | `Reg<T> andnb  (const Reg<T>, const Reg<T>)`   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 | `andnb`        |                | `Msk<N> andnb  (const Msk<N>, const Msk<N>)`   |                                                              |
-| `orb`          | `\|` and `\|=` | `Reg<T> orb    (const Reg<T>, const Reg<T>)`   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `orb`          | `pipe` and `pipe=` | `Reg<T> orb    (const Reg<T>, const Reg<T>)`   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 | `orb`          | `\|` and `\|=` | `Msk<N> orb    (const Msk<N>, const Msk<N>)`   |                                                              |
 | `xorb`         | `^` and `^=`   | `Reg<T> xorb   (const Reg<T>, const Reg<T>)`   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 | `xorb`         | `^` and `^=`   | `Msk<N> xorb   (const Msk<N>, const Msk<N>)`   |                                                              |
