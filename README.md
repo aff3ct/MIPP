@@ -349,22 +349,22 @@ std::cout << ZMM4 << std::endl; // output: "[0, -3, 0, 0]"
 
 ### Bitwise operations
 
-| **Short name** | **Operator**   | **Prototype**                                  | **Supported types**                                          |
-| :---           | :---           | :---                                           | :---                                                         |
-| `andb`         | `&` and `&=`   | `Reg<T> andb   (const Reg<T>, const Reg<T>)`   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `andb`         | `&` and `&=`   | `Msk<N> andb   (const Msk<N>, const Msk<N>)`   |                                                              |
-| `andnb`        |                | `Reg<T> andnb  (const Reg<T>, const Reg<T>)`   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `andnb`        |                | `Msk<N> andnb  (const Msk<N>, const Msk<N>)`   |                                                              |
+| **Short name** | **Operator**       | **Prototype**                                  | **Supported types**                                          |
+| :---           | :---               | :---                                           | :---                                                         |
+| `andb`         | `&` and `&=`       | `Reg<T> andb   (const Reg<T>, const Reg<T>)`   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `andb`         | `&` and `&=`       | `Msk<N> andb   (const Msk<N>, const Msk<N>)`   |                                                              |
+| `andnb`        |                    | `Reg<T> andnb  (const Reg<T>, const Reg<T>)`   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `andnb`        |                    | `Msk<N> andnb  (const Msk<N>, const Msk<N>)`   |                                                              |
 | `orb`          | `pipe` and `pipe=` | `Reg<T> orb    (const Reg<T>, const Reg<T>)`   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `orb`          | `\|` and `\|=` | `Msk<N> orb    (const Msk<N>, const Msk<N>)`   |                                                              |
-| `xorb`         | `^` and `^=`   | `Reg<T> xorb   (const Reg<T>, const Reg<T>)`   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `xorb`         | `^` and `^=`   | `Msk<N> xorb   (const Msk<N>, const Msk<N>)`   |                                                              |
-| `lshift`       | `<<` and `<<=` | `Reg<T> lshift (const Reg<T>, const uint32_t)` | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `lshift`       | `<<` and `<<=` | `Msk<N> lshift (const Msk<N>, const uint32_t)` |                                                              |
-| `rshift`       | `>>` and `>>=` | `Reg<T> rshift (const Reg<T>, const uint32_t)` | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `rshift`       | `>>` and `>>=` | `Msk<N> rshift (const Msk<N>, const uint32_t)` |                                                              |
-| `notb`         | `~`            | `Reg<T> not    (const Reg<T>)`                 | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `notb`         | `~`            | `Msk<N> not    (const Msk<N>)`                 |                                                              |
+| `orb`          | `pipe` and `pipe=` | `Msk<N> orb    (const Msk<N>, const Msk<N>)`   |                                                              |
+| `xorb`         | `^` and `^=`       | `Reg<T> xorb   (const Reg<T>, const Reg<T>)`   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `xorb`         | `^` and `^=`       | `Msk<N> xorb   (const Msk<N>, const Msk<N>)`   |                                                              |
+| `lshift`       | `<<` and `<<=`     | `Reg<T> lshift (const Reg<T>, const uint32_t)` | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `lshift`       | `<<` and `<<=`     | `Msk<N> lshift (const Msk<N>, const uint32_t)` |                                                              |
+| `rshift`       | `>>` and `>>=`     | `Reg<T> rshift (const Reg<T>, const uint32_t)` | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `rshift`       | `>>` and `>>=`     | `Msk<N> rshift (const Msk<N>, const uint32_t)` |                                                              |
+| `notb`         | `~`                | `Reg<T> not    (const Reg<T>)`                 | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `notb`         | `~`                | `Msk<N> not    (const Msk<N>)`                 |                                                              |
 
 ### Comparisons
 
