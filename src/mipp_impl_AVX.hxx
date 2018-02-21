@@ -3066,7 +3066,7 @@
 	}
 
 	template <>
-	inline int testz<16>(const msk v1) {
+	inline bool testz<16>(const msk v1) {
 		return testz<16>(v1, _mm256_castps_si256(mipp::set1<int16_t>(-1)));
 	}
 
