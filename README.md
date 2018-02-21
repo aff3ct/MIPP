@@ -297,9 +297,9 @@ Those functions allow you to benefit from the AVX-512 masked instructions.
 `mask` and `maskz` functions are retro compatible with older instruction sets.
 
 ```cpp
-mipp::Reg<        float>  ZMM1 = {   40,  -30,    60,    80};
-mipp::Reg<        float>  ZMM2 = 0.1; // broadcast
-mipp::Msk<mipp::N<float>> k1   = {false, true, false, false};
+mipp::Reg<        float   > ZMM1 = {   40,  -30,    60,    80};
+mipp::Reg<        float   > ZMM2 = 0.1; // broadcast
+mipp::Msk<mipp::N<float>()> k1   = {false, true, false, false};
 
 // ZMM3 = k1 ? ZMM1 * ZMM2 : ZMM1;
 auto ZMM3 = mipp::mask<float, mipp::mul>(k1, ZMM1, ZMM1, ZMM2);
@@ -311,6 +311,19 @@ std::cout << ZMM4 << std::endl; // output: "[0, -3, 0, 0]"
 ```
 
 ## List of MIPP functions
+
+This section presents an exhaustive list of all the available functions in MIPP.
+Of course the MIPP wrapper does not cover all the possible intrinsics of each instruction set but it tries to gives you the most important and useful ones.
+
+In the following tables, `T`, `T1` and `T2` stand for data types (`double`, `float`, `int64_t`, `int32_t`, `int16_t` or `int8_t`).
+`N` stands for the number or elements in a mask or in a register.
+`N` is a strictly positive integer and can easily be deduced from the data type: `constexpr int N = mipp::N<T>()`.
+When `T` and `N` are mixed in a prototype, `N` has to satisfy the previous constraint (`N = mipp::N<T>()`).
+
+In the documentation there are some terms that required to be clarified:
+
+  - **register element**: a SIMD register is composed by multiple scalar elements, those elements are built-in data types (`double`, `float`, `int64_t`, ...),
+  - **register lane**: modern instruction sets can have multiple implicit sub parts in an entire SIMD register, those sub parts are called lanes (SSE has one lane of 128 bits, AVX has two lanes of 128 bits, AVX-512 has four lanes of 128 bits).
 
 ### Memory operations
 
@@ -326,8 +339,8 @@ std::cout << ZMM4 << std::endl; // output: "[0, -3, 0, 0]"
 | `set1`          | `Msk  <N> set1          (const bool bit)`                                   | Broadcasts `bit` in a mask.                                                                             |                                                              |
 | `set0`          | `Reg  <T> set0          ()`                                                 | Initializes a register to zero.                                                                         | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 | `set0`          | `Msk  <N> set0          ()`                                                 | Initializes a mask to false.                                                                            |                                                              |
-| `low`           | `Reg_2<T> low           ()`                                                 | Gets the low part of a register.                                                                        | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `high`          | `Reg_2<T> high          ()`                                                 | Gets the high part of a register.                                                                       | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `low`           | `Reg_2<T> low           (const Reg<T> r)`                                   | Gets the low part of the `r` register.                                                                  | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `high`          | `Reg_2<T> high          (const Reg<T> r)`                                   | Gets the high part of the `r` register.                                                                 | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 | `cmask`         | `Reg  <T> cmask         (const uint32_t[N  ] ids)`                          | Creates a cmask from an indexes list (indexes have to be between 0 and N-1).                            | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 | `cmask2`        | `Reg  <T> cmask2        (const uint32_t[N/2] ids)`                          | Creates a cmask2 from an indexes list (indexes have to be between 0 and (N/2)-1).                       | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 | `cmask4`        | `Reg  <T> cmask4        (const uint32_t[N/4] ids)`                          | Creates a cmask4 from an indexes list (indexes have to be between 0 and (N/4)-1).                       | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
@@ -368,14 +381,14 @@ std::cout << ZMM4 << std::endl; // output: "[0, -3, 0, 0]"
 
 ### Logical comparisons
 
-| **Short name** | **Operator** | **Prototype**                                      | **Documentation**                          | **Supported types**                                          |
-| :---           | :---         | :---                                               | :---                                       | :---                                                         |
-| `cmpeq`        | `==`         | `Msk<N> cmpeq  (const Reg<T> r1, const Reg<T> r2)` | Compares if equal: `r1 == r2`.             | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `cmpneq`       | `!=`         | `Msk<N> cmpneq (const Reg<T> r1, const Reg<T> r2)` | Compares if not equal: `r1 != r2`.         | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `cmpge`        | `>=`         | `Msk<N> cmpge  (const Reg<T> r1, const Reg<T> r2)` | Compares if greater or equal : `r1 >= r2`. | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `cmpgt`        | `>`          | `Msk<N> cmpgt  (const Reg<T> r1, const Reg<T> r2)` | Compares if strictly greater: `r1 > r2`.   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `cmple`        | `<=`         | `Msk<N> cmple  (const Reg<T> r1, const Reg<T> r2)` | Compares if lower or equal: `r1 <= r2`.    | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `cmplt`        | `<`          | `Msk<N> cmplt  (const Reg<T> r1, const Reg<T> r2)` | Compares if strictly lower: `r1 < r2`.     | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| **Short name** | **Operator** | **Prototype**                                      | **Documentation**                             | **Supported types**                                          |
+| :---           | :---         | :---                                               | :---                                          | :---                                                         |
+| `cmpeq`        | `==`         | `Msk<N> cmpeq  (const Reg<T> r1, const Reg<T> r2)` | Compares if equal to: `r1 == r2`.             | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `cmpneq`       | `!=`         | `Msk<N> cmpneq (const Reg<T> r1, const Reg<T> r2)` | Compares if not equal to: `r1 != r2`.         | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `cmpge`        | `>=`         | `Msk<N> cmpge  (const Reg<T> r1, const Reg<T> r2)` | Compares if greater or equal to: `r1 >= r2`.  | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `cmpgt`        | `>`          | `Msk<N> cmpgt  (const Reg<T> r1, const Reg<T> r2)` | Compares if strictly greater than: `r1 > r2`. | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `cmple`        | `<=`         | `Msk<N> cmple  (const Reg<T> r1, const Reg<T> r2)` | Compares if lower or equal to: `r1 <= r2`.    | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `cmplt`        | `<`          | `Msk<N> cmplt  (const Reg<T> r1, const Reg<T> r2)` | Compares if strictly lower than: `r1 < r2`.   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 
 ### Conversions and packing
 
@@ -422,7 +435,7 @@ std::cout << ZMM4 << std::endl; // output: "[0, -3, 0, 0]"
 | `testz`           | `bool testz                   (const Reg<T> r1, const Reg<T> r2)` | Mainly tests if all the elements of the registers are zeros: `r = (r1 & r2); !(r_1 OR r_2 OR ... OR r_n)`.         | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 | `testz`           | `bool testz                   (const Msk<N> m1, const Msk<N> m2)` | Mainly tests if all the elements of the masks are zeros: `m = (m1 & m2); !(m_1 OR m_2 OR ... OR m_n)`.             |                                                              |
 | `testz`           | `bool testz                   (const Reg<T> r)`                   | Tests if all the elements of the register aren't zeros: `!(r_1 OR r_2 OR ... OR r_n)`.                             | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `testz`           | `bool testz                   (const Msk<N> r)`                   | Tests if all the elements of the mask are zeros: `!(m_1 OR m_2 OR ... OR m_n)`.                                    |                                                              |
+| `testz`           | `bool testz                   (const Msk<N> m)`                   | Tests if all the elements of the mask are zeros: `!(m_1 OR m_2 OR ... OR m_n)`.                                    |                                                              |
 | `Reduction<T,OP>` | `T    Reduction<T,OP>::sapply (const Reg<T> r)`                   | Generic reduction operation, can take a user defined operator `OP` and will performs the reduction with it on `r`. | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 
 ### Math functions
