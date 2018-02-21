@@ -529,26 +529,28 @@
 		return (__m512i)mipp::load<int8_t>((int8_t*)data);
 	}
 
-	// static __m512i _mm512_setr_epi8 (char  e0, char  e1, char  e2, char  e3, char  e4, char  e5, char  e6, char  e7,
-	//                                  char  e8, char  e9, char e10, char e11, char e12, char e13, char e14, char e15,
-	//                                  char e16, char e17, char e18, char e19, char e20, char e21, char e22, char e23,
-	//                                  char e24, char e25, char e26, char e27, char e28, char e29, char e30, char e31,
-	//                                  char e32, char e33, char e34, char e35, char e36, char e37, char e38, char e39,
-	//                                  char e40, char e41, char e42, char e43, char e44, char e45, char e46, char e47,
-	//                                  char e48, char e49, char e50, char e51, char e52, char e53, char e54, char e55,
-	//                                  char e56, char e57, char e58, char e59, char e60, char e61, char e62, char e63)
-	// {
-	// 	char data[64] = {e0,   e1,  e2,  e3,  e4,  e5,  e6,  e7,
-	// 	                 e8,   e9, e10, e11, e12, e13, e14, e15,
-	// 	                 e16, e17, e18, e19, e20, e21, e22, e23,
-	// 	                 e24, e25, e26, e27, e28, e29, e30, e31,
-	// 	                 e32, e33, e34, e35, e36, e37, e38, e39,
-	// 	                 e40, e41, e42, e43, e44, e45, e46, e47,
-	// 	                 e48, e49, e50, e51, e52, e53, e54, e55,
-	// 	                 e56, e57, e58, e59, e60, e61, e62, e63};
+#if defined(__AVX512VBMI__)
+	static __m512i _mm512_setr_epi8 (char  e0, char  e1, char  e2, char  e3, char  e4, char  e5, char  e6, char  e7,
+	                                 char  e8, char  e9, char e10, char e11, char e12, char e13, char e14, char e15,
+	                                 char e16, char e17, char e18, char e19, char e20, char e21, char e22, char e23,
+	                                 char e24, char e25, char e26, char e27, char e28, char e29, char e30, char e31,
+	                                 char e32, char e33, char e34, char e35, char e36, char e37, char e38, char e39,
+	                                 char e40, char e41, char e42, char e43, char e44, char e45, char e46, char e47,
+	                                 char e48, char e49, char e50, char e51, char e52, char e53, char e54, char e55,
+	                                 char e56, char e57, char e58, char e59, char e60, char e61, char e62, char e63)
+	{
+		char data[64] = {e0,   e1,  e2,  e3,  e4,  e5,  e6,  e7,
+		                 e8,   e9, e10, e11, e12, e13, e14, e15,
+		                 e16, e17, e18, e19, e20, e21, e22, e23,
+		                 e24, e25, e26, e27, e28, e29, e30, e31,
+		                 e32, e33, e34, e35, e36, e37, e38, e39,
+		                 e40, e41, e42, e43, e44, e45, e46, e47,
+		                 e48, e49, e50, e51, e52, e53, e54, e55,
+		                 e56, e57, e58, e59, e60, e61, e62, e63};
 
-	// 	return (__m512i)mipp::load<int8_t>((int8_t*)data);
-	// }
+		return (__m512i)mipp::load<int8_t>((int8_t*)data);
+	}
+#endif
 
 	template <>
 	inline reg set<int16_t>(const int16_t vals[nElReg<int16_t>()]) {
@@ -809,213 +811,7 @@
 #endif
 
 	// ---------------------------------------------------------------------------------------------------------- cmask
-#if defined(__AVX512BW__)
-	template <>
-	inline reg cmask<double>(const uint32_t val[nElReg<double>()]) {
-		int8_t val_bis[nElReg<int8_t>()] = {(int8_t)(val[0]*8 + 0), (int8_t)(val[0]*8 + 1),
-		                                    (int8_t)(val[0]*8 + 2), (int8_t)(val[0]*8 + 3),
-		                                    (int8_t)(val[0]*8 + 4), (int8_t)(val[0]*8 + 5),
-		                                    (int8_t)(val[0]*8 + 6), (int8_t)(val[0]*8 + 7),
-		                                    (int8_t)(val[1]*8 + 0), (int8_t)(val[1]*8 + 1),
-		                                    (int8_t)(val[1]*8 + 2), (int8_t)(val[1]*8 + 3),
-		                                    (int8_t)(val[1]*8 + 4), (int8_t)(val[1]*8 + 5),
-		                                    (int8_t)(val[1]*8 + 6), (int8_t)(val[1]*8 + 7),
-		                                    (int8_t)(val[2]*8 + 0), (int8_t)(val[2]*8 + 1),
-		                                    (int8_t)(val[2]*8 + 2), (int8_t)(val[2]*8 + 3),
-		                                    (int8_t)(val[2]*8 + 4), (int8_t)(val[2]*8 + 5),
-		                                    (int8_t)(val[2]*8 + 6), (int8_t)(val[2]*8 + 7),
-		                                    (int8_t)(val[3]*8 + 0), (int8_t)(val[3]*8 + 1),
-		                                    (int8_t)(val[3]*8 + 2), (int8_t)(val[3]*8 + 3),
-		                                    (int8_t)(val[3]*8 + 4), (int8_t)(val[3]*8 + 5),
-		                                    (int8_t)(val[3]*8 + 6), (int8_t)(val[3]*8 + 7),
-		                                    (int8_t)(val[4]*8 + 0), (int8_t)(val[4]*8 + 1),
-		                                    (int8_t)(val[4]*8 + 2), (int8_t)(val[4]*8 + 3),
-		                                    (int8_t)(val[4]*8 + 4), (int8_t)(val[4]*8 + 5),
-		                                    (int8_t)(val[4]*8 + 6), (int8_t)(val[4]*8 + 7),
-		                                    (int8_t)(val[5]*8 + 0), (int8_t)(val[5]*8 + 1),
-		                                    (int8_t)(val[5]*8 + 2), (int8_t)(val[5]*8 + 3),
-		                                    (int8_t)(val[5]*8 + 4), (int8_t)(val[5]*8 + 5),
-		                                    (int8_t)(val[5]*8 + 6), (int8_t)(val[5]*8 + 7),
-		                                    (int8_t)(val[6]*8 + 0), (int8_t)(val[6]*8 + 1),
-		                                    (int8_t)(val[6]*8 + 2), (int8_t)(val[6]*8 + 3),
-		                                    (int8_t)(val[6]*8 + 4), (int8_t)(val[6]*8 + 5),
-		                                    (int8_t)(val[6]*8 + 6), (int8_t)(val[6]*8 + 7),
-		                                    (int8_t)(val[7]*8 + 0), (int8_t)(val[7]*8 + 1),
-		                                    (int8_t)(val[7]*8 + 2), (int8_t)(val[7]*8 + 3),
-		                                    (int8_t)(val[7]*8 + 4), (int8_t)(val[7]*8 + 5),
-		                                    (int8_t)(val[7]*8 + 6), (int8_t)(val[7]*8 + 7)};
-		return mipp::set<int8_t>(val_bis);
-	}
-
-	template <>
-	inline reg cmask<float>(const uint32_t val[nElReg<float>()]) {
-		int8_t val_bis[nElReg<int8_t>()] = {(int8_t)(val[ 0]*4 + 0), (int8_t)(val[ 0]*4 + 1),
-		                                    (int8_t)(val[ 0]*4 + 2), (int8_t)(val[ 0]*4 + 3),
-		                                    (int8_t)(val[ 1]*4 + 0), (int8_t)(val[ 1]*4 + 1),
-		                                    (int8_t)(val[ 1]*4 + 2), (int8_t)(val[ 1]*4 + 3),
-		                                    (int8_t)(val[ 2]*4 + 0), (int8_t)(val[ 2]*4 + 1),
-		                                    (int8_t)(val[ 2]*4 + 2), (int8_t)(val[ 2]*4 + 3),
-		                                    (int8_t)(val[ 3]*4 + 0), (int8_t)(val[ 3]*4 + 1),
-		                                    (int8_t)(val[ 3]*4 + 2), (int8_t)(val[ 3]*4 + 3),
-		                                    (int8_t)(val[ 4]*4 + 0), (int8_t)(val[ 4]*4 + 1),
-		                                    (int8_t)(val[ 4]*4 + 2), (int8_t)(val[ 4]*4 + 3),
-		                                    (int8_t)(val[ 5]*4 + 0), (int8_t)(val[ 5]*4 + 1),
-		                                    (int8_t)(val[ 5]*4 + 2), (int8_t)(val[ 5]*4 + 3),
-		                                    (int8_t)(val[ 6]*4 + 0), (int8_t)(val[ 6]*4 + 1),
-		                                    (int8_t)(val[ 6]*4 + 2), (int8_t)(val[ 6]*4 + 3),
-		                                    (int8_t)(val[ 7]*4 + 0), (int8_t)(val[ 7]*4 + 1),
-		                                    (int8_t)(val[ 7]*4 + 2), (int8_t)(val[ 7]*4 + 3),
-		                                    (int8_t)(val[ 8]*4 + 0), (int8_t)(val[ 8]*4 + 1),
-		                                    (int8_t)(val[ 8]*4 + 2), (int8_t)(val[ 8]*4 + 3),
-		                                    (int8_t)(val[ 9]*4 + 0), (int8_t)(val[ 9]*4 + 1),
-		                                    (int8_t)(val[ 9]*4 + 2), (int8_t)(val[ 9]*4 + 3),
-		                                    (int8_t)(val[10]*4 + 0), (int8_t)(val[10]*4 + 1),
-		                                    (int8_t)(val[10]*4 + 2), (int8_t)(val[10]*4 + 3),
-		                                    (int8_t)(val[11]*4 + 0), (int8_t)(val[11]*4 + 1),
-		                                    (int8_t)(val[11]*4 + 2), (int8_t)(val[11]*4 + 3),
-		                                    (int8_t)(val[12]*4 + 0), (int8_t)(val[12]*4 + 1),
-		                                    (int8_t)(val[12]*4 + 2), (int8_t)(val[12]*4 + 3),
-		                                    (int8_t)(val[13]*4 + 0), (int8_t)(val[13]*4 + 1),
-		                                    (int8_t)(val[13]*4 + 2), (int8_t)(val[13]*4 + 3),
-		                                    (int8_t)(val[14]*4 + 0), (int8_t)(val[14]*4 + 1),
-		                                    (int8_t)(val[14]*4 + 2), (int8_t)(val[14]*4 + 3),
-		                                    (int8_t)(val[15]*4 + 0), (int8_t)(val[15]*4 + 1),
-		                                    (int8_t)(val[15]*4 + 2), (int8_t)(val[15]*4 + 3)};
-		return mipp::set<int8_t>(val_bis);
-	}
-
-	template <>
-	inline reg cmask<int64_t>(const uint32_t val[nElReg<int64_t>()]) {
-		int8_t val_bis[nElReg<int8_t>()] = {(int8_t)(val[0]*8 + 0), (int8_t)(val[0]*8 + 1),
-		                                    (int8_t)(val[0]*8 + 2), (int8_t)(val[0]*8 + 3),
-		                                    (int8_t)(val[0]*8 + 4), (int8_t)(val[0]*8 + 5),
-		                                    (int8_t)(val[0]*8 + 6), (int8_t)(val[0]*8 + 7),
-		                                    (int8_t)(val[1]*8 + 0), (int8_t)(val[1]*8 + 1),
-		                                    (int8_t)(val[1]*8 + 2), (int8_t)(val[1]*8 + 3),
-		                                    (int8_t)(val[1]*8 + 4), (int8_t)(val[1]*8 + 5),
-		                                    (int8_t)(val[1]*8 + 6), (int8_t)(val[1]*8 + 7),
-		                                    (int8_t)(val[2]*8 + 0), (int8_t)(val[2]*8 + 1),
-		                                    (int8_t)(val[2]*8 + 2), (int8_t)(val[2]*8 + 3),
-		                                    (int8_t)(val[2]*8 + 4), (int8_t)(val[2]*8 + 5),
-		                                    (int8_t)(val[2]*8 + 6), (int8_t)(val[2]*8 + 7),
-		                                    (int8_t)(val[3]*8 + 0), (int8_t)(val[3]*8 + 1),
-		                                    (int8_t)(val[3]*8 + 2), (int8_t)(val[3]*8 + 3),
-		                                    (int8_t)(val[3]*8 + 4), (int8_t)(val[3]*8 + 5),
-		                                    (int8_t)(val[3]*8 + 6), (int8_t)(val[3]*8 + 7),
-		                                    (int8_t)(val[4]*8 + 0), (int8_t)(val[4]*8 + 1),
-		                                    (int8_t)(val[4]*8 + 2), (int8_t)(val[4]*8 + 3),
-		                                    (int8_t)(val[4]*8 + 4), (int8_t)(val[4]*8 + 5),
-		                                    (int8_t)(val[4]*8 + 6), (int8_t)(val[4]*8 + 7),
-		                                    (int8_t)(val[5]*8 + 0), (int8_t)(val[5]*8 + 1),
-		                                    (int8_t)(val[5]*8 + 2), (int8_t)(val[5]*8 + 3),
-		                                    (int8_t)(val[5]*8 + 4), (int8_t)(val[5]*8 + 5),
-		                                    (int8_t)(val[5]*8 + 6), (int8_t)(val[5]*8 + 7),
-		                                    (int8_t)(val[6]*8 + 0), (int8_t)(val[6]*8 + 1),
-		                                    (int8_t)(val[6]*8 + 2), (int8_t)(val[6]*8 + 3),
-		                                    (int8_t)(val[6]*8 + 4), (int8_t)(val[6]*8 + 5),
-		                                    (int8_t)(val[6]*8 + 6), (int8_t)(val[6]*8 + 7),
-		                                    (int8_t)(val[7]*8 + 0), (int8_t)(val[7]*8 + 1),
-		                                    (int8_t)(val[7]*8 + 2), (int8_t)(val[7]*8 + 3),
-		                                    (int8_t)(val[7]*8 + 4), (int8_t)(val[7]*8 + 5),
-		                                    (int8_t)(val[7]*8 + 6), (int8_t)(val[7]*8 + 7)};
-		return mipp::set<int8_t>(val_bis);
-	}
-
-	template <>
-	inline reg cmask<int32_t>(const uint32_t val[nElReg<int32_t>()]) {
-		int8_t val_bis[nElReg<int8_t>()] = {(int8_t)(val[ 0]*4 + 0), (int8_t)(val[ 0]*4 + 1),
-		                                    (int8_t)(val[ 0]*4 + 2), (int8_t)(val[ 0]*4 + 3),
-		                                    (int8_t)(val[ 1]*4 + 0), (int8_t)(val[ 1]*4 + 1),
-		                                    (int8_t)(val[ 1]*4 + 2), (int8_t)(val[ 1]*4 + 3),
-		                                    (int8_t)(val[ 2]*4 + 0), (int8_t)(val[ 2]*4 + 1),
-		                                    (int8_t)(val[ 2]*4 + 2), (int8_t)(val[ 2]*4 + 3),
-		                                    (int8_t)(val[ 3]*4 + 0), (int8_t)(val[ 3]*4 + 1),
-		                                    (int8_t)(val[ 3]*4 + 2), (int8_t)(val[ 3]*4 + 3),
-		                                    (int8_t)(val[ 4]*4 + 0), (int8_t)(val[ 4]*4 + 1),
-		                                    (int8_t)(val[ 4]*4 + 2), (int8_t)(val[ 4]*4 + 3),
-		                                    (int8_t)(val[ 5]*4 + 0), (int8_t)(val[ 5]*4 + 1),
-		                                    (int8_t)(val[ 5]*4 + 2), (int8_t)(val[ 5]*4 + 3),
-		                                    (int8_t)(val[ 6]*4 + 0), (int8_t)(val[ 6]*4 + 1),
-		                                    (int8_t)(val[ 6]*4 + 2), (int8_t)(val[ 6]*4 + 3),
-		                                    (int8_t)(val[ 7]*4 + 0), (int8_t)(val[ 7]*4 + 1),
-		                                    (int8_t)(val[ 7]*4 + 2), (int8_t)(val[ 7]*4 + 3),
-		                                    (int8_t)(val[ 8]*4 + 0), (int8_t)(val[ 8]*4 + 1),
-		                                    (int8_t)(val[ 8]*4 + 2), (int8_t)(val[ 8]*4 + 3),
-		                                    (int8_t)(val[ 9]*4 + 0), (int8_t)(val[ 9]*4 + 1),
-		                                    (int8_t)(val[ 9]*4 + 2), (int8_t)(val[ 9]*4 + 3),
-		                                    (int8_t)(val[10]*4 + 0), (int8_t)(val[10]*4 + 1),
-		                                    (int8_t)(val[10]*4 + 2), (int8_t)(val[10]*4 + 3),
-		                                    (int8_t)(val[11]*4 + 0), (int8_t)(val[11]*4 + 1),
-		                                    (int8_t)(val[11]*4 + 2), (int8_t)(val[11]*4 + 3),
-		                                    (int8_t)(val[12]*4 + 0), (int8_t)(val[12]*4 + 1),
-		                                    (int8_t)(val[12]*4 + 2), (int8_t)(val[12]*4 + 3),
-		                                    (int8_t)(val[13]*4 + 0), (int8_t)(val[13]*4 + 1),
-		                                    (int8_t)(val[13]*4 + 2), (int8_t)(val[13]*4 + 3),
-		                                    (int8_t)(val[14]*4 + 0), (int8_t)(val[14]*4 + 1),
-		                                    (int8_t)(val[14]*4 + 2), (int8_t)(val[14]*4 + 3),
-		                                    (int8_t)(val[15]*4 + 0), (int8_t)(val[15]*4 + 1),
-		                                    (int8_t)(val[15]*4 + 2), (int8_t)(val[15]*4 + 3)};
-		return mipp::set<int8_t>(val_bis);
-	}
-
-	template <>
-	inline reg cmask<int16_t>(const uint32_t val[nElReg<int16_t>()]) {
-		int8_t val_bis[nElReg<int8_t>()] = {(int8_t)(val[ 0]*2 + 0), (int8_t)(val[ 0]*2 + 1),
-		                                    (int8_t)(val[ 1]*2 + 0), (int8_t)(val[ 1]*2 + 1),
-		                                    (int8_t)(val[ 2]*2 + 0), (int8_t)(val[ 2]*2 + 1),
-		                                    (int8_t)(val[ 3]*2 + 0), (int8_t)(val[ 3]*2 + 1),
-		                                    (int8_t)(val[ 4]*2 + 0), (int8_t)(val[ 4]*2 + 1),
-		                                    (int8_t)(val[ 5]*2 + 0), (int8_t)(val[ 5]*2 + 1),
-		                                    (int8_t)(val[ 6]*2 + 0), (int8_t)(val[ 6]*2 + 1),
-		                                    (int8_t)(val[ 7]*2 + 0), (int8_t)(val[ 7]*2 + 1),
-		                                    (int8_t)(val[ 8]*2 + 0), (int8_t)(val[ 8]*2 + 1),
-		                                    (int8_t)(val[ 9]*2 + 0), (int8_t)(val[ 9]*2 + 1),
-		                                    (int8_t)(val[10]*2 + 0), (int8_t)(val[10]*2 + 1),
-		                                    (int8_t)(val[11]*2 + 0), (int8_t)(val[11]*2 + 1),
-		                                    (int8_t)(val[12]*2 + 0), (int8_t)(val[12]*2 + 1),
-		                                    (int8_t)(val[13]*2 + 0), (int8_t)(val[13]*2 + 1),
-		                                    (int8_t)(val[14]*2 + 0), (int8_t)(val[14]*2 + 1),
-		                                    (int8_t)(val[15]*2 + 0), (int8_t)(val[15]*2 + 1),
-		                                    (int8_t)(val[16]*2 + 0), (int8_t)(val[16]*2 + 1),
-		                                    (int8_t)(val[17]*2 + 0), (int8_t)(val[17]*2 + 1),
-		                                    (int8_t)(val[18]*2 + 0), (int8_t)(val[18]*2 + 1),
-		                                    (int8_t)(val[19]*2 + 0), (int8_t)(val[19]*2 + 1),
-		                                    (int8_t)(val[20]*2 + 0), (int8_t)(val[20]*2 + 1),
-		                                    (int8_t)(val[21]*2 + 0), (int8_t)(val[21]*2 + 1),
-		                                    (int8_t)(val[22]*2 + 0), (int8_t)(val[22]*2 + 1),
-		                                    (int8_t)(val[23]*2 + 0), (int8_t)(val[23]*2 + 1),
-		                                    (int8_t)(val[24]*2 + 0), (int8_t)(val[24]*2 + 1),
-		                                    (int8_t)(val[25]*2 + 0), (int8_t)(val[25]*2 + 1),
-		                                    (int8_t)(val[26]*2 + 0), (int8_t)(val[26]*2 + 1),
-		                                    (int8_t)(val[27]*2 + 0), (int8_t)(val[27]*2 + 1),
-		                                    (int8_t)(val[28]*2 + 0), (int8_t)(val[28]*2 + 1),
-		                                    (int8_t)(val[29]*2 + 0), (int8_t)(val[29]*2 + 1),
-		                                    (int8_t)(val[30]*2 + 0), (int8_t)(val[30]*2 + 1),
-		                                    (int8_t)(val[31]*2 + 0), (int8_t)(val[31]*2 + 1)};
-		return mipp::set<int8_t>(val_bis);
-	}
-
-	template <>
-	inline reg cmask<int8_t>(const uint32_t val[nElReg<int8_t>()]) {
-		int8_t val_bis[nElReg<int8_t>()] = {(int8_t)val[ 0], (int8_t)val[ 1], (int8_t)val[ 2], (int8_t)val[ 3],
-		                                    (int8_t)val[ 4], (int8_t)val[ 5], (int8_t)val[ 6], (int8_t)val[ 7],
-		                                    (int8_t)val[ 8], (int8_t)val[ 9], (int8_t)val[10], (int8_t)val[11],
-		                                    (int8_t)val[12], (int8_t)val[13], (int8_t)val[14], (int8_t)val[15],
-		                                    (int8_t)val[16], (int8_t)val[17], (int8_t)val[18], (int8_t)val[19],
-		                                    (int8_t)val[20], (int8_t)val[21], (int8_t)val[22], (int8_t)val[23],
-		                                    (int8_t)val[24], (int8_t)val[25], (int8_t)val[26], (int8_t)val[27],
-		                                    (int8_t)val[28], (int8_t)val[29], (int8_t)val[30], (int8_t)val[31],
-		                                    (int8_t)val[32], (int8_t)val[33], (int8_t)val[34], (int8_t)val[35],
-		                                    (int8_t)val[36], (int8_t)val[37], (int8_t)val[38], (int8_t)val[39],
-		                                    (int8_t)val[40], (int8_t)val[41], (int8_t)val[42], (int8_t)val[43],
-		                                    (int8_t)val[44], (int8_t)val[45], (int8_t)val[46], (int8_t)val[47],
-		                                    (int8_t)val[48], (int8_t)val[49], (int8_t)val[50], (int8_t)val[51],
-		                                    (int8_t)val[52], (int8_t)val[53], (int8_t)val[54], (int8_t)val[55],
-		                                    (int8_t)val[56], (int8_t)val[57], (int8_t)val[58], (int8_t)val[59],
-		                                    (int8_t)val[60], (int8_t)val[61], (int8_t)val[62], (int8_t)val[63]};
-		return mipp::set<int8_t>(val_bis);
-	}
-#elif defined(__AVX512F__)
+#if defined(__AVX512F__)
 	template <>
 	inline reg cmask<double>(const uint32_t vals[nElReg<double>()]) {
 		return _mm512_castsi512_ps(_mm512_set_epi32((int32_t)vals[7]*2 +1, (int32_t)vals[7]*2 +0, (int32_t)vals[6]*2 +1, (int32_t)vals[6]*2 +0,
@@ -1049,214 +845,45 @@
 	}
 #endif
 
-	// --------------------------------------------------------------------------------------------------------- cmask2
 #if defined(__AVX512BW__)
 	template <>
-	inline reg cmask2<double>(const uint32_t val[nElReg<double>()/2]) {
-		int8_t val_bis[nElReg<int8_t>()] = {(int8_t)(val[0]*8 + 0 + 0), (int8_t)(val[0]*8 + 1 + 0),
-		                                    (int8_t)(val[0]*8 + 2 + 0), (int8_t)(val[0]*8 + 3 + 0),
-		                                    (int8_t)(val[0]*8 + 4 + 0), (int8_t)(val[0]*8 + 5 + 0),
-		                                    (int8_t)(val[0]*8 + 6 + 0), (int8_t)(val[0]*8 + 7 + 0),
-		                                    (int8_t)(val[1]*8 + 0 + 0), (int8_t)(val[1]*8 + 1 + 0),
-		                                    (int8_t)(val[1]*8 + 2 + 0), (int8_t)(val[1]*8 + 3 + 0),
-		                                    (int8_t)(val[1]*8 + 4 + 0), (int8_t)(val[1]*8 + 5 + 0),
-		                                    (int8_t)(val[1]*8 + 6 + 0), (int8_t)(val[1]*8 + 7 + 0),
-		                                    (int8_t)(val[2]*8 + 0 + 0), (int8_t)(val[2]*8 + 1 + 0),
-		                                    (int8_t)(val[2]*8 + 2 + 0), (int8_t)(val[2]*8 + 3 + 0),
-		                                    (int8_t)(val[2]*8 + 4 + 0), (int8_t)(val[2]*8 + 5 + 0),
-		                                    (int8_t)(val[2]*8 + 6 + 0), (int8_t)(val[2]*8 + 7 + 0),
-		                                    (int8_t)(val[3]*8 + 0 + 0), (int8_t)(val[3]*8 + 1 + 0),
-		                                    (int8_t)(val[3]*8 + 2 + 0), (int8_t)(val[3]*8 + 3 + 0),
-		                                    (int8_t)(val[3]*8 + 4 + 0), (int8_t)(val[3]*8 + 5 + 0),
-		                                    (int8_t)(val[3]*8 + 6 + 0), (int8_t)(val[3]*8 + 7 + 0),
-		                                    (int8_t)(val[0]*8 + 0 +32), (int8_t)(val[0]*8 + 1 +32),
-		                                    (int8_t)(val[0]*8 + 2 +32), (int8_t)(val[0]*8 + 3 +32),
-		                                    (int8_t)(val[0]*8 + 4 +32), (int8_t)(val[0]*8 + 5 +32),
-		                                    (int8_t)(val[0]*8 + 6 +32), (int8_t)(val[0]*8 + 7 +32),
-		                                    (int8_t)(val[1]*8 + 0 +32), (int8_t)(val[1]*8 + 1 +32),
-		                                    (int8_t)(val[1]*8 + 2 +32), (int8_t)(val[1]*8 + 3 +32),
-		                                    (int8_t)(val[1]*8 + 4 +32), (int8_t)(val[1]*8 + 5 +32),
-		                                    (int8_t)(val[1]*8 + 6 +32), (int8_t)(val[1]*8 + 7 +32),
-		                                    (int8_t)(val[2]*8 + 0 +32), (int8_t)(val[2]*8 + 1 +32),
-		                                    (int8_t)(val[2]*8 + 2 +32), (int8_t)(val[2]*8 + 3 +32),
-		                                    (int8_t)(val[2]*8 + 4 +32), (int8_t)(val[2]*8 + 5 +32),
-		                                    (int8_t)(val[2]*8 + 6 +32), (int8_t)(val[2]*8 + 7 +32),
-		                                    (int8_t)(val[3]*8 + 0 +32), (int8_t)(val[3]*8 + 1 +32),
-		                                    (int8_t)(val[3]*8 + 2 +32), (int8_t)(val[3]*8 + 3 +32),
-		                                    (int8_t)(val[3]*8 + 4 +32), (int8_t)(val[3]*8 + 5 +32),
-		                                    (int8_t)(val[3]*8 + 6 +32), (int8_t)(val[3]*8 + 7 +32)};
-		return mipp::set<int8_t>(val_bis);
+	inline reg cmask<int16_t>(const uint32_t val[nElReg<int16_t>()]) {
+		return _mm512_castsi512_ps(_mm512_set_epi16((int16_t)val[31], (int16_t)val[30], (int16_t)val[29], (int16_t)val[28],
+		                                            (int16_t)val[27], (int16_t)val[26], (int16_t)val[25], (int16_t)val[24],
+		                                            (int16_t)val[23], (int16_t)val[22], (int16_t)val[21], (int16_t)val[20],
+		                                            (int16_t)val[19], (int16_t)val[18], (int16_t)val[17], (int16_t)val[16],
+		                                            (int16_t)val[15], (int16_t)val[14], (int16_t)val[13], (int16_t)val[12],
+		                                            (int16_t)val[11], (int16_t)val[10], (int16_t)val[ 9], (int16_t)val[ 8],
+		                                            (int16_t)val[ 7], (int16_t)val[ 6], (int16_t)val[ 5], (int16_t)val[ 4],
+		                                            (int16_t)val[ 3], (int16_t)val[ 2], (int16_t)val[ 1], (int16_t)val[ 0]));
 	}
+#endif
 
+#if defined(__AVX512VBMI__)
 	template <>
-	inline reg cmask2<float>(const uint32_t val[nElReg<float>()/2]) {
-		int8_t val_bis[nElReg<int8_t>()] = {(int8_t)(val[ 0]*4 + 0 + 0), (int8_t)(val[ 0]*4 + 1 + 0),
-		                                    (int8_t)(val[ 0]*4 + 2 + 0), (int8_t)(val[ 0]*4 + 3 + 0),
-		                                    (int8_t)(val[ 1]*4 + 0 + 0), (int8_t)(val[ 1]*4 + 1 + 0),
-		                                    (int8_t)(val[ 1]*4 + 2 + 0), (int8_t)(val[ 1]*4 + 3 + 0),
-		                                    (int8_t)(val[ 2]*4 + 0 + 0), (int8_t)(val[ 2]*4 + 1 + 0),
-		                                    (int8_t)(val[ 2]*4 + 2 + 0), (int8_t)(val[ 2]*4 + 3 + 0),
-		                                    (int8_t)(val[ 3]*4 + 0 + 0), (int8_t)(val[ 3]*4 + 1 + 0),
-		                                    (int8_t)(val[ 3]*4 + 2 + 0), (int8_t)(val[ 3]*4 + 3 + 0),
-		                                    (int8_t)(val[ 4]*4 + 0 + 0), (int8_t)(val[ 4]*4 + 1 + 0),
-		                                    (int8_t)(val[ 4]*4 + 2 + 0), (int8_t)(val[ 4]*4 + 3 + 0),
-		                                    (int8_t)(val[ 5]*4 + 0 + 0), (int8_t)(val[ 5]*4 + 1 + 0),
-		                                    (int8_t)(val[ 5]*4 + 2 + 0), (int8_t)(val[ 5]*4 + 3 + 0),
-		                                    (int8_t)(val[ 6]*4 + 0 + 0), (int8_t)(val[ 6]*4 + 1 + 0),
-		                                    (int8_t)(val[ 6]*4 + 2 + 0), (int8_t)(val[ 6]*4 + 3 + 0),
-		                                    (int8_t)(val[ 7]*4 + 0 + 0), (int8_t)(val[ 7]*4 + 1 + 0),
-		                                    (int8_t)(val[ 7]*4 + 2 + 0), (int8_t)(val[ 7]*4 + 3 + 0),
-		                                    (int8_t)(val[ 0]*4 + 0 +32), (int8_t)(val[ 0]*4 + 1 +32),
-		                                    (int8_t)(val[ 0]*4 + 2 +32), (int8_t)(val[ 0]*4 + 3 +32),
-		                                    (int8_t)(val[ 1]*4 + 0 +32), (int8_t)(val[ 1]*4 + 1 +32),
-		                                    (int8_t)(val[ 1]*4 + 2 +32), (int8_t)(val[ 1]*4 + 3 +32),
-		                                    (int8_t)(val[ 2]*4 + 0 +32), (int8_t)(val[ 2]*4 + 1 +32),
-		                                    (int8_t)(val[ 2]*4 + 2 +32), (int8_t)(val[ 2]*4 + 3 +32),
-		                                    (int8_t)(val[ 3]*4 + 0 +32), (int8_t)(val[ 3]*4 + 1 +32),
-		                                    (int8_t)(val[ 3]*4 + 2 +32), (int8_t)(val[ 3]*4 + 3 +32),
-		                                    (int8_t)(val[ 4]*4 + 0 +32), (int8_t)(val[ 4]*4 + 1 +32),
-		                                    (int8_t)(val[ 4]*4 + 2 +32), (int8_t)(val[ 4]*4 + 3 +32),
-		                                    (int8_t)(val[ 5]*4 + 0 +32), (int8_t)(val[ 5]*4 + 1 +32),
-		                                    (int8_t)(val[ 5]*4 + 2 +32), (int8_t)(val[ 5]*4 + 3 +32),
-		                                    (int8_t)(val[ 6]*4 + 0 +32), (int8_t)(val[ 6]*4 + 1 +32),
-		                                    (int8_t)(val[ 6]*4 + 2 +32), (int8_t)(val[ 6]*4 + 3 +32),
-		                                    (int8_t)(val[ 7]*4 + 0 +32), (int8_t)(val[ 7]*4 + 1 +32),
-		                                    (int8_t)(val[ 7]*4 + 2 +32), (int8_t)(val[ 7]*4 + 3 +32)};
-		return mipp::set<int8_t>(val_bis);
-	}
+	inline reg cmask<int8_t>(const uint32_t val[nElReg<int8_t>()]) {
+		return _mm512_castsi512_ps(_mm512_setr_epi8((int8_t)val[ 0], (int8_t)val[ 1], (int8_t)val[ 2], (int8_t)val[ 3],
+		                                            (int8_t)val[ 4], (int8_t)val[ 5], (int8_t)val[ 6], (int8_t)val[ 7],
+		                                            (int8_t)val[ 8], (int8_t)val[ 9], (int8_t)val[10], (int8_t)val[11],
+		                                            (int8_t)val[12], (int8_t)val[13], (int8_t)val[14], (int8_t)val[15],
+		                                            (int8_t)val[16], (int8_t)val[17], (int8_t)val[18], (int8_t)val[19],
+		                                            (int8_t)val[20], (int8_t)val[21], (int8_t)val[22], (int8_t)val[23],
+		                                            (int8_t)val[24], (int8_t)val[25], (int8_t)val[26], (int8_t)val[27],
+		                                            (int8_t)val[28], (int8_t)val[29], (int8_t)val[30], (int8_t)val[31],
+		                                            (int8_t)val[32], (int8_t)val[33], (int8_t)val[34], (int8_t)val[35],
+		                                            (int8_t)val[36], (int8_t)val[37], (int8_t)val[38], (int8_t)val[39],
+		                                            (int8_t)val[40], (int8_t)val[41], (int8_t)val[42], (int8_t)val[43],
+		                                            (int8_t)val[44], (int8_t)val[45], (int8_t)val[46], (int8_t)val[47],
+		                                            (int8_t)val[48], (int8_t)val[49], (int8_t)val[50], (int8_t)val[51],
+		                                            (int8_t)val[52], (int8_t)val[53], (int8_t)val[54], (int8_t)val[55],
+		                                            (int8_t)val[56], (int8_t)val[57], (int8_t)val[58], (int8_t)val[59],
+		                                            (int8_t)val[60], (int8_t)val[61], (int8_t)val[62], (int8_t)val[63]));
 
-	template <>
-	inline reg cmask2<int64_t>(const uint32_t val[nElReg<int64_t>()/2]) {
-		int8_t val_bis[nElReg<int8_t>()] = {(int8_t)(val[0]*8 + 0 + 0), (int8_t)(val[0]*8 + 1 + 0),
-		                                    (int8_t)(val[0]*8 + 2 + 0), (int8_t)(val[0]*8 + 3 + 0),
-		                                    (int8_t)(val[0]*8 + 4 + 0), (int8_t)(val[0]*8 + 5 + 0),
-		                                    (int8_t)(val[0]*8 + 6 + 0), (int8_t)(val[0]*8 + 7 + 0),
-		                                    (int8_t)(val[1]*8 + 0 + 0), (int8_t)(val[1]*8 + 1 + 0),
-		                                    (int8_t)(val[1]*8 + 2 + 0), (int8_t)(val[1]*8 + 3 + 0),
-		                                    (int8_t)(val[1]*8 + 4 + 0), (int8_t)(val[1]*8 + 5 + 0),
-		                                    (int8_t)(val[1]*8 + 6 + 0), (int8_t)(val[1]*8 + 7 + 0),
-		                                    (int8_t)(val[2]*8 + 0 + 0), (int8_t)(val[2]*8 + 1 + 0),
-		                                    (int8_t)(val[2]*8 + 2 + 0), (int8_t)(val[2]*8 + 3 + 0),
-		                                    (int8_t)(val[2]*8 + 4 + 0), (int8_t)(val[2]*8 + 5 + 0),
-		                                    (int8_t)(val[2]*8 + 6 + 0), (int8_t)(val[2]*8 + 7 + 0),
-		                                    (int8_t)(val[3]*8 + 0 + 0), (int8_t)(val[3]*8 + 1 + 0),
-		                                    (int8_t)(val[3]*8 + 2 + 0), (int8_t)(val[3]*8 + 3 + 0),
-		                                    (int8_t)(val[3]*8 + 4 + 0), (int8_t)(val[3]*8 + 5 + 0),
-		                                    (int8_t)(val[3]*8 + 6 + 0), (int8_t)(val[3]*8 + 7 + 0),
-		                                    (int8_t)(val[0]*8 + 0 +32), (int8_t)(val[0]*8 + 1 +32),
-		                                    (int8_t)(val[0]*8 + 2 +32), (int8_t)(val[0]*8 + 3 +32),
-		                                    (int8_t)(val[0]*8 + 4 +32), (int8_t)(val[0]*8 + 5 +32),
-		                                    (int8_t)(val[0]*8 + 6 +32), (int8_t)(val[0]*8 + 7 +32),
-		                                    (int8_t)(val[1]*8 + 0 +32), (int8_t)(val[1]*8 + 1 +32),
-		                                    (int8_t)(val[1]*8 + 2 +32), (int8_t)(val[1]*8 + 3 +32),
-		                                    (int8_t)(val[1]*8 + 4 +32), (int8_t)(val[1]*8 + 5 +32),
-		                                    (int8_t)(val[1]*8 + 6 +32), (int8_t)(val[1]*8 + 7 +32),
-		                                    (int8_t)(val[2]*8 + 0 +32), (int8_t)(val[2]*8 + 1 +32),
-		                                    (int8_t)(val[2]*8 + 2 +32), (int8_t)(val[2]*8 + 3 +32),
-		                                    (int8_t)(val[2]*8 + 4 +32), (int8_t)(val[2]*8 + 5 +32),
-		                                    (int8_t)(val[2]*8 + 6 +32), (int8_t)(val[2]*8 + 7 +32),
-		                                    (int8_t)(val[3]*8 + 0 +32), (int8_t)(val[3]*8 + 1 +32),
-		                                    (int8_t)(val[3]*8 + 2 +32), (int8_t)(val[3]*8 + 3 +32),
-		                                    (int8_t)(val[3]*8 + 4 +32), (int8_t)(val[3]*8 + 5 +32),
-		                                    (int8_t)(val[3]*8 + 6 +32), (int8_t)(val[3]*8 + 7 +32)};
-		return mipp::set<int8_t>(val_bis);
 	}
+#endif
 
-	template <>
-	inline reg cmask2<int32_t>(const uint32_t val[nElReg<int32_t>()/2]) {
-		int8_t val_bis[nElReg<int8_t>()] = {(int8_t)(val[ 0]*4 + 0 + 0), (int8_t)(val[ 0]*4 + 1 + 0),
-		                                    (int8_t)(val[ 0]*4 + 2 + 0), (int8_t)(val[ 0]*4 + 3 + 0),
-		                                    (int8_t)(val[ 1]*4 + 0 + 0), (int8_t)(val[ 1]*4 + 1 + 0),
-		                                    (int8_t)(val[ 1]*4 + 2 + 0), (int8_t)(val[ 1]*4 + 3 + 0),
-		                                    (int8_t)(val[ 2]*4 + 0 + 0), (int8_t)(val[ 2]*4 + 1 + 0),
-		                                    (int8_t)(val[ 2]*4 + 2 + 0), (int8_t)(val[ 2]*4 + 3 + 0),
-		                                    (int8_t)(val[ 3]*4 + 0 + 0), (int8_t)(val[ 3]*4 + 1 + 0),
-		                                    (int8_t)(val[ 3]*4 + 2 + 0), (int8_t)(val[ 3]*4 + 3 + 0),
-		                                    (int8_t)(val[ 4]*4 + 0 + 0), (int8_t)(val[ 4]*4 + 1 + 0),
-		                                    (int8_t)(val[ 4]*4 + 2 + 0), (int8_t)(val[ 4]*4 + 3 + 0),
-		                                    (int8_t)(val[ 5]*4 + 0 + 0), (int8_t)(val[ 5]*4 + 1 + 0),
-		                                    (int8_t)(val[ 5]*4 + 2 + 0), (int8_t)(val[ 5]*4 + 3 + 0),
-		                                    (int8_t)(val[ 6]*4 + 0 + 0), (int8_t)(val[ 6]*4 + 1 + 0),
-		                                    (int8_t)(val[ 6]*4 + 2 + 0), (int8_t)(val[ 6]*4 + 3 + 0),
-		                                    (int8_t)(val[ 7]*4 + 0 + 0), (int8_t)(val[ 7]*4 + 1 + 0),
-		                                    (int8_t)(val[ 7]*4 + 2 + 0), (int8_t)(val[ 7]*4 + 3 + 0),
-		                                    (int8_t)(val[ 0]*4 + 0 +32), (int8_t)(val[ 0]*4 + 1 +32),
-		                                    (int8_t)(val[ 0]*4 + 2 +32), (int8_t)(val[ 0]*4 + 3 +32),
-		                                    (int8_t)(val[ 1]*4 + 0 +32), (int8_t)(val[ 1]*4 + 1 +32),
-		                                    (int8_t)(val[ 1]*4 + 2 +32), (int8_t)(val[ 1]*4 + 3 +32),
-		                                    (int8_t)(val[ 2]*4 + 0 +32), (int8_t)(val[ 2]*4 + 1 +32),
-		                                    (int8_t)(val[ 2]*4 + 2 +32), (int8_t)(val[ 2]*4 + 3 +32),
-		                                    (int8_t)(val[ 3]*4 + 0 +32), (int8_t)(val[ 3]*4 + 1 +32),
-		                                    (int8_t)(val[ 3]*4 + 2 +32), (int8_t)(val[ 3]*4 + 3 +32),
-		                                    (int8_t)(val[ 4]*4 + 0 +32), (int8_t)(val[ 4]*4 + 1 +32),
-		                                    (int8_t)(val[ 4]*4 + 2 +32), (int8_t)(val[ 4]*4 + 3 +32),
-		                                    (int8_t)(val[ 5]*4 + 0 +32), (int8_t)(val[ 5]*4 + 1 +32),
-		                                    (int8_t)(val[ 5]*4 + 2 +32), (int8_t)(val[ 5]*4 + 3 +32),
-		                                    (int8_t)(val[ 6]*4 + 0 +32), (int8_t)(val[ 6]*4 + 1 +32),
-		                                    (int8_t)(val[ 6]*4 + 2 +32), (int8_t)(val[ 6]*4 + 3 +32),
-		                                    (int8_t)(val[ 7]*4 + 0 +32), (int8_t)(val[ 7]*4 + 1 +32),
-		                                    (int8_t)(val[ 7]*4 + 2 +32), (int8_t)(val[ 7]*4 + 3 +32)};
-		return mipp::set<int8_t>(val_bis);
-	}
-
-	template <>
-	inline reg cmask2<int16_t>(const uint32_t val[nElReg<int16_t>()/2]) {
-		int8_t val_bis[nElReg<int8_t>()] = {(int8_t)(val[ 0]*2 + 0 + 0), (int8_t)(val[ 0]*2 + 1 + 0),
-		                                    (int8_t)(val[ 1]*2 + 0 + 0), (int8_t)(val[ 1]*2 + 1 + 0),
-		                                    (int8_t)(val[ 2]*2 + 0 + 0), (int8_t)(val[ 2]*2 + 1 + 0),
-		                                    (int8_t)(val[ 3]*2 + 0 + 0), (int8_t)(val[ 3]*2 + 1 + 0),
-		                                    (int8_t)(val[ 4]*2 + 0 + 0), (int8_t)(val[ 4]*2 + 1 + 0),
-		                                    (int8_t)(val[ 5]*2 + 0 + 0), (int8_t)(val[ 5]*2 + 1 + 0),
-		                                    (int8_t)(val[ 6]*2 + 0 + 0), (int8_t)(val[ 6]*2 + 1 + 0),
-		                                    (int8_t)(val[ 7]*2 + 0 + 0), (int8_t)(val[ 7]*2 + 1 + 0),
-		                                    (int8_t)(val[ 8]*2 + 0 + 0), (int8_t)(val[ 8]*2 + 1 + 0),
-		                                    (int8_t)(val[ 9]*2 + 0 + 0), (int8_t)(val[ 9]*2 + 1 + 0),
-		                                    (int8_t)(val[10]*2 + 0 + 0), (int8_t)(val[10]*2 + 1 + 0),
-		                                    (int8_t)(val[11]*2 + 0 + 0), (int8_t)(val[11]*2 + 1 + 0),
-		                                    (int8_t)(val[12]*2 + 0 + 0), (int8_t)(val[12]*2 + 1 + 0),
-		                                    (int8_t)(val[13]*2 + 0 + 0), (int8_t)(val[13]*2 + 1 + 0),
-		                                    (int8_t)(val[14]*2 + 0 + 0), (int8_t)(val[14]*2 + 1 + 0),
-		                                    (int8_t)(val[15]*2 + 0 + 0), (int8_t)(val[15]*2 + 1 + 0),
-		                                    (int8_t)(val[ 0]*2 + 0 +32), (int8_t)(val[ 0]*2 + 1 +32),
-		                                    (int8_t)(val[ 1]*2 + 0 +32), (int8_t)(val[ 1]*2 + 1 +32),
-		                                    (int8_t)(val[ 2]*2 + 0 +32), (int8_t)(val[ 2]*2 + 1 +32),
-		                                    (int8_t)(val[ 3]*2 + 0 +32), (int8_t)(val[ 3]*2 + 1 +32),
-		                                    (int8_t)(val[ 4]*2 + 0 +32), (int8_t)(val[ 4]*2 + 1 +32),
-		                                    (int8_t)(val[ 5]*2 + 0 +32), (int8_t)(val[ 5]*2 + 1 +32),
-		                                    (int8_t)(val[ 6]*2 + 0 +32), (int8_t)(val[ 6]*2 + 1 +32),
-		                                    (int8_t)(val[ 7]*2 + 0 +32), (int8_t)(val[ 7]*2 + 1 +32),
-		                                    (int8_t)(val[ 8]*2 + 0 +32), (int8_t)(val[ 8]*2 + 1 +32),
-		                                    (int8_t)(val[ 9]*2 + 0 +32), (int8_t)(val[ 9]*2 + 1 +32),
-		                                    (int8_t)(val[10]*2 + 0 +32), (int8_t)(val[10]*2 + 1 +32),
-		                                    (int8_t)(val[11]*2 + 0 +32), (int8_t)(val[11]*2 + 1 +32),
-		                                    (int8_t)(val[12]*2 + 0 +32), (int8_t)(val[12]*2 + 1 +32),
-		                                    (int8_t)(val[13]*2 + 0 +32), (int8_t)(val[13]*2 + 1 +32),
-		                                    (int8_t)(val[14]*2 + 0 +32), (int8_t)(val[14]*2 + 1 +32),
-		                                    (int8_t)(val[15]*2 + 0 +32), (int8_t)(val[15]*2 + 1 +32)};
-		return mipp::set<int8_t>(val_bis);
-	}
-
-	template <>
-	inline reg cmask2<int8_t>(const uint32_t val[nElReg<int8_t>()/2]) {
-		int8_t val_bis[nElReg<int8_t>()] = {(int8_t)(val[ 0] + 0), (int8_t)(val[ 1] + 0), (int8_t)(val[ 2] + 0), (int8_t)(val[ 3] + 0),
-		                                    (int8_t)(val[ 4] + 0), (int8_t)(val[ 5] + 0), (int8_t)(val[ 6] + 0), (int8_t)(val[ 7] + 0),
-		                                    (int8_t)(val[ 8] + 0), (int8_t)(val[ 9] + 0), (int8_t)(val[10] + 0), (int8_t)(val[11] + 0),
-		                                    (int8_t)(val[12] + 0), (int8_t)(val[13] + 0), (int8_t)(val[14] + 0), (int8_t)(val[15] + 0),
-		                                    (int8_t)(val[16] + 0), (int8_t)(val[17] + 0), (int8_t)(val[18] + 0), (int8_t)(val[19] + 0),
-		                                    (int8_t)(val[20] + 0), (int8_t)(val[21] + 0), (int8_t)(val[22] + 0), (int8_t)(val[23] + 0),
-		                                    (int8_t)(val[24] + 0), (int8_t)(val[25] + 0), (int8_t)(val[26] + 0), (int8_t)(val[27] + 0),
-		                                    (int8_t)(val[28] + 0), (int8_t)(val[29] + 0), (int8_t)(val[30] + 0), (int8_t)(val[31] + 0),
-		                                    (int8_t)(val[ 0] +32), (int8_t)(val[ 1] +32), (int8_t)(val[ 2] +32), (int8_t)(val[ 3] +32),
-		                                    (int8_t)(val[ 4] +32), (int8_t)(val[ 5] +32), (int8_t)(val[ 6] +32), (int8_t)(val[ 7] +32),
-		                                    (int8_t)(val[ 8] +32), (int8_t)(val[ 9] +32), (int8_t)(val[10] +32), (int8_t)(val[11] +32),
-		                                    (int8_t)(val[12] +32), (int8_t)(val[13] +32), (int8_t)(val[14] +32), (int8_t)(val[15] +32),
-		                                    (int8_t)(val[16] +32), (int8_t)(val[17] +32), (int8_t)(val[18] +32), (int8_t)(val[19] +32),
-		                                    (int8_t)(val[20] +32), (int8_t)(val[21] +32), (int8_t)(val[22] +32), (int8_t)(val[23] +32),
-		                                    (int8_t)(val[24] +32), (int8_t)(val[25] +32), (int8_t)(val[26] +32), (int8_t)(val[27] +32),
-		                                    (int8_t)(val[28] +32), (int8_t)(val[29] +32), (int8_t)(val[30] +32), (int8_t)(val[31] +32)};
-		return mipp::set<int8_t>(val_bis);
-	}
-#elif defined(__AVX512F__)
+	// --------------------------------------------------------------------------------------------------------- cmask2
+#if defined(__AVX512F__)
 	template <>
 	inline reg cmask2<double>(const uint32_t vals[nElReg<double>()/2]) {
 		return _mm512_castsi512_ps(_mm512_set_epi32((int32_t)vals[3]*2 +1+8, (int32_t)vals[3]*2 +0+8, (int32_t)vals[2]*2 +1+8, (int32_t)vals[2]*2 +0+8,
@@ -1290,214 +917,44 @@
 	}
 #endif
 
-	// --------------------------------------------------------------------------------------------------------- cmask4
 #if defined(__AVX512BW__)
 	template <>
-	inline reg cmask4<double>(const uint32_t val[nElReg<double>()/4]) {
-		int8_t val_bis[nElReg<int8_t>()] = {(int8_t)(val[0]*8 + 0 + 0), (int8_t)(val[0]*8 + 1 + 0),
-		                                    (int8_t)(val[0]*8 + 2 + 0), (int8_t)(val[0]*8 + 3 + 0),
-		                                    (int8_t)(val[0]*8 + 4 + 0), (int8_t)(val[0]*8 + 5 + 0),
-		                                    (int8_t)(val[0]*8 + 6 + 0), (int8_t)(val[0]*8 + 7 + 0),
-		                                    (int8_t)(val[1]*8 + 0 + 0), (int8_t)(val[1]*8 + 1 + 0),
-		                                    (int8_t)(val[1]*8 + 2 + 0), (int8_t)(val[1]*8 + 3 + 0),
-		                                    (int8_t)(val[1]*8 + 4 + 0), (int8_t)(val[1]*8 + 5 + 0),
-		                                    (int8_t)(val[1]*8 + 6 + 0), (int8_t)(val[1]*8 + 7 + 0),
-		                                    (int8_t)(val[0]*8 + 0 +16), (int8_t)(val[0]*8 + 1 +16),
-		                                    (int8_t)(val[0]*8 + 2 +16), (int8_t)(val[0]*8 + 3 +16),
-		                                    (int8_t)(val[0]*8 + 4 +16), (int8_t)(val[0]*8 + 5 +16),
-		                                    (int8_t)(val[0]*8 + 6 +16), (int8_t)(val[0]*8 + 7 +16),
-		                                    (int8_t)(val[1]*8 + 0 +16), (int8_t)(val[1]*8 + 1 +16),
-		                                    (int8_t)(val[1]*8 + 2 +16), (int8_t)(val[1]*8 + 3 +16),
-		                                    (int8_t)(val[1]*8 + 4 +16), (int8_t)(val[1]*8 + 5 +16),
-		                                    (int8_t)(val[1]*8 + 6 +16), (int8_t)(val[1]*8 + 7 +16),
-		                                    (int8_t)(val[0]*8 + 0 +32), (int8_t)(val[0]*8 + 1 +32),
-		                                    (int8_t)(val[0]*8 + 2 +32), (int8_t)(val[0]*8 + 3 +32),
-		                                    (int8_t)(val[0]*8 + 4 +32), (int8_t)(val[0]*8 + 5 +32),
-		                                    (int8_t)(val[0]*8 + 6 +32), (int8_t)(val[0]*8 + 7 +32),
-		                                    (int8_t)(val[1]*8 + 0 +32), (int8_t)(val[1]*8 + 1 +32),
-		                                    (int8_t)(val[1]*8 + 2 +32), (int8_t)(val[1]*8 + 3 +32),
-		                                    (int8_t)(val[1]*8 + 4 +32), (int8_t)(val[1]*8 + 5 +32),
-		                                    (int8_t)(val[1]*8 + 6 +32), (int8_t)(val[1]*8 + 7 +32),
-		                                    (int8_t)(val[0]*8 + 0 +48), (int8_t)(val[0]*8 + 1 +48),
-		                                    (int8_t)(val[0]*8 + 2 +48), (int8_t)(val[0]*8 + 3 +48),
-		                                    (int8_t)(val[0]*8 + 4 +48), (int8_t)(val[0]*8 + 5 +48),
-		                                    (int8_t)(val[0]*8 + 6 +48), (int8_t)(val[0]*8 + 7 +48),
-		                                    (int8_t)(val[1]*8 + 0 +48), (int8_t)(val[1]*8 + 1 +48),
-		                                    (int8_t)(val[1]*8 + 2 +48), (int8_t)(val[1]*8 + 3 +48),
-		                                    (int8_t)(val[1]*8 + 4 +48), (int8_t)(val[1]*8 + 5 +48),
-		                                    (int8_t)(val[1]*8 + 6 +48), (int8_t)(val[1]*8 + 7 +48)};
-		return mipp::set<int8_t>(val_bis);
+	inline reg cmask2<int16_t>(const uint32_t vals[nElReg<int16_t>()/2]) {
+		return _mm512_castsi512_ps(_mm512_set_epi16((int16_t)vals[15]+16, (int16_t)vals[14]+16, (int16_t)vals[13]+16, (int16_t)vals[12]+16,
+		                                            (int16_t)vals[11]+16, (int16_t)vals[10]+16, (int16_t)vals[ 9]+16, (int16_t)vals[ 8]+16,
+		                                            (int16_t)vals[ 7]+16, (int16_t)vals[ 6]+16, (int16_t)vals[ 5]+16, (int16_t)vals[ 4]+16,
+		                                            (int16_t)vals[ 3]+16, (int16_t)vals[ 2]+16, (int16_t)vals[ 1]+16, (int16_t)vals[ 0]+16,
+		                                            (int16_t)vals[15]+ 0, (int16_t)vals[14]+ 0, (int16_t)vals[13]+ 0, (int16_t)vals[12]+ 0,
+		                                            (int16_t)vals[11]+ 0, (int16_t)vals[10]+ 0, (int16_t)vals[ 9]+ 0, (int16_t)vals[ 8]+ 0,
+		                                            (int16_t)vals[ 7]+ 0, (int16_t)vals[ 6]+ 0, (int16_t)vals[ 5]+ 0, (int16_t)vals[ 4]+ 0,
+		                                            (int16_t)vals[ 3]+ 0, (int16_t)vals[ 2]+ 0, (int16_t)vals[ 1]+ 0, (int16_t)vals[ 0]+ 0));
 	}
+#endif
 
+#if defined(__AVX512VBMI__)
 	template <>
-	inline reg cmask4<float>(const uint32_t val[nElReg<float>()/4]) {
-		int8_t val_bis[nElReg<int8_t>()] = {(int8_t)(val[ 0]*4 + 0 + 0), (int8_t)(val[ 0]*4 + 1 + 0),
-		                                    (int8_t)(val[ 0]*4 + 2 + 0), (int8_t)(val[ 0]*4 + 3 + 0),
-		                                    (int8_t)(val[ 1]*4 + 0 + 0), (int8_t)(val[ 1]*4 + 1 + 0),
-		                                    (int8_t)(val[ 1]*4 + 2 + 0), (int8_t)(val[ 1]*4 + 3 + 0),
-		                                    (int8_t)(val[ 2]*4 + 0 + 0), (int8_t)(val[ 2]*4 + 1 + 0),
-		                                    (int8_t)(val[ 2]*4 + 2 + 0), (int8_t)(val[ 2]*4 + 3 + 0),
-		                                    (int8_t)(val[ 3]*4 + 0 + 0), (int8_t)(val[ 3]*4 + 1 + 0),
-		                                    (int8_t)(val[ 3]*4 + 2 + 0), (int8_t)(val[ 3]*4 + 3 + 0),
-		                                    (int8_t)(val[ 0]*4 + 0 +16), (int8_t)(val[ 0]*4 + 1 +16),
-		                                    (int8_t)(val[ 0]*4 + 2 +16), (int8_t)(val[ 0]*4 + 3 +16),
-		                                    (int8_t)(val[ 1]*4 + 0 +16), (int8_t)(val[ 1]*4 + 1 +16),
-		                                    (int8_t)(val[ 1]*4 + 2 +16), (int8_t)(val[ 1]*4 + 3 +16),
-		                                    (int8_t)(val[ 2]*4 + 0 +16), (int8_t)(val[ 2]*4 + 1 +16),
-		                                    (int8_t)(val[ 2]*4 + 2 +16), (int8_t)(val[ 2]*4 + 3 +16),
-		                                    (int8_t)(val[ 3]*4 + 0 +16), (int8_t)(val[ 3]*4 + 1 +16),
-		                                    (int8_t)(val[ 3]*4 + 2 +16), (int8_t)(val[ 3]*4 + 3 +16),
-		                                    (int8_t)(val[ 0]*4 + 0 +32), (int8_t)(val[ 0]*4 + 1 +32),
-		                                    (int8_t)(val[ 0]*4 + 2 +32), (int8_t)(val[ 0]*4 + 3 +32),
-		                                    (int8_t)(val[ 1]*4 + 0 +32), (int8_t)(val[ 1]*4 + 1 +32),
-		                                    (int8_t)(val[ 1]*4 + 2 +32), (int8_t)(val[ 1]*4 + 3 +32),
-		                                    (int8_t)(val[ 2]*4 + 0 +32), (int8_t)(val[ 2]*4 + 1 +32),
-		                                    (int8_t)(val[ 2]*4 + 2 +32), (int8_t)(val[ 2]*4 + 3 +32),
-		                                    (int8_t)(val[ 3]*4 + 0 +32), (int8_t)(val[ 3]*4 + 1 +32),
-		                                    (int8_t)(val[ 3]*4 + 2 +32), (int8_t)(val[ 3]*4 + 3 +32),
-		                                    (int8_t)(val[ 0]*4 + 0 +48), (int8_t)(val[ 0]*4 + 1 +48),
-		                                    (int8_t)(val[ 0]*4 + 2 +48), (int8_t)(val[ 0]*4 + 3 +48),
-		                                    (int8_t)(val[ 1]*4 + 0 +48), (int8_t)(val[ 1]*4 + 1 +48),
-		                                    (int8_t)(val[ 1]*4 + 2 +48), (int8_t)(val[ 1]*4 + 3 +48),
-		                                    (int8_t)(val[ 2]*4 + 0 +48), (int8_t)(val[ 2]*4 + 1 +48),
-		                                    (int8_t)(val[ 2]*4 + 2 +48), (int8_t)(val[ 2]*4 + 3 +48),
-		                                    (int8_t)(val[ 3]*4 + 0 +48), (int8_t)(val[ 3]*4 + 1 +48),
-		                                    (int8_t)(val[ 3]*4 + 2 +48), (int8_t)(val[ 3]*4 + 3 +48)};
-		return mipp::set<int8_t>(val_bis);
+	inline reg cmask2<int8_t>(const uint32_t val[nElReg<int8_t>()/2]) {
+		return _mm512_castsi512_ps(_mm512_setr_epi8((int8_t)(val[ 0] + 0), (int8_t)(val[ 1] + 0), (int8_t)(val[ 2] + 0), (int8_t)(val[ 3] + 0),
+		                                            (int8_t)(val[ 4] + 0), (int8_t)(val[ 5] + 0), (int8_t)(val[ 6] + 0), (int8_t)(val[ 7] + 0),
+		                                            (int8_t)(val[ 8] + 0), (int8_t)(val[ 9] + 0), (int8_t)(val[10] + 0), (int8_t)(val[11] + 0),
+		                                            (int8_t)(val[12] + 0), (int8_t)(val[13] + 0), (int8_t)(val[14] + 0), (int8_t)(val[15] + 0),
+		                                            (int8_t)(val[16] + 0), (int8_t)(val[17] + 0), (int8_t)(val[18] + 0), (int8_t)(val[19] + 0),
+		                                            (int8_t)(val[20] + 0), (int8_t)(val[21] + 0), (int8_t)(val[22] + 0), (int8_t)(val[23] + 0),
+		                                            (int8_t)(val[24] + 0), (int8_t)(val[25] + 0), (int8_t)(val[26] + 0), (int8_t)(val[27] + 0),
+		                                            (int8_t)(val[28] + 0), (int8_t)(val[29] + 0), (int8_t)(val[30] + 0), (int8_t)(val[31] + 0),
+		                                            (int8_t)(val[ 0] +32), (int8_t)(val[ 1] +32), (int8_t)(val[ 2] +32), (int8_t)(val[ 3] +32),
+		                                            (int8_t)(val[ 4] +32), (int8_t)(val[ 5] +32), (int8_t)(val[ 6] +32), (int8_t)(val[ 7] +32),
+		                                            (int8_t)(val[ 8] +32), (int8_t)(val[ 9] +32), (int8_t)(val[10] +32), (int8_t)(val[11] +32),
+		                                            (int8_t)(val[12] +32), (int8_t)(val[13] +32), (int8_t)(val[14] +32), (int8_t)(val[15] +32),
+		                                            (int8_t)(val[16] +32), (int8_t)(val[17] +32), (int8_t)(val[18] +32), (int8_t)(val[19] +32),
+		                                            (int8_t)(val[20] +32), (int8_t)(val[21] +32), (int8_t)(val[22] +32), (int8_t)(val[23] +32),
+		                                            (int8_t)(val[24] +32), (int8_t)(val[25] +32), (int8_t)(val[26] +32), (int8_t)(val[27] +32),
+		                                            (int8_t)(val[28] +32), (int8_t)(val[29] +32), (int8_t)(val[30] +32), (int8_t)(val[31] +32)));
 	}
+#endif
 
-	template <>
-	inline reg cmask4<int64_t>(const uint32_t val[nElReg<int64_t>()/4]) {
-		int8_t val_bis[nElReg<int8_t>()] = {(int8_t)(val[0]*8 + 0 + 0), (int8_t)(val[0]*8 + 1 + 0),
-		                                    (int8_t)(val[0]*8 + 2 + 0), (int8_t)(val[0]*8 + 3 + 0),
-		                                    (int8_t)(val[0]*8 + 4 + 0), (int8_t)(val[0]*8 + 5 + 0),
-		                                    (int8_t)(val[0]*8 + 6 + 0), (int8_t)(val[0]*8 + 7 + 0),
-		                                    (int8_t)(val[1]*8 + 0 + 0), (int8_t)(val[1]*8 + 1 + 0),
-		                                    (int8_t)(val[1]*8 + 2 + 0), (int8_t)(val[1]*8 + 3 + 0),
-		                                    (int8_t)(val[1]*8 + 4 + 0), (int8_t)(val[1]*8 + 5 + 0),
-		                                    (int8_t)(val[1]*8 + 6 + 0), (int8_t)(val[1]*8 + 7 + 0),
-		                                    (int8_t)(val[0]*8 + 0 +16), (int8_t)(val[0]*8 + 1 +16),
-		                                    (int8_t)(val[0]*8 + 2 +16), (int8_t)(val[0]*8 + 3 +16),
-		                                    (int8_t)(val[0]*8 + 4 +16), (int8_t)(val[0]*8 + 5 +16),
-		                                    (int8_t)(val[0]*8 + 6 +16), (int8_t)(val[0]*8 + 7 +16),
-		                                    (int8_t)(val[1]*8 + 0 +16), (int8_t)(val[1]*8 + 1 +16),
-		                                    (int8_t)(val[1]*8 + 2 +16), (int8_t)(val[1]*8 + 3 +16),
-		                                    (int8_t)(val[1]*8 + 4 +16), (int8_t)(val[1]*8 + 5 +16),
-		                                    (int8_t)(val[1]*8 + 6 +16), (int8_t)(val[1]*8 + 7 +16),
-		                                    (int8_t)(val[0]*8 + 0 +32), (int8_t)(val[0]*8 + 1 +32),
-		                                    (int8_t)(val[0]*8 + 2 +32), (int8_t)(val[0]*8 + 3 +32),
-		                                    (int8_t)(val[0]*8 + 4 +32), (int8_t)(val[0]*8 + 5 +32),
-		                                    (int8_t)(val[0]*8 + 6 +32), (int8_t)(val[0]*8 + 7 +32),
-		                                    (int8_t)(val[1]*8 + 0 +32), (int8_t)(val[1]*8 + 1 +32),
-		                                    (int8_t)(val[1]*8 + 2 +32), (int8_t)(val[1]*8 + 3 +32),
-		                                    (int8_t)(val[1]*8 + 4 +32), (int8_t)(val[1]*8 + 5 +32),
-		                                    (int8_t)(val[1]*8 + 6 +32), (int8_t)(val[1]*8 + 7 +32),
-		                                    (int8_t)(val[0]*8 + 0 +48), (int8_t)(val[0]*8 + 1 +48),
-		                                    (int8_t)(val[0]*8 + 2 +48), (int8_t)(val[0]*8 + 3 +48),
-		                                    (int8_t)(val[0]*8 + 4 +48), (int8_t)(val[0]*8 + 5 +48),
-		                                    (int8_t)(val[0]*8 + 6 +48), (int8_t)(val[0]*8 + 7 +48),
-		                                    (int8_t)(val[1]*8 + 0 +48), (int8_t)(val[1]*8 + 1 +48),
-		                                    (int8_t)(val[1]*8 + 2 +48), (int8_t)(val[1]*8 + 3 +48),
-		                                    (int8_t)(val[1]*8 + 4 +48), (int8_t)(val[1]*8 + 5 +48),
-		                                    (int8_t)(val[1]*8 + 6 +48), (int8_t)(val[1]*8 + 7 +48)};
-		return mipp::set<int8_t>(val_bis);
-	}
-
-	template <>
-	inline reg cmask4<int32_t>(const uint32_t val[nElReg<int32_t>()/4]) {
-		int8_t val_bis[nElReg<int8_t>()] = {(int8_t)(val[ 0]*4 + 0 + 0), (int8_t)(val[ 0]*4 + 1 + 0),
-		                                    (int8_t)(val[ 0]*4 + 2 + 0), (int8_t)(val[ 0]*4 + 3 + 0),
-		                                    (int8_t)(val[ 1]*4 + 0 + 0), (int8_t)(val[ 1]*4 + 1 + 0),
-		                                    (int8_t)(val[ 1]*4 + 2 + 0), (int8_t)(val[ 1]*4 + 3 + 0),
-		                                    (int8_t)(val[ 2]*4 + 0 + 0), (int8_t)(val[ 2]*4 + 1 + 0),
-		                                    (int8_t)(val[ 2]*4 + 2 + 0), (int8_t)(val[ 2]*4 + 3 + 0),
-		                                    (int8_t)(val[ 3]*4 + 0 + 0), (int8_t)(val[ 3]*4 + 1 + 0),
-		                                    (int8_t)(val[ 3]*4 + 2 + 0), (int8_t)(val[ 3]*4 + 3 + 0),
-		                                    (int8_t)(val[ 0]*4 + 0 +16), (int8_t)(val[ 0]*4 + 1 +16),
-		                                    (int8_t)(val[ 0]*4 + 2 +16), (int8_t)(val[ 0]*4 + 3 +16),
-		                                    (int8_t)(val[ 1]*4 + 0 +16), (int8_t)(val[ 1]*4 + 1 +16),
-		                                    (int8_t)(val[ 1]*4 + 2 +16), (int8_t)(val[ 1]*4 + 3 +16),
-		                                    (int8_t)(val[ 2]*4 + 0 +16), (int8_t)(val[ 2]*4 + 1 +16),
-		                                    (int8_t)(val[ 2]*4 + 2 +16), (int8_t)(val[ 2]*4 + 3 +16),
-		                                    (int8_t)(val[ 3]*4 + 0 +16), (int8_t)(val[ 3]*4 + 1 +16),
-		                                    (int8_t)(val[ 3]*4 + 2 +16), (int8_t)(val[ 3]*4 + 3 +16),
-		                                    (int8_t)(val[ 0]*4 + 0 +32), (int8_t)(val[ 0]*4 + 1 +32),
-		                                    (int8_t)(val[ 0]*4 + 2 +32), (int8_t)(val[ 0]*4 + 3 +32),
-		                                    (int8_t)(val[ 1]*4 + 0 +32), (int8_t)(val[ 1]*4 + 1 +32),
-		                                    (int8_t)(val[ 1]*4 + 2 +32), (int8_t)(val[ 1]*4 + 3 +32),
-		                                    (int8_t)(val[ 2]*4 + 0 +32), (int8_t)(val[ 2]*4 + 1 +32),
-		                                    (int8_t)(val[ 2]*4 + 2 +32), (int8_t)(val[ 2]*4 + 3 +32),
-		                                    (int8_t)(val[ 3]*4 + 0 +32), (int8_t)(val[ 3]*4 + 1 +32),
-		                                    (int8_t)(val[ 3]*4 + 2 +32), (int8_t)(val[ 3]*4 + 3 +32),
-		                                    (int8_t)(val[ 0]*4 + 0 +48), (int8_t)(val[ 0]*4 + 1 +48),
-		                                    (int8_t)(val[ 0]*4 + 2 +48), (int8_t)(val[ 0]*4 + 3 +48),
-		                                    (int8_t)(val[ 1]*4 + 0 +48), (int8_t)(val[ 1]*4 + 1 +48),
-		                                    (int8_t)(val[ 1]*4 + 2 +48), (int8_t)(val[ 1]*4 + 3 +48),
-		                                    (int8_t)(val[ 2]*4 + 0 +48), (int8_t)(val[ 2]*4 + 1 +48),
-		                                    (int8_t)(val[ 2]*4 + 2 +48), (int8_t)(val[ 2]*4 + 3 +48),
-		                                    (int8_t)(val[ 3]*4 + 0 +48), (int8_t)(val[ 3]*4 + 1 +48),
-		                                    (int8_t)(val[ 3]*4 + 2 +48), (int8_t)(val[ 3]*4 + 3 +48)};
-		return mipp::set<int8_t>(val_bis);
-	}
-
-	template <>
-	inline reg cmask4<int16_t>(const uint32_t val[nElReg<int16_t>()/4]) {
-		int8_t val_bis[nElReg<int8_t>()] = {(int8_t)(val[ 0]*2 + 0 + 0), (int8_t)(val[ 0]*2 + 1 + 0),
-		                                    (int8_t)(val[ 1]*2 + 0 + 0), (int8_t)(val[ 1]*2 + 1 + 0),
-		                                    (int8_t)(val[ 2]*2 + 0 + 0), (int8_t)(val[ 2]*2 + 1 + 0),
-		                                    (int8_t)(val[ 3]*2 + 0 + 0), (int8_t)(val[ 3]*2 + 1 + 0),
-		                                    (int8_t)(val[ 4]*2 + 0 + 0), (int8_t)(val[ 4]*2 + 1 + 0),
-		                                    (int8_t)(val[ 5]*2 + 0 + 0), (int8_t)(val[ 5]*2 + 1 + 0),
-		                                    (int8_t)(val[ 6]*2 + 0 + 0), (int8_t)(val[ 6]*2 + 1 + 0),
-		                                    (int8_t)(val[ 7]*2 + 0 + 0), (int8_t)(val[ 7]*2 + 1 + 0),
-		                                    (int8_t)(val[ 0]*2 + 0 +16), (int8_t)(val[ 0]*2 + 1 +16),
-		                                    (int8_t)(val[ 1]*2 + 0 +16), (int8_t)(val[ 1]*2 + 1 +16),
-		                                    (int8_t)(val[ 2]*2 + 0 +16), (int8_t)(val[ 2]*2 + 1 +16),
-		                                    (int8_t)(val[ 3]*2 + 0 +16), (int8_t)(val[ 3]*2 + 1 +16),
-		                                    (int8_t)(val[ 4]*2 + 0 +16), (int8_t)(val[ 4]*2 + 1 +16),
-		                                    (int8_t)(val[ 5]*2 + 0 +16), (int8_t)(val[ 5]*2 + 1 +16),
-		                                    (int8_t)(val[ 6]*2 + 0 +16), (int8_t)(val[ 6]*2 + 1 +16),
-		                                    (int8_t)(val[ 7]*2 + 0 +16), (int8_t)(val[ 7]*2 + 1 +16),
-		                                    (int8_t)(val[ 0]*2 + 0 +32), (int8_t)(val[ 0]*2 + 1 +32),
-		                                    (int8_t)(val[ 1]*2 + 0 +32), (int8_t)(val[ 1]*2 + 1 +32),
-		                                    (int8_t)(val[ 2]*2 + 0 +32), (int8_t)(val[ 2]*2 + 1 +32),
-		                                    (int8_t)(val[ 3]*2 + 0 +32), (int8_t)(val[ 3]*2 + 1 +32),
-		                                    (int8_t)(val[ 4]*2 + 0 +32), (int8_t)(val[ 4]*2 + 1 +32),
-		                                    (int8_t)(val[ 5]*2 + 0 +32), (int8_t)(val[ 5]*2 + 1 +32),
-		                                    (int8_t)(val[ 6]*2 + 0 +32), (int8_t)(val[ 6]*2 + 1 +32),
-		                                    (int8_t)(val[ 7]*2 + 0 +32), (int8_t)(val[ 7]*2 + 1 +32),
-		                                    (int8_t)(val[ 0]*2 + 0 +48), (int8_t)(val[ 0]*2 + 1 +48),
-		                                    (int8_t)(val[ 1]*2 + 0 +48), (int8_t)(val[ 1]*2 + 1 +48),
-		                                    (int8_t)(val[ 2]*2 + 0 +48), (int8_t)(val[ 2]*2 + 1 +48),
-		                                    (int8_t)(val[ 3]*2 + 0 +48), (int8_t)(val[ 3]*2 + 1 +48),
-		                                    (int8_t)(val[ 4]*2 + 0 +48), (int8_t)(val[ 4]*2 + 1 +48),
-		                                    (int8_t)(val[ 5]*2 + 0 +48), (int8_t)(val[ 5]*2 + 1 +48),
-		                                    (int8_t)(val[ 6]*2 + 0 +48), (int8_t)(val[ 6]*2 + 1 +48),
-		                                    (int8_t)(val[ 7]*2 + 0 +48), (int8_t)(val[ 7]*2 + 1 +48)};
-		return mipp::set<int8_t>(val_bis);
-	}
-
-	template <>
-	inline reg cmask4<int8_t>(const uint32_t val[nElReg<int8_t>()/4]) {
-		int8_t val_bis[nElReg<int8_t>()] = {(int8_t)(val[ 0] + 0), (int8_t)(val[ 1] + 0), (int8_t)(val[ 2] + 0), (int8_t)(val[ 3] + 0),
-		                                    (int8_t)(val[ 4] + 0), (int8_t)(val[ 5] + 0), (int8_t)(val[ 6] + 0), (int8_t)(val[ 7] + 0),
-		                                    (int8_t)(val[ 8] + 0), (int8_t)(val[ 9] + 0), (int8_t)(val[10] + 0), (int8_t)(val[11] + 0),
-		                                    (int8_t)(val[12] + 0), (int8_t)(val[13] + 0), (int8_t)(val[14] + 0), (int8_t)(val[15] + 0),
-		                                    (int8_t)(val[ 0] +16), (int8_t)(val[ 1] +16), (int8_t)(val[ 2] +16), (int8_t)(val[ 3] +16),
-		                                    (int8_t)(val[ 4] +16), (int8_t)(val[ 5] +16), (int8_t)(val[ 6] +16), (int8_t)(val[ 7] +16),
-		                                    (int8_t)(val[ 8] +16), (int8_t)(val[ 9] +16), (int8_t)(val[10] +16), (int8_t)(val[11] +16),
-		                                    (int8_t)(val[12] +16), (int8_t)(val[13] +16), (int8_t)(val[14] +16), (int8_t)(val[15] +16),
-		                                    (int8_t)(val[ 0] +32), (int8_t)(val[ 1] +32), (int8_t)(val[ 2] +32), (int8_t)(val[ 3] +32),
-		                                    (int8_t)(val[ 4] +32), (int8_t)(val[ 5] +32), (int8_t)(val[ 6] +32), (int8_t)(val[ 7] +32),
-		                                    (int8_t)(val[ 8] +32), (int8_t)(val[ 9] +32), (int8_t)(val[10] +32), (int8_t)(val[11] +32),
-		                                    (int8_t)(val[12] +32), (int8_t)(val[13] +32), (int8_t)(val[14] +32), (int8_t)(val[15] +32),
-		                                    (int8_t)(val[ 0] +48), (int8_t)(val[ 1] +48), (int8_t)(val[ 2] +48), (int8_t)(val[ 3] +48),
-		                                    (int8_t)(val[ 4] +48), (int8_t)(val[ 5] +48), (int8_t)(val[ 6] +48), (int8_t)(val[ 7] +48),
-		                                    (int8_t)(val[ 8] +48), (int8_t)(val[ 9] +48), (int8_t)(val[10] +48), (int8_t)(val[11] +48),
-		                                    (int8_t)(val[12] +48), (int8_t)(val[13] +48), (int8_t)(val[14] +48), (int8_t)(val[15] +48)};
-		return mipp::set<int8_t>(val_bis);
-	}
-#elif defined(__AVX512F__)
+	// --------------------------------------------------------------------------------------------------------- cmask4
+#if defined(__AVX512F__)
 	template <>
 	inline reg cmask4<double>(const uint32_t vals[nElReg<double>()/4]) {
 		return _mm512_castsi512_ps(_mm512_set_epi32((int32_t)vals[1]*2 +1+12, (int32_t)vals[1]*2 +0+12, (int32_t)vals[0]*2 +1+12, (int32_t)vals[0]*2 +0+12,
@@ -1531,57 +988,76 @@
 	}
 #endif
 
-
-	// ---------------------------------------------------------------------------------------------------------- shuff
 #if defined(__AVX512BW__)
 	template <>
+	inline reg cmask4<int16_t>(const uint32_t vals[nElReg<int16_t>()/4]) {
+		return _mm512_castsi512_ps(_mm512_set_epi16((int32_t)vals[7]+24, (int32_t)vals[6]+24, (int32_t)vals[5]+24, (int32_t)vals[4]+24,
+		                                            (int32_t)vals[3]+24, (int32_t)vals[2]+24, (int32_t)vals[1]+24, (int32_t)vals[0]+24,
+		                                            (int32_t)vals[7]+16, (int32_t)vals[6]+16, (int32_t)vals[5]+16, (int32_t)vals[4]+16,
+		                                            (int32_t)vals[3]+16, (int32_t)vals[2]+16, (int32_t)vals[1]+16, (int32_t)vals[0]+16,
+		                                            (int32_t)vals[7]+ 8, (int32_t)vals[6]+ 8, (int32_t)vals[5]+ 8, (int32_t)vals[4]+ 8,
+		                                            (int32_t)vals[3]+ 8, (int32_t)vals[2]+ 8, (int32_t)vals[1]+ 8, (int32_t)vals[0]+ 8,
+		                                            (int32_t)vals[7]+ 0, (int32_t)vals[6]+ 0, (int32_t)vals[5]+ 0, (int32_t)vals[4]+ 0,
+		                                            (int32_t)vals[3]+ 0, (int32_t)vals[2]+ 0, (int32_t)vals[1]+ 0, (int32_t)vals[0]+ 0));
+	}
+#endif
+
+#if defined(__AVX512VBMI__)
+	template <>
+	inline reg cmask4<int8_t>(const uint32_t val[nElReg<int8_t>()/4]) {
+		return _mm512_castsi512_ps(_mm512_setr_epi8((int8_t)(val[ 0] + 0), (int8_t)(val[ 1] + 0), (int8_t)(val[ 2] + 0), (int8_t)(val[ 3] + 0),
+		                                            (int8_t)(val[ 4] + 0), (int8_t)(val[ 5] + 0), (int8_t)(val[ 6] + 0), (int8_t)(val[ 7] + 0),
+		                                            (int8_t)(val[ 8] + 0), (int8_t)(val[ 9] + 0), (int8_t)(val[10] + 0), (int8_t)(val[11] + 0),
+		                                            (int8_t)(val[12] + 0), (int8_t)(val[13] + 0), (int8_t)(val[14] + 0), (int8_t)(val[15] + 0),
+		                                            (int8_t)(val[ 0] +16), (int8_t)(val[ 1] +16), (int8_t)(val[ 2] +16), (int8_t)(val[ 3] +16),
+		                                            (int8_t)(val[ 4] +16), (int8_t)(val[ 5] +16), (int8_t)(val[ 6] +16), (int8_t)(val[ 7] +16),
+		                                            (int8_t)(val[ 8] +16), (int8_t)(val[ 9] +16), (int8_t)(val[10] +16), (int8_t)(val[11] +16),
+		                                            (int8_t)(val[12] +16), (int8_t)(val[13] +16), (int8_t)(val[14] +16), (int8_t)(val[15] +16),
+		                                            (int8_t)(val[ 0] +32), (int8_t)(val[ 1] +32), (int8_t)(val[ 2] +32), (int8_t)(val[ 3] +32),
+		                                            (int8_t)(val[ 4] +32), (int8_t)(val[ 5] +32), (int8_t)(val[ 6] +32), (int8_t)(val[ 7] +32),
+		                                            (int8_t)(val[ 8] +32), (int8_t)(val[ 9] +32), (int8_t)(val[10] +32), (int8_t)(val[11] +32),
+		                                            (int8_t)(val[12] +32), (int8_t)(val[13] +32), (int8_t)(val[14] +32), (int8_t)(val[15] +32),
+		                                            (int8_t)(val[ 0] +48), (int8_t)(val[ 1] +48), (int8_t)(val[ 2] +48), (int8_t)(val[ 3] +48),
+		                                            (int8_t)(val[ 4] +48), (int8_t)(val[ 5] +48), (int8_t)(val[ 6] +48), (int8_t)(val[ 7] +48),
+		                                            (int8_t)(val[ 8] +48), (int8_t)(val[ 9] +48), (int8_t)(val[10] +48), (int8_t)(val[11] +48),
+		                                            (int8_t)(val[12] +48), (int8_t)(val[13] +48), (int8_t)(val[14] +48), (int8_t)(val[15] +48)));
+	}
+#endif
+
+	// ---------------------------------------------------------------------------------------------------------- shuff
+#if defined(__AVX512F__)
+	template <>
 	inline reg shuff<double>(const reg v, const reg cm) {
-		return _mm512_castsi512_ps(_mm512_shuffle_epi8(_mm512_castps_si512(v), _mm512_castps_si512(cm)));
+		return _mm512_permutexvar_ps(_mm512_castps_si512(cm), v);
 	}
 
 	template <>
 	inline reg shuff<float>(const reg v, const reg cm) {
-		return _mm512_castsi512_ps(_mm512_shuffle_epi8(_mm512_castps_si512(v), _mm512_castps_si512(cm)));
+		return _mm512_permutexvar_ps(_mm512_castps_si512(cm), v);
 	}
 
 	template <>
 	inline reg shuff<int64_t>(const reg v, const reg cm) {
-		return _mm512_castsi512_ps(_mm512_shuffle_epi8(_mm512_castps_si512(v), _mm512_castps_si512(cm)));
+		return _mm512_permutexvar_ps(_mm512_castps_si512(cm), v);
 	}
 
 	template <>
 	inline reg shuff<int32_t>(const reg v, const reg cm) {
-		return _mm512_castsi512_ps(_mm512_shuffle_epi8(_mm512_castps_si512(v), _mm512_castps_si512(cm)));
+		return _mm512_permutexvar_ps(_mm512_castps_si512(cm), v);
 	}
+#endif
 
+#if defined(__AVX512BW__)
 	template <>
 	inline reg shuff<int16_t>(const reg v, const reg cm) {
-		return _mm512_castsi512_ps(_mm512_shuffle_epi8(_mm512_castps_si512(v), _mm512_castps_si512(cm)));
+		return _mm512_castsi512_ps(_mm512_permutexvar_epi16(_mm512_castps_si512(v), _mm512_castps_si512(cm)));
 	}
+#endif
 
+#if defined(__AVX512VBMI__)
 	template <>
 	inline reg shuff<int8_t>(const reg v, const reg cm) {
-		return _mm512_castsi512_ps(_mm512_shuffle_epi8(_mm512_castps_si512(v), _mm512_castps_si512(cm)));
-	}
-#elif defined(__AVX512F__)
-	template <>
-	inline reg shuff<double>(const reg v, const reg cm) {
-		return _mm512_permutexvar_ps(_mm512_castps_si512(cm), v);
-	}
-
-	template <>
-	inline reg shuff<float>(const reg v, const reg cm) {
-		return _mm512_permutexvar_ps(_mm512_castps_si512(cm), v);
-	}
-
-	template <>
-	inline reg shuff<int64_t>(const reg v, const reg cm) {
-		return _mm512_permutexvar_ps(_mm512_castps_si512(cm), v);
-	}
-
-	template <>
-	inline reg shuff<int32_t>(const reg v, const reg cm) {
-		return _mm512_permutexvar_ps(_mm512_castps_si512(cm), v);
+		return _mm512_castsi512_ps(_mm512_permutexvar_epi8(_mm512_castps_si512(v), _mm512_castps_si512(cm)));
 	}
 #endif
 
@@ -2337,12 +1813,14 @@
 #if defined(__AVX512BW__)
 	template <>
 	inline msk andb<32>(const msk v1, const msk v2) {
-		return _mm512_kand(v1, v2);
+		// return _mm512_kand(v1, v2);
+		return v1 & v2;
 	}
 
 	template <>
 	inline msk andb<64>(const msk v1, const msk v2) {
-		return _mm512_kand(v1, v2);
+		// return _mm512_kand(v1, v2);
+		return v1 & v2;
 	}
 #endif
 
@@ -2391,12 +1869,14 @@
 #if defined(__AVX512BW__)
 	template <>
 	inline msk andnb<32>(const msk v1, const msk v2) {
-		return _mm512_kandn(v1, v2);
+		// return _mm512_kandn(v1, v2);
+		return (~v1) & v2;
 	}
 
 	template <>
 	inline msk andnb<64>(const msk v1, const msk v2) {
-		return _mm512_kandn(v1, v2);
+		// return _mm512_kandn(v1, v2);
+		return (~v1) & v2;
 	}
 #endif
 
@@ -2457,12 +1937,14 @@
 #if defined(__AVX512BW__)
 	template <>
 	inline msk notb<32>(const msk v) {
-		return _mm512_knot(v);
+		// return _mm512_knot(v);
+		return ~v;
 	}
 
 	template <>
 	inline msk notb<64>(const msk v) {
-		return _mm512_knot(v);
+		// return _mm512_knot(v);
+		return ~v;
 	}
 #endif
 
@@ -2511,12 +1993,14 @@
 #if defined(__AVX512BW__)
 	template <>
 	inline msk orb<32>(const msk v1, const msk v2) {
-		return _mm512_kor(v1, v2);
+		// return _mm512_kor(v1, v2);
+		return v1 | v2;
 	}
 
 	template <>
 	inline msk orb<64>(const msk v1, const msk v2) {
-		return _mm512_kor(v1, v2);
+		// return _mm512_kor(v1, v2);
+		return v1 | v2;
 	}
 #endif
 
@@ -2565,12 +2049,14 @@
 #if defined(__AVX512BW__)
 	template <>
 	inline msk xorb<32>(const msk v1, const msk v2) {
-		return _mm512_kxor(v1, v2);
+		// return _mm512_kxor(v1, v2);
+		return v1 ^ v2;
 	}
 
 	template <>
 	inline msk xorb<64>(const msk v1, const msk v2) {
-		return _mm512_kxor(v1, v2);
+		// return _mm512_kxor(v1, v2);
+		return v1 ^ v2;
 	}
 #endif
 
@@ -2625,7 +2111,7 @@
 		return v1 << n;
 	}
 
-#if defined(__AVX512BW__)
+#if defined(__AVX512BW__) // TODO: /!\ the shift on 16-bit and 8-bit masks fails on ICPC
 	template <>
 	inline msk lshift<32>(const msk v1, const uint32_t n) {
 		return v1 << n;
@@ -2688,7 +2174,7 @@
 		return v1 >> n;
 	}
 
-#if defined(__AVX512BW__)
+#if defined(__AVX512BW__) // TODO: /!\ the shift on 16-bit and 8-bit masks fails on ICPC
 	template <>
 	inline msk rshift<32>(const msk v1, const uint32_t n) {
 		return v1 >> n;

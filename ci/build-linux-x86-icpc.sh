@@ -18,12 +18,14 @@ source /opt/intel/vars-intel.sh
 cd tests
 
 build_root=build_linux_x86_icpc
-compile "${build_root}_nointr"   "-DMIPP_NO_INTRINSICS"
-compile "${build_root}_sse2"     "-msse2"
-compile "${build_root}_sse3"     "-msse3"
-compile "${build_root}_ssse3"    "-mssse3"
-compile "${build_root}_sse4_1"   "-msse4.1"
-compile "${build_root}_sse4_2"   "-msse4.2"
-compile "${build_root}_avx"      "-mavx"
-compile "${build_root}_avx2_fma" "-march=core-avx2 -fma"
-compile "${build_root}_avx512f"  "-xMIC-AVX512"
+compile "${build_root}_nointr"    "-DMIPP_NO_INTRINSICS"
+compile "${build_root}_sse2"      "-msse2"
+compile "${build_root}_sse3"      "-msse3"
+compile "${build_root}_ssse3"     "-mssse3"
+compile "${build_root}_sse4_1"    "-msse4.1"
+compile "${build_root}_sse4_2"    "-msse4.2"
+compile "${build_root}_avx"       "-mavx"
+compile "${build_root}_avx2_fma"  "-march=core-avx2 -fma"
+compile "${build_root}_avx512mic" "-xMIC-AVX512"
+compile "${build_root}_avx512f"   "-xCOMMON-AVX512"
+compile "${build_root}_avx512bw"  "-xCORE-AVX512"

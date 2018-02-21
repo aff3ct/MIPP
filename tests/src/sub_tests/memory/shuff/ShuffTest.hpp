@@ -7,7 +7,7 @@ class ShuffTest : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE(ShuffTest);
 
-#if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 31)
+#if (!defined(MIPP_SSE) && !defined(MIPP_AVX512)) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 31) || (defined(MIPP_AVX512) && defined(MIPP_AVX512VBMI))
 #if defined(MIPP_BW)
 #ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_shuff_int8);
