@@ -9,12 +9,12 @@
 // Registers the fixture into the 'registry'
 CPPUNIT_TEST_SUITE_REGISTRATION(TestzTest);
 
-void 
+void
 TestzTest::setUp()
 {
 }
 
-void 
+void
 TestzTest::tearDown()
 {
 }
@@ -54,7 +54,7 @@ void TestzTest::test_reg_testz_int()
 			for (auto i = 1; i < N; i++)
 				res |= inputs2[i];
 
-			CPPUNIT_ASSERT_EQUAL(res == 0 ? 1 : 0, val);
+			CPPUNIT_ASSERT_EQUAL(!(res == 0), val);
 		}
 	}
 	catch(std::exception &e)
@@ -104,7 +104,7 @@ void TestzTest::test_Reg_testz_int()
 			for (auto i = 1; i < N; i++)
 				res |= inputs2[i];
 
-			CPPUNIT_ASSERT_EQUAL(res == 0 ? 1 : 0, val);
+			CPPUNIT_ASSERT_EQUAL(!(res == 0), val);
 		}
 	}
 	catch(std::exception &e)
@@ -153,7 +153,7 @@ void TestzTest::test_msk_testz_int()
 			for (auto i = 1; i < N; i++)
 				res |= inputs2[i];
 
-			CPPUNIT_ASSERT_EQUAL(res == 0 ? 1 : 0, val);
+			CPPUNIT_ASSERT_EQUAL(!(res == 0), val);
 		}
 	}
 	catch(std::exception &e)
@@ -203,7 +203,7 @@ void TestzTest::test_Msk_testz_int()
 			for (auto i = 1; i < N; i++)
 				res |= inputs2[i];
 
-			CPPUNIT_ASSERT_EQUAL(res == 0 ? 1 : 0, val);
+			CPPUNIT_ASSERT_EQUAL(!(res == 0), val);
 		}
 	}
 	catch(std::exception &e)
@@ -246,7 +246,7 @@ void TestzTest::test_reg_testz1_int()
 			for (auto i = 1; i < N; i++)
 				res |= inputs1[i];
 
-			CPPUNIT_ASSERT_EQUAL(res == 0 ? 1 : 0, val);
+			CPPUNIT_ASSERT_EQUAL(!(res == 0), val);
 		}
 	}
 	catch(std::exception &e)
@@ -289,7 +289,7 @@ void TestzTest::test_Reg_testz1_int()
 			for (auto i = 1; i < N; i++)
 				res |= inputs1[i];
 
-			CPPUNIT_ASSERT_EQUAL(res == 0 ? 1 : 0, val);
+			CPPUNIT_ASSERT_EQUAL(!(res == 0), val);
 		}
 	}
 	catch(std::exception &e)
@@ -333,7 +333,7 @@ void TestzTest::test_msk_testz1_int()
 			for (auto i = 1; i < N; i++)
 				res |= inputs1[i];
 
-			CPPUNIT_ASSERT_EQUAL(res == 0 ? 1 : 0, val);
+			CPPUNIT_ASSERT_EQUAL(!(res == 0), val);
 		}
 	}
 	catch(std::exception &e)
@@ -377,7 +377,7 @@ void TestzTest::test_Msk_testz1_int()
 			for (auto i = 1; i < N; i++)
 				res |= inputs1[i];
 
-			CPPUNIT_ASSERT_EQUAL(res == 0 ? 1 : 0, val);
+			CPPUNIT_ASSERT_EQUAL(!(res == 0), val);
 		}
 	}
 	catch(std::exception &e)
