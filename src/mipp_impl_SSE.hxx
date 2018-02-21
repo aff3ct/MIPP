@@ -2856,86 +2856,86 @@
 	// ---------------------------------------------------------------------------------------------------------- testz
 #ifdef __SSE4_1__
 	template <>
-	inline int testz<int64_t>(const reg v1, const reg v2) {
+	inline bool testz<int64_t>(const reg v1, const reg v2) {
 		return _mm_testz_si128(_mm_castps_si128(v1), _mm_castps_si128(v2));
 	}
 
 	template <>
-	inline int testz<int32_t>(const reg v1, const reg v2) {
+	inline bool testz<int32_t>(const reg v1, const reg v2) {
 		return _mm_testz_si128(_mm_castps_si128(v1), _mm_castps_si128(v2));
 	}
 
 	template <>
-	inline int testz<int16_t>(const reg v1, const reg v2) {
+	inline bool testz<int16_t>(const reg v1, const reg v2) {
 		return _mm_testz_si128(_mm_castps_si128(v1), _mm_castps_si128(v2));
 	}
 
 	template <>
-	inline int testz<int8_t>(const reg v1, const reg v2) {
+	inline bool testz<int8_t>(const reg v1, const reg v2) {
 		return _mm_testz_si128(_mm_castps_si128(v1), _mm_castps_si128(v2));
 	}
 
 	template <>
-	inline int testz<int64_t>(const reg v1) {
+	inline bool testz<int64_t>(const reg v1) {
 		return testz<int64_t>(v1, mipp::set1<int64_t>(-1));
 	}
 
 	template <>
-	inline int testz<int32_t>(const reg v1) {
+	inline bool testz<int32_t>(const reg v1) {
 		return testz<int32_t>(v1, mipp::set1<int32_t>(-1));
 	}
 
 	template <>
-	inline int testz<int16_t>(const reg v1) {
+	inline bool testz<int16_t>(const reg v1) {
 		return testz<int16_t>(v1, mipp::set1<int16_t>(-1));
 	}
 
 	template <>
-	inline int testz<int8_t>(const reg v1) {
+	inline bool testz<int8_t>(const reg v1) {
 		return testz<int8_t>(v1, mipp::set1<int8_t>(-1));
 	}
 #else
 	template <>
-	inline int testz<int64_t>(const reg v1, const reg v2) {
+	inline bool testz<int64_t>(const reg v1, const reg v2) {
 		auto andvec = mipp::andb<int64_t>(v1, v2);
 		return mipp::reduction<int64_t, mipp::orb<int64_t>>::sapply(andvec) == 0;
 	}
 
 	template <>
-	inline int testz<int32_t>(const reg v1, const reg v2) {
+	inline bool testz<int32_t>(const reg v1, const reg v2) {
 		auto andvec = mipp::andb<int32_t>(v1, v2);
 		return mipp::reduction<int32_t, mipp::orb<int32_t>>::sapply(andvec) == 0;
 	}
 
 	template <>
-	inline int testz<int16_t>(const reg v1, const reg v2) {
+	inline bool testz<int16_t>(const reg v1, const reg v2) {
 		auto andvec = mipp::andb<int16_t>(v1, v2);
 		return mipp::reduction<int16_t, mipp::orb<int16_t>>::sapply(andvec) == 0;
 	}
 
 	template <>
-	inline int testz<int8_t>(const reg v1, const reg v2) {
+	inline bool testz<int8_t>(const reg v1, const reg v2) {
 		auto andvec = mipp::andb<int8_t>(v1, v2);
 		return mipp::reduction<int8_t, mipp::orb<int8_t>>::sapply(andvec) == 0;
 	}
 
 	template <>
-	inline int testz<int64_t>(const reg v1) {
+	inline bool testz<int64_t>(const reg v1) {
 		return mipp::reduction<int64_t, mipp::orb<int64_t>>::sapply(v1) == 0;
 	}
 
 	template <>
-	inline int testz<int32_t>(const reg v1) {
+	inline bool testz<int32_t>(const reg v1) {
 		return mipp::reduction<int32_t, mipp::orb<int32_t>>::sapply(v1) == 0;
 	}
 
 	template <>
-	inline int testz<int16_t>(const reg v1) {
+	inline bool testz<int16_t>(const reg v1) {
 		return mipp::reduction<int16_t, mipp::orb<int16_t>>::sapply(v1) == 0;
 	}
 
 	template <>
-	inline int testz<int8_t>(const reg v1) {
+	inline bool testz<int8_t>(const reg v1) {
 		return mipp::reduction<int8_t, mipp::orb<int8_t>>::sapply(v1) == 0;
 	}
 #endif
@@ -2943,86 +2943,86 @@
 	// --------------------------------------------------------------------------------------------------- testz (mask)
 #ifdef __SSE4_1__
 	template <>
-	inline int testz<2>(const msk v1, const msk v2) {
+	inline bool testz<2>(const msk v1, const msk v2) {
 		return _mm_testz_si128(v1, v2);
 	}
 
 	template <>
-	inline int testz<4>(const msk v1, const msk v2) {
+	inline bool testz<4>(const msk v1, const msk v2) {
 		return _mm_testz_si128(v1, v2);
 	}
 
 	template <>
-	inline int testz<8>(const msk v1, const msk v2) {
+	inline bool testz<8>(const msk v1, const msk v2) {
 		return _mm_testz_si128(v1, v2);
 	}
 
 	template <>
-	inline int testz<16>(const msk v1, const msk v2) {
+	inline bool testz<16>(const msk v1, const msk v2) {
 		return _mm_testz_si128(v1, v2);
 	}
 
 	template <>
-	inline int testz<2>(const msk v1) {
+	inline bool testz<2>(const msk v1) {
 		return testz<2>(v1, _mm_castps_si128(mipp::set1<int64_t>(-1)));
 	}
 
 	template <>
-	inline int testz<4>(const msk v1) {
+	inline bool testz<4>(const msk v1) {
 		return testz<4>(v1, _mm_castps_si128(mipp::set1<int32_t>(-1)));
 	}
 
 	template <>
-	inline int testz<8>(const msk v1) {
+	inline bool testz<8>(const msk v1) {
 		return testz<8>(v1, _mm_castps_si128(mipp::set1<int16_t>(-1)));
 	}
 
 	template <>
-	inline int testz<16>(const msk v1) {
+	inline bool testz<16>(const msk v1) {
 		return testz<16>(v1, _mm_castps_si128(mipp::set1<int8_t>(-1)));
 	}
 #else
 	template <>
-	inline int testz<2>(const msk v1, const msk v2) {
+	inline bool testz<2>(const msk v1, const msk v2) {
 		auto andvec = mipp::andb<2>(v1, v2);
 		return mipp::reduction<int64_t, mipp::orb<int64_t>>::sapply(mipp::toreg<2>(andvec)) == 0;
 	}
 
 	template <>
-	inline int testz<4>(const msk v1, const msk v2) {
+	inline bool testz<4>(const msk v1, const msk v2) {
 		auto andvec = mipp::andb<4>(v1, v2);
 		return mipp::reduction<int32_t, mipp::orb<int32_t>>::sapply(mipp::toreg<4>(andvec)) == 0;
 	}
 
 	template <>
-	inline int testz<8>(const msk v1, const msk v2) {
+	inline bool testz<8>(const msk v1, const msk v2) {
 		auto andvec = mipp::andb<8>(v1, v2);
 		return mipp::reduction<int16_t, mipp::orb<int16_t>>::sapply(mipp::toreg<8>(andvec)) == 0;
 	}
 
 	template <>
-	inline int testz<16>(const msk v1, const msk v2) {
+	inline bool testz<16>(const msk v1, const msk v2) {
 		auto andvec = mipp::andb<16>(v1, v2);
 		return mipp::reduction<int8_t, mipp::orb<int8_t>>::sapply(mipp::toreg<16>(andvec)) == 0;
 	}
 
 	template <>
-	inline int testz<2>(const msk v1) {
+	inline bool testz<2>(const msk v1) {
 		return mipp::reduction<int64_t, mipp::orb<int64_t>>::sapply(mipp::toreg<2>(v1)) == 0;
 	}
 
 	template <>
-	inline int testz<4>(const msk v1) {
+	inline bool testz<4>(const msk v1) {
 		return mipp::reduction<int32_t, mipp::orb<int32_t>>::sapply(mipp::toreg<4>(v1)) == 0;
 	}
 
 	template <>
-	inline int testz<8>(const msk v1) {
+	inline bool testz<8>(const msk v1) {
 		return mipp::reduction<int16_t, mipp::orb<int16_t>>::sapply(mipp::toreg<8>(v1)) == 0;
 	}
 
 	template <>
-	inline int testz<16>(const msk v1) {
+	inline bool testz<16>(const msk v1) {
 		return mipp::reduction<int8_t, mipp::orb<int8_t>>::sapply(mipp::toreg<16>(v1)) == 0;
 	}
 #endif

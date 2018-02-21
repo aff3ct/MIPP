@@ -274,7 +274,7 @@
 		                 vals[ 8] ? (uint8_t)0xFF : (uint8_t)0, vals[ 9] ? (uint8_t)0xFF : (uint8_t)0,
 		                 vals[10] ? (uint8_t)0xFF : (uint8_t)0, vals[11] ? (uint8_t)0xFF : (uint8_t)0,
 		                 vals[12] ? (uint8_t)0xFF : (uint8_t)0, vals[13] ? (uint8_t)0xFF : (uint8_t)0,
-		                 vals[14] ? (uint8_t)0xFF : (uint8_t)0, vals[15] ? (uint8_t)0xFF : (uint8_t)0}; 
+		                 vals[14] ? (uint8_t)0xFF : (uint8_t)0, vals[15] ? (uint8_t)0xFF : (uint8_t)0};
 		return (msk) set<int8_t>((int8_t*)v);
 	}
 
@@ -717,7 +717,7 @@
 		uint8x8_t low  = vtbl2_u8(v2, vget_low_u8 ((uint8x16_t)cm));
 		uint8x8_t high = vtbl2_u8(v2, vget_high_u8((uint8x16_t)cm));
 
-		return (reg)vcombine_u8(low, high);	
+		return (reg)vcombine_u8(low, high);
 	}
 
 	template <>
@@ -847,7 +847,7 @@
 		// res = [c0, c1, d0, d1]
 		uint32x2x2_t res = vzip_u32(vget_high_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v2));
 		return (reg)vcombine_u32(res.val[0], res.val[1]);
-	}	
+	}
 
 	template <>
 	inline reg interleavehi<int64_t>(const reg v1, const reg v2) {
@@ -962,7 +962,7 @@
 
 		regx2 res = {{(reg)vcombine_u32(res0.val[0], res0.val[1]),
 		              (reg)vcombine_u32(res1.val[0], res1.val[1])}};
-		
+
 		return res;
 	}
 
@@ -984,7 +984,7 @@
 
 		regx2 res = {{(reg)vcombine_u32(res0.val[0], res0.val[1]),
 		              (reg)vcombine_u32(res1.val[0], res1.val[1])}};
-		
+
 		return res;
 	}
 
@@ -995,7 +995,7 @@
 
 		regx2 res = {{(reg)vcombine_u16(res0.val[0], res0.val[1]),
 		              (reg)vcombine_u16(res1.val[0], res1.val[1])}};
-		
+
 		return res;
 	}
 
@@ -1006,7 +1006,7 @@
 
 		regx2 res = {{(reg)vcombine_u8(res0.val[0], res0.val[1]),
 		              (reg)vcombine_u8(res1.val[0], res1.val[1])}};
-		
+
 		return res;
 	}
 
@@ -1674,7 +1674,7 @@
 	inline msk cmpgt<int8_t>(const reg v1, const reg v2) {
 		return (msk) vcgtq_s8((int8x16_t) v1, (int8x16_t) v2);
 	}
-	
+
 	// ---------------------------------------------------------------------------------------------------------- cmpge
 #ifdef __aarch64__
 	template <>
@@ -1682,7 +1682,7 @@
 		return (msk) vcgeq_f64((float64x2_t)v1, (float64x2_t)v2);
 	}
 #endif
-	
+
 	template <>
 	inline msk cmpge<float>(const reg v1, const reg v2) {
 		return (msk) vcgeq_f32(v1, v2);
@@ -2712,69 +2712,69 @@
 	// ---------------------------------------------------------------------------------------------------------- testz
 #ifdef __aarch64__
 	template <>
-	inline int testz<int64_t>(const reg v1, const reg v2) {
+	inline bool testz<int64_t>(const reg v1, const reg v2) {
 		auto andvec = mipp::andb<int64_t>(v1, v2);
 		return mipp::reduction<int64_t, mipp::orb<int64_t>>::sapply(andvec) == 0;
 	}
 #endif
 
 	template <>
-	inline int testz<int32_t>(const reg v1, const reg v2) {
+	inline bool testz<int32_t>(const reg v1, const reg v2) {
 		auto andvec = mipp::andb<int32_t>(v1, v2);
 		return mipp::reduction<int32_t, mipp::orb<int32_t>>::sapply(andvec) == 0;
 	}
 
 	template <>
-	inline int testz<int16_t>(const reg v1, const reg v2) {
+	inline bool testz<int16_t>(const reg v1, const reg v2) {
 		auto andvec = mipp::andb<int16_t>(v1, v2);
 		return mipp::reduction<int16_t, mipp::orb<int16_t>>::sapply(andvec) == 0;
 	}
 
 	template <>
-	inline int testz<int8_t>(const reg v1, const reg v2) {
+	inline bool testz<int8_t>(const reg v1, const reg v2) {
 		auto andvec = mipp::andb<int8_t>(v1, v2);
 		return mipp::reduction<int8_t, mipp::orb<int8_t>>::sapply(andvec) == 0;
 	}
 
 #ifdef __aarch64__
 	template <>
-	inline int testz<int64_t>(const reg v1) {
+	inline bool testz<int64_t>(const reg v1) {
 		auto tmp = vorr_u64(vget_low_u64((uint64x2_t)v1), vget_high_u64((uint64x2_t)v1));
 		return !vget_lane_u64(tmp, 0);
 	}
 
 	template <>
-	inline int testz<int32_t>(const reg v1) {
+	inline bool testz<int32_t>(const reg v1) {
 		auto tmp = vorr_u64(vget_low_u64((uint64x2_t)v1), vget_high_u64((uint64x2_t)v1));
 		return !vget_lane_u64(tmp, 0);
 	}
 
 	template <>
-	inline int testz<int16_t>(const reg v1) {
+	inline bool testz<int16_t>(const reg v1) {
 		auto tmp = vorr_u64(vget_low_u64((uint64x2_t)v1), vget_high_u64((uint64x2_t)v1));
 		return !vget_lane_u64(tmp, 0);
 	}
 
 	template <>
-	inline int testz<int8_t>(const reg v1) {
+	inline bool testz<int8_t>(const reg v1) {
 		auto tmp = vorr_u64(vget_low_u64((uint64x2_t)v1), vget_high_u64((uint64x2_t)v1));
 		return !vget_lane_u64(tmp, 0);
 	}
 #else
 	template <>
-	inline int testz<int32_t>(const reg v1) {
+	inline bool testz<int32_t>(const reg v1) {
 		uint32x2_t v2 = vorr_u32(vget_low_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v1));
 		return !(vget_lane_u32(vpmax_u32(v2, v2), 0));
 	}
 
 	template <>
-	inline int testz<int16_t>(const reg v1) {
+	inline bool testz<int16_t>(const reg v1) {
 		uint32x2_t v2 = vorr_u32(vget_low_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v1));
 		return !(vget_lane_u32(vpmax_u32(v2, v2), 0));
 	}
 
 	template <>
-	inline int testz<int8_t>(const reg v1) {
+	inline bool testz<int8_t>(const reg v1) {
 		uint32x2_t v2 = vorr_u32(vget_low_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v1));
 		return !(vget_lane_u32(vpmax_u32(v2, v2), 0));
 	}
@@ -2783,69 +2783,69 @@
 	// --------------------------------------------------------------------------------------------------- testz (mask)
 #ifdef __aarch64__
 	template <>
-	inline int testz<2>(const msk v1, const msk v2) {
+	inline bool testz<2>(const msk v1, const msk v2) {
 		auto andvec = mipp::andb<2>(v1, v2);
 		return mipp::reduction<int64_t, mipp::orb<int64_t>>::sapply(mipp::toreg<2>(andvec)) == 0;
 	}
 #endif
 
 	template <>
-	inline int testz<4>(const msk v1, const msk v2) {
+	inline bool testz<4>(const msk v1, const msk v2) {
 		auto andvec = mipp::andb<4>(v1, v2);
 		return mipp::reduction<int32_t, mipp::orb<int32_t>>::sapply(mipp::toreg<4>(andvec)) == 0;
 	}
 
 	template <>
-	inline int testz<8>(const msk v1, const msk v2) {
+	inline bool testz<8>(const msk v1, const msk v2) {
 		auto andvec = mipp::andb<8>(v1, v2);
 		return mipp::reduction<int16_t, mipp::orb<int16_t>>::sapply(mipp::toreg<8>(andvec)) == 0;
 	}
 
 	template <>
-	inline int testz<16>(const msk v1, const msk v2) {
+	inline bool testz<16>(const msk v1, const msk v2) {
 		auto andvec = mipp::andb<16>(v1, v2);
 		return mipp::reduction<int8_t, mipp::orb<int8_t>>::sapply(mipp::toreg<16>(andvec)) == 0;
 	}
 
 #ifdef __aarch64__
 	template <>
-	inline int testz<2>(const msk v1) {
+	inline bool testz<2>(const msk v1) {
 		auto tmp = vorr_u64(vget_low_u64((uint64x2_t)v1), vget_high_u64((uint64x2_t)v1));
 		return !vget_lane_u64(tmp, 0);
 	}
 
 	template <>
-	inline int testz<4>(const msk v1) {
+	inline bool testz<4>(const msk v1) {
 		auto tmp = vorr_u64(vget_low_u64((uint64x2_t)v1), vget_high_u64((uint64x2_t)v1));
 		return !vget_lane_u64(tmp, 0);
 	}
 
 	template <>
-	inline int testz<8>(const msk v1) {
+	inline bool testz<8>(const msk v1) {
 		auto tmp = vorr_u64(vget_low_u64((uint64x2_t)v1), vget_high_u64((uint64x2_t)v1));
 		return !vget_lane_u64(tmp, 0);
 	}
 
 	template <>
-	inline int testz<16>(const msk v1) {
+	inline bool testz<16>(const msk v1) {
 		auto tmp = vorr_u64(vget_low_u64((uint64x2_t)v1), vget_high_u64((uint64x2_t)v1));
 		return !vget_lane_u64(tmp, 0);
 	}
 #else
 	template <>
-	inline int testz<4>(const msk v1) {
+	inline bool testz<4>(const msk v1) {
 		uint32x2_t v2 = vorr_u32(vget_low_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v1));
 		return !(vget_lane_u32(vpmax_u32(v2, v2), 0));
 	}
 
 	template <>
-	inline int testz<8>(const msk v1) {
+	inline bool testz<8>(const msk v1) {
 		uint32x2_t v2 = vorr_u32(vget_low_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v1));
 		return !(vget_lane_u32(vpmax_u32(v2, v2), 0));
 	}
 
 	template <>
-	inline int testz<16>(const msk v1) {
+	inline bool testz<16>(const msk v1) {
 		uint32x2_t v2 = vorr_u32(vget_low_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v1));
 		return !(vget_lane_u32(vpmax_u32(v2, v2), 0));
 	}

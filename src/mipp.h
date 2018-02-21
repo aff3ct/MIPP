@@ -693,10 +693,10 @@ template <typename T> inline reg   div2         (const reg)                     
 template <typename T> inline reg   div4         (const reg)                       { errorMessage<T>("div4");          exit(-1); }
 template <typename T> inline reg   sat          (const reg, T, T)                 { errorMessage<T>("sat");           exit(-1); }
 template <typename T> inline reg   round        (const reg)                       { errorMessage<T>("round");         exit(-1); }
-template <typename T> inline int   testz        (const reg, const reg)            { errorMessage<T>("testz");         exit(-1); }
-template <int      N> inline int   testz        (const msk, const msk)            { errorMessage<N>("testz");         exit(-1); }
-template <typename T> inline int   testz        (const reg)                       { errorMessage<T>("testz");         exit(-1); }
-template <int      N> inline int   testz        (const msk)                       { errorMessage<N>("testz");         exit(-1); }
+template <typename T> inline bool  testz        (const reg, const reg)            { errorMessage<T>("testz");         exit(-1); }
+template <int      N> inline bool  testz        (const msk, const msk)            { errorMessage<N>("testz");         exit(-1); }
+template <typename T> inline bool  testz        (const reg)                       { errorMessage<T>("testz");         exit(-1); }
+template <int      N> inline bool  testz        (const msk)                       { errorMessage<N>("testz");         exit(-1); }
 
 template <typename T1, typename T2>
 inline reg cvt(const reg) {
