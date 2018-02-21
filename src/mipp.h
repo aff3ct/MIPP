@@ -161,6 +161,7 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 #endif
 #ifdef __AVX512BW__
 	#define MIPP_AVX512BW
+	#define MIPP_BW
 #endif
 #ifdef __AVX512CD__
 	#define MIPP_AVX512CD
@@ -176,6 +177,9 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 #endif
 #ifdef __AVX512VL__
 	#define MIPP_AVX512VL
+#endif
+#ifdef __AVX512VBMI__
+	#define MIPP_AVX512VBMI
 #endif
 
 	const std::string InstructionFullType = InstructionType;

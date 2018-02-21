@@ -7,7 +7,7 @@ class InterleaveloTest : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE(InterleaveloTest);
 
-#if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
+#if (!defined(MIPP_AVX) && !defined(MIPP_AVX512)) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2) || (defined(MIPP_AVX512) && defined(MIPP_AVX512VBMI))
 #if defined(MIPP_BW)
 #ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_interleavelo_int8);

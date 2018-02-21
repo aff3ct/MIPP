@@ -8,7 +8,7 @@ class LrotTest : public CppUnit::TestFixture
 	CPPUNIT_TEST_SUITE(LrotTest);
 
 #if defined(MIPP_BW)
-#if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 31)
+#if (!defined(MIPP_SSE) && !defined(MIPP_AVX512)) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 31) || (defined(MIPP_AVX512) && defined(MIPP_AVX512VBMI))
 #ifndef MIPP_NO
 	CPPUNIT_TEST(test_reg_lrot_int8);
 #endif
