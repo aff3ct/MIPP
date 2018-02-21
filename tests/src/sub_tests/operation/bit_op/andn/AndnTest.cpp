@@ -116,7 +116,7 @@ void AndnTest::test_msk_andn()
 
 			for (auto i = 0; i < N; i++)
 			{
-				bool res = ~inputs1[i] & inputs2[i];
+				bool res = !inputs1[i] & inputs2[i];
 
 				if (res)
 					CPPUNIT_ASSERT(*((T*)&r +i) != (T)0);
@@ -163,7 +163,7 @@ void AndnTest::test_Msk_andn()
 
 			for (auto i = 0; i < N; i++)
 			{
-				bool res = ~inputs1[i] & inputs2[i];
+				bool res = !inputs1[i] & inputs2[i];
 				CPPUNIT_ASSERT_EQUAL(res, m3[i]);
 			}
 		}

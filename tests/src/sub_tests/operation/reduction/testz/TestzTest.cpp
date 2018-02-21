@@ -137,7 +137,7 @@ void TestzTest::test_msk_testz_int()
 				switch (j%3)
 				{
 					case 0: inputs2[i] = dis(g) ? true : false; break;
-					case 1: inputs2[i] = ~inputs1[i];           break;
+					case 1: inputs2[i] = !inputs1[i];           break;
 					case 2: inputs2[i] = false;                 break;
 				}
 			}
@@ -186,7 +186,7 @@ void TestzTest::test_Msk_testz_int()
 				switch (j%3)
 				{
 					case 0:  inputs2[i] = dis(g) ? true : false; break;
-					case 1:  inputs2[i] = ~inputs1[i];           break;
+					case 1:  inputs2[i] = !inputs1[i];           break;
 					case 2:  inputs2[i] = false;                 break;
 					default: inputs2[i] = false;                 break;
 				}
