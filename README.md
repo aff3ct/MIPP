@@ -320,7 +320,7 @@ In the following tables, `T`, `T1` and `T2` stand for data types (`double`, `flo
 `N` is a strictly positive integer and can easily be deduced from the data type: `constexpr int N = mipp::N<T>()`.
 When `T` and `N` are mixed in a prototype, `N` has to satisfy the previous constraint (`N = mipp::N<T>()`).
 
-In the documentation there are some terms that required to be clarified:
+In the documentation there are some terms that requires to be clarified:
 
   - **register element**: a SIMD register is composed by multiple scalar elements, those elements are built-in data types (`double`, `float`, `int64_t`, ...),
   - **register lane**: modern instruction sets can have multiple implicit sub parts in an entire SIMD register, those sub parts are called lanes (SSE has one lane of 128 bits, AVX has two lanes of 128 bits, AVX-512 has four lanes of 128 bits).
