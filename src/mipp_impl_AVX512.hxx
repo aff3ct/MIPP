@@ -3403,32 +3403,16 @@
 #ifdef __AVX512BW__
 	template <>
 	inline reg pack<int32_t,int16_t>(const reg v1, const reg v2) {
-		auto mask =_mm512_set_epi16(31, 30, 29, 28,
-		                            23, 22, 21, 20,
-		                            15, 14, 13, 12,
-		                             7,  6,  5,  4,
-		                            27, 26, 25, 24,
-		                            19, 18, 17, 16,
-		                            11, 10,  9,  8,
-		                             3,  2,  1,  0);
-		return _mm512_castsi512_ps(_mm512_permutexvar_epi16(mask, _mm512_packs_epi32(_mm512_castps_si512(v1),
+		auto mask =_mm512_set_epi64(7,5,3,1,6,4,2,0);
+		return _mm512_castsi512_ps(_mm512_permutexvar_epi64(mask, _mm512_packs_epi32(_mm512_castps_si512(v1),
 		                                                                             _mm512_castps_si512(v2))));
 	}
-#endif
 
-#ifdef __AVX512VBMI__
 	template <>
 	inline reg pack<int16_t,int8_t>(const reg v1, const reg v2) {
-		auto mask =_mm512_set_epi8(63, 62, 61, 60, 59, 58, 57, 56,
-		                           47, 46, 45, 44, 43, 42, 41, 40,
-		                           31, 30, 29, 28, 27, 26, 25, 24,
-		                           15, 14, 13, 12, 11, 10,  9,  8,
-		                           55, 54, 53, 52, 51, 50, 49, 48,
-		                           39, 38, 37, 36, 35, 34, 33, 32,
-		                           23, 22, 21, 20, 19, 18, 17, 16,
-		                            7,  6,  5,  4,  3,  2,  1,  0);
-		return _mm512_castsi512_ps(_mm512_permutexvar_epi8(mask, _mm512_packs_epi32(_mm512_castps_si512(v1),
-		                                                                            _mm512_castps_si512(v2))));
+		auto mask =_mm512_set_epi64(7,5,3,1,6,4,2,0);
+		return _mm512_castsi512_ps(_mm512_permutexvar_epi64(mask, _mm512_packs_epi16(_mm512_castps_si512(v1),
+		                                                                             _mm512_castps_si512(v2))));
 	}
 #endif
 
