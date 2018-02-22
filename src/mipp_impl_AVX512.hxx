@@ -529,7 +529,6 @@
 		return (__m512i)mipp::load<int8_t>((int8_t*)data);
 	}
 
-#if defined(__AVX512VBMI__)
 	static __m512i _mm512_setr_epi8 (char  e0, char  e1, char  e2, char  e3, char  e4, char  e5, char  e6, char  e7,
 	                                 char  e8, char  e9, char e10, char e11, char e12, char e13, char e14, char e15,
 	                                 char e16, char e17, char e18, char e19, char e20, char e21, char e22, char e23,
@@ -550,7 +549,6 @@
 
 		return (__m512i)mipp::load<int8_t>((int8_t*)data);
 	}
-#endif
 
 	template <>
 	inline reg set<int16_t>(const int16_t vals[nElReg<int16_t>()]) {
@@ -1000,9 +998,7 @@
 		                                            (int32_t)vals[7]+ 0, (int32_t)vals[6]+ 0, (int32_t)vals[5]+ 0, (int32_t)vals[4]+ 0,
 		                                            (int32_t)vals[3]+ 0, (int32_t)vals[2]+ 0, (int32_t)vals[1]+ 0, (int32_t)vals[0]+ 0));
 	}
-#endif
 
-#if defined(__AVX512VBMI__)
 	template <>
 	inline reg cmask4<int8_t>(const uint32_t val[nElReg<int8_t>()/4]) {
 		return _mm512_castsi512_ps(_mm512_setr_epi8((int8_t)(val[ 0] + 0), (int8_t)(val[ 1] + 0), (int8_t)(val[ 2] + 0), (int8_t)(val[ 3] + 0),
@@ -1089,7 +1085,9 @@
 	inline reg shuff2<int16_t>(const reg v, const reg cm) {
 		return mipp::shuff<int16_t>(v, cm);
 	}
+#endif
 
+#if defined(__AVX512VBMI__)
 	template <>
 	inline reg shuff2<int8_t>(const reg v, const reg cm) {
 		return mipp::shuff<int8_t>(v, cm);
@@ -1127,7 +1125,7 @@
 
 	template <>
 	inline reg shuff4<int8_t>(const reg v, const reg cm) {
-		return mipp::shuff<int8_t>(v, cm);
+		return (reg)_mm512_shuffle_epi8(_mm512_castps_si512(v), _mm512_castps_si512(cm));
 	}
 #endif
 
