@@ -1241,12 +1241,12 @@
 	inline reg interleavelo2<int32_t>(const reg v1, const reg v2) {
 		auto lo4 = mipp::interleavelo4<int32_t>(v1, v2);
 		auto hi4 = mipp::interleavehi4<int32_t>(v1, v2);
-		auto idx = _mm512_set_epi32(16|11,16|10,16|9,16|8,
-		                               11,   10,   9,   8,
-		                            16| 3,16| 2,16|1,16|0,
-		                                3,    2,   1,   0);
+		auto idx = _mm512_set_epi64(8|5,8|4,
+		                              5,  4,
+		                            8|1,8|0,
+		                              1,  0);
 
-		return _mm512_castsi512_ps(_mm512_permutex2var_epi32(_mm512_castps_si512(lo4), idx, _mm512_castps_si512(hi4)));
+		return _mm512_castsi512_ps(_mm512_permutex2var_epi64(_mm512_castps_si512(lo4), idx, _mm512_castps_si512(hi4)));
 	}
 #endif
 
@@ -1255,26 +1255,24 @@
 	inline reg interleavelo2<int16_t>(const reg v1, const reg v2) {
 		auto lo4 = mipp::interleavelo4<int16_t>(v1, v2);
 		auto hi4 = mipp::interleavehi4<int16_t>(v1, v2);
-		auto idx = _mm512_set_epi16(32|23,32|22,32|21,32|20,32|19,32|18,32|17,32|16,
-		                               23,   22,   21,   20,   19,   18,   17,   16,
-		                            32| 7,32| 6,32| 5,32| 4,32|3, 32| 2,32| 1,32| 0,
-		                                7,    6,    5,    4,   3,     2,    1,    0);
+		auto idx = _mm512_set_epi64(8|5,8|4,
+		                              5,  4,
+		                            8|1,8|0,
+		                              1,  0);
 
-		return _mm512_castsi512_ps(_mm512_permutex2var_epi16(_mm512_castps_si512(lo4), idx, _mm512_castps_si512(hi4)));
+		return _mm512_castsi512_ps(_mm512_permutex2var_epi64(_mm512_castps_si512(lo4), idx, _mm512_castps_si512(hi4)));
 	}
-#endif
 
-#if defined(__AVX512VBMI__)
 	template <>
 	inline reg interleavelo2<int8_t>(const reg v1, const reg v2) {
 		auto lo4 = mipp::interleavelo4<int8_t>(v1, v2);
 		auto hi4 = mipp::interleavehi4<int8_t>(v1, v2);
-		auto idx = _mm512_set_epi8(64|47,64|46,64|45,64|44,64|43,64|42,64|41,64|40,64|39,64|38,64|37,64|36,64|35,64|34,64|33,64|32,
-		                              47,   46,   45,   44,   43,   42,   41,   40,   39,   38,   37,   36,   35,   34,   33,   32,
-		                           64|15,64|14,64|13,64|12,64|11,64|10,64| 9,64| 8,64| 7,64| 6,64| 5,64| 4,64|3, 64| 2,64| 1,64| 0,
-		                              15,   14,   13,   12,   11,   10,    9,    8,    7,    6,    5,    4,   3,     2,    1,    0);
+		auto idx = _mm512_set_epi64(8|5,8|4,
+		                              5,  4,
+		                            8|1,8|0,
+		                              1,  0);
 
-		return _mm512_castsi512_ps(_mm512_permutex2var_epi8(_mm512_castps_si512(lo4), idx, _mm512_castps_si512(hi4)));
+		return _mm512_castsi512_ps(_mm512_permutex2var_epi64(_mm512_castps_si512(lo4), idx, _mm512_castps_si512(hi4)));
 	}
 #endif
 
@@ -1296,12 +1294,12 @@
 	inline reg interleavehi2<float>(const reg v1, const reg v2) {
 		auto lo4 = mipp::interleavelo4<float>(v1, v2);
 		auto hi4 = mipp::interleavehi4<float>(v1, v2);
-		auto idx = _mm512_set_epi32(16|15,16|14,16|13,16|12,
-		                               15,   14,   13,   12,
-		                            16| 7,16| 6,16| 5,16| 4,
-		                                7,    6,    5,    4);
+		auto idx = _mm512_set_epi64(8|7,8|6,
+		                              7,  6,
+		                            8|3,8|2,
+		                              3,  2);
 
-		return _mm512_permutex2var_ps(lo4, idx, hi4);
+		return _mm512_castpd_ps(_mm512_permutex2var_pd(_mm512_castps_pd(lo4), idx, _mm512_castps_pd(hi4)));
 	}
 
 	template <>
@@ -1313,19 +1311,19 @@
 		                            8|3,8|2,
 		                              3,  2);
 
-		return _mm512_castsi512_ps(_mm512_permutex2var_epi64(_mm512_castps_si512(lo4), idx, _mm512_castps_si512(hi4)));
+		return _mm512_castpd_ps(_mm512_permutex2var_pd(_mm512_castps_pd(lo4), idx, _mm512_castps_pd(hi4)));
 	}
 
 	template <>
 	inline reg interleavehi2<int32_t>(const reg v1, const reg v2) {
 		auto lo4 = mipp::interleavelo4<int32_t>(v1, v2);
 		auto hi4 = mipp::interleavehi4<int32_t>(v1, v2);
-		auto idx = _mm512_set_epi32(16|15,16|14,16|13,16|12,
-		                               15,   14,   13,   12,
-		                            16| 7,16| 6,16| 5,16| 4,
-		                                7,    6,    5,    4);
+		auto idx = _mm512_set_epi64(8|7,8|6,
+		                              7,  6,
+		                            8|3,8|2,
+		                              3,  2);
 
-		return _mm512_castsi512_ps(_mm512_permutex2var_epi32(_mm512_castps_si512(lo4), idx, _mm512_castps_si512(hi4)));
+		return _mm512_castpd_ps(_mm512_permutex2var_pd(_mm512_castps_pd(lo4), idx, _mm512_castps_pd(hi4)));
 	}
 #endif
 
@@ -1334,26 +1332,24 @@
 	inline reg interleavehi2<int16_t>(const reg v1, const reg v2) {
 		auto lo4 = mipp::interleavelo4<int16_t>(v1, v2);
 		auto hi4 = mipp::interleavehi4<int16_t>(v1, v2);
-		auto idx = _mm512_set_epi16(32|31,32|30,32|29,32|28,32|27,32|26,32|25,32|24,
-		                               31,   30,   29,   28,   27,   26,   25,   24,
-		                            32|15,32|14,32|13,32|12,32|11,32|10,32| 9,32| 8,
-		                               15,   14,   13,   12,   11,   10,    9,    8);
+		auto idx = _mm512_set_epi64(8|7,8|6,
+		                              7,  6,
+		                            8|3,8|2,
+		                              3,  2);
 
-		return _mm512_castsi512_ps(_mm512_permutex2var_epi16(_mm512_castps_si512(lo4), idx, _mm512_castps_si512(hi4)));
+		return _mm512_castpd_ps(_mm512_permutex2var_pd(_mm512_castps_pd(lo4), idx, _mm512_castps_pd(hi4)));
 	}
-#endif
 
-#if defined(__AVX512VBMI__)
 	template <>
 	inline reg interleavehi2<int8_t>(const reg v1, const reg v2) {
 		auto lo4 = mipp::interleavelo4<int8_t>(v1, v2);
 		auto hi4 = mipp::interleavehi4<int8_t>(v1, v2);
-		auto idx = _mm512_set_epi8(64|63,64|62,64|61,64|60,64|59,64|58,64|57,64|56,64|55,64|54,64|53,64|52,64|51,64|50,64|49,64|48,
-		                              63,   62,   61,   60,   59,   58,   57,   56,   55,   54,   53,   52,   51,   50,   49,   48,
-		                           64|31,64|30,64|29,64|28,64|27,64|26,64|25,64|24,64|23,64|22,64|21,64|20,64|19,64|18,64|17,64|16,
-		                              31,   30,   29,   28,   27,   26,   25,   24,   23,   22,   21,   20,   19,   18,   17,   16);
+		auto idx = _mm512_set_epi64(8|7,8|6,
+		                              7,  6,
+		                            8|3,8|2,
+		                              3,  2);
 
-		return _mm512_castsi512_ps(_mm512_permutex2var_epi8(_mm512_castps_si512(lo4), idx, _mm512_castps_si512(hi4)));
+		return _mm512_castpd_ps(_mm512_permutex2var_pd(_mm512_castps_pd(lo4), idx, _mm512_castps_pd(hi4)));
 	}
 #endif
 
@@ -1379,16 +1375,16 @@
 	inline regx2 interleave<float>(const reg v1, const reg v2) {
 		auto lo4 = mipp::interleavelo4<float>(v1, v2);
 		auto hi4 = mipp::interleavehi4<float>(v1, v2);
-		auto idxlo = _mm512_set_epi32(16| 7,16| 6,16|5,16|4,
-		                                  7,    6,   5,   4,
-		                              16| 3,16| 2,16|1,16|0,
-		                                  3,    2,   1,   0);
-		auto idxhi = _mm512_set_epi32(16|15,16|14,16|13,16|12,
-		                                 15,   14,   13,   12,
-		                              16|11,16|10,16| 9,16| 8,
-		                                 11,   10,    9,    8);
-		return {{_mm512_permutex2var_ps(lo4, idxlo, hi4),
-		         _mm512_permutex2var_ps(lo4, idxhi, hi4)}};
+		auto idxlo = _mm512_set_epi64(8|3,8|2,
+		                                3,  2,
+		                              8|1,8|0,
+		                                1,  0);
+		auto idxhi = _mm512_set_epi64(8|7,8|6,
+		                                7,  6,
+		                              8|5,8|4,
+		                                5,  4);
+		return {{_mm512_castpd_ps(_mm512_permutex2var_pd(_mm512_castps_pd(lo4), idxlo, _mm512_castps_pd(hi4))),
+		         _mm512_castpd_ps(_mm512_permutex2var_pd(_mm512_castps_pd(lo4), idxhi, _mm512_castps_pd(hi4)))}};
 	}
 
 	template <>
@@ -1403,24 +1399,24 @@
 		                                7,  6,
 		                              8|5,8|4,
 		                                5,  4);
-		return {{_mm512_castsi512_ps(_mm512_permutex2var_epi64(_mm512_castps_si512(lo4), idxlo, _mm512_castps_si512(hi4))),
-		         _mm512_castsi512_ps(_mm512_permutex2var_epi64(_mm512_castps_si512(lo4), idxhi, _mm512_castps_si512(hi4)))}};
+		return {{_mm512_castpd_ps(_mm512_permutex2var_pd(_mm512_castps_pd(lo4), idxlo, _mm512_castps_pd(hi4))),
+		         _mm512_castpd_ps(_mm512_permutex2var_pd(_mm512_castps_pd(lo4), idxhi, _mm512_castps_pd(hi4)))}};
 	}
 
 	template <>
 	inline regx2 interleave<int32_t>(const reg v1, const reg v2) {
 		auto lo4 = mipp::interleavelo4<int32_t>(v1, v2);
 		auto hi4 = mipp::interleavehi4<int32_t>(v1, v2);
-		auto idxlo = _mm512_set_epi32(16| 7,16| 6,16|5,16|4,
-		                                  7,    6,   5,   4,
-		                              16| 3,16| 2,16|1,16|0,
-		                                  3,    2,   1,   0);
-		auto idxhi = _mm512_set_epi32(16|15,16|14,16|13,16|12,
-		                                 15,   14,   13,   12,
-		                              16|11,16|10,16| 9,16| 8,
-		                                 11,   10,    9,    8);
-		return {{_mm512_castsi512_ps(_mm512_permutex2var_epi32(_mm512_castps_si512(lo4), idxlo, _mm512_castps_si512(hi4))),
-		         _mm512_castsi512_ps(_mm512_permutex2var_epi32(_mm512_castps_si512(lo4), idxhi, _mm512_castps_si512(hi4)))}};
+		auto idxlo = _mm512_set_epi64(8|3,8|2,
+		                                3,  2,
+		                              8|1,8|0,
+		                                1,  0);
+		auto idxhi = _mm512_set_epi64(8|7,8|6,
+		                                7,  6,
+		                              8|5,8|4,
+		                                5,  4);
+		return {{_mm512_castpd_ps(_mm512_permutex2var_pd(_mm512_castps_pd(lo4), idxlo, _mm512_castps_pd(hi4))),
+		         _mm512_castpd_ps(_mm512_permutex2var_pd(_mm512_castps_pd(lo4), idxhi, _mm512_castps_pd(hi4)))}};
 	}
 #endif
 
@@ -1429,34 +1425,32 @@
 	inline regx2 interleave<int16_t>(const reg v1, const reg v2) {
 		auto lo4 = mipp::interleavelo4<int16_t>(v1, v2);
 		auto hi4 = mipp::interleavehi4<int16_t>(v1, v2);
-		auto idxlo = _mm512_set_epi16(32|15,32|14,32|13,32|12,32|11,32|10,32|9,32|8,
-		                                 15,   14,   13,   12,   11,   10,   9,   8,
-		                              32| 7,32| 6,32| 5,32| 4,32|3, 32| 2,32|1,32|0,
-		                                  7,    6,    5,    4,   3,     2,   1,   0);
-		auto idxhi = _mm512_set_epi16(32|31,32|30,32|29,32|28,32|27,32|26,32|25,32|24,
-		                                 31,   30,   29,   28,   27,   26,   25,   24,
-		                              32|23,32|22,32|21,32|20,32|19,32|18,32|17,32|16,
-		                                 23,   22,   21,   20,   19,   18,   17,   16);
-		return {{_mm512_castsi512_ps(_mm512_permutex2var_epi16(_mm512_castps_si512(lo4), idxlo, _mm512_castps_si512(hi4))),
-		         _mm512_castsi512_ps(_mm512_permutex2var_epi16(_mm512_castps_si512(lo4), idxhi, _mm512_castps_si512(hi4)))}};
+		auto idxlo = _mm512_set_epi64(8|3,8|2,
+		                                3,  2,
+		                              8|1,8|0,
+		                                1,  0);
+		auto idxhi = _mm512_set_epi64(8|7,8|6,
+		                                7,  6,
+		                              8|5,8|4,
+		                                5,  4);
+		return {{_mm512_castpd_ps(_mm512_permutex2var_pd(_mm512_castps_pd(lo4), idxlo, _mm512_castps_pd(hi4))),
+		         _mm512_castpd_ps(_mm512_permutex2var_pd(_mm512_castps_pd(lo4), idxhi, _mm512_castps_pd(hi4)))}};
 	}
-#endif
 
-#if defined(__AVX512VBMI__)
 	template <>
 	inline regx2 interleave<int8_t>(const reg v1, const reg v2) {
 		auto lo4 = mipp::interleavelo4<int8_t>(v1, v2);
 		auto hi4 = mipp::interleavehi4<int8_t>(v1, v2);
-		auto idxlo = _mm512_set_epi8(64|31,64|30,64|29,64|28,64|27,64|26,64|25,64|24,64|23,64|22,64|21,64|20,64|19,64|18,64|17,64|16,
-		                                31,   30,   29,   28,   27,   26,   25,   24,   23,   22,   21,   20,   19,   18,   17,   16,
-		                             64|15,64|14,64|13,64|12,64|11,64|10,64| 9,64| 8,64| 7,64| 6,64| 5,64| 4,64|3, 64| 2,64| 1,64| 0,
-		                                15,   14,   13,   12,   11,   10,    9,    8,    7,    6,    5,    4,   3,     2,    1,    0);
-		auto idxhi = _mm512_set_epi8(64|63,64|62,64|61,64|60,64|59,64|58,64|57,64|56,64|55,64|54,64|53,64|52,64|51,64|50,64|49,64|48,
-		                                63,   62,   61,   60,   59,   58,   57,   56,   55,   54,   53,   52,   51,   50,   49,   48,
-		                             64|47,64|46,64|45,64|44,64|43,64|42,64|41,64|40,64|39,64|38,64|37,64|36,64|35,64|34,64|33,64|32,
-		                                47,   46,   45,   44,   43,   42,   41,   40,   39,   38,   37,   36,   35,   34,   33,   32);
-		return {{_mm512_castsi512_ps(_mm512_permutex2var_epi8(_mm512_castps_si512(lo4), idxlo, _mm512_castps_si512(hi4))),
-		         _mm512_castsi512_ps(_mm512_permutex2var_epi8(_mm512_castps_si512(lo4), idxhi, _mm512_castps_si512(hi4)))}};
+		auto idxlo = _mm512_set_epi64(8|3,8|2,
+		                                3,  2,
+		                              8|1,8|0,
+		                                1,  0);
+		auto idxhi = _mm512_set_epi64(8|7,8|6,
+		                                7,  6,
+		                              8|5,8|4,
+		                                5,  4);
+		return {{_mm512_castpd_ps(_mm512_permutex2var_pd(_mm512_castps_pd(lo4), idxlo, _mm512_castps_pd(hi4))),
+		         _mm512_castpd_ps(_mm512_permutex2var_pd(_mm512_castps_pd(lo4), idxhi, _mm512_castps_pd(hi4)))}};
 	}
 #endif
 
@@ -1479,11 +1473,11 @@
 	inline reg interleavelo<float>(const reg v1, const reg v2) {
 		auto lo4 = mipp::interleavelo4<float>(v1, v2);
 		auto hi4 = mipp::interleavehi4<float>(v1, v2);
-		auto idxlo = _mm512_set_epi32(16| 7,16| 6,16|5,16|4,
-		                                  7,    6,   5,   4,
-		                              16| 3,16| 2,16|1,16|0,
-		                                  3,    2,   1,   0);
-		return _mm512_permutex2var_ps(lo4, idxlo, hi4);
+		auto idxlo = _mm512_set_epi64(8|3,8|2,
+		                                3,  2,
+		                              8|1,8|0,
+		                                1,  0);
+		return _mm512_castpd_ps(_mm512_permutex2var_pd(_mm512_castps_pd(lo4), idxlo, _mm512_castps_pd(hi4)));
 	}
 
 	template <>
@@ -1494,18 +1488,18 @@
 		                                3,  2,
 		                              8|1,8|0,
 		                                1,  0);
-		return _mm512_castsi512_ps(_mm512_permutex2var_epi64(_mm512_castps_si512(lo4), idxlo, _mm512_castps_si512(hi4)));
+		return _mm512_castpd_ps(_mm512_permutex2var_pd(_mm512_castps_pd(lo4), idxlo, _mm512_castps_pd(hi4)));
 	}
 
 	template <>
 	inline reg interleavelo<int32_t>(const reg v1, const reg v2) {
 		auto lo4 = mipp::interleavelo4<int32_t>(v1, v2);
 		auto hi4 = mipp::interleavehi4<int32_t>(v1, v2);
-		auto idxlo = _mm512_set_epi32(16| 7,16| 6,16|5,16|4,
-		                                  7,    6,   5,   4,
-		                              16| 3,16| 2,16|1,16|0,
-		                                  3,    2,   1,   0);
-		return _mm512_castsi512_ps(_mm512_permutex2var_epi32(_mm512_castps_si512(lo4), idxlo, _mm512_castps_si512(hi4)));
+		auto idxlo = _mm512_set_epi64(8|3,8|2,
+		                                3,  2,
+		                              8|1,8|0,
+		                                1,  0);
+		return _mm512_castpd_ps(_mm512_permutex2var_pd(_mm512_castps_pd(lo4), idxlo, _mm512_castps_pd(hi4)));
 	}
 #endif
 
@@ -1514,24 +1508,22 @@
 	inline reg interleavelo<int16_t>(const reg v1, const reg v2) {
 		auto lo4 = mipp::interleavelo4<int16_t>(v1, v2);
 		auto hi4 = mipp::interleavehi4<int16_t>(v1, v2);
-		auto idxlo = _mm512_set_epi16(32|15,32|14,32|13,32|12,32|11,32|10,32|9,32|8,
-		                                 15,   14,   13,   12,   11,   10,   9,   8,
-		                              32| 7,32| 6,32| 5,32| 4,32|3, 32| 2,32|1,32|0,
-		                                  7,    6,    5,    4,   3,     2,   1,   0);
-		return _mm512_castsi512_ps(_mm512_permutex2var_epi16(_mm512_castps_si512(lo4), idxlo, _mm512_castps_si512(hi4)));
+		auto idxlo = _mm512_set_epi64(8|3,8|2,
+		                                3,  2,
+		                              8|1,8|0,
+		                                1,  0);
+		return _mm512_castpd_ps(_mm512_permutex2var_pd(_mm512_castps_pd(lo4), idxlo, _mm512_castps_pd(hi4)));
 	}
-#endif
 
-#if defined(__AVX512VBMI__)
 	template <>
 	inline reg interleavelo<int8_t>(const reg v1, const reg v2) {
 		auto lo4 = mipp::interleavelo4<int8_t>(v1, v2);
 		auto hi4 = mipp::interleavehi4<int8_t>(v1, v2);
-		auto idxlo = _mm512_set_epi8(64|31,64|30,64|29,64|28,64|27,64|26,64|25,64|24,64|23,64|22,64|21,64|20,64|19,64|18,64|17,64|16,
-		                                31,   30,   29,   28,   27,   26,   25,   24,   23,   22,   21,   20,   19,   18,   17,   16,
-		                             64|15,64|14,64|13,64|12,64|11,64|10,64| 9,64| 8,64| 7,64| 6,64| 5,64| 4,64|3, 64| 2,64| 1,64| 0,
-		                                15,   14,   13,   12,   11,   10,    9,    8,    7,    6,    5,    4,   3,     2,    1,    0);
-		return _mm512_castsi512_ps(_mm512_permutex2var_epi8(_mm512_castps_si512(lo4), idxlo, _mm512_castps_si512(hi4)));
+		auto idxlo = _mm512_set_epi64(8|3,8|2,
+		                                3,  2,
+		                              8|1,8|0,
+		                                1,  0);
+		return _mm512_castpd_ps(_mm512_permutex2var_pd(_mm512_castps_pd(lo4), idxlo, _mm512_castps_pd(hi4)));
 	}
 #endif
 
@@ -1552,11 +1544,11 @@
 	inline reg interleavehi<float>(const reg v1, const reg v2) {
 		auto lo4 = mipp::interleavelo4<float>(v1, v2);
 		auto hi4 = mipp::interleavehi4<float>(v1, v2);
-		auto idxhi = _mm512_set_epi32(16|15,16|14,16|13,16|12,
-		                                 15,   14,   13,   12,
-		                              16|11,16|10,16| 9,16| 8,
-		                                 11,   10,    9,    8);
-		return _mm512_permutex2var_ps(lo4, idxhi, hi4);
+		auto idxhi = _mm512_set_epi64(8|7,8|6,
+		                                7,  6,
+		                              8|5,8|4,
+		                                5,  4);
+		return _mm512_castpd_ps(_mm512_permutex2var_pd(_mm512_castps_pd(lo4), idxhi, _mm512_castps_pd(hi4)));
 	}
 
 	template <>
@@ -1567,18 +1559,18 @@
 		                                7,  6,
 		                              8|5,8|4,
 		                                5,  4);
-		return _mm512_castsi512_ps(_mm512_permutex2var_epi64(_mm512_castps_si512(lo4), idxhi, _mm512_castps_si512(hi4)));
+		return _mm512_castpd_ps(_mm512_permutex2var_pd(_mm512_castps_pd(lo4), idxhi, _mm512_castps_pd(hi4)));
 	}
 
 	template <>
 	inline reg interleavehi<int32_t>(const reg v1, const reg v2) {
 		auto lo4 = mipp::interleavelo4<int32_t>(v1, v2);
 		auto hi4 = mipp::interleavehi4<int32_t>(v1, v2);
-		auto idxhi = _mm512_set_epi32(16|15,16|14,16|13,16|12,
-		                                 15,   14,   13,   12,
-		                              16|11,16|10,16| 9,16| 8,
-		                                 11,   10,    9,    8);
-		return _mm512_castsi512_ps(_mm512_permutex2var_epi32(_mm512_castps_si512(lo4), idxhi, _mm512_castps_si512(hi4)));
+		auto idxhi = _mm512_set_epi64(8|7,8|6,
+		                                7,  6,
+		                              8|5,8|4,
+		                                5,  4);
+		return _mm512_castpd_ps(_mm512_permutex2var_pd(_mm512_castps_pd(lo4), idxhi, _mm512_castps_pd(hi4)));
 	}
 #endif
 
@@ -1587,24 +1579,22 @@
 	inline reg interleavehi<int16_t>(const reg v1, const reg v2) {
 		auto lo4 = mipp::interleavelo4<int16_t>(v1, v2);
 		auto hi4 = mipp::interleavehi4<int16_t>(v1, v2);
-		auto idxhi = _mm512_set_epi16(32|31,32|30,32|29,32|28,32|27,32|26,32|25,32|24,
-		                                 31,   30,   29,   28,   27,   26,   25,   24,
-		                              32|23,32|22,32|21,32|20,32|19,32|18,32|17,32|16,
-		                                 23,   22,   21,   20,   19,   18,   17,   16);
-		return _mm512_castsi512_ps(_mm512_permutex2var_epi16(_mm512_castps_si512(lo4), idxhi, _mm512_castps_si512(hi4)));
+		auto idxhi = _mm512_set_epi64(8|7,8|6,
+		                                7,  6,
+		                              8|5,8|4,
+		                                5,  4);
+		return _mm512_castpd_ps(_mm512_permutex2var_pd(_mm512_castps_pd(lo4), idxhi, _mm512_castps_pd(hi4)));
 	}
-#endif
 
-#if defined(__AVX512VBMI__)
 	template <>
 	inline reg interleavehi<int8_t>(const reg v1, const reg v2) {
 		auto lo4 = mipp::interleavelo4<int8_t>(v1, v2);
 		auto hi4 = mipp::interleavehi4<int8_t>(v1, v2);
-		auto idxhi = _mm512_set_epi8(64|63,64|62,64|61,64|60,64|59,64|58,64|57,64|56,64|55,64|54,64|53,64|52,64|51,64|50,64|49,64|48,
-		                                63,   62,   61,   60,   59,   58,   57,   56,   55,   54,   53,   52,   51,   50,   49,   48,
-		                             64|47,64|46,64|45,64|44,64|43,64|42,64|41,64|40,64|39,64|38,64|37,64|36,64|35,64|34,64|33,64|32,
-		                                47,   46,   45,   44,   43,   42,   41,   40,   39,   38,   37,   36,   35,   34,   33,   32);
-		return _mm512_castsi512_ps(_mm512_permutex2var_epi8(_mm512_castps_si512(lo4), idxhi, _mm512_castps_si512(hi4)));
+		auto idxhi = _mm512_set_epi64(8|7,8|6,
+		                                7,  6,
+		                              8|5,8|4,
+		                                5,  4);
+		return _mm512_castpd_ps(_mm512_permutex2var_pd(_mm512_castps_pd(lo4), idxhi, _mm512_castps_pd(hi4)));
 	}
 #endif
 
@@ -1630,16 +1620,16 @@
 	inline regx2 interleave2<float>(const reg v1, const reg v2) {
 		auto lo4 = mipp::interleavelo4<float>(v1, v2);
 		auto hi4 = mipp::interleavehi4<float>(v1, v2);
-		auto idxlo = _mm512_set_epi32(16|11,16|10,16|9,16|8,
-		                                 11,   10,   9,   8,
-		                              16| 3,16| 2,16|1,16|0,
-		                                  3,    2,   1,   0);
-		auto idxhi = _mm512_set_epi32(16|15,16|14,16|13,16|12,
-		                                 15,   14,   13,   12,
-		                              16| 7,16| 6,16| 5,16| 4,
-		                                  7,    6,    5,    4);
-		return {{_mm512_permutex2var_ps(lo4, idxlo, hi4),
-		         _mm512_permutex2var_ps(lo4, idxhi, hi4)}};
+		auto idxlo = _mm512_set_epi64(8|5,8|4,
+		                                5,  4,
+		                              8|1,8|0,
+		                                1,  0);
+		auto idxhi = _mm512_set_epi64(8|7,8|6,
+		                                7,  6,
+		                              8|3,8|2,
+		                                3,  2);
+		return {{_mm512_castpd_ps(_mm512_permutex2var_pd(_mm512_castps_pd(lo4), idxlo, _mm512_castps_pd(hi4))),
+		         _mm512_castpd_ps(_mm512_permutex2var_pd(_mm512_castps_pd(lo4), idxhi, _mm512_castps_pd(hi4)))}};
 	}
 
 	template <>
@@ -1654,24 +1644,24 @@
 		                                7,  6,
 		                              8|3,8|2,
 		                                3,  2);
-		return {{_mm512_castsi512_ps(_mm512_permutex2var_epi64(_mm512_castps_si512(lo4), idxlo, _mm512_castps_si512(hi4))),
-		         _mm512_castsi512_ps(_mm512_permutex2var_epi64(_mm512_castps_si512(lo4), idxhi, _mm512_castps_si512(hi4)))}};
+		return {{_mm512_castpd_ps(_mm512_permutex2var_pd(_mm512_castps_pd(lo4), idxlo, _mm512_castps_pd(hi4))),
+		         _mm512_castpd_ps(_mm512_permutex2var_pd(_mm512_castps_pd(lo4), idxhi, _mm512_castps_pd(hi4)))}};
 	}
 
 	template <>
 	inline regx2 interleave2<int32_t>(const reg v1, const reg v2) {
 		auto lo4 = mipp::interleavelo4<int32_t>(v1, v2);
 		auto hi4 = mipp::interleavehi4<int32_t>(v1, v2);
-		auto idxlo = _mm512_set_epi32(16|11,16|10,16|9,16|8,
-		                                 11,   10,   9,   8,
-		                              16| 3,16| 2,16|1,16|0,
-		                                  3,    2,   1,   0);
-		auto idxhi = _mm512_set_epi32(16|15,16|14,16|13,16|12,
-		                                 15,   14,   13,   12,
-		                              16| 7,16| 6,16| 5,16| 4,
-		                                  7,    6,    5,    4);
-		return {{_mm512_castsi512_ps(_mm512_permutex2var_epi32(_mm512_castps_si512(lo4), idxlo, _mm512_castps_si512(hi4))),
-		         _mm512_castsi512_ps(_mm512_permutex2var_epi32(_mm512_castps_si512(lo4), idxhi, _mm512_castps_si512(hi4)))}};
+		auto idxlo = _mm512_set_epi64(8|5,8|4,
+		                                5,  4,
+		                              8|1,8|0,
+		                                1,  0);
+		auto idxhi = _mm512_set_epi64(8|7,8|6,
+		                                7,  6,
+		                              8|3,8|2,
+		                                3,  2);
+		return {{_mm512_castpd_ps(_mm512_permutex2var_pd(_mm512_castps_pd(lo4), idxlo, _mm512_castps_pd(hi4))),
+		         _mm512_castpd_ps(_mm512_permutex2var_pd(_mm512_castps_pd(lo4), idxhi, _mm512_castps_pd(hi4)))}};
 	}
 #endif
 
@@ -1680,34 +1670,32 @@
 	inline regx2 interleave2<int16_t>(const reg v1, const reg v2) {
 		auto lo4 = mipp::interleavelo4<int16_t>(v1, v2);
 		auto hi4 = mipp::interleavehi4<int16_t>(v1, v2);
-		auto idxlo = _mm512_set_epi16(32|23,32|22,32|21,32|20,32|19,32|18,32|17,32|16,
-		                                 23,   22,   21,   20,   19,   18,   17,   16,
-		                              32| 7,32| 6,32| 5,32| 4,32|3, 32| 2,32| 1,32| 0,
-		                                  7,    6,    5,    4,   3,     2,    1,    0);
-		auto idxhi = _mm512_set_epi16(32|31,32|30,32|29,32|28,32|27,32|26,32|25,32|24,
-		                                 31,   30,   29,   28,   27,   26,   25,   24,
-		                              32|15,32|14,32|13,32|12,32|11,32|10,32| 9,32| 8,
-		                                 15,   14,   13,   12,   11,   10,    9,    8);
-		return {{_mm512_castsi512_ps(_mm512_permutex2var_epi16(_mm512_castps_si512(lo4), idxlo, _mm512_castps_si512(hi4))),
-		         _mm512_castsi512_ps(_mm512_permutex2var_epi16(_mm512_castps_si512(lo4), idxhi, _mm512_castps_si512(hi4)))}};
+		auto idxlo = _mm512_set_epi64(8|5,8|4,
+		                                5,  4,
+		                              8|1,8|0,
+		                                1,  0);
+		auto idxhi = _mm512_set_epi64(8|7,8|6,
+		                                7,  6,
+		                              8|3,8|2,
+		                                3,  2);
+		return {{_mm512_castpd_ps(_mm512_permutex2var_pd(_mm512_castps_pd(lo4), idxlo, _mm512_castps_pd(hi4))),
+		         _mm512_castpd_ps(_mm512_permutex2var_pd(_mm512_castps_pd(lo4), idxhi, _mm512_castps_pd(hi4)))}};
 	}
-#endif
 
-#if defined(__AVX512VBMI__)
 	template <>
 	inline regx2 interleave2<int8_t>(const reg v1, const reg v2) {
 		auto lo4 = mipp::interleavelo4<int8_t>(v1, v2);
 		auto hi4 = mipp::interleavehi4<int8_t>(v1, v2);
-		auto idxlo = _mm512_set_epi8(64|47,64|46,64|45,64|44,64|43,64|42,64|41,64|40,64|39,64|38,64|37,64|36,64|35,64|34,64|33,64|32,
-		                                47,   46,   45,   44,   43,   42,   41,   40,   39,   38,   37,   36,   35,   34,   33,   32,
-		                             64|15,64|14,64|13,64|12,64|11,64|10,64| 9,64| 8,64| 7,64| 6,64| 5,64| 4,64|3, 64| 2,64| 1,64| 0,
-		                                15,   14,   13,   12,   11,   10,    9,    8,    7,    6,    5,    4,   3,     2,    1,    0);
-		auto idxhi = _mm512_set_epi8(64|63,64|62,64|61,64|60,64|59,64|58,64|57,64|56,64|55,64|54,64|53,64|52,64|51,64|50,64|49,64|48,
-		                                63,   62,   61,   60,   59,   58,   57,   56,   55,   54,   53,   52,   51,   50,   49,   48,
-		                             64|31,64|30,64|29,64|28,64|27,64|26,64|25,64|24,64|23,64|22,64|21,64|20,64|19,64|18,64|17,64|16,
-		                                31,   30,   29,   28,   27,   26,   25,   24,   23,   22,   21,   20,   19,   18,   17,   16);
-		return {{_mm512_castsi512_ps(_mm512_permutex2var_epi8(_mm512_castps_si512(lo4), idxlo, _mm512_castps_si512(hi4))),
-		         _mm512_castsi512_ps(_mm512_permutex2var_epi8(_mm512_castps_si512(lo4), idxhi, _mm512_castps_si512(hi4)))}};
+		auto idxlo = _mm512_set_epi64(8|5,8|4,
+		                                5,  4,
+		                              8|1,8|0,
+		                                1,  0);
+		auto idxhi = _mm512_set_epi64(8|7,8|6,
+		                                7,  6,
+		                              8|3,8|2,
+		                                3,  2);
+		return {{_mm512_castpd_ps(_mm512_permutex2var_pd(_mm512_castps_pd(lo4), idxlo, _mm512_castps_pd(hi4))),
+		         _mm512_castpd_ps(_mm512_permutex2var_pd(_mm512_castps_pd(lo4), idxhi, _mm512_castps_pd(hi4)))}};
 	}
 #endif
 
@@ -1744,9 +1732,7 @@
 		return {{mipp::interleavelo4<int16_t>(v1, v2),
 		         mipp::interleavehi4<int16_t>(v1, v2)}};
 	}
-#endif
 
-#if defined(__AVX512VBMI__)
 	template <>
 	inline regx2 interleave4<int8_t>(const reg v1, const reg v2) {
 		return {{mipp::interleavelo4<int8_t>(v1, v2),
