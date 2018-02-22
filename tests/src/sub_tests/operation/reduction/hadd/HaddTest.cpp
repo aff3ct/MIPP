@@ -9,12 +9,12 @@
 // Registers the fixture into the 'registry'
 CPPUNIT_TEST_SUITE_REGISTRATION(HaddTest);
 
-void 
+void
 HaddTest::setUp()
 {
 }
 
-void 
+void
 HaddTest::tearDown()
 {
 }
@@ -37,9 +37,12 @@ void HaddTest::test_reg_hadd_int()
 			mipp::reg r1 = mipp::load<T>(inputs1);
 			auto val = mipp::hadd<T>(r1);
 
-			auto res = inputs1[0];
+			int64_t acc = inputs1[0];
 			for (auto i = 1; i < N; i++)
-				res += inputs1[i];
+				acc += (int64_t)inputs1[i];
+
+			T res = (T)std::max(std::min(acc, (int64_t)std::numeric_limits<T>::max()),
+			                                  (int64_t)std::numeric_limits<T>::min());
 
 			CPPUNIT_ASSERT_EQUAL(res, val);
 		}
@@ -107,9 +110,12 @@ void HaddTest::test_Reg_hadd_int()
 			mipp::Reg<T> r1 = inputs1;
 			auto val = mipp::hadd(r1);
 
-			auto res = inputs1[0];
+			int64_t acc = inputs1[0];
 			for (auto i = 1; i < N; i++)
-				res += inputs1[i];
+				acc += (int64_t)inputs1[i];
+
+			T res = (T)std::max(std::min(acc, (int64_t)std::numeric_limits<T>::max()),
+			                                  (int64_t)std::numeric_limits<T>::min());
 
 			CPPUNIT_ASSERT_EQUAL(res, val);
 		}
