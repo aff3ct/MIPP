@@ -313,7 +313,7 @@ std::cout << ZMM4 << std::endl; // output: "[0, -3, 0, 0]"
 ## List of MIPP functions
 
 This section presents an exhaustive list of all the available functions in MIPP.
-Of course the MIPP wrapper does not cover all the possible intrinsics of each instruction set but it tries to gives you the most important and useful ones.
+Of course the MIPP wrapper does not cover all the possible intrinsics of each instruction set but it tries to give you the most important and useful ones.
 
 In the following tables, `T`, `T1` and `T2` stand for data types (`double`, `float`, `int64_t`, `int32_t`, `int16_t` or `int8_t`).
 `N` stands for the number or elements in a mask or in a register.
@@ -434,7 +434,7 @@ In the documentation there are some terms that requires to be clarified:
 | `hmax`            | `T    hmax                    (const Reg<T> r)`                   | Selects the maximum element in the register `r` : `max(max(max(..., r_1), r_2), r_n)`.                             | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 | `testz`           | `bool testz                   (const Reg<T> r1, const Reg<T> r2)` | Mainly tests if all the elements of the registers are zeros: `r = (r1 & r2); !(r_1 OR r_2 OR ... OR r_n)`.         | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 | `testz`           | `bool testz                   (const Msk<N> m1, const Msk<N> m2)` | Mainly tests if all the elements of the masks are zeros: `m = (m1 & m2); !(m_1 OR m_2 OR ... OR m_n)`.             |                                                              |
-| `testz`           | `bool testz                   (const Reg<T> r)`                   | Tests if all the elements of the register aren't zeros: `!(r_1 OR r_2 OR ... OR r_n)`.                             | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `testz`           | `bool testz                   (const Reg<T> r)`                   | Tests if all the elements of the register are zeros: `!(r_1 OR r_2 OR ... OR r_n)`.                                | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 | `testz`           | `bool testz                   (const Msk<N> m)`                   | Tests if all the elements of the mask are zeros: `!(m_1 OR m_2 OR ... OR m_n)`.                                    |                                                              |
 | `Reduction<T,OP>` | `T    Reduction<T,OP>::sapply (const Reg<T> r)`                   | Generic reduction operation, can take a user defined operator `OP` and will performs the reduction with it on `r`. | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 
