@@ -874,7 +874,7 @@ void dump(const mipp::reg r, std::ostream &stream = std::cout, const uint32_t el
 	{
 		for (auto i = 0; i < lane_size; i++)
 			stream << std::setw(elmtWidth) << +data[l * lane_size +i] << ((i < lane_size -1) ? ", " : "");
-		stream << ((l < mipp::Lanes -1) ? " | " : "");
+		stream << (((int)l < (int)mipp::Lanes -1) ? " | " : "");
 	}
 	stream << "]";
 }
@@ -898,7 +898,7 @@ void dump(const mipp::msk m, std::ostream &stream = std::cout, const uint32_t el
 		{
 			for (auto i = 0; i < lane_size; i++)
 				stream << std::setw(elmtWidth) << (data[l * lane_size +i] ? 1 : 0) << ((i < lane_size -1) ? ", " : "");
-			stream << ((l < (int)mipp::Lanes -1) ? " | " : "");
+			stream << (((int)l < (int)mipp::Lanes -1) ? " | " : "");
 		}
 	}
 	else if (bits == 16)
@@ -907,11 +907,11 @@ void dump(const mipp::msk m, std::ostream &stream = std::cout, const uint32_t el
 		int16_t data[N];
 		store<int16_t>(data, r);
 
-		for (auto l = 0; l < (int)mipp::Lanes; l++)
+		for (uint32_t l = 0; l < (int)mipp::Lanes; l++)
 		{
 			for (auto i = 0; i < lane_size; i++)
 				stream << std::setw(elmtWidth) << (data[l * lane_size +i] ? 1 : 0) << ((i < lane_size -1) ? ", " : "");
-			stream << ((l < (int)mipp::Lanes -1) ? " | " : "");
+			stream << (((int)l < (int)mipp::Lanes -1) ? " | " : "");
 		}
 	}
 	else if (bits == 32)
@@ -920,11 +920,11 @@ void dump(const mipp::msk m, std::ostream &stream = std::cout, const uint32_t el
 		int32_t data[N];
 		store<int32_t>(data, r);
 
-		for (auto l = 0; l < (int)mipp::Lanes; l++)
+		for (uint32_t l = 0; l < (int)mipp::Lanes; l++)
 		{
 			for (auto i = 0; i < lane_size; i++)
 				stream << std::setw(elmtWidth) << (data[l * lane_size +i] ? 1 : 0) << ((i < lane_size -1) ? ", " : "");
-			stream << ((l < (int)mipp::Lanes -1) ? " | " : "");
+			stream << (((int)l < (int)mipp::Lanes -1) ? " | " : "");
 		}
 	}
 	else if (bits == 64)
@@ -933,11 +933,11 @@ void dump(const mipp::msk m, std::ostream &stream = std::cout, const uint32_t el
 		int64_t data[N];
 		store<int64_t>(data, r);
 
-		for (auto l = 0; l < (int)mipp::Lanes; l++)
+		for (uint32_t l = 0; l < (int)mipp::Lanes; l++)
 		{
 			for (auto i = 0; i < lane_size; i++)
 				stream << std::setw(elmtWidth) << (data[l * lane_size +i] ? 1 : 0) << ((i < lane_size -1) ? ", " : "");
-			stream << ((l < (int)mipp::Lanes -1) ? " | " : "");
+			stream << (((int)l < (int)mipp::Lanes -1) ? " | " : "");
 		}
 	}
 
