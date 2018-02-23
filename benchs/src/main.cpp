@@ -4,6 +4,7 @@
 #include <chrono>
 #include <tuple>
 #include <sstream>
+#include <numeric>
 
 #include <mipp.h>
 
