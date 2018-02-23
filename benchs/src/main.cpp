@@ -9,6 +9,7 @@
 #include <mipp.h>
 
 constexpr int Trials = 10000000;
+float CPUFreq = 0.;
 
 template <typename T>
 void benchmark_series(std::vector<std::tuple<unsigned, std::string, std::string, std::chrono::nanoseconds>> &benchResults)
@@ -1036,6 +1037,12 @@ int main(int argc, char* argv[])
 		std::cout << "}" << std::endl;
 	}
 
+	if (argc >= 2)
+	{
+		CPUFreq = std::atof(argv[1]);
+		std::cout << "CPU frequency:     " << CPUFreq << " GHz" << std::endl;
+	}
+
 	std::cout << std::endl << "CPU warm-up... ";
 	std::flush(std::cout);
 	volatile uint64_t burner = 0;
@@ -1154,32 +1161,80 @@ int main(int argc, char* argv[])
 			std::stringstream strDurationDouble, strDurationFloat, strDurationInt64, strDurationInt32, strDurationInt16, strDurationInt8;
 
 			if (durationDouble)
+			{
 				strDurationDouble << std::fixed << std::setprecision(2) << durationDouble;
+				if (CPUFreq != 0.)
+				{
+					auto invFreq = 1. / CPUFreq;
+					auto nInstrPerCycle = invFreq / durationDouble;
+					strDurationDouble << std::fixed << std::setprecision(1)<< "[" << nInstrPerCycle << "]";
+				}
+			}
 			else
 				strDurationDouble << std::fixed << std::setprecision(2) << "N/A";
 
 			if (durationFloat)
+			{
 				strDurationFloat << std::fixed << std::setprecision(2) << durationFloat;
+				if (CPUFreq != 0.)
+				{
+					auto invFreq = 1. / CPUFreq;
+					auto nInstrPerCycle = invFreq / durationFloat;
+					strDurationFloat << std::fixed << std::setprecision(1)<< "[" << nInstrPerCycle << "]";
+				}
+			}
 			else
 				strDurationFloat << std::fixed << std::setprecision(2) << "N/A";
 
 			if (durationInt64)
+			{
 				strDurationInt64 << std::fixed << std::setprecision(2) << durationInt64;
+				if (CPUFreq != 0.)
+				{
+					auto invFreq = 1. / CPUFreq;
+					auto nInstrPerCycle = invFreq / durationInt64;
+					strDurationInt64 << std::fixed << std::setprecision(1)<< "[" << nInstrPerCycle << "]";
+				}
+			}
 			else
 				strDurationInt64 << std::fixed << std::setprecision(2) << "N/A";
 
 			if (durationInt32)
+			{
 				strDurationInt32 << std::fixed << std::setprecision(2) << durationInt32;
+				if (CPUFreq != 0.)
+				{
+					auto invFreq = 1. / CPUFreq;
+					auto nInstrPerCycle = invFreq / durationInt32;
+					strDurationInt32 << std::fixed << std::setprecision(1)<< "[" << nInstrPerCycle << "]";
+				}
+			}
 			else
 				strDurationInt32 << std::fixed << std::setprecision(2) << "N/A";
 
 			if (durationInt16)
+			{
 				strDurationInt16 << std::fixed << std::setprecision(2) << durationInt16;
+				if (CPUFreq != 0.)
+				{
+					auto invFreq = 1. / CPUFreq;
+					auto nInstrPerCycle = invFreq / durationInt16;
+					strDurationInt16 << std::fixed << std::setprecision(1)<< "[" << nInstrPerCycle << "]";
+				}
+			}
 			else
 				strDurationInt16 << std::fixed << std::setprecision(2) << "N/A";
 
 			if (durationInt8)
+			{
 				strDurationInt8 << std::fixed << std::setprecision(2) << durationInt8;
+				if (CPUFreq != 0.)
+				{
+					auto invFreq = 1. / CPUFreq;
+					auto nInstrPerCycle = invFreq / durationInt8;
+					strDurationInt8 << std::fixed << std::setprecision(1)<< "[" << nInstrPerCycle << "]";
+				}
+			}
 			else
 				strDurationInt8 << std::fixed << std::setprecision(2) << "N/A";
 
