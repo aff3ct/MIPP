@@ -993,7 +993,7 @@ void benchmark_series(std::vector<std::tuple<unsigned, std::string, std::string,
 }
 
 // template <typename T1, typename T2>
-// void bench_series2()
+// void benchmark_series2()
 // {
 
 // 	template <typename T1, typename T2>
@@ -1017,8 +1017,8 @@ void benchmark_series(std::vector<std::tuple<unsigned, std::string, std::string,
 
 int main(int argc, char* argv[])
 {
-	std::cout << "MIPP Benchmarks" << std::endl;
-	std::cout << "---------------" << std::endl << std::endl;
+	std::cout << "MIPP Benchmark" << std::endl;
+	std::cout << "--------------" << std::endl << std::endl;
 
 	std::cout << "Instr. type:       " << mipp::InstructionType                  << std::endl;
 	std::cout << "Instr. full type:  " << mipp::InstructionFullType              << std::endl;
@@ -1056,7 +1056,7 @@ int main(int argc, char* argv[])
 	std::vector<std::tuple<unsigned, std::string, std::string, std::chrono::nanoseconds>> benchsInt16;
 	std::vector<std::tuple<unsigned, std::string, std::string, std::chrono::nanoseconds>> benchsInt8;
 
-	std::cout << std::endl << "Running benchmarks... ";
+	std::cout << std::endl << "Running benchmark... ";
 	std::flush(std::cout);
 	benchmark_series<double >(benchsDouble);
 	benchmark_series<float  >(benchsFloat);
@@ -1066,16 +1066,35 @@ int main(int argc, char* argv[])
 	benchmark_series<int8_t >(benchsInt8);
 	std::cout << "Done." << std::endl << std::endl;
 
-	std::cout << "Benchmark results:" << std::endl;
-	std::cout << std::setw( 3) << "id"
-	          << std::setw(16) << "name"
-	          << std::setw(16) << "group"
-	          << std::setw(16) << "Double (ns)"
-	          << std::setw(16) << "Float (ns)"
-	          << std::setw(16) << "Int64 (ns)"
-	          << std::setw(16) << "Int32 (ns)"
-	          << std::setw(16) << "Int16 (ns)"
-	          << std::setw(16) << "Int8 (ns)"
+	std::cout << std::setw(                     3) << "id"                                          << " | "
+	          << std::setw(                    16) << "name"                                        << " | "
+	          << std::setw(                    12) << "group"                                       << " | "
+	          << std::setw(CPUFreq == 0. ? 9 : 16) << (CPUFreq == 0. ? "Double" : "type -> Double") << " | "
+	          << std::setw(CPUFreq == 0. ? 9 : 16) << (CPUFreq == 0. ? "Float"  : "type -> Float" ) << " | "
+	          << std::setw(CPUFreq == 0. ? 9 : 16) << (CPUFreq == 0. ? "Int64"  : "type -> Int64" ) << " | "
+	          << std::setw(CPUFreq == 0. ? 9 : 16) << (CPUFreq == 0. ? "Int32"  : "type -> Int32" ) << " | "
+	          << std::setw(CPUFreq == 0. ? 9 : 16) << (CPUFreq == 0. ? "Int16"  : "type -> Int16" ) << " | "
+	          << std::setw(CPUFreq == 0. ? 9 : 16) << (CPUFreq == 0. ? "Int8"   : "type -> Int8"  )
+	          << std::endl;
+	std::cout << std::setw( 3) << "  "                                                                                                            << " | "
+	          << std::setw(16) << "    "                                                                                                          << " | "
+	          << std::setw(12) << "     "                                                                                                         << " | "
+	          << std::setw( 9) << "time (ns)" << (CPUFreq == 0. ? "" : " | ") << std::setw(CPUFreq == 0. ? 0 : 4) << (CPUFreq == 0. ? "" : "CPI") << " | "
+	          << std::setw( 9) << "time (ns)" << (CPUFreq == 0. ? "" : " | ") << std::setw(CPUFreq == 0. ? 0 : 4) << (CPUFreq == 0. ? "" : "CPI") << " | "
+	          << std::setw( 9) << "time (ns)" << (CPUFreq == 0. ? "" : " | ") << std::setw(CPUFreq == 0. ? 0 : 4) << (CPUFreq == 0. ? "" : "CPI") << " | "
+	          << std::setw( 9) << "time (ns)" << (CPUFreq == 0. ? "" : " | ") << std::setw(CPUFreq == 0. ? 0 : 4) << (CPUFreq == 0. ? "" : "CPI") << " | "
+	          << std::setw( 9) << "time (ns)" << (CPUFreq == 0. ? "" : " | ") << std::setw(CPUFreq == 0. ? 0 : 4) << (CPUFreq == 0. ? "" : "CPI") << " | "
+	          << std::setw( 9) << "time (ns)" << (CPUFreq == 0. ? "" : " | ") << std::setw(CPUFreq == 0. ? 0 : 4) << (CPUFreq == 0. ? "" : "CPI")
+	          << std::endl;
+	std::cout << std::setw( 3)                     << "---"                                              << " | "
+	          << std::setw(16)                     << "----------------"                                 << " | "
+	          << std::setw(12)                     << "------------"                                     << " | "
+	          << std::setw(CPUFreq == 0. ? 9 : 16) << (CPUFreq == 0. ? "---------" : "----------------") << " | "
+	          << std::setw(CPUFreq == 0. ? 9 : 16) << (CPUFreq == 0. ? "---------" : "----------------") << " | "
+	          << std::setw(CPUFreq == 0. ? 9 : 16) << (CPUFreq == 0. ? "---------" : "----------------") << " | "
+	          << std::setw(CPUFreq == 0. ? 9 : 16) << (CPUFreq == 0. ? "---------" : "----------------") << " | "
+	          << std::setw(CPUFreq == 0. ? 9 : 16) << (CPUFreq == 0. ? "---------" : "----------------") << " | "
+	          << std::setw(CPUFreq == 0. ? 9 : 16) << (CPUFreq == 0. ? "---------" : "----------------")
 	          << std::endl;
 
 	auto iDouble = 0;
@@ -1159,101 +1178,63 @@ int main(int argc, char* argv[])
 		if (!name.empty())
 		{
 			std::stringstream strDurationDouble, strDurationFloat, strDurationInt64, strDurationInt32, strDurationInt16, strDurationInt8;
+			std::stringstream strCPIDouble, strCPIFloat, strCPIInt64, strCPIInt32, strCPIInt16, strCPIInt8;
 
 			if (durationDouble)
 			{
 				strDurationDouble << std::fixed << std::setprecision(2) << durationDouble;
 				if (CPUFreq != 0.)
-				{
-					auto invFreq = 1. / CPUFreq;
-					auto nInstrPerCycle = invFreq / durationDouble;
-					strDurationDouble << std::fixed << std::setprecision(1)<< "[" << nInstrPerCycle << "]";
-				}
+					strCPIDouble << std::fixed << std::setprecision(1) << (CPUFreq * durationDouble);
 			}
-			else
-				strDurationDouble << std::fixed << std::setprecision(2) << "N/A";
 
 			if (durationFloat)
 			{
 				strDurationFloat << std::fixed << std::setprecision(2) << durationFloat;
 				if (CPUFreq != 0.)
-				{
-					auto invFreq = 1. / CPUFreq;
-					auto nInstrPerCycle = invFreq / durationFloat;
-					strDurationFloat << std::fixed << std::setprecision(1)<< "[" << nInstrPerCycle << "]";
-				}
+					strCPIFloat << std::fixed << std::setprecision(1) << (CPUFreq * durationFloat);
 			}
-			else
-				strDurationFloat << std::fixed << std::setprecision(2) << "N/A";
 
 			if (durationInt64)
 			{
 				strDurationInt64 << std::fixed << std::setprecision(2) << durationInt64;
 				if (CPUFreq != 0.)
-				{
-					auto invFreq = 1. / CPUFreq;
-					auto nInstrPerCycle = invFreq / durationInt64;
-					strDurationInt64 << std::fixed << std::setprecision(1)<< "[" << nInstrPerCycle << "]";
-				}
+					strCPIInt64 << std::fixed << std::setprecision(1) << (CPUFreq * durationInt64);
 			}
-			else
-				strDurationInt64 << std::fixed << std::setprecision(2) << "N/A";
 
 			if (durationInt32)
 			{
 				strDurationInt32 << std::fixed << std::setprecision(2) << durationInt32;
 				if (CPUFreq != 0.)
-				{
-					auto invFreq = 1. / CPUFreq;
-					auto nInstrPerCycle = invFreq / durationInt32;
-					strDurationInt32 << std::fixed << std::setprecision(1)<< "[" << nInstrPerCycle << "]";
-				}
+					strCPIInt32<< std::fixed << std::setprecision(1) << (CPUFreq * durationInt32);
 			}
-			else
-				strDurationInt32 << std::fixed << std::setprecision(2) << "N/A";
 
 			if (durationInt16)
 			{
 				strDurationInt16 << std::fixed << std::setprecision(2) << durationInt16;
 				if (CPUFreq != 0.)
-				{
-					auto invFreq = 1. / CPUFreq;
-					auto nInstrPerCycle = invFreq / durationInt16;
-					strDurationInt16 << std::fixed << std::setprecision(1)<< "[" << nInstrPerCycle << "]";
-				}
+					strCPIInt16 << std::fixed << std::setprecision(1) << (CPUFreq * durationInt16);
 			}
-			else
-				strDurationInt16 << std::fixed << std::setprecision(2) << "N/A";
 
 			if (durationInt8)
 			{
 				strDurationInt8 << std::fixed << std::setprecision(2) << durationInt8;
 				if (CPUFreq != 0.)
-				{
-					auto invFreq = 1. / CPUFreq;
-					auto nInstrPerCycle = invFreq / durationInt8;
-					strDurationInt8 << std::fixed << std::setprecision(1)<< "[" << nInstrPerCycle << "]";
-				}
+					strCPIInt8 << std::fixed << std::setprecision(1) << (CPUFreq * durationInt8);
 			}
-			else
-				strDurationInt8 << std::fixed << std::setprecision(2) << "N/A";
 
 			std::cout << std::fixed << std::setprecision(2);
-			std::cout << std::setw( 3) << id
-			          << std::setw(16) << name
-			          << std::setw(16) << group
-			          << std::setw(16) << strDurationDouble.str()
-			          << std::setw(16) << strDurationFloat.str()
-			          << std::setw(16) << strDurationInt64.str()
-			          << std::setw(16) << strDurationInt32.str()
-			          << std::setw(16) << strDurationInt16.str()
-			          << std::setw(16) << strDurationInt8.str()
+			std::cout << std::setw( 3) << id                                                                                                                  << " | "
+			          << std::setw(16) << name                                                                                                                << " | "
+			          << std::setw(12) << group                                                                                                               << " | "
+			          << std::setw( 9) << strDurationDouble.str() << (CPUFreq == 0. ? "" : "   ") << std::setw((CPUFreq == 0. ? 0 : 4)) << strCPIDouble.str() << " | "
+			          << std::setw( 9) << strDurationFloat .str() << (CPUFreq == 0. ? "" : "   ") << std::setw((CPUFreq == 0. ? 0 : 4)) << strCPIFloat .str() << " | "
+			          << std::setw( 9) << strDurationInt64 .str() << (CPUFreq == 0. ? "" : "   ") << std::setw((CPUFreq == 0. ? 0 : 4)) << strCPIInt64 .str() << " | "
+			          << std::setw( 9) << strDurationInt32 .str() << (CPUFreq == 0. ? "" : "   ") << std::setw((CPUFreq == 0. ? 0 : 4)) << strCPIInt32 .str() << " | "
+			          << std::setw( 9) << strDurationInt16 .str() << (CPUFreq == 0. ? "" : "   ") << std::setw((CPUFreq == 0. ? 0 : 4)) << strCPIInt16 .str() << " | "
+			          << std::setw( 9) << strDurationInt8  .str() << (CPUFreq == 0. ? "" : "   ") << std::setw((CPUFreq == 0. ? 0 : 4)) << strCPIInt8  .str()
 			          << std::endl;
 		}
 	}
-
-
-	std::cout << "End of the benchmarks." << std::endl;
 
 	return 0;
 }

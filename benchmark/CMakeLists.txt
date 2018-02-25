@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-project(MIPP_benchs)
+project(MIPP_benchmark)
 
 set (CMAKE_MACOSX_RPATH 1)
 
@@ -23,4 +23,4 @@ include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/../src/")
 
 # Generate the source files list
 file (GLOB_RECURSE source_files src/*)
-add_executable(run_benchs ${source_files})
+add_executable(run_benchmark ${source_files})
