@@ -397,7 +397,7 @@ In the documentation there are some terms that requires to be clarified:
 | `toReg`        | `Reg<T>  toReg (const Msk<N> m)`                     | Converts the mask `m` into a register of type `T`, the number of elements `N` has to be the same for the mask and the register.     | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t`    |
 | `cvt`          | `Reg<T2> cvt   (const Reg<T1> r)`                    | Converts the elements of `r` into an other representation (the new representation and the original one have to have the same size). | `float -> int32_t`,                                             |
 | `cvt`          | `Reg<T2> cvt   (const Reg_2<T1> r)`                  | Converts elements of `r` into bigger elements (in bits).                                                                            | `int8_t -> int16_t`, `int16_t -> int32_t`, `int32_t -> int64_t` |
-| `pack`         | `Reg<T2> pack  (const Reg<T1> r1, const Reg<T1> r2)` | Packs elements of `r1` and `r2` into smaller elements (some information can be lose in the conversion).                             | `int32_t -> int16_t`, `int16_t -> int8_t`                       |
+| `pack`         | `Reg<T2> pack  (const Reg<T1> r1, const Reg<T1> r2)` | Packs elements of `r1` and `r2` into smaller elements (some information can be lost in the conversion).                             | `int32_t -> int16_t`, `int16_t -> int8_t`                       |
 
 ### Arithmetic operations
 
