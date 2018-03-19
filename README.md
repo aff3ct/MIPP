@@ -362,7 +362,7 @@ In the documentation there are some terms that requires to be clarified:
 
 ### Bitwise operations
 
-The `pipe` keyword stand for the &#124; binary operator.
+The `pipe` keyword stands for the "&#124;" binary operator.
 
 | **Short name** | **Operator**       | **Prototype**                                      | **Documentation**                           | **Supported types**                                          |
 | :---           | :---               | :---                                               | :---                                        | :---                                                         |
