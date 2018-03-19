@@ -215,9 +215,9 @@ r1 = 9.0;             // r1 = | +9.0 | +9.0 | +9.0 | +9.0 |
 r2 = mipp::rsqrt(r1); // r2 = | +0.3 | +0.3 | +0.3 | +0.3 |
 ```
 
-### Comparisons
+### Selections
 
-Find the **minimum** between two vector registers:
+Select the **minimum** between two vector registers:
 
 ```cpp
 mipp::Reg<float> r1, r2, r3;
@@ -228,7 +228,7 @@ r2 = 3.0;               // r2 = | +3.0 | +3.0 | +3.0 | +3.0 |
 r3 = mipp::min(r1, r2); // r3 = | +2.0 | +2.0 | +2.0 | +2.0 |
 ```
 
-Find the **maximum** between two vector registers:
+Select the **maximum** between two vector registers:
 
 ```cpp
 mipp::Reg<float> r1, r2, r3;
@@ -241,16 +241,16 @@ r3 = mipp::max(r1, r2); // r3 = | +3.0 | +3.0 | +3.0 | +3.0 |
 
 ### Permutations
 
-The `lrot(...)` method allows you to perform a **left rotation** (a cyclic permutation) of the elements inside the register:
+The `rrot(...)` method allows you to perform a **right rotation** (a cyclic permutation) of the elements inside the register:
 
 ```cpp
 mipp::Reg<float> r1, r2;
-r1 = {3.0, 2.0, 1.0, 0.0} // r1 = | +3.0 | +2.0 | +1.0 | +0.0 |
+r1 = {3.0, 2.0, 1.0, 0.0}  // r1 = | +3.0 | +2.0 | +1.0 | +0.0 |
 
-r2 = mipp::lrot(r1);       // r2 = | +0.0 | +3.0 | +2.0 | +1.0 |
-r1 = mipp::lrot(r2);       // r1 = | +1.0 | +0.0 | +3.0 | +2.0 |
-r2 = mipp::lrot(r1);       // r2 = | +2.0 | +1.0 | +0.0 | +3.0 |
-r1 = mipp::lrot(r2);       // r1 = | +3.0 | +2.0 | +1.0 | +0.0 |
+r2 = mipp::rrot(r1);       // r2 = | +0.0 | +3.0 | +2.0 | +1.0 |
+r1 = mipp::rrot(r2);       // r1 = | +1.0 | +0.0 | +3.0 | +2.0 |
+r2 = mipp::rrot(r1);       // r2 = | +2.0 | +1.0 | +0.0 | +3.0 |
+r1 = mipp::rrot(r2);       // r1 = | +3.0 | +2.0 | +1.0 | +0.0 |
 ```
 
 Of course there are many more available instructions in the MIPP wrapper and you can find these instructions at the end of this page.
@@ -362,12 +362,14 @@ In the documentation there are some terms that requires to be clarified:
 
 ### Bitwise operations
 
+The `pipe` keyword stand for the &#124; binary operator.
+
 | **Short name** | **Operator**       | **Prototype**                                      | **Documentation**                           | **Supported types**                                          |
 | :---           | :---               | :---                                               | :---                                        | :---                                                         |
 | `andb`         | `&` and `&=`       | `Reg<T> andb   (const Reg<T> r1, const Reg<T> r2)` | Computes the bitwise AND: `r1 & r2`.        | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 | `andb`         | `&` and `&=`       | `Msk<N> andb   (const Msk<N> m1, const Msk<N> m2)` | Computes the bitwise AND: `m1 & m2`.        |                                                              |
-| `andnb`        |                    | `Reg<T> andnb  (const Reg<T> r1, const Reg<T> r1)` | Computes the bitwise AND NOT: `~r1 & r2`.   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `andnb`        |                    | `Msk<N> andnb  (const Msk<N> m1, const Msk<N> m2)` | Computes the bitwise AND NOT: `~m1 & m2`.   |                                                              |
+| `andnb`        |                    | `Reg<T> andnb  (const Reg<T> r1, const Reg<T> r1)` | Computes the bitwise AND NOT: `(~r1) & r2`. | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `andnb`        |                    | `Msk<N> andnb  (const Msk<N> m1, const Msk<N> m2)` | Computes the bitwise AND NOT: `(~m1) & m2`. |                                                              |
 | `orb`          | `pipe` and `pipe=` | `Reg<T> orb    (const Reg<T> r1, const Reg<T> r2)` | Computes the bitwise OR: `r1 pipe r2`.      | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 | `orb`          | `pipe` and `pipe=` | `Msk<N> orb    (const Msk<N> m1, const Msk<N> m2)` | Computes the bitwise OR: `m1 pipe m2`.      |                                                              |
 | `xorb`         | `^` and `^=`       | `Reg<T> xorb   (const Reg<T> r1, const Reg<T> r2)` | Computes the bitwise XOR: `r1 ^ r2`.        | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
