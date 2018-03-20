@@ -1834,6 +1834,16 @@
 	inline msk cmpeq<int8_t>(const reg v1, const reg v2) {
 		return _mm256_cmpeq_epi8(_mm256_castps_si256(v1), _mm256_castps_si256(v2));
 	}
+#else
+	template <>
+	inline msk cmpeq<int64_t>(const reg v1, const reg v2) {
+		return cmpeq<double>(v1, v2);
+	}
+
+	template <>
+	inline msk cmpeq<int32_t>(const reg v1, const reg v2) {
+		return cmpeq<float>(v1, v2);
+	}
 #endif
 
 	// --------------------------------------------------------------------------------------------------------- cmpneq
