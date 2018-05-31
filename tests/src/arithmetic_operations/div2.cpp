@@ -22,7 +22,7 @@ void test_reg_div2()
 	{
 		T res = inputs1[i] / (T)2;
 #if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
-		REQUIRE(*((T*)&r2 +i) == Approx(res).esilon(0.01));
+		REQUIRE(*((T*)&r2 +i) == Approx(res).epsilon(0.01));
 #else
 		REQUIRE(*((T*)&r2 +i) == res);
 #endif
