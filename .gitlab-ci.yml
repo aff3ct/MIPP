@@ -398,121 +398,121 @@ test-linux-arm-unit-neon32-fma:
 
 # BUILDS --------------------------------------------------------------------------------------------------------------
 
-# build-windows-x86-gcc:
-#   stage: build
-#   tags:
-#     - windows
-#   artifacts:
-#     paths:
-#       - ./tests/build_windows_x86_gcc_nointr/bin/
-#       - ./tests/build_windows_x86_gcc_sse2/bin/
-#       - ./tests/build_windows_x86_gcc_sse3/bin/
-#       - ./tests/build_windows_x86_gcc_ssse3/bin/
-#       - ./tests/build_windows_x86_gcc_sse4_1/bin/
-#       - ./tests/build_windows_x86_gcc_sse4_2/bin/
-#       - ./tests/build_windows_x86_gcc_avx/bin/
-#       - ./tests/build_windows_x86_gcc_avx2/bin/
-#       - ./tests/build_windows_x86_gcc_avx2_fma/bin/
-#       - ./tests/build_windows_x86_gcc_avx512f/bin/
-#   script:
-#     - ./ci/build-windows-x86-gcc.bat
+build-windows-x86-gcc:
+  stage: build
+  tags:
+    - windows
+  artifacts:
+    paths:
+      - ./tests/build_windows_x86_gcc_nointr/bin/
+      - ./tests/build_windows_x86_gcc_sse2/bin/
+      - ./tests/build_windows_x86_gcc_sse3/bin/
+      - ./tests/build_windows_x86_gcc_ssse3/bin/
+      - ./tests/build_windows_x86_gcc_sse4_1/bin/
+      - ./tests/build_windows_x86_gcc_sse4_2/bin/
+      - ./tests/build_windows_x86_gcc_avx/bin/
+      - ./tests/build_windows_x86_gcc_avx2/bin/
+      - ./tests/build_windows_x86_gcc_avx2_fma/bin/
+      - ./tests/build_windows_x86_gcc_avx512f/bin/
+  script:
+    - ./ci/build-windows-x86-gcc.bat
 
-# build-windows-x86-msvc:
-#   stage: build
-#   tags:
-#     - windows
-#   artifacts:
-#     paths:
-#       - ./tests/build_windows_x86_msvc_nointr/bin/
-#       - ./tests/build_windows_x86_msvc_sse2/bin/
-#       - ./tests/build_windows_x86_msvc_sse3/bin/
-#       - ./tests/build_windows_x86_msvc_ssse3/bin/
-#       - ./tests/build_windows_x86_msvc_sse4_1/bin/
-#       - ./tests/build_windows_x86_msvc_sse4_2/bin/
-#       - ./tests/build_windows_x86_msvc_avx/bin/
-#       - ./tests/build_windows_x86_msvc_avx2_fma/bin/
-#       - ./tests/build_windows_x86_msvc_avx512f/bin/
-#   script:
-#     - ./ci/build-windows-x86-msvc.bat
+build-windows-x86-msvc:
+  stage: build
+  tags:
+    - windows
+  artifacts:
+    paths:
+      - ./tests/build_windows_x86_msvc_nointr/bin/
+      - ./tests/build_windows_x86_msvc_sse2/bin/
+      - ./tests/build_windows_x86_msvc_sse3/bin/
+      - ./tests/build_windows_x86_msvc_ssse3/bin/
+      - ./tests/build_windows_x86_msvc_sse4_1/bin/
+      - ./tests/build_windows_x86_msvc_sse4_2/bin/
+      - ./tests/build_windows_x86_msvc_avx/bin/
+      - ./tests/build_windows_x86_msvc_avx2_fma/bin/
+      - ./tests/build_windows_x86_msvc_avx512f/bin/
+  script:
+    - ./ci/build-windows-x86-msvc.bat
 
 # TESTS ---------------------------------------------------------------------------------------------------------------
 
-# test-windows-x86-unit-nointr:
-#   stage: test
-#   tags:
-#      - windows
-#   artifacts:
-#     paths:
-#       - ./tests/build_windows_x86_gcc_nointr/bin/
-#       - ./tests/build_windows_x86_msvc_nointr/bin/
-#   script:
-#     - ./ci/test-windows-unit.bat build_windows_x86_gcc_nointr build_windows_x86_msvc_nointr
+test-windows-x86-unit-nointr:
+  stage: test
+  tags:
+     - windows
+  artifacts:
+    paths:
+      - ./tests/build_windows_x86_gcc_nointr/bin/
+      - ./tests/build_windows_x86_msvc_nointr/bin/
+  script:
+    - ./ci/test-windows-unit.bat build_windows_x86_gcc_nointr build_windows_x86_msvc_nointr
 
-# test-windows-x86-unit-sse2:
-#   stage: test
-#   tags:
-#     - windows
-#   artifacts:
-#     paths:
-#       - ./tests/build_windows_x86_gcc_sse2/bin/
-#       - ./tests/build_windows_x86_msvc_sse2/bin/
-#   script:
-#     - ./ci/test-windows-unit.bat build_windows_x86_gcc_sse2 build_windows_x86_msvc_sse2
+test-windows-x86-unit-sse2:
+  stage: test
+  tags:
+    - windows
+  artifacts:
+    paths:
+      - ./tests/build_windows_x86_gcc_sse2/bin/
+      - ./tests/build_windows_x86_msvc_sse2/bin/
+  script:
+    - ./ci/test-windows-unit.bat build_windows_x86_gcc_sse2 build_windows_x86_msvc_sse2
 
-# test-windows-x86-unit-sse3:
-#   stage: test
-#   tags:
-#     - windows
-#   artifacts:
-#     paths:
-#       - ./tests/build_windows_x86_gcc_sse3/bin/
-#       - ./tests/build_windows_x86_msvc_sse3/bin/
-#   script:
-#     - ./ci/test-windows-unit.bat build_windows_x86_gcc_sse3 build_windows_x86_msvc_sse3
+test-windows-x86-unit-sse3:
+  stage: test
+  tags:
+    - windows
+  artifacts:
+    paths:
+      - ./tests/build_windows_x86_gcc_sse3/bin/
+      - ./tests/build_windows_x86_msvc_sse3/bin/
+  script:
+    - ./ci/test-windows-unit.bat build_windows_x86_gcc_sse3 build_windows_x86_msvc_sse3
 
-# test-windows-x86-unit-ssse3:
-#   stage: test
-#   tags:
-#     - windows
-#   artifacts:
-#     paths:
-#       - ./tests/build_windows_x86_gcc_ssse3/bin/
-#       - ./tests/build_windows_x86_msvc_ssse3/bin/
-#   script:
-#     - ./ci/test-windows-unit.bat build_windows_x86_gcc_ssse3 build_windows_x86_msvc_ssse3
+test-windows-x86-unit-ssse3:
+  stage: test
+  tags:
+    - windows
+  artifacts:
+    paths:
+      - ./tests/build_windows_x86_gcc_ssse3/bin/
+      - ./tests/build_windows_x86_msvc_ssse3/bin/
+  script:
+    - ./ci/test-windows-unit.bat build_windows_x86_gcc_ssse3 build_windows_x86_msvc_ssse3
 
-# test-windows-x86-unit-sse4_1:
-#   stage: test
-#   tags:
-#     - windows
-#   artifacts:
-#     paths:
-#       - ./tests/build_windows_x86_gcc_sse4_1/bin/
-#       - ./tests/build_windows_x86_msvc_sse4_1/bin/
-#   script:
-#     - ./ci/test-windows-unit.bat build_windows_x86_gcc_sse4_1 build_windows_x86_msvc_sse4_1
+test-windows-x86-unit-sse4_1:
+  stage: test
+  tags:
+    - windows
+  artifacts:
+    paths:
+      - ./tests/build_windows_x86_gcc_sse4_1/bin/
+      - ./tests/build_windows_x86_msvc_sse4_1/bin/
+  script:
+    - ./ci/test-windows-unit.bat build_windows_x86_gcc_sse4_1 build_windows_x86_msvc_sse4_1
 
-# test-windows-x86-unit-sse4_2:
-#   stage: test
-#   tags:
-#     - windows
-#   artifacts:
-#     paths:
-#       - ./tests/build_windows_x86_gcc_sse4_2/bin/
-#       - ./tests/build_windows_x86_msvc_sse4_2/bin/
-#   script:
-#     - ./ci/test-windows-unit.bat build_windows_x86_gcc_sse4_2 build_windows_x86_msvc_sse4_2
+test-windows-x86-unit-sse4_2:
+  stage: test
+  tags:
+    - windows
+  artifacts:
+    paths:
+      - ./tests/build_windows_x86_gcc_sse4_2/bin/
+      - ./tests/build_windows_x86_msvc_sse4_2/bin/
+  script:
+    - ./ci/test-windows-unit.bat build_windows_x86_gcc_sse4_2 build_windows_x86_msvc_sse4_2
 
-# test-windows-x86-unit-avx:
-#   stage: test
-#   tags:
-#     - windows
-#   artifacts:
-#     paths:
-#       - ./tests/build_windows_x86_gcc_avx/bin/
-#       - ./tests/build_windows_x86_msvc_avx/bin/
-#   script:
-#     - ./ci/test-windows-unit.bat build_windows_x86_gcc_avx build_windows_x86_msvc_avx
+test-windows-x86-unit-avx:
+  stage: test
+  tags:
+    - windows
+  artifacts:
+    paths:
+      - ./tests/build_windows_x86_gcc_avx/bin/
+      - ./tests/build_windows_x86_msvc_avx/bin/
+  script:
+    - ./ci/test-windows-unit.bat build_windows_x86_gcc_avx build_windows_x86_msvc_avx
 
 # test-windows-x86-unit-avx2:
 #   stage: test
