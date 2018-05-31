@@ -15,6 +15,14 @@ int main(int argc, char* argv[])
 	std::cout << "Instr. lanes:      " << mipp::Lanes                            << std::endl;
 	std::cout << "64-bit support:    " << (mipp::Support64Bit    ? "yes" : "no") << std::endl;
 	std::cout << "Byte/word support: " << (mipp::SupportByteWord ? "yes" : "no") << std::endl;
+	auto ext = mipp::InstructionExtensions();
+	if (ext.size() > 0)
+	{
+		std::cout << "Instr. extensions: {";
+		for (auto i = 0; i < (int)ext.size(); i++)
+			std::cout << ext[i] << (i < ((int)ext.size() -1) ? ", " : "");
+		std::cout << "}" << std::endl;
+	}
 	std::cout << std::endl;
 
 	int result = Catch::Session().run(argc, argv);
