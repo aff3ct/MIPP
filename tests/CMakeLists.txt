@@ -21,16 +21,9 @@ set (EXECUTABLE_OUTPUT_PATH bin/)
 # include MIPP headers
 include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/../src/")
 
+# include Catch2 header
+include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/lib/Catch2/include/")
+
 # Generate the source files list
 file (GLOB_RECURSE source_files src/*)
 add_executable(run_tests ${source_files})
-#add_test(tests run_tests)
-
-# Link with CPP Unit
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules/")
-FIND_PACKAGE(CPPUNIT REQUIRED)
-
-if (CPPUNIT_FOUND)
-    include_directories (${CPPUNIT_INCLUDE_DIR})
-    target_link_libraries (run_tests "${CPPUNIT_LIBRARIES}")
-endif (CPPUNIT_FOUND)

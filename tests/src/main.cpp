@@ -1,8 +1,5 @@
-//#include "stdafx.h"
-#include <cppunit/CompilerOutputter.h>
-#include <cppunit/extensions/TestFactoryRegistry.h>
-#include <cppunit/ui/text/TestRunner.h>
-
+#define CATCH_CONFIG_RUNNER
+#include <catch.hpp>
 #include <iostream>
 #include <mipp.h>
 
@@ -18,31 +15,9 @@ int main(int argc, char* argv[])
 	std::cout << "Instr. lanes:      " << mipp::Lanes                            << std::endl;
 	std::cout << "64-bit support:    " << (mipp::Support64Bit    ? "yes" : "no") << std::endl;
 	std::cout << "Byte/word support: " << (mipp::SupportByteWord ? "yes" : "no") << std::endl;
+	std::cout << std::endl;
 
-	auto ext = mipp::InstructionExtensions();
-	if (ext.size() > 0)
-	{
-		std::cout << "Instr. extensions: {";
-		for (auto i = 0; i < (int)ext.size(); i++)
-			std::cout << ext[i] << (i < ((int)ext.size() -1) ? ", " : "");
-		std::cout << "}" << std::endl;
-	}
+	int result = Catch::Session().run(argc, argv);
 
-	std::cout << std::endl << "Running tests: ";
-
-	// Get the top level suite from the registry
-	CppUnit::Test *suite = CppUnit::TestFactoryRegistry::getRegistry().makeTest();
-
-	// Adds the test to the list of test to run
-	CppUnit::TextUi::TestRunner runner;
-	runner.addTest(suite);
-
-	// Change the default outputter to a compiler error format outputter
-	runner.setOutputter(new CppUnit::CompilerOutputter(&runner.result(), std::cerr));
-
-	// Run the tests.
-	bool wasSucessful = runner.run();
-
-	// Return error code 1 if the one of test failed.
-	return wasSucessful ? 0 : 1;
+	return result;
 }
