@@ -95,7 +95,11 @@ void test_reg_shuff2()
 {
 	if (mipp::N<T>() >= 2)
 	{
+#ifdef _MSC_VER
+		uint32_t cm2_inputs[mipp::N<T>()];
+#else
 		uint32_t cm2_inputs[mipp::N<T>()/2];
+#endif
 		std::mt19937 g;
 		std::iota   (cm2_inputs, cm2_inputs + mipp::N<T>()/2, (uint32_t)0);
 		std::shuffle(cm2_inputs, cm2_inputs + mipp::N<T>()/2, g);
@@ -149,7 +153,11 @@ void test_Reg_shuff2()
 {
 	if (mipp::N<T>() >= 2)
 	{
+#ifdef _MSC_VER
+		uint32_t cm2_inputs[mipp::N<T>()];
+#else
 		uint32_t cm2_inputs[mipp::N<T>()/2];
+#endif
 		std::mt19937 g;
 		std::iota   (cm2_inputs, cm2_inputs + mipp::N<T>()/2, (uint32_t)0);
 		std::shuffle(cm2_inputs, cm2_inputs + mipp::N<T>()/2, g);
@@ -201,7 +209,11 @@ void test_reg_shuff4()
 {
 	if (mipp::N<T>() >= 4)
 	{
+#ifdef _MSC_VER
+		uint32_t cm4_inputs[mipp::N<T>()];
+#else
 		uint32_t cm4_inputs[mipp::N<T>()/4];
+#endif
 		std::mt19937 g;
 		std::iota   (cm4_inputs, cm4_inputs + mipp::N<T>()/4, (uint32_t)0);
 		std::shuffle(cm4_inputs, cm4_inputs + mipp::N<T>()/4, g);
@@ -258,7 +270,11 @@ void test_Reg_shuff4()
 {
 	if (mipp::N<T>() >= 4)
 	{
+#ifdef _MSC_VER
+		uint32_t cm4_inputs[mipp::N<T>()];
+#else
 		uint32_t cm4_inputs[mipp::N<T>()/4];
+#endif
 		std::mt19937 g;
 		std::iota   (cm4_inputs, cm4_inputs + mipp::N<T>()/4, (uint32_t)0);
 		std::shuffle(cm4_inputs, cm4_inputs + mipp::N<T>()/4, g);

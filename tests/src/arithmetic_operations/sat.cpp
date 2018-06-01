@@ -1,3 +1,4 @@
+#include <type_traits>
 #include <exception>
 #include <algorithm>
 #include <numeric>
@@ -12,7 +13,13 @@ void test_reg_sat_int()
 	constexpr int N = mipp::N<T>();
 	T inputs1[N];
 	std::mt19937 g;
-	std::uniform_int_distribution<T> dis(std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
+
+	typedef typename std::conditional<sizeof(T) == 1, signed char,
+	        typename std::conditional<sizeof(T) == 2, short,
+	        typename std::conditional<sizeof(T) == 4, int,
+	                                                  long long>::type>::type>::type T2;
+
+	std::uniform_int_distribution<T2> dis(std::numeric_limits<T2>::min(), std::numeric_limits<T2>::max());
 
 	for (auto i = 0; i < 100; i++)
 	{
@@ -101,7 +108,13 @@ void test_Reg_sat_int()
 	constexpr int N = mipp::N<T>();
 	T inputs1[N];
 	std::mt19937 g;
-	std::uniform_int_distribution<T> dis(std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
+
+	typedef typename std::conditional<sizeof(T) == 1, signed char,
+	        typename std::conditional<sizeof(T) == 2, short,
+	        typename std::conditional<sizeof(T) == 4, int,
+	                                                  long long>::type>::type>::type T2;
+
+	std::uniform_int_distribution<T2> dis(std::numeric_limits<T2>::min(), std::numeric_limits<T2>::max());
 
 	for (auto i = 0; i < 100; i++)
 	{
