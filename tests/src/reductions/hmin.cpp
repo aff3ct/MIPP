@@ -84,7 +84,9 @@ TEST_CASE("Horizontal minimum - mipp::reg", "[mipp::hmin]")
 	SECTION("datatype = int16_t") { test_reg_hmin_int<int16_t>(); }
 #endif
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
+#ifndef _MSC_VER
 	SECTION("datatype = int8_t") { test_reg_hmin_int<int8_t>(); }
+#endif
 #endif
 #endif
 }
@@ -166,7 +168,9 @@ TEST_CASE("Horizontal minimum - mipp::Reg", "[mipp::hmin]")
 	SECTION("datatype = int16_t") { test_Reg_hmin_int<int16_t>(); }
 #endif
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
+#ifndef _MSC_VER
 	SECTION("datatype = int8_t") { test_Reg_hmin_int<int8_t>(); }
+#endif
 #endif
 #endif
 }

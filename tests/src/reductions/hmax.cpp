@@ -83,7 +83,9 @@ TEST_CASE("Horizontal maximum - mipp::reg", "[mipp::hmax]")
 	SECTION("datatype = int16_t") { test_reg_hmax_int<int16_t>(); }
 #endif
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
+#ifndef _MSC_VER
 	SECTION("datatype = int8_t") { test_reg_hmax_int<int8_t>(); }
+#endif
 #endif
 #endif
 }
@@ -165,7 +167,9 @@ TEST_CASE("Horizontal maximum - mipp::Reg", "[mipp::hmax]")
 	SECTION("datatype = int16_t") { test_Reg_hmax_int<int16_t>(); }
 #endif
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
+#ifndef _MSC_VER
 	SECTION("datatype = int8_t") { test_Reg_hmax_int<int8_t>(); }
+#endif
 #endif
 #endif
 }

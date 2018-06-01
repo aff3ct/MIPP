@@ -96,7 +96,9 @@ TEST_CASE("Saturation - mipp::reg", "[mipp::sat]")
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_reg_sat_int<int16_t>(); }
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
+#ifndef _MSC_VER
 	SECTION("datatype = int8_t") { test_reg_sat_int<int8_t>(); }
+#endif
 #endif
 #endif
 }
@@ -190,7 +192,9 @@ TEST_CASE("Saturation - mipp::Reg", "[mipp::sat]")
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_Reg_sat_int<int16_t>(); }
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
+#ifndef _MSC_VER
 	SECTION("datatype = int8_t") { test_Reg_sat_int<int8_t>(); }
+#endif
 #endif
 #endif
 }

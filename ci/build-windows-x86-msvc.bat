@@ -17,7 +17,7 @@ call :compile "build_windows_x86_msvc_sse4_1"   "/arch:SSE4.1"
 call :compile "build_windows_x86_msvc_sse4_2"   "/arch:SSE4.2"
 call :compile "build_windows_x86_msvc_avx"      "/arch:AVX"
 call :compile "build_windows_x86_msvc_avx2_fma" "/arch:AVX2"
-call :compile "build_windows_x86_msvc_avx512f"  "/arch:AVX512"
+rem call :compile "build_windows_x86_msvc_avx512f"  "/arch:AVX512"
 
 exit /B %ERRORLEVEL%
 

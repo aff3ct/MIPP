@@ -82,7 +82,7 @@ void test_msk_andnb()
 	constexpr int N = mipp::N<T>();
 	bool inputs1[N], inputs2[N];
 	std::mt19937 g;
-	std::uniform_int_distribution<unsigned char> dis(0, 1);
+	std::uniform_int_distribution<unsigned short> dis(0, 1);
 
 	for (auto t = 0; t < 100; t++)
 	{
@@ -133,7 +133,7 @@ void test_Msk_andnb()
 	constexpr int N = mipp::N<T>();
 	bool inputs1[N], inputs2[N];
 	std::mt19937 g;
-	std::uniform_int_distribution<unsigned char> dis(0, 1);
+	std::uniform_int_distribution<unsigned short> dis(0, 1);
 
 	for (auto t = 0; t < 100; t++)
 	{

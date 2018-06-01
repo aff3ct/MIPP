@@ -59,7 +59,9 @@ TEST_CASE("Testz - mipp::reg", "[mipp::testz]")
 #if defined(MIPP_BW)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 31)
 	SECTION("datatype = int16_t") { test_reg_testz_int<int16_t>(); }
+#ifndef _MSC_VER
 	SECTION("datatype = int8_t") { test_reg_testz_int<int8_t>(); }
+#endif
 #endif
 #endif
 }
@@ -118,7 +120,9 @@ TEST_CASE("Testz - mipp::Reg", "[mipp::testz]")
 #if defined(MIPP_BW)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 31)
 	SECTION("datatype = int16_t") { test_Reg_testz_int<int16_t>(); }
+#ifndef _MSC_VER
 	SECTION("datatype = int8_t") { test_Reg_testz_int<int8_t>(); }
+#endif
 #endif
 #endif
 }
@@ -176,7 +180,9 @@ TEST_CASE("Testz - mipp::msk", "[mipp::testz]")
 #if defined(MIPP_BW)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 31)
 	SECTION("datatype = int16_t") { test_msk_testz_int<int16_t>(); }
+#ifndef _MSC_VER
 	SECTION("datatype = int8_t") { test_msk_testz_int<int8_t>(); }
+#endif
 #endif
 #endif
 }
@@ -235,7 +241,9 @@ TEST_CASE("Testz - mipp::Msk", "[mipp::testz]")
 #if defined(MIPP_BW)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 31)
 	SECTION("datatype = int16_t") { test_Msk_testz_int<int16_t>(); }
+#ifndef _MSC_VER
 	SECTION("datatype = int8_t") { test_Msk_testz_int<int8_t>(); }
+#endif
 #endif
 #endif
 }
@@ -287,7 +295,9 @@ TEST_CASE("Testz1 - mipp::reg", "[mipp::testz1]")
 #if defined(MIPP_BW)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 31)
 	SECTION("datatype = int16_t") { test_reg_testz1_int<int16_t>(); }
+#ifndef _MSC_VER
 	SECTION("datatype = int8_t") { test_reg_testz1_int<signed char>(); }
+#endif
 #endif
 #endif
 }
@@ -339,7 +349,9 @@ TEST_CASE("Testz1 - mipp::Reg", "[mipp::testz1]")
 #if defined(MIPP_BW)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 31)
 	SECTION("datatype = int16_t") { test_Reg_testz1_int<int16_t>(); }
+#ifndef _MSC_VER
 	SECTION("datatype = int8_t") { test_Reg_testz1_int<int8_t>(); }
+#endif
 #endif
 #endif
 }
@@ -392,7 +404,9 @@ TEST_CASE("Testz1 - mipp::msk", "[mipp::testz1]")
 #if defined(MIPP_BW)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 31)
 	SECTION("datatype = int16_t") { test_msk_testz1_int<int16_t>(); }
+#ifndef _MSC_VER
 	SECTION("datatype = int8_t") { test_msk_testz1_int<int8_t>(); }
+#endif
 #endif
 #endif
 }
@@ -446,7 +460,9 @@ TEST_CASE("Testz1 - mipp::Msk", "[mipp::testz1]")
 #if defined(MIPP_BW)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 31)
 	SECTION("datatype = int16_t") { test_Msk_testz1_int<int16_t>(); }
+#ifndef _MSC_VER
 	SECTION("datatype = int8_t") { test_Msk_testz1_int<int8_t>(); }
+#endif
 #endif
 #endif
 }

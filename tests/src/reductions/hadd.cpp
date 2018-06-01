@@ -81,7 +81,9 @@ TEST_CASE("Horizontal addition - mipp::reg", "[mipp::hadd]")
 #if defined(MIPP_BW)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 31)
 	SECTION("datatype = int16_t") { test_reg_hadd_int<int16_t>(); }
+#ifndef _MSC_VER
 	SECTION("datatype = int8_t") { test_reg_hadd_int<int8_t>(); }
+#endif
 #endif
 #endif
 }
@@ -161,7 +163,9 @@ TEST_CASE("Horizontal addition - mipp::Reg", "[mipp::hadd]")
 #if defined(MIPP_BW)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 31)
 	SECTION("datatype = int16_t") { test_Reg_hadd_int<int16_t>(); }
+#ifndef _MSC_VER
 	SECTION("datatype = int8_t") { test_Reg_hadd_int<int8_t>(); }
+#endif
 #endif
 #endif
 }
