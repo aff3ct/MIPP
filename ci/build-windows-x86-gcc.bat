@@ -16,7 +16,7 @@ call :compile "build_windows_x86_gcc_sse4_2"   "-msse4.2"
 call :compile "build_windows_x86_gcc_avx"      "-mavx"
 call :compile "build_windows_x86_gcc_avx2"     "-mavx2"
 call :compile "build_windows_x86_gcc_avx2_fma" "-mavx2 -mfma"
-call :compile "build_windows_x86_gcc_avx512f"  "-mavx512f"
+rem call :compile "build_windows_x86_gcc_avx512f"  "-mavx512f"
 
 exit /B %ERRORLEVEL%
 
@@ -28,6 +28,6 @@ cd %build%
 cmake .. -G"MinGW Makefiles" -DCMAKE_CXX_COMPILER=g++.exe -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-Wall -funroll-loops -finline-functions %params%"
 if %ERRORLEVEL% neq 0 exit /B %ERRORLEVEL%
 mingw32-make
-if %ERRORLEVEL% neq 0 exit /B %ERRORLEVEL%
 cd ..
+if %ERRORLEVEL% neq 0 exit /B %ERRORLEVEL%
 exit /B 0
