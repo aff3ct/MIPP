@@ -2278,7 +2278,6 @@
 		return neg<float>(v1, toreg<8>(v2));
 	}
 
-#ifdef __SSE2__
 	template <>
 	inline reg neg<double>(const reg v1, const reg v2) {
 		return xorb<double>(v1, msb<double>(v2));
@@ -2288,7 +2287,6 @@
 	inline reg neg<double>(const reg v1, const msk v2) {
 		return neg<double>(v1, toreg<4>(v2));
 	}
-#endif
 
 #ifdef __AVX2__
 	template <>
