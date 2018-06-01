@@ -29,8 +29,8 @@ cd %build%
 cmake .. -G"Visual Studio 15 2017 Win64" -DCMAKE_CXX_FLAGS="-D_CRT_SECURE_NO_DEPRECATE /EHsc %params%"
 if %ERRORLEVEL% neq 0 exit /B %ERRORLEVEL%
 devenv /build Release MIPP_tests.sln
+if %ERRORLEVEL% neq 0 exit /B %ERRORLEVEL%
 move bin\Release\* bin\
 rmdir bin\Release\
 cd ..
-if %ERRORLEVEL% neq 0 exit /B %ERRORLEVEL%
 exit /B 0
