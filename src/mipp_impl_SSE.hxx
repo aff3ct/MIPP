@@ -794,7 +794,7 @@
 
 	// -------------------------------------------------------------------------------------------------- lshift (mask)
 #ifdef __SSE2__
-#ifndef __clang__
+#if !defined(__clang__) && !defined(_MSC_VER)
 	template <>
 	inline msk lshift<2>(const msk v1, const uint32_t n) {
 		return _mm_slli_si128(v1, n * 8);
@@ -860,7 +860,7 @@
 
 	// -------------------------------------------------------------------------------------------------- rshift (mask)
 #ifdef __SSE2__
-#ifndef __clang__
+#if !defined(__clang__) && !defined(_MSC_VER)
 	template <>
 	inline msk rshift<2>(const msk v1, const uint32_t n) {
 		return _mm_srli_si128(v1, n * 8);

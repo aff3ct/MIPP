@@ -146,7 +146,7 @@ struct msk_lshift<T,-1>
 };
 
 #ifndef MIPP_NO
-#if !defined(MIPP_AVX) && !defined(__clang__)
+#if !defined(MIPP_AVX) && !defined(__clang__) && !defined(_MSC_VER)
 TEST_CASE("Binary left shift - mipp::msk", "[mipp::lshift]")
 {
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
@@ -205,7 +205,7 @@ struct Msk_lshift<T,-1>
 	static void test() {}
 };
 
-#if !defined(MIPP_AVX) && !defined(__clang__)
+#if !defined(MIPP_AVX) && !defined(__clang__) && !defined(_MSC_VER)
 TEST_CASE("Binary left shift - mipp::Msk", "[mipp::lshift]")
 {
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
