@@ -12,13 +12,7 @@ void test_reg_hmul_int()
 	constexpr int N = mipp::N<T>();
 	T inputs1[N];
 	std::mt19937 g;
-
-	typedef typename std::conditional<sizeof(T) == 1, signed char,
-	        typename std::conditional<sizeof(T) == 2, short,
-	        typename std::conditional<sizeof(T) == 4, int,
-	                                                  long long>::type>::type>::type T2;
-
-	std::uniform_int_distribution<T2> dis((T2)-10, (T2)10);
+	std::uniform_int_distribution<T> dis((T)-10, (T)10);
 
 	for (auto j = 0; j < 100; j++)
 	{
@@ -77,13 +71,7 @@ void test_Reg_hmul_int()
 	constexpr int N = mipp::N<T>();
 	T inputs1[N];
 	std::mt19937 g;
-
-	typedef typename std::conditional<sizeof(T) == 1, signed char,
-	        typename std::conditional<sizeof(T) == 2, short,
-	        typename std::conditional<sizeof(T) == 4, int,
-	                                                  long long>::type>::type>::type T2;
-
-	std::uniform_int_distribution<T2> dis((T2)-10, (T2)10);
+	std::uniform_int_distribution<T> dis((T)-10, (T)10);
 
 	for (auto j = 0; j < 100; j++)
 	{

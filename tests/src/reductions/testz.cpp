@@ -12,13 +12,7 @@ void test_reg_testz_int()
 	constexpr int N = mipp::N<T>();
 	T inputs1[N], inputs2[N];
 	std::mt19937 g;
-
-	typedef typename std::conditional<sizeof(T) == 1, signed char,
-	        typename std::conditional<sizeof(T) == 2, short,
-	        typename std::conditional<sizeof(T) == 4, int,
-	                                                  long long>::type>::type>::type T2;
-
-	std::uniform_int_distribution<T2> dis(std::numeric_limits<T2>::min(), (T2)std::numeric_limits<T>::max());
+	std::uniform_int_distribution<T> dis(std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
 
 	for (auto j = 0; j < 100; j++)
 	{
@@ -73,13 +67,7 @@ void test_Reg_testz_int()
 	constexpr int N = mipp::N<T>();
 	T inputs1[N], inputs2[N];
 	std::mt19937 g;
-
-	typedef typename std::conditional<sizeof(T) == 1, signed char,
-	        typename std::conditional<sizeof(T) == 2, short,
-	        typename std::conditional<sizeof(T) == 4, int,
-	                                                  long long>::type>::type>::type T2;
-
-	std::uniform_int_distribution<T2> dis(std::numeric_limits<T2>::min(), std::numeric_limits<T2>::max());
+	std::uniform_int_distribution<T> dis(std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
 
 	for (auto j = 0; j < 100; j++)
 	{
@@ -133,13 +121,7 @@ void test_msk_testz_int()
 	constexpr int N = mipp::N<T>();
 	bool inputs1[N], inputs2[N];
 	std::mt19937 g;
-
-	typedef typename std::conditional<sizeof(T) == 1, signed char,
-	        typename std::conditional<sizeof(T) == 2, short,
-	        typename std::conditional<sizeof(T) == 4, int,
-	                                                  long long>::type>::type>::type T2;
-
-	std::uniform_int_distribution<T2> dis((T2)0, (T2)1);
+	std::uniform_int_distribution<T> dis((T)0, (T)1);
 
 	for (auto j = 0; j < 100; j++)
 	{
@@ -194,13 +176,7 @@ void test_Msk_testz_int()
 	constexpr int N = mipp::N<T>();
 	bool inputs1[N], inputs2[N];
 	std::mt19937 g;
-
-	typedef typename std::conditional<sizeof(T) == 1, signed char,
-	        typename std::conditional<sizeof(T) == 2, short,
-	        typename std::conditional<sizeof(T) == 4, int,
-	                                                  long long>::type>::type>::type T2;
-
-	std::uniform_int_distribution<T2> dis((T2)0, (T2)1);
+	std::uniform_int_distribution<T> dis((T)0, (T)1);
 
 	for (auto j = 0; j < 100; j++)
 	{
@@ -254,13 +230,7 @@ void test_reg_testz1_int()
 	constexpr int N = mipp::N<T>();
 	T inputs1[N];
 	std::mt19937 g;
-
-	typedef typename std::conditional<sizeof(T) == 1, signed char,
-	        typename std::conditional<sizeof(T) == 2, short,
-	        typename std::conditional<sizeof(T) == 4, int,
-	                                                  long long>::type>::type>::type T2;
-
-	std::uniform_int_distribution<T2> dis(std::numeric_limits<T2>::min(), std::numeric_limits<T2>::max());
+	std::uniform_int_distribution<T> dis(std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
 
 	for (auto j = 0; j < 100; j++)
 	{
@@ -309,13 +279,7 @@ void test_Reg_testz1_int()
 	constexpr int N = mipp::N<T>();
 	T inputs1[N];
 	std::mt19937 g;
-
-	typedef typename std::conditional<sizeof(T) == 1, signed char,
-	        typename std::conditional<sizeof(T) == 2, short,
-	        typename std::conditional<sizeof(T) == 4, int,
-	                                                  long long>::type>::type>::type T2;
-
-	std::uniform_int_distribution<T2> dis(std::numeric_limits<T2>::min(), std::numeric_limits<T2>::max());
+	std::uniform_int_distribution<T> dis(std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
 
 	for (auto j = 0; j < 100; j++)
 	{
@@ -362,13 +326,7 @@ void test_msk_testz1_int()
 	constexpr int N = mipp::N<T>();
 	bool inputs1[N];
 	std::mt19937 g;
-
-	typedef typename std::conditional<sizeof(T) == 1, signed char,
-	        typename std::conditional<sizeof(T) == 2, short,
-	        typename std::conditional<sizeof(T) == 4, int,
-	                                                  long long>::type>::type>::type T2;
-
-	std::uniform_int_distribution<T2> dis((T2)0, (T2)1);
+	std::uniform_int_distribution<T> dis((T)0, (T)1);
 
 	for (auto j = 0; j < 100; j++)
 	{
@@ -418,13 +376,7 @@ void test_Msk_testz1_int()
 	constexpr int N = mipp::N<T>();
 	bool inputs1[N];
 	std::mt19937 g;
-
-	typedef typename std::conditional<sizeof(T) == 1, signed char,
-	        typename std::conditional<sizeof(T) == 2, short,
-	        typename std::conditional<sizeof(T) == 4, int,
-	                                                  long long>::type>::type>::type T2;
-
-	std::uniform_int_distribution<T2> dis((T2)0, (T2)1);
+	std::uniform_int_distribution<T> dis((T)0, (T)1);
 
 	for (auto j = 0; j < 100; j++)
 	{
