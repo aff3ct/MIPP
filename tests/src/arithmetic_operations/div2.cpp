@@ -22,7 +22,7 @@ void test_reg_div2()
 	{
 		T res = inputs1[i] / (T)2;
 #if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
-		REQUIRE(*((T*)&r2 +i) == Approx(res).epsilon(0.01));
+		REQUIRE(*((T*)&r2 +i) == Approx(res).margin(0.01));
 #else
 		REQUIRE(*((T*)&r2 +i) == res);
 #endif
@@ -70,7 +70,7 @@ void test_Reg_div2()
 	{
 		T res = inputs1[i] / (T)2;
 #if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
-		REQUIRE(r2[i] == Approx(res).epsilon(0.01));
+		REQUIRE(r2[i] == Approx(res).margin(0.01));
 #else
 		REQUIRE(r2[i] == res);
 #endif
@@ -126,7 +126,7 @@ void test_reg_maskz_div2()
 		{
 			T res = inputs1[i] / (T)2;
 #if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
-			REQUIRE(*((T*)&r2 +i) == Approx(res).epsilon(0.01));
+			REQUIRE(*((T*)&r2 +i) == Approx(res).margin(0.01));
 #else
 			REQUIRE(*((T*)&r2 +i) == res);
 #endif
@@ -187,7 +187,7 @@ void test_Reg_maskz_div2()
 		{
 			T res = inputs1[i] / (T)2;
 #if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
-			REQUIRE(r2[i] == Approx(res).epsilon(0.01));
+			REQUIRE(r2[i] == Approx(res).margin(0.01));
 #else
 			REQUIRE(r2[i] == res);
 #endif
@@ -248,7 +248,7 @@ void test_reg_mask_div2()
 		{
 			T res = inputs1[i] / (T)2;
 #if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
-			REQUIRE(*((T*)&r3 +i) == Approx(res).epsilon(0.01));
+			REQUIRE(*((T*)&r3 +i) == Approx(res).margin(0.01));
 #else
 			REQUIRE(*((T*)&r3 +i) == res);
 #endif
@@ -311,7 +311,7 @@ void test_Reg_mask_div2()
 		{
 			T res = inputs1[i] / (T)2;
 #if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
-			REQUIRE(r3[i] == Approx(res).epsilon(0.01));
+			REQUIRE(r3[i] == Approx(res).margin(0.01));
 #else
 			REQUIRE(r3[i] == res);
 #endif
