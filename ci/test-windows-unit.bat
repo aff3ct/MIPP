@@ -1,4 +1,4 @@
-@echo off
+@echo on
 
 cd tests
 :Loop

@@ -147,7 +147,7 @@ struct msk_rshift<T,-1>
 };
 
 #ifndef MIPP_NO
-#if !defined(MIPP_AVX) && !defined(__clang__)
+#if !defined(MIPP_AVX) && !defined(__clang__) && !defined(_MSC_VER)
 TEST_CASE("Binary right shift - mipp::msk", "[mipp::rshift]")
 {
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
@@ -206,7 +206,7 @@ struct Msk_rshift<T,-1>
 	static void test() {}
 };
 
-#if !defined(MIPP_AVX) && !defined(__clang__)
+#if !defined(MIPP_AVX) && !defined(__clang__) && !defined(_MSC_VER)
 TEST_CASE("Binary right shift - mipp::Msk", "[mipp::rshift]")
 {
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
