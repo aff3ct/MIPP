@@ -296,7 +296,7 @@ TEST_CASE("Testz1 - mipp::reg", "[mipp::testz1]")
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 31)
 	SECTION("datatype = int16_t") { test_reg_testz1_int<int16_t>(); }
 #ifndef _MSC_VER
-	SECTION("datatype = int8_t") { test_reg_testz1_int<signed char>(); }
+	SECTION("datatype = int8_t") { test_reg_testz1_int<int8_t>(); }
 #endif
 #endif
 #endif
