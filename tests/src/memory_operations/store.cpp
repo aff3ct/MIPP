@@ -10,7 +10,7 @@ template <typename T>
 void test_reg_store()
 {
 	T inputs[mipp::N<T>()], outputs[mipp::N<T>()];
-	std::iota(inputs, inputs + mipp::N<T>(), 0);
+	std::iota(inputs, inputs + mipp::N<T>(), (T)0);
 
 	mipp::reg r = mipp::load<T>(inputs);
 	mipp::store<T>(outputs, r);
@@ -42,7 +42,7 @@ template <typename T>
 void test_Reg_store()
 {
 	T inputs[mipp::N<T>()], outputs[mipp::N<T>()];
-	std::iota(inputs, inputs + mipp::N<T>(), 0);
+	std::iota(inputs, inputs + mipp::N<T>(), (T)0);
 
 	mipp::Reg<T> r; r.load(inputs);
 	r.store(outputs);
@@ -72,7 +72,7 @@ template <typename T>
 void test_reg_storeu()
 {
 	T inputs[mipp::N<T>()], outputs[mipp::N<T>()];
-	std::iota(inputs, inputs + mipp::N<T>(), 0);
+	std::iota(inputs, inputs + mipp::N<T>(), (T)0);
 
 	mipp::reg r = mipp::loadu<T>(inputs);
 	mipp::storeu<T>(outputs, r);
@@ -104,7 +104,7 @@ template <typename T>
 void test_Reg_storeu()
 {
 	T inputs[mipp::N<T>()], outputs[mipp::N<T>()];
-	std::iota(inputs, inputs + mipp::N<T>(), 0);
+	std::iota(inputs, inputs + mipp::N<T>(), (T)0);
 
 	mipp::Reg<T> r; r.loadu(inputs);
 	r.storeu(outputs);

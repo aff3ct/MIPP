@@ -11,8 +11,8 @@ void test_reg_blend()
 {
 	constexpr int N = mipp::N<T>();
 	T inputs1[N], inputs2[N];
-	std::iota(inputs1, inputs1 + N, 0);
-	std::iota(inputs2, inputs2 + N, N);
+	std::iota(inputs1, inputs1 + N, (T)0);
+	std::iota(inputs2, inputs2 + N, (T)N);
 
 	bool mask[N];
 	std::fill(mask,       mask + N/2, true );
@@ -58,8 +58,8 @@ void test_Reg_blend()
 {
 	constexpr int N = mipp::N<T>();
 	T inputs1[N], inputs2[N];
-	std::iota(inputs1, inputs1 + N, 0);
-	std::iota(inputs2, inputs2 + N, N);
+	std::iota(inputs1, inputs1 + N, (T)0);
+	std::iota(inputs2, inputs2 + N, (T)N);
 
 	bool mask[N];
 	std::fill(mask,       mask + N/2, true );

@@ -16,8 +16,8 @@ void test_reg_pack()
 	static_assert(N1 < N2, "N1 has to be smaller than N2.");
 
 	T1 inputs1[N1], inputs2[N1];
-	std::iota(inputs1, inputs1 + N1, std::numeric_limits<T1>::max() - N1);
-	std::iota(inputs2, inputs2 + N1, -N1/2);
+	std::iota(inputs1, inputs1 + N1, std::numeric_limits<T1>::max() - (T1)N1);
+	std::iota(inputs2, inputs2 + N1, (T1)-N1/2);
 
 	std::mt19937 g;
 	std::shuffle(inputs1, inputs1 + N1, g);
@@ -63,8 +63,8 @@ void test_Reg_pack()
 	static_assert(N1 < N2, "N1 has to be smaller than N2.");
 
 	T1 inputs1[N1], inputs2[N1];
-	std::iota(inputs1, inputs1 + N1, std::numeric_limits<T1>::max() - N1);
-	std::iota(inputs2, inputs2 + N1, -N1/2);
+	std::iota(inputs1, inputs1 + N1, std::numeric_limits<T1>::max() - (T1)N1);
+	std::iota(inputs2, inputs2 + N1, (T1)-N1/2);
 
 	std::mt19937 g;
 	std::shuffle(inputs1, inputs1 + N1, g);

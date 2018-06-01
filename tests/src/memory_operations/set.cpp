@@ -114,7 +114,7 @@ template <typename T>
 void test_reg_set()
 {
 	T inputs[mipp::N<T>()];
-	std::iota(inputs, inputs + mipp::N<T>(), 0);
+	std::iota(inputs, inputs + mipp::N<T>(), (T)0);
 
 	mipp::reg r = mipp::set<T>(inputs);
 	for (auto i = 0; i < mipp::N<T>(); i++)
@@ -144,7 +144,7 @@ template <typename T>
 void test_Reg_set()
 {
 	T inputs[mipp::N<T>()];
-	std::iota(inputs, inputs + mipp::N<T>(), 0);
+	std::iota(inputs, inputs + mipp::N<T>(), (T)0);
 
 	mipp::Reg<T> r = inputs;
 	for (auto i = 0; i < mipp::N<T>(); i++)

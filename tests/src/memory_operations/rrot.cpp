@@ -11,7 +11,7 @@ void test_reg_rrot()
 {
 	constexpr int N = mipp::N<T>();
 	T inputs1[N];
-	std::iota(inputs1, inputs1 + N, 0);
+	std::iota(inputs1, inputs1 + N, (T)0);
 
 	mipp::reg r1 = mipp::load<T>(inputs1);
 	mipp::reg r2 = mipp::rrot<T>(r1);
@@ -46,7 +46,7 @@ void test_Reg_rrot()
 {
 	constexpr int N = mipp::N<T>();
 	T inputs1[N];
-	std::iota(inputs1, inputs1 + N, 0);
+	std::iota(inputs1, inputs1 + N, (T)0);
 
 	mipp::Reg<T> r1 = inputs1;
 	mipp::Reg<T> r2 = mipp::rrot(r1);

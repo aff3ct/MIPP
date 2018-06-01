@@ -10,8 +10,8 @@ template <typename T>
 void test_reg_mul()
 {
 	T inputs1[mipp::N<T>()], inputs2[mipp::N<T>()];
-	std::iota(inputs1, inputs1 + mipp::N<T>(), 1);
-	std::iota(inputs2, inputs2 + mipp::N<T>(), 1);
+	std::iota(inputs1, inputs1 + mipp::N<T>(), (T)1);
+	std::iota(inputs2, inputs2 + mipp::N<T>(), (T)1);
 
 	std::mt19937 g;
 	std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
@@ -52,8 +52,8 @@ template <typename T>
 void test_Reg_mul()
 {
 	T inputs1[mipp::N<T>()], inputs2[mipp::N<T>()];
-	std::iota(inputs1, inputs1 + mipp::N<T>(), 1);
-	std::iota(inputs2, inputs2 + mipp::N<T>(), 1);
+	std::iota(inputs1, inputs1 + mipp::N<T>(), (T)1);
+	std::iota(inputs2, inputs2 + mipp::N<T>(), (T)1);
 
 	std::mt19937 g;
 	std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
@@ -91,40 +91,40 @@ TEST_CASE("Multiplication - mipp::Reg", "[mipp::mul]")
 template <typename T>
 void test_reg_maskz_mul()
 {
-		constexpr int N = mipp::N<T>();
-		T inputs1[N], inputs2[N];
-		std::iota(inputs1, inputs1 + mipp::N<T>(), 1);
-		std::iota(inputs2, inputs2 + mipp::N<T>(), 1);
+	constexpr int N = mipp::N<T>();
+	T inputs1[N], inputs2[N];
+	std::iota(inputs1, inputs1 + mipp::N<T>(), (T)1);
+	std::iota(inputs2, inputs2 + mipp::N<T>(), (T)1);
 
-		bool mask[N];
-		std::fill(mask,       mask + N/2, true );
-		std::fill(mask + N/2, mask + N,   false);
+	bool mask[N];
+	std::fill(mask,       mask + N/2, true );
+	std::fill(mask + N/2, mask + N,   false);
 
-		std::mt19937 g;
-		std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
-		std::shuffle(inputs2, inputs2 + mipp::N<T>(), g);
-		std::shuffle(mask,    mask    + mipp::N<T>(), g);
+	std::mt19937 g;
+	std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
+	std::shuffle(inputs2, inputs2 + mipp::N<T>(), g);
+	std::shuffle(mask,    mask    + mipp::N<T>(), g);
 
-		mipp::reg r1 = mipp::load<T>(inputs1);
-		mipp::reg r2 = mipp::load<T>(inputs2);
-		mipp::msk m  = mipp::set <N>(mask   );
+	mipp::reg r1 = mipp::load<T>(inputs1);
+	mipp::reg r2 = mipp::load<T>(inputs2);
+	mipp::msk m  = mipp::set <N>(mask   );
 
-		mipp::reg r3 = mipp::maskz<T,mipp::mul<T>>(m, r1, r2);
+	mipp::reg r3 = mipp::maskz<T,mipp::mul<T>>(m, r1, r2);
 
-		for (auto i = 0; i < mipp::N<T>(); i++)
+	for (auto i = 0; i < mipp::N<T>(); i++)
+	{
+		if (mask[i])
 		{
-			if (mask[i])
-			{
-				T res = inputs1[i] * inputs2[i];
+			T res = inputs1[i] * inputs2[i];
 #if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
-				REQUIRE(*((T*)&r3 +i) == Approx(res));
+			REQUIRE(*((T*)&r3 +i) == Approx(res));
 #else
-				REQUIRE(*((T*)&r3 +i) == res);
+			REQUIRE(*((T*)&r3 +i) == res);
 #endif
-			}
-			else
-				REQUIRE(*((T*)&r3 +i) == (T)0);
 		}
+		else
+			REQUIRE(*((T*)&r3 +i) == (T)0);
+	}
 }
 
 #ifndef MIPP_NO
@@ -148,8 +148,8 @@ void test_Reg_maskz_mul()
 {
 	constexpr int N = mipp::N<T>();
 	T inputs1[N], inputs2[N];
-	std::iota(inputs1, inputs1 + mipp::N<T>(), 1);
-	std::iota(inputs2, inputs2 + mipp::N<T>(), 1);
+	std::iota(inputs1, inputs1 + mipp::N<T>(), (T)1);
+	std::iota(inputs2, inputs2 + mipp::N<T>(), (T)1);
 
 	bool mask[N];
 	std::fill(mask,       mask + N/2, true );
@@ -201,9 +201,9 @@ void test_reg_mask_mul()
 {
 	constexpr int N = mipp::N<T>();
 	T inputs1[N], inputs2[N], inputs3[N];
-	std::iota(inputs1, inputs1 + mipp::N<T>(), 1);
-	std::iota(inputs2, inputs2 + mipp::N<T>(), 1);
-	std::iota(inputs3, inputs3 + mipp::N<T>(), 0);
+	std::iota(inputs1, inputs1 + mipp::N<T>(), (T)1);
+	std::iota(inputs2, inputs2 + mipp::N<T>(), (T)1);
+	std::iota(inputs3, inputs3 + mipp::N<T>(), (T)0);
 
 	bool mask[N];
 	std::fill(mask,       mask + N/2, true );
@@ -258,9 +258,9 @@ void test_Reg_mask_mul()
 {
 	constexpr int N = mipp::N<T>();
 	T inputs1[N], inputs2[N], inputs3[N];
-	std::iota(inputs1, inputs1 + mipp::N<T>(), 1);
-	std::iota(inputs2, inputs2 + mipp::N<T>(), 1);
-	std::iota(inputs3, inputs3 + mipp::N<T>(), 0);
+	std::iota(inputs1, inputs1 + mipp::N<T>(), (T)1);
+	std::iota(inputs2, inputs2 + mipp::N<T>(), (T)1);
+	std::iota(inputs3, inputs3 + mipp::N<T>(), (T)0);
 
 	bool mask[N];
 	std::fill(mask,       mask + N/2, true );

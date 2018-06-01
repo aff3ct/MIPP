@@ -11,9 +11,9 @@ void test_reg_interleavelo()
 {
 	T inputs1[mipp::N<T>()], inputs2[mipp::N<T>()];
 	std::mt19937 g;
-	std::iota   (inputs1, inputs1 + mipp::N<T>(), 0);
+	std::iota   (inputs1, inputs1 + mipp::N<T>(), (T)0);
 	std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
-	std::iota   (inputs2, inputs2 + mipp::N<T>(), 0);
+	std::iota   (inputs2, inputs2 + mipp::N<T>(), (T)0);
 	std::shuffle(inputs2, inputs2 + mipp::N<T>(), g);
 
 	mipp::reg r1 = mipp::load<T>(inputs1);
@@ -54,9 +54,9 @@ void test_Reg_interleavelo()
 {
 	T inputs1[mipp::N<T>()], inputs2[mipp::N<T>()];
 	std::mt19937 g;
-	std::iota   (inputs1, inputs1 + mipp::N<T>(), 0);
+	std::iota   (inputs1, inputs1 + mipp::N<T>(), (T)0);
 	std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
-	std::iota   (inputs2, inputs2 + mipp::N<T>(), 0);
+	std::iota   (inputs2, inputs2 + mipp::N<T>(), (T)0);
 	std::shuffle(inputs2, inputs2 + mipp::N<T>(), g);
 
 	mipp::Reg<T> r1 = inputs1;
@@ -97,9 +97,9 @@ void test_reg_interleavelo2()
 	{
 		T inputs1[mipp::N<T>()], inputs2[mipp::N<T>()];
 		std::mt19937 g;
-		std::iota   (inputs1, inputs1 + mipp::N<T>(), 0);
+		std::iota   (inputs1, inputs1 + mipp::N<T>(), (T)0);
 		std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
-		std::iota   (inputs2, inputs2 + mipp::N<T>(), 0);
+		std::iota   (inputs2, inputs2 + mipp::N<T>(), (T)0);
 		std::shuffle(inputs2, inputs2 + mipp::N<T>(), g);
 
 		mipp::reg r1 = mipp::load<T>(inputs1);
@@ -149,9 +149,9 @@ void test_Reg_interleavelo2()
 	{
 		T inputs1[mipp::N<T>()], inputs2[mipp::N<T>()];
 		std::mt19937 g;
-		std::iota   (inputs1, inputs1 + mipp::N<T>(), 0);
+		std::iota   (inputs1, inputs1 + mipp::N<T>(), (T)0);
 		std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
-		std::iota   (inputs2, inputs2 + mipp::N<T>(), 0);
+		std::iota   (inputs2, inputs2 + mipp::N<T>(), (T)0);
 		std::shuffle(inputs2, inputs2 + mipp::N<T>(), g);
 
 		mipp::Reg<T> r1 = inputs1;
@@ -199,9 +199,9 @@ void test_reg_interleavelo4()
 	{
 		T inputs1[mipp::N<T>()], inputs2[mipp::N<T>()];
 		std::mt19937 g;
-		std::iota   (inputs1, inputs1 + mipp::N<T>(), 0);
+		std::iota   (inputs1, inputs1 + mipp::N<T>(), (T)0);
 		std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
-		std::iota   (inputs2, inputs2 + mipp::N<T>(), 0);
+		std::iota   (inputs2, inputs2 + mipp::N<T>(), (T)0);
 		std::shuffle(inputs2, inputs2 + mipp::N<T>(), g);
 
 		mipp::reg r1 = mipp::load<T>(inputs1);
@@ -246,9 +246,9 @@ void test_Reg_interleavelo4()
 	{
 		T inputs1[mipp::N<T>()], inputs2[mipp::N<T>()];
 		std::mt19937 g;
-		std::iota   (inputs1, inputs1 + mipp::N<T>(), 0);
+		std::iota   (inputs1, inputs1 + mipp::N<T>(), (T)0);
 		std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
-		std::iota   (inputs2, inputs2 + mipp::N<T>(), 0);
+		std::iota   (inputs2, inputs2 + mipp::N<T>(), (T)0);
 		std::shuffle(inputs2, inputs2 + mipp::N<T>(), g);
 
 		mipp::Reg<T> r1 = inputs1;

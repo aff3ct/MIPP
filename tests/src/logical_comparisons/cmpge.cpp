@@ -10,8 +10,8 @@ template <typename T>
 void test_reg_cmpge()
 {
 	T inputs1[mipp::N<T>()], inputs2[mipp::N<T>()];
-	std::iota(inputs1, inputs1 + mipp::N<T>(), 1);
-	std::iota(inputs2, inputs2 + mipp::N<T>(), 1);
+	std::iota(inputs1, inputs1 + mipp::N<T>(), (T)1);
+	std::iota(inputs2, inputs2 + mipp::N<T>(), (T)1);
 
 	std::mt19937 g;
 	for (auto t = 0; t < 100; t++)
@@ -62,8 +62,8 @@ template <typename T>
 void test_Reg_cmpge()
 {
 	T inputs1[mipp::N<T>()], inputs2[mipp::N<T>()];
-	std::iota(inputs1, inputs1 + mipp::N<T>(), 1);
-	std::iota(inputs2, inputs2 + mipp::N<T>(), 1);
+	std::iota(inputs1, inputs1 + mipp::N<T>(), (T)1);
+	std::iota(inputs2, inputs2 + mipp::N<T>(), (T)1);
 
 	std::mt19937 g;
 	for (auto t = 0; t < 100; t++)

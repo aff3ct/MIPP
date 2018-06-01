@@ -10,8 +10,8 @@ template <typename T>
 void test_reg_cmplt()
 {
 	T inputs1[mipp::N<T>()], inputs2[mipp::N<T>()];
-	std::iota(inputs1, inputs1 + mipp::N<T>(), 1);
-	std::iota(inputs2, inputs2 + mipp::N<T>(), 1);
+	std::iota(inputs1, inputs1 + mipp::N<T>(), (T)1);
+	std::iota(inputs2, inputs2 + mipp::N<T>(), (T)1);
 
 	std::mt19937 g;
 	for (auto t = 0; t < 100; t++)
@@ -61,23 +61,23 @@ TEST_CASE("Compare lower than - mipp::reg", "[mipp::cmplt]")
 template <typename T>
 void test_Reg_cmplt()
 {
-		T inputs1[mipp::N<T>()], inputs2[mipp::N<T>()];
-		std::iota(inputs1, inputs1 + mipp::N<T>(), 1);
-		std::iota(inputs2, inputs2 + mipp::N<T>(), 1);
+	T inputs1[mipp::N<T>()], inputs2[mipp::N<T>()];
+	std::iota(inputs1, inputs1 + mipp::N<T>(), (T)1);
+	std::iota(inputs2, inputs2 + mipp::N<T>(), (T)1);
 
-		std::mt19937 g;
-		for (auto t = 0; t < 100; t++)
-		{
-			std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
-			std::shuffle(inputs2, inputs2 + mipp::N<T>(), g);
+	std::mt19937 g;
+	for (auto t = 0; t < 100; t++)
+	{
+		std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
+		std::shuffle(inputs2, inputs2 + mipp::N<T>(), g);
 
-			mipp::Reg<T> r1 = inputs1;
-			mipp::Reg<T> r2 = inputs2;
-			mipp::Msk<mipp::N<T>()> m = r1 < r2;
+		mipp::Reg<T> r1 = inputs1;
+		mipp::Reg<T> r2 = inputs2;
+		mipp::Msk<mipp::N<T>()> m = r1 < r2;
 
-			for (auto i = 0; i < mipp::N<T>(); i++)
-				REQUIRE(m[i] == (inputs1[i] < inputs2[i]));
-		}
+		for (auto i = 0; i < mipp::N<T>(); i++)
+			REQUIRE(m[i] == (inputs1[i] < inputs2[i]));
+	}
 }
 
 TEST_CASE("Compare lower than - mipp::Reg", "[mipp::cmplt]")

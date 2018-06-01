@@ -10,7 +10,7 @@ template <typename T>
 void test_reg_high()
 {
 	T inputs[mipp::N<T>()];
-	std::iota(inputs, inputs + mipp::N<T>(), 0);
+	std::iota(inputs, inputs + mipp::N<T>(), (T)0);
 
 	mipp::reg   r   = mipp::load<T>(inputs);
 	mipp::reg_2 r_2 = mipp::high <T>(r);
@@ -43,7 +43,7 @@ template <typename T>
 void test_Reg_high()
 {
 	T inputs[mipp::N<T>()];
-	std::iota(inputs, inputs + mipp::N<T>(), 0);
+	std::iota(inputs, inputs + mipp::N<T>(), (T)0);
 
 	mipp::Reg  <T> r   = inputs;
 	mipp::Reg_2<T> r_2 = r.high();

@@ -10,7 +10,7 @@ template <typename T>
 void test_reg_sincos()
 {
 	T inputs1[mipp::N<T>()];
-	std::iota(inputs1, inputs1 + mipp::N<T>(), 1);
+	std::iota(inputs1, inputs1 + mipp::N<T>(), (T)1);
 
 	std::mt19937 g;
 	std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
@@ -46,7 +46,7 @@ template <typename T>
 void test_Reg_sincos()
 {
 	T inputs1[mipp::N<T>()];
-	std::iota(inputs1, inputs1 + mipp::N<T>(), 1);
+	std::iota(inputs1, inputs1 + mipp::N<T>(), (T)1);
 
 	std::mt19937 g;
 	std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);

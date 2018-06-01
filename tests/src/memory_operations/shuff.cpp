@@ -11,13 +11,13 @@ void test_reg_shuff()
 {
 	uint32_t cm_inputs[mipp::N<T>()];
 	std::mt19937 g;
-	std::iota   (cm_inputs, cm_inputs + mipp::N<T>(), 0);
+	std::iota   (cm_inputs, cm_inputs + mipp::N<T>(), (uint32_t)0);
 	std::shuffle(cm_inputs, cm_inputs + mipp::N<T>(), g);
 
 	mipp::reg cm = mipp::cmask<T>(cm_inputs);
 
 	T inputs[mipp::N<T>()];
-	std::iota(inputs, inputs + mipp::N<T>(), 0);
+	std::iota(inputs, inputs + mipp::N<T>(), (T)0);
 
 	mipp::reg r = mipp::load<T>(inputs);
 	mipp::reg s = mipp::shuff<T>(r, cm);
@@ -54,13 +54,13 @@ void test_Reg_shuff()
 {
 	uint32_t cm_inputs[mipp::N<T>()];
 	std::mt19937 g;
-	std::iota   (cm_inputs, cm_inputs + mipp::N<T>(), 0);
+	std::iota   (cm_inputs, cm_inputs + mipp::N<T>(), (uint32_t)0);
 	std::shuffle(cm_inputs, cm_inputs + mipp::N<T>(), g);
 
 	mipp::Reg<T> cm = mipp::Reg<T>::cmask(cm_inputs);
 
 	T inputs[mipp::N<T>()];
-	std::iota(inputs, inputs + mipp::N<T>(), 0);
+	std::iota(inputs, inputs + mipp::N<T>(), (T)0);
 
 	mipp::Reg<T> r = inputs;
 	mipp::Reg<T> s = r.shuff(cm);
@@ -97,13 +97,13 @@ void test_reg_shuff2()
 	{
 		uint32_t cm2_inputs[mipp::N<T>()/2];
 		std::mt19937 g;
-		std::iota   (cm2_inputs, cm2_inputs + mipp::N<T>()/2, 0);
+		std::iota   (cm2_inputs, cm2_inputs + mipp::N<T>()/2, (uint32_t)0);
 		std::shuffle(cm2_inputs, cm2_inputs + mipp::N<T>()/2, g);
 
 		mipp::reg cm2 = mipp::cmask2<T>(cm2_inputs);
 
 		T inputs[mipp::N<T>()];
-		std::iota(inputs, inputs + mipp::N<T>(), 0);
+		std::iota(inputs, inputs + mipp::N<T>(), (T)0);
 
 		mipp::reg r = mipp::load<T>(inputs);
 		mipp::reg s = mipp::shuff2<T>(r, cm2);
@@ -151,13 +151,13 @@ void test_Reg_shuff2()
 	{
 		uint32_t cm2_inputs[mipp::N<T>()/2];
 		std::mt19937 g;
-		std::iota   (cm2_inputs, cm2_inputs + mipp::N<T>()/2, 0);
+		std::iota   (cm2_inputs, cm2_inputs + mipp::N<T>()/2, (uint32_t)0);
 		std::shuffle(cm2_inputs, cm2_inputs + mipp::N<T>()/2, g);
 
 		mipp::Reg<T> cm2 = mipp::Reg<T>::cmask2(cm2_inputs);
 
 		T inputs[mipp::N<T>()];
-		std::iota(inputs, inputs + mipp::N<T>(), 0);
+		std::iota(inputs, inputs + mipp::N<T>(), (T)0);
 
 		mipp::Reg<T> r = inputs;
 		mipp::Reg<T> s = r.shuff2(cm2);
@@ -203,13 +203,13 @@ void test_reg_shuff4()
 	{
 		uint32_t cm4_inputs[mipp::N<T>()/4];
 		std::mt19937 g;
-		std::iota   (cm4_inputs, cm4_inputs + mipp::N<T>()/4, 0);
+		std::iota   (cm4_inputs, cm4_inputs + mipp::N<T>()/4, (uint32_t)0);
 		std::shuffle(cm4_inputs, cm4_inputs + mipp::N<T>()/4, g);
 
 		mipp::reg cm4 = mipp::cmask4<T>(cm4_inputs);
 
 		T inputs[mipp::N<T>()];
-		std::iota(inputs, inputs + mipp::N<T>(), 0);
+		std::iota(inputs, inputs + mipp::N<T>(), (T)0);
 
 		mipp::reg r = mipp::load<T>(inputs);
 		mipp::reg s = mipp::shuff4<T>(r, cm4);
@@ -260,13 +260,13 @@ void test_Reg_shuff4()
 	{
 		uint32_t cm4_inputs[mipp::N<T>()/4];
 		std::mt19937 g;
-		std::iota   (cm4_inputs, cm4_inputs + mipp::N<T>()/4, 0);
+		std::iota   (cm4_inputs, cm4_inputs + mipp::N<T>()/4, (uint32_t)0);
 		std::shuffle(cm4_inputs, cm4_inputs + mipp::N<T>()/4, g);
 
 		mipp::Reg<T> cm4 = mipp::Reg<T>::cmask4(cm4_inputs);
 
 		T inputs[mipp::N<T>()];
-		std::iota(inputs, inputs + mipp::N<T>(), 0);
+		std::iota(inputs, inputs + mipp::N<T>(), (T)0);
 
 		mipp::Reg<T> r = inputs;
 		mipp::Reg<T> s = r.shuff4(cm4);

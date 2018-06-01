@@ -14,7 +14,7 @@ struct reg_lshift
 		reg_lshift<T,n-1>::test();
 
 		T inputs1[mipp::N<T>()];
-		std::iota(inputs1, inputs1 + mipp::N<T>(), 0);
+		std::iota(inputs1, inputs1 + mipp::N<T>(), (T)0);
 
 		std::mt19937 g;
 		std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
@@ -62,7 +62,7 @@ struct Reg_lshift
 		Reg_lshift<T,n-1>::test();
 
 		T inputs1[mipp::N<T>()];
-		std::iota(inputs1, inputs1 + mipp::N<T>(), 0);
+		std::iota(inputs1, inputs1 + mipp::N<T>(), (T)0);
 
 		std::mt19937 g;
 		std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);

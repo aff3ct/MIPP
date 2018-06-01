@@ -11,7 +11,7 @@ void test_reg_sign()
 {
 	constexpr int N = mipp::N<T>();
 	T inputs1[N];
-	std::iota(inputs1, inputs1 + N, -N/2);
+	std::iota(inputs1, inputs1 + N, (T)-N/2);
 
 	std::mt19937 g;
 	std::shuffle(inputs1, inputs1 + N, g);
@@ -59,7 +59,7 @@ void test_Reg_sign()
 {
 	constexpr int N = mipp::N<T>();
 	T inputs1[N];
-	std::iota(inputs1, inputs1 + N, -N/2);
+	std::iota(inputs1, inputs1 + N, (T)-N/2);
 
 	std::mt19937 g;
 	std::shuffle(inputs1, inputs1 + N, g);

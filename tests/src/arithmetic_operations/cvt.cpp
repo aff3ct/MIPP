@@ -13,7 +13,7 @@ void test_reg_cvt()
 	constexpr int N2 = mipp::N<T2>();
 
 	T1 inputs1[N1];
-	std::iota(inputs1, inputs1 + N1, -N1/2);
+	std::iota(inputs1, inputs1 + N1, (T1)-N1/2);
 
 	for (auto i = 0; i < N1; i++)
 		inputs1[i] += i % 2 ? (T1)0.4 : (T1)0.6;
@@ -63,7 +63,7 @@ void test_Reg_cvt()
 	constexpr int N2 = mipp::N<T2>();
 
 	T1 inputs1[N1];
-	std::iota(inputs1, inputs1 + N1, -N1/2);
+	std::iota(inputs1, inputs1 + N1, (T1)-N1/2);
 
 	for (auto i = 0; i < N1; i++)
 		inputs1[i] += i % 2 ? (T1)0.4 : (T1)0.6;

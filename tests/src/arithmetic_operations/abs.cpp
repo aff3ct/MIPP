@@ -10,7 +10,7 @@ template <typename T>
 void test_reg_abs()
 {
 	T inputs1[mipp::N<T>()];
-	std::iota(inputs1, inputs1 + mipp::N<T>(), -mipp::N<T>()/2);
+	std::iota(inputs1, inputs1 + mipp::N<T>(), (T)-mipp::N<T>()/2);
 
 	std::mt19937 g;
 	std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
@@ -54,7 +54,7 @@ template <typename T>
 void test_Reg_abs()
 {
 	T inputs1[mipp::N<T>()];
-	std::iota(inputs1, inputs1 + mipp::N<T>(), -mipp::N<T>()/2);
+	std::iota(inputs1, inputs1 + mipp::N<T>(), (T)-mipp::N<T>()/2);
 
 	std::mt19937 g;
 	std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
@@ -97,7 +97,7 @@ void test_reg_maskz_abs()
 {
 	constexpr int N = mipp::N<T>();
 	T inputs1[N];
-	std::iota(inputs1, inputs1 + mipp::N<T>(), -N/2);
+	std::iota(inputs1, inputs1 + mipp::N<T>(), (T)-N/2);
 
 	bool mask[N];
 	std::fill(mask,       mask + N/2, true );
@@ -154,7 +154,7 @@ void test_Reg_maskz_abs()
 {
 	constexpr int N = mipp::N<T>();
 	T inputs1[N];
-	std::iota(inputs1, inputs1 + mipp::N<T>(), 1);
+	std::iota(inputs1, inputs1 + mipp::N<T>(), (T)1);
 
 	bool mask[N];
 	std::fill(mask,       mask + N/2, true );
@@ -209,8 +209,8 @@ void test_reg_mask_abs()
 {
 	constexpr int N = mipp::N<T>();
 	T inputs1[N], inputs2[N];
-	std::iota(inputs1, inputs1 + mipp::N<T>(), 1);
-	std::iota(inputs2, inputs2 + mipp::N<T>(), 0);
+	std::iota(inputs1, inputs1 + mipp::N<T>(), (T)1);
+	std::iota(inputs2, inputs2 + mipp::N<T>(), (T)0);
 
 	bool mask[N];
 	std::fill(mask,       mask + N/2, true );
@@ -267,35 +267,35 @@ TEST_CASE("Absolute value - mipp::reg - mask", "[mipp::abs]")
 template <typename T>
 void test_Reg_mask_abs()
 {
-		constexpr int N = mipp::N<T>();
-		T inputs1[N], inputs2[N];
-		std::iota(inputs1, inputs1 + mipp::N<T>(), 1);
-		std::iota(inputs2, inputs2 + mipp::N<T>(), 0);
+	constexpr int N = mipp::N<T>();
+	T inputs1[N], inputs2[N];
+	std::iota(inputs1, inputs1 + mipp::N<T>(), (T)1);
+	std::iota(inputs2, inputs2 + mipp::N<T>(), (T)0);
 
-		bool mask[N];
-		std::fill(mask,       mask + N/2, true );
-		std::fill(mask + N/2, mask + N,   false);
+	bool mask[N];
+	std::fill(mask,       mask + N/2, true );
+	std::fill(mask + N/2, mask + N,   false);
 
-		std::mt19937 g;
-		std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
-		std::shuffle(mask,    mask    + mipp::N<T>(), g);
+	std::mt19937 g;
+	std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
+	std::shuffle(mask,    mask    + mipp::N<T>(), g);
 
-		mipp::Reg<T> r1 = inputs1;
-		mipp::Reg<T> r2 = inputs2;
-		mipp::Msk<N> m  = mask;
+	mipp::Reg<T> r1 = inputs1;
+	mipp::Reg<T> r2 = inputs2;
+	mipp::Msk<N> m  = mask;
 
-		mipp::Reg<T> r3 = mipp::mask<T,mipp::abs>(m, r2, r1);
+	mipp::Reg<T> r3 = mipp::mask<T,mipp::abs>(m, r2, r1);
 
-		for (auto i = 0; i < mipp::N<T>(); i++)
+	for (auto i = 0; i < mipp::N<T>(); i++)
+	{
+		if (mask[i])
 		{
-			if (mask[i])
-			{
-				T res = std::abs(inputs1[i]);
-				REQUIRE(*((T*)&r3 +i) == res);
-			}
-			else
-				REQUIRE(*((T*)&r3 +i) == inputs2[i]);
+			T res = std::abs(inputs1[i]);
+			REQUIRE(*((T*)&r3 +i) == res);
 		}
+		else
+			REQUIRE(*((T*)&r3 +i) == inputs2[i]);
+	}
 }
 
 TEST_CASE("Absolute value - mipp::Reg - mask", "[mipp::abs]")
