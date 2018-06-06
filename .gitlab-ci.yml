@@ -653,7 +653,7 @@ build-coverage-linux-arm-gcc:
   script:
     - ./ci/build-coverage-linux-arm-gcc.sh
 
-coverage-linux-gcc:
+coverage-linux:
   stage: coverage
   dependencies:
     - build-coverage-linux-x86-gcc
