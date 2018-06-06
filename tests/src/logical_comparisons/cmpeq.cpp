@@ -43,12 +43,14 @@ TEST_CASE("Compare equal - mipp::reg", "[mipp::cmpeq]")
 #endif
 	SECTION("datatype = float") { test_reg_cmpeq<float>(); }
 
+#if !defined(MIPP_AVX) || defined(MIPP_AVX2) || (defined(MIPP_AVX) && !defined(__INTEL_COMPILER) && !defined(__ICL) && !defined(__ICC))
 #if defined(MIPP_64BIT)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
 	SECTION("datatype = int64_t") { test_reg_cmpeq<int64_t>(); }
 #endif
 #endif
 	SECTION("datatype = int32_t") { test_reg_cmpeq<int32_t>(); }
+#endif
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_reg_cmpeq<int16_t>(); }
 	SECTION("datatype = int8_t") { test_reg_cmpeq<int8_t>(); }
@@ -85,12 +87,14 @@ TEST_CASE("Compare equal - mipp::Reg", "[mipp::cmpeq]")
 #endif
 	SECTION("datatype = float") { test_Reg_cmpeq<float>(); }
 
+#if !defined(MIPP_AVX) || defined(MIPP_AVX2) || (defined(MIPP_AVX) && !defined(__INTEL_COMPILER) && !defined(__ICL) && !defined(__ICC))
 #if defined(MIPP_64BIT)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
 	SECTION("datatype = int64_t") { test_Reg_cmpeq<int64_t>(); }
 #endif
 #endif
 	SECTION("datatype = int32_t") { test_Reg_cmpeq<int32_t>(); }
+#endif
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_Reg_cmpeq<int16_t>(); }
 	SECTION("datatype = int8_t") { test_Reg_cmpeq<int8_t>(); }
