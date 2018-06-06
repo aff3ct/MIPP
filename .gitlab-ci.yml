@@ -554,7 +554,7 @@ build-coverage-linux-x86-gcc:
   stage: build
   tags:
     - coverage
-    - linux
+    - linux-vm
   artifacts:
     name: code_coverage_files
     when: always
@@ -595,7 +595,7 @@ coverage-linux-gcc:
     # - build-coverage-linux-arm-gcc
   tags:
     - coverage
-    - linux
+    - linux-vm
   coverage: '/.*lines\.*: (\d+.\d+\%)/'
   artifacts:
      name: code_coverage_report
