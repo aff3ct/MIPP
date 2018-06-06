@@ -682,4 +682,4 @@ coverage-linux:
       - ./tests/code_coverage_files/build_coverage_linux_arm_gcc_neon32_fma.info
       - ./tests/code_coverage_report/
   script:
-    - ./ci/coverage-linux-gcc.sh
+    - ./ci/coverage-linux.sh
