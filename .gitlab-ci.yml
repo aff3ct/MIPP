@@ -566,33 +566,33 @@ build-coverage-linux-x86-gcc:
       - code_coverage_files/build_coverage_linux_x86_gcc_sse4_1.info
       - code_coverage_files/build_coverage_linux_x86_gcc_sse4_2.info
       - code_coverage_files/build_coverage_linux_x86_gcc_avx.info
-      # - code_coverage_files/build_coverage_linux_x86_gcc_avx2.info
-      # - code_coverage_files/build_coverage_linux_x86_gcc_avx2_fma.info
-      # - code_coverage_files/build_coverage_linux_x86_gcc_avx512f.info
-      # - code_coverage_files/build_coverage_linux_x86_gcc_avx512bw.info
+      - code_coverage_files/build_coverage_linux_x86_gcc_avx2.info
+      - code_coverage_files/build_coverage_linux_x86_gcc_avx2_fma.info
+      - code_coverage_files/build_coverage_linux_x86_gcc_avx512f.info
+      - code_coverage_files/build_coverage_linux_x86_gcc_avx512bw.info
   script:
     - ./ci/build-coverage-linux-x86-gcc.sh
 
-# build-coverage-linux-arm-gcc:
-#   stage: build
-#   tags:
-#     - coverage
-#     - linux-arm32
-#   artifacts:
-#     name: code_coverage_files
-#     when: always
-#     paths:
-#       - code_coverage_files/build_coverage_linux_arm_gcc_nointr.info
-#       - code_coverage_files/build_coverage_linux_arm_gcc_neon32.info
-#       - code_coverage_files/build_coverage_linux_arm_gcc_neon32_fma.info
-#   script:
-#     - ./ci/build-coverage-linux-arm-gcc.sh
+build-coverage-linux-arm-gcc:
+  stage: build
+  tags:
+    - coverage
+    - linux-arm32
+  artifacts:
+    name: code_coverage_files
+    when: always
+    paths:
+      - code_coverage_files/build_coverage_linux_arm_gcc_nointr.info
+      - code_coverage_files/build_coverage_linux_arm_gcc_neon32.info
+      - code_coverage_files/build_coverage_linux_arm_gcc_neon32_fma.info
+  script:
+    - ./ci/build-coverage-linux-arm-gcc.sh
 
 coverage-linux-gcc:
   stage: coverage
   dependencies:
     - build-coverage-linux-x86-gcc
-    # - build-coverage-linux-arm-gcc
+    - build-coverage-linux-arm-gcc
   tags:
     - coverage
     - linux-vm
@@ -608,12 +608,12 @@ coverage-linux-gcc:
       - code_coverage_files/build_coverage_linux_x86_gcc_sse4_1.info
       - code_coverage_files/build_coverage_linux_x86_gcc_sse4_2.info
       - code_coverage_files/build_coverage_linux_x86_gcc_avx.info
-      # - code_coverage_files/build_coverage_linux_x86_gcc_avx2.info
-      # - code_coverage_files/build_coverage_linux_x86_gcc_avx2_fma.info
-      # - code_coverage_files/build_coverage_linux_x86_gcc_avx512f.info
-      # - code_coverage_files/build_coverage_linux_x86_gcc_avx512bw.info
-      # - code_coverage_files/build_coverage_linux_arm_gcc_nointr.info
-      # - code_coverage_files/build_coverage_linux_arm_gcc_neon32.info
-      # - code_coverage_files/build_coverage_linux_arm_gcc_neon32_fma.info
+      - code_coverage_files/build_coverage_linux_x86_gcc_avx2.info
+      - code_coverage_files/build_coverage_linux_x86_gcc_avx2_fma.info
+      - code_coverage_files/build_coverage_linux_x86_gcc_avx512f.info
+      - code_coverage_files/build_coverage_linux_x86_gcc_avx512bw.info
+      - code_coverage_files/build_coverage_linux_arm_gcc_nointr.info
+      - code_coverage_files/build_coverage_linux_arm_gcc_neon32.info
+      - code_coverage_files/build_coverage_linux_arm_gcc_neon32_fma.info
   script:
     - ./ci/coverage-linux-gcc.sh
