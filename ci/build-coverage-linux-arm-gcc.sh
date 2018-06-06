@@ -13,7 +13,7 @@ function gen_coverage_info {
 	make -j $THREADS
 	rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 	./bin/run_tests
-	rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
+	# rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 	lcov --capture --directory CMakeFiles/run_tests.dir/src/ --output-file ../code_coverage_files/$build.info
 	rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 	lcov --remove ../code_coverage_files/$build.info "*/usr*" "*lib/*" "*/tests/src*" --output-file ../code_coverage_files/$build.info

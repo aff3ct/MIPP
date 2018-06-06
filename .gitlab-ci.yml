@@ -550,8 +550,8 @@ test-windows-x86-unit-avx:
 
 # COVERAGE ---------------------------------------------------------------------------------------------------------------
 
-coverage-linux-x86-gcc:
-  stage: coverage
+build-coverage-linux-x86-gcc:
+  stage: build
   tags:
     - coverage
     - linux
@@ -571,10 +571,10 @@ coverage-linux-x86-gcc:
       # - code_coverage_files/build_coverage_linux_x86_gcc_avx512f.info
       # - code_coverage_files/build_coverage_linux_x86_gcc_avx512bw.info
   script:
-    - ./ci/coverage-linux-x86-gcc.sh
+    - ./ci/build-coverage-linux-x86-gcc.sh
 
-# coverage-linux-arm-gcc:
-#   stage: coverage
+# build-coverage-linux-arm-gcc:
+#   stage: build
 #   tags:
 #     - coverage
 #     - linux-arm32
@@ -586,12 +586,13 @@ coverage-linux-x86-gcc:
 #       - code_coverage_files/build_coverage_linux_arm_gcc_neon32.info
 #       - code_coverage_files/build_coverage_linux_arm_gcc_neon32_fma.info
 #   script:
-#     - ./ci/coverage-linux-arm-gcc.sh
+#     - ./ci/build-coverage-linux-arm-gcc.sh
 
 coverage-linux-gcc:
   stage: coverage
   dependencies:
-    - coverage-linux-x86-gcc
+    - build-coverage-linux-x86-gcc
+    - build-coverage-linux-arm-gcc
   tags:
     - coverage
     - linux
