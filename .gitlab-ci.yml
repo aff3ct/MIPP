@@ -568,8 +568,8 @@ build-coverage-linux-x86-gcc:
       - ./tests/code_coverage_files/build_coverage_linux_x86_gcc_avx.info
       - ./tests/code_coverage_files/build_coverage_linux_x86_gcc_avx2.info
       - ./tests/code_coverage_files/build_coverage_linux_x86_gcc_avx2_fma.info
-      - ./tests/code_coverage_files/build_coverage_linux_x86_gcc_avx512f.info
-      - ./tests/code_coverage_files/build_coverage_linux_x86_gcc_avx512bw.info
+      # - ./tests/code_coverage_files/build_coverage_linux_x86_gcc_avx512f.info
+      # - ./tests/code_coverage_files/build_coverage_linux_x86_gcc_avx512bw.info
   script:
     - ./ci/build-coverage-linux-x86-gcc.sh
 
@@ -610,8 +610,8 @@ coverage-linux-gcc:
       - ./tests/code_coverage_files/build_coverage_linux_x86_gcc_avx.info
       - ./tests/code_coverage_files/build_coverage_linux_x86_gcc_avx2.info
       - ./tests/code_coverage_files/build_coverage_linux_x86_gcc_avx2_fma.info
-      - ./tests/code_coverage_files/build_coverage_linux_x86_gcc_avx512f.info
-      - ./tests/code_coverage_files/build_coverage_linux_x86_gcc_avx512bw.info
+      # - ./tests/code_coverage_files/build_coverage_linux_x86_gcc_avx512f.info
+      # - ./tests/code_coverage_files/build_coverage_linux_x86_gcc_avx512bw.info
       - ./tests/code_coverage_files/build_coverage_linux_arm_gcc_nointr.info
       - ./tests/code_coverage_files/build_coverage_linux_arm_gcc_neon32.info
       - ./tests/code_coverage_files/build_coverage_linux_arm_gcc_neon32_fma.info
