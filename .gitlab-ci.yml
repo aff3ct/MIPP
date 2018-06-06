@@ -32,6 +32,8 @@ build-linux-x86-gcc:
   stage: build
   tags:
     - linux
+    - x86
+    - gcc
   artifacts:
     paths:
       - ./tests/build_linux_x86_gcc_nointr/bin/
@@ -51,6 +53,8 @@ build-linux-x86-clang:
   stage: build
   tags:
     - linux
+    - x86
+    - clang
   artifacts:
     paths:
       - ./tests/build_linux_x86_clang_nointr/bin/
@@ -69,6 +73,8 @@ build-linux-x86-icpc:
   stage: build
   tags:
     - linux
+    - x86
+    - icpc
   artifacts:
     paths:
       - ./tests/build_linux_x86_icpc_nointr/bin/
@@ -88,7 +94,8 @@ build-linux-x86-icpc:
 test-linux-x86-unit-nointr:
   stage: test
   tags:
-     - linux
+    - linux
+    - x86
   artifacts:
     paths:
       - ./tests/build_linux_x86_gcc_nointr/bin/
@@ -101,6 +108,8 @@ test-linux-x86-unit-sse2:
   stage: test
   tags:
     - linux
+    - x86
+    - sse2
   artifacts:
     paths:
       - ./tests/build_linux_x86_gcc_sse2/bin/
@@ -113,6 +122,8 @@ test-linux-x86-unit-sse3:
   stage: test
   tags:
     - linux
+    - x86
+    - sse3
   artifacts:
     paths:
       - ./tests/build_linux_x86_gcc_sse3/bin/
@@ -125,6 +136,8 @@ test-linux-x86-unit-ssse3:
   stage: test
   tags:
     - linux
+    - x86
+    - ssse3
   artifacts:
     paths:
       - ./tests/build_linux_x86_gcc_ssse3/bin/
@@ -137,6 +150,8 @@ test-linux-x86-unit-sse4_1:
   stage: test
   tags:
     - linux
+    - x86
+    - sse4.1
   artifacts:
     paths:
       - ./tests/build_linux_x86_gcc_sse4_1/bin/
@@ -149,6 +164,8 @@ test-linux-x86-unit-sse4_2:
   stage: test
   tags:
     - linux
+    - x86
+    - sse4.2
   artifacts:
     paths:
       - ./tests/build_linux_x86_gcc_sse4_2/bin/
@@ -157,17 +174,19 @@ test-linux-x86-unit-sse4_2:
   script:
     - ./ci/test-linux-macosx-unit.sh build_linux_x86_gcc_sse4_2 build_linux_x86_clang_sse4_2 build_linux_x86_icpc_sse4_2
 
-# test-linux-x86-unit-avx:
-#   stage: test
-#   tags:
-#     - linux
-#   artifacts:
-#     paths:
-#       - ./tests/build_linux_x86_gcc_avx/bin/
-#       - ./tests/build_linux_x86_clang_avx/bin/
-#       - ./tests/build_linux_x86_icpc_avx/bin/
-#   script:
-#     - ./ci/test-linux-macosx-unit.sh build_linux_x86_gcc_avx build_linux_x86_clang_avx build_linux_x86_icpc_avx
+test-linux-x86-unit-avx:
+  stage: test
+  tags:
+    - linux
+    - x86
+    - avx
+  artifacts:
+    paths:
+      - ./tests/build_linux_x86_gcc_avx/bin/
+      - ./tests/build_linux_x86_clang_avx/bin/
+      - ./tests/build_linux_x86_icpc_avx/bin/
+  script:
+    - ./ci/test-linux-macosx-unit.sh build_linux_x86_gcc_avx build_linux_x86_clang_avx build_linux_x86_icpc_avx
 
 # test-linux-x86-unit-avx2:
 #   stage: test
@@ -214,6 +233,8 @@ build-macosx-x86-clang:
   stage: build
   tags:
     - mac-osx
+    - x86
+    - apple-clang
   artifacts:
     paths:
       - ./tests/build_macosx_x86_clang_nointr/bin/
@@ -234,6 +255,7 @@ test-macosx-x86-unit-nointr:
   stage: test
   tags:
      - mac-osx
+     - x86
   artifacts:
     paths:
       - ./tests/build_macosx_x86_clang_nointr/bin/
@@ -244,6 +266,8 @@ test-macosx-x86-unit-sse2:
   stage: test
   tags:
     - mac-osx
+    - x86
+    - sse2
   artifacts:
     paths:
       - ./tests/build_macosx_x86_clang_sse2/bin/
@@ -254,6 +278,8 @@ test-macosx-x86-unit-sse3:
   stage: test
   tags:
     - mac-osx
+    - x86
+    - sse3
   artifacts:
     paths:
       - ./tests/build_macosx_x86_clang_sse3/bin/
@@ -264,6 +290,8 @@ test-macosx-x86-unit-ssse3:
   stage: test
   tags:
     - mac-osx
+    - x86
+    - ssse3
   artifacts:
     paths:
       - ./tests/build_macosx_x86_clang_ssse3/bin/
@@ -274,6 +302,8 @@ test-macosx-x86-unit-sse4_1:
   stage: test
   tags:
     - mac-osx
+    - x86
+    - sse4.1
   artifacts:
     paths:
       - ./tests/build_macosx_x86_clang_sse4_1/bin/
@@ -284,6 +314,8 @@ test-macosx-x86-unit-sse4_2:
   stage: test
   tags:
     - mac-osx
+    - x86
+    - sse4.2
   artifacts:
     paths:
       - ./tests/build_macosx_x86_clang_sse4_2/bin/
@@ -294,6 +326,8 @@ test-macosx-x86-unit-avx:
   stage: test
   tags:
     - mac-osx
+    - x86
+    - avx
   artifacts:
     paths:
       - ./tests/build_macosx_x86_clang_avx/bin/
@@ -338,7 +372,9 @@ test-macosx-x86-unit-avx:
 build-linux-arm-gcc:
   stage: build
   tags:
-    - linux-arm32
+    - linux
+    - arm32
+    - gcc
   artifacts:
     paths:
       - ./tests/build_linux_arm_gcc_nointr/bin/
@@ -350,7 +386,9 @@ build-linux-arm-gcc:
 build-linux-arm-clang:
   stage: build
   tags:
-    - linux-arm32
+    - linux
+    - arm32
+    - clang
   artifacts:
     paths:
       - ./tests/build_linux_arm_clang_nointr/bin/
@@ -364,7 +402,8 @@ build-linux-arm-clang:
 test-linux-arm-unit-nointr:
   stage: test
   tags:
-     - linux-arm32
+    - linux
+    - arm32
   artifacts:
     paths:
       - ./tests/build_linux_arm_gcc_nointr/bin/
@@ -375,7 +414,9 @@ test-linux-arm-unit-nointr:
 test-linux-arm-unit-neon32:
   stage: test
   tags:
-    - linux-arm32
+    - linux
+    - arm32
+    - neon32
   artifacts:
     paths:
       - ./tests/build_linux_arm_gcc_neon32/bin/
@@ -386,7 +427,9 @@ test-linux-arm-unit-neon32:
 test-linux-arm-unit-neon32-fma:
   stage: test
   tags:
-    - linux-arm32
+    - linux
+    - arm32
+    - neon32-fma
   artifacts:
     paths:
       - ./tests/build_linux_arm_gcc_neon32_fma/bin/
@@ -403,6 +446,8 @@ build-windows-x86-gcc:
   stage: build
   tags:
     - windows
+    - x86
+    - gcc
   artifacts:
     paths:
       - ./tests/build_windows_x86_gcc_nointr/bin/
@@ -422,6 +467,8 @@ build-windows-x86-msvc:
   stage: build
   tags:
     - windows
+    - x86
+    - msvc
   artifacts:
     paths:
       - ./tests/build_windows_x86_msvc_nointr/bin/
@@ -442,6 +489,7 @@ test-windows-x86-unit-nointr:
   stage: test
   tags:
      - windows
+     - x86
   artifacts:
     paths:
       - ./tests/build_windows_x86_gcc_nointr/bin/
@@ -453,6 +501,8 @@ test-windows-x86-unit-sse2:
   stage: test
   tags:
     - windows
+    - x86
+    - sse2
   artifacts:
     paths:
       - ./tests/build_windows_x86_gcc_sse2/bin/
@@ -464,6 +514,8 @@ test-windows-x86-unit-sse3:
   stage: test
   tags:
     - windows
+    - x86
+    - sse3
   artifacts:
     paths:
       - ./tests/build_windows_x86_gcc_sse3/bin/
@@ -475,6 +527,8 @@ test-windows-x86-unit-ssse3:
   stage: test
   tags:
     - windows
+    - x86
+    - ssse3
   artifacts:
     paths:
       - ./tests/build_windows_x86_gcc_ssse3/bin/
@@ -486,6 +540,9 @@ test-windows-x86-unit-sse4_1:
   stage: test
   tags:
     - windows
+    - windows
+    - x86
+    - sse4.1
   artifacts:
     paths:
       - ./tests/build_windows_x86_gcc_sse4_1/bin/
@@ -497,6 +554,8 @@ test-windows-x86-unit-sse4_2:
   stage: test
   tags:
     - windows
+    - x86
+    - sse4.2
   artifacts:
     paths:
       - ./tests/build_windows_x86_gcc_sse4_2/bin/
@@ -508,6 +567,8 @@ test-windows-x86-unit-avx:
   stage: test
   tags:
     - windows
+    - x86
+    - avx
   artifacts:
     paths:
       - ./tests/build_windows_x86_gcc_avx/bin/
@@ -554,7 +615,9 @@ build-coverage-linux-x86-gcc:
   stage: build
   tags:
     - coverage
-    - linux-vm
+    - linux
+    - x86
+    - gcc
   artifacts:
     name: code_coverage
     when: always
@@ -577,7 +640,9 @@ build-coverage-linux-arm-gcc:
   stage: build
   tags:
     - coverage
-    - linux-arm32
+    - linux
+    - arm32
+    - gcc
   artifacts:
     name: code_coverage
     when: always
@@ -595,7 +660,7 @@ coverage-linux-gcc:
     - build-coverage-linux-arm-gcc
   tags:
     - coverage
-    - linux-vm
+    - linux
   coverage: '/.*lines\.*: (\d+.\d+\%)/'
   artifacts:
      name: code_coverage
