@@ -592,7 +592,7 @@ coverage-linux-gcc:
   stage: coverage
   dependencies:
     - build-coverage-linux-x86-gcc
-    - build-coverage-linux-arm-gcc
+    # - build-coverage-linux-arm-gcc
   tags:
     - coverage
     - linux
