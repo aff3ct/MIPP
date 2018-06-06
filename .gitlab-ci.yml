@@ -556,7 +556,7 @@ build-coverage-linux-x86-gcc:
     - coverage
     - linux-vm
   artifacts:
-    name: code_coverage_files
+    name: code_coverage
     when: always
     paths:
       - ./tests/code_coverage_files/build_coverage_linux_x86_gcc_nointr.info
@@ -579,7 +579,7 @@ build-coverage-linux-arm-gcc:
     - coverage
     - linux-arm32
   artifacts:
-    name: code_coverage_files
+    name: code_coverage
     when: always
     paths:
       - ./tests/code_coverage_files/build_coverage_linux_arm_gcc_nointr.info
@@ -598,7 +598,7 @@ coverage-linux-gcc:
     - linux-vm
   coverage: '/.*lines\.*: (\d+.\d+\%)/'
   artifacts:
-     name: code_coverage_report
+     name: code_coverage
      when: always
      paths:
       - ./tests/code_coverage_files/build_coverage_linux_x86_gcc_nointr.info
@@ -615,5 +615,6 @@ coverage-linux-gcc:
       - ./tests/code_coverage_files/build_coverage_linux_arm_gcc_nointr.info
       - ./tests/code_coverage_files/build_coverage_linux_arm_gcc_neon32.info
       - ./tests/code_coverage_files/build_coverage_linux_arm_gcc_neon32_fma.info
+      - ./tests/code_coverage_report/
   script:
     - ./ci/coverage-linux-gcc.sh
