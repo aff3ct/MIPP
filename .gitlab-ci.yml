@@ -2,6 +2,7 @@ stages:
   - analysis
   - build
   - test
+  - coverage
 
 before_script:
   - hostname
@@ -546,3 +547,72 @@ test-windows-x86-unit-avx:
 #       - ./tests/build_windows_x86_msvc_avx512f/bin/
 #   script:
 #     - ./ci/test-windows-unit.bat build_windows_x86_gcc_avx512f build_windows_x86_msvc_avx512f
+
+# COVERAGE ---------------------------------------------------------------------------------------------------------------
+
+coverage-linux-x86-gcc:
+  stage: coverage
+  tags:
+    - coverage
+    - linux
+  artifacts:
+    name: code_coverage_files
+    when: always
+    paths:
+      - code_coverage_files/build_coverage_linux_x86_gcc_nointr.info
+      - code_coverage_files/build_coverage_linux_x86_gcc_sse2.info
+      - code_coverage_files/build_coverage_linux_x86_gcc_sse3.info
+      - code_coverage_files/build_coverage_linux_x86_gcc_ssse3.info
+      - code_coverage_files/build_coverage_linux_x86_gcc_sse4_1.info
+      - code_coverage_files/build_coverage_linux_x86_gcc_sse4_2.info
+      - code_coverage_files/build_coverage_linux_x86_gcc_avx.info
+      # - code_coverage_files/build_coverage_linux_x86_gcc_avx2.info
+      # - code_coverage_files/build_coverage_linux_x86_gcc_avx2_fma.info
+      # - code_coverage_files/build_coverage_linux_x86_gcc_avx512f.info
+      # - code_coverage_files/build_coverage_linux_x86_gcc_avx512bw.info
+  script:
+    - ./ci/coverage-linux-x86-gcc.sh
+
+# coverage-linux-arm-gcc:
+#   stage: coverage
+#   tags:
+#     - coverage
+#     - linux-arm32
+#   artifacts:
+#     name: code_coverage_files
+#     when: always
+#     paths:
+#       - code_coverage_files/build_coverage_linux_arm_gcc_nointr.info
+#       - code_coverage_files/build_coverage_linux_arm_gcc_neon32.info
+#       - code_coverage_files/build_coverage_linux_arm_gcc_neon32_fma.info
+#   script:
+#     - ./ci/coverage-linux-arm-gcc.sh
+
+coverage-linux-gcc:
+  stage: coverage
+  dependencies:
+    - coverage-linux-x86-gcc
+  tags:
+    - coverage
+    - linux
+  coverage: '/.*lines\.*: (\d+.\d+\%)/'
+  artifacts:
+     name: code_coverage_report
+     when: always
+     paths:
+      - code_coverage_files/build_coverage_linux_x86_gcc_nointr.info
+      - code_coverage_files/build_coverage_linux_x86_gcc_sse2.info
+      - code_coverage_files/build_coverage_linux_x86_gcc_sse3.info
+      - code_coverage_files/build_coverage_linux_x86_gcc_ssse3.info
+      - code_coverage_files/build_coverage_linux_x86_gcc_sse4_1.info
+      - code_coverage_files/build_coverage_linux_x86_gcc_sse4_2.info
+      - code_coverage_files/build_coverage_linux_x86_gcc_avx.info
+      # - code_coverage_files/build_coverage_linux_x86_gcc_avx2.info
+      # - code_coverage_files/build_coverage_linux_x86_gcc_avx2_fma.info
+      # - code_coverage_files/build_coverage_linux_x86_gcc_avx512f.info
+      # - code_coverage_files/build_coverage_linux_x86_gcc_avx512bw.info
+      # - code_coverage_files/build_coverage_linux_arm_gcc_nointr.info
+      # - code_coverage_files/build_coverage_linux_arm_gcc_neon32.info
+      # - code_coverage_files/build_coverage_linux_arm_gcc_neon32_fma.info
+  script:
+    - ./ci/coverage-linux-gcc.sh

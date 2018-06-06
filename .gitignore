@@ -7,3 +7,5 @@ htdocs/
 .settings/
 src_files.txt
 tests/build*
+tests/code_coverage_files/
+tests/code_coverage_report/
