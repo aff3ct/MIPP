@@ -13,12 +13,18 @@ function gen_coverage_info {
 	make -j $THREADS
 	rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 	./bin/run_tests
-	# rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
-	lcov --capture --directory CMakeFiles/run_tests.dir/src/ --output-file ../code_coverage_files/$build.info
-	# rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
-	lcov --remove ../code_coverage_files/$build.info "*/usr*" "*lib/*" "*/tests/src*" --output-file ../code_coverage_files/$build.info
-	# rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 	cd ..
+	# rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
+	lcov --capture --directory $build/CMakeFiles/run_tests.dir/src/ --output-file code_coverage_files/$build.info
+	# rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
+	lcov --remove code_coverage_files/$build.info "*/usr*" "*lib/*" "*/tests/src*" --output-file code_coverage_files/$build.info
+	# rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
+	if [[ -s code_coverage_files/$build.info ]]
+	then
+		sed -i -e "s#${PWD}#\.\.#g" code_coverage_files/$build.info
+	else
+		rm code_coverage_files/$build.info
+	fi
 }
 
 cd tests

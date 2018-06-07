@@ -622,17 +622,7 @@ build-coverage-linux-x86-gcc:
     name: code_coverage
     when: always
     paths:
-      - ./tests/code_coverage_files/build_coverage_linux_x86_gcc_nointr.info
-      - ./tests/code_coverage_files/build_coverage_linux_x86_gcc_sse2.info
-      - ./tests/code_coverage_files/build_coverage_linux_x86_gcc_sse3.info
-      - ./tests/code_coverage_files/build_coverage_linux_x86_gcc_ssse3.info
-      - ./tests/code_coverage_files/build_coverage_linux_x86_gcc_sse4_1.info
-      - ./tests/code_coverage_files/build_coverage_linux_x86_gcc_sse4_2.info
-      - ./tests/code_coverage_files/build_coverage_linux_x86_gcc_avx.info
-      - ./tests/code_coverage_files/build_coverage_linux_x86_gcc_avx2.info
-      - ./tests/code_coverage_files/build_coverage_linux_x86_gcc_avx2_fma.info
-      # - ./tests/code_coverage_files/build_coverage_linux_x86_gcc_avx512f.info
-      # - ./tests/code_coverage_files/build_coverage_linux_x86_gcc_avx512bw.info
+      - ./tests/code_coverage_files/*
   script:
     - ./ci/build-coverage-linux-x86-gcc.sh
 
@@ -647,9 +637,7 @@ build-coverage-linux-arm-gcc:
     name: code_coverage
     when: always
     paths:
-      - ./tests/code_coverage_files/build_coverage_linux_arm_gcc_nointr.info
-      - ./tests/code_coverage_files/build_coverage_linux_arm_gcc_neon32.info
-      - ./tests/code_coverage_files/build_coverage_linux_arm_gcc_neon32_fma.info
+      - ./tests/code_coverage_files/*
   script:
     - ./ci/build-coverage-linux-arm-gcc.sh
 
@@ -666,20 +654,7 @@ coverage-linux:
      name: code_coverage
      when: always
      paths:
-      - ./tests/code_coverage_files/build_coverage_linux_x86_gcc_nointr.info
-      - ./tests/code_coverage_files/build_coverage_linux_x86_gcc_sse2.info
-      - ./tests/code_coverage_files/build_coverage_linux_x86_gcc_sse3.info
-      - ./tests/code_coverage_files/build_coverage_linux_x86_gcc_ssse3.info
-      - ./tests/code_coverage_files/build_coverage_linux_x86_gcc_sse4_1.info
-      - ./tests/code_coverage_files/build_coverage_linux_x86_gcc_sse4_2.info
-      - ./tests/code_coverage_files/build_coverage_linux_x86_gcc_avx.info
-      - ./tests/code_coverage_files/build_coverage_linux_x86_gcc_avx2.info
-      - ./tests/code_coverage_files/build_coverage_linux_x86_gcc_avx2_fma.info
-      # - ./tests/code_coverage_files/build_coverage_linux_x86_gcc_avx512f.info
-      # - ./tests/code_coverage_files/build_coverage_linux_x86_gcc_avx512bw.info
-      - ./tests/code_coverage_files/build_coverage_linux_arm_gcc_nointr.info
-      - ./tests/code_coverage_files/build_coverage_linux_arm_gcc_neon32.info
-      - ./tests/code_coverage_files/build_coverage_linux_arm_gcc_neon32_fma.info
+      - ./tests/code_coverage_files/*
       - ./tests/code_coverage_report/
   script:
     - ./ci/coverage-linux.sh
