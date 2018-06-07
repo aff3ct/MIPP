@@ -2,7 +2,7 @@
 set -x
 
 THREADS=$(grep -c ^processor /proc/cpuinfo)
-PWD=$(pwd)
+WD=$(pwd)
 
 function gen_coverage_info {
 	build=$1
@@ -21,7 +21,7 @@ function gen_coverage_info {
 	# rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 	if [[ -s code_coverage_files/$build.info ]]
 	then
-		sed -i -e "s#${PWD}#\.\.#g" code_coverage_files/$build.info
+		sed -i -e "s#${WD}#\.\.#g" code_coverage_files/$build.info
 	else
 		rm code_coverage_files/$build.info
 	fi
