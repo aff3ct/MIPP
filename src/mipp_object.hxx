@@ -229,8 +229,8 @@ public:
 	inline Msk<N<T>()> cmple        (const Reg<T> v)                       const { return (msk)(r  <= v.r);                       }
 	inline Msk<N<T>()> cmpgt        (const Reg<T> v)                       const { return (msk)(r  >  v.r);                       }
 	inline Msk<N<T>()> cmpge        (const Reg<T> v)                       const { return (msk)(r  >= v.r);                       }
-	inline Reg<T>      add          (const Reg<T> v)                       const { return r  +  v.r;                              }
-	inline Reg<T>      sub          (const Reg<T> v)                       const { return r  -  v.r;                              }
+	inline Reg<T>      add          (const Reg<T> v)                       const { return mipp_scop::add<T>(r,v.r);               }
+	inline Reg<T>      sub          (const Reg<T> v)                       const { return mipp_scop::sub<T>(r,v.r);               }
 	inline Reg<T>      mul          (const Reg<T> v)                       const { return r  *  v.r;                              }
 	inline Reg<T>      div          (const Reg<T> v)                       const { return r  /  v.r;                              }
 	inline Reg<T>      min          (const Reg<T> v)                       const { return std::min<T>(r, v.r);                    }
