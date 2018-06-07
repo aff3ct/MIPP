@@ -34,6 +34,7 @@ build-linux-x86-gcc:
     - linux
     - x86
     - gcc
+    - cmake
   artifacts:
     paths:
       - ./tests/build_linux_x86_gcc_nointr/bin/
@@ -55,6 +56,7 @@ build-linux-x86-clang:
     - linux
     - x86
     - clang
+    - cmake
   artifacts:
     paths:
       - ./tests/build_linux_x86_clang_nointr/bin/
@@ -75,6 +77,7 @@ build-linux-x86-icpc:
     - linux
     - x86
     - icpc
+    - cmake
   artifacts:
     paths:
       - ./tests/build_linux_x86_icpc_nointr/bin/
@@ -192,6 +195,8 @@ test-linux-x86-unit-avx:
 #   stage: test
 #   tags:
 #     - linux
+#     - x86
+#     - avx2
 #   artifacts:
 #     paths:
 #       - ./tests/build_linux_x86_gcc_avx2/bin/
@@ -203,6 +208,8 @@ test-linux-x86-unit-avx:
 #   stage: test
 #   tags:
 #     - linux
+#     - x86
+#     - avx2
 #   artifacts:
 #     paths:
 #       - ./tests/build_linux_x86_gcc_avx2_fma/bin/
@@ -216,6 +223,8 @@ test-linux-x86-unit-avx:
 #   stage: test
 #   tags:
 #     - linux
+#     - x86
+#     - avx512f
 #   artifacts:
 #     paths:
 #       - ./tests/build_linux_x86_gcc_avx512f/bin/
@@ -235,6 +244,7 @@ build-macosx-x86-clang:
     - mac-osx
     - x86
     - apple-clang
+    - cmake
   artifacts:
     paths:
       - ./tests/build_macosx_x86_clang_nointr/bin/
@@ -338,6 +348,8 @@ test-macosx-x86-unit-avx:
 #   stage: test
 #   tags:
 #     - mac-osx
+#     - x86
+#     - avx2
 #   artifacts:
 #     paths:
 #       - ./tests/build_macosx_x86_clang_avx2/bin/
@@ -348,6 +360,8 @@ test-macosx-x86-unit-avx:
 #   stage: test
 #   tags:
 #     - mac-osx
+#     - x86
+#     - avx2
 #   artifacts:
 #     paths:
 #       - ./tests/build_macosx_x86_clang_avx2_fma/bin/
@@ -358,6 +372,8 @@ test-macosx-x86-unit-avx:
 #   stage: test
 #   tags:
 #     - mac-osx
+#     - x86
+#     - avx512f
 #   artifacts:
 #     paths:
 #       - ./tests/build_macosx_x86_clang_avx512f/bin/
@@ -375,6 +391,7 @@ build-linux-arm-gcc:
     - linux
     - arm32
     - gcc
+    - cmake
   artifacts:
     paths:
       - ./tests/build_linux_arm_gcc_nointr/bin/
@@ -389,6 +406,7 @@ build-linux-arm-clang:
     - linux
     - arm32
     - clang
+    - cmake
   artifacts:
     paths:
       - ./tests/build_linux_arm_clang_nointr/bin/
@@ -448,6 +466,7 @@ build-windows-x86-gcc:
     - windows
     - x86
     - gcc
+    - cmake
   artifacts:
     paths:
       - ./tests/build_windows_x86_gcc_nointr/bin/
@@ -469,6 +488,7 @@ build-windows-x86-msvc:
     - windows
     - x86
     - msvc
+    - cmake
   artifacts:
     paths:
       - ./tests/build_windows_x86_msvc_nointr/bin/
@@ -580,6 +600,8 @@ test-windows-x86-unit-avx:
 #   stage: test
 #   tags:
 #     - windows
+#     - x86
+#     - avx2
 #   artifacts:
 #     paths:
 #       - ./tests/build_windows_x86_gcc_avx2/bin/
@@ -590,6 +612,8 @@ test-windows-x86-unit-avx:
 #   stage: test
 #   tags:
 #     - windows
+#     - x86
+#     - avx2
 #   artifacts:
 #     paths:
 #       - ./tests/build_windows_x86_gcc_avx2_fma/bin/
@@ -602,6 +626,8 @@ test-windows-x86-unit-avx:
 #   stage: test
 #   tags:
 #     - windows
+#     - x86
+#     - avx512f
 #   artifacts:
 #     paths:
 #       - ./tests/build_windows_x86_gcc_avx512f/bin/
@@ -614,10 +640,11 @@ test-windows-x86-unit-avx:
 build-coverage-linux-x86-gcc:
   stage: build
   tags:
-    - coverage
+    - lcov
     - linux
     - x86
     - gcc
+    - cmake
   artifacts:
     name: code_coverage
     when: always
@@ -629,10 +656,11 @@ build-coverage-linux-x86-gcc:
 build-coverage-linux-arm-gcc:
   stage: build
   tags:
-    - coverage
+    - lcov
     - linux
     - arm32
     - gcc
+    - cmake
   artifacts:
     name: code_coverage
     when: always
@@ -647,7 +675,7 @@ coverage-linux:
     - build-coverage-linux-x86-gcc
     - build-coverage-linux-arm-gcc
   tags:
-    - coverage
+    - lcov
     - linux
   coverage: '/.*lines\.*: (\d+.\d+\%)/'
   artifacts:
