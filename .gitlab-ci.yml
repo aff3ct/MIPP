@@ -99,11 +99,6 @@ test-linux-x86-unit-nointr:
   tags:
     - linux
     - x86
-  artifacts:
-    paths:
-      - ./tests/build_linux_x86_gcc_nointr/bin/
-      - ./tests/build_linux_x86_clang_nointr/bin/
-      - ./tests/build_linux_x86_icpc_nointr/bin/
   script:
     - ./ci/test-linux-macosx-unit.sh build_linux_x86_gcc_nointr build_linux_x86_clang_nointr build_linux_x86_icpc_nointr
 
@@ -113,11 +108,6 @@ test-linux-x86-unit-sse2:
     - linux
     - x86
     - sse2
-  artifacts:
-    paths:
-      - ./tests/build_linux_x86_gcc_sse2/bin/
-      - ./tests/build_linux_x86_clang_sse2/bin/
-      - ./tests/build_linux_x86_icpc_sse2/bin/
   script:
     - ./ci/test-linux-macosx-unit.sh build_linux_x86_gcc_sse2 build_linux_x86_clang_sse2 build_linux_x86_icpc_sse2
 
@@ -127,11 +117,6 @@ test-linux-x86-unit-sse3:
     - linux
     - x86
     - sse3
-  artifacts:
-    paths:
-      - ./tests/build_linux_x86_gcc_sse3/bin/
-      - ./tests/build_linux_x86_clang_sse3/bin/
-      - ./tests/build_linux_x86_icpc_sse3/bin/
   script:
     - ./ci/test-linux-macosx-unit.sh build_linux_x86_gcc_sse3 build_linux_x86_clang_sse3 build_linux_x86_icpc_sse3
 
@@ -141,11 +126,6 @@ test-linux-x86-unit-ssse3:
     - linux
     - x86
     - ssse3
-  artifacts:
-    paths:
-      - ./tests/build_linux_x86_gcc_ssse3/bin/
-      - ./tests/build_linux_x86_clang_ssse3/bin/
-      - ./tests/build_linux_x86_icpc_ssse3/bin/
   script:
     - ./ci/test-linux-macosx-unit.sh build_linux_x86_gcc_ssse3 build_linux_x86_clang_ssse3 build_linux_x86_icpc_ssse3
 
@@ -155,11 +135,6 @@ test-linux-x86-unit-sse4_1:
     - linux
     - x86
     - sse4.1
-  artifacts:
-    paths:
-      - ./tests/build_linux_x86_gcc_sse4_1/bin/
-      - ./tests/build_linux_x86_clang_sse4_1/bin/
-      - ./tests/build_linux_x86_icpc_sse4_1/bin/
   script:
     - ./ci/test-linux-macosx-unit.sh build_linux_x86_gcc_sse4_1 build_linux_x86_clang_sse4_1 build_linux_x86_icpc_sse4_1
 
@@ -169,11 +144,6 @@ test-linux-x86-unit-sse4_2:
     - linux
     - x86
     - sse4.2
-  artifacts:
-    paths:
-      - ./tests/build_linux_x86_gcc_sse4_2/bin/
-      - ./tests/build_linux_x86_clang_sse4_2/bin/
-      - ./tests/build_linux_x86_icpc_sse4_2/bin/
   script:
     - ./ci/test-linux-macosx-unit.sh build_linux_x86_gcc_sse4_2 build_linux_x86_clang_sse4_2 build_linux_x86_icpc_sse4_2
 
@@ -183,11 +153,6 @@ test-linux-x86-unit-avx:
     - linux
     - x86
     - avx
-  artifacts:
-    paths:
-      - ./tests/build_linux_x86_gcc_avx/bin/
-      - ./tests/build_linux_x86_clang_avx/bin/
-      - ./tests/build_linux_x86_icpc_avx/bin/
   script:
     - ./ci/test-linux-macosx-unit.sh build_linux_x86_gcc_avx build_linux_x86_clang_avx build_linux_x86_icpc_avx
 
@@ -197,10 +162,6 @@ test-linux-x86-unit-avx:
 #     - linux
 #     - x86
 #     - avx2
-#   artifacts:
-#     paths:
-#       - ./tests/build_linux_x86_gcc_avx2/bin/
-#       - ./tests/build_linux_x86_clang_avx2/bin/
 #   script:
 #     - ./ci/test-linux-macosx-unit.sh build_linux_x86_gcc_avx2 build_linux_x86_clang_avx2
 
@@ -210,11 +171,6 @@ test-linux-x86-unit-avx:
 #     - linux
 #     - x86
 #     - avx2
-#   artifacts:
-#     paths:
-#       - ./tests/build_linux_x86_gcc_avx2_fma/bin/
-#       - ./tests/build_linux_x86_clang_avx2_fma/bin/
-#       - ./tests/build_linux_x86_icpc_avx2_fma/bin/
 #   script:
 #     - ./ci/test-linux-macosx-unit.sh build_linux_x86_gcc_avx2_fma build_linux_x86_clang_avx2_fma build_linux_x86_icpc_avx2_fma
 
@@ -225,11 +181,6 @@ test-linux-x86-unit-avx:
 #     - linux
 #     - x86
 #     - avx512f
-#   artifacts:
-#     paths:
-#       - ./tests/build_linux_x86_gcc_avx512f/bin/
-#       - ./tests/build_linux_x86_clang_avx512f/bin/
-#       - ./tests/build_linux_x86_icpc_avx512f/bin/
 #   script:
 #     - ./ci/test-linux-macosx-unit.sh build_linux_x86_gcc_avx512f build_linux_x86_clang_avx512f build_linux_x86_icpc_avx512f
 
@@ -266,9 +217,6 @@ test-macosx-x86-unit-nointr:
   tags:
      - mac-osx
      - x86
-  artifacts:
-    paths:
-      - ./tests/build_macosx_x86_clang_nointr/bin/
   script:
     - ./ci/test-linux-macosx-unit.sh build_macosx_x86_clang_nointr
 
@@ -278,9 +226,6 @@ test-macosx-x86-unit-sse2:
     - mac-osx
     - x86
     - sse2
-  artifacts:
-    paths:
-      - ./tests/build_macosx_x86_clang_sse2/bin/
   script:
     - ./ci/test-linux-macosx-unit.sh build_macosx_x86_clang_sse2
 
@@ -290,9 +235,6 @@ test-macosx-x86-unit-sse3:
     - mac-osx
     - x86
     - sse3
-  artifacts:
-    paths:
-      - ./tests/build_macosx_x86_clang_sse3/bin/
   script:
     - ./ci/test-linux-macosx-unit.sh build_macosx_x86_clang_sse3
 
@@ -302,9 +244,6 @@ test-macosx-x86-unit-ssse3:
     - mac-osx
     - x86
     - ssse3
-  artifacts:
-    paths:
-      - ./tests/build_macosx_x86_clang_ssse3/bin/
   script:
     - ./ci/test-linux-macosx-unit.sh build_macosx_x86_clang_ssse3
 
@@ -314,9 +253,6 @@ test-macosx-x86-unit-sse4_1:
     - mac-osx
     - x86
     - sse4.1
-  artifacts:
-    paths:
-      - ./tests/build_macosx_x86_clang_sse4_1/bin/
   script:
     - ./ci/test-linux-macosx-unit.sh build_macosx_x86_clang_sse4_1
 
@@ -326,9 +262,6 @@ test-macosx-x86-unit-sse4_2:
     - mac-osx
     - x86
     - sse4.2
-  artifacts:
-    paths:
-      - ./tests/build_macosx_x86_clang_sse4_2/bin/
   script:
     - ./ci/test-linux-macosx-unit.sh build_macosx_x86_clang_sse4_2
 
@@ -338,9 +271,6 @@ test-macosx-x86-unit-avx:
     - mac-osx
     - x86
     - avx
-  artifacts:
-    paths:
-      - ./tests/build_macosx_x86_clang_avx/bin/
   script:
     - ./ci/test-linux-macosx-unit.sh build_macosx_x86_clang_avx
 
@@ -350,9 +280,6 @@ test-macosx-x86-unit-avx:
 #     - mac-osx
 #     - x86
 #     - avx2
-#   artifacts:
-#     paths:
-#       - ./tests/build_macosx_x86_clang_avx2/bin/
 #   script:
 #     - ./ci/test-linux-macosx-unit.sh build_macosx_x86_clang_avx2
 
@@ -362,9 +289,6 @@ test-macosx-x86-unit-avx:
 #     - mac-osx
 #     - x86
 #     - avx2
-#   artifacts:
-#     paths:
-#       - ./tests/build_macosx_x86_clang_avx2_fma/bin/
 #   script:
 #     - ./ci/test-linux-macosx-unit.sh build_macosx_x86_clang_avx2_fma
 
@@ -374,9 +298,6 @@ test-macosx-x86-unit-avx:
 #     - mac-osx
 #     - x86
 #     - avx512f
-#   artifacts:
-#     paths:
-#       - ./tests/build_macosx_x86_clang_avx512f/bin/
 #   script:
 #     - ./ci/test-linux-macosx-unit.sh build_macosx_x86_clang_avx512f
 
@@ -422,10 +343,6 @@ test-linux-arm-unit-nointr:
   tags:
     - linux
     - arm32
-  artifacts:
-    paths:
-      - ./tests/build_linux_arm_gcc_nointr/bin/
-      - ./tests/build_linux_arm_clang_nointr/bin/
   script:
     - ./ci/test-linux-macosx-unit.sh build_linux_arm_gcc_nointr build_linux_arm_clang_nointr
 
@@ -435,10 +352,6 @@ test-linux-arm-unit-neon32:
     - linux
     - arm32
     - neon32
-  artifacts:
-    paths:
-      - ./tests/build_linux_arm_gcc_neon32/bin/
-      - ./tests/build_linux_arm_clang_neon32/bin/
   script:
     - ./ci/test-linux-macosx-unit.sh build_linux_arm_gcc_neon32 build_linux_arm_clang_neon32
 
@@ -448,10 +361,6 @@ test-linux-arm-unit-neon32-fma:
     - linux
     - arm32
     - neon32-fma
-  artifacts:
-    paths:
-      - ./tests/build_linux_arm_gcc_neon32_fma/bin/
-      - ./tests/build_linux_arm_clang_neon32_fma/bin/
   script:
     - ./ci/test-linux-macosx-unit.sh build_linux_arm_gcc_neon32_fma build_linux_arm_clang_neon32_fma
 
@@ -510,10 +419,6 @@ test-windows-x86-unit-nointr:
   tags:
      - windows
      - x86
-  artifacts:
-    paths:
-      - ./tests/build_windows_x86_gcc_nointr/bin/
-      - ./tests/build_windows_x86_msvc_nointr/bin/
   script:
     - ./ci/test-windows-unit.bat build_windows_x86_gcc_nointr build_windows_x86_msvc_nointr
 
@@ -523,10 +428,6 @@ test-windows-x86-unit-sse2:
     - windows
     - x86
     - sse2
-  artifacts:
-    paths:
-      - ./tests/build_windows_x86_gcc_sse2/bin/
-      - ./tests/build_windows_x86_msvc_sse2/bin/
   script:
     - ./ci/test-windows-unit.bat build_windows_x86_gcc_sse2 build_windows_x86_msvc_sse2
 
@@ -536,10 +437,6 @@ test-windows-x86-unit-sse3:
     - windows
     - x86
     - sse3
-  artifacts:
-    paths:
-      - ./tests/build_windows_x86_gcc_sse3/bin/
-      - ./tests/build_windows_x86_msvc_sse3/bin/
   script:
     - ./ci/test-windows-unit.bat build_windows_x86_gcc_sse3 build_windows_x86_msvc_sse3
 
@@ -549,10 +446,6 @@ test-windows-x86-unit-ssse3:
     - windows
     - x86
     - ssse3
-  artifacts:
-    paths:
-      - ./tests/build_windows_x86_gcc_ssse3/bin/
-      - ./tests/build_windows_x86_msvc_ssse3/bin/
   script:
     - ./ci/test-windows-unit.bat build_windows_x86_gcc_ssse3 build_windows_x86_msvc_ssse3
 
@@ -563,10 +456,6 @@ test-windows-x86-unit-sse4_1:
     - windows
     - x86
     - sse4.1
-  artifacts:
-    paths:
-      - ./tests/build_windows_x86_gcc_sse4_1/bin/
-      - ./tests/build_windows_x86_msvc_sse4_1/bin/
   script:
     - ./ci/test-windows-unit.bat build_windows_x86_gcc_sse4_1 build_windows_x86_msvc_sse4_1
 
@@ -576,10 +465,6 @@ test-windows-x86-unit-sse4_2:
     - windows
     - x86
     - sse4.2
-  artifacts:
-    paths:
-      - ./tests/build_windows_x86_gcc_sse4_2/bin/
-      - ./tests/build_windows_x86_msvc_sse4_2/bin/
   script:
     - ./ci/test-windows-unit.bat build_windows_x86_gcc_sse4_2 build_windows_x86_msvc_sse4_2
 
@@ -589,10 +474,6 @@ test-windows-x86-unit-avx:
     - windows
     - x86
     - avx
-  artifacts:
-    paths:
-      - ./tests/build_windows_x86_gcc_avx/bin/
-      - ./tests/build_windows_x86_msvc_avx/bin/
   script:
     - ./ci/test-windows-unit.bat build_windows_x86_gcc_avx build_windows_x86_msvc_avx
 
@@ -602,9 +483,6 @@ test-windows-x86-unit-avx:
 #     - windows
 #     - x86
 #     - avx2
-#   artifacts:
-#     paths:
-#       - ./tests/build_windows_x86_gcc_avx2/bin/
 #   script:
 #     - ./ci/test-windows-unit.bat build_windows_x86_gcc_avx2 build_windows_x86_msvc_avx2
 
@@ -614,10 +492,6 @@ test-windows-x86-unit-avx:
 #     - windows
 #     - x86
 #     - avx2
-#   artifacts:
-#     paths:
-#       - ./tests/build_windows_x86_gcc_avx2_fma/bin/
-#       - ./tests/build_windows_x86_msvc_avx2_fma/bin/
 #   script:
 #     - ./ci/test-windows-unit.bat build_windows_x86_gcc_avx2_fma build_windows_x86_msvc_avx2_fma
 
@@ -628,10 +502,6 @@ test-windows-x86-unit-avx:
 #     - windows
 #     - x86
 #     - avx512f
-#   artifacts:
-#     paths:
-#       - ./tests/build_windows_x86_gcc_avx512f/bin/
-#       - ./tests/build_windows_x86_msvc_avx512f/bin/
 #   script:
 #     - ./ci/test-windows-unit.bat build_windows_x86_gcc_avx512f build_windows_x86_msvc_avx512f
 
@@ -646,7 +516,7 @@ build-coverage-linux-x86-gcc:
     - gcc
     - cmake
   artifacts:
-    name: code_coverage
+    name: code-coverage-files
     when: always
     paths:
       - ./tests/code_coverage_files/*
@@ -662,8 +532,7 @@ build-coverage-linux-arm-gcc:
     - gcc
     - cmake
   artifacts:
-    name: code_coverage
-    when: always
+    name: code-coverage-files
     paths:
       - ./tests/code_coverage_files/*
   script:
@@ -679,10 +548,8 @@ coverage-linux:
     - linux
   coverage: '/.*lines\.*: (\d+.\d+\%)/'
   artifacts:
-     name: code_coverage
-     when: always
+     name: code-coverage-report
      paths:
-      - ./tests/code_coverage_files/*
       - ./tests/code_coverage_report/
   script:
     - ./ci/coverage-linux.sh
