@@ -3,6 +3,7 @@ stages:
   - build
   - test
   - coverage
+  - deploy
 
 before_script:
   - hostname
@@ -553,3 +554,16 @@ coverage-linux:
       - ./tests/code_coverage_report/
   script:
     - ./ci/coverage-linux.sh
+
+pages:
+  stage: deploy
+  dependencies:
+    - coverage-linux
+  script:
+    - mv ./tests/code_coverage_report/ public/
+  artifacts:
+    paths:
+      - public
+    expire_in: 30 days
+  only:
+    - master
