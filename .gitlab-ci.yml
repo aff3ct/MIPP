@@ -101,7 +101,7 @@ test-linux-x86-unit-nointr:
     - linux
     - x86
   script:
-    - ./ci/test-linux-macosx-unit.sh build_linux_x86_gcc_nointr build_linux_x86_clang_nointr build_linux_x86_icpc_nointr
+    - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_nointr build_linux_x86_clang_nointr build_linux_x86_icpc_nointr
 
 test-linux-x86-unit-sse2:
   stage: test
@@ -110,7 +110,7 @@ test-linux-x86-unit-sse2:
     - x86
     - sse2
   script:
-    - ./ci/test-linux-macosx-unit.sh build_linux_x86_gcc_sse2 build_linux_x86_clang_sse2 build_linux_x86_icpc_sse2
+    - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_sse2 build_linux_x86_clang_sse2 build_linux_x86_icpc_sse2
 
 test-linux-x86-unit-sse3:
   stage: test
@@ -119,7 +119,7 @@ test-linux-x86-unit-sse3:
     - x86
     - sse3
   script:
-    - ./ci/test-linux-macosx-unit.sh build_linux_x86_gcc_sse3 build_linux_x86_clang_sse3 build_linux_x86_icpc_sse3
+    - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_sse3 build_linux_x86_clang_sse3 build_linux_x86_icpc_sse3
 
 test-linux-x86-unit-ssse3:
   stage: test
@@ -128,7 +128,7 @@ test-linux-x86-unit-ssse3:
     - x86
     - ssse3
   script:
-    - ./ci/test-linux-macosx-unit.sh build_linux_x86_gcc_ssse3 build_linux_x86_clang_ssse3 build_linux_x86_icpc_ssse3
+    - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_ssse3 build_linux_x86_clang_ssse3 build_linux_x86_icpc_ssse3
 
 test-linux-x86-unit-sse4_1:
   stage: test
@@ -137,7 +137,7 @@ test-linux-x86-unit-sse4_1:
     - x86
     - sse4.1
   script:
-    - ./ci/test-linux-macosx-unit.sh build_linux_x86_gcc_sse4_1 build_linux_x86_clang_sse4_1 build_linux_x86_icpc_sse4_1
+    - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_sse4_1 build_linux_x86_clang_sse4_1 build_linux_x86_icpc_sse4_1
 
 test-linux-x86-unit-sse4_2:
   stage: test
@@ -146,7 +146,7 @@ test-linux-x86-unit-sse4_2:
     - x86
     - sse4.2
   script:
-    - ./ci/test-linux-macosx-unit.sh build_linux_x86_gcc_sse4_2 build_linux_x86_clang_sse4_2 build_linux_x86_icpc_sse4_2
+    - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_sse4_2 build_linux_x86_clang_sse4_2 build_linux_x86_icpc_sse4_2
 
 test-linux-x86-unit-avx:
   stage: test
@@ -155,7 +155,7 @@ test-linux-x86-unit-avx:
     - x86
     - avx
   script:
-    - ./ci/test-linux-macosx-unit.sh build_linux_x86_gcc_avx build_linux_x86_clang_avx build_linux_x86_icpc_avx
+    - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_avx build_linux_x86_clang_avx build_linux_x86_icpc_avx
 
 # test-linux-x86-unit-avx2:
 #   stage: test
@@ -164,7 +164,7 @@ test-linux-x86-unit-avx:
 #     - x86
 #     - avx2
 #   script:
-#     - ./ci/test-linux-macosx-unit.sh build_linux_x86_gcc_avx2 build_linux_x86_clang_avx2
+#     - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_avx2 build_linux_x86_clang_avx2
 
 # test-linux-x86-unit-avx2-fma:
 #   stage: test
@@ -173,7 +173,7 @@ test-linux-x86-unit-avx:
 #     - x86
 #     - avx2
 #   script:
-#     - ./ci/test-linux-macosx-unit.sh build_linux_x86_gcc_avx2_fma build_linux_x86_clang_avx2_fma build_linux_x86_icpc_avx2_fma
+#     - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_avx2_fma build_linux_x86_clang_avx2_fma build_linux_x86_icpc_avx2_fma
 
 
 # test-linux-x86-unit-avx512f:
@@ -183,124 +183,124 @@ test-linux-x86-unit-avx:
 #     - x86
 #     - avx512f
 #   script:
-#     - ./ci/test-linux-macosx-unit.sh build_linux_x86_gcc_avx512f build_linux_x86_clang_avx512f build_linux_x86_icpc_avx512f
+#     - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_avx512f build_linux_x86_clang_avx512f build_linux_x86_icpc_avx512f
 
 # ---------------------------------------------------------------------------------------------------------------------
 # MACOSX X86 ----------------------------------------------------------------------------------------------------------
 
 # BUILDS --------------------------------------------------------------------------------------------------------------
 
-build-macosx-x86-clang:
+build-macos-x86-clang:
   stage: build
   tags:
-    - mac-osx
+    - macos
     - x86
     - apple-clang
     - cmake
   artifacts:
     paths:
-      - ./tests/build_macosx_x86_clang_nointr/bin/
-      - ./tests/build_macosx_x86_clang_sse2/bin/
-      - ./tests/build_macosx_x86_clang_sse3/bin/
-      - ./tests/build_macosx_x86_clang_ssse3/bin/
-      - ./tests/build_macosx_x86_clang_sse4_1/bin/
-      - ./tests/build_macosx_x86_clang_sse4_2/bin/
-      - ./tests/build_macosx_x86_clang_avx/bin/
-      - ./tests/build_macosx_x86_clang_avx2/bin/
-      - ./tests/build_macosx_x86_clang_avx2_fma/bin/
+      - ./tests/build_macos_x86_clang_nointr/bin/
+      - ./tests/build_macos_x86_clang_sse2/bin/
+      - ./tests/build_macos_x86_clang_sse3/bin/
+      - ./tests/build_macos_x86_clang_ssse3/bin/
+      - ./tests/build_macos_x86_clang_sse4_1/bin/
+      - ./tests/build_macos_x86_clang_sse4_2/bin/
+      - ./tests/build_macos_x86_clang_avx/bin/
+      - ./tests/build_macos_x86_clang_avx2/bin/
+      - ./tests/build_macos_x86_clang_avx2_fma/bin/
   script:
-    - ./ci/build-macosx-x86-clang.sh
+    - ./ci/build-macos-x86-clang.sh
 
 # TESTS ---------------------------------------------------------------------------------------------------------------
 
-test-macosx-x86-unit-nointr:
+test-macos-x86-unit-nointr:
   stage: test
   tags:
-     - mac-osx
+     - macos
      - x86
   script:
-    - ./ci/test-linux-macosx-unit.sh build_macosx_x86_clang_nointr
+    - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_nointr
 
-test-macosx-x86-unit-sse2:
+test-macos-x86-unit-sse2:
   stage: test
   tags:
-    - mac-osx
+    - macos
     - x86
     - sse2
   script:
-    - ./ci/test-linux-macosx-unit.sh build_macosx_x86_clang_sse2
+    - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_sse2
 
-test-macosx-x86-unit-sse3:
+test-macos-x86-unit-sse3:
   stage: test
   tags:
-    - mac-osx
+    - macos
     - x86
     - sse3
   script:
-    - ./ci/test-linux-macosx-unit.sh build_macosx_x86_clang_sse3
+    - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_sse3
 
-test-macosx-x86-unit-ssse3:
+test-macos-x86-unit-ssse3:
   stage: test
   tags:
-    - mac-osx
+    - macos
     - x86
     - ssse3
   script:
-    - ./ci/test-linux-macosx-unit.sh build_macosx_x86_clang_ssse3
+    - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_ssse3
 
-test-macosx-x86-unit-sse4_1:
+test-macos-x86-unit-sse4_1:
   stage: test
   tags:
-    - mac-osx
+    - macos
     - x86
     - sse4.1
   script:
-    - ./ci/test-linux-macosx-unit.sh build_macosx_x86_clang_sse4_1
+    - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_sse4_1
 
-test-macosx-x86-unit-sse4_2:
+test-macos-x86-unit-sse4_2:
   stage: test
   tags:
-    - mac-osx
+    - macos
     - x86
     - sse4.2
   script:
-    - ./ci/test-linux-macosx-unit.sh build_macosx_x86_clang_sse4_2
+    - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_sse4_2
 
-test-macosx-x86-unit-avx:
+test-macos-x86-unit-avx:
   stage: test
   tags:
-    - mac-osx
+    - macos
     - x86
     - avx
   script:
-    - ./ci/test-linux-macosx-unit.sh build_macosx_x86_clang_avx
+    - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_avx
 
-# test-macosx-x86-unit-avx2:
+# test-macos-x86-unit-avx2:
 #   stage: test
 #   tags:
-#     - mac-osx
+#     - macos
 #     - x86
 #     - avx2
 #   script:
-#     - ./ci/test-linux-macosx-unit.sh build_macosx_x86_clang_avx2
+#     - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_avx2
 
-# test-macosx-x86-unit-avx2-fma:
+# test-macos-x86-unit-avx2-fma:
 #   stage: test
 #   tags:
-#     - mac-osx
+#     - macos
 #     - x86
 #     - avx2
 #   script:
-#     - ./ci/test-linux-macosx-unit.sh build_macosx_x86_clang_avx2_fma
+#     - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_avx2_fma
 
-# test-macosx-x86-unit-avx512f:
+# test-macos-x86-unit-avx512f:
 #   stage: test
 #   tags:
-#     - mac-osx
+#     - macos
 #     - x86
 #     - avx512f
 #   script:
-#     - ./ci/test-linux-macosx-unit.sh build_macosx_x86_clang_avx512f
+#     - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_avx512f
 
 # ---------------------------------------------------------------------------------------------------------------------
 # LINUX ARM -----------------------------------------------------------------------------------------------------------
@@ -345,7 +345,7 @@ test-linux-arm-unit-nointr:
     - linux
     - arm32
   script:
-    - ./ci/test-linux-macosx-unit.sh build_linux_arm_gcc_nointr build_linux_arm_clang_nointr
+    - ./ci/test-linux-macos-unit.sh build_linux_arm_gcc_nointr build_linux_arm_clang_nointr
 
 test-linux-arm-unit-neon32:
   stage: test
@@ -354,7 +354,7 @@ test-linux-arm-unit-neon32:
     - arm32
     - neon32
   script:
-    - ./ci/test-linux-macosx-unit.sh build_linux_arm_gcc_neon32 build_linux_arm_clang_neon32
+    - ./ci/test-linux-macos-unit.sh build_linux_arm_gcc_neon32 build_linux_arm_clang_neon32
 
 test-linux-arm-unit-neon32-fma:
   stage: test
@@ -363,7 +363,7 @@ test-linux-arm-unit-neon32-fma:
     - arm32
     - neon32-fma
   script:
-    - ./ci/test-linux-macosx-unit.sh build_linux_arm_gcc_neon32_fma build_linux_arm_clang_neon32_fma
+    - ./ci/test-linux-macos-unit.sh build_linux_arm_gcc_neon32_fma build_linux_arm_clang_neon32_fma
 
 # ---------------------------------------------------------------------------------------------------------------------
 # WINDOWS X86 ---------------------------------------------------------------------------------------------------------
