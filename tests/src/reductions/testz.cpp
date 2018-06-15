@@ -234,13 +234,21 @@ void test_reg_testz1_int()
 
 	for (auto j = 0; j < 100; j++)
 	{
-		for (auto i = 0; i < N; i++)
+		if (j == 0)
 		{
-			switch (j%2)
+			for (auto i = 0; i < N -1; i++) inputs1[i] = (T)0;
+			inputs1[N -1] = (T)1;
+		}
+		else
+		{
+			for (auto i = 0; i < N; i++)
 			{
-				case 0:  inputs1[i] = dis(g); break;
-				case 1:  inputs1[i] = 0;      break;
-				default: inputs1[i] = 0;      break;
+				switch (j%2)
+				{
+					case 0:  inputs1[i] = dis(g); break;
+					case 1:  inputs1[i] = 0;      break;
+					default: inputs1[i] = 0;      break;
+				}
 			}
 		}
 
@@ -283,13 +291,21 @@ void test_Reg_testz1_int()
 
 	for (auto j = 0; j < 100; j++)
 	{
-		for (auto i = 0; i < N; i++)
+		if (j == 0)
 		{
-			switch (j%2)
+			for (auto i = 0; i < N -1; i++) inputs1[i] = (T)0;
+			inputs1[N -1] = (T)1;
+		}
+		else
+		{
+			for (auto i = 0; i < N; i++)
 			{
-				case 0:  inputs1[i] = dis(g); break;
-				case 1:  inputs1[i] = 0;      break;
-				default: inputs1[i] = 0;      break;
+				switch (j%2)
+				{
+					case 0:  inputs1[i] = dis(g); break;
+					case 1:  inputs1[i] = 0;      break;
+					default: inputs1[i] = 0;      break;
+				}
 			}
 		}
 
@@ -330,14 +346,22 @@ void test_msk_testz1_int()
 
 	for (auto j = 0; j < 100; j++)
 	{
-		for (auto i = 0; i < N; i++)
+		if (j == 0)
 		{
-			switch (j%3)
+			for (auto i = 0; i < N -1; i++) inputs1[i] = false;
+			inputs1[N -1] = true;
+		}
+		else
+		{
+			for (auto i = 0; i < N; i++)
 			{
-				case 0:  inputs1[i] = dis(g) ? true : false; break;
-				case 1:  inputs1[i] = true;                  break;
-				case 2:  inputs1[i] = false;                 break;
-				default: inputs1[i] = false;                 break;
+				switch (j%3)
+				{
+					case 0:  inputs1[i] = dis(g) ? true : false; break;
+					case 1:  inputs1[i] = true;                  break;
+					case 2:  inputs1[i] = false;                 break;
+					default: inputs1[i] = false;                 break;
+				}
 			}
 		}
 
@@ -380,14 +404,22 @@ void test_Msk_testz1_int()
 
 	for (auto j = 0; j < 100; j++)
 	{
-		for (auto i = 0; i < N; i++)
+		if (j == 0)
 		{
-			switch (j%3)
+			for (auto i = 0; i < N -1; i++) inputs1[i] = false;
+			inputs1[N -1] = true;
+		}
+		else
+		{
+			for (auto i = 0; i < N; i++)
 			{
-				case 0:  inputs1[i] = dis(g) ? true : false; break;
-				case 1:  inputs1[i] = true;                  break;
-				case 2:  inputs1[i] = false;                 break;
-				default: inputs1[i] = false;                 break;
+				switch (j%3)
+				{
+					case 0:  inputs1[i] = dis(g) ? true : false; break;
+					case 1:  inputs1[i] = true;                  break;
+					case 2:  inputs1[i] = false;                 break;
+					default: inputs1[i] = false;                 break;
+				}
 			}
 		}
 
