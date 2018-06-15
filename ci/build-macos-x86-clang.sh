@@ -14,7 +14,7 @@ function compile {
 
 cd tests
 
-build_root=build_macosx_x86_clang
+build_root=build_macos_x86_clang
 compile "${build_root}_nointr"   "-DMIPP_NO_INTRINSICS"
 compile "${build_root}_sse2"     "-msse2"
 compile "${build_root}_sse3"     "-msse3"

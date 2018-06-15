@@ -1,7 +1,7 @@
 #!/bin/bash
 set -x
 
-THREADS=$(grep -c ^processor /proc/cpuinfo)
+source ci/threads.sh
 
 function compile {
 	build=$1
