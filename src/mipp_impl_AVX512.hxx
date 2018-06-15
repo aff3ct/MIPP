@@ -3447,25 +3447,29 @@
 	template <>
 	inline bool testz<int16_t>(const reg v1, const reg v2) {
 		auto msk = mipp::cmpneq<int16_t>(mipp::andb<int16_t>(v1, v2), mipp::set0<int16_t>());
-		return _mm512_kortestz(msk, mipp::set0<32>());
+		// return _mm512_kortestz(msk, mipp::set0<32>());
+		return (uint64_t)msk == 0;
 	}
 
 	template <>
 	inline bool testz<int8_t>(const reg v1, const reg v2) {
 		auto msk = mipp::cmpneq<int8_t>(mipp::andb<int8_t>(v1, v2), mipp::set0<int8_t>());
-		return _mm512_kortestz(msk, mipp::set0<64>());
+		// return _mm512_kortestz(msk, mipp::set0<64>());
+		return (uint64_t)msk == 0;
 	}
 
 	template <>
 	inline bool testz<int16_t>(const reg v1) {
 		auto msk = mipp::cmpneq<int16_t>(v1, mipp::set0<int16_t>());
-		return _mm512_kortestz(msk, mipp::set0<32>());
+		// return _mm512_kortestz(msk, mipp::set0<32>());
+		return (uint64_t)msk == 0;
 	}
 
 	template <>
 	inline bool testz<int8_t>(const reg v1) {
 		auto msk = mipp::cmpneq<int8_t>(v1, mipp::set0<int8_t>());
-		return _mm512_kortestz(msk, mipp::set0<64>());
+		// return _mm512_kortestz(msk, mipp::set0<64>());
+		return (uint64_t)msk == 0;
 	}
 #endif
 
@@ -3495,22 +3499,26 @@
 #if defined(__AVX512BW__)
 	template <>
 	inline bool testz<32>(const msk v1, const msk v2) {
-		return _mm512_kortestz(mipp::andb<32>(v1, v2), mipp::set0<32>());
+		// return _mm512_kortestz(mipp::andb<32>(v1, v2), mipp::set0<32>());
+		return ((uint64_t)v1 & (uint64_t)v2) == 0;
 	}
 
 	template <>
 	inline bool testz<64>(const msk v1, const msk v2) {
-		return _mm512_kortestz(mipp::andb<64>(v1, v2), mipp::set0<64>());
+		// return _mm512_kortestz(mipp::andb<64>(v1, v2), mipp::set0<64>());
+		return ((uint64_t)v1 & (uint64_t)v2) == 0;
 	}
 
 	template <>
 	inline bool testz<32>(const msk v1) {
-		return _mm512_kortestz(v1, mipp::set0<32>());
+		// return _mm512_kortestz(v1, mipp::set0<32>());
+		return (uint64_t)v1 == 0;
 	}
 
 	template <>
 	inline bool testz<64>(const msk v1) {
-		return _mm512_kortestz(v1, mipp::set0<64>());
+		// return _mm512_kortestz(v1, mipp::set0<64>());
+		return (uint64_t)v1 == 0;
 	}
 #endif
 
