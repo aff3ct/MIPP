@@ -81,6 +81,7 @@ void test_reg_maskz_fmadd()
 	T inputs1[N], inputs2[N], inputs3[N];
 	std::iota(inputs1, inputs1 + mipp::N<T>(), (T)1);
 	std::iota(inputs2, inputs2 + mipp::N<T>(), (T)1);
+	std::iota(inputs3, inputs3 + mipp::N<T>(), (T)1);
 
 	bool mask[N];
 	std::fill(mask,       mask + N/2, true );
