@@ -22,12 +22,7 @@ Mathieu Léonardon, Adrien Cassagne, Camille Leroux, Christophe Jégo, Louis-Phi
 [**Fast and Flexible Software Polar List Decoders**](https://arxiv.org/abs/1710.08314)  
 *Submitted to Springer Journal of Signal Processing Systems (JSPS), October 2017.*  
   
-  
-Alireza Ghaffari, Mathieu Léonardon, Yvon Savaria, Christophe Jégo and Camille Leroux  
-[**Improving Performance of SCMA MPA Decoders Using Estimation of Conditional Probabilities**](http://ieeexplore.ieee.org/document/8010095/)  
-*The 15th IEEE International NEWCAS Conference (NEWCAS 2017), June 2017.*  
-  
-  
+    
 Adrien Cassagne, Thibaud Tonnellier, Camille Leroux, Bertrand Le Gal, Olivier Aumage and Denis Barthou  
 [**Beyond Gbps Turbo Decoder on Multi-Core CPUs**](http://ieeexplore.ieee.org/document/7593092/)  
 *The 10th International Symposium on Turbo Codes and Iterative Information Processing (ISTC 2016), September 2016.*  
