@@ -9,6 +9,40 @@ MIPP wrapper supports simple/double precision floating-point numbers and also si
 
 With the MIPP wrapper you do not need to write a specific intrinsic code anymore. Just use provided functions and the wrapper will automatically generates the right intrisic calls for your specific architecture.
 
+## Miscellaneous
+
+### Scientific publications
+
+Adrien Cassagne, Olivier Aumage, Denis Barthou, Camille Leroux and Christophe Jégo  
+[**MIPP: a Portable C++ SIMD Wrapper and its use for Error Correction Coding in 5G Standard**](https://dl.acm.org/citation.cfm?doid=3178433.3178435)  
+*The 5th International Workshop on Programming Models for SIMD/Vector Processing (WPMVP 2018), February 2018.*  
+- - -
+Mathieu Léonardon, Adrien Cassagne, Camille Leroux, Christophe Jégo, Louis-Philippe Hamelin and Yvon Savaria  
+[**Fast and Flexible Software Polar List Decoders**](https://arxiv.org/abs/1710.08314)  
+*Submitted to Springer Journal of Signal Processing Systems (JSPS), October 2017.*  
+- - -
+Alireza Ghaffari, Mathieu Léonardon, Yvon Savaria, Christophe Jégo and Camille Leroux  
+[**Improving Performance of SCMA MPA Decoders Using Estimation of Conditional Probabilities**](http://ieeexplore.ieee.org/document/8010095/)  
+*The 15th IEEE International NEWCAS Conference (NEWCAS 2017), June 2017.*  
+- - -
+Adrien Cassagne, Thibaud Tonnellier, Camille Leroux, Bertrand Le Gal, Olivier Aumage and Denis Barthou  
+[**Beyond Gbps Turbo Decoder on Multi-Core CPUs**](http://ieeexplore.ieee.org/document/7593092/)  
+*The 10th International Symposium on Turbo Codes and Iterative Information Processing (ISTC 2016), September 2016.*  
+- - -
+Adrien Cassagne, Olivier Aumage, Camille Leroux, Denis Barthou and Bertrand Le Gal  
+[**Energy Consumption Analysis of Software Polar Decoders on Low Power Processors**](http://ieeexplore.ieee.org/document/7760327/)  
+*The 24nd European Signal Processing Conference (EUSIPCO 2016), September 2016.*  
+- - -
+Adrien Cassagne, Bertrand Le Gal, Camille Leroux, Olivier Aumage and Denis Barthou  
+[**An Efficient, Portable and Generic Library for Successive Cancellation Decoding of Polar Codes**](https://link.springer.com/chapter/10.1007%2F978-3-319-29778-1_19)  
+*The 28th International Workshop on Languages and Compilers for Parallel Computing (LCPC 2015), September 2015.*  
+
+### Open-source projects in which MIPP is used
+
+  - [AFF3CT](https://github.com/aff3ct/aff3ct): A Fast Forward Error Correction Toolbox!
+  - [MUrB](https://github.com/kouchy/MUrB): a N-body problem simulator with various implementations (multi-threaded, MPI, SIMD, etc.).
+  - [mandelbrot](https://gitlab.inria.fr/acassagn/mandelbrot): the Mandelbrot fractal, sequential and SIMD implementations.
+
 ## Short documentation
 
 ### Supported compilers
@@ -449,3 +483,4 @@ The `pipe` keyword stands for the "&#124;" binary operator.
 | `sin`          | `Reg<T> sin    (const Reg<T> r)`                       | Computes the sines of `r`.                                           | `double` (only on `icpc`), `float` |
 | `cos`          | `Reg<T> cos    (const Reg<T> r)`                       | Computes the cosines of `r`.                                         | `double` (only on `icpc`), `float` |
 | `sincos`       | `void   sincos (const Reg<T> r, Reg<T>& s, Reg<T>& c)` | Computes at once the sines (in `s`) and the cosines (in `c`) of `r`. | `double` (only on `icpc`), `float` |
+
