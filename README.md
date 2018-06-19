@@ -16,23 +16,28 @@ With the MIPP wrapper you do not need to write a specific intrinsic code anymore
 Adrien Cassagne, Olivier Aumage, Denis Barthou, Camille Leroux and Christophe Jégo  
 [**MIPP: a Portable C++ SIMD Wrapper and its use for Error Correction Coding in 5G Standard**](https://dl.acm.org/citation.cfm?doid=3178433.3178435)  
 *The 5th International Workshop on Programming Models for SIMD/Vector Processing (WPMVP 2018), February 2018.*  
-- - -
+  
+  
 Mathieu Léonardon, Adrien Cassagne, Camille Leroux, Christophe Jégo, Louis-Philippe Hamelin and Yvon Savaria  
 [**Fast and Flexible Software Polar List Decoders**](https://arxiv.org/abs/1710.08314)  
 *Submitted to Springer Journal of Signal Processing Systems (JSPS), October 2017.*  
-- - -
+  
+  
 Alireza Ghaffari, Mathieu Léonardon, Yvon Savaria, Christophe Jégo and Camille Leroux  
 [**Improving Performance of SCMA MPA Decoders Using Estimation of Conditional Probabilities**](http://ieeexplore.ieee.org/document/8010095/)  
 *The 15th IEEE International NEWCAS Conference (NEWCAS 2017), June 2017.*  
-- - -
+  
+  
 Adrien Cassagne, Thibaud Tonnellier, Camille Leroux, Bertrand Le Gal, Olivier Aumage and Denis Barthou  
 [**Beyond Gbps Turbo Decoder on Multi-Core CPUs**](http://ieeexplore.ieee.org/document/7593092/)  
 *The 10th International Symposium on Turbo Codes and Iterative Information Processing (ISTC 2016), September 2016.*  
-- - -
+  
+  
 Adrien Cassagne, Olivier Aumage, Camille Leroux, Denis Barthou and Bertrand Le Gal  
 [**Energy Consumption Analysis of Software Polar Decoders on Low Power Processors**](http://ieeexplore.ieee.org/document/7760327/)  
 *The 24nd European Signal Processing Conference (EUSIPCO 2016), September 2016.*  
-- - -
+  
+  
 Adrien Cassagne, Bertrand Le Gal, Camille Leroux, Olivier Aumage and Denis Barthou  
 [**An Efficient, Portable and Generic Library for Successive Cancellation Decoding of Polar Codes**](https://link.springer.com/chapter/10.1007%2F978-3-319-29778-1_19)  
 *The 28th International Workshop on Languages and Compilers for Parallel Computing (LCPC 2015), September 2015.*  
