@@ -97,6 +97,10 @@ build-linux-x86-icpc:
 
 test-linux-x86-unit-nointr:
   stage: test
+  dependencies:
+    - build-linux-x86-gcc
+    - build-linux-x86-clang
+    - build-linux-x86-icpc
   tags:
     - linux
     - x86
@@ -105,6 +109,10 @@ test-linux-x86-unit-nointr:
 
 test-linux-x86-unit-sse2:
   stage: test
+  dependencies:
+    - build-linux-x86-gcc
+    - build-linux-x86-clang
+    - build-linux-x86-icpc
   tags:
     - linux
     - x86
@@ -114,6 +122,10 @@ test-linux-x86-unit-sse2:
 
 test-linux-x86-unit-sse3:
   stage: test
+  dependencies:
+    - build-linux-x86-gcc
+    - build-linux-x86-clang
+    - build-linux-x86-icpc
   tags:
     - linux
     - x86
@@ -123,6 +135,10 @@ test-linux-x86-unit-sse3:
 
 test-linux-x86-unit-ssse3:
   stage: test
+  dependencies:
+    - build-linux-x86-gcc
+    - build-linux-x86-clang
+    - build-linux-x86-icpc
   tags:
     - linux
     - x86
@@ -132,6 +148,10 @@ test-linux-x86-unit-ssse3:
 
 test-linux-x86-unit-sse4_1:
   stage: test
+  dependencies:
+    - build-linux-x86-gcc
+    - build-linux-x86-clang
+    - build-linux-x86-icpc
   tags:
     - linux
     - x86
@@ -141,6 +161,10 @@ test-linux-x86-unit-sse4_1:
 
 test-linux-x86-unit-sse4_2:
   stage: test
+  dependencies:
+    - build-linux-x86-gcc
+    - build-linux-x86-clang
+    - build-linux-x86-icpc
   tags:
     - linux
     - x86
@@ -150,6 +174,10 @@ test-linux-x86-unit-sse4_2:
 
 test-linux-x86-unit-avx:
   stage: test
+  dependencies:
+    - build-linux-x86-gcc
+    - build-linux-x86-clang
+    - build-linux-x86-icpc
   tags:
     - linux
     - x86
@@ -159,6 +187,10 @@ test-linux-x86-unit-avx:
 
 # test-linux-x86-unit-avx2:
 #   stage: test
+#   dependencies:
+#     - build-linux-x86-gcc
+#     - build-linux-x86-clang
+#     - build-linux-x86-icpc
 #   tags:
 #     - linux
 #     - x86
@@ -168,6 +200,10 @@ test-linux-x86-unit-avx:
 
 # test-linux-x86-unit-avx2-fma:
 #   stage: test
+#   dependencies:
+#     - build-linux-x86-gcc
+#     - build-linux-x86-clang
+#     - build-linux-x86-icpc
 #   tags:
 #     - linux
 #     - x86
@@ -178,6 +214,10 @@ test-linux-x86-unit-avx:
 
 # test-linux-x86-unit-avx512f:
 #   stage: test
+#   dependencies:
+#     - build-linux-x86-gcc
+#     - build-linux-x86-clang
+#     - build-linux-x86-icpc
 #   tags:
 #     - linux
 #     - x86
@@ -215,6 +255,8 @@ build-macos-x86-clang:
 
 test-macos-x86-unit-nointr:
   stage: test
+  dependencies:
+    - build-macos-x86-clang
   tags:
      - macos
      - x86
@@ -223,6 +265,8 @@ test-macos-x86-unit-nointr:
 
 test-macos-x86-unit-sse2:
   stage: test
+  dependencies:
+    - build-macos-x86-clang
   tags:
     - macos
     - x86
@@ -232,6 +276,8 @@ test-macos-x86-unit-sse2:
 
 test-macos-x86-unit-sse3:
   stage: test
+  dependencies:
+    - build-macos-x86-clang
   tags:
     - macos
     - x86
@@ -241,6 +287,8 @@ test-macos-x86-unit-sse3:
 
 test-macos-x86-unit-ssse3:
   stage: test
+  dependencies:
+    - build-macos-x86-clang
   tags:
     - macos
     - x86
@@ -250,6 +298,8 @@ test-macos-x86-unit-ssse3:
 
 test-macos-x86-unit-sse4_1:
   stage: test
+  dependencies:
+    - build-macos-x86-clang
   tags:
     - macos
     - x86
@@ -259,6 +309,8 @@ test-macos-x86-unit-sse4_1:
 
 test-macos-x86-unit-sse4_2:
   stage: test
+  dependencies:
+    - build-macos-x86-clang
   tags:
     - macos
     - x86
@@ -268,6 +320,8 @@ test-macos-x86-unit-sse4_2:
 
 test-macos-x86-unit-avx:
   stage: test
+  dependencies:
+    - build-macos-x86-clang
   tags:
     - macos
     - x86
@@ -277,6 +331,8 @@ test-macos-x86-unit-avx:
 
 # test-macos-x86-unit-avx2:
 #   stage: test
+#   dependencies:
+#    - build-macos-x86-clang
 #   tags:
 #     - macos
 #     - x86
@@ -286,6 +342,8 @@ test-macos-x86-unit-avx:
 
 # test-macos-x86-unit-avx2-fma:
 #   stage: test
+#   dependencies:
+#     - build-macos-x86-clang
 #   tags:
 #     - macos
 #     - x86
@@ -295,6 +353,8 @@ test-macos-x86-unit-avx:
 
 # test-macos-x86-unit-avx512f:
 #   stage: test
+#   dependencies:
+#     - build-macos-x86-clang
 #   tags:
 #     - macos
 #     - x86
@@ -369,6 +429,9 @@ build-linux-armv8-clang:
 
 test-linux-armv7-unit-nointr:
   stage: test
+  dependencies:
+    - build-linux-armv7-gcc
+    - build-linux-armv7-clang
   tags:
     - linux
     - armv7
@@ -377,6 +440,9 @@ test-linux-armv7-unit-nointr:
 
 test-linux-armv7-unit-neon32:
   stage: test
+  dependencies:
+    - build-linux-armv7-gcc
+    - build-linux-armv7-clang
   tags:
     - linux
     - armv7
@@ -386,6 +452,9 @@ test-linux-armv7-unit-neon32:
 
 test-linux-armv7-unit-neon32-fma:
   stage: test
+  dependencies:
+    - build-linux-armv7-gcc
+    - build-linux-armv7-clang
   tags:
     - linux
     - armv7
@@ -395,6 +464,9 @@ test-linux-armv7-unit-neon32-fma:
 
 test-linux-armv8-unit-nointr:
   stage: test
+  dependencies:
+    - build-linux-armv8-gcc
+    - build-linux-armv8-clang
   tags:
     - linux
     - armv8
@@ -403,6 +475,9 @@ test-linux-armv8-unit-nointr:
 
 test-linux-armv8-unit-neon64:
   stage: test
+  dependencies:
+    - build-linux-armv8-gcc
+    - build-linux-armv8-clang
   tags:
     - linux
     - armv8
@@ -462,6 +537,9 @@ build-windows-x86-msvc:
 
 test-windows-x86-unit-nointr:
   stage: test
+  dependencies:
+    - build-windows-x86-gcc
+    - build-windows-x86-msvc
   tags:
      - windows
      - x86
@@ -470,6 +548,9 @@ test-windows-x86-unit-nointr:
 
 test-windows-x86-unit-sse2:
   stage: test
+  dependencies:
+    - build-windows-x86-gcc
+    - build-windows-x86-msvc
   tags:
     - windows
     - x86
@@ -479,6 +560,9 @@ test-windows-x86-unit-sse2:
 
 test-windows-x86-unit-sse3:
   stage: test
+  dependencies:
+    - build-windows-x86-gcc
+    - build-windows-x86-msvc
   tags:
     - windows
     - x86
@@ -488,6 +572,9 @@ test-windows-x86-unit-sse3:
 
 test-windows-x86-unit-ssse3:
   stage: test
+  dependencies:
+    - build-windows-x86-gcc
+    - build-windows-x86-msvc
   tags:
     - windows
     - x86
@@ -497,6 +584,9 @@ test-windows-x86-unit-ssse3:
 
 test-windows-x86-unit-sse4_1:
   stage: test
+  dependencies:
+    - build-windows-x86-gcc
+    - build-windows-x86-msvc
   tags:
     - windows
     - windows
@@ -507,6 +597,9 @@ test-windows-x86-unit-sse4_1:
 
 test-windows-x86-unit-sse4_2:
   stage: test
+  dependencies:
+    - build-windows-x86-gcc
+    - build-windows-x86-msvc
   tags:
     - windows
     - x86
@@ -516,6 +609,9 @@ test-windows-x86-unit-sse4_2:
 
 test-windows-x86-unit-avx:
   stage: test
+  dependencies:
+    - build-windows-x86-gcc
+    - build-windows-x86-msvc
   tags:
     - windows
     - x86
@@ -525,6 +621,9 @@ test-windows-x86-unit-avx:
 
 # test-windows-x86-unit-avx2:
 #   stage: test
+#   dependencies:
+#     - build-windows-x86-gcc
+#     - build-windows-x86-msvc
 #   tags:
 #     - windows
 #     - x86
@@ -534,6 +633,9 @@ test-windows-x86-unit-avx:
 
 # test-windows-x86-unit-avx2-fma:
 #   stage: test
+#   dependencies:
+#     - build-windows-x86-gcc
+#     - build-windows-x86-msvc
 #   tags:
 #     - windows
 #     - x86
@@ -544,6 +646,9 @@ test-windows-x86-unit-avx:
 
 # test-windows-x86-unit-avx512f:
 #   stage: test
+#   dependencies:
+#     - build-windows-x86-gcc
+#     - build-windows-x86-msvc
 #   tags:
 #     - windows
 #     - x86
@@ -604,6 +709,7 @@ coverage-linux:
   dependencies:
     - build-coverage-linux-x86-gcc
     - build-coverage-linux-armv7-gcc
+    - build-coverage-linux-armv8-gcc
   tags:
     - lcov
     - linux
