@@ -31,7 +31,6 @@ function gen_coverage_info {
 cd tests
 mkdir code_coverage_files || true
 
-build_root=build_coverage_linux_arm_gcc
-gen_coverage_info "${build_root}_nointr"     "-DMIPP_NO_INTRINSICS"
-gen_coverage_info "${build_root}_neon32"     "-mfpu=neon"
-gen_coverage_info "${build_root}_neon32_fma" "-mfpu=neon-vfpv4"
+build_root=build_coverage_linux_armv8_gcc
+gen_coverage_info "${build_root}_nointr" "-DMIPP_NO_INTRINSICS"
+gen_coverage_info "${build_root}_neon64" "-march=native"

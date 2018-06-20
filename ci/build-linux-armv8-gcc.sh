@@ -16,7 +16,6 @@ function compile {
 
 cd tests
 
-build_root=build_linux_arm_gcc
-compile "${build_root}_nointr"     "-DMIPP_NO_INTRINSICS"
-compile "${build_root}_neon32"     "-mfpu=neon"
-compile "${build_root}_neon32_fma" "-mfpu=neon-vfpv4"
+build_root=build_linux_armv8_gcc
+compile "${build_root}_nointr" "-DMIPP_NO_INTRINSICS"
+compile "${build_root}_neon64" "-march=native"

@@ -307,63 +307,108 @@ test-macos-x86-unit-avx:
 
 # BUILDS --------------------------------------------------------------------------------------------------------------
 
-build-linux-arm-gcc:
+build-linux-armv7-gcc:
   stage: build
   tags:
     - linux
-    - arm32
+    - armv7
     - gcc
     - cmake
   artifacts:
     paths:
-      - ./tests/build_linux_arm_gcc_nointr/bin/
-      - ./tests/build_linux_arm_gcc_neon32/bin/
-      - ./tests/build_linux_arm_gcc_neon32_fma/bin/
+      - ./tests/build_linux_armv7_gcc_nointr/bin/
+      - ./tests/build_linux_armv7_gcc_neon32/bin/
+      - ./tests/build_linux_armv7_gcc_neon32_fma/bin/
   script:
-    - ./ci/build-linux-arm-gcc.sh
+    - ./ci/build-linux-armv7-gcc.sh
 
-build-linux-arm-clang:
+build-linux-armv7-clang:
   stage: build
   tags:
     - linux
-    - arm32
+    - armv7
     - clang
     - cmake
   artifacts:
     paths:
-      - ./tests/build_linux_arm_clang_nointr/bin/
-      - ./tests/build_linux_arm_clang_neon32/bin/
-      - ./tests/build_linux_arm_clang_neon32_fma/bin/
+      - ./tests/build_linux_armv7_clang_nointr/bin/
+      - ./tests/build_linux_armv7_clang_neon32/bin/
+      - ./tests/build_linux_armv7_clang_neon32_fma/bin/
   script:
-    - ./ci/build-linux-arm-clang.sh
+    - ./ci/build-linux-armv7-clang.sh
+
+build-linux-armv8-gcc:
+  stage: build
+  tags:
+    - linux
+    - armv8
+    - gcc
+    - cmake
+  artifacts:
+    paths:
+      - ./tests/build_linux_armv8_gcc_nointr/bin/
+      - ./tests/build_linux_armv8_gcc_neon64/bin/
+  script:
+    - ./ci/build-linux-armv8-gcc.sh
+
+build-linux-armv8-clang:
+  stage: build
+  tags:
+    - linux
+    - armv8
+    - clang
+    - cmake
+  artifacts:
+    paths:
+      - ./tests/build_linux_armv8_clang_nointr/bin/
+      - ./tests/build_linux_armv8_clang_neon64/bin/
+  script:
+    - ./ci/build-linux-armv8-clang.sh
 
 # TESTS ---------------------------------------------------------------------------------------------------------------
 
-test-linux-arm-unit-nointr:
+test-linux-armv7-unit-nointr:
   stage: test
   tags:
     - linux
-    - arm32
+    - armv7
   script:
-    - ./ci/test-linux-macos-unit.sh build_linux_arm_gcc_nointr build_linux_arm_clang_nointr
+    - ./ci/test-linux-macos-unit.sh build_linux_armv7_gcc_nointr build_linux_armv7_clang_nointr
 
-test-linux-arm-unit-neon32:
+test-linux-armv7-unit-neon32:
   stage: test
   tags:
     - linux
-    - arm32
+    - armv7
     - neon32
   script:
-    - ./ci/test-linux-macos-unit.sh build_linux_arm_gcc_neon32 build_linux_arm_clang_neon32
+    - ./ci/test-linux-macos-unit.sh build_linux_armv7_gcc_neon32 build_linux_armv7_clang_neon32
 
-test-linux-arm-unit-neon32-fma:
+test-linux-armv7-unit-neon32-fma:
   stage: test
   tags:
     - linux
-    - arm32
+    - armv7
     - neon32-fma
   script:
-    - ./ci/test-linux-macos-unit.sh build_linux_arm_gcc_neon32_fma build_linux_arm_clang_neon32_fma
+    - ./ci/test-linux-macos-unit.sh build_linux_armv7_gcc_neon32_fma build_linux_armv7_clang_neon32_fma
+
+test-linux-armv8-unit-nointr:
+  stage: test
+  tags:
+    - linux
+    - armv8
+  script:
+    - ./ci/test-linux-macos-unit.sh build_linux_armv8_gcc_nointr build_linux_armv8_clang_nointr
+
+test-linux-armv8-unit-neon64:
+  stage: test
+  tags:
+    - linux
+    - armv8
+    - neon64
+  script:
+    - ./ci/test-linux-macos-unit.sh build_linux_armv8_gcc_neon64 build_linux_armv8_clang_neon64
 
 # ---------------------------------------------------------------------------------------------------------------------
 # WINDOWS X86 ---------------------------------------------------------------------------------------------------------
@@ -524,12 +569,12 @@ build-coverage-linux-x86-gcc:
   script:
     - ./ci/build-coverage-linux-x86-gcc.sh
 
-build-coverage-linux-arm-gcc:
+build-coverage-linux-armv7-gcc:
   stage: build
   tags:
     - lcov
     - linux
-    - arm32
+    - armv7
     - gcc
     - cmake
   artifacts:
@@ -537,13 +582,28 @@ build-coverage-linux-arm-gcc:
     paths:
       - ./tests/code_coverage_files/*
   script:
-    - ./ci/build-coverage-linux-arm-gcc.sh
+    - ./ci/build-coverage-linux-armv7-gcc.sh
+
+build-coverage-linux-armv8-gcc:
+  stage: build
+  tags:
+    - lcov
+    - linux
+    - armv8
+    - gcc
+    - cmake
+  artifacts:
+    name: code-coverage-files
+    paths:
+      - ./tests/code_coverage_files/*
+  script:
+    - ./ci/build-coverage-linux-armv8-gcc.sh
 
 coverage-linux:
   stage: coverage
   dependencies:
     - build-coverage-linux-x86-gcc
-    - build-coverage-linux-arm-gcc
+    - build-coverage-linux-armv7-gcc
   tags:
     - lcov
     - linux
