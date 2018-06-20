@@ -18,4 +18,4 @@ cd tests
 
 build_root=build_linux_armv8_clang
 compile "${build_root}_nointr" "-DMIPP_NO_INTRINSICS"
-compile "${build_root}_neon64" "-march=native"
+compile "${build_root}_neon64" "-march=armv8.1-a+simd"
