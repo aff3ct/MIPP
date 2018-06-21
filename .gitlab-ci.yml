@@ -377,8 +377,8 @@ build-linux-armv7-gcc:
   artifacts:
     paths:
       - ./tests/build_linux_armv7_gcc_nointr/bin/
-      - ./tests/build_linux_armv7_gcc_neon32/bin/
-      - ./tests/build_linux_armv7_gcc_neon32_fma/bin/
+      - ./tests/build_linux_armv7_gcc_neon/bin/
+      - ./tests/build_linux_armv7_gcc_neon_fma/bin/
   script:
     - ./ci/build-linux-armv7-gcc.sh
 
@@ -392,8 +392,8 @@ build-linux-armv7-clang:
   artifacts:
     paths:
       - ./tests/build_linux_armv7_clang_nointr/bin/
-      - ./tests/build_linux_armv7_clang_neon32/bin/
-      - ./tests/build_linux_armv7_clang_neon32_fma/bin/
+      - ./tests/build_linux_armv7_clang_neon/bin/
+      - ./tests/build_linux_armv7_clang_neon_fma/bin/
   script:
     - ./ci/build-linux-armv7-clang.sh
 
@@ -407,7 +407,7 @@ build-linux-armv8-gcc:
   artifacts:
     paths:
       - ./tests/build_linux_armv8_gcc_nointr/bin/
-      - ./tests/build_linux_armv8_gcc_neon64/bin/
+      - ./tests/build_linux_armv8_gcc_neon/bin/
   script:
     - ./ci/build-linux-armv8-gcc.sh
 
@@ -421,7 +421,7 @@ build-linux-armv8-clang:
   artifacts:
     paths:
       - ./tests/build_linux_armv8_clang_nointr/bin/
-      - ./tests/build_linux_armv8_clang_neon64/bin/
+      - ./tests/build_linux_armv8_clang_neon/bin/
   script:
     - ./ci/build-linux-armv8-clang.sh
 
@@ -438,7 +438,7 @@ test-linux-armv7-unit-nointr:
   script:
     - ./ci/test-linux-macos-unit.sh build_linux_armv7_gcc_nointr build_linux_armv7_clang_nointr
 
-test-linux-armv7-unit-neon32:
+test-linux-armv7-unit-neon:
   stage: test
   dependencies:
     - build-linux-armv7-gcc
@@ -446,11 +446,11 @@ test-linux-armv7-unit-neon32:
   tags:
     - linux
     - armv7
-    - neon32
+    - neon
   script:
-    - ./ci/test-linux-macos-unit.sh build_linux_armv7_gcc_neon32 build_linux_armv7_clang_neon32
+    - ./ci/test-linux-macos-unit.sh build_linux_armv7_gcc_neon build_linux_armv7_clang_neon
 
-test-linux-armv7-unit-neon32-fma:
+test-linux-armv7-unit-neon-fma:
   stage: test
   dependencies:
     - build-linux-armv7-gcc
@@ -458,9 +458,9 @@ test-linux-armv7-unit-neon32-fma:
   tags:
     - linux
     - armv7
-    - neon32-fma
+    - neon-fma
   script:
-    - ./ci/test-linux-macos-unit.sh build_linux_armv7_gcc_neon32_fma build_linux_armv7_clang_neon32_fma
+    - ./ci/test-linux-macos-unit.sh build_linux_armv7_gcc_neon_fma build_linux_armv7_clang_neon_fma
 
 test-linux-armv8-unit-nointr:
   stage: test
@@ -473,7 +473,7 @@ test-linux-armv8-unit-nointr:
   script:
     - ./ci/test-linux-macos-unit.sh build_linux_armv8_gcc_nointr build_linux_armv8_clang_nointr
 
-test-linux-armv8-unit-neon64:
+test-linux-armv8-unit-neon:
   stage: test
   dependencies:
     - build-linux-armv8-gcc
@@ -481,9 +481,9 @@ test-linux-armv8-unit-neon64:
   tags:
     - linux
     - armv8
-    - neon64
+    - neon
   script:
-    - ./ci/test-linux-macos-unit.sh build_linux_armv8_gcc_neon64 build_linux_armv8_clang_neon64
+    - ./ci/test-linux-macos-unit.sh build_linux_armv8_gcc_neon build_linux_armv8_clang_neon
 
 # ---------------------------------------------------------------------------------------------------------------------
 # WINDOWS X86 ---------------------------------------------------------------------------------------------------------

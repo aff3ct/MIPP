@@ -33,4 +33,4 @@ mkdir code_coverage_files || true
 
 build_root=build_coverage_linux_armv8_gcc
 gen_coverage_info "${build_root}_nointr" "-DMIPP_NO_INTRINSICS"
-gen_coverage_info "${build_root}_neon64" "-march=armv8.1-a+simd"
+gen_coverage_info "${build_root}_neon"   "-march=armv8.1-a+simd"
