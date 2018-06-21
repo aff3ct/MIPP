@@ -1,9 +1,5 @@
 @echo on
 
-set PATH=%PATH%;C:\Program Files\Git\cmd
-set PATH=%PATH%;C:\Program Files\CMake\bin
-set PATH=%PATH%;C:\Program Files\Git\mingw64\bin
-
 cd tests
 
 rem set build_root=build_windows_x86_gcc
