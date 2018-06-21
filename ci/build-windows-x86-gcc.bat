@@ -23,7 +23,7 @@ mkdir %build%
 cd %build%
 cmake .. -G"MinGW Makefiles" -DCMAKE_CXX_COMPILER=g++.exe -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-Wall -funroll-loops -finline-functions %params%"
 if %ERRORLEVEL% neq 0 exit /B %ERRORLEVEL%
-mingw32-make
+mingw32-make -j %THREADS%
 if %ERRORLEVEL% neq 0 exit /B %ERRORLEVEL%
 cd ..
 exit /B 0

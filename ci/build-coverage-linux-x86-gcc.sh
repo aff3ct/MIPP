@@ -1,8 +1,6 @@
 #!/bin/bash
 set -x
 
-source ci/threads.sh
-
 WD=$(pwd)
 
 function gen_coverage_info {

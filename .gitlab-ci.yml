@@ -49,6 +49,7 @@ build-linux-x86-gcc:
       - ./tests/build_linux_x86_gcc_avx2_fma/bin/
       - ./tests/build_linux_x86_gcc_avx512f/bin/
   script:
+    - source ./ci/tools/threads.sh
     - ./ci/build-linux-x86-gcc.sh
 
 build-linux-x86-clang:
@@ -70,6 +71,7 @@ build-linux-x86-clang:
       - ./tests/build_linux_x86_clang_avx2/bin/
       - ./tests/build_linux_x86_clang_avx2_fma/bin/
   script:
+    - source ./ci/tools/threads.sh
     - ./ci/build-linux-x86-clang.sh
 
 build-linux-x86-icpc:
@@ -91,6 +93,7 @@ build-linux-x86-icpc:
       - ./tests/build_linux_x86_icpc_avx2_fma/bin/
       - ./tests/build_linux_x86_icpc_avx512f/bin/
   script:
+    - source ./ci/tools/threads.sh
     - ./ci/build-linux-x86-icpc.sh
 
 # TESTS ---------------------------------------------------------------------------------------------------------------
@@ -249,6 +252,7 @@ build-macos-x86-clang:
       - ./tests/build_macos_x86_clang_avx2/bin/
       - ./tests/build_macos_x86_clang_avx2_fma/bin/
   script:
+    - source ./ci/tools/threads.sh
     - ./ci/build-macos-x86-clang.sh
 
 # TESTS ---------------------------------------------------------------------------------------------------------------
@@ -380,6 +384,7 @@ build-linux-armv7-gcc:
       - ./tests/build_linux_armv7_gcc_neon/bin/
       - ./tests/build_linux_armv7_gcc_neon_fma/bin/
   script:
+    - source ./ci/tools/threads.sh
     - ./ci/build-linux-armv7-gcc.sh
 
 build-linux-armv7-clang:
@@ -395,6 +400,7 @@ build-linux-armv7-clang:
       - ./tests/build_linux_armv7_clang_neon/bin/
       - ./tests/build_linux_armv7_clang_neon_fma/bin/
   script:
+    - source ./ci/tools/threads.sh
     - ./ci/build-linux-armv7-clang.sh
 
 build-linux-armv8-gcc:
@@ -409,6 +415,7 @@ build-linux-armv8-gcc:
       - ./tests/build_linux_armv8_gcc_nointr/bin/
       - ./tests/build_linux_armv8_gcc_neon/bin/
   script:
+    - source ./ci/tools/threads.sh
     - ./ci/build-linux-armv8-gcc.sh
 
 build-linux-armv8-clang:
@@ -423,6 +430,7 @@ build-linux-armv8-clang:
       - ./tests/build_linux_armv8_clang_nointr/bin/
       - ./tests/build_linux_armv8_clang_neon/bin/
   script:
+    - source ./ci/tools/threads.sh
     - ./ci/build-linux-armv8-clang.sh
 
 # TESTS ---------------------------------------------------------------------------------------------------------------
@@ -510,6 +518,7 @@ build-windows-x86-gcc:
       - ./tests/build_windows_x86_gcc_avx2_fma/bin/
       # - ./tests/build_windows_x86_gcc_avx512f/bin/
   script:
+    - call ./ci/tools/threads.bat
     - ./ci/build-windows-x86-gcc.bat
 
 build-windows-x86-msvc:
@@ -531,6 +540,7 @@ build-windows-x86-msvc:
       - ./tests/build_windows_x86_msvc_avx2_fma/bin/
       # - ./tests/build_windows_x86_msvc_avx512f/bin/
   script:
+    - call ./ci/tools/threads.bat
     - ./ci/build-windows-x86-msvc.bat
 
 # TESTS ---------------------------------------------------------------------------------------------------------------
@@ -672,6 +682,7 @@ build-coverage-linux-x86-gcc:
     paths:
       - ./tests/code_coverage_files/*
   script:
+    - source ./ci/tools/threads.sh
     - ./ci/build-coverage-linux-x86-gcc.sh
 
 build-coverage-linux-armv7-gcc:
@@ -687,6 +698,7 @@ build-coverage-linux-armv7-gcc:
     paths:
       - ./tests/code_coverage_files/*
   script:
+    - source ./ci/tools/threads.sh
     - ./ci/build-coverage-linux-armv7-gcc.sh
 
 build-coverage-linux-armv8-gcc:
@@ -702,6 +714,7 @@ build-coverage-linux-armv8-gcc:
     paths:
       - ./tests/code_coverage_files/*
   script:
+    - source ./ci/tools/threads.sh
     - ./ci/build-coverage-linux-armv8-gcc.sh
 
 coverage-linux:
