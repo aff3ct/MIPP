@@ -1,7 +1,7 @@
 @echo on
 
 set "VSCMD_START_DIR=%CD%"
-call "vcvars64.bat"
+call "%VS_PATH%\VC\Auxiliary\Build\vcvars64.bat"
 
 cd tests
 
