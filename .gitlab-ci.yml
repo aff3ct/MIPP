@@ -505,6 +505,7 @@ build-windows-x86-gcc:
     - x86
     - gcc
     - cmake
+    - 64-bit
   artifacts:
     paths:
       - ./tests/build_windows_x86_gcc_nointr/bin/
@@ -553,6 +554,7 @@ test-windows-x86-unit-nointr:
   tags:
      - windows
      - x86
+     - 64-bit
   script:
     - ./ci/test-windows-unit.bat build_windows_x86_gcc_nointr build_windows_x86_msvc_nointr
 
@@ -564,6 +566,7 @@ test-windows-x86-unit-sse2:
   tags:
     - windows
     - x86
+    - 64-bit
     - sse2
   script:
     - ./ci/test-windows-unit.bat build_windows_x86_gcc_sse2 build_windows_x86_msvc_sse2
@@ -576,6 +579,7 @@ test-windows-x86-unit-sse3:
   tags:
     - windows
     - x86
+    - 64-bit
     - sse3
   script:
     - ./ci/test-windows-unit.bat build_windows_x86_gcc_sse3 build_windows_x86_msvc_sse3
@@ -588,6 +592,7 @@ test-windows-x86-unit-ssse3:
   tags:
     - windows
     - x86
+    - 64-bit
     - ssse3
   script:
     - ./ci/test-windows-unit.bat build_windows_x86_gcc_ssse3 build_windows_x86_msvc_ssse3
@@ -599,8 +604,8 @@ test-windows-x86-unit-sse4_1:
     - build-windows-x86-msvc
   tags:
     - windows
-    - windows
     - x86
+    - 64-bit
     - sse4.1
   script:
     - ./ci/test-windows-unit.bat build_windows_x86_gcc_sse4_1 build_windows_x86_msvc_sse4_1
@@ -613,6 +618,7 @@ test-windows-x86-unit-sse4_2:
   tags:
     - windows
     - x86
+    - 64-bit
     - sse4.2
   script:
     - ./ci/test-windows-unit.bat build_windows_x86_gcc_sse4_2 build_windows_x86_msvc_sse4_2
@@ -625,6 +631,7 @@ test-windows-x86-unit-avx:
   tags:
     - windows
     - x86
+    - 64-bit
     - avx
   script:
     - ./ci/test-windows-unit.bat build_windows_x86_gcc_avx build_windows_x86_msvc_avx
@@ -637,6 +644,7 @@ test-windows-x86-unit-avx:
 #   tags:
 #     - windows
 #     - x86
+#     - 64-bit
 #     - avx2
 #   script:
 #     - ./ci/test-windows-unit.bat build_windows_x86_gcc_avx2 build_windows_x86_msvc_avx2
@@ -649,6 +657,7 @@ test-windows-x86-unit-avx:
 #   tags:
 #     - windows
 #     - x86
+#     - 64-bit
 #     - avx2
 #   script:
 #     - ./ci/test-windows-unit.bat build_windows_x86_gcc_avx2_fma build_windows_x86_msvc_avx2_fma
@@ -662,6 +671,7 @@ test-windows-x86-unit-avx:
 #   tags:
 #     - windows
 #     - x86
+#     - 64-bit
 #     - avx512f
 #   script:
 #     - ./ci/test-windows-unit.bat build_windows_x86_gcc_avx512f build_windows_x86_msvc_avx512f
