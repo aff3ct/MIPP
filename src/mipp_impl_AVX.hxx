@@ -2085,6 +2085,11 @@
 	inline reg mul<int32_t>(const reg v1, const reg v2) {
 		return _mm256_castsi256_ps(_mm256_mullo_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
 	}
+
+	template <>
+	inline reg mul<int16_t>(const reg v1, const reg v2) {
+		return _mm256_castsi256_ps(_mm256_mullo_epi16(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	}
 #endif
 
 	// ------------------------------------------------------------------------------------------------------------ div

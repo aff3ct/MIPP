@@ -30,6 +30,26 @@ void test_reg_mul()
 		REQUIRE(*((T*)&r3 +i) == res);
 #endif
 	}
+
+	std::iota(inputs1, inputs1 + mipp::N<T>(), std::numeric_limits<T>::max() - mipp::N<T>());
+	std::iota(inputs2, inputs2 + mipp::N<T>(), std::numeric_limits<T>::max() - mipp::N<T>());
+
+	std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
+	std::shuffle(inputs2, inputs2 + mipp::N<T>(), g);
+
+	r1 = mipp::load<T>(inputs1);
+	r2 = mipp::load<T>(inputs2);
+	r3 = mipp::mul <T>(r1, r2);
+
+	for (auto i = 0; i < mipp::N<T>(); i++)
+	{
+		T res = inputs1[i] * inputs2[i];
+#if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
+		REQUIRE(*((T*)&r3 +i) == Approx(res));
+#else
+		REQUIRE(*((T*)&r3 +i) == res);
+#endif
+	}
 }
 
 #ifndef MIPP_NO
@@ -44,6 +64,12 @@ TEST_CASE("Multiplication - mipp::reg", "[mipp::mul]")
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
 	SECTION("datatype = int32_t") { test_reg_mul<int32_t>(); }
 #endif
+#if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 2)
+	SECTION("datatype = int16_t") { test_reg_mul<int16_t>(); }
+#endif
+#endif
+#if defined(MIPP_NEON)
+	SECTION("datatype = int8_t") { test_reg_mul<int8_t>(); }
 #endif
 }
 #endif
@@ -72,8 +98,29 @@ void test_Reg_mul()
 		REQUIRE(r3[i] == res);
 #endif
 	}
+
+	std::iota(inputs1, inputs1 + mipp::N<T>(), std::numeric_limits<T>::max() - mipp::N<T>());
+	std::iota(inputs2, inputs2 + mipp::N<T>(), std::numeric_limits<T>::max() - mipp::N<T>());
+
+	std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
+	std::shuffle(inputs2, inputs2 + mipp::N<T>(), g);
+
+	r1 = inputs1;
+	r2 = inputs2;
+	r3 = r1 * r2;
+
+	for (auto i = 0; i < mipp::N<T>(); i++)
+	{
+		T res = inputs1[i] * inputs2[i];
+#if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
+		REQUIRE(r3[i] == Approx(res));
+#else
+		REQUIRE(r3[i] == res);
+#endif
+	}
 }
 
+#ifndef MIPP_NO
 TEST_CASE("Multiplication - mipp::Reg", "[mipp::mul]")
 {
 #if defined(MIPP_64BIT)
@@ -85,8 +132,15 @@ TEST_CASE("Multiplication - mipp::Reg", "[mipp::mul]")
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
 	SECTION("datatype = int32_t") { test_Reg_mul<int32_t>(); }
 #endif
+#if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 2)
+	SECTION("datatype = int16_t") { test_Reg_mul<int16_t>(); }
+#endif
+#endif
+#if defined(MIPP_NEON)
+	SECTION("datatype = int8_t") { test_Reg_mul<int8_t>(); }
 #endif
 }
+#endif
 
 template <typename T>
 void test_reg_maskz_mul()

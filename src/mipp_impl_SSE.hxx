@@ -1973,6 +1973,13 @@
 	}
 #endif
 
+#ifdef __SSE2__
+	template <>
+	inline reg mul<int16_t>(const reg v1, const reg v2) {
+		return _mm_castsi128_ps(_mm_mullo_epi16(_mm_castps_si128(v1), _mm_castps_si128(v2)));
+	}
+#endif
+
 	// ------------------------------------------------------------------------------------------------------------ div
 	template <>
 	inline reg div<float>(const reg v1, const reg v2) {

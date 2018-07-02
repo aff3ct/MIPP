@@ -1798,6 +1798,16 @@
 		return (reg) vmulq_s32((int32x4_t) v1, (int32x4_t) v2);
 	}
 
+	template <>
+	inline reg mul<int16_t>(const reg v1, const reg v2) {
+		return (reg) vmulq_s16((int16x8_t) v1, (int16x8_t) v2);
+	}
+
+	template <>
+	inline reg mul<int8_t>(const reg v1, const reg v2) {
+		return (reg) vmulq_s8((int8x16_t) v1, (int8x16_t) v2);
+	}
+
 	// ------------------------------------------------------------------------------------------------------------ div
 #ifdef __aarch64__
 	template <>
