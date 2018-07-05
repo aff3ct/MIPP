@@ -176,7 +176,20 @@ public:
 	inline Reg<T>      exp          ()                                     const { return mipp::exp          <T>(r);              }
 	inline Reg<T>      sin          ()                                     const { return mipp::sin          <T>(r);              }
 	inline Reg<T>      cos          ()                                     const { return mipp::cos          <T>(r);              }
+	inline Reg<T>      tan          ()                                     const { return mipp::tan          <T>(r);              }
 	inline void        sincos       (      Reg<T> &s,       Reg<T> &c)     const {        mipp::sincos       <T>(r,  s.r,  c.r);  }
+	inline Reg<T>      sinh         ()                                     const { return mipp::sinh         <T>(r);              }
+	inline Reg<T>      cosh         ()                                     const { return mipp::cosh         <T>(r);              }
+	inline Reg<T>      tanh         ()                                     const { return mipp::tanh         <T>(r);              }
+	inline Reg<T>      asinh        ()                                     const { return mipp::asinh        <T>(r);              }
+	inline Reg<T>      acosh        ()                                     const { return mipp::acosh        <T>(r);              }
+	inline Reg<T>      atanh        ()                                     const { return mipp::atanh        <T>(r);              }
+//	inline Reg<T>      csch         ()                                     const { return mipp::csch         <T>(r);              }
+//	inline Reg<T>      sech         ()                                     const { return mipp::sech         <T>(r);              }
+//	inline Reg<T>      coth         ()                                     const { return mipp::coth         <T>(r);              }
+//	inline Reg<T>      acsch        ()                                     const { return mipp::acsch        <T>(r);              }
+//	inline Reg<T>      asech        ()                                     const { return mipp::asech        <T>(r);              }
+//	inline Reg<T>      acoth        ()                                     const { return mipp::acoth        <T>(r);              }
 	inline Reg<T>      fmadd        (const Reg<T> v1, const Reg<T> v2)     const { return mipp::fmadd        <T>(r, v1.r, v2.r);  }
 	inline Reg<T>      fnmadd       (const Reg<T> v1, const Reg<T> v2)     const { return mipp::fnmadd       <T>(r, v1.r, v2.r);  }
 	inline Reg<T>      fmsub        (const Reg<T> v1, const Reg<T> v2)     const { return mipp::fmsub        <T>(r, v1.r, v2.r);  }
@@ -250,7 +263,14 @@ public:
 	inline Reg<T>      exp          ()                                     const { return (T)std::exp(r);                         }
 	inline Reg<T>      sin          ()                                     const { return (T)std::sin(r);                         }
 	inline Reg<T>      cos          ()                                     const { return (T)std::cos(r);                         }
+	inline Reg<T>      tan          ()                                     const { return (T)std::tan(r);                         }
 	inline void        sincos       (      Reg<T> &s,       Reg<T> &c)     const { s = std::sin(r); c = std::cos(r);              }
+	inline Reg<T>      sinh         ()                                     const { return (T)std::sinh(r);                        }
+	inline Reg<T>      cosh         ()                                     const { return (T)std::cosh(r);                        }
+	inline Reg<T>      tanh         ()                                     const { return (T)std::tanh(r);                        }
+	inline Reg<T>      asinh        ()                                     const { return (T)std::asinh(r);                       }
+	inline Reg<T>      acosh        ()                                     const { return (T)std::acosh(r);                       }
+	inline Reg<T>      atanh        ()                                     const { return (T)std::atanh(r);                       }
 	inline Reg<T>      fmadd        (const Reg<T> v1, const Reg<T> v2)     const { return   r * v1.r + v2.r;                      }
 	inline Reg<T>      fnmadd       (const Reg<T> v1, const Reg<T> v2)     const { return v2.r -(r * v1.r);                       }
 	inline Reg<T>      fmsub        (const Reg<T> v1, const Reg<T> v2)     const { return   r * v1.r - v2.r;                      }
@@ -660,7 +680,14 @@ template <typename T> inline Reg<T>      log          (const Reg<T> v)          
 template <typename T> inline Reg<T>      exp          (const Reg<T> v)                                        { return v.exp();                  }
 template <typename T> inline Reg<T>      sin          (const Reg<T> v)                                        { return v.sin();                  }
 template <typename T> inline Reg<T>      cos          (const Reg<T> v)                                        { return v.cos();                  }
+template <typename T> inline Reg<T>      tan          (const Reg<T> v)                                        { return v.tan();                  }
 template <typename T> inline void        sincos       (const Reg<T> x,        Reg<T> &s,       Reg<T> &c)     { return x.sincos(s,c);            }
+template <typename T> inline Reg<T>      sinh         (const Reg<T> v)                                        { return v.sinh();                 }
+template <typename T> inline Reg<T>      cosh         (const Reg<T> v)                                        { return v.cosh();                 }
+template <typename T> inline Reg<T>      tanh         (const Reg<T> v)                                        { return v.tanh();                 }
+template <typename T> inline Reg<T>      asinh        (const Reg<T> v)                                        { return v.asinh();                }
+template <typename T> inline Reg<T>      acosh        (const Reg<T> v)                                        { return v.acosh();                }
+template <typename T> inline Reg<T>      atanh        (const Reg<T> v)                                        { return v.atanh();                }
 template <typename T> inline Reg<T>      fmadd        (const Reg<T> v1, const Reg<T> v2, const Reg<T> v3)     { return v1.fmadd(v2, v3);         }
 template <typename T> inline Reg<T>      fnmadd       (const Reg<T> v1, const Reg<T> v2, const Reg<T> v3)     { return v1.fnmadd(v2, v3);        }
 template <typename T> inline Reg<T>      fmsub        (const Reg<T> v1, const Reg<T> v2, const Reg<T> v3)     { return v1.fmsub(v2, v3);         }

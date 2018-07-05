@@ -725,6 +725,111 @@ inline reg pack(const reg, const reg) {
 template <typename T> inline reg copysign(const reg r1, const reg r2) { return neg<T>(r1, r2); }
 template <typename T> inline reg copysign(const reg r1, const msk r2) { return neg<T>(r1, r2); }
 
+// --------------------------------------------------------------------------------- hyperbolic trigonometric functions
+// --------------------------------------------------------------------------------------------------------------------
+template <typename T>
+inline reg tan(const reg r)
+{
+	mipp::reg sin, cos;
+	mipp::sincos<T>(r, sin, cos);
+	return mipp::div<T>(sin, cos);
+}
+
+template <typename T>
+inline reg sinh(const reg r)
+{
+	mipp::reg zero = mipp::set0<T>();
+	mipp::reg half = mipp::set1<T>((T)0.5);
+	return mipp::mul<T>(mipp::sub<T>(mipp::exp<T>(r), mipp::exp<T>(mipp::sub<T>(zero,r))), half);
+}
+
+template <typename T>
+inline reg cosh(const reg r)
+{
+	mipp::reg zero = mipp::set0<T>();
+	mipp::reg half = mipp::set1<T>((T)0.5);
+	return mipp::mul<T>(mipp::add<T>(mipp::exp<T>(r), mipp::exp<T>(mipp::sub<T>(zero,r))), half);
+}
+
+template <typename T>
+inline reg tanh(const reg r)
+{
+	mipp::reg zero = mipp::set0<T>();
+	auto epx = mipp::exp<T>(r);
+	auto emx = mipp::exp<T>(mipp::sub<T>(zero,r));
+	return mipp::div<T>(mipp::sub<T>(epx, emx), mipp::add<T>(epx, emx));
+}
+
+template <typename T>
+inline reg asinh(const reg r)
+{
+	mipp::reg one = mipp::set1<T>((T)1);
+	return mipp::log<T>(mipp::add<T>(r, mipp::sqrt<T>(mipp::add<T>(mipp::mul<T>(r, r), one))));
+}
+
+template <typename T>
+inline reg acosh(const reg r)
+{
+	mipp::reg one = mipp::set1<T>((T)1);
+	return mipp::log<T>(mipp::add<T>(r, mipp::sqrt<T>(mipp::sub<T>(mipp::mul<T>(r, r), one))));
+}
+
+template <typename T>
+inline reg atanh(const reg r)
+{
+	mipp::reg one = mipp::set1<T>((T)1);
+	mipp::reg half = mipp::set1<T>((T)0.5);
+	return mipp::mul<T>(half, mipp::log<T>(mipp::div<T>(mipp::add<T>(one, r), mipp::sub<T>(one, r))));
+}
+
+// template <typename T>
+// inline reg csch(const reg r)
+// {
+// 	mipp::reg zero = mipp::set0<T>();
+// 	mipp::reg two = mipp::set1<T>((T)2);
+// 	return mipp::div<T>(two, mipp::sub<T>(mipp::exp<T>(r), mipp::exp<T>(mipp::sub<T>(zero,r))));
+// }
+
+// template <typename T>
+// inline reg sech(const reg r)
+// {
+// 	mipp::reg zero = mipp::set0<T>();
+// 	mipp::reg two = mipp::set1<T>((T)2);
+// 	return mipp::div<T>(two, mipp::add<T>(mipp::exp<T>(r), mipp::exp<T>(mipp::sub<T>(zero,r))));
+// }
+
+// template <typename T>
+// inline reg coth(const reg r)
+// {
+// 	mipp::reg zero = mipp::set0<T>();
+// 	auto epx = mipp::exp<T>(r);
+// 	auto emx = mipp::exp<T>(mipp::sub<T>(zero,r));
+// 	return mipp::div<T>(mipp::add<T>(epx, emx), mipp::sub<T>(epx, emx));
+// }
+
+// template <typename T>
+// inline reg acsch(const reg r)
+// {
+// 	mipp::reg one = mipp::set1<T>((T)1);
+// 	return mipp::log<T>(mipp::div<T>(mipp::add<T>(one, mipp::sqrt<T>(mipp::add<T>(one, mipp::mul<T>(r, r)))), r));
+// }
+
+// template <typename T>
+// inline reg asech(const reg r)
+// {
+// 	mipp::reg one = mipp::set1<T>((T)1);
+// 	return mipp::log<T>(mipp::div<T>(mipp::add<T>(one, mipp::sqrt<T>(mipp::sub<T>(one, mipp::mul<T>(r, r)))), r));
+// }
+
+// template <typename T>
+// inline reg acoth(const reg r)
+// {
+// 	mipp::reg one = mipp::set1<T>((T)1);
+// 	mipp::reg half = mipp::set1<T>((T)0.5);
+// 	return mipp::mul<T>(half, mipp::log<T>(mipp::div<T>(mipp::add<T>(r, one), mipp::sub<T>(r, one))));
+// }
+
+
 // ------------------------------------------------------------------------------------------------------------ masking
 // --------------------------------------------------------------------------------------------------------------------
 

@@ -482,5 +482,12 @@ The `pipe` keyword stands for the "&#124;" binary operator.
 | `log`          | `Reg<T> log    (const Reg<T> r)`                       | Computes the logarithm of `r`.                                       | `double` (only on `icpc`), `float` |
 | `sin`          | `Reg<T> sin    (const Reg<T> r)`                       | Computes the sines of `r`.                                           | `double` (only on `icpc`), `float` |
 | `cos`          | `Reg<T> cos    (const Reg<T> r)`                       | Computes the cosines of `r`.                                         | `double` (only on `icpc`), `float` |
+| `tan`          | `Reg<T> tan    (const Reg<T> r)`                       | Computes the tangent of `r`.                                         | `double` (only on `icpc`), `float` |
 | `sincos`       | `void   sincos (const Reg<T> r, Reg<T>& s, Reg<T>& c)` | Computes at once the sines (in `s`) and the cosines (in `c`) of `r`. | `double` (only on `icpc`), `float` |
+| `sinh`         | `Reg<T> sinh   (const Reg<T> r)`                       | Computes the hyperbolic sines of `r`.                                | `double` (only on `icpc`), `float` |
+| `cosh`         | `Reg<T> cosh   (const Reg<T> r)`                       | Computes the hyperbolic cosines of `r`.                              | `double` (only on `icpc`), `float` |
+| `tanh`         | `Reg<T> tanh   (const Reg<T> r)`                       | Computes the hyperbolic tangent of `r`.                              | `double` (only on `icpc`), `float` |
+| `asinh`        | `Reg<T> asinh  (const Reg<T> r)`                       | Computes the inverse hyperbolic sines of `r`.                        | `double` (only on `icpc`), `float` |
+| `acosh`        | `Reg<T> acosh  (const Reg<T> r)`                       | Computes the inverse hyperbolic cosines of `r`.                      | `double` (only on `icpc`), `float` |
+| `atanh`        | `Reg<T> atanh  (const Reg<T> r)`                       | Computes the inverse hyperbolic tangent of `r`.                      | `double` (only on `icpc`), `float` |
 
