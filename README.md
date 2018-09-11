@@ -428,7 +428,7 @@ The `pipe` keyword stands for the "&#124;" binary operator.
 
 ### Conversions and packing
 
-| **Short name** | **Prototype**                                        | **Documentation**                                                                                                                   | **Supported types**                                                                                             |
+| **Short name** | **Prototype**                                        | **Documentation**                                                                                                                   | **Supported types**                                             |
 | :---           | :---                                                 | :---                                                                                                                                | :---                                                            |
 | `toReg`        | `Reg<T>  toReg (const Msk<N> m)`                     | Converts the mask `m` into a register of type `T`, the number of elements `N` has to be the same for the mask and the register.     | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t`    |
 | `cvt`          | `Reg<T2> cvt   (const Reg<T1> r)`                    | Converts the elements of `r` into an other representation (the new representation and the original one have to have the same size). | `float -> int32_t`,                                             |
