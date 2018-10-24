@@ -7,7 +7,7 @@ IF "%~1"=="" goto End
    set build=%~1%
    cd %build%/bin/
    run_tests.exe
-   if %ERRORLEVEL% neq 0 exit /B %ERRORLEVEL%
+   if %ERRORLEVEL% neq 0 exit %ERRORLEVEL%
    cd ../../
 
 shift
