@@ -352,7 +352,7 @@ for (int i = 0; i < vecLoopSize; i += mipp::N<float>()) {
 	rout.store(&out[i]);
 }
 
-// Scalar tail loop: compute the remaining element that can't be vectorized.
+// Scalar tail loop: compute the remaining elements that can't be vectorized.
 for (int i = vecLoopSize; i < n; i++) {
 	out[i] = 0.75f * in1[i] * std::exp(in2[i]);
 }
