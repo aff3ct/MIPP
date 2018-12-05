@@ -312,8 +312,8 @@ int main()
 
 	// compute rC with the MIPP vectorized functions
 	for (int i = 0; i < n; i += mipp::N<float>()) {
-		rA.load(&vA[i]);
-		rB.load(&vB[i]);
+		rA.load(&vA[i]); // Unaligned load by default (use the -DMIPP_ALIGNED_LOADS
+		rB.load(&vB[i]); // macro definition to force aligned loads and stores).
 		rC = rA + rB;
 		rC.store(&vC[i]);
 	}
@@ -342,8 +342,8 @@ for (int i = 0; i < n; i++) {
 auto vecLoopSize = (n / mipp::N<float>()) * mipp::N<float>();
 mipp::Reg<float> rout, rin1, rin2;
 for (int i = 0; i < vecLoopSize; i += mipp::N<float>()) {
-	rin1.load(&in1[i]);
-	rin2.load(&in2[i]);
+	rin1.load(&in1[i]); // Unaligned load by default (use the -DMIPP_ALIGNED_LOADS
+	rin2.load(&in2[i]); // macro definition to force aligned loads and stores).
 	// The '0.75f' constant will be broadcast in a vector but it has to be at
 	// the right of a 'mipp::Reg<T>', this is why it has been moved at the right
 	// of the 'rin1' register. Notice that 'std::exp' has been replaced by
@@ -353,9 +353,6 @@ for (int i = 0; i < vecLoopSize; i += mipp::N<float>()) {
 }
 
 // Scalar tail loop: compute the remaining element that can't be vectorized.
-// If you are sure that 'n' is a multiple of 'mipp::N<float>()', then the tail
-// loop is not required. It is also possible to use the padding technique to
-// avoid this scalar loop.
 for (int i = vecLoopSize; i < n; i++) {
 	out[i] = 0.75f * in1[i] * std::exp(in2[i]);
 }
