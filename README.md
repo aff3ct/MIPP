@@ -91,7 +91,7 @@ If you want to check the MIPP mode configuration, you can print the following gl
 Just use the `mipp::Reg<T>` type.
 
 ```cpp
-mipp:Reg<T> r1, r2, r3; // we have declared 3 vector registers
+mipp::Reg<T> r1, r2, r3; // we have declared 3 vector registers
 ```
 
 But we do not know the number of elements per registers here. This number of elements can be obtained by calling the `mipp::N<T>()` function (`T` is a template parameter, it can be `double`, `float`, `int64_t`, `int32_t`, `int16_t` or `int8_t` type).
@@ -289,8 +289,6 @@ r1 = mipp::rrot(r2);       // r1 = | +3.0 | +2.0 | +1.0 | +0.0 |
 
 Of course there are many more available instructions in the MIPP wrapper and you can find these instructions at the end of this page.
 
-## Code examples
-
 ### Addition of two vectors
 
 ```cpp
@@ -314,14 +312,54 @@ int main()
 
 	// compute rC with the MIPP vectorized functions
 	for (int i = 0; i < n; i += mipp::N<float>()) {
-		rA = &vA[i];
-		rB = &vB[i];
+		rA.load(&vA[i]);
+		rB.load(&vB[i]);
 		rC = rA + rB;
 		rC.store(&vC[i]);
 	}
 
 	return 0;
 }
+```
+
+### Vectorizing an existing code
+
+#### Scalar code
+
+```cpp
+// ...
+for (int i = 0; i < n; i++) {
+	out[i] = 0.75f * in1[i] * std::exp(in2[i]);
+}
+// ...
+```
+
+#### Vectorized code
+
+```cpp
+// ...
+// Compute the vectorized loop size which is a multiple of 'mipp::N<float>()'.
+auto vecLoopSize = (n / mipp::N<float>()) * mipp::N<float>();
+mipp::Reg<float> rout, rin1, rin2;
+for (int i = 0; i < vecLoopSize; i += mipp::N<float>()) {
+	rin1.load(&in1[i]);
+	rin2.load(&in2[i]);
+	// The '0.75f' constant will be broadcast in a vector but it has to be at
+	// the right of a 'mipp::Reg<T>', this is why it has been moved at the right
+	// of the 'rin1' register. Notice that 'std::exp' has been replaced by
+	// 'mipp::exp'.
+	rout = rin1 * 0.75f * mipp::exp(rin2);
+	rout.store(&out[i]);
+}
+
+// Scalar tail loop: compute the remaining element that can't be vectorized.
+// If you are sure that 'n' is a multiple of 'mipp::N<float>()', then the tail
+// loop is not required. It is also possible to use the padding technique to
+// avoid this scalar loop.
+for (int i = vecLoopSize; i < n; i++) {
+	out[i] = 0.75f * in1[i] * std::exp(in2[i]);
+}
+// ...
 ```
 
 ### Masked instructions
