@@ -1,7 +1,7 @@
 # MyIntrinsics++ (MIPP)
 
 [![pipeline status](https://gitlab.com/aff3ct/MIPP/badges/master/pipeline.svg)](https://gitlab.com/aff3ct/MIPP/pipelines)
-[![coverage report](https://gitlab.com/aff3ct/MIPP/badges/master/coverage.svg)](https://gitlab.com/aff3ct/MIPP/commits/master)
+[![coverage report](https://gitlab.com/aff3ct/MIPP/badges/master/coverage.svg)](https://aff3ct.gitlab.io/MIPP/)
 
 ![](mipp.jpg)
 
