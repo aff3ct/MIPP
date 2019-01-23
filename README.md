@@ -16,28 +16,33 @@ With the MIPP wrapper you do not need to write a specific intrinsic code anymore
 
 ### Scientific publications
 
-Adrien Cassagne, Olivier Aumage, Denis Barthou, Camille Leroux and Christophe Jégo
-[**MIPP: a Portable C++ SIMD Wrapper and its use for Error Correction Coding in 5G Standard**](https://dl.acm.org/citation.cfm?doid=3178433.3178435)
+Adrien Cassagne, Olivier Aumage, Denis Barthou, Camille Leroux and Christophe Jégo,  
+[**MIPP: a Portable C++ SIMD Wrapper and its use for Error Correction Coding in 5G Standard**](https://doi.org/10.1145/3178433.3178435),  
 *The 5th International Workshop on Programming Models for SIMD/Vector Processing (WPMVP 2018), February 2018.*
 
 
-Mathieu Léonardon, Adrien Cassagne, Camille Leroux, Christophe Jégo, Louis-Philippe Hamelin and Yvon Savaria
-[**Fast and Flexible Software Polar List Decoders**](https://arxiv.org/abs/1710.08314)
-*Submitted to Springer Journal of Signal Processing Systems (JSPS), October 2017.*
+Mathieu Léonardon, Adrien Cassagne, Camille Leroux, Christophe Jégo, Louis-Philippe Hamelin and Yvon Savaria,  
+[**Fast and Flexible Software Polar List Decoders**](https://doi.org/10.1007/s11265-018-1430-3),  
+*Springer Journal of Signal Processing Systems (JSPS), January 2019.*
 
 
-Adrien Cassagne, Thibaud Tonnellier, Camille Leroux, Bertrand Le Gal, Olivier Aumage and Denis Barthou
-[**Beyond Gbps Turbo Decoder on Multi-Core CPUs**](http://ieeexplore.ieee.org/document/7593092/)
+Alireza Ghaffari, Mathieu Leonardon, Adrien Cassagne, Camille Leroux, Yvon Savaria,  
+[**Toward High-Performance Implementation of 5G SCMA Algorithms**](https://doi.org/10.1109/ACCESS.2019.2891597),  
+*IEEE Acces, January 2019.*
+
+
+Adrien Cassagne, Thibaud Tonnellier, Camille Leroux, Bertrand Le Gal, Olivier Aumage and Denis Barthou,  
+[**Beyond Gbps Turbo Decoder on Multi-Core CPUs**](https://doi.org/10.1109/ISTC.2016.7593092),  
 *The 10th International Symposium on Turbo Codes and Iterative Information Processing (ISTC 2016), September 2016.*
 
 
-Adrien Cassagne, Olivier Aumage, Camille Leroux, Denis Barthou and Bertrand Le Gal
-[**Energy Consumption Analysis of Software Polar Decoders on Low Power Processors**](http://ieeexplore.ieee.org/document/7760327/)
+Adrien Cassagne, Olivier Aumage, Camille Leroux, Denis Barthou and Bertrand Le Gal,  
+[**Energy Consumption Analysis of Software Polar Decoders on Low Power Processors**](https://doi.org/10.1109/EUSIPCO.2016.7760327),  
 *The 24nd European Signal Processing Conference (EUSIPCO 2016), September 2016.*
 
 
-Adrien Cassagne, Bertrand Le Gal, Camille Leroux, Olivier Aumage and Denis Barthou
-[**An Efficient, Portable and Generic Library for Successive Cancellation Decoding of Polar Codes**](https://link.springer.com/chapter/10.1007%2F978-3-319-29778-1_19)
+Adrien Cassagne, Bertrand Le Gal, Camille Leroux, Olivier Aumage and Denis Barthou,  
+[**An Efficient, Portable and Generic Library for Successive Cancellation Decoding of Polar Codes**](https://doi.org/10.1007/978-3-319-29778-1_19),  
 *The 28th International Workshop on Languages and Compilers for Parallel Computing (LCPC 2015), September 2015.*
 
 ### Open-source projects in which MIPP is used
