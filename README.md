@@ -60,7 +60,10 @@ At this time, MIPP has been tested on the following compilers:
   - Intel: `icpc` >= `16`,
   - GNU: `g++` >= `4.8`,
   - Clang: `clang++` >= `3.6`,
-  - Microsoft: `msvc` >= `14` (the performances are reduced compared to the other compilers, the compiler is not able to fully inline all the MIPP methods).
+  - Microsoft: `msvc` >= `14`.
+
+On `msvc` `14.10` (Microsoft Visual Studio 2017), the performances are reduced compared to the other compilers, the compiler is not able to fully inline all the MIPP methods.
+This has been fixed on `msvc` `14.21` (Microsoft Visual Studio 2019) and now you can expect high performances.
 
 ### Install and configure your code
 
