@@ -48,6 +48,7 @@ build-linux-x86-gcc:
       - ./tests/build_linux_x86_gcc_avx2/bin/
       - ./tests/build_linux_x86_gcc_avx2_fma/bin/
       - ./tests/build_linux_x86_gcc_avx512f/bin/
+      - ./tests/build_linux_x86_gcc_avx512bw/bin/
   script:
     - source ./ci/tools/threads.sh
     - ./ci/build-linux-x86-gcc.sh
@@ -188,45 +189,55 @@ test-linux-x86-unit-avx:
   script:
     - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_avx build_linux_x86_clang_avx build_linux_x86_icpc_avx
 
-# test-linux-x86-unit-avx2:
-#   stage: test
-#   dependencies:
-#     - build-linux-x86-gcc
-#     - build-linux-x86-clang
-#     - build-linux-x86-icpc
-#   tags:
-#     - linux
-#     - x86
-#     - avx2
-#   script:
-#     - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_avx2 build_linux_x86_clang_avx2
+test-linux-x86-unit-avx2:
+  stage: test
+  dependencies:
+    - build-linux-x86-gcc
+    - build-linux-x86-clang
+    - build-linux-x86-icpc
+  tags:
+    - linux
+    - x86
+    - avx2
+  script:
+    - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_avx2 build_linux_x86_clang_avx2
 
-# test-linux-x86-unit-avx2-fma:
-#   stage: test
-#   dependencies:
-#     - build-linux-x86-gcc
-#     - build-linux-x86-clang
-#     - build-linux-x86-icpc
-#   tags:
-#     - linux
-#     - x86
-#     - avx2
-#   script:
-#     - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_avx2_fma build_linux_x86_clang_avx2_fma build_linux_x86_icpc_avx2_fma
+test-linux-x86-unit-avx2-fma:
+  stage: test
+  dependencies:
+    - build-linux-x86-gcc
+    - build-linux-x86-clang
+    - build-linux-x86-icpc
+  tags:
+    - linux
+    - x86
+    - avx2
+  script:
+    - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_avx2_fma build_linux_x86_clang_avx2_fma build_linux_x86_icpc_avx2_fma
 
 
-# test-linux-x86-unit-avx512f:
-#   stage: test
-#   dependencies:
-#     - build-linux-x86-gcc
-#     - build-linux-x86-clang
-#     - build-linux-x86-icpc
-#   tags:
-#     - linux
-#     - x86
-#     - avx512f
-#   script:
-#     - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_avx512f build_linux_x86_clang_avx512f build_linux_x86_icpc_avx512f
+test-linux-x86-unit-avx512f:
+  stage: test
+  dependencies:
+    - build-linux-x86-gcc
+    - build-linux-x86-icpc
+  tags:
+    - linux
+    - x86
+    - avx512f
+  script:
+    - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_avx512f build_linux_x86_icpc_avx512f
+
+test-linux-x86-unit-avx512bw:
+  stage: test
+  dependencies:
+    - build-linux-x86-gcc
+  tags:
+    - linux
+    - x86
+    - avx512bw
+  script:
+    - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_avx512bw
 
 # ---------------------------------------------------------------------------------------------------------------------
 # MACOSX X86 ----------------------------------------------------------------------------------------------------------
