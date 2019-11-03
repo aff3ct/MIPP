@@ -1985,22 +1985,22 @@
 
 	template <>
 	inline msk cmplt<int64_t>(const reg v1, const reg v2) {
-		return notb<N<int64_t>()>(cmpge<int64_t>(v1, v2));
+		return cmpgt<int64_t>(v2, v1);
 	}
 
 	template <>
 	inline msk cmplt<int32_t>(const reg v1, const reg v2) {
-		return notb<N<int32_t>()>(cmpge<int32_t>(v1, v2));
+		return cmpgt<int32_t>(v2, v1);
 	}
 
 	template <>
 	inline msk cmplt<int16_t>(const reg v1, const reg v2) {
-		return notb<N<int16_t>()>(cmpge<int16_t>(v1, v2));
+		return cmpgt<int16_t>(v2, v1);
 	}
 
 	template <>
 	inline msk cmplt<int8_t>(const reg v1, const reg v2) {
-		return notb<N<int8_t>()>(cmpge<int8_t>(v1, v2));
+		return cmpgt<int8_t>(v2, v1);
 	}
 
 	// ------------------------------------------------------------------------------------------------------------ add
