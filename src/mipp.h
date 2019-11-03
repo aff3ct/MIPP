@@ -986,6 +986,9 @@ void dump(const mipp::reg r, std::ostream &stream = std::cout, const uint32_t el
 		stream << (((int)l < (int)mipp::Lanes -1) ? " | " : "");
 	}
 	stream << "]";
+#ifdef MIPP_ALIGNED_LOADS
+	free(data);
+#endif
 }
 
 template <int N>
@@ -1013,6 +1016,9 @@ void dump(const mipp::msk m, std::ostream &stream = std::cout, const uint32_t el
 				stream << std::setw(elmtWidth) << (data[l * lane_size +i] ? 1 : 0) << ((i < lane_size -1) ? ", " : "");
 			stream << (((int)l < (int)mipp::Lanes -1) ? " | " : "");
 		}
+#ifdef MIPP_ALIGNED_LOADS
+		free(data);
+#endif
 	}
 	else if (bits == 16)
 	{
@@ -1030,6 +1036,9 @@ void dump(const mipp::msk m, std::ostream &stream = std::cout, const uint32_t el
 				stream << std::setw(elmtWidth) << (data[l * lane_size +i] ? 1 : 0) << ((i < lane_size -1) ? ", " : "");
 			stream << (((int)l < (int)mipp::Lanes -1) ? " | " : "");
 		}
+#ifdef MIPP_ALIGNED_LOADS
+		free(data);
+#endif
 	}
 	else if (bits == 32)
 	{
@@ -1047,6 +1056,9 @@ void dump(const mipp::msk m, std::ostream &stream = std::cout, const uint32_t el
 				stream << std::setw(elmtWidth) << (data[l * lane_size +i] ? 1 : 0) << ((i < lane_size -1) ? ", " : "");
 			stream << (((int)l < (int)mipp::Lanes -1) ? " | " : "");
 		}
+#ifdef MIPP_ALIGNED_LOADS
+		free(data);
+#endif
 	}
 	else if (bits == 64)
 	{
@@ -1064,6 +1076,9 @@ void dump(const mipp::msk m, std::ostream &stream = std::cout, const uint32_t el
 				stream << std::setw(elmtWidth) << (data[l * lane_size +i] ? 1 : 0) << ((i < lane_size -1) ? ", " : "");
 			stream << (((int)l < (int)mipp::Lanes -1) ? " | " : "");
 		}
+#ifdef MIPP_ALIGNED_LOADS
+		free(data);
+#endif
 	}
 
 	stream << "]";
