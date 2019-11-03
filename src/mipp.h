@@ -971,7 +971,11 @@ void dump(const mipp::reg r, std::ostream &stream = std::cout, const uint32_t el
 	constexpr int32_t lane_size = (int32_t)(mipp::N<T>() / mipp::Lanes);
 
 //	const T* data = (T*)&r;
-	T data[mipp::nElReg<T>()];
+#ifdef MIPP_ALIGNED_LOADS
+   	T* data = malloc<T>(mipp::N<T>());
+#else
+   	T data[mipp::nElReg<T>()];
+#endif
 	store<T>(data, r);
 
 	stream << "[";
