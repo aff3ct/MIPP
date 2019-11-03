@@ -1000,7 +1000,11 @@ void dump(const mipp::msk m, std::ostream &stream = std::cout, const uint32_t el
 	if (bits == 8)
 	{
 		// const int8_t* data = (int8_t*)&r;
+#ifdef MIPP_ALIGNED_LOADS
+		int8_t* data = malloc<int8_t>(N);
+#else
 		int8_t data[N];
+#endif
 		store<int8_t>(data, r);
 
 		for (uint32_t l = 0; l < mipp::Lanes; l++)
@@ -1013,7 +1017,11 @@ void dump(const mipp::msk m, std::ostream &stream = std::cout, const uint32_t el
 	else if (bits == 16)
 	{
 		// const int16_t* data = (int16_t*)&r;
+#ifdef MIPP_ALIGNED_LOADS
+		int16_t* data = malloc<int8_t>(N);
+#else
 		int16_t data[N];
+#endif
 		store<int16_t>(data, r);
 
 		for (uint32_t l = 0; l < (int)mipp::Lanes; l++)
@@ -1026,7 +1034,11 @@ void dump(const mipp::msk m, std::ostream &stream = std::cout, const uint32_t el
 	else if (bits == 32)
 	{
 		// const int32_t* data = (int32_t*)&r;
+#ifdef MIPP_ALIGNED_LOADS
+		int32_t* data = malloc<int8_t>(N);
+#else
 		int32_t data[N];
+#endif
 		store<int32_t>(data, r);
 
 		for (uint32_t l = 0; l < (int)mipp::Lanes; l++)
@@ -1039,7 +1051,11 @@ void dump(const mipp::msk m, std::ostream &stream = std::cout, const uint32_t el
 	else if (bits == 64)
 	{
 		// const int64_t* data = (int64_t*)&r;
+#ifdef MIPP_ALIGNED_LOADS
+		int64_t* data = malloc<int8_t>(N);
+#else
 		int64_t data[N];
+#endif
 		store<int64_t>(data, r);
 
 		for (uint32_t l = 0; l < (int)mipp::Lanes; l++)
