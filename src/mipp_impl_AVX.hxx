@@ -27,7 +27,7 @@
 
 	template<>
 	inline reg loadu<uint32_t>(const uint32_t *mem_addr){
-	   return _mm256_loadu_ps((const float*)mem_addr);
+		return _mm256_loadu_ps((const float*)mem_addr);
 	}
 
 	template <>
@@ -64,7 +64,7 @@
 
 	template<>
 	inline reg load<uint32_t>(const uint32_t *mem_addr){
-	        return _mm256_load_ps((const float*)mem_addr);
+			  return _mm256_load_ps((const float*)mem_addr);
 	}
 
 	template <>
@@ -98,9 +98,9 @@
 	}
 
 	template <>
-        inline reg load<uint32_t>(const uint32_t *mem_addr) {
-               return mipp::loadu<uint32_t>(mem_addr);
-        }
+	inline reg load<uint32_t>(const uint32_t *mem_addr) {
+		return mipp::loadu<uint32_t>(mem_addr);
+	}
 
 	template <>
 	inline reg load<int16_t>(const int16_t *mem_addr) {
@@ -135,9 +135,9 @@
 	}
 
 	template <>
-         inline void storeu<uint32_t>(uint32_t *mem_addr, const reg v) {
-            _mm256_storeu_ps((float *)mem_addr, v);
-         }
+	inline void storeu<uint32_t>(uint32_t *mem_addr, const reg v) {
+		_mm256_storeu_ps((float *)mem_addr, v);
+	}
 
 	template <>
 	inline void storeu<int16_t>(int16_t *mem_addr, const reg v) {
@@ -205,9 +205,9 @@
 	}
 
 	template <>
-        inline void store<uint32_t>(uint32_t *mem_addr, const reg v) {
-            mipp::storeu<uint32_t>(mem_addr, v);
-        }
+	inline void store<uint32_t>(uint32_t *mem_addr, const reg v) {
+		mipp::storeu<uint32_t>(mem_addr, v);
+	}
 	template <>
 	inline void store<int16_t>(int16_t *mem_addr, const reg v) {
 		mipp::storeu<int16_t>(mem_addr, v);
@@ -240,11 +240,13 @@
 		return _mm256_castsi256_ps(_mm256_set_epi32(vals[7], vals[6], vals[5], vals[4],
 		                                            vals[3], vals[2], vals[1], vals[0]));
 	}
-         template <>
-         inline reg set<uint32_t>(const uint32_t vals[nElReg<uint32_t>()]) {
-            return _mm256_castsi256_ps(_mm256_set_epi32(vals[7], vals[6], vals[5], vals[4],
-                                                        vals[3], vals[2], vals[1], vals[0]));
-         }
+
+	template <>
+	inline reg set<uint32_t>(const uint32_t vals[nElReg<uint32_t>()]) {
+		return _mm256_castsi256_ps(_mm256_set_epi32((uint32_t)vals[7], (uint32_t)vals[6], (uint32_t)vals[5], (uint32_t)vals[4],
+													(uint32_t)vals[3], (uint32_t)vals[2], (uint32_t)vals[1], (uint32_t)vals[0]));
+	}
+	
 	template <>
 	inline reg set<int16_t>(const int16_t vals[nElReg<int16_t>()]) {
 		return _mm256_castsi256_ps(_mm256_set_epi16(vals[15], vals[14], vals[13], vals[12],
@@ -326,10 +328,12 @@
 	inline reg set1<int32_t>(const int32_t val) {
 		return _mm256_castsi256_ps(_mm256_set1_epi32(val));
 	}
-         template <>
-         inline reg set1<uint32_t>(const uint32_t val) {
-            return _mm256_castsi256_ps(_mm256_set1_epi32(val));
-         }
+
+	template <>
+	inline reg set1<uint32_t>(const uint32_t val) {
+		return _mm256_castsi256_ps(_mm256_set1_epi32((uint32_t)val));
+    }
+
 #ifdef __AVX2__
 	template <>
 	inline reg set1<int16_t>(const int16_t val) {
@@ -441,10 +445,10 @@
 		return _mm_castsi128_ps(_mm256_extractf128_si256(_mm256_castps_si256(v), 0));
 	}
 
-        template <>
-        inline reg_2 low<uint32_t>(const reg v) {
-           return _mm_castsi128_ps(_mm256_extractf128_si256(_mm256_castps_si256(v), 0));
-        }
+	template <>
+	inline reg_2 low<uint32_t>(const reg v) {
+		return _mm_castsi128_ps(_mm256_extractf128_si256(_mm256_castps_si256(v), 0));
+	}
 
 	template <>
 	inline reg_2 low<int16_t>(const reg v) {
@@ -477,10 +481,10 @@
 		return _mm_castsi128_ps(_mm256_extractf128_si256(_mm256_castps_si256(v), 1));
 	}
 
-        template <>
-        inline reg_2 high<uint32_t>(const reg v) {
-           return _mm_castsi128_ps(_mm256_extractf128_si256(_mm256_castps_si256(v), 1));
-        }
+	template <>
+	inline reg_2 high<uint32_t>(const reg v) {
+		return _mm_castsi128_ps(_mm256_extractf128_si256(_mm256_castps_si256(v), 1));
+	}
 
 	template <>
 	inline reg_2 high<int16_t>(const reg v) {
@@ -517,6 +521,11 @@
 		int32_t val_bis[nElReg<int32_t>()] = {(int32_t)val[0], (int32_t)val[1], (int32_t)val[2], (int32_t)val[3],
 		                                      (int32_t)val[4], (int32_t)val[5], (int32_t)val[6], (int32_t)val[7]};
 		return mipp::set<int32_t>(val_bis);
+	}
+
+	template <>
+	inline reg cmask<uint32_t>(const uint32_t val[nElReg<uint32_t>()]) {
+		return mipp::set<uint32_t>(val);
 	}
 
 	template <>
@@ -1430,6 +1439,12 @@
 	inline reg andb<int32_t>(const reg v1, const reg v2) {
 		return _mm256_and_ps(v1, v2);
 	}
+	
+	template <>
+	inline reg andb<uint32_t>(const reg v1, const reg v2) {
+		return _mm256_and_ps(v1, v2);
+	}
+
 
 #ifdef __AVX2__
 	template <>
@@ -1871,10 +1886,10 @@
 	inline msk cmpeq<int32_t>(const reg v1, const reg v2) {
 		return _mm256_cmpeq_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2));
 	}
-         template <>
-         inline msk cmpeq<uint32_t>(const reg v1, const reg v2) {
-            return _mm256_cmpeq_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2));
-         }
+	template <>
+	inline msk cmpeq<uint32_t>(const reg v1, const reg v2) {
+		return _mm256_cmpeq_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2));
+	}
 	template <>
 	inline msk cmpeq<int16_t>(const reg v1, const reg v2) {
 		return _mm256_cmpeq_epi16(_mm256_castps_si256(v1), _mm256_castps_si256(v2));
@@ -1917,10 +1932,10 @@
 		return notb<N<int32_t>()>(cmpeq<int32_t>(v1, v2));
 	}
 
-        template <>
-        inline msk cmpneq<uint32_t>(const reg v1, const reg v2) {
-           return notb<N<uint32_t>()>(cmpeq<uint32_t>(v1, v2));
-        }
+	template <>
+	inline msk cmpneq<uint32_t>(const reg v1, const reg v2) {
+		return notb<N<uint32_t>()>(cmpeq<uint32_t>(v1, v2));
+	}
 
 	template <>
 	inline msk cmpneq<int16_t>(const reg v1, const reg v2) {
@@ -1955,10 +1970,10 @@
 	}
 	template <>
 	inline msk cmpgt<uint32_t>(const reg v1, const reg v2) {
-           __m256i signbit = _mm256_set1_epi32(0x80000000);
-           __m256i a1 = _mm256_xor_si256(_mm256_castps_si256(v1), signbit);
-           __m256i b1 = _mm256_xor_si256(_mm256_castps_si256(v2), signbit);
-           return _mm256_cmpgt_epi32(a1, b1);
+			__m256i signbit = _mm256_set1_epi32(0x80000000);
+			__m256i a1 = _mm256_xor_si256(_mm256_castps_si256(v1), signbit);
+			__m256i b1 = _mm256_xor_si256(_mm256_castps_si256(v2), signbit);
+			return _mm256_cmpgt_epi32(a1, b1);
 	}
 	template <>
 	inline msk cmpgt<int16_t>(const reg v1, const reg v2) {
@@ -1987,10 +2002,10 @@
 		return orb<N<int64_t>()>(cmpeq<int64_t>(v1, v2), cmpgt<int64_t>(v1, v2));
 	}
 
-         template <>
-         inline msk cmpge<uint32_t>(const reg v1, const reg v2) {
-            return orb<N<uint32_t>()>(cmpeq<uint32_t>(v1, v2), cmpgt<uint32_t>(v1, v2));
-         }
+	template <>
+	inline msk cmpge<uint32_t>(const reg v1, const reg v2) {
+		return orb<N<uint32_t>()>(cmpeq<uint32_t>(v1, v2), cmpgt<uint32_t>(v1, v2));
+	}
 
 	template <>
 	inline msk cmpge<int32_t>(const reg v1, const reg v2) {
@@ -2027,10 +2042,12 @@
 	inline msk cmple<int32_t>(const reg v1, const reg v2) {
 		return notb<N<int32_t>()>(cmpgt<int32_t>(v1, v2));
 	}
-        template <>
-        inline msk cmple<uint32_t>(const reg v1, const reg v2) {
-           return notb<N<uint32_t>()>(cmpgt<uint32_t>(v1, v2));
-        }
+	
+	template <>
+	inline msk cmple<uint32_t>(const reg v1, const reg v2) {
+		return notb<N<uint32_t>()>(cmpgt<uint32_t>(v1, v2));
+	}
+	
 	template <>
 	inline msk cmple<int16_t>(const reg v1, const reg v2) {
 		return notb<N<int16_t>()>(cmpgt<int16_t>(v1, v2));
@@ -2061,10 +2078,12 @@
 	inline msk cmplt<int32_t>(const reg v1, const reg v2) {
 		return cmpgt<int32_t>(v2, v1);
 	}
-        template <>
-        inline msk cmplt<uint32_t>(const reg v1, const reg v2) {
-                return cmpgt<uint32_t>(v2, v1);
-        }
+
+	template <>
+	inline msk cmplt<uint32_t>(const reg v1, const reg v2) {
+			return cmpgt<uint32_t>(v2, v1);
+	}
+
 	template <>
 	inline msk cmplt<int16_t>(const reg v1, const reg v2) {
 		return cmpgt<int16_t>(v2, v1);
@@ -2094,6 +2113,11 @@
 
 	template <>
 	inline reg add<int32_t>(const reg v1, const reg v2) {
+		return _mm256_castsi256_ps(_mm256_add_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	}
+	
+	template <>
+	inline reg add<uint32_t>(const reg v1, const reg v2) {
 		return _mm256_castsi256_ps(_mm256_add_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
 	}
 
@@ -2129,6 +2153,11 @@
 	inline reg sub<int32_t>(const reg v1, const reg v2) {
 		return _mm256_castsi256_ps(_mm256_sub_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
 	}
+	
+	template <>
+	inline reg sub<uint32_t>(const reg v1, const reg v2) {
+		return _mm256_castsi256_ps(_mm256_sub_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	}
 
 	template <>
 	inline reg sub<int16_t>(const reg v1, const reg v2) {
@@ -2155,6 +2184,11 @@
 #ifdef __AVX2__
 	template <>
 	inline reg mul<int32_t>(const reg v1, const reg v2) {
+		return _mm256_castsi256_ps(_mm256_mullo_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	}
+	
+	template <>
+	inline reg mul<uint32_t>(const reg v1, const reg v2) {
 		return _mm256_castsi256_ps(_mm256_mullo_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
 	}
 
@@ -2193,6 +2227,11 @@
 	}
 
 	template <>
+	inline reg min<uint32_t>(const reg v1, const reg v2) {
+		return _mm256_castsi256_ps(_mm256_min_epu32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	}
+
+	template <>
 	inline reg min<int16_t>(const reg v1, const reg v2) {
 		return _mm256_castsi256_ps(_mm256_min_epi16(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
 	}
@@ -2219,7 +2258,12 @@
 	inline reg max<int32_t>(const reg v1, const reg v2) {
 		return _mm256_castsi256_ps(_mm256_max_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
 	}
-
+	
+	template <>
+	inline reg max<uint32_t>(const reg v1, const reg v2) {
+		return _mm256_castsi256_ps(_mm256_max_epu32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	}
+	
 	template <>
 	inline reg max<int16_t>(const reg v1, const reg v2) {
 		return _mm256_castsi256_ps(_mm256_max_epi16(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
@@ -2670,6 +2714,11 @@
 
 	template <>
 	inline reg blend<int32_t>(const reg v1, const reg v2, const msk m) {
+		return _mm256_blendv_ps(v2, v1, _mm256_castsi256_ps(m));
+	}
+	
+	template <>
+	inline reg blend<uint32_t>(const reg v1, const reg v2, const msk m) {
 		return _mm256_blendv_ps(v2, v1, _mm256_castsi256_ps(m));
 	}
 

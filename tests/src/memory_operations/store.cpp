@@ -31,6 +31,7 @@ TEST_CASE("Store - mipp::reg", "[mipp::store]")
 	SECTION("datatype = int64_t") { test_reg_store<int64_t>(); }
 #endif
 	SECTION("datatype = int32_t") { test_reg_store<int32_t>(); }
+	SECTION("datatype = uint32_t") { test_reg_store<uint32_t>(); }
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_reg_store<int16_t>(); }
 	SECTION("datatype = int8_t") { test_reg_store<int8_t>(); }
@@ -62,6 +63,7 @@ TEST_CASE("Store - mipp::Reg", "[mipp::store]")
 	SECTION("datatype = int64_t") { test_Reg_store<int64_t>(); }
 #endif
 	SECTION("datatype = int32_t") { test_Reg_store<int32_t>(); }
+	SECTION("datatype = uint32_t") { test_Reg_store<uint32_t>(); }
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_Reg_store<int16_t>(); }
 	SECTION("datatype = int8_t") { test_Reg_store<int8_t>(); }
@@ -93,6 +95,7 @@ TEST_CASE("Store unaligned - mipp::reg", "[mipp::storeu]")
 	SECTION("datatype = int64_t") { test_reg_storeu<int64_t>(); }
 #endif
 	SECTION("datatype = int32_t") { test_reg_storeu<int32_t>(); }
+	SECTION("datatype = uint32_t") { test_reg_storeu<uint32_t>(); }
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_reg_storeu<int16_t>(); }
 	SECTION("datatype = int8_t") { test_reg_storeu<int8_t>(); }
@@ -124,6 +127,7 @@ TEST_CASE("Store unaligned - mipp::Reg", "[mipp::storeu]")
 	SECTION("datatype = int64_t") { test_Reg_storeu<int64_t>(); }
 #endif
 	SECTION("datatype = int32_t") { test_Reg_storeu<int32_t>(); }
+	SECTION("datatype = uint32_t") { test_Reg_storeu<uint32_t>(); }
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_Reg_storeu<int16_t>(); }
 	SECTION("datatype = int8_t") { test_Reg_storeu<int8_t>(); }
