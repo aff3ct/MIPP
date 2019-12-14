@@ -57,17 +57,15 @@ TEST_CASE("Compare greater than - mipp::reg", "[mipp::cmpgt]") {
 #endif
 
 void test_Reg_cmpgt_uint32_t() {
-#ifdef __AVX2__
-   mipp::Reg<uint32_t> a({4294967281, 4294967283, 4294967295, 3, 4, 5, 6, 7});
-   mipp::Reg<uint32_t> b(4294967291);
-   mipp::Msk<mipp::N<uint32_t>()> m = a > b;
-   for (int i = 0; i < 8; i++) {
-      if (i == 2)
-         REQUIRE(m[i]);
-      else
-         REQUIRE(!m[i]);
-   }
-#endif
+	mipp::Reg<uint32_t> a({4294967281, 4294967283, 4294967295, 3, 4, 5, 6, 7});
+	mipp::Reg<uint32_t> b(4294967291);
+	mipp::Msk<mipp::N<uint32_t>()> m = a > b;
+	for (int i = 0; i < 8; i++) {
+		if (i == 2)
+			REQUIRE(m[i]);
+		else
+			REQUIRE(!m[i]);
+	}
 }
 
 template <typename T>

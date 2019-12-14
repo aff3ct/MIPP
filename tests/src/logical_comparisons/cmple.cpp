@@ -50,6 +50,7 @@ TEST_CASE("Compare lower or equal - mipp::reg", "[mipp::cmple]")
 #endif
 #endif
 	SECTION("datatype = int32_t") { test_reg_cmple<int32_t>(); }
+	SECTION("datatype = uint32_t") { test_reg_cmple<uint32_t>(); }
 #endif
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_reg_cmple<int16_t>(); }
@@ -57,19 +58,20 @@ TEST_CASE("Compare lower or equal - mipp::reg", "[mipp::cmple]")
 #endif
 }
 #endif
+
 void test_Reg_cmple_uint32_t() {
-#ifdef __AVX2__
-   mipp::Reg<uint32_t> a({4294967281, 4294967283, 4294967295, 3, 4, 5, 6, 7});
-   mipp::Reg<uint32_t> b(4294967291);
-   mipp::Msk<mipp::N<uint32_t>()> m = a < b;
-   for (int i = 0; i < 8; i++) {
-      if (i != 2)
-         REQUIRE(m[i]);
-      else
-         REQUIRE(!m[i]);
-   }
-#endif
+	mipp::Reg<uint32_t> a({4294967281, 4294967283, 4294967295, 3, 4, 5, 6, 7});
+	mipp::Reg<uint32_t> b(4294967291);
+	mipp::Msk<mipp::N<uint32_t>()> m = a < b;
+	for (int i = 0; i < 8; i++) {
+		if (i != 2)
+			REQUIRE(m[i]);
+		else
+			REQUIRE(!m[i]);
+	}
+
 }
+
 template <typename T>
 void test_Reg_cmple()
 {
@@ -106,8 +108,8 @@ TEST_CASE("Compare lower or equal - mipp::Reg", "[mipp::cmple]")
 #endif
 #endif
 	SECTION("datatype = int32_t") { test_Reg_cmple<int32_t>(); }
-        SECTION("datatype = uint32_t") { test_Reg_cmple<uint32_t>(); }
-        SECTION("datatype = uint32_t") { test_Reg_cmple_uint32_t(); }
+	SECTION("datatype = uint32_t") { test_Reg_cmple<uint32_t>(); }
+	SECTION("datatype = uint32_t") { test_Reg_cmple_uint32_t(); }
 #endif
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_Reg_cmple<int16_t>(); }
