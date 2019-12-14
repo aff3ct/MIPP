@@ -50,6 +50,7 @@ TEST_CASE("Compare greater or equal - mipp::reg", "[mipp::cmpge]")
 #endif
 #endif
 	SECTION("datatype = int32_t") { test_reg_cmpge<int32_t>(); }
+        SECTION("datatype = uint32_t") { test_reg_cmpge<uint32_t>(); }
 #endif
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_reg_cmpge<int16_t>(); }
@@ -94,6 +95,7 @@ TEST_CASE("Compare greater or equal - mipp::Reg", "[mipp::cmpge]")
 #endif
 #endif
 	SECTION("datatype = int32_t") { test_Reg_cmpge<int32_t>(); }
+        SECTION("datatype = uint32_t") { test_Reg_cmpge<uint32_t>(); }
 #endif
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_Reg_cmpge<int16_t>(); }
