@@ -2063,7 +2063,7 @@
 	}
         template <>
         inline msk cmplt<uint32_t>(const reg v1, const reg v2) {
-           return notb<N<uint32_t>()>(cmpge<uint32_t>(v1, v2));
+                return cmpgt<uint32_t>(v2, v1);
         }
 	template <>
 	inline msk cmplt<int16_t>(const reg v1, const reg v2) {
