@@ -63,6 +63,7 @@ TEST_CASE("Multiplication - mipp::reg", "[mipp::mul]")
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
 	SECTION("datatype = int32_t") { test_reg_mul<int32_t>(); }
+	SECTION("datatype = uint32_t") { test_reg_mul<uint32_t>(); }
 #endif
 #if defined(MIPP_BW)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 2)
@@ -133,6 +134,7 @@ TEST_CASE("Multiplication - mipp::Reg", "[mipp::mul]")
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
 	SECTION("datatype = int32_t") { test_Reg_mul<int32_t>(); }
+	SECTION("datatype = uint32_t") { test_Reg_mul<uint32_t>(); }
 #endif
 #if defined(MIPP_BW)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 2)
@@ -196,6 +198,7 @@ TEST_CASE("Multiplication - mipp::reg - maskz", "[mipp::mul]")
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
 	SECTION("datatype = int32_t") { test_reg_maskz_mul<int32_t>(); }
+	SECTION("datatype = uint32_t") { test_reg_maskz_mul<uint32_t>(); }
 #endif
 #endif
 }
@@ -250,6 +253,7 @@ TEST_CASE("Multiplication - mipp::Reg - maskz", "[mipp::mul]")
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
 	SECTION("datatype = int32_t") { test_Reg_maskz_mul<int32_t>(); }
+	SECTION("datatype = uint32_t") { test_Reg_maskz_mul<uint32_t>(); }
 #endif
 #endif
 }
@@ -306,6 +310,7 @@ TEST_CASE("Multiplication - mipp::reg - mask", "[mipp::mul]")
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
 	SECTION("datatype = int32_t") { test_reg_mask_mul<int32_t>(); }
+	SECTION("datatype = uint32_t") { test_reg_mask_mul<uint32_t>(); }
 #endif
 #endif
 }
@@ -362,6 +367,7 @@ TEST_CASE("Multiplication - mipp::Reg - mask", "[mipp::mul]")
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
 	SECTION("datatype = int32_t") { test_Reg_mask_mul<int32_t>(); }
+	SECTION("datatype = uint32_t") { test_Reg_mask_mul<uint32_t>(); }
 #endif
 #endif
 }
