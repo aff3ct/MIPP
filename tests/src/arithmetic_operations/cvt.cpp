@@ -28,6 +28,15 @@ void test_reg_cvt()
 	}
 }
 
+void test_cvt_unsigned(){
+	mipp::Reg<uint32_t> a(4294967291);
+	mipp::Reg<float> b(4294967291);
+	mipp::Reg<float> r = mipp::cvt<uint32_t,float>(a);
+	for(int i = 0; i < mipp::N<uint32_t>(); i++){
+		REQUIRE(r[i] == b[i]);
+	}
+}
+
 #ifndef MIPP_NO
 TEST_CASE("Convert - mipp::reg", "[mipp::cvt]")
 {
@@ -40,6 +49,7 @@ TEST_CASE("Convert - mipp::reg", "[mipp::cvt]")
 #endif
 #endif
 	SECTION("datatype = int32_t -> float") { test_reg_cvt<int32_t,float>(); }
+	SECTION("datatype = uint32_t -> float") { test_reg_cvt<uint32_t,float>(); }
 	SECTION("datatype = float -> int32_t") { test_reg_cvt<float,int32_t>(); }
 
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
@@ -89,6 +99,7 @@ TEST_CASE("Convert - mipp::Reg", "[mipp::cvt]")
 #endif
 #endif
 	SECTION("datatype = int32_t -> float") { test_Reg_cvt<int32_t,float>(); }
+	SECTION("datatype = uint32_t -> float") { test_Reg_cvt<uint32_t,float>(); test_cvt_unsigned(); }
 	SECTION("datatype = float -> int32_t") { test_Reg_cvt<float,int32_t>(); }
 
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
