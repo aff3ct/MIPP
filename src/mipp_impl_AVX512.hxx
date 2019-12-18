@@ -3541,7 +3541,7 @@
 
 	template <>
 	inline reg cvt<uint32_t,float>(const reg v) {
-		return _mm512_cvtepi32_ps(_mm512_castps_si512(v));
+		return _mm512_cvtepu32_ps(_mm512_castps_si512(v));
 	}
 	
 	template <>

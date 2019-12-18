@@ -3075,7 +3075,11 @@
 
 	template <>
 	inline reg cvt<uint32_t,float>(const reg v) {
-		return _mm256_cvtepi32_ps(_mm256_castps_si256(v));
+		__m256i a = _mm256_srli_epi32(v, 1);
+		__m256i b = _mm256_and_si256(v, _mm256_set1_epi32(1));
+		__m256 c = _mm256_cvtepi32_ps(a);
+		__m256 d = _mm256_cvtepi32_ps(b);
+		return _mm256_add_ps(_mm256_add_ps(c, c), d);
 	}
 
 #ifdef __AVX2__
