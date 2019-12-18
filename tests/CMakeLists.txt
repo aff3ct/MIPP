@@ -17,7 +17,6 @@ set (EXECUTABLE_OUTPUT_PATH bin/)
 #if(COMMAND cmake_policy)
 #    cmake_policy(SET CMP0003 NEW)
 #endif(COMMAND cmake_policy)
-add_definitions(-march=native)
 # include MIPP headers
 include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/../src/")
 
