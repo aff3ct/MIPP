@@ -49,13 +49,13 @@ TEST_CASE("Convert - mipp::reg", "[mipp::cvt]")
 #endif
 #endif
 	SECTION("datatype = int32_t -> float") { test_reg_cvt<int32_t,float>(); }
-	SECTION("datatype = uint32_t -> float") { test_reg_cvt<uint32_t,float>(); }
 	SECTION("datatype = float -> int32_t") { test_reg_cvt<float,int32_t>(); }
 
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
 #if defined(MIPP_64BIT)
 	SECTION("datatype = int32_t -> int64_t") { test_reg_cvt<int32_t,int64_t>(); }
+	SECTION("datatype = uint32_t -> float") { test_reg_cvt<uint32_t,float>(); }
 #endif
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t -> int32_t") { test_reg_cvt<int16_t,int32_t>(); }
@@ -99,13 +99,13 @@ TEST_CASE("Convert - mipp::Reg", "[mipp::cvt]")
 #endif
 #endif
 	SECTION("datatype = int32_t -> float") { test_Reg_cvt<int32_t,float>(); }
-	SECTION("datatype = uint32_t -> float") { test_Reg_cvt<uint32_t,float>(); test_cvt_unsigned(); }
 	SECTION("datatype = float -> int32_t") { test_Reg_cvt<float,int32_t>(); }
 
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
 #if defined(MIPP_64BIT)
 	SECTION("datatype = int32_t -> int64_t") { test_Reg_cvt<int32_t,int64_t>(); }
+	SECTION("datatype = uint32_t -> float") { test_Reg_cvt<uint32_t,float>(); test_cvt_unsigned(); }
 #endif
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t -> int32_t") { test_Reg_cvt<int16_t,int32_t>(); }
