@@ -56,24 +56,24 @@ TEST_CASE("Compare greater than - mipp::reg", "[mipp::cmpgt]") {
 }
 #endif
 
-#if(defined(MIPP_AVX))
+#if defined(MIPP_AVX512)
 void test_Reg_cmpgt_uint32_t() {
-	mipp::Reg<uint32_t> a({4294967281, 4294967283, 4294967295, 3, 4, 5, 6, 7});
+	mipp::Reg<uint32_t> a({4294967281, 4294967283, 4294967295, 3, 4, 5, 6, 7,9,10,11,12,13,14,15,16});
 	mipp::Reg<uint32_t> b(4294967291);
 	mipp::Msk<mipp::N<uint32_t>()> m = a > b;
-	for (int i = 0; i < 8; i++) {
+	for (int i = 0; i < 16; i++) {
 		if (i == 2)
 			REQUIRE(m[i]);
 		else
 			REQUIRE(!m[i]);
 	}
 }
-#elif defined(MIPP_AVX512)
+#elif !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 void test_Reg_cmpgt_uint32_t() {
-	mipp::Reg<uint32_t> a({4294967281, 4294967283, 4294967295, 3, 4, 5, 6, 7,9,10,11,12,13,14,15,16});
+	mipp::Reg<uint32_t> a({4294967281, 4294967283, 4294967295, 3, 4, 5, 6, 7});
 	mipp::Reg<uint32_t> b(4294967291);
 	mipp::Msk<mipp::N<uint32_t>()> m = a > b;
-	for (int i = 0; i < 16; i++) {
+	for (int i = 0; i < 8; i++) {
 		if (i == 2)
 			REQUIRE(m[i]);
 		else
