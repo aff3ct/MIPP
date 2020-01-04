@@ -18,7 +18,14 @@ jobs:
         source ./ci/tools/threads.sh
         source ./ci/tools/build-linux-x86-gcc-generic.sh
         compile nointr "-DMIPP_NO_INTRINSICS"
+    - name: Cache SDE
+      id: cache-sde
+      uses: actions/cache@v1
+      with:
+        path: intel-sde-downloader
+        key: ${{ runner.os }}-sde
     - name: install-sde
+      if: steps.cache-sde.outputs.cache-hit != 'true'
       run: |
         git clone https://github.com/marehr/intel-sde-downloader
         cd intel-sde-downloader
@@ -28,7 +35,6 @@ jobs:
         mv sde-external-8.35.0-2019-03-11-lin sde
         sudo sh -c "echo 0 > /proc/sys/kernel/yama/ptrace_scope"
         cd ..
-    
     - name: run-test-nointr  
       run: ./intel-sde-downloader/sde/sde64 -skx -- ./tests/build_linux_x86_gcc_nointr/bin/run_tests
   build-sse:
@@ -50,7 +56,14 @@ jobs:
         compile "ssse3"    "-mssse3"
         compile "sse4_1"   "-msse4.1"
         compile "sse4_2"   "-msse4.2"
+    - name: Cache SDE
+      id: cache-sde
+      uses: actions/cache@v1
+      with:
+        path: intel-sde-downloader
+        key: ${{ runner.os }}-sde
     - name: install-sde
+      if: steps.cache-sde.outputs.cache-hit != 'true'
       run: |
         git clone https://github.com/marehr/intel-sde-downloader
         cd intel-sde-downloader
@@ -87,7 +100,14 @@ jobs:
         compile "avx"      "-mavx"
         compile "avx2"     "-mavx2"
         compile "avx2_fma" "-mavx2 -mfma"
+    - name: Cache SDE
+      id: cache-sde
+      uses: actions/cache@v1
+      with:
+        path: intel-sde-downloader
+        key: ${{ runner.os }}-sde
     - name: install-sde
+      if: steps.cache-sde.outputs.cache-hit != 'true'
       run: |
         git clone https://github.com/marehr/intel-sde-downloader
         cd intel-sde-downloader
@@ -96,7 +116,7 @@ jobs:
         tar xvf sde-external-8.35.0-2019-03-11-lin.tar.bz2
         mv sde-external-8.35.0-2019-03-11-lin sde
         sudo sh -c "echo 0 > /proc/sys/kernel/yama/ptrace_scope"
-        cd ..  
+        cd ..
     - name: run-test-avx
       run: ./intel-sde-downloader/sde/sde64 -skx -- ./tests/build_linux_x86_gcc_avx/bin/run_tests
     - name: run-test-avx2
@@ -119,7 +139,14 @@ jobs:
         source ./ci/tools/build-linux-x86-gcc-generic.sh
         compile "avx512f"      "-mavx512f"
         compile "avx512bw"     "-mavx512f -mavx512bw"
+    - name: Cache SDE
+      id: cache-sde
+      uses: actions/cache@v1
+      with:
+        path: intel-sde-downloader
+        key: ${{ runner.os }}-sde
     - name: install-sde
+      if: steps.cache-sde.outputs.cache-hit != 'true'
       run: |
         git clone https://github.com/marehr/intel-sde-downloader
         cd intel-sde-downloader
@@ -128,7 +155,7 @@ jobs:
         tar xvf sde-external-8.35.0-2019-03-11-lin.tar.bz2
         mv sde-external-8.35.0-2019-03-11-lin sde
         sudo sh -c "echo 0 > /proc/sys/kernel/yama/ptrace_scope"
-        cd ..    
+        cd ..
     - name: run-test-avx512f
       run: ./intel-sde-downloader/sde/sde64 -skx -- ./tests/build_linux_x86_gcc_avx512f/bin/run_tests
     - name: run-test-avx512bw
