@@ -41,11 +41,13 @@ TEST_CASE("Addition - mipp::reg", "[mipp::add]")
 	SECTION("datatype = int64_t") { test_reg_add<int64_t>(); }
 #endif
 	SECTION("datatype = int32_t") { test_reg_add<int32_t>(); }
-	SECTION("datatype = uint32_t") { test_reg_add<uint32_t>(); }
 #endif
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_reg_add<int16_t>(); }
 	SECTION("datatype = int8_t") { test_reg_add<int8_t>(); }
+#endif
+#if defined(MIPP_AVX2) || defined(MIPP_AVX512)
+	SECTION("datatype = uint32_t") { test_reg_add<uint32_t>(); }
 #endif
 }
 #endif
@@ -84,11 +86,13 @@ TEST_CASE("Addition - mipp::Reg", "[mipp::add]")
 	SECTION("datatype = int64_t") { test_Reg_add<int64_t>(); }
 #endif
 	SECTION("datatype = int32_t") { test_Reg_add<int32_t>(); }
-	SECTION("datatype = uint32_t") { test_Reg_add<uint32_t>(); }
 #endif
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_Reg_add<int16_t>(); }
 	SECTION("datatype = int8_t") { test_Reg_add<int8_t>(); }
+#endif
+#if defined(MIPP_AVX2) || defined(MIPP_AVX512)
+	SECTION("datatype = uint32_t") { test_Reg_add<uint32_t>(); }
 #endif
 }
 
@@ -140,11 +144,13 @@ TEST_CASE("Addition - mipp::reg - maskz", "[mipp::add]")
 	SECTION("datatype = int64_t") { test_reg_maskz_add<int64_t>(); }
 #endif
 	SECTION("datatype = int32_t") { test_reg_maskz_add<int32_t>(); }
-	SECTION("datatype = uint32_t") { test_reg_maskz_add<uint32_t>(); }
 #endif
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_reg_maskz_add<int16_t>(); }
 	SECTION("datatype = int8_t") { test_reg_maskz_add<int8_t>(); }
+#endif
+#if defined(MIPP_AVX2) || defined(MIPP_AVX512)
+	SECTION("datatype = uint32_t") { test_reg_maskz_add<uint32_t>(); }
 #endif
 }
 #endif
@@ -196,11 +202,13 @@ TEST_CASE("Addition - mipp::Reg - maskz", "[mipp::add]")
 	SECTION("datatype = int64_t") { test_Reg_maskz_add<int64_t>(); }
 #endif
 	SECTION("datatype = int32_t") { test_Reg_maskz_add<int32_t>(); }
-	SECTION("datatype = uint32_t") { test_Reg_maskz_add<uint32_t>(); }
 #endif
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_Reg_maskz_add<int16_t>(); }
 	SECTION("datatype = int8_t") { test_Reg_maskz_add<int8_t>(); }
+#endif
+#if defined(MIPP_AVX2) || defined(MIPP_AVX512)
+	SECTION("datatype = uint32_t") { test_Reg_maskz_add<uint32_t>(); }
 #endif
 }
 
@@ -254,11 +262,14 @@ TEST_CASE("Addition - mipp::reg - mask", "[mipp::add]")
 	SECTION("datatype = int64_t") { test_reg_mask_add<int64_t>(); }
 #endif
 	SECTION("datatype = int32_t") { test_reg_mask_add<int32_t>(); }
-	SECTION("datatype = uint32_t") { test_reg_mask_add<uint32_t>(); }
+	
 #endif
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_reg_mask_add<int16_t>(); }
 	SECTION("datatype = int8_t") { test_reg_mask_add<int8_t>(); }
+#endif
+#if defined(MIPP_AVX2) || defined(MIPP_AVX512)
+	SECTION("datatype = uint32_t") { test_reg_mask_add<uint32_t>(); }
 #endif
 }
 #endif
@@ -312,10 +323,14 @@ TEST_CASE("Addition - mipp::Reg - mask", "[mipp::add]")
 	SECTION("datatype = int64_t") { test_Reg_mask_add<int64_t>(); }
 #endif
 	SECTION("datatype = int32_t") { test_Reg_mask_add<int32_t>(); }
-	SECTION("datatype = uint32_t") { test_Reg_mask_add<uint32_t>(); }
 #endif
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_Reg_mask_add<int16_t>(); }
 	SECTION("datatype = int8_t") { test_Reg_mask_add<int8_t>(); }
 #endif
+
+#if defined(MIPP_AVX2) || defined(MIPP_AVX512)
+	SECTION("datatype = uint32_t") { test_Reg_mask_add<uint32_t>(); }
+#endif
+
 }
