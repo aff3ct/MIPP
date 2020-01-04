@@ -12,5 +12,5 @@ function compile {
 	rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 	make -j $THREADS
 	rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
-	cd ..
+	cd ../..
 }
