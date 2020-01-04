@@ -52,7 +52,7 @@ TEST_CASE("Minimum - mipp::reg", "[mipp::min]")
 	SECTION("datatype = int8_t") { test_reg_min<int8_t>(); }
 #endif
 #endif
-#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+#if defined(MIPP_AVX2) || defined(MIPP_AVX512)
 	SECTION("datatype = uint32_t") { test_reg_min<uint32_t>(); }
 #endif
 }
@@ -103,7 +103,7 @@ TEST_CASE("Minimum - mipp::Reg", "[mipp::min]")
 	SECTION("datatype = int8_t") { test_Reg_min<int8_t>(); }
 #endif
 #endif
-#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+#if defined(MIPP_AVX2) || defined(MIPP_AVX512)
 	SECTION("datatype = uint32_t") { test_Reg_min<uint32_t>(); }
 #endif
 }
@@ -167,7 +167,7 @@ TEST_CASE("Minimum - mipp::reg - maskz", "[mipp::min]")
 	SECTION("datatype = int8_t") { test_reg_maskz_min<int8_t>(); }
 #endif
 #endif
-#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+#if defined(MIPP_AVX2) || defined(MIPP_AVX512)
 	SECTION("datatype = uint32_t") { test_reg_maskz_min<uint32_t>(); }
 #endif
 }
@@ -231,7 +231,7 @@ TEST_CASE("Minimum - mipp::Reg - maskz", "[mipp::min]")
 	SECTION("datatype = int8_t") { test_Reg_maskz_min<int8_t>(); }
 #endif
 #endif
-#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+#if defined(MIPP_AVX2) || defined(MIPP_AVX512)
 	SECTION("datatype = uint32_t") { test_Reg_maskz_min<uint32_t>(); }
 #endif
 }
@@ -297,7 +297,7 @@ TEST_CASE("Minimum - mipp::reg - mask", "[mipp::min]")
 	SECTION("datatype = int8_t") { test_reg_mask_min<int8_t>(); }
 #endif
 #endif
-#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+#if defined(MIPP_AVX2) || defined(MIPP_AVX512)
 	SECTION("datatype = uint32_t") { test_reg_mask_min<uint32_t>(); }
 #endif
 }
@@ -363,7 +363,7 @@ TEST_CASE("Minimum - mipp::Reg - mask", "[mipp::min]")
 	SECTION("datatype = int8_t") { test_Reg_mask_min<int8_t>(); }
 #endif
 #endif
-#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+#if defined(MIPP_AVX2) || defined(MIPP_AVX512)
 	SECTION("datatype = uint32_t") { test_Reg_mask_min<uint32_t>(); }
 #endif
 }
