@@ -26,10 +26,12 @@ TEST_CASE("Set1 - mipp::reg", "[mipp::set1]")
 	SECTION("datatype = int64_t") { test_reg_set1<int64_t>(); }
 #endif
 	SECTION("datatype = int32_t") { test_reg_set1<int32_t>(); }
-	SECTION("datatype = uint32_t") { test_reg_set1<uint32_t>(); }
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_reg_set1<int16_t>(); }
 	SECTION("datatype = int8_t") { test_reg_set1<int8_t>(); }
+#endif
+#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+	SECTION("datatype = uint32_t") { test_reg_set1<uint32_t>(); }
 #endif
 }
 #endif
@@ -53,10 +55,12 @@ TEST_CASE("Set1 - mipp::Reg", "[mipp::set1]")
 	SECTION("datatype = int64_t") { test_Reg_set1<int64_t>(); }
 #endif
 	SECTION("datatype = int32_t") { test_Reg_set1<int32_t>(); }
-	SECTION("datatype = uint32_t") { test_Reg_set1<uint32_t>(); }
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_Reg_set1<int16_t>(); }
 	SECTION("datatype = int8_t") { test_Reg_set1<int8_t>(); }
+#endif
+#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+	SECTION("datatype = uint32_t") { test_Reg_set1<uint32_t>(); }
 #endif
 }
 
@@ -80,10 +84,12 @@ TEST_CASE("Set0 - mipp::reg", "[mipp::set0]")
 	SECTION("datatype = int64_t") { test_reg_set0<int64_t>(); }
 #endif
 	SECTION("datatype = int32_t") { test_reg_set0<int32_t>(); }
-	SECTION("datatype = uint32_t") { test_reg_set0<uint32_t>(); }
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_reg_set0<int16_t>(); }
 	SECTION("datatype = int8_t") { test_reg_set0<int8_t>(); }
+#endif
+#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+	SECTION("datatype = uint32_t") { test_reg_set0<uint32_t>(); }
 #endif
 }
 #endif
@@ -107,10 +113,12 @@ TEST_CASE("Set0 - mipp::Reg", "[mipp::set0]")
 	SECTION("datatype = int64_t") { test_Reg_set0<int64_t>(); }
 #endif
 	SECTION("datatype = int32_t") { test_Reg_set0<int32_t>(); }
-	SECTION("datatype = uint32_t") { test_Reg_set0<uint32_t>(); }
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_Reg_set0<int16_t>(); }
 	SECTION("datatype = int8_t") { test_Reg_set0<int8_t>(); }
+#endif
+#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+	SECTION("datatype = uint32_t") { test_Reg_set0<uint32_t>(); }
 #endif
 }
 
@@ -137,10 +145,12 @@ TEST_CASE("Set - mipp::reg", "[mipp::set]")
 	SECTION("datatype = int64_t") { test_reg_set<int64_t>(); }
 #endif
 	SECTION("datatype = int32_t") { test_reg_set<int32_t>(); }
-	SECTION("datatype = uint32_t") { test_reg_set<uint32_t>(); }
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_reg_set<int16_t>(); }
 	SECTION("datatype = int8_t") { test_reg_set<int8_t>(); }
+#endif
+#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+	SECTION("datatype = uint32_t") { test_reg_set<uint32_t>(); }
 #endif
 }
 #endif
@@ -167,10 +177,12 @@ TEST_CASE("Set - mipp::Reg", "[mipp::set]")
 	SECTION("datatype = int64_t") { test_Reg_set<int64_t>(); }
 #endif
 	SECTION("datatype = int32_t") { test_Reg_set<int32_t>(); }
-	SECTION("datatype = uint32_t") { test_Reg_set<uint32_t>(); }
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_Reg_set<int16_t>(); }
 	SECTION("datatype = int8_t") { test_Reg_set<int8_t>(); }
+#endif
+#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+	SECTION("datatype = uint32_t") { test_Reg_set<uint32_t>(); }
 #endif
 }
 
@@ -202,10 +214,12 @@ TEST_CASE("Set1 - mipp::msk", "[mipp::set1]")
 	SECTION("datatype = int64_t") { test_msk_set1<int64_t>(); }
 #endif
 	SECTION("datatype = int32_t") { test_msk_set1<int32_t>(); }
-	SECTION("datatype = uint32_t") { test_msk_set1<uint32_t>(); }
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_msk_set1<int16_t>(); }
 	SECTION("datatype = int8_t") { test_msk_set1<int8_t>(); }
+#endif
+#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+	SECTION("datatype = uint32_t") { test_msk_set1<uint32_t>(); }
 #endif
 }
 #endif
@@ -234,10 +248,12 @@ TEST_CASE("Set1 - mipp::Msk", "[mipp::set1]")
 	SECTION("datatype = int64_t") { test_Msk_set1<int64_t>(); }
 #endif
 	SECTION("datatype = int32_t") { test_Msk_set1<int32_t>(); }
-	SECTION("datatype = uint32_t") { test_Msk_set1<uint32_t>(); }
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_Msk_set1<int16_t>(); }
 	SECTION("datatype = int8_t") { test_Msk_set1<int8_t>(); }
+#endif
+#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+	SECTION("datatype = uint32_t") { test_Msk_set1<uint32_t>(); }
 #endif
 }
 
@@ -263,10 +279,12 @@ TEST_CASE("Set0 - mipp::msk", "[mipp::set0]")
 	SECTION("datatype = int64_t") { test_msk_set0<int64_t>(); }
 #endif
 	SECTION("datatype = int32_t") { test_msk_set0<int32_t>(); }
-	SECTION("datatype = uint32_t") { test_msk_set0<uint32_t>(); }
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_msk_set0<int16_t>(); }
 	SECTION("datatype = int8_t") { test_msk_set0<int8_t>(); }
+#endif
+#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+	SECTION("datatype = uint32_t") { test_msk_set0<uint32_t>(); }
 #endif
 }
 #endif
@@ -291,10 +309,12 @@ TEST_CASE("Set0 - mipp::Msk", "[mipp::set0]")
 	SECTION("datatype = int64_t") { test_Msk_set0<int64_t>(); }
 #endif
 	SECTION("datatype = int32_t") { test_Msk_set0<int32_t>(); }
-	SECTION("datatype = uint32_t") { test_Msk_set0<uint32_t>(); }
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_Msk_set0<int16_t>(); }
 	SECTION("datatype = int8_t") { test_Msk_set0<int8_t>(); }
+#endif
+#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+	SECTION("datatype = uint32_t") { test_Msk_set0<uint32_t>(); }
 #endif
 }
 
@@ -328,10 +348,12 @@ TEST_CASE("Set - mipp::msk", "[mipp::set]")
 	SECTION("datatype = int64_t") { test_msk_set<int64_t>(); }
 #endif
 	SECTION("datatype = int32_t") { test_msk_set<int32_t>(); }
-    SECTION("datatype = uint32_t") { test_msk_set<uint32_t>(); }
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_msk_set<int16_t>(); }
 	SECTION("datatype = int8_t") { test_msk_set<int8_t>(); }
+#endif
+#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+    SECTION("datatype = uint32_t") { test_msk_set<uint32_t>(); }
 #endif
 }
 #endif
@@ -361,9 +383,11 @@ TEST_CASE("Set - mipp::Msk", "[mipp::set]")
 	SECTION("datatype = int64_t") { test_Msk_set<int64_t>(); }
 #endif
 	SECTION("datatype = int32_t") { test_Msk_set<int32_t>(); }
-    SECTION("datatype = uint32_t") { test_Msk_set<uint32_t>(); }
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_Msk_set<int16_t>(); }
 	SECTION("datatype = int8_t") { test_Msk_set<int8_t>(); }
+#endif
+#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+    SECTION("datatype = uint32_t") { test_Msk_set<uint32_t>(); }
 #endif
 }
