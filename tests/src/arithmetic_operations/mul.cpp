@@ -73,7 +73,7 @@ TEST_CASE("Multiplication - mipp::reg", "[mipp::mul]")
 	SECTION("datatype = int8_t") { test_reg_mul<int8_t>(); }
 #endif
 #endif
-#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+#if defined(MIPP_AVX2) || defined(MIPP_AVX512)
 	SECTION("datatype = uint32_t") { test_reg_mul<uint32_t>(); }
 #endif
 }
@@ -146,7 +146,7 @@ TEST_CASE("Multiplication - mipp::Reg", "[mipp::mul]")
 	SECTION("datatype = int8_t") { test_Reg_mul<int8_t>(); }
 #endif
 #endif
-#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+#if defined(MIPP_AVX2) || defined(MIPP_AVX512)
 	SECTION("datatype = uint32_t") { test_Reg_mul<uint32_t>(); }
 #endif
 }
@@ -204,7 +204,7 @@ TEST_CASE("Multiplication - mipp::reg - maskz", "[mipp::mul]")
 	SECTION("datatype = int32_t") { test_reg_maskz_mul<int32_t>(); }
 #endif
 #endif
-#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+#if defined(MIPP_AVX2) || defined(MIPP_AVX512)
 	SECTION("datatype = uint32_t") { test_reg_maskz_mul<uint32_t>(); }
 #endif
 }
@@ -261,7 +261,7 @@ TEST_CASE("Multiplication - mipp::Reg - maskz", "[mipp::mul]")
 	SECTION("datatype = int32_t") { test_Reg_maskz_mul<int32_t>(); }
 #endif
 #endif
-#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+#if defined(MIPP_AVX2) || defined(MIPP_AVX512)
 	SECTION("datatype = uint32_t") { test_Reg_maskz_mul<uint32_t>(); }
 #endif
 }
@@ -320,7 +320,7 @@ TEST_CASE("Multiplication - mipp::reg - mask", "[mipp::mul]")
 	SECTION("datatype = int32_t") { test_reg_mask_mul<int32_t>(); }
 #endif
 #endif
-#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+#if defined(MIPP_AVX2) || defined(MIPP_AVX512)
 	SECTION("datatype = uint32_t") { test_reg_mask_mul<uint32_t>(); }
 #endif
 }
@@ -379,7 +379,7 @@ TEST_CASE("Multiplication - mipp::Reg - mask", "[mipp::mul]")
 	SECTION("datatype = int32_t") { test_Reg_mask_mul<int32_t>(); }
 #endif
 #endif
-#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+#if defined(MIPP_AVX2) || defined(MIPP_AVX512)
 	SECTION("datatype = uint32_t") { test_Reg_mask_mul<uint32_t>(); }
 #endif
 }

@@ -46,7 +46,7 @@ TEST_CASE("Subtraction - mipp::reg", "[mipp::sub]")
 	SECTION("datatype = int16_t") { test_reg_sub<int16_t>(); }
 	SECTION("datatype = int8_t") { test_reg_sub<int8_t>(); }
 #endif
-#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+#if defined(MIPP_AVX2) || defined(MIPP_AVX512)
 	SECTION("datatype = uint32_t") { test_reg_sub<uint32_t>(); }
 #endif
 }
@@ -91,7 +91,7 @@ TEST_CASE("Subtraction - mipp::Reg", "[mipp::sub]")
 	SECTION("datatype = int16_t") { test_Reg_sub<int16_t>(); }
 	SECTION("datatype = int8_t") { test_Reg_sub<int8_t>(); }
 #endif
-#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+#if defined(MIPP_AVX2) || defined(MIPP_AVX512)
 	SECTION("datatype = uint32_t") { test_Reg_sub<uint32_t>(); }
 #endif
 }
@@ -149,7 +149,7 @@ TEST_CASE("Subtraction - mipp::reg - maskz", "[mipp::sub]")
 	SECTION("datatype = int16_t") { test_reg_maskz_sub<int16_t>(); }
 	SECTION("datatype = int8_t") { test_reg_maskz_sub<int8_t>(); }
 #endif
-#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+#if defined(MIPP_AVX2) || defined(MIPP_AVX512)
 	SECTION("datatype = uint32_t") { test_reg_maskz_sub<uint32_t>(); }
 #endif
 }
@@ -207,7 +207,7 @@ TEST_CASE("Subtraction - mipp::Reg - maskz", "[mipp::sub]")
 	SECTION("datatype = int16_t") { test_Reg_maskz_sub<int16_t>(); }
 	SECTION("datatype = int8_t") { test_Reg_maskz_sub<int8_t>(); }
 #endif
-#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+#if defined(MIPP_AVX2) || defined(MIPP_AVX512)
 	SECTION("datatype = uint32_t") { test_Reg_maskz_sub<uint32_t>(); }
 #endif
 }
@@ -267,7 +267,7 @@ TEST_CASE("Subtraction - mipp::reg - mask", "[mipp::sub]")
 	SECTION("datatype = int16_t") { test_reg_mask_sub<int16_t>(); }
 	SECTION("datatype = int8_t") { test_reg_mask_sub<int8_t>(); }
 #endif
-#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+#if defined(MIPP_AVX2) || defined(MIPP_AVX512)
 	SECTION("datatype = uint32_t") { test_reg_mask_sub<uint32_t>(); }
 #endif
 }
@@ -327,7 +327,7 @@ TEST_CASE("Subtraction - mipp::Reg - mask", "[mipp::sub]")
 	SECTION("datatype = int16_t") { test_Reg_mask_sub<int16_t>(); }
 	SECTION("datatype = int8_t") { test_Reg_mask_sub<int8_t>(); }
 #endif
-#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+#if defined(MIPP_AVX2) || defined(MIPP_AVX512)
 	SECTION("datatype = uint32_t") { test_Reg_mask_sub<uint32_t>(); }
 #endif
 }

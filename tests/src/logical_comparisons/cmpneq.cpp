@@ -102,7 +102,7 @@ TEST_CASE("Compare not equal - mipp::Reg", "[mipp::cmpneq]")
 	SECTION("datatype = int16_t") { test_Reg_cmpneq<int16_t>(); }
 	SECTION("datatype = int8_t") { test_Reg_cmpneq<int8_t>(); }
 #endif
-#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+#if defined(MIPP_AVX2) || defined(MIPP_AVX512)
 	SECTION("datatype = uint32_t") { test_Reg_cmpneq<uint32_t>(); }
 #endif
 }

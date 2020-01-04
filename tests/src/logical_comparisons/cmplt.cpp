@@ -102,7 +102,7 @@ TEST_CASE("Compare lower than - mipp::Reg", "[mipp::cmplt]")
 	SECTION("datatype = int16_t") { test_Reg_cmplt<int16_t>(); }
 	SECTION("datatype = int8_t") { test_Reg_cmplt<int8_t>(); }
 #endif
-#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+#if defined(MIPP_AVX2) || defined(MIPP_AVX512)
 	SECTION("datatype = uint32_t") { test_Reg_cmplt<uint32_t>(); }
 #endif
 }
