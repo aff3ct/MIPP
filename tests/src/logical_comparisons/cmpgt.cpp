@@ -47,11 +47,13 @@ TEST_CASE("Compare greater than - mipp::reg", "[mipp::cmpgt]") {
 #endif
 #endif
    SECTION("datatype = int32_t") { test_reg_cmpgt<int32_t>(); }
-   SECTION("datatype = uint32_t") { test_reg_cmpgt<uint32_t>(); }
 #endif
 #if defined(MIPP_BW)
    SECTION("datatype = int16_t") { test_reg_cmpgt<int16_t>(); }
    SECTION("datatype = int8_t") { test_reg_cmpgt<int8_t>(); }
+#endif
+#if defined(MIPP_AVX2) || defined(MIPP_AVX512)
+   SECTION("datatype = uint32_t") { test_reg_cmpgt<uint32_t>(); }
 #endif
 }
 #endif
@@ -68,7 +70,7 @@ void test_Reg_cmpgt_uint32_t() {
 			REQUIRE(!m[i]);
 	}
 }
-#elif !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
+#elif defined(MIPP_AVX)
 void test_Reg_cmpgt_uint32_t() {
 	mipp::Reg<uint32_t> a({4294967281, 4294967283, 4294967295, 3, 4, 5, 6, 7});
 	mipp::Reg<uint32_t> b(4294967291);
@@ -114,11 +116,13 @@ TEST_CASE("Compare greater than - mipp::Reg", "[mipp::cmpgt]") {
 #endif
 #endif
    SECTION("datatype = int32_t") { test_Reg_cmpgt<int32_t>(); }
-   SECTION("datatype = uint32_t") { test_Reg_cmpgt<uint32_t>(); }
-   SECTION("datatype = uint32_t") { test_Reg_cmpgt_uint32_t(); }
 #endif
 #if defined(MIPP_BW)
    SECTION("datatype = int16_t") { test_Reg_cmpgt<int16_t>(); }
    SECTION("datatype = int8_t") { test_Reg_cmpgt<int8_t>(); }
+#endif
+#if defined(MIPP_AVX2) || defined(MIPP_AVX512)
+   SECTION("datatype = uint32_t") { test_Reg_cmpgt<uint32_t>(); }
+   SECTION("datatype = uint32_t") { test_Reg_cmpgt_uint32_t(); }
 #endif
 }
