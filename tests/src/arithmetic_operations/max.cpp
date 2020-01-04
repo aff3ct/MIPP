@@ -44,7 +44,6 @@ TEST_CASE("Maximum - mipp::reg", "[mipp::max]")
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
 	SECTION("datatype = int32_t") { test_reg_max<int32_t>(); }
-	SECTION("datatype = uint32_t") { test_reg_max<uint32_t>(); }
 #endif
 #endif
 #if defined(MIPP_BW)
@@ -52,6 +51,9 @@ TEST_CASE("Maximum - mipp::reg", "[mipp::max]")
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
 	SECTION("datatype = int8_t") { test_reg_max<int8_t>(); }
 #endif
+#endif
+#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+	SECTION("datatype = uint32_t") { test_reg_max<uint32_t>(); }
 #endif
 }
 #endif
@@ -93,7 +95,6 @@ TEST_CASE("Maximum - mipp::Reg", "[mipp::max]")
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
 	SECTION("datatype = int32_t") { test_Reg_max<int32_t>(); }
-	SECTION("datatype = uint32_t") { test_Reg_max<uint32_t>(); }
 #endif
 #endif
 #if defined(MIPP_BW)
@@ -101,6 +102,9 @@ TEST_CASE("Maximum - mipp::Reg", "[mipp::max]")
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
 	SECTION("datatype = int8_t") { test_Reg_max<int8_t>(); }
 #endif
+#endif
+#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+	SECTION("datatype = uint32_t") { test_Reg_max<uint32_t>(); }
 #endif
 }
 
@@ -155,7 +159,6 @@ TEST_CASE("Maximum - mipp::reg - maskz", "[mipp::max]")
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
 	SECTION("datatype = int32_t") { test_reg_maskz_max<int32_t>(); }
-	SECTION("datatype = uint32_t") { test_reg_maskz_max<uint32_t>(); }
 #endif
 #endif
 #if defined(MIPP_BW)
@@ -163,6 +166,9 @@ TEST_CASE("Maximum - mipp::reg - maskz", "[mipp::max]")
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
 	SECTION("datatype = int8_t") { test_reg_maskz_max<int8_t>(); }
 #endif
+#endif
+#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+	SECTION("datatype = uint32_t") { test_reg_maskz_max<uint32_t>(); }
 #endif
 }
 #endif
@@ -217,7 +223,6 @@ TEST_CASE("Maximum - mipp::Reg - maskz", "[mipp::max]")
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
 	SECTION("datatype = int32_t") { test_Reg_maskz_max<int32_t>(); }
-	SECTION("datatype = uint32_t") { test_Reg_maskz_max<uint32_t>(); }
 #endif
 #endif
 #if defined(MIPP_BW)
@@ -225,6 +230,9 @@ TEST_CASE("Maximum - mipp::Reg - maskz", "[mipp::max]")
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
 	SECTION("datatype = int8_t") { test_Reg_maskz_max<int8_t>(); }
 #endif
+#endif
+#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+	SECTION("datatype = uint32_t") { test_Reg_maskz_max<uint32_t>(); }
 #endif
 }
 
@@ -281,7 +289,6 @@ TEST_CASE("Maximum - mipp::reg - mask", "[mipp::max]")
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
 	SECTION("datatype = int32_t") { test_reg_mask_max<int32_t>(); }
-	SECTION("datatype = uint32_t") { test_reg_mask_max<uint32_t>(); }
 #endif
 #endif
 #if defined(MIPP_BW)
@@ -289,6 +296,9 @@ TEST_CASE("Maximum - mipp::reg - mask", "[mipp::max]")
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
 	SECTION("datatype = int8_t") { test_reg_mask_max<int8_t>(); }
 #endif
+#endif
+#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+	SECTION("datatype = uint32_t") { test_reg_mask_max<uint32_t>(); }
 #endif
 }
 #endif
@@ -345,7 +355,6 @@ TEST_CASE("Maximum - mipp::Reg - mask", "[mipp::max]")
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
 	SECTION("datatype = int32_t") { test_Reg_mask_max<int32_t>(); }
-	SECTION("datatype = uint32_t") { test_Reg_mask_max<uint32_t>(); }
 #endif
 #endif
 #if defined(MIPP_BW)
@@ -353,5 +362,8 @@ TEST_CASE("Maximum - mipp::Reg - mask", "[mipp::max]")
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
 	SECTION("datatype = int8_t") { test_Reg_mask_max<int8_t>(); }
 #endif
+#endif
+#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+	SECTION("datatype = uint32_t") { test_Reg_mask_max<uint32_t>(); }
 #endif
 }

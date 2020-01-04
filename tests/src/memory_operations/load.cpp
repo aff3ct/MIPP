@@ -30,6 +30,10 @@ TEST_CASE("Load - mipp::reg", "[mipp::load]")
 	SECTION("datatype = int64_t") { test_reg_load<int64_t>(); }
 #endif
 	SECTION("datatype = int32_t") { test_reg_load<int32_t>(); }
+
+#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+	SECTION("datatype = uint32_t") { test_reg_load<uint32_t>(); }
+#endif
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_reg_load<int16_t>(); }
 	SECTION("datatype = int8_t") { test_reg_load<int8_t>(); }
@@ -60,6 +64,10 @@ TEST_CASE("Load - mipp::Reg", "[mipp::load]")
 	SECTION("datatype = int64_t") { test_Reg_load<int64_t>(); }
 #endif
 	SECTION("datatype = int32_t") { test_Reg_load<int32_t>(); }
+	
+#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+	SECTION("datatype = uint32_t") { test_Reg_load<uint32_t>(); }
+#endif
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_Reg_load<int16_t>(); }
 	SECTION("datatype = int8_t") { test_Reg_load<int8_t>(); }
@@ -89,7 +97,11 @@ TEST_CASE("Load unaligned - mipp::reg", "[mipp::loadu]")
 #if defined(MIPP_64BIT)
 	SECTION("datatype = int64_t") { test_reg_loadu<int64_t>(); }
 #endif
+#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+	SECTION("datatype = uint32_t") { test_reg_loadu<uint32_t>(); }
+#endif
 	SECTION("datatype = int32_t") { test_reg_loadu<int32_t>(); }
+
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_reg_loadu<int16_t>(); }
 	SECTION("datatype = int8_t") { test_reg_loadu<int8_t>(); }
@@ -118,6 +130,9 @@ TEST_CASE("Load unaligned - mipp::Reg", "[mipp::loadu]")
 
 #if defined(MIPP_64BIT)
 	SECTION("datatype = int64_t") { test_Reg_loadu<int64_t>(); }
+#endif
+#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+	SECTION("datatype = uint32_t") { test_Reg_loadu<uint32_t>(); }
 #endif
 	SECTION("datatype = int32_t") { test_Reg_loadu<int32_t>(); }
 #if defined(MIPP_BW)
