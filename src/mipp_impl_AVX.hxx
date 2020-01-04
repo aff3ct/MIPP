@@ -1909,6 +1909,11 @@
 	inline msk cmpeq<int32_t>(const reg v1, const reg v2) {
 		return cmpeq<float>(v1, v2);
 	}
+
+	template <>
+	inline msk cmpeq<uint32_t>(const reg v1, const reg v2) {
+		return cmpeq<float>(v1, v2);
+	}
 #endif
 
 	// --------------------------------------------------------------------------------------------------------- cmpneq
