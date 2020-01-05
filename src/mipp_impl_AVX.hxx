@@ -246,7 +246,7 @@
 		return _mm256_castsi256_ps(_mm256_set_epi32((uint32_t)vals[7], (uint32_t)vals[6], (uint32_t)vals[5], (uint32_t)vals[4],
 													(uint32_t)vals[3], (uint32_t)vals[2], (uint32_t)vals[1], (uint32_t)vals[0]));
 	}
-	
+
 	template <>
 	inline reg set<int16_t>(const int16_t vals[nElReg<int16_t>()]) {
 		return _mm256_castsi256_ps(_mm256_set_epi16(vals[15], vals[14], vals[13], vals[12],
@@ -1439,7 +1439,7 @@
 	inline reg andb<int32_t>(const reg v1, const reg v2) {
 		return _mm256_and_ps(v1, v2);
 	}
-	
+
 	template <>
 	inline reg andb<uint32_t>(const reg v1, const reg v2) {
 		return _mm256_and_ps(v1, v2);
@@ -2047,12 +2047,12 @@
 	inline msk cmple<int32_t>(const reg v1, const reg v2) {
 		return notb<N<int32_t>()>(cmpgt<int32_t>(v1, v2));
 	}
-	
+
 	template <>
 	inline msk cmple<uint32_t>(const reg v1, const reg v2) {
 		return notb<N<uint32_t>()>(cmpgt<uint32_t>(v1, v2));
 	}
-	
+
 	template <>
 	inline msk cmple<int16_t>(const reg v1, const reg v2) {
 		return notb<N<int16_t>()>(cmpgt<int16_t>(v1, v2));
@@ -2120,7 +2120,7 @@
 	inline reg add<int32_t>(const reg v1, const reg v2) {
 		return _mm256_castsi256_ps(_mm256_add_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
 	}
-	
+
 	template <>
 	inline reg add<uint32_t>(const reg v1, const reg v2) {
 		return _mm256_castsi256_ps(_mm256_add_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
@@ -2158,7 +2158,7 @@
 	inline reg sub<int32_t>(const reg v1, const reg v2) {
 		return _mm256_castsi256_ps(_mm256_sub_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
 	}
-	
+
 	template <>
 	inline reg sub<uint32_t>(const reg v1, const reg v2) {
 		return _mm256_castsi256_ps(_mm256_sub_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
@@ -2191,7 +2191,7 @@
 	inline reg mul<int32_t>(const reg v1, const reg v2) {
 		return _mm256_castsi256_ps(_mm256_mullo_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
 	}
-	
+
 	template <>
 	inline reg mul<uint32_t>(const reg v1, const reg v2) {
 		return _mm256_castsi256_ps(_mm256_mullo_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
@@ -2263,12 +2263,12 @@
 	inline reg max<int32_t>(const reg v1, const reg v2) {
 		return _mm256_castsi256_ps(_mm256_max_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
 	}
-	
+
 	template <>
 	inline reg max<uint32_t>(const reg v1, const reg v2) {
 		return _mm256_castsi256_ps(_mm256_max_epu32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
 	}
-	
+
 	template <>
 	inline reg max<int16_t>(const reg v1, const reg v2) {
 		return _mm256_castsi256_ps(_mm256_max_epi16(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
@@ -2721,7 +2721,7 @@
 	inline reg blend<int32_t>(const reg v1, const reg v2, const msk m) {
 		return _mm256_blendv_ps(v2, v1, _mm256_castsi256_ps(m));
 	}
-	
+
 	template <>
 	inline reg blend<uint32_t>(const reg v1, const reg v2, const msk m) {
 		return _mm256_blendv_ps(v2, v1, _mm256_castsi256_ps(m));
