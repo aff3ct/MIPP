@@ -55,7 +55,7 @@ TEST_CASE("Compare not equal - mipp::reg", "[mipp::cmpneq]")
 	SECTION("datatype = int16_t") { test_reg_cmpneq<int16_t>(); }
 	SECTION("datatype = int8_t") { test_reg_cmpneq<int8_t>(); }
 #endif
-#if defined(MIPP_AVX) || defined(MIPP_AVX512)
+#if defined(MIPP_AVX2) || defined(MIPP_AVX512) || ((defined(MIPP_AVX) && !defined(__INTEL_COMPILER) && !defined(__ICL) && !defined(__ICC)))
 	SECTION("datatype = uint32_t") { test_reg_cmpneq<uint32_t>(); }
 #endif
 }
@@ -102,7 +102,7 @@ TEST_CASE("Compare not equal - mipp::Reg", "[mipp::cmpneq]")
 	SECTION("datatype = int16_t") { test_Reg_cmpneq<int16_t>(); }
 	SECTION("datatype = int8_t") { test_Reg_cmpneq<int8_t>(); }
 #endif
-#if defined(MIPP_AVX2) || defined(MIPP_AVX512)
+#if defined(MIPP_AVX2) || defined(MIPP_AVX512) || ((defined(MIPP_AVX) && !defined(__INTEL_COMPILER) && !defined(__ICL) && !defined(__ICC)))
 	SECTION("datatype = uint32_t") { test_Reg_cmpneq<uint32_t>(); }
 #endif
 }
