@@ -616,7 +616,6 @@ template <typename T> inline reg   set0         ()                              
 template <int      N> inline msk   set0         ()                                { errorMessage<N>("set0");          exit(-1); }
 template <typename T> inline reg_2 low          (const reg)                       { errorMessage<T>("low");           exit(-1); }
 template <typename T> inline reg_2 high         (const reg)                       { errorMessage<T>("high");          exit(-1); }
-template <typename T> inline reg   cast         (const reg_2)                     { errorMessage<T>("cast");          exit(-1); }
 template <typename T> inline reg   combine      (const reg_2, const reg_2)        { errorMessage<T>("combine");       exit(-1); }
 #ifdef MIPP_NO_INTRINSICS // tricks to avoid compiling errors with Clang...
 template <typename T> inline reg   cmask        (const uint32_t[1])               { errorMessage<T>("cmask");         exit(-1); }

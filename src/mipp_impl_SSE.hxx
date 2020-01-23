@@ -443,37 +443,6 @@
 		return _mm_castps_pd(_mm_shuffle_ps(v, v, _MM_SHUFFLE(1, 0, 3, 2)));
 	}
 
-	// ----------------------------------------------------------------------------------------------------------- cast
-	template <>
-	inline reg cast<double>(const reg_2 v) {
-		return _mm_castpd_ps(v);
-	}
-
-	template <>
-	inline reg cast<float>(const reg_2 v) {
-		return _mm_castpd_ps(v);
-	}
-
-	template <>
-	inline reg cast<int64_t>(const reg_2 v) {
-		return _mm_castpd_ps(v);
-	}
-
-	template <>
-	inline reg cast<int32_t>(const reg_2 v) {
-		return _mm_castpd_ps(v);
-	}
-
-	template <>
-	inline reg cast<int16_t>(const reg_2 v) {
-		return _mm_castpd_ps(v);
-	}
-
-	template <>
-	inline reg cast<int8_t>(const reg_2 v) {
-		return _mm_castpd_ps(v);
-	}
-
 	// -------------------------------------------------------------------------------------------------------- combine
 	template <>
 	inline reg combine<double>(const reg_2 v1, const reg_2 v2)

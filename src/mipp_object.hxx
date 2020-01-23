@@ -559,10 +559,8 @@ public:
 #endif
 
 #ifndef MIPP_NO_INTRINSICS
-	inline Reg<T> cast   (             ) const { return mipp::cast   <T>(r);      }
 	inline Reg<T> combine(const Reg_2 v) const { return mipp::combine<T>(r, v.r); }
 #else
-	inline Reg<T> cast() const { return r; }
 	inline Reg<T> combine(const Reg_2 v) const
 	{
 		throw std::runtime_error("Impossible to make the 'mipp::combine' operation in the 'MIPP_NO_INTRINSICS' mode.");

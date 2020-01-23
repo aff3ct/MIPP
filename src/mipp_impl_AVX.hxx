@@ -445,37 +445,6 @@
 		return _mm_castsi128_ps(_mm256_extractf128_si256(_mm256_castps_si256(v), 1));
 	}
 
-	// ----------------------------------------------------------------------------------------------------------- cast
-	template <>
-	inline reg cast<double>(const reg_2 v) {
-		return _mm256_castps128_ps256(v);
-	}
-
-	template <>
-	inline reg cast<float>(const reg_2 v) {
-		return _mm256_castps128_ps256(v);
-	}
-
-	template <>
-	inline reg cast<int64_t>(const reg_2 v) {
-		return _mm256_castps128_ps256(v);
-	}
-
-	template <>
-	inline reg cast<int32_t>(const reg_2 v) {
-		return _mm256_castps128_ps256(v);
-	}
-
-	template <>
-	inline reg cast<int16_t>(const reg_2 v) {
-		return _mm256_castps128_ps256(v);
-	}
-
-	template <>
-	inline reg cast<int8_t>(const reg_2 v) {
-		return _mm256_castps128_ps256(v);
-	}
-
 	// -------------------------------------------------------------------------------------------------------- combine
 	template <>
 	inline reg combine<double>(const reg_2 v1, const reg_2 v2)

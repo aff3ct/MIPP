@@ -808,39 +808,6 @@
 	}
 #endif
 
-	// ----------------------------------------------------------------------------------------------------------- cast
-#if defined(__AVX512F__)
-	template <>
-	inline reg cast<double>(const reg_2 v) {
-		return _mm512_castps256_ps512(v);
-	}
-
-	template <>
-	inline reg cast<float>(const reg_2 v) {
-		return _mm512_castps256_ps512(v);
-	}
-
-	template <>
-	inline reg cast<int64_t>(const reg_2 v) {
-		return _mm512_castps256_ps512(v);
-	}
-
-	template <>
-	inline reg cast<int32_t>(const reg_2 v) {
-		return _mm512_castps256_ps512(v);
-	}
-
-	template <>
-	inline reg cast<int16_t>(const reg_2 v) {
-		return _mm512_castps256_ps512(v);
-	}
-
-	template <>
-	inline reg cast<int8_t>(const reg_2 v) {
-		return _mm512_castps256_ps512(v);
-	}
-#endif
-
 	// -------------------------------------------------------------------------------------------------------- combine
 #if defined(__AVX512F__)
 	template <>
