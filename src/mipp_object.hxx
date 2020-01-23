@@ -585,7 +585,7 @@ public:
 	Regx2(const T  vals[2]    ) : val{vals[0], vals[1]}                                        {}
 #endif
 
-	inline const Reg<T>& operator[](size_t index) const { return val[index]; }
+	inline Reg<T>& operator[](size_t index) const { return val[index]; }
 
 	~Regx2() = default;
 
