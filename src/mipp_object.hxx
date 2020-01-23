@@ -592,11 +592,11 @@ public:
 #ifndef MIPP_NO_INTRINSICS
 	inline void     store   (T* data         ) const { mipp::store <T>(data, val[0].r); mipp::store <T>(data + mipp::N<T>(), val[1].r); }
 	inline void     storeu  (T* data         ) const { mipp::storeu<T>(data, val[0].r); mipp::storeu<T>(data + mipp::N<T>(), val[1].r); }
-	inline Regx2<T> cmix    (                ) const { return mipp::cmix    <T>({{val[0].r, val[1].r}});                                }
-	inline Regx2<T> cunmix  (                ) const { return mipp::cunmix  <T>({{val[0].r, val[1].r}});                                }
-	inline Regx2<T> cmul    (const Regx2<T> v) const { return mipp::cmul    <T>({{val[0].r, val[1].r}}, {{v.val[0].r, v.val[1].r}});    }
-	inline Regx2<T> cmulconj(const Regx2<T> v) const { return mipp::cmulconj<T>({{val[0].r, val[1].r}}, {{v.val[0].r, v.val[1].r}});    }
-	inline Regx2<T> cconj   (                ) const { return mipp::cconj   <T>({{val[0].r, val[1].r}});                                }
+	inline Regx2<T> cmix    (                ) const { return mipp::cmix    <T>((regx2)val);                                            }
+	inline Regx2<T> cunmix  (                ) const { return mipp::cunmix  <T>((regx2)val);                                            }
+	inline Regx2<T> cmul    (const Regx2<T> v) const { return mipp::cmul    <T>((regx2)val, (regx2)v);                                  }
+	inline Regx2<T> cmulconj(const Regx2<T> v) const { return mipp::cmulconj<T>((regx2)val, (regx2)v);                                  }
+	inline Regx2<T> cconj   (                ) const { return mipp::cconj   <T>((regx2)val);                                            }
 #else
 	inline void     store   (T* data         ) const { data[0] = val[0]; data[1] = val[1];                                              }
 	inline void     storeu  (T* data         ) const { data[0] = val[0]; data[1] = val[1];                                              }
