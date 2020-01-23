@@ -1674,37 +1674,6 @@
 	}
 #endif
 
-	// ----------------------------------------------------------------------------------------------------- interleave
-	template <>
-	inline regx2 interleave<double>(const reg v1, const reg v2) {
-		return {{ mipp::interleavelo<double>(v1, v2), mipp::interleavehi<double>(v1, v2) }}
-	}
-
-	template <>
-	inline regx2 interleave<int64_t>(const reg v1, const reg v2) {
-		return {{ mipp::interleavelo<int64_t>(v1, v2), mipp::interleavehi<int64_t>(v1, v2) }}
-	}
-
-	template <>
-	inline regx2 interleave<float>(const reg v1, const reg v2) {
-		return {{ mipp::interleavelo<float>(v1, v2), mipp::interleavehi<float>(v1, v2) }}
-	}
-
-	template <>
-	inline regx2 interleave<int32_t>(const reg v1, const reg v2) {
-		return {{ mipp::interleavelo<int32_t>(v1, v2), mipp::interleavehi<int32_t>(v1, v2) }}
-	}
-
-	template <>
-	inline regx2 interleave<int16_t>(const reg v1, const reg v2) {
-		return {{ mipp::interleavelo<int16_t>(v1, v2), mipp::interleavehi<int16_t>(v1, v2) }}
-	}
-
-	template <>
-	inline regx2 interleave<int8_t>(const reg v1, const reg v2) {
-		return {{ mipp::interleavelo<int8_t>(v1, v2), mipp::interleavehi<int8_t>(v1, v2) }}
-	}
-
 	// ---------------------------------------------------------------------------------------------------- interleave2
 #if defined(__AVX512F__)
 	template <>
