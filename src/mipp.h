@@ -720,6 +720,20 @@ inline reg pack(const reg, const reg) {
 	exit(-1);
 }
 
+template <typename T>
+inline regx2 cmul(const reg ra_mix1, const reg ra_mix2, const reg rb_mix1, const reg rb_mix2)
+{
+	errorMessage<T>("cmul");
+	exit(-1);
+}
+
+template <typename T>
+inline regx2 cmul_alt(const reg ra_mix1, const reg ra_mix2, const reg rb_re, const reg rb_im)
+{
+	errorMessage<T>("cmul_alt");
+	exit(-1);
+}
+
 // ------------------------------------------------------------------------------------------------------------ aliases
 // --------------------------------------------------------------------------------------------------------------------
 template <typename T> inline reg copysign(const reg r1, const reg r2) { return neg<T>(r1, r2); }
@@ -829,6 +843,68 @@ inline reg atanh(const reg r)
 // 	return mipp::mul<T>(half, mipp::log<T>(mipp::div<T>(mipp::add<T>(r, one), mipp::sub<T>(r, one))));
 // }
 
+// -------------------------------------------------------------------------------------------------- complex functions
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename T>
+inline regx2 cmul(const reg ra_mix1, const reg ra_mix2, const reg rb_mix1, const reg rb_mix2, const msk m)
+{
+	auto ra_mix2r = mipp::rrot<T>(ra_mix2);
+	auto ra_mix1r = mipp::lrot<T>(ra_mix1);
+
+	auto ra_re = mipp::blend<T>(ra_mix1 , ra_mix2r, m);
+	auto ra_im = mipp::blend<T>(ra_mix1r, ra_mix2 , m);
+
+	auto rb_mix2r = mipp::rrot<T>(rb_mix2);
+	auto rb_mix1r = mipp::lrot<T>(rb_mix1);
+
+	auto rb_re = mipp::blend<T>(rb_mix1 , rb_mix2r, m);
+	auto rb_im = mipp::blend<T>(rb_mix1r, rb_mix2 , m);
+
+	auto rc_re = mipp::add<T>(mipp::mul<T>(ra_re, rb_im), mipp::mul<T>(ra_im, rb_re));
+	auto rc_im = mipp::sub<T>(mipp::mul<T>(ra_re, rb_re), mipp::mul<T>(ra_im, rb_im));
+
+	auto rc_imr = mipp::rrot<T>(rc_im);
+	auto rc_rer = mipp::lrot<T>(rc_re);
+
+	auto rc_mix1 = mipp::blend<T>(rc_re , rc_imr, m);
+	auto rc_mix2 = mipp::blend<T>(rc_rer, rc_im , m);
+
+	return {{rc_mix1, rc_mix2}};
+}
+
+template <typename T>
+inline regx2 cmul(const regx2 ra_mix, const regx2 rb_mix)
+{
+	return mipp::cmul<T>(ra_mix.val[0], ra_mix.val[1], rb_mix.val[0], rb_mix.val[1]);
+}
+
+template <typename T>
+inline regx2 cmul_alt(const reg ra_mix1, const reg ra_mix2, const reg rb_re, const reg rb_im, const msk m)
+{
+	auto ra_mix2r = mipp::rrot<T>(ra_mix2);
+	auto ra_mix1r = mipp::lrot<T>(ra_mix1);
+
+	auto ra_re = mipp::blend<T>(ra_mix1 , ra_mix2r, m);
+	auto ra_im = mipp::blend<T>(ra_mix1r, ra_mix2 , m);
+
+	auto rc_re = mipp::add<T>(mipp::mul<T>(ra_re, rb_im), mipp::mul<T>(ra_im, rb_re));
+	auto rc_im = mipp::sub<T>(mipp::mul<T>(ra_re, rb_re), mipp::mul<T>(ra_im, rb_im));
+
+	auto rc_imr = mipp::rrot<T>(rc_im);
+	auto rc_rer = mipp::lrot<T>(rc_re);
+
+	auto rc_mix1 = mipp::blend<T>(rc_re , rc_imr, m);
+	auto rc_mix2 = mipp::blend<T>(rc_rer, rc_im , m);
+
+	return {{rc_mix1, rc_mix2}};
+}
+
+template <typename T>
+inline regx2 cmul_alt(const regx2 ra_mix, const regx2 rb_re_im)
+{
+	return mipp::cmul<T>(ra_mix.val[0], ra_mix.val[1], rb_re_im.val[0], rb_re_im.val[1]);
+}
 
 // ------------------------------------------------------------------------------------------------------------ masking
 // --------------------------------------------------------------------------------------------------------------------

@@ -1980,6 +1980,40 @@
 	}
 #endif
 
+	// ----------------------------------------------------------------------------------------------------------- cmul
+	template <>
+	inline regx2 cmul<double>(const reg ra_mix1, const reg ra_mix2, const reg rb_mix1, const reg rb_mix2)
+	{
+		const bool mask[2] = {1,0};
+		const msk m = set<2>(mask);
+		return cmul<double>(ra_mix1, ra_mix2, rb_mix1, rb_mix2, m);
+	}
+
+	template <>
+	inline regx2 cmul<float>(const reg ra_mix1, const reg ra_mix2, const reg rb_mix1, const reg rb_mix2)
+	{
+		const bool mask[4] = {1,0,1,0};
+		const msk m = set<4>(mask);
+		return cmul<float>(ra_mix1, ra_mix2, rb_mix1, rb_mix2, m);
+	}
+
+	// ------------------------------------------------------------------------------------------------------- cmul_alt
+	template <>
+	inline regx2 cmul_alt<double>(const reg ra_mix1, const reg ra_mix2, const reg rb_re, const reg rb_im)
+	{
+		const bool mask[2] = {1,0};
+		const msk m = set<2>(mask);
+		return cmul_alt<double>(ra_mix1, ra_mix2, rb_re, rb_im, m);
+	}
+
+	template <>
+	inline regx2 cmul_alt<float>(const reg ra_mix1, const reg ra_mix2, const reg rb_re, const reg rb_im)
+	{
+		const bool mask[4] = {1,0,1,0};
+		const msk m = set<4>(mask);
+		return cmul_alt<float>(ra_mix1, ra_mix2, rb_re, rb_im, m);
+	}
+
 	// ------------------------------------------------------------------------------------------------------------ div
 	template <>
 	inline reg div<float>(const reg v1, const reg v2) {

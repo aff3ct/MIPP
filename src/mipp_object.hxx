@@ -58,7 +58,7 @@ public:
 		r = vec[0];
 	}
 
-	~Reg() {}
+	~Reg() = default;
 #endif
 
 #ifndef MIPP_NO_INTRINSICS
@@ -351,6 +351,10 @@ public:
 	inline const T& operator[](size_t index) const { return r; }
 #endif
 
+	// -------------------------------------------------------------------------------------------------------- complex
+	inline Regx2<T> cmul    (const Reg<T> v1, const Reg<T> v2, const Reg<T> v3) const { return mipp::cmul    <T>(r, v1.r, v2.r, v3.r); }
+	inline Regx2<T> cmul_alt(const Reg<T> v1, const Reg<T> v2, const Reg<T> v3) const { return mipp::cmul_alt<T>(r, v1.r, v2.r, v3.r); }
+
 	// ------------------------------------------------------------------------------------------------------ reduction
 #ifndef MIPP_NO_INTRINSICS
 	inline T sum () const { return Reduction<T,mipp::add>::sapply(*this); }
@@ -451,7 +455,7 @@ public:
 	}
 #endif
 
-	~Msk() {}
+	~Msk() = default;
 
 #ifndef MIPP_NO_INTRINSICS
 	inline void set0(              ) { m = mipp::set0<N>(   ); }
@@ -542,7 +546,7 @@ public:
 	Reg_2(const T val  ) : r(val) {}
 #endif
 
-	virtual ~Reg_2() {}
+	virtual ~Reg_2() = default;
 
 #ifndef MIPP_NO_INTRINSICS
 	template <typename T2> inline Reg<T2> cvt() const { return mipp::cvt<T,T2>(r); }
@@ -571,7 +575,11 @@ public:
 
 	inline const Reg<T>& operator[](size_t index) const { return val[index]; }
 
-	~Regx2() {}
+	~Regx2() = default;
+
+	// -------------------------------------------------------------------------------------------------------- complex
+	inline Regx2<T> cmul    (const Regx2<T> v) const { return mipp::cmul    <T>(val[0], val[1], v.val[0], v.val[1]); }
+	inline Regx2<T> cmul_alt(const Regx2<T> v) const { return mipp::cmul_alt<T>(val[0], val[1], v.val[0], v.val[1]); }
 };
 
 #ifndef MIPP_NO_INTRINSICS
@@ -710,8 +718,7 @@ template <typename T> inline     T       hmin         (const Reg<T> v)          
 template <typename T> inline     T       hmax         (const Reg<T> v)                                        { return v.hmax();                 }
 
 template <typename T>
-inline Reg<T> toReg(const Msk<N<T>()> m)
-{
+inline Reg<T> toReg(const Msk<N<T>()> m) {
 	return m.template toReg<T>();
 }
 
@@ -731,7 +738,26 @@ inline Reg<T2> pack(const Reg<T1> v1, const Reg<T1> v2) {
 }
 
 template <typename T1, typename T2>
-inline Reg<T2> cast(const Reg<T1> v)
-{
+inline Reg<T2> cast(const Reg<T1> v) {
 	return v.template cast<T2>();
+}
+
+template <typename T>
+inline Regx2<T> cmul(const Reg<T> v1, const Reg<T> v2, const Reg<T> v3, const Reg<T> v4) {
+	return v1.cmul(v2, v3, v4);
+}
+
+template <typename T>
+inline Regx2<T> cmul_alt(const Reg<T> v1, const Reg<T> v2, const Reg<T> v3, const Reg<T> v4) {
+	return v1.cmul_alt(v2, v3, v4);
+}
+
+template <typename T>
+inline Regx2<T> cmul(const Regx2<T> v1, const Regx2<T> v2) {
+	return v1.cmul(v2);
+}
+
+template <typename T>
+inline Regx2<T> cmul_alt(const Regx2<T> v1, const Regx2<T> v2) {
+	return v1.cmul_alt(v2);
 }
