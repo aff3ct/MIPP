@@ -590,18 +590,18 @@ public:
 	~Regx2() = default;
 
 #ifndef MIPP_NO_INTRINSICS
-	inline void     store   (T* data         ) const { mipp::store <T>(data, val[0].r); mipp::store <T>(data, val[1].r);             }
-	inline void     storeu  (T* data         ) const { mipp::storeu<T>(data, val[0].r); mipp::storeu<T>(data, val[1].r);             }
-	inline Regx2<T> cmix    (                ) const { return mipp::cmix    <T>({{val[0].r, val[1].r}});                             }
-	inline Regx2<T> cunmix  (                ) const { return mipp::cunmix  <T>({{val[0].r, val[1].r}});                             }
-	inline Regx2<T> cmul    (const Regx2<T> v) const { return mipp::cmul    <T>({{val[0].r, val[1].r}}, {{v.val[0].r, v.val[1].r}}); }
-	inline Regx2<T> cmulconj(const Regx2<T> v) const { return mipp::cmulconj<T>({{val[0].r, val[1].r}}, {{v.val[0].r, v.val[1].r}}); }
-	inline Regx2<T> cconj   (                ) const { return mipp::cconj   <T>({{val[0].r, val[1].r}});                             }
+	inline void     store   (T* data         ) const { mipp::store <T>(data, val[0].r); mipp::store <T>(data + mipp::N<T>(), val[1].r); }
+	inline void     storeu  (T* data         ) const { mipp::storeu<T>(data, val[0].r); mipp::storeu<T>(data + mipp::N<T>(), val[1].r); }
+	inline Regx2<T> cmix    (                ) const { return mipp::cmix    <T>({{val[0].r, val[1].r}});                                }
+	inline Regx2<T> cunmix  (                ) const { return mipp::cunmix  <T>({{val[0].r, val[1].r}});                                }
+	inline Regx2<T> cmul    (const Regx2<T> v) const { return mipp::cmul    <T>({{val[0].r, val[1].r}}, {{v.val[0].r, v.val[1].r}});    }
+	inline Regx2<T> cmulconj(const Regx2<T> v) const { return mipp::cmulconj<T>({{val[0].r, val[1].r}}, {{v.val[0].r, v.val[1].r}});    }
+	inline Regx2<T> cconj   (                ) const { return mipp::cconj   <T>({{val[0].r, val[1].r}});                                }
 #else
-	inline void     store   (T* data         ) const { data[0] = val[0]; data[1] = val[1];                                           }
-	inline void     storeu  (T* data         ) const { data[0] = val[0]; data[1] = val[1];                                           }
-	inline Regx2<T> cmix    (                ) const { return *this;                                                                 }
-	inline Regx2<T> cunmix  (                ) const { return *this;                                                                 }
+	inline void     store   (T* data         ) const { data[0] = val[0]; data[1] = val[1];                                              }
+	inline void     storeu  (T* data         ) const { data[0] = val[0]; data[1] = val[1];                                              }
+	inline Regx2<T> cmix    (                ) const { return *this;                                                                    }
+	inline Regx2<T> cunmix  (                ) const { return *this;                                                                    }
 	inline Regx2<T> cmul(const Regx2<T> v) const
 	{
 		auto re = val[0] * v.val[0] - val[1] * v.val[1];
