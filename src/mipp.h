@@ -861,8 +861,8 @@ inline regx2 cmul(const reg ra_mix1, const reg ra_mix2, const reg rb_mix1, const
 	auto rb_re = mipp::blend<T>(rb_mix1 , rb_mix2r, m);
 	auto rb_im = mipp::blend<T>(rb_mix1r, rb_mix2 , m);
 
-	auto rc_re = mipp::add<T>(mipp::mul<T>(ra_re, rb_im), mipp::mul<T>(ra_im, rb_re));
-	auto rc_im = mipp::sub<T>(mipp::mul<T>(ra_re, rb_re), mipp::mul<T>(ra_im, rb_im));
+	auto rc_re = mipp::sub<T>(mipp::mul<T>(ra_re, rb_im), mipp::mul<T>(ra_im, rb_re));
+	auto rc_im = mipp::add<T>(mipp::mul<T>(ra_re, rb_re), mipp::mul<T>(ra_im, rb_im));
 
 	auto rc_imr = mipp::rrot<T>(rc_im);
 	auto rc_rer = mipp::lrot<T>(rc_re);
@@ -888,8 +888,8 @@ inline regx2 cmul_alt(const reg ra_mix1, const reg ra_mix2, const reg rb_re, con
 	auto ra_re = mipp::blend<T>(ra_mix1 , ra_mix2r, m);
 	auto ra_im = mipp::blend<T>(ra_mix1r, ra_mix2 , m);
 
-	auto rc_re = mipp::add<T>(mipp::mul<T>(ra_re, rb_im), mipp::mul<T>(ra_im, rb_re));
-	auto rc_im = mipp::sub<T>(mipp::mul<T>(ra_re, rb_re), mipp::mul<T>(ra_im, rb_im));
+	auto rc_re = mipp::sub<T>(mipp::mul<T>(ra_re, rb_im), mipp::mul<T>(ra_im, rb_re));
+	auto rc_im = mipp::add<T>(mipp::mul<T>(ra_re, rb_re), mipp::mul<T>(ra_im, rb_im));
 
 	auto rc_imr = mipp::rrot<T>(rc_im);
 	auto rc_rer = mipp::lrot<T>(rc_re);
