@@ -465,34 +465,36 @@
 	}
 
 	// ----------------------------------------------------------------------------------------------------------- cast
+#ifdef __aarch64__
 	template <>
 	inline reg cast<double>(const reg_2 v) {
-		return (reg) v;
-	}
-
-	template <>
-	inline reg cast<float>(const reg_2 v) {
-		return (reg) v;
+		return (reg) vcombine_f64((float64x1_t)v, (float64x1_t)v);
 	}
 
 	template <>
 	inline reg cast<int64_t>(const reg_2 v) {
-		return (reg) v;
+		return (reg) vcombine_s64((in64x1_t)v, (in64x1_t)v);
+	}
+#endif
+
+	template <>
+	inline reg cast<float>(const reg_2 v) {
+		return (reg) vcombine_f32((float32x2_t)v, (float32x2_t)v);
 	}
 
 	template <>
 	inline reg cast<int32_t>(const reg_2 v) {
-		return (reg) v;
+		return (reg) vcombine_s32((int32x2_t)v, (int32x2_t)v);
 	}
 
 	template <>
 	inline reg cast<int16_t>(const reg_2 v) {
-		return (reg) v;
+		return (reg) vcombine_s16((int16x4_t)v, (int16x4_t)v);
 	}
 
 	template <>
 	inline reg cast<int8_t>(const reg_2 v) {
-		return (reg) v;
+		return (reg) vcombine_s8((int8x8_t)v, (int8x8_t)v);
 	}
 
 	// -------------------------------------------------------------------------------------------------------- combine
