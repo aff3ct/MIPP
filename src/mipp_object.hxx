@@ -351,10 +351,6 @@ public:
 	inline const T& operator[](size_t index) const { return r; }
 #endif
 
-	// -------------------------------------------------------------------------------------------------------- complex
-	inline Regx2<T> cmul    (const Reg<T> v1, const Reg<T> v2, const Reg<T> v3) const { return mipp::cmul    <T>(r, v1.r, v2.r, v3.r); }
-	inline Regx2<T> cmul_alt(const Reg<T> v1, const Reg<T> v2, const Reg<T> v3) const { return mipp::cmul_alt<T>(r, v1.r, v2.r, v3.r); }
-
 	// ------------------------------------------------------------------------------------------------------ reduction
 #ifndef MIPP_NO_INTRINSICS
 	inline T sum () const { return Reduction<T,mipp::add>::sapply(*this); }
@@ -559,6 +555,17 @@ public:
 #else
 	inline const T& operator[](size_t index) const { return r; }
 #endif
+
+#ifndef MIPP_NO_INTRINSICS
+	inline Reg<T> cast   (             ) const { return mipp::cast   <T>(r);      }
+	inline Reg<T> combine(const Reg_2 v) const { return mipp::combine<T>(r, v.r); }
+#else
+	inline Reg<T> cast() const { return r; }
+	inline Reg<T> combine(const Reg_2 v) const
+	{
+		throw std::runtime_error("Impossible to make the 'mipp::combine' operation in the 'MIPP_NO_INTRINSICS' mode.");
+	}
+#endif
 };
 
 template <typename T>
@@ -567,19 +574,49 @@ class Regx2
 public:
 	Reg<T> val[2];
 
-	Regx2(                    )                                             {}
-	Regx2(Reg<T> r1, Reg<T> r2) : val{r1, r2}                               {}
+	Regx2(                    )                                                                {}
+	Regx2(Reg<T> r1, Reg<T> r2) : val{r1, r2}                                                  {}
 #ifndef MIPP_NO_INTRINSICS
-	Regx2(regx2 r2            ) : val{Reg<T>(r2.val[0]), Reg<T>(r2.val[1])} {}
+	Regx2(regx2 r2            ) : val{Reg<T>(r2.val[0]), Reg<T>(r2.val[1])}                    {}
+	Regx2(const T  *data      ) : val{mipp::load<T>(data), mipp::load<T>(data + mipp::N<T>())} {}
+#else
+	Regx2(const T  vals[2]    ) : val{vals[0], vals[1]}                                        {}
 #endif
 
 	inline const Reg<T>& operator[](size_t index) const { return val[index]; }
 
 	~Regx2() = default;
 
-	// -------------------------------------------------------------------------------------------------------- complex
-	inline Regx2<T> cmul    (const Regx2<T> v) const { return mipp::cmul    <T>(val[0], val[1], v.val[0], v.val[1]); }
-	inline Regx2<T> cmul_alt(const Regx2<T> v) const { return mipp::cmul_alt<T>(val[0], val[1], v.val[0], v.val[1]); }
+#ifndef MIPP_NO_INTRINSICS
+	inline void     store   (T* data         ) const { mipp::store <T>(data, val[0]); mipp::store <T>(data, val[1]); }
+	inline void     storeu  (T* data         ) const { mipp::storeu<T>(data, val[0]); mipp::storeu<T>(data, val[1]); }
+	inline Regx2<T> cmix    (                ) const { return mipp::cmix    <T>(val);                                }
+	inline Regx2<T> cunmix  (                ) const { return mipp::cunmix  <T>(val);                                }
+	inline Regx2<T> cmul    (const Regx2<T> v) const { return mipp::cmul    <T>(val, v.val);                         }
+	inline Regx2<T> cmulconj(const Regx2<T> v) const { return mipp::cmulconj<T>(val, v.val);                         }
+	inline Regx2<T> cconj   (                ) const { return mipp::cconj   <T>(val);                                }
+#else
+	inline void     store   (T* data         ) const { data[0] = val[0]; data[1] = val[1];                           }
+	inline void     storeu  (T* data         ) const { data[0] = val[0]; data[1] = val[1];                           }
+	inline Regx2<T> cmix    (                ) const { return *this;                                                 }
+	inline Regx2<T> cunmix  (                ) const { return *this;                                                 }
+	inline Regx2<T> cmul(const Regx2<T> v) const
+	{
+		auto re = val[0] * v.val[0] - val[1] * v.val[1];
+		auto im = val[0] * v.val[1] + val[1] * v.val[0];
+		return Regx2<T>(re, im);
+	}
+	inline Regx2<T> cmulconj(const Regx2<T> v) const
+	{
+		auto re = val[0] * v.val[0] + val[1] * v.val[1];
+		auto im = val[1] * v.val[0] - val[0] * v.val[1];
+		return Regx2<T>(re, im);
+	}
+	inline Regx2<T> cconj() const
+	{
+		return Regx2<T>(val[0], -val[1]);
+	}
+#endif
 };
 
 #ifndef MIPP_NO_INTRINSICS
@@ -716,6 +753,12 @@ template <typename T> inline     T       hadd         (const Reg<T> v)          
 template <typename T> inline     T       hmul         (const Reg<T> v)                                        { return v.hmul();                 }
 template <typename T> inline     T       hmin         (const Reg<T> v)                                        { return v.hmin();                 }
 template <typename T> inline     T       hmax         (const Reg<T> v)                                        { return v.hmax();                 }
+template <typename T> inline Reg<T>      combine      (const Reg_2<T> v1, const Reg_2<T> v2)                  { return v1.combine(v2);           }
+template <typename T> inline Regx2<T>    cmix         (const Regx2<T> v)                                      { return v.cmix();                 }
+template <typename T> inline Regx2<T>    cunmix       (const Regx2<T> v)                                      { return v.cunmix();               }
+template <typename T> inline Regx2<T>    cmul         (const Regx2<T> v1, const Regx2<T> v2)                  { return v1.cmul(v2);              }
+template <typename T> inline Regx2<T>    cmulconj     (const Regx2<T> v1, const Regx2<T> v2)                  { return v1.cmulconj(v2);          }
+template <typename T> inline Regx2<T>    cconj        (const Regx2<T> v)                                      { return v.cconj();                }
 
 template <typename T>
 inline Reg<T> toReg(const Msk<N<T>()> m) {
@@ -740,24 +783,4 @@ inline Reg<T2> pack(const Reg<T1> v1, const Reg<T1> v2) {
 template <typename T1, typename T2>
 inline Reg<T2> cast(const Reg<T1> v) {
 	return v.template cast<T2>();
-}
-
-template <typename T>
-inline Regx2<T> cmul(const Reg<T> v1, const Reg<T> v2, const Reg<T> v3, const Reg<T> v4) {
-	return v1.cmul(v2, v3, v4);
-}
-
-template <typename T>
-inline Regx2<T> cmul_alt(const Reg<T> v1, const Reg<T> v2, const Reg<T> v3, const Reg<T> v4) {
-	return v1.cmul_alt(v2, v3, v4);
-}
-
-template <typename T>
-inline Regx2<T> cmul(const Regx2<T> v1, const Regx2<T> v2) {
-	return v1.cmul(v2);
-}
-
-template <typename T>
-inline Regx2<T> cmul_alt(const Regx2<T> v1, const Regx2<T> v2) {
-	return v1.cmul_alt(v2);
 }

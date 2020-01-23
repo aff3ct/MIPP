@@ -616,6 +616,8 @@ template <typename T> inline reg   set0         ()                              
 template <int      N> inline msk   set0         ()                                { errorMessage<N>("set0");          exit(-1); }
 template <typename T> inline reg_2 low          (const reg)                       { errorMessage<T>("low");           exit(-1); }
 template <typename T> inline reg_2 high         (const reg)                       { errorMessage<T>("high");          exit(-1); }
+template <typename T> inline reg   cast         (const reg_2)                     { errorMessage<T>("cast");          exit(-1); }
+template <typename T> inline reg   combine      (const reg_2, const reg_2)        { errorMessage<T>("combine");       exit(-1); }
 #ifdef MIPP_NO_INTRINSICS // tricks to avoid compiling errors with Clang...
 template <typename T> inline reg   cmask        (const uint32_t[1])               { errorMessage<T>("cmask");         exit(-1); }
 template <typename T> inline reg   cmask2       (const uint32_t[1])               { errorMessage<T>("cmask2");        exit(-1); }
@@ -641,6 +643,8 @@ template <typename T> inline reg   interleave   (const reg)                     
 template <typename T> inline regx2 interleavex2 (const reg, const reg)            { errorMessage<T>("interleavex2");  exit(-1); }
 template <typename T> inline reg   interleavex4 (const reg)                       { errorMessage<T>("interleavex4");  exit(-1); }
 template <typename T> inline reg   interleavex16(const reg)                       { errorMessage<T>("interleavex16"); exit(-1); }
+template <typename T> inline regx2 cmix         (const regx2)                     { errorMessage<T>("cmix");          exit(-1); }
+template <typename T> inline regx2 cunmix       (const regx2)                     { errorMessage<T>("cunmix");        exit(-1); }
 template <typename T> inline void  transpose    (      reg[nElReg<T>()])          { errorMessage<T>("transpose");     exit(-1); }
 template <typename T> inline void  transpose8x8 (      reg[8])                    { errorMessage<T>("transpose8x8");  exit(-1); }
 template <typename T> inline void  transpose2   (      reg[nElReg<T>()/2])        { errorMessage<T>("transpose2");    exit(-1); }
@@ -717,20 +721,6 @@ inline reg cvt(const reg_2) {
 template <typename T1, typename T2>
 inline reg pack(const reg, const reg) {
 	errorMessage<T1,T2>("pack");
-	exit(-1);
-}
-
-template <typename T>
-inline regx2 cmul(const reg ra_mix1, const reg ra_mix2, const reg rb_mix1, const reg rb_mix2)
-{
-	errorMessage<T>("cmul");
-	exit(-1);
-}
-
-template <typename T>
-inline regx2 cmul_alt(const reg ra_mix1, const reg ra_mix2, const reg rb_re, const reg rb_im)
-{
-	errorMessage<T>("cmul_alt");
 	exit(-1);
 }
 
@@ -847,63 +837,34 @@ inline reg atanh(const reg r)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename T>
-inline regx2 cmul(const reg ra_mix1, const reg ra_mix2, const reg rb_mix1, const reg rb_mix2, const msk m)
+inline regx2 cmul(const regx2 v1, const regx2 v2)
 {
-	auto ra_mix2r = mipp::rrot<T>(ra_mix2);
-	auto ra_mix1r = mipp::lrot<T>(ra_mix1);
+	auto v3_re = mipp::sub<T>(mipp::mul<T>(v1.val[0], v2.val[1]), mipp::mul<T>(v1.val[1], v2.val[0]));
+	auto v3_im = mipp::add<T>(mipp::mul<T>(v1.val[0], v2.val[0]), mipp::mul<T>(v1.val[1], v2.val[1]));
 
-	auto ra_re = mipp::blend<T>(ra_mix1 , ra_mix2r, m);
-	auto ra_im = mipp::blend<T>(ra_mix1r, ra_mix2 , m);
-
-	auto rb_mix2r = mipp::rrot<T>(rb_mix2);
-	auto rb_mix1r = mipp::lrot<T>(rb_mix1);
-
-	auto rb_re = mipp::blend<T>(rb_mix1 , rb_mix2r, m);
-	auto rb_im = mipp::blend<T>(rb_mix1r, rb_mix2 , m);
-
-	auto rc_re = mipp::sub<T>(mipp::mul<T>(ra_re, rb_im), mipp::mul<T>(ra_im, rb_re));
-	auto rc_im = mipp::add<T>(mipp::mul<T>(ra_re, rb_re), mipp::mul<T>(ra_im, rb_im));
-
-	auto rc_imr = mipp::rrot<T>(rc_im);
-	auto rc_rer = mipp::lrot<T>(rc_re);
-
-	auto rc_mix1 = mipp::blend<T>(rc_re , rc_imr, m);
-	auto rc_mix2 = mipp::blend<T>(rc_rer, rc_im , m);
-
-	return {{rc_mix1, rc_mix2}};
+	return {{v3_re, v3_im}};
 }
 
 template <typename T>
-inline regx2 cmul(const regx2 ra_mix, const regx2 rb_mix)
+inline regx2 cmulconj(const regx2 v1, const regx2 v2)
 {
-	return mipp::cmul<T>(ra_mix.val[0], ra_mix.val[1], rb_mix.val[0], rb_mix.val[1]);
+	auto v3_re = mipp::add<T>(mipp::mul<T>(v1.val[0], v2.val[0]), mipp::mul<T>(v1.val[1], v2.val[1]));
+	auto v3_im = mipp::sub<T>(mipp::mul<T>(v1.val[1], v2.val[0]), mipp::mul<T>(v1.val[0], v2.val[1]));
+
+	return {{v3_re, v3_im}};
 }
 
 template <typename T>
-inline regx2 cmul_alt(const reg ra_mix1, const reg ra_mix2, const reg rb_re, const reg rb_im, const msk m)
+inline regx2 cconj(const regx2 v)
 {
-	auto ra_mix2r = mipp::rrot<T>(ra_mix2);
-	auto ra_mix1r = mipp::lrot<T>(ra_mix1);
-
-	auto ra_re = mipp::blend<T>(ra_mix1 , ra_mix2r, m);
-	auto ra_im = mipp::blend<T>(ra_mix1r, ra_mix2 , m);
-
-	auto rc_re = mipp::sub<T>(mipp::mul<T>(ra_re, rb_im), mipp::mul<T>(ra_im, rb_re));
-	auto rc_im = mipp::add<T>(mipp::mul<T>(ra_re, rb_re), mipp::mul<T>(ra_im, rb_im));
-
-	auto rc_imr = mipp::rrot<T>(rc_im);
-	auto rc_rer = mipp::lrot<T>(rc_re);
-
-	auto rc_mix1 = mipp::blend<T>(rc_re , rc_imr, m);
-	auto rc_mix2 = mipp::blend<T>(rc_rer, rc_im , m);
-
-	return {{rc_mix1, rc_mix2}};
+	const auto zeros = mipp::set0<T>();
+	return {{v.val[0], zeros - v.val[1]}};
 }
 
 template <typename T>
-inline regx2 cmul_alt(const regx2 ra_mix, const regx2 rb_re_im)
+inline reg cnorm(const regx2 v)
 {
-	return mipp::cmul<T>(ra_mix.val[0], ra_mix.val[1], rb_re_im.val[0], rb_re_im.val[1]);
+	return mipp::add<T>(mipp::mul<T>(v.val[0], v.val[0]), mipp::mul<T>(v.val[1], v.val[1]));
 }
 
 // ------------------------------------------------------------------------------------------------------------ masking

@@ -464,6 +464,76 @@
 		return (reg_2) vget_high_f32((float32x4_t) v);
 	}
 
+	// ----------------------------------------------------------------------------------------------------------- cast
+	template <>
+	inline reg cast<double>(const reg_2 v) {
+		return (reg) v;
+	}
+
+	template <>
+	inline reg cast<float>(const reg_2 v) {
+		return (reg) v;
+	}
+
+	template <>
+	inline reg cast<int64_t>(const reg_2 v) {
+		return (reg) v;
+	}
+
+	template <>
+	inline reg cast<int32_t>(const reg_2 v) {
+		return (reg) v;
+	}
+
+	template <>
+	inline reg cast<int16_t>(const reg_2 v) {
+		return (reg) v;
+	}
+
+	template <>
+	inline reg cast<int8_t>(const reg_2 v) {
+		return (reg) v;
+	}
+
+	// -------------------------------------------------------------------------------------------------------- combine
+#ifdef __aarch64__
+	template <>
+	inline reg combine<double>(const reg_2 v1, const reg_2 v2)
+	{
+		return (reg) vcombine_f64((float64x1_t) v1, (float64x1_t) v2);
+	}
+
+	template <>
+	inline reg combine<int64_t>(const reg_2 v1, const reg_2 v2)
+	{
+		return (reg) vcombine_s64((int64x1_t) v1, (int64x1_t) v2);
+	}
+#endif
+
+	template <>
+	inline reg combine<float>(const reg_2 v1, const reg_2 v2)
+	{
+		return (reg) vcombine_f32((float32x2_t) v1, (float32x2_t) v2);
+	}
+
+	template <>
+	inline reg combine<int32_t>(const reg_2 v1, const reg_2 v2)
+	{
+		return (reg) vcombine_s32((int32x2_t) v1, (int32x2_t) v2);
+	}
+
+	template <>
+	inline reg combine<int16_t>(const reg_2 v1, const reg_2 v2)
+	{
+		return (reg) vcombine_s16((int16x4_t) v1, (int16x4_t) v2);
+	}
+
+	template <>
+	inline reg combine<int8_t>(const reg_2 v1, const reg_2 v2)
+	{
+		return (reg) vcombine_s8((int8x8_t) v1, (int8x8_t) v2);
+	}
+
 	// ---------------------------------------------------------------------------------------------------------- cmask
 #ifdef __aarch64__
 	template <>
@@ -1053,6 +1123,168 @@
 		              (reg) vcombine_u8(res1.val[1], res2.val[1])}};
 
 		return res;
+	}
+
+	// ----------------------------------------------------------------------------------------------------------- cmix
+#ifdef __aarch64__
+	template <>
+	inline regx2 cmix<double>(const regx2 v)
+	{
+		return mipp::interleave<double>(v.val[0], v.val[1]);
+	}
+
+	template <>
+	inline regx2 cmix<int64_t>(const regx2 v)
+	{
+		return mipp::interleave<int64_t>(v.val[0], v.val[1]);
+	}
+#endif
+
+	template <>
+	inline regx2 cmix<float>(const regx2 v)
+	{
+		return mipp::interleave<float>(v.val[0], v.val[1]);
+	}
+
+	template <>
+	inline regx2 cmix<int32_t>(const regx2 v)
+	{
+		return mipp::interleave<int32_t>(v.val[0], v.val[1]);
+	}
+
+	template <>
+	inline regx2 cmix<int16_t>(const regx2 v)
+	{
+		return mipp::interleave<int16_t>(v.val[0], v.val[1]);
+	}
+
+	template <>
+	inline regx2 cmix<int8_t>(const regx2 v)
+	{
+		return mipp::interleave<int8_t>(v.val[0], v.val[1]);
+	}
+
+	// --------------------------------------------------------------------------------------------------------- cunmix
+#ifdef __aarch64__
+	template <>
+	inline regx2 cunmix<double>(const regx2 v)
+	{
+		auto v0 = v.val[0];
+		auto v1 = v.val[1];
+
+		auto v0l = mipp::low<double>(v0);
+		auto v1l = mipp::low<double>(v1);
+
+		auto v0h = mipp::high<double>(v0);
+		auto v1h = mipp::high<double>(v1);
+
+		auto v_re = mipp::combine<double>(v0l, v1l);
+		auto v_im = mipp::combine<double>(v0h, v1h);
+
+		return {{v_re, v_im}};
+	}
+
+	template <>
+	inline regx2 cunmix<int64_t>(const regx2 v)
+	{
+		auto v0 = v.val[0];
+		auto v1 = v.val[1];
+
+		auto v0l = mipp::low<int64_t>(v0);
+		auto v1l = mipp::low<int64_t>(v1);
+
+		auto v0h = mipp::high<int64_t>(v0);
+		auto v1h = mipp::high<int64_t>(v1);
+
+		auto v_re = mipp::combine<int64_t>(v0l, v1l);
+		auto v_im = mipp::combine<int64_t>(v0h, v1h);
+
+		return {{v_re, v_im}};
+	}
+#endif
+
+	template <>
+	inline regx2 cunmix<float>(const regx2 v)
+	{
+		const uint32_t cmask[4] = {0, 2, 1, 3};
+		auto cm = mipp::cmask<float>(cmask);
+
+		auto v0 = mipp::shuff<float>(v.val[0], cm);
+		auto v1 = mipp::shuff<float>(v.val[1], cm);
+
+		auto v0l = mipp::low<float>(v0);
+		auto v1l = mipp::low<float>(v1);
+
+		auto v0h = mipp::high<float>(v0);
+		auto v1h = mipp::high<float>(v1);
+
+		auto v_re = mipp::combine<float>(v0l, v1l);
+		auto v_im = mipp::combine<float>(v0h, v1h);
+
+		return {{v_re, v_im}};
+	}
+
+	template <>
+	inline regx2 cunmix<int32_t>(const regx2 v)
+	{
+		const uint32_t cmask[4] = {0, 2, 1, 3};
+		auto cm = mipp::cmask<int32_t>(cmask);
+
+		auto v0 = mipp::shuff<int32_t>(v.val[0], cm);
+		auto v1 = mipp::shuff<int32_t>(v.val[1], cm);
+
+		auto v0l = mipp::low<int32_t>(v0);
+		auto v1l = mipp::low<int32_t>(v1);
+
+		auto v0h = mipp::high<int32_t>(v0);
+		auto v1h = mipp::high<int32_t>(v1);
+
+		auto v_re = mipp::combine<int32_t>(v0l, v1l);
+		auto v_im = mipp::combine<int32_t>(v0h, v1h);
+
+		return {{v_re, v_im}};
+	}
+
+	template <>
+	inline regx2 cunmix<int16_t>(const regx2 v)
+	{
+		const uint32_t cmask[8] = {0, 4, 1, 5, 2, 6, 3, 7};
+		auto cm = mipp::cmask<int16_t>(cmask);
+
+		auto v0 = mipp::shuff<int16_t>(v.val[0], cm);
+		auto v1 = mipp::shuff<int16_t>(v.val[1], cm);
+
+		auto v0l = mipp::low<int16_t>(v0);
+		auto v1l = mipp::low<int16_t>(v1);
+
+		auto v0h = mipp::high<int16_t>(v0);
+		auto v1h = mipp::high<int16_t>(v1);
+
+		auto v_re = mipp::combine<int16_t>(v0l, v1l);
+		auto v_im = mipp::combine<int16_t>(v0h, v1h);
+
+		return {{v_re, v_im}};
+	}
+
+	template <>
+	inline regx2 cunmix<int8_t>(const regx2 v)
+	{
+		const uint32_t cmask[16] = {0, 8, 1, 9, 2, 10, 3, 11, 4, 12, 5, 13, 6, 14, 7, 15};
+		auto cm = mipp::cmask<int8_t>(cmask);
+
+		auto v0 = mipp::shuff<int8_t>(v.val[0], cm);
+		auto v1 = mipp::shuff<int8_t>(v.val[1], cm);
+
+		auto v0l = mipp::low<int8_t>(v0);
+		auto v1l = mipp::low<int8_t>(v1);
+
+		auto v0h = mipp::high<int8_t>(v0);
+		auto v1h = mipp::high<int8_t>(v1);
+
+		auto v_re = mipp::combine<int8_t>(v0l, v1l);
+		auto v_im = mipp::combine<int8_t>(v0h, v1h);
+
+		return {{v_re, v_im}};
 	}
 
 	// ----------------------------------------------------------------------------------------------------------- andb
@@ -1806,44 +2038,6 @@
 	template <>
 	inline reg mul<int8_t>(const reg v1, const reg v2) {
 		return (reg) vmulq_s8((int8x16_t) v1, (int8x16_t) v2);
-	}
-
-	// ----------------------------------------------------------------------------------------------------------- cmul
-#ifdef __aarch64__
-	template <>
-	inline regx2 cmul<double>(const reg ra_mix1, const reg ra_mix2, const reg rb_mix1, const reg rb_mix2)
-	{
-		const bool mask[2] = {1,0};
-		const msk m = set<2>(mask);
-		return cmul<double>(ra_mix1, ra_mix2, rb_mix1, rb_mix2, m);
-	}
-#endif
-
-	template <>
-	inline regx2 cmul<float>(const reg ra_mix1, const reg ra_mix2, const reg rb_mix1, const reg rb_mix2)
-	{
-		const bool mask[4] = {1,0,1,0};
-		const msk m = set<4>(mask);
-		return cmul<float>(ra_mix1, ra_mix2, rb_mix1, rb_mix2, m);
-	}
-
-	// ------------------------------------------------------------------------------------------------------- cmul_alt
-#ifdef __aarch64__
-	template <>
-	inline regx2 cmul_alt<double>(const reg ra_mix1, const reg ra_mix2, const reg rb_re, const reg rb_im)
-	{
-		const bool mask[2] = {1,0};
-		const msk m = set<2>(mask);
-		return cmul_alt<double>(ra_mix1, ra_mix2, rb_re, rb_im, m);
-	}
-#endif
-
-	template <>
-	inline regx2 cmul_alt<float>(const reg ra_mix1, const reg ra_mix2, const reg rb_re, const reg rb_im)
-	{
-		const bool mask[4] = {1,0,1,0};
-		const msk m = set<4>(mask);
-		return cmul_alt<float>(ra_mix1, ra_mix2, rb_re, rb_im, m);
 	}
 
 	// ------------------------------------------------------------------------------------------------------------ div
