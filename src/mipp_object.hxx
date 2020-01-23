@@ -178,6 +178,7 @@ public:
 	inline Reg<T>      cos          ()                                     const { return mipp::cos          <T>(r);              }
 	inline Reg<T>      tan          ()                                     const { return mipp::tan          <T>(r);              }
 	inline void        sincos       (      Reg<T> &s,       Reg<T> &c)     const {        mipp::sincos       <T>(r,  s.r,  c.r);  }
+	inline Regx2<T>    sincos       ()                                     const { return mipp::sincos       <T>(r);              }
 	inline Reg<T>      sinh         ()                                     const { return mipp::sinh         <T>(r);              }
 	inline Reg<T>      cosh         ()                                     const { return mipp::cosh         <T>(r);              }
 	inline Reg<T>      tanh         ()                                     const { return mipp::tanh         <T>(r);              }
@@ -265,6 +266,7 @@ public:
 	inline Reg<T>      cos          ()                                     const { return (T)std::cos(r);                         }
 	inline Reg<T>      tan          ()                                     const { return (T)std::tan(r);                         }
 	inline void        sincos       (      Reg<T> &s,       Reg<T> &c)     const { s = std::sin(r); c = std::cos(r);              }
+	inline Regx2<T>    sincos       ()                                     const { return Regx2<T>(std::sin(r), std::cos(r));     }
 	inline Reg<T>      sinh         ()                                     const { return (T)std::sinh(r);                        }
 	inline Reg<T>      cosh         ()                                     const { return (T)std::cosh(r);                        }
 	inline Reg<T>      tanh         ()                                     const { return (T)std::tanh(r);                        }
@@ -727,6 +729,7 @@ template <typename T> inline Reg<T>      sin          (const Reg<T> v)          
 template <typename T> inline Reg<T>      cos          (const Reg<T> v)                                        { return v.cos();                  }
 template <typename T> inline Reg<T>      tan          (const Reg<T> v)                                        { return v.tan();                  }
 template <typename T> inline void        sincos       (const Reg<T> x,        Reg<T> &s,       Reg<T> &c)     { return x.sincos(s,c);            }
+template <typename T> inline Regx2<T>    sincos       (const Reg<T> x)                                        { return x.sincos();               }
 template <typename T> inline Reg<T>      sinh         (const Reg<T> v)                                        { return v.sinh();                 }
 template <typename T> inline Reg<T>      cosh         (const Reg<T> v)                                        { return v.cosh();                 }
 template <typename T> inline Reg<T>      tanh         (const Reg<T> v)                                        { return v.tanh();                 }

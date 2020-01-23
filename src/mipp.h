@@ -724,6 +724,14 @@ inline reg pack(const reg, const reg) {
 	exit(-1);
 }
 
+template <typename T>
+inline regx2 sincos(const reg v)
+{
+	regx2 sin_cos;
+	mipp::sincos<T>(v, sin_cos.val[0], sin_cos.val[1]);
+	return sin_cos;
+}
+
 // ------------------------------------------------------------------------------------------------------------ aliases
 // --------------------------------------------------------------------------------------------------------------------
 template <typename T> inline reg copysign(const reg r1, const reg r2) { return neg<T>(r1, r2); }
