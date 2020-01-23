@@ -847,8 +847,8 @@ inline reg atanh(const reg r)
 template <typename T>
 inline regx2 cmul(const regx2 v1, const regx2 v2)
 {
-	auto v3_re = mipp::sub<T>(mipp::mul<T>(v1.val[0], v2.val[1]), mipp::mul<T>(v1.val[1], v2.val[0]));
-	auto v3_im = mipp::add<T>(mipp::mul<T>(v1.val[0], v2.val[0]), mipp::mul<T>(v1.val[1], v2.val[1]));
+	auto v3_re = mipp::sub<T>(mipp::mul<T>(v1.val[0], v2.val[0]), mipp::mul<T>(v1.val[1], v2.val[1]));
+	auto v3_im = mipp::add<T>(mipp::mul<T>(v1.val[0], v2.val[1]), mipp::mul<T>(v1.val[1], v2.val[0]));
 
 	return {{v3_re, v3_im}};
 }
