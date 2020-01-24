@@ -61,9 +61,9 @@ TEST_CASE("Complex multiplication - mipp::reg", "[mipp::cmul]")
 	SECTION("datatype = int16_t") { test_reg_cmul<int16_t>(); }
 #endif
 #endif
-#if defined(MIPP_NEON)
-	SECTION("datatype = int8_t") { test_reg_cmul<int8_t>(); }
-#endif
+// #if defined(MIPP_NEON)
+// 	SECTION("datatype = int8_t") { test_reg_cmul<int8_t>(); }
+// #endif
 #endif
 }
 #endif
@@ -116,8 +116,8 @@ TEST_CASE("Complex multiplication - mipp::Reg", "[mipp::cmul]")
 	SECTION("datatype = int16_t") { test_Reg_cmul<int16_t>(); }
 #endif
 #endif
-#if defined(MIPP_NEON)
-	SECTION("datatype = int8_t") { test_Reg_cmul<int8_t>(); }
-#endif
+// #if defined(MIPP_NEON)
+// 	SECTION("datatype = int8_t") { test_Reg_cmul<int8_t>(); }
+// #endif
 #endif
 }

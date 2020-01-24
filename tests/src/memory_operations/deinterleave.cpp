@@ -45,8 +45,12 @@ TEST_CASE("Deinterleave - mipp::reg", "[mipp::deinterleave]")
 #endif
 	SECTION("datatype = int32_t") { test_reg_deinterleave<int32_t>(); }
 #if defined(MIPP_BW)
+#if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 31)
 	SECTION("datatype = int16_t") { test_reg_deinterleave<int16_t>(); }
+#if !defined(MIPP_AVX512) || (defined(MIPP_AVX512) && defined(MIPP_AVX512VBMI))
 	SECTION("datatype = int8_t") { test_reg_deinterleave<int8_t>(); }
+#endif
+#endif
 #endif
 }
 #endif
@@ -89,7 +93,11 @@ TEST_CASE("Deinterleave - mipp::Reg", "[mipp::deinterleave]")
 #endif
 	SECTION("datatype = int32_t") { test_Reg_deinterleave<int32_t>(); }
 #if defined(MIPP_BW)
+#if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 31)
 	SECTION("datatype = int16_t") { test_Reg_deinterleave<int16_t>(); }
+#if !defined(MIPP_AVX512) || (defined(MIPP_AVX512) && defined(MIPP_AVX512VBMI))
 	SECTION("datatype = int8_t") { test_Reg_deinterleave<int8_t>(); }
+#endif
+#endif
 #endif
 }

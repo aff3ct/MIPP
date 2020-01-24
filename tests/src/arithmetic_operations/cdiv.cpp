@@ -37,8 +37,8 @@ void test_reg_cdiv()
 		T res_im = (inputs1[mipp::N<T>() +i] * inputs2[i] - inputs1[              i] * inputs2[mipp::N<T>() +i]) / norm;
 
 #if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
-		REQUIRE(*((T*)&r3.val[0] +i) == Approx(res_re));
-		REQUIRE(*((T*)&r3.val[1] +i) == Approx(res_im));
+		REQUIRE(*((T*)&r3.val[0] +i) == Approx(res_re).epsilon(0.01));
+		REQUIRE(*((T*)&r3.val[1] +i) == Approx(res_im).epsilon(0.01));
 #else
 		REQUIRE(*((T*)&r3.val[0] +i) == res_re);
 		REQUIRE(*((T*)&r3.val[1] +i) == res_im);
@@ -81,8 +81,8 @@ void test_Reg_cdiv()
 		T res_im = (inputs1[mipp::N<T>() +i] * inputs2[i] - inputs1[              i] * inputs2[mipp::N<T>() +i]) / norm;
 
 #if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
-		REQUIRE(r3[0][i] == Approx(res_re));
-		REQUIRE(r3[1][i] == Approx(res_im));
+		REQUIRE(r3[0][i] == Approx(res_re).epsilon(0.01));
+		REQUIRE(r3[1][i] == Approx(res_im).epsilon(0.01));
 #else
 		REQUIRE(r3[0][i] == res_re);
 		REQUIRE(r3[1][i] == res_im);

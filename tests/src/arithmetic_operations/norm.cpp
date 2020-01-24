@@ -52,9 +52,9 @@ TEST_CASE("Complex norm - mipp::reg", "[mipp::norm]")
 	SECTION("datatype = int16_t") { test_reg_norm<int16_t>(); }
 #endif
 #endif
-#if defined(MIPP_NEON)
-	SECTION("datatype = int8_t") { test_reg_norm<int8_t>(); }
-#endif
+// #if defined(MIPP_NEON)
+// 	SECTION("datatype = int8_t") { test_reg_norm<int8_t>(); }
+// #endif
 #endif
 }
 #endif
@@ -100,8 +100,8 @@ TEST_CASE("Complex norm - mipp::Reg", "[mipp::norm]")
 	SECTION("datatype = int16_t") { test_Reg_norm<int16_t>(); }
 #endif
 #endif
-#if defined(MIPP_NEON)
-	SECTION("datatype = int8_t") { test_Reg_norm<int8_t>(); }
-#endif
+// #if defined(MIPP_NEON)
+// 	SECTION("datatype = int8_t") { test_Reg_norm<int8_t>(); }
+// #endif
 #endif
 }

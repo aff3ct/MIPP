@@ -28,13 +28,8 @@ void test_reg_conj()
 		T res_re =  inputs1[              i];
 		T res_im = -inputs1[mipp::N<T>() +i];
 
-#if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
-		REQUIRE(*((T*)&r2.val[0] +i) == Approx(res_re));
-		REQUIRE(*((T*)&r2.val[1] +i) == Approx(res_im));
-#else
 		REQUIRE(*((T*)&r2.val[0] +i) == res_re);
 		REQUIRE(*((T*)&r2.val[1] +i) == res_im);
-#endif
 	}
 }
 
@@ -76,13 +71,8 @@ void test_Reg_conj()
 		T res_re =  inputs1[              i];
 		T res_im = -inputs1[mipp::N<T>() +i];
 
-#if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
-		REQUIRE(r2[0][i] == Approx(res_re));
-		REQUIRE(r2[1][i] == Approx(res_im));
-#else
 		REQUIRE(r2[0][i] == res_re);
 		REQUIRE(r2[1][i] == res_im);
-#endif
 	}
 }
 

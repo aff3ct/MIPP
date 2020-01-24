@@ -956,7 +956,7 @@
 	{
 		const bool mask[2] = {1,0};
 		const msk m = set<2>(mask);
-		auto v3 = _mm_shuffle_ps(_mm_castpd_ps(v2), _mm_castpd_ps(v2), _MM_SHUFFLE(3, 2, 1, 0));
+		auto v3 = _mm_shuffle_ps(_mm_castpd_ps(v2), _mm_castpd_ps(v2), _MM_SHUFFLE(1, 0, 3, 2));
 		return mipp::blend<double>(_mm_castpd_ps(v1), v3, m);
 	}
 
@@ -965,7 +965,7 @@
 	{
 		const bool mask[2] = {1,0};
 		const msk m = set<2>(mask);
-		auto v3 = _mm_shuffle_ps(_mm_castpd_ps(v2), _mm_castpd_ps(v2), _MM_SHUFFLE(3, 2, 1, 0));
+		auto v3 = _mm_shuffle_ps(_mm_castpd_ps(v2), _mm_castpd_ps(v2), _MM_SHUFFLE(1, 0, 3, 2));
 		return mipp::blend<double>(_mm_castpd_ps(v1), v3, m);
 	}
 
@@ -974,7 +974,7 @@
 	{
 		const bool mask[2] = {1,0};
 		const msk m = set<2>(mask);
-		auto v3 = _mm_shuffle_ps(_mm_castpd_ps(v2), _mm_castpd_ps(v2), _MM_SHUFFLE(3, 2, 1, 0));
+		auto v3 = _mm_shuffle_ps(_mm_castpd_ps(v2), _mm_castpd_ps(v2), _MM_SHUFFLE(1, 0, 3, 2));
 		return mipp::blend<double>(_mm_castpd_ps(v1), v3, m);
 	}
 
@@ -983,7 +983,7 @@
 	{
 		const bool mask[2] = {1,0};
 		const msk m = set<2>(mask);
-		auto v3 = _mm_shuffle_ps(_mm_castpd_ps(v2), _mm_castpd_ps(v2), _MM_SHUFFLE(3, 2, 1, 0));
+		auto v3 = _mm_shuffle_ps(_mm_castpd_ps(v2), _mm_castpd_ps(v2), _MM_SHUFFLE(1, 0, 3, 2));
 		return mipp::blend<double>(_mm_castpd_ps(v1), v3, m);
 	}
 
@@ -992,7 +992,7 @@
 	{
 		const bool mask[2] = {1,0};
 		const msk m = set<2>(mask);
-		auto v3 = _mm_shuffle_ps(_mm_castpd_ps(v2), _mm_castpd_ps(v2), _MM_SHUFFLE(3, 2, 1, 0));
+		auto v3 = _mm_shuffle_ps(_mm_castpd_ps(v2), _mm_castpd_ps(v2), _MM_SHUFFLE(1, 0, 3, 2));
 		return mipp::blend<double>(_mm_castpd_ps(v1), v3, m);
 	}
 
@@ -1001,7 +1001,7 @@
 	{
 		const bool mask[2] = {1,0};
 		const msk m = set<2>(mask);
-		auto v3 = _mm_shuffle_ps(_mm_castpd_ps(v2), _mm_castpd_ps(v2), _MM_SHUFFLE(3, 2, 1, 0));
+		auto v3 = _mm_shuffle_ps(_mm_castpd_ps(v2), _mm_castpd_ps(v2), _MM_SHUFFLE(1, 0, 3, 2));
 		return mipp::blend<double>(_mm_castpd_ps(v1), v3, m);
 	}
 
@@ -1664,11 +1664,8 @@
 	template <>
 	inline regx2 deinterleave<float>(const reg v0, const reg v1)
 	{
-		const uint32_t cmask[4] = {0, 2, 1, 3};
-		auto cm = mipp::cmask<float>(cmask);
-
-		auto v0s = mipp::shuff<float>(v0, cm);
-		auto v1s = mipp::shuff<float>(v1, cm);
+		auto v0s = _mm_shuffle_ps(v0, v0, _MM_SHUFFLE(3,1,2,0));
+		auto v1s = _mm_shuffle_ps(v1, v1, _MM_SHUFFLE(3,1,2,0));
 
 		auto v0l = mipp::low<float>(v0s);
 		auto v1l = mipp::low<float>(v1s);
@@ -1685,11 +1682,8 @@
 	template <>
 	inline regx2 deinterleave<int32_t>(const reg v0, const reg v1)
 	{
-		const uint32_t cmask[4] = {0, 2, 1, 3};
-		auto cm = mipp::cmask<int32_t>(cmask);
-
-		auto v0s = mipp::shuff<int32_t>(v0, cm);
-		auto v1s = mipp::shuff<int32_t>(v1, cm);
+		auto v0s = _mm_shuffle_ps(v0, v0, _MM_SHUFFLE(3,1,2,0));
+		auto v1s = _mm_shuffle_ps(v1, v1, _MM_SHUFFLE(3,1,2,0));
 
 		auto v0l = mipp::low<int32_t>(v0s);
 		auto v1l = mipp::low<int32_t>(v1s);

@@ -53,7 +53,7 @@ TEST_CASE("Complex multiplication conjugate - mipp::reg", "[mipp::cmulconj]")
 	SECTION("datatype = float") { test_reg_cmulconj<float>(); }
 
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
-#if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 2)
+#if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
 	SECTION("datatype = int32_t") { test_reg_cmulconj<int32_t>(); }
 #endif
 #if defined(MIPP_BW)
@@ -61,9 +61,9 @@ TEST_CASE("Complex multiplication conjugate - mipp::reg", "[mipp::cmulconj]")
 	SECTION("datatype = int16_t") { test_reg_cmulconj<int16_t>(); }
 #endif
 #endif
-#if defined(MIPP_NEON)
-	SECTION("datatype = int8_t") { test_reg_cmulconj<int8_t>(); }
-#endif
+// #if defined(MIPP_NEON)
+// 	SECTION("datatype = int8_t") { test_reg_cmulconj<int8_t>(); }
+// #endif
 #endif
 }
 #endif
@@ -116,8 +116,8 @@ TEST_CASE("Complex multiplication conjugate - mipp::Reg", "[mipp::cmulconj]")
 	SECTION("datatype = int16_t") { test_Reg_cmulconj<int16_t>(); }
 #endif
 #endif
-#if defined(MIPP_NEON)
-	SECTION("datatype = int8_t") { test_Reg_cmulconj<int8_t>(); }
-#endif
+// #if defined(MIPP_NEON)
+// 	SECTION("datatype = int8_t") { test_Reg_cmulconj<int8_t>(); }
+// #endif
 #endif
 }
