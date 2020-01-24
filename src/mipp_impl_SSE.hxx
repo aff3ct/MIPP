@@ -449,8 +449,8 @@
 	{
 		const bool mask[2] = {1,0};
 		const msk m = set<2>(mask);
-		v2 = _mm_shuffle_ps(_mm_castpd_ps(v2), _mm_castpd_ps(v2), _MM_SHUFFLE(3, 2, 1, 0));
-		return mipp::blend<double>(_mm_castpd_ps(v1), v2, m);
+		auto v3 = _mm_shuffle_ps(_mm_castpd_ps(v2), _mm_castpd_ps(v2), _MM_SHUFFLE(3, 2, 1, 0));
+		return mipp::blend<double>(_mm_castpd_ps(v1), v3, m);
 	}
 
 	template <>
@@ -458,8 +458,8 @@
 	{
 		const bool mask[2] = {1,0};
 		const msk m = set<2>(mask);
-		v2 = _mm_shuffle_ps(_mm_castpd_ps(v2), _mm_castpd_ps(v2), _MM_SHUFFLE(3, 2, 1, 0));
-		return mipp::blend<double>(_mm_castpd_ps(v1), v2, m);
+		auto v3 = _mm_shuffle_ps(_mm_castpd_ps(v2), _mm_castpd_ps(v2), _MM_SHUFFLE(3, 2, 1, 0));
+		return mipp::blend<double>(_mm_castpd_ps(v1), v3, m);
 	}
 
 	template <>
@@ -467,8 +467,8 @@
 	{
 		const bool mask[2] = {1,0};
 		const msk m = set<2>(mask);
-		v2 = _mm_shuffle_ps(_mm_castpd_ps(v2), _mm_castpd_ps(v2), _MM_SHUFFLE(3, 2, 1, 0));
-		return mipp::blend<double>(_mm_castpd_ps(v1), v2, m);
+		auto v3 = _mm_shuffle_ps(_mm_castpd_ps(v2), _mm_castpd_ps(v2), _MM_SHUFFLE(3, 2, 1, 0));
+		return mipp::blend<double>(_mm_castpd_ps(v1), v3, m);
 	}
 
 	template <>
@@ -476,8 +476,8 @@
 	{
 		const bool mask[2] = {1,0};
 		const msk m = set<2>(mask);
-		v2 = _mm_shuffle_ps(_mm_castpd_ps(v2), _mm_castpd_ps(v2), _MM_SHUFFLE(3, 2, 1, 0));
-		return mipp::blend<double>(_mm_castpd_ps(v1), v2, m);
+		auto v3 = _mm_shuffle_ps(_mm_castpd_ps(v2), _mm_castpd_ps(v2), _MM_SHUFFLE(3, 2, 1, 0));
+		return mipp::blend<double>(_mm_castpd_ps(v1), v3, m);
 	}
 
 	template <>
@@ -485,8 +485,8 @@
 	{
 		const bool mask[2] = {1,0};
 		const msk m = set<2>(mask);
-		v2 = _mm_shuffle_ps(_mm_castpd_ps(v2), _mm_castpd_ps(v2), _MM_SHUFFLE(3, 2, 1, 0));
-		return mipp::blend<double>(_mm_castpd_ps(v1), v2, m);
+		auto v3 = _mm_shuffle_ps(_mm_castpd_ps(v2), _mm_castpd_ps(v2), _MM_SHUFFLE(3, 2, 1, 0));
+		return mipp::blend<double>(_mm_castpd_ps(v1), v3, m);
 	}
 
 	template <>
@@ -494,8 +494,8 @@
 	{
 		const bool mask[2] = {1,0};
 		const msk m = set<2>(mask);
-		v2 = _mm_shuffle_ps(_mm_castpd_ps(v2), _mm_castpd_ps(v2), _MM_SHUFFLE(3, 2, 1, 0));
-		return mipp::blend<double>(_mm_castpd_ps(v1), v2, m);
+		auto v3 = _mm_shuffle_ps(_mm_castpd_ps(v2), _mm_castpd_ps(v2), _MM_SHUFFLE(3, 2, 1, 0));
+		return mipp::blend<double>(_mm_castpd_ps(v1), v3, m);
 	}
 
 	// ----------------------------------------------------------------------------------------------------------- andb
