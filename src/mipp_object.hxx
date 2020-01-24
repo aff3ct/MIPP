@@ -592,6 +592,8 @@ public:
 	~Regx2() = default;
 
 #ifndef MIPP_NO_INTRINSICS
+	inline void     load        (const T* data   )       { val[0] = mipp::load <T>(data); val[1] = mipp::load <T>(data + mipp::N<T>());           }
+	inline void     loadu       (const T* data   )       { val[0] = mipp::loadu<T>(data); val[1] = mipp::loadu<T>(data + mipp::N<T>());           }
 	inline void     store       (T* data         ) const { mipp::store <T>(data, val[0].r); mipp::store <T>(data + mipp::N<T>(), val[1].r);       }
 	inline void     storeu      (T* data         ) const { mipp::storeu<T>(data, val[0].r); mipp::storeu<T>(data + mipp::N<T>(), val[1].r);       }
 	inline Regx2<T> interleave  (                ) const { return mipp::interleave  <T>(*(mipp::regx2*)this);                                     }
@@ -604,6 +606,8 @@ public:
 	inline Regx2<T> cmulconj    (const Regx2<T> v) const { return mipp::cmulconj    <T>(*(mipp::regx2*)this, *(regx2*)&v);                        }
 	inline Regx2<T> cdiv        (const Regx2<T> v) const { return mipp::cdiv        <T>(*(mipp::regx2*)this, *(regx2*)&v);                        }
 #else
+	inline void     load        (const T* data   )       { val[0] = data[0]; val[1] = data[1];                                                    }
+	inline void     loadu       (const T* data   )       { val[0] = data[0]; val[1] = data[1];                                                    }
 	inline void     store       (T* data         ) const { data[0] = val[0]; data[1] = val[1];                                                    }
 	inline void     storeu      (T* data         ) const { data[0] = val[0]; data[1] = val[1];                                                    }
 	inline Regx2<T> interleave  (                ) const { return *this;                                                                          }
