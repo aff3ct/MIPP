@@ -898,7 +898,7 @@ template <typename T>
 inline regx2 conj(const regx2 v)
 {
 	const auto zeros = mipp::set0<T>();
-	return {{v.val[0], zeros - v.val[1]}};
+	return {{v.val[0], mipp::sub<T>(zeros, v.val[1])}};
 }
 
 template <typename T>
