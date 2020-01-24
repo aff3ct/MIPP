@@ -1091,14 +1091,14 @@
 #if defined(__AVX512BW__)
 	template <>
 	inline reg shuff<int16_t>(const reg v, const reg cm) {
-		return _mm512_castsi512_ps(_mm512_permutexvar_epi16(_mm512_castps_si512(v), _mm512_castps_si512(cm)));
+		return _mm512_castsi512_ps(_mm512_permutexvar_epi16(_mm512_castps_si512(cm), _mm512_castps_si512(v)));
 	}
 #endif
 
 #if defined(__AVX512VBMI__)
 	template <>
 	inline reg shuff<int8_t>(const reg v, const reg cm) {
-		return _mm512_castsi512_ps(_mm512_permutexvar_epi8(_mm512_castps_si512(v), _mm512_castps_si512(cm)));
+		return _mm512_castsi512_ps(_mm512_permutexvar_epi8(_mm512_castps_si512(cm), _mm512_castps_si512(v)));
 	}
 #endif
 
