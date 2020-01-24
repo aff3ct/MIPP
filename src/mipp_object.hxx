@@ -633,17 +633,17 @@ public:
 	}
 #endif
 
-	inline Reg<T>& operator+=(const Regx2<T> &v)       { auto res = this->add(v); val[0] = res.val[0]; val[1] = res.val[1]; return *this;  }
-	inline Reg<T>  operator+ (const Regx2<T>  v) const { return this->add(v);                                                              }
+	inline Regx2<T>& operator+=(const Regx2<T> &v)       { auto res = this->add(v); val[0] = res.val[0]; val[1] = res.val[1]; return *this;  }
+	inline Regx2<T>  operator+ (const Regx2<T>  v) const { return this->add(v);                                                              }
 
-	inline Reg<T>& operator-=(const Regx2<T> &v)       { auto res = this->sub(v); val[0] = res.val[0]; val[1] = res.val[1]; return *this;  }
-	inline Reg<T>  operator- (const Regx2<T>  v) const { return this->sub(v);                                                              }
+	inline Regx2<T>& operator-=(const Regx2<T> &v)       { auto res = this->sub(v); val[0] = res.val[0]; val[1] = res.val[1]; return *this;  }
+	inline Regx2<T>  operator- (const Regx2<T>  v) const { return this->sub(v);                                                              }
 
-	inline Reg<T>& operator*=(const Regx2<T> &v)       { auto res = this->cmul(v); val[0] = res.val[0]; val[1] = res.val[1]; return *this; }
-	inline Reg<T>  operator* (const Regx2<T>  v) const { return this->cmul(v);                                                             }
+	inline Regx2<T>& operator*=(const Regx2<T> &v)       { auto res = this->cmul(v); val[0] = res.val[0]; val[1] = res.val[1]; return *this; }
+	inline Regx2<T>  operator* (const Regx2<T>  v) const { return this->cmul(v);                                                             }
 
-	inline Reg<T>& operator/=(const Regx2<T> &v)       { auto res = this->cdiv(v); val[0] = res.val[0]; val[1] = res.val[1]; return *this; }
-	inline Reg<T>  operator/ (const Regx2<T>  v) const { return this->cdiv(v);                                                             }
+	inline Regx2<T>& operator/=(const Regx2<T> &v)       { auto res = this->cdiv(v); val[0] = res.val[0]; val[1] = res.val[1]; return *this; }
+	inline Regx2<T>  operator/ (const Regx2<T>  v) const { return this->cdiv(v);                                                             }
 };
 
 #ifndef MIPP_NO_INTRINSICS
