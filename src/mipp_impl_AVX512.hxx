@@ -495,18 +495,18 @@
 		return (__m512i)mipp::load<int16_t>((int16_t*)data);
 	}
 
-	static __m512i _mm512_setr_epi16 (short  e0, short  e1, short  e2, short  e3, short  e4, short  e5, short  e6, short  e7,
-	                                  short  e8, short  e9, short e10, short e11, short e12, short e13, short e14, short e15,
-	                                  short e16, short e17, short e18, short e19, short e20, short e21, short e22, short e23,
-	                                  short e24, short e25, short e26, short e27, short e28, short e29, short e30, short e31)
-	{
-		short data[32] = {e0,   e1,  e2,  e3,  e4,  e5,  e6,  e7,
-		                  e8,   e9, e10, e11, e12, e13, e14, e15,
-		                  e16, e17, e18, e19, e20, e21, e22, e23,
-		                  e24, e25, e26, e27, e28, e29, e30, e31};
+	// static __m512i _mm512_setr_epi16 (short  e0, short  e1, short  e2, short  e3, short  e4, short  e5, short  e6, short  e7,
+	//                                   short  e8, short  e9, short e10, short e11, short e12, short e13, short e14, short e15,
+	//                                   short e16, short e17, short e18, short e19, short e20, short e21, short e22, short e23,
+	//                                   short e24, short e25, short e26, short e27, short e28, short e29, short e30, short e31)
+	// {
+	// 	short data[32] = {e0,   e1,  e2,  e3,  e4,  e5,  e6,  e7,
+	// 	                  e8,   e9, e10, e11, e12, e13, e14, e15,
+	// 	                  e16, e17, e18, e19, e20, e21, e22, e23,
+	// 	                  e24, e25, e26, e27, e28, e29, e30, e31};
 
-		return (__m512i)mipp::load<int16_t>((int16_t*)data);
-	}
+	// 	return (__m512i)mipp::load<int16_t>((int16_t*)data);
+	// }
 
 	static __m512i _mm512_set_epi8 (char e63, char e62, char e61, char e60, char e59, char e58, char e57, char e56,
 	                                char e55, char e54, char e53, char e52, char e51, char e50, char e49, char e48,
@@ -529,26 +529,26 @@
 		return (__m512i)mipp::load<int8_t>((int8_t*)data);
 	}
 
-	static __m512i _mm512_setr_epi8 (char  e0, char  e1, char  e2, char  e3, char  e4, char  e5, char  e6, char  e7,
-	                                 char  e8, char  e9, char e10, char e11, char e12, char e13, char e14, char e15,
-	                                 char e16, char e17, char e18, char e19, char e20, char e21, char e22, char e23,
-	                                 char e24, char e25, char e26, char e27, char e28, char e29, char e30, char e31,
-	                                 char e32, char e33, char e34, char e35, char e36, char e37, char e38, char e39,
-	                                 char e40, char e41, char e42, char e43, char e44, char e45, char e46, char e47,
-	                                 char e48, char e49, char e50, char e51, char e52, char e53, char e54, char e55,
-	                                 char e56, char e57, char e58, char e59, char e60, char e61, char e62, char e63)
-	{
-		char data[64] = {e0,   e1,  e2,  e3,  e4,  e5,  e6,  e7,
-		                 e8,   e9, e10, e11, e12, e13, e14, e15,
-		                 e16, e17, e18, e19, e20, e21, e22, e23,
-		                 e24, e25, e26, e27, e28, e29, e30, e31,
-		                 e32, e33, e34, e35, e36, e37, e38, e39,
-		                 e40, e41, e42, e43, e44, e45, e46, e47,
-		                 e48, e49, e50, e51, e52, e53, e54, e55,
-		                 e56, e57, e58, e59, e60, e61, e62, e63};
+	// static __m512i _mm512_setr_epi8 (char  e0, char  e1, char  e2, char  e3, char  e4, char  e5, char  e6, char  e7,
+	//                                  char  e8, char  e9, char e10, char e11, char e12, char e13, char e14, char e15,
+	//                                  char e16, char e17, char e18, char e19, char e20, char e21, char e22, char e23,
+	//                                  char e24, char e25, char e26, char e27, char e28, char e29, char e30, char e31,
+	//                                  char e32, char e33, char e34, char e35, char e36, char e37, char e38, char e39,
+	//                                  char e40, char e41, char e42, char e43, char e44, char e45, char e46, char e47,
+	//                                  char e48, char e49, char e50, char e51, char e52, char e53, char e54, char e55,
+	//                                  char e56, char e57, char e58, char e59, char e60, char e61, char e62, char e63)
+	// {
+	// 	char data[64] = {e0,   e1,  e2,  e3,  e4,  e5,  e6,  e7,
+	// 	                 e8,   e9, e10, e11, e12, e13, e14, e15,
+	// 	                 e16, e17, e18, e19, e20, e21, e22, e23,
+	// 	                 e24, e25, e26, e27, e28, e29, e30, e31,
+	// 	                 e32, e33, e34, e35, e36, e37, e38, e39,
+	// 	                 e40, e41, e42, e43, e44, e45, e46, e47,
+	// 	                 e48, e49, e50, e51, e52, e53, e54, e55,
+	// 	                 e56, e57, e58, e59, e60, e61, e62, e63};
 
-		return (__m512i)mipp::load<int8_t>((int8_t*)data);
-	}
+	// 	return (__m512i)mipp::load<int8_t>((int8_t*)data);
+	// }
 
 	template <>
 	inline reg set<int16_t>(const int16_t vals[nElReg<int16_t>()]) {
@@ -905,23 +905,38 @@
 #if defined(__AVX512VBMI__)
 	template <>
 	inline reg cmask<int8_t>(const uint32_t val[nElReg<int8_t>()]) {
-		return _mm512_castsi512_ps(_mm512_setr_epi8((int8_t)val[ 0], (int8_t)val[ 1], (int8_t)val[ 2], (int8_t)val[ 3],
-		                                            (int8_t)val[ 4], (int8_t)val[ 5], (int8_t)val[ 6], (int8_t)val[ 7],
-		                                            (int8_t)val[ 8], (int8_t)val[ 9], (int8_t)val[10], (int8_t)val[11],
-		                                            (int8_t)val[12], (int8_t)val[13], (int8_t)val[14], (int8_t)val[15],
-		                                            (int8_t)val[16], (int8_t)val[17], (int8_t)val[18], (int8_t)val[19],
-		                                            (int8_t)val[20], (int8_t)val[21], (int8_t)val[22], (int8_t)val[23],
-		                                            (int8_t)val[24], (int8_t)val[25], (int8_t)val[26], (int8_t)val[27],
-		                                            (int8_t)val[28], (int8_t)val[29], (int8_t)val[30], (int8_t)val[31],
-		                                            (int8_t)val[32], (int8_t)val[33], (int8_t)val[34], (int8_t)val[35],
-		                                            (int8_t)val[36], (int8_t)val[37], (int8_t)val[38], (int8_t)val[39],
-		                                            (int8_t)val[40], (int8_t)val[41], (int8_t)val[42], (int8_t)val[43],
-		                                            (int8_t)val[44], (int8_t)val[45], (int8_t)val[46], (int8_t)val[47],
-		                                            (int8_t)val[48], (int8_t)val[49], (int8_t)val[50], (int8_t)val[51],
-		                                            (int8_t)val[52], (int8_t)val[53], (int8_t)val[54], (int8_t)val[55],
-		                                            (int8_t)val[56], (int8_t)val[57], (int8_t)val[58], (int8_t)val[59],
-		                                            (int8_t)val[60], (int8_t)val[61], (int8_t)val[62], (int8_t)val[63]));
-
+		// return _mm512_castsi512_ps(_mm512_setr_epi8((int8_t)val[ 0], (int8_t)val[ 1], (int8_t)val[ 2], (int8_t)val[ 3],
+		//                                             (int8_t)val[ 4], (int8_t)val[ 5], (int8_t)val[ 6], (int8_t)val[ 7],
+		//                                             (int8_t)val[ 8], (int8_t)val[ 9], (int8_t)val[10], (int8_t)val[11],
+		//                                             (int8_t)val[12], (int8_t)val[13], (int8_t)val[14], (int8_t)val[15],
+		//                                             (int8_t)val[16], (int8_t)val[17], (int8_t)val[18], (int8_t)val[19],
+		//                                             (int8_t)val[20], (int8_t)val[21], (int8_t)val[22], (int8_t)val[23],
+		//                                             (int8_t)val[24], (int8_t)val[25], (int8_t)val[26], (int8_t)val[27],
+		//                                             (int8_t)val[28], (int8_t)val[29], (int8_t)val[30], (int8_t)val[31],
+		//                                             (int8_t)val[32], (int8_t)val[33], (int8_t)val[34], (int8_t)val[35],
+		//                                             (int8_t)val[36], (int8_t)val[37], (int8_t)val[38], (int8_t)val[39],
+		//                                             (int8_t)val[40], (int8_t)val[41], (int8_t)val[42], (int8_t)val[43],
+		//                                             (int8_t)val[44], (int8_t)val[45], (int8_t)val[46], (int8_t)val[47],
+		//                                             (int8_t)val[48], (int8_t)val[49], (int8_t)val[50], (int8_t)val[51],
+		//                                             (int8_t)val[52], (int8_t)val[53], (int8_t)val[54], (int8_t)val[55],
+		//                                             (int8_t)val[56], (int8_t)val[57], (int8_t)val[58], (int8_t)val[59],
+		//                                             (int8_t)val[60], (int8_t)val[61], (int8_t)val[62], (int8_t)val[63]));
+		return _mm512_castsi512_ps(_mm512_set_epi8((int8_t)val[63], (int8_t)val[62], (int8_t)val[61], (int8_t)val[60],
+		                                           (int8_t)val[59], (int8_t)val[58], (int8_t)val[57], (int8_t)val[56],
+		                                           (int8_t)val[55], (int8_t)val[54], (int8_t)val[53], (int8_t)val[52],
+		                                           (int8_t)val[51], (int8_t)val[50], (int8_t)val[49], (int8_t)val[48],
+		                                           (int8_t)val[47], (int8_t)val[46], (int8_t)val[45], (int8_t)val[44],
+		                                           (int8_t)val[43], (int8_t)val[42], (int8_t)val[41], (int8_t)val[40],
+		                                           (int8_t)val[39], (int8_t)val[38], (int8_t)val[37], (int8_t)val[36],
+		                                           (int8_t)val[35], (int8_t)val[34], (int8_t)val[33], (int8_t)val[32],
+		                                           (int8_t)val[31], (int8_t)val[30], (int8_t)val[29], (int8_t)val[28],
+		                                           (int8_t)val[27], (int8_t)val[26], (int8_t)val[25], (int8_t)val[24],
+		                                           (int8_t)val[23], (int8_t)val[22], (int8_t)val[21], (int8_t)val[20],
+		                                           (int8_t)val[19], (int8_t)val[18], (int8_t)val[17], (int8_t)val[16],
+		                                           (int8_t)val[15], (int8_t)val[14], (int8_t)val[13], (int8_t)val[12],
+		                                           (int8_t)val[11], (int8_t)val[10], (int8_t)val[ 9], (int8_t)val[ 8],
+		                                           (int8_t)val[ 7], (int8_t)val[ 6], (int8_t)val[ 5], (int8_t)val[ 4],
+		                                           (int8_t)val[ 3], (int8_t)val[ 2], (int8_t)val[ 1], (int8_t)val[ 0]));
 	}
 #endif
 
@@ -977,22 +992,39 @@
 #if defined(__AVX512VBMI__)
 	template <>
 	inline reg cmask2<int8_t>(const uint32_t val[nElReg<int8_t>()/2]) {
-		return _mm512_castsi512_ps(_mm512_setr_epi8((int8_t)(val[ 0] + 0), (int8_t)(val[ 1] + 0), (int8_t)(val[ 2] + 0), (int8_t)(val[ 3] + 0),
-		                                            (int8_t)(val[ 4] + 0), (int8_t)(val[ 5] + 0), (int8_t)(val[ 6] + 0), (int8_t)(val[ 7] + 0),
-		                                            (int8_t)(val[ 8] + 0), (int8_t)(val[ 9] + 0), (int8_t)(val[10] + 0), (int8_t)(val[11] + 0),
-		                                            (int8_t)(val[12] + 0), (int8_t)(val[13] + 0), (int8_t)(val[14] + 0), (int8_t)(val[15] + 0),
-		                                            (int8_t)(val[16] + 0), (int8_t)(val[17] + 0), (int8_t)(val[18] + 0), (int8_t)(val[19] + 0),
-		                                            (int8_t)(val[20] + 0), (int8_t)(val[21] + 0), (int8_t)(val[22] + 0), (int8_t)(val[23] + 0),
-		                                            (int8_t)(val[24] + 0), (int8_t)(val[25] + 0), (int8_t)(val[26] + 0), (int8_t)(val[27] + 0),
-		                                            (int8_t)(val[28] + 0), (int8_t)(val[29] + 0), (int8_t)(val[30] + 0), (int8_t)(val[31] + 0),
-		                                            (int8_t)(val[ 0] +32), (int8_t)(val[ 1] +32), (int8_t)(val[ 2] +32), (int8_t)(val[ 3] +32),
-		                                            (int8_t)(val[ 4] +32), (int8_t)(val[ 5] +32), (int8_t)(val[ 6] +32), (int8_t)(val[ 7] +32),
-		                                            (int8_t)(val[ 8] +32), (int8_t)(val[ 9] +32), (int8_t)(val[10] +32), (int8_t)(val[11] +32),
-		                                            (int8_t)(val[12] +32), (int8_t)(val[13] +32), (int8_t)(val[14] +32), (int8_t)(val[15] +32),
-		                                            (int8_t)(val[16] +32), (int8_t)(val[17] +32), (int8_t)(val[18] +32), (int8_t)(val[19] +32),
-		                                            (int8_t)(val[20] +32), (int8_t)(val[21] +32), (int8_t)(val[22] +32), (int8_t)(val[23] +32),
-		                                            (int8_t)(val[24] +32), (int8_t)(val[25] +32), (int8_t)(val[26] +32), (int8_t)(val[27] +32),
-		                                            (int8_t)(val[28] +32), (int8_t)(val[29] +32), (int8_t)(val[30] +32), (int8_t)(val[31] +32)));
+		// return _mm512_castsi512_ps(_mm512_setr_epi8((int8_t)(val[ 0] + 0), (int8_t)(val[ 1] + 0), (int8_t)(val[ 2] + 0), (int8_t)(val[ 3] + 0),
+		//                                             (int8_t)(val[ 4] + 0), (int8_t)(val[ 5] + 0), (int8_t)(val[ 6] + 0), (int8_t)(val[ 7] + 0),
+		//                                             (int8_t)(val[ 8] + 0), (int8_t)(val[ 9] + 0), (int8_t)(val[10] + 0), (int8_t)(val[11] + 0),
+		//                                             (int8_t)(val[12] + 0), (int8_t)(val[13] + 0), (int8_t)(val[14] + 0), (int8_t)(val[15] + 0),
+		//                                             (int8_t)(val[16] + 0), (int8_t)(val[17] + 0), (int8_t)(val[18] + 0), (int8_t)(val[19] + 0),
+		//                                             (int8_t)(val[20] + 0), (int8_t)(val[21] + 0), (int8_t)(val[22] + 0), (int8_t)(val[23] + 0),
+		//                                             (int8_t)(val[24] + 0), (int8_t)(val[25] + 0), (int8_t)(val[26] + 0), (int8_t)(val[27] + 0),
+		//                                             (int8_t)(val[28] + 0), (int8_t)(val[29] + 0), (int8_t)(val[30] + 0), (int8_t)(val[31] + 0),
+		//                                             (int8_t)(val[ 0] +32), (int8_t)(val[ 1] +32), (int8_t)(val[ 2] +32), (int8_t)(val[ 3] +32),
+		//                                             (int8_t)(val[ 4] +32), (int8_t)(val[ 5] +32), (int8_t)(val[ 6] +32), (int8_t)(val[ 7] +32),
+		//                                             (int8_t)(val[ 8] +32), (int8_t)(val[ 9] +32), (int8_t)(val[10] +32), (int8_t)(val[11] +32),
+		//                                             (int8_t)(val[12] +32), (int8_t)(val[13] +32), (int8_t)(val[14] +32), (int8_t)(val[15] +32),
+		//                                             (int8_t)(val[16] +32), (int8_t)(val[17] +32), (int8_t)(val[18] +32), (int8_t)(val[19] +32),
+		//                                             (int8_t)(val[20] +32), (int8_t)(val[21] +32), (int8_t)(val[22] +32), (int8_t)(val[23] +32),
+		//                                             (int8_t)(val[24] +32), (int8_t)(val[25] +32), (int8_t)(val[26] +32), (int8_t)(val[27] +32),
+		//                                             (int8_t)(val[28] +32), (int8_t)(val[29] +32), (int8_t)(val[30] +32), (int8_t)(val[31] +32)));
+
+		return _mm512_castsi512_ps(_mm512_set_epi8((int8_t)(val[31] +32), (int8_t)(val[30] +32), (int8_t)(val[29] +32), (int8_t)(val[28] +32),
+		                                           (int8_t)(val[27] +32), (int8_t)(val[26] +32), (int8_t)(val[25] +32), (int8_t)(val[24] +32),
+		                                           (int8_t)(val[23] +32), (int8_t)(val[22] +32), (int8_t)(val[21] +32), (int8_t)(val[20] +32),
+		                                           (int8_t)(val[19] +32), (int8_t)(val[18] +32), (int8_t)(val[17] +32), (int8_t)(val[16] +32),
+		                                           (int8_t)(val[15] +32), (int8_t)(val[14] +32), (int8_t)(val[13] +32), (int8_t)(val[12] +32),
+		                                           (int8_t)(val[11] +32), (int8_t)(val[10] +32), (int8_t)(val[ 9] +32), (int8_t)(val[ 8] +32),
+		                                           (int8_t)(val[ 7] +32), (int8_t)(val[ 6] +32), (int8_t)(val[ 5] +32), (int8_t)(val[ 4] +32),
+		                                           (int8_t)(val[ 3] +32), (int8_t)(val[ 2] +32), (int8_t)(val[ 1] +32), (int8_t)(val[ 0] +32),
+		                                           (int8_t)(val[31] + 0), (int8_t)(val[30] + 0), (int8_t)(val[29] + 0), (int8_t)(val[28] + 0),
+		                                           (int8_t)(val[27] + 0), (int8_t)(val[26] + 0), (int8_t)(val[25] + 0), (int8_t)(val[24] + 0),
+		                                           (int8_t)(val[23] + 0), (int8_t)(val[22] + 0), (int8_t)(val[21] + 0), (int8_t)(val[20] + 0),
+		                                           (int8_t)(val[19] + 0), (int8_t)(val[18] + 0), (int8_t)(val[17] + 0), (int8_t)(val[16] + 0),
+		                                           (int8_t)(val[15] + 0), (int8_t)(val[14] + 0), (int8_t)(val[13] + 0), (int8_t)(val[12] + 0),
+		                                           (int8_t)(val[11] + 0), (int8_t)(val[10] + 0), (int8_t)(val[ 9] + 0), (int8_t)(val[ 8] + 0),
+		                                           (int8_t)(val[ 7] + 0), (int8_t)(val[ 6] + 0), (int8_t)(val[ 5] + 0), (int8_t)(val[ 4] + 0),
+		                                           (int8_t)(val[ 3] + 0), (int8_t)(val[ 2] + 0), (int8_t)(val[ 1] + 0), (int8_t)(val[ 0] + 0)));
 	}
 #endif
 
@@ -1046,22 +1078,22 @@
 
 	template <>
 	inline reg cmask4<int8_t>(const uint32_t val[nElReg<int8_t>()/4]) {
-		return _mm512_castsi512_ps(_mm512_setr_epi8((int8_t)(val[ 0] + 0), (int8_t)(val[ 1] + 0), (int8_t)(val[ 2] + 0), (int8_t)(val[ 3] + 0),
-		                                            (int8_t)(val[ 4] + 0), (int8_t)(val[ 5] + 0), (int8_t)(val[ 6] + 0), (int8_t)(val[ 7] + 0),
-		                                            (int8_t)(val[ 8] + 0), (int8_t)(val[ 9] + 0), (int8_t)(val[10] + 0), (int8_t)(val[11] + 0),
-		                                            (int8_t)(val[12] + 0), (int8_t)(val[13] + 0), (int8_t)(val[14] + 0), (int8_t)(val[15] + 0),
-		                                            (int8_t)(val[ 0] +16), (int8_t)(val[ 1] +16), (int8_t)(val[ 2] +16), (int8_t)(val[ 3] +16),
-		                                            (int8_t)(val[ 4] +16), (int8_t)(val[ 5] +16), (int8_t)(val[ 6] +16), (int8_t)(val[ 7] +16),
-		                                            (int8_t)(val[ 8] +16), (int8_t)(val[ 9] +16), (int8_t)(val[10] +16), (int8_t)(val[11] +16),
-		                                            (int8_t)(val[12] +16), (int8_t)(val[13] +16), (int8_t)(val[14] +16), (int8_t)(val[15] +16),
-		                                            (int8_t)(val[ 0] +32), (int8_t)(val[ 1] +32), (int8_t)(val[ 2] +32), (int8_t)(val[ 3] +32),
-		                                            (int8_t)(val[ 4] +32), (int8_t)(val[ 5] +32), (int8_t)(val[ 6] +32), (int8_t)(val[ 7] +32),
-		                                            (int8_t)(val[ 8] +32), (int8_t)(val[ 9] +32), (int8_t)(val[10] +32), (int8_t)(val[11] +32),
-		                                            (int8_t)(val[12] +32), (int8_t)(val[13] +32), (int8_t)(val[14] +32), (int8_t)(val[15] +32),
-		                                            (int8_t)(val[ 0] +48), (int8_t)(val[ 1] +48), (int8_t)(val[ 2] +48), (int8_t)(val[ 3] +48),
-		                                            (int8_t)(val[ 4] +48), (int8_t)(val[ 5] +48), (int8_t)(val[ 6] +48), (int8_t)(val[ 7] +48),
-		                                            (int8_t)(val[ 8] +48), (int8_t)(val[ 9] +48), (int8_t)(val[10] +48), (int8_t)(val[11] +48),
-		                                            (int8_t)(val[12] +48), (int8_t)(val[13] +48), (int8_t)(val[14] +48), (int8_t)(val[15] +48)));
+		return _mm512_castsi512_ps(_mm512_set_epi8((int8_t)(val[15] +48), (int8_t)(val[14] +48), (int8_t)(val[13] +48), (int8_t)(val[12] +48),
+		                                           (int8_t)(val[11] +48), (int8_t)(val[10] +48), (int8_t)(val[ 9] +48), (int8_t)(val[ 8] +48),
+		                                           (int8_t)(val[ 7] +48), (int8_t)(val[ 6] +48), (int8_t)(val[ 5] +48), (int8_t)(val[ 4] +48),
+		                                           (int8_t)(val[ 3] +48), (int8_t)(val[ 2] +48), (int8_t)(val[ 1] +48), (int8_t)(val[ 0] +48),
+		                                           (int8_t)(val[15] +32), (int8_t)(val[14] +32), (int8_t)(val[13] +32), (int8_t)(val[12] +32),
+		                                           (int8_t)(val[11] +32), (int8_t)(val[10] +32), (int8_t)(val[ 9] +32), (int8_t)(val[ 8] +32),
+		                                           (int8_t)(val[ 7] +32), (int8_t)(val[ 6] +32), (int8_t)(val[ 5] +32), (int8_t)(val[ 4] +32),
+		                                           (int8_t)(val[ 3] +32), (int8_t)(val[ 2] +32), (int8_t)(val[ 1] +32), (int8_t)(val[ 0] +32),
+		                                           (int8_t)(val[15] +16), (int8_t)(val[14] +16), (int8_t)(val[13] +16), (int8_t)(val[12] +16),
+		                                           (int8_t)(val[11] +16), (int8_t)(val[10] +16), (int8_t)(val[ 9] +16), (int8_t)(val[ 8] +16),
+		                                           (int8_t)(val[ 7] +16), (int8_t)(val[ 6] +16), (int8_t)(val[ 5] +16), (int8_t)(val[ 4] +16),
+		                                           (int8_t)(val[ 3] +16), (int8_t)(val[ 2] +16), (int8_t)(val[ 1] +16), (int8_t)(val[ 0] +16),
+		                                           (int8_t)(val[15] + 0), (int8_t)(val[14] + 0), (int8_t)(val[13] + 0), (int8_t)(val[12] + 0),
+		                                           (int8_t)(val[11] + 0), (int8_t)(val[10] + 0), (int8_t)(val[ 9] + 0), (int8_t)(val[ 8] + 0),
+		                                           (int8_t)(val[ 7] + 0), (int8_t)(val[ 6] + 0), (int8_t)(val[ 5] + 0), (int8_t)(val[ 4] + 0),
+		                                           (int8_t)(val[ 3] + 0), (int8_t)(val[ 2] + 0), (int8_t)(val[ 1] + 0), (int8_t)(val[ 0] + 0)));
 	}
 #endif
 
@@ -1592,6 +1624,7 @@
 		return {{v_re, v_im}};
 	}
 
+#ifdef __AVX512BW__
 	template <>
 	inline regx2 deinterleave<int16_t>(const reg v0, const reg v1)
 	{
@@ -1599,8 +1632,11 @@
 		//                             1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31};
 		// auto cm = mipp::cmask<int16_t>(cmask);
 
-		auto cm = _mm512_castsi512_ps(_mm512_setr_epi16(0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30,
-		                                                1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31));
+		// auto cm = _mm512_castsi512_ps(_mm512_setr_epi16(0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30,
+		//                                                 1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31));
+
+		auto cm = _mm512_castsi512_ps(_mm512_set_epi16(31, 29, 27, 25, 23, 21, 19, 17, 15, 13, 11, 9, 7, 5, 3, 1,
+		                                               30, 28, 26, 24, 22, 20, 18, 16, 14, 12, 10, 8, 6, 4, 2, 0));
 
 		auto v0s = mipp::shuff<int16_t>(v0, cm);
 		auto v1s = mipp::shuff<int16_t>(v1, cm);
@@ -1626,10 +1662,15 @@
 		//                             33, 35, 37, 39, 41, 43, 45, 47, 49, 51, 53, 55, 57, 59, 61, 63 };
 		// auto cm = mipp::cmask<int8_t>(cmask);
 
-		auto cm = _mm512_castsi512_ps(_mm512_setr_epi8( 0,  2,  4,  6,  8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30,
-		                                               32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60, 62,
-		                                                1,  3,  5,  7,  9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31,
-		                                               33, 35, 37, 39, 41, 43, 45, 47, 49, 51, 53, 55, 57, 59, 61, 63));
+		// auto cm = _mm512_castsi512_ps(_mm512_setr_epi8( 0,  2,  4,  6,  8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30,
+		//                                                32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60, 62,
+		//                                                 1,  3,  5,  7,  9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31,
+		//                                                33, 35, 37, 39, 41, 43, 45, 47, 49, 51, 53, 55, 57, 59, 61, 63));
+
+		auto cm = _mm512_castsi512_ps(_mm512_set_epi8(63, 61, 59, 57, 55, 53, 51, 49, 47, 45, 43, 41, 39, 37, 35, 33,
+		                                              31, 29, 27, 25, 23, 21, 19, 17, 15, 13, 11,  9,  7,  5,  3,  1,
+		                                              62, 60, 58, 56, 54, 52, 50, 48, 46, 44, 42, 40, 38, 36, 34, 32,
+		                                              30, 28, 26, 24, 22, 20, 18, 16, 14, 12, 10,  8,  6,  4,  2,  0));
 
 		auto v0s = mipp::shuff<int8_t>(v0, cm);
 		auto v1s = mipp::shuff<int8_t>(v1, cm);
@@ -1645,6 +1686,7 @@
 
 		return {{v_re, v_im}};
 	}
+#endif
 
 	// --------------------------------------------------------------------------------------------------- interleavelo
 #if defined(__AVX512F__)
@@ -3336,24 +3378,38 @@
 #ifdef __AVX512BW__
 	template <>
 	inline reg lrot<int16_t>(const reg v1) {
-		return _mm512_castsi512_ps(_mm512_permutexvar_epi16(_mm512_setr_epi16( 1,  2,  3,  4,  5,  6,  7,  8,
-		                                                                       9, 10, 11, 12, 13, 14, 15, 16,
-		                                                                      17, 18, 19, 20, 21, 22, 23, 24,
-		                                                                      25, 26, 27, 28, 29, 30, 31,  0), _mm512_castps_si512(v1)));
+		// return _mm512_castsi512_ps(_mm512_permutexvar_epi16(_mm512_setr_epi16( 1,  2,  3,  4,  5,  6,  7,  8,
+		//                                                                        9, 10, 11, 12, 13, 14, 15, 16,
+		//                                                                       17, 18, 19, 20, 21, 22, 23, 24,
+		//                                                                       25, 26, 27, 28, 29, 30, 31,  0), _mm512_castps_si512(v1)));
+
+		return _mm512_castsi512_ps(_mm512_permutexvar_epi16(_mm512_set_epi16( 0, 31, 30, 29, 28, 27, 26, 25,
+		                                                                     24, 23, 22, 21, 20, 19, 18, 17,
+		                                                                     16, 15, 14, 13, 12, 11, 10,  9,
+		                                                                      8,  7,  6,  5,  4,  3,  2,  1), _mm512_castps_si512(v1)));
 	}
 #endif
 
 #ifdef __AVX512VBMI__
 	template <>
 	inline reg lrot<int8_t>(const reg v1) {
-		return _mm512_castsi512_ps(_mm512_permutexvar_epi8(_mm512_setr_epi8( 1,  2,  3,  4,  5,  6,  7,  8,
-		                                                                     9, 10, 11, 12, 13, 14, 15, 16,
-		                                                                    17, 18, 19, 20, 21, 22, 23, 24,
-		                                                                    25, 26, 27, 28, 29, 30, 31, 32,
-		                                                                    33, 34, 35, 36, 37, 38, 39, 40,
-		                                                                    41, 42, 43, 44, 45, 46, 47, 48,
-		                                                                    49, 50, 51, 52, 53, 54, 55, 56,
-		                                                                    57, 58, 59, 60, 61, 62, 63,  0), _mm512_castps_si512(v1)));
+		// return _mm512_castsi512_ps(_mm512_permutexvar_epi8(_mm512_setr_epi8( 1,  2,  3,  4,  5,  6,  7,  8,
+		//                                                                      9, 10, 11, 12, 13, 14, 15, 16,
+		//                                                                     17, 18, 19, 20, 21, 22, 23, 24,
+		//                                                                     25, 26, 27, 28, 29, 30, 31, 32,
+		//                                                                     33, 34, 35, 36, 37, 38, 39, 40,
+		//                                                                     41, 42, 43, 44, 45, 46, 47, 48,
+		//                                                                     49, 50, 51, 52, 53, 54, 55, 56,
+		//                                                                     57, 58, 59, 60, 61, 62, 63,  0), _mm512_castps_si512(v1)));
+
+		return _mm512_castsi512_ps(_mm512_permutexvar_epi8(_mm512_set_epi8( 0, 63, 62, 61, 60, 59, 58, 57,
+		                                                                   56, 55, 54, 53, 52, 51, 50, 49,
+		                                                                   48, 47, 46, 45, 44, 43, 42, 41,
+		                                                                   40, 39, 38, 37, 36, 35, 34, 33,
+		                                                                   32, 31, 30, 29, 28, 27, 26, 25,
+		                                                                   24, 23, 22, 21, 20, 19, 18, 17,
+		                                                                   16, 15, 14, 13, 12, 11, 10,  9,
+		                                                                    8,  7,  6,  5,  4,  3,  2,  1), _mm512_castps_si512(v1)));
 	}
 #endif
 
@@ -3383,24 +3439,36 @@
 #ifdef __AVX512BW__
 	template <>
 	inline reg rrot<int16_t>(const reg v1) {
-		return _mm512_castsi512_ps(_mm512_permutexvar_epi16(_mm512_setr_epi16(31,  0,  1,  2,  3,  4,  5,  6,
-		                                                                       7,  8,  9, 10, 11, 12, 13, 14,
-		                                                                      15, 16, 17, 18, 19, 20, 21, 22,
-		                                                                      23, 24, 25, 26, 27, 28, 29, 30), _mm512_castps_si512(v1)));
+		// return _mm512_castsi512_ps(_mm512_permutexvar_epi16(_mm512_setr_epi16(31,  0,  1,  2,  3,  4,  5,  6,
+		//                                                                        7,  8,  9, 10, 11, 12, 13, 14,
+		//                                                                       15, 16, 17, 18, 19, 20, 21, 22,
+		//                                                                       23, 24, 25, 26, 27, 28, 29, 30), _mm512_castps_si512(v1)));
+		return _mm512_castsi512_ps(_mm512_permutexvar_epi16(_mm512_set_epi16(30, 29, 28, 27, 26, 25, 24, 23,
+		                                                                     22, 21, 20, 19, 18, 17, 16, 15,
+		                                                                     14, 13, 12, 11, 10,  9,  8,  7,
+		                                                                      6,  5,  4,  3,  3,  1,  0, 31), _mm512_castps_si512(v1)));
 	}
 #endif
 
 #ifdef __AVX512VBMI__
 	template <>
 	inline reg rrot<int8_t>(const reg v1) {
-		return _mm512_castsi512_ps(_mm512_permutexvar_epi8(_mm512_setr_epi8(63,  0,  1,  2,  3,  4,  5,  6,
-		                                                                     7,  8,  9, 10, 11, 12, 13, 14,
-		                                                                    15, 16, 17, 18, 19, 20, 21, 22,
-		                                                                    23, 24, 25, 26, 27, 28, 29, 30,
-		                                                                    31, 32, 33, 34, 35, 36, 37, 38,
-		                                                                    39, 40, 41, 42, 43, 44, 45, 46,
-		                                                                    47, 48, 49, 50, 51, 52, 53, 54,
-		                                                                    55, 56, 57, 58, 59, 60, 61, 62), _mm512_castps_si512(v1)));
+		// return _mm512_castsi512_ps(_mm512_permutexvar_epi8(_mm512_setr_epi8(63,  0,  1,  2,  3,  4,  5,  6,
+		//                                                                      7,  8,  9, 10, 11, 12, 13, 14,
+		//                                                                     15, 16, 17, 18, 19, 20, 21, 22,
+		//                                                                     23, 24, 25, 26, 27, 28, 29, 30,
+		//                                                                     31, 32, 33, 34, 35, 36, 37, 38,
+		//                                                                     39, 40, 41, 42, 43, 44, 45, 46,
+		//                                                                     47, 48, 49, 50, 51, 52, 53, 54,
+		//                                                                     55, 56, 57, 58, 59, 60, 61, 62), _mm512_castps_si512(v1)));
+		return _mm512_castsi512_ps(_mm512_permutexvar_epi8(_mm512_set_epi8(62, 61, 60, 59, 58, 57, 56, 55,
+		                                                                   54, 53, 52, 51, 50, 49, 48, 47,
+		                                                                   46, 45, 44, 43, 42, 41, 40, 39,
+		                                                                   38, 37, 36, 35, 34, 33, 32, 31,
+		                                                                   30, 29, 28, 27, 26, 25, 24, 23,
+		                                                                   22, 21, 20, 19, 18, 17, 16, 15,
+		                                                                   14, 13, 12, 11, 10,  9,  8,  7,
+		                                                                    6,  5,  4,  3,  2,  1,  0, 63), _mm512_castps_si512(v1)));
 	}
 #endif
 
