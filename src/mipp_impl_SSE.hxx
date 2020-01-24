@@ -443,61 +443,6 @@
 		return _mm_castps_pd(_mm_shuffle_ps(v, v, _MM_SHUFFLE(1, 0, 3, 2)));
 	}
 
-	// -------------------------------------------------------------------------------------------------------- combine
-	template <>
-	inline reg combine<double>(const reg_2 v1, const reg_2 v2)
-	{
-		const bool mask[2] = {1,0};
-		const msk m = set<2>(mask);
-		auto v3 = _mm_shuffle_ps(_mm_castpd_ps(v2), _mm_castpd_ps(v2), _MM_SHUFFLE(3, 2, 1, 0));
-		return mipp::blend<double>(_mm_castpd_ps(v1), v3, m);
-	}
-
-	template <>
-	inline reg combine<int64_t>(const reg_2 v1, const reg_2 v2)
-	{
-		const bool mask[2] = {1,0};
-		const msk m = set<2>(mask);
-		auto v3 = _mm_shuffle_ps(_mm_castpd_ps(v2), _mm_castpd_ps(v2), _MM_SHUFFLE(3, 2, 1, 0));
-		return mipp::blend<double>(_mm_castpd_ps(v1), v3, m);
-	}
-
-	template <>
-	inline reg combine<float>(const reg_2 v1, const reg_2 v2)
-	{
-		const bool mask[2] = {1,0};
-		const msk m = set<2>(mask);
-		auto v3 = _mm_shuffle_ps(_mm_castpd_ps(v2), _mm_castpd_ps(v2), _MM_SHUFFLE(3, 2, 1, 0));
-		return mipp::blend<double>(_mm_castpd_ps(v1), v3, m);
-	}
-
-	template <>
-	inline reg combine<int32_t>(const reg_2 v1, const reg_2 v2)
-	{
-		const bool mask[2] = {1,0};
-		const msk m = set<2>(mask);
-		auto v3 = _mm_shuffle_ps(_mm_castpd_ps(v2), _mm_castpd_ps(v2), _MM_SHUFFLE(3, 2, 1, 0));
-		return mipp::blend<double>(_mm_castpd_ps(v1), v3, m);
-	}
-
-	template <>
-	inline reg combine<int16_t>(const reg_2 v1, const reg_2 v2)
-	{
-		const bool mask[2] = {1,0};
-		const msk m = set<2>(mask);
-		auto v3 = _mm_shuffle_ps(_mm_castpd_ps(v2), _mm_castpd_ps(v2), _MM_SHUFFLE(3, 2, 1, 0));
-		return mipp::blend<double>(_mm_castpd_ps(v1), v3, m);
-	}
-
-	template <>
-	inline reg combine<int8_t>(const reg_2 v1, const reg_2 v2)
-	{
-		const bool mask[2] = {1,0};
-		const msk m = set<2>(mask);
-		auto v3 = _mm_shuffle_ps(_mm_castpd_ps(v2), _mm_castpd_ps(v2), _MM_SHUFFLE(3, 2, 1, 0));
-		return mipp::blend<double>(_mm_castpd_ps(v1), v3, m);
-	}
-
 	// ----------------------------------------------------------------------------------------------------------- andb
 	template <>
 	inline reg andb<float>(const reg v1, const reg v2) {
@@ -1004,6 +949,61 @@
 		return blend<double>(v1, v2, m);
 	}
 #endif
+
+	// -------------------------------------------------------------------------------------------------------- combine
+	template <>
+	inline reg combine<double>(const reg_2 v1, const reg_2 v2)
+	{
+		const bool mask[2] = {1,0};
+		const msk m = set<2>(mask);
+		auto v3 = _mm_shuffle_ps(_mm_castpd_ps(v2), _mm_castpd_ps(v2), _MM_SHUFFLE(3, 2, 1, 0));
+		return mipp::blend<double>(_mm_castpd_ps(v1), v3, m);
+	}
+
+	template <>
+	inline reg combine<int64_t>(const reg_2 v1, const reg_2 v2)
+	{
+		const bool mask[2] = {1,0};
+		const msk m = set<2>(mask);
+		auto v3 = _mm_shuffle_ps(_mm_castpd_ps(v2), _mm_castpd_ps(v2), _MM_SHUFFLE(3, 2, 1, 0));
+		return mipp::blend<double>(_mm_castpd_ps(v1), v3, m);
+	}
+
+	template <>
+	inline reg combine<float>(const reg_2 v1, const reg_2 v2)
+	{
+		const bool mask[2] = {1,0};
+		const msk m = set<2>(mask);
+		auto v3 = _mm_shuffle_ps(_mm_castpd_ps(v2), _mm_castpd_ps(v2), _MM_SHUFFLE(3, 2, 1, 0));
+		return mipp::blend<double>(_mm_castpd_ps(v1), v3, m);
+	}
+
+	template <>
+	inline reg combine<int32_t>(const reg_2 v1, const reg_2 v2)
+	{
+		const bool mask[2] = {1,0};
+		const msk m = set<2>(mask);
+		auto v3 = _mm_shuffle_ps(_mm_castpd_ps(v2), _mm_castpd_ps(v2), _MM_SHUFFLE(3, 2, 1, 0));
+		return mipp::blend<double>(_mm_castpd_ps(v1), v3, m);
+	}
+
+	template <>
+	inline reg combine<int16_t>(const reg_2 v1, const reg_2 v2)
+	{
+		const bool mask[2] = {1,0};
+		const msk m = set<2>(mask);
+		auto v3 = _mm_shuffle_ps(_mm_castpd_ps(v2), _mm_castpd_ps(v2), _MM_SHUFFLE(3, 2, 1, 0));
+		return mipp::blend<double>(_mm_castpd_ps(v1), v3, m);
+	}
+
+	template <>
+	inline reg combine<int8_t>(const reg_2 v1, const reg_2 v2)
+	{
+		const bool mask[2] = {1,0};
+		const msk m = set<2>(mask);
+		auto v3 = _mm_shuffle_ps(_mm_castpd_ps(v2), _mm_castpd_ps(v2), _MM_SHUFFLE(3, 2, 1, 0));
+		return mipp::blend<double>(_mm_castpd_ps(v1), v3, m);
+	}
 
 	// ---------------------------------------------------------------------------------------------------------- cmask
 #ifdef __SSE2__
