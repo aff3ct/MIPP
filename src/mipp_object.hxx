@@ -137,6 +137,7 @@ public:
 	inline Reg<T>      interleavelo4(const Reg<T> v)                       const { return mipp::interleavelo4<T>(r, v.r);         }
 	inline Reg<T>      interleavehi4(const Reg<T> v)                       const { return mipp::interleavehi4<T>(r, v.r);         }
 	inline Regx2<T>    interleave   (const Reg<T> v)                       const { return mipp::interleave   <T>(r, v.r);         }
+	inline Regx2<T>    deinterleave (const Reg<T> v)                       const { return mipp::deinterleave <T>(r, v.r);         }
 	inline Regx2<T>    interleave2  (const Reg<T> v)                       const { return mipp::interleave2  <T>(r, v.r);         }
 	inline Regx2<T>    interleave4  (const Reg<T> v)                       const { return mipp::interleave4  <T>(r, v.r);         }
 	inline Reg<T>      interleave   ()                                     const { return mipp::interleave   <T>(r);              }
@@ -224,6 +225,7 @@ public:
 	inline Reg<T>      interleavelo4(const Reg<T> v)                       const { return *this;                                  }
 	inline Reg<T>      interleavehi4(const Reg<T> v)                       const { return *this;                                  }
 	inline Regx2<T>    interleave   (const Reg<T> v)                       const { return Regx2<T>(*this, v);                     }
+	inline Regx2<T>    deinterleave (const Reg<T> v)                       const { return Regx2<T>(*this, v);                     }
 	inline Regx2<T>    interleave2  (const Reg<T> v)                       const { return Regx2<T>(*this, v);                     }
 	inline Regx2<T>    interleave4  (const Reg<T> v)                       const { return Regx2<T>(*this, v);                     }
 	inline Reg<T>      interleave   ()                                     const { return *this;                                  }
@@ -588,18 +590,26 @@ public:
 	~Regx2() = default;
 
 #ifndef MIPP_NO_INTRINSICS
-	inline void     store   (T* data         ) const { mipp::store <T>(data, val[0].r); mipp::store <T>(data + mipp::N<T>(), val[1].r); }
-	inline void     storeu  (T* data         ) const { mipp::storeu<T>(data, val[0].r); mipp::storeu<T>(data + mipp::N<T>(), val[1].r); }
-	inline Regx2<T> cmix    (                ) const { return mipp::cmix    <T>(*(mipp::regx2*)this);                                   }
-	inline Regx2<T> cunmix  (                ) const { return mipp::cunmix  <T>(*(mipp::regx2*)this);                                   }
-	inline Regx2<T> cmul    (const Regx2<T> v) const { return mipp::cmul    <T>(*(mipp::regx2*)this, *(regx2*)&v);                      }
-	inline Regx2<T> cmulconj(const Regx2<T> v) const { return mipp::cmulconj<T>(*(mipp::regx2*)this, *(regx2*)&v);                      }
-	inline Regx2<T> cconj   (                ) const { return mipp::cconj   <T>(*(mipp::regx2*)this);                                   }
+	inline void     store       (T* data         ) const { mipp::store <T>(data, val[0].r); mipp::store <T>(data + mipp::N<T>(), val[1].r);       }
+	inline void     storeu      (T* data         ) const { mipp::storeu<T>(data, val[0].r); mipp::storeu<T>(data + mipp::N<T>(), val[1].r);       }
+	inline Regx2<T> interleave  (                ) const { return mipp::interleave  <T>(*(mipp::regx2*)this);                                     }
+	inline Regx2<T> deinterleave(                ) const { return mipp::deinterleave<T>(*(mipp::regx2*)this);                                     }
+	inline Regx2<T> conj        (                ) const { return mipp::conj        <T>(*(mipp::regx2*)this);                                     }
+	inline Reg  <T> norm        (                ) const { return mipp::norm        <T>(*(mipp::regx2*)this);                                     }
+	inline Regx2<T> add         (const Regx2<T> v) const { return mipp::Regx2<T>(mipp::add<T>(val[0], v.val[0]), mipp::add<T>(val[1], v.val[1])); }
+	inline Regx2<T> sub         (const Regx2<T> v) const { return mipp::Regx2<T>(mipp::sub<T>(val[0], v.val[0]), mipp::sub<T>(val[1], v.val[1])); }
+	inline Regx2<T> cmul        (const Regx2<T> v) const { return mipp::cmul        <T>(*(mipp::regx2*)this, *(regx2*)&v);                        }
+	inline Regx2<T> cmulconj    (const Regx2<T> v) const { return mipp::cmulconj    <T>(*(mipp::regx2*)this, *(regx2*)&v);                        }
+	inline Regx2<T> cdiv        (const Regx2<T> v) const { return mipp::cdiv        <T>(*(mipp::regx2*)this, *(regx2*)&v);                        }
 #else
-	inline void     store   (T* data         ) const { data[0] = val[0]; data[1] = val[1];                                              }
-	inline void     storeu  (T* data         ) const { data[0] = val[0]; data[1] = val[1];                                              }
-	inline Regx2<T> cmix    (                ) const { return *this;                                                                    }
-	inline Regx2<T> cunmix  (                ) const { return *this;                                                                    }
+	inline void     store       (T* data         ) const { data[0] = val[0]; data[1] = val[1];                                                    }
+	inline void     storeu      (T* data         ) const { data[0] = val[0]; data[1] = val[1];                                                    }
+	inline Regx2<T> interleave  (                ) const { return *this;                                                                          }
+	inline Regx2<T> deinterleave(                ) const { return *this;                                                                          }
+	inline Regx2<T> conj        (                ) const { return Regx2<T>(val[0], -val[1]);                                                      }
+	inline Reg  <T> norm        (                ) const { return val[0] * val[0] + val[1] * val[1];                                              }
+	inline Regx2<T> add         (const Regx2<T> v) const { return mipp::Regx2<T>(val[0] + v.val[0], val[1] + v.val[1]);                           }
+	inline Regx2<T> sub         (const Regx2<T> v) const { return mipp::Regx2<T>(val[0] - v.val[0], val[1] - v.val[1]);                           }
 	inline Regx2<T> cmul(const Regx2<T> v) const
 	{
 		auto re = val[0] * v.val[0] - val[1] * v.val[1];
@@ -612,11 +622,26 @@ public:
 		auto im = val[1] * v.val[0] - val[0] * v.val[1];
 		return Regx2<T>(re, im);
 	}
-	inline Regx2<T> cconj() const
+	inline Regx2<T> cdiv(const Regx2<T> v) const
 	{
-		return Regx2<T>(val[0], -val[1]);
+		auto norm = v.val[0] * v.val[0] + v.val[1] * v.val[1];
+		auto re = (val[0] * v.val[0] + val[1] * v.val[1]) / norm;
+		auto im = (val[1] * v.val[0] - val[0] * v.val[1]) / norm;
+		return Regx2<T>(re, im);
 	}
 #endif
+
+	inline Reg<T>& operator+=(const Regx2<T> &v)       { auto res = this->add(v); val[0] = res.val[0]; val[1] = res.val[1]; return *this;  }
+	inline Reg<T>  operator+ (const Regx2<T>  v) const { return this->add(v);                                                              }
+
+	inline Reg<T>& operator-=(const Regx2<T> &v)       { auto res = this->sub(v); val[0] = res.val[0]; val[1] = res.val[1]; return *this;  }
+	inline Reg<T>  operator- (const Regx2<T>  v) const { return this->sub(v);                                                              }
+
+	inline Reg<T>& operator*=(const Regx2<T> &v)       { auto res = this->cmul(v); val[0] = res.val[0]; val[1] = res.val[1]; return *this; }
+	inline Reg<T>  operator* (const Regx2<T>  v) const { return this->cmul(v);                                                             }
+
+	inline Reg<T>& operator/=(const Regx2<T> &v)       { auto res = this->cdiv(v); val[0] = res.val[0]; val[1] = res.val[1]; return *this; }
+	inline Reg<T>  operator/ (const Regx2<T>  v) const { return this->cdiv(v);                                                             }
 };
 
 #ifndef MIPP_NO_INTRINSICS
@@ -671,6 +696,9 @@ template <typename T> inline Reg<T>      interleavehi2(const Reg<T> v1, const Re
 template <typename T> inline Reg<T>      interleavelo4(const Reg<T> v1, const Reg<T> v2)                      { return v1.interleavelo4(v2);     }
 template <typename T> inline Reg<T>      interleavehi4(const Reg<T> v1, const Reg<T> v2)                      { return v1.interleavehi4(v2);     }
 template <typename T> inline Regx2<T>    interleave   (const Reg<T> v1, const Reg<T> v2)                      { return v1.interleave(v2);        }
+template <typename T> inline Regx2<T>    interleave   (const Regx2<T> v)                                      { return v.interleave();           }
+template <typename T> inline Regx2<T>    deinterleave (const Reg<T> v1, const Reg<T> v2)                      { return v1.deinterleave(v2);      }
+template <typename T> inline Regx2<T>    deinterleave (const Regx2<T> v)                                      { return v.deinterleave();         }
 template <typename T> inline Regx2<T>    interleave2  (const Reg<T> v1, const Reg<T> v2)                      { return v1.interleave2(v2);       }
 template <typename T> inline Regx2<T>    interleave4  (const Reg<T> v1, const Reg<T> v2)                      { return v1.interleave4(v2);       }
 template <typename T> inline Reg<T>      interleave   (const Reg<T> v)                                        { return v.interleave();           }
@@ -755,11 +783,11 @@ template <typename T> inline     T       hmul         (const Reg<T> v)          
 template <typename T> inline     T       hmin         (const Reg<T> v)                                        { return v.hmin();                 }
 template <typename T> inline     T       hmax         (const Reg<T> v)                                        { return v.hmax();                 }
 template <typename T> inline Reg<T>      combine      (const Reg_2<T> v1, const Reg_2<T> v2)                  { return v1.combine(v2);           }
-template <typename T> inline Regx2<T>    cmix         (const Regx2<T> v)                                      { return v.cmix();                 }
-template <typename T> inline Regx2<T>    cunmix       (const Regx2<T> v)                                      { return v.cunmix();               }
 template <typename T> inline Regx2<T>    cmul         (const Regx2<T> v1, const Regx2<T> v2)                  { return v1.cmul(v2);              }
 template <typename T> inline Regx2<T>    cmulconj     (const Regx2<T> v1, const Regx2<T> v2)                  { return v1.cmulconj(v2);          }
-template <typename T> inline Regx2<T>    cconj        (const Regx2<T> v)                                      { return v.cconj();                }
+template <typename T> inline Regx2<T>    cdiv         (const Regx2<T> v1, const Regx2<T> v2)                  { return v1.cdiv(v2);              }
+template <typename T> inline Regx2<T>    conj         (const Regx2<T> v)                                      { return v.conj();                 }
+template <typename T> inline Reg<T>      norm         (const Regx2<T> v)                                      { return v.norm();                 }
 
 template <typename T>
 inline Reg<T> toReg(const Msk<N<T>()> m) {

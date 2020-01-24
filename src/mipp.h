@@ -636,14 +636,13 @@ template <typename T> inline reg   interleavehi2(const reg, const reg)          
 template <typename T> inline reg   interleavelo4(const reg, const reg)            { errorMessage<T>("interleavelo4"); exit(-1); }
 template <typename T> inline reg   interleavehi4(const reg, const reg)            { errorMessage<T>("interleavehi4"); exit(-1); }
 template <typename T> inline regx2 interleave   (const reg, const reg)            { errorMessage<T>("interleave");    exit(-1); }
+template <typename T> inline regx2 deinterleave (const reg, const reg)            { errorMessage<T>("deinterleave");  exit(-1); }
 template <typename T> inline regx2 interleave2  (const reg, const reg)            { errorMessage<T>("interleave2");   exit(-1); }
 template <typename T> inline regx2 interleave4  (const reg, const reg)            { errorMessage<T>("interleave4");   exit(-1); }
 template <typename T> inline reg   interleave   (const reg)                       { errorMessage<T>("interleave");    exit(-1); }
 template <typename T> inline regx2 interleavex2 (const reg, const reg)            { errorMessage<T>("interleavex2");  exit(-1); }
 template <typename T> inline reg   interleavex4 (const reg)                       { errorMessage<T>("interleavex4");  exit(-1); }
 template <typename T> inline reg   interleavex16(const reg)                       { errorMessage<T>("interleavex16"); exit(-1); }
-template <typename T> inline regx2 cmix         (const regx2)                     { errorMessage<T>("cmix");          exit(-1); }
-template <typename T> inline regx2 cunmix       (const regx2)                     { errorMessage<T>("cunmix");        exit(-1); }
 template <typename T> inline void  transpose    (      reg[nElReg<T>()])          { errorMessage<T>("transpose");     exit(-1); }
 template <typename T> inline void  transpose8x8 (      reg[8])                    { errorMessage<T>("transpose8x8");  exit(-1); }
 template <typename T> inline void  transpose2   (      reg[nElReg<T>()/2])        { errorMessage<T>("transpose2");    exit(-1); }
@@ -729,6 +728,26 @@ inline regx2 sincos(const reg v)
 	regx2 sin_cos;
 	mipp::sincos<T>(v, sin_cos.val[0], sin_cos.val[1]);
 	return sin_cos;
+}
+
+template <typename T>
+inline regx2 cossin(const reg v)
+{
+	regx2 sin_cos;
+	mipp::sincos<T>(v, sin_cos.val[1], sin_cos.val[0]);
+	return sin_cos;
+}
+
+template <typename T>
+inline regx2 interleave(const regx2 v)
+{
+	return mipp::interleave<T>(v.val[0], v.val[1]);
+}
+
+template <typename T>
+inline regx2 deinterleave(const regx2 v)
+{
+	return mipp::deinterleave<T>(v.val[0], v.val[1]);
 }
 
 // ------------------------------------------------------------------------------------------------------------ aliases
@@ -862,14 +881,28 @@ inline regx2 cmulconj(const regx2 v1, const regx2 v2)
 }
 
 template <typename T>
-inline regx2 cconj(const regx2 v)
+inline regx2 cdiv(const regx2 v1, const regx2 v2)
+{
+	auto norm = mipp::add<T>(mipp::mul<T>(v2.val[0], v2.val[0]), mipp::mul<T>(v2.val[1], v2.val[1]));
+
+	auto v3_re = mipp::add<T>(mipp::mul<T>(v1.val[0], v2.val[0]), mipp::mul<T>(v1.val[1], v2.val[1]));
+	auto v3_im = mipp::sub<T>(mipp::mul<T>(v1.val[1], v2.val[0]), mipp::mul<T>(v1.val[0], v2.val[1]));
+
+	v3_re = mipp::div<T>(v3_re, norm);
+	v3_im = mipp::div<T>(v3_im, norm);
+
+	return {{v3_re, v3_im}};
+}
+
+template <typename T>
+inline regx2 conj(const regx2 v)
 {
 	const auto zeros = mipp::set0<T>();
 	return {{v.val[0], zeros - v.val[1]}};
 }
 
 template <typename T>
-inline reg cnorm(const regx2 v)
+inline reg norm(const regx2 v)
 {
 	return mipp::add<T>(mipp::mul<T>(v.val[0], v.val[0]), mipp::mul<T>(v.val[1], v.val[1]));
 }
