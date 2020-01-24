@@ -122,7 +122,6 @@ void test_Reg_mul()
 	}
 }
 
-#ifndef MIPP_NO
 TEST_CASE("Multiplication - mipp::Reg", "[mipp::mul]")
 {
 #if defined(MIPP_64BIT)
@@ -144,7 +143,6 @@ TEST_CASE("Multiplication - mipp::Reg", "[mipp::mul]")
 #endif
 #endif
 }
-#endif
 
 template <typename T>
 void test_reg_maskz_mul()
