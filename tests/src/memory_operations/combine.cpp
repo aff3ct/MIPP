@@ -61,6 +61,7 @@ void test_Reg_combine()
 		REQUIRE(r2[i] == inputs[i]);
 }
 
+#ifndef MIPP_NO
 TEST_CASE("Combine - mipp::Reg", "[mipp::combine]")
 {
 #if defined(MIPP_64BIT)
@@ -77,3 +78,4 @@ TEST_CASE("Combine - mipp::Reg", "[mipp::combine]")
 	SECTION("datatype = int8_t") { test_Reg_combine<int8_t>(); }
 #endif
 }
+#endif
