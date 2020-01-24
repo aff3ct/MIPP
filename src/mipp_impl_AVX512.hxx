@@ -1503,8 +1503,10 @@
 	template <>
 	inline regx2 deinterleave<double>(const reg v0, const reg v1)
 	{
-		const uint32_t cmask[8] = {0, 2, 4, 6, 1, 3, 5, 7};
-		auto cm = mipp::cmask<double>(cmask);
+		// const uint32_t cmask[8] = {0, 2, 4, 6, 1, 3, 5, 7};
+		// auto cm = mipp::cmask<double>(cmask);
+
+		auto cm = _mm512_castsi512_ps(_mm512_setr_epi32(0, 1, 4, 5, 8, 9, 12, 13, 2, 3, 6, 7, 10, 11, 14, 15));
 
 		auto v0s = mipp::shuff<double>(v0, cm);
 		auto v1s = mipp::shuff<double>(v1, cm);
@@ -1524,8 +1526,10 @@
 	template <>
 	inline regx2 deinterleave<int64_t>(const reg v0, const reg v1)
 	{
-		const uint32_t cmask[8] = {0, 2, 4, 6, 1, 3, 5, 7};
-		auto cm = mipp::cmask<int64_t>(cmask);
+		// const uint32_t cmask[8] = {0, 2, 4, 6, 1, 3, 5, 7};
+		// auto cm = mipp::cmask<int64_t>(cmask);
+
+		auto cm = _mm512_castsi512_ps(_mm512_setr_epi32(0, 1, 4, 5, 8, 9, 12, 13, 2, 3, 6, 7, 10, 11, 14, 15));
 
 		auto v0s = mipp::shuff<int64_t>(v0, cm);
 		auto v1s = mipp::shuff<int64_t>(v1, cm);
@@ -1545,8 +1549,10 @@
 	template <>
 	inline regx2 deinterleave<float>(const reg v0, const reg v1)
 	{
-		const uint32_t cmask[16] = {0, 2, 4, 6, 8, 10, 12, 14, 1, 3, 5, 7, 9, 11, 13, 15};
-		auto cm = mipp::cmask<float>(cmask);
+		// const uint32_t cmask[16] = {0, 2, 4, 6, 8, 10, 12, 14, 1, 3, 5, 7, 9, 11, 13, 15};
+		// auto cm = mipp::cmask<float>(cmask);
+
+		auto cm = _mm512_castsi512_ps(_mm512_setr_epi32(0, 2, 4, 6, 8, 10, 12, 14, 1, 3, 5, 7, 9, 11, 13, 15));
 
 		auto v0s = mipp::shuff<float>(v0, cm);
 		auto v1s = mipp::shuff<float>(v1, cm);
@@ -1566,8 +1572,10 @@
 	template <>
 	inline regx2 deinterleave<int32_t>(const reg v0, const reg v1)
 	{
-		const uint32_t cmask[16] = {0, 2, 4, 6, 8, 10, 12, 14, 1, 3, 5, 7, 9, 11, 13, 15};
-		auto cm = mipp::cmask<int32_t>(cmask);
+		// const uint32_t cmask[16] = {0, 2, 4, 6, 8, 10, 12, 14, 1, 3, 5, 7, 9, 11, 13, 15};
+		// auto cm = mipp::cmask<int32_t>(cmask);
+
+		auto cm = _mm512_castsi512_ps(_mm512_setr_epi32(0, 2, 4, 6, 8, 10, 12, 14, 1, 3, 5, 7, 9, 11, 13, 15));
 
 		auto v0s = mipp::shuff<int32_t>(v0, cm);
 		auto v1s = mipp::shuff<int32_t>(v1, cm);
@@ -1587,9 +1595,12 @@
 	template <>
 	inline regx2 deinterleave<int16_t>(const reg v0, const reg v1)
 	{
-		const uint32_t cmask[32] = {0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30,
-		                            1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31};
-		auto cm = mipp::cmask<int16_t>(cmask);
+		// const uint32_t cmask[32] = {0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30,
+		//                             1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31};
+		// auto cm = mipp::cmask<int16_t>(cmask);
+
+		auto cm = _mm512_castsi512_ps(_mm512_setr_epi16(0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30,
+		                                                1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31));
 
 		auto v0s = mipp::shuff<int16_t>(v0, cm);
 		auto v1s = mipp::shuff<int16_t>(v1, cm);
@@ -1609,11 +1620,16 @@
 	template <>
 	inline regx2 deinterleave<int8_t>(const reg v0, const reg v1)
 	{
-		const uint32_t cmask[64] = { 0,  2,  4,  6,  8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30,
-		                            32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60, 62,
-		                             1,  3,  5,  7,  9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31,
-		                            33, 35, 37, 39, 41, 43, 45, 47, 49, 51, 53, 55, 57, 59, 61, 63 };
-		auto cm = mipp::cmask<int8_t>(cmask);
+		// const uint32_t cmask[64] = { 0,  2,  4,  6,  8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30,
+		//                             32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60, 62,
+		//                              1,  3,  5,  7,  9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31,
+		//                             33, 35, 37, 39, 41, 43, 45, 47, 49, 51, 53, 55, 57, 59, 61, 63 };
+		// auto cm = mipp::cmask<int8_t>(cmask);
+
+		auto cm = _mm512_castsi512_ps(_mm512_setr_epi8( 0,  2,  4,  6,  8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30,
+		                                               32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60, 62,
+		                                                1,  3,  5,  7,  9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31,
+		                                               33, 35, 37, 39, 41, 43, 45, 47, 49, 51, 53, 55, 57, 59, 61, 63));
 
 		auto v0s = mipp::shuff<int8_t>(v0, cm);
 		auto v1s = mipp::shuff<int8_t>(v1, cm);

@@ -1116,128 +1116,62 @@
 	template <>
 	inline regx2 deinterleave<double>(const reg v0, const reg v1)
 	{
-		const uint32_t cmask[4] = {0, 2, 1, 3};
-		auto cm = mipp::cmask<double>(cmask);
+		auto vi1 = mipp::interleave<double>(v0, v1);
+		auto vi2 = mipp::interleave<double>(vi1.val[0], vi1.val[1]);
 
-		auto v0s = mipp::shuff<double>(v0, cm);
-		auto v1s = mipp::shuff<double>(v1, cm);
-
-		auto v0l = mipp::low<double>(v0s);
-		auto v1l = mipp::low<double>(v1s);
-
-		auto v0h = mipp::high<double>(v0s);
-		auto v1h = mipp::high<double>(v1s);
-
-		auto v_re = mipp::combine<double>(v0l, v1l);
-		auto v_im = mipp::combine<double>(v0h, v1h);
-
-		return {{v_re, v_im}};
+		return {{vi2.val[0], vi2.val[1]}};
 	}
 
 	template <>
 	inline regx2 deinterleave<int64_t>(const reg v0, const reg v1)
 	{
-		const uint32_t cmask[4] = {0, 2, 1, 3};
-		auto cm = mipp::cmask<int64_t>(cmask);
+		auto vi1 = mipp::interleave<int64_t>(v0, v1);
+		auto vi2 = mipp::interleave<int64_t>(vi1.val[0], vi1.val[1]);
 
-		auto v0s = mipp::shuff<int64_t>(v0, cm);
-		auto v1s = mipp::shuff<int64_t>(v1, cm);
-
-		auto v0l = mipp::low<int64_t>(v0s);
-		auto v1l = mipp::low<int64_t>(v1s);
-
-		auto v0h = mipp::high<int64_t>(v0s);
-		auto v1h = mipp::high<int64_t>(v1s);
-
-		auto v_re = mipp::combine<int64_t>(v0l, v1l);
-		auto v_im = mipp::combine<int64_t>(v0h, v1h);
-
-		return {{v_re, v_im}};
+		return {{vi2.val[0], vi2.val[1]}};
 	}
 
 	template <>
 	inline regx2 deinterleave<float>(const reg v0, const reg v1)
 	{
-		const uint32_t cmask[8] = {0, 2, 4, 6, 1, 3, 5, 7};
-		auto cm = mipp::cmask<float>(cmask);
+		auto vi1 = mipp::interleave<float>(v0, v1);
+		auto vi2 = mipp::interleave<float>(vi1.val[0], vi1.val[1]);
+		auto vi3 = mipp::interleave<float>(vi2.val[0], vi2.val[1]);
 
-		auto v0s = mipp::shuff<float>(v0, cm);
-		auto v1s = mipp::shuff<float>(v1, cm);
-
-		auto v0l = mipp::low<float>(v0s);
-		auto v1l = mipp::low<float>(v1s);
-
-		auto v0h = mipp::high<float>(v0s);
-		auto v1h = mipp::high<float>(v1s);
-
-		auto v_re = mipp::combine<float>(v0l, v1l);
-		auto v_im = mipp::combine<float>(v0h, v1h);
-
-		return {{v_re, v_im}};
+		return {{vi3.val[0], vi3.val[1]}};
 	}
 
 	template <>
 	inline regx2 deinterleave<int32_t>(const reg v0, const reg v1)
 	{
-		const uint32_t cmask[8] = {0, 2, 4, 6, 1, 3, 5, 7};
-		auto cm = mipp::cmask<int32_t>(cmask);
+		auto vi1 = mipp::interleave<int32_t>(v0, v1);
+		auto vi2 = mipp::interleave<int32_t>(vi1.val[0], vi1.val[1]);
+		auto vi3 = mipp::interleave<int32_t>(vi2.val[0], vi2.val[1]);
 
-		auto v0s = mipp::shuff<int32_t>(v0, cm);
-		auto v1s = mipp::shuff<int32_t>(v1, cm);
-
-		auto v0l = mipp::low<int32_t>(v0s);
-		auto v1l = mipp::low<int32_t>(v1s);
-
-		auto v0h = mipp::high<int32_t>(v0s);
-		auto v1h = mipp::high<int32_t>(v1s);
-
-		auto v_re = mipp::combine<int32_t>(v0l, v1l);
-		auto v_im = mipp::combine<int32_t>(v0h, v1h);
-
-		return {{v_re, v_im}};
+		return {{vi3.val[0], vi3.val[1]}};
 	}
 
 	template <>
 	inline regx2 deinterleave<int16_t>(const reg v0, const reg v1)
 	{
-		const uint32_t cmask[16] = {0, 2, 4, 6, 8, 10, 12, 14, 1, 3, 5, 7, 9, 11, 13, 15};
-		auto cm = mipp::cmask<int16_t>(cmask);
+		auto vi1 = mipp::interleave<int16_t>(v0, v1);
+		auto vi2 = mipp::interleave<int16_t>(vi1.val[0], vi1.val[1]);
+		auto vi3 = mipp::interleave<int16_t>(vi2.val[0], vi2.val[1]);
+		auto vi4 = mipp::interleave<int16_t>(vi3.val[0], vi3.val[1]);
 
-		auto v0s = mipp::shuff<int16_t>(v0, cm);
-		auto v1s = mipp::shuff<int16_t>(v1, cm);
-
-		auto v0l = mipp::low<int16_t>(v0s);
-		auto v1l = mipp::low<int16_t>(v1s);
-
-		auto v0h = mipp::high<int16_t>(v0s);
-		auto v1h = mipp::high<int16_t>(v1s);
-
-		auto v_re = mipp::combine<int16_t>(v0l, v1l);
-		auto v_im = mipp::combine<int16_t>(v0h, v1h);
-
-		return {{v_re, v_im}};
+		return {{vi4.val[0], vi4.val[1]}};
 	}
 
 	template <>
 	inline regx2 deinterleave<int8_t>(const reg v0, const reg v1)
 	{
-		const uint32_t cmask[32] = {0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30,
-		                            1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31};
-		auto cm = mipp::cmask<int8_t>(cmask);
+		auto vi1 = mipp::interleave<int8_t>(v0, v1);
+		auto vi2 = mipp::interleave<int8_t>(vi1.val[0], vi1.val[1]);
+		auto vi3 = mipp::interleave<int8_t>(vi2.val[0], vi2.val[1]);
+		auto vi4 = mipp::interleave<int8_t>(vi3.val[0], vi3.val[1]);
+		auto vi5 = mipp::interleave<int8_t>(vi4.val[0], vi4.val[1]);
 
-		auto v0s = mipp::shuff<int8_t>(v0, cm);
-		auto v1s = mipp::shuff<int8_t>(v1, cm);
-
-		auto v0l = mipp::low<int8_t>(v0s);
-		auto v1l = mipp::low<int8_t>(v1s);
-
-		auto v0h = mipp::high<int8_t>(v0s);
-		auto v1h = mipp::high<int8_t>(v1s);
-
-		auto v_re = mipp::combine<int8_t>(v0l, v1l);
-		auto v_im = mipp::combine<int8_t>(v0h, v1h);
-
-		return {{v_re, v_im}};
+		return {{vi5.val[0], vi5.val[1]}};
 	}
 
 	// --------------------------------------------------------------------------------------------------- interleavelo
