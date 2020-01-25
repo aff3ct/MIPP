@@ -71,6 +71,22 @@ void test_Reg_conj()
 		T res_re =  inputs1[              i];
 		T res_im = -inputs1[mipp::N<T>() +i];
 
+		if (r2[0][i] != res_re)
+		{
+			std::cout << "i          = " << i           << std::endl;
+			std::cout << "inputs1[i] = " << +inputs1[i] << std::endl;
+			std::cout << "res_re     = " << +res_re     << std::endl;
+			std::cout << "r2[0][i]   = " << +r2[0][i]   << std::endl;
+		}
+
+		if (r2[1][i] != res_im)
+		{
+			std::cout << "i            = " << i                         << std::endl;
+			std::cout << "inputs1[N+i] = " << +inputs1[mipp::N<T>() +i] << std::endl;
+			std::cout << "res_im       = " << +res_im                   << std::endl;
+			std::cout << "r2[1][i]     = " << +r2[1][i]                 << std::endl;
+		}
+
 		REQUIRE(r2[0][i] == res_re);
 		REQUIRE(r2[1][i] == res_im);
 	}
