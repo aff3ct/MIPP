@@ -600,8 +600,8 @@ public:
 	inline Regx2<T> deinterleave(                ) const { return mipp::deinterleave<T>(*(mipp::regx2*)this);                                     }
 	inline Regx2<T> conj        (                ) const { return mipp::conj        <T>(*(mipp::regx2*)this);                                     }
 	inline Reg  <T> norm        (                ) const { return mipp::norm        <T>(*(mipp::regx2*)this);                                     }
-	inline Regx2<T> add         (const Regx2<T> v) const { return mipp::Regx2<T>(mipp::add<T>(val[0], v.val[0]), mipp::add<T>(val[1], v.val[1])); }
-	inline Regx2<T> sub         (const Regx2<T> v) const { return mipp::Regx2<T>(mipp::sub<T>(val[0], v.val[0]), mipp::sub<T>(val[1], v.val[1])); }
+	inline Regx2<T> cadd        (const Regx2<T> v) const { return mipp::cadd        <T>(*(mipp::regx2*)this, *(regx2*)&v);                        }
+	inline Regx2<T> csub        (const Regx2<T> v) const { return mipp::csub        <T>(*(mipp::regx2*)this, *(regx2*)&v);                        }
 	inline Regx2<T> cmul        (const Regx2<T> v) const { return mipp::cmul        <T>(*(mipp::regx2*)this, *(regx2*)&v);                        }
 	inline Regx2<T> cmulconj    (const Regx2<T> v) const { return mipp::cmulconj    <T>(*(mipp::regx2*)this, *(regx2*)&v);                        }
 	inline Regx2<T> cdiv        (const Regx2<T> v) const { return mipp::cdiv        <T>(*(mipp::regx2*)this, *(regx2*)&v);                        }
@@ -637,11 +637,11 @@ public:
 	}
 #endif
 
-	inline Regx2<T>& operator+=(const Regx2<T> &v)       { auto res = this->add(v); val[0] = res.val[0]; val[1] = res.val[1]; return *this;  }
-	inline Regx2<T>  operator+ (const Regx2<T>  v) const { return this->add(v);                                                              }
+	inline Regx2<T>& operator+=(const Regx2<T> &v)       { auto res = this->cadd(v); val[0] = res.val[0]; val[1] = res.val[1]; return *this; }
+	inline Regx2<T>  operator+ (const Regx2<T>  v) const { return this->cadd(v);                                                             }
 
-	inline Regx2<T>& operator-=(const Regx2<T> &v)       { auto res = this->sub(v); val[0] = res.val[0]; val[1] = res.val[1]; return *this;  }
-	inline Regx2<T>  operator- (const Regx2<T>  v) const { return this->sub(v);                                                              }
+	inline Regx2<T>& operator-=(const Regx2<T> &v)       { auto res = this->csub(v); val[0] = res.val[0]; val[1] = res.val[1]; return *this; }
+	inline Regx2<T>  operator- (const Regx2<T>  v) const { return this->csub(v);                                                             }
 
 	inline Regx2<T>& operator*=(const Regx2<T> &v)       { auto res = this->cmul(v); val[0] = res.val[0]; val[1] = res.val[1]; return *this; }
 	inline Regx2<T>  operator* (const Regx2<T>  v) const { return this->cmul(v);                                                             }
@@ -790,6 +790,8 @@ template <typename T> inline     T       hmul         (const Reg<T> v)          
 template <typename T> inline     T       hmin         (const Reg<T> v)                                        { return v.hmin();                 }
 template <typename T> inline     T       hmax         (const Reg<T> v)                                        { return v.hmax();                 }
 template <typename T> inline Reg<T>      combine      (const Reg_2<T> v1, const Reg_2<T> v2)                  { return v1.combine(v2);           }
+template <typename T> inline Regx2<T>    cadd         (const Regx2<T> v1, const Regx2<T> v2)                  { return v1.cadd(v2);              }
+template <typename T> inline Regx2<T>    csub         (const Regx2<T> v1, const Regx2<T> v2)                  { return v1.csub(v2);              }
 template <typename T> inline Regx2<T>    cmul         (const Regx2<T> v1, const Regx2<T> v2)                  { return v1.cmul(v2);              }
 template <typename T> inline Regx2<T>    cmulconj     (const Regx2<T> v1, const Regx2<T> v2)                  { return v1.cmulconj(v2);          }
 template <typename T> inline Regx2<T>    cdiv         (const Regx2<T> v1, const Regx2<T> v2)                  { return v1.cdiv(v2);              }

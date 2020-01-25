@@ -7,10 +7,15 @@
 
 ## Purpose
 
-MIPP is a portable and Open-source wrapper (MIT license) for vector intrinsic functions (SIMD) written in C++11. It works for SSE, AVX, AVX-512 and ARM NEON (32-bit and 64-bit) instructions.
-MIPP wrapper supports simple/double precision floating-point numbers and also signed integer arithmetic (64-bit, 32-bit, 16-bit and 8-bit).
+MIPP is a portable and Open-source wrapper (MIT license) for vector intrinsic 
+functions (SIMD) written in C++11. It works for SSE, AVX, AVX-512 and ARM NEON 
+(32-bit and 64-bit) instructions. MIPP wrapper supports simple/double precision 
+floating-point numbers and also signed integer arithmetic (64-bit, 32-bit, 
+16-bit and 8-bit).
 
-With the MIPP wrapper you do not need to write a specific intrinsic code anymore. Just use provided functions and the wrapper will automatically generates the right intrisic calls for your specific architecture.
+With the MIPP wrapper you do not need to write a specific intrinsic code 
+anymore. Just use provided functions and the wrapper will automatically 
+generates the right intrisic calls for your specific architecture.
 
 ## Miscellaneous
 
@@ -20,6 +25,9 @@ Adrien Cassagne, Olivier Aumage, Denis Barthou, Camille Leroux and Christophe J�
 [**MIPP: a Portable C++ SIMD Wrapper and its use for Error Correction Coding in 5G Standard**](https://doi.org/10.1145/3178433.3178435),  
 *The 5th International Workshop on Programming Models for SIMD/Vector Processing (WPMVP 2018), February 2018.*
 
+Adrien Cassagne, Olivier Hartmann, Mathieu Léonardon, Kun He, Camille Leroux, Romain Tajan, Olivier Aumage, Denis Barthou, Thibaud Tonnellier, Vincent Pignoly, Bertrand Le Gal and Christophe Jégo,  
+[**AFF3CT: A Fast Forward Error Correction Toolbox!**](https://doi.org/10.1016/j.softx.2019.100345),  
+*Elsevier SoftwareX, October 2019.*
 
 Mathieu Léonardon, Adrien Cassagne, Camille Leroux, Christophe Jégo, Louis-Philippe Hamelin and Yvon Savaria,  
 [**Fast and Flexible Software Polar List Decoders**](https://doi.org/10.1007/s11265-018-1430-3),  
@@ -47,9 +55,12 @@ Adrien Cassagne, Bertrand Le Gal, Camille Leroux, Olivier Aumage and Denis Barth
 
 ### Open-source projects in which MIPP is used
 
-  - [AFF3CT](https://github.com/aff3ct/aff3ct): A Fast Forward Error Correction Toolbox!
-  - [MUrB](https://github.com/kouchy/MUrB): a N-body problem simulator with various implementations (multi-threaded, MPI, SIMD, etc.).
-  - [mandelbrot](https://gitlab.inria.fr/acassagn/mandelbrot): the Mandelbrot fractal, sequential and SIMD implementations.
+  - [AFF3CT](https://github.com/aff3ct/aff3ct): A Fast Forward Error Correction 
+  Toolbox!
+  - [MUrB](https://github.com/kouchy/MUrB): a N-body problem simulator with 
+  various implementations (multi-threaded, MPI, SIMD, etc.).
+  - [mandelbrot](https://gitlab.inria.fr/acassagn/mandelbrot): the Mandelbrot 
+  fractal, sequential and SIMD implementations.
 
 ## Short documentation
 
@@ -62,8 +73,10 @@ At this time, MIPP has been tested on the following compilers:
   - Clang: `clang++` >= `3.6`,
   - Microsoft: `msvc` >= `14`.
 
-On `msvc` `14.10` (Microsoft Visual Studio 2017), the performances are reduced compared to the other compilers, the compiler is not able to fully inline all the MIPP methods.
-This has been fixed on `msvc` `14.21` (Microsoft Visual Studio 2019) and now you can expect high performances.
+On `msvc` `14.10` (Microsoft Visual Studio 2017), the performances are reduced 
+compared to the other compilers, the compiler is not able to fully inline all 
+the MIPP methods. This has been fixed on `msvc` `14.21` (Microsoft Visual Studio 
+2019) and now you can expect high performances.
 
 ### Install and configure your code
 
@@ -74,28 +87,37 @@ Just include the header into your source files when the wrapper is needed.
 #include "mipp.h"
 ```
 
-mipp.h use a C++ `namespace`: `mipp`, if you do not want to prefix all the MIPP calls by `mipp::` you can do that:
+mipp.h use a C++ `namespace`: `mipp`, if you do not want to prefix all the MIPP 
+calls by `mipp::` you can do that:
 
 ```cpp
 #include "mipp.h"
 using namespace mipp;
 ```
 
-Before trying to compile, think to tell the compiler what kind of vector instructions you want to use.
-For instance, if you are using GNU compiler (`g++`) you simply have to add the `-march=native` option for SSE and AVX CPUs compatible.
-For ARM CPUs with NEON instructions you have to add the `-mfpu=neon` option (since most of current NEON instructions are not IEEE-754 compatible).
-MIPP also use some nice features provided by the C++11 and so we have to add the `-std=c++11` flag to compile the code. Your are now ready to run your code with the mipp.h wrapper.
+Before trying to compile, think to tell the compiler what kind of vector 
+instructions you want to use. For instance, if you are using GNU compiler 
+(`g++`) you simply have to add the `-march=native` option for SSE and AVX CPUs 
+compatible. For ARM CPUs with NEON instructions you have to add the `-mfpu=neon` 
+option (since most of current NEON instructions are not IEEE-754 compatible).
+MIPP also use some nice features provided by the C++11 and so we have to add the 
+`-std=c++11` flag to compile the code. Your are now ready to run your code with 
+the mipp.h wrapper.
 
 ### Sequential mode
 
-By default, MIPP try to recognize the instruction set from the preprocessor definitions.
-If MIPP can't match the instruction set (for instance when MIPP does not support the targeted instruction set), MIPP fall back on standard sequential instructions.
-In this mode, the vectorization is not guarantee anymore but the compiler can still perform auto-vectorization.
+By default, MIPP try to recognize the instruction set from the preprocessor 
+definitions. If MIPP can't match the instruction set (for instance when MIPP 
+does not support the targeted instruction set), MIPP fall back on standard 
+sequential instructions. In this mode, the vectorization is not guarantee 
+anymore but the compiler can still perform auto-vectorization.
 
-It is possible to force MIPP to use the sequential mode with the following compiler definition: `-DMIPP_NO_INTRINSICS`.
-Sometime it can be useful for debugging or to bench a code.
+It is possible to force MIPP to use the sequential mode with the following 
+compiler definition: `-DMIPP_NO_INTRINSICS`. Sometime it can be useful for 
+debugging or to bench a code.
 
-If you want to check the MIPP mode configuration, you can print the following global variable: `mipp::InstructionFullType` (`std::string`).
+If you want to check the MIPP mode configuration, you can print the following 
+global variable: `mipp::InstructionFullType` (`std::string`).
 
 ### Vector register declaration
 
@@ -105,7 +127,10 @@ Just use the `mipp::Reg<T>` type.
 mipp::Reg<T> r1, r2, r3; // we have declared 3 vector registers
 ```
 
-But we do not know the number of elements per registers here. This number of elements can be obtained by calling the `mipp::N<T>()` function (`T` is a template parameter, it can be `double`, `float`, `int64_t`, `int32_t`, `int16_t` or `int8_t` type).
+But we do not know the number of elements per registers here. This number of 
+elements can be obtained by calling the `mipp::N<T>()` function (`T` is a 
+template parameter, it can be `double`, `float`, `int64_t`, `int32_t`, `int16_t` 
+or `int8_t` type).
 
 ```cpp
 for(int i = 0; i < n; i += mipp::N<float>()) {
@@ -113,7 +138,8 @@ for(int i = 0; i < n; i += mipp::N<float>()) {
 }
 ```
 
-The register size directly depends on the precision of the data we are working on.
+The register size directly depends on the precision of the data we are working 
+on.
 
 ### Register load and store instructions
 
@@ -140,13 +166,18 @@ r1.store(&myVector[(i+1)*mipp::N<float>()]);
 ```
 
 By default the loads and stores work on **unaligned memory**.
-It is possible to control this behavior with the `-DMIPP_ALIGNED_LOADS` definition: when specified, the loads and stores work on **aligned memory** by default.
-In the **aligned memory** mode, it is still possible to perform unaligned memory operations with the `mipp::loadu` and `mipp::storeu` functions.
-However, it is not possible to perform aligned loads and stores in the **unaligned memory** mode.
+It is possible to control this behavior with the `-DMIPP_ALIGNED_LOADS` 
+definition: when specified, the loads and stores work on **aligned memory** by 
+default. In the **aligned memory** mode, it is still possible to perform 
+unaligned memory operations with the `mipp::loadu` and `mipp::storeu` functions.
+However, it is not possible to perform aligned loads and stores in the 
+**unaligned memory** mode.
 
 
-To allocate aligned data you can use the MIPP aligned memory allocator wrapped into the `mipp::vector` class.
-`mipp::vector` is fully retro-compatible with the standard `std::vector` class and it can be use everywhere you can use `std::vector`.
+To allocate aligned data you can use the MIPP aligned memory allocator wrapped 
+into the `mipp::vector` class. `mipp::vector` is fully retro-compatible with the 
+standard `std::vector` class and it can be use everywhere you can use 
+`std::vector`.
 
 ```cpp
 mipp::vector<float> myVector(n);
@@ -250,7 +281,8 @@ r1 = 9.0;             // r1 = | +9.0 | +9.0 | +9.0 | +9.0 |
 r2 = mipp::sqrt(r1);  // r2 = | +3.0 | +3.0 | +3.0 | +3.0 |
 ```
 
-**Reciprocal square root** of a vector register (be careful: this intrinsic exists only for simple precision floating-point numbers):
+**Reciprocal square root** of a vector register (be careful: this intrinsic 
+exists only for simple precision floating-point numbers):
 
 ```cpp
 mipp::Reg<float> r1, r2;
@@ -286,7 +318,8 @@ r3 = mipp::max(r1, r2); // r3 = | +3.0 | +3.0 | +3.0 | +3.0 |
 
 ### Permutations
 
-The `rrot(...)` method allows you to perform a **right rotation** (a cyclic permutation) of the elements inside the register:
+The `rrot(...)` method allows you to perform a **right rotation** (a cyclic 
+permutation) of the elements inside the register:
 
 ```cpp
 mipp::Reg<float> r1, r2;
@@ -298,7 +331,8 @@ r2 = mipp::rrot(r1);       // r2 = | +2.0 | +1.0 | +0.0 | +3.0 |
 r1 = mipp::rrot(r2);       // r1 = | +3.0 | +2.0 | +1.0 | +0.0 |
 ```
 
-Of course there are many more available instructions in the MIPP wrapper and you can find these instructions at the end of this page.
+Of course there are many more available instructions in the MIPP wrapper and you 
+can find these instructions at the end of this page.
 
 ### Addition of two vectors
 
@@ -372,9 +406,10 @@ for (int i = vecLoopSize; i < n; i++) {
 
 ### Masked instructions
 
-MIPP comes with two generic and templatized masked functions (`mask` and `maskz`).
-Those functions allow you to benefit from the AVX-512 masked instructions.
-`mask` and `maskz` functions are retro compatible with older instruction sets.
+MIPP comes with two generic and templatized masked functions (`mask` and 
+`maskz`). Those functions allow you to benefit from the AVX-512 masked 
+instructions. `mask` and `maskz` functions are retro compatible with older 
+instruction sets.
 
 ```cpp
 mipp::Reg<        float   > ZMM1 = {   40,  -30,    60,    80};
@@ -393,17 +428,26 @@ std::cout << ZMM4 << std::endl; // output: "[0, -3, 0, 0]"
 ## List of MIPP functions
 
 This section presents an exhaustive list of all the available functions in MIPP.
-Of course the MIPP wrapper does not cover all the possible intrinsics of each instruction set but it tries to give you the most important and useful ones.
+Of course the MIPP wrapper does not cover all the possible intrinsics of each 
+instruction set but it tries to give you the most important and useful ones.
 
-In the following tables, `T`, `T1` and `T2` stand for data types (`double`, `float`, `int64_t`, `int32_t`, `int16_t` or `int8_t`).
+In the following tables, `T`, `T1` and `T2` stand for data types (`double`, 
+`float`, `int64_t`, `int32_t`, `int16_t` or `int8_t`).
 `N` stands for the number or elements in a mask or in a register.
-`N` is a strictly positive integer and can easily be deduced from the data type: `constexpr int N = mipp::N<T>()`.
-When `T` and `N` are mixed in a prototype, `N` has to satisfy the previous constraint (`N = mipp::N<T>()`).
+`N` is a strictly positive integer and can easily be deduced from the data type: 
+`constexpr int N = mipp::N<T>()`.
+When `T` and `N` are mixed in a prototype, `N` has to satisfy the previous 
+constraint (`N = mipp::N<T>()`).
 
 In the documentation there are some terms that requires to be clarified:
 
-  - **register element**: a SIMD register is composed by multiple scalar elements, those elements are built-in data types (`double`, `float`, `int64_t`, ...),
-  - **register lane**: modern instruction sets can have multiple implicit sub parts in an entire SIMD register, those sub parts are called lanes (SSE has one lane of 128 bits, AVX has two lanes of 128 bits, AVX-512 has four lanes of 128 bits).
+  - **register element**: a SIMD register is composed by multiple scalar 
+  elements, those elements are built-in data types (`double`, `float`, 
+  `int64_t`, ...),
+  - **register lane**: modern instruction sets can have multiple implicit sub 
+  parts in an entire SIMD register, those sub parts are called lanes (SSE has 
+  one lane of 128 bits, AVX has two lanes of 128 bits, AVX-512 has four lanes of 
+  128 bits).
 
 ### Memory operations
 
@@ -421,6 +465,7 @@ In the documentation there are some terms that requires to be clarified:
 | `set0`          | `Msk  <N> set0          ()`                                                 | Initializes a mask to false.                                                                            |                                                              |
 | `low`           | `Reg_2<T> low           (const Reg<T> r)`                                   | Gets the low part of the `r` register.                                                                  | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 | `high`          | `Reg_2<T> high          (const Reg<T> r)`                                   | Gets the high part of the `r` register.                                                                 | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `combine`       | `Reg  <T> combine       (const Reg_2<T> r1,  Reg_2<T> r2)`                  | Combine two half registers in a full register, `r1` will be the low part and `r2` the high part.        | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 | `cmask`         | `Reg  <T> cmask         (const uint32_t[N  ] ids)`                          | Creates a cmask from an indexes list (indexes have to be between 0 and N-1).                            | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 | `cmask2`        | `Reg  <T> cmask2        (const uint32_t[N/2] ids)`                          | Creates a cmask2 from an indexes list (indexes have to be between 0 and (N/2)-1).                       | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 | `cmask4`        | `Reg  <T> cmask4        (const uint32_t[N/4] ids)`                          | Creates a cmask4 from an indexes list (indexes have to be between 0 and (N/4)-1).                       | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
@@ -428,6 +473,7 @@ In the documentation there are some terms that requires to be clarified:
 | `shuff2`        | `Reg  <T> shuff2        (const Reg<T> r, const Reg<T> cm2)`                 | Shuffles the elements of `r` according to the cmask2 `cm2` (same shuffle is applied in both lanes).     | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 | `shuff4`        | `Reg  <T> shuff4        (const Reg<T> r, const Reg<T> cm4)`                 | Shuffles the elements of `r` according to the cmask4 `cm4` (same shuffle is applied in the four lanes). | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 | `interleave`    | `Regx2<T> interleave    (const Reg<T> r1, const Reg<T> r2)`                 | Interleaves `r1` and `r2` : `[r1_1, r2_1, r1_2, r2_2, ..., r1_n, r2_n]`.                                | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `deinterleave`  | `Regx2<T> deinterleave  (const Reg<T> r1, const Reg<T> r2)`                 | Reverts the previous defined interleave operation.                                                      | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 | `interleave2`   | `Regx2<T> interleave2   (const Reg<T> r1, const Reg<T> r2)`                 | Interleaves `r1` and `r2` considering two lanes.                                                        | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 | `interleave4`   | `Regx2<T> interleave4   (const Reg<T> r1, const Reg<T> r2)`                 | Interleaves `r1` and `r2` considering four lanes.                                                       | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 | `interleavelo`  | `Reg  <T> interleavelo  (const Reg<T> r1, const Reg<T> r2)`                 | Interleaves the low part of `r1` with the low part of `r2`.                                             | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
@@ -506,7 +552,30 @@ The `pipe` keyword stands for the "&#124;" binary operator.
 | `sign`         |              | `Msk<N> sign   (const Reg<T> r)`                                    | Returns the sign: `r < 0`.                                                                          | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 | `round`        |              | `Reg<T> round  (const Reg<T> r)`                                    | Rounds the registers values: `fractional_part(r) >= 0.5 ? integral_part(r) + 1 : integral_part(r)`. | `double`, `float`                                            |
 
-### Reductions (horizontal functions) :
+### Arithmetic operations on complex numbers
+
+The complex operations are exclusively performed on `Regx2<T>` objects (one 
+`Regx2<T>` object contains two `Reg<T>` hardware registers). Each `Regx2<T>` 
+object contains `mipp::N<T>()` complex number. If we declare a `Regx2<T> cmplx` 
+object, the `cmplx[0]` register will contain the real part of the complex 
+numbers and `cmplx[1]` will contain the imaginary part. Depending on how you 
+stored your complex numbers in memory you can need to use reordering before 
+calling a complex operation. For instance, if you choose to store the complex 
+numbers in a mixed format like this: `r0, i0, r1, i1, r2, i2, ..., rn, in` you 
+will need to call the `mipp::deinterleave` operation before and the 
+`mipp::interleave` operation after the complex operation.
+
+| **Short name** | **Operator** | **Prototype**                                              | **Documentation**                                                    | **Supported types**                                          |
+| :---           | :---         | :---                                                       | :---                                                                 | :---                                                         |
+| `cadd`         | `+` and `+=` | `Regx2<T> cadd     (const Regx2<T> r1, const Regx2<T> r2)` | Performs the complex addition: `r1 + r2`.                            | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `csub`         | `-` and `-=` | `Regx2<T> csub     (const Regx2<T> r1, const Regx2<T> r2)` | Performs the complex subtraction: `r1 - r2`.                         | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `cmul`         | `*` and `*=` | `Regx2<T> cmul     (const Regx2<T> r1, const Regx2<T> r2)` | Performs the complex multiplication: `r1 * r2`.                      | `double`, `float`, `int32_t`, `int16_t`, `int8_t`            |
+| `cdiv`         | `/` and `/=` | `Regx2<T> cdiv     (const Regx2<T> r1, const Regx2<T> r2)` | Performs the complex division: `r1 / r2`.                            | `double`, `float`                                            |
+| `cmulconj`     |              | `Regx2<T> cmulconj (const Regx2<T> r1, const Regx2<T> r2)` | Performs the complex multiplication with conjugate: `r1 * conj(r2)`. | `double`, `float`, `int32_t`, `int16_t`, `int8_t`            |
+| `conj`         |              | `Regx2<T> cmulconj (const Regx2<T> r)`                     | Computes the conjugate: `conj(r)`.                                   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `norm`         |              | `Reg  <T> norm     (const Regx2<T> r)`                     | Computes the squared magnitude: `norm(r)`.                           | `double`, `float`, `int32_t`, `int16_t`, `int8_t`            |
+
+### Reductions (horizontal functions)
 
 | **Short name**    | **Prototype**                                                     | **Documentation**                                                                                                  | **Supported types**                                          |
 | :---              | :---                                                              | :---                                                                                                               | :---                                                         |
