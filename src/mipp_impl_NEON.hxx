@@ -1547,6 +1547,29 @@
 		return (reg) vshlq_u8((uint8x16_t) v1, (int8x16_t)mipp::set1<int8_t>((int8_t) n));
 	}
 
+	// -------------------------------------------------------------------------------------------------------- lshiftr
+#ifdef __aarch64__
+	template <>
+	inline reg lshiftr<int64_t>(const reg v1, const reg v2) {
+		return (reg) vshlq_u64((uint64x2_t) v1, (int64x2_t) v2);
+	}
+#endif
+
+	template <>
+	inline reg lshiftr<int32_t>(const reg v1, const reg v2) {
+		return (reg) vshlq_u32((uint32x4_t) v1, (int32x4_t) v2);
+	}
+
+	template <>
+	inline reg lshiftr<int16_t>(const reg v1, const reg v2) {
+		return (reg) vshlq_u16((uint16x8_t) v1, (int16x8_t) v2);
+	}
+
+	template <>
+	inline reg lshiftr<int8_t>(const reg v1, const reg v2) {
+		return (reg) vshlq_u8((uint8x16_t) v1, (int8x16_t) v2);
+	}
+
 	// -------------------------------------------------------------------------------------------------- lshift (mask)
 #ifndef __clang__
 #ifdef __aarch64__
@@ -1605,6 +1628,33 @@
 	template <>
 	inline reg rshift<int8_t>(const reg v1, const uint32_t n) {
 		return (reg) vshlq_u8((uint8x16_t) v1, (int8x16_t)mipp::set1<int8_t>((int8_t)-n));
+	}
+
+	// -------------------------------------------------------------------------------------------------------- rshiftr
+#ifdef __aarch64__
+	template <>
+	inline reg rshiftr<int64_t>(const reg v1, const reg v2) {
+		auto zeros = mipp::set0<int64_t>;
+		return (reg) vshlq_u64((uint64x2_t) v1, vsubq_s64((int64x2_t)zeros, (int64x2_t)v2));
+	}
+#endif
+
+	template <>
+	inline reg rshiftr<int32_t>(const reg v1, const reg v2) {
+		auto zeros = mipp::set0<int32_t>;
+		return (reg) vshlq_u32((uint32x4_t) v1, vsubq_s32((int32x4_t)zeros, (int32x4_t)v2));
+	}
+
+	template <>
+	inline reg rshiftr<int16_t>(const reg v1, const reg v2) {
+		auto zeros = mipp::set0<int16_t>;
+		return (reg) vshlq_u16((uint16x8_t) v1, vsubq_s16((int16x8_t)zeros, (int16x8_t)v2));
+	}
+
+	template <>
+	inline reg rshiftr<int8_t>(const reg v1, const reg v2) {
+		auto zeros = mipp::set0<int8_t>;
+		return (reg) vshlq_u8((uint8x16_t) v1, vsubq_s8((int8x16_t)zeros, (int8x16_t)v2));
 	}
 
 	// -------------------------------------------------------------------------------------------------- rshift (mask)

@@ -1965,6 +1965,19 @@
 	}
 #endif
 
+	// -------------------------------------------------------------------------------------------------------- lshiftr
+#ifdef __AVX2__
+	template <>
+	inline reg lshiftr<int64_t>(const reg v1, const reg v2) {
+		return _mm256_castsi256_ps(_mm256_sllv_epi64(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	}
+
+	template <>
+	inline reg lshiftr<int32_t>(const reg v1, const reg v2) {
+		return _mm256_castsi256_ps(_mm256_sllv_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	}
+#endif
+
 	// -------------------------------------------------------------------------------------------------- lshift (mask)
 
 	// --------------------------------------------------------------------------------------------------------- rshift
@@ -2032,6 +2045,19 @@
 		res = _mm256_insertf128_ps(res, v1_lane1, 1);
 
 		return res;
+	}
+#endif
+
+	// -------------------------------------------------------------------------------------------------------- rshiftr
+#ifdef __AVX2__
+	template <>
+	inline reg rshiftr<int64_t>(const reg v1, const reg v2) {
+		return _mm256_castsi256_ps(_mm256_srlv_epi64(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	}
+
+	template <>
+	inline reg rshiftr<int32_t>(const reg v1, const reg v2) {
+		return _mm256_castsi256_ps(_mm256_srlv_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
 	}
 #endif
 

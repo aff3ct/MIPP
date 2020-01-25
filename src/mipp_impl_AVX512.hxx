@@ -2316,6 +2316,28 @@
 	}
 #endif
 
+	// -------------------------------------------------------------------------------------------------------- lshiftr
+#if defined(__AVX512F__)
+	template <>
+	inline reg lshiftr<int64_t>(const reg v1, const reg v2) {
+		return _mm512_castsi512_ps(_mm512_sllv_epi64(_mm512_castps_si512(v1), _mm512_castps_si512(v2)));
+	}
+#endif
+
+#if defined(__AVX512F__) || defined(__MIC__) || defined(__KNCNI__)
+	template <>
+	inline reg lshiftr<int32_t>(const reg v1, const reg v2) {
+		return _mm512_castsi512_ps(_mm512_sllv_epi32(_mm512_castps_si512(v1), _mm512_castps_si512(v2)));
+	}
+#endif
+
+#if defined(__AVX512F__)
+	template <>
+	inline reg lshiftr<int16_t>(const reg v1, const reg v2) {
+		return _mm512_castsi512_ps(_mm512_sllv_epi16(_mm512_castps_si512(v1), _mm512_castps_si512(v2)));
+	}
+#endif
+
 	// -------------------------------------------------------------------------------------------------- lshift (mask)
 	template <>
 	inline msk lshift<8>(const msk v1, const uint32_t n) {
@@ -2376,6 +2398,28 @@
 		reg rsh = rshift<int16_t>(v1, n);
 		rsh = andb<int16_t>(msk, rsh);
 		return rsh;
+	}
+#endif
+
+	// -------------------------------------------------------------------------------------------------------- rshiftr
+#if defined(__AVX512F__)
+	template <>
+	inline reg rshiftr<int64_t>(const reg v1, const reg v2) {
+		return _mm512_castsi512_ps(_mm512_srlv_epi64(_mm512_castps_si512(v1), _mm512_castps_si512(v2)));
+	}
+#endif
+
+#if defined(__AVX512F__) || defined(__MIC__) || defined(__KNCNI__)
+	template <>
+	inline reg rshiftr<int32_t>(const reg v1, const reg v2) {
+		return _mm512_castsi512_ps(_mm512_srlv_epi32(_mm512_castps_si512(v1), _mm512_castps_si512(v2)));
+	}
+#endif
+
+#if defined(__AVX512F__)
+	template <>
+	inline reg rshiftr<int16_t>(const reg v1, const reg v2) {
+		return _mm512_castsi512_ps(_mm512_srlv_epi16(_mm512_castps_si512(v1), _mm512_castps_si512(v2)));
 	}
 #endif
 
