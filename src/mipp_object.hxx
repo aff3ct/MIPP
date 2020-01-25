@@ -625,8 +625,8 @@ public:
 	inline Regx2<T> deinterleave(                ) const { return *this;                                                                          }
 	inline Regx2<T> conj        (                ) const { return Regx2<T>(val[0].r, -val[1].r);                                                  }
 	inline Reg  <T> norm        (                ) const { return val[0].r * val[0].r + val[1].r * val[1].r;                                      }
-	inline Regx2<T> add         (const Regx2<T> v) const { return mipp::Regx2<T>(val[0].r + v.val[0].r, val[1].r + v.val[1].r);                   }
-	inline Regx2<T> sub         (const Regx2<T> v) const { return mipp::Regx2<T>(val[0].r - v.val[0].r, val[1].r - v.val[1].r);                   }
+	inline Regx2<T> cadd        (const Regx2<T> v) const { return mipp::Regx2<T>(val[0].r + v.val[0].r, val[1].r + v.val[1].r);                   }
+	inline Regx2<T> csub        (const Regx2<T> v) const { return mipp::Regx2<T>(val[0].r - v.val[0].r, val[1].r - v.val[1].r);                   }
 	inline Regx2<T> cmul(const Regx2<T> v) const
 	{
 		auto re = val[0].r * v.val[0].r - val[1].r * v.val[1].r;
