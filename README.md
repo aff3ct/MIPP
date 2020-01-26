@@ -490,22 +490,24 @@ In the documentation there are some terms that requires to be clarified:
 
 The `pipe` keyword stands for the "&#124;" binary operator.
 
-| **Short name** | **Operator**       | **Prototype**                                      | **Documentation**                           | **Supported types**                                          |
-| :---           | :---               | :---                                               | :---                                        | :---                                                         |
-| `andb`         | `&` and `&=`       | `Reg<T> andb   (const Reg<T> r1, const Reg<T> r2)` | Computes the bitwise AND: `r1 & r2`.        | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `andb`         | `&` and `&=`       | `Msk<N> andb   (const Msk<N> m1, const Msk<N> m2)` | Computes the bitwise AND: `m1 & m2`.        |                                                              |
-| `andnb`        |                    | `Reg<T> andnb  (const Reg<T> r1, const Reg<T> r1)` | Computes the bitwise AND NOT: `(~r1) & r2`. | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `andnb`        |                    | `Msk<N> andnb  (const Msk<N> m1, const Msk<N> m2)` | Computes the bitwise AND NOT: `(~m1) & m2`. |                                                              |
-| `orb`          | `pipe` and `pipe=` | `Reg<T> orb    (const Reg<T> r1, const Reg<T> r2)` | Computes the bitwise OR: `r1 pipe r2`.      | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `orb`          | `pipe` and `pipe=` | `Msk<N> orb    (const Msk<N> m1, const Msk<N> m2)` | Computes the bitwise OR: `m1 pipe m2`.      |                                                              |
-| `xorb`         | `^` and `^=`       | `Reg<T> xorb   (const Reg<T> r1, const Reg<T> r2)` | Computes the bitwise XOR: `r1 ^ r2`.        | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `xorb`         | `^` and `^=`       | `Msk<N> xorb   (const Msk<N> m1, const Msk<N> m2)` | Computes the bitwise XOR: `m1 ^ m2`.        |                                                              |
-| `lshift`       | `<<` and `<<=`     | `Reg<T> lshift (const Reg<T> r, const uint32_t n)` | Computes the bitwise LEFT SHIFT: `r << n`.  | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `lshift`       | `<<` and `<<=`     | `Msk<N> lshift (const Msk<N> m, const uint32_t n)` | Computes the bitwise LEFT SHIFT: `m << n`.  |                                                              |
-| `rshift`       | `>>` and `>>=`     | `Reg<T> rshift (const Reg<T> r, const uint32_t n)` | Computes the bitwise RIGHT SHIFT: `r >> n`. | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `rshift`       | `>>` and `>>=`     | `Msk<N> rshift (const Msk<N> m, const uint32_t n)` | Computes the bitwise RIGHT SHIFT: `m >> n`. |                                                              |
-| `notb`         | `~`                | `Reg<T> notb   (const Reg<T> r)`                   | Computes the bitwise NOT: `~r`.             | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `notb`         | `~`                | `Msk<N> notb   (const Msk<N> m)`                   | Computes the bitwise NOT: `~m`.             |                                                              |
+| **Short name** | **Operator**       | **Prototype**                                       | **Documentation**                             | **Supported types**                                          |
+| :---           | :---               | :---                                                | :---                                          | :---                                                         |
+| `andb`         | `&` and `&=`       | `Reg<T> andb    (const Reg<T> r1, const Reg<T> r2)` | Computes the bitwise AND: `r1 & r2`.          | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `andb`         | `&` and `&=`       | `Msk<N> andb    (const Msk<N> m1, const Msk<N> m2)` | Computes the bitwise AND: `m1 & m2`.          |                                                              |
+| `andnb`        |                    | `Reg<T> andnb   (const Reg<T> r1, const Reg<T> r1)` | Computes the bitwise AND NOT: `(~r1) & r2`.   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `andnb`        |                    | `Msk<N> andnb   (const Msk<N> m1, const Msk<N> m2)` | Computes the bitwise AND NOT: `(~m1) & m2`.   |                                                              |
+| `orb`          | `pipe` and `pipe=` | `Reg<T> orb     (const Reg<T> r1, const Reg<T> r2)` | Computes the bitwise OR: `r1 pipe r2`.        | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `orb`          | `pipe` and `pipe=` | `Msk<N> orb     (const Msk<N> m1, const Msk<N> m2)` | Computes the bitwise OR: `m1 pipe m2`.        |                                                              |
+| `xorb`         | `^` and `^=`       | `Reg<T> xorb    (const Reg<T> r1, const Reg<T> r2)` | Computes the bitwise XOR: `r1 ^ r2`.          | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `xorb`         | `^` and `^=`       | `Msk<N> xorb    (const Msk<N> m1, const Msk<N> m2)` | Computes the bitwise XOR: `m1 ^ m2`.          |                                                              |
+| `lshift`       | `<<` and `<<=`     | `Reg<T> lshift  (const Reg<T> r, const uint32_t n)` | Computes the bitwise LEFT SHIFT: `r << n`.    | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `lshiftr`      | `<<` and `<<=`     | `Reg<T> lshiftr (const Reg<T> r1, const Reg<T> r2)` | Computes the bitwise LEFT SHIFT: `r1 << r2`.  | `int64_t`, `int32_t`, `int16_t`, `int8_t`                    |
+| `lshift`       | `<<` and `<<=`     | `Msk<N> lshift  (const Msk<N> m, const uint32_t n)` | Computes the bitwise LEFT SHIFT: `m << n`.    |                                                              |
+| `rshift`       | `>>` and `>>=`     | `Reg<T> rshift  (const Reg<T> r, const uint32_t n)` | Computes the bitwise RIGHT SHIFT: `r >> n`.   | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `rshiftr`      | `>>` and `>>=`     | `Reg<T> rshiftr (const Reg<T> r1, const Reg<T> r2)` | Computes the bitwise RIGHT SHIFT: `r1 >> r2`. | `int64_t`, `int32_t`, `int16_t`, `int8_t`                    |
+| `rshift`       | `>>` and `>>=`     | `Msk<N> rshift  (const Msk<N> m, const uint32_t n)` | Computes the bitwise RIGHT SHIFT: `m >> n`.   |                                                              |
+| `notb`         | `~`                | `Reg<T> notb    (const Reg<T> r)`                   | Computes the bitwise NOT: `~r`.               | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `notb`         | `~`                | `Msk<N> notb    (const Msk<N> m)`                   | Computes the bitwise NOT: `~m`.               |                                                              |
 
 ### Logical comparisons
 
