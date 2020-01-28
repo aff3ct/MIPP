@@ -864,6 +864,7 @@ inline reg atanh(const reg r)
 // -------------------------------------------------------------------------------------------------- complex functions
 // --------------------------------------------------------------------------------------------------------------------
 
+
 template <typename T>
 inline regx2 cadd(const regx2 v1, const regx2 v2)
 {
@@ -879,8 +880,8 @@ inline regx2 csub(const regx2 v1, const regx2 v2)
 template <typename T>
 inline regx2 cmul(const regx2 v1, const regx2 v2)
 {
-	auto v3_re = mipp::fmsub<T>(v1.val[0], v2.val[0], mipp::mul<T>(v1.val[1], v2.val[1]));
-	auto v3_im = mipp::fmadd<T>(v1.val[0], v2.val[1], mipp::mul<T>(v1.val[1], v2.val[0]));
+	auto v3_re = mipp::sub<T>(mipp::mul<T>(v1.val[0], v2.val[0]), mipp::mul<T>(v1.val[1], v2.val[1]));
+	auto v3_im = mipp::add<T>(mipp::mul<T>(v1.val[0], v2.val[1]), mipp::mul<T>(v1.val[1], v2.val[0]));
 
 	return {{v3_re, v3_im}};
 }
@@ -888,8 +889,8 @@ inline regx2 cmul(const regx2 v1, const regx2 v2)
 template <typename T>
 inline regx2 cmulconj(const regx2 v1, const regx2 v2)
 {
-	auto v3_re = mipp::fmadd<T>(v1.val[0], v2.val[0], mipp::mul<T>(v1.val[1], v2.val[1]));
-	auto v3_im = mipp::fmsub<T>(v1.val[1], v2.val[0], mipp::mul<T>(v1.val[0], v2.val[1]));
+	auto v3_re = mipp::add<T>(mipp::mul<T>(v1.val[0], v2.val[0]), mipp::mul<T>(v1.val[1], v2.val[1]));
+	auto v3_im = mipp::sub<T>(mipp::mul<T>(v1.val[1], v2.val[0]), mipp::mul<T>(v1.val[0], v2.val[1]));
 
 	return {{v3_re, v3_im}};
 }
@@ -899,8 +900,8 @@ inline regx2 cdiv(const regx2 v1, const regx2 v2)
 {
 	auto norm = mipp::add<T>(mipp::mul<T>(v2.val[0], v2.val[0]), mipp::mul<T>(v2.val[1], v2.val[1]));
 
-	auto v3_re = mipp::fmadd<T>(v1.val[0], v2.val[0], mipp::mul<T>(v1.val[1], v2.val[1]));
-	auto v3_im = mipp::fmsub<T>(v1.val[1], v2.val[0], mipp::mul<T>(v1.val[0], v2.val[1]));
+	auto v3_re = mipp::add<T>(mipp::mul<T>(v1.val[0], v2.val[0]), mipp::mul<T>(v1.val[1], v2.val[1]));
+	auto v3_im = mipp::sub<T>(mipp::mul<T>(v1.val[1], v2.val[0]), mipp::mul<T>(v1.val[0], v2.val[1]));
 
 	v3_re = mipp::div<T>(v3_re, norm);
 	v3_im = mipp::div<T>(v3_im, norm);
@@ -918,9 +919,45 @@ inline regx2 conj(const regx2 v)
 template <typename T>
 inline reg norm(const regx2 v)
 {
-	return mipp::fmadd<T>(v.val[0], v.val[0], mipp::mul<T>(v.val[1], v.val[1]));
+	return mipp::add<T>(mipp::mul<T>(v.val[0], v.val[0]), mipp::mul<T>(v.val[1], v.val[1]));
 }
 
+template <>
+inline regx2 cmul<float>(const regx2 v1, const regx2 v2)
+{
+	auto v3_re = mipp::fmsub<float>(v1.val[0], v2.val[0], mipp::mul<float>(v1.val[1], v2.val[1]));
+	auto v3_im = mipp::fmadd<float>(v1.val[0], v2.val[1], mipp::mul<float>(v1.val[1], v2.val[0]));
+
+	return {{v3_re, v3_im}};
+}
+
+template <>
+inline regx2 cmulconj<float>(const regx2 v1, const regx2 v2)
+{
+	auto v3_re = mipp::fmadd<float>(v1.val[0], v2.val[0], mipp::mul<float>(v1.val[1], v2.val[1]));
+	auto v3_im = mipp::fmsub<float>(v1.val[1], v2.val[0], mipp::mul<float>(v1.val[0], v2.val[1]));
+
+	return {{v3_re, v3_im}};
+}
+
+template <>
+inline regx2 cdiv<float>(const regx2 v1, const regx2 v2)
+{
+	auto norm = mipp::fmadd<float>(v2.val[0], v2.val[0], mipp::mul<float>(v2.val[1], v2.val[1]));
+
+	auto v3_re = mipp::fmadd<float>(v1.val[0], v2.val[0], mipp::mul<float>(v1.val[1], v2.val[1]));
+	auto v3_im = mipp::fmsub<float>(v1.val[1], v2.val[0], mipp::mul<float>(v1.val[0], v2.val[1]));
+
+	v3_re = mipp::div<float>(v3_re, norm);
+	v3_im = mipp::div<float>(v3_im, norm);
+
+	return {{v3_re, v3_im}};
+}
+template <>
+inline reg norm<float>(const regx2 v)
+{
+	return mipp::fmadd<float>(v.val[0], v.val[0], mipp::mul<float>(v.val[1], v.val[1]));
+}
 // ------------------------------------------------------------------------------------------------------------ masking
 // --------------------------------------------------------------------------------------------------------------------
 
