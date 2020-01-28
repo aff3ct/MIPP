@@ -1,0 +1,166 @@
+name: C/C++ CI
+
+on: [push]
+
+jobs:
+  build-nointr:
+
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: submodule-sync
+      run: git submodule sync --recursive
+    - name: submodule-update
+      run: git submodule update --init --recursive
+    - name: build-test
+      run: | 
+        source ./ci/tools/threads.sh
+        source ./ci/tools/build-linux-x86-gcc-generic.sh
+        compile nointr "-DMIPP_NO_INTRINSICS"
+    - name: Cache SDE
+      id: cache-sde
+      uses: actions/cache@v1
+      with:
+        path: intel-sde-downloader
+        key: ${{ runner.os }}-sde
+    - name: install-sde
+      if: steps.cache-sde.outputs.cache-hit != 'true'
+      run: |
+        git clone https://github.com/marehr/intel-sde-downloader
+        cd intel-sde-downloader
+        pip install -r requirements.txt
+        python ./intel-sde-downloader.py sde-external-8.35.0-2019-03-11-lin.tar.bz2
+        tar xvf sde-external-8.35.0-2019-03-11-lin.tar.bz2
+        mv sde-external-8.35.0-2019-03-11-lin sde
+        rm sde-external-8.35.0-2019-03-11-lin.tar.bz2
+        sudo sh -c "echo 0 > /proc/sys/kernel/yama/ptrace_scope"
+        cd ..
+    - name: run-test-nointr  
+      run: ./intel-sde-downloader/sde/sde64 -skx -- ./tests/build_linux_x86_gcc_nointr/bin/run_tests
+  build-sse:
+
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: submodule-sync
+      run: git submodule sync --recursive
+    - name: submodule-update
+      run: git submodule update --init --recursive
+    - name: build-test
+      run: | 
+        source ./ci/tools/threads.sh
+        source ./ci/tools/build-linux-x86-gcc-generic.sh
+        compile "sse2"     "-msse2"
+        compile "sse3"     "-msse3"
+        compile "ssse3"    "-mssse3"
+        compile "sse4_1"   "-msse4.1"
+        compile "sse4_2"   "-msse4.2"
+    - name: Cache SDE
+      id: cache-sde
+      uses: actions/cache@v1
+      with:
+        path: intel-sde-downloader
+        key: ${{ runner.os }}-sde
+    - name: install-sde
+      if: steps.cache-sde.outputs.cache-hit != 'true'
+      run: |
+        git clone https://github.com/marehr/intel-sde-downloader
+        cd intel-sde-downloader
+        pip install -r requirements.txt
+        python ./intel-sde-downloader.py sde-external-8.35.0-2019-03-11-lin.tar.bz2
+        tar xvf sde-external-8.35.0-2019-03-11-lin.tar.bz2
+        mv sde-external-8.35.0-2019-03-11-lin sde
+        rm sde-external-8.35.0-2019-03-11-lin.tar.bz2
+        sudo sh -c "echo 0 > /proc/sys/kernel/yama/ptrace_scope"
+        cd ..
+    - name: run-test-sse2  
+      run: ./intel-sde-downloader/sde/sde64 -skx -- ./tests/build_linux_x86_gcc_sse2/bin/run_tests
+    - name: run-test-sse3  
+      run: ./intel-sde-downloader/sde/sde64 -skx -- ./tests/build_linux_x86_gcc_sse3/bin/run_tests  
+    - name: run-test-ssse3  
+      run: ./intel-sde-downloader/sde/sde64 -skx -- ./tests/build_linux_x86_gcc_ssse3/bin/run_tests
+    - name: run-test-sse4_1  
+      run: ./intel-sde-downloader/sde/sde64 -skx -- ./tests/build_linux_x86_gcc_sse4_1/bin/run_tests  
+    - name: run-test-sse4_2  
+      run: ./intel-sde-downloader/sde/sde64 -skx -- ./tests/build_linux_x86_gcc_sse4_2/bin/run_tests
+  build-avx:
+
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: submodule-sync
+      run: git submodule sync --recursive
+    - name: submodule-update
+      run: git submodule update --init --recursive
+    - name: build-test
+      run: | 
+        source ./ci/tools/threads.sh
+        source ./ci/tools/build-linux-x86-gcc-generic.sh
+        compile "avx"      "-mavx"
+        compile "avx2"     "-mavx2"
+        compile "avx2_fma" "-mavx2 -mfma"
+    - name: Cache SDE
+      id: cache-sde
+      uses: actions/cache@v1
+      with:
+        path: intel-sde-downloader
+        key: ${{ runner.os }}-sde
+    - name: install-sde
+      if: steps.cache-sde.outputs.cache-hit != 'true'
+      run: |
+        git clone https://github.com/marehr/intel-sde-downloader
+        cd intel-sde-downloader
+        pip install -r requirements.txt
+        python ./intel-sde-downloader.py sde-external-8.35.0-2019-03-11-lin.tar.bz2
+        tar xvf sde-external-8.35.0-2019-03-11-lin.tar.bz2
+        mv sde-external-8.35.0-2019-03-11-lin sde
+        rm sde-external-8.35.0-2019-03-11-lin.tar.bz2
+        sudo sh -c "echo 0 > /proc/sys/kernel/yama/ptrace_scope"
+        cd ..
+    - name: run-test-avx
+      run: ./intel-sde-downloader/sde/sde64 -skx -- ./tests/build_linux_x86_gcc_avx/bin/run_tests
+    - name: run-test-avx2
+      run: ./intel-sde-downloader/sde/sde64 -skx -- ./tests/build_linux_x86_gcc_avx2/bin/run_tests
+    - name: run-test-avx2_fma
+      run: ./intel-sde-downloader/sde/sde64 -skx -- ./tests/build_linux_x86_gcc_avx2_fma/bin/run_tests
+  build-avx512:
+
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: submodule-sync
+      run: git submodule sync --recursive
+    - name: submodule-update
+      run: git submodule update --init --recursive
+    - name: build-test
+      run: | 
+        source ./ci/tools/threads.sh
+        source ./ci/tools/build-linux-x86-gcc-generic.sh
+        compile "avx512f"      "-mavx512f"
+        compile "avx512bw"     "-mavx512f -mavx512bw"
+    - name: Cache SDE
+      id: cache-sde
+      uses: actions/cache@v1
+      with:
+        path: intel-sde-downloader
+        key: ${{ runner.os }}-sde
+    - name: install-sde
+      if: steps.cache-sde.outputs.cache-hit != 'true'
+      run: |
+        git clone https://github.com/marehr/intel-sde-downloader
+        cd intel-sde-downloader
+        pip install -r requirements.txt
+        python ./intel-sde-downloader.py sde-external-8.35.0-2019-03-11-lin.tar.bz2
+        tar xvf sde-external-8.35.0-2019-03-11-lin.tar.bz2
+        mv sde-external-8.35.0-2019-03-11-lin sde
+        rm sde-external-8.35.0-2019-03-11-lin.tar.bz2
+        sudo sh -c "echo 0 > /proc/sys/kernel/yama/ptrace_scope"
+        cd ..
+    - name: run-test-avx512f
+      run: ./intel-sde-downloader/sde/sde64 -skx -- ./tests/build_linux_x86_gcc_avx512f/bin/run_tests
+    - name: run-test-avx512bw
+      run: ./intel-sde-downloader/sde/sde64 -skx -- ./tests/build_linux_x86_gcc_avx512bw/bin/run_tests
