@@ -5,7 +5,7 @@ function compile {
 	build=$1
 	mkdir $build
 	cd $build
-	cmake .. -G"Unix Makefiles" -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-Wall -funroll-loops -finline-functions $2" -DCMAKE_EXE_LINKER_FLAGS="-pie"
+	cmake .. -G"Unix Makefiles" -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-Wall -funroll-loops -finline-functions $2"
 	rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 	make
 	rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
