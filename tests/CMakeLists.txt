@@ -27,3 +27,5 @@ include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/lib/Catch2/include/")
 # Generate the source files list
 file (GLOB_RECURSE source_files src/*)
 add_executable(run_tests ${source_files})
+
+set_target_properties(run_tests PROPERTIES POSITION_INDEPENDENT_CODE ON) # set -fpie
