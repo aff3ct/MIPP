@@ -507,7 +507,7 @@
 
 		return (__m512i)mipp::load<int16_t>((int16_t*)data);
 	}
-	
+
 	static __m512i _mm512_set_epi8 (char e63, char e62, char e61, char e60, char e59, char e58, char e57, char e56,
 	                                char e55, char e54, char e53, char e52, char e51, char e50, char e49, char e48,
 	                                char e47, char e46, char e45, char e44, char e43, char e42, char e41, char e40,
@@ -1472,15 +1472,32 @@
 #if defined(__AVX512BW__)
 	template <>
 	inline regx2 interleave<int16_t>(const reg v1, const reg v2) {
-		__m512i idx = _mm512_setr_epi16(0, 32, 1, 33,  2, 34,  3, 35,  4, 36,  5, 37,  6, 38,  7, 39, 
-										8, 40, 9, 41, 10, 42, 11, 43, 12, 44, 13, 45, 14, 46, 15, 47);
+		__m512i idx = _mm512_setr_epi16(0, 32, 1, 33,  2, 34,  3, 35,  4, 36,  5, 37,  6, 38,  7, 39,
+		                                8, 40, 9, 41, 10, 42, 11, 43, 12, 44, 13, 45, 14, 46, 15, 47);
 		auto hi = _mm512_permutex2var_epi16(_mm512_castps_si512(v1), idx, _mm512_castps_si512(v2));
-		idx = _mm512_setr_epi16(16, 48, 17, 49, 18, 50, 19, 51, 20, 52, 21, 53, 22, 54, 23, 55, 
-								24, 56, 25, 57, 26, 58, 27, 59, 28, 60, 29, 61, 30, 62, 31, 63);
+		idx = _mm512_setr_epi16(16, 48, 17, 49, 18, 50, 19, 51, 20, 52, 21, 53, 22, 54, 23, 55,
+		                        24, 56, 25, 57, 26, 58, 27, 59, 28, 60, 29, 61, 30, 62, 31, 63);
 		auto lo = _mm512_permutex2var_epi16(_mm512_castps_si512(v1), idx, _mm512_castps_si512(v2));
 		return {{_mm512_castsi512_ps(hi), _mm512_castsi512_ps(lo)}};
 	}
 
+#if defined(__AVX512VMBI__)
+	template <>
+	inline regx2 interleave<int8_t>(const reg v1, const reg v2) {
+		__m512i idx = _mm512_setr_epi8( 0, 64,  1, 65,  2, 66,  3, 67,  4, 68,  5, 69,  6, 70,  7, 71,
+		                                8, 72,  9, 73, 10, 74, 11, 75, 12, 76, 13, 77, 14, 78, 15, 79,
+		                               16, 80, 17, 81, 18, 82, 19, 83, 20, 84, 21, 85, 22, 86, 23, 87,
+		                               24, 88, 25, 89, 26, 90, 27, 91, 28, 92, 29, 93, 30, 94, 31, 95);
+		auto hi = _mm512_permutex2var_epi8(_mm512_castps_si512(v1), idx, _mm512_castps_si512(v2));
+		idx = _mm512_setr_epi8(32,  96, 33,  97, 34,  98, 35,  99, 36, 100, 37, 101, 38, 102, 39, 103,
+		                       40, 104, 41, 105, 42, 106, 43, 107, 44, 108, 45, 109, 46, 110, 47, 111,
+		                       48, 112, 49, 113, 50, 114, 51, 115, 52, 116, 53, 117, 54, 118, 55, 119,
+		                       56, 120, 57, 121, 58, 122, 59, 123, 60, 124, 61, 125, 62, 126, 63, 127);
+
+		auto lo = _mm512_permutex2var_epi8(_mm512_castps_si512(v1), idx, _mm512_castps_si512(v2));
+		return {{_mm512_castsi512_ps(hi), _mm512_castsi512_ps(lo)}};
+	}
+#else
 	template <>
 	inline regx2 interleave<int8_t>(const reg v1, const reg v2) {
 		auto lo4 = mipp::interleavelo4<int8_t>(v1, v2);
@@ -1497,23 +1514,8 @@
 		         _mm512_castpd_ps(_mm512_permutex2var_pd(_mm512_castps_pd(lo4), idxhi, _mm512_castps_pd(hi4)))}};
 	}
 #endif
-	//#if defined(__AVX512VMBI__)
-	//	template <>
-	//	inline regx2 interleave<int8_t>(const reg v1, const reg v2) {
-	//		__m512i idx = _mm512_setr_epi8( 0, 64,  1, 65,  2, 66,  3, 67,  4, 68,  5, 69,  6, 70,  7, 71,
-	//										8, 72,  9, 73, 10, 74, 11, 75, 12, 76, 13, 77, 14, 78, 15, 79,
-	//									   16, 80, 17, 81, 18, 82, 19, 83, 20, 84, 21, 85, 22, 86, 23, 87,
-	//									   24, 88, 25, 89, 26, 90, 27, 91, 28, 92, 29, 93, 30, 94, 31, 95);
-	//		auto hi = _mm512_permutex2var_epi8(_mm512_castps_si512(v1), idx, _mm512_castps_si512(v2));
-	//		idx = _mm512_setr_epi8( 32,  96, 33,  97, 34,  98, 35,  99, 36, 100, 37, 101, 38, 102, 39, 103,
-	//								40, 104, 41, 105, 42, 106, 43, 107, 44, 108, 45, 109, 46, 110, 47, 111,
-	//								48, 112, 49, 113, 50, 114, 51, 115, 52, 116, 53, 117, 54, 118, 55, 119,
-	//								56, 120, 57, 121, 58, 122, 59, 123, 60, 124, 61, 125, 62, 126, 63, 127);
-	//		
-	//		auto lo = _mm512_permutex2var_epi8(_mm512_castps_si512(v1), idx, _mm512_castps_si512(v2));
-	//		return {{_mm512_castsi512_ps(hi), _mm512_castsi512_ps(lo)}};
-	//	}
-	//#endif
+#endif
+
 	// --------------------------------------------------------------------------------------------------- deinterleave
 	template <>
 	inline regx2 deinterleave<double>(const reg v0, const reg v1)
@@ -1560,15 +1562,32 @@
 	inline regx2 deinterleave<int16_t>(const reg v0, const reg v1)
 	{
 		__m512i realIndicies = _mm512_setr_epi16( 0,  2,  4,  6,  8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30,
-												 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60, 62);
-		__m512i imagIndicies = _mm512_setr_epi16( 1,  3,  5,  7,  9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 
-												 33, 35, 37, 39, 41, 43, 45, 47, 49, 51, 53, 55, 57, 59, 61, 63);
+		                                         32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60, 62);
+		__m512i imagIndicies = _mm512_setr_epi16( 1,  3,  5,  7,  9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31,
+		                                         33, 35, 37, 39, 41, 43, 45, 47, 49, 51, 53, 55, 57, 59, 61, 63);
 		auto v_re = _mm512_permutex2var_epi16(_mm512_castps_si512(v0), realIndicies, _mm512_castps_si512(v1));
 		auto v_im = _mm512_permutex2var_epi16(_mm512_castps_si512(v0), imagIndicies, _mm512_castps_si512(v1));
 		return {{_mm512_castsi512_ps(v_re), _mm512_castsi512_ps(v_im)}};
-		
+
 	}
 
+#if defined(__AVX512VMBI__)
+	template <>
+	inline regx2 deinterleave<int8_t>(const reg v0, const reg v1)
+	{
+		__m512i realIndicies = _mm512_setr_epi8( 0,  2,   4,   6,   8,  10,  12,  14,  16,  18,  20,  22,  24,  26,  28,  30,
+		                                        32, 34,  36,  38,  40,  42,  44,  46,  48,  50,  52,  54,  56,  58,  60,  62,
+		                                        64, 66,  68,  70,  72,  74,  76,  78,  80,  82,  84,  86,  88,  90,  92,  94,
+		                                        96, 98, 100, 102, 104, 106, 108, 110, 112, 114, 116, 118, 120, 122, 124, 126);
+		__m512i imagIndicies = _mm512_setr_epi8( 1,  3,  5,    7,   9,  11,  13,  15,  17,  19,  21,  23,  25,  27,  29,  31,
+		                                        33, 35, 37,   39,  41,  43,  45,  47,  49,  51,  53,  55,  57,  59,  61,  63,
+		                                        65, 67, 69,   71,  73,  75,  77,  79,  81,  83,  85,  87,  89,  91,  93,  95,
+		                                        97, 99, 101, 103, 105, 107, 109, 111, 113, 115, 117, 119, 121, 123, 125, 127);
+		auto v_re = _mm512_permutex2var_epi8(_mm512_castps_si512(v0), realIndicies, _mm512_castps_si512(v1));
+		auto v_im = _mm512_permutex2var_epi8(_mm512_castps_si512(v0), imagIndicies, _mm512_castps_si512(v1));
+		return {{_mm512_castsi512_ps(v_re), _mm512_castsi512_ps(v_im)}};
+	}
+#else
 	template <>
 	inline regx2 deinterleave<int8_t>(const reg v0, const reg v1)
 	{
@@ -1602,26 +1621,9 @@
 
 		return {{v_re, v_im}};
 	}
-	
-	
 #endif
-	//#if defined(__AVX512VMBI__)
-	// template <>
-	// inline regx2 deinterleave<int8_t>(const reg v0, const reg v1)
-	// {
-	// 	__m512i realIndicies = _mm512_setr_epi8(  0,  2,   4,   6,   8,  10,  12,  14,  16,  18,  20,  22,  24,  26,  28,  30,
-	// 											 32, 34,  36,  38,  40,  42,  44,  46,  48,  50,  52,  54,  56,  58,  60,  62,
-	// 											 64, 66,  68,  70,  72,  74,  76,  78,  80,  82,  84,  86,  88,  90,  92,  94,
-	// 											 96, 98, 100, 102, 104, 106, 108, 110, 112, 114, 116, 118, 120, 122, 124, 126);
-	// 	__m512i imagIndicies = _mm512_setr_epi8( 1,  3,  5,    7,   9,  11,  13,  15,  17,  19,  21,  23,  25,  27,  29,  31, 
-	// 											33, 35, 37,   39,  41,  43,  45,  47,  49,  51,  53,  55,  57,  59,  61,  63,
-	// 											65, 67, 69,   71,  73,  75,  77,  79,  81,  83,  85,  87,  89,  91,  93,  95,
-	// 											97, 99, 101, 103, 105, 107, 109, 111, 113, 115, 117, 119, 121, 123, 125, 127);
-	// 	auto v_re = _mm512_permutex2var_epi8(_mm512_castps_si512(v0), realIndicies, _mm512_castps_si512(v1));
-	// 	auto v_im = _mm512_permutex2var_epi8(_mm512_castps_si512(v0), imagIndicies, _mm512_castps_si512(v1));
-	// 	return {{_mm512_castsi512_ps(v_re), _mm512_castsi512_ps(v_im)}};
-	// }
-	//#endif
+#endif
+
 	// --------------------------------------------------------------------------------------------------- interleavelo
 #if defined(__AVX512F__)
 	template <>
