@@ -792,17 +792,17 @@
 	}
 
 	// ---------------------------------------------------------------------------------------------------------- shuff
+#ifdef __AVX2__
 	template <>
-	inline reg shuff<double>(const reg v, const reg cm) {
-		constexpr int N = mipp::N<double>();
-
-		double out[N];
-		for (auto i = 0; i < N; i++)
-			out[i] = *((double*)&v + (*((int64_t*)&cm +i)));
-
-		return mipp::loadu<double>(out);
+	inline reg shuff<float>(const reg v, const reg cm) {
+		return _mm256_permutevar8x32_ps(v, _mm256_castps_si256(cm));
 	}
 
+	template <>
+	inline reg shuff<int32_t>(const reg v, const reg cm) {
+		return _mm256_permutevar8x32_ps(v, _mm256_castps_si256(cm));
+	}
+#else
 	template <>
 	inline reg shuff<float>(const reg v, const reg cm) {
 		constexpr int N = mipp::N<float>();
@@ -815,17 +815,6 @@
 	}
 
 	template <>
-	inline reg shuff<int64_t>(const reg v, const reg cm) {
-		constexpr int N = mipp::N<int64_t>();
-
-		int64_t out[N];
-		for (auto i = 0; i < N; i++)
-			out[i] = *((int64_t*)&v + (*((int64_t*)&cm +i)));
-
-		return mipp::loadu<int64_t>(out);
-	}
-
-	template <>
 	inline reg shuff<int32_t>(const reg v, const reg cm) {
 		constexpr int N = mipp::N<int32_t>();
 
@@ -834,6 +823,29 @@
 			out[i] = *((int32_t*)&v + (*((int32_t*)&cm +i)));
 
 		return mipp::loadu<int32_t>(out);
+	}
+#endif
+
+	template <>
+	inline reg shuff<double>(const reg v, const reg cm) {
+		constexpr int N = mipp::N<double>();
+
+		double out[N];
+		for (auto i = 0; i < N; i++)
+			out[i] = *((double*)&v + (*((int64_t*)&cm +i)));
+
+		return mipp::loadu<double>(out);
+	}
+
+	template <>
+	inline reg shuff<int64_t>(const reg v, const reg cm) {
+		constexpr int N = mipp::N<int64_t>();
+
+		int64_t out[N];
+		for (auto i = 0; i < N; i++)
+			out[i] = *((int64_t*)&v + (*((int64_t*)&cm +i)));
+
+		return mipp::loadu<int64_t>(out);
 	}
 
 	template <>
