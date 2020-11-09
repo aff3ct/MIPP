@@ -373,7 +373,7 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	const std::string InstructionFullType = "NO_INTRINSICS";
 	const std::string InstructionVersion  = "1";
 
-	#define MIPP_REQUIRED_ALIGNMENT 1
+#define MIPP_REQUIRED_ALIGNMENT 1
 #if UINTPTR_MAX == 0xffffffffffffffff
 #define MIPP_64BIT
 #endif

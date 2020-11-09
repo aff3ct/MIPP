@@ -792,6 +792,10 @@
 	}
 
 	// ---------------------------------------------------------------------------------------------------------- shuff
+#if !defined(__clang__) && !defined(__llvm__) && defined(__GNUC__) && defined(__cplusplus)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
 	template <>
 	inline reg shuff<double>(const reg v, const reg cm) {
 		constexpr int N = mipp::N<double>();
@@ -857,6 +861,9 @@
 
 		return mipp::loadu<int8_t>(out);
 	}
+#if !defined(__clang__) && !defined(__llvm__) && defined(__GNUC__) && defined(__cplusplus)
+#pragma GCC diagnostic pop
+#endif
 
 	// --------------------------------------------------------------------------------------------------------- shuff2
 #ifdef __AVX2__
