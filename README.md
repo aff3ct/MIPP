@@ -149,6 +149,14 @@ Loading memory from a vector into a register:
 int n = mipp::N<float>() * 10;
 std::vector<float> myVector(n);
 int i = 0;
+mipp::Reg<float> r1;
+r1.load(&myVector[i*mipp::N<float>()]);
+```
+
+The last two lines can be shorten as follow where the `load` call becomes
+implicit:
+
+```cpp
 mipp::Reg<float> r1 = &myVector[i*mipp::N<float>()];
 ```
 
