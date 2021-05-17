@@ -373,7 +373,7 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 	const std::string InstructionFullType = "NO_INTRINSICS";
 	const std::string InstructionVersion  = "1";
 
-	#define MIPP_REQUIRED_ALIGNMENT 1
+#define MIPP_REQUIRED_ALIGNMENT 1
 #if UINTPTR_MAX == 0xffffffffffffffff
 #define MIPP_64BIT
 #endif
@@ -544,7 +544,11 @@ static inline void errorMessage(std::string instr)
 	type_names[typeid(double)  ] = "double";
 
 	std::string message;
+#if cplusplus >= 201703L
+	if constexpr (RegisterSizeBit == 0)
+#else
 	if (RegisterSizeBit == 0)
+#endif
 		message = "mipp::" + instr + "<" + type_names[typeid(T)] + "> (" + InstructionFullType + ") is undefined!, "
 		          "try to add -mfpu=neon-vfpv4, -msse4.2, -mavx, -march=native... at the compile time.";
 	else
@@ -559,7 +563,11 @@ template <int N>
 static inline void errorMessage(std::string instr)
 {
 	std::string message;
+#if cplusplus >= 201703L
+	if constexpr (RegisterSizeBit == 0)
+#else
 	if (RegisterSizeBit == 0)
+#endif
 		message = "mipp::" + instr + "<" + std::to_string(N) + "> (" + InstructionFullType + ") is undefined!, "
 		          "try to add -mfpu=neon-vfpv4, -msse4.2, -mavx, -march=native... at the compile time.";
 	else
@@ -1053,6 +1061,37 @@ inline Reg<T> maskz(const Msk<N<T>()> m, const Reg<T> a, const Reg<T> b, const R
 
 // --------------------------------------------------------------------------------------- myIntrinsics implementations
 // --------------------------------------------------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------------------------------------------- get
+template <typename T>
+T get(const mipp::reg r, const size_t index)
+{
+	T tmp[mipp::N<T>()];
+	mipp::storeu<T>(tmp, r);
+	return tmp[index % mipp::N<T>()];
+}
+
+template <typename T>
+T get(const mipp::reg_2 r, const size_t index)
+{
+	mipp::reg_2 rosef = r;
+	auto r_full = mipp::combine<T>(r, rosef);
+	T tmp[mipp::N<T>()];
+	mipp::storeu<T>(tmp, r_full);
+	return tmp[index % (mipp::N<T>()/2)];
+}
+
+template <int N>
+bool get(const mipp::msk m, const size_t index)
+{
+#ifdef MIPP_AVX512
+		return (m >> (index % N)) & 0x1;
+#else
+		uint8_t tmp[mipp::RegisterSizeBit / 8];
+		mipp::storeu<float>((float*)tmp, (reg)m);
+		return tmp[index * (mipp::RegisterSizeBit / (N * 8))];
+#endif
+}
 
 // --------------------------------------------------------------------------------------------------------------- dump
 

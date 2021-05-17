@@ -792,6 +792,10 @@
 	}
 
 	// ---------------------------------------------------------------------------------------------------------- shuff
+#if !defined(__clang__) && !defined(__llvm__) && defined(__GNUC__) && defined(__cplusplus)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
 #ifdef __AVX2__
 	template <>
 	inline reg shuff<float>(const reg v, const reg cm) {
@@ -808,8 +812,14 @@
 		constexpr int N = mipp::N<float>();
 
 		float out[N];
+		float in[N];
+		int32_t ctrl[N];
+
+		mipp::storeu<float>(in, v);
+		mipp::storeu<int32_t>(ctrl, cm);
+
 		for (auto i = 0; i < N; i++)
-			out[i] = *((float*)&v + (*((int32_t*)&cm +i)));
+			out[i] = in[ctrl[i]];
 
 		return mipp::loadu<float>(out);
 	}
@@ -819,8 +829,14 @@
 		constexpr int N = mipp::N<int32_t>();
 
 		int32_t out[N];
+		int32_t in[N];
+		int32_t ctrl[N];
+
+		mipp::storeu<int32_t>(in, v);
+		mipp::storeu<int32_t>(ctrl, cm);
+
 		for (auto i = 0; i < N; i++)
-			out[i] = *((int32_t*)&v + (*((int32_t*)&cm +i)));
+			out[i] = in[ctrl[i]];
 
 		return mipp::loadu<int32_t>(out);
 	}
@@ -831,8 +847,14 @@
 		constexpr int N = mipp::N<double>();
 
 		double out[N];
+		double in[N];
+		int64_t ctrl[N];
+
+		mipp::storeu<double>(in, v);
+		mipp::storeu<int64_t>(ctrl, cm);
+
 		for (auto i = 0; i < N; i++)
-			out[i] = *((double*)&v + (*((int64_t*)&cm +i)));
+			out[i] = in[ctrl[i]];
 
 		return mipp::loadu<double>(out);
 	}
@@ -842,8 +864,14 @@
 		constexpr int N = mipp::N<int64_t>();
 
 		int64_t out[N];
+		int64_t in[N];
+		int64_t ctrl[N];
+
+		mipp::storeu<int64_t>(in, v);
+		mipp::storeu<int64_t>(ctrl, cm);
+
 		for (auto i = 0; i < N; i++)
-			out[i] = *((int64_t*)&v + (*((int64_t*)&cm +i)));
+			out[i] = in[ctrl[i]];
 
 		return mipp::loadu<int64_t>(out);
 	}
@@ -853,8 +881,14 @@
 		constexpr int N = mipp::N<int16_t>();
 
 		int16_t out[N];
+		int16_t in[N];
+		int16_t ctrl[N];
+
+		mipp::storeu<int16_t>(in, v);
+		mipp::storeu<int16_t>(ctrl, cm);
+
 		for (auto i = 0; i < N; i++)
-			out[i] = *((int16_t*)&v + (*((int16_t*)&cm +i)));
+			out[i] = in[ctrl[i]];
 
 		return mipp::loadu<int16_t>(out);
 	}
@@ -864,11 +898,20 @@
 		constexpr int N = mipp::N<int8_t>();
 
 		int8_t out[N];
+		int8_t in[N];
+		int8_t ctrl[N];
+
+		mipp::storeu<int8_t>(in, v);
+		mipp::storeu<int8_t>(ctrl, cm);
+
 		for (auto i = 0; i < N; i++)
-			out[i] = *((int8_t*)&v + (*((int8_t*)&cm +i)));
+			out[i] = in[ctrl[i]];
 
 		return mipp::loadu<int8_t>(out);
 	}
+#if !defined(__clang__) && !defined(__llvm__) && defined(__GNUC__) && defined(__cplusplus)
+#pragma GCC diagnostic pop
+#endif
 
 	// --------------------------------------------------------------------------------------------------------- shuff2
 #ifdef __AVX2__

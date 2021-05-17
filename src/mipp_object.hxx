@@ -362,9 +362,9 @@ public:
 	inline Msk<N<T>()> operator>=(Reg<T> v) const { return this->cmpge (v); }
 
 #ifndef MIPP_NO_INTRINSICS
-	inline const T& operator[](size_t index) const { return *((T*)&this->r + index); }
+	inline T operator[](const size_t index) const { return mipp::get<T>(this->r, index); }
 #else
-	inline const T& operator[](size_t index) const { return r; }
+	inline T operator[](const size_t index) const { return r; }
 #endif
 
 	// ------------------------------------------------------------------------------------------------------ reduction
@@ -528,17 +528,9 @@ public:
 	inline Msk<N>  operator>> (const uint32_t n) const { return this->rshift(n);                 }
 
 #ifndef MIPP_NO_INTRINSICS
-	inline bool operator[](size_t index) const
-	{
-#ifdef MIPP_AVX512
-		return (this->m >> index) & 0x1;
+	inline bool operator[](const size_t index) const { return mipp::get<N>(this->m, index); }
 #else
-		uint8_t* ptr = (uint8_t*)&this->m;
-		return ptr[index * (mipp::RegisterSizeBit / (N * 8))];
-#endif
-	}
-#else
-	inline bool operator[](size_t index) const { return m; }
+	inline bool operator[](const size_t index) const { return m; }
 #endif
 };
 
@@ -567,9 +559,9 @@ public:
 #endif
 
 #ifndef MIPP_NO_INTRINSICS
-	inline const T& operator[](size_t index) const { return *((T*)&this->r + index); }
+	inline T operator[](const size_t index) const { return mipp::get<T>(this->r, index); }
 #else
-	inline const T& operator[](size_t index) const { return r; }
+	inline T operator[](const size_t index) const { return r; }
 #endif
 
 #ifndef MIPP_NO_INTRINSICS

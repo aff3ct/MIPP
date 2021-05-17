@@ -2117,7 +2117,7 @@
 #ifdef __aarch64__
 	template <>
 	inline reg msb<double>(const reg v1) {
-		const reg msb_mask = set1<int64_t>(0x8000000000000000);
+		const reg msb_mask = set1<int64_t>(-0x8000000000000000);
 		return andb<double>(v1, msb_mask);
 	}
 
@@ -2132,7 +2132,7 @@
 	template <>
 	inline reg msb<float>(const reg v1) {
 		// msb_mask = 10000000000000000000000000000000 // 32 bits
-		const reg msb_mask = set1<int32_t>(0x80000000);
+		const reg msb_mask = set1<int32_t>(-0x80000000);
 
 		// indices  = 31 30 29 28 27 26 25 24 23 22 21 20 19 18 17 16 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
 		// msb_mask =  1  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
@@ -2151,7 +2151,7 @@
 #ifdef __aarch64__
 	template <>
 	inline reg msb<int64_t>(const reg v1) {
-		const reg msb_mask = set1<int64_t>(0x8000000000000000);
+		const reg msb_mask = set1<int64_t>(-0x8000000000000000);
 		return andb<int64_t>(v1, msb_mask);
 	}
 
@@ -2165,7 +2165,7 @@
 
 	template <>
 	inline reg msb<int32_t>(const reg v1) {
-		const reg msb_mask = set1<int32_t>(0x80000000);
+		const reg msb_mask = set1<int32_t>(-0x80000000);
 		return andb<int32_t>(v1, msb_mask);
 	}
 
@@ -2178,7 +2178,7 @@
 
 	template <>
 	inline reg msb<int16_t>(const reg v1) {
-		const reg msb_mask = set1<int16_t>(0x8000);
+		const reg msb_mask = set1<int16_t>(-0x8000);
 		return andb<int16_t>(v1, msb_mask);
 	}
 
@@ -2191,7 +2191,7 @@
 
 	template <>
 	inline reg msb<int8_t>(const reg v1) {
-		const reg msb_mask = set1<int8_t>(0x80);
+		const reg msb_mask = set1<int8_t>(-0x80);
 		return andb<int8_t>(v1, msb_mask);
 	}
 

@@ -57,8 +57,6 @@ Adrien Cassagne, Bertrand Le Gal, Camille Leroux, Olivier Aumage and Denis Barth
 
   - [AFF3CT](https://github.com/aff3ct/aff3ct): A Fast Forward Error Correction 
   Toolbox!
-  - [MUrB](https://github.com/kouchy/MUrB): a N-body problem simulator with 
-  various implementations (multi-threaded, MPI, SIMD, etc.).
   - [mandelbrot](https://gitlab.inria.fr/acassagn/mandelbrot): the Mandelbrot 
   fractal, sequential and SIMD implementations.
 
@@ -149,6 +147,14 @@ Loading memory from a vector into a register:
 int n = mipp::N<float>() * 10;
 std::vector<float> myVector(n);
 int i = 0;
+mipp::Reg<float> r1;
+r1.load(&myVector[i*mipp::N<float>()]);
+```
+
+The last two lines can be shorten as follow where the `load` call becomes
+implicit:
+
+```cpp
 mipp::Reg<float> r1 = &myVector[i*mipp::N<float>()];
 ```
 
