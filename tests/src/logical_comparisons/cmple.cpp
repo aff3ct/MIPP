@@ -28,9 +28,9 @@ void test_reg_cmple()
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
 			if (inputs1[i] <= inputs2[i])
-				REQUIRE(*((T*)&r3 +i) != (T)0);
+				REQUIRE(mipp::get<T>(r3, i) != (T)0);
 			else
-				REQUIRE(*((T*)&r3 +i) == (T)0);
+				REQUIRE(mipp::get<T>(r3, i) == (T)0);
 		}
 	}
 }

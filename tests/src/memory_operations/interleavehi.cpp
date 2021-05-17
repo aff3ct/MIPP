@@ -23,9 +23,9 @@ void test_reg_interleavehi()
 
 	for (auto i = 0; i < mipp::N<T>(); i++)
 		if (i % 2)
-			REQUIRE(*((T*)&ri +i) == inputs2[mipp::N<T>()/2 + i/2]);
+			REQUIRE(mipp::get<T>(ri, i) == inputs2[mipp::N<T>()/2 + i/2]);
 		else
-			REQUIRE(*((T*)&ri +i) == inputs1[mipp::N<T>()/2 + i/2]);
+			REQUIRE(mipp::get<T>(ri, i) == inputs1[mipp::N<T>()/2 + i/2]);
 }
 
 #ifndef MIPP_NO
@@ -109,15 +109,15 @@ void test_reg_interleavehi2()
 
 		for (auto i = 0; i < mipp::N<T>()/2; i++)
 			if (i % 2)
-				REQUIRE(*((T*)&ri +i) == inputs2[mipp::N<T>()/4 + i/2]);
+				REQUIRE(mipp::get<T>(ri, i) == inputs2[mipp::N<T>()/4 + i/2]);
 			else
-				REQUIRE(*((T*)&ri +i) == inputs1[mipp::N<T>()/4 + i/2]);
+				REQUIRE(mipp::get<T>(ri, i) == inputs1[mipp::N<T>()/4 + i/2]);
 
 		for (auto i = 0; i < mipp::N<T>()/2; i++)
 			if (i % 2)
-				REQUIRE(*((T*)&ri + mipp::N<T>()/2 +i) == inputs2[mipp::N<T>()/2 + mipp::N<T>()/4 + i/2]);
+				REQUIRE(mipp::get<T>(ri, mipp::N<T>()/2 +i) == inputs2[mipp::N<T>()/2 + mipp::N<T>()/4 + i/2]);
 			else
-				REQUIRE(*((T*)&ri + mipp::N<T>()/2 +i) == inputs1[mipp::N<T>()/2 + mipp::N<T>()/4 + i/2]);
+				REQUIRE(mipp::get<T>(ri, mipp::N<T>()/2 +i) == inputs1[mipp::N<T>()/2 + mipp::N<T>()/4 + i/2]);
 	}
 }
 
@@ -212,9 +212,9 @@ void test_reg_interleavehi4()
 		for (auto j = 0; j < 4; j++)
 			for (auto i = 0; i < mipp::N<T>()/4; i++)
 				if (i % 2)
-					REQUIRE(*((T*)&ri + j*mipp::N<T>()/4 +i) == inputs2[j*mipp::N<T>()/4 + mipp::N<T>()/8 + i/2]);
+					REQUIRE(mipp::get<T>(ri, j*mipp::N<T>()/4 +i) == inputs2[j*mipp::N<T>()/4 + mipp::N<T>()/8 + i/2]);
 				else
-					REQUIRE(*((T*)&ri + j*mipp::N<T>()/4 +i) == inputs1[j*mipp::N<T>()/4 + mipp::N<T>()/8 + i/2]);
+					REQUIRE(mipp::get<T>(ri, j*mipp::N<T>()/4 +i) == inputs1[j*mipp::N<T>()/4 + mipp::N<T>()/8 + i/2]);
 	}
 }
 

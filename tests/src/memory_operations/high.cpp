@@ -16,7 +16,7 @@ void test_reg_high()
 	mipp::reg_2 r_2 = mipp::high <T>(r);
 
 	for (auto i = 0; i < mipp::N<T>()/2; i++)
-		REQUIRE(*((T*)&r_2 +i) == inputs[mipp::N<T>()/2 +i]);
+		REQUIRE(mipp::get<T>(r_2, i) == inputs[mipp::N<T>()/2 +i]);
 }
 
 #ifndef MIPP_NO

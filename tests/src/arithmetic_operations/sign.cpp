@@ -23,9 +23,9 @@ void test_reg_sign()
 	for (auto i = 0; i < N; i++)
 	{
 		if (inputs1[i] >= 0)
-			REQUIRE(*((T*)&r2 +i) == (T)0);
+			REQUIRE(mipp::get<T>(r2, i) == (T)0);
 		else
-			REQUIRE(*((T*)&r2 +i) != (T)0);
+			REQUIRE(mipp::get<T>(r2, i) != (T)0);
 	}
 }
 
@@ -71,9 +71,9 @@ void test_Reg_sign()
 	for (auto i = 0; i < N; i++)
 	{
 		if (inputs1[i] >= 0)
-			REQUIRE(*((T*)&r2 +i) == (T)0);
+			REQUIRE(r2[i] == (T)0);
 		else
-			REQUIRE(*((T*)&r2 +i) != (T)0);
+			REQUIRE(r2[i] != (T)0);
 	}
 }
 

@@ -17,7 +17,7 @@ void test_reg_rrot()
 	mipp::reg r2 = mipp::rrot<T>(r1);
 
 	for (auto i = 0; i < N; i++)
-		REQUIRE(*((T*)&r2 +i) == (i == 0 ? inputs1[N-1] : inputs1[i-1]));
+		REQUIRE(mipp::get<T>(r2, i) == (i == 0 ? inputs1[N-1] : inputs1[i-1]));
 }
 
 #ifndef MIPP_NO

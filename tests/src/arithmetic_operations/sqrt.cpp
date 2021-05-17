@@ -22,9 +22,9 @@ void test_reg_sqrt()
 	{
 		T res = std::sqrt(inputs1[i]);
 #ifdef MIPP_NEON
-		REQUIRE(*((T*)&r2 +i) == Approx(res).epsilon(0.01));
+		REQUIRE(mipp::get<T>(r2, i) == Approx(res).epsilon(0.01));
 #else
-		REQUIRE(*((T*)&r2 +i) == Approx(res));
+		REQUIRE(mipp::get<T>(r2, i) == Approx(res));
 #endif
 	}
 }
@@ -96,13 +96,13 @@ void test_reg_maskz_sqrt()
 		{
 			T res = std::sqrt(inputs1[i]);
 #ifdef MIPP_NEON
-			REQUIRE(*((T*)&r2 +i) == Approx(res).epsilon(0.01));
+			REQUIRE(mipp::get<T>(r2, i) == Approx(res).epsilon(0.01));
 #else
-			REQUIRE(*((T*)&r2 +i) == Approx(res));
+			REQUIRE(mipp::get<T>(r2, i) == Approx(res));
 #endif
 		}
 		else
-			REQUIRE(*((T*)&r2 +i) == (T)0);
+			REQUIRE(mipp::get<T>(r2, i) == (T)0);
 	}
 }
 
@@ -188,13 +188,13 @@ void test_reg_mask_sqrt()
 		{
 			T res = std::sqrt(inputs1[i]);
 #ifdef MIPP_NEON
-			REQUIRE(*((T*)&r3 +i) == Approx(res).epsilon(0.01));
+			REQUIRE(mipp::get<T>(r3, i) == Approx(res).epsilon(0.01));
 #else
-			REQUIRE(*((T*)&r3 +i) == Approx(res));
+			REQUIRE(mipp::get<T>(r3, i) == Approx(res));
 #endif
 		}
 		else
-			REQUIRE(*((T*)&r3 +i) == inputs2[i]);
+			REQUIRE(mipp::get<T>(r3, i) == inputs2[i]);
 	}
 }
 

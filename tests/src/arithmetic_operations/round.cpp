@@ -25,7 +25,7 @@ void test_reg_round()
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
 			T res = std::round(inputs1[i]);
-			REQUIRE(*((T*)&r2 +i) == res);
+			REQUIRE(mipp::get<T>(r2, i) == res);
 		}
 	}
 }
@@ -105,10 +105,10 @@ void test_reg_maskz_round()
 			if (mask[i])
 			{
 				T res = std::round(inputs1[i]);
-				REQUIRE(*((T*)&r2 +i) == res);
+				REQUIRE(mipp::get<T>(r2, i) == res);
 			}
 			else
-				REQUIRE(*((T*)&r2 +i) == (T)0);
+				REQUIRE(mipp::get<T>(r2, i) == (T)0);
 		}
 	}
 }
@@ -203,10 +203,10 @@ void test_reg_mask_round()
 			if (mask[i])
 			{
 				T res = std::round(inputs1[i]);
-				REQUIRE(*((T*)&r3 +i) == res);
+				REQUIRE(mipp::get<T>(r3, i) == res);
 			}
 			else
-				REQUIRE(*((T*)&r3 +i) == inputs2[i]);
+				REQUIRE(mipp::get<T>(r3, i) == inputs2[i]);
 		}
 	}
 }

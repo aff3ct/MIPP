@@ -24,11 +24,11 @@ void test_reg_sincos()
 		T res1 = std::sin(inputs1[i]);
 		T res2 = std::cos(inputs1[i]);
 
-		// REQUIRE(*((T*)&r2 +i) == Approx(res1).epsilon(0.001));
-		REQUIRE(*((T*)&r2 +i) == Approx(res1));
+		// REQUIRE(mipp::get<T>(r2, i) == Approx(res1).epsilon(0.001));
+		REQUIRE(mipp::get<T>(r2, i) == Approx(res1));
 
-		// REQUIRE(*((T*)&r3 +i) == Approx(res2).epsilon(0.001));
-		REQUIRE(*((T*)&r3 +i) == Approx(res2));
+		// REQUIRE(mipp::get<T>(r3, i) == Approx(res2).epsilon(0.001));
+		REQUIRE(mipp::get<T>(r3, i) == Approx(res2));
 	}
 }
 

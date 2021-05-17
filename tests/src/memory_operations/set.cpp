@@ -11,7 +11,7 @@ void test_reg_set1()
 {
 	mipp::reg r = mipp::set1<T>((T)12);
 	for (auto i = 0; i < mipp::N<T>(); i++)
-		REQUIRE(*((T*)&r +i) == (T)12);
+		REQUIRE(mipp::get<T>(r, i) == (T)12);
 }
 
 #ifndef MIPP_NO
@@ -63,7 +63,7 @@ void test_reg_set0()
 {
 	mipp::reg r = mipp::set0<T>();
 	for (auto i = 0; i < mipp::N<T>(); i++)
-		REQUIRE(*((T*)&r +i) == (T)0);
+		REQUIRE(mipp::get<T>(r, i) == (T)0);
 }
 
 #ifndef MIPP_NO
@@ -118,7 +118,7 @@ void test_reg_set()
 
 	mipp::reg r = mipp::set<T>(inputs);
 	for (auto i = 0; i < mipp::N<T>(); i++)
-		REQUIRE(*((T*)&r +i) == inputs[i]);
+		REQUIRE(mipp::get<T>(r, i) == inputs[i]);
 }
 
 #ifndef MIPP_NO
@@ -178,10 +178,10 @@ void test_msk_set1()
 	mipp::reg r1 = mipp::toreg<mipp::N<T>()>(m1);
 
 	for (auto i = 0; i < mipp::N<T>(); i++)
-		REQUIRE(*((T*)&r0 +i) == (T)0);
+		REQUIRE(mipp::get<T>(r0, i) == (T)0);
 
 	for (auto i = 0; i < mipp::N<T>(); i++)
-		REQUIRE(*((T*)&r1 +i) != (T)0);
+		REQUIRE(mipp::get<T>(r1, i) != (T)0);
 }
 
 #ifndef MIPP_NO
@@ -240,7 +240,7 @@ void test_msk_set0()
 	mipp::reg r0 = mipp::toreg<mipp::N<T>()>(m0);
 
 	for (auto i = 0; i < mipp::N<T>(); i++)
-		REQUIRE(*((T*)&r0 +i) == (T)0);
+		REQUIRE(mipp::get<T>(r0, i) == (T)0);
 }
 
 #ifndef MIPP_NO
@@ -301,9 +301,9 @@ void test_msk_set()
 
 	for (auto i = 0; i < mipp::N<T>(); i++)
 		if (!inputs[i])
-			REQUIRE(*((T*)&r +i) == (T)0);
+			REQUIRE(mipp::get<T>(r, i) == (T)0);
 		else
-			REQUIRE(*((T*)&r +i) != (T)0);
+			REQUIRE(mipp::get<T>(r, i) != (T)0);
 }
 
 #ifndef MIPP_NO

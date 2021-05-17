@@ -32,13 +32,13 @@ void test_reg_pack()
 	for (auto i = 0; i < N1; i++)
 	{
 		auto res = static_cast<T2>(std::min<T1>(std::max<T1>(inputs1[i], m), M));
-		REQUIRE(*((T2*)&r3 +i) == res);
+		REQUIRE(mipp::get<T2>(r3, i) == res);
 	}
 
 	for (auto i = 0; i < N1; i++)
 	{
 		auto res = static_cast<T2>(std::min<T1>(std::max<T1>(inputs2[i], m), M));
-		REQUIRE(*((T2*)&r3 + N1 +i) == res);
+		REQUIRE(mipp::get<T2>(r3, N1 +i) == res);
 	}
 }
 #endif

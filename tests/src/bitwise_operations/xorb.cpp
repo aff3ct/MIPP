@@ -25,7 +25,7 @@ void test_reg_xorb()
 	for (auto i = 0; i < mipp::N<T>(); i++)
 	{
 		T res = inputs1[i] ^ inputs2[i];
-		REQUIRE(*((T*)&r3 +i) == res);
+		REQUIRE(mipp::get<T>(r3, i) == res);
 	}
 }
 
@@ -107,9 +107,9 @@ void test_msk_xorb()
 			bool res = inputs1[i] ^ inputs2[i];
 
 			if (res)
-				REQUIRE(*((T*)&r +i) != (T)0);
+				REQUIRE(mipp::get<T>(r, i) != (T)0);
 			else
-				REQUIRE(*((T*)&r +i) == (T)res);
+				REQUIRE(mipp::get<T>(r, i) == (T)res);
 		}
 	}
 }

@@ -15,7 +15,7 @@ void test_reg_load()
 	mipp::reg r = mipp::load<T>(inputs);
 
 	for (auto i = 0; i < mipp::N<T>(); i++)
-		REQUIRE(*((T*)&r +i) == inputs[i]);
+		REQUIRE(mipp::get<T>(r, i) == inputs[i]);
 }
 
 #ifndef MIPP_NO
@@ -75,7 +75,7 @@ void test_reg_loadu()
 	mipp::reg r = mipp::loadu<T>(inputs);
 
 	for (auto i = 0; i < mipp::N<T>(); i++)
-		REQUIRE( *((T*)&r +i) == inputs[i]);
+		REQUIRE(mipp::get<T>(r, i) == inputs[i]);
 }
 
 #ifndef MIPP_NO

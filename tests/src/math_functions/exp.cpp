@@ -23,8 +23,8 @@ void test_reg_exp()
 		if (inputs1[i] < 8)
 		{
 			T res = std::exp(inputs1[i]);
-			// REQUIRE(*((T*)&r2 +i) == Approx(res).epsilon(0.001));
-			REQUIRE(*((T*)&r2 +i) == Approx(res));
+			// REQUIRE(mipp::get<T>(r2, i) == Approx(res).epsilon(0.001));
+			REQUIRE(mipp::get<T>(r2, i) == Approx(res));
 		}
 	}
 }
@@ -97,11 +97,11 @@ void test_reg_maskz_exp()
 			if (mask[i])
 			{
 				T res = std::exp(inputs1[i]);
-				// REQUIRE(*((T*)&r2 +i) == Approx(res).epsilon(0.001));
-				REQUIRE(*((T*)&r2 +i) == Approx(res));
+				// REQUIRE(mipp::get<T>(r2, i) == Approx(res).epsilon(0.001));
+				REQUIRE(mipp::get<T>(r2, i) == Approx(res));
 			}
 			else
-				REQUIRE(*((T*)&r2 +i) == (T)0);
+				REQUIRE(mipp::get<T>(r2, i) == (T)0);
 		}
 	}
 }
@@ -189,11 +189,11 @@ void test_reg_mask_exp()
 			if (mask[i])
 			{
 				T res = std::exp(inputs1[i]);
-				// REQUIRE(*((T*)&r3 +i) == Approx(res).epsilon(0.001));
-				REQUIRE(*((T*)&r3 +i) == Approx(res));
+				// REQUIRE(mipp::get<T>(r3, i) == Approx(res).epsilon(0.001));
+				REQUIRE(mipp::get<T>(r3, i) == Approx(res));
 			}
 			else
-				REQUIRE(*((T*)&r3 +i) == inputs2[i]);
+				REQUIRE(mipp::get<T>(r3, i) == inputs2[i]);
 		}
 	}
 }

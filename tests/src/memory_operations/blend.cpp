@@ -30,7 +30,7 @@ void test_reg_blend()
 		mipp::reg ri = mipp::blend<T>(r1, r2, m);
 
 		for (auto i = 0; i < N; i++)
-			REQUIRE(*((T*)&ri +i) == (mask[i] ? inputs1[i] : inputs2[i]));
+			REQUIRE(mipp::get<T>(ri, i) == (mask[i] ? inputs1[i] : inputs2[i]));
 	}
 }
 

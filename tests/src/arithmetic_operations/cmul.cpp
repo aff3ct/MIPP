@@ -35,11 +35,11 @@ void test_reg_cmul()
 		T res_im = inputs1[i] * inputs2[mipp::N<T>() +i] + inputs1[mipp::N<T>() +i] * inputs2[              i];
 
 #if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
-		REQUIRE(*((T*)&r3.val[0] +i) == Approx(res_re));
-		REQUIRE(*((T*)&r3.val[1] +i) == Approx(res_im));
+		REQUIRE(mipp::get<T>(r3.val[0], i) == Approx(res_re));
+		REQUIRE(mipp::get<T>(r3.val[1], i) == Approx(res_im));
 #else
-		REQUIRE(*((T*)&r3.val[0] +i) == res_re);
-		REQUIRE(*((T*)&r3.val[1] +i) == res_im);
+		REQUIRE(mipp::get<T>(r3.val[0], i) == res_re);
+		REQUIRE(mipp::get<T>(r3.val[1], i) == res_im);
 #endif
 	}
 }

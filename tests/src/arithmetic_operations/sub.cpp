@@ -24,7 +24,7 @@ void test_reg_sub()
 	for (auto i = 0; i < mipp::N<T>(); i++)
 	{
 		T res = inputs1[i] - inputs2[i];
-		REQUIRE(*((T*)&r3 +i) == res);
+		REQUIRE(mipp::get<T>(r3, i) == res);
 	}
 }
 
@@ -118,10 +118,10 @@ void test_reg_maskz_sub()
 		if (mask[i])
 		{
 			T res = inputs1[i] - inputs2[i];
-			REQUIRE(*((T*)&r3 +i) == res);
+			REQUIRE(mipp::get<T>(r3, i) == res);
 		}
 		else
-			REQUIRE(*((T*)&r3 +i) == (T)0);
+			REQUIRE(mipp::get<T>(r3, i) == (T)0);
 	}
 }
 
@@ -230,10 +230,10 @@ void test_reg_mask_sub()
 		if (mask[i])
 		{
 			T res = inputs1[i] - inputs2[i];
-			REQUIRE(*((T*)&r4 +i) == res);
+			REQUIRE(mipp::get<T>(r4, i) == res);
 		}
 		else
-			REQUIRE(*((T*)&r4 +i) == inputs3[i]);
+			REQUIRE(mipp::get<T>(r4, i) == inputs3[i]);
 	}
 }
 
@@ -288,10 +288,10 @@ void test_Reg_mask_sub()
 		if (mask[i])
 		{
 			T res = inputs1[i] - inputs2[i];
-			REQUIRE(*((T*)&r4 +i) == res);
+			REQUIRE(r4[i] == res);
 		}
 		else
-			REQUIRE(*((T*)&r4 +i) == inputs3[i]);
+			REQUIRE(r4[i] == inputs3[i]);
 	}
 }
 

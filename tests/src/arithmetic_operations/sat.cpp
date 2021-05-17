@@ -33,7 +33,7 @@ void test_reg_sat_int()
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
 			T res = std::min<T>(std::max<T>(inputs1[i], m), M);
-			REQUIRE(*((T*)&r2 +i) == res);
+			REQUIRE(mipp::get<T>(r2, i) == res);
 		}
 	}
 }
@@ -64,7 +64,7 @@ void test_reg_sat_real()
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
 			T res = std::min<T>(std::max<T>(inputs1[i], m), M);
-			REQUIRE(*((T*)&r2 +i) == res);
+			REQUIRE(mipp::get<T>(r2, i) == res);
 		}
 	}
 }

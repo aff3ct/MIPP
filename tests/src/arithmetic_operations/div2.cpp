@@ -22,9 +22,9 @@ void test_reg_div2()
 	{
 		T res = inputs1[i] / (T)2;
 #if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
-		REQUIRE(*((T*)&r2 +i) == Approx(res).margin(0.01));
+		REQUIRE(mipp::get<T>(r2, i) == Approx(res).margin(0.01));
 #else
-		REQUIRE(*((T*)&r2 +i) == res);
+		REQUIRE(mipp::get<T>(r2, i) == res);
 #endif
 	}
 }
@@ -126,13 +126,13 @@ void test_reg_maskz_div2()
 		{
 			T res = inputs1[i] / (T)2;
 #if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
-			REQUIRE(*((T*)&r2 +i) == Approx(res).margin(0.01));
+			REQUIRE(mipp::get<T>(r2, i) == Approx(res).margin(0.01));
 #else
-			REQUIRE(*((T*)&r2 +i) == res);
+			REQUIRE(mipp::get<T>(r2, i) == res);
 #endif
 		}
 		else
-			REQUIRE(*((T*)&r2 +i) == (T)0);
+			REQUIRE(mipp::get<T>(r2, i) == (T)0);
 	}
 }
 
@@ -248,13 +248,13 @@ void test_reg_mask_div2()
 		{
 			T res = inputs1[i] / (T)2;
 #if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
-			REQUIRE(*((T*)&r3 +i) == Approx(res).margin(0.01));
+			REQUIRE(mipp::get<T>(r3, i) == Approx(res).margin(0.01));
 #else
-			REQUIRE(*((T*)&r3 +i) == res);
+			REQUIRE(mipp::get<T>(r3, i) == res);
 #endif
 		}
 		else
-			REQUIRE(*((T*)&r3 +i) == inputs2[i]);
+			REQUIRE(mipp::get<T>(r3, i) == inputs2[i]);
 	}
 }
 

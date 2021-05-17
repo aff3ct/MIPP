@@ -28,8 +28,8 @@ void test_reg_conj()
 		T res_re =  inputs1[              i];
 		T res_im = -inputs1[mipp::N<T>() +i];
 
-		REQUIRE(*((T*)&r2.val[0] +i) == res_re);
-		REQUIRE(*((T*)&r2.val[1] +i) == res_im);
+		REQUIRE(mipp::get<T>(r2.val[0], i) == res_re);
+		REQUIRE(mipp::get<T>(r2.val[1], i) == res_im);
 	}
 }
 

@@ -21,7 +21,7 @@ void test_reg_notb()
 	for (auto i = 0; i < mipp::N<T>(); i++)
 	{
 		T res = ~inputs1[i];
-		REQUIRE(*((T*)&r2 +i) == res);
+		REQUIRE(mipp::get<T>(r2, i) == res);
 	}
 }
 
@@ -95,9 +95,9 @@ void test_msk_notb()
 			bool res = !inputs1[i];
 
 			if (res)
-				REQUIRE(*((T*)&r +i) != (T)0);
+				REQUIRE(mipp::get<T>(r, i) != (T)0);
 			else
-				REQUIRE(*((T*)&r +i) == (T)res);
+				REQUIRE(mipp::get<T>(r, i) == (T)res);
 		}
 	}
 }

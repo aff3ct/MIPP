@@ -25,9 +25,9 @@ void test_reg_mul()
 	{
 		T res = inputs1[i] * inputs2[i];
 #if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
-		REQUIRE(*((T*)&r3 +i) == Approx(res));
+		REQUIRE(mipp::get<T>(r3, i) == Approx(res));
 #else
-		REQUIRE(*((T*)&r3 +i) == res);
+		REQUIRE(mipp::get<T>(r3, i) == res);
 #endif
 	}
 
@@ -45,9 +45,9 @@ void test_reg_mul()
 	{
 		T res = inputs1[i] * inputs2[i];
 #if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
-		REQUIRE(*((T*)&r3 +i) == Approx(res));
+		REQUIRE(mipp::get<T>(r3, i) == Approx(res));
 #else
-		REQUIRE(*((T*)&r3 +i) == res);
+		REQUIRE(mipp::get<T>(r3, i) == res);
 #endif
 	}
 }
@@ -173,13 +173,13 @@ void test_reg_maskz_mul()
 		{
 			T res = inputs1[i] * inputs2[i];
 #if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
-			REQUIRE(*((T*)&r3 +i) == Approx(res));
+			REQUIRE(mipp::get<T>(r3, i) == Approx(res));
 #else
-			REQUIRE(*((T*)&r3 +i) == res);
+			REQUIRE(mipp::get<T>(r3, i) == res);
 #endif
 		}
 		else
-			REQUIRE(*((T*)&r3 +i) == (T)0);
+			REQUIRE(mipp::get<T>(r3, i) == (T)0);
 	}
 }
 
@@ -283,13 +283,13 @@ void test_reg_mask_mul()
 		{
 			T res = inputs1[i] * inputs2[i];
 #if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
-			REQUIRE(*((T*)&r4 +i) == Approx(res));
+			REQUIRE(mipp::get<T>(r4, i) == Approx(res));
 #else
-			REQUIRE(*((T*)&r4 +i) == res);
+			REQUIRE(mipp::get<T>(r4, i) == res);
 #endif
 		}
 		else
-			REQUIRE(*((T*)&r4 +i) == inputs3[i]);
+			REQUIRE(mipp::get<T>(r4, i) == inputs3[i]);
 	}
 }
 

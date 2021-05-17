@@ -25,7 +25,7 @@ struct reg_lshift
 		for (auto i = 0; i < mipp::N<T>(); i++)
 		{
 			T res = inputs1[i] << n;
-			REQUIRE(*((T*)&r2 +i) == res);
+			REQUIRE(mipp::get<T>(r2, i) == res);
 		}
 	}
 };
@@ -131,9 +131,9 @@ struct msk_lshift
 			for (auto i = 0; i < N; i++)
 			{
 				if (inputs2[i])
-					REQUIRE(*((T*)&r +i) != (T)0);
+					REQUIRE(mipp::get<T>(r, i) != (T)0);
 				else
-					REQUIRE(*((T*)&r +i) == (T)0);
+					REQUIRE(mipp::get<T>(r, i) == (T)0);
 			}
 		}
 	}

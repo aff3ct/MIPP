@@ -24,7 +24,7 @@ void test_reg_cvt()
 	for (auto i = 0; i < N2; i++)
 	{
 		auto res = static_cast<T2>(std::round(inputs1[i]));
-		REQUIRE(*((T2*)&r2 +i) == res);
+		REQUIRE(mipp::get<T2>(r2, i) == res);
 	}
 }
 

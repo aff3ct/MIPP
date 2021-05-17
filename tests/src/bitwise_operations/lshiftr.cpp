@@ -25,7 +25,7 @@ void test_reg_lshiftr()
 	for (auto i = 0; i < mipp::N<T>(); i++)
 	{
 		T res = inputs1[i] << inputs2[i];
-		REQUIRE(*((T*)&r3 +i) == res);
+		REQUIRE(mipp::get<T>(r3, i) == res);
 	}
 }
 

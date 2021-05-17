@@ -28,9 +28,9 @@ void test_reg_norm()
 		T res = inputs1[i] * inputs1[i] + inputs1[mipp::N<T>() +i] * inputs1[mipp::N<T>() +i];
 
 #if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
-		REQUIRE(*((T*)&r2 +i) == Approx(res));
+		REQUIRE(mipp::get<T>(r2, i) == Approx(res));
 #else
-		REQUIRE(*((T*)&r2 +i) == res);
+		REQUIRE(mipp::get<T>(r2, i) == res);
 #endif
 	}
 }

@@ -26,10 +26,10 @@ void test_reg_deinterleave()
 	mipp::regx2 ri = mipp::deinterleave<T>(r1, r2);
 
 	for (auto i = 0; i < mipp::N<T>(); i++)
-		REQUIRE(*((T*)&ri.val[0] +i) == inputs[2 * i +0]);
+		REQUIRE(mipp::get<T>(ri.val[0], i) == inputs[2 * i +0]);
 
 	for (auto i = 0; i < mipp::N<T>(); i++)
-		REQUIRE(*((T*)&ri.val[1] +i) == inputs[2 * i +1]);
+		REQUIRE(mipp::get<T>(ri.val[1], i) == inputs[2 * i +1]);
 }
 
 #ifndef MIPP_NO

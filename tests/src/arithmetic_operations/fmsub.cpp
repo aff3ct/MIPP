@@ -27,7 +27,7 @@ void test_reg_fmsub()
 	for (auto i = 0; i < mipp::N<T>(); i++)
 	{
 		T res = inputs1[i] * inputs2[i] - inputs3[i];
-		REQUIRE(*((T*)&r4 +i) == Approx(res));
+		REQUIRE(mipp::get<T>(r4, i) == Approx(res));
 	}
 }
 
@@ -105,10 +105,10 @@ void test_reg_maskz_fmsub()
 		if (mask[i])
 		{
 			T res = inputs1[i] * inputs2[i] - inputs3[i];
-			REQUIRE(*((T*)&r4 +i) == Approx(res));
+			REQUIRE(mipp::get<T>(r4, i) == Approx(res));
 		}
 		else
-			REQUIRE(*((T*)&r4 +i) == (T)0);
+			REQUIRE(mipp::get<T>(r4, i) == (T)0);
 	}
 }
 
@@ -201,10 +201,10 @@ void test_reg_mask_fmsub()
 		if (mask[i])
 		{
 			T res = inputs1[i] * inputs2[i] - inputs3[i];
-			REQUIRE(*((T*)&r5 +i) == Approx(res));
+			REQUIRE(mipp::get<T>(r5, i) == Approx(res));
 		}
 		else
-			REQUIRE(*((T*)&r5 +i) == inputs4[i]);
+			REQUIRE(mipp::get<T>(r5, i) == inputs4[i]);
 	}
 }
 

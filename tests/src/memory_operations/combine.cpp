@@ -21,7 +21,7 @@ void test_reg_combine()
 	mipp::reg r2 = mipp::combine<T>(r1_lo, r1_hi);
 
 	for (auto i = 0; i < mipp::N<T>(); i++)
-		REQUIRE(*((T*)&r2 +i) == inputs[i]);
+		REQUIRE(mipp::get<T>(r2, i) == inputs[i]);
 }
 
 #ifndef MIPP_NO

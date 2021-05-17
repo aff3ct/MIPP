@@ -23,7 +23,7 @@ void test_reg_shuff()
 	mipp::reg s = mipp::shuff<T>(r, cm);
 
 	for (auto i = 0; i < mipp::N<T>(); i++)
-		REQUIRE(*((T*)&s +i) == inputs[cm_inputs[i]]);
+		REQUIRE(mipp::get<T>(s, i) == inputs[cm_inputs[i]]);
 }
 
 #ifndef MIPP_NO
@@ -113,9 +113,9 @@ void test_reg_shuff2()
 		mipp::reg s = mipp::shuff2<T>(r, cm2);
 
 		for (auto i = 0; i < mipp::N<T>()/2; i++)
-			REQUIRE(*((T*)&s +i) == inputs[cm2_inputs[i]]);
+			REQUIRE(mipp::get<T>(s, i) == inputs[cm2_inputs[i]]);
 		for (auto i = 0; i < mipp::N<T>()/2; i++)
-			REQUIRE(*((T*)&s + mipp::N<T>()/2 +i) == inputs[mipp::N<T>()/2 + cm2_inputs[i]]);
+			REQUIRE(mipp::get<T>(s, mipp::N<T>()/2 +i) == inputs[mipp::N<T>()/2 + cm2_inputs[i]]);
 	}
 }
 
@@ -228,7 +228,7 @@ void test_reg_shuff4()
 
 		for (auto j = 0; j < 4; j++)
 			for (auto i = 0; i < mipp::N<T>()/4; i++)
-				REQUIRE(*((T*)&s + j*mipp::N<T>()/4 +i) == inputs[j*mipp::N<T>()/4 + cm4_inputs[i]]);
+				REQUIRE(mipp::get<T>(s, j*mipp::N<T>()/4 +i) == inputs[j*mipp::N<T>()/4 + cm4_inputs[i]]);
 	}
 }
 
