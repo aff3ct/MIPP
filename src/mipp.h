@@ -544,7 +544,11 @@ static inline void errorMessage(std::string instr)
 	type_names[typeid(double)  ] = "double";
 
 	std::string message;
+#if cplusplus >= 201703L
 	if constexpr (RegisterSizeBit == 0)
+#else
+	if (RegisterSizeBit == 0)
+#endif
 		message = "mipp::" + instr + "<" + type_names[typeid(T)] + "> (" + InstructionFullType + ") is undefined!, "
 		          "try to add -mfpu=neon-vfpv4, -msse4.2, -mavx, -march=native... at the compile time.";
 	else
@@ -559,7 +563,11 @@ template <int N>
 static inline void errorMessage(std::string instr)
 {
 	std::string message;
+#if cplusplus >= 201703L
 	if constexpr (RegisterSizeBit == 0)
+#else
+	if (RegisterSizeBit == 0)
+#endif
 		message = "mipp::" + instr + "<" + std::to_string(N) + "> (" + InstructionFullType + ") is undefined!, "
 		          "try to add -mfpu=neon-vfpv4, -msse4.2, -mavx, -march=native... at the compile time.";
 	else
