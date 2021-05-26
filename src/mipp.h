@@ -449,7 +449,7 @@ template <typename T>
 inline bool isAligned(const T *ptr)
 {
 #ifdef MIPP_ALIGNED_LOADS
-	return RegisterSizeBit ? (((uintptr_t)ptr) % (RegisterSizeBit / 8)) == 0 : true;
+	return RegisterSizeBit >= 8 ? (((uintptr_t)ptr) % (RegisterSizeBit / 8)) == 0 : true;
 #else
 	return true;
 #endif
