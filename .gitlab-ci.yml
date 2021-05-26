@@ -37,6 +37,7 @@ analysis-cppcheck:
 build-linux-x86-gcc:
   image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_gcc:v9.3.0
   stage: build
+  needs: []
   tags:
     - x86_64
     - linux
@@ -61,6 +62,7 @@ build-linux-x86-gcc:
 build-linux-x86-clang:
   image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_clang:v10.0.0
   stage: build
+  needs: []
   tags:
     - x86_64
     - linux
@@ -85,6 +87,7 @@ build-linux-x86-clang:
 build-linux-x86-icpc:
   image: intel/oneapi-hpckit
   stage: build
+  needs: []
   tags:
     - x86_64
     - linux
@@ -312,6 +315,7 @@ test-linux-x86-unit-avx512bw:
 
 build-macos-x86-clang:
   stage: build
+  needs: []
   tags:
     - x86_64
     - macos
@@ -459,6 +463,7 @@ test-macos-x86-unit-avx:
 build-linux-armv7-gcc:
   image: registry.gitlab.com/aff3ct/aff3ct/armhf_ubuntu_gcc:v9.3.0
   stage: build
+  needs: []
   tags:
     - armhf
     - linux
@@ -475,6 +480,7 @@ build-linux-armv7-gcc:
 build-linux-armv7-clang:
   image: registry.gitlab.com/aff3ct/aff3ct/armhf_ubuntu_clang:v10.0.0
   stage: build
+  needs: []
   tags:
     - armhf
     - linux
@@ -491,6 +497,7 @@ build-linux-armv7-clang:
 build-linux-armv8-gcc:
   image: registry.gitlab.com/aff3ct/aff3ct/arm64_ubuntu_gcc:v9.3.0
   stage: build
+  needs: []
   tags:
     - arm64
     - linux
@@ -506,6 +513,7 @@ build-linux-armv8-gcc:
 build-linux-armv8-clang:
   image: registry.gitlab.com/aff3ct/aff3ct/arm64_ubuntu_clang:v10.0.0
   stage: build
+  needs: []
   tags:
     - arm64
     - linux
@@ -608,6 +616,7 @@ test-linux-armv8-unit-neon:
 build-windows-x86-gcc:
   image: registry.gitlab.com/aff3ct/aff3ct/x86_64_windows_gcc:v8.1.0
   stage: build
+  needs: []
   tags:
     - x86_64
     - windows
@@ -629,6 +638,7 @@ build-windows-x86-gcc:
 build-windows-x86-msvc:
   image: registry.gitlab.com/aff3ct/aff3ct/x86_64_windows_msvc:v15
   stage: build
+  needs: []
   tags:
     - x86_64
     - windows
@@ -791,6 +801,7 @@ test-windows-x86-unit-avx:
 build-coverage-linux-x86-gcc:
   image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_coverage
   stage: build
+  needs: []
   tags:
     - x86_64
     - avx2
@@ -808,6 +819,7 @@ build-coverage-linux-x86-gcc:
 build-coverage-linux-armv7-gcc:
   image: registry.gitlab.com/aff3ct/aff3ct/armhf_ubuntu_coverage
   stage: build
+  needs: []
   tags:
     - armhf
     - neon
@@ -825,6 +837,7 @@ build-coverage-linux-armv7-gcc:
 build-coverage-linux-armv8-gcc:
   image: registry.gitlab.com/aff3ct/aff3ct/arm64_ubuntu_coverage
   stage: build
+  needs: []
   tags:
     - arm64
     - neon
