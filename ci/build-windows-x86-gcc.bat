@@ -1,5 +1,7 @@
 @echo on
 
+call ./ci/tools/threads.bat
+
 cd tests
 
 rem set build_root=build_windows_x86_gcc

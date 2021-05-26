@@ -1,5 +1,7 @@
 @echo on
 
+call ./ci/tools/threads.bat
+
 set "VSCMD_START_DIR=%CD%"
 call "%VS_PATH%\VC\Auxiliary\Build\vcvars64.bat"
 
