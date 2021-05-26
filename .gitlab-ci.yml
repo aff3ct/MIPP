@@ -804,7 +804,7 @@ build-coverage-linux-x86-gcc:
   needs: []
   tags:
     - x86_64
-    - avx2
+    - avx512f
     - linux
     - docker
   artifacts:
