@@ -1088,7 +1088,7 @@ bool get(const mipp::msk m, const size_t index)
 		return (m >> (index % N)) & 0x1;
 #else
 		uint8_t tmp[mipp::RegisterSizeBit / 8];
-		mipp::storeu<float>((float*)tmp, (reg)m);
+		mipp::storeu<float>((float*)tmp, mipp::toreg<N>(m));
 		return tmp[index * (mipp::RegisterSizeBit / (N * 8))];
 #endif
 }
