@@ -8,7 +8,7 @@
 void print_v(float32_t* v, const std::string &name)
 {
 	std::cout << name << " = [";
-	for (int i = 0; i < mipp::N<float32_t,2>(); i++)
+	for (int i = 0; i < mipp::N<float32_t,4>(); i++)
 		std::cout << v[i] << ",";
 	std::cout << "]" << std::endl;
 }
@@ -16,11 +16,11 @@ void print_v(float32_t* v, const std::string &name)
 int main(int argc, char** argv)
 {
 	int i;
-	float32_t a1[mipp::N<float32_t,2>()];
-	float32_t a2[mipp::N<float32_t,2>()];
-	float32_t a3[mipp::N<float32_t,2>()];
+	float32_t a1[mipp::N<float32_t,4>()];
+	float32_t a2[mipp::N<float32_t,4>()];
+	float32_t a3[mipp::N<float32_t,4>()];
 
-	for (int i = 0; i < mipp::N<float32_t,2>(); i++) {
+	for (int i = 0; i < mipp::N<float32_t,4>(); i++) {
 		a1[i] = i+0;
 		a2[i] = i+1;
 	}
@@ -33,12 +33,12 @@ int main(int argc, char** argv)
 	std::cout << "mipp::N<float32_t,4>() = " << mipp::N<float32_t,4>() << std::endl;
 	std::cout << "mipp::N<float32_t,8>() = " << mipp::N<float32_t,8>() << std::endl;
 
-	mipp::rvd<float32_t,2> rvd1, rvd2, rvd3;
+	mipp::rvd<float32_t,4> rvd1, rvd2, rvd3;
 
 	mipp::loadu(a1, rvd1);
 	mipp::loadu(a1, rvd2);
 
-	rvd3 = mipp::add<float32_t,2>(rvd1, rvd2);
+	rvd3 = mipp::add(rvd1, rvd2);
 
 	mipp::storeu(a3, rvd3);
 

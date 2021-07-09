@@ -66,16 +66,16 @@
 
 // ----------------------------- declaration of the data vector registers (rvd)
 
-typedef __m256d rvd_float64_m1_t;
-typedef __m256  rvd_float32_m1_t;
-typedef __m256i rvd_int64_m1_t;
-typedef __m256i rvd_int32_m1_t;
-typedef __m256i rvd_int16_m1_t;
-typedef __m256i rvd_int8_m1_t;
-typedef __m256i rvd_uint64_m1_t;
-typedef __m256i rvd_uint32_m1_t;
-typedef __m256i rvd_uint16_m1_t;
-typedef __m256i rvd_uint8_m1_t;
+typedef struct { __m256d m; } rvd_float64_m1_t;
+typedef struct { __m256  m; } rvd_float32_m1_t;
+typedef struct { __m256i m; } rvd_int64_m1_t;
+typedef struct { __m256i m; } rvd_int32_m1_t;
+typedef struct { __m256i m; } rvd_int16_m1_t;
+typedef struct { __m256i m; } rvd_int8_m1_t;
+typedef struct { __m256i m; } rvd_uint64_m1_t;
+typedef struct { __m256i m; } rvd_uint32_m1_t;
+typedef struct { __m256i m; } rvd_uint16_m1_t;
+typedef struct { __m256i m; } rvd_uint8_m1_t;
 
 typedef rvd_float64_m1_t rvd_float64_t;
 typedef rvd_float32_m1_t rvd_float32_t;
@@ -88,41 +88,42 @@ typedef rvd_uint32_m1_t  rvd_uint32_t;
 typedef rvd_uint16_m1_t  rvd_uint16_t;
 typedef rvd_uint8_m1_t   rvd_uint8_t;
 
-typedef struct { rvd_float64_m1_t sp1, sp2; } rvd_float64_m2_t;
-typedef struct { rvd_float32_m1_t sp1, sp2; } rvd_float32_m2_t;
-typedef struct { rvd_int64_m1_t   sp1, sp2; } rvd_int64_m2_t;
-typedef struct { rvd_int32_m1_t   sp1, sp2; } rvd_int32_m2_t;
-typedef struct { rvd_int16_m1_t   sp1, sp2; } rvd_int16_m2_t;
-typedef struct { rvd_int8_m1_t    sp1, sp2; } rvd_int8_m2_t;
-typedef struct { rvd_uint64_m1_t  sp1, sp2; } rvd_uint64_m2_t;
-typedef struct { rvd_uint32_m1_t  sp1, sp2; } rvd_uint32_m2_t;
-typedef struct { rvd_uint16_m1_t  sp1, sp2; } rvd_uint16_m2_t;
-typedef struct { rvd_uint8_m1_t   sp1, sp2; } rvd_uint8_m2_t;
+typedef struct { rvd_float64_m1_t m1, m2; } rvd_float64_m2_t;
+typedef struct { rvd_float32_m1_t m1, m2; } rvd_float32_m2_t;
+typedef struct { rvd_int64_m1_t   m1, m2; } rvd_int64_m2_t;
+typedef struct { rvd_int32_m1_t   m1, m2; } rvd_int32_m2_t;
+typedef struct { rvd_int16_m1_t   m1, m2; } rvd_int16_m2_t;
+typedef struct { rvd_int8_m1_t    m1, m2; } rvd_int8_m2_t;
+typedef struct { rvd_uint64_m1_t  m1, m2; } rvd_uint64_m2_t;
+typedef struct { rvd_uint32_m1_t  m1, m2; } rvd_uint32_m2_t;
+typedef struct { rvd_uint16_m1_t  m1, m2; } rvd_uint16_m2_t;
+typedef struct { rvd_uint8_m1_t   m1, m2; } rvd_uint8_m2_t;
 
-typedef struct { rvd_float64_m2_t sp1, sp2; } rvd_float64_m4_t;
-typedef struct { rvd_float32_m2_t sp1, sp2; } rvd_float32_m4_t;
-typedef struct { rvd_int64_m2_t   sp1, sp2; } rvd_int64_m4_t;
-typedef struct { rvd_int32_m2_t   sp1, sp2; } rvd_int32_m4_t;
-typedef struct { rvd_int16_m2_t   sp1, sp2; } rvd_int16_m4_t;
-typedef struct { rvd_int8_m2_t    sp1, sp2; } rvd_int8_m4_t;
-typedef struct { rvd_uint64_m2_t  sp1, sp2; } rvd_uint64_m4_t;
-typedef struct { rvd_uint32_m2_t  sp1, sp2; } rvd_uint32_m4_t;
-typedef struct { rvd_uint16_m2_t  sp1, sp2; } rvd_uint16_m4_t;
-typedef struct { rvd_uint8_m2_t   sp1, sp2; } rvd_uint8_m4_t;
+typedef struct { rvd_float64_m2_t m1, m2; } rvd_float64_m4_t;
+typedef struct { rvd_float32_m2_t m1, m2; } rvd_float32_m4_t;
+typedef struct { rvd_int64_m2_t   m1, m2; } rvd_int64_m4_t;
+typedef struct { rvd_int32_m2_t   m1, m2; } rvd_int32_m4_t;
+typedef struct { rvd_int16_m2_t   m1, m2; } rvd_int16_m4_t;
+typedef struct { rvd_int8_m2_t    m1, m2; } rvd_int8_m4_t;
+typedef struct { rvd_uint64_m2_t  m1, m2; } rvd_uint64_m4_t;
+typedef struct { rvd_uint32_m2_t  m1, m2; } rvd_uint32_m4_t;
+typedef struct { rvd_uint16_m2_t  m1, m2; } rvd_uint16_m4_t;
+typedef struct { rvd_uint8_m2_t   m1, m2; } rvd_uint8_m4_t;
 
-typedef struct { rvd_float64_m4_t sp1, sp2; } rvd_float64_m8_t;
-typedef struct { rvd_float32_m4_t sp1, sp2; } rvd_float32_m8_t;
-typedef struct { rvd_int64_m4_t   sp1, sp2; } rvd_int64_m8_t;
-typedef struct { rvd_int32_m4_t   sp1, sp2; } rvd_int32_m8_t;
-typedef struct { rvd_int16_m4_t   sp1, sp2; } rvd_int16_m8_t;
-typedef struct { rvd_int8_m4_t    sp1, sp2; } rvd_int8_m8_t;
-typedef struct { rvd_uint64_m4_t  sp1, sp2; } rvd_uint64_m8_t;
-typedef struct { rvd_uint32_m4_t  sp1, sp2; } rvd_uint32_m8_t;
-typedef struct { rvd_uint16_m4_t  sp1, sp2; } rvd_uint16_m8_t;
-typedef struct { rvd_uint8_m4_t   sp1, sp2; } rvd_uint8_m8_t;
+typedef struct { rvd_float64_m4_t m1, m2; } rvd_float64_m8_t;
+typedef struct { rvd_float32_m4_t m1, m2; } rvd_float32_m8_t;
+typedef struct { rvd_int64_m4_t   m1, m2; } rvd_int64_m8_t;
+typedef struct { rvd_int32_m4_t   m1, m2; } rvd_int32_m8_t;
+typedef struct { rvd_int16_m4_t   m1, m2; } rvd_int16_m8_t;
+typedef struct { rvd_int8_m4_t    m1, m2; } rvd_int8_m8_t;
+typedef struct { rvd_uint64_m4_t  m1, m2; } rvd_uint64_m8_t;
+typedef struct { rvd_uint32_m4_t  m1, m2; } rvd_uint32_m8_t;
+typedef struct { rvd_uint16_m4_t  m1, m2; } rvd_uint16_m8_t;
+typedef struct { rvd_uint8_m4_t   m1, m2; } rvd_uint8_m8_t;
 
 // ----------------------------- declaration of the mask vector registers (rvm)
 
+/*
 typedef __m256d rvm_float64_m1_t;
 typedef __m256  rvm_float32_m1_t;
 typedef __m256i rvm_int64_m1_t;
@@ -177,22 +178,23 @@ typedef struct { rvm_uint64_m4_t  sp1, sp2; } rvm_uint64_m8_t;
 typedef struct { rvm_uint32_m4_t  sp1, sp2; } rvm_uint32_m8_t;
 typedef struct { rvm_uint16_m4_t  sp1, sp2; } rvm_uint16_m8_t;
 typedef struct { rvm_uint8_m4_t   sp1, sp2; } rvm_uint8_m8_t;
+*/
 
 // ---------------------------------------------------------------------- loadu
 // ----------------------------------------------------------------------------
 
 // --------------------------------------------------------------------- LMUL=1
 
-rvd_float64_m1_t mipp_loadu_float64_m1(float64_t *mem_addr) { return (rvd_float64_m1_t) _mm256_loadu_ps((float32_t*) mem_addr); }
-rvd_float32_m1_t mipp_loadu_float32_m1(float32_t *mem_addr) { return (rvd_float32_m1_t) _mm256_loadu_ps((float32_t*) mem_addr); }
-  rvd_int64_m1_t   mipp_loadu_int64_m1(  int64_t *mem_addr) { return (  rvd_int64_m1_t) _mm256_loadu_ps((float32_t*) mem_addr); }
-  rvd_int32_m1_t   mipp_loadu_int32_m1(  int32_t *mem_addr) { return (  rvd_int32_m1_t) _mm256_loadu_ps((float32_t*) mem_addr); }
-  rvd_int16_m1_t   mipp_loadu_int16_m1(  int16_t *mem_addr) { return (  rvd_int16_m1_t) _mm256_loadu_ps((float32_t*) mem_addr); }
-   rvd_int8_m1_t    mipp_loadu_int8_m1(   int8_t *mem_addr) { return (   rvd_int8_m1_t) _mm256_loadu_ps((float32_t*) mem_addr); }
- rvd_uint64_m1_t  mipp_loadu_uint64_m1( uint64_t *mem_addr) { return ( rvd_uint64_m1_t) _mm256_loadu_ps((float32_t*) mem_addr); }
- rvd_uint32_m1_t  mipp_loadu_uint32_m1( uint32_t *mem_addr) { return ( rvd_uint32_m1_t) _mm256_loadu_ps((float32_t*) mem_addr); }
- rvd_uint16_m1_t  mipp_loadu_uint16_m1( uint16_t *mem_addr) { return ( rvd_uint16_m1_t) _mm256_loadu_ps((float32_t*) mem_addr); }
-  rvd_uint8_m1_t   mipp_loadu_uint8_m1(  uint8_t *mem_addr) { return (  rvd_uint8_m1_t) _mm256_loadu_ps((float32_t*) mem_addr); }
+rvd_float64_m1_t mipp_loadu_float64_m1(float64_t *mem_addr) { rvd_float64_m1_t rvd; rvd.m = (__m256d) _mm256_loadu_ps((float32_t*) mem_addr); return rvd; }
+rvd_float32_m1_t mipp_loadu_float32_m1(float32_t *mem_addr) { rvd_float32_m1_t rvd; rvd.m = (__m256 ) _mm256_loadu_ps((float32_t*) mem_addr); return rvd; }
+  rvd_int64_m1_t   mipp_loadu_int64_m1(  int64_t *mem_addr) {   rvd_int64_m1_t rvd; rvd.m = (__m256i) _mm256_loadu_ps((float32_t*) mem_addr); return rvd; }
+  rvd_int32_m1_t   mipp_loadu_int32_m1(  int32_t *mem_addr) {   rvd_int32_m1_t rvd; rvd.m = (__m256i) _mm256_loadu_ps((float32_t*) mem_addr); return rvd; }
+  rvd_int16_m1_t   mipp_loadu_int16_m1(  int16_t *mem_addr) {   rvd_int16_m1_t rvd; rvd.m = (__m256i) _mm256_loadu_ps((float32_t*) mem_addr); return rvd; }
+   rvd_int8_m1_t    mipp_loadu_int8_m1(   int8_t *mem_addr) {    rvd_int8_m1_t rvd; rvd.m = (__m256i) _mm256_loadu_ps((float32_t*) mem_addr); return rvd; }
+ rvd_uint64_m1_t  mipp_loadu_uint64_m1( uint64_t *mem_addr) {  rvd_uint64_m1_t rvd; rvd.m = (__m256i) _mm256_loadu_ps((float32_t*) mem_addr); return rvd; }
+ rvd_uint32_m1_t  mipp_loadu_uint32_m1( uint32_t *mem_addr) {  rvd_uint32_m1_t rvd; rvd.m = (__m256i) _mm256_loadu_ps((float32_t*) mem_addr); return rvd; }
+ rvd_uint16_m1_t  mipp_loadu_uint16_m1( uint16_t *mem_addr) {  rvd_uint16_m1_t rvd; rvd.m = (__m256i) _mm256_loadu_ps((float32_t*) mem_addr); return rvd; }
+  rvd_uint8_m1_t   mipp_loadu_uint8_m1(  uint8_t *mem_addr) {   rvd_uint8_m1_t rvd; rvd.m = (__m256i) _mm256_loadu_ps((float32_t*) mem_addr); return rvd; }
 
 // ---------------------------------------------------------------------- ALIAS
 
@@ -209,58 +211,58 @@ rvd_float32_t mipp_loadu_float32(float32_t *mem_addr) { return mipp_loadu_float3
 
 // --------------------------------------------------------------------- LMUL=2
 
-rvd_float64_m2_t mipp_loadu_float64_m2(float64_t *mem_addr) { rvd_float64_m2_t rvd; rvd.sp1 = mipp_loadu_float64_m1(mem_addr); rvd.sp2 = mipp_loadu_float64_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1)); return rvd; }
-rvd_float32_m2_t mipp_loadu_float32_m2(float32_t *mem_addr) { rvd_float32_m2_t rvd; rvd.sp1 = mipp_loadu_float32_m1(mem_addr); rvd.sp2 = mipp_loadu_float32_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1)); return rvd; }
-  rvd_int64_m2_t   mipp_loadu_int64_m2(  int64_t *mem_addr) {   rvd_int64_m2_t rvd; rvd.sp1 =   mipp_loadu_int64_m1(mem_addr); rvd.sp2 =   mipp_loadu_int64_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1)); return rvd; }
-  rvd_int32_m2_t   mipp_loadu_int32_m2(  int32_t *mem_addr) {   rvd_int32_m2_t rvd; rvd.sp1 =   mipp_loadu_int32_m1(mem_addr); rvd.sp2 =   mipp_loadu_int32_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1)); return rvd; }
-  rvd_int16_m2_t   mipp_loadu_int16_m2(  int16_t *mem_addr) {   rvd_int16_m2_t rvd; rvd.sp1 =   mipp_loadu_int16_m1(mem_addr); rvd.sp2 =   mipp_loadu_int16_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1)); return rvd; }
-   rvd_int8_m2_t    mipp_loadu_int8_m2(   int8_t *mem_addr) {    rvd_int8_m2_t rvd; rvd.sp1 =    mipp_loadu_int8_m1(mem_addr); rvd.sp2 =    mipp_loadu_int8_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1)); return rvd; }
- rvd_uint64_m2_t  mipp_loadu_uint64_m2( uint64_t *mem_addr) {  rvd_uint64_m2_t rvd; rvd.sp1 =  mipp_loadu_uint64_m1(mem_addr); rvd.sp2 =  mipp_loadu_uint64_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1)); return rvd; }
- rvd_uint32_m2_t  mipp_loadu_uint32_m2( uint32_t *mem_addr) {  rvd_uint32_m2_t rvd; rvd.sp1 =  mipp_loadu_uint32_m1(mem_addr); rvd.sp2 =  mipp_loadu_uint32_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1)); return rvd; }
- rvd_uint16_m2_t  mipp_loadu_uint16_m2( uint16_t *mem_addr) {  rvd_uint16_m2_t rvd; rvd.sp1 =  mipp_loadu_uint16_m1(mem_addr); rvd.sp2 =  mipp_loadu_uint16_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1)); return rvd; }
-  rvd_uint8_m2_t   mipp_loadu_uint8_m2(  uint8_t *mem_addr) {   rvd_uint8_m2_t rvd; rvd.sp1 =   mipp_loadu_uint8_m1(mem_addr); rvd.sp2 =   mipp_loadu_uint8_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1)); return rvd; }
+rvd_float64_m2_t mipp_loadu_float64_m2(float64_t *mem_addr) { rvd_float64_m2_t rvd; rvd.m1 = mipp_loadu_float64_m1(mem_addr); rvd.m2 = mipp_loadu_float64_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1)); return rvd; }
+rvd_float32_m2_t mipp_loadu_float32_m2(float32_t *mem_addr) { rvd_float32_m2_t rvd; rvd.m1 = mipp_loadu_float32_m1(mem_addr); rvd.m2 = mipp_loadu_float32_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1)); return rvd; }
+  rvd_int64_m2_t   mipp_loadu_int64_m2(  int64_t *mem_addr) {   rvd_int64_m2_t rvd; rvd.m1 =   mipp_loadu_int64_m1(mem_addr); rvd.m2 =   mipp_loadu_int64_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1)); return rvd; }
+  rvd_int32_m2_t   mipp_loadu_int32_m2(  int32_t *mem_addr) {   rvd_int32_m2_t rvd; rvd.m1 =   mipp_loadu_int32_m1(mem_addr); rvd.m2 =   mipp_loadu_int32_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1)); return rvd; }
+  rvd_int16_m2_t   mipp_loadu_int16_m2(  int16_t *mem_addr) {   rvd_int16_m2_t rvd; rvd.m1 =   mipp_loadu_int16_m1(mem_addr); rvd.m2 =   mipp_loadu_int16_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1)); return rvd; }
+   rvd_int8_m2_t    mipp_loadu_int8_m2(   int8_t *mem_addr) {    rvd_int8_m2_t rvd; rvd.m1 =    mipp_loadu_int8_m1(mem_addr); rvd.m2 =    mipp_loadu_int8_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1)); return rvd; }
+ rvd_uint64_m2_t  mipp_loadu_uint64_m2( uint64_t *mem_addr) {  rvd_uint64_m2_t rvd; rvd.m1 =  mipp_loadu_uint64_m1(mem_addr); rvd.m2 =  mipp_loadu_uint64_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1)); return rvd; }
+ rvd_uint32_m2_t  mipp_loadu_uint32_m2( uint32_t *mem_addr) {  rvd_uint32_m2_t rvd; rvd.m1 =  mipp_loadu_uint32_m1(mem_addr); rvd.m2 =  mipp_loadu_uint32_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1)); return rvd; }
+ rvd_uint16_m2_t  mipp_loadu_uint16_m2( uint16_t *mem_addr) {  rvd_uint16_m2_t rvd; rvd.m1 =  mipp_loadu_uint16_m1(mem_addr); rvd.m2 =  mipp_loadu_uint16_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1)); return rvd; }
+  rvd_uint8_m2_t   mipp_loadu_uint8_m2(  uint8_t *mem_addr) {   rvd_uint8_m2_t rvd; rvd.m1 =   mipp_loadu_uint8_m1(mem_addr); rvd.m2 =   mipp_loadu_uint8_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1)); return rvd; }
 
 // --------------------------------------------------------------------- LMUL=4
 
-rvd_float64_m4_t mipp_loadu_float64_m4(float64_t *mem_addr) { rvd_float64_m4_t rvd; rvd.sp1 = mipp_loadu_float64_m2(mem_addr); rvd.sp2 = mipp_loadu_float64_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2)); return rvd; }
-rvd_float32_m4_t mipp_loadu_float32_m4(float32_t *mem_addr) { rvd_float32_m4_t rvd; rvd.sp1 = mipp_loadu_float32_m2(mem_addr); rvd.sp2 = mipp_loadu_float32_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2)); return rvd; }
-  rvd_int64_m4_t   mipp_loadu_int64_m4(  int64_t *mem_addr) {   rvd_int64_m4_t rvd; rvd.sp1 =   mipp_loadu_int64_m2(mem_addr); rvd.sp2 =   mipp_loadu_int64_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2)); return rvd; }
-  rvd_int32_m4_t   mipp_loadu_int32_m4(  int32_t *mem_addr) {   rvd_int32_m4_t rvd; rvd.sp1 =   mipp_loadu_int32_m2(mem_addr); rvd.sp2 =   mipp_loadu_int32_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2)); return rvd; }
-  rvd_int16_m4_t   mipp_loadu_int16_m4(  int16_t *mem_addr) {   rvd_int16_m4_t rvd; rvd.sp1 =   mipp_loadu_int16_m2(mem_addr); rvd.sp2 =   mipp_loadu_int16_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2)); return rvd; }
-   rvd_int8_m4_t    mipp_loadu_int8_m4(   int8_t *mem_addr) {    rvd_int8_m4_t rvd; rvd.sp1 =    mipp_loadu_int8_m2(mem_addr); rvd.sp2 =    mipp_loadu_int8_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2)); return rvd; }
- rvd_uint64_m4_t  mipp_loadu_uint64_m4( uint64_t *mem_addr) {  rvd_uint64_m4_t rvd; rvd.sp1 =  mipp_loadu_uint64_m2(mem_addr); rvd.sp2 =  mipp_loadu_uint64_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2)); return rvd; }
- rvd_uint32_m4_t  mipp_loadu_uint32_m4( uint32_t *mem_addr) {  rvd_uint32_m4_t rvd; rvd.sp1 =  mipp_loadu_uint32_m2(mem_addr); rvd.sp2 =  mipp_loadu_uint32_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2)); return rvd; }
- rvd_uint16_m4_t  mipp_loadu_uint16_m4( uint16_t *mem_addr) {  rvd_uint16_m4_t rvd; rvd.sp1 =  mipp_loadu_uint16_m2(mem_addr); rvd.sp2 =  mipp_loadu_uint16_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2)); return rvd; }
-  rvd_uint8_m4_t   mipp_loadu_uint8_m4(  uint8_t *mem_addr) {   rvd_uint8_m4_t rvd; rvd.sp1 =   mipp_loadu_uint8_m2(mem_addr); rvd.sp2 =   mipp_loadu_uint8_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2)); return rvd; }
+rvd_float64_m4_t mipp_loadu_float64_m4(float64_t *mem_addr) { rvd_float64_m4_t rvd; rvd.m1 = mipp_loadu_float64_m2(mem_addr); rvd.m2 = mipp_loadu_float64_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2)); return rvd; }
+rvd_float32_m4_t mipp_loadu_float32_m4(float32_t *mem_addr) { rvd_float32_m4_t rvd; rvd.m1 = mipp_loadu_float32_m2(mem_addr); rvd.m2 = mipp_loadu_float32_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2)); return rvd; }
+  rvd_int64_m4_t   mipp_loadu_int64_m4(  int64_t *mem_addr) {   rvd_int64_m4_t rvd; rvd.m1 =   mipp_loadu_int64_m2(mem_addr); rvd.m2 =   mipp_loadu_int64_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2)); return rvd; }
+  rvd_int32_m4_t   mipp_loadu_int32_m4(  int32_t *mem_addr) {   rvd_int32_m4_t rvd; rvd.m1 =   mipp_loadu_int32_m2(mem_addr); rvd.m2 =   mipp_loadu_int32_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2)); return rvd; }
+  rvd_int16_m4_t   mipp_loadu_int16_m4(  int16_t *mem_addr) {   rvd_int16_m4_t rvd; rvd.m1 =   mipp_loadu_int16_m2(mem_addr); rvd.m2 =   mipp_loadu_int16_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2)); return rvd; }
+   rvd_int8_m4_t    mipp_loadu_int8_m4(   int8_t *mem_addr) {    rvd_int8_m4_t rvd; rvd.m1 =    mipp_loadu_int8_m2(mem_addr); rvd.m2 =    mipp_loadu_int8_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2)); return rvd; }
+ rvd_uint64_m4_t  mipp_loadu_uint64_m4( uint64_t *mem_addr) {  rvd_uint64_m4_t rvd; rvd.m1 =  mipp_loadu_uint64_m2(mem_addr); rvd.m2 =  mipp_loadu_uint64_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2)); return rvd; }
+ rvd_uint32_m4_t  mipp_loadu_uint32_m4( uint32_t *mem_addr) {  rvd_uint32_m4_t rvd; rvd.m1 =  mipp_loadu_uint32_m2(mem_addr); rvd.m2 =  mipp_loadu_uint32_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2)); return rvd; }
+ rvd_uint16_m4_t  mipp_loadu_uint16_m4( uint16_t *mem_addr) {  rvd_uint16_m4_t rvd; rvd.m1 =  mipp_loadu_uint16_m2(mem_addr); rvd.m2 =  mipp_loadu_uint16_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2)); return rvd; }
+  rvd_uint8_m4_t   mipp_loadu_uint8_m4(  uint8_t *mem_addr) {   rvd_uint8_m4_t rvd; rvd.m1 =   mipp_loadu_uint8_m2(mem_addr); rvd.m2 =   mipp_loadu_uint8_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2)); return rvd; }
 
 // --------------------------------------------------------------------- LMUL=8
 
-rvd_float64_m8_t mipp_loadu_float64_m8(float64_t *mem_addr) { rvd_float64_m8_t rvd; rvd.sp1 = mipp_loadu_float64_m4(mem_addr); rvd.sp2 = mipp_loadu_float64_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4)); return rvd; }
-rvd_float32_m8_t mipp_loadu_float32_m8(float32_t *mem_addr) { rvd_float32_m8_t rvd; rvd.sp1 = mipp_loadu_float32_m4(mem_addr); rvd.sp2 = mipp_loadu_float32_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4)); return rvd; }
-  rvd_int64_m8_t   mipp_loadu_int64_m8(  int64_t *mem_addr) {   rvd_int64_m8_t rvd; rvd.sp1 =   mipp_loadu_int64_m4(mem_addr); rvd.sp2 =   mipp_loadu_int64_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4)); return rvd; }
-  rvd_int32_m8_t   mipp_loadu_int32_m8(  int32_t *mem_addr) {   rvd_int32_m8_t rvd; rvd.sp1 =   mipp_loadu_int32_m4(mem_addr); rvd.sp2 =   mipp_loadu_int32_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4)); return rvd; }
-  rvd_int16_m8_t   mipp_loadu_int16_m8(  int16_t *mem_addr) {   rvd_int16_m8_t rvd; rvd.sp1 =   mipp_loadu_int16_m4(mem_addr); rvd.sp2 =   mipp_loadu_int16_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4)); return rvd; }
-   rvd_int8_m8_t    mipp_loadu_int8_m8(   int8_t *mem_addr) {    rvd_int8_m8_t rvd; rvd.sp1 =    mipp_loadu_int8_m4(mem_addr); rvd.sp2 =    mipp_loadu_int8_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4)); return rvd; }
- rvd_uint64_m8_t  mipp_loadu_uint64_m8( uint64_t *mem_addr) {  rvd_uint64_m8_t rvd; rvd.sp1 =  mipp_loadu_uint64_m4(mem_addr); rvd.sp2 =  mipp_loadu_uint64_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4)); return rvd; }
- rvd_uint32_m8_t  mipp_loadu_uint32_m8( uint32_t *mem_addr) {  rvd_uint32_m8_t rvd; rvd.sp1 =  mipp_loadu_uint32_m4(mem_addr); rvd.sp2 =  mipp_loadu_uint32_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4)); return rvd; }
- rvd_uint16_m8_t  mipp_loadu_uint16_m8( uint16_t *mem_addr) {  rvd_uint16_m8_t rvd; rvd.sp1 =  mipp_loadu_uint16_m4(mem_addr); rvd.sp2 =  mipp_loadu_uint16_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4)); return rvd; }
-  rvd_uint8_m8_t   mipp_loadu_uint8_m8(  uint8_t *mem_addr) {   rvd_uint8_m8_t rvd; rvd.sp1 =   mipp_loadu_uint8_m4(mem_addr); rvd.sp2 =   mipp_loadu_uint8_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4)); return rvd; }
+rvd_float64_m8_t mipp_loadu_float64_m8(float64_t *mem_addr) { rvd_float64_m8_t rvd; rvd.m1 = mipp_loadu_float64_m4(mem_addr); rvd.m2 = mipp_loadu_float64_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4)); return rvd; }
+rvd_float32_m8_t mipp_loadu_float32_m8(float32_t *mem_addr) { rvd_float32_m8_t rvd; rvd.m1 = mipp_loadu_float32_m4(mem_addr); rvd.m2 = mipp_loadu_float32_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4)); return rvd; }
+  rvd_int64_m8_t   mipp_loadu_int64_m8(  int64_t *mem_addr) {   rvd_int64_m8_t rvd; rvd.m1 =   mipp_loadu_int64_m4(mem_addr); rvd.m2 =   mipp_loadu_int64_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4)); return rvd; }
+  rvd_int32_m8_t   mipp_loadu_int32_m8(  int32_t *mem_addr) {   rvd_int32_m8_t rvd; rvd.m1 =   mipp_loadu_int32_m4(mem_addr); rvd.m2 =   mipp_loadu_int32_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4)); return rvd; }
+  rvd_int16_m8_t   mipp_loadu_int16_m8(  int16_t *mem_addr) {   rvd_int16_m8_t rvd; rvd.m1 =   mipp_loadu_int16_m4(mem_addr); rvd.m2 =   mipp_loadu_int16_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4)); return rvd; }
+   rvd_int8_m8_t    mipp_loadu_int8_m8(   int8_t *mem_addr) {    rvd_int8_m8_t rvd; rvd.m1 =    mipp_loadu_int8_m4(mem_addr); rvd.m2 =    mipp_loadu_int8_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4)); return rvd; }
+ rvd_uint64_m8_t  mipp_loadu_uint64_m8( uint64_t *mem_addr) {  rvd_uint64_m8_t rvd; rvd.m1 =  mipp_loadu_uint64_m4(mem_addr); rvd.m2 =  mipp_loadu_uint64_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4)); return rvd; }
+ rvd_uint32_m8_t  mipp_loadu_uint32_m8( uint32_t *mem_addr) {  rvd_uint32_m8_t rvd; rvd.m1 =  mipp_loadu_uint32_m4(mem_addr); rvd.m2 =  mipp_loadu_uint32_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4)); return rvd; }
+ rvd_uint16_m8_t  mipp_loadu_uint16_m8( uint16_t *mem_addr) {  rvd_uint16_m8_t rvd; rvd.m1 =  mipp_loadu_uint16_m4(mem_addr); rvd.m2 =  mipp_loadu_uint16_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4)); return rvd; }
+  rvd_uint8_m8_t   mipp_loadu_uint8_m8(  uint8_t *mem_addr) {   rvd_uint8_m8_t rvd; rvd.m1 =   mipp_loadu_uint8_m4(mem_addr); rvd.m2 =   mipp_loadu_uint8_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4)); return rvd; }
 
 // --------------------------------------------------------------------- storeu
 // ----------------------------------------------------------------------------
 
 // --------------------------------------------------------------------- LMUL=1
 
-void mipp_storeu_float64_m1(float64_t *mem_addr, rvd_float64_m1_t rvd) { _mm256_storeu_ps((float32_t*) mem_addr, (rvd_float32_t) rvd); }
-void mipp_storeu_float32_m1(float32_t *mem_addr, rvd_float32_m1_t rvd) { _mm256_storeu_ps((float32_t*) mem_addr, (rvd_float32_t) rvd); }
-void   mipp_storeu_int64_m1(  int64_t *mem_addr,   rvd_int64_m1_t rvd) { _mm256_storeu_ps((float32_t*) mem_addr, (rvd_float32_t) rvd); }
-void   mipp_storeu_int32_m1(  int32_t *mem_addr,   rvd_int32_m1_t rvd) { _mm256_storeu_ps((float32_t*) mem_addr, (rvd_float32_t) rvd); }
-void   mipp_storeu_int16_m1(  int16_t *mem_addr,   rvd_int16_m1_t rvd) { _mm256_storeu_ps((float32_t*) mem_addr, (rvd_float32_t) rvd); }
-void    mipp_storeu_int8_m1(   int8_t *mem_addr,    rvd_int8_m1_t rvd) { _mm256_storeu_ps((float32_t*) mem_addr, (rvd_float32_t) rvd); }
-void  mipp_storeu_uint64_m1( uint64_t *mem_addr,  rvd_uint64_m1_t rvd) { _mm256_storeu_ps((float32_t*) mem_addr, (rvd_float32_t) rvd); }
-void  mipp_storeu_uint32_m1( uint32_t *mem_addr,  rvd_uint32_m1_t rvd) { _mm256_storeu_ps((float32_t*) mem_addr, (rvd_float32_t) rvd); }
-void  mipp_storeu_uint16_m1( uint16_t *mem_addr,  rvd_uint16_m1_t rvd) { _mm256_storeu_ps((float32_t*) mem_addr, (rvd_float32_t) rvd); }
-void   mipp_storeu_uint8_m1(  uint8_t *mem_addr,   rvd_uint8_m1_t rvd) { _mm256_storeu_ps((float32_t*) mem_addr, (rvd_float32_t) rvd); }
+void mipp_storeu_float64_m1(float64_t *mem_addr, rvd_float64_m1_t rvd) { _mm256_storeu_ps((float32_t*) mem_addr, (__m256) rvd.m); }
+void mipp_storeu_float32_m1(float32_t *mem_addr, rvd_float32_m1_t rvd) { _mm256_storeu_ps((float32_t*) mem_addr, (__m256) rvd.m); }
+void   mipp_storeu_int64_m1(  int64_t *mem_addr,   rvd_int64_m1_t rvd) { _mm256_storeu_ps((float32_t*) mem_addr, (__m256) rvd.m); }
+void   mipp_storeu_int32_m1(  int32_t *mem_addr,   rvd_int32_m1_t rvd) { _mm256_storeu_ps((float32_t*) mem_addr, (__m256) rvd.m); }
+void   mipp_storeu_int16_m1(  int16_t *mem_addr,   rvd_int16_m1_t rvd) { _mm256_storeu_ps((float32_t*) mem_addr, (__m256) rvd.m); }
+void    mipp_storeu_int8_m1(   int8_t *mem_addr,    rvd_int8_m1_t rvd) { _mm256_storeu_ps((float32_t*) mem_addr, (__m256) rvd.m); }
+void  mipp_storeu_uint64_m1( uint64_t *mem_addr,  rvd_uint64_m1_t rvd) { _mm256_storeu_ps((float32_t*) mem_addr, (__m256) rvd.m); }
+void  mipp_storeu_uint32_m1( uint32_t *mem_addr,  rvd_uint32_m1_t rvd) { _mm256_storeu_ps((float32_t*) mem_addr, (__m256) rvd.m); }
+void  mipp_storeu_uint16_m1( uint16_t *mem_addr,  rvd_uint16_m1_t rvd) { _mm256_storeu_ps((float32_t*) mem_addr, (__m256) rvd.m); }
+void   mipp_storeu_uint8_m1(  uint8_t *mem_addr,   rvd_uint8_m1_t rvd) { _mm256_storeu_ps((float32_t*) mem_addr, (__m256) rvd.m); }
 
 // ---------------------------------------------------------------------- ALIAS
 
@@ -277,66 +279,63 @@ void   mipp_storeu_uint8(  uint8_t *mem_addr,   rvd_uint8_t rvd) {   mipp_storeu
 
 // --------------------------------------------------------------------- LMUL=2
 
-void mipp_storeu_float64_m2(float64_t *mem_addr, rvd_float64_m2_t rvd) { mipp_storeu_float64_m1(mem_addr, rvd.sp1); mipp_storeu_float64_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1), rvd.sp2); }
-void mipp_storeu_float32_m2(float32_t *mem_addr, rvd_float32_m2_t rvd) { mipp_storeu_float32_m1(mem_addr, rvd.sp1); mipp_storeu_float32_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1), rvd.sp2); }
-void   mipp_storeu_int64_m2(  int64_t *mem_addr,   rvd_int64_m2_t rvd) {   mipp_storeu_int64_m1(mem_addr, rvd.sp1);   mipp_storeu_int64_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1), rvd.sp2); }
-void   mipp_storeu_int32_m2(  int32_t *mem_addr,   rvd_int32_m2_t rvd) {   mipp_storeu_int32_m1(mem_addr, rvd.sp1);   mipp_storeu_int32_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1), rvd.sp2); }
-void   mipp_storeu_int16_m2(  int16_t *mem_addr,   rvd_int16_m2_t rvd) {   mipp_storeu_int16_m1(mem_addr, rvd.sp1);   mipp_storeu_int16_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1), rvd.sp2); }
-void    mipp_storeu_int8_m2(   int8_t *mem_addr,    rvd_int8_m2_t rvd) {    mipp_storeu_int8_m1(mem_addr, rvd.sp1);    mipp_storeu_int8_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1), rvd.sp2); }
-void  mipp_storeu_uint64_m2( uint64_t *mem_addr,  rvd_uint64_m2_t rvd) {  mipp_storeu_uint64_m1(mem_addr, rvd.sp1);  mipp_storeu_uint64_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1), rvd.sp2); }
-void  mipp_storeu_uint32_m2( uint32_t *mem_addr,  rvd_uint32_m2_t rvd) {  mipp_storeu_uint32_m1(mem_addr, rvd.sp1);  mipp_storeu_uint32_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1), rvd.sp2); }
-void  mipp_storeu_uint16_m2( uint16_t *mem_addr,  rvd_uint16_m2_t rvd) {  mipp_storeu_uint16_m1(mem_addr, rvd.sp1);  mipp_storeu_uint16_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1), rvd.sp2); }
-void   mipp_storeu_uint8_m2(  uint8_t *mem_addr,   rvd_uint8_m2_t rvd) {   mipp_storeu_uint8_m1(mem_addr, rvd.sp1);   mipp_storeu_uint8_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1), rvd.sp2); }
+void mipp_storeu_float64_m2(float64_t *mem_addr, rvd_float64_m2_t rvd) { mipp_storeu_float64_m1(mem_addr, rvd.m1); mipp_storeu_float64_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1), rvd.m2); }
+void mipp_storeu_float32_m2(float32_t *mem_addr, rvd_float32_m2_t rvd) { mipp_storeu_float32_m1(mem_addr, rvd.m1); mipp_storeu_float32_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1), rvd.m2); }
+void   mipp_storeu_int64_m2(  int64_t *mem_addr,   rvd_int64_m2_t rvd) {   mipp_storeu_int64_m1(mem_addr, rvd.m1);   mipp_storeu_int64_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1), rvd.m2); }
+void   mipp_storeu_int32_m2(  int32_t *mem_addr,   rvd_int32_m2_t rvd) {   mipp_storeu_int32_m1(mem_addr, rvd.m1);   mipp_storeu_int32_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1), rvd.m2); }
+void   mipp_storeu_int16_m2(  int16_t *mem_addr,   rvd_int16_m2_t rvd) {   mipp_storeu_int16_m1(mem_addr, rvd.m1);   mipp_storeu_int16_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1), rvd.m2); }
+void    mipp_storeu_int8_m2(   int8_t *mem_addr,    rvd_int8_m2_t rvd) {    mipp_storeu_int8_m1(mem_addr, rvd.m1);    mipp_storeu_int8_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1), rvd.m2); }
+void  mipp_storeu_uint64_m2( uint64_t *mem_addr,  rvd_uint64_m2_t rvd) {  mipp_storeu_uint64_m1(mem_addr, rvd.m1);  mipp_storeu_uint64_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1), rvd.m2); }
+void  mipp_storeu_uint32_m2( uint32_t *mem_addr,  rvd_uint32_m2_t rvd) {  mipp_storeu_uint32_m1(mem_addr, rvd.m1);  mipp_storeu_uint32_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1), rvd.m2); }
+void  mipp_storeu_uint16_m2( uint16_t *mem_addr,  rvd_uint16_m2_t rvd) {  mipp_storeu_uint16_m1(mem_addr, rvd.m1);  mipp_storeu_uint16_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1), rvd.m2); }
+void   mipp_storeu_uint8_m2(  uint8_t *mem_addr,   rvd_uint8_m2_t rvd) {   mipp_storeu_uint8_m1(mem_addr, rvd.m1);   mipp_storeu_uint8_m1(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 1), rvd.m2); }
 
 // --------------------------------------------------------------------- LMUL=4
 
-void mipp_storeu_float64_m4(float64_t *mem_addr, rvd_float64_m4_t rvd) { mipp_storeu_float64_m2(mem_addr, rvd.sp1); mipp_storeu_float64_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2), rvd.sp2); }
-void mipp_storeu_float32_m4(float32_t *mem_addr, rvd_float32_m4_t rvd) { mipp_storeu_float32_m2(mem_addr, rvd.sp1); mipp_storeu_float32_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2), rvd.sp2); }
-void   mipp_storeu_int64_m4(  int64_t *mem_addr,   rvd_int64_m4_t rvd) {   mipp_storeu_int64_m2(mem_addr, rvd.sp1);   mipp_storeu_int64_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2), rvd.sp2); }
-void   mipp_storeu_int32_m4(  int32_t *mem_addr,   rvd_int32_m4_t rvd) {   mipp_storeu_int32_m2(mem_addr, rvd.sp1);   mipp_storeu_int32_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2), rvd.sp2); }
-void   mipp_storeu_int16_m4(  int16_t *mem_addr,   rvd_int16_m4_t rvd) {   mipp_storeu_int16_m2(mem_addr, rvd.sp1);   mipp_storeu_int16_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2), rvd.sp2); }
-void    mipp_storeu_int8_m4(   int8_t *mem_addr,    rvd_int8_m4_t rvd) {    mipp_storeu_int8_m2(mem_addr, rvd.sp1);    mipp_storeu_int8_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2), rvd.sp2); }
-void  mipp_storeu_uint64_m4( uint64_t *mem_addr,  rvd_uint64_m4_t rvd) {  mipp_storeu_uint64_m2(mem_addr, rvd.sp1);  mipp_storeu_uint64_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2), rvd.sp2); }
-void  mipp_storeu_uint32_m4( uint32_t *mem_addr,  rvd_uint32_m4_t rvd) {  mipp_storeu_uint32_m2(mem_addr, rvd.sp1);  mipp_storeu_uint32_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2), rvd.sp2); }
-void  mipp_storeu_uint16_m4( uint16_t *mem_addr,  rvd_uint16_m4_t rvd) {  mipp_storeu_uint16_m2(mem_addr, rvd.sp1);  mipp_storeu_uint16_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2), rvd.sp2); }
-void   mipp_storeu_uint8_m4(  uint8_t *mem_addr,   rvd_uint8_m4_t rvd) {   mipp_storeu_uint8_m2(mem_addr, rvd.sp1);   mipp_storeu_uint8_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2), rvd.sp2); }
+void mipp_storeu_float64_m4(float64_t *mem_addr, rvd_float64_m4_t rvd) { mipp_storeu_float64_m2(mem_addr, rvd.m1); mipp_storeu_float64_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2), rvd.m2); }
+void mipp_storeu_float32_m4(float32_t *mem_addr, rvd_float32_m4_t rvd) { mipp_storeu_float32_m2(mem_addr, rvd.m1); mipp_storeu_float32_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2), rvd.m2); }
+void   mipp_storeu_int64_m4(  int64_t *mem_addr,   rvd_int64_m4_t rvd) {   mipp_storeu_int64_m2(mem_addr, rvd.m1);   mipp_storeu_int64_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2), rvd.m2); }
+void   mipp_storeu_int32_m4(  int32_t *mem_addr,   rvd_int32_m4_t rvd) {   mipp_storeu_int32_m2(mem_addr, rvd.m1);   mipp_storeu_int32_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2), rvd.m2); }
+void   mipp_storeu_int16_m4(  int16_t *mem_addr,   rvd_int16_m4_t rvd) {   mipp_storeu_int16_m2(mem_addr, rvd.m1);   mipp_storeu_int16_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2), rvd.m2); }
+void    mipp_storeu_int8_m4(   int8_t *mem_addr,    rvd_int8_m4_t rvd) {    mipp_storeu_int8_m2(mem_addr, rvd.m1);    mipp_storeu_int8_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2), rvd.m2); }
+void  mipp_storeu_uint64_m4( uint64_t *mem_addr,  rvd_uint64_m4_t rvd) {  mipp_storeu_uint64_m2(mem_addr, rvd.m1);  mipp_storeu_uint64_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2), rvd.m2); }
+void  mipp_storeu_uint32_m4( uint32_t *mem_addr,  rvd_uint32_m4_t rvd) {  mipp_storeu_uint32_m2(mem_addr, rvd.m1);  mipp_storeu_uint32_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2), rvd.m2); }
+void  mipp_storeu_uint16_m4( uint16_t *mem_addr,  rvd_uint16_m4_t rvd) {  mipp_storeu_uint16_m2(mem_addr, rvd.m1);  mipp_storeu_uint16_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2), rvd.m2); }
+void   mipp_storeu_uint8_m4(  uint8_t *mem_addr,   rvd_uint8_m4_t rvd) {   mipp_storeu_uint8_m2(mem_addr, rvd.m1);   mipp_storeu_uint8_m2(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 2), rvd.m2); }
 
 // --------------------------------------------------------------------- LMUL=8
 
-void mipp_storeu_float64_m8(float64_t *mem_addr, rvd_float64_m8_t rvd) { mipp_storeu_float64_m4(mem_addr, rvd.sp1); mipp_storeu_float64_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4), rvd.sp2); }
-void mipp_storeu_float32_m8(float32_t *mem_addr, rvd_float32_m8_t rvd) { mipp_storeu_float32_m4(mem_addr, rvd.sp1); mipp_storeu_float32_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4), rvd.sp2); }
-void   mipp_storeu_int64_m8(  int64_t *mem_addr,   rvd_int64_m8_t rvd) {   mipp_storeu_int64_m4(mem_addr, rvd.sp1);   mipp_storeu_int64_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4), rvd.sp2); }
-void   mipp_storeu_int32_m8(  int32_t *mem_addr,   rvd_int32_m8_t rvd) {   mipp_storeu_int32_m4(mem_addr, rvd.sp1);   mipp_storeu_int32_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4), rvd.sp2); }
-void   mipp_storeu_int16_m8(  int16_t *mem_addr,   rvd_int16_m8_t rvd) {   mipp_storeu_int16_m4(mem_addr, rvd.sp1);   mipp_storeu_int16_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4), rvd.sp2); }
-void    mipp_storeu_int8_m8(   int8_t *mem_addr,    rvd_int8_m8_t rvd) {    mipp_storeu_int8_m4(mem_addr, rvd.sp1);    mipp_storeu_int8_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4), rvd.sp2); }
-void  mipp_storeu_uint64_m8( uint64_t *mem_addr,  rvd_uint64_m8_t rvd) {  mipp_storeu_uint64_m4(mem_addr, rvd.sp1);  mipp_storeu_uint64_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4), rvd.sp2); }
-void  mipp_storeu_uint32_m8( uint32_t *mem_addr,  rvd_uint32_m8_t rvd) {  mipp_storeu_uint32_m4(mem_addr, rvd.sp1);  mipp_storeu_uint32_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4), rvd.sp2); }
-void  mipp_storeu_uint16_m8( uint16_t *mem_addr,  rvd_uint16_m8_t rvd) {  mipp_storeu_uint16_m4(mem_addr, rvd.sp1);  mipp_storeu_uint16_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4), rvd.sp2); }
-void   mipp_storeu_uint8_m8(  uint8_t *mem_addr,   rvd_uint8_m8_t rvd) {   mipp_storeu_uint8_m4(mem_addr, rvd.sp1);   mipp_storeu_uint8_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4), rvd.sp2); }
+void mipp_storeu_float64_m8(float64_t *mem_addr, rvd_float64_m8_t rvd) { mipp_storeu_float64_m4(mem_addr, rvd.m1); mipp_storeu_float64_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4), rvd.m2); }
+void mipp_storeu_float32_m8(float32_t *mem_addr, rvd_float32_m8_t rvd) { mipp_storeu_float32_m4(mem_addr, rvd.m1); mipp_storeu_float32_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4), rvd.m2); }
+void   mipp_storeu_int64_m8(  int64_t *mem_addr,   rvd_int64_m8_t rvd) {   mipp_storeu_int64_m4(mem_addr, rvd.m1);   mipp_storeu_int64_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4), rvd.m2); }
+void   mipp_storeu_int32_m8(  int32_t *mem_addr,   rvd_int32_m8_t rvd) {   mipp_storeu_int32_m4(mem_addr, rvd.m1);   mipp_storeu_int32_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4), rvd.m2); }
+void   mipp_storeu_int16_m8(  int16_t *mem_addr,   rvd_int16_m8_t rvd) {   mipp_storeu_int16_m4(mem_addr, rvd.m1);   mipp_storeu_int16_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4), rvd.m2); }
+void    mipp_storeu_int8_m8(   int8_t *mem_addr,    rvd_int8_m8_t rvd) {    mipp_storeu_int8_m4(mem_addr, rvd.m1);    mipp_storeu_int8_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4), rvd.m2); }
+void  mipp_storeu_uint64_m8( uint64_t *mem_addr,  rvd_uint64_m8_t rvd) {  mipp_storeu_uint64_m4(mem_addr, rvd.m1);  mipp_storeu_uint64_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4), rvd.m2); }
+void  mipp_storeu_uint32_m8( uint32_t *mem_addr,  rvd_uint32_m8_t rvd) {  mipp_storeu_uint32_m4(mem_addr, rvd.m1);  mipp_storeu_uint32_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4), rvd.m2); }
+void  mipp_storeu_uint16_m8( uint16_t *mem_addr,  rvd_uint16_m8_t rvd) {  mipp_storeu_uint16_m4(mem_addr, rvd.m1);  mipp_storeu_uint16_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4), rvd.m2); }
+void   mipp_storeu_uint8_m8(  uint8_t *mem_addr,   rvd_uint8_m8_t rvd) {   mipp_storeu_uint8_m4(mem_addr, rvd.m1);   mipp_storeu_uint8_m4(mem_addr + MIPP_LMUL_STRIDE(sizeof(*mem_addr), 4), rvd.m2); }
 
 // ------------------------------------------------------------------------ add
 // ----------------------------------------------------------------------------
 
 // --------------------------------------------------------------------- LMUL=1
 
-rvd_float64_m1_t mipp_add_float64_m1(rvd_float64_m1_t rvd1, rvd_float64_m1_t rvd2) { return     _mm256_add_pd(rvd1, rvd2); }
-rvd_float32_m1_t mipp_add_float32_m1(rvd_float32_m1_t rvd1, rvd_float32_m1_t rvd2) { return     _mm256_add_ps(rvd1, rvd2); }
-#ifdef __AVX2__
-  rvd_int64_m1_t   mipp_add_int64_m1(  rvd_int64_m1_t rvd1,   rvd_int64_m1_t rvd2) { return  _mm256_add_epi64(rvd1, rvd2); }
-  rvd_int32_m1_t   mipp_add_int32_m1(  rvd_int32_m1_t rvd1,   rvd_int32_m1_t rvd2) { return  _mm256_add_epi32(rvd1, rvd2); }
-  rvd_int16_m1_t   mipp_add_int16_m1(  rvd_int16_m1_t rvd1,   rvd_int16_m1_t rvd2) { return  _mm256_add_epi16(rvd1, rvd2); }
-   rvd_int8_m1_t    mipp_add_int8_m1(   rvd_int8_m1_t rvd1,    rvd_int8_m1_t rvd2) { return   _mm256_add_epi8(rvd1, rvd2); }
- rvd_uint64_m1_t  mipp_add_uint64_m1( rvd_uint64_m1_t rvd1,  rvd_uint64_m1_t rvd2) { return  _mm256_add_epi64(rvd1, rvd2); }
- rvd_uint32_m1_t  mipp_add_uint32_m1( rvd_uint32_m1_t rvd1,  rvd_uint32_m1_t rvd2) { return  _mm256_add_epi32(rvd1, rvd2); }
- rvd_uint16_m1_t  mipp_add_uint16_m1( rvd_uint16_m1_t rvd1,  rvd_uint16_m1_t rvd2) { return _mm256_adds_epu16(rvd1, rvd2); }
-  rvd_uint8_m1_t   mipp_add_uint8_m1(  rvd_uint8_m1_t rvd1,   rvd_uint8_m1_t rvd2) { return  _mm256_adds_epu8(rvd1, rvd2); }
-#endif
+rvd_float64_m1_t mipp_add_float64_m1(rvd_float64_m1_t rvd1, rvd_float64_m1_t rvd2) { rvd_float64_m1_t rvd; rvd.m =     _mm256_add_pd(rvd1.m, rvd2.m); return rvd; }
+rvd_float32_m1_t mipp_add_float32_m1(rvd_float32_m1_t rvd1, rvd_float32_m1_t rvd2) { rvd_float32_m1_t rvd; rvd.m =     _mm256_add_ps(rvd1.m, rvd2.m); return rvd; }
+  rvd_int64_m1_t   mipp_add_int64_m1(  rvd_int64_m1_t rvd1,   rvd_int64_m1_t rvd2) {   rvd_int64_m1_t rvd; rvd.m =  _mm256_add_epi64(rvd1.m, rvd2.m); return rvd; }
+  rvd_int32_m1_t   mipp_add_int32_m1(  rvd_int32_m1_t rvd1,   rvd_int32_m1_t rvd2) {   rvd_int32_m1_t rvd; rvd.m =  _mm256_add_epi32(rvd1.m, rvd2.m); return rvd; }
+  rvd_int16_m1_t   mipp_add_int16_m1(  rvd_int16_m1_t rvd1,   rvd_int16_m1_t rvd2) {   rvd_int16_m1_t rvd; rvd.m =  _mm256_add_epi16(rvd1.m, rvd2.m); return rvd; }
+   rvd_int8_m1_t    mipp_add_int8_m1(   rvd_int8_m1_t rvd1,    rvd_int8_m1_t rvd2) {    rvd_int8_m1_t rvd; rvd.m =   _mm256_add_epi8(rvd1.m, rvd2.m); return rvd; }
+ rvd_uint64_m1_t  mipp_add_uint64_m1( rvd_uint64_m1_t rvd1,  rvd_uint64_m1_t rvd2) {  rvd_uint64_m1_t rvd; rvd.m =  _mm256_add_epi64(rvd1.m, rvd2.m); return rvd; }
+ rvd_uint32_m1_t  mipp_add_uint32_m1( rvd_uint32_m1_t rvd1,  rvd_uint32_m1_t rvd2) {  rvd_uint32_m1_t rvd; rvd.m =  _mm256_add_epi32(rvd1.m, rvd2.m); return rvd; }
+ rvd_uint16_m1_t  mipp_add_uint16_m1( rvd_uint16_m1_t rvd1,  rvd_uint16_m1_t rvd2) {  rvd_uint16_m1_t rvd; rvd.m = _mm256_adds_epu16(rvd1.m, rvd2.m); return rvd; }
+  rvd_uint8_m1_t   mipp_add_uint8_m1(  rvd_uint8_m1_t rvd1,   rvd_uint8_m1_t rvd2) {   rvd_uint8_m1_t rvd; rvd.m =  _mm256_adds_epu8(rvd1.m, rvd2.m); return rvd; }
 
 // ---------------------------------------------------------------------- ALIAS
 
 rvd_float64_t mipp_add_float64(rvd_float64_t rvd1, rvd_float64_t rvd2) { return mipp_add_float64_m1(rvd1, rvd2); }
 rvd_float32_t mipp_add_float32(rvd_float32_t rvd1, rvd_float32_t rvd2) { return mipp_add_float32_m1(rvd1, rvd2); }
-#ifdef __AVX2__
   rvd_int64_t   mipp_add_int64(  rvd_int64_t rvd1,   rvd_int64_t rvd2) { return   mipp_add_int64_m1(rvd1, rvd2); }
   rvd_int32_t   mipp_add_int32(  rvd_int32_t rvd1,   rvd_int32_t rvd2) { return   mipp_add_int32_m1(rvd1, rvd2); }
   rvd_int16_t   mipp_add_int16(  rvd_int16_t rvd1,   rvd_int16_t rvd2) { return   mipp_add_int16_m1(rvd1, rvd2); }
@@ -345,49 +344,42 @@ rvd_float32_t mipp_add_float32(rvd_float32_t rvd1, rvd_float32_t rvd2) { return 
  rvd_uint32_t  mipp_add_uint32( rvd_uint32_t rvd1,  rvd_uint32_t rvd2) { return  mipp_add_uint32_m1(rvd1, rvd2); }
  rvd_uint16_t  mipp_add_uint16( rvd_uint16_t rvd1,  rvd_uint16_t rvd2) { return  mipp_add_uint16_m1(rvd1, rvd2); }
   rvd_uint8_t   mipp_add_uint8(  rvd_uint8_t rvd1,   rvd_uint8_t rvd2) { return   mipp_add_uint8_m1(rvd1, rvd2); }
-#endif
 
 // --------------------------------------------------------------------- LMUL=2
 
-rvd_float64_m2_t mipp_add_float64_m2(rvd_float64_m2_t rvd1, rvd_float64_m2_t rvd2) { rvd_float64_m2_t rvd; rvd.sp1 = mipp_add_float64_m1(rvd1.sp1, rvd2.sp1); rvd.sp2 = mipp_add_float64_m1(rvd1.sp2, rvd2.sp2); return rvd; }
-rvd_float32_m2_t mipp_add_float32_m2(rvd_float32_m2_t rvd1, rvd_float32_m2_t rvd2) { rvd_float32_m2_t rvd; rvd.sp1 = mipp_add_float32_m1(rvd1.sp1, rvd2.sp1); rvd.sp2 = mipp_add_float32_m1(rvd1.sp2, rvd2.sp2); return rvd; }
-#ifdef __AVX2__
-  rvd_int64_m2_t   mipp_add_int64_m2(  rvd_int64_m2_t rvd1,   rvd_int64_m2_t rvd2) {   rvd_int64_m2_t rvd; rvd.sp1 =   mipp_add_int64_m1(rvd1.sp1, rvd2.sp1); rvd.sp2 =   mipp_add_int64_m1(rvd1.sp2, rvd2.sp2); return rvd; }
-  rvd_int32_m2_t   mipp_add_int32_m2(  rvd_int32_m2_t rvd1,   rvd_int32_m2_t rvd2) {   rvd_int32_m2_t rvd; rvd.sp1 =   mipp_add_int32_m1(rvd1.sp1, rvd2.sp1); rvd.sp2 =   mipp_add_int32_m1(rvd1.sp2, rvd2.sp2); return rvd; }
-  rvd_int16_m2_t   mipp_add_int16_m2(  rvd_int16_m2_t rvd1,   rvd_int16_m2_t rvd2) {   rvd_int16_m2_t rvd; rvd.sp1 =   mipp_add_int16_m1(rvd1.sp1, rvd2.sp1); rvd.sp2 =   mipp_add_int16_m1(rvd1.sp2, rvd2.sp2); return rvd; }
-   rvd_int8_m2_t    mipp_add_int8_m2(   rvd_int8_m2_t rvd1,    rvd_int8_m2_t rvd2) {    rvd_int8_m2_t rvd; rvd.sp1 =    mipp_add_int8_m1(rvd1.sp1, rvd2.sp1); rvd.sp2 =    mipp_add_int8_m1(rvd1.sp2, rvd2.sp2); return rvd; }
- rvd_uint64_m2_t  mipp_add_uint64_m2( rvd_uint64_m2_t rvd1,  rvd_uint64_m2_t rvd2) {  rvd_uint64_m2_t rvd; rvd.sp1 =  mipp_add_uint64_m1(rvd1.sp1, rvd2.sp1); rvd.sp2 =  mipp_add_uint64_m1(rvd1.sp2, rvd2.sp2); return rvd; }
- rvd_uint32_m2_t  mipp_add_uint32_m2( rvd_uint32_m2_t rvd1,  rvd_uint32_m2_t rvd2) {  rvd_uint32_m2_t rvd; rvd.sp1 =  mipp_add_uint32_m1(rvd1.sp1, rvd2.sp1); rvd.sp2 =  mipp_add_uint32_m1(rvd1.sp2, rvd2.sp2); return rvd; }
- rvd_uint16_m2_t  mipp_add_uint16_m2( rvd_uint16_m2_t rvd1,  rvd_uint16_m2_t rvd2) {  rvd_uint16_m2_t rvd; rvd.sp1 =  mipp_add_uint16_m1(rvd1.sp1, rvd2.sp1); rvd.sp2 =  mipp_add_uint16_m1(rvd1.sp2, rvd2.sp2); return rvd; }
-  rvd_uint8_m2_t   mipp_add_uint8_m2(  rvd_uint8_m2_t rvd1,   rvd_uint8_m2_t rvd2) {   rvd_uint8_m2_t rvd; rvd.sp1 =   mipp_add_uint8_m1(rvd1.sp1, rvd2.sp1); rvd.sp2 =   mipp_add_uint8_m1(rvd1.sp2, rvd2.sp2); return rvd; }
-#endif
+rvd_float64_m2_t mipp_add_float64_m2(rvd_float64_m2_t rvd1, rvd_float64_m2_t rvd2) { rvd_float64_m2_t rvd; rvd.m1 = mipp_add_float64_m1(rvd1.m1, rvd2.m1); rvd.m2 = mipp_add_float64_m1(rvd1.m2, rvd2.m2); return rvd; }
+rvd_float32_m2_t mipp_add_float32_m2(rvd_float32_m2_t rvd1, rvd_float32_m2_t rvd2) { rvd_float32_m2_t rvd; rvd.m1 = mipp_add_float32_m1(rvd1.m1, rvd2.m1); rvd.m2 = mipp_add_float32_m1(rvd1.m2, rvd2.m2); return rvd; }
+  rvd_int64_m2_t   mipp_add_int64_m2(  rvd_int64_m2_t rvd1,   rvd_int64_m2_t rvd2) {   rvd_int64_m2_t rvd; rvd.m1 =   mipp_add_int64_m1(rvd1.m1, rvd2.m1); rvd.m2 =   mipp_add_int64_m1(rvd1.m2, rvd2.m2); return rvd; }
+  rvd_int32_m2_t   mipp_add_int32_m2(  rvd_int32_m2_t rvd1,   rvd_int32_m2_t rvd2) {   rvd_int32_m2_t rvd; rvd.m1 =   mipp_add_int32_m1(rvd1.m1, rvd2.m1); rvd.m2 =   mipp_add_int32_m1(rvd1.m2, rvd2.m2); return rvd; }
+  rvd_int16_m2_t   mipp_add_int16_m2(  rvd_int16_m2_t rvd1,   rvd_int16_m2_t rvd2) {   rvd_int16_m2_t rvd; rvd.m1 =   mipp_add_int16_m1(rvd1.m1, rvd2.m1); rvd.m2 =   mipp_add_int16_m1(rvd1.m2, rvd2.m2); return rvd; }
+   rvd_int8_m2_t    mipp_add_int8_m2(   rvd_int8_m2_t rvd1,    rvd_int8_m2_t rvd2) {    rvd_int8_m2_t rvd; rvd.m1 =    mipp_add_int8_m1(rvd1.m1, rvd2.m1); rvd.m2 =    mipp_add_int8_m1(rvd1.m2, rvd2.m2); return rvd; }
+ rvd_uint64_m2_t  mipp_add_uint64_m2( rvd_uint64_m2_t rvd1,  rvd_uint64_m2_t rvd2) {  rvd_uint64_m2_t rvd; rvd.m1 =  mipp_add_uint64_m1(rvd1.m1, rvd2.m1); rvd.m2 =  mipp_add_uint64_m1(rvd1.m2, rvd2.m2); return rvd; }
+ rvd_uint32_m2_t  mipp_add_uint32_m2( rvd_uint32_m2_t rvd1,  rvd_uint32_m2_t rvd2) {  rvd_uint32_m2_t rvd; rvd.m1 =  mipp_add_uint32_m1(rvd1.m1, rvd2.m1); rvd.m2 =  mipp_add_uint32_m1(rvd1.m2, rvd2.m2); return rvd; }
+ rvd_uint16_m2_t  mipp_add_uint16_m2( rvd_uint16_m2_t rvd1,  rvd_uint16_m2_t rvd2) {  rvd_uint16_m2_t rvd; rvd.m1 =  mipp_add_uint16_m1(rvd1.m1, rvd2.m1); rvd.m2 =  mipp_add_uint16_m1(rvd1.m2, rvd2.m2); return rvd; }
+  rvd_uint8_m2_t   mipp_add_uint8_m2(  rvd_uint8_m2_t rvd1,   rvd_uint8_m2_t rvd2) {   rvd_uint8_m2_t rvd; rvd.m1 =   mipp_add_uint8_m1(rvd1.m1, rvd2.m1); rvd.m2 =   mipp_add_uint8_m1(rvd1.m2, rvd2.m2); return rvd; }
 
 // --------------------------------------------------------------------- LMUL=4
 
-rvd_float64_m4_t mipp_add_float64_m4(rvd_float64_m4_t rvd1, rvd_float64_m4_t rvd2) { rvd_float64_m4_t rvd; rvd.sp1 = mipp_add_float64_m2(rvd1.sp1, rvd2.sp1); rvd.sp2 = mipp_add_float64_m2(rvd1.sp2, rvd2.sp2); return rvd; }
-rvd_float32_m4_t mipp_add_float32_m4(rvd_float32_m4_t rvd1, rvd_float32_m4_t rvd2) { rvd_float32_m4_t rvd; rvd.sp1 = mipp_add_float32_m2(rvd1.sp1, rvd2.sp1); rvd.sp2 = mipp_add_float32_m2(rvd1.sp2, rvd2.sp2); return rvd; }
-#ifdef __AVX2__
-  rvd_int64_m4_t   mipp_add_int64_m4(  rvd_int64_m4_t rvd1,   rvd_int64_m4_t rvd2) {   rvd_int64_m4_t rvd; rvd.sp1 =   mipp_add_int64_m2(rvd1.sp1, rvd2.sp1); rvd.sp2 =   mipp_add_int64_m2(rvd1.sp2, rvd2.sp2); return rvd; }
-  rvd_int32_m4_t   mipp_add_int32_m4(  rvd_int32_m4_t rvd1,   rvd_int32_m4_t rvd2) {   rvd_int32_m4_t rvd; rvd.sp1 =   mipp_add_int32_m2(rvd1.sp1, rvd2.sp1); rvd.sp2 =   mipp_add_int32_m2(rvd1.sp2, rvd2.sp2); return rvd; }
-  rvd_int16_m4_t   mipp_add_int16_m4(  rvd_int16_m4_t rvd1,   rvd_int16_m4_t rvd2) {   rvd_int16_m4_t rvd; rvd.sp1 =   mipp_add_int16_m2(rvd1.sp1, rvd2.sp1); rvd.sp2 =   mipp_add_int16_m2(rvd1.sp2, rvd2.sp2); return rvd; }
-   rvd_int8_m4_t    mipp_add_int8_m4(   rvd_int8_m4_t rvd1,    rvd_int8_m4_t rvd2) {    rvd_int8_m4_t rvd; rvd.sp1 =    mipp_add_int8_m2(rvd1.sp1, rvd2.sp1); rvd.sp2 =    mipp_add_int8_m2(rvd1.sp2, rvd2.sp2); return rvd; }
- rvd_uint64_m4_t  mipp_add_uint64_m4( rvd_uint64_m4_t rvd1,  rvd_uint64_m4_t rvd2) {  rvd_uint64_m4_t rvd; rvd.sp1 =  mipp_add_uint64_m2(rvd1.sp1, rvd2.sp1); rvd.sp2 =  mipp_add_uint64_m2(rvd1.sp2, rvd2.sp2); return rvd; }
- rvd_uint32_m4_t  mipp_add_uint32_m4( rvd_uint32_m4_t rvd1,  rvd_uint32_m4_t rvd2) {  rvd_uint32_m4_t rvd; rvd.sp1 =  mipp_add_uint32_m2(rvd1.sp1, rvd2.sp1); rvd.sp2 =  mipp_add_uint32_m2(rvd1.sp2, rvd2.sp2); return rvd; }
- rvd_uint16_m4_t  mipp_add_uint16_m4( rvd_uint16_m4_t rvd1,  rvd_uint16_m4_t rvd2) {  rvd_uint16_m4_t rvd; rvd.sp1 =  mipp_add_uint16_m2(rvd1.sp1, rvd2.sp1); rvd.sp2 =  mipp_add_uint16_m2(rvd1.sp2, rvd2.sp2); return rvd; }
-  rvd_uint8_m4_t   mipp_add_uint8_m4(  rvd_uint8_m4_t rvd1,   rvd_uint8_m4_t rvd2) {   rvd_uint8_m4_t rvd; rvd.sp1 =   mipp_add_uint8_m2(rvd1.sp1, rvd2.sp1); rvd.sp2 =   mipp_add_uint8_m2(rvd1.sp2, rvd2.sp2); return rvd; }
-#endif
+rvd_float64_m4_t mipp_add_float64_m4(rvd_float64_m4_t rvd1, rvd_float64_m4_t rvd2) { rvd_float64_m4_t rvd; rvd.m1 = mipp_add_float64_m2(rvd1.m1, rvd2.m1); rvd.m2 = mipp_add_float64_m2(rvd1.m2, rvd2.m2); return rvd; }
+rvd_float32_m4_t mipp_add_float32_m4(rvd_float32_m4_t rvd1, rvd_float32_m4_t rvd2) { rvd_float32_m4_t rvd; rvd.m1 = mipp_add_float32_m2(rvd1.m1, rvd2.m1); rvd.m2 = mipp_add_float32_m2(rvd1.m2, rvd2.m2); return rvd; }
+  rvd_int64_m4_t   mipp_add_int64_m4(  rvd_int64_m4_t rvd1,   rvd_int64_m4_t rvd2) {   rvd_int64_m4_t rvd; rvd.m1 =   mipp_add_int64_m2(rvd1.m1, rvd2.m1); rvd.m2 =   mipp_add_int64_m2(rvd1.m2, rvd2.m2); return rvd; }
+  rvd_int32_m4_t   mipp_add_int32_m4(  rvd_int32_m4_t rvd1,   rvd_int32_m4_t rvd2) {   rvd_int32_m4_t rvd; rvd.m1 =   mipp_add_int32_m2(rvd1.m1, rvd2.m1); rvd.m2 =   mipp_add_int32_m2(rvd1.m2, rvd2.m2); return rvd; }
+  rvd_int16_m4_t   mipp_add_int16_m4(  rvd_int16_m4_t rvd1,   rvd_int16_m4_t rvd2) {   rvd_int16_m4_t rvd; rvd.m1 =   mipp_add_int16_m2(rvd1.m1, rvd2.m1); rvd.m2 =   mipp_add_int16_m2(rvd1.m2, rvd2.m2); return rvd; }
+   rvd_int8_m4_t    mipp_add_int8_m4(   rvd_int8_m4_t rvd1,    rvd_int8_m4_t rvd2) {    rvd_int8_m4_t rvd; rvd.m1 =    mipp_add_int8_m2(rvd1.m1, rvd2.m1); rvd.m2 =    mipp_add_int8_m2(rvd1.m2, rvd2.m2); return rvd; }
+ rvd_uint64_m4_t  mipp_add_uint64_m4( rvd_uint64_m4_t rvd1,  rvd_uint64_m4_t rvd2) {  rvd_uint64_m4_t rvd; rvd.m1 =  mipp_add_uint64_m2(rvd1.m1, rvd2.m1); rvd.m2 =  mipp_add_uint64_m2(rvd1.m2, rvd2.m2); return rvd; }
+ rvd_uint32_m4_t  mipp_add_uint32_m4( rvd_uint32_m4_t rvd1,  rvd_uint32_m4_t rvd2) {  rvd_uint32_m4_t rvd; rvd.m1 =  mipp_add_uint32_m2(rvd1.m1, rvd2.m1); rvd.m2 =  mipp_add_uint32_m2(rvd1.m2, rvd2.m2); return rvd; }
+ rvd_uint16_m4_t  mipp_add_uint16_m4( rvd_uint16_m4_t rvd1,  rvd_uint16_m4_t rvd2) {  rvd_uint16_m4_t rvd; rvd.m1 =  mipp_add_uint16_m2(rvd1.m1, rvd2.m1); rvd.m2 =  mipp_add_uint16_m2(rvd1.m2, rvd2.m2); return rvd; }
+  rvd_uint8_m4_t   mipp_add_uint8_m4(  rvd_uint8_m4_t rvd1,   rvd_uint8_m4_t rvd2) {   rvd_uint8_m4_t rvd; rvd.m1 =   mipp_add_uint8_m2(rvd1.m1, rvd2.m1); rvd.m2 =   mipp_add_uint8_m2(rvd1.m2, rvd2.m2); return rvd; }
 
 // --------------------------------------------------------------------- LMUL=8
 
-rvd_float64_m8_t mipp_add_float64_m8(rvd_float64_m8_t rvd1, rvd_float64_m8_t rvd2) { rvd_float64_m8_t rvd; rvd.sp1 = mipp_add_float64_m4(rvd1.sp1, rvd2.sp1); rvd.sp2 = mipp_add_float64_m4(rvd1.sp2, rvd2.sp2); return rvd; }
-rvd_float32_m8_t mipp_add_float32_m8(rvd_float32_m8_t rvd1, rvd_float32_m8_t rvd2) { rvd_float32_m8_t rvd; rvd.sp1 = mipp_add_float32_m4(rvd1.sp1, rvd2.sp1); rvd.sp2 = mipp_add_float32_m4(rvd1.sp2, rvd2.sp2); return rvd; }
-#ifdef __AVX2__
-  rvd_int64_m8_t   mipp_add_int64_m8(  rvd_int64_m8_t rvd1,   rvd_int64_m8_t rvd2) {   rvd_int64_m8_t rvd; rvd.sp1 =   mipp_add_int64_m4(rvd1.sp1, rvd2.sp1); rvd.sp2 =   mipp_add_int64_m4(rvd1.sp2, rvd2.sp2); return rvd; }
-  rvd_int32_m8_t   mipp_add_int32_m8(  rvd_int32_m8_t rvd1,   rvd_int32_m8_t rvd2) {   rvd_int32_m8_t rvd; rvd.sp1 =   mipp_add_int32_m4(rvd1.sp1, rvd2.sp1); rvd.sp2 =   mipp_add_int32_m4(rvd1.sp2, rvd2.sp2); return rvd; }
-  rvd_int16_m8_t   mipp_add_int16_m8(  rvd_int16_m8_t rvd1,   rvd_int16_m8_t rvd2) {   rvd_int16_m8_t rvd; rvd.sp1 =   mipp_add_int16_m4(rvd1.sp1, rvd2.sp1); rvd.sp2 =   mipp_add_int16_m4(rvd1.sp2, rvd2.sp2); return rvd; }
-   rvd_int8_m8_t    mipp_add_int8_m8(   rvd_int8_m8_t rvd1,    rvd_int8_m8_t rvd2) {    rvd_int8_m8_t rvd; rvd.sp1 =    mipp_add_int8_m4(rvd1.sp1, rvd2.sp1); rvd.sp2 =    mipp_add_int8_m4(rvd1.sp2, rvd2.sp2); return rvd; }
- rvd_uint64_m8_t  mipp_add_uint64_m8( rvd_uint64_m8_t rvd1,  rvd_uint64_m8_t rvd2) {  rvd_uint64_m8_t rvd; rvd.sp1 =  mipp_add_uint64_m4(rvd1.sp1, rvd2.sp1); rvd.sp2 =  mipp_add_uint64_m4(rvd1.sp2, rvd2.sp2); return rvd; }
- rvd_uint32_m8_t  mipp_add_uint32_m8( rvd_uint32_m8_t rvd1,  rvd_uint32_m8_t rvd2) {  rvd_uint32_m8_t rvd; rvd.sp1 =  mipp_add_uint32_m4(rvd1.sp1, rvd2.sp1); rvd.sp2 =  mipp_add_uint32_m4(rvd1.sp2, rvd2.sp2); return rvd; }
- rvd_uint16_m8_t  mipp_add_uint16_m8( rvd_uint16_m8_t rvd1,  rvd_uint16_m8_t rvd2) {  rvd_uint16_m8_t rvd; rvd.sp1 =  mipp_add_uint16_m4(rvd1.sp1, rvd2.sp1); rvd.sp2 =  mipp_add_uint16_m4(rvd1.sp2, rvd2.sp2); return rvd; }
-  rvd_uint8_m8_t   mipp_add_uint8_m8(  rvd_uint8_m8_t rvd1,   rvd_uint8_m8_t rvd2) {   rvd_uint8_m8_t rvd; rvd.sp1 =   mipp_add_uint8_m4(rvd1.sp1, rvd2.sp1); rvd.sp2 =   mipp_add_uint8_m4(rvd1.sp2, rvd2.sp2); return rvd; }
-#endif
+rvd_float64_m8_t mipp_add_float64_m8(rvd_float64_m8_t rvd1, rvd_float64_m8_t rvd2) { rvd_float64_m8_t rvd; rvd.m1 = mipp_add_float64_m4(rvd1.m1, rvd2.m1); rvd.m2 = mipp_add_float64_m4(rvd1.m2, rvd2.m2); return rvd; }
+rvd_float32_m8_t mipp_add_float32_m8(rvd_float32_m8_t rvd1, rvd_float32_m8_t rvd2) { rvd_float32_m8_t rvd; rvd.m1 = mipp_add_float32_m4(rvd1.m1, rvd2.m1); rvd.m2 = mipp_add_float32_m4(rvd1.m2, rvd2.m2); return rvd; }
+  rvd_int64_m8_t   mipp_add_int64_m8(  rvd_int64_m8_t rvd1,   rvd_int64_m8_t rvd2) {   rvd_int64_m8_t rvd; rvd.m1 =   mipp_add_int64_m4(rvd1.m1, rvd2.m1); rvd.m2 =   mipp_add_int64_m4(rvd1.m2, rvd2.m2); return rvd; }
+  rvd_int32_m8_t   mipp_add_int32_m8(  rvd_int32_m8_t rvd1,   rvd_int32_m8_t rvd2) {   rvd_int32_m8_t rvd; rvd.m1 =   mipp_add_int32_m4(rvd1.m1, rvd2.m1); rvd.m2 =   mipp_add_int32_m4(rvd1.m2, rvd2.m2); return rvd; }
+  rvd_int16_m8_t   mipp_add_int16_m8(  rvd_int16_m8_t rvd1,   rvd_int16_m8_t rvd2) {   rvd_int16_m8_t rvd; rvd.m1 =   mipp_add_int16_m4(rvd1.m1, rvd2.m1); rvd.m2 =   mipp_add_int16_m4(rvd1.m2, rvd2.m2); return rvd; }
+   rvd_int8_m8_t    mipp_add_int8_m8(   rvd_int8_m8_t rvd1,    rvd_int8_m8_t rvd2) {    rvd_int8_m8_t rvd; rvd.m1 =    mipp_add_int8_m4(rvd1.m1, rvd2.m1); rvd.m2 =    mipp_add_int8_m4(rvd1.m2, rvd2.m2); return rvd; }
+ rvd_uint64_m8_t  mipp_add_uint64_m8( rvd_uint64_m8_t rvd1,  rvd_uint64_m8_t rvd2) {  rvd_uint64_m8_t rvd; rvd.m1 =  mipp_add_uint64_m4(rvd1.m1, rvd2.m1); rvd.m2 =  mipp_add_uint64_m4(rvd1.m2, rvd2.m2); return rvd; }
+ rvd_uint32_m8_t  mipp_add_uint32_m8( rvd_uint32_m8_t rvd1,  rvd_uint32_m8_t rvd2) {  rvd_uint32_m8_t rvd; rvd.m1 =  mipp_add_uint32_m4(rvd1.m1, rvd2.m1); rvd.m2 =  mipp_add_uint32_m4(rvd1.m2, rvd2.m2); return rvd; }
+ rvd_uint16_m8_t  mipp_add_uint16_m8( rvd_uint16_m8_t rvd1,  rvd_uint16_m8_t rvd2) {  rvd_uint16_m8_t rvd; rvd.m1 =  mipp_add_uint16_m4(rvd1.m1, rvd2.m1); rvd.m2 =  mipp_add_uint16_m4(rvd1.m2, rvd2.m2); return rvd; }
+  rvd_uint8_m8_t   mipp_add_uint8_m8(  rvd_uint8_m8_t rvd1,   rvd_uint8_m8_t rvd2) {   rvd_uint8_m8_t rvd; rvd.m1 =   mipp_add_uint8_m4(rvd1.m1, rvd2.m1); rvd.m2 =   mipp_add_uint8_m4(rvd1.m2, rvd2.m2); return rvd; }

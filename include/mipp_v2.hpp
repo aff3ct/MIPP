@@ -190,63 +190,49 @@ void storeu( uint32_t *mem_addr, const rvd< uint32_t,8> rvd) {  mipp_storeu_uint
 void storeu( uint16_t *mem_addr, const rvd< uint16_t,8> rvd) {  mipp_storeu_uint16_m8(mem_addr, rvd); }
 void storeu(  uint8_t *mem_addr, const rvd<  uint8_t,8> rvd) {   mipp_storeu_uint8_m8(mem_addr, rvd); }
 
-template<typename T, int LMUL=1>
-rvd<T,LMUL> add(const rvd<T,LMUL> rvd1, const rvd<T,LMUL> rvd2) { /* TODO */ }
+rvd<float64_t,1> add(const rvd<float64_t,1> rvd1, const rvd<float64_t,1> rvd2) { return mipp_add_float64_m1(rvd1, rvd2); }
+rvd<float32_t,1> add(const rvd<float32_t,1> rvd1, const rvd<float32_t,1> rvd2) { return mipp_add_float32_m1(rvd1, rvd2); }
+rvd<  int64_t,1> add(const rvd<  int64_t,1> rvd1, const rvd<  int64_t,1> rvd2) { return   mipp_add_int64_m1(rvd1, rvd2); }
+rvd<  int32_t,1> add(const rvd<  int32_t,1> rvd1, const rvd<  int32_t,1> rvd2) { return   mipp_add_int32_m1(rvd1, rvd2); }
+rvd<  int16_t,1> add(const rvd<  int16_t,1> rvd1, const rvd<  int16_t,1> rvd2) { return   mipp_add_int16_m1(rvd1, rvd2); }
+rvd<   int8_t,1> add(const rvd<   int8_t,1> rvd1, const rvd<   int8_t,1> rvd2) { return    mipp_add_int8_m1(rvd1, rvd2); }
+rvd< uint64_t,1> add(const rvd< uint64_t,1> rvd1, const rvd< uint64_t,1> rvd2) { return  mipp_add_uint64_m1(rvd1, rvd2); }
+rvd< uint32_t,1> add(const rvd< uint32_t,1> rvd1, const rvd< uint32_t,1> rvd2) { return  mipp_add_uint32_m1(rvd1, rvd2); }
+rvd< uint16_t,1> add(const rvd< uint16_t,1> rvd1, const rvd< uint16_t,1> rvd2) { return  mipp_add_uint16_m1(rvd1, rvd2); }
+rvd<  uint8_t,1> add(const rvd<  uint8_t,1> rvd1, const rvd<  uint8_t,1> rvd2) { return   mipp_add_uint8_m1(rvd1, rvd2); }
 
-template<> rvd<float64_t,1> add<float64_t,1>(const rvd<float64_t,1> rvd1, const rvd<float64_t,1> rvd2) { return mipp_add_float64_m1(rvd1, rvd2); }
-template<> rvd<float32_t,1> add<float32_t,1>(const rvd<float32_t,1> rvd1, const rvd<float32_t,1> rvd2) { return mipp_add_float32_m1(rvd1, rvd2); }
-template<> rvd<  int64_t,1> add<  int64_t,1>(const rvd<  int64_t,1> rvd1, const rvd<  int64_t,1> rvd2) { return   mipp_add_int64_m1(rvd1, rvd2); }
-template<> rvd<  int32_t,1> add<  int32_t,1>(const rvd<  int32_t,1> rvd1, const rvd<  int32_t,1> rvd2) { return   mipp_add_int32_m1(rvd1, rvd2); }
-template<> rvd<  int16_t,1> add<  int16_t,1>(const rvd<  int16_t,1> rvd1, const rvd<  int16_t,1> rvd2) { return   mipp_add_int16_m1(rvd1, rvd2); }
-template<> rvd<   int8_t,1> add<   int8_t,1>(const rvd<   int8_t,1> rvd1, const rvd<   int8_t,1> rvd2) { return    mipp_add_int8_m1(rvd1, rvd2); }
-template<> rvd< uint64_t,1> add< uint64_t,1>(const rvd< uint64_t,1> rvd1, const rvd< uint64_t,1> rvd2) { return  mipp_add_uint64_m1(rvd1, rvd2); }
-template<> rvd< uint32_t,1> add< uint32_t,1>(const rvd< uint32_t,1> rvd1, const rvd< uint32_t,1> rvd2) { return  mipp_add_uint32_m1(rvd1, rvd2); }
-template<> rvd< uint16_t,1> add< uint16_t,1>(const rvd< uint16_t,1> rvd1, const rvd< uint16_t,1> rvd2) { return  mipp_add_uint16_m1(rvd1, rvd2); }
-template<> rvd<  uint8_t,1> add<  uint8_t,1>(const rvd<  uint8_t,1> rvd1, const rvd<  uint8_t,1> rvd2) { return   mipp_add_uint8_m1(rvd1, rvd2); }
+rvd<float64_t,2> add(const rvd<float64_t,2> rvd1, const rvd<float64_t,2> rvd2) { return mipp_add_float64_m2(rvd1, rvd2); }
+rvd<float32_t,2> add(const rvd<float32_t,2> rvd1, const rvd<float32_t,2> rvd2) { return mipp_add_float32_m2(rvd1, rvd2); }
+rvd<  int64_t,2> add(const rvd<  int64_t,2> rvd1, const rvd<  int64_t,2> rvd2) { return   mipp_add_int64_m2(rvd1, rvd2); }
+rvd<  int32_t,2> add(const rvd<  int32_t,2> rvd1, const rvd<  int32_t,2> rvd2) { return   mipp_add_int32_m2(rvd1, rvd2); }
+rvd<  int16_t,2> add(const rvd<  int16_t,2> rvd1, const rvd<  int16_t,2> rvd2) { return   mipp_add_int16_m2(rvd1, rvd2); }
+rvd<   int8_t,2> add(const rvd<   int8_t,2> rvd1, const rvd<   int8_t,2> rvd2) { return    mipp_add_int8_m2(rvd1, rvd2); }
+rvd< uint64_t,2> add(const rvd< uint64_t,2> rvd1, const rvd< uint64_t,2> rvd2) { return  mipp_add_uint64_m2(rvd1, rvd2); }
+rvd< uint32_t,2> add(const rvd< uint32_t,2> rvd1, const rvd< uint32_t,2> rvd2) { return  mipp_add_uint32_m2(rvd1, rvd2); }
+rvd< uint16_t,2> add(const rvd< uint16_t,2> rvd1, const rvd< uint16_t,2> rvd2) { return  mipp_add_uint16_m2(rvd1, rvd2); }
+rvd<  uint8_t,2> add(const rvd<  uint8_t,2> rvd1, const rvd<  uint8_t,2> rvd2) { return   mipp_add_uint8_m2(rvd1, rvd2); }
 
-template<> rvd<float64_t,2> add<float64_t,2>(const rvd<float64_t,2> rvd1, const rvd<float64_t,2> rvd2) { return mipp_add_float64_m2(rvd1, rvd2); }
-template<> rvd<float32_t,2> add<float32_t,2>(const rvd<float32_t,2> rvd1, const rvd<float32_t,2> rvd2) { return mipp_add_float32_m2(rvd1, rvd2); }
-template<> rvd<  int64_t,2> add<  int64_t,2>(const rvd<  int64_t,2> rvd1, const rvd<  int64_t,2> rvd2) { return   mipp_add_int64_m2(rvd1, rvd2); }
-template<> rvd<  int32_t,2> add<  int32_t,2>(const rvd<  int32_t,2> rvd1, const rvd<  int32_t,2> rvd2) { return   mipp_add_int32_m2(rvd1, rvd2); }
-template<> rvd<  int16_t,2> add<  int16_t,2>(const rvd<  int16_t,2> rvd1, const rvd<  int16_t,2> rvd2) { return   mipp_add_int16_m2(rvd1, rvd2); }
-template<> rvd<   int8_t,2> add<   int8_t,2>(const rvd<   int8_t,2> rvd1, const rvd<   int8_t,2> rvd2) { return    mipp_add_int8_m2(rvd1, rvd2); }
-template<> rvd< uint64_t,2> add< uint64_t,2>(const rvd< uint64_t,2> rvd1, const rvd< uint64_t,2> rvd2) { return  mipp_add_uint64_m2(rvd1, rvd2); }
-template<> rvd< uint32_t,2> add< uint32_t,2>(const rvd< uint32_t,2> rvd1, const rvd< uint32_t,2> rvd2) { return  mipp_add_uint32_m2(rvd1, rvd2); }
-template<> rvd< uint16_t,2> add< uint16_t,2>(const rvd< uint16_t,2> rvd1, const rvd< uint16_t,2> rvd2) { return  mipp_add_uint16_m2(rvd1, rvd2); }
-template<> rvd<  uint8_t,2> add<  uint8_t,2>(const rvd<  uint8_t,2> rvd1, const rvd<  uint8_t,2> rvd2) { return   mipp_add_uint8_m2(rvd1, rvd2); }
-//
-// rvd<float64_t,2> add(const rvd<float64_t,2> rvd1, const rvd<float64_t,2> rvd2) { return mipp_add_float64_m2(rvd1, rvd2); }
-// rvd<float32_t,2> add(const rvd<float32_t,2> rvd1, const rvd<float32_t,2> rvd2) { return mipp_add_float32_m2(rvd1, rvd2); }
-// rvd<  int64_t,2> add(const rvd<  int64_t,2> rvd1, const rvd<  int64_t,2> rvd2) { return   mipp_add_int64_m2(rvd1, rvd2); }
-// rvd<  int32_t,2> add(const rvd<  int32_t,2> rvd1, const rvd<  int32_t,2> rvd2) { return   mipp_add_int32_m2(rvd1, rvd2); }
-// rvd<  int16_t,2> add(const rvd<  int16_t,2> rvd1, const rvd<  int16_t,2> rvd2) { return   mipp_add_int16_m2(rvd1, rvd2); }
-// rvd<   int8_t,2> add(const rvd<   int8_t,2> rvd1, const rvd<   int8_t,2> rvd2) { return    mipp_add_int8_m2(rvd1, rvd2); }
-// rvd< uint64_t,2> add(const rvd< uint64_t,2> rvd1, const rvd< uint64_t,2> rvd2) { return  mipp_add_uint64_m2(rvd1, rvd2); }
-// rvd< uint32_t,2> add(const rvd< uint32_t,2> rvd1, const rvd< uint32_t,2> rvd2) { return  mipp_add_uint32_m2(rvd1, rvd2); }
-// rvd< uint16_t,2> add(const rvd< uint16_t,2> rvd1, const rvd< uint16_t,2> rvd2) { return  mipp_add_uint16_m2(rvd1, rvd2); }
-// rvd<  uint8_t,2> add(const rvd<  uint8_t,2> rvd1, const rvd<  uint8_t,2> rvd2) { return   mipp_add_uint8_m2(rvd1, rvd2); }
-//
-// rvd<float64_t,4> add(const rvd<float64_t,4> rvd1, const rvd<float64_t,4> rvd2) { return mipp_add_float64_m4(rvd1, rvd2); }
-// rvd<float32_t,4> add(const rvd<float32_t,4> rvd1, const rvd<float32_t,4> rvd2) { return mipp_add_float32_m4(rvd1, rvd2); }
-// rvd<  int64_t,4> add(const rvd<  int64_t,4> rvd1, const rvd<  int64_t,4> rvd2) { return   mipp_add_int64_m4(rvd1, rvd2); }
-// rvd<  int32_t,4> add(const rvd<  int32_t,4> rvd1, const rvd<  int32_t,4> rvd2) { return   mipp_add_int32_m4(rvd1, rvd2); }
-// rvd<  int16_t,4> add(const rvd<  int16_t,4> rvd1, const rvd<  int16_t,4> rvd2) { return   mipp_add_int16_m4(rvd1, rvd2); }
-// rvd<   int8_t,4> add(const rvd<   int8_t,4> rvd1, const rvd<   int8_t,4> rvd2) { return    mipp_add_int8_m4(rvd1, rvd2); }
-// rvd< uint64_t,4> add(const rvd< uint64_t,4> rvd1, const rvd< uint64_t,4> rvd2) { return  mipp_add_uint64_m4(rvd1, rvd2); }
-// rvd< uint32_t,4> add(const rvd< uint32_t,4> rvd1, const rvd< uint32_t,4> rvd2) { return  mipp_add_uint32_m4(rvd1, rvd2); }
-// rvd< uint16_t,4> add(const rvd< uint16_t,4> rvd1, const rvd< uint16_t,4> rvd2) { return  mipp_add_uint16_m4(rvd1, rvd2); }
-// rvd<  uint8_t,4> add(const rvd<  uint8_t,4> rvd1, const rvd<  uint8_t,4> rvd2) { return   mipp_add_uint8_m4(rvd1, rvd2); }
-//
-// rvd<float64_t,8> add(const rvd<float64_t,8> rvd1, const rvd<float64_t,8> rvd2) { return mipp_add_float64_m8(rvd1, rvd2); }
-// rvd<float32_t,8> add(const rvd<float32_t,8> rvd1, const rvd<float32_t,8> rvd2) { return mipp_add_float32_m8(rvd1, rvd2); }
-// rvd<  int64_t,8> add(const rvd<  int64_t,8> rvd1, const rvd<  int64_t,8> rvd2) { return   mipp_add_int64_m8(rvd1, rvd2); }
-// rvd<  int32_t,8> add(const rvd<  int32_t,8> rvd1, const rvd<  int32_t,8> rvd2) { return   mipp_add_int32_m8(rvd1, rvd2); }
-// rvd<  int16_t,8> add(const rvd<  int16_t,8> rvd1, const rvd<  int16_t,8> rvd2) { return   mipp_add_int16_m8(rvd1, rvd2); }
-// rvd<   int8_t,8> add(const rvd<   int8_t,8> rvd1, const rvd<   int8_t,8> rvd2) { return    mipp_add_int8_m8(rvd1, rvd2); }
-// rvd< uint64_t,8> add(const rvd< uint64_t,8> rvd1, const rvd< uint64_t,8> rvd2) { return  mipp_add_uint64_m8(rvd1, rvd2); }
-// rvd< uint32_t,8> add(const rvd< uint32_t,8> rvd1, const rvd< uint32_t,8> rvd2) { return  mipp_add_uint32_m8(rvd1, rvd2); }
-// rvd< uint16_t,8> add(const rvd< uint16_t,8> rvd1, const rvd< uint16_t,8> rvd2) { return  mipp_add_uint16_m8(rvd1, rvd2); }
-// rvd<  uint8_t,8> add(const rvd<  uint8_t,8> rvd1, const rvd<  uint8_t,8> rvd2) { return   mipp_add_uint8_m8(rvd1, rvd2); }
+rvd<float64_t,4> add(const rvd<float64_t,4> rvd1, const rvd<float64_t,4> rvd2) { return mipp_add_float64_m4(rvd1, rvd2); }
+rvd<float32_t,4> add(const rvd<float32_t,4> rvd1, const rvd<float32_t,4> rvd2) { return mipp_add_float32_m4(rvd1, rvd2); }
+rvd<  int64_t,4> add(const rvd<  int64_t,4> rvd1, const rvd<  int64_t,4> rvd2) { return   mipp_add_int64_m4(rvd1, rvd2); }
+rvd<  int32_t,4> add(const rvd<  int32_t,4> rvd1, const rvd<  int32_t,4> rvd2) { return   mipp_add_int32_m4(rvd1, rvd2); }
+rvd<  int16_t,4> add(const rvd<  int16_t,4> rvd1, const rvd<  int16_t,4> rvd2) { return   mipp_add_int16_m4(rvd1, rvd2); }
+rvd<   int8_t,4> add(const rvd<   int8_t,4> rvd1, const rvd<   int8_t,4> rvd2) { return    mipp_add_int8_m4(rvd1, rvd2); }
+rvd< uint64_t,4> add(const rvd< uint64_t,4> rvd1, const rvd< uint64_t,4> rvd2) { return  mipp_add_uint64_m4(rvd1, rvd2); }
+rvd< uint32_t,4> add(const rvd< uint32_t,4> rvd1, const rvd< uint32_t,4> rvd2) { return  mipp_add_uint32_m4(rvd1, rvd2); }
+rvd< uint16_t,4> add(const rvd< uint16_t,4> rvd1, const rvd< uint16_t,4> rvd2) { return  mipp_add_uint16_m4(rvd1, rvd2); }
+rvd<  uint8_t,4> add(const rvd<  uint8_t,4> rvd1, const rvd<  uint8_t,4> rvd2) { return   mipp_add_uint8_m4(rvd1, rvd2); }
+
+rvd<float64_t,8> add(const rvd<float64_t,8> rvd1, const rvd<float64_t,8> rvd2) { return mipp_add_float64_m8(rvd1, rvd2); }
+rvd<float32_t,8> add(const rvd<float32_t,8> rvd1, const rvd<float32_t,8> rvd2) { return mipp_add_float32_m8(rvd1, rvd2); }
+rvd<  int64_t,8> add(const rvd<  int64_t,8> rvd1, const rvd<  int64_t,8> rvd2) { return   mipp_add_int64_m8(rvd1, rvd2); }
+rvd<  int32_t,8> add(const rvd<  int32_t,8> rvd1, const rvd<  int32_t,8> rvd2) { return   mipp_add_int32_m8(rvd1, rvd2); }
+rvd<  int16_t,8> add(const rvd<  int16_t,8> rvd1, const rvd<  int16_t,8> rvd2) { return   mipp_add_int16_m8(rvd1, rvd2); }
+rvd<   int8_t,8> add(const rvd<   int8_t,8> rvd1, const rvd<   int8_t,8> rvd2) { return    mipp_add_int8_m8(rvd1, rvd2); }
+rvd< uint64_t,8> add(const rvd< uint64_t,8> rvd1, const rvd< uint64_t,8> rvd2) { return  mipp_add_uint64_m8(rvd1, rvd2); }
+rvd< uint32_t,8> add(const rvd< uint32_t,8> rvd1, const rvd< uint32_t,8> rvd2) { return  mipp_add_uint32_m8(rvd1, rvd2); }
+rvd< uint16_t,8> add(const rvd< uint16_t,8> rvd1, const rvd< uint16_t,8> rvd2) { return  mipp_add_uint16_m8(rvd1, rvd2); }
+rvd<  uint8_t,8> add(const rvd<  uint8_t,8> rvd1, const rvd<  uint8_t,8> rvd2) { return   mipp_add_uint8_m8(rvd1, rvd2); }
 
 }
 
