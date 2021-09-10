@@ -86,7 +86,7 @@ SOFTWARE.
 #include <cmath>
 #include <map>
 
-#if (defined(__GNUC__) || defined(__clang__) || defined(__llvm__)) && (defined(__linux__) || defined(__linux) || defined(__APPLE__))
+#if (defined(__GNUC__) || defined(__clang__) || defined(__llvm__)) && (defined(__linux__) || defined(__linux) || defined(__APPLE__)) && !defined(__ANDROID__)
 #include <execinfo.h>
 #include <unistd.h>
 #include <cstdlib>
@@ -511,7 +511,7 @@ template<class T> using vector = std::vector<T, allocator<T>>;
 static inline std::string get_back_trace()
 {
 	std::string bt_str;
-#if defined(MIPP_ENABLE_BACKTRACE) && (defined(__GNUC__) || defined(__clang__) || defined(__llvm__)) && (defined(__linux__) || defined(__linux) || defined(__APPLE__))
+#if defined(MIPP_ENABLE_BACKTRACE) && (defined(__GNUC__) || defined(__clang__) || defined(__llvm__)) && (defined(__linux__) || defined(__linux) || defined(__APPLE__)) && !defined(__ANDROID__)
 	const int bt_max_depth = 32;
 	void *bt_array[bt_max_depth];
 
