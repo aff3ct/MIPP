@@ -129,3 +129,223 @@ TEST_CASE("Store unaligned - mipp::Reg", "[mipp::storeu]")
 	SECTION("datatype = int8_t") { test_Reg_storeu<int8_t>(); }
 #endif
 }
+
+template <typename T, mipp::proto_is<T> IS = mipp::storeu<T>, mipp::proto_il<T> IL = mipp::loadu<T>>
+void test_reg_maskst()
+{
+	constexpr int N = mipp::N<T>();
+	T inputs[N], outputs[N], outputs_cpy[N];
+	std::iota(inputs,  inputs  + N, (T)0);
+	std::iota(outputs, outputs + N, (T)0);
+
+	bool mask[N];
+	std::fill(mask,       mask + N/2, true );
+	std::fill(mask + N/2, mask + N,   false);
+
+	std::mt19937 g;
+	std::shuffle(inputs,  inputs  + N, g);
+	std::shuffle(outputs, outputs + N, g);
+	std::shuffle(mask,    mask    + N, g);
+
+	std::copy(outputs, outputs + N, outputs_cpy);
+
+	mipp::msk m = mipp::set<N>(mask);
+	mipp::reg r = mipp::loadu<T>(inputs);
+	mipp::maskst<T,IS,IL>(m, outputs, r);
+
+	for (auto i = 0; i < N; i++)
+	{
+		if (mask[i])
+			REQUIRE(outputs[i] == inputs[i]);
+		else
+			REQUIRE(outputs[i] == outputs_cpy[i]);
+	}
+}
+
+#ifndef MIPP_NO
+TEST_CASE("Masked store - mipp::reg", "[mipp::maskst]")
+{
+#if defined(MIPP_64BIT)
+	SECTION("datatype = double") { test_reg_maskst<double, mipp::storeu<double>, mipp::loadu<double>>(); }
+	SECTION("datatype = double") { test_reg_maskst<double, mipp::store<double>, mipp::load<double>>(); }
+#endif
+	SECTION("datatype = float") { test_reg_maskst<float, mipp::storeu<float>, mipp::loadu<float>>(); }
+	SECTION("datatype = float") { test_reg_maskst<float, mipp::store<float>, mipp::load<float>>(); }
+
+#if defined(MIPP_64BIT)
+	SECTION("datatype = int64_t") { test_reg_maskst<int64_t, mipp::storeu<int64_t>, mipp::loadu<int64_t>>(); }
+	SECTION("datatype = int64_t") { test_reg_maskst<int64_t, mipp::store<int64_t>, mipp::load<int64_t>>(); }
+#endif
+	SECTION("datatype = int32_t") { test_reg_maskst<int32_t, mipp::storeu<int32_t>, mipp::loadu<int32_t>>(); }
+	SECTION("datatype = int32_t") { test_reg_maskst<int32_t, mipp::store<int32_t>, mipp::load<int32_t>>(); }
+#if defined(MIPP_BW)
+	SECTION("datatype = int16_t") { test_reg_maskst<int16_t, mipp::storeu<int16_t>, mipp::loadu<int16_t>>(); }
+	SECTION("datatype = int16_t") { test_reg_maskst<int16_t, mipp::store<int16_t>, mipp::load<int16_t>>(); }
+	SECTION("datatype = int8_t") { test_reg_maskst<int8_t, mipp::storeu<int8_t>, mipp::loadu<int8_t>>(); }
+	SECTION("datatype = int8_t") { test_reg_maskst<int8_t, mipp::store<int8_t>, mipp::load<int8_t>>(); }
+#endif
+}
+#endif
+
+template <typename T, mipp::proto_IS<T> IS = mipp::ostoreu<T>, mipp::proto_IL<T> IL = mipp::oloadu<T>>
+void test_Reg_maskst()
+{
+	constexpr int N = mipp::N<T>();
+	T inputs[N], outputs[N], outputs_cpy[N];
+	std::iota(inputs,  inputs  + N, (T)0);
+	std::iota(outputs, outputs + N, (T)0);
+
+	bool mask[N];
+	std::fill(mask,       mask + N/2, true );
+	std::fill(mask + N/2, mask + N,   false);
+
+	std::mt19937 g;
+	std::shuffle(inputs,  inputs  + N, g);
+	std::shuffle(outputs, outputs + N, g);
+	std::shuffle(mask,    mask    + N, g);
+
+	std::copy(outputs, outputs + N, outputs_cpy);
+
+	mipp::Msk<N> m = mipp::oset<N>(mask);
+	mipp::Reg<T> r = mipp::oloadu<T>(inputs);
+	mipp::maskst<T,IS,IL>(m, outputs, r);
+
+	for (auto i = 0; i < N; i++)
+	{
+		if (mask[i])
+			REQUIRE(outputs[i] == inputs[i]);
+		else
+			REQUIRE(outputs[i] == outputs_cpy[i]);
+	}
+}
+
+#ifndef MIPP_NO
+TEST_CASE("Masked store - mipp::Reg", "[mipp::maskst]")
+{
+#if defined(MIPP_64BIT)
+	SECTION("datatype = double") { test_Reg_maskst<double, mipp::ostoreu<double>, mipp::oloadu<double>>(); }
+	SECTION("datatype = double") { test_Reg_maskst<double, mipp::ostore<double>, mipp::oload<double>>(); }
+#endif
+	SECTION("datatype = float") { test_Reg_maskst<float, mipp::ostoreu<float>, mipp::oloadu<float>>(); }
+	SECTION("datatype = float") { test_Reg_maskst<float, mipp::ostore<float>, mipp::oload<float>>(); }
+
+#if defined(MIPP_64BIT)
+	SECTION("datatype = int64_t") { test_Reg_maskst<int64_t, mipp::ostoreu<int64_t>, mipp::oloadu<int64_t>>(); }
+	SECTION("datatype = int64_t") { test_Reg_maskst<int64_t, mipp::ostore<int64_t>, mipp::oload<int64_t>>(); }
+#endif
+	SECTION("datatype = int32_t") { test_Reg_maskst<int32_t, mipp::ostoreu<int32_t>, mipp::oloadu<int32_t>>(); }
+	SECTION("datatype = int32_t") { test_Reg_maskst<int32_t, mipp::ostore<int32_t>, mipp::oload<int32_t>>(); }
+#if defined(MIPP_BW)
+	SECTION("datatype = int16_t") { test_Reg_maskst<int16_t, mipp::ostoreu<int16_t>, mipp::oloadu<int16_t>>(); }
+	SECTION("datatype = int16_t") { test_Reg_maskst<int16_t, mipp::ostore<int16_t>, mipp::oload<int16_t>>(); }
+	SECTION("datatype = int8_t") { test_Reg_maskst<int8_t, mipp::ostoreu<int8_t>, mipp::oloadu<int8_t>>(); }
+	SECTION("datatype = int8_t") { test_Reg_maskst<int8_t, mipp::ostore<int8_t>, mipp::oload<int8_t>>(); }
+#endif
+}
+#endif
+
+template <typename T, mipp::proto_is<T> IS = mipp::storeu<T>>
+void test_reg_masksts()
+{
+	constexpr int N = mipp::N<T>();
+	T inputs[N], outputs[N/2], outputs_cpy[N/2];
+	std::iota(inputs,  inputs  + N,   (T)0);
+	std::iota(outputs, outputs + N/2, (T)0);
+
+	bool mask[N];
+	std::fill(mask,       mask + N/2, true );
+	std::fill(mask + N/2, mask + N,   false);
+
+	std::mt19937 g;
+	std::shuffle(inputs,  inputs  + N,   g);
+	std::shuffle(outputs, outputs + N/2, g);
+
+	std::copy(outputs, outputs + N/2, outputs_cpy);
+
+	mipp::msk m = mipp::set<N>(mask);
+	mipp::reg r = mipp::loadu<T>(inputs);
+	mipp::masksts<T,IS>(m, outputs, r);
+
+	for (auto i = 0; i < N/2; i++)
+	{
+		REQUIRE(outputs[i] == inputs[i]);
+	}
+}
+
+#ifndef MIPP_NO
+TEST_CASE("Masked store safe - mipp::reg", "[mipp::masksts]")
+{
+#if defined(MIPP_64BIT)
+	SECTION("datatype = double") { test_reg_masksts<double, mipp::storeu<double>>(); }
+	SECTION("datatype = double") { test_reg_masksts<double, mipp::store<double>>(); }
+#endif
+	SECTION("datatype = float") { test_reg_masksts<float, mipp::storeu<float>>(); }
+	SECTION("datatype = float") { test_reg_masksts<float, mipp::store<float>>(); }
+
+#if defined(MIPP_64BIT)
+	SECTION("datatype = int64_t") { test_reg_masksts<int64_t, mipp::storeu<int64_t>>(); }
+	SECTION("datatype = int64_t") { test_reg_masksts<int64_t, mipp::store<int64_t>>(); }
+#endif
+	SECTION("datatype = int32_t") { test_reg_masksts<int32_t, mipp::storeu<int32_t>>(); }
+	SECTION("datatype = int32_t") { test_reg_masksts<int32_t, mipp::store<int32_t>>(); }
+#if defined(MIPP_BW)
+	SECTION("datatype = int16_t") { test_reg_masksts<int16_t, mipp::storeu<int16_t>>(); }
+	SECTION("datatype = int16_t") { test_reg_masksts<int16_t, mipp::store<int16_t>>(); }
+	SECTION("datatype = int8_t") { test_reg_masksts<int8_t, mipp::storeu<int8_t>>(); }
+	SECTION("datatype = int8_t") { test_reg_masksts<int8_t, mipp::store<int8_t>>(); }
+#endif
+}
+#endif
+
+template <typename T, mipp::proto_IS<T> IS = mipp::ostoreu<T>>
+void test_Reg_masksts()
+{
+	constexpr int N = mipp::N<T>();
+	T inputs[N], outputs[N/2], outputs_cpy[N/2];
+	std::iota(inputs,  inputs  + N,   (T)0);
+	std::iota(outputs, outputs + N/2, (T)0);
+
+	bool mask[N];
+	std::fill(mask,       mask + N/2, true );
+	std::fill(mask + N/2, mask + N,   false);
+
+	std::mt19937 g;
+	std::shuffle(inputs,  inputs  + N,   g);
+	std::shuffle(outputs, outputs + N/2, g);
+
+	std::copy(outputs, outputs + N/2, outputs_cpy);
+
+	mipp::Msk<N> m = mipp::oset<N>(mask);
+	mipp::Reg<T> r = mipp::oloadu<T>(inputs);
+	mipp::masksts<T,IS>(m, outputs, r);
+
+	for (auto i = 0; i < N/2; i++)
+	{
+		REQUIRE(outputs[i] == inputs[i]);
+	}
+}
+
+#ifndef MIPP_NO
+TEST_CASE("Masked store safe - mipp::Reg", "[mipp::masksts]")
+{
+#if defined(MIPP_64BIT)
+	SECTION("datatype = double") { test_Reg_masksts<double, mipp::ostoreu<double>>(); }
+	SECTION("datatype = double") { test_Reg_masksts<double, mipp::ostore<double>>(); }
+#endif
+	SECTION("datatype = float") { test_Reg_masksts<float, mipp::ostoreu<float>>(); }
+	SECTION("datatype = float") { test_Reg_masksts<float, mipp::ostore<float>>(); }
+
+#if defined(MIPP_64BIT)
+	SECTION("datatype = int64_t") { test_Reg_masksts<int64_t, mipp::ostoreu<int64_t>>(); }
+	SECTION("datatype = int64_t") { test_Reg_masksts<int64_t, mipp::ostore<int64_t>>(); }
+#endif
+	SECTION("datatype = int32_t") { test_Reg_masksts<int32_t, mipp::ostoreu<int32_t>>(); }
+	SECTION("datatype = int32_t") { test_Reg_masksts<int32_t, mipp::ostore<int32_t>>(); }
+#if defined(MIPP_BW)
+	SECTION("datatype = int16_t") { test_Reg_masksts<int16_t, mipp::ostoreu<int16_t>>(); }
+	SECTION("datatype = int16_t") { test_Reg_masksts<int16_t, mipp::ostore<int16_t>>(); }
+	SECTION("datatype = int8_t") { test_Reg_masksts<int8_t, mipp::ostoreu<int8_t>>(); }
+	SECTION("datatype = int8_t") { test_Reg_masksts<int8_t, mipp::ostore<int8_t>>(); }
+#endif
+}
+#endif

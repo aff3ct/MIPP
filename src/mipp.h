@@ -932,9 +932,11 @@ inline reg norm(const regx2 v)
 // ------------------------------------------------------------------------------------------------------------ masking
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename T> using proto_i1 = reg (*)(const reg a);
-template <typename T> using proto_i2 = reg (*)(const reg a, const reg b);
-template <typename T> using proto_i3 = reg (*)(const reg a, const reg b, const reg c);
+template <typename T> using proto_i1 = reg  (*)(const reg a);
+template <typename T> using proto_i2 = reg  (*)(const reg a, const reg b);
+template <typename T> using proto_i3 = reg  (*)(const reg a, const reg b, const reg c);
+template <typename T> using proto_il = reg  (*)(const T*);
+template <typename T> using proto_is = void (*)(T*, const reg);
 
 template <typename T, proto_i1<T> I1>
 inline reg mask(const msk m, const reg src, const reg a)
@@ -978,6 +980,45 @@ inline reg maskz(const msk m, const reg a, const reg b, const reg c)
 	return andb<T>(m_reg, a_modif);
 }
 
+template <typename T, proto_il<T> IL = mipp::loadu<T>>
+inline reg maskld(const msk m, const T* memp)
+{
+	auto rl = IL(memp);
+	auto rm = toreg<N<T>()>(m);
+	return andb<T>(rm, rl);
+}
+
+template <typename T, proto_il<T> IL = mipp::loadu<T>, proto_is<T> IS = mipp::storeu<T>>
+inline reg masklds(const msk m, const T* memp)
+{
+	T mask[mipp::N<T>()], data[mipp::N<T>()];
+	auto rm = toreg<N<T>()>(m);
+	IS(mask, rm);
+	for (int i = 0; i < mipp::N<T>(); i++)
+		data[i] = mask[i] != (T)0 ? memp[i] : (T)0;
+	return IL(data);
+}
+
+template <typename T, proto_is<T> IS = mipp::storeu<T>, proto_il<T> IL = mipp::loadu<T>>
+inline void maskst(const msk m, T* memp, const reg a)
+{
+	auto rl = IL(memp);
+	auto rres = mipp::blend<T>(a, rl, m);
+	IS(memp, rres);
+}
+
+template <typename T, proto_is<T> IS = mipp::storeu<T>>
+inline void masksts(const msk m, T* memp, const reg a)
+{
+	T mask[mipp::N<T>()], data[mipp::N<T>()];
+	auto rm = toreg<N<T>()>(m);
+	IS(mask, rm);
+	IS(data, a);
+	for (int i = 0; i < mipp::N<T>(); i++)
+		if (mask[i] != (T)0)
+			memp[i] = data[i];
+}
+
 // -------------------------------------------------------------------------------------------------------- obj masking
 
 template <typename T>
@@ -986,12 +1027,16 @@ class Reg;
 template <int N>
 class Msk;
 
-template <typename T> inline Reg<T> blend(const Reg<T> v1, const Reg<T> v2, const Msk<N<T>()> m);
-template <typename T> inline Reg<T> andb (const Reg<T> v1, const Reg<T> v2);
+template <typename T> inline Reg<T> blend  (const Reg<T> v1, const Reg<T> v2, const Msk<N<T>()> m);
+template <typename T> inline Reg<T> andb   (const Reg<T> v1, const Reg<T> v2);
+template <typename T> inline Reg<T> oloadu (const T* memp);
+template <typename T> inline void   ostoreu(      T* memp, const Reg<T> v1);
 
 template <typename T> using proto_I1 = Reg<T> (*)(const Reg<T> a);
 template <typename T> using proto_I2 = Reg<T> (*)(const Reg<T> a, const Reg<T> b);
 template <typename T> using proto_I3 = Reg<T> (*)(const Reg<T> a, const Reg<T> b, const Reg<T> c);
+template <typename T> using proto_IL = Reg<T> (*)(const T*);
+template <typename T> using proto_IS = void (*)(T*, const Reg<T>);
 
 template <typename T, proto_I1<T> I1>
 inline Reg<T> mask(const Msk<N<T>()> m, const Reg<T> src, const Reg<T> a)
@@ -1056,6 +1101,61 @@ inline Reg<T> maskz(const Msk<N<T>()> m, const Reg<T> a, const Reg<T> b, const R
 	return andb<T>(m_reg, a_modif);
 #else
 	return m.m ? I3(a, b, c) : Reg<T>((T)0);
+#endif
+}
+
+template <typename T, proto_IL<T> IL = mipp::oloadu<T>>
+inline Reg<T> maskld(const Msk<N<T>()> m, const T* memp)
+{
+#ifndef MIPP_NO
+	auto rl = IL(memp);
+	auto rm = m.template toReg<T>();
+	return andb<T>(rm, rl);
+#else
+	return m.m ? Reg<T>((T)*memp) : Reg<T>((T)0);
+#endif
+}
+
+template <typename T, proto_IL<T> IL = mipp::oloadu<T>, proto_IS<T> IS = mipp::ostoreu<T>>
+inline Reg<T> masklds(const Msk<N<T>()> m, const T* memp)
+{
+#ifndef MIPP_NO
+	T mask[mipp::N<T>()], data[mipp::N<T>()];
+	auto rm = m.template toReg<T>();
+	IS(mask, rm);
+	for (int i = 0; i < mipp::N<T>(); i++)
+		data[i] = mask[i] != (T)0 ? memp[i] : (T)0;
+	return IL(data);
+#else
+	return m.m ? Reg<T>((T)*memp) : Reg<T>((T)0);
+#endif
+}
+
+template <typename T, proto_IS<T> IS = mipp::ostoreu<T>, proto_IL<T> IL = mipp::oloadu<T>>
+inline void maskst(const Msk<N<T>()> m, T* memp, const Reg<T> a)
+{
+#ifndef MIPP_NO
+	auto rl = IL(memp);
+	auto rres = mipp::blend<T>(a, rl, m);
+	IS(memp, rres);
+#else
+	if (m.m) memp[0] = a.r;
+#endif
+}
+
+template <typename T, proto_IS<T> IS = mipp::ostoreu<T>>
+inline void masksts(const Msk<N<T>()> m, T* memp, const Reg<T> a)
+{
+#ifndef MIPP_NO
+	T mask[mipp::N<T>()], data[mipp::N<T>()];
+	auto rm = m.template toReg<T>();
+	IS(mask, rm);
+	IS(data, a);
+	for (int i = 0; i < mipp::N<T>(); i++)
+		if (mask[i] != (T)0)
+			memp[i] = data[i];
+#else
+	if (m.m) memp[0] = a.r;
 #endif
 }
 
