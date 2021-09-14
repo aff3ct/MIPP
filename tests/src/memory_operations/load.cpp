@@ -299,6 +299,7 @@ void test_Reg_masklds()
 	}
 }
 
+#ifndef MIPP_NO
 TEST_CASE("Masked load safe - mipp::Reg", "[mipp::masklds]")
 {
 #if defined(MIPP_64BIT)
@@ -321,3 +322,4 @@ TEST_CASE("Masked load safe - mipp::Reg", "[mipp::masklds]")
 	SECTION("datatype = int8_t") { test_Reg_masklds<int8_t, mipp::oload<int8_t>, mipp::store<int8_t>>();; }
 #endif
 }
+#endif

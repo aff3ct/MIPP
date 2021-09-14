@@ -295,6 +295,7 @@ TEST_CASE("Masked store safe - mipp::reg", "[mipp::masksts]")
 }
 #endif
 
+#ifndef MIPP_NO
 template <typename T, mipp::proto_IS<T> IS = mipp::storeu<T>>
 void test_Reg_masksts()
 {
@@ -345,3 +346,4 @@ TEST_CASE("Masked store safe - mipp::Reg", "[mipp::masksts]")
 	SECTION("datatype = int8_t") { test_Reg_masksts<int8_t, mipp::store<int8_t>>(); }
 #endif
 }
+#endif
