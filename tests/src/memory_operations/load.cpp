@@ -205,7 +205,6 @@ void test_Reg_maskld()
 	}
 }
 
-#ifndef MIPP_NO
 TEST_CASE("Masked load - mipp::Reg", "[mipp::maskld]")
 {
 #if defined(MIPP_64BIT)
@@ -228,9 +227,8 @@ TEST_CASE("Masked load - mipp::Reg", "[mipp::maskld]")
 	SECTION("datatype = int8_t") { test_Reg_maskld<int8_t, mipp::oload<int8_t>>(); }
 #endif
 }
-#endif
 
-template <typename T, mipp::proto_il<T> IL = mipp::loadu<T>, mipp::proto_is<T> IS = mipp::ostoreu<T>>
+template <typename T, mipp::proto_il<T> IL = mipp::loadu<T>, mipp::proto_is<T> IS = mipp::storeu<T>>
 void test_reg_masklds()
 {
 	constexpr int N = mipp::N<T>();
@@ -278,7 +276,7 @@ TEST_CASE("Masked load safe - mipp::reg", "[mipp::masklds]")
 }
 #endif
 
-template <typename T, mipp::proto_IL<T> IL = mipp::oloadu<T>, mipp::proto_IS<T> IS = mipp::ostoreu<T>>
+template <typename T, mipp::proto_IL<T> IL = mipp::oloadu<T>, mipp::proto_IS<T> IS = mipp::storeu<T>>
 void test_Reg_masklds()
 {
 	constexpr int N = mipp::N<T>();
@@ -301,27 +299,25 @@ void test_Reg_masklds()
 	}
 }
 
-#ifndef MIPP_NO
 TEST_CASE("Masked load safe - mipp::Reg", "[mipp::masklds]")
 {
 #if defined(MIPP_64BIT)
-	SECTION("datatype = double") { test_Reg_masklds<double, mipp::oloadu<double>, mipp::ostoreu<double>>(); }
-	SECTION("datatype = double") { test_Reg_masklds<double, mipp::oload<double>, mipp::ostore<double>>(); }
+	SECTION("datatype = double") { test_Reg_masklds<double, mipp::oloadu<double>, mipp::storeu<double>>(); }
+	SECTION("datatype = double") { test_Reg_masklds<double, mipp::oload<double>, mipp::store<double>>(); }
 #endif
-	SECTION("datatype = float") { test_Reg_masklds<float, mipp::oloadu<float>, mipp::ostoreu<float>>(); }
-	SECTION("datatype = float") { test_Reg_masklds<float, mipp::oload<float>, mipp::ostore<float>>(); }
+	SECTION("datatype = float") { test_Reg_masklds<float, mipp::oloadu<float>, mipp::storeu<float>>(); }
+	SECTION("datatype = float") { test_Reg_masklds<float, mipp::oload<float>, mipp::store<float>>(); }
 
 #if defined(MIPP_64BIT)
-	SECTION("datatype = int64_t") { test_Reg_masklds<int64_t, mipp::oloadu<int64_t>, mipp::ostoreu<int64_t>>(); }
-	SECTION("datatype = int64_t") { test_Reg_masklds<int64_t, mipp::oload<int64_t>, mipp::ostore<int64_t>>(); }
+	SECTION("datatype = int64_t") { test_Reg_masklds<int64_t, mipp::oloadu<int64_t>, mipp::storeu<int64_t>>(); }
+	SECTION("datatype = int64_t") { test_Reg_masklds<int64_t, mipp::oload<int64_t>, mipp::store<int64_t>>(); }
 #endif
-	SECTION("datatype = int32_t") { test_Reg_masklds<int32_t, mipp::oloadu<int32_t>, mipp::ostoreu<int32_t>>(); }
-	SECTION("datatype = int32_t") { test_Reg_masklds<int32_t, mipp::oload<int32_t>, mipp::ostore<int32_t>>(); }
+	SECTION("datatype = int32_t") { test_Reg_masklds<int32_t, mipp::oloadu<int32_t>, mipp::storeu<int32_t>>(); }
+	SECTION("datatype = int32_t") { test_Reg_masklds<int32_t, mipp::oload<int32_t>, mipp::store<int32_t>>(); }
 #if defined(MIPP_BW)
-	SECTION("datatype = int16_t") { test_Reg_masklds<int16_t, mipp::oloadu<int16_t>, mipp::ostoreu<int16_t>>(); }
-	SECTION("datatype = int16_t") { test_Reg_masklds<int16_t, mipp::oload<int16_t>, mipp::ostore<int16_t>>(); }
-	SECTION("datatype = int8_t") { test_Reg_masklds<int8_t, mipp::oloadu<int8_t>, mipp::ostoreu<int8_t>>(); }
-	SECTION("datatype = int8_t") { test_Reg_masklds<int8_t, mipp::oload<int8_t>, mipp::ostore<int8_t>>();; }
+	SECTION("datatype = int16_t") { test_Reg_masklds<int16_t, mipp::oloadu<int16_t>, mipp::storeu<int16_t>>(); }
+	SECTION("datatype = int16_t") { test_Reg_masklds<int16_t, mipp::oload<int16_t>, mipp::store<int16_t>>(); }
+	SECTION("datatype = int8_t") { test_Reg_masklds<int8_t, mipp::oloadu<int8_t>, mipp::storeu<int8_t>>(); }
+	SECTION("datatype = int8_t") { test_Reg_masklds<int8_t, mipp::oload<int8_t>, mipp::store<int8_t>>();; }
 #endif
 }
-#endif

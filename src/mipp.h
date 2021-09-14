@@ -1027,10 +1027,10 @@ class Reg;
 template <int N>
 class Msk;
 
-template <typename T> inline Reg<T> blend  (const Reg<T> v1, const Reg<T> v2, const Msk<N<T>()> m);
-template <typename T> inline Reg<T> andb   (const Reg<T> v1, const Reg<T> v2);
-template <typename T> inline Reg<T> oloadu (const T* memp);
-template <typename T> inline void   ostoreu(      T* memp, const Reg<T> v1);
+template <typename T> inline Reg<T> blend (const Reg<T> v1, const Reg<T> v2, const Msk<N<T>()> m);
+template <typename T> inline Reg<T> andb  (const Reg<T> v1, const Reg<T> v2);
+template <typename T> inline Reg<T> oloadu(const T* memp);
+template <typename T> inline void   storeu(      T* memp, const Reg<T> v1);
 
 template <typename T> using proto_I1 = Reg<T> (*)(const Reg<T> a);
 template <typename T> using proto_I2 = Reg<T> (*)(const Reg<T> a, const Reg<T> b);
@@ -1116,7 +1116,7 @@ inline Reg<T> maskld(const Msk<N<T>()> m, const T* memp)
 #endif
 }
 
-template <typename T, proto_IL<T> IL = mipp::oloadu<T>, proto_IS<T> IS = mipp::ostoreu<T>>
+template <typename T, proto_IL<T> IL = mipp::oloadu<T>, proto_IS<T> IS = mipp::storeu<T>>
 inline Reg<T> masklds(const Msk<N<T>()> m, const T* memp)
 {
 #ifndef MIPP_NO
@@ -1131,7 +1131,7 @@ inline Reg<T> masklds(const Msk<N<T>()> m, const T* memp)
 #endif
 }
 
-template <typename T, proto_IS<T> IS = mipp::ostoreu<T>, proto_IL<T> IL = mipp::oloadu<T>>
+template <typename T, proto_IS<T> IS = mipp::storeu<T>, proto_IL<T> IL = mipp::oloadu<T>>
 inline void maskst(const Msk<N<T>()> m, T* memp, const Reg<T> a)
 {
 #ifndef MIPP_NO
@@ -1143,7 +1143,7 @@ inline void maskst(const Msk<N<T>()> m, T* memp, const Reg<T> a)
 #endif
 }
 
-template <typename T, proto_IS<T> IS = mipp::ostoreu<T>>
+template <typename T, proto_IS<T> IS = mipp::storeu<T>>
 inline void masksts(const Msk<N<T>()> m, T* memp, const Reg<T> a)
 {
 #ifndef MIPP_NO
@@ -1191,6 +1191,25 @@ bool get(const mipp::msk m, const size_t index)
 		mipp::storeu<float>((float*)tmp, mipp::toreg<N>(m));
 		return tmp[index * (mipp::RegisterSizeBit / (N * 8))];
 #endif
+}
+
+// ----------------------------------------------------------------------------------------------------------- getfirst
+template <typename T>
+T getfirst(const mipp::reg r)
+{
+	return get<T>(r, 0);
+}
+
+template <typename T>
+T getfirst(const mipp::reg_2 r)
+{
+	return get<T>(r, 0);
+}
+
+template <int N>
+bool getfirst(const mipp::msk m)
+{
+	return get<N>(m, 0);
 }
 
 // --------------------------------------------------------------------------------------------------------------- dump
