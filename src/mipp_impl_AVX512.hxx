@@ -231,6 +231,70 @@
 	}
 #endif
 
+	// --------------------------------------------------------------------------------------------------------- gather
+
+	template <>
+	inline reg gather<double,int64_t>(const double *mem_addr, const reg idx) {
+		return gather_seq<double,int64_t>(mem_addr, idx);
+	}
+
+	template <>
+	inline reg gather<float,int32_t>(const float *mem_addr, const reg idx) {
+		return gather_seq<float,int32_t>(mem_addr, idx);
+	}
+
+	template <>
+	inline reg gather<int64_t,int64_t>(const int64_t *mem_addr, const reg idx) {
+		return gather_seq<int64_t,int64_t>(mem_addr, idx);
+	}
+
+	template <>
+	inline reg gather<int32_t,int32_t>(const int32_t *mem_addr, const reg idx) {
+		return gather_seq<int32_t,int32_t>(mem_addr, idx);
+	}
+
+	template <>
+	inline reg gather<int16_t,int16_t>(const int16_t *mem_addr, const reg idx) {
+		return gather_seq<int16_t,int16_t>(mem_addr, idx);
+	}
+
+	template <>
+	inline reg gather<int8_t,int8_t>(const int8_t *mem_addr, const reg idx) {
+		return gather_seq<int8_t,int8_t>(mem_addr, idx);
+	}
+
+	// -------------------------------------------------------------------------------------------------------- scatter
+
+	template <>
+	inline void scatter<double,int64_t>(double *mem_addr, const reg idx, const reg r) {
+		scatter_seq<double,int64_t>(mem_addr, idx, r);
+	}
+
+	template <>
+	inline void scatter<float,int32_t>(float *mem_addr, const reg idx, const reg r) {
+		scatter_seq<float,int32_t>(mem_addr, idx, r);
+	}
+
+	template <>
+	inline void scatter<int64_t,int64_t>(int64_t *mem_addr, const reg idx, const reg r) {
+		scatter_seq<int64_t,int64_t>(mem_addr, idx, r);
+	}
+
+	template <>
+	inline void scatter<int32_t,int32_t>(int32_t *mem_addr, const reg idx, const reg r) {
+		scatter_seq<int32_t,int32_t>(mem_addr, idx, r);
+	}
+
+	template <>
+	inline void scatter<int16_t,int16_t>(int16_t *mem_addr, const reg idx, const reg r) {
+		scatter_seq<int16_t,int16_t>(mem_addr, idx, r);
+	}
+
+	template <>
+	inline void scatter<int8_t,int8_t>(int8_t *mem_addr, const reg idx, const reg r) {
+		scatter_seq<int8_t,int8_t>(mem_addr, idx, r);
+	}
+
 	// ---------------------------------------------------------------------------------------------------------- cmpeq
 	template <>
 	inline msk cmpeq<double>(const reg v1, const reg v2) {

@@ -668,7 +668,7 @@ test-windows-x86-unit-nointr:
      - x86_64
      - windows
   script:
-    - ./ci/test-windows-unit.bat build_windows_x86_gcc_nointr build_windows_x86_msvc_nointr
+    - ./ci/test-windows-unit.bat build_windows_x86_msvc_nointr build_windows_x86_gcc_nointr
 
 test-windows-x86-unit-sse2:
   stage: test
@@ -682,7 +682,7 @@ test-windows-x86-unit-sse2:
     - sse2
     - windows
   script:
-    - ./ci/test-windows-unit.bat build_windows_x86_gcc_sse2 build_windows_x86_msvc_sse2
+    - ./ci/test-windows-unit.bat build_windows_x86_msvc_sse2 build_windows_x86_gcc_sse2
 
 test-windows-x86-unit-sse3:
   stage: test
@@ -696,7 +696,7 @@ test-windows-x86-unit-sse3:
     - sse3
     - windows
   script:
-    - ./ci/test-windows-unit.bat build_windows_x86_gcc_sse3 build_windows_x86_msvc_sse3
+    - ./ci/test-windows-unit.bat build_windows_x86_msvc_sse3 build_windows_x86_gcc_sse3
 
 test-windows-x86-unit-ssse3:
   stage: test
@@ -710,7 +710,7 @@ test-windows-x86-unit-ssse3:
     - ssse3
     - windows
   script:
-    - ./ci/test-windows-unit.bat build_windows_x86_gcc_ssse3 build_windows_x86_msvc_ssse3
+    - ./ci/test-windows-unit.bat build_windows_x86_msvc_ssse3 build_windows_x86_gcc_ssse3
 
 test-windows-x86-unit-sse4_1:
   stage: test
@@ -724,7 +724,7 @@ test-windows-x86-unit-sse4_1:
     - sse4.1
     - windows
   script:
-    - ./ci/test-windows-unit.bat build_windows_x86_gcc_sse4_1 build_windows_x86_msvc_sse4_1
+    - ./ci/test-windows-unit.bat build_windows_x86_msvc_sse4_1 build_windows_x86_gcc_sse4_1
 
 test-windows-x86-unit-sse4_2:
   stage: test
@@ -738,7 +738,7 @@ test-windows-x86-unit-sse4_2:
     - sse4.2
     - windows
   script:
-    - ./ci/test-windows-unit.bat build_windows_x86_gcc_sse4_2 build_windows_x86_msvc_sse4_2
+    - ./ci/test-windows-unit.bat build_windows_x86_msvc_sse4_2 build_windows_x86_gcc_sse4_2
 
 test-windows-x86-unit-avx:
   stage: test
@@ -752,7 +752,7 @@ test-windows-x86-unit-avx:
     - avx
     - windows
   script:
-    - ./ci/test-windows-unit.bat build_windows_x86_gcc_avx build_windows_x86_msvc_avx
+    - ./ci/test-windows-unit.bat build_windows_x86_msvc_avx build_windows_x86_gcc_avx
 
 test-windows-x86-unit-avx2:
   stage: test
@@ -766,7 +766,7 @@ test-windows-x86-unit-avx2:
     - avx2
     - windows
   script:
-    - ./ci/test-windows-unit.bat build_windows_x86_gcc_avx2 build_windows_x86_msvc_avx2
+    - ./ci/test-windows-unit.bat build_windows_x86_msvc_avx2 build_windows_x86_gcc_avx2
 
 test-windows-x86-unit-avx2-fma:
   stage: test
@@ -780,7 +780,7 @@ test-windows-x86-unit-avx2-fma:
     - avx2
     - windows
   script:
-    - ./ci/test-windows-unit.bat build_windows_x86_gcc_avx2_fma build_windows_x86_msvc_avx2_fma
+    - ./ci/test-windows-unit.bat build_windows_x86_msvc_avx2_fma build_windows_x86_gcc_avx2_fma
 
 # test-windows-x86-unit-avx512f:
 #   stage: test
@@ -792,7 +792,7 @@ test-windows-x86-unit-avx2-fma:
 #     - avx512f
 #     - windows
 #   script:
-#     - ./ci/test-windows-unit.bat build_windows_x86_gcc_avx512f build_windows_x86_msvc_avx512f
+#     - ./ci/test-windows-unit.bat build_windows_x86_msvc_avx512f build_windows_x86_gcc_avx512f
 
 # COVERAGE ---------------------------------------------------------------------------------------------------------------
 

@@ -305,6 +305,31 @@ public:
 	inline Reg<T>      xorb         (const Msk<N<T>()> m)                  const { return this->xorb (m.template toReg<T>().r); }
 
 #ifndef MIPP_NO_INTRINSICS
+	template <typename TI>
+	inline void gather(const T* mem, const Reg<TI> idx)
+	{
+		auto r = mipp::gather<T,TI>(mem, idx.r);
+		this->r = r;
+	}
+	template <typename TI>
+	inline void scatter(T* mem, const Reg<TI> idx) const
+	{
+		mipp::scatter<T,TI>(mem, idx.r, this->r);
+	}
+#else
+	template <typename TI>
+	inline void gather(const T* mem, const Reg<TI> idx)
+	{
+		this->r = mem[idx.r];
+	}
+	template <typename TI>
+	inline void scatter(T* mem, const Reg<TI> idx) const
+	{
+		mem[idx.r] = this->r;
+	}
+#endif
+
+#ifndef MIPP_NO_INTRINSICS
 	template <typename T2> inline Reg<T2> cvt ()               const { return mipp::cvt<T,T2>(r);       }
 	template <typename T2> inline Reg<T2> pack(const Reg<T> v) const { return mipp::pack<T,T2>(r, v.r); }
 	template <typename T2> inline Reg<T2> cast()               const { return Reg<T2>(this->r);         }
@@ -424,18 +449,16 @@ public:
 	}
 
 	template <proto_IL<T> IL = mipp::oloadu<T>>
-	inline void maskld(const Msk<N<T>()> m, const T* memp) const
+	inline void maskzld(const Msk<N<T>()> m, const T* memp)
 	{
-
-		mipp::Reg<T> r = mipp::maskld<T, IL>(m, memp);
+		mipp::Reg<T> r = mipp::maskzld<T, IL>(m, memp);
 		this->r = r;
-
 	}
 
 	template <proto_IL<T> IL = mipp::oloadu<T>, proto_IS<T> IS = mipp::storeu<T>>
-	inline void masklds(const Msk<N<T>()> m, const T* memp) const
+	inline void maskzlds(const Msk<N<T>()> m, const T* memp)
 	{
-		mipp::Reg<T> r = mipp::maskld<T, IL, IS>(m, memp);
+		mipp::Reg<T> r = mipp::maskzld<T, IL, IS>(m, memp);
 		this->r = r;
 	}
 
@@ -446,9 +469,22 @@ public:
 	}
 
 	template <proto_IS<T> IS = mipp::storeu<T>>
-	inline void masksts(const Msk<N<T>()> m, T* memp)
+	inline void masksts(const Msk<N<T>()> m, T* memp) const
 	{
 		return mipp::masksts<T, IS>(m, memp, *this);
+	}
+
+	template <typename TI>
+	inline void maskzgat(const Msk<N<T>()> m, const T* memp, const Reg<TI> idx)
+	{
+		mipp::Reg<T> r = mipp::maskzgat(m, memp, idx);
+		this->r = r;
+	}
+
+	template <typename TI>
+	inline void masksca(const Msk<N<T>()> m, T* memp, const Reg<TI> idx) const
+	{
+		mipp::masksca(m, memp, idx, *this);
 	}
 };
 
@@ -876,4 +912,16 @@ inline Reg<T2> pack(const Reg<T1> v1, const Reg<T1> v2) {
 template <typename T1, typename T2>
 inline Reg<T2> cast(const Reg<T1> v) {
 	return v.template cast<T2>();
+}
+
+template <typename TD, typename TI>
+inline Reg<TD> gather(const TD* mem, const Reg<TI> idx) {
+	Reg<TD> r;
+	r.gather(mem, idx);
+	return r;
+}
+
+template <typename TD, typename TI>
+inline void scatter(TD* mem, const Reg<TI> idx, const Reg<TD> r) {
+	r.scatter(mem, idx);
 }

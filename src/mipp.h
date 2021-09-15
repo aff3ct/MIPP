@@ -714,6 +714,18 @@ template <int      N> inline bool  testz        (const msk, const msk)          
 template <typename T> inline bool  testz        (const reg)                       { errorMessage<T>("testz");         exit(-1); }
 template <int      N> inline bool  testz        (const msk)                       { errorMessage<N>("testz");         exit(-1); }
 
+template <typename TD, typename TI>
+inline reg gather(const TD*, const reg) {
+	errorMessage<TD,TI>("gather");
+	exit(-1);
+}
+
+template <typename TD, typename TI>
+inline void scatter(TD*, const reg, const reg) {
+	errorMessage<TD,TI>("scatter");
+	exit(-1);
+}
+
 template <typename T1, typename T2>
 inline reg cvt(const reg) {
 	errorMessage<T1,T2>("cvt");
@@ -981,7 +993,7 @@ inline reg maskz(const msk m, const reg a, const reg b, const reg c)
 }
 
 template <typename T, proto_il<T> IL = mipp::loadu<T>>
-inline reg maskld(const msk m, const T* memp)
+inline reg maskzld(const msk m, const T* memp)
 {
 	auto rl = IL(memp);
 	auto rm = toreg<N<T>()>(m);
@@ -989,7 +1001,7 @@ inline reg maskld(const msk m, const T* memp)
 }
 
 template <typename T, proto_il<T> IL = mipp::loadu<T>, proto_is<T> IS = mipp::storeu<T>>
-inline reg masklds(const msk m, const T* memp)
+inline reg maskzlds(const msk m, const T* memp)
 {
 #ifndef MIPP_NO
 	alignas(alignof(mipp::reg)) T mask[mipp::N<T>()], data[mipp::N<T>()];
@@ -1025,6 +1037,22 @@ inline void masksts(const msk m, T* memp, const reg a)
 	for (int i = 0; i < mipp::N<T>(); i++)
 		if (mask[i] != (T)0)
 			memp[i] = data[i];
+}
+
+template <typename TD, typename TI>
+inline reg maskzgat(const msk m, const TD* memp, const reg idx)
+{
+	auto rg = mipp::gather<TD,TI>(memp, idx);
+	auto rm = toreg<N<TD>()>(m);
+	return mipp::andb<TD>(rg, rm);
+}
+
+template <typename TD, typename TI>
+inline void masksca(const msk m, TD* memp, const reg idx, const reg r)
+{
+	auto rg = mipp::gather<TD,TI>(memp, idx);
+	auto rs = mipp::blend<TD>(r, rg, m);
+	mipp::scatter<TD,TI>(memp, idx, rs);
 }
 
 // -------------------------------------------------------------------------------------------------------- obj masking
@@ -1113,7 +1141,7 @@ inline Reg<T> maskz(const Msk<N<T>()> m, const Reg<T> a, const Reg<T> b, const R
 }
 
 template <typename T, proto_IL<T> IL = mipp::oloadu<T>>
-inline Reg<T> maskld(const Msk<N<T>()> m, const T* memp)
+inline Reg<T> maskzld(const Msk<N<T>()> m, const T* memp)
 {
 #ifndef MIPP_NO
 	auto rl = IL(memp);
@@ -1125,7 +1153,7 @@ inline Reg<T> maskld(const Msk<N<T>()> m, const T* memp)
 }
 
 template <typename T, proto_IL<T> IL = mipp::oloadu<T>, proto_IS<T> IS = mipp::storeu<T>>
-inline Reg<T> masklds(const Msk<N<T>()> m, const T* memp)
+inline Reg<T> maskzlds(const Msk<N<T>()> m, const T* memp)
 {
 #ifndef MIPP_NO
 	alignas(alignof(mipp::reg)) T mask[mipp::N<T>()], data[mipp::N<T>()];
@@ -1164,6 +1192,27 @@ inline void masksts(const Msk<N<T>()> m, T* memp, const Reg<T> a)
 			memp[i] = data[i];
 #else
 	if (m.m) memp[0] = a.r;
+#endif
+}
+
+template <typename TD, typename TI>
+inline Reg<TD> maskzgat(const Msk<N<TD>()> m, const TD* memp, const Reg<TI> idx)
+{
+#ifndef MIPP_NO
+	return Reg<TD>(mipp::maskzgat<TD,TI>(m.m, memp, idx.r));
+#else
+	return m.m ? Reg<TD>(memp[idx.r]) : Reg<TD>((TD)0);
+#endif
+}
+
+template <typename TD, typename TI>
+inline void masksca(const Msk<N<TD>()> m, TD* memp, const Reg<TI> idx, const Reg<TD> r)
+{
+#ifndef MIPP_NO
+	mipp::masksca<TD,TI>(m.m, memp, idx.r, r.r);
+#else
+	if (m.m)
+		memp[idx.r] = r.r;
 #endif
 }
 
@@ -1482,6 +1531,30 @@ template <typename T> inline T hadd(const reg v) { return reduction<T,mipp::add<
 template <typename T> inline T hmul(const reg v) { return reduction<T,mipp::mul<T>>::sapply(v); }
 template <typename T> inline T hmin(const reg v) { return reduction<T,mipp::min<T>>::sapply(v); }
 template <typename T> inline T hmax(const reg v) { return reduction<T,mipp::max<T>>::sapply(v); }
+
+// ---------------------------------------------------------------------------------------- sequential gather & scatter
+
+template <typename TD, typename TI>
+inline reg gather_seq(const TD *mem_addr, const reg idx) {
+	constexpr int N = mipp::N<TI>();
+	TI indexes[N];
+	mipp::storeu<TI>(indexes, idx);
+	TD data[N];
+	for (int i = 0; i < N; i++)
+		data[i] = mem_addr[indexes[i]];
+	return mipp::loadu<TD>(data);
+}
+
+template <typename TD, typename TI>
+inline void scatter_seq(TD *mem_addr, const reg idx, const reg r) {
+	constexpr int N = mipp::N<TI>();
+	TI indexes[N];
+	TD data[N];
+	mipp::storeu<TI>(indexes, idx);
+	mipp::storeu<TD>(data, r);
+	for (int i = 0; i < N; i++)
+		mem_addr[indexes[i]] = data[i];
+}
 
 // ------------------------------------------------------------------------------------------------- wrapper to objects
 #include "mipp_object.hxx"
