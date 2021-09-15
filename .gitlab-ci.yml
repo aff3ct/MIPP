@@ -271,7 +271,6 @@ test-linux-x86-unit-avx2-fma:
   script:
     - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_avx2_fma build_linux_x86_clang_avx2_fma build_linux_x86_icpc_avx2_fma
 
-
 test-linux-x86-unit-avx512f:
   image: ubuntu:20.04
   stage: test
@@ -755,34 +754,33 @@ test-windows-x86-unit-avx:
   script:
     - ./ci/test-windows-unit.bat build_windows_x86_gcc_avx build_windows_x86_msvc_avx
 
-# test-windows-x86-unit-avx2:
-#   stage: test
-#   needs:
-#     - job: build-windows-x86-gcc
-#       artifacts: true
-#     - job: build-windows-x86-msvc
-#       artifacts: true
-#   tags:
-#     - x86_64
-#     - avx2
-#     - windows
-#   script:
-#     - ./ci/test-windows-unit.bat build_windows_x86_gcc_avx2 build_windows_x86_msvc_avx2
+test-windows-x86-unit-avx2:
+  stage: test
+  needs:
+    - job: build-windows-x86-gcc
+      artifacts: true
+    - job: build-windows-x86-msvc
+      artifacts: true
+  tags:
+    - x86_64
+    - avx2
+    - windows
+  script:
+    - ./ci/test-windows-unit.bat build_windows_x86_gcc_avx2 build_windows_x86_msvc_avx2
 
-# test-windows-x86-unit-avx2-fma:
-#   stage: test
-#   needs:
-#     - job: build-windows-x86-gcc
-#       artifacts: true
-#     - job: build-windows-x86-msvc
-#       artifacts: true
-#   tags:
-#     - x86_64
-#     - avx2
-#     - windows
-#   script:
-#     - ./ci/test-windows-unit.bat build_windows_x86_gcc_avx2_fma build_windows_x86_msvc_avx2_fma
-
+test-windows-x86-unit-avx2-fma:
+  stage: test
+  needs:
+    - job: build-windows-x86-gcc
+      artifacts: true
+    - job: build-windows-x86-msvc
+      artifacts: true
+  tags:
+    - x86_64
+    - avx2
+    - windows
+  script:
+    - ./ci/test-windows-unit.bat build_windows_x86_gcc_avx2_fma build_windows_x86_msvc_avx2_fma
 
 # test-windows-x86-unit-avx512f:
 #   stage: test

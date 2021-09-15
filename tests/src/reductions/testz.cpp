@@ -28,8 +28,8 @@ void test_reg_testz_int()
 			}
 		}
 
-		mipp::reg r1 = mipp::load<T>(inputs1);
-		mipp::reg r2 = mipp::load<T>(inputs2);
+		mipp::reg r1 = mipp::loadu<T>(inputs1);
+		mipp::reg r2 = mipp::loadu<T>(inputs2);
 		auto val = mipp::testz<T>(r1, r2);
 
 		for (auto i = 0; i < N; i++)
@@ -252,7 +252,7 @@ void test_reg_testz1_int()
 			}
 		}
 
-		mipp::reg r1 = mipp::load<T>(inputs1);
+		mipp::reg r1 = mipp::loadu<T>(inputs1);
 		auto val = mipp::testz<T>(r1);
 
 		auto res = inputs1[0];

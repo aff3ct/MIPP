@@ -991,7 +991,11 @@ inline reg maskld(const msk m, const T* memp)
 template <typename T, proto_il<T> IL = mipp::loadu<T>, proto_is<T> IS = mipp::storeu<T>>
 inline reg masklds(const msk m, const T* memp)
 {
+#ifndef MIPP_NO
+	alignas(alignof(mipp::reg)) T mask[mipp::N<T>()], data[mipp::N<T>()];
+#else
 	T mask[mipp::N<T>()], data[mipp::N<T>()];
+#endif
 	auto rm = toreg<N<T>()>(m);
 	IS(mask, rm);
 	for (int i = 0; i < mipp::N<T>(); i++)
@@ -1010,7 +1014,11 @@ inline void maskst(const msk m, T* memp, const reg a)
 template <typename T, proto_is<T> IS = mipp::storeu<T>>
 inline void masksts(const msk m, T* memp, const reg a)
 {
+#ifndef MIPP_NO
+	alignas(alignof(mipp::reg)) T mask[mipp::N<T>()], data[mipp::N<T>()];
+#else
 	T mask[mipp::N<T>()], data[mipp::N<T>()];
+#endif
 	auto rm = toreg<N<T>()>(m);
 	IS(mask, rm);
 	IS(data, a);
@@ -1120,7 +1128,7 @@ template <typename T, proto_IL<T> IL = mipp::oloadu<T>, proto_IS<T> IS = mipp::s
 inline Reg<T> masklds(const Msk<N<T>()> m, const T* memp)
 {
 #ifndef MIPP_NO
-	T mask[mipp::N<T>()], data[mipp::N<T>()];
+	alignas(alignof(mipp::reg)) T mask[mipp::N<T>()], data[mipp::N<T>()];
 	auto rm = m.template toReg<T>();
 	IS(mask, rm);
 	for (int i = 0; i < mipp::N<T>(); i++)
@@ -1147,7 +1155,7 @@ template <typename T, proto_IS<T> IS = mipp::storeu<T>>
 inline void masksts(const Msk<N<T>()> m, T* memp, const Reg<T> a)
 {
 #ifndef MIPP_NO
-	T mask[mipp::N<T>()], data[mipp::N<T>()];
+	alignas(alignof(mipp::reg)) T mask[mipp::N<T>()], data[mipp::N<T>()];
 	auto rm = m.template toReg<T>();
 	IS(mask, rm);
 	IS(data, a);

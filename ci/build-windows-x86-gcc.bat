@@ -5,15 +5,15 @@ call ./ci/tools/threads.bat
 cd tests
 
 rem set build_root=build_windows_x86_gcc
-call :compile "build_windows_x86_gcc_nointr"   "-DMIPP_NO_INTRINSICS"
-call :compile "build_windows_x86_gcc_sse2"     "-msse2"
-call :compile "build_windows_x86_gcc_sse3"     "-msse3"
-call :compile "build_windows_x86_gcc_ssse3"    "-mssse3"
-call :compile "build_windows_x86_gcc_sse4_1"   "-msse4.1"
-call :compile "build_windows_x86_gcc_sse4_2"   "-msse4.2"
-call :compile "build_windows_x86_gcc_avx"      "-mavx"
-call :compile "build_windows_x86_gcc_avx2"     "-mavx2"
-call :compile "build_windows_x86_gcc_avx2_fma" "-mavx2 -mfma"
+call :compile "build_windows_x86_gcc_nointr"   "-Wno-attributes -DMIPP_NO_INTRINSICS"
+call :compile "build_windows_x86_gcc_sse2"     "-Wno-attributes -msse2"
+call :compile "build_windows_x86_gcc_sse3"     "-Wno-attributes -msse3"
+call :compile "build_windows_x86_gcc_ssse3"    "-Wno-attributes -mssse3"
+call :compile "build_windows_x86_gcc_sse4_1"   "-Wno-attributes -msse4.1"
+call :compile "build_windows_x86_gcc_sse4_2"   "-Wno-attributes -msse4.2"
+call :compile "build_windows_x86_gcc_avx"      "-Wno-attributes -mavx"
+call :compile "build_windows_x86_gcc_avx2"     "-Wno-attributes -mavx2"
+call :compile "build_windows_x86_gcc_avx2_fma" "-Wno-attributes -mavx2 -mfma"
 rem call :compile "build_windows_x86_gcc_avx512f"  "-mavx512f"
 
 exit /B %ERRORLEVEL%

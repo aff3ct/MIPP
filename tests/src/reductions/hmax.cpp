@@ -19,7 +19,7 @@ void test_reg_hmax_int()
 		for (auto i = 0; i < N; i++)
 			inputs1[i] = dis(g);
 
-		mipp::reg r1 = mipp::load<T>(inputs1);
+		mipp::reg r1 = mipp::loadu<T>(inputs1);
 		auto val = mipp::hmax<T>(r1);
 
 		auto res = inputs1[0];
@@ -43,7 +43,7 @@ void test_reg_hmax_real()
 		for (auto i = 0; i < N; i++)
 			inputs1[i] = dis(g);
 
-		mipp::reg r1 = mipp::load<T>(inputs1);
+		mipp::reg r1 = mipp::loadu<T>(inputs1);
 		auto val = mipp::hmax<T>(r1);
 
 		auto res = inputs1[0];
