@@ -37,12 +37,18 @@ void test_reg_scatter()
 #ifndef MIPP_NO
 TEST_CASE("Scatter - mipp::reg", "[mipp::scatter]")
 {
+#if defined(MIPP_64BIT)
 	SECTION("datatype = double") { test_reg_scatter<double,int64_t>(); }
+#endif
 	SECTION("datatype = float") { test_reg_scatter<float,int32_t>(); }
+#if defined(MIPP_64BIT)
 	SECTION("datatype = int64_t") { test_reg_scatter<int64_t,int64_t>(); }
+#endif
 	SECTION("datatype = int32_t") { test_reg_scatter<int32_t,int32_t>(); }
+#if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_reg_scatter<int16_t,int16_t>(); }
 	//SECTION("datatype = int8_t") { test_reg_scatter<int8_t,int8_t>(); }
+#endif
 }
 #endif
 
@@ -76,12 +82,18 @@ void test_Reg_scatter()
 
 TEST_CASE("Scatter - mipp::Reg", "[mipp::scatter]")
 {
+#if defined(MIPP_64BIT)
 	SECTION("datatype = double") { test_Reg_scatter<double,int64_t>(); }
+#endif
 	SECTION("datatype = float") { test_Reg_scatter<float,int32_t>(); }
+#if defined(MIPP_64BIT)
 	SECTION("datatype = int64_t") { test_Reg_scatter<int64_t,int64_t>(); }
+#endif
 	SECTION("datatype = int32_t") { test_Reg_scatter<int32_t,int32_t>(); }
+#if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_Reg_scatter<int16_t,int16_t>(); }
 	//SECTION("datatype = int8_t") { test_Reg_scatter<int8_t,int8_t>(); }
+#endif
 }
 
 template <typename TD, typename TI>
@@ -126,12 +138,18 @@ void test_reg_masksca()
 #ifndef MIPP_NO
 TEST_CASE("Masked scatter - mipp::reg", "[mipp::masksca]")
 {
+#if defined(MIPP_64BIT)
 	SECTION("datatype = double") { test_reg_masksca<double,int64_t>(); }
+#endif
 	SECTION("datatype = float") { test_reg_masksca<float,int32_t>(); }
+#if defined(MIPP_64BIT)
 	SECTION("datatype = int64_t") { test_reg_masksca<int64_t,int64_t>(); }
+#endif
 	SECTION("datatype = int32_t") { test_reg_masksca<int32_t,int32_t>(); }
+#if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_reg_masksca<int16_t,int16_t>(); }
 	//SECTION("datatype = int8_t") { test_reg_masksca<int8_t,int8_t>(); }
+#endif
 }
 #endif
 
@@ -176,10 +194,16 @@ void test_Reg_masksca()
 
 TEST_CASE("Masked scatter - mipp::Reg", "[mipp::masksca]")
 {
+#if defined(MIPP_64BIT)
 	SECTION("datatype = double") { test_Reg_masksca<double,int64_t>(); }
+#endif
 	SECTION("datatype = float") { test_Reg_masksca<float,int32_t>(); }
+#if defined(MIPP_64BIT)
 	SECTION("datatype = int64_t") { test_Reg_masksca<int64_t,int64_t>(); }
+#endif
 	SECTION("datatype = int32_t") { test_Reg_masksca<int32_t,int32_t>(); }
+#if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_Reg_masksca<int16_t,int16_t>(); }
 	//SECTION("datatype = int8_t") { test_Reg_masksca<int8_t,int8_t>(); }
+#endif
 }

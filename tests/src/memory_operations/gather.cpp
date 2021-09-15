@@ -31,12 +31,18 @@ void test_reg_gather()
 #ifndef MIPP_NO
 TEST_CASE("Gather - mipp::reg", "[mipp::gather]")
 {
+#if defined(MIPP_64BIT)
 	SECTION("datatype = double") { test_reg_gather<double,int64_t>(); }
+#endif
 	SECTION("datatype = float") { test_reg_gather<float,int32_t>(); }
+#if defined(MIPP_64BIT)
 	SECTION("datatype = int64_t") { test_reg_gather<int64_t,int64_t>(); }
+#endif
 	SECTION("datatype = int32_t") { test_reg_gather<int32_t,int32_t>(); }
+#if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_reg_gather<int16_t,int16_t>(); }
 	//SECTION("datatype = int8_t") { test_reg_gather<int8_t,int8_t>(); }
+#endif
 }
 #endif
 
@@ -64,12 +70,18 @@ void test_Reg_gather()
 
 TEST_CASE("Gather - mipp::Reg", "[mipp::gather]")
 {
+#if defined(MIPP_64BIT)
 	SECTION("datatype = double") { test_Reg_gather<double,int64_t>(); }
+#endif
 	SECTION("datatype = float") { test_Reg_gather<float,int32_t>(); }
+#if defined(MIPP_64BIT)
 	SECTION("datatype = int64_t") { test_Reg_gather<int64_t,int64_t>(); }
+#endif
 	SECTION("datatype = int32_t") { test_Reg_gather<int32_t,int32_t>(); }
+#if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_Reg_gather<int16_t,int16_t>(); }
 	//SECTION("datatype = int8_t") { test_Reg_gather<int8_t,int8_t>(); }
+#endif
 }
 
 template <typename TD, typename TI>
@@ -108,12 +120,18 @@ void test_reg_maskzgat()
 #ifndef MIPP_NO
 TEST_CASE("Masked gather - mipp::reg", "[mipp::maskzgat]")
 {
+#if defined(MIPP_64BIT)
 	SECTION("datatype = double") { test_reg_maskzgat<double,int64_t>(); }
+#endif
 	SECTION("datatype = float") { test_reg_maskzgat<float,int32_t>(); }
+#if defined(MIPP_64BIT)
 	SECTION("datatype = int64_t") { test_reg_maskzgat<int64_t,int64_t>(); }
+#endif
 	SECTION("datatype = int32_t") { test_reg_maskzgat<int32_t,int32_t>(); }
+#if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_reg_maskzgat<int16_t,int16_t>(); }
 	//SECTION("datatype = int8_t") { test_reg_maskzgat<int8_t,int8_t>(); }
+#endif
 }
 #endif
 
@@ -152,10 +170,16 @@ void test_Reg_maskzgat()
 
 TEST_CASE("Masked gather - mipp::Reg", "[mipp::maskzgat]")
 {
+#if defined(MIPP_64BIT)
 	SECTION("datatype = double") { test_Reg_maskzgat<double,int64_t>(); }
+#endif
 	SECTION("datatype = float") { test_Reg_maskzgat<float,int32_t>(); }
+#if defined(MIPP_64BIT)
 	SECTION("datatype = int64_t") { test_Reg_maskzgat<int64_t,int64_t>(); }
+#endif
 	SECTION("datatype = int32_t") { test_Reg_maskzgat<int32_t,int32_t>(); }
+#if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_Reg_maskzgat<int16_t,int16_t>(); }
 	//SECTION("datatype = int8_t") { test_Reg_maskzgat<int8_t,int8_t>(); }
+#endif
 }
