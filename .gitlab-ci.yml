@@ -650,6 +650,7 @@ build-windows-x86-msvc:
       - ./tests/build_windows_x86_msvc_sse4_1/bin/
       - ./tests/build_windows_x86_msvc_sse4_2/bin/
       - ./tests/build_windows_x86_msvc_avx/bin/
+      - ./tests/build_windows_x86_msvc_avx2/bin/
       - ./tests/build_windows_x86_msvc_avx2_fma/bin/
       # - ./tests/build_windows_x86_msvc_avx512f/bin/
   script:
