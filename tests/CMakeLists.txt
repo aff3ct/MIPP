@@ -18,6 +18,11 @@ set (EXECUTABLE_OUTPUT_PATH bin/)
 #    cmake_policy(SET CMP0003 NEW)
 #endif(COMMAND cmake_policy)
 
+include(cmake/target_optimizations.cmake)
+include(cmake/target_fast_math.cmake)
+include(cmake/compiler_warnings.cmake)
+
+
 # include MIPP headers
 include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/../src/")
 
@@ -27,5 +32,9 @@ include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/lib/Catch2/include/")
 # Generate the source files list
 file (GLOB_RECURSE source_files src/*)
 add_executable(run_tests ${source_files})
+target_set_cxx_arch_flags(run_tests)
+target_set_mipp_intrinsics(run_tests)  # allow deactivation of mipp
+# target_set_cxx_fast_math(run_tests)  # produces errors in tests
+# target_activate_cxx_compiler_warnings(run_tests)  # too many warning
 
 set_target_properties(run_tests PROPERTIES POSITION_INDEPENDENT_CODE ON) # set -fpie
