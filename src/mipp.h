@@ -544,7 +544,7 @@ static inline void errorMessage(std::string instr)
 	type_names[typeid(double)  ] = "double";
 
 	std::string message;
-#if cplusplus >= 201703L
+#if __cplusplus >= 201703L
 	if constexpr (RegisterSizeBit == 0)
 #else
 	if (RegisterSizeBit == 0)
@@ -563,7 +563,7 @@ template <int N>
 static inline void errorMessage(std::string instr)
 {
 	std::string message;
-#if cplusplus >= 201703L
+#if __cplusplus >= 201703L
 	if constexpr (RegisterSizeBit == 0)
 #else
 	if (RegisterSizeBit == 0)

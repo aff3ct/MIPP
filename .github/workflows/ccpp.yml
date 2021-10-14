@@ -30,10 +30,10 @@ jobs:
         git clone https://github.com/marehr/intel-sde-downloader
         cd intel-sde-downloader
         pip install -r requirements.txt
-        python ./intel-sde-downloader.py sde-external-8.59.0-2020-10-05-lin.tar.bz2
-        tar xvf sde-external-8.59.0-2020-10-05-lin.tar.bz2
-        mv sde-external-8.59.0-2020-10-05-lin sde
-        rm sde-external-8.59.0-2020-10-05-lin.tar.bz2
+        python ./intel-sde-downloader.py sde-external-8.69.1-2021-07-18-lin.tar.bz2
+        tar xvf sde-external-8.69.1-2021-07-18-lin.tar.bz2
+        mv sde-external-8.69.1-2021-07-18-lin sde
+        rm sde-external-8.69.1-2021-07-18-lin.tar.bz2
         sudo sh -c "echo 0 > /proc/sys/kernel/yama/ptrace_scope"
         cd ..
     - name: run-test-nointr  
@@ -69,10 +69,10 @@ jobs:
         git clone https://github.com/marehr/intel-sde-downloader
         cd intel-sde-downloader
         pip install -r requirements.txt
-        python ./intel-sde-downloader.py sde-external-8.59.0-2020-10-05-lin.tar.bz2
-        tar xvf sde-external-8.59.0-2020-10-05-lin.tar.bz2
-        mv sde-external-8.59.0-2020-10-05-lin sde
-        rm sde-external-8.59.0-2020-10-05-lin.tar.bz2
+        python ./intel-sde-downloader.py sde-external-8.69.1-2021-07-18-lin.tar.bz2
+        tar xvf sde-external-8.69.1-2021-07-18-lin.tar.bz2
+        mv sde-external-8.69.1-2021-07-18-lin sde
+        rm sde-external-8.69.1-2021-07-18-lin.tar.bz2
         sudo sh -c "echo 0 > /proc/sys/kernel/yama/ptrace_scope"
         cd ..
     - name: run-test-sse2  
@@ -114,10 +114,10 @@ jobs:
         git clone https://github.com/marehr/intel-sde-downloader
         cd intel-sde-downloader
         pip install -r requirements.txt
-        python ./intel-sde-downloader.py sde-external-8.59.0-2020-10-05-lin.tar.bz2
-        tar xvf sde-external-8.59.0-2020-10-05-lin.tar.bz2
-        mv sde-external-8.59.0-2020-10-05-lin sde
-        rm sde-external-8.59.0-2020-10-05-lin.tar.bz2
+        python ./intel-sde-downloader.py sde-external-8.69.1-2021-07-18-lin.tar.bz2
+        tar xvf sde-external-8.69.1-2021-07-18-lin.tar.bz2
+        mv sde-external-8.69.1-2021-07-18-lin sde
+        rm sde-external-8.69.1-2021-07-18-lin.tar.bz2
         sudo sh -c "echo 0 > /proc/sys/kernel/yama/ptrace_scope"
         cd ..
     - name: run-test-avx
@@ -154,10 +154,10 @@ jobs:
         git clone https://github.com/marehr/intel-sde-downloader
         cd intel-sde-downloader
         pip install -r requirements.txt
-        python ./intel-sde-downloader.py sde-external-8.59.0-2020-10-05-lin.tar.bz2
-        tar xvf sde-external-8.59.0-2020-10-05-lin.tar.bz2
-        mv sde-external-8.59.0-2020-10-05-lin sde
-        rm sde-external-8.59.0-2020-10-05-lin.tar.bz2
+        python ./intel-sde-downloader.py sde-external-8.69.1-2021-07-18-lin.tar.bz2
+        tar xvf sde-external-8.69.1-2021-07-18-lin.tar.bz2
+        mv sde-external-8.69.1-2021-07-18-lin sde
+        rm sde-external-8.69.1-2021-07-18-lin.tar.bz2
         sudo sh -c "echo 0 > /proc/sys/kernel/yama/ptrace_scope"
         cd ..
     - name: run-test-avx512f
