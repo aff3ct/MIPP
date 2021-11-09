@@ -8,8 +8,12 @@
 typedef double float64_t;
 typedef float float32_t;
 
+#include "mipp_v2_tools.h"
+
 #if defined(__AVX__)
 #include "mipp_v2_impl_AVX.h"
 #endif
+
+#include "mipp_v2_interface.h"
 
 #endif /* MY_INTRINSICS_PLUS_PLUS_H_ */

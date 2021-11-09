@@ -9,7 +9,7 @@
 void print_v(float32_t* v, const std::string &name)
 {
 	std::cout << name << " = [";
-	for (int i = 0; i < mipp::N<float32_t,4>(); i++)
+	for (uint32_t i = 0; i < mipp::N<float32_t,4>(); i++)
 		std::cout << v[i] << ",";
 	std::cout << "]" << std::endl;
 }
