@@ -50,10 +50,38 @@
 
 // ----------------------------------------------------------- error management
 
-#define MIPP_MACRO_UNIMPLEMENTED_2ARGS(MIPP_NAME, INSTR_NAME_SMALL, LMUL, FULL_TYPE, UNUSED_INTEL_TYPE, UNUSED_INTEL_LDST_TYPE, UNUSED_CAST_TYPE) \
-  rvd_##INSTR_NAME_SMALL##_##FULL_TYPE##_t mipp_##INSTR_NAME_SMALL##_##MIPP_NAME##_##FULL_TYPE(rvd_##INSTR_NAME_SMALL##_##FULL_TYPE##_t rvd1, rvd_##INSTR_NAME_SMALL##_##FULL_TYPE##_t rvd2) \
+#define MIPP_MACRO_UNIMPLEMENTED_SET1(MIPP_NAME, INSTR_NAME_LO, N_BITS, TYPE, UNUSED_INTEL_TYPE, UNUSED_INTEL_LDST_TYPE, UNUSED_CAST_TYPE) \
+  rvd_##INSTR_NAME_LO##_##TYPE##N_BITS##_t mipp_##INSTR_NAME_LO##_##MIPP_NAME##_##TYPE##N_BITS(TYPE##N_BITS##_t val) \
   { \
-    printf("ERROR: 'mipp_%s_%s_%s_m%s' is not supported!\n", #INSTR_NAME_SMALL, #MIPP_NAME, #FULL_TYPE, #LMUL); \
+    printf("ERROR: 'mipp_%s_%s_%s%s' is not supported!\n", #INSTR_NAME_LO, #MIPP_NAME, #TYPE, #N_BITS); \
+    exit(-1); \
+  }
+
+#define MIPP_MACRO_UNIMPLEMENTED_1ARG(MIPP_NAME, INSTR_NAME_LO, N_BITS, TYPE, UNUSED_INTEL_TYPE, UNUSED_INTEL_LDST_TYPE, UNUSED_CAST_TYPE) \
+  rvd_##INSTR_NAME_LO##_##TYPE##N_BITS##_t mipp_##INSTR_NAME_LO##_##MIPP_NAME##_##TYPE##N_BITS(rvd_##INSTR_NAME_LO##_##TYPE##N_BITS##_t rvd) \
+  { \
+    printf("ERROR: 'mipp_%s_%s_%s%s' is not supported!\n", #INSTR_NAME_LO, #MIPP_NAME, #TYPE, #N_BITS); \
+    exit(-1); \
+  }
+
+#define MIPP_MACRO_UNIMPLEMENTED_2ARGS(MIPP_NAME, INSTR_NAME_LO, N_BITS, TYPE, UNUSED_INTEL_TYPE, UNUSED_INTEL_LDST_TYPE, UNUSED_CAST_TYPE) \
+  rvd_##INSTR_NAME_LO##_##TYPE##N_BITS##_t mipp_##INSTR_NAME_LO##_##MIPP_NAME##_##TYPE##N_BITS(rvd_##INSTR_NAME_LO##_##TYPE##N_BITS##_t rvd1, rvd_##INSTR_NAME_LO##_##TYPE##N_BITS##_t rvd2) \
+  { \
+    printf("ERROR: 'mipp_%s_%s_%s%s' is not supported!\n", #INSTR_NAME_LO, #MIPP_NAME, #TYPE, #N_BITS); \
+    exit(-1); \
+  }
+
+#define MIPP_MACRO_UNIMPLEMENTED_3ARGS(MIPP_NAME, INSTR_NAME_LO, N_BITS, TYPE, UNUSED_INTEL_TYPE, UNUSED_INTEL_LDST_TYPE, UNUSED_CAST_TYPE) \
+  rvd_##INSTR_NAME_LO##_##TYPE##N_BITS##_t mipp_##INSTR_NAME_LO##_##MIPP_NAME##_##TYPE##N_BITS(rvd_##INSTR_NAME_LO##_##TYPE##N_BITS##_t rvd1, rvd_##INSTR_NAME_LO##_##TYPE##N_BITS##_t rvd2, rvd_##INSTR_NAME_LO##_##TYPE##N_BITS##_t rvd3) \
+  { \
+    printf("ERROR: 'mipp_%s_%s_%s%s' is not supported!\n", #INSTR_NAME_LO, #MIPP_NAME, #TYPE, #N_BITS); \
+    exit(-1); \
+  }
+
+#define MIPP_MACRO_UNIMPLEMENTED_XSHIFTR(MIPP_NAME, INSTR_NAME_LO, N_BITS, TYPE, UNUSED_INTEL_TYPE, UNUSED_INTEL_LDST_TYPE, UNUSED_CAST_TYPE) \
+  rvd_##INSTR_NAME_LO##_##TYPE##N_BITS##_t mipp_##INSTR_NAME_LO##_##MIPP_NAME##_##TYPE##N_BITS(rvd_##INSTR_NAME_LO##_##TYPE##N_BITS##_t rvd1, rvd_##INSTR_NAME_LO##_int##N_BITS##_t rvd2) \
+  { \
+    printf("ERROR: 'mipp_%s_%s_%s%s' is not supported!\n", #INSTR_NAME_LO, #MIPP_NAME, #TYPE, #N_BITS); \
     exit(-1); \
   }
 

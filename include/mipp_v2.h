@@ -9,6 +9,7 @@ typedef double float64_t;
 typedef float float32_t;
 
 #include "mipp_v2_tools.h"
+#include "mipp_v2_impl_emulated.h"
 
 #if defined(__AVX__)
 #include "mipp_v2_impl_AVX.h"
