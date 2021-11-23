@@ -99,31 +99,112 @@ def build_ifdef_contents(funcs, func_name, dt_key, logi="&&"):
 			is_first = False
 	return str_ifdef
 
-def convert_ir(ir, isa, funcs, func_name, dt_par, dt_ret):
+def build_dt(input_str, isa, dt_par, dt_ret):
+	dt = ""
+	dt_info_carac = input_str.split("|")
+	if len(dt_info_carac) == 1:
+		if dt_info_carac[0] == "tp":
+			dt = dt_par
+		elif dt_info_carac[0] == "tr":
+			dt = dt_ret
+	elif len(dt_info_carac) > 1:
+		dt_info_carac_dic = {}
+		for dtic in dt_info_carac:
+			dt_info_carac_dic[dtic.split(':')[0]] = dtic.split(':')[1]
+
+		if "c" in dt_info_carac_dic:
+			if dt_info_carac_dic["c"] == "tp":
+				dt += isa["datatypes"][dt_par]["category"]
+			elif dt_info_carac_dic["c"] == "tr":
+				dt += isa["datatypes"][dt_ret]["category"]
+			elif dt_info_carac_dic["c"] == "int":
+				dt += "int"
+			elif dt_info_carac_dic["c"] == "uint":
+				dt += "uint"
+			elif dt_info_carac_dic["c"] == "float":
+				dt += "float"
+			else:
+				print("Panic: unknown datatype '" + dt_info_carac_dic["c"] + "'.")
+				exit(-1)
+		else:
+			dt += isa["datatypes"][dt_par]["category"]
+
+		if "b" in dt_info_carac_dic:
+			if dt_info_carac_dic["b"] == "tp":
+				dt += str(isa["datatypes"][dt_par]["n_bits"])
+			elif dt_info_carac_dic["b"] == "tr":
+				dt += str(isa["datatypes"][dt_ret]["n_bits"])
+			elif dt_info_carac_dic["b"] == "64":
+				dt += "64"
+			elif dt_info_carac_dic["b"] == "32":
+				dt += "32"
+			elif dt_info_carac_dic["b"] == "16":
+				dt += "16"
+			elif dt_info_carac_dic["b"] == "8":
+				dt += "8"
+			else:
+				print("Panic: unknown n_bits '" + dt_info_carac_dic["b"] + "'.")
+				exit(-1)
+		else:
+			dt += str(isa["datatypes"][dt_par]["n_bits"])
+	return dt
+
+def dump_dict_json(di, filename):
+	# debug
+	fj = open(filename, "w")
+	json_object = json.dumps(di, indent = 4)
+	print(json_object, file=fj)
+	fj.close()
+
+def is_missing_func(f_name, dt_key, funcs):
+	is_missing = False
+	if "implem_status" in funcs[f_name]:
+		if dt_key in funcs[f_name]["implem_status"]:
+			if len(funcs[f_name]["implem_status"][dt_key]) > 0:
+				is_missing = True
+		else:
+			is_missing = True
+	else:
+		is_missing = True
+
+	return is_missing
+
+def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret):
 	dt_key = dt_par + "," + dt_ret
 	converted_ir = ir
 
-	ar_substitute = re.findall(r'\%(.*)\%', ir)
+	ar_substitute = re.findall(r'\%([^%]*)\%', ir)
+	# print(ar_substitute)
 
 	for s in ar_substitute:
 		item_type = s.split('<')[0]
 
 		if item_type == "r":
-			dt_info = re.findall(r'\<([^]]*)\>', s)[0]
+			dt_info = re.findall(r'\<(.*)\>', s)[0]
 			# print("dt_info: " + dt_info)
 			dt_info_params = dt_info.split(",")
 			dt = ""
 			if len(dt_info_params) == 1:
-				dt_info_carac = dt_info_params[0].split("|")
-				if len(dt_info_carac) == 1 and dt_info_carac[0] == "tp":
-					dt = dt_par
-					# print("dt: " + dt)
+				dt = build_dt(dt_info_params[0], isa, dt_par, dt_ret)
 
 			if dt not in isa["datatypes"]:
 				print("Panic: '" + dt + "' is not available.")
 				exit(-1)
 
 			converted_ir = converted_ir.replace("%" + s + "%", build_reg(isa["datatypes"][dt], isa))
+
+		elif item_type == "m":
+			dt_info = re.findall(r'\<(.*)\>', s)[0]
+			dt_info_params = dt_info.split(",")
+			dt = ""
+			if len(dt_info_params) == 1:
+				dt = build_dt(dt_info_params[0], isa, dt_par, dt_ret)
+
+			if dt not in isa["datatypes"]:
+				print("Panic: '" + dt + "' is not available.")
+				exit(-1)
+
+			converted_ir = converted_ir.replace("%" + s + "%", build_msk(isa["datatypes"][dt], isa))
 
 		else:
 			f_name = item_type
@@ -134,39 +215,40 @@ def convert_ir(ir, isa, funcs, func_name, dt_par, dt_ret):
 				exit(-1)
 
 			fdt_key = ""
-
-			dt_info = re.findall(r'\<([^]]*)\>', s)[0]
+			dt_info = re.findall(r'\<(.*)\>', s)[0]
 			# print("dt_info: " + dt_info)
 			dt_info_params = dt_info.split(",")
 			if len(dt_info_params) == 1:
-				dt_info_carac = dt_info_params[0].split("|")
-				if len(dt_info_carac) == 1 and dt_info_carac[0] == "tp":
-					fdt_key = dt_par + "," + dt_par
-					# print("fdt_key: " + fdt_key)
+				dt = build_dt(dt_info_params[0], isa, dt_par, dt_ret)
+				fdt_key = dt + "," + dt
+				f_full_name = build_func_name_short(isa, dt, f_name);
 
-				f_full_name = build_func_name_short(isa, dt_par, f_name);
-
-			if "implem_status" not in funcs[f_name] or fdt_key not in funcs[f_name]["implem_status"]:
-				print("Panic: '" + f_name + "<" + fdt_key + ">' is not in the available MIPP functions.")
+			elif len(dt_info_params) == 2:
+				dt_1 = build_dt(dt_info_params[0], isa, dt_par, dt_ret)
+				dt_2 = build_dt(dt_info_params[1], isa, dt_par, dt_ret)
+				fdt_key = dt_1 + "," + dt_2
+				f_full_name = build_func_name(isa, dt_1, dt_2, f_name);
+			else:
+				print("Panic: '" + f_name + "' has incompatible format.")
 				exit(-1)
+
+			if f_name not in funcs:
+				print("Panic: '" + f_name + "' is not in the available MIPP functions.")
+				exit(-1)
+
+			if is_missing_func(f_name, fdt_key, funcs):
+				raise Exception("Warning: '" + f_name + "<" + fdt_key + ">' is not implemented.")
 
 			if len(funcs[f_name]["implem_status"]) > 0:
 				if "implem_status" not in funcs[func_name]:
 					funcs[func_name]["implem_status"] = {}
-				if fdt_key not in funcs[func_name]["implem_status"]:
-					funcs[func_name]["implem_status"][fdt_key] = []
-				for ifdef in funcs[f_name]["implem_status"][fdt_key]:
-					funcs[func_name]["implem_status"][fdt_key].append(ifdef)
+				if dt_key not in funcs[func_name]["implem_status"]:
+					funcs[func_name]["implem_status"][dt_key] = []
+				for ifdef in funcs[f_name]["implem_status"][dt_key]:
+					if ifdef not in funcs[func_name]["implem_status"][dt_key]:
+						funcs[func_name]["implem_status"][dt_key].append(ifdef)
 
 			converted_ir = converted_ir.replace("%" + s + "%", f_full_name)
-
-
-	# if len(ar_substitute) :
-	# 	print("func_name: " + func_name + "<par=" + dt_par + ",ret=" + dt_ret + ">")
-	# 	print(ar_substitute)
-	# 	# print("requirements: ", end='')
-	# 	# print(requirements)
-	# 	print("")
 
 	return converted_ir
 
@@ -175,7 +257,7 @@ def convert_ir(ir, isa, funcs, func_name, dt_par, dt_ret):
 # =============================================================================
 
 def gen_defines(isa, file):
-	template = """#define MIPP_MACRO_{{ type_category_upper }}{{ datatype.n_bits }}(MACRO, ...) MACRO(__VA_ARGS__, {{ datatype.n_bits }}, {{ datatype.category }}, {{ datatype.data_ext }}, {{ datatype.data_ext_logi }}, {{ isa.casts.to_ptr[datatype.name] }})"""
+	template = """#define MIPP_MACRO_{{ type_category_upper }}{{ datatype.n_bits }}(MACRO, ...) MACRO(__VA_ARGS__, {{ datatype.n_bits }}, {{ datatype.category }}, {{ datatype.data_ext }}, {{ datatype.data_ext_logi }}, {{ datatype.to_ptr }})"""
 	j2_template = Template(template, undefined=StrictUndefined)
 
 	for dt in isa["datatypes"]:
@@ -210,8 +292,8 @@ def gen_native_functions(isa, file, funcs):
 		"cast_m":       { "format": "short", "code": "m0.m;" },
 		"toreg":        { "format": "short", "code": "{% if dt_par.data_ext_msk != dt_ret.data_ext_logi -%}{{ isa.prefix }}_{{ instr_name }}{{dt_par.data_ext_msk}}_{{dt_ret.data_ext_logi}}(m0.m);{% else -%} m0.m;{% endif %}" },
 		"tomsk":        { "format": "short", "code": "{% if dt_par.data_ext_logi != dt_ret.data_ext_msk -%}{{ isa.prefix }}_{{ instr_name }}{{dt_par.data_ext_logi}}_{{dt_ret.data_ext_msk}}(r0.m);{% else -%} r0.m;{% endif %}" },
-		"load":         { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext_logi }}(({{ isa.casts.to_ptr[dt_par.name] }}*) p0);" },
-		"store":        { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext_logi }}(({{ isa.casts.to_ptr[dt_par.name]}}*) p0, r0.m);" },
+		"load":         { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext_logi }}(({{ dt_par.to_ptr }}*) p0);" },
+		"store":        { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext_logi }}(({{ dt_par.to_ptr }}*) p0, r0.m);" },
 		"set0":         { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext_logi }}();" },
 		"set0_m":       { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext_msk }}();" },
 		"set1":         { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(v0);" },
@@ -419,7 +501,7 @@ def gen_native_functions(isa, file, funcs):
 
 				j2_template = Template(ff["template"]["code"], undefined=StrictUndefined)
 				pre_rendering = j2_template.render(isa=isa, instr_name=ff["instr_name"], dt_par=isa["datatypes"][dt_par], dt_ret=isa["datatypes"][dt_ret])
-				post_rendering = convert_ir(pre_rendering, isa, funcs, f, dt_par, dt_ret)
+				post_rendering = parse_placeholders(pre_rendering, isa, funcs, f, dt_par, dt_ret)
 
 				if "if" in ff:
 					print("#if " + ff["if"], file=file)
@@ -443,18 +525,71 @@ def gen_native_functions(isa, file, funcs):
 				if "if" in ff:
 					print("#endif // " + ff["if"], file=file)
 
-	# # debug
-	# fj = open("dbg.json", "w")
-	# json_object = json.dumps(funcs, indent = 4)
-	# print(json_object, file=fj)
-	# fj.close()
-
-	return funcs
-
 def gen_emulated_functions(isa, file, funcs):
-	print("TODO gen_emulated_functions")
+	print("Generation of the emulated implementations...")
 
-	return funcs
+	funcs_emu = {
+		"blend": [
+			{ "datatypes": ["int64", "int32", "uint64", "uint32"], "template":
+"""	%r<c:float|b:tp>% r0f = %cast<tp,c:float|b:tp>%(r0);
+	%r<c:float|b:tp>% r1f = %cast<tp,c:float|b:tp>%(r1);
+	%m<c:float|b:tp>% m0f = %cast_m<tp,c:float|b:tp>%(m0);
+	%r<c:float|b:tp>% resf = %blend<c:float|b:tp>%(r0f, r1f, m0f);
+	return %cast<c:float|b:tp,tp>%(resf);
+""" },
+			{ "datatypes": all_datatypes, "template":
+"""	%r<c:int|b:tp>% rmi = %toreg<tp>%(m0);
+
+	%r<c:int|b:tp>% r0i = %cast<tp,c:int|b:tp>%(r0);
+	%r<c:int|b:tp>% r1i = %cast<tp,c:int|b:tp>%(r1);
+
+	%r<c:int|b:tp>% r_0i = %andb<c:int|b:tp>%(rmi, r0i);
+	%r<c:int|b:tp>% r_1i = %andnb<c:int|b:tp>%(rmi, r1i);
+	%r<c:int|b:tp>% resi = %xorb<c:int|b:tp>%(r_0i, r_1i);
+
+	%r<tr>% res = %cast<c:int|b:tr,tr>%(resi);
+	return res;""" }, ],
+	}
+
+	for f in funcs:
+		for dt in funcs[f]["datatypes"]:
+			if len(dt.split(',')) <= 1:
+				dt_par = dt.split(',')[0]
+				dt_ret = dt.split(',')[0]
+			else:
+				dt_par = dt.split(',')[0]
+				dt_ret = dt.split(',')[1]
+			dt_key = dt_par + "," + dt_ret
+			defines = []
+
+			if is_missing_func(f, dt_key, funcs):
+				if f in funcs_emu:
+					for tpl in funcs_emu[f]:
+						if dt_par in tpl["datatypes"]:
+							try:
+								post_rendering = parse_placeholders(tpl["template"], isa, funcs, f, dt_par, dt_ret)
+							except Exception:
+								print(" -> 'f<" + dt_key + ">' has been skipped.")
+								continue
+
+							ifdef = build_ifdef_contents(funcs, f, dt_key, "||")
+							if ifdef != "":
+								print("#if !( " + ifdef + " )", file=file)
+							if len(dt.split(',')) <= 1:
+								func_name = build_func_name_short(isa, dt_par, f)
+							else:
+								func_name = build_func_name(isa, dt_par, dt_ret, f)
+							print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name) + " {", file=file)
+							print(post_rendering, file=file)
+							print("}", file=file);
+							if ifdef != "":
+								print("#endif // !( " + ifdef + " )", file=file)
+							funcs[f]["implem_status"][dt_key].clear()
+
+							print(" -> '" + f + "<" + dt_key + ">' has been implemented.")
+							break
+
+	dump_dict_json(funcs, "gen_emulated_functions.json")
 
 def gen_missing_functions(isa, file, funcs):
 	for f in funcs:
@@ -468,17 +603,7 @@ def gen_missing_functions(isa, file, funcs):
 			dt_key = dt_par + "," + dt_ret
 			defines = []
 
-			is_missing = False
-			if "implem_status" in funcs[f]:
-				if dt_key in funcs[f]["implem_status"]:
-					if len(funcs[f]["implem_status"][dt_key]) > 0:
-						is_missing = True
-				else:
-					is_missing = True
-			else:
-				is_missing = True
-
-			if is_missing:
+			if is_missing_func(f, dt_key, funcs):
 				ifdef = build_ifdef_contents(funcs, f, dt_key, "||")
 				if ifdef != "":
 					print("#if !( " + ifdef + " )", file=file)
@@ -668,31 +793,17 @@ isa_avx = {
 	"prefix": "_mm256",
 	"size": 256,
 	"datatypes": {
-		"float64" : { "name" : "float64", "category": "float", "n_bits" : 64, "data_ext" :    "pd", "data_ext_logi":    "pd", "data_ext_msk": "si256", "reg" : "__m256d", "msk" : "__m256i" },
-		"float32" : { "name" : "float32", "category": "float", "n_bits" : 32, "data_ext" :    "ps", "data_ext_logi":    "ps", "data_ext_msk": "si256", "reg" : " __m256", "msk" : "__m256i" },
-		  "int64" : { "name" :   "int64", "category":   "int", "n_bits" : 64, "data_ext" : "epi64", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg" : "__m256i", "msk" : "__m256i" },
-		  "int32" : { "name" :   "int32", "category":   "int", "n_bits" : 32, "data_ext" : "epi32", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg" : "__m256i", "msk" : "__m256i" },
-		  "int16" : { "name" :   "int16", "category":   "int", "n_bits" : 16, "data_ext" : "epi16", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg" : "__m256i", "msk" : "__m256i" },
-		   "int8" : { "name" :    "int8", "category":   "int", "n_bits" :  8, "data_ext" :  "epi8", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg" : "__m256i", "msk" : "__m256i" },
-		 "uint64" : { "name" :  "uint64", "category":  "uint", "n_bits" : 64, "data_ext" : "epu64", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg" : "__m256i", "msk" : "__m256i" },
-		 "uint32" : { "name" :  "uint32", "category":  "uint", "n_bits" : 32, "data_ext" : "epu32", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg" : "__m256i", "msk" : "__m256i" },
-		 "uint16" : { "name" :  "uint16", "category":  "uint", "n_bits" : 16, "data_ext" : "epu16", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg" : "__m256i", "msk" : "__m256i" },
-		  "uint8" : { "name" :   "uint8", "category":  "uint", "n_bits" :  8, "data_ext" :  "epu8", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg" : "__m256i", "msk" : "__m256i" },
+		"float64" : { "name" : "float64", "category": "float", "n_bits" : 64, "data_ext" :    "pd", "data_ext_logi":    "pd", "data_ext_msk": "si256", "reg" : "__m256d", "msk" : "__m256i", "to_ptr": "float64_t", },
+		"float32" : { "name" : "float32", "category": "float", "n_bits" : 32, "data_ext" :    "ps", "data_ext_logi":    "ps", "data_ext_msk": "si256", "reg" : " __m256", "msk" : "__m256i", "to_ptr": "float32_t", },
+		  "int64" : { "name" :   "int64", "category":   "int", "n_bits" : 64, "data_ext" : "epi64", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg" : "__m256i", "msk" : "__m256i", "to_ptr":   "__m256i", },
+		  "int32" : { "name" :   "int32", "category":   "int", "n_bits" : 32, "data_ext" : "epi32", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg" : "__m256i", "msk" : "__m256i", "to_ptr":   "__m256i", },
+		  "int16" : { "name" :   "int16", "category":   "int", "n_bits" : 16, "data_ext" : "epi16", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg" : "__m256i", "msk" : "__m256i", "to_ptr":   "__m256i", },
+		   "int8" : { "name" :    "int8", "category":   "int", "n_bits" :  8, "data_ext" :  "epi8", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg" : "__m256i", "msk" : "__m256i", "to_ptr":   "__m256i", },
+		 "uint64" : { "name" :  "uint64", "category":  "uint", "n_bits" : 64, "data_ext" : "epu64", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg" : "__m256i", "msk" : "__m256i", "to_ptr":   "__m256i", },
+		 "uint32" : { "name" :  "uint32", "category":  "uint", "n_bits" : 32, "data_ext" : "epu32", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg" : "__m256i", "msk" : "__m256i", "to_ptr":   "__m256i", },
+		 "uint16" : { "name" :  "uint16", "category":  "uint", "n_bits" : 16, "data_ext" : "epu16", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg" : "__m256i", "msk" : "__m256i", "to_ptr":   "__m256i", },
+		  "uint8" : { "name" :   "uint8", "category":  "uint", "n_bits" :  8, "data_ext" :  "epu8", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg" : "__m256i", "msk" : "__m256i", "to_ptr":   "__m256i", },
 	},
-	"casts": {
-		"to_ptr": {
-			"float64": "float64_t",
-			"float32": "float32_t",
-			  "int64":   "__m256i",
-			  "int32":   "__m256i",
-			  "int16":   "__m256i",
-			   "int8":   "__m256i",
-			 "uint64":   "__m256i",
-			 "uint32":   "__m256i",
-			 "uint16":   "__m256i",
-			  "uint8":   "__m256i",
-		},
-	}
 }
 
 file = open("../include/mipp_v2_impl_AVX_gen.h", "w")
@@ -706,8 +817,8 @@ print(j2_template.render(), file=file)
 
 gen_defines(isa_avx, file)
 gen_structures(isa_avx, file)
-mipp_funcs = gen_native_functions(isa_avx, file, mipp_funcs)
-mipp_funcs = gen_emulated_functions(isa_avx, file, mipp_funcs)
+gen_native_functions(isa_avx, file, mipp_funcs)
+gen_emulated_functions(isa_avx, file, mipp_funcs)
 gen_missing_functions(isa_avx, file, mipp_funcs)
 
 tpl_footer_avx = """#endif /* MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX_H_ */"""
