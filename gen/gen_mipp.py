@@ -149,12 +149,23 @@ def build_dt(input_str, isa, dt_par, dt_ret):
 			dt += str(isa["datatypes"][dt_par]["n_bits"])
 	return dt
 
+# for debug
 def dump_dict_json(di, filename):
 	# debug
 	fj = open(filename, "w")
 	json_object = json.dumps(di, indent = 4)
 	print(json_object, file=fj)
 	fj.close()
+
+def is_fully_missing_func(f_name, dt_key, funcs):
+	is_missing = False
+	if "implem_status" in funcs[f_name]:
+		if dt_key not in funcs[f_name]["implem_status"]:
+			is_missing = True
+	else:
+		is_missing = True
+
+	return is_missing
 
 def is_missing_func(f_name, dt_key, funcs):
 	is_missing = False
@@ -208,8 +219,6 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret):
 
 		else:
 			f_name = item_type
-			# print("f_name: " + f_name)
-
 			if f_name not in funcs:
 				print("Panic: '" + f_name + "' is not in the available MIPP functions.")
 				exit(-1)
@@ -236,7 +245,7 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret):
 				print("Panic: '" + f_name + "' is not in the available MIPP functions.")
 				exit(-1)
 
-			if is_missing_func(f_name, fdt_key, funcs):
+			if is_fully_missing_func(f_name, fdt_key, funcs):
 				raise Exception("Warning: '" + f_name + "<" + fdt_key + ">' is not implemented.")
 
 			if len(funcs[f_name]["implem_status"]) > 0:
@@ -331,6 +340,18 @@ def gen_native_functions(isa, file, funcs):
 		"cmp_int":      { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(r0.m, r1.m);" },
 		"blend_float":  { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(r0.m, r1.m, %toreg<tp>%(m0).m);" },
 		"blend_int":    { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_epi8(r0.m, r1.m, m0.m);" },
+		"logi_2args_e": { "format": "long", "code":
+"""	%r<c:float|b:32>% r0f = %cast<tp,c:float|b:32>%(r0);
+	%r<c:float|b:32>% r1f = %cast<tp,c:float|b:32>%(r1);
+	%r<c:float|b:32>% resf = %{{ instr_name }}<c:float|b:32>%(r0f, r1f);
+	return %cast<c:float|b:32,tp>%(resf);"""
+		},
+		"logi_m_2args_e": { "format": "long", "code":
+"""	%r<c:float|b:32>% r0f = %toreg<c:float|b:32>%(%cast_m<tp,c:float|b:32>%(m0));
+	%r<c:float|b:32>% r1f = %toreg<c:float|b:32>%(%cast_m<tp,c:float|b:32>%(m1));
+	%r<c:float|b:32>% resf = %{{ instr_name }}<c:float|b:32>%(r0f, r1f);
+	return %tomsk<tp>%(%cast<c:float|b:32,tp>%(resf));"""
+		},
 	}
 
 	implems = {
@@ -417,30 +438,38 @@ def gen_native_functions(isa, file, funcs):
 		"andb": {
 			"implem": [
 				{ "instr_name": "and", "datatypes": all_float, "template": tpl_implem_avx["logi_2args"] },
+				{ "instr_name": "andb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_2args_e"], "if": "!defined(__AVX2__)" },
 				{ "instr_name": "and", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_2args"], "if": "defined(__AVX2__)" }] },
 		"andb_m": {
 			"implem": [
+				{ "instr_name": "andb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_m_2args_e"], "if": "!defined(__AVX2__)" },
 				{ "instr_name": "and", "datatypes": all_datatypes, "template": tpl_implem_avx["logi_m_2args"], "if": "defined(__AVX2__)" }], },
 		"andnb": {
 			"implem" : [
 				{ "instr_name": "andnot", "datatypes": all_float, "template": tpl_implem_avx["logi_2args"] },
+				{ "instr_name": "andnb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_2args_e"], "if": "!defined(__AVX2__)" },
 				{ "instr_name": "andnot", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_2args"], "if": "defined(__AVX2__)" }], },
 		"andnb_m": {
 			"implem": [
+				{ "instr_name": "andnb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_m_2args_e"], "if": "!defined(__AVX2__)" },
 				{ "instr_name": "andnot", "datatypes": all_datatypes, "template": tpl_implem_avx["logi_m_2args"], "if": "defined(__AVX2__)" }], },
 		"orb": {
 			"implem": [
 				{ "instr_name": "or", "datatypes": all_float, "template": tpl_implem_avx["logi_2args"] },
+				{ "instr_name": "orb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_2args_e"], "if": "!defined(__AVX2__)" },
 				{ "instr_name": "or", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_2args"], "if": "defined(__AVX2__)" }], },
 		"orb_m": {
 			"implem": [
+				{ "instr_name": "orb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_m_2args_e"], "if": "!defined(__AVX2__)" },
 				{ "instr_name": "or", "datatypes": all_datatypes, "template": tpl_implem_avx["logi_m_2args"], "if": "defined(__AVX2__)" }], },
 		"xorb": {
 			"implem": [
 				{ "instr_name": "xor", "datatypes": all_float, "template": tpl_implem_avx["logi_2args"] },
+				{ "instr_name": "xorb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_2args_e"], "if": "!defined(__AVX2__)" },
 				{ "instr_name": "xor", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_2args"], "if": "defined(__AVX2__)" }], },
 		"xorb_m": {
 			"implem": [
+				{ "instr_name": "xorb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_m_2args_e"], "if": "!defined(__AVX2__)" },
 				{ "instr_name": "xor", "datatypes": all_datatypes, "template": tpl_implem_avx["logi_m_2args"], "if": "defined(__AVX2__)" }], },
 		"lshiftr": {
 			"implem": [
@@ -538,15 +567,12 @@ def gen_emulated_functions(isa, file, funcs):
 	return %cast<c:float|b:tp,tp>%(resf);
 """ },
 			{ "datatypes": all_datatypes, "template":
-"""	%r<c:int|b:tp>% rmi = %toreg<tp>%(m0);
-
+"""	%r<c:int|b:tp>% rmi = %cast<tp,c:int|b:tp>%(%toreg<tp>%(m0));
 	%r<c:int|b:tp>% r0i = %cast<tp,c:int|b:tp>%(r0);
 	%r<c:int|b:tp>% r1i = %cast<tp,c:int|b:tp>%(r1);
-
 	%r<c:int|b:tp>% r_0i = %andb<c:int|b:tp>%(rmi, r0i);
 	%r<c:int|b:tp>% r_1i = %andnb<c:int|b:tp>%(rmi, r1i);
 	%r<c:int|b:tp>% resi = %xorb<c:int|b:tp>%(r_0i, r_1i);
-
 	%r<tr>% res = %cast<c:int|b:tr,tr>%(resi);
 	return res;""" }, ],
 	}
@@ -568,8 +594,8 @@ def gen_emulated_functions(isa, file, funcs):
 						if dt_par in tpl["datatypes"]:
 							try:
 								post_rendering = parse_placeholders(tpl["template"], isa, funcs, f, dt_par, dt_ret)
-							except Exception:
-								print(" -> 'f<" + dt_key + ">' has been skipped.")
+							except Exception as err:
+								print(" -> '" + f + "<" + dt_key + ">' has been skipped (reason: \"{0}\").".format(err))
 								continue
 
 							ifdef = build_ifdef_contents(funcs, f, dt_key, "||")
@@ -755,18 +781,18 @@ mipp_funcs = {
 	"set1":    { "name": "set1",    "proto": protos["ret_reg_1arg_val"       ], "datatypes": all_datatypes           },
 	"set0":    { "name": "set0",    "proto": protos["ret_reg_0arg"           ], "datatypes": all_datatypes           },
 	"set0_m":  { "name": "set0_m",  "proto": protos["ret_msk_0arg"           ], "datatypes": all_datatypes           },
-	"sqrt":    { "name": "sqrt",    "proto": protos["ret_reg_1arg_reg"       ], "datatypes": all_datatypes           },
-	"rsqrt":   { "name": "rsqrt",   "proto": protos["ret_reg_1arg_reg"       ], "datatypes": all_datatypes           },
+	"sqrt":    { "name": "sqrt",    "proto": protos["ret_reg_1arg_reg"       ], "datatypes": all_float               },
+	"rsqrt":   { "name": "rsqrt",   "proto": protos["ret_reg_1arg_reg"       ], "datatypes": all_float               },
 	"add":     { "name": "add",     "proto": protos["ret_reg_2args_reg"      ], "datatypes": all_datatypes           },
 	"sub":     { "name": "sub",     "proto": protos["ret_reg_2args_reg"      ], "datatypes": all_datatypes           },
 	"mul":     { "name": "mul",     "proto": protos["ret_reg_2args_reg"      ], "datatypes": all_datatypes           },
-	"div":     { "name": "div",     "proto": protos["ret_reg_2args_reg"      ], "datatypes": all_datatypes           },
+	"div":     { "name": "div",     "proto": protos["ret_reg_2args_reg"      ], "datatypes": all_float               },
 	"min":     { "name": "min",     "proto": protos["ret_reg_2args_reg"      ], "datatypes": all_datatypes           },
 	"max":     { "name": "max",     "proto": protos["ret_reg_2args_reg"      ], "datatypes": all_datatypes           },
-	"fmadd":   { "name": "fmadd",   "proto": protos["ret_reg_3args_reg"      ], "datatypes": all_datatypes           },
-	"fnmadd":  { "name": "fnmadd",  "proto": protos["ret_reg_3args_reg"      ], "datatypes": all_datatypes           },
-	"fmsub":   { "name": "fmsub",   "proto": protos["ret_reg_3args_reg"      ], "datatypes": all_datatypes           },
-	"fnmsub":  { "name": "fnmsub",  "proto": protos["ret_reg_3args_reg"      ], "datatypes": all_datatypes           },
+	"fmadd":   { "name": "fmadd",   "proto": protos["ret_reg_3args_reg"      ], "datatypes": all_float               },
+	"fnmadd":  { "name": "fnmadd",  "proto": protos["ret_reg_3args_reg"      ], "datatypes": all_float               },
+	"fmsub":   { "name": "fmsub",   "proto": protos["ret_reg_3args_reg"      ], "datatypes": all_float               },
+	"fnmsub":  { "name": "fnmsub",  "proto": protos["ret_reg_3args_reg"      ], "datatypes": all_float               },
 	"andb":    { "name": "andb",    "proto": protos["ret_reg_2args_reg"      ], "datatypes": all_datatypes           },
 	"andb_m":  { "name": "andb_m",  "proto": protos["ret_msk_2args_msk"      ], "datatypes": all_datatypes           },
 	"andnb":   { "name": "andnb",   "proto": protos["ret_reg_2args_reg"      ], "datatypes": all_datatypes           },
