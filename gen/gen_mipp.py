@@ -83,20 +83,127 @@ def build_func_name(isa, dt_par, dt_ret, mipp_name):
 	return_type = isa["datatypes"][dt_ret]["category"] + str(isa["datatypes"][dt_ret]["n_bits"])
 	return "mipp_" + isa["name"] + "_" + mipp_name + "_" + param_type + "_" + return_type
 
-def build_ifdef_contents(funcs, func_name, dt_key, logi="&&"):
-	str_ifdef = ""
+# def build_ifdef_contents(funcs, func_name, dt_key, logi="&&"):
+# 	str_ifdef = ""
+# 	defines = []
+# 	if "implem_status" in funcs[func_name]:
+# 		if dt_key in funcs[func_name]["implem_status"]:
+# 			if funcs[func_name]["implem_status"][dt_key]:
+# 				defines = funcs[func_name]["implem_status"][dt_key]
+# 	if defines:
+# 		is_first = True
+# 		for define in defines:
+# 			if not is_first:
+# 				str_ifdef = str_ifdef + " " + logi + " "
+# 			str_ifdef = str_ifdef + "(" + define["if"] + ")"
+# 			is_first = False
+# 	return str_ifdef
+
+# def get_ifdef_rec(funcs, func_name, dt_key):
+# 	defines = []
+# 	if "implem_status" in funcs[func_name]:
+# 		if dt_key in funcs[func_name]["implem_status"]:
+# 			for implem in funcs[func_name]["implem_status"][dt_key]:
+# 				if implem["if"] != "":
+# 					if implem["if"] not in defines:
+# 						defines.append(implem["if"])
+# 				for f_name in implem["requirements"]:
+# 					for fdt_key in implem["requirements"][f_name]:
+# 						defines	= defines + get_ifdef_rec(funcs, f_name, fdt_key)
+# 	return defines
+
+def get_ifdef_rec(funcs, func_name, dt_key):
 	defines = []
 	if "implem_status" in funcs[func_name]:
 		if dt_key in funcs[func_name]["implem_status"]:
-			if funcs[func_name]["implem_status"][dt_key]:
-				defines = funcs[func_name]["implem_status"][dt_key]
-	if defines:
-		is_first = True
-		for define in defines:
-			if not is_first:
-				str_ifdef = str_ifdef + " " + logi + " "
-			str_ifdef = str_ifdef + "(" + define + ")"
-			is_first = False
+			for implem in funcs[func_name]["implem_status"][dt_key]:
+				sub_def = []
+				if implem["if"] != "":
+					if implem["if"] not in defines:
+						sub_def.append(implem["if"])
+				for f_name in implem["requirements"]:
+					for fdt_key in implem["requirements"][f_name]:
+						sub_def	= sub_def + get_ifdef_rec(funcs, f_name, fdt_key)
+				if len(sub_def):
+					defines.append(sub_def)
+	return defines
+
+def is_ifdef(funcs, func_name, dt_key):
+	defines = get_ifdef_rec(funcs, func_name, dt_key)
+	if len(defines) > 0:
+		# print(defines)
+		return True
+	else:
+		return False
+
+def is_fully_missing_func(funcs, func_name, dt_key):
+	is_missing = False
+	if "implem_status" in funcs[func_name]:
+		if dt_key not in funcs[func_name]["implem_status"]:
+			is_missing = True
+	else:
+		is_missing = True
+	return is_missing
+
+def is_missing_func(funcs, func_name, dt_key):
+	return is_fully_missing_func(funcs, func_name, dt_key) or is_ifdef(funcs, func_name, dt_key)
+
+def build_ifdef_rec(funcs, func_name, dt_key):
+	str_ifdef = ""
+	if "implem_status" in funcs[func_name]:
+		if dt_key in funcs[func_name]["implem_status"]:
+			is_first_or = True
+			str_ifdef_sub = ""
+			for implem in funcs[func_name]["implem_status"][dt_key]:
+				if not is_first_or:
+					str_ifdef_sub = str_ifdef_sub + " || "
+
+				is_first_and = True
+				str_ifdef_sub_sub = ""
+				for f_name in implem["requirements"]:
+					for fdt_key in implem["requirements"][f_name]:
+						ret = build_ifdef_rec(funcs, f_name, fdt_key)
+						if ret:
+							if not is_first_and:
+								str_ifdef_sub_sub = str_ifdef_sub_sub + " && "
+							str_ifdef_sub_sub = str_ifdef_sub_sub + "( " + ret + " )"
+							is_first_and = False
+
+				if implem["if"] and str_ifdef_sub_sub:
+					str_ifdef_sub = str_ifdef_sub + "( " + implem["if"] + " && (" + str_ifdef_sub_sub + ") )"
+				if implem["if"] and not str_ifdef_sub_sub:
+					str_ifdef_sub = str_ifdef_sub + "( " + implem["if"] + " )"
+				if str_ifdef_sub_sub and not implem["if"]:
+					str_ifdef_sub = str_ifdef_sub + "( " + str_ifdef_sub_sub + " )"
+
+				if implem["if"] or str_ifdef_sub_sub:
+					is_first_or = False
+
+			if str_ifdef_sub:
+				str_ifdef = "( " + str_ifdef_sub + " )"
+	return str_ifdef
+
+def build_ifdef(funcs, func_name, dt_key, implem_id):
+	str_ifdef = ""
+	if "if" in funcs[func_name]["implem_status"][dt_key][implem_id]:
+		str_ifdef = str_ifdef + funcs[func_name]["implem_status"][dt_key][implem_id]["if"]
+
+	is_first_and = True
+	str_ifdef_and = ""
+	for f in funcs[func_name]["implem_status"][dt_key][implem_id]["requirements"]:
+		for fdt in funcs[func_name]["implem_status"][dt_key][implem_id]["requirements"][f]:
+			ret = build_ifdef_rec(funcs, f, fdt)
+			if ret:
+				if not is_first_and:
+					str_ifdef_and = str_ifdef_and + " && "
+				str_ifdef_and = str_ifdef_and + "( " + ret + " )"
+				is_first_and = False
+
+	if str_ifdef and str_ifdef_and:
+		str_ifdef = str_ifdef + " && (" + str_ifdef_and + ")"
+	if str_ifdef_and and not str_ifdef:
+		str_ifdef = str_ifdef_and
+
 	return str_ifdef
 
 def build_dt(input_str, isa, dt_par, dt_ret):
@@ -157,35 +264,15 @@ def dump_dict_json(di, filename):
 	print(json_object, file=fj)
 	fj.close()
 
-def is_fully_missing_func(f_name, dt_key, funcs):
-	is_missing = False
-	if "implem_status" in funcs[f_name]:
-		if dt_key not in funcs[f_name]["implem_status"]:
-			is_missing = True
-	else:
-		is_missing = True
-
-	return is_missing
-
-def is_missing_func(f_name, dt_key, funcs):
-	is_missing = False
-	if "implem_status" in funcs[f_name]:
-		if dt_key in funcs[f_name]["implem_status"]:
-			if len(funcs[f_name]["implem_status"][dt_key]) > 0:
-				is_missing = True
-		else:
-			is_missing = True
-	else:
-		is_missing = True
-
-	return is_missing
-
 def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret):
 	dt_key = dt_par + "," + dt_ret
+
 	converted_ir = ir
 
 	ar_substitute = re.findall(r'\%([^%]*)\%', ir)
 	# print(ar_substitute)
+
+	requirements = {}
 
 	for s in ar_substitute:
 		item_type = s.split('<')[0]
@@ -225,7 +312,6 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret):
 
 			fdt_key = ""
 			dt_info = re.findall(r'\<(.*)\>', s)[0]
-			# print("dt_info: " + dt_info)
 			dt_info_params = dt_info.split(",")
 			if len(dt_info_params) == 1:
 				dt = build_dt(dt_info_params[0], isa, dt_par, dt_ret)
@@ -245,21 +331,19 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret):
 				print("Panic: '" + f_name + "' is not in the available MIPP functions.")
 				exit(-1)
 
-			if is_fully_missing_func(f_name, fdt_key, funcs):
+			if is_fully_missing_func(funcs, f_name, fdt_key):
 				raise Exception("Warning: '" + f_name + "<" + fdt_key + ">' is not implemented.")
 
-			if len(funcs[f_name]["implem_status"]) > 0:
-				if "implem_status" not in funcs[func_name]:
-					funcs[func_name]["implem_status"] = {}
-				if dt_key not in funcs[func_name]["implem_status"]:
-					funcs[func_name]["implem_status"][dt_key] = []
-				for ifdef in funcs[f_name]["implem_status"][dt_key]:
-					if ifdef not in funcs[func_name]["implem_status"][dt_key]:
-						funcs[func_name]["implem_status"][dt_key].append(ifdef)
+			if f_name not in requirements:
+				requirements[f_name] = []
+			if fdt_key not in requirements[f_name]:
+				requirements[f_name].append(fdt_key)
 
 			converted_ir = converted_ir.replace("%" + s + "%", f_full_name)
 
-	return converted_ir
+	ret_pack = { "converted_ir": converted_ir, "requirements": requirements }
+
+	return ret_pack
 
 # =============================================================================
 # =============================================================================
@@ -520,20 +604,28 @@ def gen_native_functions(isa, file, funcs):
 					dt_ret = dt.split(',')[1]
 				dt_key = dt_par + "," + dt_ret
 
-				if "implem_status" not in funcs[f]:
-					funcs[f]["implem_status"] = {}
-				if dt_key not in funcs[f]["implem_status"]:
-					funcs[f]["implem_status"][dt_key] = []
-				if "if" in ff:
-					if ff["if"] not in funcs[f]["implem_status"][dt_key]:
-						funcs[f]["implem_status"][dt_key].append(ff["if"])
-
 				j2_template = Template(ff["template"]["code"], undefined=StrictUndefined)
 				pre_rendering = j2_template.render(isa=isa, instr_name=ff["instr_name"], dt_par=isa["datatypes"][dt_par], dt_ret=isa["datatypes"][dt_ret])
-				post_rendering = parse_placeholders(pre_rendering, isa, funcs, f, dt_par, dt_ret)
 
+				ph_ret = parse_placeholders(pre_rendering, isa, funcs, f, dt_par, dt_ret)
+
+				cur_implem_status = { "if": "", "requirements": {} }
 				if "if" in ff:
-					print("#if " + ff["if"], file=file)
+					cur_implem_status["if"] = ff["if"]
+				cur_implem_status["requirements"] = ph_ret["requirements"]
+
+				if "implem_status" not in funcs[f]:
+				 	funcs[f]["implem_status"] = {}
+				if dt_key not in funcs[f]["implem_status"]:
+				 	funcs[f]["implem_status"][dt_key] = []
+				funcs[f]["implem_status"][dt_key].append(cur_implem_status)
+
+				post_rendering = ph_ret["converted_ir"]
+
+				ifd = build_ifdef(funcs, f, dt_key, len(funcs[f]["implem_status"][dt_key])-1)
+				if ifd:
+					print("#if " + ifd, file=file)
+
 				if len(dt.split(',')) <= 1:
 					func_name = build_func_name_short(isa, dt_par, f);
 				else:
@@ -551,8 +643,8 @@ def gen_native_functions(isa, file, funcs):
 					if funcs[f]["proto"]["ret"]["type"]:
 						print("\treturn res;", file=file);
 				print("}", file=file)
-				if "if" in ff:
-					print("#endif // " + ff["if"], file=file)
+				if ifd:
+					print("#endif", file=file)
 
 def gen_emulated_functions(isa, file, funcs):
 	print("Generation of the emulated implementations...")
@@ -564,8 +656,8 @@ def gen_emulated_functions(isa, file, funcs):
 	%r<c:float|b:tp>% r1f = %cast<tp,c:float|b:tp>%(r1);
 	%m<c:float|b:tp>% m0f = %cast_m<tp,c:float|b:tp>%(m0);
 	%r<c:float|b:tp>% resf = %blend<c:float|b:tp>%(r0f, r1f, m0f);
-	return %cast<c:float|b:tp,tp>%(resf);
-""" },
+	return %cast<c:float|b:tp,tp>%(resf); """
+			},
 			{ "datatypes": all_datatypes, "template":
 """	%r<c:int|b:tp>% rmi = %cast<tp,c:int|b:tp>%(%toreg<tp>%(m0));
 	%r<c:int|b:tp>% r0i = %cast<tp,c:int|b:tp>%(r0);
@@ -574,48 +666,104 @@ def gen_emulated_functions(isa, file, funcs):
 	%r<c:int|b:tp>% r_1i = %andnb<c:int|b:tp>%(rmi, r1i);
 	%r<c:int|b:tp>% resi = %xorb<c:int|b:tp>%(r_0i, r_1i);
 	%r<tr>% res = %cast<c:int|b:tr,tr>%(resi);
-	return res;""" }, ],
+	return res;"""
+			}, ],
+		"sat": [
+			{ "datatypes": all_datatypes, "template":
+"""	%r<tp>% rmin = %set1<tp>%(v0);
+	%r<tp>% rmax = %set1<tp>%(v1);
+	%r<tp>% res = %max<tp>%(%min<tp>%(r0, rmax), rmin);
+	return res;"""
+			}, ],
+		"fmadd": [
+			{ "datatypes": all_float, "template":
+"""	%r<tp>% rmul = %mul<tp>%(r0, r1);
+	%r<tp>% res = %add<tp>%(rmul, r2);
+	return res;"""
+			}, ],
+		"fmsub": [
+			{ "datatypes": all_float, "template":
+"""	%r<tp>% rmul = %mul<tp>%(r0, r1);
+	%r<tp>% res = %sub<tp>%(rmul, r3);
+	return res;"""
+			}, ],
+		"fnmadd": [
+			{ "datatypes": all_float, "template":
+"""	%r<tp>% rmul = %mul<tp>%(r0, r1);
+	%r<tp>% res = %sub<tp>%(r3, rmul);
+	return res;"""
+			}, ],
+		"fnmsub": [
+			{ "datatypes": all_float, "template":
+"""	%r<tp>% rmul = %mul<tp>%(r0, r1);
+	%r<tp>% rmulz = %sub<tp>%(%set0<tp>%(), rmul);
+	%r<tp>% res = %sub<tp>%(rmulz, r3);
+	return res;"""
+			}, ],
 	}
 
-	for f in funcs:
-		for dt in funcs[f]["datatypes"]:
-			if len(dt.split(',')) <= 1:
-				dt_par = dt.split(',')[0]
-				dt_ret = dt.split(',')[0]
-			else:
-				dt_par = dt.split(',')[0]
-				dt_ret = dt.split(',')[1]
-			dt_key = dt_par + "," + dt_ret
-			defines = []
-
-			if is_missing_func(f, dt_key, funcs):
-				if f in funcs_emu:
-					for tpl in funcs_emu[f]:
-						if dt_par in tpl["datatypes"]:
+	for f in funcs_emu:
+		if f in funcs:
+			for tpl in funcs_emu[f]:
+				for dt_par in tpl["datatypes"]:
+					if dt_par in funcs[f]["datatypes"]:
+						dt_ret = dt_par
+						dt_key = dt_par + "," + dt_ret
+						if is_missing_func(funcs, f, dt_key):
 							try:
-								post_rendering = parse_placeholders(tpl["template"], isa, funcs, f, dt_par, dt_ret)
+								ph_ret = parse_placeholders(tpl["template"], isa, funcs, f, dt_par, dt_ret)
 							except Exception as err:
 								print(" -> '" + f + "<" + dt_key + ">' has been skipped (reason: \"{0}\").".format(err))
 								continue
 
-							ifdef = build_ifdef_contents(funcs, f, dt_key, "||")
-							if ifdef != "":
-								print("#if !( " + ifdef + " )", file=file)
-							if len(dt.split(',')) <= 1:
-								func_name = build_func_name_short(isa, dt_par, f)
-							else:
-								func_name = build_func_name(isa, dt_par, dt_ret, f)
+							post_rendering = ph_ret["converted_ir"]
+
+							ifd = ""
+							if "implem_status" in funcs[f] and dt_key in funcs[f]["implem_status"]:
+								is_first = True
+								i = 0
+								for implem in funcs[f]["implem_status"][dt_key]:
+									ifd_sub = build_ifdef(funcs, f, dt_key, i)
+									if ifd_sub:
+										if not is_first:
+											ifd = ifd + " && "
+										ifd = ifd + "!( "
+										ifd = ifd + ifd_sub
+										ifd = ifd + " )"
+										is_first = False
+									i = i +1
+
+							if "implem_status" not in funcs[f]:
+								funcs[f]["implem_status"] = {}
+							if dt_key not in funcs[f]["implem_status"]:
+								funcs[f]["implem_status"][dt_key] = []
+							funcs[f]["implem_status"][dt_key].append({ "if": "", "requirements": ph_ret["requirements"] })
+
+							ifd_cur = build_ifdef(funcs, f, dt_key, len(funcs[f]["implem_status"][dt_key])-1)
+							if ifd and ifd_cur:
+								ifd = ifd + " && ( " + ifd_cur + " )"
+							elif ifd_cur:
+								ifd = ifd_cur
+							if ifd:
+								print("#if " + ifd, file=file)
+
+							funcs[f]["implem_status"][dt_key][len(funcs[f]["implem_status"][dt_key])-1]["if"] = ifd
+
+							func_name = build_func_name_short(isa, dt_par, f)
 							print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name) + " {", file=file)
 							print(post_rendering, file=file)
 							print("}", file=file);
-							if ifdef != "":
-								print("#endif // !( " + ifdef + " )", file=file)
-							funcs[f]["implem_status"][dt_key].clear()
+
+							if ifd:
+								print("#endif", file=file)
+
 
 							print(" -> '" + f + "<" + dt_key + ">' has been implemented.")
-							break
-
-	dump_dict_json(funcs, "gen_emulated_functions.json")
+					else:
+						print("Panic: unsupported type for '" + f + "<" + dt_par + "," + dt_par + ">' function.")
+		else:
+			print("Panic: '" + f + "' function does not exist.")
+			exit(-1)
 
 def gen_missing_functions(isa, file, funcs):
 	for f in funcs:
@@ -629,10 +777,23 @@ def gen_missing_functions(isa, file, funcs):
 			dt_key = dt_par + "," + dt_ret
 			defines = []
 
-			if is_missing_func(f, dt_key, funcs):
-				ifdef = build_ifdef_contents(funcs, f, dt_key, "||")
-				if ifdef != "":
-					print("#if !( " + ifdef + " )", file=file)
+			if is_missing_func(funcs, f, dt_key):
+				ifd = ""
+				if "implem_status" in funcs[f] and dt_key in funcs[f]["implem_status"]:
+					is_first = True
+					i = 0
+					for implem in funcs[f]["implem_status"][dt_key]:
+						ifd_sub = build_ifdef(funcs, f, dt_key, i)
+						if ifd_sub:
+							if not is_first:
+								ifd = ifd + " && "
+							ifd = ifd + "!( "
+							ifd = ifd + ifd_sub
+							ifd = ifd + " )"
+							is_first = False
+						i = i +1
+				if ifd:
+					print("#if " + ifd, file=file)
 
 				if len(dt.split(',')) <= 1:
 					func_name = build_func_name_short(isa, dt_par, f)
@@ -643,8 +804,8 @@ def gen_missing_functions(isa, file, funcs):
 				print("\texit(-1);", file=file);
 				print("}", file=file);
 
-				if ifdef != "":
-					print("#endif // !( " + ifdef + ")", file=file)
+				if ifd:
+					print("#endif", file=file)
 
 # =============================================================================
 # ======================================================================== MAIN
@@ -767,11 +928,20 @@ protos = {
 			{"type": "msk", "charac": "RO", "fixeddatatype": False},
 		]
 	},
+	"ret_reg_3args_1reg_2val": {
+		"ret" :
+			{"type": "reg", "charac": "WO", "fixeddatatype": False},
+		"args" : [
+			{"type": "reg", "charac": "RO", "fixeddatatype": False},
+			{"type": "val", "charac": "RO", "fixeddatatype": False},
+			{"type": "val", "charac": "RO", "fixeddatatype": False},
+		]
+	},
 }
 
 mipp_funcs = {
 	"cast":    { "name": "cast",    "proto": protos["ret_reg_1arg_reg"       ], "datatypes": all_datatypes_cart_prod },
-	"cast_m":  { "name": "cast",    "proto": protos["ret_msk_1arg_msk"       ], "datatypes": all_datatypes_cart_prod },
+	"cast_m":  { "name": "cast_m",  "proto": protos["ret_msk_1arg_msk"       ], "datatypes": all_datatypes_cart_prod },
 	"toreg":   { "name": "toreg",   "proto": protos["ret_reg_1arg_msk"       ], "datatypes": all_datatypes           },
 	"tomsk":   { "name": "tomsk",   "proto": protos["ret_msk_1arg_reg"       ], "datatypes": all_datatypes           },
 	"load":    { "name": "load",    "proto": protos["ret_reg_1arg_ptr"       ], "datatypes": all_datatypes           },
@@ -812,6 +982,7 @@ mipp_funcs = {
 	"cmpge":   { "name": "cmpge",   "proto": protos["ret_msk_2args_reg"      ], "datatypes": all_datatypes           },
 	"cmpgt":   { "name": "cmpgt",   "proto": protos["ret_msk_2args_reg"      ], "datatypes": all_datatypes           },
 	"blend":   { "name": "blend",   "proto": protos["ret_reg_3args_2reg_1msk"], "datatypes": all_datatypes           },
+	"sat":     { "name": "sat",     "proto": protos["ret_reg_3args_1reg_2val"], "datatypes": all_datatypes           },
 }
 
 isa_avx = {
@@ -843,9 +1014,12 @@ print(j2_template.render(), file=file)
 
 gen_defines(isa_avx, file)
 gen_structures(isa_avx, file)
+
 gen_native_functions(isa_avx, file, mipp_funcs)
 gen_emulated_functions(isa_avx, file, mipp_funcs)
 gen_missing_functions(isa_avx, file, mipp_funcs)
+
+dump_dict_json(mipp_funcs, "test.json")
 
 tpl_footer_avx = """#endif /* MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX_H_ */"""
 j2_template = Template(tpl_footer_avx, undefined=StrictUndefined)
