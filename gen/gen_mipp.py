@@ -974,18 +974,10 @@ implems_emu = {
 		{ "instr_name": "max_m", "datatypes": all_datatypes, "template": tpl_implem_emu["arith_2args_1msk_1reg"] }, ],
 }
 
-implems_mixed = implems_avx
 for iemu in implems_emu:
-	# print(iemu)
-	if iemu not in implems_mixed:
-		# print("notin")
-		implems_mixed[iemu] = []
 	for sub_iemu in implems_emu[iemu]:
-		# print(sub_iemu)
-		sub_iemu["type"] = "emulated"
-		implems_mixed[iemu].append(sub_iemu)
-
-dump_dict_json(implems_mixed, "impl.json")
+		if "type" not in sub_iemu:
+			sub_iemu["type"] = "emulated"
 
 file = open("../include/mipp_v2_impl_AVX_gen.h", "w")
 
@@ -999,7 +991,8 @@ print(j2_template.render(), file=file)
 gen_defines(isa_avx, file)
 gen_structures(isa_avx, file)
 
-gen_functions(isa_avx, file, mipp_funcs, implems_mixed)
+gen_functions(isa_avx, file, mipp_funcs, implems_avx)
+gen_functions(isa_avx, file, mipp_funcs, implems_emu)
 gen_missing_functions(isa_avx, file, mipp_funcs)
 
 dump_dict_json(mipp_funcs, "test.json")
