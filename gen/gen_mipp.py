@@ -340,346 +340,42 @@ def gen_structures(isa, file):
 	for dt in isa["datatypes"]:
 		print(j2_template.render(isa=isa, datatype=isa["datatypes"][dt]), file=file)
 
-def gen_native_functions(isa, file, funcs):
-	tpl_implem_avx = {
-		"cast":         { "format": "short", "code": "{% if dt_par.data_ext_logi != dt_ret.data_ext_logi -%}{{ isa.prefix }}_{{ instr_name }}{{dt_par.data_ext_logi}}_{{dt_ret.data_ext_logi}}(r0.m);{% else -%} r0.m;{% endif %}" },
-		"cast_m":       { "format": "short", "code": "m0.m;" },
-		"toreg":        { "format": "short", "code": "{% if dt_par.data_ext_msk != dt_ret.data_ext_logi -%}{{ isa.prefix }}_{{ instr_name }}{{dt_par.data_ext_msk}}_{{dt_ret.data_ext_logi}}(m0.m);{% else -%} m0.m;{% endif %}" },
-		"tomsk":        { "format": "short", "code": "{% if dt_par.data_ext_logi != dt_ret.data_ext_msk -%}{{ isa.prefix }}_{{ instr_name }}{{dt_par.data_ext_logi}}_{{dt_ret.data_ext_msk}}(r0.m);{% else -%} r0.m;{% endif %}" },
-		"load":         { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext_logi }}(({{ dt_par.to_ptr }}*) p0);" },
-		"store":        { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext_logi }}(({{ dt_par.to_ptr }}*) p0, r0.m);" },
-		"set0":         { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext_logi }}();" },
-		"set0_m":       { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext_msk }}();" },
-		"set1":         { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(v0);" },
-		"set1x":        { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}x(v0);" },
-		"arith_1arg":   { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(r0.m);" },
-		"arith_2args":  { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(r0.m, r1.m);" },
-		"logi_2args":   { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext_logi }}(r0.m, r1.m);" },
-		"logi_m_2args": { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext_msk }}(m0.m, m1.m);" },
-		"arith_3args":  { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(r0.m, r1.m, r2.m);" },
-		"shift_2args":  { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(r0.m, v0);" },
-		"cmpeq_float":  { "format": "long", "code":
-"""	%r<tp>% tmp;
-	tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(r0.m, r1.m, _CMP_EQ_OQ);
-	return %tomsk<tp>%(tmp);""" },
-		"cmpneq_float": { "format": "long", "code":
-"""	%r<tp>% tmp;
-	tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(r0.m, r1.m, _CMP_NEQ_OQ);
-	return %tomsk<tp>%(tmp);""" },
-		"cmpgt_float":  { "format": "long", "code":
-"""	%r<tp>% tmp;
-	tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(r0.m, r1.m, _CMP_GT_OS);
-	return %tomsk<tp>%(tmp);""" },
-		"cmpge_float":  { "format": "long", "code":
-"""	%r<tp>% tmp;
-	tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(r0.m, r1.m, _CMP_GE_OS);
-	return %tomsk<tp>%(tmp);""" },
-		"cmple_float":  { "format": "long", "code":
-"""	%r<tp>% tmp;
-	tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(r0.m, r1.m, _CMP_LE_OS);
-	return %tomsk<tp>%(tmp);""" },
-		"cmplt_float":  { "format": "long", "code":
-"""	%r<tp>% tmp;
-	tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(r0.m, r1.m, _CMP_LT_OS);
-	return %tomsk<tp>%(tmp);""" },
-		"cmp_int":      { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(r0.m, r1.m);" },
-		"blend_float":  { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(r0.m, r1.m, %toreg<tp>%(m0).m);" },
-		"blend_int":    { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_epi8(r0.m, r1.m, m0.m);" },
-		"logi_2args_e": { "format": "long", "code":
-"""	%r<c:float|b:32>% r0f = %cast<tp,c:float|b:32>%(r0);
-	%r<c:float|b:32>% r1f = %cast<tp,c:float|b:32>%(r1);
-	%r<c:float|b:32>% resf = %{{ instr_name }}<c:float|b:32>%(r0f, r1f);
-	return %cast<c:float|b:32,tp>%(resf);"""
-		},
-		"logi_m_2args_e": { "format": "long", "code":
-"""	%r<c:float|b:32>% r0f = %toreg<c:float|b:32>%(%cast_m<tp,c:float|b:32>%(m0));
-	%r<c:float|b:32>% r1f = %toreg<c:float|b:32>%(%cast_m<tp,c:float|b:32>%(m1));
-	%r<c:float|b:32>% resf = %{{ instr_name }}<c:float|b:32>%(r0f, r1f);
-	return %tomsk<tp>%(%cast<c:float|b:32,tp>%(resf));"""
-		},
-	}
-
-	implems = {
-		"cast": {
-			"implem": [
-				{ "instr_name": "cast", "datatypes": all_datatypes_cart_prod, "template": tpl_implem_avx["cast"], }], },
-		"cast_m": {
-			"implem": [
-				{ "instr_name": "cast", "datatypes": all_datatypes_cart_prod, "template": tpl_implem_avx["cast_m"], }], },
-		"toreg": {
-			"implem": [
-				{ "instr_name": "cast", "datatypes": all_datatypes, "template": tpl_implem_avx["toreg"], }], },
-		"tomsk": {
-			"implem": [
-				{ "instr_name": "cast", "datatypes": all_datatypes, "template": tpl_implem_avx["tomsk"], }], },
-		"load": {
-			"implem": [
-				{ "instr_name": "load", "datatypes": all_datatypes, "template": tpl_implem_avx["load"], "if": "defined(MIPP_ALIGNED_LOADS)" },
-				{ "instr_name": "loadu", "datatypes": all_datatypes, "template": tpl_implem_avx["load"], "if": "!defined(MIPP_ALIGNED_LOADS)" }], },
-		"loadu": {
-			"implem": [
-				{ "instr_name": "loadu", "datatypes": all_datatypes, "template": tpl_implem_avx["load"] }], },
-		"store": {
-			"implem": [
-				{ "instr_name": "store", "datatypes": all_datatypes, "template": tpl_implem_avx["store"], "if": "defined(MIPP_ALIGNED_LOADS)" },
-				{ "instr_name": "storeu", "datatypes": all_datatypes, "template": tpl_implem_avx["store"], "if": "!defined(MIPP_ALIGNED_LOADS)" }] },
-		"storeu": {
-			"implem": [
-				{ "instr_name": "storeu", "datatypes": all_datatypes, "template": tpl_implem_avx["store"] }] },
-		"set1": {
-			"implem": [
-				{ "instr_name": "set1", "datatypes": all_float, "template": tpl_implem_avx["set1"] },
-				{ "instr_name": "set1", "datatypes": [int64], "template": tpl_implem_avx["set1x"] },
-				{ "instr_name": "set1", "datatypes": [int32, int16, int8], "template": tpl_implem_avx["set1"] }], },
-		"set0": {
-			"implem": [
-				{ "instr_name": "setzero", "datatypes": all_datatypes, "template": tpl_implem_avx["set0"] }], },
-		"set0_m": {
-			"implem": [
-				{ "instr_name": "setzero", "datatypes": all_datatypes, "template": tpl_implem_avx["set0_m"] }], },
-		"sqrt": {
-			"implem": [
-				{ "instr_name": "sqrt", "datatypes": all_float, "template": tpl_implem_avx["arith_1arg"] }], },
-		"rsqrt": {
-			"implem": [
-				{ "instr_name": "rsqrt", "datatypes": [float32], "template": tpl_implem_avx["arith_1arg"] }], },
-		"add": {
-			"implem": [
-				{ "instr_name": "add", "datatypes": all_float, "template": tpl_implem_avx["arith_2args"] },
-				{ "instr_name": "add", "datatypes": [int64, int32], "template": tpl_implem_avx["arith_2args"], "if": "defined(__AVX2__)" },
-				{ "instr_name": "adds", "datatypes": [int16, int8, uint16, uint8], "template": tpl_implem_avx["arith_2args"], "if": "defined(__AVX2__)" }], },
-		"sub": {
-			"implem": [
-				{ "instr_name": "sub", "datatypes": all_float, "template": tpl_implem_avx["arith_2args"] },
-				{ "instr_name": "sub", "datatypes": [int64, int32], "template": tpl_implem_avx["arith_2args"], "if": "defined(__AVX2__)" },
-				{ "instr_name": "subs", "datatypes": [int16, int8, uint16, uint8], "template": tpl_implem_avx["arith_2args"], "if": "defined(__AVX2__)" }], },
-		"mul": {
-			"implem": [
-				{ "instr_name": "mul", "datatypes": all_float, "template": tpl_implem_avx["arith_2args"] },
-				{ "instr_name": "mullo", "datatypes": [int32, int16], "template": tpl_implem_avx["arith_2args"], "if": "defined(__AVX2__)" }], },
-		"div": {
-			"implem" : [
-				{ "instr_name": "div", "datatypes": all_float, "template": tpl_implem_avx["arith_2args"] }], },
-		"min": {
-			"implem": [
-				{ "instr_name": "min", "datatypes": all_float, "template": tpl_implem_avx["arith_2args"] },
-				{ "instr_name": "min", "datatypes": [int32, int16, int8, uint32, uint16, uint8], "template": tpl_implem_avx["arith_2args"], "if": "defined(__AVX2__)" }], },
-		"max": {
-			"implem": [
-				{ "instr_name": "max", "datatypes": all_float, "template": tpl_implem_avx["arith_2args"] },
-				{ "instr_name": "max", "datatypes": [int32, int16, int8, uint32, uint16, uint8], "template": tpl_implem_avx["arith_2args"], "if": "defined(__AVX2__)" }], },
-		"fmadd": {
-			"implem": [
-				{ "instr_name": "fmadd", "datatypes": all_float, "template": tpl_implem_avx["arith_3args"], "if": "defined(__FMA__)" }], },
-		"fnmadd": {
-			"implem": [
-				{ "instr_name": "fnmadd", "datatypes": all_float, "template": tpl_implem_avx["arith_3args"], "if": "defined(__FMA__)" }], },
-		"fmsub": {
-			"implem": [
-				{ "instr_name": "fmsub", "datatypes": all_float, "template": tpl_implem_avx["arith_3args"], "if": "defined(__FMA__)" }], },
-		"fnmsub": {
-			"implem": [
-				{ "instr_name": "fnmsub", "datatypes": all_float, "template": tpl_implem_avx["arith_3args"], "if": "defined(__FMA__)" }], },
-		"andb": {
-			"implem": [
-				{ "instr_name": "and", "datatypes": all_float, "template": tpl_implem_avx["logi_2args"] },
-				{ "instr_name": "andb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_2args_e"], "if": "!defined(__AVX2__)" },
-				{ "instr_name": "and", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_2args"], "if": "defined(__AVX2__)" }] },
-		"andb_m": {
-			"implem": [
-				{ "instr_name": "andb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_m_2args_e"], "if": "!defined(__AVX2__)" },
-				{ "instr_name": "and", "datatypes": all_datatypes, "template": tpl_implem_avx["logi_m_2args"], "if": "defined(__AVX2__)" }], },
-		"andnb": {
-			"implem" : [
-				{ "instr_name": "andnot", "datatypes": all_float, "template": tpl_implem_avx["logi_2args"] },
-				{ "instr_name": "andnb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_2args_e"], "if": "!defined(__AVX2__)" },
-				{ "instr_name": "andnot", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_2args"], "if": "defined(__AVX2__)" }], },
-		"andnb_m": {
-			"implem": [
-				{ "instr_name": "andnb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_m_2args_e"], "if": "!defined(__AVX2__)" },
-				{ "instr_name": "andnot", "datatypes": all_datatypes, "template": tpl_implem_avx["logi_m_2args"], "if": "defined(__AVX2__)" }], },
-		"orb": {
-			"implem": [
-				{ "instr_name": "or", "datatypes": all_float, "template": tpl_implem_avx["logi_2args"] },
-				{ "instr_name": "orb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_2args_e"], "if": "!defined(__AVX2__)" },
-				{ "instr_name": "or", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_2args"], "if": "defined(__AVX2__)" }], },
-		"orb_m": {
-			"implem": [
-				{ "instr_name": "orb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_m_2args_e"], "if": "!defined(__AVX2__)" },
-				{ "instr_name": "or", "datatypes": all_datatypes, "template": tpl_implem_avx["logi_m_2args"], "if": "defined(__AVX2__)" }], },
-		"xorb": {
-			"implem": [
-				{ "instr_name": "xor", "datatypes": all_float, "template": tpl_implem_avx["logi_2args"] },
-				{ "instr_name": "xorb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_2args_e"], "if": "!defined(__AVX2__)" },
-				{ "instr_name": "xor", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_2args"], "if": "defined(__AVX2__)" }], },
-		"xorb_m": {
-			"implem": [
-				{ "instr_name": "xorb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_m_2args_e"], "if": "!defined(__AVX2__)" },
-				{ "instr_name": "xor", "datatypes": all_datatypes, "template": tpl_implem_avx["logi_m_2args"], "if": "defined(__AVX2__)" }], },
-		"lshiftr": {
-			"implem": [
-				{ "instr_name": "sllv", "datatypes": [int64, int32], "template": tpl_implem_avx["arith_2args"], "if": "defined(__AVX2__)" }], },
-		"rshiftr": {
-			"implem": [
-				{ "instr_name": "srlv", "datatypes": [int64, int32], "template": tpl_implem_avx["arith_2args"], "if": "defined(__AVX2__)" }], },
-		"lshift": {
-			"implem": [
-				{ "instr_name": "slli", "datatypes": [int64, int32, int16], "template": tpl_implem_avx["shift_2args"], "if": "defined(__AVX2__)" }], },
-		"rshift": {
-			"implem": [
-				{ "instr_name": "srli", "datatypes": [int64, int32, int16], "template": tpl_implem_avx["shift_2args"], "if": "defined(__AVX2__)" }], },
-		"cmpeq": {
-			"implem": [
-				{ "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx["cmpeq_float"], },
-				{ "instr_name": "cmpeq", "datatypes": all_int, "template": tpl_implem_avx["cmp_int"], "if": "defined(__AVX2__)" }], },
-		"cmpneq": {
-			"implem": [
-				{ "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx["cmpneq_float"], }], },
-		"cmplt": {
-			"implem": [
-				{ "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx["cmplt_float"], }], },
-		"cmple": {
-			"implem": [
-				{ "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx["cmple_float"], }], },
-		"cmpge": {
-			"implem": [
-				{ "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx["cmpge_float"], }], },
-		"cmpgt": {
-			"implem": [
-				{ "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx["cmpgt_float"], },
-				{ "instr_name": "cmpgt", "datatypes": all_int, "template": tpl_implem_avx["cmp_int"], "if": "defined(__AVX2__)" }], },
-		"blend": {
-			"implem": [
-				{ "instr_name": "blendv", "datatypes": all_float, "template": tpl_implem_avx["blend_float"], },
-				{ "instr_name": "blendv", "datatypes": all_int_uint, "template": tpl_implem_avx["blend_int"], "if": "defined(__AVX2__)", }], },
-	}
-
+def gen_functions(isa, file, funcs, implems):
 	for f in implems:
-		for ff in implems[f]["implem"]:
-			for dt in ff["datatypes"]:
-				if len(dt.split(',')) <= 1:
-					dt_par = dt.split(',')[0]
-					dt_ret = dt.split(',')[0]
-				else:
-					dt_par = dt.split(',')[0]
-					dt_ret = dt.split(',')[1]
-				dt_key = dt_par + "," + dt_ret
-
-				j2_template = Template(ff["template"]["code"], undefined=StrictUndefined)
-				pre_rendering = j2_template.render(isa=isa, instr_name=ff["instr_name"], dt_par=isa["datatypes"][dt_par], dt_ret=isa["datatypes"][dt_ret])
-
-				ph_ret = parse_placeholders(pre_rendering, isa, funcs, f, dt_par, dt_ret)
-
-				cur_implem_status = { "if": "", "requirements": {} }
-				if "if" in ff:
-					cur_implem_status["if"] = ff["if"]
-				cur_implem_status["requirements"] = ph_ret["requirements"]
-
-				if "implem_status" not in funcs[f]:
-				 	funcs[f]["implem_status"] = {}
-				if dt_key not in funcs[f]["implem_status"]:
-				 	funcs[f]["implem_status"][dt_key] = []
-				funcs[f]["implem_status"][dt_key].append(cur_implem_status)
-
-				post_rendering = ph_ret["converted_ir"]
-
-				ifd = build_ifdef(funcs, f, dt_key, len(funcs[f]["implem_status"][dt_key])-1)
-				if ifd:
-					print("#if " + ifd, file=file)
-
-				if len(dt.split(',')) <= 1:
-					func_name = build_func_name_short(isa, dt_par, f);
-				else:
-					func_name = build_func_name(isa, dt_par, dt_ret, f);
-				print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name) + " {", file=file)
-
-				if ff["template"]["format"] == "short":
-					if funcs[f]["proto"]["ret"]["type"]:
-						print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], isa["datatypes"][dt_ret], isa) + " res;", file=file);
-						print("\tres.m = ", end='', file=file)
-					else:
-						print("\t", end='', file=file)
-				print(post_rendering, file=file)
-				if ff["template"]["format"] == "short":
-					if funcs[f]["proto"]["ret"]["type"]:
-						print("\treturn res;", file=file);
-				print("}", file=file)
-				if ifd:
-					print("#endif", file=file)
-
-def gen_emulated_functions(isa, file, funcs):
-	print("Generation of the emulated implementations...")
-
-	funcs_emu = {
-		"blend": [
-			{ "datatypes": [int64, int32, uint64, uint32], "template":
-"""	%r<c:float|b:tp>% r0f = %cast<tp,c:float|b:tp>%(r0);
-	%r<c:float|b:tp>% r1f = %cast<tp,c:float|b:tp>%(r1);
-	%m<c:float|b:tp>% m0f = %cast_m<tp,c:float|b:tp>%(m0);
-	%r<c:float|b:tp>% resf = %blend<c:float|b:tp>%(r0f, r1f, m0f);
-	return %cast<c:float|b:tp,tp>%(resf); """
-			},
-			{ "datatypes": all_datatypes, "template":
-"""	%r<c:int|b:tp>% rmi = %cast<tp,c:int|b:tp>%(%toreg<tp>%(m0));
-	%r<c:int|b:tp>% r0i = %cast<tp,c:int|b:tp>%(r0);
-	%r<c:int|b:tp>% r1i = %cast<tp,c:int|b:tp>%(r1);
-	%r<c:int|b:tp>% r_0i = %andb<c:int|b:tp>%(rmi, r0i);
-	%r<c:int|b:tp>% r_1i = %andnb<c:int|b:tp>%(rmi, r1i);
-	%r<c:int|b:tp>% resi = %xorb<c:int|b:tp>%(r_0i, r_1i);
-	%r<tr>% res = %cast<c:int|b:tr,tr>%(resi);
-	return res;"""
-			}, ],
-		"sat": [
-			{ "datatypes": all_datatypes, "template":
-"""	%r<tp>% rmin = %set1<tp>%(v0);
-	%r<tp>% rmax = %set1<tp>%(v1);
-	%r<tp>% res = %max<tp>%(%min<tp>%(r0, rmax), rmin);
-	return res;"""
-			}, ],
-		"fmadd": [
-			{ "datatypes": all_float, "template":
-"""	%r<tp>% rmul = %mul<tp>%(r0, r1);
-	%r<tp>% res = %add<tp>%(rmul, r2);
-	return res;"""
-			}, ],
-		"fmsub": [
-			{ "datatypes": all_float, "template":
-"""	%r<tp>% rmul = %mul<tp>%(r0, r1);
-	%r<tp>% res = %sub<tp>%(rmul, r3);
-	return res;"""
-			}, ],
-		"fnmadd": [
-			{ "datatypes": all_float, "template":
-"""	%r<tp>% rmul = %mul<tp>%(r0, r1);
-	%r<tp>% res = %sub<tp>%(r3, rmul);
-	return res;"""
-			}, ],
-		"fnmsub": [
-			{ "datatypes": all_float, "template":
-"""	%r<tp>% rmul = %mul<tp>%(r0, r1);
-	%r<tp>% rmulz = %sub<tp>%(%set0<tp>%(), rmul);
-	%r<tp>% res = %sub<tp>%(rmulz, r3);
-	return res;"""
-			}, ],
-	}
-
-	for f in funcs_emu:
 		if f in funcs:
-			for tpl in funcs_emu[f]:
-				for dt_par in tpl["datatypes"]:
-					if dt_par in funcs[f]["datatypes"]:
-						dt_ret = dt_par
-						dt_key = dt_par + "," + dt_ret
-						if is_missing_func(funcs, f, dt_key):
-							try:
-								ph_ret = parse_placeholders(tpl["template"], isa, funcs, f, dt_par, dt_ret)
-							except Exception as err:
-								print(" -> '" + f + "<" + dt_key + ">' has been skipped (reason: \"{0}\").".format(err))
-								continue
+			for ff in implems[f]:
+				for dt in ff["datatypes"]:
+					if len(dt.split(',')) <= 1:
+						dt_par = dt.split(',')[0]
+						dt_ret = dt.split(',')[0]
+						if dt_par not in funcs[f]["datatypes"]:
+							print("Panic: unsupported type for '" + f + "<" + dt_par + "," + dt_par + ">' function.")
+							exit(-1)
+					else:
+						dt_par = dt.split(',')[0]
+						dt_ret = dt.split(',')[1]
 
-							post_rendering = ph_ret["converted_ir"]
+						dtk = dt_par + "," + dt_ret
+						if dtk not in funcs[f]["datatypes"]:
+							print("Panic: unsupported type for '" + f + "<" + dt_par + "," + dt_ret + ">' function.")
+							exit(-1)
+					dt_key = dt_par + "," + dt_ret
 
-							ifd = ""
+					if is_missing_func(funcs, f, dt_key):
+						j2_template = Template(ff["template"]["code"], undefined=StrictUndefined)
+						instr_name = ""
+						if "instr_name" in ff:
+							instr_name = ff["instr_name"]
+						pre_rendering = j2_template.render(isa=isa, instr_name=instr_name, dt_par=isa["datatypes"][dt_par], dt_ret=isa["datatypes"][dt_ret])
+
+						try:
+							ph_ret = parse_placeholders(pre_rendering, isa, funcs, f, dt_par, dt_ret)
+						except Exception as err:
+							print(" -> '" + f + "<" + dt_key + ">' has been skipped (reason: \"{0}\").".format(err))
+							continue
+
+						ifd = ""
+						if "type" in ff and ff["type"] == "emulated":
 							if "implem_status" in funcs[f] and dt_key in funcs[f]["implem_status"]:
 								is_first = True
 								i = 0
@@ -694,33 +390,51 @@ def gen_emulated_functions(isa, file, funcs):
 										is_first = False
 									i = i +1
 
-							if "implem_status" not in funcs[f]:
-								funcs[f]["implem_status"] = {}
-							if dt_key not in funcs[f]["implem_status"]:
-								funcs[f]["implem_status"][dt_key] = []
-							funcs[f]["implem_status"][dt_key].append({ "if": "", "requirements": ph_ret["requirements"] })
+						cur_implem_status = { "if": "", "requirements": {} }
+						if "if" in ff:
+							cur_implem_status["if"] = ff["if"]
+						cur_implem_status["requirements"] = ph_ret["requirements"]
 
-							ifd_cur = build_ifdef(funcs, f, dt_key, len(funcs[f]["implem_status"][dt_key])-1)
-							if ifd and ifd_cur:
-								ifd = ifd + " && ( " + ifd_cur + " )"
-							elif ifd_cur:
-								ifd = ifd_cur
-							if ifd:
-								print("#if " + ifd, file=file)
+						if "implem_status" not in funcs[f]:
+						 	funcs[f]["implem_status"] = {}
+						if dt_key not in funcs[f]["implem_status"]:
+						 	funcs[f]["implem_status"][dt_key] = []
+						funcs[f]["implem_status"][dt_key].append(cur_implem_status)
 
-							funcs[f]["implem_status"][dt_key][len(funcs[f]["implem_status"][dt_key])-1]["if"] = ifd
+						post_rendering = ph_ret["converted_ir"]
 
-							func_name = build_func_name_short(isa, dt_par, f)
-							print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name) + " {", file=file)
-							print(post_rendering, file=file)
-							print("}", file=file);
+						ifd_cur = build_ifdef(funcs, f, dt_key, len(funcs[f]["implem_status"][dt_key])-1)
+						if ifd and ifd_cur:
+							ifd = ifd + " && ( " + ifd_cur + " )"
+						elif ifd_cur:
+							ifd = ifd_cur
+						if ifd:
+							print("#if " + ifd, file=file)
+							if "type" in ff and ff["type"] == "emulated":
+								funcs[f]["implem_status"][dt_key][len(funcs[f]["implem_status"][dt_key])-1]["if"] = ifd
 
-							if ifd:
-								print("#endif", file=file)
+						if len(dt.split(',')) <= 1:
+							func_name = build_func_name_short(isa, dt_par, f);
+						else:
+							func_name = build_func_name(isa, dt_par, dt_ret, f);
+						print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name) + " {", file=file)
 
+						if ff["template"]["format"] == "short":
+							if funcs[f]["proto"]["ret"]["type"]:
+								print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], isa["datatypes"][dt_ret], isa) + " res;", file=file);
+								print("\tres.m = ", end='', file=file)
+							else:
+								print("\t", end='', file=file)
+						print(post_rendering, file=file)
+						if ff["template"]["format"] == "short":
+							if funcs[f]["proto"]["ret"]["type"]:
+								print("\treturn res;", file=file);
+						print("}", file=file)
+						if ifd:
+							print("#endif", file=file)
+
+						if "type" in ff and ff["type"] == "emulated":
 							print(" -> '" + f + "<" + dt_key + ">' has been implemented.")
-					else:
-						print("Panic: unsupported type for '" + f + "<" + dt_par + "," + dt_par + ">' function.")
 		else:
 			print("Panic: '" + f + "' function does not exist.")
 			exit(-1)
@@ -897,52 +611,83 @@ protos = {
 			{"type": "val", "charac": "RO", "fixeddatatype": False},
 		]
 	},
+	"ret_reg_3args_2reg_1msk": {
+		"ret" :
+			{"type": "reg", "charac": "WO", "fixeddatatype": False},
+		"args" : [
+			{"type": "reg", "charac": "RO", "fixeddatatype": False},
+			{"type": "reg", "charac": "RO", "fixeddatatype": False},
+			{"type": "msk", "charac": "RO", "fixeddatatype": False},
+		]
+	},
+	"ret_reg_3args_2reg_1msk_1reg": {
+		"ret" :
+			{"type": "reg", "charac": "WO", "fixeddatatype": False},
+		"args" : [
+			{"type": "reg", "charac": "RO", "fixeddatatype": False},
+			{"type": "reg", "charac": "RO", "fixeddatatype": False},
+			{"type": "msk", "charac": "RO", "fixeddatatype": False},
+			{"type": "reg", "charac": "RO", "fixeddatatype": False},
+		]
+	},
 }
 
 mipp_funcs = {
-	"cast":    { "name": "cast",    "proto": protos["ret_reg_1arg_reg"       ], "datatypes": all_datatypes_cart_prod },
-	"cast_m":  { "name": "cast_m",  "proto": protos["ret_msk_1arg_msk"       ], "datatypes": all_datatypes_cart_prod },
-	"toreg":   { "name": "toreg",   "proto": protos["ret_reg_1arg_msk"       ], "datatypes": all_datatypes           },
-	"tomsk":   { "name": "tomsk",   "proto": protos["ret_msk_1arg_reg"       ], "datatypes": all_datatypes           },
-	"load":    { "name": "load",    "proto": protos["ret_reg_1arg_ptr"       ], "datatypes": all_datatypes           },
-	"loadu":   { "name": "loadu",   "proto": protos["ret_reg_1arg_ptr"       ], "datatypes": all_datatypes           },
-	"store":   { "name": "store",   "proto": protos["ret_void_2args_ptr_reg" ], "datatypes": all_datatypes           },
-	"storeu":  { "name": "storeu",  "proto": protos["ret_void_2args_ptr_reg" ], "datatypes": all_datatypes           },
-	"set1":    { "name": "set1",    "proto": protos["ret_reg_1arg_val"       ], "datatypes": all_datatypes           },
-	"set0":    { "name": "set0",    "proto": protos["ret_reg_0arg"           ], "datatypes": all_datatypes           },
-	"set0_m":  { "name": "set0_m",  "proto": protos["ret_msk_0arg"           ], "datatypes": all_datatypes           },
-	"sqrt":    { "name": "sqrt",    "proto": protos["ret_reg_1arg_reg"       ], "datatypes": all_float               },
-	"rsqrt":   { "name": "rsqrt",   "proto": protos["ret_reg_1arg_reg"       ], "datatypes": all_float               },
-	"add":     { "name": "add",     "proto": protos["ret_reg_2args_reg"      ], "datatypes": all_datatypes           },
-	"sub":     { "name": "sub",     "proto": protos["ret_reg_2args_reg"      ], "datatypes": all_datatypes           },
-	"mul":     { "name": "mul",     "proto": protos["ret_reg_2args_reg"      ], "datatypes": all_datatypes           },
-	"div":     { "name": "div",     "proto": protos["ret_reg_2args_reg"      ], "datatypes": all_float               },
-	"min":     { "name": "min",     "proto": protos["ret_reg_2args_reg"      ], "datatypes": all_datatypes           },
-	"max":     { "name": "max",     "proto": protos["ret_reg_2args_reg"      ], "datatypes": all_datatypes           },
-	"fmadd":   { "name": "fmadd",   "proto": protos["ret_reg_3args_reg"      ], "datatypes": all_float               },
-	"fnmadd":  { "name": "fnmadd",  "proto": protos["ret_reg_3args_reg"      ], "datatypes": all_float               },
-	"fmsub":   { "name": "fmsub",   "proto": protos["ret_reg_3args_reg"      ], "datatypes": all_float               },
-	"fnmsub":  { "name": "fnmsub",  "proto": protos["ret_reg_3args_reg"      ], "datatypes": all_float               },
-	"andb":    { "name": "andb",    "proto": protos["ret_reg_2args_reg"      ], "datatypes": all_datatypes           },
-	"andb_m":  { "name": "andb_m",  "proto": protos["ret_msk_2args_msk"      ], "datatypes": all_datatypes           },
-	"andnb":   { "name": "andnb",   "proto": protos["ret_reg_2args_reg"      ], "datatypes": all_datatypes           },
-	"andnb_m": { "name": "andnb_m", "proto": protos["ret_msk_2args_msk"      ], "datatypes": all_datatypes           },
-	"orb":     { "name": "orb",     "proto": protos["ret_reg_2args_reg"      ], "datatypes": all_datatypes           },
-	"orb_m":   { "name": "orb_m",   "proto": protos["ret_msk_2args_msk"      ], "datatypes": all_datatypes           },
-	"xorb":    { "name": "xorb",    "proto": protos["ret_reg_2args_reg"      ], "datatypes": all_datatypes           },
-	"xorb_m":  { "name": "xorb_m",  "proto": protos["ret_msk_2args_msk"      ], "datatypes": all_datatypes           },
-	"lshiftr": { "name": "lshiftr", "proto": protos["ret_reg_2args_reg"      ], "datatypes": all_datatypes           },
-	"rshiftr": { "name": "rshiftr", "proto": protos["ret_reg_2args_reg"      ], "datatypes": all_datatypes           },
-	"lshift":  { "name": "lshift",  "proto": protos["ret_reg_2args_reg_val"  ], "datatypes": all_datatypes           },
-	"rshift":  { "name": "rshift",  "proto": protos["ret_reg_2args_reg_val"  ], "datatypes": all_datatypes           },
-	"cmpeq":   { "name": "cmpeq",   "proto": protos["ret_msk_2args_reg"      ], "datatypes": all_datatypes           },
-	"cmpneq":  { "name": "cmpneq",  "proto": protos["ret_msk_2args_reg"      ], "datatypes": all_datatypes           },
-	"cmplt":   { "name": "cmplt",   "proto": protos["ret_msk_2args_reg"      ], "datatypes": all_datatypes           },
-	"cmple":   { "name": "cmple",   "proto": protos["ret_msk_2args_reg"      ], "datatypes": all_datatypes           },
-	"cmpge":   { "name": "cmpge",   "proto": protos["ret_msk_2args_reg"      ], "datatypes": all_datatypes           },
-	"cmpgt":   { "name": "cmpgt",   "proto": protos["ret_msk_2args_reg"      ], "datatypes": all_datatypes           },
-	"blend":   { "name": "blend",   "proto": protos["ret_reg_3args_2reg_1msk"], "datatypes": all_datatypes           },
-	"sat":     { "name": "sat",     "proto": protos["ret_reg_3args_1reg_2val"], "datatypes": all_datatypes           },
+	"cast":    { "proto": protos["ret_reg_1arg_reg"            ], "datatypes": all_datatypes_cart_prod },
+	"cast_m":  { "proto": protos["ret_msk_1arg_msk"            ], "datatypes": all_datatypes_cart_prod },
+	"toreg":   { "proto": protos["ret_reg_1arg_msk"            ], "datatypes": all_datatypes           },
+	"tomsk":   { "proto": protos["ret_msk_1arg_reg"            ], "datatypes": all_datatypes           },
+	"load":    { "proto": protos["ret_reg_1arg_ptr"            ], "datatypes": all_datatypes           },
+	"loadu":   { "proto": protos["ret_reg_1arg_ptr"            ], "datatypes": all_datatypes           },
+	"store":   { "proto": protos["ret_void_2args_ptr_reg"      ], "datatypes": all_datatypes           },
+	"storeu":  { "proto": protos["ret_void_2args_ptr_reg"      ], "datatypes": all_datatypes           },
+	"set1":    { "proto": protos["ret_reg_1arg_val"            ], "datatypes": all_datatypes           },
+	"set0":    { "proto": protos["ret_reg_0arg"                ], "datatypes": all_datatypes           },
+	"set0_m":  { "proto": protos["ret_msk_0arg"                ], "datatypes": all_datatypes           },
+	"sqrt":    { "proto": protos["ret_reg_1arg_reg"            ], "datatypes": all_float               },
+	"rsqrt":   { "proto": protos["ret_reg_1arg_reg"            ], "datatypes": all_float               },
+	"add":     { "proto": protos["ret_reg_2args_reg"           ], "datatypes": all_datatypes           },
+	"add_m":   { "proto": protos["ret_reg_3args_2reg_1msk_1reg"], "datatypes": all_datatypes           },
+	"add_mz":  { "proto": protos["ret_reg_3args_2reg_1msk"     ], "datatypes": all_datatypes           },
+	"sub":     { "proto": protos["ret_reg_2args_reg"           ], "datatypes": all_datatypes           },
+	"sub_m":   { "proto": protos["ret_reg_3args_2reg_1msk_1reg"], "datatypes": all_datatypes           },
+	"sub_mz":  { "proto": protos["ret_reg_3args_2reg_1msk"     ], "datatypes": all_datatypes           },
+	"mul":     { "proto": protos["ret_reg_2args_reg"           ], "datatypes": all_datatypes           },
+	"mul_m":   { "proto": protos["ret_reg_3args_2reg_1msk_1reg"], "datatypes": all_datatypes           },
+	"mul_mz":  { "proto": protos["ret_reg_3args_2reg_1msk"     ], "datatypes": all_datatypes           },
+	"div":     { "proto": protos["ret_reg_2args_reg"           ], "datatypes": all_float               },
+	"div_m":   { "proto": protos["ret_reg_3args_2reg_1msk_1reg"], "datatypes": all_float               },
+	"div_mz":  { "proto": protos["ret_reg_3args_2reg_1msk"     ], "datatypes": all_float               },
+	"min":     { "proto": protos["ret_reg_2args_reg"           ], "datatypes": all_datatypes           },
+	"min_m":   { "proto": protos["ret_reg_3args_2reg_1msk_1reg"], "datatypes": all_datatypes           },
+	"min_mz":  { "proto": protos["ret_reg_3args_2reg_1msk"     ], "datatypes": all_datatypes           },
+	"max":     { "proto": protos["ret_reg_2args_reg"           ], "datatypes": all_datatypes           },
+	"max_m":   { "proto": protos["ret_reg_3args_2reg_1msk_1reg"], "datatypes": all_datatypes           },
+	"max_mz":  { "proto": protos["ret_reg_3args_2reg_1msk"     ], "datatypes": all_datatypes           },
+	"fmadd":   { "proto": protos["ret_reg_3args_reg"           ], "datatypes": all_float               },
+	"fnmadd":  { "proto": protos["ret_reg_3args_reg"           ], "datatypes": all_float               },
+	"fmsub":   { "proto": protos["ret_reg_3args_reg"           ], "datatypes": all_float               },
+	"fnmsub":  { "proto": protos["ret_reg_3args_reg"           ], "datatypes": all_float               },
+	"andb":    { "proto": protos["ret_reg_2args_reg"           ], "datatypes": all_datatypes           },
+	"andb_m":  { "proto": protos["ret_msk_2args_msk"           ], "datatypes": all_datatypes           },
+	"andnb":   { "proto": protos["ret_reg_2args_reg"           ], "datatypes": all_datatypes           },
+	"andnb_m": { "proto": protos["ret_msk_2args_msk"           ], "datatypes": all_datatypes           },
+	"orb":     { "proto": protos["ret_reg_2args_reg"           ], "datatypes": all_datatypes           },
+	"orb_m":   { "proto": protos["ret_msk_2args_msk"           ], "datatypes": all_datatypes           },
+	"xorb":    { "proto": protos["ret_reg_2args_reg"           ], "datatypes": all_datatypes           },
+	"xorb_m":  { "proto": protos["ret_msk_2args_msk"           ], "datatypes": all_datatypes           },
+	"lshiftr": { "proto": protos["ret_reg_2args_reg"           ], "datatypes": all_datatypes           },
+	"rshiftr": { "proto": protos["ret_reg_2args_reg"           ], "datatypes": all_datatypes           },
+	"lshift":  { "proto": protos["ret_reg_2args_reg_val"       ], "datatypes": all_datatypes           },
+	"rshift":  { "proto": protos["ret_reg_2args_reg_val"       ], "datatypes": all_datatypes           },
+	"cmpeq":   { "proto": protos["ret_msk_2args_reg"           ], "datatypes": all_datatypes           },
+	"cmpneq":  { "proto": protos["ret_msk_2args_reg"           ], "datatypes": all_datatypes           },
+	"cmplt":   { "proto": protos["ret_msk_2args_reg"           ], "datatypes": all_datatypes           },
+	"cmple":   { "proto": protos["ret_msk_2args_reg"           ], "datatypes": all_datatypes           },
+	"cmpge":   { "proto": protos["ret_msk_2args_reg"           ], "datatypes": all_datatypes           },
+	"cmpgt":   { "proto": protos["ret_msk_2args_reg"           ], "datatypes": all_datatypes           },
+	"blend":   { "proto": protos["ret_reg_3args_2reg_1msk"     ], "datatypes": all_datatypes           },
+	"sat":     { "proto": protos["ret_reg_3args_1reg_2val"     ], "datatypes": all_datatypes           },
 }
 
 isa_avx = {
@@ -963,6 +708,285 @@ isa_avx = {
 	},
 }
 
+tpl_implem_avx = {
+	"cast":         { "format": "short", "code": "{% if dt_par.data_ext_logi != dt_ret.data_ext_logi -%}{{ isa.prefix }}_{{ instr_name }}{{dt_par.data_ext_logi}}_{{dt_ret.data_ext_logi}}(r0.m);{% else -%} r0.m;{% endif %}" },
+	"cast_m":       { "format": "short", "code": "m0.m;" },
+	"toreg":        { "format": "short", "code": "{% if dt_par.data_ext_msk != dt_ret.data_ext_logi -%}{{ isa.prefix }}_{{ instr_name }}{{dt_par.data_ext_msk}}_{{dt_ret.data_ext_logi}}(m0.m);{% else -%} m0.m;{% endif %}" },
+	"tomsk":        { "format": "short", "code": "{% if dt_par.data_ext_logi != dt_ret.data_ext_msk -%}{{ isa.prefix }}_{{ instr_name }}{{dt_par.data_ext_logi}}_{{dt_ret.data_ext_msk}}(r0.m);{% else -%} r0.m;{% endif %}" },
+	"load":         { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext_logi }}(({{ dt_par.to_ptr }}*) p0);" },
+	"store":        { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext_logi }}(({{ dt_par.to_ptr }}*) p0, r0.m);" },
+	"set0":         { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext_logi }}();" },
+	"set0_m":       { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext_msk }}();" },
+	"set1":         { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(v0);" },
+	"set1x":        { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}x(v0);" },
+	"arith_1arg":   { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(r0.m);" },
+	"arith_2args":  { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(r0.m, r1.m);" },
+	"logi_2args":   { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext_logi }}(r0.m, r1.m);" },
+	"logi_m_2args": { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext_msk }}(m0.m, m1.m);" },
+	"arith_3args":  { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(r0.m, r1.m, r2.m);" },
+	"shift_2args":  { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(r0.m, v0);" },
+	"cmpeq_float":  { "format": "long", "code":
+"""	%r<tp>% tmp;
+	tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(r0.m, r1.m, _CMP_EQ_OQ);
+	return %tomsk<tp>%(tmp);""" },
+	"cmpneq_float": { "format": "long", "code":
+"""	%r<tp>% tmp;
+	tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(r0.m, r1.m, _CMP_NEQ_OQ);
+	return %tomsk<tp>%(tmp);""" },
+	"cmpgt_float":  { "format": "long", "code":
+"""	%r<tp>% tmp;
+	tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(r0.m, r1.m, _CMP_GT_OS);
+	return %tomsk<tp>%(tmp);""" },
+	"cmpge_float":  { "format": "long", "code":
+"""	%r<tp>% tmp;
+	tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(r0.m, r1.m, _CMP_GE_OS);
+	return %tomsk<tp>%(tmp);""" },
+	"cmple_float":  { "format": "long", "code":
+"""	%r<tp>% tmp;
+	tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(r0.m, r1.m, _CMP_LE_OS);
+	return %tomsk<tp>%(tmp);""" },
+	"cmplt_float":  { "format": "long", "code":
+"""	%r<tp>% tmp;
+	tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(r0.m, r1.m, _CMP_LT_OS);
+	return %tomsk<tp>%(tmp);""" },
+	"cmp_int":      { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(r0.m, r1.m);" },
+	"blend_float":  { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(r0.m, r1.m, %toreg<tp>%(m0).m);" },
+	"blend_int":    { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_epi8(r0.m, r1.m, m0.m);" },
+	"logi_2args_e": { "format": "long", "code":
+"""	%r<c:float|b:32>% r0f = %cast<tp,c:float|b:32>%(r0);
+	%r<c:float|b:32>% r1f = %cast<tp,c:float|b:32>%(r1);
+	%r<c:float|b:32>% resf = %{{ instr_name }}<c:float|b:32>%(r0f, r1f);
+	return %cast<c:float|b:32,tp>%(resf);"""
+	},
+	"logi_m_2args_e": { "format": "long", "code":
+"""	%r<c:float|b:32>% r0f = %toreg<c:float|b:32>%(%cast_m<tp,c:float|b:32>%(m0));
+	%r<c:float|b:32>% r1f = %toreg<c:float|b:32>%(%cast_m<tp,c:float|b:32>%(m1));
+	%r<c:float|b:32>% resf = %{{ instr_name }}<c:float|b:32>%(r0f, r1f);
+	return %tomsk<tp>%(%cast<c:float|b:32,tp>%(resf));"""
+	},
+}
+
+implems_avx = {
+	"cast": [
+		{ "instr_name": "cast", "datatypes": all_datatypes_cart_prod, "template": tpl_implem_avx["cast"], } ],
+	"cast_m": [
+		{ "instr_name": "cast", "datatypes": all_datatypes_cart_prod, "template": tpl_implem_avx["cast_m"], } ],
+	"toreg": [
+		{ "instr_name": "cast", "datatypes": all_datatypes, "template": tpl_implem_avx["toreg"], } ],
+	"tomsk": [
+		{ "instr_name": "cast", "datatypes": all_datatypes, "template": tpl_implem_avx["tomsk"], } ],
+	"load": [
+		{ "instr_name": "load", "datatypes": all_datatypes, "template": tpl_implem_avx["load"], "if": "defined(MIPP_ALIGNED_LOADS)" },
+		{ "instr_name": "loadu", "datatypes": all_datatypes, "template": tpl_implem_avx["load"], "if": "!defined(MIPP_ALIGNED_LOADS)" } ],
+	"loadu": [
+		{ "instr_name": "loadu", "datatypes": all_datatypes, "template": tpl_implem_avx["load"] } ],
+	"store": [
+		{ "instr_name": "store", "datatypes": all_datatypes, "template": tpl_implem_avx["store"], "if": "defined(MIPP_ALIGNED_LOADS)" },
+		{ "instr_name": "storeu", "datatypes": all_datatypes, "template": tpl_implem_avx["store"], "if": "!defined(MIPP_ALIGNED_LOADS)" } ],
+	"storeu": [
+		{ "instr_name": "storeu", "datatypes": all_datatypes, "template": tpl_implem_avx["store"] } ],
+	"set1": [
+		{ "instr_name": "set1", "datatypes": all_float, "template": tpl_implem_avx["set1"] },
+		{ "instr_name": "set1", "datatypes": [int64], "template": tpl_implem_avx["set1x"] },
+		{ "instr_name": "set1", "datatypes": [int32, int16, int8], "template": tpl_implem_avx["set1"] } ],
+	"set0": [
+			{ "instr_name": "setzero", "datatypes": all_datatypes, "template": tpl_implem_avx["set0"] } ],
+	"set0_m": [
+		{ "instr_name": "setzero", "datatypes": all_datatypes, "template": tpl_implem_avx["set0_m"] } ],
+	"sqrt": [
+		{ "instr_name": "sqrt", "datatypes": all_float, "template": tpl_implem_avx["arith_1arg"] } ],
+	"rsqrt": [
+		{ "instr_name": "rsqrt", "datatypes": [float32], "template": tpl_implem_avx["arith_1arg"] } ],
+	"add": [
+		{ "instr_name": "add", "datatypes": all_float, "template": tpl_implem_avx["arith_2args"] },
+		{ "instr_name": "add", "datatypes": [int64, int32], "template": tpl_implem_avx["arith_2args"], "if": "defined(__AVX2__)" },
+		{ "instr_name": "adds", "datatypes": [int16, int8, uint16, uint8], "template": tpl_implem_avx["arith_2args"], "if": "defined(__AVX2__)" } ],
+	"sub": [
+		{ "instr_name": "sub", "datatypes": all_float, "template": tpl_implem_avx["arith_2args"] },
+		{ "instr_name": "sub", "datatypes": [int64, int32], "template": tpl_implem_avx["arith_2args"], "if": "defined(__AVX2__)" },
+		{ "instr_name": "subs", "datatypes": [int16, int8, uint16, uint8], "template": tpl_implem_avx["arith_2args"], "if": "defined(__AVX2__)" } ],
+	"mul": [
+		{ "instr_name": "mul", "datatypes": all_float, "template": tpl_implem_avx["arith_2args"] },
+		{ "instr_name": "mullo", "datatypes": [int32, int16], "template": tpl_implem_avx["arith_2args"], "if": "defined(__AVX2__)" }],
+	"div": [
+		{ "instr_name": "div", "datatypes": all_float, "template": tpl_implem_avx["arith_2args"] } ],
+	"min": [
+		{ "instr_name": "min", "datatypes": all_float, "template": tpl_implem_avx["arith_2args"] },
+		{ "instr_name": "min", "datatypes": [int32, int16, int8, uint32, uint16, uint8], "template": tpl_implem_avx["arith_2args"], "if": "defined(__AVX2__)" } ],
+	"max": [
+		{ "instr_name": "max", "datatypes": all_float, "template": tpl_implem_avx["arith_2args"] },
+		{ "instr_name": "max", "datatypes": [int32, int16, int8, uint32, uint16, uint8], "template": tpl_implem_avx["arith_2args"], "if": "defined(__AVX2__)" } ],
+	"fmadd": [
+		{ "instr_name": "fmadd", "datatypes": all_float, "template": tpl_implem_avx["arith_3args"], "if": "defined(__FMA__)" } ],
+	"fnmadd": [
+		{ "instr_name": "fnmadd", "datatypes": all_float, "template": tpl_implem_avx["arith_3args"], "if": "defined(__FMA__)" } ],
+	"fmsub": [
+		{ "instr_name": "fmsub", "datatypes": all_float, "template": tpl_implem_avx["arith_3args"], "if": "defined(__FMA__)" } ],
+	"fnmsub": [
+		{ "instr_name": "fnmsub", "datatypes": all_float, "template": tpl_implem_avx["arith_3args"], "if": "defined(__FMA__)" } ],
+	"andb": [
+		{ "instr_name": "and", "datatypes": all_float, "template": tpl_implem_avx["logi_2args"] },
+		{ "instr_name": "andb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_2args_e"], "if": "!defined(__AVX2__)" },
+		{ "instr_name": "and", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_2args"], "if": "defined(__AVX2__)" } ],
+	"andb_m": [
+		{ "instr_name": "andb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_m_2args_e"], "if": "!defined(__AVX2__)" },
+		{ "instr_name": "and", "datatypes": all_datatypes, "template": tpl_implem_avx["logi_m_2args"], "if": "defined(__AVX2__)" } ],
+	"andnb": [
+		{ "instr_name": "andnot", "datatypes": all_float, "template": tpl_implem_avx["logi_2args"] },
+		{ "instr_name": "andnb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_2args_e"], "if": "!defined(__AVX2__)" },
+		{ "instr_name": "andnot", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_2args"], "if": "defined(__AVX2__)" } ],
+	"andnb_m": [
+		{ "instr_name": "andnb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_m_2args_e"], "if": "!defined(__AVX2__)" },
+		{ "instr_name": "andnot", "datatypes": all_datatypes, "template": tpl_implem_avx["logi_m_2args"], "if": "defined(__AVX2__)" } ],
+	"orb": [
+		{ "instr_name": "or", "datatypes": all_float, "template": tpl_implem_avx["logi_2args"] },
+		{ "instr_name": "orb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_2args_e"], "if": "!defined(__AVX2__)" },
+		{ "instr_name": "or", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_2args"], "if": "defined(__AVX2__)" } ],
+	"orb_m": [
+		{ "instr_name": "orb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_m_2args_e"], "if": "!defined(__AVX2__)" },
+		{ "instr_name": "or", "datatypes": all_datatypes, "template": tpl_implem_avx["logi_m_2args"], "if": "defined(__AVX2__)" } ],
+	"xorb": [
+		{ "instr_name": "xor", "datatypes": all_float, "template": tpl_implem_avx["logi_2args"] },
+		{ "instr_name": "xorb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_2args_e"], "if": "!defined(__AVX2__)" },
+		{ "instr_name": "xor", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_2args"], "if": "defined(__AVX2__)" } ],
+	"xorb_m": [
+		{ "instr_name": "xorb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_m_2args_e"], "if": "!defined(__AVX2__)" },
+		{ "instr_name": "xor", "datatypes": all_datatypes, "template": tpl_implem_avx["logi_m_2args"], "if": "defined(__AVX2__)" } ],
+	"lshiftr": [
+		{ "instr_name": "sllv", "datatypes": [int64, int32], "template": tpl_implem_avx["arith_2args"], "if": "defined(__AVX2__)" } ],
+	"rshiftr": [
+		{ "instr_name": "srlv", "datatypes": [int64, int32], "template": tpl_implem_avx["arith_2args"], "if": "defined(__AVX2__)" } ],
+	"lshift": [
+		{ "instr_name": "slli", "datatypes": [int64, int32, int16], "template": tpl_implem_avx["shift_2args"], "if": "defined(__AVX2__)" } ],
+	"rshift": [
+		{ "instr_name": "srli", "datatypes": [int64, int32, int16], "template": tpl_implem_avx["shift_2args"], "if": "defined(__AVX2__)" } ],
+	"cmpeq": [
+		{ "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx["cmpeq_float"], },
+		{ "instr_name": "cmpeq", "datatypes": all_int, "template": tpl_implem_avx["cmp_int"], "if": "defined(__AVX2__)" } ],
+	"cmpneq": [
+		{ "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx["cmpneq_float"], } ],
+	"cmplt": [
+		{ "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx["cmplt_float"], } ],
+	"cmple": [
+		{ "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx["cmple_float"], } ],
+	"cmpge": [
+		{ "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx["cmpge_float"], } ],
+	"cmpgt": [
+		{ "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx["cmpgt_float"], },
+		{ "instr_name": "cmpgt", "datatypes": all_int, "template": tpl_implem_avx["cmp_int"], "if": "defined(__AVX2__)" } ],
+	"blend": [
+		{ "instr_name": "blendv", "datatypes": all_float, "template": tpl_implem_avx["blend_float"], },
+		{ "instr_name": "blendv", "datatypes": all_int_uint, "template": tpl_implem_avx["blend_int"], "if": "defined(__AVX2__)", } ],
+}
+
+tpl_implem_emu = {
+	"blend-1": { "format": "long", "code":
+"""	%r<c:float|b:tp>% r0f = %cast<tp,c:float|b:tp>%(r0);
+	%r<c:float|b:tp>% r1f = %cast<tp,c:float|b:tp>%(r1);
+	%m<c:float|b:tp>% m0f = %cast_m<tp,c:float|b:tp>%(m0);
+	%r<c:float|b:tp>% resf = %blend<c:float|b:tp>%(r0f, r1f, m0f);
+	return %cast<c:float|b:tp,tp>%(resf); """
+	},
+	"blend-2": { "format": "long", "code":
+"""	%r<c:int|b:tp>% rmi = %cast<tp,c:int|b:tp>%(%toreg<tp>%(m0));
+	%r<c:int|b:tp>% r0i = %cast<tp,c:int|b:tp>%(r0);
+	%r<c:int|b:tp>% r1i = %cast<tp,c:int|b:tp>%(r1);
+	%r<c:int|b:tp>% r_0i = %andb<c:int|b:tp>%(rmi, r0i);
+	%r<c:int|b:tp>% r_1i = %andnb<c:int|b:tp>%(rmi, r1i);
+	%r<c:int|b:tp>% resi = %xorb<c:int|b:tp>%(r_0i, r_1i);
+	%r<tr>% res = %cast<c:int|b:tr,tr>%(resi);
+	return res;"""
+	},
+	"sat": { "format": "long", "code":
+"""	%r<tp>% rmin = %set1<tp>%(v0);
+	%r<tp>% rmax = %set1<tp>%(v1);
+	%r<tp>% res = %max<tp>%(%min<tp>%(r0, rmax), rmin);
+	return res;"""
+	},
+	"fmadd": { "format": "long", "code":
+"""	%r<tp>% rmul = %mul<tp>%(r0, r1);
+	%r<tp>% res = %add<tp>%(rmul, r2);
+	return res;"""
+	},
+	"fmsub": { "format": "long", "code":
+"""	%r<tp>% rmul = %mul<tp>%(r0, r1);
+	%r<tp>% res = %sub<tp>%(rmul, r2);
+	return res;"""
+	},
+	"fnmadd": { "format": "long", "code":
+"""	%r<tp>% rmul = %mul<tp>%(r0, r1);
+	%r<tp>% res = %sub<tp>%(r2, rmul);
+	return res;"""
+	},
+	"fnmsub": { "format": "long", "code":
+"""	%r<tp>% rmul = %mul<tp>%(r0, r1);
+	%r<tp>% rmulz = %sub<tp>%(%set0<tp>%(), rmul);
+	%r<tp>% res = %sub<tp>%(rmulz, r2);
+	return res;"""
+	},
+	"arith_2args_1msk": { "format": "long", "code":
+"""	%r<tp>% res = %{{ instr_name }}<tp>%(r0, r1);
+	return %blend<tp>%(res, r2, m0);"""
+	},
+	"arith_2args_1msk_1reg": { "format": "long", "code":
+"""	%r<tp>% rz = %set0<tp>%();
+	return %{{ instr_name }}<tp>%(r0, r1, m0, rz);"""
+	},
+}
+
+implems_emu = {
+	"blend": [
+		{ "datatypes": [int64, int32, uint64, uint32], "template": tpl_implem_emu["blend-1"]},
+		{ "datatypes": all_datatypes, "template": tpl_implem_emu["blend-2"]}, ],
+	"sat": [
+		{ "datatypes": all_datatypes, "template": tpl_implem_emu["sat"] }, ],
+	"fmadd": [
+		{ "datatypes": all_float, "template": tpl_implem_emu["fmadd"] }, ],
+	"fmsub": [
+		{ "datatypes": all_float, "template": tpl_implem_emu["fmsub"] }, ],
+	"fnmadd": [
+		{ "datatypes": all_float, "template": tpl_implem_emu["fnmadd"] }, ],
+	"fnmsub": [
+		{ "datatypes": all_float, "template": tpl_implem_emu["fnmsub"] }, ],
+	"add_m": [
+		{ "instr_name": "add", "datatypes": all_datatypes, "template": tpl_implem_emu["arith_2args_1msk"] }, ],
+	"add_mz": [
+		{ "instr_name": "add_m", "datatypes": all_datatypes, "template": tpl_implem_emu["arith_2args_1msk_1reg"] }, ],
+	"sub_m": [
+		{ "instr_name": "sub", "datatypes": all_datatypes, "template": tpl_implem_emu["arith_2args_1msk"] }, ],
+	"sub_mz": [
+		{ "instr_name": "sub_m", "datatypes": all_datatypes, "template": tpl_implem_emu["arith_2args_1msk_1reg"] }, ],
+	"mul_m": [
+		{ "instr_name": "mul", "datatypes": all_datatypes, "template": tpl_implem_emu["arith_2args_1msk"] }, ],
+	"mul_mz": [
+		{ "instr_name": "mul_m", "datatypes": all_datatypes, "template": tpl_implem_emu["arith_2args_1msk_1reg"] }, ],
+	"div_m": [
+		{ "instr_name": "div", "datatypes": all_float, "template": tpl_implem_emu["arith_2args_1msk"] }, ],
+	"div_mz": [
+		{ "instr_name": "div_m", "datatypes": all_float, "template": tpl_implem_emu["arith_2args_1msk_1reg"] }, ],
+	"min_m": [
+		{ "instr_name": "min", "datatypes": all_datatypes, "template": tpl_implem_emu["arith_2args_1msk"] }, ],
+	"min_mz": [
+		{ "instr_name": "min_m", "datatypes": all_datatypes, "template": tpl_implem_emu["arith_2args_1msk_1reg"] }, ],
+	"max_m": [
+		{ "instr_name": "max", "datatypes": all_datatypes, "template": tpl_implem_emu["arith_2args_1msk"] }, ],
+	"max_mz": [
+		{ "instr_name": "max_m", "datatypes": all_datatypes, "template": tpl_implem_emu["arith_2args_1msk_1reg"] }, ],
+}
+
+implems_mixed = implems_avx
+for iemu in implems_emu:
+	# print(iemu)
+	if iemu not in implems_mixed:
+		# print("notin")
+		implems_mixed[iemu] = []
+	for sub_iemu in implems_emu[iemu]:
+		# print(sub_iemu)
+		sub_iemu["type"] = "emulated"
+		implems_mixed[iemu].append(sub_iemu)
+
+dump_dict_json(implems_mixed, "impl.json")
+
 file = open("../include/mipp_v2_impl_AVX_gen.h", "w")
 
 tpl_header_avx = """#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX_H_
@@ -975,8 +999,7 @@ print(j2_template.render(), file=file)
 gen_defines(isa_avx, file)
 gen_structures(isa_avx, file)
 
-gen_native_functions(isa_avx, file, mipp_funcs)
-gen_emulated_functions(isa_avx, file, mipp_funcs)
+gen_functions(isa_avx, file, mipp_funcs, implems_mixed)
 gen_missing_functions(isa_avx, file, mipp_funcs)
 
 dump_dict_json(mipp_funcs, "test.json")
