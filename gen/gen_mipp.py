@@ -178,12 +178,11 @@ def build_ifdef(funcs, func_name, dt_key, implem_id):
 def build_dt(input_str, isa, dt_par, dt_ret):
 	dt = ""
 	dt_info_carac = input_str.split("|")
-	if len(dt_info_carac) == 1:
-		if dt_info_carac[0] == "tp":
-			dt = dt_par
-		elif dt_info_carac[0] == "tr":
-			dt = dt_ret
-	elif len(dt_info_carac) > 1:
+	if len(dt_info_carac) == 1 and dt_info_carac[0] == "tp":
+		dt = dt_par
+	elif len(dt_info_carac) == 1 and dt_info_carac[0] == "tr":
+		dt = dt_ret
+	elif len(dt_info_carac) >= 1:
 		dt_info_carac_dic = {}
 		for dtic in dt_info_carac:
 			dt_info_carac_dic[dtic.split(':')[0]] = dtic.split(':')[1]
@@ -253,7 +252,6 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret):
 				print("Panic: '" + dt + "' is not available.")
 				exit(-1)
 			converted_ir = converted_ir.replace("%" + s + "%", build_reg(isa["datatypes"][dt], isa))
-
 		elif item_type == "m":
 			dt_info = re.findall(r'\<(.*)\>', s)[0]
 			dt_info_params = dt_info.split(",")
@@ -264,7 +262,6 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret):
 				print("Panic: '" + dt + "' is not available.")
 				exit(-1)
 			converted_ir = converted_ir.replace("%" + s + "%", build_msk(isa["datatypes"][dt], isa))
-
 		else:
 			f_name = item_type
 			if f_name not in funcs:
@@ -278,7 +275,6 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret):
 				dt = build_dt(dt_info_params[0], isa, dt_par, dt_ret)
 				fdt_key = dt + "," + dt
 				f_full_name = build_func_name_short(isa, dt, f_name);
-
 			elif len(dt_info_params) == 2:
 				dt_1 = build_dt(dt_info_params[0], isa, dt_par, dt_ret)
 				dt_2 = build_dt(dt_info_params[1], isa, dt_par, dt_ret)
@@ -676,6 +672,9 @@ mipp_funcs = {
 	"orb_m":   { "proto": protos["ret_msk_2args_msk"           ], "datatypes": all_datatypes           },
 	"xorb":    { "proto": protos["ret_reg_2args_reg"           ], "datatypes": all_datatypes           },
 	"xorb_m":  { "proto": protos["ret_msk_2args_msk"           ], "datatypes": all_datatypes           },
+	"msb":     { "proto": protos["ret_reg_1arg_reg"            ], "datatypes": all_datatypes           },
+	"notb":    { "proto": protos["ret_reg_1arg_reg"            ], "datatypes": all_datatypes           },
+	"notb_m":  { "proto": protos["ret_msk_1arg_msk"            ], "datatypes": all_datatypes           },
 	"lshiftr": { "proto": protos["ret_reg_2args_reg"           ], "datatypes": all_datatypes           },
 	"rshiftr": { "proto": protos["ret_reg_2args_reg"           ], "datatypes": all_datatypes           },
 	"lshift":  { "proto": protos["ret_reg_2args_reg_val"       ], "datatypes": all_datatypes           },
@@ -932,6 +931,66 @@ tpl_implem_emu = {
 """	%r<tp>% rz = %set0<tp>%();
 	return %{{ instr_name }}<tp>%(r0, r1, m0, rz);"""
 	},
+	"msb-64": { "format": "long", "code":
+"""	%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%(0x8000000000000000));
+	return %andb<tp>%(r0, rm);"""
+	},
+	"msb-32": { "format": "long", "code":
+"""	%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%(0x80000000));
+	return %andb<tp>%(r0, rm);"""
+	},
+	"msb-16": { "format": "long", "code":
+"""	%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%(0x8000));
+	return %andb<tp>%(r0, rm);"""
+	},
+	"msb-8": { "format": "long", "code":
+"""	%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%(0x80));
+	return %andb<tp>%(r0, rm);"""
+	},
+	"notb-64": { "format": "long", "code":
+"""	%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%(0xFFFFFFFFFFFFFFFF));
+	return %andnb<tp>%(r0, rm);"""
+	},
+	"notb-32": { "format": "long", "code":
+"""	%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%(0xFFFFFFFF));
+	return %andnb<tp>%(r0, rm);"""
+	},
+	"notb-16": { "format": "long", "code":
+"""	%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%(0xFFFF));
+	return %andnb<tp>%(r0, rm);"""
+	},
+	"notb-8": { "format": "long", "code":
+"""	%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%(0xFF));
+	return %andnb<tp>%(r0, rm);"""
+	},
+	"notb_m-64": { "format": "long", "code":
+"""	%m<tp>% mm = %cast_m<c:int|b:tp,tp>%(%tomsk<c:int|b:tp>%(%set1<c:int|b:tp>%(0xFFFFFFFFFFFFFFFF)));
+	return %andnb_m<tp>%(m0, mm);"""
+	},
+	"notb_m-32": { "format": "long", "code":
+"""	%m<tp>% mm = %cast_m<c:int|b:tp,tp>%(%tomsk<c:int|b:tp>%(%set1<c:int|b:tp>%(0xFFFFFFFF)));
+	return %andnb_m<tp>%(m0, mm);"""
+	},
+	"notb_m-16": { "format": "long", "code":
+"""	%m<tp>% mm = %cast_m<c:int|b:tp,tp>%(%tomsk<c:int|b:tp>%(%set1<c:int|b:tp>%(0xFFFF)));
+	return %andnb_m<tp>%(m0, mm);"""
+	},
+	"notb_m-8": { "format": "long", "code":
+"""	%m<tp>% mm = %cast_m<c:int|b:tp,tp>%(%tomsk<c:int|b:tp>%(%set1<c:int|b:tp>%(0xFF)));
+	return %andnb_m<tp>%(m0, mm);"""
+	},
+	"cmpeq-1": { "format": "long", "code":
+"""	return %cast_m<c:float,tp>%(%cmpeq<c:float>%(%cast<tp,c:float>%(r0), %cast<tp,c:float>%(r1)));"""
+	},
+	"cmpeq-2": { "format": "long", "code":
+"""	return %cast_m<c:int,tp>%(%cmpeq<c:int>%(%cast<tp,c:int>%(r0), %cast<tp,c:int>%(r1)));"""
+	},
+	"cmpneq": { "format": "long", "code":
+"""	return %notb_m<tp>%(%cmpeq<tp>%(r0, r1));"""
+	},
+	"cmpge": { "format": "long", "code":
+"""	return %orb_m<tp>%(%cmpeq<tp>%(r0, r1), %cmpgt<tp>%(r0, r1));"""
+	},
 }
 
 implems_emu = {
@@ -972,6 +1031,28 @@ implems_emu = {
 		{ "instr_name": "max", "datatypes": all_datatypes, "template": tpl_implem_emu["arith_2args_1msk"] }, ],
 	"max_mz": [
 		{ "instr_name": "max_m", "datatypes": all_datatypes, "template": tpl_implem_emu["arith_2args_1msk_1reg"] }, ],
+	"msb": [
+		{ "datatypes": [float64, int64, uint64], "template": tpl_implem_emu["msb-64"] },
+		{ "datatypes": [float32, int32, uint32], "template": tpl_implem_emu["msb-32"] },
+		{ "datatypes": [int16, uint16], "template": tpl_implem_emu["msb-16"] },
+		{ "datatypes": [int8, uint8], "template": tpl_implem_emu["msb-8"] }, ],
+	"notb": [
+		{ "datatypes": [float64, int64, uint64], "template": tpl_implem_emu["notb-64"] },
+		{ "datatypes": [float32, int32, uint32], "template": tpl_implem_emu["notb-32"] },
+		{ "datatypes": [int16, uint16], "template": tpl_implem_emu["notb-16"] },
+		{ "datatypes": [int8, uint8], "template": tpl_implem_emu["notb-8"] }, ],
+	"notb_m": [
+		{ "datatypes": [float64, int64, uint64], "template": tpl_implem_emu["notb_m-64"] },
+		{ "datatypes": [float32, int32, uint32], "template": tpl_implem_emu["notb_m-32"] },
+		{ "datatypes": [int16, uint16], "template": tpl_implem_emu["notb_m-16"] },
+		{ "datatypes": [int8, uint8], "template": tpl_implem_emu["notb_m-8"] }, ],
+	"cmpeq": [
+		{ "datatypes": [int64, int32, uint64, uint32], "template": tpl_implem_emu["cmpeq-1"] },
+		{ "datatypes": [uint16, uint8], "template": tpl_implem_emu["cmpeq-2"] } ],
+	"cmpneq": [
+		{ "datatypes": all_datatypes, "template": tpl_implem_emu["cmpneq"] } ],
+	"cmpge": [
+		{ "datatypes": all_datatypes, "template": tpl_implem_emu["cmpge"] } ],
 }
 
 for iemu in implems_emu:
