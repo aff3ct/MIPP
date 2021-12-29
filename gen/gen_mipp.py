@@ -19,6 +19,19 @@ uint32 = cuint + "32"
 uint16 = cuint + "16"
 uint8 = cuint + "8"
 
+cstdint = {
+	float64: "float64_t",
+	float32: "float32_t",
+	int64: "int64_t",
+	int32: "int32_t",
+	int16: "int16_t",
+	int8: "int8_t",
+	uint64: "uint64_t",
+	uint32: "uint32_t",
+	uint16: "uint16_t",
+	uint8: "uint8_t",
+}
+
 all_float = [float64, float32]
 all_int = [int64, int32, int16, int8]
 all_uint = [uint64, uint32, uint16, uint8]
@@ -43,6 +56,9 @@ def build_val(datatype, isa):
 
 def build_ptr(datatype, isa):
 	return datatype["category"] + str(datatype["n_bits"]) + "_t*"
+
+def build_N(datatype, isa):
+	return "MIPP_" + isa["name"].upper() + "_N_" + datatype["category"].upper() + str(datatype["n_bits"]).upper()
 
 def build_type(type, datatype, isa):
 	if type:
@@ -73,6 +89,8 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name):
 		realdatatype = isa["datatypes"][dt_par]
 		if (arg["fixeddatatype"]):
 			realdatatype = isa["datatypes"][arg["fixeddatatype"]]
+		if arg["charac"] == "RO":
+			p += "const "
 		p += build_type(arg["type"], realdatatype, isa)
 		if arg["type"] == "reg":
 			p += " r" + str(cnt_reg)
@@ -262,6 +280,26 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret):
 				print("Panic: '" + dt + "' is not available.")
 				exit(-1)
 			converted_ir = converted_ir.replace("%" + s + "%", build_msk(isa["datatypes"][dt], isa))
+		elif item_type == "v":
+			dt_info = re.findall(r'\<(.*)\>', s)[0]
+			dt_info_params = dt_info.split(",")
+			dt = ""
+			if len(dt_info_params) == 1:
+				dt = build_dt(dt_info_params[0], isa, dt_par, dt_ret)
+			if dt not in isa["datatypes"]:
+				print("Panic: '" + dt + "' is not available.")
+				exit(-1)
+			converted_ir = converted_ir.replace("%" + s + "%", build_val(isa["datatypes"][dt], isa))
+		elif item_type == "N":
+			dt_info = re.findall(r'\<(.*)\>', s)[0]
+			dt_info_params = dt_info.split(",")
+			dt = ""
+			if len(dt_info_params) == 1:
+				dt = build_dt(dt_info_params[0], isa, dt_par, dt_ret)
+			if dt not in isa["datatypes"]:
+				print("Panic: '" + dt + "' is not available.")
+				exit(-1)
+			converted_ir = converted_ir.replace("%" + s + "%", build_N(isa["datatypes"][dt], isa))
 		else:
 			f_name = item_type
 			if f_name not in funcs:
@@ -362,7 +400,7 @@ def gen_functions(isa, file, funcs, implems):
 						instr_name = ""
 						if "instr_name" in ff:
 							instr_name = ff["instr_name"]
-						pre_rendering = j2_template.render(isa=isa, instr_name=instr_name, dt_par=isa["datatypes"][dt_par], dt_ret=isa["datatypes"][dt_ret])
+						pre_rendering = j2_template.render(isa=isa, instr_name=instr_name, dt_par=isa["datatypes"][dt_par], dt_ret=isa["datatypes"][dt_ret], cstdint_ret=cstdint[dt_ret])
 
 						try:
 							ph_ret = parse_placeholders(pre_rendering, isa, funcs, f, dt_par, dt_ret)
@@ -556,6 +594,14 @@ protos = {
 			{"type": "reg", "charac": "RO", "fixeddatatype": False},
 		]
 	},
+	"ret_reg_2args_reg_msk": {
+		"ret" :
+			{"type": "reg", "charac": "WO", "fixeddatatype": False},
+		"args" : [
+			{"type": "reg", "charac": "RO", "fixeddatatype": False},
+			{"type": "msk", "charac": "RO", "fixeddatatype": False},
+		]
+	},
 	"ret_msk_2args_reg": {
 		"ret" :
 			{"type": "msk", "charac": "WO", "fixeddatatype": False},
@@ -626,11 +672,48 @@ protos = {
 			{"type": "reg", "charac": "RO", "fixeddatatype": False},
 		]
 	},
+	"ret_i32_1arg_msk": {
+		"ret" :
+			{"type": "val", "charac": "WO", "fixeddatatype": int32},
+		"args" : [
+			{"type": "msk", "charac": "RO", "fixeddatatype": False},
+		]
+	},
+	"ret_i32_2args_msk": {
+		"ret" :
+			{"type": "val", "charac": "WO", "fixeddatatype": int32},
+		"args" : [
+			{"type": "msk", "charac": "RO", "fixeddatatype": False},
+			{"type": "msk", "charac": "RO", "fixeddatatype": False},
+		]
+	},
+	"ret_val_1arg_reg": {
+		"ret" :
+			{"type": "val", "charac": "WO", "fixeddatatype": False},
+		"args" : [
+			{"type": "reg", "charac": "RO", "fixeddatatype": False},
+		]
+	},
+	"ret_val_2args_reg_val": {
+		"ret" :
+			{"type": "val", "charac": "WO", "fixeddatatype": False},
+		"args" : [
+			{"type": "reg", "charac": "RO", "fixeddatatype": False},
+			{"type": "val", "charac": "RO", "fixeddatatype": uint32},
+		]
+	},
+	"ret_val_1arg_reg": {
+		"ret" :
+			{"type": "val", "charac": "WO", "fixeddatatype": False},
+		"args" : [
+			{"type": "reg", "charac": "RO", "fixeddatatype": False},
+		]
+	},
 }
 
 mipp_funcs = {
 	"cast":    { "proto": protos["ret_reg_1arg_reg"            ], "datatypes": all_datatypes_cart_prod },
-	"cast_m":  { "proto": protos["ret_msk_1arg_msk"            ], "datatypes": all_datatypes_cart_prod },
+	"cast_k":  { "proto": protos["ret_msk_1arg_msk"            ], "datatypes": all_datatypes_cart_prod },
 	"toreg":   { "proto": protos["ret_reg_1arg_msk"            ], "datatypes": all_datatypes           },
 	"tomsk":   { "proto": protos["ret_msk_1arg_reg"            ], "datatypes": all_datatypes           },
 	"load":    { "proto": protos["ret_reg_1arg_ptr"            ], "datatypes": all_datatypes           },
@@ -639,9 +722,14 @@ mipp_funcs = {
 	"storeu":  { "proto": protos["ret_void_2args_ptr_reg"      ], "datatypes": all_datatypes           },
 	"set1":    { "proto": protos["ret_reg_1arg_val"            ], "datatypes": all_datatypes           },
 	"set0":    { "proto": protos["ret_reg_0arg"                ], "datatypes": all_datatypes           },
-	"set0_m":  { "proto": protos["ret_msk_0arg"                ], "datatypes": all_datatypes           },
+	"set0_k":  { "proto": protos["ret_msk_0arg"                ], "datatypes": all_datatypes           },
+	"get":     { "proto": protos["ret_val_2args_reg_val"       ], "datatypes": all_datatypes           },
+	"getfirst":{ "proto": protos["ret_val_1arg_reg"            ], "datatypes": all_datatypes           },
 	"sqrt":    { "proto": protos["ret_reg_1arg_reg"            ], "datatypes": all_float               },
 	"rsqrt":   { "proto": protos["ret_reg_1arg_reg"            ], "datatypes": all_float               },
+	"abs":     { "proto": protos["ret_reg_1arg_reg"            ], "datatypes": all_float+all_int       },
+	"div2":    { "proto": protos["ret_reg_1arg_reg"            ], "datatypes": all_datatypes           },
+	"div4":    { "proto": protos["ret_reg_1arg_reg"            ], "datatypes": all_datatypes           },
 	"add":     { "proto": protos["ret_reg_2args_reg"           ], "datatypes": all_datatypes           },
 	"add_m":   { "proto": protos["ret_reg_3args_2reg_1msk_1reg"], "datatypes": all_datatypes           },
 	"add_mz":  { "proto": protos["ret_reg_3args_2reg_1msk"     ], "datatypes": all_datatypes           },
@@ -665,16 +753,16 @@ mipp_funcs = {
 	"fmsub":   { "proto": protos["ret_reg_3args_reg"           ], "datatypes": all_float               },
 	"fnmsub":  { "proto": protos["ret_reg_3args_reg"           ], "datatypes": all_float               },
 	"andb":    { "proto": protos["ret_reg_2args_reg"           ], "datatypes": all_datatypes           },
-	"andb_m":  { "proto": protos["ret_msk_2args_msk"           ], "datatypes": all_datatypes           },
+	"andb_k":  { "proto": protos["ret_msk_2args_msk"           ], "datatypes": all_datatypes           },
 	"andnb":   { "proto": protos["ret_reg_2args_reg"           ], "datatypes": all_datatypes           },
-	"andnb_m": { "proto": protos["ret_msk_2args_msk"           ], "datatypes": all_datatypes           },
+	"andnb_k": { "proto": protos["ret_msk_2args_msk"           ], "datatypes": all_datatypes           },
 	"orb":     { "proto": protos["ret_reg_2args_reg"           ], "datatypes": all_datatypes           },
-	"orb_m":   { "proto": protos["ret_msk_2args_msk"           ], "datatypes": all_datatypes           },
+	"orb_k":   { "proto": protos["ret_msk_2args_msk"           ], "datatypes": all_datatypes           },
 	"xorb":    { "proto": protos["ret_reg_2args_reg"           ], "datatypes": all_datatypes           },
-	"xorb_m":  { "proto": protos["ret_msk_2args_msk"           ], "datatypes": all_datatypes           },
+	"xorb_k":  { "proto": protos["ret_msk_2args_msk"           ], "datatypes": all_datatypes           },
 	"msb":     { "proto": protos["ret_reg_1arg_reg"            ], "datatypes": all_datatypes           },
 	"notb":    { "proto": protos["ret_reg_1arg_reg"            ], "datatypes": all_datatypes           },
-	"notb_m":  { "proto": protos["ret_msk_1arg_msk"            ], "datatypes": all_datatypes           },
+	"notb_k":  { "proto": protos["ret_msk_1arg_msk"            ], "datatypes": all_datatypes           },
 	"lshiftr": { "proto": protos["ret_reg_2args_reg"           ], "datatypes": all_datatypes           },
 	"rshiftr": { "proto": protos["ret_reg_2args_reg"           ], "datatypes": all_datatypes           },
 	"lshift":  { "proto": protos["ret_reg_2args_reg_val"       ], "datatypes": all_datatypes           },
@@ -686,7 +774,19 @@ mipp_funcs = {
 	"cmpge":   { "proto": protos["ret_msk_2args_reg"           ], "datatypes": all_datatypes           },
 	"cmpgt":   { "proto": protos["ret_msk_2args_reg"           ], "datatypes": all_datatypes           },
 	"blend":   { "proto": protos["ret_reg_3args_2reg_1msk"     ], "datatypes": all_datatypes           },
+	"neg":     { "proto": protos["ret_reg_2args_reg"           ], "datatypes": all_float+all_int       },
+	"neg_2":   { "proto": protos["ret_reg_2args_reg_msk"       ], "datatypes": all_float+all_int       },
 	"sat":     { "proto": protos["ret_reg_3args_1reg_2val"     ], "datatypes": all_datatypes           },
+	"testz":   { "proto": protos["ret_i32_2args_msk"           ], "datatypes": all_datatypes           },
+	"testz_2": { "proto": protos["ret_i32_1arg_msk"            ], "datatypes": all_datatypes           },
+	"hadd":    { "proto": protos["ret_reg_1arg_reg"            ], "datatypes": all_datatypes           },
+	"hadd_2":  { "proto": protos["ret_val_1arg_reg"            ], "datatypes": all_datatypes           },
+	"hmul":    { "proto": protos["ret_reg_1arg_reg"            ], "datatypes": all_datatypes           },
+	"hmul_2":  { "proto": protos["ret_val_1arg_reg"            ], "datatypes": all_datatypes           },
+	"hmin":    { "proto": protos["ret_reg_1arg_reg"            ], "datatypes": all_datatypes           },
+	"hmin_2":  { "proto": protos["ret_val_1arg_reg"            ], "datatypes": all_datatypes           },
+	"hmax":    { "proto": protos["ret_reg_1arg_reg"            ], "datatypes": all_datatypes           },
+	"hmax_2":  { "proto": protos["ret_val_1arg_reg"            ], "datatypes": all_datatypes           },
 }
 
 isa_avx = {
@@ -709,21 +809,24 @@ isa_avx = {
 
 tpl_implem_avx = {
 	"cast":         { "format": "short", "code": "{% if dt_par.data_ext_logi != dt_ret.data_ext_logi -%}{{ isa.prefix }}_{{ instr_name }}{{dt_par.data_ext_logi}}_{{dt_ret.data_ext_logi}}(r0.m);{% else -%} r0.m;{% endif %}" },
-	"cast_m":       { "format": "short", "code": "m0.m;" },
+	"cast_k":       { "format": "short", "code": "m0.m;" },
 	"toreg":        { "format": "short", "code": "{% if dt_par.data_ext_msk != dt_ret.data_ext_logi -%}{{ isa.prefix }}_{{ instr_name }}{{dt_par.data_ext_msk}}_{{dt_ret.data_ext_logi}}(m0.m);{% else -%} m0.m;{% endif %}" },
 	"tomsk":        { "format": "short", "code": "{% if dt_par.data_ext_logi != dt_ret.data_ext_msk -%}{{ isa.prefix }}_{{ instr_name }}{{dt_par.data_ext_logi}}_{{dt_ret.data_ext_msk}}(r0.m);{% else -%} r0.m;{% endif %}" },
 	"load":         { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext_logi }}(({{ dt_par.to_ptr }}*) p0);" },
 	"store":        { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext_logi }}(({{ dt_par.to_ptr }}*) p0, r0.m);" },
 	"set0":         { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext_logi }}();" },
-	"set0_m":       { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext_msk }}();" },
+	"set0_k":       { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext_msk }}();" },
 	"set1":         { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(v0);" },
 	"set1x":        { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}x(v0);" },
+	"getfirst":     { "format": "long",  "code":
+"""	return ({{ cstdint_ret }}){{ isa.prefix }}_{{ instr_name }}_epi{{ dt_par.n_bits }}(%cast<tp,c:int|b:tp>%(r0).m, 0);""" },
 	"arith_1arg":   { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(r0.m);" },
 	"arith_2args":  { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(r0.m, r1.m);" },
 	"logi_2args":   { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext_logi }}(r0.m, r1.m);" },
 	"logi_m_2args": { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext_msk }}(m0.m, m1.m);" },
 	"arith_3args":  { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(r0.m, r1.m, r2.m);" },
-	"shift_2args":  { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(r0.m, v0);" },
+	"shift_2args":  { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_epi{{ dt_par.n_bits }}(r0.m, v0);" },
+	"shiftr_2args": { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_epi{{ dt_par.n_bits }}(r0.m, r1.m);" },
 	"cmpeq_float":  { "format": "long", "code":
 """	%r<tp>% tmp;
 	tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(r0.m, r1.m, _CMP_EQ_OQ);
@@ -758,18 +861,94 @@ tpl_implem_avx = {
 	return %cast<c:float|b:32,tp>%(resf);"""
 	},
 	"logi_m_2args_e": { "format": "long", "code":
-"""	%r<c:float|b:32>% r0f = %toreg<c:float|b:32>%(%cast_m<tp,c:float|b:32>%(m0));
-	%r<c:float|b:32>% r1f = %toreg<c:float|b:32>%(%cast_m<tp,c:float|b:32>%(m1));
+"""	%r<c:float|b:32>% r0f = %toreg<c:float|b:32>%(%cast_k<tp,c:float|b:32>%(m0));
+	%r<c:float|b:32>% r1f = %toreg<c:float|b:32>%(%cast_k<tp,c:float|b:32>%(m1));
 	%r<c:float|b:32>% resf = %{{ instr_name }}<c:float|b:32>%(r0f, r1f);
 	return %tomsk<tp>%(%cast<c:float|b:32,tp>%(resf));"""
 	},
+	"neg_int": { "format": "long", "code":
+"""	%r<tp>% rone = %set1<tp>%(1);
+	%r<tp>% r1bis = %orb<tp>%(r1, rone); // hack to avoid `0` case
+	%r<tp>% res;
+	res.m = {{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(r0.m, r1bis.m);
+	return res;"""
+	},
+	"testz_2args": { "format": "long", "code":
+"""	return {{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext_msk }}(m0.m, m1.m);""" },
+	"reduce_64": { "format": "long", "code":
+"""	%r<c:float|b:32>% rsf;
+	rsf.m = _mm256_permute2f128_ps(%cast<tp,c:float|b:32>%(r0).m, %cast<tp,c:float|b:32>%(r0).m, _MM_SHUFFLE(0,0,0,1));
+	%r<tp>% rs1 = %cast<c:float|b:32,tp>%(rsf);
+	rs1.m = {{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(r0.m, rs1.m);
+	rsf = %cast<tp,c:float|b:32>%(rs1);
+	rsf.m = _mm256_shuffle_ps(rsf.m, rsf.m, _MM_SHUFFLE(1,0,3,2));
+	%r<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);
+	rs2.m = {{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(rs1.m, rs2.m);
+	return rs2;""" },
+	"reduce_32": { "format": "long", "code":
+"""	%r<c:float|b:32>% rsf;
+	rsf.m = _mm256_permute2f128_ps(%cast<tp,c:float|b:32>%(r0).m, %cast<tp,c:float|b:32>%(r0).m, _MM_SHUFFLE(0,0,0,1));
+	%r<tp>% rs1 = %cast<c:float|b:32,tp>%(rsf);
+	rs1.m = {{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(r0.m, rs1.m);
+	rsf = %cast<tp,c:float|b:32>%(rs1);
+	rsf.m = _mm256_shuffle_ps(rsf.m, rsf.m, _MM_SHUFFLE(1,0,3,2));
+	%r<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);
+	rs2.m = {{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(rs1.m, rs2.m);
+	rsf = %cast<tp,c:float|b:32>%(rs2);
+	rsf.m = _mm256_shuffle_ps(rsf.m, rsf.m, _MM_SHUFFLE(2,3,0,1));
+	%r<tp>% rs3 = %cast<c:float|b:32,tp>%(rsf);
+	rs3.m = {{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(rs2.m, rs3.m);
+	return rs3;""" },
+	"reduce_16": { "format": "long", "code":
+"""	%r<c:float|b:32>% rsf;
+	rsf.m = _mm256_permute2f128_ps(%cast<tp,c:float|b:32>%(r0).m, %cast<tp,c:float|b:32>%(r0).m, _MM_SHUFFLE(0,0,0,1));
+	%r<tp>% rs1 = %cast<c:float|b:32,tp>%(rsf);
+	rs1.m = {{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(r0.m, rs1.m);
+	rsf = %cast<tp,c:float|b:32>%(rs1);
+	rsf.m = _mm256_shuffle_ps(rsf.m, rsf.m, _MM_SHUFFLE(1,0,3,2));
+	%r<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);
+	rs2.m = {{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(rs1.m, rs2.m);
+	rsf = %cast<tp,c:float|b:32>%(rs2);
+	rsf.m = _mm256_shuffle_ps(rsf.m, rsf.m, _MM_SHUFFLE(2,3,0,1));
+	%r<tp>% rs3 = %cast<c:float|b:32,tp>%(rsf);
+	rs3.m = {{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(rs2.m, rs3.m);
+	%r<c:int|b:8>% rsi = %cast<tp,c:int|b:8>%(rs3);
+	__m256i mask_16 = _mm256_set_epi8(29, 28, 31, 30, 25, 24, 27, 26, 21, 20, 23, 22, 17, 16, 19, 18, 13, 12, 15, 14, 9, 8, 11, 10, 5, 4, 7, 6, 1, 0, 3, 2);
+	rsi.m = _mm256_shuffle_epi8(rsi.m, mask_16);
+	%r<tp>% rs4 = %cast<c:int|b:8,tp>%(rsi);
+	rs4.m = {{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(rs3.m, rs4.m);
+	return rs4;""" },
+	"reduce_8": { "format": "long", "code":
+"""	%r<c:float|b:32>% rsf;
+	rsf.m = _mm256_permute2f128_ps(%cast<tp,c:float|b:32>%(r0).m, %cast<tp,c:float|b:32>%(r0).m, _MM_SHUFFLE(0,0,0,1));
+	%r<tp>% rs1 = %cast<c:float|b:32,tp>%(rsf);
+	rs1.m = {{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(r0.m, rs1.m);
+	rsf = %cast<tp,c:float|b:32>%(rs1);
+	rsf.m = _mm256_shuffle_ps(rsf.m, rsf.m, _MM_SHUFFLE(1,0,3,2));
+	%r<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);
+	rs2.m = {{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(rs1.m, rs2.m);
+	rsf = %cast<tp,c:float|b:32>%(rs2);
+	rsf.m = _mm256_shuffle_ps(rsf.m, rsf.m, _MM_SHUFFLE(2,3,0,1));
+	%r<tp>% rs3 = %cast<c:float|b:32,tp>%(rsf);
+	rs3.m = {{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(rs2.m, rs3.m);
+	%r<c:int|b:8>% rsi = %cast<tp,c:int|b:8>%(rs3);
+	__m256i mask_16 = _mm256_set_epi8(29, 28, 31, 30, 25, 24, 27, 26, 21, 20, 23, 22, 17, 16, 19, 18, 13, 12, 15, 14, 9, 8, 11, 10, 5, 4, 7, 6, 1, 0, 3, 2);
+	rsi.m = _mm256_shuffle_epi8(rsi.m, mask_16);
+	%r<tp>% rs4 = %cast<c:int|b:8,tp>%(rsi);
+	rs4.m = {{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(rs3.m, rs4.m);
+	rsi = %cast<tp,c:int|b:8>%(rs4);
+	__m256i mask_8 = _mm256_set_epi8(30, 31, 28, 29, 26, 27, 24, 25, 22, 23, 20, 21, 18, 19, 16, 17, 14, 15, 12, 13, 10, 11, 8, 9, 6, 7, 4, 5, 2, 3, 0, 1);
+	rsi.m = _mm256_shuffle_epi8(rsi.m, mask_8);
+	%r<tp>% rs5 = %cast<c:int|b:8,tp>%(rsi);
+	rs5.m = {{ isa.prefix }}_{{ instr_name }}_{{ dt_par.data_ext }}(rs4.m, rs5.m);
+	return rs5;""" },
 }
 
 implems_avx = {
 	"cast": [
 		{ "instr_name": "cast", "datatypes": all_datatypes_cart_prod, "template": tpl_implem_avx["cast"], } ],
-	"cast_m": [
-		{ "instr_name": "cast", "datatypes": all_datatypes_cart_prod, "template": tpl_implem_avx["cast_m"], } ],
+	"cast_k": [
+		{ "instr_name": "cast", "datatypes": all_datatypes_cart_prod, "template": tpl_implem_avx["cast_k"], } ],
 	"toreg": [
 		{ "instr_name": "cast", "datatypes": all_datatypes, "template": tpl_implem_avx["toreg"], } ],
 	"tomsk": [
@@ -790,12 +969,17 @@ implems_avx = {
 		{ "instr_name": "set1", "datatypes": [int32, int16, int8], "template": tpl_implem_avx["set1"] } ],
 	"set0": [
 			{ "instr_name": "setzero", "datatypes": all_datatypes, "template": tpl_implem_avx["set0"] } ],
-	"set0_m": [
-		{ "instr_name": "setzero", "datatypes": all_datatypes, "template": tpl_implem_avx["set0_m"] } ],
+	"set0_k": [
+		{ "instr_name": "setzero", "datatypes": all_datatypes, "template": tpl_implem_avx["set0_k"] } ],
+	"getfirst": [
+	 		{ "instr_name": "extract", "datatypes": all_float+[int64, int32, uint64, uint32], "template": tpl_implem_avx["getfirst"] },
+	 		{ "instr_name": "extract", "datatypes": [int16, int8, uint16, uint8], "template": tpl_implem_avx["getfirst"], "if": "defined(__AVX2__)" } ],
 	"sqrt": [
 		{ "instr_name": "sqrt", "datatypes": all_float, "template": tpl_implem_avx["arith_1arg"] } ],
 	"rsqrt": [
 		{ "instr_name": "rsqrt", "datatypes": [float32], "template": tpl_implem_avx["arith_1arg"] } ],
+	"abs": [
+		{ "instr_name": "abs", "datatypes": [int32, int16, int8], "template": tpl_implem_avx["arith_1arg"], "if": "defined(__AVX2__)" } ],
 	"add": [
 		{ "instr_name": "add", "datatypes": all_float, "template": tpl_implem_avx["arith_2args"] },
 		{ "instr_name": "add", "datatypes": [int64, int32], "template": tpl_implem_avx["arith_2args"], "if": "defined(__AVX2__)" },
@@ -827,38 +1011,39 @@ implems_avx = {
 		{ "instr_name": "and", "datatypes": all_float, "template": tpl_implem_avx["logi_2args"] },
 		{ "instr_name": "andb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_2args_e"], "if": "!defined(__AVX2__)" },
 		{ "instr_name": "and", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_2args"], "if": "defined(__AVX2__)" } ],
-	"andb_m": [
+	"andb_k": [
 		{ "instr_name": "andb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_m_2args_e"], "if": "!defined(__AVX2__)" },
 		{ "instr_name": "and", "datatypes": all_datatypes, "template": tpl_implem_avx["logi_m_2args"], "if": "defined(__AVX2__)" } ],
 	"andnb": [
 		{ "instr_name": "andnot", "datatypes": all_float, "template": tpl_implem_avx["logi_2args"] },
 		{ "instr_name": "andnb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_2args_e"], "if": "!defined(__AVX2__)" },
 		{ "instr_name": "andnot", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_2args"], "if": "defined(__AVX2__)" } ],
-	"andnb_m": [
+	"andnb_k": [
 		{ "instr_name": "andnb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_m_2args_e"], "if": "!defined(__AVX2__)" },
 		{ "instr_name": "andnot", "datatypes": all_datatypes, "template": tpl_implem_avx["logi_m_2args"], "if": "defined(__AVX2__)" } ],
 	"orb": [
 		{ "instr_name": "or", "datatypes": all_float, "template": tpl_implem_avx["logi_2args"] },
 		{ "instr_name": "orb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_2args_e"], "if": "!defined(__AVX2__)" },
 		{ "instr_name": "or", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_2args"], "if": "defined(__AVX2__)" } ],
-	"orb_m": [
+	"orb_k": [
 		{ "instr_name": "orb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_m_2args_e"], "if": "!defined(__AVX2__)" },
 		{ "instr_name": "or", "datatypes": all_datatypes, "template": tpl_implem_avx["logi_m_2args"], "if": "defined(__AVX2__)" } ],
 	"xorb": [
 		{ "instr_name": "xor", "datatypes": all_float, "template": tpl_implem_avx["logi_2args"] },
 		{ "instr_name": "xorb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_2args_e"], "if": "!defined(__AVX2__)" },
 		{ "instr_name": "xor", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_2args"], "if": "defined(__AVX2__)" } ],
-	"xorb_m": [
+	"xorb_k": [
 		{ "instr_name": "xorb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_m_2args_e"], "if": "!defined(__AVX2__)" },
 		{ "instr_name": "xor", "datatypes": all_datatypes, "template": tpl_implem_avx["logi_m_2args"], "if": "defined(__AVX2__)" } ],
 	"lshiftr": [
-		{ "instr_name": "sllv", "datatypes": [int64, int32], "template": tpl_implem_avx["arith_2args"], "if": "defined(__AVX2__)" } ],
+		{ "instr_name": "sllv", "datatypes": [uint64, uint32], "template": tpl_implem_avx["shiftr_2args"], "if": "defined(__AVX2__)" } ],
 	"rshiftr": [
-		{ "instr_name": "srlv", "datatypes": [int64, int32], "template": tpl_implem_avx["arith_2args"], "if": "defined(__AVX2__)" } ],
+		{ "instr_name": "srlv", "datatypes": [uint64, uint32], "template": tpl_implem_avx["shiftr_2args"], "if": "defined(__AVX2__)" } ],
 	"lshift": [
-		{ "instr_name": "slli", "datatypes": [int64, int32, int16], "template": tpl_implem_avx["shift_2args"], "if": "defined(__AVX2__)" } ],
+		{ "instr_name": "slli", "datatypes": [uint64, uint32, uint16], "template": tpl_implem_avx["shift_2args"], "if": "defined(__AVX2__)" } ],
 	"rshift": [
-		{ "instr_name": "srli", "datatypes": [int64, int32, int16], "template": tpl_implem_avx["shift_2args"], "if": "defined(__AVX2__)" } ],
+		{ "instr_name": "srli", "datatypes": [uint64, uint32, uint16], "template": tpl_implem_avx["shift_2args"], "if": "defined(__AVX2__)" },
+		{ "instr_name": "srai", "datatypes": [int32, int16], "template": tpl_implem_avx["shift_2args"], "if": "defined(__AVX2__)" } ],
 	"cmpeq": [
 		{ "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx["cmpeq_float"], },
 		{ "instr_name": "cmpeq", "datatypes": all_int, "template": tpl_implem_avx["cmp_int"], "if": "defined(__AVX2__)" } ],
@@ -876,13 +1061,41 @@ implems_avx = {
 	"blend": [
 		{ "instr_name": "blendv", "datatypes": all_float, "template": tpl_implem_avx["blend_float"], },
 		{ "instr_name": "blendv", "datatypes": all_int_uint, "template": tpl_implem_avx["blend_int"], "if": "defined(__AVX2__)", } ],
+	"neg": [
+		{ "instr_name": "sign", "datatypes": [int32, int16, int8], "template": tpl_implem_avx["neg_int"], "if": "defined(__AVX2__)", }, ],
+	"testz": [
+		{ "instr_name": "testz", "datatypes": all_datatypes, "template": tpl_implem_avx["testz_2args"], }, ],
+	"hadd": [
+		{ "instr_name": "add", "datatypes": [float64], "template": tpl_implem_avx["reduce_64"], },
+		{ "instr_name": "add", "datatypes": [int64], "template": tpl_implem_avx["reduce_64"], "if": "defined(__AVX2__)", },
+		{ "instr_name": "add", "datatypes": [float32], "template": tpl_implem_avx["reduce_32"], },
+		{ "instr_name": "add", "datatypes": [int32], "template": tpl_implem_avx["reduce_32"], "if": "defined(__AVX2__)", },
+		{ "instr_name": "adds", "datatypes": [int16, uint16], "template": tpl_implem_avx["reduce_16"], "if": "defined(__AVX2__)", },
+		{ "instr_name": "adds", "datatypes": [int8, uint8], "template": tpl_implem_avx["reduce_8"], "if": "defined(__AVX2__)", }, ],
+	"hmul": [
+		{ "instr_name": "mul", "datatypes": [float64], "template": tpl_implem_avx["reduce_64"], },
+		{ "instr_name": "mul", "datatypes": [float32], "template": tpl_implem_avx["reduce_32"], },
+		{ "instr_name": "mullo", "datatypes": [int32], "template": tpl_implem_avx["reduce_32"], "if": "defined(__AVX2__)", },
+		{ "instr_name": "mullo", "datatypes": [int16], "template": tpl_implem_avx["reduce_16"], "if": "defined(__AVX2__)", }, ],
+	"hmin": [
+		{ "instr_name": "min", "datatypes": [float64], "template": tpl_implem_avx["reduce_64"], },
+		{ "instr_name": "min", "datatypes": [float32], "template": tpl_implem_avx["reduce_32"], },
+		{ "instr_name": "min", "datatypes": [int32, uint32], "template": tpl_implem_avx["reduce_32"], "if": "defined(__AVX2__)", },
+		{ "instr_name": "min", "datatypes": [int16, uint16], "template": tpl_implem_avx["reduce_16"], "if": "defined(__AVX2__)", },
+		{ "instr_name": "min", "datatypes": [int8, uint8], "template": tpl_implem_avx["reduce_8"], "if": "defined(__AVX2__)", }, ],
+	"hmax": [
+		{ "instr_name": "max", "datatypes": [float64], "template": tpl_implem_avx["reduce_64"], },
+		{ "instr_name": "max", "datatypes": [float32], "template": tpl_implem_avx["reduce_32"], },
+		{ "instr_name": "max", "datatypes": [int32, uint32], "template": tpl_implem_avx["reduce_32"], "if": "defined(__AVX2__)", },
+		{ "instr_name": "max", "datatypes": [int16, uint16], "template": tpl_implem_avx["reduce_16"], "if": "defined(__AVX2__)", },
+		{ "instr_name": "max", "datatypes": [int8, uint8], "template": tpl_implem_avx["reduce_8"], "if": "defined(__AVX2__)", }, ],
 }
 
 tpl_implem_emu = {
 	"blend-1": { "format": "long", "code":
 """	%r<c:float|b:tp>% r0f = %cast<tp,c:float|b:tp>%(r0);
 	%r<c:float|b:tp>% r1f = %cast<tp,c:float|b:tp>%(r1);
-	%m<c:float|b:tp>% m0f = %cast_m<tp,c:float|b:tp>%(m0);
+	%m<c:float|b:tp>% m0f = %cast_k<tp,c:float|b:tp>%(m0);
 	%r<c:float|b:tp>% resf = %blend<c:float|b:tp>%(r0f, r1f, m0f);
 	return %cast<c:float|b:tp,tp>%(resf); """
 	},
@@ -963,33 +1176,98 @@ tpl_implem_emu = {
 """	%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%(0xFF));
 	return %andnb<tp>%(r0, rm);"""
 	},
-	"notb_m-64": { "format": "long", "code":
-"""	%m<tp>% mm = %cast_m<c:int|b:tp,tp>%(%tomsk<c:int|b:tp>%(%set1<c:int|b:tp>%(0xFFFFFFFFFFFFFFFF)));
-	return %andnb_m<tp>%(m0, mm);"""
+	"notb_k-64": { "format": "long", "code":
+"""	%m<tp>% mm = %cast_k<c:int|b:tp,tp>%(%tomsk<c:int|b:tp>%(%set1<c:int|b:tp>%(0xFFFFFFFFFFFFFFFF)));
+	return %andnb_k<tp>%(m0, mm);"""
 	},
-	"notb_m-32": { "format": "long", "code":
-"""	%m<tp>% mm = %cast_m<c:int|b:tp,tp>%(%tomsk<c:int|b:tp>%(%set1<c:int|b:tp>%(0xFFFFFFFF)));
-	return %andnb_m<tp>%(m0, mm);"""
+	"notb_k-32": { "format": "long", "code":
+"""	%m<tp>% mm = %cast_k<c:int|b:tp,tp>%(%tomsk<c:int|b:tp>%(%set1<c:int|b:tp>%(0xFFFFFFFF)));
+	return %andnb_k<tp>%(m0, mm);"""
 	},
-	"notb_m-16": { "format": "long", "code":
-"""	%m<tp>% mm = %cast_m<c:int|b:tp,tp>%(%tomsk<c:int|b:tp>%(%set1<c:int|b:tp>%(0xFFFF)));
-	return %andnb_m<tp>%(m0, mm);"""
+	"notb_k-16": { "format": "long", "code":
+"""	%m<tp>% mm = %cast_k<c:int|b:tp,tp>%(%tomsk<c:int|b:tp>%(%set1<c:int|b:tp>%(0xFFFF)));
+	return %andnb_k<tp>%(m0, mm);"""
 	},
-	"notb_m-8": { "format": "long", "code":
-"""	%m<tp>% mm = %cast_m<c:int|b:tp,tp>%(%tomsk<c:int|b:tp>%(%set1<c:int|b:tp>%(0xFF)));
-	return %andnb_m<tp>%(m0, mm);"""
+	"notb_k-8": { "format": "long", "code":
+"""	%m<tp>% mm = %cast_k<c:int|b:tp,tp>%(%tomsk<c:int|b:tp>%(%set1<c:int|b:tp>%(0xFF)));
+	return %andnb_k<tp>%(m0, mm);"""
 	},
 	"cmpeq-1": { "format": "long", "code":
-"""	return %cast_m<c:float,tp>%(%cmpeq<c:float>%(%cast<tp,c:float>%(r0), %cast<tp,c:float>%(r1)));"""
+"""	return %cast_k<c:float,tp>%(%cmpeq<c:float>%(%cast<tp,c:float>%(r0), %cast<tp,c:float>%(r1)));"""
 	},
 	"cmpeq-2": { "format": "long", "code":
-"""	return %cast_m<c:int,tp>%(%cmpeq<c:int>%(%cast<tp,c:int>%(r0), %cast<tp,c:int>%(r1)));"""
+"""	return %cast_k<c:int,tp>%(%cmpeq<c:int>%(%cast<tp,c:int>%(r0), %cast<tp,c:int>%(r1)));"""
 	},
 	"cmpneq": { "format": "long", "code":
-"""	return %notb_m<tp>%(%cmpeq<tp>%(r0, r1));"""
+"""	return %notb_k<tp>%(%cmpeq<tp>%(r0, r1));"""
 	},
 	"cmpge": { "format": "long", "code":
-"""	return %orb_m<tp>%(%cmpeq<tp>%(r0, r1), %cmpgt<tp>%(r0, r1));"""
+"""	return %orb_k<tp>%(%cmpeq<tp>%(r0, r1), %cmpgt<tp>%(r0, r1));"""
+	},
+	"cmple": { "format": "long", "code":
+"""	return %notb_k<tp>%(%cmpgt<tp>%(r0, r1));"""
+	},
+	"cmplt": { "format": "long", "code":
+"""	return %cmpgt<tp>%(r1, r0);"""
+	},
+	"neg-float": { "format": "long", "code":
+"""	return %xorb<tp>%(r0, %msb<tp>%(r1));""" },
+	"cmpeq-1": { "format": "long", "code":
+"""	return %cast_k<c:float,tp>%(%cmpeq<c:float>%(%cast<tp,c:float>%(r0), %cast<tp,c:float>%(r1)));"""
+	},
+	"neg-int": { "format": "long", "code":
+"""	%r<tp>% rz = %set0<tp>%();
+	%r<tp>% nr0 = %sub<tp>%(rz, r0);
+	%m<tp>% mn = %cmplt<tp>%(r1, rz);
+	return %blend<tp>%(nr0, r0, mn);""" },
+	"neg_2": { "format": "long", "code":
+"""	%r<tp>% r1 = %toreg<tp>%(m0);
+	return %neg<tp>%(r0, r1);""" },
+	"div2-float": { "format": "long", "code":
+"""	%r<tp>% r1 = %set1<tp>%(2);
+	return %div<tp>%(r0, r1);""" },
+	"div4-float": { "format": "long", "code":
+"""	%r<tp>% r1 = %set1<tp>%(4);
+	return %div<tp>%(r0, r1);""" },
+	"div2-int": { "format": "long", "code":
+"""	return %rshift<tp>%(r0, 1);""" },
+	"div4-int": { "format": "long", "code":
+"""	return %rshift<tp>%(r0, 2);""" },
+	"lshift-8": { "format": "long", "code":
+"""	%r<c:int|b:8>% rm8 = %set1<c:int|b:8>%((1 << v0) -1);
+	%r<c:tp|b:16>% rlsh = %lshift<c:tp|b:16>%(%cast<c:tp|b:8,c:tp|b:16>%(r0), v0);
+	%r<c:tp|b:16>% res = %andnb<c:tp|b:16>%(%cast<c:int|b:8,c:tp|b:16>%(rm8), rlsh);
+	return %cast<c:tp|b:16,tp>%(res);""" },
+	"rshift-8": { "format": "long", "code":
+"""	%r<c:int|b:8>% rm8 = %set1<c:int|b:8>%((1 << (8 -v0)) -1);
+	%r<c:tp|b:16>% rrsh = %rshift<c:tp|b:16>%(%cast<c:tp|b:8,c:tp|b:16>%(r0), v0);
+	%r<c:tp|b:16>% res = %andnb<c:tp|b:16>%(%cast<c:int|b:8,c:tp|b:16>%(rm8), rrsh);
+	return %cast<c:tp|b:16,tp>%(res);""" },
+	"testz_2": { "format": "long", "code":
+"""	%r<c:int|b:32>% r32 = %set1<c:int|b:32>%(-1);
+	%m<c:int|b:32>% m32 = %tomsk<c:int|b:32>%(r32);
+	return %testz<tp>%(m0, %cast_k<c:int|b:32,tp>%(m32));""" },
+	"get": { "format": "long", "code":
+"""	%v<tp>% t[%N<tp>%];
+	%storeu<tp>%(t, r0);
+	return t[v0];""" },
+	"getfirst": { "format": "long", "code":
+"""	return %get<tp>%(r0, 0);""" },
+	"hadd_2": { "format": "long", "code":
+"""	return %getfirst<tp>%(%hadd<tp>%(r0));""" },
+	"hmul_2": { "format": "long", "code":
+"""	return %getfirst<tp>%(%hmul<tp>%(r0));""" },
+	"hmin_2": { "format": "long", "code":
+"""	return %getfirst<tp>%(%hmin<tp>%(r0));""" },
+	"hmax_2": { "format": "long", "code":
+"""	return %getfirst<tp>%(%hmax<tp>%(r0));""" },
+	"abs-float64": { "format": "long", "code":
+"""	%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%(0x7FFFFFFFFFFFFFFF));
+	return %andb<tp>%(r0, rm);"""
+	},
+	"abs-float32": { "format": "long", "code":
+"""	%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%(0x7FFFFFFF));
+	return %andb<tp>%(r0, rm);"""
 	},
 }
 
@@ -1041,11 +1319,11 @@ implems_emu = {
 		{ "datatypes": [float32, int32, uint32], "template": tpl_implem_emu["notb-32"] },
 		{ "datatypes": [int16, uint16], "template": tpl_implem_emu["notb-16"] },
 		{ "datatypes": [int8, uint8], "template": tpl_implem_emu["notb-8"] }, ],
-	"notb_m": [
-		{ "datatypes": [float64, int64, uint64], "template": tpl_implem_emu["notb_m-64"] },
-		{ "datatypes": [float32, int32, uint32], "template": tpl_implem_emu["notb_m-32"] },
-		{ "datatypes": [int16, uint16], "template": tpl_implem_emu["notb_m-16"] },
-		{ "datatypes": [int8, uint8], "template": tpl_implem_emu["notb_m-8"] }, ],
+	"notb_k": [
+		{ "datatypes": [float64, int64, uint64], "template": tpl_implem_emu["notb_k-64"] },
+		{ "datatypes": [float32, int32, uint32], "template": tpl_implem_emu["notb_k-32"] },
+		{ "datatypes": [int16, uint16], "template": tpl_implem_emu["notb_k-16"] },
+		{ "datatypes": [int8, uint8], "template": tpl_implem_emu["notb_k-8"] }, ],
 	"cmpeq": [
 		{ "datatypes": [int64, int32, uint64, uint32], "template": tpl_implem_emu["cmpeq-1"] },
 		{ "datatypes": [uint16, uint8], "template": tpl_implem_emu["cmpeq-2"] } ],
@@ -1053,6 +1331,42 @@ implems_emu = {
 		{ "datatypes": all_datatypes, "template": tpl_implem_emu["cmpneq"] } ],
 	"cmpge": [
 		{ "datatypes": all_datatypes, "template": tpl_implem_emu["cmpge"] } ],
+	"cmple": [
+		{ "datatypes": all_datatypes, "template": tpl_implem_emu["cmple"] } ],
+	"cmplt": [
+		{ "datatypes": all_datatypes, "template": tpl_implem_emu["cmplt"] } ],
+	"neg": [
+		{ "datatypes": all_float, "template": tpl_implem_emu["neg-float"] },
+		{ "datatypes": all_int, "template": tpl_implem_emu["neg-int"] }, ],
+	"neg_2": [
+		{ "datatypes": all_float + all_int, "template": tpl_implem_emu["neg_2"] }, ],
+	"div2": [
+		{ "datatypes": all_float, "template": tpl_implem_emu["div2-float"] },
+		{ "datatypes": all_int_uint, "template": tpl_implem_emu["div2-int"] }, ],
+	"div4": [
+		{ "datatypes": all_float, "template": tpl_implem_emu["div4-float"] },
+		{ "datatypes": all_int_uint, "template": tpl_implem_emu["div4-int"] }, ],
+	"lshift": [
+		{ "datatypes": [uint8], "template": tpl_implem_emu["lshift-8"] }, ],
+	"rshift": [
+		{ "datatypes": [uint8], "template": tpl_implem_emu["rshift-8"] }, ],
+	"testz_2": [
+		{ "datatypes": all_datatypes, "template": tpl_implem_emu["testz_2"] }, ],
+	"get": [
+		{ "datatypes": all_datatypes, "template": tpl_implem_emu["get"] }, ],
+	"getfirst": [
+		{ "datatypes": all_datatypes, "template": tpl_implem_emu["getfirst"] }, ],
+	"hadd_2": [
+		{ "datatypes": all_datatypes, "template": tpl_implem_emu["hadd_2"] }, ],
+	"hmul_2": [
+		{ "datatypes": all_datatypes, "template": tpl_implem_emu["hmul_2"] }, ],
+	"hmin_2": [
+		{ "datatypes": all_datatypes, "template": tpl_implem_emu["hmin_2"] }, ],
+	"hmax_2": [
+		{ "datatypes": all_datatypes, "template": tpl_implem_emu["hmax_2"] }, ],
+	"abs": [
+		{ "datatypes": [float64], "template": tpl_implem_emu["abs-float64"] },
+		{ "datatypes": [float32], "template": tpl_implem_emu["abs-float32"] }, ],
 }
 
 for iemu in implems_emu:
