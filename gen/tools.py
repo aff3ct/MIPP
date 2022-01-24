@@ -17,19 +17,6 @@ uint32 = cuint + "32"
 uint16 = cuint + "16"
 uint8 = cuint + "8"
 
-cstdint = {
-	float64: "float64_t",
-	float32: "float32_t",
-	int64: "int64_t",
-	int32: "int32_t",
-	int16: "int16_t",
-	int8: "int8_t",
-	uint64: "uint64_t",
-	uint32: "uint32_t",
-	uint16: "uint16_t",
-	uint8: "uint8_t",
-}
-
 all_float = [float64, float32]
 all_int = [int64, int32, int16, int8]
 all_uint = [uint64, uint32, uint16, uint8]
@@ -43,25 +30,58 @@ for dt_ret in all_datatypes:
 		if new_entry not in all_datatypes_cart_prod:
 			all_datatypes_cart_prod.append(dt_par + "," + dt_ret);
 
-def build_reg(datatype, isa, lmul=0, isa_name=True):
-	str_reg = "rvd_"
-	if isa_name:
-		str_reg += isa["name"] + "_"
-	str_reg += datatype["category"] + str(datatype["n_bits"])
-	if lmul:
-		str_reg += "_m" + str(int(lmul))
-	str_reg += "_t"
-	return str_reg
+datatypes = {
+	float64 : { "name" : float64, "category": cfloat, "n_bits" : 64, "cstd": "float64_t", },
+	float32 : { "name" : float32, "category": cfloat, "n_bits" : 32, "cstd": "float32_t", },
+	  int64 : { "name" :   int64, "category":   cint, "n_bits" : 64, "cstd":   "int64_t", },
+	  int32 : { "name" :   int32, "category":   cint, "n_bits" : 32, "cstd":   "int32_t", },
+	  int16 : { "name" :   int16, "category":   cint, "n_bits" : 16, "cstd":   "int16_t", },
+	   int8 : { "name" :    int8, "category":   cint, "n_bits" :  8, "cstd":    "int8_t", },
+	 uint64 : { "name" :  uint64, "category":  cuint, "n_bits" : 64, "cstd":  "uint64_t", },
+	 uint32 : { "name" :  uint32, "category":  cuint, "n_bits" : 32, "cstd":  "uint32_t", },
+	 uint16 : { "name" :  uint16, "category":  cuint, "n_bits" : 16, "cstd":  "uint16_t", },
+	  uint8 : { "name" :   uint8, "category":  cuint, "n_bits" :  8, "cstd":   "uint8_t", },
+}
 
-def build_msk(datatype, isa, lmul=0, isa_name=True):
-	str_msk = "rvm_"
-	if isa_name:
-		str_msk += isa["name"] + "_"
-	str_msk += datatype["category"] + str(datatype["n_bits"])
-	if lmul:
-		str_msk += "_m" + str(int(lmul))
-	str_msk += "_t"
-	return str_msk
+def build_reg(datatype, isa, lmul=0, isa_name=True, cpp=False):
+	if cpp:
+		str_reg = "rvd"
+		if isa_name:
+			str_reg += "_"+isa["name"]
+		str_reg += "<" + datatype["cstd"]
+		if lmul:
+			str_reg += "," + str(int(lmul))
+		str_reg += ">"
+		return str_reg
+	else:
+		str_reg = "rvd_"
+		if isa_name:
+			str_reg += isa["name"] + "_"
+		str_reg += datatype["category"] + str(datatype["n_bits"])
+		if lmul:
+			str_reg += "_m" + str(int(lmul))
+		str_reg += "_t"
+		return str_reg
+
+def build_msk(datatype, isa, lmul=0, isa_name=True, cpp=False):
+	if cpp:
+		str_msk = "rvm"
+		if isa_name:
+			str_msk += "_"+isa["name"]
+		str_msk += "<" + datatype["cstd"]
+		if lmul:
+			str_msk += "," + str(int(lmul))
+		str_msk += ">"
+		return str_msk
+	else:
+		str_msk = "rvm_"
+		if isa_name:
+			str_msk += isa["name"] + "_"
+		str_msk += datatype["category"] + str(datatype["n_bits"])
+		if lmul:
+			str_msk += "_m" + str(int(lmul))
+		str_msk += "_t"
+		return str_msk
 
 def build_val(datatype, isa, lmul=0):
 	return datatype["category"] + str(datatype["n_bits"]) + "_t"
@@ -78,12 +98,12 @@ def build_N(datatype, isa, lmul=0, isa_name=True):
 		str_N += "_M" + str(int(lmul))
 	return str_N
 
-def build_type(type, datatype, isa, lmul=0, isa_name=True):
+def build_type(type, datatype, isa, lmul=0, isa_name=True, cpp=False):
 	if type:
 		if type == "reg":
-			return build_reg(datatype, isa, lmul, isa_name)
+			return build_reg(datatype, isa, lmul, isa_name, cpp)
 		elif type == "msk":
-			return build_msk(datatype, isa, lmul, isa_name)
+			return build_msk(datatype, isa, lmul, isa_name, cpp)
 		elif type == "val":
 			return build_val(datatype, isa)
 		elif type == "ptr":
@@ -91,13 +111,27 @@ def build_type(type, datatype, isa, lmul=0, isa_name=True):
 	else:
 		return "void"
 
-def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True):
-	if lmul:
+def lmul_specialized(proto):
+	n_lmul_spe = 0
+	for arg in proto["args"]:
+		if (arg["type"] == "reg" or arg["type"] == "msk") and not arg["fixeddatatype"]:
+			n_lmul_spe = n_lmul_spe +1
+	return n_lmul_spe
+
+def type_specialized(proto):
+	n_type_spe = 0
+	for arg in proto["args"]:
+		if not arg["fixeddatatype"]:
+			n_type_spe = n_type_spe +1
+	return n_type_spe
+
+def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False):
+	if lmul and (not cpp or (cpp and not lmul_specialized(proto))):
 		func_name += "_m" + str(int(lmul))
-	realdatatype = isa["datatypes"][dt_ret]
+	realdatatype = datatypes[dt_ret]
 	if (proto["ret"]["fixeddatatype"]):
-		realdatatype = isa["datatypes"][proto["ret"]["fixeddatatype"]]
-	p = build_type(proto["ret"]["type"], realdatatype, isa, lmul, isa_name) + " " + func_name + "("
+		realdatatype = datatypes[proto["ret"]["fixeddatatype"]]
+	p = build_type(proto["ret"]["type"], realdatatype, isa, lmul, isa_name, cpp) + " " + func_name + "("
 	cnt_reg = 0
 	cnt_msk = 0
 	cnt_val = 0
@@ -106,12 +140,12 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True):
 	for arg in proto["args"]:
 		if not is_first:
 			p += ", "
-		realdatatype = isa["datatypes"][dt_par]
+		realdatatype = datatypes[dt_par]
 		if (arg["fixeddatatype"]):
-			realdatatype = isa["datatypes"][arg["fixeddatatype"]]
+			realdatatype = datatypes[arg["fixeddatatype"]]
 		if arg["charac"] == "RO":
 			p += "const "
-		p += build_type(arg["type"], realdatatype, isa, lmul, isa_name)
+		p += build_type(arg["type"], realdatatype, isa, lmul, isa_name, cpp)
 		if arg["type"] == "reg":
 			p += " r" + str(cnt_reg)
 			cnt_reg = cnt_reg +1
@@ -127,11 +161,11 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True):
 		is_first = False
 	return p + ")";
 
-def build_call(proto, dt_par, dt_ret, isa, func_name, lmul=0):
+def build_call(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True):
 	if lmul:
 		func_name += "_m" + str(int(lmul))
 	p = ""
-	realdatatype = isa["datatypes"][dt_ret]
+	realdatatype = datatypes[dt_ret]
 	if (proto["ret"]["type"]):
 		p += "return "
 	p += func_name + "("
@@ -162,7 +196,7 @@ def _build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul, part):
 	if lmul:
 		func_name += "_m" + str(int(lmul))
 	p = ""
-	realdatatype = isa["datatypes"][dt_ret]
+	realdatatype = datatypes[dt_ret]
 	if (proto["ret"]["type"]):
 		p += "res.m"  + str(int(part)) + " = "
 	p += func_name + "("
@@ -192,9 +226,9 @@ def _build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul, part):
 def build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul=2, isa_name=True):
 	lmul_2 = int(lmul / 2)
 	str_code = ""
-	realdatatype = isa["datatypes"][dt_ret]
+	realdatatype = datatypes[dt_ret]
 	if proto["ret"]["fixeddatatype"]:
-		realdatatype = isa["datatypes"][proto["ret"]["fixeddatatype"]]
+		realdatatype = datatypes[proto["ret"]["fixeddatatype"]]
 	if proto["ret"]["type"]:
 		str_code += "\t" + build_type(proto["ret"]["type"], realdatatype, isa, lmul, isa_name) + " res;\n"
 	str_code += "\t" + _build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul_2, 1) + ";\n"
@@ -204,19 +238,36 @@ def build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul=2, isa_name=True
 	return str_code;
 
 def build_func_name_short(isa, dt, mipp_name, isa_name=True):
-	param_type = isa["datatypes"][dt]["category"] + str(isa["datatypes"][dt]["n_bits"])
+	param_type = datatypes[dt]["category"] + str(datatypes[dt]["n_bits"])
 	if isa_name:
 		return "mipp_" + isa["name"] + "_" + mipp_name + "_" +  param_type
 	else:
 		return "mipp_" + mipp_name + "_" +  param_type
 
+def build_cpp_func_name_short(proto, dt_ret, mipp_name):
+	if type_specialized(proto):
+		mipp_name = mipp_name.replace("_mz", "")
+		mipp_name = mipp_name.replace("_m", "")
+		mipp_name = mipp_name.replace("_k", "")
+		return mipp_name
+	else:
+		return_type = datatypes[dt_ret]["category"] + str(datatypes[dt_ret]["n_bits"])
+		return mipp_name + "_" + return_type
+
 def build_func_name(isa, dt_par, dt_ret, mipp_name, isa_name=True):
-	param_type = isa["datatypes"][dt_par]["category"] + str(isa["datatypes"][dt_par]["n_bits"])
-	return_type = isa["datatypes"][dt_ret]["category"] + str(isa["datatypes"][dt_ret]["n_bits"])
+	param_type = datatypes[dt_par]["category"] + str(datatypes[dt_par]["n_bits"])
+	return_type = datatypes[dt_ret]["category"] + str(datatypes[dt_ret]["n_bits"])
 	if isa_name:
 		return "mipp_" + isa["name"] + "_" + mipp_name + "_" + param_type + "_" + return_type
 	else:
 		return "mipp_" + mipp_name + "_" + param_type + "_" + return_type
+
+def build_cpp_func_name(dt_ret, mipp_name):
+	mipp_name = mipp_name.replace("_mz", "")
+	mipp_name = mipp_name.replace("_m", "")
+	mipp_name = mipp_name.replace("_k", "")
+	return_type = datatypes[dt_ret]["category"] + str(datatypes[dt_ret]["n_bits"])
+	return mipp_name + "_" + return_type
 
 def build_ifdef_rec(funcs, func_name, dt_key):
 	str_ifdef = ""
@@ -309,9 +360,9 @@ def build_dt(input_str, isa, dt_par, dt_ret):
 
 		if "c" in dt_info_carac_dic:
 			if dt_info_carac_dic["c"] == "tp":
-				dt += isa["datatypes"][dt_par]["category"]
+				dt += datatypes[dt_par]["category"]
 			elif dt_info_carac_dic["c"] == "tr":
-				dt += isa["datatypes"][dt_ret]["category"]
+				dt += datatypes[dt_ret]["category"]
 			elif dt_info_carac_dic["c"] == "int":
 				dt += cint
 			elif dt_info_carac_dic["c"] == "uint":
@@ -322,13 +373,13 @@ def build_dt(input_str, isa, dt_par, dt_ret):
 				print("Panic: unknown datatype '" + dt_info_carac_dic["c"] + "'.")
 				exit(-1)
 		else:
-			dt += isa["datatypes"][dt_par]["category"]
+			dt += datatypes[dt_par]["category"]
 
 		if "b" in dt_info_carac_dic:
 			if dt_info_carac_dic["b"] == "tp":
-				dt += str(isa["datatypes"][dt_par]["n_bits"])
+				dt += str(datatypes[dt_par]["n_bits"])
 			elif dt_info_carac_dic["b"] == "tr":
-				dt += str(isa["datatypes"][dt_ret]["n_bits"])
+				dt += str(datatypes[dt_ret]["n_bits"])
 			elif dt_info_carac_dic["b"] == "64":
 				dt += "64"
 			elif dt_info_carac_dic["b"] == "32":
@@ -341,7 +392,7 @@ def build_dt(input_str, isa, dt_par, dt_ret):
 				print("Panic: unknown n_bits '" + dt_info_carac_dic["b"] + "'.")
 				exit(-1)
 		else:
-			dt += str(isa["datatypes"][dt_par]["n_bits"])
+			dt += str(datatypes[dt_par]["n_bits"])
 	return dt
 
 # for debug
@@ -371,7 +422,7 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret):
 			if dt not in isa["datatypes"]:
 				print("Panic: '" + dt + "' is not available.")
 				exit(-1)
-			converted_ir = converted_ir.replace("%" + s + "%", build_reg(isa["datatypes"][dt], isa))
+			converted_ir = converted_ir.replace("%" + s + "%", build_reg(datatypes[dt], isa))
 		elif item_type == "m":
 			dt_info = re.findall(r'\<(.*)\>', s)[0]
 			dt_info_params = dt_info.split(",")
@@ -381,7 +432,7 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret):
 			if dt not in isa["datatypes"]:
 				print("Panic: '" + dt + "' is not available.")
 				exit(-1)
-			converted_ir = converted_ir.replace("%" + s + "%", build_msk(isa["datatypes"][dt], isa))
+			converted_ir = converted_ir.replace("%" + s + "%", build_msk(datatypes[dt], isa))
 		elif item_type == "v":
 			dt_info = re.findall(r'\<(.*)\>', s)[0]
 			dt_info_params = dt_info.split(",")
@@ -391,7 +442,7 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret):
 			if dt not in isa["datatypes"]:
 				print("Panic: '" + dt + "' is not available.")
 				exit(-1)
-			converted_ir = converted_ir.replace("%" + s + "%", build_val(isa["datatypes"][dt], isa))
+			converted_ir = converted_ir.replace("%" + s + "%", build_val(datatypes[dt], isa))
 		elif item_type == "N":
 			dt_info = re.findall(r'\<(.*)\>', s)[0]
 			dt_info_params = dt_info.split(",")
@@ -401,7 +452,7 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret):
 			if dt not in isa["datatypes"]:
 				print("Panic: '" + dt + "' is not available.")
 				exit(-1)
-			converted_ir = converted_ir.replace("%" + s + "%", build_N(isa["datatypes"][dt], isa))
+			converted_ir = converted_ir.replace("%" + s + "%", build_N(datatypes[dt], isa))
 		else:
 			f_name = item_type
 			if f_name not in funcs:

@@ -18,7 +18,7 @@ def gen_ci_defines(isa_list, file):
 		j2_template = Template(template, undefined=StrictUndefined)
 
 		for dt in isa["datatypes"]:
-			print(j2_template.render(isa_name_upper=isa["name"].upper(), type_category_upper=isa["datatypes"][dt]["category"].upper(), n_bits=isa["datatypes"][dt]["n_bits"]), file=file)
+			print(j2_template.render(isa_name_upper=isa["name"].upper(), type_category_upper=datatypes[dt]["category"].upper(), n_bits=datatypes[dt]["n_bits"]), file=file)
 		i = i + 1
 		if i == len(isa_list):
 			print("#endif", file=file)
@@ -30,7 +30,7 @@ def gen_ci_defines(isa_list, file):
 		j2_template = Template(template, undefined=StrictUndefined)
 
 		for dt in isa["datatypes"]:
-			print(j2_template.render(type_category_upper=isa["datatypes"][dt]["category"].upper(), n_bits=isa["datatypes"][dt]["n_bits"], lmul=str(lmul)), file=file)
+			print(j2_template.render(type_category_upper=datatypes[dt]["category"].upper(), n_bits=datatypes[dt]["n_bits"], lmul=str(lmul)), file=file)
 
 def gen_ci_structures(isa_list, file):
 	i = 0
@@ -45,13 +45,13 @@ def gen_ci_structures(isa_list, file):
 		j2_template = Template(template, undefined=StrictUndefined)
 
 		for dt in isa["datatypes"]:
-			print(j2_template.render(isa=isa, datatype=isa["datatypes"][dt]), file=file)
+			print(j2_template.render(isa=isa, datatype=datatypes[dt]), file=file)
 
 		template = """typedef rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t rvm_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
 		j2_template = Template(template, undefined=StrictUndefined)
 
 		for dt in isa["datatypes"]:
-			print(j2_template.render(isa=isa, datatype=isa["datatypes"][dt]), file=file)
+			print(j2_template.render(isa=isa, datatype=datatypes[dt]), file=file)
 
 		i = i + 1
 		if i == len(isa_list):
@@ -61,26 +61,26 @@ def gen_ci_structures(isa_list, file):
 	j2_template = Template(template, undefined=StrictUndefined)
 
 	for dt in isa["datatypes"]:
-		print(j2_template.render(isa=isa, datatype=isa["datatypes"][dt]), file=file)
+		print(j2_template.render(isa=isa, datatype=datatypes[dt]), file=file)
 
 	template = """typedef rvm_{{ datatype.category }}{{ datatype.n_bits }}_t rvm_{{ datatype.category }}{{ datatype.n_bits }}_m1_t;"""
 	j2_template = Template(template, undefined=StrictUndefined)
 
 	for dt in isa["datatypes"]:
-		print(j2_template.render(isa=isa, datatype=isa["datatypes"][dt]), file=file)
+		print(j2_template.render(isa=isa, datatype=datatypes[dt]), file=file)
 
 	for lmul in [2, 4, 8]:
 		lmul_2 = int(lmul / 2)
 		template = """typedef struct { rvd_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul_2 }}_t m1, m2; } rvd_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t;"""
 		j2_template = Template(template, undefined=StrictUndefined)
 		for dt in isa["datatypes"]:
-			print(j2_template.render(isa=isa, datatype=isa["datatypes"][dt], lmul=str(lmul), lmul_2=str(lmul_2)), file=file)
+			print(j2_template.render(isa=isa, datatype=datatypes[dt], lmul=str(lmul), lmul_2=str(lmul_2)), file=file)
 	for lmul in [2, 4, 8]:
 		lmul_2 = int(lmul / 2)
 		template = """typedef struct { rvm_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul_2 }}_t m1, m2; } rvm_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t;"""
 		j2_template = Template(template, undefined=StrictUndefined)
 		for dt in isa["datatypes"]:
-			print(j2_template.render(isa=isa, datatype=isa["datatypes"][dt], lmul=str(lmul), lmul_2=str(lmul_2)), file=file)
+			print(j2_template.render(isa=isa, datatype=datatypes[dt], lmul=str(lmul), lmul_2=str(lmul_2)), file=file)
 
 def gen_ci_functions(isa_list, file, funcs):
 	for f in funcs:

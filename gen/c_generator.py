@@ -5,11 +5,11 @@ import re
 from tools import *
 
 def gen_c_defines(isa, file):
-	template = """#define MIPP_MACRO_{{ type_category_upper }}{{ datatype.n_bits }}(MACRO, ...) MACRO(__VA_ARGS__, {{ datatype.n_bits }}, {{ datatype.category }}, {{ datatype.data_ext }}, {{ datatype.data_ext_logi }}, {{ datatype.to_ptr }})"""
+	template = """#define MIPP_MACRO_{{ type_category_upper }}{{ datatype.n_bits }}(MACRO, ...) MACRO(__VA_ARGS__, {{ datatype.n_bits }}, {{ datatype.category }}, {{ isa_datatype.data_ext }}, {{ isa_datatype.data_ext_logi }}, {{ isa_datatype.to_ptr }})"""
 	j2_template = Template(template, undefined=StrictUndefined)
 
 	for dt in isa["datatypes"]:
-		print(j2_template.render(isa=isa, type_category_upper=isa["datatypes"][dt]["category"].upper(), datatype=isa["datatypes"][dt]), file=file)
+		print(j2_template.render(isa=isa, type_category_upper=datatypes[dt]["category"].upper(), isa_datatype=isa["datatypes"][dt], datatype=datatypes[dt]), file=file)
 
 	print("#define MIPP_" + isa["name"].upper() + "_RVD_SIZE_BIT " + str(isa["size"]), file=file)
 	print("#define MIPP_" + isa["name"].upper() + "_RVD_SIZE_BYTE " + str(int(isa["size"] / 8)), file=file)
@@ -18,21 +18,21 @@ def gen_c_defines(isa, file):
 	j2_template = Template(template, undefined=StrictUndefined)
 
 	for dt in isa["datatypes"]:
-		n_elmts = int(isa["size"] / isa["datatypes"][dt]["n_bits"])
-		print(j2_template.render(isa_name_upper=isa["name"].upper(), type_category_upper=isa["datatypes"][dt]["category"].upper(), n_bits=isa["datatypes"][dt]["n_bits"], n_elmts=n_elmts), file=file)
+		n_elmts = int(isa["size"] / datatypes[dt]["n_bits"])
+		print(j2_template.render(isa_name_upper=isa["name"].upper(), type_category_upper=datatypes[dt]["category"].upper(), n_bits=datatypes[dt]["n_bits"], n_elmts=n_elmts), file=file)
 
 def gen_c_structures(isa, file):
-	template = """typedef struct { {{ datatype.reg }} m; } rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
+	template = """typedef struct { {{ isa_datatype.reg }} m; } rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
 	j2_template = Template(template, undefined=StrictUndefined)
 
 	for dt in isa["datatypes"]:
-		print(j2_template.render(isa=isa, datatype=isa["datatypes"][dt]), file=file)
+		print(j2_template.render(isa=isa, isa_datatype=isa["datatypes"][dt], datatype=datatypes[dt]), file=file)
 
-	template = """typedef struct { {{ datatype.msk }} m; } rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
+	template = """typedef struct { {{ isa_datatype.msk }} m; } rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
 	j2_template = Template(template, undefined=StrictUndefined)
 
 	for dt in isa["datatypes"]:
-		print(j2_template.render(isa=isa, datatype=isa["datatypes"][dt]), file=file)
+		print(j2_template.render(isa=isa, isa_datatype=isa["datatypes"][dt], datatype=datatypes[dt]), file=file)
 
 def gen_c_functions(isa, file, funcs, implems):
 	for f in implems:
@@ -60,7 +60,7 @@ def gen_c_functions(isa, file, funcs, implems):
 						instr_name = ""
 						if "instr_name" in ff:
 							instr_name = ff["instr_name"]
-						pre_rendering = j2_template.render(isa=isa, instr_name=instr_name, dt_par=isa["datatypes"][dt_par], dt_ret=isa["datatypes"][dt_ret], cstdint_ret=cstdint[dt_ret])
+						pre_rendering = j2_template.render(isa=isa, instr_name=instr_name, dt_par=datatypes[dt_par], dt_ret=datatypes[dt_ret], isa_dt_par=isa["datatypes"][dt_par], isa_dt_ret=isa["datatypes"][dt_ret], cstdint_ret=datatypes[dt_ret]["cstd"])
 
 						try:
 							ph_ret = parse_placeholders(pre_rendering, isa, funcs, f, dt_par, dt_ret)
@@ -115,7 +115,7 @@ def gen_c_functions(isa, file, funcs, implems):
 
 						if ff["template"]["format"] == "short":
 							if funcs[f]["proto"]["ret"]["type"]:
-								print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], isa["datatypes"][dt_ret], isa) + " res;", file=file);
+								print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file);
 								print("\tres.m = ", end='', file=file)
 							else:
 								print("\t", end='', file=file)
