@@ -32,18 +32,13 @@ gen_c_functions(isa_avx, file, mipp_funcs, implems_avx)
 gen_c_functions(isa_avx, file, mipp_funcs, implems_emu)
 gen_c_missing_functions(isa_avx, file, mipp_funcs)
 
-dump_dict_json(mipp_funcs, "test.json")
+#dump_dict_json(mipp_funcs, "test.json")
 
 tpl_footer_avx = """#endif /* MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX_H_ */"""
 j2_template = Template(tpl_footer_avx, undefined=StrictUndefined)
 print(j2_template.render(), file=file)
 
 file.close()
-
-
-
-
-
 
 file = open("../include/mipp_v2_interface_gen.h", "w")
 
@@ -65,9 +60,6 @@ j2_template = Template(tpl_footer_interface, undefined=StrictUndefined)
 print(j2_template.render(), file=file)
 
 file.close()
-
-
-
 
 file = open("../include/mipp_v2_gen.hpp", "w")
 
@@ -93,6 +85,3 @@ j2_template = Template(tpl_footer_cpp, undefined=StrictUndefined)
 print(j2_template.render(), file=file)
 
 file.close()
-
-
-
