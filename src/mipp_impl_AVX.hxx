@@ -348,6 +348,22 @@
 	}
 #endif
 
+    // ------------------------------------------------------------------------------------------------------------ getfirst
+	template <>
+	inline double getfirst<double>(const mipp::reg r){
+		return _mm256_cvtsd_f64(_mm256_castps_pd(r));
+	}
+
+	template <>
+	inline float getfirst<float>(const mipp::reg r){
+		return _mm256_cvtss_f32(r);
+	}
+
+    template <>
+	inline int32_t getfirst<int32_t>(const mipp::reg r){
+	    return _mm_cvtsi128_si32(_mm256_castsi256_si128(_mm256_castps_si256(r)));
+	}
+
 	// ------------------------------------------------------------------------------------------------------------ set
 	template <>
 	inline reg set<double>(const double vals[nElReg<double>()]) {
