@@ -359,6 +359,29 @@
 		scatter_seq<int8_t,int8_t>(mem_addr, idx, r);
 	}
 
+	// -------------------------------------------------------------------------------------------------------- masked scatter
+#if defined(__AVX512F__)
+	template <>
+	inline void masksca<double,int64_t>(const msk m, double *mem_addr, const reg idx, const reg r) {
+		_mm512_mask_i64scatter_pd(mem_addr,(__mmask8)m,_mm512_castps_si512(idx),_mm512_castps_pd(r),8);
+	}
+
+	template <>
+	inline void masksca<float,int32_t>(const msk m, float *mem_addr, const reg idx, const reg r) {
+		_mm512_mask_i32scatter_ps(mem_addr,(__mmask16)m,_mm512_castps_si512(idx),r,4);
+	}
+
+	template <>
+	inline void masksca<int64_t,int64_t>(const msk m, int64_t *mem_addr, const reg idx, const reg r) {
+		_mm512_mask_i64scatter_epi64(mem_addr,(__mmask8)m,_mm512_castps_si512(idx),_mm512_castps_si512(r),8);
+	}
+
+	template <>
+	inline void masksca<int32_t,int32_t>(const msk m, int32_t *mem_addr, const reg idx, const reg r) {
+		_mm512_mask_i32scatter_epi32(mem_addr,(__mmask16)m,_mm512_castps_si512(idx),_mm512_castps_si512(r),4);
+	}
+#endif
+
 	// ---------------------------------------------------------------------------------------------------------- cmpeq
 	template <>
 	inline msk cmpeq<double>(const reg v1, const reg v2) {
