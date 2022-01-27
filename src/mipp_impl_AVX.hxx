@@ -301,6 +301,53 @@
 		scatter_seq<int8_t,int8_t>(mem_addr, idx, r);
 	}
 
+	// ------------------------------------------------------------------------------------------------------------ maskzld
+	template <>
+	inline reg maskzld<double>(const msk m, const double* memp){
+		return _mm256_castpd_ps(_mm256_maskload_pd(memp,m));
+	}
+
+	template <>
+	inline reg maskzld<float>(const msk m, const float* memp){
+		return _mm256_maskload_ps(memp,m);
+	}
+
+#ifdef __AVX2__
+	template <>
+	inline reg maskzld<int64_t>(const msk m, const int64_t* memp){
+		// probleme cast int64_t
+		return _mm256_castsi256_ps(_mm256_maskload_epi64((const long long *)memp,m));
+	}
+
+	template <>
+	inline reg maskzld<int32_t>(const msk m, const int32_t* memp){
+		return _mm256_castsi256_ps(_mm256_maskload_epi32(memp,m));
+	}
+#endif
+
+	// ------------------------------------------------------------------------------------------------------------ maskst
+	template <>
+	inline void maskst<double>(const msk m, double* memp, const reg a){
+		_mm256_maskstore_pd(memp,m,_mm256_castps_pd(a));
+	}
+
+	template <>
+	inline void maskst<float>(const msk m, float* memp, const reg a){
+		_mm256_maskstore_ps(memp,m,a);
+	}
+
+#ifdef __AVX2__
+	template <>
+	inline void maskst<int64_t>(const msk m, int64_t* memp, const reg a){
+		_mm256_maskstore_epi64((long long *)memp,m,_mm256_castps_si256(a));
+	}
+
+	template <>
+	inline void maskst<int32_t>(const msk m, int32_t* memp, const reg a){
+		_mm256_maskstore_epi32(memp,m,_mm256_castps_si256(a));
+	}
+#endif
+
 	// ------------------------------------------------------------------------------------------------------------ set
 	template <>
 	inline reg set<double>(const double vals[nElReg<double>()]) {

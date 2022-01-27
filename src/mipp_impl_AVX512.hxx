@@ -382,6 +382,52 @@
 	}
 #endif
 
+	// ------------------------------------------------------------------------------------------------------------ maskzld
+#if defined(__AVX512F__)
+	template <>
+	inline reg maskzld<double>(const msk m, const double* memp){
+		return _mm512_castpd_ps(_mm512_mask_load_pd(_mm512_setzero_pd(),(__mmask8)m,memp));
+	}
+
+	template <>
+	inline reg maskzld<float>(const msk m, const float* memp){
+		return _mm512_mask_load_ps(_mm512_setzero_ps(),(__mmask16)m,memp);
+	}
+
+	template <>
+	inline reg maskzld<int64_t>(const msk m, const int64_t* memp){
+		return _mm512_castsi512_ps(_mm512_mask_load_epi64(_mm512_setzero_si512(),(__mmask8)m,memp));
+	}
+
+	template <>
+	inline reg maskzld<int32_t>(const msk m, const int32_t* memp){
+		return _mm512_castsi512_ps(_mm512_mask_load_epi32(_mm512_setzero_si512(),(__mmask16)m,memp));
+	}
+#endif
+
+	// ------------------------------------------------------------------------------------------------------------ maskst
+#if defined(__AVX512F__)
+	template <>
+	inline void maskst<double>(const msk m, double* memp, const reg a){
+		_mm512_mask_store_pd(memp,(__mmask8)m,_mm512_castps_pd(a));
+	}
+
+	template <>
+	inline void maskst<float>(const msk m, float* memp, const reg a){
+		_mm512_mask_store_ps(memp,(__mmask16)m,a);
+	}
+
+	template <>
+	inline void maskst<int64_t>(const msk m, int64_t* memp, const reg a){
+		_mm512_mask_store_epi64(memp,(__mmask8)m,_mm512_castps_si512(a));
+	}
+
+	template <>
+	inline void maskst<int32_t>(const msk m, int32_t* memp, const reg a){
+		_mm512_mask_store_epi32(memp,(__mmask16)m,_mm512_castps_si512(a));
+	}
+#endif
+
 	// ---------------------------------------------------------------------------------------------------------- cmpeq
 	template <>
 	inline msk cmpeq<double>(const reg v1, const reg v2) {
