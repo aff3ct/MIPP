@@ -2654,8 +2654,8 @@
 
 		// indices = 31 30 29 28 27 26 25 24 23 22 21 20 19 18 17 16 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
 		// mask    =  1  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
-		// v1      =  ��  ���  ��  ��  ��  &  z  y  x  w  v  u  t  s  r  q  p  o  n  m  l  k  j  i  h  g  f  e  d  c  b  a
-		// res     =  ��  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+		// v1      =  ù  €  è  é  à  &  z  y  x  w  v  u  t  s  r  q  p  o  n  m  l  k  j  i  h  g  f  e  d  c  b  a
+		// res     =  ù  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
 		return andb<float>(v1, msb_mask);
 	}
 
@@ -2673,8 +2673,8 @@
 
 		// indices = 63 62 61 60 59 58 57 56 55 54 53 52 51 50 49 48 47 46 45 44 43 42 41 40 39 38 37 36 35 34 33 32...
 		// mask    =  1  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0...
-		// v1      =  ��  ���  ��  ��  ��  &  z  y  x  w  v  u  t  s  r  q  p  o  n  m  l  k  j  i  h  g  f  e  d  c  b  a...
-		// res     =  ��  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0...
+		// v1      =  ù  €  è  é  à  &  z  y  x  w  v  u  t  s  r  q  p  o  n  m  l  k  j  i  h  g  f  e  d  c  b  a...
+		// res     =  ù  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0...
 		return andb<double>(v1, msb_mask);
 	}
 
@@ -2823,8 +2823,8 @@
 
 		// indices = 31 30 29 28 27 26 25 24 23 22 21 20 19 18 17 16 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
 		// mask    =  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
-		// v1      =  ��  ���  ��  ��  ��  &  z  y  x  w  v  u  t  s  r  q  p  o  n  m  l  k  j  i  h  g  f  e  d  c  b  a
-		// v1      =  0  ���  ��  ��  ��  &  z  y  x  w  v  u  t  s  r  q  p  o  n  m  l  k  j  i  h  g  f  e  d  c  b  a
+		// v1      =  ù  €  è  é  à  &  z  y  x  w  v  u  t  s  r  q  p  o  n  m  l  k  j  i  h  g  f  e  d  c  b  a
+		// v1      =  0  €  è  é  à  &  z  y  x  w  v  u  t  s  r  q  p  o  n  m  l  k  j  i  h  g  f  e  d  c  b  a
 		// res is the sign because the first bit is the sign bit (0 = positive, 1 = negative)
 		return andb<float>(v1, abs_mask);
 	}
@@ -2836,8 +2836,8 @@
 
 		// indices = 63 62 61 60 59 58 57 56 55 54 53 52 51 50 49 48 47 46 45 44 43 42 41 40 39 38 37 36 35 34 33 32...
 		// mask    =  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1...
-		// v1      =  ��  ���  ��  ��  ��  &  z  y  x  w  v  u  t  s  r  q  p  o  n  m  l  k  j  i  h  g  f  e  d  c  b  a...
-		// v1      =  0  ���  ��  ��  ��  &  z  y  x  w  v  u  t  s  r  q  p  o  n  m  l  k  j  i  h  g  f  e  d  c  b  a...
+		// v1      =  ù  €  è  é  à  &  z  y  x  w  v  u  t  s  r  q  p  o  n  m  l  k  j  i  h  g  f  e  d  c  b  a...
+		// v1      =  0  €  è  é  à  &  z  y  x  w  v  u  t  s  r  q  p  o  n  m  l  k  j  i  h  g  f  e  d  c  b  a...
 		// res is the sign because the first bit is the sign bit (0 = positive, 1 = negative)
 		return andb<double>(v1, abs_mask);
 	}
@@ -3453,6 +3453,18 @@
 	template <>
 	inline reg cvt<int32_t,int64_t>(const reg_2 v) {
 		return _mm256_castsi256_ps(_mm256_cvtepi32_epi64(_mm_castps_si128(v)));
+	}
+#else
+    // sequence
+	template <>
+	inline reg cvt<int32_t,int64_t>(const reg_2 v) {
+		const __m256i vi = _mm256_castsi128_si256(_mm_castps_si128(v));
+		return _mm256_castsi256_ps(
+				_mm256_set_epi64x(
+				   (uint64_t) _mm256_extract_epi32(vi,0),
+				   (uint64_t) _mm256_extract_epi32(vi,1),
+				   (uint64_t) _mm256_extract_epi32(vi,2),
+				   (uint64_t) _mm256_extract_epi32(vi,3)));
 	}
 #endif
 
