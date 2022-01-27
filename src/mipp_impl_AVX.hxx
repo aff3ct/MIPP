@@ -244,6 +244,30 @@
 	inline reg gather<int8_t,int8_t>(const int8_t *mem_addr, const reg idx) {
 		return gather_seq<int8_t,int8_t>(mem_addr, idx);
 	}
+	// ------------------------------------------------------------------------------------------------------- masked gather
+
+#ifdef __AVX2__
+	template <>
+	inline reg maskzgat<double,int64_t>(const msk m, const double *mem_addr, const reg idx) {
+		return _mm256_castpd_ps(_mm256_mask_i64gather_pd(_mm256_setzero_pd(),mem_addr,_mm256_castps_si256(idx),_mm256_castsi256_pd(m),8));
+	}
+
+	template <>
+	inline reg maskzgat<float,int32_t>(const msk m, const float *mem_addr, const reg idx) {
+		return _mm256_mask_i32gather_ps(_mm256_setzero_ps(),mem_addr,_mm256_castps_si256(idx),idx,4);
+	}
+
+	template <>
+	inline reg maskzgat<int64_t,int64_t>(const msk m, const int64_t *mem_addr, const reg idx) {
+		// problem cast int64_t
+		return _mm256_castsi256_ps(_mm256_mask_i64gather_epi64(_mm256_setzero_si256(), (const long long int*) mem_addr,_mm256_castps_si256(idx),m,8));
+	}
+
+	template <>
+	inline reg maskzgat<int32_t,int32_t>(const msk m, const int32_t *mem_addr, const reg idx) {
+		return _mm256_castsi256_ps(_mm256_mask_i32gather_epi32(_mm256_setzero_si256(),mem_addr,_mm256_castps_si256(idx),m,4));
+	}
+#endif
 
 	// -------------------------------------------------------------------------------------------------------- scatter
 
