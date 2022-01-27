@@ -254,7 +254,7 @@
 
 	template <>
 	inline reg maskzgat<float,int32_t>(const msk m, const float *mem_addr, const reg idx) {
-		return _mm256_mask_i32gather_ps(_mm256_setzero_ps(),mem_addr,_mm256_castps_si256(idx),idx,4);
+		return _mm256_mask_i32gather_ps(_mm256_setzero_ps(),mem_addr,_mm256_castps_si256(idx),m,4);
 	}
 
 	template <>
