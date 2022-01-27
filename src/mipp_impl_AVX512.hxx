@@ -308,6 +308,27 @@
 
 	// -------------------------------------------------------------------------------------------------------- scatter
 
+#if defined(__AVX512F__)
+	template <>
+	inline void scatter<double,int64_t>(double *mem_addr, const reg idx, const reg r) {
+		_mm512_i64scatter_pd(mem_addr,_mm512_castps_si512(idx),_mm512_castps_pd(r),8);
+	}
+
+	template <>
+	inline void scatter<float,int32_t>(float *mem_addr, const reg idx, const reg r) {
+		_mm512_i32scatter_ps(mem_addr,_mm512_castps_si512(idx),r,4);
+	}
+
+	template <>
+	inline void scatter<int64_t,int64_t>(int64_t *mem_addr, const reg idx, const reg r) {
+		_mm512_i64scatter_epi64(mem_addr,_mm512_castps_si512(idx),_mm512_castps_si512(r),8);
+	}
+
+	template <>
+	inline void scatter<int32_t,int32_t>(int32_t *mem_addr, const reg idx, const reg r) {
+		_mm512_i32scatter_epi32(mem_addr,_mm512_castps_si512(idx),_mm512_castps_si512(r),4);
+	}
+#else
 	template <>
 	inline void scatter<double,int64_t>(double *mem_addr, const reg idx, const reg r) {
 		scatter_seq<double,int64_t>(mem_addr, idx, r);
@@ -327,7 +348,7 @@
 	inline void scatter<int32_t,int32_t>(int32_t *mem_addr, const reg idx, const reg r) {
 		scatter_seq<int32_t,int32_t>(mem_addr, idx, r);
 	}
-
+#endif
 	template <>
 	inline void scatter<int16_t,int16_t>(int16_t *mem_addr, const reg idx, const reg r) {
 		scatter_seq<int16_t,int16_t>(mem_addr, idx, r);
