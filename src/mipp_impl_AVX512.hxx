@@ -232,7 +232,27 @@
 #endif
 
 	// --------------------------------------------------------------------------------------------------------- gather
+#if defined(__AVX512F__)
+	template <>
+	inline reg gather<double,int64_t>(const double *mem_addr, const reg idx) {
+		return _mm512_castpd_ps(_mm512_i64gather_pd(_mm512_castps_si512(idx),mem_addr,8));
+	}
 
+	template <>
+	inline reg gather<float,int32_t>(const float *mem_addr, const reg idx) {
+		return _mm512_i32gather_ps(_mm512_castps_si512(idx),mem_addr,4);
+	}
+
+	template <>
+	inline reg gather<int64_t,int64_t>(const int64_t *mem_addr, const reg idx) {
+		return _mm512_castsi512_ps(_mm512_i64gather_epi64(_mm512_castps_si512(idx),mem_addr,8));
+	}
+
+	template <>
+	inline reg gather<int32_t,int32_t>(const int32_t *mem_addr, const reg idx) {
+		return _mm512_castsi512_ps(_mm512_i32gather_epi32(_mm512_castps_si512(idx),mem_addr,4));
+	}
+#else
 	template <>
 	inline reg gather<double,int64_t>(const double *mem_addr, const reg idx) {
 		return gather_seq<double,int64_t>(mem_addr, idx);
@@ -252,7 +272,7 @@
 	inline reg gather<int32_t,int32_t>(const int32_t *mem_addr, const reg idx) {
 		return gather_seq<int32_t,int32_t>(mem_addr, idx);
 	}
-
+#endif
 	template <>
 	inline reg gather<int16_t,int16_t>(const int16_t *mem_addr, const reg idx) {
 		return gather_seq<int16_t,int16_t>(mem_addr, idx);

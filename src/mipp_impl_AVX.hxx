@@ -193,7 +193,27 @@
 #endif
 
 	// --------------------------------------------------------------------------------------------------------- gather
+#ifdef __AVX2__
+	template <>
+	inline reg gather<double,int64_t>(const double *mem_addr, const reg idx) {
+		return _mm256_castpd_ps(_mm256_i64gather_pd(mem_addr,_mm256_castps_si256(idx),8));
+	}
 
+	template <>
+	inline reg gather<float,int32_t>(const float *mem_addr, const reg idx) {
+		return _mm256_i32gather_ps(mem_addr,_mm256_castps_si256(idx),4);
+	}
+
+	template <>
+	inline reg gather<int64_t,int64_t>(const int64_t *mem_addr, const reg idx) {
+		return _mm256_castsi256_ps(_mm256_i64gather_epi64((const long long int*) mem_addr,_mm256_castps_si256(idx),8));
+	}
+
+	template <>
+	inline reg gather<int32_t,int32_t>(const int32_t *mem_addr, const reg idx) {
+		return _mm256_castsi256_ps(_mm256_i32gather_epi32(mem_addr,_mm256_castps_si256(idx),4));
+	}
+#else
 	template <>
 	inline reg gather<double,int64_t>(const double *mem_addr, const reg idx) {
 		return gather_seq<double,int64_t>(mem_addr, idx);
@@ -213,6 +233,7 @@
 	inline reg gather<int32_t,int32_t>(const int32_t *mem_addr, const reg idx) {
 		return gather_seq<int32_t,int32_t>(mem_addr, idx);
 	}
+#endif
 
 	template <>
 	inline reg gather<int16_t,int16_t>(const int16_t *mem_addr, const reg idx) {
@@ -2546,8 +2567,8 @@
 
 		// indices = 31 30 29 28 27 26 25 24 23 22 21 20 19 18 17 16 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
 		// mask    =  1  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
-		// v1      =  ù  €  è  é  à  &  z  y  x  w  v  u  t  s  r  q  p  o  n  m  l  k  j  i  h  g  f  e  d  c  b  a
-		// res     =  ù  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+		// v1      =  ��  ���  ��  ��  ��  &  z  y  x  w  v  u  t  s  r  q  p  o  n  m  l  k  j  i  h  g  f  e  d  c  b  a
+		// res     =  ��  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
 		return andb<float>(v1, msb_mask);
 	}
 
@@ -2565,8 +2586,8 @@
 
 		// indices = 63 62 61 60 59 58 57 56 55 54 53 52 51 50 49 48 47 46 45 44 43 42 41 40 39 38 37 36 35 34 33 32...
 		// mask    =  1  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0...
-		// v1      =  ù  €  è  é  à  &  z  y  x  w  v  u  t  s  r  q  p  o  n  m  l  k  j  i  h  g  f  e  d  c  b  a...
-		// res     =  ù  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0...
+		// v1      =  ��  ���  ��  ��  ��  &  z  y  x  w  v  u  t  s  r  q  p  o  n  m  l  k  j  i  h  g  f  e  d  c  b  a...
+		// res     =  ��  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0...
 		return andb<double>(v1, msb_mask);
 	}
 
@@ -2715,8 +2736,8 @@
 
 		// indices = 31 30 29 28 27 26 25 24 23 22 21 20 19 18 17 16 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
 		// mask    =  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
-		// v1      =  ù  €  è  é  à  &  z  y  x  w  v  u  t  s  r  q  p  o  n  m  l  k  j  i  h  g  f  e  d  c  b  a
-		// v1      =  0  €  è  é  à  &  z  y  x  w  v  u  t  s  r  q  p  o  n  m  l  k  j  i  h  g  f  e  d  c  b  a
+		// v1      =  ��  ���  ��  ��  ��  &  z  y  x  w  v  u  t  s  r  q  p  o  n  m  l  k  j  i  h  g  f  e  d  c  b  a
+		// v1      =  0  ���  ��  ��  ��  &  z  y  x  w  v  u  t  s  r  q  p  o  n  m  l  k  j  i  h  g  f  e  d  c  b  a
 		// res is the sign because the first bit is the sign bit (0 = positive, 1 = negative)
 		return andb<float>(v1, abs_mask);
 	}
@@ -2728,8 +2749,8 @@
 
 		// indices = 63 62 61 60 59 58 57 56 55 54 53 52 51 50 49 48 47 46 45 44 43 42 41 40 39 38 37 36 35 34 33 32...
 		// mask    =  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1...
-		// v1      =  ù  €  è  é  à  &  z  y  x  w  v  u  t  s  r  q  p  o  n  m  l  k  j  i  h  g  f  e  d  c  b  a...
-		// v1      =  0  €  è  é  à  &  z  y  x  w  v  u  t  s  r  q  p  o  n  m  l  k  j  i  h  g  f  e  d  c  b  a...
+		// v1      =  ��  ���  ��  ��  ��  &  z  y  x  w  v  u  t  s  r  q  p  o  n  m  l  k  j  i  h  g  f  e  d  c  b  a...
+		// v1      =  0  ���  ��  ��  ��  &  z  y  x  w  v  u  t  s  r  q  p  o  n  m  l  k  j  i  h  g  f  e  d  c  b  a...
 		// res is the sign because the first bit is the sign bit (0 = positive, 1 = negative)
 		return andb<double>(v1, abs_mask);
 	}
