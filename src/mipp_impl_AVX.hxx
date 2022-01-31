@@ -193,7 +193,27 @@
 #endif
 
 	// --------------------------------------------------------------------------------------------------------- gather
+#ifdef __AVX2__
+	template <>
+	inline reg gather<double,int64_t>(const double *mem_addr, const reg idx) {
+		return _mm256_castpd_ps(_mm256_i64gather_pd(mem_addr,_mm256_castps_si256(idx),8));
+	}
 
+	template <>
+	inline reg gather<float,int32_t>(const float *mem_addr, const reg idx) {
+		return _mm256_i32gather_ps(mem_addr,_mm256_castps_si256(idx),4);
+	}
+
+	template <>
+	inline reg gather<int64_t,int64_t>(const int64_t *mem_addr, const reg idx) {
+		return _mm256_castsi256_ps(_mm256_i64gather_epi64((const long long int*) mem_addr,_mm256_castps_si256(idx),8));
+	}
+
+	template <>
+	inline reg gather<int32_t,int32_t>(const int32_t *mem_addr, const reg idx) {
+		return _mm256_castsi256_ps(_mm256_i32gather_epi32(mem_addr,_mm256_castps_si256(idx),4));
+	}
+#else
 	template <>
 	inline reg gather<double,int64_t>(const double *mem_addr, const reg idx) {
 		return gather_seq<double,int64_t>(mem_addr, idx);
@@ -213,6 +233,7 @@
 	inline reg gather<int32_t,int32_t>(const int32_t *mem_addr, const reg idx) {
 		return gather_seq<int32_t,int32_t>(mem_addr, idx);
 	}
+#endif
 
 	template <>
 	inline reg gather<int16_t,int16_t>(const int16_t *mem_addr, const reg idx) {
@@ -223,6 +244,30 @@
 	inline reg gather<int8_t,int8_t>(const int8_t *mem_addr, const reg idx) {
 		return gather_seq<int8_t,int8_t>(mem_addr, idx);
 	}
+	// ------------------------------------------------------------------------------------------------------- masked gather
+
+#ifdef __AVX2__
+	template <>
+	inline reg maskzgat<double,int64_t>(const msk m, const double *mem_addr, const reg idx) {
+		return _mm256_castpd_ps(_mm256_mask_i64gather_pd(_mm256_setzero_pd(),mem_addr,_mm256_castps_si256(idx),_mm256_castsi256_pd(m),8));
+	}
+
+	template <>
+	inline reg maskzgat<float,int32_t>(const msk m, const float *mem_addr, const reg idx) {
+		return _mm256_mask_i32gather_ps(_mm256_setzero_ps(),mem_addr,_mm256_castps_si256(idx),m,4);
+	}
+
+	template <>
+	inline reg maskzgat<int64_t,int64_t>(const msk m, const int64_t *mem_addr, const reg idx) {
+		// problem cast int64_t
+		return _mm256_castsi256_ps(_mm256_mask_i64gather_epi64(_mm256_setzero_si256(), (const long long int*) mem_addr,_mm256_castps_si256(idx),m,8));
+	}
+
+	template <>
+	inline reg maskzgat<int32_t,int32_t>(const msk m, const int32_t *mem_addr, const reg idx) {
+		return _mm256_castsi256_ps(_mm256_mask_i32gather_epi32(_mm256_setzero_si256(),mem_addr,_mm256_castps_si256(idx),m,4));
+	}
+#endif
 
 	// -------------------------------------------------------------------------------------------------------- scatter
 
@@ -254,6 +299,69 @@
 	template <>
 	inline void scatter<int8_t,int8_t>(int8_t *mem_addr, const reg idx, const reg r) {
 		scatter_seq<int8_t,int8_t>(mem_addr, idx, r);
+	}
+
+	// ------------------------------------------------------------------------------------------------------------ maskzld
+	template <>
+	inline reg maskzld<double>(const msk m, const double* memp){
+		return _mm256_castpd_ps(_mm256_maskload_pd(memp,m));
+	}
+
+	template <>
+	inline reg maskzld<float>(const msk m, const float* memp){
+		return _mm256_maskload_ps(memp,m);
+	}
+
+#ifdef __AVX2__
+	template <>
+	inline reg maskzld<int64_t>(const msk m, const int64_t* memp){
+		// probleme cast int64_t
+		return _mm256_castsi256_ps(_mm256_maskload_epi64((const long long *)memp,m));
+	}
+
+	template <>
+	inline reg maskzld<int32_t>(const msk m, const int32_t* memp){
+		return _mm256_castsi256_ps(_mm256_maskload_epi32(memp,m));
+	}
+#endif
+
+	// ------------------------------------------------------------------------------------------------------------ maskst
+	template <>
+	inline void maskst<double>(const msk m, double* memp, const reg a){
+		_mm256_maskstore_pd(memp,m,_mm256_castps_pd(a));
+	}
+
+	template <>
+	inline void maskst<float>(const msk m, float* memp, const reg a){
+		_mm256_maskstore_ps(memp,m,a);
+	}
+
+#ifdef __AVX2__
+	template <>
+	inline void maskst<int64_t>(const msk m, int64_t* memp, const reg a){
+		_mm256_maskstore_epi64((long long *)memp,m,_mm256_castps_si256(a));
+	}
+
+	template <>
+	inline void maskst<int32_t>(const msk m, int32_t* memp, const reg a){
+		_mm256_maskstore_epi32(memp,m,_mm256_castps_si256(a));
+	}
+#endif
+
+    // ------------------------------------------------------------------------------------------------------------ getfirst
+	template <>
+	inline double getfirst<double>(const mipp::reg r){
+		return _mm256_cvtsd_f64(_mm256_castps_pd(r));
+	}
+
+	template <>
+	inline float getfirst<float>(const mipp::reg r){
+		return _mm256_cvtss_f32(r);
+	}
+
+    template <>
+	inline int32_t getfirst<int32_t>(const mipp::reg r){
+	    return _mm_cvtsi128_si32(_mm256_castsi256_si128(_mm256_castps_si256(r)));
 	}
 
 	// ------------------------------------------------------------------------------------------------------------ set
@@ -3345,6 +3453,18 @@
 	template <>
 	inline reg cvt<int32_t,int64_t>(const reg_2 v) {
 		return _mm256_castsi256_ps(_mm256_cvtepi32_epi64(_mm_castps_si128(v)));
+	}
+#else
+    // sequence
+	template <>
+	inline reg cvt<int32_t,int64_t>(const reg_2 v) {
+		const __m256i vi = _mm256_castsi128_si256(_mm_castps_si128(v));
+		return _mm256_castsi256_ps(
+				_mm256_set_epi64x(
+				   (uint64_t) _mm256_extract_epi32(vi,0),
+				   (uint64_t) _mm256_extract_epi32(vi,1),
+				   (uint64_t) _mm256_extract_epi32(vi,2),
+				   (uint64_t) _mm256_extract_epi32(vi,3)));
 	}
 #endif
 

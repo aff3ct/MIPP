@@ -347,6 +347,7 @@ public:
 
 	inline Reg<T>& operator-= (const Reg<T>      &v)       { r =    this->sub(v).r;    return *this;  }
 	inline Reg<T>  operator-  (const Reg<T>       v) const { return this->sub(v);                     }
+	inline Reg<T>  operator-  (                    ) const { return mipp::sub<T>(mipp::set0<T>(), r); }
 
 	inline Reg<T>& operator*= (const Reg<T>      &v)       { r =    this->mul(v).r;    return *this;  }
 	inline Reg<T>  operator*  (const Reg<T>       v) const { return this->mul(v);                     }
