@@ -528,6 +528,39 @@
 		return (reg_2) vget_high_f32((float32x4_t) v);
 	}
 
+    // ------------------------------------------------------------------------------------------------------- getfirst
+#ifdef __aarch64__
+	template <>
+	inline double getfirst<double>(const mipp::reg r){
+		return vdupd_lane_f64((float64x1_t)mipp::low<double>(r), 0);
+	}
+
+	template <>
+	inline float getfirst<float>(const mipp::reg r){
+		return vdups_lane_f32((float32x2_t)mipp::low<float>(r), 0);
+	}
+
+	template <>
+	inline int64_t getfirst<int64_t>(const mipp::reg r){
+		return vdupd_laneq_s64((int64x2_t)r, 0);
+	}
+
+	template <>
+	inline int32_t getfirst<int32_t>(const mipp::reg r){
+		return vdups_laneq_s32((int32x4_t)r, 0);
+	}
+
+	template <>
+	inline int16_t getfirst<int16_t>(const mipp::reg r){
+		return vduph_laneq_s16((int16x8_t)r, 0);
+	}
+
+	template <>
+	inline int8_t getfirst<int8_t>(const mipp::reg r){
+		return vdupb_laneq_s8((int8x16_t)r, 0);
+	}
+#endif
+
 	// -------------------------------------------------------------------------------------------------------- combine
 #ifdef __aarch64__
 	template <>
