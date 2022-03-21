@@ -22,6 +22,21 @@ include(cmake/target_optimizations.cmake)
 include(cmake/target_fast_math.cmake)
 include(cmake/compiler_warnings.cmake)
 
+# have MIPP intrinsics activated, which depends on on target architecture
+option(USE_MIPP_INTRINSICS  "Use MIPP intrinsics?" ON)
+
+######################################################
+
+function(target_set_mipp_intrinsics target)
+    if (USE_MIPP_INTRINSICS)
+        message(STATUS "MIPP intrinsics for target ${target} are enabled")
+    else()
+        message(STATUS "MIPP intrinsics for target ${target} are disabled with definition MIPP_NO_INTRINSICS")
+        target_compile_definitions(${target} PRIVATE MIPP_NO_INTRINSICS)
+    endif()
+endfunction()
+
+######################################################
 
 # include MIPP headers
 include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/../src/")
