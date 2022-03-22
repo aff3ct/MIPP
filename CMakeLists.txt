@@ -32,8 +32,15 @@ set( MIPP_MATH_HEADERS
 install( FILES ${MIPP_HEADERS}       DESTINATION include/mipp)
 install( FILES ${MIPP_MATH_HEADERS}  DESTINATION include/mipp/math)
 
+
+# Create uninstall target
+configure_file(
+    ${PROJECT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake
+@ONLY)
+
 add_custom_target(uninstall
-    "${CMAKE_COMMAND}" -P "${CMAKE_SOURCE_DIR}/cmake/uninstall.cmake"
+    ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake
 )
 
 ######################################################

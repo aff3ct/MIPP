@@ -53,3 +53,14 @@ target_set_mipp_intrinsics(run_tests)  # allow deactivation of mipp
 # target_activate_cxx_compiler_warnings(run_tests)  # too many warning
 
 set_target_properties(run_tests PROPERTIES POSITION_INDEPENDENT_CODE ON) # set -fpie
+
+# no need to compile test program for install
+set_target_properties(run_tests PROPERTIES EXCLUDE_FROM_ALL TRUE)
+
+######################################################
+
+add_custom_target(test
+  COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bin/run_tests"
+  DEPENDS run_tests
+)
+
