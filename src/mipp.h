@@ -81,6 +81,7 @@ SOFTWARE.
 #include <cstddef>
 #include <cassert>
 #include <cstdint>
+#include <cstdlib>
 #include <string>
 #include <vector>
 #include <cmath>
@@ -89,7 +90,6 @@ SOFTWARE.
 #if (defined(__GNUC__) || defined(__clang__) || defined(__llvm__)) && (defined(__linux__) || defined(__linux) || defined(__APPLE__)) && !defined(__ANDROID__)
 #include <execinfo.h>
 #include <unistd.h>
-#include <cstdlib>
 #endif
 
 #ifdef _MSC_VER
@@ -457,6 +457,7 @@ inline bool isAligned(const T *ptr)
 
 // --------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------- memory allocator
+
 template <typename T>
 T* malloc(uint32_t nData)
 {
@@ -465,7 +466,7 @@ T* malloc(uint32_t nData)
 #if !defined(MIPP_NO_INTRINSICS) && (defined(__SSE2__) || defined(__AVX__) || defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__))
 	ptr = (T*)_mm_malloc(nData * sizeof(T), mipp::RequiredAlignment);
 #else
-	ptr = new T[nData];
+	ptr = (T*)std::malloc((size_t)(sizeof(T) * nData));
 #endif
 
 	return ptr;
@@ -477,7 +478,7 @@ void free(T* ptr)
 #if !defined(MIPP_NO_INTRINSICS) && (defined(__SSE2__) || defined(__AVX__) || defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__))
 	_mm_free(ptr);
 #else
-	delete[] ptr;
+	std::free(ptr);
 #endif
 }
 
