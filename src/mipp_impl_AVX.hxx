@@ -351,12 +351,20 @@
     // ------------------------------------------------------------------------------------------------------------ getfirst
 	template <>
 	inline double getfirst<double>(const mipp::reg r){
+#if !defined(__APPLE__)
 		return _mm256_cvtsd_f64(_mm256_castps_pd(r));
+#else
+		return _mm_cvtsd_f64(_mm_castsi128_pd(_mm256_extractf128_si256(_mm256_castps_si256(r), 0)));
+#endif
 	}
 
 	template <>
 	inline float getfirst<float>(const mipp::reg r){
+#if !defined(__APPLE__)
 		return _mm256_cvtss_f32(r);
+#else
+		return _mm_cvtss_f32(_mm_castsi128_ps(_mm256_extractf128_si256(_mm256_castps_si256(r), 0)));
+#endif
 	}
 
     template <>
