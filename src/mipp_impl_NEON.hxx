@@ -2783,8 +2783,19 @@
 		auto tmp = mipp::add<float>(v, half);
 		return vcvtq_f32_s32(vcvtq_s32_f32(tmp));
 	}
-
 #endif
+
+	// ---------------------------------------------------------------------------------------------------------- trunc
+#ifdef __aarch64__
+	template <>
+	inline reg trunc<double>(const reg v) {
+		return (reg) vcvtq_f64_s64(vcvtq_s64_f64((float64x2_t) v));
+	}
+#endif
+	template <>
+	inline reg trunc<float>(const reg v) {
+		return vcvtq_f32_s32(vcvtq_s32_f32(v));
+	}
 
 	// ------------------------------------------------------------------------------------------------------------ cvt
 #ifdef __aarch64__

@@ -3795,20 +3795,31 @@
 #ifdef __AVX512F__
 	template <>
 	inline reg round<double>(const reg v) {
-		// TODO: not sure if it works
-		return _mm512_castpd_ps(_mm512_roundscale_round_pd(_mm512_castps_pd(v), 0, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));
+		return _mm512_castpd_ps(_mm512_roundscale_round_pd(_mm512_castps_pd(v), _MM_FROUND_TO_NEAREST_INT, _MM_FROUND_NO_EXC));
 	}
 
 	template <>
 	inline reg round<float>(const reg v) {
-		// TODO: not sure if it works
-		return _mm512_roundscale_round_ps(v, 0, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
+		return _mm512_roundscale_round_ps(v, _MM_FROUND_TO_NEAREST_INT, _MM_FROUND_NO_EXC);
 	}
 
 #elif defined(__MIC__) || defined(__KNCNI__)
 	template <>
 	inline reg round<float>(const reg v) {
 		return _mm512_round_ps(v, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC, _MM_EXPADJ_NONE);
+	}
+#endif
+
+	// ---------------------------------------------------------------------------------------------------------- trunc
+#ifdef __AVX512F__
+	template <>
+	inline reg trunc<double>(const reg v) {
+		return _mm512_castpd_ps(_mm512_roundscale_round_pd(_mm512_castps_pd(v), _MM_FROUND_TO_ZERO, _MM_FROUND_NO_EXC));
+	}
+
+	template <>
+	inline reg trunc<float>(const reg v) {
+		return _mm512_roundscale_round_ps(v, _MM_FROUND_TO_ZERO, _MM_FROUND_NO_EXC);
 	}
 #endif
 

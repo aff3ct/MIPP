@@ -545,7 +545,7 @@ The `pipe` keyword stands for the "&#124;" binary operator.
 | **Short name** | **Prototype**                                        | **Documentation**                                                                                                                   | **Supported types**                                             |
 | :---           | :---                                                 | :---                                                                                                                                | :---                                                            |
 | `toReg`        | `Reg<T>  toReg (const Msk<N> m)`                     | Converts the mask `m` into a register of type `T`, the number of elements `N` has to be the same for the mask and the register.     | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t`    |
-| `cvt`          | `Reg<T2> cvt   (const Reg<T1> r)`                    | Converts the elements of `r` into an other representation (the new representation and the original one have to have the same size). | `float -> int32_t`,                                             |
+| `cvt`          | `Reg<T2> cvt   (const Reg<T1> r)`                    | Converts the elements of `r` into an other representation (the new representation and the original one have to have the same size). | `float -> int32_t`, `int32_t -> float`                          |
 | `cvt`          | `Reg<T2> cvt   (const Reg_2<T1> r)`                  | Converts elements of `r` into bigger elements (in bits).                                                                            | `int8_t -> int16_t`, `int16_t -> int32_t`, `int32_t -> int64_t` |
 | `pack`         | `Reg<T2> pack  (const Reg<T1> r1, const Reg<T1> r2)` | Packs elements of `r1` and `r2` into smaller elements (some information can be lost in the conversion).                             | `int32_t -> int16_t`, `int16_t -> int8_t`                       |
 
@@ -572,7 +572,8 @@ The `pipe` keyword stands for the "&#124;" binary operator.
 | `neg`          |              | `Reg<T> neg    (const Reg<T> r, const Msk<N> m)`                    | Negates the register elements following the mask values: `m_i ? -r_i : r_i`.                        | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 | `neg`          |              | `Reg<T> neg    (const Reg<T> r1, const Reg<T> r2)`                  | Negates the register elements following the last register values: `r2_i < 0 ? -r1_i : r1_i`.        | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 | `sign`         |              | `Msk<N> sign   (const Reg<T> r)`                                    | Returns the sign: `r < 0`.                                                                          | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
-| `round`        |              | `Reg<T> round  (const Reg<T> r)`                                    | Rounds the registers values: `fractional_part(r) >= 0.5 ? integral_part(r) + 1 : integral_part(r)`. | `double`, `float`                                            |
+| `round`        |              | `Reg<T> round  (const Reg<T> r)`                                    | Rounds the register values: `fractional_part(r) >= 0.5 ? integral_part(r) + 1 : integral_part(r)`.  | `double`, `float`                                            |
+| `trunc`        |              | `Reg<T> trunc  (const Reg<T> r)`                                    | Truncate the register values: `integral_part(r) `.                                                  | `double`, `float`                                            |
 
 ### Arithmetic operations on complex numbers
 

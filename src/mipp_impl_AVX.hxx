@@ -3428,6 +3428,17 @@
 		return _mm256_castpd_ps(_mm256_round_pd(_mm256_castps_pd(v), _MM_FROUND_TO_NEAREST_INT |_MM_FROUND_NO_EXC));
 	}
 
+	// ---------------------------------------------------------------------------------------------------------- trunc
+	template <>
+	inline reg trunc<float>(const reg v) {
+		return _mm256_round_ps(v, _MM_FROUND_TO_ZERO |_MM_FROUND_NO_EXC);
+	}
+
+	template <>
+	inline reg trunc<double>(const reg v) {
+		return _mm256_castpd_ps(_mm256_round_pd(_mm256_castps_pd(v), _MM_FROUND_TO_ZERO |_MM_FROUND_NO_EXC));
+	}
+
 	// ------------------------------------------------------------------------------------------------------------ cvt
 	template <>
 	inline reg cvt<float,int32_t>(const reg v) {

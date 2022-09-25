@@ -208,6 +208,7 @@ public:
 	inline Reg<T>      div4         ()                                     const { return mipp::div4         <T>(r);              }
 	inline Reg<T>      sat          (T min, T max)                         const { return mipp::sat          <T>(r, min, max);    }
 	inline Reg<T>      round        ()                                     const { return mipp::round        <T>(r);              }
+	inline Reg<T>      trunc        ()                                     const { return mipp::trunc        <T>(r);              }
 	inline bool        testz        (const Reg<T> v)                       const { return mipp::testz        <T>(r, v.r);         }
 	inline bool        testz        ()                                     const { return mipp::testz        <T>(r);              }
 #else
@@ -296,6 +297,7 @@ public:
 	inline Reg<T>      div4         ()                                     const { return mipp_scop::div4<T>(r);                  }
 	inline Reg<T>      sat          (T min, T max)                         const { return std::min(std::max(r, min), max);        }
 	inline Reg<T>      round        ()                                     const { return std::round(r);                          }
+	inline Reg<T>      trunc        ()                                     const { return std::trunc(r);                          }
 	inline bool        testz        (const Reg<T> v)                       const { return mipp_scop::andb<T>(r, v.r) == 0 ? 1 : 0;}
 	inline bool        testz        ()                                     const { return !r;                                     }
 #endif
@@ -872,6 +874,7 @@ template <typename T> inline Reg<T>      div2         (const Reg<T> v)          
 template <typename T> inline Reg<T>      div4         (const Reg<T> v)                                        { return v.div4();                 }
 template <typename T> inline Reg<T>      sat          (const Reg<T> v, T min, T max)                          { return v.sat(min, max);          }
 template <typename T> inline Reg<T>      round        (const Reg<T> v)                                        { return v.round();                }
+template <typename T> inline Reg<T>      trunc        (const Reg<T> v)                                        { return v.trunc();                }
 template <typename T> inline bool        testz        (const Reg<T> v1, const Reg<T> v2)                      { return v1.testz(v2);             }
 template <int      N> inline bool        testz        (const Msk<N> v1, const Msk<N> v2)                      { return v1.testz(v2);             }
 template <typename T> inline bool        testz        (const Reg<T> v1)                                       { return v1.testz();               }

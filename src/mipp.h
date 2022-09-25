@@ -81,15 +81,15 @@ SOFTWARE.
 #include <cstddef>
 #include <cassert>
 #include <cstdint>
+#include <cstdlib>
 #include <string>
 #include <vector>
 #include <cmath>
 #include <map>
 
-#if (defined(__GNUC__) || defined(__clang__) || defined(__llvm__)) && (defined(__linux__) || defined(__linux) || defined(__APPLE__))
+#if (defined(__GNUC__) || defined(__clang__) || defined(__llvm__)) && (defined(__linux__) || defined(__linux) || defined(__APPLE__)) && !defined(__ANDROID__)
 #include <execinfo.h>
 #include <unistd.h>
-#include <cstdlib>
 #endif
 
 #ifdef _MSC_VER
@@ -457,6 +457,7 @@ inline bool isAligned(const T *ptr)
 
 // --------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------- memory allocator
+
 template <typename T>
 T* malloc(uint32_t nData)
 {
@@ -465,7 +466,7 @@ T* malloc(uint32_t nData)
 #if !defined(MIPP_NO_INTRINSICS) && (defined(__SSE2__) || defined(__AVX__) || defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__))
 	ptr = (T*)_mm_malloc(nData * sizeof(T), mipp::RequiredAlignment);
 #else
-	ptr = new T[nData];
+	ptr = (T*)std::malloc((size_t)(sizeof(T) * nData));
 #endif
 
 	return ptr;
@@ -477,7 +478,7 @@ void free(T* ptr)
 #if !defined(MIPP_NO_INTRINSICS) && (defined(__SSE2__) || defined(__AVX__) || defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__))
 	_mm_free(ptr);
 #else
-	delete[] ptr;
+	std::free(ptr);
 #endif
 }
 
@@ -511,7 +512,7 @@ template<class T> using vector = std::vector<T, allocator<T>>;
 static inline std::string get_back_trace()
 {
 	std::string bt_str;
-#if defined(MIPP_ENABLE_BACKTRACE) && (defined(__GNUC__) || defined(__clang__) || defined(__llvm__)) && (defined(__linux__) || defined(__linux) || defined(__APPLE__))
+#if defined(MIPP_ENABLE_BACKTRACE) && (defined(__GNUC__) || defined(__clang__) || defined(__llvm__)) && (defined(__linux__) || defined(__linux) || defined(__APPLE__)) && !defined(__ANDROID__)
 	const int bt_max_depth = 32;
 	void *bt_array[bt_max_depth];
 
@@ -709,6 +710,7 @@ template <typename T> inline reg   div2         (const reg)                     
 template <typename T> inline reg   div4         (const reg)                       { errorMessage<T>("div4");          exit(-1); }
 template <typename T> inline reg   sat          (const reg, T, T)                 { errorMessage<T>("sat");           exit(-1); }
 template <typename T> inline reg   round        (const reg)                       { errorMessage<T>("round");         exit(-1); }
+template <typename T> inline reg   trunc        (const reg)                       { errorMessage<T>("trunc");         exit(-1); }
 template <typename T> inline bool  testz        (const reg, const reg)            { errorMessage<T>("testz");         exit(-1); }
 template <int      N> inline bool  testz        (const msk, const msk)            { errorMessage<N>("testz");         exit(-1); }
 template <typename T> inline bool  testz        (const reg)                       { errorMessage<T>("testz");         exit(-1); }
