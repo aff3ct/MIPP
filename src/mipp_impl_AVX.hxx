@@ -1059,7 +1059,6 @@
 #ifdef __AVX2__
 	template <> inline reg add<int16_t>(const reg v1, const reg v2);
 	template <> inline reg mul<int16_t>(const reg v1, const reg v2);
-	template <> inline reg blend<int16_t>(const reg v1, const reg v2, const msk m);
 
 	template <>
 	inline reg shuff<int16_t>(const reg v, const reg cm) {
@@ -1087,6 +1086,30 @@
 			return _mm256_castsi256_ps(_mm256_blendv_epi8(_mm256_castps_si256(v_shuffle), _mm256_castps_si256(v_swap_shuffle), _mm256_castps_si256(blend_mask)));
 		}
 	}
+
+	template <>
+	inline reg shuff<int8_t>(const reg v, const reg cm) {
+		// extract cross-lane shuffle indices
+		const reg cross_lane_mask =
+			_mm256_castsi256_ps(_mm256_xor_si256(
+					_mm256_and_si256(_mm256_castps_si256(cm), _mm256_castps_si256(set1<int8_t>(0x10))),
+					_mm256_set_epi8(
+						0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10, 0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,
+						0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00)));
+		if (_mm256_testz_si256(_mm256_castps_si256(cross_lane_mask), _mm256_castps_si256(cross_lane_mask))) {
+			return _mm256_castsi256_ps(_mm256_shuffle_epi8(_mm256_castps_si256(v), _mm256_castps_si256(cm)));
+		} else {
+			const reg v_swap	 = _mm256_castsi256_ps(_mm256_permute2x128_si256(_mm256_castps_si256(v), _mm256_castps_si256(v), 1));
+			const reg v_shuffle	 = _mm256_castsi256_ps(_mm256_shuffle_epi8(_mm256_castps_si256(v), _mm256_castps_si256(cm)));
+			const reg v_swap_shuffle = _mm256_castsi256_ps(_mm256_shuffle_epi8(_mm256_castps_si256(v_swap), _mm256_castps_si256(cm)));
+			// transform cross-lane mask into blend mask
+			const reg blend_mask	 =
+				mul<int16_t>(
+						set1<int16_t>(0x00ff),
+						_mm256_castsi256_ps(_mm256_srli_epi16(_mm256_castps_si256(cross_lane_mask), 4)));
+			return _mm256_castsi256_ps(_mm256_blendv_epi8(_mm256_castps_si256(v_shuffle), _mm256_castps_si256(v_swap_shuffle), _mm256_castps_si256(blend_mask)));
+		}
+	}
 #else
 	template <>
 	inline reg shuff<int16_t>(const reg v, const reg cm) {
@@ -1104,7 +1127,6 @@
 
 		return mipp::loadu<int16_t>(out);
 	}
-#endif
 
 	template <>
 	inline reg shuff<int8_t>(const reg v, const reg cm) {
@@ -1122,6 +1144,8 @@
 
 		return mipp::loadu<int8_t>(out);
 	}
+#endif
+
 #if !defined(__clang__) && !defined(__llvm__) && defined(__GNUC__) && defined(__cplusplus)
 #pragma GCC diagnostic pop
 #endif
