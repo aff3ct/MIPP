@@ -312,111 +312,111 @@ test-linux-x86-unit-avx512bw:
 
 # BUILDS --------------------------------------------------------------------------------------------------------------
 
-build-macos-x86-clang:
-  stage: build
-  needs: []
-  tags:
-    - x86_64
-    - macos
-  artifacts:
-    paths:
-      - ./tests/build_macos_x86_clang_nointr/bin/
-      - ./tests/build_macos_x86_clang_sse2/bin/
-      - ./tests/build_macos_x86_clang_sse3/bin/
-      - ./tests/build_macos_x86_clang_ssse3/bin/
-      - ./tests/build_macos_x86_clang_sse4_1/bin/
-      - ./tests/build_macos_x86_clang_sse4_2/bin/
-      - ./tests/build_macos_x86_clang_avx/bin/
-      - ./tests/build_macos_x86_clang_avx2/bin/
-      - ./tests/build_macos_x86_clang_avx2_fma/bin/
-  script:
-    - source ./ci/tools/threads.sh
-    - ./ci/build-macos-x86-clang.sh
+# build-macos-x86-clang:
+#   stage: build
+#   needs: []
+#   tags:
+#     - x86_64
+#     - macos
+#   artifacts:
+#     paths:
+#       - ./tests/build_macos_x86_clang_nointr/bin/
+#       - ./tests/build_macos_x86_clang_sse2/bin/
+#       - ./tests/build_macos_x86_clang_sse3/bin/
+#       - ./tests/build_macos_x86_clang_ssse3/bin/
+#       - ./tests/build_macos_x86_clang_sse4_1/bin/
+#       - ./tests/build_macos_x86_clang_sse4_2/bin/
+#       - ./tests/build_macos_x86_clang_avx/bin/
+#       - ./tests/build_macos_x86_clang_avx2/bin/
+#       - ./tests/build_macos_x86_clang_avx2_fma/bin/
+#   script:
+#     - source ./ci/tools/threads.sh
+#     - ./ci/build-macos-x86-clang.sh
 
-# TESTS ---------------------------------------------------------------------------------------------------------------
+# # TESTS ---------------------------------------------------------------------------------------------------------------
 
-test-macos-x86-unit-nointr:
-  stage: test
-  needs:
-    - job: build-macos-x86-clang
-      artifacts: true
-  tags:
-     - x86_64
-     - macos
-  script:
-    - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_nointr
+# test-macos-x86-unit-nointr:
+#   stage: test
+#   needs:
+#     - job: build-macos-x86-clang
+#       artifacts: true
+#   tags:
+#      - x86_64
+#      - macos
+#   script:
+#     - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_nointr
 
-test-macos-x86-unit-sse2:
-  stage: test
-  needs:
-    - job: build-macos-x86-clang
-      artifacts: true
-  tags:
-    - x86_64
-    - sse2
-    - macos
-  script:
-    - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_sse2
+# test-macos-x86-unit-sse2:
+#   stage: test
+#   needs:
+#     - job: build-macos-x86-clang
+#       artifacts: true
+#   tags:
+#     - x86_64
+#     - sse2
+#     - macos
+#   script:
+#     - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_sse2
 
-test-macos-x86-unit-sse3:
-  stage: test
-  needs:
-    - job: build-macos-x86-clang
-      artifacts: true
-  tags:
-    - x86_64
-    - sse3
-    - macos
-  script:
-    - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_sse3
+# test-macos-x86-unit-sse3:
+#   stage: test
+#   needs:
+#     - job: build-macos-x86-clang
+#       artifacts: true
+#   tags:
+#     - x86_64
+#     - sse3
+#     - macos
+#   script:
+#     - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_sse3
 
-test-macos-x86-unit-ssse3:
-  stage: test
-  needs:
-    - job: build-macos-x86-clang
-      artifacts: true
-  tags:
-    - x86_64
-    - ssse3
-    - macos
-  script:
-    - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_ssse3
+# test-macos-x86-unit-ssse3:
+#   stage: test
+#   needs:
+#     - job: build-macos-x86-clang
+#       artifacts: true
+#   tags:
+#     - x86_64
+#     - ssse3
+#     - macos
+#   script:
+#     - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_ssse3
 
-test-macos-x86-unit-sse4_1:
-  stage: test
-  needs:
-    - job: build-macos-x86-clang
-      artifacts: true
-  tags:
-    - x86_64
-    - sse4.1
-    - macos
-  script:
-    - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_sse4_1
+# test-macos-x86-unit-sse4_1:
+#   stage: test
+#   needs:
+#     - job: build-macos-x86-clang
+#       artifacts: true
+#   tags:
+#     - x86_64
+#     - sse4.1
+#     - macos
+#   script:
+#     - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_sse4_1
 
-test-macos-x86-unit-sse4_2:
-  stage: test
-  needs:
-    - job: build-macos-x86-clang
-      artifacts: true
-  tags:
-    - x86_64
-    - sse4.2
-    - macos
-  script:
-    - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_sse4_2
+# test-macos-x86-unit-sse4_2:
+#   stage: test
+#   needs:
+#     - job: build-macos-x86-clang
+#       artifacts: true
+#   tags:
+#     - x86_64
+#     - sse4.2
+#     - macos
+#   script:
+#     - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_sse4_2
 
-test-macos-x86-unit-avx:
-  stage: test
-  needs:
-    - job: build-macos-x86-clang
-      artifacts: true
-  tags:
-    - x86_64
-    - avx
-    - macos
-  script:
-    - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_avx
+# test-macos-x86-unit-avx:
+#   stage: test
+#   needs:
+#     - job: build-macos-x86-clang
+#       artifacts: true
+#   tags:
+#     - x86_64
+#     - avx
+#     - macos
+#   script:
+#     - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_avx
 
 # test-macos-x86-unit-avx2:
 #   stage: test
