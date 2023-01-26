@@ -3537,10 +3537,10 @@
 		const __m256i vi = _mm256_castsi128_si256(_mm_castps_si128(v));
 		return _mm256_castsi256_ps(
 				_mm256_set_epi64x(
-				   (uint64_t) _mm256_extract_epi32(vi,0),
-				   (uint64_t) _mm256_extract_epi32(vi,1),
+				   (uint64_t) _mm256_extract_epi32(vi,3),
 				   (uint64_t) _mm256_extract_epi32(vi,2),
-				   (uint64_t) _mm256_extract_epi32(vi,3)));
+				   (uint64_t) _mm256_extract_epi32(vi,1),
+				   (uint64_t) _mm256_extract_epi32(vi,0)));
 	}
 #endif
 
