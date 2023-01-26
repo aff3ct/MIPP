@@ -1349,6 +1349,17 @@
 		return {{_mm256_castsi256_ps(_mm256_permute2f128_si256(lo, hi, _MM_SHUFFLE(0,2,0,0))),
 		         _mm256_castsi256_ps(_mm256_permute2f128_si256(lo, hi, _MM_SHUFFLE(0,3,0,1)))}};
 	}
+#elif defined(__AVX__)
+	template <>
+	inline regx2 interleave<float>(const reg v1, const reg v2) {
+		// v1         = [a0, b0, c0, d0, e0, f0, g0, h0], v2         = [a1, b1, c1, d1, e1, f1, g1, h1]
+		// res.val[0] = [a0, a1, b0, b1, c0, c1, d0, d1], res.val[1] = [e0, e1, f0, f1, g0, g1, h0, h1]
+		auto lo = _mm256_unpacklo_ps(v1, v2);
+		auto hi = _mm256_unpackhi_ps(v1, v2);
+
+		return {{_mm256_permute2f128_ps(lo, hi, _MM_SHUFFLE(0,2,0,0)),
+		         _mm256_permute2f128_ps(lo, hi, _MM_SHUFFLE(0,3,0,1))}};
+	}
 #endif
 
 	// ----------------------------------------------------------------------------------------------------- interleave

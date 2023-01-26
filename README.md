@@ -102,6 +102,30 @@ MIPP also use some nice features provided by the C++11 and so we have to add the
 `-std=c++11` flag to compile the code. Your are now ready to run your code with 
 the mipp.h wrapper.
 
+
+You can install the header files (locally) to allow finding them
+with cmake's `find_package()`:
+
+```
+git clone https://github.com/hayguen/MIPP.git
+cmake -S MIPP -B MIPP_build -DCMAKE_INSTALL_PREFIX=$HOME/.local
+cmake -S MIPP -B MIPP_build  # alternative installs into system, defaults to /usr/local
+cmake --build MIPP_build --target install  # might require sudo
+```
+
+for building and running the tests
+
+```
+cmake --build MIPP_build --target test
+```
+
+for later uninstall:
+
+```
+cmake --build MIPP_build --target uninstall
+```
+
+
 ### Sequential mode
 
 By default, MIPP try to recognize the instruction set from the preprocessor 

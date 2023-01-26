@@ -35,6 +35,16 @@ void test_reg_interleave()
 }
 
 #ifndef MIPP_NO
+#if !defined(MIPP_AVX) || (defined(MIPP_AVX))
+TEST_CASE("Interleave - mipp::reg<float>", "[mipp::interleave_float]")
+{
+    SECTION("datatype = float") { test_reg_interleave<float>(); }
+}
+#endif
+#endif
+
+
+#ifndef MIPP_NO
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 TEST_CASE("Interleave - mipp::reg", "[mipp::interleave]")
 {
