@@ -107,7 +107,7 @@ You can install the header files (locally) to allow finding them
 with cmake's `find_package()`:
 
 ```
-git clone https://github.com/hayguen/MIPP.git
+git clone https://github.com/aff3ct/MIPP.git
 cmake -S MIPP -B MIPP_build -DCMAKE_INSTALL_PREFIX=$HOME/.local
 cmake -S MIPP -B MIPP_build  # alternative installs into system, defaults to /usr/local
 cmake --build MIPP_build --target install  # might require sudo
