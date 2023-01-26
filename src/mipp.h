@@ -690,7 +690,9 @@ template <typename T> inline reg   msb          (const reg)                     
 template <typename T> inline reg   msb          (const reg, const reg)            { errorMessage<T>("msb");           exit(-1); }
 template <typename T> inline msk   sign         (const reg)                       { errorMessage<T>("sign");          exit(-1); }
 template <typename T> inline reg   neg          (const reg, const reg)            { errorMessage<T>("neg");           exit(-1); }
+#if !(defined(_MSC_VER) && defined(_M_ARM))  //Avoid compiling error with MSVC for ARM
 template <typename T> inline reg   neg          (const reg, const msk)            { errorMessage<T>("neg");           exit(-1); }
+#endif
 template <typename T> inline reg   abs          (const reg)                       { errorMessage<T>("abs");           exit(-1); }
 template <typename T> inline reg   sqrt         (const reg)                       { errorMessage<T>("sqrt");          exit(-1); }
 template <typename T> inline reg   rsqrt        (const reg)                       { errorMessage<T>("rsqrt");         exit(-1); }
@@ -777,8 +779,9 @@ inline regx2 deinterleave(const regx2 v)
 // ------------------------------------------------------------------------------------------------------------ aliases
 // --------------------------------------------------------------------------------------------------------------------
 template <typename T> inline reg copysign(const reg r1, const reg r2) { return neg<T>(r1, r2); }
+#if !(defined(_MSC_VER) && defined(_M_ARM))  //Avoid compiling error with MSVC for ARM
 template <typename T> inline reg copysign(const reg r1, const msk r2) { return neg<T>(r1, r2); }
-
+#endif
 // --------------------------------------------------------------------------------- hyperbolic trigonometric functions
 // --------------------------------------------------------------------------------------------------------------------
 template <typename T>

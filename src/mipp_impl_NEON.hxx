@@ -2348,10 +2348,12 @@
 		return xorb<float>(v1, msb<float>(v2));
 	}
 
+#if !(defined(_MSC_VER) && defined(_M_ARM))  //Avoid compiling error with MSVC for ARM
 	template <>
 	inline reg neg<float>(const reg v1, const msk v2) {
 		return neg<float>(v1, toreg<4>(v2));
 	}
+#endif
 
 #ifdef __aarch64__
 	template <>
@@ -2382,10 +2384,12 @@
 		return res;
 	}
 
+#if !(defined(_MSC_VER) && defined(_M_ARM))  //Avoid compiling error with MSVC for ARM
 	template <>
 	inline reg neg<int32_t>(const reg v1, const msk v2) {
 		return neg<int32_t>(v1, toreg<4>(v2));
 	}
+#endif
 
 	template <>
 	inline reg neg<int16_t>(const reg v1, const reg v2) {
@@ -2398,10 +2402,12 @@
 		return res;
 	}
 
+#if !(defined(_MSC_VER) && defined(_M_ARM))  //Avoid compiling error with MSVC for ARM
 	template <>
 	inline reg neg<int16_t>(const reg v1, const msk v2) {
 		return neg<int16_t>(v1, toreg<8>(v2));
 	}
+#endif
 
 	template <>
 	inline reg neg<int8_t>(const reg v1, const reg v2) {
@@ -2414,10 +2420,12 @@
 		return res;
 	}
 
+#if !(defined(_MSC_VER) && defined(_M_ARM))  //Avoid compiling error with MSVC for ARM
 	template <>
 	inline reg neg<int8_t>(const reg v1, const msk v2) {
 		return neg<int8_t>(v1, toreg<16>(v2));
 	}
+#endif
 
 	// ------------------------------------------------------------------------------------------------------------ abs
 #ifdef __aarch64__
