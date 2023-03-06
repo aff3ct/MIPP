@@ -35,7 +35,9 @@ SOFTWARE.
 #define MIPP
 
 #ifndef MIPP_NO_INTRINSICS
-#if defined(__ARM_NEON__) || defined(__ARM_NEON)
+#if defined(__ARM_FEATURE_SVE)
+#include <arm_sve.h>
+#elif defined(__ARM_NEON__) || defined(__ARM_NEON)
 #include <arm_neon.h>
 #include "math/neon_mathfun.h"
 #elif defined(__SSE__) || defined(__AVX__) || defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)
@@ -105,8 +107,54 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 // ------------------------------------------------------------------------------------------ myIntrinsics vector sizes
 // --------------------------------------------------------------------------------------------------------------------
 #ifndef MIPP_NO_INTRINSICS
+
+// -------------------------------------------------------------------------------------------------------- ARM SVE(specific size 512)
+#if defined(__ARM_FEATURE_SVE)
+#if __ARM_FEATURE_SVE_BITS
+#define MIPP_REGISTER_SIZE __ARM_FEATURE_SVE_BITS
+typedef svfloat32_t fixed_float32_t __attribute__((arm_sve_vector_bits(MIPP_REGISTER_SIZE)));
+typedef svfloat64_t fixed_float64_t __attribute__((arm_sve_vector_bits(MIPP_REGISTER_SIZE)));
+typedef svint32_t fixed_int32_t __attribute__((arm_sve_vector_bits(MIPP_REGISTER_SIZE)));
+typedef svint64_t fixed_int64_t __attribute__((arm_sve_vector_bits(MIPP_REGISTER_SIZE)));
+
+typedef svbool_t fixed_bool_t __attribute__((arm_sve_vector_bits(MIPP_REGISTER_SIZE)));
+
+#else
+#error Only -msve-vector-bits = 128-256-512-1024-2048 is supported
+#endif
+const std::string InstructionType = "SVE-LS";
+#define MIPP_SVE_LS
+
+#define MIPP_REQUIRED_ALIGNMENT 16
+#define MIPP_64BIT
+
+// activate when generator ok
+//#define MIPP_BW
+
+const std::string InstructionFullType = InstructionType;
+const std::string InstructionVersion  = "1";
+
+#define MIPP_INSTR_VERSION 1
+#define MIPP_LANES 4
+
+using msk   = fixed_bool_t;
+using reg   = fixed_float32_t;
+using reg_2 = fixed_int32_t; // half a full register (information is in the lower part of the 128 bit register)
+
+template <int N>
+inline reg toreg(const msk m) {
+	throw std::runtime_error("mipp: Invalid mask size 'N' = " + std::to_string(N) + ".");
+}
+
+inline std::vector<std::string> InstructionExtensions()
+{
+	std::vector<std::string> ext;
+	ext.push_back("SVE_LS");
+	return ext;
+}
+
 // ------------------------------------------------------------------------------------------------------- ARM NEON-128
-#if defined(__ARM_NEON__) || defined(__ARM_NEON)
+#elif defined(__ARM_NEON__) || defined(__ARM_NEON)
 	const std::string InstructionType = "NEON";
 	#define MIPP_NEON
 
@@ -1488,7 +1536,7 @@ struct Reduction
 	static T sapply(const Reg<T> r)
 	{
 		auto red = Reduction<T,OP>::apply(r);
-		return red[0];
+		return getfirst<T>(red);
 	}
 
 	template <ld_op<T> LD = mipp::load<T>>
@@ -1565,9 +1613,13 @@ inline void scatter_seq(TD *mem_addr, const reg idx, const reg r) {
 #include "mipp_object.hxx"
 
 #ifndef MIPP_NO_INTRINSICS
+// ------------------------------------------------------------------------------------------------------- ARM SVE LS()
+// --------------------------------------------------------------------------------------------------------------------
+#if defined(__ARM_FEATURE_SVE)
+#include "mipp_impl_SVE.hxx"
 // ------------------------------------------------------------------------------------------------------- ARM NEON-128
 // --------------------------------------------------------------------------------------------------------------------
-#if defined(__ARM_NEON__) || defined(__ARM_NEON)
+#elif defined(__ARM_NEON__) || defined(__ARM_NEON)
 #include "mipp_impl_NEON.hxx"
 // -------------------------------------------------------------------------------------------------------- X86 AVX-512
 // --------------------------------------------------------------------------------------------------------------------
