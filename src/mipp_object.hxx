@@ -7,8 +7,6 @@ template <typename T> inline Reg<T> add(const Reg<T> v1, const Reg<T> v2);
 template <typename T> inline Reg<T> sub(const Reg<T> v1, const Reg<T> v2);
 template <typename T> inline Reg<T> mul(const Reg<T> v1, const Reg<T> v2);
 template <typename T> inline Reg<T> div(const Reg<T> v1, const Reg<T> v2);
-template <typename T> inline Reg<T> min(const Reg<T> v1, const Reg<T> v2);
-template <typename T> inline Reg<T> max(const Reg<T> v1, const Reg<T> v2);
 
 template <typename T>
 class Reg_2;
@@ -163,13 +161,8 @@ public:
 	inline Reg<T>      sub          (const Reg<T> v)                       const { return mipp::sub          <T>(r, v.r);         }
 	inline Reg<T>      mul          (const Reg<T> v)                       const { return mipp::mul          <T>(r, v.r);         }
 	inline Reg<T>      div          (const Reg<T> v)                       const { return mipp::div          <T>(r, v.r);         }
-	inline Reg<T>      min          (const Reg<T> v)                       const { return mipp::min          <T>(r, v.r);         }
-	inline Reg<T>      max          (const Reg<T> v)                       const { return mipp::max          <T>(r, v.r);         }
 	inline Reg<T>      msb          ()                                     const { return mipp::msb          <T>(r);              }
 	inline Reg<T>      msb          (const Reg<T> v)                       const { return mipp::msb          <T>(r, v.r);         }
-	inline Msk<N<T>()> sign         ()                                     const { return mipp::sign         <T>(r);              }
-	inline Reg<T>      neg          (const Reg<T> v)                       const { return mipp::neg          <T>(r, v.r);         }
-	inline Reg<T>      neg          (const Msk<N<T>()> v)                  const { return mipp::neg          <T>(r, v.m);         }
 	inline Reg<T>      copysign     (const Reg<T> v)                       const { return mipp::copysign     <T>(r, v.r);         }
 	inline Reg<T>      copysign     (const Msk<N<T>()> v)                  const { return mipp::copysign     <T>(r, v.m);         }
 	inline Reg<T>      abs          ()                                     const { return mipp::abs          <T>(r);              }
@@ -189,12 +182,6 @@ public:
 	inline Reg<T>      asinh        ()                                     const { return mipp::asinh        <T>(r);              }
 	inline Reg<T>      acosh        ()                                     const { return mipp::acosh        <T>(r);              }
 	inline Reg<T>      atanh        ()                                     const { return mipp::atanh        <T>(r);              }
-//	inline Reg<T>      csch         ()                                     const { return mipp::csch         <T>(r);              }
-//	inline Reg<T>      sech         ()                                     const { return mipp::sech         <T>(r);              }
-//	inline Reg<T>      coth         ()                                     const { return mipp::coth         <T>(r);              }
-//	inline Reg<T>      acsch        ()                                     const { return mipp::acsch        <T>(r);              }
-//	inline Reg<T>      asech        ()                                     const { return mipp::asech        <T>(r);              }
-//	inline Reg<T>      acoth        ()                                     const { return mipp::acoth        <T>(r);              }
 	inline Reg<T>      fmadd        (const Reg<T> v1, const Reg<T> v2)     const { return mipp::fmadd        <T>(r, v1.r, v2.r);  }
 	inline Reg<T>      fnmadd       (const Reg<T> v1, const Reg<T> v2)     const { return mipp::fnmadd       <T>(r, v1.r, v2.r);  }
 	inline Reg<T>      fmsub        (const Reg<T> v1, const Reg<T> v2)     const { return mipp::fmsub        <T>(r, v1.r, v2.r);  }
@@ -204,7 +191,6 @@ public:
 	inline Reg<T>      rrot         ()                                     const { return mipp::rrot         <T>(r);              }
 	inline Reg<T>      div2         ()                                     const { return mipp::div2         <T>(r);              }
 	inline Reg<T>      div4         ()                                     const { return mipp::div4         <T>(r);              }
-	inline Reg<T>      sat          (T min, T max)                         const { return mipp::sat          <T>(r, min, max);    }
 	inline Reg<T>      round        ()                                     const { return mipp::round        <T>(r);              }
 	inline bool        testz        (const Reg<T> v)                       const { return mipp::testz        <T>(r, v.r);         }
 	inline bool        testz        ()                                     const { return mipp::testz        <T>(r);              }
@@ -254,14 +240,9 @@ public:
 	inline Reg<T>      sub          (const Reg<T> v)                       const { return mipp_scop::sub<T>(r,v.r);               }
 	inline Reg<T>      mul          (const Reg<T> v)                       const { return r  *  v.r;                              }
 	inline Reg<T>      div          (const Reg<T> v)                       const { return r  /  v.r;                              }
-	inline Reg<T>      min          (const Reg<T> v)                       const { return std::min<T>(r, v.r);                    }
-	inline Reg<T>      max          (const Reg<T> v)                       const { return std::max<T>(r, v.r);                    }
 	// (1 = positive, -1 = negative, 0 = 0)
 	inline Reg<T>      msb          ()                                     const { return mipp_scop::msb<T>(r);                   }
 	inline Reg<T>      msb          (const Reg<T> v)                       const { return msb(Reg<T>(r ^ v.r));                   }
-	inline Msk<N<T>()> sign         ()                                     const { return r < 0;                                  }
-	inline Reg<T>      neg          (const Reg<T> v)                       const { return v.r >= 0 ? Reg<T>(r) : Reg<T>(-r);      }
-	inline Reg<T>      neg          (const Msk<N<T>()> v)                  const { return v.m == 0 ? Reg<T>(r) : Reg<T>(-r);      }
 	inline Reg<T>      copysign     (const Reg<T> v)                       const { return this->neg(v);                           }
 	inline Reg<T>      copysign     (const Msk<N<T>()> v)                  const { return this->neg(v);                           }
 	inline Reg<T>      abs          ()                                     const { return std::abs(r);                            }
@@ -290,7 +271,6 @@ public:
 	inline Reg<T>      rrot         ()                                     const { return r;                                      }
 	inline Reg<T>      div2         ()                                     const { return mipp_scop::div2<T>(r);                  }
 	inline Reg<T>      div4         ()                                     const { return mipp_scop::div4<T>(r);                  }
-	inline Reg<T>      sat          (T min, T max)                         const { return std::min(std::max(r, min), max);        }
 	inline Reg<T>      round        ()                                     const { return std::round(r);                          }
 	inline bool        testz        (const Reg<T> v)                       const { return mipp_scop::andb<T>(r, v.r) == 0 ? 1 : 0;}
 	inline bool        testz        ()                                     const { return !r;                                     }
@@ -748,13 +728,8 @@ template <typename T> inline Reg<T>      add          (const Reg<T> v1, const Re
 template <typename T> inline Reg<T>      sub          (const Reg<T> v1, const Reg<T> v2)                      { return v1.sub(v2);               }
 template <typename T> inline Reg<T>      mul          (const Reg<T> v1, const Reg<T> v2)                      { return v1.mul(v2);               }
 template <typename T> inline Reg<T>      div          (const Reg<T> v1, const Reg<T> v2)                      { return v1.div(v2);               }
-template <typename T> inline Reg<T>      min          (const Reg<T> v1, const Reg<T> v2)                      { return v1.min(v2);               }
-template <typename T> inline Reg<T>      max          (const Reg<T> v1, const Reg<T> v2)                      { return v1.max(v2);               }
 template <typename T> inline Reg<T>      msb          (const Reg<T> v)                                        { return v.msb();                  }
 template <typename T> inline Reg<T>      msb          (const Reg<T> v1, const Reg<T> v2)                      { return v1.msb(v2);               }
-template <typename T> inline Msk<N<T>()> sign         (const Reg<T> v)                                        { return v.sign();                 }
-template <typename T> inline Reg<T>      neg          (const Reg<T> v1, const Reg<T> v2)                      { return v1.neg(v2);               }
-template <typename T> inline Reg<T>      neg          (const Reg<T> v1, const Msk<N<T>()> v2)                 { return v1.neg(v2);               }
 template <typename T> inline Reg<T>      copysign     (const Reg<T> v1, const Reg<T> v2)                      { return v1.copysign(v2);          }
 template <typename T> inline Reg<T>      copysign     (const Reg<T> v1, const Msk<N<T>()> v2)                 { return v1.copysign(v2);          }
 template <typename T> inline Reg<T>      abs          (const Reg<T> v)                                        { return v.abs();                  }
@@ -783,7 +758,6 @@ template <typename T> inline Reg<T>      lrot         (const Reg<T> v)          
 template <typename T> inline Reg<T>      rrot         (const Reg<T> v)                                        { return v.rrot();                 }
 template <typename T> inline Reg<T>      div2         (const Reg<T> v)                                        { return v.div2();                 }
 template <typename T> inline Reg<T>      div4         (const Reg<T> v)                                        { return v.div4();                 }
-template <typename T> inline Reg<T>      sat          (const Reg<T> v, T min, T max)                          { return v.sat(min, max);          }
 template <typename T> inline Reg<T>      round        (const Reg<T> v)                                        { return v.round();                }
 template <typename T> inline bool        testz        (const Reg<T> v1, const Reg<T> v2)                      { return v1.testz(v2);             }
 template <int      N> inline bool        testz        (const Msk<N> v1, const Msk<N> v2)                      { return v1.testz(v2);             }

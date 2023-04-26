@@ -2190,70 +2190,6 @@
 	}
 #endif
 
-	// ------------------------------------------------------------------------------------------------------------ min
-	template <>
-	inline reg min<float>(const reg v1, const reg v2) {
-		return _mm_min_ps(v1, v2);
-	}
-
-#ifdef __SSE2__
-	template <>
-	inline reg min<double>(const reg v1, const reg v2) {
-		return _mm_castpd_ps(_mm_min_pd(_mm_castps_pd(v1), _mm_castps_pd(v2)));
-	}
-
-#ifdef __SSE4_1__
-	template <>
-	inline reg min<int32_t>(const reg v1, const reg v2) {
-		return _mm_castsi128_ps(_mm_min_epi32(_mm_castps_si128(v1), _mm_castps_si128(v2)));
-	}
-#endif
-
-	template <>
-	inline reg min<int16_t>(const reg v1, const reg v2) {
-		return _mm_castsi128_ps(_mm_min_epi16(_mm_castps_si128(v1), _mm_castps_si128(v2)));
-	}
-
-#ifdef __SSE4_1__
-	template <>
-	inline reg min<int8_t>(const reg v1, const reg v2) {
-		return _mm_castsi128_ps(_mm_min_epi8(_mm_castps_si128(v1), _mm_castps_si128(v2)));
-	}
-#endif
-#endif
-
-	// ------------------------------------------------------------------------------------------------------------ max
-	template <>
-	inline reg max<float>(const reg v1, const reg v2) {
-		return _mm_max_ps(v1, v2);
-	}
-
-#ifdef __SSE2__
-	template <>
-	inline reg max<double>(const reg v1, const reg v2) {
-		return _mm_castpd_ps(_mm_max_pd(_mm_castps_pd(v1), _mm_castps_pd(v2)));
-	}
-
-#ifdef __SSE4_1__
-	template <>
-	inline reg max<int32_t>(const reg v1, const reg v2) {
-		return _mm_castsi128_ps(_mm_max_epi32(_mm_castps_si128(v1), _mm_castps_si128(v2)));
-	}
-#endif
-
-	template <>
-	inline reg max<int16_t>(const reg v1, const reg v2) {
-		return _mm_castsi128_ps(_mm_max_epi16(_mm_castps_si128(v1), _mm_castps_si128(v2)));
-	}
-
-#ifdef __SSE4_1__
-	template <>
-	inline reg max<int8_t>(const reg v1, const reg v2) {
-		return _mm_castsi128_ps(_mm_max_epi8(_mm_castps_si128(v1), _mm_castps_si128(v2)));
-	}
-#endif
-#endif
-
 	// ------------------------------------------------------------------------------------------------------------ msb
 	template <>
 	inline reg msb<float>(const reg v1) {
@@ -2355,95 +2291,6 @@
 		    msb_v1_v2 = msb<int8_t>(msb_v1_v2);
 		return msb_v1_v2;
 	}
-
-	// ----------------------------------------------------------------------------------------------------------- sign
-	template <>
-	inline msk sign<double>(const reg v1) {
-		return cmplt<double>(v1, set0<double>());
-	}
-
-	template <>
-	inline msk sign<float>(const reg v1) {
-		return cmplt<float>(v1, set0<float>());
-	}
-
-	template <>
-	inline msk sign<int64_t>(const reg v1) {
-		return cmplt<int64_t>(v1, set0<int64_t>());
-	}
-
-	template <>
-	inline msk sign<int32_t>(const reg v1) {
-		return cmplt<int32_t>(v1, set0<int32_t>());
-	}
-
-	template <>
-	inline msk sign<int16_t>(const reg v1) {
-		return cmplt<int16_t>(v1, set0<int16_t>());
-	}
-
-	template <>
-	inline msk sign<int8_t>(const reg v1) {
-		return cmplt<int8_t>(v1, set0<int8_t>());
-	}
-
-	// ------------------------------------------------------------------------------------------------------------ neg
-	template <>
-	inline reg neg<float>(const reg v1, const reg v2) {
-		return xorb<float>(v1, msb<float>(v2));
-	}
-
-	template <>
-	inline reg neg<float>(const reg v1, const msk v2) {
-		return neg<float>(v1, toreg<4>(v2));
-	}
-
-#ifdef __SSE2__
-	template <>
-	inline reg neg<double>(const reg v1, const reg v2) {
-		return xorb<double>(v1, msb<double>(v2));
-	}
-
-	template <>
-	inline reg neg<double>(const reg v1, const msk v2) {
-		return neg<double>(v1, toreg<2>(v2));
-	}
-#endif
-
-#ifdef __SSSE3__
-	template <>
-	inline reg neg<int32_t>(const reg v1, const reg v2) {
-		reg v2_2 = orb<int32_t>(v2, set1<int32_t>(1)); // hack to avoid -0 case
-		return _mm_castsi128_ps(_mm_sign_epi32(_mm_castps_si128(v1), _mm_castps_si128(v2_2)));
-	}
-
-	template <>
-	inline reg neg<int32_t>(const reg v1, const msk v2) {
-		return neg<int32_t>(v1, toreg<4>(v2));
-	}
-
-	template <>
-	inline reg neg<int16_t>(const reg v1, const reg v2) {
-		reg v2_2 = orb<int16_t>(v2, set1<int16_t>(1)); // hack to avoid -0 case
-		return _mm_castsi128_ps(_mm_sign_epi16(_mm_castps_si128(v1), _mm_castps_si128(v2_2)));
-	}
-
-	template <>
-	inline reg neg<int16_t>(const reg v1, const msk v2) {
-		return neg<int16_t>(v1, toreg<8>(v2));
-	}
-
-	template <>
-	inline reg neg<int8_t>(const reg v1, const reg v2) {
-		reg v2_2 = orb<int8_t>(v2, set1<int8_t>(1)); // hack to avoid -0 case
-		return _mm_castsi128_ps(_mm_sign_epi8(_mm_castps_si128(v1), _mm_castps_si128(v2_2)));
-	}
-
-	template <>
-	inline reg neg<int8_t>(const reg v1, const msk v2) {
-		return neg<int8_t>(v1, toreg<16>(v2));
-	}
-#endif
 
 	// ------------------------------------------------------------------------------------------------------------ abs
 	template <>
@@ -2825,32 +2672,6 @@
 		return sh8;
 	}
 #endif
-
-	// ------------------------------------------------------------------------------------------------------------ sat
-	template <>
-	inline reg sat<float>(const reg v1, float min, float max) {
-		return mipp::min<float>(mipp::max<float>(v1, set1<float>(min)), set1<float>(max));
-	}
-
-	template <>
-	inline reg sat<double>(const reg v1, double min, double max) {
-		return mipp::min<double>(mipp::max<double>(v1, set1<double>(min)), set1<double>(max));
-	}
-
-	template <>
-	inline reg sat<int32_t>(const reg v1, int32_t min, int32_t max) {
-		return mipp::min<int32_t>(mipp::max<int32_t>(v1, set1<int32_t>(min)), set1<int32_t>(max));
-	}
-
-	template <>
-	inline reg sat<int16_t>(const reg v1, int16_t min, int16_t max) {
-		return mipp::min<int16_t>(mipp::max<int16_t>(v1, set1<int16_t>(min)), set1<int16_t>(max));
-	}
-
-	template <>
-	inline reg sat<int8_t>(const reg v1, int8_t min, int8_t max) {
-		return mipp::min<int8_t>(mipp::max<int8_t>(v1, set1<int8_t>(min)), set1<int8_t>(max));
-	}
 
 	// ---------------------------------------------------------------------------------------------------------- round
 #ifdef __SSE4_1__

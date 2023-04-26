@@ -2418,62 +2418,6 @@
 		return _mm256_castpd_ps(_mm256_div_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2)));
 	}
 
-	// ------------------------------------------------------------------------------------------------------------ min
-	template <>
-	inline reg min<float>(const reg v1, const reg v2) {
-		return _mm256_min_ps(v1, v2);
-	}
-
-	template <>
-	inline reg min<double>(const reg v1, const reg v2) {
-		return _mm256_castpd_ps(_mm256_min_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2)));
-	}
-
-#ifdef __AVX2__
-	template <>
-	inline reg min<int32_t>(const reg v1, const reg v2) {
-		return _mm256_castsi256_ps(_mm256_min_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
-	}
-
-	template <>
-	inline reg min<int16_t>(const reg v1, const reg v2) {
-		return _mm256_castsi256_ps(_mm256_min_epi16(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
-	}
-
-	template <>
-	inline reg min<int8_t>(const reg v1, const reg v2) {
-		return _mm256_castsi256_ps(_mm256_min_epi8(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
-	}
-#endif
-
-	// ------------------------------------------------------------------------------------------------------------ max
-	template <>
-	inline reg max<float>(const reg v1, const reg v2) {
-		return _mm256_max_ps(v1, v2);
-	}
-
-	template <>
-	inline reg max<double>(const reg v1, const reg v2) {
-		return _mm256_castpd_ps(_mm256_max_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2)));
-	}
-
-#ifdef __AVX2__
-	template <>
-	inline reg max<int32_t>(const reg v1, const reg v2) {
-		return _mm256_castsi256_ps(_mm256_max_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
-	}
-
-	template <>
-	inline reg max<int16_t>(const reg v1, const reg v2) {
-		return _mm256_castsi256_ps(_mm256_max_epi16(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
-	}
-
-	template <>
-	inline reg max<int8_t>(const reg v1, const reg v2) {
-		return _mm256_castsi256_ps(_mm256_max_epi8(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
-	}
-#endif
-
 	// ------------------------------------------------------------------------------------------------------------ msb
 	template <>
 	inline reg msb<float>(const reg v1) {
@@ -3218,32 +3162,6 @@
 		return sh8;
 	}
 #endif
-
-	// ------------------------------------------------------------------------------------------------------------ sat
-	template <>
-	inline reg sat<float>(const reg v1, float min, float max) {
-		return mipp::min<float>(mipp::max<float>(v1, set1<float>(min)), set1<float>(max));
-	}
-
-	template <>
-	inline reg sat<double>(const reg v1, double min, double max) {
-		return mipp::min<double>(mipp::max<double>(v1, set1<double>(min)), set1<double>(max));
-	}
-
-	template <>
-	inline reg sat<int32_t>(const reg v1, int32_t min, int32_t max) {
-		return mipp::min<int32_t>(mipp::max<int32_t>(v1, set1<int32_t>(min)), set1<int32_t>(max));
-	}
-
-	template <>
-	inline reg sat<int16_t>(const reg v1, int16_t min, int16_t max) {
-		return mipp::min<int16_t>(mipp::max<int16_t>(v1, set1<int16_t>(min)), set1<int16_t>(max));
-	}
-
-	template <>
-	inline reg sat<int8_t>(const reg v1, int8_t min, int8_t max) {
-		return mipp::min<int8_t>(mipp::max<int8_t>(v1, set1<int8_t>(min)), set1<int8_t>(max));
-	}
 
 	// ---------------------------------------------------------------------------------------------------------- round
 	template <>

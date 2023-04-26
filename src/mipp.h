@@ -683,13 +683,8 @@ template <typename T> inline reg   add          (const reg, const reg)          
 template <typename T> inline reg   sub          (const reg, const reg)            { errorMessage<T>("sub");           exit(-1); }
 template <typename T> inline reg   mul          (const reg, const reg)            { errorMessage<T>("mul");           exit(-1); }
 template <typename T> inline reg   div          (const reg, const reg)            { errorMessage<T>("div");           exit(-1); }
-template <typename T> inline reg   min          (const reg, const reg)            { errorMessage<T>("min");           exit(-1); }
-template <typename T> inline reg   max          (const reg, const reg)            { errorMessage<T>("max");           exit(-1); }
 template <typename T> inline reg   msb          (const reg)                       { errorMessage<T>("msb");           exit(-1); }
 template <typename T> inline reg   msb          (const reg, const reg)            { errorMessage<T>("msb");           exit(-1); }
-template <typename T> inline msk   sign         (const reg)                       { errorMessage<T>("sign");          exit(-1); }
-template <typename T> inline reg   neg          (const reg, const reg)            { errorMessage<T>("neg");           exit(-1); }
-template <typename T> inline reg   neg          (const reg, const msk)            { errorMessage<T>("neg");           exit(-1); }
 template <typename T> inline reg   abs          (const reg)                       { errorMessage<T>("abs");           exit(-1); }
 template <typename T> inline reg   sqrt         (const reg)                       { errorMessage<T>("sqrt");          exit(-1); }
 template <typename T> inline reg   rsqrt        (const reg)                       { errorMessage<T>("rsqrt");         exit(-1); }
@@ -707,7 +702,6 @@ template <typename T> inline reg   lrot         (const reg)                     
 template <typename T> inline reg   rrot         (const reg)                       { errorMessage<T>("rrot");          exit(-1); }
 template <typename T> inline reg   div2         (const reg)                       { errorMessage<T>("div2");          exit(-1); }
 template <typename T> inline reg   div4         (const reg)                       { errorMessage<T>("div4");          exit(-1); }
-template <typename T> inline reg   sat          (const reg, T, T)                 { errorMessage<T>("sat");           exit(-1); }
 template <typename T> inline reg   round        (const reg)                       { errorMessage<T>("round");         exit(-1); }
 template <typename T> inline bool  testz        (const reg, const reg)            { errorMessage<T>("testz");         exit(-1); }
 template <int      N> inline bool  testz        (const msk, const msk)            { errorMessage<N>("testz");         exit(-1); }
