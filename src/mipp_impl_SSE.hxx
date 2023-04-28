@@ -1227,98 +1227,11 @@
 #endif
 
 	// ---------------------------------------------------------------------------------------------------------- shuff
-#ifdef __SSSE3__
-	template <>
-	inline reg shuff<double>(const reg v, const reg cm) {
-		return _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v), _mm_castps_si128(cm)));
-	}
-
-	template <>
-	inline reg shuff<float>(const reg v, const reg cm) {
-		return _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v), _mm_castps_si128(cm)));
-	}
-
-	template <>
-	inline reg shuff<int64_t>(const reg v, const reg cm) {
-		return _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v), _mm_castps_si128(cm)));
-	}
-
-	template <>
-	inline reg shuff<int32_t>(const reg v, const reg cm) {
-		return _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v), _mm_castps_si128(cm)));
-	}
-
-	template <>
-	inline reg shuff<int16_t>(const reg v, const reg cm) {
-		return _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v), _mm_castps_si128(cm)));
-	}
-
-	template <>
-	inline reg shuff<int8_t>(const reg v, const reg cm) {
-		return _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v), _mm_castps_si128(cm)));
-	}
-#endif
 
 	// --------------------------------------------------------------------------------------------------------- shuff2
-#ifdef __SSSE3__
-	template <>
-	inline reg shuff2<double>(const reg v, const reg cm) {
-		return mipp::shuff<double>(v, cm);
-	}
-
-	template <>
-	inline reg shuff2<float>(const reg v, const reg cm) {
-		return mipp::shuff<float>(v, cm);
-	}
-
-	template <>
-	inline reg shuff2<int64_t>(const reg v, const reg cm) {
-		return mipp::shuff<int64_t>(v, cm);
-	}
-
-	template <>
-	inline reg shuff2<int32_t>(const reg v, const reg cm) {
-		return mipp::shuff<int32_t>(v, cm);
-	}
-
-	template <>
-	inline reg shuff2<int16_t>(const reg v, const reg cm) {
-		return mipp::shuff<int16_t>(v, cm);
-	}
-
-	template <>
-	inline reg shuff2<int8_t>(const reg v, const reg cm) {
-		return mipp::shuff<int8_t>(v, cm);
-	}
-#endif
 
 	// --------------------------------------------------------------------------------------------------------- shuff4
-#ifdef __SSSE3__
-	template <>
-	inline reg shuff4<float>(const reg v, const reg cm) {
-		return mipp::shuff<float>(v, cm);
-	}
 
-	template <>
-	inline reg shuff4<int64_t>(const reg v, const reg cm) {
-		return mipp::shuff<int64_t>(v, cm);
-	}
-
-	template <>
-	inline reg shuff4<int32_t>(const reg v, const reg cm) {
-		return mipp::shuff<int32_t>(v, cm);
-	}
-
-	template <>
-	inline reg shuff4<int16_t>(const reg v, const reg cm) {
-		return mipp::shuff<int16_t>(v, cm);
-	}
-
-	template <>
-	inline reg shuff4<int8_t>(const reg v, const reg cm) {
-		return mipp::shuff<int8_t>(v, cm);
-	}
-#endif
 
 	// --------------------------------------------------------------------------------------------------- interleavelo
 
@@ -1974,15 +1887,6 @@
 	}
 
 	// --------------------------------------------------------------------------------------------------------- fnmadd
-	template <>
-	inline reg fnmadd<float>(const reg v1, const reg v2, const reg v3) {
-		return sub<float>(v3, mul<float>(v1, v2));
-	}
-
-	template <>
-	inline reg fnmadd<double>(const reg v1, const reg v2, const reg v3) {
-		return sub<double>(v3, mul<double>(v1, v2));
-	}
 
 	// ---------------------------------------------------------------------------------------------------------- fmsub
 	template <>
@@ -1996,15 +1900,6 @@
 	}
 
 	// --------------------------------------------------------------------------------------------------------- fnmsub
-	template <>
-	inline reg fnmsub<float>(const reg v1, const reg v2, const reg v3) {
-		return sub<float>(sub<float>(set0<float>(), mul<float>(v1, v2)), v3);
-	}
-
-	template <>
-	inline reg fnmsub<double>(const reg v1, const reg v2, const reg v3) {
-		return sub<double>(sub<double>(set0<double>(), mul<double>(v1, v2)), v3);
-	}
 
 	// ----------------------------------------------------------------------------------------------------------- lrot
 #ifdef __SSE2__

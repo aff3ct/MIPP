@@ -792,192 +792,10 @@
 	}
 
 	// ---------------------------------------------------------------------------------------------------------- shuff
-#if !defined(__clang__) && !defined(__llvm__) && defined(__GNUC__) && defined(__cplusplus)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-#endif
-#ifdef __AVX2__
-	template <>
-	inline reg shuff<float>(const reg v, const reg cm) {
-		return _mm256_permutevar8x32_ps(v, _mm256_castps_si256(cm));
-	}
-
-	template <>
-	inline reg shuff<int32_t>(const reg v, const reg cm) {
-		return _mm256_permutevar8x32_ps(v, _mm256_castps_si256(cm));
-	}
-#else
-	template <>
-	inline reg shuff<float>(const reg v, const reg cm) {
-		constexpr int N = mipp::N<float>();
-
-		float out[N];
-		float in[N];
-		int32_t ctrl[N];
-
-		mipp::storeu<float>(in, v);
-		mipp::storeu<int32_t>(ctrl, cm);
-
-		for (auto i = 0; i < N; i++)
-			out[i] = in[ctrl[i]];
-
-		return mipp::loadu<float>(out);
-	}
-
-	template <>
-	inline reg shuff<int32_t>(const reg v, const reg cm) {
-		constexpr int N = mipp::N<int32_t>();
-
-		int32_t out[N];
-		int32_t in[N];
-		int32_t ctrl[N];
-
-		mipp::storeu<int32_t>(in, v);
-		mipp::storeu<int32_t>(ctrl, cm);
-
-		for (auto i = 0; i < N; i++)
-			out[i] = in[ctrl[i]];
-
-		return mipp::loadu<int32_t>(out);
-	}
-#endif
-
-	template <>
-	inline reg shuff<double>(const reg v, const reg cm) {
-		constexpr int N = mipp::N<double>();
-
-		double out[N];
-		double in[N];
-		int64_t ctrl[N];
-
-		mipp::storeu<double>(in, v);
-		mipp::storeu<int64_t>(ctrl, cm);
-
-		for (auto i = 0; i < N; i++)
-			out[i] = in[ctrl[i]];
-
-		return mipp::loadu<double>(out);
-	}
-
-	template <>
-	inline reg shuff<int64_t>(const reg v, const reg cm) {
-		constexpr int N = mipp::N<int64_t>();
-
-		int64_t out[N];
-		int64_t in[N];
-		int64_t ctrl[N];
-
-		mipp::storeu<int64_t>(in, v);
-		mipp::storeu<int64_t>(ctrl, cm);
-
-		for (auto i = 0; i < N; i++)
-			out[i] = in[ctrl[i]];
-
-		return mipp::loadu<int64_t>(out);
-	}
-
-	template <>
-	inline reg shuff<int16_t>(const reg v, const reg cm) {
-		constexpr int N = mipp::N<int16_t>();
-
-		int16_t out[N];
-		int16_t in[N];
-		int16_t ctrl[N];
-
-		mipp::storeu<int16_t>(in, v);
-		mipp::storeu<int16_t>(ctrl, cm);
-
-		for (auto i = 0; i < N; i++)
-			out[i] = in[ctrl[i]];
-
-		return mipp::loadu<int16_t>(out);
-	}
-
-	template <>
-	inline reg shuff<int8_t>(const reg v, const reg cm) {
-		constexpr int N = mipp::N<int8_t>();
-
-		int8_t out[N];
-		int8_t in[N];
-		int8_t ctrl[N];
-
-		mipp::storeu<int8_t>(in, v);
-		mipp::storeu<int8_t>(ctrl, cm);
-
-		for (auto i = 0; i < N; i++)
-			out[i] = in[ctrl[i]];
-
-		return mipp::loadu<int8_t>(out);
-	}
-#if !defined(__clang__) && !defined(__llvm__) && defined(__GNUC__) && defined(__cplusplus)
-#pragma GCC diagnostic pop
-#endif
 
 	// --------------------------------------------------------------------------------------------------------- shuff2
-#ifdef __AVX2__
-	template <>
-	inline reg shuff2<double>(const reg v, const reg cm) {
-		return _mm256_castsi256_ps(_mm256_shuffle_epi8(_mm256_castps_si256(v), _mm256_castps_si256(cm)));
-	}
-
-	template <>
-	inline reg shuff2<float>(const reg v, const reg cm) {
-		return _mm256_castsi256_ps(_mm256_shuffle_epi8(_mm256_castps_si256(v), _mm256_castps_si256(cm)));
-	}
-
-	template <>
-	inline reg shuff2<int64_t>(const reg v, const reg cm) {
-		return _mm256_castsi256_ps(_mm256_shuffle_epi8(_mm256_castps_si256(v), _mm256_castps_si256(cm)));
-	}
-
-	template <>
-	inline reg shuff2<int32_t>(const reg v, const reg cm) {
-		return _mm256_castsi256_ps(_mm256_shuffle_epi8(_mm256_castps_si256(v), _mm256_castps_si256(cm)));
-	}
-
-	template <>
-	inline reg shuff2<int16_t>(const reg v, const reg cm) {
-		return _mm256_castsi256_ps(_mm256_shuffle_epi8(_mm256_castps_si256(v), _mm256_castps_si256(cm)));
-	}
-
-	template <>
-	inline reg shuff2<int8_t>(const reg v, const reg cm) {
-		return _mm256_castsi256_ps(_mm256_shuffle_epi8(_mm256_castps_si256(v), _mm256_castps_si256(cm)));
-	}
-#endif
-
 	// --------------------------------------------------------------------------------------------------------- shuff4
-#ifdef __AVX2__
-	template <>
-	inline reg shuff4<double>(const reg v, const reg cm) {
-		return mipp::shuff2<double>(v, cm);
-	}
 
-	template <>
-	inline reg shuff4<float>(const reg v, const reg cm) {
-		return mipp::shuff2<float>(v, cm);
-	}
-
-	template <>
-	inline reg shuff4<int64_t>(const reg v, const reg cm) {
-		return mipp::shuff2<int64_t>(v, cm);
-	}
-
-	template <>
-	inline reg shuff4<int32_t>(const reg v, const reg cm) {
-		return mipp::shuff2<int32_t>(v, cm);
-	}
-
-	template <>
-	inline reg shuff4<int16_t>(const reg v, const reg cm) {
-		return mipp::shuff2<int16_t>(v, cm);
-	}
-
-	template <>
-	inline reg shuff4<int8_t>(const reg v, const reg cm) {
-		return mipp::shuff2<int8_t>(v, cm);
-	}
-#endif
 
 	// -------------------------------------------------------------------------------------------------- interleavelo2
 
@@ -2097,27 +1915,6 @@
 #endif
 
 	// --------------------------------------------------------------------------------------------------------- fnmadd
-#ifdef __FMA__
-	template <>
-	inline reg fnmadd<float>(const reg v1, const reg v2, const reg v3) {
-		return _mm256_fnmadd_ps(v1, v2, v3);
-	}
-
-	template <>
-	inline reg fnmadd<double>(const reg v1, const reg v2, const reg v3) {
-		return _mm256_castpd_ps(_mm256_fnmadd_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2), _mm256_castps_pd(v3)));
-	}
-#else
-	template <>
-	inline reg fnmadd<float>(const reg v1, const reg v2, const reg v3) {
-		return sub<float>(v3, mul<float>(v1, v2));
-	}
-
-	template <>
-	inline reg fnmadd<double>(const reg v1, const reg v2, const reg v3) {
-		return sub<double>(v3, mul<double>(v1, v2));
-	}
-#endif
 
 	// ---------------------------------------------------------------------------------------------------------- fmsub
 #ifdef __FMA__
@@ -2143,27 +1940,7 @@
 #endif
 
 	// --------------------------------------------------------------------------------------------------------- fnmsub
-#ifdef __FMA__
-	template <>
-	inline reg fnmsub<float>(const reg v1, const reg v2, const reg v3) {
-		return _mm256_fnmsub_ps(v1, v2, v3);
-	}
 
-	template <>
-	inline reg fnmsub<double>(const reg v1, const reg v2, const reg v3) {
-		return _mm256_castpd_ps(_mm256_fnmsub_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2), _mm256_castps_pd(v3)));
-	}
-#else
-	template <>
-	inline reg fnmsub<float>(const reg v1, const reg v2, const reg v3) {
-		return sub<float>(sub<float>(set0<float>(), mul<float>(v1, v2)), v3);
-	}
-
-	template <>
-	inline reg fnmsub<double>(const reg v1, const reg v2, const reg v3) {
-		return sub<double>(sub<double>(set0<double>(), mul<double>(v1, v2)), v3);
-	}
-#endif
 
 	// ---------------------------------------------------------------------------------------------------------- blend
 	template <>

@@ -634,9 +634,6 @@ template <typename T> inline reg   cmask        (const uint32_t[nElReg<T>()])   
 template <typename T> inline reg   cmask2       (const uint32_t[nElReg<T>()/2])   { errorMessage<T>("cmask2");        exit(-1); }
 template <typename T> inline reg   cmask4       (const uint32_t[nElReg<T>()/4])   { errorMessage<T>("cmask4");        exit(-1); }
 #endif
-template <typename T> inline reg   shuff        (const reg, const reg)            { errorMessage<T>("shuff");         exit(-1); }
-template <typename T> inline reg   shuff2       (const reg, const reg)            { errorMessage<T>("shuff2");        exit(-1); }
-template <typename T> inline reg   shuff4       (const reg, const reg)            { errorMessage<T>("shuff4");        exit(-1); }
 /*template <typename T> inline reg   interleavelo (const reg, const reg)            { errorMessage<T>("interleavelo");  exit(-1); }
 template <typename T> inline reg   interleavehi (const reg, const reg)            { errorMessage<T>("interleavehi");  exit(-1); }
 template <typename T> inline reg   interleavelo2(const reg, const reg)            { errorMessage<T>("interleavelo2"); exit(-1); }
@@ -690,9 +687,7 @@ template <typename T> inline reg   sin          (const reg)                     
 template <typename T> inline reg   cos          (const reg)                       { errorMessage<T>("cos");           exit(-1); }
 template <typename T> inline void  sincos       (const reg, reg&, reg&)           { errorMessage<T>("sincos");        exit(-1); }
 template <typename T> inline reg   fmadd        (const reg, const reg, const reg) { errorMessage<T>("fmadd");         exit(-1); }
-template <typename T> inline reg   fnmadd       (const reg, const reg, const reg) { errorMessage<T>("fnmadd");        exit(-1); }
 template <typename T> inline reg   fmsub        (const reg, const reg, const reg) { errorMessage<T>("fmsub");         exit(-1); }
-template <typename T> inline reg   fnmsub       (const reg, const reg, const reg) { errorMessage<T>("fnmsub");        exit(-1); }
 template <typename T> inline reg   blend        (const reg, const reg, const msk) { errorMessage<T>("blend");         exit(-1); }
 template <typename T> inline reg   lrot         (const reg)                       { errorMessage<T>("lrot");          exit(-1); }
 template <typename T> inline reg   rrot         (const reg)                       { errorMessage<T>("rrot");          exit(-1); }

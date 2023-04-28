@@ -723,112 +723,10 @@
 	}
 
 	// ---------------------------------------------------------------------------------------------------------- shuff
-	template <>
-	inline reg shuff<double>(const reg v, const reg cm) {
-		uint8x8x2_t v2 = {{vget_low_u8((uint8x16_t)v), vget_high_u8((uint8x16_t)v)}};
-		uint8x8_t low  = vtbl2_u8(v2, vget_low_u8 ((uint8x16_t)cm));
-		uint8x8_t high = vtbl2_u8(v2, vget_high_u8((uint8x16_t)cm));
-
-		return (reg)vcombine_u8(low, high);
-	}
-
-	template <>
-	inline reg shuff<float>(const reg v, const reg cm) {
-		uint8x8x2_t v2 = {{vget_low_u8((uint8x16_t)v), vget_high_u8((uint8x16_t)v)}};
-		uint8x8_t low  = vtbl2_u8(v2, vget_low_u8 ((uint8x16_t)cm));
-		uint8x8_t high = vtbl2_u8(v2, vget_high_u8((uint8x16_t)cm));
-
-		return (reg)vcombine_u8(low, high);
-	}
-
-	template <>
-	inline reg shuff<int64_t>(const reg v, const reg cm) {
-		uint8x8x2_t v2 = {{vget_low_u8((uint8x16_t)v), vget_high_u8((uint8x16_t)v)}};
-		uint8x8_t low  = vtbl2_u8(v2, vget_low_u8 ((uint8x16_t)cm));
-		uint8x8_t high = vtbl2_u8(v2, vget_high_u8((uint8x16_t)cm));
-
-		return (reg)vcombine_u8(low, high);
-	}
-
-	template <>
-	inline reg shuff<int32_t>(const reg v, const reg cm) {
-		uint8x8x2_t v2 = {{vget_low_u8((uint8x16_t)v), vget_high_u8((uint8x16_t)v)}};
-		uint8x8_t low  = vtbl2_u8(v2, vget_low_u8 ((uint8x16_t)cm));
-		uint8x8_t high = vtbl2_u8(v2, vget_high_u8((uint8x16_t)cm));
-
-		return (reg)vcombine_u8(low, high);
-	}
-
-	template <>
-	inline reg shuff<int16_t>(const reg v, const reg cm) {
-		uint8x8x2_t v2 = {{vget_low_u8((uint8x16_t)v), vget_high_u8((uint8x16_t)v)}};
-		uint8x8_t low  = vtbl2_u8(v2, vget_low_u8 ((uint8x16_t)cm));
-		uint8x8_t high = vtbl2_u8(v2, vget_high_u8((uint8x16_t)cm));
-
-		return (reg)vcombine_u8(low, high);
-	}
-
-	template <>
-	inline reg shuff<int8_t>(const reg v, const reg cm) {
-		uint8x8x2_t v2 = {{vget_low_u8((uint8x16_t)v), vget_high_u8((uint8x16_t)v)}};
-		uint8x8_t low  = vtbl2_u8(v2, vget_low_u8 ((uint8x16_t)cm));
-		uint8x8_t high = vtbl2_u8(v2, vget_high_u8((uint8x16_t)cm));
-
-		return (reg)vcombine_u8(low, high);
-	}
 
 	// --------------------------------------------------------------------------------------------------------- shuff2
-	template <>
-	inline reg shuff2<double>(const reg v, const reg cm) {
-		return mipp::shuff<double>(v, cm);
-	}
-
-	template <>
-	inline reg shuff2<float>(const reg v, const reg cm) {
-		return mipp::shuff<float>(v, cm);
-	}
-
-	template <>
-	inline reg shuff2<int64_t>(const reg v, const reg cm) {
-		return mipp::shuff<int64_t>(v, cm);
-	}
-
-	template <>
-	inline reg shuff2<int32_t>(const reg v, const reg cm) {
-		return mipp::shuff<int32_t>(v, cm);
-	}
-
-	template <>
-	inline reg shuff2<int16_t>(const reg v, const reg cm) {
-		return mipp::shuff<int16_t>(v, cm);
-	}
-
-	template <>
-	inline reg shuff2<int8_t>(const reg v, const reg cm) {
-		return mipp::shuff<int8_t>(v, cm);
-	}
 
 	// --------------------------------------------------------------------------------------------------------- shuff4
-	template <>
-	inline reg shuff4<float>(const reg v, const reg cm) {
-		return mipp::shuff<float>(v, cm);
-	}
-
-	template <>
-	inline reg shuff4<int32_t>(const reg v, const reg cm) {
-		return mipp::shuff<int32_t>(v, cm);
-	}
-
-	template <>
-	inline reg shuff4<int16_t>(const reg v, const reg cm) {
-		return mipp::shuff<int16_t>(v, cm);
-	}
-
-
-	template <>
-	inline reg shuff4<int8_t>(const reg v, const reg cm) {
-		return mipp::shuff<int8_t>(v, cm);
-	}
 
 	// --------------------------------------------------------------------------------------------------- interleavelo
 	
@@ -1929,25 +1827,6 @@
 	}
 
 	// --------------------------------------------------------------------------------------------------------- fnmadd
-#ifdef __aarch64__
-	template <>
-	inline reg fnmadd<double>(const reg v1, const reg v2, const reg v3) {
-#if defined(__ARM_FEATURE_FMA) && !defined(__clang__)
-		return (reg) vfmsq_f64((float64x2_t)v3, (float64x2_t)v1, (float64x2_t)v2);
-#else
- 		return sub<double>(v3, mul<double>(v1, v2));
-#endif
-	}
-#endif
-
-	template <>
-	inline reg fnmadd<float>(const reg v1, const reg v2, const reg v3) {
-#if defined(__ARM_FEATURE_FMA) && !defined(__clang__)
-		return (reg) vfmsq_f32((float32x4_t)v3, (float32x4_t)v1, (float32x4_t)v2);
-#else
- 		return sub<float>(v3, mul<float>(v1, v2));
-#endif
-	}
 
 	// ---------------------------------------------------------------------------------------------------------- fmsub
 	template <>
@@ -1961,15 +1840,6 @@
 	}
 
 	// --------------------------------------------------------------------------------------------------------- fnmsub
-	template <>
-	inline reg fnmsub<double>(const reg v1, const reg v2, const reg v3) {
-		return xorb<double>(fmadd<double>(v1, v2, v3), set1<int64_t>(0x8000000000000000));
-	}
-
-	template <>
-	inline reg fnmsub<float>(const reg v1, const reg v2, const reg v3) {
-		return xorb<float>(fmadd<float>(v1, v2, v3), set1<int32_t>(0x80000000));
-	}
 
 	// ----------------------------------------------------------------------------------------------------------- lrot
 #ifdef __aarch64__

@@ -81,9 +81,6 @@ public:
 	inline void        storeu       (T* data)                              const { mipp::storeu<T>(data, r);                      }
 	inline Reg_2<T>    low          ()                                     const { return mipp::low <T>(r);                       }
 	inline Reg_2<T>    high         ()                                     const { return mipp::high<T>(r);                       }
-	inline Reg<T>      shuff        (const Reg<T> v_shu)                   const { return mipp::shuff        <T>(r, v_shu.r);     }
-	inline Reg<T>      shuff2       (const Reg<T> v_shu)                   const { return mipp::shuff2       <T>(r, v_shu.r);     }
-	inline Reg<T>      shuff4       (const Reg<T> v_shu)                   const { return mipp::shuff4       <T>(r, v_shu.r);     }
 	inline Reg<T>      andb         (const Reg<T> v)                       const { return mipp::andb         <T>(r, v.r);         }
 	inline Reg<T>      andnb        (const Reg<T> v)                       const { return mipp::andnb        <T>(r, v.r);         }
 	inline Reg<T>      notb         ()                                     const { return mipp::notb         <T>(r);              }
@@ -125,9 +122,7 @@ public:
 	inline Reg<T>      acosh        ()                                     const { return mipp::acosh        <T>(r);              }
 	inline Reg<T>      atanh        ()                                     const { return mipp::atanh        <T>(r);              }
 	inline Reg<T>      fmadd        (const Reg<T> v1, const Reg<T> v2)     const { return mipp::fmadd        <T>(r, v1.r, v2.r);  }
-	inline Reg<T>      fnmadd       (const Reg<T> v1, const Reg<T> v2)     const { return mipp::fnmadd       <T>(r, v1.r, v2.r);  }
 	inline Reg<T>      fmsub        (const Reg<T> v1, const Reg<T> v2)     const { return mipp::fmsub        <T>(r, v1.r, v2.r);  }
-	inline Reg<T>      fnmsub       (const Reg<T> v1, const Reg<T> v2)     const { return mipp::fnmsub       <T>(r, v1.r, v2.r);  }
 	inline Reg<T>      blend        (const Reg<T> v1, const Msk<N<T>()> m) const { return mipp::blend        <T>(r, v1.r,  m.m);  }
 	inline Reg<T>      lrot         ()                                     const { return mipp::lrot         <T>(r);              }
 	inline Reg<T>      rrot         ()                                     const { return mipp::rrot         <T>(r);              }
@@ -186,9 +181,7 @@ public:
 	inline Reg<T>      acosh        ()                                     const { return (T)std::acosh(r);                       }
 	inline Reg<T>      atanh        ()                                     const { return (T)std::atanh(r);                       }
 	inline Reg<T>      fmadd        (const Reg<T> v1, const Reg<T> v2)     const { return   r * v1.r + v2.r;                      }
-	inline Reg<T>      fnmadd       (const Reg<T> v1, const Reg<T> v2)     const { return v2.r -(r * v1.r);                       }
 	inline Reg<T>      fmsub        (const Reg<T> v1, const Reg<T> v2)     const { return   r * v1.r - v2.r;                      }
-	inline Reg<T>      fnmsub       (const Reg<T> v1, const Reg<T> v2)     const { return -v2.r - (r * v1.r) ;                    }
 	inline Reg<T>      blend        (const Reg<T> v1, const Msk<N<T>()> m) const { return (m.m) ? r : v1.r;                       }
 	inline Reg<T>      lrot         ()                                     const { return r;                                      }
 	inline Reg<T>      rrot         ()                                     const { return r;                                      }
@@ -596,9 +589,6 @@ std::ostream& operator<<(std::ostream& os, const Msk<N>& m)
 //template <int      N> inline Msk<N>      set1         (const bool val)                                        { Msk<N> m; m.set1(val); return m; }
 //template <typename T> inline Reg<T>      set0         ()                                                      { Reg<T> r; r.set0();    return r; }
 //template <int      N> inline Msk<N>      set0         ()                                                      { Msk<N> m; m.set0();    return m; }
-template <typename T> inline Reg<T>      shuff        (const Reg<T> v1, const Reg<T> v2)                      { return v1.shuff(v2);             }
-template <typename T> inline Reg<T>      shuff2       (const Reg<T> v1, const Reg<T> v2)                      { return v1.shuff2(v2);            }
-template <typename T> inline Reg<T>      shuff4       (const Reg<T> v1, const Reg<T> v2)                      { return v1.shuff4(v2);            }
 template <typename T> inline Reg<T>      andb         (const Reg<T> v1, const Reg<T> v2)                      { return v1.andb(v2);              }
 template <int      N> inline Msk<N>      andb         (const Msk<N> v1, const Msk<N> v2)                      { return v1.andb(v2);              }
 template <typename T> inline Reg<T>      andb         (const Reg<T> v1, const Msk<N<T>()> v2)                 { return v1.andb(v2);              }
@@ -655,9 +645,7 @@ template <typename T> inline Reg<T>      asinh        (const Reg<T> v)          
 template <typename T> inline Reg<T>      acosh        (const Reg<T> v)                                        { return v.acosh();                }
 template <typename T> inline Reg<T>      atanh        (const Reg<T> v)                                        { return v.atanh();                }
 template <typename T> inline Reg<T>      fmadd        (const Reg<T> v1, const Reg<T> v2, const Reg<T> v3)     { return v1.fmadd(v2, v3);         }
-template <typename T> inline Reg<T>      fnmadd       (const Reg<T> v1, const Reg<T> v2, const Reg<T> v3)     { return v1.fnmadd(v2, v3);        }
 template <typename T> inline Reg<T>      fmsub        (const Reg<T> v1, const Reg<T> v2, const Reg<T> v3)     { return v1.fmsub(v2, v3);         }
-template <typename T> inline Reg<T>      fnmsub       (const Reg<T> v1, const Reg<T> v2, const Reg<T> v3)     { return v1.fnmsub(v2, v3);        }
 template <typename T> inline Reg<T>      blend        (const Reg<T> v1, const Reg<T> v2, const Msk<N<T>()> m) { return v1.blend(v2, m );         }
 template <typename T> inline Reg<T>      lrot         (const Reg<T> v)                                        { return v.lrot();                 }
 template <typename T> inline Reg<T>      rrot         (const Reg<T> v)                                        { return v.rrot();                 }

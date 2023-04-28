@@ -1098,113 +1098,10 @@
 #endif
 
 	// ---------------------------------------------------------------------------------------------------------- shuff
-#if defined(__AVX512F__)
-	template <>
-	inline reg shuff<double>(const reg v, const reg cm) {
-		return _mm512_permutexvar_ps(_mm512_castps_si512(cm), v);
-	}
-
-	template <>
-	inline reg shuff<float>(const reg v, const reg cm) {
-		return _mm512_permutexvar_ps(_mm512_castps_si512(cm), v);
-	}
-
-	template <>
-	inline reg shuff<int64_t>(const reg v, const reg cm) {
-		return _mm512_permutexvar_ps(_mm512_castps_si512(cm), v);
-	}
-
-	template <>
-	inline reg shuff<int32_t>(const reg v, const reg cm) {
-		return _mm512_permutexvar_ps(_mm512_castps_si512(cm), v);
-	}
-#endif
-
-#if defined(__AVX512BW__)
-	template <>
-	inline reg shuff<int16_t>(const reg v, const reg cm) {
-		return _mm512_castsi512_ps(_mm512_permutexvar_epi16(_mm512_castps_si512(cm), _mm512_castps_si512(v)));
-	}
-#endif
-
-#if defined(__AVX512VBMI__)
-	template <>
-	inline reg shuff<int8_t>(const reg v, const reg cm) {
-		return _mm512_castsi512_ps(_mm512_permutexvar_epi8(_mm512_castps_si512(cm), _mm512_castps_si512(v)));
-	}
-#endif
 
 	// --------------------------------------------------------------------------------------------------------- shuff2
-#if defined(__AVX512F__)
-	template <>
-	inline reg shuff2<double>(const reg v, const reg cm) {
-		return mipp::shuff<double>(v, cm);
-	}
-
-	template <>
-	inline reg shuff2<float>(const reg v, const reg cm) {
-		return mipp::shuff<float>(v, cm);
-	}
-
-	template <>
-	inline reg shuff2<int64_t>(const reg v, const reg cm) {
-		return mipp::shuff<int64_t>(v, cm);
-	}
-
-	template <>
-	inline reg shuff2<int32_t>(const reg v, const reg cm) {
-		return mipp::shuff<int32_t>(v, cm);
-	}
-#endif
-
-#if defined(__AVX512BW__)
-	template <>
-	inline reg shuff2<int16_t>(const reg v, const reg cm) {
-		return mipp::shuff<int16_t>(v, cm);
-	}
-#endif
-
-#if defined(__AVX512VBMI__)
-	template <>
-	inline reg shuff2<int8_t>(const reg v, const reg cm) {
-		return mipp::shuff<int8_t>(v, cm);
-	}
-#endif
 
 	// --------------------------------------------------------------------------------------------------------- shuff4
-#if defined(__AVX512F__)
-	template <>
-	inline reg shuff4<double>(const reg v, const reg cm) {
-		return mipp::shuff<double>(v, cm);
-	}
-
-	template <>
-	inline reg shuff4<float>(const reg v, const reg cm) {
-		return mipp::shuff<float>(v, cm);
-	}
-
-	template <>
-	inline reg shuff4<int64_t>(const reg v, const reg cm) {
-		return mipp::shuff<int64_t>(v, cm);
-	}
-
-	template <>
-	inline reg shuff4<int32_t>(const reg v, const reg cm) {
-		return mipp::shuff<int32_t>(v, cm);
-	}
-#endif
-
-#if defined(__AVX512BW__)
-	template <>
-	inline reg shuff4<int16_t>(const reg v, const reg cm) {
-		return mipp::shuff<int16_t>(v, cm);
-	}
-
-	template <>
-	inline reg shuff4<int8_t>(const reg v, const reg cm) {
-		return (reg)_mm512_shuffle_epi8(_mm512_castps_si512(v), _mm512_castps_si512(cm));
-	}
-#endif
 
 	// -------------------------------------------------------------------------------------------------- interleavelo4
 
@@ -2514,15 +2411,6 @@
 #endif
 
 	// --------------------------------------------------------------------------------------------------------- fnmadd
-	template <>
-	inline reg fnmadd<double>(const reg v1, const reg v2, const reg v3) {
-		return _mm512_castpd_ps(_mm512_fnmadd_pd(_mm512_castps_pd(v1), _mm512_castps_pd(v2), _mm512_castps_pd(v3)));
-	}
-
-	template <>
-	inline reg fnmadd<float>(const reg v1, const reg v2, const reg v3) {
-		return _mm512_fnmadd_ps(v1, v2, v3);
-	}
 
 	// ---------------------------------------------------------------------------------------------------------- fmsub
 	template <>
@@ -2536,15 +2424,6 @@
 	}
 
 	// --------------------------------------------------------------------------------------------------------- fnmsub
-	template <>
-	inline reg fnmsub<double>(const reg v1, const reg v2, const reg v3) {
-		return _mm512_castpd_ps(_mm512_fnmsub_pd(_mm512_castps_pd(v1), _mm512_castps_pd(v2), _mm512_castps_pd(v3)));
-	}
-
-	template <>
-	inline reg fnmsub<float>(const reg v1, const reg v2, const reg v3) {
-		return _mm512_fnmsub_ps(v1, v2, v3);
-	}
 
 	// ----------------------------------------------------------------------------------------------------------- lrot
 #ifdef __AVX512F__
