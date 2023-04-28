@@ -637,7 +637,7 @@ template <typename T> inline reg   cmask4       (const uint32_t[nElReg<T>()/4]) 
 template <typename T> inline reg   shuff        (const reg, const reg)            { errorMessage<T>("shuff");         exit(-1); }
 template <typename T> inline reg   shuff2       (const reg, const reg)            { errorMessage<T>("shuff2");        exit(-1); }
 template <typename T> inline reg   shuff4       (const reg, const reg)            { errorMessage<T>("shuff4");        exit(-1); }
-template <typename T> inline reg   interleavelo (const reg, const reg)            { errorMessage<T>("interleavelo");  exit(-1); }
+/*template <typename T> inline reg   interleavelo (const reg, const reg)            { errorMessage<T>("interleavelo");  exit(-1); }
 template <typename T> inline reg   interleavehi (const reg, const reg)            { errorMessage<T>("interleavehi");  exit(-1); }
 template <typename T> inline reg   interleavelo2(const reg, const reg)            { errorMessage<T>("interleavelo2"); exit(-1); }
 template <typename T> inline reg   interleavehi2(const reg, const reg)            { errorMessage<T>("interleavehi2"); exit(-1); }
@@ -650,13 +650,7 @@ template <typename T> inline regx2 interleave4  (const reg, const reg)          
 template <typename T> inline reg   interleave   (const reg)                       { errorMessage<T>("interleave");    exit(-1); }
 template <typename T> inline regx2 interleavex2 (const reg, const reg)            { errorMessage<T>("interleavex2");  exit(-1); }
 template <typename T> inline reg   interleavex4 (const reg)                       { errorMessage<T>("interleavex4");  exit(-1); }
-template <typename T> inline reg   interleavex16(const reg)                       { errorMessage<T>("interleavex16"); exit(-1); }
-template <typename T> inline void  transpose    (      reg[nElReg<T>()])          { errorMessage<T>("transpose");     exit(-1); }
-template <typename T> inline void  transpose8x8 (      reg[8])                    { errorMessage<T>("transpose8x8");  exit(-1); }
-template <typename T> inline void  transpose2   (      reg[nElReg<T>()/2])        { errorMessage<T>("transpose2");    exit(-1); }
-template <typename T> inline void  transpose28x8(      reg[8])                    { errorMessage<T>("transpose28x8"); exit(-1); }
-template <typename T> inline void  transpose4   (      reg[nElReg<T>()/2])        { errorMessage<T>("transpose4");    exit(-1); }
-template <typename T> inline void  transpose48x8(      reg[8])                    { errorMessage<T>("transpose48x8"); exit(-1); }
+template <typename T> inline reg   interleavex16(const reg)                       { errorMessage<T>("interleavex16"); exit(-1); }*/
 template <typename T> inline reg   andb         (const reg, const reg)            { errorMessage<T>("andb");          exit(-1); }
 template <int      N> inline msk   andb         (const msk, const msk)            { errorMessage<N>("andb");          exit(-1); }
 template <typename T> inline reg   andnb        (const reg, const reg)            { errorMessage<T>("andnb");         exit(-1); }
@@ -683,6 +677,8 @@ template <typename T> inline reg   add          (const reg, const reg)          
 template <typename T> inline reg   sub          (const reg, const reg)            { errorMessage<T>("sub");           exit(-1); }
 template <typename T> inline reg   mul          (const reg, const reg)            { errorMessage<T>("mul");           exit(-1); }
 template <typename T> inline reg   div          (const reg, const reg)            { errorMessage<T>("div");           exit(-1); }
+template <typename T> inline reg   min          (const reg, const reg)            { errorMessage<T>("min");           exit(-1); }
+template <typename T> inline reg   max          (const reg, const reg)            { errorMessage<T>("max");           exit(-1); }
 template <typename T> inline reg   msb          (const reg)                       { errorMessage<T>("msb");           exit(-1); }
 template <typename T> inline reg   msb          (const reg, const reg)            { errorMessage<T>("msb");           exit(-1); }
 template <typename T> inline reg   abs          (const reg)                       { errorMessage<T>("abs");           exit(-1); }
@@ -700,8 +696,6 @@ template <typename T> inline reg   fnmsub       (const reg, const reg, const reg
 template <typename T> inline reg   blend        (const reg, const reg, const msk) { errorMessage<T>("blend");         exit(-1); }
 template <typename T> inline reg   lrot         (const reg)                       { errorMessage<T>("lrot");          exit(-1); }
 template <typename T> inline reg   rrot         (const reg)                       { errorMessage<T>("rrot");          exit(-1); }
-template <typename T> inline reg   div2         (const reg)                       { errorMessage<T>("div2");          exit(-1); }
-template <typename T> inline reg   div4         (const reg)                       { errorMessage<T>("div4");          exit(-1); }
 template <typename T> inline reg   round        (const reg)                       { errorMessage<T>("round");         exit(-1); }
 template <typename T> inline bool  testz        (const reg, const reg)            { errorMessage<T>("testz");         exit(-1); }
 template <int      N> inline bool  testz        (const msk, const msk)            { errorMessage<N>("testz");         exit(-1); }
@@ -742,22 +736,6 @@ inline regx2 cossin(const reg v)
 	return sin_cos;
 }
 
-template <typename T>
-inline regx2 interleave(const regx2 v)
-{
-	return mipp::interleave<T>(v.val[0], v.val[1]);
-}
-
-template <typename T>
-inline regx2 deinterleave(const regx2 v)
-{
-	return mipp::deinterleave<T>(v.val[0], v.val[1]);
-}
-
-// ------------------------------------------------------------------------------------------------------------ aliases
-// --------------------------------------------------------------------------------------------------------------------
-template <typename T> inline reg copysign(const reg r1, const reg r2) { return neg<T>(r1, r2); }
-template <typename T> inline reg copysign(const reg r1, const msk r2) { return neg<T>(r1, r2); }
 
 // --------------------------------------------------------------------------------- hyperbolic trigonometric functions
 // --------------------------------------------------------------------------------------------------------------------

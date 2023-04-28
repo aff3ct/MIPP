@@ -980,678 +980,33 @@
 #endif
 
 	// -------------------------------------------------------------------------------------------------- interleavelo2
-#ifdef __AVX2__
-	template <>
-	inline reg interleavelo2<double>(const reg v1, const reg v2) {
-		return _mm256_castsi256_ps(_mm256_unpacklo_epi64(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
-	}
-
-	template <>
-	inline reg interleavelo2<float>(const reg v1, const reg v2) {
-		// v1  = [a0, b0, c0, d0, e0, f0, g0, h0], v2 = [a1, b1, c1, d1, e1, f1, g1, h1]
-		// res = [a0, a1, b0, b1, e0, e1, f0, f1]
-		return _mm256_castsi256_ps(_mm256_unpacklo_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
-	}
-
-	template <>
-	inline reg interleavelo2<int64_t>(const reg v1, const reg v2) {
-		return _mm256_castsi256_ps(_mm256_unpacklo_epi64(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
-	}
-
-	template <>
-	inline reg interleavelo2<int32_t>(const reg v1, const reg v2) {
-		// v1  = [a0, b0, c0, d0, e0, f0, g0, h0], v2 = [a1, b1, c1, d1, e1, f1, g1, h1]
-		// res = [a0, a1, b0, b1, e0, e1, f0, f1]
-		return _mm256_castsi256_ps(_mm256_unpacklo_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
-	}
-
-	template <>
-	inline reg interleavelo2<int16_t>(const reg v1, const reg v2) {
-		return _mm256_castsi256_ps(_mm256_unpacklo_epi16(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
-	}
-
-	template <>
-	inline reg interleavelo2<int8_t>(const reg v1, const reg v2) {
-		return _mm256_castsi256_ps(_mm256_unpacklo_epi8(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
-	}
-#endif
 
 	// -------------------------------------------------------------------------------------------------- interleavehi2
-#ifdef __AVX2__
-	template <>
-	inline reg interleavehi2<double>(const reg v1, const reg v2) {
-		return _mm256_castsi256_ps(_mm256_unpackhi_epi64(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
-	}
-
-	template <>
-	inline reg interleavehi2<float>(const reg v1, const reg v2) {
-		// v1  = [a0, b0, c0, d0, e0, f0, g0, h0], v2 = [a1, b1, c1, d1, e1, f1, g1, h1]
-		// res = [c0, c1, d0, d1, g0, g1, h0, h1]
-		return _mm256_castsi256_ps(_mm256_unpackhi_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
-	}
-
-	template <>
-	inline reg interleavehi2<int64_t>(const reg v1, const reg v2) {
-		return _mm256_castsi256_ps(_mm256_unpackhi_epi64(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
-	}
-
-	template <>
-	inline reg interleavehi2<int32_t>(const reg v1, const reg v2) {
-		// v1  = [a0, b0, c0, d0, e0, f0, g0, h0], v2 = [a1, b1, c1, d1, e1, f1, g1, h1]
-		// res = [c0, c1, d0, d1, g0, g1, h0, h1]
-		return _mm256_castsi256_ps(_mm256_unpackhi_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
-	}
-
-	template <>
-	inline reg interleavehi2<int16_t>(const reg v1, const reg v2) {
-		return _mm256_castsi256_ps(_mm256_unpackhi_epi16(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
-	}
-
-	template <>
-	inline reg interleavehi2<int8_t>(const reg v1, const reg v2) {
-		return _mm256_castsi256_ps(_mm256_unpackhi_epi8(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
-	}
-#endif
 
 	// ----------------------------------------------------------------------------------------------------- interleave
-#ifdef __AVX2__
-	template <>
-	inline regx2 interleave<double>(const reg v1, const reg v2) {
-		auto lo = _mm256_unpacklo_epi64(_mm256_castps_si256(v1), _mm256_castps_si256(v2));
-		auto hi = _mm256_unpackhi_epi64(_mm256_castps_si256(v1), _mm256_castps_si256(v2));
-
-		return {{_mm256_castsi256_ps(_mm256_permute2f128_si256(lo, hi, _MM_SHUFFLE(0,2,0,0))),
-		         _mm256_castsi256_ps(_mm256_permute2f128_si256(lo, hi, _MM_SHUFFLE(0,3,0,1)))}};
-	}
-
-	template <>
-	inline regx2 interleave<int64_t>(const reg v1, const reg v2) {
-		auto lo = _mm256_unpacklo_epi64(_mm256_castps_si256(v1), _mm256_castps_si256(v2));
-		auto hi = _mm256_unpackhi_epi64(_mm256_castps_si256(v1), _mm256_castps_si256(v2));
-
-		return {{_mm256_castsi256_ps(_mm256_permute2f128_si256(lo, hi, _MM_SHUFFLE(0,2,0,0))),
-		         _mm256_castsi256_ps(_mm256_permute2f128_si256(lo, hi, _MM_SHUFFLE(0,3,0,1)))}};
-	}
-
-	template <>
-	inline regx2 interleave<float>(const reg v1, const reg v2) {
-		// v1         = [a0, b0, c0, d0, e0, f0, g0, h0], v2         = [a1, b1, c1, d1, e1, f1, g1, h1]
-		// res.val[0] = [a0, a1, b0, b1, c0, c1, d0, d1], res.val[1] = [e0, e1, f0, f1, g0, g1, h0, h1]
-		auto lo = _mm256_unpacklo_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2));
-		auto hi = _mm256_unpackhi_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2));
-
-		return {{_mm256_castsi256_ps(_mm256_permute2f128_si256(lo, hi, _MM_SHUFFLE(0,2,0,0))),
-		         _mm256_castsi256_ps(_mm256_permute2f128_si256(lo, hi, _MM_SHUFFLE(0,3,0,1)))}};
-	}
-
-	template <>
-	inline regx2 interleave<int32_t>(const reg v1, const reg v2) {
-		// v1         = [a0, b0, c0, d0, e0, f0, g0, h0], v2         = [a1, b1, c1, d1, e1, f1, g1, h1]
-		// res.val[0] = [a0, a1, b0, b1, c0, c1, d0, d1], res.val[1] = [e0, e1, f0, f1, g0, g1, h0, h1]
-		auto lo = _mm256_unpacklo_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2));
-		auto hi = _mm256_unpackhi_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2));
-
-		return {{_mm256_castsi256_ps(_mm256_permute2f128_si256(lo, hi, _MM_SHUFFLE(0,2,0,0))),
-		         _mm256_castsi256_ps(_mm256_permute2f128_si256(lo, hi, _MM_SHUFFLE(0,3,0,1)))}};
-	}
-
-	template <>
-	inline regx2 interleave<int16_t>(const reg v1, const reg v2) {
-		auto lo = _mm256_unpacklo_epi16(_mm256_castps_si256(v1), _mm256_castps_si256(v2));
-		auto hi = _mm256_unpackhi_epi16(_mm256_castps_si256(v1), _mm256_castps_si256(v2));
-
-		return {{_mm256_castsi256_ps(_mm256_permute2f128_si256(lo, hi, _MM_SHUFFLE(0,2,0,0))),
-		         _mm256_castsi256_ps(_mm256_permute2f128_si256(lo, hi, _MM_SHUFFLE(0,3,0,1)))}};
-	}
-
-	template <>
-	inline regx2 interleave<int8_t>(const reg v1, const reg v2) {
-		auto lo = _mm256_unpacklo_epi8(_mm256_castps_si256(v1), _mm256_castps_si256(v2));
-		auto hi = _mm256_unpackhi_epi8(_mm256_castps_si256(v1), _mm256_castps_si256(v2));
-
-		return {{_mm256_castsi256_ps(_mm256_permute2f128_si256(lo, hi, _MM_SHUFFLE(0,2,0,0))),
-		         _mm256_castsi256_ps(_mm256_permute2f128_si256(lo, hi, _MM_SHUFFLE(0,3,0,1)))}};
-	}
-#endif
 
 	// ----------------------------------------------------------------------------------------------------- interleave
-	template <>
-	inline reg interleave<double>(const reg v) {
-		auto v_permute = _mm256_permute2f128_pd(_mm256_castps_pd(v), _mm256_castps_pd(v), _MM_SHUFFLE(0,0,0,3));
-
-		auto lo = _mm256_unpacklo_pd(_mm256_castps_pd(v), v_permute);
-		auto hi = _mm256_unpackhi_pd(_mm256_castps_pd(v), v_permute);
-
-		return _mm256_castpd_ps(_mm256_permute2f128_pd(lo, hi, _MM_SHUFFLE(0,2,0,0)));
-	}
-
-	template <>
-	inline reg interleave<float>(const reg v) {
-		auto v_permute = _mm256_permute2f128_ps(v, v, _MM_SHUFFLE(0,0,0,3));
-
-		auto lo = _mm256_unpacklo_ps(v, v_permute);
-		auto hi = _mm256_unpackhi_ps(v, v_permute);
-
-		return _mm256_permute2f128_ps(lo, hi, _MM_SHUFFLE(0,2,0,0));
-	}
-
-	template <>
-	inline reg interleave<int64_t>(const reg v) {
-		return interleave<double>(v);
-	}
-
-	template <>
-	inline reg interleave<int32_t>(const reg v) {
-		return interleave<float>(v);
-	}
-
-#ifdef __AVX2__
-	template <>
-	inline reg interleave<int16_t>(const reg v) {
-		auto v_permute = _mm256_permute2f128_si256(_mm256_castps_si256(v), _mm256_castps_si256(v), _MM_SHUFFLE(0,0,0,3));
-
-		auto lo = _mm256_unpacklo_epi16(_mm256_castps_si256(v), v_permute);
-		auto hi = _mm256_unpackhi_epi16(_mm256_castps_si256(v), v_permute);
-
-		return _mm256_castsi256_ps(_mm256_permute2f128_si256(lo, hi, _MM_SHUFFLE(0,2,0,0)));
-	}
-
-	template <>
-	inline reg interleave<int8_t>(const reg v) {
-		auto v_permute = _mm256_permute2f128_si256(_mm256_castps_si256(v), _mm256_castps_si256(v), _MM_SHUFFLE(0,0,0,3));
-
-		auto lo = _mm256_unpacklo_epi8(_mm256_castps_si256(v), v_permute);
-		auto hi = _mm256_unpackhi_epi8(_mm256_castps_si256(v), v_permute);
-
-		return _mm256_castsi256_ps(_mm256_permute2f128_si256(lo, hi, _MM_SHUFFLE(0,2,0,0)));
-	}
-#endif
-
+	
 	// --------------------------------------------------------------------------------------------------- deinterleave
-#ifdef __AVX2__
-	template <>
-	inline regx2 deinterleave<double>(const reg v0, const reg v1)
-	{
-		auto vi1 = mipp::interleave<double>(v0, v1);
-		auto vi2 = mipp::interleave<double>(vi1.val[0], vi1.val[1]);
-
-		return {{vi2.val[0], vi2.val[1]}};
-	}
-
-	template <>
-	inline regx2 deinterleave<int64_t>(const reg v0, const reg v1)
-	{
-		auto vi1 = mipp::interleave<int64_t>(v0, v1);
-		auto vi2 = mipp::interleave<int64_t>(vi1.val[0], vi1.val[1]);
-
-		return {{vi2.val[0], vi2.val[1]}};
-	}
-
-	template <>
-	inline regx2 deinterleave<float>(const reg v0, const reg v1)
-	{
-		auto vi1 = mipp::interleave<float>(v0, v1);
-		auto vi2 = mipp::interleave<float>(vi1.val[0], vi1.val[1]);
-		auto vi3 = mipp::interleave<float>(vi2.val[0], vi2.val[1]);
-
-		return {{vi3.val[0], vi3.val[1]}};
-	}
-
-	template <>
-	inline regx2 deinterleave<int32_t>(const reg v0, const reg v1)
-	{
-		auto vi1 = mipp::interleave<int32_t>(v0, v1);
-		auto vi2 = mipp::interleave<int32_t>(vi1.val[0], vi1.val[1]);
-		auto vi3 = mipp::interleave<int32_t>(vi2.val[0], vi2.val[1]);
-
-		return {{vi3.val[0], vi3.val[1]}};
-	}
-
-	template <>
-	inline regx2 deinterleave<int16_t>(const reg v0, const reg v1)
-	{
-		auto vi1 = mipp::interleave<int16_t>(v0, v1);
-		auto vi2 = mipp::interleave<int16_t>(vi1.val[0], vi1.val[1]);
-		auto vi3 = mipp::interleave<int16_t>(vi2.val[0], vi2.val[1]);
-		auto vi4 = mipp::interleave<int16_t>(vi3.val[0], vi3.val[1]);
-
-		return {{vi4.val[0], vi4.val[1]}};
-	}
-
-	template <>
-	inline regx2 deinterleave<int8_t>(const reg v0, const reg v1)
-	{
-		auto vi1 = mipp::interleave<int8_t>(v0, v1);
-		auto vi2 = mipp::interleave<int8_t>(vi1.val[0], vi1.val[1]);
-		auto vi3 = mipp::interleave<int8_t>(vi2.val[0], vi2.val[1]);
-		auto vi4 = mipp::interleave<int8_t>(vi3.val[0], vi3.val[1]);
-		auto vi5 = mipp::interleave<int8_t>(vi4.val[0], vi4.val[1]);
-
-		return {{vi5.val[0], vi5.val[1]}};
-	}
-#else
-	template <>
-	inline regx2 deinterleave<double>(const reg v0, const reg v1)
-	{
-		const uint32_t cmask[4] = {0, 2, 1, 3};
-		auto cm = mipp::cmask<double>(cmask);
-
-		auto v0s = mipp::shuff<double>(v0, cm);
-		auto v1s = mipp::shuff<double>(v1, cm);
-
-		auto v0l = mipp::low<double>(v0s);
-		auto v1l = mipp::low<double>(v1s);
-
-		auto v0h = mipp::high<double>(v0s);
-		auto v1h = mipp::high<double>(v1s);
-
-		auto v_re = mipp::combine<double>(v0l, v1l);
-		auto v_im = mipp::combine<double>(v0h, v1h);
-
-		return {{v_re, v_im}};
-	}
-
-	template <>
-	inline regx2 deinterleave<int64_t>(const reg v0, const reg v1)
-	{
-		const uint32_t cmask[4] = {0, 2, 1, 3};
-		auto cm = mipp::cmask<int64_t>(cmask);
-
-		auto v0s = mipp::shuff<int64_t>(v0, cm);
-		auto v1s = mipp::shuff<int64_t>(v1, cm);
-
-		auto v0l = mipp::low<int64_t>(v0s);
-		auto v1l = mipp::low<int64_t>(v1s);
-
-		auto v0h = mipp::high<int64_t>(v0s);
-		auto v1h = mipp::high<int64_t>(v1s);
-
-		auto v_re = mipp::combine<int64_t>(v0l, v1l);
-		auto v_im = mipp::combine<int64_t>(v0h, v1h);
-
-		return {{v_re, v_im}};
-	}
-
-	template <>
-	inline regx2 deinterleave<float>(const reg v0, const reg v1)
-	{
-		const uint32_t cmask[8] = {0, 2, 4, 6, 1, 3, 5, 7};
-		auto cm = mipp::cmask<float>(cmask);
-
-		auto v0s = mipp::shuff<float>(v0, cm);
-		auto v1s = mipp::shuff<float>(v1, cm);
-
-		auto v0l = mipp::low<float>(v0s);
-		auto v1l = mipp::low<float>(v1s);
-
-		auto v0h = mipp::high<float>(v0s);
-		auto v1h = mipp::high<float>(v1s);
-
-		auto v_re = mipp::combine<float>(v0l, v1l);
-		auto v_im = mipp::combine<float>(v0h, v1h);
-
-		return {{v_re, v_im}};
-	}
-
-	template <>
-	inline regx2 deinterleave<int32_t>(const reg v0, const reg v1)
-	{
-		const uint32_t cmask[8] = {0, 2, 4, 6, 1, 3, 5, 7};
-		auto cm = mipp::cmask<int32_t>(cmask);
-
-		auto v0s = mipp::shuff<int32_t>(v0, cm);
-		auto v1s = mipp::shuff<int32_t>(v1, cm);
-
-		auto v0l = mipp::low<int32_t>(v0s);
-		auto v1l = mipp::low<int32_t>(v1s);
-
-		auto v0h = mipp::high<int32_t>(v0s);
-		auto v1h = mipp::high<int32_t>(v1s);
-
-		auto v_re = mipp::combine<int32_t>(v0l, v1l);
-		auto v_im = mipp::combine<int32_t>(v0h, v1h);
-
-		return {{v_re, v_im}};
-	}
-
-	template <>
-	inline regx2 deinterleave<int16_t>(const reg v0, const reg v1)
-	{
-		const uint32_t cmask[16] = {0, 2, 4, 6, 8, 10, 12, 14, 1, 3, 5, 7, 9, 11, 13, 15};
-		auto cm = mipp::cmask<int16_t>(cmask);
-
-		auto v0s = mipp::shuff<int16_t>(v0, cm);
-		auto v1s = mipp::shuff<int16_t>(v1, cm);
-
-		auto v0l = mipp::low<int16_t>(v0s);
-		auto v1l = mipp::low<int16_t>(v1s);
-
-		auto v0h = mipp::high<int16_t>(v0s);
-		auto v1h = mipp::high<int16_t>(v1s);
-
-		auto v_re = mipp::combine<int16_t>(v0l, v1l);
-		auto v_im = mipp::combine<int16_t>(v0h, v1h);
-
-		return {{v_re, v_im}};
-	}
-
-	template <>
-	inline regx2 deinterleave<int8_t>(const reg v0, const reg v1)
-	{
-		const uint32_t cmask[32] = {0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30,
-		                            1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31};
-		auto cm = mipp::cmask<int8_t>(cmask);
-
-		auto v0s = mipp::shuff<int8_t>(v0, cm);
-		auto v1s = mipp::shuff<int8_t>(v1, cm);
-
-		auto v0l = mipp::low<int8_t>(v0s);
-		auto v1l = mipp::low<int8_t>(v1s);
-
-		auto v0h = mipp::high<int8_t>(v0s);
-		auto v1h = mipp::high<int8_t>(v1s);
-
-		auto v_re = mipp::combine<int8_t>(v0l, v1l);
-		auto v_im = mipp::combine<int8_t>(v0h, v1h);
-
-		return {{v_re, v_im}};
-	}
-#endif
 
 	// --------------------------------------------------------------------------------------------------- interleavelo
-	template <>
-	inline reg interleavelo<double>(const reg v1, const reg v2) {
-		auto rx2 = interleave<double>(v1, v2);
-		return rx2.val[0];
-	}
-
-	template <>
-	inline reg interleavelo<float>(const reg v1, const reg v2) {
-		auto rx2 = interleave<float>(v1, v2);
-		return rx2.val[0];
-	}
-
-	template <>
-	inline reg interleavelo<int64_t>(const reg v1, const reg v2) {
-		auto rx2 = interleave<int64_t>(v1, v2);
-		return rx2.val[0];
-	}
-
-	template <>
-	inline reg interleavelo<int32_t>(const reg v1, const reg v2) {
-		auto rx2 = interleave<int32_t>(v1, v2);
-		return rx2.val[0];
-	}
-
-	template <>
-	inline reg interleavelo<int16_t>(const reg v1, const reg v2) {
-		auto rx2 = interleave<int16_t>(v1, v2);
-		return rx2.val[0];
-	}
-
-	template <>
-	inline reg interleavelo<int8_t>(const reg v1, const reg v2) {
-		auto rx2 = interleave<int8_t>(v1, v2);
-		return rx2.val[0];
-	}
-
+	
 	// --------------------------------------------------------------------------------------------------- interleavehi
-	template <>
-	inline reg interleavehi<double>(const reg v1, const reg v2) {
-		auto rx2 = interleave<double>(v1, v2);
-		return rx2.val[1];
-	}
-
-	template <>
-	inline reg interleavehi<int64_t>(const reg v1, const reg v2) {
-		auto rx2 = interleave<int64_t>(v1, v2);
-		return rx2.val[1];
-	}
-
-	template <>
-	inline reg interleavehi<float>(const reg v1, const reg v2) {
-		auto rx2 = interleave<float>(v1, v2);
-		return rx2.val[1];
-	}
-
-	template <>
-	inline reg interleavehi<int32_t>(const reg v1, const reg v2) {
-		auto rx2 = interleave<int32_t>(v1, v2);
-		return rx2.val[1];
-	}
-
-	template <>
-	inline reg interleavehi<int16_t>(const reg v1, const reg v2) {
-		auto rx2 = interleave<int16_t>(v1, v2);
-		return rx2.val[1];
-	}
-
-	template <>
-	inline reg interleavehi<int8_t>(const reg v1, const reg v2) {
-		auto rx2 = interleave<int8_t>(v1, v2);
-		return rx2.val[1];
-	}
+	
 
 	// ---------------------------------------------------------------------------------------------------- interleave2
-	template <>
-	inline regx2 interleave2<double>(const reg v1, const reg v2) {
-		regx2 res = {{mipp::interleavelo2<double>(v1, v2), mipp::interleavehi2<double>(v1, v2)}};
-		return res;
-	}
-
-	template <>
-	inline regx2 interleave2<float>(const reg v1, const reg v2) {
-		regx2 res = {{mipp::interleavelo2<float>(v1, v2), mipp::interleavehi2<float>(v1, v2)}};
-		return res;
-	}
-
-	template <>
-	inline regx2 interleave2<int64_t>(const reg v1, const reg v2) {
-		regx2 res = {{mipp::interleavelo2<int64_t>(v1, v2), mipp::interleavehi2<int64_t>(v1, v2)}};
-		return res;
-	}
-
-	template <>
-	inline regx2 interleave2<int32_t>(const reg v1, const reg v2) {
-		regx2 res = {{mipp::interleavelo2<int32_t>(v1, v2), mipp::interleavehi2<int32_t>(v1, v2)}};
-		return res;
-	}
-
-	template <>
-	inline regx2 interleave2<int16_t>(const reg v1, const reg v2) {
-		regx2 res = {{mipp::interleavelo2<int16_t>(v1, v2), mipp::interleavehi2<int16_t>(v1, v2)}};
-		return res;
-	}
-
-	template <>
-	inline regx2 interleave2<int8_t>(const reg v1, const reg v2) {
-		regx2 res = {{mipp::interleavelo2<int8_t>(v1, v2), mipp::interleavehi2<int8_t>(v1, v2)}};
-		return res;
-	}
-
+	
 	// --------------------------------------------------------------------------------------------------- interleavex2
-#ifdef __AVX2__
-	template <>
-	inline regx2 interleavex2<float>(const reg v1, const reg v2) {
-		// v1         = [a, b, c, d,| e, f, g, h]
-		// v2         = [A, B, C, D,| E, F, G, H]
-		// =>
-		// res.val[0] = [a, b, c, d,| A, B, C, D]
-		// res.val[1] = [e, f, g, h,| E, F, G, H]
-		auto lo = _mm256_castsi256_ps(_mm256_permute2f128_si256(_mm256_castps_si256(v1),
-		                                                        _mm256_castps_si256(v2),
-		                                                        _MM_SHUFFLE(0,2,0,0)));
-		auto hi = _mm256_castsi256_ps(_mm256_permute2f128_si256(_mm256_castps_si256(v1),
-		                                                        _mm256_castps_si256(v2),
-		                                                        _MM_SHUFFLE(0,3,0,1)));
-		regx2 res = {{lo, hi}};
-		return res;
-	}
-#endif
 
 	// --------------------------------------------------------------------------------------------------- interleavex4
-#ifdef __AVX2__
-	template <>
-	inline reg interleavex4<int16_t>(const reg v) {
-		// [a, b, c, d,| e, f, g, h,| i, j, k, l,| m, n, o, p]
-		// =>
-		// [a, b, c, d,| i, j, k, l,| e, f, g, h,| m, n, o, p]
-		return _mm256_castsi256_ps(_mm256_permute4x64_epi64(_mm256_castps_si256(v), _MM_SHUFFLE(3,1,2,0)));
-	}
-
-	template <>
-	inline reg interleavex4<int8_t>(const reg v) {
-		return _mm256_castsi256_ps(_mm256_permute4x64_epi64(_mm256_castps_si256(v), _MM_SHUFFLE(3,1,2,0)));
-	}
-#endif
-
 	// -------------------------------------------------------------------------------------------------- interleavex16
-	template <>
-	inline reg interleavex16<int8_t>(const reg v) {
-		return mipp::interleave<int16_t>(v);
-	}
 
 	// ------------------------------------------------------------------------------------------------------ transpose
-#ifdef __AVX2__
-	template <>
-	inline void transpose<float>(reg tab[nElReg<float>()]) {
-		// Transpose the 8x8 matrix:
-		// -------------------------
-		// tab[0] = [a0, a1, a2, a3, a4, a5, a6, a7]        tab[0] = [a0, b0, c0, d0, e0, f0, g0, h0]
-		// tab[1] = [b0, b1, b2, b3, b4, b5, b6, b7]        tab[1] = [a1, b1, c1, d1, e1, f1, g1, h1]
-		// tab[2] = [c0, c1, c2, c3, c4, c5, c6, c7]        tab[2] = [a2, b2, c2, d2, e2, f2, g2, h2]
-		// tab[3] = [d0, d1, d2, d3, d4, d5, d6, d7]        tab[3] = [a3, b3, c3, d3, e3, f3, g3, h3]
-		// tab[4] = [e0, e1, e2, e3, e4, e5, e6, e7]   =>   tab[4] = [a4, b4, c4, d4, e4, f4, g4, h4]
-		// tab[5] = [f0, f1, f2, f3, f4, f5, f6, f7]        tab[5] = [a5, b5, c5, d5, e5, f5, g5, h5]
-		// tab[6] = [g0, g1, g2, g3, g4, g5, g6, g7]        tab[6] = [a6, b6, c6, d6, e6, f6, g6, h6]
-		// tab[7] = [h0, h1, h2, h3, h4, h5, h6, h7]        tab[7] = [a7, b7, c7, d7, e7, f7, g7, h7]
-
-		auto ab = mipp::interleave<float>(tab[0], tab[1]);
-		auto cd = mipp::interleave<float>(tab[2], tab[3]);
-		auto ef = mipp::interleave<float>(tab[4], tab[5]);
-		auto gh = mipp::interleave<float>(tab[6], tab[7]);
-
-		auto a03b03 = ab.val[0];
-		auto c03d03 = cd.val[0];
-		auto e03f03 = ef.val[0];
-		auto g03h03 = gh.val[0];
-		auto a47b47 = ab.val[1];
-		auto c47d47 = cd.val[1];
-		auto e47f47 = ef.val[1];
-		auto g47h47 = gh.val[1];
-
-		auto a03b03c03d03 = mipp::interleave<int64_t>(a03b03, c03d03);
-		auto e03f03g03h03 = mipp::interleave<int64_t>(e03f03, g03h03);
-		auto a47b47c47d47 = mipp::interleave<int64_t>(a47b47, c47d47);
-		auto e47f47g47h47 = mipp::interleave<int64_t>(e47f47, g47h47);
-
-		auto a01b01c01d01 = a03b03c03d03.val[0];
-		auto a23b23c23d23 = a03b03c03d03.val[1];
-		auto e01f01g01h01 = e03f03g03h03.val[0];
-		auto e23f23g23h23 = e03f03g03h03.val[1];
-		auto a45b45c45d45 = a47b47c47d47.val[0];
-		auto a67b67c67d67 = a47b47c47d47.val[1];
-		auto e45f45g45h45 = e47f47g47h47.val[0];
-		auto e67f67g67h67 = e47f47g47h47.val[1];
-
-		auto a01b01c01d01e01f01g01h01 = mipp::interleavex2<float>(a01b01c01d01, e01f01g01h01);
-		auto a23b23c23d23e23f23g23h23 = mipp::interleavex2<float>(a23b23c23d23, e23f23g23h23);
-		auto a45b45c45d45e45f45g45h45 = mipp::interleavex2<float>(a45b45c45d45, e45f45g45h45);
-		auto a67b67c67d67e67f67g67h67 = mipp::interleavex2<float>(a67b67c67d67, e67f67g67h67);
-
-		auto a0b0c0d0e0f0g0h0 = a01b01c01d01e01f01g01h01.val[0];
-		auto a1b1c1d1e1f1g1h1 = a01b01c01d01e01f01g01h01.val[1];
-		auto a2b2c2d2e2f2g2h2 = a23b23c23d23e23f23g23h23.val[0];
-		auto a3b3c3d3e3f3g3h3 = a23b23c23d23e23f23g23h23.val[1];
-		auto a4b4c4d4e4f4g4h4 = a45b45c45d45e45f45g45h45.val[0];
-		auto a5b5c5d5e5f5g5h5 = a45b45c45d45e45f45g45h45.val[1];
-		auto a6b6c6d6e6f6g6h6 = a67b67c67d67e67f67g67h67.val[0];
-		auto a7b7c7d7e7f7g7h7 = a67b67c67d67e67f67g67h67.val[1];
-
-		tab[0] = (reg)a0b0c0d0e0f0g0h0;
-		tab[1] = (reg)a1b1c1d1e1f1g1h1;
-		tab[2] = (reg)a2b2c2d2e2f2g2h2;
-		tab[3] = (reg)a3b3c3d3e3f3g3h3;
-		tab[4] = (reg)a4b4c4d4e4f4g4h4;
-		tab[5] = (reg)a5b5c5d5e5f5g5h5;
-		tab[6] = (reg)a6b6c6d6e6f6g6h6;
-		tab[7] = (reg)a7b7c7d7e7f7g7h7;
-	}
-#endif
 
 	// ----------------------------------------------------------------------------------------------------- transpose2
-#ifdef __AVX2__
-	template <>
-	inline void transpose2<int16_t>(reg tab[nElReg<int16_t>()/2]) {
-		// Transpose the 8x8 matrix:
-		// -------------------------
-		//
-		// Input:
-		// ------
-		// tab[0] = [a0, a1, a2, a3, a4, a5, a6, a7,  A0, A1, A2, A3, A4, A5, A6, A7]
-		// tab[1] = [b0, b1, b2, b3, b4, b5, b6, b7,  B0, B1, B2, B3, B4, B5, B6, B7]
-		// tab[2] = [c0, c1, c2, c3, c4, c5, c6, c7,  C0, C1, C2, C3, C4, C5, C6, C7]
-		// tab[3] = [d0, d1, d2, d3, d4, d5, d6, d7,  D0, D1, D2, D3, D4, D5, D6, D7]
-		// tab[4] = [e0, e1, e2, e3, e4, e5, e6, e7,  E0, E1, E2, E3, E4, E5, E6, E7]
-		// tab[5] = [f0, f1, f2, f3, f4, f5, f6, f7,  F0, F1, F2, F3, F4, F5, F6, F7]
-		// tab[6] = [g0, g1, g2, g3, g4, g5, g6, g7,  G0, G1, G2, G3, G4, G5, G6, G7]
-		// tab[7] = [h0, h1, h2, h3, h4, h5, h6, h7,  H0, H1, H2, H3, H4, H5, H6, H7]
-		//
-		// Output:
-		// -------
-		// tab[0] = [a0, b0, c0, d0, e0, f0, g0, h0,  A0, B0, C0, D0, E0, F0, G0, H0]
-		// tab[1] = [a1, b1, c1, d1, e1, f1, g1, h1,  A1, B1, C1, D1, E1, F1, G1, H1]
-		// tab[2] = [a2, b2, c2, d2, e2, f2, g2, h2,  A2, B2, C2, D2, E2, F2, G2, H2]
-		// tab[3] = [a3, b3, c3, d3, e3, f3, g3, h3,  A3, B3, C3, D3, E3, F3, G3, H3]
-		// tab[4] = [a4, b4, c4, d4, e4, f4, g4, h4,  A4, B4, C4, D4, E4, F4, G4, H4]
-		// tab[5] = [a5, b5, c5, d5, e5, f5, g5, h5,  A5, B5, C5, D5, E5, F5, G5, H5]
-		// tab[6] = [a6, b6, c6, d6, e6, f6, g6, h6,  A6, B6, C6, D6, E6, F6, G6, H6]
-		// tab[7] = [a7, b7, c7, d7, e7, f7, g7, h7,  A7, B7, C7, D7, E7, F7, G7, H7]
-
-		auto a03b03 = mipp::interleavelo2<int16_t>(tab[0], tab[1]);
-		auto c03d03 = mipp::interleavelo2<int16_t>(tab[2], tab[3]);
-		auto e03f03 = mipp::interleavelo2<int16_t>(tab[4], tab[5]);
-		auto g03h03 = mipp::interleavelo2<int16_t>(tab[6], tab[7]);
-		auto a47b47 = mipp::interleavehi2<int16_t>(tab[0], tab[1]);
-		auto c47d47 = mipp::interleavehi2<int16_t>(tab[2], tab[3]);
-		auto e47f47 = mipp::interleavehi2<int16_t>(tab[4], tab[5]);
-		auto g47h47 = mipp::interleavehi2<int16_t>(tab[6], tab[7]);
-
-		auto a01b01c01d01 = mipp::interleavelo2<int32_t>(a03b03, c03d03);
-		auto a23b23c23d23 = mipp::interleavehi2<int32_t>(a03b03, c03d03);
-		auto e01f01g01h01 = mipp::interleavelo2<int32_t>(e03f03, g03h03);
-		auto e23f23g23h23 = mipp::interleavehi2<int32_t>(e03f03, g03h03);
-		auto a45b45c45d45 = mipp::interleavelo2<int32_t>(a47b47, c47d47);
-		auto a67b67c67d67 = mipp::interleavehi2<int32_t>(a47b47, c47d47);
-		auto e45f45g45h45 = mipp::interleavelo2<int32_t>(e47f47, g47h47);
-		auto e67f67g67h67 = mipp::interleavehi2<int32_t>(e47f47, g47h47);
-
-		auto a0b0c0d0e0f0g0h0 = mipp::interleavelo2<int64_t>(a01b01c01d01, e01f01g01h01);
-		auto a1b1c1d1e1f1g1h1 = mipp::interleavehi2<int64_t>(a01b01c01d01, e01f01g01h01);
-		auto a2b2c2d2e2f2g2h2 = mipp::interleavelo2<int64_t>(a23b23c23d23, e23f23g23h23);
-		auto a3b3c3d3e3f3g3h3 = mipp::interleavehi2<int64_t>(a23b23c23d23, e23f23g23h23);
-		auto a4b4c4d4e4f4g4h4 = mipp::interleavelo2<int64_t>(a45b45c45d45, e45f45g45h45);
-		auto a5b5c5d5e5f5g5h5 = mipp::interleavehi2<int64_t>(a45b45c45d45, e45f45g45h45);
-		auto a6b6c6d6e6f6g6h6 = mipp::interleavelo2<int64_t>(a67b67c67d67, e67f67g67h67);
-		auto a7b7c7d7e7f7g7h7 = mipp::interleavehi2<int64_t>(a67b67c67d67, e67f67g67h67);
-
-		tab[0] = (reg)a0b0c0d0e0f0g0h0;
-		tab[1] = (reg)a1b1c1d1e1f1g1h1;
-		tab[2] = (reg)a2b2c2d2e2f2g2h2;
-		tab[3] = (reg)a3b3c3d3e3f3g3h3;
-		tab[4] = (reg)a4b4c4d4e4f4g4h4;
-		tab[5] = (reg)a5b5c5d5e5f5g5h5;
-		tab[6] = (reg)a6b6c6d6e6f6g6h6;
-		tab[7] = (reg)a7b7c7d7e7f7g7h7;
-	}
-#endif
 
 	// -------------------------------------------------------------------------------------------------- transpose28x8
-	template <>
-	inline void transpose28x8<int8_t>(reg tab[8]) {
-		mipp::transpose2<int16_t>(tab);
-	}
-
+	
 	// ----------------------------------------------------------------------------------------------------------- andb
 	template <>
 	inline reg andb<double>(const reg v1, const reg v2) {
@@ -2417,6 +1772,61 @@
 	inline reg div<double>(const reg v1, const reg v2) {
 		return _mm256_castpd_ps(_mm256_div_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2)));
 	}
+	// ------------------------------------------------------------------------------------------------------------ min
+	template <>
+	inline reg min<float>(const reg v1, const reg v2) {
+		return _mm256_min_ps(v1, v2);
+	}
+
+	template <>
+	inline reg min<double>(const reg v1, const reg v2) {
+		return _mm256_castpd_ps(_mm256_min_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2)));
+	}
+
+#ifdef __AVX2__
+	template <>
+	inline reg min<int32_t>(const reg v1, const reg v2) {
+		return _mm256_castsi256_ps(_mm256_min_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	}
+
+	template <>
+	inline reg min<int16_t>(const reg v1, const reg v2) {
+		return _mm256_castsi256_ps(_mm256_min_epi16(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	}
+
+	template <>
+	inline reg min<int8_t>(const reg v1, const reg v2) {
+		return _mm256_castsi256_ps(_mm256_min_epi8(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	}
+#endif
+
+	// ------------------------------------------------------------------------------------------------------------ max
+	template <>
+	inline reg max<float>(const reg v1, const reg v2) {
+		return _mm256_max_ps(v1, v2);
+	}
+
+	template <>
+	inline reg max<double>(const reg v1, const reg v2) {
+		return _mm256_castpd_ps(_mm256_max_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2)));
+	}
+
+#ifdef __AVX2__
+	template <>
+	inline reg max<int32_t>(const reg v1, const reg v2) {
+		return _mm256_castsi256_ps(_mm256_max_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	}
+
+	template <>
+	inline reg max<int16_t>(const reg v1, const reg v2) {
+		return _mm256_castsi256_ps(_mm256_max_epi16(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	}
+
+	template <>
+	inline reg max<int8_t>(const reg v1, const reg v2) {
+		return _mm256_castsi256_ps(_mm256_max_epi8(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	}
+#endif
 
 	// ------------------------------------------------------------------------------------------------------------ msb
 	template <>
@@ -2500,92 +1910,8 @@
 		return msb_v1_v2;
 	}
 
-	// ----------------------------------------------------------------------------------------------------------- sign
-	template <>
-	inline msk sign<double>(const reg v1) {
-		return cmplt<double>(v1, set0<double>());
-	}
-
-	template <>
-	inline msk sign<float>(const reg v1) {
-		return cmplt<float>(v1, set0<float>());
-	}
-
-	template <>
-	inline msk sign<int64_t>(const reg v1) {
-		return cmpgt<int64_t>(set0<int64_t>(), v1);
-	}
-
-	template <>
-	inline msk sign<int32_t>(const reg v1) {
-		return cmpgt<int32_t>(set0<int32_t>(), v1);
-	}
-
-	template <>
-	inline msk sign<int16_t>(const reg v1) {
-		return cmpgt<int16_t>(set0<int16_t>(), v1);
-	}
-
-	template <>
-	inline msk sign<int8_t>(const reg v1) {
-		return cmpgt<int8_t>(set0<int8_t>(), v1);
-	}
 
 	// ------------------------------------------------------------------------------------------------------------ neg
-	template <>
-	inline reg neg<float>(const reg v1, const reg v2) {
-		return xorb<float>(v1, msb<float>(v2));
-	}
-
-	template <>
-	inline reg neg<float>(const reg v1, const msk v2) {
-		return neg<float>(v1, toreg<8>(v2));
-	}
-
-	template <>
-	inline reg neg<double>(const reg v1, const reg v2) {
-		return xorb<double>(v1, msb<double>(v2));
-	}
-
-	template <>
-	inline reg neg<double>(const reg v1, const msk v2) {
-		return neg<double>(v1, toreg<4>(v2));
-	}
-
-#ifdef __AVX2__
-	template <>
-	inline reg neg<int32_t>(const reg v1, const reg v2) {
-		reg v2_2 = orb<int32_t>(v2, set1<int32_t>(1)); // hack to avoid -0 case
-		return _mm256_castsi256_ps(_mm256_sign_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2_2)));
-	}
-
-	template <>
-	inline reg neg<int32_t>(const reg v1, const msk v2) {
-		return neg<int32_t>(v1, toreg<8>(v2));
-	}
-
-	template <>
-	inline reg neg<int16_t>(const reg v1, const reg v2) {
-		reg v2_2 = orb<int16_t>(v2, set1<int16_t>(1)); // hack to avoid -0 case
-		return _mm256_castsi256_ps(_mm256_sign_epi16(_mm256_castps_si256(v1), _mm256_castps_si256(v2_2)));
-	}
-
-	template <>
-	inline reg neg<int16_t>(const reg v1, const msk v2) {
-		return neg<int16_t>(v1, toreg<16>(v2));
-	}
-
-	template <>
-	inline reg neg<int8_t>(const reg v1, const reg v2) {
-		reg v2_2 = orb<int8_t>(v2, set1<int8_t>(1)); // hack to avoid -0 case
-		return _mm256_castsi256_ps(_mm256_sign_epi8(_mm256_castps_si256(v1), _mm256_castps_si256(v2_2)));
-	}
-
-	template <>
-	inline reg neg<int8_t>(const reg v1, const msk v2) {
-		return neg<int8_t>(v1, toreg<32>(v2));
-	}
-#endif
 
 	// ------------------------------------------------------------------------------------------------------------ abs
 	template <>
@@ -3072,96 +2398,8 @@
 #endif
 
 	// ----------------------------------------------------------------------------------------------------------- div2
-	template <>
-	inline reg div2<float>(const reg v1) {
-		return mul<float>(v1, set1<float>(0.5f));
-	}
-
-	template <>
-	inline reg div2<double>(const reg v1) {
-		return mul<double>(v1, set1<double>(0.5));
-	}
-
-#ifdef __AVX2__
-	template <>
-	inline reg div2<int32_t>(const reg v1) {
-//		return _mm256_castsi256_ps(_mm256_srai_epi32(_mm256_castps_si256(v1), 1)); // seems to do not work
-		reg abs_v1 = abs<int32_t>(v1);
-		reg sh = rshift<int32_t>(abs_v1, 1);
-		sh = neg<int32_t>(sh, v1);
-		return sh;
-	}
-
-	template <>
-	inline reg div2<int16_t>(const reg v1) {
-//		return _mm256_castsi256_ps(_mm256_srai_epi16(_mm256_castps_si256(v1), 1)); // seems to do not work
-		reg abs_v1 = abs<int16_t>(v1);
-		reg sh = rshift<int16_t>(abs_v1, 1);
-		sh = neg<int16_t>(sh, v1);
-		return sh;
-	}
-
-	template <>
-	inline reg div2<int8_t>(const reg v1) {
-		reg abs_v1 = abs<int8_t>(v1);
-		reg sh16 = rshift<int16_t>(abs_v1, 1);
-#ifdef _MSC_VER
-#pragma warning( disable : 4309 )
-#endif
-		sh16 = andnb<int8_t>(set1<int8_t>(0x80), sh16);
-#ifdef _MSC_VER
-#pragma warning( default : 4309 )
-#endif
-		reg sh8 = neg<int8_t>(sh16, v1);
-		return sh8;
-	}
-#endif
 
 	// ----------------------------------------------------------------------------------------------------------- div4
-	template <>
-	inline reg div4<float>(const reg v1) {
-		return mul<float>(v1, set1<float>(0.25f));
-	}
-
-	template <>
-	inline reg div4<double>(const reg v1) {
-		return mul<double>(v1, set1<double>(0.25));
-	}
-
-#ifdef __AVX2__
-	template <>
-	inline reg div4<int32_t>(const reg v1) {
-//		return _mm256_castsi256_ps(_mm256_srai_epi32(_mm256_castps_si256(v1), 2)); // seems to do not work
-		reg abs_v1 = abs<int32_t>(v1);
-		reg sh = rshift<int32_t>(abs_v1, 2);
-		sh = neg<int32_t>(sh, v1);
-		return sh;
-	}
-
-	template <>
-	inline reg div4<int16_t>(const reg v1) {
-//		return _mm256_castsi256_ps(_mm256_srai_epi16(_mm256_castps_si256(v1), 2)); // seems to do not work
-		reg abs_v1 = abs<int16_t>(v1);
-		reg sh = rshift<int16_t>(abs_v1, 2);
-		sh = neg<int16_t>(sh, v1);
-		return sh;
-	}
-
-	template <>
-	inline reg div4<int8_t>(const reg v1) {
-		reg abs_v1 = abs<int8_t>(v1);
-		reg sh16 = rshift<int16_t>(abs_v1, 2);
-#ifdef _MSC_VER
-#pragma warning( disable : 4309 )
-#endif
-		sh16 = andnb<int8_t>(set1<int8_t>(0xc0), sh16);
-#ifdef _MSC_VER
-#pragma warning( default : 4309 )
-#endif
-		reg sh8 = neg<int8_t>(sh16, v1);
-		return sh8;
-	}
-#endif
 
 	// ---------------------------------------------------------------------------------------------------------- round
 	template <>

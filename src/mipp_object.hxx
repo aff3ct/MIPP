@@ -7,6 +7,8 @@ template <typename T> inline Reg<T> add(const Reg<T> v1, const Reg<T> v2);
 template <typename T> inline Reg<T> sub(const Reg<T> v1, const Reg<T> v2);
 template <typename T> inline Reg<T> mul(const Reg<T> v1, const Reg<T> v2);
 template <typename T> inline Reg<T> div(const Reg<T> v1, const Reg<T> v2);
+template <typename T> inline Reg<T> min(const Reg<T> v1, const Reg<T> v2);
+template <typename T> inline Reg<T> max(const Reg<T> v1, const Reg<T> v2);
 
 template <typename T>
 class Reg_2;
@@ -69,52 +71,6 @@ public:
 	static inline Reg<T> cmask4(const uint32_t mask[1]) { return Reg<T>((T)0);          }
 #endif
 
-	static inline void transpose(Reg<T> regs[nElReg<T>()])
-	{
-#ifndef MIPP_NO_INTRINSICS
-		reg rs[nElReg<T>()];
-		for (auto i = 0; i < nElReg<T>(); i++) rs[i] = regs[i].r;
-		mipp::transpose<T>(rs);
-		for (auto i = 0; i < nElReg<T>(); i++) regs[i].r = rs[i];
-#endif
-	}
-
-	static inline void transpose8x8(Reg<T> regs[8])
-	{
-#ifndef MIPP_NO_INTRINSICS
-		reg rs[8];
-		for (auto i = 0; i < 8; i++) rs[i] = regs[i].r;
-		mipp::transpose8x8<T>(rs);
-		for (auto i = 0; i < 8; i++) regs[i].r = rs[i];
-#else
-		throw std::runtime_error("mipp::Reg<T>::transpose8x8: non-sense in sequential mode.");
-#endif
-	}
-
-	static inline void transpose2(Reg<T> regs[nElReg<T>()/2])
-	{
-#ifndef MIPP_NO_INTRINSICS
-		reg rs[nElReg<T>()/2];
-		for (auto i = 0; i < nElReg<T>()/2; i++) rs[i] = regs[i].r;
-		mipp::transpose2<T>(rs);
-		for (auto i = 0; i < nElReg<T>()/2; i++) regs[i].r = rs[i];
-#else
-		throw std::runtime_error("mipp::Reg<T>::transpose2: non-sense in sequential mode.");
-#endif
-	}
-
-	static inline void transpose28x8(Reg<T> regs[8])
-	{
-#ifndef MIPP_NO_INTRINSICS
-		reg rs[8];
-		for (auto i = 0; i < 8; i++) rs[i] = regs[i].r;
-		mipp::transpose28x8<T>(rs);
-		for (auto i = 0; i < 8; i++) regs[i].r = rs[i];
-#else
-		throw std::runtime_error("mipp::Reg<T>::transpose28x8: non-sense in sequential mode.");
-#endif
-	}
-
 #ifndef MIPP_NO_INTRINSICS
 	inline void        set0         ()                                           { r = mipp::set0<T>();                           }
 	inline void        set1         (const T val)                                { r = mipp::set1<T>(val);                        }
@@ -128,20 +84,6 @@ public:
 	inline Reg<T>      shuff        (const Reg<T> v_shu)                   const { return mipp::shuff        <T>(r, v_shu.r);     }
 	inline Reg<T>      shuff2       (const Reg<T> v_shu)                   const { return mipp::shuff2       <T>(r, v_shu.r);     }
 	inline Reg<T>      shuff4       (const Reg<T> v_shu)                   const { return mipp::shuff4       <T>(r, v_shu.r);     }
-	inline Reg<T>      interleavelo (const Reg<T> v)                       const { return mipp::interleavelo <T>(r, v.r);         }
-	inline Reg<T>      interleavehi (const Reg<T> v)                       const { return mipp::interleavehi <T>(r, v.r);         }
-	inline Reg<T>      interleavelo2(const Reg<T> v)                       const { return mipp::interleavelo2<T>(r, v.r);         }
-	inline Reg<T>      interleavehi2(const Reg<T> v)                       const { return mipp::interleavehi2<T>(r, v.r);         }
-	inline Reg<T>      interleavelo4(const Reg<T> v)                       const { return mipp::interleavelo4<T>(r, v.r);         }
-	inline Reg<T>      interleavehi4(const Reg<T> v)                       const { return mipp::interleavehi4<T>(r, v.r);         }
-	inline Regx2<T>    interleave   (const Reg<T> v)                       const { return mipp::interleave   <T>(r, v.r);         }
-	inline Regx2<T>    deinterleave (const Reg<T> v)                       const { return mipp::deinterleave <T>(r, v.r);         }
-	inline Regx2<T>    interleave2  (const Reg<T> v)                       const { return mipp::interleave2  <T>(r, v.r);         }
-	inline Regx2<T>    interleave4  (const Reg<T> v)                       const { return mipp::interleave4  <T>(r, v.r);         }
-	inline Reg<T>      interleave   ()                                     const { return mipp::interleave   <T>(r);              }
-	inline Regx2<T>    interleavex2 (const Reg<T> v)                       const { return mipp::interleavex2 <T>(r, v.r);         }
-	inline Reg<T>      interleavex4 ()                                     const { return mipp::interleavex4 <T>(r);              }
-	inline Reg<T>      interleavex16()                                     const { return mipp::interleavex16<T>(r);              }
 	inline Reg<T>      andb         (const Reg<T> v)                       const { return mipp::andb         <T>(r, v.r);         }
 	inline Reg<T>      andnb        (const Reg<T> v)                       const { return mipp::andnb        <T>(r, v.r);         }
 	inline Reg<T>      notb         ()                                     const { return mipp::notb         <T>(r);              }
@@ -161,10 +103,10 @@ public:
 	inline Reg<T>      sub          (const Reg<T> v)                       const { return mipp::sub          <T>(r, v.r);         }
 	inline Reg<T>      mul          (const Reg<T> v)                       const { return mipp::mul          <T>(r, v.r);         }
 	inline Reg<T>      div          (const Reg<T> v)                       const { return mipp::div          <T>(r, v.r);         }
+	inline Reg<T>      max          (const Reg<T> v)                       const { return mipp::max          <T>(r, v.r);         }
+	inline Reg<T>      min          (const Reg<T> v)                       const { return mipp::min          <T>(r, v.r);         }
 	inline Reg<T>      msb          ()                                     const { return mipp::msb          <T>(r);              }
 	inline Reg<T>      msb          (const Reg<T> v)                       const { return mipp::msb          <T>(r, v.r);         }
-	inline Reg<T>      copysign     (const Reg<T> v)                       const { return mipp::copysign     <T>(r, v.r);         }
-	inline Reg<T>      copysign     (const Msk<N<T>()> v)                  const { return mipp::copysign     <T>(r, v.m);         }
 	inline Reg<T>      abs          ()                                     const { return mipp::abs          <T>(r);              }
 	inline Reg<T>      sqrt         ()                                     const { return mipp::sqrt         <T>(r);              }
 	inline Reg<T>      rsqrt        ()                                     const { return mipp::rsqrt        <T>(r);              }
@@ -189,8 +131,6 @@ public:
 	inline Reg<T>      blend        (const Reg<T> v1, const Msk<N<T>()> m) const { return mipp::blend        <T>(r, v1.r,  m.m);  }
 	inline Reg<T>      lrot         ()                                     const { return mipp::lrot         <T>(r);              }
 	inline Reg<T>      rrot         ()                                     const { return mipp::rrot         <T>(r);              }
-	inline Reg<T>      div2         ()                                     const { return mipp::div2         <T>(r);              }
-	inline Reg<T>      div4         ()                                     const { return mipp::div4         <T>(r);              }
 	inline Reg<T>      round        ()                                     const { return mipp::round        <T>(r);              }
 	inline bool        testz        (const Reg<T> v)                       const { return mipp::testz        <T>(r, v.r);         }
 	inline bool        testz        ()                                     const { return mipp::testz        <T>(r);              }
@@ -204,23 +144,6 @@ public:
 	inline void        storeu       (T* data)                              const { data[0] = r;                                   }
 	inline Reg_2<T>    low          ()                                     const { return r;                                      }
 	inline Reg_2<T>    high         ()                                     const { return r;                                      }
-	inline Reg<T>      shuff        (const Reg<T> v_shu)                   const { return *this;                                  }
-	inline Reg<T>      shuff2       (const Reg<T> v_shu)                   const { return *this;                                  }
-	inline Reg<T>      shuff4       (const Reg<T> v_shu)                   const { return *this;                                  }
-	inline Reg<T>      interleavelo (const Reg<T> v)                       const { return *this;                                  }
-	inline Reg<T>      interleavehi (const Reg<T> v)                       const { return *this;                                  }
-	inline Reg<T>      interleavelo2(const Reg<T> v)                       const { return *this;                                  }
-	inline Reg<T>      interleavehi2(const Reg<T> v)                       const { return *this;                                  }
-	inline Reg<T>      interleavelo4(const Reg<T> v)                       const { return *this;                                  }
-	inline Reg<T>      interleavehi4(const Reg<T> v)                       const { return *this;                                  }
-	inline Regx2<T>    interleave   (const Reg<T> v)                       const { return Regx2<T>(*this, v);                     }
-	inline Regx2<T>    deinterleave (const Reg<T> v)                       const { return Regx2<T>(*this, v);                     }
-	inline Regx2<T>    interleave2  (const Reg<T> v)                       const { return Regx2<T>(*this, v);                     }
-	inline Regx2<T>    interleave4  (const Reg<T> v)                       const { return Regx2<T>(*this, v);                     }
-	inline Reg<T>      interleave   ()                                     const { return *this;                                  }
-	inline Regx2<T>    interleavex2 (const Reg<T> v)                       const { return Regx2<T>(*this, v);                     }
-	inline Reg<T>      interleavex4 ()                                     const { return *this;                                  }
-	inline Reg<T>      interleavex16()                                     const { return *this;                                  }
 	inline Reg<T>      andb         (const Reg<T> v)                       const { return mipp_scop::andb<T>( r, v.r);            }
 	inline Reg<T>      andnb        (const Reg<T> v)                       const { return mipp_scop::andb<T>(~r, v.r);            }
 	inline Reg<T>      notb         ()                                     const { return ~r;                                     }
@@ -240,11 +163,11 @@ public:
 	inline Reg<T>      sub          (const Reg<T> v)                       const { return mipp_scop::sub<T>(r,v.r);               }
 	inline Reg<T>      mul          (const Reg<T> v)                       const { return r  *  v.r;                              }
 	inline Reg<T>      div          (const Reg<T> v)                       const { return r  /  v.r;                              }
+	inline Reg<T>      min          (const Reg<T> v)                       const { return std::min<T>(r, v.r);                    }
+	inline Reg<T>      max          (const Reg<T> v)                       const { return std::max<T>(r, v.r);                    }
 	// (1 = positive, -1 = negative, 0 = 0)
 	inline Reg<T>      msb          ()                                     const { return mipp_scop::msb<T>(r);                   }
 	inline Reg<T>      msb          (const Reg<T> v)                       const { return msb(Reg<T>(r ^ v.r));                   }
-	inline Reg<T>      copysign     (const Reg<T> v)                       const { return this->neg(v);                           }
-	inline Reg<T>      copysign     (const Msk<N<T>()> v)                  const { return this->neg(v);                           }
 	inline Reg<T>      abs          ()                                     const { return std::abs(r);                            }
 	inline Reg<T>      sqrt         ()                                     const { return (T)std::sqrt(r);                        }
 	inline Reg<T>      rsqrt        ()                                     const { return (T)(1 / std::sqrt(r));                  }
@@ -269,8 +192,6 @@ public:
 	inline Reg<T>      blend        (const Reg<T> v1, const Msk<N<T>()> m) const { return (m.m) ? r : v1.r;                       }
 	inline Reg<T>      lrot         ()                                     const { return r;                                      }
 	inline Reg<T>      rrot         ()                                     const { return r;                                      }
-	inline Reg<T>      div2         ()                                     const { return mipp_scop::div2<T>(r);                  }
-	inline Reg<T>      div4         ()                                     const { return mipp_scop::div4<T>(r);                  }
 	inline Reg<T>      round        ()                                     const { return std::round(r);                          }
 	inline bool        testz        (const Reg<T> v)                       const { return mipp_scop::andb<T>(r, v.r) == 0 ? 1 : 0;}
 	inline bool        testz        ()                                     const { return !r;                                     }
@@ -579,8 +500,8 @@ public:
 	inline void     loadu       (const T* data   )       { val[0] = mipp::loadu<T>(data); val[1] = mipp::loadu<T>(data + mipp::N<T>());           }
 	inline void     store       (T* data         ) const { mipp::store <T>(data, val[0].r); mipp::store <T>(data + mipp::N<T>(), val[1].r);       }
 	inline void     storeu      (T* data         ) const { mipp::storeu<T>(data, val[0].r); mipp::storeu<T>(data + mipp::N<T>(), val[1].r);       }
-	inline Regx2<T> interleave  (                ) const { return mipp::interleave  <T>(*(mipp::regx2*)this);                                     }
-	inline Regx2<T> deinterleave(                ) const { return mipp::deinterleave<T>(*(mipp::regx2*)this);                                     }
+	/*inline Regx2<T> interleave  (                ) const { return mipp::interleave  <T>(*(mipp::regx2*)this);                                   }
+	inline Regx2<T> deinterleave(                ) const { return mipp::deinterleave<T>(*(mipp::regx2*)this);                                     }*/
 	inline Regx2<T> conj        (                ) const { return mipp::conj        <T>(*(mipp::regx2*)this);                                     }
 	inline Reg  <T> norm        (                ) const { return mipp::norm        <T>(*(mipp::regx2*)this);                                     }
 	inline Regx2<T> cadd        (const Regx2<T> v) const { return mipp::cadd        <T>(*(mipp::regx2*)this, *(regx2*)&v);                        }
@@ -593,8 +514,8 @@ public:
 	inline void     loadu       (const T* data   )       { val[0] = data[0]; val[1] = data[1];                                                    }
 	inline void     store       (T* data         ) const { data[0] = val[0]; data[1] = val[1];                                                    }
 	inline void     storeu      (T* data         ) const { data[0] = val[0]; data[1] = val[1];                                                    }
-	inline Regx2<T> interleave  (                ) const { return *this;                                                                          }
-	inline Regx2<T> deinterleave(                ) const { return *this;                                                                          }
+	/*inline Regx2<T> interleave  (                ) const { return *this;                                                                          }
+	inline Regx2<T> deinterleave(                ) const { return *this;                                                                          }*/
 	inline Regx2<T> conj        (                ) const { return Regx2<T>(val[0].r, -val[1].r);                                                  }
 	inline Reg  <T> norm        (                ) const { return val[0].r * val[0].r + val[1].r * val[1].r;                                      }
 	inline Regx2<T> cadd        (const Regx2<T> v) const { return mipp::Regx2<T>(val[0].r + v.val[0].r, val[1].r + v.val[1].r);                   }
@@ -678,22 +599,6 @@ std::ostream& operator<<(std::ostream& os, const Msk<N>& m)
 template <typename T> inline Reg<T>      shuff        (const Reg<T> v1, const Reg<T> v2)                      { return v1.shuff(v2);             }
 template <typename T> inline Reg<T>      shuff2       (const Reg<T> v1, const Reg<T> v2)                      { return v1.shuff2(v2);            }
 template <typename T> inline Reg<T>      shuff4       (const Reg<T> v1, const Reg<T> v2)                      { return v1.shuff4(v2);            }
-template <typename T> inline Reg<T>      interleavelo (const Reg<T> v1, const Reg<T> v2)                      { return v1.interleavelo(v2);      }
-template <typename T> inline Reg<T>      interleavehi (const Reg<T> v1, const Reg<T> v2)                      { return v1.interleavehi(v2);      }
-template <typename T> inline Reg<T>      interleavelo2(const Reg<T> v1, const Reg<T> v2)                      { return v1.interleavelo2(v2);     }
-template <typename T> inline Reg<T>      interleavehi2(const Reg<T> v1, const Reg<T> v2)                      { return v1.interleavehi2(v2);     }
-template <typename T> inline Reg<T>      interleavelo4(const Reg<T> v1, const Reg<T> v2)                      { return v1.interleavelo4(v2);     }
-template <typename T> inline Reg<T>      interleavehi4(const Reg<T> v1, const Reg<T> v2)                      { return v1.interleavehi4(v2);     }
-template <typename T> inline Regx2<T>    interleave   (const Reg<T> v1, const Reg<T> v2)                      { return v1.interleave(v2);        }
-template <typename T> inline Regx2<T>    interleave   (const Regx2<T> v)                                      { return v.interleave();           }
-template <typename T> inline Regx2<T>    deinterleave (const Reg<T> v1, const Reg<T> v2)                      { return v1.deinterleave(v2);      }
-template <typename T> inline Regx2<T>    deinterleave (const Regx2<T> v)                                      { return v.deinterleave();         }
-template <typename T> inline Regx2<T>    interleave2  (const Reg<T> v1, const Reg<T> v2)                      { return v1.interleave2(v2);       }
-template <typename T> inline Regx2<T>    interleave4  (const Reg<T> v1, const Reg<T> v2)                      { return v1.interleave4(v2);       }
-template <typename T> inline Reg<T>      interleave   (const Reg<T> v)                                        { return v.interleave();           }
-template <typename T> inline Regx2<T>    interleavex2 (const Reg<T> v1, const Reg<T> v2)                      { return v1.interleavex2(v2);      }
-template <typename T> inline Reg<T>      interleavex4 (const Reg<T> v)                                        { return v.interleavex4();         }
-template <typename T> inline Reg<T>      interleavex16(const Reg<T> v)                                        { return v.interleavex16();        }
 template <typename T> inline Reg<T>      andb         (const Reg<T> v1, const Reg<T> v2)                      { return v1.andb(v2);              }
 template <int      N> inline Msk<N>      andb         (const Msk<N> v1, const Msk<N> v2)                      { return v1.andb(v2);              }
 template <typename T> inline Reg<T>      andb         (const Reg<T> v1, const Msk<N<T>()> v2)                 { return v1.andb(v2);              }
@@ -728,10 +633,10 @@ template <typename T> inline Reg<T>      add          (const Reg<T> v1, const Re
 template <typename T> inline Reg<T>      sub          (const Reg<T> v1, const Reg<T> v2)                      { return v1.sub(v2);               }
 template <typename T> inline Reg<T>      mul          (const Reg<T> v1, const Reg<T> v2)                      { return v1.mul(v2);               }
 template <typename T> inline Reg<T>      div          (const Reg<T> v1, const Reg<T> v2)                      { return v1.div(v2);               }
+template <typename T> inline Reg<T>      min          (const Reg<T> v1, const Reg<T> v2)                      { return v1.min(v2);               }
+template <typename T> inline Reg<T>      max          (const Reg<T> v1, const Reg<T> v2)                      { return v1.max(v2);               }
 template <typename T> inline Reg<T>      msb          (const Reg<T> v)                                        { return v.msb();                  }
 template <typename T> inline Reg<T>      msb          (const Reg<T> v1, const Reg<T> v2)                      { return v1.msb(v2);               }
-template <typename T> inline Reg<T>      copysign     (const Reg<T> v1, const Reg<T> v2)                      { return v1.copysign(v2);          }
-template <typename T> inline Reg<T>      copysign     (const Reg<T> v1, const Msk<N<T>()> v2)                 { return v1.copysign(v2);          }
 template <typename T> inline Reg<T>      abs          (const Reg<T> v)                                        { return v.abs();                  }
 template <typename T> inline Reg<T>      sqrt         (const Reg<T> v)                                        { return v.sqrt();                 }
 template <typename T> inline Reg<T>      rsqrt        (const Reg<T> v)                                        { return v.rsqrt();                }
@@ -756,8 +661,6 @@ template <typename T> inline Reg<T>      fnmsub       (const Reg<T> v1, const Re
 template <typename T> inline Reg<T>      blend        (const Reg<T> v1, const Reg<T> v2, const Msk<N<T>()> m) { return v1.blend(v2, m );         }
 template <typename T> inline Reg<T>      lrot         (const Reg<T> v)                                        { return v.lrot();                 }
 template <typename T> inline Reg<T>      rrot         (const Reg<T> v)                                        { return v.rrot();                 }
-template <typename T> inline Reg<T>      div2         (const Reg<T> v)                                        { return v.div2();                 }
-template <typename T> inline Reg<T>      div4         (const Reg<T> v)                                        { return v.div4();                 }
 template <typename T> inline Reg<T>      round        (const Reg<T> v)                                        { return v.round();                }
 template <typename T> inline bool        testz        (const Reg<T> v1, const Reg<T> v2)                      { return v1.testz(v2);             }
 template <int      N> inline bool        testz        (const Msk<N> v1, const Msk<N> v2)                      { return v1.testz(v2);             }
