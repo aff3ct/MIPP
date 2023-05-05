@@ -170,14 +170,6 @@ tpl_implem_emu = {
 """	return %getfirst<tp>%(%hmin<tp>%(r0));""" },
 	"hmax_2": { "format": "long", "code":
 """	return %getfirst<tp>%(%hmax<tp>%(r0));""" },
-	"abs-float64": { "format": "long", "code":
-"""	%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%(0x7FFFFFFFFFFFFFFF));
-	return %andb<tp>%(r0, rm);"""
-	},
-	"abs-float32": { "format": "long", "code":
-"""	%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%(0x7FFFFFFF));
-	return %andb<tp>%(r0, rm);"""
-	},
 }
 
 implems_emu = {
@@ -273,7 +265,4 @@ implems_emu = {
 		{ "datatypes": all_datatypes, "template": tpl_implem_emu["hmin_2"] }, ],
 	"hmax_2": [
 		{ "datatypes": all_datatypes, "template": tpl_implem_emu["hmax_2"] }, ],
-	"abs": [
-		{ "datatypes": [float64], "template": tpl_implem_emu["abs-float64"] },
-		{ "datatypes": [float32], "template": tpl_implem_emu["abs-float32"] }, ],
 }

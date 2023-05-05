@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+# ce fichier genère : mipp_v2_impl_AVX_gen.h , mipp_v2_interface_gen.h , mipp_v2_gen.hpp
 from jinja2 import Template, StrictUndefined
 import json
 

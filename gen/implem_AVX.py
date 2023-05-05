@@ -191,8 +191,6 @@ implems_avx = {
 		{ "instr_name": "sqrt", "datatypes": all_float, "template": tpl_implem_avx["arith_1arg"] } ],
 	"rsqrt": [
 		{ "instr_name": "rsqrt", "datatypes": [float32], "template": tpl_implem_avx["arith_1arg"] } ],
-	"abs": [
-		{ "instr_name": "abs", "datatypes": [int32, int16, int8], "template": tpl_implem_avx["arith_1arg"], "if": "defined(__AVX2__)" } ],
 	"add": [
 		{ "instr_name": "add", "datatypes": all_float, "template": tpl_implem_avx["arith_2args"] },
 		{ "instr_name": "add", "datatypes": [int64, int32], "template": tpl_implem_avx["arith_2args"], "if": "defined(__AVX2__)" },
