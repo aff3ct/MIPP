@@ -121,16 +121,6 @@ tpl_implem_emu = {
 	"neg_2": { "format": "long", "code":
 """	%r<tp>% r1 = %toreg<tp>%(m0);
 	return %neg<tp>%(r0, r1);""" },
-	"div2-float": { "format": "long", "code":
-"""	%r<tp>% r1 = %set1<tp>%(2);
-	return %div<tp>%(r0, r1);""" },
-	"div4-float": { "format": "long", "code":
-"""	%r<tp>% r1 = %set1<tp>%(4);
-	return %div<tp>%(r0, r1);""" },
-	"div2-int": { "format": "long", "code":
-"""	return %rshift<tp>%(r0, 1);""" },
-	"div4-int": { "format": "long", "code":
-"""	return %rshift<tp>%(r0, 2);""" },
 	"lshift-8": { "format": "long", "code":
 """	%r<c:int|b:8>% rm8 = %set1<c:int|b:8>%((1 << v0) -1);
 	%r<c:tp|b:16>% rlsh = %lshift<c:tp|b:16>%(%cast<c:tp|b:8,c:tp|b:16>%(r0), v0);
@@ -226,12 +216,6 @@ implems_emu = {
 		{ "datatypes": all_int, "template": tpl_implem_emu["neg-int"] }, ],
 	"neg_2": [
 		{ "datatypes": all_float + all_int, "template": tpl_implem_emu["neg_2"] }, ],
-	"div2": [
-		{ "datatypes": all_float, "template": tpl_implem_emu["div2-float"] },
-		{ "datatypes": all_int_uint, "template": tpl_implem_emu["div2-int"] }, ],
-	"div4": [
-		{ "datatypes": all_float, "template": tpl_implem_emu["div4-float"] },
-		{ "datatypes": all_int_uint, "template": tpl_implem_emu["div4-int"] }, ],
 	"lshift": [
 		{ "datatypes": [uint8], "template": tpl_implem_emu["lshift-8"] }, ],
 	"rshift": [
