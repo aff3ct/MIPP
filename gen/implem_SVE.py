@@ -3,7 +3,7 @@ from tools import *
 isa_sve = {
     "name": "sve",
     "prefix": "sv",
-    "size": 512,
+    "size": {"128 , 256 , 512 , 1024 , 2048",},
     "define": "__ARM_FEATURE_SVE",
     "hw_lmul": True,
     "datatypes": {
@@ -21,13 +21,18 @@ isa_sve = {
 }
 
 tpl_implem_sve = {
-        "load" : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(({{ isa_dt_par.to_ptr }}*) p0);" },
+        "reinterpret" : { "format": "short", "code": "{% if isa_dt_par.data_ext_logi != isa_dt_ret.data_ext_logi -%}{{ isa.prefix }}{{ instr_name }}_{{isa_dt_par.data_ext_logi}}_{{isa_dt_ret.data_ext_logi}}(r0.m);{% else -%} r0.m;{% endif %}" },
+        "load"        : { "format": "short", "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(({{isa_dt_par.data_ext_msk}} m,{{ isa_dt_par.to_ptr }}*) p0);" },
+        "toreg"       : { "format": "short", "code": "{% if isa_dt_par.data_ext_msk != isa_dt_ret.data_ext_logi -%}{{ isa.prefix }}_{{ instr_name }}{{isa_dt_par.data_ext_msk}}_{{isa_dt_ret.data_ext_logi}}(m0.m);{% else -%} m0.m;{% endif %}" },
+
 }
 
 implems_sve = {
-    
-"load": [
-        { "instr_name": "maskzld", "datatypes": all_datatypes, "template": tpl_implem_avx["load"]},
-        { "instr_name": "loadu", "datatypes": all_datatypes, "template": tpl_implem_avx["load"], "if": "defined(_ARM_FEATURE_UNALIGNED)" } ],
-
+    "reinterpret" : [
+        { "instr_name": "reinterpret", "datatypes": [float32, float64, int64, int32], "template": tpl_implem_sve["reinterpret"], } ],
+    "load"        : [
+        { "instr_name": "ld1", "datatypes": all_datatypes, "template": tpl_implem_sve["load"]},
+        { "instr_name": "loadu", "datatypes": all_datatypes, "template": tpl_implem_sve["load"], "if": "defined(_ARM_FEATURE_UNALIGNED)" } ],
+    "toreg"       : [
+        { "instr_name": "cast", "datatypes": all_datatypes, "template": tpl_implem_avx["toreg"], } ],
 }
