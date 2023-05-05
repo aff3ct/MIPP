@@ -258,14 +258,6 @@ MIPP_MACRO_ALL_FLOAT(MIPP_MACRO_ARITHMETIC_EMULATED_FMADD, avx)
 #endif
 MIPP_MACRO_LATE_EVAL(MIPP_MACRO_ALL_INT_AND_UINT, MIPP_MACRO_UNIMPLEMENTED_3ARGS, fmadd, avx)
 
-// --------------------------------------------------------------------- fnmadd
-
-#ifdef __FMA__
-MIPP_MACRO_ALL_FLOAT(MIPP_MACRO_ARITHMETIC_3ARGS_AVX, fnmadd, fnmadd)
-#else
-MIPP_MACRO_ALL_FLOAT(MIPP_MACRO_ARITHMETIC_EMULATED_FNMADD, avx)
-#endif
-MIPP_MACRO_LATE_EVAL(MIPP_MACRO_ALL_INT_AND_UINT, MIPP_MACRO_UNIMPLEMENTED_3ARGS, fnmadd, avx)
 
 // ---------------------------------------------------------------------- fmsub
 
@@ -275,15 +267,6 @@ MIPP_MACRO_ALL_FLOAT(MIPP_MACRO_ARITHMETIC_3ARGS_AVX, fmsub, fmsub)
 MIPP_MACRO_ALL_FLOAT(MIPP_MACRO_ARITHMETIC_EMULATED_FMSUB, avx)
 #endif
 MIPP_MACRO_LATE_EVAL(MIPP_MACRO_ALL_INT_AND_UINT, MIPP_MACRO_UNIMPLEMENTED_3ARGS, fmsub, avx)
-
-// --------------------------------------------------------------------- fnmsub
-
-#ifdef __FMA__
-MIPP_MACRO_ALL_FLOAT(MIPP_MACRO_ARITHMETIC_3ARGS_AVX, fnmsub, fnmsub)
-#else
-MIPP_MACRO_ALL_FLOAT(MIPP_MACRO_ARITHMETIC_EMULATED_FNMSUB, avx)
-#endif
-MIPP_MACRO_LATE_EVAL(MIPP_MACRO_ALL_INT_AND_UINT, MIPP_MACRO_UNIMPLEMENTED_3ARGS, fnmsub, avx)
 
 // ----------------------------------------------- generic logical 2 args macro
 

@@ -34,17 +34,6 @@ tpl_implem_emu = {
 	%r<tp>% res = %sub<tp>%(rmul, r2);
 	return res;"""
 	},
-	"fnmadd": { "format": "long", "code":
-"""	%r<tp>% rmul = %mul<tp>%(r0, r1);
-	%r<tp>% res = %sub<tp>%(r2, rmul);
-	return res;"""
-	},
-	"fnmsub": { "format": "long", "code":
-"""	%r<tp>% rmul = %mul<tp>%(r0, r1);
-	%r<tp>% rmulz = %sub<tp>%(%set0<tp>%(), rmul);
-	%r<tp>% res = %sub<tp>%(rmulz, r2);
-	return res;"""
-	},
 	"arith_2args_1msk": { "format": "long", "code":
 """	%r<tp>% res = %{{ instr_name }}<tp>%(r0, r1);
 	return %blend<tp>%(res, r2, m0);"""
@@ -182,10 +171,6 @@ implems_emu = {
 		{ "datatypes": all_float, "template": tpl_implem_emu["fmadd"] }, ],
 	"fmsub": [
 		{ "datatypes": all_float, "template": tpl_implem_emu["fmsub"] }, ],
-	"fnmadd": [
-		{ "datatypes": all_float, "template": tpl_implem_emu["fnmadd"] }, ],
-	"fnmsub": [
-		{ "datatypes": all_float, "template": tpl_implem_emu["fnmsub"] }, ],
 	"add_m": [
 		{ "instr_name": "add", "datatypes": all_datatypes, "template": tpl_implem_emu["arith_2args_1msk"] }, ],
 	"add_mz": [

@@ -1904,20 +1904,6 @@ rvd_avx_float32_t mipp_avx_fmadd_float32(const rvd_avx_float32_t r0, const rvd_a
 }
 #endif
 #if defined(__FMA__)
-rvd_avx_float64_t mipp_avx_fnmadd_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1, const rvd_avx_float64_t r2) {
-	rvd_avx_float64_t res;
-	res.m = _mm256_fnmadd_pd(r0.m, r1.m, r2.m);
-	return res;
-}
-#endif
-#if defined(__FMA__)
-rvd_avx_float32_t mipp_avx_fnmadd_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1, const rvd_avx_float32_t r2) {
-	rvd_avx_float32_t res;
-	res.m = _mm256_fnmadd_ps(r0.m, r1.m, r2.m);
-	return res;
-}
-#endif
-#if defined(__FMA__)
 rvd_avx_float64_t mipp_avx_fmsub_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1, const rvd_avx_float64_t r2) {
 	rvd_avx_float64_t res;
 	res.m = _mm256_fmsub_pd(r0.m, r1.m, r2.m);
@@ -1928,20 +1914,6 @@ rvd_avx_float64_t mipp_avx_fmsub_float64(const rvd_avx_float64_t r0, const rvd_a
 rvd_avx_float32_t mipp_avx_fmsub_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1, const rvd_avx_float32_t r2) {
 	rvd_avx_float32_t res;
 	res.m = _mm256_fmsub_ps(r0.m, r1.m, r2.m);
-	return res;
-}
-#endif
-#if defined(__FMA__)
-rvd_avx_float64_t mipp_avx_fnmsub_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1, const rvd_avx_float64_t r2) {
-	rvd_avx_float64_t res;
-	res.m = _mm256_fnmsub_pd(r0.m, r1.m, r2.m);
-	return res;
-}
-#endif
-#if defined(__FMA__)
-rvd_avx_float32_t mipp_avx_fnmsub_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1, const rvd_avx_float32_t r2) {
-	rvd_avx_float32_t res;
-	res.m = _mm256_fnmsub_ps(r0.m, r1.m, r2.m);
 	return res;
 }
 #endif
@@ -4055,36 +4027,6 @@ rvd_avx_float32_t mipp_avx_fmsub_float32(const rvd_avx_float32_t r0, const rvd_a
 	return res;
 }
 #endif
-#if !( defined(__FMA__) )
-rvd_avx_float64_t mipp_avx_fnmadd_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1, const rvd_avx_float64_t r2) {
-	rvd_avx_float64_t rmul = mipp_avx_mul_float64(r0, r1);
-	rvd_avx_float64_t res = mipp_avx_sub_float64(r2, rmul);
-	return res;
-}
-#endif
-#if !( defined(__FMA__) )
-rvd_avx_float32_t mipp_avx_fnmadd_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1, const rvd_avx_float32_t r2) {
-	rvd_avx_float32_t rmul = mipp_avx_mul_float32(r0, r1);
-	rvd_avx_float32_t res = mipp_avx_sub_float32(r2, rmul);
-	return res;
-}
-#endif
-#if !( defined(__FMA__) )
-rvd_avx_float64_t mipp_avx_fnmsub_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1, const rvd_avx_float64_t r2) {
-	rvd_avx_float64_t rmul = mipp_avx_mul_float64(r0, r1);
-	rvd_avx_float64_t rmulz = mipp_avx_sub_float64(mipp_avx_set0_float64(), rmul);
-	rvd_avx_float64_t res = mipp_avx_sub_float64(rmulz, r2);
-	return res;
-}
-#endif
-#if !( defined(__FMA__) )
-rvd_avx_float32_t mipp_avx_fnmsub_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1, const rvd_avx_float32_t r2) {
-	rvd_avx_float32_t rmul = mipp_avx_mul_float32(r0, r1);
-	rvd_avx_float32_t rmulz = mipp_avx_sub_float32(mipp_avx_set0_float32(), rmul);
-	rvd_avx_float32_t res = mipp_avx_sub_float32(rmulz, r2);
-	return res;
-}
-#endif
 rvd_avx_float64_t mipp_avx_add_m_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1, const rvm_avx_float64_t m0, const rvd_avx_float64_t r2) {
 	rvd_avx_float64_t res = mipp_avx_add_float64(r0, r1);
 	return mipp_avx_blend_float64(res, r2, m0);
@@ -4861,6 +4803,72 @@ rvd_avx_int8_t mipp_avx_neg_2_int8(const rvd_avx_int8_t r0, const rvm_avx_int8_t
 	return mipp_avx_neg_int8(r0, r1);
 }
 #endif
+rvd_avx_float64_t mipp_avx_div2_float64(const rvd_avx_float64_t r0) {
+	rvd_avx_float64_t r1 = mipp_avx_set1_float64(2);
+	return mipp_avx_div_float64(r0, r1);
+}
+rvd_avx_float32_t mipp_avx_div2_float32(const rvd_avx_float32_t r0) {
+	rvd_avx_float32_t r1 = mipp_avx_set1_float32(2);
+	return mipp_avx_div_float32(r0, r1);
+}
+#if ( ( ( defined(__AVX2__) ) ) )
+rvd_avx_int32_t mipp_avx_div2_int32(const rvd_avx_int32_t r0) {
+	return mipp_avx_rshift_int32(r0, 1);
+}
+#endif
+#if ( ( ( defined(__AVX2__) ) ) )
+rvd_avx_int16_t mipp_avx_div2_int16(const rvd_avx_int16_t r0) {
+	return mipp_avx_rshift_int16(r0, 1);
+}
+#endif
+#if ( ( ( defined(__AVX2__) ) ) )
+rvd_avx_uint64_t mipp_avx_div2_uint64(const rvd_avx_uint64_t r0) {
+	return mipp_avx_rshift_uint64(r0, 1);
+}
+#endif
+#if ( ( ( defined(__AVX2__) ) ) )
+rvd_avx_uint32_t mipp_avx_div2_uint32(const rvd_avx_uint32_t r0) {
+	return mipp_avx_rshift_uint32(r0, 1);
+}
+#endif
+#if ( ( ( defined(__AVX2__) ) ) )
+rvd_avx_uint16_t mipp_avx_div2_uint16(const rvd_avx_uint16_t r0) {
+	return mipp_avx_rshift_uint16(r0, 1);
+}
+#endif
+rvd_avx_float64_t mipp_avx_div4_float64(const rvd_avx_float64_t r0) {
+	rvd_avx_float64_t r1 = mipp_avx_set1_float64(4);
+	return mipp_avx_div_float64(r0, r1);
+}
+rvd_avx_float32_t mipp_avx_div4_float32(const rvd_avx_float32_t r0) {
+	rvd_avx_float32_t r1 = mipp_avx_set1_float32(4);
+	return mipp_avx_div_float32(r0, r1);
+}
+#if ( ( ( defined(__AVX2__) ) ) )
+rvd_avx_int32_t mipp_avx_div4_int32(const rvd_avx_int32_t r0) {
+	return mipp_avx_rshift_int32(r0, 2);
+}
+#endif
+#if ( ( ( defined(__AVX2__) ) ) )
+rvd_avx_int16_t mipp_avx_div4_int16(const rvd_avx_int16_t r0) {
+	return mipp_avx_rshift_int16(r0, 2);
+}
+#endif
+#if ( ( ( defined(__AVX2__) ) ) )
+rvd_avx_uint64_t mipp_avx_div4_uint64(const rvd_avx_uint64_t r0) {
+	return mipp_avx_rshift_uint64(r0, 2);
+}
+#endif
+#if ( ( ( defined(__AVX2__) ) ) )
+rvd_avx_uint32_t mipp_avx_div4_uint32(const rvd_avx_uint32_t r0) {
+	return mipp_avx_rshift_uint32(r0, 2);
+}
+#endif
+#if ( ( ( defined(__AVX2__) ) ) )
+rvd_avx_uint16_t mipp_avx_div4_uint16(const rvd_avx_uint16_t r0) {
+	return mipp_avx_rshift_uint16(r0, 2);
+}
+#endif
 #if ( ( ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )
 rvd_avx_uint8_t mipp_avx_lshift_uint8(const rvd_avx_uint8_t r0, const int32_t v0) {
 	rvd_avx_int8_t rm8 = mipp_avx_set1_int8((1 << v0) -1);
@@ -5283,6 +5291,90 @@ uint8_t mipp_avx_getfirst_uint8(const rvd_avx_uint8_t r0) {
 #endif
 rvd_avx_float64_t mipp_avx_rsqrt_float64(const rvd_avx_float64_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_rsqrt_float64");
+	exit(-1);
+}
+rvd_avx_int64_t mipp_avx_div2_int64(const rvd_avx_int64_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_div2_int64");
+	exit(-1);
+}
+#if !( ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) ) )) )
+rvd_avx_int32_t mipp_avx_div2_int32(const rvd_avx_int32_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_div2_int32");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) ) )) )
+rvd_avx_int16_t mipp_avx_div2_int16(const rvd_avx_int16_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_div2_int16");
+	exit(-1);
+}
+#endif
+rvd_avx_int8_t mipp_avx_div2_int8(const rvd_avx_int8_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_div2_int8");
+	exit(-1);
+}
+#if !( ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) ) )) )
+rvd_avx_uint64_t mipp_avx_div2_uint64(const rvd_avx_uint64_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_div2_uint64");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) ) )) )
+rvd_avx_uint32_t mipp_avx_div2_uint32(const rvd_avx_uint32_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_div2_uint32");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) ) )) )
+rvd_avx_uint16_t mipp_avx_div2_uint16(const rvd_avx_uint16_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_div2_uint16");
+	exit(-1);
+}
+#endif
+rvd_avx_uint8_t mipp_avx_div2_uint8(const rvd_avx_uint8_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_div2_uint8");
+	exit(-1);
+}
+rvd_avx_int64_t mipp_avx_div4_int64(const rvd_avx_int64_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_div4_int64");
+	exit(-1);
+}
+#if !( ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) ) )) )
+rvd_avx_int32_t mipp_avx_div4_int32(const rvd_avx_int32_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_div4_int32");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) ) )) )
+rvd_avx_int16_t mipp_avx_div4_int16(const rvd_avx_int16_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_div4_int16");
+	exit(-1);
+}
+#endif
+rvd_avx_int8_t mipp_avx_div4_int8(const rvd_avx_int8_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_div4_int8");
+	exit(-1);
+}
+#if !( ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) ) )) )
+rvd_avx_uint64_t mipp_avx_div4_uint64(const rvd_avx_uint64_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_div4_uint64");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) ) )) )
+rvd_avx_uint32_t mipp_avx_div4_uint32(const rvd_avx_uint32_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_div4_uint32");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) ) )) )
+rvd_avx_uint16_t mipp_avx_div4_uint16(const rvd_avx_uint16_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_div4_uint16");
+	exit(-1);
+}
+#endif
+rvd_avx_uint8_t mipp_avx_div4_uint8(const rvd_avx_uint8_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_div4_uint8");
 	exit(-1);
 }
 #if !( defined(__AVX2__) )
@@ -5934,18 +6026,6 @@ rvd_avx_float32_t mipp_avx_fmadd_float32(const rvd_avx_float32_t r0, const rvd_a
 }
 #endif
 #if !( defined(__FMA__) ) && !( !( defined(__FMA__) ) )
-rvd_avx_float64_t mipp_avx_fnmadd_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1, const rvd_avx_float64_t r2) {
-	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_fnmadd_float64");
-	exit(-1);
-}
-#endif
-#if !( defined(__FMA__) ) && !( !( defined(__FMA__) ) )
-rvd_avx_float32_t mipp_avx_fnmadd_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1, const rvd_avx_float32_t r2) {
-	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_fnmadd_float32");
-	exit(-1);
-}
-#endif
-#if !( defined(__FMA__) ) && !( !( defined(__FMA__) ) )
 rvd_avx_float64_t mipp_avx_fmsub_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1, const rvd_avx_float64_t r2) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_fmsub_float64");
 	exit(-1);
@@ -5954,18 +6034,6 @@ rvd_avx_float64_t mipp_avx_fmsub_float64(const rvd_avx_float64_t r0, const rvd_a
 #if !( defined(__FMA__) ) && !( !( defined(__FMA__) ) )
 rvd_avx_float32_t mipp_avx_fmsub_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1, const rvd_avx_float32_t r2) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_fmsub_float32");
-	exit(-1);
-}
-#endif
-#if !( defined(__FMA__) ) && !( !( defined(__FMA__) ) )
-rvd_avx_float64_t mipp_avx_fnmsub_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1, const rvd_avx_float64_t r2) {
-	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_fnmsub_float64");
-	exit(-1);
-}
-#endif
-#if !( defined(__FMA__) ) && !( !( defined(__FMA__) ) )
-rvd_avx_float32_t mipp_avx_fnmsub_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1, const rvd_avx_float32_t r2) {
-	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_fnmsub_float32");
 	exit(-1);
 }
 #endif
