@@ -99,38 +99,6 @@ tpl_implem_emu = {
 	"cmpneq": { "format": "long", "code":
 """	return %notb_k<tp>%(%cmpeq<tp>%(r0, r1));"""
 	},
-	"cmpge": { "format": "long", "code":
-"""	return %orb_k<tp>%(%cmpeq<tp>%(r0, r1), %cmpgt<tp>%(r0, r1));"""
-	},
-	"cmple": { "format": "long", "code":
-"""	return %notb_k<tp>%(%cmpgt<tp>%(r0, r1));"""
-	},
-	"cmplt": { "format": "long", "code":
-"""	return %cmpgt<tp>%(r1, r0);"""
-	},
-	"neg-float": { "format": "long", "code":
-"""	return %xorb<tp>%(r0, %msb<tp>%(r1));""" },
-	"cmpeq-1": { "format": "long", "code":
-"""	return %cast_k<c:float,tp>%(%cmpeq<c:float>%(%cast<tp,c:float>%(r0), %cast<tp,c:float>%(r1)));"""
-	},
-	"neg-int": { "format": "long", "code":
-"""	%r<tp>% rz = %set0<tp>%();
-	%r<tp>% nr0 = %sub<tp>%(rz, r0);
-	%m<tp>% mn = %cmplt<tp>%(r1, rz);
-	return %blend<tp>%(nr0, r0, mn);""" },
-	"neg_2": { "format": "long", "code":
-"""	%r<tp>% r1 = %toreg<tp>%(m0);
-	return %neg<tp>%(r0, r1);""" },
-	"lshift-8": { "format": "long", "code":
-"""	%r<c:int|b:8>% rm8 = %set1<c:int|b:8>%((1 << v0) -1);
-	%r<c:tp|b:16>% rlsh = %lshift<c:tp|b:16>%(%cast<c:tp|b:8,c:tp|b:16>%(r0), v0);
-	%r<c:tp|b:16>% res = %andnb<c:tp|b:16>%(%cast<c:int|b:8,c:tp|b:16>%(rm8), rlsh);
-	return %cast<c:tp|b:16,tp>%(res);""" },
-	"rshift-8": { "format": "long", "code":
-"""	%r<c:int|b:8>% rm8 = %set1<c:int|b:8>%((1 << (8 -v0)) -1);
-	%r<c:tp|b:16>% rrsh = %rshift<c:tp|b:16>%(%cast<c:tp|b:8,c:tp|b:16>%(r0), v0);
-	%r<c:tp|b:16>% res = %andnb<c:tp|b:16>%(%cast<c:int|b:8,c:tp|b:16>%(rm8), rrsh);
-	return %cast<c:tp|b:16,tp>%(res);""" },
 	"testz_2": { "format": "long", "code":
 """	%r<c:int|b:32>% r32 = %set1<c:int|b:32>%(-1);
 	%m<c:int|b:32>% m32 = %tomsk<c:int|b:32>%(r32);
@@ -205,21 +173,6 @@ implems_emu = {
 		{ "datatypes": [uint16, uint8], "template": tpl_implem_emu["cmpeq-2"] } ],
 	"cmpneq": [
 		{ "datatypes": all_datatypes, "template": tpl_implem_emu["cmpneq"] } ],
-	"cmpge": [
-		{ "datatypes": all_datatypes, "template": tpl_implem_emu["cmpge"] } ],
-	"cmple": [
-		{ "datatypes": all_datatypes, "template": tpl_implem_emu["cmple"] } ],
-	"cmplt": [
-		{ "datatypes": all_datatypes, "template": tpl_implem_emu["cmplt"] } ],
-	"neg": [
-		{ "datatypes": all_float, "template": tpl_implem_emu["neg-float"] },
-		{ "datatypes": all_int, "template": tpl_implem_emu["neg-int"] }, ],
-	"neg_2": [
-		{ "datatypes": all_float + all_int, "template": tpl_implem_emu["neg_2"] }, ],
-	"lshift": [
-		{ "datatypes": [uint8], "template": tpl_implem_emu["lshift-8"] }, ],
-	"rshift": [
-		{ "datatypes": [uint8], "template": tpl_implem_emu["rshift-8"] }, ],
 	"testz_2": [
 		{ "datatypes": all_datatypes, "template": tpl_implem_emu["testz_2"] }, ],
 	"get": [

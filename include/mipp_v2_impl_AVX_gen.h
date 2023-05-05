@@ -2973,90 +2973,6 @@ rvm_avx_uint8_t mipp_avx_xorb_k_uint8(const rvm_avx_uint8_t m0, const rvm_avx_ui
 	return res;
 }
 #endif
-#if defined(__AVX2__)
-rvd_avx_uint64_t mipp_avx_lshiftr_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
-	rvd_avx_uint64_t res;
-	res.m = _mm256_sllv_epi64(r0.m, r1.m);
-	return res;
-}
-#endif
-#if defined(__AVX2__)
-rvd_avx_uint32_t mipp_avx_lshiftr_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
-	rvd_avx_uint32_t res;
-	res.m = _mm256_sllv_epi32(r0.m, r1.m);
-	return res;
-}
-#endif
-#if defined(__AVX2__)
-rvd_avx_uint64_t mipp_avx_rshiftr_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
-	rvd_avx_uint64_t res;
-	res.m = _mm256_srlv_epi64(r0.m, r1.m);
-	return res;
-}
-#endif
-#if defined(__AVX2__)
-rvd_avx_uint32_t mipp_avx_rshiftr_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
-	rvd_avx_uint32_t res;
-	res.m = _mm256_srlv_epi32(r0.m, r1.m);
-	return res;
-}
-#endif
-#if defined(__AVX2__)
-rvd_avx_uint64_t mipp_avx_lshift_uint64(const rvd_avx_uint64_t r0, const int32_t v0) {
-	rvd_avx_uint64_t res;
-	res.m = _mm256_slli_epi64(r0.m, v0);
-	return res;
-}
-#endif
-#if defined(__AVX2__)
-rvd_avx_uint32_t mipp_avx_lshift_uint32(const rvd_avx_uint32_t r0, const int32_t v0) {
-	rvd_avx_uint32_t res;
-	res.m = _mm256_slli_epi32(r0.m, v0);
-	return res;
-}
-#endif
-#if defined(__AVX2__)
-rvd_avx_uint16_t mipp_avx_lshift_uint16(const rvd_avx_uint16_t r0, const int32_t v0) {
-	rvd_avx_uint16_t res;
-	res.m = _mm256_slli_epi16(r0.m, v0);
-	return res;
-}
-#endif
-#if defined(__AVX2__)
-rvd_avx_uint64_t mipp_avx_rshift_uint64(const rvd_avx_uint64_t r0, const int32_t v0) {
-	rvd_avx_uint64_t res;
-	res.m = _mm256_srli_epi64(r0.m, v0);
-	return res;
-}
-#endif
-#if defined(__AVX2__)
-rvd_avx_uint32_t mipp_avx_rshift_uint32(const rvd_avx_uint32_t r0, const int32_t v0) {
-	rvd_avx_uint32_t res;
-	res.m = _mm256_srli_epi32(r0.m, v0);
-	return res;
-}
-#endif
-#if defined(__AVX2__)
-rvd_avx_uint16_t mipp_avx_rshift_uint16(const rvd_avx_uint16_t r0, const int32_t v0) {
-	rvd_avx_uint16_t res;
-	res.m = _mm256_srli_epi16(r0.m, v0);
-	return res;
-}
-#endif
-#if defined(__AVX2__)
-rvd_avx_int32_t mipp_avx_rshift_int32(const rvd_avx_int32_t r0, const int32_t v0) {
-	rvd_avx_int32_t res;
-	res.m = _mm256_srai_epi32(r0.m, v0);
-	return res;
-}
-#endif
-#if defined(__AVX2__)
-rvd_avx_int16_t mipp_avx_rshift_int16(const rvd_avx_int16_t r0, const int32_t v0) {
-	rvd_avx_int16_t res;
-	res.m = _mm256_srai_epi16(r0.m, v0);
-	return res;
-}
-#endif
 rvm_avx_float64_t mipp_avx_cmpeq_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1) {
 	rvd_avx_float64_t tmp;
 	tmp.m = _mm256_cmp_pd(r0.m, r1.m, _CMP_EQ_OQ);
@@ -3168,33 +3084,6 @@ rvd_avx_uint16_t mipp_avx_blend_uint16(const rvd_avx_uint16_t r0, const rvd_avx_
 rvd_avx_uint8_t mipp_avx_blend_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1, const rvm_avx_uint8_t m0) {
 	rvd_avx_uint8_t res;
 	res.m = _mm256_blendv_epi8(r0.m, r1.m, m0.m);
-	return res;
-}
-#endif
-#if defined(__AVX2__) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ))
-rvd_avx_int32_t mipp_avx_neg_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
-	rvd_avx_int32_t rone = mipp_avx_set1_int32(1);
-	rvd_avx_int32_t r1bis = mipp_avx_orb_int32(r1, rone); // hack to avoid `0` case
-	rvd_avx_int32_t res;
-	res.m = _mm256_sign_epi32(r0.m, r1bis.m);
-	return res;
-}
-#endif
-#if defined(__AVX2__) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ))
-rvd_avx_int16_t mipp_avx_neg_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
-	rvd_avx_int16_t rone = mipp_avx_set1_int16(1);
-	rvd_avx_int16_t r1bis = mipp_avx_orb_int16(r1, rone); // hack to avoid `0` case
-	rvd_avx_int16_t res;
-	res.m = _mm256_sign_epi16(r0.m, r1bis.m);
-	return res;
-}
-#endif
-#if defined(__AVX2__) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ))
-rvd_avx_int8_t mipp_avx_neg_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
-	rvd_avx_int8_t rone = mipp_avx_set1_int8(1);
-	rvd_avx_int8_t r1bis = mipp_avx_orb_int8(r1, rone); // hack to avoid `0` case
-	rvd_avx_int8_t res;
-	res.m = _mm256_sign_epi8(r0.m, r1bis.m);
 	return res;
 }
 #endif
@@ -4605,3 +4494,2166 @@ rvm_avx_uint8_t mipp_avx_cmpneq_uint8(const rvd_avx_uint8_t r0, const rvd_avx_ui
 	return mipp_avx_notb_k_uint8(mipp_avx_cmpeq_uint8(r0, r1));
 }
 #endif
+int32_t mipp_avx_testz_2_float64(const rvm_avx_float64_t m0) {
+	rvd_avx_int32_t r32 = mipp_avx_set1_int32(-1);
+	rvm_avx_int32_t m32 = mipp_avx_tomsk_int32(r32);
+	return mipp_avx_testz_float64(m0, mipp_avx_cast_k_int32_float64(m32));
+}
+int32_t mipp_avx_testz_2_float32(const rvm_avx_float32_t m0) {
+	rvd_avx_int32_t r32 = mipp_avx_set1_int32(-1);
+	rvm_avx_int32_t m32 = mipp_avx_tomsk_int32(r32);
+	return mipp_avx_testz_float32(m0, mipp_avx_cast_k_int32_float32(m32));
+}
+int32_t mipp_avx_testz_2_int64(const rvm_avx_int64_t m0) {
+	rvd_avx_int32_t r32 = mipp_avx_set1_int32(-1);
+	rvm_avx_int32_t m32 = mipp_avx_tomsk_int32(r32);
+	return mipp_avx_testz_int64(m0, mipp_avx_cast_k_int32_int64(m32));
+}
+int32_t mipp_avx_testz_2_int32(const rvm_avx_int32_t m0) {
+	rvd_avx_int32_t r32 = mipp_avx_set1_int32(-1);
+	rvm_avx_int32_t m32 = mipp_avx_tomsk_int32(r32);
+	return mipp_avx_testz_int32(m0, mipp_avx_cast_k_int32_int32(m32));
+}
+int32_t mipp_avx_testz_2_int16(const rvm_avx_int16_t m0) {
+	rvd_avx_int32_t r32 = mipp_avx_set1_int32(-1);
+	rvm_avx_int32_t m32 = mipp_avx_tomsk_int32(r32);
+	return mipp_avx_testz_int16(m0, mipp_avx_cast_k_int32_int16(m32));
+}
+int32_t mipp_avx_testz_2_int8(const rvm_avx_int8_t m0) {
+	rvd_avx_int32_t r32 = mipp_avx_set1_int32(-1);
+	rvm_avx_int32_t m32 = mipp_avx_tomsk_int32(r32);
+	return mipp_avx_testz_int8(m0, mipp_avx_cast_k_int32_int8(m32));
+}
+int32_t mipp_avx_testz_2_uint64(const rvm_avx_uint64_t m0) {
+	rvd_avx_int32_t r32 = mipp_avx_set1_int32(-1);
+	rvm_avx_int32_t m32 = mipp_avx_tomsk_int32(r32);
+	return mipp_avx_testz_uint64(m0, mipp_avx_cast_k_int32_uint64(m32));
+}
+int32_t mipp_avx_testz_2_uint32(const rvm_avx_uint32_t m0) {
+	rvd_avx_int32_t r32 = mipp_avx_set1_int32(-1);
+	rvm_avx_int32_t m32 = mipp_avx_tomsk_int32(r32);
+	return mipp_avx_testz_uint32(m0, mipp_avx_cast_k_int32_uint32(m32));
+}
+int32_t mipp_avx_testz_2_uint16(const rvm_avx_uint16_t m0) {
+	rvd_avx_int32_t r32 = mipp_avx_set1_int32(-1);
+	rvm_avx_int32_t m32 = mipp_avx_tomsk_int32(r32);
+	return mipp_avx_testz_uint16(m0, mipp_avx_cast_k_int32_uint16(m32));
+}
+int32_t mipp_avx_testz_2_uint8(const rvm_avx_uint8_t m0) {
+	rvd_avx_int32_t r32 = mipp_avx_set1_int32(-1);
+	rvm_avx_int32_t m32 = mipp_avx_tomsk_int32(r32);
+	return mipp_avx_testz_uint8(m0, mipp_avx_cast_k_int32_uint8(m32));
+}
+float64_t mipp_avx_get_float64(const rvd_avx_float64_t r0, const uint32_t v0) {
+	float64_t t[MIPP_AVX_N_FLOAT64];
+	mipp_avx_storeu_float64(t, r0);
+	return t[v0];
+}
+float32_t mipp_avx_get_float32(const rvd_avx_float32_t r0, const uint32_t v0) {
+	float32_t t[MIPP_AVX_N_FLOAT32];
+	mipp_avx_storeu_float32(t, r0);
+	return t[v0];
+}
+int64_t mipp_avx_get_int64(const rvd_avx_int64_t r0, const uint32_t v0) {
+	int64_t t[MIPP_AVX_N_INT64];
+	mipp_avx_storeu_int64(t, r0);
+	return t[v0];
+}
+int32_t mipp_avx_get_int32(const rvd_avx_int32_t r0, const uint32_t v0) {
+	int32_t t[MIPP_AVX_N_INT32];
+	mipp_avx_storeu_int32(t, r0);
+	return t[v0];
+}
+int16_t mipp_avx_get_int16(const rvd_avx_int16_t r0, const uint32_t v0) {
+	int16_t t[MIPP_AVX_N_INT16];
+	mipp_avx_storeu_int16(t, r0);
+	return t[v0];
+}
+int8_t mipp_avx_get_int8(const rvd_avx_int8_t r0, const uint32_t v0) {
+	int8_t t[MIPP_AVX_N_INT8];
+	mipp_avx_storeu_int8(t, r0);
+	return t[v0];
+}
+uint64_t mipp_avx_get_uint64(const rvd_avx_uint64_t r0, const uint32_t v0) {
+	uint64_t t[MIPP_AVX_N_UINT64];
+	mipp_avx_storeu_uint64(t, r0);
+	return t[v0];
+}
+uint32_t mipp_avx_get_uint32(const rvd_avx_uint32_t r0, const uint32_t v0) {
+	uint32_t t[MIPP_AVX_N_UINT32];
+	mipp_avx_storeu_uint32(t, r0);
+	return t[v0];
+}
+uint16_t mipp_avx_get_uint16(const rvd_avx_uint16_t r0, const uint32_t v0) {
+	uint16_t t[MIPP_AVX_N_UINT16];
+	mipp_avx_storeu_uint16(t, r0);
+	return t[v0];
+}
+uint8_t mipp_avx_get_uint8(const rvd_avx_uint8_t r0, const uint32_t v0) {
+	uint8_t t[MIPP_AVX_N_UINT8];
+	mipp_avx_storeu_uint8(t, r0);
+	return t[v0];
+}
+#if !( defined(__AVX2__) )
+int16_t mipp_avx_getfirst_int16(const rvd_avx_int16_t r0) {
+	return mipp_avx_get_int16(r0, 0);
+}
+#endif
+#if !( defined(__AVX2__) )
+int8_t mipp_avx_getfirst_int8(const rvd_avx_int8_t r0) {
+	return mipp_avx_get_int8(r0, 0);
+}
+#endif
+#if !( defined(__AVX2__) )
+uint16_t mipp_avx_getfirst_uint16(const rvd_avx_uint16_t r0) {
+	return mipp_avx_get_uint16(r0, 0);
+}
+#endif
+#if !( defined(__AVX2__) )
+uint8_t mipp_avx_getfirst_uint8(const rvd_avx_uint8_t r0) {
+	return mipp_avx_get_uint8(r0, 0);
+}
+#endif
+float64_t mipp_avx_hadd_2_float64(const rvd_avx_float64_t r0) {
+	return mipp_avx_getfirst_float64(mipp_avx_hadd_float64(r0));
+}
+float32_t mipp_avx_hadd_2_float32(const rvd_avx_float32_t r0) {
+	return mipp_avx_getfirst_float32(mipp_avx_hadd_float32(r0));
+}
+#if ( ( ( defined(__AVX2__) ) ) )
+int64_t mipp_avx_hadd_2_int64(const rvd_avx_int64_t r0) {
+	return mipp_avx_getfirst_int64(mipp_avx_hadd_int64(r0));
+}
+#endif
+#if ( ( ( defined(__AVX2__) ) ) )
+int32_t mipp_avx_hadd_2_int32(const rvd_avx_int32_t r0) {
+	return mipp_avx_getfirst_int32(mipp_avx_hadd_int32(r0));
+}
+#endif
+#if ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) )
+int16_t mipp_avx_hadd_2_int16(const rvd_avx_int16_t r0) {
+	return mipp_avx_getfirst_int16(mipp_avx_hadd_int16(r0));
+}
+#endif
+#if ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) )
+int8_t mipp_avx_hadd_2_int8(const rvd_avx_int8_t r0) {
+	return mipp_avx_getfirst_int8(mipp_avx_hadd_int8(r0));
+}
+#endif
+#if ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) )
+uint16_t mipp_avx_hadd_2_uint16(const rvd_avx_uint16_t r0) {
+	return mipp_avx_getfirst_uint16(mipp_avx_hadd_uint16(r0));
+}
+#endif
+#if ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) )
+uint8_t mipp_avx_hadd_2_uint8(const rvd_avx_uint8_t r0) {
+	return mipp_avx_getfirst_uint8(mipp_avx_hadd_uint8(r0));
+}
+#endif
+float64_t mipp_avx_hmul_2_float64(const rvd_avx_float64_t r0) {
+	return mipp_avx_getfirst_float64(mipp_avx_hmul_float64(r0));
+}
+float32_t mipp_avx_hmul_2_float32(const rvd_avx_float32_t r0) {
+	return mipp_avx_getfirst_float32(mipp_avx_hmul_float32(r0));
+}
+#if ( ( ( defined(__AVX2__) ) ) )
+int32_t mipp_avx_hmul_2_int32(const rvd_avx_int32_t r0) {
+	return mipp_avx_getfirst_int32(mipp_avx_hmul_int32(r0));
+}
+#endif
+#if ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) )
+int16_t mipp_avx_hmul_2_int16(const rvd_avx_int16_t r0) {
+	return mipp_avx_getfirst_int16(mipp_avx_hmul_int16(r0));
+}
+#endif
+float64_t mipp_avx_hmin_2_float64(const rvd_avx_float64_t r0) {
+	return mipp_avx_getfirst_float64(mipp_avx_hmin_float64(r0));
+}
+float32_t mipp_avx_hmin_2_float32(const rvd_avx_float32_t r0) {
+	return mipp_avx_getfirst_float32(mipp_avx_hmin_float32(r0));
+}
+#if ( ( ( defined(__AVX2__) ) ) )
+int32_t mipp_avx_hmin_2_int32(const rvd_avx_int32_t r0) {
+	return mipp_avx_getfirst_int32(mipp_avx_hmin_int32(r0));
+}
+#endif
+#if ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) )
+int16_t mipp_avx_hmin_2_int16(const rvd_avx_int16_t r0) {
+	return mipp_avx_getfirst_int16(mipp_avx_hmin_int16(r0));
+}
+#endif
+#if ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) )
+int8_t mipp_avx_hmin_2_int8(const rvd_avx_int8_t r0) {
+	return mipp_avx_getfirst_int8(mipp_avx_hmin_int8(r0));
+}
+#endif
+#if ( ( ( defined(__AVX2__) ) ) )
+uint32_t mipp_avx_hmin_2_uint32(const rvd_avx_uint32_t r0) {
+	return mipp_avx_getfirst_uint32(mipp_avx_hmin_uint32(r0));
+}
+#endif
+#if ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) )
+uint16_t mipp_avx_hmin_2_uint16(const rvd_avx_uint16_t r0) {
+	return mipp_avx_getfirst_uint16(mipp_avx_hmin_uint16(r0));
+}
+#endif
+#if ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) )
+uint8_t mipp_avx_hmin_2_uint8(const rvd_avx_uint8_t r0) {
+	return mipp_avx_getfirst_uint8(mipp_avx_hmin_uint8(r0));
+}
+#endif
+float64_t mipp_avx_hmax_2_float64(const rvd_avx_float64_t r0) {
+	return mipp_avx_getfirst_float64(mipp_avx_hmax_float64(r0));
+}
+float32_t mipp_avx_hmax_2_float32(const rvd_avx_float32_t r0) {
+	return mipp_avx_getfirst_float32(mipp_avx_hmax_float32(r0));
+}
+#if ( ( ( defined(__AVX2__) ) ) )
+int32_t mipp_avx_hmax_2_int32(const rvd_avx_int32_t r0) {
+	return mipp_avx_getfirst_int32(mipp_avx_hmax_int32(r0));
+}
+#endif
+#if ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) )
+int16_t mipp_avx_hmax_2_int16(const rvd_avx_int16_t r0) {
+	return mipp_avx_getfirst_int16(mipp_avx_hmax_int16(r0));
+}
+#endif
+#if ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) )
+int8_t mipp_avx_hmax_2_int8(const rvd_avx_int8_t r0) {
+	return mipp_avx_getfirst_int8(mipp_avx_hmax_int8(r0));
+}
+#endif
+#if ( ( ( defined(__AVX2__) ) ) )
+uint32_t mipp_avx_hmax_2_uint32(const rvd_avx_uint32_t r0) {
+	return mipp_avx_getfirst_uint32(mipp_avx_hmax_uint32(r0));
+}
+#endif
+#if ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) )
+uint16_t mipp_avx_hmax_2_uint16(const rvd_avx_uint16_t r0) {
+	return mipp_avx_getfirst_uint16(mipp_avx_hmax_uint16(r0));
+}
+#endif
+#if ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) )
+uint8_t mipp_avx_hmax_2_uint8(const rvd_avx_uint8_t r0) {
+	return mipp_avx_getfirst_uint8(mipp_avx_hmax_uint8(r0));
+}
+#endif
+#if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
+rvd_avx_float64_t mipp_avx_load_float64(const float64_t* p0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_load_float64");
+	exit(-1);
+}
+#endif
+#if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
+rvd_avx_float32_t mipp_avx_load_float32(const float32_t* p0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_load_float32");
+	exit(-1);
+}
+#endif
+#if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
+rvd_avx_int64_t mipp_avx_load_int64(const int64_t* p0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_load_int64");
+	exit(-1);
+}
+#endif
+#if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
+rvd_avx_int32_t mipp_avx_load_int32(const int32_t* p0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_load_int32");
+	exit(-1);
+}
+#endif
+#if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
+rvd_avx_int16_t mipp_avx_load_int16(const int16_t* p0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_load_int16");
+	exit(-1);
+}
+#endif
+#if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
+rvd_avx_int8_t mipp_avx_load_int8(const int8_t* p0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_load_int8");
+	exit(-1);
+}
+#endif
+#if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
+rvd_avx_uint64_t mipp_avx_load_uint64(const uint64_t* p0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_load_uint64");
+	exit(-1);
+}
+#endif
+#if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
+rvd_avx_uint32_t mipp_avx_load_uint32(const uint32_t* p0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_load_uint32");
+	exit(-1);
+}
+#endif
+#if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
+rvd_avx_uint16_t mipp_avx_load_uint16(const uint16_t* p0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_load_uint16");
+	exit(-1);
+}
+#endif
+#if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
+rvd_avx_uint8_t mipp_avx_load_uint8(const uint8_t* p0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_load_uint8");
+	exit(-1);
+}
+#endif
+#if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
+void mipp_avx_store_float64(float64_t* p0, const rvd_avx_float64_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_store_float64");
+	exit(-1);
+}
+#endif
+#if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
+void mipp_avx_store_float32(float32_t* p0, const rvd_avx_float32_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_store_float32");
+	exit(-1);
+}
+#endif
+#if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
+void mipp_avx_store_int64(int64_t* p0, const rvd_avx_int64_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_store_int64");
+	exit(-1);
+}
+#endif
+#if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
+void mipp_avx_store_int32(int32_t* p0, const rvd_avx_int32_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_store_int32");
+	exit(-1);
+}
+#endif
+#if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
+void mipp_avx_store_int16(int16_t* p0, const rvd_avx_int16_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_store_int16");
+	exit(-1);
+}
+#endif
+#if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
+void mipp_avx_store_int8(int8_t* p0, const rvd_avx_int8_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_store_int8");
+	exit(-1);
+}
+#endif
+#if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
+void mipp_avx_store_uint64(uint64_t* p0, const rvd_avx_uint64_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_store_uint64");
+	exit(-1);
+}
+#endif
+#if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
+void mipp_avx_store_uint32(uint32_t* p0, const rvd_avx_uint32_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_store_uint32");
+	exit(-1);
+}
+#endif
+#if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
+void mipp_avx_store_uint16(uint16_t* p0, const rvd_avx_uint16_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_store_uint16");
+	exit(-1);
+}
+#endif
+#if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
+void mipp_avx_store_uint8(uint8_t* p0, const rvd_avx_uint8_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_store_uint8");
+	exit(-1);
+}
+#endif
+rvd_avx_uint64_t mipp_avx_set1_uint64(const uint64_t v0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_set1_uint64");
+	exit(-1);
+}
+rvd_avx_uint32_t mipp_avx_set1_uint32(const uint32_t v0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_set1_uint32");
+	exit(-1);
+}
+rvd_avx_uint16_t mipp_avx_set1_uint16(const uint16_t v0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_set1_uint16");
+	exit(-1);
+}
+rvd_avx_uint8_t mipp_avx_set1_uint8(const uint8_t v0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_set1_uint8");
+	exit(-1);
+}
+#if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) )
+int16_t mipp_avx_getfirst_int16(const rvd_avx_int16_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_getfirst_int16");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) )
+int8_t mipp_avx_getfirst_int8(const rvd_avx_int8_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_getfirst_int8");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) )
+uint16_t mipp_avx_getfirst_uint16(const rvd_avx_uint16_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_getfirst_uint16");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) )
+uint8_t mipp_avx_getfirst_uint8(const rvd_avx_uint8_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_getfirst_uint8");
+	exit(-1);
+}
+#endif
+rvd_avx_float64_t mipp_avx_rsqrt_float64(const rvd_avx_float64_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_rsqrt_float64");
+	exit(-1);
+}
+#if !( defined(__AVX2__) )
+rvd_avx_int64_t mipp_avx_add_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_add_int64");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvd_avx_int32_t mipp_avx_add_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_add_int32");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvd_avx_int16_t mipp_avx_add_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_add_int16");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvd_avx_int8_t mipp_avx_add_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_add_int8");
+	exit(-1);
+}
+#endif
+rvd_avx_uint64_t mipp_avx_add_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_add_uint64");
+	exit(-1);
+}
+rvd_avx_uint32_t mipp_avx_add_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_add_uint32");
+	exit(-1);
+}
+#if !( defined(__AVX2__) )
+rvd_avx_uint16_t mipp_avx_add_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_add_uint16");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvd_avx_uint8_t mipp_avx_add_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_add_uint8");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) )
+rvd_avx_int64_t mipp_avx_add_m_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1, const rvm_avx_int64_t m0, const rvd_avx_int64_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_add_m_int64");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) )
+rvd_avx_int32_t mipp_avx_add_m_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1, const rvm_avx_int32_t m0, const rvd_avx_int32_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_add_m_int32");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) )
+rvd_avx_int16_t mipp_avx_add_m_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1, const rvm_avx_int16_t m0, const rvd_avx_int16_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_add_m_int16");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) )
+rvd_avx_int8_t mipp_avx_add_m_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1, const rvm_avx_int8_t m0, const rvd_avx_int8_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_add_m_int8");
+	exit(-1);
+}
+#endif
+rvd_avx_uint64_t mipp_avx_add_m_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1, const rvm_avx_uint64_t m0, const rvd_avx_uint64_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_add_m_uint64");
+	exit(-1);
+}
+rvd_avx_uint32_t mipp_avx_add_m_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1, const rvm_avx_uint32_t m0, const rvd_avx_uint32_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_add_m_uint32");
+	exit(-1);
+}
+#if !( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) )
+rvd_avx_uint16_t mipp_avx_add_m_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1, const rvm_avx_uint16_t m0, const rvd_avx_uint16_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_add_m_uint16");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) )
+rvd_avx_uint8_t mipp_avx_add_m_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1, const rvm_avx_uint8_t m0, const rvd_avx_uint8_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_add_m_uint8");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) ) && (( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) )) )
+rvd_avx_int64_t mipp_avx_add_mz_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1, const rvm_avx_int64_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_add_mz_int64");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) ) && (( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) )) )
+rvd_avx_int32_t mipp_avx_add_mz_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1, const rvm_avx_int32_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_add_mz_int32");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) ) && (( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) )) )
+rvd_avx_int16_t mipp_avx_add_mz_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1, const rvm_avx_int16_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_add_mz_int16");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) ) && (( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) )) )
+rvd_avx_int8_t mipp_avx_add_mz_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1, const rvm_avx_int8_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_add_mz_int8");
+	exit(-1);
+}
+#endif
+rvd_avx_uint64_t mipp_avx_add_mz_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1, const rvm_avx_uint64_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_add_mz_uint64");
+	exit(-1);
+}
+rvd_avx_uint32_t mipp_avx_add_mz_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1, const rvm_avx_uint32_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_add_mz_uint32");
+	exit(-1);
+}
+#if !( ( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) ) && (( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) )) )
+rvd_avx_uint16_t mipp_avx_add_mz_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1, const rvm_avx_uint16_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_add_mz_uint16");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) ) && (( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) )) )
+rvd_avx_uint8_t mipp_avx_add_mz_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1, const rvm_avx_uint8_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_add_mz_uint8");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvd_avx_int64_t mipp_avx_sub_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sub_int64");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvd_avx_int32_t mipp_avx_sub_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sub_int32");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvd_avx_int16_t mipp_avx_sub_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sub_int16");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvd_avx_int8_t mipp_avx_sub_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sub_int8");
+	exit(-1);
+}
+#endif
+rvd_avx_uint64_t mipp_avx_sub_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sub_uint64");
+	exit(-1);
+}
+rvd_avx_uint32_t mipp_avx_sub_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sub_uint32");
+	exit(-1);
+}
+#if !( defined(__AVX2__) )
+rvd_avx_uint16_t mipp_avx_sub_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sub_uint16");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvd_avx_uint8_t mipp_avx_sub_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sub_uint8");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) )
+rvd_avx_int64_t mipp_avx_sub_m_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1, const rvm_avx_int64_t m0, const rvd_avx_int64_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sub_m_int64");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) )
+rvd_avx_int32_t mipp_avx_sub_m_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1, const rvm_avx_int32_t m0, const rvd_avx_int32_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sub_m_int32");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) )
+rvd_avx_int16_t mipp_avx_sub_m_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1, const rvm_avx_int16_t m0, const rvd_avx_int16_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sub_m_int16");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) )
+rvd_avx_int8_t mipp_avx_sub_m_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1, const rvm_avx_int8_t m0, const rvd_avx_int8_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sub_m_int8");
+	exit(-1);
+}
+#endif
+rvd_avx_uint64_t mipp_avx_sub_m_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1, const rvm_avx_uint64_t m0, const rvd_avx_uint64_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sub_m_uint64");
+	exit(-1);
+}
+rvd_avx_uint32_t mipp_avx_sub_m_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1, const rvm_avx_uint32_t m0, const rvd_avx_uint32_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sub_m_uint32");
+	exit(-1);
+}
+#if !( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) )
+rvd_avx_uint16_t mipp_avx_sub_m_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1, const rvm_avx_uint16_t m0, const rvd_avx_uint16_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sub_m_uint16");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) )
+rvd_avx_uint8_t mipp_avx_sub_m_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1, const rvm_avx_uint8_t m0, const rvd_avx_uint8_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sub_m_uint8");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) ) && (( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) )) )
+rvd_avx_int64_t mipp_avx_sub_mz_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1, const rvm_avx_int64_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sub_mz_int64");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) ) && (( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) )) )
+rvd_avx_int32_t mipp_avx_sub_mz_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1, const rvm_avx_int32_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sub_mz_int32");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) ) && (( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) )) )
+rvd_avx_int16_t mipp_avx_sub_mz_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1, const rvm_avx_int16_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sub_mz_int16");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) ) && (( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) )) )
+rvd_avx_int8_t mipp_avx_sub_mz_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1, const rvm_avx_int8_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sub_mz_int8");
+	exit(-1);
+}
+#endif
+rvd_avx_uint64_t mipp_avx_sub_mz_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1, const rvm_avx_uint64_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sub_mz_uint64");
+	exit(-1);
+}
+rvd_avx_uint32_t mipp_avx_sub_mz_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1, const rvm_avx_uint32_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sub_mz_uint32");
+	exit(-1);
+}
+#if !( ( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) ) && (( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) )) )
+rvd_avx_uint16_t mipp_avx_sub_mz_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1, const rvm_avx_uint16_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sub_mz_uint16");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) ) && (( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) )) )
+rvd_avx_uint8_t mipp_avx_sub_mz_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1, const rvm_avx_uint8_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sub_mz_uint8");
+	exit(-1);
+}
+#endif
+rvd_avx_int64_t mipp_avx_mul_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_mul_int64");
+	exit(-1);
+}
+#if !( defined(__AVX2__) )
+rvd_avx_int32_t mipp_avx_mul_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_mul_int32");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvd_avx_int16_t mipp_avx_mul_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_mul_int16");
+	exit(-1);
+}
+#endif
+rvd_avx_int8_t mipp_avx_mul_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_mul_int8");
+	exit(-1);
+}
+rvd_avx_uint64_t mipp_avx_mul_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_mul_uint64");
+	exit(-1);
+}
+rvd_avx_uint32_t mipp_avx_mul_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_mul_uint32");
+	exit(-1);
+}
+rvd_avx_uint16_t mipp_avx_mul_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_mul_uint16");
+	exit(-1);
+}
+rvd_avx_uint8_t mipp_avx_mul_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_mul_uint8");
+	exit(-1);
+}
+rvd_avx_int64_t mipp_avx_mul_m_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1, const rvm_avx_int64_t m0, const rvd_avx_int64_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_mul_m_int64");
+	exit(-1);
+}
+#if !( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) )
+rvd_avx_int32_t mipp_avx_mul_m_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1, const rvm_avx_int32_t m0, const rvd_avx_int32_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_mul_m_int32");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) )
+rvd_avx_int16_t mipp_avx_mul_m_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1, const rvm_avx_int16_t m0, const rvd_avx_int16_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_mul_m_int16");
+	exit(-1);
+}
+#endif
+rvd_avx_int8_t mipp_avx_mul_m_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1, const rvm_avx_int8_t m0, const rvd_avx_int8_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_mul_m_int8");
+	exit(-1);
+}
+rvd_avx_uint64_t mipp_avx_mul_m_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1, const rvm_avx_uint64_t m0, const rvd_avx_uint64_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_mul_m_uint64");
+	exit(-1);
+}
+rvd_avx_uint32_t mipp_avx_mul_m_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1, const rvm_avx_uint32_t m0, const rvd_avx_uint32_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_mul_m_uint32");
+	exit(-1);
+}
+rvd_avx_uint16_t mipp_avx_mul_m_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1, const rvm_avx_uint16_t m0, const rvd_avx_uint16_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_mul_m_uint16");
+	exit(-1);
+}
+rvd_avx_uint8_t mipp_avx_mul_m_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1, const rvm_avx_uint8_t m0, const rvd_avx_uint8_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_mul_m_uint8");
+	exit(-1);
+}
+rvd_avx_int64_t mipp_avx_mul_mz_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1, const rvm_avx_int64_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_mul_mz_int64");
+	exit(-1);
+}
+#if !( ( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) ) && (( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) )) )
+rvd_avx_int32_t mipp_avx_mul_mz_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1, const rvm_avx_int32_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_mul_mz_int32");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) ) && (( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) )) )
+rvd_avx_int16_t mipp_avx_mul_mz_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1, const rvm_avx_int16_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_mul_mz_int16");
+	exit(-1);
+}
+#endif
+rvd_avx_int8_t mipp_avx_mul_mz_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1, const rvm_avx_int8_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_mul_mz_int8");
+	exit(-1);
+}
+rvd_avx_uint64_t mipp_avx_mul_mz_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1, const rvm_avx_uint64_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_mul_mz_uint64");
+	exit(-1);
+}
+rvd_avx_uint32_t mipp_avx_mul_mz_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1, const rvm_avx_uint32_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_mul_mz_uint32");
+	exit(-1);
+}
+rvd_avx_uint16_t mipp_avx_mul_mz_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1, const rvm_avx_uint16_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_mul_mz_uint16");
+	exit(-1);
+}
+rvd_avx_uint8_t mipp_avx_mul_mz_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1, const rvm_avx_uint8_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_mul_mz_uint8");
+	exit(-1);
+}
+rvd_avx_int64_t mipp_avx_min_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_min_int64");
+	exit(-1);
+}
+#if !( defined(__AVX2__) )
+rvd_avx_int32_t mipp_avx_min_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_min_int32");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvd_avx_int16_t mipp_avx_min_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_min_int16");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvd_avx_int8_t mipp_avx_min_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_min_int8");
+	exit(-1);
+}
+#endif
+rvd_avx_uint64_t mipp_avx_min_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_min_uint64");
+	exit(-1);
+}
+#if !( defined(__AVX2__) )
+rvd_avx_uint32_t mipp_avx_min_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_min_uint32");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvd_avx_uint16_t mipp_avx_min_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_min_uint16");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvd_avx_uint8_t mipp_avx_min_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_min_uint8");
+	exit(-1);
+}
+#endif
+rvd_avx_int64_t mipp_avx_min_m_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1, const rvm_avx_int64_t m0, const rvd_avx_int64_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_min_m_int64");
+	exit(-1);
+}
+#if !( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) )
+rvd_avx_int32_t mipp_avx_min_m_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1, const rvm_avx_int32_t m0, const rvd_avx_int32_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_min_m_int32");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) )
+rvd_avx_int16_t mipp_avx_min_m_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1, const rvm_avx_int16_t m0, const rvd_avx_int16_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_min_m_int16");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) )
+rvd_avx_int8_t mipp_avx_min_m_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1, const rvm_avx_int8_t m0, const rvd_avx_int8_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_min_m_int8");
+	exit(-1);
+}
+#endif
+rvd_avx_uint64_t mipp_avx_min_m_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1, const rvm_avx_uint64_t m0, const rvd_avx_uint64_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_min_m_uint64");
+	exit(-1);
+}
+#if !( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) )
+rvd_avx_uint32_t mipp_avx_min_m_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1, const rvm_avx_uint32_t m0, const rvd_avx_uint32_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_min_m_uint32");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) )
+rvd_avx_uint16_t mipp_avx_min_m_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1, const rvm_avx_uint16_t m0, const rvd_avx_uint16_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_min_m_uint16");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) )
+rvd_avx_uint8_t mipp_avx_min_m_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1, const rvm_avx_uint8_t m0, const rvd_avx_uint8_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_min_m_uint8");
+	exit(-1);
+}
+#endif
+rvd_avx_int64_t mipp_avx_min_mz_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1, const rvm_avx_int64_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_min_mz_int64");
+	exit(-1);
+}
+#if !( ( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) ) && (( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) )) )
+rvd_avx_int32_t mipp_avx_min_mz_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1, const rvm_avx_int32_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_min_mz_int32");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) ) && (( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) )) )
+rvd_avx_int16_t mipp_avx_min_mz_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1, const rvm_avx_int16_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_min_mz_int16");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) ) && (( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) )) )
+rvd_avx_int8_t mipp_avx_min_mz_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1, const rvm_avx_int8_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_min_mz_int8");
+	exit(-1);
+}
+#endif
+rvd_avx_uint64_t mipp_avx_min_mz_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1, const rvm_avx_uint64_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_min_mz_uint64");
+	exit(-1);
+}
+#if !( ( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) ) && (( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) )) )
+rvd_avx_uint32_t mipp_avx_min_mz_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1, const rvm_avx_uint32_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_min_mz_uint32");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) ) && (( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) )) )
+rvd_avx_uint16_t mipp_avx_min_mz_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1, const rvm_avx_uint16_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_min_mz_uint16");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) ) && (( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) )) )
+rvd_avx_uint8_t mipp_avx_min_mz_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1, const rvm_avx_uint8_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_min_mz_uint8");
+	exit(-1);
+}
+#endif
+rvd_avx_int64_t mipp_avx_max_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_max_int64");
+	exit(-1);
+}
+#if !( defined(__AVX2__) )
+rvd_avx_int32_t mipp_avx_max_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_max_int32");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvd_avx_int16_t mipp_avx_max_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_max_int16");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvd_avx_int8_t mipp_avx_max_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_max_int8");
+	exit(-1);
+}
+#endif
+rvd_avx_uint64_t mipp_avx_max_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_max_uint64");
+	exit(-1);
+}
+#if !( defined(__AVX2__) )
+rvd_avx_uint32_t mipp_avx_max_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_max_uint32");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvd_avx_uint16_t mipp_avx_max_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_max_uint16");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvd_avx_uint8_t mipp_avx_max_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_max_uint8");
+	exit(-1);
+}
+#endif
+rvd_avx_int64_t mipp_avx_max_m_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1, const rvm_avx_int64_t m0, const rvd_avx_int64_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_max_m_int64");
+	exit(-1);
+}
+#if !( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) )
+rvd_avx_int32_t mipp_avx_max_m_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1, const rvm_avx_int32_t m0, const rvd_avx_int32_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_max_m_int32");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) )
+rvd_avx_int16_t mipp_avx_max_m_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1, const rvm_avx_int16_t m0, const rvd_avx_int16_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_max_m_int16");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) )
+rvd_avx_int8_t mipp_avx_max_m_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1, const rvm_avx_int8_t m0, const rvd_avx_int8_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_max_m_int8");
+	exit(-1);
+}
+#endif
+rvd_avx_uint64_t mipp_avx_max_m_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1, const rvm_avx_uint64_t m0, const rvd_avx_uint64_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_max_m_uint64");
+	exit(-1);
+}
+#if !( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) )
+rvd_avx_uint32_t mipp_avx_max_m_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1, const rvm_avx_uint32_t m0, const rvd_avx_uint32_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_max_m_uint32");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) )
+rvd_avx_uint16_t mipp_avx_max_m_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1, const rvm_avx_uint16_t m0, const rvd_avx_uint16_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_max_m_uint16");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) )
+rvd_avx_uint8_t mipp_avx_max_m_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1, const rvm_avx_uint8_t m0, const rvd_avx_uint8_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_max_m_uint8");
+	exit(-1);
+}
+#endif
+rvd_avx_int64_t mipp_avx_max_mz_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1, const rvm_avx_int64_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_max_mz_int64");
+	exit(-1);
+}
+#if !( ( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) ) && (( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) )) )
+rvd_avx_int32_t mipp_avx_max_mz_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1, const rvm_avx_int32_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_max_mz_int32");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) ) && (( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) )) )
+rvd_avx_int16_t mipp_avx_max_mz_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1, const rvm_avx_int16_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_max_mz_int16");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) ) && (( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) )) )
+rvd_avx_int8_t mipp_avx_max_mz_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1, const rvm_avx_int8_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_max_mz_int8");
+	exit(-1);
+}
+#endif
+rvd_avx_uint64_t mipp_avx_max_mz_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1, const rvm_avx_uint64_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_max_mz_uint64");
+	exit(-1);
+}
+#if !( ( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) ) && (( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) || ( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) )) )
+rvd_avx_uint32_t mipp_avx_max_mz_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1, const rvm_avx_uint32_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_max_mz_uint32");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) ) && (( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) )) )
+rvd_avx_uint16_t mipp_avx_max_mz_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1, const rvm_avx_uint16_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_max_mz_uint16");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) ) && (( ( ( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) ) ) )) )
+rvd_avx_uint8_t mipp_avx_max_mz_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1, const rvm_avx_uint8_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_max_mz_uint8");
+	exit(-1);
+}
+#endif
+#if !( defined(__FMA__) ) && !( !( defined(__FMA__) ) )
+rvd_avx_float64_t mipp_avx_fmadd_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1, const rvd_avx_float64_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_fmadd_float64");
+	exit(-1);
+}
+#endif
+#if !( defined(__FMA__) ) && !( !( defined(__FMA__) ) )
+rvd_avx_float32_t mipp_avx_fmadd_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1, const rvd_avx_float32_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_fmadd_float32");
+	exit(-1);
+}
+#endif
+#if !( defined(__FMA__) ) && !( !( defined(__FMA__) ) )
+rvd_avx_float64_t mipp_avx_fmsub_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1, const rvd_avx_float64_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_fmsub_float64");
+	exit(-1);
+}
+#endif
+#if !( defined(__FMA__) ) && !( !( defined(__FMA__) ) )
+rvd_avx_float32_t mipp_avx_fmsub_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1, const rvd_avx_float32_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_fmsub_float32");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvd_avx_int64_t mipp_avx_andb_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andb_int64");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvd_avx_int32_t mipp_avx_andb_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andb_int32");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvd_avx_int16_t mipp_avx_andb_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andb_int16");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvd_avx_int8_t mipp_avx_andb_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andb_int8");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvd_avx_uint64_t mipp_avx_andb_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andb_uint64");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvd_avx_uint32_t mipp_avx_andb_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andb_uint32");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvd_avx_uint16_t mipp_avx_andb_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andb_uint16");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvd_avx_uint8_t mipp_avx_andb_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andb_uint8");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvm_avx_float64_t mipp_avx_andb_k_float64(const rvm_avx_float64_t m0, const rvm_avx_float64_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andb_k_float64");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvm_avx_float32_t mipp_avx_andb_k_float32(const rvm_avx_float32_t m0, const rvm_avx_float32_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andb_k_float32");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvm_avx_int64_t mipp_avx_andb_k_int64(const rvm_avx_int64_t m0, const rvm_avx_int64_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andb_k_int64");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvm_avx_int32_t mipp_avx_andb_k_int32(const rvm_avx_int32_t m0, const rvm_avx_int32_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andb_k_int32");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvm_avx_int16_t mipp_avx_andb_k_int16(const rvm_avx_int16_t m0, const rvm_avx_int16_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andb_k_int16");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvm_avx_int8_t mipp_avx_andb_k_int8(const rvm_avx_int8_t m0, const rvm_avx_int8_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andb_k_int8");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvm_avx_uint64_t mipp_avx_andb_k_uint64(const rvm_avx_uint64_t m0, const rvm_avx_uint64_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andb_k_uint64");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvm_avx_uint32_t mipp_avx_andb_k_uint32(const rvm_avx_uint32_t m0, const rvm_avx_uint32_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andb_k_uint32");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvm_avx_uint16_t mipp_avx_andb_k_uint16(const rvm_avx_uint16_t m0, const rvm_avx_uint16_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andb_k_uint16");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvm_avx_uint8_t mipp_avx_andb_k_uint8(const rvm_avx_uint8_t m0, const rvm_avx_uint8_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andb_k_uint8");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvd_avx_int64_t mipp_avx_andnb_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andnb_int64");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvd_avx_int32_t mipp_avx_andnb_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andnb_int32");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvd_avx_int16_t mipp_avx_andnb_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andnb_int16");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvd_avx_int8_t mipp_avx_andnb_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andnb_int8");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvd_avx_uint64_t mipp_avx_andnb_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andnb_uint64");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvd_avx_uint32_t mipp_avx_andnb_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andnb_uint32");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvd_avx_uint16_t mipp_avx_andnb_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andnb_uint16");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvd_avx_uint8_t mipp_avx_andnb_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andnb_uint8");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvm_avx_float64_t mipp_avx_andnb_k_float64(const rvm_avx_float64_t m0, const rvm_avx_float64_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andnb_k_float64");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvm_avx_float32_t mipp_avx_andnb_k_float32(const rvm_avx_float32_t m0, const rvm_avx_float32_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andnb_k_float32");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvm_avx_int64_t mipp_avx_andnb_k_int64(const rvm_avx_int64_t m0, const rvm_avx_int64_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andnb_k_int64");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvm_avx_int32_t mipp_avx_andnb_k_int32(const rvm_avx_int32_t m0, const rvm_avx_int32_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andnb_k_int32");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvm_avx_int16_t mipp_avx_andnb_k_int16(const rvm_avx_int16_t m0, const rvm_avx_int16_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andnb_k_int16");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvm_avx_int8_t mipp_avx_andnb_k_int8(const rvm_avx_int8_t m0, const rvm_avx_int8_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andnb_k_int8");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvm_avx_uint64_t mipp_avx_andnb_k_uint64(const rvm_avx_uint64_t m0, const rvm_avx_uint64_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andnb_k_uint64");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvm_avx_uint32_t mipp_avx_andnb_k_uint32(const rvm_avx_uint32_t m0, const rvm_avx_uint32_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andnb_k_uint32");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvm_avx_uint16_t mipp_avx_andnb_k_uint16(const rvm_avx_uint16_t m0, const rvm_avx_uint16_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andnb_k_uint16");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvm_avx_uint8_t mipp_avx_andnb_k_uint8(const rvm_avx_uint8_t m0, const rvm_avx_uint8_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andnb_k_uint8");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvd_avx_int64_t mipp_avx_orb_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_orb_int64");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvd_avx_int32_t mipp_avx_orb_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_orb_int32");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvd_avx_int16_t mipp_avx_orb_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_orb_int16");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvd_avx_int8_t mipp_avx_orb_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_orb_int8");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvd_avx_uint64_t mipp_avx_orb_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_orb_uint64");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvd_avx_uint32_t mipp_avx_orb_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_orb_uint32");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvd_avx_uint16_t mipp_avx_orb_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_orb_uint16");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvd_avx_uint8_t mipp_avx_orb_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_orb_uint8");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvm_avx_float64_t mipp_avx_orb_k_float64(const rvm_avx_float64_t m0, const rvm_avx_float64_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_orb_k_float64");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvm_avx_float32_t mipp_avx_orb_k_float32(const rvm_avx_float32_t m0, const rvm_avx_float32_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_orb_k_float32");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvm_avx_int64_t mipp_avx_orb_k_int64(const rvm_avx_int64_t m0, const rvm_avx_int64_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_orb_k_int64");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvm_avx_int32_t mipp_avx_orb_k_int32(const rvm_avx_int32_t m0, const rvm_avx_int32_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_orb_k_int32");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvm_avx_int16_t mipp_avx_orb_k_int16(const rvm_avx_int16_t m0, const rvm_avx_int16_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_orb_k_int16");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvm_avx_int8_t mipp_avx_orb_k_int8(const rvm_avx_int8_t m0, const rvm_avx_int8_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_orb_k_int8");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvm_avx_uint64_t mipp_avx_orb_k_uint64(const rvm_avx_uint64_t m0, const rvm_avx_uint64_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_orb_k_uint64");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvm_avx_uint32_t mipp_avx_orb_k_uint32(const rvm_avx_uint32_t m0, const rvm_avx_uint32_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_orb_k_uint32");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvm_avx_uint16_t mipp_avx_orb_k_uint16(const rvm_avx_uint16_t m0, const rvm_avx_uint16_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_orb_k_uint16");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvm_avx_uint8_t mipp_avx_orb_k_uint8(const rvm_avx_uint8_t m0, const rvm_avx_uint8_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_orb_k_uint8");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvd_avx_int64_t mipp_avx_xorb_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_xorb_int64");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvd_avx_int32_t mipp_avx_xorb_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_xorb_int32");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvd_avx_int16_t mipp_avx_xorb_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_xorb_int16");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvd_avx_int8_t mipp_avx_xorb_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_xorb_int8");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvd_avx_uint64_t mipp_avx_xorb_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_xorb_uint64");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvd_avx_uint32_t mipp_avx_xorb_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_xorb_uint32");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvd_avx_uint16_t mipp_avx_xorb_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_xorb_uint16");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvd_avx_uint8_t mipp_avx_xorb_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_xorb_uint8");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvm_avx_float64_t mipp_avx_xorb_k_float64(const rvm_avx_float64_t m0, const rvm_avx_float64_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_xorb_k_float64");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvm_avx_float32_t mipp_avx_xorb_k_float32(const rvm_avx_float32_t m0, const rvm_avx_float32_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_xorb_k_float32");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvm_avx_int64_t mipp_avx_xorb_k_int64(const rvm_avx_int64_t m0, const rvm_avx_int64_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_xorb_k_int64");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvm_avx_int32_t mipp_avx_xorb_k_int32(const rvm_avx_int32_t m0, const rvm_avx_int32_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_xorb_k_int32");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvm_avx_int16_t mipp_avx_xorb_k_int16(const rvm_avx_int16_t m0, const rvm_avx_int16_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_xorb_k_int16");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvm_avx_int8_t mipp_avx_xorb_k_int8(const rvm_avx_int8_t m0, const rvm_avx_int8_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_xorb_k_int8");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvm_avx_uint64_t mipp_avx_xorb_k_uint64(const rvm_avx_uint64_t m0, const rvm_avx_uint64_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_xorb_k_uint64");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvm_avx_uint32_t mipp_avx_xorb_k_uint32(const rvm_avx_uint32_t m0, const rvm_avx_uint32_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_xorb_k_uint32");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvm_avx_uint16_t mipp_avx_xorb_k_uint16(const rvm_avx_uint16_t m0, const rvm_avx_uint16_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_xorb_k_uint16");
+	exit(-1);
+}
+#endif
+#if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
+rvm_avx_uint8_t mipp_avx_xorb_k_uint8(const rvm_avx_uint8_t m0, const rvm_avx_uint8_t m1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_xorb_k_uint8");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
+rvd_avx_int64_t mipp_avx_msb_int64(const rvd_avx_int64_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_msb_int64");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
+rvd_avx_int32_t mipp_avx_msb_int32(const rvd_avx_int32_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_msb_int32");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
+rvd_avx_int16_t mipp_avx_msb_int16(const rvd_avx_int16_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_msb_int16");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
+rvd_avx_int8_t mipp_avx_msb_int8(const rvd_avx_int8_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_msb_int8");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
+rvd_avx_uint64_t mipp_avx_msb_uint64(const rvd_avx_uint64_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_msb_uint64");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
+rvd_avx_uint32_t mipp_avx_msb_uint32(const rvd_avx_uint32_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_msb_uint32");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
+rvd_avx_uint16_t mipp_avx_msb_uint16(const rvd_avx_uint16_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_msb_uint16");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
+rvd_avx_uint8_t mipp_avx_msb_uint8(const rvd_avx_uint8_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_msb_uint8");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
+rvd_avx_int64_t mipp_avx_notb_int64(const rvd_avx_int64_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_notb_int64");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
+rvd_avx_int32_t mipp_avx_notb_int32(const rvd_avx_int32_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_notb_int32");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
+rvd_avx_int16_t mipp_avx_notb_int16(const rvd_avx_int16_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_notb_int16");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
+rvd_avx_int8_t mipp_avx_notb_int8(const rvd_avx_int8_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_notb_int8");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
+rvd_avx_uint64_t mipp_avx_notb_uint64(const rvd_avx_uint64_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_notb_uint64");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
+rvd_avx_uint32_t mipp_avx_notb_uint32(const rvd_avx_uint32_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_notb_uint32");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
+rvd_avx_uint16_t mipp_avx_notb_uint16(const rvd_avx_uint16_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_notb_uint16");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
+rvd_avx_uint8_t mipp_avx_notb_uint8(const rvd_avx_uint8_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_notb_uint8");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) ) )) )
+rvm_avx_float64_t mipp_avx_notb_k_float64(const rvm_avx_float64_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_notb_k_float64");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) ) )) )
+rvm_avx_float32_t mipp_avx_notb_k_float32(const rvm_avx_float32_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_notb_k_float32");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
+rvm_avx_int64_t mipp_avx_notb_k_int64(const rvm_avx_int64_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_notb_k_int64");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
+rvm_avx_int32_t mipp_avx_notb_k_int32(const rvm_avx_int32_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_notb_k_int32");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
+rvm_avx_int16_t mipp_avx_notb_k_int16(const rvm_avx_int16_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_notb_k_int16");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
+rvm_avx_int8_t mipp_avx_notb_k_int8(const rvm_avx_int8_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_notb_k_int8");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
+rvm_avx_uint64_t mipp_avx_notb_k_uint64(const rvm_avx_uint64_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_notb_k_uint64");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
+rvm_avx_uint32_t mipp_avx_notb_k_uint32(const rvm_avx_uint32_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_notb_k_uint32");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
+rvm_avx_uint16_t mipp_avx_notb_k_uint16(const rvm_avx_uint16_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_notb_k_uint16");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
+rvm_avx_uint8_t mipp_avx_notb_k_uint8(const rvm_avx_uint8_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_notb_k_uint8");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) )
+rvm_avx_int64_t mipp_avx_cmpeq_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpeq_int64");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) )
+rvm_avx_int32_t mipp_avx_cmpeq_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpeq_int32");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvm_avx_int16_t mipp_avx_cmpeq_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpeq_int16");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvm_avx_int8_t mipp_avx_cmpeq_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpeq_int8");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) ) )) )
+rvm_avx_uint16_t mipp_avx_cmpeq_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpeq_uint16");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) ) )) )
+rvm_avx_uint8_t mipp_avx_cmpeq_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpeq_uint8");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && (( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) )) )
+rvm_avx_int64_t mipp_avx_cmpneq_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpneq_int64");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && (( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) )) )
+rvm_avx_int32_t mipp_avx_cmpneq_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpneq_int32");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && ( ( ( defined(__AVX2__) ) ) ) && (( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && ( ( ( defined(__AVX2__) ) ) )) )
+rvm_avx_int16_t mipp_avx_cmpneq_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpneq_int16");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && ( ( ( defined(__AVX2__) ) ) ) && (( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && ( ( ( defined(__AVX2__) ) ) )) )
+rvm_avx_int8_t mipp_avx_cmpneq_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpneq_int8");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) )
+rvm_avx_uint64_t mipp_avx_cmpneq_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpneq_uint64");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) )
+rvm_avx_uint32_t mipp_avx_cmpneq_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpneq_uint32");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && ( ( ( ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && ( ( ( ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) ) )) ) ) )) )
+rvm_avx_uint16_t mipp_avx_cmpneq_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpneq_uint16");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && ( ( ( ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && ( ( ( ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) ) )) ) ) )) )
+rvm_avx_uint8_t mipp_avx_cmpneq_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpneq_uint8");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && !( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
+rvd_avx_int64_t mipp_avx_blend_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1, const rvm_avx_int64_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_blend_int64");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && !( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
+rvd_avx_int32_t mipp_avx_blend_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1, const rvm_avx_int32_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_blend_int32");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
+rvd_avx_int16_t mipp_avx_blend_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1, const rvm_avx_int16_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_blend_int16");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
+rvd_avx_int8_t mipp_avx_blend_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1, const rvm_avx_int8_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_blend_int8");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && !( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
+rvd_avx_uint64_t mipp_avx_blend_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1, const rvm_avx_uint64_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_blend_uint64");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && !( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
+rvd_avx_uint32_t mipp_avx_blend_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1, const rvm_avx_uint32_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_blend_uint32");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
+rvd_avx_uint16_t mipp_avx_blend_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1, const rvm_avx_uint16_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_blend_uint16");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
+rvd_avx_uint8_t mipp_avx_blend_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1, const rvm_avx_uint8_t m0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_blend_uint8");
+	exit(-1);
+}
+#endif
+rvd_avx_int64_t mipp_avx_sat_int64(const rvd_avx_int64_t r0, const int64_t v0, const int64_t v1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sat_int64");
+	exit(-1);
+}
+#if !( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) ) )) )
+rvd_avx_int32_t mipp_avx_sat_int32(const rvd_avx_int32_t r0, const int32_t v0, const int32_t v1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sat_int32");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) ) )) )
+rvd_avx_int16_t mipp_avx_sat_int16(const rvd_avx_int16_t r0, const int16_t v0, const int16_t v1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sat_int16");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) ) ) && ( ( ( defined(__AVX2__) ) ) )) )
+rvd_avx_int8_t mipp_avx_sat_int8(const rvd_avx_int8_t r0, const int8_t v0, const int8_t v1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sat_int8");
+	exit(-1);
+}
+#endif
+rvd_avx_uint64_t mipp_avx_sat_uint64(const rvd_avx_uint64_t r0, const uint64_t v0, const uint64_t v1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sat_uint64");
+	exit(-1);
+}
+rvd_avx_uint32_t mipp_avx_sat_uint32(const rvd_avx_uint32_t r0, const uint32_t v0, const uint32_t v1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sat_uint32");
+	exit(-1);
+}
+rvd_avx_uint16_t mipp_avx_sat_uint16(const rvd_avx_uint16_t r0, const uint16_t v0, const uint16_t v1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sat_uint16");
+	exit(-1);
+}
+rvd_avx_uint8_t mipp_avx_sat_uint8(const rvd_avx_uint8_t r0, const uint8_t v0, const uint8_t v1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sat_uint8");
+	exit(-1);
+}
+#if !( defined(__AVX2__) )
+rvd_avx_int64_t mipp_avx_hadd_int64(const rvd_avx_int64_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hadd_int64");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvd_avx_int32_t mipp_avx_hadd_int32(const rvd_avx_int32_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hadd_int32");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvd_avx_int16_t mipp_avx_hadd_int16(const rvd_avx_int16_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hadd_int16");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvd_avx_int8_t mipp_avx_hadd_int8(const rvd_avx_int8_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hadd_int8");
+	exit(-1);
+}
+#endif
+rvd_avx_uint64_t mipp_avx_hadd_uint64(const rvd_avx_uint64_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hadd_uint64");
+	exit(-1);
+}
+rvd_avx_uint32_t mipp_avx_hadd_uint32(const rvd_avx_uint32_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hadd_uint32");
+	exit(-1);
+}
+#if !( defined(__AVX2__) )
+rvd_avx_uint16_t mipp_avx_hadd_uint16(const rvd_avx_uint16_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hadd_uint16");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvd_avx_uint8_t mipp_avx_hadd_uint8(const rvd_avx_uint8_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hadd_uint8");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) ) )) )
+int64_t mipp_avx_hadd_2_int64(const rvd_avx_int64_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hadd_2_int64");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) ) )) )
+int32_t mipp_avx_hadd_2_int32(const rvd_avx_int32_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hadd_2_int32");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) )) )
+int16_t mipp_avx_hadd_2_int16(const rvd_avx_int16_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hadd_2_int16");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) )) )
+int8_t mipp_avx_hadd_2_int8(const rvd_avx_int8_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hadd_2_int8");
+	exit(-1);
+}
+#endif
+uint64_t mipp_avx_hadd_2_uint64(const rvd_avx_uint64_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hadd_2_uint64");
+	exit(-1);
+}
+uint32_t mipp_avx_hadd_2_uint32(const rvd_avx_uint32_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hadd_2_uint32");
+	exit(-1);
+}
+#if !( ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) )) )
+uint16_t mipp_avx_hadd_2_uint16(const rvd_avx_uint16_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hadd_2_uint16");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) )) )
+uint8_t mipp_avx_hadd_2_uint8(const rvd_avx_uint8_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hadd_2_uint8");
+	exit(-1);
+}
+#endif
+rvd_avx_int64_t mipp_avx_hmul_int64(const rvd_avx_int64_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmul_int64");
+	exit(-1);
+}
+#if !( defined(__AVX2__) )
+rvd_avx_int32_t mipp_avx_hmul_int32(const rvd_avx_int32_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmul_int32");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvd_avx_int16_t mipp_avx_hmul_int16(const rvd_avx_int16_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmul_int16");
+	exit(-1);
+}
+#endif
+rvd_avx_int8_t mipp_avx_hmul_int8(const rvd_avx_int8_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmul_int8");
+	exit(-1);
+}
+rvd_avx_uint64_t mipp_avx_hmul_uint64(const rvd_avx_uint64_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmul_uint64");
+	exit(-1);
+}
+rvd_avx_uint32_t mipp_avx_hmul_uint32(const rvd_avx_uint32_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmul_uint32");
+	exit(-1);
+}
+rvd_avx_uint16_t mipp_avx_hmul_uint16(const rvd_avx_uint16_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmul_uint16");
+	exit(-1);
+}
+rvd_avx_uint8_t mipp_avx_hmul_uint8(const rvd_avx_uint8_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmul_uint8");
+	exit(-1);
+}
+int64_t mipp_avx_hmul_2_int64(const rvd_avx_int64_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmul_2_int64");
+	exit(-1);
+}
+#if !( ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) ) )) )
+int32_t mipp_avx_hmul_2_int32(const rvd_avx_int32_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmul_2_int32");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) )) )
+int16_t mipp_avx_hmul_2_int16(const rvd_avx_int16_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmul_2_int16");
+	exit(-1);
+}
+#endif
+int8_t mipp_avx_hmul_2_int8(const rvd_avx_int8_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmul_2_int8");
+	exit(-1);
+}
+uint64_t mipp_avx_hmul_2_uint64(const rvd_avx_uint64_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmul_2_uint64");
+	exit(-1);
+}
+uint32_t mipp_avx_hmul_2_uint32(const rvd_avx_uint32_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmul_2_uint32");
+	exit(-1);
+}
+uint16_t mipp_avx_hmul_2_uint16(const rvd_avx_uint16_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmul_2_uint16");
+	exit(-1);
+}
+uint8_t mipp_avx_hmul_2_uint8(const rvd_avx_uint8_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmul_2_uint8");
+	exit(-1);
+}
+rvd_avx_int64_t mipp_avx_hmin_int64(const rvd_avx_int64_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmin_int64");
+	exit(-1);
+}
+#if !( defined(__AVX2__) )
+rvd_avx_int32_t mipp_avx_hmin_int32(const rvd_avx_int32_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmin_int32");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvd_avx_int16_t mipp_avx_hmin_int16(const rvd_avx_int16_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmin_int16");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvd_avx_int8_t mipp_avx_hmin_int8(const rvd_avx_int8_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmin_int8");
+	exit(-1);
+}
+#endif
+rvd_avx_uint64_t mipp_avx_hmin_uint64(const rvd_avx_uint64_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmin_uint64");
+	exit(-1);
+}
+#if !( defined(__AVX2__) )
+rvd_avx_uint32_t mipp_avx_hmin_uint32(const rvd_avx_uint32_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmin_uint32");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvd_avx_uint16_t mipp_avx_hmin_uint16(const rvd_avx_uint16_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmin_uint16");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvd_avx_uint8_t mipp_avx_hmin_uint8(const rvd_avx_uint8_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmin_uint8");
+	exit(-1);
+}
+#endif
+int64_t mipp_avx_hmin_2_int64(const rvd_avx_int64_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmin_2_int64");
+	exit(-1);
+}
+#if !( ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) ) )) )
+int32_t mipp_avx_hmin_2_int32(const rvd_avx_int32_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmin_2_int32");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) )) )
+int16_t mipp_avx_hmin_2_int16(const rvd_avx_int16_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmin_2_int16");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) )) )
+int8_t mipp_avx_hmin_2_int8(const rvd_avx_int8_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmin_2_int8");
+	exit(-1);
+}
+#endif
+uint64_t mipp_avx_hmin_2_uint64(const rvd_avx_uint64_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmin_2_uint64");
+	exit(-1);
+}
+#if !( ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) ) )) )
+uint32_t mipp_avx_hmin_2_uint32(const rvd_avx_uint32_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmin_2_uint32");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) )) )
+uint16_t mipp_avx_hmin_2_uint16(const rvd_avx_uint16_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmin_2_uint16");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) )) )
+uint8_t mipp_avx_hmin_2_uint8(const rvd_avx_uint8_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmin_2_uint8");
+	exit(-1);
+}
+#endif
+rvd_avx_int64_t mipp_avx_hmax_int64(const rvd_avx_int64_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmax_int64");
+	exit(-1);
+}
+#if !( defined(__AVX2__) )
+rvd_avx_int32_t mipp_avx_hmax_int32(const rvd_avx_int32_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmax_int32");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvd_avx_int16_t mipp_avx_hmax_int16(const rvd_avx_int16_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmax_int16");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvd_avx_int8_t mipp_avx_hmax_int8(const rvd_avx_int8_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmax_int8");
+	exit(-1);
+}
+#endif
+rvd_avx_uint64_t mipp_avx_hmax_uint64(const rvd_avx_uint64_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmax_uint64");
+	exit(-1);
+}
+#if !( defined(__AVX2__) )
+rvd_avx_uint32_t mipp_avx_hmax_uint32(const rvd_avx_uint32_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmax_uint32");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvd_avx_uint16_t mipp_avx_hmax_uint16(const rvd_avx_uint16_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmax_uint16");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) )
+rvd_avx_uint8_t mipp_avx_hmax_uint8(const rvd_avx_uint8_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmax_uint8");
+	exit(-1);
+}
+#endif
+int64_t mipp_avx_hmax_2_int64(const rvd_avx_int64_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmax_2_int64");
+	exit(-1);
+}
+#if !( ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) ) )) )
+int32_t mipp_avx_hmax_2_int32(const rvd_avx_int32_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmax_2_int32");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) )) )
+int16_t mipp_avx_hmax_2_int16(const rvd_avx_int16_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmax_2_int16");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) )) )
+int8_t mipp_avx_hmax_2_int8(const rvd_avx_int8_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmax_2_int8");
+	exit(-1);
+}
+#endif
+uint64_t mipp_avx_hmax_2_uint64(const rvd_avx_uint64_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmax_2_uint64");
+	exit(-1);
+}
+#if !( ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) ) )) )
+uint32_t mipp_avx_hmax_2_uint32(const rvd_avx_uint32_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmax_2_uint32");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) )) )
+uint16_t mipp_avx_hmax_2_uint16(const rvd_avx_uint16_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmax_2_uint16");
+	exit(-1);
+}
+#endif
+#if !( ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && ( ( ( defined(__AVX2__) ) ) )) )
+uint8_t mipp_avx_hmax_2_uint8(const rvd_avx_uint8_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmax_2_uint8");
+	exit(-1);
+}
+#endif
+#endif /* MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX_H_ */
