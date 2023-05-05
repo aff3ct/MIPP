@@ -233,8 +233,6 @@ mipp_funcs = {
 	"andb_k":  { "proto": protos["ret_msk_2args_msk"           ], "datatypes": all_datatypes          , "horizontal": False },
 	"andnb":   { "proto": protos["ret_reg_2args_reg"           ], "datatypes": all_datatypes          , "horizontal": False },
 	"andnb_k": { "proto": protos["ret_msk_2args_msk"           ], "datatypes": all_datatypes          , "horizontal": False },
-	"orb":     { "proto": protos["ret_reg_2args_reg"           ], "datatypes": all_datatypes          , "horizontal": False },
-	"orb_k":   { "proto": protos["ret_msk_2args_msk"           ], "datatypes": all_datatypes          , "horizontal": False },
 	"xorb":    { "proto": protos["ret_reg_2args_reg"           ], "datatypes": all_datatypes          , "horizontal": False },
 	"xorb_k":  { "proto": protos["ret_msk_2args_msk"           ], "datatypes": all_datatypes          , "horizontal": False },
 	"msb":     { "proto": protos["ret_reg_1arg_reg"            ], "datatypes": all_datatypes          , "horizontal": False },
