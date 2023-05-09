@@ -8,7 +8,7 @@ isa_avx = {
 	"hw_lmul": False,
 	"datatypes": {
 		float64 : { "data_ext" :    "pd", "data_ext_logi":    "pd", "data_ext_msk": "si256", "reg" : "__m256d", "msk" : "__m256i", "to_ptr": "float64_t", },
-		float32 : { "data_ext" :    "ps", "data_ext_logi":    "ps", "data_ext_msk": "si256", "reg" : " __m256", "msk" : "__m256i", "to_ptr": "float32_t", },
+		float32 : { "data_ext" :    "ps", "data_ext_logi":    "ps", "data_ext_msk": "si256", "reg" : "__m256" , "msk" : "__m256i", "to_ptr": "float32_t", },
 		  int64 : { "data_ext" : "epi64", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg" : "__m256i", "msk" : "__m256i", "to_ptr":   "__m256i", },
 		  int32 : { "data_ext" : "epi32", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg" : "__m256i", "msk" : "__m256i", "to_ptr":   "__m256i", },
 		  int16 : { "data_ext" : "epi16", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg" : "__m256i", "msk" : "__m256i", "to_ptr":   "__m256i", },
