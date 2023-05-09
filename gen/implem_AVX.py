@@ -63,6 +63,8 @@ tpl_implem_avx = {
 	},
 	"testz_2args": { "format": "long", "code":
 """	return {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_msk }}(m0.m, m1.m);""" },
+	
+
 	"reduce_64": { "format": "long", "code":
 """	%r<c:float|b:32>% rsf;
 	rsf.m = _mm256_permute2f128_ps(%cast<tp,c:float|b:32>%(r0).m, %cast<tp,c:float|b:32>%(r0).m, _MM_SHUFFLE(0,0,0,1));
@@ -73,6 +75,8 @@ tpl_implem_avx = {
 	%r<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);
 	rs2.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs1.m, rs2.m);
 	return rs2;""" },
+
+	
 	"reduce_32": { "format": "long", "code":
 """	%r<c:float|b:32>% rsf;
 	rsf.m = _mm256_permute2f128_ps(%cast<tp,c:float|b:32>%(r0).m, %cast<tp,c:float|b:32>%(r0).m, _MM_SHUFFLE(0,0,0,1));

@@ -18,6 +18,7 @@ isa_avx512 = {
         uint16  : { "data_ext" : "epu16" , "data_ext_logi": "si512" , "data_ext_msk": "si512" , "reg" : "__m512i" , "msk" : "__mmask32" , "to_ptr": "uint16_t"  , } ,
         uint8   : { "data_ext" : "epu8"  , "data_ext_logi": "si512" , "data_ext_msk": "si512" , "reg" : "__m512i" , "msk" : "__mmask64" , "to_ptr": "uint8_t"   , } ,
     },
+}
 
 tpl_implem_avx512 = {
     "cast"   : { "format": "short", "code": "{% if isa_dt_par.data_ext_logi != isa_dt_ret.data_ext_logi -%}{{ isa.prefix }}_{{ instr_name }}{{isa_dt_par.data_ext_logi}}_{{isa_dt_ret.data_ext_logi}}(r0.m);{% else -%} r0.m;{% endif %}" },
@@ -25,7 +26,9 @@ tpl_implem_avx512 = {
     "toreg"  : { "format": "short", "code": "{% if isa_dt_par.data_ext_msk != isa_dt_ret.data_ext_logi -%}{{ isa.prefix }}_{{ instr_name }}{{isa_dt_par.data_ext_msk}}_{{isa_dt_ret.data_ext_logi}}(m0.m);{% else -%} m0.m;{% endif %}" },
     "load"   : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(({{ isa_dt_par.to_ptr }}*) p0);" },
     "store"  : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(({{ isa_dt_par.to_ptr }}*) p0, r0.m);" },
-
+    "set0"   : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}();" },
+    "set1"   : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(v0);" },
+}
 implems_avx = {
     "cast"   : [
         { "instr_name" : "cast", "datatypes": all_datatypes_cart_prod, "template": tpl_implem_avx["cast"],"if": "defined(__AVX512F__)" } ],
@@ -43,3 +46,7 @@ implems_avx = {
         { "instr_name": "storeu", "datatypes": all_datatypes, "template": tpl_implem_avx["store"], "if": "!defined(MIPP_ALIGNED_LOADS)" } ],
     "storeu" : [
         { "instr_name": "storeu", "datatypes": all_datatypes, "template": tpl_implem_avx["store"], "if": "defined(__AVX512F__)"} ],
+    "set0"   : [
+        { "instr_name": "setzero", "datatypes": [all_float,all_int], "template": tpl_implem_avx["set0"], "if": "defined(__AVX512F__)"} ],   
+    "set1"   : [
+        { "instr_name": "set1", "datatypes": [all_float,all_int], "template": tpl_implem_avx["set1"], "if": "defined(__AVX512F__)" } ],
