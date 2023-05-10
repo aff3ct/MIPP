@@ -15,8 +15,22 @@ tpl_implem_emu512 = {
 	""" %r<c:int|b:32>% r32 = %set1<c:int|b:32>%(0);
  	    %m<c:int|b:32>% m32 = %tomsk<c:int|b:32>%(r32);
   	    return _mm512_kxor(m32, m32);""" 
+		"set-64f"   : { "format": "short", "code": 
+	"""	return %cast_k<c:float,tp>%(_mm512_set_pd(vals[7], vals[6], vals[5], vals[4], vals[3], vals[2], vals[1], vals[0]));"""
+  	    "set-32f"   : { "format": "short", "code": 
+	"""	return _mm512_set_ps(vals[15], vals[14], vals[13], vals[12],vals[11], vals[10], vals[ 9], vals[ 8],
+		                     vals[ 7], vals[ 6], vals[ 5], vals[ 4],vals[ 3], vals[ 2], vals[ 1], vals[ 0]));"""
+   	    "set-64"   : { "format": "short", "code": 
+	"""	return %cast_k<c:float,tp>%(_mm512_set_epi64((vals[15], vals[14], vals[13], vals[12],
+		                     					  	  vals[11], vals[10], vals[ 9], vals[ 8],
+		                     					  	  vals[ 7], vals[ 6], vals[ 5], vals[ 4],
+		                     					 	  vals[ 3], vals[ 2], vals[ 1], vals[ 0]));"""
+   	    "set-32"   : { "format": "short", "code": 
+    """ return %cast_k<c:float,tp>%(_mm512_castsi512_ps(_mm512_set_epi32(vals[15], vals[14], vals[13], vals[12], vals[11], vals[10], vals[ 9], vals[ 8],
+		                                            					 vals[ 7], vals[ 6], vals[ 5], vals[ 4],vals[ 3], vals[ 2], vals[ 1], vals[ 0]));"""
   	    }, 
-	
+}
+implems_emu = {
 		"set0":[
 		{ "datatypes": [float64] , "template": tpl_implem_emu512["set0-f64"] , "if": "defined(__MIC__) || defined(__KNCNI__)"} ,
 		{ "datatypes": [float32] , "template": tpl_implem_emu512["set0-f32"] , "if": "defined(__MIC__) || defined(__KNCNI__)"} ,

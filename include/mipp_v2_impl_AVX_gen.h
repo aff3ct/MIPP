@@ -25,7 +25,7 @@
 #define MIPP_AVX_N_UINT16 16
 #define MIPP_AVX_N_UINT8 32
 typedef struct { __m256d m; } rvd_avx_float64_t;
-typedef struct {  __m256 m; } rvd_avx_float32_t;
+typedef struct { __m256 m; } rvd_avx_float32_t;
 typedef struct { __m256i m; } rvd_avx_int64_t;
 typedef struct { __m256i m; } rvd_avx_int32_t;
 typedef struct { __m256i m; } rvd_avx_int16_t;
