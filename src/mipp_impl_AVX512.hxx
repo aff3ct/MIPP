@@ -639,7 +639,7 @@
 
 	template <>
 	inline msk set<16>(const bool vals[16]) {
-		uint32_t v[16] = {vals[ 0] ? 0xFFFFFFFF : 0, valscd [ 1] ? 0xFFFFFFFF : 0,
+		uint32_t v[16] = {vals[ 0] ? 0xFFFFFFFF : 0, vals[ 1] ? 0xFFFFFFFF : 0,
 		                  vals[ 2] ? 0xFFFFFFFF : 0, vals[ 3] ? 0xFFFFFFFF : 0,
 		                  vals[ 4] ? 0xFFFFFFFF : 0, vals[ 5] ? 0xFFFFFFFF : 0,
 		                  vals[ 6] ? 0xFFFFFFFF : 0, vals[ 7] ? 0xFFFFFFFF : 0,
