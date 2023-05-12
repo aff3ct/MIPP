@@ -748,64 +748,63 @@
 	inline reg_2 low<double>(const reg v) {
 		return _mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(v), 0));
 	}
+#endif
+
+#if defined(__AVX512DQ__)
 
 	template <>
 	inline reg_2 low<float>(const reg v) {
-		return _mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(v), 0));
+		return _mm256_castpd_ps(_mm512_extractf32x8_ps(v, 0));
 	}
 
 	template <>
 	inline reg_2 low<int64_t>(const reg v) {
-		return _mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(v), 0));
+		return _mm256_castsi256_ps(_mm512_extracti64x4_epi64(_mm512_castps_si512(v), 0));
 	}
 
 	template <>
 	inline reg_2 low<int32_t>(const reg v) {
-		return _mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(v), 0));
+		return _mm256_castsi256_ps(_mm512_extracti32x8_epi32(_mm512_castps_si512(v), 0));
 	}
-
 	template <>
 	inline reg_2 low<int16_t>(const reg v) {
-		return _mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(v), 0));
+		return _mm256_castsi256_ps(_mm512_extracti32x8_epi32(_mm512_castps_si512(v), 0));
 	}
-
 	template <>
 	inline reg_2 low<int8_t>(const reg v) {
-		return _mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(v), 0));
-	}
+		return _mm256_castsi256_ps(_mm512_extracti32x8_epi32(_mm512_castps_si512(v), 0));
 #endif
-
 	// ----------------------------------------------------------------------------------------------------------- high
 #if defined(__AVX512F__)
 	template <>
 	inline reg_2 high<double>(const reg v) {
-		return _mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(v), 1));
+		return _mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(v), 0));
 	}
+#endif
+
+#if defined(__AVX512DQ__)
 
 	template <>
 	inline reg_2 high<float>(const reg v) {
-		return _mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(v), 1));
+		return _mm256_castpd_ps(_mm512_extractf32x8_ps(v, 1));
 	}
 
 	template <>
 	inline reg_2 high<int64_t>(const reg v) {
-		return _mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(v), 1));
+		return _mm256_castsi256_ps(_mm512_extracti64x4_epi64(_mm512_castps_si512(v), 1));
 	}
 
 	template <>
 	inline reg_2 high<int32_t>(const reg v) {
-		return _mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(v), 1));
+		return _mm256_castsi256_ps(_mm512_extracti32x8_epi32(_mm512_castps_si512(v), 1));
 	}
-
 	template <>
 	inline reg_2 high<int16_t>(const reg v) {
-		return _mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(v), 1));
+		return _mm256_castsi256_ps(_mm512_extracti32x8_epi32(_mm512_castps_si512(v), 1));
 	}
-
 	template <>
 	inline reg_2 high<int8_t>(const reg v) {
-		return _mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(v), 1));
-	}
+		return _mm256_castsi256_ps(_mm512_extracti32x8_epi32(_mm512_castps_si512(v), 1));
 #endif
 
 	// -------------------------------------------------------------------------------------------------------- combine
@@ -1787,7 +1786,7 @@
 		return mask<double,add<double>>(m.m, src.r, v1.r, v2.r);
 	}
 
-#if defined(__AVX512F__)
+#if defined(__AVX512F__)                   
 	template <>
 	inline reg maskz<double,add<double>>(const msk m, const reg v1, const reg v2) {
 		return _mm512_castpd_ps(_mm512_maskz_add_pd((__mmask8)m, _mm512_castps_pd(v1), _mm512_castps_pd(v2)));
