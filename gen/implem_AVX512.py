@@ -21,23 +21,27 @@ isa_avx512 = {
 }
 
 tpl_implem_avx512 = {
-"cast"                : { "format": "short", "code": "{% if isa_dt_par.data_ext_logi != isa_dt_ret.data_ext_logi -%}{{ isa.prefix }}_{{ instr_name }}{{isa_dt_par.data_ext_logi}}_{{isa_dt_ret.data_ext_logi}}(r0.m);{% else -%} r0.m;{% endif %}" },
-"cast_k"              : { "format": "short", "code": "m0.m;" },
-"toreg"               : { "format": "short", "code": "{% if isa_dt_par.data_ext_msk != isa_dt_ret.data_ext_logi -%}{{ isa.prefix }}_{{ instr_name }}{{isa_dt_par.data_ext_msk}}_{{isa_dt_ret.data_ext_logi}}(m0.m);{% else -%} m0.m;{% endif %}" },
-"tomsk"               : { "format": "short", "code": "{% if isa_dt_par.data_ext_logi != isa_dt_ret.data_ext_msk -%}{{ isa.prefix }}_{{ instr_name }}{{isa_dt_par.data_ext_logi}}_{{isa_dt_ret.data_ext_msk}}(r0.m);{% else -%} r0.m;{% endif %}" },
-"load"                : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(({{ isa_dt_par.to_ptr }}*) p0);" },
-"store"               : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(({{ isa_dt_par.to_ptr }}*) p0, r0.m);" },
-"set0"                : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}();" },
-"set1"                : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(v0);" },
-"low"                 : { "format": "long",  "code":
+    "cast"                : { "format": "short", "code": "{% if isa_dt_par.data_ext_logi != isa_dt_ret.data_ext_logi -%}{{ isa.prefix }}_{{ instr_name }}{{isa_dt_par.data_ext_logi}}_{{isa_dt_ret.data_ext_logi}}(r0.m);{% else -%} r0.m;{% endif %}" },
+    "cast_k"              : { "format": "short", "code": "m0.m;" },
+    "toreg"               : { "format": "short", "code": "{% if isa_dt_par.data_ext_msk != isa_dt_ret.data_ext_logi -%}{{ isa.prefix }}_{{ instr_name }}{{isa_dt_par.data_ext_msk}}_{{isa_dt_ret.data_ext_logi}}(m0.m);{% else -%} m0.m;{% endif %}" },
+    "tomsk"               : { "format": "short", "code": "{% if isa_dt_par.data_ext_logi != isa_dt_ret.data_ext_msk -%}{{ isa.prefix }}_{{ instr_name }}{{isa_dt_par.data_ext_logi}}_{{isa_dt_ret.data_ext_msk}}(r0.m);{% else -%} r0.m;{% endif %}" },
+    "load"                : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(({{ isa_dt_par.to_ptr }}*) p0);" },
+    "store"               : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(({{ isa_dt_par.to_ptr }}*) p0, r0.m);" },
+    "set0"                : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}();" },
+    "set1"                : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(v0);" },
+    "low"                 : { "format": "long",  "code":
 """ return %cast<tp,c : float|b:32>%({{ isa.prefix }}_{{ instr_name }}_pd(%cast<c:float|b:32,tp>%(r0).m, 0));""" },
-"high"                : { "format": "long",  "code":
+    "high"                : { "format": "long",  "code":
 """ return %cast<tp,c : float|b:32>%({{ isa.prefix }}_{{ instr_name }}_pd(%cast<c:float|b:32,tp>%(r0).m, 1));""" },
-"arith_1arg"          : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m);" },
-"arith_2args"         : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, r1.m);" },
-"logi_2args"          : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(r0.m, r1.m);" },
-"logi_m_2args"        : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_msk }}(m0.m, m1.m);" },
-"arith_3args"         : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, r1.m, r2.m);" },
+    "arith_1arg"          : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m);" },
+    "arith_2args"         : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, r1.m);" },
+    "logi_2args"          : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(r0.m, r1.m);" },
+    "logi_m_2args"        : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}(m0.m, m1.m);" },
+    "arith_3args"         : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, r1.m, r2.m);" },
+    "andb_k"              : { "format": "long",  "code":
+""""{{ isa.prefix }}_{{ instr_name }}(m0.m, m1.m);""" }, 
+    "andb_fk"              : { "format": "long",  "code":
+""""return (m0.m & m1.m);""" }, 
 
 }
 implems_avx512 = {
@@ -89,3 +93,13 @@ implems_avx512 = {
         { "instr_name": "max", "datatypes": all_float+[int64 , int32], "template": tpl_implem_avx["arith_2args"], "if": "defined(__AVX512F__)"},
         { "instr_name": "max", "datatypes": [int16, int8], "template": tpl_implem_avx["arith_2args"], "if": "defined(__AVX512BW__)"  } ,
         { "instr_name": "gmax", "datatypes": all_float, "template": tpl_implem_avx["arith_2args"], "if": "defined(__MIC__) || defined(__KNCNI__)" } ],
+    "fmadd": [
+        { "instr_name": "fmadd", "datatypes": all_float, "template": tpl_implem_avx["arith_3args"] },
+        { "instr_name": "fmadd", "datatypes": int32_t, "template": tpl_implem_avx["arith_3args"], "if": "defined(__MIC__) || defined(__KNCNI__)" } ],
+    "fmsub": [
+        { "instr_name": "fmsub", "datatypes": all_float, "template": tpl_implem_avx["arith_3args"] } ],
+    "andb": [
+        { "instr_name": "and", "datatypes": [all_float, all_int] , "template": tpl_implem_avx["logi_2args"] }],    
+    "andb_k": [
+        { "instr_name": "kand", "datatypes": [int8_t,int16_t] , "template": tpl_implem_avx["andb_k"],  },
+        { "datatypes": all_float, "template": tpl_implem_avx["andb_fk"], "if": "defined(__AVX512BW__)" } ],
