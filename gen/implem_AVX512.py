@@ -46,6 +46,8 @@ tpl_implem_avx512 = {
 """"return ((~m0.m) & m1.m);""" }, 
     "xorb_k"              : { "format": "long",  "code":
 """"return (m0.m ^ m1.m);""" }, 
+    "orb_k"              : { "format": "long",  "code":
+""""return (m0.m | m1.m);""" }, 
     "cmpeq_float"         : { "format": "long", "code":
 """ %r<tp>% tmp;
     tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(r0.m, r1.m, _CMP_EQ_OQ);
@@ -55,7 +57,39 @@ tpl_implem_avx512 = {
 """ %r<tp>% tmp;
     tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(r0.m, r1.m, _CMP_NEQ_OQ);
     return %tomsk<tp>%(tmp);""" },
-    "blend"                 : { "format": "short", "code": "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, r1.m, %toreg<tp>%(m0).m);" },
+    "blend"                : { "format": "short", "code": "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, r1.m, %toreg<tp>%(m0).m);" },
+    "reduce_64": { "format": "long", "code":
+""" %r<c:float|b:32>% rsf; 
+    rsf.m = _mm512_permutexvar_ps(%cast<tp,c:float|b:32>%(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8), %cast<tp,c:float|b:32>%(r0).m));
+    %r<tp>% rs1 = %cast<c:float|b:32,tp>%(rsf);
+    rs1.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, rs1.m);
+    rsf = %cast<tp,c:float|b:32>%(rs1);
+    rsf.m = _mm512_permutexvar_ps(%cast<tp,c:float|b:32>%(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4), %cast<tp,c:float|b:32>%(r0).m));
+    %r<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);
+    rs2.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs1.m, rs2.m);
+    rsf = %cast<tp,c:float|b:32>%(rs1);
+    rsf.m = _mm512_shuffle_epi32(rsf.m, _MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2))))); 
+    %r<tp>% rs3 = %cast<c:float|b:32,tp>%(rsf);
+    rs3.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs2.m, rs3.m);
+    return rs3;""" 
+    "reduce_32": { "format": "long", "code":
+""" %r<c:float|b:32>% rsf;
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),%cast<tp,c:float|b:32>%(r0).m));
+    %r<tp>% rs1 = %cast<c:float|b:32,tp>%(rsf);
+    rs1.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, rs1.m);   
+    rsf = %cast<tp,c:float|b:32>%(rs1);
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),%cast<tp,c:float|b:32>%(r0).m));
+    %r<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);
+    rs2.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs1.m, rs2.m);
+    rsf = %cast<tp,c:float|b:32>%(rs2);
+    rsf.m = _mm512_shuffle_epi32(%cast<tp,c:float|b:32>%(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));
+    %r<tp>% rs3 = %cast<c:float|b:32,tp>%(rsf);
+    rs3.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs2.m, rs3.m);
+    rsf = %cast<tp,c:float|b:32>%(rs3);
+    rsf.m = _mm512_shuffle_epi32(%cast<tp,c:float|b:32>%(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(2,3,0,1)));
+    %r<tp>% rs4 = %cast<c:float|b:32,tp>%(rsf);
+    rs4.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs3.m, rs4.m);
+    return rs4;""" },
 
 }
 implems_avx512 = {
@@ -127,6 +161,11 @@ implems_avx512 = {
     "xorb_k": [
         { "instr_name": "kxor", "datatypes": [int8_t,int16_t] , "template": tpl_implem_avx512["xor_k"],  },
         { "datatypes": all_float, "template": tpl_implem_avx512["andnb_fk"], "if": "defined(__AVX512BW__)" } ],
+    "orb": [
+        { "instr_name": "or", "datatypes":[all_float, all_int], "template": tpl_implem_avx512["logi_2args"] },],
+    "orb_k": [
+        { "instr_name": "kor", "datatypes": [int8_t,int16_t] , "template": tpl_implem_avx512["orb_k"],  },
+        { "datatypes": all_float, "template": tpl_implem_avx512["orb_k"], "if": "defined(__AVX512BW__)" } ],
     "cmpeq": [
         { "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx512["cmpeq_float"], },
         { "instr_name": "cmpeq", "datatypes": [int32_t,int64_t], "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512F__)" } ,
