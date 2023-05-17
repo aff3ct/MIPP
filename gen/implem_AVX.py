@@ -46,6 +46,22 @@ tpl_implem_avx = {
 """	%r<tp>% tmp;
 	tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, r1.m, _CMP_NEQ_OQ);
 	return %tomsk<tp>%(tmp);""" },
+	"cmpgt_float":  { "format": "long", "code":
+"""	%r<tp>% tmp;
+	tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, r1.m, _CMP_GT_OS);
+	return %tomsk<tp>%(tmp);""" },
+	"cmpge_float":  { "format": "long", "code":
+"""	%r<tp>% tmp;
+	tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, r1.m, _CMP_GE_OS);
+	return %tomsk<tp>%(tmp);""" },
+	"cmple_float":  { "format": "long", "code":
+"""	%r<tp>% tmp;
+	tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, r1.m, _CMP_LE_OS);
+	return %tomsk<tp>%(tmp);""" },
+	"cmplt_float":  { "format": "long", "code":
+"""	%r<tp>% tmp;
+	tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, r1.m, _CMP_LT_OS);"""
+	},
 	"cmp_int":      { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, r1.m);" },
 	"blend_float":  { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, r1.m, %toreg<tp>%(m0).m);" },
 	"blend_int":    { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_epi8(r0.m, r1.m, m0.m);" },
@@ -219,6 +235,14 @@ implems_avx = {
 		{ "instr_name": "cmpeq", "datatypes": all_int, "template": tpl_implem_avx["cmp_int"], "if": "defined(__AVX2__)" } ],
 	"cmpneq": [
 		{ "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx["cmpneq_float"], } ],
+	"cmplt": [
+		{ "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx["cmplt_float"], } ],
+	"cmple": [
+		{ "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx["cmple_float"], } ],
+	"cmpge": [
+		{ "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx["cmpge_float"], } ],
+	"cmpgt": [
+		{ "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx["cmpgt_float"], },
 	"blend": [
 		{ "instr_name": "blendv", "datatypes": all_float, "template": tpl_implem_avx["blend_float"], },
 		{ "instr_name": "blendv", "datatypes": all_int_uint, "template": tpl_implem_avx["blend_int"], "if": "defined(__AVX2__)", } ],
