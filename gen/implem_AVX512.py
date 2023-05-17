@@ -38,6 +38,7 @@ tpl_implem_avx512 = {
     "logi_2args"          : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(r0.m, r1.m);" },
     "logi_m_2args"        : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}(m0.m, m1.m);" },
     "arith_3args"         : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, r1.m, r2.m);" },
+    "lshift"              : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, r1.m, r2.m);" },
     "andb_k"              : { "format": "long",  "code":
 """"{{ isa.prefix }}_{{ instr_name }}(m0.m, m1.m);""" }, 
     
