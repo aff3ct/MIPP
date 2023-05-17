@@ -51,6 +51,22 @@ tpl_implem_avx512 = {
 """ %r<tp>% tmp;
     tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(r0.m, r1.m, _CMP_NEQ_OQ);
     return %tomsk<tp>%(tmp);""" },
+    "cmplt_float"         : { "format": "long", "code":
+""" %r<tp>% tmp;
+    tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(r0.m, r1.m, _CMP_LT_OS);
+    return %tomsk<tp>%(tmp);""" },    
+    "cmple_float"         : { "format": "long", "code":
+""" %r<tp>% tmp;
+    tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(r0.m, r1.m, _CMP_LE_OS);
+    return %tomsk<tp>%(tmp);""" }, 
+    "cmpgt_float"         : { "format": "long", "code":
+""" %r<tp>% tmp;
+    tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(r0.m, r1.m, _CMP_GT_OS);
+    return %tomsk<tp>%(tmp);""" },    
+    "cmpge_float"         : { "format": "long", "code":
+""" %r<tp>% tmp;
+    tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(r0.m, r1.m, _CMP_GE_OS);
+    return %tomsk<tp>%(tmp);""" },    
     "blend"                : { "format": "short", "code": "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, r1.m, %toreg<tp>%(m0).m);" },
     "reduce_64": { "format": "long", "code":
 """ %r<c:float|b:32>% rsf; 
@@ -225,9 +241,26 @@ implems_avx512 = {
     "orb_k": [
         { "instr_name": "kor", "datatypes": [int8_t,int16_t] , "template": tpl_implem_avx512["orb_k"],  }],
     "cmpeq": [
-        { "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx512["cmpeq_float"], },
+        { "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx512["cmp_float"], },
         { "instr_name": "cmpeq", "datatypes": [int32_t,int64_t], "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512F__)" } ,
         { "instr_name": "cmpeq", "datatypes": [int16_t,int8_t], "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512BW__)" } ],
+    "cmplt": [
+        { "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx512["cmplt_float"], },
+        { "instr_name": "cmplt", "datatypes": [int32_t,int64_t], "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512F__)" } ,
+        { "instr_name": "cmplt", "datatypes": [int16_t,int8_t], "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512BW__)" } ],
+    "cmple": [
+        { "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx512["cmple_float"], },
+        { "instr_name": "cmple", "datatypes": [int32_t,int64_t], "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512F__)" } ,
+        { "instr_name": "cmple", "datatypes": [int16_t,int8_t], "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512BW__)" } ],
+    "cmpgt": [
+        { "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx512["cmpgt_float"], },
+        { "instr_name": "cmpgt", "datatypes": [int32_t,int64_t], "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512F__)" } ,
+        { "instr_name": "cmpgt", "datatypes": [int16_t,int8_t], "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512BW__)" } ],
+    "cmpge": [
+        { "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx512["cmpge_float"], },
+        { "instr_name": "cmpge", "datatypes": [int32_t,int64_t], "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512F__)" } ,
+        { "instr_name": "cmpge", "datatypes": [int16_t,int8_t], "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512BW__)" } ],
+
     "cmpneq": [
         { "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx512["cmpneq_float"], } ,
         { "instr_name": "cmpneq", "datatypes": [int32_t,int64_t], "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512F__)" } ,
