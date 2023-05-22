@@ -8,7 +8,7 @@ isa_avx = {
 	"hw_lmul": False,
 	"datatypes": {
 		float64 : { "data_ext" :    "pd", "data_ext_logi":    "pd", "data_ext_msk": "si256", "reg" : "__m256d", "msk" : "__m256i", "to_ptr": "float64_t", },
-		float32 : { "data_ext" :    "ps", "data_ext_logi":    "ps", "data_ext_msk": "si256", "reg" : "__m256" , "msk" : "__m256i", "to_ptr": "float32_t", },
+		float32 : { "data_ext" :    "ps", "data_ext_logi":    "ps", "data_ext_msk": "si256", "reg" : " __m256", "msk" : "__m256i", "to_ptr": "float32_t", },
 		  int64 : { "data_ext" : "epi64", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg" : "__m256i", "msk" : "__m256i", "to_ptr":   "__m256i", },
 		  int32 : { "data_ext" : "epi32", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg" : "__m256i", "msk" : "__m256i", "to_ptr":   "__m256i", },
 		  int16 : { "data_ext" : "epi16", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg" : "__m256i", "msk" : "__m256i", "to_ptr":   "__m256i", },
@@ -38,6 +38,8 @@ tpl_implem_avx = {
 	"logi_2args":   { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(r0.m, r1.m);" },
 	"logi_m_2args": { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_msk }}(m0.m, m1.m);" },
 	"arith_3args":  { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, r1.m, r2.m);" },
+	"shift_2args":  { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_epi{{ dt_par.n_bits }}(r0.m, v0);" },
+	"shiftr_2args": { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_epi{{ dt_par.n_bits }}(r0.m, r1.m);" },
 	"cmpeq_float":  { "format": "long", "code":
 """	%r<tp>% tmp;
 	tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, r1.m, _CMP_EQ_OQ);
@@ -60,8 +62,8 @@ tpl_implem_avx = {
 	return %tomsk<tp>%(tmp);""" },
 	"cmplt_float":  { "format": "long", "code":
 """	%r<tp>% tmp;
-	tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, r1.m, _CMP_LT_OS);"""
-	},
+	tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, r1.m, _CMP_LT_OS);
+	return %tomsk<tp>%(tmp);""" },
 	"cmp_int":      { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, r1.m);" },
 	"blend_float":  { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, r1.m, %toreg<tp>%(m0).m);" },
 	"blend_int":    { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_epi8(r0.m, r1.m, m0.m);" },
@@ -77,10 +79,15 @@ tpl_implem_avx = {
 	%r<c:float|b:32>% resf = %{{ instr_name }}<c:float|b:32>%(r0f, r1f);
 	return %tomsk<tp>%(%cast<c:float|b:32,tp>%(resf));"""
 	},
+	"neg_int": { "format": "long", "code":
+"""	%r<tp>% rone = %set1<tp>%(1);
+	%r<tp>% r1bis = %orb<tp>%(r1, rone); // hack to avoid `0` case
+	%r<tp>% res;
+	res.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, r1bis.m);
+	return res;"""
+	},
 	"testz_2args": { "format": "long", "code":
 """	return {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_msk }}(m0.m, m1.m);""" },
-	
-
 	"reduce_64": { "format": "long", "code":
 """	%r<c:float|b:32>% rsf;
 	rsf.m = _mm256_permute2f128_ps(%cast<tp,c:float|b:32>%(r0).m, %cast<tp,c:float|b:32>%(r0).m, _MM_SHUFFLE(0,0,0,1));
@@ -91,8 +98,6 @@ tpl_implem_avx = {
 	%r<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);
 	rs2.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs1.m, rs2.m);
 	return rs2;""" },
-
-	
 	"reduce_32": { "format": "long", "code":
 """	%r<c:float|b:32>% rsf;
 	rsf.m = _mm256_permute2f128_ps(%cast<tp,c:float|b:32>%(r0).m, %cast<tp,c:float|b:32>%(r0).m, _MM_SHUFFLE(0,0,0,1));
@@ -186,6 +191,8 @@ implems_avx = {
 		{ "instr_name": "sqrt", "datatypes": all_float, "template": tpl_implem_avx["arith_1arg"] } ],
 	"rsqrt": [
 		{ "instr_name": "rsqrt", "datatypes": [float32], "template": tpl_implem_avx["arith_1arg"] } ],
+	"abs": [
+		{ "instr_name": "abs", "datatypes": [int32, int16, int8], "template": tpl_implem_avx["arith_1arg"], "if": "defined(__AVX2__)" } ],
 	"add": [
 		{ "instr_name": "add", "datatypes": all_float, "template": tpl_implem_avx["arith_2args"] },
 		{ "instr_name": "add", "datatypes": [int64, int32], "template": tpl_implem_avx["arith_2args"], "if": "defined(__AVX2__)" },
@@ -207,8 +214,12 @@ implems_avx = {
 		{ "instr_name": "max", "datatypes": [int32, int16, int8, uint32, uint16, uint8], "template": tpl_implem_avx["arith_2args"], "if": "defined(__AVX2__)" } ],
 	"fmadd": [
 		{ "instr_name": "fmadd", "datatypes": all_float, "template": tpl_implem_avx["arith_3args"], "if": "defined(__FMA__)" } ],
+	"fnmadd": [
+		{ "instr_name": "fnmadd", "datatypes": all_float, "template": tpl_implem_avx["arith_3args"], "if": "defined(__FMA__)" } ],
 	"fmsub": [
 		{ "instr_name": "fmsub", "datatypes": all_float, "template": tpl_implem_avx["arith_3args"], "if": "defined(__FMA__)" } ],
+	"fnmsub": [
+		{ "instr_name": "fnmsub", "datatypes": all_float, "template": tpl_implem_avx["arith_3args"], "if": "defined(__FMA__)" } ],
 	"andb": [
 		{ "instr_name": "and", "datatypes": all_float, "template": tpl_implem_avx["logi_2args"] },
 		{ "instr_name": "andb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_2args_e"], "if": "!defined(__AVX2__)" },
@@ -223,6 +234,13 @@ implems_avx = {
 	"andnb_k": [
 		{ "instr_name": "andnb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_m_2args_e"], "if": "!defined(__AVX2__)" },
 		{ "instr_name": "andnot", "datatypes": all_datatypes, "template": tpl_implem_avx["logi_m_2args"], "if": "defined(__AVX2__)" } ],
+	"orb": [
+		{ "instr_name": "or", "datatypes": all_float, "template": tpl_implem_avx["logi_2args"] },
+		{ "instr_name": "orb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_2args_e"], "if": "!defined(__AVX2__)" },
+		{ "instr_name": "or", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_2args"], "if": "defined(__AVX2__)" } ],
+	"orb_k": [
+		{ "instr_name": "orb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_m_2args_e"], "if": "!defined(__AVX2__)" },
+		{ "instr_name": "or", "datatypes": all_datatypes, "template": tpl_implem_avx["logi_m_2args"], "if": "defined(__AVX2__)" } ],
 	"xorb": [
 		{ "instr_name": "xor", "datatypes": all_float, "template": tpl_implem_avx["logi_2args"] },
 		{ "instr_name": "xorb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_2args_e"], "if": "!defined(__AVX2__)" },
@@ -230,6 +248,15 @@ implems_avx = {
 	"xorb_k": [
 		{ "instr_name": "xorb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_m_2args_e"], "if": "!defined(__AVX2__)" },
 		{ "instr_name": "xor", "datatypes": all_datatypes, "template": tpl_implem_avx["logi_m_2args"], "if": "defined(__AVX2__)" } ],
+	"lshiftr": [
+		{ "instr_name": "sllv", "datatypes": [uint64, uint32], "template": tpl_implem_avx["shiftr_2args"], "if": "defined(__AVX2__)" } ],
+	"rshiftr": [
+		{ "instr_name": "srlv", "datatypes": [uint64, uint32], "template": tpl_implem_avx["shiftr_2args"], "if": "defined(__AVX2__)" } ],
+	"lshift": [
+		{ "instr_name": "slli", "datatypes": [uint64, uint32, uint16], "template": tpl_implem_avx["shift_2args"], "if": "defined(__AVX2__)" } ],
+	"rshift": [
+		{ "instr_name": "srli", "datatypes": [uint64, uint32, uint16], "template": tpl_implem_avx["shift_2args"], "if": "defined(__AVX2__)" },
+		{ "instr_name": "srai", "datatypes": [int32, int16], "template": tpl_implem_avx["shift_2args"], "if": "defined(__AVX2__)" } ],
 	"cmpeq": [
 		{ "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx["cmpeq_float"], },
 		{ "instr_name": "cmpeq", "datatypes": all_int, "template": tpl_implem_avx["cmp_int"], "if": "defined(__AVX2__)" } ],
@@ -243,9 +270,12 @@ implems_avx = {
 		{ "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx["cmpge_float"], } ],
 	"cmpgt": [
 		{ "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx["cmpgt_float"], },
+		{ "instr_name": "cmpgt", "datatypes": all_int, "template": tpl_implem_avx["cmp_int"], "if": "defined(__AVX2__)" } ],
 	"blend": [
 		{ "instr_name": "blendv", "datatypes": all_float, "template": tpl_implem_avx["blend_float"], },
 		{ "instr_name": "blendv", "datatypes": all_int_uint, "template": tpl_implem_avx["blend_int"], "if": "defined(__AVX2__)", } ],
+	"neg": [
+		{ "instr_name": "sign", "datatypes": [int32, int16, int8], "template": tpl_implem_avx["neg_int"], "if": "defined(__AVX2__)", }, ],
 	"testz": [
 		{ "instr_name": "testz", "datatypes": all_datatypes, "template": tpl_implem_avx["testz_2args"], }, ],
 	"hadd": [
