@@ -185,9 +185,9 @@ implems_avx512 = {
     "set1"   : [
         { "instr_name" : "set1"    , "datatypes": [all_float, all_int]    , "template": tpl_implem_avx512["set1"]   , "if": "defined(__AVX512F__)"} ],
     "low": [
-        { "instr_name": "extractf64x4" , "datatypes": all_float+[int64 , int32 , int16 , int8_t] , "template": tpl_implem_avx512["low"] , "if": "defined(__AVX512F__)"  } ],
+        { "instr_name": "extractf64x4" , "datatypes": all_float+[int64 , int32 , int16 , int8] , "template": tpl_implem_avx512["low"] , "if": "defined(__AVX512F__)"  } ],
     "high": [
-        { "instr_name": "extractf64x4" , "datatypes": all_float+[int64 , int32 , int16 , int8_t] , "template": tpl_implem_avx512["high"] , "if": "defined(__AVX512F__)"  } ],
+        { "instr_name": "extractf64x4" , "datatypes": all_float+[int64 , int32 , int16 , int8] , "template": tpl_implem_avx512["high"] , "if": "defined(__AVX512F__)"  } ],
     "sqrt": [
         { "instr_name": "sqrt", "datatypes": all_float, "template": tpl_implem_avx512["arith_1arg"], "if": "defined(__AVX512F__)"} ],
     "rsqrt": [
@@ -199,7 +199,7 @@ implems_avx512 = {
     "mul": [
         { "instr_name": "mul", "datatypes": all_float, "template": tpl_implem_avx512["arith_2args"] },
         { "instr_name": "mullo", "datatypes": [int32], "template": tpl_implem_avx512["arith_2args"] },
-        { "instr_name": "mullo", "datatypes": [int16_t], "template": tpl_implem_avx512["arith_2args"], "if": "defined(__AVX512BW__)" } ],
+        { "instr_name": "mullo", "datatypes": [int16], "template": tpl_implem_avx512["arith_2args"], "if": "defined(__AVX512BW__)" } ],
     "div": [
         { "instr_name": "div", "datatypes": all_float, "template": tpl_implem_avx512["arith_2args"], "if": "defined(__AVX512BW__)"} ],
     "min": [
@@ -212,53 +212,49 @@ implems_avx512 = {
         { "instr_name": "gmax", "datatypes": all_float, "template": tpl_implem_avx512["arith_2args"], "if": "defined(__MIC__) || defined(__KNCNI__)" } ],
     "fmadd": [
         { "instr_name": "fmadd", "datatypes": all_float, "template": tpl_implem_avx512["arith_3args"] },
-        { "instr_name": "fmadd", "datatypes": int32_t, "template": tpl_implem_avx512["arith_3args"], "if": "defined(__MIC__) || defined(__KNCNI__)" } ],
+        { "instr_name": "fmadd", "datatypes": int32, "template": tpl_implem_avx512["arith_3args"], "if": "defined(__MIC__) || defined(__KNCNI__)" } ],
     "fmsub": [
         { "instr_name": "fmsub", "datatypes": all_float, "template": tpl_implem_avx512["arith_3args"] } ],
     "andb": [
         { "instr_name": "and", "datatypes": [all_float, all_int] , "template": tpl_implem_avx512["logi_2args"] }],    
     "andb_k": [
-        { "instr_name": "kand", "datatypes": [int8_t,int16_t] , "template": tpl_implem_avx512["andb_k"],  }],
+        { "instr_name": "kand", "datatypes": [int8,int16] , "template": tpl_implem_avx512["andb_k"],  }],
     "andnb": [
         { "instr_name": "andnot", "datatypes":[all_float, all_int], "template": tpl_implem_avx512["logi_2args"] }],
     "andnb_k": [
-        { "instr_name": "kand", "datatypes": [int8_t,int16_t] , "template": tpl_implem_avx512["andb_k"],  }],
+        { "instr_name": "kand", "datatypes": [int8,int16] , "template": tpl_implem_avx512["andb_k"],  }],
     "xorb": [
         { "instr_name": "xor", "datatypes":[all_float, all_int], "template": tpl_implem_avx512["logi_2args"] }],
-    "xorb_k": [
-        { "instr_name": "kxor", "datatypes": [int8_t,int16_t] , "template": tpl_implem_avx512["xor_k"],  }],
     "orb": [
         { "instr_name": "or", "datatypes":[all_float, all_int], "template": tpl_implem_avx512["logi_2args"] }],
-    "orb_k": [
-        { "instr_name": "kor", "datatypes": [int8_t,int16_t] , "template": tpl_implem_avx512["orb_k"],  }],
     "cmpeq": [
-        { "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx512["cmp_float"], },
-        { "instr_name": "cmpeq", "datatypes": [int32_t,int64_t], "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512F__)" } ,
-        { "instr_name": "cmpeq", "datatypes": [int16_t,int8_t] , "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512BW__)" } ],
+        { "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx512["cmpeq_float"], },
+        { "instr_name": "cmpeq", "datatypes": [int32,int64], "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512F__)" } ,
+        { "instr_name": "cmpeq", "datatypes": [int16,int8] , "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512BW__)" } ],
     "cmplt": [
         { "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx512["cmplt_float"], },
-        { "instr_name": "cmplt", "datatypes": [int32_t,int64_t], "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512F__)" } ,
-        { "instr_name": "cmplt", "datatypes": [int16_t,int8_t], "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512BW__)" } ],
+        { "instr_name": "cmplt", "datatypes": [int32,int64], "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512F__)" } ,
+        { "instr_name": "cmplt", "datatypes": [int16,int8], "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512BW__)" } ],
     "cmple": [
         { "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx512["cmple_float"], },
-        { "instr_name": "cmple", "datatypes": [int32_t,int64_t], "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512F__)" } ,
-        { "instr_name": "cmple", "datatypes": [int16_t,int8_t], "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512BW__)" } ],
+        { "instr_name": "cmple", "datatypes": [int32,int64], "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512F__)" } ,
+        { "instr_name": "cmple", "datatypes": [int16,int8], "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512BW__)" } ],
     "cmpgt": [
         { "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx512["cmpgt_float"], },
-        { "instr_name": "cmpgt", "datatypes": [int32_t,int64_t], "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512F__)" } ,
-        { "instr_name": "cmpgt", "datatypes": [int16_t,int8_t], "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512BW__)" } ],
+        { "instr_name": "cmpgt", "datatypes": [int32,int64], "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512F__)" } ,
+        { "instr_name": "cmpgt", "datatypes": [int16,int8], "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512BW__)" } ],
     "cmpge": [
         { "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx512["cmpge_float"], },
-        { "instr_name": "cmpge", "datatypes": [int32_t,int64_t], "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512F__)" } ,
-        { "instr_name": "cmpge", "datatypes": [int16_t,int8_t], "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512BW__)" } ],
+        { "instr_name": "cmpge", "datatypes": [int32,int64], "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512F__)" } ,
+        { "instr_name": "cmpge", "datatypes": [int16,int8], "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512BW__)" } ],
 
     "cmpneq": [
         { "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx512["cmpneq_float"], } ,
-        { "instr_name": "cmpneq", "datatypes": [int32_t,int64_t], "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512F__)" } ,
-        { "instr_name": "cmpneq", "datatypes": [int16_t,int8_t], "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512BW__)" } ],
+        { "instr_name": "cmpneq", "datatypes": [int32,int64], "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512F__)" } ,
+        { "instr_name": "cmpneq", "datatypes": [int16,int8], "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512BW__)" } ],
     "blend": [
         { "instr_name": "blend", "datatypes": all_float+[int64 , int32], "template": tpl_implem_avx512["blend"],"if":"defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)" },
-        { "instr_name": "blend", "datatypes": [int8_t,int16_t] , "template": tpl_implem_avx512["blend"],  "if": "defined(__AVX512BW__)" } ],
+        { "instr_name": "blend", "datatypes": [int8,int16] , "template": tpl_implem_avx512["blend"],  "if": "defined(__AVX512BW__)" } ],
     "hmul": [
         { "instr_name": "mul", "datatypes": [float64], "template": tpl_implem_avx512["reduce_64"],"if": "defined(__AVX512F__)"},
         { "instr_name": "mul", "datatypes": [float32], "template": tpl_implem_avx512["reduce_32"],"if": "defined(__AVX512F__)"},
@@ -283,3 +279,10 @@ implems_avx512 = {
         { "instr_name": "max", "datatypes": [int16], "template": tpl_implem_avx512["reduce_16"],"if": "defined(__AVX512BW__)"  }, 
         { "instr_name": "max", "datatypes": [int8], "template": tpl_implem_avx512["reduce_16"],"if": "defined(__AVX512BW__)" }],
 }
+
+print("isa_avx512 = ",isa_avx512)
+print("--------------------------------------------------------------------------------------------------------------------------")
+print("tpl_implem_avx512 = ",tpl_implem_avx512)
+print("--------------------------------------------------------------------------------------------------------------------------")
+print ("implems_avx512 = ",implems_avx512)
+
