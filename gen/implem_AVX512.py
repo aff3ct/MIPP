@@ -66,6 +66,10 @@ tpl_implem_avx512 = {
 """ %r<tp>% tmp;
     tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(r0.m, r1.m, _CMP_GE_OS);
     return %tomsk<tp>%(tmp);""" },    
+    "round"              : { "format": "long",  "code":
+""""{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, 0, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);""" },
+    "round_f"              : { "format": "long",  "code":
+""""{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m,  _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC, _MM_EXPADJ_NONE);""" },
     "blend"                : { "format": "short", "code": "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, r1.m, %toreg<tp>%(m0).m);" },
     "reduce_64": { "format": "long", "code":
 """ %r<c:float|b:32>% rsf; 
@@ -158,7 +162,7 @@ tpl_implem_avx512 = {
     rsi.m = _mm512_shuffle_epi8((rsi.m, mask_8);
     %r<tp>% rs6 = %cast<c:int|b:8,tp>%(rsi);
     rs6.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs5.m, rs6.m);
-    return rs6;""" },
+    return rs6;""" }
 }
 implems_avx512 = {
     "cast"   : [
@@ -252,9 +256,12 @@ implems_avx512 = {
         { "instr_name": "cmpge", "datatypes": [int16,int8], "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512BW__)" } ],
 
     "cmpneq": [
-        { "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx512["cmpneq_float"], } ,
+        { "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx512["cmpneq_float"],"if": "defined(__AVX512F__)"  } ,
         { "instr_name": "cmpneq", "datatypes": [int32,int64], "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512F__)" } ,
         { "instr_name": "cmpneq", "datatypes": [int16,int8], "template": tpl_implem_avx512["cmp_int"], "if": "defined(__AVX512BW__)" } ],
+    "round": [
+        { "instr_name": "roundscale", "datatypes": all_float, "template": tpl_implem_avx512["round"], } ,
+        { "instr_name": "round", "datatypes": all_float, "template": tpl_implem_avx512["round_f"], "if":"defined(__MIC__) || defined(__KNCNI__)"} ],
     "blend": [
         { "instr_name": "blend", "datatypes": all_float+[int64 , int32], "template": tpl_implem_avx512["blend"],"if":"defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)" },
         { "instr_name": "blend", "datatypes": [int8,int16] , "template": tpl_implem_avx512["blend"],  "if": "defined(__AVX512BW__)" } ],
@@ -271,7 +278,7 @@ implems_avx512 = {
         { "instr_name": "min", "datatypes": [int32], "template": tpl_implem_avx512["reduce_32"],"if": "defined(__AVX512F__)" },
         { "instr_name": "min", "datatypes": [int64], "template": tpl_implem_avx512["reduce_16"],"if": "defined(__AVX512F__)"}, 
         { "instr_name": "min", "datatypes": [int16], "template": tpl_implem_avx512["reduce_16"],"if": "defined(__AVX512BW__)" }, 
-        { "instr_name": "min", "datatypes": [int8], "template": tpl_implem_avx512["reduce_16"],"if": "defined(__AVX512BW__)"}],
+        { "instr_name": "min", "datatypes": [int8], "template": tpl_implem_avx512["reduce_8"],"if": "defined(__AVX512BW__)"}],
     "hmax": [
         { "instr_name": "max", "datatypes": [float64], "template": tpl_implem_avx512["reduce_64"],"if": "defined(__AVX512F__)" },
         { "instr_name": "max", "datatypes": [float32], "template": tpl_implem_avx512["reduce_32"],"if": "defined(__AVX512F__)" },
@@ -280,7 +287,7 @@ implems_avx512 = {
         { "instr_name": "max", "datatypes": [int32], "template": tpl_implem_avx512["reduce_32"],"if": "defined(__AVX512F__)" },
         { "instr_name": "max", "datatypes": [int64], "template": tpl_implem_avx512["reduce_16"],"if": "defined(__AVX512F__)" }, 
         { "instr_name": "max", "datatypes": [int16], "template": tpl_implem_avx512["reduce_16"],"if": "defined(__AVX512BW__)"  }, 
-        { "instr_name": "max", "datatypes": [int8], "template": tpl_implem_avx512["reduce_16"],"if": "defined(__AVX512BW__)" }],
+        { "instr_name": "max", "datatypes": [int8], "template": tpl_implem_avx512["reduce_8"],"if": "defined(__AVX512BW__)" }],
 }
 
 print("isa_avx512 = ",isa_avx512)
