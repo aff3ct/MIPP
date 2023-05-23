@@ -41,7 +41,6 @@ tpl_implem_avx512 = {
     "lshift"              : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, r1.m, r2.m);" },
     "andb_k"              : { "format": "long",  "code":
 """"{{ isa.prefix }}_{{ instr_name }}(m0.m, m1.m);""" }, 
-    
     "cmpeq_float"         : { "format": "long", "code":
 """ %r<tp>% tmp;
     tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(r0.m, r1.m, _CMP_EQ_OQ);
@@ -192,6 +191,10 @@ implems_avx512 = {
         { "instr_name": "sqrt", "datatypes": all_float, "template": tpl_implem_avx512["arith_1arg"], "if": "defined(__AVX512F__)"} ],
     "rsqrt": [
         { "instr_name": "rsqrt", "datatypes": [float32], "template": tpl_implem_avx512["arith_1arg"] } ],
+    "add": [
+        { "instr_name": "add", "datatypes": [all_float,int32], "template": tpl_implem_avx512["arith_2args"] },
+        { "instr_name": "add", "datatypes": int64, "template": tpl_implem_avx512["arith_2args"],"if": "defined(__AVX512F__)"},
+        { "instr_name": "adds", "datatypes": [int16, int8, uint16, uint8], "template": tpl_implem_avx512["arith_2args"], "if": "defined(__AVX512BW__)" } ],
     "sub": [
         { "instr_name": "sub", "datatypes": all_float, "template": tpl_implem_avx512["arith_2args"] },
         { "instr_name": "sub", "datatypes": [int64, int32], "template": tpl_implem_avx512["arith_2args"], "if": "defined(__AVX512F__)" },
