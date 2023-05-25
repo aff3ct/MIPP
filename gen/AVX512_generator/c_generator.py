@@ -39,6 +39,7 @@ def gen_c_functions(isa, file, funcs, implems):
 		if f in funcs:
 			for ff in implems[f]:
 				for dt in ff["datatypes"]:
+
 					if len(dt.split(',')) <= 1:
 						dt_par = dt.split(',')[0]
 						dt_ret = dt.split(',')[0]
