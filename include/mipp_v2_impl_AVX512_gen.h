@@ -2901,11 +2901,11 @@ rvd_avx512_int16_t mipp_avx512_blend_int16(const rvd_avx512_int16_t r0, const rv
 #if defined(__AVX512F__) && (( ( ( defined(__AVX512F__) ) ) ) && ( ( ( defined(__AVX512F__) ) ) ))
 rvd_avx512_float64_t mipp_avx512_hadd_float64(const rvd_avx512_float64_t r0) {
  rvd_avx512_float32_t rsf; 
-    rsf.m = _mm512_permutexvar_ps(mipp_avx512_cast_float64_float32(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8), mipp_avx512_cast_float64_float32(r0.m)));
+    rsf.m = _mm512_permutexvar_ps(mipp_avx512_cast_float64_float32(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8), mipp_avx512_cast_float64_float32(r0).m);
     rvd_avx512_float64_t rs1 = mipp_avx512_cast_float32_float64(rsf);
     rs1.m = _mm512_add_pd(r0.m, rs1.m);
     rsf = mipp_avx512_cast_float64_float32(rs1);
-    rsf.m = _mm512_permutexvar_ps(mipp_avx512_cast_float64_float32(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4), mipp_avx512_cast_float64_float32(r0.m)));
+    rsf.m = _mm512_permutexvar_ps(mipp_avx512_cast_float64_float32(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4), mipp_avx512_cast_float64_float32(r0).m);
     rvd_avx512_float64_t rs2 = mipp_avx512_cast_float32_float64(rsf);
     rs2.m = _mm512_add_pd(rs1.m, rs2.m);
     rsf = mipp_avx512_cast_float64_float32(rs1);
@@ -2918,11 +2918,11 @@ rvd_avx512_float64_t mipp_avx512_hadd_float64(const rvd_avx512_float64_t r0) {
 #if defined(__AVX512F__) && (( ( ( defined(__AVX512F__) ) ) ) && ( ( ( defined(__AVX512F__) ) ) ))
 rvd_avx512_int64_t mipp_avx512_hadd_int64(const rvd_avx512_int64_t r0) {
  rvd_avx512_float32_t rsf; 
-    rsf.m = _mm512_permutexvar_ps(mipp_avx512_cast_int64_float32(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8), mipp_avx512_cast_int64_float32(r0.m)));
+    rsf.m = _mm512_permutexvar_ps(mipp_avx512_cast_int64_float32(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8), mipp_avx512_cast_int64_float32(r0).m);
     rvd_avx512_int64_t rs1 = mipp_avx512_cast_float32_int64(rsf);
     rs1.m = _mm512_add_epi64(r0.m, rs1.m);
     rsf = mipp_avx512_cast_int64_float32(rs1);
-    rsf.m = _mm512_permutexvar_ps(mipp_avx512_cast_int64_float32(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4), mipp_avx512_cast_int64_float32(r0.m)));
+    rsf.m = _mm512_permutexvar_ps(mipp_avx512_cast_int64_float32(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4), mipp_avx512_cast_int64_float32(r0).m);
     rvd_avx512_int64_t rs2 = mipp_avx512_cast_float32_int64(rsf);
     rs2.m = _mm512_add_epi64(rs1.m, rs2.m);
     rsf = mipp_avx512_cast_int64_float32(rs1);
@@ -2935,19 +2935,19 @@ rvd_avx512_int64_t mipp_avx512_hadd_int64(const rvd_avx512_int64_t r0) {
 #if defined(__AVX512F__) && (( ( ( defined(__AVX512F__) ) ) ))
 rvd_avx512_float32_t mipp_avx512_hadd_float32(const rvd_avx512_float32_t r0) {
  rvd_avx512_float32_t rsf;
-    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),mipp_avx512_cast_float32_float32(r0.m));
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),mipp_avx512_cast_float32_float32(r0).m);
     rvd_avx512_float32_t rs1 = mipp_avx512_cast_float32_float32(rsf);
     rs1.m = _mm512_add_ps(r0.m, rs1.m);   
     rsf = mipp_avx512_cast_float32_float32(rs1);
-    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),mipp_avx512_cast_float32_float32(r0.m));
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),mipp_avx512_cast_float32_float32(r0).m);
     rvd_avx512_float32_t rs2 = mipp_avx512_cast_float32_float32(rsf);
     rs2.m = _mm512_add_ps(rs1.m, rs2.m);
     rsf = mipp_avx512_cast_float32_float32(rs2);
-    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_float32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2))); 
+    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_float32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));
     rvd_avx512_float32_t rs3 = mipp_avx512_cast_float32_float32(rsf);
     rs3.m = _mm512_add_ps(rs2.m, rs3.m);
     rsf = mipp_avx512_cast_float32_float32(rs3);
-    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_float32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2))); 
+    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_float32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(2,3,0,1)));
     rvd_avx512_float32_t rs4 = mipp_avx512_cast_float32_float32(rsf);
     rs4.m = _mm512_add_ps(rs3.m, rs4.m);
     return rs4;
@@ -2956,19 +2956,19 @@ rvd_avx512_float32_t mipp_avx512_hadd_float32(const rvd_avx512_float32_t r0) {
 #if defined(__AVX512F__) && (( ( ( defined(__AVX512F__) ) ) ) && ( ( ( defined(__AVX512F__) ) ) ))
 rvd_avx512_int32_t mipp_avx512_hadd_int32(const rvd_avx512_int32_t r0) {
  rvd_avx512_float32_t rsf;
-    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),mipp_avx512_cast_int32_float32(r0.m));
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),mipp_avx512_cast_int32_float32(r0).m);
     rvd_avx512_int32_t rs1 = mipp_avx512_cast_float32_int32(rsf);
     rs1.m = _mm512_add_epi32(r0.m, rs1.m);   
     rsf = mipp_avx512_cast_int32_float32(rs1);
-    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),mipp_avx512_cast_int32_float32(r0.m));
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),mipp_avx512_cast_int32_float32(r0).m);
     rvd_avx512_int32_t rs2 = mipp_avx512_cast_float32_int32(rsf);
     rs2.m = _mm512_add_epi32(rs1.m, rs2.m);
     rsf = mipp_avx512_cast_int32_float32(rs2);
-    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_int32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2))); 
+    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_int32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));
     rvd_avx512_int32_t rs3 = mipp_avx512_cast_float32_int32(rsf);
     rs3.m = _mm512_add_epi32(rs2.m, rs3.m);
     rsf = mipp_avx512_cast_int32_float32(rs3);
-    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_int32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2))); 
+    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_int32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(2,3,0,1)));
     rvd_avx512_int32_t rs4 = mipp_avx512_cast_float32_int32(rsf);
     rs4.m = _mm512_add_epi32(rs3.m, rs4.m);
     return rs4;
@@ -2977,18 +2977,19 @@ rvd_avx512_int32_t mipp_avx512_hadd_int32(const rvd_avx512_int32_t r0) {
 #if defined(__AVX512BW__) && (( ( ( defined(__AVX512F__) ) ) ) && ( ( ( defined(__AVX512F__) ) ) ) && ( ( ( defined(__AVX512F__) ) ) ))
 rvd_avx512_int16_t mipp_avx512_hadd_int16(const rvd_avx512_int16_t r0) {
  rvd_avx512_float32_t rsf;
-    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),mipp_avx512_cast_int16_float32(r0.m));
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),mipp_avx512_cast_int16_float32(r0).m);
     rvd_avx512_int16_t rs1 = mipp_avx512_cast_float32_int16(rsf);
     rs1.m = _mm512_adds_epi16(r0.m, rs1.m);   
     rsf = mipp_avx512_cast_int16_float32(rs1);
-    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),mipp_avx512_cast_int16_float32(r0.m));
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),mipp_avx512_cast_int16_float32(r0).m);
     rvd_avx512_int16_t rs2 = mipp_avx512_cast_float32_int16(rsf);
     rs2.m = _mm512_adds_epi16(rs1.m, rs2.m);
     rsf = mipp_avx512_cast_int16_float32(rs2);
     rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_int16_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));
+    rvd_avx512_int16_t rs3 = mipp_avx512_cast_float32_int16(rsf);
     rs3.m = _mm512_adds_epi16(rs2.m, rs3.m);
     rsf = mipp_avx512_cast_int16_float32(rs3);
-    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_int16_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));
+    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_int16_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(2,3,0,1)));
     rvd_avx512_int16_t rs4 = mipp_avx512_cast_float32_int16(rsf);
     rs4.m = _mm512_adds_epi16(rs3.m, rs4.m);
     rsf = mipp_avx512_cast_int16_float32(rs4);
@@ -2997,7 +2998,7 @@ rvd_avx512_int16_t mipp_avx512_hadd_int16(const rvd_avx512_int16_t r0) {
                                        29,28,31,30,25,24,27,26,21,20,23,22,17,16,19,18,
                                        13,12,15,14, 9, 8,11,10, 5, 4, 7, 6, 1, 0, 3, 2);
 
-    rsi.m = _mm512_shuffle_epi8(rsi.m, mask_16);
+    rsi.m = _mm512_shuffle_epi8((rsi.m, mask_16));
     rvd_avx512_int16_t rs5 = mipp_avx512_cast_int8_int16(rsi);
     rs5.m = _mm512_adds_epi16(rs4.m, rs5.m);
     return rs5;
@@ -3006,11 +3007,11 @@ rvd_avx512_int16_t mipp_avx512_hadd_int16(const rvd_avx512_int16_t r0) {
 #if defined(__AVX512BW__) && (( ( ( defined(__AVX512F__) ) ) ) && ( ( ( defined(__AVX512F__) ) ) ) && ( ( ( defined(__AVX512F__) ) ) ))
 rvd_avx512_int8_t mipp_avx512_hadd_int8(const rvd_avx512_int8_t r0) {
  rvd_avx512_float32_t rsf;
-    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),mipp_avx512_cast_int8_float32(r0.m));
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),mipp_avx512_cast_int8_float32(r0).m);
     rvd_avx512_int8_t rs1 = mipp_avx512_cast_float32_int8(rsf);
     rs1.m = _mm512_adds_epi8(r0.m, rs1.m);   
     rsf = mipp_avx512_cast_int8_float32(rs1);
-    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),mipp_avx512_cast_int8_float32(r0.m));
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),mipp_avx512_cast_int8_float32(r0).m);
     rvd_avx512_int8_t rs2 = mipp_avx512_cast_float32_int8(rsf);
     rs2.m = _mm512_adds_epi8(rs1.m, rs2.m);
     rsf = mipp_avx512_cast_int8_float32(rs2);
@@ -3026,14 +3027,14 @@ rvd_avx512_int8_t mipp_avx512_hadd_int8(const rvd_avx512_int8_t r0) {
                                       45,44,47,46,41,40,43,42,37,36,39,38,33,32,35,34,
                                       29,28,31,30,25,24,27,26,21,20,23,22,17,16,19,18,
                                       13,12,15,14, 9, 8,11,10, 5, 4, 7, 6, 1, 0, 3, 2);
-    rsi.m = _mm512_shuffle_epi8(rsi.m, mask_16);
+    rsi.m = _mm512_shuffle_epi8((rsi.m, mask_16);
     rvd_avx512_int8_t rs5 = mipp_avx512_cast_int8_int8(rsi);
     rs5.m = _mm512_adds_epi8(rs4.m, rs5.m);
     __m512i mask_8  = _mm512_set_epi8(62,63,60,61,58,59,56,57,54,55,52,53,50,51,48,49,
                                       46,47,44,45,42,43,40,41,38,39,36,37,34,35,32,33,
                                       30,31,28,29,26,27,24,25,22,23,20,21,18,19,16,17,
                                       14,15,12,13,10,11, 8, 9, 6, 7, 4, 5, 2, 3, 0, 1);
-    rsi.m = _mm512_shuffle_epi8((rsi.m, mask_8));
+    rsi.m = _mm512_shuffle_epi8((rsi.m, mask_8);
     rvd_avx512_int8_t rs6 = mipp_avx512_cast_int8_int8(rsi);
     rs6.m = _mm512_adds_epi8(rs5.m, rs6.m);
     return rs6;
@@ -3042,11 +3043,11 @@ rvd_avx512_int8_t mipp_avx512_hadd_int8(const rvd_avx512_int8_t r0) {
 #if defined(__AVX512F__) && (( ( ( defined(__AVX512F__) ) ) ) && ( ( ( defined(__AVX512F__) ) ) ))
 rvd_avx512_float64_t mipp_avx512_hmul_float64(const rvd_avx512_float64_t r0) {
  rvd_avx512_float32_t rsf; 
-    rsf.m = _mm512_permutexvar_ps(mipp_avx512_cast_float64_float32(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8), mipp_avx512_cast_float64_float32(r0.m)));
+    rsf.m = _mm512_permutexvar_ps(mipp_avx512_cast_float64_float32(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8), mipp_avx512_cast_float64_float32(r0).m);
     rvd_avx512_float64_t rs1 = mipp_avx512_cast_float32_float64(rsf);
     rs1.m = _mm512_mul_pd(r0.m, rs1.m);
     rsf = mipp_avx512_cast_float64_float32(rs1);
-    rsf.m = _mm512_permutexvar_ps(mipp_avx512_cast_float64_float32(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4), mipp_avx512_cast_float64_float32(r0.m)));
+    rsf.m = _mm512_permutexvar_ps(mipp_avx512_cast_float64_float32(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4), mipp_avx512_cast_float64_float32(r0).m);
     rvd_avx512_float64_t rs2 = mipp_avx512_cast_float32_float64(rsf);
     rs2.m = _mm512_mul_pd(rs1.m, rs2.m);
     rsf = mipp_avx512_cast_float64_float32(rs1);
@@ -3059,19 +3060,19 @@ rvd_avx512_float64_t mipp_avx512_hmul_float64(const rvd_avx512_float64_t r0) {
 #if defined(__AVX512F__) && (( ( ( defined(__AVX512F__) ) ) ))
 rvd_avx512_float32_t mipp_avx512_hmul_float32(const rvd_avx512_float32_t r0) {
  rvd_avx512_float32_t rsf;
-    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),mipp_avx512_cast_float32_float32(r0.m));
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),mipp_avx512_cast_float32_float32(r0).m);
     rvd_avx512_float32_t rs1 = mipp_avx512_cast_float32_float32(rsf);
     rs1.m = _mm512_mul_ps(r0.m, rs1.m);   
     rsf = mipp_avx512_cast_float32_float32(rs1);
-    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),mipp_avx512_cast_float32_float32(r0.m));
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),mipp_avx512_cast_float32_float32(r0).m);
     rvd_avx512_float32_t rs2 = mipp_avx512_cast_float32_float32(rsf);
     rs2.m = _mm512_mul_ps(rs1.m, rs2.m);
     rsf = mipp_avx512_cast_float32_float32(rs2);
-    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_float32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2))); 
+    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_float32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));
     rvd_avx512_float32_t rs3 = mipp_avx512_cast_float32_float32(rsf);
     rs3.m = _mm512_mul_ps(rs2.m, rs3.m);
     rsf = mipp_avx512_cast_float32_float32(rs3);
-    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_float32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2))); 
+    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_float32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(2,3,0,1)));
     rvd_avx512_float32_t rs4 = mipp_avx512_cast_float32_float32(rsf);
     rs4.m = _mm512_mul_ps(rs3.m, rs4.m);
     return rs4;
@@ -3080,19 +3081,19 @@ rvd_avx512_float32_t mipp_avx512_hmul_float32(const rvd_avx512_float32_t r0) {
 #if defined(__AVX512F__) && (( ( ( defined(__AVX512F__) ) ) ) && ( ( ( defined(__AVX512F__) ) ) ))
 rvd_avx512_int32_t mipp_avx512_hmul_int32(const rvd_avx512_int32_t r0) {
  rvd_avx512_float32_t rsf;
-    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),mipp_avx512_cast_int32_float32(r0.m));
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),mipp_avx512_cast_int32_float32(r0).m);
     rvd_avx512_int32_t rs1 = mipp_avx512_cast_float32_int32(rsf);
     rs1.m = _mm512_mul_epi32(r0.m, rs1.m);   
     rsf = mipp_avx512_cast_int32_float32(rs1);
-    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),mipp_avx512_cast_int32_float32(r0.m));
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),mipp_avx512_cast_int32_float32(r0).m);
     rvd_avx512_int32_t rs2 = mipp_avx512_cast_float32_int32(rsf);
     rs2.m = _mm512_mul_epi32(rs1.m, rs2.m);
     rsf = mipp_avx512_cast_int32_float32(rs2);
-    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_int32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2))); 
+    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_int32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));
     rvd_avx512_int32_t rs3 = mipp_avx512_cast_float32_int32(rsf);
     rs3.m = _mm512_mul_epi32(rs2.m, rs3.m);
     rsf = mipp_avx512_cast_int32_float32(rs3);
-    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_int32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2))); 
+    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_int32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(2,3,0,1)));
     rvd_avx512_int32_t rs4 = mipp_avx512_cast_float32_int32(rsf);
     rs4.m = _mm512_mul_epi32(rs3.m, rs4.m);
     return rs4;
@@ -3101,18 +3102,19 @@ rvd_avx512_int32_t mipp_avx512_hmul_int32(const rvd_avx512_int32_t r0) {
 #if defined(__AVX512F__) && (( ( ( defined(__AVX512F__) ) ) ) && ( ( ( defined(__AVX512F__) ) ) ) && ( ( ( defined(__AVX512F__) ) ) ))
 rvd_avx512_int16_t mipp_avx512_hmul_int16(const rvd_avx512_int16_t r0) {
  rvd_avx512_float32_t rsf;
-    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),mipp_avx512_cast_int16_float32(r0.m));
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),mipp_avx512_cast_int16_float32(r0).m);
     rvd_avx512_int16_t rs1 = mipp_avx512_cast_float32_int16(rsf);
     rs1.m = _mm512_mullo_epi16(r0.m, rs1.m);   
     rsf = mipp_avx512_cast_int16_float32(rs1);
-    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),mipp_avx512_cast_int16_float32(r0.m));
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),mipp_avx512_cast_int16_float32(r0).m);
     rvd_avx512_int16_t rs2 = mipp_avx512_cast_float32_int16(rsf);
     rs2.m = _mm512_mullo_epi16(rs1.m, rs2.m);
     rsf = mipp_avx512_cast_int16_float32(rs2);
     rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_int16_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));
+    rvd_avx512_int16_t rs3 = mipp_avx512_cast_float32_int16(rsf);
     rs3.m = _mm512_mullo_epi16(rs2.m, rs3.m);
     rsf = mipp_avx512_cast_int16_float32(rs3);
-    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_int16_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));
+    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_int16_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(2,3,0,1)));
     rvd_avx512_int16_t rs4 = mipp_avx512_cast_float32_int16(rsf);
     rs4.m = _mm512_mullo_epi16(rs3.m, rs4.m);
     rsf = mipp_avx512_cast_int16_float32(rs4);
@@ -3121,7 +3123,7 @@ rvd_avx512_int16_t mipp_avx512_hmul_int16(const rvd_avx512_int16_t r0) {
                                        29,28,31,30,25,24,27,26,21,20,23,22,17,16,19,18,
                                        13,12,15,14, 9, 8,11,10, 5, 4, 7, 6, 1, 0, 3, 2);
 
-    rsi.m = _mm512_shuffle_epi8(rsi.m, mask_16);
+    rsi.m = _mm512_shuffle_epi8((rsi.m, mask_16));
     rvd_avx512_int16_t rs5 = mipp_avx512_cast_int8_int16(rsi);
     rs5.m = _mm512_mullo_epi16(rs4.m, rs5.m);
     return rs5;
@@ -3130,11 +3132,11 @@ rvd_avx512_int16_t mipp_avx512_hmul_int16(const rvd_avx512_int16_t r0) {
 #if defined(__AVX512F__) && (( ( ( defined(__AVX512F__) ) ) ) && ( ( ( defined(__AVX512F__) ) ) ))
 rvd_avx512_float64_t mipp_avx512_hmin_float64(const rvd_avx512_float64_t r0) {
  rvd_avx512_float32_t rsf; 
-    rsf.m = _mm512_permutexvar_ps(mipp_avx512_cast_float64_float32(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8), mipp_avx512_cast_float64_float32(r0.m)));
+    rsf.m = _mm512_permutexvar_ps(mipp_avx512_cast_float64_float32(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8), mipp_avx512_cast_float64_float32(r0).m);
     rvd_avx512_float64_t rs1 = mipp_avx512_cast_float32_float64(rsf);
     rs1.m = _mm512_min_pd(r0.m, rs1.m);
     rsf = mipp_avx512_cast_float64_float32(rs1);
-    rsf.m = _mm512_permutexvar_ps(mipp_avx512_cast_float64_float32(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4), mipp_avx512_cast_float64_float32(r0.m)));
+    rsf.m = _mm512_permutexvar_ps(mipp_avx512_cast_float64_float32(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4), mipp_avx512_cast_float64_float32(r0).m);
     rvd_avx512_float64_t rs2 = mipp_avx512_cast_float32_float64(rsf);
     rs2.m = _mm512_min_pd(rs1.m, rs2.m);
     rsf = mipp_avx512_cast_float64_float32(rs1);
@@ -3147,19 +3149,19 @@ rvd_avx512_float64_t mipp_avx512_hmin_float64(const rvd_avx512_float64_t r0) {
 #if defined(__AVX512F__) && (( ( ( defined(__AVX512F__) ) ) ))
 rvd_avx512_float32_t mipp_avx512_hmin_float32(const rvd_avx512_float32_t r0) {
  rvd_avx512_float32_t rsf;
-    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),mipp_avx512_cast_float32_float32(r0.m));
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),mipp_avx512_cast_float32_float32(r0).m);
     rvd_avx512_float32_t rs1 = mipp_avx512_cast_float32_float32(rsf);
     rs1.m = _mm512_min_ps(r0.m, rs1.m);   
     rsf = mipp_avx512_cast_float32_float32(rs1);
-    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),mipp_avx512_cast_float32_float32(r0.m));
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),mipp_avx512_cast_float32_float32(r0).m);
     rvd_avx512_float32_t rs2 = mipp_avx512_cast_float32_float32(rsf);
     rs2.m = _mm512_min_ps(rs1.m, rs2.m);
     rsf = mipp_avx512_cast_float32_float32(rs2);
-    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_float32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2))); 
+    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_float32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));
     rvd_avx512_float32_t rs3 = mipp_avx512_cast_float32_float32(rsf);
     rs3.m = _mm512_min_ps(rs2.m, rs3.m);
     rsf = mipp_avx512_cast_float32_float32(rs3);
-    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_float32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2))); 
+    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_float32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(2,3,0,1)));
     rvd_avx512_float32_t rs4 = mipp_avx512_cast_float32_float32(rsf);
     rs4.m = _mm512_min_ps(rs3.m, rs4.m);
     return rs4;
@@ -3168,11 +3170,11 @@ rvd_avx512_float32_t mipp_avx512_hmin_float32(const rvd_avx512_float32_t r0) {
 #if defined(__MIC__) || defined(__KNCNI__) && (( ( ( defined(__AVX512F__) ) ) ) && ( ( ( defined(__AVX512F__) ) ) ))
 rvd_avx512_float64_t mipp_avx512_hmin_float64(const rvd_avx512_float64_t r0) {
  rvd_avx512_float32_t rsf; 
-    rsf.m = _mm512_permutexvar_ps(mipp_avx512_cast_float64_float32(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8), mipp_avx512_cast_float64_float32(r0.m)));
+    rsf.m = _mm512_permutexvar_ps(mipp_avx512_cast_float64_float32(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8), mipp_avx512_cast_float64_float32(r0).m);
     rvd_avx512_float64_t rs1 = mipp_avx512_cast_float32_float64(rsf);
     rs1.m = _mm512_gmin_pd(r0.m, rs1.m);
     rsf = mipp_avx512_cast_float64_float32(rs1);
-    rsf.m = _mm512_permutexvar_ps(mipp_avx512_cast_float64_float32(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4), mipp_avx512_cast_float64_float32(r0.m)));
+    rsf.m = _mm512_permutexvar_ps(mipp_avx512_cast_float64_float32(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4), mipp_avx512_cast_float64_float32(r0).m);
     rvd_avx512_float64_t rs2 = mipp_avx512_cast_float32_float64(rsf);
     rs2.m = _mm512_gmin_pd(rs1.m, rs2.m);
     rsf = mipp_avx512_cast_float64_float32(rs1);
@@ -3185,19 +3187,19 @@ rvd_avx512_float64_t mipp_avx512_hmin_float64(const rvd_avx512_float64_t r0) {
 #if defined(__MIC__) || defined(__KNCNI__) && (( ( ( defined(__AVX512F__) ) ) ))
 rvd_avx512_float32_t mipp_avx512_hmin_float32(const rvd_avx512_float32_t r0) {
  rvd_avx512_float32_t rsf;
-    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),mipp_avx512_cast_float32_float32(r0.m));
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),mipp_avx512_cast_float32_float32(r0).m);
     rvd_avx512_float32_t rs1 = mipp_avx512_cast_float32_float32(rsf);
     rs1.m = _mm512_gmin_ps(r0.m, rs1.m);   
     rsf = mipp_avx512_cast_float32_float32(rs1);
-    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),mipp_avx512_cast_float32_float32(r0.m));
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),mipp_avx512_cast_float32_float32(r0).m);
     rvd_avx512_float32_t rs2 = mipp_avx512_cast_float32_float32(rsf);
     rs2.m = _mm512_gmin_ps(rs1.m, rs2.m);
     rsf = mipp_avx512_cast_float32_float32(rs2);
-    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_float32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2))); 
+    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_float32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));
     rvd_avx512_float32_t rs3 = mipp_avx512_cast_float32_float32(rsf);
     rs3.m = _mm512_gmin_ps(rs2.m, rs3.m);
     rsf = mipp_avx512_cast_float32_float32(rs3);
-    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_float32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2))); 
+    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_float32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(2,3,0,1)));
     rvd_avx512_float32_t rs4 = mipp_avx512_cast_float32_float32(rsf);
     rs4.m = _mm512_gmin_ps(rs3.m, rs4.m);
     return rs4;
@@ -3206,19 +3208,19 @@ rvd_avx512_float32_t mipp_avx512_hmin_float32(const rvd_avx512_float32_t r0) {
 #if defined(__AVX512F__) && (( ( ( defined(__AVX512F__) ) ) ) && ( ( ( defined(__AVX512F__) ) ) ))
 rvd_avx512_int32_t mipp_avx512_hmin_int32(const rvd_avx512_int32_t r0) {
  rvd_avx512_float32_t rsf;
-    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),mipp_avx512_cast_int32_float32(r0.m));
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),mipp_avx512_cast_int32_float32(r0).m);
     rvd_avx512_int32_t rs1 = mipp_avx512_cast_float32_int32(rsf);
     rs1.m = _mm512_min_epi32(r0.m, rs1.m);   
     rsf = mipp_avx512_cast_int32_float32(rs1);
-    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),mipp_avx512_cast_int32_float32(r0.m));
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),mipp_avx512_cast_int32_float32(r0).m);
     rvd_avx512_int32_t rs2 = mipp_avx512_cast_float32_int32(rsf);
     rs2.m = _mm512_min_epi32(rs1.m, rs2.m);
     rsf = mipp_avx512_cast_int32_float32(rs2);
-    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_int32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2))); 
+    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_int32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));
     rvd_avx512_int32_t rs3 = mipp_avx512_cast_float32_int32(rsf);
     rs3.m = _mm512_min_epi32(rs2.m, rs3.m);
     rsf = mipp_avx512_cast_int32_float32(rs3);
-    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_int32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2))); 
+    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_int32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(2,3,0,1)));
     rvd_avx512_int32_t rs4 = mipp_avx512_cast_float32_int32(rsf);
     rs4.m = _mm512_min_epi32(rs3.m, rs4.m);
     return rs4;
@@ -3227,18 +3229,19 @@ rvd_avx512_int32_t mipp_avx512_hmin_int32(const rvd_avx512_int32_t r0) {
 #if defined(__AVX512F__) && (( ( ( defined(__AVX512F__) ) ) ) && ( ( ( defined(__AVX512F__) ) ) ) && ( ( ( defined(__AVX512F__) ) ) ))
 rvd_avx512_int16_t mipp_avx512_hmin_int16(const rvd_avx512_int16_t r0) {
  rvd_avx512_float32_t rsf;
-    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),mipp_avx512_cast_int16_float32(r0.m));
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),mipp_avx512_cast_int16_float32(r0).m);
     rvd_avx512_int16_t rs1 = mipp_avx512_cast_float32_int16(rsf);
     rs1.m = _mm512_min_epi16(r0.m, rs1.m);   
     rsf = mipp_avx512_cast_int16_float32(rs1);
-    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),mipp_avx512_cast_int16_float32(r0.m));
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),mipp_avx512_cast_int16_float32(r0).m);
     rvd_avx512_int16_t rs2 = mipp_avx512_cast_float32_int16(rsf);
     rs2.m = _mm512_min_epi16(rs1.m, rs2.m);
     rsf = mipp_avx512_cast_int16_float32(rs2);
     rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_int16_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));
+    rvd_avx512_int16_t rs3 = mipp_avx512_cast_float32_int16(rsf);
     rs3.m = _mm512_min_epi16(rs2.m, rs3.m);
     rsf = mipp_avx512_cast_int16_float32(rs3);
-    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_int16_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));
+    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_int16_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(2,3,0,1)));
     rvd_avx512_int16_t rs4 = mipp_avx512_cast_float32_int16(rsf);
     rs4.m = _mm512_min_epi16(rs3.m, rs4.m);
     rsf = mipp_avx512_cast_int16_float32(rs4);
@@ -3247,7 +3250,7 @@ rvd_avx512_int16_t mipp_avx512_hmin_int16(const rvd_avx512_int16_t r0) {
                                        29,28,31,30,25,24,27,26,21,20,23,22,17,16,19,18,
                                        13,12,15,14, 9, 8,11,10, 5, 4, 7, 6, 1, 0, 3, 2);
 
-    rsi.m = _mm512_shuffle_epi8(rsi.m, mask_16);
+    rsi.m = _mm512_shuffle_epi8((rsi.m, mask_16));
     rvd_avx512_int16_t rs5 = mipp_avx512_cast_int8_int16(rsi);
     rs5.m = _mm512_min_epi16(rs4.m, rs5.m);
     return rs5;
@@ -3256,18 +3259,19 @@ rvd_avx512_int16_t mipp_avx512_hmin_int16(const rvd_avx512_int16_t r0) {
 #if defined(__AVX512BW__) && (( ( ( defined(__AVX512F__) ) ) ) && ( ( ( defined(__AVX512F__) ) ) ) && ( ( ( defined(__AVX512F__) ) ) ))
 rvd_avx512_int16_t mipp_avx512_hmin_int16(const rvd_avx512_int16_t r0) {
  rvd_avx512_float32_t rsf;
-    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),mipp_avx512_cast_int16_float32(r0.m));
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),mipp_avx512_cast_int16_float32(r0).m);
     rvd_avx512_int16_t rs1 = mipp_avx512_cast_float32_int16(rsf);
     rs1.m = _mm512_min_epi16(r0.m, rs1.m);   
     rsf = mipp_avx512_cast_int16_float32(rs1);
-    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),mipp_avx512_cast_int16_float32(r0.m));
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),mipp_avx512_cast_int16_float32(r0).m);
     rvd_avx512_int16_t rs2 = mipp_avx512_cast_float32_int16(rsf);
     rs2.m = _mm512_min_epi16(rs1.m, rs2.m);
     rsf = mipp_avx512_cast_int16_float32(rs2);
     rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_int16_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));
+    rvd_avx512_int16_t rs3 = mipp_avx512_cast_float32_int16(rsf);
     rs3.m = _mm512_min_epi16(rs2.m, rs3.m);
     rsf = mipp_avx512_cast_int16_float32(rs3);
-    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_int16_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));
+    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_int16_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(2,3,0,1)));
     rvd_avx512_int16_t rs4 = mipp_avx512_cast_float32_int16(rsf);
     rs4.m = _mm512_min_epi16(rs3.m, rs4.m);
     rsf = mipp_avx512_cast_int16_float32(rs4);
@@ -3276,7 +3280,7 @@ rvd_avx512_int16_t mipp_avx512_hmin_int16(const rvd_avx512_int16_t r0) {
                                        29,28,31,30,25,24,27,26,21,20,23,22,17,16,19,18,
                                        13,12,15,14, 9, 8,11,10, 5, 4, 7, 6, 1, 0, 3, 2);
 
-    rsi.m = _mm512_shuffle_epi8(rsi.m, mask_16);
+    rsi.m = _mm512_shuffle_epi8((rsi.m, mask_16));
     rvd_avx512_int16_t rs5 = mipp_avx512_cast_int8_int16(rsi);
     rs5.m = _mm512_min_epi16(rs4.m, rs5.m);
     return rs5;
@@ -3285,11 +3289,11 @@ rvd_avx512_int16_t mipp_avx512_hmin_int16(const rvd_avx512_int16_t r0) {
 #if defined(__AVX512BW__) && (( ( ( defined(__AVX512F__) ) ) ) && ( ( ( defined(__AVX512F__) ) ) ) && ( ( ( defined(__AVX512F__) ) ) ))
 rvd_avx512_int8_t mipp_avx512_hmin_int8(const rvd_avx512_int8_t r0) {
  rvd_avx512_float32_t rsf;
-    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),mipp_avx512_cast_int8_float32(r0.m));
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),mipp_avx512_cast_int8_float32(r0).m);
     rvd_avx512_int8_t rs1 = mipp_avx512_cast_float32_int8(rsf);
     rs1.m = _mm512_min_epi8(r0.m, rs1.m);   
     rsf = mipp_avx512_cast_int8_float32(rs1);
-    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),mipp_avx512_cast_int8_float32(r0.m));
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),mipp_avx512_cast_int8_float32(r0).m);
     rvd_avx512_int8_t rs2 = mipp_avx512_cast_float32_int8(rsf);
     rs2.m = _mm512_min_epi8(rs1.m, rs2.m);
     rsf = mipp_avx512_cast_int8_float32(rs2);
@@ -3305,14 +3309,14 @@ rvd_avx512_int8_t mipp_avx512_hmin_int8(const rvd_avx512_int8_t r0) {
                                       45,44,47,46,41,40,43,42,37,36,39,38,33,32,35,34,
                                       29,28,31,30,25,24,27,26,21,20,23,22,17,16,19,18,
                                       13,12,15,14, 9, 8,11,10, 5, 4, 7, 6, 1, 0, 3, 2);
-    rsi.m = _mm512_shuffle_epi8(rsi.m, mask_16);
+    rsi.m = _mm512_shuffle_epi8((rsi.m, mask_16);
     rvd_avx512_int8_t rs5 = mipp_avx512_cast_int8_int8(rsi);
     rs5.m = _mm512_min_epi8(rs4.m, rs5.m);
     __m512i mask_8  = _mm512_set_epi8(62,63,60,61,58,59,56,57,54,55,52,53,50,51,48,49,
                                       46,47,44,45,42,43,40,41,38,39,36,37,34,35,32,33,
                                       30,31,28,29,26,27,24,25,22,23,20,21,18,19,16,17,
                                       14,15,12,13,10,11, 8, 9, 6, 7, 4, 5, 2, 3, 0, 1);
-    rsi.m = _mm512_shuffle_epi8((rsi.m, mask_8));
+    rsi.m = _mm512_shuffle_epi8((rsi.m, mask_8);
     rvd_avx512_int8_t rs6 = mipp_avx512_cast_int8_int8(rsi);
     rs6.m = _mm512_min_epi8(rs5.m, rs6.m);
     return rs6;
@@ -3321,11 +3325,11 @@ rvd_avx512_int8_t mipp_avx512_hmin_int8(const rvd_avx512_int8_t r0) {
 #if defined(__AVX512F__) && (( ( ( defined(__AVX512F__) ) ) ) && ( ( ( defined(__AVX512F__) ) ) ))
 rvd_avx512_float64_t mipp_avx512_hmax_float64(const rvd_avx512_float64_t r0) {
  rvd_avx512_float32_t rsf; 
-    rsf.m = _mm512_permutexvar_ps(mipp_avx512_cast_float64_float32(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8), mipp_avx512_cast_float64_float32(r0.m)));
+    rsf.m = _mm512_permutexvar_ps(mipp_avx512_cast_float64_float32(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8), mipp_avx512_cast_float64_float32(r0).m);
     rvd_avx512_float64_t rs1 = mipp_avx512_cast_float32_float64(rsf);
     rs1.m = _mm512_max_pd(r0.m, rs1.m);
     rsf = mipp_avx512_cast_float64_float32(rs1);
-    rsf.m = _mm512_permutexvar_ps(mipp_avx512_cast_float64_float32(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4), mipp_avx512_cast_float64_float32(r0.m)));
+    rsf.m = _mm512_permutexvar_ps(mipp_avx512_cast_float64_float32(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4), mipp_avx512_cast_float64_float32(r0).m);
     rvd_avx512_float64_t rs2 = mipp_avx512_cast_float32_float64(rsf);
     rs2.m = _mm512_max_pd(rs1.m, rs2.m);
     rsf = mipp_avx512_cast_float64_float32(rs1);
@@ -3338,19 +3342,19 @@ rvd_avx512_float64_t mipp_avx512_hmax_float64(const rvd_avx512_float64_t r0) {
 #if defined(__AVX512F__) && (( ( ( defined(__AVX512F__) ) ) ))
 rvd_avx512_float32_t mipp_avx512_hmax_float32(const rvd_avx512_float32_t r0) {
  rvd_avx512_float32_t rsf;
-    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),mipp_avx512_cast_float32_float32(r0.m));
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),mipp_avx512_cast_float32_float32(r0).m);
     rvd_avx512_float32_t rs1 = mipp_avx512_cast_float32_float32(rsf);
     rs1.m = _mm512_max_ps(r0.m, rs1.m);   
     rsf = mipp_avx512_cast_float32_float32(rs1);
-    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),mipp_avx512_cast_float32_float32(r0.m));
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),mipp_avx512_cast_float32_float32(r0).m);
     rvd_avx512_float32_t rs2 = mipp_avx512_cast_float32_float32(rsf);
     rs2.m = _mm512_max_ps(rs1.m, rs2.m);
     rsf = mipp_avx512_cast_float32_float32(rs2);
-    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_float32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2))); 
+    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_float32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));
     rvd_avx512_float32_t rs3 = mipp_avx512_cast_float32_float32(rsf);
     rs3.m = _mm512_max_ps(rs2.m, rs3.m);
     rsf = mipp_avx512_cast_float32_float32(rs3);
-    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_float32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2))); 
+    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_float32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(2,3,0,1)));
     rvd_avx512_float32_t rs4 = mipp_avx512_cast_float32_float32(rsf);
     rs4.m = _mm512_max_ps(rs3.m, rs4.m);
     return rs4;
@@ -3359,11 +3363,11 @@ rvd_avx512_float32_t mipp_avx512_hmax_float32(const rvd_avx512_float32_t r0) {
 #if defined(__MIC__) || defined(__KNCNI__) && (( ( ( defined(__AVX512F__) ) ) ) && ( ( ( defined(__AVX512F__) ) ) ))
 rvd_avx512_float64_t mipp_avx512_hmax_float64(const rvd_avx512_float64_t r0) {
  rvd_avx512_float32_t rsf; 
-    rsf.m = _mm512_permutexvar_ps(mipp_avx512_cast_float64_float32(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8), mipp_avx512_cast_float64_float32(r0.m)));
+    rsf.m = _mm512_permutexvar_ps(mipp_avx512_cast_float64_float32(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8), mipp_avx512_cast_float64_float32(r0).m);
     rvd_avx512_float64_t rs1 = mipp_avx512_cast_float32_float64(rsf);
     rs1.m = _mm512_gmax_pd(r0.m, rs1.m);
     rsf = mipp_avx512_cast_float64_float32(rs1);
-    rsf.m = _mm512_permutexvar_ps(mipp_avx512_cast_float64_float32(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4), mipp_avx512_cast_float64_float32(r0.m)));
+    rsf.m = _mm512_permutexvar_ps(mipp_avx512_cast_float64_float32(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4), mipp_avx512_cast_float64_float32(r0).m);
     rvd_avx512_float64_t rs2 = mipp_avx512_cast_float32_float64(rsf);
     rs2.m = _mm512_gmax_pd(rs1.m, rs2.m);
     rsf = mipp_avx512_cast_float64_float32(rs1);
@@ -3376,19 +3380,19 @@ rvd_avx512_float64_t mipp_avx512_hmax_float64(const rvd_avx512_float64_t r0) {
 #if defined(__MIC__) || defined(__KNCNI__) && (( ( ( defined(__AVX512F__) ) ) ))
 rvd_avx512_float32_t mipp_avx512_hmax_float32(const rvd_avx512_float32_t r0) {
  rvd_avx512_float32_t rsf;
-    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),mipp_avx512_cast_float32_float32(r0.m));
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),mipp_avx512_cast_float32_float32(r0).m);
     rvd_avx512_float32_t rs1 = mipp_avx512_cast_float32_float32(rsf);
     rs1.m = _mm512_gmax_ps(r0.m, rs1.m);   
     rsf = mipp_avx512_cast_float32_float32(rs1);
-    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),mipp_avx512_cast_float32_float32(r0.m));
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),mipp_avx512_cast_float32_float32(r0).m);
     rvd_avx512_float32_t rs2 = mipp_avx512_cast_float32_float32(rsf);
     rs2.m = _mm512_gmax_ps(rs1.m, rs2.m);
     rsf = mipp_avx512_cast_float32_float32(rs2);
-    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_float32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2))); 
+    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_float32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));
     rvd_avx512_float32_t rs3 = mipp_avx512_cast_float32_float32(rsf);
     rs3.m = _mm512_gmax_ps(rs2.m, rs3.m);
     rsf = mipp_avx512_cast_float32_float32(rs3);
-    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_float32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2))); 
+    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_float32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(2,3,0,1)));
     rvd_avx512_float32_t rs4 = mipp_avx512_cast_float32_float32(rsf);
     rs4.m = _mm512_gmax_ps(rs3.m, rs4.m);
     return rs4;
@@ -3397,19 +3401,19 @@ rvd_avx512_float32_t mipp_avx512_hmax_float32(const rvd_avx512_float32_t r0) {
 #if defined(__AVX512F__) && (( ( ( defined(__AVX512F__) ) ) ) && ( ( ( defined(__AVX512F__) ) ) ))
 rvd_avx512_int32_t mipp_avx512_hmax_int32(const rvd_avx512_int32_t r0) {
  rvd_avx512_float32_t rsf;
-    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),mipp_avx512_cast_int32_float32(r0.m));
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),mipp_avx512_cast_int32_float32(r0).m);
     rvd_avx512_int32_t rs1 = mipp_avx512_cast_float32_int32(rsf);
     rs1.m = _mm512_max_epi32(r0.m, rs1.m);   
     rsf = mipp_avx512_cast_int32_float32(rs1);
-    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),mipp_avx512_cast_int32_float32(r0.m));
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),mipp_avx512_cast_int32_float32(r0).m);
     rvd_avx512_int32_t rs2 = mipp_avx512_cast_float32_int32(rsf);
     rs2.m = _mm512_max_epi32(rs1.m, rs2.m);
     rsf = mipp_avx512_cast_int32_float32(rs2);
-    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_int32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2))); 
+    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_int32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));
     rvd_avx512_int32_t rs3 = mipp_avx512_cast_float32_int32(rsf);
     rs3.m = _mm512_max_epi32(rs2.m, rs3.m);
     rsf = mipp_avx512_cast_int32_float32(rs3);
-    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_int32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2))); 
+    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_int32_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(2,3,0,1)));
     rvd_avx512_int32_t rs4 = mipp_avx512_cast_float32_int32(rsf);
     rs4.m = _mm512_max_epi32(rs3.m, rs4.m);
     return rs4;
@@ -3418,18 +3422,19 @@ rvd_avx512_int32_t mipp_avx512_hmax_int32(const rvd_avx512_int32_t r0) {
 #if defined(__AVX512F__) && (( ( ( defined(__AVX512F__) ) ) ) && ( ( ( defined(__AVX512F__) ) ) ) && ( ( ( defined(__AVX512F__) ) ) ))
 rvd_avx512_int16_t mipp_avx512_hmax_int16(const rvd_avx512_int16_t r0) {
  rvd_avx512_float32_t rsf;
-    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),mipp_avx512_cast_int16_float32(r0.m));
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),mipp_avx512_cast_int16_float32(r0).m);
     rvd_avx512_int16_t rs1 = mipp_avx512_cast_float32_int16(rsf);
     rs1.m = _mm512_max_epi16(r0.m, rs1.m);   
     rsf = mipp_avx512_cast_int16_float32(rs1);
-    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),mipp_avx512_cast_int16_float32(r0.m));
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),mipp_avx512_cast_int16_float32(r0).m);
     rvd_avx512_int16_t rs2 = mipp_avx512_cast_float32_int16(rsf);
     rs2.m = _mm512_max_epi16(rs1.m, rs2.m);
     rsf = mipp_avx512_cast_int16_float32(rs2);
     rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_int16_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));
+    rvd_avx512_int16_t rs3 = mipp_avx512_cast_float32_int16(rsf);
     rs3.m = _mm512_max_epi16(rs2.m, rs3.m);
     rsf = mipp_avx512_cast_int16_float32(rs3);
-    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_int16_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));
+    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_int16_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(2,3,0,1)));
     rvd_avx512_int16_t rs4 = mipp_avx512_cast_float32_int16(rsf);
     rs4.m = _mm512_max_epi16(rs3.m, rs4.m);
     rsf = mipp_avx512_cast_int16_float32(rs4);
@@ -3438,7 +3443,7 @@ rvd_avx512_int16_t mipp_avx512_hmax_int16(const rvd_avx512_int16_t r0) {
                                        29,28,31,30,25,24,27,26,21,20,23,22,17,16,19,18,
                                        13,12,15,14, 9, 8,11,10, 5, 4, 7, 6, 1, 0, 3, 2);
 
-    rsi.m = _mm512_shuffle_epi8(rsi.m, mask_16);
+    rsi.m = _mm512_shuffle_epi8((rsi.m, mask_16));
     rvd_avx512_int16_t rs5 = mipp_avx512_cast_int8_int16(rsi);
     rs5.m = _mm512_max_epi16(rs4.m, rs5.m);
     return rs5;
@@ -3447,18 +3452,19 @@ rvd_avx512_int16_t mipp_avx512_hmax_int16(const rvd_avx512_int16_t r0) {
 #if defined(__AVX512BW__) && (( ( ( defined(__AVX512F__) ) ) ) && ( ( ( defined(__AVX512F__) ) ) ) && ( ( ( defined(__AVX512F__) ) ) ))
 rvd_avx512_int16_t mipp_avx512_hmax_int16(const rvd_avx512_int16_t r0) {
  rvd_avx512_float32_t rsf;
-    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),mipp_avx512_cast_int16_float32(r0.m));
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),mipp_avx512_cast_int16_float32(r0).m);
     rvd_avx512_int16_t rs1 = mipp_avx512_cast_float32_int16(rsf);
     rs1.m = _mm512_max_epi16(r0.m, rs1.m);   
     rsf = mipp_avx512_cast_int16_float32(rs1);
-    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),mipp_avx512_cast_int16_float32(r0.m));
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),mipp_avx512_cast_int16_float32(r0).m);
     rvd_avx512_int16_t rs2 = mipp_avx512_cast_float32_int16(rsf);
     rs2.m = _mm512_max_epi16(rs1.m, rs2.m);
     rsf = mipp_avx512_cast_int16_float32(rs2);
     rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_int16_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));
+    rvd_avx512_int16_t rs3 = mipp_avx512_cast_float32_int16(rsf);
     rs3.m = _mm512_max_epi16(rs2.m, rs3.m);
     rsf = mipp_avx512_cast_int16_float32(rs3);
-    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_int16_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));
+    rsf.m = _mm512_shuffle_epi32(mipp_avx512_cast_int16_float32(r0).m,_MM_PERM_ENUM(_MM_SHUFFLE(2,3,0,1)));
     rvd_avx512_int16_t rs4 = mipp_avx512_cast_float32_int16(rsf);
     rs4.m = _mm512_max_epi16(rs3.m, rs4.m);
     rsf = mipp_avx512_cast_int16_float32(rs4);
@@ -3467,7 +3473,7 @@ rvd_avx512_int16_t mipp_avx512_hmax_int16(const rvd_avx512_int16_t r0) {
                                        29,28,31,30,25,24,27,26,21,20,23,22,17,16,19,18,
                                        13,12,15,14, 9, 8,11,10, 5, 4, 7, 6, 1, 0, 3, 2);
 
-    rsi.m = _mm512_shuffle_epi8(rsi.m, mask_16);
+    rsi.m = _mm512_shuffle_epi8((rsi.m, mask_16));
     rvd_avx512_int16_t rs5 = mipp_avx512_cast_int8_int16(rsi);
     rs5.m = _mm512_max_epi16(rs4.m, rs5.m);
     return rs5;
@@ -3476,11 +3482,11 @@ rvd_avx512_int16_t mipp_avx512_hmax_int16(const rvd_avx512_int16_t r0) {
 #if defined(__AVX512BW__) && (( ( ( defined(__AVX512F__) ) ) ) && ( ( ( defined(__AVX512F__) ) ) ) && ( ( ( defined(__AVX512F__) ) ) ))
 rvd_avx512_int8_t mipp_avx512_hmax_int8(const rvd_avx512_int8_t r0) {
  rvd_avx512_float32_t rsf;
-    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),mipp_avx512_cast_int8_float32(r0.m));
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8),mipp_avx512_cast_int8_float32(r0).m);
     rvd_avx512_int8_t rs1 = mipp_avx512_cast_float32_int8(rsf);
     rs1.m = _mm512_max_epi8(r0.m, rs1.m);   
     rsf = mipp_avx512_cast_int8_float32(rs1);
-    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),mipp_avx512_cast_int8_float32(r0.m));
+    rsf.m = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4),mipp_avx512_cast_int8_float32(r0).m);
     rvd_avx512_int8_t rs2 = mipp_avx512_cast_float32_int8(rsf);
     rs2.m = _mm512_max_epi8(rs1.m, rs2.m);
     rsf = mipp_avx512_cast_int8_float32(rs2);
@@ -3496,14 +3502,14 @@ rvd_avx512_int8_t mipp_avx512_hmax_int8(const rvd_avx512_int8_t r0) {
                                       45,44,47,46,41,40,43,42,37,36,39,38,33,32,35,34,
                                       29,28,31,30,25,24,27,26,21,20,23,22,17,16,19,18,
                                       13,12,15,14, 9, 8,11,10, 5, 4, 7, 6, 1, 0, 3, 2);
-    rsi.m = _mm512_shuffle_epi8(rsi.m, mask_16);
+    rsi.m = _mm512_shuffle_epi8((rsi.m, mask_16);
     rvd_avx512_int8_t rs5 = mipp_avx512_cast_int8_int8(rsi);
     rs5.m = _mm512_max_epi8(rs4.m, rs5.m);
     __m512i mask_8  = _mm512_set_epi8(62,63,60,61,58,59,56,57,54,55,52,53,50,51,48,49,
                                       46,47,44,45,42,43,40,41,38,39,36,37,34,35,32,33,
                                       30,31,28,29,26,27,24,25,22,23,20,21,18,19,16,17,
                                       14,15,12,13,10,11, 8, 9, 6, 7, 4, 5, 2, 3, 0, 1);
-    rsi.m = _mm512_shuffle_epi8((rsi.m, mask_8));
+    rsi.m = _mm512_shuffle_epi8((rsi.m, mask_8);
     rvd_avx512_int8_t rs6 = mipp_avx512_cast_int8_int8(rsi);
     rs6.m = _mm512_max_epi8(rs5.m, rs6.m);
     return rs6;
@@ -3528,7 +3534,7 @@ rvd_avx512_float32_t mipp_avx512_set_float32(const float32_t v0) {
 rvd_avx512_int32_t mipp_avx512_set_int32(const int32_t v0) {
 	rvd_avx512_int32_t res;
 	res.m =  return mipp_avx512_cast_k_float32_int32(_mm512_castsi512_ps(_mm512_set_epi32(vals[15], vals[14], vals[13], vals[12], vals[11], vals[10], vals[ 9], vals[ 8],                                            					
-																	 vals[ 7], vals[ 6], vals[ 5], vals[ 4],vals[ 3], vals[ 2], vals[ 1], vals[ 0])));
+																	 vals[ 7], vals[ 6], vals[ 5], vals[ 4],vals[ 3], vals[ 2], vals[ 1], vals[ 0]));
 	return res;
 }
 #endif
@@ -3538,7 +3544,7 @@ rvd_avx512_int64_t mipp_avx512_set_int64(const int64_t v0) {
 	res.m = 	return mipp_avx512_cast_k_float64_int64(_mm512_set_epi64((vals[15], vals[14], vals[13], vals[12],
 	                     					  	  vals[11], vals[10], vals[ 9], vals[ 8],
 	                     					  	  vals[ 7], vals[ 6], vals[ 5], vals[ 4],
-	                     					 	  vals[ 3], vals[ 2], vals[ 1], vals[ 0])));
+	                     					 	  vals[ 3], vals[ 2], vals[ 1], vals[ 0]));
 	return res;
 }
 #endif

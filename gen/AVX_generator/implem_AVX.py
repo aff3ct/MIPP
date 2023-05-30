@@ -7,17 +7,17 @@ isa_avx = {
 	"define": "__AVX__",
 	"hw_lmul": False,
 	"datatypes": {
-		float64 : { "data_ext" :    "pd", "data_ext_logi":    "pd", "data_ext_msk": "si256", "reg" : "__m256d", "msk" : "__m256i", "to_ptr": "float64_t", },
-		float32 : { "data_ext" :    "ps", "data_ext_logi":    "ps", "data_ext_msk": "si256", "reg" : " __m256", "msk" : "__m256i", "to_ptr": "float32_t", },
-		  int64 : { "data_ext" : "epi64", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg" : "__m256i", "msk" : "__m256i", "to_ptr":   "__m256i", },
-		  int32 : { "data_ext" : "epi32", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg" : "__m256i", "msk" : "__m256i", "to_ptr":   "__m256i", },
-		  int16 : { "data_ext" : "epi16", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg" : "__m256i", "msk" : "__m256i", "to_ptr":   "__m256i", },
-		   int8 : { "data_ext" :  "epi8", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg" : "__m256i", "msk" : "__m256i", "to_ptr":   "__m256i", },
-		 uint64 : { "data_ext" : "epu64", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg" : "__m256i", "msk" : "__m256i", "to_ptr":   "__m256i", },
-		 uint32 : { "data_ext" : "epu32", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg" : "__m256i", "msk" : "__m256i", "to_ptr":   "__m256i", },
-		 uint16 : { "data_ext" : "epu16", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg" : "__m256i", "msk" : "__m256i", "to_ptr":   "__m256i", },
-		  uint8 : { "data_ext" :  "epu8", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg" : "__m256i", "msk" : "__m256i", "to_ptr":   "__m256i", },
-	},
+		float64 : { "data_ext" :    "pd", "data_ext_logi":    "pd", "data_ext_msk": "si256", "reg" : "__m256d", "msk" : "__m256i", "to_ptr": "float64_t" },
+		float32 : { "data_ext" :    "ps", "data_ext_logi":    "ps", "data_ext_msk": "si256", "reg" : " __m256", "msk" : "__m256i", "to_ptr": "float32_t" },
+		  int64 : { "data_ext" : "epi64", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg" : "__m256i", "msk" : "__m256i", "to_ptr":   "__m256i" },
+		  int32 : { "data_ext" : "epi32", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg" : "__m256i", "msk" : "__m256i", "to_ptr":   "__m256i" },
+		  int16 : { "data_ext" : "epi16", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg" : "__m256i", "msk" : "__m256i", "to_ptr":   "__m256i" },
+		   int8 : { "data_ext" :  "epi8", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg" : "__m256i", "msk" : "__m256i", "to_ptr":   "__m256i" },
+		 uint64 : { "data_ext" : "epu64", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg" : "__m256i", "msk" : "__m256i", "to_ptr":   "__m256i" },
+		 uint32 : { "data_ext" : "epu32", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg" : "__m256i", "msk" : "__m256i", "to_ptr":   "__m256i" },
+		 uint16 : { "data_ext" : "epu16", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg" : "__m256i", "msk" : "__m256i", "to_ptr":   "__m256i" },
+		  uint8 : { "data_ext" :  "epu8", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg" : "__m256i", "msk" : "__m256i", "to_ptr":   "__m256i" },
+	},                                                                                           
 }
 
 tpl_implem_avx = {
@@ -150,13 +150,13 @@ tpl_implem_avx = {
 
 implems_avx = {
 	"cast": [
-		{ "instr_name": "cast", "datatypes": all_datatypes_cart_prod, "template": tpl_implem_avx["cast"], } ],
+		{ "instr_name": "cast", "datatypes": all_datatypes_cart_prod, "template": tpl_implem_avx["cast"] } ],
 	"cast_k": [
-		{ "instr_name": "cast", "datatypes": all_datatypes_cart_prod, "template": tpl_implem_avx["cast_k"], } ],
+		{ "instr_name": "cast", "datatypes": all_datatypes_cart_prod, "template": tpl_implem_avx["cast_k"] } ],
 	"toreg": [
-		{ "instr_name": "cast", "datatypes": all_datatypes, "template": tpl_implem_avx["toreg"], } ],
+		{ "instr_name": "cast", "datatypes": all_datatypes, "template": tpl_implem_avx["toreg"] } ],
 	"tomsk": [
-		{ "instr_name": "cast", "datatypes": all_datatypes, "template": tpl_implem_avx["tomsk"], } ],
+		{ "instr_name": "cast", "datatypes": all_datatypes, "template": tpl_implem_avx["tomsk"] } ],
 	"load": [
 		{ "instr_name": "load", "datatypes": all_datatypes, "template": tpl_implem_avx["load"], "if": "defined(MIPP_ALIGNED_LOADS)" },
 		{ "instr_name": "loadu", "datatypes": all_datatypes, "template": tpl_implem_avx["load"], "if": "!defined(MIPP_ALIGNED_LOADS)" } ],
@@ -234,46 +234,46 @@ implems_avx = {
 		{ "instr_name": "xorb", "datatypes": all_int_uint, "template": tpl_implem_avx["logi_m_2args_e"], "if": "!defined(__AVX2__)" },
 		{ "instr_name": "xor", "datatypes": all_datatypes, "template": tpl_implem_avx["logi_m_2args"], "if": "defined(__AVX2__)" } ],
 	"cmpeq": [
-		{ "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx["cmpeq_float"], },
+		{ "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx["cmpeq_float"] },
 		{ "instr_name": "cmpeq", "datatypes": all_int, "template": tpl_implem_avx["cmp_int"], "if": "defined(__AVX2__)" } ],
 	"cmpneq": [
-		{ "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx["cmpneq_float"], } ],
+		{ "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx["cmpneq_float"] } ],
 	"cmplt": [
-		{ "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx["cmplt_float"], } ],
+		{ "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx["cmplt_float"] } ],
 	"cmple": [
-		{ "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx["cmple_float"], } ],
+		{ "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx["cmple_float"] } ],
 	"cmpge": [
-		{ "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx["cmpge_float"], } ],
+		{ "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx["cmpge_float"] } ],
 	"cmpgt": [
 		{ "instr_name": "cmp", "datatypes": all_float, "template": tpl_implem_avx["cmpgt_float"], },
 		{ "instr_name": "cmpgt", "datatypes": all_int, "template": tpl_implem_avx["cmp_int"], "if": "defined(__AVX2__)" } ],
 	"blend": [
-		{ "instr_name": "blendv", "datatypes": all_float, "template": tpl_implem_avx["blend_float"], },
-		{ "instr_name": "blendv", "datatypes": all_int_uint, "template": tpl_implem_avx["blend_int"], "if": "defined(__AVX2__)", } ],
+		{ "instr_name": "blendv", "datatypes": all_float, "template": tpl_implem_avx["blend_float"] },
+		{ "instr_name": "blendv", "datatypes": all_int_uint, "template": tpl_implem_avx["blend_int"], "if": "defined(__AVX2__)" } ],
 	"testz": [
-		{ "instr_name": "testz", "datatypes": all_datatypes, "template": tpl_implem_avx["testz_2args"], }, ],
+		{ "instr_name": "testz", "datatypes": all_datatypes, "template": tpl_implem_avx["testz_2args"] } ],
 	"hadd": [
-		{ "instr_name": "add", "datatypes": [float64], "template": tpl_implem_avx["reduce_64"], },
-		{ "instr_name": "add", "datatypes": [int64], "template": tpl_implem_avx["reduce_64"], "if": "defined(__AVX2__)", },
-		{ "instr_name": "add", "datatypes": [float32], "template": tpl_implem_avx["reduce_32"], },
-		{ "instr_name": "add", "datatypes": [int32], "template": tpl_implem_avx["reduce_32"], "if": "defined(__AVX2__)", },
-		{ "instr_name": "adds", "datatypes": [int16, uint16], "template": tpl_implem_avx["reduce_16"], "if": "defined(__AVX2__)", },
-		{ "instr_name": "adds", "datatypes": [int8, uint8], "template": tpl_implem_avx["reduce_8"], "if": "defined(__AVX2__)", }, ],
+		{ "instr_name": "add", "datatypes": [float64], "template": tpl_implem_avx["reduce_64"] },
+		{ "instr_name": "add", "datatypes": [int64], "template": tpl_implem_avx["reduce_64"], "if": "defined(__AVX2__)" },
+		{ "instr_name": "add", "datatypes": [float32], "template": tpl_implem_avx["reduce_32"] },
+		{ "instr_name": "add", "datatypes": [int32], "template": tpl_implem_avx["reduce_32"], "if": "defined(__AVX2__)" },
+		{ "instr_name": "adds", "datatypes": [int16, uint16], "template": tpl_implem_avx["reduce_16"], "if": "defined(__AVX2__)" },
+		{ "instr_name": "adds", "datatypes": [int8, uint8], "template": tpl_implem_avx["reduce_8"], "if": "defined(__AVX2__)" } ],
 	"hmul": [
-		{ "instr_name": "mul", "datatypes": [float64], "template": tpl_implem_avx["reduce_64"], },
-		{ "instr_name": "mul", "datatypes": [float32], "template": tpl_implem_avx["reduce_32"], },
-		{ "instr_name": "mullo", "datatypes": [int32], "template": tpl_implem_avx["reduce_32"], "if": "defined(__AVX2__)", },
-		{ "instr_name": "mullo", "datatypes": [int16], "template": tpl_implem_avx["reduce_16"], "if": "defined(__AVX2__)", }, ],
+		{ "instr_name": "mul", "datatypes": [float64], "template": tpl_implem_avx["reduce_64"] },
+		{ "instr_name": "mul", "datatypes": [float32], "template": tpl_implem_avx["reduce_32"] },
+		{ "instr_name": "mullo", "datatypes": [int32], "template": tpl_implem_avx["reduce_32"], "if": "defined(__AVX2__)" },
+		{ "instr_name": "mullo", "datatypes": [int16], "template": tpl_implem_avx["reduce_16"], "if": "defined(__AVX2__)" } ],
 	"hmin": [
-		{ "instr_name": "min", "datatypes": [float64], "template": tpl_implem_avx["reduce_64"], },
-		{ "instr_name": "min", "datatypes": [float32], "template": tpl_implem_avx["reduce_32"], },
-		{ "instr_name": "min", "datatypes": [int32, uint32], "template": tpl_implem_avx["reduce_32"], "if": "defined(__AVX2__)", },
-		{ "instr_name": "min", "datatypes": [int16, uint16], "template": tpl_implem_avx["reduce_16"], "if": "defined(__AVX2__)", },
-		{ "instr_name": "min", "datatypes": [int8, uint8], "template": tpl_implem_avx["reduce_8"], "if": "defined(__AVX2__)", }, ],
+		{ "instr_name": "min", "datatypes": [float64], "template": tpl_implem_avx["reduce_64"] },
+		{ "instr_name": "min", "datatypes": [float32], "template": tpl_implem_avx["reduce_32"] },
+		{ "instr_name": "min", "datatypes": [int32, uint32], "template": tpl_implem_avx["reduce_32"], "if": "defined(__AVX2__)" },
+		{ "instr_name": "min", "datatypes": [int16, uint16], "template": tpl_implem_avx["reduce_16"], "if": "defined(__AVX2__)" },
+		{ "instr_name": "min", "datatypes": [int8, uint8], "template": tpl_implem_avx["reduce_8"], "if": "defined(__AVX2__)" } ],
 	"hmax": [
-		{ "instr_name": "max", "datatypes": [float64], "template": tpl_implem_avx["reduce_64"], },
-		{ "instr_name": "max", "datatypes": [float32], "template": tpl_implem_avx["reduce_32"], },
-		{ "instr_name": "max", "datatypes": [int32, uint32], "template": tpl_implem_avx["reduce_32"], "if": "defined(__AVX2__)", },
-		{ "instr_name": "max", "datatypes": [int16, uint16], "template": tpl_implem_avx["reduce_16"], "if": "defined(__AVX2__)", },
-		{ "instr_name": "max", "datatypes": [int8, uint8], "template": tpl_implem_avx["reduce_8"], "if": "defined(__AVX2__)", }, ],
+		{ "instr_name": "max", "datatypes": [float64], "template": tpl_implem_avx["reduce_64"] },
+		{ "instr_name": "max", "datatypes": [float32], "template": tpl_implem_avx["reduce_32"] },
+		{ "instr_name": "max", "datatypes": [int32, uint32], "template": tpl_implem_avx["reduce_32"], "if": "defined(__AVX2__)" },
+		{ "instr_name": "max", "datatypes": [int16, uint16], "template": tpl_implem_avx["reduce_16"], "if": "defined(__AVX2__)" },
+		{ "instr_name": "max", "datatypes": [int8, uint8], "template": tpl_implem_avx["reduce_8"], "if": "defined(__AVX2__)" } ],
 }

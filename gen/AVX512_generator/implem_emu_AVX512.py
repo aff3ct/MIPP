@@ -21,17 +21,17 @@ tpl_implem_emu512 = {
     },
     "set-32f"   : { "format": "short", "code": 
 """	return _mm512_set_ps(vals[15], vals[14], vals[13], vals[12],vals[11], vals[10], vals[ 9], vals[ 8],
-	                     vals[ 7], vals[ 6], vals[ 5], vals[ 4],vals[ 3], vals[ 2], vals[ 1], vals[ 0]));"""
+	                     vals[ 7], vals[ 6], vals[ 5], vals[ 4],vals[ 3], vals[ 2], vals[ 1], vals[ 0]);"""
     },
     "set-64"   : { "format": "short", "code": 
 """	return %cast_k<c:float,tp>%(_mm512_set_epi64((vals[15], vals[14], vals[13], vals[12],
 	                     					  	  vals[11], vals[10], vals[ 9], vals[ 8],
 	                     					  	  vals[ 7], vals[ 6], vals[ 5], vals[ 4],
-	                     					 	  vals[ 3], vals[ 2], vals[ 1], vals[ 0]));"""
+	                     					 	  vals[ 3], vals[ 2], vals[ 1], vals[ 0])));"""
 	},
     "set-32"   : { "format": "short", "code": 
 """ return %cast_k<c:float,tp>%(_mm512_castsi512_ps(_mm512_set_epi32(vals[15], vals[14], vals[13], vals[12], vals[11], vals[10], vals[ 9], vals[ 8],                                            					
-																	 vals[ 7], vals[ 6], vals[ 5], vals[ 4],vals[ 3], vals[ 2], vals[ 1], vals[ 0]));"""
+																	 vals[ 7], vals[ 6], vals[ 5], vals[ 4],vals[ 3], vals[ 2], vals[ 1], vals[ 0])));"""
   	}, 
   	"set-16"   : { "format": "short", "code": 
 """ return %cast_k<c:float,tp>%(_mm512_castsi512_ps(_mm512_set_epi16((%cast<c:int|b:tp,tp>%)vals[31], (%cast<c:int|b:tp,tp>%)vals[30], (%cast<c:int|b:tp,tp>%)vals[29], (%cast<c:int|b:tp,tp>%)vals[28],
@@ -70,7 +70,7 @@ tpl_implem_emu512 = {
 		                 vals[5] ? (%cast<c:int|b:tp,tp>%)0xFFFFFFFFFFFFFFFF : (%cast<c:int|b:tp,tp>%)0,
 		                 vals[6] ? (%cast<c:int|b:tp,tp>%)0xFFFFFFFFFFFFFFFF : (%cast<c:int|b:tp,tp>%)0,
 		                 vals[7] ? (%cast<c:int|b:tp,tp>%)0xFFFFFFFFFFFFFFFF : (%cast<c:int|b:tp,tp>%)0};
-    %r<c:int|b:tp>% r0_32 = %set<c:int|b:tp>%((%cast<c:int|b:tp,tp>%)*)t);
+    %r<c:int|b:tp>% r0_32 = %set<c:int|b:tp>%((%cast<c:int|b:tp,tp>%)*t);
     %r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%((%cast<c:int|b:tp,tp>%)0xFFFFFFFFFFFFFFFF);
 	%r<c:int|b:tp>% msk   = %cmpneq<c:int|b:tp>%(r0_32, r1_32);
     %m<c:int|b:tp>% res   = %tomsk<c:int|b:tp>%(msk);
@@ -85,7 +85,7 @@ tpl_implem_emu512 = {
 		                  vals[10] ? 0xFFFFFFFF : 0, vals[11] ? 0xFFFFFFFF : 0,
 		                  vals[12] ? 0xFFFFFFFF : 0, vals[13] ? 0xFFFFFFFF : 0,
 		                  vals[14] ? 0xFFFFFFFF : 0, vals[15] ? 0xFFFFFFFF : 0};
-    %r<c:int|b:tp>% r0_32 = %set<c:int|b:tp>%((%cast<c:int|b:tp,tp>%)*)t);
+    %r<c:int|b:tp>% r0_32 = %set<c:int|b:tp>%((%cast<c:int|b:tp,tp>%)*t);
     %r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%(0xFFFFFFFF);
 	%r<c:int|b:tp>% msk   = %cmpneq<c:int|b:tp>%(r0_32, r1_32);
     %m<c:int|b:tp>% res   = %tomsk<c:int|b:tp>%(msk);
@@ -108,14 +108,14 @@ tpl_implem_emu512 = {
 		                  vals[26] ? (%cast<c:int|b:tp,tp>%)0xFFFF : (%cast<c:int|b:tp,tp>%)0, vals[27] ? (%cast<c:int|b:tp,tp>%)0xFFFF : (%cast<c:int|b:tp,tp>%)0,
 		                  vals[28] ? (%cast<c:int|b:tp,tp>%)0xFFFF : (%cast<c:int|b:tp,tp>%)0, vals[29] ? (%cast<c:int|b:tp,tp>%)0xFFFF : (%cast<c:int|b:tp,tp>%)0,
 		                  vals[30] ? (%cast<c:int|b:tp,tp>%)0xFFFF : (%cast<c:int|b:tp,tp>%)0, vals[31] ? (%cast<c:int|b:tp,tp>%)0xFFFF : (%cast<c:int|b:tp,tp>%)0};
-    %r<c:int|b:tp>% r0_32 = %set<c:int|b:tp>%((%cast<c:int|b:tp,tp>%)*)t);
+    %r<c:int|b:tp>% r0_32 = %set<c:int|b:tp>%((%cast<c:int|b:tp,tp>%)*t);
     %r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%(0xFFFF);
 	%r<c:int|b:tp>% msk   = %cmpneq<c:int|b:tp>%(r0_32, r1_32);
     %m<c:int|b:tp>% res   = %tomsk<c:int|b:tp>%(msk);
 	return res;""" 
 	},
   "set_k-64": {"format": "long", "code":
-""" %v<tp>% t[%N<tp>%] = {{ vals[ 0] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[ 1] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[ 2] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[ 3] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0,
+""" %v<tp>% t[%N<tp>%] = { vals[ 0] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[ 1] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[ 2] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[ 3] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0,
                             vals[ 4] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[ 5] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[ 6] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[ 7] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0,
                             vals[ 8] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[ 9] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[10] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[11] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0,
                             vals[12] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[13] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[14] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[15] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0,
@@ -126,8 +126,8 @@ tpl_implem_emu512 = {
                             vals[32] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[33] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[34] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[35] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0,
                             vals[36] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[37] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[38] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[39] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0,
                             vals[40] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[41] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[42] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[43] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0,
-                            vals[44] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[45] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[46] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[47] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0}}
-    %r<c:int|b:tp>% r0_32 = %set<c:int|b:tp>%((%cast<c:int|b:tp,tp>%)*)t);
+                            vals[44] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[45] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[46] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[47] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0};
+    %r<c:int|b:tp>% r0_32 = %set<c:int|b:tp>%((%cast<c:int|b:tp,tp>%)*t);
     %r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%(0xFF);
 	%r<c:int|b:tp>% msk   = %cmpneq<c:int|b:tp>%(r0_32, r1_32);
     %m<c:int|b:tp>% res   = %tomsk<c:int|b:tp>%(msk);
@@ -164,15 +164,15 @@ tpl_implem_emu512 = {
 	 },
 		
 	"andb_fk"            : { "format": "long",  "code":
-""""return (m0.m & m1.m);""" }, 	                                           
+""" return (m0.m & m1.m);""" }, 	                                           
     "andnb_fk"            : { "format": "long",  "code":
-""""return ((~m0.m) & m1.m);""" }, 
+""" return ((~m0.m) & m1.m);""" }, 
     "xorb_k"              : { "format": "long",  "code":
-""""return (m0.m ^ m1.m);""" }, 
+""" return (m0.m ^ m1.m);""" }, 
     "orb_k"              : { "format": "long",  "code":
-""""return (m0.m | m1.m);""" }, 
+""" return (m0.m | m1.m);""" }, 
 	"msb-64": { "format": "long", "code":
-"""	%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%(0x8000000000000000);
+"""	%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%(0x8000000000000000));
 	return %andb<tp>%(r0, rm);"""
 	},
 	"msb-32": { "format": "long", "code":
@@ -215,35 +215,58 @@ tpl_implem_emu512 = {
 	"notb_k-64": { "format": "long", "code":
 """	return ~(m0, mm);"""
 	},
-	"testz_2-32-64": {
-"""	%r<c:int|b:tp>% r0_32 = %andb<c:int|b:tp>%(r0, rm)
-	%r<c:int|b:tp>% r1_32 = %set0<c:int|b:tp>%()
+	"testz_2-64": {
+"""	%r<c:int|b:tp>% r0_32 = %andb<c:int|b:tp>%(r0, rm);
+	%r<c:int|b:tp>% r1_32 = %set0<c:int|b:tp>%();
+	%r<c:int|b:tp>% msk   = %cmpneq<c:int|b:tp>%(r0_32, r1_32);
+	%m<c:int|b:tp>% m32   = %tomsk<c:int|b:tp>%(msk);
+	%r<c:int|b:tp>% rz    = %set0<8>%();
+	%m<c:int|b:tp>% mz    = %tomsk<c:int|b:tp>%(rz);
+	return _mm512_kortestz(m32, mz);"""
+	},
+	"testz_2-32": {
+"""	%r<c:int|b:tp>% r0_32 = %andb<c:int|b:tp>%(r0, rm);
+	%r<c:int|b:tp>% r1_32 = %set0<c:int|b:tp>%();
 	%r<c:int|b:tp>% msk   = %cmpneq<c:int|b:tp>%(r0_32, r1_32)
 	%m<c:int|b:tp>% m32   = %tomsk<c:int|b:tp>%(msk);
-	%r<c:int|b:tp>% rz    = %set0<c:int|b:tp>%();
+	%r<c:int|b:tp>% rz    = %set0<16>%();
 	%m<c:int|b:tp>% mz    = %tomsk<c:int|b:tp>%(rz);
 	return _mm512_kortestz(m32, mz);"""
 	},
 	"testz_2-16-8": {
-"""	%r<c:int|b:tp>% r0_32 = %andb<c:int|b:tp>%(r0, rm)
-	%r<c:int|b:tp>% r1_32 = %set0<c:int|b:tp>%()
-	%r<c:int|b:tp>% msk   = %cmpneq<c:int|b:tp>%(r0_32, r1_32)
+"""	%r<c:int|b:tp>% r0_32 = %andb<c:int|b:tp>%(r0, rm);
+	%r<c:int|b:tp>% r1_32 = %set0<c:int|b:tp>%();
+	%r<c:int|b:tp>% msk   = %cmpneq<c:int|b:tp>%(r0_32, r1_32);
 	%m<c:int|b:tp>% m32   = %tomsk<c:int|b:tp>%(msk);
 	return %cast<c:int|b:tp,tp>%(m32 == 0);"""
 	},
-    "testz-32-64": { "format": "long", "code":
-"""	%r<c:int|b:tp>% r32 = %set0<c:int|b:tp>%()
+    "testz-32": { "format": "long", "code":
+"""	%r<c:int|b:tp>% r32 = %set0<c:int|b:tp>%();
 	%m<c:int|b:32>% m32 = %tomsk<c:int|b:32>%(r32);
-	%r<c:int|b:tp>% rz    = %set0<c:int|b:tp>%();
+	%r<c:int|b:tp>% rz    = %set0<16>%();
 	%m<c:int|b:tp>% mz    = %tomsk<c:int|b:tp>%(rz);
 	%r<c:int|b:tp>% msk = %cmpneq<c:int|b:tp>%(r0, m32)					
-	return  _mm512_kortestz(msk, mz);"""
+	return _mm512_kortestz(m32, mz);"""
+	},
+	"testz-64": { "format": "long", "code":
+"""	%r<c:int|b:tp>% r32 = %set0<c:int|b:tp>%();
+	%m<c:int|b:32>% m32 = %tomsk<c:int|b:32>%(r32);
+	%r<c:int|b:tp>% rz    = %set0<8>%();
+	%m<c:int|b:tp>% mz    = %tomsk<c:int|b:tp>%(rz);
+	%r<c:int|b:tp>% msk = %cmpneq<c:int|b:tp>%(r0, m32);					
+	return _mm512_kortestz(m32, mz);"""
 	},
 	
-	"testz-16-8": { "format": "long", "code":
-"""	%r<c:int|b:tp>% r32 = %set0<c:int|b:tp>%()
+	"testz-16": { "format": "long", "code":
+"""	%r<c:int|b:tp>% r32 = %set0<c:int|b:tp>%();
 	%m<c:int|b:32>% m32 = %tomsk<c:int|b:32>%(r32);
-	%r<c:int|b:tp>% msk = %cmpneq<c:int|b:tp>%(r0, m32)					
+	%r<c:int|b:tp>% msk = %cmpneq<c:int|b:tp>%(r0, m32);				
+	return %cast<c:int|b:tp,tp>%(msk == 0);"""
+	},
+	"testz-8": { "format": "long", "code":
+"""	%r<c:int|b:tp>% r32 = %set0<c:int|b:tp>%();
+	%m<c:int|b:32>% m32 = %tomsk<c:int|b:32>%(r32);
+	%r<c:int|b:tp>% msk = %cmpneq<c:int|b:tp>%(r0, m32)	;				
 	return %cast<c:int|b:tp,tp>%(msk == 0);"""
 	},
 }
@@ -262,7 +285,12 @@ implems_emu512 = {
 			{ "datatypes": [int16] , "template": tpl_implem_emu512["set_k-16"] , "if": "defined(__AVX512F__)"} ,
 			{ "datatypes": [int32] , "template": tpl_implem_emu512["set_k-32"] , "if": "defined(__AVX512BW__)"} ,
 			{ "datatypes": [int64] , "template": tpl_implem_emu512["set_k-64"] , "if": "defined(__AVX512BW__)"} ,
-
+    	],
+    	"set1_k":[
+			{ "datatypes": [int8] , "template": tpl_implem_emu512["set1_k-8"] } ,
+			{ "datatypes": [int16] , "template": tpl_implem_emu512["set1_k-16"] } ,
+			{ "datatypes": [int32] , "template": tpl_implem_emu512["set1_k-32"]} ,
+			{ "datatypes": [int64] , "template": tpl_implem_emu512["set1_k-64"] } ,
 		],
 		"set0":[
 			{ "datatypes": [float64] , "template": tpl_implem_emu512["set0-f64"] , "if": "defined(__MIC__) || defined(__KNCNI__)"} ,
@@ -270,13 +298,7 @@ implems_emu512 = {
 			{ "datatypes": [int32]   , "template": tpl_implem_emu512["set0-32"]  , "if": "defined(__MIC__) || defined(__KNCNI__)"} , ] ,
 			
 		"set0_k": [
-			{ "datatypes": [all_float, all_int]   , "template": tpl_implem_emu512["set0_k"]} , ] ,
-    	"set1_k":[
-			{ "datatypes": [int8] , "template": tpl_implem_emu512["set1_k-8"] } ,
-			{ "datatypes": [int16] , "template": tpl_implem_emu512["set1_k-16"] } ,
-			{ "datatypes": [int32] , "template": tpl_implem_emu512["set1_k-32"]} ,
-			{ "datatypes": [int64] , "template": tpl_implem_emu512["set1_k-64"] } ,
-    	],
+			{ "datatypes": all_datatypes  , "template": tpl_implem_emu512["set0_k"]} , ] ,
     	"andb_k": [
         	{ "datatypes": all_float, "template": tpl_implem_emu512["andb_fk"], "if": "defined(__AVX512BW__)" } ],
     	"andnb_k": [
@@ -304,11 +326,14 @@ implems_emu512 = {
 			{ "datatypes": [int8], "template": tpl_implem_emu512["notb_k-8"] }, 
 		],	
 		"testz": [
-			{ "datatypes": [int32, int64,uint32,uint64], "template": tpl_implem_emu512["testz-32-64"], "if": "defined (__AVX512F__) || defined(__MIC__) || defined(__KNCNI__)" },
-			{ "datatypes": [int16, int8, uint16,uint8], "template": tpl_implem_emu512["testz-16-8"], "if": "defined (__AVX512BW__)" },
+			{ "datatypes": [int32], "template": tpl_implem_emu512["testz-32"], "if": "defined (__AVX512F__) || defined(__MIC__) || defined(__KNCNI__)" },
+			{ "datatypes": [int64 ], "template": tpl_implem_emu512["testz-64"], "if": "defined (__AVX512F__) || defined(__MIC__) || defined(__KNCNI__)" },
+			{ "datatypes": [int16,uint16], "template": tpl_implem_emu512["testz-16"], "if": "defined (__AVX512BW__)" },
+			{ "datatypes": [int8,uint8], "template": tpl_implem_emu512["testz-8"], "if": "defined (__AVX512BW__)" },
 		],
 		"testz_2": [
-			{ "datatypes": [int32, int64,uint32,uint64], "template": tpl_implem_emu512["testz_2-32-64"], "if": "defined (__AVX512F__) || defined(__MIC__) || defined(__KNCNI__)" },
+			{ "datatypes": [int32,uint32,], "template": tpl_implem_emu512["testz_2-32"], "if": "defined (__AVX512F__) || defined(__MIC__) || defined(__KNCNI__)" },
+			{ "datatypes": [int64,uint64], "template": tpl_implem_emu512["testz_2-64"], "if": "defined (__AVX512F__) || defined(__MIC__) || defined(__KNCNI__)" },
 			{ "datatypes": [int16, int8, uint16,uint8], "template": tpl_implem_emu512["testz_2-16-8"], "if": "defined (__AVX512BW__)" },
 		],
 }
