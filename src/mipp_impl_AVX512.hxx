@@ -230,6 +230,18 @@
 		mipp::storeu<int8_t>(mem_addr, v);
 	}
 #endif
+// ------------------------------------------------------------------------------------------------------------ getfirst
+#if defined(__AVX512F__)
+	template <>
+	inline double getfirst<double>(const mipp::reg r){
+		return _mm512_cvtsd_f64(_mm512_castps_pd(r));
+	}
+
+	template <>
+	inline float getfirst<float>(const mipp::reg r){
+		return _mm512_cvtss_f32(r);
+	}
+#endif
 
 	// ---------------------------------------------------------------------------------------------------------- cmpeq
 	template <>

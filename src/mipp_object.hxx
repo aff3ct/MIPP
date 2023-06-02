@@ -79,6 +79,7 @@ public:
 	inline void        loadu        (const T* data)                              { r = mipp::loadu<T>(data);                      }
 	inline void        store        (T* data)                              const { mipp::store<T>(data, r);                       }
 	inline void        storeu       (T* data)                              const { mipp::storeu<T>(data, r);                      }
+    inline T           getfirst     ()                                     const { return mipp::getfirst<T>(r);                   }
 	inline Reg_2<T>    low          ()                                     const { return mipp::low <T>(r);                       }
 	inline Reg_2<T>    high         ()                                     const { return mipp::high<T>(r);                       }
 	inline Reg<T>      andb         (const Reg<T> v)                       const { return mipp::andb         <T>(r, v.r);         }
@@ -137,6 +138,7 @@ public:
 	inline void        loadu        (const T* data)                              { r = data[0];                                   }
 	inline void        store        (T* data)                              const { data[0] = r;                                   }
 	inline void        storeu       (T* data)                              const { data[0] = r;                                   }
+	inline T           getfirst     ()                                     const { return r;                                      }	
 	inline Reg_2<T>    low          ()                                     const { return r;                                      }
 	inline Reg_2<T>    high         ()                                     const { return r;                                      }
 	inline Reg<T>      andb         (const Reg<T> v)                       const { return mipp_scop::andb<T>( r, v.r);            }
@@ -366,9 +368,12 @@ public:
 #ifndef MIPP_NO_INTRINSICS
 	inline void set0(              ) { m = mipp::set0<N>(   ); }
 	inline void set1(const bool val) { m = mipp::set1<N>(val); }
+	inline bool getfirst(                  ) const { return mipp::getfirst<N>(m);   }
 #else
 	inline void set0(              ) { m = 0;                   }
 	inline void set1(const bool val) { m = val ? ~0 : 0;        }
+	inline bool getfirst(                  ) const { return m;           }
+
 #endif
 
 #ifndef MIPP_NO_INTRINSICS
@@ -453,8 +458,11 @@ public:
 #endif
 
 #ifndef MIPP_NO_INTRINSICS
+	inline T getfirst  (                  ) const { return mipp::getfirst<T>(r);   }
 	inline T operator[](const size_t index) const { return mipp::get<T>(this->r, index); }
+
 #else
+	inline T getfirst  (                  ) const { return r; }
 	inline T operator[](const size_t index) const { return r; }
 #endif
 
@@ -577,18 +585,23 @@ std::ostream& operator<<(std::ostream& os, const Msk<N>& m)
 
 //template <typename T> inline Reg<T>      load         (const T* in)                                           { Reg<T> r; r.load (in); return r; }
 //template <typename T> inline Reg<T>      loadu        (const T* in)                                           { Reg<T> r; r.loadu(in); return r; }
-//template <typename T> inline void        store        (T* out, const Reg<T> v)                                { v.store (out);                   }
-//template <typename T> inline void        storeu       (T* out, const Reg<T> v)                                { v.storeu(out);                   }
-//template <typename T> inline Reg<T>      set          (const T in[N<T>()])                                    { Reg<T> r; r.set(in);   return r; }
-//#ifdef _MSC_VER
-//template <int      N> inline Msk<N>      set          (const bool in[])                                       { Msk<N> m; m.set(in);   return m; }
-//#else
-//template <int      N> inline Msk<N>      set          (const bool in[N])                                      { Msk<N> m; m.set(in);   return m; }
-//#endif
-//template <typename T> inline Reg<T>      set1         (const T val)                                           { Reg<T> r; r.set1(val); return r; }
-//template <int      N> inline Msk<N>      set1         (const bool val)                                        { Msk<N> m; m.set1(val); return m; }
-//template <typename T> inline Reg<T>      set0         ()                                                      { Reg<T> r; r.set0();    return r; }
-//template <int      N> inline Msk<N>      set0         ()                                                      { Msk<N> m; m.set0();    return m; }
+template <typename T> inline void        store        (T* out, const Reg<T> v)                                { v.store (out);                   }
+template <typename T> inline void        storeu       (T* out, const Reg<T> v)                                { v.storeu(out);                   }
+template <typename T> inline Reg<T>      set          (const T in[N<T>()])                                    { Reg<T> r; r.set(in);   return r; }
+#ifdef _MSC_VER
+template <int      N> inline Msk<N>      set          (const bool in[])                                       { Msk<N> m; m.set(in);   return m; }
+#else
+template <int      N> inline Msk<N>      set          (const bool in[N])                                      { Msk<N> m; m.set(in);   return m; }
+#endif
+template <typename T> inline T           getfirst     (const Reg<T> v)                                        { return v.getfirst();             }
+template <typename T> inline T           getfirst     (const Reg_2<T> v)                                      { return v.getfirst();             }
+template <int      N> inline bool        getfirst     (const Msk<N> m)                                        { return m.getfirst();             }
+template <typename T> inline Reg_2<T>    low          (const Reg<T> v)                                        { return v.low();                  }
+template <typename T> inline Reg_2<T>    high         (const Reg<T> v)  
+template <typename T> inline Reg<T>      set1         (const T val)                                           { Reg<T> r; r.set1(val); return r; }
+template <int      N> inline Msk<N>      set1         (const bool val)                                        { Msk<N> m; m.set1(val); return m; }
+template <typename T> inline Reg<T>      set0         ()                                                      { Reg<T> r; r.set0();    return r; }
+template <int      N> inline Msk<N>      set0         ()                                                      { Msk<N> m; m.set0();    return m; }
 template <typename T> inline Reg<T>      andb         (const Reg<T> v1, const Reg<T> v2)                      { return v1.andb(v2);              }
 template <int      N> inline Msk<N>      andb         (const Msk<N> v1, const Msk<N> v2)                      { return v1.andb(v2);              }
 template <typename T> inline Reg<T>      andb         (const Reg<T> v1, const Msk<N<T>()> v2)                 { return v1.andb(v2);              }
@@ -607,12 +620,6 @@ template <typename T> inline Reg<T>      xorb         (const Reg<T> v1, const Re
 template <int      N> inline Msk<N>      xorb         (const Msk<N> v1, const Msk<N> v2)                      { return v1.xorb(v2);              }
 template <typename T> inline Reg<T>      xorb         (const Reg<T> v1, const Msk<N<T>()> v2)                 { return v1.xorb(v2);              }
 template <typename T> inline Reg<T>      xorb         (const Msk<N<T>()> v1, const Reg<T> v2)                 { return v1.xorb(v2);              }
-template <typename T> inline Reg<T>      lshift       (const Reg<T> v,  const uint32_t n)                     { return v.lshift(n);              }
-template <typename T> inline Reg<T>      lshiftr      (const Reg<T> v1, const Reg<T> v2)                      { return v1.lshiftr(v2);           }
-template <int      N> inline Msk<N>      lshift       (const Msk<N> v,  const uint32_t n)                     { return v.lshift(n);              }
-template <typename T> inline Reg<T>      rshift       (const Reg<T> v,  const uint32_t n)                     { return v.rshift(n);              }
-template <typename T> inline Reg<T>      rshiftr      (const Reg<T> v1, const Reg<T> v2)                      { return v1.rshiftr(v2);           }
-template <int      N> inline Msk<N>      rshift       (const Msk<N> v,  const uint32_t n)                     { return v.rshift(n);              }
 template <typename T> inline Msk<N<T>()> cmpeq        (const Reg<T> v1, const Reg<T> v2)                      { return v1.cmpeq(v2);             }
 template <typename T> inline Msk<N<T>()> cmpneq       (const Reg<T> v1, const Reg<T> v2)                      { return v1.cmpneq(v2);            }
 template <typename T> inline Msk<N<T>()> cmplt        (const Reg<T> v1, const Reg<T> v2)                      { return v1.cmplt(v2);             }

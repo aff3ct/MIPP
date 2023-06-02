@@ -1059,7 +1059,24 @@ bool get(const mipp::msk m, const size_t index)
 		return tmp[index * (mipp::RegisterSizeBit / (N * 8))];
 #endif
 }
+// ----------------------------------------------------------------------------------------------------------- getfirst
+template <typename T>
+T getfirst(const mipp::reg r)
+{
+	return get<T>(r, 0);
+}
 
+template <typename T>
+T getfirst(const mipp::reg_2 r)
+{
+	return get<T>(r, 0);
+}
+
+template <int N>
+bool getfirst(const mipp::msk m)
+{
+	return get<N>(m, 0);
+}
 // --------------------------------------------------------------------------------------------------------------- dump
 
 template <typename T>

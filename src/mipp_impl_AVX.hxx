@@ -191,6 +191,29 @@
 		mipp::storeu<int8_t>(mem_addr, v);
 	}
 #endif
+ // ------------------------------------------------------------------------------------------------------------ getfirst
+	template <>
+	inline double getfirst<double>(const mipp::reg r){
+#if !defined(__APPLE__)
+		return _mm256_cvtsd_f64(_mm256_castps_pd(r));
+#else
+		return _mm_cvtsd_f64(_mm_castsi128_pd(_mm256_extractf128_si256(_mm256_castps_si256(r), 0)));
+#endif
+	}
+
+	template <>
+	inline float getfirst<float>(const mipp::reg r){
+#if !defined(__APPLE__)
+		return _mm256_cvtss_f32(r);
+#else
+		return _mm_cvtss_f32(_mm_castsi128_ps(_mm256_extractf128_si256(_mm256_castps_si256(r), 0)));
+#endif
+	}
+
+    template <>
+	inline int32_t getfirst<int32_t>(const mipp::reg r){
+	    return _mm_cvtsi128_si32(_mm256_castsi256_si128(_mm256_castps_si256(r)));
+	}
 
 	// ------------------------------------------------------------------------------------------------------------ set
 	template <>

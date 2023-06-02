@@ -202,6 +202,7 @@ mipp_funcs = {
 	"loadu":   { "proto": protos["ret_reg_1arg_ptr"            ], "datatypes": all_datatypes          , "horizontal": False },
 	"store":   { "proto": protos["ret_void_2args_ptr_reg"      ], "datatypes": all_datatypes          , "horizontal": False },
 	"storeu":  { "proto": protos["ret_void_2args_ptr_reg"      ], "datatypes": all_datatypes          , "horizontal": False },
+	"getfirst":{ "proto": protos["ret_val_1arg_reg"            ], "datatypes": all_float              , "horizontal": True  },
 	"set" :    { "proto": protos["ret_reg_1arg_val"            ], "datatypes": all_datatypes          , "horizontal": False },	
 	"set_k" :  { "proto": protos["ret_reg_1arg_val"            ], "datatypes": all_int                , "horizontal": False },		
 	"set1":    { "proto": protos["ret_reg_1arg_val"            ], "datatypes": all_datatypes          , "horizontal": False },

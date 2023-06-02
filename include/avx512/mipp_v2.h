@@ -11,8 +11,8 @@ typedef float float32_t;
 #include "mipp_v2_tools.h"
 #include "mipp_v2_impl_emulated.h"
 
-#if defined(__AVX__)
-#include "mipp_v2_impl_AVX.h"
+#if defined((__AVX512F__) || defined(__AVX512BW__)|| defined(__MIC__) || defined(__KNCNI__))
+#include "mipp_v2_impl_AVX512.h"
 #endif
 
 #include "mipp_v2_interface.h"

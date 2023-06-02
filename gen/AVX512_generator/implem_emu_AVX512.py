@@ -161,8 +161,7 @@ tpl_implem_emu512 = {
 	%r<c:int|b:tp>% msk   = %cmpneq<c:int|b:tp>%(r0_32, r1_32)
     %m<c:int|b:tp>% res   = %tomsk<c:int|b:tp>%(msk);
 	return res;"""
-	 },
-		
+	 },	
 	"andb_fk"            : { "format": "long",  "code":
 """ return (m0.m & m1.m);""" }, 	                                           
     "andnb_fk"            : { "format": "long",  "code":

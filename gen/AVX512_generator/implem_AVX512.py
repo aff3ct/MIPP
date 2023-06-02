@@ -29,6 +29,8 @@ tpl_implem_avx512 = {
     "store"               : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(({{ isa_dt_par.to_ptr }}*) p0, r0.m);" },
     "set0"                : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}();" },
     "set1"                : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(v0);" },
+    "getfirst":     { "format": "long",  "code":
+""" return {{ isa.prefix }}_{{ instr_name }}(%cast<tp,c:int|b:tp>%(r0).m);""" },    
     "low"                 : { "format": "long",  "code":
 """ return %cast<tp,c : float|b:32>%({{ isa.prefix }}_{{ instr_name }}_pd(%cast<c:float|b:32,tp>%(r0).m, 0));""" },
     "high"                : { "format": "long",  "code":
@@ -182,6 +184,9 @@ implems_avx512 = {
         { "instr_name" : "storeu"  , "datatypes": all_datatypes           , "template": tpl_implem_avx512["store"]  , "if": "!defined(MIPP_ALIGNED_LOADS)" } ],
     "storeu" : [
         { "instr_name" : "storeu"  , "datatypes": all_datatypes           , "template": tpl_implem_avx512["store"]  , "if": "defined(__AVX512F__)"} ],
+    "getfirst": [
+            { "instr_name": "cvtsd_f64", "datatypes": [float64], "template": tpl_implem_avx512["getfirst"] ,"if": "defined(__AVX512F__)"},
+            { "instr_name": "cvtss_f32", "datatypes": [float32], "template": tpl_implem_avx512["getfirst"], "if": "defined(__AVX512F__)"} ],
     "set1"   : [
         { "instr_name" : "set1"    , "datatypes": all_datatypes    , "template": tpl_implem_avx512["set1"]   , "if": "defined(__AVX512F__)"} ],
     "set0"   : [

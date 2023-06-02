@@ -17,18 +17,6 @@ namespace mipp_scop // My Intrinsics Plus Plus SCalar OPerations
 
 	template <typename T>
 	inline T msb(const T val);
-
-	template <typename T>
-	inline T div2(const T val);
-
-	template <typename T>
-	inline T div4(const T val);
-
-	template <typename T>
-	inline T rshift(const T val, const int n);
-
-	template <typename T>
-	inline T lshift(const T val, const int n);
 }
 
 #include "mipp_scalar_op.hxx"

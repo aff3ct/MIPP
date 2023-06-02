@@ -1924,6 +1924,16 @@ void mipp_avx512_storeu_uint8(uint8_t* p0, const rvd_avx512_uint8_t r0) {
 	_mm512_storeu_si512((uint8_t*) p0, r0.m);
 }
 #endif
+#if defined(__AVX512F__) && (( ( ( defined(__AVX512F__) ) ) ))
+float64_t mipp_avx512_getfirst_float64(const rvd_avx512_float64_t r0) {
+ return _mm512_cvtsd_f64(mipp_avx512_cast_float64_int64(r0).m);
+}
+#endif
+#if defined(__AVX512F__) && (( ( ( defined(__AVX512F__) ) ) ))
+float32_t mipp_avx512_getfirst_float32(const rvd_avx512_float32_t r0) {
+ return _mm512_cvtss_f32(mipp_avx512_cast_float32_int32(r0).m);
+}
+#endif
 #if defined(__AVX512F__)
 rvd_avx512_float64_t mipp_avx512_set1_float64(const float64_t v0) {
 	rvd_avx512_float64_t res;
