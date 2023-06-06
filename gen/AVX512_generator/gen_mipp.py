@@ -34,7 +34,7 @@ gen_c_missing_functions(isa_avx512, file, mipp_funcs)
 
 #dump_dict_json(mipp_funcs, "test.json")
 
-tpl_footer_avx = """#endif /* MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX_H_ */"""
+tpl_footer_avx = """#endif /* MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX512_H_ */"""
 j2_template = Template(tpl_footer_avx, undefined=StrictUndefined)
 print(j2_template.render(), file=file)
 
@@ -45,6 +45,7 @@ file = open("../../include/avx512/mipp_v2_interface_gen.h", "w")
 tpl_header_interface = """#ifndef MY_INTRINSICS_PLUS_PLUS_INTERFACE_H_
 #define MY_INTRINSICS_PLUS_PLUS_INTERFACE_H_
 #include "mipp_v2.h" """
+
 j2_template = Template(tpl_header_interface, undefined=StrictUndefined)
 print(j2_template.render(), file=file)
 
@@ -52,8 +53,8 @@ gen_ci_defines([isa_avx512], file)
 gen_ci_structures([isa_avx512], file)
 
 gen_ci_functions([isa_avx512], file, mipp_funcs)
-# gen_ci_functions(isa_avx512, file, mipp_funcs, implems_emu512)
-# gen_ci_missing_functions(isa_avx512, file, mipp_funcs)
+# gen_ci_functions(isa_avx, file, mipp_funcs, implems_emu)
+# gen_ci_missing_functions(isa_avx, file, mipp_funcs)
 
 tpl_footer_interface = """#endif /* MY_INTRINSICS_PLUS_PLUS_INTERFACE_H_ */"""
 j2_template = Template(tpl_footer_interface, undefined=StrictUndefined)

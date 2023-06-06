@@ -198,6 +198,7 @@ def _build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul, part):
 	p = ""
 	realdatatype = datatypes[dt_ret]
 	if (proto["ret"]["type"]):
+		print(proto["ret"]["type"])
 		p += "res.m"  + str(int(part)) + " = "
 	p += func_name + "("
 	cnt_reg = 0

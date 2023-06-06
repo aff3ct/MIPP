@@ -1,7 +1,6 @@
 from tools import *
 
 tpl_implem_emu512 = {
-	
 	"set0-f64" : { "format": "long", "code":
 """ return %set1<c:float|b:tp,tp>%(0.0); """
 	},
@@ -9,13 +8,8 @@ tpl_implem_emu512 = {
 """ return %set1<c:float|b:tp,tp>%(0.f); """
 	},
 	"set0-32" : { "format": "long", "code":
-""" return %set1<c:float|b:tp,tp>%(0); """
+""" return %set1<c:int|b:tp,tp>%(0); """
 	},
-	"set0_k"   : { "format": "short", "code": 
-""" %r<c:int|b:tp>% r32 = 0;
-	%m<c:int|b:32>% m32 = %tomsk<c:int|b:32>%(r32);
-    return _mm512_kxor(m32, m32);""" 
-    },
 	"set-64f"   : { "format": "short", "code": 
 """	return %cast_k<c:float,tp>%(_mm512_set_pd(vals[7], vals[6], vals[5], vals[4], vals[3], vals[2], vals[1], vals[0]));"""
     },
@@ -114,7 +108,7 @@ tpl_implem_emu512 = {
     %m<c:int|b:tp>% res   = %tomsk<c:int|b:tp>%(msk);
 	return res;""" 
 	},
-  "set_k-64": {"format": "long", "code":
+    "set_k-64": {"format": "long", "code":
 """ %v<tp>% t[%N<tp>%] = { vals[ 0] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[ 1] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[ 2] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[ 3] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0,
                             vals[ 4] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[ 5] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[ 6] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[ 7] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0,
                             vals[ 8] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[ 9] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[10] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[11] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0,
@@ -144,23 +138,27 @@ tpl_implem_emu512 = {
 	"set1_k-16": { "format": "long", "code":
 """ %r<c:int|b:tp>% r0_32 = %set1<c:int|b:tp>%(r0 ? 0xFFFFFFFF : 0);
     %r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%(  0xFFFFFFFF    );
-	%r<c:int|b:tp>% msk   = %cmpneq<c:int|b:tp>%(r0_32, r1_32)
+	%r<c:int|b:tp>% msk   = %cmpneq<c:int|b:tp>%(r0_32, r1_32);
     %m<c:int|b:tp>% res   = %tomsk<c:int|b:tp>%(msk);
 	return res;"""
 	 },
 	"set1_k-32": { "format": "long", "code":
 """ %r<c:int|b:tp>% r0_32 = %set1<c:int|b:tp>%(r0 ? 0xFFFF : 0);
     %r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%( 0xFFFF    );
-	%r<c:int|b:tp>% msk   = %cmpneq<c:int|b:tp>%(r0_32, r1_32)
+	%r<c:int|b:tp>% msk   = %cmpneq<c:int|b:tp>%(r0_32, r1_32);
     %m<c:int|b:tp>% res   = %tomsk<c:int|b:tp>%(msk);
 	return res;"""
 	 },
 	"set1_k-64": { "format": "long", "code":
 """ %r<c:int|b:tp>% r0_32 = %set1<c:int|b:tp>%(r0 ? 0xFF : 0);
     %r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%( 0xFF    );
-	%r<c:int|b:tp>% msk   = %cmpneq<c:int|b:tp>%(r0_32, r1_32)
+	%r<c:int|b:tp>% msk   = %cmpneq<c:int|b:tp>%(r0_32, r1_32);
     %m<c:int|b:tp>% res   = %tomsk<c:int|b:tp>%(msk);
 	return res;"""
+	 },	
+	"set0_k"  : { "format": "long", "code":
+""" %m<c:int|b:tp>% m  = 0;
+	return _mm512_kxor(m, m);"""
 	 },	
 	"andb_fk"            : { "format": "long",  "code":
 """ return (m0.m & m1.m);""" }, 	                                           
@@ -226,7 +224,7 @@ tpl_implem_emu512 = {
 	"testz_2-32": {
 """	%r<c:int|b:tp>% r0_32 = %andb<c:int|b:tp>%(r0, rm);
 	%r<c:int|b:tp>% r1_32 = %set0<c:int|b:tp>%();
-	%r<c:int|b:tp>% msk   = %cmpneq<c:int|b:tp>%(r0_32, r1_32)
+	%r<c:int|b:tp>% msk   = %cmpneq<c:int|b:tp>%(r0_32, r1_32);
 	%m<c:int|b:tp>% m32   = %tomsk<c:int|b:tp>%(msk);
 	%r<c:int|b:tp>% rz    = %set0<16>%();
 	%m<c:int|b:tp>% mz    = %tomsk<c:int|b:tp>%(rz);
@@ -244,7 +242,7 @@ tpl_implem_emu512 = {
 	%m<c:int|b:32>% m32 = %tomsk<c:int|b:32>%(r32);
 	%r<c:int|b:tp>% rz    = %set0<16>%();
 	%m<c:int|b:tp>% mz    = %tomsk<c:int|b:tp>%(rz);
-	%r<c:int|b:tp>% msk = %cmpneq<c:int|b:tp>%(r0, m32)					
+	%r<c:int|b:tp>% msk = %cmpneq<c:int|b:tp>%(r0, m32);				
 	return _mm512_kortestz(m32, mz);"""
 	},
 	"testz-64": { "format": "long", "code":
@@ -291,13 +289,13 @@ implems_emu512 = {
 			{ "datatypes": [int32] , "template": tpl_implem_emu512["set1_k-32"]} ,
 			{ "datatypes": [int64] , "template": tpl_implem_emu512["set1_k-64"] } ,
 		],
-		"set0":[
-			{ "datatypes": [float64] , "template": tpl_implem_emu512["set0-f64"] , "if": "defined(__MIC__) || defined(__KNCNI__)"} ,
-			{ "datatypes": [float32] , "template": tpl_implem_emu512["set0-f32"] , "if": "defined(__MIC__) || defined(__KNCNI__)"} ,
-			{ "datatypes": [int32]   , "template": tpl_implem_emu512["set0-32"]  , "if": "defined(__MIC__) || defined(__KNCNI__)"} , ] ,
-			
-		"set0_k": [
-			{ "datatypes": all_datatypes  , "template": tpl_implem_emu512["set0_k"]} , ] ,
+		"set0_mk":[
+			{ "datatypes": [float64] , "template": tpl_implem_emu512["set0-f64"] , "if": "defined(__MIC__) || (__KNCNI__)"} ,
+			{ "datatypes": [float32] , "template": tpl_implem_emu512["set0-f32"] , "if": "defined(__MIC__) || (__KNCNI__)"} ,
+			{ "datatypes": [int32]   , "template": tpl_implem_emu512["set0-32"]  , "if": "defined(__MIC__) || (__KNCNI__)"} , ] ,
+    	"set0_k":[
+   			{ "datatypes": all_int_uint , "template": tpl_implem_emu512["set0_k"]  } , 
+    	],
     	"andb_k": [
         	{ "datatypes": all_float, "template": tpl_implem_emu512["andb_fk"], "if": "defined(__AVX512BW__)" } ],
     	"andnb_k": [
@@ -325,14 +323,14 @@ implems_emu512 = {
 			{ "datatypes": [int8], "template": tpl_implem_emu512["notb_k-8"] }, 
 		],	
 		"testz": [
-			{ "datatypes": [int32], "template": tpl_implem_emu512["testz-32"], "if": "defined (__AVX512F__) || defined(__MIC__) || defined(__KNCNI__)" },
-			{ "datatypes": [int64 ], "template": tpl_implem_emu512["testz-64"], "if": "defined (__AVX512F__) || defined(__MIC__) || defined(__KNCNI__)" },
+			{ "datatypes": [int32,uint32], "template": tpl_implem_emu512["testz-32"], "if": "defined (__AVX512F__) || defined(__MIC__) || defined(__KNCNI__)" },
+			{ "datatypes": [int64,uint64 ], "template": tpl_implem_emu512["testz-64"], "if": "defined (__AVX512F__) || defined(__MIC__) || defined(__KNCNI__)" },
 			{ "datatypes": [int16,uint16], "template": tpl_implem_emu512["testz-16"], "if": "defined (__AVX512BW__)" },
 			{ "datatypes": [int8,uint8], "template": tpl_implem_emu512["testz-8"], "if": "defined (__AVX512BW__)" },
 		],
 		"testz_2": [
 			{ "datatypes": [int32,uint32,], "template": tpl_implem_emu512["testz_2-32"], "if": "defined (__AVX512F__) || defined(__MIC__) || defined(__KNCNI__)" },
 			{ "datatypes": [int64,uint64], "template": tpl_implem_emu512["testz_2-64"], "if": "defined (__AVX512F__) || defined(__MIC__) || defined(__KNCNI__)" },
-			{ "datatypes": [int16, int8, uint16,uint8], "template": tpl_implem_emu512["testz_2-16-8"], "if": "defined (__AVX512BW__)" },
+			{ "datatypes": [int16, uint16,int8,uint8], "template": tpl_implem_emu512["testz_2-16-8"], "if": "defined (__AVX512BW__)" },
 		],
 }
