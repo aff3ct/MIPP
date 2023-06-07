@@ -171,12 +171,27 @@ protos = {
 			{"type": "msk", "charac": "RO", "fixeddatatype": False},
 		]
 	},
+	"ret_i32_1arg_reg": {
+		"ret" :
+			{"type": "val", "charac": "WO", "fixeddatatype": int32},
+		"args" : [
+			{"type": "reg", "charac": "RO", "fixeddatatype": False},
+		]
+	},
 	"ret_i32_2args_msk": {
 		"ret" :
 			{"type": "val", "charac": "WO", "fixeddatatype": int32},
 		"args" : [
 			{"type": "msk", "charac": "RO", "fixeddatatype": False},
 			{"type": "msk", "charac": "RO", "fixeddatatype": False},
+		]
+	},
+	"ret_i32_2args_reg": {
+		"ret" :
+			{"type": "val", "charac": "WO", "fixeddatatype": int32},
+		"args" : [
+			{"type": "ret", "charac": "RO", "fixeddatatype": False},
+			{"type": "ret", "charac": "RO", "fixeddatatype": False},
 		]
 	},
 	"ret_val_1arg_reg": {
@@ -213,8 +228,8 @@ mipp_funcs = {
 	"store"    : { "proto": protos["ret_void_2args_ptr_reg"      ], "datatypes": all_datatypes          , "horizontal": False },
 	"storeu"   : { "proto": protos["ret_void_2args_ptr_reg"      ], "datatypes": all_datatypes          , "horizontal": False },
 	"getfirst" : { "proto": protos["ret_val_1arg_reg"            ], "datatypes": all_float              , "horizontal": True  },
-	"set"      : { "proto": protos["ret_reg_1arg_val"            ], "datatypes": all_datatypes          , "horizontal": False },	
-	"set_k"    : { "proto": protos["ret_reg_1arg_val"            ], "datatypes": all_int                , "horizontal": False },		
+	"set"      : { "proto": protos["ret_msk_0arg_msk"            ], "datatypes": all_datatypes          , "horizontal": False },	
+	"set_k"    : { "proto": protos["ret_reg_1arg_val"            ], "datatypes": all_int               , "horizontal": False },		
 	"set1"     : { "proto": protos["ret_reg_1arg_val"            ], "datatypes": all_datatypes          , "horizontal": False },
 	"set1_k"   : { "proto": protos["ret_msk_0arg"                ], "datatypes": all_datatypes          , "horizontal": False },
 	"set0"     : { "proto": protos["ret_reg_0arg"                ], "datatypes": all_datatypes          , "horizontal": False },
@@ -251,9 +266,8 @@ mipp_funcs = {
 	"cmpgt"    : { "proto": protos["ret_msk_2args_reg"           ], "datatypes": all_datatypes          , "horizontal": False },
 	"round"    : { "proto": protos["ret_val_1arg_reg"            ], "datatypes": all_float              , "horizontal": False },
 	"blend"    : { "proto": protos["ret_reg_3args_2reg_1msk"     ], "datatypes": all_datatypes          , "horizontal": False },
-	"testz"    : { "proto": protos["ret_i32_2args_msk"            ], "datatypes": all_int_uint           , "horizontal": True  },
-	"testz"    : { "proto": protos["ret_i32_1arg_msk"            ], "datatypes": all_int_uint           , "horizontal": True  },
-	"testz_2"  : { "proto": protos["ret_i32_2args_msk"           ], "datatypes": all_int_uint           , "horizontal": True  },
+	"testz"    : { "proto": protos["ret_i32_1arg_reg"            ], "datatypes": all_int_uint           , "horizontal": True  },
+	"testz_2"  : { "proto": protos["ret_i32_2args_reg"           ], "datatypes": all_int_uint           , "horizontal": True  },
 	"hadd"     : { "proto": protos["ret_reg_1arg_reg"            ], "datatypes": all_datatypes          , "horizontal": True  },
 	"hmul"     : { "proto": protos["ret_reg_1arg_reg"            ], "datatypes": all_float+[int32,int16], "horizontal": True  },
 	"hmin"     : { "proto": protos["ret_reg_1arg_reg"            ], "datatypes": all_datatypes          , "horizontal": True  },
