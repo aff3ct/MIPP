@@ -45,7 +45,6 @@ def gen_c_functions(isa, file, funcs, implems):
 						dt_par = dt.split(',')[0]
 						dt_ret = dt.split(',')[0]
 						if dt_par not in funcs[f]["datatypes"]:
-							print(dt_par)
 							print("Panic: unsupported type for '" + f + "<" + dt_par + "," + dt_par + ">' function.")
 							exit(-1)
 					else:

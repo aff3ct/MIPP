@@ -40,7 +40,7 @@ print(j2_template.render(), file=file)
 
 file.close()
 
-file = open("../../include/avx512/mipp_v2_interface_gen.h", "w")
+file = open("../../include/avx512/mipp_v2_interface_AVX512_gen.h", "w")
 
 tpl_header_interface = """#ifndef MY_INTRINSICS_PLUS_PLUS_INTERFACE_H_
 #define MY_INTRINSICS_PLUS_PLUS_INTERFACE_H_
@@ -62,7 +62,7 @@ print(j2_template.render(), file=file)
 
 file.close()
 
-file = open("../../include/avx512/mipp_v2_gen.hpp", "w")
+file = open("../../include/avx512/mipp_v2_AVX512_gen.hpp", "w")
 
 tpl_header_cpp = """#ifndef MY_INTRINSICS_PLUS_PLUS_HPP_
 #define MY_INTRINSICS_PLUS_PLUS_HPP_

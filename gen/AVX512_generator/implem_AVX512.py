@@ -4,7 +4,7 @@ isa_avx512 = {
     "name": "avx512",
     "prefix": "_mm512",
     "size": 512,
-    "define": {"__AVX512F__","__AVX512__","__KNCNI__","__MIC__"},
+    "define": '__AVX512DQ__;__AVX512F__;__AVX512__;__KNCNI__;__MIC__',
     "hw_lmul": False,
     "datatypes": {
         float64 : { "data_ext" : "pd"    , "data_ext_logi": "pd"    , "data_ext_msk": "si512" , "reg" : "__m512d" , "msk" : "__mmask8"  , "to_ptr": "float64_t" , } ,
@@ -31,10 +31,6 @@ tpl_implem_avx512 = {
     "set1"                : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(v0);" },
     "getfirst"            : { "format": "long",  "code":
 """ return {{ isa.prefix }}_{{ instr_name }}(%cast<tp,c:int|b:tp>%(r0).m);""" },    
-    "low"                 : { "format": "long",  "code":
-""" return %cast<tp,c : float|b:32>%({{ isa.prefix }}_{{ instr_name }}_pd(%cast<c:float|b:32,tp>%(r0).m, 0));""" },
-    "high"                : { "format": "long",  "code":
-""" return %cast<tp,c : float|b:32>%({{ isa.prefix }}_{{ instr_name }}_pd(%cast<c:float|b:32,tp>%(r0).m, 1));""" },
     "arith_1arg"          : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m);" },
     "arith_2args"         : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, r1.m);" },
     "logi_2args"          : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(r0.m, r1.m);" },
@@ -191,10 +187,6 @@ implems_avx512 = {
         { "instr_name" : "set1"    , "datatypes": all_datatypes    , "template": tpl_implem_avx512["set1"]   } ],
     "set0"   : [
         { "instr_name" : "setzero" , "datatypes": all_datatypes    , "template": tpl_implem_avx512["set0"]   } ],
-    "low": [
-        { "instr_name": "extractf64x4" , "datatypes": all_float+[int64 , int32 , int16 , int8] , "template": tpl_implem_avx512["low"] ,  } ],
-    "high": [
-        { "instr_name": "extractf64x4" , "datatypes": all_float+[int64 , int32 , int16 , int8] , "template": tpl_implem_avx512["high"] ,  } ],
     "sqrt": [
         { "instr_name": "sqrt", "datatypes": all_float, "template": tpl_implem_avx512["arith_1arg"],} ],
     "rsqrt": [

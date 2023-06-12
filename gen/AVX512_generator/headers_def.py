@@ -190,8 +190,8 @@ protos = {
 		"ret" :
 			{"type": "val", "charac": "WO", "fixeddatatype": int32},
 		"args" : [
-			{"type": "ret", "charac": "RO", "fixeddatatype": False},
-			{"type": "ret", "charac": "RO", "fixeddatatype": False},
+			{"type": "reg", "charac": "RO", "fixeddatatype": False},
+			{"type": "reg", "charac": "RO", "fixeddatatype": False},
 		]
 	},
 	"ret_val_1arg_reg": {
@@ -235,8 +235,6 @@ mipp_funcs = {
 	"set0"     : { "proto": protos["ret_reg_0arg"                ], "datatypes": all_datatypes          , "horizontal": False },
 	"set0_k"   : { "proto": protos["ret_msk_0arg_msk"            ], "datatypes": all_datatypes          , "horizontal": False },
 	"set0_mk"  : { "proto": protos["ret_msk_0arg_msk"            ], "datatypes": all_float+[int32]      , "horizontal": False },
-	"low"      : { "proto": protos["ret_val_1arg_reg"            ], "datatypes": all_float+[int64 , int32 , int16 , int8]      , "horizontal": True  },
-	"high"     : { "proto": protos["ret_val_1arg_reg"            ], "datatypes": all_float+[int64 , int32 , int16 , int8]      , "horizontal": True  },
 	"sqrt"     : { "proto": protos["ret_reg_1arg_reg"            ], "datatypes": all_float              , "horizontal": False },
 	"rsqrt"    : { "proto": protos["ret_reg_1arg_reg"            ], "datatypes": [float32]              , "horizontal": False },
 	"add"      : { "proto": protos["ret_reg_2args_reg"           ], "datatypes": all_datatypes          , "horizontal": False },

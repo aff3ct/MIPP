@@ -214,20 +214,24 @@ tpl_implem_emu512 = {
 	},
 
 
-
-	"testz_2-64": {
-"""	%r<c:int|b:tp>% r0_32 = %andb<c:int|b:tp>%(r0, r1);
-	%r<c:int|b:tp>% r1_32 = %set0<c:int|b:tp>%();
-	return _mm512_kortestz(msk, %set0<c:int|b:8>%());"""
+	"testz_2-64":{ "format": "long",  "code":
+"""	%r<c:int|b:tp>% r32 = %set0<c:int|b:tp>%();
+	%m<c:int|b:tp>% msk = %cmpneq<c:int|b:tp>%(r0, r32);		
+	return _mm512_kortestz(msk,%set0<c:int|b:8>%());"""
+	},
+	"testz-64": { "format": "long", "code":
+"""	%r<c:int|b:tp>% r32 = %set0<c:int|b:tp>%();
+	%m<c:int|b:tp>% msk = %cmpneq<c:int|b:tp>%(r0, r32);		
+	return _mm512_kortestz(msk,%set0<c:int|b:8>%());"""
 	},
 
-	"testz_2-32": {
+	"testz_2-32" : { "format": "long",  "code":
 """	%r<c:int|b:tp>% r0_32 = %andb<c:int|b:tp>%(r0, r1);
 	%r<c:int|b:tp>% r1_32 = %set0<c:int|b:tp>%();
-	%r<c:int|b:tp>% msk   = %cmpneq<c:int|b:tp>%(r0_32, r1_32);
+	%m<c:int|b:tp>% msk   = %cmpneq<c:int|b:tp>%(r0_32, r1_32);
 	return _mm512_kortestz(m32, %set0<c:int|b:16>%());"""
 	},
-	"testz_2-16-8": {
+	"testz_2-16-8" : { "format": "long",  "code":
 """	%r<c:int|b:tp>% r0_32 = %andb<c:int|b:tp>%(r0, r1);
 	%r<c:int|b:tp>% r1_32 = %set0<c:int|b:tp>%();
 	%m<c:int|b:tp>% msk   = %cmpneq<c:int|b:tp>%(r0_32, r1_32);
@@ -318,8 +322,8 @@ implems_emu512 = {
 			{ "datatypes": [int8,uint8], "template": tpl_implem_emu512["testz-8"], "if": "defined (__AVX512BW__)"},
 		],
 		"testz_2": [
-			{ "datatypes": [int32,uint32,], "template": tpl_implem_emu512["testz_2-32"], "if": "defined (__AVX512F__) || defined(__MIC__) || defined(__KNCNI__)" },
+			{ "datatypes": [int32,uint32], "template": tpl_implem_emu512["testz_2-32"], "if": "defined (__AVX512F__) || defined(__MIC__) || defined(__KNCNI__)" },
 			{ "datatypes": [int64,uint64], "template": tpl_implem_emu512["testz_2-64"], "if": "defined (__AVX512F__) || defined(__MIC__) || defined(__KNCNI__)" },
-			{ "datatypes": [int16, uint16,int8,uint8], "template": tpl_implem_emu512["testz_2-16-8"], "if": "defined (__AVX512BW__)"},
+			{ "datatypes": [int16,int8,uint16,uint8], "template": tpl_implem_emu512["testz_2-16-8"], "if": "defined (__AVX512BW__)"},
 		],
 }
