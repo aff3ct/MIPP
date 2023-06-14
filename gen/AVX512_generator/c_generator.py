@@ -38,9 +38,7 @@ def gen_c_functions(isa, file, funcs, implems):
 	for f in implems:
 		if f in funcs:
 			for ff in implems[f]:
-				print("// ----------------------------------------------------------------------------------------------------------------------------------------------", f ,file=file)
 				for dt in ff["datatypes"]:
-
 					if len(dt.split(',')) <= 1:
 						dt_par = dt.split(',')[0]
 						dt_ret = dt.split(',')[0]
@@ -58,7 +56,6 @@ def gen_c_functions(isa, file, funcs, implems):
 					dt_key = dt_par + "," + dt_ret
 
 					if is_missing_func(funcs, f, dt_key):
-
 						j2_template = Template(ff["template"]["code"], undefined=StrictUndefined)
 						instr_name = ""
 						if "instr_name" in ff:
@@ -83,7 +80,7 @@ def gen_c_functions(isa, file, funcs, implems):
 											ifd = ifd + " && "
 										ifd = ifd + "!( "
 										ifd = ifd + ifd_sub
-										ifd = ifd + ")"
+										ifd = ifd + " )"
 										is_first = False
 									i = i +1
 
@@ -102,7 +99,7 @@ def gen_c_functions(isa, file, funcs, implems):
 
 						ifd_cur = build_ifdef(funcs, f, dt_key, len(funcs[f]["implem_status"][dt_key])-1)
 						if ifd and ifd_cur:
-							ifd = ifd + " &&  " + ifd_cur + " "
+							ifd = ifd + " && ( " + ifd_cur + " )"
 						elif ifd_cur:
 							ifd = ifd_cur
 						if ifd:
@@ -114,7 +111,6 @@ def gen_c_functions(isa, file, funcs, implems):
 							func_name = build_func_name_short(isa, dt_par, f);
 						else:
 							func_name = build_func_name(isa, dt_par, dt_ret, f);
-
 						print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name) + " {", file=file)
 
 						if ff["template"]["format"] == "short":
