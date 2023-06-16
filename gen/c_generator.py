@@ -39,10 +39,12 @@ def gen_c_functions(isa, file, funcs, implems):
 		if f in funcs:
 			for ff in implems[f]:
 				for dt in ff["datatypes"]:
+					print("// ----------------------------------------------------------------------------------------------------------------------------------------------", f ,file=file)
 					if len(dt.split(',')) <= 1:
 						dt_par = dt.split(',')[0]
 						dt_ret = dt.split(',')[0]
 						if dt_par not in funcs[f]["datatypes"]:
+
 							print("Panic: unsupported type for '" + f + "<" + dt_par + "," + dt_par + ">' function.")
 							exit(-1)
 					else:

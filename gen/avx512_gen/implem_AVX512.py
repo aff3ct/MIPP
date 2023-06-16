@@ -4,7 +4,7 @@ isa_avx512 = {
     "name": "avx512",
     "prefix": "_mm512",
     "size": 512,
-    "define": '__AVX512DQ__;__AVX512F__;__AVX512__;__KNCNI__;__MIC__',
+    "define": '__AVX512__',
     "hw_lmul": False,
     "datatypes": {
         float64 : { "data_ext" : "pd"    , "data_ext_logi": "pd"    , "data_ext_msk": "si512" , "reg" : "__m512d" , "msk" : "__mmask8"  , "to_ptr": "float64_t" , } ,
@@ -181,8 +181,8 @@ implems_avx512 = {
     "storeu" : [
         { "instr_name" : "storeu"  , "datatypes": all_datatypes           , "template": tpl_implem_avx512["store"]  } ],
     "getfirst": [
-            { "instr_name": "cvtsd_f64", "datatypes": [float64], "template": tpl_implem_avx512["getfirst"] },
-            { "instr_name": "cvtss_f32", "datatypes": [float32], "template": tpl_implem_avx512["getfirst"]} ],
+        { "instr_name": "cvtsd_f64", "datatypes": [float64], "template": tpl_implem_avx512["getfirst"] },
+        { "instr_name": "cvtss_f32", "datatypes": [float32], "template": tpl_implem_avx512["getfirst"]} ],
     "set1"   : [
         { "instr_name" : "set1"    , "datatypes": all_datatypes    , "template": tpl_implem_avx512["set1"]   } ],
     "set0"   : [
