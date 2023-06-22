@@ -43,6 +43,31 @@ datatypes = {
 	  uint8 : { "name" :   uint8, "category":  cuint, "n_bits" :  8, "cstd":   "uint8_t", },
 }
 
+operators = {
+
+    '+=': 'add',
+    '+': 'add',
+    '-=': 'sub',
+    '-': 'sub',
+    '*=': 'mul',
+    '*': 'mul',
+    '/=': 'div',
+    '/': 'div',
+    '~': 'notb',
+    '^=': 'xorb',
+    '^': 'xorb',
+    '|=': 'orb',
+    '|': 'orb',
+    '&=': 'andb',
+    '&': 'andb',
+    '==': 'cmpeq',
+    '!=': 'cmpneq',
+    '<': 'cmplt',
+    '<=': 'cmple',
+    '>': 'cmpgt',
+    '>=': 'cmpge',
+
+}
 def build_reg(datatype, isa, lmul=0, isa_name=True, cpp=False):
 	if cpp:
 		str_reg = "rvd"

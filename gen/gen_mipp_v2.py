@@ -1,6 +1,10 @@
-
+#!/usr/bin/env python3
 import sys
 import os
+import shutil
+import fcntl
+import struct
+import argparse
 
 path = os.getcwd()
 
@@ -9,28 +13,93 @@ sys.path.insert(1,path + '/avx_gen')
 
 from avx_gen import gen_mipp_avx
 from avx512_gen import gen_mipp_avx512
-dir = 
-/work/dendanil/MIPP/include/avx512
-print(path)
 
-for arg in sys.argv:
-	if(arg == "gen_mipp_v2.py"):
-		continue
-	if(arg == "avx2"):
-		gen_mipp_avx.gen_mipp_avx()
-	elif (arg == "avx512"):
-		gen_mipp_avx512.gen_mipp_avx512()
-	elif (arg == "all"):
-		gen_mipp_avx512.gen_mipp_avx512()
-		print("//////////////////////////////////////////////////////////")
-		gen_mipp_avx.gen_mipp_avx()
-	elif (arg == "--help"):
-		print("avx: mipp generator for avx2 simd")
-		print("avx512: mipp generator for avx512 simd")
-		print("version: mipp version")
-	elif (arg == "--version"):
-		print("MIPP.V2 version 2023")
-	
-	else:
-		print("Error: unknown argument : {}".format(arg))
-		sys.exit(1)
+avx_gen = "../include/avx/"
+avx512_gen = "../include/avx512/"
+
+def clean_content_folder(folder_path):
+    for filename in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, filename)
+        try:
+            if os.path.isfile(file_path):
+               os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        except Exception as e:
+            print(f"Failed to delete {file_path}. Reason: {e}")
+
+#Function that manages the display help menu
+def help_menu():
+    nb_caract = 12
+    
+    w = struct.unpack('hhhh', fcntl.ioctl(0, 21523, struct.pack('HHHH', 0, 0, 0, 0)))
+    nb_ast = (w[1] - nb_caract) // 2
+    
+    for i in range(nb_ast):
+        print("\033[0;37m#", end='')
+    
+    print(" MIPP generator ", end='')
+    
+    for i in range(nb_ast-3):
+        print("#", end='')
+    
+    print(
+        "\n\n"
+        "List of argument:\n"
+        "\t-'--avx2'         : Generate MIPP code for avx2 \n"
+        "\t-'--avx512'       : Generate MIPP code for avx512 \n"
+        "\t-'--all'          : Generate MIPP code for both of avx2 and avx512\n"
+        "\t-'--clean_all'    : Remove all generated files in both of  'include/avx2' and 'include/avx512' folder\n"
+        "\t-'--clean_avx2'   : Remove avx2 generated files in 'include/avx2' folder\n"
+        "\t-'--clean_avx512' : Remove avx2 generated files in 'include/avx512' folder\n"
+        "\t-'--version'    		: Return current version of MIPP \n"
+        "\t-'--info' or '--h'  : Print brief documentation for how to invoke the program \n"
+        "\t-'--quit'         : Quit the program\n\n"
+    )
+    
+    for i in range(w[1]):
+        print("#", end='')
+    
+    print("\n\n\033[0m")
+
+def main(args):
+    if args.avx2:
+        print("Generating MIPP code for avx2")
+        gen_mipp_avx.gen_mipp_avx()
+    if args.avx512:
+        print("Generating MIPP code for avx512")
+        gen_mipp_avx512.gen_mipp_avx512()
+    if args.all:
+        print("Generating MIPP code for both avx2 and avx512")
+        gen_mipp_avx.gen_mipp_avx()
+        gen_mipp_avx512.gen_mipp_avx512()
+    if args.clean_all:
+        print("Removing all generated files")
+        clean_content_folder(avx_gen)
+        clean_content_folder(avx512_gen)
+    if args.clean_avx2:
+        print("Removing avx2 generated files")
+        clean_content_folder(avx_gen)
+    if args.clean_avx512:
+        print("Removing avx512 generated files")
+        clean_content_folder(avx512_gen)
+    if args.version:
+        print("MIPP.V2 version 2023")
+    if args.info:
+        print("Help menu")
+        help_menu()
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(prog='gen_mipp_v2.py', description='MIPP generator')
+
+    parser.add_argument('--avx2'         , action='store_true' , help='Generate MIPP code for avx2')
+    parser.add_argument('--avx512'       , action='store_true' , help='Generate MIPP code for avx512')
+    parser.add_argument('--all'          , action='store_true' , help='Generate MIPP code for both avx2 and avx512')
+    parser.add_argument('--clean_all'    , action='store_true' , help='Remove all generated files')
+    parser.add_argument('--clean_avx2'   , action='store_true' , help='Remove avx2 generated files')
+    parser.add_argument('--clean_avx512' , action='store_true' , help='Remove avx512 generated files')
+    parser.add_argument('--version'      , action='store_true' , help='Return current version of MIPP')
+    parser.add_argument('--info'         , action='store_true' , help='Print brief documentation on how to invoke the program')
+
+    args = parser.parse_args()
+    main(args)
