@@ -106,44 +106,7 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 // --------------------------------------------------------------------------------------------------------------------
 #ifndef MIPP_NO_INTRINSICS
 // ------------------------------------------------------------------------------------------------------- ARM NEON-128
-#if defined(__ARM_NEON__) || defined(__ARM_NEON)
-	const std::string InstructionType = "NEON";
-	#define MIPP_NEON
 
-	#define MIPP_REQUIRED_ALIGNMENT 16
-#ifdef __aarch64__
-	const std::string InstructionFullType = InstructionType + "v2";
-	const std::string InstructionVersion  = "2";
-	#define MIPP_NEONV2
-	#define MIPP_INSTR_VERSION 2
-	#define MIPP_64BIT
-#else
-	const std::string InstructionFullType = InstructionType + "v1";
-	const std::string InstructionVersion  = "1";
-	#define MIPP_NEONV1
-	#define MIPP_INSTR_VERSION 1
-#endif
-	#define MIPP_BW
-	#define MIPP_REGISTER_SIZE 128
-	#define MIPP_LANES 1
-
-	using msk   = uint32x4_t;
-	using reg   = float32x4_t;
-	using reg_2 = float32x2_t; // half a full register
-
-	template <int N>
-	inline reg toreg(const msk m) {
-		return (reg)m;
-	}
-
-	inline std::vector<std::string> InstructionExtensions()
-	{
-		std::vector<std::string> ext;
-#ifdef __ARM_FEATURE_FMA
-		ext.push_back("FMA");
-#endif
-		return ext;
-	}
 
 // -------------------------------------------------------------------------------------------------------- X86 AVX-512
 #elif defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)
