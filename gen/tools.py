@@ -45,29 +45,39 @@ datatypes = {
 
 operators = {
 
-    '+=': 'add',
-    '+': 'add',
-    '-=': 'sub',
-    '-': 'sub',
-    '*=': 'mul',
-    '*': 'mul',
-    '/=': 'div',
-    '/': 'div',
-    '~': 'notb',
-    '^=': 'xorb',
-    '^': 'xorb',
-    '|=': 'orb',
-    '|': 'orb',
-    '&=': 'andb',
-    '&': 'andb',
-    '==': 'cmpeq',
-    '!=': 'cmpneq',
-    '<': 'cmplt',
-    '<=': 'cmple',
-    '>': 'cmpgt',
-    '>=': 'cmpge',
+    "+=": "add",
+    "+": "add",
+    "-=": "sub",
+    "-": "sub",
+    "*=": "mul",
+    "*": "mul",
+    "/=": "div",
+    "/": "div",
+    "~": "notb",
+    "^=": "xorb",
+    "^": "xorb",
+    "|=": "orb",
+    "|": "orb",
+    "&=": "andb",
+    "&": "andb",
+    "==": "cmpeq",
+    "!=": "cmpneq",
+    "<": "cmplt",
+    "<=": "cmple",
+    ">": "cmpgt",
+    ">=": "cmpge",
 
 }
+operators_msk = {
+    "==": "cmpeq",
+    "!=": "cmpneq",
+    "<": "cmplt",
+    "<=": "cmple",
+    ">": "cmpgt",
+    ">=": "cmpge",
+}
+
+
 def build_reg(datatype, isa, lmul=0, isa_name=True, cpp=False):
 	if cpp:
 		str_reg = "rvd"
@@ -107,7 +117,85 @@ def build_msk(datatype, isa, lmul=0, isa_name=True, cpp=False):
 			str_msk += "_m" + str(int(lmul))
 		str_msk += "_t"
 		return str_msk
+		
+# pour la couche object 
+def build_reg_obj(datatype, isa, lmul=0, isa_name=True, cpp=False):
+	if cpp:
+		str_reg = "Rvd"
+		if isa_name:
+			str_reg += "_"+isa["name"]
+		str_reg += "<" + datatype["cstd"]
+		str_reg += ">"
+		return str_reg
+	else:
+		str_reg = "Rvd_"
+		if isa_name:
+			str_reg += isa["name"] + "_"
+		str_reg += datatype["category"] + str(datatype["n_bits"])
+		str_reg += "_t"
+		return str_reg
 
+def build_msk_obj(datatype, isa, lmul=0, isa_name=True, cpp=False):
+	if cpp:
+		str_msk = "Rvm"
+		if isa_name:
+			str_msk += "_"+isa["name"]
+		str_msk += "<" + datatype["cstd"]
+		str_msk += ">"
+		return str_msk
+	else:
+		str_msk = "Rvm_"
+		if isa_name:
+			str_msk += isa["name"] + "_"
+		str_msk += datatype["category"] + str(datatype["n_bits"])
+		str_msk += "_t"
+		return str_msk
+def build_type_obj(type, datatype, isa, lmul=0, isa_name=True, cpp=False):
+	if type:
+		if type == "reg":
+			return build_reg_obj(datatype, isa,isa_name, cpp)
+		elif type == "msk":
+			return build_msk_obj(datatype, isa, isa_name, cpp)
+		elif type == "val":
+			return build_val(datatype, isa)
+		elif type == "ptr":
+			return build_ptr(datatype, isa)
+	else:
+		return "void"
+def build_proto_obj(proto, dt_par, dt_ret, isa, func_name, isa_name=True, cpp=False):
+	realdatatype = datatypes[dt_ret]
+	if (proto["ret"]["fixeddatatype"]):
+		realdatatype = datatypes[proto["ret"]["fixeddatatype"]]
+	p = build_type_obj(proto["ret"]["type"], realdatatype, isa, isa_name, cpp) + " " + func_name + "("
+	cnt_reg = 0
+	cnt_msk = 0
+	cnt_val = 0
+	cnt_ptr = 0
+	is_first = True
+	for arg in proto["args"]:
+		if not is_first:
+			p += ", "
+		realdatatype = datatypes[dt_par]
+		if (arg["fixeddatatype"]):
+			realdatatype = datatypes[arg["fixeddatatype"]]
+		if arg["charac"] == "RO":
+			p += "const "
+		p += build_type_obj(arg["type"], realdatatype, isa, isa_name, cpp)
+		if arg["type"] == "reg":
+			p += " r" + str(cnt_reg)
+			cnt_reg = cnt_reg +1
+		elif arg["type"] == "msk":
+			p += " m" + str(cnt_msk)
+			cnt_msk = cnt_msk +1
+		elif arg["type"] == "val":
+			p += " v" + str(cnt_val)
+			cnt_val = cnt_val +1
+		elif arg["type"] == "ptr":
+			p += " p" + str(cnt_ptr)
+			cnt_ptr = cnt_ptr +1
+		is_first = False
+	return p + ")";
+# pour la couche object 
 def build_val(datatype, isa, lmul=0):
 	return datatype["category"] + str(datatype["n_bits"]) + "_t"
 

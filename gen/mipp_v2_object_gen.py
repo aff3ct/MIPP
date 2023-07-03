@@ -50,12 +50,12 @@ public:
 	print(rvm_end.render(), file=file)
 
 
-file = open("../include/mipp_object_v2_gen.hpp", "w")
+file = open("../include/mipp_operator_v2_gen.hpp", "w")
 
 tpl_header_cpp = """#ifndef MY_INTRINSICS_PLUS_PLUS_OBJECT_HPP_
-#define MY_INTRINSICS_PLUS_PLUS_OBJECT_HPP_
+#define MY_INTRINSICS_PLUS_PLUS_OPERATORS_HPP_
 
-#include "mipp_v2.hpp"
+#include "mipp_v2.h"
 
 namespace mipp
 {

@@ -19,7 +19,6 @@ def gen_mipp_avx512():
 	file = open("../include/avx512/mipp_v2_impl_AVX512_gen.h", "w")
 	tpl_header_avx = """#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX512_H_
 #define MY_INTRINSICS_PLUS_PLUS_IMPL_AVX512_H_
-#include "mipp_v2.h"
 #include <immintrin.h>"""
 	j2_template = Template(tpl_header_avx, undefined=StrictUndefined)
 	print(j2_template.render(), file=file)
@@ -41,8 +40,6 @@ def gen_mipp_avx512():
 
 	tpl_header_cpp = """#ifndef MY_INTRINSICS_PLUS_PLUS_HPP_
 #define MY_INTRINSICS_PLUS_PLUS_HPP_
-
-#include "mipp_v2.h"
 
 namespace mipp
 {"""

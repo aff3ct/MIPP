@@ -2,7 +2,9 @@ from jinja2 import Template, StrictUndefined
 import json
 import re
 from avx_gen.headers_def_AVX import *
-
+from avx512_gen.headers_def_AVX512 import *
+from c_generator import *
+from cpp_generator import *
 from tools import *
 
 def gen_cpp_functions(file, funcs):
@@ -25,10 +27,27 @@ def gen_cpp_functions(file, funcs):
 				cpp_func_name = build_cpp_func_name(dt_ret, f);
 
 			for lmul in [1]:
-				print("inline "+ build_proto(funcs[f]["proto"], dt_par, dt_ret, {}, cpp_func_name, lmul, False, True) , file=file)
+				print("inline "+ build_proto(funcs[f]["proto"], dt_par, dt_ret, {}, cpp_func_name, lmul, False, True ) +";", file=file)
 				#print("\t"+build_call(funcs[f]["proto"], dt_par, dt_ret, {}, c_func_name, lmul, False)+";", file=file)
 
-file = open("func.hpp", "w")
+file = open("../include/mipp_v2_func_gen.hpp", "w")
+
+tpl_header_cpp = """#ifndef MY_INTRINSICS_PLUS_PLUS_H_
+#define MY_INTRINSICS_PLUS_PLUS_H_
+
+#include "mipp_v2.h"
+
+namespace mipp
+
+{"""
+j2_template = Template(tpl_header_cpp, undefined=StrictUndefined)
+print(j2_template.render(), file=file)
 
 gen_cpp_functions(file, mipp_funcs)
+
+tpl_footer_cpp = """}
+#endif /* MY_INTRINSICS_PLUS_PLUS_H_ */"""
+j2_template = Template(tpl_footer_cpp, undefined=StrictUndefined)
+print(j2_template.render(), file=file)
+
 file.close()

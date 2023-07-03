@@ -20,7 +20,6 @@ def gen_mipp_avx():
 
 	tpl_header_avx = """#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX_H_
 #define MY_INTRINSICS_PLUS_PLUS_IMPL_AVX_H_
-#include "mipp_v2.h"
 #include <immintrin.h>"""
 	j2_template = Template(tpl_header_avx, undefined=StrictUndefined)
 	print(j2_template.render(), file=file)
@@ -40,12 +39,10 @@ def gen_mipp_avx():
 
 	file.close()
 
-	file = open("../include/avx/mipp_v2_gen.hpp", "w")
+	file = open("../include/avx/mipp_v2_AVX_gen.hpp", "w")
 
 	tpl_header_cpp = """#ifndef MY_INTRINSICS_PLUS_PLUS_HPP_
 #define MY_INTRINSICS_PLUS_PLUS_HPP_
-
-#include "mipp_v2.h"
 
 namespace mipp
 
