@@ -13,8 +13,9 @@ typedef float float32_t;
 
 
 #if defined(__AVX__)
-#include "avx/mipp_v2_AVX_gen.hpp"
+// RG a l'envers
 #include "avx/mipp_v2_impl_AVX_gen.h"
+#include "avx/mipp_v2_AVX_gen.hpp"
 #endif
 
 
@@ -157,13 +158,14 @@ const std::string InstructionType = "AVX512";
 // -------------------------------------------------------------------------------------------------------- X86 AVX-512
 // --------------------------------------------------------------------------------------------------------------------
 #elif defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)
-#include "avx/mipp_v2_AVX512_gen.hpp"
 #include "avx/mipp_v2_impl_AVX512_gen.h"
+#include "avx/mipp_v2_AVX512_gen.hpp"
 // -------------------------------------------------------------------------------------------------------- X86 AVX-256
 // --------------------------------------------------------------------------------------------------------------------
 #elif defined(__AVX__)
-#include "avx/mipp_v2_AVX_gen.hpp"
 #include "avx/mipp_v2_impl_AVX_gen.h"
+#include "avx/mipp_v2_AVX_gen.hpp"
+
 
 #endif
 

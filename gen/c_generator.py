@@ -14,6 +14,8 @@ def gen_c_defines(isa, file):
 	print("#define MIPP_" + isa["name"].upper() + "_RVD_SIZE_BIT " + str(isa["size"]), file=file)
 	print("#define MIPP_" + isa["name"].upper() + "_RVD_SIZE_BYTE " + str(int(isa["size"] / 8)), file=file)
 
+	##define MIPP_AVX_N_FLOAT64 4
+
 	template = """#define MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{n_bits}} {{n_elmts}}"""
 	j2_template = Template(template, undefined=StrictUndefined)
 
@@ -113,6 +115,7 @@ def gen_c_functions(isa, file, funcs, implems):
 							func_name = build_func_name_short(isa, dt_par, f);
 						else:
 							func_name = build_func_name(isa, dt_par, dt_ret, f);
+							
 						print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name) + " {", file=file)
 
 						if ff["template"]["format"] == "short":

@@ -50,8 +50,8 @@ namespace mipp
 	j2_template = Template(tpl_header_cpp, undefined=StrictUndefined)
 	print(j2_template.render(), file=file)
 
-	gen_cpp_structures(file)
-	gen_cpp_constexpr_functions(file)
+	gen_cpp_structures(isa_avx,file)
+	gen_cpp_constexpr_functions(isa_avx,file)
 	gen_cpp_functions(file, mipp_funcs)
 
 	tpl_footer_cpp = """}
