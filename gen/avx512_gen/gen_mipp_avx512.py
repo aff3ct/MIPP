@@ -49,7 +49,7 @@ namespace mipp
 
 	gen_cpp_structures(isa_avx512,file)
 	gen_cpp_constexpr_functions(isa_avx512,file)
-	gen_cpp_functions(file, mipp_funcs)
+	gen_cpp_functions(isa_avx512,file, mipp_funcs)
 
 	tpl_footer_cpp = """
 

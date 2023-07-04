@@ -113,8 +113,10 @@ def gen_c_functions(isa, file, funcs, implems):
 
 						if len(dt.split(',')) <= 1:
 							func_name = build_func_name_short(isa, dt_par, f);
+
 						else:
 							func_name = build_func_name(isa, dt_par, dt_ret, f);
+							print(func_name)
 							
 						print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name) + " {", file=file)
 

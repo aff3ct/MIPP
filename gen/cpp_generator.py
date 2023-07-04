@@ -42,7 +42,7 @@ def gen_cpp_constexpr_functions(isa,file):
 		for dt in datatypes:
 			print(j2_template.render(isa_name_upper=isa["name"].upper(),datatype=datatypes[dt], lmul=str(lmul), type_category_upper=datatypes[dt]["category"].upper()), file=file)
 
-def gen_cpp_functions(file, funcs):
+def gen_cpp_functions(isa,file, funcs):
 	for f in funcs:
 		for dt in funcs[f]["datatypes"]:
 			if len(dt.split(',')) <= 1:
@@ -54,13 +54,16 @@ def gen_cpp_functions(file, funcs):
 				dtk = dt_par + "," + dt_ret
 			dt_key = dt_par + "," + dt_ret
 
-			if len(dt.split(',')) <= 1:
-				c_func_name = build_func_name_short({}, dt_par, f, False);
-				cpp_func_name = build_cpp_func_name_short(funcs[f]["proto"], dt_ret, f);
-			else:
-				c_func_name = build_func_name({}, dt_par, dt_ret, f, False);
-				cpp_func_name = build_cpp_func_name(dt_ret, f);
 
+			if len(dt.split(',')) <= 1:
+				c_func_name = build_func_name_short(isa , dt_par, f, False);
+				
+				cpp_func_name = build_cpp_func_name_short(funcs[f]["proto"], dt_par,dt_ret, f);
+			
+			else:
+				c_func_name = build_func_name(isa, dt_par, dt_ret, f);
+				cpp_func_name = build_cpp_func_name(funcs[f]["proto"],dt_par,dt_ret, f);
+				print(cpp_func_name)
 			for lmul in [1]:
 				print(build_proto(funcs[f]["proto"], dt_par, dt_ret, {}, cpp_func_name, lmul, False, True) + " {", file=file)
 				print("\t"+build_call(funcs[f]["proto"], dt_par, dt_ret, {}, c_func_name, lmul, False)+";", file=file)
