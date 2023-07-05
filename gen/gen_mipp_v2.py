@@ -14,10 +14,28 @@ sys.path.insert(1,path + '/avx_gen')
 from avx_gen import gen_mipp_avx
 from avx512_gen import gen_mipp_avx512
 
-avx_gen = "../include/avx/"
-avx512_gen = "../include/avx512/"
+avx_gen = "../include/"
+avx512_gen = "../include/"
+
+# Chemin des dossiers avx et avx512
+avx_path = os.path.join(avx_gen, "avx")
+avx512_path = os.path.join(avx512_gen, "avx512")
+
+def create_dir():
+    if not os.path.exists(avx_path):
+        os.makedirs(avx_path)
+        print("Dossier 'avx' créé avec succès.")
+    else:
+        print("Le dossier 'avx' existe déjà.")
+
+    if not os.path.exists(avx512_path):
+        os.makedirs(avx512_path)
+        print("Dossier 'avx512' créé avec succès.")
+    else:
+        print("Le dossier 'avx512' existe déjà.")
 
 def clean_content_folder(folder_path):
+    create_dir()
     for filename in os.listdir(folder_path):
         file_path = os.path.join(folder_path, filename)
         try:

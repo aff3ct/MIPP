@@ -272,25 +272,28 @@ def build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul=2, isa_name=True
 		str_code += "\n\t" + "return res;"
 	return str_code;
 
+
+# Build other functions build_func_name_short & build_cpp_func_name_short
 def build_func_name_short(isa, dt, mipp_name, isa_name=True):
 	param_type = datatypes[dt]["category"] + str(datatypes[dt]["n_bits"])
 	if isa_name:
 		return "mipp_" + isa["name"] + "_" + mipp_name + "_" +  param_type
 	else:
-		return "mipp_" + mipp_name + "_" +  param_type
+		return  mipp_name + "_" +  param_type
 
-def build_cpp_func_name_short(proto, dt_par, dt_ret, mipp_name):
-	param_type = datatypes[dt_par]["category"] + str(datatypes[dt_par]["n_bits"])
+def build_cpp_func_name_short(proto, dt_ret, mipp_name):
 	return_type = datatypes[dt_ret]["category"] + str(datatypes[dt_ret]["n_bits"])
 	if type_specialized(proto):
 		mipp_name = mipp_name.replace("_mz", "")
 		mipp_name = mipp_name.replace("_m", "")
 		mipp_name = mipp_name.replace("_k", "")
-		return mipp_name + "_" + param_type + "_" + return_type
+		return mipp_name + "_" +return_type
 	else:
 		return_type = datatypes[dt_ret]["category"] + str(datatypes[dt_ret]["n_bits"])
-		return mipp_name + "_" + param_type + "_" + return_type
+		return mipp_name + "_" +return_type
 
+
+# Build cast's functions build_func_name & build_cpp_func_name
 def build_func_name(isa, dt_par, dt_ret, mipp_name, isa_name=True):
 	param_type = datatypes[dt_par]["category"] + str(datatypes[dt_par]["n_bits"])
 	return_type = datatypes[dt_ret]["category"] + str(datatypes[dt_ret]["n_bits"])
@@ -299,13 +302,6 @@ def build_func_name(isa, dt_par, dt_ret, mipp_name, isa_name=True):
 	else:
 		return "mipp_" + mipp_name + "_" + param_type + "_" + return_type
 
-"""def build_cpp_func_name(proto,dt_par,dt_ret, mipp_name):
-	param_type = datatypes[dt_par]["category"] + str(datatypes[dt_par]["n_bits"])
-	mipp_name = mipp_name.replace("_mz", "")
-	mipp_name = mipp_name.replace("_m", "")
-	mipp_name = mipp_name.replace("_k", "")
-	return_type = datatypes[dt_ret]["category"] + str(datatypes[dt_ret]["n_bits"])
-	return mipp_name + "_" + param_type + "_" + return_type"""
 
 def build_cpp_func_name(isa, dt_par, dt_ret, mipp_name):
 
