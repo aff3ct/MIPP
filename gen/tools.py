@@ -117,6 +117,45 @@ def build_msk(datatype, isa, lmul=0, isa_name=True, cpp=False):
 			str_msk += "_m" + str(int(lmul))
 		str_msk += "_t"
 		return str_msk
+# build class Rvd and Rvm
+def build_Reg(datatype, isa, lmul=0, isa_name=True, cpp=False):
+	if cpp:
+		str_reg = "Rvd"
+		if isa_name:
+			str_reg += "_"+isa["name"]
+		str_reg += "<" + datatype["cstd"]
+		if lmul:
+			str_reg += "," + str(int(lmul))
+		str_reg += ">"
+		return str_reg
+	else:
+		str_reg = "Rvd_"
+		if isa_name:
+			str_reg += isa["name"] + "_"
+		str_reg += datatype["category"] + str(datatype["n_bits"])
+		if lmul:
+			str_reg += "_m" + str(int(lmul))
+		str_reg += "_t"
+		return str_reg
+def build_Msk(datatype, isa, lmul=0, isa_name=True, cpp=False):
+	if cpp:
+		str_msk = "Rvm"
+		if isa_name:
+			str_msk += "_"+isa["name"]
+		str_msk += "<" + datatype["cstd"]
+		if lmul:
+			str_msk += "," + str(int(lmul))
+		str_msk += ">"
+		return str_msk
+	else:
+		str_msk = "Rvm_"
+		if isa_name:
+			str_msk += isa["name"] + "_"
+		str_msk += datatype["category"] + str(datatype["n_bits"])
+		if lmul:
+			str_msk += "_m" + str(int(lmul))
+		str_msk += "_t"
+		return str_msk
 		
 def build_val(datatype, isa, lmul=0):
 	return datatype["category"] + str(datatype["n_bits"]) + "_t"
@@ -145,7 +184,19 @@ def build_type(type, datatype, isa, lmul=0, isa_name=True, cpp=False):
 			return build_ptr(datatype, isa)
 	else:
 		return "void"
-
+# for object layer
+def build_class_type(type, datatype, isa, lmul=0, isa_name=True, cpp=False):
+	if type:
+		if type == "reg":
+			return build_Reg(datatype, isa, lmul, isa_name, cpp)
+		elif type == "msk":
+			return build_Msk(datatype, isa, lmul, isa_name, cpp)
+		elif type == "val":
+			return build_val(datatype, isa)
+		elif type == "ptr":
+			return build_ptr(datatype, isa)
+	else:
+		return "void"
 def lmul_specialized(proto):
 	n_lmul_spe = 0
 	for arg in proto["args"]:
@@ -194,6 +245,46 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
 			p += " p" + str(cnt_ptr)
 			cnt_ptr = cnt_ptr +1
 		is_first = False
+
+	return p + ")";
+
+
+# For layer object
+def build_proto_object(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False):
+	"""if lmul and (not cpp or (cpp and not lmul_specialized(proto))):
+		func_name += "_m" + str(int(lmul))"""
+	realdatatype = datatypes[dt_ret]
+	if (proto["ret"]["fixeddatatype"]):
+		realdatatype = datatypes[proto["ret"]["fixeddatatype"]]
+	p = build_class_type(proto["ret"]["type"], realdatatype, isa, lmul, isa_name, cpp) + " " + func_name + "("
+	cnt_reg = 0
+	cnt_msk = 0
+	cnt_val = 0
+	cnt_ptr = 0
+	is_first = True
+	for arg in proto["args"]:
+		if not is_first:
+			p += ", "
+		realdatatype = datatypes[dt_par]
+		if (arg["fixeddatatype"]):
+			realdatatype = datatypes[arg["fixeddatatype"]]
+		if arg["charac"] == "RO":
+			p += "const "
+		p += build_class_type(arg["type"], realdatatype, isa, lmul, isa_name, cpp)
+		if arg["type"] == "reg":
+			p += " r" + str(cnt_reg)
+			cnt_reg = cnt_reg +1
+		elif arg["type"] == "msk":
+			p += " m" + str(cnt_msk)
+			cnt_msk = cnt_msk +1
+		elif arg["type"] == "val":
+			p += " v" + str(cnt_val)
+			cnt_val = cnt_val +1
+		elif arg["type"] == "ptr":
+			p += " p" + str(cnt_ptr)
+			cnt_ptr = cnt_ptr +1
+		is_first = False
+
 	return p + ")";
 
 def build_call(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True):
@@ -227,13 +318,21 @@ def build_call(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True):
 		is_first = False
 	return p + ")";
 
+# build call function  
 def _build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul, part):
 	"""if lmul:
 		func_name += "_m" + str(int(lmul))"""
 	p = ""
 	realdatatype = datatypes[dt_ret]
-	if (proto["ret"]["type"]):
-		p += "res.m"  + str(int(part)) + " = "
+	for arg in proto["args"]:
+		if (proto["ret"]["type"] == "reg" and arg["type"] == "reg"):
+			p += "r" + str(cnt_reg) + ".r" + str(int(part))
+			cnt_reg = cnt_reg +1							
+		elif (proto["ret"]["type"] == "reg" and arg["type"] == "msk"):
+			
+			p += "res.r"  + str(int(part)) + " = "
+			p += "m" + str(cnt_msk) + ".m" + str(int(part))
+
 	p += func_name + "("
 	cnt_reg = 0
 	cnt_msk = 0
@@ -244,7 +343,7 @@ def _build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul, part):
 		if not is_first:
 			p += ", "
 		if arg["type"] == "reg":
-			p += "r" + str(cnt_reg) + ".m" + str(int(part))
+			p += "r" + str(cnt_reg) + ".r" + str(int(part))
 			cnt_reg = cnt_reg +1
 		elif arg["type"] == "msk":
 			p += "m" + str(cnt_msk) + ".m" + str(int(part))
@@ -266,6 +365,7 @@ def build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul=2, isa_name=True
 		realdatatype = datatypes[proto["ret"]["fixeddatatype"]]
 	if proto["ret"]["type"]:
 		str_code += "\t" + build_type(proto["ret"]["type"], realdatatype, isa, lmul, isa_name) + " res;\n"
+		print(str_code)
 	str_code += "\t" + _build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul_2, 1) + ";\n"
 	str_code += "\t" + _build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul_2, 2) + ";"
 	if (proto["ret"]["type"]):
@@ -280,6 +380,13 @@ def build_func_name_short(isa, dt, mipp_name, isa_name=True):
 		return "mipp_" + isa["name"] + "_" + mipp_name + "_" +  param_type
 	else:
 		return  mipp_name + "_" +  param_type
+
+def build_func_name_short_object(isa, dt, mipp_name, isa_name=True):
+	param_type = datatypes[dt]["category"]+ str(datatypes[dt]["n_bits"])
+	if isa_name:
+		return "mipp_" + isa["name"] + "_" + mipp_name + "_" +  param_type
+	else:
+		return  mipp_name 
 
 def build_cpp_func_name_short(proto, dt_ret, mipp_name):
 	return_type = datatypes[dt_ret]["category"] + str(datatypes[dt_ret]["n_bits"])
@@ -302,6 +409,10 @@ def build_func_name(isa, dt_par, dt_ret, mipp_name, isa_name=True):
 	else:
 		return "mipp_" + mipp_name + "_" + param_type + "_" + return_type
 
+def build_func_name_object(isa, dt_par, dt_ret, mipp_name):
+	param_type = datatypes[dt_par]["category"] + str(datatypes[dt_par]["n_bits"])
+	return_type = datatypes[dt_ret]["category"] + str(datatypes[dt_ret]["n_bits"])
+	return  mipp_name 
 
 def build_cpp_func_name(isa, dt_par, dt_ret, mipp_name):
 

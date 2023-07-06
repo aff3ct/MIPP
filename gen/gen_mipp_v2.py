@@ -21,21 +21,18 @@ avx512_gen = "../include/"
 avx_path = os.path.join(avx_gen, "avx")
 avx512_path = os.path.join(avx512_gen, "avx512")
 
-def create_dir():
-    if not os.path.exists(avx_path):
-        os.makedirs(avx_path)
-        print("Dossier 'avx' créé avec succès.")
-    else:
-        print("Le dossier 'avx' existe déjà.")
-
-    if not os.path.exists(avx512_path):
-        os.makedirs(avx512_path)
-        print("Dossier 'avx512' créé avec succès.")
-    else:
-        print("Le dossier 'avx512' existe déjà.")
+if not os.path.exists(avx_path):
+    os.makedirs(avx_path)
+    print("Dossier 'avx' créé avec succès.")
+else:
+    print("Le dossier 'avx' existe déjà.")
+if not os.path.exists(avx512_path):
+    os.makedirs(avx512_path)
+    print("Dossier 'avx512' créé avec succès.")
+else:
+    print("Le dossier 'avx512' existe déjà.")
 
 def clean_content_folder(folder_path):
-    create_dir()
     for filename in os.listdir(folder_path):
         file_path = os.path.join(folder_path, filename)
         try:

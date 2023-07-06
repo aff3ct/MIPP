@@ -24,7 +24,7 @@ def gen_c_defines(isa, file):
 		print(j2_template.render(isa_name_upper=isa["name"].upper(), type_category_upper=datatypes[dt]["category"].upper(), n_bits=datatypes[dt]["n_bits"], n_elmts=n_elmts), file=file)
 
 def gen_c_structures(isa, file):
-	template = """typedef struct { {{ isa_datatype.reg }} m; } rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
+	template = """typedef struct { {{ isa_datatype.reg }} r; } rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
 	j2_template = Template(template, undefined=StrictUndefined)
 
 	for dt in isa["datatypes"]:
@@ -116,14 +116,27 @@ def gen_c_functions(isa, file, funcs, implems):
 
 						else:
 							func_name = build_func_name(isa, dt_par, dt_ret, f);
-							
+
 							
 						print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name) + " {", file=file)
 
 						if ff["template"]["format"] == "short":
 							if funcs[f]["proto"]["ret"]["type"]:
-								print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file);
-								print("\tres.m = ", end='', file=file)
+								for arg in funcs[f]["proto"]["args"]:
+									if (funcs[f]["proto"]["ret"]["type"] == "reg" and arg["type"] == "reg"):
+										print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file);
+										print("\tres.r= ", end='', file=file)
+									elif (funcs[f]["proto"]["ret"]["type"] == "reg" and arg["type"] == "msk"):
+										print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file);
+										print("\tres.r= ", end='', file=file)
+									else:
+										if arg["type"] == "reg":
+											print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file);
+											print("\tres.r= ", end='', file=file)
+										elif arg["type"] == "msk":
+											print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file);
+											print("\tres.m= ", end='', file=file)
+
 							else:
 								print("\t", end='', file=file)
 						print(post_rendering, file=file)

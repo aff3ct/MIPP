@@ -1,28 +1,66 @@
 from jinja2 import Template, StrictUndefined
 import json
 import re
+
+from avx_gen.implem_AVX import *
+from avx_gen.implem_emu_AVX import *
+from avx512_gen.implem_AVX512 import *
+from avx512_gen.implem_emu_AVX512 import *
 from avx_gen.headers_def_AVX import *
+from avx512_gen.headers_def_AVX512 import *
+from c_generator import *
+from cpp_generator import *
 from tools import *
 
+def gen_func_obj(isa,file, funcs):
+	template = """
+template <typename T> inline Rvd<T> {{func_name}}() const { return Rvd<T>(this->r);         }"""
+	j2_template = Template(template, undefined=StrictUndefined)
+	for f in funcs:
+		for dt in funcs[f]["datatypes"]:
+			if len(dt.split(',')) <= 1:
+				dt_par = dt.split(',')[0]
+				dt_ret = dt.split(',')[0]
+			else:
+				dt_par = dt.split(',')[0]
+				dt_ret = dt.split(',')[1]
+				dtk = dt_par + "," + dt_ret
+			dt_key = dt_par + "," + dt_ret
+			
+			if len(dt.split(',')) <= 1:
+				#cast
+				c_func_name  = build_func_name_short_object(isa, dt_par, f, False);
+				print(j2_template.render(func_name=c_func_name), file=file)
+				
+			else:
+				dt_par = dt.split(',')[0]
+				dt_ret = dt.split(',')[1]
+				#other_functions
+				c_func_name = build_func_name_object(isa,dt_par, dt_ret, f);
+
+			for lmul in [1]:
+				print("inline "+ build_proto_object(funcs[f]["proto"], dt_par, dt_ret, {}, c_func_name, lmul, False, True ) +";", file=file)
+				print(j2_template.render(func_name=c_func_name), file=file)
+		
 
 
 def gen_cpp_operators(file):
 	template = """
-inline Rvd<{{ datatype.cstd }}>& operator{{op}} (const Rvd<{{ datatype.cstd }}>& rvd) { r = this->{{func}}(rvd).r; return *this; }
-inline Rvd<{{ datatype.cstd }}> operator{{op}} (Rvd<{{ datatype.cstd }}>& rvd) const { return this->{{func}}(rvd); }
+inline Rvd<T>& operator{{op}} (const Rvd<T>& rvd) { r = this->{{func}}(rvd).r; return *this; }
+inline Rvd<T> operator{{op}} (const Rvd<T>& rvd) const { return this->{{func}}(rvd); }
 """
 	j2_template = Template(template, undefined=StrictUndefined)
-	for dt in datatypes:
-		for op, func in operators.items():
-			print(j2_template.render(datatype=datatypes[dt], op=op, func=func), file=file)
-	for dt in datatypes:
-		for op, func in operators_msk.items():
-			print(j2_template.render(datatype=datatypes[dt], op=op, func=func), file=file)
+	for op, func in operators.items():
+		print(j2_template.render(op=op, func=func), file=file)
+
+	for op, func in operators_msk.items():
+		print(j2_template.render(op=op, func=func), file=file)
 	tpl_end_class_rvd = """}
 """
 	rvd_end = Template(tpl_end_class_rvd, undefined=StrictUndefined)
 	print(rvd_end.render(), file=file)
-# operators with mask 
+
+	# operators with mask 
 	print("// ------------------------------------------------------------------------------------------------------ operators (Msk) ",file=file)
 
 	tpl_class_Rvm = """class Rvm
@@ -38,17 +76,23 @@ public:
 	template = Template(tpl_class_Rvm, undefined=StrictUndefined)
 	print(template.render(), file=file)
 
-	template_msk= """inline Rvm<N<{{ datatype.cstd }}>()> operator{{op}} (rvm<{{ datatype.cstd }}> rvm) const { return this->{{func}} (rvm);}"""
+	template_msk= """
+inline Rvm<N<T>()> operator{{op}} (rvm<T> rvm) const { return this->{{func}} (rvm);}"""
+	
 	j3_template = Template(template_msk, undefined=StrictUndefined)
-	for dt in datatypes:
-		for op, func in operators_msk.items():
-			print(j3_template.render(datatype=datatypes[dt], op=op, func=func), file=file)
+	for op, func in operators_msk.items():
+		print(j3_template.render(op=op, func=func), file=file)
 
 	tpl_end_class_rvm = """}
 """
 	rvm_end = Template(tpl_end_class_rvm, undefined=StrictUndefined)
 	print(rvm_end.render(), file=file)
 
+
+
+
+
+""" -----------------------------------------------------------------------------------------------------"""
 
 file = open("../include/mipp_operator_v2_gen.hpp", "w")
 
@@ -74,6 +118,7 @@ print(j2_template.render(), file=file)
 print("// ------------------------------------------------------------------------------------------------------ operators ",file=file)
 
 gen_cpp_operators(file)
+gen_func_obj(isa_avx,file, mipp_funcs)
 
 tpl_MIPP_NO_INTRINSICS="""#ifndef MIPP_NO_INTRINSICS
 	inline bool operator[](const size_t index) const { return mipp::get<N>(this->, index); }

@@ -61,7 +61,7 @@ def gen_cpp_functions(isa,file, funcs):
 				#print("c_func_name pour dt <1: ", c_func_name)
 
 				cpp_func_name = build_cpp_func_name_short(funcs[f]["proto"],dt_ret, f);
-				print("cpp_func_name pour dt <1: ", cpp_func_name)
+				#print("cpp_func_name pour dt <1: ", cpp_func_name)
 			else:
 				# Build cast's functions
 				c_func_name = build_func_name(isa, dt_par, dt_ret, f);
