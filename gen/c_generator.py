@@ -123,32 +123,37 @@ def gen_c_functions(isa, file, funcs, implems):
 						if ff["template"]["format"] == "short":
 							if funcs[f]["proto"]["ret"]["type"]:
 								for arg in funcs[f]["proto"]["args"]:
+
+									## Toreg & Tomsk
 									if (funcs[f]["proto"]["ret"]["type"] == "reg" and arg["type"] == "reg"):
 										print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file);
 										print("\tres.r= ", end='', file=file)
 									elif (funcs[f]["proto"]["ret"]["type"] == "reg" and arg["type"] == "msk"):
 										print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file);
 										print("\tres.r= ", end='', file=file)
-									else:
-										if arg["type"] == "reg":
-											print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file);
-											print("\tres.r= ", end='', file=file)
-										elif arg["type"] == "msk":
-											print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file);
-											print("\tres.m= ", end='', file=file)
+									elif (funcs[f]["proto"]["ret"]["type"] == "msk" and arg["type"] == "msk"):
+										print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file);
+										print("\tres.m= ", end='', file=file)
+									elif (funcs[f]["proto"]["ret"]["type"] == "msk" and arg["type"] == "reg"):
+										print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file);
+										print("\tres.m= ", end='', file=file)
+									
 
 							else:
 								print("\t", end='', file=file)
+
 						print(post_rendering, file=file)
 						if ff["template"]["format"] == "short":
 							if funcs[f]["proto"]["ret"]["type"]:
 								print("\treturn res;", file=file);
 						print("}", file=file)
+				
 						if ifd:
 							print("#endif", file=file)
 
 						if "type" in ff and ff["type"] == "emulated":
 							print(" -> '" + f + "<" + dt_key + ">' has been implemented.")
+			
 		else:
 			print("Panic: '" + f + "' function does not exist.")
 			exit(-1)

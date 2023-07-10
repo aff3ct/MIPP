@@ -117,13 +117,13 @@ def build_msk(datatype, isa, lmul=0, isa_name=True, cpp=False):
 			str_msk += "_m" + str(int(lmul))
 		str_msk += "_t"
 		return str_msk
+
+
+
 # build class Rvd and Rvm
-def build_Reg(datatype, isa, lmul=0, isa_name=True, cpp=False):
+def build_Reg(datatype, isa, lmul=0, isa_name=True, cpp=True):
 	if cpp:
-		str_reg = "Rvd"
-		if isa_name:
-			str_reg += "_"+isa["name"]
-		str_reg += "<" + datatype["cstd"]
+		str_reg = "Rvd <T "
 		if lmul:
 			str_reg += "," + str(int(lmul))
 		str_reg += ">"
@@ -142,7 +142,7 @@ def build_Msk(datatype, isa, lmul=0, isa_name=True, cpp=False):
 		str_msk = "Rvm"
 		if isa_name:
 			str_msk += "_"+isa["name"]
-		str_msk += "<" + datatype["cstd"]
+		str_msk += "<T " 
 		if lmul:
 			str_msk += "," + str(int(lmul))
 		str_msk += ">"
@@ -250,13 +250,15 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
 
 
 # For layer object
-def build_proto_object(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False):
+def build_proto_object(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=False, cpp=False):
 	"""if lmul and (not cpp or (cpp and not lmul_specialized(proto))):
 		func_name += "_m" + str(int(lmul))"""
 	realdatatype = datatypes[dt_ret]
+
 	if (proto["ret"]["fixeddatatype"]):
 		realdatatype = datatypes[proto["ret"]["fixeddatatype"]]
-	p = build_class_type(proto["ret"]["type"], realdatatype, isa, lmul, isa_name, cpp) + " " + func_name + "("
+	p = build_class_type(proto["ret"]["type"], realdatatype, isa, lmul, isa_name, cpp) + " " + func_name + "(" 
+	
 	cnt_reg = 0
 	cnt_msk = 0
 	cnt_val = 0
@@ -264,12 +266,14 @@ def build_proto_object(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=T
 	is_first = True
 	for arg in proto["args"]:
 		if not is_first:
-			p += ", "
+			p += ","
+
 		realdatatype = datatypes[dt_par]
 		if (arg["fixeddatatype"]):
 			realdatatype = datatypes[arg["fixeddatatype"]]
 		if arg["charac"] == "RO":
-			p += "const "
+			p += " const "
+
 		p += build_class_type(arg["type"], realdatatype, isa, lmul, isa_name, cpp)
 		if arg["type"] == "reg":
 			p += " r" + str(cnt_reg)
@@ -287,6 +291,7 @@ def build_proto_object(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=T
 
 	return p + ")";
 
+# print "return func" 
 def build_call(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True):
 	"""if lmul:
 		func_name += "_m" + str(int(lmul))"""
@@ -420,6 +425,12 @@ def build_cpp_func_name(isa, dt_par, dt_ret, mipp_name):
 	return_type = datatypes[dt_ret]["category"] + str(datatypes[dt_ret]["n_bits"])
 	
 	return mipp_name + "_" + param_type + "_" + return_type
+def build_cpp_func_name_object(isa, dt_par, dt_ret, mipp_name):
+
+	param_type = datatypes[dt_par]["category"] + str(datatypes[dt_par]["n_bits"])
+	return_type = datatypes[dt_ret]["category"] + str(datatypes[dt_ret]["n_bits"])
+	
+	return mipp_name 
 	
 
 def build_ifdef_rec(funcs, func_name, dt_key):

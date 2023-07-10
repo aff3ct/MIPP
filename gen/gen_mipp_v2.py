@@ -17,22 +17,19 @@ from avx512_gen import gen_mipp_avx512
 avx_gen = "../include/"
 avx512_gen = "../include/"
 
-# Chemin des dossiers avx et avx512
+# avx and avx512 folder path
 avx_path = os.path.join(avx_gen, "avx")
 avx512_path = os.path.join(avx512_gen, "avx512")
 
-if not os.path.exists(avx_path):
-    os.makedirs(avx_path)
-    print("Dossier 'avx' créé avec succès.")
-else:
-    print("Le dossier 'avx' existe déjà.")
-if not os.path.exists(avx512_path):
-    os.makedirs(avx512_path)
-    print("Dossier 'avx512' créé avec succès.")
-else:
-    print("Le dossier 'avx512' existe déjà.")
+def create_folder(folder_path):
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+        print(folder_path+"folder successfully created")
+    else:
+        print("The "+ folder_path+" folder already exists.")
 
-def clean_content_folder(folder_path):
+
+"""def clean_content_folder(folder_path):
     for filename in os.listdir(folder_path):
         file_path = os.path.join(folder_path, filename)
         try:
@@ -41,7 +38,14 @@ def clean_content_folder(folder_path):
             elif os.path.isdir(file_path):
                 shutil.rmtree(file_path)
         except Exception as e:
-            print(f"Failed to delete {file_path}. Reason: {e}")
+            print(f"Failed to delete {file_path}. Reason: {e}")"""
+
+def clean_folder(folder_path):
+    try:
+        shutil.rmtree(folder_path)
+        print(f"Successfully deleted folder: {folder_path}")
+    except Exception as e:
+        print(f"Failed to delete folder: {folder_path}. Reason: {e}")
 
 #Function that manages the display help menu
 def help_menu():
@@ -79,25 +83,29 @@ def help_menu():
 
 def main(args):
     if args.avx2:
+        create_folder(avx_path)
         print("Generating MIPP code for avx2")
         gen_mipp_avx.gen_mipp_avx()
     if args.avx512:
+        create_folder(avx512_path)
         print("Generating MIPP code for avx512")
         gen_mipp_avx512.gen_mipp_avx512()
     if args.all:
+        create_folder(avx_path)
+        create_folder(avx512_path)
         print("Generating MIPP code for both avx2 and avx512")
         gen_mipp_avx.gen_mipp_avx()
         gen_mipp_avx512.gen_mipp_avx512()
     if args.clean_all:
-        print("Removing all generated files")
-        clean_content_folder(avx_gen)
-        clean_content_folder(avx512_gen)
+        print("Removing all generated files ...")
+        clean_folder(avx_path)
+        clean_folder(avx512_path)
     if args.clean_avx2:
         print("Removing avx2 generated files")
-        clean_content_folder(avx_gen)
+        clean_folder(avx_path)
     if args.clean_avx512:
         print("Removing avx512 generated files")
-        clean_content_folder(avx512_gen)
+        clean_folder(avx512_path)
     if args.version:
         print("MIPP.V2 version 2023")
     if args.info:

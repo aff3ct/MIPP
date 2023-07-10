@@ -30,7 +30,7 @@ template <typename T> inline Rvd<T> {{func_name}}() const { return Rvd<T>(this->
 			if len(dt.split(',')) <= 1:
 				#cast
 				c_func_name  = build_func_name_short_object(isa, dt_par, f, False);
-				print(j2_template.render(func_name=c_func_name), file=file)
+				#print(j2_template.render(func_name=c_func_name), file=file)
 				
 			else:
 				dt_par = dt.split(',')[0]
@@ -39,8 +39,8 @@ template <typename T> inline Rvd<T> {{func_name}}() const { return Rvd<T>(this->
 				c_func_name = build_func_name_object(isa,dt_par, dt_ret, f);
 
 			for lmul in [1]:
-				print("inline "+ build_proto_object(funcs[f]["proto"], dt_par, dt_ret, {}, c_func_name, lmul, False, True ) +";", file=file)
-				print(j2_template.render(func_name=c_func_name), file=file)
+				print("inline "+ build_proto_object(funcs[f]["proto"], dt_par, dt_ret,lmul, c_func_name, lmul, False, True ) +";", file=file)
+				#print(j2_template.render(func_name=c_func_name), file=file)
 		
 
 
@@ -118,7 +118,7 @@ print(j2_template.render(), file=file)
 print("// ------------------------------------------------------------------------------------------------------ operators ",file=file)
 
 gen_cpp_operators(file)
-gen_func_obj(isa_avx,file, mipp_funcs)
+#gen_func_obj(isa_avx,file, mipp_funcs)
 
 tpl_MIPP_NO_INTRINSICS="""#ifndef MIPP_NO_INTRINSICS
 	inline bool operator[](const size_t index) const { return mipp::get<N>(this->, index); }
