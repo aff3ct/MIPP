@@ -24,47 +24,47 @@ tpl_implem_avx = {
 	"cast":         { "format": "short", "code":"{% if isa_dt_par.data_ext_logi != isa_dt_ret.data_ext_logi -%}{{ isa.prefix }}_{{ instr_name }}{{isa_dt_par.data_ext_logi}}_{{isa_dt_ret.data_ext_logi}}(r0.r);{% else -%} r0.r;{% endif %}"},
 	"cast_k":       { "format": "short", "code": "m0.m;" },
 	"toreg":        { "format": "short", "code": "{% if isa_dt_par.data_ext_msk != isa_dt_ret.data_ext_logi -%}{{ isa.prefix }}_{{ instr_name }}{{isa_dt_par.data_ext_msk}}_{{isa_dt_ret.data_ext_logi}}(m0.m);{% else -%} m0.m;{% endif %}" },
-	"tomsk":        { "format": "short", "code": "{% if isa_dt_par.data_ext_logi != isa_dt_ret.data_ext_msk -%}{{ isa.prefix }}_{{ instr_name }}{{isa_dt_par.data_ext_logi}}_{{isa_dt_ret.data_ext_msk}}(r0.m);{% else -%} r0.m;{% endif %}" },
+	"tomsk":        { "format": "short", "code": "{% if isa_dt_par.data_ext_logi != isa_dt_ret.data_ext_msk -%}{{ isa.prefix }}_{{ instr_name }}{{isa_dt_par.data_ext_logi}}_{{isa_dt_ret.data_ext_msk}}(r0.r);{% else -%} r0.r;{% endif %}" },
 	"load":         { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(({{ isa_dt_par.to_ptr }}*) p0);" },
-	"store":        { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(({{ isa_dt_par.to_ptr }}*) p0, r0.m);" },
+	"store":        { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(({{ isa_dt_par.to_ptr }}*) p0, r0.r);" },
 	"set0":         { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}();" },
 	"set0_k":       { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_msk }}();" },
 	"set1":         { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(v0);" },
 	"set1x":        { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}x(v0);" },
 	"getfirst":     { "format": "long",  "code":
-"""	return ({{ cstdint_ret }}){{ isa.prefix }}_{{ instr_name }}_epi{{ dt_par.n_bits }}(%cast<tp,c:int|b:tp>%(r0).m, 0);""" },
-	"arith_1arg":   { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m);" },
-	"arith_2args":  { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, r1.m);" },
-	"logi_2args":   { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(r0.m, r1.m);" },
+"""	return ({{ cstdint_ret }}){{ isa.prefix }}_{{ instr_name }}_epi{{ dt_par.n_bits }}(%cast<tp,c:int|b:tp>%(r0).r, 0);""" },
+	"arith_1arg":   { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r);" },
+	"arith_2args":  { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r);" },
+	"logi_2args":   { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(r0.r, r1.r);" },
 	"logi_m_2args": { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_msk }}(m0.m, m1.m);" },
-	"arith_3args":  { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, r1.m, r2.m);" },
+	"arith_3args":  { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, r2.m);" },
 	"cmpeq_float":  { "format": "long", "code":
 """	%r<tp>% tmp;
-	tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, r1.m, _CMP_EQ_OQ);
+	tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, _CMP_EQ_OQ);
 	return %tomsk<tp>%(tmp);""" },
 	"cmpneq_float": { "format": "long", "code":
 """	%r<tp>% tmp;
-	tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, r1.m, _CMP_NEQ_OQ);
+	tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, _CMP_NEQ_OQ);
 	return %tomsk<tp>%(tmp);""" },
 	"cmpgt_float":  { "format": "long", "code":
 """	%r<tp>% tmp;
-	tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, r1.m, _CMP_GT_OS);
+	tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, _CMP_GT_OS);
 	return %tomsk<tp>%(tmp);""" },
 	"cmpge_float":  { "format": "long", "code":
 """	%r<tp>% tmp;
-	tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, r1.m, _CMP_GE_OS);
+	tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, _CMP_GE_OS);
 	return %tomsk<tp>%(tmp);""" },
 	"cmple_float":  { "format": "long", "code":
 """	%r<tp>% tmp;
-	tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, r1.m, _CMP_LE_OS);
+	tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, _CMP_LE_OS);
 	return %tomsk<tp>%(tmp);""" },
 	"cmplt_float":  { "format": "long", "code":
 """	%r<tp>% tmp;
-	tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, r1.m, _CMP_LT_OS);
+	tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, _CMP_LT_OS);
 	return %tomsk<tp>%(tmp);""" },
-	"cmp_int":      { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, r1.m);" },
-	"blend_float":  { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, r1.m, %toreg<tp>%(m0).m);" },
-	"blend_int":    { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_epi8(r0.m, r1.m, m0.m);" },
+	"cmp_int":      { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r);" },
+	"blend_float":  { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, %toreg<tp>%(m0).m);" },
+	"blend_int":    { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_epi8(r0.r, r1.r, m0.m);" },
 	"logi_2args_e": { "format": "long", "code":
 """	%r<c:float|b:32>% r0f = %cast<tp,c:float|b:32>%(r0);
 	%r<c:float|b:32>% r1f = %cast<tp,c:float|b:32>%(r1);
@@ -81,70 +81,70 @@ tpl_implem_avx = {
 """	return {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_msk }}(m0.m, m1.m);""" },
 	"reduce_64": { "format": "long", "code":
 """	%r<c:float|b:32>% rsf;
-	rsf.m = _mm256_permute2f128_ps(%cast<tp,c:float|b:32>%(r0).m, %cast<tp,c:float|b:32>%(r0).m, _MM_SHUFFLE(0,0,0,1));
+	rsf.r = _mm256_permute2f128_ps(%cast<tp,c:float|b:32>%(r0).r, %cast<tp,c:float|b:32>%(r0).r, _MM_SHUFFLE(0,0,0,1));
 	%r<tp>% rs1 = %cast<c:float|b:32,tp>%(rsf);
-	rs1.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, rs1.m);
+	rs1.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, rs1.r);
 	rsf = %cast<tp,c:float|b:32>%(rs1);
-	rsf.m = _mm256_shuffle_ps(rsf.m, rsf.m, _MM_SHUFFLE(1,0,3,2));
+	rsf.r = _mm256_shuffle_ps(rsf.r, rsf.r, _MM_SHUFFLE(1,0,3,2));
 	%r<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);
-	rs2.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs1.m, rs2.m);
+	rs2.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs1.r, rs2.r);
 	return rs2;""" },
 	"reduce_32": { "format": "long", "code":
 """	%r<c:float|b:32>% rsf;
-	rsf.m = _mm256_permute2f128_ps(%cast<tp,c:float|b:32>%(r0).m, %cast<tp,c:float|b:32>%(r0).m, _MM_SHUFFLE(0,0,0,1));
+	rsf.r = _mm256_permute2f128_ps(%cast<tp,c:float|b:32>%(r0).r, %cast<tp,c:float|b:32>%(r0).r, _MM_SHUFFLE(0,0,0,1));
 	%r<tp>% rs1 = %cast<c:float|b:32,tp>%(rsf);
-	rs1.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, rs1.m);
+	rs1.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, rs1.r);
 	rsf = %cast<tp,c:float|b:32>%(rs1);
-	rsf.m = _mm256_shuffle_ps(rsf.m, rsf.m, _MM_SHUFFLE(1,0,3,2));
+	rsf.r = _mm256_shuffle_ps(rsf.r, rsf.r, _MM_SHUFFLE(1,0,3,2));
 	%r<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);
-	rs2.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs1.m, rs2.m);
+	rs2.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs1.r, rs2.r);
 	rsf = %cast<tp,c:float|b:32>%(rs2);
-	rsf.m = _mm256_shuffle_ps(rsf.m, rsf.m, _MM_SHUFFLE(2,3,0,1));
+	rsf.r = _mm256_shuffle_ps(rsf.r, rsf.r, _MM_SHUFFLE(2,3,0,1));
 	%r<tp>% rs3 = %cast<c:float|b:32,tp>%(rsf);
-	rs3.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs2.m, rs3.m);
+	rs3.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs2.r, rs3.r);
 	return rs3;""" },
 	"reduce_16": { "format": "long", "code":
 """	%r<c:float|b:32>% rsf;
-	rsf.m = _mm256_permute2f128_ps(%cast<tp,c:float|b:32>%(r0).m, %cast<tp,c:float|b:32>%(r0).m, _MM_SHUFFLE(0,0,0,1));
+	rsf.r = _mm256_permute2f128_ps(%cast<tp,c:float|b:32>%(r0).r, %cast<tp,c:float|b:32>%(r0).r, _MM_SHUFFLE(0,0,0,1));
 	%r<tp>% rs1 = %cast<c:float|b:32,tp>%(rsf);
-	rs1.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, rs1.m);
+	rs1.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, rs1.r);
 	rsf = %cast<tp,c:float|b:32>%(rs1);
-	rsf.m = _mm256_shuffle_ps(rsf.m, rsf.m, _MM_SHUFFLE(1,0,3,2));
+	rsf.r = _mm256_shuffle_ps(rsf.r, rsf.r, _MM_SHUFFLE(1,0,3,2));
 	%r<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);
-	rs2.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs1.m, rs2.m);
+	rs2.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs1.r, rs2.r);
 	rsf = %cast<tp,c:float|b:32>%(rs2);
-	rsf.m = _mm256_shuffle_ps(rsf.m, rsf.m, _MM_SHUFFLE(2,3,0,1));
+	rsf.r = _mm256_shuffle_ps(rsf.r, rsf.r, _MM_SHUFFLE(2,3,0,1));
 	%r<tp>% rs3 = %cast<c:float|b:32,tp>%(rsf);
-	rs3.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs2.m, rs3.m);
+	rs3.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs2.r, rs3.r);
 	%r<c:int|b:8>% rsi = %cast<tp,c:int|b:8>%(rs3);
 	__m256i mask_16 = _mm256_set_epi8(29,28,31,30,25,24,27,26,21,20,23,22,17,16,19,18,13,12,15,14,9,8,11,10,5,4,7,6,1,0,3,2);
-	rsi.m = _mm256_shuffle_epi8(rsi.m, mask_16);
+	rsi.r = _mm256_shuffle_epi8(rsi.r, mask_16);
 	%r<tp>% rs4 = %cast<c:int|b:8,tp>%(rsi);
-	rs4.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs3.m, rs4.m);
+	rs4.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs3.r, rs4.r);
 	return rs4;""" },
 	"reduce_8": { "format": "long", "code":
 """	%r<c:float|b:32>% rsf;
-	rsf.m = _mm256_permute2f128_ps(%cast<tp,c:float|b:32>%(r0).m, %cast<tp,c:float|b:32>%(r0).m, _MM_SHUFFLE(0,0,0,1));
+	rsf.r = _mm256_permute2f128_ps(%cast<tp,c:float|b:32>%(r0).r, %cast<tp,c:float|b:32>%(r0).r, _MM_SHUFFLE(0,0,0,1));
 	%r<tp>% rs1 = %cast<c:float|b:32,tp>%(rsf);
-	rs1.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.m, rs1.m);
+	rs1.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, rs1.r);
 	rsf = %cast<tp,c:float|b:32>%(rs1);
-	rsf.m = _mm256_shuffle_ps(rsf.m, rsf.m, _MM_SHUFFLE(1,0,3,2));
+	rsf.r = _mm256_shuffle_ps(rsf.r, rsf.r, _MM_SHUFFLE(1,0,3,2));
 	%r<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);
-	rs2.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs1.m, rs2.m);
+	rs2.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs1.r, rs2.r);
 	rsf = %cast<tp,c:float|b:32>%(rs2);
-	rsf.m = _mm256_shuffle_ps(rsf.m, rsf.m, _MM_SHUFFLE(2,3,0,1));
+	rsf.r = _mm256_shuffle_ps(rsf.r, rsf.r, _MM_SHUFFLE(2,3,0,1));
 	%r<tp>% rs3 = %cast<c:float|b:32,tp>%(rsf);
-	rs3.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs2.m, rs3.m);
+	rs3.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs2.r, rs3.r);
 	%r<c:int|b:8>% rsi = %cast<tp,c:int|b:8>%(rs3);
 	__m256i mask_16 = _mm256_set_epi8(29,28,31,30,25,24,27,26,21,20,23,22,17,16,19,18,13,12,15,14,9,8,11,10,5,4,7,6,1,0,3,2);
-	rsi.m = _mm256_shuffle_epi8(rsi.m, mask_16);
+	rsi.r = _mm256_shuffle_epi8(rsi.r, mask_16);
 	%r<tp>% rs4 = %cast<c:int|b:8,tp>%(rsi);
-	rs4.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs3.m, rs4.m);
+	rs4.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs3.r, rs4.r);
 	rsi = %cast<tp,c:int|b:8>%(rs4);
 	__m256i mask_8 = _mm256_set_epi8(30,31,28,29,26,27,24,25,22,23,20,21,18,19,16,17,14,15,12,13,10,11,8,9,6,7,4,5,2,3,0,1);
-	rsi.m = _mm256_shuffle_epi8(rsi.m, mask_8);
+	rsi.r = _mm256_shuffle_epi8(rsi.r, mask_8);
 	%r<tp>% rs5 = %cast<c:int|b:8,tp>%(rsi);
-	rs5.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs4.m, rs5.m);
+	rs5.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs4.r, rs5.r);
 	return rs5;""" },
 }
 
