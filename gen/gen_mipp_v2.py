@@ -14,8 +14,8 @@ sys.path.insert(1,path + '/avx_gen')
 from avx_gen import gen_mipp_avx
 from avx512_gen import gen_mipp_avx512
 
-avx_gen = "../include/"
-avx512_gen = "../include/"
+avx_gen = "../include/avx"
+avx512_gen = "../include/avx512"
 
 # avx and avx512 folder path
 avx_path = os.path.join(avx_gen, "avx")

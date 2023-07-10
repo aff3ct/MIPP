@@ -42,7 +42,7 @@ def gen_cpp_functions(isa,file, funcs):
 				#print("\t"+build_call(funcs[f]["proto"], dt_par, dt_ret, {}, c_func_name, lmul, False)+";", file=file)
 
 
-file = open("../include/mipp_v2_func_avx_gen.h", "w")
+file = open("../include/mipp_v2_func_gen.h", "w")
 
 tpl_header_cpp = """#ifndef MY_INTRINSICS_PLUS_PLUS_H_
 #define MY_INTRINSICS_PLUS_PLUS_H_
@@ -64,24 +64,3 @@ print(j2_template.render(), file=file)
 
 file.close()
 
-file = open("../include/mipp_v2_func_avx512_gen.h", "w")
-
-tpl_header_cpp = """#ifndef MY_INTRINSICS_PLUS_PLUS_H_
-#define MY_INTRINSICS_PLUS_PLUS_H_
-
-#include "mipp_v2.h"
-
-namespace mipp
-
-{"""
-j2_template = Template(tpl_header_cpp, undefined=StrictUndefined)
-print(j2_template.render(), file=file)
-
-gen_cpp_functions(isa_avx512,file, mipp_funcs)
-
-tpl_footer_cpp = """}
-#endif /* MY_INTRINSICS_PLUS_PLUS_H_ */"""
-j2_template = Template(tpl_footer_cpp, undefined=StrictUndefined)
-print(j2_template.render(), file=file)
-
-file.close()
