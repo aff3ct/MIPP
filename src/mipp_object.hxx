@@ -59,17 +59,7 @@ public:
 	}
 
 	~Reg() = default;
-#endif
 
-#ifndef MIPP_NO_INTRINSICS
-	static inline Reg<T> cmask (const uint32_t mask[nElReg<T>()  ]) { return mipp::cmask <T>(mask); }
-	static inline Reg<T> cmask2(const uint32_t mask[nElReg<T>()/2]) { return mipp::cmask2<T>(mask); }
-	static inline Reg<T> cmask4(const uint32_t mask[nElReg<T>()/4]) { return mipp::cmask4<T>(mask); }
-#else
-	static inline Reg<T> cmask (const uint32_t mask[1]) { return Reg<T>((T)0);          }
-	static inline Reg<T> cmask2(const uint32_t mask[1]) { return Reg<T>((T)0);          }
-	static inline Reg<T> cmask4(const uint32_t mask[1]) { return Reg<T>((T)0);          }
-#endif
 
 #ifndef MIPP_NO_INTRINSICS
 	inline void        set0         ()                                           { r = mipp::set0<T>();                           }
@@ -80,8 +70,7 @@ public:
 	inline void        store        (T* data)                              const { mipp::store<T>(data, r);                       }
 	inline void        storeu       (T* data)                              const { mipp::storeu<T>(data, r);                      }
     inline T           getfirst     ()                                     const { return mipp::getfirst<T>(r);                   }
-	inline Reg_2<T>    low          ()                                     const { return mipp::low <T>(r);                       }
-	inline Reg_2<T>    high         ()                                     const { return mipp::high<T>(r);                       }
+	
 	inline Reg<T>      andb         (const Reg<T> v)                       const { return mipp::andb         <T>(r, v.r);         }
 	inline Reg<T>      andnb        (const Reg<T> v)                       const { return mipp::andnb        <T>(r, v.r);         }
 	inline Reg<T>      notb         ()                                     const { return mipp::notb         <T>(r);              }
@@ -91,12 +80,17 @@ public:
 	inline Reg<T>      lshiftr      (const Reg<T> v)                       const { return mipp::lshiftr      <T>(r, v.r);         }
 	inline Reg<T>      rshift       (const uint32_t n)                     const { return mipp::rshift       <T>(r, n);           }
 	inline Reg<T>      rshiftr      (const Reg<T> v)                       const { return mipp::rshiftr      <T>(r, v.r);         }
+	
+
 	inline Msk<N<T>()> cmpeq        (const Reg<T> v)                       const { return mipp::cmpeq        <T>(r, v.r);         }
 	inline Msk<N<T>()> cmpneq       (const Reg<T> v)                       const { return mipp::cmpneq       <T>(r, v.r);         }
 	inline Msk<N<T>()> cmplt        (const Reg<T> v)                       const { return mipp::cmplt        <T>(r, v.r);         }
 	inline Msk<N<T>()> cmple        (const Reg<T> v)                       const { return mipp::cmple        <T>(r, v.r);         }
 	inline Msk<N<T>()> cmpgt        (const Reg<T> v)                       const { return mipp::cmpgt        <T>(r, v.r);         }
 	inline Msk<N<T>()> cmpge        (const Reg<T> v)                       const { return mipp::cmpge        <T>(r, v.r);         }
+	
+
+
 	inline Reg<T>      add          (const Reg<T> v)                       const { return mipp::add          <T>(r, v.r);         }
 	inline Reg<T>      sub          (const Reg<T> v)                       const { return mipp::sub          <T>(r, v.r);         }
 	inline Reg<T>      mul          (const Reg<T> v)                       const { return mipp::mul          <T>(r, v.r);         }
@@ -114,8 +108,8 @@ public:
 	inline Reg<T>      cos          ()                                     const { return mipp::cos          <T>(r);              }
 	inline Reg<T>      tan          ()                                     const { return mipp::tan          <T>(r);              }
 	inline void        sincos       (      Reg<T> &s,       Reg<T> &c)     const {        mipp::sincos       <T>(r,  s.r,  c.r);  }
-	inline Regx2<T>    sincos       ()                                     const { return mipp::sincos       <T>(r);              }
-	inline Regx2<T>    cossin       ()                                     const { return mipp::cossin       <T>(r);              }
+
+
 	inline Reg<T>      sinh         ()                                     const { return mipp::sinh         <T>(r);              }
 	inline Reg<T>      cosh         ()                                     const { return mipp::cosh         <T>(r);              }
 	inline Reg<T>      tanh         ()                                     const { return mipp::tanh         <T>(r);              }
@@ -128,9 +122,12 @@ public:
 	inline Reg<T>      lrot         ()                                     const { return mipp::lrot         <T>(r);              }
 	inline Reg<T>      rrot         ()                                     const { return mipp::rrot         <T>(r);              }
 	inline Reg<T>      round        ()                                     const { return mipp::round        <T>(r);              }
+	
 	inline bool        testz        (const Reg<T> v)                       const { return mipp::testz        <T>(r, v.r);         }
 	inline bool        testz        ()                                     const { return mipp::testz        <T>(r);              }
 #else
+	
+
 	inline void        set0         ()                                           { r = 0;                                         }
 	inline void        set1         (const T val)                                { r = val;                                       }
 	inline void        set          (const T vals[1])                            { r = vals[0];                                   }
@@ -138,9 +135,10 @@ public:
 	inline void        loadu        (const T* data)                              { r = data[0];                                   }
 	inline void        store        (T* data)                              const { data[0] = r;                                   }
 	inline void        storeu       (T* data)                              const { data[0] = r;                                   }
+	
 	inline T           getfirst     ()                                     const { return r;                                      }	
-	inline Reg_2<T>    low          ()                                     const { return r;                                      }
-	inline Reg_2<T>    high         ()                                     const { return r;                                      }
+	
+
 	inline Reg<T>      andb         (const Reg<T> v)                       const { return mipp_scop::andb<T>( r, v.r);            }
 	inline Reg<T>      andnb        (const Reg<T> v)                       const { return mipp_scop::andb<T>(~r, v.r);            }
 	inline Reg<T>      notb         ()                                     const { return ~r;                                     }
@@ -150,12 +148,15 @@ public:
 	inline Reg<T>      lshiftr      (const Reg<T> v)                       const { return mipp_scop::lshift<T>(r, (uint32_t)v.r); }
 	inline Reg<T>      rshift       (const uint32_t n)                     const { return mipp_scop::rshift<T>(r, n);             }
 	inline Reg<T>      rshiftr      (const Reg<T> v)                       const { return mipp_scop::rshift<T>(r, (uint32_t)v.r); }
+	
+
 	inline Msk<N<T>()> cmpeq        (const Reg<T> v)                       const { return (msk)(r  == v.r);                       }
 	inline Msk<N<T>()> cmpneq       (const Reg<T> v)                       const { return (msk)(r  != v.r);                       }
 	inline Msk<N<T>()> cmplt        (const Reg<T> v)                       const { return (msk)(r  <  v.r);                       }
 	inline Msk<N<T>()> cmple        (const Reg<T> v)                       const { return (msk)(r  <= v.r);                       }
 	inline Msk<N<T>()> cmpgt        (const Reg<T> v)                       const { return (msk)(r  >  v.r);                       }
 	inline Msk<N<T>()> cmpge        (const Reg<T> v)                       const { return (msk)(r  >= v.r);                       }
+	
 	inline Reg<T>      add          (const Reg<T> v)                       const { return mipp_scop::add<T>(r,v.r);               }
 	inline Reg<T>      sub          (const Reg<T> v)                       const { return mipp_scop::sub<T>(r,v.r);               }
 	inline Reg<T>      mul          (const Reg<T> v)                       const { return r  *  v.r;                              }
@@ -173,9 +174,9 @@ public:
 	inline Reg<T>      sin          ()                                     const { return (T)std::sin(r);                         }
 	inline Reg<T>      cos          ()                                     const { return (T)std::cos(r);                         }
 	inline Reg<T>      tan          ()                                     const { return (T)std::tan(r);                         }
+	
 	inline void        sincos       (      Reg<T> &s,       Reg<T> &c)     const { s = std::sin(r); c = std::cos(r);              }
-	inline Regx2<T>    sincos       ()                                     const { return Regx2<T>(std::sin(r), std::cos(r));     }
-	inline Regx2<T>    cossin       ()                                     const { return Regx2<T>(std::cos(r), std::sin(r));     }
+
 	inline Reg<T>      sinh         ()                                     const { return (T)std::sinh(r);                        }
 	inline Reg<T>      cosh         ()                                     const { return (T)std::cosh(r);                        }
 	inline Reg<T>      tanh         ()                                     const { return (T)std::tanh(r);                        }
@@ -188,6 +189,8 @@ public:
 	inline Reg<T>      lrot         ()                                     const { return r;                                      }
 	inline Reg<T>      rrot         ()                                     const { return r;                                      }
 	inline Reg<T>      round        ()                                     const { return std::round(r);                          }
+	inline rvd<T,1> cast (const rvd<T,lmul> r0) 
+	return mipp_avx_cast_float32_float64(r0);
 	inline bool        testz        (const Reg<T> v)                       const { return mipp_scop::andb<T>(r, v.r) == 0 ? 1 : 0;}
 	inline bool        testz        ()                                     const { return !r;                                     }
 #endif

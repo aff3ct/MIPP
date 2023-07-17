@@ -373,8 +373,8 @@ def build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul=2, isa_name=True
 		print(str_code)
 	str_code += "\t" + _build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul_2, 1) + ";\n"
 	str_code += "\t" + _build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul_2, 2) + ";"
-	if (proto["ret"]["type"]):
-		str_code += "\n\t" + "return res;"
+	"""if (proto["ret"]["type"]):
+					str_code += "\n\t" + "return res;"""
 	return str_code;
 
 
