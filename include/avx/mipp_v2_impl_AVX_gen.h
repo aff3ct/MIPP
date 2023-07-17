@@ -1366,322 +1366,382 @@ rvm_avx_uint8_t mipp_avx_tomsk_uint8(const rvd_avx_uint8_t r0) {
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if defined(MIPP_ALIGNED_LOADS)
 rvd_avx_float64_t mipp_avx_load_float64(const float64_t* p0) {
-return _mm256_load_pd((float64_t*) p0);
+	rvd_avx_float64_t res;
+	res.r= _mm256_load_pd((float64_t*) p0);
+	return res;
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if defined(MIPP_ALIGNED_LOADS)
 rvd_avx_float32_t mipp_avx_load_float32(const float32_t* p0) {
-return _mm256_load_ps((float32_t*) p0);
+	rvd_avx_float32_t res;
+	res.r= _mm256_load_ps((float32_t*) p0);
+	return res;
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if defined(MIPP_ALIGNED_LOADS)
 rvd_avx_int64_t mipp_avx_load_int64(const int64_t* p0) {
-return _mm256_load_si256((__m256i*) p0);
+	rvd_avx_int64_t res;
+	res.r= _mm256_load_si256((__m256i*) p0);
+	return res;
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if defined(MIPP_ALIGNED_LOADS)
 rvd_avx_int32_t mipp_avx_load_int32(const int32_t* p0) {
-return _mm256_load_si256((__m256i*) p0);
+	rvd_avx_int32_t res;
+	res.r= _mm256_load_si256((__m256i*) p0);
+	return res;
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if defined(MIPP_ALIGNED_LOADS)
 rvd_avx_int16_t mipp_avx_load_int16(const int16_t* p0) {
-return _mm256_load_si256((__m256i*) p0);
+	rvd_avx_int16_t res;
+	res.r= _mm256_load_si256((__m256i*) p0);
+	return res;
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if defined(MIPP_ALIGNED_LOADS)
 rvd_avx_int8_t mipp_avx_load_int8(const int8_t* p0) {
-return _mm256_load_si256((__m256i*) p0);
+	rvd_avx_int8_t res;
+	res.r= _mm256_load_si256((__m256i*) p0);
+	return res;
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if defined(MIPP_ALIGNED_LOADS)
 rvd_avx_uint64_t mipp_avx_load_uint64(const uint64_t* p0) {
-return _mm256_load_si256((__m256i*) p0);
+	rvd_avx_uint64_t res;
+	res.r= _mm256_load_si256((__m256i*) p0);
+	return res;
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if defined(MIPP_ALIGNED_LOADS)
 rvd_avx_uint32_t mipp_avx_load_uint32(const uint32_t* p0) {
-return _mm256_load_si256((__m256i*) p0);
+	rvd_avx_uint32_t res;
+	res.r= _mm256_load_si256((__m256i*) p0);
+	return res;
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if defined(MIPP_ALIGNED_LOADS)
 rvd_avx_uint16_t mipp_avx_load_uint16(const uint16_t* p0) {
-return _mm256_load_si256((__m256i*) p0);
+	rvd_avx_uint16_t res;
+	res.r= _mm256_load_si256((__m256i*) p0);
+	return res;
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if defined(MIPP_ALIGNED_LOADS)
 rvd_avx_uint8_t mipp_avx_load_uint8(const uint8_t* p0) {
-return _mm256_load_si256((__m256i*) p0);
+	rvd_avx_uint8_t res;
+	res.r= _mm256_load_si256((__m256i*) p0);
+	return res;
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if !defined(MIPP_ALIGNED_LOADS)
 rvd_avx_float64_t mipp_avx_load_float64(const float64_t* p0) {
-return _mm256_loadu_pd((float64_t*) p0);
+	rvd_avx_float64_t res;
+	res.r= _mm256_loadu_pd((float64_t*) p0);
+	return res;
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if !defined(MIPP_ALIGNED_LOADS)
 rvd_avx_float32_t mipp_avx_load_float32(const float32_t* p0) {
-return _mm256_loadu_ps((float32_t*) p0);
+	rvd_avx_float32_t res;
+	res.r= _mm256_loadu_ps((float32_t*) p0);
+	return res;
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if !defined(MIPP_ALIGNED_LOADS)
 rvd_avx_int64_t mipp_avx_load_int64(const int64_t* p0) {
-return _mm256_loadu_si256((__m256i*) p0);
+	rvd_avx_int64_t res;
+	res.r= _mm256_loadu_si256((__m256i*) p0);
+	return res;
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if !defined(MIPP_ALIGNED_LOADS)
 rvd_avx_int32_t mipp_avx_load_int32(const int32_t* p0) {
-return _mm256_loadu_si256((__m256i*) p0);
+	rvd_avx_int32_t res;
+	res.r= _mm256_loadu_si256((__m256i*) p0);
+	return res;
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if !defined(MIPP_ALIGNED_LOADS)
 rvd_avx_int16_t mipp_avx_load_int16(const int16_t* p0) {
-return _mm256_loadu_si256((__m256i*) p0);
+	rvd_avx_int16_t res;
+	res.r= _mm256_loadu_si256((__m256i*) p0);
+	return res;
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if !defined(MIPP_ALIGNED_LOADS)
 rvd_avx_int8_t mipp_avx_load_int8(const int8_t* p0) {
-return _mm256_loadu_si256((__m256i*) p0);
+	rvd_avx_int8_t res;
+	res.r= _mm256_loadu_si256((__m256i*) p0);
+	return res;
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if !defined(MIPP_ALIGNED_LOADS)
 rvd_avx_uint64_t mipp_avx_load_uint64(const uint64_t* p0) {
-return _mm256_loadu_si256((__m256i*) p0);
+	rvd_avx_uint64_t res;
+	res.r= _mm256_loadu_si256((__m256i*) p0);
+	return res;
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if !defined(MIPP_ALIGNED_LOADS)
 rvd_avx_uint32_t mipp_avx_load_uint32(const uint32_t* p0) {
-return _mm256_loadu_si256((__m256i*) p0);
+	rvd_avx_uint32_t res;
+	res.r= _mm256_loadu_si256((__m256i*) p0);
+	return res;
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if !defined(MIPP_ALIGNED_LOADS)
 rvd_avx_uint16_t mipp_avx_load_uint16(const uint16_t* p0) {
-return _mm256_loadu_si256((__m256i*) p0);
+	rvd_avx_uint16_t res;
+	res.r= _mm256_loadu_si256((__m256i*) p0);
+	return res;
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if !defined(MIPP_ALIGNED_LOADS)
 rvd_avx_uint8_t mipp_avx_load_uint8(const uint8_t* p0) {
-return _mm256_loadu_si256((__m256i*) p0);
+	rvd_avx_uint8_t res;
+	res.r= _mm256_loadu_si256((__m256i*) p0);
+	return res;
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- loadu
 rvd_avx_float64_t mipp_avx_loadu_float64(const float64_t* p0) {
-return _mm256_loadu_pd((float64_t*) p0);
+	rvd_avx_float64_t res;
+	res.r= _mm256_loadu_pd((float64_t*) p0);
+	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- loadu
 rvd_avx_float32_t mipp_avx_loadu_float32(const float32_t* p0) {
-return _mm256_loadu_ps((float32_t*) p0);
+	rvd_avx_float32_t res;
+	res.r= _mm256_loadu_ps((float32_t*) p0);
+	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- loadu
 rvd_avx_int64_t mipp_avx_loadu_int64(const int64_t* p0) {
-return _mm256_loadu_si256((__m256i*) p0);
+	rvd_avx_int64_t res;
+	res.r= _mm256_loadu_si256((__m256i*) p0);
+	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- loadu
 rvd_avx_int32_t mipp_avx_loadu_int32(const int32_t* p0) {
-return _mm256_loadu_si256((__m256i*) p0);
+	rvd_avx_int32_t res;
+	res.r= _mm256_loadu_si256((__m256i*) p0);
+	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- loadu
 rvd_avx_int16_t mipp_avx_loadu_int16(const int16_t* p0) {
-return _mm256_loadu_si256((__m256i*) p0);
+	rvd_avx_int16_t res;
+	res.r= _mm256_loadu_si256((__m256i*) p0);
+	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- loadu
 rvd_avx_int8_t mipp_avx_loadu_int8(const int8_t* p0) {
-return _mm256_loadu_si256((__m256i*) p0);
+	rvd_avx_int8_t res;
+	res.r= _mm256_loadu_si256((__m256i*) p0);
+	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- loadu
 rvd_avx_uint64_t mipp_avx_loadu_uint64(const uint64_t* p0) {
-return _mm256_loadu_si256((__m256i*) p0);
+	rvd_avx_uint64_t res;
+	res.r= _mm256_loadu_si256((__m256i*) p0);
+	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- loadu
 rvd_avx_uint32_t mipp_avx_loadu_uint32(const uint32_t* p0) {
-return _mm256_loadu_si256((__m256i*) p0);
+	rvd_avx_uint32_t res;
+	res.r= _mm256_loadu_si256((__m256i*) p0);
+	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- loadu
 rvd_avx_uint16_t mipp_avx_loadu_uint16(const uint16_t* p0) {
-return _mm256_loadu_si256((__m256i*) p0);
+	rvd_avx_uint16_t res;
+	res.r= _mm256_loadu_si256((__m256i*) p0);
+	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- loadu
 rvd_avx_uint8_t mipp_avx_loadu_uint8(const uint8_t* p0) {
-return _mm256_loadu_si256((__m256i*) p0);
+	rvd_avx_uint8_t res;
+	res.r= _mm256_loadu_si256((__m256i*) p0);
+	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if defined(MIPP_ALIGNED_LOADS)
 void mipp_avx_store_float64(float64_t* p0, const rvd_avx_float64_t r0) {
-	return _mm256_store_pd((float64_t*) p0, r0.r);
+	_mm256_store_pd((float64_t*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if defined(MIPP_ALIGNED_LOADS)
 void mipp_avx_store_float32(float32_t* p0, const rvd_avx_float32_t r0) {
-	return _mm256_store_ps((float32_t*) p0, r0.r);
+	_mm256_store_ps((float32_t*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if defined(MIPP_ALIGNED_LOADS)
 void mipp_avx_store_int64(int64_t* p0, const rvd_avx_int64_t r0) {
-	return _mm256_store_si256((__m256i*) p0, r0.r);
+	_mm256_store_si256((__m256i*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if defined(MIPP_ALIGNED_LOADS)
 void mipp_avx_store_int32(int32_t* p0, const rvd_avx_int32_t r0) {
-	return _mm256_store_si256((__m256i*) p0, r0.r);
+	_mm256_store_si256((__m256i*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if defined(MIPP_ALIGNED_LOADS)
 void mipp_avx_store_int16(int16_t* p0, const rvd_avx_int16_t r0) {
-	return _mm256_store_si256((__m256i*) p0, r0.r);
+	_mm256_store_si256((__m256i*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if defined(MIPP_ALIGNED_LOADS)
 void mipp_avx_store_int8(int8_t* p0, const rvd_avx_int8_t r0) {
-	return _mm256_store_si256((__m256i*) p0, r0.r);
+	_mm256_store_si256((__m256i*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if defined(MIPP_ALIGNED_LOADS)
 void mipp_avx_store_uint64(uint64_t* p0, const rvd_avx_uint64_t r0) {
-	return _mm256_store_si256((__m256i*) p0, r0.r);
+	_mm256_store_si256((__m256i*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if defined(MIPP_ALIGNED_LOADS)
 void mipp_avx_store_uint32(uint32_t* p0, const rvd_avx_uint32_t r0) {
-	return _mm256_store_si256((__m256i*) p0, r0.r);
+	_mm256_store_si256((__m256i*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if defined(MIPP_ALIGNED_LOADS)
 void mipp_avx_store_uint16(uint16_t* p0, const rvd_avx_uint16_t r0) {
-	return _mm256_store_si256((__m256i*) p0, r0.r);
+	_mm256_store_si256((__m256i*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if defined(MIPP_ALIGNED_LOADS)
 void mipp_avx_store_uint8(uint8_t* p0, const rvd_avx_uint8_t r0) {
-	return _mm256_store_si256((__m256i*) p0, r0.r);
+	_mm256_store_si256((__m256i*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if !defined(MIPP_ALIGNED_LOADS)
 void mipp_avx_store_float64(float64_t* p0, const rvd_avx_float64_t r0) {
-	return _mm256_storeu_pd((float64_t*) p0, r0.r);
+	_mm256_storeu_pd((float64_t*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if !defined(MIPP_ALIGNED_LOADS)
 void mipp_avx_store_float32(float32_t* p0, const rvd_avx_float32_t r0) {
-	return _mm256_storeu_ps((float32_t*) p0, r0.r);
+	_mm256_storeu_ps((float32_t*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if !defined(MIPP_ALIGNED_LOADS)
 void mipp_avx_store_int64(int64_t* p0, const rvd_avx_int64_t r0) {
-	return _mm256_storeu_si256((__m256i*) p0, r0.r);
+	_mm256_storeu_si256((__m256i*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if !defined(MIPP_ALIGNED_LOADS)
 void mipp_avx_store_int32(int32_t* p0, const rvd_avx_int32_t r0) {
-	return _mm256_storeu_si256((__m256i*) p0, r0.r);
+	_mm256_storeu_si256((__m256i*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if !defined(MIPP_ALIGNED_LOADS)
 void mipp_avx_store_int16(int16_t* p0, const rvd_avx_int16_t r0) {
-	return _mm256_storeu_si256((__m256i*) p0, r0.r);
+	_mm256_storeu_si256((__m256i*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if !defined(MIPP_ALIGNED_LOADS)
 void mipp_avx_store_int8(int8_t* p0, const rvd_avx_int8_t r0) {
-	return _mm256_storeu_si256((__m256i*) p0, r0.r);
+	_mm256_storeu_si256((__m256i*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if !defined(MIPP_ALIGNED_LOADS)
 void mipp_avx_store_uint64(uint64_t* p0, const rvd_avx_uint64_t r0) {
-	return _mm256_storeu_si256((__m256i*) p0, r0.r);
+	_mm256_storeu_si256((__m256i*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if !defined(MIPP_ALIGNED_LOADS)
 void mipp_avx_store_uint32(uint32_t* p0, const rvd_avx_uint32_t r0) {
-	return _mm256_storeu_si256((__m256i*) p0, r0.r);
+	_mm256_storeu_si256((__m256i*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if !defined(MIPP_ALIGNED_LOADS)
 void mipp_avx_store_uint16(uint16_t* p0, const rvd_avx_uint16_t r0) {
-	return _mm256_storeu_si256((__m256i*) p0, r0.r);
+	_mm256_storeu_si256((__m256i*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if !defined(MIPP_ALIGNED_LOADS)
 void mipp_avx_store_uint8(uint8_t* p0, const rvd_avx_uint8_t r0) {
-	return _mm256_storeu_si256((__m256i*) p0, r0.r);
+	_mm256_storeu_si256((__m256i*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- storeu
 void mipp_avx_storeu_float64(float64_t* p0, const rvd_avx_float64_t r0) {
-	return _mm256_storeu_pd((float64_t*) p0, r0.r);
+	_mm256_storeu_pd((float64_t*) p0, r0.r);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- storeu
 void mipp_avx_storeu_float32(float32_t* p0, const rvd_avx_float32_t r0) {
-	return _mm256_storeu_ps((float32_t*) p0, r0.r);
+	_mm256_storeu_ps((float32_t*) p0, r0.r);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- storeu
 void mipp_avx_storeu_int64(int64_t* p0, const rvd_avx_int64_t r0) {
-	return _mm256_storeu_si256((__m256i*) p0, r0.r);
+	_mm256_storeu_si256((__m256i*) p0, r0.r);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- storeu
 void mipp_avx_storeu_int32(int32_t* p0, const rvd_avx_int32_t r0) {
-	return _mm256_storeu_si256((__m256i*) p0, r0.r);
+	_mm256_storeu_si256((__m256i*) p0, r0.r);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- storeu
 void mipp_avx_storeu_int16(int16_t* p0, const rvd_avx_int16_t r0) {
-	return _mm256_storeu_si256((__m256i*) p0, r0.r);
+	_mm256_storeu_si256((__m256i*) p0, r0.r);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- storeu
 void mipp_avx_storeu_int8(int8_t* p0, const rvd_avx_int8_t r0) {
-	return _mm256_storeu_si256((__m256i*) p0, r0.r);
+	_mm256_storeu_si256((__m256i*) p0, r0.r);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- storeu
 void mipp_avx_storeu_uint64(uint64_t* p0, const rvd_avx_uint64_t r0) {
-	return _mm256_storeu_si256((__m256i*) p0, r0.r);
+	_mm256_storeu_si256((__m256i*) p0, r0.r);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- storeu
 void mipp_avx_storeu_uint32(uint32_t* p0, const rvd_avx_uint32_t r0) {
-	return _mm256_storeu_si256((__m256i*) p0, r0.r);
+	_mm256_storeu_si256((__m256i*) p0, r0.r);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- storeu
 void mipp_avx_storeu_uint16(uint16_t* p0, const rvd_avx_uint16_t r0) {
-	return _mm256_storeu_si256((__m256i*) p0, r0.r);
+	_mm256_storeu_si256((__m256i*) p0, r0.r);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- storeu
 void mipp_avx_storeu_uint8(uint8_t* p0, const rvd_avx_uint8_t r0) {
-	return _mm256_storeu_si256((__m256i*) p0, r0.r);
+	_mm256_storeu_si256((__m256i*) p0, r0.r);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set1
 rvd_avx_float64_t mipp_avx_set1_float64(const float64_t v0) {
