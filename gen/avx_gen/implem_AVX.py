@@ -31,8 +31,7 @@ tpl_implem_avx = {
 	"set0_k":       { "format": "short",  "code": "	 {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_msk }}();" },
 	"set1":         { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(v0);"},
 	"set1x":        { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}x(v0);" },
-	"getfirst":     { "format": "long",  "code":
-"""	return ({{ cstdint_ret }}){{ isa.prefix }}_{{ instr_name }}_epi{{ dt_par.n_bits }}(%cast<tp,c:int|b:tp>%(r0).r, 0);""" },
+	"getfirst":     { "format": "long",  "code":"return ({{ cstdint_ret }}) {{ isa.prefix }}_{{ instr_name }}_epi{{ dt_par.n_bits }}(%cast<tp,c:int|b:tp>%(r0).r, 0);" },
 	"arith_1arg":   { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r);" },
 	"arith_2args":  { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r);" },
 	"logi_2args":   { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(r0.r, r1.r);" },
@@ -62,9 +61,9 @@ tpl_implem_avx = {
 """	%r<tp>% tmp;
 	tmp.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, _CMP_LT_OS);
 	return %tomsk<tp>%(tmp);""" },
-	"cmp_int":      { "format": "long", "code": " return {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r);" },
-	"blend_float":  { "format": "long", "code": "return {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, %toreg<tp>%(m0).m);" },
-	"blend_int":    { "format": "long", "code": "return {{ isa.prefix }}_{{ instr_name }}_epi8(r0.r, r1.r, m0.m);" },
+	"cmp_int":      { "format": "short", "code": " {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r);" },
+	"blend_float":  { "format": "short", "code":"{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, m0.m);"},
+	"blend_int":    { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_epi8(r0.r, r1.r, m0.m);" },
 	"logi_2args_e": { "format": "long", "code":
 """	%r<c:float|b:32>% r0f = %cast<tp,c:float|b:32>%(r0);
 	%r<c:float|b:32>% r1f = %cast<tp,c:float|b:32>%(r1);

@@ -77,7 +77,7 @@ public:
 	print(template.render(), file=file)
 
 	template_msk= """
-inline Rvm<N<T>()> operator{{op}} (rvm<T> rvm) const { return this->{{func}} (rvm);}"""
+inline Rvm<N<T>()> operator_{{ datatype.cstd }}_{{op}} (rvm<T> rvm) const { return this->{{func}} (rvm);}"""
 	
 	j3_template = Template(template_msk, undefined=StrictUndefined)
 	for op, func in operators_msk.items():
