@@ -21,7 +21,7 @@ def gen_cpp_structures(isa,file):
 	print("// should throw an exception", file=file)
 	print("template<typename T, int LMUL=1> struct rvm_type{};", file=file)
 
-	template = """template<> struct rvm_type<{{ datatype.cstd }}, {{ lmul }}>{ using type = rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t; };"""
+	template = """template<> struct rvm_type<{{ datatype.cstd }}, {{ lmul }}>{ using type = rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t; };"""
 	j2_template = Template(template, undefined=StrictUndefined)
 
 	for lmul in [1]:
