@@ -122,23 +122,26 @@ def gen_c_functions(isa, file, funcs, implems):
 
 						if ff["template"]["format"] == "short":
 							if funcs[f]["proto"]["ret"]["type"]:
+								if (funcs[f]["proto"]["ret"]["type"]):
+										print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file);
+										print("\tres.m= ", end='', file=file)
 								for arg in funcs[f]["proto"]["args"]:
 								## Toreg & Tomsk
-									if (funcs[f]["proto"]["ret"]["type"] == "reg" and arg["type"] == "reg"):
+									if (funcs[f]["proto"]["ret"]["type"] == "reg"):
 										print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file);
 										print("\tres.r= ", end='', file=file)
+									elif (funcs[f]["proto"]["ret"]["type"] == "msk"):
+										print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file);
+										print("\tres.m= ", end='', file=file)
 									elif (funcs[f]["proto"]["ret"]["type"] == "reg" and arg["type"] == "msk"):
 										print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file);
 										print("\tres.r= ", end='', file=file)
-									elif (funcs[f]["proto"]["ret"]["type"] == "msk" and arg["type"] == "msk"):
-										print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file);
-										print("\tres.m= ", end='', file=file)
 									elif (funcs[f]["proto"]["ret"]["type"] == "msk" and arg["type"] == "reg"):
 										print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file);
 										print("\tres.m= ", end='', file=file)
-									elif (funcs[f]["proto"]["ret"]["type"] == "reg" and arg["type"] == "ptr"):
-										print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file);
-										print("\tres.r= ", end='', file=file)
+									
+									
+						
 							else:
 								print("\t", end='', file=file)
 

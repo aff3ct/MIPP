@@ -27,12 +27,9 @@ tpl_implem_avx = {
 	"tomsk":        { "format": "short", "code": "{% if isa_dt_par.data_ext_logi != isa_dt_ret.data_ext_logi -%}{{ isa.prefix }}_{{ instr_name }}{{isa_dt_par.data_ext_logi}}_{{isa_dt_ret.data_ext_logi}}(r0.r);{% else -%} r0.r;{% endif %}" },
 	"load":         { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(({{ isa_dt_par.to_ptr }}*) p0);" },
 	"store":        { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(({{ isa_dt_par.to_ptr }}*) p0, r0.r);" },
-	"set0":         { "format": "short", "code": 
-"""  res.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}();""" },
-	"set0_k":       { "format": "short", "code": 
-"""  res.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_msk }}();""" },
-	"set1":         { "format": "short", "code": 
-"""  res.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(v0);"""},
+	"set0":         { "format": "short",  "code": " {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}();"},
+	"set0_k":       { "format": "short",  "code": "	 {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_msk }}();" },
+	"set1":         { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(v0);"},
 	"set1x":        { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}x(v0);" },
 	"getfirst":     { "format": "long",  "code":
 """	return ({{ cstdint_ret }}){{ isa.prefix }}_{{ instr_name }}_epi{{ dt_par.n_bits }}(%cast<tp,c:int|b:tp>%(r0).r, 0);""" },
