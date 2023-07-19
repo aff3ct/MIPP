@@ -44,37 +44,28 @@ datatypes = {
 }
 
 operators = {
-
-    "+=": "add",
-    "+": "add",
-    "-=": "sub",
-    "-": "sub",
-    "*=": "mul",
-    "*": "mul",
-    "/=": "div",
-    "/": "div",
-    "~": "notb",
-    "^=": "xorb",
-    "^": "xorb",
-    "|=": "orb",
-    "|": "orb",
-    "&=": "andb",
-    "&": "andb",
-    "==": "cmpeq",
-    "!=": "cmpneq",
-    "<": "cmplt",
-    "<=": "cmple",
-    ">": "cmpgt",
-    ">=": "cmpge",
-
+    "add"    : {"operation" : "+", "option"  : "+="},
+    "sub"    : {"operation" : "-", "option"  : "-="},
+    "mul"    : {"operation" : "*", "option"  : "*="},
+    "div"    : {"operation" : "/", "option"  : "/="},
+    "notb"   : {"operation" : "~", "option"  : "~"},
+    "xorb"   : {"operation" : "^", "option"  : "^="},
+    "orb"    : {"operation" : "|", "option"  : "|="},
+    "andb"   : {"operation" : "&", "option"  : "&="},
+    "cmpeq"  : {"operation" : "==", "option" : "=="},
+    "cmpneq" : {"operation" : "!=", "option" : "!="},
+    "cmplt"  : {"operation" : "<", "option"  : "<"},
+    "cmple"  : {"operation" : "<=", "option" : "<="},
+    "cmpgt"  : {"operation" : ">", "option"  : ">"},
+    "cmpge"  : {"operation" : ">=", "option" : ">="},
 }
 operators_msk = {
-    "==": "cmpeq",
-    "!=": "cmpneq",
-    "<": "cmplt",
-    "<=": "cmple",
-    ">": "cmpgt",
-    ">=": "cmpge",
+    "==" : "cmpeq",
+    "!=" : "cmpneq",
+    "<"  : "cmplt",
+    "<=" : "cmple",
+    ">"  : "cmpgt",
+    ">=" : "cmpge",
 }
 
 

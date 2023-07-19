@@ -46,15 +46,14 @@ template <typename T> inline Rvd<T> {{func_name}}() const { return Rvd<T>(this->
 
 def gen_cpp_operators(file):
 	template = """
-inline Rvd<T>& operator{{op}} (const Rvd<T>& rvd) { r = this->{{func}}(rvd).r; return *this; }
-inline Rvd<T> operator{{op}} (const Rvd<T>& rvd) const { return this->{{func}}(rvd); }
+inline Rvd<T>& operator{{option}}(const Rvd<T>& rvd) {  r = this->{{op}}(rvd).r; return *this; }
+inline Rvd<T> operator{{operation}}(const Rvd<T>& rvd) const { return this->{{op}}(rvd);}
 """
-	j2_template = Template(template, undefined=StrictUndefined)
-	for op, func in operators.items():
-		print(j2_template.render(op=op, func=func), file=file)
 
-	for op, func in operators_msk.items():
-		print(j2_template.render(op=op, func=func), file=file)
+	j2_template = Template(template, undefined=StrictUndefined)
+	for op in operators:
+		print(j2_template.render(option=operators[op]["option"],op=op, operation=operators[op]["operation"]), file=file)
+
 	tpl_end_class_rvd = """}
 """
 	rvd_end = Template(tpl_end_class_rvd, undefined=StrictUndefined)
@@ -76,8 +75,7 @@ public:
 	template = Template(tpl_class_Rvm, undefined=StrictUndefined)
 	print(template.render(), file=file)
 
-	template_msk= """
-inline Rvm<N<T>()> operator_{{ datatype.cstd }}_{{op}} (rvm<T> rvm) const { return this->{{func}} (rvm);}"""
+	template_msk= "inline Rvm<N<T>()> operator{{op}} (rvm<T> rvm) const { return this->{{func}} (rvm);}"
 	
 	j3_template = Template(template_msk, undefined=StrictUndefined)
 	for op, func in operators_msk.items():
