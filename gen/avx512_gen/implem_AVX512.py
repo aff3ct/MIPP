@@ -21,31 +21,22 @@ isa_avx512 = {
 }
 
 tpl_implem_avx512 = {
-    "cast"                : { "format": "short", "code": 
-""" {% if isa_dt_par.data_ext_logi != isa_dt_ret.data_ext_logi -%} return {{ isa.prefix }}_{{ instr_name }}{{isa_dt_par.data_ext_logi}}_{{isa_dt_ret.data_ext_logi}}(r0.r);{% else -%} r0.r;{% endif %}""" },
-    "cast_k"              : { "format": "short", "code": "m0.m;" },
-    "toreg"               : { "format": "short", "code": 
-"""  {% if isa_dt_par.data_ext_msk != isa_dt_ret.data_ext_logi -%} return {{ isa.prefix }}_{{ instr_name }}{{isa_dt_par.data_ext_msk}}_{{isa_dt_ret.data_ext_logi}}(m0.m);{% else -%} m0.m;{% endif %}""" },
-    "tomsk"               : { "format": "short", "code": 
-"""  {% if isa_dt_par.data_ext_logi != isa_dt_ret.data_ext_msk -%} return {{ isa.prefix }}_{{ instr_name }}{{isa_dt_par.data_ext_logi}}_{{isa_dt_ret.data_ext_msk}}(r0.r);{% else -%} r0.r;{% endif %}""" },
-    "load"                : { "format": "short", "code": 
-"""  return {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(({{ isa_dt_par.to_ptr }}*) p0);""" },
-    "store"               : { "format": "short", "code": 
-"""  return {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(({{ isa_dt_par.to_ptr }}*) p0, r0.r);""" },
-    "set0"                : { "format": "short", "code": 
-"""  return {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}();""" },
-    "set1"                : { "format": "short", "code": 
-"""  return {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(v0);""" },
-    "getfirst"            : { "format": "long",  "code":
-""" return {{ isa.prefix }}_{{ instr_name }}(%cast<tp,c:int|b:tp>%(r0).r);""" },    
+    "cast"                : { "format": "short", "code":"{% if isa_dt_par.data_ext_logi != isa_dt_ret.data_ext_logi -%}{{ isa.prefix }}_{{ instr_name }}{{isa_dt_par.data_ext_logi}}_{{isa_dt_ret.data_ext_logi}}(r0.r);{% else -%} r0.r;{% endif %}" },
+    "cast_k"              : { "format": "short", "code":"{% if isa_dt_par.data_ext_logi != isa_dt_ret.data_ext_logi -%}{{ isa.prefix }}_{{ instr_name }}{{isa_dt_par.data_ext_logi}}_{{ isa_dt_ret.data_ext_logi}}(m0.m);{% else -%} m0.m;{% endif %}"},
+    "toreg"               : { "format": "short", "code":"{% if isa_dt_par.data_ext_logi != isa_dt_ret.data_ext_logi -%}{{ isa.prefix }}_{{ instr_name }}{{isa_dt_par.data_ext_logi}}_{{isa_dt_ret.data_ext_logi}}(m0.m);{% else -%} m0.m;{% endif %}" },
+    "tomsk"               : { "format": "short", "code":"{% if isa_dt_par.data_ext_logi != isa_dt_ret.data_ext_logi -%}{{ isa.prefix }}_{{ instr_name }}{{isa_dt_par.data_ext_logi}}_{{isa_dt_ret.data_ext_logi}}(r0.r);{% else -%} r0.r;{% endif %}""" },
+    "load"                : { "format": "short", "code":"{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(({{ isa_dt_par.to_ptr }}*) p0);" },
+    "store"               : { "format": "short", "code":"{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(({{ isa_dt_par.to_ptr }}*) p0, r0.r);" },
+    "set0"                : { "format": "short", "code":"{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}();""" },
+    "set1"                : { "format": "short", "code":"{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(v0);"},
+    "getfirst"            : { "format": "long",  "code":"return ({{ isa.prefix }}_{{ instr_name }}(%cast<tp,c:int|b:tp>%(r0).r));""" },    
     "arith_1arg"          : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r);" },
     "arith_2args"         : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r);" },
     "logi_2args"          : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(r0.r, r1.r);" },
     "logi_m_2args"        : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}(m0.m, m1.m);" },
     "arith_3args"         : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, r2.r);" },
     "lshift"              : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, r2.r);" },
-    "andb_k"              : { "format": "long",  "code":
-"""{{ isa.prefix }}_{{ instr_name }}(m0.m, m1.m);""" }, 
+    "andb_k"              : { "format": "short",  "code":"{{ isa.prefix }}_{{ instr_name }}(m0.m, m1.m);" }, 
     "cmpeq_float"         : { "format": "long", "code":
 """ %r<tp>% tmp;
     tmp.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(r0.r, r1.r, _CMP_EQ_OQ);
@@ -71,11 +62,9 @@ tpl_implem_avx512 = {
 """ %r<tp>% tmp;
     tmp.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(r0.r, r1.r, _CMP_GE_OS);
     return %tomsk<tp>%(tmp);""" },    
-    "round"              : { "format": "long",  "code":
-""" return {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, 0, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);""" },
-    "roundf"             : { "format": "long",  "code":
-""" return {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC, _MM_EXPADJ_NONE);""" },
-    "blend"              : { "format": "short", "code": "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, %toreg<tp>%(m0).m);" },
+    "round"              : { "format": "short", "code":"{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, 0, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);" },
+    "roundf"             : { "format": "short",  "code":"{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC, _MM_EXPADJ_NONE);" },
+    "blend"              : { "format": "short", "code": "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, m0.m);" },
     "reduce_64"          : { "format": "long", "code":
 """ %r<c:float|b:32>% rsf; 
     rsf.r = _mm512_permutexvar_ps(%cast<tp,c:float|b:32>%(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8), %cast<tp,c:float|b:32>%(r0.r)));

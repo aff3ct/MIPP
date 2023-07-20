@@ -10,25 +10,25 @@ tpl_implem_emu512 = {
 	"set0-32" : { "format": "long", "code":
 """ return %set1<c:int|b:tp,tp>%(0); """
 	},
-	"set-64f"   : { "format": "short", "code": 
-"""	%cast_k<c:float,tp>%(_mm512_set_pd(vals[7], vals[6], vals[5], vals[4], vals[3], vals[2], vals[1], vals[0]));"""
+	"set-64f"   : { "format": "long", "code": 
+"""	return %cast_k<c:float,tp>%(_mm512_set_pd(vals[7], vals[6], vals[5], vals[4], vals[3], vals[2], vals[1], vals[0]));"""
     },
-    "set-32f"   : { "format": "short", "code": 
-"""	_mm512_set_ps(vals[15], vals[14], vals[13], vals[12],vals[11], vals[10], vals[ 9], vals[ 8],
+    "set-32f"   : { "format": "long", "code": 
+"""	return _mm512_set_ps(vals[15], vals[14], vals[13], vals[12],vals[11], vals[10], vals[ 9], vals[ 8],
 	                     vals[ 7], vals[ 6], vals[ 5], vals[ 4],vals[ 3], vals[ 2], vals[ 1], vals[ 0]);"""
     },
-    "set-64"   : { "format": "short", "code": 
-"""	%cast_k<c:float,tp>%(_mm512_set_epi64((vals[15], vals[14], vals[13], vals[12],
+    "set-64"   : { "format": "long", "code": 
+"""	return %cast_k<c:float,tp>%(_mm512_set_epi64((vals[15], vals[14], vals[13], vals[12],
 	                     					  	  vals[11], vals[10], vals[ 9], vals[ 8],
 	                     					  	  vals[ 7], vals[ 6], vals[ 5], vals[ 4],
 	                     					 	  vals[ 3], vals[ 2], vals[ 1], vals[ 0])));"""
 	},
-    "set-32"   : { "format": "short", "code": 
-""" rcast_k<c:float,tp>%(_mm512_castsi512_ps(_mm512_set_epi32(vals[15], vals[14], vals[13], vals[12], vals[11], vals[10], vals[ 9], vals[ 8],                                            					
+    "set-32"   : { "format": "long", "code": 
+""" retrun %cast_k<c:float,tp>%(_mm512_castsi512_ps(_mm512_set_epi32(vals[15], vals[14], vals[13], vals[12], vals[11], vals[10], vals[ 9], vals[ 8],                                            					
 																	 vals[ 7], vals[ 6], vals[ 5], vals[ 4],vals[ 3], vals[ 2], vals[ 1], vals[ 0])));"""
   	}, 
-  	"set-16"   : { "format": "short", "code": 
-""" %cast_k<c:float,tp>%(_mm512_castsi512_ps(_mm512_set_epi16((%cast<c:int|b:tp,tp>%)vals[31], (%cast<c:int|b:tp,tp>%)vals[30], (%cast<c:int|b:tp,tp>%)vals[29], (%cast<c:int|b:tp,tp>%)vals[28],
+  	"set-16"   : { "format": "long", "code": 
+""" retrun %cast_k<c:float,tp>%(_mm512_castsi512_ps(_mm512_set_epi16((%cast<c:int|b:tp,tp>%)vals[31], (%cast<c:int|b:tp,tp>%)vals[30], (%cast<c:int|b:tp,tp>%)vals[29], (%cast<c:int|b:tp,tp>%)vals[28],
 		                                            (%cast<c:int|b:tp,tp>%)vals[27], (%cast<c:int|b:tp,tp>%)vals[26], (%cast<c:int|b:tp,tp>%)vals[25], (%cast<c:int|b:tp,tp>%)vals[24],
 		                                            (%cast<c:int|b:tp,tp>%)vals[23], (%cast<c:int|b:tp,tp>%)vals[22], (%cast<c:int|b:tp,tp>%)vals[21], (%cast<c:int|b:tp,tp>%)vals[20],
 		                                            (%cast<c:int|b:tp,tp>%)vals[19], (%cast<c:int|b:tp,tp>%)vals[18], (%cast<c:int|b:tp,tp>%)vals[17], (%cast<c:int|b:tp,tp>%)vals[16],
@@ -37,8 +37,8 @@ tpl_implem_emu512 = {
 		                                            (%cast<c:int|b:tp,tp>%)vals[ 7], (%cast<c:int|b:tp,tp>%)vals[ 6], (%cast<c:int|b:tp,tp>%)vals[ 5], (%cast<c:int|b:tp,tp>%)vals[ 4],
 		                                            (%cast<c:int|b:tp,tp>%)vals[ 3], (%cast<c:int|b:tp,tp>%)vals[ 2], (%cast<c:int|b:tp,tp>%)vals[ 1], (%cast<c:int|b:tp,tp>%)vals[ 0]));"""
     },
-    "set-8"   : { "format": "short", "code": 
-""" %cast_k<c:float,tp>%(_mm512_castsi512_ps(_mm512_set_epi8((%cast<c:int|b:tp,tp>%)vals[63], (%cast<c:int|b:tp,tp>%)vals[62], (%cast<c:int|b:tp,tp>%)vals[61], (%cast<c:int|b:tp,tp>%)vals[60],
+    "set-8"   : { "format": "long", "code": 
+""" retrun %cast_k<c:float,tp>%(_mm512_castsi512_ps(_mm512_set_epi8((%cast<c:int|b:tp,tp>%)vals[63], (%cast<c:int|b:tp,tp>%)vals[62], (%cast<c:int|b:tp,tp>%)vals[61], (%cast<c:int|b:tp,tp>%)vals[60],
 		                                           (%cast<c:int|b:tp,tp>%)vals[59], (%cast<c:int|b:tp,tp>%)vals[58], (%cast<c:int|b:tp,tp>%)vals[57], (%cast<c:int|b:tp,tp>%)vals[56],
 		                                           (%cast<c:int|b:tp,tp>%)vals[55], (%cast<c:int|b:tp,tp>%)vals[54], (%cast<c:int|b:tp,tp>%)vals[53], (%cast<c:int|b:tp,tp>%)vals[52],
 		                                           (%cast<c:int|b:tp,tp>%)vals[51], (%cast<c:int|b:tp,tp>%)vals[50], (%cast<c:int|b:tp,tp>%)vals[49], (%cast<c:int|b:tp,tp>%)vals[48],
@@ -161,13 +161,13 @@ tpl_implem_emu512 = {
 	return _mm512_kxor(m, m);"""
 	 },	
 	"andb_fk"            : { "format": "long",  "code":
-""" return (m0.m & m1.m);""" }, 	                                           
+""" return (m0 & m1);""" }, 	                                           
     "andnb_fk"            : { "format": "long",  "code":
-""" return ((~m0.m) & m1.m);""" }, 
+""" return ((~m0) & m1);""" }, 
     "xorb_k"              : { "format": "long",  "code":
-""" return (m0.m ^ m1.m);""" }, 
+""" return (m0 ^ m1);""" }, 
     "orb_k"              : { "format": "long",  "code":
-""" return (m0.m | m1.m);""" }, 
+""" return (m0 | m1);""" }, 
 	"msb-64": { "format": "long", "code":
 """	%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%(0x8000000000000000));
 	return %andb<tp>%(r0, rm);"""

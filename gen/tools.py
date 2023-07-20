@@ -48,7 +48,6 @@ operators = {
     "sub"    : {"operation" : "-", "option"  : "-="},
     "mul"    : {"operation" : "*", "option"  : "*="},
     "div"    : {"operation" : "/", "option"  : "/="},
-    "notb"   : {"operation" : "~", "option"  : "~"},
     "xorb"   : {"operation" : "^", "option"  : "^="},
     "orb"    : {"operation" : "|", "option"  : "|="},
     "andb"   : {"operation" : "&", "option"  : "&="},
@@ -60,12 +59,12 @@ operators = {
     "cmpge"  : {"operation" : ">=", "option" : ">="},
 }
 operators_msk = {
-    "==" : "cmpeq",
-    "!=" : "cmpneq",
-    "<"  : "cmplt",
-    "<=" : "cmple",
-    ">"  : "cmpgt",
-    ">=" : "cmpge",
+    "cmpeq"  : {"operation" : "==", "option" : "=="},
+    "cmpneq" : {"operation" : "!=", "option" : "!="},
+    "cmplt"  : {"operation" : "<", "option"  : "<"},
+    "cmple"  : {"operation" : "<=", "option" : "<="},
+    "cmpgt"  : {"operation" : ">", "option"  : ">"},
+    "cmpge"  : {"operation" : ">=", "option" : ">="},
 }
 
 
@@ -375,25 +374,26 @@ def build_func_name_short(isa, dt, mipp_name, isa_name=True):
 	if isa_name:
 		return "mipp_" + isa["name"] + "_" + mipp_name + "_" +  param_type
 	else:
-		return  mipp_name + "_" +  param_type
+		return "mipp_" + mipp_name + "_" +  param_type
 
+
+"""
 def build_func_name_short_object(isa, dt, mipp_name, isa_name=True):
 	param_type = datatypes[dt]["category"]+ str(datatypes[dt]["n_bits"])
 	if isa_name:
 		return "mipp_" + isa["name"] + "_" + mipp_name + "_" +  param_type
 	else:
-		return  mipp_name 
+		return  mipp_name """
 
 def build_cpp_func_name_short(proto, dt_ret, mipp_name):
-	return_type = datatypes[dt_ret]["category"] + str(datatypes[dt_ret]["n_bits"])
 	if type_specialized(proto):
 		mipp_name = mipp_name.replace("_mz", "")
 		mipp_name = mipp_name.replace("_m", "")
 		mipp_name = mipp_name.replace("_k", "")
-		return mipp_name + "_" +return_type
+		return mipp_name
 	else:
 		return_type = datatypes[dt_ret]["category"] + str(datatypes[dt_ret]["n_bits"])
-		return mipp_name + "_" +return_type
+		return mipp_name + "_" + return_type
 
 
 # Build cast's functions build_func_name & build_cpp_func_name
@@ -405,24 +405,28 @@ def build_func_name(isa, dt_par, dt_ret, mipp_name, isa_name=True):
 	else:
 		return "mipp_" + mipp_name + "_" + param_type + "_" + return_type
 
-def build_func_name_object(isa, dt_par, dt_ret, mipp_name):
+
+def build_cpp_func_name(dt_ret, mipp_name):
+	mipp_name = mipp_name.replace("_mz", "")
+	mipp_name = mipp_name.replace("_m", "")
+	mipp_name = mipp_name.replace("_k", "")
+	return_type = datatypes[dt_ret]["category"] + str(datatypes[dt_ret]["n_bits"])
+	return mipp_name + "_" + return_type
+
+
+"""def build_func_name_object(isa, dt_par, dt_ret, mipp_name):
 	param_type = datatypes[dt_par]["category"] + str(datatypes[dt_par]["n_bits"])
 	return_type = datatypes[dt_ret]["category"] + str(datatypes[dt_ret]["n_bits"])
-	return  mipp_name 
+	return  mipp_name """
 
-def build_cpp_func_name(isa, dt_par, dt_ret, mipp_name):
+"""def build_cpp_func_name_object(isa, dt_par, dt_ret, mipp_name):
 
-	param_type = datatypes[dt_par]["category"] + str(datatypes[dt_par]["n_bits"])
+	mipp_name = mipp_name.replace("_mz", "")
+	mipp_name = mipp_name.replace("_m", "")
+	mipp_name = mipp_name.replace("_k", "")
 	return_type = datatypes[dt_ret]["category"] + str(datatypes[dt_ret]["n_bits"])
-	
-	return mipp_name + "_" + param_type + "_" + return_type
-def build_cpp_func_name_object(isa, dt_par, dt_ret, mipp_name):
+	return mipp_name + "_" + return_type"""
 
-	param_type = datatypes[dt_par]["category"] + str(datatypes[dt_par]["n_bits"])
-	return_type = datatypes[dt_ret]["category"] + str(datatypes[dt_ret]["n_bits"])
-	
-	return mipp_name 
-	
 
 def build_ifdef_rec(funcs, func_name, dt_key):
 	str_ifdef = ""
