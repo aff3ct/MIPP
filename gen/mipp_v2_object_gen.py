@@ -109,8 +109,7 @@ inline Rvm<T,LMUL>  operator{{operation}}(const Rvm<T,LMUL>& rvm) const 						{ 
 file = open("../include/mipp_operator_v2_gen.hpp", "w")
 
 tpl_header_cpp = """#ifndef MY_INTRINSICS_PLUS_PLUS_OBJECT_HPP_
-#define MY_INTRINSICS_PLUS_PLUS_OPERATORS_HPP_
-
+#define MY_INTRINSICS_PLUS_PLUS_OBJECT_HPP_
 
 namespace mipp
 {
