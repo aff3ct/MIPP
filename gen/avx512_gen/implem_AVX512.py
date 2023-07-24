@@ -4,7 +4,7 @@ isa_avx512 = {
     "name": "avx512",
     "prefix": "_mm512",
     "size": 512,
-    "define": '__AVX512__',
+    "define": '__AVX__',
     "hw_lmul": False,
     "datatypes": {
         float64 : { "data_ext" : "pd"    , "data_ext_logi": "pd"    , "data_ext_msk": "si512" , "reg" : "__m512d" , "msk" : "__mmask8"  , "to_ptr": "float64_t" , } ,
@@ -27,8 +27,10 @@ tpl_implem_avx512 = {
     "tomsk"               : { "format": "short", "code":"{% if isa_dt_par.data_ext_logi != isa_dt_ret.data_ext_logi -%}{{ isa.prefix }}_{{ instr_name }}{{isa_dt_par.data_ext_logi}}_{{isa_dt_ret.data_ext_logi}}(r0.r);{% else -%} r0.r;{% endif %}""" },
     "load"                : { "format": "short", "code":"{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(({{ isa_dt_par.to_ptr }}*) p0);" },
     "store"               : { "format": "short", "code":"{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(({{ isa_dt_par.to_ptr }}*) p0, r0.r);" },
-    "set0"                : { "format": "short", "code":"{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}();""" },
-    "set1"                : { "format": "short", "code":"{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(v0);"},
+    "set0"                : { "format": "short", "code":"{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}();"},
+    "set0_k"              : { "format": "short", "code":"{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_msk }}();" },
+    "set1"                : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(v0);"},
+    "set1x"               : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}x(v0);" },
     "getfirst"            : { "format": "long",  "code":"return ({{ isa.prefix }}_{{ instr_name }}(%cast<tp,c:int|b:tp>%(r0).r));""" },    
     "arith_1arg"          : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r);" },
     "arith_2args"         : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r);" },
@@ -180,9 +182,13 @@ implems_avx512 = {
         { "instr_name": "cvtsd_f64", "datatypes": [float64], "template": tpl_implem_avx512["getfirst"] },
         { "instr_name": "cvtss_f32", "datatypes": [float32], "template": tpl_implem_avx512["getfirst"]} ],
     "set1"   : [
-        { "instr_name" : "set1"    , "datatypes": all_datatypes    , "template": tpl_implem_avx512["set1"]   } ],
+        { "instr_name" : "set1"    , "datatypes": all_float    , "template": tpl_implem_avx512["set1"]   } ,
+        { "instr_name" : "set1"    , "datatypes": [int64],           "template": tpl_implem_avx512["set1x"] },
+        { "instr_name" : "set1"    , "datatypes": [int32, int16, int8], "template": tpl_implem_avx512["set1"] } ],
     "set0"   : [
         { "instr_name" : "setzero" , "datatypes": all_datatypes    , "template": tpl_implem_avx512["set0"]   } ],
+    "set0_k": [
+        { "instr_name": "setzero", "datatypes": all_datatypes, "template": tpl_implem_avx512["set0_k"] } ],
     "sqrt": [
         { "instr_name": "sqrt", "datatypes": all_float, "template": tpl_implem_avx512["arith_1arg"],} ],
     "rsqrt": [

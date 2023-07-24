@@ -19,7 +19,7 @@ typedef float float32_t;
 #endif
 
 
-#if defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)
+/*#if defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)
 const std::string InstructionType = "AVX512";
 	#define MIPP_AVX512
 
@@ -147,11 +147,11 @@ const std::string InstructionType = "AVX512";
 		return ext;
 	}
 #endif
-
+*/
 // ------------------------------------------------------------------------------------------------- includes files
 #include "mipp_v2_tools.h"
 #include "mipp_operator_v2_gen.hpp"
-#include "mipp_v2_func_gen.h"
+
 
 
 #ifndef MIPP_NO_INTRINSICS
@@ -163,8 +163,8 @@ const std::string InstructionType = "AVX512";
 // -------------------------------------------------------------------------------------------------------- X86 AVX-256
 // --------------------------------------------------------------------------------------------------------------------
 #elif defined(__AVX__)
-#include "avx/mipp_v2_impl_AVX_gen.h"
-#include "avx/mipp_v2_AVX_gen.hpp"
+//#include "avx/mipp_v2_impl_AVX_gen.h"
+//#include "avx/mipp_v2_AVX_gen.hpp"
 
 
 #endif

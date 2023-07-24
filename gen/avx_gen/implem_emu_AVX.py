@@ -30,7 +30,35 @@ tpl_implem_emu = {
 		                                           (int8_t)vals[ 7], (int8_t)vals[ 6], (int8_t)vals[ 5], (int8_t)vals[ 4],
 		                                           (int8_t)vals[ 3], (int8_t)vals[ 2], (int8_t)vals[ 1], (int8_t)vals[ 0]));"""
 	},
-	
+	"set_k-4": { "format": "long", "code":
+"""	retrun %cast_k<c:float,tp>%_mm256_set_epi64x(vals[3] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
+		                         vals[2] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
+		                         vals[1] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
+		                         vals[0] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0);"""
+    "set_k-8": { "format": "long", "code":
+"""	return  _mm256_set_epi32(vals[7] ? 0xFFFFFFFF : 0, vals[6] ? 0xFFFFFFFF : 0,
+		                        vals[5] ? 0xFFFFFFFF : 0, vals[4] ? 0xFFFFFFFF : 0,
+		                        vals[3] ? 0xFFFFFFFF : 0, vals[2] ? 0xFFFFFFFF : 0,
+		                        vals[1] ? 0xFFFFFFFF : 0, vals[0] ? 0xFFFFFFFF : 0);"""
+	"set_k-16": { "format": "long", "code":
+"""	return  _mm256_set_epi16(vals[15] ? 0xFFFF : 0, vals[14] ? 0xFFFF : 0,
+		                        vals[13] ? 0xFFFF : 0, vals[12] ? 0xFFFF : 0,
+		                        vals[11] ? 0xFFFF : 0, vals[10] ? 0xFFFF : 0,
+		                        vals[ 9] ? 0xFFFF : 0, vals[ 8] ? 0xFFFF : 0,
+		                        vals[ 7] ? 0xFFFF : 0, vals[ 6] ? 0xFFFF : 0,
+		                        vals[ 5] ? 0xFFFF : 0, vals[ 4] ? 0xFFFF : 0,
+		                        vals[ 3] ? 0xFFFF : 0, vals[ 2] ? 0xFFFF : 0,
+		                        vals[ 1] ? 0xFFFF : 0, vals[ 0] ? 0xFFFF : 0);"""
+	 
+    "set_k-32": { "format": "long", "code":	                        
+""" return _mm256_set_epi8(vals[31] ? 0xFF : 0, vals[30] ? 0xFF : 0, vals[29] ? 0xFF : 0, vals[28] ? 0xFF : 0,
+		                       vals[27] ? 0xFF : 0, vals[26] ? 0xFF : 0, vals[25] ? 0xFF : 0, vals[24] ? 0xFF : 0,
+		                       vals[23] ? 0xFF : 0, vals[22] ? 0xFF : 0, vals[21] ? 0xFF : 0, vals[20] ? 0xFF : 0,
+		                       vals[19] ? 0xFF : 0, vals[18] ? 0xFF : 0, vals[17] ? 0xFF : 0, vals[16] ? 0xFF : 0,
+		                       vals[15] ? 0xFF : 0, vals[14] ? 0xFF : 0, vals[13] ? 0xFF : 0, vals[12] ? 0xFF : 0,
+		                       vals[11] ? 0xFF : 0, vals[10] ? 0xFF : 0, vals[ 9] ? 0xFF : 0, vals[ 8] ? 0xFF : 0,
+		                       vals[ 7] ? 0xFF : 0, vals[ 6] ? 0xFF : 0, vals[ 5] ? 0xFF : 0, vals[ 4] ? 0xFF : 0,
+		                       vals[ 3] ? 0xFF : 0, vals[ 2] ? 0xFF : 0, vals[ 1] ? 0xFF : 0, vals[ 0] ? 0xFF : 0);"""                       
 	"blend-1": { "format": "long", "code":
 """	%r<c:float|b:tp>% r0f = %cast<tp,c:float|b:tp>%(r0);
 	%r<c:float|b:tp>% r1f = %cast<tp,c:float|b:tp>%(r1);
