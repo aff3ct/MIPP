@@ -1,6 +1,36 @@
 from tools import *
 
 tpl_implem_emu = {
+	"set-64f"   : { "format": "long", "code": 
+"""	return %cast_k<c:float,tp>%(_mm256_set_pd(vals[3], vals[2], vals[1], vals[0]));"""
+    },
+    "set-32f"   : { "format": "long", "code": 
+"""	return _mm256_set_ps(vals[7], vals[6], vals[5], vals[4], vals[3], vals[2], vals[1], vals[0]);"""
+    },
+    "set-64"   : { "format": "long", "code": 
+"""	return %cast_k<c:float,tp>%(_mm256_set_epi64x(vals[3], vals[2], vals[1], vals[0]));"""
+	},
+	"set-32"   : { "format": "long", "code": 
+"""	return %cast_k<c:float,tp>%(_mm256_set_epi32(vals[7], vals[6], vals[5], vals[4],
+												 vals[3], vals[2], vals[1], vals[0]));"""
+	},
+	"set-16"   : { "format": "long", "code": 
+"""	return %cast_k<c:float,tp>%(_mm256_set_epi16(vals[15], vals[14], vals[13], vals[12],
+		                                         vals[11], vals[10], vals[ 9], vals[ 8],
+		                                         vals[ 7], vals[ 6], vals[ 5], vals[ 4],
+		                                         vals[ 3], vals[ 2], vals[ 1], vals[ 0]));"""
+	},
+	"set-8"   : { "format": "long", "code": 
+""" retrun %cast_k<c:float,tp>%(_mm256_set_epi8((int8_t)vals[31], (int8_t)vals[30], (int8_t)vals[29], (int8_t)vals[28],
+		                                           (int8_t)vals[27], (int8_t)vals[26], (int8_t)vals[25], (int8_t)vals[24],
+		                                           (int8_t)vals[23], (int8_t)vals[22], (int8_t)vals[21], (int8_t)vals[20],
+		                                           (int8_t)vals[19], (int8_t)vals[18], (int8_t)vals[17], (int8_t)vals[16],
+		                                           (int8_t)vals[15], (int8_t)vals[14], (int8_t)vals[13], (int8_t)vals[12],
+		                                           (int8_t)vals[11], (int8_t)vals[10], (int8_t)vals[ 9], (int8_t)vals[ 8],
+		                                           (int8_t)vals[ 7], (int8_t)vals[ 6], (int8_t)vals[ 5], (int8_t)vals[ 4],
+		                                           (int8_t)vals[ 3], (int8_t)vals[ 2], (int8_t)vals[ 1], (int8_t)vals[ 0]));"""
+	},
+	
 	"blend-1": { "format": "long", "code":
 """	%r<c:float|b:tp>% r0f = %cast<tp,c:float|b:tp>%(r0);
 	%r<c:float|b:tp>% r1f = %cast<tp,c:float|b:tp>%(r1);
@@ -114,6 +144,15 @@ tpl_implem_emu = {
 }
 
 implems_emu = {
+	"set" :[
+		{ "datatypes": [float64] , "template": tpl_implem_emu512["set-64f"] , "if": "defined(__AVX512F__)"} ,
+		{ "datatypes": [float32] , "template": tpl_implem_emu512["set-32f"] , "if": "defined(__AVX512F__)"} ,
+		{ "datatypes": [int32] , "template": tpl_implem_emu512["set-32"] , "if": "defined(__AVX512F__)"} ,
+		{ "datatypes": [int64] , "template": tpl_implem_emu512["set-64"] , "if": "defined(__AVX512F__)"} ,
+		{ "datatypes": [int16] , "template": tpl_implem_emu512["set-16"] , "if": "defined(__AVX512BW__)"} ,
+		{ "datatypes": [int8] , "template": tpl_implem_emu512["set-8"] , "if": "defined(__AVX512BW__)"} ,
+
+		],
 	"blend": [
 		{ "datatypes": [int64, int32, uint64, uint32], "template": tpl_implem_emu["blend-1"]},
 		{ "datatypes": all_datatypes, "template": tpl_implem_emu["blend-2"]}, ],

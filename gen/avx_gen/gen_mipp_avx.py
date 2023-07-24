@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from jinja2 import Template, StrictUndefined
 import json
 import os

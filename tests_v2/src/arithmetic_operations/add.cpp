@@ -8,7 +8,21 @@
 
 template <typename T>
 void test_reg_add()
-{
+{   
+	const int vectorSize = mipp::N<T>();
+	T inputs1[vectorSize],inputs2[vectorSize];
+	std::iota(inputs1, inputs1 + mipp::N<T>(), (T)1);
+	std::iota(inputs2, inputs2 + mipp::N<T>(), (T)1);
+
+	std::mt19937 g;
+	std::shuffle(inputs1, inputs1 + vectorSize, g);
+	std::shuffle(inputs2, inputs2 + vectorSize, g);
+
+	mipp::rvd<T> r1 = mipp::load(inputs1);
+	mipp::rvd<T> r2 = mipp::load(inputs2);
+	mipp::rvd<T> r3 = mipp::add (r1, r2);
+
+
 	/*T inputs1[mipp::N<T>()], inputs2[mipp::N<T>()];
 	std::iota(inputs1, inputs1 + mipp::N<T>(), (T)1);
 	std::iota(inputs2, inputs2 + mipp::N<T>(), (T)1);
@@ -19,13 +33,13 @@ void test_reg_add()
 
 	mipp::reg r1 = mipp::load<T>(inputs1);
 	mipp::reg r2 = mipp::load<T>(inputs2);
-	mipp::reg r3 = mipp::add <T>(r1, r2);
+	mipp::reg r3 = mipp::add <T>(r1, r2);*/
 
-	for (auto i = 0; i < mipp::N<T>(); i++)
+	for (auto i = 0; i < vectorSize; i++)
 	{
 		T res = inputs1[i] + inputs2[i];
-		REQUIRE(mipp::get<T>(r3, i) == res);
-	}*/
+		REQUIRE(mipp::get(r3, i) == res);
+	}
 }
 
 #ifndef MIPP_NO
@@ -52,6 +66,23 @@ TEST_CASE("Addition - mipp::reg", "[mipp::add]")
 template <typename T>
 void test_Reg_add()
 {
+
+	const int vectorSize = mipp::N<T>();
+	T inputs1[vectorSize],inputs2[vectorSize];
+	std::iota(inputs1, inputs1 + vectorSize, (T)1);
+	std::iota(inputs2, inputs2 + vectorSize, (T)1);
+
+	std::mt19937 g;
+	std::shuffle(inputs1, inputs1 + vectorSize, g);
+	std::shuffle(inputs2, inputs2 + vectorSize, g);
+
+ 
+	mipp::Rvd<T> r1 = mipp::load(inputs1);
+	mipp::Rvd<T> r2 = mipp::load(inputs2);
+	mipp::Rvd<T> r3 = r1 + r2;
+	
+
+
 	/*T inputs1[mipp::N<T>()], inputs2[mipp::N<T>()];
 	std::iota(inputs1, inputs1 + mipp::N<T>(), (T)1);
 	std::iota(inputs2, inputs2 + mipp::N<T>(), (T)1);
@@ -62,13 +93,13 @@ void test_Reg_add()
 
 	mipp::Reg<T> r1 = inputs1;
 	mipp::Reg<T> r2 = inputs2;
-	mipp::Reg<T> r3 = r1 + r2;
+	mipp::Reg<T> r3 = r1 + r2;*/
 
-	for (auto i = 0; i < mipp::N<T>(); i++)
+	for (auto i = 0; i < vectorSize; i++)
 	{
 		T res = inputs1[i] + inputs2[i];
 		REQUIRE(r3[i] == res);
-	}*/
+	}
 }
 
 TEST_CASE("Addition - mipp::Reg", "[mipp::add]")
@@ -93,35 +124,37 @@ TEST_CASE("Addition - mipp::Reg", "[mipp::add]")
 template <typename T>
 void test_reg_maskz_add()
 {
-	/*constexpr int N = mipp::N<T>();
-	T inputs1[N], inputs2[N];
-	std::iota(inputs1, inputs1 + mipp::N<T>(), (T)1);
-	std::iota(inputs2, inputs2 + mipp::N<T>(), (T)1);
+	/*const int vectorSize = mipp::N<T>();
 
-	bool mask[N];
-	std::fill(mask,       mask + N/2, true );
-	std::fill(mask + N/2, mask + N,   false);
+	T inputs1[vectorSize],inputs2[vectorSize];
+	std::iota(inputs1, inputs1 + vectorSize, (T)1);
+	std::iota(inputs2, inputs2 + vectorSize, (T)1);
+
+
+	bool mask[vectorSize];
+	std::fill(mask,       mask + vectorSize/2, true );
+	std::fill(mask + vectorSize/2, mask + vectorSize,   false);
 
 	std::mt19937 g;
-	std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
-	std::shuffle(inputs2, inputs2 + mipp::N<T>(), g);
-	std::shuffle(mask,    mask    + mipp::N<T>(), g);
+	std::shuffle(inputs1, inputs1 + vectorSize, g);
+	std::shuffle(inputs2, inputs2 + vectorSize, g);
+	std::shuffle(mask,    mask    + vectorSize, g);
 
-	mipp::reg r1 = mipp::load<T>(inputs1);
-	mipp::reg r2 = mipp::load<T>(inputs2);
-	mipp::msk m  = mipp::set <N>(mask   );
+	mipp::rvd<T> r1 = mipp::load(inputs1);
+	mipp::rvd<T> r2 = mipp::load(inputs2);
+	mipp::rvm<T> m  = mipp::set (mask   );
 
-	mipp::reg r3 = mipp::maskz<T,mipp::add<T>>(m, r1, r2);
+	mipp::rvd<T> r3 = mipp::maskz(m, r1, r2);
 
-	for (auto i = 0; i < mipp::N<T>(); i++)
+	for (auto i = 0; i < vectorSize; i++)
 	{
 		if (mask[i])
 		{
 			T res = inputs1[i] + inputs2[i];
-			REQUIRE(mipp::get<T>(r3, i) == res);
+			REQUIRE(mipp::get(r3, i) == res);
 		}
 		else
-			REQUIRE(mipp::get<T>(r3, i) == (T)0);
+			REQUIRE(mipp::get(r3, i) == (T)0);
 	}*/
 }
 
