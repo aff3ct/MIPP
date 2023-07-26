@@ -25,12 +25,7 @@ inline Rvd<T,LMUL>	operator{{operation}}     (const Rvd<T,LMUL> rvd) const 					
 		print(j2_template.render(option=operators[op]["option"],op=op, operation=operators[op]["operation"]), file=file)
 
 	tpl_MIPP_NO_INTRINSICS="""
-
-#ifndef MIPP_NO_INTRINSICS
-	inline T operator[](const size_t index) const { return mipp::get(this->r, index); }
-#else
-	inline T operator[](const size_t index) const { return r; }
-#endif
+inline T operator[](const size_t index) const { return mipp::get(this->r, index); }
 };"""
 	j3_template = Template(tpl_MIPP_NO_INTRINSICS, undefined=StrictUndefined)
 	print(j3_template.render(), file=file)
@@ -67,12 +62,7 @@ inline Rvm<T,LMUL>  operator{{operation}}(const Rvm<T,LMUL>  rvm) const 						{ 
 		print(j4_template.render(option=operators[op]["option"],op=op, operation=operators[op]["operation"]), file=file)
 
 	tpl_MIPP_NO_INTRINSICS="""
-
-#ifndef MIPP_NO_INTRINSICS
 	inline T operator[](const size_t index) const { return mipp::get(this->m, index); }
-#else
-	inline T operator[](const size_t index) const { return m; }
-#endif
 };"""
 	j5_template = Template(tpl_MIPP_NO_INTRINSICS, undefined=StrictUndefined)
 	print(j5_template.render(), file=file)

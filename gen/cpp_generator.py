@@ -35,7 +35,7 @@ def gen_cpp_constexpr_functions(isa,file):
 	print("template<typename T, int LMUL=1> constexpr uint32_t N(){ return 0; }", file=file)
 
 
-	template = """template<> constexpr uint32_t N<{{ datatype.cstd }}, {{ lmul }}>(){ return MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{ datatype.n_bits }}; }"""
+	template = """template<> constexpr uint32_t N<{{ datatype.cstd }}, {{ lmul }}>(){ return MIPP_N_{{type_category_upper}}{{ datatype.n_bits }}; }"""
 	j2_template = Template(template, undefined=StrictUndefined)
 
 	for lmul in [1]:
@@ -71,5 +71,5 @@ def gen_cpp_functions(isa,file, funcs):
 				
 			for lmul in [1]:
 				print(build_proto(funcs[f]["proto"], dt_par, dt_ret, {}, cpp_func_name, lmul, False, True) + " {", file=file)
-				print("\t"+build_call(funcs[f]["proto"], dt_par, dt_ret, {}, c_func_name, lmul, False)+";", file=file)
+				print("\t"+build_call(funcs[f]["proto"], dt_par, dt_ret,isa, c_func_name, lmul, True)+";", file=file)
 				print("}", file=file)

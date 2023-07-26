@@ -154,15 +154,16 @@ def build_ptr(datatype, isa, lmul=0):
 	return datatype["category"] + str(datatype["n_bits"]) + "_t*"
 
 def build_N(datatype, isa, lmul=0, isa_name=True):
-	str_N = "MIPP_"
+	"""	str_N = "MIPP_"
 	if isa_name:
-		str_N += isa["name"].upper() + "_"
-	str_N += "N_" + datatype["category"].upper() + str(datatype["n_bits"]).upper()
+		str_N += isa["name"].upper() + "_"""
+	str_N = "MIPP_N_" + datatype["category"].upper() + str(datatype["n_bits"]).upper()
 	if lmul:
 		str_N += "_M" + str(int(lmul))
 	return str_N
 
-def build_type(type, datatype, isa, lmul=0, isa_name=True, cpp=False):
+
+def build_type(type, datatype, isa,lmul=0, isa_name=True, cpp=False):
 	if type:
 		if type == "reg":
 			return build_reg(datatype, isa, lmul, isa_name, cpp)
@@ -172,6 +173,8 @@ def build_type(type, datatype, isa, lmul=0, isa_name=True, cpp=False):
 			return build_val(datatype, isa)
 		elif type == "ptr":
 			return build_ptr(datatype, isa)
+		elif type == "Nele":
+			return datatype["cstd"]
 	else:
 		return "void"
 # for object layer
@@ -184,7 +187,7 @@ def build_class_type(type, datatype, isa, lmul=0, isa_name=True, cpp=False):
 		elif type == "val":
 			return build_val(datatype, isa)
 		elif type == "ptr":
-			return build_ptr(datatype, isa)
+			return build_ptr(datatype, isa,{},isa_name)
 	else:
 		return "void"
 def lmul_specialized(proto):
@@ -234,6 +237,8 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
 		elif arg["type"] == "ptr":
 			p += " p" + str(cnt_ptr)
 			cnt_ptr = cnt_ptr +1
+		elif arg["type"] == "Nele":
+			p += " vals["+build_N(datatypes[dt_par],{},{},False)+"]"
 		is_first = False
 
 	return p + ")";
@@ -310,6 +315,8 @@ def build_call(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True):
 		elif arg["type"] == "ptr":
 			p += "p" + str(cnt_ptr)
 			cnt_ptr = cnt_ptr +1
+		elif arg["type"] == "Nele":
+			p += " vals"
 		is_first = False
 	return p + ")";
 
@@ -377,14 +384,6 @@ def build_func_name_short(isa, dt, mipp_name, isa_name=True):
 		return "mipp_" + mipp_name + "_" +  param_type
 
 
-"""
-def build_func_name_short_object(isa, dt, mipp_name, isa_name=True):
-	param_type = datatypes[dt]["category"]+ str(datatypes[dt]["n_bits"])
-	if isa_name:
-		return "mipp_" + isa["name"] + "_" + mipp_name + "_" +  param_type
-	else:
-		return  mipp_name """
-
 def build_cpp_func_name_short(proto, dt_ret, mipp_name):
 	if type_specialized(proto):
 		mipp_name = mipp_name.replace("_mz", "")
@@ -413,19 +412,6 @@ def build_cpp_func_name(dt_ret, mipp_name):
 	return_type = datatypes[dt_ret]["category"] + str(datatypes[dt_ret]["n_bits"])
 	return mipp_name + "_" + return_type
 
-
-"""def build_func_name_object(isa, dt_par, dt_ret, mipp_name):
-	param_type = datatypes[dt_par]["category"] + str(datatypes[dt_par]["n_bits"])
-	return_type = datatypes[dt_ret]["category"] + str(datatypes[dt_ret]["n_bits"])
-	return  mipp_name """
-
-"""def build_cpp_func_name_object(isa, dt_par, dt_ret, mipp_name):
-
-	mipp_name = mipp_name.replace("_mz", "")
-	mipp_name = mipp_name.replace("_m", "")
-	mipp_name = mipp_name.replace("_k", "")
-	return_type = datatypes[dt_ret]["category"] + str(datatypes[dt_ret]["n_bits"])
-	return mipp_name + "_" + return_type"""
 
 
 def build_ifdef_rec(funcs, func_name, dt_key):

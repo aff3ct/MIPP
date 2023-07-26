@@ -23,6 +23,27 @@ protos = {
 			{"type": "val", "charac": "RO", "fixeddatatype": False}
 		]
 	},
+	"ret_reg_1arg_Nele": {
+		"ret" :
+			{"type": "reg", "charac": "WO", "fixeddatatype": False},
+		"args" : [
+			{"type": "Nele", "charac": "RO", "fixeddatatype": False}
+		]
+	},
+	"ret_msk_1arg_Nele": {
+		"ret" :
+			{"type": "msk", "charac": "WO", "fixeddatatype": False},
+		"args" : [
+			{"type": "Nele", "charac": "RO", "fixeddatatype": int32}
+		]
+	},
+	"ret_reg_1arg_i32": {
+		"ret" :
+			{"type": "reg", "charac": "WO", "fixeddatatype": False},
+		"args" : [
+			{"type": "val", "charac": "RO", "fixeddatatype": int32}
+		]
+	},
 	"ret_msk_1arg_val": {
 		"ret" :
 			{"type": "msk", "charac": "WO", "fixeddatatype": False},
@@ -202,6 +223,8 @@ mipp_funcs = {
 	"loadu":   { "proto": protos["ret_reg_1arg_ptr"            ], "datatypes": all_datatypes          , "horizontal": False },
 	"store":   { "proto": protos["ret_void_2args_ptr_reg"      ], "datatypes": all_datatypes          , "horizontal": False },
 	"storeu":  { "proto": protos["ret_void_2args_ptr_reg"      ], "datatypes": all_datatypes          , "horizontal": False },
+	"set" :    { "proto": protos["ret_reg_1arg_Nele"           ], "datatypes": all_datatypes          , "horizontal": True },
+	"set_k" :  { "proto": protos["ret_msk_1arg_Nele"            ], "datatypes": all_datatypes          , "horizontal": False },	
 	"set1":    { "proto": protos["ret_reg_1arg_val"            ], "datatypes": all_datatypes          , "horizontal": False },
 	"set0":    { "proto": protos["ret_reg_0arg"                ], "datatypes": all_datatypes          , "horizontal": False },
 	"set0_k":  { "proto": protos["ret_msk_0arg"                ], "datatypes": all_datatypes          , "horizontal": False },

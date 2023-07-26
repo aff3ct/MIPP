@@ -14,8 +14,6 @@ public:
 
 	Rvd() {}
 	Rvd(rvd<T, LMUL>  r) : r(r) {}
-
-
 inline Rvd<T,LMUL>	notb	(const Rvd<T,LMUL> rvd)								const{ return mipp::notb(r, rvd.r);}
 inline Rvd<T,LMUL>	operator~() const 					                            { return this->notb();}
 
@@ -72,12 +70,7 @@ inline Rvd<T,LMUL>	cmpge	          (const Rvd<T,LMUL> rvd)								   const{ retu
 inline Rvd<T,LMUL>&	operator>=    (const Rvd<T,LMUL>& rvd) 									{  r = this->cmpge(rvd).r; return *this; }
 inline Rvd<T,LMUL>	operator>=     (const Rvd<T,LMUL> rvd) const 							{ return this->cmpge(rvd);}
 
-
-#ifndef MIPP_NO_INTRINSICS
-	inline T operator[](const size_t index) const { return mipp::get(this->r, index); }
-#else
-	inline T operator[](const size_t index) const { return r; }
-#endif
+inline T operator[](const size_t index) const { return mipp::get(this->r, index); }
 };
 // ------------------------------------------------------------------------------------------------------ operators (Msk) 
 template <typename T, int LMUL = 1>
@@ -116,12 +109,7 @@ inline Rvm<T,LMUL>  cmpge(const Rvm<T,LMUL>  rvm)             						const{ retur
 inline Rvm<T,LMUL>& operator>=(const Rvm<T,LMUL>& rvm) 								{ m = this->cmpge(rvm).m; return *this; }
 inline Rvm<T,LMUL>  operator>=(const Rvm<T,LMUL>  rvm) const 						{ return this->cmpge(rvm);}
 
-
-#ifndef MIPP_NO_INTRINSICS
 	inline T operator[](const size_t index) const { return mipp::get(this->m, index); }
-#else
-	inline T operator[](const size_t index) const { return m; }
-#endif
 };
 }
 

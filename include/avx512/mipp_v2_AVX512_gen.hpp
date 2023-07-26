@@ -31,16 +31,16 @@ template<> struct rvm_type<uint8_t, 1>{ using type = rvm_avx512_uint8_t; };
 template <typename T, int LMUL=1> using rvm = typename rvm_type<T,LMUL>::type;
 // should throw an exception
 template<typename T, int LMUL=1> constexpr uint32_t N(){ return 0; }
-template<> constexpr uint32_t N<float64_t, 1>(){ return MIPP_AVX512_N_FLOAT64; }
-template<> constexpr uint32_t N<float32_t, 1>(){ return MIPP_AVX512_N_FLOAT32; }
-template<> constexpr uint32_t N<int64_t, 1>(){ return MIPP_AVX512_N_INT64; }
-template<> constexpr uint32_t N<int32_t, 1>(){ return MIPP_AVX512_N_INT32; }
-template<> constexpr uint32_t N<int16_t, 1>(){ return MIPP_AVX512_N_INT16; }
-template<> constexpr uint32_t N<int8_t, 1>(){ return MIPP_AVX512_N_INT8; }
-template<> constexpr uint32_t N<uint64_t, 1>(){ return MIPP_AVX512_N_UINT64; }
-template<> constexpr uint32_t N<uint32_t, 1>(){ return MIPP_AVX512_N_UINT32; }
-template<> constexpr uint32_t N<uint16_t, 1>(){ return MIPP_AVX512_N_UINT16; }
-template<> constexpr uint32_t N<uint8_t, 1>(){ return MIPP_AVX512_N_UINT8; }
+template<> constexpr uint32_t N<float64_t, 1>(){ return MIPP_N_FLOAT64; }
+template<> constexpr uint32_t N<float32_t, 1>(){ return MIPP_N_FLOAT32; }
+template<> constexpr uint32_t N<int64_t, 1>(){ return MIPP_N_INT64; }
+template<> constexpr uint32_t N<int32_t, 1>(){ return MIPP_N_INT32; }
+template<> constexpr uint32_t N<int16_t, 1>(){ return MIPP_N_INT16; }
+template<> constexpr uint32_t N<int8_t, 1>(){ return MIPP_N_INT8; }
+template<> constexpr uint32_t N<uint64_t, 1>(){ return MIPP_N_UINT64; }
+template<> constexpr uint32_t N<uint32_t, 1>(){ return MIPP_N_UINT32; }
+template<> constexpr uint32_t N<uint16_t, 1>(){ return MIPP_N_UINT16; }
+template<> constexpr uint32_t N<uint8_t, 1>(){ return MIPP_N_UINT8; }
 rvd<float64_t,1> cast_float64(const rvd<float64_t,1> r0) {
 	return mipp_avx512_cast_float64_float64(r0);
 }

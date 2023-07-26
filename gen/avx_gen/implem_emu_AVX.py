@@ -1,47 +1,49 @@
 from tools import *
 
 tpl_implem_emu = {
-	"set-64f"   : { "format": "long", "code": 
-"""	return %cast_k<c:float,tp>%(_mm256_set_pd(vals[3], vals[2], vals[1], vals[0]));"""
+	"set-64f"   : { "format": "short", "code": 
+"""	_mm256_set_pd(vals[3], vals[2], vals[1], vals[0]);"""
     },
-    "set-32f"   : { "format": "long", "code": 
-"""	return _mm256_set_ps(vals[7], vals[6], vals[5], vals[4], vals[3], vals[2], vals[1], vals[0]);"""
+    "set-32f"   : { "format": "short", "code": 
+"""	_mm256_set_ps(vals[7], vals[6], vals[5], vals[4], vals[3], vals[2], vals[1], vals[0]);"""
     },
-    "set-64"   : { "format": "long", "code": 
-"""	return %cast_k<c:float,tp>%(_mm256_set_epi64x(vals[3], vals[2], vals[1], vals[0]));"""
+    "set-64"   : { "format": "short", "code": 
+"""	_mm256_set_epi64x(vals[3], vals[2], vals[1], vals[0]);"""
 	},
-	"set-32"   : { "format": "long", "code": 
-"""	return %cast_k<c:float,tp>%(_mm256_set_epi32(vals[7], vals[6], vals[5], vals[4],
-												 vals[3], vals[2], vals[1], vals[0]));"""
+	"set-32"   : { "format": "short", "code": 
+"""	_mm256_set_epi32(vals[7], vals[6], vals[5], vals[4],
+												 vals[3], vals[2], vals[1], vals[0]);"""
 	},
-	"set-16"   : { "format": "long", "code": 
-"""	return %cast_k<c:float,tp>%(_mm256_set_epi16(vals[15], vals[14], vals[13], vals[12],
+	"set-16"   : { "format": "short", "code": 
+"""	_mm256_set_epi16(vals[15], vals[14], vals[13], vals[12],
 		                                         vals[11], vals[10], vals[ 9], vals[ 8],
 		                                         vals[ 7], vals[ 6], vals[ 5], vals[ 4],
-		                                         vals[ 3], vals[ 2], vals[ 1], vals[ 0]));"""
+		                                         vals[ 3], vals[ 2], vals[ 1], vals[ 0]);"""
 	},
-	"set-8"   : { "format": "long", "code": 
-""" retrun %cast_k<c:float,tp>%(_mm256_set_epi8((int8_t)vals[31], (int8_t)vals[30], (int8_t)vals[29], (int8_t)vals[28],
+	"set-8"   : { "format": "short", "code": 
+""" _mm256_set_epi8((int8_t)vals[31], (int8_t)vals[30], (int8_t)vals[29], (int8_t)vals[28],
 		                                           (int8_t)vals[27], (int8_t)vals[26], (int8_t)vals[25], (int8_t)vals[24],
 		                                           (int8_t)vals[23], (int8_t)vals[22], (int8_t)vals[21], (int8_t)vals[20],
 		                                           (int8_t)vals[19], (int8_t)vals[18], (int8_t)vals[17], (int8_t)vals[16],
 		                                           (int8_t)vals[15], (int8_t)vals[14], (int8_t)vals[13], (int8_t)vals[12],
 		                                           (int8_t)vals[11], (int8_t)vals[10], (int8_t)vals[ 9], (int8_t)vals[ 8],
 		                                           (int8_t)vals[ 7], (int8_t)vals[ 6], (int8_t)vals[ 5], (int8_t)vals[ 4],
-		                                           (int8_t)vals[ 3], (int8_t)vals[ 2], (int8_t)vals[ 1], (int8_t)vals[ 0]));"""
+		                                           (int8_t)vals[ 3], (int8_t)vals[ 2], (int8_t)vals[ 1], (int8_t)vals[ 0]);"""
 	},
-	"set_k-4": { "format": "long", "code":
-"""	retrun %cast_k<c:float,tp>%_mm256_set_epi64x(vals[3] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
-		                         vals[2] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
-		                         vals[1] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
-		                         vals[0] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0);"""
-    "set_k-8": { "format": "long", "code":
-"""	return  _mm256_set_epi32(vals[7] ? 0xFFFFFFFF : 0, vals[6] ? 0xFFFFFFFF : 0,
+	"set_k-64": { "format": "short", "code":
+"""	_mm256_set_epi64x(vals[3] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
+		                     vals[2] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
+		                     vals[1] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
+		                     vals[0] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0);"""
+    },
+    "set_k-32": { "format": "short", "code": 
+"""	_mm256_set_epi32(vals[7] ? 0xFFFFFFFF : 0, vals[6] ? 0xFFFFFFFF : 0,
 		                        vals[5] ? 0xFFFFFFFF : 0, vals[4] ? 0xFFFFFFFF : 0,
 		                        vals[3] ? 0xFFFFFFFF : 0, vals[2] ? 0xFFFFFFFF : 0,
 		                        vals[1] ? 0xFFFFFFFF : 0, vals[0] ? 0xFFFFFFFF : 0);"""
-	"set_k-16": { "format": "long", "code":
-"""	return  _mm256_set_epi16(vals[15] ? 0xFFFF : 0, vals[14] ? 0xFFFF : 0,
+	},
+	"set_k-16": { "format": "short", "code":
+"""	_mm256_set_epi16(vals[15] ? 0xFFFF : 0, vals[14] ? 0xFFFF : 0,
 		                        vals[13] ? 0xFFFF : 0, vals[12] ? 0xFFFF : 0,
 		                        vals[11] ? 0xFFFF : 0, vals[10] ? 0xFFFF : 0,
 		                        vals[ 9] ? 0xFFFF : 0, vals[ 8] ? 0xFFFF : 0,
@@ -49,9 +51,9 @@ tpl_implem_emu = {
 		                        vals[ 5] ? 0xFFFF : 0, vals[ 4] ? 0xFFFF : 0,
 		                        vals[ 3] ? 0xFFFF : 0, vals[ 2] ? 0xFFFF : 0,
 		                        vals[ 1] ? 0xFFFF : 0, vals[ 0] ? 0xFFFF : 0);"""
-	 
-    "set_k-32": { "format": "long", "code":	                        
-""" return _mm256_set_epi8(vals[31] ? 0xFF : 0, vals[30] ? 0xFF : 0, vals[29] ? 0xFF : 0, vals[28] ? 0xFF : 0,
+	}, 
+    "set_k-8": { "format": "short", "code":	                        
+""" _mm256_set_epi8(vals[31] ? 0xFF : 0, vals[30] ? 0xFF : 0, vals[29] ? 0xFF : 0, vals[28] ? 0xFF : 0,
 		                       vals[27] ? 0xFF : 0, vals[26] ? 0xFF : 0, vals[25] ? 0xFF : 0, vals[24] ? 0xFF : 0,
 		                       vals[23] ? 0xFF : 0, vals[22] ? 0xFF : 0, vals[21] ? 0xFF : 0, vals[20] ? 0xFF : 0,
 		                       vals[19] ? 0xFF : 0, vals[18] ? 0xFF : 0, vals[17] ? 0xFF : 0, vals[16] ? 0xFF : 0,
@@ -59,6 +61,7 @@ tpl_implem_emu = {
 		                       vals[11] ? 0xFF : 0, vals[10] ? 0xFF : 0, vals[ 9] ? 0xFF : 0, vals[ 8] ? 0xFF : 0,
 		                       vals[ 7] ? 0xFF : 0, vals[ 6] ? 0xFF : 0, vals[ 5] ? 0xFF : 0, vals[ 4] ? 0xFF : 0,
 		                       vals[ 3] ? 0xFF : 0, vals[ 2] ? 0xFF : 0, vals[ 1] ? 0xFF : 0, vals[ 0] ? 0xFF : 0);"""                       
+	},
 	"blend-1": { "format": "long", "code":
 """	%r<c:float|b:tp>% r0f = %cast<tp,c:float|b:tp>%(r0);
 	%r<c:float|b:tp>% r1f = %cast<tp,c:float|b:tp>%(r1);
@@ -173,14 +176,17 @@ tpl_implem_emu = {
 
 implems_emu = {
 	"set" :[
-		{ "datatypes": [float64] , "template": tpl_implem_emu512["set-64f"] , "if": "defined(__AVX512F__)"} ,
-		{ "datatypes": [float32] , "template": tpl_implem_emu512["set-32f"] , "if": "defined(__AVX512F__)"} ,
-		{ "datatypes": [int32] , "template": tpl_implem_emu512["set-32"] , "if": "defined(__AVX512F__)"} ,
-		{ "datatypes": [int64] , "template": tpl_implem_emu512["set-64"] , "if": "defined(__AVX512F__)"} ,
-		{ "datatypes": [int16] , "template": tpl_implem_emu512["set-16"] , "if": "defined(__AVX512BW__)"} ,
-		{ "datatypes": [int8] , "template": tpl_implem_emu512["set-8"] , "if": "defined(__AVX512BW__)"} ,
-
-		],
+		{ "datatypes": [float64] , "template": tpl_implem_emu["set-64f"] } ,
+		{ "datatypes": [float32] , "template": tpl_implem_emu["set-32f"] } ,
+		{ "datatypes": [int32] , "template": tpl_implem_emu["set-32"] } ,
+		{ "datatypes": [int64] , "template": tpl_implem_emu["set-64"] } ,
+		{ "datatypes": [int16] , "template": tpl_implem_emu["set-16"] ,} ,
+		{ "datatypes": [int8] , "template": tpl_implem_emu["set-8"] ,} ,],
+	"set_k" : [
+		{ "datatypes": [int8] , "template": tpl_implem_emu["set_k-8"] } ,
+		{ "datatypes": [int16]  , "template": tpl_implem_emu["set_k-16"] } ,
+		{ "datatypes": [int32] , "template": tpl_implem_emu["set_k-32"] ,} ,
+		{ "datatypes": [int64] , "template": tpl_implem_emu["set_k-64"] ,} ,],
 	"blend": [
 		{ "datatypes": [int64, int32, uint64, uint32], "template": tpl_implem_emu["blend-1"]},
 		{ "datatypes": all_datatypes, "template": tpl_implem_emu["blend-2"]}, ],
