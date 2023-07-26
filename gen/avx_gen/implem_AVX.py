@@ -31,6 +31,8 @@ tpl_implem_avx = {
 	"set0_k":       { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_msk }}();" },
 	"set1":         { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(v0);"},
 	"set1x":        { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}x(v0);" },
+	"maskzld":		{ "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(p0,m0.m);"},
+	"maskst":		{ "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(p0,m0.m, r0.r);"},
 	"getfirst":     { "format": "long",  "code":"return ({{ cstdint_ret }}) {{ isa.prefix }}_{{ instr_name }}_epi{{ dt_par.n_bits }}(%cast<tp,c:int|b:tp>%(r0).r, 0);" },
 	"arith_1arg":   { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r);" },
 	"arith_2args":  { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r);" },
@@ -170,6 +172,12 @@ implems_avx = {
 		{ "instr_name": "set1", "datatypes": all_float, "template": tpl_implem_avx["set1"] },
 		{ "instr_name": "set1", "datatypes": [int64], "template": tpl_implem_avx["set1x"] },
 		{ "instr_name": "set1", "datatypes": [int32, int16, int8], "template": tpl_implem_avx["set1"] } ],
+	"maskzld":[
+	    { "instr_name": "maskload", "datatypes": all_float, "template": tpl_implem_avx["maskzld"] },
+		{ "instr_name": "maskload", "datatypes": [int32], "template": tpl_implem_avx["maskzld"],"if": "defined(__AVX2__)" } ],
+	"maskst":[
+	    { "instr_name": "maskstore", "datatypes": all_float, "template": tpl_implem_avx["maskst"] },
+		{ "instr_name": "maskstore", "datatypes": [int32], "template": tpl_implem_avx["maskst"],"if": "defined(__AVX2__)" } ],
 	"set0": [
 		{ "instr_name": "setzero", "datatypes": all_datatypes, "template": tpl_implem_avx["set0"] } ],
 	"set0_k": [

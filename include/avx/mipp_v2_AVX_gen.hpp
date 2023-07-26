@@ -912,6 +912,66 @@ rvd<uint16_t,1> set1(const uint16_t v0) {
 rvd<uint8_t,1> set1(const uint8_t v0) {
 	return mipp_avx_set1_uint8(v0);
 }
+rvd<float64_t,1> maskzld(const rvm<int32_t,1> m0, const float64_t* p0) {
+	return mipp_avx_maskzld_float64(m0, p0);
+}
+rvd<float32_t,1> maskzld(const rvm<int32_t,1> m0, const float32_t* p0) {
+	return mipp_avx_maskzld_float32(m0, p0);
+}
+rvd<int64_t,1> maskzld(const rvm<int32_t,1> m0, const int64_t* p0) {
+	return mipp_avx_maskzld_int64(m0, p0);
+}
+rvd<int32_t,1> maskzld(const rvm<int32_t,1> m0, const int32_t* p0) {
+	return mipp_avx_maskzld_int32(m0, p0);
+}
+rvd<int16_t,1> maskzld(const rvm<int32_t,1> m0, const int16_t* p0) {
+	return mipp_avx_maskzld_int16(m0, p0);
+}
+rvd<int8_t,1> maskzld(const rvm<int32_t,1> m0, const int8_t* p0) {
+	return mipp_avx_maskzld_int8(m0, p0);
+}
+rvd<uint64_t,1> maskzld(const rvm<int32_t,1> m0, const uint64_t* p0) {
+	return mipp_avx_maskzld_uint64(m0, p0);
+}
+rvd<uint32_t,1> maskzld(const rvm<int32_t,1> m0, const uint32_t* p0) {
+	return mipp_avx_maskzld_uint32(m0, p0);
+}
+rvd<uint16_t,1> maskzld(const rvm<int32_t,1> m0, const uint16_t* p0) {
+	return mipp_avx_maskzld_uint16(m0, p0);
+}
+rvd<uint8_t,1> maskzld(const rvm<int32_t,1> m0, const uint8_t* p0) {
+	return mipp_avx_maskzld_uint8(m0, p0);
+}
+void maskst(float64_t* p0, const rvm<int32_t,1> m0, const rvd<float64_t,1> r0) {
+	mipp_avx_maskst_float64(p0, m0, r0);
+}
+void maskst(float32_t* p0, const rvm<int32_t,1> m0, const rvd<float32_t,1> r0) {
+	mipp_avx_maskst_float32(p0, m0, r0);
+}
+void maskst(int64_t* p0, const rvm<int32_t,1> m0, const rvd<int64_t,1> r0) {
+	mipp_avx_maskst_int64(p0, m0, r0);
+}
+void maskst(int32_t* p0, const rvm<int32_t,1> m0, const rvd<int32_t,1> r0) {
+	mipp_avx_maskst_int32(p0, m0, r0);
+}
+void maskst(int16_t* p0, const rvm<int32_t,1> m0, const rvd<int16_t,1> r0) {
+	mipp_avx_maskst_int16(p0, m0, r0);
+}
+void maskst(int8_t* p0, const rvm<int32_t,1> m0, const rvd<int8_t,1> r0) {
+	mipp_avx_maskst_int8(p0, m0, r0);
+}
+void maskst(uint64_t* p0, const rvm<int32_t,1> m0, const rvd<uint64_t,1> r0) {
+	mipp_avx_maskst_uint64(p0, m0, r0);
+}
+void maskst(uint32_t* p0, const rvm<int32_t,1> m0, const rvd<uint32_t,1> r0) {
+	mipp_avx_maskst_uint32(p0, m0, r0);
+}
+void maskst(uint16_t* p0, const rvm<int32_t,1> m0, const rvd<uint16_t,1> r0) {
+	mipp_avx_maskst_uint16(p0, m0, r0);
+}
+void maskst(uint8_t* p0, const rvm<int32_t,1> m0, const rvd<uint8_t,1> r0) {
+	mipp_avx_maskst_uint8(p0, m0, r0);
+}
 rvd<float64_t,1> set0_float64() {
 	return mipp_avx_set0_float64();
 }

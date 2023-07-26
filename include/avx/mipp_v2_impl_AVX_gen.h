@@ -1779,6 +1779,40 @@ rvd_avx_int8_t mipp_avx_set1_int8(const int8_t v0) {
 	res.r= _mm256_set1_epi8(v0);
 	return res;
 }
+// ---------------------------------------------------------------------------------------------------------------------------------------------- maskzld
+rvd_avx_float64_t mipp_avx_maskzld_float64(const rvm_avx_int32_t m0, const float64_t* p0) {
+	rvd_avx_float64_t res;
+	res.r= _mm256_maskload_pd(p0,m0.m);
+	return res;
+}
+// ---------------------------------------------------------------------------------------------------------------------------------------------- maskzld
+rvd_avx_float32_t mipp_avx_maskzld_float32(const rvm_avx_int32_t m0, const float32_t* p0) {
+	rvd_avx_float32_t res;
+	res.r= _mm256_maskload_ps(p0,m0.m);
+	return res;
+}
+// ---------------------------------------------------------------------------------------------------------------------------------------------- maskzld
+#if defined(__AVX2__)
+rvd_avx_int32_t mipp_avx_maskzld_int32(const rvm_avx_int32_t m0, const int32_t* p0) {
+	rvd_avx_int32_t res;
+	res.r= _mm256_maskload_epi32(p0,m0.m);
+	return res;
+}
+#endif
+// ---------------------------------------------------------------------------------------------------------------------------------------------- maskst
+void mipp_avx_maskst_float64(float64_t* p0, const rvm_avx_int32_t m0, const rvd_avx_float64_t r0) {
+_mm256_maskstore_pd(p0,m0.m, r0.r);
+}
+// ---------------------------------------------------------------------------------------------------------------------------------------------- maskst
+void mipp_avx_maskst_float32(float32_t* p0, const rvm_avx_int32_t m0, const rvd_avx_float32_t r0) {
+_mm256_maskstore_ps(p0,m0.m, r0.r);
+}
+// ---------------------------------------------------------------------------------------------------------------------------------------------- maskst
+#if defined(__AVX2__)
+void mipp_avx_maskst_int32(int32_t* p0, const rvm_avx_int32_t m0, const rvd_avx_int32_t r0) {
+_mm256_maskstore_epi32(p0,m0.m, r0.r);
+}
+#endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set0
 rvd_avx_float64_t mipp_avx_set0_float64() {
 	rvd_avx_float64_t res;
@@ -5169,6 +5203,74 @@ rvd_avx_uint16_t mipp_avx_set1_uint16(const uint16_t v0) {
 }
 rvd_avx_uint8_t mipp_avx_set1_uint8(const uint8_t v0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_set1_uint8");
+	exit(-1);
+}
+rvd_avx_int64_t mipp_avx_maskzld_int64(const rvm_avx_int32_t m0, const int64_t* p0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskzld_int64");
+	exit(-1);
+}
+#if !( defined(__AVX2__) )
+rvd_avx_int32_t mipp_avx_maskzld_int32(const rvm_avx_int32_t m0, const int32_t* p0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskzld_int32");
+	exit(-1);
+}
+#endif
+rvd_avx_int16_t mipp_avx_maskzld_int16(const rvm_avx_int32_t m0, const int16_t* p0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskzld_int16");
+	exit(-1);
+}
+rvd_avx_int8_t mipp_avx_maskzld_int8(const rvm_avx_int32_t m0, const int8_t* p0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskzld_int8");
+	exit(-1);
+}
+rvd_avx_uint64_t mipp_avx_maskzld_uint64(const rvm_avx_int32_t m0, const uint64_t* p0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskzld_uint64");
+	exit(-1);
+}
+rvd_avx_uint32_t mipp_avx_maskzld_uint32(const rvm_avx_int32_t m0, const uint32_t* p0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskzld_uint32");
+	exit(-1);
+}
+rvd_avx_uint16_t mipp_avx_maskzld_uint16(const rvm_avx_int32_t m0, const uint16_t* p0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskzld_uint16");
+	exit(-1);
+}
+rvd_avx_uint8_t mipp_avx_maskzld_uint8(const rvm_avx_int32_t m0, const uint8_t* p0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskzld_uint8");
+	exit(-1);
+}
+void mipp_avx_maskst_int64(int64_t* p0, const rvm_avx_int32_t m0, const rvd_avx_int64_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskst_int64");
+	exit(-1);
+}
+#if !( defined(__AVX2__) )
+void mipp_avx_maskst_int32(int32_t* p0, const rvm_avx_int32_t m0, const rvd_avx_int32_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskst_int32");
+	exit(-1);
+}
+#endif
+void mipp_avx_maskst_int16(int16_t* p0, const rvm_avx_int32_t m0, const rvd_avx_int16_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskst_int16");
+	exit(-1);
+}
+void mipp_avx_maskst_int8(int8_t* p0, const rvm_avx_int32_t m0, const rvd_avx_int8_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskst_int8");
+	exit(-1);
+}
+void mipp_avx_maskst_uint64(uint64_t* p0, const rvm_avx_int32_t m0, const rvd_avx_uint64_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskst_uint64");
+	exit(-1);
+}
+void mipp_avx_maskst_uint32(uint32_t* p0, const rvm_avx_int32_t m0, const rvd_avx_uint32_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskst_uint32");
+	exit(-1);
+}
+void mipp_avx_maskst_uint16(uint16_t* p0, const rvm_avx_int32_t m0, const rvd_avx_uint16_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskst_uint16");
+	exit(-1);
+}
+void mipp_avx_maskst_uint8(uint8_t* p0, const rvm_avx_int32_t m0, const rvd_avx_uint8_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskst_uint8");
 	exit(-1);
 }
 #if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) )

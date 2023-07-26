@@ -8,6 +8,23 @@ protos = {
 			{"type": "ptr", "charac": "RO", "fixeddatatype": False}
 		]
 	},
+	"ret_reg_2args_msk_ptr": {
+		"ret" :
+			{"type": "reg", "charac": "WO", "fixeddatatype": False},
+		"args" : [
+		    {"type": "msk", "charac": "RO", "fixeddatatype": int32},
+			{"type": "ptr", "charac": "RO", "fixeddatatype": False}
+		]
+	},
+	"ret_void_3args_ptr_msk_reg":{
+		"ret" :
+			{"type": False, "fixeddatatype": False},
+		"args" : [
+			{"type": "ptr", "charac": "WO", "fixeddatatype": False},
+		    {"type": "msk", "charac": "RO", "fixeddatatype": int32},
+			{"type": "reg", "charac": "RO", "fixeddatatype": False}
+		]
+	},
 	"ret_void_2args_ptr_reg": {
 		"ret" :
 			{"type": False, "fixeddatatype": False},
@@ -224,8 +241,10 @@ mipp_funcs = {
 	"store":   { "proto": protos["ret_void_2args_ptr_reg"      ], "datatypes": all_datatypes          , "horizontal": False },
 	"storeu":  { "proto": protos["ret_void_2args_ptr_reg"      ], "datatypes": all_datatypes          , "horizontal": False },
 	"set" :    { "proto": protos["ret_reg_1arg_Nele"           ], "datatypes": all_datatypes          , "horizontal": True },
-	"set_k" :  { "proto": protos["ret_msk_1arg_Nele"            ], "datatypes": all_datatypes          , "horizontal": False },	
+	"set_k" :  { "proto": protos["ret_msk_1arg_Nele"           ], "datatypes": all_datatypes          , "horizontal": False },	
 	"set1":    { "proto": protos["ret_reg_1arg_val"            ], "datatypes": all_datatypes          , "horizontal": False },
+	"maskzld": { "proto": protos["ret_reg_2args_msk_ptr"       ], "datatypes": all_datatypes          , "horizontal": False },
+	"maskst":  { "proto": protos["ret_void_3args_ptr_msk_reg"  ], "datatypes": all_datatypes          , "horizontal": False },
 	"set0":    { "proto": protos["ret_reg_0arg"                ], "datatypes": all_datatypes          , "horizontal": False },
 	"set0_k":  { "proto": protos["ret_msk_0arg"                ], "datatypes": all_datatypes          , "horizontal": False },
 	"get":     { "proto": protos["ret_val_2args_reg_val"       ], "datatypes": all_datatypes          , "horizontal": True  },
