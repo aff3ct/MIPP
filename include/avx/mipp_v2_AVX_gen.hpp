@@ -1092,6 +1092,30 @@ uint16_t getfirst(const rvd<uint16_t,1> r0) {
 uint8_t getfirst(const rvd<uint8_t,1> r0) {
 	return mipp_avx_getfirst_uint8(r0);
 }
+rvd<int64_t,1> gather_seq(int64_t* p0, const rvd<int64_t,1> r0) {
+	return mipp_avx_gather_seq_int64(p0, r0);
+}
+rvd<int32_t,1> gather_seq(int32_t* p0, const rvd<int32_t,1> r0) {
+	return mipp_avx_gather_seq_int32(p0, r0);
+}
+rvd<int16_t,1> gather_seq(int16_t* p0, const rvd<int16_t,1> r0) {
+	return mipp_avx_gather_seq_int16(p0, r0);
+}
+rvd<int8_t,1> gather_seq(int8_t* p0, const rvd<int8_t,1> r0) {
+	return mipp_avx_gather_seq_int8(p0, r0);
+}
+rvd<uint64_t,1> gather_seq(uint64_t* p0, const rvd<uint64_t,1> r0) {
+	return mipp_avx_gather_seq_uint64(p0, r0);
+}
+rvd<uint32_t,1> gather_seq(uint32_t* p0, const rvd<uint32_t,1> r0) {
+	return mipp_avx_gather_seq_uint32(p0, r0);
+}
+rvd<uint16_t,1> gather_seq(uint16_t* p0, const rvd<uint16_t,1> r0) {
+	return mipp_avx_gather_seq_uint16(p0, r0);
+}
+rvd<uint8_t,1> gather_seq(uint8_t* p0, const rvd<uint8_t,1> r0) {
+	return mipp_avx_gather_seq_uint8(p0, r0);
+}
 rvd<float64_t,1> sqrt(const rvd<float64_t,1> r0) {
 	return mipp_avx_sqrt_float64(r0);
 }

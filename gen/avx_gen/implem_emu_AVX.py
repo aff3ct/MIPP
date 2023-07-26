@@ -172,6 +172,13 @@ tpl_implem_emu = {
 """	return %getfirst<tp>%(%hmin<tp>%(r0));""" },
 	"hmax_2": { "format": "long", "code":
 """	return %getfirst<tp>%(%hmax<tp>%(r0));""" },
+	"gather_seq":{ "format": "long", "code":
+""" %v<tp>% t[%N<tp>%];
+    %storeu<tp>%(t, r0);
+    %v<tp>% data[%N<tp>%];
+    for (int i = 0; i < %N<tp>%; i++)
+		data[i] = p0[t[i]];
+	return %loadu<tp>%(data);"""},
 }
 
 implems_emu = {
@@ -220,5 +227,6 @@ implems_emu = {
 		{ "datatypes": all_datatypes, "template": tpl_implem_emu["get"] }, ],
 	"getfirst": [
 		{ "datatypes": all_datatypes, "template": tpl_implem_emu["getfirst"] }, ],
-	
+	"gather_seq": [
+		{ "datatypes": all_int_uint, "template": tpl_implem_emu["gather_seq"] }, ],
 }

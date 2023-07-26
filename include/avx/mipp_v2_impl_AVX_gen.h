@@ -5029,6 +5029,78 @@ uint8_t mipp_avx_getfirst_uint8(const rvd_avx_uint8_t r0) {
 		return mipp_avx_get_uint8(r0, 0);
 }
 #endif
+// ---------------------------------------------------------------------------------------------------------------------------------------------- gather_seq
+rvd_avx_int64_t mipp_avx_gather_seq_int64(int64_t* p0, const rvd_avx_int64_t r0) {
+	 int64_t t[MIPP_N_INT64];
+    mipp_avx_storeu_int64(t, r0);
+    int64_t data[MIPP_N_INT64];
+    for (int i = 0; i < MIPP_N_INT64; i++)
+		data[i] = p0[t[i]];
+	return mipp_avx_loadu_int64(data);
+}
+// ---------------------------------------------------------------------------------------------------------------------------------------------- gather_seq
+rvd_avx_int32_t mipp_avx_gather_seq_int32(int32_t* p0, const rvd_avx_int32_t r0) {
+	 int32_t t[MIPP_N_INT32];
+    mipp_avx_storeu_int32(t, r0);
+    int32_t data[MIPP_N_INT32];
+    for (int i = 0; i < MIPP_N_INT32; i++)
+		data[i] = p0[t[i]];
+	return mipp_avx_loadu_int32(data);
+}
+// ---------------------------------------------------------------------------------------------------------------------------------------------- gather_seq
+rvd_avx_int16_t mipp_avx_gather_seq_int16(int16_t* p0, const rvd_avx_int16_t r0) {
+	 int16_t t[MIPP_N_INT16];
+    mipp_avx_storeu_int16(t, r0);
+    int16_t data[MIPP_N_INT16];
+    for (int i = 0; i < MIPP_N_INT16; i++)
+		data[i] = p0[t[i]];
+	return mipp_avx_loadu_int16(data);
+}
+// ---------------------------------------------------------------------------------------------------------------------------------------------- gather_seq
+rvd_avx_int8_t mipp_avx_gather_seq_int8(int8_t* p0, const rvd_avx_int8_t r0) {
+	 int8_t t[MIPP_N_INT8];
+    mipp_avx_storeu_int8(t, r0);
+    int8_t data[MIPP_N_INT8];
+    for (int i = 0; i < MIPP_N_INT8; i++)
+		data[i] = p0[t[i]];
+	return mipp_avx_loadu_int8(data);
+}
+// ---------------------------------------------------------------------------------------------------------------------------------------------- gather_seq
+rvd_avx_uint64_t mipp_avx_gather_seq_uint64(uint64_t* p0, const rvd_avx_uint64_t r0) {
+	 uint64_t t[MIPP_N_UINT64];
+    mipp_avx_storeu_uint64(t, r0);
+    uint64_t data[MIPP_N_UINT64];
+    for (int i = 0; i < MIPP_N_UINT64; i++)
+		data[i] = p0[t[i]];
+	return mipp_avx_loadu_uint64(data);
+}
+// ---------------------------------------------------------------------------------------------------------------------------------------------- gather_seq
+rvd_avx_uint32_t mipp_avx_gather_seq_uint32(uint32_t* p0, const rvd_avx_uint32_t r0) {
+	 uint32_t t[MIPP_N_UINT32];
+    mipp_avx_storeu_uint32(t, r0);
+    uint32_t data[MIPP_N_UINT32];
+    for (int i = 0; i < MIPP_N_UINT32; i++)
+		data[i] = p0[t[i]];
+	return mipp_avx_loadu_uint32(data);
+}
+// ---------------------------------------------------------------------------------------------------------------------------------------------- gather_seq
+rvd_avx_uint16_t mipp_avx_gather_seq_uint16(uint16_t* p0, const rvd_avx_uint16_t r0) {
+	 uint16_t t[MIPP_N_UINT16];
+    mipp_avx_storeu_uint16(t, r0);
+    uint16_t data[MIPP_N_UINT16];
+    for (int i = 0; i < MIPP_N_UINT16; i++)
+		data[i] = p0[t[i]];
+	return mipp_avx_loadu_uint16(data);
+}
+// ---------------------------------------------------------------------------------------------------------------------------------------------- gather_seq
+rvd_avx_uint8_t mipp_avx_gather_seq_uint8(uint8_t* p0, const rvd_avx_uint8_t r0) {
+	 uint8_t t[MIPP_N_UINT8];
+    mipp_avx_storeu_uint8(t, r0);
+    uint8_t data[MIPP_N_UINT8];
+    for (int i = 0; i < MIPP_N_UINT8; i++)
+		data[i] = p0[t[i]];
+	return mipp_avx_loadu_uint8(data);
+}
 #if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
 rvd_avx_float64_t mipp_avx_load_float64(const float64_t* p0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_load_float64");
