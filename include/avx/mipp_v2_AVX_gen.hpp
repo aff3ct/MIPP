@@ -822,64 +822,88 @@ void storeu(uint16_t* p0, const rvd<uint16_t,1> r0) {
 void storeu(uint8_t* p0, const rvd<uint8_t,1> r0) {
 	mipp_avx_storeu_uint8(p0, r0);
 }
-rvd<float64_t,1> set(const float64_t vals[MIPP_N_FLOAT64]) {
+template <typename T> inline rvd<T, 1> set(const T[N<T>()]) { std::cerr << "set" << std::endl; exit(-1);}
+
+template <>
+rvd<float64_t, 1> set(const float64_t vals[MIPP_N_FLOAT64]) {
 	return mipp_avx_set_float64( vals);
 }
-rvd<float32_t,1> set(const float32_t vals[MIPP_N_FLOAT32]) {
+template <>
+rvd<float32_t, 1> set(const float32_t vals[MIPP_N_FLOAT32]) {
 	return mipp_avx_set_float32( vals);
 }
-rvd<int64_t,1> set(const int64_t vals[MIPP_N_INT64]) {
+template <>
+rvd<int64_t, 1> set(const int64_t vals[MIPP_N_INT64]) {
 	return mipp_avx_set_int64( vals);
 }
-rvd<int32_t,1> set(const int32_t vals[MIPP_N_INT32]) {
+template <>
+rvd<int32_t, 1> set(const int32_t vals[MIPP_N_INT32]) {
 	return mipp_avx_set_int32( vals);
 }
-rvd<int16_t,1> set(const int16_t vals[MIPP_N_INT16]) {
+template <>
+rvd<int16_t, 1> set(const int16_t vals[MIPP_N_INT16]) {
 	return mipp_avx_set_int16( vals);
 }
-rvd<int8_t,1> set(const int8_t vals[MIPP_N_INT8]) {
+template <>
+rvd<int8_t, 1> set(const int8_t vals[MIPP_N_INT8]) {
 	return mipp_avx_set_int8( vals);
 }
-rvd<uint64_t,1> set(const uint64_t vals[MIPP_N_UINT64]) {
+template <>
+rvd<uint64_t, 1> set(const uint64_t vals[MIPP_N_UINT64]) {
 	return mipp_avx_set_uint64( vals);
 }
-rvd<uint32_t,1> set(const uint32_t vals[MIPP_N_UINT32]) {
+template <>
+rvd<uint32_t, 1> set(const uint32_t vals[MIPP_N_UINT32]) {
 	return mipp_avx_set_uint32( vals);
 }
-rvd<uint16_t,1> set(const uint16_t vals[MIPP_N_UINT16]) {
+template <>
+rvd<uint16_t, 1> set(const uint16_t vals[MIPP_N_UINT16]) {
 	return mipp_avx_set_uint16( vals);
 }
-rvd<uint8_t,1> set(const uint8_t vals[MIPP_N_UINT8]) {
+template <>
+rvd<uint8_t, 1> set(const uint8_t vals[MIPP_N_UINT8]) {
 	return mipp_avx_set_uint8( vals);
 }
-rvm<float64_t,1> set_k_float64(const int32_t vals[MIPP_N_FLOAT64]) {
+template <typename T> inline rvm<T, 1> set_k(const int32_t[N<T>()]) { std::cerr << "set_k" << std::endl; exit(-1);}
+
+template <>
+rvm<float64_t, 1> set_k<float64_t>(const int32_t vals[MIPP_N_FLOAT64]) {
 	return mipp_avx_set_k_float64( vals);
 }
-rvm<float32_t,1> set_k_float32(const int32_t vals[MIPP_N_FLOAT32]) {
+template <>
+rvm<float32_t, 1> set_k<float32_t>(const int32_t vals[MIPP_N_FLOAT32]) {
 	return mipp_avx_set_k_float32( vals);
 }
-rvm<int64_t,1> set_k_int64(const int32_t vals[MIPP_N_INT64]) {
+template <>
+rvm<int64_t, 1> set_k<int64_t>(const int32_t vals[MIPP_N_INT64]) {
 	return mipp_avx_set_k_int64( vals);
 }
-rvm<int32_t,1> set_k_int32(const int32_t vals[MIPP_N_INT32]) {
+template <>
+rvm<int32_t, 1> set_k<int32_t>(const int32_t vals[MIPP_N_INT32]) {
 	return mipp_avx_set_k_int32( vals);
 }
-rvm<int16_t,1> set_k_int16(const int32_t vals[MIPP_N_INT16]) {
+template <>
+rvm<int16_t, 1> set_k<int16_t>(const int32_t vals[MIPP_N_INT16]) {
 	return mipp_avx_set_k_int16( vals);
 }
-rvm<int8_t,1> set_k_int8(const int32_t vals[MIPP_N_INT8]) {
+template <>
+rvm<int8_t, 1> set_k<int8_t>(const int32_t vals[MIPP_N_INT8]) {
 	return mipp_avx_set_k_int8( vals);
 }
-rvm<uint64_t,1> set_k_uint64(const int32_t vals[MIPP_N_UINT64]) {
+template <>
+rvm<uint64_t, 1> set_k<uint64_t>(const int32_t vals[MIPP_N_UINT64]) {
 	return mipp_avx_set_k_uint64( vals);
 }
-rvm<uint32_t,1> set_k_uint32(const int32_t vals[MIPP_N_UINT32]) {
+template <>
+rvm<uint32_t, 1> set_k<uint32_t>(const int32_t vals[MIPP_N_UINT32]) {
 	return mipp_avx_set_k_uint32( vals);
 }
-rvm<uint16_t,1> set_k_uint16(const int32_t vals[MIPP_N_UINT16]) {
+template <>
+rvm<uint16_t, 1> set_k<uint16_t>(const int32_t vals[MIPP_N_UINT16]) {
 	return mipp_avx_set_k_uint16( vals);
 }
-rvm<uint8_t,1> set_k_uint8(const int32_t vals[MIPP_N_UINT8]) {
+template <>
+rvm<uint8_t, 1> set_k<uint8_t>(const int32_t vals[MIPP_N_UINT8]) {
 	return mipp_avx_set_k_uint8( vals);
 }
 rvd<float64_t,1> set1(const float64_t v0) {
@@ -972,64 +996,88 @@ void maskst(uint16_t* p0, const rvm<int32_t,1> m0, const rvd<uint16_t,1> r0) {
 void maskst(uint8_t* p0, const rvm<int32_t,1> m0, const rvd<uint8_t,1> r0) {
 	mipp_avx_maskst_uint8(p0, m0, r0);
 }
-rvd<float64_t,1> set0_float64() {
+template <typename T> inline rvd<T, 1> set0() { std::cerr << "set0" << std::endl; exit(-1);}
+
+template <>
+rvd<float64_t, 1> set0<float64_t>() {
 	return mipp_avx_set0_float64();
 }
-rvd<float32_t,1> set0_float32() {
+template <>
+rvd<float32_t, 1> set0<float32_t>() {
 	return mipp_avx_set0_float32();
 }
-rvd<int64_t,1> set0_int64() {
+template <>
+rvd<int64_t, 1> set0<int64_t>() {
 	return mipp_avx_set0_int64();
 }
-rvd<int32_t,1> set0_int32() {
+template <>
+rvd<int32_t, 1> set0<int32_t>() {
 	return mipp_avx_set0_int32();
 }
-rvd<int16_t,1> set0_int16() {
+template <>
+rvd<int16_t, 1> set0<int16_t>() {
 	return mipp_avx_set0_int16();
 }
-rvd<int8_t,1> set0_int8() {
+template <>
+rvd<int8_t, 1> set0<int8_t>() {
 	return mipp_avx_set0_int8();
 }
-rvd<uint64_t,1> set0_uint64() {
+template <>
+rvd<uint64_t, 1> set0<uint64_t>() {
 	return mipp_avx_set0_uint64();
 }
-rvd<uint32_t,1> set0_uint32() {
+template <>
+rvd<uint32_t, 1> set0<uint32_t>() {
 	return mipp_avx_set0_uint32();
 }
-rvd<uint16_t,1> set0_uint16() {
+template <>
+rvd<uint16_t, 1> set0<uint16_t>() {
 	return mipp_avx_set0_uint16();
 }
-rvd<uint8_t,1> set0_uint8() {
+template <>
+rvd<uint8_t, 1> set0<uint8_t>() {
 	return mipp_avx_set0_uint8();
 }
-rvm<float64_t,1> set0_k_float64() {
+template <typename T> inline rvm<T, 1> set0_k() { std::cerr << "set0_k" << std::endl; exit(-1);}
+
+template <>
+rvm<float64_t, 1> set0_k<float64_t>() {
 	return mipp_avx_set0_k_float64();
 }
-rvm<float32_t,1> set0_k_float32() {
+template <>
+rvm<float32_t, 1> set0_k<float32_t>() {
 	return mipp_avx_set0_k_float32();
 }
-rvm<int64_t,1> set0_k_int64() {
+template <>
+rvm<int64_t, 1> set0_k<int64_t>() {
 	return mipp_avx_set0_k_int64();
 }
-rvm<int32_t,1> set0_k_int32() {
+template <>
+rvm<int32_t, 1> set0_k<int32_t>() {
 	return mipp_avx_set0_k_int32();
 }
-rvm<int16_t,1> set0_k_int16() {
+template <>
+rvm<int16_t, 1> set0_k<int16_t>() {
 	return mipp_avx_set0_k_int16();
 }
-rvm<int8_t,1> set0_k_int8() {
+template <>
+rvm<int8_t, 1> set0_k<int8_t>() {
 	return mipp_avx_set0_k_int8();
 }
-rvm<uint64_t,1> set0_k_uint64() {
+template <>
+rvm<uint64_t, 1> set0_k<uint64_t>() {
 	return mipp_avx_set0_k_uint64();
 }
-rvm<uint32_t,1> set0_k_uint32() {
+template <>
+rvm<uint32_t, 1> set0_k<uint32_t>() {
 	return mipp_avx_set0_k_uint32();
 }
-rvm<uint16_t,1> set0_k_uint16() {
+template <>
+rvm<uint16_t, 1> set0_k<uint16_t>() {
 	return mipp_avx_set0_k_uint16();
 }
-rvm<uint8_t,1> set0_k_uint8() {
+template <>
+rvm<uint8_t, 1> set0_k<uint8_t>() {
 	return mipp_avx_set0_k_uint8();
 }
 float64_t get(const rvd<float64_t,1> r0, const uint32_t v0) {

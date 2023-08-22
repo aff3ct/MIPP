@@ -204,9 +204,50 @@ def type_specialized(proto):
 			n_type_spe = n_type_spe +1
 	return n_type_spe
 
+# Build prototype of set0
+def build_proto_set0(dt_ret, func_name):
+    if(func_name == "set0"):
+    	reg_type = "rvd"
+    elif (func_name == "set0_k"):
+    	reg_type = "rvm"
+    return f"template <>\n{reg_type}<{dt_ret}_t, 1> {func_name}<{dt_ret}_t>("
+
+# Build prototype of set
+def build_proto_set(dt_ret, func_name):
+    if(func_name == "set"):
+    	template = ""
+    	dt_par = f"{dt_ret}_t"
+    	reg_type = "rvd"
+    elif (func_name == "set_k"):
+    	dt_par = "int32_t"
+    	template = f"<{dt_ret}_t>"
+    	reg_type = "rvm"
+
+    return f"template <>\n{reg_type}<{dt_ret}_t, 1> {func_name}{template}(const {dt_par} vals[MIPP_N_{dt_ret.upper()}]"
+
+#function message error set functions
+def gen_set_func_error(func_name,file):
+	if func_name == "set":
+		print(f"template <typename T> inline rvd<T, 1> {func_name}(const T[N<T>()]) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
+	if func_name == "set0":
+		print(f"template <typename T> inline rvd<T, 1> {func_name}() {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
+	if func_name == "set_k":
+		print(f"template <typename T> inline rvm<T, 1> {func_name}(const int32_t[N<T>()]) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
+	if func_name == "set0_k":
+		print(f"template <typename T> inline rvm<T, 1> {func_name}() {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
+		
+
+
+
 def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False):
 	"""if lmul and (not cpp or (cpp and not lmul_specialized(proto))):
 		func_name += "_m" + str(int(lmul))"""
+	#build proto for special fonction
+	if func_name == "set0" or func_name =="set0_k":
+		return  build_proto_set0(dt_ret, func_name) +')'
+	if func_name == "set" or func_name =="set_k":
+		return  build_proto_set(dt_ret, func_name) +')'
+
 	realdatatype = datatypes[dt_ret]
 	if (proto["ret"]["fixeddatatype"]):
 		realdatatype = datatypes[proto["ret"]["fixeddatatype"]]
@@ -392,8 +433,7 @@ def build_cpp_func_name_short(proto, dt_ret, mipp_name):
 		return mipp_name
 	else:
 		return_type = datatypes[dt_ret]["category"] + str(datatypes[dt_ret]["n_bits"])
-		return mipp_name + "_" + return_type
-
+		return mipp_name 
 
 # Build cast's functions build_func_name & build_cpp_func_name
 def build_func_name(isa, dt_par, dt_ret, mipp_name, isa_name=True):

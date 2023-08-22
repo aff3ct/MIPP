@@ -124,14 +124,14 @@ TEST_CASE("Addition - mipp::Reg", "[mipp::add]")
 template <typename T>
 void test_reg_maskz_add()
 {
-	/*const int vectorSize = mipp::N<T>();
+	const int vectorSize = mipp::N<T>();
 
 	T inputs1[vectorSize],inputs2[vectorSize];
 	std::iota(inputs1, inputs1 + vectorSize, (T)1);
 	std::iota(inputs2, inputs2 + vectorSize, (T)1);
 
 
-	bool mask[vectorSize];
+	int32_t mask[vectorSize];
 	std::fill(mask,       mask + vectorSize/2, true );
 	std::fill(mask + vectorSize/2, mask + vectorSize,   false);
 
@@ -142,8 +142,9 @@ void test_reg_maskz_add()
 
 	mipp::rvd<T> r1 = mipp::load(inputs1);
 	mipp::rvd<T> r2 = mipp::load(inputs2);
-	mipp::rvm<T> m  = mipp::set (mask   );
+	mipp::rvm<T> m  = mipp::set_k<T>(mask);
 
+	/*
 	mipp::rvd<T> r3 = mipp::maskz(m, r1, r2);
 
 	for (auto i = 0; i < vectorSize; i++)

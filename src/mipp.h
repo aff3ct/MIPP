@@ -583,7 +583,6 @@ template <int      N> inline msk   set          (const bool[N])                 
 #endif
 template <typename T> inline reg   set1         (const T)                         { errorMessage<T>("set1");          exit(-1); }
 template <int      N> inline msk   set1         (const bool)                      { errorMessage<N>("set1");          exit(-1); }
-template <typename T> inline reg   set0         ()                                { errorMessage<T>("set0");          exit(-1); }
 template <int      N> inline msk   set0         ()                                { errorMessage<N>("set0");          exit(-1); }
 template <typename T> inline reg_2 low          (const reg)                       { errorMessage<T>("low");           exit(-1); }
 template <typename T> inline reg_2 high         (const reg)                       { errorMessage<T>("high");          exit(-1); }

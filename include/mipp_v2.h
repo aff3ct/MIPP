@@ -7,17 +7,18 @@
 
 
 #include <stdint.h>
+#include <iostream>
+#include <cstdlib>
 
 typedef double float64_t;
 typedef float float32_t;
 
 
 #if defined(__AVX__)
-// RG a l'envers
+
 #include "avx/mipp_v2_impl_AVX_gen.h"
 #include "avx/mipp_v2_AVX_gen.hpp"
 #endif
-
 
 /*#if defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)
 const std::string InstructionType = "AVX512";
@@ -148,6 +149,11 @@ const std::string InstructionType = "AVX512";
 	}
 #endif
 */
+
+
+// -------------------------------------------------------------------------------------------------- complex functions
+// --------------------------------------------------------------------------------------------------------------------
+
 // ------------------------------------------------------------------------------------------------- includes files
 #include "mipp_v2_tools.h"
 #include "mipp_operator_v2_gen.hpp"
@@ -158,8 +164,8 @@ const std::string InstructionType = "AVX512";
 // -------------------------------------------------------------------------------------------------------- X86 AVX-512
 // --------------------------------------------------------------------------------------------------------------------
 #elif defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)
-#include "avx/mipp_v2_impl_AVX512_gen.h"
-#include "avx/mipp_v2_AVX512_gen.hpp"
+#include "avx512/mipp_v2_impl_AVX512_gen.h"
+#include "avx512/mipp_v2_AVX512_gen.hpp"
 // -------------------------------------------------------------------------------------------------------- X86 AVX-256
 // --------------------------------------------------------------------------------------------------------------------
 #elif defined(__AVX__)

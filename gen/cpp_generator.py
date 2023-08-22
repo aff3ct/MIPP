@@ -43,8 +43,12 @@ def gen_cpp_constexpr_functions(isa,file):
 			print(j2_template.render(isa_name_upper=isa["name"].upper(),datatype=datatypes[dt], lmul=str(lmul), type_category_upper=datatypes[dt]["category"].upper()), file=file)
 
 def gen_cpp_functions(isa,file, funcs):
+	set_functions = ["set0","set0_k","set","set_k"]
 	for f in funcs:
+		if f in set_functions:
+			gen_set_func_error(f,file)
 		for dt in funcs[f]["datatypes"]:
+
 			if len(dt.split(',')) <= 1:
 				dt_par = dt.split(',')[0]
 				dt_ret = dt.split(',')[0]
@@ -56,7 +60,6 @@ def gen_cpp_functions(isa,file, funcs):
 
 			if len(dt.split(',')) <= 1:
 				# build other functions 
-
 				c_func_name = build_func_name_short(isa, dt_par, f, True);
 
 				#print("c_func_name pour dt <1: ", c_func_name)
