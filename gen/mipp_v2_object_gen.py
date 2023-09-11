@@ -54,8 +54,6 @@ inline Rvm<T,LMUL>  {{op}}(const Rvm<T,LMUL>  rvm)             						const{ retu
 inline Rvm<T,LMUL>& operator{{option}}(const Rvm<T,LMUL>& rvm) 								{ m = this->{{op}}(rvm).m; return *this; }
 inline Rvm<T,LMUL>  operator{{operation}}(const Rvm<T,LMUL>  rvm) const 						{ return this->{{op}}(rvm);}
 """ 
-	"""inline Rvm<T,LMUL> operator{{op}} (Rvm<T,LMUL> rvm) const { return this->{{func}} (rvm);}
-	"""
 	
 	j4_template = Template(template_msk, undefined=StrictUndefined)
 	for op in operators_msk:

@@ -43,6 +43,8 @@ datatypes = {
 	  uint8 : { "name" :   uint8, "category":  cuint, "n_bits" :  8, "cstd":   "uint8_t", },
 }
 
+
+#  Operator overloading in the object layer
 operators = {
     "add"    : {"operation" : "+", "option"  : "+="},
     "sub"    : {"operation" : "-", "option"  : "-="},
@@ -242,7 +244,8 @@ def gen_set_func_error(func_name,file):
 def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False):
 	"""if lmul and (not cpp or (cpp and not lmul_specialized(proto))):
 		func_name += "_m" + str(int(lmul))"""
-	#build proto for special fonction
+
+	#build proto for set functions
 	if func_name == "set0" or func_name =="set0_k":
 		return  build_proto_set0(dt_ret, func_name) +')'
 	if func_name == "set" or func_name =="set_k":
@@ -327,7 +330,7 @@ def build_proto_object(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=F
 
 	return p + ")";
 
-# print "return func" 
+
 def build_call(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True):
 	"""if lmul:
 		func_name += "_m" + str(int(lmul))"""

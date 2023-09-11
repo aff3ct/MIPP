@@ -1,5 +1,14 @@
 from tools import *
 
+"""
+"protos" dictionary:
+	- Defines prototypes of SIMD functions presented in a dictionary. 
+	- Each prototype is defined with a key representing a specific function model. 
+	- For each model, specifications for the return type and arguments are provided. 
+	- Details include the type ("reg" for register , "msk" to designate masks, "r" , "val" for values, "ptr" for pointers and "Nele" for number of elements).
+	- The attribute (such as "WO" for Write Only or "RO" for Read Only)
+	-"fixeddatatype" is defined as a Boolean value, thus determining whether a variation in data type is allowed or not.
+"""
 protos = {
 	"ret_reg_1arg_ptr": {
 		"ret" :
@@ -238,6 +247,11 @@ protos = {
 		]
 	},
 }
+"""
+	"mipp_funcs" dictionnary : contains different MIPP functions specific to the "AVX/AVX2" architecture. 
+		-Each function is associated with a prototype model based on its key in the "protos" dictionary, with the data types
+		(for which the function is to be generated are specified, along with other parameters such as the parameters such as the "horizontal" flag
+"""
 
 mipp_funcs = {
     "cast":    { "proto": protos["ret_reg_1arg_reg"            ], "datatypes": all_datatypes_cart_prod, "horizontal": False },
@@ -257,7 +271,7 @@ mipp_funcs = {
 	"set0_k":  { "proto": protos["ret_msk_0arg"                ], "datatypes": all_datatypes          , "horizontal": False },
 	"get":     { "proto": protos["ret_val_2args_reg_val"       ], "datatypes": all_datatypes          , "horizontal": True  },
 	"getfirst":{ "proto": protos["ret_val_1arg_reg"            ], "datatypes": all_datatypes          , "horizontal": True  },
-	"gather_seq":{ "proto": protos["ret_reg_2args_ptr_reg"            ], "datatypes": all_int_uint          , "horizontal": False  },
+	"gather_seq":{ "proto": protos["ret_reg_2args_ptr_reg"     ], "datatypes": all_int_uint          , "horizontal": False  },
 	"sqrt":    { "proto": protos["ret_reg_1arg_reg"            ], "datatypes": all_float              , "horizontal": False },
 	"rsqrt":   { "proto": protos["ret_reg_1arg_reg"            ], "datatypes": all_float              , "horizontal": False },
 	"add":     { "proto": protos["ret_reg_2args_reg"           ], "datatypes": all_datatypes          , "horizontal": False },

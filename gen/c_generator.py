@@ -15,7 +15,6 @@ def gen_c_defines(isa, file):
 	print("#define MIPP_" + isa["name"].upper() + "_RVD_SIZE_BIT " + str(isa["size"]), file=file)
 	print("#define MIPP_" + isa["name"].upper() + "_RVD_SIZE_BYTE " + str(int(isa["size"] / 8)), file=file)
 
-	##define MIPP_AVX_N_FLOAT64 4
 
 	template = """#define MIPP_N_{{type_category_upper}}{{n_bits}} {{n_elmts}}"""
 	j2_template = Template(template, undefined=StrictUndefined)
@@ -124,15 +123,17 @@ def gen_c_functions(isa, file, funcs, implems):
 						if ff["template"]["format"] == "short":
 							if funcs[f]["proto"]["args"]:
 							
-								# Toreg & Tomsk
+								# Toreg 
 								if funcs[f]["proto"]["ret"]["type"] == "reg":
 									print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file)
 									print("\tres.r= ", end='', file=file)
 
+								# Tomsk
 								elif (funcs[f]["proto"]["ret"]["type"] == "msk"):
 									print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file);
 									print("\tres.m= ", end='', file=file)
 
+							#Other functions
 							else:
 								if (funcs[f]["proto"]["ret"]["type"] == "reg"):
 										print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file);

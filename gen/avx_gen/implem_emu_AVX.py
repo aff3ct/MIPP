@@ -1,5 +1,9 @@
 from tools import *
 
+""" "tpl_implem_emu" dictionary:
+	-Purpose: to provide a collection of emulation functions for missing SIMD instructions and then provide the operands needed to simulate the behavior of that instruction.
+	-Use: it is used to implement emulation for specific SIMD instructions that are not directly available in the AVX architecture.
+"""
 tpl_implem_emu = {
 	"set-64f"   : { "format": "short", "code": 
 """	_mm256_set_pd(vals[3], vals[2], vals[1], vals[0]);"""
@@ -180,6 +184,11 @@ tpl_implem_emu = {
 		data[i] = p0[t[i]];
 	return %loadu<tp>%(data);"""},
 }
+""" "implems_emu" dictionary:
+    -Purpose: This dictionary contains implementation models for various emulated functions.
+    -Use: During the generation phase, this dictionary is used to select the appropriate implementation model for a specific emulated function and the datatypes .
+    
+"""
 
 implems_emu = {
 	"set" :[
