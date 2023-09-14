@@ -108,7 +108,8 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 // --------------------------------------------------------------------------------------------------------------------
 #ifndef MIPP_NO_INTRINSICS
 
-// -------------------------------------------------------------------------------------------------------- ARM SVE(specific size 512)
+// -------------------------------------------------------------------------------------------------------- ARM SVE (specific size in 128-256-512-1024-2048) 
+// -------------------------------------------------------------------------------------------------------- Size is specified at compilation time using flag -msve-vector-bits
 #if defined(__ARM_FEATURE_SVE)
 #if __ARM_FEATURE_SVE_BITS
 #define MIPP_REGISTER_SIZE __ARM_FEATURE_SVE_BITS

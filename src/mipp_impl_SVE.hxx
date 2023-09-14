@@ -28,7 +28,6 @@
 
 	// all operations is masked so masked before
 	// ------------------------------------------------------------------------------------------------------------ maskzld
-
 	inline reg _maskzld(const msk m, const float* memp){
 		return svld1_f32(m, memp);
 	}
@@ -61,9 +60,7 @@
 		svst1_s32(m,memp,svreinterpret_s32_f32(a));
 	}
 
-    //
 	// ----------------------------------------------------------------------------------------------------------- load
-//#ifdef MIPP_ALIGNED_LOADS
 	template <>
 	inline reg load<float>(const float *mem_addr) {
 		return _maskzld(svptrue_b32(),mem_addr);
@@ -83,10 +80,8 @@
 	inline reg load<int32_t>(const int32_t *mem_addr) {
 		return _maskzld(svptrue_b32(),mem_addr);
 	}
-//#endif
 
 	// ---------------------------------------------------------------------------------------------------------- store
-//#ifdef MIPP_ALIGNED_LOADS
 	template <>
 	inline void store<float>(float *mem_addr, const reg v) {
 		_maskst(svptrue_b32(),mem_addr,v);
@@ -106,7 +101,7 @@
 	inline void store<int32_t>(int32_t *mem_addr, const reg v) {
 		_maskst(svptrue_b32(),mem_addr,v);
 	}
-//#endif
+
 #ifdef __ARM_FEATURE_UNALIGNED
 	// ---------------------------------------------------------------------------------------------------------- loadu
 	template <>
@@ -680,45 +675,27 @@
 	}
 
 	// ----------------------------------------------------------------------------------------------------- set (mask)
-
-    // ces tailles n'ont pas de sens Reg size = 128-256-512-1024-2048
-	// 512 version combinatoire a generer
 	template <>
 	inline msk set<nElReg<int64_t>()>(const bool vals[nElReg<int64_t>()]) {
 	#ifdef __ARM_FEATURE_SVE_PREDICATE_OPERATORS
-		   msk m = vals;
-		   return m;
+		msk m = vals;
+		return m;
 	#else
-		   uint64_t v[nElReg<int64_t>()];
-		   for (int i = 0; i < nElReg<int64_t>(); i++)
-			 v[i] = vals[i] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0;
-		  /* uint64_t v[8] =  {vals[0] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uin64_t)0,
-	               vals[1] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
-	               vals[2] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
-	               vals[3] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
-	               vals[4] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
-	               vals[5] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
-	               vals[6] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
-	               vals[7] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0};*/
-	       auto r1 = set<int64_t>((int64_t*)v);
-	       auto r2 = set1<int64_t>((uint64_t)0xFFFFFFFFFFFFFFFF);
-	       return cmpeq<int64_t>(r1, r2);
+		uint64_t v[nElReg<int64_t>()];
+		for (int i = 0; i < nElReg<int64_t>(); i++)
+			v[i] = vals[i] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0;
+		auto r1 = set<int64_t>((int64_t*)v);
+		auto r2 = set1<int64_t>((uint64_t)0xFFFFFFFFFFFFFFFF);
+
+		return cmpeq<int64_t>(r1, r2);
 	#endif
-		}
+	}
 
 	template <>
 	inline msk set<nElReg<int32_t>()>(const bool vals[nElReg<int32_t>()]) {
 		uint32_t v[nElReg<int32_t>()];
 		for (int i = 0; i < nElReg<int32_t>(); i++)
 			v[i] = vals[i] ? 0xFFFFFFFF : 0;
-		/*uint32_t v[16] = {vals[ 0] ? 0xFFFFFFFF : 0, vals[ 1] ? 0xFFFFFFFF : 0,
-		                  vals[ 2] ? 0xFFFFFFFF : 0, vals[ 3] ? 0xFFFFFFFF : 0,
-		                  vals[ 4] ? 0xFFFFFFFF : 0, vals[ 5] ? 0xFFFFFFFF : 0,
-		                  vals[ 6] ? 0xFFFFFFFF : 0, vals[ 7] ? 0xFFFFFFFF : 0,
-		                  vals[ 8] ? 0xFFFFFFFF : 0, vals[ 9] ? 0xFFFFFFFF : 0,
-		                  vals[10] ? 0xFFFFFFFF : 0, vals[11] ? 0xFFFFFFFF : 0,
-		                  vals[12] ? 0xFFFFFFFF : 0, vals[13] ? 0xFFFFFFFF : 0,
-		                  vals[14] ? 0xFFFFFFFF : 0, vals[15] ? 0xFFFFFFFF : 0};*/
 		auto r1 = set <int32_t>((int32_t*)v);
 		auto r2 = set1<int32_t>(0xFFFFFFFF);
 
@@ -828,7 +805,7 @@
 	}
 	template <>
 	inline reg_2 low<int32_t>(const reg v) {
-		// a revoir feinte reg pas propre reg_2 eq reg<int>
+		// clean it here reg_2 eq reg<int>
 		return svreinterpret_s32_f32(v);
 	}
 
