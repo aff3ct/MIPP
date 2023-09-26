@@ -85,7 +85,7 @@ build-linux-x86-clang:
     - ./ci/build-linux-x86-clang.sh
 
 build-linux-x86-icpc:
-  image: intel/oneapi-hpckit
+  image: intel/oneapi-hpckit:2022.2-devel-ubuntu20.04
   stage: build
   needs: []
   tags:
