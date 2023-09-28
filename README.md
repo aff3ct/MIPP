@@ -17,6 +17,8 @@ With the MIPP wrapper you do not need to write a specific intrinsic code
 anymore. Just use provided functions and the wrapper will automatically 
 generates the right intrisic calls for your specific architecture.
 
+If you are interested by ARM SVE status, [please follow this link](#arm-sve).
+
 ## Miscellaneous
 
 ### Scientific publications
@@ -101,30 +103,6 @@ option (since most of current NEON instructions are not IEEE-754 compatible).
 MIPP also use some nice features provided by the C++11 and so we have to add the 
 `-std=c++11` flag to compile the code. Your are now ready to run your code with 
 the mipp.h wrapper.
-
-
-You can install the header files (locally) to allow finding them
-with cmake's `find_package()`:
-
-```
-git clone https://github.com/aff3ct/MIPP.git
-cmake -S MIPP -B MIPP_build -DCMAKE_INSTALL_PREFIX=$HOME/.local
-cmake -S MIPP -B MIPP_build  # alternative installs into system, defaults to /usr/local
-cmake --build MIPP_build --target install  # might require sudo
-```
-
-for building and running the tests
-
-```
-cmake --build MIPP_build --target test
-```
-
-for later uninstall:
-
-```
-cmake --build MIPP_build --target uninstall
-```
-
 
 ### Sequential mode
 
@@ -282,7 +260,7 @@ mipp::Reg<float> r1, r2, r3, r4;
 
 r1 = 2.0;                     // r1 = | +2.0 | +2.0 | +2.0 | +2.0 |
 r2 = 3.0;                     // r2 = | +3.0 | +3.0 | +3.0 | +3.0 |
-r3 = 1.0;                     // r3 = | +1.0 | +1.0 | +1.0 | +1.0 |
+r2 = 1.0;                     // r3 = | +1.0 | +1.0 | +1.0 | +1.0 |
 
 // r4 = (r1 * r2) + r3
 r4 = mipp::fmadd(r1, r2, r3); // r4 = | +7.0 | +7.0 | +7.0 | +7.0 |
@@ -654,4 +632,29 @@ will need to call the `mipp::deinterleave` operation before and the
 | `asinh`        | `Reg<T>   asinh  (const Reg<T> r)`                       | Computes the inverse hyperbolic sines of `r`.                        | `double` (only on `icpc`), `float` |
 | `acosh`        | `Reg<T>   acosh  (const Reg<T> r)`                       | Computes the inverse hyperbolic cosines of `r`.                      | `double` (only on `icpc`), `float` |
 | `atanh`        | `Reg<T>   atanh  (const Reg<T> r)`                       | Computes the inverse hyperbolic tangent of `r`.                      | `double` (only on `icpc`), `float` |
+
+
+## arm sve
+
+### sve length specific
+
+An arm sve version is under construction. This version uses sve length specific 
+more appropriate for the MIPP architecture. Because in this use the size of 
+the "register" is defined at compilation. As a reminder with sve the size is 
+in the range 128-256-512-1024-2048. It is specified at compilation by the flag -msve-vector-bits="size". 
+
+
+### instructions implemented to date
+
+**Memory operations:** load, store, blend, set, set1, blend, gather, scatter, maskzld, maskst, maskzgat, masksca
+
+**Logical  comparaisons:** cmpeq, cmneq
+
+**Bitwise operations:** andb, notb(msk)
+
+**Arithmetic operations:** anddb, fmadd, add, sub, mul, div
+
+**Reductions:** testz(msk), Reduce<T, add >
+
+Byte and Word Instructions are not yet implemented.
 
