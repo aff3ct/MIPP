@@ -7,14 +7,14 @@
 
 ## Purpose
 
-MIPP is a portable and Open-source wrapper (MIT license) for vector intrinsic 
-functions (SIMD) written in C++11. It works for SSE, AVX, AVX-512 and ARM NEON 
-(32-bit and 64-bit) instructions. MIPP wrapper supports simple/double precision 
-floating-point numbers and also signed integer arithmetic (64-bit, 32-bit, 
-16-bit and 8-bit).
+MIPP is a portable and Open-source wrapper (MIT license) for vector intrinsic
+functions (SIMD) written in C++11. It works for SSE, AVX, AVX-512, ARM NEON
+and SVE (work in progress) instructions. MIPP wrapper supports simple/double
+precision floating-point numbers and also signed integer arithmetic (64-bit,
+32-bit, 16-bit and 8-bit).
 
-With the MIPP wrapper you do not need to write a specific intrinsic code 
-anymore. Just use provided functions and the wrapper will automatically 
+With the MIPP wrapper you do not need to write a specific intrinsic code
+anymore. Just use provided functions and the wrapper will automatically
 generates the right intrisic calls for your specific architecture.
 
 If you are interested by ARM SVE status, [please follow this link](#arm-sve).
@@ -633,28 +633,24 @@ will need to call the `mipp::deinterleave` operation before and the
 | `acosh`        | `Reg<T>   acosh  (const Reg<T> r)`                       | Computes the inverse hyperbolic cosines of `r`.                      | `double` (only on `icpc`), `float` |
 | `atanh`        | `Reg<T>   atanh  (const Reg<T> r)`                       | Computes the inverse hyperbolic tangent of `r`.                      | `double` (only on `icpc`), `float` |
 
+## ARM SVE
 
-## arm sve
+### SVE Length Specific
 
-### sve length specific
+An ARM SVE version is under construction. This version uses *SVE length
+specific* which is more appropriated to the MIPP architecture. This way, the
+size of the *MIPP registers* is defined at compilation. As a reminder, with SVE
+the sizes can be: 128, 256, 512, 1024 or 2048 bits. It is specified at
+the compilation time by the `-msve-vector-bits=<size>` flag.
 
-An arm sve version is under construction. This version uses sve length specific 
-more appropriate for the MIPP architecture. Because in this use the size of 
-the "register" is defined at compilation. As a reminder with sve the size is 
-in the range 128-256-512-1024-2048. It is specified at compilation by the flag -msve-vector-bits="size". 
+### Supported MIPP Operations
 
+- **Memory operations:** `load`, `store`, `blend`, `set`, `set1`, `blend`, 
+  `gather`, `scatter`, `maskzld`, `maskst`, `maskzgat`, `masksca`
+- **Logical comparisons:** `cmpeq`, `cmneq`
+- **Bitwise operations:** `andb`, `notb` (msk)
+- **Arithmetic operations:** `anddb`, `fmadd`, `add`, `sub`, `mul`, `div`
+- **Reductions:** `testz(msk), Reduce<T, add>`
 
-### instructions implemented to date
-
-**Memory operations:** load, store, blend, set, set1, blend, gather, scatter, maskzld, maskst, maskzgat, masksca
-
-**Logical  comparaisons:** cmpeq, cmneq
-
-**Bitwise operations:** andb, notb(msk)
-
-**Arithmetic operations:** anddb, fmadd, add, sub, mul, div
-
-**Reductions:** testz(msk), Reduce<T, add >
-
-Byte and Word Instructions are not yet implemented.
+*Byte* and *word* operations are not yet implemented.
 
