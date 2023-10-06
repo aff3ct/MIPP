@@ -509,6 +509,22 @@ build-linux-armv8-gcc:
     - source ./ci/tools/threads.sh
     - ./ci/build-linux-armv8-gcc.sh
 
+build-linux-armv8-gcc-sve:
+  image: registry.gitlab.com/aff3ct/aff3ct/arm64_ubuntu_armie:v22.0
+  stage: build
+  needs: []
+  tags:
+    - arm64
+    - linux
+    - docker
+  artifacts:
+    paths:
+      - ./tests/build_linux_armv8_gcc_sve_ls256/bin/
+      - ./tests/build_linux_armv8_gcc_sve_ls512/bin/
+  script:
+    - source ./ci/tools/threads.sh
+    - ./ci/build-linux-armv8-gcc-11.sh
+
 build-linux-armv8-clang:
   image: registry.gitlab.com/aff3ct/aff3ct/arm64_ubuntu_clang:v10.0.0
   stage: build
@@ -606,6 +622,19 @@ test-linux-armv8-unit-neon:
     - docker
   script:
     - ./ci/test-linux-macos-unit.sh build_linux_armv8_gcc_neon build_linux_armv8_clang_neon
+
+test-linux-armv8-unit-sve:
+  image: registry.gitlab.com/aff3ct/aff3ct/arm64_ubuntu_armie:v22.0
+  stage: test
+  needs:
+    - job: build-linux-armv8-gcc-sve
+      artifacts: true
+  tags:
+    - arm64
+    - linux
+    - docker
+  script:
+    - ./ci/test-linux-macos-unit.sh build_linux_armv8_gcc_sve_ls256 build_linux_armv8_gcc_sve_ls512
 
 # ---------------------------------------------------------------------------------------------------------------------
 # WINDOWS X86 ---------------------------------------------------------------------------------------------------------
