@@ -1,1 +1,1 @@
-Catch2 (v2.2.2) from [GitHub](https://github.com/catchorg/Catch2).
+Catch2 (v2.13.10) from [GitHub](https://github.com/catchorg/Catch2).
