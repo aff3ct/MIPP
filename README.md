@@ -19,49 +19,6 @@ generates the right intrisic calls for your specific architecture.
 
 If you are interested by ARM SVE status, [please follow this link](#arm-sve).
 
-## Miscellaneous
-
-### Scientific publications
-
-Adrien Cassagne, Olivier Aumage, Denis Barthou, Camille Leroux and Christophe Jégo,  
-[**MIPP: a Portable C++ SIMD Wrapper and its use for Error Correction Coding in 5G Standard**](https://doi.org/10.1145/3178433.3178435),  
-*The 5th International Workshop on Programming Models for SIMD/Vector Processing (WPMVP 2018), February 2018.*
-
-Adrien Cassagne, Olivier Hartmann, Mathieu Léonardon, Kun He, Camille Leroux, Romain Tajan, Olivier Aumage, Denis Barthou, Thibaud Tonnellier, Vincent Pignoly, Bertrand Le Gal and Christophe Jégo,  
-[**AFF3CT: A Fast Forward Error Correction Toolbox!**](https://doi.org/10.1016/j.softx.2019.100345),  
-*Elsevier SoftwareX, October 2019.*
-
-Mathieu Léonardon, Adrien Cassagne, Camille Leroux, Christophe Jégo, Louis-Philippe Hamelin and Yvon Savaria,  
-[**Fast and Flexible Software Polar List Decoders**](https://doi.org/10.1007/s11265-018-1430-3),  
-*Springer Journal of Signal Processing Systems (JSPS), January 2019.*
-
-
-Alireza Ghaffari, Mathieu Leonardon, Adrien Cassagne, Camille Leroux, Yvon Savaria,  
-[**Toward High-Performance Implementation of 5G SCMA Algorithms**](https://doi.org/10.1109/ACCESS.2019.2891597),  
-*IEEE Acces, January 2019.*
-
-
-Adrien Cassagne, Thibaud Tonnellier, Camille Leroux, Bertrand Le Gal, Olivier Aumage and Denis Barthou,  
-[**Beyond Gbps Turbo Decoder on Multi-Core CPUs**](https://doi.org/10.1109/ISTC.2016.7593092),  
-*The 10th International Symposium on Turbo Codes and Iterative Information Processing (ISTC 2016), September 2016.*
-
-
-Adrien Cassagne, Olivier Aumage, Camille Leroux, Denis Barthou and Bertrand Le Gal,  
-[**Energy Consumption Analysis of Software Polar Decoders on Low Power Processors**](https://doi.org/10.1109/EUSIPCO.2016.7760327),  
-*The 24nd European Signal Processing Conference (EUSIPCO 2016), September 2016.*
-
-
-Adrien Cassagne, Bertrand Le Gal, Camille Leroux, Olivier Aumage and Denis Barthou,  
-[**An Efficient, Portable and Generic Library for Successive Cancellation Decoding of Polar Codes**](https://doi.org/10.1007/978-3-319-29778-1_19),  
-*The 28th International Workshop on Languages and Compilers for Parallel Computing (LCPC 2015), September 2015.*
-
-### Open-source projects in which MIPP is used
-
-  - [AFF3CT](https://github.com/aff3ct/aff3ct): A Fast Forward Error Correction 
-  Toolbox!
-  - [mandelbrot](https://gitlab.inria.fr/acassagn/mandelbrot): the Mandelbrot 
-  fractal, sequential and SIMD implementations.
-
 ## Short documentation
 
 ### Supported compilers
@@ -639,9 +596,10 @@ will need to call the `mipp::deinterleave` operation before and the
 
 An ARM SVE version is under construction. This version uses *SVE length
 specific* which is more appropriated to the MIPP architecture. This way, the
-size of the *MIPP registers* is defined at compilation. As a reminder, with SVE
-the sizes can be: 128, 256, 512, 1024 or 2048 bits. It is specified at
-the compilation time by the `-msve-vector-bits=<size>` flag.
+size of the *MIPP registers* is defined at compilation. As a reminder, the 
+vector length can vary from a minimum of 128 bits up to a maximum of 2048 bits, 
+at 128-bit increments. It is specified at the compilation time by the 
+`-msve-vector-bits=<size>` flag.
 
 ### Supported MIPP Operations
 
@@ -653,4 +611,47 @@ the compilation time by the `-msve-vector-bits=<size>` flag.
 - **Reductions:** `testz(msk), Reduce<T, add>`
 
 *Byte* and *word* operations are not yet implemented.
+
+## Miscellaneous
+
+### Scientific publications
+
+Adrien Cassagne, Olivier Aumage, Denis Barthou, Camille Leroux and Christophe Jégo,  
+[**MIPP: a Portable C++ SIMD Wrapper and its use for Error Correction Coding in 5G Standard**](https://doi.org/10.1145/3178433.3178435),  
+*The 5th International Workshop on Programming Models for SIMD/Vector Processing (WPMVP 2018), February 2018.*
+
+Adrien Cassagne, Olivier Hartmann, Mathieu Léonardon, Kun He, Camille Leroux, Romain Tajan, Olivier Aumage, Denis Barthou, Thibaud Tonnellier, Vincent Pignoly, Bertrand Le Gal and Christophe Jégo,  
+[**AFF3CT: A Fast Forward Error Correction Toolbox!**](https://doi.org/10.1016/j.softx.2019.100345),  
+*Elsevier SoftwareX, October 2019.*
+
+Mathieu Léonardon, Adrien Cassagne, Camille Leroux, Christophe Jégo, Louis-Philippe Hamelin and Yvon Savaria,  
+[**Fast and Flexible Software Polar List Decoders**](https://doi.org/10.1007/s11265-018-1430-3),  
+*Springer Journal of Signal Processing Systems (JSPS), January 2019.*
+
+
+Alireza Ghaffari, Mathieu Leonardon, Adrien Cassagne, Camille Leroux, Yvon Savaria,  
+[**Toward High-Performance Implementation of 5G SCMA Algorithms**](https://doi.org/10.1109/ACCESS.2019.2891597),  
+*IEEE Acces, January 2019.*
+
+
+Adrien Cassagne, Thibaud Tonnellier, Camille Leroux, Bertrand Le Gal, Olivier Aumage and Denis Barthou,  
+[**Beyond Gbps Turbo Decoder on Multi-Core CPUs**](https://doi.org/10.1109/ISTC.2016.7593092),  
+*The 10th International Symposium on Turbo Codes and Iterative Information Processing (ISTC 2016), September 2016.*
+
+
+Adrien Cassagne, Olivier Aumage, Camille Leroux, Denis Barthou and Bertrand Le Gal,  
+[**Energy Consumption Analysis of Software Polar Decoders on Low Power Processors**](https://doi.org/10.1109/EUSIPCO.2016.7760327),  
+*The 24nd European Signal Processing Conference (EUSIPCO 2016), September 2016.*
+
+
+Adrien Cassagne, Bertrand Le Gal, Camille Leroux, Olivier Aumage and Denis Barthou,  
+[**An Efficient, Portable and Generic Library for Successive Cancellation Decoding of Polar Codes**](https://doi.org/10.1007/978-3-319-29778-1_19),  
+*The 28th International Workshop on Languages and Compilers for Parallel Computing (LCPC 2015), September 2015.*
+
+### Open-source projects in which MIPP is used
+
+  - [AFF3CT](https://github.com/aff3ct/aff3ct): A Fast Forward Error Correction 
+  Toolbox!
+  - [mandelbrot](https://gitlab.inria.fr/acassagn/mandelbrot): the Mandelbrot 
+  fractal, sequential and SIMD implementations.
 
