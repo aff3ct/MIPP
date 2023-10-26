@@ -1,0 +1,8 @@
+set(MIPP_VERSION @MIPP_VERSION@)
+
+@PACKAGE_INIT@
+
+set_and_check(MIPP_INC_DIR "@PACKAGE_INC_INSTALL_DIR@")
+
+# Add the targets file
+include("${CMAKE_CURRENT_LIST_DIR}/mippTargets.cmake")

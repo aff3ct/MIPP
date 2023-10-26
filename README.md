@@ -62,6 +62,37 @@ compliant). However, this is no more the case on ARMv8 processors, so the
 by the C++11 and so we have to add the `-std=c++11` flag to compile the code. 
 You are now ready to run your code with the MIPP wrapper.
 
+In the case where MIPP is installed on the system it can be integrated into a
+cmake projet in a standard way. Example
+```sh
+# install MIPP
+cd MIPP/
+export MIPP_ROOT=$PWD/build/install
+cmake -B build -DCMAKE_INSTALL_PREFIX=$MIPP_ROOT
+cmake --build build -j5
+cmake --install build
+```
+
+In your `CMakeLists.txt`:
+```cmake
+# find the installation of MIPP on the system
+find_package(MIPP REQUIRED)
+
+# define your executable
+add_executable(gemm gemm.cpp)
+
+# link your executable to MIPP
+target_link_libraries(gemm PRIVATE MIPP::mipp)
+```
+
+```sh
+cd your_project/
+# if MIPP is installed in a system standard path: MIPP will be found automatically with cmake
+cmake -B build
+# if MIPP is installed in a non-standard path: use CMAKE_PREFIX_PATH
+cmake -B build -DCMAKE_PREFIX_PATH=$MIPP_ROOT
+```
+
 ### Sequential Mode
 
 By default, MIPP tries to recognize the instruction set from the preprocessor 
