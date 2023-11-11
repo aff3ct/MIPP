@@ -66,9 +66,9 @@ public:
 	static inline Reg<T> cmask2(const uint32_t mask[nElReg<T>()/2]) { return mipp::cmask2<T>(mask); }
 	static inline Reg<T> cmask4(const uint32_t mask[nElReg<T>()/4]) { return mipp::cmask4<T>(mask); }
 #else
-	static inline Reg<T> cmask (const uint32_t mask[1]) { return Reg<T>((T)0);          }
-	static inline Reg<T> cmask2(const uint32_t mask[1]) { return Reg<T>((T)0);          }
-	static inline Reg<T> cmask4(const uint32_t mask[1]) { return Reg<T>((T)0);          }
+	static inline Reg<T> cmask (const uint32_t mask[1]) { return Reg<T>((T)0); }
+	static inline Reg<T> cmask2(const uint32_t mask[1]) { return Reg<T>((T)0); }
+	static inline Reg<T> cmask4(const uint32_t mask[1]) { return Reg<T>((T)0); }
 #endif
 
 	static inline void transpose(Reg<T> regs[nElReg<T>()])
@@ -202,6 +202,7 @@ public:
 	inline Reg<T>      fmsub        (const Reg<T> v1, const Reg<T> v2)     const { return mipp::fmsub        <T>(r, v1.r, v2.r);  }
 	inline Reg<T>      fnmsub       (const Reg<T> v1, const Reg<T> v2)     const { return mipp::fnmsub       <T>(r, v1.r, v2.r);  }
 	inline Reg<T>      blend        (const Reg<T> v1, const Msk<N<T>()> m) const { return mipp::blend        <T>(r, v1.r,  m.m);  }
+	inline Reg<T>      select       (const Reg<T> v1, const Msk<N<T>()> m) const { return mipp::select       <T>(m.m, r, v1.r );  }
 	inline Reg<T>      lrot         ()                                     const { return mipp::lrot         <T>(r);              }
 	inline Reg<T>      rrot         ()                                     const { return mipp::rrot         <T>(r);              }
 	inline Reg<T>      div2         ()                                     const { return mipp::div2         <T>(r);              }
@@ -291,6 +292,7 @@ public:
 	inline Reg<T>      fmsub        (const Reg<T> v1, const Reg<T> v2)     const { return   r * v1.r - v2.r;                      }
 	inline Reg<T>      fnmsub       (const Reg<T> v1, const Reg<T> v2)     const { return -v2.r - (r * v1.r) ;                    }
 	inline Reg<T>      blend        (const Reg<T> v1, const Msk<N<T>()> m) const { return (m.m) ? r : v1.r;                       }
+	inline Reg<T>      select       (const Reg<T> v1, const Msk<N<T>()> m) const { return (m.m) ? r : v1.r;                       }
 	inline Reg<T>      lrot         ()                                     const { return r;                                      }
 	inline Reg<T>      rrot         ()                                     const { return r;                                      }
 	inline Reg<T>      div2         ()                                     const { return mipp_scop::div2<T>(r);                  }
@@ -867,7 +869,8 @@ template <typename T> inline Reg<T>      fmadd        (const Reg<T> v1, const Re
 template <typename T> inline Reg<T>      fnmadd       (const Reg<T> v1, const Reg<T> v2, const Reg<T> v3)     { return v1.fnmadd(v2, v3);        }
 template <typename T> inline Reg<T>      fmsub        (const Reg<T> v1, const Reg<T> v2, const Reg<T> v3)     { return v1.fmsub(v2, v3);         }
 template <typename T> inline Reg<T>      fnmsub       (const Reg<T> v1, const Reg<T> v2, const Reg<T> v3)     { return v1.fnmsub(v2, v3);        }
-template <typename T> inline Reg<T>      blend        (const Reg<T> v1, const Reg<T> v2, const Msk<N<T>()> m) { return v1.blend(v2, m );         }
+template <typename T> inline Reg<T>      blend        (const Reg<T> v1, const Reg<T> v2, const Msk<N<T>()> m) { return v1.blend(v2, m);          }
+template <typename T> inline Reg<T>      select       (const Msk<N<T>()> m, const Reg<T> v1, const Reg<T> v2) { return v1.select(v2, m);         }
 template <typename T> inline Reg<T>      lrot         (const Reg<T> v)                                        { return v.lrot();                 }
 template <typename T> inline Reg<T>      rrot         (const Reg<T> v)                                        { return v.rrot();                 }
 template <typename T> inline Reg<T>      div2         (const Reg<T> v)                                        { return v.div2();                 }

@@ -495,6 +495,7 @@ In the documentation there are some terms that requires to be clarified:
 | `lrot`          | `Reg  <T> lrot          (const Reg<T> r)`                                              | Rotates the `r` register from the left (cyclic permutation).                                                                                                        | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 | `rrot`          | `Reg  <T> rrot          (const Reg<T> r)`                                              | Rotates the `r` register from the right (cyclic permutation).                                                                                                       | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 | `blend`         | `Reg  <T> blend         (const Reg<T> r1, const Reg<T> r2, const Msk<N> m)`            | Combines `r1` and `r2` register following the `m` mask values (`m_i ? r1_i : r2_i`).                                                                                | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
+| `select`        | `Reg  <T> select        (const Msk<N> m, const Reg<T> r1, const Reg<T> r2)`            | Alias for the previous `blend` function. Parameters order is a little bit different.                                                                                | `double`, `float`, `int64_t`, `int32_t`, `int16_t`, `int8_t` |
 
 ### Bitwise Operations
 
