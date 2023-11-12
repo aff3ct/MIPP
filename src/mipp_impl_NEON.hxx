@@ -3466,8 +3466,8 @@
 			uint16x4_t high2 = vrev32_u16((uint16x4_t) vget_high_u32((uint32x4_t) val));
 			val = OP(val, (reg) vcombine_u32((uint32x2_t) low2, (uint32x2_t) high2));
 
-			uint8x8_t low3  = vrev16_u8((uint8x8_t) vget_low_s32((uint32x4_t) val));
-			uint8x8_t high3 = vrev16_u8((uint8x8_t) vget_high_s32((uint32x4_t) val));
+			uint8x8_t low3  = vrev16_u8((uint8x8_t) vget_low_u32((uint32x4_t) val));
+			uint8x8_t high3 = vrev16_u8((uint8x8_t) vget_high_u32((uint32x4_t) val));
 			val = OP(val, (reg) vcombine_u32((uint32x2_t) low3, (uint32x2_t) high3));
 
 			return val;
@@ -3482,8 +3482,8 @@
 
 			val = OP(val, Reg<uint8_t>((reg) vextq_u32((uint32x4_t) val.r, (uint32x4_t) val.r, 2)));
 
-			uint32x2_t low1  = vrev64_u32((uint32x2_t) vget_low_s32 ((uint32x4_t) val.r));
-			uint32x2_t high1 = vrev64_u32((uint32x2_t) vget_high_s32((uint32x4_t) val.r));
+			uint32x2_t low1  = vrev64_u32((uint32x2_t) vget_low_u32 ((uint32x4_t) val.r));
+			uint32x2_t high1 = vrev64_u32((uint32x2_t) vget_high_u32((uint32x4_t) val.r));
 			val = OP(val, Reg<uint8_t>((reg) vcombine_u32((uint32x2_t) low1, (uint32x2_t) high1)));
 
 			uint16x4_t low2  = vrev32_u16((uint16x4_t) vget_low_u32((uint32x4_t) val.r));
