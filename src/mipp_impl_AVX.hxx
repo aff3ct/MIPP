@@ -246,7 +246,6 @@
 	}
 
 	// -------------------------------------------------------------------------------------------------- masked gather
-
 #ifdef __AVX2__
 	template <>
 	inline reg maskzgat<double,int64_t>(const msk m, const double *mem_addr, const reg idx) {
@@ -271,7 +270,6 @@
 #endif
 
 	// -------------------------------------------------------------------------------------------------------- scatter
-
 	template <>
 	inline void scatter<double,int64_t>(double *mem_addr, const reg idx, const reg r) {
 		scatter_seq<double,int64_t>(mem_addr, idx, r);

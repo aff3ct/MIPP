@@ -1725,12 +1725,12 @@ template <> inline void store<uint8_t >(uint8_t  *mem_addr, const reg v) { store
 
 // ---------------------------------------------------------------------------------------------------------------- set
 #ifdef MIPP_64BIT
-template <> inline reg set<uint64_t>(const uint64_t vals[N<uint64_t>()]) { return load<uint64_t>(vals); }
+template <> inline reg set<uint64_t>(const uint64_t vals[N<uint64_t>()]) { return loadu<uint64_t>(vals); }
 #endif
-template <> inline reg set<uint32_t>(const uint32_t vals[N<uint32_t>()]) { return load<uint32_t>(vals); }
+template <> inline reg set<uint32_t>(const uint32_t vals[N<uint32_t>()]) { return loadu<uint32_t>(vals); }
 #ifdef MIPP_BW
-template <> inline reg set<uint16_t>(const uint16_t vals[N<uint16_t>()]) { return load<uint16_t>(vals); }
-template <> inline reg set<uint8_t> (const uint8_t  vals[N<uint8_t >()]) { return load<uint8_t >(vals); }
+template <> inline reg set<uint16_t>(const uint16_t vals[N<uint16_t>()]) { return loadu<uint16_t>(vals); }
+template <> inline reg set<uint8_t> (const uint8_t  vals[N<uint8_t >()]) { return loadu<uint8_t >(vals); }
 #endif
 
 // ---------------------------------------------------------------------------------------------------------------- low
