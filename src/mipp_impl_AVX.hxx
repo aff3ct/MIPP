@@ -3964,6 +3964,28 @@
 		}
 	};
 
+	template <red_op<uint64_t> OP>
+	struct _reduction<uint64_t,OP>
+	{
+		static reg apply(const reg v1) {
+			auto val = v1;
+			val = OP(val, _mm256_permute2f128_ps(val, val, _MM_SHUFFLE(0,0,0,1)));
+			val = OP(val, _mm256_shuffle_ps     (val, val, _MM_SHUFFLE(1,0,3,2)));
+			return val;
+		}
+	};
+
+	template <Red_op<uint64_t> OP>
+	struct _Reduction<uint64_t,OP>
+	{
+		static const Reg<uint64_t> apply(const Reg<uint64_t> v1) {
+			auto val = v1;
+			val = OP(val, Reg<uint64_t>(_mm256_permute2f128_ps(val.r, val.r, _MM_SHUFFLE(0,0,0,1))));
+			val = OP(val, Reg<uint64_t>(_mm256_shuffle_ps     (val.r, val.r, _MM_SHUFFLE(1,0,3,2))));
+			return val;
+		}
+	};
+
 	template <red_op<int32_t> OP>
 	struct _reduction<int32_t,OP>
 	{
@@ -3984,6 +4006,30 @@
 			val = OP(val, Reg<int32_t>(_mm256_permute2f128_ps(val.r, val.r, _MM_SHUFFLE(0,0,0,1))));
 			val = OP(val, Reg<int32_t>(_mm256_shuffle_ps     (val.r, val.r, _MM_SHUFFLE(1,0,3,2))));
 			val = OP(val, Reg<int32_t>(_mm256_shuffle_ps     (val.r, val.r, _MM_SHUFFLE(2,3,0,1))));
+			return val;
+		}
+	};
+
+	template <red_op<uint32_t> OP>
+	struct _reduction<uint32_t,OP>
+	{
+		static reg apply(const reg v1) {
+			auto val = v1;
+			val = OP(val, _mm256_permute2f128_ps(val, val, _MM_SHUFFLE(0,0,0,1)));
+			val = OP(val, _mm256_shuffle_ps     (val, val, _MM_SHUFFLE(1,0,3,2)));
+			val = OP(val, _mm256_shuffle_ps     (val, val, _MM_SHUFFLE(2,3,0,1)));
+			return val;
+		}
+	};
+
+	template <Red_op<uint32_t> OP>
+	struct _Reduction<uint32_t,OP>
+	{
+		static Reg<uint32_t> apply(const Reg<uint32_t> v1) {
+			auto val = v1;
+			val = OP(val, Reg<uint32_t>(_mm256_permute2f128_ps(val.r, val.r, _MM_SHUFFLE(0,0,0,1))));
+			val = OP(val, Reg<uint32_t>(_mm256_shuffle_ps     (val.r, val.r, _MM_SHUFFLE(1,0,3,2))));
+			val = OP(val, Reg<uint32_t>(_mm256_shuffle_ps     (val.r, val.r, _MM_SHUFFLE(2,3,0,1))));
 			return val;
 		}
 	};
@@ -4027,6 +4073,48 @@
 			                                                                         _MM_SHUFFLE(2,3,0,1)))));
 			val = OP(val, Reg<int16_t>(_mm256_castsi256_ps(_mm256_shuffle_epi8      (_mm256_castps_si256(val.r),
 			                                                                         mask_16))));
+			return val;
+		}
+	};
+
+	template <red_op<uint16_t> OP>
+	struct _reduction<uint16_t,OP>
+	{
+		static reg apply(const reg v1) {
+			__m256i mask_16 = _mm256_set_epi8(29, 28, 31, 30, 25, 24, 27, 26, 21, 20, 23, 22, 17, 16, 19, 18, 13, 12, 15,
+			                                  14, 9, 8, 11, 10, 5, 4, 7, 6, 1, 0, 3, 2);
+
+			auto val = v1;
+			val = OP(val, _mm256_castsi256_ps(_mm256_permute2f128_si256(_mm256_castps_si256(val),
+			                                                            _mm256_castps_si256(val),
+			                                                            _MM_SHUFFLE(0,0,0,1))));
+			val = OP(val, _mm256_castsi256_ps(_mm256_permute4x64_epi64 (_mm256_castps_si256(val),
+			                                                            _MM_SHUFFLE(2,3,0,1))));
+			val = OP(val, _mm256_castsi256_ps(_mm256_shuffle_epi32     (_mm256_castps_si256(val),
+			                                                            _MM_SHUFFLE(2,3,0,1))));
+			val = OP(val, _mm256_castsi256_ps(_mm256_shuffle_epi8      (_mm256_castps_si256(val),
+			                                                            mask_16)));
+			return val;
+		}
+	};
+
+	template <Red_op<uint16_t> OP>
+	struct _Reduction<uint16_t,OP>
+	{
+		static Reg<uint16_t> apply(const Reg<uint16_t> v1) {
+			__m256i mask_16 = _mm256_set_epi8(29, 28, 31, 30, 25, 24, 27, 26, 21, 20, 23, 22, 17, 16, 19, 18, 13, 12, 15,
+			                                  14, 9, 8, 11, 10, 5, 4, 7, 6, 1, 0, 3, 2);
+
+			auto val = v1;
+			val = OP(val, Reg<uint16_t>(_mm256_castsi256_ps(_mm256_permute2f128_si256(_mm256_castps_si256(val.r),
+			                                                                          _mm256_castps_si256(val.r),
+			                                                                          _MM_SHUFFLE(0,0,0,1)))));
+			val = OP(val, Reg<uint16_t>(_mm256_castsi256_ps(_mm256_permute4x64_epi64 (_mm256_castps_si256(val.r),
+			                                                                           _MM_SHUFFLE(2,3,0,1)))));
+			val = OP(val, Reg<uint16_t>(_mm256_castsi256_ps(_mm256_shuffle_epi32     (_mm256_castps_si256(val.r),
+			                                                                          _MM_SHUFFLE(2,3,0,1)))));
+			val = OP(val, Reg<uint16_t>(_mm256_castsi256_ps(_mm256_shuffle_epi8      (_mm256_castps_si256(val.r),
+			                                                                          mask_16))));
 			return val;
 		}
 	};
@@ -4079,6 +4167,56 @@
 			                                                                        mask_16))));
 			val = OP(val, Reg<int8_t>(_mm256_castsi256_ps(_mm256_shuffle_epi8      (_mm256_castps_si256(val.r),
 			                                                                        mask_8))));
+			return val;
+		}
+	};
+
+	template <red_op<uint8_t> OP>
+	struct _reduction<uint8_t,OP>
+	{
+		static reg apply(const reg v1) {
+			__m256i mask_16 = _mm256_set_epi8(29, 28, 31, 30, 25, 24, 27, 26, 21, 20, 23, 22, 17, 16, 19, 18, 13, 12, 15,
+			                                  14, 9, 8, 11, 10, 5, 4, 7, 6, 1, 0, 3, 2);
+			__m256i mask_8  = _mm256_set_epi8(30, 31, 28, 29, 26, 27, 24, 25, 22, 23, 20, 21, 18, 19, 16, 17, 14, 15, 12,
+			                                  13, 10, 11, 8, 9, 6, 7, 4, 5, 2, 3, 0, 1);
+
+			auto val = v1;
+			val = OP(val, _mm256_castsi256_ps(_mm256_permute2f128_si256(_mm256_castps_si256(val),
+			                                                            _mm256_castps_si256(val),
+			                                                            _MM_SHUFFLE(0,0,0,1))));
+			val = OP(val, _mm256_castsi256_ps(_mm256_permute4x64_epi64 (_mm256_castps_si256(val),
+			                                                            _MM_SHUFFLE(2,3,0,1))));
+			val = OP(val, _mm256_castsi256_ps(_mm256_shuffle_epi32     (_mm256_castps_si256(val),
+			                                                            _MM_SHUFFLE(2,3,0,1))));
+			val = OP(val, _mm256_castsi256_ps(_mm256_shuffle_epi8      (_mm256_castps_si256(val),
+			                                                            mask_16)));
+			val = OP(val, _mm256_castsi256_ps(_mm256_shuffle_epi8      (_mm256_castps_si256(val),
+			                                                            mask_8)));
+			return val;
+		}
+	};
+
+	template <Red_op<uint8_t> OP>
+	struct _Reduction<uint8_t,OP>
+	{
+		static Reg<uint8_t> apply(const Reg<uint8_t> v1) {
+			__m256i mask_16 = _mm256_set_epi8(29, 28, 31, 30, 25, 24, 27, 26, 21, 20, 23, 22, 17, 16, 19, 18, 13, 12, 15,
+			                                  14, 9, 8, 11, 10, 5, 4, 7, 6, 1, 0, 3, 2);
+			__m256i mask_8  = _mm256_set_epi8(30, 31, 28, 29, 26, 27, 24, 25, 22, 23, 20, 21, 18, 19, 16, 17, 14, 15, 12,
+			                                  13, 10, 11, 8, 9, 6, 7, 4, 5, 2, 3, 0, 1);
+
+			auto val = v1;
+			val = OP(val, Reg<uint8_t>(_mm256_castsi256_ps(_mm256_permute2f128_si256(_mm256_castps_si256(val.r),
+			                                                                         _mm256_castps_si256(val.r),
+			                                                                         _MM_SHUFFLE(0,0,0,1)))));
+			val = OP(val, Reg<uint8_t>(_mm256_castsi256_ps(_mm256_permute4x64_epi64 (_mm256_castps_si256(val.r),
+			                                                                         _MM_SHUFFLE(2,3,0,1)))));
+			val = OP(val, Reg<uint8_t>(_mm256_castsi256_ps(_mm256_shuffle_epi32     (_mm256_castps_si256(val.r),
+			                                                                         _MM_SHUFFLE(2,3,0,1)))));
+			val = OP(val, Reg<uint8_t>(_mm256_castsi256_ps(_mm256_shuffle_epi8      (_mm256_castps_si256(val.r),
+			                                                                         mask_16))));
+			val = OP(val, Reg<uint8_t>(_mm256_castsi256_ps(_mm256_shuffle_epi8      (_mm256_castps_si256(val.r),
+			                                                                         mask_8))));
 			return val;
 		}
 	};

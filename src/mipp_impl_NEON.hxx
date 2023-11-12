@@ -3232,6 +3232,30 @@
 			return val;
 		}
 	};
+
+	template <red_op<uint64_t> OP>
+	struct _reduction<uint64_t,OP>
+	{
+		static reg apply(const reg v1) {
+			auto val = v1;
+
+			val = OP(val, (reg) vextq_u64((uint64x2_t)val, (uint64x2_t)val, 1));
+
+			return val;
+		}
+	};
+
+	template <Red_op<uint64_t> OP>
+	struct _Reduction<uint64_t,OP>
+	{
+		static Reg<uint64_t> apply(const Reg<uint64_t> v1) {
+			auto val = v1;
+
+			val = OP(val, Reg<uint64_t>((reg) vextq_u64((uint64x2_t)val.r, (uint64x2_t)val.r, 1)));
+
+			return val;
+		}
+	};
 #endif
 
 	template <red_op<int32_t> OP>
@@ -3261,6 +3285,38 @@
 			int32x2_t low1  = vrev64_s32((int32x2_t) vget_low_s32 ((int32x4_t) val.r));
 			int32x2_t high1 = vrev64_s32((int32x2_t) vget_high_s32((int32x4_t) val.r));
 			val = OP(val, Reg<int32_t>((reg) vcombine_s32((int32x2_t) low1, (int32x2_t) high1)));
+
+			return val;
+		}
+	};
+
+	template <red_op<uint32_t> OP>
+	struct _reduction<uint32_t,OP>
+	{
+		static reg apply(const reg v1) {
+			auto val = v1;
+
+			val = OP(val, (reg) vextq_u32((uint32x4_t) val, (uint32x4_t) val, 2));
+
+			uint32x2_t low1  = vrev64_u32((uint32x2_t) vget_low_u32 ((uint32x4_t) val));
+			uint32x2_t high1 = vrev64_u32((uint32x2_t) vget_high_u32((uint32x4_t) val));
+			val = OP(val, (reg) vcombine_u32((uint32x2_t) low1, (uint32x2_t) high1));
+
+			return val;
+		}
+	};
+
+	template <Red_op<uint32_t> OP>
+	struct _Reduction<uint32_t,OP>
+	{
+		static Reg<uint32_t> apply(const Reg<uint32_t> v1) {
+			auto val = v1;
+
+			val = OP(val, Reg<uint32_t>((reg) vextq_u32((uint32x4_t) val.r, (uint32x4_t) val.r, 2)));
+
+			uint32x2_t low1  = vrev64_u32((uint32x2_t) vget_low_u32 ((uint32x4_t) val.r));
+			uint32x2_t high1 = vrev64_u32((uint32x2_t) vget_high_u32((uint32x4_t) val.r));
+			val = OP(val, Reg<uint32_t>((reg) vcombine_u32((uint32x2_t) low1, (uint32x2_t) high1)));
 
 			return val;
 		}
@@ -3301,6 +3357,46 @@
 			int16x4_t low2  = vrev32_s16((int16x4_t) vget_low_s32((int32x4_t) val.r));
 			int16x4_t high2 = vrev32_s16((int16x4_t) vget_high_s32((int32x4_t) val.r));
 			val = OP(val, Reg<int16_t>((reg) vcombine_s32((int32x2_t) low2, (int32x2_t) high2)));
+
+			return val;
+		}
+	};
+
+	template <red_op<uint16_t> OP>
+	struct _reduction<uint16_t,OP>
+	{
+		static reg apply(const reg v1) {
+			auto val = v1;
+
+			val = OP(val, (reg) vextq_u32((uint32x4_t) val, (uint32x4_t) val, 2));
+
+			uint32x2_t low1  = vrev64_u32((uint32x2_t) vget_low_u32 ((uint32x4_t) val));
+			uint32x2_t high1 = vrev64_u32((uint32x2_t) vget_high_u32((uint32x4_t) val));
+			val = OP(val, (reg) vcombine_u32((uint32x2_t) low1, (uint32x2_t) high1));
+
+			uint16x4_t low2  = vrev32_u16((uint16x4_t) vget_low_u32((uint32x4_t) val));
+			uint16x4_t high2 = vrev32_u16((uint16x4_t) vget_high_u32((uint32x4_t) val));
+			val = OP(val, (reg) vcombine_u32((uint32x2_t) low2, (uint32x2_t) high2));
+
+			return val;
+		}
+	};
+
+	template <Red_op<uint16_t> OP>
+	struct _Reduction<uint16_t,OP>
+	{
+		static Reg<uint16_t> apply(const Reg<uint16_t> v1) {
+			auto val = v1;
+
+			val = OP(val, Reg<uint16_t>((reg) vextq_u32((uint32x4_t) val.r, (uint32x4_t) val.r, 2)));
+
+			uint32x2_t low1  = vrev64_u32((uint32x2_t) vget_low_u32 ((uint32x4_t) val.r));
+			uint32x2_t high1 = vrev64_u32((uint32x2_t) vget_high_u32((uint32x4_t) val.r));
+			val = OP(val, Reg<uint16_t>((reg) vcombine_u32((uint32x2_t) low1, (uint32x2_t) high1)));
+
+			uint16x4_t low2  = vrev32_u16((uint16x4_t) vget_low_u32((uint32x4_t) val.r));
+			uint16x4_t high2 = vrev32_u16((uint16x4_t) vget_high_u32((uint32x4_t) val.r));
+			val = OP(val, Reg<uint16_t>((reg) vcombine_u32((uint32x2_t) low2, (uint32x2_t) high2)));
 
 			return val;
 		}
@@ -3349,6 +3445,54 @@
 			int8x8_t low3  = vrev16_s8((int8x8_t) vget_low_s32((int32x4_t) val.r));
 			int8x8_t high3 = vrev16_s8((int8x8_t) vget_high_s32((int32x4_t) val.r));
 			val = OP(val, Reg<int8_t>((reg) vcombine_s32((int32x2_t) low3, (int32x2_t) high3)));
+
+			return val;
+		}
+	};
+
+	template <red_op<uint8_t> OP>
+	struct _reduction<uint8_t,OP>
+	{
+		static reg apply(const reg v1) {
+			auto val = v1;
+
+			val = OP(val, (reg) vextq_u32((uint32x4_t) val, (uint32x4_t) val, 2));
+
+			uint32x2_t low1  = vrev64_u32((uint32x2_t) vget_low_u32 ((uint32x4_t) val));
+			uint32x2_t high1 = vrev64_u32((uint32x2_t) vget_high_u32((uint32x4_t) val));
+			val = OP(val, (reg) vcombine_u32((uint32x2_t) low1, (uint32x2_t) high1));
+
+			uint16x4_t low2  = vrev32_u16((uint16x4_t) vget_low_u32((uint32x4_t) val));
+			uint16x4_t high2 = vrev32_u16((uint16x4_t) vget_high_u32((uint32x4_t) val));
+			val = OP(val, (reg) vcombine_u32((uint32x2_t) low2, (uint32x2_t) high2));
+
+			uint8x8_t low3  = vrev16_u8((uint8x8_t) vget_low_s32((uint32x4_t) val));
+			uint8x8_t high3 = vrev16_u8((uint8x8_t) vget_high_s32((uint32x4_t) val));
+			val = OP(val, (reg) vcombine_u32((uint32x2_t) low3, (uint32x2_t) high3));
+
+			return val;
+		}
+	};
+
+	template <Red_op<uint8_t> OP>
+	struct _Reduction<uint8_t,OP>
+	{
+		static Reg<uint8_t> apply(const Reg<uint8_t> v1) {
+			auto val = v1;
+
+			val = OP(val, Reg<uint8_t>((reg) vextq_u32((uint32x4_t) val.r, (uint32x4_t) val.r, 2)));
+
+			uint32x2_t low1  = vrev64_u32((uint32x2_t) vget_low_s32 ((uint32x4_t) val.r));
+			uint32x2_t high1 = vrev64_u32((uint32x2_t) vget_high_s32((uint32x4_t) val.r));
+			val = OP(val, Reg<uint8_t>((reg) vcombine_u32((uint32x2_t) low1, (uint32x2_t) high1)));
+
+			uint16x4_t low2  = vrev32_u16((uint16x4_t) vget_low_u32((uint32x4_t) val.r));
+			uint16x4_t high2 = vrev32_u16((uint16x4_t) vget_high_u32((uint32x4_t) val.r));
+			val = OP(val, Reg<uint8_t>((reg) vcombine_u32((uint32x2_t) low2, (uint32x2_t) high2)));
+
+			uint8x8_t low3  = vrev16_u8((uint8x8_t) vget_low_u32((uint32x4_t) val.r));
+			uint8x8_t high3 = vrev16_u8((uint8x8_t) vget_high_u32((uint32x4_t) val.r));
+			val = OP(val, Reg<uint8_t>((reg) vcombine_u32((uint32x2_t) low3, (uint32x2_t) high3)));
 
 			return val;
 		}

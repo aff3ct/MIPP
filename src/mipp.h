@@ -2081,8 +2081,6 @@ template <> inline reg div4<uint16_t>(const reg v1) { return rshift<uint16_t>(v1
 template <> inline reg div4<uint8_t >(const reg v1) { return rshift<uint8_t >(v1, 2); }
 #endif
 
-// --------------------------------------------------------------------------------------------------- reduction (TODO)
-
 // -------------------------------------------------------------------------------------------------------------- testz
 #ifdef MIPP_64BIT
 template <> inline bool testz<uint64_t>(const reg v1, const reg v2) { return testz<int64_t>(v1, v2); }
