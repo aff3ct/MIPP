@@ -121,6 +121,8 @@ elements can be obtained by calling the `mipp::N<T>()` function (`T` is a
 template parameter, it can be `double`, `float`, `int64_t`, `uint64_t`,
 `int32_t`, `uint32_t`, `int16_t`, `uint16_t`, `int8_t` or `uint8_t` type).
 
+For all the following examples ``` T = float ```
+
 ```cpp
 for (int i = 0; i < n; i += mipp::N<float>()) {
 	// ...
