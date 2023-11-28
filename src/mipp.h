@@ -732,6 +732,7 @@ template <typename T> inline msk   cmpge        (const reg, const reg)          
 template <typename T> inline reg   add          (const reg, const reg)            { errorMessage<T>("add");           exit(-1); }
 template <typename T> inline reg_2 add          (const reg_2, const reg_2)        { errorMessage<T>("add");           exit(-1); }
 template <typename T> inline reg   sub          (const reg, const reg)            { errorMessage<T>("sub");           exit(-1); }
+template <typename T> inline reg_2 sub          (const reg_2, const reg_2)        { errorMessage<T>("sub");           exit(-1); }
 template <typename T> inline reg   mul          (const reg, const reg)            { errorMessage<T>("mul");           exit(-1); }
 template <typename T> inline reg_2 mul          (const reg_2, const reg_2)        { errorMessage<T>("mul");           exit(-1); }
 template <typename T> inline reg   div          (const reg, const reg)            { errorMessage<T>("div");           exit(-1); }

@@ -2748,6 +2748,13 @@
 	}
 #endif
 
+#ifdef __SSE2__
+    template <>
+    inline reg_2 add<int32_t>(const reg_2 v1, const reg_2 v2) {
+        return _mm_castsi128_ps(_mm_add_epi32(_mm_castps_si128(v1), _mm_castps_si128(v2)));
+    }
+#endif
+
 	// ------------------------------------------------------------------------------------------------------------ sub
 	template <>
 	inline reg sub<float>(const reg v1, const reg v2) {
@@ -2791,6 +2798,14 @@
 	}
 #endif
 
+#ifdef __SSE2__
+    template <>
+	inline reg_2 sub<int32_t>(const reg_2 v1, const reg_2 v2) {
+		return _mm_castsi128_ps(_mm_sub_epi32(_mm_castps_si128(v1), _mm_castps_si128(v2)));
+	}
+#endif
+
+
 	// ------------------------------------------------------------------------------------------------------------ mul
 	template <>
 	inline reg mul<float>(const reg v1, const reg v2) {
@@ -2814,6 +2829,12 @@
 	}
 #endif
 
+#ifdef __SSE4_1__
+    template <>
+    inline reg_2 mul<int32_t>(const reg_2 v1, const reg_2 v2) {
+        return _mm_castsi128_ps(_mm_mullo_epi32(_mm_castps_si128(v1), _mm_castps_si128(v2)));
+    }
+#endif
 	// ------------------------------------------------------------------------------------------------------------ div
 	template <>
 	inline reg div<float>(const reg v1, const reg v2) {
