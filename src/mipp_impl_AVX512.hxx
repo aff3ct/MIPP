@@ -2992,6 +2992,12 @@
 		return _mm512_castsi512_ps(_mm512_add_epi32(_mm512_castps_si512(v1), _mm512_castps_si512(v2)));
 	}
 
+#if defined(__AVX__)
+ 	template <>
+	inline reg_2 add<int32_t>(const reg_2 v1, const reg_2 v2) {
+		return _mm256_castsi256_ps(_mm256_add_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	}
+#endif
 	template <>
 	inline reg mask<int32_t,add<int32_t>>(const msk m, const reg src, const reg v1, const reg v2) {
 		return _mm512_castsi512_ps(_mm512_mask_add_epi32(_mm512_castps_si512(src), (__mmask16)m, _mm512_castps_si512(v1), _mm512_castps_si512(v2)));
@@ -3180,6 +3186,13 @@
 	inline reg mul<int32_t>(const reg v1, const reg v2) {
 		return _mm512_castsi512_ps(_mm512_mullo_epi32(_mm512_castps_si512(v1), _mm512_castps_si512(v2)));
 	}
+
+#if defined(__AVX__)
+	template <>
+	inline reg_2 mul<int32_t>(const reg_2 v1, const reg_2 v2) {
+		return _mm256_castsi256_ps(_mm256_mullo_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	}
+#endif
 
 #if defined(__AVX512BW__)
 	template <>
