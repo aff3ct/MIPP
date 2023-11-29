@@ -629,7 +629,7 @@ public:
 	Reg_2(const T val  ) : r(val) {}
 #endif
 
-	virtual ~Reg_2() = default;
+	~Reg_2() = default;
 
 #ifndef MIPP_NO_INTRINSICS
 	template <typename T2> inline Reg<T2> cvt() const { return mipp::cvt<T,T2>(r); }
