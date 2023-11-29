@@ -3154,7 +3154,7 @@
 	inline reg_2 sub<int32_t>(const reg_2 v1, const reg_2 v2) {
 		return _mm256_castsi256_ps(_mm256_sub_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
 	}
-
+#endif
 
 #if defined(__AVX512BW__)
 	template <>
