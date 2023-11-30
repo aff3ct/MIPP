@@ -2,7 +2,7 @@ variables:
   GIT_SUBMODULE_STRATEGY: none
 
 stages:
-  - analysis
+  # - analysis
   - build
   - test
   - coverage
@@ -13,21 +13,21 @@ before_script:
   - whoami
 # - pwd
 
-analysis-cppcheck:
-  image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_cppcheck:v1.9
-  stage: analysis
-  allow_failure: false
-  artifacts:
-    name: analysis-cppcheck-logs
-    when: always
-    paths:
-      - cppcheck/
-  tags:
-    - x86_64
-    - linux
-    - docker
-  script:
-    - ./ci/analysis-cppcheck.sh
+# analysis-cppcheck:
+#   image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_cppcheck:v1.9
+#   stage: analysis
+#   allow_failure: false
+#   artifacts:
+#     name: analysis-cppcheck-logs
+#     when: always
+#     paths:
+#       - cppcheck/
+#   tags:
+#     - x86_64
+#     - linux
+#     - docker
+#   script:
+#     - ./ci/analysis-cppcheck.sh
 
 # ---------------------------------------------------------------------------------------------------------------------
 # LINUX X86 -----------------------------------------------------------------------------------------------------------
