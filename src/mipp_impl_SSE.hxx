@@ -902,7 +902,49 @@
 #endif
 
 	// -------------------------------------------------------------------------------------------------------- lshiftr
+	template <>
+	inline reg lshiftr<int64_t>(const reg v1, const reg v2) {
+		int64_t t1[2], t2[2];
+		mipp::storeu<int64_t>(t1, v1);
+		mipp::storeu<int64_t>(t2, v2);
+		for (int i = 0; i < 2; i++){
+			t1[i] <<= t2[i];			
+		}
+		return mipp::loadu<int64_t>(t1);
+	}
 
+	template <>
+	inline reg lshiftr<int32_t>(const reg v1, const reg v2) {
+		int32_t t1[4], t2[4];
+		mipp::storeu<int32_t>(t1, v1);
+		mipp::storeu<int32_t>(t2, v2);
+		for (int i = 0; i < 4; i++){
+			t1[i] <<= t2[i];			
+		}
+		return mipp::loadu<int32_t>(t1);
+	}
+
+	template <>
+	inline reg lshiftr<int16_t>(const reg v1, const reg v2) {
+		int16_t t1[8], t2[8];
+		mipp::storeu<int16_t>(t1, v1);
+		mipp::storeu<int16_t>(t2, v2);
+		for (int i = 0; i < 8; i++){
+			t1[i] <<= t2[i];			
+		}
+		return mipp::loadu<int16_t>(t1);
+	}
+
+	template <>
+	inline reg lshiftr<int8_t>(const reg v1, const reg v2) {
+		int8_t t1[16], t2[16];
+		mipp::storeu<int8_t>(t1, v1);
+		mipp::storeu<int8_t>(t2, v2);
+		for (int i = 0; i < 16; i++){
+			t1[i] <<= t2[i];			
+		}
+		return mipp::loadu<int8_t>(t1);
+	}
 	// -------------------------------------------------------------------------------------------------- lshift (mask)
 #ifdef __SSE2__
 #if !defined(__clang__) && !defined(_MSC_VER) && !defined(__GNUC__)
@@ -970,7 +1012,49 @@
 #endif
 
 	// -------------------------------------------------------------------------------------------------------- rshiftr
+	template <>
+	inline reg rshiftr<int64_t>(const reg v1, const reg v2) {
+		int64_t t1[2], t2[2];
+		mipp::storeu<int64_t>(t1, v1);
+		mipp::storeu<int64_t>(t2, v2);
+		for (int i = 0; i < 2; i++){
+			t1[i] >>= t2[i];			
+		}
+		return mipp::loadu<int64_t>(t1);
+	}
 
+	template <>
+	inline reg rshiftr<int32_t>(const reg v1, const reg v2) {
+		int32_t t1[4], t2[4];
+		mipp::storeu<int32_t>(t1, v1);
+		mipp::storeu<int32_t>(t2, v2);
+		for (int i = 0; i < 4; i++){
+			t1[i] >>= t2[i];			
+		}
+		return mipp::loadu<int32_t>(t1);
+	}
+
+	template <>
+	inline reg rshiftr<int16_t>(const reg v1, const reg v2) {
+		int16_t t1[8], t2[8];
+		mipp::storeu<int16_t>(t1, v1);
+		mipp::storeu<int16_t>(t2, v2);
+		for (int i = 0; i < 8; i++){
+			t1[i] >>= t2[i];			
+		}
+		return mipp::loadu<int16_t>(t1);
+	}
+	
+	template <>
+	inline reg rshiftr<int8_t>(const reg v1, const reg v2) {
+		int8_t t1[16], t2[16];
+		mipp::storeu<int8_t>(t1, v1);
+		mipp::storeu<int8_t>(t2, v2);
+		for (int i = 0; i < 16; i++){
+			t1[i] >>= t2[i];			
+		}
+		return mipp::loadu<int8_t>(t1);
+	}
 	// -------------------------------------------------------------------------------------------------- rshift (mask)
 #ifdef __SSE2__
 #if !defined(__clang__) && !defined(_MSC_VER) && !defined(__GNUC__)
