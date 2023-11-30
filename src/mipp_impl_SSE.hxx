@@ -902,7 +902,6 @@
 #endif
 
 	// -------------------------------------------------------------------------------------------------------- lshiftr
-#ifdef __SSE2__
 	template <>
 	inline reg lshiftr<int64_t>(const reg v1, const reg v2) {
 		int64_t t1[2], t2[2];
@@ -946,7 +945,6 @@
 		}
 		return mipp::loadu<int8_t>(t1);
 	}
-#endif
 	// -------------------------------------------------------------------------------------------------- lshift (mask)
 #ifdef __SSE2__
 #if !defined(__clang__) && !defined(_MSC_VER) && !defined(__GNUC__)
@@ -1014,7 +1012,6 @@
 #endif
 
 	// -------------------------------------------------------------------------------------------------------- rshiftr
-#ifdef __SSE2__
 	template <>
 	inline reg rshiftr<int64_t>(const reg v1, const reg v2) {
 		int64_t t1[2], t2[2];
@@ -1058,7 +1055,6 @@
 		}
 		return mipp::loadu<int8_t>(t1);
 	}
-#endif
 	// -------------------------------------------------------------------------------------------------- rshift (mask)
 #ifdef __SSE2__
 #if !defined(__clang__) && !defined(_MSC_VER) && !defined(__GNUC__)
