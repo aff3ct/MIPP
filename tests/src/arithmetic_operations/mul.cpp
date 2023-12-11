@@ -104,7 +104,7 @@ void test_reg_2_mul()
     }
 
     std::iota(inputs1, inputs1 + N_2, std::numeric_limits<T>::max() - N_2);
-    std::iota(inputs2, inputs2 + mipp::N<T>(), std::numeric_limits<T>::max() - N_2);
+    std::iota(inputs2, inputs2 + N_2, std::numeric_limits<T>::max() - N_2);
 
     std::shuffle(inputs1, inputs1 + N_2, g);
     std::shuffle(inputs2, inputs2 + N_2, g);
