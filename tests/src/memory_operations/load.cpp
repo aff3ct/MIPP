@@ -40,7 +40,7 @@ TEST_CASE("Load - mipp::reg", "[mipp::load]")
 template <typename T>
 void test_reg_2_load()
 {
-    auto N_2 = mipp::N<T>()/2;
+    constexpr auto N_2 = mipp::N<T>()/2;
 
     T inputs[N_2];
     std::iota(inputs, inputs + N_2, (T)0);
@@ -92,7 +92,7 @@ TEST_CASE("Load - mipp::Reg", "[mipp::load]")
 template <typename T>
 void test_Reg_2_load()
 {
-    auto N_2 = mipp::N<T>()/2;
+    constexpr auto N_2 = mipp::N<T>()/2;
 
 	T inputs[N_2];
 	std::iota(inputs, inputs + N_2, (T)0);
@@ -146,7 +146,7 @@ TEST_CASE("Load unaligned - mipp::reg", "[mipp::loadu]")
 template <typename T>
 void test_reg_2_loadu()
 {
-    auto N_2 = mipp::N<T>()/2;
+    constexpr auto N_2 = mipp::N<T>()/2;
 
     T inputs[N_2];
     std::iota(inputs, inputs + N_2, (T)0);
@@ -198,7 +198,7 @@ TEST_CASE("Load unaligned - mipp::Reg", "[mipp::loadu]")
 template <typename T>
 void test_Reg_2_loadu()
 {
-    auto N_2 = mipp::N<T>()/2;
+    constexpr auto N_2 = mipp::N<T>()/2;
 
     T inputs[N_2];
     std::iota(inputs, inputs + N_2, (T)0);

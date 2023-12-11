@@ -52,7 +52,7 @@ TEST_CASE("Subtraction - mipp::reg", "[mipp::sub]")
 template <typename T>
 void test_reg_2_sub()
 {
-    auto N_2 = mipp::N<T>()/2;
+    constexpr auto N_2 = mipp::N<T>()/2;
 
     T inputs1[N_2], inputs2[N_2];
     std::iota(inputs1, inputs1 + N_2, (T)1);
@@ -126,7 +126,7 @@ TEST_CASE("Subtraction - mipp::Reg", "[mipp::sub]")
 template <typename T>
 void test_Reg_2_sub()
 {
-    auto N_2 = mipp::N<T>()/2;
+    constexpr auto N_2 = mipp::N<T>()/2;
 
     T inputs1[N_2], inputs2[N_2];
     std::iota(inputs1, inputs1 + N_2, (T)1);
