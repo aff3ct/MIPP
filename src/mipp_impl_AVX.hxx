@@ -35,6 +35,13 @@
 		return _mm256_loadu_ps((const float*) mem_addr);
 	}
 
+#if defined(__SSE__)
+    template <>
+    inline reg_2 loadu_2<int32_t>(const int32_t *mem_addr) {
+        return _mm_loadu_ps((const float*) mem_addr);
+    }
+#endif
+
 	// ----------------------------------------------------------------------------------------------------------- load
 #ifdef MIPP_ALIGNED_LOADS
 	template <>
@@ -66,6 +73,14 @@
 	inline reg load<int8_t>(const int8_t *mem_addr) {
 		return _mm256_load_ps((const float*) mem_addr);
 	}
+
+#if defined(__SSE__)
+	template <>
+	inline reg_2 load_2<int32_t>(const int32_t *mem_addr) {
+		return _mm_load_ps((const float*) mem_addr);
+	}
+#endif
+
 #else
 	template <>
 	inline reg load<float>(const float *mem_addr) {
@@ -96,6 +111,11 @@
 	inline reg load<int8_t>(const int8_t *mem_addr) {
 		return mipp::loadu<int8_t>(mem_addr);
 	}
+
+    template <>
+    inline reg_2 load_2<int32_t>(const int32_t *mem_addr) {
+        return mipp::loadu_2<int32_t>(mem_addr);
+    }
 #endif
 
 	// --------------------------------------------------------------------------------------------------------- storeu

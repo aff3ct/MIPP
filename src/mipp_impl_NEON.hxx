@@ -39,6 +39,11 @@
 		return (reg) vld1q_s8((int8_t*) mem_addr);
 	}
 
+	template <>
+	inline reg_2 loadu_2<int32_t>(const int32_t *mem_addr) {
+		return (reg_2) vld1_s32(mem_addr);
+	}
+
 	// ----------------------------------------------------------------------------------------------------------- load
 #ifdef MIPP_ALIGNED_LOADS
 #ifdef __aarch64__
@@ -74,6 +79,12 @@
 	inline reg load<int8_t>(const int8_t *mem_addr) {
 		return (reg) vld1q_s8((int8_t*) mem_addr);
 	}
+
+ 	template <>
+	inline reg_2 load_2<int32_t>(const int32_t *mem_addr) {
+		return (reg_2) vld1_s32(mem_addr);
+	}
+
 #else
 	template <>
 	inline reg load<double>(const double *mem_addr) {
@@ -103,6 +114,11 @@
 	template <>
 	inline reg load<int8_t>(const int8_t *mem_addr) {
 		return mipp::loadu<int8_t>(mem_addr);
+	}
+
+	template <>
+	inline reg_2 load_2<int32_t>(const int32_t *mem_addr) {
+		return mipp::loadu_2<int32_t>(mem_addr);
 	}
 #endif
 

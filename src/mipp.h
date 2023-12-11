@@ -659,7 +659,9 @@ static inline void errorMessage(std::string instr)
 }
 
 template <typename T> inline reg   load         (const T*)                        { errorMessage<T>("load");          exit(-1); }
+template <typename T> inline reg_2 load_2       (const T*)                        { errorMessage<T>("load_2");        exit(-1); }
 template <typename T> inline reg   loadu        (const T*)                        { errorMessage<T>("loadu");         exit(-1); }
+template <typename T> inline reg_2 loadu_2      (const T*)                        { errorMessage<T>("loadu_2");       exit(-1); }
 template <typename T> inline void  store        (T*, const reg)                   { errorMessage<T>("store");         exit(-1); }
 template <typename T> inline void  storeu       (T*, const reg)                   { errorMessage<T>("storeu");        exit(-1); }
 template <typename T> inline reg   set          (const T[nElReg<T>()])            { errorMessage<T>("set");           exit(-1); }

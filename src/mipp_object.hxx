@@ -624,7 +624,8 @@ public:
 #endif
 
 #ifndef MIPP_NO_INTRINSICS
-	Reg_2(const reg_2 r) : r(r)   {}
+	Reg_2(const reg_2 r ) : r(r)   {}
+    Reg_2(const T  *data) : r(mipp::load_2<T>(data)){}
 #else
 	Reg_2(const T val  ) : r(val) {}
 #endif
@@ -632,7 +633,9 @@ public:
 	~Reg_2() = default;
 
 #ifndef MIPP_NO_INTRINSICS
-	template <typename T2> inline Reg<T2> cvt() const { return mipp::cvt<T,T2>(r); }
+    template <typename T2> inline Reg<T2> cvt() const { return mipp::cvt<T,T2>(r); }
+
+    inline void          load         (const T*       data)                          { r = mipp::load_2<T>(data);                     }
     inline Reg_2<T>      add          (const Reg_2<T> v)                       const { return mipp::add          <T>(r, v.r);         }
     inline Reg_2<T>      sub          (const Reg_2<T> v)                       const { return mipp::sub          <T>(r, v.r);         }
     inline Reg_2<T>      mul          (const Reg_2<T> v)                       const { return mipp::mul          <T>(r, v.r);         }
