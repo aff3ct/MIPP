@@ -79,3 +79,55 @@ TEST_CASE("Combine - mipp::Reg", "[mipp::combine]")
 #endif
 }
 #endif
+
+#include "../static_for.hpp"
+
+template <typename T>
+struct sub_test_combine_bis
+{
+	template<int LOOP_INDEX> static inline void func(const mipp::Reg<T> &r1, const mipp::Reg<T> &r2, const T *inputs)
+	{
+		mipp::Reg<T> r3 = mipp::combine<LOOP_INDEX>(r1, r2);
+
+		for (auto i = 0; i < mipp::N<T>(); i++)
+			REQUIRE(r3[i] == inputs[i + LOOP_INDEX]);
+	}
+};
+
+template <typename T>
+void test_Reg_combine_bis()
+{
+	T inputs[2 * mipp::N<T>()];
+
+	std::iota(inputs, inputs + 2 * mipp::N<T>(), (T)0);
+
+	mipp::Reg<T> r1 = inputs;
+	mipp::Reg<T> r2 = inputs + mipp::N<T>();
+
+	static_for<mipp::N<T>(), sub_test_combine_bis<T>>(r1, r2, inputs);
+}
+
+#ifdef MIPP_NEON
+#ifndef MIPP_NO
+TEST_CASE("Combine (bis) - mipp::Reg", "[mipp::combine_bis]")
+{
+#if defined(MIPP_64BIT)
+	SECTION("datatype = double") { test_Reg_combine_bis<double>(); }
+#endif
+	SECTION("datatype = float") { test_Reg_combine_bis<float>(); }
+
+#if defined(MIPP_64BIT)
+	SECTION("datatype = int64_t") { test_Reg_combine_bis<int64_t>(); }
+	SECTION("datatype = uint64_t") { test_Reg_combine_bis<uint64_t>(); }
+#endif
+	SECTION("datatype = int32_t") { test_Reg_combine_bis<int32_t>(); }
+	SECTION("datatype = uint32_t") { test_Reg_combine_bis<uint32_t>(); }
+#if defined(MIPP_BW)
+	SECTION("datatype = int16_t") { test_Reg_combine_bis<int16_t>(); }
+	SECTION("datatype = uint16_t") { test_Reg_combine_bis<uint16_t>(); }
+	SECTION("datatype = int8_t") { test_Reg_combine_bis<int8_t>(); }
+	SECTION("datatype = uint8_t") { test_Reg_combine_bis<uint8_t>(); }
+#endif
+}
+#endif
+#endif

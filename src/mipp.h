@@ -108,8 +108,8 @@ namespace mipp // My Intrinsics Plus Plus => mipp
 // --------------------------------------------------------------------------------------------------------------------
 #ifndef MIPP_NO_INTRINSICS
 
-// -------------------------------------------------------------------------------------------------------- ARM SVE (specific size in 128-256-512-1024-2048) 
-// -------------------------------------------------------------------------------------------------------- Size is specified at compilation time using flag -msve-vector-bits
+// ------------------------------------------------------------------- ARM SVE (specific size in 128-256-512-1024-2048)
+// ------------------------------------------------- Size is specified at compilation time using flag -msve-vector-bits
 #if defined(__ARM_FEATURE_SVE)
 #if __ARM_FEATURE_SVE_BITS
 #define MIPP_REGISTER_SIZE __ARM_FEATURE_SVE_BITS
@@ -794,6 +794,12 @@ inline reg cvt(const reg_2) {
 template <typename T1, typename T2>
 inline reg pack(const reg, const reg) {
 	errorMessage<T1,T2>("pack");
+	exit(-1);
+}
+
+template <int S, typename T>
+inline reg combine(const reg, const reg) {
+	errorMessage<T>("combine");
 	exit(-1);
 }
 
@@ -1761,6 +1767,45 @@ template <> inline reg combine<uint32_t>(const reg_2 v1, const reg_2 v2) { retur
 #ifdef MIPP_BW
 template <> inline reg combine<uint16_t>(const reg_2 v1, const reg_2 v2) { return combine<int16_t>(v1, v2); }
 template <> inline reg combine<uint8_t >(const reg_2 v1, const reg_2 v2) { return combine<int8_t >(v1, v2); }
+#endif
+
+// ------------------------------------------------------------------------------------------------------ combine (bis)
+#ifdef MIPP_64BIT
+template <> inline reg combine< 0, uint64_t>(const reg v1, const reg v2) { return combine<0, int64_t>(v1, v2); }
+template <> inline reg combine< 1, uint64_t>(const reg v1, const reg v2) { return combine<1, int64_t>(v1, v2); }
+#endif
+
+template <> inline reg combine< 0, uint32_t>(const reg v1, const reg v2) { return combine<0, int32_t>(v1, v2); }
+template <> inline reg combine< 1, uint32_t>(const reg v1, const reg v2) { return combine<1, int32_t>(v1, v2); }
+template <> inline reg combine< 2, uint32_t>(const reg v1, const reg v2) { return combine<2, int32_t>(v1, v2); }
+template <> inline reg combine< 3, uint32_t>(const reg v1, const reg v2) { return combine<3, int32_t>(v1, v2); }
+
+#ifdef MIPP_BW
+template <> inline reg combine< 0, uint16_t>(const reg v1, const reg v2) { return combine<0, int16_t>(v1, v2); }
+template <> inline reg combine< 1, uint16_t>(const reg v1, const reg v2) { return combine<1, int16_t>(v1, v2); }
+template <> inline reg combine< 2, uint16_t>(const reg v1, const reg v2) { return combine<2, int16_t>(v1, v2); }
+template <> inline reg combine< 3, uint16_t>(const reg v1, const reg v2) { return combine<3, int16_t>(v1, v2); }
+template <> inline reg combine< 4, uint16_t>(const reg v1, const reg v2) { return combine<4, int16_t>(v1, v2); }
+template <> inline reg combine< 5, uint16_t>(const reg v1, const reg v2) { return combine<5, int16_t>(v1, v2); }
+template <> inline reg combine< 6, uint16_t>(const reg v1, const reg v2) { return combine<6, int16_t>(v1, v2); }
+template <> inline reg combine< 7, uint16_t>(const reg v1, const reg v2) { return combine<7, int16_t>(v1, v2); }
+
+template <> inline reg combine< 0, uint8_t>(const reg v1, const reg v2) { return combine< 0, int8_t>(v1, v2); }
+template <> inline reg combine< 1, uint8_t>(const reg v1, const reg v2) { return combine< 1, int8_t>(v1, v2); }
+template <> inline reg combine< 2, uint8_t>(const reg v1, const reg v2) { return combine< 2, int8_t>(v1, v2); }
+template <> inline reg combine< 3, uint8_t>(const reg v1, const reg v2) { return combine< 3, int8_t>(v1, v2); }
+template <> inline reg combine< 4, uint8_t>(const reg v1, const reg v2) { return combine< 4, int8_t>(v1, v2); }
+template <> inline reg combine< 5, uint8_t>(const reg v1, const reg v2) { return combine< 5, int8_t>(v1, v2); }
+template <> inline reg combine< 6, uint8_t>(const reg v1, const reg v2) { return combine< 6, int8_t>(v1, v2); }
+template <> inline reg combine< 7, uint8_t>(const reg v1, const reg v2) { return combine< 7, int8_t>(v1, v2); }
+template <> inline reg combine< 8, uint8_t>(const reg v1, const reg v2) { return combine< 8, int8_t>(v1, v2); }
+template <> inline reg combine< 9, uint8_t>(const reg v1, const reg v2) { return combine< 9, int8_t>(v1, v2); }
+template <> inline reg combine<10, uint8_t>(const reg v1, const reg v2) { return combine<10, int8_t>(v1, v2); }
+template <> inline reg combine<11, uint8_t>(const reg v1, const reg v2) { return combine<11, int8_t>(v1, v2); }
+template <> inline reg combine<12, uint8_t>(const reg v1, const reg v2) { return combine<12, int8_t>(v1, v2); }
+template <> inline reg combine<13, uint8_t>(const reg v1, const reg v2) { return combine<13, int8_t>(v1, v2); }
+template <> inline reg combine<14, uint8_t>(const reg v1, const reg v2) { return combine<14, int8_t>(v1, v2); }
+template <> inline reg combine<15, uint8_t>(const reg v1, const reg v2) { return combine<15, int8_t>(v1, v2); }
 #endif
 
 // -------------------------------------------------------------------------------------------------------------- cmask
