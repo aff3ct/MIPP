@@ -107,7 +107,7 @@ void test_Reg_combine_bis()
 	static_for<mipp::N<T>(), sub_test_combine_bis<T>>(r1, r2, inputs);
 }
 
-#if defined(MIPP_NEON) || defined(MIPP_SSE) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
+#if defined(MIPP_NEON) || defined(MIPP_SSE) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2) || defined(MIPP_AVX512F)
 #ifndef MIPP_NO
 TEST_CASE("Combine (bis) - mipp::Reg", "[mipp::combine_bis]")
 {
@@ -126,8 +126,10 @@ TEST_CASE("Combine (bis) - mipp::Reg", "[mipp::combine_bis]")
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 31)
 	SECTION("datatype = int16_t") { test_Reg_combine_bis<int16_t>(); }
 	SECTION("datatype = uint16_t") { test_Reg_combine_bis<uint16_t>(); }
+#if !defined(MIPP_AVX512) || (defined(MIPP_AVX512) && defined(MIPP_AVX512VBMI))
 	SECTION("datatype = int8_t") { test_Reg_combine_bis<int8_t>(); }
 	SECTION("datatype = uint8_t") { test_Reg_combine_bis<uint8_t>(); }
+#endif
 #endif
 #endif
 }
