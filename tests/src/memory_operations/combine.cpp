@@ -107,7 +107,7 @@ void test_Reg_combine_bis()
 	static_for<mipp::N<T>(), sub_test_combine_bis<T>>(r1, r2, inputs);
 }
 
-#if defined(MIPP_NEON) || defined(MIPP_SSE)
+#if defined(MIPP_NEON) || defined(MIPP_SSE) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 #ifndef MIPP_NO
 TEST_CASE("Combine (bis) - mipp::Reg", "[mipp::combine_bis]")
 {
