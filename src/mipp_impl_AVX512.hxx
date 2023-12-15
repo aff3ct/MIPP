@@ -1138,42 +1138,42 @@
 	template <> inline reg combine<15, float>(const reg v1, const reg v2) { return _mm512_permutex2var_ps(v1, _mm512_setr_epi32(15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30), v2); }
 
 	// int32_t ----------------------------------------------------------------
-	template <> inline reg combine< 0, int32_t>(const reg v1, const reg v2) { combine< 0, float>(v1, v2);; }
-	template <> inline reg combine< 1, int32_t>(const reg v1, const reg v2) { combine< 1, float>(v1, v2);; }
-	template <> inline reg combine< 2, int32_t>(const reg v1, const reg v2) { combine< 2, float>(v1, v2);; }
-	template <> inline reg combine< 3, int32_t>(const reg v1, const reg v2) { combine< 3, float>(v1, v2);; }
-	template <> inline reg combine< 4, int32_t>(const reg v1, const reg v2) { combine< 4, float>(v1, v2);; }
-	template <> inline reg combine< 5, int32_t>(const reg v1, const reg v2) { combine< 5, float>(v1, v2);; }
-	template <> inline reg combine< 6, int32_t>(const reg v1, const reg v2) { combine< 6, float>(v1, v2);; }
-	template <> inline reg combine< 7, int32_t>(const reg v1, const reg v2) { combine< 7, float>(v1, v2);; }
-	template <> inline reg combine< 8, int32_t>(const reg v1, const reg v2) { combine< 8, float>(v1, v2);; }
-	template <> inline reg combine< 9, int32_t>(const reg v1, const reg v2) { combine< 9, float>(v1, v2);; }
-	template <> inline reg combine<10, int32_t>(const reg v1, const reg v2) { combine<10, float>(v1, v2);; }
-	template <> inline reg combine<11, int32_t>(const reg v1, const reg v2) { combine<11, float>(v1, v2);; }
-	template <> inline reg combine<12, int32_t>(const reg v1, const reg v2) { combine<12, float>(v1, v2);; }
-	template <> inline reg combine<13, int32_t>(const reg v1, const reg v2) { combine<13, float>(v1, v2);; }
-	template <> inline reg combine<14, int32_t>(const reg v1, const reg v2) { combine<14, float>(v1, v2);; }
-	template <> inline reg combine<15, int32_t>(const reg v1, const reg v2) { combine<15, float>(v1, v2);; }
+	template <> inline reg combine< 0, int32_t>(const reg v1, const reg v2) { return combine< 0, float>(v1, v2); }
+	template <> inline reg combine< 1, int32_t>(const reg v1, const reg v2) { return combine< 1, float>(v1, v2); }
+	template <> inline reg combine< 2, int32_t>(const reg v1, const reg v2) { return combine< 2, float>(v1, v2); }
+	template <> inline reg combine< 3, int32_t>(const reg v1, const reg v2) { return combine< 3, float>(v1, v2); }
+	template <> inline reg combine< 4, int32_t>(const reg v1, const reg v2) { return combine< 4, float>(v1, v2); }
+	template <> inline reg combine< 5, int32_t>(const reg v1, const reg v2) { return combine< 5, float>(v1, v2); }
+	template <> inline reg combine< 6, int32_t>(const reg v1, const reg v2) { return combine< 6, float>(v1, v2); }
+	template <> inline reg combine< 7, int32_t>(const reg v1, const reg v2) { return combine< 7, float>(v1, v2); }
+	template <> inline reg combine< 8, int32_t>(const reg v1, const reg v2) { return combine< 8, float>(v1, v2); }
+	template <> inline reg combine< 9, int32_t>(const reg v1, const reg v2) { return combine< 9, float>(v1, v2); }
+	template <> inline reg combine<10, int32_t>(const reg v1, const reg v2) { return combine<10, float>(v1, v2); }
+	template <> inline reg combine<11, int32_t>(const reg v1, const reg v2) { return combine<11, float>(v1, v2); }
+	template <> inline reg combine<12, int32_t>(const reg v1, const reg v2) { return combine<12, float>(v1, v2); }
+	template <> inline reg combine<13, int32_t>(const reg v1, const reg v2) { return combine<13, float>(v1, v2); }
+	template <> inline reg combine<14, int32_t>(const reg v1, const reg v2) { return combine<14, float>(v1, v2); }
+	template <> inline reg combine<15, int32_t>(const reg v1, const reg v2) { return combine<15, float>(v1, v2); }
 
 	// double -----------------------------------------------------------------
-	template <> inline reg combine< 0, float>(const reg v1, const reg v2) { combine< 0, float>(v1, v2); }
-	template <> inline reg combine< 1, float>(const reg v1, const reg v2) { combine< 2, float>(v1, v2); }
-	template <> inline reg combine< 2, float>(const reg v1, const reg v2) { combine< 4, float>(v1, v2); }
-	template <> inline reg combine< 3, float>(const reg v1, const reg v2) { combine< 6, float>(v1, v2); }
-	template <> inline reg combine< 4, float>(const reg v1, const reg v2) { combine< 8, float>(v1, v2); }
-	template <> inline reg combine< 5, float>(const reg v1, const reg v2) { combine<10, float>(v1, v2); }
-	template <> inline reg combine< 6, float>(const reg v1, const reg v2) { combine<12, float>(v1, v2); }
-	template <> inline reg combine< 7, float>(const reg v1, const reg v2) { combine<14, float>(v1, v2); }
+	template <> inline reg combine< 0, double>(const reg v1, const reg v2) { return combine< 0, float>(v1, v2); }
+	template <> inline reg combine< 1, double>(const reg v1, const reg v2) { return combine< 2, float>(v1, v2); }
+	template <> inline reg combine< 2, double>(const reg v1, const reg v2) { return combine< 4, float>(v1, v2); }
+	template <> inline reg combine< 3, double>(const reg v1, const reg v2) { return combine< 6, float>(v1, v2); }
+	template <> inline reg combine< 4, double>(const reg v1, const reg v2) { return combine< 8, float>(v1, v2); }
+	template <> inline reg combine< 5, double>(const reg v1, const reg v2) { return combine<10, float>(v1, v2); }
+	template <> inline reg combine< 6, double>(const reg v1, const reg v2) { return combine<12, float>(v1, v2); }
+	template <> inline reg combine< 7, double>(const reg v1, const reg v2) { return combine<14, float>(v1, v2); }
 
 	// int64_t ----------------------------------------------------------------
-	template <> inline reg combine< 0, int64_t>(const reg v1, const reg v2) { combine<0, double>(v1, v2); }
-	template <> inline reg combine< 1, int64_t>(const reg v1, const reg v2) { combine<1, double>(v1, v2); }
-	template <> inline reg combine< 2, int64_t>(const reg v1, const reg v2) { combine<2, double>(v1, v2); }
-	template <> inline reg combine< 3, int64_t>(const reg v1, const reg v2) { combine<3, double>(v1, v2); }
-	template <> inline reg combine< 4, int64_t>(const reg v1, const reg v2) { combine<4, double>(v1, v2); }
-	template <> inline reg combine< 5, int64_t>(const reg v1, const reg v2) { combine<5, double>(v1, v2); }
-	template <> inline reg combine< 6, int64_t>(const reg v1, const reg v2) { combine<6, double>(v1, v2); }
-	template <> inline reg combine< 7, int64_t>(const reg v1, const reg v2) { combine<7, double>(v1, v2); }
+	template <> inline reg combine< 0, int64_t>(const reg v1, const reg v2) { return combine<0, double>(v1, v2); }
+	template <> inline reg combine< 1, int64_t>(const reg v1, const reg v2) { return combine<1, double>(v1, v2); }
+	template <> inline reg combine< 2, int64_t>(const reg v1, const reg v2) { return combine<2, double>(v1, v2); }
+	template <> inline reg combine< 3, int64_t>(const reg v1, const reg v2) { return combine<3, double>(v1, v2); }
+	template <> inline reg combine< 4, int64_t>(const reg v1, const reg v2) { return combine<4, double>(v1, v2); }
+	template <> inline reg combine< 5, int64_t>(const reg v1, const reg v2) { return combine<5, double>(v1, v2); }
+	template <> inline reg combine< 6, int64_t>(const reg v1, const reg v2) { return combine<6, double>(v1, v2); }
+	template <> inline reg combine< 7, int64_t>(const reg v1, const reg v2) { return combine<7, double>(v1, v2); }
 #endif
 
 #if defined(__AVX512BW__)
