@@ -672,6 +672,174 @@
 		return _mm_castsi128_ps(_mm256_extractf128_si256(_mm256_castps_si256(v), 1));
 	}
 
+	// ----------------------------------------------------------------------------------------------------------- andb
+	template <>
+	inline reg andb<double>(const reg v1, const reg v2) {
+		return _mm256_castpd_ps(_mm256_and_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2)));
+	}
+
+	template <>
+	inline reg andb<float>(const reg v1, const reg v2) {
+		return _mm256_and_ps(v1, v2);
+	}
+
+	template <>
+	inline reg andb<int64_t>(const reg v1, const reg v2) {
+		return _mm256_castpd_ps(_mm256_and_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2)));
+	}
+
+	template <>
+	inline reg andb<int32_t>(const reg v1, const reg v2) {
+		return _mm256_and_ps(v1, v2);
+	}
+
+#ifdef __AVX2__
+	template <>
+	inline reg andb<int16_t>(const reg v1, const reg v2) {
+		return _mm256_castsi256_ps(_mm256_and_si256(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	}
+
+	template <>
+	inline reg andb<int8_t>(const reg v1, const reg v2) {
+		return _mm256_castsi256_ps(_mm256_and_si256(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	}
+#endif
+
+	// ---------------------------------------------------------------------------------------------------- andb (mask)
+	template <>
+	inline msk andb<4>(const msk v1, const msk v2) {
+		return _mm256_castpd_si256(_mm256_and_pd(_mm256_castsi256_pd(v1), _mm256_castsi256_pd(v2)));
+	}
+
+	template <>
+	inline msk andb<8>(const msk v1, const msk v2) {
+		return _mm256_castps_si256(_mm256_and_ps(_mm256_castsi256_ps(v1), _mm256_castsi256_ps(v2)));
+	}
+
+#ifdef __AVX2__
+	template <>
+	inline msk andb<16>(const msk v1, const msk v2) {
+		return _mm256_and_si256(v1, v2);
+	}
+
+	template <>
+	inline msk andb<32>(const msk v1, const msk v2) {
+		return _mm256_and_si256(v1, v2);
+	}
+#endif
+
+	// ---------------------------------------------------------------------------------------------------------- andnb
+	template <>
+	inline reg andnb<double>(const reg v1, const reg v2) {
+		return _mm256_castpd_ps(_mm256_andnot_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2)));
+	}
+
+	template <>
+	inline reg andnb<float>(const reg v1, const reg v2) {
+		return _mm256_andnot_ps(v1, v2);
+	}
+
+	template <>
+	inline reg andnb<int64_t>(const reg v1, const reg v2) {
+		return _mm256_castpd_ps(_mm256_andnot_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2)));
+	}
+
+	template <>
+	inline reg andnb<int32_t>(const reg v1, const reg v2) {
+		return _mm256_andnot_ps(v1, v2);
+	}
+
+#ifdef __AVX2__
+	template <>
+	inline reg andnb<int16_t>(const reg v1, const reg v2) {
+		return _mm256_castsi256_ps(_mm256_andnot_si256(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	}
+
+	template <>
+	inline reg andnb<int8_t>(const reg v1, const reg v2) {
+		return _mm256_castsi256_ps(_mm256_andnot_si256(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	}
+#endif
+
+	// --------------------------------------------------------------------------------------------------- andnb (mask)
+	template <>
+	inline msk andnb<4>(const msk v1, const msk v2) {
+		return _mm256_castpd_si256(_mm256_andnot_pd(_mm256_castsi256_pd(v1), _mm256_castsi256_pd(v2)));
+	}
+
+	template <>
+	inline msk andnb<8>(const msk v1, const msk v2) {
+		return _mm256_castps_si256(_mm256_andnot_ps(_mm256_castsi256_ps(v1), _mm256_castsi256_ps(v2)));
+	}
+
+#ifdef __AVX2__
+	template <>
+	inline msk andnb<16>(const msk v1, const msk v2) {
+		return _mm256_andnot_si256(v1, v2);
+	}
+
+	template <>
+	inline msk andnb<32>(const msk v1, const msk v2) {
+		return _mm256_andnot_si256(v1, v2);
+	}
+#endif
+
+	// ----------------------------------------------------------------------------------------------------------- xorb
+	template <>
+	inline reg xorb<float>(const reg v1, const reg v2) {
+		return _mm256_xor_ps(v1, v2);
+	}
+
+	template <>
+	inline reg xorb<double>(const reg v1, const reg v2) {
+		return _mm256_castpd_ps(_mm256_xor_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2)));
+	}
+
+	template <>
+	inline reg xorb<int64_t>(const reg v1, const reg v2) {
+		return _mm256_castpd_ps(_mm256_xor_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2)));
+	}
+
+	template <>
+	inline reg xorb<int32_t>(const reg v1, const reg v2) {
+		return _mm256_xor_ps(v1, v2);
+	}
+
+#ifdef __AVX2__
+	template <>
+	inline reg xorb<int16_t>(const reg v1, const reg v2) {
+		return _mm256_castsi256_ps(_mm256_xor_si256(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	}
+
+	template <>
+	inline reg xorb<int8_t>(const reg v1, const reg v2) {
+		return _mm256_castsi256_ps(_mm256_xor_si256(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	}
+#endif
+
+	// ---------------------------------------------------------------------------------------------------- xorb (mask)
+	template <>
+	inline msk xorb<4>(const msk v1, const msk v2) {
+		return _mm256_castps_si256(_mm256_xor_ps(_mm256_castsi256_ps(v1), _mm256_castsi256_ps(v2)));
+	}
+
+	template <>
+	inline msk xorb<8>(const msk v1, const msk v2) {
+		return _mm256_castps_si256(_mm256_xor_ps(_mm256_castsi256_ps(v1), _mm256_castsi256_ps(v2)));
+	}
+
+#ifdef __AVX2__
+	template <>
+	inline msk xorb<16>(const msk v1, const msk v2) {
+		return _mm256_xor_si256(v1, v2);
+	}
+
+	template <>
+	inline msk xorb<32>(const msk v1, const msk v2) {
+		return _mm256_xor_si256(v1, v2);
+	}
+#endif
+
 	// ---------------------------------------------------------------------------------------------------------- blend
 	template <>
 	inline reg blend<double>(const reg v1, const reg v2, const msk m) {
@@ -2767,118 +2935,6 @@
 		mipp::transpose2<int16_t>(tab);
 	}
 
-	// ----------------------------------------------------------------------------------------------------------- andb
-	template <>
-	inline reg andb<double>(const reg v1, const reg v2) {
-		return _mm256_castpd_ps(_mm256_and_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2)));
-	}
-
-	template <>
-	inline reg andb<float>(const reg v1, const reg v2) {
-		return _mm256_and_ps(v1, v2);
-	}
-
-	template <>
-	inline reg andb<int64_t>(const reg v1, const reg v2) {
-		return _mm256_castpd_ps(_mm256_and_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2)));
-	}
-
-	template <>
-	inline reg andb<int32_t>(const reg v1, const reg v2) {
-		return _mm256_and_ps(v1, v2);
-	}
-
-#ifdef __AVX2__
-	template <>
-	inline reg andb<int16_t>(const reg v1, const reg v2) {
-		return _mm256_castsi256_ps(_mm256_and_si256(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
-	}
-
-	template <>
-	inline reg andb<int8_t>(const reg v1, const reg v2) {
-		return _mm256_castsi256_ps(_mm256_and_si256(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
-	}
-#endif
-
-	// ---------------------------------------------------------------------------------------------------- andb (mask)
-	template <>
-	inline msk andb<4>(const msk v1, const msk v2) {
-		return _mm256_castpd_si256(_mm256_and_pd(_mm256_castsi256_pd(v1), _mm256_castsi256_pd(v2)));
-	}
-
-	template <>
-	inline msk andb<8>(const msk v1, const msk v2) {
-		return _mm256_castps_si256(_mm256_and_ps(_mm256_castsi256_ps(v1), _mm256_castsi256_ps(v2)));
-	}
-
-#ifdef __AVX2__
-	template <>
-	inline msk andb<16>(const msk v1, const msk v2) {
-		return _mm256_and_si256(v1, v2);
-	}
-
-	template <>
-	inline msk andb<32>(const msk v1, const msk v2) {
-		return _mm256_and_si256(v1, v2);
-	}
-#endif
-
-	// ---------------------------------------------------------------------------------------------------------- andnb
-	template <>
-	inline reg andnb<double>(const reg v1, const reg v2) {
-		return _mm256_castpd_ps(_mm256_andnot_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2)));
-	}
-
-	template <>
-	inline reg andnb<float>(const reg v1, const reg v2) {
-		return _mm256_andnot_ps(v1, v2);
-	}
-
-	template <>
-	inline reg andnb<int64_t>(const reg v1, const reg v2) {
-		return _mm256_castpd_ps(_mm256_andnot_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2)));
-	}
-
-	template <>
-	inline reg andnb<int32_t>(const reg v1, const reg v2) {
-		return _mm256_andnot_ps(v1, v2);
-	}
-
-#ifdef __AVX2__
-	template <>
-	inline reg andnb<int16_t>(const reg v1, const reg v2) {
-		return _mm256_castsi256_ps(_mm256_andnot_si256(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
-	}
-
-	template <>
-	inline reg andnb<int8_t>(const reg v1, const reg v2) {
-		return _mm256_castsi256_ps(_mm256_andnot_si256(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
-	}
-#endif
-
-	// --------------------------------------------------------------------------------------------------- andnb (mask)
-	template <>
-	inline msk andnb<4>(const msk v1, const msk v2) {
-		return _mm256_castpd_si256(_mm256_andnot_pd(_mm256_castsi256_pd(v1), _mm256_castsi256_pd(v2)));
-	}
-
-	template <>
-	inline msk andnb<8>(const msk v1, const msk v2) {
-		return _mm256_castps_si256(_mm256_andnot_ps(_mm256_castsi256_ps(v1), _mm256_castsi256_ps(v2)));
-	}
-
-#ifdef __AVX2__
-	template <>
-	inline msk andnb<16>(const msk v1, const msk v2) {
-		return _mm256_andnot_si256(v1, v2);
-	}
-
-	template <>
-	inline msk andnb<32>(const msk v1, const msk v2) {
-		return _mm256_andnot_si256(v1, v2);
-	}
-#endif
-
 	// ----------------------------------------------------------------------------------------------------------- notb
 	template <>
 	inline reg notb<float>(const reg v) {
@@ -3008,62 +3064,6 @@
 	template <>
 	inline msk orb<32>(const msk v1, const msk v2) {
 		return _mm256_or_si256(v1, v2);
-	}
-#endif
-
-	// ----------------------------------------------------------------------------------------------------------- xorb
-	template <>
-	inline reg xorb<float>(const reg v1, const reg v2) {
-		return _mm256_xor_ps(v1, v2);
-	}
-
-	template <>
-	inline reg xorb<double>(const reg v1, const reg v2) {
-		return _mm256_castpd_ps(_mm256_xor_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2)));
-	}
-
-	template <>
-	inline reg xorb<int64_t>(const reg v1, const reg v2) {
-		return _mm256_castpd_ps(_mm256_xor_pd(_mm256_castps_pd(v1), _mm256_castps_pd(v2)));
-	}
-
-	template <>
-	inline reg xorb<int32_t>(const reg v1, const reg v2) {
-		return _mm256_xor_ps(v1, v2);
-	}
-
-#ifdef __AVX2__
-	template <>
-	inline reg xorb<int16_t>(const reg v1, const reg v2) {
-		return _mm256_castsi256_ps(_mm256_xor_si256(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
-	}
-
-	template <>
-	inline reg xorb<int8_t>(const reg v1, const reg v2) {
-		return _mm256_castsi256_ps(_mm256_xor_si256(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
-	}
-#endif
-
-	// ---------------------------------------------------------------------------------------------------- xorb (mask)
-	template <>
-	inline msk xorb<4>(const msk v1, const msk v2) {
-		return _mm256_castps_si256(_mm256_xor_ps(_mm256_castsi256_ps(v1), _mm256_castsi256_ps(v2)));
-	}
-
-	template <>
-	inline msk xorb<8>(const msk v1, const msk v2) {
-		return _mm256_castps_si256(_mm256_xor_ps(_mm256_castsi256_ps(v1), _mm256_castsi256_ps(v2)));
-	}
-
-#ifdef __AVX2__
-	template <>
-	inline msk xorb<16>(const msk v1, const msk v2) {
-		return _mm256_xor_si256(v1, v2);
-	}
-
-	template <>
-	inline msk xorb<32>(const msk v1, const msk v2) {
-		return _mm256_xor_si256(v1, v2);
 	}
 #endif
 
