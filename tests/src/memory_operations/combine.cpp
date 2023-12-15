@@ -123,10 +123,12 @@ TEST_CASE("Combine (bis) - mipp::Reg", "[mipp::combine_bis]")
 	SECTION("datatype = int32_t") { test_Reg_combine_bis<int32_t>(); }
 	SECTION("datatype = uint32_t") { test_Reg_combine_bis<uint32_t>(); }
 #if defined(MIPP_BW)
+#if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 31)
 	SECTION("datatype = int16_t") { test_Reg_combine_bis<int16_t>(); }
 	SECTION("datatype = uint16_t") { test_Reg_combine_bis<uint16_t>(); }
 	SECTION("datatype = int8_t") { test_Reg_combine_bis<int8_t>(); }
 	SECTION("datatype = uint8_t") { test_Reg_combine_bis<uint8_t>(); }
+#endif
 #endif
 }
 #endif
