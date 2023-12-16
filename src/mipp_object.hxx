@@ -36,6 +36,30 @@ public:
 //	Reg(const T   vals[mipp::N<T>()]) : r(mipp::set <T>(vals)){}
 	Reg(const T  *data              ) : r(mipp::load<T>(data)){}
 
+	Reg(const Reg_2<float   > r_2);
+	Reg(const Reg_2<int32_t > r_2);
+	Reg(const Reg_2<int16_t > r_2);
+	Reg(const Reg_2<int8_t  > r_2);
+	Reg(const Reg_2<uint32_t> r_2);
+	Reg(const Reg_2<uint16_t> r_2);
+	Reg(const Reg_2<uint8_t > r_2);
+
+	Reg(const Regx2<double  > rx2);
+	Reg(const Regx2<int64_t > rx2);
+	Reg(const Regx2<int32_t > rx2);
+	Reg(const Regx2<int16_t > rx2);
+	Reg(const Regx2<uint64_t> rx2);
+	Reg(const Regx2<uint32_t> rx2);
+	Reg(const Regx2<uint16_t> rx2);
+
+	Reg(const Reg<double  > r1, const Reg<double  > r2);
+	Reg(const Reg<int64_t > r1, const Reg<int64_t > r2);
+	Reg(const Reg<int32_t > r1, const Reg<int32_t > r2);
+	Reg(const Reg<int16_t > r1, const Reg<int16_t > r2);
+	Reg(const Reg<uint64_t> r1, const Reg<uint64_t> r2);
+	Reg(const Reg<uint32_t> r1, const Reg<uint32_t> r2);
+	Reg(const Reg<uint16_t> r1, const Reg<uint16_t> r2);
+
 	Reg(const std::initializer_list<T> &l)
 	{
 		if (l.size() >= (unsigned)mipp::nElReg<T>())

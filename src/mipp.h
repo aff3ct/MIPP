@@ -2242,5 +2242,31 @@ template <> inline bool testz<uint16_t>(const reg v1, const reg v2) { return tes
 template <> inline bool testz<uint8_t >(const reg v1, const reg v2) { return testz<int8_t >(v1, v2); }
 #endif
 
+// ----------------------------------------------------------------------------------- implicit conversions and packing
+#ifndef MIPP_NO_INTRINSICS
+template <> inline mipp::Reg<double  >::Reg(const mipp::Reg_2<float   > r_2) : r(mipp::cvt<float,    double  >(r_2.r)) {}
+template <> inline mipp::Reg<int64_t >::Reg(const mipp::Reg_2<int32_t > r_2) : r(mipp::cvt<int32_t,  int64_t >(r_2.r)) {}
+template <> inline mipp::Reg<int32_t >::Reg(const mipp::Reg_2<int16_t > r_2) : r(mipp::cvt<int16_t,  int32_t >(r_2.r)) {}
+template <> inline mipp::Reg<int16_t >::Reg(const mipp::Reg_2<int8_t  > r_2) : r(mipp::cvt<int8_t,   int16_t >(r_2.r)) {}
+template <> inline mipp::Reg<uint64_t>::Reg(const mipp::Reg_2<uint32_t> r_2) : r(mipp::cvt<uint32_t, uint64_t>(r_2.r)) {}
+template <> inline mipp::Reg<uint32_t>::Reg(const mipp::Reg_2<uint16_t> r_2) : r(mipp::cvt<uint16_t, uint32_t>(r_2.r)) {}
+template <> inline mipp::Reg<uint16_t>::Reg(const mipp::Reg_2<uint8_t > r_2) : r(mipp::cvt<uint8_t,  uint16_t>(r_2.r)) {}
+
+template <> inline mipp::Reg<float   >::Reg(const mipp::Regx2<double  > rx2) : r(mipp::pack<float,    double  >(rx2.val[0].r, rx2.val[1].r)) {}
+template <> inline mipp::Reg<int32_t >::Reg(const mipp::Regx2<int64_t > rx2) : r(mipp::pack<int64_t,  int32_t >(rx2.val[0].r, rx2.val[1].r)) {}
+template <> inline mipp::Reg<int16_t >::Reg(const mipp::Regx2<int32_t > rx2) : r(mipp::pack<int32_t,  int16_t >(rx2.val[0].r, rx2.val[1].r)) {}
+template <> inline mipp::Reg<int8_t  >::Reg(const mipp::Regx2<int16_t > rx2) : r(mipp::pack<int16_t,  int8_t  >(rx2.val[0].r, rx2.val[1].r)) {}
+template <> inline mipp::Reg<uint32_t>::Reg(const mipp::Regx2<uint64_t> rx2) : r(mipp::pack<uint64_t, uint32_t>(rx2.val[0].r, rx2.val[1].r)) {}
+template <> inline mipp::Reg<uint16_t>::Reg(const mipp::Regx2<uint32_t> rx2) : r(mipp::pack<uint32_t, uint16_t>(rx2.val[0].r, rx2.val[1].r)) {}
+template <> inline mipp::Reg<uint8_t >::Reg(const mipp::Regx2<uint16_t> rx2) : r(mipp::pack<uint16_t, uint8_t >(rx2.val[0].r, rx2.val[1].r)) {}
+
+template <> inline mipp::Reg<float   >::Reg(const mipp::Reg<double  > r1, const mipp::Reg<double  > r2) : r(mipp::pack<float,    double  >(r1.r, r2.r)) {}
+template <> inline mipp::Reg<int32_t >::Reg(const mipp::Reg<int64_t > r1, const mipp::Reg<int64_t > r2) : r(mipp::pack<int64_t,  int32_t >(r1.r, r2.r)) {}
+template <> inline mipp::Reg<int16_t >::Reg(const mipp::Reg<int32_t > r1, const mipp::Reg<int32_t > r2) : r(mipp::pack<int32_t,  int16_t >(r1.r, r2.r)) {}
+template <> inline mipp::Reg<int8_t  >::Reg(const mipp::Reg<int16_t > r1, const mipp::Reg<int16_t > r2) : r(mipp::pack<int16_t,  int8_t  >(r1.r, r2.r)) {}
+template <> inline mipp::Reg<uint32_t>::Reg(const mipp::Reg<uint64_t> r1, const mipp::Reg<uint64_t> r2) : r(mipp::pack<uint64_t, uint32_t>(r1.r, r2.r)) {}
+template <> inline mipp::Reg<uint16_t>::Reg(const mipp::Reg<uint32_t> r1, const mipp::Reg<uint32_t> r2) : r(mipp::pack<uint32_t, uint16_t>(r1.r, r2.r)) {}
+template <> inline mipp::Reg<uint8_t >::Reg(const mipp::Reg<uint16_t> r1, const mipp::Reg<uint16_t> r2) : r(mipp::pack<uint16_t, uint8_t >(r1.r, r2.r)) {}
+#endif
 }
 #endif /* MY_INTRINSICS_PLUS_PLUS_H_ */
