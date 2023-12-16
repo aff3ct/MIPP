@@ -4329,10 +4329,24 @@
 	}
 
 	template <>
+	inline reg pack<uint32_t,uint16_t>(const reg v1, const reg v2) {
+		auto mask =_mm512_set_epi64(7,5,3,1,6,4,2,0);
+		return _mm512_castsi512_ps(_mm512_permutexvar_epi64(mask, _mm512_packus_epi32(_mm512_castps_si512(v1),
+		                                                                              _mm512_castps_si512(v2))));
+	}
+
+	template <>
 	inline reg pack<int16_t,int8_t>(const reg v1, const reg v2) {
 		auto mask =_mm512_set_epi64(7,5,3,1,6,4,2,0);
 		return _mm512_castsi512_ps(_mm512_permutexvar_epi64(mask, _mm512_packs_epi16(_mm512_castps_si512(v1),
 		                                                                             _mm512_castps_si512(v2))));
+	}
+
+	template <>
+	inline reg pack<uint16_t,uint8_t>(const reg v1, const reg v2) {
+		auto mask =_mm512_set_epi64(7,5,3,1,6,4,2,0);
+		return _mm512_castsi512_ps(_mm512_permutexvar_epi64(mask, _mm512_packus_epi16(_mm512_castps_si512(v1),
+		                                                                              _mm512_castps_si512(v2))));
 	}
 #endif
 

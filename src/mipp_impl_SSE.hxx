@@ -3612,8 +3612,18 @@
 	}
 
 	template <>
+	inline reg pack<uint32_t,uint16_t>(const reg v1, const reg v2) {
+		return _mm_castsi128_ps(_mm_packus_epi32(_mm_castps_si128(v1), _mm_castps_si128(v2)));
+	}
+
+	template <>
 	inline reg pack<int16_t,int8_t>(const reg v1, const reg v2) {
 		return _mm_castsi128_ps(_mm_packs_epi16(_mm_castps_si128(v1), _mm_castps_si128(v2)));
+	}
+
+	template <>
+	inline reg pack<uint16_t,uint8_t>(const reg v1, const reg v2) {
+		return _mm_castsi128_ps(_mm_packus_epi16(_mm_castps_si128(v1), _mm_castps_si128(v2)));
 	}
 #endif
 
