@@ -4549,9 +4549,23 @@
 	}
 
 	template <>
+	inline reg pack<uint32_t,uint16_t>(const reg v1, const reg v2) {
+		return _mm256_castsi256_ps(_mm256_permute4x64_epi64(_mm256_packus_epi32(_mm256_castps_si256(v1),
+		                                                                        _mm256_castps_si256(v2)),
+		                                                    _MM_SHUFFLE(3, 1, 2, 0)));
+	}
+
+	template <>
 	inline reg pack<int16_t,int8_t>(const reg v1, const reg v2) {
 		return _mm256_castsi256_ps(_mm256_permute4x64_epi64(_mm256_packs_epi16(_mm256_castps_si256(v1),
 		                                                                       _mm256_castps_si256(v2)),
+		                                                    _MM_SHUFFLE(3, 1, 2, 0)));
+	}
+
+	template <>
+	inline reg pack<uint16_t,uint8_t>(const reg v1, const reg v2) {
+		return _mm256_castsi256_ps(_mm256_permute4x64_epi64(_mm256_packus_epi16(_mm256_castps_si256(v1),
+		                                                                        _mm256_castps_si256(v2)),
 		                                                    _MM_SHUFFLE(3, 1, 2, 0)));
 	}
 #endif
