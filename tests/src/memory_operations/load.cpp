@@ -203,7 +203,7 @@ void test_Reg_2_loadu()
     T inputs[N_2];
     std::iota(inputs, inputs + N_2, (T)0);
 
-    mipp::Reg<T> r; r.loadu(inputs);
+    mipp::Reg_2<T> r; r.loadu(inputs);
 
     for (auto i = 0; i < N_2; i++)
         REQUIRE(r[i] == inputs[i]);

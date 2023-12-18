@@ -667,6 +667,7 @@ public:
 	template <typename T2> inline Reg<T2> cvt() const { return mipp::cvt<T,T2>(r); }
 
 	inline void          load         (const T*       data)                          { r = mipp::load_2<T>(data);                     }
+	inline void          loadu        (const T*       data)                          { r = mipp::loadu_2<T>(data);                    }
 	inline Reg_2<T>      add          (const Reg_2<T> v)                       const { return mipp::add          <T>(r, v.r);         }
 	inline Reg_2<T>      sub          (const Reg_2<T> v)                       const { return mipp::sub          <T>(r, v.r);         }
 	inline Reg_2<T>      mul          (const Reg_2<T> v)                       const { return mipp::mul          <T>(r, v.r);         }
