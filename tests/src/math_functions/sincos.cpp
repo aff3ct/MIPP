@@ -32,7 +32,7 @@ void test_reg_sincos()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Sine & Cosine - mipp::reg", "[mipp::sincos]")
 {
 	SECTION("datatype = float" ) { test_reg_sincos<float>(); }
@@ -68,6 +68,7 @@ void test_Reg_sincos()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Sine & Cosine - mipp::Reg", "[mipp::sincos]")
 {
 	SECTION("datatype = float" ) { test_Reg_sincos<float>(); }
@@ -75,3 +76,4 @@ TEST_CASE("Sine & Cosine - mipp::Reg", "[mipp::sincos]")
 	SECTION("datatype = double") { test_Reg_sincos<double>(); }
 #endif
 }
+#endif

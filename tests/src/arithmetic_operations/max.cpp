@@ -28,7 +28,7 @@ void test_reg_max()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Maximum - mipp::reg", "[mipp::max]")
 {
 #if defined(MIPP_64BIT)
@@ -81,6 +81,7 @@ void test_Reg_max()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Maximum - mipp::Reg", "[mipp::max]")
 {
 #if defined(MIPP_64BIT)
@@ -109,6 +110,7 @@ TEST_CASE("Maximum - mipp::Reg", "[mipp::max]")
 #endif
 #endif
 }
+#endif
 
 template <typename T>
 void test_reg_maskz_max()
@@ -145,7 +147,7 @@ void test_reg_maskz_max()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Maximum - mipp::reg - maskz", "[mipp::max]")
 {
 #if defined(MIPP_64BIT)
@@ -207,6 +209,7 @@ void test_Reg_maskz_max()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Maximum - mipp::Reg - maskz", "[mipp::max]")
 {
 #if defined(MIPP_64BIT)
@@ -231,6 +234,7 @@ TEST_CASE("Maximum - mipp::Reg - maskz", "[mipp::max]")
 #endif
 #endif
 }
+#endif
 
 template <typename T>
 void test_reg_mask_max()
@@ -269,7 +273,7 @@ void test_reg_mask_max()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Maximum - mipp::reg - mask", "[mipp::max]")
 {
 #if defined(MIPP_64BIT)
@@ -333,6 +337,7 @@ void test_Reg_mask_max()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Maximum - mipp::Reg - mask", "[mipp::max]")
 {
 #if defined(MIPP_64BIT)
@@ -357,3 +362,4 @@ TEST_CASE("Maximum - mipp::Reg - mask", "[mipp::max]")
 #endif
 #endif
 }
+#endif

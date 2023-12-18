@@ -36,7 +36,7 @@ struct reg_lshift<T,-1>
 	static void test() {}
 };
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Binary left shift - mipp::reg", "[mipp::lshift]")
 {
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
@@ -84,6 +84,7 @@ struct Reg_lshift<T,-1>
 	static void test() {}
 };
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Binary left shift - mipp::Reg", "[mipp::lshift]")
 {
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
@@ -99,6 +100,7 @@ TEST_CASE("Binary left shift - mipp::Reg", "[mipp::lshift]")
 #endif
 #endif
 }
+#endif
 
 template <typename T, int n = mipp::N<T>()>
 struct msk_lshift
@@ -145,7 +147,7 @@ struct msk_lshift<T,-1>
 	static void test() {}
 };
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 #if !defined(MIPP_AVX) && !defined(__clang__) && !defined(_MSC_VER) && !defined(__GNUC__)
 TEST_CASE("Binary left shift - mipp::msk", "[mipp::lshift]")
 {
@@ -205,7 +207,7 @@ struct Msk_lshift<T,-1>
 	static void test() {}
 };
 
-#if !defined(MIPP_AVX) && !defined(__clang__) && !defined(_MSC_VER) && !defined(__GNUC__)
+#if !defined(MIPP_AVX) && !defined(__clang__) && !defined(_MSC_VER) && !defined(__GNUC__) && !defined(MIPP_SVE_LS)
 TEST_CASE("Binary left shift - mipp::Msk", "[mipp::lshift]")
 {
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)

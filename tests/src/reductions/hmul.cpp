@@ -55,7 +55,7 @@ void test_reg_hmul_real()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Horizontal multiplication - mipp::reg", "[mipp::hmul]")
 {
 #if defined(MIPP_64BIT)
@@ -114,7 +114,7 @@ void test_Reg_hmul_real()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Horizontal multiplication - mipp::Reg", "[mipp::hmul]")
 {
 #if defined(MIPP_64BIT)

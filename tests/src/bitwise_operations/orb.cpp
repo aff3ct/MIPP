@@ -28,7 +28,7 @@ void test_reg_orb()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Binary or - mipp::reg", "[mipp::orb]")
 {
 #if defined(MIPP_64BIT)
@@ -64,6 +64,7 @@ void test_Reg_orb()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Binary or - mipp::Reg", "[mipp::orb]")
 {
 #if defined(MIPP_64BIT)
@@ -75,6 +76,7 @@ TEST_CASE("Binary or - mipp::Reg", "[mipp::orb]")
 	SECTION("datatype = int8_t") { test_Reg_orb<int8_t>(); }
 #endif
 }
+#endif
 
 template <typename T>
 void test_msk_orb()
@@ -113,7 +115,7 @@ void test_msk_orb()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Binary or - mipp::msk", "[mipp::orb]")
 {
 #if defined(MIPP_64BIT)
@@ -158,6 +160,7 @@ void test_Msk_orb()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Binary or - mipp::Msk", "[mipp::orb]")
 {
 #if defined(MIPP_64BIT)
@@ -169,3 +172,4 @@ TEST_CASE("Binary or - mipp::Msk", "[mipp::orb]")
 	SECTION("datatype = int8_t") { test_Msk_orb<int8_t>(); }
 #endif
 }
+#endif

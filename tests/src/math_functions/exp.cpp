@@ -29,7 +29,7 @@ void test_reg_exp()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Exponential - mipp::reg", "[mipp::exp]")
 {
 	SECTION("datatype = float" ) { test_reg_exp<float>(); }
@@ -62,6 +62,7 @@ void test_Reg_exp()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Exponential - mipp::Reg", "[mipp::exp]")
 {
 	SECTION("datatype = float" ) { test_Reg_exp<float>(); }
@@ -69,6 +70,7 @@ TEST_CASE("Exponential - mipp::Reg", "[mipp::exp]")
 	SECTION("datatype = double") { test_Reg_exp<double>(); }
 #endif
 }
+#endif
 
 template <typename T>
 void test_reg_maskz_exp()
@@ -106,7 +108,7 @@ void test_reg_maskz_exp()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Exponential - mipp::reg - maskz", "[mipp::exp]")
 {
 	SECTION("datatype = float" ) { test_reg_maskz_exp<float>(); }
@@ -152,6 +154,7 @@ void test_Reg_maskz_exp()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Exponential - mipp::Reg - maskz", "[mipp::exp]")
 {
 	SECTION("datatype = float" ) { test_Reg_maskz_exp<float>(); }
@@ -159,6 +162,7 @@ TEST_CASE("Exponential - mipp::Reg - maskz", "[mipp::exp]")
 	SECTION("datatype = double") { test_Reg_maskz_exp<double>(); }
 #endif
 }
+#endif
 
 template <typename T>
 void test_reg_mask_exp()
@@ -198,7 +202,7 @@ void test_reg_mask_exp()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Exponential - mipp::reg - mask", "[mipp::exp]")
 {
 	SECTION("datatype = float" ) { test_reg_mask_exp<float>(); }
@@ -246,6 +250,7 @@ void test_Reg_mask_exp()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Exponential - mipp::Reg - mask", "[mipp::exp]")
 {
 	SECTION("datatype = float" ) { test_Reg_mask_exp<float>(); }
@@ -253,3 +258,5 @@ TEST_CASE("Exponential - mipp::Reg - mask", "[mipp::exp]")
 	SECTION("datatype = double") { test_Reg_mask_exp<double>(); }
 #endif
 }
+#endif
+

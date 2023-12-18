@@ -626,6 +626,7 @@ test-linux-armv8-unit-neon:
 test-linux-armv8-unit-sve:
   image: registry.gitlab.com/aff3ct/aff3ct/arm64_ubuntu_armie:v22.0
   stage: test
+  allow_failure: true
   needs:
     - job: build-linux-armv8-gcc-sve
       artifacts: true

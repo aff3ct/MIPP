@@ -26,7 +26,7 @@ void test_reg_log()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Logarithm - mipp::reg", "[mipp::log]")
 {
 	SECTION("datatype = float" ) { test_reg_log<float>(); }
@@ -35,7 +35,6 @@ TEST_CASE("Logarithm - mipp::reg", "[mipp::log]")
 #endif
 }
 #endif
-
 
 template <typename T>
 void test_Reg_log()
@@ -57,6 +56,7 @@ void test_Reg_log()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Logarithm - mipp::Reg", "[mipp::log]")
 {
 	SECTION("datatype = float" ) { test_Reg_log<float>(); }
@@ -64,7 +64,7 @@ TEST_CASE("Logarithm - mipp::Reg", "[mipp::log]")
 	SECTION("datatype = double") { test_Reg_log<double>(); }
 #endif
 }
-
+#endif
 
 template <typename T>
 void test_reg_maskz_log()
@@ -99,7 +99,7 @@ void test_reg_maskz_log()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Logarithm - mipp::reg - maskz", "[mipp::log]")
 {
 	SECTION("datatype = float" ) { test_reg_maskz_log<float>(); }
@@ -142,6 +142,7 @@ void test_Reg_maskz_log()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Logarithm - mipp::Reg - maskz", "[mipp::log]")
 {
 	SECTION("datatype = float" ) { test_Reg_maskz_log<float>(); }
@@ -149,6 +150,7 @@ TEST_CASE("Logarithm - mipp::Reg - maskz", "[mipp::log]")
 	SECTION("datatype = double") { test_Reg_maskz_log<double>(); }
 #endif
 }
+#endif
 
 template <typename T>
 void test_reg_mask_log()
@@ -185,7 +187,7 @@ void test_reg_mask_log()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Logarithm - mipp::reg - mask", "[mipp::log]")
 {
 	SECTION("datatype = float" ) { test_reg_mask_log<float>(); }
@@ -230,6 +232,7 @@ void test_Reg_mask_log()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Logarithm - mipp::Reg - mask", "[mipp::log]")
 {
 	SECTION("datatype = float" ) { test_Reg_mask_log<float>(); }
@@ -237,3 +240,4 @@ TEST_CASE("Logarithm - mipp::Reg - mask", "[mipp::log]")
 	SECTION("datatype = double") { test_Reg_mask_log<double>(); }
 #endif
 }
+#endif

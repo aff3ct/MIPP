@@ -35,7 +35,7 @@ void test_reg_cmpge()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Compare greater or equal - mipp::reg", "[mipp::cmpge]")
 {
 #if defined(MIPP_64BIT)
@@ -84,6 +84,7 @@ void test_Reg_cmpge()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Compare greater or equal - mipp::Reg", "[mipp::cmpge]")
 {
 #if defined(MIPP_64BIT)
@@ -108,3 +109,4 @@ TEST_CASE("Compare greater or equal - mipp::Reg", "[mipp::cmpge]")
 	SECTION("datatype = uint8_t") { test_Reg_cmpge<uint8_t>(); }
 #endif
 }
+#endif

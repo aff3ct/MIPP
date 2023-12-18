@@ -29,7 +29,7 @@ void test_reg_div4()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Division by 4 - mipp::reg", "[mipp::div4]")
 {
 #if defined(MIPP_64BIT)
@@ -77,6 +77,7 @@ void test_Reg_div4()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Division by 4 - mipp::Reg", "[mipp::div4]")
 {
 #if defined(MIPP_64BIT)
@@ -99,6 +100,7 @@ TEST_CASE("Division by 4 - mipp::Reg", "[mipp::div4]")
 #endif
 #endif
 }
+#endif
 
 template <typename T>
 void test_reg_maskz_div4()
@@ -136,7 +138,7 @@ void test_reg_maskz_div4()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Division by 4 - mipp::reg - maskz", "[mipp::div4]")
 {
 #if defined(MIPP_64BIT)
@@ -197,6 +199,7 @@ void test_Reg_maskz_div4()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Division by 4 - mipp::Reg - maskz", "[mipp::div4]")
 {
 #if defined(MIPP_64BIT)
@@ -219,6 +222,7 @@ TEST_CASE("Division by 4 - mipp::Reg - maskz", "[mipp::div4]")
 #endif
 #endif
 }
+#endif
 
 template <typename T>
 void test_reg_mask_div4()
@@ -258,7 +262,7 @@ void test_reg_mask_div4()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Division by 4 - mipp::reg - mask", "[mipp::div4]")
 {
 #if defined(MIPP_64BIT)
@@ -321,6 +325,7 @@ void test_Reg_mask_div4()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Division by 4 - mipp::Reg - mask", "[mipp::div4]")
 {
 #if defined(MIPP_64BIT)
@@ -343,3 +348,4 @@ TEST_CASE("Division by 4 - mipp::Reg - mask", "[mipp::div4]")
 #endif
 #endif
 }
+#endif

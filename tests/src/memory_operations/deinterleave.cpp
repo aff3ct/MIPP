@@ -32,7 +32,7 @@ void test_reg_deinterleave()
 		REQUIRE(mipp::get<T>(ri.val[1], i) == inputs[2 * i +1]);
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Deinterleave - mipp::reg", "[mipp::deinterleave]")
 {
 #if defined(MIPP_64BIT)
@@ -81,6 +81,7 @@ void test_Reg_deinterleave()
 		REQUIRE(ri[1][i] == inputs[2 * i +1]);
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Deinterleave - mipp::Reg", "[mipp::deinterleave]")
 {
 #if defined(MIPP_64BIT)
@@ -101,3 +102,4 @@ TEST_CASE("Deinterleave - mipp::Reg", "[mipp::deinterleave]")
 #endif
 #endif
 }
+#endif

@@ -29,7 +29,7 @@ void test_reg_rsqrt()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Reciprocal square root - mipp::reg", "[mipp::rsqrt]")
 {
 #if defined(MIPP_64BIT)
@@ -62,6 +62,7 @@ void test_Reg_rsqrt()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Reciprocal square root - mipp::Reg", "[mipp::rsqrt]")
 {
 #if defined(MIPP_64BIT)
@@ -69,6 +70,7 @@ TEST_CASE("Reciprocal square root - mipp::Reg", "[mipp::rsqrt]")
 #endif
 	SECTION("datatype = float") { test_Reg_rsqrt<float>(); }
 }
+#endif
 
 template <typename T>
 void test_reg_maskz_rsqrt()
@@ -106,7 +108,7 @@ void test_reg_maskz_rsqrt()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Reciprocal square root - mipp::reg - maskz", "[mipp::rsqrt]")
 {
 #if defined(MIPP_64BIT)
@@ -152,6 +154,7 @@ void test_Reg_maskz_rsqrt()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Reciprocal square root - mipp::Reg - maskz", "[mipp::rsqrt]")
 {
 #if defined(MIPP_64BIT)
@@ -159,6 +162,7 @@ TEST_CASE("Reciprocal square root - mipp::Reg - maskz", "[mipp::rsqrt]")
 #endif
 	SECTION("datatype = float") { test_Reg_maskz_rsqrt<float>(); }
 }
+#endif
 
 template <typename T>
 void test_reg_mask_rsqrt()
@@ -198,7 +202,7 @@ void test_reg_mask_rsqrt()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Reciprocal square root - mipp::reg - mask", "[mipp::rsqrt]")
 {
 #if defined(MIPP_64BIT)
@@ -246,6 +250,7 @@ void test_Reg_mask_rsqrt()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Reciprocal square root - mipp::Reg - mask", "[mipp::rsqrt]")
 {
 #if defined(MIPP_64BIT)
@@ -253,3 +258,4 @@ TEST_CASE("Reciprocal square root - mipp::Reg - mask", "[mipp::rsqrt]")
 #endif
 	SECTION("datatype = float") { test_Reg_mask_rsqrt<float>(); }
 }
+#endif

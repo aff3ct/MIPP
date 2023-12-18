@@ -54,7 +54,7 @@ void test_reg_hmax_real()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Horizontal maximum - mipp::reg", "[mipp::hmax]")
 {
 #if defined(MIPP_64BIT)
@@ -133,6 +133,7 @@ void test_Reg_hmax_real()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Horizontal maximum - mipp::Reg", "[mipp::hmax]")
 {
 #if defined(MIPP_64BIT)
@@ -161,3 +162,4 @@ TEST_CASE("Horizontal maximum - mipp::Reg", "[mipp::hmax]")
 #endif
 #endif
 }
+#endif

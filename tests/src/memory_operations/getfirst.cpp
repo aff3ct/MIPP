@@ -22,7 +22,7 @@ void test_reg_getfirst()
 	REQUIRE(mipp::getfirst<T>(r) == inputs[0]);
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Get first - mipp::reg", "[mipp::getfirst]")
 {
 #if defined(MIPP_64BIT)
@@ -57,6 +57,7 @@ void test_Reg_getfirst()
 	REQUIRE(mipp::getfirst(r) == inputs[0]);
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Get first - mipp::Reg", "[mipp::getfirst]")
 {
 #if defined(MIPP_64BIT)
@@ -73,6 +74,7 @@ TEST_CASE("Get first - mipp::Reg", "[mipp::getfirst]")
 	SECTION("datatype = int8_t") { test_Reg_getfirst<int8_t>(); }
 #endif
 }
+#endif
 
 template <typename T>
 void test_reg_2_getfirst()
@@ -94,7 +96,7 @@ void test_reg_2_getfirst()
 	REQUIRE(mipp::getfirst<T>(rh) == (T)inputs[mipp::N<T>()/2]);
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Get first - mipp::reg_2", "[mipp::getfirst]")
 {
 #if defined(MIPP_64BIT)
@@ -133,6 +135,7 @@ void test_Reg_2_getfirst()
 	REQUIRE(mipp::getfirst(rh) == (T)inputs[mipp::N<T>()/2]);
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Get first - mipp::Reg_2", "[mipp::getfirst]")
 {
 #if defined(MIPP_64BIT)
@@ -149,6 +152,7 @@ TEST_CASE("Get first - mipp::Reg_2", "[mipp::getfirst]")
 	SECTION("datatype = int8_t") { test_Reg_2_getfirst<int8_t>(); }
 #endif
 }
+#endif
 
 template <typename T>
 void test_msk_getfirst()
@@ -167,7 +171,7 @@ void test_msk_getfirst()
 	REQUIRE(mipp::getfirst<N>(m) == mask[0]);
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Get first - mipp::msk", "[mipp::getfirst]")
 {
 #if defined(MIPP_64BIT)
@@ -203,6 +207,7 @@ void test_Msk_getfirst()
 	REQUIRE(mipp::getfirst(m) == mask[0]);
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Get first - mipp::Msk", "[mipp::getfirst]")
 {
 #if defined(MIPP_64BIT)
@@ -219,3 +224,4 @@ TEST_CASE("Get first - mipp::Msk", "[mipp::getfirst]")
 	SECTION("datatype = int8_t") { test_Msk_getfirst<int8_t>(); }
 #endif
 }
+#endif

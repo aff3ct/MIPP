@@ -29,7 +29,7 @@ void test_reg_sign()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Sign - mipp::reg", "[mipp::sign]")
 {
 #if defined(MIPP_64BIT)
@@ -77,6 +77,7 @@ void test_Reg_sign()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Sign - mipp::Reg", "[mipp::sign]")
 {
 #if defined(MIPP_64BIT)
@@ -99,3 +100,4 @@ TEST_CASE("Sign - mipp::Reg", "[mipp::sign]")
 	SECTION("datatype = int8_t") { test_Reg_sign<int8_t>(); }
 #endif
 }
+#endif

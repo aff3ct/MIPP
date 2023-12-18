@@ -28,7 +28,7 @@ void test_reg_min()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Minimum - mipp::reg", "[mipp::min]")
 {
 #if defined(MIPP_64BIT)
@@ -81,6 +81,7 @@ void test_Reg_min()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Minimum - mipp::Reg", "[mipp::min]")
 {
 #if defined(MIPP_64BIT)
@@ -109,6 +110,7 @@ TEST_CASE("Minimum - mipp::Reg", "[mipp::min]")
 #endif
 #endif
 }
+#endif
 
 template <typename T>
 void test_reg_maskz_min()
@@ -145,7 +147,7 @@ void test_reg_maskz_min()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Minimum - mipp::reg - maskz", "[mipp::min]")
 {
 #if defined(MIPP_64BIT)
@@ -207,6 +209,7 @@ void test_Reg_maskz_min()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Minimum - mipp::Reg - maskz", "[mipp::min]")
 {
 #if defined(MIPP_64BIT)
@@ -231,6 +234,7 @@ TEST_CASE("Minimum - mipp::Reg - maskz", "[mipp::min]")
 #endif
 #endif
 }
+#endif
 
 template <typename T>
 void test_reg_mask_min()
@@ -269,7 +273,7 @@ void test_reg_mask_min()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Minimum - mipp::reg - mask", "[mipp::min]")
 {
 #if defined(MIPP_64BIT)
@@ -333,6 +337,7 @@ void test_Reg_mask_min()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Minimum - mipp::Reg - mask", "[mipp::min]")
 {
 #if defined(MIPP_64BIT)
@@ -357,3 +362,4 @@ TEST_CASE("Minimum - mipp::Reg - mask", "[mipp::min]")
 #endif
 #endif
 }
+#endif

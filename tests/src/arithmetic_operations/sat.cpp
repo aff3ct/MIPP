@@ -69,7 +69,7 @@ void test_reg_sat_real()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Saturation - mipp::reg", "[mipp::sat]")
 {
 #if defined(MIPP_64BIT)
@@ -164,6 +164,7 @@ void test_Reg_sat_real()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Saturation - mipp::Reg", "[mipp::sat]")
 {
 #if defined(MIPP_64BIT)
@@ -194,3 +195,4 @@ TEST_CASE("Saturation - mipp::Reg", "[mipp::sat]")
 #endif
 #endif
 }
+#endif

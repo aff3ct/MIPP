@@ -61,12 +61,12 @@ TEST_CASE("Subtraction - mipp::reg", "[mipp::sub]")
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 #if defined(MIPP_64BIT)
 	SECTION("datatype = int64_t") { test_reg_sub<int64_t>(); }
-#if !defined(MIPP_SSE) && !defined(MIPP_AVX) && !defined(MIPP_AVX512)
+#if !defined(MIPP_SSE) && !defined(MIPP_AVX) && !defined(MIPP_AVX512) && !defined(MIPP_SVE_LS)
 	SECTION("datatype = uint64_t") { test_reg_subu<uint64_t>(); }
 #endif
 #endif
 	SECTION("datatype = int32_t") { test_reg_sub<int32_t>(); }
-#if !defined(MIPP_AVX512)
+#if !defined(MIPP_SSE) && !defined(MIPP_AVX) && !defined(MIPP_AVX512) && !defined(MIPP_SVE_LS)
 	SECTION("datatype = uint32_t") { test_reg_subu<uint32_t>(); }
 #endif
 #endif
@@ -166,12 +166,12 @@ TEST_CASE("Subtraction - mipp::Reg", "[mipp::sub]")
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 #if defined(MIPP_64BIT)
 	SECTION("datatype = int64_t") { test_Reg_sub<int64_t>(); }
-#if !defined(MIPP_SSE) && !defined(MIPP_AVX) && !defined(MIPP_AVX512)
+#if !defined(MIPP_SSE) && !defined(MIPP_AVX) && !defined(MIPP_AVX512) && !defined(MIPP_SVE_LS)
 	SECTION("datatype = uint64_t") { test_Reg_subu<uint64_t>(); }
 #endif
 #endif
 	SECTION("datatype = int32_t") { test_Reg_sub<int32_t>(); }
-#if !defined(MIPP_AVX512)
+#if !defined(MIPP_SSE) && !defined(MIPP_AVX) && !defined(MIPP_AVX512) && !defined(MIPP_SVE_LS)
 	SECTION("datatype = uint32_t") { test_Reg_subu<uint32_t>(); }
 #endif
 #endif

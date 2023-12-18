@@ -30,7 +30,7 @@ void test_reg_trunc()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Truncate - mipp::reg", "[mipp::trunc]")
 {
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
@@ -66,6 +66,7 @@ void test_Reg_trunc()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Truncate - mipp::Reg", "[mipp::trunc]")
 {
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
@@ -75,6 +76,7 @@ TEST_CASE("Truncate - mipp::Reg", "[mipp::trunc]")
 	SECTION("datatype = float") { test_Reg_trunc<float>(); }
 #endif
 }
+#endif
 
 template <typename T>
 void test_reg_maskz_trunc()
@@ -113,7 +115,7 @@ void test_reg_maskz_trunc()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Truncate - mipp::reg - maskz", "[mipp::trunc]")
 {
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
@@ -162,6 +164,7 @@ void test_Reg_maskz_trunc()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Truncate - mipp::Reg - maskz", "[mipp::trunc]")
 {
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
@@ -171,6 +174,7 @@ TEST_CASE("Truncate - mipp::Reg - maskz", "[mipp::trunc]")
 	SECTION("datatype = float") { test_Reg_maskz_trunc<float>(); }
 #endif
 }
+#endif
 
 template <typename T>
 void test_reg_mask_trunc()
@@ -211,7 +215,7 @@ void test_reg_mask_trunc()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Truncate - mipp::reg - mask", "[mipp::trunc]")
 {
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
@@ -262,6 +266,7 @@ void test_Reg_mask_trunc()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Truncate - mipp::Reg - mask", "[mipp::trunc]")
 {
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
@@ -271,3 +276,5 @@ TEST_CASE("Truncate - mipp::Reg - mask", "[mipp::trunc]")
 	SECTION("datatype = float") { test_Reg_mask_trunc<float>(); }
 #endif
 }
+#endif
+

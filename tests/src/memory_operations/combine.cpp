@@ -24,7 +24,7 @@ void test_reg_combine()
 		REQUIRE(mipp::get<T>(r2, i) == inputs[i]);
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Combine - mipp::reg", "[mipp::combine]")
 {
 #if defined(MIPP_64BIT)
@@ -61,7 +61,7 @@ void test_Reg_combine()
 		REQUIRE(r2[i] == inputs[i]);
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Combine - mipp::Reg", "[mipp::combine]")
 {
 #if defined(MIPP_64BIT)
@@ -108,7 +108,7 @@ void test_Reg_combine_bis()
 }
 
 #if defined(MIPP_NEON) || defined(MIPP_SSE) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2) || defined(MIPP_AVX512F)
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Combine (bis) - mipp::Reg", "[mipp::combine_bis]")
 {
 #if defined(MIPP_64BIT)

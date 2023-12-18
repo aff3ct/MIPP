@@ -18,7 +18,7 @@ void test_reg_get()
 		REQUIRE(mipp::get<T>(r, i) == (T)i);
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Get - mipp::reg", "[mipp::get]")
 {
 #if defined(MIPP_64BIT)
@@ -49,6 +49,7 @@ void test_Reg_get()
 		REQUIRE(mipp::get(r, i) == (T)i);
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Get - mipp::Reg", "[mipp::get]")
 {
 #if defined(MIPP_64BIT)
@@ -65,6 +66,7 @@ TEST_CASE("Get - mipp::Reg", "[mipp::get]")
 	SECTION("datatype = int8_t") { test_Reg_get<int8_t>(); }
 #endif
 }
+#endif
 
 template <typename T>
 void test_reg_2_get()
@@ -84,7 +86,7 @@ void test_reg_2_get()
 		REQUIRE(mipp::get<T>(rh, i) == (T)(i+mipp::N<T>()/2));
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Get - mipp::reg_2", "[mipp::get]")
 {
 #if defined(MIPP_64BIT)
@@ -121,6 +123,7 @@ void test_Reg_2_get()
 		REQUIRE(mipp::get(rh, i) == (T)(i+mipp::N<T>()/2));
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Get - mipp::Reg_2", "[mipp::get]")
 {
 #if defined(MIPP_64BIT)
@@ -137,6 +140,7 @@ TEST_CASE("Get - mipp::Reg_2", "[mipp::get]")
 	SECTION("datatype = int8_t") { test_Reg_2_get<int8_t>(); }
 #endif
 }
+#endif
 
 template <typename T>
 void test_msk_get()
@@ -156,7 +160,7 @@ void test_msk_get()
 		REQUIRE(mipp::get<N>(m, i) == mask[i]);
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Get - mipp::msk", "[mipp::get]")
 {
 #if defined(MIPP_64BIT)
@@ -193,6 +197,7 @@ void test_Msk_get()
 		REQUIRE(mipp::get(m, i) == mask[i]);
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Get - mipp::Msk", "[mipp::get]")
 {
 #if defined(MIPP_64BIT)
@@ -209,3 +214,4 @@ TEST_CASE("Get - mipp::Msk", "[mipp::get]")
 	SECTION("datatype = int8_t") { test_Msk_get<int8_t>(); }
 #endif
 }
+#endif

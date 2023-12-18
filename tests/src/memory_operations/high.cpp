@@ -19,7 +19,7 @@ void test_reg_high()
 		REQUIRE(mipp::get<T>(r_2, i) == inputs[mipp::N<T>()/2 +i]);
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("High - mipp::reg", "[mipp::high]")
 {
 #if defined(MIPP_64BIT)
@@ -38,7 +38,6 @@ TEST_CASE("High - mipp::reg", "[mipp::high]")
 }
 #endif
 
-
 template <typename T>
 void test_Reg_high()
 {
@@ -52,6 +51,7 @@ void test_Reg_high()
 		REQUIRE(r_2[i] == inputs[mipp::N<T>()/2 +i]);
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("High - mipp::Reg", "[mipp::high]")
 {
 #if defined(MIPP_64BIT)
@@ -68,3 +68,4 @@ TEST_CASE("High - mipp::Reg", "[mipp::high]")
 	SECTION("datatype = int8_t") { test_Reg_high<int8_t>(); }
 #endif
 }
+#endif

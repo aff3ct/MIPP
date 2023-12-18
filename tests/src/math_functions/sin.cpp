@@ -26,7 +26,7 @@ void test_reg_sin()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Sine - mipp::reg", "[mipp::sin]")
 {
 	SECTION("datatype = float" ) { test_reg_sin<float>(); }
@@ -35,7 +35,6 @@ TEST_CASE("Sine - mipp::reg", "[mipp::sin]")
 #endif
 }
 #endif
-
 
 template <typename T>
 void test_Reg_sin()
@@ -57,6 +56,7 @@ void test_Reg_sin()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Sine - mipp::Reg", "[mipp::sin]")
 {
 	SECTION("datatype = float" ) { test_Reg_sin<float>(); }
@@ -64,7 +64,7 @@ TEST_CASE("Sine - mipp::Reg", "[mipp::sin]")
 	SECTION("datatype = double") { test_Reg_sin<double>(); }
 #endif
 }
-
+#endif
 
 template <typename T>
 void test_reg_maskz_sin()
@@ -99,7 +99,7 @@ void test_reg_maskz_sin()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Sine - mipp::reg - maskz", "[mipp::sin]")
 {
 	SECTION("datatype = float" ) { test_reg_maskz_sin<float>(); }
@@ -142,6 +142,7 @@ void test_Reg_maskz_sin()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Sine - mipp::Reg - maskz", "[mipp::sin]")
 {
 	SECTION("datatype = float" ) { test_Reg_maskz_sin<float>(); }
@@ -149,6 +150,7 @@ TEST_CASE("Sine - mipp::Reg - maskz", "[mipp::sin]")
 	SECTION("datatype = double") { test_Reg_maskz_sin<double>(); }
 #endif
 }
+#endif
 
 template <typename T>
 void test_reg_mask_sin()
@@ -185,7 +187,7 @@ void test_reg_mask_sin()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Sine - mipp::reg - mask", "[mipp::sin]")
 {
 	SECTION("datatype = float" ) { test_reg_mask_sin<float>(); }
@@ -230,6 +232,7 @@ void test_Reg_mask_sin()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Sine - mipp::Reg - mask", "[mipp::sin]")
 {
 	SECTION("datatype = float" ) { test_Reg_mask_sin<float>(); }
@@ -237,3 +240,4 @@ TEST_CASE("Sine - mipp::Reg - mask", "[mipp::sin]")
 	SECTION("datatype = double") { test_Reg_mask_sin<double>(); }
 #endif
 }
+#endif

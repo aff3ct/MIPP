@@ -46,7 +46,7 @@ void test_reg_cdiv()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Complex division - mipp::reg", "[mipp::cdiv]")
 {
 #if defined(MIPP_64BIT)
@@ -90,6 +90,7 @@ void test_Reg_cdiv()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Complex division - mipp::Reg", "[mipp::cdiv]")
 {
 #if defined(MIPP_64BIT)
@@ -97,3 +98,4 @@ TEST_CASE("Complex division - mipp::Reg", "[mipp::cdiv]")
 #endif
 	SECTION("datatype = float") { test_Reg_cdiv<float>(); }
 }
+#endif

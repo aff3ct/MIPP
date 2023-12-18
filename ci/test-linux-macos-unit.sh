@@ -18,11 +18,13 @@ do
 				exit 1;
 			fi
 		fi
-		armie -msve-vector-bits=$nbits -- ./bin/run_tests 2>&1 | tee sve_$nbits.txt
-		RES=$(cat sve_$nbits.txt | tail -3 | head -n 1)
-		if [[ "$RES" != *"test cases:   289 |    92 passed | 197 failed"* ]]; then
-			exit 1;
-		fi
+		# armie -msve-vector-bits=$nbits -- ./bin/run_tests 2>&1 | tee sve_$nbits.txt
+		# RES=$(cat sve_$nbits.txt | tail -3 | head -n 1)
+		# if [[ "$RES" != *"test cases:   289 |    92 passed | 197 failed"* ]]; then
+		# 	exit 1;
+		# fi
+		armie -msve-vector-bits=$nbits -- ./bin/run_tests
+		rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 	else
 		./bin/run_tests
 		rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi

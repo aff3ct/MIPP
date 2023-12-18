@@ -34,7 +34,7 @@ void test_reg_interleave()
 			REQUIRE(mipp::get<T>(ri.val[1], i) == inputs1[mipp::N<T>()/2 + i/2]);
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX))
 TEST_CASE("Interleave - mipp::reg<float>", "[mipp::interleave_float]")
 {
@@ -44,7 +44,7 @@ TEST_CASE("Interleave - mipp::reg<float>", "[mipp::interleave_float]")
 #endif
 
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 TEST_CASE("Interleave - mipp::reg", "[mipp::interleave]")
 {
@@ -93,6 +93,7 @@ void test_Reg_interleave()
 			REQUIRE(ri[1][i] == inputs1[mipp::N<T>()/2 + i/2]);
 }
 
+#if !defined(MIPP_SVE_LS)
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 TEST_CASE("Interleave - mipp::Reg", "[mipp::interleave]")
 {
@@ -110,6 +111,7 @@ TEST_CASE("Interleave - mipp::Reg", "[mipp::interleave]")
 	SECTION("datatype = int8_t") { test_Reg_interleave<int8_t>(); }
 #endif
 }
+#endif
 #endif
 
 template <typename T>
@@ -155,7 +157,7 @@ void test_reg_interleave2()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 TEST_CASE("Interleave2 - mipp::reg", "[mipp::interleave2]")
 {
@@ -219,6 +221,7 @@ void test_Reg_interleave2()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 TEST_CASE("Interleave2 - mipp::Reg", "[mipp::interleave2]")
 {
@@ -236,6 +239,7 @@ TEST_CASE("Interleave2 - mipp::Reg", "[mipp::interleave2]")
 	SECTION("datatype = int8_t") { test_Reg_interleave2<int8_t>(); }
 #endif
 }
+#endif
 #endif
 
 template <typename T>
@@ -271,7 +275,6 @@ void test_reg_interleave4()
 	}
 }
 
-#ifndef MIPP_NO
 #if defined(MIPP_AVX512)
 TEST_CASE("Interleave4 - mipp::reg", "[mipp::interleave4]")
 {
@@ -289,7 +292,6 @@ TEST_CASE("Interleave4 - mipp::reg", "[mipp::interleave4]")
 	SECTION("datatype = int8_t") { test_reg_interleave4<int8_t>(); }
 #endif
 }
-#endif
 #endif
 
 template <typename T>

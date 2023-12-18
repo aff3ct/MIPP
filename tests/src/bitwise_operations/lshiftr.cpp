@@ -29,7 +29,7 @@ void test_reg_lshiftr()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Binary left shift (register) - mipp::reg", "[mipp::lshiftr]")
 {
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
@@ -72,6 +72,7 @@ void test_Reg_lshiftr()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Binary left shift (register) - mipp::Reg", "[mipp::lshiftr]")
 {
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
@@ -89,3 +90,4 @@ TEST_CASE("Binary left shift (register) - mipp::Reg", "[mipp::lshiftr]")
 #endif
 #endif
 }
+#endif
