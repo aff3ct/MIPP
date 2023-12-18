@@ -28,6 +28,28 @@ void test_reg_sub()
 	}
 }
 
+template <typename T>
+void test_reg_subu()
+{
+	T inputs1[mipp::N<T>()], inputs2[mipp::N<T>()];
+	std::iota(inputs1, inputs1 + mipp::N<T>(), (T)100);
+	std::iota(inputs2, inputs2 + mipp::N<T>(), (T)1);
+
+	std::mt19937 g;
+	std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
+	std::shuffle(inputs2, inputs2 + mipp::N<T>(), g);
+
+	mipp::reg r1 = mipp::load<T>(inputs1);
+	mipp::reg r2 = mipp::load<T>(inputs2);
+	mipp::reg r3 = mipp::sub <T>(r1, r2);
+
+	for (auto i = 0; i < mipp::N<T>(); i++)
+	{
+		T res = inputs1[i] - inputs2[i];
+		REQUIRE(mipp::get<T>(r3, i) == res);
+	}
+}
+
 #ifndef MIPP_NO
 TEST_CASE("Subtraction - mipp::reg", "[mipp::sub]")
 {
@@ -39,12 +61,16 @@ TEST_CASE("Subtraction - mipp::reg", "[mipp::sub]")
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 #if defined(MIPP_64BIT)
 	SECTION("datatype = int64_t") { test_reg_sub<int64_t>(); }
+	SECTION("datatype = uint64_t") { test_reg_subu<uint64_t>(); }
 #endif
 	SECTION("datatype = int32_t") { test_reg_sub<int32_t>(); }
+	SECTION("datatype = uint32_t") { test_reg_subu<uint32_t>(); }
 #endif
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_reg_sub<int16_t>(); }
+	SECTION("datatype = uint16_t") { test_reg_subu<uint16_t>(); }
 	SECTION("datatype = int8_t") { test_reg_sub<int8_t>(); }
+	SECTION("datatype = uint8_t") { test_reg_subu<uint8_t>(); }
 #endif
 }
 #endif
@@ -104,6 +130,28 @@ void test_Reg_sub()
 	}
 }
 
+template <typename T>
+void test_Reg_subu()
+{
+	T inputs1[mipp::N<T>()], inputs2[mipp::N<T>()];
+	std::iota(inputs1, inputs1 + mipp::N<T>(), (T)100);
+	std::iota(inputs2, inputs2 + mipp::N<T>(), (T)1);
+
+	std::mt19937 g;
+	std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
+	std::shuffle(inputs2, inputs2 + mipp::N<T>(), g);
+
+	mipp::Reg<T> r1 = inputs1;
+	mipp::Reg<T> r2 = inputs2;
+	mipp::Reg<T> r3 = r1 - r2;
+
+	for (auto i = 0; i < mipp::N<T>(); i++)
+	{
+		T res = inputs1[i] - inputs2[i];
+		REQUIRE(r3[i] == res);
+	}
+}
+
 TEST_CASE("Subtraction - mipp::Reg", "[mipp::sub]")
 {
 #if defined(MIPP_64BIT)
@@ -114,12 +162,16 @@ TEST_CASE("Subtraction - mipp::Reg", "[mipp::sub]")
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 #if defined(MIPP_64BIT)
 	SECTION("datatype = int64_t") { test_Reg_sub<int64_t>(); }
+	SECTION("datatype = uint64_t") { test_Reg_subu<uint64_t>(); }
 #endif
 	SECTION("datatype = int32_t") { test_Reg_sub<int32_t>(); }
+	SECTION("datatype = uint32_t") { test_Reg_subu<uint32_t>(); }
 #endif
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_Reg_sub<int16_t>(); }
+	SECTION("datatype = uint16_t") { test_Reg_subu<uint16_t>(); }
 	SECTION("datatype = int8_t") { test_Reg_sub<int8_t>(); }
+	SECTION("datatype = uint8_t") { test_Reg_subu<uint8_t>(); }
 #endif
 }
 
