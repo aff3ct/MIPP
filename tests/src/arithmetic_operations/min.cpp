@@ -50,8 +50,8 @@ TEST_CASE("Minimum - mipp::reg", "[mipp::min]")
 #endif
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_reg_min<int16_t>(); }
-	SECTION("datatype = uint16_t") { test_reg_min<uint16_t>(); }
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
+	SECTION("datatype = uint16_t") { test_reg_min<uint16_t>(); }
 	SECTION("datatype = int8_t") { test_reg_min<int8_t>(); }
 	SECTION("datatype = uint8_t") { test_reg_min<uint8_t>(); }
 #endif
@@ -102,8 +102,8 @@ TEST_CASE("Minimum - mipp::Reg", "[mipp::min]")
 #endif
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_Reg_min<int16_t>(); }
-	SECTION("datatype = uint16_t") { test_Reg_min<uint16_t>(); }
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
+	SECTION("datatype = uint16_t") { test_Reg_min<uint16_t>(); }
 	SECTION("datatype = int8_t") { test_Reg_min<int8_t>(); }
 	SECTION("datatype = uint8_t") { test_Reg_min<uint8_t>(); }
 #endif

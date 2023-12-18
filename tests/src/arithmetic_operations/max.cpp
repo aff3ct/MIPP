@@ -50,8 +50,8 @@ TEST_CASE("Maximum - mipp::reg", "[mipp::max]")
 #endif
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_reg_max<int16_t>(); }
-	SECTION("datatype = uint16_t") { test_reg_max<uint16_t>(); }
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
+	SECTION("datatype = uint16_t") { test_reg_max<uint16_t>(); }
 	SECTION("datatype = int8_t") { test_reg_max<int8_t>(); }
 	SECTION("datatype = uint8_t") { test_reg_max<uint8_t>(); }
 #endif
@@ -102,8 +102,8 @@ TEST_CASE("Maximum - mipp::Reg", "[mipp::max]")
 #endif
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_Reg_max<int16_t>(); }
-	SECTION("datatype = uint16_t") { test_Reg_max<uint16_t>(); }
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
+	SECTION("datatype = uint16_t") { test_Reg_max<uint16_t>(); }
 	SECTION("datatype = int8_t") { test_Reg_max<int8_t>(); }
 	SECTION("datatype = uint8_t") { test_Reg_max<uint8_t>(); }
 #endif

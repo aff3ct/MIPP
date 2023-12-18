@@ -39,10 +39,14 @@ TEST_CASE("Addition - mipp::reg", "[mipp::add]")
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 #if defined(MIPP_64BIT)
 	SECTION("datatype = int64_t") { test_reg_add<int64_t>(); }
+#if !defined(MIPP_SSE) && !defined(MIPP_AVX) && !defined(MIPP_AVX512)
 	SECTION("datatype = uint64_t") { test_reg_add<uint64_t>(); }
 #endif
+#endif
 	SECTION("datatype = int32_t") { test_reg_add<int32_t>(); }
+#if !defined(MIPP_AVX512)
 	SECTION("datatype = uint32_t") { test_reg_add<uint32_t>(); }
+#endif
 #endif
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_reg_add<int16_t>(); }
@@ -118,10 +122,14 @@ TEST_CASE("Addition - mipp::Reg", "[mipp::add]")
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 #if defined(MIPP_64BIT)
 	SECTION("datatype = int64_t") { test_Reg_add<int64_t>(); }
+#if !defined(MIPP_SSE) && !defined(MIPP_AVX) && !defined(MIPP_AVX512)
 	SECTION("datatype = uint64_t") { test_Reg_add<uint64_t>(); }
 #endif
+#endif
 	SECTION("datatype = int32_t") { test_Reg_add<int32_t>(); }
+#if !defined(MIPP_AVX512)
 	SECTION("datatype = uint32_t") { test_Reg_add<uint32_t>(); }
+#endif
 #endif
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_Reg_add<int16_t>(); }
