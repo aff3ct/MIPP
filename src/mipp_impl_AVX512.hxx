@@ -70,6 +70,14 @@
 	inline reg loadu<int8_t>(const int8_t *mem_addr) {
 		return _mm512_loadu_ps((const float*) mem_addr);
 	}
+
+#if defined(__AVX__)
+	template <>
+	inline reg_2 loadu_2<int32_t>(const int32_t *mem_addr) {
+		return _mm256_loadu_ps((const float*) mem_addr);
+	}
+#endif
+
 #endif
 
 	// ----------------------------------------------------------------------------------------------------------- load
@@ -103,6 +111,13 @@
 	inline reg load<int8_t>(const int8_t *mem_addr) {
 		return _mm512_load_ps((const float*) mem_addr);
 	}
+
+#if defined(__AVX__)
+    template <>
+    inline reg_2 load_2<int32_t>(const int32_t *mem_addr) {
+        return _mm256_load_ps((const float*) mem_addr);
+    }
+#endif
 #else
 	template <>
 	inline reg load<float>(const float *mem_addr) {
@@ -133,6 +148,11 @@
 	inline reg load<int8_t>(const int8_t *mem_addr) {
 		return mipp::loadu<int8_t>(mem_addr);
 	}
+
+    template <>
+    inline reg_2 load_2<int32_t>(const int32_t *mem_addr) {
+        return mipp::loadu_2<int32_t>(mem_addr);
+    }
 #endif
 
 	// --------------------------------------------------------------------------------------------------------- storeu
@@ -3155,6 +3175,12 @@
 		return _mm512_castsi512_ps(_mm512_add_epi32(_mm512_castps_si512(v1), _mm512_castps_si512(v2)));
 	}
 
+#if defined(__AVX2__)
+ 	template <>
+	inline reg_2 add<int32_t>(const reg_2 v1, const reg_2 v2) {
+		return _mm256_castsi256_ps(_mm256_add_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	}
+#endif
 	template <>
 	inline reg mask<int32_t,add<int32_t>>(const msk m, const reg src, const reg v1, const reg v2) {
 		return _mm512_castsi512_ps(_mm512_mask_add_epi32(_mm512_castps_si512(src), (__mmask16)m, _mm512_castps_si512(v1), _mm512_castps_si512(v2)));
@@ -3306,6 +3332,13 @@
 		return _mm512_castsi512_ps(_mm512_sub_epi32(_mm512_castps_si512(v1), _mm512_castps_si512(v2)));
 	}
 
+#if defined(__AVX2__)
+    template <>
+	inline reg_2 sub<int32_t>(const reg_2 v1, const reg_2 v2) {
+		return _mm256_castsi256_ps(_mm256_sub_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	}
+#endif
+
 #if defined(__AVX512BW__)
 	template <>
 	inline reg sub<int16_t>(const reg v1, const reg v2) {
@@ -3343,6 +3376,13 @@
 	inline reg mul<int32_t>(const reg v1, const reg v2) {
 		return _mm512_castsi512_ps(_mm512_mullo_epi32(_mm512_castps_si512(v1), _mm512_castps_si512(v2)));
 	}
+
+#if defined(__AVX2__)
+	template <>
+	inline reg_2 mul<int32_t>(const reg_2 v1, const reg_2 v2) {
+		return _mm256_castsi256_ps(_mm256_mullo_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
+	}
+#endif
 
 #if defined(__AVX512BW__)
 	template <>

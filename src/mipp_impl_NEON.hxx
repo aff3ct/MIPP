@@ -39,6 +39,11 @@
 		return (reg) vld1q_s8((int8_t*) mem_addr);
 	}
 
+	template <>
+	inline reg_2 loadu_2<int32_t>(const int32_t *mem_addr) {
+		return (reg_2) vld1_s32(mem_addr);
+	}
+
 	// ----------------------------------------------------------------------------------------------------------- load
 #ifdef MIPP_ALIGNED_LOADS
 #ifdef __aarch64__
@@ -74,6 +79,12 @@
 	inline reg load<int8_t>(const int8_t *mem_addr) {
 		return (reg) vld1q_s8((int8_t*) mem_addr);
 	}
+
+ 	template <>
+	inline reg_2 load_2<int32_t>(const int32_t *mem_addr) {
+		return (reg_2) vld1_s32(mem_addr);
+	}
+
 #else
 	template <>
 	inline reg load<double>(const double *mem_addr) {
@@ -103,6 +114,11 @@
 	template <>
 	inline reg load<int8_t>(const int8_t *mem_addr) {
 		return mipp::loadu<int8_t>(mem_addr);
+	}
+
+	template <>
+	inline reg_2 load_2<int32_t>(const int32_t *mem_addr) {
+		return mipp::loadu_2<int32_t>(mem_addr);
 	}
 #endif
 
@@ -2276,6 +2292,11 @@
 		return (reg) vqaddq_u8((uint8x16_t) v1, (uint8x16_t)v2);
 	}
 
+  	template <>
+	inline reg_2 add<int32_t>(const reg_2 v1, const reg_2 v2) {
+		return (reg_2) vadd_s32((int32x2_t)v1, (int32x2_t)v2);
+	}
+
 	// ------------------------------------------------------------------------------------------------------------ sub
 #ifdef __aarch64__
 	template <>
@@ -2331,6 +2352,11 @@
 		return (reg) vqsubq_u8((uint8x16_t) v1, (uint8x16_t) v2);
 	}
 
+  	template <>
+	inline reg_2 sub<int32_t>(const reg_2 v1, const reg_2 v2) {
+		return (reg_2) vsub_s32((int32x2_t)v1, (int32x2_t)v2);
+	}
+
 	// ------------------------------------------------------------------------------------------------------------ mul
 #ifdef __aarch64__
 	template <>
@@ -2372,6 +2398,11 @@
 	template <>
 	inline reg mul<uint8_t>(const reg v1, const reg v2) {
 		return (reg) vmulq_u8((uint8x16_t) v1, (uint8x16_t) v2);
+	}
+
+  	template <>
+	inline reg_2 mul<int32_t>(const reg_2 v1, const reg_2 v2) {
+		return (reg_2) vmul_s32((int32x2_t)v1, (int32x2_t)v2);
 	}
 
 	// ------------------------------------------------------------------------------------------------------------ div

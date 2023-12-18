@@ -659,7 +659,9 @@ static inline void errorMessage(std::string instr)
 }
 
 template <typename T> inline reg   load         (const T*)                        { errorMessage<T>("load");          exit(-1); }
+template <typename T> inline reg_2 load_2       (const T*)                        { errorMessage<T>("load_2");        exit(-1); }
 template <typename T> inline reg   loadu        (const T*)                        { errorMessage<T>("loadu");         exit(-1); }
+template <typename T> inline reg_2 loadu_2      (const T*)                        { errorMessage<T>("loadu_2");       exit(-1); }
 template <typename T> inline void  store        (T*, const reg)                   { errorMessage<T>("store");         exit(-1); }
 template <typename T> inline void  storeu       (T*, const reg)                   { errorMessage<T>("storeu");        exit(-1); }
 template <typename T> inline reg   set          (const T[nElReg<T>()])            { errorMessage<T>("set");           exit(-1); }
@@ -730,8 +732,11 @@ template <typename T> inline msk   cmple        (const reg, const reg)          
 template <typename T> inline msk   cmpgt        (const reg, const reg)            { errorMessage<T>("cmpgt");         exit(-1); }
 template <typename T> inline msk   cmpge        (const reg, const reg)            { errorMessage<T>("cmpge");         exit(-1); }
 template <typename T> inline reg   add          (const reg, const reg)            { errorMessage<T>("add");           exit(-1); }
+template <typename T> inline reg_2 add          (const reg_2, const reg_2)        { errorMessage<T>("add");           exit(-1); }
 template <typename T> inline reg   sub          (const reg, const reg)            { errorMessage<T>("sub");           exit(-1); }
+template <typename T> inline reg_2 sub          (const reg_2, const reg_2)        { errorMessage<T>("sub");           exit(-1); }
 template <typename T> inline reg   mul          (const reg, const reg)            { errorMessage<T>("mul");           exit(-1); }
+template <typename T> inline reg_2 mul          (const reg_2, const reg_2)        { errorMessage<T>("mul");           exit(-1); }
 template <typename T> inline reg   div          (const reg, const reg)            { errorMessage<T>("div");           exit(-1); }
 template <typename T> inline reg   min          (const reg, const reg)            { errorMessage<T>("min");           exit(-1); }
 template <typename T> inline reg   max          (const reg, const reg)            { errorMessage<T>("max");           exit(-1); }

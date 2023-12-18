@@ -38,6 +38,29 @@ TEST_CASE("Load - mipp::reg", "[mipp::load]")
 #endif
 
 template <typename T>
+void test_reg_2_load()
+{
+    constexpr auto N_2 = mipp::N<T>()/2;
+
+    T inputs[N_2];
+    std::iota(inputs, inputs + N_2, (T)0);
+
+    mipp::reg_2 r = mipp::load_2<T>(inputs);
+
+    for (auto i = 0; i < N_2; i++)
+        REQUIRE(mipp::get<T>(r, i) == inputs[i]);
+}
+
+#ifndef MIPP_NO
+#if defined(MIPP_NEON) || defined(MIPP_AVX512) || defined(MIPP_AVX2) || defined(MIPP_AVX)
+TEST_CASE("Load - mipp::reg_2", "[mipp::load_2]")
+{
+    SECTION("datatype = int32_t") { test_reg_2_load<int32_t>(); }
+}
+#endif
+#endif
+
+template <typename T>
 void test_Reg_load()
 {
 	T inputs[mipp::N<T>()];
@@ -65,6 +88,29 @@ TEST_CASE("Load - mipp::Reg", "[mipp::load]")
 	SECTION("datatype = int8_t") { test_Reg_load<int8_t>(); }
 #endif
 }
+
+template <typename T>
+void test_Reg_2_load()
+{
+    constexpr auto N_2 = mipp::N<T>()/2;
+
+	T inputs[N_2];
+	std::iota(inputs, inputs + N_2, (T)0);
+
+	mipp::Reg_2<T> r; r.load(inputs);
+
+	for (auto i = 0; i < N_2; i++)
+		REQUIRE(r[i] == inputs[i]);
+}
+
+#ifndef MIPP_NO
+#if defined(MIPP_NEON) || defined(MIPP_AVX512) || defined(MIPP_AVX2) || defined(MIPP_AVX)
+TEST_CASE("Load - mipp::Reg_2", "[mipp::load]")
+{
+   SECTION("datatype = int32_t") { test_Reg_2_load<int32_t>(); }
+}
+#endif
+#endif
 
 template <typename T>
 void test_reg_loadu()
@@ -98,6 +144,29 @@ TEST_CASE("Load unaligned - mipp::reg", "[mipp::loadu]")
 #endif
 
 template <typename T>
+void test_reg_2_loadu()
+{
+    constexpr auto N_2 = mipp::N<T>()/2;
+
+    T inputs[N_2];
+    std::iota(inputs, inputs + N_2, (T)0);
+
+    mipp::reg_2 r = mipp::loadu_2<T>(inputs);
+
+    for (auto i = 0; i < N_2; i++)
+        REQUIRE(mipp::get<T>(r, i) == inputs[i]);
+}
+
+#ifndef MIPP_NO
+#if defined(MIPP_NEON) || defined(MIPP_AVX512) || defined(MIPP_AVX2) || defined(MIPP_AVX)
+TEST_CASE("Load unaligned - mipp::reg_2", "[mipp::loadu_2]")
+{
+    SECTION("datatype = int32_t") { test_reg_2_loadu<int32_t>(); }
+}
+#endif
+#endif
+
+template <typename T>
 void test_Reg_loadu()
 {
 	T inputs[mipp::N<T>()];
@@ -125,6 +194,27 @@ TEST_CASE("Load unaligned - mipp::Reg", "[mipp::loadu]")
 	SECTION("datatype = int8_t") { test_Reg_loadu<int8_t>(); }
 #endif
 }
+
+template <typename T>
+void test_Reg_2_loadu()
+{
+    constexpr auto N_2 = mipp::N<T>()/2;
+
+    T inputs[N_2];
+    std::iota(inputs, inputs + N_2, (T)0);
+
+    mipp::Reg<T> r; r.loadu(inputs);
+
+    for (auto i = 0; i < N_2; i++)
+        REQUIRE(r[i] == inputs[i]);
+}
+
+#if defined(MIPP_NEON) || defined(MIPP_AVX512) || defined(MIPP_AVX2) || defined(MIPP_AVX)
+TEST_CASE("Load unaligned - mipp::Reg_2", "[mipp::loadu_2]")
+{
+    SECTION("datatype = int32_t") { test_Reg_2_loadu<int32_t>(); }
+}
+#endif
 
 template <typename T, mipp::proto_il<T> IL = mipp::loadu<T>>
 void test_reg_maskzld()

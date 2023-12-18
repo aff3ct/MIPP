@@ -35,6 +35,13 @@
 		return _mm256_loadu_ps((const float*) mem_addr);
 	}
 
+#if defined(__SSE__)
+    template <>
+    inline reg_2 loadu_2<int32_t>(const int32_t *mem_addr) {
+        return _mm_loadu_ps((const float*) mem_addr);
+    }
+#endif
+
 	// ----------------------------------------------------------------------------------------------------------- load
 #ifdef MIPP_ALIGNED_LOADS
 	template <>
@@ -66,6 +73,14 @@
 	inline reg load<int8_t>(const int8_t *mem_addr) {
 		return _mm256_load_ps((const float*) mem_addr);
 	}
+
+#if defined(__SSE__)
+	template <>
+	inline reg_2 load_2<int32_t>(const int32_t *mem_addr) {
+		return _mm_load_ps((const float*) mem_addr);
+	}
+#endif
+
 #else
 	template <>
 	inline reg load<float>(const float *mem_addr) {
@@ -96,6 +111,11 @@
 	inline reg load<int8_t>(const int8_t *mem_addr) {
 		return mipp::loadu<int8_t>(mem_addr);
 	}
+
+    template <>
+    inline reg_2 load_2<int32_t>(const int32_t *mem_addr) {
+        return mipp::loadu_2<int32_t>(mem_addr);
+    }
 #endif
 
 	// --------------------------------------------------------------------------------------------------------- storeu
@@ -3568,6 +3588,13 @@
 	}
 #endif
 
+#ifdef __SSE2__
+    template <>
+    inline reg_2 add<int32_t>(const reg_2 v1, const reg_2 v2) {
+        return _mm_castsi128_ps(_mm_add_epi32(_mm_castps_si128(v1), _mm_castps_si128(v2)));
+    }
+#endif
+
 	// ------------------------------------------------------------------------------------------------------------ sub
 	template <>
 	inline reg sub<float>(const reg v1, const reg v2) {
@@ -3611,6 +3638,14 @@
 	}
 #endif
 
+#ifdef __SSE2__
+    template <>
+	inline reg_2 sub<int32_t>(const reg_2 v1, const reg_2 v2) {
+		return _mm_castsi128_ps(_mm_sub_epi32(_mm_castps_si128(v1), _mm_castps_si128(v2)));
+	}
+#endif
+
+
 	// ------------------------------------------------------------------------------------------------------------ mul
 	template <>
 	inline reg mul<float>(const reg v1, const reg v2) {
@@ -3634,6 +3669,12 @@
 	}
 #endif
 
+#ifdef __SSE4_1__
+    template <>
+    inline reg_2 mul<int32_t>(const reg_2 v1, const reg_2 v2) {
+        return _mm_castsi128_ps(_mm_mullo_epi32(_mm_castps_si128(v1), _mm_castps_si128(v2)));
+    }
+#endif
 	// ------------------------------------------------------------------------------------------------------------ div
 	template <>
 	inline reg div<float>(const reg v1, const reg v2) {

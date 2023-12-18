@@ -655,17 +655,26 @@ public:
 #endif
 
 #ifndef MIPP_NO_INTRINSICS
-	Reg_2(const reg_2 r) : r(r)   {}
+	Reg_2(const reg_2 r ) : r(r)   {}
+	Reg_2(const T  *data) : r(mipp::load_2<T>(data)){}
 #else
 	Reg_2(const T val  ) : r(val) {}
 #endif
-
+	Reg_2() = default;
 	~Reg_2() = default;
 
 #ifndef MIPP_NO_INTRINSICS
 	template <typename T2> inline Reg<T2> cvt() const { return mipp::cvt<T,T2>(r); }
+
+	inline void          load         (const T*       data)                          { r = mipp::load_2<T>(data);                     }
+	inline Reg_2<T>      add          (const Reg_2<T> v)                       const { return mipp::add          <T>(r, v.r);         }
+	inline Reg_2<T>      sub          (const Reg_2<T> v)                       const { return mipp::sub          <T>(r, v.r);         }
+	inline Reg_2<T>      mul          (const Reg_2<T> v)                       const { return mipp::mul          <T>(r, v.r);         }
 #else
 	template <typename T2> inline Reg<T2> cvt() const { return (T2)std::round(r);  }
+	inline Reg_2<T>      add          (const Reg_2<T> v)                       const { return mipp_scop::add<T>(r,v.r);               }
+	inline Reg_2<T>      sub          (const Reg_2<T> v)                       const { return mipp_scop::sub<T>(r,v.r);               }
+	inline Reg_2<T>      mul          (const Reg_2<T> v)                       const { return r  *  v.r;                              }
 #endif
 
 #ifndef MIPP_NO_INTRINSICS
@@ -677,6 +686,16 @@ public:
 	inline T getfirst  (                  ) const { return r; }
 	inline T operator[](const size_t index) const { return r; }
 #endif
+
+	inline Reg_2<T>& operator+= (const Reg_2<T>      &v)       { r =    this->add(v).r;    return *this;  }
+	inline Reg_2<T>  operator+  (const Reg_2<T>       v) const { return this->add(v);                     }
+
+	inline Reg_2<T>& operator-= (const Reg_2<T>      &v)       { r =    this->sub(v).r;    return *this;  }
+	inline Reg_2<T>  operator-  (const Reg_2<T>       v) const { return this->sub(v);                     }
+	inline Reg_2<T>  operator-  (                      ) const { return mipp::sub<T>(mipp::set0<T>(), r); }
+
+	inline Reg_2<T>& operator*= (const Reg_2<T>      &v)       { r =    this->mul(v).r;    return *this;  }
+	inline Reg_2<T>  operator*  (const Reg_2<T>       v) const { return this->mul(v);                     }
 
 #ifndef MIPP_NO_INTRINSICS
 	inline Reg<T> combine(const Reg_2 v) const { return mipp::combine<T>(r, v.r); }
@@ -774,6 +793,13 @@ std::ostream& operator<<(std::ostream& os, const Reg<T>& r)
 	dump<T>(r.r, os); return os;
 }
 
+template <typename T>
+std::ostream& operator<<(std::ostream& os, const Reg_2<T>& r)
+{
+  throw std::runtime_error(std::string(__PRETTY_FUNCTION__)+" not implemented");
+  //dump<T>(r.r, os); return os;
+}
+
 template <int N>
 std::ostream& operator<<(std::ostream& os, const Msk<N>& m)
 {
@@ -782,6 +808,13 @@ std::ostream& operator<<(std::ostream& os, const Msk<N>& m)
 #else
 template <typename T>
 std::ostream& operator<<(std::ostream& os, const Reg<T>& r)
+{
+	os << +r.r;
+	return os;
+}
+
+template <typename T>
+std::ostream& operator<<(std::ostream& os, const Reg_2<T>& r)
 {
 	os << +r.r;
 	return os;
@@ -870,6 +903,9 @@ template <typename T>        inline Reg<T>      add          (const Reg<T> v1, c
 template <typename T>        inline Reg<T>      sub          (const Reg<T> v1, const Reg<T> v2)                      { return v1.sub(v2);                 }
 template <typename T>        inline Reg<T>      mul          (const Reg<T> v1, const Reg<T> v2)                      { return v1.mul(v2);                 }
 template <typename T>        inline Reg<T>      div          (const Reg<T> v1, const Reg<T> v2)                      { return v1.div(v2);                 }
+template <typename T>        inline Reg_2<T>    add          (const Reg_2<T> v1, const Reg_2<T> v2)                  { return v1.add(v2);                 }
+template <typename T>        inline Reg_2<T>    sub          (const Reg_2<T> v1, const Reg_2<T> v2)                  { return v1.sub(v2);                 }
+template <typename T>        inline Reg_2<T>    mul          (const Reg_2<T> v1, const Reg_2<T> v2)                  { return v1.mul(v2);                 }
 template <typename T>        inline Reg<T>      min          (const Reg<T> v1, const Reg<T> v2)                      { return v1.min(v2);                 }
 template <typename T>        inline Reg<T>      max          (const Reg<T> v1, const Reg<T> v2)                      { return v1.max(v2);                 }
 template <typename T>        inline Reg<T>      msb          (const Reg<T> v)                                        { return v.msb();                    }
