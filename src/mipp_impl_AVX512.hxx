@@ -113,10 +113,10 @@
 	}
 
 #if defined(__AVX__)
-    template <>
-    inline reg_2 load_2<int32_t>(const int32_t *mem_addr) {
-        return _mm256_load_ps((const float*) mem_addr);
-    }
+	template <>
+	inline reg_2 load_2<int32_t>(const int32_t *mem_addr) {
+		return _mm256_load_ps((const float*) mem_addr);
+	}
 #endif
 #else
 	template <>
@@ -149,10 +149,10 @@
 		return mipp::loadu<int8_t>(mem_addr);
 	}
 
-    template <>
-    inline reg_2 load_2<int32_t>(const int32_t *mem_addr) {
-        return mipp::loadu_2<int32_t>(mem_addr);
-    }
+	template <>
+	inline reg_2 load_2<int32_t>(const int32_t *mem_addr) {
+		return mipp::loadu_2<int32_t>(mem_addr);
+	}
 #endif
 
 	// --------------------------------------------------------------------------------------------------------- storeu
@@ -3333,7 +3333,7 @@
 	}
 
 #if defined(__AVX2__)
-    template <>
+	template <>
 	inline reg_2 sub<int32_t>(const reg_2 v1, const reg_2 v2) {
 		return _mm256_castsi256_ps(_mm256_sub_epi32(_mm256_castps_si256(v1), _mm256_castps_si256(v2)));
 	}

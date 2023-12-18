@@ -2292,7 +2292,7 @@
 		return (reg) vqaddq_u8((uint8x16_t) v1, (uint8x16_t)v2);
 	}
 
-  	template <>
+	template <>
 	inline reg_2 add<int32_t>(const reg_2 v1, const reg_2 v2) {
 		return (reg_2) vadd_s32((int32x2_t)v1, (int32x2_t)v2);
 	}
@@ -2352,7 +2352,7 @@
 		return (reg) vqsubq_u8((uint8x16_t) v1, (uint8x16_t) v2);
 	}
 
-  	template <>
+	template <>
 	inline reg_2 sub<int32_t>(const reg_2 v1, const reg_2 v2) {
 		return (reg_2) vsub_s32((int32x2_t)v1, (int32x2_t)v2);
 	}
@@ -2400,7 +2400,7 @@
 		return (reg) vmulq_u8((uint8x16_t) v1, (uint8x16_t) v2);
 	}
 
-  	template <>
+	template <>
 	inline reg_2 mul<int32_t>(const reg_2 v1, const reg_2 v2) {
 		return (reg_2) vmul_s32((int32x2_t)v1, (int32x2_t)v2);
 	}
