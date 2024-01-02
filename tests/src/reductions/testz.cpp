@@ -267,7 +267,7 @@ void test_reg_testz1_int()
 	}
 }
 
-#if !defined(MIPP_NO)
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Testz1 - mipp::reg", "[mipp::testz1]")
 {
 #if defined(MIPP_64BIT)
@@ -324,6 +324,7 @@ void test_Reg_testz1_int()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Testz1 - mipp::Reg", "[mipp::testz1]")
 {
 #if defined(MIPP_64BIT)
@@ -339,7 +340,7 @@ TEST_CASE("Testz1 - mipp::Reg", "[mipp::testz1]")
 #endif
 #endif
 }
-
+#endif
 template <typename T>
 void test_msk_testz1_int()
 {

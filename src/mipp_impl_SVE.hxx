@@ -635,22 +635,22 @@
 
 	template <>
 	inline msk set0<nElReg<int64_t>()>() {
-		return svptrue_b64();
+		return svpfalse_b();
 	}
 
 	template <>
 	inline msk set0<nElReg<int32_t>()>() {
-		return svptrue_b32();
+		return svpfalse_b();
 	}
 
 	template <>
 	inline msk set0<nElReg<int16_t>()>() {
-		return svptrue_b16();
+		return svpfalse_b();
 	}
 
 	template <>
 	inline msk set0<nElReg<int8_t>()>() {
-		return svptrue_b8();
+		return svpfalse_b();
 	}
 
 	// ------------------------------------------------------------------------------------------------------------ set
@@ -796,6 +796,27 @@
 		}
 	};
 
+        template <>
+        struct Reduction<double, mipp::add<double> >
+        {
+                static double sapply(const Reg<double> v1) {
+                        return svaddv_f64(svptrue_b64(), svreinterpret_f64_f32(v1.r));
+                }
+                static Reg<double> apply(const reg v1) {
+                        return mipp::set1<double>(sapply(v1));
+                }
+        };
+
+        template <>
+        struct Reduction<float, mipp::add<float> >
+        {
+                static float sapply(const Reg<float> v1) {
+                        return svaddv_f32(svptrue_b32(), v1.r);
+                }
+                static Reg<float> apply(const reg v1) {
+                        return mipp::set1<float>(sapply(v1));
+                }
+        };
 	// -------------------------------------------------------------- reg_2 use
 	template <>
 	inline reg cvt<int32_t, int64_t>(const reg_2 v) {
