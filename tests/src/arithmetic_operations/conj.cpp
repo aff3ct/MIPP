@@ -33,7 +33,7 @@ void test_reg_conj()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Complex conjugate - mipp::reg", "[mipp::conj]")
 {
 #if defined(MIPP_64BIT)
@@ -76,6 +76,7 @@ void test_Reg_conj()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Complex conjugate - mipp::Reg", "[mipp::conj]")
 {
 #if defined(MIPP_64BIT)
@@ -93,3 +94,4 @@ TEST_CASE("Complex conjugate - mipp::Reg", "[mipp::conj]")
 	SECTION("datatype = int8_t") { test_Reg_conj<int8_t>(); }
 #endif
 }
+#endif

@@ -28,7 +28,7 @@ void test_reg_cvt()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Convert - mipp::reg", "[mipp::cvt]")
 {
 #if defined(MIPP_64BIT)
@@ -78,6 +78,7 @@ void test_Reg_cvt()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Convert - mipp::Reg", "[mipp::cvt]")
 {
 #if defined(MIPP_64BIT)
@@ -103,3 +104,4 @@ TEST_CASE("Convert - mipp::Reg", "[mipp::cvt]")
 #endif
 #endif
 }
+#endif

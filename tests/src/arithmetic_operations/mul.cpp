@@ -77,6 +77,64 @@ TEST_CASE("Multiplication - mipp::reg", "[mipp::mul]")
 #endif
 
 template <typename T>
+void test_reg_2_mul()
+{
+    constexpr auto N_2 = mipp::N<T>()/2;
+
+    T inputs1[N_2], inputs2[N_2];
+    std::iota(inputs1, inputs1 + N_2, (T)1);
+    std::iota(inputs2, inputs2 + N_2, (T)1);
+
+    std::mt19937 g;
+    std::shuffle(inputs1, inputs1 + N_2, g);
+    std::shuffle(inputs2, inputs2 + N_2, g);
+
+    mipp::reg_2 r1 = mipp::load_2<T>(inputs1);
+    mipp::reg_2 r2 = mipp::load_2<T>(inputs2);
+    mipp::reg_2 r3 = mipp::mul <T>(r1, r2);
+
+    for (auto i = 0; i < N_2; i++)
+    {
+        T res = inputs1[i] * inputs2[i];
+#if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
+        REQUIRE(mipp::get<T>(r3, i) == Approx(res));
+#else
+        REQUIRE(mipp::get<T>(r3, i) == res);
+#endif
+    }
+
+    std::iota(inputs1, inputs1 + N_2, std::numeric_limits<T>::max() - N_2);
+    std::iota(inputs2, inputs2 + N_2, std::numeric_limits<T>::max() - N_2);
+
+    std::shuffle(inputs1, inputs1 + N_2, g);
+    std::shuffle(inputs2, inputs2 + N_2, g);
+
+    r1 = mipp::load_2<T>(inputs1);
+    r2 = mipp::load_2<T>(inputs2);
+    r3 = mipp::mul <T>(r1, r2);
+
+    for (auto i = 0; i < N_2; i++)
+    {
+        T res = inputs1[i] * inputs2[i];
+#if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
+        REQUIRE(mipp::get<T>(r3, i) == Approx(res));
+#else
+        REQUIRE(mipp::get<T>(r3, i) == res);
+#endif
+    }
+}
+
+#ifndef MIPP_NO
+#if defined(MIPP_NEON) || defined(MIPP_AVX512) || defined(MIPP_AVX2) || defined(MIPP_AVX)
+TEST_CASE("Multiplication - mipp::reg_2", "[mipp::mul]")
+{
+	SECTION("datatype = int32_t") { test_reg_2_mul<int32_t>(); }
+
+}
+#endif
+#endif
+
+template <typename T>
 void test_Reg_mul()
 {
 	T inputs1[mipp::N<T>()], inputs2[mipp::N<T>()];
@@ -143,6 +201,61 @@ TEST_CASE("Multiplication - mipp::Reg", "[mipp::mul]")
 #endif
 #endif
 }
+
+template <typename T>
+void test_Reg_2_mul()
+{
+    constexpr auto N_2 = mipp::N<T>()/2;
+
+    T inputs1[N_2], inputs2[N_2];
+    std::iota(inputs1, inputs1 + N_2, (T)1);
+    std::iota(inputs2, inputs2 + N_2, (T)1);
+
+    std::mt19937 g;
+    std::shuffle(inputs1, inputs1 + N_2, g);
+    std::shuffle(inputs2, inputs2 + N_2, g);
+
+    mipp::Reg_2<T> r1 = inputs1;
+    mipp::Reg_2<T> r2 = inputs2;
+    mipp::Reg_2<T> r3 = r1 * r2;
+
+    for (auto i = 0; i < N_2; i++)
+    {
+        T res = inputs1[i] * inputs2[i];
+#if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
+        REQUIRE(r3[i] == Approx(res));
+#else
+        REQUIRE(r3[i] == res);
+#endif
+    }
+
+    std::iota(inputs1, inputs1 + N_2, std::numeric_limits<T>::max() - N_2);
+    std::iota(inputs2, inputs2 + N_2, std::numeric_limits<T>::max() - N_2);
+
+    std::shuffle(inputs1, inputs1 + N_2, g);
+    std::shuffle(inputs2, inputs2 + N_2, g);
+
+    r1 = inputs1;
+    r2 = inputs2;
+    r3 = r1 * r2;
+
+    for (auto i = 0; i < N_2; i++)
+    {
+        T res = inputs1[i] * inputs2[i];
+#if defined(MIPP_NEON) && MIPP_INSTR_VERSION == 1
+        REQUIRE(r3[i] == Approx(res));
+#else
+        REQUIRE(r3[i] == res);
+#endif
+    }
+}
+
+#if defined(MIPP_NEON) || defined(MIPP_AVX512) || defined(MIPP_AVX2) || defined(MIPP_AVX)
+TEST_CASE("Multiplication - mipp::Reg_2", "[mipp::mul]")
+{
+    SECTION("datatype = int32_t") { test_Reg_2_mul<int32_t>(); }
+}
+#endif
 
 template <typename T>
 void test_reg_maskz_mul()

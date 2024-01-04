@@ -19,7 +19,7 @@ void test_reg_low()
 		REQUIRE(mipp::get<T>(r_2, i) == inputs[i]);
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Low - mipp::reg", "[mipp::low]")
 {
 #if defined(MIPP_64BIT)
@@ -51,6 +51,7 @@ void test_Reg_low()
 		REQUIRE(r_2[i] == inputs[i]);
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Low - mipp::Reg", "[mipp::low]")
 {
 #if defined(MIPP_64BIT)
@@ -67,3 +68,4 @@ TEST_CASE("Low - mipp::Reg", "[mipp::low]")
 	SECTION("datatype = int8_t") { test_Reg_low<int8_t>(); }
 #endif
 }
+#endif

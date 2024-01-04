@@ -28,7 +28,7 @@ void test_reg_neg()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Negation - mipp::reg", "[mipp::neg]")
 {
 #if defined(MIPP_64BIT)
@@ -75,6 +75,7 @@ void test_Reg_neg()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Negation - mipp::Reg", "[mipp::neg]")
 {
 #if defined(MIPP_64BIT)
@@ -97,6 +98,7 @@ TEST_CASE("Negation - mipp::Reg", "[mipp::neg]")
 #endif
 #endif
 }
+#endif
 
 template <typename T>
 void test_reg_maskz_neg()
@@ -133,7 +135,7 @@ void test_reg_maskz_neg()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Negation - mipp::reg - maskz", "[mipp::neg]")
 {
 #if defined(MIPP_64BIT)
@@ -193,6 +195,7 @@ void test_Reg_maskz_neg()
 	}
 }
 
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Negation - mipp::Reg - maskz", "[mipp::neg]")
 {
 #if defined(MIPP_64BIT)
@@ -215,6 +218,7 @@ TEST_CASE("Negation - mipp::Reg - maskz", "[mipp::neg]")
 #endif
 #endif
 }
+#endif
 
 template <typename T>
 void test_reg_mask_neg()
@@ -253,7 +257,7 @@ void test_reg_mask_neg()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Negation - mipp::reg - mask", "[mipp::neg]")
 {
 #if defined(MIPP_64BIT)
@@ -315,6 +319,7 @@ void test_Reg_mask_neg()
 	}
 }
 
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Negation - mipp::Reg - mask", "[mipp::neg]")
 {
 #if defined(MIPP_64BIT)
@@ -337,3 +342,4 @@ TEST_CASE("Negation - mipp::Reg - mask", "[mipp::neg]")
 #endif
 #endif
 }
+#endif

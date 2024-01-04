@@ -908,7 +908,7 @@
 		mipp::storeu<int64_t>(t1, v1);
 		mipp::storeu<int64_t>(t2, v2);
 		for (int i = 0; i < 2; i++){
-			t1[i] <<= t2[i];			
+			t1[i] <<= t2[i];
 		}
 		return mipp::loadu<int64_t>(t1);
 	}
@@ -919,7 +919,7 @@
 		mipp::storeu<int32_t>(t1, v1);
 		mipp::storeu<int32_t>(t2, v2);
 		for (int i = 0; i < 4; i++){
-			t1[i] <<= t2[i];			
+			t1[i] <<= t2[i];
 		}
 		return mipp::loadu<int32_t>(t1);
 	}
@@ -930,7 +930,7 @@
 		mipp::storeu<int16_t>(t1, v1);
 		mipp::storeu<int16_t>(t2, v2);
 		for (int i = 0; i < 8; i++){
-			t1[i] <<= t2[i];			
+			t1[i] <<= t2[i];
 		}
 		return mipp::loadu<int16_t>(t1);
 	}
@@ -941,7 +941,7 @@
 		mipp::storeu<int8_t>(t1, v1);
 		mipp::storeu<int8_t>(t2, v2);
 		for (int i = 0; i < 16; i++){
-			t1[i] <<= t2[i];			
+			t1[i] <<= t2[i];
 		}
 		return mipp::loadu<int8_t>(t1);
 	}
@@ -1018,7 +1018,7 @@
 		mipp::storeu<int64_t>(t1, v1);
 		mipp::storeu<int64_t>(t2, v2);
 		for (int i = 0; i < 2; i++){
-			t1[i] >>= t2[i];			
+			t1[i] >>= t2[i];
 		}
 		return mipp::loadu<int64_t>(t1);
 	}
@@ -1029,7 +1029,7 @@
 		mipp::storeu<int32_t>(t1, v1);
 		mipp::storeu<int32_t>(t2, v2);
 		for (int i = 0; i < 4; i++){
-			t1[i] >>= t2[i];			
+			t1[i] >>= t2[i];
 		}
 		return mipp::loadu<int32_t>(t1);
 	}
@@ -1040,18 +1040,18 @@
 		mipp::storeu<int16_t>(t1, v1);
 		mipp::storeu<int16_t>(t2, v2);
 		for (int i = 0; i < 8; i++){
-			t1[i] >>= t2[i];			
+			t1[i] >>= t2[i];
 		}
 		return mipp::loadu<int16_t>(t1);
 	}
-	
+
 	template <>
 	inline reg rshiftr<int8_t>(const reg v1, const reg v2) {
 		int8_t t1[16], t2[16];
 		mipp::storeu<int8_t>(t1, v1);
 		mipp::storeu<int8_t>(t2, v2);
 		for (int i = 0; i < 16; i++){
-			t1[i] >>= t2[i];			
+			t1[i] >>= t2[i];
 		}
 		return mipp::loadu<int8_t>(t1);
 	}
@@ -1201,6 +1201,337 @@
 		auto v3 = _mm_shuffle_ps(_mm_castpd_ps(v2), _mm_castpd_ps(v2), _MM_SHUFFLE(1, 0, 3, 2));
 		return mipp::blend<double>(_mm_castpd_ps(v1), v3, m);
 	}
+
+	// -------------------------------------------------------------------------------------------------- combine (bis)
+
+#ifdef __SSE2__
+	// double -----------------------------------------------------------------
+	template <>
+	inline reg combine<0, double>(const reg v1, const reg v2)
+	{
+		return v1;
+	}
+
+	template <>
+	inline reg combine<1, double>(const reg v1, const reg v2)
+	{
+		constexpr uint32_t shuff = _MM_SHUFFLE(0, 0, 0, 1);
+		return _mm_castpd_ps(_mm_shuffle_pd(_mm_castps_pd(v1), _mm_castps_pd(v2), shuff));
+	}
+
+	// int64_t ----------------------------------------------------------------
+	template <>
+	inline reg combine<0, int64_t>(const reg v1, const reg v2)
+	{
+		return v1;
+	}
+
+	template <>
+	inline reg combine<1, int64_t>(const reg v1, const reg v2)
+	{
+		return mipp::combine<1,double>(v1, v2);
+	}
+#endif
+
+	// float ------------------------------------------------------------------
+	template <>
+	inline reg combine<0, float>(const reg v1, const reg v2)
+	{
+		return v1;
+	}
+
+	template <>
+	inline reg combine<1, float>(const reg v1, const reg v2)
+	{
+		constexpr uint32_t shuff = _MM_SHUFFLE(0, 3, 2, 1);
+		msk m =  _mm_setr_epi32(-1,-1,-1,0);
+		reg p1 = _mm_shuffle_ps(v1, v1, shuff);
+		reg p2 = _mm_shuffle_ps(v2, v2, shuff);
+		return mipp::blend<float>(p1, p2, m);
+	}
+
+	template <>
+	inline reg combine<2, float>(const reg v1, const reg v2)
+	{
+		constexpr uint32_t shuff = _MM_SHUFFLE(1, 0, 3, 2);
+		return _mm_shuffle_ps(v1, v2, shuff);
+	}
+
+	template <>
+	inline reg combine<3, float>(const reg v1, const reg v2)
+	{
+		constexpr uint32_t shuff = _MM_SHUFFLE(2, 1, 0, 3);
+		msk m =  _mm_setr_epi32(-1,0,0,0);
+		reg p1 = _mm_shuffle_ps(v1, v1, shuff);
+		reg p2 = _mm_shuffle_ps(v2, v2, shuff);
+		return mipp::blend<float>(p1, p2, m);
+	}
+
+	// int32_t ----------------------------------------------------------------
+	template <>
+	inline reg combine<0, int32_t>(const reg v1, const reg v2)
+	{
+		return mipp::combine<0,float>(v1, v2);
+	}
+
+	template <>
+	inline reg combine<1, int32_t>(const reg v1, const reg v2)
+	{
+		return mipp::combine<1,float>(v1, v2);
+	}
+
+	template <>
+	inline reg combine<2, int32_t>(const reg v1, const reg v2)
+	{
+		return mipp::combine<2,float>(v1, v2);
+	}
+
+	template <>
+	inline reg combine<3, int32_t>(const reg v1, const reg v2)
+	{
+		return mipp::combine<3,float>(v1, v2);
+	}
+
+#ifdef __SSSE3__
+	// int16_t ----------------------------------------------------------------
+	template <>
+	inline reg combine<0, int16_t>(const reg v1, const reg v2)
+	{
+		return v1;
+	}
+
+	template <>
+	inline reg combine<1, int16_t>(const reg v1, const reg v2)
+	{
+		__m128i shuff = _mm_setr_epi8(2,3,4,5,6,7,8,9,10,11,12,13,14,15,0,1);
+		msk m =  _mm_setr_epi8(-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,0);
+		reg p1 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v1), shuff));
+		reg p2 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v2), shuff));
+		return mipp::blend<int16_t>(p1, p2, m);
+	}
+
+	template <>
+	inline reg combine<2, int16_t>(const reg v1, const reg v2)
+	{
+		__m128i shuff = _mm_setr_epi8(4,5,6,7,8,9,10,11,12,13,14,15,0,1,2,3);
+		msk m =  _mm_setr_epi8(-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,0,0,0);
+		reg p1 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v1), shuff));
+		reg p2 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v2), shuff));
+		return mipp::blend<int16_t>(p1, p2, m);
+	}
+
+	template <>
+	inline reg combine<3, int16_t>(const reg v1, const reg v2)
+	{
+		__m128i shuff = _mm_setr_epi8(6,7,8,9,10,11,12,13,14,15,0,1,2,3,4,5);
+		msk m =  _mm_setr_epi8(-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,0,0,0,0,0);
+		reg p1 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v1), shuff));
+		reg p2 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v2), shuff));
+		return mipp::blend<int16_t>(p1, p2, m);
+	}
+
+	template <>
+	inline reg combine<4, int16_t>(const reg v1, const reg v2)
+	{
+		__m128i shuff = _mm_setr_epi8(8,9,10,11,12,13,14,15,0,1,2,3,4,5,6,7);
+		msk m =  _mm_setr_epi8(-1,-1,-1,-1,-1,-1,-1,-1,0,0,0,0,0,0,0,0);
+		reg p1 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v1), shuff));
+		reg p2 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v2), shuff));
+
+		return mipp::blend<int16_t>(p1, p2, m);
+	}
+
+	template <>
+	inline reg combine<5, int16_t>(const reg v1, const reg v2)
+	{
+		__m128i shuff = _mm_setr_epi8(10,11,12,13,14,15,0,1,2,3,4,5,6,7,8,9);
+		msk m =  _mm_setr_epi8(-1,-1,-1,-1,-1,-1,0,0,0,0,0,0,0,0,0,0);
+		reg p1 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v1), shuff));
+		reg p2 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v2), shuff));
+
+		return mipp::blend<int16_t>(p1, p2, m);
+	}
+
+	template <>
+	inline reg combine<6, int16_t>(const reg v1, const reg v2)
+	{
+		__m128i shuff = _mm_setr_epi8(12,13,14,15,0,1,2,3,4,5,6,7,8,9,10,11);
+		msk m =  _mm_setr_epi8(-1,-1,-1,-1,0,0,0,0,0,0,0,0,0,0,0,0);
+		reg p1 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v1), shuff));
+		reg p2 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v2), shuff));
+		return mipp::blend<int16_t>(p1, p2, m);
+	}
+
+	template <>
+	inline reg combine<7, int16_t>(const reg v1, const reg v2)
+	{
+		__m128i shuff = _mm_setr_epi8(14,15,0,1,2,3,4,5,6,7,8,9,10,11,12,13);
+		msk m =  _mm_setr_epi8(-1,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+		reg p1 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v1), shuff));
+		reg p2 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v2), shuff));
+		return mipp::blend<int16_t>(p1, p2, m);
+	}
+
+	// int8_t -----------------------------------------------------------------
+	template <>
+	inline reg combine<0, int8_t>(const reg v1, const reg v2)
+	{
+		return v1;
+	}
+
+	template <>
+	inline reg combine<1, int8_t>(const reg v1, const reg v2)
+	{
+		__m128i shuff = _mm_setr_epi8(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0);
+		msk m =  _mm_setr_epi8(-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0);
+		reg p1 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v1), shuff));
+		reg p2 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v2), shuff));
+		return mipp::blend<int8_t>(p1, p2, m);
+	}
+
+	template <>
+	inline reg combine<2, int8_t>(const reg v1, const reg v2)
+	{
+		__m128i shuff = _mm_setr_epi8(2,3,4,5,6,7,8,9,10,11,12,13,14,15,0,1);
+		msk m =  _mm_setr_epi8(-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,0);
+		reg p1 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v1), shuff));
+		reg p2 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v2), shuff));
+		return mipp::blend<int8_t>(p1, p2, m);
+	}
+
+	template <>
+	inline reg combine<3, int8_t>(const reg v1, const reg v2)
+	{
+		__m128i shuff = _mm_setr_epi8(3,4,5,6,7,8,9,10,11,12,13,14,15,0,1,2);
+		msk m =  _mm_setr_epi8(-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,0,0);
+		reg p1 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v1), shuff));
+		reg p2 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v2), shuff));
+
+		return mipp::blend<int8_t>(p1, p2, m);
+	}
+
+	template <>
+	inline reg combine<4, int8_t>(const reg v1, const reg v2)
+	{
+		__m128i shuff =_mm_setr_epi8(4,5,6,7,8,9,10,11,12,13,14,15,0,1,2,3);
+		msk m =  _mm_setr_epi8(-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,0,0,0);
+		reg p1 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v1), shuff));
+		reg p2 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v2), shuff));
+
+		return mipp::blend<int8_t>(p1, p2, m);
+	}
+
+	template <>
+	inline reg combine<5, int8_t>(const reg v1, const reg v2)
+	{
+		__m128i shuff = _mm_setr_epi8(5,6,7,8,9,10,11,12,13,14,15,0,1,2,3,4);
+		msk m =  _mm_setr_epi8(-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,0,0,0,0);
+		reg p1 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v1), shuff));
+		reg p2 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v2), shuff));
+
+		return mipp::blend<int8_t>(p1, p2, m);
+	}
+
+	template <>
+	inline reg combine<6, int8_t>(const reg v1, const reg v2)
+	{
+		__m128i shuff = _mm_setr_epi8(6,7,8,9,10,11,12,13,14,15,0,1,2,3,4,5);
+		msk m =  _mm_setr_epi8(-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,0,0,0,0,0);
+		reg p1 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v1), shuff));
+		reg p2 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v2), shuff));
+		return mipp::blend<int8_t>(p1, p2, m);
+	}
+
+	template <>
+	inline reg combine<7, int8_t>(const reg v1, const reg v2)
+	{
+		__m128i shuff = _mm_setr_epi8(7,8,9,10,11,12,13,14,15,0,1,2,3,4,5,6);
+		msk m =  _mm_setr_epi8(-1,-1,-1,-1,-1,-1,-1,-1,-1,0,0,0,0,0,0,0);
+		reg p1 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v1), shuff));
+		reg p2 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v2), shuff));
+		return mipp::blend<int8_t>(p1, p2, m);
+	}
+
+	template <>
+	inline reg combine<8, int8_t>(const reg v1, const reg v2)
+	{
+		__m128i shuff = _mm_setr_epi8(8,9,10,11,12,13,14,15,0,1,2,3,4,5,6,7);
+		msk m =  _mm_setr_epi8(-1,-1,-1,-1,-1,-1,-1,-1,0,0,0,0,0,0,0,0);
+		reg p1 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v1), shuff));
+		reg p2 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v2), shuff));
+		return mipp::blend<int8_t>(p1, p2, m);
+	}
+
+	template <>
+	inline reg combine<9, int8_t>(const reg v1, const reg v2)
+	{
+		__m128i shuff = _mm_setr_epi8(9,10,11,12,13,14,15,0,1,2,3,4,5,6,7,8);
+		msk m =  _mm_setr_epi8(-1,-1,-1,-1,-1,-1,-1,0,0,0,0,0,0,0,0,0);
+		reg p1 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v1), shuff));
+		reg p2 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v2), shuff));
+		return mipp::blend<int8_t>(p1, p2, m);
+	}
+
+	template <>
+	inline reg combine<10, int8_t>(const reg v1, const reg v2)
+	{
+		__m128i shuff = _mm_setr_epi8(10,11,12,13,14,15,0,1,2,3,4,5,6,7,8,9);
+		msk m =  _mm_setr_epi8(-1,-1,-1,-1,-1,-1,0,0,0,0,0,0,0,0,0,0);
+		reg p1 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v1), shuff));
+		reg p2 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v2), shuff));
+		return mipp::blend<int8_t>(p1, p2, m);
+	}
+
+	template <>
+	inline reg combine<11, int8_t>(const reg v1, const reg v2)
+	{
+		__m128i shuff = _mm_setr_epi8(11,12,13,14,15,0,1,2,3,4,5,6,7,8,9,10);
+		msk m =  _mm_setr_epi8(-1,-1,-1,-1,-1,0,0,0,0,0,0,0,0,0,0,0);
+		reg p1 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v1), shuff));
+		reg p2 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v2), shuff));
+		return mipp::blend<int8_t>(p1, p2, m);
+	}
+
+	template <>
+	inline reg combine<12, int8_t>(const reg v1, const reg v2)
+	{
+		__m128i shuff = _mm_setr_epi8(12,13,14,15,0,1,2,3,4,5,6,7,8,9,10,11);
+		msk m =  _mm_setr_epi8(-1,-1,-1,-1,0,0,0,0,0,0,0,0,0,0,0,0);
+		reg p1 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v1), shuff));
+		reg p2 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v2), shuff));
+		return mipp::blend<int8_t>(p1, p2, m);
+	}
+
+	template <>
+	inline reg combine<13, int8_t>(const reg v1, const reg v2)
+	{
+		__m128i shuff = _mm_setr_epi8(13,14,15,0,1,2,3,4,5,6,7,8,9,10,11,12);
+		msk m =  _mm_setr_epi8(-1,-1,-1,0,0,0,0,0,0,0,0,0,0,0,0,0);
+		reg p1 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v1), shuff));
+		reg p2 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v2), shuff));
+		return mipp::blend<int8_t>(p1, p2, m);
+	}
+
+	template <>
+	inline reg combine<14, int8_t>(const reg v1, const reg v2)
+	{
+		__m128i shuff = _mm_setr_epi8(14,15,0,1,2,3,4,5,6,7,8,9,10,11,12,13);
+		msk m =  _mm_setr_epi8(-1,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+		reg p1 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v1), shuff));
+		reg p2 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v2), shuff));
+		return mipp::blend<int8_t>(p1, p2, m);
+	}
+
+	template <>
+	inline reg combine<15, int8_t>(const reg v1, const reg v2)
+	{
+		__m128i shuff = _mm_setr_epi8(15,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14);
+		msk m =  _mm_setr_epi8(-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+		reg p1 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v1), shuff));
+		reg p2 = _mm_castsi128_ps(_mm_shuffle_epi8(_mm_castps_si128(v2), shuff));
+		return mipp::blend<int8_t>(p1, p2, m);
+	}
+#endif
 
 	// ---------------------------------------------------------------------------------------------------------- cmask
 #ifdef __SSE2__
@@ -3281,8 +3612,18 @@
 	}
 
 	template <>
+	inline reg pack<uint32_t,uint16_t>(const reg v1, const reg v2) {
+		return _mm_castsi128_ps(_mm_packus_epi32(_mm_castps_si128(v1), _mm_castps_si128(v2)));
+	}
+
+	template <>
 	inline reg pack<int16_t,int8_t>(const reg v1, const reg v2) {
 		return _mm_castsi128_ps(_mm_packs_epi16(_mm_castps_si128(v1), _mm_castps_si128(v2)));
+	}
+
+	template <>
+	inline reg pack<uint16_t,uint8_t>(const reg v1, const reg v2) {
+		return _mm_castsi128_ps(_mm_packus_epi16(_mm_castps_si128(v1), _mm_castps_si128(v2)));
 	}
 #endif
 

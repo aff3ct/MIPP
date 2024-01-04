@@ -37,7 +37,7 @@ struct reg_rshift<T,-1>
 	static void test() {}
 };
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Binary right shift - mipp::reg", "[mipp::rshift]")
 {
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
@@ -85,6 +85,7 @@ struct Reg_rshift<T,-1>
 	static void test() {}
 };
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Binary right shift - mipp::Reg", "[mipp::rshift]")
 {
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
@@ -100,6 +101,7 @@ TEST_CASE("Binary right shift - mipp::Reg", "[mipp::rshift]")
 #endif
 #endif
 }
+#endif
 
 template <typename T, int n = mipp::N<T>()>
 struct msk_rshift

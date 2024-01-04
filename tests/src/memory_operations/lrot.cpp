@@ -20,7 +20,7 @@ void test_reg_lrot()
 		REQUIRE(mipp::get<T>(r2, i) == (i == N-1 ? inputs1[0] : inputs1[i+1]));
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Left rotation (cyclic permutation) - mipp::reg", "[mipp::lrot]")
 {
 #if defined(MIPP_64BIT)
@@ -55,6 +55,7 @@ void test_Reg_lrot()
 		REQUIRE(r2[i] == (i == N-1 ? inputs1[0] : inputs1[i+1]));
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Left rotation (cyclic permutation) - mipp::Reg", "[mipp::lrot]")
 {
 #if defined(MIPP_64BIT)
@@ -73,3 +74,4 @@ TEST_CASE("Left rotation (cyclic permutation) - mipp::Reg", "[mipp::lrot]")
 #endif
 #endif
 }
+#endif

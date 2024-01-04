@@ -44,7 +44,7 @@ void test_reg_cmulconj()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Complex multiplication conjugate - mipp::reg", "[mipp::cmulconj]")
 {
 #if defined(MIPP_64BIT)
@@ -100,6 +100,7 @@ void test_Reg_cmulconj()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Complex multiplication conjugate - mipp::Reg", "[mipp::cmulconj]")
 {
 #if defined(MIPP_64BIT)
@@ -121,3 +122,4 @@ TEST_CASE("Complex multiplication conjugate - mipp::Reg", "[mipp::cmulconj]")
 // #endif
 #endif
 }
+#endif

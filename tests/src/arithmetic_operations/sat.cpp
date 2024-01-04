@@ -69,7 +69,7 @@ void test_reg_sat_real()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Saturation - mipp::reg", "[mipp::sat]")
 {
 #if defined(MIPP_64BIT)
@@ -80,18 +80,22 @@ TEST_CASE("Saturation - mipp::reg", "[mipp::sat]")
 #if defined(MIPP_64BIT)
 #if !defined(MIPP_SSE) && !defined(MIPP_AVX) && !defined(MIPP_NEON)
 	SECTION("datatype = int64_t") { test_reg_sat_int<int64_t>(); }
+	SECTION("datatype = uint64_t") { test_reg_sat_int<uint64_t>(); }
 #endif
 #endif
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
 	SECTION("datatype = int32_t") { test_reg_sat_int<int32_t>(); }
+	SECTION("datatype = uint32_t") { test_reg_sat_int<uint32_t>(); }
 #endif
 #endif
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_reg_sat_int<int16_t>(); }
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
+	SECTION("datatype = uint16_t") { test_reg_sat_int<uint16_t>(); }
 #ifndef _MSC_VER
 	SECTION("datatype = int8_t") { test_reg_sat_int<int8_t>(); }
+	SECTION("datatype = uint8_t") { test_reg_sat_int<uint8_t>(); }
 #endif
 #endif
 #endif
@@ -160,6 +164,7 @@ void test_Reg_sat_real()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Saturation - mipp::Reg", "[mipp::sat]")
 {
 #if defined(MIPP_64BIT)
@@ -170,19 +175,24 @@ TEST_CASE("Saturation - mipp::Reg", "[mipp::sat]")
 #if defined(MIPP_64BIT)
 #if !defined(MIPP_SSE) && !defined(MIPP_AVX) && !defined(MIPP_NEON)
 	SECTION("datatype = int64_t") { test_Reg_sat_int<int64_t>(); }
+	SECTION("datatype = uint64_t") { test_Reg_sat_int<uint64_t>(); }
 #endif
 #endif
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
 	SECTION("datatype = int32_t") { test_Reg_sat_int<int32_t>(); }
+	SECTION("datatype = uint32_t") { test_Reg_sat_int<uint32_t>(); }
 #endif
 #endif
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_Reg_sat_int<int16_t>(); }
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
+	SECTION("datatype = uint16_t") { test_Reg_sat_int<uint16_t>(); }
 #ifndef _MSC_VER
 	SECTION("datatype = int8_t") { test_Reg_sat_int<int8_t>(); }
+	SECTION("datatype = uint8_t") { test_Reg_sat_int<uint8_t>(); }
 #endif
 #endif
 #endif
 }
+#endif

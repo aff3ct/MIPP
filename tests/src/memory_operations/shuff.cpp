@@ -26,7 +26,7 @@ void test_reg_shuff()
 		REQUIRE(mipp::get<T>(s, i) == inputs[cm_inputs[i]]);
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 31)
 TEST_CASE("Shuffle - mipp::reg", "[mipp::shuff]")
 {
@@ -69,6 +69,7 @@ void test_Reg_shuff()
 		REQUIRE(s[i] == inputs[cm_inputs[i]]);
 }
 
+#if !defined(MIPP_SVE_LS)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 31)
 TEST_CASE("Shuffle - mipp::Reg", "[mipp::shuff]")
 {
@@ -88,6 +89,7 @@ TEST_CASE("Shuffle - mipp::Reg", "[mipp::shuff]")
 #endif
 #endif
 }
+#endif
 #endif
 
 template <typename T>
@@ -119,7 +121,7 @@ void test_reg_shuff2()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 31)
 TEST_CASE("Shuffle2 - mipp::reg", "[mipp::shuff2]")
 {
@@ -177,6 +179,7 @@ void test_Reg_shuff2()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 31)
 TEST_CASE("Shuffle2 - mipp::Reg", "[mipp::shuff2]")
 {
@@ -202,6 +205,7 @@ TEST_CASE("Shuffle2 - mipp::Reg", "[mipp::shuff2]")
 #endif
 #endif
 }
+#endif
 #endif
 
 template <typename T>
@@ -232,7 +236,7 @@ void test_reg_shuff4()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 31)
 TEST_CASE("Shuffle4 - mipp::reg", "[mipp::shuff4]")
 {
@@ -293,6 +297,7 @@ void test_Reg_shuff4()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 31)
 TEST_CASE("Shuffle4 - mipp::Reg", "[mipp::shuff4]")
 {
@@ -322,4 +327,5 @@ TEST_CASE("Shuffle4 - mipp::Reg", "[mipp::shuff4]")
 #endif
 #endif
 }
+#endif
 #endif

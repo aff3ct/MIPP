@@ -26,7 +26,7 @@ void test_reg_cos()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Cosine - mipp::reg", "[mipp::cos]")
 {
 	SECTION("datatype = float" ) { test_reg_cos<float>(); }
@@ -57,6 +57,7 @@ void test_Reg_cos()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Cosine - mipp::Reg", "[mipp::cos]")
 {
 	SECTION("datatype = float" ) { test_Reg_cos<float>(); }
@@ -64,7 +65,7 @@ TEST_CASE("Cosine - mipp::Reg", "[mipp::cos]")
 	SECTION("datatype = double") { test_Reg_cos<double>(); }
 #endif
 }
-
+#endif
 
 template <typename T>
 void test_reg_maskz_cos()
@@ -99,7 +100,7 @@ void test_reg_maskz_cos()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Cosine - mipp::reg - maskz", "[mipp::cos]")
 {
 	SECTION("datatype = float" ) { test_reg_maskz_cos<float>(); }
@@ -142,6 +143,7 @@ void test_Reg_maskz_cos()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Cosine - mipp::Reg - maskz", "[mipp::cos]")
 {
 	SECTION("datatype = float" ) { test_Reg_maskz_cos<float>(); }
@@ -149,6 +151,7 @@ TEST_CASE("Cosine - mipp::Reg - maskz", "[mipp::cos]")
 	SECTION("datatype = double") { test_Reg_maskz_cos<double>(); }
 #endif
 }
+#endif
 
 template <typename T>
 void test_reg_mask_cos()
@@ -185,7 +188,7 @@ void test_reg_mask_cos()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Cosine - mipp::reg - mask", "[mipp::cos]")
 {
 	SECTION("datatype = float" ) { test_reg_mask_cos<float>(); }
@@ -230,6 +233,7 @@ void test_Reg_mask_cos()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Cosine - mipp::Reg - mask", "[mipp::cos]")
 {
 	SECTION("datatype = float" ) { test_Reg_mask_cos<float>(); }
@@ -237,3 +241,4 @@ TEST_CASE("Cosine - mipp::Reg - mask", "[mipp::cos]")
 	SECTION("datatype = double") { test_Reg_mask_cos<double>(); }
 #endif
 }
+#endif

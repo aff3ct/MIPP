@@ -28,7 +28,7 @@ void test_reg_interleavelo()
 			REQUIRE(inputs1[i/2] == mipp::get<T>(ri, i));
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 TEST_CASE("Interleave low - mipp::reg", "[mipp::interleavelo]")
 {
@@ -71,6 +71,7 @@ void test_Reg_interleavelo()
 			REQUIRE(ri[i] == inputs1[i/2]);
 }
 
+#if !defined(MIPP_SVE_LS)
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 TEST_CASE("Interleave low - mipp::Reg", "[mipp::interleavelo]")
 {
@@ -88,6 +89,7 @@ TEST_CASE("Interleave low - mipp::Reg", "[mipp::interleavelo]")
 	SECTION("datatype = int8_t") { test_Reg_interleavelo<int8_t>(); }
 #endif
 }
+#endif
 #endif
 
 template <typename T>
@@ -121,7 +123,7 @@ void test_reg_interleavelo2()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 TEST_CASE("Interleave2 low - mipp::reg", "[mipp::interleavelo2]")
 {
@@ -173,6 +175,7 @@ void test_Reg_interleavelo2()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 TEST_CASE("Interleave2 low - mipp::Reg", "[mipp::interleavelo2]")
 {
@@ -190,6 +193,7 @@ TEST_CASE("Interleave2 low - mipp::Reg", "[mipp::interleavelo2]")
 	SECTION("datatype = int8_t") { test_Reg_interleavelo2<int8_t>(); }
 #endif
 }
+#endif
 #endif
 
 template <typename T>
@@ -218,7 +222,7 @@ void test_reg_interleavelo4()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 #if defined(MIPP_AVX512)
 TEST_CASE("Interleave4 low - mipp::reg", "[mipp::interleavelo4]")
 {

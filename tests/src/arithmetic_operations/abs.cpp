@@ -25,7 +25,7 @@ void test_reg_abs()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Absolute value - mipp::reg", "[mipp::abs]")
 {
 #if defined(MIPP_64BIT)
@@ -69,6 +69,7 @@ void test_Reg_abs()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Absolute value - mipp::Reg", "[mipp::abs]")
 {
 #if defined(MIPP_64BIT)
@@ -91,6 +92,7 @@ TEST_CASE("Absolute value - mipp::Reg", "[mipp::abs]")
 #endif
 #endif
 }
+#endif
 
 template <typename T>
 void test_reg_maskz_abs()
@@ -124,7 +126,7 @@ void test_reg_maskz_abs()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Absolute value - mipp::reg - maskz", "[mipp::abs]")
 {
 #if defined(MIPP_64BIT)
@@ -181,6 +183,7 @@ void test_Reg_maskz_abs()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Absolute value - mipp::Reg - maskz", "[mipp::abs]")
 {
 #if defined(MIPP_64BIT)
@@ -203,6 +206,7 @@ TEST_CASE("Absolute value - mipp::Reg - maskz", "[mipp::abs]")
 #endif
 #endif
 }
+#endif
 
 template <typename T>
 void test_reg_mask_abs()
@@ -239,7 +243,7 @@ void test_reg_mask_abs()
 }
 
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Absolute value - mipp::reg - mask", "[mipp::abs]")
 {
 #if defined(MIPP_64BIT)
@@ -298,6 +302,7 @@ void test_Reg_mask_abs()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Absolute value - mipp::Reg - mask", "[mipp::abs]")
 {
 #if defined(MIPP_64BIT)
@@ -320,3 +325,4 @@ TEST_CASE("Absolute value - mipp::Reg - mask", "[mipp::abs]")
 #endif
 #endif
 }
+#endif

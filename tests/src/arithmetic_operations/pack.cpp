@@ -43,7 +43,7 @@ void test_reg_pack()
 }
 #endif
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Pack - mipp::reg", "[mipp::pack]")
 {
 #if defined(MIPP_BW)
@@ -90,7 +90,7 @@ void test_Reg_pack()
 }
 #endif
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Pack - mipp::Reg", "[mipp::pack]")
 {
 #if defined(MIPP_BW)

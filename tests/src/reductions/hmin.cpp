@@ -55,7 +55,7 @@ void test_reg_hmin_real()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Horizontal minimum - mipp::reg", "[mipp::hmin]")
 {
 #if defined(MIPP_64BIT)
@@ -134,6 +134,7 @@ void test_Reg_hmin_real()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Horizontal minimum - mipp::Reg", "[mipp::hmin]")
 {
 #if defined(MIPP_64BIT)
@@ -162,3 +163,4 @@ TEST_CASE("Horizontal minimum - mipp::Reg", "[mipp::hmin]")
 #endif
 #endif
 }
+#endif

@@ -35,7 +35,7 @@ void test_reg_cmplt()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Compare lower than - mipp::reg", "[mipp::cmplt]")
 {
 #if defined(MIPP_64BIT)
@@ -47,13 +47,17 @@ TEST_CASE("Compare lower than - mipp::reg", "[mipp::cmplt]")
 #if !defined(MIPP_SSE)
 #if defined(MIPP_64BIT)
 	SECTION("datatype = int64_t") { test_reg_cmplt<int64_t>(); }
+	SECTION("datatype = uint64_t") { test_reg_cmplt<uint64_t>(); }
 #endif
 #endif
 	SECTION("datatype = int32_t") { test_reg_cmplt<int32_t>(); }
+	SECTION("datatype = uint32_t") { test_reg_cmplt<uint32_t>(); }
 #endif
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_reg_cmplt<int16_t>(); }
+	SECTION("datatype = uint16_t") { test_reg_cmplt<uint16_t>(); }
 	SECTION("datatype = int8_t") { test_reg_cmplt<int8_t>(); }
+	SECTION("datatype = uint8_t") { test_reg_cmplt<uint8_t>(); }
 #endif
 }
 #endif
@@ -80,6 +84,7 @@ void test_Reg_cmplt()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Compare lower than - mipp::Reg", "[mipp::cmplt]")
 {
 #if defined(MIPP_64BIT)
@@ -91,12 +96,17 @@ TEST_CASE("Compare lower than - mipp::Reg", "[mipp::cmplt]")
 #if !defined(MIPP_SSE)
 #if defined(MIPP_64BIT)
 	SECTION("datatype = int64_t") { test_Reg_cmplt<int64_t>(); }
+	SECTION("datatype = uint64_t") { test_Reg_cmplt<uint64_t>(); }
 #endif
 #endif
 	SECTION("datatype = int32_t") { test_Reg_cmplt<int32_t>(); }
+	SECTION("datatype = uint32_t") { test_Reg_cmplt<uint32_t>(); }
 #endif
 #if defined(MIPP_BW)
 	SECTION("datatype = int16_t") { test_Reg_cmplt<int16_t>(); }
+	SECTION("datatype = uint16_t") { test_Reg_cmplt<uint16_t>(); }
 	SECTION("datatype = int8_t") { test_Reg_cmplt<int8_t>(); }
+	SECTION("datatype = uint8_t") { test_Reg_cmplt<uint8_t>(); }
 #endif
 }
+#endif

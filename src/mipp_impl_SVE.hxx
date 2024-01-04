@@ -1,6 +1,6 @@
 #include "mipp.h"
 
-// -------------------------------------------------------------------------------------------------------- ARM SVE Specific size
+// ---------------------------------------------------------------------------------------------- ARM SVE Specific size
 // --------------------------------------------------------------------------------------------------------------------
 #if defined(__ARM_FEATURE_SVE)
 
@@ -27,7 +27,7 @@
 	}
 
 	// all operations is masked so masked before
-	// ------------------------------------------------------------------------------------------------------------ maskzld
+	// -------------------------------------------------------------------------------------------------------- maskzld
 	inline reg _maskzld(const msk m, const float* memp){
 		return svld1_f32(m, memp);
 	}
@@ -166,7 +166,7 @@
 		return _maskzld(m,memp);
 	}
 
-	// ------------------------------------------------------------------------------------------------------------ maskst
+	// --------------------------------------------------------------------------------------------------------- maskst
 	template <>
 	inline void maskst<double>(const msk m, double* memp, const reg a){
 		_maskst(m,memp,a);
@@ -188,7 +188,7 @@
 	}
 
 	// all operations masked do it first
-	// ------------------------------------------------------------------------------------------------------- masked gather
+	// -------------------------------------------------------------------------------------------------- masked gather
 	template <>
 	inline reg maskzgat<double,int64_t>(const msk m, const double *mem_addr, const reg idx) {
 		return svreinterpret_f32_f64(svld1_gather_s64index_f64(m,mem_addr,svreinterpret_s64_f32(idx)));
@@ -230,7 +230,7 @@
 		return maskzgat<int32_t,int32_t>(svptrue_b32(),mem_addr,idx);
 	}
 
-	// -------------------------------------------------------------------------------------------------------- masked scatter
+	// ------------------------------------------------------------------------------------------------- masked scatter
 	template <>
 	inline void masksca<double,int64_t>(const msk m, double *mem_addr, const reg idx, const reg r) {
 		svst1_scatter_s64index_f64(m,mem_addr,svreinterpret_s64_f32(idx),svreinterpret_f64_f32(r));
@@ -566,7 +566,7 @@
 		return svreinterpret_f32_s32(svdup_s32(val));
 	}
 
-	// ------------------------------------------------------------------------------------------------------------ getfirst
+	// ------------------------------------------------------------------------------------------------------- getfirst
 
 	// ---------------------------------------------------------------------------------------------------------- cmpeq
 	template <>
@@ -589,7 +589,7 @@
 		return svcmpeq_s32(svptrue_b32(),svreinterpret_s32_f32(v1),svreinterpret_s32_f32(v2));
 	}
 
-	// ---------------------------------------------------------------------------------------------------------- cmnpeq
+	// --------------------------------------------------------------------------------------------------------- cmnpeq
 	template <>
 	inline msk cmpneq<double>(const reg v1, const reg v2) {
 		return svcmpne_f64(svptrue_b64(),svreinterpret_f64_f32(v1),svreinterpret_f64_f32(v2));
@@ -635,22 +635,22 @@
 
 	template <>
 	inline msk set0<nElReg<int64_t>()>() {
-		return svptrue_b64();
+		return svpfalse_b();
 	}
 
 	template <>
 	inline msk set0<nElReg<int32_t>()>() {
-		return svptrue_b32();
+		return svpfalse_b();
 	}
 
 	template <>
 	inline msk set0<nElReg<int16_t>()>() {
-		return svptrue_b16();
+		return svpfalse_b();
 	}
 
 	template <>
 	inline msk set0<nElReg<int8_t>()>() {
-		return svptrue_b8();
+		return svpfalse_b();
 	}
 
 	// ------------------------------------------------------------------------------------------------------------ set
@@ -743,52 +743,50 @@
 	// ---------------------------------------------------------------------------------------------------- andb (mask)
 	template <>
 	inline msk andb<nElReg<int64_t>()>(const msk v1, const msk v2) {
-		return svand_z(svptrue_b64(),v1, v2);
+		return svand_z(svptrue_b64(), v1, v2);
 	}
 
 	template <>
 	inline msk andb<nElReg<int32_t>()>(const msk v1, const msk v2) {
-		return svand_z(svptrue_b32(),v1, v2);
+		return svand_z(svptrue_b32(), v1, v2);
 	}
 
 	// ---------------------------------------------------------------------------------------------------- notb (mask)
-
 	template <>
 	inline msk notb<nElReg<int64_t>()>(const msk v) {
-		return svnot_z(svptrue_b64(),v);
+		return svnot_z(svptrue_b64(), v);
 	}
 
 	template <>
 	inline msk notb<nElReg<int32_t>()>(const msk v) {
-		return svnot_z(svptrue_b32(),v);
+		return svnot_z(svptrue_b32(), v);
 	}
 
 	// --------------------------------------------------------------------------------------------------- testz (mask)
-
 	template <>
 	inline bool testz<nElReg<int64_t>()>(const msk v1) {
-		return !svptest_any(svptrue_b64(),v1);
+		return !svptest_any(svptrue_b64(), v1);
 	}
 
 	template <>
 	inline bool testz<nElReg<int32_t>()>(const msk v1) {
-		return !svptest_any(svptrue_b32(),v1);
+		return !svptest_any(svptrue_b32(), v1);
 	}
 
 	// ------------------------------------------------------------------------------------------------------ reduction
 	template <>
-	struct reduction<double,mipp::add<double> >
+	struct reduction<double, mipp::add<double> >
 	{
 		static double sapply(const reg v1) {
 			return svaddv_f64(svptrue_b64(), svreinterpret_f64_f32(v1));
 		}
 		static reg apply(const reg v1) {
-		    return mipp::set1<double>(sapply(v1));
+			return mipp::set1<double>(sapply(v1));
 		}
 	};
 
 	template <>
-	struct reduction<float,mipp::add<float> >
+	struct reduction<float, mipp::add<float> >
 	{
 		static float sapply(const reg v1) {
 			return svaddv_f32(svptrue_b32(), v1);
@@ -798,11 +796,33 @@
 		}
 	};
 
-	// ----------------------------------------------------- reg_2 use
+        template <>
+        struct Reduction<double, mipp::add<double> >
+        {
+                static double sapply(const Reg<double> v1) {
+                        return svaddv_f64(svptrue_b64(), svreinterpret_f64_f32(v1.r));
+                }
+                static Reg<double> apply(const reg v1) {
+                        return mipp::set1<double>(sapply(v1));
+                }
+        };
+
+        template <>
+        struct Reduction<float, mipp::add<float> >
+        {
+                static float sapply(const Reg<float> v1) {
+                        return svaddv_f32(svptrue_b32(), v1.r);
+                }
+                static Reg<float> apply(const reg v1) {
+                        return mipp::set1<float>(sapply(v1));
+                }
+        };
+	// -------------------------------------------------------------- reg_2 use
 	template <>
-	inline reg cvt<int32_t,int64_t>(const reg_2 v) {
+	inline reg cvt<int32_t, int64_t>(const reg_2 v) {
 		return svreinterpret_f32_s64(svunpklo_s64(v));
 	}
+
 	template <>
 	inline reg_2 low<int32_t>(const reg v) {
 		// clean it here reg_2 eq reg<int>

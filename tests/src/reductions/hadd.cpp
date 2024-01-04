@@ -66,6 +66,7 @@ TEST_CASE("Horizontal addition - mipp::reg", "[mipp::hadd]")
 #endif
 	SECTION("datatype = float") { test_reg_hadd_real<float>(); }
 
+#if !defined(MIPP_SVE_LS)
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 #if defined(MIPP_64BIT)
 	SECTION("datatype = int64_t") { test_reg_hadd_int<int64_t>(); }
@@ -77,6 +78,7 @@ TEST_CASE("Horizontal addition - mipp::reg", "[mipp::hadd]")
 	SECTION("datatype = int16_t") { test_reg_hadd_int<int16_t>(); }
 #ifndef _MSC_VER
 	SECTION("datatype = int8_t") { test_reg_hadd_int<int8_t>(); }
+#endif
 #endif
 #endif
 #endif
@@ -142,6 +144,7 @@ TEST_CASE("Horizontal addition - mipp::Reg", "[mipp::hadd]")
 #endif
 	SECTION("datatype = float") { test_Reg_hadd_real<float>(); }
 
+#if !defined(MIPP_SVE_LS)
 #if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
 #if defined(MIPP_64BIT)
 	SECTION("datatype = int64_t") { test_Reg_hadd_int<int64_t>(); }
@@ -153,6 +156,7 @@ TEST_CASE("Horizontal addition - mipp::Reg", "[mipp::hadd]")
 	SECTION("datatype = int16_t") { test_Reg_hadd_int<int16_t>(); }
 #ifndef _MSC_VER
 	SECTION("datatype = int8_t") { test_Reg_hadd_int<int8_t>(); }
+#endif
 #endif
 #endif
 #endif

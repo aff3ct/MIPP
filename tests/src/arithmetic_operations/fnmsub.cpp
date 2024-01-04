@@ -31,7 +31,7 @@ void test_reg_fnmsub()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Fused negative multiplication and subtraction - mipp::reg", "[mipp::fnmsub]")
 {
 #if defined(MIPP_64BIT)
@@ -66,6 +66,7 @@ void test_Reg_fnmsub()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Fused negative multiplication and subtraction - mipp::Reg", "[mipp::fnmsub]")
 {
 #if defined(MIPP_64BIT)
@@ -73,6 +74,7 @@ TEST_CASE("Fused negative multiplication and subtraction - mipp::Reg", "[mipp::f
 #endif
 	SECTION("datatype = float") { test_Reg_fnmsub<float>(); }
 }
+#endif
 
 template <typename T>
 void test_reg_maskz_fnmsub()
@@ -112,7 +114,7 @@ void test_reg_maskz_fnmsub()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Fused negative multiplication and subtraction - mipp::reg - maskz", "[mipp::fnmsub]")
 {
 #if defined(MIPP_64BIT)
@@ -160,6 +162,7 @@ void test_Reg_maskz_fnmsub()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Fused negative multiplication and subtraction - mipp::Reg - maskz", "[mipp::fnmsub]")
 {
 #if defined(MIPP_64BIT)
@@ -167,6 +170,7 @@ TEST_CASE("Fused negative multiplication and subtraction - mipp::Reg - maskz", "
 #endif
 	SECTION("datatype = float") { test_Reg_maskz_fnmsub<float>(); }
 }
+#endif
 
 template <typename T>
 void test_reg_mask_fnmsub()
@@ -208,7 +212,7 @@ void test_reg_mask_fnmsub()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Fused negative multiplication and subtraction - mipp::reg - mask", "[mipp::fnmsub]")
 {
 #if defined(MIPP_64BIT)
@@ -258,6 +262,7 @@ void test_Reg_mask_fnmsub()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Fused negative multiplication and subtraction - mipp::Reg - mask", "[mipp::fnmsub]")
 {
 #if defined(MIPP_64BIT)
@@ -265,3 +270,4 @@ TEST_CASE("Fused negative multiplication and subtraction - mipp::Reg - mask", "[
 #endif
 	SECTION("datatype = float") { test_Reg_mask_fnmsub<float>(); }
 }
+#endif

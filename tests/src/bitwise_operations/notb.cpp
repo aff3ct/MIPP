@@ -25,7 +25,7 @@ void test_reg_notb()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Binary not - mipp::reg", "[mipp::notb]")
 {
 #if defined(MIPP_64BIT)
@@ -58,6 +58,7 @@ void test_Reg_notb()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Binary not - mipp::Reg", "[mipp::notb]")
 {
 #if defined(MIPP_64BIT)
@@ -69,6 +70,7 @@ TEST_CASE("Binary not - mipp::Reg", "[mipp::notb]")
 	SECTION("datatype = int8_t") { test_Reg_notb<int8_t>(); }
 #endif
 }
+#endif
 
 template <typename T>
 void test_msk_notb()

@@ -637,12 +637,12 @@ compilation time with the `-msve-vector-bits=<size>` flag.
 
 ### Supported MIPP Operations
 
-- **Memory operations:** `load`, `store`, `blend`, `set`, `set1`, `blend`, 
-  `gather`, `scatter`, `maskzld`, `maskst`, `maskzgat`, `masksca`
+- **Memory operations:** `load`, `store`, `blend`, `set`, `set1`, `gather`, 
+  `scatter`, `maskzld`, `maskst`, `maskzgat`, `masksca`
 - **Logical comparisons:** `cmpeq`, `cmneq`
 - **Bitwise operations:** `andb`, `notb` (msk)
-- **Arithmetic operations:** `anddb`, `fmadd`, `add`, `sub`, `mul`, `div`
-- **Reductions:** `testz(msk), Reduce<T, add>`
+- **Arithmetic operations:** `fmadd`, `add`, `sub`, `mul`, `div`
+- **Reductions:** `testz` (msk), `Reduce<T, add>`
 
 *Byte* and *word* operations are not yet implemented.
 

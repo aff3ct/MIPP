@@ -29,7 +29,7 @@ void test_reg_xorb()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Binary xor - mipp::reg", "[mipp::xorb]")
 {
 #if defined(MIPP_64BIT)
@@ -65,6 +65,7 @@ void test_Reg_xorb()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Binary xor - mipp::Reg", "[mipp::xorb]")
 {
 #if defined(MIPP_64BIT)
@@ -76,6 +77,7 @@ TEST_CASE("Binary xor - mipp::Reg", "[mipp::xorb]")
 	SECTION("datatype = int8_t") { test_Reg_xorb<int8_t>(); }
 #endif
 }
+#endif
 
 template <typename T>
 void test_msk_xorb()
@@ -114,7 +116,7 @@ void test_msk_xorb()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Binary xor - mipp::msk", "[mipp::xorb]")
 {
 #if defined(MIPP_64BIT)
@@ -159,6 +161,7 @@ void test_Msk_xorb()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Binary xor - mipp::Msk", "[mipp::xorb]")
 {
 #if defined(MIPP_64BIT)
@@ -170,3 +173,5 @@ TEST_CASE("Binary xor - mipp::Msk", "[mipp::xorb]")
 	SECTION("datatype = int8_t") { test_Msk_xorb<int8_t>(); }
 #endif
 }
+#endif
+

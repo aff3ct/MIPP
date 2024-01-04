@@ -43,7 +43,7 @@ void test_reg_testz_int()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Testz - mipp::reg", "[mipp::testz]")
 {
 #if defined(MIPP_64BIT)
@@ -99,6 +99,7 @@ void test_Reg_testz_int()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Testz - mipp::Reg", "[mipp::testz]")
 {
 #if defined(MIPP_64BIT)
@@ -114,6 +115,7 @@ TEST_CASE("Testz - mipp::Reg", "[mipp::testz]")
 #endif
 #endif
 }
+#endif
 
 template <typename T>
 void test_msk_testz_int()
@@ -152,7 +154,7 @@ void test_msk_testz_int()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Testz - mipp::msk", "[mipp::testz]")
 {
 #if defined(MIPP_64BIT)
@@ -208,6 +210,7 @@ void test_Msk_testz_int()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Testz - mipp::Msk", "[mipp::testz]")
 {
 #if defined(MIPP_64BIT)
@@ -223,6 +226,7 @@ TEST_CASE("Testz - mipp::Msk", "[mipp::testz]")
 #endif
 #endif
 }
+#endif
 
 template <typename T>
 void test_reg_testz1_int()
@@ -263,7 +267,7 @@ void test_reg_testz1_int()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Testz1 - mipp::reg", "[mipp::testz1]")
 {
 #if defined(MIPP_64BIT)
@@ -320,6 +324,7 @@ void test_Reg_testz1_int()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Testz1 - mipp::Reg", "[mipp::testz1]")
 {
 #if defined(MIPP_64BIT)
@@ -335,7 +340,7 @@ TEST_CASE("Testz1 - mipp::Reg", "[mipp::testz1]")
 #endif
 #endif
 }
-
+#endif
 template <typename T>
 void test_msk_testz1_int()
 {
@@ -376,7 +381,7 @@ void test_msk_testz1_int()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO)
 TEST_CASE("Testz1 - mipp::msk", "[mipp::testz1]")
 {
 #if defined(MIPP_64BIT)
@@ -434,7 +439,7 @@ void test_Msk_testz1_int()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO)
 TEST_CASE("Testz1 - mipp::Msk", "[mipp::testz1]")
 {
 #if defined(MIPP_64BIT)

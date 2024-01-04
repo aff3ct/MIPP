@@ -28,7 +28,7 @@ void test_reg_andnb()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Binary not and - mipp::reg", "[mipp::andnb]")
 {
 #if defined(MIPP_64BIT)
@@ -64,6 +64,7 @@ void test_Reg_andnb()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Binary not and - mipp::Reg", "[mipp::andnb]")
 {
 #if defined(MIPP_64BIT)
@@ -75,6 +76,7 @@ TEST_CASE("Binary not and - mipp::Reg", "[mipp::andnb]")
 	SECTION("datatype = int8_t") { test_Reg_andnb<int8_t>(); }
 #endif
 }
+#endif
 
 template <typename T>
 void test_msk_andnb()
@@ -113,7 +115,7 @@ void test_msk_andnb()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Binary not and - mipp::msk", "[mipp::andnb]")
 {
 #if defined(MIPP_64BIT)
@@ -158,6 +160,7 @@ void test_Msk_andnb()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Binary not and - mipp::Msk", "[mipp::andnb]")
 {
 #if defined(MIPP_64BIT)
@@ -169,3 +172,4 @@ TEST_CASE("Binary not and - mipp::Msk", "[mipp::andnb]")
 	SECTION("datatype = int8_t") { test_Msk_andnb<int8_t>(); }
 #endif
 }
+#endif

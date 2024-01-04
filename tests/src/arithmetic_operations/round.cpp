@@ -30,7 +30,7 @@ void test_reg_round()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Round - mipp::reg", "[mipp::round]")
 {
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
@@ -66,6 +66,7 @@ void test_Reg_round()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Round - mipp::Reg", "[mipp::round]")
 {
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
@@ -75,6 +76,7 @@ TEST_CASE("Round - mipp::Reg", "[mipp::round]")
 	SECTION("datatype = float") { test_Reg_round<float>(); }
 #endif
 }
+#endif
 
 template <typename T>
 void test_reg_maskz_round()
@@ -113,7 +115,7 @@ void test_reg_maskz_round()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Round - mipp::reg - maskz", "[mipp::round]")
 {
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
@@ -162,6 +164,7 @@ void test_Reg_maskz_round()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Round - mipp::Reg - maskz", "[mipp::round]")
 {
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
@@ -171,6 +174,7 @@ TEST_CASE("Round - mipp::Reg - maskz", "[mipp::round]")
 	SECTION("datatype = float") { test_Reg_maskz_round<float>(); }
 #endif
 }
+#endif
 
 template <typename T>
 void test_reg_mask_round()
@@ -211,7 +215,7 @@ void test_reg_mask_round()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Round - mipp::reg - mask", "[mipp::round]")
 {
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
@@ -262,6 +266,7 @@ void test_Reg_mask_round()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Round - mipp::Reg - mask", "[mipp::round]")
 {
 #if !defined(MIPP_SSE) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 41)
@@ -271,3 +276,4 @@ TEST_CASE("Round - mipp::Reg - mask", "[mipp::round]")
 	SECTION("datatype = float") { test_Reg_mask_round<float>(); }
 #endif
 }
+#endif

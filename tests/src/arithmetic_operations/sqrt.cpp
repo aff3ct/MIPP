@@ -29,7 +29,7 @@ void test_reg_sqrt()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Square root - mipp::reg", "[mipp::sqrt]")
 {
 #if defined(MIPP_64BIT)
@@ -62,6 +62,7 @@ void test_Reg_sqrt()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Square root - mipp::Reg", "[mipp::sqrt]")
 {
 #if defined(MIPP_64BIT)
@@ -69,6 +70,7 @@ TEST_CASE("Square root - mipp::Reg", "[mipp::sqrt]")
 #endif
 	SECTION("datatype = float") { test_Reg_sqrt<float>(); }
 }
+#endif
 
 template <typename T>
 void test_reg_maskz_sqrt()
@@ -106,7 +108,7 @@ void test_reg_maskz_sqrt()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Square root - mipp::reg - maskz", "[mipp::sqrt]")
 {
 #if defined(MIPP_64BIT)
@@ -152,6 +154,7 @@ void test_Reg_maskz_sqrt()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Square root - mipp::Reg - maskz", "[mipp::sqrt]")
 {
 #if defined(MIPP_64BIT)
@@ -159,6 +162,7 @@ TEST_CASE("Square root - mipp::Reg - maskz", "[mipp::sqrt]")
 #endif
 	SECTION("datatype = float") { test_Reg_maskz_sqrt<float>(); }
 }
+#endif
 
 template <typename T>
 void test_reg_mask_sqrt()
@@ -198,7 +202,7 @@ void test_reg_mask_sqrt()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Square root - mipp::reg - mask", "[mipp::sqrt]")
 {
 #if defined(MIPP_64BIT)
@@ -246,6 +250,7 @@ void test_Reg_mask_sqrt()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Square root - mipp::Reg - mask", "[mipp::sqrt]")
 {
 #if defined(MIPP_64BIT)
@@ -253,3 +258,4 @@ TEST_CASE("Square root - mipp::Reg - mask", "[mipp::sqrt]")
 #endif
 	SECTION("datatype = float") { test_Reg_mask_sqrt<float>(); }
 }
+#endif

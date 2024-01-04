@@ -31,7 +31,7 @@ void test_reg_fmsub()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Fused multiplication and subtraction - mipp::reg", "[mipp::fmsub]")
 {
 #if defined(MIPP_64BIT)
@@ -66,6 +66,7 @@ void test_Reg_fmsub()
 	}
 }
 
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Fused multiplication and subtraction - mipp::Reg", "[mipp::fmsub]")
 {
 #if defined(MIPP_64BIT)
@@ -73,6 +74,7 @@ TEST_CASE("Fused multiplication and subtraction - mipp::Reg", "[mipp::fmsub]")
 #endif
 	SECTION("datatype = float") { test_Reg_fmsub<float>(); }
 }
+#endif
 
 template <typename T>
 void test_reg_maskz_fmsub()
@@ -112,7 +114,7 @@ void test_reg_maskz_fmsub()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Fused multiplication and subtraction - mipp::reg - maskz", "[mipp::fmsub]")
 {
 #if defined(MIPP_64BIT)
@@ -160,6 +162,7 @@ void test_Reg_maskz_fmsub()
 	}
 }
 
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Fused multiplication and subtraction - mipp::Reg - maskz", "[mipp::fmsub]")
 {
 #if defined(MIPP_64BIT)
@@ -167,6 +170,7 @@ TEST_CASE("Fused multiplication and subtraction - mipp::Reg - maskz", "[mipp::fm
 #endif
 	SECTION("datatype = float") { test_Reg_maskz_fmsub<float>(); }
 }
+#endif
 
 template <typename T>
 void test_reg_mask_fmsub()
@@ -208,7 +212,7 @@ void test_reg_mask_fmsub()
 	}
 }
 
-#ifndef MIPP_NO
+#if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Fused multiplication and subtraction - mipp::reg - mask", "[mipp::fmsub]")
 {
 #if defined(MIPP_64BIT)
@@ -258,6 +262,7 @@ void test_Reg_mask_fmsub()
 	}
 }
 
+#if !defined(MIPP_SVE_LS)
 TEST_CASE("Fused multiplication and subtraction - mipp::Reg - mask", "[mipp::fmsub]")
 {
 #if defined(MIPP_64BIT)
@@ -265,3 +270,4 @@ TEST_CASE("Fused multiplication and subtraction - mipp::Reg - mask", "[mipp::fms
 #endif
 	SECTION("datatype = float") { test_Reg_mask_fmsub<float>(); }
 }
+#endif
