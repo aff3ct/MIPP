@@ -1,0 +1,10 @@
+alignas(32)
+int8_t {{ lutname }}[{{ entries }}][{{ simdwidth }}] = {
+{%- for i in range(0, entries) %}
+  {
+  {%- for j in range(0, simdwidth) -%}
+    {{ "%3d" | format(lut[i][j]) }},
+  {%- endfor -%}
+  },
+{%- endfor %}
+};

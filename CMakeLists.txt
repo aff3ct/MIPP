@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.5)
 project(MY_INTRINSICS_PLUS_PLUS CXX)
 
+option(MIPP_STATIC "Compile MIPP as static library (e.g. to include LUT)" OFF)
+
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -27,6 +29,11 @@ set( MIPP_MATH_HEADERS
   src/math/sse_mathfun.hxx
 )
 
+set ( MIPP_SRCS
+  src/mipp_SSE_LUT.cpp
+  src/mipp_NEON_LUT.cpp
+)
+
 ######################################################
 
 # Install headers files
@@ -34,13 +41,17 @@ install( FILES ${MIPP_HEADERS}      DESTINATION include/mipp)
 install( FILES ${MIPP_MATH_HEADERS} DESTINATION include/mipp/math)
 
 # Create the header only library in the cmake sense
-add_library(mipp INTERFACE)
+add_library(mipp STATIC ${MIPP_SRCS})
 target_compile_definitions(mipp INTERFACE HAVE_MIPP=1)
 target_compile_features(mipp INTERFACE cxx_std_11)
 target_include_directories(mipp INTERFACE
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
                            $<INSTALL_INTERFACE:include/mipp>)
 
+if (MIPP_STATIC)
+  target_compile_definitions(mipp PUBLIC MIPP_STATIC)
+endif()
+			 
 # Target export
 install(EXPORT mippTargets
         NAMESPACE MIPP::

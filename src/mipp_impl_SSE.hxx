@@ -1,5 +1,12 @@
 #include "mipp.h"
 
+#if defined(MIPP_STATIC)
+	extern int8_t vcompress_LUT64x2_SSE[4][16];
+	extern int8_t vcompress_LUT32x4_SSE[16][16];
+	extern int8_t vcompress_LUT16x8_SSE[256][16];
+	extern int8_t vcompress_LUT8x16_SSE[65536][16];
+#endif
+
 // -------------------------------------------------------------------------------------------------------- X86 SSE-128
 // --------------------------------------------------------------------------------------------------------------------
 #if defined(__SSE__)
@@ -2417,6 +2424,63 @@
 		return _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(v), _MM_SHUFFLE(3,1,2,0)));
 	}
 #endif
+
+
+// ---------------------------------------------------------------------------------------------------------- compress
+#ifdef __SSSE3__
+// LUT for vcompress are only available if using MIPP as static library
+// Re-uses Lemire's proposition: https://lemire.me/blog/2017/04/25/quickly-pruning-elements-in-simd-vectors-using-the-simdprune-library/        
+#ifdef MIPP_STATIC        
+	template <>
+	inline reg compress<double>(const reg v, const msk m) {
+		int idx = _mm_movemask_pd(_mm_castsi128_pd(m));
+		auto shufidx = mipp::loadu<int8_t>(vcompress_LUT64x2_SSE[idx]);
+		return mipp::shuff<double>(v, shufidx);
+	}
+
+	template <>
+	inline reg compress<float>(const reg v, const msk m) {
+		int idx = _mm_movemask_ps(_mm_castsi128_ps(m));
+		auto shufidx = mipp::loadu<int8_t>(vcompress_LUT32x4_SSE[idx]);
+		return mipp::shuff<float>(v, shufidx);
+	}
+
+	template <>
+	inline reg compress<int64_t>(const reg v, const msk m) {
+		// Bypass lack of movemask_epi64 by casting to __m128d (double)
+		int idx = _mm_movemask_pd(_mm_castsi128_pd(m));
+		auto shufidx = mipp::loadu<int8_t>(vcompress_LUT64x2_SSE[idx]);
+		return mipp::shuff<int64_t>(v, shufidx);
+	}
+
+	template <>
+	inline reg compress<int32_t>(const reg v, const msk m) {
+		// Bypass lack of movemask_epi64 by casting to __m128 (float)
+		int idx = _mm_movemask_ps(_mm_castsi128_ps(m));
+		auto shufidx = mipp::loadu<int8_t>(vcompress_LUT32x4_SSE[idx]);
+		return mipp::shuff<int32_t>(v, shufidx);
+	}
+
+	template <>
+	inline reg compress<int16_t>(const reg v, const msk m) {
+		// movemask_epi8 on 16-bit elements => must drop every other bits
+		// This is done on the mask, using pext instruction
+		int idx = _mm_movemask_epi8(m);
+		idx = _pext_u32(idx, 0x5555);
+		auto shufidx = mipp::loadu<int8_t>(vcompress_LUT16x8_SSE[idx]);
+		return mipp::shuff<int16_t>(v, shufidx);
+	}
+
+	template <>
+	inline reg compress<int8_t>(const reg v, const msk m) {
+		int idx = _mm_movemask_epi8(m);
+		auto shufidx = mipp::loadu<int8_t>(vcompress_LUT8x16_SSE[idx]);
+		return mipp::shuff<int8_t>(v, shufidx);
+	}
+
+#endif 
+#endif         
+
 
 	// ---------------------------------------------------------------------------------------------------------- cmpeq
 	template <>
