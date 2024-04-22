@@ -55,4 +55,4 @@ def generate_luts(filename, simdname, simdwidth, lut_params_list):
         
     
 generate_luts("src/mipp_SSE_LUT.cpp",  "SSE",  16, [(4, 2), (16, 4), (256, 8), (65536, 16)])
-generate_luts("src/mipp_NEON_LUT.cpp", "NEON", 16, [(4, 2), (16, 4), (256, 8)])
+generate_luts("src/mipp_NEON_LUT.cpp", "NEON", 16, [(4, 2), (16, 4), (256, 8), (65536, 16)])
