@@ -16,13 +16,12 @@ void test_reg_compress()
 	T expected[N];
 	bool mask1[N];
 	
-	std::iota(inputs1, inputs1 + N, (T)0);
+	std::iota(inputs1, inputs1 + N, (T)1);
 	mipp::reg r1 = mipp::load<T>(inputs1);
 	mipp::reg r2 = mipp::set0<T>();
-	mipp::reg rexpected = mipp::set0<T>();
 		
 	std::mt19937 g;
-	for (auto t = 0; t < 100; t++)
+	for (auto t = 0; t < 1000; t++)
 	{
 		// Generate random mask
 		int k = 0;
@@ -31,12 +30,12 @@ void test_reg_compress()
 			bool bit = (g() & 1) ? false : true; // Generate random bit
 			mask1[i] = bit;
 			if (bit) {
-				expected[k] = i;
+				expected[k] = i + (T)1;
 				k++;
 			}
 		}
 
-		mipp::msk mask = mipp::set<N>(mask1);
+                mipp::msk mask = mipp::set<N>(mask1);
 		
 		r2 = mipp::compress<T>(r1, mask);
 
