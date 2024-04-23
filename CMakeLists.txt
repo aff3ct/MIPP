@@ -29,10 +29,12 @@ set( MIPP_MATH_HEADERS
   src/math/sse_mathfun.hxx
 )
 
-set ( MIPP_SRCS
-  src/mipp_SSE_LUT.cpp
-  src/mipp_NEON_LUT.cpp
-)
+if (MIPP_STATIC)
+  set ( MIPP_SRCS
+    src/mipp_SSE_LUT.cpp
+    src/mipp_NEON_LUT.cpp
+  )
+endif()
 
 ######################################################
 
@@ -41,7 +43,13 @@ install( FILES ${MIPP_HEADERS}      DESTINATION include/mipp)
 install( FILES ${MIPP_MATH_HEADERS} DESTINATION include/mipp/math)
 
 # Create the header only library in the cmake sense
-add_library(mipp STATIC ${MIPP_SRCS})
+
+if (MIPP_STATIC)
+  add_library(mipp STATIC ${MIPP_SRCS})
+else()
+  add_library(mipp INTERFACE) # Header-ony version
+endif()
+
 target_compile_definitions(mipp INTERFACE HAVE_MIPP=1)
 target_compile_features(mipp INTERFACE cxx_std_11)
 target_include_directories(mipp INTERFACE
