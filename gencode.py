@@ -6,16 +6,16 @@ template_lut = env.get_template("vcompress-LUT.cpp.j2")
 template_file = env.get_template("mipp_LUT.cpp.j2")
 
 
-def generate_lut(entries, simdwidth, entry_words):
+def generate_lut(entries, simdwidth, words_per_simd):
     lut = [[0 for j in range(0, simdwidth)] for i in range(0, entries)]
 
-    elem_bytes = simdwidth // entry_words
+    elem_bytes = simdwidth // words_per_simd
     
     for i in range(0, entries):
         mask = i
         j = 0
         
-        for k in range(0, entry_words):
+        for k in range(0, words_per_simd):
             for b in range(0, elem_bytes):
                 lut[i][j + b] = k * elem_bytes + b
                 
@@ -28,18 +28,20 @@ def generate_lut(entries, simdwidth, entry_words):
             
     return lut
 
+def generate_luts(filename, simdname, simdwidth, entrydef, lut_params_list):
 
-def generate_luts(filename, simdname, simdwidth, lut_params_list):
+    (entrytype, entrybytes) = entrydef
     
     all_luts = []
     for entries, simd_words in lut_params_list:
 
-        elem_bits = (simdwidth // simd_words) * 8
+        elem_bits = (simdwidth // simd_words) * entrybytes * 8
         
         lut = template_lut.render(
             lutname = f"vcompress_LUT{elem_bits}x{simd_words}_{simdname}",
             entries = entries,
             simdwidth = simdwidth,
+	    entrytype = entrytype,
             lut = generate_lut(entries, simdwidth, simd_words)
         )
 
@@ -53,6 +55,13 @@ def generate_luts(filename, simdname, simdwidth, lut_params_list):
         file.write(all_content)
         
         
+
+def generate_AVX_luts(filename, simdname):
     
-generate_luts("src/mipp_SSE_LUT.cpp",  "SSE",  16, [(4, 2), (16, 4), (256, 8), (65536, 16)])
-generate_luts("src/mipp_NEON_LUT.cpp", "NEON", 16, [(4, 2), (16, 4), (256, 8), (65536, 16)])
+    
+    pass
+	
+generate_luts("src/mipp_SSE_LUT.cpp",  "SSE",  16, ("int8_t", 1),  [(4, 2), (16, 4), (256, 8), (65536, 16)])
+generate_luts("src/mipp_NEON_LUT.cpp", "NEON", 16, ("int8_t", 1),  [(4, 2), (16, 4), (256, 8), (65536, 16)])
+
+generate_luts("src/mipp_AVX_LUT.cpp",  "AVX",  8, ("int32_t", 4), [(256, 8)])

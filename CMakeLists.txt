@@ -32,6 +32,7 @@ set( MIPP_MATH_HEADERS
 if (MIPP_STATIC)
   set ( MIPP_SRCS
     src/mipp_SSE_LUT.cpp
+    src/mipp_AVX_LUT.cpp
     src/mipp_NEON_LUT.cpp
   )
 endif()

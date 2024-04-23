@@ -1,4 +1,11 @@
 #include "mipp.h"
+#include <immintrin.h>
+#include <x86intrin.h>
+
+#if defined(MIPP_STATIC)
+	extern int32_t vcompress_LUT32x8_AVX[256][8]; // 8 x 32-bit for _mm_permutevar_epi32
+	extern int32_t vcompress_LUT64x4_AVX[16][8]; // 8 x 32-bit for _mm_permutevar_epi32
+#endif 
 
 // -------------------------------------------------------------------------------------------------------- X86 AVX-256
 // --------------------------------------------------------------------------------------------------------------------
@@ -2955,6 +2962,71 @@
 		mipp::transpose2<int16_t>(tab);
 	}
 
+        // -------------------------------------------------------------------------------------------------- compress
+#ifdef __AVX2__
+#ifdef MIPP_STATIC        
+	template <>
+	inline reg compress<float>(const reg v, const msk m) {
+		// Compute movemask
+		int mask = _mm256_movemask_epi8(m);
+		mask = _pext_u32(mask, 0x11111111);
+
+		__m256i vperm = _mm256_load_si256((__m256i*)vcompress_LUT32x8_AVX[mask]);
+		__m256 res = _mm256_permutevar8x32_ps(v, vperm);
+	
+		// Unlike regular shuffes, -1 values in `vperm` will not zero result elements
+		// We therefore zero extra elements
+		// To do this, we re-use the vperm mask (if -1 => set value to 0)
+		const __m256i vminusone = _mm256_set1_epi32(-1); 
+		__m256i mtail = _mm256_cmpeq_epi32(vperm, vminusone);
+		res = _mm256_blendv_ps(res, _mm256_setzero_ps(), _mm256_castsi256_ps(mtail));
+	
+		return res;
+        }
+        
+	template <>
+	inline reg compress<double>(const reg v, const msk m) {
+		// Compute movemask
+		int mask = _mm256_movemask_epi8(m);
+		mask = _pext_u32(mask, 0x01010101);
+
+		__m256i vperm = _mm256_load_si256((__m256i*)vcompress_LUT64x4_AVX[mask]);
+		__m256d res = _mm256_castps_pd(_mm256_permutevar8x32_ps(v, vperm));
+		
+		// Unlike regular shuffes, -1 values in `vperm` will not zero result elements
+		// We therefore zero extra elements
+		// To do this, we re-use the vperm mask (if -1 => set value to 0)
+		const __m256i vminusone = _mm256_set1_epi32(-1);
+		// HACK: u32: [-1, -1] and u64: [-1] are both 0xFFFFFFFF'FFFFFFFF
+		// which is why we can compare directly the 32-bits permute indices to
+		// 64-bits -1
+		__m256i mtail = _mm256_cmpeq_epi64(vperm, vminusone); 
+		res = _mm256_blendv_pd(res, _mm256_setzero_pd(), _mm256_castsi256_pd(mtail));
+	
+		return _mm256_castpd_ps(res);
+	}
+	
+	template <>
+	inline reg compress<int32_t>(const reg v, const msk m) {
+		// Compute movemask
+		int mask = _mm256_movemask_epi8(m);
+		mask = _pext_u32(mask, 0x11111111);
+
+		__m256i vperm = _mm256_load_si256((__m256i*)vcompress_LUT32x8_AVX[mask]);
+		__m256i res = _mm256_permutevar8x32_epi32(_mm256_castps_si256(v), vperm);
+
+		// Unlike regular shuffes, -1 values in `vperm` will not zero result elements
+		// We therefore zero extra elements
+		// To do this, we re-use the vperm mask (if -1 => set value to 0)
+		const __m256i vminusone = _mm256_set1_epi32(-1);
+		__m256i mtail = _mm256_cmpeq_epi32(vperm, vminusone);
+		res = _mm256_blendv_epi8(res, _mm256_setzero_si256(), mtail);
+
+		return _mm256_castsi256_ps(res);
+	}
+#endif 
+#endif
+        
 	// ----------------------------------------------------------------------------------------------------------- notb
 	template <>
 	inline reg notb<float>(const reg v) {

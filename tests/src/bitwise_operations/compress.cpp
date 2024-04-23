@@ -50,7 +50,9 @@ void test_reg_compress()
 #if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Compress - mipp::reg", "[mipp::compress]")
 {
-#if defined(MIPP_SSE) || defined(MIPP_AVX512) || defined(MIPP_NEON)
+#if defined(MIPP_SSE) || defined(MIPP_AVX512) || defined(MIPP_NEON) || defined(MIPP_AVX)
+	SECTION("datatype = double") { test_reg_compress<double>(); }
+	SECTION("datatype = float") { test_reg_compress<float>(); }
 	SECTION("datatype = int64_t") { test_reg_compress<int64_t>(); }
 	SECTION("datatype = int32_t") { test_reg_compress<int32_t>(); }
 #if defined(MIPP_SSE) || defined(MIPP_AVX512VBMI) || defined(MIPP_NEON)
