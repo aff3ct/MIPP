@@ -1,11 +1,10 @@
 @echo on
 
-cd tests
 :Loop
 IF "%~1"=="" goto End
 
    set build=%~1%
-   cd %build%/bin/
+   cd %build%/bin/tests/
    run_tests.exe
    if %ERRORLEVEL% neq 0 exit %ERRORLEVEL%
    cd ../../

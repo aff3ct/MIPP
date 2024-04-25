@@ -2,8 +2,6 @@
 
 call ./ci/tools/threads.bat
 
-cd tests
-
 rem set build_root=build_windows_x86_gcc
 call :compile "build_windows_x86_gcc_nointr"   "-Wno-attributes -DMIPP_NO_INTRINSICS"
 call :compile "build_windows_x86_gcc_sse2"     "-Wno-attributes -msse2"

@@ -5,8 +5,6 @@ call ./ci/tools/threads.bat
 set "VSCMD_START_DIR=%CD%"
 call "%VS_PATH%\VC\Auxiliary\Build\vcvars64.bat"
 
-cd tests
-
 rem set build_root=build_windows_x86_msvc
 call :compile "build_windows_x86_msvc_nointr"   "-DMIPP_NO_INTRINSICS"
 call :compile "build_windows_x86_msvc_sse2"     "/arch:SSE2   -D__SSE__ -D__SSE2__"

@@ -12,8 +12,6 @@ function compile {
 	cd ..
 }
 
-cd tests
-
 build_root=build_linux_armv8_gcc
 compile "${build_root}_sve_ls256" "-march=armv8-a+sve -msve-vector-bits=256"
 compile "${build_root}_sve_ls512" "-march=armv8-a+sve -msve-vector-bits=512"

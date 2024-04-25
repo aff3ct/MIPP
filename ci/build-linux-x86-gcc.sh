@@ -12,8 +12,6 @@ function compile {
 	cd ..
 }
 
-cd tests
-
 build_root=build_linux_x86_gcc
 compile "${build_root}_nointr"   "-DMIPP_NO_INTRINSICS"
 compile "${build_root}_sse2"     "-msse2"

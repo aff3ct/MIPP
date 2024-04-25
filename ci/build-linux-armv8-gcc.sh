@@ -12,8 +12,6 @@ function compile {
 	cd ..
 }
 
-cd tests
-
 build_root=build_linux_armv8_gcc
 compile "${build_root}_nointr" "-DMIPP_NO_INTRINSICS"
 compile "${build_root}_neon"   "-march=armv8.1-a+simd"

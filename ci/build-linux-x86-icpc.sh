@@ -13,7 +13,6 @@ function compile {
 }
 
 source /opt/intel/vars-intel.sh
-cd tests
 
 build_root=build_linux_x86_icpc
 compile "${build_root}_nointr"    "-DMIPP_NO_INTRINSICS"

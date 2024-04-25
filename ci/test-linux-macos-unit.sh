@@ -1,7 +1,6 @@
 #!/bin/bash
 set -x
 
-cd tests
 for build in "$@"
 do
 	cd $build
@@ -23,10 +22,10 @@ do
 		# if [[ "$RES" != *"test cases:   289 |    92 passed | 197 failed"* ]]; then
 		# 	exit 1;
 		# fi
-		armie -msve-vector-bits=$nbits -- ./bin/run_tests
+		armie -msve-vector-bits=$nbits -- ./tests/bin/run_tests
 		rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 	else
-		./bin/run_tests
+		./tests/bin/run_tests
 		rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 	fi
 	cd ..
