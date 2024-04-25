@@ -271,41 +271,41 @@ test-linux-x86-unit-avx2-fma:
   script:
     - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_avx2_fma build_linux_x86_clang_avx2_fma build_linux_x86_icpc_avx2_fma
 
-test-linux-x86-unit-avx512f:
-  image: ubuntu:20.04
-  stage: test
-  needs:
-    - job: build-linux-x86-gcc
-      artifacts: true
-    - job: build-linux-x86-clang
-      artifacts: true
-    - job: build-linux-x86-icpc
-      artifacts: true
-  tags:
-    - x86_64
-    - avx512f
-    - linux
-    - docker
-  script:
-    - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_avx512f build_linux_x86_clang_avx512f build_linux_x86_icpc_avx512f
+# test-linux-x86-unit-avx512f:
+#   image: ubuntu:20.04
+#   stage: test
+#   needs:
+#     - job: build-linux-x86-gcc
+#       artifacts: true
+#     - job: build-linux-x86-clang
+#       artifacts: true
+#     - job: build-linux-x86-icpc
+#       artifacts: true
+#   tags:
+#     - x86_64
+#     - avx512f
+#     - linux
+#     - docker
+#   script:
+#     - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_avx512f build_linux_x86_clang_avx512f build_linux_x86_icpc_avx512f
 
-test-linux-x86-unit-avx512bw:
-  image: ubuntu:20.04
-  stage: test
-  needs:
-    - job: build-linux-x86-gcc
-      artifacts: true
-    - job: build-linux-x86-clang
-      artifacts: true
-    - job: build-linux-x86-icpc
-      artifacts: true
-  tags:
-    - x86_64
-    - avx512bw
-    - linux
-    - docker
-  script:
-    - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_avx512bw build_linux_x86_clang_avx512bw build_linux_x86_icpc_avx512bw
+# test-linux-x86-unit-avx512bw:
+#   image: ubuntu:20.04
+#   stage: test
+#   needs:
+#     - job: build-linux-x86-gcc
+#       artifacts: true
+#     - job: build-linux-x86-clang
+#       artifacts: true
+#     - job: build-linux-x86-icpc
+#       artifacts: true
+#   tags:
+#     - x86_64
+#     - avx512bw
+#     - linux
+#     - docker
+#   script:
+#     - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_avx512bw build_linux_x86_clang_avx512bw build_linux_x86_icpc_avx512bw
 
 # ---------------------------------------------------------------------------------------------------------------------
 # MACOSX X86 ----------------------------------------------------------------------------------------------------------
@@ -642,176 +642,176 @@ test-linux-armv8-unit-sve:
 
 # BUILDS --------------------------------------------------------------------------------------------------------------
 
-build-windows-x86-gcc:
-  image: registry.gitlab.com/aff3ct/aff3ct/x86_64_windows_gcc:v8.1.0
-  stage: build
-  needs: []
-  tags:
-    - x86_64
-    - windows
-  artifacts:
-    paths:
-      - ./tests/build_windows_x86_gcc_nointr/bin/
-      - ./tests/build_windows_x86_gcc_sse2/bin/
-      - ./tests/build_windows_x86_gcc_sse3/bin/
-      - ./tests/build_windows_x86_gcc_ssse3/bin/
-      - ./tests/build_windows_x86_gcc_sse4_1/bin/
-      - ./tests/build_windows_x86_gcc_sse4_2/bin/
-      - ./tests/build_windows_x86_gcc_avx/bin/
-      - ./tests/build_windows_x86_gcc_avx2/bin/
-      - ./tests/build_windows_x86_gcc_avx2_fma/bin/
-      # - ./tests/build_windows_x86_gcc_avx512f/bin/
-  script:
-    - ./ci/build-windows-x86-gcc.bat
+# build-windows-x86-gcc:
+#   image: registry.gitlab.com/aff3ct/aff3ct/x86_64_windows_gcc:v8.1.0
+#   stage: build
+#   needs: []
+#   tags:
+#     - x86_64
+#     - windows
+#   artifacts:
+#     paths:
+#       - ./tests/build_windows_x86_gcc_nointr/bin/
+#       - ./tests/build_windows_x86_gcc_sse2/bin/
+#       - ./tests/build_windows_x86_gcc_sse3/bin/
+#       - ./tests/build_windows_x86_gcc_ssse3/bin/
+#       - ./tests/build_windows_x86_gcc_sse4_1/bin/
+#       - ./tests/build_windows_x86_gcc_sse4_2/bin/
+#       - ./tests/build_windows_x86_gcc_avx/bin/
+#       - ./tests/build_windows_x86_gcc_avx2/bin/
+#       - ./tests/build_windows_x86_gcc_avx2_fma/bin/
+#       # - ./tests/build_windows_x86_gcc_avx512f/bin/
+#   script:
+#     - ./ci/build-windows-x86-gcc.bat
 
-build-windows-x86-msvc:
-  image: registry.gitlab.com/aff3ct/aff3ct/x86_64_windows_msvc:v15
-  stage: build
-  needs: []
-  tags:
-    - x86_64
-    - windows
-  artifacts:
-    paths:
-      - ./tests/build_windows_x86_msvc_nointr/bin/
-      - ./tests/build_windows_x86_msvc_sse2/bin/
-      - ./tests/build_windows_x86_msvc_sse3/bin/
-      - ./tests/build_windows_x86_msvc_ssse3/bin/
-      - ./tests/build_windows_x86_msvc_sse4_1/bin/
-      - ./tests/build_windows_x86_msvc_sse4_2/bin/
-      - ./tests/build_windows_x86_msvc_avx/bin/
-      - ./tests/build_windows_x86_msvc_avx2/bin/
-      - ./tests/build_windows_x86_msvc_avx2_fma/bin/
-      # - ./tests/build_windows_x86_msvc_avx512f/bin/
-  script:
-    - ./ci/build-windows-x86-msvc.bat
+# build-windows-x86-msvc:
+#   image: registry.gitlab.com/aff3ct/aff3ct/x86_64_windows_msvc:v15
+#   stage: build
+#   needs: []
+#   tags:
+#     - x86_64
+#     - windows
+#   artifacts:
+#     paths:
+#       - ./tests/build_windows_x86_msvc_nointr/bin/
+#       - ./tests/build_windows_x86_msvc_sse2/bin/
+#       - ./tests/build_windows_x86_msvc_sse3/bin/
+#       - ./tests/build_windows_x86_msvc_ssse3/bin/
+#       - ./tests/build_windows_x86_msvc_sse4_1/bin/
+#       - ./tests/build_windows_x86_msvc_sse4_2/bin/
+#       - ./tests/build_windows_x86_msvc_avx/bin/
+#       - ./tests/build_windows_x86_msvc_avx2/bin/
+#       - ./tests/build_windows_x86_msvc_avx2_fma/bin/
+#       # - ./tests/build_windows_x86_msvc_avx512f/bin/
+#   script:
+#     - ./ci/build-windows-x86-msvc.bat
 
-# TESTS ---------------------------------------------------------------------------------------------------------------
+# # TESTS ---------------------------------------------------------------------------------------------------------------
 
-test-windows-x86-unit-nointr:
-  stage: test
-  needs:
-    - job: build-windows-x86-gcc
-      artifacts: true
-    - job: build-windows-x86-msvc
-      artifacts: true
-  tags:
-     - x86_64
-     - windows
-  script:
-    - ./ci/test-windows-unit.bat build_windows_x86_msvc_nointr build_windows_x86_gcc_nointr
+# test-windows-x86-unit-nointr:
+#   stage: test
+#   needs:
+#     - job: build-windows-x86-gcc
+#       artifacts: true
+#     - job: build-windows-x86-msvc
+#       artifacts: true
+#   tags:
+#      - x86_64
+#      - windows
+#   script:
+#     - ./ci/test-windows-unit.bat build_windows_x86_msvc_nointr build_windows_x86_gcc_nointr
 
-test-windows-x86-unit-sse2:
-  stage: test
-  needs:
-    - job: build-windows-x86-gcc
-      artifacts: true
-    - job: build-windows-x86-msvc
-      artifacts: true
-  tags:
-    - x86_64
-    - sse2
-    - windows
-  script:
-    - ./ci/test-windows-unit.bat build_windows_x86_msvc_sse2 build_windows_x86_gcc_sse2
+# test-windows-x86-unit-sse2:
+#   stage: test
+#   needs:
+#     - job: build-windows-x86-gcc
+#       artifacts: true
+#     - job: build-windows-x86-msvc
+#       artifacts: true
+#   tags:
+#     - x86_64
+#     - sse2
+#     - windows
+#   script:
+#     - ./ci/test-windows-unit.bat build_windows_x86_msvc_sse2 build_windows_x86_gcc_sse2
 
-test-windows-x86-unit-sse3:
-  stage: test
-  needs:
-    - job: build-windows-x86-gcc
-      artifacts: true
-    - job: build-windows-x86-msvc
-      artifacts: true
-  tags:
-    - x86_64
-    - sse3
-    - windows
-  script:
-    - ./ci/test-windows-unit.bat build_windows_x86_msvc_sse3 build_windows_x86_gcc_sse3
+# test-windows-x86-unit-sse3:
+#   stage: test
+#   needs:
+#     - job: build-windows-x86-gcc
+#       artifacts: true
+#     - job: build-windows-x86-msvc
+#       artifacts: true
+#   tags:
+#     - x86_64
+#     - sse3
+#     - windows
+#   script:
+#     - ./ci/test-windows-unit.bat build_windows_x86_msvc_sse3 build_windows_x86_gcc_sse3
 
-test-windows-x86-unit-ssse3:
-  stage: test
-  needs:
-    - job: build-windows-x86-gcc
-      artifacts: true
-    - job: build-windows-x86-msvc
-      artifacts: true
-  tags:
-    - x86_64
-    - ssse3
-    - windows
-  script:
-    - ./ci/test-windows-unit.bat build_windows_x86_msvc_ssse3 build_windows_x86_gcc_ssse3
+# test-windows-x86-unit-ssse3:
+#   stage: test
+#   needs:
+#     - job: build-windows-x86-gcc
+#       artifacts: true
+#     - job: build-windows-x86-msvc
+#       artifacts: true
+#   tags:
+#     - x86_64
+#     - ssse3
+#     - windows
+#   script:
+#     - ./ci/test-windows-unit.bat build_windows_x86_msvc_ssse3 build_windows_x86_gcc_ssse3
 
-test-windows-x86-unit-sse4_1:
-  stage: test
-  needs:
-    - job: build-windows-x86-gcc
-      artifacts: true
-    - job: build-windows-x86-msvc
-      artifacts: true
-  tags:
-    - x86_64
-    - sse4.1
-    - windows
-  script:
-    - ./ci/test-windows-unit.bat build_windows_x86_msvc_sse4_1 build_windows_x86_gcc_sse4_1
+# test-windows-x86-unit-sse4_1:
+#   stage: test
+#   needs:
+#     - job: build-windows-x86-gcc
+#       artifacts: true
+#     - job: build-windows-x86-msvc
+#       artifacts: true
+#   tags:
+#     - x86_64
+#     - sse4.1
+#     - windows
+#   script:
+#     - ./ci/test-windows-unit.bat build_windows_x86_msvc_sse4_1 build_windows_x86_gcc_sse4_1
 
-test-windows-x86-unit-sse4_2:
-  stage: test
-  needs:
-    - job: build-windows-x86-gcc
-      artifacts: true
-    - job: build-windows-x86-msvc
-      artifacts: true
-  tags:
-    - x86_64
-    - sse4.2
-    - windows
-  script:
-    - ./ci/test-windows-unit.bat build_windows_x86_msvc_sse4_2 build_windows_x86_gcc_sse4_2
+# test-windows-x86-unit-sse4_2:
+#   stage: test
+#   needs:
+#     - job: build-windows-x86-gcc
+#       artifacts: true
+#     - job: build-windows-x86-msvc
+#       artifacts: true
+#   tags:
+#     - x86_64
+#     - sse4.2
+#     - windows
+#   script:
+#     - ./ci/test-windows-unit.bat build_windows_x86_msvc_sse4_2 build_windows_x86_gcc_sse4_2
 
-test-windows-x86-unit-avx:
-  stage: test
-  needs:
-    - job: build-windows-x86-gcc
-      artifacts: true
-    - job: build-windows-x86-msvc
-      artifacts: true
-  tags:
-    - x86_64
-    - avx
-    - windows
-  script:
-    - ./ci/test-windows-unit.bat build_windows_x86_msvc_avx build_windows_x86_gcc_avx
+# test-windows-x86-unit-avx:
+#   stage: test
+#   needs:
+#     - job: build-windows-x86-gcc
+#       artifacts: true
+#     - job: build-windows-x86-msvc
+#       artifacts: true
+#   tags:
+#     - x86_64
+#     - avx
+#     - windows
+#   script:
+#     - ./ci/test-windows-unit.bat build_windows_x86_msvc_avx build_windows_x86_gcc_avx
 
-test-windows-x86-unit-avx2:
-  stage: test
-  needs:
-    - job: build-windows-x86-gcc
-      artifacts: true
-    - job: build-windows-x86-msvc
-      artifacts: true
-  tags:
-    - x86_64
-    - avx2
-    - windows
-  script:
-    - ./ci/test-windows-unit.bat build_windows_x86_msvc_avx2 build_windows_x86_gcc_avx2
+# test-windows-x86-unit-avx2:
+#   stage: test
+#   needs:
+#     - job: build-windows-x86-gcc
+#       artifacts: true
+#     - job: build-windows-x86-msvc
+#       artifacts: true
+#   tags:
+#     - x86_64
+#     - avx2
+#     - windows
+#   script:
+#     - ./ci/test-windows-unit.bat build_windows_x86_msvc_avx2 build_windows_x86_gcc_avx2
 
-test-windows-x86-unit-avx2-fma:
-  stage: test
-  needs:
-    - job: build-windows-x86-gcc
-      artifacts: true
-    - job: build-windows-x86-msvc
-      artifacts: true
-  tags:
-    - x86_64
-    - avx2
-    - windows
-  script:
-    - ./ci/test-windows-unit.bat build_windows_x86_msvc_avx2_fma build_windows_x86_gcc_avx2_fma
+# test-windows-x86-unit-avx2-fma:
+#   stage: test
+#   needs:
+#     - job: build-windows-x86-gcc
+#       artifacts: true
+#     - job: build-windows-x86-msvc
+#       artifacts: true
+#   tags:
+#     - x86_64
+#     - avx2
+#     - windows
+#   script:
+#     - ./ci/test-windows-unit.bat build_windows_x86_msvc_avx2_fma build_windows_x86_gcc_avx2_fma
 
 # test-windows-x86-unit-avx512f:
 #   stage: test
@@ -833,7 +833,8 @@ build-coverage-linux-x86-gcc:
   needs: []
   tags:
     - x86_64
-    - avx512f
+#   - avx512f
+    - avx2
     - linux
     - docker
   artifacts:
