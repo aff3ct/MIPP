@@ -1,5 +1,5 @@
 alignas(32)
-int8_t {{ lutname }}[{{ entries }}][{{ simdwidth }}] = {
+{{ entrytype }} {{ lutname }}[{{ entries }}][{{ simdwidth }}] = {
 {%- for i in range(0, entries) %}
   {
   {%- for j in range(0, simdwidth) -%}

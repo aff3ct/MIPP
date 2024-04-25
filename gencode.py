@@ -28,6 +28,15 @@ def generate_lut(entries, simdwidth, words_per_simd):
             
     return lut
 
+def write_all_luts(filename, all_luts):    
+    
+    all_content = template_file.render(
+	luts = all_luts,
+    )
+
+    with open(filename, "w+") as file:
+        file.write(all_content)
+
 def generate_luts(filename, simdname, simdwidth, entrydef, lut_params_list):
 
     (entrytype, entrybytes) = entrydef
@@ -47,21 +56,35 @@ def generate_luts(filename, simdname, simdwidth, entrydef, lut_params_list):
 
         all_luts += [lut]
 
-    all_content = template_file.render(
-        luts = all_luts,
-    )
-        
-    with open(filename, 'w+') as file:
-        file.write(all_content)
+    write_all_luts(filename, all_luts)
         
         
 
-def generate_AVX_luts(filename, simdname):
+def generate_AVX_luts(filename):
+
+    lut_AVX_32x8 = template_lut.render(
+	lutname = f"vcompress_LUT32x8_AVX",
+	entries = 256,
+	simdwidth = 8,
+	entrytype = "int32_t",
+	lut = generate_lut(256, 8, 8)
+    )
     
-    
+    lut_AVX_64x4 = template_lut.render(
+	lutname = "vcompress_LUT64x4_AVX",
+	entries = 16,
+	simdwidth = 8,
+	entrytype = "int32_t",
+	lut = generate_lut(16, 8, 4)
+    )
+
+    all_luts = [lut_AVX_32x8, lut_AVX_64x4]
+
+    write_all_luts(filename, all_luts)
     pass
 	
 generate_luts("src/mipp_SSE_LUT.cpp",  "SSE",  16, ("int8_t", 1),  [(4, 2), (16, 4), (256, 8), (65536, 16)])
 generate_luts("src/mipp_NEON_LUT.cpp", "NEON", 16, ("int8_t", 1),  [(4, 2), (16, 4), (256, 8), (65536, 16)])
 
-generate_luts("src/mipp_AVX_LUT.cpp",  "AVX",  8, ("int32_t", 4), [(256, 8)])
+#generate_luts("src/mipp_AVX_LUT.cpp",  "AVX",  8, ("int32_t", 4), [(256, 8)])
+generate_AVX_luts("src/mipp_AVX_LUT.cpp")

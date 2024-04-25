@@ -3024,6 +3024,29 @@
 
 		return _mm256_castsi256_ps(res);
 	}
+
+	template <>
+	inline reg compress<int64_t>(const reg v, const msk m) {
+		// Compute movemask
+		int mask = _mm256_movemask_epi8(m);
+		mask = _pext_u32(mask, 0x01010101);
+
+		__m256i vperm = _mm256_load_si256((__m256i*)vcompress_LUT64x4_AVX[mask]);
+		__m256i res = _mm256_permutevar8x32_epi32(_mm256_castps_si256(v), vperm);
+		
+		// Unlike regular shuffes, -1 values in `vperm` will not zero result elements
+		// We therefore zero extra elements
+		// To do this, we re-use the vperm mask (if -1 => set value to 0)
+		const __m256i vminusone = _mm256_set1_epi32(-1);
+		// HACK: u32: [-1, -1] and u64: [-1] are both 0xFFFFFFFF'FFFFFFFF
+		// which is why we can compare directly the 32-bits permute indices to
+		// 64-bits -1
+		__m256i mtail = _mm256_cmpeq_epi64(vperm, vminusone); 
+		res = _mm256_blendv_epi8(res, _mm256_setzero_si256(), mtail);
+	
+		return _mm256_castsi256_ps(res);
+	}
+        
 #endif 
 #endif
         
