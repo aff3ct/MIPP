@@ -2,7 +2,7 @@
 #include <immintrin.h>
 #include <x86intrin.h>
 
-#if defined(MIPP_STATIC)
+#if defined(MIPP_STATIC_LIB)
 	extern int32_t vcompress_LUT32x8_AVX[256][8]; // 8 x 32-bit for _mm_permutevar_epi32
 	extern int32_t vcompress_LUT64x4_AVX[16][8]; // 8 x 32-bit for _mm_permutevar_epi32
 #endif 
@@ -2964,7 +2964,7 @@
 
         // -------------------------------------------------------------------------------------------------- compress
 #ifdef __AVX2__
-#ifdef MIPP_STATIC        
+#ifdef MIPP_STATIC_LIB
 	template <>
 	inline reg compress<float>(const reg v, const msk m) {
 		// Compute movemask

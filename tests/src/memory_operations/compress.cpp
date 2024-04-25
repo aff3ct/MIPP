@@ -26,7 +26,8 @@ void test_reg_compress()
 		// Generate random mask
 		int k = 0;
 		std::fill_n(expected, N, 0);
-		for (int i = 0; i < N; i++) {
+		for (int i = 0; i < N; i++)
+		{
 			bool bit = (g() & 1) ? false : true; // Generate random bit
 			mask1[i] = bit;
 			if (bit) {
@@ -35,7 +36,7 @@ void test_reg_compress()
 			}
 		}
 
-                mipp::msk mask = mipp::set<N>(mask1);
+		mipp::msk mask = mipp::set<N>(mask1);
 		
 		r2 = mipp::compress<T>(r1, mask);
 
@@ -46,6 +47,7 @@ void test_reg_compress()
 }
 
 
+#if defined(MIPP_STATIC_LIB) || defined(MIPP_AVX512VBMI2)
 #if !defined(MIPP_NO) && !defined(MIPP_SVE_LS)
 TEST_CASE("Compress - mipp::reg", "[mipp::compress]")
 {
@@ -60,4 +62,5 @@ TEST_CASE("Compress - mipp::reg", "[mipp::compress]")
 #endif
 #endif
 }
+#endif
 #endif

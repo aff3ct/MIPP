@@ -1,6 +1,6 @@
 #include "mipp.h"
 
-#if defined(MIPP_STATIC)
+#if defined(MIPP_STATIC_LIB)
 	extern int8_t vcompress_LUT64x2_SSE[4][16];
 	extern int8_t vcompress_LUT32x4_SSE[16][16];
 	extern int8_t vcompress_LUT16x8_SSE[256][16];
@@ -2430,7 +2430,7 @@
 #ifdef __SSSE3__
 // LUT for vcompress are only available if using MIPP as static library
 // Re-uses Lemire's proposition: https://lemire.me/blog/2017/04/25/quickly-pruning-elements-in-simd-vectors-using-the-simdprune-library/        
-#ifdef MIPP_STATIC        
+#ifdef MIPP_STATIC_LIB
 	template <>
 	inline reg compress<double>(const reg v, const msk m) {
 		int idx = _mm_movemask_pd(_mm_castsi128_pd(m));

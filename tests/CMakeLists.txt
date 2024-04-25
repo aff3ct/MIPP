@@ -55,8 +55,9 @@ target_set_mipp_intrinsics(run_tests)  # allow deactivation of mipp
 set_target_properties(run_tests PROPERTIES POSITION_INDEPENDENT_CODE ON) # set -fpie
 
 # If MIPP was compiled as static library then link argainst it
-target_link_libraries(run_tests PUBLIC mipp)
-
+if (MIPP_STATIC_LIB)
+    target_link_libraries(run_tests PUBLIC mipp)
+endif()
 
 # no need to compile test program for install
 # set_target_properties(run_tests PROPERTIES EXCLUDE_FROM_ALL TRUE)

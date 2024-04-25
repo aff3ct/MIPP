@@ -1,6 +1,6 @@
 #include "mipp.h"
 
-#if defined(MIPP_STATIC)
+#if defined(MIPP_STATIC_LIB)
 	extern int8_t vcompress_LUT64x2_NEON[4][16];
 	extern int8_t vcompress_LUT32x4_NEON[16][16];
 	extern int8_t vcompress_LUT16x8_NEON[256][16];
@@ -1462,7 +1462,7 @@
 // ---------------------------------------------------------------------------------------------------------- compress
 
 
-#ifdef MIPP_STATIC
+#ifdef MIPP_STATIC_LIB
 #ifdef __aarch64__
 
 	template <>

@@ -230,6 +230,9 @@ inline std::vector<std::string> InstructionExtensions()
 #ifdef __AVX512VBMI__
 	#define MIPP_AVX512VBMI
 #endif
+#ifdef __AVX512VBMI2__
+	#define MIPP_AVX512VBMI2
+#endif
 
 	const std::string InstructionFullType = InstructionType;
 	const std::string InstructionVersion  = "1";
