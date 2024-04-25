@@ -5,7 +5,7 @@
 #if defined(MIPP_STATIC_LIB)
 	extern int32_t vcompress_LUT32x8_AVX[256][8]; // 8 x 32-bit for _mm_permutevar_epi32
 	extern int32_t vcompress_LUT64x4_AVX[16][8]; // 8 x 32-bit for _mm_permutevar_epi32
-#endif 
+#endif
 
 // -------------------------------------------------------------------------------------------------------- X86 AVX-256
 // --------------------------------------------------------------------------------------------------------------------
@@ -2962,8 +2962,8 @@
 		mipp::transpose2<int16_t>(tab);
 	}
 
-        // -------------------------------------------------------------------------------------------------- compress
-#ifdef __AVX2__
+	// ------------------------------------------------------------------------------------------------------- compress
+#if defined(__AVX2__) && defined(__BMI2__)
 #ifdef MIPP_STATIC_LIB
 	template <>
 	inline reg compress<float>(const reg v, const msk m) {
@@ -2980,10 +2980,10 @@
 		const __m256i vminusone = _mm256_set1_epi32(-1); 
 		__m256i mtail = _mm256_cmpeq_epi32(vperm, vminusone);
 		res = _mm256_blendv_ps(res, _mm256_setzero_ps(), _mm256_castsi256_ps(mtail));
-	
+
 		return res;
-        }
-        
+	}
+
 	template <>
 	inline reg compress<double>(const reg v, const msk m) {
 		// Compute movemask
@@ -2992,7 +2992,7 @@
 
 		__m256i vperm = _mm256_load_si256((__m256i*)vcompress_LUT64x4_AVX[mask]);
 		__m256d res = _mm256_castps_pd(_mm256_permutevar8x32_ps(v, vperm));
-		
+
 		// Unlike regular shuffes, -1 values in `vperm` will not zero result elements
 		// We therefore zero extra elements
 		// To do this, we re-use the vperm mask (if -1 => set value to 0)
@@ -3002,10 +3002,10 @@
 		// 64-bits -1
 		__m256i mtail = _mm256_cmpeq_epi64(vperm, vminusone); 
 		res = _mm256_blendv_pd(res, _mm256_setzero_pd(), _mm256_castsi256_pd(mtail));
-	
+
 		return _mm256_castpd_ps(res);
 	}
-	
+
 	template <>
 	inline reg compress<int32_t>(const reg v, const msk m) {
 		// Compute movemask
@@ -3043,13 +3043,12 @@
 		// 64-bits -1
 		__m256i mtail = _mm256_cmpeq_epi64(vperm, vminusone); 
 		res = _mm256_blendv_epi8(res, _mm256_setzero_si256(), mtail);
-	
+
 		return _mm256_castsi256_ps(res);
 	}
-        
-#endif 
 #endif
-        
+#endif
+
 	// ----------------------------------------------------------------------------------------------------------- notb
 	template <>
 	inline reg notb<float>(const reg v) {

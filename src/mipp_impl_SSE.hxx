@@ -2426,10 +2426,10 @@
 #endif
 
 
-// ---------------------------------------------------------------------------------------------------------- compress
+	// ------------------------------------------------------------------------------------------------------- compress
 #ifdef __SSSE3__
-// LUT for vcompress are only available if using MIPP as static library
-// Re-uses Lemire's proposition: https://lemire.me/blog/2017/04/25/quickly-pruning-elements-in-simd-vectors-using-the-simdprune-library/        
+	// LUT for vcompress are only available if using MIPP as static library
+	// Re-uses Lemire's proposition: https://lemire.me/blog/2017/04/25/quickly-pruning-elements-in-simd-vectors-using-the-simdprune-library/
 #ifdef MIPP_STATIC_LIB
 	template <>
 	inline reg compress<double>(const reg v, const msk m) {
@@ -2477,10 +2477,8 @@
 		auto shufidx = mipp::loadu<int8_t>(vcompress_LUT8x16_SSE[idx]);
 		return mipp::shuff<int8_t>(v, shufidx);
 	}
-
-#endif 
-#endif         
-
+#endif
+#endif
 
 	// ---------------------------------------------------------------------------------------------------------- cmpeq
 	template <>

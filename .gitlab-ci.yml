@@ -52,7 +52,8 @@ build-linux-x86-gcc:
       - ./build_linux_x86_gcc_sse4_2/tests/bin/
       - ./build_linux_x86_gcc_avx/tests/bin/
       - ./build_linux_x86_gcc_avx2/tests/bin/
-      - ./build_linux_x86_gcc_avx2_fma/tests/bin/
+      - ./build_linux_x86_gcc_avx2_mbi2/tests/bin/
+      - ./build_linux_x86_gcc_avx2_mbi2_fma/tests/bin/
       - ./build_linux_x86_gcc_avx512f/tests/bin/
       - ./build_linux_x86_gcc_avx512bw/tests/bin/
   script:
@@ -77,7 +78,8 @@ build-linux-x86-clang:
       - ./build_linux_x86_clang_sse4_2/tests/bin/
       - ./build_linux_x86_clang_avx/tests/bin/
       - ./build_linux_x86_clang_avx2/tests/bin/
-      - ./build_linux_x86_clang_avx2_fma/tests/bin/
+      - ./build_linux_x86_clang_avx2_mbi2/tests/bin/
+      - ./build_linux_x86_clang_avx2_mbi2_fma/tests/bin/
       - ./build_linux_x86_clang_avx512f/tests/bin/
       - ./build_linux_x86_clang_avx512bw/tests/bin/
   script:
@@ -253,7 +255,7 @@ test-linux-x86-unit-avx2:
   script:
     - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_avx2 build_linux_x86_clang_avx2
 
-test-linux-x86-unit-avx2-fma:
+test-linux-x86-unit-avx2-mbi2:
   image: ubuntu:20.04
   stage: test
   needs:
@@ -269,7 +271,25 @@ test-linux-x86-unit-avx2-fma:
     - linux
     - docker
   script:
-    - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_avx2_fma build_linux_x86_clang_avx2_fma build_linux_x86_icpc_avx2_fma
+    - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_avx2_mbi2 build_linux_x86_clang_avx2_mbi2
+
+test-linux-x86-unit-avx2-mbi2-fma:
+  image: ubuntu:20.04
+  stage: test
+  needs:
+    - job: build-linux-x86-gcc
+      artifacts: true
+    - job: build-linux-x86-clang
+      artifacts: true
+    - job: build-linux-x86-icpc
+      artifacts: true
+  tags:
+    - x86_64
+    - avx2
+    - linux
+    - docker
+  script:
+    - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_avx2_mbi2_fma build_linux_x86_clang_avx2_mbi2_fma build_linux_x86_icpc_avx2_fma
 
 # test-linux-x86-unit-avx512f:
 #   image: ubuntu:20.04

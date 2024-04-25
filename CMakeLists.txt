@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 project(MY_INTRINSICS_PLUS_PLUS CXX)
 
+option(MIPP_TESTS_EXE "Compile MIPP test suite" ON)
 option(MIPP_STATIC_LIB "Compile MIPP as static library (e.g. to include LUT)" OFF)
 
 set(CMAKE_CXX_STANDARD 11)
@@ -10,6 +11,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Print CMake options values --------------------------------------------------
 # -----------------------------------------------------------------------------
 message(STATUS "MIPP options: ")
+message(STATUS "  * MIPP_TESTS_EXE: '${MIPP_TESTS_EXE}'")
 message(STATUS "  * MIPP_STATIC_LIB: '${MIPP_STATIC_LIB}'")
 
 set(MIPP_HEADERS
@@ -99,4 +101,6 @@ add_custom_target(uninstall
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
 
-add_subdirectory(tests)
+if (MIPP_TESTS_EXE)
+    add_subdirectory(tests)
+endif()

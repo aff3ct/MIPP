@@ -126,6 +126,7 @@ typedef svbool_t fixed_bool_t __attribute__((arm_sve_vector_bits(MIPP_REGISTER_S
 const std::string InstructionType = "SVE-LS";
 #define MIPP_SVE_LS
 
+#define MIPP_FMA
 #define MIPP_REQUIRED_ALIGNMENT 16
 #define MIPP_64BIT
 
@@ -151,6 +152,7 @@ inline std::vector<std::string> InstructionExtensions()
 {
 	std::vector<std::string> ext;
 	ext.push_back("SVE_LS");
+	ext.push_back("FMA");
 	return ext;
 }
 
@@ -172,6 +174,10 @@ inline std::vector<std::string> InstructionExtensions()
 	#define MIPP_NEONV1
 	#define MIPP_INSTR_VERSION 1
 #endif
+#ifdef __ARM_FEATURE_FMA
+	#define MIPP_FMA
+#endif
+
 	#define MIPP_BW
 	#define MIPP_REGISTER_SIZE 128
 	#define MIPP_LANES 1
@@ -233,6 +239,9 @@ inline std::vector<std::string> InstructionExtensions()
 #ifdef __AVX512VBMI2__
 	#define MIPP_AVX512VBMI2
 #endif
+#ifdef __FMA__
+	#define MIPP_FMA
+#endif
 
 	const std::string InstructionFullType = InstructionType;
 	const std::string InstructionVersion  = "1";
@@ -257,6 +266,7 @@ inline std::vector<std::string> InstructionExtensions()
 	inline std::vector<std::string> InstructionExtensions()
 	{
 		std::vector<std::string> ext;
+		ext.push_back("FMA");
 #if defined(__MIC__) || defined(__KNCNI__)
 		ext.push_back("KNC");
 #endif
@@ -303,6 +313,13 @@ inline std::vector<std::string> InstructionExtensions()
 	#define MIPP_AVX1
 	#define MIPP_INSTR_VERSION 1
 #endif
+#ifdef __BMI2__
+	#define MIPP_BMI2
+#endif
+#ifdef __FMA__
+	#define MIPP_FMA
+#endif
+
 	#define MIPP_REGISTER_SIZE 256
 	#define MIPP_LANES 2
 
@@ -320,6 +337,9 @@ inline std::vector<std::string> InstructionExtensions()
 		std::vector<std::string> ext;
 #ifdef __FMA__
 		ext.push_back("FMA");
+#endif
+#ifdef __BMI2__
+	ext.push_back("BMI2");
 #endif
 		return ext;
 	}
@@ -365,6 +385,10 @@ inline std::vector<std::string> InstructionExtensions()
 	#define MIPP_SSE1
 	#define MIPP_INSTR_VERSION 1
 #endif
+#ifdef __FMA__
+	#define MIPP_FMA
+#endif
+
 	#define MIPP_REGISTER_SIZE 128
 	#define MIPP_LANES 1
 
@@ -380,6 +404,9 @@ inline std::vector<std::string> InstructionExtensions()
 	inline std::vector<std::string> InstructionExtensions()
 	{
 		std::vector<std::string> ext;
+#ifdef __FMA__
+		ext.push_back("FMA");
+#endif
 		return ext;
 	}
 
@@ -680,6 +707,7 @@ template <int      N> inline msk   set0         ()                              
 template <typename T> inline reg_2 low          (const reg)                       { errorMessage<T>("low");           exit(-1); }
 template <typename T> inline reg_2 high         (const reg)                       { errorMessage<T>("high");          exit(-1); }
 template <typename T> inline reg   combine      (const reg_2, const reg_2)        { errorMessage<T>("combine");       exit(-1); }
+template <typename T> inline reg   compress     (const reg, const msk m)          { errorMessage<T>("compress");      exit(-1); }
 #ifdef MIPP_NO_INTRINSICS // tricks to avoid compiling errors with Clang...
 template <typename T> inline reg   cmask        (const uint32_t[1])               { errorMessage<T>("cmask");         exit(-1); }
 template <typename T> inline reg   cmask2       (const uint32_t[1])               { errorMessage<T>("cmask2");        exit(-1); }
@@ -712,7 +740,6 @@ template <typename T> inline void  transpose2   (      reg[nElReg<T>()/2])      
 template <typename T> inline void  transpose28x8(      reg[8])                    { errorMessage<T>("transpose28x8"); exit(-1); }
 template <typename T> inline void  transpose4   (      reg[nElReg<T>()/2])        { errorMessage<T>("transpose4");    exit(-1); }
 template <typename T> inline void  transpose48x8(      reg[8])                    { errorMessage<T>("transpose48x8"); exit(-1); }
-template <typename T> inline reg   compress     (const reg, const msk m)          { errorMessage<T>("compress"); exit(-1); }
 template <typename T> inline reg   andb         (const reg, const reg)            { errorMessage<T>("andb");          exit(-1); }
 template <int      N> inline msk   andb         (const msk, const msk)            { errorMessage<N>("andb");          exit(-1); }
 template <typename T> inline reg   andnb        (const reg, const reg)            { errorMessage<T>("andnb");         exit(-1); }
@@ -1922,6 +1949,16 @@ template <> inline reg combine<63, uint8_t>(const reg v1, const reg v2) { return
 #endif /* MIPP_REGISTER_SIZE >= 512 */
 #endif /* MIPP_REGISTER_SIZE >= 256 */
 #endif /* MIPP_BW */
+
+// ----------------------------------------------------------------------------------------------------------- compress
+#ifdef MIPP_64BIT
+template <> inline reg compress<uint64_t>(const reg v, const msk m) { return compress<int64_t>(v, m); }
+#endif
+template <> inline reg compress<uint32_t>(const reg v, const msk m) { return compress<int32_t>(v, m); }
+#ifdef MIPP_BW
+template <> inline reg compress<uint16_t>(const reg v, const msk m) { return compress<int16_t>(v, m); }
+template <> inline reg compress<uint8_t >(const reg v, const msk m) { return compress<int8_t >(v, m); }
+#endif
 
 // -------------------------------------------------------------------------------------------------------------- cmask
 #ifdef MIPP_64BIT

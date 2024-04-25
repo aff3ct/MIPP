@@ -155,6 +155,7 @@ public:
 	inline Reg_2<T>    high         ()                                     const { return mipp::high<T>(r);                       }
 	template <int S>
 	inline Reg<T>      combine      (const Reg<T> v)                       const { return mipp::combine      <S, T>(r, v.r);      }
+	inline Reg<T>      compress     (const Msk<N<T>()> v)                  const { return mipp::compress     <T>(r, v.m);         }
 	inline Reg<T>      shuff        (const Reg<T> v_shu)                   const { return mipp::shuff        <T>(r, v_shu.r);     }
 	inline Reg<T>      shuff2       (const Reg<T> v_shu)                   const { return mipp::shuff2       <T>(r, v_shu.r);     }
 	inline Reg<T>      shuff4       (const Reg<T> v_shu)                   const { return mipp::shuff4       <T>(r, v_shu.r);     }
@@ -957,6 +958,7 @@ template <typename T>        inline     T       hmin         (const Reg<T> v)   
 template <typename T>        inline     T       hmax         (const Reg<T> v)                                        { return v.hmax();                   }
 template <typename T>        inline Reg<T>      combine      (const Reg_2<T> v1, const Reg_2<T> v2)                  { return v1.combine(v2);             }
 template <int S, typename T> inline Reg<T>      combine      (const Reg<T>   v1, const Reg<T>   v2)                  { return v1.template combine<S>(v2); }
+template <typename T>        inline Reg<T>      compress     (const Reg<T>   v,  const Msk<N<T>()> m)                { return v.compress(m);              }
 template <typename T>        inline Regx2<T>    cadd         (const Regx2<T> v1, const Regx2<T> v2)                  { return v1.cadd(v2);                }
 template <typename T>        inline Regx2<T>    csub         (const Regx2<T> v1, const Regx2<T> v2)                  { return v1.csub(v2);                }
 template <typename T>        inline Regx2<T>    cmul         (const Regx2<T> v1, const Regx2<T> v2)                  { return v1.cmul(v2);                }

@@ -2367,28 +2367,26 @@
 
 	// -------------------------------------------------------------------------------------------------- transpose28x8
 
-	// -------------------------------------------------------------------------------------------------- compress
-
+	// ------------------------------------------------------------------------------------------------------- compress
 #if defined(__AVX512F__)
 	template <> inline reg compress<double>(const reg v, const msk m) {
 		return _mm512_castpd_ps(_mm512_maskz_compress_pd((__mmask8)m, _mm512_castps_pd(v)));
 	}
-	
+
 	template <>
 	inline reg compress<float>(const reg v, const msk m) {
 		return _mm512_maskz_compress_ps((__mmask16)m, v);
 	}
-	
+
 	template <>
 	inline reg compress<int64_t>(const reg v, const msk m) {
 		return _mm512_castsi512_ps(_mm512_maskz_compress_epi64((__mmask8)m, _mm512_castps_si512(v)));
 	}
-	
+
 	template <>
 	inline reg compress<int32_t>(const reg v, const msk m) {
 		return _mm512_castsi512_ps(_mm512_maskz_compress_epi32((__mmask16)m, _mm512_castps_si512(v)));
 	}
-	
 #endif
 
 #if defined(__AVX512VBMI2__)
@@ -2396,20 +2394,14 @@
 	inline reg compress<int16_t>(const reg v, const msk m) {
 		return _mm512_castsi512_ps(_mm512_maskz_compress_epi16((__mmask32)m, _mm512_castps_si512(v)));
 	}
-	
+
 	template <>
 	inline reg compress<int8_t>(const reg v, const msk m) {
 		return _mm512_castsi512_ps(_mm512_maskz_compress_epi8((__mmask64)m, _mm512_castps_si512(v)));
 	}
-	
-#endif         
+#endif
 
-        // ----------------------------------------------------------------------------------------------------------- andb
-
-#if defined(__AVX512F__)
-
-#endif         
-        
+	// ----------------------------------------------------------------------------------------------------------- andb
 	template <>
 	inline reg andb<double>(const reg v1, const reg v2) {
 		return _mm512_castsi512_ps(_mm512_and_si512(_mm512_castps_si512(v1), _mm512_castps_si512(v2)));
