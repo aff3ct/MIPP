@@ -394,6 +394,9 @@ inline std::vector<std::string> InstructionExtensions()
 #ifdef __FMA__
 	#define MIPP_FMA
 #endif
+#ifdef __BMI2__
+	#define MIPP_BMI2
+#endif
 
 	#define MIPP_REGISTER_SIZE 128
 	#define MIPP_LANES 1
@@ -412,6 +415,9 @@ inline std::vector<std::string> InstructionExtensions()
 		std::vector<std::string> ext;
 #ifdef __FMA__
 		ext.push_back("FMA");
+#endif
+#ifdef __BMI2__
+		ext.push_back("BMI2");
 #endif
 		return ext;
 	}

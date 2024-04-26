@@ -2461,6 +2461,7 @@
 		return mipp::shuff<int32_t>(v, shufidx);
 	}
 
+#if defined(__BMI2__)
 	template <>
 	inline reg compress<int16_t>(const reg v, const msk m) {
 		// movemask_epi8 on 16-bit elements => must drop every other bits
@@ -2470,6 +2471,7 @@
 		auto shufidx = mipp::loadu<int8_t>(vcompress_LUT16x8_SSE[idx]);
 		return mipp::shuff<int16_t>(v, shufidx);
 	}
+#endif
 
 	template <>
 	inline reg compress<int8_t>(const reg v, const msk m) {
