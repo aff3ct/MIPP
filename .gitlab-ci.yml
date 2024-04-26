@@ -291,41 +291,43 @@ test-linux-x86-unit-avx2-mbi2-fma:
   script:
     - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_avx2_mbi2_fma build_linux_x86_clang_avx2_mbi2_fma build_linux_x86_icpc_avx2_fma
 
-# test-linux-x86-unit-avx512f:
-#   image: ubuntu:20.04
-#   stage: test
-#   needs:
-#     - job: build-linux-x86-gcc
-#       artifacts: true
-#     - job: build-linux-x86-clang
-#       artifacts: true
-#     - job: build-linux-x86-icpc
-#       artifacts: true
-#   tags:
-#     - x86_64
-#     - avx512f
-#     - linux
-#     - docker
-#   script:
-#     - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_avx512f build_linux_x86_clang_avx512f build_linux_x86_icpc_avx512f
+test-linux-x86-unit-avx512f:
+  image: ubuntu:20.04
+  stage: test
+  needs:
+    - job: build-linux-x86-gcc
+      artifacts: true
+    - job: build-linux-x86-clang
+      artifacts: true
+    - job: build-linux-x86-icpc
+      artifacts: true
+  tags:
+    - x86_64
+#   - avx512f
+    - linux
+    - docker
+  script:
+    - export INTEL_SDE_ARCH="-skx"
+    - ./ci/test-linux-intel-sde-unit.sh build_linux_x86_gcc_avx512f build_linux_x86_clang_avx512f build_linux_x86_icpc_avx512f
 
-# test-linux-x86-unit-avx512bw:
-#   image: ubuntu:20.04
-#   stage: test
-#   needs:
-#     - job: build-linux-x86-gcc
-#       artifacts: true
-#     - job: build-linux-x86-clang
-#       artifacts: true
-#     - job: build-linux-x86-icpc
-#       artifacts: true
-#   tags:
-#     - x86_64
-#     - avx512bw
-#     - linux
-#     - docker
-#   script:
-#     - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_avx512bw build_linux_x86_clang_avx512bw build_linux_x86_icpc_avx512bw
+test-linux-x86-unit-avx512bw:
+  image: ubuntu:20.04
+  stage: test
+  needs:
+    - job: build-linux-x86-gcc
+      artifacts: true
+    - job: build-linux-x86-clang
+      artifacts: true
+    - job: build-linux-x86-icpc
+      artifacts: true
+  tags:
+    - x86_64
+#   - avx512bw
+    - linux
+    - docker
+  script:
+    - export INTEL_SDE_ARCH="-skx"
+    - ./ci/test-linux-intel-sde-unit.sh build_linux_x86_gcc_avx512bw build_linux_x86_clang_avx512bw build_linux_x86_icpc_avx512bw
 
 # ---------------------------------------------------------------------------------------------------------------------
 # MACOSX X86 ----------------------------------------------------------------------------------------------------------
