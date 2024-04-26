@@ -19,32 +19,32 @@ message(STATUS "  * MIPP_TESTS_EXE: '${MIPP_TESTS_EXE}'")
 message(STATUS "  * MIPP_STATIC_LIB: '${MIPP_STATIC_LIB}'")
 
 set(MIPP_HEADERS
-  src/mipp.h
-  src/mipp_impl_AVX512.hxx
-  src/mipp_impl_AVX.hxx
-  src/mipp_impl_NEON.hxx
-  src/mipp_impl_SSE.hxx
-  src/mipp_object.hxx
-  src/mipp_scalar_op.h
-  src/mipp_scalar_op.hxx
+  include/mipp.h
+  include/mipp_impl_AVX512.hxx
+  include/mipp_impl_AVX.hxx
+  include/mipp_impl_NEON.hxx
+  include/mipp_impl_SSE.hxx
+  include/mipp_object.hxx
+  include/mipp_scalar_op.h
+  include/mipp_scalar_op.hxx
 )
 
 set(MIPP_MATH_HEADERS
-  src/math/avx512_mathfun.h
-  src/math/avx512_mathfun.hxx
-  src/math/avx_mathfun.h
-  src/math/avx_mathfun.hxx
-  src/math/neon_mathfun.h
-  src/math/neon_mathfun.hxx
-  src/math/sse_mathfun.h
-  src/math/sse_mathfun.hxx
+  include/math/avx512_mathfun.h
+  include/math/avx512_mathfun.hxx
+  include/math/avx_mathfun.h
+  include/math/avx_mathfun.hxx
+  include/math/neon_mathfun.h
+  include/math/neon_mathfun.hxx
+  include/math/sse_mathfun.h
+  include/math/sse_mathfun.hxx
 )
 
 if (MIPP_STATIC_LIB)
   set(MIPP_SRCS
-      src/mipp_SSE_LUT.cpp
-      src/mipp_AVX_LUT.cpp
-      src/mipp_NEON_LUT.cpp
+      src/gen/compress_LUT_AVX.cpp
+      src/gen/compress_LUT_SSE.cpp
+      src/gen/compress_LUT_NEON.cpp
   )
 endif()
 
@@ -112,7 +112,8 @@ if (MIPP_TESTS_EXE)
     set_target_properties(run_tests PROPERTIES OUTPUT_NAME run-tests POSITION_INDEPENDENT_CODE ON) # set -fpie
 
     # include MIPP headers
-	target_include_directories(run_tests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/")
+	target_include_directories(run_tests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include/")
+
 	# include Catch2 header
     target_include_directories(run_tests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/tests/lib/Catch2/include/")
 

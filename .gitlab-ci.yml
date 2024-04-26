@@ -920,7 +920,7 @@ coverage-linux:
   artifacts:
      name: code-coverage-report
      paths:
-      - ./code_coverage_report/
+      - ./tests/code_coverage_report/
   script:
     - ./ci/coverage-linux.sh
 
