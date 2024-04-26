@@ -9,6 +9,7 @@ fi
 
 apt update
 apt install -y wget xz-utils
+echo 0 > /proc/sys/kernel/yama/ptrace_scope
 
 WD=$(pwd)
 mkdir softwares
