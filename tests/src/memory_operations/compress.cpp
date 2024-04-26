@@ -49,7 +49,7 @@ void test_reg_compress()
 #if defined(MIPP_STATIC_LIB) && !defined(MIPP_NO)
 TEST_CASE("Compress - mipp::reg", "[mipp::compress]")
 {
-#if (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 31) || defined(MIPP_AVX512) || defined(MIPP_NEONV2) || (defined(MIPP_AVX2) && defined(MIPP_MBI2))
+#if (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 31) || defined(MIPP_AVX512) || defined(MIPP_NEONV2) || (defined(MIPP_AVX2) && defined(MIPP_BMI2))
 #if defined(MIPP_64BIT)
 	SECTION("datatype = double") { test_reg_compress<double>(); }
 #endif
@@ -60,7 +60,7 @@ TEST_CASE("Compress - mipp::reg", "[mipp::compress]")
 	SECTION("datatype = int32_t") { test_reg_compress<int32_t>(); }
 #if defined(MIPP_BW)
 #if !defined(MIPP_AVX512) || (defined(MIPP_AVX512) && defined(MIPP_AVX512VBMI2))
-#if !defined(MIPP_SSE) || (defined(MIPP_SSE) && defined(MIPP_MBI2))
+#if !defined(MIPP_SSE) || (defined(MIPP_SSE) && defined(MIPP_BMI2))
 	SECTION("datatype = int16_t") { test_reg_compress<int16_t>(); }
 #endif
 	SECTION("datatype = int8_t") { test_reg_compress<int8_t>(); }
@@ -112,7 +112,7 @@ void test_Reg_compress()
 #if defined(MIPP_STATIC_LIB) && !defined(MIPP_NO)
 TEST_CASE("Compress - mipp::Reg", "[mipp::compress]")
 {
-#if (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 31) || defined(MIPP_AVX512) || defined(MIPP_NEONV2) || (defined(MIPP_AVX2) && defined(MIPP_MBI2))
+#if (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 31) || defined(MIPP_AVX512) || defined(MIPP_NEONV2) || (defined(MIPP_AVX2) && defined(MIPP_BMI2))
 #if defined(MIPP_64BIT)
 	SECTION("datatype = double") { test_Reg_compress<double>(); }
 #endif
@@ -123,7 +123,7 @@ TEST_CASE("Compress - mipp::Reg", "[mipp::compress]")
 	SECTION("datatype = int32_t") { test_Reg_compress<int32_t>(); }
 #if defined(MIPP_BW)
 #if !defined(MIPP_AVX512) || (defined(MIPP_AVX512) && defined(MIPP_AVX512VBMI2))
-#if !defined(MIPP_SSE) || (defined(MIPP_SSE) && defined(MIPP_MBI2))
+#if !defined(MIPP_SSE) || (defined(MIPP_SSE) && defined(MIPP_BMI2))
 	SECTION("datatype = int16_t") { test_Reg_compress<int16_t>(); }
 #endif
 	SECTION("datatype = int8_t") { test_Reg_compress<int8_t>(); }
