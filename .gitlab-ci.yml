@@ -861,7 +861,7 @@ build-coverage-linux-x86-gcc:
     name: code-coverage-files
     when: always
     paths:
-      - ./code_coverage_files/*
+      - ./tests/code_coverage_files/*
   script:
     - source ./ci/tools/threads.sh
     - ./ci/build-coverage-linux-x86-gcc.sh
@@ -879,7 +879,7 @@ build-coverage-linux-armv7-gcc:
   artifacts:
     name: code-coverage-files
     paths:
-      - ./code_coverage_files/*
+      - ./tests/code_coverage_files/*
   script:
     - source ./ci/tools/threads.sh
     - ./ci/build-coverage-linux-armv7-gcc.sh
@@ -897,7 +897,7 @@ build-coverage-linux-armv8-gcc:
   artifacts:
     name: code-coverage-files
     paths:
-      - ./code_coverage_files/*
+      - ./tests/code_coverage_files/*
   script:
     - source ./ci/tools/threads.sh
     - ./ci/build-coverage-linux-armv8-gcc.sh
@@ -932,7 +932,7 @@ pages:
     - job: coverage-linux
       artifacts: true
   script:
-    - mv ./code_coverage_report/ public/
+    - mv ./tests/code_coverage_report/ public/
   artifacts:
     paths:
       - public
