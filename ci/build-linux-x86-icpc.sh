@@ -12,8 +12,8 @@ function compile {
 	cd ..
 }
 
-pip3 install --user -r requirements.txt
-python3 gencode.py
+pip3 install --user -r codegen/requirements.txt
+python3 codegen/gen_compress.py
 
 source /opt/intel/vars-intel.sh
 

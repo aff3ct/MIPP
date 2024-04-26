@@ -103,12 +103,12 @@ To generate the source files containing these LUTs you need to install Python3
 with the Jinja2 package:
 ```bash
 sudo apt install python3 python3-pip
-pip3 install --user -r requirements.txt
+pip3 install --user -r codegen/requirements.txt
 ```
 
 Then you can call the generator as follow:
 ```bash
-python3 gencode.py
+python3 codegen/gen_compress.py
 ```
 
 And, finally you can compile the MIPP static library:
@@ -506,7 +506,7 @@ In the documentation there are some terms that requires to be clarified:
 | `high`          | `Reg_2<T> high          (const Reg<T> r)`                                              | Gets the high part of the `r` register.                                                                                                                             | `double`, `float`, `int64_t`, `uint64_t`, `int32_t`, `uint32_t`, `int16_t`, `uint16_t`, `int8_t`, `uint8_t` |
 | `combine`       | `Reg  <T> combine       (const Reg_2<T> r1, const Reg_2<T> r2)`                        | Combine two half registers in a full register, `r1` will be the low part and `r2` the high part.                                                                    | `double`, `float`, `int64_t`, `uint64_t`, `int32_t`, `uint32_t`, `int16_t`, `uint16_t`, `int8_t`, `uint8_t` |
 | `combine`       | `Reg  <S,T> combine     (const Reg<T> r1, const Reg<T> r2)`                            | `S` elements of `r1` are shifted to the left, `(S - N) + N` elements of `r2` are shifted to the right. Shifted `r1` and `r2` are combined to give the result.       | `double`, `float`, `int64_t`, `uint64_t`, `int32_t`, `uint32_t`, `int16_t`, `uint16_t`, `int8_t`, `uint8_t` |
-| `compress`      | `Reg  <T> compress      (const Reg<T> r1, const Msk<N> m)`                             | TODO.                                                                                                                                                               | `double`, `float`, `int64_t`, `uint64_t`, `int32_t`, `uint32_t`, `int16_t`, `uint16_t`, `int8_t`, `uint8_t` |
+| `compress`      | `Reg  <T> compress      (const Reg<T> r1, const Msk<N> m)`                             | Pack the elements of `r1` at the beginning of the register according to the bitmask `m` (if the bit is 1 then element is picked, otherwise it is not).              | `double`, `float`, `int64_t`, `uint64_t`, `int32_t`, `uint32_t`, `int16_t`, `uint16_t`, `int8_t`, `uint8_t` |
 | `cmask`         | `Reg  <T> cmask         (const uint32_t[N  ] ids)`                                     | Creates a cmask from an indexes list (indexes have to be between 0 and N-1).                                                                                        | `double`, `float`, `int64_t`, `uint64_t`, `int32_t`, `uint32_t`, `int16_t`, `uint16_t`, `int8_t`, `uint8_t` |
 | `cmask2`        | `Reg  <T> cmask2        (const uint32_t[N/2] ids)`                                     | Creates a cmask2 from an indexes list (indexes have to be between 0 and (N/2)-1).                                                                                   | `double`, `float`, `int64_t`, `uint64_t`, `int32_t`, `uint32_t`, `int16_t`, `uint16_t`, `int8_t`, `uint8_t` |
 | `cmask4`        | `Reg  <T> cmask4        (const uint32_t[N/4] ids)`                                     | Creates a cmask4 from an indexes list (indexes have to be between 0 and (N/4)-1).                                                                                   | `double`, `float`, `int64_t`, `uint64_t`, `int32_t`, `uint32_t`, `int16_t`, `uint16_t`, `int8_t`, `uint8_t` |

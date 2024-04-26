@@ -26,7 +26,7 @@ function gen_coverage_info {
 	fi
 }
 
-python3 gencode.py
+python3 codegen/gen_compress.py
 
 cd tests
 mkdir code_coverage_files || true
