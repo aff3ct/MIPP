@@ -7,6 +7,9 @@ then
 	exit 1
 fi
 
+apt update
+apt install -y wget xz-utils
+
 WD=$(pwd)
 mkdir softwares
 cd softwares

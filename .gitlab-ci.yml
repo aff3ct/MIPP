@@ -56,6 +56,7 @@ build-linux-x86-gcc:
       - ./build_linux_x86_gcc_avx2_mbi2_fma/bin/
       - ./build_linux_x86_gcc_avx512f/bin/
       - ./build_linux_x86_gcc_avx512bw/bin/
+      - ./build_linux_x86_gcc_avx512vbmi2/bin/
   script:
     - source ./ci/tools/threads.sh
     - ./ci/build-linux-x86-gcc.sh
@@ -82,6 +83,7 @@ build-linux-x86-clang:
       - ./build_linux_x86_clang_avx2_mbi2_fma/bin/
       - ./build_linux_x86_clang_avx512f/bin/
       - ./build_linux_x86_clang_avx512bw/bin/
+      - ./build_linux_x86_clang_avx512vbmi2/bin/
   script:
     - source ./ci/tools/threads.sh
     - ./ci/build-linux-x86-clang.sh
@@ -307,7 +309,7 @@ test-linux-x86-unit-avx512f:
     - linux
     - docker
   script:
-    - export INTEL_SDE_ARCH="-skx"
+    - export INTEL_SDE_ARCH="-skx" # Skylake server architecture
     - ./ci/test-linux-intel-sde-unit.sh build_linux_x86_gcc_avx512f build_linux_x86_clang_avx512f build_linux_x86_icpc_avx512f
 
 test-linux-x86-unit-avx512bw:
@@ -326,8 +328,27 @@ test-linux-x86-unit-avx512bw:
     - linux
     - docker
   script:
-    - export INTEL_SDE_ARCH="-skx"
+    - export INTEL_SDE_ARCH="-skx" # Skylake server architecture
     - ./ci/test-linux-intel-sde-unit.sh build_linux_x86_gcc_avx512bw build_linux_x86_clang_avx512bw build_linux_x86_icpc_avx512bw
+
+test-linux-x86-unit-avx512vbmi2:
+  image: ubuntu:20.04
+  stage: test
+  needs:
+    - job: build-linux-x86-gcc
+      artifacts: true
+    - job: build-linux-x86-clang
+      artifacts: true
+    - job: build-linux-x86-icpc
+      artifacts: true
+  tags:
+    - x86_64
+#   - avx512vbmi2
+    - linux
+    - docker
+  script:
+    - export INTEL_SDE_ARCH="-spr" # Sapphire Rapids architecture
+    - ./ci/test-linux-intel-sde-unit.sh build_linux_x86_gcc_avx512vbmi2 build_linux_x86_clang_avx512vbmi2
 
 # ---------------------------------------------------------------------------------------------------------------------
 # MACOSX X86 ----------------------------------------------------------------------------------------------------------

@@ -1232,7 +1232,7 @@
 	template <> inline reg combine<31, int16_t>(const reg v1, const reg v2) { return _mm512_castsi512_ps(_mm512_permutex2var_epi16(_mm512_castps_si512(v1), _mm512_setr_epi16(31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62), _mm512_castps_si512(v2))); }
 #endif
 
-#if defined(__AVX512_VBMI__)
+#if defined(__AVX512VBMI__)
 	// int8_t -----------------------------------------------------------------
 	template <> inline reg combine< 0, int8_t>(const reg v1, const reg v2) { return v1; }
 	template <> inline reg combine< 1, int8_t>(const reg v1, const reg v2) { return _mm512_castsi512_ps(_mm512_permutex2var_epi8(_mm512_castps_si512(v1), _mm512_setr_epi8( 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64), _mm512_castps_si512(v2))); }
