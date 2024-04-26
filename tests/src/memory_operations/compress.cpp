@@ -59,7 +59,7 @@ TEST_CASE("Compress - mipp::reg", "[mipp::compress]")
 #endif
 	SECTION("datatype = int32_t") { test_reg_compress<int32_t>(); }
 #if defined(MIPP_BW)
-#if defined(MIPP_AVX512VBMI2)
+#if !defined(MIPP_AVX512) || (defined(MIPP_AVX512) && defined(MIPP_AVX512VBMI2))
 	SECTION("datatype = int16_t") { test_reg_compress<int16_t>(); }
 	SECTION("datatype = int8_t") { test_reg_compress<int8_t>(); }
 #endif
@@ -120,7 +120,7 @@ TEST_CASE("Compress - mipp::Reg", "[mipp::compress]")
 #endif
 	SECTION("datatype = int32_t") { test_Reg_compress<int32_t>(); }
 #if defined(MIPP_BW)
-#if defined(MIPP_AVX512VBMI2)
+#if !defined(MIPP_AVX512) || (defined(MIPP_AVX512) && defined(MIPP_AVX512VBMI2))
 	SECTION("datatype = int16_t") { test_Reg_compress<int16_t>(); }
 	SECTION("datatype = int8_t") { test_Reg_compress<int8_t>(); }
 #endif

@@ -33,9 +33,11 @@ TEST_CASE("Right rotation (cyclic permutation) - mipp::reg", "[mipp::rrot]")
 #endif
 	SECTION("datatype = int32_t") { test_reg_rrot<int32_t>(); }
 #if defined(MIPP_BW)
-#if (!defined(MIPP_SSE) && !defined(MIPP_AVX512)) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 31) || (defined(MIPP_AVX512) && defined(MIPP_AVX512VBMI))
+#if (!defined(MIPP_SSE) && !defined(MIPP_AVX512)) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 31) || (defined(MIPP_AVX512) && defined(MIPP_AVX512BW))
 	SECTION("datatype = int16_t") { test_reg_rrot<int16_t>(); }
+#if !defined(MIPP_AVX512) || (defined(MIPP_AVX512) && defined(MIPP_AVX512VBMI))
 	SECTION("datatype = int8_t") { test_reg_rrot<int8_t>(); }
+#endif
 #endif
 #endif
 }
@@ -68,9 +70,11 @@ TEST_CASE("Right rotation (cyclic permutation) - mipp::Reg", "[mipp::rrot]")
 #endif
 	SECTION("datatype = int32_t") { test_Reg_rrot<int32_t>(); }
 #if defined(MIPP_BW)
-#if (!defined(MIPP_SSE) && !defined(MIPP_AVX512)) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 31) || (defined(MIPP_AVX512) && defined(MIPP_AVX512VBMI))
+#if (!defined(MIPP_SSE) && !defined(MIPP_AVX512)) || (defined(MIPP_SSE) && MIPP_INSTR_VERSION >= 31) || (defined(MIPP_AVX512) && defined(MIPP_AVX512BW))
 	SECTION("datatype = int16_t") { test_Reg_rrot<int16_t>(); }
+#if !defined(MIPP_AVX512) || (defined(MIPP_AVX512) && defined(MIPP_AVX512VBMI))
 	SECTION("datatype = int8_t") { test_Reg_rrot<int8_t>(); }
+#endif
 #endif
 #endif
 }

@@ -291,6 +291,12 @@ inline std::vector<std::string> InstructionExtensions()
 #ifdef __AVX512VL__
 		ext.push_back("VL");
 #endif
+#ifdef __AVX512VBMI__
+		ext.push_back("VBMI");
+#endif
+#ifdef __AVX512VBMI2__
+		ext.push_back("VBMI2");
+#endif
 		return ext;
 	}
 
