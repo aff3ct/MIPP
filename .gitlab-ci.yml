@@ -44,18 +44,18 @@ build-linux-x86-gcc:
     - docker
   artifacts:
     paths:
-      - ./build_linux_x86_gcc_nointr/tests/bin/
-      - ./build_linux_x86_gcc_sse2/tests/bin/
-      - ./build_linux_x86_gcc_sse3/tests/bin/
-      - ./build_linux_x86_gcc_ssse3/tests/bin/
-      - ./build_linux_x86_gcc_sse4_1/tests/bin/
-      - ./build_linux_x86_gcc_sse4_2/tests/bin/
-      - ./build_linux_x86_gcc_avx/tests/bin/
-      - ./build_linux_x86_gcc_avx2/tests/bin/
-      - ./build_linux_x86_gcc_avx2_mbi2/tests/bin/
-      - ./build_linux_x86_gcc_avx2_mbi2_fma/tests/bin/
-      - ./build_linux_x86_gcc_avx512f/tests/bin/
-      - ./build_linux_x86_gcc_avx512bw/tests/bin/
+      - ./build_linux_x86_gcc_nointr/bin/
+      - ./build_linux_x86_gcc_sse2/bin/
+      - ./build_linux_x86_gcc_sse3/bin/
+      - ./build_linux_x86_gcc_ssse3/bin/
+      - ./build_linux_x86_gcc_sse4_1/bin/
+      - ./build_linux_x86_gcc_sse4_2/bin/
+      - ./build_linux_x86_gcc_avx/bin/
+      - ./build_linux_x86_gcc_avx2/bin/
+      - ./build_linux_x86_gcc_avx2_mbi2/bin/
+      - ./build_linux_x86_gcc_avx2_mbi2_fma/bin/
+      - ./build_linux_x86_gcc_avx512f/bin/
+      - ./build_linux_x86_gcc_avx512bw/bin/
   script:
     - source ./ci/tools/threads.sh
     - ./ci/build-linux-x86-gcc.sh
@@ -70,18 +70,18 @@ build-linux-x86-clang:
     - docker
   artifacts:
     paths:
-      - ./build_linux_x86_clang_nointr/tests/bin/
-      - ./build_linux_x86_clang_sse2/tests/bin/
-      - ./build_linux_x86_clang_sse3/tests/bin/
-      - ./build_linux_x86_clang_ssse3/tests/bin/
-      - ./build_linux_x86_clang_sse4_1/tests/bin/
-      - ./build_linux_x86_clang_sse4_2/tests/bin/
-      - ./build_linux_x86_clang_avx/tests/bin/
-      - ./build_linux_x86_clang_avx2/tests/bin/
-      - ./build_linux_x86_clang_avx2_mbi2/tests/bin/
-      - ./build_linux_x86_clang_avx2_mbi2_fma/tests/bin/
-      - ./build_linux_x86_clang_avx512f/tests/bin/
-      - ./build_linux_x86_clang_avx512bw/tests/bin/
+      - ./build_linux_x86_clang_nointr/bin/
+      - ./build_linux_x86_clang_sse2/bin/
+      - ./build_linux_x86_clang_sse3/bin/
+      - ./build_linux_x86_clang_ssse3/bin/
+      - ./build_linux_x86_clang_sse4_1/bin/
+      - ./build_linux_x86_clang_sse4_2/bin/
+      - ./build_linux_x86_clang_avx/bin/
+      - ./build_linux_x86_clang_avx2/bin/
+      - ./build_linux_x86_clang_avx2_mbi2/bin/
+      - ./build_linux_x86_clang_avx2_mbi2_fma/bin/
+      - ./build_linux_x86_clang_avx512f/bin/
+      - ./build_linux_x86_clang_avx512bw/bin/
   script:
     - source ./ci/tools/threads.sh
     - ./ci/build-linux-x86-clang.sh
@@ -96,16 +96,16 @@ build-linux-x86-icpc:
     - docker
   artifacts:
     paths:
-      - ./build_linux_x86_icpc_nointr/tests/bin/
-      - ./build_linux_x86_icpc_sse2/tests/bin/
-      - ./build_linux_x86_icpc_sse3/tests/bin/
-      - ./build_linux_x86_icpc_ssse3/tests/bin/
-      - ./build_linux_x86_icpc_sse4_1/tests/bin/
-      - ./build_linux_x86_icpc_sse4_2/tests/bin/
-      - ./build_linux_x86_icpc_avx/tests/bin/
-      - ./build_linux_x86_icpc_avx2_fma/tests/bin/
-      - ./build_linux_x86_icpc_avx512f/tests/bin/
-      - ./build_linux_x86_icpc_avx512bw/tests/bin/
+      - ./build_linux_x86_icpc_nointr/bin/
+      - ./build_linux_x86_icpc_sse2/bin/
+      - ./build_linux_x86_icpc_sse3/bin/
+      - ./build_linux_x86_icpc_ssse3/bin/
+      - ./build_linux_x86_icpc_sse4_1/bin/
+      - ./build_linux_x86_icpc_sse4_2/bin/
+      - ./build_linux_x86_icpc_avx/bin/
+      - ./build_linux_x86_icpc_avx2_fma/bin/
+      - ./build_linux_x86_icpc_avx512f/bin/
+      - ./build_linux_x86_icpc_avx512bw/bin/
   script:
     - source ./ci/tools/threads.sh
     - ./ci/build-linux-x86-icpc.sh
@@ -340,15 +340,15 @@ test-linux-x86-unit-avx2-mbi2-fma:
 #     - macos
 #   artifacts:
 #     paths:
-#       - ./build_macos_x86_clang_nointr/tests/bin/
-#       - ./build_macos_x86_clang_sse2/tests/bin/
-#       - ./build_macos_x86_clang_sse3/tests/bin/
-#       - ./build_macos_x86_clang_ssse3/tests/bin/
-#       - ./build_macos_x86_clang_sse4_1/tests/bin/
-#       - ./build_macos_x86_clang_sse4_2/tests/bin/
-#       - ./build_macos_x86_clang_avx/tests/bin/
-#       - ./build_macos_x86_clang_avx2/tests/bin/
-#       - ./build_macos_x86_clang_avx2_fma/tests/bin/
+#       - ./build_macos_x86_clang_nointr/bin/
+#       - ./build_macos_x86_clang_sse2/bin/
+#       - ./build_macos_x86_clang_sse3/bin/
+#       - ./build_macos_x86_clang_ssse3/bin/
+#       - ./build_macos_x86_clang_sse4_1/bin/
+#       - ./build_macos_x86_clang_sse4_2/bin/
+#       - ./build_macos_x86_clang_avx/bin/
+#       - ./build_macos_x86_clang_avx2/bin/
+#       - ./build_macos_x86_clang_avx2_fma/bin/
 #   script:
 #     - source ./ci/tools/threads.sh
 #     - ./ci/build-macos-x86-clang.sh
@@ -489,9 +489,9 @@ build-linux-armv7-gcc:
     - docker
   artifacts:
     paths:
-      - ./build_linux_armv7_gcc_nointr/tests/bin/
-      - ./build_linux_armv7_gcc_neon/tests/bin/
-      - ./build_linux_armv7_gcc_neon_fma/tests/bin/
+      - ./build_linux_armv7_gcc_nointr/bin/
+      - ./build_linux_armv7_gcc_neon/bin/
+      - ./build_linux_armv7_gcc_neon_fma/bin/
   script:
     - source ./ci/tools/threads.sh
     - ./ci/build-linux-armv7-gcc.sh
@@ -506,9 +506,9 @@ build-linux-armv7-clang:
     - docker
   artifacts:
     paths:
-      - ./build_linux_armv7_clang_nointr/tests/bin/
-      - ./build_linux_armv7_clang_neon/tests/bin/
-      - ./build_linux_armv7_clang_neon_fma/tests/bin/
+      - ./build_linux_armv7_clang_nointr/bin/
+      - ./build_linux_armv7_clang_neon/bin/
+      - ./build_linux_armv7_clang_neon_fma/bin/
   script:
     - source ./ci/tools/threads.sh
     - ./ci/build-linux-armv7-clang.sh
@@ -523,8 +523,8 @@ build-linux-armv8-gcc:
     - docker
   artifacts:
     paths:
-      - ./build_linux_armv8_gcc_nointr/tests/bin/
-      - ./build_linux_armv8_gcc_neon/tests/bin/
+      - ./build_linux_armv8_gcc_nointr/bin/
+      - ./build_linux_armv8_gcc_neon/bin/
   script:
     - source ./ci/tools/threads.sh
     - ./ci/build-linux-armv8-gcc.sh
@@ -539,8 +539,8 @@ build-linux-armv8-gcc-sve:
     - docker
   artifacts:
     paths:
-      - ./build_linux_armv8_gcc_sve_ls256/tests/bin/
-      - ./build_linux_armv8_gcc_sve_ls512/tests/bin/
+      - ./build_linux_armv8_gcc_sve_ls256/bin/
+      - ./build_linux_armv8_gcc_sve_ls512/bin/
   script:
     - source ./ci/tools/threads.sh
     - ./ci/build-linux-armv8-gcc-11.sh
@@ -555,8 +555,8 @@ build-linux-armv8-clang:
     - docker
   artifacts:
     paths:
-      - ./build_linux_armv8_clang_nointr/tests/bin/
-      - ./build_linux_armv8_clang_neon/tests/bin/
+      - ./build_linux_armv8_clang_nointr/bin/
+      - ./build_linux_armv8_clang_neon/bin/
   script:
     - source ./ci/tools/threads.sh
     - ./ci/build-linux-armv8-clang.sh
@@ -671,16 +671,16 @@ test-linux-armv8-unit-sve:
 #     - windows
 #   artifacts:
 #     paths:
-#       - ./build_windows_x86_gcc_nointr/tests/bin/
-#       - ./build_windows_x86_gcc_sse2/tests/bin/
-#       - ./build_windows_x86_gcc_sse3/tests/bin/
-#       - ./build_windows_x86_gcc_ssse3/tests/bin/
-#       - ./build_windows_x86_gcc_sse4_1/tests/bin/
-#       - ./build_windows_x86_gcc_sse4_2/tests/bin/
-#       - ./build_windows_x86_gcc_avx/tests/bin/
-#       - ./build_windows_x86_gcc_avx2/tests/bin/
-#       - ./build_windows_x86_gcc_avx2_fma/tests/bin/
-#       # - ./build_windows_x86_gcc_avx512f/tests/bin/
+#       - ./build_windows_x86_gcc_nointr/bin/
+#       - ./build_windows_x86_gcc_sse2/bin/
+#       - ./build_windows_x86_gcc_sse3/bin/
+#       - ./build_windows_x86_gcc_ssse3/bin/
+#       - ./build_windows_x86_gcc_sse4_1/bin/
+#       - ./build_windows_x86_gcc_sse4_2/bin/
+#       - ./build_windows_x86_gcc_avx/bin/
+#       - ./build_windows_x86_gcc_avx2/bin/
+#       - ./build_windows_x86_gcc_avx2_fma/bin/
+#       # - ./build_windows_x86_gcc_avx512f/bin/
 #   script:
 #     - ./ci/build-windows-x86-gcc.bat
 
@@ -693,16 +693,16 @@ test-linux-armv8-unit-sve:
 #     - windows
 #   artifacts:
 #     paths:
-#       - ./build_windows_x86_msvc_nointr/tests/bin/
-#       - ./build_windows_x86_msvc_sse2/tests/bin/
-#       - ./build_windows_x86_msvc_sse3/tests/bin/
-#       - ./build_windows_x86_msvc_ssse3/tests/bin/
-#       - ./build_windows_x86_msvc_sse4_1/tests/bin/
-#       - ./build_windows_x86_msvc_sse4_2/tests/bin/
-#       - ./build_windows_x86_msvc_avx/tests/bin/
-#       - ./build_windows_x86_msvc_avx2/tests/bin/
-#       - ./build_windows_x86_msvc_avx2_fma/tests/bin/
-#       # - ./build_windows_x86_msvc_avx512f/tests/bin/
+#       - ./build_windows_x86_msvc_nointr/bin/
+#       - ./build_windows_x86_msvc_sse2/bin/
+#       - ./build_windows_x86_msvc_sse3/bin/
+#       - ./build_windows_x86_msvc_ssse3/bin/
+#       - ./build_windows_x86_msvc_sse4_1/bin/
+#       - ./build_windows_x86_msvc_sse4_2/bin/
+#       - ./build_windows_x86_msvc_avx/bin/
+#       - ./build_windows_x86_msvc_avx2/bin/
+#       - ./build_windows_x86_msvc_avx2_fma/bin/
+#       # - ./build_windows_x86_msvc_avx512f/bin/
 #   script:
 #     - ./ci/build-windows-x86-msvc.bat
 

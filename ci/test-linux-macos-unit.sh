@@ -22,10 +22,10 @@ do
 		# if [[ "$RES" != *"test cases:   289 |    92 passed | 197 failed"* ]]; then
 		# 	exit 1;
 		# fi
-		armie -msve-vector-bits=$nbits -- ./tests/bin/run_tests
+		armie -msve-vector-bits=$nbits -- ./bin/run-tests
 		rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 	else
-		./tests/bin/run_tests
+		./bin/run-tests
 		rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 	fi
 	cd ..

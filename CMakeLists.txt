@@ -8,6 +8,10 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# Specify bin and lib paths
+set(EXECUTABLE_OUTPUT_PATH bin/)
+set(LIBRARY_OUTPUT_PATH lib/)
+
 # Print CMake options values --------------------------------------------------
 # -----------------------------------------------------------------------------
 message(STATUS "MIPP options: ")
@@ -102,5 +106,21 @@ add_custom_target(uninstall
 # -----------------------------------------------------------------------------
 
 if (MIPP_TESTS_EXE)
-    add_subdirectory(tests)
+    # Generate the source files list
+    file (GLOB_RECURSE MIPP_SRCS_TEST ${CMAKE_CURRENT_SOURCE_DIR}/tests/src/*)
+    add_executable(run_tests ${MIPP_SRCS_TEST})
+    set_target_properties(run_tests PROPERTIES OUTPUT_NAME run-tests POSITION_INDEPENDENT_CODE ON) # set -fpie
+
+    # include MIPP headers
+	target_include_directories(run_tests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/")
+	# include Catch2 header
+    target_include_directories(run_tests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/tests/lib/Catch2/include/")
+
+    # If MIPP was compiled as static library then link argainst it
+    if (MIPP_STATIC_LIB)
+        target_link_libraries(run_tests PUBLIC mipp)
+    endif()
+
+    enable_testing()
+    add_test(NAME mipp::test COMMAND run_tests)
 endif()
