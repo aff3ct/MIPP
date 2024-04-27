@@ -948,6 +948,37 @@
 	}
 
 	// ---------------------------------------------------------------------------------------------------------- shuff
+#ifdef __aarch64__
+	template <>
+	inline reg shuff<double>(const reg v, const reg cm) {
+		return (reg)vqtbl1q_u8((uint8x16_t)v, (uint8x16_t)cm);
+	}
+
+	template <>
+	inline reg shuff<float>(const reg v, const reg cm) {
+		return (reg)vqtbl1q_u8((uint8x16_t)v, (uint8x16_t)cm);
+	}
+
+	template <>
+	inline reg shuff<int64_t>(const reg v, const reg cm) {
+		return (reg)vqtbl1q_u8((uint8x16_t)v, (uint8x16_t)cm);
+	}
+
+	template <>
+	inline reg shuff<int32_t>(const reg v, const reg cm) {
+		return (reg)vqtbl1q_u8((uint8x16_t)v, (uint8x16_t)cm);
+	}
+
+	template <>
+	inline reg shuff<int16_t>(const reg v, const reg cm) {
+		return (reg)vqtbl1q_u8((uint8x16_t)v, (uint8x16_t)cm);
+	}
+
+	template <>
+	inline reg shuff<int8_t>(const reg v, const reg cm) {
+		return (reg)vqtbl1q_u8((uint8x16_t)v, (uint8x16_t)cm);
+	}
+#else
 	template <>
 	inline reg shuff<double>(const reg v, const reg cm) {
 		uint8x8x2_t v2 = {{vget_low_u8((uint8x16_t)v), vget_high_u8((uint8x16_t)v)}};
@@ -1001,6 +1032,7 @@
 
 		return (reg)vcombine_u8(low, high);
 	}
+#endif
 
 	// --------------------------------------------------------------------------------------------------------- shuff2
 	template <>
@@ -1458,104 +1490,6 @@
 
 		return res;
 	}
-
-	// ------------------------------------------------------------------------------------------------------- compress
-#ifdef MIPP_STATIC_LIB
-#ifdef __aarch64__
-	template <>
-	inline reg compress<double>(const reg v, const msk m) {
-		// Convert mask to integer
-		alignas(16) constexpr uint64x2_t bits = {0x01, 0x02};
-		uint64x2_t m64 = vandq_u64((uint64x2_t)m, bits);
-		uint32_t idx = vaddvq_u64(m64);
-
-		// Get shuffle from LUT
-		int8x16_t shuff = vld1q_s8(vcompress_LUT64x2_NEON[idx]);
-		float64x2_t res = (float64x2_t)vqtbl1q_s8((int8x16_t)v, (uint8x16_t)shuff);
-		
-		return (reg)res;
-	}
-
-	template <>
-	inline reg compress<float>(const reg v, const msk m) {
-		// Convert mask to integer
-		alignas(16) constexpr uint32x4_t bits = {0x01, 0x02, 0x04, 0x08};
-		uint32x4_t m32 = vandq_u32((uint32x4_t)m, bits);
-		uint32_t idx = vaddvq_u32(m32);
-
-		// Get shuffle from LUT
-		int8x16_t shuff = vld1q_s8(vcompress_LUT32x4_NEON[idx]);
-		float32x4_t res = (float32x4_t)vqtbl1q_s8((int8x16_t)v, (uint8x16_t)shuff);
-	
-		return (reg) res;
-	}
-
-	template <>
-	inline reg compress<int64_t>(const reg v, const msk m) {
-		// Convert mask to integer
-		alignas(16) constexpr uint64x2_t bits = {0x01, 0x02};
-		uint64x2_t m64 = vandq_u64((uint64x2_t)m, bits);
-		uint32_t idx = vaddvq_u64(m64);
-
-		// Get shuffle from LUT
-		int8x16_t shuff = vld1q_s8(vcompress_LUT64x2_NEON[idx]);
-		int64x2_t res = (int64x2_t)vqtbl1q_s8((int8x16_t)v, (uint8x16_t)shuff);
-
-		return (reg) res;
-	}
-
-	template <>
-	inline reg compress<int32_t>(const reg v, const msk m) { 
-		// Convert mask to integer
-		alignas(16) constexpr uint32x4_t bits = {0x01, 0x02, 0x04, 0x08};
-		uint32x4_t m32 = vandq_u32((uint32x4_t)m, bits);
-		uint32_t idx = vaddvq_u32(m32);
-
-		// Get shuffle from LUT
-		int8x16_t shuff = vld1q_s8(vcompress_LUT32x4_NEON[idx]);
-		int32x4_t res = (int32x4_t)vqtbl1q_s8((int8x16_t)v, (uint8x16_t)shuff);
-		
-		return (reg) res;
-	}
-
-	template <>
-	inline reg compress<int16_t>(const reg v, const msk m) {
-		// Convert mask to integer
-		alignas(16) constexpr uint16x8_t bits = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
-		uint16x8_t m32 = vandq_u16((uint16x8_t)m, bits);
-		uint32_t idx = vaddvq_u16(m32);
-
-		// Get shuffle from LUT
-		int8x16_t shuff = vld1q_s8(vcompress_LUT16x8_NEON[idx]);
-		int16x8_t res = (int16x8_t)vqtbl1q_s8((int8x16_t)v, (uint8x16_t)shuff);
-		
-		return (reg) res;  
-	}
-
-	template <>
-	inline reg compress<int8_t>(const reg v, const msk m) {
-		// Convert mask to integer
-		alignas(16) constexpr uint8x16_t bits0 = {
-			0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80,
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-		alignas(16) constexpr uint8x16_t bits1 = {
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
-		
-		uint8x16_t m32a = vandq_u8((uint8x16_t)m, bits0);
-		uint8x16_t m32b = vandq_u8((uint8x16_t)m, bits1);
-		uint32_t idx0 = vaddvq_u8(m32a);
-		uint32_t idx1 = vaddvq_u8(m32b);
-		uint32_t idx = idx0 | (idx1 << 8);
-		
-		// Get shuffle from LUT
-		int8x16_t shuff = vld1q_s8(vcompress_LUT8x16_NEON[idx]);
-		int8x16_t res = (int8x16_t)vqtbl1q_u8((uint8x16_t)v, (uint8x16_t)shuff);
-		
-		return (reg) res;  
-	}
-#endif
-#endif
 
 	// ----------------------------------------------------------------------------------------------------------- andb
 #ifdef __aarch64__
@@ -3818,6 +3752,126 @@
 	inline bool testz<16>(const msk v1) {
 		uint32x2_t v2 = vorr_u32(vget_low_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v1));
 		return !(vget_lane_u32(vpmax_u32(v2, v2), 0));
+	}
+#endif
+
+	// ------------------------------------------------------------------------------------------------------- compress
+#ifdef MIPP_STATIC_LIB
+#ifdef __aarch64__
+	template <>
+	inline reg compress<double>(const reg v, const msk m) {
+		// Convert mask to integer
+		alignas(16) constexpr uint64x2_t bits = {0x01, 0x02};
+		uint64x2_t m64 = vandq_u64((uint64x2_t)m, bits);
+		uint32_t idx = vaddvq_u64(m64);
+
+		// Get shuffle from LUT
+		int8x16_t shuff = vld1q_s8(vcompress_LUT64x2_NEON[idx]);
+		// float64x2_t res = (float64x2_t)vqtbl1q_s8((int8x16_t)v, (uint8x16_t)shuff);
+		float64x2_t res = (float64x2_t)mipp::shuff<double>((reg)v, (reg)shuff);
+
+		return (reg)res;
+	}
+#endif
+
+	template <>
+	inline reg compress<float>(const reg v, const msk m) {
+		// Convert mask to integer
+		alignas(16) constexpr uint32x4_t bits = {0x01, 0x02, 0x04, 0x08};
+		uint32x4_t m32 = vandq_u32((uint32x4_t)m, bits);
+#ifdef __aarch64__
+ 		uint32_t idx = vaddvq_u32(m32);
+#else
+		uint32_t idx = mipp::getfirst<uint32_t>(mipp::_reduction<uint32_t, mipp::add<uint32_t>>::apply((reg)m32));
+#endif
+		// Get shuffle from LUT
+		int8x16_t shuff = vld1q_s8(vcompress_LUT32x4_NEON[idx]);
+		// float32x4_t res = (float32x4_t)vqtbl1q_s8((int8x16_t)v, (uint8x16_t)shuff);
+		float32x4_t res = (float32x4_t)mipp::shuff<float>((reg)v, (reg)shuff);
+
+		return (reg) res;
+	}
+
+#ifdef __aarch64__
+	template <>
+	inline reg compress<int64_t>(const reg v, const msk m) {
+		// Convert mask to integer
+		alignas(16) constexpr uint64x2_t bits = {0x01, 0x02};
+		uint64x2_t m64 = vandq_u64((uint64x2_t)m, bits);
+		uint32_t idx = vaddvq_u64(m64);
+
+		// Get shuffle from LUT
+		int8x16_t shuff = vld1q_s8(vcompress_LUT64x2_NEON[idx]);
+		// int64x2_t res = (int64x2_t)vqtbl1q_s8((int8x16_t)v, (uint8x16_t)shuff);
+		int64x2_t res = (int64x2_t)mipp::shuff<int64_t>((reg)v, (reg)shuff);
+
+		return (reg) res;
+	}
+#endif
+
+	template <>
+	inline reg compress<int32_t>(const reg v, const msk m) {
+		// Convert mask to integer
+		alignas(16) constexpr uint32x4_t bits = {0x01, 0x02, 0x04, 0x08};
+		uint32x4_t m32 = vandq_u32((uint32x4_t)m, bits);
+#ifdef __aarch64__
+ 		uint32_t idx = vaddvq_u32(m32);
+#else
+		uint32_t idx = mipp::getfirst<uint32_t>(mipp::_reduction<uint32_t, mipp::add<uint32_t>>::apply((reg)m32));
+#endif
+		// Get shuffle from LUT
+		int8x16_t shuff = vld1q_s8(vcompress_LUT32x4_NEON[idx]);
+		// int32x4_t res = (int32x4_t)vqtbl1q_s8((int8x16_t)v, (uint8x16_t)shuff);
+		int32x4_t res = (int32x4_t)mipp::shuff<int32_t>((reg)v, (reg)shuff);
+
+		return (reg) res;
+	}
+
+	template <>
+	inline reg compress<int16_t>(const reg v, const msk m) {
+		// Convert mask to integer
+		alignas(16) constexpr uint16x8_t bits = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
+		uint16x8_t m32 = vandq_u16((uint16x8_t)m, bits);
+#ifdef __aarch64__
+		uint16_t idx = vaddvq_u16(m32);
+#else
+		uint16_t idx = mipp::getfirst<uint16_t>(mipp::_reduction<uint16_t, mipp::add<uint16_t>>::apply((reg)m32));
+#endif
+		// Get shuffle from LUT
+		int8x16_t shuff = vld1q_s8(vcompress_LUT16x8_NEON[idx]);
+		// int16x8_t res = (int16x8_t)vqtbl1q_s8((int8x16_t)v, (uint8x16_t)shuff);
+		int16x8_t res = (int16x8_t)mipp::shuff<int16_t>((reg)v, (reg)shuff);
+
+		return (reg) res;
+	}
+
+	template <>
+	inline reg compress<int8_t>(const reg v, const msk m) {
+		// Convert mask to integer
+		alignas(16) constexpr uint8x16_t bits0 = {
+			0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80,
+			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+		alignas(16) constexpr uint8x16_t bits1 = {
+			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+			0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
+
+		uint8x16_t m32a = vandq_u8((uint8x16_t)m, bits0);
+		uint8x16_t m32b = vandq_u8((uint8x16_t)m, bits1);
+#ifdef __aarch64__
+ 		uint8_t idx0 = vaddvq_u8(m32a);
+ 		uint8_t idx1 = vaddvq_u8(m32b);
+#else
+		uint8_t idx0 = mipp::getfirst<uint8_t>(mipp::_reduction<uint8_t, mipp::add<uint8_t>>::apply((reg)m32a));
+		uint8_t idx1 = mipp::getfirst<uint8_t>(mipp::_reduction<uint8_t, mipp::add<uint8_t>>::apply((reg)m32b));
+#endif
+		uint32_t idx = idx0 | (idx1 << 8);
+
+		// Get shuffle from LUT
+		int8x16_t shuff = vld1q_s8(vcompress_LUT8x16_NEON[idx]);
+		// int8x16_t res = (int8x16_t)vqtbl1q_u8((uint8x16_t)v, (uint8x16_t)shuff);
+		int8x16_t res = (int8x16_t)mipp::shuff<int8_t>((reg)v, (reg)shuff);
+
+		return (reg) res;
 	}
 #endif
 
