@@ -1521,6 +1521,11 @@ struct _reduction
 		errorMessage<T>("_reduction::apply");
 		exit(-1);
 	}
+
+	static T sapply(const reg) {
+		errorMessage<T>("_reduction::sapply");
+		exit(-1);
+	}
 };
 
 template <typename T, Red_op<T> OP>
@@ -1534,6 +1539,15 @@ struct _Reduction
 		return r;
 #endif
 	}
+
+	static T sapply(const Reg<T> r) {
+#ifndef MIPP_NO_INTRINSICS
+		errorMessage<T>("_Reduction::sapply");
+		exit(-1);
+#else
+		return r.r;
+#endif
+	}
 };
 
 template <typename T, red_op<T> OP>
@@ -1541,17 +1555,25 @@ struct reduction
 {
 	static reg apply(const reg r)
 	{
+#ifdef __ARM_FEATURE_SVE
+		return mipp::set1<T>(_reduction<T,OP>::sapply(r));
+#else
 		return _reduction<T,OP>::apply(r);
+#endif
 	}
 
 	static T sapply(const reg r)
 	{
+#ifdef __ARM_FEATURE_SVE
+		return _reduction<T,OP>::sapply(r);
+#else
 		auto red = reduction<T,OP>::apply(r);
 #ifdef _MSC_VER
 		return *((T*)&red);
 #else
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 		return *((T*)&red);
+#endif
 #endif
 	}
 
@@ -1590,13 +1612,21 @@ struct Reduction
 {
 	static Reg<T> apply(const Reg<T> r)
 	{
+#ifdef __ARM_FEATURE_SVE
+		return mipp::set1<T>(_Reduction<T,OP>::sapply(r));
+#else
 		return _Reduction<T,OP>::apply(r);
+#endif
 	}
 
 	static T sapply(const Reg<T> r)
 	{
+#ifdef __ARM_FEATURE_SVE
+		return _Reduction<T,OP>::sapply(r);
+#else
 		auto red = Reduction<T,OP>::apply(r);
 		return getfirst<T>(red);
+#endif
 	}
 
 	template <ld_op<T> LD = mipp::load<T>>
