@@ -7,10 +7,10 @@ then
 	exit 1
 fi
 
+# install Intel SDE emulator --------------------------------------------------
 apt update
 apt install -y wget xz-utils
 echo 0 > /proc/sys/kernel/yama/ptrace_scope
-
 WD=$(pwd)
 mkdir softwares
 cd softwares
@@ -19,6 +19,7 @@ tar -xvvf sde-external-9.33.0-2024-01-07-lin.tar.xz
 ln -s $WD/softwares/sde-external-9.33.0-2024-01-07-lin $WD/softwares/sde
 export PATH=$WD/softwares/sde:$PATH
 cd ..
+# -----------------------------------------------------------------------------
 
 for build in "$@"
 do

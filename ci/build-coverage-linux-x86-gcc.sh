@@ -3,6 +3,19 @@ set -x
 
 WD=$(pwd)
 
+# install Intel SDE emulator --------------------------------------------------
+apt update
+apt install -y wget xz-utils
+echo 0 > /proc/sys/kernel/yama/ptrace_scope
+mkdir softwares
+cd softwares
+wget https://largo.lip6.fr/monolithe/downloads/sde-external-9.33.0-2024-01-07-lin.tar.xz
+tar -xvvf sde-external-9.33.0-2024-01-07-lin.tar.xz
+ln -s $WD/softwares/sde-external-9.33.0-2024-01-07-lin $WD/softwares/sde
+export PATH=$WD/softwares/sde:$PATH
+cd ..
+# -----------------------------------------------------------------------------
+
 function gen_coverage_info {
 	build=$1
 	mkdir $build
@@ -11,7 +24,13 @@ function gen_coverage_info {
 	rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 	make -j $THREADS
 	rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
-	./bin/run-tests
+	if [[ $3 == no ]]; then
+		# execute directly the tests
+		./bin/run-tests
+	else
+		# use the Intel SDE emulator to execute the tests
+		sde64 $3 -- ./bin/run-tests
+	fi
 	cd ..
 	# rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 	lcov --capture --directory $build/CMakeFiles/run_tests.dir/tests/src/ --output-file code_coverage_files/$build.info
@@ -32,15 +51,16 @@ cd tests
 mkdir code_coverage_files || true
 
 build_root=build_coverage_linux_x86_gcc
-gen_coverage_info "${build_root}_nointr"        "-DMIPP_NO_INTRINSICS"
-gen_coverage_info "${build_root}_sse2"          "-msse2"
-gen_coverage_info "${build_root}_sse3"          "-msse3"
-gen_coverage_info "${build_root}_ssse3"         "-mssse3"
-gen_coverage_info "${build_root}_sse4_1"        "-msse4.1"
-gen_coverage_info "${build_root}_sse4_2"        "-msse4.2"
-gen_coverage_info "${build_root}_avx"           "-mavx"
-gen_coverage_info "${build_root}_avx2"          "-mavx2"
-gen_coverage_info "${build_root}_avx2_bmi2"     "-mavx2 -mbmi2"
-gen_coverage_info "${build_root}_avx2_bmi2_fma" "-mavx2 -mbmi2 -mfma"
-#gen_coverage_info "${build_root}_avx512f"  "-mavx512f"
-#gen_coverage_info "${build_root}_avx512bw" "-mavx512f -mavx512bw"
+gen_coverage_info "${build_root}_nointr"        "-DMIPP_NO_INTRINSICS"                            "no"
+gen_coverage_info "${build_root}_sse2"          "-msse2"                                          "no"
+gen_coverage_info "${build_root}_sse3"          "-msse3"                                          "no"
+gen_coverage_info "${build_root}_ssse3"         "-mssse3"                                         "no"
+gen_coverage_info "${build_root}_sse4_1"        "-msse4.1"                                        "no"
+gen_coverage_info "${build_root}_sse4_2"        "-msse4.2"                                        "no"
+gen_coverage_info "${build_root}_avx"           "-mavx"                                           "no"
+gen_coverage_info "${build_root}_avx2"          "-mavx2"                                          "no"
+gen_coverage_info "${build_root}_avx2_bmi2"     "-mavx2 -mbmi2"                                   "no"
+gen_coverage_info "${build_root}_avx2_bmi2_fma" "-mavx2 -mbmi2 -mfma"                             "no"
+gen_coverage_info "${build_root}_avx512f"       "-mavx512f"                                       "-skx"
+gen_coverage_info "${build_root}_avx512bw"      "-mavx512f -mavx512bw"                            "-skx"
+gen_coverage_info "${build_root}_avx512vbmi2"   "-mavx512f -mavx512bw -mavx512vbmi -mavx512vbmi2" "-spr"
