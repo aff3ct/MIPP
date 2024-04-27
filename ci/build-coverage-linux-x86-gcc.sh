@@ -25,7 +25,7 @@ function gen_coverage_info {
 	make -j $THREADS
 	rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 	if [[ $3 == no ]]; then
-		# execute directly the tests
+		# execute the tests natively
 		./bin/run-tests
 	else
 		# use the Intel SDE emulator to execute the tests

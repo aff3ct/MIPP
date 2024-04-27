@@ -908,7 +908,7 @@ build-coverage-linux-armv7-gcc:
     - ./ci/build-coverage-linux-armv7-gcc.sh
 
 build-coverage-linux-armv8-gcc:
-  image: registry.gitlab.com/aff3ct/aff3ct/arm64_ubuntu_coverage
+  image: registry.gitlab.com/aff3ct/aff3ct/arm64_ubuntu_armie:v22.0
   stage: build
   needs: []
   tags:
