@@ -1622,7 +1622,7 @@ struct Reduction
 #else
 		auto rRed = Reg<T>(data[0]);
 #endif
-		for (auto i = mipp::nElReg<T>(); i < dataSize; i += mipp::nElReg<T>())
+		for (uint32_t i = mipp::nElReg<T>(); i < dataSize; i += mipp::nElReg<T>())
 #ifndef MIPP_NO_INTRINSICS
 			rRed = OP(rRed, Reg<T>(LD(&data[i])));
 #else

@@ -5,7 +5,7 @@
 #include <vector>
 #include <algorithm>
 
-#include "../../src/mipp.h"
+#include <mipp.h>
 
 #include "LC_sorter.hpp"
 

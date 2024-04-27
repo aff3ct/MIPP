@@ -796,27 +796,28 @@
 		}
 	};
 
-        template <>
-        struct Reduction<double, mipp::add<double> >
-        {
-                static double sapply(const Reg<double> v1) {
-                        return svaddv_f64(svptrue_b64(), svreinterpret_f64_f32(v1.r));
-                }
-                static Reg<double> apply(const reg v1) {
-                        return mipp::set1<double>(sapply(v1));
-                }
-        };
+	template <>
+	struct Reduction<double, mipp::add<double> >
+	{
+		static double sapply(const Reg<double> v1) {
+			return svaddv_f64(svptrue_b64(), svreinterpret_f64_f32(v1.r));
+		}
+		static Reg<double> apply(const Reg<double> v1) {
+			return mipp::set1<double>(sapply(v1));
+		}
+	};
 
-        template <>
-        struct Reduction<float, mipp::add<float> >
-        {
-                static float sapply(const Reg<float> v1) {
-                        return svaddv_f32(svptrue_b32(), v1.r);
-                }
-                static Reg<float> apply(const reg v1) {
-                        return mipp::set1<float>(sapply(v1));
-                }
-        };
+	template <>
+	struct Reduction<float, mipp::add<float> >
+	{
+		static float sapply(const Reg<float> v1) {
+			return svaddv_f32(svptrue_b32(), v1.r);
+		}
+		static Reg<float> apply(const Reg<float> v1) {
+			return mipp::set1<float>(sapply(v1));
+		}
+	};
+
 	// -------------------------------------------------------------- reg_2 use
 	template <>
 	inline reg cvt<int32_t, int64_t>(const reg_2 v) {

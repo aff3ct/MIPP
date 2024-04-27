@@ -5,7 +5,7 @@
 #include <vector>
 #include <algorithm>
 
-#include "../../src/mipp.h"
+#include <mipp.h>
 
 template <typename T>
 class LC_sorter_simd;

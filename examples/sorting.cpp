@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <chrono>
 
-#include "../src/mipp.h"
+#include <mipp.h>
 
 #include "sort/LC_sorter.hpp"
 #include "sort/LC_sorter_simd.hpp"
@@ -13,7 +13,26 @@ using type = float;
 
 int main(int argc, char** argv)
 {
-	// -------------------------------------------------------------------------
+	// ------------------------------------------------------------------------
+	std::cout << "MIPP example" << std::endl;
+	std::cout << "------------" << std::endl;
+	std::cout << " - Instr. type:       " << mipp::InstructionType                  << std::endl;
+	std::cout << " - Instr. full type:  " << mipp::InstructionFullType              << std::endl;
+	std::cout << " - Instr. version:    " << mipp::InstructionVersion               << std::endl;
+	std::cout << " - Reg. size:         " << mipp::RegisterSizeBit       << " bits" << std::endl;
+	std::cout << " - Reg. lanes:        " << mipp::Lanes                            << std::endl;
+	std::cout << " - 64-bit support:    " << (mipp::Support64Bit    ? "yes" : "no") << std::endl;
+	std::cout << " - Byte/word support: " << (mipp::SupportByteWord ? "yes" : "no") << std::endl;
+	auto ext = mipp::InstructionExtensions();
+	if (ext.size() > 0)
+	{
+		std::cout << " - Instr. extensions: {";
+		for (auto i = 0; i < (int)ext.size(); i++)
+			std::cout << ext[i] << (i < ((int)ext.size() -1) ? ", " : "");
+		std::cout << "}" << std::endl;
+	}
+	std::cout << std::endl;
+	// ------------------------------------------------------------------------
 
 	const auto n_elmts = (argc > 1) ? std::atoi(argv[1]) : 512;
 	const auto k       = (argc > 2) ? std::atoi(argv[2]) : 2;

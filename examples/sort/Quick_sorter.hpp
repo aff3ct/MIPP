@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <cassert>
 
-#include "../../src/mipp.h"
+#include <mipp.h>
 
 template <typename T>
 class Quick_sorter

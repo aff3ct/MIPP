@@ -17,7 +17,8 @@ With the MIPP wrapper you do not need to write a specific intrinsic code
 anymore. Just use provided functions and the wrapper will automatically
 generates the right intrisic calls for your specific architecture.
 
-If you are interested by ARM SVE status, [please follow this link](#arm-sve).
+If you are interested by ARM SVE development status, 
+[please follow this link](#arm-sve).
 
 ## Short Documentation
 
@@ -93,10 +94,10 @@ cmake -B build
 cmake -B build -DCMAKE_PREFIX_PATH=$MIPP_ROOT
 ```
 
-#### Compiling the Static Library
+#### Generate Sources & Compile the Static Library
 
 MIPP is mainly a header only library. However, some macro operations require
-to compile a small library. This is especially the case of the `compress` 
+to compile a small library. This is particularly true for the `compress` 
 operation that relies on generated LUTs stored in the static library.
 
 To generate the source files containing these LUTs you need to install Python3
