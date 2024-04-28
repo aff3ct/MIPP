@@ -871,7 +871,7 @@ test-linux-armv8-unit-sve:
 # COVERAGE ---------------------------------------------------------------------------------------------------------------
 
 build-coverage-linux-x86-gcc:
-  image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_coverage
+  image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_coverage:v2.0
   stage: build
   needs: []
   tags:
@@ -890,7 +890,7 @@ build-coverage-linux-x86-gcc:
     - ./ci/build-coverage-linux-x86-gcc.sh
 
 build-coverage-linux-armv7-gcc:
-  image: registry.gitlab.com/aff3ct/aff3ct/armhf_ubuntu_coverage
+  image: registry.gitlab.com/aff3ct/aff3ct/armhf_ubuntu_coverage:v2.0
   stage: build
   needs: []
   tags:
@@ -908,7 +908,7 @@ build-coverage-linux-armv7-gcc:
     - ./ci/build-coverage-linux-armv7-gcc.sh
 
 build-coverage-linux-armv8-gcc:
-  image: registry.gitlab.com/aff3ct/aff3ct/arm64_ubuntu_armie:v22.0
+  image: registry.gitlab.com/aff3ct/aff3ct/arm64_ubuntu_coverage:v2.0
   stage: build
   needs: []
   tags:
@@ -926,7 +926,7 @@ build-coverage-linux-armv8-gcc:
     - ./ci/build-coverage-linux-armv8-gcc.sh
 
 coverage-linux:
-  image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_coverage
+  image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_coverage:v2.0
   stage: coverage
   needs:
     - job: build-coverage-linux-x86-gcc
