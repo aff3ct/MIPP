@@ -110,22 +110,22 @@ add_custom_target(uninstall
 if (MIPP_TESTS_EXE)
     # Generate the source files list
     file (GLOB_RECURSE MIPP_SRCS_TEST ${CMAKE_CURRENT_SOURCE_DIR}/tests/src/*)
-    add_executable(run_tests ${MIPP_SRCS_TEST})
-    set_target_properties(run_tests PROPERTIES OUTPUT_NAME run-tests POSITION_INDEPENDENT_CODE ON) # set -fpie
+    add_executable(tests_exe ${MIPP_SRCS_TEST})
+    set_target_properties(tests_exe PROPERTIES OUTPUT_NAME run-tests POSITION_INDEPENDENT_CODE ON) # set -fpie
 
     # include MIPP headers
-	target_include_directories(run_tests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include/")
+    target_include_directories(tests_exe PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include/")
 
-	# include Catch2 header
-    target_include_directories(run_tests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/tests/lib/Catch2/include/")
+    # include Catch2 header
+    target_include_directories(tests_exe PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/tests/lib/Catch2/include/")
 
     # If MIPP was compiled as static library then link argainst it
     if (MIPP_STATIC_LIB)
-        target_link_libraries(run_tests PUBLIC mipp)
+        target_link_libraries(tests_exe PUBLIC mipp)
     endif()
 
     enable_testing()
-    add_test(NAME mipp::test COMMAND run_tests)
+    add_test(NAME mipp::test COMMAND tests_exe)
 endif()
 
 # -----------------------------------------------------------------------------

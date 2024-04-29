@@ -1,6 +1,4 @@
 #include "mipp.h"
-#include <immintrin.h>
-#include <x86intrin.h>
 
 #if defined(MIPP_STATIC_LIB)
 	extern int32_t vcompress_LUT32x8_AVX[256][8]; // 8 x 32-bit for _mm_permutevar_epi32

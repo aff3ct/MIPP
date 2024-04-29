@@ -688,16 +688,16 @@ build-windows-x86-gcc:
     - windows
   artifacts:
     paths:
-      - ./build_windows_x86_gcc_nointr/bin/run-tests
-      - ./build_windows_x86_gcc_sse2/bin/run-tests
-      - ./build_windows_x86_gcc_sse3/bin/run-tests
-      - ./build_windows_x86_gcc_ssse3/bin/run-tests
-      - ./build_windows_x86_gcc_sse4_1/bin/run-tests
-      - ./build_windows_x86_gcc_sse4_2/bin/run-tests
-      - ./build_windows_x86_gcc_avx/bin/run-tests
-      - ./build_windows_x86_gcc_avx2/bin/run-tests
-      - ./build_windows_x86_gcc_avx2_fma/bin/run-tests
-      # - ./build_windows_x86_gcc_avx512f/bin/run-tests
+      - ./build_windows_x86_gcc_nointr/bin/run-tests.exe
+      - ./build_windows_x86_gcc_sse2/bin/run-tests.exe
+      - ./build_windows_x86_gcc_sse3/bin/run-tests.exe
+      - ./build_windows_x86_gcc_ssse3/bin/run-tests.exe
+      - ./build_windows_x86_gcc_sse4_1/bin/run-tests.exe
+      - ./build_windows_x86_gcc_sse4_2/bin/run-tests.exe
+      - ./build_windows_x86_gcc_avx/bin/run-tests.exe
+      - ./build_windows_x86_gcc_avx2/bin/run-tests.exe
+      - ./build_windows_x86_gcc_avx2_fma/bin/run-tests.exe
+      # - ./build_windows_x86_gcc_avx512f/bin/run-tests.exe
   script:
     - ./ci/build-windows-x86-gcc.bat
 
@@ -716,16 +716,16 @@ build-windows-x86-msvc:
     - windows
   artifacts:
     paths:
-      - ./build_windows_x86_msvc_nointr/bin/run-tests
-      - ./build_windows_x86_msvc_sse2/bin/run-tests
-      - ./build_windows_x86_msvc_sse3/bin/run-tests
-      - ./build_windows_x86_msvc_ssse3/bin/run-tests
-      - ./build_windows_x86_msvc_sse4_1/bin/run-tests
-      - ./build_windows_x86_msvc_sse4_2/bin/run-tests
-      - ./build_windows_x86_msvc_avx/bin/run-tests
-      - ./build_windows_x86_msvc_avx2/bin/run-tests
-      - ./build_windows_x86_msvc_avx2_fma/bin/run-tests
-      # - ./build_windows_x86_msvc_avx512f/bin/run-tests
+      - ./build_windows_x86_msvc_nointr/bin/run-tests.exe
+      - ./build_windows_x86_msvc_sse2/bin/run-tests.exe
+      - ./build_windows_x86_msvc_sse3/bin/run-tests.exe
+      - ./build_windows_x86_msvc_ssse3/bin/run-tests.exe
+      - ./build_windows_x86_msvc_sse4_1/bin/run-tests.exe
+      - ./build_windows_x86_msvc_sse4_2/bin/run-tests.exe
+      - ./build_windows_x86_msvc_avx/bin/run-tests.exe
+      - ./build_windows_x86_msvc_avx2/bin/run-tests.exe
+      - ./build_windows_x86_msvc_avx2_fma/bin/run-tests.exe
+      # - ./build_windows_x86_msvc_avx512f/bin/run-tests.exe
   script:
     - ./ci/build-windows-x86-msvc.bat
 

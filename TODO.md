@@ -1,5 +1,6 @@
 # TODO
 
+- [ ] Fix and improve GitHub actions
 - [ ] Create a docker image with "Intel Software Development Emulator" to enable 
       AVX-512 instructions emulation on the runners that does not support
       native AVX-512
