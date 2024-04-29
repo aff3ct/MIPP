@@ -24,7 +24,7 @@ function gen_coverage_info {
 	rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 	make -j $THREADS
 	rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
-	if [[ $3 == no ]]; then
+	if [[ $3 == native ]]; then
 		# execute the tests natively
 		./bin/run-tests
 	else
@@ -51,16 +51,16 @@ cd tests
 mkdir code_coverage_files || true
 
 build_root=build_coverage_linux_x86_gcc
-gen_coverage_info "${build_root}_nointr"        "-DMIPP_NO_INTRINSICS"                            "no"
-gen_coverage_info "${build_root}_sse2"          "-msse2"                                          "no"
-gen_coverage_info "${build_root}_sse3"          "-msse3"                                          "no"
-gen_coverage_info "${build_root}_ssse3"         "-mssse3"                                         "no"
-gen_coverage_info "${build_root}_sse4_1"        "-msse4.1"                                        "no"
-gen_coverage_info "${build_root}_sse4_2"        "-msse4.2"                                        "no"
-gen_coverage_info "${build_root}_avx"           "-mavx"                                           "no"
-gen_coverage_info "${build_root}_avx2"          "-mavx2"                                          "no"
-gen_coverage_info "${build_root}_avx2_bmi2"     "-mavx2 -mbmi2"                                   "no"
-gen_coverage_info "${build_root}_avx2_bmi2_fma" "-mavx2 -mbmi2 -mfma"                             "no"
-gen_coverage_info "${build_root}_avx512f"       "-mavx512f"                                       "-skx"
-gen_coverage_info "${build_root}_avx512bw"      "-mavx512f -mavx512bw"                            "-skx"
-gen_coverage_info "${build_root}_avx512vbmi2"   "-mavx512f -mavx512bw -mavx512vbmi -mavx512vbmi2" "-spr"
+gen_coverage_info "${build_root}_nointr"        "-DMIPP_NO_INTRINSICS"                            "native"
+gen_coverage_info "${build_root}_sse2"          "-msse2"                                          "native"
+gen_coverage_info "${build_root}_sse3"          "-msse3"                                          "native"
+gen_coverage_info "${build_root}_ssse3"         "-mssse3"                                         "native"
+gen_coverage_info "${build_root}_sse4_1"        "-msse4.1"                                        "native"
+gen_coverage_info "${build_root}_sse4_2"        "-msse4.2"                                        "native"
+gen_coverage_info "${build_root}_avx"           "-mavx"                                           "native"
+gen_coverage_info "${build_root}_avx2"          "-mavx2"                                          "native"
+gen_coverage_info "${build_root}_avx2_bmi2"     "-mavx2 -mbmi2"                                   "native"
+gen_coverage_info "${build_root}_avx2_bmi2_fma" "-mavx2 -mbmi2 -mfma"                             "native"
+gen_coverage_info "${build_root}_avx512f"       "-mavx512f"                                       "-skx" # skylake server architecture emulation
+gen_coverage_info "${build_root}_avx512bw"      "-mavx512f -mavx512bw"                            "-skx" # skylake server architecture emulation
+gen_coverage_info "${build_root}_avx512vbmi2"   "-mavx512f -mavx512bw -mavx512vbmi -mavx512vbmi2" "-spr" # sapphire rapid architecture emulation

@@ -562,8 +562,10 @@ build-linux-armv8-gcc-sve:
     - docker
   artifacts:
     paths:
+      - ./build_linux_armv8_gcc_sve_ls128/bin/run-tests
       - ./build_linux_armv8_gcc_sve_ls256/bin/run-tests
       - ./build_linux_armv8_gcc_sve_ls512/bin/run-tests
+      - ./build_linux_armv8_gcc_sve_ls1024/bin/run-tests
   script:
     - source ./ci/tools/threads.sh
     - ./ci/build-linux-armv8-gcc-11.sh
@@ -678,7 +680,7 @@ test-linux-armv8-unit-sve:
     - linux
     - docker
   script:
-    - ./ci/test-linux-macos-unit.sh build_linux_armv8_gcc_sve_ls256 build_linux_armv8_gcc_sve_ls512
+    - ./ci/test-linux-macos-unit.sh build_linux_armv8_gcc_sve_ls128 build_linux_armv8_gcc_sve_ls256 build_linux_armv8_gcc_sve_ls512 build_linux_armv8_gcc_sve_ls1024
 
 # ---------------------------------------------------------------------------------------------------------------------
 # WINDOWS X86 ---------------------------------------------------------------------------------------------------------
@@ -908,7 +910,7 @@ build-coverage-linux-armv7-gcc:
     - ./ci/build-coverage-linux-armv7-gcc.sh
 
 build-coverage-linux-armv8-gcc:
-  image: registry.gitlab.com/aff3ct/aff3ct/arm64_ubuntu_coverage:v2.0
+  image: registry.gitlab.com/aff3ct/aff3ct/arm64_ubuntu_armie:v22.0
   stage: build
   needs: []
   tags:
