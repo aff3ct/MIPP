@@ -537,7 +537,7 @@ build-linux-armv7-clang:
     - ./ci/build-linux-armv7-clang.sh
 
 build-linux-armv8-gcc:
-  image: registry.gitlab.com/aff3ct/aff3ct/arm64_ubuntu_gcc:v9.3.0
+  image: registry.gitlab.com/aff3ct/aff3ct/arm64_ubuntu_armie:v22.0
   stage: build
   needs: []
   tags:
@@ -548,27 +548,13 @@ build-linux-armv8-gcc:
     paths:
       - ./build_linux_armv8_gcc_nointr/bin/run-tests
       - ./build_linux_armv8_gcc_neon/bin/run-tests
-  script:
-    - source ./ci/tools/threads.sh
-    - ./ci/build-linux-armv8-gcc.sh
-
-build-linux-armv8-gcc-sve:
-  image: registry.gitlab.com/aff3ct/aff3ct/arm64_ubuntu_armie:v22.0
-  stage: build
-  needs: []
-  tags:
-    - arm64
-    - linux
-    - docker
-  artifacts:
-    paths:
       - ./build_linux_armv8_gcc_sve_ls128/bin/run-tests
       - ./build_linux_armv8_gcc_sve_ls256/bin/run-tests
       - ./build_linux_armv8_gcc_sve_ls512/bin/run-tests
       - ./build_linux_armv8_gcc_sve_ls1024/bin/run-tests
   script:
     - source ./ci/tools/threads.sh
-    - ./ci/build-linux-armv8-gcc-11.sh
+    - ./ci/build-linux-armv8-gcc.sh
 
 build-linux-armv8-clang:
   image: registry.gitlab.com/aff3ct/aff3ct/arm64_ubuntu_clang:v10.0.0
@@ -673,7 +659,7 @@ test-linux-armv8-unit-sve:
   stage: test
   allow_failure: true
   needs:
-    - job: build-linux-armv8-gcc-sve
+    - job: build-linux-armv8-gcc
       artifacts: true
   tags:
     - arm64
@@ -743,7 +729,7 @@ build-windows-x86-msvc:
   script:
     - ./ci/build-windows-x86-msvc.bat
 
-# # TESTS ---------------------------------------------------------------------------------------------------------------
+# TESTS ---------------------------------------------------------------------------------------------------------------
 
 test-windows-x86-unit-nointr:
   stage: test
@@ -942,7 +928,7 @@ test-windows-x86-unit-avx2-fma:
 #   script:
 #     - ./ci/test-windows-unit.bat build_windows_x86_msvc_avx512f build_windows_x86_gcc_avx512f
 
-# COVERAGE ---------------------------------------------------------------------------------------------------------------
+# COVERAGE ------------------------------------------------------------------------------------------------------------
 
 build-coverage-linux-x86-gcc:
   image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_coverage:v2.0
