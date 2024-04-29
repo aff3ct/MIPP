@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(MY_INTRINSICS_PLUS_PLUS CXX)
+project(MIPP CXX)
 
 option(MIPP_TESTS_EXE "Compile MIPP test suite" ON)
 option(MIPP_EXAMPLES_EXE "Compile MIPP examples" ON)
