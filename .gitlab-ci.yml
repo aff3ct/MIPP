@@ -623,7 +623,7 @@ test-linux-armv7-unit-neon-fma:
     - ./ci/test-linux-macos-unit.sh build_linux_armv7_gcc_neon_fma build_linux_armv7_clang_neon_fma
 
 test-linux-armv8-unit-nointr:
-  image: ubuntu:20.04
+  image: registry.gitlab.com/aff3ct/aff3ct/arm64_ubuntu_armie:v22.0
   stage: test
   needs:
     - job: build-linux-armv8-gcc
@@ -638,7 +638,7 @@ test-linux-armv8-unit-nointr:
     - ./ci/test-linux-macos-unit.sh build_linux_armv8_gcc_nointr build_linux_armv8_clang_nointr
 
 test-linux-armv8-unit-neon:
-  image: ubuntu:20.04
+  image: registry.gitlab.com/aff3ct/aff3ct/arm64_ubuntu_armie:v22.0
   stage: test
   needs:
     - job: build-linux-armv8-gcc
