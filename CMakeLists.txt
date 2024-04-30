@@ -63,6 +63,7 @@ if (MIPP_STATIC_LIB)
 else()
   add_library(mipp INTERFACE) # Header-ony version
 endif()
+add_library(MIPP::mipp ALIAS mipp)
 
 target_compile_definitions(mipp INTERFACE HAVE_MIPP=1)
 target_compile_features(mipp INTERFACE cxx_std_11)
