@@ -63,11 +63,12 @@ if (MIPP_STATIC_LIB)
 else()
   add_library(mipp INTERFACE) # Header-ony version
 endif()
+add_library(MIPP::mipp ALIAS mipp)
 
 target_compile_definitions(mipp INTERFACE HAVE_MIPP=1)
 target_compile_features(mipp INTERFACE cxx_std_11)
 target_include_directories(mipp INTERFACE
-                           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+                           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
                            $<INSTALL_INTERFACE:include/mipp>)
 
 if (MIPP_STATIC_LIB)
