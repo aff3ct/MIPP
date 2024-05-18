@@ -4,6 +4,8 @@ project(MIPP CXX)
 option(MIPP_TESTS_EXE "Compile MIPP test suite" ON)
 option(MIPP_EXAMPLES_EXE "Compile MIPP examples" ON)
 option(MIPP_STATIC_LIB "Compile MIPP as static library (e.g. to include LUT)" OFF)
+option(MIPP_NO_INTRINSICS "Disable SIMD instrinsic functions and use regular code instead" OFF)
+option(MIPP_ENABLE_BACKTRACE "Print the backtrace when throwing an error" OFF)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -19,6 +21,8 @@ message(STATUS "MIPP options: ")
 message(STATUS "  * MIPP_TESTS_EXE: '${MIPP_TESTS_EXE}'")
 message(STATUS "  * MIPP_EXAMPLES_EXE: '${MIPP_EXAMPLES_EXE}'")
 message(STATUS "  * MIPP_STATIC_LIB: '${MIPP_STATIC_LIB}'")
+message(STATUS "  * MIPP_NO_INTRINSICS: '${MIPP_NO_INTRINSICS}'")
+message(STATUS "  * MIPP_ENABLE_BACKTRACE: '${MIPP_ENABLE_BACKTRACE}'")
 
 set(MIPP_HEADERS
   include/mipp.h
@@ -72,7 +76,13 @@ target_include_directories(mipp INTERFACE
                            $<INSTALL_INTERFACE:include/mipp>)
 
 if (MIPP_STATIC_LIB)
-  target_compile_definitions(mipp PUBLIC MIPP_STATIC_LIB)
+  target_compile_definitions(mipp INTERFACE MIPP_STATIC_LIB)
+endif()
+if (MIPP_NO_INTRINSICS)
+  target_compile_definitions(mipp INTERFACE MIPP_NO_INTRINSICS)
+endif()
+if (MIPP_ENABLE_BACKTRACE)
+  target_compile_definitions(mipp INTERFACE MIPP_ENABLE_BACKTRACE)
 endif()
 
 # Target export
