@@ -59,4 +59,26 @@ template <          > inline int64_t rshift(const int64_t val, const int n) { re
 template <          > inline int32_t rshift(const int32_t val, const int n) { return static_cast<int32_t>(static_cast<uint32_t>(val) >> n); }
 template <          > inline int16_t rshift(const int16_t val, const int n) { return static_cast<int16_t>(static_cast<uint16_t>(val) >> n); }
 template <          > inline int8_t  rshift(const int8_t  val, const int n) { return static_cast<int8_t >(static_cast<uint8_t >(val) >> n); }
+
+template <typename T>
+inline T All_one_bits<T>::make()
+{
+	return ~((T)0);
+}
+
+template <>
+inline float All_one_bits<float>::make()
+{
+	uint32_t all_one_bits = ~0;
+	float all_one_bits_f = *((float*)((void*)(&all_one_bits)));
+	return all_one_bits_f;
+}
+
+template <>
+inline double All_one_bits<double>::make()
+{
+	uint64_t all_one_bits = ~0;
+	double all_one_bits_f = *((double*)((void*)(&all_one_bits)));
+	return all_one_bits_f;
+}
 }

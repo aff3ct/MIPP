@@ -65,6 +65,16 @@ int main(int argc, char** argv)
 	std::cout << "m_4  = " << m_4  << std::endl;
 	std::cout << std::endl;
 
+    std::cout << "r_1 = m_1.toReg<T>(): " << std::endl;
+    mipp::Reg<T> r_1 = m_1.toReg<T>();
+    std::cout << "r_1 = " << r_1 << std::endl;
+    std::cout << std::endl;
+
+    std::cout << "r_2 = m_2.toReg<T>(): " << std::endl;
+    mipp::Reg<T> r_2 = m_2.toReg<T>();
+    std::cout << "r_2 = " << r_2 << std::endl;
+    std::cout << std::endl;
+
 	std::cout << "Output vector (mout = m_3; mout.set0()): " << std::endl;
 	auto mout = m_3;
 	mout.set0();

@@ -568,7 +568,7 @@ public:
 	template <typename T>
 	inline Reg<T> toReg() const
 	{
-		return this->m ? (T)1 : (T)0;
+		return this->m ? mipp_scop::All_one_bits<T>::make() : (T)0;
 	}
 #endif
 

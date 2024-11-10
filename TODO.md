@@ -1,5 +1,6 @@
 # TODO
 
+- [ ] Add left operator functions (ex: "5 + mipp::Reg" should work then!)
 - [ ] Fix and improve GitHub actions
 - [ ] Create a docker image with "Intel Software Development Emulator" to enable 
       AVX-512 instructions emulation on the runners that does not support

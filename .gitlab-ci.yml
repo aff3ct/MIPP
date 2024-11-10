@@ -663,6 +663,7 @@ test-linux-armv8-unit-sve:
       artifacts: true
   tags:
     - arm64
+    - armie
     - linux
     - docker
   script:

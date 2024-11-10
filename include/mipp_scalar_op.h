@@ -29,6 +29,11 @@ namespace mipp_scop // My Intrinsics Plus Plus SCalar OPerations
 
 	template <typename T>
 	inline T lshift(const T val, const int n);
+
+	template <typename T>
+	struct All_one_bits {
+		static inline T make();
+	};
 }
 
 #include "mipp_scalar_op.hxx"
