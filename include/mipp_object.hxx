@@ -746,8 +746,8 @@ public:
 #else
 	inline void     load        (const T* data   )       { val[0] = data[0]; val[1] = data[1];                                                    }
 	inline void     loadu       (const T* data   )       { val[0] = data[0]; val[1] = data[1];                                                    }
-	inline void     store       (T* data         ) const { data[0] = val[0]; data[1] = val[1];                                                    }
-	inline void     storeu      (T* data         ) const { data[0] = val[0]; data[1] = val[1];                                                    }
+	inline void     store       (T* data         ) const { data[0] = val[0].r; data[1] = val[1].r;                                                }
+	inline void     storeu      (T* data         ) const { data[0] = val[0].r; data[1] = val[1].r;                                                }
 	inline Regx2<T> interleave  (                ) const { return *this;                                                                          }
 	inline Regx2<T> deinterleave(                ) const { return *this;                                                                          }
 	inline Regx2<T> conj        (                ) const { return Regx2<T>(val[0].r, -val[1].r);                                                  }
