@@ -1130,42 +1130,38 @@
 	inline reg interleavehi<double>(const reg v1, const reg v2) {
 		// v1  = [a0, b0], v2 = [a1, b1]
 		// res = [b0, b1]
-		return (reg)vcombine_u64(vget_high_u64((uint64x2_t)v1), vget_high_u64((uint64x2_t)v2));
+        return (reg)vzip2q_f64(v1, v2);
 	}
 
 	template <>
 	inline reg interleavehi<float>(const reg v1, const reg v2) {
 		// v1  = [a0, b0, c0, d0], v2 = [a1, b1, c1, d1]
 		// res = [c0, c1, d0, d1]
-		uint32x2x2_t res = vzip_u32(vget_high_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v2));
-		return (reg)vcombine_u32(res.val[0], res.val[1]);
+		return (reg)vzip2q_f32(v1, v2);
 	}
 
 	template <>
 	inline reg interleavehi<int64_t>(const reg v1, const reg v2) {
 		// v1  = [a0, b0], v2 = [a1, b1]
 		// res = [b0, b1]
-		return (reg)vcombine_u64(vget_high_u64((uint64x2_t)v1), vget_high_u64((uint64x2_t)v2));
+        return (reg)vzip2q_s64(v1, v2);
 	}
 
 	template <>
 	inline reg interleavehi<int32_t>(const reg v1, const reg v2) {
 		// v1  = [a0, b0, c0, d0], v2 = [a1, b1, c1, d1]
 		// res = [c0, c1, d0, d1]
-		uint32x2x2_t res = vzip_u32(vget_high_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v2));
-		return (reg)vcombine_u32(res.val[0], res.val[1]);
+        return (reg)vzip2q_s32(v1, v2);
 	}
 
 	template <>
 	inline reg interleavehi<int16_t>(const reg v1, const reg v2) {
-		uint16x4x2_t res = vzip_u16(vget_high_u16((uint16x8_t)v1), vget_high_u16((uint16x8_t)v2));
-		return (reg)vcombine_u16(res.val[0], res.val[1]);
+		return (reg)vzip2q_s16(v1, v2);
 	}
 
 	template <>
 	inline reg interleavehi<int8_t>(const reg v1, const reg v2) {
-		uint8x8x2_t res = vzip_u8(vget_high_u8((uint8x16_t)v1), vget_high_u8((uint8x16_t)v2));
-		return (reg)vcombine_u8(res.val[0], res.val[1]);
+        return (reg)vzip2q_s8(v1, v2);
 	}
 
 	// -------------------------------------------------------------------------------------------------- interleavelo2
