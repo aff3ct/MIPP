@@ -1167,34 +1167,38 @@
 	// -------------------------------------------------------------------------------------------------- interleavelo2
 	template <>
 	inline reg interleavelo2<float>(const reg v1, const reg v2) {
-		uint32x2x2_t res1 = vzip_u32(vget_low_u32 ((uint32x4_t)v1), vget_low_u32 ((uint32x4_t)v2));
-		uint32x2x2_t res2 = vzip_u32(vget_high_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v2));
+		float32x2_t zip1low = vget_low_f32(vzip1q_f32(v1, v2));
+		float32x2_t zip2low = vget_low_f32(vzip2q_f32(v1, v2));
 
-		return (reg) vcombine_u32(res1.val[0], res2.val[0]);
+        // INS (vcombine) has lower latency than a third ZIPx
+		return (reg)vcombine_f32(zip1low, zip2low);
 	}
 
 	template <>
 	inline reg interleavelo2<int32_t>(const reg v1, const reg v2) {
-		uint32x2x2_t res1 = vzip_u32(vget_low_u32 ((uint32x4_t)v1), vget_low_u32 ((uint32x4_t)v2));
-		uint32x2x2_t res2 = vzip_u32(vget_high_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v2));
+		int32x2_t zip1low = vget_low_s32(vzip1q_s32(v1, v2));
+		int32x2_t zip2low = vget_low_s32(vzip2q_s32(v1, v2));
 
-		return (reg)vcombine_u32(res1.val[0], res2.val[0]);
+        // INS (vcombine) has lower latency than a third ZIPx
+		return (reg)vcombine_s32(zip1low, zip2low);
 	}
 
 	template <>
 	inline reg interleavelo2<int16_t>(const reg v1, const reg v2) {
-		uint16x4x2_t res1 = vzip_u16(vget_low_u16 ((uint16x8_t)v1), vget_low_u16 ((uint16x8_t)v2));
-		uint16x4x2_t res2 = vzip_u16(vget_high_u16((uint16x8_t)v1), vget_high_u16((uint16x8_t)v2));
+        int16x4_t zip1low = vget_low_s16(vzip1q_s16(v1, v2));
+		int16x4_t zip2low = vget_low_s16(vzip2q_s16(v1, v2));
 
-		return (reg)vcombine_u16(res1.val[0], res2.val[0]);
+        // INS (vcombine) has lower latency than a third ZIPx
+		return (reg)vcombine_s16(zip1low, zip2low);
 	}
 
 	template <>
 	inline reg interleavelo2<int8_t>(const reg v1, const reg v2) {
-		uint8x8x2_t res1 = vzip_u8(vget_low_u8 ((uint8x16_t)v1), vget_low_u8 ((uint8x16_t)v2));
-		uint8x8x2_t res2 = vzip_u8(vget_high_u8((uint8x16_t)v1), vget_high_u8((uint8x16_t)v2));
+        int8x8_t zip1low = vget_low_s8(vzip1q_s8(v1, v2));
+		int8x8_t zip2low = vget_low_s8(vzip2q_s8(v1, v2));
 
-		return (reg)vcombine_u8(res1.val[0], res2.val[0]);
+        // INS (vcombine) has lower latency than a third ZIPx
+		return (reg)vcombine_s8(zip1low, zip2low);
 	}
 
 	// -------------------------------------------------------------------------------------------------- interleavehi2
