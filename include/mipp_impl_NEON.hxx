@@ -1244,7 +1244,7 @@
 	inline regx2 interleave<double>(const reg v1, const reg v2) {
 		// v1         = [a0, b0], v2         = [a1, b1]
 		// res.val[0] = [a0, a1], res.val[1] = [b0, b1]
-		return {(reg)vzip1q_f64(v1, v2), (reg)vzip2q_f64(v1, v2)};
+		return {{(reg)vzip1q_f64(v1, v2), (reg)vzip2q_f64(v1, v2)}};
 	}
 
 	template <>
@@ -1252,14 +1252,14 @@
 		// v1         = [a0, b0, c0, d0], v2         = [a1, b1, c1, d1]
 		// res.val[0] = [a0, a1, b0, b1], res.val[1] = [c0, c1, d0, d1]
 		float32x4x2_t zip = vzipq_f32(v1, v2);
-		return {(reg)zip.val[0], (reg)zip.val[1]};
+		return {{(reg)zip.val[0], (reg)zip.val[1]}};
 	}
 
 	template <>
 	inline regx2 interleave<int64_t>(const reg v1, const reg v2) {
 		// v1         = [a0, b0], v2         = [a1, b1]
 		// res.val[0] = [a0, a1], res.val[1] = [b0, b1]
-		return {(reg)vzip1q_s64(v1, v2), (reg)vzip2q_s64(v1, v2)};
+		return {{(reg)vzip1q_s64(v1, v2), (reg)vzip2q_s64(v1, v2)}};
 	}
 
 	template <>
@@ -1267,19 +1267,19 @@
 		// v1  = [a0, b0, c0, d0], v2 = [a1, b1, c1, d1]
 		// res = [a0, a1, b0, b1]
 		int32x4x2_t zip = vzipq_s32(v1, v2);
-		return {(reg)zip.val[0], (reg)zip.val[1]};
+		return {{(reg)zip.val[0], (reg)zip.val[1]}};
 	}
 
 	template <>
 	inline regx2 interleave<int16_t>(const reg v1, const reg v2) {
 		int16x8x2_t zip = vzipq_s16(v1, v2);
-		return {(reg)zip.val[0], (reg)zip.val[1]};
+		return {{(reg)zip.val[0], (reg)zip.val[1]}};
 	}
 
 	template <>
 	inline regx2 interleave<int8_t>(const reg v1, const reg v2) {
 		int8x16x2_t zip = vzipq_s8(v1, v2);
-		return {(reg)zip.val[0], (reg)zip.val[1]};
+		return {{(reg)zip.val[0], (reg)zip.val[1]}};
 	}
 
 	// --------------------------------------------------------------------------------------------------- deinterleave
