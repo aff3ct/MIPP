@@ -1087,223 +1087,234 @@
 	}
 
 	// --------------------------------------------------------------------------------------------------- interleavelo
+#ifdef __aarch64__
 	template <>
 	inline reg interleavelo<double>(const reg v1, const reg v2) {
 		// v1  = [a0, b0], v2 = [a1, b1]
 		// res = [a0, a1]
-		return (reg)vcombine_u64(vget_low_u64((uint64x2_t)v1), vget_low_u64((uint64x2_t)v2));
+		return (reg)vzip1q_f64((float64x2_t)v1, (float64x2_t)v2);
 	}
+#endif
 
 	template <>
 	inline reg interleavelo<float>(const reg v1, const reg v2) {
 		// v1  = [a0, b0, c0, d0], v2 = [a1, b1, c1, d1]
 		// res = [a0, a1, b0, b1]
-		uint32x2x2_t res = vzip_u32(vget_low_u32((uint32x4_t)v1), vget_low_u32((uint32x4_t)v2));
-		return (reg)vcombine_u32(res.val[0], res.val[1]);
+#ifdef __aarch64__
+		return (reg)vzip1q_f32((float32x4_t)v1, (float32x4_t)v2);
+#else
+		auto zip = vzipq_f32((float32x4_t)v1, (float32x4_t)v2);
+		return (reg)zip.val[0];
+#endif
 	}
 
 	template <>
 	inline reg interleavelo<int64_t>(const reg v1, const reg v2) {
 		// v1  = [a0, b0], v2 = [a1, b1]
 		// res = [a0, a1]
+#ifdef __aarch64__
+		return (reg)vzip1q_s64((uint64x2_t)v1, (uint64x2_t)v2);
+#else
 		return (reg)vcombine_u64(vget_low_u64((uint64x2_t)v1), vget_low_u64((uint64x2_t)v2));
+#endif
 	}
 
 	template <>
 	inline reg interleavelo<int32_t>(const reg v1, const reg v2) {
 		// v1  = [a0, b0, c0, d0], v2 = [a1, b1, c1, d1]
 		// res = [a0, a1, b0, b1]
-		uint32x2x2_t res = vzip_u32(vget_low_u32((uint32x4_t)v1), vget_low_u32((uint32x4_t)v2));
-		return (reg)vcombine_u32(res.val[0], res.val[1]);
+#ifdef __aarch64__
+		return (reg)vzip1q_s32((int32x4_t)v1, (int32x4_t)v2);
+#else
+		auto zip = vzipq_s32((int32x4_t)v1, (int32x4_t)v2);
+		return (reg)zip.val[0];
+#endif
 	}
 
 	template <>
 	inline reg interleavelo<int16_t>(const reg v1, const reg v2) {
-		uint16x4x2_t res = vzip_u16(vget_low_u16((uint16x8_t)v1), vget_low_u16((uint16x8_t)v2));
-		return (reg)vcombine_u16(res.val[0], res.val[1]);
+#ifdef __aarch64__
+		return (reg)vzip1q_s16((int16x8_t)v1, (int16x8_t)v2);
+#else
+		auto zip = vzipq_s16((int16x8_t)v1, (int16x8_t)v2);
+		return (reg)zip.val[0];
+#endif
 	}
 
 	template <>
 	inline reg interleavelo<int8_t>(const reg v1, const reg v2) {
-		uint8x8x2_t res = vzip_u8(vget_low_u8((uint8x16_t)v1), vget_low_u8((uint8x16_t)v2));
-		return (reg)vcombine_u8(res.val[0], res.val[1]);
+#ifdef __aarch64__
+		return (reg)vzip1q_s8((int8x16_t)v1, (int8x16_t)v2);
+#else
+		auto zip = vzipq_s8((int8x16_t)v1, (int8x16_t)v2);
+		return (reg)zip.val[0];
+#endif
 	}
 
 	// --------------------------------------------------------------------------------------------------- interleavehi
+#ifdef __aarch64__
 	template <>
 	inline reg interleavehi<double>(const reg v1, const reg v2) {
 		// v1  = [a0, b0], v2 = [a1, b1]
 		// res = [b0, b1]
-		return (reg)vcombine_u64(vget_high_u64((uint64x2_t)v1), vget_high_u64((uint64x2_t)v2));
+		return (reg)vzip2q_f64((float64x2_t)v1, (float64x2_t)v2);
 	}
+#endif
 
 	template <>
 	inline reg interleavehi<float>(const reg v1, const reg v2) {
 		// v1  = [a0, b0, c0, d0], v2 = [a1, b1, c1, d1]
 		// res = [c0, c1, d0, d1]
-		uint32x2x2_t res = vzip_u32(vget_high_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v2));
-		return (reg)vcombine_u32(res.val[0], res.val[1]);
+#ifdef __aarch64__
+		return (reg)vzip2q_f32((float32x4_t)v1, (float32x4_t)v2);
+#else
+		auto zip = vzipq_f32((float32x4_t)v1, (float32x4_t)v2);
+		return (reg)zip.val[1];
+#endif
 	}
 
 	template <>
 	inline reg interleavehi<int64_t>(const reg v1, const reg v2) {
 		// v1  = [a0, b0], v2 = [a1, b1]
 		// res = [b0, b1]
-		return (reg)vcombine_u64(vget_high_u64((uint64x2_t)v1), vget_high_u64((uint64x2_t)v2));
+#ifdef __aarch64__
+		return (reg)vzip2q_s64((int64x2_t)v1, (int64x2_t)v2);
+#else
+		return (reg)vcombine_s64(vget_high_s64((int64x2_t)v1), vget_high_s64((int64x2_t)v2));
+#endif
 	}
 
 	template <>
 	inline reg interleavehi<int32_t>(const reg v1, const reg v2) {
 		// v1  = [a0, b0, c0, d0], v2 = [a1, b1, c1, d1]
 		// res = [c0, c1, d0, d1]
-		uint32x2x2_t res = vzip_u32(vget_high_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v2));
-		return (reg)vcombine_u32(res.val[0], res.val[1]);
+#ifdef __aarch64__
+		return (reg)vzip2q_s32((int32x4_t)v1, (int32x4_t)v2);
+#else
+		auto zip = vzipq_s32((int32x4_t)v1, (int32x4_t)v2);
+		return (reg)zip.val[1];
+#endif
 	}
 
 	template <>
 	inline reg interleavehi<int16_t>(const reg v1, const reg v2) {
-		uint16x4x2_t res = vzip_u16(vget_high_u16((uint16x8_t)v1), vget_high_u16((uint16x8_t)v2));
-		return (reg)vcombine_u16(res.val[0], res.val[1]);
+#ifdef __aarch64__
+		return (reg)vzip2q_s16((int16x8_t)v1, (int16x8_t)v2);
+#else
+		auto zip = vzipq_s16((int16x8_t)v1, (int16x8_t)v2);
+		return (reg)zip.val[1];
+#endif
 	}
 
 	template <>
 	inline reg interleavehi<int8_t>(const reg v1, const reg v2) {
-		uint8x8x2_t res = vzip_u8(vget_high_u8((uint8x16_t)v1), vget_high_u8((uint8x16_t)v2));
-		return (reg)vcombine_u8(res.val[0], res.val[1]);
+#ifdef __aarch64__
+		return (reg)vzip2q_s8((int8x16_t)v1, (int8x16_t)v2);
+#else
+		auto zip = vzipq_s8((int8x16_t)v1, (int8x16_t)v2);
+		return (reg)zip.val[1];
+#endif
 	}
 
 	// -------------------------------------------------------------------------------------------------- interleavelo2
 	template <>
 	inline reg interleavelo2<float>(const reg v1, const reg v2) {
-		uint32x2x2_t res1 = vzip_u32(vget_low_u32 ((uint32x4_t)v1), vget_low_u32 ((uint32x4_t)v2));
-		uint32x2x2_t res2 = vzip_u32(vget_high_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v2));
-
-		return (reg) vcombine_u32(res1.val[0], res2.val[0]);
+		auto zip = vzipq_f32((float32x4_t)v1, (float32x4_t)v2);
+		return (reg)vcombine_f32(vget_low_f32(zip.val[0]), vget_low_f32(zip.val[1]));
 	}
 
 	template <>
 	inline reg interleavelo2<int32_t>(const reg v1, const reg v2) {
-		uint32x2x2_t res1 = vzip_u32(vget_low_u32 ((uint32x4_t)v1), vget_low_u32 ((uint32x4_t)v2));
-		uint32x2x2_t res2 = vzip_u32(vget_high_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v2));
-
-		return (reg)vcombine_u32(res1.val[0], res2.val[0]);
+		auto zip = vzipq_s32((int32x4_t)v1, (int32x4_t)v2);
+		return (reg)vcombine_s32(vget_low_s32(zip.val[0]), vget_low_s32(zip.val[1]));
 	}
 
 	template <>
 	inline reg interleavelo2<int16_t>(const reg v1, const reg v2) {
-		uint16x4x2_t res1 = vzip_u16(vget_low_u16 ((uint16x8_t)v1), vget_low_u16 ((uint16x8_t)v2));
-		uint16x4x2_t res2 = vzip_u16(vget_high_u16((uint16x8_t)v1), vget_high_u16((uint16x8_t)v2));
-
-		return (reg)vcombine_u16(res1.val[0], res2.val[0]);
+		auto zip = vzipq_s16((int16x8_t)v1, (int16x8_t)v2);
+		return (reg)vcombine_s16(vget_low_s16(zip.val[0]), vget_low_s16(zip.val[1]));
 	}
 
 	template <>
 	inline reg interleavelo2<int8_t>(const reg v1, const reg v2) {
-		uint8x8x2_t res1 = vzip_u8(vget_low_u8 ((uint8x16_t)v1), vget_low_u8 ((uint8x16_t)v2));
-		uint8x8x2_t res2 = vzip_u8(vget_high_u8((uint8x16_t)v1), vget_high_u8((uint8x16_t)v2));
-
-		return (reg)vcombine_u8(res1.val[0], res2.val[0]);
+		auto zip = vzipq_s8((int8x16_t)v1, (int8x16_t)v2);
+		return (reg)vcombine_s8(vget_low_s8(zip.val[0]), vget_low_s8(zip.val[1]));
 	}
 
 	// -------------------------------------------------------------------------------------------------- interleavehi2
 	template <>
 	inline reg interleavehi2<float>(const reg v1, const reg v2) {
-		uint32x2x2_t res1 = vzip_u32(vget_low_u32 ((uint32x4_t)v1), vget_low_u32 ((uint32x4_t)v2));
-		uint32x2x2_t res2 = vzip_u32(vget_high_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v2));
-
-		return (reg) vcombine_u32(res1.val[1], res2.val[1]);
+		auto zip = vzipq_f32((float32x4_t)v1, (float32x4_t)v2);
+		return (reg)vcombine_f32(vget_high_f32(zip.val[0]), vget_high_f32(zip.val[1]));
 	}
 
 	template <>
 	inline reg interleavehi2<int32_t>(const reg v1, const reg v2) {
-		uint32x2x2_t res1 = vzip_u32(vget_low_u32 ((uint32x4_t)v1), vget_low_u32 ((uint32x4_t)v2));
-		uint32x2x2_t res2 = vzip_u32(vget_high_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v2));
-
-		return (reg)vcombine_u32(res1.val[1], res2.val[1]);
+		auto zip = vzipq_s32((int32x4_t)v1, (int32x4_t)v2);
+		return (reg)vcombine_s32(vget_high_s32(zip.val[0]), vget_high_s32(zip.val[1]));
 	}
 
 	template <>
 	inline reg interleavehi2<int16_t>(const reg v1, const reg v2) {
-		uint16x4x2_t res1 = vzip_u16(vget_low_u16 ((uint16x8_t)v1), vget_low_u16 ((uint16x8_t)v2));
-		uint16x4x2_t res2 = vzip_u16(vget_high_u16((uint16x8_t)v1), vget_high_u16((uint16x8_t)v2));
-
-		return (reg)vcombine_u16(res1.val[1], res2.val[1]);
+		auto zip = vzipq_s16((int16x8_t)v1, (int16x8_t)v2);
+		return (reg)vcombine_s16(vget_high_s16(zip.val[0]), vget_high_s16(zip.val[1]));
 	}
 
 	template <>
 	inline reg interleavehi2<int8_t>(const reg v1, const reg v2) {
-		uint8x8x2_t res1 = vzip_u8(vget_low_u8 ((uint8x16_t)v1), vget_low_u8 ((uint8x16_t)v2));
-		uint8x8x2_t res2 = vzip_u8(vget_high_u8((uint8x16_t)v1), vget_high_u8((uint8x16_t)v2));
-
-		return (reg)vcombine_u8(res1.val[1], res2.val[1]);
+		auto zip = vzipq_s8((int8x16_t)v1, (int8x16_t)v2);
+		return (reg)vcombine_s8(vget_high_s8(zip.val[0]), vget_high_s8(zip.val[1]));
 	}
 
 
 	// ----------------------------------------------------------------------------------------------------- interleave
+#ifdef __aarch64__
 	template <>
 	inline regx2 interleave<double>(const reg v1, const reg v2) {
 		// v1         = [a0, b0], v2         = [a1, b1]
 		// res.val[0] = [a0, a1], res.val[1] = [b0, b1]
-		regx2 res = {{(reg)vcombine_u64(vget_low_u64 ((uint64x2_t)v1), vget_low_u64 ((uint64x2_t)v2)),
-		              (reg)vcombine_u64(vget_high_u64((uint64x2_t)v1), vget_high_u64((uint64x2_t)v2))}};
-		return res;
+		return {{(reg)vzip1q_f64((float64x2_t)v1, (float64x2_t)v2), (reg)vzip2q_f64((float64x2_t)v1, (float64x2_t)v2)}};
 	}
+#endif
 
 	template <>
 	inline regx2 interleave<float>(const reg v1, const reg v2) {
 		// v1         = [a0, b0, c0, d0], v2         = [a1, b1, c1, d1]
 		// res.val[0] = [a0, a1, b0, b1], res.val[1] = [c0, c1, d0, d1]
-		uint32x2x2_t res0 = vzip_u32(vget_low_u32 ((uint32x4_t)v1), vget_low_u32 ((uint32x4_t)v2));
-		uint32x2x2_t res1 = vzip_u32(vget_high_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v2));
-
-		regx2 res = {{(reg)vcombine_u32(res0.val[0], res0.val[1]),
-		              (reg)vcombine_u32(res1.val[0], res1.val[1])}};
-
-		return res;
+		auto zip = vzipq_f32((float32x4_t)v1, (float32x4_t)v2);
+		return {{(reg)zip.val[0], (reg)zip.val[1]}};
 	}
 
 	template <>
 	inline regx2 interleave<int64_t>(const reg v1, const reg v2) {
 		// v1         = [a0, b0], v2         = [a1, b1]
 		// res.val[0] = [a0, a1], res.val[1] = [b0, b1]
-		regx2 res = {{(reg)vcombine_u64(vget_low_u64 ((uint64x2_t)v1), vget_low_u64 ((uint64x2_t)v2)),
-		              (reg)vcombine_u64(vget_high_u64((uint64x2_t)v1), vget_high_u64((uint64x2_t)v2))}};
-		return res;
+#ifdef __aarch64__
+		return {{(reg)vzip1q_s64((int64x2_t)v1, (int64x2_t)v2), (reg)vzip2q_s64((int64x2_t)v1, (int64x2_t)v2)}};
+#else
+		return {{(reg)vcombine_s64(vget_low_s64 ((int64x2_t)v1), vget_low_s64 ((int64x2_t)v2)),
+		         (reg)vcombine_s64(vget_high_s64((int64x2_t)v1), vget_high_s64((int64x2_t)v2))}};
+#endif
 	}
 
 	template <>
 	inline regx2 interleave<int32_t>(const reg v1, const reg v2) {
 		// v1  = [a0, b0, c0, d0], v2 = [a1, b1, c1, d1]
 		// res = [a0, a1, b0, b1]
-		uint32x2x2_t res0 = vzip_u32(vget_low_u32 ((uint32x4_t)v1), vget_low_u32 ((uint32x4_t)v2));
-		uint32x2x2_t res1 = vzip_u32(vget_high_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v2));
-
-		regx2 res = {{(reg)vcombine_u32(res0.val[0], res0.val[1]),
-		              (reg)vcombine_u32(res1.val[0], res1.val[1])}};
-
-		return res;
+		auto zip = vzipq_s32((int32x4_t)v1, (int32x4_t)v2);
+		return {{(reg)zip.val[0], (reg)zip.val[1]}};
 	}
 
 	template <>
 	inline regx2 interleave<int16_t>(const reg v1, const reg v2) {
-		uint16x4x2_t res0 = vzip_u16(vget_low_u16 ((uint16x8_t)v1), vget_low_u16 ((uint16x8_t)v2));
-		uint16x4x2_t res1 = vzip_u16(vget_high_u16((uint16x8_t)v1), vget_high_u16((uint16x8_t)v2));
-
-		regx2 res = {{(reg)vcombine_u16(res0.val[0], res0.val[1]),
-		              (reg)vcombine_u16(res1.val[0], res1.val[1])}};
-
-		return res;
+		auto zip = vzipq_s16((int16x8_t)v1, (int16x8_t)v2);
+		return {{(reg)zip.val[0], (reg)zip.val[1]}};
 	}
 
 	template <>
 	inline regx2 interleave<int8_t>(const reg v1, const reg v2) {
-		uint8x8x2_t res0 = vzip_u8(vget_low_u8 ((uint8x16_t)v1), vget_low_u8 ((uint8x16_t)v2));
-		uint8x8x2_t res1 = vzip_u8(vget_high_u8((uint8x16_t)v1), vget_high_u8((uint8x16_t)v2));
-
-		regx2 res = {{(reg)vcombine_u8(res0.val[0], res0.val[1]),
-		              (reg)vcombine_u8(res1.val[0], res1.val[1])}};
-
-		return res;
+		auto zip = vzipq_s8((int8x16_t)v1, (int8x16_t)v2);
+		return {{(reg)zip.val[0], (reg)zip.val[1]}};
 	}
 
 	// --------------------------------------------------------------------------------------------------- deinterleave
@@ -1311,184 +1322,71 @@
 	template <>
 	inline regx2 deinterleave<double>(const reg v0, const reg v1)
 	{
-		auto v0l = mipp::low<double>(v0);
-		auto v1l = mipp::low<double>(v1);
-
-		auto v0h = mipp::high<double>(v0);
-		auto v1h = mipp::high<double>(v1);
-
-		auto v_re = mipp::combine<double>(v0l, v1l);
-		auto v_im = mipp::combine<double>(v0h, v1h);
-
-		return {{v_re, v_im}};
+		return {{(reg)vuzp1q_f64((float64x2_t)v0, (float64x2_t)v1), (reg)vuzp2q_f64((float64x2_t)v0, (float64x2_t)v1)}};
 	}
 
 	template <>
 	inline regx2 deinterleave<int64_t>(const reg v0, const reg v1)
 	{
-		auto v0l = mipp::low<int64_t>(v0);
-		auto v1l = mipp::low<int64_t>(v1);
-
-		auto v0h = mipp::high<int64_t>(v0);
-		auto v1h = mipp::high<int64_t>(v1);
-
-		auto v_re = mipp::combine<int64_t>(v0l, v1l);
-		auto v_im = mipp::combine<int64_t>(v0h, v1h);
-
-		return {{v_re, v_im}};
+		return {{(reg)vuzp1q_s64((int64x2_t)v0, (int64x2_t)v1), (reg)vuzp2q_s64((int64x2_t)v0, (int64x2_t)v1)}};
 	}
 #endif
 
 	template <>
 	inline regx2 deinterleave<float>(const reg v0, const reg v1)
 	{
-		// const uint32_t cmask[4] = {0, 2, 1, 3};
-		// auto cm = mipp::cmask<float>(cmask);
-
-		// auto v0s = mipp::shuff<float>(v0, cm);
-		// auto v1s = mipp::shuff<float>(v1, cm);
-
-		// auto v0l = mipp::low<float>(v0s);
-		// auto v1l = mipp::low<float>(v1s);
-
-		// auto v0h = mipp::high<float>(v0s);
-		// auto v1h = mipp::high<float>(v1s);
-
-		// auto v_re = mipp::combine<float>(v0l, v1l);
-		// auto v_im = mipp::combine<float>(v0h, v1h);
-
-		// return {{v_re, v_im}};
-
-		auto vi1 = mipp::interleave<float>(v0, v1);
-		auto vi2 = mipp::interleave<float>(vi1.val[0], vi1.val[1]);
-
-		return {{vi2.val[0], vi2.val[1]}};
+		auto uzip = vuzpq_f32((float32x4_t)v0, (float32x4_t)v1);
+		return {{(reg)uzip.val[0], (reg)uzip.val[1]}};
 	}
 
 	template <>
 	inline regx2 deinterleave<int32_t>(const reg v0, const reg v1)
 	{
-		// const uint32_t cmask[4] = {0, 2, 1, 3};
-		// auto cm = mipp::cmask<int32_t>(cmask);
-
-		// auto v0s = mipp::shuff<int32_t>(v0, cm);
-		// auto v1s = mipp::shuff<int32_t>(v1, cm);
-
-		// auto v0l = mipp::low<int32_t>(v0s);
-		// auto v1l = mipp::low<int32_t>(v1s);
-
-		// auto v0h = mipp::high<int32_t>(v0s);
-		// auto v1h = mipp::high<int32_t>(v1s);
-
-		// auto v_re = mipp::combine<int32_t>(v0l, v1l);
-		// auto v_im = mipp::combine<int32_t>(v0h, v1h);
-
-		// return {{v_re, v_im}};
-
-		auto vi1 = mipp::interleave<int32_t>(v0, v1);
-		auto vi2 = mipp::interleave<int32_t>(vi1.val[0], vi1.val[1]);
-
-		return {{vi2.val[0], vi2.val[1]}};
+		auto uzip = vuzpq_s32((int32x4_t)v0, (int32x4_t)v1);
+		return {{(reg)uzip.val[0], (reg)uzip.val[1]}};
 	}
 
 	template <>
 	inline regx2 deinterleave<int16_t>(const reg v0, const reg v1)
 	{
-		// const uint32_t cmask[8] = {0, 2, 4, 6, 1, 3, 5, 7};
-		// auto cm = mipp::cmask<int16_t>(cmask);
-
-		// auto v0s = mipp::shuff<int16_t>(v0, cm);
-		// auto v1s = mipp::shuff<int16_t>(v1, cm);
-
-		// auto v0l = mipp::low<int16_t>(v0s);
-		// auto v1l = mipp::low<int16_t>(v1s);
-
-		// auto v0h = mipp::high<int16_t>(v0s);
-		// auto v1h = mipp::high<int16_t>(v1s);
-
-		// auto v_re = mipp::combine<int16_t>(v0l, v1l);
-		// auto v_im = mipp::combine<int16_t>(v0h, v1h);
-
-		// return {{v_re, v_im}};
-
-		auto vi1 = mipp::interleave<int16_t>(v0, v1);
-		auto vi2 = mipp::interleave<int16_t>(vi1.val[0], vi1.val[1]);
-		auto vi3 = mipp::interleave<int16_t>(vi2.val[0], vi2.val[1]);
-
-		return {{vi3.val[0], vi3.val[1]}};
+		auto uzip = vuzpq_s16((int16x8_t)v0, (int16x8_t)v1);
+		return {{(reg)uzip.val[0], (reg)uzip.val[1]}};
 	}
 
 	template <>
 	inline regx2 deinterleave<int8_t>(const reg v0, const reg v1)
 	{
-		// const uint32_t cmask[16] = {0, 2, 4, 6, 8, 10, 12, 14, 1, 3, 5, 7, 9, 11, 13, 15};
-		// auto cm = mipp::cmask<int8_t>(cmask);
-
-		// auto v0s = mipp::shuff<int8_t>(v0, cm);
-		// auto v1s = mipp::shuff<int8_t>(v1, cm);
-
-		// auto v0l = mipp::low<int8_t>(v0s);
-		// auto v1l = mipp::low<int8_t>(v1s);
-
-		// auto v0h = mipp::high<int8_t>(v0s);
-		// auto v1h = mipp::high<int8_t>(v1s);
-
-		// auto v_re = mipp::combine<int8_t>(v0l, v1l);
-		// auto v_im = mipp::combine<int8_t>(v0h, v1h);
-
-		// return {{v_re, v_im}};
-
-		auto vi1 = mipp::interleave<int8_t>(v0, v1);
-		auto vi2 = mipp::interleave<int8_t>(vi1.val[0], vi1.val[1]);
-		auto vi3 = mipp::interleave<int8_t>(vi2.val[0], vi2.val[1]);
-		auto vi4 = mipp::interleave<int8_t>(vi3.val[0], vi3.val[1]);
-
-		return {{vi4.val[0], vi4.val[1]}};
+		auto uzip = vuzpq_s8((int8x16_t)v0, (int8x16_t)v1);
+		return {{(reg)uzip.val[0], (reg)uzip.val[1]}};
 	}
 
 	// ---------------------------------------------------------------------------------------------------- interleave2
 	template <>
 	inline regx2 interleave2<float>(const reg v1, const reg v2) {
-		uint32x2x2_t res1 = vzip_u32(vget_low_u32 ((uint32x4_t)v1), vget_low_u32 ((uint32x4_t)v2));
-		uint32x2x2_t res2 = vzip_u32(vget_high_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v2));
-
-		regx2 res = {{(reg) vcombine_u32(res1.val[0], res2.val[0]),
-		              (reg) vcombine_u32(res1.val[1], res2.val[1])}};
-
-		return res;
+		auto zip = vzipq_f32((float32x4_t)v1, (float32x4_t)v2);
+		return {{(reg) vcombine_f32(vget_low_f32(zip.val[0]), vget_low_f32(zip.val[1])),
+		         (reg) vcombine_f32(vget_high_f32(zip.val[0]), vget_high_f32(zip.val[1]))}};
 	}
 
 	template <>
 	inline regx2 interleave2<int32_t>(const reg v1, const reg v2) {
-		uint32x2x2_t res1 = vzip_u32(vget_low_u32 ((uint32x4_t)v1), vget_low_u32 ((uint32x4_t)v2));
-		uint32x2x2_t res2 = vzip_u32(vget_high_u32((uint32x4_t)v1), vget_high_u32((uint32x4_t)v2));
-
-		regx2 res = {{(reg) vcombine_u32(res1.val[0], res2.val[0]),
-		              (reg) vcombine_u32(res1.val[1], res2.val[1])}};
-
-		return res;
+		auto zip = vzipq_s32((int32x4_t)v1, (int32x4_t)v2);
+		return {{(reg) vcombine_s32(vget_low_s32(zip.val[0]), vget_low_s32(zip.val[1])),
+		         (reg) vcombine_s32(vget_high_s32(zip.val[0]), vget_high_s32(zip.val[1]))}};
 	}
 
 	template <>
 	inline regx2 interleave2<int16_t>(const reg v1, const reg v2) {
-		uint16x4x2_t res1 = vzip_u16(vget_low_u16 ((uint16x8_t)v1), vget_low_u16 ((uint16x8_t)v2));
-		uint16x4x2_t res2 = vzip_u16(vget_high_u16((uint16x8_t)v1), vget_high_u16((uint16x8_t)v2));
-
-		regx2 res = {{(reg) vcombine_u16(res1.val[0], res2.val[0]),
-		              (reg) vcombine_u16(res1.val[1], res2.val[1])}};
-
-		return res;
+		auto zip = vzipq_s16((int16x8_t)v1, (int16x8_t)v2);
+		return {{(reg) vcombine_s16(vget_low_s16(zip.val[0]), vget_low_s16(zip.val[1])),
+		         (reg) vcombine_s16(vget_high_s16(zip.val[0]), vget_high_s16(zip.val[1]))}};
 	}
 
 	template <>
 	inline regx2 interleave2<int8_t>(const reg v1, const reg v2) {
-		uint8x8x2_t res1 = vzip_u8(vget_low_u8 ((uint8x16_t)v1), vget_low_u8 ((uint8x16_t)v2));
-		uint8x8x2_t res2 = vzip_u8(vget_high_u8((uint8x16_t)v1), vget_high_u8((uint8x16_t)v2));
-
-		regx2 res = {{(reg) vcombine_u8(res1.val[0], res2.val[0]),
-		              (reg) vcombine_u8(res1.val[1], res2.val[1])}};
-
-		return res;
+		auto zip = vzipq_s8((int8x16_t)v1, (int8x16_t)v2);
+		return {{(reg) vcombine_s8(vget_low_s8(zip.val[0]), vget_low_s8(zip.val[1])),
+		         (reg) vcombine_s8(vget_high_s8(zip.val[0]), vget_high_s8(zip.val[1]))}};
 	}
 
 	// ----------------------------------------------------------------------------------------------------------- andb
