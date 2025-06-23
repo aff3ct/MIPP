@@ -1113,9 +1113,9 @@
 		// v1  = [a0, b0], v2 = [a1, b1]
 		// res = [a0, a1]
 #ifdef __aarch64__
-		return (reg)vzip1q_s64((uint64x2_t)v1, (uint64x2_t)v2);
+		return (reg)vzip1q_s64((int64x2_t)v1, (int64x2_t)v2);
 #else
-		return (reg)vcombine_u64(vget_low_u64((uint64x2_t)v1), vget_low_u64((uint64x2_t)v2));
+		return (reg)vcombine_s64(vget_low_s64((int64x2_t)v1), vget_low_s64((int64x2_t)v2));
 #endif
 	}
 
