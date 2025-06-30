@@ -776,7 +776,7 @@
 		                  e16, e17, e18, e19, e20, e21, e22, e23,
 		                  e24, e25, e26, e27, e28, e29, e30, e31};
 
-		return (__m512i)mipp::load<int16_t>((int16_t*)data);
+		return _mm512_castps_si512(mipp::load<int16_t>((int16_t*)data));
 	}
 
 	static __m512i _mm512_setr_epi16 (short  e0, short  e1, short  e2, short  e3, short  e4, short  e5, short  e6, short e7,
@@ -789,7 +789,7 @@
 		                  e16, e17, e18, e19, e20, e21, e22, e23,
 		                  e24, e25, e26, e27, e28, e29, e30, e31};
 
-		return (__m512i)mipp::load<int16_t>((int16_t*)data);
+		return _mm512_castps_si512(mipp::load<int16_t>((int16_t*)data));
 	}
 
 	static __m512i _mm512_set_epi8 (char e63, char e62, char e61, char e60, char e59, char e58, char e57, char e56,
@@ -810,7 +810,7 @@
 		                 e48, e49, e50, e51, e52, e53, e54, e55,
 		                 e56, e57, e58, e59, e60, e61, e62, e63};
 
-		return (__m512i)mipp::load<int8_t>((int8_t*)data);
+		return _mm512_castps_si512(mipp::load<int8_t>((int8_t*)data));
 	}
 
 	// static __m512i _mm512_setr_epi8 (char  e0, char  e1, char  e2, char  e3, char  e4, char  e5, char  e6, char  e7,
@@ -831,7 +831,7 @@
 	// 	                 e48, e49, e50, e51, e52, e53, e54, e55,
 	// 	                 e56, e57, e58, e59, e60, e61, e62, e63};
 
-	// 	return (__m512i)mipp::load<int8_t>((int8_t*)data);
+	// 	return _mm512_castps_si512(mipp::load<int8_t>((int8_t*)data));
 	// }
 
 	template <>
@@ -1665,7 +1665,7 @@
 
 	template <>
 	inline reg shuff4<int8_t>(const reg v, const reg cm) {
-		return (reg)_mm512_shuffle_epi8(_mm512_castps_si512(v), _mm512_castps_si512(cm));
+		return _mm512_castsi512_ps(_mm512_shuffle_epi8(_mm512_castps_si512(v), _mm512_castps_si512(cm)));
 	}
 #endif
 
