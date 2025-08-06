@@ -43,7 +43,7 @@ def gen_cpp_constexpr_functions(isa,file):
 			print(j2_template.render(isa_name_upper=isa["name"].upper(),datatype=datatypes[dt], lmul=str(lmul), type_category_upper=datatypes[dt]["category"].upper()), file=file)
 
 def gen_cpp_functions(isa,file, funcs):
-	set_functions = ["set0","set0_k","set","set_k"]
+	set_functions = ["set0","set0_k","set","set_k","set1_k"]
 	for f in funcs:
 		if f in set_functions:
 			gen_set_func_error(f,file)

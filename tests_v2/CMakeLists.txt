@@ -17,15 +17,15 @@ set (EXECUTABLE_OUTPUT_PATH bin/)
 #if(COMMAND cmake_policy)
 #    cmake_policy(SET CMP0003 NEW)
 #endif(COMMAND cmake_policy)
+file (GLOB_RECURSE MIPP_SRCS_TEST ${CMAKE_CURRENT_SOURCE_DIR}/src/*)
+add_executable(tests_exe ${MIPP_SRCS_TEST})
+set_target_properties(tests_exe PROPERTIES OUTPUT_NAME run-tests POSITION_INDEPENDENT_CODE ON) # set -fpie
 
-# include MIPP V2 generated headers
-include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/../include/")
+ # include MIPP headers
+target_include_directories(tests_exe PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../include/")
 
 # include Catch2 header
-include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/lib/Catch2/include/")
+target_include_directories(tests_exe PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/lib/Catch2/include/")
 
-# Generate the source files list
-file (GLOB_RECURSE source_files src/*)
-add_executable(run_tests ${source_files})
-
-set_target_properties(run_tests PROPERTIES POSITION_INDEPENDENT_CODE ON) # set -fpie
+enable_testing()
+add_test(NAME mipp::test COMMAND tests_exe)

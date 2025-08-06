@@ -1,16 +1,6 @@
 #ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX_H_
 #define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX_H_
 #include <immintrin.h>
-#define MIPP_MACRO_FLOAT64(MACRO, ...) MACRO(__VA_ARGS__, 64, float, pd, pd, float64_t)
-#define MIPP_MACRO_FLOAT32(MACRO, ...) MACRO(__VA_ARGS__, 32, float, ps, ps, float32_t)
-#define MIPP_MACRO_INT64(MACRO, ...) MACRO(__VA_ARGS__, 64, int, epi64, si256, __m256i)
-#define MIPP_MACRO_INT32(MACRO, ...) MACRO(__VA_ARGS__, 32, int, epi32, si256, __m256i)
-#define MIPP_MACRO_INT16(MACRO, ...) MACRO(__VA_ARGS__, 16, int, epi16, si256, __m256i)
-#define MIPP_MACRO_INT8(MACRO, ...) MACRO(__VA_ARGS__, 8, int, epi8, si256, __m256i)
-#define MIPP_MACRO_UINT64(MACRO, ...) MACRO(__VA_ARGS__, 64, uint, epu64, si256, __m256i)
-#define MIPP_MACRO_UINT32(MACRO, ...) MACRO(__VA_ARGS__, 32, uint, epu32, si256, __m256i)
-#define MIPP_MACRO_UINT16(MACRO, ...) MACRO(__VA_ARGS__, 16, uint, epu16, si256, __m256i)
-#define MIPP_MACRO_UINT8(MACRO, ...) MACRO(__VA_ARGS__, 8, uint, epu8, si256, __m256i)
 #define MIPP_AVX_RVD_SIZE_BIT 256
 #define MIPP_AVX_RVD_SIZE_BYTE 32
 #define MIPP_N_FLOAT64 4
@@ -44,1328 +34,1328 @@ typedef struct { __m256i m; } rvm_avx_uint32_t;
 typedef struct { __m256i m; } rvm_avx_uint16_t;
 typedef struct { __m256i m; } rvm_avx_uint8_t;
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_float64_t mipp_avx_cast_float64_float64(const rvd_avx_float64_t r0) {
+static inline rvd_avx_float64_t mipp_avx_cast_float64_float64(const rvd_avx_float64_t r0) {
 	rvd_avx_float64_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_float64_t mipp_avx_cast_float32_float64(const rvd_avx_float32_t r0) {
+static inline rvd_avx_float64_t mipp_avx_cast_float32_float64(const rvd_avx_float32_t r0) {
 	rvd_avx_float64_t res;
 	res.r= _mm256_castps_pd(r0.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_float64_t mipp_avx_cast_int64_float64(const rvd_avx_int64_t r0) {
+static inline rvd_avx_float64_t mipp_avx_cast_int64_float64(const rvd_avx_int64_t r0) {
 	rvd_avx_float64_t res;
 	res.r= _mm256_castsi256_pd(r0.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_float64_t mipp_avx_cast_int32_float64(const rvd_avx_int32_t r0) {
+static inline rvd_avx_float64_t mipp_avx_cast_int32_float64(const rvd_avx_int32_t r0) {
 	rvd_avx_float64_t res;
 	res.r= _mm256_castsi256_pd(r0.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_float64_t mipp_avx_cast_int16_float64(const rvd_avx_int16_t r0) {
+static inline rvd_avx_float64_t mipp_avx_cast_int16_float64(const rvd_avx_int16_t r0) {
 	rvd_avx_float64_t res;
 	res.r= _mm256_castsi256_pd(r0.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_float64_t mipp_avx_cast_int8_float64(const rvd_avx_int8_t r0) {
+static inline rvd_avx_float64_t mipp_avx_cast_int8_float64(const rvd_avx_int8_t r0) {
 	rvd_avx_float64_t res;
 	res.r= _mm256_castsi256_pd(r0.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_float64_t mipp_avx_cast_uint64_float64(const rvd_avx_uint64_t r0) {
+static inline rvd_avx_float64_t mipp_avx_cast_uint64_float64(const rvd_avx_uint64_t r0) {
 	rvd_avx_float64_t res;
 	res.r= _mm256_castsi256_pd(r0.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_float64_t mipp_avx_cast_uint32_float64(const rvd_avx_uint32_t r0) {
+static inline rvd_avx_float64_t mipp_avx_cast_uint32_float64(const rvd_avx_uint32_t r0) {
 	rvd_avx_float64_t res;
 	res.r= _mm256_castsi256_pd(r0.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_float64_t mipp_avx_cast_uint16_float64(const rvd_avx_uint16_t r0) {
+static inline rvd_avx_float64_t mipp_avx_cast_uint16_float64(const rvd_avx_uint16_t r0) {
 	rvd_avx_float64_t res;
 	res.r= _mm256_castsi256_pd(r0.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_float64_t mipp_avx_cast_uint8_float64(const rvd_avx_uint8_t r0) {
+static inline rvd_avx_float64_t mipp_avx_cast_uint8_float64(const rvd_avx_uint8_t r0) {
 	rvd_avx_float64_t res;
 	res.r= _mm256_castsi256_pd(r0.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_float32_t mipp_avx_cast_float64_float32(const rvd_avx_float64_t r0) {
+static inline rvd_avx_float32_t mipp_avx_cast_float64_float32(const rvd_avx_float64_t r0) {
 	rvd_avx_float32_t res;
 	res.r= _mm256_castpd_ps(r0.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_float32_t mipp_avx_cast_float32_float32(const rvd_avx_float32_t r0) {
+static inline rvd_avx_float32_t mipp_avx_cast_float32_float32(const rvd_avx_float32_t r0) {
 	rvd_avx_float32_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_float32_t mipp_avx_cast_int64_float32(const rvd_avx_int64_t r0) {
-	rvd_avx_float32_t res;
-	res.r= _mm256_castsi256_ps(r0.r);
-	return res;
-}
-// ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_float32_t mipp_avx_cast_int32_float32(const rvd_avx_int32_t r0) {
+static inline rvd_avx_float32_t mipp_avx_cast_int64_float32(const rvd_avx_int64_t r0) {
 	rvd_avx_float32_t res;
 	res.r= _mm256_castsi256_ps(r0.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_float32_t mipp_avx_cast_int16_float32(const rvd_avx_int16_t r0) {
+static inline rvd_avx_float32_t mipp_avx_cast_int32_float32(const rvd_avx_int32_t r0) {
 	rvd_avx_float32_t res;
 	res.r= _mm256_castsi256_ps(r0.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_float32_t mipp_avx_cast_int8_float32(const rvd_avx_int8_t r0) {
+static inline rvd_avx_float32_t mipp_avx_cast_int16_float32(const rvd_avx_int16_t r0) {
 	rvd_avx_float32_t res;
 	res.r= _mm256_castsi256_ps(r0.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_float32_t mipp_avx_cast_uint64_float32(const rvd_avx_uint64_t r0) {
+static inline rvd_avx_float32_t mipp_avx_cast_int8_float32(const rvd_avx_int8_t r0) {
 	rvd_avx_float32_t res;
 	res.r= _mm256_castsi256_ps(r0.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_float32_t mipp_avx_cast_uint32_float32(const rvd_avx_uint32_t r0) {
+static inline rvd_avx_float32_t mipp_avx_cast_uint64_float32(const rvd_avx_uint64_t r0) {
 	rvd_avx_float32_t res;
 	res.r= _mm256_castsi256_ps(r0.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_float32_t mipp_avx_cast_uint16_float32(const rvd_avx_uint16_t r0) {
+static inline rvd_avx_float32_t mipp_avx_cast_uint32_float32(const rvd_avx_uint32_t r0) {
 	rvd_avx_float32_t res;
 	res.r= _mm256_castsi256_ps(r0.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_float32_t mipp_avx_cast_uint8_float32(const rvd_avx_uint8_t r0) {
+static inline rvd_avx_float32_t mipp_avx_cast_uint16_float32(const rvd_avx_uint16_t r0) {
 	rvd_avx_float32_t res;
 	res.r= _mm256_castsi256_ps(r0.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int64_t mipp_avx_cast_float64_int64(const rvd_avx_float64_t r0) {
+static inline rvd_avx_float32_t mipp_avx_cast_uint8_float32(const rvd_avx_uint8_t r0) {
+	rvd_avx_float32_t res;
+	res.r= _mm256_castsi256_ps(r0.r);
+	return res;
+}
+// ---------------------------------------------------------------------------------------------------------------------------------------------- cast
+static inline rvd_avx_int64_t mipp_avx_cast_float64_int64(const rvd_avx_float64_t r0) {
 	rvd_avx_int64_t res;
 	res.r= _mm256_castpd_si256(r0.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int64_t mipp_avx_cast_float32_int64(const rvd_avx_float32_t r0) {
+static inline rvd_avx_int64_t mipp_avx_cast_float32_int64(const rvd_avx_float32_t r0) {
 	rvd_avx_int64_t res;
 	res.r= _mm256_castps_si256(r0.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int64_t mipp_avx_cast_int64_int64(const rvd_avx_int64_t r0) {
+static inline rvd_avx_int64_t mipp_avx_cast_int64_int64(const rvd_avx_int64_t r0) {
 	rvd_avx_int64_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int64_t mipp_avx_cast_int32_int64(const rvd_avx_int32_t r0) {
+static inline rvd_avx_int64_t mipp_avx_cast_int32_int64(const rvd_avx_int32_t r0) {
 	rvd_avx_int64_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int64_t mipp_avx_cast_int16_int64(const rvd_avx_int16_t r0) {
+static inline rvd_avx_int64_t mipp_avx_cast_int16_int64(const rvd_avx_int16_t r0) {
 	rvd_avx_int64_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int64_t mipp_avx_cast_int8_int64(const rvd_avx_int8_t r0) {
+static inline rvd_avx_int64_t mipp_avx_cast_int8_int64(const rvd_avx_int8_t r0) {
 	rvd_avx_int64_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int64_t mipp_avx_cast_uint64_int64(const rvd_avx_uint64_t r0) {
+static inline rvd_avx_int64_t mipp_avx_cast_uint64_int64(const rvd_avx_uint64_t r0) {
 	rvd_avx_int64_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int64_t mipp_avx_cast_uint32_int64(const rvd_avx_uint32_t r0) {
+static inline rvd_avx_int64_t mipp_avx_cast_uint32_int64(const rvd_avx_uint32_t r0) {
 	rvd_avx_int64_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int64_t mipp_avx_cast_uint16_int64(const rvd_avx_uint16_t r0) {
+static inline rvd_avx_int64_t mipp_avx_cast_uint16_int64(const rvd_avx_uint16_t r0) {
 	rvd_avx_int64_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int64_t mipp_avx_cast_uint8_int64(const rvd_avx_uint8_t r0) {
+static inline rvd_avx_int64_t mipp_avx_cast_uint8_int64(const rvd_avx_uint8_t r0) {
 	rvd_avx_int64_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int32_t mipp_avx_cast_float64_int32(const rvd_avx_float64_t r0) {
+static inline rvd_avx_int32_t mipp_avx_cast_float64_int32(const rvd_avx_float64_t r0) {
 	rvd_avx_int32_t res;
 	res.r= _mm256_castpd_si256(r0.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int32_t mipp_avx_cast_float32_int32(const rvd_avx_float32_t r0) {
+static inline rvd_avx_int32_t mipp_avx_cast_float32_int32(const rvd_avx_float32_t r0) {
 	rvd_avx_int32_t res;
 	res.r= _mm256_castps_si256(r0.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int32_t mipp_avx_cast_int64_int32(const rvd_avx_int64_t r0) {
+static inline rvd_avx_int32_t mipp_avx_cast_int64_int32(const rvd_avx_int64_t r0) {
 	rvd_avx_int32_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int32_t mipp_avx_cast_int32_int32(const rvd_avx_int32_t r0) {
+static inline rvd_avx_int32_t mipp_avx_cast_int32_int32(const rvd_avx_int32_t r0) {
 	rvd_avx_int32_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int32_t mipp_avx_cast_int16_int32(const rvd_avx_int16_t r0) {
+static inline rvd_avx_int32_t mipp_avx_cast_int16_int32(const rvd_avx_int16_t r0) {
 	rvd_avx_int32_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int32_t mipp_avx_cast_int8_int32(const rvd_avx_int8_t r0) {
+static inline rvd_avx_int32_t mipp_avx_cast_int8_int32(const rvd_avx_int8_t r0) {
 	rvd_avx_int32_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int32_t mipp_avx_cast_uint64_int32(const rvd_avx_uint64_t r0) {
+static inline rvd_avx_int32_t mipp_avx_cast_uint64_int32(const rvd_avx_uint64_t r0) {
 	rvd_avx_int32_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int32_t mipp_avx_cast_uint32_int32(const rvd_avx_uint32_t r0) {
+static inline rvd_avx_int32_t mipp_avx_cast_uint32_int32(const rvd_avx_uint32_t r0) {
 	rvd_avx_int32_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int32_t mipp_avx_cast_uint16_int32(const rvd_avx_uint16_t r0) {
+static inline rvd_avx_int32_t mipp_avx_cast_uint16_int32(const rvd_avx_uint16_t r0) {
 	rvd_avx_int32_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int32_t mipp_avx_cast_uint8_int32(const rvd_avx_uint8_t r0) {
+static inline rvd_avx_int32_t mipp_avx_cast_uint8_int32(const rvd_avx_uint8_t r0) {
 	rvd_avx_int32_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int16_t mipp_avx_cast_float64_int16(const rvd_avx_float64_t r0) {
+static inline rvd_avx_int16_t mipp_avx_cast_float64_int16(const rvd_avx_float64_t r0) {
 	rvd_avx_int16_t res;
 	res.r= _mm256_castpd_si256(r0.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int16_t mipp_avx_cast_float32_int16(const rvd_avx_float32_t r0) {
+static inline rvd_avx_int16_t mipp_avx_cast_float32_int16(const rvd_avx_float32_t r0) {
 	rvd_avx_int16_t res;
 	res.r= _mm256_castps_si256(r0.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int16_t mipp_avx_cast_int64_int16(const rvd_avx_int64_t r0) {
+static inline rvd_avx_int16_t mipp_avx_cast_int64_int16(const rvd_avx_int64_t r0) {
 	rvd_avx_int16_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int16_t mipp_avx_cast_int32_int16(const rvd_avx_int32_t r0) {
+static inline rvd_avx_int16_t mipp_avx_cast_int32_int16(const rvd_avx_int32_t r0) {
 	rvd_avx_int16_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int16_t mipp_avx_cast_int16_int16(const rvd_avx_int16_t r0) {
+static inline rvd_avx_int16_t mipp_avx_cast_int16_int16(const rvd_avx_int16_t r0) {
 	rvd_avx_int16_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int16_t mipp_avx_cast_int8_int16(const rvd_avx_int8_t r0) {
+static inline rvd_avx_int16_t mipp_avx_cast_int8_int16(const rvd_avx_int8_t r0) {
 	rvd_avx_int16_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int16_t mipp_avx_cast_uint64_int16(const rvd_avx_uint64_t r0) {
+static inline rvd_avx_int16_t mipp_avx_cast_uint64_int16(const rvd_avx_uint64_t r0) {
 	rvd_avx_int16_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int16_t mipp_avx_cast_uint32_int16(const rvd_avx_uint32_t r0) {
+static inline rvd_avx_int16_t mipp_avx_cast_uint32_int16(const rvd_avx_uint32_t r0) {
 	rvd_avx_int16_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int16_t mipp_avx_cast_uint16_int16(const rvd_avx_uint16_t r0) {
+static inline rvd_avx_int16_t mipp_avx_cast_uint16_int16(const rvd_avx_uint16_t r0) {
 	rvd_avx_int16_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int16_t mipp_avx_cast_uint8_int16(const rvd_avx_uint8_t r0) {
+static inline rvd_avx_int16_t mipp_avx_cast_uint8_int16(const rvd_avx_uint8_t r0) {
 	rvd_avx_int16_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int8_t mipp_avx_cast_float64_int8(const rvd_avx_float64_t r0) {
+static inline rvd_avx_int8_t mipp_avx_cast_float64_int8(const rvd_avx_float64_t r0) {
 	rvd_avx_int8_t res;
 	res.r= _mm256_castpd_si256(r0.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int8_t mipp_avx_cast_float32_int8(const rvd_avx_float32_t r0) {
+static inline rvd_avx_int8_t mipp_avx_cast_float32_int8(const rvd_avx_float32_t r0) {
 	rvd_avx_int8_t res;
 	res.r= _mm256_castps_si256(r0.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int8_t mipp_avx_cast_int64_int8(const rvd_avx_int64_t r0) {
+static inline rvd_avx_int8_t mipp_avx_cast_int64_int8(const rvd_avx_int64_t r0) {
 	rvd_avx_int8_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int8_t mipp_avx_cast_int32_int8(const rvd_avx_int32_t r0) {
+static inline rvd_avx_int8_t mipp_avx_cast_int32_int8(const rvd_avx_int32_t r0) {
 	rvd_avx_int8_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int8_t mipp_avx_cast_int16_int8(const rvd_avx_int16_t r0) {
+static inline rvd_avx_int8_t mipp_avx_cast_int16_int8(const rvd_avx_int16_t r0) {
 	rvd_avx_int8_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int8_t mipp_avx_cast_int8_int8(const rvd_avx_int8_t r0) {
+static inline rvd_avx_int8_t mipp_avx_cast_int8_int8(const rvd_avx_int8_t r0) {
 	rvd_avx_int8_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int8_t mipp_avx_cast_uint64_int8(const rvd_avx_uint64_t r0) {
+static inline rvd_avx_int8_t mipp_avx_cast_uint64_int8(const rvd_avx_uint64_t r0) {
 	rvd_avx_int8_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int8_t mipp_avx_cast_uint32_int8(const rvd_avx_uint32_t r0) {
+static inline rvd_avx_int8_t mipp_avx_cast_uint32_int8(const rvd_avx_uint32_t r0) {
 	rvd_avx_int8_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int8_t mipp_avx_cast_uint16_int8(const rvd_avx_uint16_t r0) {
+static inline rvd_avx_int8_t mipp_avx_cast_uint16_int8(const rvd_avx_uint16_t r0) {
 	rvd_avx_int8_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_int8_t mipp_avx_cast_uint8_int8(const rvd_avx_uint8_t r0) {
+static inline rvd_avx_int8_t mipp_avx_cast_uint8_int8(const rvd_avx_uint8_t r0) {
 	rvd_avx_int8_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint64_t mipp_avx_cast_float64_uint64(const rvd_avx_float64_t r0) {
+static inline rvd_avx_uint64_t mipp_avx_cast_float64_uint64(const rvd_avx_float64_t r0) {
 	rvd_avx_uint64_t res;
 	res.r= _mm256_castpd_si256(r0.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint64_t mipp_avx_cast_float32_uint64(const rvd_avx_float32_t r0) {
+static inline rvd_avx_uint64_t mipp_avx_cast_float32_uint64(const rvd_avx_float32_t r0) {
 	rvd_avx_uint64_t res;
 	res.r= _mm256_castps_si256(r0.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint64_t mipp_avx_cast_int64_uint64(const rvd_avx_int64_t r0) {
+static inline rvd_avx_uint64_t mipp_avx_cast_int64_uint64(const rvd_avx_int64_t r0) {
 	rvd_avx_uint64_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint64_t mipp_avx_cast_int32_uint64(const rvd_avx_int32_t r0) {
+static inline rvd_avx_uint64_t mipp_avx_cast_int32_uint64(const rvd_avx_int32_t r0) {
 	rvd_avx_uint64_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint64_t mipp_avx_cast_int16_uint64(const rvd_avx_int16_t r0) {
+static inline rvd_avx_uint64_t mipp_avx_cast_int16_uint64(const rvd_avx_int16_t r0) {
 	rvd_avx_uint64_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint64_t mipp_avx_cast_int8_uint64(const rvd_avx_int8_t r0) {
+static inline rvd_avx_uint64_t mipp_avx_cast_int8_uint64(const rvd_avx_int8_t r0) {
 	rvd_avx_uint64_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint64_t mipp_avx_cast_uint64_uint64(const rvd_avx_uint64_t r0) {
+static inline rvd_avx_uint64_t mipp_avx_cast_uint64_uint64(const rvd_avx_uint64_t r0) {
 	rvd_avx_uint64_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint64_t mipp_avx_cast_uint32_uint64(const rvd_avx_uint32_t r0) {
+static inline rvd_avx_uint64_t mipp_avx_cast_uint32_uint64(const rvd_avx_uint32_t r0) {
 	rvd_avx_uint64_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint64_t mipp_avx_cast_uint16_uint64(const rvd_avx_uint16_t r0) {
+static inline rvd_avx_uint64_t mipp_avx_cast_uint16_uint64(const rvd_avx_uint16_t r0) {
 	rvd_avx_uint64_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint64_t mipp_avx_cast_uint8_uint64(const rvd_avx_uint8_t r0) {
+static inline rvd_avx_uint64_t mipp_avx_cast_uint8_uint64(const rvd_avx_uint8_t r0) {
 	rvd_avx_uint64_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint32_t mipp_avx_cast_float64_uint32(const rvd_avx_float64_t r0) {
+static inline rvd_avx_uint32_t mipp_avx_cast_float64_uint32(const rvd_avx_float64_t r0) {
 	rvd_avx_uint32_t res;
 	res.r= _mm256_castpd_si256(r0.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint32_t mipp_avx_cast_float32_uint32(const rvd_avx_float32_t r0) {
+static inline rvd_avx_uint32_t mipp_avx_cast_float32_uint32(const rvd_avx_float32_t r0) {
 	rvd_avx_uint32_t res;
 	res.r= _mm256_castps_si256(r0.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint32_t mipp_avx_cast_int64_uint32(const rvd_avx_int64_t r0) {
+static inline rvd_avx_uint32_t mipp_avx_cast_int64_uint32(const rvd_avx_int64_t r0) {
 	rvd_avx_uint32_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint32_t mipp_avx_cast_int32_uint32(const rvd_avx_int32_t r0) {
+static inline rvd_avx_uint32_t mipp_avx_cast_int32_uint32(const rvd_avx_int32_t r0) {
 	rvd_avx_uint32_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint32_t mipp_avx_cast_int16_uint32(const rvd_avx_int16_t r0) {
+static inline rvd_avx_uint32_t mipp_avx_cast_int16_uint32(const rvd_avx_int16_t r0) {
 	rvd_avx_uint32_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint32_t mipp_avx_cast_int8_uint32(const rvd_avx_int8_t r0) {
+static inline rvd_avx_uint32_t mipp_avx_cast_int8_uint32(const rvd_avx_int8_t r0) {
 	rvd_avx_uint32_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint32_t mipp_avx_cast_uint64_uint32(const rvd_avx_uint64_t r0) {
+static inline rvd_avx_uint32_t mipp_avx_cast_uint64_uint32(const rvd_avx_uint64_t r0) {
 	rvd_avx_uint32_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint32_t mipp_avx_cast_uint32_uint32(const rvd_avx_uint32_t r0) {
+static inline rvd_avx_uint32_t mipp_avx_cast_uint32_uint32(const rvd_avx_uint32_t r0) {
 	rvd_avx_uint32_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint32_t mipp_avx_cast_uint16_uint32(const rvd_avx_uint16_t r0) {
+static inline rvd_avx_uint32_t mipp_avx_cast_uint16_uint32(const rvd_avx_uint16_t r0) {
 	rvd_avx_uint32_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint32_t mipp_avx_cast_uint8_uint32(const rvd_avx_uint8_t r0) {
+static inline rvd_avx_uint32_t mipp_avx_cast_uint8_uint32(const rvd_avx_uint8_t r0) {
 	rvd_avx_uint32_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint16_t mipp_avx_cast_float64_uint16(const rvd_avx_float64_t r0) {
+static inline rvd_avx_uint16_t mipp_avx_cast_float64_uint16(const rvd_avx_float64_t r0) {
 	rvd_avx_uint16_t res;
 	res.r= _mm256_castpd_si256(r0.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint16_t mipp_avx_cast_float32_uint16(const rvd_avx_float32_t r0) {
+static inline rvd_avx_uint16_t mipp_avx_cast_float32_uint16(const rvd_avx_float32_t r0) {
 	rvd_avx_uint16_t res;
 	res.r= _mm256_castps_si256(r0.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint16_t mipp_avx_cast_int64_uint16(const rvd_avx_int64_t r0) {
+static inline rvd_avx_uint16_t mipp_avx_cast_int64_uint16(const rvd_avx_int64_t r0) {
 	rvd_avx_uint16_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint16_t mipp_avx_cast_int32_uint16(const rvd_avx_int32_t r0) {
+static inline rvd_avx_uint16_t mipp_avx_cast_int32_uint16(const rvd_avx_int32_t r0) {
 	rvd_avx_uint16_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint16_t mipp_avx_cast_int16_uint16(const rvd_avx_int16_t r0) {
+static inline rvd_avx_uint16_t mipp_avx_cast_int16_uint16(const rvd_avx_int16_t r0) {
 	rvd_avx_uint16_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint16_t mipp_avx_cast_int8_uint16(const rvd_avx_int8_t r0) {
+static inline rvd_avx_uint16_t mipp_avx_cast_int8_uint16(const rvd_avx_int8_t r0) {
 	rvd_avx_uint16_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint16_t mipp_avx_cast_uint64_uint16(const rvd_avx_uint64_t r0) {
+static inline rvd_avx_uint16_t mipp_avx_cast_uint64_uint16(const rvd_avx_uint64_t r0) {
 	rvd_avx_uint16_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint16_t mipp_avx_cast_uint32_uint16(const rvd_avx_uint32_t r0) {
+static inline rvd_avx_uint16_t mipp_avx_cast_uint32_uint16(const rvd_avx_uint32_t r0) {
 	rvd_avx_uint16_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint16_t mipp_avx_cast_uint16_uint16(const rvd_avx_uint16_t r0) {
+static inline rvd_avx_uint16_t mipp_avx_cast_uint16_uint16(const rvd_avx_uint16_t r0) {
 	rvd_avx_uint16_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint16_t mipp_avx_cast_uint8_uint16(const rvd_avx_uint8_t r0) {
+static inline rvd_avx_uint16_t mipp_avx_cast_uint8_uint16(const rvd_avx_uint8_t r0) {
 	rvd_avx_uint16_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint8_t mipp_avx_cast_float64_uint8(const rvd_avx_float64_t r0) {
+static inline rvd_avx_uint8_t mipp_avx_cast_float64_uint8(const rvd_avx_float64_t r0) {
 	rvd_avx_uint8_t res;
 	res.r= _mm256_castpd_si256(r0.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint8_t mipp_avx_cast_float32_uint8(const rvd_avx_float32_t r0) {
+static inline rvd_avx_uint8_t mipp_avx_cast_float32_uint8(const rvd_avx_float32_t r0) {
 	rvd_avx_uint8_t res;
 	res.r= _mm256_castps_si256(r0.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint8_t mipp_avx_cast_int64_uint8(const rvd_avx_int64_t r0) {
+static inline rvd_avx_uint8_t mipp_avx_cast_int64_uint8(const rvd_avx_int64_t r0) {
 	rvd_avx_uint8_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint8_t mipp_avx_cast_int32_uint8(const rvd_avx_int32_t r0) {
+static inline rvd_avx_uint8_t mipp_avx_cast_int32_uint8(const rvd_avx_int32_t r0) {
 	rvd_avx_uint8_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint8_t mipp_avx_cast_int16_uint8(const rvd_avx_int16_t r0) {
+static inline rvd_avx_uint8_t mipp_avx_cast_int16_uint8(const rvd_avx_int16_t r0) {
 	rvd_avx_uint8_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint8_t mipp_avx_cast_int8_uint8(const rvd_avx_int8_t r0) {
+static inline rvd_avx_uint8_t mipp_avx_cast_int8_uint8(const rvd_avx_int8_t r0) {
 	rvd_avx_uint8_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint8_t mipp_avx_cast_uint64_uint8(const rvd_avx_uint64_t r0) {
+static inline rvd_avx_uint8_t mipp_avx_cast_uint64_uint8(const rvd_avx_uint64_t r0) {
 	rvd_avx_uint8_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint8_t mipp_avx_cast_uint32_uint8(const rvd_avx_uint32_t r0) {
+static inline rvd_avx_uint8_t mipp_avx_cast_uint32_uint8(const rvd_avx_uint32_t r0) {
 	rvd_avx_uint8_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint8_t mipp_avx_cast_uint16_uint8(const rvd_avx_uint16_t r0) {
+static inline rvd_avx_uint8_t mipp_avx_cast_uint16_uint8(const rvd_avx_uint16_t r0) {
 	rvd_avx_uint8_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast
-rvd_avx_uint8_t mipp_avx_cast_uint8_uint8(const rvd_avx_uint8_t r0) {
+static inline rvd_avx_uint8_t mipp_avx_cast_uint8_uint8(const rvd_avx_uint8_t r0) {
 	rvd_avx_uint8_t res;
 	res.r= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_float64_t mipp_avx_cast_k_float64_float64(const rvm_avx_float64_t m0) {
+static inline rvm_avx_float64_t mipp_avx_cast_k_float64_float64(const rvm_avx_float64_t m0) {
 	rvm_avx_float64_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_float64_t mipp_avx_cast_k_float32_float64(const rvm_avx_float32_t m0) {
+static inline rvm_avx_float64_t mipp_avx_cast_k_float32_float64(const rvm_avx_float32_t m0) {
 	rvm_avx_float64_t res;
 	res.m= _mm256_castps_pd(m0.m);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_float64_t mipp_avx_cast_k_int64_float64(const rvm_avx_int64_t m0) {
+static inline rvm_avx_float64_t mipp_avx_cast_k_int64_float64(const rvm_avx_int64_t m0) {
 	rvm_avx_float64_t res;
 	res.m= _mm256_castsi256_pd(m0.m);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_float64_t mipp_avx_cast_k_int32_float64(const rvm_avx_int32_t m0) {
+static inline rvm_avx_float64_t mipp_avx_cast_k_int32_float64(const rvm_avx_int32_t m0) {
 	rvm_avx_float64_t res;
 	res.m= _mm256_castsi256_pd(m0.m);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_float64_t mipp_avx_cast_k_int16_float64(const rvm_avx_int16_t m0) {
+static inline rvm_avx_float64_t mipp_avx_cast_k_int16_float64(const rvm_avx_int16_t m0) {
 	rvm_avx_float64_t res;
 	res.m= _mm256_castsi256_pd(m0.m);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_float64_t mipp_avx_cast_k_int8_float64(const rvm_avx_int8_t m0) {
+static inline rvm_avx_float64_t mipp_avx_cast_k_int8_float64(const rvm_avx_int8_t m0) {
 	rvm_avx_float64_t res;
 	res.m= _mm256_castsi256_pd(m0.m);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_float64_t mipp_avx_cast_k_uint64_float64(const rvm_avx_uint64_t m0) {
+static inline rvm_avx_float64_t mipp_avx_cast_k_uint64_float64(const rvm_avx_uint64_t m0) {
 	rvm_avx_float64_t res;
 	res.m= _mm256_castsi256_pd(m0.m);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_float64_t mipp_avx_cast_k_uint32_float64(const rvm_avx_uint32_t m0) {
+static inline rvm_avx_float64_t mipp_avx_cast_k_uint32_float64(const rvm_avx_uint32_t m0) {
 	rvm_avx_float64_t res;
 	res.m= _mm256_castsi256_pd(m0.m);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_float64_t mipp_avx_cast_k_uint16_float64(const rvm_avx_uint16_t m0) {
+static inline rvm_avx_float64_t mipp_avx_cast_k_uint16_float64(const rvm_avx_uint16_t m0) {
 	rvm_avx_float64_t res;
 	res.m= _mm256_castsi256_pd(m0.m);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_float64_t mipp_avx_cast_k_uint8_float64(const rvm_avx_uint8_t m0) {
+static inline rvm_avx_float64_t mipp_avx_cast_k_uint8_float64(const rvm_avx_uint8_t m0) {
 	rvm_avx_float64_t res;
 	res.m= _mm256_castsi256_pd(m0.m);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_float32_t mipp_avx_cast_k_float64_float32(const rvm_avx_float64_t m0) {
+static inline rvm_avx_float32_t mipp_avx_cast_k_float64_float32(const rvm_avx_float64_t m0) {
 	rvm_avx_float32_t res;
 	res.m= _mm256_castpd_ps(m0.m);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_float32_t mipp_avx_cast_k_float32_float32(const rvm_avx_float32_t m0) {
+static inline rvm_avx_float32_t mipp_avx_cast_k_float32_float32(const rvm_avx_float32_t m0) {
 	rvm_avx_float32_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_float32_t mipp_avx_cast_k_int64_float32(const rvm_avx_int64_t m0) {
-	rvm_avx_float32_t res;
-	res.m= _mm256_castsi256_ps(m0.m);
-	return res;
-}
-// ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_float32_t mipp_avx_cast_k_int32_float32(const rvm_avx_int32_t m0) {
+static inline rvm_avx_float32_t mipp_avx_cast_k_int64_float32(const rvm_avx_int64_t m0) {
 	rvm_avx_float32_t res;
 	res.m= _mm256_castsi256_ps(m0.m);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_float32_t mipp_avx_cast_k_int16_float32(const rvm_avx_int16_t m0) {
+static inline rvm_avx_float32_t mipp_avx_cast_k_int32_float32(const rvm_avx_int32_t m0) {
 	rvm_avx_float32_t res;
 	res.m= _mm256_castsi256_ps(m0.m);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_float32_t mipp_avx_cast_k_int8_float32(const rvm_avx_int8_t m0) {
+static inline rvm_avx_float32_t mipp_avx_cast_k_int16_float32(const rvm_avx_int16_t m0) {
 	rvm_avx_float32_t res;
 	res.m= _mm256_castsi256_ps(m0.m);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_float32_t mipp_avx_cast_k_uint64_float32(const rvm_avx_uint64_t m0) {
+static inline rvm_avx_float32_t mipp_avx_cast_k_int8_float32(const rvm_avx_int8_t m0) {
 	rvm_avx_float32_t res;
 	res.m= _mm256_castsi256_ps(m0.m);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_float32_t mipp_avx_cast_k_uint32_float32(const rvm_avx_uint32_t m0) {
+static inline rvm_avx_float32_t mipp_avx_cast_k_uint64_float32(const rvm_avx_uint64_t m0) {
 	rvm_avx_float32_t res;
 	res.m= _mm256_castsi256_ps(m0.m);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_float32_t mipp_avx_cast_k_uint16_float32(const rvm_avx_uint16_t m0) {
+static inline rvm_avx_float32_t mipp_avx_cast_k_uint32_float32(const rvm_avx_uint32_t m0) {
 	rvm_avx_float32_t res;
 	res.m= _mm256_castsi256_ps(m0.m);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_float32_t mipp_avx_cast_k_uint8_float32(const rvm_avx_uint8_t m0) {
+static inline rvm_avx_float32_t mipp_avx_cast_k_uint16_float32(const rvm_avx_uint16_t m0) {
 	rvm_avx_float32_t res;
 	res.m= _mm256_castsi256_ps(m0.m);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int64_t mipp_avx_cast_k_float64_int64(const rvm_avx_float64_t m0) {
+static inline rvm_avx_float32_t mipp_avx_cast_k_uint8_float32(const rvm_avx_uint8_t m0) {
+	rvm_avx_float32_t res;
+	res.m= _mm256_castsi256_ps(m0.m);
+	return res;
+}
+// ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
+static inline rvm_avx_int64_t mipp_avx_cast_k_float64_int64(const rvm_avx_float64_t m0) {
 	rvm_avx_int64_t res;
 	res.m= _mm256_castpd_si256(m0.m);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int64_t mipp_avx_cast_k_float32_int64(const rvm_avx_float32_t m0) {
+static inline rvm_avx_int64_t mipp_avx_cast_k_float32_int64(const rvm_avx_float32_t m0) {
 	rvm_avx_int64_t res;
 	res.m= _mm256_castps_si256(m0.m);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int64_t mipp_avx_cast_k_int64_int64(const rvm_avx_int64_t m0) {
+static inline rvm_avx_int64_t mipp_avx_cast_k_int64_int64(const rvm_avx_int64_t m0) {
 	rvm_avx_int64_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int64_t mipp_avx_cast_k_int32_int64(const rvm_avx_int32_t m0) {
+static inline rvm_avx_int64_t mipp_avx_cast_k_int32_int64(const rvm_avx_int32_t m0) {
 	rvm_avx_int64_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int64_t mipp_avx_cast_k_int16_int64(const rvm_avx_int16_t m0) {
+static inline rvm_avx_int64_t mipp_avx_cast_k_int16_int64(const rvm_avx_int16_t m0) {
 	rvm_avx_int64_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int64_t mipp_avx_cast_k_int8_int64(const rvm_avx_int8_t m0) {
+static inline rvm_avx_int64_t mipp_avx_cast_k_int8_int64(const rvm_avx_int8_t m0) {
 	rvm_avx_int64_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int64_t mipp_avx_cast_k_uint64_int64(const rvm_avx_uint64_t m0) {
+static inline rvm_avx_int64_t mipp_avx_cast_k_uint64_int64(const rvm_avx_uint64_t m0) {
 	rvm_avx_int64_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int64_t mipp_avx_cast_k_uint32_int64(const rvm_avx_uint32_t m0) {
+static inline rvm_avx_int64_t mipp_avx_cast_k_uint32_int64(const rvm_avx_uint32_t m0) {
 	rvm_avx_int64_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int64_t mipp_avx_cast_k_uint16_int64(const rvm_avx_uint16_t m0) {
+static inline rvm_avx_int64_t mipp_avx_cast_k_uint16_int64(const rvm_avx_uint16_t m0) {
 	rvm_avx_int64_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int64_t mipp_avx_cast_k_uint8_int64(const rvm_avx_uint8_t m0) {
+static inline rvm_avx_int64_t mipp_avx_cast_k_uint8_int64(const rvm_avx_uint8_t m0) {
 	rvm_avx_int64_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int32_t mipp_avx_cast_k_float64_int32(const rvm_avx_float64_t m0) {
+static inline rvm_avx_int32_t mipp_avx_cast_k_float64_int32(const rvm_avx_float64_t m0) {
 	rvm_avx_int32_t res;
 	res.m= _mm256_castpd_si256(m0.m);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int32_t mipp_avx_cast_k_float32_int32(const rvm_avx_float32_t m0) {
+static inline rvm_avx_int32_t mipp_avx_cast_k_float32_int32(const rvm_avx_float32_t m0) {
 	rvm_avx_int32_t res;
 	res.m= _mm256_castps_si256(m0.m);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int32_t mipp_avx_cast_k_int64_int32(const rvm_avx_int64_t m0) {
+static inline rvm_avx_int32_t mipp_avx_cast_k_int64_int32(const rvm_avx_int64_t m0) {
 	rvm_avx_int32_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int32_t mipp_avx_cast_k_int32_int32(const rvm_avx_int32_t m0) {
+static inline rvm_avx_int32_t mipp_avx_cast_k_int32_int32(const rvm_avx_int32_t m0) {
 	rvm_avx_int32_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int32_t mipp_avx_cast_k_int16_int32(const rvm_avx_int16_t m0) {
+static inline rvm_avx_int32_t mipp_avx_cast_k_int16_int32(const rvm_avx_int16_t m0) {
 	rvm_avx_int32_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int32_t mipp_avx_cast_k_int8_int32(const rvm_avx_int8_t m0) {
+static inline rvm_avx_int32_t mipp_avx_cast_k_int8_int32(const rvm_avx_int8_t m0) {
 	rvm_avx_int32_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int32_t mipp_avx_cast_k_uint64_int32(const rvm_avx_uint64_t m0) {
+static inline rvm_avx_int32_t mipp_avx_cast_k_uint64_int32(const rvm_avx_uint64_t m0) {
 	rvm_avx_int32_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int32_t mipp_avx_cast_k_uint32_int32(const rvm_avx_uint32_t m0) {
+static inline rvm_avx_int32_t mipp_avx_cast_k_uint32_int32(const rvm_avx_uint32_t m0) {
 	rvm_avx_int32_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int32_t mipp_avx_cast_k_uint16_int32(const rvm_avx_uint16_t m0) {
+static inline rvm_avx_int32_t mipp_avx_cast_k_uint16_int32(const rvm_avx_uint16_t m0) {
 	rvm_avx_int32_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int32_t mipp_avx_cast_k_uint8_int32(const rvm_avx_uint8_t m0) {
+static inline rvm_avx_int32_t mipp_avx_cast_k_uint8_int32(const rvm_avx_uint8_t m0) {
 	rvm_avx_int32_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int16_t mipp_avx_cast_k_float64_int16(const rvm_avx_float64_t m0) {
+static inline rvm_avx_int16_t mipp_avx_cast_k_float64_int16(const rvm_avx_float64_t m0) {
 	rvm_avx_int16_t res;
 	res.m= _mm256_castpd_si256(m0.m);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int16_t mipp_avx_cast_k_float32_int16(const rvm_avx_float32_t m0) {
+static inline rvm_avx_int16_t mipp_avx_cast_k_float32_int16(const rvm_avx_float32_t m0) {
 	rvm_avx_int16_t res;
 	res.m= _mm256_castps_si256(m0.m);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int16_t mipp_avx_cast_k_int64_int16(const rvm_avx_int64_t m0) {
+static inline rvm_avx_int16_t mipp_avx_cast_k_int64_int16(const rvm_avx_int64_t m0) {
 	rvm_avx_int16_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int16_t mipp_avx_cast_k_int32_int16(const rvm_avx_int32_t m0) {
+static inline rvm_avx_int16_t mipp_avx_cast_k_int32_int16(const rvm_avx_int32_t m0) {
 	rvm_avx_int16_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int16_t mipp_avx_cast_k_int16_int16(const rvm_avx_int16_t m0) {
+static inline rvm_avx_int16_t mipp_avx_cast_k_int16_int16(const rvm_avx_int16_t m0) {
 	rvm_avx_int16_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int16_t mipp_avx_cast_k_int8_int16(const rvm_avx_int8_t m0) {
+static inline rvm_avx_int16_t mipp_avx_cast_k_int8_int16(const rvm_avx_int8_t m0) {
 	rvm_avx_int16_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int16_t mipp_avx_cast_k_uint64_int16(const rvm_avx_uint64_t m0) {
+static inline rvm_avx_int16_t mipp_avx_cast_k_uint64_int16(const rvm_avx_uint64_t m0) {
 	rvm_avx_int16_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int16_t mipp_avx_cast_k_uint32_int16(const rvm_avx_uint32_t m0) {
+static inline rvm_avx_int16_t mipp_avx_cast_k_uint32_int16(const rvm_avx_uint32_t m0) {
 	rvm_avx_int16_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int16_t mipp_avx_cast_k_uint16_int16(const rvm_avx_uint16_t m0) {
+static inline rvm_avx_int16_t mipp_avx_cast_k_uint16_int16(const rvm_avx_uint16_t m0) {
 	rvm_avx_int16_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int16_t mipp_avx_cast_k_uint8_int16(const rvm_avx_uint8_t m0) {
+static inline rvm_avx_int16_t mipp_avx_cast_k_uint8_int16(const rvm_avx_uint8_t m0) {
 	rvm_avx_int16_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int8_t mipp_avx_cast_k_float64_int8(const rvm_avx_float64_t m0) {
+static inline rvm_avx_int8_t mipp_avx_cast_k_float64_int8(const rvm_avx_float64_t m0) {
 	rvm_avx_int8_t res;
 	res.m= _mm256_castpd_si256(m0.m);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int8_t mipp_avx_cast_k_float32_int8(const rvm_avx_float32_t m0) {
+static inline rvm_avx_int8_t mipp_avx_cast_k_float32_int8(const rvm_avx_float32_t m0) {
 	rvm_avx_int8_t res;
 	res.m= _mm256_castps_si256(m0.m);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int8_t mipp_avx_cast_k_int64_int8(const rvm_avx_int64_t m0) {
+static inline rvm_avx_int8_t mipp_avx_cast_k_int64_int8(const rvm_avx_int64_t m0) {
 	rvm_avx_int8_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int8_t mipp_avx_cast_k_int32_int8(const rvm_avx_int32_t m0) {
+static inline rvm_avx_int8_t mipp_avx_cast_k_int32_int8(const rvm_avx_int32_t m0) {
 	rvm_avx_int8_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int8_t mipp_avx_cast_k_int16_int8(const rvm_avx_int16_t m0) {
+static inline rvm_avx_int8_t mipp_avx_cast_k_int16_int8(const rvm_avx_int16_t m0) {
 	rvm_avx_int8_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int8_t mipp_avx_cast_k_int8_int8(const rvm_avx_int8_t m0) {
+static inline rvm_avx_int8_t mipp_avx_cast_k_int8_int8(const rvm_avx_int8_t m0) {
 	rvm_avx_int8_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int8_t mipp_avx_cast_k_uint64_int8(const rvm_avx_uint64_t m0) {
+static inline rvm_avx_int8_t mipp_avx_cast_k_uint64_int8(const rvm_avx_uint64_t m0) {
 	rvm_avx_int8_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int8_t mipp_avx_cast_k_uint32_int8(const rvm_avx_uint32_t m0) {
+static inline rvm_avx_int8_t mipp_avx_cast_k_uint32_int8(const rvm_avx_uint32_t m0) {
 	rvm_avx_int8_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int8_t mipp_avx_cast_k_uint16_int8(const rvm_avx_uint16_t m0) {
+static inline rvm_avx_int8_t mipp_avx_cast_k_uint16_int8(const rvm_avx_uint16_t m0) {
 	rvm_avx_int8_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_int8_t mipp_avx_cast_k_uint8_int8(const rvm_avx_uint8_t m0) {
+static inline rvm_avx_int8_t mipp_avx_cast_k_uint8_int8(const rvm_avx_uint8_t m0) {
 	rvm_avx_int8_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint64_t mipp_avx_cast_k_float64_uint64(const rvm_avx_float64_t m0) {
+static inline rvm_avx_uint64_t mipp_avx_cast_k_float64_uint64(const rvm_avx_float64_t m0) {
 	rvm_avx_uint64_t res;
 	res.m= _mm256_castpd_si256(m0.m);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint64_t mipp_avx_cast_k_float32_uint64(const rvm_avx_float32_t m0) {
+static inline rvm_avx_uint64_t mipp_avx_cast_k_float32_uint64(const rvm_avx_float32_t m0) {
 	rvm_avx_uint64_t res;
 	res.m= _mm256_castps_si256(m0.m);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint64_t mipp_avx_cast_k_int64_uint64(const rvm_avx_int64_t m0) {
+static inline rvm_avx_uint64_t mipp_avx_cast_k_int64_uint64(const rvm_avx_int64_t m0) {
 	rvm_avx_uint64_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint64_t mipp_avx_cast_k_int32_uint64(const rvm_avx_int32_t m0) {
+static inline rvm_avx_uint64_t mipp_avx_cast_k_int32_uint64(const rvm_avx_int32_t m0) {
 	rvm_avx_uint64_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint64_t mipp_avx_cast_k_int16_uint64(const rvm_avx_int16_t m0) {
+static inline rvm_avx_uint64_t mipp_avx_cast_k_int16_uint64(const rvm_avx_int16_t m0) {
 	rvm_avx_uint64_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint64_t mipp_avx_cast_k_int8_uint64(const rvm_avx_int8_t m0) {
+static inline rvm_avx_uint64_t mipp_avx_cast_k_int8_uint64(const rvm_avx_int8_t m0) {
 	rvm_avx_uint64_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint64_t mipp_avx_cast_k_uint64_uint64(const rvm_avx_uint64_t m0) {
+static inline rvm_avx_uint64_t mipp_avx_cast_k_uint64_uint64(const rvm_avx_uint64_t m0) {
 	rvm_avx_uint64_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint64_t mipp_avx_cast_k_uint32_uint64(const rvm_avx_uint32_t m0) {
+static inline rvm_avx_uint64_t mipp_avx_cast_k_uint32_uint64(const rvm_avx_uint32_t m0) {
 	rvm_avx_uint64_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint64_t mipp_avx_cast_k_uint16_uint64(const rvm_avx_uint16_t m0) {
+static inline rvm_avx_uint64_t mipp_avx_cast_k_uint16_uint64(const rvm_avx_uint16_t m0) {
 	rvm_avx_uint64_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint64_t mipp_avx_cast_k_uint8_uint64(const rvm_avx_uint8_t m0) {
+static inline rvm_avx_uint64_t mipp_avx_cast_k_uint8_uint64(const rvm_avx_uint8_t m0) {
 	rvm_avx_uint64_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint32_t mipp_avx_cast_k_float64_uint32(const rvm_avx_float64_t m0) {
+static inline rvm_avx_uint32_t mipp_avx_cast_k_float64_uint32(const rvm_avx_float64_t m0) {
 	rvm_avx_uint32_t res;
 	res.m= _mm256_castpd_si256(m0.m);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint32_t mipp_avx_cast_k_float32_uint32(const rvm_avx_float32_t m0) {
+static inline rvm_avx_uint32_t mipp_avx_cast_k_float32_uint32(const rvm_avx_float32_t m0) {
 	rvm_avx_uint32_t res;
 	res.m= _mm256_castps_si256(m0.m);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint32_t mipp_avx_cast_k_int64_uint32(const rvm_avx_int64_t m0) {
+static inline rvm_avx_uint32_t mipp_avx_cast_k_int64_uint32(const rvm_avx_int64_t m0) {
 	rvm_avx_uint32_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint32_t mipp_avx_cast_k_int32_uint32(const rvm_avx_int32_t m0) {
+static inline rvm_avx_uint32_t mipp_avx_cast_k_int32_uint32(const rvm_avx_int32_t m0) {
 	rvm_avx_uint32_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint32_t mipp_avx_cast_k_int16_uint32(const rvm_avx_int16_t m0) {
+static inline rvm_avx_uint32_t mipp_avx_cast_k_int16_uint32(const rvm_avx_int16_t m0) {
 	rvm_avx_uint32_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint32_t mipp_avx_cast_k_int8_uint32(const rvm_avx_int8_t m0) {
+static inline rvm_avx_uint32_t mipp_avx_cast_k_int8_uint32(const rvm_avx_int8_t m0) {
 	rvm_avx_uint32_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint32_t mipp_avx_cast_k_uint64_uint32(const rvm_avx_uint64_t m0) {
+static inline rvm_avx_uint32_t mipp_avx_cast_k_uint64_uint32(const rvm_avx_uint64_t m0) {
 	rvm_avx_uint32_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint32_t mipp_avx_cast_k_uint32_uint32(const rvm_avx_uint32_t m0) {
+static inline rvm_avx_uint32_t mipp_avx_cast_k_uint32_uint32(const rvm_avx_uint32_t m0) {
 	rvm_avx_uint32_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint32_t mipp_avx_cast_k_uint16_uint32(const rvm_avx_uint16_t m0) {
+static inline rvm_avx_uint32_t mipp_avx_cast_k_uint16_uint32(const rvm_avx_uint16_t m0) {
 	rvm_avx_uint32_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint32_t mipp_avx_cast_k_uint8_uint32(const rvm_avx_uint8_t m0) {
+static inline rvm_avx_uint32_t mipp_avx_cast_k_uint8_uint32(const rvm_avx_uint8_t m0) {
 	rvm_avx_uint32_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint16_t mipp_avx_cast_k_float64_uint16(const rvm_avx_float64_t m0) {
+static inline rvm_avx_uint16_t mipp_avx_cast_k_float64_uint16(const rvm_avx_float64_t m0) {
 	rvm_avx_uint16_t res;
 	res.m= _mm256_castpd_si256(m0.m);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint16_t mipp_avx_cast_k_float32_uint16(const rvm_avx_float32_t m0) {
+static inline rvm_avx_uint16_t mipp_avx_cast_k_float32_uint16(const rvm_avx_float32_t m0) {
 	rvm_avx_uint16_t res;
 	res.m= _mm256_castps_si256(m0.m);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint16_t mipp_avx_cast_k_int64_uint16(const rvm_avx_int64_t m0) {
+static inline rvm_avx_uint16_t mipp_avx_cast_k_int64_uint16(const rvm_avx_int64_t m0) {
 	rvm_avx_uint16_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint16_t mipp_avx_cast_k_int32_uint16(const rvm_avx_int32_t m0) {
+static inline rvm_avx_uint16_t mipp_avx_cast_k_int32_uint16(const rvm_avx_int32_t m0) {
 	rvm_avx_uint16_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint16_t mipp_avx_cast_k_int16_uint16(const rvm_avx_int16_t m0) {
+static inline rvm_avx_uint16_t mipp_avx_cast_k_int16_uint16(const rvm_avx_int16_t m0) {
 	rvm_avx_uint16_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint16_t mipp_avx_cast_k_int8_uint16(const rvm_avx_int8_t m0) {
+static inline rvm_avx_uint16_t mipp_avx_cast_k_int8_uint16(const rvm_avx_int8_t m0) {
 	rvm_avx_uint16_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint16_t mipp_avx_cast_k_uint64_uint16(const rvm_avx_uint64_t m0) {
+static inline rvm_avx_uint16_t mipp_avx_cast_k_uint64_uint16(const rvm_avx_uint64_t m0) {
 	rvm_avx_uint16_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint16_t mipp_avx_cast_k_uint32_uint16(const rvm_avx_uint32_t m0) {
+static inline rvm_avx_uint16_t mipp_avx_cast_k_uint32_uint16(const rvm_avx_uint32_t m0) {
 	rvm_avx_uint16_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint16_t mipp_avx_cast_k_uint16_uint16(const rvm_avx_uint16_t m0) {
+static inline rvm_avx_uint16_t mipp_avx_cast_k_uint16_uint16(const rvm_avx_uint16_t m0) {
 	rvm_avx_uint16_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint16_t mipp_avx_cast_k_uint8_uint16(const rvm_avx_uint8_t m0) {
+static inline rvm_avx_uint16_t mipp_avx_cast_k_uint8_uint16(const rvm_avx_uint8_t m0) {
 	rvm_avx_uint16_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint8_t mipp_avx_cast_k_float64_uint8(const rvm_avx_float64_t m0) {
+static inline rvm_avx_uint8_t mipp_avx_cast_k_float64_uint8(const rvm_avx_float64_t m0) {
 	rvm_avx_uint8_t res;
 	res.m= _mm256_castpd_si256(m0.m);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint8_t mipp_avx_cast_k_float32_uint8(const rvm_avx_float32_t m0) {
+static inline rvm_avx_uint8_t mipp_avx_cast_k_float32_uint8(const rvm_avx_float32_t m0) {
 	rvm_avx_uint8_t res;
 	res.m= _mm256_castps_si256(m0.m);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint8_t mipp_avx_cast_k_int64_uint8(const rvm_avx_int64_t m0) {
+static inline rvm_avx_uint8_t mipp_avx_cast_k_int64_uint8(const rvm_avx_int64_t m0) {
 	rvm_avx_uint8_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint8_t mipp_avx_cast_k_int32_uint8(const rvm_avx_int32_t m0) {
+static inline rvm_avx_uint8_t mipp_avx_cast_k_int32_uint8(const rvm_avx_int32_t m0) {
 	rvm_avx_uint8_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint8_t mipp_avx_cast_k_int16_uint8(const rvm_avx_int16_t m0) {
+static inline rvm_avx_uint8_t mipp_avx_cast_k_int16_uint8(const rvm_avx_int16_t m0) {
 	rvm_avx_uint8_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint8_t mipp_avx_cast_k_int8_uint8(const rvm_avx_int8_t m0) {
+static inline rvm_avx_uint8_t mipp_avx_cast_k_int8_uint8(const rvm_avx_int8_t m0) {
 	rvm_avx_uint8_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint8_t mipp_avx_cast_k_uint64_uint8(const rvm_avx_uint64_t m0) {
+static inline rvm_avx_uint8_t mipp_avx_cast_k_uint64_uint8(const rvm_avx_uint64_t m0) {
 	rvm_avx_uint8_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint8_t mipp_avx_cast_k_uint32_uint8(const rvm_avx_uint32_t m0) {
+static inline rvm_avx_uint8_t mipp_avx_cast_k_uint32_uint8(const rvm_avx_uint32_t m0) {
 	rvm_avx_uint8_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint8_t mipp_avx_cast_k_uint16_uint8(const rvm_avx_uint16_t m0) {
+static inline rvm_avx_uint8_t mipp_avx_cast_k_uint16_uint8(const rvm_avx_uint16_t m0) {
 	rvm_avx_uint8_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cast_k
-rvm_avx_uint8_t mipp_avx_cast_k_uint8_uint8(const rvm_avx_uint8_t m0) {
+static inline rvm_avx_uint8_t mipp_avx_cast_k_uint8_uint8(const rvm_avx_uint8_t m0) {
 	rvm_avx_uint8_t res;
 	res.m= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- toreg
-rvd_avx_float64_t mipp_avx_toreg_float64(const rvm_avx_float64_t m0) {
+static inline rvd_avx_float64_t mipp_avx_toreg_float64(const rvm_avx_float64_t m0) {
 	rvd_avx_float64_t res;
 	res.r= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- toreg
-rvd_avx_float32_t mipp_avx_toreg_float32(const rvm_avx_float32_t m0) {
+static inline rvd_avx_float32_t mipp_avx_toreg_float32(const rvm_avx_float32_t m0) {
 	rvd_avx_float32_t res;
 	res.r= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- toreg
-rvd_avx_int64_t mipp_avx_toreg_int64(const rvm_avx_int64_t m0) {
+static inline rvd_avx_int64_t mipp_avx_toreg_int64(const rvm_avx_int64_t m0) {
 	rvd_avx_int64_t res;
 	res.r= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- toreg
-rvd_avx_int32_t mipp_avx_toreg_int32(const rvm_avx_int32_t m0) {
+static inline rvd_avx_int32_t mipp_avx_toreg_int32(const rvm_avx_int32_t m0) {
 	rvd_avx_int32_t res;
 	res.r= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- toreg
-rvd_avx_int16_t mipp_avx_toreg_int16(const rvm_avx_int16_t m0) {
+static inline rvd_avx_int16_t mipp_avx_toreg_int16(const rvm_avx_int16_t m0) {
 	rvd_avx_int16_t res;
 	res.r= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- toreg
-rvd_avx_int8_t mipp_avx_toreg_int8(const rvm_avx_int8_t m0) {
+static inline rvd_avx_int8_t mipp_avx_toreg_int8(const rvm_avx_int8_t m0) {
 	rvd_avx_int8_t res;
 	res.r= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- toreg
-rvd_avx_uint64_t mipp_avx_toreg_uint64(const rvm_avx_uint64_t m0) {
+static inline rvd_avx_uint64_t mipp_avx_toreg_uint64(const rvm_avx_uint64_t m0) {
 	rvd_avx_uint64_t res;
 	res.r= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- toreg
-rvd_avx_uint32_t mipp_avx_toreg_uint32(const rvm_avx_uint32_t m0) {
+static inline rvd_avx_uint32_t mipp_avx_toreg_uint32(const rvm_avx_uint32_t m0) {
 	rvd_avx_uint32_t res;
 	res.r= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- toreg
-rvd_avx_uint16_t mipp_avx_toreg_uint16(const rvm_avx_uint16_t m0) {
+static inline rvd_avx_uint16_t mipp_avx_toreg_uint16(const rvm_avx_uint16_t m0) {
 	rvd_avx_uint16_t res;
 	res.r= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- toreg
-rvd_avx_uint8_t mipp_avx_toreg_uint8(const rvm_avx_uint8_t m0) {
+static inline rvd_avx_uint8_t mipp_avx_toreg_uint8(const rvm_avx_uint8_t m0) {
 	rvd_avx_uint8_t res;
 	res.r= m0.m;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- tomsk
-rvm_avx_float64_t mipp_avx_tomsk_float64(const rvd_avx_float64_t r0) {
+static inline rvm_avx_float64_t mipp_avx_tomsk_float64(const rvd_avx_float64_t r0) {
 	rvm_avx_float64_t res;
 	res.m= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- tomsk
-rvm_avx_float32_t mipp_avx_tomsk_float32(const rvd_avx_float32_t r0) {
+static inline rvm_avx_float32_t mipp_avx_tomsk_float32(const rvd_avx_float32_t r0) {
 	rvm_avx_float32_t res;
 	res.m= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- tomsk
-rvm_avx_int64_t mipp_avx_tomsk_int64(const rvd_avx_int64_t r0) {
+static inline rvm_avx_int64_t mipp_avx_tomsk_int64(const rvd_avx_int64_t r0) {
 	rvm_avx_int64_t res;
 	res.m= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- tomsk
-rvm_avx_int32_t mipp_avx_tomsk_int32(const rvd_avx_int32_t r0) {
+static inline rvm_avx_int32_t mipp_avx_tomsk_int32(const rvd_avx_int32_t r0) {
 	rvm_avx_int32_t res;
 	res.m= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- tomsk
-rvm_avx_int16_t mipp_avx_tomsk_int16(const rvd_avx_int16_t r0) {
+static inline rvm_avx_int16_t mipp_avx_tomsk_int16(const rvd_avx_int16_t r0) {
 	rvm_avx_int16_t res;
 	res.m= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- tomsk
-rvm_avx_int8_t mipp_avx_tomsk_int8(const rvd_avx_int8_t r0) {
+static inline rvm_avx_int8_t mipp_avx_tomsk_int8(const rvd_avx_int8_t r0) {
 	rvm_avx_int8_t res;
 	res.m= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- tomsk
-rvm_avx_uint64_t mipp_avx_tomsk_uint64(const rvd_avx_uint64_t r0) {
+static inline rvm_avx_uint64_t mipp_avx_tomsk_uint64(const rvd_avx_uint64_t r0) {
 	rvm_avx_uint64_t res;
 	res.m= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- tomsk
-rvm_avx_uint32_t mipp_avx_tomsk_uint32(const rvd_avx_uint32_t r0) {
+static inline rvm_avx_uint32_t mipp_avx_tomsk_uint32(const rvd_avx_uint32_t r0) {
 	rvm_avx_uint32_t res;
 	res.m= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- tomsk
-rvm_avx_uint16_t mipp_avx_tomsk_uint16(const rvd_avx_uint16_t r0) {
+static inline rvm_avx_uint16_t mipp_avx_tomsk_uint16(const rvd_avx_uint16_t r0) {
 	rvm_avx_uint16_t res;
 	res.m= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- tomsk
-rvm_avx_uint8_t mipp_avx_tomsk_uint8(const rvd_avx_uint8_t r0) {
+static inline rvm_avx_uint8_t mipp_avx_tomsk_uint8(const rvd_avx_uint8_t r0) {
 	rvm_avx_uint8_t res;
 	res.m= r0.r;
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if defined(MIPP_ALIGNED_LOADS)
-rvd_avx_float64_t mipp_avx_load_float64(const float64_t* p0) {
+static inline rvd_avx_float64_t mipp_avx_load_float64(const float64_t* p0) {
 	rvd_avx_float64_t res;
 	res.r= _mm256_load_pd((float64_t*) p0);
 	return res;
@@ -1373,7 +1363,7 @@ rvd_avx_float64_t mipp_avx_load_float64(const float64_t* p0) {
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if defined(MIPP_ALIGNED_LOADS)
-rvd_avx_float32_t mipp_avx_load_float32(const float32_t* p0) {
+static inline rvd_avx_float32_t mipp_avx_load_float32(const float32_t* p0) {
 	rvd_avx_float32_t res;
 	res.r= _mm256_load_ps((float32_t*) p0);
 	return res;
@@ -1381,7 +1371,7 @@ rvd_avx_float32_t mipp_avx_load_float32(const float32_t* p0) {
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if defined(MIPP_ALIGNED_LOADS)
-rvd_avx_int64_t mipp_avx_load_int64(const int64_t* p0) {
+static inline rvd_avx_int64_t mipp_avx_load_int64(const int64_t* p0) {
 	rvd_avx_int64_t res;
 	res.r= _mm256_load_si256((__m256i*) p0);
 	return res;
@@ -1389,7 +1379,7 @@ rvd_avx_int64_t mipp_avx_load_int64(const int64_t* p0) {
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if defined(MIPP_ALIGNED_LOADS)
-rvd_avx_int32_t mipp_avx_load_int32(const int32_t* p0) {
+static inline rvd_avx_int32_t mipp_avx_load_int32(const int32_t* p0) {
 	rvd_avx_int32_t res;
 	res.r= _mm256_load_si256((__m256i*) p0);
 	return res;
@@ -1397,7 +1387,7 @@ rvd_avx_int32_t mipp_avx_load_int32(const int32_t* p0) {
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if defined(MIPP_ALIGNED_LOADS)
-rvd_avx_int16_t mipp_avx_load_int16(const int16_t* p0) {
+static inline rvd_avx_int16_t mipp_avx_load_int16(const int16_t* p0) {
 	rvd_avx_int16_t res;
 	res.r= _mm256_load_si256((__m256i*) p0);
 	return res;
@@ -1405,7 +1395,7 @@ rvd_avx_int16_t mipp_avx_load_int16(const int16_t* p0) {
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if defined(MIPP_ALIGNED_LOADS)
-rvd_avx_int8_t mipp_avx_load_int8(const int8_t* p0) {
+static inline rvd_avx_int8_t mipp_avx_load_int8(const int8_t* p0) {
 	rvd_avx_int8_t res;
 	res.r= _mm256_load_si256((__m256i*) p0);
 	return res;
@@ -1413,7 +1403,7 @@ rvd_avx_int8_t mipp_avx_load_int8(const int8_t* p0) {
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if defined(MIPP_ALIGNED_LOADS)
-rvd_avx_uint64_t mipp_avx_load_uint64(const uint64_t* p0) {
+static inline rvd_avx_uint64_t mipp_avx_load_uint64(const uint64_t* p0) {
 	rvd_avx_uint64_t res;
 	res.r= _mm256_load_si256((__m256i*) p0);
 	return res;
@@ -1421,7 +1411,7 @@ rvd_avx_uint64_t mipp_avx_load_uint64(const uint64_t* p0) {
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if defined(MIPP_ALIGNED_LOADS)
-rvd_avx_uint32_t mipp_avx_load_uint32(const uint32_t* p0) {
+static inline rvd_avx_uint32_t mipp_avx_load_uint32(const uint32_t* p0) {
 	rvd_avx_uint32_t res;
 	res.r= _mm256_load_si256((__m256i*) p0);
 	return res;
@@ -1429,7 +1419,7 @@ rvd_avx_uint32_t mipp_avx_load_uint32(const uint32_t* p0) {
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if defined(MIPP_ALIGNED_LOADS)
-rvd_avx_uint16_t mipp_avx_load_uint16(const uint16_t* p0) {
+static inline rvd_avx_uint16_t mipp_avx_load_uint16(const uint16_t* p0) {
 	rvd_avx_uint16_t res;
 	res.r= _mm256_load_si256((__m256i*) p0);
 	return res;
@@ -1437,7 +1427,7 @@ rvd_avx_uint16_t mipp_avx_load_uint16(const uint16_t* p0) {
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if defined(MIPP_ALIGNED_LOADS)
-rvd_avx_uint8_t mipp_avx_load_uint8(const uint8_t* p0) {
+static inline rvd_avx_uint8_t mipp_avx_load_uint8(const uint8_t* p0) {
 	rvd_avx_uint8_t res;
 	res.r= _mm256_load_si256((__m256i*) p0);
 	return res;
@@ -1445,7 +1435,7 @@ rvd_avx_uint8_t mipp_avx_load_uint8(const uint8_t* p0) {
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if !defined(MIPP_ALIGNED_LOADS)
-rvd_avx_float64_t mipp_avx_load_float64(const float64_t* p0) {
+static inline rvd_avx_float64_t mipp_avx_load_float64(const float64_t* p0) {
 	rvd_avx_float64_t res;
 	res.r= _mm256_loadu_pd((float64_t*) p0);
 	return res;
@@ -1453,7 +1443,7 @@ rvd_avx_float64_t mipp_avx_load_float64(const float64_t* p0) {
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if !defined(MIPP_ALIGNED_LOADS)
-rvd_avx_float32_t mipp_avx_load_float32(const float32_t* p0) {
+static inline rvd_avx_float32_t mipp_avx_load_float32(const float32_t* p0) {
 	rvd_avx_float32_t res;
 	res.r= _mm256_loadu_ps((float32_t*) p0);
 	return res;
@@ -1461,7 +1451,7 @@ rvd_avx_float32_t mipp_avx_load_float32(const float32_t* p0) {
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if !defined(MIPP_ALIGNED_LOADS)
-rvd_avx_int64_t mipp_avx_load_int64(const int64_t* p0) {
+static inline rvd_avx_int64_t mipp_avx_load_int64(const int64_t* p0) {
 	rvd_avx_int64_t res;
 	res.r= _mm256_loadu_si256((__m256i*) p0);
 	return res;
@@ -1469,7 +1459,7 @@ rvd_avx_int64_t mipp_avx_load_int64(const int64_t* p0) {
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if !defined(MIPP_ALIGNED_LOADS)
-rvd_avx_int32_t mipp_avx_load_int32(const int32_t* p0) {
+static inline rvd_avx_int32_t mipp_avx_load_int32(const int32_t* p0) {
 	rvd_avx_int32_t res;
 	res.r= _mm256_loadu_si256((__m256i*) p0);
 	return res;
@@ -1477,7 +1467,7 @@ rvd_avx_int32_t mipp_avx_load_int32(const int32_t* p0) {
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if !defined(MIPP_ALIGNED_LOADS)
-rvd_avx_int16_t mipp_avx_load_int16(const int16_t* p0) {
+static inline rvd_avx_int16_t mipp_avx_load_int16(const int16_t* p0) {
 	rvd_avx_int16_t res;
 	res.r= _mm256_loadu_si256((__m256i*) p0);
 	return res;
@@ -1485,7 +1475,7 @@ rvd_avx_int16_t mipp_avx_load_int16(const int16_t* p0) {
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if !defined(MIPP_ALIGNED_LOADS)
-rvd_avx_int8_t mipp_avx_load_int8(const int8_t* p0) {
+static inline rvd_avx_int8_t mipp_avx_load_int8(const int8_t* p0) {
 	rvd_avx_int8_t res;
 	res.r= _mm256_loadu_si256((__m256i*) p0);
 	return res;
@@ -1493,7 +1483,7 @@ rvd_avx_int8_t mipp_avx_load_int8(const int8_t* p0) {
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if !defined(MIPP_ALIGNED_LOADS)
-rvd_avx_uint64_t mipp_avx_load_uint64(const uint64_t* p0) {
+static inline rvd_avx_uint64_t mipp_avx_load_uint64(const uint64_t* p0) {
 	rvd_avx_uint64_t res;
 	res.r= _mm256_loadu_si256((__m256i*) p0);
 	return res;
@@ -1501,7 +1491,7 @@ rvd_avx_uint64_t mipp_avx_load_uint64(const uint64_t* p0) {
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if !defined(MIPP_ALIGNED_LOADS)
-rvd_avx_uint32_t mipp_avx_load_uint32(const uint32_t* p0) {
+static inline rvd_avx_uint32_t mipp_avx_load_uint32(const uint32_t* p0) {
 	rvd_avx_uint32_t res;
 	res.r= _mm256_loadu_si256((__m256i*) p0);
 	return res;
@@ -1509,7 +1499,7 @@ rvd_avx_uint32_t mipp_avx_load_uint32(const uint32_t* p0) {
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if !defined(MIPP_ALIGNED_LOADS)
-rvd_avx_uint16_t mipp_avx_load_uint16(const uint16_t* p0) {
+static inline rvd_avx_uint16_t mipp_avx_load_uint16(const uint16_t* p0) {
 	rvd_avx_uint16_t res;
 	res.r= _mm256_loadu_si256((__m256i*) p0);
 	return res;
@@ -1517,503 +1507,503 @@ rvd_avx_uint16_t mipp_avx_load_uint16(const uint16_t* p0) {
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- load
 #if !defined(MIPP_ALIGNED_LOADS)
-rvd_avx_uint8_t mipp_avx_load_uint8(const uint8_t* p0) {
+static inline rvd_avx_uint8_t mipp_avx_load_uint8(const uint8_t* p0) {
 	rvd_avx_uint8_t res;
 	res.r= _mm256_loadu_si256((__m256i*) p0);
 	return res;
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- loadu
-rvd_avx_float64_t mipp_avx_loadu_float64(const float64_t* p0) {
+static inline rvd_avx_float64_t mipp_avx_loadu_float64(const float64_t* p0) {
 	rvd_avx_float64_t res;
 	res.r= _mm256_loadu_pd((float64_t*) p0);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- loadu
-rvd_avx_float32_t mipp_avx_loadu_float32(const float32_t* p0) {
+static inline rvd_avx_float32_t mipp_avx_loadu_float32(const float32_t* p0) {
 	rvd_avx_float32_t res;
 	res.r= _mm256_loadu_ps((float32_t*) p0);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- loadu
-rvd_avx_int64_t mipp_avx_loadu_int64(const int64_t* p0) {
+static inline rvd_avx_int64_t mipp_avx_loadu_int64(const int64_t* p0) {
 	rvd_avx_int64_t res;
 	res.r= _mm256_loadu_si256((__m256i*) p0);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- loadu
-rvd_avx_int32_t mipp_avx_loadu_int32(const int32_t* p0) {
+static inline rvd_avx_int32_t mipp_avx_loadu_int32(const int32_t* p0) {
 	rvd_avx_int32_t res;
 	res.r= _mm256_loadu_si256((__m256i*) p0);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- loadu
-rvd_avx_int16_t mipp_avx_loadu_int16(const int16_t* p0) {
+static inline rvd_avx_int16_t mipp_avx_loadu_int16(const int16_t* p0) {
 	rvd_avx_int16_t res;
 	res.r= _mm256_loadu_si256((__m256i*) p0);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- loadu
-rvd_avx_int8_t mipp_avx_loadu_int8(const int8_t* p0) {
+static inline rvd_avx_int8_t mipp_avx_loadu_int8(const int8_t* p0) {
 	rvd_avx_int8_t res;
 	res.r= _mm256_loadu_si256((__m256i*) p0);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- loadu
-rvd_avx_uint64_t mipp_avx_loadu_uint64(const uint64_t* p0) {
+static inline rvd_avx_uint64_t mipp_avx_loadu_uint64(const uint64_t* p0) {
 	rvd_avx_uint64_t res;
 	res.r= _mm256_loadu_si256((__m256i*) p0);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- loadu
-rvd_avx_uint32_t mipp_avx_loadu_uint32(const uint32_t* p0) {
+static inline rvd_avx_uint32_t mipp_avx_loadu_uint32(const uint32_t* p0) {
 	rvd_avx_uint32_t res;
 	res.r= _mm256_loadu_si256((__m256i*) p0);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- loadu
-rvd_avx_uint16_t mipp_avx_loadu_uint16(const uint16_t* p0) {
+static inline rvd_avx_uint16_t mipp_avx_loadu_uint16(const uint16_t* p0) {
 	rvd_avx_uint16_t res;
 	res.r= _mm256_loadu_si256((__m256i*) p0);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- loadu
-rvd_avx_uint8_t mipp_avx_loadu_uint8(const uint8_t* p0) {
+static inline rvd_avx_uint8_t mipp_avx_loadu_uint8(const uint8_t* p0) {
 	rvd_avx_uint8_t res;
 	res.r= _mm256_loadu_si256((__m256i*) p0);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if defined(MIPP_ALIGNED_LOADS)
-void mipp_avx_store_float64(float64_t* p0, const rvd_avx_float64_t r0) {
+static inline void mipp_avx_store_float64(float64_t* p0, const rvd_avx_float64_t r0) {
 _mm256_store_pd((float64_t*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if defined(MIPP_ALIGNED_LOADS)
-void mipp_avx_store_float32(float32_t* p0, const rvd_avx_float32_t r0) {
+static inline void mipp_avx_store_float32(float32_t* p0, const rvd_avx_float32_t r0) {
 _mm256_store_ps((float32_t*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if defined(MIPP_ALIGNED_LOADS)
-void mipp_avx_store_int64(int64_t* p0, const rvd_avx_int64_t r0) {
+static inline void mipp_avx_store_int64(int64_t* p0, const rvd_avx_int64_t r0) {
 _mm256_store_si256((__m256i*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if defined(MIPP_ALIGNED_LOADS)
-void mipp_avx_store_int32(int32_t* p0, const rvd_avx_int32_t r0) {
+static inline void mipp_avx_store_int32(int32_t* p0, const rvd_avx_int32_t r0) {
 _mm256_store_si256((__m256i*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if defined(MIPP_ALIGNED_LOADS)
-void mipp_avx_store_int16(int16_t* p0, const rvd_avx_int16_t r0) {
+static inline void mipp_avx_store_int16(int16_t* p0, const rvd_avx_int16_t r0) {
 _mm256_store_si256((__m256i*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if defined(MIPP_ALIGNED_LOADS)
-void mipp_avx_store_int8(int8_t* p0, const rvd_avx_int8_t r0) {
+static inline void mipp_avx_store_int8(int8_t* p0, const rvd_avx_int8_t r0) {
 _mm256_store_si256((__m256i*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if defined(MIPP_ALIGNED_LOADS)
-void mipp_avx_store_uint64(uint64_t* p0, const rvd_avx_uint64_t r0) {
+static inline void mipp_avx_store_uint64(uint64_t* p0, const rvd_avx_uint64_t r0) {
 _mm256_store_si256((__m256i*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if defined(MIPP_ALIGNED_LOADS)
-void mipp_avx_store_uint32(uint32_t* p0, const rvd_avx_uint32_t r0) {
+static inline void mipp_avx_store_uint32(uint32_t* p0, const rvd_avx_uint32_t r0) {
 _mm256_store_si256((__m256i*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if defined(MIPP_ALIGNED_LOADS)
-void mipp_avx_store_uint16(uint16_t* p0, const rvd_avx_uint16_t r0) {
+static inline void mipp_avx_store_uint16(uint16_t* p0, const rvd_avx_uint16_t r0) {
 _mm256_store_si256((__m256i*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if defined(MIPP_ALIGNED_LOADS)
-void mipp_avx_store_uint8(uint8_t* p0, const rvd_avx_uint8_t r0) {
+static inline void mipp_avx_store_uint8(uint8_t* p0, const rvd_avx_uint8_t r0) {
 _mm256_store_si256((__m256i*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if !defined(MIPP_ALIGNED_LOADS)
-void mipp_avx_store_float64(float64_t* p0, const rvd_avx_float64_t r0) {
+static inline void mipp_avx_store_float64(float64_t* p0, const rvd_avx_float64_t r0) {
 _mm256_storeu_pd((float64_t*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if !defined(MIPP_ALIGNED_LOADS)
-void mipp_avx_store_float32(float32_t* p0, const rvd_avx_float32_t r0) {
+static inline void mipp_avx_store_float32(float32_t* p0, const rvd_avx_float32_t r0) {
 _mm256_storeu_ps((float32_t*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if !defined(MIPP_ALIGNED_LOADS)
-void mipp_avx_store_int64(int64_t* p0, const rvd_avx_int64_t r0) {
+static inline void mipp_avx_store_int64(int64_t* p0, const rvd_avx_int64_t r0) {
 _mm256_storeu_si256((__m256i*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if !defined(MIPP_ALIGNED_LOADS)
-void mipp_avx_store_int32(int32_t* p0, const rvd_avx_int32_t r0) {
+static inline void mipp_avx_store_int32(int32_t* p0, const rvd_avx_int32_t r0) {
 _mm256_storeu_si256((__m256i*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if !defined(MIPP_ALIGNED_LOADS)
-void mipp_avx_store_int16(int16_t* p0, const rvd_avx_int16_t r0) {
+static inline void mipp_avx_store_int16(int16_t* p0, const rvd_avx_int16_t r0) {
 _mm256_storeu_si256((__m256i*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if !defined(MIPP_ALIGNED_LOADS)
-void mipp_avx_store_int8(int8_t* p0, const rvd_avx_int8_t r0) {
+static inline void mipp_avx_store_int8(int8_t* p0, const rvd_avx_int8_t r0) {
 _mm256_storeu_si256((__m256i*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if !defined(MIPP_ALIGNED_LOADS)
-void mipp_avx_store_uint64(uint64_t* p0, const rvd_avx_uint64_t r0) {
+static inline void mipp_avx_store_uint64(uint64_t* p0, const rvd_avx_uint64_t r0) {
 _mm256_storeu_si256((__m256i*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if !defined(MIPP_ALIGNED_LOADS)
-void mipp_avx_store_uint32(uint32_t* p0, const rvd_avx_uint32_t r0) {
+static inline void mipp_avx_store_uint32(uint32_t* p0, const rvd_avx_uint32_t r0) {
 _mm256_storeu_si256((__m256i*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if !defined(MIPP_ALIGNED_LOADS)
-void mipp_avx_store_uint16(uint16_t* p0, const rvd_avx_uint16_t r0) {
+static inline void mipp_avx_store_uint16(uint16_t* p0, const rvd_avx_uint16_t r0) {
 _mm256_storeu_si256((__m256i*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- store
 #if !defined(MIPP_ALIGNED_LOADS)
-void mipp_avx_store_uint8(uint8_t* p0, const rvd_avx_uint8_t r0) {
+static inline void mipp_avx_store_uint8(uint8_t* p0, const rvd_avx_uint8_t r0) {
 _mm256_storeu_si256((__m256i*) p0, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- storeu
-void mipp_avx_storeu_float64(float64_t* p0, const rvd_avx_float64_t r0) {
+static inline void mipp_avx_storeu_float64(float64_t* p0, const rvd_avx_float64_t r0) {
 _mm256_storeu_pd((float64_t*) p0, r0.r);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- storeu
-void mipp_avx_storeu_float32(float32_t* p0, const rvd_avx_float32_t r0) {
+static inline void mipp_avx_storeu_float32(float32_t* p0, const rvd_avx_float32_t r0) {
 _mm256_storeu_ps((float32_t*) p0, r0.r);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- storeu
-void mipp_avx_storeu_int64(int64_t* p0, const rvd_avx_int64_t r0) {
+static inline void mipp_avx_storeu_int64(int64_t* p0, const rvd_avx_int64_t r0) {
 _mm256_storeu_si256((__m256i*) p0, r0.r);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- storeu
-void mipp_avx_storeu_int32(int32_t* p0, const rvd_avx_int32_t r0) {
+static inline void mipp_avx_storeu_int32(int32_t* p0, const rvd_avx_int32_t r0) {
 _mm256_storeu_si256((__m256i*) p0, r0.r);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- storeu
-void mipp_avx_storeu_int16(int16_t* p0, const rvd_avx_int16_t r0) {
+static inline void mipp_avx_storeu_int16(int16_t* p0, const rvd_avx_int16_t r0) {
 _mm256_storeu_si256((__m256i*) p0, r0.r);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- storeu
-void mipp_avx_storeu_int8(int8_t* p0, const rvd_avx_int8_t r0) {
+static inline void mipp_avx_storeu_int8(int8_t* p0, const rvd_avx_int8_t r0) {
 _mm256_storeu_si256((__m256i*) p0, r0.r);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- storeu
-void mipp_avx_storeu_uint64(uint64_t* p0, const rvd_avx_uint64_t r0) {
+static inline void mipp_avx_storeu_uint64(uint64_t* p0, const rvd_avx_uint64_t r0) {
 _mm256_storeu_si256((__m256i*) p0, r0.r);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- storeu
-void mipp_avx_storeu_uint32(uint32_t* p0, const rvd_avx_uint32_t r0) {
+static inline void mipp_avx_storeu_uint32(uint32_t* p0, const rvd_avx_uint32_t r0) {
 _mm256_storeu_si256((__m256i*) p0, r0.r);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- storeu
-void mipp_avx_storeu_uint16(uint16_t* p0, const rvd_avx_uint16_t r0) {
+static inline void mipp_avx_storeu_uint16(uint16_t* p0, const rvd_avx_uint16_t r0) {
 _mm256_storeu_si256((__m256i*) p0, r0.r);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- storeu
-void mipp_avx_storeu_uint8(uint8_t* p0, const rvd_avx_uint8_t r0) {
+static inline void mipp_avx_storeu_uint8(uint8_t* p0, const rvd_avx_uint8_t r0) {
 _mm256_storeu_si256((__m256i*) p0, r0.r);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set1
-rvd_avx_float64_t mipp_avx_set1_float64(const float64_t v0) {
+static inline rvd_avx_float64_t mipp_avx_set1_float64(const float64_t v0) {
 	rvd_avx_float64_t res;
 	res.r= _mm256_set1_pd(v0);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set1
-rvd_avx_float32_t mipp_avx_set1_float32(const float32_t v0) {
+static inline rvd_avx_float32_t mipp_avx_set1_float32(const float32_t v0) {
 	rvd_avx_float32_t res;
 	res.r= _mm256_set1_ps(v0);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set1
-rvd_avx_int64_t mipp_avx_set1_int64(const int64_t v0) {
+static inline rvd_avx_int64_t mipp_avx_set1_int64(const int64_t v0) {
 	rvd_avx_int64_t res;
 	res.r= _mm256_set1_epi64x(v0);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set1
-rvd_avx_int32_t mipp_avx_set1_int32(const int32_t v0) {
+static inline rvd_avx_int32_t mipp_avx_set1_int32(const int32_t v0) {
 	rvd_avx_int32_t res;
 	res.r= _mm256_set1_epi32(v0);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set1
-rvd_avx_int16_t mipp_avx_set1_int16(const int16_t v0) {
+static inline rvd_avx_int16_t mipp_avx_set1_int16(const int16_t v0) {
 	rvd_avx_int16_t res;
 	res.r= _mm256_set1_epi16(v0);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set1
-rvd_avx_int8_t mipp_avx_set1_int8(const int8_t v0) {
+static inline rvd_avx_int8_t mipp_avx_set1_int8(const int8_t v0) {
 	rvd_avx_int8_t res;
 	res.r= _mm256_set1_epi8(v0);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- maskzld
-rvd_avx_float64_t mipp_avx_maskzld_float64(const rvm_avx_int32_t m0, const float64_t* p0) {
+static inline rvd_avx_float64_t mipp_avx_maskzld_float64(const rvm_avx_int32_t m0, const float64_t* p0) {
 	rvd_avx_float64_t res;
 	res.r= _mm256_maskload_pd(p0,m0.m);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- maskzld
-rvd_avx_float32_t mipp_avx_maskzld_float32(const rvm_avx_int32_t m0, const float32_t* p0) {
+static inline rvd_avx_float32_t mipp_avx_maskzld_float32(const rvm_avx_int32_t m0, const float32_t* p0) {
 	rvd_avx_float32_t res;
 	res.r= _mm256_maskload_ps(p0,m0.m);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- maskzld
 #if defined(__AVX2__)
-rvd_avx_int32_t mipp_avx_maskzld_int32(const rvm_avx_int32_t m0, const int32_t* p0) {
+static inline rvd_avx_int32_t mipp_avx_maskzld_int32(const rvm_avx_int32_t m0, const int32_t* p0) {
 	rvd_avx_int32_t res;
 	res.r= _mm256_maskload_epi32(p0,m0.m);
 	return res;
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- maskst
-void mipp_avx_maskst_float64(float64_t* p0, const rvm_avx_int32_t m0, const rvd_avx_float64_t r0) {
+static inline void mipp_avx_maskst_float64(float64_t* p0, const rvm_avx_int32_t m0, const rvd_avx_float64_t r0) {
 _mm256_maskstore_pd(p0,m0.m, r0.r);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- maskst
-void mipp_avx_maskst_float32(float32_t* p0, const rvm_avx_int32_t m0, const rvd_avx_float32_t r0) {
+static inline void mipp_avx_maskst_float32(float32_t* p0, const rvm_avx_int32_t m0, const rvd_avx_float32_t r0) {
 _mm256_maskstore_ps(p0,m0.m, r0.r);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- maskst
 #if defined(__AVX2__)
-void mipp_avx_maskst_int32(int32_t* p0, const rvm_avx_int32_t m0, const rvd_avx_int32_t r0) {
+static inline void mipp_avx_maskst_int32(int32_t* p0, const rvm_avx_int32_t m0, const rvd_avx_int32_t r0) {
 _mm256_maskstore_epi32(p0,m0.m, r0.r);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set0
-rvd_avx_float64_t mipp_avx_set0_float64() {
+static inline rvd_avx_float64_t mipp_avx_set0_float64() {
 	rvd_avx_float64_t res;
 	res.r= _mm256_setzero_pd();
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set0
-rvd_avx_float32_t mipp_avx_set0_float32() {
+static inline rvd_avx_float32_t mipp_avx_set0_float32() {
 	rvd_avx_float32_t res;
 	res.r= _mm256_setzero_ps();
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set0
-rvd_avx_int64_t mipp_avx_set0_int64() {
+static inline rvd_avx_int64_t mipp_avx_set0_int64() {
 	rvd_avx_int64_t res;
 	res.r= _mm256_setzero_si256();
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set0
-rvd_avx_int32_t mipp_avx_set0_int32() {
+static inline rvd_avx_int32_t mipp_avx_set0_int32() {
 	rvd_avx_int32_t res;
 	res.r= _mm256_setzero_si256();
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set0
-rvd_avx_int16_t mipp_avx_set0_int16() {
+static inline rvd_avx_int16_t mipp_avx_set0_int16() {
 	rvd_avx_int16_t res;
 	res.r= _mm256_setzero_si256();
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set0
-rvd_avx_int8_t mipp_avx_set0_int8() {
+static inline rvd_avx_int8_t mipp_avx_set0_int8() {
 	rvd_avx_int8_t res;
 	res.r= _mm256_setzero_si256();
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set0
-rvd_avx_uint64_t mipp_avx_set0_uint64() {
+static inline rvd_avx_uint64_t mipp_avx_set0_uint64() {
 	rvd_avx_uint64_t res;
 	res.r= _mm256_setzero_si256();
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set0
-rvd_avx_uint32_t mipp_avx_set0_uint32() {
+static inline rvd_avx_uint32_t mipp_avx_set0_uint32() {
 	rvd_avx_uint32_t res;
 	res.r= _mm256_setzero_si256();
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set0
-rvd_avx_uint16_t mipp_avx_set0_uint16() {
+static inline rvd_avx_uint16_t mipp_avx_set0_uint16() {
 	rvd_avx_uint16_t res;
 	res.r= _mm256_setzero_si256();
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set0
-rvd_avx_uint8_t mipp_avx_set0_uint8() {
+static inline rvd_avx_uint8_t mipp_avx_set0_uint8() {
 	rvd_avx_uint8_t res;
 	res.r= _mm256_setzero_si256();
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set0_k
-rvm_avx_float64_t mipp_avx_set0_k_float64() {
+static inline rvm_avx_float64_t mipp_avx_set0_k_float64() {
 	rvm_avx_float64_t res;
 	res.m= _mm256_setzero_pd();
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set0_k
-rvm_avx_float32_t mipp_avx_set0_k_float32() {
+static inline rvm_avx_float32_t mipp_avx_set0_k_float32() {
 	rvm_avx_float32_t res;
 	res.m= _mm256_setzero_ps();
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set0_k
-rvm_avx_int64_t mipp_avx_set0_k_int64() {
+static inline rvm_avx_int64_t mipp_avx_set0_k_int64() {
 	rvm_avx_int64_t res;
 	res.m= _mm256_setzero_si256();
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set0_k
-rvm_avx_int32_t mipp_avx_set0_k_int32() {
+static inline rvm_avx_int32_t mipp_avx_set0_k_int32() {
 	rvm_avx_int32_t res;
 	res.m= _mm256_setzero_si256();
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set0_k
-rvm_avx_int16_t mipp_avx_set0_k_int16() {
+static inline rvm_avx_int16_t mipp_avx_set0_k_int16() {
 	rvm_avx_int16_t res;
 	res.m= _mm256_setzero_si256();
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set0_k
-rvm_avx_int8_t mipp_avx_set0_k_int8() {
+static inline rvm_avx_int8_t mipp_avx_set0_k_int8() {
 	rvm_avx_int8_t res;
 	res.m= _mm256_setzero_si256();
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set0_k
-rvm_avx_uint64_t mipp_avx_set0_k_uint64() {
+static inline rvm_avx_uint64_t mipp_avx_set0_k_uint64() {
 	rvm_avx_uint64_t res;
 	res.m= _mm256_setzero_si256();
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set0_k
-rvm_avx_uint32_t mipp_avx_set0_k_uint32() {
+static inline rvm_avx_uint32_t mipp_avx_set0_k_uint32() {
 	rvm_avx_uint32_t res;
 	res.m= _mm256_setzero_si256();
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set0_k
-rvm_avx_uint16_t mipp_avx_set0_k_uint16() {
+static inline rvm_avx_uint16_t mipp_avx_set0_k_uint16() {
 	rvm_avx_uint16_t res;
 	res.m= _mm256_setzero_si256();
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set0_k
-rvm_avx_uint8_t mipp_avx_set0_k_uint8() {
+static inline rvm_avx_uint8_t mipp_avx_set0_k_uint8() {
 	rvm_avx_uint8_t res;
 	res.m= _mm256_setzero_si256();
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- getfirst
-float64_t mipp_avx_getfirst_float64(const rvd_avx_float64_t r0) {
+static inline float64_t mipp_avx_getfirst_float64(const rvd_avx_float64_t r0) {
 	return (float64_t) _mm256_extract_epi64(mipp_avx_cast_float64_int64(r0).r, 0);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- getfirst
-float32_t mipp_avx_getfirst_float32(const rvd_avx_float32_t r0) {
+static inline float32_t mipp_avx_getfirst_float32(const rvd_avx_float32_t r0) {
 	return (float32_t) _mm256_extract_epi32(mipp_avx_cast_float32_int32(r0).r, 0);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- getfirst
-int64_t mipp_avx_getfirst_int64(const rvd_avx_int64_t r0) {
+static inline int64_t mipp_avx_getfirst_int64(const rvd_avx_int64_t r0) {
 	return (int64_t) _mm256_extract_epi64(mipp_avx_cast_int64_int64(r0).r, 0);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- getfirst
-int32_t mipp_avx_getfirst_int32(const rvd_avx_int32_t r0) {
+static inline int32_t mipp_avx_getfirst_int32(const rvd_avx_int32_t r0) {
 	return (int32_t) _mm256_extract_epi32(mipp_avx_cast_int32_int32(r0).r, 0);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- getfirst
-uint64_t mipp_avx_getfirst_uint64(const rvd_avx_uint64_t r0) {
+static inline uint64_t mipp_avx_getfirst_uint64(const rvd_avx_uint64_t r0) {
 	return (uint64_t) _mm256_extract_epi64(mipp_avx_cast_uint64_int64(r0).r, 0);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- getfirst
-uint32_t mipp_avx_getfirst_uint32(const rvd_avx_uint32_t r0) {
+static inline uint32_t mipp_avx_getfirst_uint32(const rvd_avx_uint32_t r0) {
 	return (uint32_t) _mm256_extract_epi32(mipp_avx_cast_uint32_int32(r0).r, 0);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- getfirst
 #if defined(__AVX2__)
-int16_t mipp_avx_getfirst_int16(const rvd_avx_int16_t r0) {
+static inline int16_t mipp_avx_getfirst_int16(const rvd_avx_int16_t r0) {
 	return (int16_t) _mm256_extract_epi16(mipp_avx_cast_int16_int16(r0).r, 0);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- getfirst
 #if defined(__AVX2__)
-int8_t mipp_avx_getfirst_int8(const rvd_avx_int8_t r0) {
+static inline int8_t mipp_avx_getfirst_int8(const rvd_avx_int8_t r0) {
 	return (int8_t) _mm256_extract_epi8(mipp_avx_cast_int8_int8(r0).r, 0);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- getfirst
 #if defined(__AVX2__)
-uint16_t mipp_avx_getfirst_uint16(const rvd_avx_uint16_t r0) {
+static inline uint16_t mipp_avx_getfirst_uint16(const rvd_avx_uint16_t r0) {
 	return (uint16_t) _mm256_extract_epi16(mipp_avx_cast_uint16_int16(r0).r, 0);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- getfirst
 #if defined(__AVX2__)
-uint8_t mipp_avx_getfirst_uint8(const rvd_avx_uint8_t r0) {
+static inline uint8_t mipp_avx_getfirst_uint8(const rvd_avx_uint8_t r0) {
 	return (uint8_t) _mm256_extract_epi8(mipp_avx_cast_uint8_int8(r0).r, 0);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- sqrt
-rvd_avx_float64_t mipp_avx_sqrt_float64(const rvd_avx_float64_t r0) {
+static inline rvd_avx_float64_t mipp_avx_sqrt_float64(const rvd_avx_float64_t r0) {
 	rvd_avx_float64_t res;
 	res.r= _mm256_sqrt_pd(r0.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- sqrt
-rvd_avx_float32_t mipp_avx_sqrt_float32(const rvd_avx_float32_t r0) {
+static inline rvd_avx_float32_t mipp_avx_sqrt_float32(const rvd_avx_float32_t r0) {
 	rvd_avx_float32_t res;
 	res.r= _mm256_sqrt_ps(r0.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- rsqrt
-rvd_avx_float32_t mipp_avx_rsqrt_float32(const rvd_avx_float32_t r0) {
+static inline rvd_avx_float32_t mipp_avx_rsqrt_float32(const rvd_avx_float32_t r0) {
 	rvd_avx_float32_t res;
 	res.r= _mm256_rsqrt_ps(r0.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- add
-rvd_avx_float64_t mipp_avx_add_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1) {
+static inline rvd_avx_float64_t mipp_avx_add_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1) {
 	rvd_avx_float64_t res;
 	res.r= _mm256_add_pd(r0.r, r1.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- add
-rvd_avx_float32_t mipp_avx_add_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
+static inline rvd_avx_float32_t mipp_avx_add_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
 	rvd_avx_float32_t res;
 	res.r= _mm256_add_ps(r0.r, r1.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- add
 #if defined(__AVX2__)
-rvd_avx_int64_t mipp_avx_add_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+static inline rvd_avx_int64_t mipp_avx_add_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
 	rvd_avx_int64_t res;
 	res.r= _mm256_add_epi64(r0.r, r1.r);
 	return res;
@@ -2021,7 +2011,7 @@ rvd_avx_int64_t mipp_avx_add_int64(const rvd_avx_int64_t r0, const rvd_avx_int64
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- add
 #if defined(__AVX2__)
-rvd_avx_int32_t mipp_avx_add_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+static inline rvd_avx_int32_t mipp_avx_add_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
 	rvd_avx_int32_t res;
 	res.r= _mm256_add_epi32(r0.r, r1.r);
 	return res;
@@ -2029,7 +2019,7 @@ rvd_avx_int32_t mipp_avx_add_int32(const rvd_avx_int32_t r0, const rvd_avx_int32
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- add
 #if defined(__AVX2__)
-rvd_avx_int16_t mipp_avx_add_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+static inline rvd_avx_int16_t mipp_avx_add_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
 	rvd_avx_int16_t res;
 	res.r= _mm256_adds_epi16(r0.r, r1.r);
 	return res;
@@ -2037,7 +2027,7 @@ rvd_avx_int16_t mipp_avx_add_int16(const rvd_avx_int16_t r0, const rvd_avx_int16
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- add
 #if defined(__AVX2__)
-rvd_avx_int8_t mipp_avx_add_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+static inline rvd_avx_int8_t mipp_avx_add_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
 	rvd_avx_int8_t res;
 	res.r= _mm256_adds_epi8(r0.r, r1.r);
 	return res;
@@ -2045,7 +2035,7 @@ rvd_avx_int8_t mipp_avx_add_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- add
 #if defined(__AVX2__)
-rvd_avx_uint16_t mipp_avx_add_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+static inline rvd_avx_uint16_t mipp_avx_add_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
 	rvd_avx_uint16_t res;
 	res.r= _mm256_adds_epu16(r0.r, r1.r);
 	return res;
@@ -2053,27 +2043,27 @@ rvd_avx_uint16_t mipp_avx_add_uint16(const rvd_avx_uint16_t r0, const rvd_avx_ui
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- add
 #if defined(__AVX2__)
-rvd_avx_uint8_t mipp_avx_add_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+static inline rvd_avx_uint8_t mipp_avx_add_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
 	rvd_avx_uint8_t res;
 	res.r= _mm256_adds_epu8(r0.r, r1.r);
 	return res;
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- sub
-rvd_avx_float64_t mipp_avx_sub_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1) {
+static inline rvd_avx_float64_t mipp_avx_sub_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1) {
 	rvd_avx_float64_t res;
 	res.r= _mm256_sub_pd(r0.r, r1.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- sub
-rvd_avx_float32_t mipp_avx_sub_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
+static inline rvd_avx_float32_t mipp_avx_sub_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
 	rvd_avx_float32_t res;
 	res.r= _mm256_sub_ps(r0.r, r1.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- sub
 #if defined(__AVX2__)
-rvd_avx_int64_t mipp_avx_sub_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+static inline rvd_avx_int64_t mipp_avx_sub_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
 	rvd_avx_int64_t res;
 	res.r= _mm256_sub_epi64(r0.r, r1.r);
 	return res;
@@ -2081,7 +2071,7 @@ rvd_avx_int64_t mipp_avx_sub_int64(const rvd_avx_int64_t r0, const rvd_avx_int64
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- sub
 #if defined(__AVX2__)
-rvd_avx_int32_t mipp_avx_sub_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+static inline rvd_avx_int32_t mipp_avx_sub_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
 	rvd_avx_int32_t res;
 	res.r= _mm256_sub_epi32(r0.r, r1.r);
 	return res;
@@ -2089,7 +2079,7 @@ rvd_avx_int32_t mipp_avx_sub_int32(const rvd_avx_int32_t r0, const rvd_avx_int32
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- sub
 #if defined(__AVX2__)
-rvd_avx_int16_t mipp_avx_sub_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+static inline rvd_avx_int16_t mipp_avx_sub_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
 	rvd_avx_int16_t res;
 	res.r= _mm256_subs_epi16(r0.r, r1.r);
 	return res;
@@ -2097,7 +2087,7 @@ rvd_avx_int16_t mipp_avx_sub_int16(const rvd_avx_int16_t r0, const rvd_avx_int16
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- sub
 #if defined(__AVX2__)
-rvd_avx_int8_t mipp_avx_sub_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+static inline rvd_avx_int8_t mipp_avx_sub_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
 	rvd_avx_int8_t res;
 	res.r= _mm256_subs_epi8(r0.r, r1.r);
 	return res;
@@ -2105,7 +2095,7 @@ rvd_avx_int8_t mipp_avx_sub_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- sub
 #if defined(__AVX2__)
-rvd_avx_uint16_t mipp_avx_sub_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+static inline rvd_avx_uint16_t mipp_avx_sub_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
 	rvd_avx_uint16_t res;
 	res.r= _mm256_subs_epu16(r0.r, r1.r);
 	return res;
@@ -2113,27 +2103,27 @@ rvd_avx_uint16_t mipp_avx_sub_uint16(const rvd_avx_uint16_t r0, const rvd_avx_ui
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- sub
 #if defined(__AVX2__)
-rvd_avx_uint8_t mipp_avx_sub_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+static inline rvd_avx_uint8_t mipp_avx_sub_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
 	rvd_avx_uint8_t res;
 	res.r= _mm256_subs_epu8(r0.r, r1.r);
 	return res;
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- mul
-rvd_avx_float64_t mipp_avx_mul_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1) {
+static inline rvd_avx_float64_t mipp_avx_mul_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1) {
 	rvd_avx_float64_t res;
 	res.r= _mm256_mul_pd(r0.r, r1.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- mul
-rvd_avx_float32_t mipp_avx_mul_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
+static inline rvd_avx_float32_t mipp_avx_mul_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
 	rvd_avx_float32_t res;
 	res.r= _mm256_mul_ps(r0.r, r1.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- mul
 #if defined(__AVX2__)
-rvd_avx_int32_t mipp_avx_mul_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+static inline rvd_avx_int32_t mipp_avx_mul_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
 	rvd_avx_int32_t res;
 	res.r= _mm256_mullo_epi32(r0.r, r1.r);
 	return res;
@@ -2141,39 +2131,39 @@ rvd_avx_int32_t mipp_avx_mul_int32(const rvd_avx_int32_t r0, const rvd_avx_int32
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- mul
 #if defined(__AVX2__)
-rvd_avx_int16_t mipp_avx_mul_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+static inline rvd_avx_int16_t mipp_avx_mul_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
 	rvd_avx_int16_t res;
 	res.r= _mm256_mullo_epi16(r0.r, r1.r);
 	return res;
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- div
-rvd_avx_float64_t mipp_avx_div_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1) {
+static inline rvd_avx_float64_t mipp_avx_div_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1) {
 	rvd_avx_float64_t res;
 	res.r= _mm256_div_pd(r0.r, r1.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- div
-rvd_avx_float32_t mipp_avx_div_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
+static inline rvd_avx_float32_t mipp_avx_div_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
 	rvd_avx_float32_t res;
 	res.r= _mm256_div_ps(r0.r, r1.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- min
-rvd_avx_float64_t mipp_avx_min_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1) {
+static inline rvd_avx_float64_t mipp_avx_min_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1) {
 	rvd_avx_float64_t res;
 	res.r= _mm256_min_pd(r0.r, r1.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- min
-rvd_avx_float32_t mipp_avx_min_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
+static inline rvd_avx_float32_t mipp_avx_min_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
 	rvd_avx_float32_t res;
 	res.r= _mm256_min_ps(r0.r, r1.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- min
 #if defined(__AVX2__)
-rvd_avx_int32_t mipp_avx_min_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+static inline rvd_avx_int32_t mipp_avx_min_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
 	rvd_avx_int32_t res;
 	res.r= _mm256_min_epi32(r0.r, r1.r);
 	return res;
@@ -2181,7 +2171,7 @@ rvd_avx_int32_t mipp_avx_min_int32(const rvd_avx_int32_t r0, const rvd_avx_int32
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- min
 #if defined(__AVX2__)
-rvd_avx_int16_t mipp_avx_min_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+static inline rvd_avx_int16_t mipp_avx_min_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
 	rvd_avx_int16_t res;
 	res.r= _mm256_min_epi16(r0.r, r1.r);
 	return res;
@@ -2189,7 +2179,7 @@ rvd_avx_int16_t mipp_avx_min_int16(const rvd_avx_int16_t r0, const rvd_avx_int16
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- min
 #if defined(__AVX2__)
-rvd_avx_int8_t mipp_avx_min_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+static inline rvd_avx_int8_t mipp_avx_min_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
 	rvd_avx_int8_t res;
 	res.r= _mm256_min_epi8(r0.r, r1.r);
 	return res;
@@ -2197,7 +2187,7 @@ rvd_avx_int8_t mipp_avx_min_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- min
 #if defined(__AVX2__)
-rvd_avx_uint32_t mipp_avx_min_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
+static inline rvd_avx_uint32_t mipp_avx_min_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
 	rvd_avx_uint32_t res;
 	res.r= _mm256_min_epu32(r0.r, r1.r);
 	return res;
@@ -2205,7 +2195,7 @@ rvd_avx_uint32_t mipp_avx_min_uint32(const rvd_avx_uint32_t r0, const rvd_avx_ui
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- min
 #if defined(__AVX2__)
-rvd_avx_uint16_t mipp_avx_min_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+static inline rvd_avx_uint16_t mipp_avx_min_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
 	rvd_avx_uint16_t res;
 	res.r= _mm256_min_epu16(r0.r, r1.r);
 	return res;
@@ -2213,27 +2203,27 @@ rvd_avx_uint16_t mipp_avx_min_uint16(const rvd_avx_uint16_t r0, const rvd_avx_ui
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- min
 #if defined(__AVX2__)
-rvd_avx_uint8_t mipp_avx_min_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+static inline rvd_avx_uint8_t mipp_avx_min_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
 	rvd_avx_uint8_t res;
 	res.r= _mm256_min_epu8(r0.r, r1.r);
 	return res;
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- max
-rvd_avx_float64_t mipp_avx_max_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1) {
+static inline rvd_avx_float64_t mipp_avx_max_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1) {
 	rvd_avx_float64_t res;
 	res.r= _mm256_max_pd(r0.r, r1.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- max
-rvd_avx_float32_t mipp_avx_max_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
+static inline rvd_avx_float32_t mipp_avx_max_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
 	rvd_avx_float32_t res;
 	res.r= _mm256_max_ps(r0.r, r1.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- max
 #if defined(__AVX2__)
-rvd_avx_int32_t mipp_avx_max_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+static inline rvd_avx_int32_t mipp_avx_max_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
 	rvd_avx_int32_t res;
 	res.r= _mm256_max_epi32(r0.r, r1.r);
 	return res;
@@ -2241,7 +2231,7 @@ rvd_avx_int32_t mipp_avx_max_int32(const rvd_avx_int32_t r0, const rvd_avx_int32
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- max
 #if defined(__AVX2__)
-rvd_avx_int16_t mipp_avx_max_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+static inline rvd_avx_int16_t mipp_avx_max_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
 	rvd_avx_int16_t res;
 	res.r= _mm256_max_epi16(r0.r, r1.r);
 	return res;
@@ -2249,7 +2239,7 @@ rvd_avx_int16_t mipp_avx_max_int16(const rvd_avx_int16_t r0, const rvd_avx_int16
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- max
 #if defined(__AVX2__)
-rvd_avx_int8_t mipp_avx_max_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+static inline rvd_avx_int8_t mipp_avx_max_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
 	rvd_avx_int8_t res;
 	res.r= _mm256_max_epi8(r0.r, r1.r);
 	return res;
@@ -2257,7 +2247,7 @@ rvd_avx_int8_t mipp_avx_max_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- max
 #if defined(__AVX2__)
-rvd_avx_uint32_t mipp_avx_max_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
+static inline rvd_avx_uint32_t mipp_avx_max_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
 	rvd_avx_uint32_t res;
 	res.r= _mm256_max_epu32(r0.r, r1.r);
 	return res;
@@ -2265,7 +2255,7 @@ rvd_avx_uint32_t mipp_avx_max_uint32(const rvd_avx_uint32_t r0, const rvd_avx_ui
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- max
 #if defined(__AVX2__)
-rvd_avx_uint16_t mipp_avx_max_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+static inline rvd_avx_uint16_t mipp_avx_max_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
 	rvd_avx_uint16_t res;
 	res.r= _mm256_max_epu16(r0.r, r1.r);
 	return res;
@@ -2273,7 +2263,7 @@ rvd_avx_uint16_t mipp_avx_max_uint16(const rvd_avx_uint16_t r0, const rvd_avx_ui
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- max
 #if defined(__AVX2__)
-rvd_avx_uint8_t mipp_avx_max_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+static inline rvd_avx_uint8_t mipp_avx_max_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
 	rvd_avx_uint8_t res;
 	res.r= _mm256_max_epu8(r0.r, r1.r);
 	return res;
@@ -2281,7 +2271,7 @@ rvd_avx_uint8_t mipp_avx_max_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- fmadd
 #if defined(__FMA__)
-rvd_avx_float64_t mipp_avx_fmadd_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1, const rvd_avx_float64_t r2) {
+static inline rvd_avx_float64_t mipp_avx_fmadd_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1, const rvd_avx_float64_t r2) {
 	rvd_avx_float64_t res;
 	res.r= _mm256_fmadd_pd(r0.r, r1.r, r2.r);
 	return res;
@@ -2289,7 +2279,7 @@ rvd_avx_float64_t mipp_avx_fmadd_float64(const rvd_avx_float64_t r0, const rvd_a
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- fmadd
 #if defined(__FMA__)
-rvd_avx_float32_t mipp_avx_fmadd_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1, const rvd_avx_float32_t r2) {
+static inline rvd_avx_float32_t mipp_avx_fmadd_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1, const rvd_avx_float32_t r2) {
 	rvd_avx_float32_t res;
 	res.r= _mm256_fmadd_ps(r0.r, r1.r, r2.r);
 	return res;
@@ -2297,7 +2287,7 @@ rvd_avx_float32_t mipp_avx_fmadd_float32(const rvd_avx_float32_t r0, const rvd_a
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- fmsub
 #if defined(__FMA__)
-rvd_avx_float64_t mipp_avx_fmsub_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1, const rvd_avx_float64_t r2) {
+static inline rvd_avx_float64_t mipp_avx_fmsub_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1, const rvd_avx_float64_t r2) {
 	rvd_avx_float64_t res;
 	res.r= _mm256_fmsub_pd(r0.r, r1.r, r2.r);
 	return res;
@@ -2305,27 +2295,27 @@ rvd_avx_float64_t mipp_avx_fmsub_float64(const rvd_avx_float64_t r0, const rvd_a
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- fmsub
 #if defined(__FMA__)
-rvd_avx_float32_t mipp_avx_fmsub_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1, const rvd_avx_float32_t r2) {
+static inline rvd_avx_float32_t mipp_avx_fmsub_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1, const rvd_avx_float32_t r2) {
 	rvd_avx_float32_t res;
 	res.r= _mm256_fmsub_ps(r0.r, r1.r, r2.r);
 	return res;
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andb
-rvd_avx_float64_t mipp_avx_andb_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1) {
+static inline rvd_avx_float64_t mipp_avx_andb_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1) {
 	rvd_avx_float64_t res;
 	res.r= _mm256_and_pd(r0.r, r1.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andb
-rvd_avx_float32_t mipp_avx_andb_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
+static inline rvd_avx_float32_t mipp_avx_andb_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
 	rvd_avx_float32_t res;
 	res.r= _mm256_and_ps(r0.r, r1.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andb
 #if !defined(__AVX2__)
-rvd_avx_int64_t mipp_avx_andb_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+static inline rvd_avx_int64_t mipp_avx_andb_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
 		rvd_avx_float32_t r0f = mipp_avx_cast_int64_float32(r0);
 	rvd_avx_float32_t r1f = mipp_avx_cast_int64_float32(r1);
 	rvd_avx_float32_t resf = mipp_avx_andb_float32(r0f, r1f);
@@ -2334,7 +2324,7 @@ rvd_avx_int64_t mipp_avx_andb_int64(const rvd_avx_int64_t r0, const rvd_avx_int6
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andb
 #if !defined(__AVX2__)
-rvd_avx_int32_t mipp_avx_andb_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+static inline rvd_avx_int32_t mipp_avx_andb_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
 		rvd_avx_float32_t r0f = mipp_avx_cast_int32_float32(r0);
 	rvd_avx_float32_t r1f = mipp_avx_cast_int32_float32(r1);
 	rvd_avx_float32_t resf = mipp_avx_andb_float32(r0f, r1f);
@@ -2343,7 +2333,7 @@ rvd_avx_int32_t mipp_avx_andb_int32(const rvd_avx_int32_t r0, const rvd_avx_int3
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andb
 #if !defined(__AVX2__)
-rvd_avx_int16_t mipp_avx_andb_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+static inline rvd_avx_int16_t mipp_avx_andb_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
 		rvd_avx_float32_t r0f = mipp_avx_cast_int16_float32(r0);
 	rvd_avx_float32_t r1f = mipp_avx_cast_int16_float32(r1);
 	rvd_avx_float32_t resf = mipp_avx_andb_float32(r0f, r1f);
@@ -2352,7 +2342,7 @@ rvd_avx_int16_t mipp_avx_andb_int16(const rvd_avx_int16_t r0, const rvd_avx_int1
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andb
 #if !defined(__AVX2__)
-rvd_avx_int8_t mipp_avx_andb_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+static inline rvd_avx_int8_t mipp_avx_andb_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
 		rvd_avx_float32_t r0f = mipp_avx_cast_int8_float32(r0);
 	rvd_avx_float32_t r1f = mipp_avx_cast_int8_float32(r1);
 	rvd_avx_float32_t resf = mipp_avx_andb_float32(r0f, r1f);
@@ -2361,7 +2351,7 @@ rvd_avx_int8_t mipp_avx_andb_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t 
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andb
 #if !defined(__AVX2__)
-rvd_avx_uint64_t mipp_avx_andb_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
+static inline rvd_avx_uint64_t mipp_avx_andb_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
 		rvd_avx_float32_t r0f = mipp_avx_cast_uint64_float32(r0);
 	rvd_avx_float32_t r1f = mipp_avx_cast_uint64_float32(r1);
 	rvd_avx_float32_t resf = mipp_avx_andb_float32(r0f, r1f);
@@ -2370,7 +2360,7 @@ rvd_avx_uint64_t mipp_avx_andb_uint64(const rvd_avx_uint64_t r0, const rvd_avx_u
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andb
 #if !defined(__AVX2__)
-rvd_avx_uint32_t mipp_avx_andb_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
+static inline rvd_avx_uint32_t mipp_avx_andb_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
 		rvd_avx_float32_t r0f = mipp_avx_cast_uint32_float32(r0);
 	rvd_avx_float32_t r1f = mipp_avx_cast_uint32_float32(r1);
 	rvd_avx_float32_t resf = mipp_avx_andb_float32(r0f, r1f);
@@ -2379,7 +2369,7 @@ rvd_avx_uint32_t mipp_avx_andb_uint32(const rvd_avx_uint32_t r0, const rvd_avx_u
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andb
 #if !defined(__AVX2__)
-rvd_avx_uint16_t mipp_avx_andb_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+static inline rvd_avx_uint16_t mipp_avx_andb_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
 		rvd_avx_float32_t r0f = mipp_avx_cast_uint16_float32(r0);
 	rvd_avx_float32_t r1f = mipp_avx_cast_uint16_float32(r1);
 	rvd_avx_float32_t resf = mipp_avx_andb_float32(r0f, r1f);
@@ -2388,7 +2378,7 @@ rvd_avx_uint16_t mipp_avx_andb_uint16(const rvd_avx_uint16_t r0, const rvd_avx_u
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andb
 #if !defined(__AVX2__)
-rvd_avx_uint8_t mipp_avx_andb_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+static inline rvd_avx_uint8_t mipp_avx_andb_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
 		rvd_avx_float32_t r0f = mipp_avx_cast_uint8_float32(r0);
 	rvd_avx_float32_t r1f = mipp_avx_cast_uint8_float32(r1);
 	rvd_avx_float32_t resf = mipp_avx_andb_float32(r0f, r1f);
@@ -2397,7 +2387,7 @@ rvd_avx_uint8_t mipp_avx_andb_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andb
 #if defined(__AVX2__)
-rvd_avx_int64_t mipp_avx_andb_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+static inline rvd_avx_int64_t mipp_avx_andb_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
 	rvd_avx_int64_t res;
 	res.r= _mm256_and_si256(r0.r, r1.r);
 	return res;
@@ -2405,7 +2395,7 @@ rvd_avx_int64_t mipp_avx_andb_int64(const rvd_avx_int64_t r0, const rvd_avx_int6
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andb
 #if defined(__AVX2__)
-rvd_avx_int32_t mipp_avx_andb_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+static inline rvd_avx_int32_t mipp_avx_andb_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
 	rvd_avx_int32_t res;
 	res.r= _mm256_and_si256(r0.r, r1.r);
 	return res;
@@ -2413,7 +2403,7 @@ rvd_avx_int32_t mipp_avx_andb_int32(const rvd_avx_int32_t r0, const rvd_avx_int3
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andb
 #if defined(__AVX2__)
-rvd_avx_int16_t mipp_avx_andb_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+static inline rvd_avx_int16_t mipp_avx_andb_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
 	rvd_avx_int16_t res;
 	res.r= _mm256_and_si256(r0.r, r1.r);
 	return res;
@@ -2421,7 +2411,7 @@ rvd_avx_int16_t mipp_avx_andb_int16(const rvd_avx_int16_t r0, const rvd_avx_int1
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andb
 #if defined(__AVX2__)
-rvd_avx_int8_t mipp_avx_andb_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+static inline rvd_avx_int8_t mipp_avx_andb_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
 	rvd_avx_int8_t res;
 	res.r= _mm256_and_si256(r0.r, r1.r);
 	return res;
@@ -2429,7 +2419,7 @@ rvd_avx_int8_t mipp_avx_andb_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t 
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andb
 #if defined(__AVX2__)
-rvd_avx_uint64_t mipp_avx_andb_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
+static inline rvd_avx_uint64_t mipp_avx_andb_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
 	rvd_avx_uint64_t res;
 	res.r= _mm256_and_si256(r0.r, r1.r);
 	return res;
@@ -2437,7 +2427,7 @@ rvd_avx_uint64_t mipp_avx_andb_uint64(const rvd_avx_uint64_t r0, const rvd_avx_u
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andb
 #if defined(__AVX2__)
-rvd_avx_uint32_t mipp_avx_andb_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
+static inline rvd_avx_uint32_t mipp_avx_andb_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
 	rvd_avx_uint32_t res;
 	res.r= _mm256_and_si256(r0.r, r1.r);
 	return res;
@@ -2445,7 +2435,7 @@ rvd_avx_uint32_t mipp_avx_andb_uint32(const rvd_avx_uint32_t r0, const rvd_avx_u
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andb
 #if defined(__AVX2__)
-rvd_avx_uint16_t mipp_avx_andb_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+static inline rvd_avx_uint16_t mipp_avx_andb_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
 	rvd_avx_uint16_t res;
 	res.r= _mm256_and_si256(r0.r, r1.r);
 	return res;
@@ -2453,7 +2443,7 @@ rvd_avx_uint16_t mipp_avx_andb_uint16(const rvd_avx_uint16_t r0, const rvd_avx_u
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andb
 #if defined(__AVX2__)
-rvd_avx_uint8_t mipp_avx_andb_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+static inline rvd_avx_uint8_t mipp_avx_andb_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
 	rvd_avx_uint8_t res;
 	res.r= _mm256_and_si256(r0.r, r1.r);
 	return res;
@@ -2461,7 +2451,7 @@ rvd_avx_uint8_t mipp_avx_andb_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andb_k
 #if !defined(__AVX2__)
-rvm_avx_int64_t mipp_avx_andb_k_int64(const rvm_avx_int64_t m0, const rvm_avx_int64_t m1) {
+static inline rvm_avx_int64_t mipp_avx_andb_k_int64(const rvm_avx_int64_t m0, const rvm_avx_int64_t m1) {
 		rvd_avx_float32_t r0f = mipp_avx_toreg_float32(mipp_avx_cast_k_int64_float32(m0));
 	rvd_avx_float32_t r1f = mipp_avx_toreg_float32(mipp_avx_cast_k_int64_float32(m1));
 	rvd_avx_float32_t resf = mipp_avx_andb_float32(r0f, r1f);
@@ -2470,7 +2460,7 @@ rvm_avx_int64_t mipp_avx_andb_k_int64(const rvm_avx_int64_t m0, const rvm_avx_in
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andb_k
 #if !defined(__AVX2__)
-rvm_avx_int32_t mipp_avx_andb_k_int32(const rvm_avx_int32_t m0, const rvm_avx_int32_t m1) {
+static inline rvm_avx_int32_t mipp_avx_andb_k_int32(const rvm_avx_int32_t m0, const rvm_avx_int32_t m1) {
 		rvd_avx_float32_t r0f = mipp_avx_toreg_float32(mipp_avx_cast_k_int32_float32(m0));
 	rvd_avx_float32_t r1f = mipp_avx_toreg_float32(mipp_avx_cast_k_int32_float32(m1));
 	rvd_avx_float32_t resf = mipp_avx_andb_float32(r0f, r1f);
@@ -2479,7 +2469,7 @@ rvm_avx_int32_t mipp_avx_andb_k_int32(const rvm_avx_int32_t m0, const rvm_avx_in
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andb_k
 #if !defined(__AVX2__)
-rvm_avx_int16_t mipp_avx_andb_k_int16(const rvm_avx_int16_t m0, const rvm_avx_int16_t m1) {
+static inline rvm_avx_int16_t mipp_avx_andb_k_int16(const rvm_avx_int16_t m0, const rvm_avx_int16_t m1) {
 		rvd_avx_float32_t r0f = mipp_avx_toreg_float32(mipp_avx_cast_k_int16_float32(m0));
 	rvd_avx_float32_t r1f = mipp_avx_toreg_float32(mipp_avx_cast_k_int16_float32(m1));
 	rvd_avx_float32_t resf = mipp_avx_andb_float32(r0f, r1f);
@@ -2488,7 +2478,7 @@ rvm_avx_int16_t mipp_avx_andb_k_int16(const rvm_avx_int16_t m0, const rvm_avx_in
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andb_k
 #if !defined(__AVX2__)
-rvm_avx_int8_t mipp_avx_andb_k_int8(const rvm_avx_int8_t m0, const rvm_avx_int8_t m1) {
+static inline rvm_avx_int8_t mipp_avx_andb_k_int8(const rvm_avx_int8_t m0, const rvm_avx_int8_t m1) {
 		rvd_avx_float32_t r0f = mipp_avx_toreg_float32(mipp_avx_cast_k_int8_float32(m0));
 	rvd_avx_float32_t r1f = mipp_avx_toreg_float32(mipp_avx_cast_k_int8_float32(m1));
 	rvd_avx_float32_t resf = mipp_avx_andb_float32(r0f, r1f);
@@ -2497,7 +2487,7 @@ rvm_avx_int8_t mipp_avx_andb_k_int8(const rvm_avx_int8_t m0, const rvm_avx_int8_
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andb_k
 #if !defined(__AVX2__)
-rvm_avx_uint64_t mipp_avx_andb_k_uint64(const rvm_avx_uint64_t m0, const rvm_avx_uint64_t m1) {
+static inline rvm_avx_uint64_t mipp_avx_andb_k_uint64(const rvm_avx_uint64_t m0, const rvm_avx_uint64_t m1) {
 		rvd_avx_float32_t r0f = mipp_avx_toreg_float32(mipp_avx_cast_k_uint64_float32(m0));
 	rvd_avx_float32_t r1f = mipp_avx_toreg_float32(mipp_avx_cast_k_uint64_float32(m1));
 	rvd_avx_float32_t resf = mipp_avx_andb_float32(r0f, r1f);
@@ -2506,7 +2496,7 @@ rvm_avx_uint64_t mipp_avx_andb_k_uint64(const rvm_avx_uint64_t m0, const rvm_avx
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andb_k
 #if !defined(__AVX2__)
-rvm_avx_uint32_t mipp_avx_andb_k_uint32(const rvm_avx_uint32_t m0, const rvm_avx_uint32_t m1) {
+static inline rvm_avx_uint32_t mipp_avx_andb_k_uint32(const rvm_avx_uint32_t m0, const rvm_avx_uint32_t m1) {
 		rvd_avx_float32_t r0f = mipp_avx_toreg_float32(mipp_avx_cast_k_uint32_float32(m0));
 	rvd_avx_float32_t r1f = mipp_avx_toreg_float32(mipp_avx_cast_k_uint32_float32(m1));
 	rvd_avx_float32_t resf = mipp_avx_andb_float32(r0f, r1f);
@@ -2515,7 +2505,7 @@ rvm_avx_uint32_t mipp_avx_andb_k_uint32(const rvm_avx_uint32_t m0, const rvm_avx
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andb_k
 #if !defined(__AVX2__)
-rvm_avx_uint16_t mipp_avx_andb_k_uint16(const rvm_avx_uint16_t m0, const rvm_avx_uint16_t m1) {
+static inline rvm_avx_uint16_t mipp_avx_andb_k_uint16(const rvm_avx_uint16_t m0, const rvm_avx_uint16_t m1) {
 		rvd_avx_float32_t r0f = mipp_avx_toreg_float32(mipp_avx_cast_k_uint16_float32(m0));
 	rvd_avx_float32_t r1f = mipp_avx_toreg_float32(mipp_avx_cast_k_uint16_float32(m1));
 	rvd_avx_float32_t resf = mipp_avx_andb_float32(r0f, r1f);
@@ -2524,7 +2514,7 @@ rvm_avx_uint16_t mipp_avx_andb_k_uint16(const rvm_avx_uint16_t m0, const rvm_avx
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andb_k
 #if !defined(__AVX2__)
-rvm_avx_uint8_t mipp_avx_andb_k_uint8(const rvm_avx_uint8_t m0, const rvm_avx_uint8_t m1) {
+static inline rvm_avx_uint8_t mipp_avx_andb_k_uint8(const rvm_avx_uint8_t m0, const rvm_avx_uint8_t m1) {
 		rvd_avx_float32_t r0f = mipp_avx_toreg_float32(mipp_avx_cast_k_uint8_float32(m0));
 	rvd_avx_float32_t r1f = mipp_avx_toreg_float32(mipp_avx_cast_k_uint8_float32(m1));
 	rvd_avx_float32_t resf = mipp_avx_andb_float32(r0f, r1f);
@@ -2533,7 +2523,7 @@ rvm_avx_uint8_t mipp_avx_andb_k_uint8(const rvm_avx_uint8_t m0, const rvm_avx_ui
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andb_k
 #if defined(__AVX2__)
-rvm_avx_float64_t mipp_avx_andb_k_float64(const rvm_avx_float64_t m0, const rvm_avx_float64_t m1) {
+static inline rvm_avx_float64_t mipp_avx_andb_k_float64(const rvm_avx_float64_t m0, const rvm_avx_float64_t m1) {
 	rvm_avx_float64_t res;
 	res.m= _mm256_and_pd(m0.m, m1.m);
 	return res;
@@ -2541,7 +2531,7 @@ rvm_avx_float64_t mipp_avx_andb_k_float64(const rvm_avx_float64_t m0, const rvm_
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andb_k
 #if defined(__AVX2__)
-rvm_avx_float32_t mipp_avx_andb_k_float32(const rvm_avx_float32_t m0, const rvm_avx_float32_t m1) {
+static inline rvm_avx_float32_t mipp_avx_andb_k_float32(const rvm_avx_float32_t m0, const rvm_avx_float32_t m1) {
 	rvm_avx_float32_t res;
 	res.m= _mm256_and_ps(m0.m, m1.m);
 	return res;
@@ -2549,7 +2539,7 @@ rvm_avx_float32_t mipp_avx_andb_k_float32(const rvm_avx_float32_t m0, const rvm_
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andb_k
 #if defined(__AVX2__)
-rvm_avx_int64_t mipp_avx_andb_k_int64(const rvm_avx_int64_t m0, const rvm_avx_int64_t m1) {
+static inline rvm_avx_int64_t mipp_avx_andb_k_int64(const rvm_avx_int64_t m0, const rvm_avx_int64_t m1) {
 	rvm_avx_int64_t res;
 	res.m= _mm256_and_si256(m0.m, m1.m);
 	return res;
@@ -2557,7 +2547,7 @@ rvm_avx_int64_t mipp_avx_andb_k_int64(const rvm_avx_int64_t m0, const rvm_avx_in
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andb_k
 #if defined(__AVX2__)
-rvm_avx_int32_t mipp_avx_andb_k_int32(const rvm_avx_int32_t m0, const rvm_avx_int32_t m1) {
+static inline rvm_avx_int32_t mipp_avx_andb_k_int32(const rvm_avx_int32_t m0, const rvm_avx_int32_t m1) {
 	rvm_avx_int32_t res;
 	res.m= _mm256_and_si256(m0.m, m1.m);
 	return res;
@@ -2565,7 +2555,7 @@ rvm_avx_int32_t mipp_avx_andb_k_int32(const rvm_avx_int32_t m0, const rvm_avx_in
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andb_k
 #if defined(__AVX2__)
-rvm_avx_int16_t mipp_avx_andb_k_int16(const rvm_avx_int16_t m0, const rvm_avx_int16_t m1) {
+static inline rvm_avx_int16_t mipp_avx_andb_k_int16(const rvm_avx_int16_t m0, const rvm_avx_int16_t m1) {
 	rvm_avx_int16_t res;
 	res.m= _mm256_and_si256(m0.m, m1.m);
 	return res;
@@ -2573,7 +2563,7 @@ rvm_avx_int16_t mipp_avx_andb_k_int16(const rvm_avx_int16_t m0, const rvm_avx_in
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andb_k
 #if defined(__AVX2__)
-rvm_avx_int8_t mipp_avx_andb_k_int8(const rvm_avx_int8_t m0, const rvm_avx_int8_t m1) {
+static inline rvm_avx_int8_t mipp_avx_andb_k_int8(const rvm_avx_int8_t m0, const rvm_avx_int8_t m1) {
 	rvm_avx_int8_t res;
 	res.m= _mm256_and_si256(m0.m, m1.m);
 	return res;
@@ -2581,7 +2571,7 @@ rvm_avx_int8_t mipp_avx_andb_k_int8(const rvm_avx_int8_t m0, const rvm_avx_int8_
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andb_k
 #if defined(__AVX2__)
-rvm_avx_uint64_t mipp_avx_andb_k_uint64(const rvm_avx_uint64_t m0, const rvm_avx_uint64_t m1) {
+static inline rvm_avx_uint64_t mipp_avx_andb_k_uint64(const rvm_avx_uint64_t m0, const rvm_avx_uint64_t m1) {
 	rvm_avx_uint64_t res;
 	res.m= _mm256_and_si256(m0.m, m1.m);
 	return res;
@@ -2589,7 +2579,7 @@ rvm_avx_uint64_t mipp_avx_andb_k_uint64(const rvm_avx_uint64_t m0, const rvm_avx
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andb_k
 #if defined(__AVX2__)
-rvm_avx_uint32_t mipp_avx_andb_k_uint32(const rvm_avx_uint32_t m0, const rvm_avx_uint32_t m1) {
+static inline rvm_avx_uint32_t mipp_avx_andb_k_uint32(const rvm_avx_uint32_t m0, const rvm_avx_uint32_t m1) {
 	rvm_avx_uint32_t res;
 	res.m= _mm256_and_si256(m0.m, m1.m);
 	return res;
@@ -2597,7 +2587,7 @@ rvm_avx_uint32_t mipp_avx_andb_k_uint32(const rvm_avx_uint32_t m0, const rvm_avx
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andb_k
 #if defined(__AVX2__)
-rvm_avx_uint16_t mipp_avx_andb_k_uint16(const rvm_avx_uint16_t m0, const rvm_avx_uint16_t m1) {
+static inline rvm_avx_uint16_t mipp_avx_andb_k_uint16(const rvm_avx_uint16_t m0, const rvm_avx_uint16_t m1) {
 	rvm_avx_uint16_t res;
 	res.m= _mm256_and_si256(m0.m, m1.m);
 	return res;
@@ -2605,27 +2595,27 @@ rvm_avx_uint16_t mipp_avx_andb_k_uint16(const rvm_avx_uint16_t m0, const rvm_avx
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andb_k
 #if defined(__AVX2__)
-rvm_avx_uint8_t mipp_avx_andb_k_uint8(const rvm_avx_uint8_t m0, const rvm_avx_uint8_t m1) {
+static inline rvm_avx_uint8_t mipp_avx_andb_k_uint8(const rvm_avx_uint8_t m0, const rvm_avx_uint8_t m1) {
 	rvm_avx_uint8_t res;
 	res.m= _mm256_and_si256(m0.m, m1.m);
 	return res;
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andnb
-rvd_avx_float64_t mipp_avx_andnb_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1) {
+static inline rvd_avx_float64_t mipp_avx_andnb_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1) {
 	rvd_avx_float64_t res;
 	res.r= _mm256_andnot_pd(r0.r, r1.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andnb
-rvd_avx_float32_t mipp_avx_andnb_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
+static inline rvd_avx_float32_t mipp_avx_andnb_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
 	rvd_avx_float32_t res;
 	res.r= _mm256_andnot_ps(r0.r, r1.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andnb
 #if !defined(__AVX2__)
-rvd_avx_int64_t mipp_avx_andnb_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+static inline rvd_avx_int64_t mipp_avx_andnb_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
 		rvd_avx_float32_t r0f = mipp_avx_cast_int64_float32(r0);
 	rvd_avx_float32_t r1f = mipp_avx_cast_int64_float32(r1);
 	rvd_avx_float32_t resf = mipp_avx_andnb_float32(r0f, r1f);
@@ -2634,7 +2624,7 @@ rvd_avx_int64_t mipp_avx_andnb_int64(const rvd_avx_int64_t r0, const rvd_avx_int
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andnb
 #if !defined(__AVX2__)
-rvd_avx_int32_t mipp_avx_andnb_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+static inline rvd_avx_int32_t mipp_avx_andnb_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
 		rvd_avx_float32_t r0f = mipp_avx_cast_int32_float32(r0);
 	rvd_avx_float32_t r1f = mipp_avx_cast_int32_float32(r1);
 	rvd_avx_float32_t resf = mipp_avx_andnb_float32(r0f, r1f);
@@ -2643,7 +2633,7 @@ rvd_avx_int32_t mipp_avx_andnb_int32(const rvd_avx_int32_t r0, const rvd_avx_int
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andnb
 #if !defined(__AVX2__)
-rvd_avx_int16_t mipp_avx_andnb_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+static inline rvd_avx_int16_t mipp_avx_andnb_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
 		rvd_avx_float32_t r0f = mipp_avx_cast_int16_float32(r0);
 	rvd_avx_float32_t r1f = mipp_avx_cast_int16_float32(r1);
 	rvd_avx_float32_t resf = mipp_avx_andnb_float32(r0f, r1f);
@@ -2652,7 +2642,7 @@ rvd_avx_int16_t mipp_avx_andnb_int16(const rvd_avx_int16_t r0, const rvd_avx_int
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andnb
 #if !defined(__AVX2__)
-rvd_avx_int8_t mipp_avx_andnb_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+static inline rvd_avx_int8_t mipp_avx_andnb_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
 		rvd_avx_float32_t r0f = mipp_avx_cast_int8_float32(r0);
 	rvd_avx_float32_t r1f = mipp_avx_cast_int8_float32(r1);
 	rvd_avx_float32_t resf = mipp_avx_andnb_float32(r0f, r1f);
@@ -2661,7 +2651,7 @@ rvd_avx_int8_t mipp_avx_andnb_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andnb
 #if !defined(__AVX2__)
-rvd_avx_uint64_t mipp_avx_andnb_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
+static inline rvd_avx_uint64_t mipp_avx_andnb_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
 		rvd_avx_float32_t r0f = mipp_avx_cast_uint64_float32(r0);
 	rvd_avx_float32_t r1f = mipp_avx_cast_uint64_float32(r1);
 	rvd_avx_float32_t resf = mipp_avx_andnb_float32(r0f, r1f);
@@ -2670,7 +2660,7 @@ rvd_avx_uint64_t mipp_avx_andnb_uint64(const rvd_avx_uint64_t r0, const rvd_avx_
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andnb
 #if !defined(__AVX2__)
-rvd_avx_uint32_t mipp_avx_andnb_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
+static inline rvd_avx_uint32_t mipp_avx_andnb_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
 		rvd_avx_float32_t r0f = mipp_avx_cast_uint32_float32(r0);
 	rvd_avx_float32_t r1f = mipp_avx_cast_uint32_float32(r1);
 	rvd_avx_float32_t resf = mipp_avx_andnb_float32(r0f, r1f);
@@ -2679,7 +2669,7 @@ rvd_avx_uint32_t mipp_avx_andnb_uint32(const rvd_avx_uint32_t r0, const rvd_avx_
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andnb
 #if !defined(__AVX2__)
-rvd_avx_uint16_t mipp_avx_andnb_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+static inline rvd_avx_uint16_t mipp_avx_andnb_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
 		rvd_avx_float32_t r0f = mipp_avx_cast_uint16_float32(r0);
 	rvd_avx_float32_t r1f = mipp_avx_cast_uint16_float32(r1);
 	rvd_avx_float32_t resf = mipp_avx_andnb_float32(r0f, r1f);
@@ -2688,7 +2678,7 @@ rvd_avx_uint16_t mipp_avx_andnb_uint16(const rvd_avx_uint16_t r0, const rvd_avx_
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andnb
 #if !defined(__AVX2__)
-rvd_avx_uint8_t mipp_avx_andnb_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+static inline rvd_avx_uint8_t mipp_avx_andnb_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
 		rvd_avx_float32_t r0f = mipp_avx_cast_uint8_float32(r0);
 	rvd_avx_float32_t r1f = mipp_avx_cast_uint8_float32(r1);
 	rvd_avx_float32_t resf = mipp_avx_andnb_float32(r0f, r1f);
@@ -2697,7 +2687,7 @@ rvd_avx_uint8_t mipp_avx_andnb_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uin
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andnb
 #if defined(__AVX2__)
-rvd_avx_int64_t mipp_avx_andnb_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+static inline rvd_avx_int64_t mipp_avx_andnb_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
 	rvd_avx_int64_t res;
 	res.r= _mm256_andnot_si256(r0.r, r1.r);
 	return res;
@@ -2705,7 +2695,7 @@ rvd_avx_int64_t mipp_avx_andnb_int64(const rvd_avx_int64_t r0, const rvd_avx_int
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andnb
 #if defined(__AVX2__)
-rvd_avx_int32_t mipp_avx_andnb_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+static inline rvd_avx_int32_t mipp_avx_andnb_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
 	rvd_avx_int32_t res;
 	res.r= _mm256_andnot_si256(r0.r, r1.r);
 	return res;
@@ -2713,7 +2703,7 @@ rvd_avx_int32_t mipp_avx_andnb_int32(const rvd_avx_int32_t r0, const rvd_avx_int
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andnb
 #if defined(__AVX2__)
-rvd_avx_int16_t mipp_avx_andnb_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+static inline rvd_avx_int16_t mipp_avx_andnb_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
 	rvd_avx_int16_t res;
 	res.r= _mm256_andnot_si256(r0.r, r1.r);
 	return res;
@@ -2721,7 +2711,7 @@ rvd_avx_int16_t mipp_avx_andnb_int16(const rvd_avx_int16_t r0, const rvd_avx_int
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andnb
 #if defined(__AVX2__)
-rvd_avx_int8_t mipp_avx_andnb_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+static inline rvd_avx_int8_t mipp_avx_andnb_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
 	rvd_avx_int8_t res;
 	res.r= _mm256_andnot_si256(r0.r, r1.r);
 	return res;
@@ -2729,7 +2719,7 @@ rvd_avx_int8_t mipp_avx_andnb_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andnb
 #if defined(__AVX2__)
-rvd_avx_uint64_t mipp_avx_andnb_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
+static inline rvd_avx_uint64_t mipp_avx_andnb_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
 	rvd_avx_uint64_t res;
 	res.r= _mm256_andnot_si256(r0.r, r1.r);
 	return res;
@@ -2737,7 +2727,7 @@ rvd_avx_uint64_t mipp_avx_andnb_uint64(const rvd_avx_uint64_t r0, const rvd_avx_
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andnb
 #if defined(__AVX2__)
-rvd_avx_uint32_t mipp_avx_andnb_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
+static inline rvd_avx_uint32_t mipp_avx_andnb_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
 	rvd_avx_uint32_t res;
 	res.r= _mm256_andnot_si256(r0.r, r1.r);
 	return res;
@@ -2745,7 +2735,7 @@ rvd_avx_uint32_t mipp_avx_andnb_uint32(const rvd_avx_uint32_t r0, const rvd_avx_
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andnb
 #if defined(__AVX2__)
-rvd_avx_uint16_t mipp_avx_andnb_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+static inline rvd_avx_uint16_t mipp_avx_andnb_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
 	rvd_avx_uint16_t res;
 	res.r= _mm256_andnot_si256(r0.r, r1.r);
 	return res;
@@ -2753,7 +2743,7 @@ rvd_avx_uint16_t mipp_avx_andnb_uint16(const rvd_avx_uint16_t r0, const rvd_avx_
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andnb
 #if defined(__AVX2__)
-rvd_avx_uint8_t mipp_avx_andnb_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+static inline rvd_avx_uint8_t mipp_avx_andnb_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
 	rvd_avx_uint8_t res;
 	res.r= _mm256_andnot_si256(r0.r, r1.r);
 	return res;
@@ -2761,7 +2751,7 @@ rvd_avx_uint8_t mipp_avx_andnb_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uin
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andnb_k
 #if !defined(__AVX2__)
-rvm_avx_int64_t mipp_avx_andnb_k_int64(const rvm_avx_int64_t m0, const rvm_avx_int64_t m1) {
+static inline rvm_avx_int64_t mipp_avx_andnb_k_int64(const rvm_avx_int64_t m0, const rvm_avx_int64_t m1) {
 		rvd_avx_float32_t r0f = mipp_avx_toreg_float32(mipp_avx_cast_k_int64_float32(m0));
 	rvd_avx_float32_t r1f = mipp_avx_toreg_float32(mipp_avx_cast_k_int64_float32(m1));
 	rvd_avx_float32_t resf = mipp_avx_andnb_float32(r0f, r1f);
@@ -2770,7 +2760,7 @@ rvm_avx_int64_t mipp_avx_andnb_k_int64(const rvm_avx_int64_t m0, const rvm_avx_i
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andnb_k
 #if !defined(__AVX2__)
-rvm_avx_int32_t mipp_avx_andnb_k_int32(const rvm_avx_int32_t m0, const rvm_avx_int32_t m1) {
+static inline rvm_avx_int32_t mipp_avx_andnb_k_int32(const rvm_avx_int32_t m0, const rvm_avx_int32_t m1) {
 		rvd_avx_float32_t r0f = mipp_avx_toreg_float32(mipp_avx_cast_k_int32_float32(m0));
 	rvd_avx_float32_t r1f = mipp_avx_toreg_float32(mipp_avx_cast_k_int32_float32(m1));
 	rvd_avx_float32_t resf = mipp_avx_andnb_float32(r0f, r1f);
@@ -2779,7 +2769,7 @@ rvm_avx_int32_t mipp_avx_andnb_k_int32(const rvm_avx_int32_t m0, const rvm_avx_i
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andnb_k
 #if !defined(__AVX2__)
-rvm_avx_int16_t mipp_avx_andnb_k_int16(const rvm_avx_int16_t m0, const rvm_avx_int16_t m1) {
+static inline rvm_avx_int16_t mipp_avx_andnb_k_int16(const rvm_avx_int16_t m0, const rvm_avx_int16_t m1) {
 		rvd_avx_float32_t r0f = mipp_avx_toreg_float32(mipp_avx_cast_k_int16_float32(m0));
 	rvd_avx_float32_t r1f = mipp_avx_toreg_float32(mipp_avx_cast_k_int16_float32(m1));
 	rvd_avx_float32_t resf = mipp_avx_andnb_float32(r0f, r1f);
@@ -2788,7 +2778,7 @@ rvm_avx_int16_t mipp_avx_andnb_k_int16(const rvm_avx_int16_t m0, const rvm_avx_i
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andnb_k
 #if !defined(__AVX2__)
-rvm_avx_int8_t mipp_avx_andnb_k_int8(const rvm_avx_int8_t m0, const rvm_avx_int8_t m1) {
+static inline rvm_avx_int8_t mipp_avx_andnb_k_int8(const rvm_avx_int8_t m0, const rvm_avx_int8_t m1) {
 		rvd_avx_float32_t r0f = mipp_avx_toreg_float32(mipp_avx_cast_k_int8_float32(m0));
 	rvd_avx_float32_t r1f = mipp_avx_toreg_float32(mipp_avx_cast_k_int8_float32(m1));
 	rvd_avx_float32_t resf = mipp_avx_andnb_float32(r0f, r1f);
@@ -2797,7 +2787,7 @@ rvm_avx_int8_t mipp_avx_andnb_k_int8(const rvm_avx_int8_t m0, const rvm_avx_int8
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andnb_k
 #if !defined(__AVX2__)
-rvm_avx_uint64_t mipp_avx_andnb_k_uint64(const rvm_avx_uint64_t m0, const rvm_avx_uint64_t m1) {
+static inline rvm_avx_uint64_t mipp_avx_andnb_k_uint64(const rvm_avx_uint64_t m0, const rvm_avx_uint64_t m1) {
 		rvd_avx_float32_t r0f = mipp_avx_toreg_float32(mipp_avx_cast_k_uint64_float32(m0));
 	rvd_avx_float32_t r1f = mipp_avx_toreg_float32(mipp_avx_cast_k_uint64_float32(m1));
 	rvd_avx_float32_t resf = mipp_avx_andnb_float32(r0f, r1f);
@@ -2806,7 +2796,7 @@ rvm_avx_uint64_t mipp_avx_andnb_k_uint64(const rvm_avx_uint64_t m0, const rvm_av
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andnb_k
 #if !defined(__AVX2__)
-rvm_avx_uint32_t mipp_avx_andnb_k_uint32(const rvm_avx_uint32_t m0, const rvm_avx_uint32_t m1) {
+static inline rvm_avx_uint32_t mipp_avx_andnb_k_uint32(const rvm_avx_uint32_t m0, const rvm_avx_uint32_t m1) {
 		rvd_avx_float32_t r0f = mipp_avx_toreg_float32(mipp_avx_cast_k_uint32_float32(m0));
 	rvd_avx_float32_t r1f = mipp_avx_toreg_float32(mipp_avx_cast_k_uint32_float32(m1));
 	rvd_avx_float32_t resf = mipp_avx_andnb_float32(r0f, r1f);
@@ -2815,7 +2805,7 @@ rvm_avx_uint32_t mipp_avx_andnb_k_uint32(const rvm_avx_uint32_t m0, const rvm_av
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andnb_k
 #if !defined(__AVX2__)
-rvm_avx_uint16_t mipp_avx_andnb_k_uint16(const rvm_avx_uint16_t m0, const rvm_avx_uint16_t m1) {
+static inline rvm_avx_uint16_t mipp_avx_andnb_k_uint16(const rvm_avx_uint16_t m0, const rvm_avx_uint16_t m1) {
 		rvd_avx_float32_t r0f = mipp_avx_toreg_float32(mipp_avx_cast_k_uint16_float32(m0));
 	rvd_avx_float32_t r1f = mipp_avx_toreg_float32(mipp_avx_cast_k_uint16_float32(m1));
 	rvd_avx_float32_t resf = mipp_avx_andnb_float32(r0f, r1f);
@@ -2824,7 +2814,7 @@ rvm_avx_uint16_t mipp_avx_andnb_k_uint16(const rvm_avx_uint16_t m0, const rvm_av
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andnb_k
 #if !defined(__AVX2__)
-rvm_avx_uint8_t mipp_avx_andnb_k_uint8(const rvm_avx_uint8_t m0, const rvm_avx_uint8_t m1) {
+static inline rvm_avx_uint8_t mipp_avx_andnb_k_uint8(const rvm_avx_uint8_t m0, const rvm_avx_uint8_t m1) {
 		rvd_avx_float32_t r0f = mipp_avx_toreg_float32(mipp_avx_cast_k_uint8_float32(m0));
 	rvd_avx_float32_t r1f = mipp_avx_toreg_float32(mipp_avx_cast_k_uint8_float32(m1));
 	rvd_avx_float32_t resf = mipp_avx_andnb_float32(r0f, r1f);
@@ -2833,7 +2823,7 @@ rvm_avx_uint8_t mipp_avx_andnb_k_uint8(const rvm_avx_uint8_t m0, const rvm_avx_u
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andnb_k
 #if defined(__AVX2__)
-rvm_avx_float64_t mipp_avx_andnb_k_float64(const rvm_avx_float64_t m0, const rvm_avx_float64_t m1) {
+static inline rvm_avx_float64_t mipp_avx_andnb_k_float64(const rvm_avx_float64_t m0, const rvm_avx_float64_t m1) {
 	rvm_avx_float64_t res;
 	res.m= _mm256_andnot_pd(m0.m, m1.m);
 	return res;
@@ -2841,7 +2831,7 @@ rvm_avx_float64_t mipp_avx_andnb_k_float64(const rvm_avx_float64_t m0, const rvm
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andnb_k
 #if defined(__AVX2__)
-rvm_avx_float32_t mipp_avx_andnb_k_float32(const rvm_avx_float32_t m0, const rvm_avx_float32_t m1) {
+static inline rvm_avx_float32_t mipp_avx_andnb_k_float32(const rvm_avx_float32_t m0, const rvm_avx_float32_t m1) {
 	rvm_avx_float32_t res;
 	res.m= _mm256_andnot_ps(m0.m, m1.m);
 	return res;
@@ -2849,7 +2839,7 @@ rvm_avx_float32_t mipp_avx_andnb_k_float32(const rvm_avx_float32_t m0, const rvm
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andnb_k
 #if defined(__AVX2__)
-rvm_avx_int64_t mipp_avx_andnb_k_int64(const rvm_avx_int64_t m0, const rvm_avx_int64_t m1) {
+static inline rvm_avx_int64_t mipp_avx_andnb_k_int64(const rvm_avx_int64_t m0, const rvm_avx_int64_t m1) {
 	rvm_avx_int64_t res;
 	res.m= _mm256_andnot_si256(m0.m, m1.m);
 	return res;
@@ -2857,7 +2847,7 @@ rvm_avx_int64_t mipp_avx_andnb_k_int64(const rvm_avx_int64_t m0, const rvm_avx_i
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andnb_k
 #if defined(__AVX2__)
-rvm_avx_int32_t mipp_avx_andnb_k_int32(const rvm_avx_int32_t m0, const rvm_avx_int32_t m1) {
+static inline rvm_avx_int32_t mipp_avx_andnb_k_int32(const rvm_avx_int32_t m0, const rvm_avx_int32_t m1) {
 	rvm_avx_int32_t res;
 	res.m= _mm256_andnot_si256(m0.m, m1.m);
 	return res;
@@ -2865,7 +2855,7 @@ rvm_avx_int32_t mipp_avx_andnb_k_int32(const rvm_avx_int32_t m0, const rvm_avx_i
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andnb_k
 #if defined(__AVX2__)
-rvm_avx_int16_t mipp_avx_andnb_k_int16(const rvm_avx_int16_t m0, const rvm_avx_int16_t m1) {
+static inline rvm_avx_int16_t mipp_avx_andnb_k_int16(const rvm_avx_int16_t m0, const rvm_avx_int16_t m1) {
 	rvm_avx_int16_t res;
 	res.m= _mm256_andnot_si256(m0.m, m1.m);
 	return res;
@@ -2873,7 +2863,7 @@ rvm_avx_int16_t mipp_avx_andnb_k_int16(const rvm_avx_int16_t m0, const rvm_avx_i
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andnb_k
 #if defined(__AVX2__)
-rvm_avx_int8_t mipp_avx_andnb_k_int8(const rvm_avx_int8_t m0, const rvm_avx_int8_t m1) {
+static inline rvm_avx_int8_t mipp_avx_andnb_k_int8(const rvm_avx_int8_t m0, const rvm_avx_int8_t m1) {
 	rvm_avx_int8_t res;
 	res.m= _mm256_andnot_si256(m0.m, m1.m);
 	return res;
@@ -2881,7 +2871,7 @@ rvm_avx_int8_t mipp_avx_andnb_k_int8(const rvm_avx_int8_t m0, const rvm_avx_int8
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andnb_k
 #if defined(__AVX2__)
-rvm_avx_uint64_t mipp_avx_andnb_k_uint64(const rvm_avx_uint64_t m0, const rvm_avx_uint64_t m1) {
+static inline rvm_avx_uint64_t mipp_avx_andnb_k_uint64(const rvm_avx_uint64_t m0, const rvm_avx_uint64_t m1) {
 	rvm_avx_uint64_t res;
 	res.m= _mm256_andnot_si256(m0.m, m1.m);
 	return res;
@@ -2889,7 +2879,7 @@ rvm_avx_uint64_t mipp_avx_andnb_k_uint64(const rvm_avx_uint64_t m0, const rvm_av
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andnb_k
 #if defined(__AVX2__)
-rvm_avx_uint32_t mipp_avx_andnb_k_uint32(const rvm_avx_uint32_t m0, const rvm_avx_uint32_t m1) {
+static inline rvm_avx_uint32_t mipp_avx_andnb_k_uint32(const rvm_avx_uint32_t m0, const rvm_avx_uint32_t m1) {
 	rvm_avx_uint32_t res;
 	res.m= _mm256_andnot_si256(m0.m, m1.m);
 	return res;
@@ -2897,7 +2887,7 @@ rvm_avx_uint32_t mipp_avx_andnb_k_uint32(const rvm_avx_uint32_t m0, const rvm_av
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andnb_k
 #if defined(__AVX2__)
-rvm_avx_uint16_t mipp_avx_andnb_k_uint16(const rvm_avx_uint16_t m0, const rvm_avx_uint16_t m1) {
+static inline rvm_avx_uint16_t mipp_avx_andnb_k_uint16(const rvm_avx_uint16_t m0, const rvm_avx_uint16_t m1) {
 	rvm_avx_uint16_t res;
 	res.m= _mm256_andnot_si256(m0.m, m1.m);
 	return res;
@@ -2905,27 +2895,27 @@ rvm_avx_uint16_t mipp_avx_andnb_k_uint16(const rvm_avx_uint16_t m0, const rvm_av
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- andnb_k
 #if defined(__AVX2__)
-rvm_avx_uint8_t mipp_avx_andnb_k_uint8(const rvm_avx_uint8_t m0, const rvm_avx_uint8_t m1) {
+static inline rvm_avx_uint8_t mipp_avx_andnb_k_uint8(const rvm_avx_uint8_t m0, const rvm_avx_uint8_t m1) {
 	rvm_avx_uint8_t res;
 	res.m= _mm256_andnot_si256(m0.m, m1.m);
 	return res;
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- orb
-rvd_avx_float64_t mipp_avx_orb_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1) {
+static inline rvd_avx_float64_t mipp_avx_orb_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1) {
 	rvd_avx_float64_t res;
 	res.r= _mm256_or_pd(r0.r, r1.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- orb
-rvd_avx_float32_t mipp_avx_orb_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
+static inline rvd_avx_float32_t mipp_avx_orb_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
 	rvd_avx_float32_t res;
 	res.r= _mm256_or_ps(r0.r, r1.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- orb
 #if !defined(__AVX2__)
-rvd_avx_int64_t mipp_avx_orb_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+static inline rvd_avx_int64_t mipp_avx_orb_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
 		rvd_avx_float32_t r0f = mipp_avx_cast_int64_float32(r0);
 	rvd_avx_float32_t r1f = mipp_avx_cast_int64_float32(r1);
 	rvd_avx_float32_t resf = mipp_avx_orb_float32(r0f, r1f);
@@ -2934,7 +2924,7 @@ rvd_avx_int64_t mipp_avx_orb_int64(const rvd_avx_int64_t r0, const rvd_avx_int64
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- orb
 #if !defined(__AVX2__)
-rvd_avx_int32_t mipp_avx_orb_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+static inline rvd_avx_int32_t mipp_avx_orb_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
 		rvd_avx_float32_t r0f = mipp_avx_cast_int32_float32(r0);
 	rvd_avx_float32_t r1f = mipp_avx_cast_int32_float32(r1);
 	rvd_avx_float32_t resf = mipp_avx_orb_float32(r0f, r1f);
@@ -2943,7 +2933,7 @@ rvd_avx_int32_t mipp_avx_orb_int32(const rvd_avx_int32_t r0, const rvd_avx_int32
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- orb
 #if !defined(__AVX2__)
-rvd_avx_int16_t mipp_avx_orb_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+static inline rvd_avx_int16_t mipp_avx_orb_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
 		rvd_avx_float32_t r0f = mipp_avx_cast_int16_float32(r0);
 	rvd_avx_float32_t r1f = mipp_avx_cast_int16_float32(r1);
 	rvd_avx_float32_t resf = mipp_avx_orb_float32(r0f, r1f);
@@ -2952,7 +2942,7 @@ rvd_avx_int16_t mipp_avx_orb_int16(const rvd_avx_int16_t r0, const rvd_avx_int16
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- orb
 #if !defined(__AVX2__)
-rvd_avx_int8_t mipp_avx_orb_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+static inline rvd_avx_int8_t mipp_avx_orb_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
 		rvd_avx_float32_t r0f = mipp_avx_cast_int8_float32(r0);
 	rvd_avx_float32_t r1f = mipp_avx_cast_int8_float32(r1);
 	rvd_avx_float32_t resf = mipp_avx_orb_float32(r0f, r1f);
@@ -2961,7 +2951,7 @@ rvd_avx_int8_t mipp_avx_orb_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- orb
 #if !defined(__AVX2__)
-rvd_avx_uint64_t mipp_avx_orb_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
+static inline rvd_avx_uint64_t mipp_avx_orb_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
 		rvd_avx_float32_t r0f = mipp_avx_cast_uint64_float32(r0);
 	rvd_avx_float32_t r1f = mipp_avx_cast_uint64_float32(r1);
 	rvd_avx_float32_t resf = mipp_avx_orb_float32(r0f, r1f);
@@ -2970,7 +2960,7 @@ rvd_avx_uint64_t mipp_avx_orb_uint64(const rvd_avx_uint64_t r0, const rvd_avx_ui
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- orb
 #if !defined(__AVX2__)
-rvd_avx_uint32_t mipp_avx_orb_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
+static inline rvd_avx_uint32_t mipp_avx_orb_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
 		rvd_avx_float32_t r0f = mipp_avx_cast_uint32_float32(r0);
 	rvd_avx_float32_t r1f = mipp_avx_cast_uint32_float32(r1);
 	rvd_avx_float32_t resf = mipp_avx_orb_float32(r0f, r1f);
@@ -2979,7 +2969,7 @@ rvd_avx_uint32_t mipp_avx_orb_uint32(const rvd_avx_uint32_t r0, const rvd_avx_ui
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- orb
 #if !defined(__AVX2__)
-rvd_avx_uint16_t mipp_avx_orb_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+static inline rvd_avx_uint16_t mipp_avx_orb_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
 		rvd_avx_float32_t r0f = mipp_avx_cast_uint16_float32(r0);
 	rvd_avx_float32_t r1f = mipp_avx_cast_uint16_float32(r1);
 	rvd_avx_float32_t resf = mipp_avx_orb_float32(r0f, r1f);
@@ -2988,7 +2978,7 @@ rvd_avx_uint16_t mipp_avx_orb_uint16(const rvd_avx_uint16_t r0, const rvd_avx_ui
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- orb
 #if !defined(__AVX2__)
-rvd_avx_uint8_t mipp_avx_orb_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+static inline rvd_avx_uint8_t mipp_avx_orb_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
 		rvd_avx_float32_t r0f = mipp_avx_cast_uint8_float32(r0);
 	rvd_avx_float32_t r1f = mipp_avx_cast_uint8_float32(r1);
 	rvd_avx_float32_t resf = mipp_avx_orb_float32(r0f, r1f);
@@ -2997,7 +2987,7 @@ rvd_avx_uint8_t mipp_avx_orb_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- orb
 #if defined(__AVX2__)
-rvd_avx_int64_t mipp_avx_orb_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+static inline rvd_avx_int64_t mipp_avx_orb_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
 	rvd_avx_int64_t res;
 	res.r= _mm256_or_si256(r0.r, r1.r);
 	return res;
@@ -3005,7 +2995,7 @@ rvd_avx_int64_t mipp_avx_orb_int64(const rvd_avx_int64_t r0, const rvd_avx_int64
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- orb
 #if defined(__AVX2__)
-rvd_avx_int32_t mipp_avx_orb_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+static inline rvd_avx_int32_t mipp_avx_orb_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
 	rvd_avx_int32_t res;
 	res.r= _mm256_or_si256(r0.r, r1.r);
 	return res;
@@ -3013,7 +3003,7 @@ rvd_avx_int32_t mipp_avx_orb_int32(const rvd_avx_int32_t r0, const rvd_avx_int32
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- orb
 #if defined(__AVX2__)
-rvd_avx_int16_t mipp_avx_orb_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+static inline rvd_avx_int16_t mipp_avx_orb_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
 	rvd_avx_int16_t res;
 	res.r= _mm256_or_si256(r0.r, r1.r);
 	return res;
@@ -3021,7 +3011,7 @@ rvd_avx_int16_t mipp_avx_orb_int16(const rvd_avx_int16_t r0, const rvd_avx_int16
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- orb
 #if defined(__AVX2__)
-rvd_avx_int8_t mipp_avx_orb_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+static inline rvd_avx_int8_t mipp_avx_orb_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
 	rvd_avx_int8_t res;
 	res.r= _mm256_or_si256(r0.r, r1.r);
 	return res;
@@ -3029,7 +3019,7 @@ rvd_avx_int8_t mipp_avx_orb_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- orb
 #if defined(__AVX2__)
-rvd_avx_uint64_t mipp_avx_orb_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
+static inline rvd_avx_uint64_t mipp_avx_orb_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
 	rvd_avx_uint64_t res;
 	res.r= _mm256_or_si256(r0.r, r1.r);
 	return res;
@@ -3037,7 +3027,7 @@ rvd_avx_uint64_t mipp_avx_orb_uint64(const rvd_avx_uint64_t r0, const rvd_avx_ui
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- orb
 #if defined(__AVX2__)
-rvd_avx_uint32_t mipp_avx_orb_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
+static inline rvd_avx_uint32_t mipp_avx_orb_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
 	rvd_avx_uint32_t res;
 	res.r= _mm256_or_si256(r0.r, r1.r);
 	return res;
@@ -3045,7 +3035,7 @@ rvd_avx_uint32_t mipp_avx_orb_uint32(const rvd_avx_uint32_t r0, const rvd_avx_ui
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- orb
 #if defined(__AVX2__)
-rvd_avx_uint16_t mipp_avx_orb_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+static inline rvd_avx_uint16_t mipp_avx_orb_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
 	rvd_avx_uint16_t res;
 	res.r= _mm256_or_si256(r0.r, r1.r);
 	return res;
@@ -3053,7 +3043,7 @@ rvd_avx_uint16_t mipp_avx_orb_uint16(const rvd_avx_uint16_t r0, const rvd_avx_ui
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- orb
 #if defined(__AVX2__)
-rvd_avx_uint8_t mipp_avx_orb_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+static inline rvd_avx_uint8_t mipp_avx_orb_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
 	rvd_avx_uint8_t res;
 	res.r= _mm256_or_si256(r0.r, r1.r);
 	return res;
@@ -3061,7 +3051,7 @@ rvd_avx_uint8_t mipp_avx_orb_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- orb_k
 #if !defined(__AVX2__)
-rvm_avx_int64_t mipp_avx_orb_k_int64(const rvm_avx_int64_t m0, const rvm_avx_int64_t m1) {
+static inline rvm_avx_int64_t mipp_avx_orb_k_int64(const rvm_avx_int64_t m0, const rvm_avx_int64_t m1) {
 		rvd_avx_float32_t r0f = mipp_avx_toreg_float32(mipp_avx_cast_k_int64_float32(m0));
 	rvd_avx_float32_t r1f = mipp_avx_toreg_float32(mipp_avx_cast_k_int64_float32(m1));
 	rvd_avx_float32_t resf = mipp_avx_orb_float32(r0f, r1f);
@@ -3070,7 +3060,7 @@ rvm_avx_int64_t mipp_avx_orb_k_int64(const rvm_avx_int64_t m0, const rvm_avx_int
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- orb_k
 #if !defined(__AVX2__)
-rvm_avx_int32_t mipp_avx_orb_k_int32(const rvm_avx_int32_t m0, const rvm_avx_int32_t m1) {
+static inline rvm_avx_int32_t mipp_avx_orb_k_int32(const rvm_avx_int32_t m0, const rvm_avx_int32_t m1) {
 		rvd_avx_float32_t r0f = mipp_avx_toreg_float32(mipp_avx_cast_k_int32_float32(m0));
 	rvd_avx_float32_t r1f = mipp_avx_toreg_float32(mipp_avx_cast_k_int32_float32(m1));
 	rvd_avx_float32_t resf = mipp_avx_orb_float32(r0f, r1f);
@@ -3079,7 +3069,7 @@ rvm_avx_int32_t mipp_avx_orb_k_int32(const rvm_avx_int32_t m0, const rvm_avx_int
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- orb_k
 #if !defined(__AVX2__)
-rvm_avx_int16_t mipp_avx_orb_k_int16(const rvm_avx_int16_t m0, const rvm_avx_int16_t m1) {
+static inline rvm_avx_int16_t mipp_avx_orb_k_int16(const rvm_avx_int16_t m0, const rvm_avx_int16_t m1) {
 		rvd_avx_float32_t r0f = mipp_avx_toreg_float32(mipp_avx_cast_k_int16_float32(m0));
 	rvd_avx_float32_t r1f = mipp_avx_toreg_float32(mipp_avx_cast_k_int16_float32(m1));
 	rvd_avx_float32_t resf = mipp_avx_orb_float32(r0f, r1f);
@@ -3088,7 +3078,7 @@ rvm_avx_int16_t mipp_avx_orb_k_int16(const rvm_avx_int16_t m0, const rvm_avx_int
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- orb_k
 #if !defined(__AVX2__)
-rvm_avx_int8_t mipp_avx_orb_k_int8(const rvm_avx_int8_t m0, const rvm_avx_int8_t m1) {
+static inline rvm_avx_int8_t mipp_avx_orb_k_int8(const rvm_avx_int8_t m0, const rvm_avx_int8_t m1) {
 		rvd_avx_float32_t r0f = mipp_avx_toreg_float32(mipp_avx_cast_k_int8_float32(m0));
 	rvd_avx_float32_t r1f = mipp_avx_toreg_float32(mipp_avx_cast_k_int8_float32(m1));
 	rvd_avx_float32_t resf = mipp_avx_orb_float32(r0f, r1f);
@@ -3097,7 +3087,7 @@ rvm_avx_int8_t mipp_avx_orb_k_int8(const rvm_avx_int8_t m0, const rvm_avx_int8_t
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- orb_k
 #if !defined(__AVX2__)
-rvm_avx_uint64_t mipp_avx_orb_k_uint64(const rvm_avx_uint64_t m0, const rvm_avx_uint64_t m1) {
+static inline rvm_avx_uint64_t mipp_avx_orb_k_uint64(const rvm_avx_uint64_t m0, const rvm_avx_uint64_t m1) {
 		rvd_avx_float32_t r0f = mipp_avx_toreg_float32(mipp_avx_cast_k_uint64_float32(m0));
 	rvd_avx_float32_t r1f = mipp_avx_toreg_float32(mipp_avx_cast_k_uint64_float32(m1));
 	rvd_avx_float32_t resf = mipp_avx_orb_float32(r0f, r1f);
@@ -3106,7 +3096,7 @@ rvm_avx_uint64_t mipp_avx_orb_k_uint64(const rvm_avx_uint64_t m0, const rvm_avx_
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- orb_k
 #if !defined(__AVX2__)
-rvm_avx_uint32_t mipp_avx_orb_k_uint32(const rvm_avx_uint32_t m0, const rvm_avx_uint32_t m1) {
+static inline rvm_avx_uint32_t mipp_avx_orb_k_uint32(const rvm_avx_uint32_t m0, const rvm_avx_uint32_t m1) {
 		rvd_avx_float32_t r0f = mipp_avx_toreg_float32(mipp_avx_cast_k_uint32_float32(m0));
 	rvd_avx_float32_t r1f = mipp_avx_toreg_float32(mipp_avx_cast_k_uint32_float32(m1));
 	rvd_avx_float32_t resf = mipp_avx_orb_float32(r0f, r1f);
@@ -3115,7 +3105,7 @@ rvm_avx_uint32_t mipp_avx_orb_k_uint32(const rvm_avx_uint32_t m0, const rvm_avx_
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- orb_k
 #if !defined(__AVX2__)
-rvm_avx_uint16_t mipp_avx_orb_k_uint16(const rvm_avx_uint16_t m0, const rvm_avx_uint16_t m1) {
+static inline rvm_avx_uint16_t mipp_avx_orb_k_uint16(const rvm_avx_uint16_t m0, const rvm_avx_uint16_t m1) {
 		rvd_avx_float32_t r0f = mipp_avx_toreg_float32(mipp_avx_cast_k_uint16_float32(m0));
 	rvd_avx_float32_t r1f = mipp_avx_toreg_float32(mipp_avx_cast_k_uint16_float32(m1));
 	rvd_avx_float32_t resf = mipp_avx_orb_float32(r0f, r1f);
@@ -3124,7 +3114,7 @@ rvm_avx_uint16_t mipp_avx_orb_k_uint16(const rvm_avx_uint16_t m0, const rvm_avx_
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- orb_k
 #if !defined(__AVX2__)
-rvm_avx_uint8_t mipp_avx_orb_k_uint8(const rvm_avx_uint8_t m0, const rvm_avx_uint8_t m1) {
+static inline rvm_avx_uint8_t mipp_avx_orb_k_uint8(const rvm_avx_uint8_t m0, const rvm_avx_uint8_t m1) {
 		rvd_avx_float32_t r0f = mipp_avx_toreg_float32(mipp_avx_cast_k_uint8_float32(m0));
 	rvd_avx_float32_t r1f = mipp_avx_toreg_float32(mipp_avx_cast_k_uint8_float32(m1));
 	rvd_avx_float32_t resf = mipp_avx_orb_float32(r0f, r1f);
@@ -3133,7 +3123,7 @@ rvm_avx_uint8_t mipp_avx_orb_k_uint8(const rvm_avx_uint8_t m0, const rvm_avx_uin
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- orb_k
 #if defined(__AVX2__)
-rvm_avx_float64_t mipp_avx_orb_k_float64(const rvm_avx_float64_t m0, const rvm_avx_float64_t m1) {
+static inline rvm_avx_float64_t mipp_avx_orb_k_float64(const rvm_avx_float64_t m0, const rvm_avx_float64_t m1) {
 	rvm_avx_float64_t res;
 	res.m= _mm256_or_pd(m0.m, m1.m);
 	return res;
@@ -3141,7 +3131,7 @@ rvm_avx_float64_t mipp_avx_orb_k_float64(const rvm_avx_float64_t m0, const rvm_a
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- orb_k
 #if defined(__AVX2__)
-rvm_avx_float32_t mipp_avx_orb_k_float32(const rvm_avx_float32_t m0, const rvm_avx_float32_t m1) {
+static inline rvm_avx_float32_t mipp_avx_orb_k_float32(const rvm_avx_float32_t m0, const rvm_avx_float32_t m1) {
 	rvm_avx_float32_t res;
 	res.m= _mm256_or_ps(m0.m, m1.m);
 	return res;
@@ -3149,7 +3139,7 @@ rvm_avx_float32_t mipp_avx_orb_k_float32(const rvm_avx_float32_t m0, const rvm_a
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- orb_k
 #if defined(__AVX2__)
-rvm_avx_int64_t mipp_avx_orb_k_int64(const rvm_avx_int64_t m0, const rvm_avx_int64_t m1) {
+static inline rvm_avx_int64_t mipp_avx_orb_k_int64(const rvm_avx_int64_t m0, const rvm_avx_int64_t m1) {
 	rvm_avx_int64_t res;
 	res.m= _mm256_or_si256(m0.m, m1.m);
 	return res;
@@ -3157,7 +3147,7 @@ rvm_avx_int64_t mipp_avx_orb_k_int64(const rvm_avx_int64_t m0, const rvm_avx_int
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- orb_k
 #if defined(__AVX2__)
-rvm_avx_int32_t mipp_avx_orb_k_int32(const rvm_avx_int32_t m0, const rvm_avx_int32_t m1) {
+static inline rvm_avx_int32_t mipp_avx_orb_k_int32(const rvm_avx_int32_t m0, const rvm_avx_int32_t m1) {
 	rvm_avx_int32_t res;
 	res.m= _mm256_or_si256(m0.m, m1.m);
 	return res;
@@ -3165,7 +3155,7 @@ rvm_avx_int32_t mipp_avx_orb_k_int32(const rvm_avx_int32_t m0, const rvm_avx_int
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- orb_k
 #if defined(__AVX2__)
-rvm_avx_int16_t mipp_avx_orb_k_int16(const rvm_avx_int16_t m0, const rvm_avx_int16_t m1) {
+static inline rvm_avx_int16_t mipp_avx_orb_k_int16(const rvm_avx_int16_t m0, const rvm_avx_int16_t m1) {
 	rvm_avx_int16_t res;
 	res.m= _mm256_or_si256(m0.m, m1.m);
 	return res;
@@ -3173,7 +3163,7 @@ rvm_avx_int16_t mipp_avx_orb_k_int16(const rvm_avx_int16_t m0, const rvm_avx_int
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- orb_k
 #if defined(__AVX2__)
-rvm_avx_int8_t mipp_avx_orb_k_int8(const rvm_avx_int8_t m0, const rvm_avx_int8_t m1) {
+static inline rvm_avx_int8_t mipp_avx_orb_k_int8(const rvm_avx_int8_t m0, const rvm_avx_int8_t m1) {
 	rvm_avx_int8_t res;
 	res.m= _mm256_or_si256(m0.m, m1.m);
 	return res;
@@ -3181,7 +3171,7 @@ rvm_avx_int8_t mipp_avx_orb_k_int8(const rvm_avx_int8_t m0, const rvm_avx_int8_t
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- orb_k
 #if defined(__AVX2__)
-rvm_avx_uint64_t mipp_avx_orb_k_uint64(const rvm_avx_uint64_t m0, const rvm_avx_uint64_t m1) {
+static inline rvm_avx_uint64_t mipp_avx_orb_k_uint64(const rvm_avx_uint64_t m0, const rvm_avx_uint64_t m1) {
 	rvm_avx_uint64_t res;
 	res.m= _mm256_or_si256(m0.m, m1.m);
 	return res;
@@ -3189,7 +3179,7 @@ rvm_avx_uint64_t mipp_avx_orb_k_uint64(const rvm_avx_uint64_t m0, const rvm_avx_
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- orb_k
 #if defined(__AVX2__)
-rvm_avx_uint32_t mipp_avx_orb_k_uint32(const rvm_avx_uint32_t m0, const rvm_avx_uint32_t m1) {
+static inline rvm_avx_uint32_t mipp_avx_orb_k_uint32(const rvm_avx_uint32_t m0, const rvm_avx_uint32_t m1) {
 	rvm_avx_uint32_t res;
 	res.m= _mm256_or_si256(m0.m, m1.m);
 	return res;
@@ -3197,7 +3187,7 @@ rvm_avx_uint32_t mipp_avx_orb_k_uint32(const rvm_avx_uint32_t m0, const rvm_avx_
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- orb_k
 #if defined(__AVX2__)
-rvm_avx_uint16_t mipp_avx_orb_k_uint16(const rvm_avx_uint16_t m0, const rvm_avx_uint16_t m1) {
+static inline rvm_avx_uint16_t mipp_avx_orb_k_uint16(const rvm_avx_uint16_t m0, const rvm_avx_uint16_t m1) {
 	rvm_avx_uint16_t res;
 	res.m= _mm256_or_si256(m0.m, m1.m);
 	return res;
@@ -3205,27 +3195,27 @@ rvm_avx_uint16_t mipp_avx_orb_k_uint16(const rvm_avx_uint16_t m0, const rvm_avx_
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- orb_k
 #if defined(__AVX2__)
-rvm_avx_uint8_t mipp_avx_orb_k_uint8(const rvm_avx_uint8_t m0, const rvm_avx_uint8_t m1) {
+static inline rvm_avx_uint8_t mipp_avx_orb_k_uint8(const rvm_avx_uint8_t m0, const rvm_avx_uint8_t m1) {
 	rvm_avx_uint8_t res;
 	res.m= _mm256_or_si256(m0.m, m1.m);
 	return res;
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- xorb
-rvd_avx_float64_t mipp_avx_xorb_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1) {
+static inline rvd_avx_float64_t mipp_avx_xorb_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1) {
 	rvd_avx_float64_t res;
 	res.r= _mm256_xor_pd(r0.r, r1.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- xorb
-rvd_avx_float32_t mipp_avx_xorb_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
+static inline rvd_avx_float32_t mipp_avx_xorb_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
 	rvd_avx_float32_t res;
 	res.r= _mm256_xor_ps(r0.r, r1.r);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- xorb
 #if !defined(__AVX2__)
-rvd_avx_int64_t mipp_avx_xorb_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+static inline rvd_avx_int64_t mipp_avx_xorb_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
 		rvd_avx_float32_t r0f = mipp_avx_cast_int64_float32(r0);
 	rvd_avx_float32_t r1f = mipp_avx_cast_int64_float32(r1);
 	rvd_avx_float32_t resf = mipp_avx_xorb_float32(r0f, r1f);
@@ -3234,7 +3224,7 @@ rvd_avx_int64_t mipp_avx_xorb_int64(const rvd_avx_int64_t r0, const rvd_avx_int6
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- xorb
 #if !defined(__AVX2__)
-rvd_avx_int32_t mipp_avx_xorb_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+static inline rvd_avx_int32_t mipp_avx_xorb_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
 		rvd_avx_float32_t r0f = mipp_avx_cast_int32_float32(r0);
 	rvd_avx_float32_t r1f = mipp_avx_cast_int32_float32(r1);
 	rvd_avx_float32_t resf = mipp_avx_xorb_float32(r0f, r1f);
@@ -3243,7 +3233,7 @@ rvd_avx_int32_t mipp_avx_xorb_int32(const rvd_avx_int32_t r0, const rvd_avx_int3
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- xorb
 #if !defined(__AVX2__)
-rvd_avx_int16_t mipp_avx_xorb_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+static inline rvd_avx_int16_t mipp_avx_xorb_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
 		rvd_avx_float32_t r0f = mipp_avx_cast_int16_float32(r0);
 	rvd_avx_float32_t r1f = mipp_avx_cast_int16_float32(r1);
 	rvd_avx_float32_t resf = mipp_avx_xorb_float32(r0f, r1f);
@@ -3252,7 +3242,7 @@ rvd_avx_int16_t mipp_avx_xorb_int16(const rvd_avx_int16_t r0, const rvd_avx_int1
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- xorb
 #if !defined(__AVX2__)
-rvd_avx_int8_t mipp_avx_xorb_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+static inline rvd_avx_int8_t mipp_avx_xorb_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
 		rvd_avx_float32_t r0f = mipp_avx_cast_int8_float32(r0);
 	rvd_avx_float32_t r1f = mipp_avx_cast_int8_float32(r1);
 	rvd_avx_float32_t resf = mipp_avx_xorb_float32(r0f, r1f);
@@ -3261,7 +3251,7 @@ rvd_avx_int8_t mipp_avx_xorb_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t 
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- xorb
 #if !defined(__AVX2__)
-rvd_avx_uint64_t mipp_avx_xorb_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
+static inline rvd_avx_uint64_t mipp_avx_xorb_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
 		rvd_avx_float32_t r0f = mipp_avx_cast_uint64_float32(r0);
 	rvd_avx_float32_t r1f = mipp_avx_cast_uint64_float32(r1);
 	rvd_avx_float32_t resf = mipp_avx_xorb_float32(r0f, r1f);
@@ -3270,7 +3260,7 @@ rvd_avx_uint64_t mipp_avx_xorb_uint64(const rvd_avx_uint64_t r0, const rvd_avx_u
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- xorb
 #if !defined(__AVX2__)
-rvd_avx_uint32_t mipp_avx_xorb_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
+static inline rvd_avx_uint32_t mipp_avx_xorb_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
 		rvd_avx_float32_t r0f = mipp_avx_cast_uint32_float32(r0);
 	rvd_avx_float32_t r1f = mipp_avx_cast_uint32_float32(r1);
 	rvd_avx_float32_t resf = mipp_avx_xorb_float32(r0f, r1f);
@@ -3279,7 +3269,7 @@ rvd_avx_uint32_t mipp_avx_xorb_uint32(const rvd_avx_uint32_t r0, const rvd_avx_u
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- xorb
 #if !defined(__AVX2__)
-rvd_avx_uint16_t mipp_avx_xorb_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+static inline rvd_avx_uint16_t mipp_avx_xorb_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
 		rvd_avx_float32_t r0f = mipp_avx_cast_uint16_float32(r0);
 	rvd_avx_float32_t r1f = mipp_avx_cast_uint16_float32(r1);
 	rvd_avx_float32_t resf = mipp_avx_xorb_float32(r0f, r1f);
@@ -3288,7 +3278,7 @@ rvd_avx_uint16_t mipp_avx_xorb_uint16(const rvd_avx_uint16_t r0, const rvd_avx_u
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- xorb
 #if !defined(__AVX2__)
-rvd_avx_uint8_t mipp_avx_xorb_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+static inline rvd_avx_uint8_t mipp_avx_xorb_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
 		rvd_avx_float32_t r0f = mipp_avx_cast_uint8_float32(r0);
 	rvd_avx_float32_t r1f = mipp_avx_cast_uint8_float32(r1);
 	rvd_avx_float32_t resf = mipp_avx_xorb_float32(r0f, r1f);
@@ -3297,7 +3287,7 @@ rvd_avx_uint8_t mipp_avx_xorb_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- xorb
 #if defined(__AVX2__)
-rvd_avx_int64_t mipp_avx_xorb_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+static inline rvd_avx_int64_t mipp_avx_xorb_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
 	rvd_avx_int64_t res;
 	res.r= _mm256_xor_si256(r0.r, r1.r);
 	return res;
@@ -3305,7 +3295,7 @@ rvd_avx_int64_t mipp_avx_xorb_int64(const rvd_avx_int64_t r0, const rvd_avx_int6
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- xorb
 #if defined(__AVX2__)
-rvd_avx_int32_t mipp_avx_xorb_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+static inline rvd_avx_int32_t mipp_avx_xorb_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
 	rvd_avx_int32_t res;
 	res.r= _mm256_xor_si256(r0.r, r1.r);
 	return res;
@@ -3313,7 +3303,7 @@ rvd_avx_int32_t mipp_avx_xorb_int32(const rvd_avx_int32_t r0, const rvd_avx_int3
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- xorb
 #if defined(__AVX2__)
-rvd_avx_int16_t mipp_avx_xorb_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+static inline rvd_avx_int16_t mipp_avx_xorb_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
 	rvd_avx_int16_t res;
 	res.r= _mm256_xor_si256(r0.r, r1.r);
 	return res;
@@ -3321,7 +3311,7 @@ rvd_avx_int16_t mipp_avx_xorb_int16(const rvd_avx_int16_t r0, const rvd_avx_int1
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- xorb
 #if defined(__AVX2__)
-rvd_avx_int8_t mipp_avx_xorb_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+static inline rvd_avx_int8_t mipp_avx_xorb_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
 	rvd_avx_int8_t res;
 	res.r= _mm256_xor_si256(r0.r, r1.r);
 	return res;
@@ -3329,7 +3319,7 @@ rvd_avx_int8_t mipp_avx_xorb_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t 
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- xorb
 #if defined(__AVX2__)
-rvd_avx_uint64_t mipp_avx_xorb_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
+static inline rvd_avx_uint64_t mipp_avx_xorb_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
 	rvd_avx_uint64_t res;
 	res.r= _mm256_xor_si256(r0.r, r1.r);
 	return res;
@@ -3337,7 +3327,7 @@ rvd_avx_uint64_t mipp_avx_xorb_uint64(const rvd_avx_uint64_t r0, const rvd_avx_u
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- xorb
 #if defined(__AVX2__)
-rvd_avx_uint32_t mipp_avx_xorb_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
+static inline rvd_avx_uint32_t mipp_avx_xorb_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
 	rvd_avx_uint32_t res;
 	res.r= _mm256_xor_si256(r0.r, r1.r);
 	return res;
@@ -3345,7 +3335,7 @@ rvd_avx_uint32_t mipp_avx_xorb_uint32(const rvd_avx_uint32_t r0, const rvd_avx_u
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- xorb
 #if defined(__AVX2__)
-rvd_avx_uint16_t mipp_avx_xorb_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+static inline rvd_avx_uint16_t mipp_avx_xorb_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
 	rvd_avx_uint16_t res;
 	res.r= _mm256_xor_si256(r0.r, r1.r);
 	return res;
@@ -3353,7 +3343,7 @@ rvd_avx_uint16_t mipp_avx_xorb_uint16(const rvd_avx_uint16_t r0, const rvd_avx_u
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- xorb
 #if defined(__AVX2__)
-rvd_avx_uint8_t mipp_avx_xorb_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+static inline rvd_avx_uint8_t mipp_avx_xorb_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
 	rvd_avx_uint8_t res;
 	res.r= _mm256_xor_si256(r0.r, r1.r);
 	return res;
@@ -3361,7 +3351,7 @@ rvd_avx_uint8_t mipp_avx_xorb_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- xorb_k
 #if !defined(__AVX2__)
-rvm_avx_int64_t mipp_avx_xorb_k_int64(const rvm_avx_int64_t m0, const rvm_avx_int64_t m1) {
+static inline rvm_avx_int64_t mipp_avx_xorb_k_int64(const rvm_avx_int64_t m0, const rvm_avx_int64_t m1) {
 		rvd_avx_float32_t r0f = mipp_avx_toreg_float32(mipp_avx_cast_k_int64_float32(m0));
 	rvd_avx_float32_t r1f = mipp_avx_toreg_float32(mipp_avx_cast_k_int64_float32(m1));
 	rvd_avx_float32_t resf = mipp_avx_xorb_float32(r0f, r1f);
@@ -3370,7 +3360,7 @@ rvm_avx_int64_t mipp_avx_xorb_k_int64(const rvm_avx_int64_t m0, const rvm_avx_in
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- xorb_k
 #if !defined(__AVX2__)
-rvm_avx_int32_t mipp_avx_xorb_k_int32(const rvm_avx_int32_t m0, const rvm_avx_int32_t m1) {
+static inline rvm_avx_int32_t mipp_avx_xorb_k_int32(const rvm_avx_int32_t m0, const rvm_avx_int32_t m1) {
 		rvd_avx_float32_t r0f = mipp_avx_toreg_float32(mipp_avx_cast_k_int32_float32(m0));
 	rvd_avx_float32_t r1f = mipp_avx_toreg_float32(mipp_avx_cast_k_int32_float32(m1));
 	rvd_avx_float32_t resf = mipp_avx_xorb_float32(r0f, r1f);
@@ -3379,7 +3369,7 @@ rvm_avx_int32_t mipp_avx_xorb_k_int32(const rvm_avx_int32_t m0, const rvm_avx_in
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- xorb_k
 #if !defined(__AVX2__)
-rvm_avx_int16_t mipp_avx_xorb_k_int16(const rvm_avx_int16_t m0, const rvm_avx_int16_t m1) {
+static inline rvm_avx_int16_t mipp_avx_xorb_k_int16(const rvm_avx_int16_t m0, const rvm_avx_int16_t m1) {
 		rvd_avx_float32_t r0f = mipp_avx_toreg_float32(mipp_avx_cast_k_int16_float32(m0));
 	rvd_avx_float32_t r1f = mipp_avx_toreg_float32(mipp_avx_cast_k_int16_float32(m1));
 	rvd_avx_float32_t resf = mipp_avx_xorb_float32(r0f, r1f);
@@ -3388,7 +3378,7 @@ rvm_avx_int16_t mipp_avx_xorb_k_int16(const rvm_avx_int16_t m0, const rvm_avx_in
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- xorb_k
 #if !defined(__AVX2__)
-rvm_avx_int8_t mipp_avx_xorb_k_int8(const rvm_avx_int8_t m0, const rvm_avx_int8_t m1) {
+static inline rvm_avx_int8_t mipp_avx_xorb_k_int8(const rvm_avx_int8_t m0, const rvm_avx_int8_t m1) {
 		rvd_avx_float32_t r0f = mipp_avx_toreg_float32(mipp_avx_cast_k_int8_float32(m0));
 	rvd_avx_float32_t r1f = mipp_avx_toreg_float32(mipp_avx_cast_k_int8_float32(m1));
 	rvd_avx_float32_t resf = mipp_avx_xorb_float32(r0f, r1f);
@@ -3397,7 +3387,7 @@ rvm_avx_int8_t mipp_avx_xorb_k_int8(const rvm_avx_int8_t m0, const rvm_avx_int8_
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- xorb_k
 #if !defined(__AVX2__)
-rvm_avx_uint64_t mipp_avx_xorb_k_uint64(const rvm_avx_uint64_t m0, const rvm_avx_uint64_t m1) {
+static inline rvm_avx_uint64_t mipp_avx_xorb_k_uint64(const rvm_avx_uint64_t m0, const rvm_avx_uint64_t m1) {
 		rvd_avx_float32_t r0f = mipp_avx_toreg_float32(mipp_avx_cast_k_uint64_float32(m0));
 	rvd_avx_float32_t r1f = mipp_avx_toreg_float32(mipp_avx_cast_k_uint64_float32(m1));
 	rvd_avx_float32_t resf = mipp_avx_xorb_float32(r0f, r1f);
@@ -3406,7 +3396,7 @@ rvm_avx_uint64_t mipp_avx_xorb_k_uint64(const rvm_avx_uint64_t m0, const rvm_avx
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- xorb_k
 #if !defined(__AVX2__)
-rvm_avx_uint32_t mipp_avx_xorb_k_uint32(const rvm_avx_uint32_t m0, const rvm_avx_uint32_t m1) {
+static inline rvm_avx_uint32_t mipp_avx_xorb_k_uint32(const rvm_avx_uint32_t m0, const rvm_avx_uint32_t m1) {
 		rvd_avx_float32_t r0f = mipp_avx_toreg_float32(mipp_avx_cast_k_uint32_float32(m0));
 	rvd_avx_float32_t r1f = mipp_avx_toreg_float32(mipp_avx_cast_k_uint32_float32(m1));
 	rvd_avx_float32_t resf = mipp_avx_xorb_float32(r0f, r1f);
@@ -3415,7 +3405,7 @@ rvm_avx_uint32_t mipp_avx_xorb_k_uint32(const rvm_avx_uint32_t m0, const rvm_avx
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- xorb_k
 #if !defined(__AVX2__)
-rvm_avx_uint16_t mipp_avx_xorb_k_uint16(const rvm_avx_uint16_t m0, const rvm_avx_uint16_t m1) {
+static inline rvm_avx_uint16_t mipp_avx_xorb_k_uint16(const rvm_avx_uint16_t m0, const rvm_avx_uint16_t m1) {
 		rvd_avx_float32_t r0f = mipp_avx_toreg_float32(mipp_avx_cast_k_uint16_float32(m0));
 	rvd_avx_float32_t r1f = mipp_avx_toreg_float32(mipp_avx_cast_k_uint16_float32(m1));
 	rvd_avx_float32_t resf = mipp_avx_xorb_float32(r0f, r1f);
@@ -3424,7 +3414,7 @@ rvm_avx_uint16_t mipp_avx_xorb_k_uint16(const rvm_avx_uint16_t m0, const rvm_avx
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- xorb_k
 #if !defined(__AVX2__)
-rvm_avx_uint8_t mipp_avx_xorb_k_uint8(const rvm_avx_uint8_t m0, const rvm_avx_uint8_t m1) {
+static inline rvm_avx_uint8_t mipp_avx_xorb_k_uint8(const rvm_avx_uint8_t m0, const rvm_avx_uint8_t m1) {
 		rvd_avx_float32_t r0f = mipp_avx_toreg_float32(mipp_avx_cast_k_uint8_float32(m0));
 	rvd_avx_float32_t r1f = mipp_avx_toreg_float32(mipp_avx_cast_k_uint8_float32(m1));
 	rvd_avx_float32_t resf = mipp_avx_xorb_float32(r0f, r1f);
@@ -3433,7 +3423,7 @@ rvm_avx_uint8_t mipp_avx_xorb_k_uint8(const rvm_avx_uint8_t m0, const rvm_avx_ui
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- xorb_k
 #if defined(__AVX2__)
-rvm_avx_float64_t mipp_avx_xorb_k_float64(const rvm_avx_float64_t m0, const rvm_avx_float64_t m1) {
+static inline rvm_avx_float64_t mipp_avx_xorb_k_float64(const rvm_avx_float64_t m0, const rvm_avx_float64_t m1) {
 	rvm_avx_float64_t res;
 	res.m= _mm256_xor_pd(m0.m, m1.m);
 	return res;
@@ -3441,7 +3431,7 @@ rvm_avx_float64_t mipp_avx_xorb_k_float64(const rvm_avx_float64_t m0, const rvm_
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- xorb_k
 #if defined(__AVX2__)
-rvm_avx_float32_t mipp_avx_xorb_k_float32(const rvm_avx_float32_t m0, const rvm_avx_float32_t m1) {
+static inline rvm_avx_float32_t mipp_avx_xorb_k_float32(const rvm_avx_float32_t m0, const rvm_avx_float32_t m1) {
 	rvm_avx_float32_t res;
 	res.m= _mm256_xor_ps(m0.m, m1.m);
 	return res;
@@ -3449,7 +3439,7 @@ rvm_avx_float32_t mipp_avx_xorb_k_float32(const rvm_avx_float32_t m0, const rvm_
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- xorb_k
 #if defined(__AVX2__)
-rvm_avx_int64_t mipp_avx_xorb_k_int64(const rvm_avx_int64_t m0, const rvm_avx_int64_t m1) {
+static inline rvm_avx_int64_t mipp_avx_xorb_k_int64(const rvm_avx_int64_t m0, const rvm_avx_int64_t m1) {
 	rvm_avx_int64_t res;
 	res.m= _mm256_xor_si256(m0.m, m1.m);
 	return res;
@@ -3457,7 +3447,7 @@ rvm_avx_int64_t mipp_avx_xorb_k_int64(const rvm_avx_int64_t m0, const rvm_avx_in
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- xorb_k
 #if defined(__AVX2__)
-rvm_avx_int32_t mipp_avx_xorb_k_int32(const rvm_avx_int32_t m0, const rvm_avx_int32_t m1) {
+static inline rvm_avx_int32_t mipp_avx_xorb_k_int32(const rvm_avx_int32_t m0, const rvm_avx_int32_t m1) {
 	rvm_avx_int32_t res;
 	res.m= _mm256_xor_si256(m0.m, m1.m);
 	return res;
@@ -3465,7 +3455,7 @@ rvm_avx_int32_t mipp_avx_xorb_k_int32(const rvm_avx_int32_t m0, const rvm_avx_in
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- xorb_k
 #if defined(__AVX2__)
-rvm_avx_int16_t mipp_avx_xorb_k_int16(const rvm_avx_int16_t m0, const rvm_avx_int16_t m1) {
+static inline rvm_avx_int16_t mipp_avx_xorb_k_int16(const rvm_avx_int16_t m0, const rvm_avx_int16_t m1) {
 	rvm_avx_int16_t res;
 	res.m= _mm256_xor_si256(m0.m, m1.m);
 	return res;
@@ -3473,7 +3463,7 @@ rvm_avx_int16_t mipp_avx_xorb_k_int16(const rvm_avx_int16_t m0, const rvm_avx_in
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- xorb_k
 #if defined(__AVX2__)
-rvm_avx_int8_t mipp_avx_xorb_k_int8(const rvm_avx_int8_t m0, const rvm_avx_int8_t m1) {
+static inline rvm_avx_int8_t mipp_avx_xorb_k_int8(const rvm_avx_int8_t m0, const rvm_avx_int8_t m1) {
 	rvm_avx_int8_t res;
 	res.m= _mm256_xor_si256(m0.m, m1.m);
 	return res;
@@ -3481,7 +3471,7 @@ rvm_avx_int8_t mipp_avx_xorb_k_int8(const rvm_avx_int8_t m0, const rvm_avx_int8_
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- xorb_k
 #if defined(__AVX2__)
-rvm_avx_uint64_t mipp_avx_xorb_k_uint64(const rvm_avx_uint64_t m0, const rvm_avx_uint64_t m1) {
+static inline rvm_avx_uint64_t mipp_avx_xorb_k_uint64(const rvm_avx_uint64_t m0, const rvm_avx_uint64_t m1) {
 	rvm_avx_uint64_t res;
 	res.m= _mm256_xor_si256(m0.m, m1.m);
 	return res;
@@ -3489,7 +3479,7 @@ rvm_avx_uint64_t mipp_avx_xorb_k_uint64(const rvm_avx_uint64_t m0, const rvm_avx
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- xorb_k
 #if defined(__AVX2__)
-rvm_avx_uint32_t mipp_avx_xorb_k_uint32(const rvm_avx_uint32_t m0, const rvm_avx_uint32_t m1) {
+static inline rvm_avx_uint32_t mipp_avx_xorb_k_uint32(const rvm_avx_uint32_t m0, const rvm_avx_uint32_t m1) {
 	rvm_avx_uint32_t res;
 	res.m= _mm256_xor_si256(m0.m, m1.m);
 	return res;
@@ -3497,7 +3487,7 @@ rvm_avx_uint32_t mipp_avx_xorb_k_uint32(const rvm_avx_uint32_t m0, const rvm_avx
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- xorb_k
 #if defined(__AVX2__)
-rvm_avx_uint16_t mipp_avx_xorb_k_uint16(const rvm_avx_uint16_t m0, const rvm_avx_uint16_t m1) {
+static inline rvm_avx_uint16_t mipp_avx_xorb_k_uint16(const rvm_avx_uint16_t m0, const rvm_avx_uint16_t m1) {
 	rvm_avx_uint16_t res;
 	res.m= _mm256_xor_si256(m0.m, m1.m);
 	return res;
@@ -3505,27 +3495,27 @@ rvm_avx_uint16_t mipp_avx_xorb_k_uint16(const rvm_avx_uint16_t m0, const rvm_avx
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- xorb_k
 #if defined(__AVX2__)
-rvm_avx_uint8_t mipp_avx_xorb_k_uint8(const rvm_avx_uint8_t m0, const rvm_avx_uint8_t m1) {
+static inline rvm_avx_uint8_t mipp_avx_xorb_k_uint8(const rvm_avx_uint8_t m0, const rvm_avx_uint8_t m1) {
 	rvm_avx_uint8_t res;
 	res.m= _mm256_xor_si256(m0.m, m1.m);
 	return res;
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cmpeq
-rvm_avx_float64_t mipp_avx_cmpeq_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1) {
+static inline rvm_avx_float64_t mipp_avx_cmpeq_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1) {
 		rvd_avx_float64_t tmp;
 	tmp.r = _mm256_cmp_pd(r0.r, r1.r, _CMP_EQ_OQ);
 	return mipp_avx_tomsk_float64(tmp);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cmpeq
-rvm_avx_float32_t mipp_avx_cmpeq_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
+static inline rvm_avx_float32_t mipp_avx_cmpeq_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
 		rvd_avx_float32_t tmp;
 	tmp.r = _mm256_cmp_ps(r0.r, r1.r, _CMP_EQ_OQ);
 	return mipp_avx_tomsk_float32(tmp);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cmpeq
 #if defined(__AVX2__)
-rvm_avx_int64_t mipp_avx_cmpeq_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+static inline rvm_avx_int64_t mipp_avx_cmpeq_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
 	rvm_avx_int64_t res;
 	res.m=  _mm256_cmpeq_epi64(r0.r, r1.r);
 	return res;
@@ -3533,7 +3523,7 @@ rvm_avx_int64_t mipp_avx_cmpeq_int64(const rvd_avx_int64_t r0, const rvd_avx_int
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cmpeq
 #if defined(__AVX2__)
-rvm_avx_int32_t mipp_avx_cmpeq_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+static inline rvm_avx_int32_t mipp_avx_cmpeq_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
 	rvm_avx_int32_t res;
 	res.m=  _mm256_cmpeq_epi32(r0.r, r1.r);
 	return res;
@@ -3541,7 +3531,7 @@ rvm_avx_int32_t mipp_avx_cmpeq_int32(const rvd_avx_int32_t r0, const rvd_avx_int
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cmpeq
 #if defined(__AVX2__)
-rvm_avx_int16_t mipp_avx_cmpeq_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+static inline rvm_avx_int16_t mipp_avx_cmpeq_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
 	rvm_avx_int16_t res;
 	res.m=  _mm256_cmpeq_epi16(r0.r, r1.r);
 	return res;
@@ -3549,75 +3539,75 @@ rvm_avx_int16_t mipp_avx_cmpeq_int16(const rvd_avx_int16_t r0, const rvd_avx_int
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cmpeq
 #if defined(__AVX2__)
-rvm_avx_int8_t mipp_avx_cmpeq_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+static inline rvm_avx_int8_t mipp_avx_cmpeq_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
 	rvm_avx_int8_t res;
 	res.m=  _mm256_cmpeq_epi8(r0.r, r1.r);
 	return res;
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cmpneq
-rvm_avx_float64_t mipp_avx_cmpneq_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1) {
+static inline rvm_avx_float64_t mipp_avx_cmpneq_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1) {
 		rvd_avx_float64_t tmp;
 	tmp.r = _mm256_cmp_pd(r0.r, r1.r, _CMP_NEQ_OQ);
 	return mipp_avx_tomsk_float64(tmp);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cmpneq
-rvm_avx_float32_t mipp_avx_cmpneq_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
+static inline rvm_avx_float32_t mipp_avx_cmpneq_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
 		rvd_avx_float32_t tmp;
 	tmp.r = _mm256_cmp_ps(r0.r, r1.r, _CMP_NEQ_OQ);
 	return mipp_avx_tomsk_float32(tmp);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cmplt
-rvm_avx_float64_t mipp_avx_cmplt_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1) {
+static inline rvm_avx_float64_t mipp_avx_cmplt_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1) {
 		rvd_avx_float64_t tmp;
 	tmp.r = _mm256_cmp_pd(r0.r, r1.r, _CMP_LT_OS);
 	return mipp_avx_tomsk_float64(tmp);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cmplt
-rvm_avx_float32_t mipp_avx_cmplt_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
+static inline rvm_avx_float32_t mipp_avx_cmplt_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
 		rvd_avx_float32_t tmp;
 	tmp.r = _mm256_cmp_ps(r0.r, r1.r, _CMP_LT_OS);
 	return mipp_avx_tomsk_float32(tmp);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cmple
-rvm_avx_float64_t mipp_avx_cmple_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1) {
+static inline rvm_avx_float64_t mipp_avx_cmple_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1) {
 		rvd_avx_float64_t tmp;
 	tmp.r = _mm256_cmp_pd(r0.r, r1.r, _CMP_LE_OS);
 	return mipp_avx_tomsk_float64(tmp);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cmple
-rvm_avx_float32_t mipp_avx_cmple_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
+static inline rvm_avx_float32_t mipp_avx_cmple_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
 		rvd_avx_float32_t tmp;
 	tmp.r = _mm256_cmp_ps(r0.r, r1.r, _CMP_LE_OS);
 	return mipp_avx_tomsk_float32(tmp);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cmpge
-rvm_avx_float64_t mipp_avx_cmpge_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1) {
+static inline rvm_avx_float64_t mipp_avx_cmpge_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1) {
 		rvd_avx_float64_t tmp;
 	tmp.r = _mm256_cmp_pd(r0.r, r1.r, _CMP_GE_OS);
 	return mipp_avx_tomsk_float64(tmp);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cmpge
-rvm_avx_float32_t mipp_avx_cmpge_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
+static inline rvm_avx_float32_t mipp_avx_cmpge_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
 		rvd_avx_float32_t tmp;
 	tmp.r = _mm256_cmp_ps(r0.r, r1.r, _CMP_GE_OS);
 	return mipp_avx_tomsk_float32(tmp);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cmpgt
-rvm_avx_float64_t mipp_avx_cmpgt_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1) {
+static inline rvm_avx_float64_t mipp_avx_cmpgt_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1) {
 		rvd_avx_float64_t tmp;
 	tmp.r = _mm256_cmp_pd(r0.r, r1.r, _CMP_GT_OS);
 	return mipp_avx_tomsk_float64(tmp);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cmpgt
-rvm_avx_float32_t mipp_avx_cmpgt_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
+static inline rvm_avx_float32_t mipp_avx_cmpgt_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
 		rvd_avx_float32_t tmp;
 	tmp.r = _mm256_cmp_ps(r0.r, r1.r, _CMP_GT_OS);
 	return mipp_avx_tomsk_float32(tmp);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cmpgt
 #if defined(__AVX2__)
-rvm_avx_int64_t mipp_avx_cmpgt_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+static inline rvm_avx_int64_t mipp_avx_cmpgt_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
 	rvm_avx_int64_t res;
 	res.m=  _mm256_cmpgt_epi64(r0.r, r1.r);
 	return res;
@@ -3625,7 +3615,7 @@ rvm_avx_int64_t mipp_avx_cmpgt_int64(const rvd_avx_int64_t r0, const rvd_avx_int
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cmpgt
 #if defined(__AVX2__)
-rvm_avx_int32_t mipp_avx_cmpgt_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+static inline rvm_avx_int32_t mipp_avx_cmpgt_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
 	rvm_avx_int32_t res;
 	res.m=  _mm256_cmpgt_epi32(r0.r, r1.r);
 	return res;
@@ -3633,7 +3623,7 @@ rvm_avx_int32_t mipp_avx_cmpgt_int32(const rvd_avx_int32_t r0, const rvd_avx_int
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cmpgt
 #if defined(__AVX2__)
-rvm_avx_int16_t mipp_avx_cmpgt_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+static inline rvm_avx_int16_t mipp_avx_cmpgt_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
 	rvm_avx_int16_t res;
 	res.m=  _mm256_cmpgt_epi16(r0.r, r1.r);
 	return res;
@@ -3641,27 +3631,27 @@ rvm_avx_int16_t mipp_avx_cmpgt_int16(const rvd_avx_int16_t r0, const rvd_avx_int
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cmpgt
 #if defined(__AVX2__)
-rvm_avx_int8_t mipp_avx_cmpgt_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+static inline rvm_avx_int8_t mipp_avx_cmpgt_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
 	rvm_avx_int8_t res;
 	res.m=  _mm256_cmpgt_epi8(r0.r, r1.r);
 	return res;
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- blend
-rvd_avx_float64_t mipp_avx_blend_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1, const rvm_avx_float64_t m0) {
+static inline rvd_avx_float64_t mipp_avx_blend_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1, const rvm_avx_float64_t m0) {
 	rvd_avx_float64_t res;
 	res.r= _mm256_blendv_pd(r0.r, r1.r, m0.m);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- blend
-rvd_avx_float32_t mipp_avx_blend_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1, const rvm_avx_float32_t m0) {
+static inline rvd_avx_float32_t mipp_avx_blend_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1, const rvm_avx_float32_t m0) {
 	rvd_avx_float32_t res;
 	res.r= _mm256_blendv_ps(r0.r, r1.r, m0.m);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- blend
 #if defined(__AVX2__)
-rvd_avx_int64_t mipp_avx_blend_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1, const rvm_avx_int64_t m0) {
+static inline rvd_avx_int64_t mipp_avx_blend_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1, const rvm_avx_int64_t m0) {
 	rvd_avx_int64_t res;
 	res.r= _mm256_blendv_epi8(r0.r, r1.r, m0.m);
 	return res;
@@ -3669,7 +3659,7 @@ rvd_avx_int64_t mipp_avx_blend_int64(const rvd_avx_int64_t r0, const rvd_avx_int
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- blend
 #if defined(__AVX2__)
-rvd_avx_int32_t mipp_avx_blend_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1, const rvm_avx_int32_t m0) {
+static inline rvd_avx_int32_t mipp_avx_blend_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1, const rvm_avx_int32_t m0) {
 	rvd_avx_int32_t res;
 	res.r= _mm256_blendv_epi8(r0.r, r1.r, m0.m);
 	return res;
@@ -3677,7 +3667,7 @@ rvd_avx_int32_t mipp_avx_blend_int32(const rvd_avx_int32_t r0, const rvd_avx_int
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- blend
 #if defined(__AVX2__)
-rvd_avx_int16_t mipp_avx_blend_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1, const rvm_avx_int16_t m0) {
+static inline rvd_avx_int16_t mipp_avx_blend_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1, const rvm_avx_int16_t m0) {
 	rvd_avx_int16_t res;
 	res.r= _mm256_blendv_epi8(r0.r, r1.r, m0.m);
 	return res;
@@ -3685,7 +3675,7 @@ rvd_avx_int16_t mipp_avx_blend_int16(const rvd_avx_int16_t r0, const rvd_avx_int
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- blend
 #if defined(__AVX2__)
-rvd_avx_int8_t mipp_avx_blend_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1, const rvm_avx_int8_t m0) {
+static inline rvd_avx_int8_t mipp_avx_blend_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1, const rvm_avx_int8_t m0) {
 	rvd_avx_int8_t res;
 	res.r= _mm256_blendv_epi8(r0.r, r1.r, m0.m);
 	return res;
@@ -3693,7 +3683,7 @@ rvd_avx_int8_t mipp_avx_blend_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- blend
 #if defined(__AVX2__)
-rvd_avx_uint64_t mipp_avx_blend_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1, const rvm_avx_uint64_t m0) {
+static inline rvd_avx_uint64_t mipp_avx_blend_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1, const rvm_avx_uint64_t m0) {
 	rvd_avx_uint64_t res;
 	res.r= _mm256_blendv_epi8(r0.r, r1.r, m0.m);
 	return res;
@@ -3701,7 +3691,7 @@ rvd_avx_uint64_t mipp_avx_blend_uint64(const rvd_avx_uint64_t r0, const rvd_avx_
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- blend
 #if defined(__AVX2__)
-rvd_avx_uint32_t mipp_avx_blend_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1, const rvm_avx_uint32_t m0) {
+static inline rvd_avx_uint32_t mipp_avx_blend_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1, const rvm_avx_uint32_t m0) {
 	rvd_avx_uint32_t res;
 	res.r= _mm256_blendv_epi8(r0.r, r1.r, m0.m);
 	return res;
@@ -3709,7 +3699,7 @@ rvd_avx_uint32_t mipp_avx_blend_uint32(const rvd_avx_uint32_t r0, const rvd_avx_
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- blend
 #if defined(__AVX2__)
-rvd_avx_uint16_t mipp_avx_blend_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1, const rvm_avx_uint16_t m0) {
+static inline rvd_avx_uint16_t mipp_avx_blend_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1, const rvm_avx_uint16_t m0) {
 	rvd_avx_uint16_t res;
 	res.r= _mm256_blendv_epi8(r0.r, r1.r, m0.m);
 	return res;
@@ -3717,54 +3707,54 @@ rvd_avx_uint16_t mipp_avx_blend_uint16(const rvd_avx_uint16_t r0, const rvd_avx_
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- blend
 #if defined(__AVX2__)
-rvd_avx_uint8_t mipp_avx_blend_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1, const rvm_avx_uint8_t m0) {
+static inline rvd_avx_uint8_t mipp_avx_blend_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1, const rvm_avx_uint8_t m0) {
 	rvd_avx_uint8_t res;
 	res.r= _mm256_blendv_epi8(r0.r, r1.r, m0.m);
 	return res;
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- testz
-int32_t mipp_avx_testz_float64(const rvm_avx_float64_t m0, const rvm_avx_float64_t m1) {
+static inline int32_t mipp_avx_testz_float64(const rvm_avx_float64_t m0, const rvm_avx_float64_t m1) {
 		return _mm256_testz_pd(m0.m, m1.m);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- testz
-int32_t mipp_avx_testz_float32(const rvm_avx_float32_t m0, const rvm_avx_float32_t m1) {
+static inline int32_t mipp_avx_testz_float32(const rvm_avx_float32_t m0, const rvm_avx_float32_t m1) {
 		return _mm256_testz_ps(m0.m, m1.m);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- testz
-int32_t mipp_avx_testz_int64(const rvm_avx_int64_t m0, const rvm_avx_int64_t m1) {
+static inline int32_t mipp_avx_testz_int64(const rvm_avx_int64_t m0, const rvm_avx_int64_t m1) {
 		return _mm256_testz_si256(m0.m, m1.m);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- testz
-int32_t mipp_avx_testz_int32(const rvm_avx_int32_t m0, const rvm_avx_int32_t m1) {
+static inline int32_t mipp_avx_testz_int32(const rvm_avx_int32_t m0, const rvm_avx_int32_t m1) {
 		return _mm256_testz_si256(m0.m, m1.m);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- testz
-int32_t mipp_avx_testz_int16(const rvm_avx_int16_t m0, const rvm_avx_int16_t m1) {
+static inline int32_t mipp_avx_testz_int16(const rvm_avx_int16_t m0, const rvm_avx_int16_t m1) {
 		return _mm256_testz_si256(m0.m, m1.m);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- testz
-int32_t mipp_avx_testz_int8(const rvm_avx_int8_t m0, const rvm_avx_int8_t m1) {
+static inline int32_t mipp_avx_testz_int8(const rvm_avx_int8_t m0, const rvm_avx_int8_t m1) {
 		return _mm256_testz_si256(m0.m, m1.m);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- testz
-int32_t mipp_avx_testz_uint64(const rvm_avx_uint64_t m0, const rvm_avx_uint64_t m1) {
+static inline int32_t mipp_avx_testz_uint64(const rvm_avx_uint64_t m0, const rvm_avx_uint64_t m1) {
 		return _mm256_testz_si256(m0.m, m1.m);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- testz
-int32_t mipp_avx_testz_uint32(const rvm_avx_uint32_t m0, const rvm_avx_uint32_t m1) {
+static inline int32_t mipp_avx_testz_uint32(const rvm_avx_uint32_t m0, const rvm_avx_uint32_t m1) {
 		return _mm256_testz_si256(m0.m, m1.m);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- testz
-int32_t mipp_avx_testz_uint16(const rvm_avx_uint16_t m0, const rvm_avx_uint16_t m1) {
+static inline int32_t mipp_avx_testz_uint16(const rvm_avx_uint16_t m0, const rvm_avx_uint16_t m1) {
 		return _mm256_testz_si256(m0.m, m1.m);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- testz
-int32_t mipp_avx_testz_uint8(const rvm_avx_uint8_t m0, const rvm_avx_uint8_t m1) {
+static inline int32_t mipp_avx_testz_uint8(const rvm_avx_uint8_t m0, const rvm_avx_uint8_t m1) {
 		return _mm256_testz_si256(m0.m, m1.m);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- hadd
-rvd_avx_float64_t mipp_avx_hadd_float64(const rvd_avx_float64_t r0) {
+static inline rvd_avx_float64_t mipp_avx_hadd_float64(const rvd_avx_float64_t r0) {
 		rvd_avx_float32_t rsf;
 	rsf.r = _mm256_permute2f128_ps(mipp_avx_cast_float64_float32(r0).r, mipp_avx_cast_float64_float32(r0).r, _MM_SHUFFLE(0,0,0,1));
 	rvd_avx_float64_t rs1 = mipp_avx_cast_float32_float64(rsf);
@@ -3777,7 +3767,7 @@ rvd_avx_float64_t mipp_avx_hadd_float64(const rvd_avx_float64_t r0) {
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- hadd
 #if defined(__AVX2__)
-rvd_avx_int64_t mipp_avx_hadd_int64(const rvd_avx_int64_t r0) {
+static inline rvd_avx_int64_t mipp_avx_hadd_int64(const rvd_avx_int64_t r0) {
 		rvd_avx_float32_t rsf;
 	rsf.r = _mm256_permute2f128_ps(mipp_avx_cast_int64_float32(r0).r, mipp_avx_cast_int64_float32(r0).r, _MM_SHUFFLE(0,0,0,1));
 	rvd_avx_int64_t rs1 = mipp_avx_cast_float32_int64(rsf);
@@ -3790,7 +3780,7 @@ rvd_avx_int64_t mipp_avx_hadd_int64(const rvd_avx_int64_t r0) {
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- hadd
-rvd_avx_float32_t mipp_avx_hadd_float32(const rvd_avx_float32_t r0) {
+static inline rvd_avx_float32_t mipp_avx_hadd_float32(const rvd_avx_float32_t r0) {
 		rvd_avx_float32_t rsf;
 	rsf.r = _mm256_permute2f128_ps(mipp_avx_cast_float32_float32(r0).r, mipp_avx_cast_float32_float32(r0).r, _MM_SHUFFLE(0,0,0,1));
 	rvd_avx_float32_t rs1 = mipp_avx_cast_float32_float32(rsf);
@@ -3807,7 +3797,7 @@ rvd_avx_float32_t mipp_avx_hadd_float32(const rvd_avx_float32_t r0) {
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- hadd
 #if defined(__AVX2__)
-rvd_avx_int32_t mipp_avx_hadd_int32(const rvd_avx_int32_t r0) {
+static inline rvd_avx_int32_t mipp_avx_hadd_int32(const rvd_avx_int32_t r0) {
 		rvd_avx_float32_t rsf;
 	rsf.r = _mm256_permute2f128_ps(mipp_avx_cast_int32_float32(r0).r, mipp_avx_cast_int32_float32(r0).r, _MM_SHUFFLE(0,0,0,1));
 	rvd_avx_int32_t rs1 = mipp_avx_cast_float32_int32(rsf);
@@ -3825,7 +3815,7 @@ rvd_avx_int32_t mipp_avx_hadd_int32(const rvd_avx_int32_t r0) {
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- hadd
 #if defined(__AVX2__)
-rvd_avx_int16_t mipp_avx_hadd_int16(const rvd_avx_int16_t r0) {
+static inline rvd_avx_int16_t mipp_avx_hadd_int16(const rvd_avx_int16_t r0) {
 		rvd_avx_float32_t rsf;
 	rsf.r = _mm256_permute2f128_ps(mipp_avx_cast_int16_float32(r0).r, mipp_avx_cast_int16_float32(r0).r, _MM_SHUFFLE(0,0,0,1));
 	rvd_avx_int16_t rs1 = mipp_avx_cast_float32_int16(rsf);
@@ -3848,7 +3838,7 @@ rvd_avx_int16_t mipp_avx_hadd_int16(const rvd_avx_int16_t r0) {
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- hadd
 #if defined(__AVX2__)
-rvd_avx_uint16_t mipp_avx_hadd_uint16(const rvd_avx_uint16_t r0) {
+static inline rvd_avx_uint16_t mipp_avx_hadd_uint16(const rvd_avx_uint16_t r0) {
 		rvd_avx_float32_t rsf;
 	rsf.r = _mm256_permute2f128_ps(mipp_avx_cast_uint16_float32(r0).r, mipp_avx_cast_uint16_float32(r0).r, _MM_SHUFFLE(0,0,0,1));
 	rvd_avx_uint16_t rs1 = mipp_avx_cast_float32_uint16(rsf);
@@ -3871,7 +3861,7 @@ rvd_avx_uint16_t mipp_avx_hadd_uint16(const rvd_avx_uint16_t r0) {
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- hadd
 #if defined(__AVX2__)
-rvd_avx_int8_t mipp_avx_hadd_int8(const rvd_avx_int8_t r0) {
+static inline rvd_avx_int8_t mipp_avx_hadd_int8(const rvd_avx_int8_t r0) {
 		rvd_avx_float32_t rsf;
 	rsf.r = _mm256_permute2f128_ps(mipp_avx_cast_int8_float32(r0).r, mipp_avx_cast_int8_float32(r0).r, _MM_SHUFFLE(0,0,0,1));
 	rvd_avx_int8_t rs1 = mipp_avx_cast_float32_int8(rsf);
@@ -3899,7 +3889,7 @@ rvd_avx_int8_t mipp_avx_hadd_int8(const rvd_avx_int8_t r0) {
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- hadd
 #if defined(__AVX2__)
-rvd_avx_uint8_t mipp_avx_hadd_uint8(const rvd_avx_uint8_t r0) {
+static inline rvd_avx_uint8_t mipp_avx_hadd_uint8(const rvd_avx_uint8_t r0) {
 		rvd_avx_float32_t rsf;
 	rsf.r = _mm256_permute2f128_ps(mipp_avx_cast_uint8_float32(r0).r, mipp_avx_cast_uint8_float32(r0).r, _MM_SHUFFLE(0,0,0,1));
 	rvd_avx_uint8_t rs1 = mipp_avx_cast_float32_uint8(rsf);
@@ -3926,7 +3916,7 @@ rvd_avx_uint8_t mipp_avx_hadd_uint8(const rvd_avx_uint8_t r0) {
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- hmul
-rvd_avx_float64_t mipp_avx_hmul_float64(const rvd_avx_float64_t r0) {
+static inline rvd_avx_float64_t mipp_avx_hmul_float64(const rvd_avx_float64_t r0) {
 		rvd_avx_float32_t rsf;
 	rsf.r = _mm256_permute2f128_ps(mipp_avx_cast_float64_float32(r0).r, mipp_avx_cast_float64_float32(r0).r, _MM_SHUFFLE(0,0,0,1));
 	rvd_avx_float64_t rs1 = mipp_avx_cast_float32_float64(rsf);
@@ -3938,7 +3928,7 @@ rvd_avx_float64_t mipp_avx_hmul_float64(const rvd_avx_float64_t r0) {
 	return rs2;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- hmul
-rvd_avx_float32_t mipp_avx_hmul_float32(const rvd_avx_float32_t r0) {
+static inline rvd_avx_float32_t mipp_avx_hmul_float32(const rvd_avx_float32_t r0) {
 		rvd_avx_float32_t rsf;
 	rsf.r = _mm256_permute2f128_ps(mipp_avx_cast_float32_float32(r0).r, mipp_avx_cast_float32_float32(r0).r, _MM_SHUFFLE(0,0,0,1));
 	rvd_avx_float32_t rs1 = mipp_avx_cast_float32_float32(rsf);
@@ -3955,7 +3945,7 @@ rvd_avx_float32_t mipp_avx_hmul_float32(const rvd_avx_float32_t r0) {
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- hmul
 #if defined(__AVX2__)
-rvd_avx_int32_t mipp_avx_hmul_int32(const rvd_avx_int32_t r0) {
+static inline rvd_avx_int32_t mipp_avx_hmul_int32(const rvd_avx_int32_t r0) {
 		rvd_avx_float32_t rsf;
 	rsf.r = _mm256_permute2f128_ps(mipp_avx_cast_int32_float32(r0).r, mipp_avx_cast_int32_float32(r0).r, _MM_SHUFFLE(0,0,0,1));
 	rvd_avx_int32_t rs1 = mipp_avx_cast_float32_int32(rsf);
@@ -3973,7 +3963,7 @@ rvd_avx_int32_t mipp_avx_hmul_int32(const rvd_avx_int32_t r0) {
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- hmul
 #if defined(__AVX2__)
-rvd_avx_int16_t mipp_avx_hmul_int16(const rvd_avx_int16_t r0) {
+static inline rvd_avx_int16_t mipp_avx_hmul_int16(const rvd_avx_int16_t r0) {
 		rvd_avx_float32_t rsf;
 	rsf.r = _mm256_permute2f128_ps(mipp_avx_cast_int16_float32(r0).r, mipp_avx_cast_int16_float32(r0).r, _MM_SHUFFLE(0,0,0,1));
 	rvd_avx_int16_t rs1 = mipp_avx_cast_float32_int16(rsf);
@@ -3995,7 +3985,7 @@ rvd_avx_int16_t mipp_avx_hmul_int16(const rvd_avx_int16_t r0) {
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- hmin
-rvd_avx_float64_t mipp_avx_hmin_float64(const rvd_avx_float64_t r0) {
+static inline rvd_avx_float64_t mipp_avx_hmin_float64(const rvd_avx_float64_t r0) {
 		rvd_avx_float32_t rsf;
 	rsf.r = _mm256_permute2f128_ps(mipp_avx_cast_float64_float32(r0).r, mipp_avx_cast_float64_float32(r0).r, _MM_SHUFFLE(0,0,0,1));
 	rvd_avx_float64_t rs1 = mipp_avx_cast_float32_float64(rsf);
@@ -4007,7 +3997,7 @@ rvd_avx_float64_t mipp_avx_hmin_float64(const rvd_avx_float64_t r0) {
 	return rs2;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- hmin
-rvd_avx_float32_t mipp_avx_hmin_float32(const rvd_avx_float32_t r0) {
+static inline rvd_avx_float32_t mipp_avx_hmin_float32(const rvd_avx_float32_t r0) {
 		rvd_avx_float32_t rsf;
 	rsf.r = _mm256_permute2f128_ps(mipp_avx_cast_float32_float32(r0).r, mipp_avx_cast_float32_float32(r0).r, _MM_SHUFFLE(0,0,0,1));
 	rvd_avx_float32_t rs1 = mipp_avx_cast_float32_float32(rsf);
@@ -4024,7 +4014,7 @@ rvd_avx_float32_t mipp_avx_hmin_float32(const rvd_avx_float32_t r0) {
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- hmin
 #if defined(__AVX2__)
-rvd_avx_int32_t mipp_avx_hmin_int32(const rvd_avx_int32_t r0) {
+static inline rvd_avx_int32_t mipp_avx_hmin_int32(const rvd_avx_int32_t r0) {
 		rvd_avx_float32_t rsf;
 	rsf.r = _mm256_permute2f128_ps(mipp_avx_cast_int32_float32(r0).r, mipp_avx_cast_int32_float32(r0).r, _MM_SHUFFLE(0,0,0,1));
 	rvd_avx_int32_t rs1 = mipp_avx_cast_float32_int32(rsf);
@@ -4042,7 +4032,7 @@ rvd_avx_int32_t mipp_avx_hmin_int32(const rvd_avx_int32_t r0) {
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- hmin
 #if defined(__AVX2__)
-rvd_avx_uint32_t mipp_avx_hmin_uint32(const rvd_avx_uint32_t r0) {
+static inline rvd_avx_uint32_t mipp_avx_hmin_uint32(const rvd_avx_uint32_t r0) {
 		rvd_avx_float32_t rsf;
 	rsf.r = _mm256_permute2f128_ps(mipp_avx_cast_uint32_float32(r0).r, mipp_avx_cast_uint32_float32(r0).r, _MM_SHUFFLE(0,0,0,1));
 	rvd_avx_uint32_t rs1 = mipp_avx_cast_float32_uint32(rsf);
@@ -4060,7 +4050,7 @@ rvd_avx_uint32_t mipp_avx_hmin_uint32(const rvd_avx_uint32_t r0) {
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- hmin
 #if defined(__AVX2__)
-rvd_avx_int16_t mipp_avx_hmin_int16(const rvd_avx_int16_t r0) {
+static inline rvd_avx_int16_t mipp_avx_hmin_int16(const rvd_avx_int16_t r0) {
 		rvd_avx_float32_t rsf;
 	rsf.r = _mm256_permute2f128_ps(mipp_avx_cast_int16_float32(r0).r, mipp_avx_cast_int16_float32(r0).r, _MM_SHUFFLE(0,0,0,1));
 	rvd_avx_int16_t rs1 = mipp_avx_cast_float32_int16(rsf);
@@ -4083,7 +4073,7 @@ rvd_avx_int16_t mipp_avx_hmin_int16(const rvd_avx_int16_t r0) {
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- hmin
 #if defined(__AVX2__)
-rvd_avx_uint16_t mipp_avx_hmin_uint16(const rvd_avx_uint16_t r0) {
+static inline rvd_avx_uint16_t mipp_avx_hmin_uint16(const rvd_avx_uint16_t r0) {
 		rvd_avx_float32_t rsf;
 	rsf.r = _mm256_permute2f128_ps(mipp_avx_cast_uint16_float32(r0).r, mipp_avx_cast_uint16_float32(r0).r, _MM_SHUFFLE(0,0,0,1));
 	rvd_avx_uint16_t rs1 = mipp_avx_cast_float32_uint16(rsf);
@@ -4106,7 +4096,7 @@ rvd_avx_uint16_t mipp_avx_hmin_uint16(const rvd_avx_uint16_t r0) {
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- hmin
 #if defined(__AVX2__)
-rvd_avx_int8_t mipp_avx_hmin_int8(const rvd_avx_int8_t r0) {
+static inline rvd_avx_int8_t mipp_avx_hmin_int8(const rvd_avx_int8_t r0) {
 		rvd_avx_float32_t rsf;
 	rsf.r = _mm256_permute2f128_ps(mipp_avx_cast_int8_float32(r0).r, mipp_avx_cast_int8_float32(r0).r, _MM_SHUFFLE(0,0,0,1));
 	rvd_avx_int8_t rs1 = mipp_avx_cast_float32_int8(rsf);
@@ -4134,7 +4124,7 @@ rvd_avx_int8_t mipp_avx_hmin_int8(const rvd_avx_int8_t r0) {
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- hmin
 #if defined(__AVX2__)
-rvd_avx_uint8_t mipp_avx_hmin_uint8(const rvd_avx_uint8_t r0) {
+static inline rvd_avx_uint8_t mipp_avx_hmin_uint8(const rvd_avx_uint8_t r0) {
 		rvd_avx_float32_t rsf;
 	rsf.r = _mm256_permute2f128_ps(mipp_avx_cast_uint8_float32(r0).r, mipp_avx_cast_uint8_float32(r0).r, _MM_SHUFFLE(0,0,0,1));
 	rvd_avx_uint8_t rs1 = mipp_avx_cast_float32_uint8(rsf);
@@ -4161,7 +4151,7 @@ rvd_avx_uint8_t mipp_avx_hmin_uint8(const rvd_avx_uint8_t r0) {
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- hmax
-rvd_avx_float64_t mipp_avx_hmax_float64(const rvd_avx_float64_t r0) {
+static inline rvd_avx_float64_t mipp_avx_hmax_float64(const rvd_avx_float64_t r0) {
 		rvd_avx_float32_t rsf;
 	rsf.r = _mm256_permute2f128_ps(mipp_avx_cast_float64_float32(r0).r, mipp_avx_cast_float64_float32(r0).r, _MM_SHUFFLE(0,0,0,1));
 	rvd_avx_float64_t rs1 = mipp_avx_cast_float32_float64(rsf);
@@ -4173,7 +4163,7 @@ rvd_avx_float64_t mipp_avx_hmax_float64(const rvd_avx_float64_t r0) {
 	return rs2;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- hmax
-rvd_avx_float32_t mipp_avx_hmax_float32(const rvd_avx_float32_t r0) {
+static inline rvd_avx_float32_t mipp_avx_hmax_float32(const rvd_avx_float32_t r0) {
 		rvd_avx_float32_t rsf;
 	rsf.r = _mm256_permute2f128_ps(mipp_avx_cast_float32_float32(r0).r, mipp_avx_cast_float32_float32(r0).r, _MM_SHUFFLE(0,0,0,1));
 	rvd_avx_float32_t rs1 = mipp_avx_cast_float32_float32(rsf);
@@ -4190,7 +4180,7 @@ rvd_avx_float32_t mipp_avx_hmax_float32(const rvd_avx_float32_t r0) {
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- hmax
 #if defined(__AVX2__)
-rvd_avx_int32_t mipp_avx_hmax_int32(const rvd_avx_int32_t r0) {
+static inline rvd_avx_int32_t mipp_avx_hmax_int32(const rvd_avx_int32_t r0) {
 		rvd_avx_float32_t rsf;
 	rsf.r = _mm256_permute2f128_ps(mipp_avx_cast_int32_float32(r0).r, mipp_avx_cast_int32_float32(r0).r, _MM_SHUFFLE(0,0,0,1));
 	rvd_avx_int32_t rs1 = mipp_avx_cast_float32_int32(rsf);
@@ -4208,7 +4198,7 @@ rvd_avx_int32_t mipp_avx_hmax_int32(const rvd_avx_int32_t r0) {
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- hmax
 #if defined(__AVX2__)
-rvd_avx_uint32_t mipp_avx_hmax_uint32(const rvd_avx_uint32_t r0) {
+static inline rvd_avx_uint32_t mipp_avx_hmax_uint32(const rvd_avx_uint32_t r0) {
 		rvd_avx_float32_t rsf;
 	rsf.r = _mm256_permute2f128_ps(mipp_avx_cast_uint32_float32(r0).r, mipp_avx_cast_uint32_float32(r0).r, _MM_SHUFFLE(0,0,0,1));
 	rvd_avx_uint32_t rs1 = mipp_avx_cast_float32_uint32(rsf);
@@ -4226,7 +4216,7 @@ rvd_avx_uint32_t mipp_avx_hmax_uint32(const rvd_avx_uint32_t r0) {
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- hmax
 #if defined(__AVX2__)
-rvd_avx_int16_t mipp_avx_hmax_int16(const rvd_avx_int16_t r0) {
+static inline rvd_avx_int16_t mipp_avx_hmax_int16(const rvd_avx_int16_t r0) {
 		rvd_avx_float32_t rsf;
 	rsf.r = _mm256_permute2f128_ps(mipp_avx_cast_int16_float32(r0).r, mipp_avx_cast_int16_float32(r0).r, _MM_SHUFFLE(0,0,0,1));
 	rvd_avx_int16_t rs1 = mipp_avx_cast_float32_int16(rsf);
@@ -4249,7 +4239,7 @@ rvd_avx_int16_t mipp_avx_hmax_int16(const rvd_avx_int16_t r0) {
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- hmax
 #if defined(__AVX2__)
-rvd_avx_uint16_t mipp_avx_hmax_uint16(const rvd_avx_uint16_t r0) {
+static inline rvd_avx_uint16_t mipp_avx_hmax_uint16(const rvd_avx_uint16_t r0) {
 		rvd_avx_float32_t rsf;
 	rsf.r = _mm256_permute2f128_ps(mipp_avx_cast_uint16_float32(r0).r, mipp_avx_cast_uint16_float32(r0).r, _MM_SHUFFLE(0,0,0,1));
 	rvd_avx_uint16_t rs1 = mipp_avx_cast_float32_uint16(rsf);
@@ -4272,7 +4262,7 @@ rvd_avx_uint16_t mipp_avx_hmax_uint16(const rvd_avx_uint16_t r0) {
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- hmax
 #if defined(__AVX2__)
-rvd_avx_int8_t mipp_avx_hmax_int8(const rvd_avx_int8_t r0) {
+static inline rvd_avx_int8_t mipp_avx_hmax_int8(const rvd_avx_int8_t r0) {
 		rvd_avx_float32_t rsf;
 	rsf.r = _mm256_permute2f128_ps(mipp_avx_cast_int8_float32(r0).r, mipp_avx_cast_int8_float32(r0).r, _MM_SHUFFLE(0,0,0,1));
 	rvd_avx_int8_t rs1 = mipp_avx_cast_float32_int8(rsf);
@@ -4300,7 +4290,7 @@ rvd_avx_int8_t mipp_avx_hmax_int8(const rvd_avx_int8_t r0) {
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- hmax
 #if defined(__AVX2__)
-rvd_avx_uint8_t mipp_avx_hmax_uint8(const rvd_avx_uint8_t r0) {
+static inline rvd_avx_uint8_t mipp_avx_hmax_uint8(const rvd_avx_uint8_t r0) {
 		rvd_avx_float32_t rsf;
 	rsf.r = _mm256_permute2f128_ps(mipp_avx_cast_uint8_float32(r0).r, mipp_avx_cast_uint8_float32(r0).r, _MM_SHUFFLE(0,0,0,1));
 	rvd_avx_uint8_t rs1 = mipp_avx_cast_float32_uint8(rsf);
@@ -4327,32 +4317,32 @@ rvd_avx_uint8_t mipp_avx_hmax_uint8(const rvd_avx_uint8_t r0) {
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set
-rvd_avx_float64_t mipp_avx_set_float64(const float64_t vals[MIPP_N_FLOAT64]) {
+static inline rvd_avx_float64_t mipp_avx_set_float64(const float64_t vals[MIPP_N_FLOAT64]) {
 	rvd_avx_float64_t res;
 	res.r= 	_mm256_set_pd(vals[3], vals[2], vals[1], vals[0]);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set
-rvd_avx_float32_t mipp_avx_set_float32(const float32_t vals[MIPP_N_FLOAT32]) {
+static inline rvd_avx_float32_t mipp_avx_set_float32(const float32_t vals[MIPP_N_FLOAT32]) {
 	rvd_avx_float32_t res;
 	res.r= 	_mm256_set_ps(vals[7], vals[6], vals[5], vals[4], vals[3], vals[2], vals[1], vals[0]);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set
-rvd_avx_int32_t mipp_avx_set_int32(const int32_t vals[MIPP_N_INT32]) {
+static inline rvd_avx_int32_t mipp_avx_set_int32(const int32_t vals[MIPP_N_INT32]) {
 	rvd_avx_int32_t res;
 	res.r= 	_mm256_set_epi32(vals[7], vals[6], vals[5], vals[4],
 												 vals[3], vals[2], vals[1], vals[0]);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set
-rvd_avx_int64_t mipp_avx_set_int64(const int64_t vals[MIPP_N_INT64]) {
+static inline rvd_avx_int64_t mipp_avx_set_int64(const int64_t vals[MIPP_N_INT64]) {
 	rvd_avx_int64_t res;
 	res.r= 	_mm256_set_epi64x(vals[3], vals[2], vals[1], vals[0]);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set
-rvd_avx_int16_t mipp_avx_set_int16(const int16_t vals[MIPP_N_INT16]) {
+static inline rvd_avx_int16_t mipp_avx_set_int16(const int16_t vals[MIPP_N_INT16]) {
 	rvd_avx_int16_t res;
 	res.r= 	_mm256_set_epi16(vals[15], vals[14], vals[13], vals[12],
 		                                         vals[11], vals[10], vals[ 9], vals[ 8],
@@ -4361,7 +4351,7 @@ rvd_avx_int16_t mipp_avx_set_int16(const int16_t vals[MIPP_N_INT16]) {
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set
-rvd_avx_int8_t mipp_avx_set_int8(const int8_t vals[MIPP_N_INT8]) {
+static inline rvd_avx_int8_t mipp_avx_set_int8(const int8_t vals[MIPP_N_INT8]) {
 	rvd_avx_int8_t res;
 	res.r=  _mm256_set_epi8((int8_t)vals[31], (int8_t)vals[30], (int8_t)vals[29], (int8_t)vals[28],
 		                                           (int8_t)vals[27], (int8_t)vals[26], (int8_t)vals[25], (int8_t)vals[24],
@@ -4374,7 +4364,7 @@ rvd_avx_int8_t mipp_avx_set_int8(const int8_t vals[MIPP_N_INT8]) {
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set_k
-rvm_avx_int8_t mipp_avx_set_k_int8(const int32_t vals[MIPP_N_INT8]) {
+static inline rvm_avx_int8_t mipp_avx_set_k_int8(const int32_t vals[MIPP_N_INT8]) {
 	rvm_avx_int8_t res;
 	res.m=  _mm256_set_epi8(vals[31] ? 0xFF : 0, vals[30] ? 0xFF : 0, vals[29] ? 0xFF : 0, vals[28] ? 0xFF : 0,
 		                       vals[27] ? 0xFF : 0, vals[26] ? 0xFF : 0, vals[25] ? 0xFF : 0, vals[24] ? 0xFF : 0,
@@ -4387,7 +4377,7 @@ rvm_avx_int8_t mipp_avx_set_k_int8(const int32_t vals[MIPP_N_INT8]) {
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set_k
-rvm_avx_int16_t mipp_avx_set_k_int16(const int32_t vals[MIPP_N_INT16]) {
+static inline rvm_avx_int16_t mipp_avx_set_k_int16(const int32_t vals[MIPP_N_INT16]) {
 	rvm_avx_int16_t res;
 	res.m= 	_mm256_set_epi16(vals[15] ? 0xFFFF : 0, vals[14] ? 0xFFFF : 0,
 		                        vals[13] ? 0xFFFF : 0, vals[12] ? 0xFFFF : 0,
@@ -4400,26 +4390,58 @@ rvm_avx_int16_t mipp_avx_set_k_int16(const int32_t vals[MIPP_N_INT16]) {
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set_k
-rvm_avx_int32_t mipp_avx_set_k_int32(const int32_t vals[MIPP_N_INT32]) {
+static inline rvm_avx_int32_t mipp_avx_set_k_int32(const int32_t vals[MIPP_N_INT32]) {
 	rvm_avx_int32_t res;
-	res.m= 	_mm256_set_epi32(vals[7] ? 0xFFFFFFFF : 0, vals[6] ? 0xFFFFFFFF : 0,
+	res.m=  _mm256_set_epi32(vals[7] ? 0xFFFFFFFF : 0, vals[6] ? 0xFFFFFFFF : 0,
 		                        vals[5] ? 0xFFFFFFFF : 0, vals[4] ? 0xFFFFFFFF : 0,
 		                        vals[3] ? 0xFFFFFFFF : 0, vals[2] ? 0xFFFFFFFF : 0,
 		                        vals[1] ? 0xFFFFFFFF : 0, vals[0] ? 0xFFFFFFFF : 0);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set_k
-rvm_avx_int64_t mipp_avx_set_k_int64(const int32_t vals[MIPP_N_INT64]) {
+static inline rvm_avx_int64_t mipp_avx_set_k_int64(const int32_t vals[MIPP_N_INT64]) {
 	rvm_avx_int64_t res;
-	res.m= 	_mm256_set_epi64x(vals[3] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
+	res.m=  _mm256_set_epi64x(vals[3] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
 		                     vals[2] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
 		                     vals[1] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
 		                     vals[0] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0);
 	return res;
 }
+// ---------------------------------------------------------------------------------------------------------------------------------------------- set_k
+static inline rvm_avx_float64_t mipp_avx_set_k_float64(const int32_t vals[MIPP_N_FLOAT64]) {
+	 return mipp_avx_cast_k_int64_float64(mipp_avx_set_k_int64(vals));
+}
+// ---------------------------------------------------------------------------------------------------------------------------------------------- set_k
+static inline rvm_avx_float32_t mipp_avx_set_k_float32(const int32_t vals[MIPP_N_FLOAT32]) {
+	 return mipp_avx_cast_k_int32_float32(mipp_avx_set_k_int32(vals));
+}
+// ---------------------------------------------------------------------------------------------------------------------------------------------- set1_k
+static inline rvm_avx_int8_t mipp_avx_set1_k_int8(const int32_t v0) {
+	rvm_avx_int8_t res;
+	res.m=   _mm256_set1_epi8(v0 ? 0xFF : 0); 
+	return res;
+}
+// ---------------------------------------------------------------------------------------------------------------------------------------------- set1_k
+static inline rvm_avx_int16_t mipp_avx_set1_k_int16(const int32_t v0) {
+	rvm_avx_int16_t res;
+	res.m=   _mm256_set1_epi16(v0 ? 0xFFFF : 0); 
+	return res;
+}
+// ---------------------------------------------------------------------------------------------------------------------------------------------- set1_k
+static inline rvm_avx_int32_t mipp_avx_set1_k_int32(const int32_t v0) {
+	rvm_avx_int32_t res;
+	res.m=   _mm256_set1_epi32(v0 ? 0xFFFFFFFF : 0); 
+	return res;
+}
+// ---------------------------------------------------------------------------------------------------------------------------------------------- set1_k
+static inline rvm_avx_int64_t mipp_avx_set1_k_int64(const int32_t v0) {
+	rvm_avx_int64_t res;
+	res.m=   _mm256_set1_epi64x(v0 ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0); 
+	return res;
+}
 // ---------------------------------------------------------------------------------------------------------------------------------------------- blend
 #if !( defined(__AVX2__) )
-rvd_avx_int64_t mipp_avx_blend_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1, const rvm_avx_int64_t m0) {
+static inline rvd_avx_int64_t mipp_avx_blend_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1, const rvm_avx_int64_t m0) {
 		rvd_avx_float64_t r0f = mipp_avx_cast_int64_float64(r0);
 	rvd_avx_float64_t r1f = mipp_avx_cast_int64_float64(r1);
 	rvm_avx_float64_t m0f = mipp_avx_cast_k_int64_float64(m0);
@@ -4429,7 +4451,7 @@ rvd_avx_int64_t mipp_avx_blend_int64(const rvd_avx_int64_t r0, const rvd_avx_int
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- blend
 #if !( defined(__AVX2__) )
-rvd_avx_int32_t mipp_avx_blend_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1, const rvm_avx_int32_t m0) {
+static inline rvd_avx_int32_t mipp_avx_blend_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1, const rvm_avx_int32_t m0) {
 		rvd_avx_float32_t r0f = mipp_avx_cast_int32_float32(r0);
 	rvd_avx_float32_t r1f = mipp_avx_cast_int32_float32(r1);
 	rvm_avx_float32_t m0f = mipp_avx_cast_k_int32_float32(m0);
@@ -4439,7 +4461,7 @@ rvd_avx_int32_t mipp_avx_blend_int32(const rvd_avx_int32_t r0, const rvd_avx_int
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- blend
 #if !( defined(__AVX2__) )
-rvd_avx_uint64_t mipp_avx_blend_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1, const rvm_avx_uint64_t m0) {
+static inline rvd_avx_uint64_t mipp_avx_blend_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1, const rvm_avx_uint64_t m0) {
 		rvd_avx_float64_t r0f = mipp_avx_cast_uint64_float64(r0);
 	rvd_avx_float64_t r1f = mipp_avx_cast_uint64_float64(r1);
 	rvm_avx_float64_t m0f = mipp_avx_cast_k_uint64_float64(m0);
@@ -4449,7 +4471,7 @@ rvd_avx_uint64_t mipp_avx_blend_uint64(const rvd_avx_uint64_t r0, const rvd_avx_
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- blend
 #if !( defined(__AVX2__) )
-rvd_avx_uint32_t mipp_avx_blend_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1, const rvm_avx_uint32_t m0) {
+static inline rvd_avx_uint32_t mipp_avx_blend_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1, const rvm_avx_uint32_t m0) {
 		rvd_avx_float32_t r0f = mipp_avx_cast_uint32_float32(r0);
 	rvd_avx_float32_t r1f = mipp_avx_cast_uint32_float32(r1);
 	rvm_avx_float32_t m0f = mipp_avx_cast_k_uint32_float32(m0);
@@ -4458,36 +4480,8 @@ rvd_avx_uint32_t mipp_avx_blend_uint32(const rvd_avx_uint32_t r0, const rvd_avx_
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- blend
-// ---------------------------------------------------------------------------------------------------------------------------------------------- blend
-// ---------------------------------------------------------------------------------------------------------------------------------------------- blend
-#if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) )
-rvd_avx_int64_t mipp_avx_blend_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1, const rvm_avx_int64_t m0) {
-		rvd_avx_int64_t rmi = mipp_avx_cast_int64_int64(mipp_avx_toreg_int64(m0));
-	rvd_avx_int64_t r0i = mipp_avx_cast_int64_int64(r0);
-	rvd_avx_int64_t r1i = mipp_avx_cast_int64_int64(r1);
-	rvd_avx_int64_t r_0i = mipp_avx_andb_int64(rmi, r0i);
-	rvd_avx_int64_t r_1i = mipp_avx_andnb_int64(rmi, r1i);
-	rvd_avx_int64_t resi = mipp_avx_xorb_int64(r_0i, r_1i);
-	rvd_avx_int64_t res = mipp_avx_cast_int64_int64(resi);
-	return res;
-}
-#endif
-// ---------------------------------------------------------------------------------------------------------------------------------------------- blend
-#if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) )
-rvd_avx_int32_t mipp_avx_blend_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1, const rvm_avx_int32_t m0) {
-		rvd_avx_int32_t rmi = mipp_avx_cast_int32_int32(mipp_avx_toreg_int32(m0));
-	rvd_avx_int32_t r0i = mipp_avx_cast_int32_int32(r0);
-	rvd_avx_int32_t r1i = mipp_avx_cast_int32_int32(r1);
-	rvd_avx_int32_t r_0i = mipp_avx_andb_int32(rmi, r0i);
-	rvd_avx_int32_t r_1i = mipp_avx_andnb_int32(rmi, r1i);
-	rvd_avx_int32_t resi = mipp_avx_xorb_int32(r_0i, r_1i);
-	rvd_avx_int32_t res = mipp_avx_cast_int32_int32(resi);
-	return res;
-}
-#endif
-// ---------------------------------------------------------------------------------------------------------------------------------------------- blend
-#if !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) )
-rvd_avx_int16_t mipp_avx_blend_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1, const rvm_avx_int16_t m0) {
+#if !( defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) )
+static inline rvd_avx_int16_t mipp_avx_blend_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1, const rvm_avx_int16_t m0) {
 		rvd_avx_int16_t rmi = mipp_avx_cast_int16_int16(mipp_avx_toreg_int16(m0));
 	rvd_avx_int16_t r0i = mipp_avx_cast_int16_int16(r0);
 	rvd_avx_int16_t r1i = mipp_avx_cast_int16_int16(r1);
@@ -4499,8 +4493,8 @@ rvd_avx_int16_t mipp_avx_blend_int16(const rvd_avx_int16_t r0, const rvd_avx_int
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- blend
-#if !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) )
-rvd_avx_int8_t mipp_avx_blend_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1, const rvm_avx_int8_t m0) {
+#if !( defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) )
+static inline rvd_avx_int8_t mipp_avx_blend_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1, const rvm_avx_int8_t m0) {
 		rvd_avx_int8_t rmi = mipp_avx_cast_int8_int8(mipp_avx_toreg_int8(m0));
 	rvd_avx_int8_t r0i = mipp_avx_cast_int8_int8(r0);
 	rvd_avx_int8_t r1i = mipp_avx_cast_int8_int8(r1);
@@ -4512,34 +4506,8 @@ rvd_avx_int8_t mipp_avx_blend_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- blend
-#if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) )
-rvd_avx_uint64_t mipp_avx_blend_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1, const rvm_avx_uint64_t m0) {
-		rvd_avx_int64_t rmi = mipp_avx_cast_uint64_int64(mipp_avx_toreg_uint64(m0));
-	rvd_avx_int64_t r0i = mipp_avx_cast_uint64_int64(r0);
-	rvd_avx_int64_t r1i = mipp_avx_cast_uint64_int64(r1);
-	rvd_avx_int64_t r_0i = mipp_avx_andb_int64(rmi, r0i);
-	rvd_avx_int64_t r_1i = mipp_avx_andnb_int64(rmi, r1i);
-	rvd_avx_int64_t resi = mipp_avx_xorb_int64(r_0i, r_1i);
-	rvd_avx_uint64_t res = mipp_avx_cast_int64_uint64(resi);
-	return res;
-}
-#endif
-// ---------------------------------------------------------------------------------------------------------------------------------------------- blend
-#if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) )
-rvd_avx_uint32_t mipp_avx_blend_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1, const rvm_avx_uint32_t m0) {
-		rvd_avx_int32_t rmi = mipp_avx_cast_uint32_int32(mipp_avx_toreg_uint32(m0));
-	rvd_avx_int32_t r0i = mipp_avx_cast_uint32_int32(r0);
-	rvd_avx_int32_t r1i = mipp_avx_cast_uint32_int32(r1);
-	rvd_avx_int32_t r_0i = mipp_avx_andb_int32(rmi, r0i);
-	rvd_avx_int32_t r_1i = mipp_avx_andnb_int32(rmi, r1i);
-	rvd_avx_int32_t resi = mipp_avx_xorb_int32(r_0i, r_1i);
-	rvd_avx_uint32_t res = mipp_avx_cast_int32_uint32(resi);
-	return res;
-}
-#endif
-// ---------------------------------------------------------------------------------------------------------------------------------------------- blend
-#if !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) )
-rvd_avx_uint16_t mipp_avx_blend_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1, const rvm_avx_uint16_t m0) {
+#if !( defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) )
+static inline rvd_avx_uint16_t mipp_avx_blend_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1, const rvm_avx_uint16_t m0) {
 		rvd_avx_int16_t rmi = mipp_avx_cast_uint16_int16(mipp_avx_toreg_uint16(m0));
 	rvd_avx_int16_t r0i = mipp_avx_cast_uint16_int16(r0);
 	rvd_avx_int16_t r1i = mipp_avx_cast_uint16_int16(r1);
@@ -4551,8 +4519,8 @@ rvd_avx_uint16_t mipp_avx_blend_uint16(const rvd_avx_uint16_t r0, const rvd_avx_
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- blend
-#if !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) )
-rvd_avx_uint8_t mipp_avx_blend_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1, const rvm_avx_uint8_t m0) {
+#if !( defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) )
+static inline rvd_avx_uint8_t mipp_avx_blend_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1, const rvm_avx_uint8_t m0) {
 		rvd_avx_int8_t rmi = mipp_avx_cast_uint8_int8(mipp_avx_toreg_uint8(m0));
 	rvd_avx_int8_t r0i = mipp_avx_cast_uint8_int8(r0);
 	rvd_avx_int8_t r1i = mipp_avx_cast_uint8_int8(r1);
@@ -4565,7 +4533,7 @@ rvd_avx_uint8_t mipp_avx_blend_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uin
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- fmadd
 #if !( defined(__FMA__) )
-rvd_avx_float64_t mipp_avx_fmadd_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1, const rvd_avx_float64_t r2) {
+static inline rvd_avx_float64_t mipp_avx_fmadd_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1, const rvd_avx_float64_t r2) {
 		rvd_avx_float64_t rmul = mipp_avx_mul_float64(r0, r1);
 	rvd_avx_float64_t res = mipp_avx_add_float64(rmul, r2);
 	return res;
@@ -4573,7 +4541,7 @@ rvd_avx_float64_t mipp_avx_fmadd_float64(const rvd_avx_float64_t r0, const rvd_a
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- fmadd
 #if !( defined(__FMA__) )
-rvd_avx_float32_t mipp_avx_fmadd_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1, const rvd_avx_float32_t r2) {
+static inline rvd_avx_float32_t mipp_avx_fmadd_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1, const rvd_avx_float32_t r2) {
 		rvd_avx_float32_t rmul = mipp_avx_mul_float32(r0, r1);
 	rvd_avx_float32_t res = mipp_avx_add_float32(rmul, r2);
 	return res;
@@ -4581,7 +4549,7 @@ rvd_avx_float32_t mipp_avx_fmadd_float32(const rvd_avx_float32_t r0, const rvd_a
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- fmsub
 #if !( defined(__FMA__) )
-rvd_avx_float64_t mipp_avx_fmsub_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1, const rvd_avx_float64_t r2) {
+static inline rvd_avx_float64_t mipp_avx_fmsub_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1, const rvd_avx_float64_t r2) {
 		rvd_avx_float64_t rmul = mipp_avx_mul_float64(r0, r1);
 	rvd_avx_float64_t res = mipp_avx_sub_float64(rmul, r2);
 	return res;
@@ -4589,415 +4557,485 @@ rvd_avx_float64_t mipp_avx_fmsub_float64(const rvd_avx_float64_t r0, const rvd_a
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- fmsub
 #if !( defined(__FMA__) )
-rvd_avx_float32_t mipp_avx_fmsub_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1, const rvd_avx_float32_t r2) {
+static inline rvd_avx_float32_t mipp_avx_fmsub_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1, const rvd_avx_float32_t r2) {
 		rvd_avx_float32_t rmul = mipp_avx_mul_float32(r0, r1);
 	rvd_avx_float32_t res = mipp_avx_sub_float32(rmul, r2);
 	return res;
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- msb
-rvd_avx_float64_t mipp_avx_msb_float64(const rvd_avx_float64_t r0) {
+static inline rvd_avx_float64_t mipp_avx_msb_float64(const rvd_avx_float64_t r0) {
 		rvd_avx_float64_t rm = mipp_avx_cast_int64_float64(mipp_avx_set1_int64(0x8000000000000000));
 	return mipp_avx_andb_float64(r0, rm);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- msb
-#if ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )
-rvd_avx_int64_t mipp_avx_msb_int64(const rvd_avx_int64_t r0) {
+#if ( !defined(__AVX2__) || defined(__AVX2__) )
+static inline rvd_avx_int64_t mipp_avx_msb_int64(const rvd_avx_int64_t r0) {
 		rvd_avx_int64_t rm = mipp_avx_cast_int64_int64(mipp_avx_set1_int64(0x8000000000000000));
 	return mipp_avx_andb_int64(r0, rm);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- msb
-#if ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )
-rvd_avx_uint64_t mipp_avx_msb_uint64(const rvd_avx_uint64_t r0) {
+#if ( !defined(__AVX2__) || defined(__AVX2__) )
+static inline rvd_avx_uint64_t mipp_avx_msb_uint64(const rvd_avx_uint64_t r0) {
 		rvd_avx_uint64_t rm = mipp_avx_cast_int64_uint64(mipp_avx_set1_int64(0x8000000000000000));
 	return mipp_avx_andb_uint64(r0, rm);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- msb
-rvd_avx_float32_t mipp_avx_msb_float32(const rvd_avx_float32_t r0) {
+static inline rvd_avx_float32_t mipp_avx_msb_float32(const rvd_avx_float32_t r0) {
 		rvd_avx_float32_t rm = mipp_avx_cast_int32_float32(mipp_avx_set1_int32(0x80000000));
 	return mipp_avx_andb_float32(r0, rm);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- msb
-#if ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )
-rvd_avx_int32_t mipp_avx_msb_int32(const rvd_avx_int32_t r0) {
+#if ( !defined(__AVX2__) || defined(__AVX2__) )
+static inline rvd_avx_int32_t mipp_avx_msb_int32(const rvd_avx_int32_t r0) {
 		rvd_avx_int32_t rm = mipp_avx_cast_int32_int32(mipp_avx_set1_int32(0x80000000));
 	return mipp_avx_andb_int32(r0, rm);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- msb
-#if ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )
-rvd_avx_uint32_t mipp_avx_msb_uint32(const rvd_avx_uint32_t r0) {
+#if ( !defined(__AVX2__) || defined(__AVX2__) )
+static inline rvd_avx_uint32_t mipp_avx_msb_uint32(const rvd_avx_uint32_t r0) {
 		rvd_avx_uint32_t rm = mipp_avx_cast_int32_uint32(mipp_avx_set1_int32(0x80000000));
 	return mipp_avx_andb_uint32(r0, rm);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- msb
-#if ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )
-rvd_avx_int16_t mipp_avx_msb_int16(const rvd_avx_int16_t r0) {
+#if ( !defined(__AVX2__) || defined(__AVX2__) )
+static inline rvd_avx_int16_t mipp_avx_msb_int16(const rvd_avx_int16_t r0) {
 		rvd_avx_int16_t rm = mipp_avx_cast_int16_int16(mipp_avx_set1_int16(0x8000));
 	return mipp_avx_andb_int16(r0, rm);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- msb
-#if ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )
-rvd_avx_uint16_t mipp_avx_msb_uint16(const rvd_avx_uint16_t r0) {
+#if ( !defined(__AVX2__) || defined(__AVX2__) )
+static inline rvd_avx_uint16_t mipp_avx_msb_uint16(const rvd_avx_uint16_t r0) {
 		rvd_avx_uint16_t rm = mipp_avx_cast_int16_uint16(mipp_avx_set1_int16(0x8000));
 	return mipp_avx_andb_uint16(r0, rm);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- msb
-#if ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )
-rvd_avx_int8_t mipp_avx_msb_int8(const rvd_avx_int8_t r0) {
+#if ( !defined(__AVX2__) || defined(__AVX2__) )
+static inline rvd_avx_int8_t mipp_avx_msb_int8(const rvd_avx_int8_t r0) {
 		rvd_avx_int8_t rm = mipp_avx_cast_int8_int8(mipp_avx_set1_int8(0x80));
 	return mipp_avx_andb_int8(r0, rm);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- msb
-#if ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )
-rvd_avx_uint8_t mipp_avx_msb_uint8(const rvd_avx_uint8_t r0) {
+#if ( !defined(__AVX2__) || defined(__AVX2__) )
+static inline rvd_avx_uint8_t mipp_avx_msb_uint8(const rvd_avx_uint8_t r0) {
 		rvd_avx_uint8_t rm = mipp_avx_cast_int8_uint8(mipp_avx_set1_int8(0x80));
 	return mipp_avx_andb_uint8(r0, rm);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- notb
-rvd_avx_float64_t mipp_avx_notb_float64(const rvd_avx_float64_t r0) {
+static inline rvd_avx_float64_t mipp_avx_notb_float64(const rvd_avx_float64_t r0) {
 		rvd_avx_float64_t rm = mipp_avx_cast_int64_float64(mipp_avx_set1_int64(0xFFFFFFFFFFFFFFFF));
 	return mipp_avx_andnb_float64(r0, rm);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- notb
-#if ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )
-rvd_avx_int64_t mipp_avx_notb_int64(const rvd_avx_int64_t r0) {
+#if ( !defined(__AVX2__) || defined(__AVX2__) )
+static inline rvd_avx_int64_t mipp_avx_notb_int64(const rvd_avx_int64_t r0) {
 		rvd_avx_int64_t rm = mipp_avx_cast_int64_int64(mipp_avx_set1_int64(0xFFFFFFFFFFFFFFFF));
 	return mipp_avx_andnb_int64(r0, rm);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- notb
-#if ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )
-rvd_avx_uint64_t mipp_avx_notb_uint64(const rvd_avx_uint64_t r0) {
+#if ( !defined(__AVX2__) || defined(__AVX2__) )
+static inline rvd_avx_uint64_t mipp_avx_notb_uint64(const rvd_avx_uint64_t r0) {
 		rvd_avx_uint64_t rm = mipp_avx_cast_int64_uint64(mipp_avx_set1_int64(0xFFFFFFFFFFFFFFFF));
 	return mipp_avx_andnb_uint64(r0, rm);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- notb
-rvd_avx_float32_t mipp_avx_notb_float32(const rvd_avx_float32_t r0) {
+static inline rvd_avx_float32_t mipp_avx_notb_float32(const rvd_avx_float32_t r0) {
 		rvd_avx_float32_t rm = mipp_avx_cast_int32_float32(mipp_avx_set1_int32(0xFFFFFFFF));
 	return mipp_avx_andnb_float32(r0, rm);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- notb
-#if ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )
-rvd_avx_int32_t mipp_avx_notb_int32(const rvd_avx_int32_t r0) {
+#if ( !defined(__AVX2__) || defined(__AVX2__) )
+static inline rvd_avx_int32_t mipp_avx_notb_int32(const rvd_avx_int32_t r0) {
 		rvd_avx_int32_t rm = mipp_avx_cast_int32_int32(mipp_avx_set1_int32(0xFFFFFFFF));
 	return mipp_avx_andnb_int32(r0, rm);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- notb
-#if ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )
-rvd_avx_uint32_t mipp_avx_notb_uint32(const rvd_avx_uint32_t r0) {
+#if ( !defined(__AVX2__) || defined(__AVX2__) )
+static inline rvd_avx_uint32_t mipp_avx_notb_uint32(const rvd_avx_uint32_t r0) {
 		rvd_avx_uint32_t rm = mipp_avx_cast_int32_uint32(mipp_avx_set1_int32(0xFFFFFFFF));
 	return mipp_avx_andnb_uint32(r0, rm);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- notb
-#if ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )
-rvd_avx_int16_t mipp_avx_notb_int16(const rvd_avx_int16_t r0) {
+#if ( !defined(__AVX2__) || defined(__AVX2__) )
+static inline rvd_avx_int16_t mipp_avx_notb_int16(const rvd_avx_int16_t r0) {
 		rvd_avx_int16_t rm = mipp_avx_cast_int16_int16(mipp_avx_set1_int16(0xFFFF));
 	return mipp_avx_andnb_int16(r0, rm);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- notb
-#if ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )
-rvd_avx_uint16_t mipp_avx_notb_uint16(const rvd_avx_uint16_t r0) {
+#if ( !defined(__AVX2__) || defined(__AVX2__) )
+static inline rvd_avx_uint16_t mipp_avx_notb_uint16(const rvd_avx_uint16_t r0) {
 		rvd_avx_uint16_t rm = mipp_avx_cast_int16_uint16(mipp_avx_set1_int16(0xFFFF));
 	return mipp_avx_andnb_uint16(r0, rm);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- notb
-#if ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )
-rvd_avx_int8_t mipp_avx_notb_int8(const rvd_avx_int8_t r0) {
+#if ( !defined(__AVX2__) || defined(__AVX2__) )
+static inline rvd_avx_int8_t mipp_avx_notb_int8(const rvd_avx_int8_t r0) {
 		rvd_avx_int8_t rm = mipp_avx_cast_int8_int8(mipp_avx_set1_int8(0xFF));
 	return mipp_avx_andnb_int8(r0, rm);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- notb
-#if ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )
-rvd_avx_uint8_t mipp_avx_notb_uint8(const rvd_avx_uint8_t r0) {
+#if ( !defined(__AVX2__) || defined(__AVX2__) )
+static inline rvd_avx_uint8_t mipp_avx_notb_uint8(const rvd_avx_uint8_t r0) {
 		rvd_avx_uint8_t rm = mipp_avx_cast_int8_uint8(mipp_avx_set1_int8(0xFF));
 	return mipp_avx_andnb_uint8(r0, rm);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- notb_k
-#if ( ( ( defined(__AVX2__) ) ) )
-rvm_avx_float64_t mipp_avx_notb_k_float64(const rvm_avx_float64_t m0) {
+#if defined(__AVX2__)
+static inline rvm_avx_float64_t mipp_avx_notb_k_float64(const rvm_avx_float64_t m0) {
 		rvm_avx_float64_t mm = mipp_avx_cast_k_int64_float64(mipp_avx_tomsk_int64(mipp_avx_set1_int64(0xFFFFFFFFFFFFFFFF)));
 	return mipp_avx_andnb_k_float64(m0, mm);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- notb_k
-#if ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )
-rvm_avx_int64_t mipp_avx_notb_k_int64(const rvm_avx_int64_t m0) {
+#if ( !defined(__AVX2__) || defined(__AVX2__) )
+static inline rvm_avx_int64_t mipp_avx_notb_k_int64(const rvm_avx_int64_t m0) {
 		rvm_avx_int64_t mm = mipp_avx_cast_k_int64_int64(mipp_avx_tomsk_int64(mipp_avx_set1_int64(0xFFFFFFFFFFFFFFFF)));
 	return mipp_avx_andnb_k_int64(m0, mm);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- notb_k
-#if ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )
-rvm_avx_uint64_t mipp_avx_notb_k_uint64(const rvm_avx_uint64_t m0) {
+#if ( !defined(__AVX2__) || defined(__AVX2__) )
+static inline rvm_avx_uint64_t mipp_avx_notb_k_uint64(const rvm_avx_uint64_t m0) {
 		rvm_avx_uint64_t mm = mipp_avx_cast_k_int64_uint64(mipp_avx_tomsk_int64(mipp_avx_set1_int64(0xFFFFFFFFFFFFFFFF)));
 	return mipp_avx_andnb_k_uint64(m0, mm);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- notb_k
-#if ( ( ( defined(__AVX2__) ) ) )
-rvm_avx_float32_t mipp_avx_notb_k_float32(const rvm_avx_float32_t m0) {
+#if defined(__AVX2__)
+static inline rvm_avx_float32_t mipp_avx_notb_k_float32(const rvm_avx_float32_t m0) {
 		rvm_avx_float32_t mm = mipp_avx_cast_k_int32_float32(mipp_avx_tomsk_int32(mipp_avx_set1_int32(0xFFFFFFFF)));
 	return mipp_avx_andnb_k_float32(m0, mm);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- notb_k
-#if ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )
-rvm_avx_int32_t mipp_avx_notb_k_int32(const rvm_avx_int32_t m0) {
+#if ( !defined(__AVX2__) || defined(__AVX2__) )
+static inline rvm_avx_int32_t mipp_avx_notb_k_int32(const rvm_avx_int32_t m0) {
 		rvm_avx_int32_t mm = mipp_avx_cast_k_int32_int32(mipp_avx_tomsk_int32(mipp_avx_set1_int32(0xFFFFFFFF)));
 	return mipp_avx_andnb_k_int32(m0, mm);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- notb_k
-#if ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )
-rvm_avx_uint32_t mipp_avx_notb_k_uint32(const rvm_avx_uint32_t m0) {
+#if ( !defined(__AVX2__) || defined(__AVX2__) )
+static inline rvm_avx_uint32_t mipp_avx_notb_k_uint32(const rvm_avx_uint32_t m0) {
 		rvm_avx_uint32_t mm = mipp_avx_cast_k_int32_uint32(mipp_avx_tomsk_int32(mipp_avx_set1_int32(0xFFFFFFFF)));
 	return mipp_avx_andnb_k_uint32(m0, mm);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- notb_k
-#if ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )
-rvm_avx_int16_t mipp_avx_notb_k_int16(const rvm_avx_int16_t m0) {
+#if ( !defined(__AVX2__) || defined(__AVX2__) )
+static inline rvm_avx_int16_t mipp_avx_notb_k_int16(const rvm_avx_int16_t m0) {
 		rvm_avx_int16_t mm = mipp_avx_cast_k_int16_int16(mipp_avx_tomsk_int16(mipp_avx_set1_int16(0xFFFF)));
 	return mipp_avx_andnb_k_int16(m0, mm);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- notb_k
-#if ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )
-rvm_avx_uint16_t mipp_avx_notb_k_uint16(const rvm_avx_uint16_t m0) {
+#if ( !defined(__AVX2__) || defined(__AVX2__) )
+static inline rvm_avx_uint16_t mipp_avx_notb_k_uint16(const rvm_avx_uint16_t m0) {
 		rvm_avx_uint16_t mm = mipp_avx_cast_k_int16_uint16(mipp_avx_tomsk_int16(mipp_avx_set1_int16(0xFFFF)));
 	return mipp_avx_andnb_k_uint16(m0, mm);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- notb_k
-#if ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )
-rvm_avx_int8_t mipp_avx_notb_k_int8(const rvm_avx_int8_t m0) {
+#if ( !defined(__AVX2__) || defined(__AVX2__) )
+static inline rvm_avx_int8_t mipp_avx_notb_k_int8(const rvm_avx_int8_t m0) {
 		rvm_avx_int8_t mm = mipp_avx_cast_k_int8_int8(mipp_avx_tomsk_int8(mipp_avx_set1_int8(0xFF)));
 	return mipp_avx_andnb_k_int8(m0, mm);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- notb_k
-#if ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )
-rvm_avx_uint8_t mipp_avx_notb_k_uint8(const rvm_avx_uint8_t m0) {
+#if ( !defined(__AVX2__) || defined(__AVX2__) )
+static inline rvm_avx_uint8_t mipp_avx_notb_k_uint8(const rvm_avx_uint8_t m0) {
 		rvm_avx_uint8_t mm = mipp_avx_cast_k_int8_uint8(mipp_avx_tomsk_int8(mipp_avx_set1_int8(0xFF)));
 	return mipp_avx_andnb_k_uint8(m0, mm);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cmpeq
 #if !( defined(__AVX2__) )
-rvm_avx_int64_t mipp_avx_cmpeq_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+static inline rvm_avx_int64_t mipp_avx_cmpeq_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
 		return mipp_avx_cast_k_float64_int64(mipp_avx_cmpeq_float64(mipp_avx_cast_int64_float64(r0), mipp_avx_cast_int64_float64(r1)));
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cmpeq
 #if !( defined(__AVX2__) )
-rvm_avx_int32_t mipp_avx_cmpeq_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+static inline rvm_avx_int32_t mipp_avx_cmpeq_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
 		return mipp_avx_cast_k_float32_int32(mipp_avx_cmpeq_float32(mipp_avx_cast_int32_float32(r0), mipp_avx_cast_int32_float32(r1)));
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cmpeq
-rvm_avx_uint64_t mipp_avx_cmpeq_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
+static inline rvm_avx_uint64_t mipp_avx_cmpeq_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
 		return mipp_avx_cast_k_float64_uint64(mipp_avx_cmpeq_float64(mipp_avx_cast_uint64_float64(r0), mipp_avx_cast_uint64_float64(r1)));
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cmpeq
-rvm_avx_uint32_t mipp_avx_cmpeq_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
+static inline rvm_avx_uint32_t mipp_avx_cmpeq_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
 		return mipp_avx_cast_k_float32_uint32(mipp_avx_cmpeq_float32(mipp_avx_cast_uint32_float32(r0), mipp_avx_cast_uint32_float32(r1)));
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cmpeq
-#if ( ( ( defined(__AVX2__) ) ) )
-rvm_avx_uint16_t mipp_avx_cmpeq_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+#if defined(__AVX2__)
+static inline rvm_avx_uint16_t mipp_avx_cmpeq_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
 		return mipp_avx_cast_k_int16_uint16(mipp_avx_cmpeq_int16(mipp_avx_cast_uint16_int16(r0), mipp_avx_cast_uint16_int16(r1)));
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cmpeq
-#if ( ( ( defined(__AVX2__) ) ) )
-rvm_avx_uint8_t mipp_avx_cmpeq_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+#if defined(__AVX2__)
+static inline rvm_avx_uint8_t mipp_avx_cmpeq_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
 		return mipp_avx_cast_k_int8_uint8(mipp_avx_cmpeq_int8(mipp_avx_cast_uint8_int8(r0), mipp_avx_cast_uint8_int8(r1)));
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cmpneq
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cmpneq
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cmpneq
-#if ( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) )
-rvm_avx_int64_t mipp_avx_cmpneq_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+#if ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( defined(__AVX2__) || !( defined(__AVX2__) ) )
+static inline rvm_avx_int64_t mipp_avx_cmpneq_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
 		return mipp_avx_notb_k_int64(mipp_avx_cmpeq_int64(r0, r1));
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cmpneq
-#if ( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) )
-rvm_avx_int32_t mipp_avx_cmpneq_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+#if ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( defined(__AVX2__) || !( defined(__AVX2__) ) )
+static inline rvm_avx_int32_t mipp_avx_cmpneq_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
 		return mipp_avx_notb_k_int32(mipp_avx_cmpeq_int32(r0, r1));
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cmpneq
-#if ( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && ( ( ( defined(__AVX2__) ) ) )
-rvm_avx_int16_t mipp_avx_cmpneq_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+#if ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && defined(__AVX2__)
+static inline rvm_avx_int16_t mipp_avx_cmpneq_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
 		return mipp_avx_notb_k_int16(mipp_avx_cmpeq_int16(r0, r1));
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cmpneq
-#if ( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && ( ( ( defined(__AVX2__) ) ) )
-rvm_avx_int8_t mipp_avx_cmpneq_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+#if ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && defined(__AVX2__)
+static inline rvm_avx_int8_t mipp_avx_cmpneq_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
 		return mipp_avx_notb_k_int8(mipp_avx_cmpeq_int8(r0, r1));
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cmpneq
-#if ( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )
-rvm_avx_uint64_t mipp_avx_cmpneq_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
+#if ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) )
+static inline rvm_avx_uint64_t mipp_avx_cmpneq_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
 		return mipp_avx_notb_k_uint64(mipp_avx_cmpeq_uint64(r0, r1));
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cmpneq
-#if ( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )
-rvm_avx_uint32_t mipp_avx_cmpneq_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
+#if ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) )
+static inline rvm_avx_uint32_t mipp_avx_cmpneq_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
 		return mipp_avx_notb_k_uint32(mipp_avx_cmpeq_uint32(r0, r1));
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cmpneq
-#if ( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && ( ( ( ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) ) )) ) ) )
-rvm_avx_uint16_t mipp_avx_cmpneq_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+#if ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && defined(__AVX2__) && defined(__AVX2__)
+static inline rvm_avx_uint16_t mipp_avx_cmpneq_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
 		return mipp_avx_notb_k_uint16(mipp_avx_cmpeq_uint16(r0, r1));
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cmpneq
-#if ( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && ( ( ( ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) ) )) ) ) )
-rvm_avx_uint8_t mipp_avx_cmpneq_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+#if ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && defined(__AVX2__) && defined(__AVX2__)
+static inline rvm_avx_uint8_t mipp_avx_cmpneq_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
 		return mipp_avx_notb_k_uint8(mipp_avx_cmpeq_uint8(r0, r1));
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- testz_2
-int32_t mipp_avx_testz_2_float64(const rvm_avx_float64_t m0) {
+static inline int32_t mipp_avx_testz_2_float64(const rvm_avx_float64_t m0) {
 		rvd_avx_int32_t r32 = mipp_avx_set1_int32(-1);
 	rvm_avx_int32_t m32 = mipp_avx_tomsk_int32(r32);
 	return mipp_avx_testz_float64(m0, mipp_avx_cast_k_int32_float64(m32));
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- testz_2
-int32_t mipp_avx_testz_2_float32(const rvm_avx_float32_t m0) {
+static inline int32_t mipp_avx_testz_2_float32(const rvm_avx_float32_t m0) {
 		rvd_avx_int32_t r32 = mipp_avx_set1_int32(-1);
 	rvm_avx_int32_t m32 = mipp_avx_tomsk_int32(r32);
 	return mipp_avx_testz_float32(m0, mipp_avx_cast_k_int32_float32(m32));
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- testz_2
-int32_t mipp_avx_testz_2_int64(const rvm_avx_int64_t m0) {
+static inline int32_t mipp_avx_testz_2_int64(const rvm_avx_int64_t m0) {
 		rvd_avx_int32_t r32 = mipp_avx_set1_int32(-1);
 	rvm_avx_int32_t m32 = mipp_avx_tomsk_int32(r32);
 	return mipp_avx_testz_int64(m0, mipp_avx_cast_k_int32_int64(m32));
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- testz_2
-int32_t mipp_avx_testz_2_int32(const rvm_avx_int32_t m0) {
+static inline int32_t mipp_avx_testz_2_int32(const rvm_avx_int32_t m0) {
 		rvd_avx_int32_t r32 = mipp_avx_set1_int32(-1);
 	rvm_avx_int32_t m32 = mipp_avx_tomsk_int32(r32);
 	return mipp_avx_testz_int32(m0, mipp_avx_cast_k_int32_int32(m32));
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- testz_2
-int32_t mipp_avx_testz_2_int16(const rvm_avx_int16_t m0) {
+static inline int32_t mipp_avx_testz_2_int16(const rvm_avx_int16_t m0) {
 		rvd_avx_int32_t r32 = mipp_avx_set1_int32(-1);
 	rvm_avx_int32_t m32 = mipp_avx_tomsk_int32(r32);
 	return mipp_avx_testz_int16(m0, mipp_avx_cast_k_int32_int16(m32));
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- testz_2
-int32_t mipp_avx_testz_2_int8(const rvm_avx_int8_t m0) {
+static inline int32_t mipp_avx_testz_2_int8(const rvm_avx_int8_t m0) {
 		rvd_avx_int32_t r32 = mipp_avx_set1_int32(-1);
 	rvm_avx_int32_t m32 = mipp_avx_tomsk_int32(r32);
 	return mipp_avx_testz_int8(m0, mipp_avx_cast_k_int32_int8(m32));
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- testz_2
-int32_t mipp_avx_testz_2_uint64(const rvm_avx_uint64_t m0) {
+static inline int32_t mipp_avx_testz_2_uint64(const rvm_avx_uint64_t m0) {
 		rvd_avx_int32_t r32 = mipp_avx_set1_int32(-1);
 	rvm_avx_int32_t m32 = mipp_avx_tomsk_int32(r32);
 	return mipp_avx_testz_uint64(m0, mipp_avx_cast_k_int32_uint64(m32));
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- testz_2
-int32_t mipp_avx_testz_2_uint32(const rvm_avx_uint32_t m0) {
+static inline int32_t mipp_avx_testz_2_uint32(const rvm_avx_uint32_t m0) {
 		rvd_avx_int32_t r32 = mipp_avx_set1_int32(-1);
 	rvm_avx_int32_t m32 = mipp_avx_tomsk_int32(r32);
 	return mipp_avx_testz_uint32(m0, mipp_avx_cast_k_int32_uint32(m32));
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- testz_2
-int32_t mipp_avx_testz_2_uint16(const rvm_avx_uint16_t m0) {
+static inline int32_t mipp_avx_testz_2_uint16(const rvm_avx_uint16_t m0) {
 		rvd_avx_int32_t r32 = mipp_avx_set1_int32(-1);
 	rvm_avx_int32_t m32 = mipp_avx_tomsk_int32(r32);
 	return mipp_avx_testz_uint16(m0, mipp_avx_cast_k_int32_uint16(m32));
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- testz_2
-int32_t mipp_avx_testz_2_uint8(const rvm_avx_uint8_t m0) {
+static inline int32_t mipp_avx_testz_2_uint8(const rvm_avx_uint8_t m0) {
 		rvd_avx_int32_t r32 = mipp_avx_set1_int32(-1);
 	rvm_avx_int32_t m32 = mipp_avx_tomsk_int32(r32);
 	return mipp_avx_testz_uint8(m0, mipp_avx_cast_k_int32_uint8(m32));
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- get
-float64_t mipp_avx_get_float64(const rvd_avx_float64_t r0, const uint32_t v0) {
+static inline float64_t mipp_avx_get_float64(const rvd_avx_float64_t r0, const uint32_t v0) {
 		float64_t t[MIPP_N_FLOAT64];
 	mipp_avx_storeu_float64(t, r0);
 	return t[v0];
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- get
-float32_t mipp_avx_get_float32(const rvd_avx_float32_t r0, const uint32_t v0) {
+static inline float32_t mipp_avx_get_float32(const rvd_avx_float32_t r0, const uint32_t v0) {
 		float32_t t[MIPP_N_FLOAT32];
 	mipp_avx_storeu_float32(t, r0);
 	return t[v0];
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- get
-int64_t mipp_avx_get_int64(const rvd_avx_int64_t r0, const uint32_t v0) {
+static inline int64_t mipp_avx_get_int64(const rvd_avx_int64_t r0, const uint32_t v0) {
 		int64_t t[MIPP_N_INT64];
 	mipp_avx_storeu_int64(t, r0);
 	return t[v0];
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- get
-int32_t mipp_avx_get_int32(const rvd_avx_int32_t r0, const uint32_t v0) {
+static inline int32_t mipp_avx_get_int32(const rvd_avx_int32_t r0, const uint32_t v0) {
 		int32_t t[MIPP_N_INT32];
 	mipp_avx_storeu_int32(t, r0);
 	return t[v0];
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- get
-int16_t mipp_avx_get_int16(const rvd_avx_int16_t r0, const uint32_t v0) {
+static inline int16_t mipp_avx_get_int16(const rvd_avx_int16_t r0, const uint32_t v0) {
 		int16_t t[MIPP_N_INT16];
 	mipp_avx_storeu_int16(t, r0);
 	return t[v0];
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- get
-int8_t mipp_avx_get_int8(const rvd_avx_int8_t r0, const uint32_t v0) {
+static inline int8_t mipp_avx_get_int8(const rvd_avx_int8_t r0, const uint32_t v0) {
 		int8_t t[MIPP_N_INT8];
 	mipp_avx_storeu_int8(t, r0);
 	return t[v0];
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- get
-uint64_t mipp_avx_get_uint64(const rvd_avx_uint64_t r0, const uint32_t v0) {
+static inline uint64_t mipp_avx_get_uint64(const rvd_avx_uint64_t r0, const uint32_t v0) {
 		uint64_t t[MIPP_N_UINT64];
 	mipp_avx_storeu_uint64(t, r0);
 	return t[v0];
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- get
-uint32_t mipp_avx_get_uint32(const rvd_avx_uint32_t r0, const uint32_t v0) {
+static inline uint32_t mipp_avx_get_uint32(const rvd_avx_uint32_t r0, const uint32_t v0) {
 		uint32_t t[MIPP_N_UINT32];
 	mipp_avx_storeu_uint32(t, r0);
 	return t[v0];
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- get
-uint16_t mipp_avx_get_uint16(const rvd_avx_uint16_t r0, const uint32_t v0) {
+static inline uint16_t mipp_avx_get_uint16(const rvd_avx_uint16_t r0, const uint32_t v0) {
 		uint16_t t[MIPP_N_UINT16];
 	mipp_avx_storeu_uint16(t, r0);
 	return t[v0];
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- get
-uint8_t mipp_avx_get_uint8(const rvd_avx_uint8_t r0, const uint32_t v0) {
+static inline uint8_t mipp_avx_get_uint8(const rvd_avx_uint8_t r0, const uint32_t v0) {
 		uint8_t t[MIPP_N_UINT8];
 	mipp_avx_storeu_uint8(t, r0);
 	return t[v0];
+}
+// ---------------------------------------------------------------------------------------------------------------------------------------------- get_k
+static inline float64_t mipp_avx_get_k_float64(const rvm_avx_float64_t m0, const uint32_t v0) {
+		float64_t tmp[MIPP_N_FLOAT64];
+	rvd_avx_float64_t rmsk =mipp_avx_toreg_float64(m0);
+	mipp_avx_storeu_float64(tmp, rmsk);
+	return (int32_t) tmp[v0];
+}
+// ---------------------------------------------------------------------------------------------------------------------------------------------- get_k
+static inline float32_t mipp_avx_get_k_float32(const rvm_avx_float32_t m0, const uint32_t v0) {
+		float32_t tmp[MIPP_N_FLOAT32];
+	rvd_avx_float32_t rmsk =mipp_avx_toreg_float32(m0);
+	mipp_avx_storeu_float32(tmp, rmsk);
+	return (int32_t) tmp[v0];
+}
+// ---------------------------------------------------------------------------------------------------------------------------------------------- get_k
+static inline int64_t mipp_avx_get_k_int64(const rvm_avx_int64_t m0, const uint32_t v0) {
+		int64_t tmp[MIPP_N_INT64];
+	rvd_avx_int64_t rmsk =mipp_avx_toreg_int64(m0);
+	mipp_avx_storeu_int64(tmp, rmsk);
+	return (int32_t) tmp[v0];
+}
+// ---------------------------------------------------------------------------------------------------------------------------------------------- get_k
+static inline int32_t mipp_avx_get_k_int32(const rvm_avx_int32_t m0, const uint32_t v0) {
+		int32_t tmp[MIPP_N_INT32];
+	rvd_avx_int32_t rmsk =mipp_avx_toreg_int32(m0);
+	mipp_avx_storeu_int32(tmp, rmsk);
+	return (int32_t) tmp[v0];
+}
+// ---------------------------------------------------------------------------------------------------------------------------------------------- get_k
+static inline int16_t mipp_avx_get_k_int16(const rvm_avx_int16_t m0, const uint32_t v0) {
+		int16_t tmp[MIPP_N_INT16];
+	rvd_avx_int16_t rmsk =mipp_avx_toreg_int16(m0);
+	mipp_avx_storeu_int16(tmp, rmsk);
+	return (int32_t) tmp[v0];
+}
+// ---------------------------------------------------------------------------------------------------------------------------------------------- get_k
+static inline int8_t mipp_avx_get_k_int8(const rvm_avx_int8_t m0, const uint32_t v0) {
+		int8_t tmp[MIPP_N_INT8];
+	rvd_avx_int8_t rmsk =mipp_avx_toreg_int8(m0);
+	mipp_avx_storeu_int8(tmp, rmsk);
+	return (int32_t) tmp[v0];
+}
+// ---------------------------------------------------------------------------------------------------------------------------------------------- get_k
+static inline uint64_t mipp_avx_get_k_uint64(const rvm_avx_uint64_t m0, const uint32_t v0) {
+		uint64_t tmp[MIPP_N_UINT64];
+	rvd_avx_uint64_t rmsk =mipp_avx_toreg_uint64(m0);
+	mipp_avx_storeu_uint64(tmp, rmsk);
+	return (int32_t) tmp[v0];
+}
+// ---------------------------------------------------------------------------------------------------------------------------------------------- get_k
+static inline uint32_t mipp_avx_get_k_uint32(const rvm_avx_uint32_t m0, const uint32_t v0) {
+		uint32_t tmp[MIPP_N_UINT32];
+	rvd_avx_uint32_t rmsk =mipp_avx_toreg_uint32(m0);
+	mipp_avx_storeu_uint32(tmp, rmsk);
+	return (int32_t) tmp[v0];
+}
+// ---------------------------------------------------------------------------------------------------------------------------------------------- get_k
+static inline uint16_t mipp_avx_get_k_uint16(const rvm_avx_uint16_t m0, const uint32_t v0) {
+		uint16_t tmp[MIPP_N_UINT16];
+	rvd_avx_uint16_t rmsk =mipp_avx_toreg_uint16(m0);
+	mipp_avx_storeu_uint16(tmp, rmsk);
+	return (int32_t) tmp[v0];
+}
+// ---------------------------------------------------------------------------------------------------------------------------------------------- get_k
+static inline uint8_t mipp_avx_get_k_uint8(const rvm_avx_uint8_t m0, const uint32_t v0) {
+		uint8_t tmp[MIPP_N_UINT8];
+	rvd_avx_uint8_t rmsk =mipp_avx_toreg_uint8(m0);
+	mipp_avx_storeu_uint8(tmp, rmsk);
+	return (int32_t) tmp[v0];
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- getfirst
 // ---------------------------------------------------------------------------------------------------------------------------------------------- getfirst
@@ -5005,13 +5043,13 @@ uint8_t mipp_avx_get_uint8(const rvd_avx_uint8_t r0, const uint32_t v0) {
 // ---------------------------------------------------------------------------------------------------------------------------------------------- getfirst
 // ---------------------------------------------------------------------------------------------------------------------------------------------- getfirst
 #if !( defined(__AVX2__) )
-int16_t mipp_avx_getfirst_int16(const rvd_avx_int16_t r0) {
+static inline int16_t mipp_avx_getfirst_int16(const rvd_avx_int16_t r0) {
 		return mipp_avx_get_int16(r0, 0);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- getfirst
 #if !( defined(__AVX2__) )
-int8_t mipp_avx_getfirst_int8(const rvd_avx_int8_t r0) {
+static inline int8_t mipp_avx_getfirst_int8(const rvd_avx_int8_t r0) {
 		return mipp_avx_get_int8(r0, 0);
 }
 #endif
@@ -5019,1657 +5057,1707 @@ int8_t mipp_avx_getfirst_int8(const rvd_avx_int8_t r0) {
 // ---------------------------------------------------------------------------------------------------------------------------------------------- getfirst
 // ---------------------------------------------------------------------------------------------------------------------------------------------- getfirst
 #if !( defined(__AVX2__) )
-uint16_t mipp_avx_getfirst_uint16(const rvd_avx_uint16_t r0) {
+static inline uint16_t mipp_avx_getfirst_uint16(const rvd_avx_uint16_t r0) {
 		return mipp_avx_get_uint16(r0, 0);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- getfirst
 #if !( defined(__AVX2__) )
-uint8_t mipp_avx_getfirst_uint8(const rvd_avx_uint8_t r0) {
+static inline uint8_t mipp_avx_getfirst_uint8(const rvd_avx_uint8_t r0) {
 		return mipp_avx_get_uint8(r0, 0);
 }
 #endif
-// ---------------------------------------------------------------------------------------------------------------------------------------------- gather_seq
-rvd_avx_int64_t mipp_avx_gather_seq_int64(int64_t* p0, const rvd_avx_int64_t r0) {
-	 int64_t t[MIPP_N_INT64];
-    mipp_avx_storeu_int64(t, r0);
-    int64_t data[MIPP_N_INT64];
-    for (int i = 0; i < MIPP_N_INT64; i++)
-		data[i] = p0[t[i]];
-	return mipp_avx_loadu_int64(data);
+// ---------------------------------------------------------------------------------------------------------------------------------------------- maskz_add
+static inline rvd_avx_float64_t mipp_avx_maskz_add_float64(const rvm_avx_float64_t m0, const rvd_avx_float64_t r0, const rvd_avx_float64_t r1) {
+		rvd_avx_float64_t radd = mipp_avx_add_float64(r0, r1);
+    rvd_avx_float64_t rmsk =mipp_avx_toreg_float64(m0);
+	return mipp_avx_andb_float64(rmsk, radd);
 }
-// ---------------------------------------------------------------------------------------------------------------------------------------------- gather_seq
-rvd_avx_int32_t mipp_avx_gather_seq_int32(int32_t* p0, const rvd_avx_int32_t r0) {
-	 int32_t t[MIPP_N_INT32];
-    mipp_avx_storeu_int32(t, r0);
-    int32_t data[MIPP_N_INT32];
-    for (int i = 0; i < MIPP_N_INT32; i++)
-		data[i] = p0[t[i]];
-	return mipp_avx_loadu_int32(data);
+// ---------------------------------------------------------------------------------------------------------------------------------------------- maskz_add
+static inline rvd_avx_float32_t mipp_avx_maskz_add_float32(const rvm_avx_float32_t m0, const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
+		rvd_avx_float32_t radd = mipp_avx_add_float32(r0, r1);
+    rvd_avx_float32_t rmsk =mipp_avx_toreg_float32(m0);
+	return mipp_avx_andb_float32(rmsk, radd);
 }
-// ---------------------------------------------------------------------------------------------------------------------------------------------- gather_seq
-rvd_avx_int16_t mipp_avx_gather_seq_int16(int16_t* p0, const rvd_avx_int16_t r0) {
-	 int16_t t[MIPP_N_INT16];
-    mipp_avx_storeu_int16(t, r0);
-    int16_t data[MIPP_N_INT16];
-    for (int i = 0; i < MIPP_N_INT16; i++)
-		data[i] = p0[t[i]];
-	return mipp_avx_loadu_int16(data);
+// ---------------------------------------------------------------------------------------------------------------------------------------------- maskz_add
+#if defined(__AVX2__) && ( !defined(__AVX2__) || defined(__AVX2__) )
+static inline rvd_avx_int64_t mipp_avx_maskz_add_int64(const rvm_avx_int64_t m0, const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+		rvd_avx_int64_t radd = mipp_avx_add_int64(r0, r1);
+    rvd_avx_int64_t rmsk =mipp_avx_toreg_int64(m0);
+	return mipp_avx_andb_int64(rmsk, radd);
 }
-// ---------------------------------------------------------------------------------------------------------------------------------------------- gather_seq
-rvd_avx_int8_t mipp_avx_gather_seq_int8(int8_t* p0, const rvd_avx_int8_t r0) {
-	 int8_t t[MIPP_N_INT8];
-    mipp_avx_storeu_int8(t, r0);
-    int8_t data[MIPP_N_INT8];
-    for (int i = 0; i < MIPP_N_INT8; i++)
-		data[i] = p0[t[i]];
-	return mipp_avx_loadu_int8(data);
+#endif
+// ---------------------------------------------------------------------------------------------------------------------------------------------- maskz_add
+#if defined(__AVX2__) && ( !defined(__AVX2__) || defined(__AVX2__) )
+static inline rvd_avx_int32_t mipp_avx_maskz_add_int32(const rvm_avx_int32_t m0, const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+		rvd_avx_int32_t radd = mipp_avx_add_int32(r0, r1);
+    rvd_avx_int32_t rmsk =mipp_avx_toreg_int32(m0);
+	return mipp_avx_andb_int32(rmsk, radd);
 }
-// ---------------------------------------------------------------------------------------------------------------------------------------------- gather_seq
-rvd_avx_uint64_t mipp_avx_gather_seq_uint64(uint64_t* p0, const rvd_avx_uint64_t r0) {
-	 uint64_t t[MIPP_N_UINT64];
-    mipp_avx_storeu_uint64(t, r0);
-    uint64_t data[MIPP_N_UINT64];
-    for (int i = 0; i < MIPP_N_UINT64; i++)
-		data[i] = p0[t[i]];
-	return mipp_avx_loadu_uint64(data);
+#endif
+// ---------------------------------------------------------------------------------------------------------------------------------------------- maskz_add
+#if defined(__AVX2__) && ( !defined(__AVX2__) || defined(__AVX2__) )
+static inline rvd_avx_int16_t mipp_avx_maskz_add_int16(const rvm_avx_int16_t m0, const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+		rvd_avx_int16_t radd = mipp_avx_add_int16(r0, r1);
+    rvd_avx_int16_t rmsk =mipp_avx_toreg_int16(m0);
+	return mipp_avx_andb_int16(rmsk, radd);
 }
-// ---------------------------------------------------------------------------------------------------------------------------------------------- gather_seq
-rvd_avx_uint32_t mipp_avx_gather_seq_uint32(uint32_t* p0, const rvd_avx_uint32_t r0) {
-	 uint32_t t[MIPP_N_UINT32];
-    mipp_avx_storeu_uint32(t, r0);
-    uint32_t data[MIPP_N_UINT32];
-    for (int i = 0; i < MIPP_N_UINT32; i++)
-		data[i] = p0[t[i]];
-	return mipp_avx_loadu_uint32(data);
+#endif
+// ---------------------------------------------------------------------------------------------------------------------------------------------- maskz_add
+#if defined(__AVX2__) && ( !defined(__AVX2__) || defined(__AVX2__) )
+static inline rvd_avx_int8_t mipp_avx_maskz_add_int8(const rvm_avx_int8_t m0, const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+		rvd_avx_int8_t radd = mipp_avx_add_int8(r0, r1);
+    rvd_avx_int8_t rmsk =mipp_avx_toreg_int8(m0);
+	return mipp_avx_andb_int8(rmsk, radd);
 }
-// ---------------------------------------------------------------------------------------------------------------------------------------------- gather_seq
-rvd_avx_uint16_t mipp_avx_gather_seq_uint16(uint16_t* p0, const rvd_avx_uint16_t r0) {
-	 uint16_t t[MIPP_N_UINT16];
-    mipp_avx_storeu_uint16(t, r0);
-    uint16_t data[MIPP_N_UINT16];
-    for (int i = 0; i < MIPP_N_UINT16; i++)
-		data[i] = p0[t[i]];
-	return mipp_avx_loadu_uint16(data);
+#endif
+// ---------------------------------------------------------------------------------------------------------------------------------------------- maskz_add
+// ---------------------------------------------------------------------------------------------------------------------------------------------- maskz_add
+// ---------------------------------------------------------------------------------------------------------------------------------------------- maskz_add
+#if defined(__AVX2__) && ( !defined(__AVX2__) || defined(__AVX2__) )
+static inline rvd_avx_uint16_t mipp_avx_maskz_add_uint16(const rvm_avx_uint16_t m0, const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+		rvd_avx_uint16_t radd = mipp_avx_add_uint16(r0, r1);
+    rvd_avx_uint16_t rmsk =mipp_avx_toreg_uint16(m0);
+	return mipp_avx_andb_uint16(rmsk, radd);
 }
-// ---------------------------------------------------------------------------------------------------------------------------------------------- gather_seq
-rvd_avx_uint8_t mipp_avx_gather_seq_uint8(uint8_t* p0, const rvd_avx_uint8_t r0) {
-	 uint8_t t[MIPP_N_UINT8];
-    mipp_avx_storeu_uint8(t, r0);
-    uint8_t data[MIPP_N_UINT8];
-    for (int i = 0; i < MIPP_N_UINT8; i++)
-		data[i] = p0[t[i]];
-	return mipp_avx_loadu_uint8(data);
+#endif
+// ---------------------------------------------------------------------------------------------------------------------------------------------- maskz_add
+#if defined(__AVX2__) && ( !defined(__AVX2__) || defined(__AVX2__) )
+static inline rvd_avx_uint8_t mipp_avx_maskz_add_uint8(const rvm_avx_uint8_t m0, const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+		rvd_avx_uint8_t radd = mipp_avx_add_uint8(r0, r1);
+    rvd_avx_uint8_t rmsk =mipp_avx_toreg_uint8(m0);
+	return mipp_avx_andb_uint8(rmsk, radd);
 }
+#endif
 #if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
-rvd_avx_float64_t mipp_avx_load_float64(const float64_t* p0) {
+static inline rvd_avx_float64_t mipp_avx_load_float64(const float64_t* p0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_load_float64");
 	exit(-1);
 }
 #endif
 #if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
-rvd_avx_float32_t mipp_avx_load_float32(const float32_t* p0) {
+static inline rvd_avx_float32_t mipp_avx_load_float32(const float32_t* p0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_load_float32");
 	exit(-1);
 }
 #endif
 #if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
-rvd_avx_int64_t mipp_avx_load_int64(const int64_t* p0) {
+static inline rvd_avx_int64_t mipp_avx_load_int64(const int64_t* p0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_load_int64");
 	exit(-1);
 }
 #endif
 #if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
-rvd_avx_int32_t mipp_avx_load_int32(const int32_t* p0) {
+static inline rvd_avx_int32_t mipp_avx_load_int32(const int32_t* p0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_load_int32");
 	exit(-1);
 }
 #endif
 #if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
-rvd_avx_int16_t mipp_avx_load_int16(const int16_t* p0) {
+static inline rvd_avx_int16_t mipp_avx_load_int16(const int16_t* p0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_load_int16");
 	exit(-1);
 }
 #endif
 #if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
-rvd_avx_int8_t mipp_avx_load_int8(const int8_t* p0) {
+static inline rvd_avx_int8_t mipp_avx_load_int8(const int8_t* p0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_load_int8");
 	exit(-1);
 }
 #endif
 #if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
-rvd_avx_uint64_t mipp_avx_load_uint64(const uint64_t* p0) {
+static inline rvd_avx_uint64_t mipp_avx_load_uint64(const uint64_t* p0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_load_uint64");
 	exit(-1);
 }
 #endif
 #if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
-rvd_avx_uint32_t mipp_avx_load_uint32(const uint32_t* p0) {
+static inline rvd_avx_uint32_t mipp_avx_load_uint32(const uint32_t* p0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_load_uint32");
 	exit(-1);
 }
 #endif
 #if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
-rvd_avx_uint16_t mipp_avx_load_uint16(const uint16_t* p0) {
+static inline rvd_avx_uint16_t mipp_avx_load_uint16(const uint16_t* p0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_load_uint16");
 	exit(-1);
 }
 #endif
 #if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
-rvd_avx_uint8_t mipp_avx_load_uint8(const uint8_t* p0) {
+static inline rvd_avx_uint8_t mipp_avx_load_uint8(const uint8_t* p0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_load_uint8");
 	exit(-1);
 }
 #endif
 #if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
-void mipp_avx_store_float64(float64_t* p0, const rvd_avx_float64_t r0) {
+static inline void mipp_avx_store_float64(float64_t* p0, const rvd_avx_float64_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_store_float64");
 	exit(-1);
 }
 #endif
 #if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
-void mipp_avx_store_float32(float32_t* p0, const rvd_avx_float32_t r0) {
+static inline void mipp_avx_store_float32(float32_t* p0, const rvd_avx_float32_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_store_float32");
 	exit(-1);
 }
 #endif
 #if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
-void mipp_avx_store_int64(int64_t* p0, const rvd_avx_int64_t r0) {
+static inline void mipp_avx_store_int64(int64_t* p0, const rvd_avx_int64_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_store_int64");
 	exit(-1);
 }
 #endif
 #if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
-void mipp_avx_store_int32(int32_t* p0, const rvd_avx_int32_t r0) {
+static inline void mipp_avx_store_int32(int32_t* p0, const rvd_avx_int32_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_store_int32");
 	exit(-1);
 }
 #endif
 #if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
-void mipp_avx_store_int16(int16_t* p0, const rvd_avx_int16_t r0) {
+static inline void mipp_avx_store_int16(int16_t* p0, const rvd_avx_int16_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_store_int16");
 	exit(-1);
 }
 #endif
 #if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
-void mipp_avx_store_int8(int8_t* p0, const rvd_avx_int8_t r0) {
+static inline void mipp_avx_store_int8(int8_t* p0, const rvd_avx_int8_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_store_int8");
 	exit(-1);
 }
 #endif
 #if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
-void mipp_avx_store_uint64(uint64_t* p0, const rvd_avx_uint64_t r0) {
+static inline void mipp_avx_store_uint64(uint64_t* p0, const rvd_avx_uint64_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_store_uint64");
 	exit(-1);
 }
 #endif
 #if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
-void mipp_avx_store_uint32(uint32_t* p0, const rvd_avx_uint32_t r0) {
+static inline void mipp_avx_store_uint32(uint32_t* p0, const rvd_avx_uint32_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_store_uint32");
 	exit(-1);
 }
 #endif
 #if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
-void mipp_avx_store_uint16(uint16_t* p0, const rvd_avx_uint16_t r0) {
+static inline void mipp_avx_store_uint16(uint16_t* p0, const rvd_avx_uint16_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_store_uint16");
 	exit(-1);
 }
 #endif
 #if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
-void mipp_avx_store_uint8(uint8_t* p0, const rvd_avx_uint8_t r0) {
+static inline void mipp_avx_store_uint8(uint8_t* p0, const rvd_avx_uint8_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_store_uint8");
 	exit(-1);
 }
 #endif
-rvd_avx_uint64_t mipp_avx_set_uint64(const uint64_t vals[MIPP_N_UINT64]) {
+static inline rvd_avx_uint64_t mipp_avx_set_uint64(const uint64_t vals[MIPP_N_UINT64]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_set_uint64");
 	exit(-1);
 }
-rvd_avx_uint32_t mipp_avx_set_uint32(const uint32_t vals[MIPP_N_UINT32]) {
+static inline rvd_avx_uint32_t mipp_avx_set_uint32(const uint32_t vals[MIPP_N_UINT32]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_set_uint32");
 	exit(-1);
 }
-rvd_avx_uint16_t mipp_avx_set_uint16(const uint16_t vals[MIPP_N_UINT16]) {
+static inline rvd_avx_uint16_t mipp_avx_set_uint16(const uint16_t vals[MIPP_N_UINT16]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_set_uint16");
 	exit(-1);
 }
-rvd_avx_uint8_t mipp_avx_set_uint8(const uint8_t vals[MIPP_N_UINT8]) {
+static inline rvd_avx_uint8_t mipp_avx_set_uint8(const uint8_t vals[MIPP_N_UINT8]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_set_uint8");
 	exit(-1);
 }
-rvm_avx_float64_t mipp_avx_set_k_float64(const int32_t vals[MIPP_N_FLOAT64]) {
-	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_set_k_float64");
-	exit(-1);
-}
-rvm_avx_float32_t mipp_avx_set_k_float32(const int32_t vals[MIPP_N_FLOAT32]) {
-	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_set_k_float32");
-	exit(-1);
-}
-rvm_avx_uint64_t mipp_avx_set_k_uint64(const int32_t vals[MIPP_N_UINT64]) {
+static inline rvm_avx_uint64_t mipp_avx_set_k_uint64(const int32_t vals[MIPP_N_UINT64]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_set_k_uint64");
 	exit(-1);
 }
-rvm_avx_uint32_t mipp_avx_set_k_uint32(const int32_t vals[MIPP_N_UINT32]) {
+static inline rvm_avx_uint32_t mipp_avx_set_k_uint32(const int32_t vals[MIPP_N_UINT32]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_set_k_uint32");
 	exit(-1);
 }
-rvm_avx_uint16_t mipp_avx_set_k_uint16(const int32_t vals[MIPP_N_UINT16]) {
+static inline rvm_avx_uint16_t mipp_avx_set_k_uint16(const int32_t vals[MIPP_N_UINT16]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_set_k_uint16");
 	exit(-1);
 }
-rvm_avx_uint8_t mipp_avx_set_k_uint8(const int32_t vals[MIPP_N_UINT8]) {
+static inline rvm_avx_uint8_t mipp_avx_set_k_uint8(const int32_t vals[MIPP_N_UINT8]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_set_k_uint8");
 	exit(-1);
 }
-rvd_avx_uint64_t mipp_avx_set1_uint64(const uint64_t v0) {
+static inline rvd_avx_uint64_t mipp_avx_set1_uint64(const uint64_t v0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_set1_uint64");
 	exit(-1);
 }
-rvd_avx_uint32_t mipp_avx_set1_uint32(const uint32_t v0) {
+static inline rvd_avx_uint32_t mipp_avx_set1_uint32(const uint32_t v0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_set1_uint32");
 	exit(-1);
 }
-rvd_avx_uint16_t mipp_avx_set1_uint16(const uint16_t v0) {
+static inline rvd_avx_uint16_t mipp_avx_set1_uint16(const uint16_t v0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_set1_uint16");
 	exit(-1);
 }
-rvd_avx_uint8_t mipp_avx_set1_uint8(const uint8_t v0) {
+static inline rvd_avx_uint8_t mipp_avx_set1_uint8(const uint8_t v0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_set1_uint8");
 	exit(-1);
 }
-rvd_avx_int64_t mipp_avx_maskzld_int64(const rvm_avx_int32_t m0, const int64_t* p0) {
+static inline rvm_avx_uint64_t mipp_avx_set1_k_uint64(const int32_t v0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_set1_k_uint64");
+	exit(-1);
+}
+static inline rvm_avx_uint32_t mipp_avx_set1_k_uint32(const int32_t v0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_set1_k_uint32");
+	exit(-1);
+}
+static inline rvm_avx_uint16_t mipp_avx_set1_k_uint16(const int32_t v0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_set1_k_uint16");
+	exit(-1);
+}
+static inline rvm_avx_uint8_t mipp_avx_set1_k_uint8(const int32_t v0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_set1_k_uint8");
+	exit(-1);
+}
+static inline rvd_avx_int64_t mipp_avx_maskzld_int64(const rvm_avx_int32_t m0, const int64_t* p0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskzld_int64");
 	exit(-1);
 }
 #if !( defined(__AVX2__) )
-rvd_avx_int32_t mipp_avx_maskzld_int32(const rvm_avx_int32_t m0, const int32_t* p0) {
+static inline rvd_avx_int32_t mipp_avx_maskzld_int32(const rvm_avx_int32_t m0, const int32_t* p0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskzld_int32");
 	exit(-1);
 }
 #endif
-rvd_avx_int16_t mipp_avx_maskzld_int16(const rvm_avx_int32_t m0, const int16_t* p0) {
+static inline rvd_avx_int16_t mipp_avx_maskzld_int16(const rvm_avx_int32_t m0, const int16_t* p0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskzld_int16");
 	exit(-1);
 }
-rvd_avx_int8_t mipp_avx_maskzld_int8(const rvm_avx_int32_t m0, const int8_t* p0) {
+static inline rvd_avx_int8_t mipp_avx_maskzld_int8(const rvm_avx_int32_t m0, const int8_t* p0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskzld_int8");
 	exit(-1);
 }
-rvd_avx_uint64_t mipp_avx_maskzld_uint64(const rvm_avx_int32_t m0, const uint64_t* p0) {
+static inline rvd_avx_uint64_t mipp_avx_maskzld_uint64(const rvm_avx_int32_t m0, const uint64_t* p0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskzld_uint64");
 	exit(-1);
 }
-rvd_avx_uint32_t mipp_avx_maskzld_uint32(const rvm_avx_int32_t m0, const uint32_t* p0) {
+static inline rvd_avx_uint32_t mipp_avx_maskzld_uint32(const rvm_avx_int32_t m0, const uint32_t* p0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskzld_uint32");
 	exit(-1);
 }
-rvd_avx_uint16_t mipp_avx_maskzld_uint16(const rvm_avx_int32_t m0, const uint16_t* p0) {
+static inline rvd_avx_uint16_t mipp_avx_maskzld_uint16(const rvm_avx_int32_t m0, const uint16_t* p0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskzld_uint16");
 	exit(-1);
 }
-rvd_avx_uint8_t mipp_avx_maskzld_uint8(const rvm_avx_int32_t m0, const uint8_t* p0) {
+static inline rvd_avx_uint8_t mipp_avx_maskzld_uint8(const rvm_avx_int32_t m0, const uint8_t* p0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskzld_uint8");
 	exit(-1);
 }
-void mipp_avx_maskst_int64(int64_t* p0, const rvm_avx_int32_t m0, const rvd_avx_int64_t r0) {
+static inline void mipp_avx_maskst_int64(int64_t* p0, const rvm_avx_int32_t m0, const rvd_avx_int64_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskst_int64");
 	exit(-1);
 }
 #if !( defined(__AVX2__) )
-void mipp_avx_maskst_int32(int32_t* p0, const rvm_avx_int32_t m0, const rvd_avx_int32_t r0) {
+static inline void mipp_avx_maskst_int32(int32_t* p0, const rvm_avx_int32_t m0, const rvd_avx_int32_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskst_int32");
 	exit(-1);
 }
 #endif
-void mipp_avx_maskst_int16(int16_t* p0, const rvm_avx_int32_t m0, const rvd_avx_int16_t r0) {
+static inline void mipp_avx_maskst_int16(int16_t* p0, const rvm_avx_int32_t m0, const rvd_avx_int16_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskst_int16");
 	exit(-1);
 }
-void mipp_avx_maskst_int8(int8_t* p0, const rvm_avx_int32_t m0, const rvd_avx_int8_t r0) {
+static inline void mipp_avx_maskst_int8(int8_t* p0, const rvm_avx_int32_t m0, const rvd_avx_int8_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskst_int8");
 	exit(-1);
 }
-void mipp_avx_maskst_uint64(uint64_t* p0, const rvm_avx_int32_t m0, const rvd_avx_uint64_t r0) {
+static inline void mipp_avx_maskst_uint64(uint64_t* p0, const rvm_avx_int32_t m0, const rvd_avx_uint64_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskst_uint64");
 	exit(-1);
 }
-void mipp_avx_maskst_uint32(uint32_t* p0, const rvm_avx_int32_t m0, const rvd_avx_uint32_t r0) {
+static inline void mipp_avx_maskst_uint32(uint32_t* p0, const rvm_avx_int32_t m0, const rvd_avx_uint32_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskst_uint32");
 	exit(-1);
 }
-void mipp_avx_maskst_uint16(uint16_t* p0, const rvm_avx_int32_t m0, const rvd_avx_uint16_t r0) {
+static inline void mipp_avx_maskst_uint16(uint16_t* p0, const rvm_avx_int32_t m0, const rvd_avx_uint16_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskst_uint16");
 	exit(-1);
 }
-void mipp_avx_maskst_uint8(uint8_t* p0, const rvm_avx_int32_t m0, const rvd_avx_uint8_t r0) {
+static inline void mipp_avx_maskst_uint8(uint8_t* p0, const rvm_avx_int32_t m0, const rvd_avx_uint8_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskst_uint8");
 	exit(-1);
 }
 #if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) )
-int16_t mipp_avx_getfirst_int16(const rvd_avx_int16_t r0) {
+static inline int16_t mipp_avx_getfirst_int16(const rvd_avx_int16_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_getfirst_int16");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) )
-int8_t mipp_avx_getfirst_int8(const rvd_avx_int8_t r0) {
+static inline int8_t mipp_avx_getfirst_int8(const rvd_avx_int8_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_getfirst_int8");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) )
-uint16_t mipp_avx_getfirst_uint16(const rvd_avx_uint16_t r0) {
+static inline uint16_t mipp_avx_getfirst_uint16(const rvd_avx_uint16_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_getfirst_uint16");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) )
-uint8_t mipp_avx_getfirst_uint8(const rvd_avx_uint8_t r0) {
+static inline uint8_t mipp_avx_getfirst_uint8(const rvd_avx_uint8_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_getfirst_uint8");
 	exit(-1);
 }
 #endif
-rvd_avx_float64_t mipp_avx_rsqrt_float64(const rvd_avx_float64_t r0) {
+static inline rvd_avx_float64_t mipp_avx_rsqrt_float64(const rvd_avx_float64_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_rsqrt_float64");
 	exit(-1);
 }
 #if !( defined(__AVX2__) )
-rvd_avx_int64_t mipp_avx_add_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+static inline rvd_avx_int64_t mipp_avx_add_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_add_int64");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvd_avx_int32_t mipp_avx_add_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+static inline rvd_avx_int32_t mipp_avx_add_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_add_int32");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvd_avx_int16_t mipp_avx_add_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+static inline rvd_avx_int16_t mipp_avx_add_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_add_int16");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvd_avx_int8_t mipp_avx_add_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+static inline rvd_avx_int8_t mipp_avx_add_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_add_int8");
 	exit(-1);
 }
 #endif
-rvd_avx_uint64_t mipp_avx_add_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
+static inline rvd_avx_uint64_t mipp_avx_add_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_add_uint64");
 	exit(-1);
 }
-rvd_avx_uint32_t mipp_avx_add_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
+static inline rvd_avx_uint32_t mipp_avx_add_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_add_uint32");
 	exit(-1);
 }
 #if !( defined(__AVX2__) )
-rvd_avx_uint16_t mipp_avx_add_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+static inline rvd_avx_uint16_t mipp_avx_add_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_add_uint16");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvd_avx_uint8_t mipp_avx_add_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+static inline rvd_avx_uint8_t mipp_avx_add_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_add_uint8");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvd_avx_int64_t mipp_avx_sub_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+static inline rvd_avx_int64_t mipp_avx_sub_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sub_int64");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvd_avx_int32_t mipp_avx_sub_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+static inline rvd_avx_int32_t mipp_avx_sub_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sub_int32");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvd_avx_int16_t mipp_avx_sub_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+static inline rvd_avx_int16_t mipp_avx_sub_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sub_int16");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvd_avx_int8_t mipp_avx_sub_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+static inline rvd_avx_int8_t mipp_avx_sub_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sub_int8");
 	exit(-1);
 }
 #endif
-rvd_avx_uint64_t mipp_avx_sub_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
+static inline rvd_avx_uint64_t mipp_avx_sub_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sub_uint64");
 	exit(-1);
 }
-rvd_avx_uint32_t mipp_avx_sub_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
+static inline rvd_avx_uint32_t mipp_avx_sub_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sub_uint32");
 	exit(-1);
 }
 #if !( defined(__AVX2__) )
-rvd_avx_uint16_t mipp_avx_sub_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+static inline rvd_avx_uint16_t mipp_avx_sub_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sub_uint16");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvd_avx_uint8_t mipp_avx_sub_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+static inline rvd_avx_uint8_t mipp_avx_sub_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_sub_uint8");
 	exit(-1);
 }
 #endif
-rvd_avx_int64_t mipp_avx_mul_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+static inline rvd_avx_int64_t mipp_avx_mul_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_mul_int64");
 	exit(-1);
 }
 #if !( defined(__AVX2__) )
-rvd_avx_int32_t mipp_avx_mul_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+static inline rvd_avx_int32_t mipp_avx_mul_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_mul_int32");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvd_avx_int16_t mipp_avx_mul_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+static inline rvd_avx_int16_t mipp_avx_mul_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_mul_int16");
 	exit(-1);
 }
 #endif
-rvd_avx_int8_t mipp_avx_mul_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+static inline rvd_avx_int8_t mipp_avx_mul_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_mul_int8");
 	exit(-1);
 }
-rvd_avx_uint64_t mipp_avx_mul_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
+static inline rvd_avx_uint64_t mipp_avx_mul_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_mul_uint64");
 	exit(-1);
 }
-rvd_avx_uint32_t mipp_avx_mul_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
+static inline rvd_avx_uint32_t mipp_avx_mul_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_mul_uint32");
 	exit(-1);
 }
-rvd_avx_uint16_t mipp_avx_mul_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+static inline rvd_avx_uint16_t mipp_avx_mul_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_mul_uint16");
 	exit(-1);
 }
-rvd_avx_uint8_t mipp_avx_mul_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+static inline rvd_avx_uint8_t mipp_avx_mul_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_mul_uint8");
 	exit(-1);
 }
-rvd_avx_int64_t mipp_avx_min_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+static inline rvd_avx_int64_t mipp_avx_min_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_min_int64");
 	exit(-1);
 }
 #if !( defined(__AVX2__) )
-rvd_avx_int32_t mipp_avx_min_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+static inline rvd_avx_int32_t mipp_avx_min_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_min_int32");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvd_avx_int16_t mipp_avx_min_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+static inline rvd_avx_int16_t mipp_avx_min_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_min_int16");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvd_avx_int8_t mipp_avx_min_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+static inline rvd_avx_int8_t mipp_avx_min_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_min_int8");
 	exit(-1);
 }
 #endif
-rvd_avx_uint64_t mipp_avx_min_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
+static inline rvd_avx_uint64_t mipp_avx_min_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_min_uint64");
 	exit(-1);
 }
 #if !( defined(__AVX2__) )
-rvd_avx_uint32_t mipp_avx_min_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
+static inline rvd_avx_uint32_t mipp_avx_min_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_min_uint32");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvd_avx_uint16_t mipp_avx_min_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+static inline rvd_avx_uint16_t mipp_avx_min_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_min_uint16");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvd_avx_uint8_t mipp_avx_min_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+static inline rvd_avx_uint8_t mipp_avx_min_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_min_uint8");
 	exit(-1);
 }
 #endif
-rvd_avx_int64_t mipp_avx_max_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+static inline rvd_avx_int64_t mipp_avx_max_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_max_int64");
 	exit(-1);
 }
 #if !( defined(__AVX2__) )
-rvd_avx_int32_t mipp_avx_max_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+static inline rvd_avx_int32_t mipp_avx_max_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_max_int32");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvd_avx_int16_t mipp_avx_max_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+static inline rvd_avx_int16_t mipp_avx_max_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_max_int16");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvd_avx_int8_t mipp_avx_max_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+static inline rvd_avx_int8_t mipp_avx_max_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_max_int8");
 	exit(-1);
 }
 #endif
-rvd_avx_uint64_t mipp_avx_max_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
+static inline rvd_avx_uint64_t mipp_avx_max_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_max_uint64");
 	exit(-1);
 }
 #if !( defined(__AVX2__) )
-rvd_avx_uint32_t mipp_avx_max_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
+static inline rvd_avx_uint32_t mipp_avx_max_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_max_uint32");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvd_avx_uint16_t mipp_avx_max_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+static inline rvd_avx_uint16_t mipp_avx_max_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_max_uint16");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvd_avx_uint8_t mipp_avx_max_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+static inline rvd_avx_uint8_t mipp_avx_max_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_max_uint8");
 	exit(-1);
 }
 #endif
 #if !( defined(__FMA__) ) && !( !( defined(__FMA__) ) )
-rvd_avx_float64_t mipp_avx_fmadd_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1, const rvd_avx_float64_t r2) {
+static inline rvd_avx_float64_t mipp_avx_fmadd_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1, const rvd_avx_float64_t r2) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_fmadd_float64");
 	exit(-1);
 }
 #endif
 #if !( defined(__FMA__) ) && !( !( defined(__FMA__) ) )
-rvd_avx_float32_t mipp_avx_fmadd_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1, const rvd_avx_float32_t r2) {
+static inline rvd_avx_float32_t mipp_avx_fmadd_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1, const rvd_avx_float32_t r2) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_fmadd_float32");
 	exit(-1);
 }
 #endif
+static inline rvd_avx_int32_t mipp_avx_fmadd_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1, const rvd_avx_int32_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_fmadd_int32");
+	exit(-1);
+}
 #if !( defined(__FMA__) ) && !( !( defined(__FMA__) ) )
-rvd_avx_float64_t mipp_avx_fmsub_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1, const rvd_avx_float64_t r2) {
+static inline rvd_avx_float64_t mipp_avx_fmsub_float64(const rvd_avx_float64_t r0, const rvd_avx_float64_t r1, const rvd_avx_float64_t r2) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_fmsub_float64");
 	exit(-1);
 }
 #endif
 #if !( defined(__FMA__) ) && !( !( defined(__FMA__) ) )
-rvd_avx_float32_t mipp_avx_fmsub_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1, const rvd_avx_float32_t r2) {
+static inline rvd_avx_float32_t mipp_avx_fmsub_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1, const rvd_avx_float32_t r2) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_fmsub_float32");
 	exit(-1);
 }
 #endif
+static inline rvd_avx_int32_t mipp_avx_fmsub_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1, const rvd_avx_int32_t r2) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_fmsub_int32");
+	exit(-1);
+}
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvd_avx_int64_t mipp_avx_andb_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+static inline rvd_avx_int64_t mipp_avx_andb_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andb_int64");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvd_avx_int32_t mipp_avx_andb_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+static inline rvd_avx_int32_t mipp_avx_andb_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andb_int32");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvd_avx_int16_t mipp_avx_andb_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+static inline rvd_avx_int16_t mipp_avx_andb_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andb_int16");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvd_avx_int8_t mipp_avx_andb_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+static inline rvd_avx_int8_t mipp_avx_andb_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andb_int8");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvd_avx_uint64_t mipp_avx_andb_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
+static inline rvd_avx_uint64_t mipp_avx_andb_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andb_uint64");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvd_avx_uint32_t mipp_avx_andb_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
+static inline rvd_avx_uint32_t mipp_avx_andb_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andb_uint32");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvd_avx_uint16_t mipp_avx_andb_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+static inline rvd_avx_uint16_t mipp_avx_andb_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andb_uint16");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvd_avx_uint8_t mipp_avx_andb_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+static inline rvd_avx_uint8_t mipp_avx_andb_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andb_uint8");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvm_avx_float64_t mipp_avx_andb_k_float64(const rvm_avx_float64_t m0, const rvm_avx_float64_t m1) {
+static inline rvm_avx_float64_t mipp_avx_andb_k_float64(const rvm_avx_float64_t m0, const rvm_avx_float64_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andb_k_float64");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvm_avx_float32_t mipp_avx_andb_k_float32(const rvm_avx_float32_t m0, const rvm_avx_float32_t m1) {
+static inline rvm_avx_float32_t mipp_avx_andb_k_float32(const rvm_avx_float32_t m0, const rvm_avx_float32_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andb_k_float32");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvm_avx_int64_t mipp_avx_andb_k_int64(const rvm_avx_int64_t m0, const rvm_avx_int64_t m1) {
+static inline rvm_avx_int64_t mipp_avx_andb_k_int64(const rvm_avx_int64_t m0, const rvm_avx_int64_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andb_k_int64");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvm_avx_int32_t mipp_avx_andb_k_int32(const rvm_avx_int32_t m0, const rvm_avx_int32_t m1) {
+static inline rvm_avx_int32_t mipp_avx_andb_k_int32(const rvm_avx_int32_t m0, const rvm_avx_int32_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andb_k_int32");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvm_avx_int16_t mipp_avx_andb_k_int16(const rvm_avx_int16_t m0, const rvm_avx_int16_t m1) {
+static inline rvm_avx_int16_t mipp_avx_andb_k_int16(const rvm_avx_int16_t m0, const rvm_avx_int16_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andb_k_int16");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvm_avx_int8_t mipp_avx_andb_k_int8(const rvm_avx_int8_t m0, const rvm_avx_int8_t m1) {
+static inline rvm_avx_int8_t mipp_avx_andb_k_int8(const rvm_avx_int8_t m0, const rvm_avx_int8_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andb_k_int8");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvm_avx_uint64_t mipp_avx_andb_k_uint64(const rvm_avx_uint64_t m0, const rvm_avx_uint64_t m1) {
+static inline rvm_avx_uint64_t mipp_avx_andb_k_uint64(const rvm_avx_uint64_t m0, const rvm_avx_uint64_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andb_k_uint64");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvm_avx_uint32_t mipp_avx_andb_k_uint32(const rvm_avx_uint32_t m0, const rvm_avx_uint32_t m1) {
+static inline rvm_avx_uint32_t mipp_avx_andb_k_uint32(const rvm_avx_uint32_t m0, const rvm_avx_uint32_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andb_k_uint32");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvm_avx_uint16_t mipp_avx_andb_k_uint16(const rvm_avx_uint16_t m0, const rvm_avx_uint16_t m1) {
+static inline rvm_avx_uint16_t mipp_avx_andb_k_uint16(const rvm_avx_uint16_t m0, const rvm_avx_uint16_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andb_k_uint16");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvm_avx_uint8_t mipp_avx_andb_k_uint8(const rvm_avx_uint8_t m0, const rvm_avx_uint8_t m1) {
+static inline rvm_avx_uint8_t mipp_avx_andb_k_uint8(const rvm_avx_uint8_t m0, const rvm_avx_uint8_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andb_k_uint8");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvd_avx_int64_t mipp_avx_andnb_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+static inline rvd_avx_int64_t mipp_avx_andnb_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andnb_int64");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvd_avx_int32_t mipp_avx_andnb_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+static inline rvd_avx_int32_t mipp_avx_andnb_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andnb_int32");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvd_avx_int16_t mipp_avx_andnb_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+static inline rvd_avx_int16_t mipp_avx_andnb_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andnb_int16");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvd_avx_int8_t mipp_avx_andnb_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+static inline rvd_avx_int8_t mipp_avx_andnb_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andnb_int8");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvd_avx_uint64_t mipp_avx_andnb_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
+static inline rvd_avx_uint64_t mipp_avx_andnb_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andnb_uint64");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvd_avx_uint32_t mipp_avx_andnb_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
+static inline rvd_avx_uint32_t mipp_avx_andnb_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andnb_uint32");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvd_avx_uint16_t mipp_avx_andnb_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+static inline rvd_avx_uint16_t mipp_avx_andnb_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andnb_uint16");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvd_avx_uint8_t mipp_avx_andnb_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+static inline rvd_avx_uint8_t mipp_avx_andnb_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andnb_uint8");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvm_avx_float64_t mipp_avx_andnb_k_float64(const rvm_avx_float64_t m0, const rvm_avx_float64_t m1) {
+static inline rvm_avx_float64_t mipp_avx_andnb_k_float64(const rvm_avx_float64_t m0, const rvm_avx_float64_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andnb_k_float64");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvm_avx_float32_t mipp_avx_andnb_k_float32(const rvm_avx_float32_t m0, const rvm_avx_float32_t m1) {
+static inline rvm_avx_float32_t mipp_avx_andnb_k_float32(const rvm_avx_float32_t m0, const rvm_avx_float32_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andnb_k_float32");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvm_avx_int64_t mipp_avx_andnb_k_int64(const rvm_avx_int64_t m0, const rvm_avx_int64_t m1) {
+static inline rvm_avx_int64_t mipp_avx_andnb_k_int64(const rvm_avx_int64_t m0, const rvm_avx_int64_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andnb_k_int64");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvm_avx_int32_t mipp_avx_andnb_k_int32(const rvm_avx_int32_t m0, const rvm_avx_int32_t m1) {
+static inline rvm_avx_int32_t mipp_avx_andnb_k_int32(const rvm_avx_int32_t m0, const rvm_avx_int32_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andnb_k_int32");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvm_avx_int16_t mipp_avx_andnb_k_int16(const rvm_avx_int16_t m0, const rvm_avx_int16_t m1) {
+static inline rvm_avx_int16_t mipp_avx_andnb_k_int16(const rvm_avx_int16_t m0, const rvm_avx_int16_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andnb_k_int16");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvm_avx_int8_t mipp_avx_andnb_k_int8(const rvm_avx_int8_t m0, const rvm_avx_int8_t m1) {
+static inline rvm_avx_int8_t mipp_avx_andnb_k_int8(const rvm_avx_int8_t m0, const rvm_avx_int8_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andnb_k_int8");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvm_avx_uint64_t mipp_avx_andnb_k_uint64(const rvm_avx_uint64_t m0, const rvm_avx_uint64_t m1) {
+static inline rvm_avx_uint64_t mipp_avx_andnb_k_uint64(const rvm_avx_uint64_t m0, const rvm_avx_uint64_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andnb_k_uint64");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvm_avx_uint32_t mipp_avx_andnb_k_uint32(const rvm_avx_uint32_t m0, const rvm_avx_uint32_t m1) {
+static inline rvm_avx_uint32_t mipp_avx_andnb_k_uint32(const rvm_avx_uint32_t m0, const rvm_avx_uint32_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andnb_k_uint32");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvm_avx_uint16_t mipp_avx_andnb_k_uint16(const rvm_avx_uint16_t m0, const rvm_avx_uint16_t m1) {
+static inline rvm_avx_uint16_t mipp_avx_andnb_k_uint16(const rvm_avx_uint16_t m0, const rvm_avx_uint16_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andnb_k_uint16");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvm_avx_uint8_t mipp_avx_andnb_k_uint8(const rvm_avx_uint8_t m0, const rvm_avx_uint8_t m1) {
+static inline rvm_avx_uint8_t mipp_avx_andnb_k_uint8(const rvm_avx_uint8_t m0, const rvm_avx_uint8_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_andnb_k_uint8");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvd_avx_int64_t mipp_avx_orb_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+static inline rvd_avx_int64_t mipp_avx_orb_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_orb_int64");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvd_avx_int32_t mipp_avx_orb_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+static inline rvd_avx_int32_t mipp_avx_orb_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_orb_int32");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvd_avx_int16_t mipp_avx_orb_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+static inline rvd_avx_int16_t mipp_avx_orb_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_orb_int16");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvd_avx_int8_t mipp_avx_orb_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+static inline rvd_avx_int8_t mipp_avx_orb_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_orb_int8");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvd_avx_uint64_t mipp_avx_orb_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
+static inline rvd_avx_uint64_t mipp_avx_orb_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_orb_uint64");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvd_avx_uint32_t mipp_avx_orb_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
+static inline rvd_avx_uint32_t mipp_avx_orb_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_orb_uint32");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvd_avx_uint16_t mipp_avx_orb_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+static inline rvd_avx_uint16_t mipp_avx_orb_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_orb_uint16");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvd_avx_uint8_t mipp_avx_orb_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+static inline rvd_avx_uint8_t mipp_avx_orb_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_orb_uint8");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvm_avx_float64_t mipp_avx_orb_k_float64(const rvm_avx_float64_t m0, const rvm_avx_float64_t m1) {
+static inline rvm_avx_float64_t mipp_avx_orb_k_float64(const rvm_avx_float64_t m0, const rvm_avx_float64_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_orb_k_float64");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvm_avx_float32_t mipp_avx_orb_k_float32(const rvm_avx_float32_t m0, const rvm_avx_float32_t m1) {
+static inline rvm_avx_float32_t mipp_avx_orb_k_float32(const rvm_avx_float32_t m0, const rvm_avx_float32_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_orb_k_float32");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvm_avx_int64_t mipp_avx_orb_k_int64(const rvm_avx_int64_t m0, const rvm_avx_int64_t m1) {
+static inline rvm_avx_int64_t mipp_avx_orb_k_int64(const rvm_avx_int64_t m0, const rvm_avx_int64_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_orb_k_int64");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvm_avx_int32_t mipp_avx_orb_k_int32(const rvm_avx_int32_t m0, const rvm_avx_int32_t m1) {
+static inline rvm_avx_int32_t mipp_avx_orb_k_int32(const rvm_avx_int32_t m0, const rvm_avx_int32_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_orb_k_int32");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvm_avx_int16_t mipp_avx_orb_k_int16(const rvm_avx_int16_t m0, const rvm_avx_int16_t m1) {
+static inline rvm_avx_int16_t mipp_avx_orb_k_int16(const rvm_avx_int16_t m0, const rvm_avx_int16_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_orb_k_int16");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvm_avx_int8_t mipp_avx_orb_k_int8(const rvm_avx_int8_t m0, const rvm_avx_int8_t m1) {
+static inline rvm_avx_int8_t mipp_avx_orb_k_int8(const rvm_avx_int8_t m0, const rvm_avx_int8_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_orb_k_int8");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvm_avx_uint64_t mipp_avx_orb_k_uint64(const rvm_avx_uint64_t m0, const rvm_avx_uint64_t m1) {
+static inline rvm_avx_uint64_t mipp_avx_orb_k_uint64(const rvm_avx_uint64_t m0, const rvm_avx_uint64_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_orb_k_uint64");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvm_avx_uint32_t mipp_avx_orb_k_uint32(const rvm_avx_uint32_t m0, const rvm_avx_uint32_t m1) {
+static inline rvm_avx_uint32_t mipp_avx_orb_k_uint32(const rvm_avx_uint32_t m0, const rvm_avx_uint32_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_orb_k_uint32");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvm_avx_uint16_t mipp_avx_orb_k_uint16(const rvm_avx_uint16_t m0, const rvm_avx_uint16_t m1) {
+static inline rvm_avx_uint16_t mipp_avx_orb_k_uint16(const rvm_avx_uint16_t m0, const rvm_avx_uint16_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_orb_k_uint16");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvm_avx_uint8_t mipp_avx_orb_k_uint8(const rvm_avx_uint8_t m0, const rvm_avx_uint8_t m1) {
+static inline rvm_avx_uint8_t mipp_avx_orb_k_uint8(const rvm_avx_uint8_t m0, const rvm_avx_uint8_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_orb_k_uint8");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvd_avx_int64_t mipp_avx_xorb_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+static inline rvd_avx_int64_t mipp_avx_xorb_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_xorb_int64");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvd_avx_int32_t mipp_avx_xorb_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+static inline rvd_avx_int32_t mipp_avx_xorb_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_xorb_int32");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvd_avx_int16_t mipp_avx_xorb_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+static inline rvd_avx_int16_t mipp_avx_xorb_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_xorb_int16");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvd_avx_int8_t mipp_avx_xorb_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+static inline rvd_avx_int8_t mipp_avx_xorb_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_xorb_int8");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvd_avx_uint64_t mipp_avx_xorb_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
+static inline rvd_avx_uint64_t mipp_avx_xorb_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_xorb_uint64");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvd_avx_uint32_t mipp_avx_xorb_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
+static inline rvd_avx_uint32_t mipp_avx_xorb_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_xorb_uint32");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvd_avx_uint16_t mipp_avx_xorb_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+static inline rvd_avx_uint16_t mipp_avx_xorb_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_xorb_uint16");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvd_avx_uint8_t mipp_avx_xorb_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+static inline rvd_avx_uint8_t mipp_avx_xorb_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_xorb_uint8");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvm_avx_float64_t mipp_avx_xorb_k_float64(const rvm_avx_float64_t m0, const rvm_avx_float64_t m1) {
+static inline rvm_avx_float64_t mipp_avx_xorb_k_float64(const rvm_avx_float64_t m0, const rvm_avx_float64_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_xorb_k_float64");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvm_avx_float32_t mipp_avx_xorb_k_float32(const rvm_avx_float32_t m0, const rvm_avx_float32_t m1) {
+static inline rvm_avx_float32_t mipp_avx_xorb_k_float32(const rvm_avx_float32_t m0, const rvm_avx_float32_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_xorb_k_float32");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvm_avx_int64_t mipp_avx_xorb_k_int64(const rvm_avx_int64_t m0, const rvm_avx_int64_t m1) {
+static inline rvm_avx_int64_t mipp_avx_xorb_k_int64(const rvm_avx_int64_t m0, const rvm_avx_int64_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_xorb_k_int64");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvm_avx_int32_t mipp_avx_xorb_k_int32(const rvm_avx_int32_t m0, const rvm_avx_int32_t m1) {
+static inline rvm_avx_int32_t mipp_avx_xorb_k_int32(const rvm_avx_int32_t m0, const rvm_avx_int32_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_xorb_k_int32");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvm_avx_int16_t mipp_avx_xorb_k_int16(const rvm_avx_int16_t m0, const rvm_avx_int16_t m1) {
+static inline rvm_avx_int16_t mipp_avx_xorb_k_int16(const rvm_avx_int16_t m0, const rvm_avx_int16_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_xorb_k_int16");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvm_avx_int8_t mipp_avx_xorb_k_int8(const rvm_avx_int8_t m0, const rvm_avx_int8_t m1) {
+static inline rvm_avx_int8_t mipp_avx_xorb_k_int8(const rvm_avx_int8_t m0, const rvm_avx_int8_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_xorb_k_int8");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvm_avx_uint64_t mipp_avx_xorb_k_uint64(const rvm_avx_uint64_t m0, const rvm_avx_uint64_t m1) {
+static inline rvm_avx_uint64_t mipp_avx_xorb_k_uint64(const rvm_avx_uint64_t m0, const rvm_avx_uint64_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_xorb_k_uint64");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvm_avx_uint32_t mipp_avx_xorb_k_uint32(const rvm_avx_uint32_t m0, const rvm_avx_uint32_t m1) {
+static inline rvm_avx_uint32_t mipp_avx_xorb_k_uint32(const rvm_avx_uint32_t m0, const rvm_avx_uint32_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_xorb_k_uint32");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvm_avx_uint16_t mipp_avx_xorb_k_uint16(const rvm_avx_uint16_t m0, const rvm_avx_uint16_t m1) {
+static inline rvm_avx_uint16_t mipp_avx_xorb_k_uint16(const rvm_avx_uint16_t m0, const rvm_avx_uint16_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_xorb_k_uint16");
 	exit(-1);
 }
 #endif
 #if !( !defined(__AVX2__) ) && !( defined(__AVX2__) )
-rvm_avx_uint8_t mipp_avx_xorb_k_uint8(const rvm_avx_uint8_t m0, const rvm_avx_uint8_t m1) {
+static inline rvm_avx_uint8_t mipp_avx_xorb_k_uint8(const rvm_avx_uint8_t m0, const rvm_avx_uint8_t m1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_xorb_k_uint8");
 	exit(-1);
 }
 #endif
-#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
-rvd_avx_int64_t mipp_avx_msb_int64(const rvd_avx_int64_t r0) {
+#if !( ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) )
+static inline rvd_avx_int64_t mipp_avx_msb_int64(const rvd_avx_int64_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_msb_int64");
 	exit(-1);
 }
 #endif
-#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
-rvd_avx_int32_t mipp_avx_msb_int32(const rvd_avx_int32_t r0) {
+#if !( ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) )
+static inline rvd_avx_int32_t mipp_avx_msb_int32(const rvd_avx_int32_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_msb_int32");
 	exit(-1);
 }
 #endif
-#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
-rvd_avx_int16_t mipp_avx_msb_int16(const rvd_avx_int16_t r0) {
+#if !( ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) )
+static inline rvd_avx_int16_t mipp_avx_msb_int16(const rvd_avx_int16_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_msb_int16");
 	exit(-1);
 }
 #endif
-#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
-rvd_avx_int8_t mipp_avx_msb_int8(const rvd_avx_int8_t r0) {
+#if !( ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) )
+static inline rvd_avx_int8_t mipp_avx_msb_int8(const rvd_avx_int8_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_msb_int8");
 	exit(-1);
 }
 #endif
-#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
-rvd_avx_uint64_t mipp_avx_msb_uint64(const rvd_avx_uint64_t r0) {
+#if !( ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) )
+static inline rvd_avx_uint64_t mipp_avx_msb_uint64(const rvd_avx_uint64_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_msb_uint64");
 	exit(-1);
 }
 #endif
-#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
-rvd_avx_uint32_t mipp_avx_msb_uint32(const rvd_avx_uint32_t r0) {
+#if !( ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) )
+static inline rvd_avx_uint32_t mipp_avx_msb_uint32(const rvd_avx_uint32_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_msb_uint32");
 	exit(-1);
 }
 #endif
-#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
-rvd_avx_uint16_t mipp_avx_msb_uint16(const rvd_avx_uint16_t r0) {
+#if !( ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) )
+static inline rvd_avx_uint16_t mipp_avx_msb_uint16(const rvd_avx_uint16_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_msb_uint16");
 	exit(-1);
 }
 #endif
-#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
-rvd_avx_uint8_t mipp_avx_msb_uint8(const rvd_avx_uint8_t r0) {
+#if !( ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) )
+static inline rvd_avx_uint8_t mipp_avx_msb_uint8(const rvd_avx_uint8_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_msb_uint8");
 	exit(-1);
 }
 #endif
-#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
-rvd_avx_int64_t mipp_avx_notb_int64(const rvd_avx_int64_t r0) {
+#if !( ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) )
+static inline rvd_avx_int64_t mipp_avx_notb_int64(const rvd_avx_int64_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_notb_int64");
 	exit(-1);
 }
 #endif
-#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
-rvd_avx_int32_t mipp_avx_notb_int32(const rvd_avx_int32_t r0) {
+#if !( ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) )
+static inline rvd_avx_int32_t mipp_avx_notb_int32(const rvd_avx_int32_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_notb_int32");
 	exit(-1);
 }
 #endif
-#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
-rvd_avx_int16_t mipp_avx_notb_int16(const rvd_avx_int16_t r0) {
+#if !( ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) )
+static inline rvd_avx_int16_t mipp_avx_notb_int16(const rvd_avx_int16_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_notb_int16");
 	exit(-1);
 }
 #endif
-#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
-rvd_avx_int8_t mipp_avx_notb_int8(const rvd_avx_int8_t r0) {
+#if !( ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) )
+static inline rvd_avx_int8_t mipp_avx_notb_int8(const rvd_avx_int8_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_notb_int8");
 	exit(-1);
 }
 #endif
-#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
-rvd_avx_uint64_t mipp_avx_notb_uint64(const rvd_avx_uint64_t r0) {
+#if !( ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) )
+static inline rvd_avx_uint64_t mipp_avx_notb_uint64(const rvd_avx_uint64_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_notb_uint64");
 	exit(-1);
 }
 #endif
-#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
-rvd_avx_uint32_t mipp_avx_notb_uint32(const rvd_avx_uint32_t r0) {
+#if !( ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) )
+static inline rvd_avx_uint32_t mipp_avx_notb_uint32(const rvd_avx_uint32_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_notb_uint32");
 	exit(-1);
 }
 #endif
-#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
-rvd_avx_uint16_t mipp_avx_notb_uint16(const rvd_avx_uint16_t r0) {
+#if !( ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) )
+static inline rvd_avx_uint16_t mipp_avx_notb_uint16(const rvd_avx_uint16_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_notb_uint16");
 	exit(-1);
 }
 #endif
-#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
-rvd_avx_uint8_t mipp_avx_notb_uint8(const rvd_avx_uint8_t r0) {
+#if !( ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) )
+static inline rvd_avx_uint8_t mipp_avx_notb_uint8(const rvd_avx_uint8_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_notb_uint8");
 	exit(-1);
 }
 #endif
-#if !( ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) ) )) )
-rvm_avx_float64_t mipp_avx_notb_k_float64(const rvm_avx_float64_t m0) {
+#if !( defined(__AVX2__) && defined(__AVX2__) )
+static inline rvm_avx_float64_t mipp_avx_notb_k_float64(const rvm_avx_float64_t m0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_notb_k_float64");
 	exit(-1);
 }
 #endif
-#if !( ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) ) )) )
-rvm_avx_float32_t mipp_avx_notb_k_float32(const rvm_avx_float32_t m0) {
+#if !( defined(__AVX2__) && defined(__AVX2__) )
+static inline rvm_avx_float32_t mipp_avx_notb_k_float32(const rvm_avx_float32_t m0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_notb_k_float32");
 	exit(-1);
 }
 #endif
-#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
-rvm_avx_int64_t mipp_avx_notb_k_int64(const rvm_avx_int64_t m0) {
+#if !( ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) )
+static inline rvm_avx_int64_t mipp_avx_notb_k_int64(const rvm_avx_int64_t m0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_notb_k_int64");
 	exit(-1);
 }
 #endif
-#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
-rvm_avx_int32_t mipp_avx_notb_k_int32(const rvm_avx_int32_t m0) {
+#if !( ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) )
+static inline rvm_avx_int32_t mipp_avx_notb_k_int32(const rvm_avx_int32_t m0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_notb_k_int32");
 	exit(-1);
 }
 #endif
-#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
-rvm_avx_int16_t mipp_avx_notb_k_int16(const rvm_avx_int16_t m0) {
+#if !( ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) )
+static inline rvm_avx_int16_t mipp_avx_notb_k_int16(const rvm_avx_int16_t m0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_notb_k_int16");
 	exit(-1);
 }
 #endif
-#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
-rvm_avx_int8_t mipp_avx_notb_k_int8(const rvm_avx_int8_t m0) {
+#if !( ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) )
+static inline rvm_avx_int8_t mipp_avx_notb_k_int8(const rvm_avx_int8_t m0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_notb_k_int8");
 	exit(-1);
 }
 #endif
-#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
-rvm_avx_uint64_t mipp_avx_notb_k_uint64(const rvm_avx_uint64_t m0) {
+#if !( ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) )
+static inline rvm_avx_uint64_t mipp_avx_notb_k_uint64(const rvm_avx_uint64_t m0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_notb_k_uint64");
 	exit(-1);
 }
 #endif
-#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
-rvm_avx_uint32_t mipp_avx_notb_k_uint32(const rvm_avx_uint32_t m0) {
+#if !( ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) )
+static inline rvm_avx_uint32_t mipp_avx_notb_k_uint32(const rvm_avx_uint32_t m0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_notb_k_uint32");
 	exit(-1);
 }
 #endif
-#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
-rvm_avx_uint16_t mipp_avx_notb_k_uint16(const rvm_avx_uint16_t m0) {
+#if !( ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) )
+static inline rvm_avx_uint16_t mipp_avx_notb_k_uint16(const rvm_avx_uint16_t m0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_notb_k_uint16");
 	exit(-1);
 }
 #endif
-#if !( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
-rvm_avx_uint8_t mipp_avx_notb_k_uint8(const rvm_avx_uint8_t m0) {
+#if !( ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) )
+static inline rvm_avx_uint8_t mipp_avx_notb_k_uint8(const rvm_avx_uint8_t m0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_notb_k_uint8");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) )
-rvm_avx_int64_t mipp_avx_cmpeq_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+static inline rvm_avx_int64_t mipp_avx_cmpeq_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpeq_int64");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) )
-rvm_avx_int32_t mipp_avx_cmpeq_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+static inline rvm_avx_int32_t mipp_avx_cmpeq_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpeq_int32");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvm_avx_int16_t mipp_avx_cmpeq_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+static inline rvm_avx_int16_t mipp_avx_cmpeq_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpeq_int16");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvm_avx_int8_t mipp_avx_cmpeq_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+static inline rvm_avx_int8_t mipp_avx_cmpeq_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpeq_int8");
 	exit(-1);
 }
 #endif
-#if !( ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) ) )) )
-rvm_avx_uint16_t mipp_avx_cmpeq_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+#if !( defined(__AVX2__) && defined(__AVX2__) )
+static inline rvm_avx_uint16_t mipp_avx_cmpeq_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpeq_uint16");
 	exit(-1);
 }
 #endif
-#if !( ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) ) )) )
-rvm_avx_uint8_t mipp_avx_cmpeq_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+#if !( defined(__AVX2__) && defined(__AVX2__) )
+static inline rvm_avx_uint8_t mipp_avx_cmpeq_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpeq_uint8");
 	exit(-1);
 }
 #endif
-#if !( ( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && (( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) )) )
-rvm_avx_int64_t mipp_avx_cmpneq_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+#if !( ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( defined(__AVX2__) || !( defined(__AVX2__) ) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( defined(__AVX2__) || !( defined(__AVX2__) ) ) )
+static inline rvm_avx_int64_t mipp_avx_cmpneq_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpneq_int64");
 	exit(-1);
 }
 #endif
-#if !( ( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) ) && (( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && ( ( ( defined(__AVX2__) ) || ( !( defined(__AVX2__) ) ) ) )) )
-rvm_avx_int32_t mipp_avx_cmpneq_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+#if !( ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( defined(__AVX2__) || !( defined(__AVX2__) ) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( defined(__AVX2__) || !( defined(__AVX2__) ) ) )
+static inline rvm_avx_int32_t mipp_avx_cmpneq_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpneq_int32");
 	exit(-1);
 }
 #endif
-#if !( ( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && ( ( ( defined(__AVX2__) ) ) ) && (( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && ( ( ( defined(__AVX2__) ) ) )) )
-rvm_avx_int16_t mipp_avx_cmpneq_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+#if !( ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && defined(__AVX2__) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && defined(__AVX2__) )
+static inline rvm_avx_int16_t mipp_avx_cmpneq_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpneq_int16");
 	exit(-1);
 }
 #endif
-#if !( ( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && ( ( ( defined(__AVX2__) ) ) ) && (( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && ( ( ( defined(__AVX2__) ) ) )) )
-rvm_avx_int8_t mipp_avx_cmpneq_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+#if !( ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && defined(__AVX2__) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && defined(__AVX2__) )
+static inline rvm_avx_int8_t mipp_avx_cmpneq_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpneq_int8");
 	exit(-1);
 }
 #endif
-#if !( ( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) )
-rvm_avx_uint64_t mipp_avx_cmpneq_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
+#if !( ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) )
+static inline rvm_avx_uint64_t mipp_avx_cmpneq_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpneq_uint64");
 	exit(-1);
 }
 #endif
-#if !( ( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) )) )
-rvm_avx_uint32_t mipp_avx_cmpneq_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
+#if !( ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) )
+static inline rvm_avx_uint32_t mipp_avx_cmpneq_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpneq_uint32");
 	exit(-1);
 }
 #endif
-#if !( ( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && ( ( ( ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && ( ( ( ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) ) )) ) ) )) )
-rvm_avx_uint16_t mipp_avx_cmpneq_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+#if !( ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && defined(__AVX2__) && defined(__AVX2__) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && defined(__AVX2__) && defined(__AVX2__) )
+static inline rvm_avx_uint16_t mipp_avx_cmpneq_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpneq_uint16");
 	exit(-1);
 }
 #endif
-#if !( ( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && ( ( ( ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) ) )) ) ) ) && (( ( ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) ) ) ) && ( ( ( ( ( ( defined(__AVX2__) ) ) ) && (( ( ( defined(__AVX2__) ) ) )) ) ) )) )
-rvm_avx_uint8_t mipp_avx_cmpneq_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+#if !( ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && defined(__AVX2__) && defined(__AVX2__) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && defined(__AVX2__) && defined(__AVX2__) )
+static inline rvm_avx_uint8_t mipp_avx_cmpneq_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpneq_uint8");
 	exit(-1);
 }
 #endif
-rvm_avx_int64_t mipp_avx_cmplt_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+static inline rvm_avx_int64_t mipp_avx_cmplt_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmplt_int64");
 	exit(-1);
 }
-rvm_avx_int32_t mipp_avx_cmplt_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+static inline rvm_avx_int32_t mipp_avx_cmplt_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmplt_int32");
 	exit(-1);
 }
-rvm_avx_int16_t mipp_avx_cmplt_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+static inline rvm_avx_int16_t mipp_avx_cmplt_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmplt_int16");
 	exit(-1);
 }
-rvm_avx_int8_t mipp_avx_cmplt_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+static inline rvm_avx_int8_t mipp_avx_cmplt_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmplt_int8");
 	exit(-1);
 }
-rvm_avx_uint64_t mipp_avx_cmplt_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
+static inline rvm_avx_uint64_t mipp_avx_cmplt_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmplt_uint64");
 	exit(-1);
 }
-rvm_avx_uint32_t mipp_avx_cmplt_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
+static inline rvm_avx_uint32_t mipp_avx_cmplt_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmplt_uint32");
 	exit(-1);
 }
-rvm_avx_uint16_t mipp_avx_cmplt_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+static inline rvm_avx_uint16_t mipp_avx_cmplt_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmplt_uint16");
 	exit(-1);
 }
-rvm_avx_uint8_t mipp_avx_cmplt_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+static inline rvm_avx_uint8_t mipp_avx_cmplt_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmplt_uint8");
 	exit(-1);
 }
-rvm_avx_int64_t mipp_avx_cmple_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+static inline rvm_avx_int64_t mipp_avx_cmple_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmple_int64");
 	exit(-1);
 }
-rvm_avx_int32_t mipp_avx_cmple_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+static inline rvm_avx_int32_t mipp_avx_cmple_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmple_int32");
 	exit(-1);
 }
-rvm_avx_int16_t mipp_avx_cmple_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+static inline rvm_avx_int16_t mipp_avx_cmple_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmple_int16");
 	exit(-1);
 }
-rvm_avx_int8_t mipp_avx_cmple_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+static inline rvm_avx_int8_t mipp_avx_cmple_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmple_int8");
 	exit(-1);
 }
-rvm_avx_uint64_t mipp_avx_cmple_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
+static inline rvm_avx_uint64_t mipp_avx_cmple_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmple_uint64");
 	exit(-1);
 }
-rvm_avx_uint32_t mipp_avx_cmple_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
+static inline rvm_avx_uint32_t mipp_avx_cmple_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmple_uint32");
 	exit(-1);
 }
-rvm_avx_uint16_t mipp_avx_cmple_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+static inline rvm_avx_uint16_t mipp_avx_cmple_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmple_uint16");
 	exit(-1);
 }
-rvm_avx_uint8_t mipp_avx_cmple_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+static inline rvm_avx_uint8_t mipp_avx_cmple_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmple_uint8");
 	exit(-1);
 }
-rvm_avx_int64_t mipp_avx_cmpge_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+static inline rvm_avx_int64_t mipp_avx_cmpge_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpge_int64");
 	exit(-1);
 }
-rvm_avx_int32_t mipp_avx_cmpge_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+static inline rvm_avx_int32_t mipp_avx_cmpge_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpge_int32");
 	exit(-1);
 }
-rvm_avx_int16_t mipp_avx_cmpge_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+static inline rvm_avx_int16_t mipp_avx_cmpge_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpge_int16");
 	exit(-1);
 }
-rvm_avx_int8_t mipp_avx_cmpge_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+static inline rvm_avx_int8_t mipp_avx_cmpge_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpge_int8");
 	exit(-1);
 }
-rvm_avx_uint64_t mipp_avx_cmpge_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
+static inline rvm_avx_uint64_t mipp_avx_cmpge_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpge_uint64");
 	exit(-1);
 }
-rvm_avx_uint32_t mipp_avx_cmpge_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
+static inline rvm_avx_uint32_t mipp_avx_cmpge_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpge_uint32");
 	exit(-1);
 }
-rvm_avx_uint16_t mipp_avx_cmpge_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+static inline rvm_avx_uint16_t mipp_avx_cmpge_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpge_uint16");
 	exit(-1);
 }
-rvm_avx_uint8_t mipp_avx_cmpge_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+static inline rvm_avx_uint8_t mipp_avx_cmpge_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpge_uint8");
 	exit(-1);
 }
 #if !( defined(__AVX2__) )
-rvm_avx_int64_t mipp_avx_cmpgt_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+static inline rvm_avx_int64_t mipp_avx_cmpgt_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpgt_int64");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvm_avx_int32_t mipp_avx_cmpgt_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+static inline rvm_avx_int32_t mipp_avx_cmpgt_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpgt_int32");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvm_avx_int16_t mipp_avx_cmpgt_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+static inline rvm_avx_int16_t mipp_avx_cmpgt_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpgt_int16");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvm_avx_int8_t mipp_avx_cmpgt_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+static inline rvm_avx_int8_t mipp_avx_cmpgt_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpgt_int8");
 	exit(-1);
 }
 #endif
-rvm_avx_uint64_t mipp_avx_cmpgt_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
+static inline rvm_avx_uint64_t mipp_avx_cmpgt_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpgt_uint64");
 	exit(-1);
 }
-rvm_avx_uint32_t mipp_avx_cmpgt_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
+static inline rvm_avx_uint32_t mipp_avx_cmpgt_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpgt_uint32");
 	exit(-1);
 }
-rvm_avx_uint16_t mipp_avx_cmpgt_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+static inline rvm_avx_uint16_t mipp_avx_cmpgt_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpgt_uint16");
 	exit(-1);
 }
-rvm_avx_uint8_t mipp_avx_cmpgt_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+static inline rvm_avx_uint8_t mipp_avx_cmpgt_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_cmpgt_uint8");
 	exit(-1);
 }
-float64_t mipp_avx_round_float64(const rvd_avx_float64_t r0) {
+static inline float64_t mipp_avx_round_float64(const rvd_avx_float64_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_round_float64");
 	exit(-1);
 }
-float32_t mipp_avx_round_float32(const rvd_avx_float32_t r0) {
+static inline float32_t mipp_avx_round_float32(const rvd_avx_float32_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_round_float32");
 	exit(-1);
 }
-int64_t mipp_avx_round_int64(const rvd_avx_int64_t r0) {
+static inline int64_t mipp_avx_round_int64(const rvd_avx_int64_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_round_int64");
 	exit(-1);
 }
-int32_t mipp_avx_round_int32(const rvd_avx_int32_t r0) {
+static inline int32_t mipp_avx_round_int32(const rvd_avx_int32_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_round_int32");
 	exit(-1);
 }
-int16_t mipp_avx_round_int16(const rvd_avx_int16_t r0) {
+static inline int16_t mipp_avx_round_int16(const rvd_avx_int16_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_round_int16");
 	exit(-1);
 }
-int8_t mipp_avx_round_int8(const rvd_avx_int8_t r0) {
+static inline int8_t mipp_avx_round_int8(const rvd_avx_int8_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_round_int8");
 	exit(-1);
 }
-uint64_t mipp_avx_round_uint64(const rvd_avx_uint64_t r0) {
+static inline uint64_t mipp_avx_round_uint64(const rvd_avx_uint64_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_round_uint64");
 	exit(-1);
 }
-uint32_t mipp_avx_round_uint32(const rvd_avx_uint32_t r0) {
+static inline uint32_t mipp_avx_round_uint32(const rvd_avx_uint32_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_round_uint32");
 	exit(-1);
 }
-uint16_t mipp_avx_round_uint16(const rvd_avx_uint16_t r0) {
+static inline uint16_t mipp_avx_round_uint16(const rvd_avx_uint16_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_round_uint16");
 	exit(-1);
 }
-uint8_t mipp_avx_round_uint8(const rvd_avx_uint8_t r0) {
+static inline uint8_t mipp_avx_round_uint8(const rvd_avx_uint8_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_round_uint8");
 	exit(-1);
 }
-#if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && !( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
-rvd_avx_int64_t mipp_avx_blend_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1, const rvm_avx_int64_t m0) {
+#if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) )
+static inline rvd_avx_int64_t mipp_avx_blend_int64(const rvd_avx_int64_t r0, const rvd_avx_int64_t r1, const rvm_avx_int64_t m0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_blend_int64");
 	exit(-1);
 }
 #endif
-#if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && !( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
-rvd_avx_int32_t mipp_avx_blend_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1, const rvm_avx_int32_t m0) {
+#if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) )
+static inline rvd_avx_int32_t mipp_avx_blend_int32(const rvd_avx_int32_t r0, const rvd_avx_int32_t r1, const rvm_avx_int32_t m0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_blend_int32");
 	exit(-1);
 }
 #endif
-#if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
-rvd_avx_int16_t mipp_avx_blend_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1, const rvm_avx_int16_t m0) {
+#if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) )
+static inline rvd_avx_int16_t mipp_avx_blend_int16(const rvd_avx_int16_t r0, const rvd_avx_int16_t r1, const rvm_avx_int16_t m0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_blend_int16");
 	exit(-1);
 }
 #endif
-#if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
-rvd_avx_int8_t mipp_avx_blend_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1, const rvm_avx_int8_t m0) {
+#if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) )
+static inline rvd_avx_int8_t mipp_avx_blend_int8(const rvd_avx_int8_t r0, const rvd_avx_int8_t r1, const rvm_avx_int8_t m0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_blend_int8");
 	exit(-1);
 }
 #endif
-#if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && !( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
-rvd_avx_uint64_t mipp_avx_blend_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1, const rvm_avx_uint64_t m0) {
+#if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) )
+static inline rvd_avx_uint64_t mipp_avx_blend_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1, const rvm_avx_uint64_t m0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_blend_uint64");
 	exit(-1);
 }
 #endif
-#if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && !( !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
-rvd_avx_uint32_t mipp_avx_blend_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1, const rvm_avx_uint32_t m0) {
+#if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) )
+static inline rvd_avx_uint32_t mipp_avx_blend_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1, const rvm_avx_uint32_t m0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_blend_uint32");
 	exit(-1);
 }
 #endif
-#if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
-rvd_avx_uint16_t mipp_avx_blend_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1, const rvm_avx_uint16_t m0) {
+#if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) )
+static inline rvd_avx_uint16_t mipp_avx_blend_uint16(const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1, const rvm_avx_uint16_t m0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_blend_uint16");
 	exit(-1);
 }
 #endif
-#if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) && ( ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) ) && (( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) ) && ( ( ( !defined(__AVX2__) ) || ( defined(__AVX2__) ) ) )) )
-rvd_avx_uint8_t mipp_avx_blend_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1, const rvm_avx_uint8_t m0) {
+#if !( defined(__AVX2__) ) && !( !( defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) && ( !defined(__AVX2__) || defined(__AVX2__) ) )
+static inline rvd_avx_uint8_t mipp_avx_blend_uint8(const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1, const rvm_avx_uint8_t m0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_blend_uint8");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvd_avx_int64_t mipp_avx_hadd_int64(const rvd_avx_int64_t r0) {
+static inline rvd_avx_int64_t mipp_avx_hadd_int64(const rvd_avx_int64_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hadd_int64");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvd_avx_int32_t mipp_avx_hadd_int32(const rvd_avx_int32_t r0) {
+static inline rvd_avx_int32_t mipp_avx_hadd_int32(const rvd_avx_int32_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hadd_int32");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvd_avx_int16_t mipp_avx_hadd_int16(const rvd_avx_int16_t r0) {
+static inline rvd_avx_int16_t mipp_avx_hadd_int16(const rvd_avx_int16_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hadd_int16");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvd_avx_int8_t mipp_avx_hadd_int8(const rvd_avx_int8_t r0) {
+static inline rvd_avx_int8_t mipp_avx_hadd_int8(const rvd_avx_int8_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hadd_int8");
 	exit(-1);
 }
 #endif
-rvd_avx_uint64_t mipp_avx_hadd_uint64(const rvd_avx_uint64_t r0) {
+static inline rvd_avx_uint64_t mipp_avx_hadd_uint64(const rvd_avx_uint64_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hadd_uint64");
 	exit(-1);
 }
-rvd_avx_uint32_t mipp_avx_hadd_uint32(const rvd_avx_uint32_t r0) {
+static inline rvd_avx_uint32_t mipp_avx_hadd_uint32(const rvd_avx_uint32_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hadd_uint32");
 	exit(-1);
 }
 #if !( defined(__AVX2__) )
-rvd_avx_uint16_t mipp_avx_hadd_uint16(const rvd_avx_uint16_t r0) {
+static inline rvd_avx_uint16_t mipp_avx_hadd_uint16(const rvd_avx_uint16_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hadd_uint16");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvd_avx_uint8_t mipp_avx_hadd_uint8(const rvd_avx_uint8_t r0) {
+static inline rvd_avx_uint8_t mipp_avx_hadd_uint8(const rvd_avx_uint8_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hadd_uint8");
 	exit(-1);
 }
 #endif
-rvd_avx_int64_t mipp_avx_hmul_int64(const rvd_avx_int64_t r0) {
+static inline rvd_avx_int64_t mipp_avx_hmul_int64(const rvd_avx_int64_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmul_int64");
 	exit(-1);
 }
 #if !( defined(__AVX2__) )
-rvd_avx_int32_t mipp_avx_hmul_int32(const rvd_avx_int32_t r0) {
+static inline rvd_avx_int32_t mipp_avx_hmul_int32(const rvd_avx_int32_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmul_int32");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvd_avx_int16_t mipp_avx_hmul_int16(const rvd_avx_int16_t r0) {
+static inline rvd_avx_int16_t mipp_avx_hmul_int16(const rvd_avx_int16_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmul_int16");
 	exit(-1);
 }
 #endif
-rvd_avx_int8_t mipp_avx_hmul_int8(const rvd_avx_int8_t r0) {
+static inline rvd_avx_int8_t mipp_avx_hmul_int8(const rvd_avx_int8_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmul_int8");
 	exit(-1);
 }
-rvd_avx_uint64_t mipp_avx_hmul_uint64(const rvd_avx_uint64_t r0) {
+static inline rvd_avx_uint64_t mipp_avx_hmul_uint64(const rvd_avx_uint64_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmul_uint64");
 	exit(-1);
 }
-rvd_avx_uint32_t mipp_avx_hmul_uint32(const rvd_avx_uint32_t r0) {
+static inline rvd_avx_uint32_t mipp_avx_hmul_uint32(const rvd_avx_uint32_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmul_uint32");
 	exit(-1);
 }
-rvd_avx_uint16_t mipp_avx_hmul_uint16(const rvd_avx_uint16_t r0) {
+static inline rvd_avx_uint16_t mipp_avx_hmul_uint16(const rvd_avx_uint16_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmul_uint16");
 	exit(-1);
 }
-rvd_avx_uint8_t mipp_avx_hmul_uint8(const rvd_avx_uint8_t r0) {
+static inline rvd_avx_uint8_t mipp_avx_hmul_uint8(const rvd_avx_uint8_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmul_uint8");
 	exit(-1);
 }
-rvd_avx_int64_t mipp_avx_hmin_int64(const rvd_avx_int64_t r0) {
+static inline rvd_avx_int64_t mipp_avx_hmin_int64(const rvd_avx_int64_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmin_int64");
 	exit(-1);
 }
 #if !( defined(__AVX2__) )
-rvd_avx_int32_t mipp_avx_hmin_int32(const rvd_avx_int32_t r0) {
+static inline rvd_avx_int32_t mipp_avx_hmin_int32(const rvd_avx_int32_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmin_int32");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvd_avx_int16_t mipp_avx_hmin_int16(const rvd_avx_int16_t r0) {
+static inline rvd_avx_int16_t mipp_avx_hmin_int16(const rvd_avx_int16_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmin_int16");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvd_avx_int8_t mipp_avx_hmin_int8(const rvd_avx_int8_t r0) {
+static inline rvd_avx_int8_t mipp_avx_hmin_int8(const rvd_avx_int8_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmin_int8");
 	exit(-1);
 }
 #endif
-rvd_avx_uint64_t mipp_avx_hmin_uint64(const rvd_avx_uint64_t r0) {
+static inline rvd_avx_uint64_t mipp_avx_hmin_uint64(const rvd_avx_uint64_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmin_uint64");
 	exit(-1);
 }
 #if !( defined(__AVX2__) )
-rvd_avx_uint32_t mipp_avx_hmin_uint32(const rvd_avx_uint32_t r0) {
+static inline rvd_avx_uint32_t mipp_avx_hmin_uint32(const rvd_avx_uint32_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmin_uint32");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvd_avx_uint16_t mipp_avx_hmin_uint16(const rvd_avx_uint16_t r0) {
+static inline rvd_avx_uint16_t mipp_avx_hmin_uint16(const rvd_avx_uint16_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmin_uint16");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvd_avx_uint8_t mipp_avx_hmin_uint8(const rvd_avx_uint8_t r0) {
+static inline rvd_avx_uint8_t mipp_avx_hmin_uint8(const rvd_avx_uint8_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmin_uint8");
 	exit(-1);
 }
 #endif
-rvd_avx_int64_t mipp_avx_hmax_int64(const rvd_avx_int64_t r0) {
+static inline rvd_avx_int64_t mipp_avx_hmax_int64(const rvd_avx_int64_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmax_int64");
 	exit(-1);
 }
 #if !( defined(__AVX2__) )
-rvd_avx_int32_t mipp_avx_hmax_int32(const rvd_avx_int32_t r0) {
+static inline rvd_avx_int32_t mipp_avx_hmax_int32(const rvd_avx_int32_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmax_int32");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvd_avx_int16_t mipp_avx_hmax_int16(const rvd_avx_int16_t r0) {
+static inline rvd_avx_int16_t mipp_avx_hmax_int16(const rvd_avx_int16_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmax_int16");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvd_avx_int8_t mipp_avx_hmax_int8(const rvd_avx_int8_t r0) {
+static inline rvd_avx_int8_t mipp_avx_hmax_int8(const rvd_avx_int8_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmax_int8");
 	exit(-1);
 }
 #endif
-rvd_avx_uint64_t mipp_avx_hmax_uint64(const rvd_avx_uint64_t r0) {
+static inline rvd_avx_uint64_t mipp_avx_hmax_uint64(const rvd_avx_uint64_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmax_uint64");
 	exit(-1);
 }
 #if !( defined(__AVX2__) )
-rvd_avx_uint32_t mipp_avx_hmax_uint32(const rvd_avx_uint32_t r0) {
+static inline rvd_avx_uint32_t mipp_avx_hmax_uint32(const rvd_avx_uint32_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmax_uint32");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvd_avx_uint16_t mipp_avx_hmax_uint16(const rvd_avx_uint16_t r0) {
+static inline rvd_avx_uint16_t mipp_avx_hmax_uint16(const rvd_avx_uint16_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmax_uint16");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX2__) )
-rvd_avx_uint8_t mipp_avx_hmax_uint8(const rvd_avx_uint8_t r0) {
+static inline rvd_avx_uint8_t mipp_avx_hmax_uint8(const rvd_avx_uint8_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmax_uint8");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) && ( !defined(__AVX2__) || defined(__AVX2__) ) && defined(__AVX2__) && ( !defined(__AVX2__) || defined(__AVX2__) ) )
+static inline rvd_avx_int64_t mipp_avx_maskz_add_int64(const rvm_avx_int64_t m0, const rvd_avx_int64_t r0, const rvd_avx_int64_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskz_add_int64");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) && ( !defined(__AVX2__) || defined(__AVX2__) ) && defined(__AVX2__) && ( !defined(__AVX2__) || defined(__AVX2__) ) )
+static inline rvd_avx_int32_t mipp_avx_maskz_add_int32(const rvm_avx_int32_t m0, const rvd_avx_int32_t r0, const rvd_avx_int32_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskz_add_int32");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) && ( !defined(__AVX2__) || defined(__AVX2__) ) && defined(__AVX2__) && ( !defined(__AVX2__) || defined(__AVX2__) ) )
+static inline rvd_avx_int16_t mipp_avx_maskz_add_int16(const rvm_avx_int16_t m0, const rvd_avx_int16_t r0, const rvd_avx_int16_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskz_add_int16");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) && ( !defined(__AVX2__) || defined(__AVX2__) ) && defined(__AVX2__) && ( !defined(__AVX2__) || defined(__AVX2__) ) )
+static inline rvd_avx_int8_t mipp_avx_maskz_add_int8(const rvm_avx_int8_t m0, const rvd_avx_int8_t r0, const rvd_avx_int8_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskz_add_int8");
+	exit(-1);
+}
+#endif
+static inline rvd_avx_uint64_t mipp_avx_maskz_add_uint64(const rvm_avx_uint64_t m0, const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskz_add_uint64");
+	exit(-1);
+}
+static inline rvd_avx_uint32_t mipp_avx_maskz_add_uint32(const rvm_avx_uint32_t m0, const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskz_add_uint32");
+	exit(-1);
+}
+#if !( defined(__AVX2__) && ( !defined(__AVX2__) || defined(__AVX2__) ) && defined(__AVX2__) && ( !defined(__AVX2__) || defined(__AVX2__) ) )
+static inline rvd_avx_uint16_t mipp_avx_maskz_add_uint16(const rvm_avx_uint16_t m0, const rvd_avx_uint16_t r0, const rvd_avx_uint16_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskz_add_uint16");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) && ( !defined(__AVX2__) || defined(__AVX2__) ) && defined(__AVX2__) && ( !defined(__AVX2__) || defined(__AVX2__) ) )
+static inline rvd_avx_uint8_t mipp_avx_maskz_add_uint8(const rvm_avx_uint8_t m0, const rvd_avx_uint8_t r0, const rvd_avx_uint8_t r1) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_maskz_add_uint8");
 	exit(-1);
 }
 #endif

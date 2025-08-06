@@ -42,12 +42,21 @@ protos = {
 			{"type": "reg", "charac": "RO", "fixeddatatype": False}
 		]
 	},
-	"ret_reg_2args_ptr_reg": {
+	"ret_reg_2args_ptr_vindex": {
 		"ret" :
 			{"type": "reg", "charac": "WO", "fixeddatatype": False},
 		"args" : [
 			{"type": "ptr", "charac": "WO", "fixeddatatype": False},
-			{"type": "reg", "charac": "RO", "fixeddatatype": False}
+			{"type": "vindex", "charac": "RO", "fixeddatatype": False}
+		]
+	},
+	"ret_reg_3args_ptr_vindex_msk": {
+		"ret" :
+			{"type": "reg", "charac": "WO", "fixeddatatype": False},
+		"args" : [
+			{"type": "ptr", "charac": "WO", "fixeddatatype": False},
+			{"type": "vindex", "charac": "RO", "fixeddatatype": False},
+			{"type": "msk", "charac": "RO", "fixeddatatype": False}
 		]
 	},
 	"ret_reg_1arg_val": {
@@ -78,6 +87,13 @@ protos = {
 			{"type": "val", "charac": "RO", "fixeddatatype": int32}
 		]
 	},
+	"ret_msk_1arg_i32": {
+		"ret" :
+			{"type": "msk", "charac": "WO", "fixeddatatype": False},
+		"args" : [
+			{"type": "val", "charac": "RO", "fixeddatatype": int32}
+		]
+	},
 	"ret_msk_1arg_val": {
 		"ret" :
 			{"type": "msk", "charac": "WO", "fixeddatatype": False},
@@ -90,11 +106,11 @@ protos = {
 			{"type": "reg", "charac": "WO", "fixeddatatype": False},
 		"args" : []
 	},
-	"ret_msk_0arg": {
-		"ret" :
-			{"type": "msk", "charac": "WO", "fixeddatatype": False},
-		"args" : []
-	},
+    "ret_msk_0arg": {
+  	    "ret" :
+ 		    {"type": "msk", "charac": "WO", "fixeddatatype": False},
+	    "args" : []
+    },
 	"ret_reg_1arg_reg": {
 		"ret" :
 			{"type": "reg", "charac": "WO", "fixeddatatype": False},
@@ -209,6 +225,16 @@ protos = {
 			{"type": "reg", "charac": "RO", "fixeddatatype": False},
 		]
 	},
+	
+	"ret_reg_3args_1msk_2reg": {
+		"ret" :
+			{"type": "reg", "charac": "WO", "fixeddatatype": False},
+		"args" : [
+			{"type": "msk", "charac": "RO", "fixeddatatype": False},
+			{"type": "reg", "charac": "RO", "fixeddatatype": False},
+			{"type": "reg", "charac": "RO", "fixeddatatype": False},
+		]
+	},
 	"ret_i32_1arg_msk": {
 		"ret" :
 			{"type": "val", "charac": "WO", "fixeddatatype": int32},
@@ -239,6 +265,14 @@ protos = {
 			{"type": "val", "charac": "RO", "fixeddatatype": uint32},
 		]
 	},
+	"ret_val_2args_msk_val": {
+		"ret" :
+			{"type": "val", "charac": "WO", "fixeddatatype": False},
+		"args" : [
+			{"type": "msk", "charac": "RO", "fixeddatatype": False},
+			{"type": "val", "charac": "RO", "fixeddatatype": uint32},
+		]
+	},
 	"ret_val_1arg_reg": {
 		"ret" :
 			{"type": "val", "charac": "WO", "fixeddatatype": False},
@@ -253,6 +287,19 @@ protos = {
 		(for which the function is to be generated are specified, along with other parameters such as the parameters such as the "horizontal" flag
 """
 
+mipp_funcs_concepts = {
+	"all_casts": ["cast","cast_k","toreg","tomsk"],
+	"all_loads": ["load","loadu","set","set_k","set1","set0","set0_k","maskzld","gather"],
+	"all_acces": ["store","storeu","get", "getfirst","scatter","maskst"],
+	"all_arithm_op": ["add","sub","mul","div"],
+	"all_fused_arithm_op":["fmadd","fmsub"],
+	"all_order_op":["cmpeq","cmpneq","cmplt","cmpge","cmpgt"],
+	"all_maths_functions":["sqrt","rsqrt"],
+	"all_binary_op":["andb","andb_k","andnb","andnb_k","orb","orb_k","xorb","xorb_k","msb","notb","notb_k"],
+	"all_reductions":["hadd","hmul","hmin","hmax"],
+	"a_trier":["round","blend","testz","testz_2"]
+	}
+
 mipp_funcs = {
     "cast":    { "proto": protos["ret_reg_1arg_reg"            ], "datatypes": all_datatypes_cart_prod, "horizontal": False },
 	"cast_k":  { "proto": protos["ret_msk_1arg_msk"            ], "datatypes": all_datatypes_cart_prod, "horizontal": False },
@@ -265,13 +312,16 @@ mipp_funcs = {
 	"set" :    { "proto": protos["ret_reg_1arg_Nele"           ], "datatypes": all_datatypes          , "horizontal": True },
 	"set_k" :  { "proto": protos["ret_msk_1arg_Nele"           ], "datatypes": all_datatypes          , "horizontal": False },	
 	"set1":    { "proto": protos["ret_reg_1arg_val"            ], "datatypes": all_datatypes          , "horizontal": False },
+	"set1_k":  { "proto": protos["ret_msk_1arg_i32"            ], "datatypes": all_int_uint           , "horizontal": False },
 	"maskzld": { "proto": protos["ret_reg_2args_msk_ptr"       ], "datatypes": all_datatypes          , "horizontal": False },
 	"maskst":  { "proto": protos["ret_void_3args_ptr_msk_reg"  ], "datatypes": all_datatypes          , "horizontal": False },
 	"set0":    { "proto": protos["ret_reg_0arg"                ], "datatypes": all_datatypes          , "horizontal": False },
 	"set0_k":  { "proto": protos["ret_msk_0arg"                ], "datatypes": all_datatypes          , "horizontal": False },
 	"get":     { "proto": protos["ret_val_2args_reg_val"       ], "datatypes": all_datatypes          , "horizontal": True  },
+	"get_k":   { "proto": protos["ret_val_2args_msk_val"       ], "datatypes": all_datatypes          , "horizontal": True  },
 	"getfirst":{ "proto": protos["ret_val_1arg_reg"            ], "datatypes": all_datatypes          , "horizontal": True  },
-	"gather_seq":{ "proto": protos["ret_reg_2args_ptr_reg"     ], "datatypes": all_int_uint          , "horizontal": False  },
+	#"gather"  :{ "proto": protos["ret_reg_2args_ptr_vindex"    ], "datatypes": all_datatypes          , "horizontal": False  },
+	#"mask_gather":{ "proto": protos["ret_reg_3args_ptr_vindex_msk" ], "datatypes": all_datatypes          , "horizontal": False  },
 	"sqrt":    { "proto": protos["ret_reg_1arg_reg"            ], "datatypes": all_float              , "horizontal": False },
 	"rsqrt":   { "proto": protos["ret_reg_1arg_reg"            ], "datatypes": all_float              , "horizontal": False },
 	"add":     { "proto": protos["ret_reg_2args_reg"           ], "datatypes": all_datatypes          , "horizontal": False },
@@ -280,8 +330,8 @@ mipp_funcs = {
 	"div":     { "proto": protos["ret_reg_2args_reg"           ], "datatypes": all_float              , "horizontal": False },
 	"min":     { "proto": protos["ret_reg_2args_reg"           ], "datatypes": all_datatypes          , "horizontal": False },
 	"max":     { "proto": protos["ret_reg_2args_reg"           ], "datatypes": all_datatypes          , "horizontal": False },
-	"fmadd":   { "proto": protos["ret_reg_3args_reg"           ], "datatypes": all_float              , "horizontal": False },
-	"fmsub":   { "proto": protos["ret_reg_3args_reg"           ], "datatypes": all_float              , "horizontal": False },
+	"fmadd":   { "proto": protos["ret_reg_3args_reg"           ], "datatypes": all_float+[int32]      , "horizontal": False },
+	"fmsub":   { "proto": protos["ret_reg_3args_reg"           ], "datatypes": all_float+[int32]      , "horizontal": False },
 	"andb":    { "proto": protos["ret_reg_2args_reg"           ], "datatypes": all_datatypes          , "horizontal": False },
 	"andb_k":  { "proto": protos["ret_msk_2args_msk"           ], "datatypes": all_datatypes          , "horizontal": False },
 	"andnb":   { "proto": protos["ret_reg_2args_reg"           ], "datatypes": all_datatypes          , "horizontal": False },
@@ -307,4 +357,5 @@ mipp_funcs = {
 	"hmul":    { "proto": protos["ret_reg_1arg_reg"            ], "datatypes": all_datatypes          , "horizontal": True  },
 	"hmin":    { "proto": protos["ret_reg_1arg_reg"            ], "datatypes": all_datatypes          , "horizontal": True  },
 	"hmax":    { "proto": protos["ret_reg_1arg_reg"            ], "datatypes": all_datatypes          , "horizontal": True  },
+	"maskz_add":{ "proto": protos["ret_reg_3args_1msk_2reg" ], "datatypes": all_datatypes          , "horizontal": True  },
 }

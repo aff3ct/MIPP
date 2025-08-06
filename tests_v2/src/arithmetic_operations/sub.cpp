@@ -3,7 +3,7 @@
 #include <numeric>
 #include <random>
 #include <cmath>
-#include <mipp.h>
+#include <mipp_v2.h>
 #include <catch.hpp>
 
 template <typename T>
@@ -24,7 +24,7 @@ void test_reg_sub()
 
 	for (auto i = 0; i < vectorSize; i++)
 	{
-		T res = inputs1[i] + inputs2[i];
+		T res = inputs1[i] - inputs2[i];
 		REQUIRE(mipp::get(r3, i) == res);
 	}
 }
@@ -96,7 +96,7 @@ TEST_CASE("Subtraction - mipp::Reg", "[mipp::sub]")
 template <typename T>
 void test_reg_maskz_sub()
 {
-	const int vectorSize = mipp::N<T>();
+	/*const int vectorSize = mipp::N<T>();
 
 	T inputs1[vectorSize],inputs2[vectorSize];
 	std::iota(inputs1, inputs1 + vectorSize, (T)1);
@@ -114,7 +114,7 @@ void test_reg_maskz_sub()
 
 	mipp::rvd<T> r1 = mipp::load(inputs1);
 	mipp::rvd<T> r2 = mipp::load(inputs2);
-	mipp::rvm<T> m  = mipp::set_k<T>(mask);
+	mipp::rvm<T> m  = mipp::set_k<T>(mask);*/
 
 /*
 	mipp::reg r3 = mipp::maskz<T,mipp::sub<T>>(m, r1, r2);

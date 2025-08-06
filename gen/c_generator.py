@@ -6,12 +6,7 @@ import re
 from tools import *
 
 def gen_c_defines(isa, file):
-	template = """#define MIPP_MACRO_{{ type_category_upper }}{{ datatype.n_bits }}(MACRO, ...) MACRO(__VA_ARGS__, {{ datatype.n_bits }}, {{ datatype.category }}, {{ isa_datatype.data_ext }}, {{ isa_datatype.data_ext_logi }}, {{ isa_datatype.to_ptr }})"""
-	j2_template = Template(template, undefined=StrictUndefined)
-
-	for dt in isa["datatypes"]:
-		print(j2_template.render(isa=isa, type_category_upper=datatypes[dt]["category"].upper(), isa_datatype=isa["datatypes"][dt], datatype=datatypes[dt]), file=file)
-
+	
 	print("#define MIPP_" + isa["name"].upper() + "_RVD_SIZE_BIT " + str(isa["size"]), file=file)
 	print("#define MIPP_" + isa["name"].upper() + "_RVD_SIZE_BYTE " + str(int(isa["size"] / 8)), file=file)
 
@@ -103,7 +98,7 @@ def gen_c_functions(isa, file, funcs, implems):
 
 						ifd_cur = build_ifdef(funcs, f, dt_key, len(funcs[f]["implem_status"][dt_key])-1)
 						if ifd and ifd_cur:
-							ifd = ifd + " && ( " + ifd_cur + " )"
+							ifd = ifd + " && "+ ifd_cur
 						elif ifd_cur:
 							ifd = ifd_cur
 						if ifd:
@@ -118,7 +113,7 @@ def gen_c_functions(isa, file, funcs, implems):
 						else:
 							func_name = build_func_name(isa, dt_par, dt_ret, f,True);
 						
-						print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name) + " {", file=file)
+						print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name) + " {", file=file)
 						
 						if ff["template"]["format"] == "short":
 							if funcs[f]["proto"]["args"]:
@@ -197,7 +192,7 @@ def gen_c_missing_functions(isa, file, funcs):
 
 				else:
 					func_name = build_func_name(isa, dt_par, dt_ret, f)
-				print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name,{},True) + " {", file=file)
+				print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name,{},True) + " {", file=file)
 				print("\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \""+func_name+"\");", file=file);
 				print("\texit(-1);", file=file);
 				print("}", file=file);

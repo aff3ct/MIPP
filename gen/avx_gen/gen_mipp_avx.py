@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
+
 from jinja2 import Template, StrictUndefined
 import json
-import os
+import copy
 
 from tools import *
-from headers_def_AVX import *
+from headers_def import *
 from implem_AVX import *
 from implem_emu_AVX import *
 from c_generator import *
@@ -12,8 +13,8 @@ from cpp_generator import *
 
 
 def gen_mipp_avx():
-	for iemu in implems_emu:
-		for sub_iemu in implems_emu[iemu]:
+	for iemu in implems_emu_avx:
+		for sub_iemu in implems_emu_avx[iemu]:
 			if "type" not in sub_iemu:
 				sub_iemu["type"] = "emulated"
 
@@ -27,10 +28,11 @@ def gen_mipp_avx():
 
 	gen_c_defines(isa_avx, file)
 	gen_c_structures(isa_avx, file)
-
-	gen_c_functions(isa_avx, file, mipp_funcs, implems_avx)
-	gen_c_functions(isa_avx, file, mipp_funcs, implems_emu)
-	gen_c_missing_functions(isa_avx, file, mipp_funcs)
+	print("Generate AVX")
+	my_mipp_funcs = copy.deepcopy(mipp_funcs)
+	gen_c_functions(isa_avx, file, my_mipp_funcs, implems_avx)
+	gen_c_functions(isa_avx, file, my_mipp_funcs, implems_emu_avx)
+	gen_c_missing_functions(isa_avx, file, my_mipp_funcs)
 
 	#dump_dict_json(mipp_funcs, "test.json")
 
@@ -46,14 +48,14 @@ def gen_mipp_avx():
 #define MY_INTRINSICS_PLUS_PLUS_HPP_
 
 namespace mipp
-
 {"""
+
 	j2_template = Template(tpl_header_cpp, undefined=StrictUndefined)
 	print(j2_template.render(), file=file)
 
 	gen_cpp_structures(isa_avx,file)
 	gen_cpp_constexpr_functions(isa_avx,file)
-	gen_cpp_functions(isa_avx, file, mipp_funcs)
+	gen_cpp_functions(isa_avx, file, my_mipp_funcs)
 
 	tpl_footer_cpp = """}
 
@@ -62,5 +64,3 @@ namespace mipp
 	print(j2_template.render(), file=file)
 
 	file.close()
-
-

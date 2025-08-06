@@ -14,6 +14,8 @@ sys.path.insert(1,path + '/avx_gen')
 from avx_gen import gen_mipp_avx
 from avx512_gen import gen_mipp_avx512
 
+from cpp_object_generator import generate_cpp_object
+
 avx_gen = "../include/"
 avx512_gen = "../include/"
 
@@ -82,6 +84,7 @@ def main(args):
     if args.all:
         create_folder(avx_path)
         create_folder(avx512_path)
+        generate_cpp_object()
         print("Generating MIPP code for both avx2 and avx512")
         gen_mipp_avx.gen_mipp_avx()
         gen_mipp_avx512.gen_mipp_avx512()

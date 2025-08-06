@@ -48,8 +48,12 @@ tpl_implem_avx = {
 	"maskzld":		{ "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(p0,m0.m);"},
 	"maskst":		{ "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(p0,m0.m, r0.r);"},
 	"getfirst":     { "format": "long",  "code":"return ({{ cstdint_ret }}) {{ isa.prefix }}_{{ instr_name }}_epi{{ dt_par.n_bits }}(%cast<tp,c:int|b:tp>%(r0).r, 0);" },
-	"arith_1arg":   { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r);" },
+    # "gather":       { "format": "short",  "code" :"{{ isa.prefix }}_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(p0,vi,{{dt_par.n_bits//8}});" },
+    # "mask_gather_64": { "format": "short",  "code" :"{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(%set0<tp>%(),p0,vi,m0.m,8);" },
+    # "mask_gather_32": { "format": "short",  "code" :"{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(%set0<tp>%(),p0,vi,m0.m,4);" },
+    "arith_1arg":   { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r);" },
 	"arith_2args":  { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r);" },
+    "arithmsk_2args": { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(m0.m, r0.r, r1.r);" },
 	"logi_2args":   { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(r0.r, r1.r);" },
 	"logi_m_2args": { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_msk }}(m0.m, m1.m);" },
 	"arith_3args":  { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, r2.r);" },
@@ -180,7 +184,7 @@ implems_avx = {
 	"tomsk": [
 		{ "instr_name": "cast", "datatypes": all_datatypes, "template": tpl_implem_avx["tomsk"] } ],
 	"load": [
-		{ "instr_name": "load", "datatypes": all_datatypes, "template": tpl_implem_avx["load"], "if": "defined(MIPP_ALIGNED_LOADS)" },
+		{ "instr_name": "load", "datatypes": all_datatypes, "template": tpl_implem_avx["load"], "if": "defined(MIPP_ALIGNED_LOADS)"},
 		{ "instr_name": "loadu", "datatypes": all_datatypes, "template": tpl_implem_avx["load"], "if": "!defined(MIPP_ALIGNED_LOADS)" } ],
 	"loadu": [
 		{ "instr_name": "loadu", "datatypes": all_datatypes, "template": tpl_implem_avx["load"] } ],
@@ -304,4 +308,9 @@ implems_avx = {
 		{ "instr_name": "max", "datatypes": [int32, uint32], "template": tpl_implem_avx["reduce_32"], "if": "defined(__AVX2__)" },
 		{ "instr_name": "max", "datatypes": [int16, uint16], "template": tpl_implem_avx["reduce_16"], "if": "defined(__AVX2__)" },
 		{ "instr_name": "max", "datatypes": [int8, uint8], "template": tpl_implem_avx["reduce_8"], "if": "defined(__AVX2__)" } ],
+    # "gather": [
+    #     { "instr_name": "gather", "datatypes": [float64, float32, int64, int32], "template": tpl_implem_avx["gather"], "if": "defined(__AVX2__)" } ],
+    # "mask_gather": [
+    #     { "instr_name": "mask_i64gather", "datatypes": [float64, int64], "template": tpl_implem_avx["mask_gather_64"], "if": "defined(__AVX2__)" },
+    #     { "instr_name": "mask_i32gather", "datatypes": [float32, int32], "template": tpl_implem_avx["mask_gather_32"], "if": "defined(__AVX2__)" }  ],
 }

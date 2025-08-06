@@ -34,6 +34,7 @@ tpl_implem_avx512 = {
     "getfirst"            : { "format": "long",  "code":"return ({{ isa.prefix }}_{{ instr_name }}(%cast<tp,c:int|b:tp>%(r0).r));""" },    
     "arith_1arg"          : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r);" },
     "arith_2args"         : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r);" },
+    "arithmsk_2args"      : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(m0.m, r0.r, r1.r);" },
     "logi_2args"          : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(r0.r, r1.r);" },
     "logi_m_2args"        : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}(m0.m, m1.m);" },
     "arith_3args"         : { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, r2.r);" },
@@ -289,4 +290,6 @@ implems_avx512 = {
         { "instr_name" : "max", "datatypes" : [int16], "template"   : tpl_implem_avx512["reduce_16"],"if" : "defined(__AVX512F__)"                   } ,
         { "instr_name" : "max", "datatypes" : [int16], "template"   : tpl_implem_avx512["reduce_16"],"if" : "defined(__AVX512BW__)"                  } ,
         { "instr_name" : "max", "datatypes" : [int8], "template"    : tpl_implem_avx512["reduce_8"],"if"  : "defined(__AVX512BW__)"                  } ],
+    "maskz_add": [
+        { "instr_name" : "maskz_add", "datatypes" : all_float, "template" : tpl_implem_avx512["arithmsk_2args"],"if"  : "defined(__AVX512F__)"               } ],
  }

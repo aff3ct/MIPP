@@ -142,10 +142,19 @@ void test_reg_maskz_add()
 
 	mipp::rvd<T> r1 = mipp::load(inputs1);
 	mipp::rvd<T> r2 = mipp::load(inputs2);
-	mipp::rvm<T> m  = mipp::set_k<T>(mask);
+	mipp::rvm<T> m = mipp::set_k<T>(mask);
 
-	/*
-	mipp::rvd<T> r3 = mipp::maskz(m, r1, r2);
+	/*template <typename T, proto_i2<T> I2>
+	inline reg maskz(const msk m, const reg a, const reg b)
+	{
+		auto m_reg = toreg<N<T>()>(m);
+		auto a_modif = I2(a, b);
+		return andb<T>(m_reg, a_modif);
+	}*/
+	//mipp::rvd<T> r3 = mipp::maskz<add>(m, r1, r2);
+
+	//  a revoir
+	mipp::rvd<T> r3 = mipp::maskz_add(m, r1, r2);
 
 	for (auto i = 0; i < vectorSize; i++)
 	{
@@ -156,7 +165,7 @@ void test_reg_maskz_add()
 		}
 		else
 			REQUIRE(mipp::get(r3, i) == (T)0);
-	}*/
+	}
 }
 
 #ifndef MIPP_NO
@@ -183,25 +192,28 @@ TEST_CASE("Addition - mipp::reg - maskz", "[mipp::add]")
 template <typename T>
 void test_Reg_maskz_add()
 {
-	/*constexpr int N = mipp::N<T>();
-	T inputs1[N], inputs2[N];
-	std::iota(inputs1, inputs1 + mipp::N<T>(), (T)1);
-	std::iota(inputs2, inputs2 + mipp::N<T>(), (T)1);
+	const int vectorSize = mipp::N<T>();
 
-	bool mask[N];
-	std::fill(mask,       mask + N/2, true );
-	std::fill(mask + N/2, mask + N,   false);
+	T inputs1[vectorSize],inputs2[vectorSize];
+	std::iota(inputs1, inputs1 + vectorSize, (T)1);
+	std::iota(inputs2, inputs2 + vectorSize, (T)1);
+
+
+	int32_t mask[vectorSize];
+	std::fill(mask,       mask + vectorSize/2, true );
+	std::fill(mask + vectorSize/2, mask + vectorSize,   false);
 
 	std::mt19937 g;
-	std::shuffle(inputs1, inputs1 + mipp::N<T>(), g);
-	std::shuffle(inputs2, inputs2 + mipp::N<T>(), g);
-	std::shuffle(mask,    mask    + mipp::N<T>(), g);
+	std::shuffle(inputs1, inputs1 + vectorSize, g);
+	std::shuffle(inputs2, inputs2 + vectorSize, g);
+	std::shuffle(mask,    mask    + vectorSize, g);
 
-	mipp::Reg<T> r1 = inputs1;
-	mipp::Reg<T> r2 = inputs2;
-	mipp::Msk<N> m  = mask;
+	mipp::Rvd<T> r1 = inputs1;
+	mipp::Rvd<T> r2 = inputs2;
+	mipp::Rvm<T> m = mask;
 
-	mipp::Reg<T> r3 = mipp::maskz<T,mipp::add>(m, r1, r2);
+	//tmp
+	mipp::Rvd<T> r3 = m.toReg() & (r1 + r2);
 
 	for (auto i = 0; i < mipp::N<T>(); i++)
 	{
@@ -212,7 +224,7 @@ void test_Reg_maskz_add()
 		}
 		else
 			REQUIRE(r3[i] == (T)0);
-	}*/
+	}
 }
 
 TEST_CASE("Addition - mipp::Reg - maskz", "[mipp::add]")

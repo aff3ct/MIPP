@@ -29,6 +29,22 @@ for dt_ret in all_datatypes:
 		new_entry = [dt_par, dt_ret]
 		if new_entry not in all_datatypes_cart_prod:
 			all_datatypes_cart_prod.append(dt_par + "," + dt_ret);
+			
+def find_data_types_from(criteria):
+	all_types = dict(datatypes);
+	for datatype in datatypes:
+		current_type = datatypes[datatype]
+		for key in criteria:
+			if current_type[key]!=criteria[key]:
+				del all_types[datatype]
+				break;
+	return all_types;
+			
+def find_one_data_types_from(criteria):
+	all_types = find_data_types_from(criteria);
+	if len(all_types) != 1:
+		print("warning or error waiting for reduction size 1")
+	return next(iter(all_types.values()));
 
 datatypes = {
 	float64 : { "name" : float64, "category": cfloat, "n_bits" : 64, "cstd": "float64_t", },
@@ -45,22 +61,18 @@ datatypes = {
 
 
 #  Operator overloading in the object layer
-operators = {
+operators_arithm = {
     "add"    : {"operation" : "+", "option"  : "+="},
     "sub"    : {"operation" : "-", "option"  : "-="},
     "mul"    : {"operation" : "*", "option"  : "*="},
     "div"    : {"operation" : "/", "option"  : "/="},
+}
+operators_binary = {
     "xorb"   : {"operation" : "^", "option"  : "^="},
     "orb"    : {"operation" : "|", "option"  : "|="},
     "andb"   : {"operation" : "&", "option"  : "&="},
-    "cmpeq"  : {"operation" : "==", "option" : "=="},
-    "cmpneq" : {"operation" : "!=", "option" : "!="},
-    "cmplt"  : {"operation" : "<", "option"  : "<"},
-    "cmple"  : {"operation" : "<=", "option" : "<="},
-    "cmpgt"  : {"operation" : ">", "option"  : ">"},
-    "cmpge"  : {"operation" : ">=", "option" : ">="},
 }
-operators_msk = {
+operators_order = {
     "cmpeq"  : {"operation" : "==", "option" : "=="},
     "cmpneq" : {"operation" : "!=", "option" : "!="},
     "cmplt"  : {"operation" : "<", "option"  : "<"},
@@ -177,6 +189,9 @@ def build_type(type, datatype, isa,lmul=0, isa_name=True, cpp=False):
 			return build_ptr(datatype, isa)
 		elif type == "Nele":
 			return datatype["cstd"]
+		elif type == "vindex":
+			same_size_integer_datatype = find_one_data_types_from({"n_bits": datatype["n_bits"], "category": cint});
+			return build_reg(same_size_integer_datatype, isa, lmul, isa_name, cpp)
 	else:
 		return "void"
 # for object layer
@@ -212,7 +227,7 @@ def build_proto_set0(dt_ret, func_name):
     	reg_type = "rvd"
     elif (func_name == "set0_k"):
     	reg_type = "rvm"
-    return f"template <>\n{reg_type}<{dt_ret}_t, 1> {func_name}<{dt_ret}_t>("
+    return f"template <>\ninline {reg_type}<{dt_ret}_t, 1> {func_name}<{dt_ret}_t>("
 
 # Build prototype of set
 def build_proto_set(dt_ret, func_name):
@@ -225,7 +240,16 @@ def build_proto_set(dt_ret, func_name):
     	template = f"<{dt_ret}_t>"
     	reg_type = "rvm"
 
-    return f"template <>\n{reg_type}<{dt_ret}_t, 1> {func_name}{template}(const {dt_par} vals[MIPP_N_{dt_ret.upper()}]"
+    return f"template <>\ninline {reg_type}<{dt_ret}_t, 1> {func_name}{template}(const {dt_par} vals[MIPP_N_{dt_ret.upper()}]"
+
+def build_proto_set1(dt_ret, func_name):
+    if (func_name == "set1_k"):
+    	dt_par = "int32_t"
+    	template = f"<{dt_ret}_t>"
+    	reg_type = "rvm"
+
+    return f"template <>\ninline {reg_type}<{dt_ret}_t, 1> {func_name}{template}(const int32_t v0"
+    
 
 #function message error set functions
 def gen_set_func_error(func_name,file):
@@ -237,7 +261,8 @@ def gen_set_func_error(func_name,file):
 		print(f"template <typename T> inline rvm<T, 1> {func_name}(const int32_t[N<T>()]) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
 	if func_name == "set0_k":
 		print(f"template <typename T> inline rvm<T, 1> {func_name}() {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
-		
+	if func_name == "set1_k":
+		print(f"template <typename T> inline rvm<T, 1> {func_name}(const int32_t v0) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
 
 
 
@@ -250,11 +275,13 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
 		return  build_proto_set0(dt_ret, func_name) +')'
 	if func_name == "set" or func_name =="set_k":
 		return  build_proto_set(dt_ret, func_name) +')'
+	if func_name =="set1_k":
+		return  build_proto_set1(dt_ret, func_name) +')'
 
 	realdatatype = datatypes[dt_ret]
 	if (proto["ret"]["fixeddatatype"]):
 		realdatatype = datatypes[proto["ret"]["fixeddatatype"]]
-	p = build_type(proto["ret"]["type"], realdatatype, isa, lmul, isa_name, cpp) + " " + func_name + "("
+	p = "inline " + build_type(proto["ret"]["type"], realdatatype, isa, lmul, isa_name, cpp) + " " + func_name + "("
 	cnt_reg = 0
 	cnt_msk = 0
 	cnt_val = 0
@@ -283,6 +310,8 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
 			cnt_ptr = cnt_ptr +1
 		elif arg["type"] == "Nele":
 			p += " vals["+build_N(datatypes[dt_par],{},{},False)+"]"
+		elif arg["type"] == "vindex":
+			p += " vi"
 		is_first = False
 
 	return p + ")";
@@ -326,6 +355,8 @@ def build_proto_object(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=F
 		elif arg["type"] == "ptr":
 			p += " p" + str(cnt_ptr)
 			cnt_ptr = cnt_ptr +1
+		elif arg["type"] == "vindex":
+			p += " vi"
 		is_first = False
 
 	return p + ")";
@@ -361,6 +392,8 @@ def build_call(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True):
 			cnt_ptr = cnt_ptr +1
 		elif arg["type"] == "Nele":
 			p += " vals"
+		elif arg["type"] == "vindex":
+			p += " vi"
 		is_first = False
 	return p + ")";
 
@@ -463,10 +496,11 @@ def build_ifdef_rec(funcs, func_name, dt_key):
 		if dt_key in funcs[func_name]["implem_status"]:
 			is_first_or = True
 			str_ifdef_sub = ""
+			str_end_sub_token = ""
 			for implem in funcs[func_name]["implem_status"][dt_key]:
 				if not is_first_or:
-					str_ifdef_sub = str_ifdef_sub + " || "
-
+					str_ifdef_sub = "( " + str_ifdef_sub + " || "
+					str_end_sub_token = " )"
 				is_first_and = True
 				str_ifdef_sub_sub = ""
 				for f_name in implem["requirements"]:
@@ -475,21 +509,21 @@ def build_ifdef_rec(funcs, func_name, dt_key):
 						if ret:
 							if not is_first_and:
 								str_ifdef_sub_sub = str_ifdef_sub_sub + " && "
-							str_ifdef_sub_sub = str_ifdef_sub_sub + "( " + ret + " )"
+							str_ifdef_sub_sub = str_ifdef_sub_sub + ret
 							is_first_and = False
 
 				if implem["if"] and str_ifdef_sub_sub:
-					str_ifdef_sub = str_ifdef_sub + "( " + implem["if"] + " && (" + str_ifdef_sub_sub + ") )"
+					str_ifdef_sub = str_ifdef_sub + implem["if"] + str_end_sub_token + " && " + str_ifdef_sub_sub
 				if implem["if"] and not str_ifdef_sub_sub:
-					str_ifdef_sub = str_ifdef_sub + "( " + implem["if"] + " )"
+					str_ifdef_sub =  str_ifdef_sub + implem["if"] + str_end_sub_token
 				if str_ifdef_sub_sub and not implem["if"]:
-					str_ifdef_sub = str_ifdef_sub + "( " + str_ifdef_sub_sub + " )"
+					str_ifdef_sub = str_ifdef_sub + str_ifdef_sub_sub + str_end_sub_token
 
 				if implem["if"] or str_ifdef_sub_sub:
 					is_first_or = False
 
 			if str_ifdef_sub:
-				str_ifdef = "( " + str_ifdef_sub + " )"
+				str_ifdef = str_ifdef_sub
 	return str_ifdef
 
 def is_ifdef(funcs, func_name, dt_key):
@@ -524,11 +558,11 @@ def build_ifdef(funcs, func_name, dt_key, implem_id):
 			if ret:
 				if not is_first_and:
 					str_ifdef_and = str_ifdef_and + " && "
-				str_ifdef_and = str_ifdef_and + "( " + ret + " )"
+				str_ifdef_and = str_ifdef_and + ret
 				is_first_and = False
 
 	if str_ifdef and str_ifdef_and:
-		str_ifdef = str_ifdef + " && (" + str_ifdef_and + ")"
+		str_ifdef = str_ifdef + " && " + str_ifdef_and
 	if str_ifdef_and and not str_ifdef:
 		str_ifdef = str_ifdef_and
 
