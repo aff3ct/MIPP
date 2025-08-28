@@ -38,7 +38,6 @@ typedef float float32_t;
 // end utiles pour l'instant pour les tests...
 
 #include "avx/mipp_v2_impl_AVX_gen.h"
-//#include "avx/mipp_v2_AVX_gen.hpp"
 
 #elif defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)
 
@@ -60,7 +59,18 @@ typedef float float32_t;
 // end utiles pour l'instant pour les tests...
 
 #include "avx512/mipp_v2_impl_AVX512_gen.h"
-//#include "avx512/mipp_v2_AVX512_gen.hpp"
+
+#elif defined(__SSE__)
+// utiles pour l'instant pour les tests
+// pourrait clairement etre utile pour les generateurs au dela du if #define
+	#define MIPP_SSE
+#ifdef __SSE2__
+	#define MIPP_64BIT
+	#define MIPP_BW
+#endif
+// end utiles pour l'instant pour les tests...
+
+#include "sse/mipp_v2_impl_SSE_gen.h"
 
 #endif
 

@@ -9,10 +9,13 @@ path = os.getcwd()
 
 sys.path.insert(1,path +'/avx512_gen')
 sys.path.insert(1,path + '/avx_gen')
+sys.path.insert(1,path + '/sse_gen')
 
+from implem_SSE import isa_sse
 from implem_AVX import isa_avx
 from implem_AVX512 import isa_avx512
 
+from sse_gen import gen_mipp_sse
 from avx_gen import gen_mipp_avx
 from avx512_gen import gen_mipp_avx512
 
@@ -20,9 +23,12 @@ from ci_generator import generate_c_interface
 from cpp_generator import generate_cpp
 from cpp_object_generator import generate_cpp_object
 
+sse_gen = "../include/"
 avx_gen = "../include/"
 avx512_gen = "../include/"
 
+# avx and avx512 folder path
+sse_path = os.path.join(avx512_gen, "sse")
 avx_path = os.path.join(avx_gen, "avx")
 avx512_path = os.path.join(avx512_gen, "avx512")
 
@@ -86,14 +92,16 @@ def main(args):
         print("Generating MIPP code for avx512")
         gen_mipp_avx512.gen_mipp_avx512()
     if args.all:
+        create_folder(sse_path)
         create_folder(avx_path)
         create_folder(avx512_path)
+        gen_mipp_sse.gen_mipp_sse()
         gen_mipp_avx.gen_mipp_avx()
         gen_mipp_avx512.gen_mipp_avx512()
-        generate_c_interface([isa_avx,isa_avx512])
+        generate_c_interface([isa_sse,isa_avx,isa_avx512])
         generate_cpp()
         generate_cpp_object()
-        print("Generating MIPP code for avx2 and avx512")
+        print("Generating MIPP code for sse, avx2 and avx512")
     if args.clean_all:
         print("Removing all generated files ...")
         clean_folder(avx_path)
@@ -115,7 +123,7 @@ if __name__ == "__main__":
 
     parser.add_argument('--avx2'         , action='store_true' , help='Generate MIPP code for avx2')
     parser.add_argument('--avx512'       , action='store_true' , help='Generate MIPP code for avx512')
-    parser.add_argument('--all'          , action='store_true' , help='Generate MIPP code for both avx2 and avx512')
+    parser.add_argument('--all'          , action='store_true' , help='Generate MIPP code for all avalaible simd')
     parser.add_argument('--clean_all'    , action='store_true' , help='Remove all generated files')
     parser.add_argument('--clean_avx2'   , action='store_true' , help='Remove avx2 generated files')
     parser.add_argument('--clean_avx512' , action='store_true' , help='Remove avx512 generated files')
