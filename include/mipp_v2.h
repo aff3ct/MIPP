@@ -38,7 +38,7 @@ typedef float float32_t;
 // end utiles pour l'instant pour les tests...
 
 #include "avx/mipp_v2_impl_AVX_gen.h"
-#include "avx/mipp_v2_AVX_gen.hpp"
+//#include "avx/mipp_v2_AVX_gen.hpp"
 
 #elif defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)
 
@@ -60,7 +60,7 @@ typedef float float32_t;
 // end utiles pour l'instant pour les tests...
 
 #include "avx512/mipp_v2_impl_AVX512_gen.h"
-#include "avx512/mipp_v2_AVX512_gen.hpp"
+//#include "avx512/mipp_v2_AVX512_gen.hpp"
 
 #endif
 
@@ -73,6 +73,8 @@ typedef float float32_t;
 // --------------------------------------------------------------------------------------------------------------------
 
 // ------------------------------------------------------------------------------------------------- includes files
+
+#include "mipp_v2.hpp"
 
 #include "mipp_v2_object_gen.hpp"
 

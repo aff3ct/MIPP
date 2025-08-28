@@ -2,7 +2,6 @@
 import sys
 import os
 import shutil
-import fcntl
 import struct
 import argparse
 
@@ -11,17 +10,22 @@ path = os.getcwd()
 sys.path.insert(1,path +'/avx512_gen')
 sys.path.insert(1,path + '/avx_gen')
 
+from implem_AVX import isa_avx
+from implem_AVX512 import isa_avx512
+
 from avx_gen import gen_mipp_avx
 from avx512_gen import gen_mipp_avx512
 
+from ci_generator import generate_c_interface
+from cpp_generator import generate_cpp
 from cpp_object_generator import generate_cpp_object
 
 avx_gen = "../include/"
 avx512_gen = "../include/"
 
-# avx and avx512 folder path
 avx_path = os.path.join(avx_gen, "avx")
 avx512_path = os.path.join(avx512_gen, "avx512")
+
 
 def create_folder(folder_path):
     if not os.path.exists(folder_path):
@@ -84,10 +88,12 @@ def main(args):
     if args.all:
         create_folder(avx_path)
         create_folder(avx512_path)
-        generate_cpp_object()
-        print("Generating MIPP code for both avx2 and avx512")
         gen_mipp_avx.gen_mipp_avx()
         gen_mipp_avx512.gen_mipp_avx512()
+        generate_c_interface([isa_avx,isa_avx512])
+        generate_cpp()
+        generate_cpp_object()
+        print("Generating MIPP code for avx2 and avx512")
     if args.clean_all:
         print("Removing all generated files ...")
         clean_folder(avx_path)

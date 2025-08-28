@@ -4,7 +4,7 @@ isa_avx512 = {
     "name": "avx512",
     "prefix": "_mm512",
     "size": 512,
-    "define": '__AVX__',
+    "define": '__AVX512__',
     "hw_lmul": False,
     "datatypes": {
         float64 : { "data_ext" : "pd"    , "data_ext_logi": "pd"    , "data_ext_msk": "si512" , "reg" : "__m512d" , "msk" : "__mmask8"  , "to_ptr": "float64_t" , } ,

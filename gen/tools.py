@@ -222,48 +222,62 @@ def type_specialized(proto):
 	return n_type_spe
 
 # Build prototype of set0
-def build_proto_set0(dt_ret, func_name):
+def build_proto_set0(dt_ret, lmul, func_name):
+    template = f"<{dt_ret}_t, {lmul}>"
     if(func_name == "set0"):
     	reg_type = "rvd"
     elif (func_name == "set0_k"):
     	reg_type = "rvm"
-    return f"template <>\ninline {reg_type}<{dt_ret}_t, 1> {func_name}<{dt_ret}_t>("
+    return f"template <>\ninline {reg_type}<{dt_ret}_t, {lmul}> {func_name}{template}("
 
 # Build prototype of set
-def build_proto_set(dt_ret, func_name):
+def build_proto_set(dt_ret, lmul, func_name):
+    template = f"<{dt_ret}_t, {lmul}>"
     if(func_name == "set"):
-    	template = ""
     	dt_par = f"{dt_ret}_t"
     	reg_type = "rvd"
     elif (func_name == "set_k"):
     	dt_par = "int32_t"
-    	template = f"<{dt_ret}_t>"
     	reg_type = "rvm"
 
-    return f"template <>\ninline {reg_type}<{dt_ret}_t, 1> {func_name}{template}(const {dt_par} vals[MIPP_N_{dt_ret.upper()}]"
+    return f"template <>\ninline {reg_type}<{dt_ret}_t, {lmul}> {func_name}{template}(const {dt_par} vals[MIPP_N_{dt_ret.upper()}]"
 
-def build_proto_set1(dt_ret, func_name):
+def build_proto_set1(dt_ret, lmul, func_name):
+    template = f"<{dt_ret}_t, {lmul}>"
+    if (func_name == "set1"):
+    	dt_par = f"{dt_ret}_t"
+    	reg_type = "rvd"
     if (func_name == "set1_k"):
     	dt_par = "int32_t"
-    	template = f"<{dt_ret}_t>"
     	reg_type = "rvm"
 
-    return f"template <>\ninline {reg_type}<{dt_ret}_t, 1> {func_name}{template}(const int32_t v0"
+    return f"template <>\ninline {reg_type}<{dt_ret}_t, {lmul}> {func_name}{template}(const {dt_par} v0"
+   
+def build_proto_load(dt_ret, lmul, func_name):
+    if func_name == "load" or func_name == "loadu":
+    	dt_par = f"{dt_ret}_t"
+    	template = f"<{dt_ret}_t, {lmul}>"
+    	reg_type = "rvd"
+
+    return f"template <>\ninline {reg_type}<{dt_ret}_t, {lmul}> {func_name}{template}(const {dt_par}* p0"
     
 
 #function message error set functions
 def gen_set_func_error(func_name,file):
 	if func_name == "set":
-		print(f"template <typename T> inline rvd<T, 1> {func_name}(const T[N<T>()]) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
+		print(f"template <typename T, int LMULT=1> inline rvd<T, LMULT> {func_name}(const T[N<T>()]) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
+	if func_name == "set1":
+		print(f"template <typename T, int LMULT=1> inline rvd<T, LMULT> {func_name}(const T) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
 	if func_name == "set0":
-		print(f"template <typename T> inline rvd<T, 1> {func_name}() {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
+		print(f"template <typename T, int LMULT=1> inline rvd<T, LMULT> {func_name}() {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
 	if func_name == "set_k":
-		print(f"template <typename T> inline rvm<T, 1> {func_name}(const int32_t[N<T>()]) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
+		print(f"template <typename T, int LMULT=1> inline rvm<T, LMULT> {func_name}(const int32_t[N<T>()]) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
 	if func_name == "set0_k":
-		print(f"template <typename T> inline rvm<T, 1> {func_name}() {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
+		print(f"template <typename T, int LMULT=1> inline rvm<T, LMULT> {func_name}() {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
 	if func_name == "set1_k":
-		print(f"template <typename T> inline rvm<T, 1> {func_name}(const int32_t v0) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
-
+		print(f"template <typename T, int LMULT=1> inline rvm<T, LMULT> {func_name}(const int32_t v0) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
+	if func_name == "load" or func_name == "loadu":
+		print(f"template <typename T, int LMULT=1> inline rvd<T, LMULT> {func_name}(const T* p0) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
 
 
 def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False):
@@ -272,11 +286,13 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
 
 	#build proto for set functions
 	if func_name == "set0" or func_name =="set0_k":
-		return  build_proto_set0(dt_ret, func_name) +')'
+		return  build_proto_set0(dt_ret, lmul, func_name) +')'
 	if func_name == "set" or func_name =="set_k":
-		return  build_proto_set(dt_ret, func_name) +')'
-	if func_name =="set1_k":
-		return  build_proto_set1(dt_ret, func_name) +')'
+		return  build_proto_set(dt_ret, lmul, func_name) +')'
+	if func_name =="set1_k" or func_name =="set1":
+		return  build_proto_set1(dt_ret, lmul, func_name) +')'
+	if func_name =="load" or func_name =="loadu":
+		return  build_proto_load(dt_ret, lmul, func_name) +')'
 
 	realdatatype = datatypes[dt_ret]
 	if (proto["ret"]["fixeddatatype"]):
@@ -391,7 +407,7 @@ def build_call(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True):
 			p += "p" + str(cnt_ptr)
 			cnt_ptr = cnt_ptr +1
 		elif arg["type"] == "Nele":
-			p += " vals"
+			p += "vals"
 		elif arg["type"] == "vindex":
 			p += " vi"
 		is_first = False
@@ -402,15 +418,10 @@ def _build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul, part):
 	"""if lmul:
 		func_name += "_m" + str(int(lmul))"""
 	p = ""
-	realdatatype = datatypes[dt_ret]
-	for arg in proto["args"]:
-		if (proto["ret"]["type"] == "reg" and arg["type"] == "reg"):
-			p += "r" + str(cnt_reg) + ".r" + str(int(part))
-			cnt_reg = cnt_reg +1							
-		elif (proto["ret"]["type"] == "reg" and arg["type"] == "msk"):
-			
-			p += "res.r"  + str(int(part)) + " = "
-			p += "m" + str(cnt_msk) + ".m" + str(int(part))
+	if proto["ret"]["type"] == "reg":
+		p += "res.r" + str(int(part)) + " = "
+	elif proto["ret"]["type"] == "msk":
+		p += "msk.m"  + str(int(part))+ " = "
 
 	p += func_name + "("
 	cnt_reg = 0
@@ -433,6 +444,8 @@ def _build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul, part):
 		elif arg["type"] == "ptr":
 			p += "p" + str(cnt_ptr) + " + " + str(int(part-1)) + "*MIPP_LMUL_STRIDE(sizeof(*p" + str(cnt_ptr) + "), " + str(int(lmul)) +")"
 			cnt_ptr = cnt_ptr +1
+		elif arg["type"] == "Nele":
+			p += "vals"
 		is_first = False
 	return p + ")";
 
@@ -442,13 +455,17 @@ def build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul=2, isa_name=True
 	realdatatype = datatypes[dt_ret]
 	if proto["ret"]["fixeddatatype"]:
 		realdatatype = datatypes[proto["ret"]["fixeddatatype"]]
-	if proto["ret"]["type"]:
+	if proto["ret"]["type"] == "reg":
 		str_code += "\t" + build_type(proto["ret"]["type"], realdatatype, isa, lmul, isa_name) + " res;\n"
-		print(str_code)
+	elif proto["ret"]["type"] == "msk":
+		str_code += "\t" + build_type(proto["ret"]["type"], realdatatype, isa, lmul, isa_name) + " msk;\n"
+	
 	str_code += "\t" + _build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul_2, 1) + ";\n"
 	str_code += "\t" + _build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul_2, 2) + ";"
-	"""if (proto["ret"]["type"]):
-					str_code += "\n\t" + "return res;"""
+	if proto["ret"]["type"] == "reg":
+		str_code += "\n\t" + "return res;";
+	elif proto["ret"]["type"] == "msk":
+		str_code += "\n\t" + "return msk;";
 	return str_code;
 
 

@@ -1,4 +1,5 @@
 from tools import *
+import copy
 
 """
 "protos" dictionary:
@@ -359,3 +360,5 @@ mipp_funcs = {
 	"hmax":    { "proto": protos["ret_reg_1arg_reg"            ], "datatypes": all_datatypes          , "horizontal": True  },
 	"maskz_add":{ "proto": protos["ret_reg_3args_1msk_2reg" ], "datatypes": all_datatypes          , "horizontal": True  },
 }
+
+copy_mipp_funcs = copy.deepcopy(mipp_funcs)
