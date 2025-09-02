@@ -98,7 +98,8 @@ def main(args):
         gen_mipp_sse.gen_mipp_sse()
         gen_mipp_avx.gen_mipp_avx()
         gen_mipp_avx512.gen_mipp_avx512()
-        generate_c_interface([isa_sse,isa_avx,isa_avx512])
+        # warning order
+        generate_c_interface([isa_avx512,isa_avx,isa_sse])
         generate_cpp()
         generate_cpp_object()
         print("Generating MIPP code for sse, avx2 and avx512")

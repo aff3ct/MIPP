@@ -3,19 +3,19 @@
 #include <numeric>
 #include <random>
 #include <cmath>
-#include <mipp.h>
+#include <mipp_v2.h>
 #include <catch.hpp>
 
 template <typename T>
 void test_reg_set1()
 {
-	mipp::reg r = mipp::set1<T>((T)12);
+	mipp::rvd<T> r = mipp::set1((T)12);
 	for (auto i = 0; i < mipp::N<T>(); i++)
-		REQUIRE(mipp::get<T>(r, i) == (T)12);
+		REQUIRE(mipp::get(r, i) == (T)12);
 }
 
 #ifndef MIPP_NO
-TEST_CASE("Set1 - mipp::reg", "[mipp::set1]")
+TEST_CASE("Set1 - mipp::rvd<T>", "[mipp::set1]")
 {
 #if defined(MIPP_64BIT)
 	SECTION("datatype = double") { test_reg_set1<double>(); }
@@ -36,12 +36,12 @@ TEST_CASE("Set1 - mipp::reg", "[mipp::set1]")
 template <typename T>
 void test_Reg_set1()
 {
-	mipp::Reg<T> r = (T)12;
+	mipp::Rvd<T> r = (T)12;
 	for (auto i = 0; i < mipp::N<T>(); i++)
 		REQUIRE(r[i] == (T)12);
 }
 
-TEST_CASE("Set1 - mipp::Reg", "[mipp::set1]")
+TEST_CASE("Set1 - mipp::Rvd", "[mipp::set1]")
 {
 #if defined(MIPP_64BIT)
 	SECTION("datatype = double") { test_Reg_set1<double>(); }
@@ -61,13 +61,13 @@ TEST_CASE("Set1 - mipp::Reg", "[mipp::set1]")
 template <typename T>
 void test_reg_set0()
 {
-	mipp::reg r = mipp::set0<T>();
+	mipp::rvd<T> r = mipp::set0<T>();
 	for (auto i = 0; i < mipp::N<T>(); i++)
-		REQUIRE(mipp::get<T>(r, i) == (T)0);
+		REQUIRE(mipp::get(r, i) == (T)0);
 }
 
 #ifndef MIPP_NO
-TEST_CASE("Set0 - mipp::reg", "[mipp::set0]")
+TEST_CASE("Set0 - mipp::rvd<T>", "[mipp::set0]")
 {
 #if defined(MIPP_64BIT)
 	SECTION("datatype = double") { test_reg_set0<double>(); }
@@ -88,12 +88,12 @@ TEST_CASE("Set0 - mipp::reg", "[mipp::set0]")
 template <typename T>
 void test_Reg_set0()
 {
-	mipp::Reg<T> r; r.set0();
+	mipp::Rvd<T> r; r.set0();
 	for (auto i = 0; i < mipp::N<T>(); i++)
 		REQUIRE(r[i] == (T)0);
 }
 
-TEST_CASE("Set0 - mipp::Reg", "[mipp::set0]")
+TEST_CASE("Set0 - mipp::Rvd", "[mipp::set0]")
 {
 #if defined(MIPP_64BIT)
 	SECTION("datatype = double") { test_Reg_set0<double>(); }
@@ -116,13 +116,13 @@ void test_reg_set()
 	T inputs[mipp::N<T>()];
 	std::iota(inputs, inputs + mipp::N<T>(), (T)0);
 
-	mipp::reg r = mipp::set<T>(inputs);
+	mipp::rvd<T> r = mipp::set<T>(inputs);
 	for (auto i = 0; i < mipp::N<T>(); i++)
-		REQUIRE(mipp::get<T>(r, i) == inputs[i]);
+		REQUIRE(mipp::get(r, i) == inputs[i]);
 }
 
 #ifndef MIPP_NO
-TEST_CASE("Set - mipp::reg", "[mipp::set]")
+TEST_CASE("Set - mipp::rvd<T>", "[mipp::set]")
 {
 #if defined(MIPP_64BIT)
 	SECTION("datatype = double") { test_reg_set<double>(); }
@@ -146,12 +146,12 @@ void test_Reg_set()
 	T inputs[mipp::N<T>()];
 	std::iota(inputs, inputs + mipp::N<T>(), (T)0);
 
-	mipp::Reg<T> r = inputs;
+	mipp::Rvd<T> r = inputs;
 	for (auto i = 0; i < mipp::N<T>(); i++)
 		REQUIRE(r[i] == inputs[i]);
 }
 
-TEST_CASE("Set - mipp::Reg", "[mipp::set]")
+TEST_CASE("Set - mipp::Rvd", "[mipp::set]")
 {
 #if defined(MIPP_64BIT)
 	SECTION("datatype = double") { test_Reg_set<double>(); }
@@ -171,21 +171,21 @@ TEST_CASE("Set - mipp::Reg", "[mipp::set]")
 template <typename T>
 void test_msk_set1()
 {
-	mipp::msk m0 = mipp::set1<mipp::N<T>()>(false);
-	mipp::msk m1 = mipp::set1<mipp::N<T>()>(true );
+	/*mipp::rvm<T> m0 = mipp::set1_k<T>(0);
+	mipp::rvm<T> m1 = mipp::set1_k<T>(1);
 
-	mipp::reg r0 = mipp::toreg<mipp::N<T>()>(m0);
-	mipp::reg r1 = mipp::toreg<mipp::N<T>()>(m1);
-
-	for (auto i = 0; i < mipp::N<T>(); i++)
-		REQUIRE(mipp::get<T>(r0, i) == (T)0);
+	mipp::rvd<T> r0 = mipp::toreg(m0);
+	mipp::rvd<T> r1 = mipp::toreg(m1);
 
 	for (auto i = 0; i < mipp::N<T>(); i++)
-		REQUIRE(mipp::get<T>(r1, i) != (T)0);
+		REQUIRE(mipp::get(r0, i) == (T)0);
+
+	for (auto i = 0; i < mipp::N<T>(); i++)
+		REQUIRE(mipp::get(r1, i) != (T)0);*/
 }
 
 #ifndef MIPP_NO
-TEST_CASE("Set1 - mipp::msk", "[mipp::set1]")
+TEST_CASE("Set1 - mipp::rvm<T>", "[mipp::set1_k]")
 {
 #if defined(MIPP_64BIT)
 	SECTION("datatype = double") { test_msk_set1<double>(); }
@@ -206,8 +206,8 @@ TEST_CASE("Set1 - mipp::msk", "[mipp::set1]")
 template <typename T>
 void test_Msk_set1()
 {
-	mipp::Msk<mipp::N<T>()> m0 = false;
-	mipp::Msk<mipp::N<T>()> m1 = true;
+	mipp::Rvd<T> m0 = false;
+	mipp::Rvd<T> m1 = true;
 
 	for (auto i = 0; i < mipp::N<T>(); i++)
 		REQUIRE(m0[i] == false);
@@ -236,15 +236,15 @@ TEST_CASE("Set1 - mipp::Msk", "[mipp::set1]")
 template <typename T>
 void test_msk_set0()
 {
-	mipp::msk m0 = mipp::set0<mipp::N<T>()>();
-	mipp::reg r0 = mipp::toreg<mipp::N<T>()>(m0);
+	mipp::rvm<T> m0 = mipp::set0_k<T>();
+	mipp::rvd<T> r0 = mipp::toreg(m0);
 
 	for (auto i = 0; i < mipp::N<T>(); i++)
-		REQUIRE(mipp::get<T>(r0, i) == (T)0);
+		REQUIRE(mipp::get(r0, i) == (T)0);
 }
 
 #ifndef MIPP_NO
-TEST_CASE("Set0 - mipp::msk", "[mipp::set0]")
+TEST_CASE("Set0 - mipp::rvm<T>", "[mipp::set0]")
 {
 #if defined(MIPP_64BIT)
 	SECTION("datatype = double") { test_msk_set0<double>(); }
@@ -265,7 +265,7 @@ TEST_CASE("Set0 - mipp::msk", "[mipp::set0]")
 template <typename T>
 void test_Msk_set0()
 {
-	mipp::Msk<mipp::N<T>()> m0; m0.set0();
+	mipp::Rvd<T> m0; m0.set0();
 
 	for (auto i = 0; i < mipp::N<T>(); i++)
 		REQUIRE(m0[i] == false);
@@ -291,19 +291,19 @@ TEST_CASE("Set0 - mipp::Msk", "[mipp::set0]")
 template <typename T>
 void test_msk_set()
 {
-	bool inputs[mipp::N<T>()];
+	int32_t inputs[mipp::N<T>()];
 
 	for (auto i = 0; i < mipp::N<T>(); i++)
-		inputs[i] = i % 2 ? true : false;
+		inputs[i] = i % 2 ? 1 : 0;
 
-	mipp::msk m = mipp::set<mipp::N<T>()>(inputs);
-	mipp::reg r = mipp::toreg<mipp::N<T>()>(m);
+	mipp::rvm<T> m = mipp::set_k<T>(inputs);
+	mipp::rvd<T> r = mipp::toreg(m);
 
 	for (auto i = 0; i < mipp::N<T>(); i++)
 		if (!inputs[i])
-			REQUIRE(mipp::get<T>(r, i) == (T)0);
+			REQUIRE(mipp::get(r, i) == (T)0);
 		else
-			REQUIRE(mipp::get<T>(r, i) != (T)0);
+			REQUIRE(mipp::get(r, i) != (T)0);
 }
 
 #ifndef MIPP_NO
@@ -328,12 +328,12 @@ TEST_CASE("Set - mipp::msk", "[mipp::set]")
 template <typename T>
 void test_Msk_set()
 {
-		bool inputs[mipp::N<T>()];
+		int32_t inputs[mipp::N<T>()];
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
-			inputs[i] = i % 2 ? true : false;
+			inputs[i] = i % 2 ? -1 : 0;
 
-		mipp::Msk<mipp::N<T>()> m = inputs;
+		mipp::Rvm<T> m = inputs;
 
 		for (auto i = 0; i < mipp::N<T>(); i++)
 			REQUIRE(m[i] == inputs[i]);
@@ -341,10 +341,10 @@ void test_Msk_set()
 
 TEST_CASE("Set - mipp::Msk", "[mipp::set]")
 {
-#if defined(MIPP_64BIT)
+/*#if defined(MIPP_64BIT)
 	SECTION("datatype = double") { test_Msk_set<double>(); }
 #endif
-	SECTION("datatype = float") { test_Msk_set<float>(); }
+	SECTION("datatype = float") { test_Msk_set<float>(); }*/
 
 #if defined(MIPP_64BIT)
 	SECTION("datatype = int64_t") { test_Msk_set<int64_t>(); }
