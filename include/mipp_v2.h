@@ -72,6 +72,15 @@ typedef float float32_t;
 
 #include "sse/mipp_v2_impl_SSE_gen.h"
 
+#elif defined(__ARM_FEATURE_SVE)
+
+#include "sve/mipp_v2_impl_SVE_gen.h"
+
+#define MIPP_FMA
+#define MIPP_64BIT
+#define MIPP_BW
+#define MIPP_INSTR_VERSION 1
+
 #endif
 
 // ------------------------------------------------------------------------------------------------- MIPP_NO_INTRINSICS

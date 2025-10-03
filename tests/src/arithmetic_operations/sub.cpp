@@ -11,8 +11,8 @@ void test_reg_sub()
 {
 	const int vectorSize = mipp::N<T>();
 	T inputs1[vectorSize],inputs2[vectorSize];
-	std::iota(inputs1, inputs1 + mipp::N<T>(), (T)1);
-	std::iota(inputs2, inputs2 + mipp::N<T>(), (T)1);
+	std::iota(inputs1, inputs1 + vectorSize, (T)1);
+	std::iota(inputs2, inputs2 + vectorSize, (T)1);
 
 	std::mt19937 g;
 	std::shuffle(inputs1, inputs1 + vectorSize, g);

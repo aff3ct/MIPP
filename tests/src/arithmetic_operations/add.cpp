@@ -215,7 +215,7 @@ void test_Reg_maskz_add()
 	//tmp
 	mipp::Rvd<T> r3 = m.toReg() & (r1 + r2);
 
-	for (auto i = 0; i < mipp::N<T>(); i++)
+	for (auto i = 0; i < vectorSize; i++)
 	{
 		if (mask[i])
 		{

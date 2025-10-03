@@ -10,27 +10,29 @@ path = os.getcwd()
 sys.path.insert(1,path +'/avx512_gen')
 sys.path.insert(1,path + '/avx_gen')
 sys.path.insert(1,path + '/sse_gen')
+sys.path.insert(1,path + '/sve_gen')
 
 from implem_SSE import isa_sse
 from implem_AVX import isa_avx
 from implem_AVX512 import isa_avx512
+from implem_SVE import isa_sve
 
 from sse_gen import gen_mipp_sse
 from avx_gen import gen_mipp_avx
 from avx512_gen import gen_mipp_avx512
+from sve_gen import gen_mipp_sve
 
 from ci_generator import generate_c_interface
 from cpp_generator import generate_cpp
 from cpp_object_generator import generate_cpp_object
 
-sse_gen = "../include/"
-avx_gen = "../include/"
-avx512_gen = "../include/"
+include_gen_path = "../include/"
 
 # avx and avx512 folder path
-sse_path = os.path.join(avx512_gen, "sse")
-avx_path = os.path.join(avx_gen, "avx")
-avx512_path = os.path.join(avx512_gen, "avx512")
+sse_path = os.path.join(include_gen_path, "sse")
+avx_path = os.path.join(include_gen_path, "avx")
+avx512_path = os.path.join(include_gen_path, "avx512")
+sve_path = os.path.join(include_gen_path, "sve")
 
 
 def create_folder(folder_path):
@@ -95,11 +97,13 @@ def main(args):
         create_folder(sse_path)
         create_folder(avx_path)
         create_folder(avx512_path)
+        create_folder(sve_path)
         gen_mipp_sse.gen_mipp_sse()
         gen_mipp_avx.gen_mipp_avx()
         gen_mipp_avx512.gen_mipp_avx512()
+        gen_mipp_sve.gen_mipp_sve()
         # warning order
-        generate_c_interface([isa_avx512,isa_avx,isa_sse])
+        generate_c_interface([isa_avx512,isa_avx,isa_sse,isa_sve])
         generate_cpp()
         generate_cpp_object()
         print("Generating MIPP code for sse, avx2 and avx512")

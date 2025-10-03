@@ -119,6 +119,13 @@ protos = {
 			{"type": "reg", "charac": "RO", "fixeddatatype": False},
 		]
 	},
+	"ret_val_1arg_reg": {
+		"ret" :
+			{"type": "val", "charac": "WO", "fixeddatatype": False},
+		"args" : [
+			{"type": "reg", "charac": "RO", "fixeddatatype": False},
+		]
+	},
 	"ret_msk_1arg_msk": {
 		"ret" :
 			{"type": "msk", "charac": "WO", "fixeddatatype": False},
@@ -251,13 +258,6 @@ protos = {
 			{"type": "msk", "charac": "RO", "fixeddatatype": False},
 		]
 	},
-	"ret_val_1arg_reg": {
-		"ret" :
-			{"type": "val", "charac": "WO", "fixeddatatype": False},
-		"args" : [
-			{"type": "reg", "charac": "RO", "fixeddatatype": False},
-		]
-	},
 	"ret_val_2args_reg_val": {
 		"ret" :
 			{"type": "val", "charac": "WO", "fixeddatatype": False},
@@ -350,7 +350,7 @@ mipp_funcs = {
 	"cmple":   { "proto": protos["ret_msk_2args_reg"           ], "datatypes": all_datatypes          , "horizontal": False },
 	"cmpge":   { "proto": protos["ret_msk_2args_reg"           ], "datatypes": all_datatypes          , "horizontal": False },
 	"cmpgt":   { "proto": protos["ret_msk_2args_reg"           ], "datatypes": all_datatypes          , "horizontal": False },
-	"round":   { "proto": protos["ret_val_1arg_reg"            ], "datatypes": all_datatypes          , "horizontal": False },
+	"round":   { "proto": protos["ret_val_1arg_reg"            ], "datatypes": all_datatypes          , "horizontal": True },
 	"blend":   { "proto": protos["ret_reg_3args_2reg_1msk"     ], "datatypes": all_datatypes          , "horizontal": False },
 	"testz":   { "proto": protos["ret_i32_2args_msk"           ], "datatypes": all_datatypes          , "horizontal": True  },
 	"testz_2": { "proto": protos["ret_i32_1arg_msk"            ], "datatypes": all_datatypes          , "horizontal": True  },
@@ -358,6 +358,10 @@ mipp_funcs = {
 	"hmul":    { "proto": protos["ret_reg_1arg_reg"            ], "datatypes": all_datatypes          , "horizontal": True  },
 	"hmin":    { "proto": protos["ret_reg_1arg_reg"            ], "datatypes": all_datatypes          , "horizontal": True  },
 	"hmax":    { "proto": protos["ret_reg_1arg_reg"            ], "datatypes": all_datatypes          , "horizontal": True  },
+	"hadd_to_scal":    { "proto": protos["ret_val_1arg_reg"            ], "datatypes": all_datatypes          , "horizontal": True  },
+	#"hmul_to_scal":    { "proto": protos["ret_val_1arg_reg"            ], "datatypes": all_datatypes          , "horizontal": True  },
+	#"hmin_to_scal":    { "proto": protos["ret_val_1arg_reg"            ], "datatypes": all_datatypes          , "horizontal": True  },
+	#"hmax_to_scal":    { "proto": protos["ret_val_1arg_reg"            ], "datatypes": all_datatypes          , "horizontal": True  },
 	"maskz_add":{ "proto": protos["ret_reg_3args_1msk_2reg" ], "datatypes": all_datatypes          , "horizontal": True  },
 }
 

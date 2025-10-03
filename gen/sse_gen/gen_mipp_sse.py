@@ -26,6 +26,7 @@ def gen_mipp_sse():
 	gen_c_defines(isa_sse, file)
 	gen_c_structures(isa_sse, file)
 	print("Generate SSE")
+	copy_mipp_funcs = copy.deepcopy(mipp_funcs)
 	gen_c_functions(isa_sse, file, copy_mipp_funcs, implems_sse)
 	gen_c_functions(isa_sse, file, copy_mipp_funcs, implems_emu_sse)
 	gen_c_missing_functions(isa_sse, file, copy_mipp_funcs)

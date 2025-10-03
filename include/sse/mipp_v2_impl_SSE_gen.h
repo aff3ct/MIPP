@@ -4245,6 +4245,46 @@ static inline rvd_sse_uint8_t mipp_sse_hmax_uint8(const rvd_sse_uint8_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_sse_hmax_uint8");
 	exit(-1);
 }
+static inline float64_t mipp_sse_hadd_to_scal_float64(const rvd_sse_float64_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_sse_hadd_to_scal_float64");
+	exit(-1);
+}
+static inline float32_t mipp_sse_hadd_to_scal_float32(const rvd_sse_float32_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_sse_hadd_to_scal_float32");
+	exit(-1);
+}
+static inline int64_t mipp_sse_hadd_to_scal_int64(const rvd_sse_int64_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_sse_hadd_to_scal_int64");
+	exit(-1);
+}
+static inline int32_t mipp_sse_hadd_to_scal_int32(const rvd_sse_int32_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_sse_hadd_to_scal_int32");
+	exit(-1);
+}
+static inline int16_t mipp_sse_hadd_to_scal_int16(const rvd_sse_int16_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_sse_hadd_to_scal_int16");
+	exit(-1);
+}
+static inline int8_t mipp_sse_hadd_to_scal_int8(const rvd_sse_int8_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_sse_hadd_to_scal_int8");
+	exit(-1);
+}
+static inline uint64_t mipp_sse_hadd_to_scal_uint64(const rvd_sse_uint64_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_sse_hadd_to_scal_uint64");
+	exit(-1);
+}
+static inline uint32_t mipp_sse_hadd_to_scal_uint32(const rvd_sse_uint32_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_sse_hadd_to_scal_uint32");
+	exit(-1);
+}
+static inline uint16_t mipp_sse_hadd_to_scal_uint16(const rvd_sse_uint16_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_sse_hadd_to_scal_uint16");
+	exit(-1);
+}
+static inline uint8_t mipp_sse_hadd_to_scal_uint8(const rvd_sse_uint8_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_sse_hadd_to_scal_uint8");
+	exit(-1);
+}
 static inline rvd_sse_float64_t mipp_sse_maskz_add_float64(const rvm_sse_float64_t m0, const rvd_sse_float64_t r0, const rvd_sse_float64_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_sse_maskz_add_float64");
 	exit(-1);

@@ -9,8 +9,9 @@
 template <typename T>
 void test_reg_set1()
 {
+	const int vectorSize = mipp::N<T>();
 	mipp::rvd<T> r = mipp::set1((T)12);
-	for (auto i = 0; i < mipp::N<T>(); i++)
+	for (auto i = 0; i < vectorSize; i++)
 		REQUIRE(mipp::get(r, i) == (T)12);
 }
 
@@ -36,8 +37,9 @@ TEST_CASE("Set1 - mipp::rvd<T>", "[mipp::set1]")
 template <typename T>
 void test_Reg_set1()
 {
+	const int vectorSize = mipp::N<T>();
 	mipp::Rvd<T> r = (T)12;
-	for (auto i = 0; i < mipp::N<T>(); i++)
+	for (auto i = 0; i < vectorSize; i++)
 		REQUIRE(r[i] == (T)12);
 }
 
@@ -61,8 +63,9 @@ TEST_CASE("Set1 - mipp::Rvd", "[mipp::set1]")
 template <typename T>
 void test_reg_set0()
 {
+	const int vectorSize = mipp::N<T>();
 	mipp::rvd<T> r = mipp::set0<T>();
-	for (auto i = 0; i < mipp::N<T>(); i++)
+	for (auto i = 0; i < vectorSize; i++)
 		REQUIRE(mipp::get(r, i) == (T)0);
 }
 
@@ -88,8 +91,9 @@ TEST_CASE("Set0 - mipp::rvd<T>", "[mipp::set0]")
 template <typename T>
 void test_Reg_set0()
 {
+	const int vectorSize = mipp::N<T>();
 	mipp::Rvd<T> r; r.set0();
-	for (auto i = 0; i < mipp::N<T>(); i++)
+	for (auto i = 0; i < vectorSize; i++)
 		REQUIRE(r[i] == (T)0);
 }
 
@@ -113,11 +117,12 @@ TEST_CASE("Set0 - mipp::Rvd", "[mipp::set0]")
 template <typename T>
 void test_reg_set()
 {
-	T inputs[mipp::N<T>()];
-	std::iota(inputs, inputs + mipp::N<T>(), (T)0);
+	const int vectorSize = mipp::N<T>();
+	T inputs[vectorSize];
+	std::iota(inputs, inputs + vectorSize, (T)0);
 
 	mipp::rvd<T> r = mipp::set<T>(inputs);
-	for (auto i = 0; i < mipp::N<T>(); i++)
+	for (auto i = 0; i < vectorSize; i++)
 		REQUIRE(mipp::get(r, i) == inputs[i]);
 }
 
@@ -143,11 +148,12 @@ TEST_CASE("Set - mipp::rvd<T>", "[mipp::set]")
 template <typename T>
 void test_Reg_set()
 {
-	T inputs[mipp::N<T>()];
-	std::iota(inputs, inputs + mipp::N<T>(), (T)0);
+	const int vectorSize = mipp::N<T>();
+	T inputs[vectorSize];
+	std::iota(inputs, inputs + vectorSize, (T)0);
 
 	mipp::Rvd<T> r = inputs;
-	for (auto i = 0; i < mipp::N<T>(); i++)
+	for (auto i = 0; i < vectorSize; i++)
 		REQUIRE(r[i] == inputs[i]);
 }
 
@@ -177,10 +183,10 @@ void test_msk_set1()
 	mipp::rvd<T> r0 = mipp::toreg(m0);
 	mipp::rvd<T> r1 = mipp::toreg(m1);
 
-	for (auto i = 0; i < mipp::N<T>(); i++)
+	for (auto i = 0; i < vectorSize; i++)
 		REQUIRE(mipp::get(r0, i) == (T)0);
 
-	for (auto i = 0; i < mipp::N<T>(); i++)
+	for (auto i = 0; i < vectorSize; i++)
 		REQUIRE(mipp::get(r1, i) != (T)0);*/
 }
 
@@ -206,13 +212,14 @@ TEST_CASE("Set1 - mipp::rvm<T>", "[mipp::set1_k]")
 template <typename T>
 void test_Msk_set1()
 {
+	const int vectorSize = mipp::N<T>();
 	mipp::Rvd<T> m0 = false;
 	mipp::Rvd<T> m1 = true;
 
-	for (auto i = 0; i < mipp::N<T>(); i++)
+	for (auto i = 0; i < vectorSize; i++)
 		REQUIRE(m0[i] == false);
 
-	for (auto i = 0; i < mipp::N<T>(); i++)
+	for (auto i = 0; i < vectorSize; i++)
 		REQUIRE(m1[i] == true);
 }
 
@@ -236,10 +243,11 @@ TEST_CASE("Set1 - mipp::Msk", "[mipp::set1]")
 template <typename T>
 void test_msk_set0()
 {
+	const int vectorSize = mipp::N<T>();
 	mipp::rvm<T> m0 = mipp::set0_k<T>();
 	mipp::rvd<T> r0 = mipp::toreg(m0);
 
-	for (auto i = 0; i < mipp::N<T>(); i++)
+	for (auto i = 0; i < vectorSize; i++)
 		REQUIRE(mipp::get(r0, i) == (T)0);
 }
 
@@ -265,9 +273,10 @@ TEST_CASE("Set0 - mipp::rvm<T>", "[mipp::set0]")
 template <typename T>
 void test_Msk_set0()
 {
+	const int vectorSize = mipp::N<T>();
 	mipp::Rvd<T> m0; m0.set0();
 
-	for (auto i = 0; i < mipp::N<T>(); i++)
+	for (auto i = 0; i < vectorSize; i++)
 		REQUIRE(m0[i] == false);
 }
 
@@ -291,15 +300,15 @@ TEST_CASE("Set0 - mipp::Msk", "[mipp::set0]")
 template <typename T>
 void test_msk_set()
 {
-	int32_t inputs[mipp::N<T>()];
-
-	for (auto i = 0; i < mipp::N<T>(); i++)
+	const int vectorSize = mipp::N<T>();
+	int32_t inputs[vectorSize];
+	for (auto i = 0; i < vectorSize; i++)
 		inputs[i] = i % 2 ? 1 : 0;
 
 	mipp::rvm<T> m = mipp::set_k<T>(inputs);
 	mipp::rvd<T> r = mipp::toreg(m);
 
-	for (auto i = 0; i < mipp::N<T>(); i++)
+	for (auto i = 0; i < vectorSize; i++)
 		if (!inputs[i])
 			REQUIRE(mipp::get(r, i) == (T)0);
 		else
@@ -328,14 +337,15 @@ TEST_CASE("Set - mipp::msk", "[mipp::set]")
 template <typename T>
 void test_Msk_set()
 {
-		int32_t inputs[mipp::N<T>()];
+		const int vectorSize = mipp::N<T>();
+		int32_t inputs[vectorSize];
 
-		for (auto i = 0; i < mipp::N<T>(); i++)
+		for (auto i = 0; i < vectorSize; i++)
 			inputs[i] = i % 2 ? -1 : 0;
 
 		mipp::Rvm<T> m = inputs;
 
-		for (auto i = 0; i < mipp::N<T>(); i++)
+		for (auto i = 0; i < vectorSize; i++)
 			REQUIRE(m[i] == inputs[i]);
 }
 

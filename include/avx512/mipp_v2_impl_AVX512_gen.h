@@ -3406,7 +3406,7 @@ static inline rvd_avx512_float32_t mipp_avx512_set_float32(const float32_t vals[
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set
 #if defined(__AVX512F__)
 static inline rvd_avx512_int32_t mipp_avx512_set_int32(const int32_t vals[MIPP_N_INT32]) {
-	 retrun mipp_avx512_cast_k_float32_int32(_mm512_castsi512_ps(_mm512_set_epi32(vals[15], vals[14], vals[13], vals[12], vals[11], vals[10], vals[ 9], vals[ 8],                                            					
+	 return mipp_avx512_cast_k_float32_int32(_mm512_castsi512_ps(_mm512_set_epi32(vals[15], vals[14], vals[13], vals[12], vals[11], vals[10], vals[ 9], vals[ 8],                                            					
 																	 vals[ 7], vals[ 6], vals[ 5], vals[ 4],vals[ 3], vals[ 2], vals[ 1], vals[ 0])));
 }
 #endif
@@ -3803,20 +3803,20 @@ static inline int32_t mipp_avx512_testz_2_uint8(const rvm_avx512_uint8_t m0) {
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- maskz_add
 static inline rvd_avx512_int64_t mipp_avx512_maskz_add_int64(const rvm_avx512_int64_t m0, const rvd_avx512_int64_t r0, const rvd_avx512_int64_t r1) {
-		rvd_avx512_int64_t radd = mipp_avx512_add_int64(r0, r1);
+	rvd_avx512_int64_t radd = mipp_avx512_add_int64(r0, r1);
     rvd_avx512_int64_t rmsk =mipp_avx512_toreg_int64(m0);
 	return mipp_avx512_andb_int64(rmsk, radd);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- maskz_add
 static inline rvd_avx512_int32_t mipp_avx512_maskz_add_int32(const rvm_avx512_int32_t m0, const rvd_avx512_int32_t r0, const rvd_avx512_int32_t r1) {
-		rvd_avx512_int32_t radd = mipp_avx512_add_int32(r0, r1);
+	rvd_avx512_int32_t radd = mipp_avx512_add_int32(r0, r1);
     rvd_avx512_int32_t rmsk =mipp_avx512_toreg_int32(m0);
 	return mipp_avx512_andb_int32(rmsk, radd);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- maskz_add
 #if defined(__AVX512BW__)
 static inline rvd_avx512_int16_t mipp_avx512_maskz_add_int16(const rvm_avx512_int16_t m0, const rvd_avx512_int16_t r0, const rvd_avx512_int16_t r1) {
-		rvd_avx512_int16_t radd = mipp_avx512_add_int16(r0, r1);
+	rvd_avx512_int16_t radd = mipp_avx512_add_int16(r0, r1);
     rvd_avx512_int16_t rmsk =mipp_avx512_toreg_int16(m0);
 	return mipp_avx512_andb_int16(rmsk, radd);
 }
@@ -3824,11 +3824,119 @@ static inline rvd_avx512_int16_t mipp_avx512_maskz_add_int16(const rvm_avx512_in
 // ---------------------------------------------------------------------------------------------------------------------------------------------- maskz_add
 #if defined(__AVX512BW__)
 static inline rvd_avx512_int8_t mipp_avx512_maskz_add_int8(const rvm_avx512_int8_t m0, const rvd_avx512_int8_t r0, const rvd_avx512_int8_t r1) {
-		rvd_avx512_int8_t radd = mipp_avx512_add_int8(r0, r1);
+	rvd_avx512_int8_t radd = mipp_avx512_add_int8(r0, r1);
     rvd_avx512_int8_t rmsk =mipp_avx512_toreg_int8(m0);
 	return mipp_avx512_andb_int8(rmsk, radd);
 }
 #endif
+// ---------------------------------------------------------------------------------------------------------------------------------------------- getfirst
+// ---------------------------------------------------------------------------------------------------------------------------------------------- getfirst
+// ---------------------------------------------------------------------------------------------------------------------------------------------- getfirst
+#if ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) )
+static inline int64_t mipp_avx512_getfirst_int64(const rvd_avx512_int64_t r0) {
+	int64_t tmp[MIPP_N_INT64];
+	mipp_avx512_store_int64(tmp, r);
+	return tmp[0];
+}
+#endif
+// ---------------------------------------------------------------------------------------------------------------------------------------------- getfirst
+#if ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) )
+static inline int32_t mipp_avx512_getfirst_int32(const rvd_avx512_int32_t r0) {
+	int32_t tmp[MIPP_N_INT32];
+	mipp_avx512_store_int32(tmp, r);
+	return tmp[0];
+}
+#endif
+// ---------------------------------------------------------------------------------------------------------------------------------------------- getfirst
+#if ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) )
+static inline int16_t mipp_avx512_getfirst_int16(const rvd_avx512_int16_t r0) {
+	int16_t tmp[MIPP_N_INT16];
+	mipp_avx512_store_int16(tmp, r);
+	return tmp[0];
+}
+#endif
+// ---------------------------------------------------------------------------------------------------------------------------------------------- getfirst
+#if ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) )
+static inline int8_t mipp_avx512_getfirst_int8(const rvd_avx512_int8_t r0) {
+	int8_t tmp[MIPP_N_INT8];
+	mipp_avx512_store_int8(tmp, r);
+	return tmp[0];
+}
+#endif
+// ---------------------------------------------------------------------------------------------------------------------------------------------- getfirst
+#if ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) )
+static inline uint64_t mipp_avx512_getfirst_uint64(const rvd_avx512_uint64_t r0) {
+	uint64_t tmp[MIPP_N_UINT64];
+	mipp_avx512_store_uint64(tmp, r);
+	return tmp[0];
+}
+#endif
+// ---------------------------------------------------------------------------------------------------------------------------------------------- getfirst
+#if ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) )
+static inline uint32_t mipp_avx512_getfirst_uint32(const rvd_avx512_uint32_t r0) {
+	uint32_t tmp[MIPP_N_UINT32];
+	mipp_avx512_store_uint32(tmp, r);
+	return tmp[0];
+}
+#endif
+// ---------------------------------------------------------------------------------------------------------------------------------------------- getfirst
+#if ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) )
+static inline uint16_t mipp_avx512_getfirst_uint16(const rvd_avx512_uint16_t r0) {
+	uint16_t tmp[MIPP_N_UINT16];
+	mipp_avx512_store_uint16(tmp, r);
+	return tmp[0];
+}
+#endif
+// ---------------------------------------------------------------------------------------------------------------------------------------------- getfirst
+#if ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) )
+static inline uint8_t mipp_avx512_getfirst_uint8(const rvd_avx512_uint8_t r0) {
+	uint8_t tmp[MIPP_N_UINT8];
+	mipp_avx512_store_uint8(tmp, r);
+	return tmp[0];
+}
+#endif
+// ---------------------------------------------------------------------------------------------------------------------------------------------- hadd_to_scal
+static inline float64_t mipp_avx512_hadd_to_scal_float64(const rvd_avx512_float64_t r0) {
+	rvd_avx512_float64_t reduced = mipp_avx512_hadd_float64(r0);
+	return mipp_avx512_getfirst_float64(reduced);
+}
+// ---------------------------------------------------------------------------------------------------------------------------------------------- hadd_to_scal
+static inline float32_t mipp_avx512_hadd_to_scal_float32(const rvd_avx512_float32_t r0) {
+	rvd_avx512_float32_t reduced = mipp_avx512_hadd_float32(r0);
+	return mipp_avx512_getfirst_float32(reduced);
+}
+// ---------------------------------------------------------------------------------------------------------------------------------------------- hadd_to_scal
+#if ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) ) && ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) )
+static inline int64_t mipp_avx512_hadd_to_scal_int64(const rvd_avx512_int64_t r0) {
+	rvd_avx512_int64_t reduced = mipp_avx512_hadd_int64(r0);
+	return mipp_avx512_getfirst_int64(reduced);
+}
+#endif
+// ---------------------------------------------------------------------------------------------------------------------------------------------- hadd_to_scal
+#if ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) ) && ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) )
+static inline int32_t mipp_avx512_hadd_to_scal_int32(const rvd_avx512_int32_t r0) {
+	rvd_avx512_int32_t reduced = mipp_avx512_hadd_int32(r0);
+	return mipp_avx512_getfirst_int32(reduced);
+}
+#endif
+// ---------------------------------------------------------------------------------------------------------------------------------------------- hadd_to_scal
+#if defined(__AVX512BW__) && ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) ) && ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) )
+static inline int16_t mipp_avx512_hadd_to_scal_int16(const rvd_avx512_int16_t r0) {
+	rvd_avx512_int16_t reduced = mipp_avx512_hadd_int16(r0);
+	return mipp_avx512_getfirst_int16(reduced);
+}
+#endif
+// ---------------------------------------------------------------------------------------------------------------------------------------------- hadd_to_scal
+#if defined(__AVX512BW__) && ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) ) && ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) )
+static inline int8_t mipp_avx512_hadd_to_scal_int8(const rvd_avx512_int8_t r0) {
+	rvd_avx512_int8_t reduced = mipp_avx512_hadd_int8(r0);
+	return mipp_avx512_getfirst_int8(reduced);
+}
+#endif
+// ---------------------------------------------------------------------------------------------------------------------------------------------- hadd_to_scal
+// ---------------------------------------------------------------------------------------------------------------------------------------------- hadd_to_scal
+// ---------------------------------------------------------------------------------------------------------------------------------------------- hadd_to_scal
+// ---------------------------------------------------------------------------------------------------------------------------------------------- hadd_to_scal
 #if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
 static inline rvd_avx512_float64_t mipp_avx512_load_float64(const float64_t* p0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_load_float64");
@@ -4245,38 +4353,54 @@ static inline uint8_t mipp_avx512_get_k_uint8(const rvm_avx512_uint8_t m0, const
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_get_k_uint8");
 	exit(-1);
 }
+#if !( ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) ) && ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) ) )
 static inline int64_t mipp_avx512_getfirst_int64(const rvd_avx512_int64_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_getfirst_int64");
 	exit(-1);
 }
+#endif
+#if !( ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) ) && ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) ) )
 static inline int32_t mipp_avx512_getfirst_int32(const rvd_avx512_int32_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_getfirst_int32");
 	exit(-1);
 }
+#endif
+#if !( ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) ) && ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) ) )
 static inline int16_t mipp_avx512_getfirst_int16(const rvd_avx512_int16_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_getfirst_int16");
 	exit(-1);
 }
+#endif
+#if !( ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) ) && ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) ) )
 static inline int8_t mipp_avx512_getfirst_int8(const rvd_avx512_int8_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_getfirst_int8");
 	exit(-1);
 }
+#endif
+#if !( ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) ) && ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) ) )
 static inline uint64_t mipp_avx512_getfirst_uint64(const rvd_avx512_uint64_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_getfirst_uint64");
 	exit(-1);
 }
+#endif
+#if !( ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) ) && ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) ) )
 static inline uint32_t mipp_avx512_getfirst_uint32(const rvd_avx512_uint32_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_getfirst_uint32");
 	exit(-1);
 }
+#endif
+#if !( ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) ) && ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) ) )
 static inline uint16_t mipp_avx512_getfirst_uint16(const rvd_avx512_uint16_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_getfirst_uint16");
 	exit(-1);
 }
+#endif
+#if !( ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) ) && ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) ) )
 static inline uint8_t mipp_avx512_getfirst_uint8(const rvd_avx512_uint8_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_getfirst_uint8");
 	exit(-1);
 }
+#endif
 static inline rvd_avx512_float64_t mipp_avx512_rsqrt_float64(const rvd_avx512_float64_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_rsqrt_float64");
 	exit(-1);
@@ -5191,6 +5315,46 @@ static inline rvd_avx512_uint16_t mipp_avx512_hmax_uint16(const rvd_avx512_uint1
 }
 static inline rvd_avx512_uint8_t mipp_avx512_hmax_uint8(const rvd_avx512_uint8_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_hmax_uint8");
+	exit(-1);
+}
+#if !( ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) ) && ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) ) && ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) ) && ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) ) )
+static inline int64_t mipp_avx512_hadd_to_scal_int64(const rvd_avx512_int64_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_hadd_to_scal_int64");
+	exit(-1);
+}
+#endif
+#if !( ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) ) && ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) ) && ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) ) && ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) ) )
+static inline int32_t mipp_avx512_hadd_to_scal_int32(const rvd_avx512_int32_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_hadd_to_scal_int32");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX512BW__) && ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) ) && ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) ) && defined(__AVX512BW__) && ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) ) && ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) ) )
+static inline int16_t mipp_avx512_hadd_to_scal_int16(const rvd_avx512_int16_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_hadd_to_scal_int16");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX512BW__) && ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) ) && ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) ) && defined(__AVX512BW__) && ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) ) && ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) ) )
+static inline int8_t mipp_avx512_hadd_to_scal_int8(const rvd_avx512_int8_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_hadd_to_scal_int8");
+	exit(-1);
+}
+#endif
+static inline uint64_t mipp_avx512_hadd_to_scal_uint64(const rvd_avx512_uint64_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_hadd_to_scal_uint64");
+	exit(-1);
+}
+static inline uint32_t mipp_avx512_hadd_to_scal_uint32(const rvd_avx512_uint32_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_hadd_to_scal_uint32");
+	exit(-1);
+}
+static inline uint16_t mipp_avx512_hadd_to_scal_uint16(const rvd_avx512_uint16_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_hadd_to_scal_uint16");
+	exit(-1);
+}
+static inline uint8_t mipp_avx512_hadd_to_scal_uint8(const rvd_avx512_uint8_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_hadd_to_scal_uint8");
 	exit(-1);
 }
 #if !( defined(__AVX512F__) )

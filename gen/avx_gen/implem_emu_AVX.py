@@ -217,6 +217,10 @@ tpl_implem_emu_avx = {
      %r<tp>% rmsk =%toreg<tp>%(m0);
      return %andb<tp>%(rmsk, rgather);"""
 	},
+	"hadd_to_scal": { "format": "long", "code":
+"""%r<tp>% reduced = %hadd<tp>%(r0);
+	return %getfirst<tp>%(reduced);"""
+	},
 }
 """ "implems_emu" dictionary:
     -Purpose: This dictionary contains implementation models for various emulated functions.
@@ -284,6 +288,8 @@ implems_emu_avx = {
 		{ "datatypes": all_datatypes, "template": tpl_implem_emu_avx["getfirst"] }, ],
 	"maskz_add": [
         { "datatypes" : all_datatypes, "template" : tpl_implem_emu_avx["maskz_add"] } ],
+    "hadd_to_scal": [
+        { "datatypes" : all_datatypes, "template" : tpl_implem_emu_avx["hadd_to_scal"] } ],
  #    "gather": [
  #        { "datatypes" : all_datatypes, "template" : tpl_implem_emu_avx["gather_seq"] } ],
  # "mask_gather": [

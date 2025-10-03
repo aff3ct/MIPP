@@ -5129,6 +5129,60 @@ static inline rvd_avx_uint8_t mipp_avx_maskz_add_uint8(const rvm_avx_uint8_t m0,
 	return mipp_avx_andb_uint8(rmsk, radd);
 }
 #endif
+// ---------------------------------------------------------------------------------------------------------------------------------------------- hadd_to_scal
+static inline float64_t mipp_avx_hadd_to_scal_float64(const rvd_avx_float64_t r0) {
+	rvd_avx_float64_t reduced = mipp_avx_hadd_float64(r0);
+	return mipp_avx_getfirst_float64(reduced);
+}
+// ---------------------------------------------------------------------------------------------------------------------------------------------- hadd_to_scal
+static inline float32_t mipp_avx_hadd_to_scal_float32(const rvd_avx_float32_t r0) {
+	rvd_avx_float32_t reduced = mipp_avx_hadd_float32(r0);
+	return mipp_avx_getfirst_float32(reduced);
+}
+// ---------------------------------------------------------------------------------------------------------------------------------------------- hadd_to_scal
+#if defined(__AVX2__)
+static inline int64_t mipp_avx_hadd_to_scal_int64(const rvd_avx_int64_t r0) {
+	rvd_avx_int64_t reduced = mipp_avx_hadd_int64(r0);
+	return mipp_avx_getfirst_int64(reduced);
+}
+#endif
+// ---------------------------------------------------------------------------------------------------------------------------------------------- hadd_to_scal
+#if defined(__AVX2__)
+static inline int32_t mipp_avx_hadd_to_scal_int32(const rvd_avx_int32_t r0) {
+	rvd_avx_int32_t reduced = mipp_avx_hadd_int32(r0);
+	return mipp_avx_getfirst_int32(reduced);
+}
+#endif
+// ---------------------------------------------------------------------------------------------------------------------------------------------- hadd_to_scal
+#if defined(__AVX2__) && ( defined(__AVX2__) || !( defined(__AVX2__) ) )
+static inline int16_t mipp_avx_hadd_to_scal_int16(const rvd_avx_int16_t r0) {
+	rvd_avx_int16_t reduced = mipp_avx_hadd_int16(r0);
+	return mipp_avx_getfirst_int16(reduced);
+}
+#endif
+// ---------------------------------------------------------------------------------------------------------------------------------------------- hadd_to_scal
+#if defined(__AVX2__) && ( defined(__AVX2__) || !( defined(__AVX2__) ) )
+static inline int8_t mipp_avx_hadd_to_scal_int8(const rvd_avx_int8_t r0) {
+	rvd_avx_int8_t reduced = mipp_avx_hadd_int8(r0);
+	return mipp_avx_getfirst_int8(reduced);
+}
+#endif
+// ---------------------------------------------------------------------------------------------------------------------------------------------- hadd_to_scal
+// ---------------------------------------------------------------------------------------------------------------------------------------------- hadd_to_scal
+// ---------------------------------------------------------------------------------------------------------------------------------------------- hadd_to_scal
+#if defined(__AVX2__) && ( defined(__AVX2__) || !( defined(__AVX2__) ) )
+static inline uint16_t mipp_avx_hadd_to_scal_uint16(const rvd_avx_uint16_t r0) {
+	rvd_avx_uint16_t reduced = mipp_avx_hadd_uint16(r0);
+	return mipp_avx_getfirst_uint16(reduced);
+}
+#endif
+// ---------------------------------------------------------------------------------------------------------------------------------------------- hadd_to_scal
+#if defined(__AVX2__) && ( defined(__AVX2__) || !( defined(__AVX2__) ) )
+static inline uint8_t mipp_avx_hadd_to_scal_uint8(const rvd_avx_uint8_t r0) {
+	rvd_avx_uint8_t reduced = mipp_avx_hadd_uint8(r0);
+	return mipp_avx_getfirst_uint8(reduced);
+}
+#endif
 #if !( defined(MIPP_ALIGNED_LOADS) ) && !( !defined(MIPP_ALIGNED_LOADS) )
 static inline rvd_avx_float64_t mipp_avx_load_float64(const float64_t* p0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_load_float64");
@@ -6714,6 +6768,50 @@ static inline rvd_avx_uint16_t mipp_avx_hmax_uint16(const rvd_avx_uint16_t r0) {
 #if !( defined(__AVX2__) )
 static inline rvd_avx_uint8_t mipp_avx_hmax_uint8(const rvd_avx_uint8_t r0) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hmax_uint8");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) && defined(__AVX2__) )
+static inline int64_t mipp_avx_hadd_to_scal_int64(const rvd_avx_int64_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hadd_to_scal_int64");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) && defined(__AVX2__) )
+static inline int32_t mipp_avx_hadd_to_scal_int32(const rvd_avx_int32_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hadd_to_scal_int32");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) && ( defined(__AVX2__) || !( defined(__AVX2__) ) ) && defined(__AVX2__) && ( defined(__AVX2__) || !( defined(__AVX2__) ) ) )
+static inline int16_t mipp_avx_hadd_to_scal_int16(const rvd_avx_int16_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hadd_to_scal_int16");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) && ( defined(__AVX2__) || !( defined(__AVX2__) ) ) && defined(__AVX2__) && ( defined(__AVX2__) || !( defined(__AVX2__) ) ) )
+static inline int8_t mipp_avx_hadd_to_scal_int8(const rvd_avx_int8_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hadd_to_scal_int8");
+	exit(-1);
+}
+#endif
+static inline uint64_t mipp_avx_hadd_to_scal_uint64(const rvd_avx_uint64_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hadd_to_scal_uint64");
+	exit(-1);
+}
+static inline uint32_t mipp_avx_hadd_to_scal_uint32(const rvd_avx_uint32_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hadd_to_scal_uint32");
+	exit(-1);
+}
+#if !( defined(__AVX2__) && ( defined(__AVX2__) || !( defined(__AVX2__) ) ) && defined(__AVX2__) && ( defined(__AVX2__) || !( defined(__AVX2__) ) ) )
+static inline uint16_t mipp_avx_hadd_to_scal_uint16(const rvd_avx_uint16_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hadd_to_scal_uint16");
+	exit(-1);
+}
+#endif
+#if !( defined(__AVX2__) && ( defined(__AVX2__) || !( defined(__AVX2__) ) ) && defined(__AVX2__) && ( defined(__AVX2__) || !( defined(__AVX2__) ) ) )
+static inline uint8_t mipp_avx_hadd_to_scal_uint8(const rvd_avx_uint8_t r0) {
+	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_hadd_to_scal_uint8");
 	exit(-1);
 }
 #endif

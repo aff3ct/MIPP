@@ -47,16 +47,16 @@ def find_one_data_types_from(criteria):
 	return next(iter(all_types.values()));
 
 datatypes = {
-	float64 : { "name" : float64, "category": cfloat, "n_bits" : 64, "cstd": "float64_t", },
-	float32 : { "name" : float32, "category": cfloat, "n_bits" : 32, "cstd": "float32_t", },
-	  int64 : { "name" :   int64, "category":   cint, "n_bits" : 64, "cstd":   "int64_t", },
-	  int32 : { "name" :   int32, "category":   cint, "n_bits" : 32, "cstd":   "int32_t", },
-	  int16 : { "name" :   int16, "category":   cint, "n_bits" : 16, "cstd":   "int16_t", },
-	   int8 : { "name" :    int8, "category":   cint, "n_bits" :  8, "cstd":    "int8_t", },
-	 uint64 : { "name" :  uint64, "category":  cuint, "n_bits" : 64, "cstd":  "uint64_t", },
-	 uint32 : { "name" :  uint32, "category":  cuint, "n_bits" : 32, "cstd":  "uint32_t", },
-	 uint16 : { "name" :  uint16, "category":  cuint, "n_bits" : 16, "cstd":  "uint16_t", },
-	  uint8 : { "name" :   uint8, "category":  cuint, "n_bits" :  8, "cstd":   "uint8_t", },
+	float64 : { "name" : float64, "category": cfloat, "n_bits" : 64, "cstd": "float64_t", "literal_suffix": "d", },
+	float32 : { "name" : float32, "category": cfloat, "n_bits" : 32, "cstd": "float32_t", "literal_suffix": "f", },
+	  int64 : { "name" :   int64, "category":   cint, "n_bits" : 64, "cstd":   "int64_t", "literal_suffix": "LL", },
+	  int32 : { "name" :   int32, "category":   cint, "n_bits" : 32, "cstd":   "int32_t", "literal_suffix": "", },
+	  int16 : { "name" :   int16, "category":   cint, "n_bits" : 16, "cstd":   "int16_t", "literal_suffix": "", },
+	   int8 : { "name" :    int8, "category":   cint, "n_bits" :  8, "cstd":    "int8_t", "literal_suffix": "", },
+	 uint64 : { "name" :  uint64, "category":  cuint, "n_bits" : 64, "cstd":  "uint64_t", "literal_suffix": "UL", },
+	 uint32 : { "name" :  uint32, "category":  cuint, "n_bits" : 32, "cstd":  "uint32_t", "literal_suffix": "U", },
+	 uint16 : { "name" :  uint16, "category":  cuint, "n_bits" : 16, "cstd":  "uint16_t", "literal_suffix": "", },
+	  uint8 : { "name" :   uint8, "category":  cuint, "n_bits" :  8, "cstd":   "uint8_t", "literal_suffix": "", },
 }
 
 

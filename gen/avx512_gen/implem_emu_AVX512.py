@@ -24,11 +24,11 @@ tpl_implem_emu_avx512 = {
 	                     					 	  vals[ 3], vals[ 2], vals[ 1], vals[ 0])));"""
 	},
     "set-32"   : { "format": "long", "code": 
-""" retrun %cast_k<c:float,tp>%(_mm512_castsi512_ps(_mm512_set_epi32(vals[15], vals[14], vals[13], vals[12], vals[11], vals[10], vals[ 9], vals[ 8],                                            					
+""" return %cast_k<c:float,tp>%(_mm512_castsi512_ps(_mm512_set_epi32(vals[15], vals[14], vals[13], vals[12], vals[11], vals[10], vals[ 9], vals[ 8],                                            					
 																	 vals[ 7], vals[ 6], vals[ 5], vals[ 4],vals[ 3], vals[ 2], vals[ 1], vals[ 0])));"""
   	}, 
   	"set-16"   : { "format": "long", "code": 
-""" retrun %cast_k<c:float,tp>%(_mm512_castsi512_ps(_mm512_set_epi16((%cast<c:int|b:tp,tp>%)vals[31], (%cast<c:int|b:tp,tp>%)vals[30], (%cast<c:int|b:tp,tp>%)vals[29], (%cast<c:int|b:tp,tp>%)vals[28],
+""" return %cast_k<c:float,tp>%(_mm512_castsi512_ps(_mm512_set_epi16((%cast<c:int|b:tp,tp>%)vals[31], (%cast<c:int|b:tp,tp>%)vals[30], (%cast<c:int|b:tp,tp>%)vals[29], (%cast<c:int|b:tp,tp>%)vals[28],
 		                                            (%cast<c:int|b:tp,tp>%)vals[27], (%cast<c:int|b:tp,tp>%)vals[26], (%cast<c:int|b:tp,tp>%)vals[25], (%cast<c:int|b:tp,tp>%)vals[24],
 		                                            (%cast<c:int|b:tp,tp>%)vals[23], (%cast<c:int|b:tp,tp>%)vals[22], (%cast<c:int|b:tp,tp>%)vals[21], (%cast<c:int|b:tp,tp>%)vals[20],
 		                                            (%cast<c:int|b:tp,tp>%)vals[19], (%cast<c:int|b:tp,tp>%)vals[18], (%cast<c:int|b:tp,tp>%)vals[17], (%cast<c:int|b:tp,tp>%)vals[16],
@@ -38,7 +38,7 @@ tpl_implem_emu_avx512 = {
 		                                            (%cast<c:int|b:tp,tp>%)vals[ 3], (%cast<c:int|b:tp,tp>%)vals[ 2], (%cast<c:int|b:tp,tp>%)vals[ 1], (%cast<c:int|b:tp,tp>%)vals[ 0]));"""
     },
     "set-8"   : { "format": "long", "code": 
-""" retrun %cast_k<c:float,tp>%(_mm512_castsi512_ps(_mm512_set_epi8((%cast<c:int|b:tp,tp>%)vals[63], (%cast<c:int|b:tp,tp>%)vals[62], (%cast<c:int|b:tp,tp>%)vals[61], (%cast<c:int|b:tp,tp>%)vals[60],
+""" return %cast_k<c:float,tp>%(_mm512_castsi512_ps(_mm512_set_epi8((%cast<c:int|b:tp,tp>%)vals[63], (%cast<c:int|b:tp,tp>%)vals[62], (%cast<c:int|b:tp,tp>%)vals[61], (%cast<c:int|b:tp,tp>%)vals[60],
 		                                           (%cast<c:int|b:tp,tp>%)vals[59], (%cast<c:int|b:tp,tp>%)vals[58], (%cast<c:int|b:tp,tp>%)vals[57], (%cast<c:int|b:tp,tp>%)vals[56],
 		                                           (%cast<c:int|b:tp,tp>%)vals[55], (%cast<c:int|b:tp,tp>%)vals[54], (%cast<c:int|b:tp,tp>%)vals[53], (%cast<c:int|b:tp,tp>%)vals[52],
 		                                           (%cast<c:int|b:tp,tp>%)vals[51], (%cast<c:int|b:tp,tp>%)vals[50], (%cast<c:int|b:tp,tp>%)vals[49], (%cast<c:int|b:tp,tp>%)vals[48],
@@ -129,7 +129,7 @@ tpl_implem_emu_avx512 = {
   },
 
 	"set1_k-8": { "format": "long", "code":
-""" %r<c:int|b:tp>% r0_32 = %set1<c:int|b:tp>%(r0 ? (%cast<c:int|b:tp,tp>%)0xFFFFFFFFFFFFFFFF : 0);
+ """ %r<c:int|b:tp>% r0_32 = %set1<c:int|b:tp>%(r0 ? (%cast<c:int|b:tp,tp>%)0xFFFFFFFFFFFFFFFF : 0);
     %r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%( (%cast<c:int|b:tp,tp>%)0xFFFFFFFFFFFFFFFF    );
 	%r<c:int|b:tp>% msk   = %cmpneq<c:int|b:tp>%(r0_32, r1_32)
     %m<c:int|b:tp>% res   = %tomsk<c:int|b:tp>%(msk);
@@ -212,8 +212,6 @@ tpl_implem_emu_avx512 = {
 	"notb_k-64": { "format": "long", "code":
 """	return ~(m0);"""
 	},
-
-
 	"testz_2-64":{ "format": "long",  "code":
 """	%r<c:int|b:tp>% r32 = %set0<c:int|b:tp>%();
 	%m<c:int|b:tp>% msk = %cmpneq<c:int|b:tp>%(r0, r32);		
@@ -260,9 +258,18 @@ tpl_implem_emu_avx512 = {
 	return %cast<c:uint|b:64,tp>%(msk == 0);"""
 	},
 	"maskz_add": { "format": "long", "code":
-"""	%r<tp>% radd = %add<tp>%(r0, r1);
+ """%r<tp>% radd = %add<tp>%(r0, r1);
     %r<tp>% rmsk =%toreg<tp>%(m0);
 	return %andb<tp>%(rmsk, radd);"""
+	},
+	"getfirst_fromstore": { "format": "long", "code":
+ """%v<tp>% tmp[%N<tp>%];
+	%store<tp>%(tmp, r);
+	return tmp[0];"""
+	},
+	"hadd_to_scal": { "format": "long", "code":
+ """%r<tp>% reduced = %hadd<tp>%(r0);
+	return %getfirst<tp>%(reduced);"""
 	},
 }
 implems_emu_avx512 = {
@@ -333,4 +340,8 @@ implems_emu_avx512 = {
 		],
 		"maskz_add": [
         	{ "datatypes" : all_int, "template" : tpl_implem_emu_avx512["maskz_add"] } ],
+		"getfirst": [
+        	{ "datatypes" : all_datatypes, "template" : tpl_implem_emu_avx512["getfirst_fromstore"] } ],
+		"hadd_to_scal": [
+        	{ "datatypes" : all_datatypes, "template" : tpl_implem_emu_avx512["hadd_to_scal"] } ],
 }
