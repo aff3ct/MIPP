@@ -1499,6 +1499,12 @@
 #endif
 
 	// -------------------------------------------------------------------------------------------------- lshift (mask)
+	static inline msk low()
+  {
+    // build mask with lower n elements activated
+    return ~(0xFF << nb_el);
+  }
+	
 	template <>
 	inline msk lshift<8>(const msk v1, const uint32_t n) {
 		return v1 << n;

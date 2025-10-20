@@ -3,8 +3,9 @@ from tools import *
 isa_sve = {
     "name": "sve",
     "prefix": "sv",
-    "size": {"128 , 256 , 512 , 1024 , 2048",},
+    "size": {128 , 256 , 512 , 1024 , 2048},
     "define": "__ARM_FEATURE_SVE",
+    "architecture": "AArch64",
     "hw_lmul": True,
     "datatypes": {
         float64 : {"data_ext": "f64" , "data_ext_logi": "b64" , "data_ext_msk": "p" ,"reg" : "svfloat64_t" , "msk": "svbool_t" , "to_ptr": "float64_t",  } ,
@@ -22,16 +23,18 @@ isa_sve = {
 
 tpl_implem_sve = {
     "cast"               : { "format": "short", "code":"{% if isa_dt_par.data_ext != isa_dt_ret.data_ext -%}{{ isa.prefix }}{{ instr_name }}_{{isa_dt_ret.data_ext}}_{{isa_dt_par.data_ext}}(r0.r);{% else -%} r0.r;{% endif %}" },
+    "cast_k"             : { "format": "short", "code":" m0.m;"},
     # with mask or from mask
     "blend"                : { "format": "short", "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(m0.m, r0.r, r1.r);" },
     "load"                 : { "format": "short", "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), ({{ isa_dt_par.to_ptr }}*) p0);" },
     "mask_load"            : { "format": "short", "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(m0.m, ({{ isa_dt_par.to_ptr }}*) p0);" },
     "store"                : { "format": "short", "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), ({{ isa_dt_par.to_ptr }}*) p0, r0.r);" },
     "mask_store"           : { "format": "short", "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(m0.m, ({{ isa_dt_par.to_ptr }}*) p0, r0.r);" },
-    "set_k"                : { "format": "long", "code":
- """%m<tp>% res;
-    res.m = vals;
-    return res;""" }, 
+#    "set_k"                : { "format": "long", "code":
+# """%m<tp>% res;
+#    res.m = vals;
+#    return res;""" },
+    #"low_k"               : { "format": "short", "code": "{{ isa.prefix }}{{ instr_name }}(svptrue_{{ isa_dt_par.data_ext_logi }}());" },
     "set1"                 : { "format": "short", "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(v0);"},
     "set1_k"               : { "format": "short", "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}((const bool) v0);"},
     "set0"                 : { "format": "short", "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}({% if 'float' in isa_dt_par.to_ptr -%}0.0{% else -%}0{% endif %}{{dt_par.literal_suffix}});"},
@@ -57,6 +60,8 @@ tpl_implem_sve = {
 implems_sve = {
     "cast" : [
         { "instr_name": "reinterpret", "datatypes": all_datatypes_cart_prod, "template": tpl_implem_sve["cast"] } ],
+    "cast_k" : [
+        { "instr_name" : ""    , "datatypes": all_datatypes_cart_prod , "template": tpl_implem_sve["cast_k"]  } ],
     "blend": [
         { "instr_name": "sel", "datatypes": all_datatypes, "template": tpl_implem_sve["blend"] }],
     "load" : [
@@ -64,13 +69,13 @@ implems_sve = {
     "maskzld" : [
         { "instr_name": "ld1", "datatypes": all_datatypes, "template": tpl_implem_sve["mask_load"]},],
     "loadu"  : [
-        { "instr_name": "ld1", "datatypes": all_datatypes, "template": tpl_implem_sve["load"], "if": "defined(_ARM_FEATURE_UNALIGNED)"},],
+        { "instr_name": "ld1", "datatypes": all_datatypes, "template": tpl_implem_sve["load"]},],
     "store" : [
         { "instr_name": "st1", "datatypes": all_datatypes, "template": tpl_implem_sve["store"]},],
     "maskst" : [
         { "instr_name": "st1", "datatypes": all_datatypes, "template": tpl_implem_sve["mask_store"]},],
     "storeu" : [
-        { "instr_name": "st1", "datatypes": all_datatypes, "template": tpl_implem_sve["store"], "if": "defined(_ARM_FEATURE_UNALIGNED)"},],
+        { "instr_name": "st1", "datatypes": all_datatypes, "template": tpl_implem_sve["store"]},],
     # ok with bool array
     #"set_k" : [
     #    { "instr_name": "", "datatypes": [int32, int64], "template": tpl_implem_sve["set_k"], "if": "defined(__ARM_FEATURE_SVE_PREDICATE_OPERATORS)"},],
@@ -82,6 +87,8 @@ implems_sve = {
         { "instr_name": "dup", "datatypes": all_datatypes, "template": tpl_implem_sve["set0"]   } ],
     "set0_k": [
         { "instr_name": "pfalse", "datatypes": all_datatypes, "template": tpl_implem_sve["set0_k"] } ],
+    #"low_k": [
+    #    { "instr_name": "unpklo_b", "datatypes": all_datatypes, "template": tpl_implem_sve["low_k"] } ],
     # manage z, m , x here only z
     "andb": [
         { "instr_name": "and"  , "datatypes": all_int_uint, "template": tpl_implem_sve["andb"] } ],

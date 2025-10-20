@@ -3,16 +3,16 @@
 #include <immintrin.h>
 #define MIPP_SSE_RVD_SIZE_BIT 128
 #define MIPP_SSE_RVD_SIZE_BYTE 16
-#define MIPP_N_FLOAT64 2
-#define MIPP_N_FLOAT32 4
-#define MIPP_N_INT64 2
-#define MIPP_N_INT32 4
-#define MIPP_N_INT16 8
-#define MIPP_N_INT8 16
-#define MIPP_N_UINT64 2
-#define MIPP_N_UINT32 4
-#define MIPP_N_UINT16 8
-#define MIPP_N_UINT8 16
+#define MIPP_SSE_N_FLOAT64 2
+#define MIPP_SSE_N_FLOAT32 4
+#define MIPP_SSE_N_INT64 2
+#define MIPP_SSE_N_INT32 4
+#define MIPP_SSE_N_INT16 8
+#define MIPP_SSE_N_INT8 16
+#define MIPP_SSE_N_UINT64 2
+#define MIPP_SSE_N_UINT32 4
+#define MIPP_SSE_N_UINT16 8
+#define MIPP_SSE_N_UINT8 16
 typedef struct { __m128d r; } rvd_sse_float64_t;
 typedef struct {  __m128 r; } rvd_sse_float32_t;
 typedef struct { __m128i r; } rvd_sse_int64_t;
@@ -2302,14 +2302,6 @@ static inline rvm_sse_int32_t mipp_sse_cmpeq_int32(const rvd_sse_int32_t r0, con
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cmpeq
-#if defined(__SSE2__)
-static inline rvm_sse_int64_t mipp_sse_cmpeq_int64(const rvd_sse_int64_t r0, const rvd_sse_int64_t r1) {
-	rvm_sse_int64_t res;
-	res.m= _mm_cmpeq_epi64(r0.r, r1.r);
-	return res;
-}
-#endif
-// ---------------------------------------------------------------------------------------------------------------------------------------------- cmpeq
 #if defined(__SSE4_1__)
 static inline rvm_sse_int64_t mipp_sse_cmpeq_int64(const rvd_sse_int64_t r0, const rvd_sse_int64_t r1) {
 	rvm_sse_int64_t res;
@@ -2323,22 +2315,6 @@ static inline rvm_sse_float32_t mipp_sse_cmpneq_float32(const rvd_sse_float32_t 
 	res.m= _mm_cmpneq_ps(r0.r, r1.r);
 	return res;
 }
-// ---------------------------------------------------------------------------------------------------------------------------------------------- cmpneq
-#if defined(__SSE2__)
-static inline rvm_sse_float64_t mipp_sse_cmpneq_float64(const rvd_sse_float64_t r0, const rvd_sse_float64_t r1) {
-	rvm_sse_float64_t res;
-	res.m= _mm_cmpneq_pd(r0.r, r1.r);
-	return res;
-}
-#endif
-// ---------------------------------------------------------------------------------------------------------------------------------------------- cmpneq
-#if defined(__SSE4_1__)
-static inline rvm_sse_int64_t mipp_sse_cmpneq_int64(const rvd_sse_int64_t r0, const rvd_sse_int64_t r1) {
-	rvm_sse_int64_t res;
-	res.m= _mm_cmpneq_epi64(r0.r, r1.r);
-	return res;
-}
-#endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- cmplt
 static inline rvm_sse_float32_t mipp_sse_cmplt_float32(const rvd_sse_float32_t r0, const rvd_sse_float32_t r1) {
 	rvm_sse_float32_t res;
@@ -2563,83 +2539,83 @@ static inline void mipp_sse_store_uint8(uint8_t* p0, const rvd_sse_uint8_t r0) {
 	exit(-1);
 }
 #endif
-static inline rvd_sse_float64_t mipp_sse_set_float64(const float64_t vals[MIPP_N_FLOAT64]) {
+static inline rvd_sse_float64_t mipp_sse_set_float64(const float64_t vals[MIPP_SSE_N_FLOAT64]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_sse_set_float64");
 	exit(-1);
 }
-static inline rvd_sse_float32_t mipp_sse_set_float32(const float32_t vals[MIPP_N_FLOAT32]) {
+static inline rvd_sse_float32_t mipp_sse_set_float32(const float32_t vals[MIPP_SSE_N_FLOAT32]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_sse_set_float32");
 	exit(-1);
 }
-static inline rvd_sse_int64_t mipp_sse_set_int64(const int64_t vals[MIPP_N_INT64]) {
+static inline rvd_sse_int64_t mipp_sse_set_int64(const int64_t vals[MIPP_SSE_N_INT64]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_sse_set_int64");
 	exit(-1);
 }
-static inline rvd_sse_int32_t mipp_sse_set_int32(const int32_t vals[MIPP_N_INT32]) {
+static inline rvd_sse_int32_t mipp_sse_set_int32(const int32_t vals[MIPP_SSE_N_INT32]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_sse_set_int32");
 	exit(-1);
 }
-static inline rvd_sse_int16_t mipp_sse_set_int16(const int16_t vals[MIPP_N_INT16]) {
+static inline rvd_sse_int16_t mipp_sse_set_int16(const int16_t vals[MIPP_SSE_N_INT16]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_sse_set_int16");
 	exit(-1);
 }
-static inline rvd_sse_int8_t mipp_sse_set_int8(const int8_t vals[MIPP_N_INT8]) {
+static inline rvd_sse_int8_t mipp_sse_set_int8(const int8_t vals[MIPP_SSE_N_INT8]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_sse_set_int8");
 	exit(-1);
 }
-static inline rvd_sse_uint64_t mipp_sse_set_uint64(const uint64_t vals[MIPP_N_UINT64]) {
+static inline rvd_sse_uint64_t mipp_sse_set_uint64(const uint64_t vals[MIPP_SSE_N_UINT64]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_sse_set_uint64");
 	exit(-1);
 }
-static inline rvd_sse_uint32_t mipp_sse_set_uint32(const uint32_t vals[MIPP_N_UINT32]) {
+static inline rvd_sse_uint32_t mipp_sse_set_uint32(const uint32_t vals[MIPP_SSE_N_UINT32]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_sse_set_uint32");
 	exit(-1);
 }
-static inline rvd_sse_uint16_t mipp_sse_set_uint16(const uint16_t vals[MIPP_N_UINT16]) {
+static inline rvd_sse_uint16_t mipp_sse_set_uint16(const uint16_t vals[MIPP_SSE_N_UINT16]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_sse_set_uint16");
 	exit(-1);
 }
-static inline rvd_sse_uint8_t mipp_sse_set_uint8(const uint8_t vals[MIPP_N_UINT8]) {
+static inline rvd_sse_uint8_t mipp_sse_set_uint8(const uint8_t vals[MIPP_SSE_N_UINT8]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_sse_set_uint8");
 	exit(-1);
 }
-static inline rvm_sse_float64_t mipp_sse_set_k_float64(const int32_t vals[MIPP_N_FLOAT64]) {
+static inline rvm_sse_float64_t mipp_sse_set_k_float64(const int32_t vals[MIPP_SSE_N_FLOAT64]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_sse_set_k_float64");
 	exit(-1);
 }
-static inline rvm_sse_float32_t mipp_sse_set_k_float32(const int32_t vals[MIPP_N_FLOAT32]) {
+static inline rvm_sse_float32_t mipp_sse_set_k_float32(const int32_t vals[MIPP_SSE_N_FLOAT32]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_sse_set_k_float32");
 	exit(-1);
 }
-static inline rvm_sse_int64_t mipp_sse_set_k_int64(const int32_t vals[MIPP_N_INT64]) {
+static inline rvm_sse_int64_t mipp_sse_set_k_int64(const int32_t vals[MIPP_SSE_N_INT64]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_sse_set_k_int64");
 	exit(-1);
 }
-static inline rvm_sse_int32_t mipp_sse_set_k_int32(const int32_t vals[MIPP_N_INT32]) {
+static inline rvm_sse_int32_t mipp_sse_set_k_int32(const int32_t vals[MIPP_SSE_N_INT32]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_sse_set_k_int32");
 	exit(-1);
 }
-static inline rvm_sse_int16_t mipp_sse_set_k_int16(const int32_t vals[MIPP_N_INT16]) {
+static inline rvm_sse_int16_t mipp_sse_set_k_int16(const int32_t vals[MIPP_SSE_N_INT16]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_sse_set_k_int16");
 	exit(-1);
 }
-static inline rvm_sse_int8_t mipp_sse_set_k_int8(const int32_t vals[MIPP_N_INT8]) {
+static inline rvm_sse_int8_t mipp_sse_set_k_int8(const int32_t vals[MIPP_SSE_N_INT8]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_sse_set_k_int8");
 	exit(-1);
 }
-static inline rvm_sse_uint64_t mipp_sse_set_k_uint64(const int32_t vals[MIPP_N_UINT64]) {
+static inline rvm_sse_uint64_t mipp_sse_set_k_uint64(const int32_t vals[MIPP_SSE_N_UINT64]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_sse_set_k_uint64");
 	exit(-1);
 }
-static inline rvm_sse_uint32_t mipp_sse_set_k_uint32(const int32_t vals[MIPP_N_UINT32]) {
+static inline rvm_sse_uint32_t mipp_sse_set_k_uint32(const int32_t vals[MIPP_SSE_N_UINT32]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_sse_set_k_uint32");
 	exit(-1);
 }
-static inline rvm_sse_uint16_t mipp_sse_set_k_uint16(const int32_t vals[MIPP_N_UINT16]) {
+static inline rvm_sse_uint16_t mipp_sse_set_k_uint16(const int32_t vals[MIPP_SSE_N_UINT16]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_sse_set_k_uint16");
 	exit(-1);
 }
-static inline rvm_sse_uint8_t mipp_sse_set_k_uint8(const int32_t vals[MIPP_N_UINT8]) {
+static inline rvm_sse_uint8_t mipp_sse_set_k_uint8(const int32_t vals[MIPP_SSE_N_UINT8]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_sse_set_k_uint8");
 	exit(-1);
 }
@@ -3683,7 +3659,7 @@ static inline rvm_sse_float64_t mipp_sse_cmpeq_float64(const rvd_sse_float64_t r
 	exit(-1);
 }
 #endif
-#if !( defined(__SSE2__) ) && !( defined(__SSE4_1__) )
+#if !( defined(__SSE4_1__) )
 static inline rvm_sse_int64_t mipp_sse_cmpeq_int64(const rvd_sse_int64_t r0, const rvd_sse_int64_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_sse_cmpeq_int64");
 	exit(-1);
@@ -3721,18 +3697,14 @@ static inline rvm_sse_uint8_t mipp_sse_cmpeq_uint8(const rvd_sse_uint8_t r0, con
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_sse_cmpeq_uint8");
 	exit(-1);
 }
-#if !( defined(__SSE2__) )
 static inline rvm_sse_float64_t mipp_sse_cmpneq_float64(const rvd_sse_float64_t r0, const rvd_sse_float64_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_sse_cmpneq_float64");
 	exit(-1);
 }
-#endif
-#if !( defined(__SSE4_1__) )
 static inline rvm_sse_int64_t mipp_sse_cmpneq_int64(const rvd_sse_int64_t r0, const rvd_sse_int64_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_sse_cmpneq_int64");
 	exit(-1);
 }
-#endif
 static inline rvm_sse_int32_t mipp_sse_cmpneq_int32(const rvd_sse_int32_t r0, const rvd_sse_int32_t r1) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_sse_cmpneq_int32");
 	exit(-1);

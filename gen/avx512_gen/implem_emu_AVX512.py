@@ -55,7 +55,7 @@ tpl_implem_emu_avx512 = {
 		                                           (%cast<c:int|b:tp,tp>%)vals[ 7], (%cast<c:int|b:tp,tp>%)vals[ 6], (%cast<c:int|b:tp,tp>%)vals[ 5], (%cast<c:int|b:tp,tp>%)vals[ 4],
 		                                           (%cast<c:int|b:tp,tp>%)vals[ 3], (%cast<c:int|b:tp,tp>%)vals[ 2], (%cast<c:int|b:tp,tp>%)vals[ 1], (%cast<c:int|b:tp,tp>%)vals[ 0]));"""
 	},
-	"set_k-8": { "format": "long", "code":
+	"set_k-64": { "format": "long", "code":
 """	%v<tp>% t[%N<tp>%] = {vals[0] ? (%cast<c:int|b:tp,tp>%)0xFFFFFFFFFFFFFFFF : (%cast<c:int|b:tp,tp>%)0,
 		                 vals[1] ? (%cast<c:int|b:tp,tp>%)0xFFFFFFFFFFFFFFFF : (%cast<c:int|b:tp,tp>%)0,
 		                 vals[2] ? (%cast<c:int|b:tp,tp>%)0xFFFFFFFFFFFFFFFF : (%cast<c:int|b:tp,tp>%)0,
@@ -66,11 +66,9 @@ tpl_implem_emu_avx512 = {
 		                 vals[7] ? (%cast<c:int|b:tp,tp>%)0xFFFFFFFFFFFFFFFF : (%cast<c:int|b:tp,tp>%)0};
     %r<c:int|b:tp>% r0_32 = %set<c:int|b:tp>%((%cast<c:int|b:tp,tp>%)*t);
     %r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%((%cast<c:int|b:tp,tp>%)0xFFFFFFFFFFFFFFFF);
-	%r<c:int|b:tp>% msk   = %cmpneq<c:int|b:tp>%(r0_32, r1_32);
-    %m<c:int|b:tp>% res   = %tomsk<c:int|b:tp>%(msk);
-	return res;""" 
+	return %cmpneq<c:int|b:tp>%(r0_32, r1_32);"""
 	},
-	"set_k-16": { "format": "long", "code":
+	"set_k-32": { "format": "long", "code":
 """	%v<tp>% t[%N<tp>%] = {vals[ 0] ? 0xFFFFFFFF : 0, vals[ 1] ? 0xFFFFFFFF : 0,
 		                  vals[ 2] ? 0xFFFFFFFF : 0, vals[ 3] ? 0xFFFFFFFF : 0,
 		                  vals[ 4] ? 0xFFFFFFFF : 0, vals[ 5] ? 0xFFFFFFFF : 0,
@@ -81,11 +79,9 @@ tpl_implem_emu_avx512 = {
 		                  vals[14] ? 0xFFFFFFFF : 0, vals[15] ? 0xFFFFFFFF : 0};
     %r<c:int|b:tp>% r0_32 = %set<c:int|b:tp>%((%cast<c:int|b:tp,tp>%)*t);
     %r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%(0xFFFFFFFF);
-	%r<c:int|b:tp>% msk   = %cmpneq<c:int|b:tp>%(r0_32, r1_32);
-    %m<c:int|b:tp>% res   = %tomsk<c:int|b:tp>%(msk);
-	return res;""" 
+	return %cmpneq<c:int|b:tp>%(r0_32, r1_32);"""
 	},
-	"set_k-32": { "format": "long", "code":
+	"set_k-16": { "format": "long", "code":
 """	%v<tp>% t[%N<tp>%] = {vals[ 0] ? (%cast<c:int|b:tp,tp>%)0xFFFF : (%cast<c:int|b:tp,tp>%)0, vals[ 1] ? (%cast<c:int|b:tp,tp>%)0xFFFF : (%cast<c:int|b:tp,tp>%)0,
 		                  vals[ 2] ? (%cast<c:int|b:tp,tp>%)0xFFFF : (%cast<c:int|b:tp,tp>%)0, vals[ 3] ? (%cast<c:int|b:tp,tp>%)0xFFFF : (%cast<c:int|b:tp,tp>%)0,
 		                  vals[ 4] ? (%cast<c:int|b:tp,tp>%)0xFFFF : (%cast<c:int|b:tp,tp>%)0, vals[ 5] ? (%cast<c:int|b:tp,tp>%)0xFFFF : (%cast<c:int|b:tp,tp>%)0,
@@ -104,11 +100,9 @@ tpl_implem_emu_avx512 = {
 		                  vals[30] ? (%cast<c:int|b:tp,tp>%)0xFFFF : (%cast<c:int|b:tp,tp>%)0, vals[31] ? (%cast<c:int|b:tp,tp>%)0xFFFF : (%cast<c:int|b:tp,tp>%)0};
     %r<c:int|b:tp>% r0_32 = %set<c:int|b:tp>%((%cast<c:int|b:tp,tp>%)*t);
     %r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%(0xFFFF);
-	%r<c:int|b:tp>% msk   = %cmpneq<c:int|b:tp>%(r0_32, r1_32);
-    %m<c:int|b:tp>% res   = %tomsk<c:int|b:tp>%(msk);
-	return res;""" 
+	return %cmpneq<c:int|b:tp>%(r0_32, r1_32); """ 
 	},
-    "set_k-64": {"format": "long", "code":
+    "set_k-8": {"format": "long", "code":
 """ %v<tp>% t[%N<tp>%] = { vals[ 0] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[ 1] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[ 2] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[ 3] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0,
                             vals[ 4] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[ 5] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[ 6] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[ 7] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0,
                             vals[ 8] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[ 9] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[10] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[11] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0,
@@ -123,38 +117,28 @@ tpl_implem_emu_avx512 = {
                             vals[44] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[45] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[46] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0, vals[47] ? (%cast<c:int|b:tp,tp>%)0xFF : (%cast<c:int|b:tp,tp>%)0};
     %r<c:int|b:tp>% r0_32 = %set<c:int|b:tp>%((%cast<c:int|b:tp,tp>%)*t);
     %r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%(0xFF);
-	%r<c:int|b:tp>% msk   = %cmpneq<c:int|b:tp>%(r0_32, r1_32);
-    %m<c:int|b:tp>% res   = %tomsk<c:int|b:tp>%(msk);
-	return res; """
+	return %cmpneq<c:int|b:tp>%(r0_32, r1_32); """
   },
 
 	"set1_k-8": { "format": "long", "code":
  """ %r<c:int|b:tp>% r0_32 = %set1<c:int|b:tp>%(r0 ? (%cast<c:int|b:tp,tp>%)0xFFFFFFFFFFFFFFFF : 0);
     %r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%( (%cast<c:int|b:tp,tp>%)0xFFFFFFFFFFFFFFFF    );
-	%r<c:int|b:tp>% msk   = %cmpneq<c:int|b:tp>%(r0_32, r1_32)
-    %m<c:int|b:tp>% res   = %tomsk<c:int|b:tp>%(msk);
-	return res;"""
+	return = %cmpneq<c:int|b:tp>%(r0_32, r1_32) """
 	},
 	"set1_k-16": { "format": "long", "code":
 """ %r<c:int|b:tp>% r0_32 = %set1<c:int|b:tp>%(r0 ? 0xFFFFFFFF : 0);
     %r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%(  0xFFFFFFFF    );
-	%r<c:int|b:tp>% msk   = %cmpneq<c:int|b:tp>%(r0_32, r1_32);
-    %m<c:int|b:tp>% res   = %tomsk<c:int|b:tp>%(msk);
-	return res;"""
+	return %cmpneq<c:int|b:tp>%(r0_32, r1_32);"""
 	 },
 	"set1_k-32": { "format": "long", "code":
 """ %r<c:int|b:tp>% r0_32 = %set1<c:int|b:tp>%(r0 ? 0xFFFF : 0);
     %r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%( 0xFFFF    );
-	%r<c:int|b:tp>% msk   = %cmpneq<c:int|b:tp>%(r0_32, r1_32);
-    %m<c:int|b:tp>% res   = %tomsk<c:int|b:tp>%(msk);
-	return res;"""
+    return %cmpneq<c:int|b:tp>%(r0_32, r1_32);"""
 	 },
 	"set1_k-64": { "format": "long", "code":
 """ %r<c:int|b:tp>% r0_32 = %set1<c:int|b:tp>%(r0 ? 0xFF : 0);
     %r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%( 0xFF    );
-	%r<c:int|b:tp>% msk   = %cmpneq<c:int|b:tp>%(r0_32, r1_32);
-    %m<c:int|b:tp>% res   = %tomsk<c:int|b:tp>%(msk);
-	return res;"""
+	return %cmpneq<c:int|b:tp>%(r0_32, r1_32); """
 	 },	
 	"set0_k"  : { "format": "long", "code":
 """ %m<c:int|b:tp>% m  = 0;

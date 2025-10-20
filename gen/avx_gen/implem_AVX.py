@@ -13,6 +13,7 @@ isa_avx = {
 	"size": 256,
 	"define": "__AVX__",
 	"hw_lmul": False,
+    "architecture": "x86",
 	"datatypes": {
 		float64 : { "data_ext" :    "pd", "data_ext_logi":    "pd", "data_ext_msk": "pd", "reg" : "__m256d", "msk" : "__m256d", "to_ptr": "float64_t" },
 		float32 : { "data_ext" :    "ps", "data_ext_logi":    "ps", "data_ext_msk": "ps", "reg" : " __m256", "msk" : "__m256", "to_ptr": "float32_t" },

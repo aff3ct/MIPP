@@ -11,7 +11,7 @@ def gen_c_defines(isa, file):
 	print("#define MIPP_" + isa["name"].upper() + "_RVD_SIZE_BYTE " + str(int(isa["size"] / 8)), file=file)
 
 
-	template = """#define MIPP_N_{{type_category_upper}}{{n_bits}} {{n_elmts}}"""
+	template = """#define MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{n_bits}} {{n_elmts}}"""
 	j2_template = Template(template, undefined=StrictUndefined)
 
 	for dt in isa["datatypes"]:

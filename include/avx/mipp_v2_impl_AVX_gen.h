@@ -3,16 +3,16 @@
 #include <immintrin.h>
 #define MIPP_AVX_RVD_SIZE_BIT 256
 #define MIPP_AVX_RVD_SIZE_BYTE 32
-#define MIPP_N_FLOAT64 4
-#define MIPP_N_FLOAT32 8
-#define MIPP_N_INT64 4
-#define MIPP_N_INT32 8
-#define MIPP_N_INT16 16
-#define MIPP_N_INT8 32
-#define MIPP_N_UINT64 4
-#define MIPP_N_UINT32 8
-#define MIPP_N_UINT16 16
-#define MIPP_N_UINT8 32
+#define MIPP_AVX_N_FLOAT64 4
+#define MIPP_AVX_N_FLOAT32 8
+#define MIPP_AVX_N_INT64 4
+#define MIPP_AVX_N_INT32 8
+#define MIPP_AVX_N_INT16 16
+#define MIPP_AVX_N_INT8 32
+#define MIPP_AVX_N_UINT64 4
+#define MIPP_AVX_N_UINT32 8
+#define MIPP_AVX_N_UINT16 16
+#define MIPP_AVX_N_UINT8 32
 typedef struct { __m256d r; } rvd_avx_float64_t;
 typedef struct {  __m256 r; } rvd_avx_float32_t;
 typedef struct { __m256i r; } rvd_avx_int64_t;
@@ -4317,32 +4317,32 @@ static inline rvd_avx_uint8_t mipp_avx_hmax_uint8(const rvd_avx_uint8_t r0) {
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set
-static inline rvd_avx_float64_t mipp_avx_set_float64(const float64_t vals[MIPP_N_FLOAT64]) {
+static inline rvd_avx_float64_t mipp_avx_set_float64(const float64_t vals[MIPP_AVX_N_FLOAT64]) {
 	rvd_avx_float64_t res;
 	res.r= 	_mm256_set_pd(vals[3], vals[2], vals[1], vals[0]);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set
-static inline rvd_avx_float32_t mipp_avx_set_float32(const float32_t vals[MIPP_N_FLOAT32]) {
+static inline rvd_avx_float32_t mipp_avx_set_float32(const float32_t vals[MIPP_AVX_N_FLOAT32]) {
 	rvd_avx_float32_t res;
 	res.r= 	_mm256_set_ps(vals[7], vals[6], vals[5], vals[4], vals[3], vals[2], vals[1], vals[0]);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set
-static inline rvd_avx_int32_t mipp_avx_set_int32(const int32_t vals[MIPP_N_INT32]) {
+static inline rvd_avx_int32_t mipp_avx_set_int32(const int32_t vals[MIPP_AVX_N_INT32]) {
 	rvd_avx_int32_t res;
 	res.r= 	_mm256_set_epi32(vals[7], vals[6], vals[5], vals[4],
 												 vals[3], vals[2], vals[1], vals[0]);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set
-static inline rvd_avx_int64_t mipp_avx_set_int64(const int64_t vals[MIPP_N_INT64]) {
+static inline rvd_avx_int64_t mipp_avx_set_int64(const int64_t vals[MIPP_AVX_N_INT64]) {
 	rvd_avx_int64_t res;
 	res.r= 	_mm256_set_epi64x(vals[3], vals[2], vals[1], vals[0]);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set
-static inline rvd_avx_int16_t mipp_avx_set_int16(const int16_t vals[MIPP_N_INT16]) {
+static inline rvd_avx_int16_t mipp_avx_set_int16(const int16_t vals[MIPP_AVX_N_INT16]) {
 	rvd_avx_int16_t res;
 	res.r= 	_mm256_set_epi16(vals[15], vals[14], vals[13], vals[12],
 		                                         vals[11], vals[10], vals[ 9], vals[ 8],
@@ -4351,7 +4351,7 @@ static inline rvd_avx_int16_t mipp_avx_set_int16(const int16_t vals[MIPP_N_INT16
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set
-static inline rvd_avx_int8_t mipp_avx_set_int8(const int8_t vals[MIPP_N_INT8]) {
+static inline rvd_avx_int8_t mipp_avx_set_int8(const int8_t vals[MIPP_AVX_N_INT8]) {
 	rvd_avx_int8_t res;
 	res.r=  _mm256_set_epi8((int8_t)vals[31], (int8_t)vals[30], (int8_t)vals[29], (int8_t)vals[28],
 		                                           (int8_t)vals[27], (int8_t)vals[26], (int8_t)vals[25], (int8_t)vals[24],
@@ -4364,7 +4364,7 @@ static inline rvd_avx_int8_t mipp_avx_set_int8(const int8_t vals[MIPP_N_INT8]) {
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set_k
-static inline rvm_avx_int8_t mipp_avx_set_k_int8(const int32_t vals[MIPP_N_INT8]) {
+static inline rvm_avx_int8_t mipp_avx_set_k_int8(const int32_t vals[MIPP_AVX_N_INT8]) {
 	rvm_avx_int8_t res;
 	res.m=  _mm256_set_epi8(vals[31] ? 0xFF : 0, vals[30] ? 0xFF : 0, vals[29] ? 0xFF : 0, vals[28] ? 0xFF : 0,
 		                       vals[27] ? 0xFF : 0, vals[26] ? 0xFF : 0, vals[25] ? 0xFF : 0, vals[24] ? 0xFF : 0,
@@ -4377,7 +4377,7 @@ static inline rvm_avx_int8_t mipp_avx_set_k_int8(const int32_t vals[MIPP_N_INT8]
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set_k
-static inline rvm_avx_int16_t mipp_avx_set_k_int16(const int32_t vals[MIPP_N_INT16]) {
+static inline rvm_avx_int16_t mipp_avx_set_k_int16(const int32_t vals[MIPP_AVX_N_INT16]) {
 	rvm_avx_int16_t res;
 	res.m= 	_mm256_set_epi16(vals[15] ? 0xFFFF : 0, vals[14] ? 0xFFFF : 0,
 		                        vals[13] ? 0xFFFF : 0, vals[12] ? 0xFFFF : 0,
@@ -4390,7 +4390,7 @@ static inline rvm_avx_int16_t mipp_avx_set_k_int16(const int32_t vals[MIPP_N_INT
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set_k
-static inline rvm_avx_int32_t mipp_avx_set_k_int32(const int32_t vals[MIPP_N_INT32]) {
+static inline rvm_avx_int32_t mipp_avx_set_k_int32(const int32_t vals[MIPP_AVX_N_INT32]) {
 	rvm_avx_int32_t res;
 	res.m=  _mm256_set_epi32(vals[7] ? 0xFFFFFFFF : 0, vals[6] ? 0xFFFFFFFF : 0,
 		                        vals[5] ? 0xFFFFFFFF : 0, vals[4] ? 0xFFFFFFFF : 0,
@@ -4399,7 +4399,7 @@ static inline rvm_avx_int32_t mipp_avx_set_k_int32(const int32_t vals[MIPP_N_INT
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set_k
-static inline rvm_avx_int64_t mipp_avx_set_k_int64(const int32_t vals[MIPP_N_INT64]) {
+static inline rvm_avx_int64_t mipp_avx_set_k_int64(const int32_t vals[MIPP_AVX_N_INT64]) {
 	rvm_avx_int64_t res;
 	res.m=  _mm256_set_epi64x(vals[3] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
 		                     vals[2] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0,
@@ -4408,11 +4408,11 @@ static inline rvm_avx_int64_t mipp_avx_set_k_int64(const int32_t vals[MIPP_N_INT
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set_k
-static inline rvm_avx_float64_t mipp_avx_set_k_float64(const int32_t vals[MIPP_N_FLOAT64]) {
+static inline rvm_avx_float64_t mipp_avx_set_k_float64(const int32_t vals[MIPP_AVX_N_FLOAT64]) {
 	 return mipp_avx_cast_k_int64_float64(mipp_avx_set_k_int64(vals));
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set_k
-static inline rvm_avx_float32_t mipp_avx_set_k_float32(const int32_t vals[MIPP_N_FLOAT32]) {
+static inline rvm_avx_float32_t mipp_avx_set_k_float32(const int32_t vals[MIPP_AVX_N_FLOAT32]) {
 	 return mipp_avx_cast_k_int32_float32(mipp_avx_set_k_int32(vals));
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set1_k
@@ -4909,130 +4909,130 @@ static inline int32_t mipp_avx_testz_2_uint8(const rvm_avx_uint8_t m0) {
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- get
 static inline float64_t mipp_avx_get_float64(const rvd_avx_float64_t r0, const uint32_t v0) {
-		float64_t t[MIPP_N_FLOAT64];
+		float64_t t[MIPP_AVX_N_FLOAT64];
 	mipp_avx_storeu_float64(t, r0);
 	return t[v0];
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- get
 static inline float32_t mipp_avx_get_float32(const rvd_avx_float32_t r0, const uint32_t v0) {
-		float32_t t[MIPP_N_FLOAT32];
+		float32_t t[MIPP_AVX_N_FLOAT32];
 	mipp_avx_storeu_float32(t, r0);
 	return t[v0];
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- get
 static inline int64_t mipp_avx_get_int64(const rvd_avx_int64_t r0, const uint32_t v0) {
-		int64_t t[MIPP_N_INT64];
+		int64_t t[MIPP_AVX_N_INT64];
 	mipp_avx_storeu_int64(t, r0);
 	return t[v0];
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- get
 static inline int32_t mipp_avx_get_int32(const rvd_avx_int32_t r0, const uint32_t v0) {
-		int32_t t[MIPP_N_INT32];
+		int32_t t[MIPP_AVX_N_INT32];
 	mipp_avx_storeu_int32(t, r0);
 	return t[v0];
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- get
 static inline int16_t mipp_avx_get_int16(const rvd_avx_int16_t r0, const uint32_t v0) {
-		int16_t t[MIPP_N_INT16];
+		int16_t t[MIPP_AVX_N_INT16];
 	mipp_avx_storeu_int16(t, r0);
 	return t[v0];
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- get
 static inline int8_t mipp_avx_get_int8(const rvd_avx_int8_t r0, const uint32_t v0) {
-		int8_t t[MIPP_N_INT8];
+		int8_t t[MIPP_AVX_N_INT8];
 	mipp_avx_storeu_int8(t, r0);
 	return t[v0];
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- get
 static inline uint64_t mipp_avx_get_uint64(const rvd_avx_uint64_t r0, const uint32_t v0) {
-		uint64_t t[MIPP_N_UINT64];
+		uint64_t t[MIPP_AVX_N_UINT64];
 	mipp_avx_storeu_uint64(t, r0);
 	return t[v0];
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- get
 static inline uint32_t mipp_avx_get_uint32(const rvd_avx_uint32_t r0, const uint32_t v0) {
-		uint32_t t[MIPP_N_UINT32];
+		uint32_t t[MIPP_AVX_N_UINT32];
 	mipp_avx_storeu_uint32(t, r0);
 	return t[v0];
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- get
 static inline uint16_t mipp_avx_get_uint16(const rvd_avx_uint16_t r0, const uint32_t v0) {
-		uint16_t t[MIPP_N_UINT16];
+		uint16_t t[MIPP_AVX_N_UINT16];
 	mipp_avx_storeu_uint16(t, r0);
 	return t[v0];
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- get
 static inline uint8_t mipp_avx_get_uint8(const rvd_avx_uint8_t r0, const uint32_t v0) {
-		uint8_t t[MIPP_N_UINT8];
+		uint8_t t[MIPP_AVX_N_UINT8];
 	mipp_avx_storeu_uint8(t, r0);
 	return t[v0];
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- get_k
 static inline float64_t mipp_avx_get_k_float64(const rvm_avx_float64_t m0, const uint32_t v0) {
-		float64_t tmp[MIPP_N_FLOAT64];
+		float64_t tmp[MIPP_AVX_N_FLOAT64];
 	rvd_avx_float64_t rmsk =mipp_avx_toreg_float64(m0);
 	mipp_avx_storeu_float64(tmp, rmsk);
 	return (int32_t) tmp[v0];
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- get_k
 static inline float32_t mipp_avx_get_k_float32(const rvm_avx_float32_t m0, const uint32_t v0) {
-		float32_t tmp[MIPP_N_FLOAT32];
+		float32_t tmp[MIPP_AVX_N_FLOAT32];
 	rvd_avx_float32_t rmsk =mipp_avx_toreg_float32(m0);
 	mipp_avx_storeu_float32(tmp, rmsk);
 	return (int32_t) tmp[v0];
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- get_k
 static inline int64_t mipp_avx_get_k_int64(const rvm_avx_int64_t m0, const uint32_t v0) {
-		int64_t tmp[MIPP_N_INT64];
+		int64_t tmp[MIPP_AVX_N_INT64];
 	rvd_avx_int64_t rmsk =mipp_avx_toreg_int64(m0);
 	mipp_avx_storeu_int64(tmp, rmsk);
 	return (int32_t) tmp[v0];
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- get_k
 static inline int32_t mipp_avx_get_k_int32(const rvm_avx_int32_t m0, const uint32_t v0) {
-		int32_t tmp[MIPP_N_INT32];
+		int32_t tmp[MIPP_AVX_N_INT32];
 	rvd_avx_int32_t rmsk =mipp_avx_toreg_int32(m0);
 	mipp_avx_storeu_int32(tmp, rmsk);
 	return (int32_t) tmp[v0];
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- get_k
 static inline int16_t mipp_avx_get_k_int16(const rvm_avx_int16_t m0, const uint32_t v0) {
-		int16_t tmp[MIPP_N_INT16];
+		int16_t tmp[MIPP_AVX_N_INT16];
 	rvd_avx_int16_t rmsk =mipp_avx_toreg_int16(m0);
 	mipp_avx_storeu_int16(tmp, rmsk);
 	return (int32_t) tmp[v0];
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- get_k
 static inline int8_t mipp_avx_get_k_int8(const rvm_avx_int8_t m0, const uint32_t v0) {
-		int8_t tmp[MIPP_N_INT8];
+		int8_t tmp[MIPP_AVX_N_INT8];
 	rvd_avx_int8_t rmsk =mipp_avx_toreg_int8(m0);
 	mipp_avx_storeu_int8(tmp, rmsk);
 	return (int32_t) tmp[v0];
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- get_k
 static inline uint64_t mipp_avx_get_k_uint64(const rvm_avx_uint64_t m0, const uint32_t v0) {
-		uint64_t tmp[MIPP_N_UINT64];
+		uint64_t tmp[MIPP_AVX_N_UINT64];
 	rvd_avx_uint64_t rmsk =mipp_avx_toreg_uint64(m0);
 	mipp_avx_storeu_uint64(tmp, rmsk);
 	return (int32_t) tmp[v0];
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- get_k
 static inline uint32_t mipp_avx_get_k_uint32(const rvm_avx_uint32_t m0, const uint32_t v0) {
-		uint32_t tmp[MIPP_N_UINT32];
+		uint32_t tmp[MIPP_AVX_N_UINT32];
 	rvd_avx_uint32_t rmsk =mipp_avx_toreg_uint32(m0);
 	mipp_avx_storeu_uint32(tmp, rmsk);
 	return (int32_t) tmp[v0];
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- get_k
 static inline uint16_t mipp_avx_get_k_uint16(const rvm_avx_uint16_t m0, const uint32_t v0) {
-		uint16_t tmp[MIPP_N_UINT16];
+		uint16_t tmp[MIPP_AVX_N_UINT16];
 	rvd_avx_uint16_t rmsk =mipp_avx_toreg_uint16(m0);
 	mipp_avx_storeu_uint16(tmp, rmsk);
 	return (int32_t) tmp[v0];
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- get_k
 static inline uint8_t mipp_avx_get_k_uint8(const rvm_avx_uint8_t m0, const uint32_t v0) {
-		uint8_t tmp[MIPP_N_UINT8];
+		uint8_t tmp[MIPP_AVX_N_UINT8];
 	rvd_avx_uint8_t rmsk =mipp_avx_toreg_uint8(m0);
 	mipp_avx_storeu_uint8(tmp, rmsk);
 	return (int32_t) tmp[v0];
@@ -5303,35 +5303,35 @@ static inline void mipp_avx_store_uint8(uint8_t* p0, const rvd_avx_uint8_t r0) {
 	exit(-1);
 }
 #endif
-static inline rvd_avx_uint64_t mipp_avx_set_uint64(const uint64_t vals[MIPP_N_UINT64]) {
+static inline rvd_avx_uint64_t mipp_avx_set_uint64(const uint64_t vals[MIPP_AVX_N_UINT64]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_set_uint64");
 	exit(-1);
 }
-static inline rvd_avx_uint32_t mipp_avx_set_uint32(const uint32_t vals[MIPP_N_UINT32]) {
+static inline rvd_avx_uint32_t mipp_avx_set_uint32(const uint32_t vals[MIPP_AVX_N_UINT32]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_set_uint32");
 	exit(-1);
 }
-static inline rvd_avx_uint16_t mipp_avx_set_uint16(const uint16_t vals[MIPP_N_UINT16]) {
+static inline rvd_avx_uint16_t mipp_avx_set_uint16(const uint16_t vals[MIPP_AVX_N_UINT16]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_set_uint16");
 	exit(-1);
 }
-static inline rvd_avx_uint8_t mipp_avx_set_uint8(const uint8_t vals[MIPP_N_UINT8]) {
+static inline rvd_avx_uint8_t mipp_avx_set_uint8(const uint8_t vals[MIPP_AVX_N_UINT8]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_set_uint8");
 	exit(-1);
 }
-static inline rvm_avx_uint64_t mipp_avx_set_k_uint64(const int32_t vals[MIPP_N_UINT64]) {
+static inline rvm_avx_uint64_t mipp_avx_set_k_uint64(const int32_t vals[MIPP_AVX_N_UINT64]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_set_k_uint64");
 	exit(-1);
 }
-static inline rvm_avx_uint32_t mipp_avx_set_k_uint32(const int32_t vals[MIPP_N_UINT32]) {
+static inline rvm_avx_uint32_t mipp_avx_set_k_uint32(const int32_t vals[MIPP_AVX_N_UINT32]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_set_k_uint32");
 	exit(-1);
 }
-static inline rvm_avx_uint16_t mipp_avx_set_k_uint16(const int32_t vals[MIPP_N_UINT16]) {
+static inline rvm_avx_uint16_t mipp_avx_set_k_uint16(const int32_t vals[MIPP_AVX_N_UINT16]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_set_k_uint16");
 	exit(-1);
 }
-static inline rvm_avx_uint8_t mipp_avx_set_k_uint8(const int32_t vals[MIPP_N_UINT8]) {
+static inline rvm_avx_uint8_t mipp_avx_set_k_uint8(const int32_t vals[MIPP_AVX_N_UINT8]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx_set_k_uint8");
 	exit(-1);
 }

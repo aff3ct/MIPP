@@ -3,16 +3,16 @@
 #include <immintrin.h>
 #define MIPP_AVX512_RVD_SIZE_BIT 512
 #define MIPP_AVX512_RVD_SIZE_BYTE 64
-#define MIPP_N_FLOAT64 8
-#define MIPP_N_FLOAT32 16
-#define MIPP_N_INT64 8
-#define MIPP_N_INT32 16
-#define MIPP_N_INT16 32
-#define MIPP_N_INT8 64
-#define MIPP_N_UINT64 8
-#define MIPP_N_UINT32 16
-#define MIPP_N_UINT16 32
-#define MIPP_N_UINT8 64
+#define MIPP_AVX512_N_FLOAT64 8
+#define MIPP_AVX512_N_FLOAT32 16
+#define MIPP_AVX512_N_INT64 8
+#define MIPP_AVX512_N_INT32 16
+#define MIPP_AVX512_N_INT16 32
+#define MIPP_AVX512_N_INT8 64
+#define MIPP_AVX512_N_UINT64 8
+#define MIPP_AVX512_N_UINT32 16
+#define MIPP_AVX512_N_UINT16 32
+#define MIPP_AVX512_N_UINT8 64
 typedef struct { __m512d r; } rvd_avx512_float64_t;
 typedef struct { __m512 r; } rvd_avx512_float32_t;
 typedef struct { __m512i r; } rvd_avx512_int64_t;
@@ -1744,13 +1744,13 @@ static inline float32_t mipp_avx512_getfirst_float32(const rvd_avx512_float32_t 
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set1
 static inline rvd_avx512_float64_t mipp_avx512_set1_float64(const float64_t v0) {
 	rvd_avx512_float64_t res;
-	res.r= _mm512_set1_pd(v0);
+	res.r= _mm512_set1_pd((msk) 0, ~((msk) 0);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set1
 static inline rvd_avx512_float32_t mipp_avx512_set1_float32(const float32_t v0) {
 	rvd_avx512_float32_t res;
-	res.r= _mm512_set1_ps(v0);
+	res.r= _mm512_set1_ps((msk) 0, ~((msk) 0);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set1
@@ -1762,19 +1762,19 @@ static inline rvd_avx512_int64_t mipp_avx512_set1_int64(const int64_t v0) {
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set1
 static inline rvd_avx512_int32_t mipp_avx512_set1_int32(const int32_t v0) {
 	rvd_avx512_int32_t res;
-	res.r= _mm512_set1_epi32(v0);
+	res.r= _mm512_set1_epi32((msk) 0, ~((msk) 0);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set1
 static inline rvd_avx512_int16_t mipp_avx512_set1_int16(const int16_t v0) {
 	rvd_avx512_int16_t res;
-	res.r= _mm512_set1_epi16(v0);
+	res.r= _mm512_set1_epi16((msk) 0, ~((msk) 0);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set1
 static inline rvd_avx512_int8_t mipp_avx512_set1_int8(const int8_t v0) {
 	rvd_avx512_int8_t res;
-	res.r= _mm512_set1_epi8(v0);
+	res.r= _mm512_set1_epi8((msk) 0, ~((msk) 0);
 	return res;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set0
@@ -3392,27 +3392,27 @@ static inline rvd_avx512_float32_t mipp_avx512_maskz_add_float32(const rvm_avx51
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set
 #if defined(__AVX512F__)
-static inline rvd_avx512_float64_t mipp_avx512_set_float64(const float64_t vals[MIPP_N_FLOAT64]) {
+static inline rvd_avx512_float64_t mipp_avx512_set_float64(const float64_t vals[MIPP_AVX512_N_FLOAT64]) {
 		return mipp_avx512_cast_k_float64_float64(_mm512_set_pd(vals[7], vals[6], vals[5], vals[4], vals[3], vals[2], vals[1], vals[0]));
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set
 #if defined(__AVX512F__)
-static inline rvd_avx512_float32_t mipp_avx512_set_float32(const float32_t vals[MIPP_N_FLOAT32]) {
+static inline rvd_avx512_float32_t mipp_avx512_set_float32(const float32_t vals[MIPP_AVX512_N_FLOAT32]) {
 		return _mm512_set_ps(vals[15], vals[14], vals[13], vals[12],vals[11], vals[10], vals[ 9], vals[ 8],
 	                     vals[ 7], vals[ 6], vals[ 5], vals[ 4],vals[ 3], vals[ 2], vals[ 1], vals[ 0]);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set
 #if defined(__AVX512F__)
-static inline rvd_avx512_int32_t mipp_avx512_set_int32(const int32_t vals[MIPP_N_INT32]) {
+static inline rvd_avx512_int32_t mipp_avx512_set_int32(const int32_t vals[MIPP_AVX512_N_INT32]) {
 	 return mipp_avx512_cast_k_float32_int32(_mm512_castsi512_ps(_mm512_set_epi32(vals[15], vals[14], vals[13], vals[12], vals[11], vals[10], vals[ 9], vals[ 8],                                            					
 																	 vals[ 7], vals[ 6], vals[ 5], vals[ 4],vals[ 3], vals[ 2], vals[ 1], vals[ 0])));
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set
 #if defined(__AVX512F__)
-static inline rvd_avx512_int64_t mipp_avx512_set_int64(const int64_t vals[MIPP_N_INT64]) {
+static inline rvd_avx512_int64_t mipp_avx512_set_int64(const int64_t vals[MIPP_AVX512_N_INT64]) {
 		return mipp_avx512_cast_k_float64_int64(_mm512_set_epi64((vals[15], vals[14], vals[13], vals[12],
 	                     					  	  vals[11], vals[10], vals[ 9], vals[ 8],
 	                     					  	  vals[ 7], vals[ 6], vals[ 5], vals[ 4],
@@ -3425,50 +3425,34 @@ static inline rvd_avx512_int64_t mipp_avx512_set_int64(const int64_t vals[MIPP_N
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set_k
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set_k
 #if defined(__AVX512BW__) && defined(__AVX512F__)
-static inline rvm_avx512_int32_t mipp_avx512_set_k_int32(const int32_t vals[MIPP_N_INT32]) {
-		int32_t t[MIPP_N_INT32] = {vals[ 0] ? (mipp_avx512_cast_int32_int32)0xFFFF : (mipp_avx512_cast_int32_int32)0, vals[ 1] ? (mipp_avx512_cast_int32_int32)0xFFFF : (mipp_avx512_cast_int32_int32)0,
-		                  vals[ 2] ? (mipp_avx512_cast_int32_int32)0xFFFF : (mipp_avx512_cast_int32_int32)0, vals[ 3] ? (mipp_avx512_cast_int32_int32)0xFFFF : (mipp_avx512_cast_int32_int32)0,
-		                  vals[ 4] ? (mipp_avx512_cast_int32_int32)0xFFFF : (mipp_avx512_cast_int32_int32)0, vals[ 5] ? (mipp_avx512_cast_int32_int32)0xFFFF : (mipp_avx512_cast_int32_int32)0,
-		                  vals[ 6] ? (mipp_avx512_cast_int32_int32)0xFFFF : (mipp_avx512_cast_int32_int32)0, vals[ 7] ? (mipp_avx512_cast_int32_int32)0xFFFF : (mipp_avx512_cast_int32_int32)0,
-		                  vals[ 8] ? (mipp_avx512_cast_int32_int32)0xFFFF : (mipp_avx512_cast_int32_int32)0, vals[ 9] ? (mipp_avx512_cast_int32_int32)0xFFFF : (mipp_avx512_cast_int32_int32)0,
-		                  vals[10] ? (mipp_avx512_cast_int32_int32)0xFFFF : (mipp_avx512_cast_int32_int32)0, vals[11] ? (mipp_avx512_cast_int32_int32)0xFFFF : (mipp_avx512_cast_int32_int32)0,
-		                  vals[12] ? (mipp_avx512_cast_int32_int32)0xFFFF : (mipp_avx512_cast_int32_int32)0, vals[13] ? (mipp_avx512_cast_int32_int32)0xFFFF : (mipp_avx512_cast_int32_int32)0,
-		                  vals[14] ? (mipp_avx512_cast_int32_int32)0xFFFF : (mipp_avx512_cast_int32_int32)0, vals[15] ? (mipp_avx512_cast_int32_int32)0xFFFF : (mipp_avx512_cast_int32_int32)0,
-		                  vals[16] ? (mipp_avx512_cast_int32_int32)0xFFFF : (mipp_avx512_cast_int32_int32)0, vals[17] ? (mipp_avx512_cast_int32_int32)0xFFFF : (mipp_avx512_cast_int32_int32)0,
-		                  vals[18] ? (mipp_avx512_cast_int32_int32)0xFFFF : (mipp_avx512_cast_int32_int32)0, vals[19] ? (mipp_avx512_cast_int32_int32)0xFFFF : (mipp_avx512_cast_int32_int32)0,
-		                  vals[20] ? (mipp_avx512_cast_int32_int32)0xFFFF : (mipp_avx512_cast_int32_int32)0, vals[21] ? (mipp_avx512_cast_int32_int32)0xFFFF : (mipp_avx512_cast_int32_int32)0,
-		                  vals[22] ? (mipp_avx512_cast_int32_int32)0xFFFF : (mipp_avx512_cast_int32_int32)0, vals[23] ? (mipp_avx512_cast_int32_int32)0xFFFF : (mipp_avx512_cast_int32_int32)0,
-		                  vals[24] ? (mipp_avx512_cast_int32_int32)0xFFFF : (mipp_avx512_cast_int32_int32)0, vals[25] ? (mipp_avx512_cast_int32_int32)0xFFFF : (mipp_avx512_cast_int32_int32)0,
-		                  vals[26] ? (mipp_avx512_cast_int32_int32)0xFFFF : (mipp_avx512_cast_int32_int32)0, vals[27] ? (mipp_avx512_cast_int32_int32)0xFFFF : (mipp_avx512_cast_int32_int32)0,
-		                  vals[28] ? (mipp_avx512_cast_int32_int32)0xFFFF : (mipp_avx512_cast_int32_int32)0, vals[29] ? (mipp_avx512_cast_int32_int32)0xFFFF : (mipp_avx512_cast_int32_int32)0,
-		                  vals[30] ? (mipp_avx512_cast_int32_int32)0xFFFF : (mipp_avx512_cast_int32_int32)0, vals[31] ? (mipp_avx512_cast_int32_int32)0xFFFF : (mipp_avx512_cast_int32_int32)0};
+static inline rvm_avx512_int32_t mipp_avx512_set_k_int32(const int32_t vals[MIPP_AVX512_N_INT32]) {
+		int32_t t[MIPP_AVX512_N_INT32] = {vals[ 0] ? 0xFFFFFFFF : 0, vals[ 1] ? 0xFFFFFFFF : 0,
+		                  vals[ 2] ? 0xFFFFFFFF : 0, vals[ 3] ? 0xFFFFFFFF : 0,
+		                  vals[ 4] ? 0xFFFFFFFF : 0, vals[ 5] ? 0xFFFFFFFF : 0,
+		                  vals[ 6] ? 0xFFFFFFFF : 0, vals[ 7] ? 0xFFFFFFFF : 0,
+		                  vals[ 8] ? 0xFFFFFFFF : 0, vals[ 9] ? 0xFFFFFFFF : 0,
+		                  vals[10] ? 0xFFFFFFFF : 0, vals[11] ? 0xFFFFFFFF : 0,
+		                  vals[12] ? 0xFFFFFFFF : 0, vals[13] ? 0xFFFFFFFF : 0,
+		                  vals[14] ? 0xFFFFFFFF : 0, vals[15] ? 0xFFFFFFFF : 0};
     rvd_avx512_int32_t r0_32 = mipp_avx512_set_int32((mipp_avx512_cast_int32_int32)*t);
-    rvd_avx512_int32_t r1_32 = mipp_avx512_set1_int32(0xFFFF);
-	rvd_avx512_int32_t msk   = mipp_avx512_cmpneq_int32(r0_32, r1_32);
-    rvm_avx512_int32_t res   = mipp_avx512_tomsk_int32(msk);
-	return res;
+    rvd_avx512_int32_t r1_32 = mipp_avx512_set1_int32(0xFFFFFFFF);
+	return mipp_avx512_cmpneq_int32(r0_32, r1_32);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set_k
 #if defined(__AVX512BW__) && defined(__AVX512F__)
-static inline rvm_avx512_int64_t mipp_avx512_set_k_int64(const int32_t vals[MIPP_N_INT64]) {
-	 int64_t t[MIPP_N_INT64] = { vals[ 0] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0, vals[ 1] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0, vals[ 2] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0, vals[ 3] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0,
-                            vals[ 4] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0, vals[ 5] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0, vals[ 6] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0, vals[ 7] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0,
-                            vals[ 8] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0, vals[ 9] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0, vals[10] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0, vals[11] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0,
-                            vals[12] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0, vals[13] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0, vals[14] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0, vals[15] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0,
-                            vals[16] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0, vals[17] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0, vals[18] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0, vals[19] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0,
-                            vals[20] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0, vals[21] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0, vals[22] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0, vals[23] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0,
-                            vals[24] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0, vals[25] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0, vals[26] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0, vals[27] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0,
-                            vals[28] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0, vals[29] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0, vals[30] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0, vals[31] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0,
-                            vals[32] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0, vals[33] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0, vals[34] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0, vals[35] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0,
-                            vals[36] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0, vals[37] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0, vals[38] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0, vals[39] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0,
-                            vals[40] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0, vals[41] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0, vals[42] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0, vals[43] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0,
-                            vals[44] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0, vals[45] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0, vals[46] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0, vals[47] ? (mipp_avx512_cast_int64_int64)0xFF : (mipp_avx512_cast_int64_int64)0};
+static inline rvm_avx512_int64_t mipp_avx512_set_k_int64(const int32_t vals[MIPP_AVX512_N_INT64]) {
+		int64_t t[MIPP_AVX512_N_INT64] = {vals[0] ? (mipp_avx512_cast_int64_int64)0xFFFFFFFFFFFFFFFF : (mipp_avx512_cast_int64_int64)0,
+		                 vals[1] ? (mipp_avx512_cast_int64_int64)0xFFFFFFFFFFFFFFFF : (mipp_avx512_cast_int64_int64)0,
+		                 vals[2] ? (mipp_avx512_cast_int64_int64)0xFFFFFFFFFFFFFFFF : (mipp_avx512_cast_int64_int64)0,
+		                 vals[3] ? (mipp_avx512_cast_int64_int64)0xFFFFFFFFFFFFFFFF : (mipp_avx512_cast_int64_int64)0,
+		                 vals[4] ? (mipp_avx512_cast_int64_int64)0xFFFFFFFFFFFFFFFF : (mipp_avx512_cast_int64_int64)0,
+		                 vals[5] ? (mipp_avx512_cast_int64_int64)0xFFFFFFFFFFFFFFFF : (mipp_avx512_cast_int64_int64)0,
+		                 vals[6] ? (mipp_avx512_cast_int64_int64)0xFFFFFFFFFFFFFFFF : (mipp_avx512_cast_int64_int64)0,
+		                 vals[7] ? (mipp_avx512_cast_int64_int64)0xFFFFFFFFFFFFFFFF : (mipp_avx512_cast_int64_int64)0};
     rvd_avx512_int64_t r0_32 = mipp_avx512_set_int64((mipp_avx512_cast_int64_int64)*t);
-    rvd_avx512_int64_t r1_32 = mipp_avx512_set1_int64(0xFF);
-	rvd_avx512_int64_t msk   = mipp_avx512_cmpneq_int64(r0_32, r1_32);
-    rvm_avx512_int64_t res   = mipp_avx512_tomsk_int64(msk);
-	return res; 
+    rvd_avx512_int64_t r1_32 = mipp_avx512_set1_int64((mipp_avx512_cast_int64_int64)0xFFFFFFFFFFFFFFFF);
+	return mipp_avx512_cmpneq_int64(r0_32, r1_32);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set1_k
@@ -3476,9 +3460,7 @@ static inline rvm_avx512_int64_t mipp_avx512_set_k_int64(const int32_t vals[MIPP
 static inline rvm_avx512_int8_t mipp_avx512_set1_k_int8(const int32_t v0) {
 	 rvd_avx512_int8_t r0_32 = mipp_avx512_set1_int8(r0 ? (mipp_avx512_cast_int8_int8)0xFFFFFFFFFFFFFFFF : 0);
     rvd_avx512_int8_t r1_32 = mipp_avx512_set1_int8( (mipp_avx512_cast_int8_int8)0xFFFFFFFFFFFFFFFF    );
-	rvd_avx512_int8_t msk   = mipp_avx512_cmpneq_int8(r0_32, r1_32)
-    rvm_avx512_int8_t res   = mipp_avx512_tomsk_int8(msk);
-	return res;
+	return = mipp_avx512_cmpneq_int8(r0_32, r1_32) 
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set1_k
@@ -3486,26 +3468,20 @@ static inline rvm_avx512_int8_t mipp_avx512_set1_k_int8(const int32_t v0) {
 static inline rvm_avx512_int16_t mipp_avx512_set1_k_int16(const int32_t v0) {
 	 rvd_avx512_int16_t r0_32 = mipp_avx512_set1_int16(r0 ? 0xFFFFFFFF : 0);
     rvd_avx512_int16_t r1_32 = mipp_avx512_set1_int16(  0xFFFFFFFF    );
-	rvd_avx512_int16_t msk   = mipp_avx512_cmpneq_int16(r0_32, r1_32);
-    rvm_avx512_int16_t res   = mipp_avx512_tomsk_int16(msk);
-	return res;
+	return mipp_avx512_cmpneq_int16(r0_32, r1_32);
 }
 #endif
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set1_k
 static inline rvm_avx512_int32_t mipp_avx512_set1_k_int32(const int32_t v0) {
 	 rvd_avx512_int32_t r0_32 = mipp_avx512_set1_int32(r0 ? 0xFFFF : 0);
     rvd_avx512_int32_t r1_32 = mipp_avx512_set1_int32( 0xFFFF    );
-	rvd_avx512_int32_t msk   = mipp_avx512_cmpneq_int32(r0_32, r1_32);
-    rvm_avx512_int32_t res   = mipp_avx512_tomsk_int32(msk);
-	return res;
+    return mipp_avx512_cmpneq_int32(r0_32, r1_32);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set1_k
 static inline rvm_avx512_int64_t mipp_avx512_set1_k_int64(const int32_t v0) {
 	 rvd_avx512_int64_t r0_32 = mipp_avx512_set1_int64(r0 ? 0xFF : 0);
     rvd_avx512_int64_t r1_32 = mipp_avx512_set1_int64( 0xFF    );
-	rvd_avx512_int64_t msk   = mipp_avx512_cmpneq_int64(r0_32, r1_32);
-    rvm_avx512_int64_t res   = mipp_avx512_tomsk_int64(msk);
-	return res;
+	return mipp_avx512_cmpneq_int64(r0_32, r1_32); 
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set0_k
 // ---------------------------------------------------------------------------------------------------------------------------------------------- set0_k
@@ -3834,7 +3810,7 @@ static inline rvd_avx512_int8_t mipp_avx512_maskz_add_int8(const rvm_avx512_int8
 // ---------------------------------------------------------------------------------------------------------------------------------------------- getfirst
 #if ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) )
 static inline int64_t mipp_avx512_getfirst_int64(const rvd_avx512_int64_t r0) {
-	int64_t tmp[MIPP_N_INT64];
+	int64_t tmp[MIPP_AVX512_N_INT64];
 	mipp_avx512_store_int64(tmp, r);
 	return tmp[0];
 }
@@ -3842,7 +3818,7 @@ static inline int64_t mipp_avx512_getfirst_int64(const rvd_avx512_int64_t r0) {
 // ---------------------------------------------------------------------------------------------------------------------------------------------- getfirst
 #if ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) )
 static inline int32_t mipp_avx512_getfirst_int32(const rvd_avx512_int32_t r0) {
-	int32_t tmp[MIPP_N_INT32];
+	int32_t tmp[MIPP_AVX512_N_INT32];
 	mipp_avx512_store_int32(tmp, r);
 	return tmp[0];
 }
@@ -3850,7 +3826,7 @@ static inline int32_t mipp_avx512_getfirst_int32(const rvd_avx512_int32_t r0) {
 // ---------------------------------------------------------------------------------------------------------------------------------------------- getfirst
 #if ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) )
 static inline int16_t mipp_avx512_getfirst_int16(const rvd_avx512_int16_t r0) {
-	int16_t tmp[MIPP_N_INT16];
+	int16_t tmp[MIPP_AVX512_N_INT16];
 	mipp_avx512_store_int16(tmp, r);
 	return tmp[0];
 }
@@ -3858,7 +3834,7 @@ static inline int16_t mipp_avx512_getfirst_int16(const rvd_avx512_int16_t r0) {
 // ---------------------------------------------------------------------------------------------------------------------------------------------- getfirst
 #if ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) )
 static inline int8_t mipp_avx512_getfirst_int8(const rvd_avx512_int8_t r0) {
-	int8_t tmp[MIPP_N_INT8];
+	int8_t tmp[MIPP_AVX512_N_INT8];
 	mipp_avx512_store_int8(tmp, r);
 	return tmp[0];
 }
@@ -3866,7 +3842,7 @@ static inline int8_t mipp_avx512_getfirst_int8(const rvd_avx512_int8_t r0) {
 // ---------------------------------------------------------------------------------------------------------------------------------------------- getfirst
 #if ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) )
 static inline uint64_t mipp_avx512_getfirst_uint64(const rvd_avx512_uint64_t r0) {
-	uint64_t tmp[MIPP_N_UINT64];
+	uint64_t tmp[MIPP_AVX512_N_UINT64];
 	mipp_avx512_store_uint64(tmp, r);
 	return tmp[0];
 }
@@ -3874,7 +3850,7 @@ static inline uint64_t mipp_avx512_getfirst_uint64(const rvd_avx512_uint64_t r0)
 // ---------------------------------------------------------------------------------------------------------------------------------------------- getfirst
 #if ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) )
 static inline uint32_t mipp_avx512_getfirst_uint32(const rvd_avx512_uint32_t r0) {
-	uint32_t tmp[MIPP_N_UINT32];
+	uint32_t tmp[MIPP_AVX512_N_UINT32];
 	mipp_avx512_store_uint32(tmp, r);
 	return tmp[0];
 }
@@ -3882,7 +3858,7 @@ static inline uint32_t mipp_avx512_getfirst_uint32(const rvd_avx512_uint32_t r0)
 // ---------------------------------------------------------------------------------------------------------------------------------------------- getfirst
 #if ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) )
 static inline uint16_t mipp_avx512_getfirst_uint16(const rvd_avx512_uint16_t r0) {
-	uint16_t tmp[MIPP_N_UINT16];
+	uint16_t tmp[MIPP_AVX512_N_UINT16];
 	mipp_avx512_store_uint16(tmp, r);
 	return tmp[0];
 }
@@ -3890,7 +3866,7 @@ static inline uint16_t mipp_avx512_getfirst_uint16(const rvd_avx512_uint16_t r0)
 // ---------------------------------------------------------------------------------------------------------------------------------------------- getfirst
 #if ( defined(MIPP_ALIGNED_LOADS) || !defined(MIPP_ALIGNED_LOADS) )
 static inline uint8_t mipp_avx512_getfirst_uint8(const rvd_avx512_uint8_t r0) {
-	uint8_t tmp[MIPP_N_UINT8];
+	uint8_t tmp[MIPP_AVX512_N_UINT8];
 	mipp_avx512_store_uint8(tmp, r);
 	return tmp[0];
 }
@@ -4058,94 +4034,94 @@ static inline void mipp_avx512_store_uint8(uint8_t* p0, const rvd_avx512_uint8_t
 }
 #endif
 #if !( defined(__AVX512F__) )
-static inline rvd_avx512_float64_t mipp_avx512_set_float64(const float64_t vals[MIPP_N_FLOAT64]) {
+static inline rvd_avx512_float64_t mipp_avx512_set_float64(const float64_t vals[MIPP_AVX512_N_FLOAT64]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_set_float64");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX512F__) )
-static inline rvd_avx512_float32_t mipp_avx512_set_float32(const float32_t vals[MIPP_N_FLOAT32]) {
+static inline rvd_avx512_float32_t mipp_avx512_set_float32(const float32_t vals[MIPP_AVX512_N_FLOAT32]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_set_float32");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX512F__) )
-static inline rvd_avx512_int64_t mipp_avx512_set_int64(const int64_t vals[MIPP_N_INT64]) {
+static inline rvd_avx512_int64_t mipp_avx512_set_int64(const int64_t vals[MIPP_AVX512_N_INT64]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_set_int64");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX512F__) )
-static inline rvd_avx512_int32_t mipp_avx512_set_int32(const int32_t vals[MIPP_N_INT32]) {
+static inline rvd_avx512_int32_t mipp_avx512_set_int32(const int32_t vals[MIPP_AVX512_N_INT32]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_set_int32");
 	exit(-1);
 }
 #endif
-static inline rvd_avx512_int16_t mipp_avx512_set_int16(const int16_t vals[MIPP_N_INT16]) {
+static inline rvd_avx512_int16_t mipp_avx512_set_int16(const int16_t vals[MIPP_AVX512_N_INT16]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_set_int16");
 	exit(-1);
 }
-static inline rvd_avx512_int8_t mipp_avx512_set_int8(const int8_t vals[MIPP_N_INT8]) {
+static inline rvd_avx512_int8_t mipp_avx512_set_int8(const int8_t vals[MIPP_AVX512_N_INT8]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_set_int8");
 	exit(-1);
 }
-static inline rvd_avx512_uint64_t mipp_avx512_set_uint64(const uint64_t vals[MIPP_N_UINT64]) {
+static inline rvd_avx512_uint64_t mipp_avx512_set_uint64(const uint64_t vals[MIPP_AVX512_N_UINT64]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_set_uint64");
 	exit(-1);
 }
-static inline rvd_avx512_uint32_t mipp_avx512_set_uint32(const uint32_t vals[MIPP_N_UINT32]) {
+static inline rvd_avx512_uint32_t mipp_avx512_set_uint32(const uint32_t vals[MIPP_AVX512_N_UINT32]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_set_uint32");
 	exit(-1);
 }
-static inline rvd_avx512_uint16_t mipp_avx512_set_uint16(const uint16_t vals[MIPP_N_UINT16]) {
+static inline rvd_avx512_uint16_t mipp_avx512_set_uint16(const uint16_t vals[MIPP_AVX512_N_UINT16]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_set_uint16");
 	exit(-1);
 }
-static inline rvd_avx512_uint8_t mipp_avx512_set_uint8(const uint8_t vals[MIPP_N_UINT8]) {
+static inline rvd_avx512_uint8_t mipp_avx512_set_uint8(const uint8_t vals[MIPP_AVX512_N_UINT8]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_set_uint8");
 	exit(-1);
 }
-static inline rvm_avx512_float64_t mipp_avx512_set_k_float64(const int32_t vals[MIPP_N_FLOAT64]) {
+static inline rvm_avx512_float64_t mipp_avx512_set_k_float64(const int32_t vals[MIPP_AVX512_N_FLOAT64]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_set_k_float64");
 	exit(-1);
 }
-static inline rvm_avx512_float32_t mipp_avx512_set_k_float32(const int32_t vals[MIPP_N_FLOAT32]) {
+static inline rvm_avx512_float32_t mipp_avx512_set_k_float32(const int32_t vals[MIPP_AVX512_N_FLOAT32]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_set_k_float32");
 	exit(-1);
 }
 #if !( defined(__AVX512BW__) && defined(__AVX512F__) && defined(__AVX512F__) )
-static inline rvm_avx512_int64_t mipp_avx512_set_k_int64(const int32_t vals[MIPP_N_INT64]) {
+static inline rvm_avx512_int64_t mipp_avx512_set_k_int64(const int32_t vals[MIPP_AVX512_N_INT64]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_set_k_int64");
 	exit(-1);
 }
 #endif
 #if !( defined(__AVX512BW__) && defined(__AVX512F__) && defined(__AVX512F__) )
-static inline rvm_avx512_int32_t mipp_avx512_set_k_int32(const int32_t vals[MIPP_N_INT32]) {
+static inline rvm_avx512_int32_t mipp_avx512_set_k_int32(const int32_t vals[MIPP_AVX512_N_INT32]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_set_k_int32");
 	exit(-1);
 }
 #endif
-static inline rvm_avx512_int16_t mipp_avx512_set_k_int16(const int32_t vals[MIPP_N_INT16]) {
+static inline rvm_avx512_int16_t mipp_avx512_set_k_int16(const int32_t vals[MIPP_AVX512_N_INT16]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_set_k_int16");
 	exit(-1);
 }
-static inline rvm_avx512_int8_t mipp_avx512_set_k_int8(const int32_t vals[MIPP_N_INT8]) {
+static inline rvm_avx512_int8_t mipp_avx512_set_k_int8(const int32_t vals[MIPP_AVX512_N_INT8]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_set_k_int8");
 	exit(-1);
 }
-static inline rvm_avx512_uint64_t mipp_avx512_set_k_uint64(const int32_t vals[MIPP_N_UINT64]) {
+static inline rvm_avx512_uint64_t mipp_avx512_set_k_uint64(const int32_t vals[MIPP_AVX512_N_UINT64]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_set_k_uint64");
 	exit(-1);
 }
-static inline rvm_avx512_uint32_t mipp_avx512_set_k_uint32(const int32_t vals[MIPP_N_UINT32]) {
+static inline rvm_avx512_uint32_t mipp_avx512_set_k_uint32(const int32_t vals[MIPP_AVX512_N_UINT32]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_set_k_uint32");
 	exit(-1);
 }
-static inline rvm_avx512_uint16_t mipp_avx512_set_k_uint16(const int32_t vals[MIPP_N_UINT16]) {
+static inline rvm_avx512_uint16_t mipp_avx512_set_k_uint16(const int32_t vals[MIPP_AVX512_N_UINT16]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_set_k_uint16");
 	exit(-1);
 }
-static inline rvm_avx512_uint8_t mipp_avx512_set_k_uint8(const int32_t vals[MIPP_N_UINT8]) {
+static inline rvm_avx512_uint8_t mipp_avx512_set_k_uint8(const int32_t vals[MIPP_AVX512_N_UINT8]) {
 	printf("MIPP panic: '%s' is unimplemented.\n", "mipp_avx512_set_k_uint8");
 	exit(-1);
 }

@@ -2,6 +2,13 @@ from jinja2 import Template, StrictUndefined
 import json
 import re
 
+# houps test code generation option to do displace
+# warning order
+all_ldiv = [2]#,4]
+
+all_lmul = [1,2,4,8]
+# end houps test code generation option to do displace
+
 cfloat = "float"
 cint = "int"
 cuint = "uint"
@@ -81,7 +88,6 @@ operators_order = {
     "cmpge"  : {"operation" : ">=", "option" : ">="},
 }
 
-
 def build_reg(datatype, isa, lmul=0, isa_name=True, cpp=False):
 	if cpp:
 		str_reg = "rvd"
@@ -98,7 +104,11 @@ def build_reg(datatype, isa, lmul=0, isa_name=True, cpp=False):
 			str_reg += isa["name"] + "_"
 		str_reg += datatype["category"] + str(datatype["n_bits"])
 		if lmul:
-			str_reg += "_m" + str(int(lmul))
+			if int(lmul) > 0:
+				str_reg += "_m" + str(int(lmul))
+			if int(lmul) < 0:
+				ldiv = -int(lmul)
+				str_reg += "_d" + str(ldiv)
 		str_reg += "_t"
 		return str_reg
 
@@ -118,11 +128,13 @@ def build_msk(datatype, isa, lmul=0, isa_name=True, cpp=False):
 			str_msk += isa["name"] + "_"
 		str_msk += datatype["category"] + str(datatype["n_bits"])
 		if lmul:
-			str_msk += "_m" + str(int(lmul))
+			if int(lmul) > 0:
+				str_msk += "_m" + str(int(lmul))
+			if int(lmul) < 0:
+				ldiv = -int(lmul)
+				str_msk += "_d" + str(ldiv)
 		str_msk += "_t"
 		return str_msk
-
-
 
 # build class Rvd and Rvm
 def build_Reg(datatype, isa, lmul=0, isa_name=True, cpp=True):
@@ -141,6 +153,7 @@ def build_Reg(datatype, isa, lmul=0, isa_name=True, cpp=True):
 			str_reg += "_m" + str(int(lmul))
 		str_reg += "_t"
 		return str_reg
+
 def build_Msk(datatype, isa, lmul=0, isa_name=True, cpp=False):
 	if cpp:
 		str_msk = "Rvm"
@@ -171,11 +184,15 @@ def build_N(datatype, isa, lmul=0, isa_name=True):
 	"""	str_N = "MIPP_"
 	if isa_name:
 		str_N += isa["name"].upper() + "_"""
-	str_N = "MIPP_N_" + datatype["category"].upper() + str(datatype["n_bits"]).upper()
+	if isa_name:
+		isa_name_upper = isa["name"].upper()+"_"
+	else:
+		isa_name_upper=""
+	
+	str_N = "MIPP_"+isa_name_upper+"N_" + datatype["category"].upper() + str(datatype["n_bits"]).upper()
 	if lmul:
 		str_N += "_M" + str(int(lmul))
 	return str_N
-
 
 def build_type(type, datatype, isa,lmul=0, isa_name=True, cpp=False):
 	if type:
@@ -194,6 +211,7 @@ def build_type(type, datatype, isa,lmul=0, isa_name=True, cpp=False):
 			return build_reg(same_size_integer_datatype, isa, lmul, isa_name, cpp)
 	else:
 		return "void"
+
 # for object layer
 def build_class_type(type, datatype, isa, lmul=0, isa_name=True, cpp=False):
 	if type:
@@ -207,6 +225,7 @@ def build_class_type(type, datatype, isa, lmul=0, isa_name=True, cpp=False):
 			return build_ptr(datatype, isa,{},isa_name)
 	else:
 		return "void"
+
 def lmul_specialized(proto):
 	n_lmul_spe = 0
 	for arg in proto["args"]:
@@ -239,7 +258,7 @@ def build_proto_set(dt_ret, lmul, func_name):
     elif (func_name == "set_k"):
     	dt_par = "int32_t"
     	reg_type = "rvm"
-
+    
     return f"template <>\ninline {reg_type}<{dt_ret}_t, {lmul}> {func_name}{template}(const {dt_par} vals[MIPP_N_{dt_ret.upper()}]"
 
 def build_proto_set1(dt_ret, lmul, func_name):
@@ -250,7 +269,6 @@ def build_proto_set1(dt_ret, lmul, func_name):
     if (func_name == "set1_k"):
     	dt_par = "int32_t"
     	reg_type = "rvm"
-
     return f"template <>\ninline {reg_type}<{dt_ret}_t, {lmul}> {func_name}{template}(const {dt_par} v0"
    
 def build_proto_load(dt_ret, lmul, func_name):
@@ -258,7 +276,6 @@ def build_proto_load(dt_ret, lmul, func_name):
     	dt_par = f"{dt_ret}_t"
     	template = f"<{dt_ret}_t, {lmul}>"
     	reg_type = "rvd"
-
     return f"template <>\ninline {reg_type}<{dt_ret}_t, {lmul}> {func_name}{template}(const {dt_par}* p0"
     
 
@@ -325,7 +342,7 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
 			p += " p" + str(cnt_ptr)
 			cnt_ptr = cnt_ptr +1
 		elif arg["type"] == "Nele":
-			p += " vals["+build_N(datatypes[dt_par],{},{},False)+"]"
+			p += " vals["+build_N(datatypes[dt_par],isa,{},isa_name)+"]"
 		elif arg["type"] == "vindex":
 			p += " vi"
 		is_first = False
@@ -468,7 +485,6 @@ def build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul=2, isa_name=True
 		str_code += "\n\t" + "return msk;";
 	return str_code;
 
-
 # Build other functions build_func_name_short & build_cpp_func_name_short
 def build_func_name_short(isa, dt, mipp_name, isa_name=True):
 	param_type = datatypes[dt]["category"] + str(datatypes[dt]["n_bits"])
@@ -476,7 +492,6 @@ def build_func_name_short(isa, dt, mipp_name, isa_name=True):
 		return "mipp_" + isa["name"] + "_" + mipp_name + "_" +  param_type
 	else:
 		return "mipp_" + mipp_name + "_" +  param_type
-
 
 def build_cpp_func_name_short(proto, dt_ret, mipp_name):
 	if type_specialized(proto):
@@ -497,15 +512,12 @@ def build_func_name(isa, dt_par, dt_ret, mipp_name, isa_name=True):
 	else:
 		return "mipp_" + mipp_name + "_" + param_type + "_" + return_type
 
-
 def build_cpp_func_name(dt_ret, mipp_name):
 	mipp_name = mipp_name.replace("_mz", "")
 	mipp_name = mipp_name.replace("_m", "")
 	mipp_name = mipp_name.replace("_k", "")
 	return_type = datatypes[dt_ret]["category"] + str(datatypes[dt_ret]["n_bits"])
 	return mipp_name + "_" + return_type
-
-
 
 def build_ifdef_rec(funcs, func_name, dt_key):
 	str_ifdef = ""

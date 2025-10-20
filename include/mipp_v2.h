@@ -1,10 +1,7 @@
-
 #ifndef MY_INTRINSICS_PLUS_PLUS_H_
 #define MY_INTRINSICS_PLUS_PLUS_H_
 
 #define MIPP
-
-
 
 #include <stdint.h>
 #include <iostream>
@@ -13,13 +10,45 @@
 typedef double float64_t;
 typedef float float32_t;
 
-#ifndef MIPP_NO_INTRINSICS
+// ------------------------------------------------------------------------------------------------- includes files
 
-
+#if defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)
+#include "avx512/mipp_v2_impl_AVX512_gen.h"
+#endif
 #if defined(__AVX__)
+#include "avx/mipp_v2_impl_AVX_gen.h"
+#endif
+
+#if defined(__SSE__)
+#include "sse/mipp_v2_impl_SSE_gen.h"
+#endif
+
+#if defined(__ARM_FEATURE_SVE)
+#include "sve/mipp_v2_impl_SVE_gen.h"
+#endif
+
+#include "mipp_v2.hpp"
+
+#include "mipp_v2_object_gen.hpp"
 
 // utiles pour l'instant pour les tests
 // pourrait clairement etre utile pour les generateurs au dela du if #define
+
+#if defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)
+	#define MIPP_AVX512
+	#define MIPP_INSTR_VERSION 1
+	#define MIPP_64BIT
+#ifdef __AVX512BW__
+	#define MIPP_BW
+#endif
+#ifdef __AVX512VBMI2__
+	#define MIPP_BMI2
+#endif
+#ifdef __FMA__
+	#define MIPP_FMA
+#endif
+
+#elif defined(__AVX__)
     #define MIPP_AVX
 	#define MIPP_64BIT
 #ifdef __AVX2__
@@ -35,66 +64,22 @@ typedef float float32_t;
 #ifdef __FMA__
 	#define MIPP_FMA
 #endif
-// end utiles pour l'instant pour les tests...
-
-#include "avx/mipp_v2_impl_AVX_gen.h"
-
-#elif defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)
-
-// utiles pour l'instant pour les tests
-// pourrait clairement etre utile pour les generateurs au dela du if #define
-// idem __AVX512F__ __AVX512VBMI__ ...
-	#define MIPP_AVX512
-	#define MIPP_INSTR_VERSION 1
-	#define MIPP_64BIT
-#ifdef __AVX512BW__
-	#define MIPP_BW
-#endif
-#ifdef __AVX512VBMI2__
-	#define MIPP_BMI2
-#endif
-#ifdef __FMA__
-	#define MIPP_FMA
-#endif
-// end utiles pour l'instant pour les tests...
-
-#include "avx512/mipp_v2_impl_AVX512_gen.h"
 
 #elif defined(__SSE__)
-// utiles pour l'instant pour les tests
-// pourrait clairement etre utile pour les generateurs au dela du if #define
 	#define MIPP_SSE
 #ifdef __SSE2__
 	#define MIPP_64BIT
 	#define MIPP_BW
 #endif
-// end utiles pour l'instant pour les tests...
-
-#include "sse/mipp_v2_impl_SSE_gen.h"
 
 #elif defined(__ARM_FEATURE_SVE)
-
-#include "sve/mipp_v2_impl_SVE_gen.h"
-
 #define MIPP_FMA
 #define MIPP_64BIT
-#define MIPP_BW
+// not yet generated
+//#define MIPP_BW
 #define MIPP_INSTR_VERSION 1
-
 #endif
 
-// ------------------------------------------------------------------------------------------------- MIPP_NO_INTRINSICS
-#else
-// do something
-#endif
-
-// -------------------------------------------------------------------------------------------------- complex functions
-// --------------------------------------------------------------------------------------------------------------------
-
-// ------------------------------------------------------------------------------------------------- includes files
-
-#include "mipp_v2.hpp"
-
-#include "mipp_v2_object_gen.hpp"
+// end utiles pour l'instant pour les tests...
 
 #endif /* MY_INTRINSICS_PLUS_PLUS_H_ */

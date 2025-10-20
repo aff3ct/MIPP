@@ -12,6 +12,7 @@ isa_sse = {
 	"prefix": "_mm",
 	"size": 128,
 	"define": "__SSE__",
+    "architecture": "x86",
 	"hw_lmul": False,
 	"datatypes": {
 		float64 : { "data_ext" :    "pd", "data_ext_logi":    "pd", "data_ext_msk": "pd", "reg" : "__m128d", "msk" : "__m128d", "to_ptr": "float64_t" },
@@ -255,14 +256,14 @@ implems_sse = {
         { "instr_name": "xor", "datatypes": [int16,int32,int64], "template": tpl_implem_sse["logi_m_2args_si128"], "if": "defined(__SSE2__)" } ],
     "cmpeq": [
         { "instr_name": "cmpeq", "datatypes": [float32], "template": tpl_implem_sse["compare"] },
-        { "instr_name": "cmpeq", "datatypes": [float64,int16,int32,int64], "template": tpl_implem_sse["compare"], "if": "defined(__SSE2__)" },
+        { "instr_name": "cmpeq", "datatypes": [float64,int16,int32], "template": tpl_implem_sse["compare"], "if": "defined(__SSE2__)" },
         { "instr_name": "cmpeq", "datatypes": [int64], "template": tpl_implem_sse["compare"], "if": "defined(__SSE4_1__)" } ],
 	"cmpneq": [
-        { "instr_name": "cmpneq", "datatypes": [float32], "template": tpl_implem_sse["compare"] },
-        { "instr_name": "cmpneq", "datatypes": [float64], "template": tpl_implem_sse["compare"], "if": "defined(__SSE2__)" },
+        { "instr_name": "cmpneq", "datatypes": [float32], "template": tpl_implem_sse["compare"] } ],
+        # { "instr_name": "cmpneq", "datatypes": [float64], "template": tpl_implem_sse["compare"], "if": "defined(__SSE2__)" } ],
         # add all int combinate not and equals for __SSE2__
         #{ "instr_name": "cmpneq", "datatypes": all_int, "template": tpl_implem_sse["not_cmpneq"], "if": "defined(__SSE2__)" },
-        { "instr_name": "cmpneq", "datatypes": [int64], "template": tpl_implem_sse["compare"], "if": "defined(__SSE4_1__)" } ],
+        #{ "instr_name": "cmpneq", "datatypes": [int64], "template": tpl_implem_sse["compare"], "if": "defined(__SSE4_1__)" } ],
     "cmplt": [
         { "instr_name": "cmplt", "datatypes": [float32], "template": tpl_implem_sse["compare"] },
         { "instr_name": "cmplt", "datatypes": [int16,int32,float64], "template": tpl_implem_sse["compare"], "if": "defined(__SSE2__)" }, ],

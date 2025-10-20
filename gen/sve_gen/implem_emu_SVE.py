@@ -21,21 +21,22 @@ tpl_implem_emu_sve = {
     "set_by_load" : { "format": "long", "code":
  """return %load<tp>%(vals);"""
     },
-    "set_k-64" : { "format": "long", "code":
- """%v<tp>% v[%N<tp>%];
-    for (int i = 0; i < %N<tp>%; i++)
-        v[i] = vals[i] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0;
-    %r<tp>% r1 = %set<tp>%(v);
-    %r<tp>% r2 = %set1<tp>%(0);
-    return %cmpeq<tp>%(r1, r2);"""
+    # From enu avx512 multalized common template
+    "set_k-64": { "format": "long", "code":
+"""%v<c:uint>% t[%N<tp>%] = { {% set nb_item = (isa.size/64)|int -1 %} {% for item in range(nb_item) %}
+        t[{{ item }}] = vals[{{ item }}] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0, {% endfor %}
+        t[{{ nb_item}}] = vals[{{ nb_item }}] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0 };
+    %r<c:uint>% r0_32 = %set<c:uint>%((%v<c:uint>%*) t);
+    %r<c:uint>% r1_32 = %set1<c:uint>%((%v<c:uint>%) 0xFFFFFFFFFFFFFFFF);
+    return %cast_k<c:uint|b:tp,tp>%(%cmpeq<c:uint|b:tp>%(r0_32, r1_32));"""
     },
-    "set_k-32" : { "format": "long", "code":
- """%v<tp>% v[%N<tp>%];
-    for (int i = 0; i < %N<tp>%; i++)
-        v[i] = vals[i] ? 0xFFFFFFFF : 0;
-    %r<tp>% r1 = %set<tp>%(v);
-    %r<tp>% r2 = %set1<tp>%(0);
-    return %cmpeq<tp>%(r1, r2);"""
+    "set_k-32": { "format": "long", "code":
+"""%v<c:uint>% t[%N<tp>%] = { {% set nb_item = (isa.size/32)|int - 1 %} {% for item in range(nb_item) %}
+        t[{{ item }}] = vals[{{ item }}] ? 0xFFFFFFFF : 0, {% endfor %}
+        t[{{ nb_item}}] = vals[{{ nb_item }}] ? 0xFFFFFFFF : 0 };
+    %r<c:uint>% r0_32 = %set<c:uint>%((%v<c:uint>%*) t);
+    %r<c:uint>% r1_32 = %set1<c:uint>%(0xFFFFFFFF);
+    return %cast_k<c:uint|b:tp,tp>%(%cmpeq<c:uint|b:tp>%(r0_32, r1_32));"""        
     },
     "hadd" : { "format": "long", "code":
  """const %v<tp>% val = %hadd_to_scal<tp>%(r0);
@@ -49,14 +50,20 @@ tpl_implem_emu_sve = {
     "getfirst": { "format": "long", "code":
 """  return %get<tp>%(r0, 0);""" 
     },
+    "get_k": { "format": "long", "code":
+""" %v<tp>% tmp[%N<tp>%];
+    %r<tp>% rmsk =%toreg<tp>%(m0);
+    %storeu<tp>%(tmp, rmsk);
+    return (int32_t) tmp[v0];"""
+    },
 }
 
 # attention certain emu sont commun entre different isa descendre un impl_emu_common.py pour mutualiser
 implems_emu_sve = {
     "toreg":[ 
         # verifier genaralisation autres types
-        { "datatypes":  [uint64, int64], "template": tpl_implem_emu_sve["toreg-64"]  } ,
-        { "datatypes":  [uint32, int32], "template": tpl_implem_emu_sve["toreg-32"]  } ,
+        { "datatypes":  [uint64, int64, float64], "template": tpl_implem_emu_sve["toreg-64"]  } ,
+        { "datatypes":  [uint32, int32, float32], "template": tpl_implem_emu_sve["toreg-32"]  } ,
     ],
     "andb":[ 
         { "datatypes":  all_float, "template": tpl_implem_emu_sve["and_all_float"]  } ,
@@ -64,9 +71,11 @@ implems_emu_sve = {
     "set":[ 
         { "datatypes":  all_datatypes, "template": tpl_implem_emu_sve["set_by_load"]  } ,
     ],
+    # tres lourd pour initialiser des predicats
     "set_k" :[
-        { "datatypes":  [uint64, int64], "template": tpl_implem_emu_sve["set_k-64"]  } ,
-        { "datatypes":  [uint32, int32], "template": tpl_implem_emu_sve["set_k-32"]  } ,
+        { "datatypes":  [uint64, int64, float64], "template": tpl_implem_emu_sve["set_k-64"]  } ,
+        { "datatypes":  [uint32, int32, float32], "template": tpl_implem_emu_sve["set_k-32"]  } ,
+        #{ "datatypes":  [float64, float32]      , "template": tpl_implem_emu_avx["set_k-64f"] } ,
     ],
     "hadd":[ 
         { "datatypes":  all_datatypes, "template": tpl_implem_emu_sve["hadd"]  } ,
@@ -76,5 +85,8 @@ implems_emu_sve = {
     ],
     "getfirst": [
         { "datatypes": all_datatypes, "template": tpl_implem_emu_sve["getfirst"] }, 
+    ],
+    "get_k": [
+        { "datatypes": all_datatypes, "template": tpl_implem_emu_sve["get_k"] }, 
     ],
 }
