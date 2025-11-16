@@ -2717,14 +2717,19 @@
 #ifdef __aarch64__
 	template <>
 	inline reg sqrt<double>(const reg v1) {
-		return (reg) vrecpeq_f64((float64x2_t) rsqrt<double>(v1));
+		return (reg) vsqrtq_f64((float64x2_t) v1);
 	}
-#endif
 
-	template <>
+    template <>
+	inline reg sqrt<float>(const reg v1) {
+		return (reg) vsqrtq_f32(v1);
+	}
+#else
+    template <>
 	inline reg sqrt<float>(const reg v1) {
 		return vrecpeq_f32(rsqrt<float>(v1));
 	}
+#endif
 
 	// ------------------------------------------------------------------------------------------------------------ log
 	template <>
