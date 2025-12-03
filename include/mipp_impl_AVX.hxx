@@ -4630,6 +4630,13 @@
 
 #ifdef __AVX2__
 	template <>
+	inline reg cvt<uint32_t,float>(const reg v) {
+		const auto lo = _mm256_cvtepi32_ps(_mm256_and_si256(_mm256_castps_si256(v), _mm256_set1_epi32(0xFFFF)));
+		const auto hi = _mm256_mul_ps(_mm256_cvtepi32_ps(_mm256_srli_epi32(_mm256_castps_si256(v), 16)), _mm256_set1_ps(0x10000));
+		return _mm256_add_ps(lo, hi);
+	}
+
+	template <>
 	inline reg cvt<int8_t,int16_t>(const reg_2 v) {
 		return _mm256_castsi256_ps(_mm256_cvtepi8_epi16(_mm_castps_si128(v)));
 	}
@@ -4669,6 +4676,15 @@
 				   (uint64_t) _mm256_extract_epi32(vi,2),
 				   (uint64_t) _mm256_extract_epi32(vi,1),
 				   (uint64_t) _mm256_extract_epi32(vi,0)));
+	}
+
+	template <>
+	inline reg cvt<uint32_t,float>(const reg v) {
+            const auto lane0 = _mm256_castsi256_si128(_mm256_castps_si256(v));
+            const auto lane1 = _mm256_extractf128_si256(_mm256_castps_si256(v), 1);
+            const auto lo = _mm256_cvtepi32_ps(_mm256_set_m128i(_mm_and_si128(lane1, _mm_set1_epi32(0xFFFF)), _mm_and_si128(lane0, _mm_set1_epi32(0xFFFF))));
+            const auto hi = _mm256_mul_ps(_mm256_cvtepi32_ps(_mm256_set_m128i(_mm_srli_epi32(lane1, 16), _mm_srli_epi32(lane0, 16))), _mm256_set1_ps(0x10000));
+            return _mm256_add_ps(lo, hi);
 	}
 #endif
 
