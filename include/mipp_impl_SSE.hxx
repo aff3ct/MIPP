@@ -3634,6 +3634,13 @@
 	inline reg cvt<int32_t,float>(const reg v) {
 		return _mm_cvtepi32_ps(_mm_castps_si128(v));
 	}
+
+	template <>
+	inline reg cvt<uint32_t, float>(const reg v) {
+		const auto lo = _mm_cvtepi32_ps(_mm_and_si128(_mm_castps_si128(v), _mm_set1_epi32(0xFFFF)));
+		const auto hi = _mm_mul_ps(_mm_cvtepi32_ps(_mm_srli_epi32(_mm_castps_si128(v), 16)), _mm_set1_ps(0x10000));
+		return _mm_add_ps(lo, hi);
+	}
 #endif
 
 #ifdef __SSE4_1__
