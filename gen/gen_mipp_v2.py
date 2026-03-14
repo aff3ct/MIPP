@@ -84,7 +84,7 @@ def main():
     generate_cpp_object()
      # generate mipp_v2.h
     generate_mipp_v2_h()
-    print("Generating MIPP code for sse, avx2, avx512, sve and rvv with size in " + str(isa_sve["size"]))
+    print("Generating MIPP code for sse, avx2, avx512, rvv and sve with size in " + str(isa_sve["size"]))
     print("With lmul in "+str(all_lmul)+ " and ldiv in "+str(all_ldiv))
     
 if __name__ == "__main__":

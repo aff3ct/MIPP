@@ -9,7 +9,7 @@ sys.path.insert(1, '.')
 from tools import *
 from headers_def import *
 from implem_RVV import *
-#from implem_emu_rvv import *
+from implem_emu_rvv import *
 from c_generator import *
 
 #taken from gen_mipp_sve.py
@@ -29,20 +29,19 @@ def gen_c_structures_rvv_ls(file, rvv_size):
     for dt in isa_rvv["datatypes"]:
         print(j2_template.render(isa_datatype=isa_rvv["datatypes"][dt],rvv_size=rvv_size), file=file)
      
-    #maybe should replace w mask type idk?   
-    #template = """typedef svbool_t fixed_{{rvv_size}}_bool_t __attribute__((riscv_rvv_vector_bits({{rvv_size}})));"""
-    #j2_template = Template(template, undefined=StrictUndefined)
-    #print(j2_template.render(rvv_size=rvv_size), file=file)
+    template = """typedef vbool1_t fixed_{{rvv_size}}_bool_t __attribute__((riscv_rvv_vector_bits({{rvv_size}})));"""
+    j2_template = Template(template, undefined=StrictUndefined)
+    print(j2_template.render(rvv_size=rvv_size), file=file)
     
     template = """typedef struct { fixed_{{ rvv_size }}_{{isa_datatype.to_ptr }} r; } rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
     j2_template = Template(template, undefined=StrictUndefined)
     for dt in isa_rvv["datatypes"]:
         print(j2_template.render(isa=isa_rvv,rvv_size=rvv_size,isa_datatype=isa_rvv["datatypes"][dt], datatype=datatypes[dt]), file=file)
 
-    #template = """typedef struct { fixed_{{ rvv_size }}_bool_t m; } rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
-    #j2_template = Template(template, undefined=StrictUndefined)
-    #for dt in isa_rvv["datatypes"]:
-    #    print(j2_template.render(isa=isa_rvv,rvv_size=rvv_size,isa_datatype=isa_rvv["datatypes"][dt], datatype=datatypes[dt]), file=file)
+    template = """typedef struct { fixed_{{ rvv_size }}_bool_t m; } rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
+    j2_template = Template(template, undefined=StrictUndefined)
+    for dt in isa_rvv["datatypes"]:
+        print(j2_template.render(isa=isa_rvv,rvv_size=rvv_size,isa_datatype=isa_rvv["datatypes"][dt], datatype=datatypes[dt]), file=file)
 
 
 #taken from gen_mipp_avx.py (changed)
@@ -64,7 +63,11 @@ def gen_mipp_rvv(vl=256):
     j2_template = Template(tpl_header_rvv, undefined=StrictUndefined)
     print(j2_template.render(vl=vl), file=file)
 
-    ref_isa_name = isa_rvv["name"]+str(vl)
+    ref_isa_name = isa_rvv["name"]
+    #for function prototypes that use arrays declared w macros like MIPP_RVV256_N_FLOAT64 
+    #we want the name to contain size. This is optional atm 
+    #but if we want smtg similar to sve it will become useful
+    isa_rvv["name"] = ref_isa_name+str(vl) 
     gen_c_defines_rvv_ls(file,ref_isa_name,vl)
     gen_c_structures_rvv_ls(file,vl)
     print("Generate RVV")
@@ -72,8 +75,8 @@ def gen_mipp_rvv(vl=256):
     gen_c_functions(isa_rvv, file, copy_mipp_funcs, implems_rvv)
     
     #will do these later
-    #gen_c_functions(isa_rvv, file, copy_mipp_funcs, implems_emu_rvv)
-    #gen_c_missing_functions(isa_rvv, file, copy_mipp_funcs)
+    gen_c_functions(isa_rvv, file, copy_mipp_funcs, implems_emu_rvv)
+    gen_c_missing_functions(isa_rvv, file, copy_mipp_funcs)
 
     tpl_footer_rvv = """#endif /* MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_RVV_H_ */"""
     j2_template = Template(tpl_footer_rvv, undefined=StrictUndefined)

@@ -33,6 +33,10 @@ typedef float float32_t;
 #include "sve/mipp_v2_impl_SVE_gen.h"
 #endif
 
+#if defined(__riscv_v_intrinsic)
+#include "rvv/mipp_v2_impl_RVV_gen.h"
+#endif
+
 #include "mipp_v2.hpp"
 
 #include "mipp_v2_object_gen.hpp"
@@ -84,6 +88,10 @@ typedef float float32_t;
 // not yet generated
 //#define MIPP_BW
 #define MIPP_INSTR_VERSION 1
+#endif
+
+#ifdef __riscv_v_intrinsic
+#define MIPP_RVV
 #endif
 
 // end utiles pour l'instant pour les tests...
