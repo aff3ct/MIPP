@@ -11,16 +11,19 @@ sys.path.insert(1,path +'/avx512_gen')
 sys.path.insert(1,path + '/avx_gen')
 sys.path.insert(1,path + '/sse_gen')
 sys.path.insert(1,path + '/sve_gen')
+sys.path.insert(1,path + '/rvv_gen')
 
 from implem_SSE import isa_sse
 from implem_AVX import isa_avx
 from implem_AVX512 import isa_avx512
 from implem_SVE import isa_sve
+from implem_RVV import isa_rvv
 
 from sse_gen import gen_mipp_sse
 from avx_gen import gen_mipp_avx
 from avx512_gen import gen_mipp_avx512
 from sve_gen import gen_mipp_sve
+from rvv_gen import gen_mipp_rvv
 
 from mipp_v2_h import generate_mipp_v2_h
 from ci_generator import generate_c_interface
@@ -36,6 +39,7 @@ sse_path = os.path.join(include_gen_path, "sse")
 avx_path = os.path.join(include_gen_path, "avx")
 avx512_path = os.path.join(include_gen_path, "avx512")
 sve_path = os.path.join(include_gen_path, "sve")
+rvv_path = os.path.join(include_gen_path, "rvv")
 
 
 def create_folder(folder_path):
@@ -61,15 +65,17 @@ def main():
     create_folder(avx_path)
     create_folder(avx512_path)
     create_folder(sve_path)
+    create_folder(rvv_path)
     # generate all avalaible simd and wrapp
     gen_mipp_sse.gen_mipp_sse()
     gen_mipp_avx.gen_mipp_avx()
     gen_mipp_avx512.gen_mipp_avx512()
     gen_mipp_sve.gen_mipp_sve()
+    gen_mipp_rvv.gen_mipp_rvv()
     # warning order
     # interface all simd  in c
     # generate mipp_v2_interface_gen.h
-    generate_c_interface([isa_avx512,isa_avx,isa_sse,isa_sve])
+    generate_c_interface([isa_avx512,isa_avx,isa_sse,isa_sve,isa_rvv])
     # C++ template wrapper interface with specialization
     # generate mipp_v2.hpp
     generate_cpp()
@@ -78,7 +84,7 @@ def main():
     generate_cpp_object()
      # generate mipp_v2.h
     generate_mipp_v2_h()
-    print("Generating MIPP code for sse, avx2, avx512 and sve with size in " + str(isa_sve["size"]))
+    print("Generating MIPP code for sse, avx2, avx512, sve and rvv with size in " + str(isa_sve["size"]))
     print("With lmul in "+str(all_lmul)+ " and ldiv in "+str(all_ldiv))
     
 if __name__ == "__main__":
