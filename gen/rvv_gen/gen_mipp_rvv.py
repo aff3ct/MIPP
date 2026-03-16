@@ -9,7 +9,7 @@ sys.path.insert(1, '.')
 from tools import *
 from headers_def import *
 from implem_RVV import *
-from implem_emu_rvv import *
+from implem_emu_RVV import *
 from c_generator import *
 
 #taken from gen_mipp_sve.py
@@ -45,7 +45,7 @@ def gen_c_structures_rvv_ls(file, rvv_size):
 
 
 #taken from gen_mipp_avx.py (changed)
-def gen_mipp_rvv(vl=256):
+def gen_mipp_rvv(vl=32*8):
     #for iemu in implems_emu_rvv:
     #	for sub_iemu in implems_emu_rvv[iemu]:
     #		if "type" not in sub_iemu:
@@ -56,7 +56,7 @@ def gen_mipp_rvv(vl=256):
     tpl_header_rvv = """#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_RVV_H_
 #define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_RVV_H_
 #include <riscv_vector.h>
-#define MIPP_RVV_VL {{vl}}"""
+#define MIPP_RVV_VL {{vl}}"""#vl is unnecessary actually
 #typedef double float64_t;
 #typedef float float32_t;"""#the typedefs are here only for debugging and should be removed when 
 #we integrate w mipp
