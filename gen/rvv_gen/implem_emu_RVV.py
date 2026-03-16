@@ -25,7 +25,7 @@ tpl_implem_emu_rvv = {
     #    tmp ={{ isa.prefix }}_vslidedown_vx_{{isa_dt_par.data_ext}}(r0.r, v0, MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}}));
     #    {{isa_dt_par.to_ptr}} out;
     #    
-    #    __asm__ volatile ("vmv.x.s %0, %1"
+    #    __asm__ volatile ("vmv.x.s ??'0, ??'1"
     #    : "=r"(out)
     #    : "v"(tmp));
     #
@@ -43,7 +43,7 @@ tpl_implem_emu_rvv = {
         
     """ },
 
-}#NOT DONE!!!!
+}
 
 implems_emu_rvv = {
     "loadu" : [{"instr_name" : "loadu", "datatypes": all_datatypes, "template": tpl_implem_emu_rvv["loadu"]}],
