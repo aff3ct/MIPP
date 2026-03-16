@@ -62,6 +62,7 @@ tpl_implem_rvv = {
     	"load":         { "format": "short", "code": "{{ isa.prefix }}_vle{{ isa_dt_par.data_ext_logi }}_v_{{ isa_dt_par.data_ext }}(({{ isa_dt_par.to_ptr }}*) p0, MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}}));" },
 	    "store":        { "format": "short", "code": "{{ isa.prefix }}_vse{{ isa_dt_par.data_ext_logi}}_v_{{ isa_dt_par.data_ext }}(({{ isa_dt_par.to_ptr }}*) p0, r0.r , MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}}));" },
         "arith_2args":  { "format": "short", "code": "{{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}(r0.r, r1.r, MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}}));" },
+
 }
 
 """
@@ -69,14 +70,14 @@ this dictionnary keeps track of which instructions r implemented.
 Which template to use to generate them. Which type should be used w which template n so on.
 """
 implems_rvv = {
-"load": [{ "instr_name": "load", "datatypes": all_datatypes, "template": tpl_implem_rvv["load"] }],
-"store": [{ "instr_name": "store", "datatypes": all_datatypes, "template": tpl_implem_rvv["store"] }],
-"add": [
+    "load": [{ "instr_name": "load", "datatypes": all_datatypes, "template": tpl_implem_rvv["load"] }],
+    "store": [{ "instr_name": "store", "datatypes": all_datatypes, "template": tpl_implem_rvv["store"] }],
+    "add": [
 		{ "instr_name": "fadd", "datatypes": all_float, "template": tpl_implem_rvv["arith_2args"]},
 		{ "instr_name": "add", "datatypes": all_int_uint, "template": tpl_implem_rvv["arith_2args"] },
 		],
- "sub": [
+    "sub": [
         { "instr_name": "fsub", "datatypes": all_float, "template": tpl_implem_rvv["arith_2args"]},
         { "instr_name": "sub", "datatypes": all_int_uint, "template": tpl_implem_rvv["arith_2args"] },
-        ], 
+        ],
   }
