@@ -29,6 +29,7 @@ void test_reg_sub()
 	}
 }
 
+
 #ifndef MIPP_NO
 TEST_CASE("Subtraction - mipp::reg", "[mipp::sub]")
 {
@@ -93,6 +94,7 @@ TEST_CASE("Subtraction - mipp::Reg", "[mipp::sub]")
 #endif
 }
 
+
 template <typename T>
 void test_reg_maskz_sub()
 {
@@ -131,6 +133,7 @@ void test_reg_maskz_sub()
 	}*/
 }
 
+#ifndef MIPP_RVV
 #ifndef MIPP_NO
 TEST_CASE("Subtraction - mipp::reg - maskz", "[mipp::sub]")
 {
@@ -150,6 +153,7 @@ TEST_CASE("Subtraction - mipp::reg - maskz", "[mipp::sub]")
 	SECTION("datatype = int8_t") { test_reg_maskz_sub<int8_t>(); }
 #endif
 }
+#endif
 #endif
 
 template <typename T>
@@ -187,6 +191,7 @@ void test_Reg_maskz_sub()
 	}*/
 }
 
+#ifndef MIPP_RVV
 TEST_CASE("Subtraction - mipp::Reg - maskz", "[mipp::sub]")
 {
 #if defined(MIPP_64BIT)
@@ -205,6 +210,7 @@ TEST_CASE("Subtraction - mipp::Reg - maskz", "[mipp::sub]")
 	SECTION("datatype = int8_t") { test_Reg_maskz_sub<int8_t>(); }
 #endif
 }
+#endif
 
 template <typename T>
 void test_reg_mask_sub()
@@ -243,6 +249,7 @@ void test_reg_mask_sub()
 	}*/
 }
 
+#ifndef MIPP_RVV
 #ifndef MIPP_NO
 TEST_CASE("Subtraction - mipp::reg - mask", "[mipp::sub]")
 {
@@ -262,6 +269,7 @@ TEST_CASE("Subtraction - mipp::reg - mask", "[mipp::sub]")
 	SECTION("datatype = int8_t") { test_reg_mask_sub<int8_t>(); }
 #endif
 }
+#endif
 #endif
 
 template <typename T>
@@ -301,6 +309,7 @@ void test_Reg_mask_sub()
 	}*/
 }
 
+#ifndef MIPP_RVV
 TEST_CASE("Subtraction - mipp::Reg - mask", "[mipp::sub]")
 {
 #if defined(MIPP_64BIT)
@@ -319,3 +328,4 @@ TEST_CASE("Subtraction - mipp::Reg - mask", "[mipp::sub]")
 	SECTION("datatype = int8_t") { test_Reg_mask_sub<int8_t>(); }
 #endif
 }
+#endif

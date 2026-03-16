@@ -29,6 +29,7 @@ void test_reg_andb()
 	}
 }
 
+#ifndef MIPP_RVV
 #ifndef MIPP_NO
 TEST_CASE("Binary and - mipp::rvd", "[mipp::andb]")
 {
@@ -41,6 +42,7 @@ TEST_CASE("Binary and - mipp::rvd", "[mipp::andb]")
 	SECTION("datatype = int8_t") { test_reg_andb<int8_t>(); }
 #endif
 }
+#endif
 #endif
 
 template <typename T>
@@ -66,6 +68,7 @@ void test_Reg_andb()
 	}
 }
 
+#ifndef MIPP_RVV
 TEST_CASE("Binary and - mipp::Rvd", "[mipp::andb]")
 {
 #if defined(MIPP_64BIT)
@@ -77,6 +80,7 @@ TEST_CASE("Binary and - mipp::Rvd", "[mipp::andb]")
 	SECTION("datatype = int8_t") { test_Reg_andb<int8_t>(); }
 #endif
 }
+#endif
 
 template <typename T>
 void test_msk_andb()
@@ -115,6 +119,7 @@ void test_msk_andb()
 	}
 }
 
+#ifndef MIPP_RVV
 #ifndef MIPP_NO
 TEST_CASE("Binary and - mipp::rvm", "[mipp::andb]")
 {
@@ -127,6 +132,7 @@ TEST_CASE("Binary and - mipp::rvm", "[mipp::andb]")
 	SECTION("datatype = int8_t") { test_msk_andb<int8_t>(); }
 #endif
 }
+#endif
 #endif
 
 template <typename T>
@@ -160,6 +166,7 @@ void test_Msk_andb()
 	}
 }
 
+#ifndef MIPP_RVV
 TEST_CASE("Binary and - mipp::Msk", "[mipp::andb]")
 {
 #if defined(MIPP_64BIT)
@@ -171,3 +178,4 @@ TEST_CASE("Binary and - mipp::Msk", "[mipp::andb]")
 	SECTION("datatype = int8_t") { test_Msk_andb<int8_t>(); }
 #endif
 }
+#endif
