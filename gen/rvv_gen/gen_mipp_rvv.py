@@ -56,6 +56,7 @@ def gen_mipp_rvv(vl=32*8):
     tpl_header_rvv = """#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_RVV_H_
 #define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_RVV_H_
 #include <riscv_vector.h>
+#include <string.h>
 #define MIPP_RVV_VL {{vl}}"""#vl is unnecessary actually
 #typedef double float64_t;
 #typedef float float32_t;"""#the typedefs are here only for debugging and should be removed when 

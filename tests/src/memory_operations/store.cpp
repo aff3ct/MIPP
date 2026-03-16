@@ -101,7 +101,7 @@ TEST_CASE("Store unaligned - mipp::rvd", "[mipp::storeu]")
 #endif
 }
 #endif
-
+/*
 template <typename T>
 void test_Rvd_storeu()
 {

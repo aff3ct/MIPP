@@ -2,16 +2,20 @@
 from tools import *
 tpl_implem_emu_rvv = {
     "loadu" : { "format": "long", "code": """
-        if (((({{isa_dt_par.to_ptr}})p0) & (8 - 1)) == 0) {
-            return {{isa.prefix}}_vle{{isa_dt_par.data_ext_logi}}_v_{{isa_dt_par.data_ext}}(({{ isa_dt_par.to_ptr }}*)p0, MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}}));
+        if ((((uint64_t)p0) & (8 - 1)) == 0) {
+            %r<tp>% out;
+            out.r = {{isa.prefix}}_vle{{isa_dt_par.data_ext_logi}}_v_{{isa_dt_par.data_ext}}(({{ isa_dt_par.to_ptr }}*)p0, MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}}));
+            return out;
         } else {
             alignas(8) {{isa_dt_par.to_ptr}} tmp[MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}})];
             memcpy(tmp, p0, MIPP_RVV_VL);
-            return {{ isa.prefix }}_vle{{ isa_dt_par.data_ext_logi }}_v_{{ isa_dt_par.data_ext }}(({{ isa_dt_par.to_ptr }}*) tmp, MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}}));
+            %r<tp>% out;
+            out.r = {{ isa.prefix }}_vle{{ isa_dt_par.data_ext_logi }}_v_{{ isa_dt_par.data_ext }}(({{ isa_dt_par.to_ptr }}*) tmp, MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}}));
+            return out;
         } 
     """},
     "storeu" : { "format": "long", "code": """
-        if (((({{isa_dt_par.to_ptr}})p0) & (8 - 1)) == 0) {
+        if ((((uint64_t)p0) & (8 - 1)) == 0) {
             return {{isa.prefix}}_vse{{isa_dt_par.data_ext_logi}}_v_{{isa_dt_par.data_ext}}(({{ isa_dt_par.to_ptr }}*)p0, r0.r, MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}}));
         } else {
             alignas(8) {{isa_dt_par.to_ptr}} tmp[MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}})];
