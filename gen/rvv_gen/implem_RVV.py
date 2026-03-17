@@ -35,16 +35,26 @@ isa_rvv = {
     "architecture": "Risc-V",#used for smth ig
     "hw_lmul": True, #yeah
     "datatypes": {
-        float64 : {"data_ext" :    "f64m1", "data_ext_logi":    "64", "data_ext_msk": "vf", "reg" : "vfloat64m1_t", "msk" : "vbool1_t", "to_ptr": "float64_t"} ,
-        float32 : {"data_ext" :    "f32m1", "data_ext_logi":    "32", "data_ext_msk": "vf", "reg" : "vfloat32m1_t", "msk" : "vbool1_t", "to_ptr": "float32_t"} ,
-        int64   : {"data_ext" :    "i64m1", "data_ext_logi":    "64", "data_ext_msk": "vx", "reg" : "vint64m1_t",   "msk" : "vbool1_t", "to_ptr": "int64_t"} ,
-        int32   : {"data_ext" :    "i32m1", "data_ext_logi":    "32", "data_ext_msk": "vx", "reg" : "vint32m1_t",   "msk" : "vbool1_t", "to_ptr": "int32_t"} ,
-        int16   : {"data_ext" :    "i16m1", "data_ext_logi":    "16", "data_ext_msk": "vx", "reg" : "vint16m1_t",   "msk" : "vbool1_t", "to_ptr": "int16_t"} ,
-        int8    : {"data_ext" :    "i8m1",  "data_ext_logi":    "8", "data_ext_msk": "vx", "reg" : "vint8m1_t",    "msk" : "vbool1_t", "to_ptr": "int8_t"} ,
-        uint64  : {"data_ext" :    "u64m1", "data_ext_logi":    "64", "data_ext_msk": "vx", "reg" : "vuint64m1_t",  "msk" : "vbool1_t", "to_ptr": "uint64_t"} ,
-        uint32  : {"data_ext" :    "u32m1", "data_ext_logi":    "32", "data_ext_msk": "vx", "reg" : "vuint32m1_t",  "msk" : "vbool1_t", "to_ptr": "uint32_t"} ,
-        uint16  : {"data_ext" :    "u16m1", "data_ext_logi":    "16", "data_ext_msk": "vx", "reg" : "vuint16m1_t",  "msk" : "vbool1_t", "to_ptr": "uint16_t"} ,
-        uint8   : {"data_ext" :    "u8m1",  "data_ext_logi":    "8", "data_ext_msk": "vx", "reg" : "vuint8m1_t",   "msk" : "vbool1_t", "to_ptr": "uint8_t"} ,
+        float64 : {"data_ext" :    "f64m1", "data_ext_logi":    "64", "data_ext_msk": "vf", "reg" : "vfloat64m1_t", "msk" : "vbool1_t",
+                   "to_ptr": "float64_t", "to_int": "vint64m1_t", "to_uint" : "vuint64m1_t", "to_float" : "vfloat64m1_t", "uint_data_ext" : "u64m1"} ,#added to_int_ptr to convert float to int before bitwise operations. I'll see if I can find a better solution later.
+        float32 : {"data_ext" :    "f32m1", "data_ext_logi":    "32", "data_ext_msk": "vf", "reg" : "vfloat32m1_t", "msk" : "vbool1_t",
+                   "to_ptr": "float32_t", "to_int": "vint64m1_t", "to_uint" : "vuint32m1_t", "to_float64": "vfloat32m1_t", "uint_data_ext" : "u32m1"} ,#added to_int_ptr to convert float to int before bitwise operations. I'll see if I can find a better solution later.
+        int64   : {"data_ext" :    "i64m1", "data_ext_logi":    "64", "data_ext_msk": "vx", "reg" : "vint64m1_t",   "msk" : "vbool1_t",
+                   "to_ptr": "int64_t", "to_int": "vint64m1_t", "to_uint" : "vuint64m1_t", "to_float": "vfloat64m1_t"} ,
+        int32   : {"data_ext" :    "i32m1", "data_ext_logi":    "32", "data_ext_msk": "vx", "reg" : "vint32m1_t",   "msk" : "vbool1_t",
+                   "to_ptr": "int32_t", "to_int": "vint32m1_t", "to_uint" : "vuint32m1_t", "to_float": "vfloat32m1_t"} ,
+        int16   : {"data_ext" :    "i16m1", "data_ext_logi":    "16", "data_ext_msk": "vx", "reg" : "vint16m1_t",   "msk" : "vbool1_t",
+                   "to_ptr": "int16_t", "to_int": "vint16m1_t", "to_uint" : "vuint16m1_t", "to_float": "vfloat32m1_t"} ,
+        int8    : {"data_ext" :    "i8m1",  "data_ext_logi":    "8", "data_ext_msk": "vx", "reg" : "vint8m1_t",    "msk" : "vbool1_t",
+                   "to_ptr": "int8_t", "to_int": "vint8m1_t", "to_uint" : "vuint8m1_t", "to_float": "vfloat32m1_t"} ,
+        uint64  : {"data_ext" :    "u64m1", "data_ext_logi":    "64", "data_ext_msk": "vx", "reg" : "vuint64m1_t",  "msk" : "vbool1_t",
+                   "to_ptr": "uint64_t", "to_int": "vint64m1_t", "to_uint" : "vuint64m1_t", "to_float": "vfloat64m1_t"} ,
+        uint32  : {"data_ext" :    "u32m1", "data_ext_logi":    "32", "data_ext_msk": "vx", "reg" : "vuint32m1_t",  "msk" : "vbool1_t",
+                   "to_ptr": "uint32_t", "to_int": "vint32m1_t", "to_uint" : "vuint32m1_t", "to_float": "vfloat32m1_t"} ,
+        uint16  : {"data_ext" :    "u16m1", "data_ext_logi":    "16", "data_ext_msk": "vx", "reg" : "vuint16m1_t",  "msk" : "vbool1_t",
+                   "to_ptr": "uint16_t", "to_int": "vint16m1_t", "to_uint" : "vuint16m1_t", "to_float": "vfloat32m1_t"} ,
+        uint8   : {"data_ext" :    "u8m1",  "data_ext_logi":    "8", "data_ext_msk": "vx", "reg" : "vuint8m1_t",   "msk" : "vbool1_t",
+                   "to_ptr": "uint8_t", "to_int": "vint8m1_t", "to_uint" : "vuint8m1_t", "to_float": "vfloat32m1_t"} ,
     },
 }#I think this is ok to start doing things :)
 
@@ -62,7 +72,15 @@ tpl_implem_rvv = {
     	"load":         { "format": "short", "code": "{{ isa.prefix }}_vle{{ isa_dt_par.data_ext_logi }}_v_{{ isa_dt_par.data_ext }}(({{ isa_dt_par.to_ptr }}*) p0, MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}}));" },
 	    "store":        { "format": "short", "code": "{{ isa.prefix }}_vse{{ isa_dt_par.data_ext_logi}}_v_{{ isa_dt_par.data_ext }}(({{ isa_dt_par.to_ptr }}*) p0, r0.r , MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}}));" },
         "arith_2args":  { "format": "short", "code": "{{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}(r0.r, r1.r, MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}}));" },
-
+        "float_bitwise": { "format": "long", "code": """
+                         {{isa_dt_par.to_uint}} tmp1, tmp2;
+                         tmp1 = {{isa.prefix}}_vfcvt_xu_f_v_{{isa_dt_par.uint_data_ext}}(r0.r, MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}}));
+                         tmp2 = {{isa.prefix}}_vfcvt_xu_f_v_{{isa_dt_par.uint_data_ext}}(r1.r, MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}}));
+                         tmp1 = {{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.uint_data_ext }}(tmp1, tmp2, MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}}));
+                         %r<tp>% ret;
+                         ret.r = {{ isa.prefix }}_vfcvt_f_xu_v_{{isa_dt_par.data_ext}}(tmp1, MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}}));
+                         return ret;
+                         """},#this is wrong bc isa_dt_par is float, but we want to convert it to int before doing bitwise operations. I'll fix it later, maybe by adding a new field in the datatypes dict.
 }
 
 """
@@ -80,4 +98,6 @@ implems_rvv = {
         { "instr_name": "fsub", "datatypes": all_float, "template": tpl_implem_rvv["arith_2args"]},
         { "instr_name": "sub", "datatypes": all_int_uint, "template": tpl_implem_rvv["arith_2args"] },
         ],
+    "andb":[ {"instr_name": "and", "datatypes": all_int_uint, "template": tpl_implem_rvv["arith_2args"]},
+            {"instr_name": "and", "datatypes": all_float, "template": tpl_implem_rvv["float_bitwise"]} ],
   }
