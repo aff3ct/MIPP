@@ -24,35 +24,42 @@ tpl_implem_emu_rvv = {
             return;
         }
     """ },
-    #"get" :         { "format": "long", "code": """              
-    #    {{isa_dt_par.reg}} tmp;
-    #    tmp ={{ isa.prefix }}_vslidedown_vx_{{isa_dt_par.data_ext}}(r0.r, v0, MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}}));
-    #    {{isa_dt_par.to_ptr}} out;
-    #    
-    #    __asm__ volatile ("vmv.x.s ??'0, ??'1"
-    #    : "=r"(out)
-    #    : "v"(tmp));
-    #
-    #    return out;
-    #""" },
-    
-    "get" :         { "format": "long", "code": """              
-
-        {{isa_dt_par.to_ptr}} out;
-        //idk man stack alloc an array or smth
-        {{isa_dt_par.to_ptr}} tmp_arr[MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}})];
-        {{ isa.prefix }}_vse{{ isa_dt_par.data_ext_logi}}_v_{{ isa_dt_par.data_ext }}(({{ isa_dt_par.to_ptr }}*) tmp_arr, r0.r, MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}}));
-        out = tmp_arr[v0];
-        return out;
+    "scalar_get" :         { "format": "long", "code": """              
+        {{isa_dt_par.reg}} tmp;
+        tmp = {{ isa.prefix }}_vslidedown_vx_{{isa_dt_par.data_ext}}(r0.r, v0, MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}}));
+        {{isa_dt_par.to_ptr}} out = {{isa.prefix}}_{{instr_name}}_x_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(tmp);
         
+    
+        return out;
     """ },
+    
+    "float_get" :         { "format": "long", "code": """              
+        {{isa_dt_par.reg}} tmp;
+        tmp = {{ isa.prefix }}_vslidedown_vx_{{isa_dt_par.data_ext}}(r0.r, v0, MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}}));
+        {{isa_dt_par.to_ptr}} out = {{isa.prefix}}_{{instr_name}}_f_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(tmp);
+        
+    
+        return out;
+    """ },
+    
+    #"get" : { "format": "long", "code": """              
+    #
+    #    {{isa_dt_par.to_ptr}} out;
+    #    //idk man stack alloc an array or smth
+    #    {{isa_dt_par.to_ptr}} tmp_arr[MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}})];
+    #    {{ isa.prefix }}_vse{{ isa_dt_par.data_ext_logi}}_v_{{ isa_dt_par.data_ext }}(({{ isa_dt_par.to_ptr }}*) tmp_arr, r0.r, MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}}));
+    #    out = tmp_arr[v0];
+    #    return out;
+    #    
+    #""" },
 
 }
 
 implems_emu_rvv = {
     "loadu" : [{"instr_name" : "loadu", "datatypes": all_datatypes, "template": tpl_implem_emu_rvv["loadu"]}],
     "storeu" : [{"instr_name" : "storeu", "datatypes": all_datatypes, "template": tpl_implem_emu_rvv["storeu"]}],
-    "get" : [{"instr_name" : "get", "datatypes": all_datatypes, "template": tpl_implem_emu_rvv["get"]}],
+    "get" : [{"instr_name" : "vmv", "datatypes": all_int_uint, "template": tpl_implem_emu_rvv["scalar_get"]},
+             {"instr_name" : "vfmv", "datatypes": all_float, "template": tpl_implem_emu_rvv["float_get"]}],
     #fix : terrible hacky solution bc mipp doesn't want me to use % characters....
 
 }

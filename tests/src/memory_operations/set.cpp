@@ -15,7 +15,6 @@ void test_reg_set1()
 		REQUIRE(mipp::get(r, i) == (T)12);
 }
 
-#ifndef MIPP_RVV
 #ifndef MIPP_NO
 TEST_CASE("Set1 - mipp::rvd<T>", "[mipp::set1]")
 {
@@ -34,7 +33,6 @@ TEST_CASE("Set1 - mipp::rvd<T>", "[mipp::set1]")
 #endif
 }
 #endif
-#endif
 
 template <typename T>
 void test_Reg_set1()
@@ -45,7 +43,6 @@ void test_Reg_set1()
 		REQUIRE(r[i] == (T)12);
 }
 
-#ifndef MIPP_RVV
 TEST_CASE("Set1 - mipp::Rvd", "[mipp::set1]")
 {
 #if defined(MIPP_64BIT)
@@ -62,7 +59,6 @@ TEST_CASE("Set1 - mipp::Rvd", "[mipp::set1]")
 	SECTION("datatype = int8_t") { test_Reg_set1<int8_t>(); }
 #endif
 }
-#endif
 
 template <typename T>
 void test_reg_set0()

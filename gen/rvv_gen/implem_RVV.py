@@ -34,29 +34,55 @@ isa_rvv = {
     "define": "__riscv_v_intrinsic", #define to check is isa exists
     "architecture": "Risc-V",#used for smth ig
     "hw_lmul": True, #yeah
+    
+    #the datatypes dict contains k/v pairs with relevant information
+    #to generate intrinsics. You can write {{isa_dt_reg.key}} and it will be replace 
+    #with the value. Useful for genericity. 
+    
+    #I'm adding fields to it rn. It makes it more crowded and less legible. But it works.
     "datatypes": {
         float64 : {"data_ext" :    "f64m1", "data_ext_logi":    "64", "data_ext_msk": "vf", "reg" : "vfloat64m1_t", "msk" : "vbool1_t",
-                   "to_ptr": "float64_t", "to_int": "vint64m1_t", "to_uint" : "vuint64m1_t", "to_float" : "vfloat64m1_t", "uint_data_ext" : "u64m1"} ,#added to_int_ptr to convert float to int before bitwise operations. I'll see if I can find a better solution later.
+                   "to_ptr": "float64_t", "to_int": "vint64m1_t", "to_uint" : "vuint64m1_t", 
+                   "to_float" : "vfloat64m1_t", "uint_data_ext" : "u64m1", "reg_dt_ext": "f64"} ,#added to_int_ptr to convert float to int before bitwise operations. I'll see if I can find a better solution later.
+        
         float32 : {"data_ext" :    "f32m1", "data_ext_logi":    "32", "data_ext_msk": "vf", "reg" : "vfloat32m1_t", "msk" : "vbool1_t",
-                   "to_ptr": "float32_t", "to_int": "vint64m1_t", "to_uint" : "vuint32m1_t", "to_float64": "vfloat32m1_t", "uint_data_ext" : "u32m1"} ,#added to_int_ptr to convert float to int before bitwise operations. I'll see if I can find a better solution later.
+                   "to_ptr": "float32_t", "to_int": "vint64m1_t", "to_uint" : "vuint32m1_t", 
+                   "to_float": "vfloat32m1_t", "uint_data_ext" : "u32m1", "reg_dt_ext" : "f32"} ,#added to_int_ptr to convert float to int before bitwise operations. I'll see if I can find a better solution later.
+        
         int64   : {"data_ext" :    "i64m1", "data_ext_logi":    "64", "data_ext_msk": "vx", "reg" : "vint64m1_t",   "msk" : "vbool1_t",
-                   "to_ptr": "int64_t", "to_int": "vint64m1_t", "to_uint" : "vuint64m1_t", "to_float": "vfloat64m1_t"} ,
+                   "to_ptr": "int64_t", "to_int": "vint64m1_t", "to_uint" : "vuint64m1_t",
+                   "to_float": "vfloat64m1_t", "reg_dt_ext" : "i64"} ,
+        
         int32   : {"data_ext" :    "i32m1", "data_ext_logi":    "32", "data_ext_msk": "vx", "reg" : "vint32m1_t",   "msk" : "vbool1_t",
-                   "to_ptr": "int32_t", "to_int": "vint32m1_t", "to_uint" : "vuint32m1_t", "to_float": "vfloat32m1_t"} ,
+                   "to_ptr": "int32_t", "to_int": "vint32m1_t", "to_uint" : "vuint32m1_t",
+                   "to_float": "vfloat32m1_t", "reg_dt_ext" : "i32"} ,
+        
         int16   : {"data_ext" :    "i16m1", "data_ext_logi":    "16", "data_ext_msk": "vx", "reg" : "vint16m1_t",   "msk" : "vbool1_t",
-                   "to_ptr": "int16_t", "to_int": "vint16m1_t", "to_uint" : "vuint16m1_t", "to_float": "vfloat32m1_t"} ,
+                   "to_ptr": "int16_t", "to_int": "vint16m1_t", "to_uint" : "vuint16m1_t",
+                   "to_float": "vfloat32m1_t", "reg_dt_ext" : "i16"} ,
+        
         int8    : {"data_ext" :    "i8m1",  "data_ext_logi":    "8", "data_ext_msk": "vx", "reg" : "vint8m1_t",    "msk" : "vbool1_t",
-                   "to_ptr": "int8_t", "to_int": "vint8m1_t", "to_uint" : "vuint8m1_t", "to_float": "vfloat32m1_t"} ,
+                   "to_ptr": "int8_t", "to_int": "vint8m1_t", "to_uint" : "vuint8m1_t",
+                   "to_float": "vfloat32m1_t", "reg_dt_ext" : "i8"} ,
+        
         uint64  : {"data_ext" :    "u64m1", "data_ext_logi":    "64", "data_ext_msk": "vx", "reg" : "vuint64m1_t",  "msk" : "vbool1_t",
-                   "to_ptr": "uint64_t", "to_int": "vint64m1_t", "to_uint" : "vuint64m1_t", "to_float": "vfloat64m1_t"} ,
+                   "to_ptr": "uint64_t", "to_int": "vint64m1_t", "to_uint" : "vuint64m1_t",
+                   "to_float": "vfloat64m1_t", "reg_dt_ext" : "u64"} ,
+        
         uint32  : {"data_ext" :    "u32m1", "data_ext_logi":    "32", "data_ext_msk": "vx", "reg" : "vuint32m1_t",  "msk" : "vbool1_t",
-                   "to_ptr": "uint32_t", "to_int": "vint32m1_t", "to_uint" : "vuint32m1_t", "to_float": "vfloat32m1_t"} ,
+                   "to_ptr": "uint32_t", "to_int": "vint32m1_t", "to_uint" : "vuint32m1_t",
+                   "to_float": "vfloat32m1_t", "reg_dt_ext" : "u32"} ,
+        
         uint16  : {"data_ext" :    "u16m1", "data_ext_logi":    "16", "data_ext_msk": "vx", "reg" : "vuint16m1_t",  "msk" : "vbool1_t",
-                   "to_ptr": "uint16_t", "to_int": "vint16m1_t", "to_uint" : "vuint16m1_t", "to_float": "vfloat32m1_t"} ,
+                   "to_ptr": "uint16_t", "to_int": "vint16m1_t", "to_uint" : "vuint16m1_t",
+                   "to_float": "vfloat32m1_t", "reg_dt_ext" : "u16"} ,
+        
         uint8   : {"data_ext" :    "u8m1",  "data_ext_logi":    "8", "data_ext_msk": "vx", "reg" : "vuint8m1_t",   "msk" : "vbool1_t",
-                   "to_ptr": "uint8_t", "to_int": "vint8m1_t", "to_uint" : "vuint8m1_t", "to_float": "vfloat32m1_t"} ,
+                   "to_ptr": "uint8_t", "to_int": "vint8m1_t", "to_uint" : "vuint8m1_t",
+                   "to_float": "vfloat32m1_t", "reg_dt_ext": "u8"} ,
     },
-}#I think this is ok to start doing things :)
+}#I added a bunch of keys to datatypes dictionnary bc they will be necessary for conversion.
+#this solution is really unelegant and I might want to do it differently.
 
 #list of templates 4 mnemonics 
 """
@@ -71,8 +97,8 @@ for details
 tpl_implem_rvv = {
     	"load":         { "format": "short", "code": "{{ isa.prefix }}_vle{{ isa_dt_par.data_ext_logi }}_v_{{ isa_dt_par.data_ext }}(({{ isa_dt_par.to_ptr }}*) p0, MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}}));" },
 	    "store":        { "format": "short", "code": "{{ isa.prefix }}_vse{{ isa_dt_par.data_ext_logi}}_v_{{ isa_dt_par.data_ext }}(({{ isa_dt_par.to_ptr }}*) p0, r0.r , MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}}));" },
-        "arith_2args":  { "format": "short", "code": "{{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}(r0.r, r1.r, MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}}));" },
-        "float_bitwise": { "format": "long", "code": """
+      "arith_2args":  { "format": "short", "code": "{{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}(r0.r, r1.r, MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}}));" },
+      "float_bitwise": { "format": "long", "code": """
                          {{isa_dt_par.to_uint}} tmp1, tmp2;
                          tmp1 = {{isa.prefix}}_vfcvt_xu_f_v_{{isa_dt_par.uint_data_ext}}(r0.r, MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}}));
                          tmp2 = {{isa.prefix}}_vfcvt_xu_f_v_{{isa_dt_par.uint_data_ext}}(r1.r, MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}}));
@@ -80,7 +106,9 @@ tpl_implem_rvv = {
                          %r<tp>% ret;
                          ret.r = {{ isa.prefix }}_vfcvt_f_xu_v_{{isa_dt_par.data_ext}}(tmp1, MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}}));
                          return ret;
-                         """},#this is wrong bc isa_dt_par is float, but we want to convert it to int before doing bitwise operations. I'll fix it later, maybe by adding a new field in the datatypes dict.
+                         """},
+      "float_set1":{"format": "short", "code" :"{{isa.prefix}}_{{ instr_name }}_s_f_{{isa_dt_par.data_ext}}(v0,MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}}));"},
+      "scalar_set1":{"format": "short", "code" :"{{isa.prefix}}_{{ instr_name }}_s_x_{{isa_dt_par.data_ext}}(v0,MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}}));"}
 }
 
 """
@@ -100,4 +128,6 @@ implems_rvv = {
         ],
     "andb":[ {"instr_name": "and", "datatypes": all_int_uint, "template": tpl_implem_rvv["arith_2args"]},
             {"instr_name": "and", "datatypes": all_float, "template": tpl_implem_rvv["float_bitwise"]} ],
+    "set1":[ {"instr_name": "vmv", "datatypes" : all_int_uint, "template":tpl_implem_rvv["scalar_set1"] },
+           {"instr_name": "vfmv","datatypes": all_float, "template":tpl_implem_rvv["float_set1"]}]
   }
