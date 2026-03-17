@@ -108,7 +108,10 @@ tpl_implem_rvv = {
                          return ret;
                          """},
       "float_set1":{"format": "short", "code" :"{{isa.prefix}}_{{ instr_name }}_s_f_{{isa_dt_par.data_ext}}(v0,MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}}));"},
-      "scalar_set1":{"format": "short", "code" :"{{isa.prefix}}_{{ instr_name }}_s_x_{{isa_dt_par.data_ext}}(v0,MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}}));"}
+      "scalar_set1":{"format": "short", "code" :"{{isa.prefix}}_{{ instr_name }}_s_x_{{isa_dt_par.data_ext}}(v0,MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}}));"},
+      
+      "float_set0":{"format": "short", "code" :"{{isa.prefix}}_{{ instr_name }}_s_f_{{isa_dt_par.data_ext}}(0.f,MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}}));"},
+      "scalar_set0":{"format": "short", "code" :"{{isa.prefix}}_{{ instr_name }}_s_x_{{isa_dt_par.data_ext}}(0,MIPP_RVV_VL/sizeof({{isa_dt_par.to_ptr}}));"},
 }
 
 """
@@ -129,5 +132,7 @@ implems_rvv = {
     "andb":[ {"instr_name": "and", "datatypes": all_int_uint, "template": tpl_implem_rvv["arith_2args"]},
             {"instr_name": "and", "datatypes": all_float, "template": tpl_implem_rvv["float_bitwise"]} ],
     "set1":[ {"instr_name": "vmv", "datatypes" : all_int_uint, "template":tpl_implem_rvv["scalar_set1"] },
-           {"instr_name": "vfmv","datatypes": all_float, "template":tpl_implem_rvv["float_set1"]}]
-  }
+           {"instr_name": "vfmv","datatypes": all_float, "template":tpl_implem_rvv["float_set1"]}],
+    "set0":[ {"instr_name": "vmv", "datatypes" : all_int_uint, "template":tpl_implem_rvv["scalar_set0"] },
+           {"instr_name": "vfmv","datatypes": all_float, "template":tpl_implem_rvv["float_set0"]}],
+}
