@@ -107,8 +107,6 @@ void test_msk_andb()
 		{
 
 			bool res = inputs1[i] & inputs2[i];
-			std::cout << inputs1[i] << " " << inputs2[i] << " " << res << " " << mipp::get(r,i) << std::endl;
-
 
 			if (res)
 				REQUIRE(mipp::get(r, i) != (T)0);
