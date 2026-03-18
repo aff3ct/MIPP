@@ -1,0 +1,10 @@
+[data-md-color-scheme="slate"] {
+  img { /* svg on an img tag */
+    -webkit-filter: invert(0.85); /* safari 6.0 - 9.0 */
+            filter: invert(0.85);
+  }
+  svg {
+    -webkit-filter: invert(85%); /* safari 6.0 - 9.0 */
+            filter: invert(85%);
+  }
+}

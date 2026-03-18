@@ -12,3 +12,4 @@ tests/code_coverage_report/
 build*
 __pycache__
 .venv
+include*/
