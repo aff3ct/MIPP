@@ -130,6 +130,8 @@ implems_rvv = {
     "load": [{ "instr_name": "load", "datatypes": all_datatypes, "template": tpl_implem_rvv["load"] }],
     "store": [{ "instr_name": "store", "datatypes": all_datatypes, "template": tpl_implem_rvv["store"] }],
     
+    
+    #arith_2args functions
     "add": [
 		  { "instr_name": "fadd", "datatypes": all_float, "template": tpl_implem_rvv["arith_2args"]},
 		  { "instr_name": "add", "datatypes": all_int_uint, "template": tpl_implem_rvv["arith_2args"] },
@@ -144,13 +146,20 @@ implems_rvv = {
 		{ "instr_name": "mul", "datatypes": all_int_uint, "template": tpl_implem_rvv["arith_2args"] },
     ],
     
-    "div": [
-        { "instr_name": "fdiv", "datatypes": all_float, "template": tpl_implem_rvv["arith_2args"]},
-    ],
+    "div": [{ "instr_name": "fdiv", "datatypes": all_float, "template": tpl_implem_rvv["arith_2args"]},],
     
+    #bitwise either use arith_2args or a float emulation which casts to int, does the ob and cast back
     "andb":[ {"instr_name": "and", "datatypes": all_int_uint, "template": tpl_implem_rvv["arith_2args"]},
             {"instr_name": "and", "datatypes": all_float, "template": tpl_implem_rvv["float_bitwise"]} ],
+    "orb":[ {"instr_name": "or", "datatypes": all_int_uint, "template": tpl_implem_rvv["arith_2args"]},
+            {"instr_name": "or", "datatypes": all_float, "template": tpl_implem_rvv["float_bitwise"]} ],
+    "xorb":[ {"instr_name": "xor", "datatypes": all_int_uint, "template": tpl_implem_rvv["arith_2args"]},
+            {"instr_name": "xor", "datatypes": all_float, "template": tpl_implem_rvv["float_bitwise"]} ],
+
+    #masked ops
     "andb_k":[{"instr_name": "mand", "datatypes" : all_datatypes, "template" : tpl_implem_rvv["arith_m_2args"]}],
+    "orb_k":[{"instr_name": "mor", "datatypes" : all_datatypes, "template" : tpl_implem_rvv["arith_m_2args"]}],
+    "xorb_k":[{"instr_name": "mxor", "datatypes" : all_datatypes, "template" : tpl_implem_rvv["arith_m_2args"]}],
     
     "set1": [ {"instr_name": "vmv", "datatypes" : all_int_uint, "template":tpl_implem_rvv["scalar_set1"] },
               {"instr_name": "vfmv","datatypes": all_float, "template":tpl_implem_rvv["float_set1"]}],
