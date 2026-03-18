@@ -1,4 +1,4 @@
-// g++ mipp_v2.cpp -mavx2 -o mipp_v2_cpp.bin
+// g++ mipp.cpp -mavx2 -o mipp_cpp.bin
 
 #include <iostream>
 #include <numeric>

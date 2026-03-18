@@ -1,4 +1,4 @@
-// gcc mipp_v2.c -mavx2 -o mipp_v2_c.bin
+// gcc mipp.c -mavx2 -o mipp_c.bin
 
 #include <stdio.h>
 
