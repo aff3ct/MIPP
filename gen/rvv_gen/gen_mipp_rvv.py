@@ -29,17 +29,26 @@ def gen_c_structures_rvv_ls(file, rvv_size):
     for dt in isa_rvv["datatypes"]:
         print(j2_template.render(isa_datatype=isa_rvv["datatypes"][dt],rvv_size=rvv_size), file=file)
      
-    template = """typedef vbool1_t fixed_{{rvv_size}}_bool_t __attribute__((riscv_rvv_vector_bits({{rvv_size}})));"""
+    template = """typedef {{isa_datatype.msk}} fixed_{{rvv_size}}_bool{{isa_datatype.data_ext_logi}}_t __attribute__((riscv_rvv_vector_bits({{nb_elem}})));"""
     j2_template = Template(template, undefined=StrictUndefined)
-    print(j2_template.render(rvv_size=rvv_size), file=file)
+    
+    #hacky solution bc we need 1 bool type per size and they're the same 
+    #for types of the same size...
+    #also, mask type technically does not depend on dt type but on EEW/LMUL. 
+    #i.e both uint8m2 and uint16m1 should use vbool16. This might make lmul support 
+    #trickier to generate...
+    dt_list = {uint64 : "4", uint32 : "8", uint16 : "16", uint8 : "32"}
+    for dt in dt_list:
+        print(j2_template.render(rvv_size=rvv_size, isa_datatype=isa_rvv["datatypes"][dt], nb_elem=dt_list[dt]), file=file)
     
     template = """typedef struct { fixed_{{ rvv_size }}_{{isa_datatype.to_ptr }} r; } rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
     j2_template = Template(template, undefined=StrictUndefined)
     for dt in isa_rvv["datatypes"]:
         print(j2_template.render(isa=isa_rvv,rvv_size=rvv_size,isa_datatype=isa_rvv["datatypes"][dt], datatype=datatypes[dt]), file=file)
 
-    template = """typedef struct { fixed_{{ rvv_size }}_bool_t m; } rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
+    template = """typedef struct { fixed_{{ rvv_size }}_bool{{isa_datatype.data_ext_logi}}_t m; } rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
     j2_template = Template(template, undefined=StrictUndefined)
+    
     for dt in isa_rvv["datatypes"]:
         print(j2_template.render(isa=isa_rvv,rvv_size=rvv_size,isa_datatype=isa_rvv["datatypes"][dt], datatype=datatypes[dt]), file=file)
 

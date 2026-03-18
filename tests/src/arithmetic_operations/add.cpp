@@ -287,7 +287,6 @@ void test_reg_mask_add()
 	}*/
 }
 
-#ifndef MIPP_RVV
 #ifndef MIPP_NO
 TEST_CASE("Addition - mipp::reg - mask", "[mipp::add]")
 {
@@ -307,7 +306,6 @@ TEST_CASE("Addition - mipp::reg - mask", "[mipp::add]")
 	SECTION("datatype = int8_t") { test_reg_mask_add<int8_t>(); }
 #endif
 }
-#endif
 #endif
 
 template <typename T>
@@ -347,7 +345,6 @@ void test_Reg_mask_add()
 	}*/
 }
 
-#ifndef MIPP_RVV
 TEST_CASE("Addition - mipp::Reg - mask", "[mipp::add]")
 {
 #if defined(MIPP_64BIT)
@@ -366,4 +363,3 @@ TEST_CASE("Addition - mipp::Reg - mask", "[mipp::add]")
 	SECTION("datatype = int8_t") { test_Reg_mask_add<int8_t>(); }
 #endif
 }
-#endif

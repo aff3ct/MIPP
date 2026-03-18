@@ -105,7 +105,10 @@ void test_msk_andb()
 
 		for (auto i = 0; i < vectorSize; i++)
 		{
+
 			bool res = inputs1[i] & inputs2[i];
+			std::cout << inputs1[i] << " " << inputs2[i] << " " << res << " " << mipp::get(r,i) << std::endl;
+
 
 			if (res)
 				REQUIRE(mipp::get(r, i) != (T)0);
@@ -115,7 +118,6 @@ void test_msk_andb()
 	}
 }
 
-#ifndef MIPP_RVV
 #ifndef MIPP_NO
 TEST_CASE("Binary and - mipp::rvm", "[mipp::andb]")
 {
@@ -128,7 +130,6 @@ TEST_CASE("Binary and - mipp::rvm", "[mipp::andb]")
 	SECTION("datatype = int8_t") { test_msk_andb<int8_t>(); }
 #endif
 }
-#endif
 #endif
 
 template <typename T>
@@ -162,7 +163,6 @@ void test_Msk_andb()
 	}
 }
 
-#ifndef MIPP_RVV
 TEST_CASE("Binary and - mipp::Msk", "[mipp::andb]")
 {
 #if defined(MIPP_64BIT)
@@ -174,4 +174,3 @@ TEST_CASE("Binary and - mipp::Msk", "[mipp::andb]")
 	SECTION("datatype = int8_t") { test_Msk_andb<int8_t>(); }
 #endif
 }
-#endif

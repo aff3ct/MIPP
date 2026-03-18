@@ -317,14 +317,36 @@ void test_msk_set()
 	mipp::rvm<T> m = mipp::set_k<T>(inputs);
 	mipp::rvd<T> r = mipp::toreg(m);
 
+
 	for (auto i = 0; i < vectorSize; i++)
 		if (!inputs[i])
 			REQUIRE(mipp::get(r, i) == (T)0);
 		else
 			REQUIRE(mipp::get(r, i) != (T)0);
+
+	T vec1[vectorSize], vec2[vectorSize], vecRes[vectorSize];
+
+
+	for(auto i = 0; i < vectorSize; i++){
+		vec1[i] = 1;
+		vec2[i] = 0;
+	}
+	
+	mipp::rvd<T> tmpr1 = mipp::load(vec1);
+	mipp::rvd<T> tmpr2 = mipp::load(vec2);
+	mipp::rvd<T> r1 = mipp::blend(tmpr1, tmpr2, m);
+
+	for (auto i = 0; i < vectorSize; i++){
+		std::cout << mipp::get(r1,i) << " " << inputs[i];
+		if (!inputs[i])
+			REQUIRE(mipp::get(r1, i) == (T)0);
+		else
+			REQUIRE(mipp::get(r1, i) != (T)0);
+	}
+	
+
 }
 
-#ifndef MIPP_RVV
 #ifndef MIPP_NO
 TEST_CASE("Set - mipp::msk", "[mipp::set]")
 {
@@ -343,7 +365,6 @@ TEST_CASE("Set - mipp::msk", "[mipp::set]")
 #endif
 }
 #endif
-#endif
 
 template <typename T>
 void test_Msk_set()
@@ -360,7 +381,6 @@ void test_Msk_set()
 			REQUIRE(m[i] == inputs[i]);
 }
 
-#ifndef MIPP_RVV
 TEST_CASE("Set - mipp::Msk", "[mipp::set]")
 {
 /*#if defined(MIPP_64BIT)
@@ -377,4 +397,3 @@ TEST_CASE("Set - mipp::Msk", "[mipp::set]")
 	SECTION("datatype = int8_t") { test_Msk_set<int8_t>(); }
 #endif
 }
-#endif
