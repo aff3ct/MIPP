@@ -102,7 +102,7 @@ tpl_implem_emu_rvv = {
     
     #from implem emu avx.
     "get_k" : {"format" : "long", "code" : """
-        uint8_t tmp[%N<tp>%];
+        %v<tp>% tmp[%N<tp>%];
 	    %r<tp>% rmsk =%toreg<tp>%(m0);
 	    %storeu<tp>%(tmp, rmsk);
 	    return (int32_t) tmp[v0];

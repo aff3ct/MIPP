@@ -139,6 +139,15 @@ implems_rvv = {
         { "instr_name": "sub", "datatypes": all_int_uint, "template": tpl_implem_rvv["arith_2args"] },
     ],
     
+    "mul": [
+        { "instr_name": "fmul", "datatypes": all_float, "template": tpl_implem_rvv["arith_2args"]},
+		{ "instr_name": "mul", "datatypes": all_int_uint, "template": tpl_implem_rvv["arith_2args"] },
+    ],
+    
+    "div": [
+        { "instr_name": "fdiv", "datatypes": all_float, "template": tpl_implem_rvv["arith_2args"]},
+    ],
+    
     "andb":[ {"instr_name": "and", "datatypes": all_int_uint, "template": tpl_implem_rvv["arith_2args"]},
             {"instr_name": "and", "datatypes": all_float, "template": tpl_implem_rvv["float_bitwise"]} ],
     "andb_k":[{"instr_name": "mand", "datatypes" : all_datatypes, "template" : tpl_implem_rvv["arith_m_2args"]}],

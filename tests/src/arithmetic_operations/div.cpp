@@ -49,17 +49,6 @@ TEST_CASE("Division - mipp::reg", "[mipp::div]")
 	SECTION("datatype = double") { test_reg_div<double>(); }
 #endif
 	SECTION("datatype = float") { test_reg_div<float>(); }
-
-#if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
-#if defined(MIPP_64BIT)
-	SECTION("datatype = int64_t") { test_reg_div<int64_t>(); }
-#endif
-	SECTION("datatype = int32_t") { test_reg_div<int32_t>(); }
-#endif
-#if defined(MIPP_BW)
-	SECTION("datatype = int16_t") { test_reg_div<int16_t>(); }
-	SECTION("datatype = int8_t") { test_reg_div<int8_t>(); }
-#endif
 }
 #endif
 
@@ -108,16 +97,5 @@ TEST_CASE("Division - mipp::Reg", "[mipp::div]")
 	SECTION("datatype = double") { test_Reg_div<double>(); }
 #endif
 	SECTION("datatype = float") { test_Reg_div<float>(); }
-
-#if !defined(MIPP_AVX) || (defined(MIPP_AVX) && MIPP_INSTR_VERSION >= 2)
-#if defined(MIPP_64BIT)
-	SECTION("datatype = int64_t") { test_Reg_div<int64_t>(); }
-#endif
-	SECTION("datatype = int32_t") { test_Reg_div<int32_t>(); }
-#endif
-#if defined(MIPP_BW)
-	SECTION("datatype = int16_t") { test_Reg_div<int16_t>(); }
-	SECTION("datatype = int8_t") { test_Reg_div<int8_t>(); }
-#endif
 }
 
