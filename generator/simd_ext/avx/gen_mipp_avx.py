@@ -6,8 +6,8 @@ import copy
 
 from tools import *
 from headers_def import *
-from implem_AVX import *
-from implem_emu_AVX import *
+from implem_avx import *
+from implem_emu_avx import *
 from c_generator import *
 
 
@@ -17,7 +17,7 @@ def gen_mipp_avx():
 			if "type" not in sub_iemu:
 				sub_iemu["type"] = "emulated"
     # implementation C
-	file = open("../include/avx/mipp_v2_impl_AVX_gen.h", "w")
+	file = open("../include/avx/mipp_impl_avx_gen.h", "w")
 
 	tpl_header_avx = """#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX_H_
 #define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX_H_

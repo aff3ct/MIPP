@@ -112,7 +112,7 @@ public:
 
 def generate_cpp_object():
 	
-	file = open("../include/mipp_v2_object_gen.hpp", "w")
+	file = open("../include/mipp_object_gen.hpp", "w")
 	
 	tpl_header_cpp = """#ifndef MY_INTRINSICS_PLUS_PLUS_OBJECT_HPP_
 #define MY_INTRINSICS_PLUS_PLUS_OBJECT_HPP_

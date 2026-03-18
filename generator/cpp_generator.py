@@ -9,12 +9,12 @@ from headers_def import *
 def generate_cpp():
 
 	
-	file = open("../include/mipp_v2.hpp", "w")
+	file = open("../include/mipp.hpp", "w")
 
 	tpl_header_cpp = """#ifndef MY_INTRINSICS_PLUS_PLUS_HPP_
 #define MY_INTRINSICS_PLUS_PLUS_HPP_
 
-#include "mipp_v2_interface_gen.h"
+#include "mipp_interface_gen.h"
 
 namespace mipp
 {"""

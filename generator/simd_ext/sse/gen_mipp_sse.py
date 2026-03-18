@@ -4,8 +4,8 @@ import json
 
 from tools import *
 from headers_def import *
-from implem_SSE import *
-from implem_emu_SSE import *
+from implem_sse import *
+from implem_emu_sse import *
 from c_generator import *
 
 
@@ -15,7 +15,7 @@ def gen_mipp_sse():
 			if "type" not in sub_iemu:
 				sub_iemu["type"] = "emulated"
 
-	file = open("../include/sse/mipp_v2_impl_SSE_gen.h", "w")
+	file = open("../include/sse/mipp_impl_sse_gen.h", "w")
 
 	tpl_header_sse = """#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SSE_H_
 #define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SSE_H_

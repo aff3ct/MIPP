@@ -3,8 +3,8 @@ import json
 
 from tools import *
 from headers_def import *
-from implem_SVE import *
-from implem_emu_SVE import *
+from implem_sve import *
+from implem_emu_sve import *
 from c_generator import *
 
 def gen_c_defines_sve_ls(file, isa_name, sve_size):
@@ -43,7 +43,7 @@ def gen_mipp_sve():
             if "type" not in sub_iemu:
                 sub_iemu["type"] = "emulated"
 
-    file = open("../include/sve/mipp_v2_impl_SVE_gen.h", "w")
+    file = open("../include/sve/mipp_impl_sve_gen.h", "w")
     
     print("#if defined("+isa_sve["define"]+")", file=file)
     
@@ -56,7 +56,7 @@ def gen_mipp_sve():
         #print("#define DEFAULT_ARM_SVE_"+ str(sve_size), file=file)
         # include lower size implems
         #for sub_size in all_sve_sizes[index:]:
-        print("#include \"../include/sve/mipp_v2_impl_SVE"+str(sve_size)+"_gen.h\"", file=file)
+        print("#include \"../include/sve/mipp_impl_sve"+str(sve_size)+"_gen.h\"", file=file)
         #for sub_size in all_sve_sizes[index:]:
         print("#define MIPP_USE_ARM_SVE_"+str(sve_size), file=file)
     
@@ -78,7 +78,7 @@ def gen_mipp_sve():
         isa_sve["size"] = current_sve_size
         print("Generate SVE"+str(current_sve_size))
         
-        file = open("../include/sve/mipp_v2_impl_SVE"+str(current_sve_size)+"_gen.h", "w")
+        file = open("../include/sve/mipp_impl_sve"+str(current_sve_size)+"_gen.h", "w")
         
         tpl_header_sve = """#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SVE{{ sve_size }}_H_
 #define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SVE{{ sve_size }}_H_

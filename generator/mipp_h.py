@@ -1,8 +1,8 @@
 from jinja2 import Template, StrictUndefined
 
-def generate_mipp_v2_h():
+def generate_mipp_h():
 
-	file = open("../include/mipp_v2.h", "w")
+	file = open("../include/mipp.h", "w")
 
 	template_file = """#ifndef MY_INTRINSICS_PLUS_PLUS_H_
 #define MY_INTRINSICS_PLUS_PLUS_H_
@@ -19,23 +19,23 @@ typedef float float32_t;
 // ------------------------------------------------------------------------------------------------- includes files
 
 #if defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)
-#include "avx512/mipp_v2_impl_AVX512_gen.h"
+#include "avx512/mipp_impl_avx512_gen.h"
 #endif
 #if defined(__AVX__)
-#include "avx/mipp_v2_impl_AVX_gen.h"
+#include "avx/mipp_impl_avx_gen.h"
 #endif
 
 #if defined(__SSE__)
-#include "sse/mipp_v2_impl_SSE_gen.h"
+#include "sse/mipp_impl_sse_gen.h"
 #endif
 
 #if defined(__ARM_FEATURE_SVE)
-#include "sve/mipp_v2_impl_SVE_gen.h"
+#include "sve/mipp_impl_sve_gen.h"
 #endif
 
-#include "mipp_v2.hpp"
+#include "mipp.hpp"
 
-#include "mipp_v2_object_gen.hpp"
+#include "mipp_object_gen.hpp"
 
 // utiles pour l'instant pour les tests
 // pourrait clairement etre utile pour les generateurs au dela du if #define

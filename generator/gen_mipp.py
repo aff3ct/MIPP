@@ -7,22 +7,22 @@ import argparse
 
 path = os.getcwd()
 
-sys.path.insert(1,path +'/avx512_gen')
-sys.path.insert(1,path + '/avx_gen')
-sys.path.insert(1,path + '/sse_gen')
-sys.path.insert(1,path + '/sve_gen')
+sys.path.insert(1,path +'/simd_ext/avx512/')
+sys.path.insert(1,path + '/simd_ext/avx/')
+sys.path.insert(1,path + '/simd_ext/sse/')
+sys.path.insert(1,path + '/simd_ext/sve/')
 
-from implem_SSE import isa_sse
-from implem_AVX import isa_avx
-from implem_AVX512 import isa_avx512
-from implem_SVE import isa_sve
+from implem_sse import isa_sse
+from implem_avx import isa_avx
+from implem_avx512 import isa_avx512
+from implem_sve import isa_sve
 
-from sse_gen import gen_mipp_sse
-from avx_gen import gen_mipp_avx
-from avx512_gen import gen_mipp_avx512
-from sve_gen import gen_mipp_sve
+from gen_mipp_sse import gen_mipp_sse
+from gen_mipp_avx import gen_mipp_avx
+from gen_mipp_avx512 import gen_mipp_avx512
+from gen_mipp_sve import gen_mipp_sve
 
-from mipp_v2_h import generate_mipp_v2_h
+from mipp_h import generate_mipp_h
 from ci_generator import generate_c_interface
 from cpp_generator import generate_cpp
 from cpp_object_generator import generate_cpp_object
@@ -37,14 +37,12 @@ avx_path = os.path.join(include_gen_path, "avx")
 avx512_path = os.path.join(include_gen_path, "avx512")
 sve_path = os.path.join(include_gen_path, "sve")
 
-
 def create_folder(folder_path):
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
-        print(folder_path+"folder successfully created")
+        print(folder_path + " folder successfully created")
     else:
-        print("The "+ folder_path+" folder already exists.")
-
+        print("The " + folder_path + " folder already exists.")
 
 def clean_folder(folder_path):
     try:
@@ -62,25 +60,25 @@ def main():
     create_folder(avx512_path)
     create_folder(sve_path)
     # generate all avalaible simd and wrapp
-    gen_mipp_sse.gen_mipp_sse()
-    gen_mipp_avx.gen_mipp_avx()
-    gen_mipp_avx512.gen_mipp_avx512()
-    gen_mipp_sve.gen_mipp_sve()
+    gen_mipp_sse()
+    gen_mipp_avx()
+    gen_mipp_avx512()
+    gen_mipp_sve()
     # warning order
     # interface all simd  in c
-    # generate mipp_v2_interface_gen.h
+    # generate mipp_interface_gen.h
     generate_c_interface([isa_avx512,isa_avx,isa_sse,isa_sve])
     # C++ template wrapper interface with specialization
-    # generate mipp_v2.hpp
+    # generate mipp.hpp
     generate_cpp()
     # C++ object wrapper using template specialization
-    # generate mipp_v2_object_gen.h
+    # generate mipp_object_gen.h
     generate_cpp_object()
-     # generate mipp_v2.h
-    generate_mipp_v2_h()
+     # generate mipp.h
+    generate_mipp_h()
     print("Generating MIPP code for sse, avx2, avx512 and sve with size in " + str(isa_sve["size"]))
     print("With lmul in "+str(all_lmul)+ " and ldiv in "+str(all_ldiv))
     
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(prog='gen_mipp_v2.py', description='MIPP generator')
+    parser = argparse.ArgumentParser(prog='gen_mipp.py', description='MIPP generator')
     main()

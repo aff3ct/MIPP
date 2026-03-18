@@ -6,8 +6,8 @@ import json
 
 from tools import *
 from headers_def import *
-from implem_AVX512 import *
-from implem_emu_AVX512 import *
+from implem_avx512 import *
+from implem_emu_avx512 import *
 from c_generator import *
 
 def gen_mipp_avx512():
@@ -18,7 +18,7 @@ def gen_mipp_avx512():
 
 	# implementation C
 	
-	file = open("../include/avx512/mipp_v2_impl_AVX512_gen.h", "w")
+	file = open("../include/avx512/mipp_impl_avx512_gen.h", "w")
 	
 	tpl_header_avx = """#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX512_H_
 #define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX512_H_
