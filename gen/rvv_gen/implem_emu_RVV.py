@@ -92,13 +92,13 @@ tpl_implem_emu_rvv = {
     ret.r = {{ isa.prefix }}_vmerge_vvm_{{ isa_dt_par.data_ext }}(zero.r, one.r, m0.m, %N<tp>%);
     return ret;"""
     },
-    "toreg-8" : { "format": "long", "code":
- """%r<tp>% one  = %set1<tp>%(0xFF);
+    "toreg-8" : { "format": "long", "code":"""
+    %r<tp>% one  = %set1<tp>%(0xFF);
     %r<tp>% zero = %set1<tp>%(0);
     %r<tp>% ret;
     ret.r = {{ isa.prefix }}_vmerge_vvm_{{ isa_dt_par.data_ext }}(zero.r, one.r, m0.m, %N<tp>%);
-    return ret;"""
-    },
+    return ret;
+    """},
     
     #from implem emu avx.
     "get_k" : {"format" : "long", "code" : """
@@ -106,7 +106,31 @@ tpl_implem_emu_rvv = {
 	    %r<tp>% rmsk =%toreg<tp>%(m0);
 	    %storeu<tp>%(tmp, rmsk);
 	    return (int32_t) tmp[v0];
-    """}
+    """},
+    
+    "maskz_inst": {"format" : "long", "code" : """
+    
+    %r<tp>% ret = %set1<tp>%(0);
+    ret.r = {{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}_mu(m0.m, ret.r, r0.r, r1.r, %N<tp>%);
+    return ret;
+    """},
+    
+    "scalar_andnb": {"format" : "long", "code" : """
+    %r<tp>% ret = %set1<tp>%(-1);
+    ret = %xorb%(r0, ret);
+    ret = %andb%(r1, ret);  
+    
+    return ret;  
+    """},
+    
+    #not done
+    "float_andnb" : {"format" : "long", "code" : """
+    {{isa_dt_par.to_uint}} tmp1,tmp2;
+    tmp1 = {{isa.prefix}}_vfcvt_xu_f_v_{{isa_dt_par.uint_data_ext}}(r0.r, %N<tp>%);
+    tmp2 = {{isa.prefix}}_vfcvt_xu_f_v_{{isa_dt_par.uint_data_ext}}(r1.r, %N<tp>%);
+    
+    """},
+    
     
 }
 
@@ -134,4 +158,16 @@ implems_emu_rvv = {
     ],
     "get_k" :[{"instr_name" : "get_k", "datatypes" : all_datatypes, "template" : tpl_implem_emu_rvv["get_k"]}],
 
+    #"andnb" : [{"instr_name" : "get_k", "datatypes" : all_int_uint, "template" : tpl_implem_emu_rvv["scalar_andnb"]},
+    #          {"instr_name" : "get_k", "datatypes" : all_float, "template" : tpl_implem_emu_rvv["float_andnb"]}],
+    
+    "maskz_add": [
+        { "instr_name" : "add", "datatypes" : all_int_uint, "template" : tpl_implem_emu_rvv["maskz_inst"]},
+        { "instr_name" : "fadd", "datatypes" : all_float, "template" : tpl_implem_emu_rvv["maskz_inst"]}
+    ],
+    
+    #"maskz_sub": [
+    #    { "instr_name" : "add", "datatypes" : all_int_uint, "template" : tpl_implem_emu_rvv["maskz_inst"]},
+    #    { "instr_name" : "fadd", "datatypes" : all_float, "template" : tpl_implem_emu_rvv["maskz_inst"]}
+    #],
 }

@@ -99,7 +99,7 @@ tpl_implem_rvv = {
 	"store":        { "format": "short", "code": "{{ isa.prefix }}_vse{{ isa_dt_par.data_ext_logi}}_v_{{ isa_dt_par.data_ext }}(({{ isa_dt_par.to_ptr }}*) p0, r0.r , %N<tp>%);" },
       
     "arith_2args":  { "format": "short", "code": "{{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}(r0.r, r1.r, %N<tp>%);" },
-    "arith_m_2args": { "format": "short", "code": "{{ isa.prefix }}_v{{ instr_name }}(m0.m, m1.m, %N<tp>%);" },
+    "mask_2args": { "format": "short", "code": "{{ isa.prefix }}_v{{ instr_name }}(m0.m, m1.m, %N<tp>%);" },
       
     "float_bitwise": { "format": "long", "code": """
                          {{isa_dt_par.to_uint}} tmp1, tmp2;
@@ -120,6 +120,10 @@ tpl_implem_rvv = {
     #same as arith_2args except "vvm" instead of "vv"
     "merge":  { "format": "short", "code": "{{ isa.prefix }}_v{{ instr_name }}_vvm_{{ isa_dt_par.data_ext }}(r1.r, r0.r, m0.m, %N<tp>%);" },
 
+    #arithmetic w predicate (mask)
+    "arithmsk_2args":{ "format": "short", "code": "{{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}_mu(m0.m, r0.r, r0.r, r1.r, %N<tp>%);" },
+
+    "arith_3args":{"format": "short", "code":"{{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}(r0.r, r1.r, r2.r, %N<tp>%);"}
 }
 
 """
@@ -157,13 +161,28 @@ implems_rvv = {
             {"instr_name": "xor", "datatypes": all_float, "template": tpl_implem_rvv["float_bitwise"]} ],
 
     #masked ops
-    "andb_k":[{"instr_name": "mand", "datatypes" : all_datatypes, "template" : tpl_implem_rvv["arith_m_2args"]}],
-    "orb_k":[{"instr_name": "mor", "datatypes" : all_datatypes, "template" : tpl_implem_rvv["arith_m_2args"]}],
-    "xorb_k":[{"instr_name": "mxor", "datatypes" : all_datatypes, "template" : tpl_implem_rvv["arith_m_2args"]}],
+    "andb_k":[{"instr_name": "mand", "datatypes" : all_datatypes, "template" : tpl_implem_rvv["mask_2args"]}],
+    "orb_k":[{"instr_name": "mor", "datatypes" : all_datatypes, "template" : tpl_implem_rvv["mask_2args"]}],
+    "xorb_k":[{"instr_name": "mxor", "datatypes" : all_datatypes, "template" : tpl_implem_rvv["mask_2args"]}],
     
     "set1": [ {"instr_name": "vmv", "datatypes" : all_int_uint, "template":tpl_implem_rvv["scalar_set1"] },
               {"instr_name": "vfmv","datatypes": all_float, "template":tpl_implem_rvv["float_set1"]}],
     "set0": [ {"instr_name": "vmv", "datatypes" : all_int_uint, "template":tpl_implem_rvv["scalar_set0"] },
               {"instr_name": "vfmv","datatypes": all_float, "template":tpl_implem_rvv["float_set0"]}],
+    
     "blend": [{"instr_name": "merge", "datatypes": all_datatypes, "template" : tpl_implem_rvv["merge"]}],
+    #"select" : [{"instr_name": "select", "datatypes": all_datatypes, "template" : tpl_implem_rvv["merge"]}],
+    
+    #mask_add": [
+    #    { "instr_name" : "add", "datatypes" : all_int_uint, "template" : tpl_implem_rvv["arithmsk_2args"]},
+    #    { "instr_name": "fadd", "datatypes": all_float, "template": tpl_implem_rvv["arithmsk_2args"]},
+    #],
+    
+    #"cvt": [{"instr_name": "cvt", "datatypes": all_datatypes, "template" : tpl_implem_rvv["cvt"]}],
+    
+    "fmadd": [{"instr_name": "fmadd", "datatypes": all_float, "template" : tpl_implem_rvv["arith_3args"]}],
+    #"fnmadd": [{"instr_name": "fnmadd", "datatypes": all_float, "template" : tpl_implem_rvv["arith_3args"]}],
+    "fmsub": [{"instr_name": "fmsub", "datatypes": all_float, "template" : tpl_implem_rvv["arith_3args"]}],
+    #"fnmsub": [{"instr_name": "fnmsub", "datatypes": all_float, "template" : tpl_implem_rvv["arith_3args"]}],
+
 }
