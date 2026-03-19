@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(MIPP_tests)
+project(MIPP_tests CXX)
 
 set (CMAKE_MACOSX_RPATH 1)
 
