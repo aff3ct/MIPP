@@ -100,7 +100,12 @@ tpl_implem_rvv = {
       
     "arith_2args":  { "format": "short", "code": "{{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}(r0.r, r1.r, %N<tp>%);" },
     "mask_2args": { "format": "short", "code": "{{ isa.prefix }}_v{{ instr_name }}(m0.m, m1.m, %N<tp>%);" },
-      
+
+
+    #arith_2args but with mask dt extension at the end
+    "arith_msk_type_2args":  { "format": "short", "code": "{{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}_{{isa_dt_par.data_ext_msk}}(r0.r, r1.r, %N<tp>%);" },
+    
+    
     "float_bitwise": { "format": "long", "code": """
                          {{isa_dt_par.to_uint}} tmp1, tmp2;
                          tmp1 = {{isa.prefix}}_vfcvt_xu_f_v_{{isa_dt_par.uint_data_ext}}(r0.r, %N<tp>%);
@@ -184,6 +189,41 @@ implems_rvv = {
     #"fnmadd": [{"instr_name": "fnmadd", "datatypes": all_float, "template" : tpl_implem_rvv["arith_3args"]}],
     "fmsub": [{"instr_name": "fmsub", "datatypes": all_float, "template" : tpl_implem_rvv["arith_3args"]}],
     #"fnmsub": [{"instr_name": "fnmsub", "datatypes": all_float, "template" : tpl_implem_rvv["arith_3args"]}],
+    
+    "cmplt" : [
+            {"instr_name": "mslt", "datatypes": all_int, "template" : tpl_implem_rvv["arith_msk_type_2args"]},
+            {"instr_name": "msltu", "datatypes": all_uint, "template" : tpl_implem_rvv["arith_msk_type_2args"]},
+            {"instr_name": "mflt", "datatypes": all_float, "template" : tpl_implem_rvv["arith_msk_type_2args"]},
+    ],
+    
+    "cmple" : [
+            {"instr_name": "msle", "datatypes": all_int, "template" : tpl_implem_rvv["arith_msk_type_2args"]},
+            {"instr_name": "msleu", "datatypes": all_uint, "template" : tpl_implem_rvv["arith_msk_type_2args"]},
+            {"instr_name": "mfle", "datatypes": all_float, "template" : tpl_implem_rvv["arith_msk_type_2args"]},
+    ],
+    
+    "cmpgt" : [
+            {"instr_name": "msgt", "datatypes": all_int, "template" : tpl_implem_rvv["arith_msk_type_2args"]},
+            {"instr_name": "msgtu", "datatypes": all_uint, "template" : tpl_implem_rvv["arith_msk_type_2args"]},
+            {"instr_name": "mfgt", "datatypes": all_float, "template" : tpl_implem_rvv["arith_msk_type_2args"]},
+    ],
+    
+    "cmpge" : [
+            {"instr_name": "msge", "datatypes": all_int, "template" : tpl_implem_rvv["arith_msk_type_2args"]},
+            {"instr_name": "msgeu", "datatypes": all_uint, "template" : tpl_implem_rvv["arith_msk_type_2args"]},
+            {"instr_name": "mfge", "datatypes": all_float, "template" : tpl_implem_rvv["arith_msk_type_2args"]},
+    ],
+    
+    "cmpeq" : [
+            {"instr_name": "mseq", "datatypes": all_int_uint, "template" : tpl_implem_rvv["arith_msk_type_2args"]},
+            {"instr_name": "mfeq", "datatypes": all_float, "template" : tpl_implem_rvv["arith_msk_type_2args"]},
+    ],
+    
+    "cmpneq" : [
+            {"instr_name": "msne", "datatypes": all_int_uint, "template" : tpl_implem_rvv["arith_msk_type_2args"]},
+            {"instr_name": "mfne", "datatypes": all_float, "template" : tpl_implem_rvv["arith_msk_type_2args"]},
+    ],
+    
     
 
 }
