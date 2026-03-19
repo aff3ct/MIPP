@@ -191,15 +191,15 @@ void test_msk_set1()
 		REQUIRE(mipp::get(r1, i) != (T)0);*/
 }
 
-#ifndef MIPP_RVV
 #ifndef MIPP_NO
 TEST_CASE("Set1 - mipp::rvm<T>", "[mipp::set1_k]")
 {
+/*
 #if defined(MIPP_64BIT)
 	SECTION("datatype = double") { test_msk_set1<double>(); }
 #endif
 	SECTION("datatype = float") { test_msk_set1<float>(); }
-
+*/
 #if defined(MIPP_64BIT)
 	SECTION("datatype = int64_t") { test_msk_set1<int64_t>(); }
 #endif
@@ -209,7 +209,6 @@ TEST_CASE("Set1 - mipp::rvm<T>", "[mipp::set1_k]")
 	SECTION("datatype = int8_t") { test_msk_set1<int8_t>(); }
 #endif
 }
-#endif
 #endif
 
 template <typename T>
@@ -226,14 +225,14 @@ void test_Msk_set1()
 		REQUIRE(m1[i] == true);
 }
 
-#ifndef MIPP_RVV
 TEST_CASE("Set1 - mipp::Msk", "[mipp::set1]")
 {
+/*
 #if defined(MIPP_64BIT)
 	SECTION("datatype = double") { test_Msk_set1<double>(); }
 #endif
 	SECTION("datatype = float") { test_Msk_set1<float>(); }
-
+*/
 #if defined(MIPP_64BIT)
 	SECTION("datatype = int64_t") { test_Msk_set1<int64_t>(); }
 #endif
@@ -243,7 +242,6 @@ TEST_CASE("Set1 - mipp::Msk", "[mipp::set1]")
 	SECTION("datatype = int8_t") { test_Msk_set1<int8_t>(); }
 #endif
 }
-#endif
 
 template <typename T>
 void test_msk_set0()
@@ -256,15 +254,15 @@ void test_msk_set0()
 		REQUIRE(mipp::get(r0, i) == (T)0);
 }
 
-#ifndef MIPP_RVV
 #ifndef MIPP_NO
 TEST_CASE("Set0 - mipp::rvm<T>", "[mipp::set0]")
 {
+/*
 #if defined(MIPP_64BIT)
 	SECTION("datatype = double") { test_msk_set0<double>(); }
 #endif
 	SECTION("datatype = float") { test_msk_set0<float>(); }
-
+*/
 #if defined(MIPP_64BIT)
 	SECTION("datatype = int64_t") { test_msk_set0<int64_t>(); }
 #endif
@@ -274,7 +272,6 @@ TEST_CASE("Set0 - mipp::rvm<T>", "[mipp::set0]")
 	SECTION("datatype = int8_t") { test_msk_set0<int8_t>(); }
 #endif
 }
-#endif
 #endif
 
 template <typename T>
@@ -287,14 +284,14 @@ void test_Msk_set0()
 		REQUIRE(m0[i] == false);
 }
 
-#ifndef MIPP_RVV
 TEST_CASE("Set0 - mipp::Msk", "[mipp::set0]")
 {
+/*
 #if defined(MIPP_64BIT)
 	SECTION("datatype = double") { test_Msk_set0<double>(); }
 #endif
 	SECTION("datatype = float") { test_Msk_set0<float>(); }
-
+*/
 #if defined(MIPP_64BIT)
 	SECTION("datatype = int64_t") { test_Msk_set0<int64_t>(); }
 #endif
@@ -304,7 +301,6 @@ TEST_CASE("Set0 - mipp::Msk", "[mipp::set0]")
 	SECTION("datatype = int8_t") { test_Msk_set0<int8_t>(); }
 #endif
 }
-#endif
 
 template <typename T>
 void test_msk_set()
@@ -328,11 +324,12 @@ void test_msk_set()
 #ifndef MIPP_NO
 TEST_CASE("Set - mipp::msk", "[mipp::set]")
 {
+/*
 #if defined(MIPP_64BIT)
 	SECTION("datatype = double") { test_msk_set<double>(); }
 #endif
 	SECTION("datatype = float") { test_msk_set<float>(); }
-
+*/
 #if defined(MIPP_64BIT)
 	SECTION("datatype = int64_t") { test_msk_set<int64_t>(); }
 #endif

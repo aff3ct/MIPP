@@ -184,5 +184,6 @@ implems_rvv = {
     #"fnmadd": [{"instr_name": "fnmadd", "datatypes": all_float, "template" : tpl_implem_rvv["arith_3args"]}],
     "fmsub": [{"instr_name": "fmsub", "datatypes": all_float, "template" : tpl_implem_rvv["arith_3args"]}],
     #"fnmsub": [{"instr_name": "fnmsub", "datatypes": all_float, "template" : tpl_implem_rvv["arith_3args"]}],
+    
 
 }

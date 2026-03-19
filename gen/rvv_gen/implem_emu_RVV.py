@@ -68,36 +68,47 @@ tpl_implem_emu_rvv = {
         return out;
     """},
     
+    "set1_k" : {"format" : "long", "code" : """
+        int32_t vals[%N<tp>%];
+        memset(vals,v0,%N<tp>%*sizeof(int32_t));
+        return %set_k<tp>%(vals);
+    """},
+    
+    "set0_k" : {"format" : "long", "code" : """        
+        return %set1_k<tp>%(0);
+    """},
+    
     #from implem_emu_SVE.py
-    "toreg-64" : { "format": "long", "code":
- """%r<tp>% one  = %set1<tp>%(0xFFFFFFFFFFFFFFFF);
-    %r<tp>% zero = %set1<tp>%(0);
+    "toreg-64" : { "format": "long", "code":"""
+        %r<tp>% one  = %set1<tp>%(0xFFFFFFFFFFFFFFFF);
+        %r<tp>% zero = %set1<tp>%(0);
+        
+        %r<tp>% ret;
+        ret.r = {{ isa.prefix }}_vmerge_vvm_{{ isa_dt_par.data_ext }}(zero.r, one.r, m0.m, %N<tp>%);
+        return ret;
+    """},
+    "toreg-32" : { "format": "long", "code":"""
+        %r<tp>% one  = %set1<tp>%(0xFFFFFFFF);
+        %r<tp>% zero = %set1<tp>%(0);
+        %r<tp>% ret;
+        ret.r = {{ isa.prefix }}_vmerge_vvm_{{ isa_dt_par.data_ext }}(zero.r, one.r, m0.m, %N<tp>%);
+        return ret;
+    """},
+    "toreg-16" : { "format": "long", "code":"""
+        %r<tp>% one  = %set1<tp>%(0xFFFF);
+        %r<tp>% zero = %set1<tp>%(0);
+        
+        %r<tp>% ret;
+        ret.r = {{ isa.prefix }}_vmerge_vvm_{{ isa_dt_par.data_ext }}(zero.r, one.r, m0.m, %N<tp>%);
+        return ret;
+    """},
     
-    %r<tp>% ret;
-    ret.r = {{ isa.prefix }}_vmerge_vvm_{{ isa_dt_par.data_ext }}(zero.r, one.r, m0.m, %N<tp>%);
-    return ret;"""
-    },
-    "toreg-32" : { "format": "long", "code":
- """%r<tp>% one  = %set1<tp>%(0xFFFFFFFF);
-    %r<tp>% zero = %set1<tp>%(0);
-    %r<tp>% ret;
-    ret.r = {{ isa.prefix }}_vmerge_vvm_{{ isa_dt_par.data_ext }}(zero.r, one.r, m0.m, %N<tp>%);
-    return ret;"""
-    },
-    "toreg-16" : { "format": "long", "code":
- """%r<tp>% one  = %set1<tp>%(0xFFFF);
-    %r<tp>% zero = %set1<tp>%(0);
-    
-    %r<tp>% ret;
-    ret.r = {{ isa.prefix }}_vmerge_vvm_{{ isa_dt_par.data_ext }}(zero.r, one.r, m0.m, %N<tp>%);
-    return ret;"""
-    },
     "toreg-8" : { "format": "long", "code":"""
-    %r<tp>% one  = %set1<tp>%(0xFF);
-    %r<tp>% zero = %set1<tp>%(0);
-    %r<tp>% ret;
-    ret.r = {{ isa.prefix }}_vmerge_vvm_{{ isa_dt_par.data_ext }}(zero.r, one.r, m0.m, %N<tp>%);
-    return ret;
+        %r<tp>% one  = %set1<tp>%(0xFF);
+        %r<tp>% zero = %set1<tp>%(0);
+        %r<tp>% ret;
+        ret.r = {{ isa.prefix }}_vmerge_vvm_{{ isa_dt_par.data_ext }}(zero.r, one.r, m0.m, %N<tp>%);
+        return ret;
     """},
     
     #from implem emu avx.
@@ -111,26 +122,37 @@ tpl_implem_emu_rvv = {
     "maskz_inst": {"format" : "long", "code" : """
     
     %r<tp>% ret = %set1<tp>%(0);
-    ret.r = {{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}_mu(m0.m, ret.r, r0.r, r1.r, %N<tp>%);
-    return ret;
+        ret.r = {{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}_mu(m0.m, ret.r, r0.r, r1.r, %N<tp>%);
+        return ret;
     """},
     
     "scalar_andnb": {"format" : "long", "code" : """
-    %r<tp>% ret = %set1<tp>%(-1);
-    ret = %xorb%(r0, ret);
-    ret = %andb%(r1, ret);  
-    
-    return ret;  
+        %r<tp>% ret = %set1<tp>%(-1);
+        ret = %xorb<tp>%(r0, ret);
+        ret = %andb<tp>%(r1, ret);  
+        return ret;  
     """},
     
-    #not done
     "float_andnb" : {"format" : "long", "code" : """
-    {{isa_dt_par.to_uint}} tmp1,tmp2;
-    tmp1 = {{isa.prefix}}_vfcvt_xu_f_v_{{isa_dt_par.uint_data_ext}}(r0.r, %N<tp>%);
-    tmp2 = {{isa.prefix}}_vfcvt_xu_f_v_{{isa_dt_par.uint_data_ext}}(r1.r, %N<tp>%);
-    
+        {{isa_dt_par.to_uint}} tmp0,tmp1, tmpm1;
+        
+        tmp0 = {{isa.prefix}}_vfcvt_xu_f_v_{{isa_dt_par.uint_data_ext}}(r0.r, %N<tp>%);
+        tmp1 = {{isa.prefix}}_vfcvt_xu_f_v_{{isa_dt_par.uint_data_ext}}(r1.r, %N<tp>%);
+        tmpm1 = {{isa.prefix}}_vmv_s_x_{{isa_dt_par.uint_data_ext}}(-1,%N<tp>%);
+        
+        tmp0 = {{ isa.prefix }}_vxor_vv_{{ isa_dt_par.uint_data_ext }}(tmp0, tmpm1, %N<tp>%);
+        tmp0 = {{ isa.prefix }}_vand_vv_{{ isa_dt_par.uint_data_ext }}(tmp0, tmp1, %N<tp>%);
+        %r<tp>% ret;
+        ret.r = {{ isa.prefix }}_vfcvt_f_xu_v_{{isa_dt_par.data_ext}}(tmp0, %N<tp>%);
+        return ret;
     """},
     
+    "andnb_k" : {"format" : "long", "code" : """
+        %m<tp>% ret = %set1_k<tp>%(-1);
+        ret = %xorb_k<tp>%(m0,ret);
+        ret = %andb_k<tp>%(m1,ret);
+        return ret;
+    """},
     
 }
 
@@ -148,6 +170,10 @@ implems_emu_rvv = {
     #emulation : loadu.
     "set" : [{"instr_name" : "loadu", "datatypes": all_datatypes, "template": tpl_implem_emu_rvv["set"]}],
     "set_k" : [{"instr_name" : "set_k", "datatypes": all_datatypes, "template": tpl_implem_emu_rvv["set_k"]}],
+    # error when generating for all dttypes : Panic: unsupported type for 'set1_k<float64,float64>' function.
+    # "set1_k" : [{"instr_name" : "set1_k", "datatypes": all_datatypes, "template": tpl_implem_emu_rvv["set1_k"]}],
+    "set1_k" : [{"instr_name" : "set1_k", "datatypes": all_int_uint, "template": tpl_implem_emu_rvv["set1_k"]}],
+    "set0_k" : [{"instr_name" : "set0_k", "datatypes": all_datatypes, "template": tpl_implem_emu_rvv["set0_k"]}],
     
     "toreg":[ 
         # verifier genaralisation autres types
@@ -158,8 +184,11 @@ implems_emu_rvv = {
     ],
     "get_k" :[{"instr_name" : "get_k", "datatypes" : all_datatypes, "template" : tpl_implem_emu_rvv["get_k"]}],
 
-    #"andnb" : [{"instr_name" : "get_k", "datatypes" : all_int_uint, "template" : tpl_implem_emu_rvv["scalar_andnb"]},
-    #          {"instr_name" : "get_k", "datatypes" : all_float, "template" : tpl_implem_emu_rvv["float_andnb"]}],
+    "andnb" : [{"instr_name" : "get_k", "datatypes" : all_int_uint, "template" : tpl_implem_emu_rvv["scalar_andnb"]},
+              {"instr_name" : "get_k", "datatypes" : all_float, "template" : tpl_implem_emu_rvv["float_andnb"]}],
+    
+    "andnb_k":[{"instr_name": "andnb_k", "datatypes" : all_int_uint, "template" : tpl_implem_emu_rvv["andnb_k"]}],
+
     
     "maskz_add": [
         { "instr_name" : "add", "datatypes" : all_int_uint, "template" : tpl_implem_emu_rvv["maskz_inst"]},
