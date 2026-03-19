@@ -151,7 +151,7 @@ test-generic:
     - echo "Debug -- OS=$OS"
     - echo "Debug -- ARCH=$ARCH"
     - echo "Debug -- COMPILER=$COMPILER"
-    - ./build_${OS}_${ARCH}_${COMPILER}/bin/run-tests
+    - ./tests/build_${OS}_${ARCH}_${COMPILER}/bin/run-tests
 
 # # ---------------------------------------------------------------------------------------------------------------------
 # # LINUX X86 -----------------------------------------------------------------------------------------------------------
