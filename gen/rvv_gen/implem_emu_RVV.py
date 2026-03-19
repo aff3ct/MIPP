@@ -154,6 +154,11 @@ tpl_implem_emu_rvv = {
         return ret;
     """},
     
+    "maskzld" : {"format" : "long", "code" : """
+        %r<tp>% ret = %set1<tp>%(0);
+        ret.r = {{ isa.prefix }}_vle{{ isa_dt_par.data_ext_logi }}_v_{{ isa_dt_par.data_ext }}_mu(m0.m,ret.r,({{isa_dt_par.to_ptr}}*)p0, %N<tp>%);
+        return ret;
+    """},    
 }
 
 implems_emu_rvv = {
@@ -199,4 +204,10 @@ implems_emu_rvv = {
     #    { "instr_name" : "add", "datatypes" : all_int_uint, "template" : tpl_implem_emu_rvv["maskz_inst"]},
     #    { "instr_name" : "fadd", "datatypes" : all_float, "template" : tpl_implem_emu_rvv["maskz_inst"]}
     #],
+    
+    #"maskzld":[
+	#    { "instr_name": "maskload", "datatypes": all_float, "template": tpl_implem_emu_rvv["maskzld"] },
+	#	{ "instr_name": "maskload", "datatypes": all_int_uint, "template": tpl_implem_emu_rvv["maskzld"]}
+    #],
+    
 }

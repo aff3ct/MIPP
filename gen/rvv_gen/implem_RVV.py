@@ -96,7 +96,8 @@ for details
 """
 tpl_implem_rvv = {
     "load":         { "format": "short", "code": "{{ isa.prefix }}_vle{{ isa_dt_par.data_ext_logi }}_v_{{ isa_dt_par.data_ext }}(({{ isa_dt_par.to_ptr }}*) p0, %N<tp>%);" },
-	"store":        { "format": "short", "code": "{{ isa.prefix }}_vse{{ isa_dt_par.data_ext_logi}}_v_{{ isa_dt_par.data_ext }}(({{ isa_dt_par.to_ptr }}*) p0, r0.r , %N<tp>%);" },
+    "store":        { "format": "short", "code": "{{ isa.prefix }}_vse{{ isa_dt_par.data_ext_logi}}_v_{{ isa_dt_par.data_ext }}(({{ isa_dt_par.to_ptr }}*) p0, r0.r , %N<tp>%);" },
+    "arith_1arg":  { "format": "short", "code": "{{ isa.prefix }}_v{{ instr_name }}_v_{{ isa_dt_par.data_ext }}(r0.r, %N<tp>%);" },
       
     "arith_2args":  { "format": "short", "code": "{{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}(r0.r, r1.r, %N<tp>%);" },
     "mask_2args": { "format": "short", "code": "{{ isa.prefix }}_v{{ instr_name }}(m0.m, m1.m, %N<tp>%);" },
@@ -128,7 +129,10 @@ tpl_implem_rvv = {
     #arithmetic w predicate (mask)
     "arithmsk_2args":{ "format": "short", "code": "{{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}_mu(m0.m, r0.r, r0.r, r1.r, %N<tp>%);" },
 
-    "arith_3args":{"format": "short", "code":"{{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}(r0.r, r1.r, r2.r, %N<tp>%);"}
+    "arith_3args":{"format": "short", "code":"{{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}(r0.r, r1.r, r2.r, %N<tp>%);"},
+
+    "maskst" : {"format" : "short", "code" : "{{ isa.prefix }}_vse{{ isa_dt_par.data_ext_logi }}_v_{{ isa_dt_par.data_ext }}_m(m0.m,({{isa_dt_par.to_ptr}}*)p0, r0.r, %N<tp>%);"}
+
 }
 
 """
@@ -155,7 +159,9 @@ implems_rvv = {
 		{ "instr_name": "mul", "datatypes": all_int_uint, "template": tpl_implem_rvv["arith_2args"] },
     ],
     
-    "div": [{ "instr_name": "fdiv", "datatypes": all_float, "template": tpl_implem_rvv["arith_2args"]},],
+    "div": [{ "instr_name": "fdiv", "datatypes": all_float, "template": tpl_implem_rvv["arith_2args"]}],
+    "sqrt": [{ "instr_name": "fsqrt", "datatypes": all_float, "template": tpl_implem_rvv["arith_1arg"]}],
+    "rsqrt": [{ "instr_name": "frsqrt7", "datatypes": all_float, "template": tpl_implem_rvv["arith_1arg"]},],
     
     #bitwise either use arith_2args or a float emulation which casts to int, does the ob and cast back
     "andb":[ {"instr_name": "and", "datatypes": all_int_uint, "template": tpl_implem_rvv["arith_2args"]},
@@ -222,8 +228,8 @@ implems_rvv = {
     "cmpneq" : [
             {"instr_name": "msne", "datatypes": all_int_uint, "template" : tpl_implem_rvv["arith_msk_type_2args"]},
             {"instr_name": "mfne", "datatypes": all_float, "template" : tpl_implem_rvv["arith_msk_type_2args"]},
-    ],
+    ],    
     
-    
+    #"maskst":[{ "instr_name": "maskload", "datatypes": all_datatypes, "template": tpl_implem_rvv["maskst"] }],
 
 }

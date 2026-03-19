@@ -101,14 +101,15 @@ TEST_CASE("Store unaligned - mipp::rvd", "[mipp::storeu]")
 #endif
 }
 #endif
-/*
+
 template <typename T>
 void test_Rvd_storeu()
 {
 	T inputs[mipp::N<T>()], outputs[mipp::N<T>()];
 	std::iota(inputs, inputs + mipp::N<T>(), (T)0);
 
-	mipp::Rvd<T> r; r.loadu(inputs);
+	mipp::Rvd<T> r; 
+	r.r = mipp::loadu(inputs);
 	//r.storeu(outputs);
 	mipp::storeu(outputs, r.r);//breaks the tests on AVX2 
 
