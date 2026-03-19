@@ -4,7 +4,7 @@
 #include <random>
 #include <cmath>
 #include <mipp.h>
-#include <catch.hpp>
+#include <catch_amalgamated.hpp>
 
 template <typename T>
 void test_reg_sub()
