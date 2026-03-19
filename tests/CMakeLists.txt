@@ -28,4 +28,4 @@ target_include_directories(tests_exe PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../inc
 target_include_directories(tests_exe PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/lib/Catch2/include/")
 
 enable_testing()
-add_test(NAME mipp::test COMMAND tests_exe)
+add_test(NAME mipp::test COMMAND mipp-tests)

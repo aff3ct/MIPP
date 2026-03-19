@@ -3,7 +3,7 @@
 #include <numeric>
 #include <random>
 #include <cmath>
-#include <mipp_v2.h>
+#include <mipp.h>
 #include <catch.hpp>
 
 template <typename T>
