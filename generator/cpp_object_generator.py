@@ -25,7 +25,7 @@ public:
 	Rvd(const T *data)   : r(mipp::load(data)){}
 	~Rvd() {}
 	
-	inline void set(const T vals[mipp::N<T, LMUL>])       { r = mipp::set(vals);       }
+	inline void set(const T vals[mipp::N<T, LMUL>()])       { r = mipp::set(vals);       }
 	inline void set0(                  )       { r = mipp::set0<T>();       }
 	inline void set1(const T val    )       { r = mipp::set1(val);       }
     inline Rvd<T,LMUL>	notb	(const Rvd<T,LMUL> rvd)	const                           { return mipp::notb(r, rvd.r);}
@@ -77,9 +77,9 @@ public:
 
 	Rvm() {}
 	Rvm(rvm<T, LMUL>  m) : m(m) {}
-    Rvm(const int32_t vals[mipp::N<T, LMUL>]) : m(mipp::set_k<T>(vals)) {}
+    Rvm(const int32_t vals[mipp::N<T, LMUL>()]) : m(mipp::set_k<T>(vals)) {}
     inline Rvd<T,LMUL> toReg() const                              { return Rvd<T,LMUL>(mipp::toreg(this->m)); }
-    inline void set_k(const int32_t vals[mipp::N<T, LMUL>])       { m = mipp::set_k<T>(vals); }
+    inline void set_k(const int32_t vals[mipp::N<T, LMUL>()])     { m = mipp::set_k<T>(vals); }
 	inline void set0_k()                                          { m = mipp::set0_k<T>(); }
 	inline void set1_k(const int32_t val)                         { m = mipp::set1_k<T>(val); }
 	inline int32_t get(const size_t index) const                  { return mipp::get(m, index); }
