@@ -69,7 +69,7 @@ build-linux:
   parallel:
     matrix:
       - OS: [linux]
-        SIMD: [sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2, avx2-fma, avx512f, avx512bw]
+        ARCH: [sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2, avx2-fma, avx512f, avx512bw]
         COMPILER: ["g++-14", "clang-20"]
   tags:
     - $OS
