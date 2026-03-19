@@ -131,7 +131,10 @@ tpl_implem_rvv = {
 
     "arith_3args":{"format": "short", "code":"{{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}(r0.r, r1.r, r2.r, %N<tp>%);"},
 
-    "maskst" : {"format" : "short", "code" : "{{ isa.prefix }}_vse{{ isa_dt_par.data_ext_logi }}_v_{{ isa_dt_par.data_ext }}_m(m0.m,({{isa_dt_par.to_ptr}}*)p0, r0.r, %N<tp>%);"}
+    "maskst" : {"format" : "short", "code" : "{{ isa.prefix }}_vse{{ isa_dt_par.data_ext_logi }}_v_{{ isa_dt_par.data_ext }}_m(m0.m,({{isa_dt_par.to_ptr}}*)p0, r0.r, %N<tp>%);"},
+
+    "scalar_getfirst":{"format":"short", "code": "{{isa_dt_par.to_ptr}} res = {{ isa.prefix }}_v{{ instr_name }}_x_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(r0.r);"},
+    "float_getfirst":{"format":"short", "code": "{{isa_dt_par.to_ptr}} res = {{ isa.prefix }}_v{{ instr_name }}_f_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(r0.r);"},
 
 }
 
@@ -229,6 +232,11 @@ implems_rvv = {
             {"instr_name": "msne", "datatypes": all_int_uint, "template" : tpl_implem_rvv["arith_msk_type_2args"]},
             {"instr_name": "mfne", "datatypes": all_float, "template" : tpl_implem_rvv["arith_msk_type_2args"]},
     ],    
+    
+    "getfirst" : [
+            {"instr_name": "mv", "datatypes": all_int_uint, "template": tpl_implem_rvv["scalar_getfirst"]},
+            {"instr_name": "fmv", "datatypes": all_float, "template": tpl_implem_rvv["float_getfirst"]},
+    ]
     
     #"maskst":[{ "instr_name": "maskload", "datatypes": all_datatypes, "template": tpl_implem_rvv["maskst"] }],
 
