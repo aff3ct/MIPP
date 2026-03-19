@@ -4,7 +4,7 @@
 #include <numeric>
 #include <string>
 
-#include "../../include/mipp_v2_object.hpp"
+#include "../../include/mipp_object.hpp"
 
 void print_v(float32_t* v, const std::string &name)
 {

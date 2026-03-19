@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 
-#include "../../include/mipp_v2.h"
+#include "../../include/mipp.h"
 
 void print_v(int32_t* v, char* name)
 {

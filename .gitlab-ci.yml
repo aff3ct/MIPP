@@ -29,733 +29,704 @@ analysis-cppcheck:
   script:
     - ./ci/analysis-cppcheck.sh
 
-# ---------------------------------------------------------------------------------------------------------------------
-# LINUX X86 -----------------------------------------------------------------------------------------------------------
-
 # BUILDS --------------------------------------------------------------------------------------------------------------
 
-build-linux-x86-gcc:
-  image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_gcc:v9.3.0
+build:
+  image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_mipp:latest
   stage: build
   needs: []
+  parallel:
+    matrix:
+      - OS: [linux]
+        SIMD: [sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2, avx2-fma, avx512f, avx512bw]
+        COMPILER: ["g++-14", "clang-20"]
   tags:
-    - x86_64
-    - linux
+    - $OS
+    - $ARCH
     - docker
   artifacts:
     paths:
-      - ./tests/build_linux_x86_gcc_nointr/bin/
-      - ./tests/build_linux_x86_gcc_sse2/bin/
-      - ./tests/build_linux_x86_gcc_sse3/bin/
-      - ./tests/build_linux_x86_gcc_ssse3/bin/
-      - ./tests/build_linux_x86_gcc_sse4_1/bin/
-      - ./tests/build_linux_x86_gcc_sse4_2/bin/
-      - ./tests/build_linux_x86_gcc_avx/bin/
-      - ./tests/build_linux_x86_gcc_avx2/bin/
-      - ./tests/build_linux_x86_gcc_avx2_fma/bin/
-      - ./tests/build_linux_x86_gcc_avx512f/bin/
-      - ./tests/build_linux_x86_gcc_avx512bw/bin/
+      - ./tests/build_$OS_$SIMD_$COMPILER/bin/
+  rules:
+    - if: '$ARCH == "sse2"'
+      variables:
+        SIMD_EXT: "-msse2"
+    - if: '$ARCH == "sse3"'
+      variables:
+        SIMD_EXT: "-msse3"
+    - if: '$ARCH == "ssse3"'
+      variables:
+        SIMD_EXT: "-mssse3"
+    - if: '$ARCH == "sse4.1"'
+      variables:
+        SIMD_EXT: "-msse4.1"
+    - if: '$ARCH == "sse4.2"'
+      variables:
+        SIMD_EXT: "-msse4.2"
+    - if: '$ARCH == "avx"'
+      variables:
+        SIMD_EXT: "-mavx"
+    - if: '$ARCH == "avx2"'
+      variables:
+        SIMD_EXT: "-mavx2"
+    - if: '$ARCH == "avx2-fma"'
+      variables:
+        SIMD_EXT: "-mavx2 -mfma"
+    - if: '$ARCH == "avx512f"'
+      variables:
+        SIMD_EXT: "-mavx512f"
+    - if: '$ARCH == "avx512bw"'
+      variables:
+        SIMD_EXT: "-mavx512f -mavx512bw"
   script:
     - source ./ci/tools/threads.sh
-    - ./ci/build-linux-x86-gcc.sh
+    - cd tests
+    - cmake -S . -B build_$OS_$SIMD_$COMPILER -DCMAKE_CXX_COMPILER=$COMPILER -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-Wall -funroll-loops -finline-functions $SIMD_EXT" -DCMAKE_EXE_LINKER_FLAGS="-static -static-libgcc -static-libstdc++"
+    - cmake --build build_$OS_$SIMD_$COMPILER -j $THREADS
 
-build-linux-x86-clang:
-  image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_clang:v10.0.0
-  stage: build
-  needs: []
-  tags:
-    - x86_64
-    - linux
-    - docker
-  artifacts:
-    paths:
-      - ./tests/build_linux_x86_clang_nointr/bin/
-      - ./tests/build_linux_x86_clang_sse2/bin/
-      - ./tests/build_linux_x86_clang_sse3/bin/
-      - ./tests/build_linux_x86_clang_ssse3/bin/
-      - ./tests/build_linux_x86_clang_sse4_1/bin/
-      - ./tests/build_linux_x86_clang_sse4_2/bin/
-      - ./tests/build_linux_x86_clang_avx/bin/
-      - ./tests/build_linux_x86_clang_avx2/bin/
-      - ./tests/build_linux_x86_clang_avx2_fma/bin/
-      - ./tests/build_linux_x86_clang_avx512f/bin/
-      - ./tests/build_linux_x86_clang_avx512bw/bin/
-  script:
-    - source ./ci/tools/threads.sh
-    - ./ci/build-linux-x86-clang.sh
+# # ---------------------------------------------------------------------------------------------------------------------
+# # LINUX X86 -----------------------------------------------------------------------------------------------------------
 
-build-linux-x86-icpc:
-  image: intel/oneapi-hpckit
-  stage: build
-  needs: []
-  tags:
-    - x86_64
-    - linux
-    - docker
-  artifacts:
-    paths:
-      - ./tests/build_linux_x86_icpc_nointr/bin/
-      - ./tests/build_linux_x86_icpc_sse2/bin/
-      - ./tests/build_linux_x86_icpc_sse3/bin/
-      - ./tests/build_linux_x86_icpc_ssse3/bin/
-      - ./tests/build_linux_x86_icpc_sse4_1/bin/
-      - ./tests/build_linux_x86_icpc_sse4_2/bin/
-      - ./tests/build_linux_x86_icpc_avx/bin/
-      - ./tests/build_linux_x86_icpc_avx2_fma/bin/
-      - ./tests/build_linux_x86_icpc_avx512f/bin/
-      - ./tests/build_linux_x86_icpc_avx512bw/bin/
-  script:
-    - source ./ci/tools/threads.sh
-    - ./ci/build-linux-x86-icpc.sh
+# # BUILDS --------------------------------------------------------------------------------------------------------------
 
-# TESTS ---------------------------------------------------------------------------------------------------------------
+# build-linux-x86-gcc:
+#   image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_gcc:v9.3.0
+#   stage: build
+#   needs: []
+#   tags:
+#     - x86_64
+#     - linux
+#     - docker
+#   artifacts:
+#     paths:
+#       - ./tests/build_linux_x86_gcc_nointr/bin/
+#       - ./tests/build_linux_x86_gcc_sse2/bin/
+#       - ./tests/build_linux_x86_gcc_sse3/bin/
+#       - ./tests/build_linux_x86_gcc_ssse3/bin/
+#       - ./tests/build_linux_x86_gcc_sse4_1/bin/
+#       - ./tests/build_linux_x86_gcc_sse4_2/bin/
+#       - ./tests/build_linux_x86_gcc_avx/bin/
+#       - ./tests/build_linux_x86_gcc_avx2/bin/
+#       - ./tests/build_linux_x86_gcc_avx2_fma/bin/
+#       - ./tests/build_linux_x86_gcc_avx512f/bin/
+#       - ./tests/build_linux_x86_gcc_avx512bw/bin/
+#   script:
+#     - source ./ci/tools/threads.sh
+#     - ./ci/build-linux-x86-gcc.sh
 
-test-linux-x86-unit-nointr:
-  image: ubuntu:20.04
-  stage: test
-  needs:
-    - job: build-linux-x86-gcc
-      artifacts: true
-    - job: build-linux-x86-clang
-      artifacts: true
-    - job: build-linux-x86-icpc
-      artifacts: true
-  tags:
-    - x86_64
-    - linux
-    - docker
-  script:
-    - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_nointr build_linux_x86_clang_nointr build_linux_x86_icpc_nointr
+# build-linux-x86-clang:
+#   image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_clang:v10.0.0
+#   stage: build
+#   needs: []
+#   tags:
+#     - x86_64
+#     - linux
+#     - docker
+#   artifacts:
+#     paths:
+#       - ./tests/build_linux_x86_clang_nointr/bin/
+#       - ./tests/build_linux_x86_clang_sse2/bin/
+#       - ./tests/build_linux_x86_clang_sse3/bin/
+#       - ./tests/build_linux_x86_clang_ssse3/bin/
+#       - ./tests/build_linux_x86_clang_sse4_1/bin/
+#       - ./tests/build_linux_x86_clang_sse4_2/bin/
+#       - ./tests/build_linux_x86_clang_avx/bin/
+#       - ./tests/build_linux_x86_clang_avx2/bin/
+#       - ./tests/build_linux_x86_clang_avx2_fma/bin/
+#       - ./tests/build_linux_x86_clang_avx512f/bin/
+#       - ./tests/build_linux_x86_clang_avx512bw/bin/
+#   script:
+#     - source ./ci/tools/threads.sh
+#     - ./ci/build-linux-x86-clang.sh
 
-test-linux-x86-unit-sse2:
-  image: ubuntu:20.04
-  stage: test
-  needs:
-    - job: build-linux-x86-gcc
-      artifacts: true
-    - job: build-linux-x86-clang
-      artifacts: true
-    - job: build-linux-x86-icpc
-      artifacts: true
-  tags:
-    - x86_64
-    - sse2
-    - linux
-    - docker
-  script:
-    - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_sse2 build_linux_x86_clang_sse2 build_linux_x86_icpc_sse2
+# build-linux-x86-icpc:
+#   image: intel/oneapi-hpckit
+#   stage: build
+#   needs: []
+#   tags:
+#     - x86_64
+#     - linux
+#     - docker
+#   artifacts:
+#     paths:
+#       - ./tests/build_linux_x86_icpc_nointr/bin/
+#       - ./tests/build_linux_x86_icpc_sse2/bin/
+#       - ./tests/build_linux_x86_icpc_sse3/bin/
+#       - ./tests/build_linux_x86_icpc_ssse3/bin/
+#       - ./tests/build_linux_x86_icpc_sse4_1/bin/
+#       - ./tests/build_linux_x86_icpc_sse4_2/bin/
+#       - ./tests/build_linux_x86_icpc_avx/bin/
+#       - ./tests/build_linux_x86_icpc_avx2_fma/bin/
+#       - ./tests/build_linux_x86_icpc_avx512f/bin/
+#       - ./tests/build_linux_x86_icpc_avx512bw/bin/
+#   script:
+#     - source ./ci/tools/threads.sh
+#     - ./ci/build-linux-x86-icpc.sh
 
-test-linux-x86-unit-sse3:
-  image: ubuntu:20.04
-  stage: test
-  needs:
-    - job: build-linux-x86-gcc
-      artifacts: true
-    - job: build-linux-x86-clang
-      artifacts: true
-    - job: build-linux-x86-icpc
-      artifacts: true
-  tags:
-    - x86_64
-    - sse3
-    - linux
-    - docker
-  script:
-    - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_sse3 build_linux_x86_clang_sse3 build_linux_x86_icpc_sse3
+# # TESTS ---------------------------------------------------------------------------------------------------------------
 
-test-linux-x86-unit-ssse3:
-  image: ubuntu:20.04
-  stage: test
-  needs:
-    - job: build-linux-x86-gcc
-      artifacts: true
-    - job: build-linux-x86-clang
-      artifacts: true
-    - job: build-linux-x86-icpc
-      artifacts: true
-  tags:
-    - x86_64
-    - ssse3
-    - linux
-    - docker
-  script:
-    - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_ssse3 build_linux_x86_clang_ssse3 build_linux_x86_icpc_ssse3
-
-test-linux-x86-unit-sse4_1:
-  image: ubuntu:20.04
-  stage: test
-  needs:
-    - job: build-linux-x86-gcc
-      artifacts: true
-    - job: build-linux-x86-clang
-      artifacts: true
-    - job: build-linux-x86-icpc
-      artifacts: true
-  tags:
-    - x86_64
-    - sse4.1
-    - linux
-    - docker
-  script:
-    - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_sse4_1 build_linux_x86_clang_sse4_1 build_linux_x86_icpc_sse4_1
-
-test-linux-x86-unit-sse4_2:
-  image: ubuntu:20.04
-  stage: test
-  needs:
-    - job: build-linux-x86-gcc
-      artifacts: true
-    - job: build-linux-x86-clang
-      artifacts: true
-    - job: build-linux-x86-icpc
-      artifacts: true
-  tags:
-    - x86_64
-    - sse4.2
-    - linux
-    - docker
-  script:
-    - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_sse4_2 build_linux_x86_clang_sse4_2 build_linux_x86_icpc_sse4_2
-
-test-linux-x86-unit-avx:
-  image: ubuntu:20.04
-  stage: test
-  needs:
-    - job: build-linux-x86-gcc
-      artifacts: true
-    - job: build-linux-x86-clang
-      artifacts: true
-    - job: build-linux-x86-icpc
-      artifacts: true
-  tags:
-    - x86_64
-    - avx
-    - linux
-    - docker
-  script:
-    - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_avx build_linux_x86_clang_avx build_linux_x86_icpc_avx
-
-test-linux-x86-unit-avx2:
-  image: ubuntu:20.04
-  stage: test
-  needs:
-    - job: build-linux-x86-gcc
-      artifacts: true
-    - job: build-linux-x86-clang
-      artifacts: true
-    - job: build-linux-x86-icpc
-      artifacts: true
-  tags:
-    - x86_64
-    - avx2
-    - linux
-    - docker
-  script:
-    - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_avx2 build_linux_x86_clang_avx2
-
-test-linux-x86-unit-avx2-fma:
-  image: ubuntu:20.04
-  stage: test
-  needs:
-    - job: build-linux-x86-gcc
-      artifacts: true
-    - job: build-linux-x86-clang
-      artifacts: true
-    - job: build-linux-x86-icpc
-      artifacts: true
-  tags:
-    - x86_64
-    - avx2
-    - linux
-    - docker
-  script:
-    - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_avx2_fma build_linux_x86_clang_avx2_fma build_linux_x86_icpc_avx2_fma
-
-
-test-linux-x86-unit-avx512f:
-  image: ubuntu:20.04
-  stage: test
-  needs:
-    - job: build-linux-x86-gcc
-      artifacts: true
-    - job: build-linux-x86-clang
-      artifacts: true
-    - job: build-linux-x86-icpc
-      artifacts: true
-  tags:
-    - x86_64
-    - avx512f
-    - linux
-    - docker
-  script:
-    - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_avx512f build_linux_x86_clang_avx512f build_linux_x86_icpc_avx512f
-
-test-linux-x86-unit-avx512bw:
-  image: ubuntu:20.04
-  stage: test
-  needs:
-    - job: build-linux-x86-gcc
-      artifacts: true
-    - job: build-linux-x86-clang
-      artifacts: true
-    - job: build-linux-x86-icpc
-      artifacts: true
-  tags:
-    - x86_64
-    - avx512bw
-    - linux
-    - docker
-  script:
-    - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_avx512bw build_linux_x86_clang_avx512bw build_linux_x86_icpc_avx512bw
-
-# ---------------------------------------------------------------------------------------------------------------------
-# MACOSX X86 ----------------------------------------------------------------------------------------------------------
-
-# BUILDS --------------------------------------------------------------------------------------------------------------
-
-build-macos-x86-clang:
-  stage: build
-  needs: []
-  tags:
-    - x86_64
-    - macos
-  artifacts:
-    paths:
-      - ./tests/build_macos_x86_clang_nointr/bin/
-      - ./tests/build_macos_x86_clang_sse2/bin/
-      - ./tests/build_macos_x86_clang_sse3/bin/
-      - ./tests/build_macos_x86_clang_ssse3/bin/
-      - ./tests/build_macos_x86_clang_sse4_1/bin/
-      - ./tests/build_macos_x86_clang_sse4_2/bin/
-      - ./tests/build_macos_x86_clang_avx/bin/
-      - ./tests/build_macos_x86_clang_avx2/bin/
-      - ./tests/build_macos_x86_clang_avx2_fma/bin/
-  script:
-    - source ./ci/tools/threads.sh
-    - ./ci/build-macos-x86-clang.sh
-
-# TESTS ---------------------------------------------------------------------------------------------------------------
-
-test-macos-x86-unit-nointr:
-  stage: test
-  needs:
-    - job: build-macos-x86-clang
-      artifacts: true
-  tags:
-     - x86_64
-     - macos
-  script:
-    - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_nointr
-
-test-macos-x86-unit-sse2:
-  stage: test
-  needs:
-    - job: build-macos-x86-clang
-      artifacts: true
-  tags:
-    - x86_64
-    - sse2
-    - macos
-  script:
-    - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_sse2
-
-test-macos-x86-unit-sse3:
-  stage: test
-  needs:
-    - job: build-macos-x86-clang
-      artifacts: true
-  tags:
-    - x86_64
-    - sse3
-    - macos
-  script:
-    - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_sse3
-
-test-macos-x86-unit-ssse3:
-  stage: test
-  needs:
-    - job: build-macos-x86-clang
-      artifacts: true
-  tags:
-    - x86_64
-    - ssse3
-    - macos
-  script:
-    - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_ssse3
-
-test-macos-x86-unit-sse4_1:
-  stage: test
-  needs:
-    - job: build-macos-x86-clang
-      artifacts: true
-  tags:
-    - x86_64
-    - sse4.1
-    - macos
-  script:
-    - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_sse4_1
-
-test-macos-x86-unit-sse4_2:
-  stage: test
-  needs:
-    - job: build-macos-x86-clang
-      artifacts: true
-  tags:
-    - x86_64
-    - sse4.2
-    - macos
-  script:
-    - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_sse4_2
-
-test-macos-x86-unit-avx:
-  stage: test
-  needs:
-    - job: build-macos-x86-clang
-      artifacts: true
-  tags:
-    - x86_64
-    - avx
-    - macos
-  script:
-    - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_avx
-
-# test-macos-x86-unit-avx2:
+# test-linux-x86-unit-nointr:
+#   image: ubuntu:20.04
 #   stage: test
 #   needs:
-#     - job: build-macos-x86-clang
+#     - job: build-linux-x86-gcc
+#       artifacts: true
+#     - job: build-linux-x86-clang
+#       artifacts: true
+#     - job: build-linux-x86-icpc
+#       artifacts: true
+#   tags:
+#     - x86_64
+#     - linux
+#     - docker
+#   script:
+#     - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_nointr build_linux_x86_clang_nointr build_linux_x86_icpc_nointr
+
+# test-linux-x86-unit-sse2:
+#   image: ubuntu:20.04
+#   stage: test
+#   needs:
+#     - job: build-linux-x86-gcc
+#       artifacts: true
+#     - job: build-linux-x86-clang
+#       artifacts: true
+#     - job: build-linux-x86-icpc
+#       artifacts: true
+#   tags:
+#     - x86_64
+#     - sse2
+#     - linux
+#     - docker
+#   script:
+#     - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_sse2 build_linux_x86_clang_sse2 build_linux_x86_icpc_sse2
+
+# test-linux-x86-unit-sse3:
+#   image: ubuntu:20.04
+#   stage: test
+#   needs:
+#     - job: build-linux-x86-gcc
+#       artifacts: true
+#     - job: build-linux-x86-clang
+#       artifacts: true
+#     - job: build-linux-x86-icpc
+#       artifacts: true
+#   tags:
+#     - x86_64
+#     - sse3
+#     - linux
+#     - docker
+#   script:
+#     - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_sse3 build_linux_x86_clang_sse3 build_linux_x86_icpc_sse3
+
+# test-linux-x86-unit-ssse3:
+#   image: ubuntu:20.04
+#   stage: test
+#   needs:
+#     - job: build-linux-x86-gcc
+#       artifacts: true
+#     - job: build-linux-x86-clang
+#       artifacts: true
+#     - job: build-linux-x86-icpc
+#       artifacts: true
+#   tags:
+#     - x86_64
+#     - ssse3
+#     - linux
+#     - docker
+#   script:
+#     - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_ssse3 build_linux_x86_clang_ssse3 build_linux_x86_icpc_ssse3
+
+# test-linux-x86-unit-sse4_1:
+#   image: ubuntu:20.04
+#   stage: test
+#   needs:
+#     - job: build-linux-x86-gcc
+#       artifacts: true
+#     - job: build-linux-x86-clang
+#       artifacts: true
+#     - job: build-linux-x86-icpc
+#       artifacts: true
+#   tags:
+#     - x86_64
+#     - sse4.1
+#     - linux
+#     - docker
+#   script:
+#     - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_sse4_1 build_linux_x86_clang_sse4_1 build_linux_x86_icpc_sse4_1
+
+# test-linux-x86-unit-sse4_2:
+#   image: ubuntu:20.04
+#   stage: test
+#   needs:
+#     - job: build-linux-x86-gcc
+#       artifacts: true
+#     - job: build-linux-x86-clang
+#       artifacts: true
+#     - job: build-linux-x86-icpc
+#       artifacts: true
+#   tags:
+#     - x86_64
+#     - sse4.2
+#     - linux
+#     - docker
+#   script:
+#     - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_sse4_2 build_linux_x86_clang_sse4_2 build_linux_x86_icpc_sse4_2
+
+# test-linux-x86-unit-avx:
+#   image: ubuntu:20.04
+#   stage: test
+#   needs:
+#     - job: build-linux-x86-gcc
+#       artifacts: true
+#     - job: build-linux-x86-clang
+#       artifacts: true
+#     - job: build-linux-x86-icpc
+#       artifacts: true
+#   tags:
+#     - x86_64
+#     - avx
+#     - linux
+#     - docker
+#   script:
+#     - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_avx build_linux_x86_clang_avx build_linux_x86_icpc_avx
+
+# test-linux-x86-unit-avx2:
+#   image: ubuntu:20.04
+#   stage: test
+#   needs:
+#     - job: build-linux-x86-gcc
+#       artifacts: true
+#     - job: build-linux-x86-clang
+#       artifacts: true
+#     - job: build-linux-x86-icpc
 #       artifacts: true
 #   tags:
 #     - x86_64
 #     - avx2
-#     - macos
+#     - linux
+#     - docker
 #   script:
-#     - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_avx2
+#     - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_avx2 build_linux_x86_clang_avx2
 
-# test-macos-x86-unit-avx2-fma:
+# test-linux-x86-unit-avx2-fma:
+#   image: ubuntu:20.04
 #   stage: test
 #   needs:
-#     - job: build-macos-x86-clang
+#     - job: build-linux-x86-gcc
+#       artifacts: true
+#     - job: build-linux-x86-clang
+#       artifacts: true
+#     - job: build-linux-x86-icpc
 #       artifacts: true
 #   tags:
 #     - x86_64
 #     - avx2
-#     - macos
+#     - linux
+#     - docker
 #   script:
-#     - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_avx2_fma
+#     - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_avx2_fma build_linux_x86_clang_avx2_fma build_linux_x86_icpc_avx2_fma
 
-# test-macos-x86-unit-avx512f:
+
+# test-linux-x86-unit-avx512f:
+#   image: ubuntu:20.04
 #   stage: test
 #   needs:
-#     - job: build-macos-x86-clang
+#     - job: build-linux-x86-gcc
+#       artifacts: true
+#     - job: build-linux-x86-clang
+#       artifacts: true
+#     - job: build-linux-x86-icpc
 #       artifacts: true
 #   tags:
 #     - x86_64
 #     - avx512f
+#     - linux
+#     - docker
+#   script:
+#     - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_avx512f build_linux_x86_clang_avx512f build_linux_x86_icpc_avx512f
+
+# test-linux-x86-unit-avx512bw:
+#   image: ubuntu:20.04
+#   stage: test
+#   needs:
+#     - job: build-linux-x86-gcc
+#       artifacts: true
+#     - job: build-linux-x86-clang
+#       artifacts: true
+#     - job: build-linux-x86-icpc
+#       artifacts: true
+#   tags:
+#     - x86_64
+#     - avx512bw
+#     - linux
+#     - docker
+#   script:
+#     - ./ci/test-linux-macos-unit.sh build_linux_x86_gcc_avx512bw build_linux_x86_clang_avx512bw build_linux_x86_icpc_avx512bw
+
+# # ---------------------------------------------------------------------------------------------------------------------
+# # MACOSX X86 ----------------------------------------------------------------------------------------------------------
+
+# # BUILDS --------------------------------------------------------------------------------------------------------------
+
+# build-macos-x86-clang:
+#   stage: build
+#   needs: []
+#   tags:
+#     - x86_64
+#     - macos
+#   artifacts:
+#     paths:
+#       - ./tests/build_macos_x86_clang_nointr/bin/
+#       - ./tests/build_macos_x86_clang_sse2/bin/
+#       - ./tests/build_macos_x86_clang_sse3/bin/
+#       - ./tests/build_macos_x86_clang_ssse3/bin/
+#       - ./tests/build_macos_x86_clang_sse4_1/bin/
+#       - ./tests/build_macos_x86_clang_sse4_2/bin/
+#       - ./tests/build_macos_x86_clang_avx/bin/
+#       - ./tests/build_macos_x86_clang_avx2/bin/
+#       - ./tests/build_macos_x86_clang_avx2_fma/bin/
+#   script:
+#     - source ./ci/tools/threads.sh
+#     - ./ci/build-macos-x86-clang.sh
+
+# # TESTS ---------------------------------------------------------------------------------------------------------------
+
+# test-macos-x86-unit-nointr:
+#   stage: test
+#   needs:
+#     - job: build-macos-x86-clang
+#       artifacts: true
+#   tags:
+#      - x86_64
+#      - macos
+#   script:
+#     - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_nointr
+
+# test-macos-x86-unit-sse2:
+#   stage: test
+#   needs:
+#     - job: build-macos-x86-clang
+#       artifacts: true
+#   tags:
+#     - x86_64
+#     - sse2
 #     - macos
 #   script:
-#     - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_avx512f
+#     - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_sse2
 
-# ---------------------------------------------------------------------------------------------------------------------
-# LINUX ARM -----------------------------------------------------------------------------------------------------------
+# test-macos-x86-unit-sse3:
+#   stage: test
+#   needs:
+#     - job: build-macos-x86-clang
+#       artifacts: true
+#   tags:
+#     - x86_64
+#     - sse3
+#     - macos
+#   script:
+#     - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_sse3
 
-# BUILDS --------------------------------------------------------------------------------------------------------------
+# test-macos-x86-unit-ssse3:
+#   stage: test
+#   needs:
+#     - job: build-macos-x86-clang
+#       artifacts: true
+#   tags:
+#     - x86_64
+#     - ssse3
+#     - macos
+#   script:
+#     - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_ssse3
 
-build-linux-armv7-gcc:
-  image: registry.gitlab.com/aff3ct/aff3ct/armhf_ubuntu_gcc:v9.3.0
-  stage: build
-  needs: []
-  tags:
-    - armhf
-    - linux
-    - docker
-  artifacts:
-    paths:
-      - ./tests/build_linux_armv7_gcc_nointr/bin/
-      - ./tests/build_linux_armv7_gcc_neon/bin/
-      - ./tests/build_linux_armv7_gcc_neon_fma/bin/
-  script:
-    - source ./ci/tools/threads.sh
-    - ./ci/build-linux-armv7-gcc.sh
+# test-macos-x86-unit-sse4_1:
+#   stage: test
+#   needs:
+#     - job: build-macos-x86-clang
+#       artifacts: true
+#   tags:
+#     - x86_64
+#     - sse4.1
+#     - macos
+#   script:
+#     - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_sse4_1
 
-build-linux-armv7-clang:
-  image: registry.gitlab.com/aff3ct/aff3ct/armhf_ubuntu_clang:v10.0.0
-  stage: build
-  needs: []
-  tags:
-    - armhf
-    - linux
-    - docker
-  artifacts:
-    paths:
-      - ./tests/build_linux_armv7_clang_nointr/bin/
-      - ./tests/build_linux_armv7_clang_neon/bin/
-      - ./tests/build_linux_armv7_clang_neon_fma/bin/
-  script:
-    - source ./ci/tools/threads.sh
-    - ./ci/build-linux-armv7-clang.sh
+# test-macos-x86-unit-sse4_2:
+#   stage: test
+#   needs:
+#     - job: build-macos-x86-clang
+#       artifacts: true
+#   tags:
+#     - x86_64
+#     - sse4.2
+#     - macos
+#   script:
+#     - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_sse4_2
 
-build-linux-armv8-gcc:
-  image: registry.gitlab.com/aff3ct/aff3ct/arm64_ubuntu_gcc:v9.3.0
-  stage: build
-  needs: []
-  tags:
-    - arm64
-    - linux
-    - docker
-  artifacts:
-    paths:
-      - ./tests/build_linux_armv8_gcc_nointr/bin/
-      - ./tests/build_linux_armv8_gcc_neon/bin/
-  script:
-    - source ./ci/tools/threads.sh
-    - ./ci/build-linux-armv8-gcc.sh
+# test-macos-x86-unit-avx:
+#   stage: test
+#   needs:
+#     - job: build-macos-x86-clang
+#       artifacts: true
+#   tags:
+#     - x86_64
+#     - avx
+#     - macos
+#   script:
+#     - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_avx
 
-build-linux-armv8-clang:
-  image: registry.gitlab.com/aff3ct/aff3ct/arm64_ubuntu_clang:v10.0.0
-  stage: build
-  needs: []
-  tags:
-    - arm64
-    - linux
-    - docker
-  artifacts:
-    paths:
-      - ./tests/build_linux_armv8_clang_nointr/bin/
-      - ./tests/build_linux_armv8_clang_neon/bin/
-  script:
-    - source ./ci/tools/threads.sh
-    - ./ci/build-linux-armv8-clang.sh
+# # test-macos-x86-unit-avx2:
+# #   stage: test
+# #   needs:
+# #     - job: build-macos-x86-clang
+# #       artifacts: true
+# #   tags:
+# #     - x86_64
+# #     - avx2
+# #     - macos
+# #   script:
+# #     - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_avx2
 
-# TESTS ---------------------------------------------------------------------------------------------------------------
+# # test-macos-x86-unit-avx2-fma:
+# #   stage: test
+# #   needs:
+# #     - job: build-macos-x86-clang
+# #       artifacts: true
+# #   tags:
+# #     - x86_64
+# #     - avx2
+# #     - macos
+# #   script:
+# #     - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_avx2_fma
 
-test-linux-armv7-unit-nointr:
-  image: ubuntu:20.04
-  stage: test
-  needs:
-    - job: build-linux-armv7-gcc
-      artifacts: true
-    - job: build-linux-armv7-clang
-      artifacts: true
-  tags:
-    - armhf
-    - linux
-    - docker
-  script:
-    - ./ci/test-linux-macos-unit.sh build_linux_armv7_gcc_nointr build_linux_armv7_clang_nointr
+# # test-macos-x86-unit-avx512f:
+# #   stage: test
+# #   needs:
+# #     - job: build-macos-x86-clang
+# #       artifacts: true
+# #   tags:
+# #     - x86_64
+# #     - avx512f
+# #     - macos
+# #   script:
+# #     - ./ci/test-linux-macos-unit.sh build_macos_x86_clang_avx512f
 
-test-linux-armv7-unit-neon:
-  image: ubuntu:20.04
-  stage: test
-  needs:
-    - job: build-linux-armv7-gcc
-      artifacts: true
-    - job: build-linux-armv7-clang
-      artifacts: true
-  tags:
-    - armhf
-    - neon
-    - linux
-    - docker
-  script:
-    - ./ci/test-linux-macos-unit.sh build_linux_armv7_gcc_neon build_linux_armv7_clang_neon
+# # ---------------------------------------------------------------------------------------------------------------------
+# # LINUX ARM -----------------------------------------------------------------------------------------------------------
 
-test-linux-armv7-unit-neon-fma:
-  image: ubuntu:20.04
-  stage: test
-  needs:
-    - job: build-linux-armv7-gcc
-      artifacts: true
-    - job: build-linux-armv7-clang
-      artifacts: true
-  tags:
-    - armhf
-    - neon
-    - fma
-    - linux
-    - docker
-  script:
-    - ./ci/test-linux-macos-unit.sh build_linux_armv7_gcc_neon_fma build_linux_armv7_clang_neon_fma
+# # BUILDS --------------------------------------------------------------------------------------------------------------
 
-test-linux-armv8-unit-nointr:
-  image: ubuntu:20.04
-  stage: test
-  needs:
-    - job: build-linux-armv8-gcc
-      artifacts: true
-    - job: build-linux-armv8-clang
-      artifacts: true
-  tags:
-    - arm64
-    - linux
-    - docker
-  script:
-    - ./ci/test-linux-macos-unit.sh build_linux_armv8_gcc_nointr build_linux_armv8_clang_nointr
+# build-linux-armv7-gcc:
+#   image: registry.gitlab.com/aff3ct/aff3ct/armhf_ubuntu_gcc:v9.3.0
+#   stage: build
+#   needs: []
+#   tags:
+#     - armhf
+#     - linux
+#     - docker
+#   artifacts:
+#     paths:
+#       - ./tests/build_linux_armv7_gcc_nointr/bin/
+#       - ./tests/build_linux_armv7_gcc_neon/bin/
+#       - ./tests/build_linux_armv7_gcc_neon_fma/bin/
+#   script:
+#     - source ./ci/tools/threads.sh
+#     - ./ci/build-linux-armv7-gcc.sh
 
-test-linux-armv8-unit-neon:
-  image: ubuntu:20.04
-  stage: test
-  needs:
-    - job: build-linux-armv8-gcc
-      artifacts: true
-    - job: build-linux-armv8-clang
-      artifacts: true
-  tags:
-    - arm64
-    - neon
-    - fma
-    - linux
-    - docker
-  script:
-    - ./ci/test-linux-macos-unit.sh build_linux_armv8_gcc_neon build_linux_armv8_clang_neon
+# build-linux-armv7-clang:
+#   image: registry.gitlab.com/aff3ct/aff3ct/armhf_ubuntu_clang:v10.0.0
+#   stage: build
+#   needs: []
+#   tags:
+#     - armhf
+#     - linux
+#     - docker
+#   artifacts:
+#     paths:
+#       - ./tests/build_linux_armv7_clang_nointr/bin/
+#       - ./tests/build_linux_armv7_clang_neon/bin/
+#       - ./tests/build_linux_armv7_clang_neon_fma/bin/
+#   script:
+#     - source ./ci/tools/threads.sh
+#     - ./ci/build-linux-armv7-clang.sh
 
-# ---------------------------------------------------------------------------------------------------------------------
-# WINDOWS X86 ---------------------------------------------------------------------------------------------------------
+# build-linux-armv8-gcc:
+#   image: registry.gitlab.com/aff3ct/aff3ct/arm64_ubuntu_gcc:v9.3.0
+#   stage: build
+#   needs: []
+#   tags:
+#     - arm64
+#     - linux
+#     - docker
+#   artifacts:
+#     paths:
+#       - ./tests/build_linux_armv8_gcc_nointr/bin/
+#       - ./tests/build_linux_armv8_gcc_neon/bin/
+#   script:
+#     - source ./ci/tools/threads.sh
+#     - ./ci/build-linux-armv8-gcc.sh
 
-# BUILDS --------------------------------------------------------------------------------------------------------------
+# build-linux-armv8-clang:
+#   image: registry.gitlab.com/aff3ct/aff3ct/arm64_ubuntu_clang:v10.0.0
+#   stage: build
+#   needs: []
+#   tags:
+#     - arm64
+#     - linux
+#     - docker
+#   artifacts:
+#     paths:
+#       - ./tests/build_linux_armv8_clang_nointr/bin/
+#       - ./tests/build_linux_armv8_clang_neon/bin/
+#   script:
+#     - source ./ci/tools/threads.sh
+#     - ./ci/build-linux-armv8-clang.sh
 
-build-windows-x86-gcc:
-  image: registry.gitlab.com/aff3ct/aff3ct/x86_64_windows_gcc:v8.1.0
-  stage: build
-  needs: []
-  tags:
-    - x86_64
-    - windows
-  artifacts:
-    paths:
-      - ./tests/build_windows_x86_gcc_nointr/bin/
-      - ./tests/build_windows_x86_gcc_sse2/bin/
-      - ./tests/build_windows_x86_gcc_sse3/bin/
-      - ./tests/build_windows_x86_gcc_ssse3/bin/
-      - ./tests/build_windows_x86_gcc_sse4_1/bin/
-      - ./tests/build_windows_x86_gcc_sse4_2/bin/
-      - ./tests/build_windows_x86_gcc_avx/bin/
-      - ./tests/build_windows_x86_gcc_avx2/bin/
-      - ./tests/build_windows_x86_gcc_avx2_fma/bin/
-      # - ./tests/build_windows_x86_gcc_avx512f/bin/
-  script:
-    - ./ci/build-windows-x86-gcc.bat
+# # TESTS ---------------------------------------------------------------------------------------------------------------
 
-build-windows-x86-msvc:
-  image: registry.gitlab.com/aff3ct/aff3ct/x86_64_windows_msvc:v15
-  stage: build
-  needs: []
-  tags:
-    - x86_64
-    - windows
-  artifacts:
-    paths:
-      - ./tests/build_windows_x86_msvc_nointr/bin/
-      - ./tests/build_windows_x86_msvc_sse2/bin/
-      - ./tests/build_windows_x86_msvc_sse3/bin/
-      - ./tests/build_windows_x86_msvc_ssse3/bin/
-      - ./tests/build_windows_x86_msvc_sse4_1/bin/
-      - ./tests/build_windows_x86_msvc_sse4_2/bin/
-      - ./tests/build_windows_x86_msvc_avx/bin/
-      - ./tests/build_windows_x86_msvc_avx2_fma/bin/
-      # - ./tests/build_windows_x86_msvc_avx512f/bin/
-  script:
-    - ./ci/build-windows-x86-msvc.bat
+# test-linux-armv7-unit-nointr:
+#   image: ubuntu:20.04
+#   stage: test
+#   needs:
+#     - job: build-linux-armv7-gcc
+#       artifacts: true
+#     - job: build-linux-armv7-clang
+#       artifacts: true
+#   tags:
+#     - armhf
+#     - linux
+#     - docker
+#   script:
+#     - ./ci/test-linux-macos-unit.sh build_linux_armv7_gcc_nointr build_linux_armv7_clang_nointr
 
-# TESTS ---------------------------------------------------------------------------------------------------------------
+# test-linux-armv7-unit-neon:
+#   image: ubuntu:20.04
+#   stage: test
+#   needs:
+#     - job: build-linux-armv7-gcc
+#       artifacts: true
+#     - job: build-linux-armv7-clang
+#       artifacts: true
+#   tags:
+#     - armhf
+#     - neon
+#     - linux
+#     - docker
+#   script:
+#     - ./ci/test-linux-macos-unit.sh build_linux_armv7_gcc_neon build_linux_armv7_clang_neon
 
-test-windows-x86-unit-nointr:
-  stage: test
-  needs:
-    - job: build-windows-x86-gcc
-      artifacts: true
-    - job: build-windows-x86-msvc
-      artifacts: true
-  tags:
-     - x86_64
-     - windows
-  script:
-    - ./ci/test-windows-unit.bat build_windows_x86_gcc_nointr build_windows_x86_msvc_nointr
+# test-linux-armv7-unit-neon-fma:
+#   image: ubuntu:20.04
+#   stage: test
+#   needs:
+#     - job: build-linux-armv7-gcc
+#       artifacts: true
+#     - job: build-linux-armv7-clang
+#       artifacts: true
+#   tags:
+#     - armhf
+#     - neon
+#     - fma
+#     - linux
+#     - docker
+#   script:
+#     - ./ci/test-linux-macos-unit.sh build_linux_armv7_gcc_neon_fma build_linux_armv7_clang_neon_fma
 
-test-windows-x86-unit-sse2:
-  stage: test
-  needs:
-    - job: build-windows-x86-gcc
-      artifacts: true
-    - job: build-windows-x86-msvc
-      artifacts: true
-  tags:
-    - x86_64
-    - sse2
-    - windows
-  script:
-    - ./ci/test-windows-unit.bat build_windows_x86_gcc_sse2 build_windows_x86_msvc_sse2
+# test-linux-armv8-unit-nointr:
+#   image: ubuntu:20.04
+#   stage: test
+#   needs:
+#     - job: build-linux-armv8-gcc
+#       artifacts: true
+#     - job: build-linux-armv8-clang
+#       artifacts: true
+#   tags:
+#     - arm64
+#     - linux
+#     - docker
+#   script:
+#     - ./ci/test-linux-macos-unit.sh build_linux_armv8_gcc_nointr build_linux_armv8_clang_nointr
 
-test-windows-x86-unit-sse3:
-  stage: test
-  needs:
-    - job: build-windows-x86-gcc
-      artifacts: true
-    - job: build-windows-x86-msvc
-      artifacts: true
-  tags:
-    - x86_64
-    - sse3
-    - windows
-  script:
-    - ./ci/test-windows-unit.bat build_windows_x86_gcc_sse3 build_windows_x86_msvc_sse3
+# test-linux-armv8-unit-neon:
+#   image: ubuntu:20.04
+#   stage: test
+#   needs:
+#     - job: build-linux-armv8-gcc
+#       artifacts: true
+#     - job: build-linux-armv8-clang
+#       artifacts: true
+#   tags:
+#     - arm64
+#     - neon
+#     - fma
+#     - linux
+#     - docker
+#   script:
+#     - ./ci/test-linux-macos-unit.sh build_linux_armv8_gcc_neon build_linux_armv8_clang_neon
 
-test-windows-x86-unit-ssse3:
-  stage: test
-  needs:
-    - job: build-windows-x86-gcc
-      artifacts: true
-    - job: build-windows-x86-msvc
-      artifacts: true
-  tags:
-    - x86_64
-    - ssse3
-    - windows
-  script:
-    - ./ci/test-windows-unit.bat build_windows_x86_gcc_ssse3 build_windows_x86_msvc_ssse3
+# # ---------------------------------------------------------------------------------------------------------------------
+# # WINDOWS X86 ---------------------------------------------------------------------------------------------------------
 
-test-windows-x86-unit-sse4_1:
-  stage: test
-  needs:
-    - job: build-windows-x86-gcc
-      artifacts: true
-    - job: build-windows-x86-msvc
-      artifacts: true
-  tags:
-    - x86_64
-    - sse4.1
-    - windows
-  script:
-    - ./ci/test-windows-unit.bat build_windows_x86_gcc_sse4_1 build_windows_x86_msvc_sse4_1
+# # BUILDS --------------------------------------------------------------------------------------------------------------
 
-test-windows-x86-unit-sse4_2:
-  stage: test
-  needs:
-    - job: build-windows-x86-gcc
-      artifacts: true
-    - job: build-windows-x86-msvc
-      artifacts: true
-  tags:
-    - x86_64
-    - sse4.2
-    - windows
-  script:
-    - ./ci/test-windows-unit.bat build_windows_x86_gcc_sse4_2 build_windows_x86_msvc_sse4_2
+# build-windows-x86-gcc:
+#   image: registry.gitlab.com/aff3ct/aff3ct/x86_64_windows_gcc:v8.1.0
+#   stage: build
+#   needs: []
+#   tags:
+#     - x86_64
+#     - windows
+#   artifacts:
+#     paths:
+#       - ./tests/build_windows_x86_gcc_nointr/bin/
+#       - ./tests/build_windows_x86_gcc_sse2/bin/
+#       - ./tests/build_windows_x86_gcc_sse3/bin/
+#       - ./tests/build_windows_x86_gcc_ssse3/bin/
+#       - ./tests/build_windows_x86_gcc_sse4_1/bin/
+#       - ./tests/build_windows_x86_gcc_sse4_2/bin/
+#       - ./tests/build_windows_x86_gcc_avx/bin/
+#       - ./tests/build_windows_x86_gcc_avx2/bin/
+#       - ./tests/build_windows_x86_gcc_avx2_fma/bin/
+#       # - ./tests/build_windows_x86_gcc_avx512f/bin/
+#   script:
+#     - ./ci/build-windows-x86-gcc.bat
 
-test-windows-x86-unit-avx:
-  stage: test
-  needs:
-    - job: build-windows-x86-gcc
-      artifacts: true
-    - job: build-windows-x86-msvc
-      artifacts: true
-  tags:
-    - x86_64
-    - avx
-    - windows
-  script:
-    - ./ci/test-windows-unit.bat build_windows_x86_gcc_avx build_windows_x86_msvc_avx
+# build-windows-x86-msvc:
+#   image: registry.gitlab.com/aff3ct/aff3ct/x86_64_windows_msvc:v15
+#   stage: build
+#   needs: []
+#   tags:
+#     - x86_64
+#     - windows
+#   artifacts:
+#     paths:
+#       - ./tests/build_windows_x86_msvc_nointr/bin/
+#       - ./tests/build_windows_x86_msvc_sse2/bin/
+#       - ./tests/build_windows_x86_msvc_sse3/bin/
+#       - ./tests/build_windows_x86_msvc_ssse3/bin/
+#       - ./tests/build_windows_x86_msvc_sse4_1/bin/
+#       - ./tests/build_windows_x86_msvc_sse4_2/bin/
+#       - ./tests/build_windows_x86_msvc_avx/bin/
+#       - ./tests/build_windows_x86_msvc_avx2_fma/bin/
+#       # - ./tests/build_windows_x86_msvc_avx512f/bin/
+#   script:
+#     - ./ci/build-windows-x86-msvc.bat
 
-# test-windows-x86-unit-avx2:
+# # TESTS ---------------------------------------------------------------------------------------------------------------
+
+# test-windows-x86-unit-nointr:
+#   stage: test
+#   needs:
+#     - job: build-windows-x86-gcc
+#       artifacts: true
+#     - job: build-windows-x86-msvc
+#       artifacts: true
+#   tags:
+#      - x86_64
+#      - windows
+#   script:
+#     - ./ci/test-windows-unit.bat build_windows_x86_gcc_nointr build_windows_x86_msvc_nointr
+
+# test-windows-x86-unit-sse2:
 #   stage: test
 #   needs:
 #     - job: build-windows-x86-gcc
@@ -764,12 +735,12 @@ test-windows-x86-unit-avx:
 #       artifacts: true
 #   tags:
 #     - x86_64
-#     - avx2
+#     - sse2
 #     - windows
 #   script:
-#     - ./ci/test-windows-unit.bat build_windows_x86_gcc_avx2 build_windows_x86_msvc_avx2
+#     - ./ci/test-windows-unit.bat build_windows_x86_gcc_sse2 build_windows_x86_msvc_sse2
 
-# test-windows-x86-unit-avx2-fma:
+# test-windows-x86-unit-sse3:
 #   stage: test
 #   needs:
 #     - job: build-windows-x86-gcc
@@ -778,114 +749,198 @@ test-windows-x86-unit-avx:
 #       artifacts: true
 #   tags:
 #     - x86_64
-#     - avx2
+#     - sse3
 #     - windows
 #   script:
-#     - ./ci/test-windows-unit.bat build_windows_x86_gcc_avx2_fma build_windows_x86_msvc_avx2_fma
+#     - ./ci/test-windows-unit.bat build_windows_x86_gcc_sse3 build_windows_x86_msvc_sse3
 
-
-# test-windows-x86-unit-avx512f:
+# test-windows-x86-unit-ssse3:
 #   stage: test
-#   dependencies:
-#     - build-windows-x86-gcc
-#     - build-windows-x86-msvc
+#   needs:
+#     - job: build-windows-x86-gcc
+#       artifacts: true
+#     - job: build-windows-x86-msvc
+#       artifacts: true
+#   tags:
+#     - x86_64
+#     - ssse3
+#     - windows
+#   script:
+#     - ./ci/test-windows-unit.bat build_windows_x86_gcc_ssse3 build_windows_x86_msvc_ssse3
+
+# test-windows-x86-unit-sse4_1:
+#   stage: test
+#   needs:
+#     - job: build-windows-x86-gcc
+#       artifacts: true
+#     - job: build-windows-x86-msvc
+#       artifacts: true
+#   tags:
+#     - x86_64
+#     - sse4.1
+#     - windows
+#   script:
+#     - ./ci/test-windows-unit.bat build_windows_x86_gcc_sse4_1 build_windows_x86_msvc_sse4_1
+
+# test-windows-x86-unit-sse4_2:
+#   stage: test
+#   needs:
+#     - job: build-windows-x86-gcc
+#       artifacts: true
+#     - job: build-windows-x86-msvc
+#       artifacts: true
+#   tags:
+#     - x86_64
+#     - sse4.2
+#     - windows
+#   script:
+#     - ./ci/test-windows-unit.bat build_windows_x86_gcc_sse4_2 build_windows_x86_msvc_sse4_2
+
+# test-windows-x86-unit-avx:
+#   stage: test
+#   needs:
+#     - job: build-windows-x86-gcc
+#       artifacts: true
+#     - job: build-windows-x86-msvc
+#       artifacts: true
+#   tags:
+#     - x86_64
+#     - avx
+#     - windows
+#   script:
+#     - ./ci/test-windows-unit.bat build_windows_x86_gcc_avx build_windows_x86_msvc_avx
+
+# # test-windows-x86-unit-avx2:
+# #   stage: test
+# #   needs:
+# #     - job: build-windows-x86-gcc
+# #       artifacts: true
+# #     - job: build-windows-x86-msvc
+# #       artifacts: true
+# #   tags:
+# #     - x86_64
+# #     - avx2
+# #     - windows
+# #   script:
+# #     - ./ci/test-windows-unit.bat build_windows_x86_gcc_avx2 build_windows_x86_msvc_avx2
+
+# # test-windows-x86-unit-avx2-fma:
+# #   stage: test
+# #   needs:
+# #     - job: build-windows-x86-gcc
+# #       artifacts: true
+# #     - job: build-windows-x86-msvc
+# #       artifacts: true
+# #   tags:
+# #     - x86_64
+# #     - avx2
+# #     - windows
+# #   script:
+# #     - ./ci/test-windows-unit.bat build_windows_x86_gcc_avx2_fma build_windows_x86_msvc_avx2_fma
+
+
+# # test-windows-x86-unit-avx512f:
+# #   stage: test
+# #   dependencies:
+# #     - build-windows-x86-gcc
+# #     - build-windows-x86-msvc
+# #   tags:
+# #     - x86_64
+# #     - avx512f
+# #     - windows
+# #   script:
+# #     - ./ci/test-windows-unit.bat build_windows_x86_gcc_avx512f build_windows_x86_msvc_avx512f
+
+# # COVERAGE ---------------------------------------------------------------------------------------------------------------
+
+# build-coverage-linux-x86-gcc:
+#   image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_coverage
+#   stage: build
+#   needs: []
 #   tags:
 #     - x86_64
 #     - avx512f
-#     - windows
+#     - linux
+#     - docker
+#   artifacts:
+#     name: code-coverage-files
+#     when: always
+#     paths:
+#       - ./tests/code_coverage_files/*
 #   script:
-#     - ./ci/test-windows-unit.bat build_windows_x86_gcc_avx512f build_windows_x86_msvc_avx512f
+#     - source ./ci/tools/threads.sh
+#     - ./ci/build-coverage-linux-x86-gcc.sh
 
-# COVERAGE ---------------------------------------------------------------------------------------------------------------
+# build-coverage-linux-armv7-gcc:
+#   image: registry.gitlab.com/aff3ct/aff3ct/armhf_ubuntu_coverage
+#   stage: build
+#   needs: []
+#   tags:
+#     - armhf
+#     - neon
+#     - fma
+#     - linux
+#     - docker
+#   artifacts:
+#     name: code-coverage-files
+#     paths:
+#       - ./tests/code_coverage_files/*
+#   script:
+#     - source ./ci/tools/threads.sh
+#     - ./ci/build-coverage-linux-armv7-gcc.sh
 
-build-coverage-linux-x86-gcc:
-  image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_coverage
-  stage: build
-  needs: []
-  tags:
-    - x86_64
-    - avx512f
-    - linux
-    - docker
-  artifacts:
-    name: code-coverage-files
-    when: always
-    paths:
-      - ./tests/code_coverage_files/*
-  script:
-    - source ./ci/tools/threads.sh
-    - ./ci/build-coverage-linux-x86-gcc.sh
+# build-coverage-linux-armv8-gcc:
+#   image: registry.gitlab.com/aff3ct/aff3ct/arm64_ubuntu_coverage
+#   stage: build
+#   needs: []
+#   tags:
+#     - arm64
+#     - neon
+#     - fma
+#     - linux
+#     - docker
+#   artifacts:
+#     name: code-coverage-files
+#     paths:
+#       - ./tests/code_coverage_files/*
+#   script:
+#     - source ./ci/tools/threads.sh
+#     - ./ci/build-coverage-linux-armv8-gcc.sh
 
-build-coverage-linux-armv7-gcc:
-  image: registry.gitlab.com/aff3ct/aff3ct/armhf_ubuntu_coverage
-  stage: build
-  needs: []
-  tags:
-    - armhf
-    - neon
-    - fma
-    - linux
-    - docker
-  artifacts:
-    name: code-coverage-files
-    paths:
-      - ./tests/code_coverage_files/*
-  script:
-    - source ./ci/tools/threads.sh
-    - ./ci/build-coverage-linux-armv7-gcc.sh
+# coverage-linux:
+#   image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_coverage
+#   stage: coverage
+#   needs:
+#     - job: build-coverage-linux-x86-gcc
+#       artifacts: true
+#     - job: build-coverage-linux-armv7-gcc
+#       artifacts: true
+#     - job: build-coverage-linux-armv8-gcc
+#       artifacts: true
+#   tags:
+#     - x86_64
+#     - linux
+#     - docker
+#   coverage: '/.*lines\.*: (\d+.\d+\%)/'
+#   artifacts:
+#      name: code-coverage-report
+#      paths:
+#       - ./tests/code_coverage_report/
+#   script:
+#     - ./ci/coverage-linux.sh
 
-build-coverage-linux-armv8-gcc:
-  image: registry.gitlab.com/aff3ct/aff3ct/arm64_ubuntu_coverage
-  stage: build
-  needs: []
-  tags:
-    - arm64
-    - neon
-    - fma
-    - linux
-    - docker
-  artifacts:
-    name: code-coverage-files
-    paths:
-      - ./tests/code_coverage_files/*
-  script:
-    - source ./ci/tools/threads.sh
-    - ./ci/build-coverage-linux-armv8-gcc.sh
-
-coverage-linux:
-  image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_coverage
-  stage: coverage
-  needs:
-    - job: build-coverage-linux-x86-gcc
-      artifacts: true
-    - job: build-coverage-linux-armv7-gcc
-      artifacts: true
-    - job: build-coverage-linux-armv8-gcc
-      artifacts: true
-  tags:
-    - x86_64
-    - linux
-    - docker
-  coverage: '/.*lines\.*: (\d+.\d+\%)/'
-  artifacts:
-     name: code-coverage-report
-     paths:
-      - ./tests/code_coverage_report/
-  script:
-    - ./ci/coverage-linux.sh
-
-pages:
-  stage: deploy
-  tags:
-    - linux
-  needs:
-    - job: coverage-linux
-      artifacts: true
-  script:
-    - mv ./tests/code_coverage_report/ public/
-  artifacts:
-    paths:
-      - public
-    expire_in: 30 days
-  only:
-    - master
+# pages:
+#   stage: deploy
+#   tags:
+#     - linux
+#   needs:
+#     - job: coverage-linux
+#       artifacts: true
+#   script:
+#     - mv ./tests/code_coverage_report/ public/
+#   artifacts:
+#     paths:
+#       - public
+#     expire_in: 30 days
+#   only:
+#     - master

@@ -3,7 +3,7 @@
 #include <iostream>
 #include <string>
 
-#include "../../include/mipp_v2.hpp"
+#include "../../include/mipp.hpp"
 
 void print_v(int32_t* v, const std::string &name)
 {
