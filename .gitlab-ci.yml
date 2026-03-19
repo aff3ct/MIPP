@@ -2,20 +2,48 @@ variables:
   GIT_SUBMODULE_STRATEGY: none
 
 stages:
+  - generation
   - analysis
   - build
-  - test
-  - coverage
-  - deploy
+  # - test
+  # - coverage
+  # - deploy
 
 before_script:
   - hostname
   - whoami
 # - pwd
 
+# GENERATION ----------------------------------------------------------------------------------------------------------
+
+generation-headers:
+  image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_mipp:latest
+  stage: generation
+  allow_failure: false
+  artifacts:
+    name: mipp_headers
+    when: always
+    paths:
+      - include/
+  tags:
+    - x86_64
+    - linux
+    - docker
+  script:
+    - cd generator
+    - python3 -m venv .venv
+    - source .venv/bin/activate
+    - pip3 install -r requirements.txt
+    - ./gen_mipp.py
+
+# ANALYSIS ------------------------------------------------------------------------------------------------------------
+
 analysis-cppcheck:
   image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_cppcheck:v1.9
   stage: analysis
+  needs:
+    - job: generation-headers
+      artifacts: true
   allow_failure: false
   artifacts:
     name: analysis-cppcheck-logs
@@ -31,10 +59,13 @@ analysis-cppcheck:
 
 # BUILDS --------------------------------------------------------------------------------------------------------------
 
-build:
+build-linux:
   image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_mipp:latest
   stage: build
-  needs: []
+  needs:
+    - job: generation-headers
+      artifacts: true
+  allow_failure: false
   parallel:
     matrix:
       - OS: [linux]
@@ -45,6 +76,8 @@ build:
     - $ARCH
     - docker
   artifacts:
+    name: build-$OS-$SIMD-$COMPILER
+    when: always
     paths:
       - ./tests/build_$OS_$SIMD_$COMPILER/bin/
   rules:
