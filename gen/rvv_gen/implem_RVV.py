@@ -135,6 +135,16 @@ tpl_implem_rvv = {
 
     "scalar_getfirst":{"format":"short", "code": "{{isa_dt_par.to_ptr}} res = {{ isa.prefix }}_v{{ instr_name }}_x_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(r0.r);"},
     "float_getfirst":{"format":"short", "code": "{{isa_dt_par.to_ptr}} res = {{ isa.prefix }}_v{{ instr_name }}_f_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(r0.r);"},
+
+
+    "scalar_notb":{"format":"short", "code": "{{isa.prefix}}_v{{instr_name}}_vx_{{isa_dt_par.data_ext}}(r0.r, -1, %N<tp>%);"},
+    "float_notb":{"format": "long", "code": """
+        {{isa_dt_par.to_uint}} tmp = {{isa.prefix}}_vfcvt_xu_f_v_{{isa_dt_par.uint_data_ext}}(r0.r, %N<tp>%);
+        tmp = {{isa.prefix}}_v{{instr_name}}_vx_{{isa_dt_par.uint_data_ext}}(tmp, -1, %N<tp>%);
+        %r<tp>% ret;
+        ret.r = {{ isa.prefix }}_vfcvt_f_xu_v_{{isa_dt_par.data_ext}}(tmp, %N<tp>%);
+        return ret;
+    """},
 }
 
 """
@@ -250,4 +260,9 @@ implems_rvv = {
             {"instr_name": "maxu", "datatypes": all_uint, "template": tpl_implem_rvv["arith_2args"]},
             {"instr_name": "fmax", "datatypes": all_float, "template": tpl_implem_rvv["arith_2args"]},
    ],
+   
+   "notb" : [
+           {"instr_name" : "xor", "datatypes" : all_int_uint, "template" : tpl_implem_rvv["scalar_notb"]},
+           {"instr_name" : "xor", "datatypes" : all_float, "template" : tpl_implem_rvv["float_notb"]},      
+   ],   
 }
