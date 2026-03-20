@@ -135,8 +135,6 @@ tpl_implem_rvv = {
 
     "scalar_getfirst":{"format":"short", "code": "{{isa_dt_par.to_ptr}} res = {{ isa.prefix }}_v{{ instr_name }}_x_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(r0.r);"},
     "float_getfirst":{"format":"short", "code": "{{isa_dt_par.to_ptr}} res = {{ isa.prefix }}_v{{ instr_name }}_f_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(r0.r);"},
-
-   
 }
 
 """
@@ -241,9 +239,15 @@ implems_rvv = {
     
     #"maskst":[{ "instr_name": "maskload", "datatypes": all_datatypes, "template": tpl_implem_rvv["maskst"] }],
 
-   #"min" : [
-   #         {"instr_name": "min", "datatypes": all_int, "template": tpl_implem_rvv["min_max"]},
-   #         {"instr_name": "minu", "datatypes": all_uint, "template": tpl_implem_rvv["min_max"]},
-   #         {"instr_name": "fmin", "datatypes": all_float, "template": tpl_implem_rvv["min_max"]},
-   #],
+   "min" : [
+            {"instr_name": "min", "datatypes": all_int, "template": tpl_implem_rvv["arith_2args"]},
+            {"instr_name": "minu", "datatypes": all_uint, "template": tpl_implem_rvv["arith_2args"]},
+            {"instr_name": "fmin", "datatypes": all_float, "template": tpl_implem_rvv["arith_2args"]},
+   ],
+   
+   "max" : [
+            {"instr_name": "max", "datatypes": all_int, "template": tpl_implem_rvv["arith_2args"]},
+            {"instr_name": "maxu", "datatypes": all_uint, "template": tpl_implem_rvv["arith_2args"]},
+            {"instr_name": "fmax", "datatypes": all_float, "template": tpl_implem_rvv["arith_2args"]},
+   ],
 }
