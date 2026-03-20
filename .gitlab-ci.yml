@@ -69,8 +69,7 @@ build-generic:
   parallel:
     matrix:
       - OS: [linux]
-        # ARCH: [sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2, avx2-fma, avx512f, avx512bw]
-        ARCH: [sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2, avx2-fma]
+        ARCH: [sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2, avx2-fma, avx512f, avx512bw]
         COMPILER: ["g++-14", "clang++-20"]
   tags:
     - $OS
@@ -126,9 +125,6 @@ build-generic:
 
 # TESTS ---------------------------------------------------------------------------------------------------------------
 
-# Impossible to use matrices variables in "needs" => this is why we wait for all the builds before to start the tests.
-# See the following post:
-# https://stackoverflow.com/questions/77144529/defining-one-to-one-dependencies-between-multiple-parallel-matrix-jobs-in-gitlab
 test-generic:
   image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_mipp:latest
   stage: test
@@ -136,8 +132,7 @@ test-generic:
   parallel:
     matrix:
       - OS: [linux]
-        # ARCH: [sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2, avx2-fma, avx512f, avx512bw]
-        ARCH: [sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2, avx2-fma]
+        ARCH: [sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2, avx2-fma, avx512f, avx512bw]
         COMPILER: ["g++-14", "clang++-20"]
   tags:
     - $OS
@@ -146,6 +141,11 @@ test-generic:
   needs:
     - job: build-generic
       artifacts: true
+      parallel:
+        matrix:
+          - OS: ['$[[ matrix.OS ]]']
+            ARCH: ['$[[ matrix.ARCH ]]']
+            COMPILER: ['$[[ matrix.COMPILER ]]']
   script:
     - echo "Debug -- Job=$CI_NODE_INDEX/$CI_NODE_TOTAL"
     - echo "Debug -- OS=$OS"
