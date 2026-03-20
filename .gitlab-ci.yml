@@ -124,7 +124,7 @@ build-generic:
       fi
       export THREADS
     fi
-  # define the real compiler executable name (because we compile en C++ and not in C)
+  # define the real compiler executable name (because we compile in C++ and not in C)
   - |
     case "$COMPILER" in
       gcc-14)
