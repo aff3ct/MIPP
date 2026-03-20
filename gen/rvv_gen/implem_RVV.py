@@ -145,6 +145,8 @@ tpl_implem_rvv = {
         ret.r = {{ isa.prefix }}_vfcvt_f_xu_v_{{isa_dt_par.data_ext}}(tmp, %N<tp>%);
         return ret;
     """},
+    
+    "testz_2" : {"format": "short", "code": "   int32_t res = !({{isa.prefix}}_v{{instr_name}}_m_{{isa_dt_par.data_ext_msk}}(m0.m, %N<tp>%));"}
 }
 
 """
@@ -265,4 +267,6 @@ implems_rvv = {
            {"instr_name" : "xor", "datatypes" : all_int_uint, "template" : tpl_implem_rvv["scalar_notb"]},
            {"instr_name" : "xor", "datatypes" : all_float, "template" : tpl_implem_rvv["float_notb"]},      
    ],   
+   
+   "testz_2" : [{"instr_name" : "cpop", "datatypes" : all_datatypes, "template" : tpl_implem_rvv["testz_2"]}],
 }

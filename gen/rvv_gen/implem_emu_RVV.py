@@ -215,6 +215,10 @@ tpl_implem_emu_rvv = {
         ret.m = {{isa.prefix}}_v{{instr_name}}_mm_{{isa_dt_par.data_ext_msk}}(ret.m,m0.m, %N<tp>%);
         return ret;
    """},
+    
+    "testz":{"format":"long", "code": """
+        return %testz_2<tp>%(m0) && %testz_2<tp>%(m1);
+    """},
 }
 
 implems_emu_rvv = {
@@ -294,7 +298,9 @@ implems_emu_rvv = {
         {"instr_name": "fredmax", "datatypes": [float64], "template": tpl_implem_emu_rvv["hmax_float64"]},
    ],
    
-    "notb_k" : [{"instr_name" : "morn", "datatypes" : all_datatypes, "template" : tpl_implem_emu_rvv["notb_k"]}],
+   "notb_k" : [{"instr_name" : "morn", "datatypes" : all_datatypes, "template" : tpl_implem_emu_rvv["notb_k"]}],
+   
+   #pourquoi testz_2?
+   "testz" : [{"instr_name" : "cpop", "datatypes" : all_datatypes, "template" : tpl_implem_emu_rvv["testz"]}],
 
-    
 }
