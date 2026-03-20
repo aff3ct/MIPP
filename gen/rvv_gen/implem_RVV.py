@@ -136,11 +136,7 @@ tpl_implem_rvv = {
     "scalar_getfirst":{"format":"short", "code": "{{isa_dt_par.to_ptr}} res = {{ isa.prefix }}_v{{ instr_name }}_x_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(r0.r);"},
     "float_getfirst":{"format":"short", "code": "{{isa_dt_par.to_ptr}} res = {{ isa.prefix }}_v{{ instr_name }}_f_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(r0.r);"},
 
-    "reduction":{"format" : "long", "code":"""
-                %r<tp>% ret = %set1<tp>%(0);
-                ret.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.data_ext}}(r0.r,ret.r,%N<tp>%);
-                return ret;
-    """}
+   
 }
 
 """
@@ -245,8 +241,9 @@ implems_rvv = {
     
     #"maskst":[{ "instr_name": "maskload", "datatypes": all_datatypes, "template": tpl_implem_rvv["maskst"] }],
 
-   "hadd" : [
-        {"instr_name": "redsum", "datatypes": all_int_uint, "template": tpl_implem_rvv["reduction"]},
-        {"instr_name": "fredosum", "datatypes": all_float, "template": tpl_implem_rvv["reduction"]},
-   ],
+   #"min" : [
+   #         {"instr_name": "min", "datatypes": all_int, "template": tpl_implem_rvv["min_max"]},
+   #         {"instr_name": "minu", "datatypes": all_uint, "template": tpl_implem_rvv["min_max"]},
+   #         {"instr_name": "fmin", "datatypes": all_float, "template": tpl_implem_rvv["min_max"]},
+   #],
 }

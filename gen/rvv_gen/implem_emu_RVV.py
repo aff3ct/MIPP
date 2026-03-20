@@ -158,7 +158,56 @@ tpl_implem_emu_rvv = {
         %r<tp>% ret = %set1<tp>%(0);
         ret.r = {{ isa.prefix }}_vle{{ isa_dt_par.data_ext_logi }}_v_{{ isa_dt_par.data_ext }}_mu(m0.m,ret.r,({{isa_dt_par.to_ptr}}*)p0, %N<tp>%);
         return ret;
-    """},    
+    """},  
+    
+     #suitable for hadd and hmax on unsigned ints
+    "hadd_hmax_uint":{"format" : "long", "code":"""
+                %r<tp>% ret = %set1<tp>%(0);
+                ret.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.data_ext}}(r0.r,ret.r,%N<tp>%);
+                return ret;
+    """},
+    
+    "hmax_int":{"format" : "long", "code":"""
+                %r<tp>% ret = %set1<tp>%(INT{{isa_dt_par.data_ext_logi}}_MIN);
+                ret.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.data_ext}}(r0.r,ret.r,%N<tp>%);
+                return ret;
+    """},
+    
+    "hmax_float32":{"format" : "long", "code":"""
+                %r<tp>% ret = %set1<tp>%(FLT_MIN);
+                ret.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.data_ext}}(r0.r,ret.r,%N<tp>%);
+                return ret;
+    """},
+    
+    "hmax_float64":{"format" : "long", "code":"""
+                %r<tp>% ret = %set1<tp>%(DBL_MIN);
+                ret.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.data_ext}}(r0.r,ret.r,%N<tp>%);
+                return ret;
+    """},
+    
+    "hmin_int":{"format" : "long", "code":"""
+                %r<tp>% ret = %set1<tp>%(INT{{isa_dt_par.data_ext_logi}}_MAX);
+                ret.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.data_ext}}(r0.r,ret.r,%N<tp>%);
+                return ret;
+    """},
+    
+    "hmin_uint":{"format" : "long", "code":"""
+                %r<tp>% ret = %set1<tp>%(UINT{{isa_dt_par.data_ext_logi}}_MAX);
+                ret.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.data_ext}}(r0.r,ret.r,%N<tp>%);
+                return ret;
+    """},
+    
+    "hmin_float32":{"format" : "long", "code":"""
+                %r<tp>% ret = %set1<tp>%(FLT_MAX);
+                ret.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.data_ext}}(r0.r,ret.r,%N<tp>%);
+                return ret;
+    """},
+    
+    "hmin_float64":{"format" : "long", "code":"""
+                %r<tp>% ret = %set1<tp>%(DBL_MAX);
+                ret.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.data_ext}}(r0.r,ret.r,%N<tp>%);
+                return ret;
+    """},  
 }
 
 implems_emu_rvv = {
@@ -209,5 +258,33 @@ implems_emu_rvv = {
 	#    { "instr_name": "maskload", "datatypes": all_float, "template": tpl_implem_emu_rvv["maskzld"] },
 	#	{ "instr_name": "maskload", "datatypes": all_int_uint, "template": tpl_implem_emu_rvv["maskzld"]}
     #],
+    
+    "hadd" : [
+        {"instr_name": "redsum", "datatypes": all_int_uint, "template": tpl_implem_emu_rvv["hadd_hmax_uint"]},
+        #I could use fredusum for unordered sum as well.
+        {"instr_name": "fredosum", "datatypes": all_float, "template": tpl_implem_emu_rvv["hadd_hmax_uint"]},
+   ],
+   
+   #redmul does not exist in rvv :((((
+   #"hmul":
+           
+   #can't use same template bc I need min value / max value for the types....
+   "hmin":[
+        {"instr_name": "redmin", "datatypes": all_int, "template": tpl_implem_emu_rvv["hmin_int"]},
+        {"instr_name": "redminu", "datatypes": all_uint, "template": tpl_implem_emu_rvv["hmin_uint"]},
+
+
+        {"instr_name": "fredmin", "datatypes": [float32], "template": tpl_implem_emu_rvv["hmin_float32"]},
+        {"instr_name": "fredmin", "datatypes": [float64], "template": tpl_implem_emu_rvv["hmin_float64"]},
+
+   ],
+   "hmax":[
+        {"instr_name": "redmax", "datatypes": all_int, "template": tpl_implem_emu_rvv["hmax_int"]},
+ 
+        {"instr_name": "redmaxu", "datatypes": all_uint, "template": tpl_implem_emu_rvv["hadd_hmax_uint"]},
+        
+        {"instr_name": "fredmax", "datatypes": [float32], "template": tpl_implem_emu_rvv["hmax_float32"]},
+        {"instr_name": "fredmax", "datatypes": [float64], "template": tpl_implem_emu_rvv["hmax_float64"]},
+   ],
     
 }
