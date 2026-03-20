@@ -81,12 +81,6 @@ build-generic:
     paths:
       - ./tests/build_${OS}_${COMPILER}_${ARCH}/bin/
   rules:
-    - if: '$COMPILER == "gcc-14"'
-      variables:
-        COMPILER_EXE: "g++-14"
-    - if: '$COMPILER == "clang-20"'
-      variables:
-        COMPILER_EXE: "clang++-20"
     - if: '$ARCH == "sse2"'
       variables:
         SIMD_EXT: "-msse2"
@@ -117,6 +111,20 @@ build-generic:
     - if: '$ARCH == "avx512bw"'
       variables:
         SIMD_EXT: "-mavx512f -mavx512bw"
+  before_script:
+  - |
+    case "$COMPILER" in
+      gcc-14)
+        export COMPILER_EXE="g++-14"
+        ;;
+      clang-20)
+        export COMPILER_EXE="clang++-20"
+        ;;
+      *)
+        echo "Unknown value of COMPILER: $COMPILER"
+        exit 1
+        ;;
+    esac
   script:
     - echo "Debug -- Job=$CI_NODE_INDEX/$CI_NODE_TOTAL"
     - echo "Debug -- OS=$OS"
