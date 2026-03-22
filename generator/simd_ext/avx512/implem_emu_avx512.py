@@ -18,7 +18,7 @@ tpl_implem_emu_avx512 = {
 """// long format
 	%r<c:int|b:tp>% r0_32 = %set1<c:int|b:tp>%(v0 ? 0xFFFFFFFFFFFFFFFF : 0);
 	%r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%(     0xFFFFFFFFFFFFFFFF    );
-	return = %cmpneq<c:int|b:tp>%(r0_32, r1_32);""" },
+	return %cmpneq<c:int|b:tp>%(r0_32, r1_32);""" },
     "set1_k-16": { "format": "long", "code":
 """// long format
 	%r<c:int|b:tp>% r0_32 = %set1<c:int|b:tp>%(v0 ? 0xFFFFFFFF : 0);
@@ -201,10 +201,10 @@ implems_emu_avx512 = {
     "tomsk": [
         { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["tomsk"]                                                                                 } ], # tomsk
     "set1_k":[
-        { "datatypes": [int8],                       "template": tpl_implem_emu_avx512["set1_k-8"]                                                                              },
-        { "datatypes": [int16] ,                     "template": tpl_implem_emu_avx512["set1_k-16"]                                                                             },
-        { "datatypes": [int32] ,                     "template": tpl_implem_emu_avx512["set1_k-32"]                                                                             },
-        { "datatypes": [int64] ,                     "template": tpl_implem_emu_avx512["set1_k-64"]                                                                             } ], # set1_k
+        { "datatypes": [int64],                      "template": tpl_implem_emu_avx512["set1_k-8"]                                                                              },
+        { "datatypes": [int32],                      "template": tpl_implem_emu_avx512["set1_k-16"]                                                                             },
+        { "datatypes": [int16],                      "template": tpl_implem_emu_avx512["set1_k-32"]                                                                             },
+        { "datatypes": [int8],                       "template": tpl_implem_emu_avx512["set1_k-64"]                                                                             } ], # set1_k
     "set_k" : [
         { "datatypes": [int64],                      "template": tpl_implem_emu_avx512["set_k-64"],                                                                             },
         { "datatypes": [int32],                      "template": tpl_implem_emu_avx512["set_k-32"],                                                                             },
