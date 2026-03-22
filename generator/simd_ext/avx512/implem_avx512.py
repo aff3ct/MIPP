@@ -23,7 +23,7 @@ isa_avx512 = {
 
 tpl_implem_avx512 = {
     "cast"                : { "format": "short", "code":"{% if isa_dt_par.data_ext_logi != isa_dt_ret.data_ext_logi -%}{{ isa.prefix }}_{{ instr_name }}{{isa_dt_par.data_ext_logi}}_{{isa_dt_ret.data_ext_logi}}(r0.r);{% else -%} r0.r;{% endif %}" },
-    "cast_k"              : { "format": "short", "code":"{% if isa_dt_par.data_ext_logi != isa_dt_ret.data_ext_logi -%}res.m = ({{ isa_dt_ret.msk }})m0.m;{% else -%}res.m = m0.m;{% endif %}"},
+    "cast_k"              : { "format": "short", "code":"{% if isa_dt_par.msk != isa_dt_ret.msk -%}res.m = ({{ isa_dt_ret.msk }})m0.m;{% else -%}res.m = m0.m;{% endif %}"},
 #     "cast_k"              : { "format": "long", "code":
 # """ %m<tr>% res;
 #     {% if isa_dt_par.data_ext_logi != isa_dt_ret.data_ext_logi -%}res.m = ({{ isa_dt_ret.msk }})m0.m;{% else -%}res.m = m0.m;{% endif %}
