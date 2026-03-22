@@ -16,22 +16,22 @@ tpl_implem_emu_avx512 = {
 	return res;""" },
     "set1_k-8": { "format": "long", "code":
 """// long format
-	%r<c:int|b:tp>% r0_32 = %set1<c:int|b:tp>%(r0 ? 0xFFFFFFFFFFFFFFFF : 0);
+	%r<c:int|b:tp>% r0_32 = %set1<c:int|b:tp>%(v0 ? 0xFFFFFFFFFFFFFFFF : 0);
 	%r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%(     0xFFFFFFFFFFFFFFFF    );
 	return = %cmpneq<c:int|b:tp>%(r0_32, r1_32);""" },
     "set1_k-16": { "format": "long", "code":
 """// long format
-	%r<c:int|b:tp>% r0_32 = %set1<c:int|b:tp>%(r0 ? 0xFFFFFFFF : 0);
+	%r<c:int|b:tp>% r0_32 = %set1<c:int|b:tp>%(v0 ? 0xFFFFFFFF : 0);
 	%r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%(     0xFFFFFFFF    );
 	return %cmpneq<c:int|b:tp>%(r0_32, r1_32);""" },
     "set1_k-32": { "format": "long", "code":
 """// long format
-	%r<c:int|b:tp>% r0_32 = %set1<c:int|b:tp>%(r0 ? 0xFFFF : 0);
+	%r<c:int|b:tp>% r0_32 = %set1<c:int|b:tp>%(v0 ? 0xFFFF : 0);
 	%r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%(     0xFFFF    );
 	return %cmpneq<c:int|b:tp>%(r0_32, r1_32);""" },
     "set1_k-64": { "format": "long", "code":
 """// long format
-	%r<c:int|b:tp>% r0_32 = %set1<c:int|b:tp>%(r0 ? 0xFF : 0);
+	%r<c:int|b:tp>% r0_32 = %set1<c:int|b:tp>%(v0 ? 0xFF : 0);
 	%r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%( 0xFF    );
 	return %cmpneq<c:int|b:tp>%(r0_32, r1_32); """ },
     "set_k-64": { "format": "long", "code":
@@ -45,7 +45,7 @@ tpl_implem_emu_avx512 = {
 		(int64_t)(vals[5] ? 0xFFFFFFFFFFFFFFFF : 0),
 		(int64_t)(vals[6] ? 0xFFFFFFFFFFFFFFFF : 0),
 		(int64_t)(vals[7] ? 0xFFFFFFFFFFFFFFFF : 0) };
-	%r<c:int|b:tp>% r0_32 = %set<c:int|b:tp>%(*t);
+	%r<c:int|b:tp>% r0_32 = %set<c:int|b:tp>%(t);
 	%r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%(0xFFFFFFFFFFFFFFFF);
 	return %cmpneq<c:int|b:tp>%(r0_32, r1_32);""" },
     "set_k-32": { "format": "long", "code":
@@ -59,7 +59,7 @@ tpl_implem_emu_avx512 = {
 		(int32_t)(vals[10] ? 0xFFFFFFFF : 0), (int32_t)(vals[11] ? 0xFFFFFFFF : 0),
 		(int32_t)(vals[12] ? 0xFFFFFFFF : 0), (int32_t)(vals[13] ? 0xFFFFFFFF : 0),
 		(int32_t)(vals[14] ? 0xFFFFFFFF : 0), (int32_t)(vals[15] ? 0xFFFFFFFF : 0) };
-	%r<c:int|b:tp>% r0_32 = %set<c:int|b:tp>%(*t);
+	%r<c:int|b:tp>% r0_32 = %set<c:int|b:tp>%(t);
 	%r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%(0xFFFFFFFF);
 	return %cmpneq<c:int|b:tp>%(r0_32, r1_32);""" },
     "set_k-16": { "format": "long", "code":
@@ -81,7 +81,7 @@ tpl_implem_emu_avx512 = {
 		(int16_t)(vals[26] ? 0xFFFF : 0), (int16_t)(vals[27] ? 0xFFFF : 0),
 		(int16_t)(vals[28] ? 0xFFFF : 0), (int16_t)(vals[29] ? 0xFFFF : 0),
 		(int16_t)(vals[30] ? 0xFFFF : 0), (int16_t)(vals[31] ? 0xFFFF : 0) };
-	%r<c:int|b:tp>% r0_32 = %set<c:int|b:tp>%(*t);
+	%r<c:int|b:tp>% r0_32 = %set<c:int|b:tp>%(t);
 	%r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%(0xFFFF);
 	return %cmpneq<c:int|b:tp>%(r0_32, r1_32);""" },
     "set_k-8": {"format": "long", "code":
@@ -99,7 +99,7 @@ tpl_implem_emu_avx512 = {
 		(int8_t)(vals[36] ? 0xFF : 0), (int8_t)(vals[37] ? 0xFF : 0), (int8_t)(vals[38] ? 0xFF : 0), (int8_t)(vals[39] ? 0xFF : 0),
 		(int8_t)(vals[40] ? 0xFF : 0), (int8_t)(vals[41] ? 0xFF : 0), (int8_t)(vals[42] ? 0xFF : 0), (int8_t)(vals[43] ? 0xFF : 0),
 		(int8_t)(vals[44] ? 0xFF : 0), (int8_t)(vals[45] ? 0xFF : 0), (int8_t)(vals[46] ? 0xFF : 0), (int8_t)(vals[47] ? 0xFF : 0) };
-	%r<c:int|b:tp>% r0_32 = %set<c:int|b:tp>%(*t);
+	%r<c:int|b:tp>% r0_32 = %set<c:int|b:tp>%(t);
 	%r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%(0xFF);
 	return %cmpneq<c:int|b:tp>%(r0_32, r1_32);""" },
     "andb_k" : { "format": "long",  "code":
