@@ -107,7 +107,6 @@ def gen_c_functions(isa, file, funcs, implems):
 								funcs[f]["implem_status"][dt_key][len(funcs[f]["implem_status"][dt_key])-1]["if"] = ifd
 
 						if len(dt.split(',')) <= 1:
-
 							func_name = build_func_name_short(isa, dt_par, f,True);
 
 						else:
@@ -121,22 +120,22 @@ def gen_c_functions(isa, file, funcs, implems):
 								# Toreg 
 								if funcs[f]["proto"]["ret"]["type"] == "reg":
 									print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file)
-									print("\tres.r= ", end='', file=file)
+									print("\tres.r = ", end='', file=file)
 
 								# Tomsk
 								elif (funcs[f]["proto"]["ret"]["type"] == "msk"):
 									print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file);
-									print("\tres.m= ", end='', file=file)
+									print("\tres.m = ", end='', file=file)
 
 							#Other functions
 							else:
 								if (funcs[f]["proto"]["ret"]["type"] == "reg"):
 										print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file);
-										print("\tres.r= ", end='', file=file)
+										print("\tres.r = ", end='', file=file)
 
 								elif (funcs[f]["proto"]["ret"]["type"] == "msk"):
 										print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file);
-										print("\tres.m= ", end='', file=file) 
+										print("\tres.m = ", end='', file=file)
 						
 						else:
 							print("\t", end='', file=file)
