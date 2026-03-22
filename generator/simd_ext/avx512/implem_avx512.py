@@ -167,7 +167,7 @@ implems_avx512 = {
         { "instr_name": "cvtsd_f64",  "datatypes": [float64],                    "template": tpl_implem_avx512["getfirst"]                                                                                                      },
         { "instr_name": "cvtss_f32",  "datatypes": [float32],                    "template": tpl_implem_avx512["getfirst"]                                                                                                      } ], # getfirst
     "set1"   : [
-        { "instr_name": "set1",       "datatypes": all_datatypes,                "template": tpl_implem_avx512["set1"]                                                                                                          } ], # set1
+        { "instr_name": "set1",       "datatypes": all_float + all_int,          "template": tpl_implem_avx512["set1"]                                                                                                          } ], # set1
     "set0"   : [
         { "instr_name": "setzero",    "datatypes": all_datatypes,                "template": tpl_implem_avx512["set0"]                                                                                                          } ], # set0
     "set0_k": [
