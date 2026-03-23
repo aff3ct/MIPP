@@ -1,5 +1,52 @@
 
 from tools import *
+
+
+
+#this is used for casts. RVV intrinsic to not define widening/narrowing casts for floating types. 
+#i.e no f32->f64, f32->i8, u16->f64 etc.
+datatypes_int_float_cart_prod = [
+    "int8,float32", "int16,float32", "int64,float32",
+    "int8,float64","int16,float64", "int32,float64"
+]
+datatypes_uint_float_cart_prod = [
+    "uint8,float32", "uint16,float32", "uint64,float32",
+    "uint8,float64","uint16,float64", "uint32,float64"
+]
+
+
+datatypes_float_float_cart_prod = ["float64,float32", "float32,float64"]
+datatypes_float_int_cart_prod = [
+    "float32,int8", "float32,int16", "float32,int64", 
+    "float64,int8", "float64,int16", "float64,int32"
+]
+datatypes_float_uint_cart_prod = [
+    "float32,uint8", "float32,uint16", "float32,uint64", 
+    "float64,uint8", "float64,uint16", "float64,uint32"
+]
+
+datatypes_int_uint_cart_prod = [
+    "int8,uint16", "int8,uint32", "int8,uint64", 
+    "int16,uint8", "int16,uint32", "int16,uint64",
+    "int32,uint16", "int32,uint8", "int32,uint64", 
+    "int64,uint16", "int64,uint32", "int64,uint8"
+]
+datatypes_uint_int_cart_prod = [
+    "uint16,int8", "uint32,int8", "uint64,int8",
+    "uint8,int16", "uint32,int16", "uint64,int16",
+    "uint16,int32", "uint8,int32", "uint64,int32",
+    "uint16,int64", "uint32,int64", "uint8,int64",
+]
+datatypes_intuint_float_cart_prod = datatypes_int_float_cart_prod + datatypes_uint_float_cart_prod
+datatypes_float_intuint_cart_prod = datatypes_float_int_cart_prod + datatypes_float_uint_cart_prod
+
+datatypes_intuint_cart_prod = datatypes_uint_int_cart_prod + datatypes_int_uint_cart_prod
+
+datatypes_problematic_cart_prod = datatypes_intuint_float_cart_prod + datatypes_float_intuint_cart_prod  + datatypes_intuint_cart_prod + datatypes_float_float_cart_prod
+
+datatypes_unproblematic_cart_prod =  list(filter(lambda x : x not in datatypes_problematic_cart_prod, all_datatypes_cart_prod))
+
+
 tpl_implem_emu_rvv = {
     "loadu" : { "format": "long", "code": """
         if ((((uint64_t)p0) & (8 - 1)) == 0) {
@@ -247,6 +294,50 @@ tpl_implem_emu_rvv = {
     //return {{isa.prefix}}_vfmv_f_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(tmp.r);
     return tmp;
     """},
+    
+    "hadd_to_scal": {"format": "long", "code":"""
+    %r<tp>% tmp = %hadd<tp>%(r0);
+    return {{isa.prefix}}_{{instr_name}}_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(tmp.r);
+    """},
+    
+    #generic cast for "unproblematic" i.e single intrinsic casts
+    "cast":{ "format": "short", "code": "{% if isa_dt_par.data_ext != isa_dt_ret.data_ext -%} {{ isa.prefix }}_{{ instr_name }}_v_{{isa_dt_par.data_ext}}_{{isa_dt_ret.data_ext}}(r0.r);{% else -%} r0.r;{% endif %}"},
+    
+    #cast float->other
+    "cast_float_other" : { "format" : "long", "code":"""
+    %r<c:int|b:tp>% rint = %cast<tp,c:int|b:tp>%(r0); 
+    %r<c:int|b:tr>% rint2 = %cast<c:int|b:tp,c:int|b:tr>%(rint);
+    
+    return %cast<c:int|b:tr,tr>%(rint2);            
+    """},
+
+    #used for int to float, int to uint, uint to int
+    "cast_intuint_other" : { "format" : "long", "code":"""
+    %r<c:tp|b:tr>% r1 = %cast<c:tp|b:tp,c:tp|b:tr>%(r0);
+    return %cast<c:tp|b:tr,c:tr|b:tr>%(r1);
+    """},
+    
+    "tomsk" : {"format" : "long", "code" : """       
+    %r<tp>% r1 = %set1<tp>%(0); 
+    return %cmpneq<tp>%(r1,r0);
+    """},
+    
+    "msb-64": { "format": "long", "code":
+"""	%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%(0x8000000000000000));
+	return %andb<tp>%(r0, rm);"""
+	},
+	"msb-32": { "format": "long", "code":
+"""	%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%(0x80000000));
+	return %andb<tp>%(r0, rm);"""
+	},
+	"msb-16": { "format": "long", "code":
+"""	%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%(0x8000));
+	return %andb<tp>%(r0, rm);"""
+	},
+	"msb-8": { "format": "long", "code":
+"""	%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%(0x80));
+	return %andb<tp>%(r0, rm);"""
+	},
 }
 
 implems_emu_rvv = {
@@ -302,7 +393,7 @@ implems_emu_rvv = {
         {"instr_name": "redsum", "datatypes": all_int_uint, "template": tpl_implem_emu_rvv["hadd_hmax_uint"]},
         #I could use fredusum for unordered sum as well.
         {"instr_name": "fredosum", "datatypes": all_float, "template": tpl_implem_emu_rvv["hadd_hmax_uint"]},
-   ],
+    ],
    
    #redmul does not exist in rvv :((((
    #"hmul":
@@ -334,5 +425,29 @@ implems_emu_rvv = {
        {"instr_name" : "vmul", "datatypes" : all_int_uint, "template" : tpl_implem_emu_rvv["hmul_int_uint"]},
        {"instr_name" : "vfmul", "datatypes" : all_float, "template" : tpl_implem_emu_rvv["hmul_float"]},
     
-    ]
+    ],
+   
+   "hadd_to_scal" : [
+       {"instr_name" : "vmv_x", "datatypes" : all_int_uint, "template" : tpl_implem_emu_rvv["hadd_to_scal"]},
+       {"instr_name" : "vfmv_f", "datatypes" : all_float, "template" : tpl_implem_emu_rvv["hadd_to_scal"]},
+   ],
+   
+   "cast" : [
+       {"instr_name" : "vreinterpret", "datatypes" : datatypes_unproblematic_cart_prod, "template" : tpl_implem_emu_rvv["cast"]},
+       {"instr_name": "vreinterpret", "datatypes" : datatypes_intuint_float_cart_prod, "template" : tpl_implem_emu_rvv["cast_intuint_other"]},
+       {"instr_name": "vreinterpret", "datatypes" : datatypes_intuint_cart_prod, "template" : tpl_implem_emu_rvv["cast_intuint_other"]},
+       {"instr_name": "vreinterpret", "datatypes" : datatypes_float_float_cart_prod, "template" : tpl_implem_emu_rvv["cast_float_other"]},
+       {"instr_name": "vreinterpret", "datatypes" : datatypes_float_intuint_cart_prod, "template" : tpl_implem_emu_rvv["cast_float_other"]},
+
+   ],
+    
+   "tomsk"  : [{"instr_name": "tomsk", "datatypes": all_datatypes, "template" : tpl_implem_emu_rvv["tomsk"]}],   
+
+    #from avx2
+    
+    "msb": [
+		{ "datatypes": [float64, int64, uint64], "template": tpl_implem_emu_rvv["msb-64"] },
+		{ "datatypes": [float32, int32, uint32], "template": tpl_implem_emu_rvv["msb-32"] },
+		{ "datatypes": [int16, uint16], "template": tpl_implem_emu_rvv["msb-16"] },
+		{ "datatypes": [int8, uint8], "template": tpl_implem_emu_rvv["msb-8"] }, ],
 }
