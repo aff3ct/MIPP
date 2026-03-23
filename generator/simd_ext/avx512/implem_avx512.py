@@ -294,36 +294,36 @@ implems_avx512 = {
     "fmsub": [
         { "instr_name": "fmsub",      "datatypes": all_float,                    "template": tpl_implem_avx512["arith_3args"]                                                                                                   } ], # fmsub
     "notb_k": [
-        { "instr_name": "knot",       "datatypes": [float64, int64, uint64],     "template": tpl_implem_avx512["bitwise_1arg"]                                                                                                    },
-        { "instr_name": "knot",       "datatypes": [float32, int32, uint32],     "template": tpl_implem_avx512["bitwise_1arg"]                                                                                                   },
+        { "instr_name": "knot",       "datatypes": [float64, int64, uint64],     "template": tpl_implem_avx512["bitwise_1arg"]                                                                                                  },
+        { "instr_name": "knot",       "datatypes": [float32, int32, uint32],     "template": tpl_implem_avx512["bitwise_1arg"]                                                                                                  },
         { "instr_name": "knot",       "datatypes": [int16, uint16],              "template": tpl_implem_avx512["bitwise_1arg"],   "if": "defined(__AVX512BW__)"                                                                 },
         { "instr_name": "knot",       "datatypes": [int8, uint8],                "template": tpl_implem_avx512["bitwise_1arg"],   "if": "defined(__AVX512BW__)"                                                                 } ], # notb_k
     "andb": [
         { "instr_name": "and",        "datatypes": all_datatypes,                "template": tpl_implem_avx512["logi_2args"]                                                                                                    } ], # andb
     "andb_k": [
-        { "instr_name": "kand",       "datatypes": [float64, int64, uint64],     "template": tpl_implem_avx512["bitwise_2args"]                                                                                                   },
-        { "instr_name": "kand",       "datatypes": [float32, int32, uint32],     "template": tpl_implem_avx512["bitwise_2args"]                                                                                                  },
+        { "instr_name": "kand",       "datatypes": [float64, int64, uint64],     "template": tpl_implem_avx512["bitwise_2args"]                                                                                                 },
+        { "instr_name": "kand",       "datatypes": [float32, int32, uint32],     "template": tpl_implem_avx512["bitwise_2args"]                                                                                                 },
         { "instr_name": "kand",       "datatypes": [int16, uint16],              "template": tpl_implem_avx512["bitwise_2args"],  "if": "defined(__AVX512BW__)"                                                                 },
         { "instr_name": "kand",       "datatypes": [int8, uint8],                "template": tpl_implem_avx512["bitwise_2args"],  "if": "defined(__AVX512BW__)"                                                                 } ], # andb_k
     "andnb": [
         { "instr_name": "andnot",     "datatypes": all_datatypes,                "template": tpl_implem_avx512["logi_2args"]                                                                                                    } ], # andnb
     "andnb_k": [
-        { "instr_name": "kandn",      "datatypes": [float64, int64, uint64],     "template": tpl_implem_avx512["bitwise_2args"]                                                                                                   },
-        { "instr_name": "kandn",      "datatypes": [float32, int32, uint32],     "template": tpl_implem_avx512["bitwise_2args"]                                                                                                  },
+        { "instr_name": "kandn",      "datatypes": [float64, int64, uint64],     "template": tpl_implem_avx512["bitwise_2args"]                                                                                                 },
+        { "instr_name": "kandn",      "datatypes": [float32, int32, uint32],     "template": tpl_implem_avx512["bitwise_2args"]                                                                                                 },
         { "instr_name": "kandn",      "datatypes": [int16, uint16],              "template": tpl_implem_avx512["bitwise_2args"],  "if": "defined(__AVX512BW__)"                                                                 },
         { "instr_name": "kandn",      "datatypes": [int8, uint8],                "template": tpl_implem_avx512["bitwise_2args"],  "if": "defined(__AVX512BW__)"                                                                 } ], # kandn
     "xorb": [
         { "instr_name": "xor",        "datatypes": all_datatypes,                "template": tpl_implem_avx512["logi_2args"]                                                                                                    } ], # xorb
     "xorb_k": [
-        { "instr_name": "kxor",       "datatypes": [float64, int64, uint64],     "template": tpl_implem_avx512["bitwise_2args"]                                                                                                   },
-        { "instr_name": "kxor",       "datatypes": [float32, int32, uint32],     "template": tpl_implem_avx512["bitwise_2args"]                                                                                                  },
+        { "instr_name": "kxor",       "datatypes": [float64, int64, uint64],     "template": tpl_implem_avx512["bitwise_2args"]                                                                                                 },
+        { "instr_name": "kxor",       "datatypes": [float32, int32, uint32],     "template": tpl_implem_avx512["bitwise_2args"]                                                                                                 },
         { "instr_name": "kxor",       "datatypes": [int16, uint16],              "template": tpl_implem_avx512["bitwise_2args"],  "if": "defined(__AVX512BW__)"                                                                 },
         { "instr_name": "kxor",       "datatypes": [int8, uint8],                "template": tpl_implem_avx512["bitwise_2args"],  "if": "defined(__AVX512BW__)"                                                                 } ], # xorb_k
     "orb": [
         { "instr_name": "or",         "datatypes": all_datatypes,                "template": tpl_implem_avx512["logi_2args"]                                                                                                    } ], # orb
     "orb_k": [
-        { "instr_name": "kor",        "datatypes": [float64, int64, uint64],     "template": tpl_implem_avx512["bitwise_2args"]                                                                                                   },
-        { "instr_name": "kor",        "datatypes": [float32, int32, uint32],     "template": tpl_implem_avx512["bitwise_2args"]                                                                                                  },
+        { "instr_name": "kor",        "datatypes": [float64, int64, uint64],     "template": tpl_implem_avx512["bitwise_2args"]                                                                                                 },
+        { "instr_name": "kor",        "datatypes": [float32, int32, uint32],     "template": tpl_implem_avx512["bitwise_2args"]                                                                                                 },
         { "instr_name": "kor",        "datatypes": [int16, uint16],              "template": tpl_implem_avx512["bitwise_2args"],  "if": "defined(__AVX512BW__)"                                                                 },
         { "instr_name": "kor",        "datatypes": [int8, uint8],                "template": tpl_implem_avx512["bitwise_2args"],  "if": "defined(__AVX512BW__)"                                                                 } ], # orb_k
     "testz": [
@@ -361,8 +361,8 @@ implems_avx512 = {
         { "instr_name": "cmpgt",      "datatypes": [int32, int64],               "template": tpl_implem_avx512["cmp_int"],                                                                                                      },
         { "instr_name": "cmpgt",      "datatypes": [int16, int8],                "template": tpl_implem_avx512["cmp_int"],        "if": "defined(__AVX512BW__)"                                                                 } ], # cmpgt
     "round": [
-        { "instr_name": "round",      "datatypes": all_float,                    "template": tpl_implem_avx512["roundf"],         "if":"defined(__MIC__) || defined(__KNCNI__)"                                                 },
-        { "instr_name": "roundscale", "datatypes": all_float,                    "template": tpl_implem_avx512["round"]                                                                                                         } ], # round
+        { "instr_name": "round",      "datatypes": all_float,                    "template": tpl_implem_avx512["roundf"],         "if": "defined(__MIC__) || defined(__KNCNI__)"                                                },
+        { "instr_name": "roundscale", "datatypes": all_float,                    "template": tpl_implem_avx512["round"],          "if": "defined(__AVX512F__)"                                                                  } ], # round
     "blend": [
         { "instr_name": "blend",      "datatypes": all_float + [int64, int32],   "template": tpl_implem_avx512["blend"],          "if": "defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)" },
         { "instr_name": "blend",      "datatypes": [int8, int16],                "template": tpl_implem_avx512["blend"],          "if": "defined(__AVX512BW__)"                                                                 } ], # blend
