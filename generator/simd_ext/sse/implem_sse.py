@@ -1,12 +1,12 @@
 from tools import *
 
-"""isa_sse" dictionary:
+"""
+"isa_sse" dictionary:
 
     -Purpose: This dictionary defines architectural characteristics specific to the "AVX" architecture.
     -Content: It includes detailed information about data types, their properties, and other specific details relevant to the AVX architecture. 
     -These details are essential for generating optimized SIMD instructions
 """
-
 isa_sse = {
     "name": "sse",
     "prefix": "_mm",
@@ -28,7 +28,8 @@ isa_sse = {
     },
 }
 
-"""tpl_implem_avx dictionary:
+"""
+"tpl_implem_avx" dictionary:
 
     -Purpose: This dictionary contains implementation models for various functions.
     -Use: During the generation phase, this dictionary is used to select the appropriate implementation model for a specific function.
@@ -272,7 +273,7 @@ implems_sse = {
     "cmpneq": [
         { "instr_name": "cmpneq",  "datatypes": [float32],               "template": tpl_implem_sse["compare"]                                                                      } ], # cmpneq
 #       { "instr_name": "cmpneq",  "datatypes": [float64],               "template": tpl_implem_sse["compare"],            "if": "defined(__SSE2__)"                                } ],
-# comment: add all int combinate not and equals for __SSE2__
+#       COMMENT: add all int combinate not and equals for __SSE2__
 #       { "instr_name": "cmpneq",  "datatypes": all_int,                 "template": tpl_implem_sse["not_cmpneq"],         "if": "defined(__SSE2__)"                                },
 #       { "instr_name": "cmpneq",  "datatypes": [int64],                 "template": tpl_implem_sse["compare"],            "if": "defined(__SSE4_1__)"                              } ],
     "cmplt": [

@@ -32,7 +32,7 @@ tpl_implem_emu_avx512 = {
     "set1_k-64": { "format": "long", "code":
 """// long format
 	%r<c:int|b:tp>% r0_32 = %set1<c:int|b:tp>%(v0 ? 0xFF : 0);
-	%r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%( 0xFF    );
+	%r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%(     0xFF    );
 	return %cmpneq<c:int|b:tp>%(r0_32, r1_32); """ },
     "set_k-64": { "format": "long", "code":
 """// long format
@@ -173,16 +173,16 @@ implems_emu_avx512 = {
         { "datatypes": [int32],                      "template": tpl_implem_emu_avx512["set_k-32"],                                                                             },
         { "datatypes": [int16],                      "template": tpl_implem_emu_avx512["set_k-16"],                                                                             },
         { "datatypes": [int8],                       "template": tpl_implem_emu_avx512["set_k-8"],                                                                              } ], # set_k
-    # "andb_k": [
-    #     { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["andb_k"],       "if": "defined(__AVX512BW__)"                                           } ], # andb_k
-    # "andnb_k": [
-    #     { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["andnb_k"],      "if": "defined(__AVX512BW__)"                                           } ], # andnb_k
-    # "xorb_k": [
-    #     { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["xorb_k"],       "if": "defined(__AVX512BW__)"                                           } ], # xorb_k
-    # "orb_k": [
-    #     { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["orb_k"],        "if": "defined(__AVX512BW__)"                                           } ], # orb_k
-    # "notb_k": [
-    #     { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["notb_k"]                                                                                } ], # notb_k
+#   "andb_k": [
+#       { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["andb_k"],       "if": "defined(__AVX512BW__)"                                           } ], # andb_k
+#   "andnb_k": [
+#       { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["andnb_k"],      "if": "defined(__AVX512BW__)"                                           } ], # andnb_k
+#   "xorb_k": [
+#       { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["xorb_k"],       "if": "defined(__AVX512BW__)"                                           } ], # xorb_k
+#   "orb_k": [
+#       { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["orb_k"],        "if": "defined(__AVX512BW__)"                                           } ], # orb_k
+#   "notb_k": [
+#       { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["notb_k"]                                                                                } ], # notb_k
     "msb": [
         { "datatypes": [float64, int64, uint64],     "template": tpl_implem_emu_avx512["msb-64"]                                                                                },
         { "datatypes": [float32, int32, uint32],     "template": tpl_implem_emu_avx512["msb-32"]                                                                                },

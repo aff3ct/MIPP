@@ -28,7 +28,7 @@ tpl_implem_avx512 = {
     "store":            { "format": "short", "code": "\t{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(({{ isa_dt_par.to_ptr }}*) p0, r0.r);" },
     "set0":             { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}();"},
     "set0_k":           { "format": "short", "code": "0;" },
-    # "low_k":            { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_msk }}();" },
+#   "low_k":            { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_msk }}();" },
     "set1":             { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(v0);"},
     "arith_1arg":       { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r);" },
     "arith_2args":      { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r);" },
@@ -258,10 +258,10 @@ implems_avx512 = {
         { "instr_name": "setzero",    "datatypes": all_datatypes,                "template": tpl_implem_avx512["set0"]                                                                                                          } ], # set0
     "set0_k": [
         { "instr_name": "setzero",    "datatypes": all_datatypes,                "template": tpl_implem_avx512["set0_k"]                                                                                                        } ], # set0_k
-    #"low_k": [
-    #    { "instr_name": "kunpackd",  "datatypes": [float64, int64],             "template": tpl_implem_avx512["low_k"]                                                                                                         },
-    #    { "instr_name": "kunpackw",  "datatypes": [float32, int32],             "template": tpl_implem_avx512["low_k"]                                                                                                         },
-    #    { "instr_name": "kunpackb",  "datatypes": [int16],                      "template": tpl_implem_avx512["low_k"]                                                                                                         } ], # low_k
+#   "low_k": [
+#       { "instr_name": "kunpackd",   "datatypes": [float64, int64],             "template": tpl_implem_avx512["low_k"]                                                                                                         },
+#       { "instr_name": "kunpackw",   "datatypes": [float32, int32],             "template": tpl_implem_avx512["low_k"]                                                                                                         },
+#       { "instr_name": "kunpackb",   "datatypes": [int16],                      "template": tpl_implem_avx512["low_k"]                                                                                                         } ], # low_k
     "sqrt": [
         { "instr_name": "sqrt",       "datatypes": all_float,                    "template": tpl_implem_avx512["arith_1arg"]                                                                                                    } ], # sqrt
     "rsqrt": [
