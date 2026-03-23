@@ -37,8 +37,6 @@ tpl_implem_avx512 = {
     "logi_m_2args":     { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}(m0.m, m1.m);" },
     "arith_3args":      { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, r2.r);" },
     "lshift":           { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, r2.r);" },
-    "bitwise_1arg":     { "format": "short", "code": "return (int32_t)_{{ instr_name }}_{{ isa_dt_par.msk_short }}(m0.m);" },
-    "bitwise_2args":    { "format": "short", "code": "return (int32_t)_{{ instr_name }}_{{ isa_dt_par.msk_short }}(m0.m, m1.m);" },
     "cmp_int":          { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(r0.r, r1.r);" },
     "cmpeq_float":      { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(r0.r, r1.r, _CMP_EQ_OQ);" },
     "cmpneq_float":     { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(r0.r, r1.r, _CMP_NEQ_OQ);" },
@@ -49,6 +47,8 @@ tpl_implem_avx512 = {
     "blend":            { "format": "short", "code": "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext }}(m0.m, r0.r, r1.r);" },
     "round":            { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, _MM_FROUND_TO_NEAREST_INT);" },
     "roundf":           { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC, _MM_EXPADJ_NONE);" },
+    "bitwise_1arg":     { "format": "short", "code": "_{{ instr_name }}_{{ isa_dt_par.msk_short }}(m0.m);" },
+    "bitwise_2args":    { "format": "short", "code": "_{{ instr_name }}_{{ isa_dt_par.msk_short }}(m0.m, m1.m);" },
     "testz_1arg":       { "format": "long",  "code": "return (int32_t)_{{ instr_name }}_{{ isa_dt_par.msk_short }}_u8(m0.m, m0.m);" },
     "testz_2args":      { "format": "long",  "code": "return (int32_t)_{{ instr_name }}_{{ isa_dt_par.msk_short }}_u8(m0.m, m1.m);" },
     "set-64": { "format": "long", "code":
