@@ -150,7 +150,7 @@ tpl_implem_emu_avx512 = {
     "getfirst_fromstore": { "format": "long", "code":
 """// long format
 	%v<tp>% tmp[%N<tp>%];
-	%store<tp>%(tmp, r);
+	%store<tp>%(tmp, r0);
 	return tmp[0];""" },
     "hadd_to_scal": { "format": "long", "code":
 """// long format

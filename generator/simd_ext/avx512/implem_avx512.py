@@ -105,6 +105,16 @@ tpl_implem_avx512 = {
     "getfirst": { "format": "long", "code":
 """// long format
 	return {{ isa.prefix }}_{{ instr_name }}(r0.r);""" },
+    "getfirst-hack64": { "format": "long", "code":
+"""// long format
+	float64_t tmp1 = {{ isa.prefix }}_{{ instr_name }}(%cast<tp,c:float>%(r0).r);
+	void* tmp2 = (void*)(&tmp1);
+	return *({{isa_dt_ret.to_ptr}}*)tmp2;""" },
+    "getfirst-hack32": { "format": "long", "code":
+"""// long format
+	float32_t tmp1 = {{ isa.prefix }}_{{ instr_name }}(%cast<tp,c:float>%(r0).r);
+	void* tmp2 = (void*)(&tmp1);
+	return *({{isa_dt_ret.to_ptr}}*)tmp2;""" },
     "reduce_64": { "format": "long", "code":
 """// long format
 	%r<c:float|b:32>% rsf;
@@ -239,7 +249,9 @@ implems_avx512 = {
         { "instr_name": "storeu",     "datatypes": all_datatypes,                "template": tpl_implem_avx512["store"]                                                                                                         } ], # storeu
     "getfirst": [
         { "instr_name": "cvtsd_f64",  "datatypes": [float64],                    "template": tpl_implem_avx512["getfirst"]                                                                                                      },
-        { "instr_name": "cvtss_f32",  "datatypes": [float32],                    "template": tpl_implem_avx512["getfirst"]                                                                                                      } ], # getfirst
+        { "instr_name": "cvtss_f32",  "datatypes": [float32],                    "template": tpl_implem_avx512["getfirst"]                                                                                                      },
+        { "instr_name": "cvtsd_f64",  "datatypes": [int64, uint64],              "template": tpl_implem_avx512["getfirst-hack64"]                                                                                               },
+        { "instr_name": "cvtss_f32",  "datatypes": [int32, uint32],              "template": tpl_implem_avx512["getfirst-hack32"]                                                                                               } ], # getfirst
     "set1": [
         { "instr_name": "set1",       "datatypes": all_float + all_int,          "template": tpl_implem_avx512["set1"]                                                                                                          } ], # set1
     "set0": [
