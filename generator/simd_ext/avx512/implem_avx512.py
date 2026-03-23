@@ -53,50 +53,50 @@ tpl_implem_avx512 = {
     "testz_2args":      { "format": "long",  "code": "return (int32_t)_{{ instr_name }}_{{ isa_dt_par.msk_short }}_u8(m0.m, m1.m);" },
     "set-64": { "format": "long", "code":
 """// long format
-    %r<tp>% res;
-    res.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(vals[7], vals[6], vals[5], vals[4], vals[3], vals[2], vals[1], vals[0]);
-    return res;""" },
+	%r<tp>% res;
+	res.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(vals[7], vals[6], vals[5], vals[4], vals[3], vals[2], vals[1], vals[0]);
+	return res;""" },
     "set-32": { "format": "long", "code":
 """// long format
-    %r<tp>% res;
-    res.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(
-        vals[15], vals[14], vals[13], vals[12],vals[11], vals[10], vals[ 9], vals[ 8],
-        vals[ 7], vals[ 6], vals[ 5], vals[ 4],vals[ 3], vals[ 2], vals[ 1], vals[ 0]);
-    return res;""" },
+	%r<tp>% res;
+	res.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(
+		vals[15], vals[14], vals[13], vals[12],vals[11], vals[10], vals[ 9], vals[ 8],
+		vals[ 7], vals[ 6], vals[ 5], vals[ 4],vals[ 3], vals[ 2], vals[ 1], vals[ 0]);
+	return res;""" },
     "set-16": { "format": "long", "code":
 """// long format
-    %r<tp>% res;
-    res.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(
-        vals[31], vals[30], vals[29], vals[28],
-        vals[27], vals[26], vals[25], vals[24],
-        vals[23], vals[22], vals[21], vals[20],
-        vals[19], vals[18], vals[17], vals[16],
-        vals[15], vals[14], vals[13], vals[12],
-        vals[11], vals[10], vals[ 9], vals[ 8],
-        vals[ 7], vals[ 6], vals[ 5], vals[ 4],
-        vals[ 3], vals[ 2], vals[ 1], vals[ 0]);
-    return res;""" },
+	%r<tp>% res;
+	res.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(
+		vals[31], vals[30], vals[29], vals[28],
+		vals[27], vals[26], vals[25], vals[24],
+		vals[23], vals[22], vals[21], vals[20],
+		vals[19], vals[18], vals[17], vals[16],
+		vals[15], vals[14], vals[13], vals[12],
+		vals[11], vals[10], vals[ 9], vals[ 8],
+		vals[ 7], vals[ 6], vals[ 5], vals[ 4],
+		vals[ 3], vals[ 2], vals[ 1], vals[ 0]);
+	return res;""" },
     "set-8": { "format": "long", "code":
 """// long format
-    %r<tp>% res;
-    res.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(
-        vals[63], vals[62], vals[61], vals[60],
-        vals[59], vals[58], vals[57], vals[56],
-        vals[55], vals[54], vals[53], vals[52],
-        vals[51], vals[50], vals[49], vals[48],
-        vals[47], vals[46], vals[45], vals[44],
-        vals[43], vals[42], vals[41], vals[40],
-        vals[39], vals[38], vals[37], vals[36],
-        vals[35], vals[34], vals[33], vals[32],
-        vals[31], vals[30], vals[29], vals[28],
-        vals[27], vals[26], vals[25], vals[24],
-        vals[23], vals[22], vals[21], vals[20],
-        vals[19], vals[18], vals[17], vals[16],
-        vals[15], vals[14], vals[13], vals[12],
-        vals[11], vals[10], vals[ 9], vals[ 8],
-        vals[ 7], vals[ 6], vals[ 5], vals[ 4],
-        vals[ 3], vals[ 2], vals[ 1], vals[ 0]);
-    return res;""" },
+	%r<tp>% res;
+	res.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(
+		vals[63], vals[62], vals[61], vals[60],
+		vals[59], vals[58], vals[57], vals[56],
+		vals[55], vals[54], vals[53], vals[52],
+		vals[51], vals[50], vals[49], vals[48],
+		vals[47], vals[46], vals[45], vals[44],
+		vals[43], vals[42], vals[41], vals[40],
+		vals[39], vals[38], vals[37], vals[36],
+		vals[35], vals[34], vals[33], vals[32],
+		vals[31], vals[30], vals[29], vals[28],
+		vals[27], vals[26], vals[25], vals[24],
+		vals[23], vals[22], vals[21], vals[20],
+		vals[19], vals[18], vals[17], vals[16],
+		vals[15], vals[14], vals[13], vals[12],
+		vals[11], vals[10], vals[ 9], vals[ 8],
+		vals[ 7], vals[ 6], vals[ 5], vals[ 4],
+		vals[ 3], vals[ 2], vals[ 1], vals[ 0]);
+	return res;""" },
     "set0_k": { "format": "long", "code":
 """// long format
 	%m<tp>% m;
