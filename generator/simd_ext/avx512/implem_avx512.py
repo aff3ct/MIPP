@@ -369,8 +369,8 @@ implems_avx512 = {
     "hadd": [
         { "instr_name": "add",        "datatypes": [float64, int64],             "template": tpl_implem_avx512["reduce_64"]                                                                                                     },
         { "instr_name": "add",        "datatypes": [float32, int32],             "template": tpl_implem_avx512["reduce_32"]                                                                                                     },
-        { "instr_name": "adds",       "datatypes": [int16],                      "template": tpl_implem_avx512["reduce_16"],      "if": "defined(__AVX512BW__)"                                                                 },
-        { "instr_name": "adds",       "datatypes": [int8],                       "template": tpl_implem_avx512["reduce_8"],       "if": "defined(__AVX512BW__)"                                                                 } ], # hadd
+        { "instr_name": "adds",       "datatypes": [int16, uint16],              "template": tpl_implem_avx512["reduce_16"],      "if": "defined(__AVX512BW__)"                                                                 },
+        { "instr_name": "adds",       "datatypes": [int8, uint8],                "template": tpl_implem_avx512["reduce_8"],       "if": "defined(__AVX512BW__)"                                                                 } ], # hadd
     "hmul": [
         { "instr_name": "mul",        "datatypes": [float64],                    "template": tpl_implem_avx512["reduce_64"],      "if": "defined(__AVX512F__)"                                                                  },
         { "instr_name": "mul",        "datatypes": [float32, int32],             "template": tpl_implem_avx512["reduce_32"],      "if": "defined(__AVX512F__)"                                                                  },
