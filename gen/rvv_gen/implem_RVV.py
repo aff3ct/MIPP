@@ -84,7 +84,7 @@ isa_rvv = {
 }#I added a bunch of keys to datatypes dictionnary bc they will be necessary for conversion.
 #this solution is really unelegant and I might want to do it differently.
 
-#list of templates 4 mnemonics 
+#list of templates 4 intrinsics
 """
 Load/store currently working. 
 

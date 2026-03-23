@@ -219,6 +219,34 @@ tpl_implem_emu_rvv = {
     "testz":{"format":"long", "code": """
         return %testz_2<tp>%(m0) && %testz_2<tp>%(m1);
     """},
+    
+    "hmul_int_uint":{"format":"long", "code": """
+    
+    %r<tp>% tmp; 
+    tmp.r = r0.r;
+    size_t vl = %N<tp>%;
+    for (size_t off = 1; off < vl; off <<= 1) {
+        %r<tp>% shifted; 
+        shifted.r =  {{isa.prefix}}_vslidedown_vx_{{isa_dt_par.data_ext}}(tmp.r,off,vl);
+        tmp.r = {{isa.prefix}}_{{instr_name}}_vv_{{isa_dt_par.data_ext}}(tmp.r, shifted.r, vl);
+    }
+    //return {{isa.prefix}}_vmv_x_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(tmp.r);
+    return tmp;
+    """},
+    
+    "hmul_float":{"format":"long", "code": """
+
+    %r<tp>% tmp;
+    tmp.r = r0.r;
+    size_t vl = %N<tp>%;
+    for (size_t off = 1; off < vl; off <<= 1) {
+        %r<tp>% shifted;
+        shifted.r =  {{isa.prefix}}_vslidedown_vx_{{isa_dt_par.data_ext}}(tmp.r,off,vl);
+        tmp.r = {{isa.prefix}}_{{instr_name}}_vv_{{isa_dt_par.data_ext}}(tmp.r, shifted.r, vl);
+    }
+    //return {{isa.prefix}}_vfmv_f_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(tmp.r);
+    return tmp;
+    """},
 }
 
 implems_emu_rvv = {
@@ -302,5 +330,9 @@ implems_emu_rvv = {
    
    #pourquoi testz_2?
    "testz" : [{"instr_name" : "cpop", "datatypes" : all_datatypes, "template" : tpl_implem_emu_rvv["testz"]}],
-
+   "hmul"  : [
+       {"instr_name" : "vmul", "datatypes" : all_int_uint, "template" : tpl_implem_emu_rvv["hmul_int_uint"]},
+       {"instr_name" : "vfmul", "datatypes" : all_float, "template" : tpl_implem_emu_rvv["hmul_float"]},
+    
+    ]
 }
