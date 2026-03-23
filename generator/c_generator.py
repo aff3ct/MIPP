@@ -41,7 +41,6 @@ def gen_c_functions(isa, file, funcs, implems):
 						dt_par = dt.split(',')[0]
 						dt_ret = dt.split(',')[0]
 						if dt_par not in funcs[f]["datatypes"]:
-
 							print("Panic: unsupported type for '" + f + "<" + dt_par + "," + dt_par + ">' function.")
 							exit(-1)
 					else:
@@ -54,7 +53,9 @@ def gen_c_functions(isa, file, funcs, implems):
 							exit(-1)
 					dt_key = dt_par + "," + dt_ret
 
-					if is_missing_func(funcs, f, dt_key):
+					if not is_missing_func(funcs, f, dt_key):
+						print("// '" + f + "<" + dt_key + ">' has been skipped (reason: \"Info: It has been implemented before.\").",file=file)
+					else:
 						j2_template = Template(ff["template"]["code"], undefined=StrictUndefined)
 						instr_name = ""
 						if "instr_name" in ff:
@@ -64,7 +65,9 @@ def gen_c_functions(isa, file, funcs, implems):
 						try:
 							ph_ret = parse_placeholders(pre_rendering, isa, funcs, f, dt_par, dt_ret)
 						except Exception as err:
-							print(" -> '" + f + "<" + dt_key + ">' has been skipped (reason: \"{0}\").".format(err))
+							err_message = "'" + f + "<" + dt_key + ">' has been skipped (reason: \"{0}\").".format(err)
+							print(" -> " + err_message)
+							print("// " + err_message,file=file)
 							continue
 
 						ifd = ""
@@ -108,7 +111,6 @@ def gen_c_functions(isa, file, funcs, implems):
 
 						if len(dt.split(',')) <= 1:
 							func_name = build_func_name_short(isa, dt_par, f,True);
-
 						else:
 							func_name = build_func_name(isa, dt_par, dt_ret, f,True);
 						
@@ -116,7 +118,6 @@ def gen_c_functions(isa, file, funcs, implems):
 						
 						if ff["template"]["format"] == "short":
 							if funcs[f]["proto"]["args"]:
-							
 								# Toreg 
 								if funcs[f]["proto"]["ret"]["type"] == "reg":
 									print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file)
