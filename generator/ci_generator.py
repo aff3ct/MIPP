@@ -177,8 +177,11 @@ def gen_ci_functions(isa_list, file, funcs):
 					func_name_impl = build_func_name(isa, dt_par, dt_ret, f);
 				print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa, func_name_impl) + ";", file=file)
 				if i == len(isa_list)-1:
+					print("#else", file=file)
+					print("\tprintf(\"MIPP panic: '%s', unsupported case, this should never happen.\\n\", \""+func_name+"\");", file=file);
+					print("\texit(-1);", file=file);
 					print("#endif", file=file)
-		  		
+
 			print("}", file=file)
 
 			print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name+"_m1", 1, False) + " {", file=file)
