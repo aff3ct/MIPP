@@ -3,8 +3,9 @@
 #include <numeric>
 #include <random>
 #include <cmath>
+
 #include <mipp.h>
-#include <catch_amalgamated.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 template <typename T>
 void test_reg_set1()
