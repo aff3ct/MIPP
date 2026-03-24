@@ -10,4 +10,6 @@ tests/build*
 tests/code_coverage_files/
 tests/code_coverage_report/
 build*
-gen/__pycache__/
+__pycache__
+.venv
+include*/

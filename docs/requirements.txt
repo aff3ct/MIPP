@@ -1,0 +1,7 @@
+mkdocs==1.5.3
+jinja2==3.0.0
+pymdown-extensions==10.7.1
+mkdocs-material==9.5.13
+mkdocs-charts-plugin==0.0.10
+markdown-grid-tables
+mkdocs-glightbox==0.5.2
