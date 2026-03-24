@@ -3,8 +3,9 @@
 #include <numeric>
 #include <random>
 #include <cmath>
-#include <mipp_v2.h>
-#include <catch.hpp>
+#include <mipp.h>
+#include <catch_amalgamated.hpp>
+
 
 template <typename T>
 void test_reg_tomsk()

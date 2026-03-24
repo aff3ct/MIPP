@@ -7,23 +7,25 @@ import argparse
 
 path = os.getcwd()
 
-sys.path.insert(1,path +'/avx512_gen')
-sys.path.insert(1,path + '/avx_gen')
-sys.path.insert(1,path + '/sse_gen')
-sys.path.insert(1,path + '/sve_gen')
-sys.path.insert(1,path + '/rvv_gen')
+sys.path.insert(1,path +'/simd_ext/avx512/')
+sys.path.insert(1,path + '/simd_ext/avx/')
+sys.path.insert(1,path + '/simd_ext/sse/')
+sys.path.insert(1,path + '/simd_ext/sve/')
+sys.path.insert(1,path + '/simd_ext/rvv/')
 
-from implem_SSE import isa_sse
-from implem_AVX import isa_avx
-from implem_AVX512 import isa_avx512
-from implem_SVE import isa_sve
-from implem_RVV import isa_rvv
+from implem_sse import isa_sse
+from implem_avx import isa_avx
+from implem_avx512 import isa_avx512
+from implem_sve import isa_sve
+from implem_rvv import isa_rvv
 
-from sse_gen import gen_mipp_sse
-from avx_gen import gen_mipp_avx
-from avx512_gen import gen_mipp_avx512
-from sve_gen import gen_mipp_sve
-from rvv_gen import gen_mipp_rvv
+from gen_mipp_sse import gen_mipp_sse
+from gen_mipp_avx import gen_mipp_avx
+from gen_mipp_avx512 import gen_mipp_avx512
+from gen_mipp_sve import gen_mipp_sve
+from gen_mipp_rvv import gen_mipp_rvv
+
+
 
 from mipp_h import generate_mipp_h
 from ci_generator import generate_c_interface
@@ -65,41 +67,24 @@ def main():
     create_folder(sve_path)
     create_folder(rvv_path)
     # generate all avalaible simd and wrapp
-<<<<<<< HEAD:gen/gen_mipp_v2.py
-    gen_mipp_sse.gen_mipp_sse()
-    gen_mipp_avx.gen_mipp_avx()
-    gen_mipp_avx512.gen_mipp_avx512()
-    gen_mipp_sve.gen_mipp_sve()
-    gen_mipp_rvv.gen_mipp_rvv()
-    # warning order
-    # interface all simd  in c
-    # generate mipp_v2_interface_gen.h
-    generate_c_interface([isa_avx512,isa_avx,isa_sse,isa_sve,isa_rvv])
-=======
     gen_mipp_sse()
     gen_mipp_avx()
     gen_mipp_avx512()
     gen_mipp_sve()
+    gen_mipp_rvv()
     # warning order
     # interface all simd  in c
-    # generate mipp_interface_gen.h
-    generate_c_interface([isa_avx512,isa_avx,isa_sse,isa_sve])
->>>>>>> origin/develop:generator/gen_mipp.py
+    # generate mipp_v2_interface_gen.h
+    generate_c_interface([isa_avx512,isa_avx,isa_sse,isa_sve,isa_rvv])
     # C++ template wrapper interface with specialization
     # generate mipp.hpp
     generate_cpp()
     # C++ object wrapper using template specialization
     # generate mipp_object_gen.h
     generate_cpp_object()
-<<<<<<< HEAD:gen/gen_mipp_v2.py
      # generate mipp_v2.h
-    generate_mipp_v2_h()
-    print("Generating MIPP code for sse, avx2, avx512, rvv and sve with size in " + str(isa_sve["size"]))
-=======
-     # generate mipp.h
     generate_mipp_h()
-    print("Generating MIPP code for sse, avx2, avx512 and sve with size in " + str(isa_sve["size"]))
->>>>>>> origin/develop:generator/gen_mipp.py
+    print("Generating MIPP code for sse, avx2, avx512, rvv and sve with size in " + str(isa_sve["size"]))
     print("With lmul in "+str(all_lmul)+ " and ldiv in "+str(all_ldiv))
     
 if __name__ == "__main__":

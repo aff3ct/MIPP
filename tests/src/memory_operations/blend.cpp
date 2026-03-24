@@ -3,8 +3,9 @@
 #include <numeric>
 #include <random>
 #include <cmath>
-#include <mipp_v2.h>
-#include <catch.hpp>
+#include <mipp.h>
+#include <catch_amalgamated.hpp>
+
 //this file is relevant to test get_k (mask get operation)
 
 //same test as set
