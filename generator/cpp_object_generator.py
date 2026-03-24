@@ -7,7 +7,7 @@ from tools import *
 
 def gen_cpp_reg_operators(file):
 	tpl_class_Rvd = """
-	
+ 
 template <typename T, int LMUL>
 class Rvm;
 
@@ -112,11 +112,12 @@ public:
 
 def generate_cpp_object():
 	
-	file = open("../include/mipp_object_gen.hpp", "w")
+	file = open("../include/mipp_obj.hpp", "w")
 	
 	tpl_header_cpp = """#ifndef MY_INTRINSICS_PLUS_PLUS_OBJECT_HPP_
 #define MY_INTRINSICS_PLUS_PLUS_OBJECT_HPP_
-	
+	#include <mipp.hpp>	
+
 	namespace mipp
 	{
 	"""

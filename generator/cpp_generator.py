@@ -14,7 +14,8 @@ def generate_cpp():
 	tpl_header_cpp = """#ifndef MY_INTRINSICS_PLUS_PLUS_HPP_
 #define MY_INTRINSICS_PLUS_PLUS_HPP_
 
-#include "mipp_interface_gen.h"
+#include "mipp.h"
+#include <iostream>
 
 namespace mipp
 {"""

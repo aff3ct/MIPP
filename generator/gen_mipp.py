@@ -72,6 +72,8 @@ def main():
     gen_mipp_avx512()
     gen_mipp_sve()
     gen_mipp_rvv()
+    # generate mipp_v2.h
+    generate_mipp_h()
     # warning order
     # interface all simd  in c
     # generate mipp_v2_interface_gen.h
@@ -82,8 +84,7 @@ def main():
     # C++ object wrapper using template specialization
     # generate mipp_object_gen.h
     generate_cpp_object()
-     # generate mipp_v2.h
-    generate_mipp_h()
+
     print("Generating MIPP code for sse, avx2, avx512, rvv and sve with size in " + str(isa_sve["size"]))
     print("With lmul in "+str(all_lmul)+ " and ldiv in "+str(all_ldiv))
     

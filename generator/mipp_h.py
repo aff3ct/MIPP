@@ -10,8 +10,8 @@ def generate_mipp_h():
 #define MIPP
 
 #include <stdint.h>
-#include <iostream>
-#include <cstdlib>
+//#include <iostream>
+#include <stdlib.h>
 
 typedef double float64_t;
 typedef float float32_t;
@@ -37,9 +37,9 @@ typedef float float32_t;
 #include "rvv/mipp_v2_impl_RVV_gen.h"
 #endif
 
-#include "mipp.hpp"
+//#include "mipp.hpp"
 
-#include "mipp_object_gen.hpp"
+//#include "mipp_object_gen.hpp"
 
 // utiles pour l'instant pour les tests
 // pourrait clairement etre utile pour les generateurs au dela du if #define

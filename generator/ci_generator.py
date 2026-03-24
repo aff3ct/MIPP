@@ -38,7 +38,7 @@ def duplicate_isa_sve_along_size(isa_list):
 
 def generate_c_interface(isa_list):
 	
-	file = open("../include/mipp_interface_gen.h", "w")
+	file = open("../include/mipp.h", "a")
 
 	tpl_header_interface = """#ifndef MY_INTRINSICS_PLUS_PLUS_INTERFACE_H_
 #define MY_INTRINSICS_PLUS_PLUS_INTERFACE_H_ """

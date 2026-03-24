@@ -3,7 +3,7 @@
 #include <numeric>
 #include <random>
 #include <cmath>
-#include <mipp.h>
+#include <mipp_obj.hpp>
 #include <catch_amalgamated.hpp>
 
 //this file is relevant to test get_k (mask get operation)
