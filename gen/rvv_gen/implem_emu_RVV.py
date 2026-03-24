@@ -46,6 +46,91 @@ datatypes_problematic_cart_prod = datatypes_intuint_float_cart_prod + datatypes_
 
 datatypes_unproblematic_cart_prod =  list(filter(lambda x : x not in datatypes_problematic_cart_prod, all_datatypes_cart_prod))
 
+#cast_k types
+datatypes_same_size = [
+    # identity (a == b)
+    "int8,int8",
+    "uint8,uint8",
+    "int16,int16",
+    "uint16,uint16",
+    "int32,int32",
+    "uint32,uint32",
+    "float32,float32",
+    "int64,int64",
+    "uint64,uint64",
+    "float64,float64",
+
+    # existing same-size cross-type pairs
+    "int8,uint8", "uint8,int8",
+
+    "int16,uint16", "uint16,int16",
+
+    "int32,uint32", "uint32,int32",
+    "int32,float32", "float32,int32",
+    "uint32,float32", "float32,uint32",
+
+    "int64,uint64", "uint64,int64",
+    "int64,float64", "float64,int64",
+    "uint64,float64", "float64,uint64",
+]
+
+datatypes_narrowing = [
+    # 16 -> 8
+    "int16,int8", "int16,uint8",
+    "uint16,int8", "uint16,uint8",
+
+    # 32 -> 16
+    "int32,int16", "int32,uint16",
+    "uint32,int16", "uint32,uint16",
+    "float32,int16", "float32,uint16",
+
+    # 32 -> 8
+    "int32,int8", "int32,uint8",
+    "uint32,int8", "uint32,uint8",
+    "float32,int8", "float32,uint8",
+
+    # 64 -> 32
+    "int64,int32", "int64,uint32", "int64,float32",
+    "uint64,int32", "uint64,uint32", "uint64,float32",
+    "float64,int32", "float64,uint32", "float64,float32",
+
+    # 64 -> 16
+    "int64,int16", "int64,uint16",
+    "uint64,int16", "uint64,uint16",
+    "float64,int16", "float64,uint16",
+
+    # 64 -> 8
+    "int64,int8", "int64,uint8",
+    "uint64,int8", "uint64,uint8",
+    "float64,int8", "float64,uint8",
+]
+
+datatypes_widening = [
+    # 8 -> 16
+    "int8,int16", "int8,uint16",
+    "uint8,int16", "uint8,uint16",
+
+    # 8 -> 32
+    "int8,int32", "int8,uint32", "int8,float32",
+    "uint8,int32", "uint8,uint32", "uint8,float32",
+
+    # 8 -> 64
+    "int8,int64", "int8,uint64", "int8,float64",
+    "uint8,int64", "uint8,uint64", "uint8,float64",
+
+    # 16 -> 32
+    "int16,int32", "int16,uint32", "int16,float32",
+    "uint16,int32", "uint16,uint32", "uint16,float32",
+
+    # 16 -> 64
+    "int16,int64", "int16,uint64", "int16,float64",
+    "uint16,int64", "uint16,uint64", "uint16,float64",
+
+    # 32 -> 64
+    "int32,int64", "int32,uint64", "int32,float64",
+    "uint32,int64", "uint32,uint64", "uint32,float64",
+    "float32,int64", "float32,uint64", "float32,float64",
+]
 
 tpl_implem_emu_rvv = {
     "loadu" : { "format": "long", "code": """
@@ -338,6 +423,34 @@ tpl_implem_emu_rvv = {
 """	%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%(0x80));
 	return %andb<tp>%(r0, rm);"""
 	},
+ 
+    "cast_k_same_size":{"format":"short", "code":"m0.m;"},
+    
+    "cast_k_diff_size":{"format":"long", "code":"""
+        %r<tp>% r0 =  %toreg<tp>%(m0);
+        %r<tr>% r1 = %cast<tp,tr>%(r0);
+        %r<c:uint|b:tr>% rtmp0;
+        rtmp0.r = {{isa.prefix}}_vid_v_u{{isa_dt_ret.data_ext_logi}}m1(%N<tp>%);
+        %r<tr>% rtmp = %cast<c:uint|b:tr,tr>%(rtmp0);
+        %r<tr>% rtmp1;
+        rtmp1 = %set0<tr>%();
+        rtmp = %andb<tr>%(rtmp,rtmp1);
+        r1 = %andb<tr>%(r1,rtmp);
+        return %tomsk<tr>%(r1);
+    """},
+
+    "cast_k_narrowing":{"format":"long", "code":"""
+        %r<tp>% r0 = %toreg<tp>%(m0);
+        %r<tr>% r1 = %cast<tp,tr>%(r0);
+        %r<tr>% rtmp;
+        rtmp.r = {{isa.prefix}}_vid_v_u{{isa_dt_re.data_ext_logi}}m1(%N<tr>%);
+        %r<tr>% rtmp1;
+        rtmp1 = %set0<tr>%(1);
+        rtmp = %andb<tr>%(rtmp,rtmp1);
+        r1 = %andb<tr>%(r1,rtmp);
+        return %tomsk<tr>%(r1);
+    """}
+
 }
 
 implems_emu_rvv = {
@@ -450,4 +563,14 @@ implems_emu_rvv = {
 		{ "datatypes": [float32, int32, uint32], "template": tpl_implem_emu_rvv["msb-32"] },
 		{ "datatypes": [int16, uint16], "template": tpl_implem_emu_rvv["msb-16"] },
 		{ "datatypes": [int8, uint8], "template": tpl_implem_emu_rvv["msb-8"] }, ],
+    
+    "cast_k" : [
+      #no problem
+      {"instr_name" : "vid", "datatypes" : datatypes_same_size, "template" : tpl_implem_emu_rvv["cast_k_same_size"]},
+      #use toreg->cast->vid+and(1)->tomask
+      {"instr_name" : "vid", "datatypes" : datatypes_narrowing, "template" : tpl_implem_emu_rvv["cast_k_diff_size"]},
+      #dont know how its supposed to work
+      {"instr_name" : "vid", "datatypes" : datatypes_widening, "template" : tpl_implem_emu_rvv["cast_k_diff_size"]},
+    ],
+    
 }
