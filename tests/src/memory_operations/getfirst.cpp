@@ -4,7 +4,7 @@
 #include <random>
 #include <cmath>
 #include <mipp_obj.hpp>
-#include <catch_amalgamated.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 //this file is relevant to test get_k (mask get operation)
 

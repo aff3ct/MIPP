@@ -1,1 +1,0 @@
-Catch2 (v3.13.0) from [GitHub](https://github.com/catchorg/Catch2).

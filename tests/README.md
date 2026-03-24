@@ -1,7 +1,13 @@
 # MIPP Tests
 
 Be sure to have generated the MIPP headers first. To do so, follow the 
-`README.md` file in the `$root/generator/` folder.
+`README.md` file in the `$root/generator/` folder. The tests are written with
+the Catch2 v3 API.
+
+Install Catch2 on Ubuntu 24.04 LTS:
+```bash
+sudo apt install catch2
+```
 
 To compile the tests:
 ```bash

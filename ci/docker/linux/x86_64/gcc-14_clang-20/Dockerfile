@@ -16,5 +16,6 @@ RUN apt install -y python3.12
 RUN apt install -y python3.12-venv
 RUN apt install -y python3-pip
 RUN apt install -y doxygen
+RUN apt install -y catch2
 
 CMD [""]

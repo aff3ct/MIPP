@@ -4,7 +4,8 @@
 #include <random>
 #include <cmath>
 #include <mipp_obj.hpp>
-#include <catch_amalgamated.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 
 template <typename T>
@@ -24,7 +25,7 @@ void test_rvd_rsqrt()
 	{
 		T res = 1/sqrt(inputs1[i]); 
 		//REQUIRE(mipp::get(r2, i) == res);
-        REQUIRE_THAT(mipp::get(r2,i), Catch::Matchers::WithinRel(res,0.1));
+        REQUIRE_THAT(mipp::get(r2,i), Catch::Matchers::WithinRel((T)res,(T)0.1));
 	}
 }
 
@@ -59,7 +60,7 @@ void test_Rvd_rsqrt()
 	for (auto i = 0; i < vectorSize; i++)
 	{
 		T res = 1/sqrt(inputs1[i]); 
-        REQUIRE_THAT(r2[i], Catch::Matchers::WithinRel(res,0.1));
+        REQUIRE_THAT(r2[i], Catch::Matchers::WithinRel((T)res,(T)0.1));
 
 	}
 }

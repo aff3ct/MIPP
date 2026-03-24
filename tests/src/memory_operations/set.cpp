@@ -4,7 +4,8 @@
 #include <random>
 #include <cmath>
 #include <mipp_obj.hpp>
-#include <catch_amalgamated.hpp>
+
+#include <catch2/catch_test_macros.hpp>
 
 template <typename T>
 void test_reg_set1()

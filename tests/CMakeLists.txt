@@ -11,14 +11,15 @@ set (CMAKE_CXX_STANDARD 14)
 set (EXECUTABLE_OUTPUT_PATH bin/)
 
 file (GLOB_RECURSE MIPP_SRCS_TEST ${CMAKE_CURRENT_SOURCE_DIR}/src/*)
-add_executable(tests_exe ${MIPP_SRCS_TEST} lib/Catch2/src/catch_amalgamated.cpp)
+add_executable(tests_exe ${MIPP_SRCS_TEST})
 set_target_properties(tests_exe PROPERTIES OUTPUT_NAME run-tests POSITION_INDEPENDENT_CODE ON) # set -fpie
 
  # include MIPP headers
 target_include_directories(tests_exe PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../include/")
 
-# include Catch2 header
-target_include_directories(tests_exe PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/lib/Catch2/include/")
+# link with Catch2
+find_package(Catch2 3 REQUIRED)
+target_link_libraries(tests_exe PRIVATE Catch2::Catch2)
 
 enable_testing()
 add_test(NAME mipp::test COMMAND tests_exe)
