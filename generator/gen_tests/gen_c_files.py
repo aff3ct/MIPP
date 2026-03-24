@@ -70,8 +70,8 @@ def add_type_guards(func, implem, function):
 
 #generate type guards for 1 func in all implems
 #this isn't very elegant, we could "factorise" common guards ig
-def gen_c_test_type_guards(func):
-    res = ""
+def gen_c_test_type_guards(func, long_name, short_name):
+    res = f'TEST_CASE("{long_name} - placeholer", "[{short_name}]") {{\n'
     for implems in implem_dict.values():
         if func in implems["implem"]:
             res += implems["guard"] + "\n"
@@ -80,25 +80,29 @@ def gen_c_test_type_guards(func):
     res += "#else\n"
     res += f'#error "No implementation for {func} in any of the supported architectures"\n'
     res += "#endif\n"
+    res += "}\n"
     return res
 
 def gen_c_headers():
     return f'#include <exception>\
             \n#include <algorithm>\
             \n#include <numeric>\
-            \n#include <random.h>\
+            \n//#include <random.h>\
+            \n#include <stdio.h>\
             \n#include <math.h>\
             \n#include <mipp.h>\
             \n#include <catch2/catch_test_macros.hpp>\n'
 
 
 def gen_c_func(func, scalar_type, reg_type_prefix="rvd", reg_type_suffix=""):
-    res = f'void test_{func}_{scalar_type}() {{\n' + bodies_dict[func] + '}\n'
+    res = f'void test_{func}_{scalar_type}() {{\n' + gen_test_dict[func]["template"] + "}\n"
     template = Template(res, undefined=StrictUndefined)
     
-    reg_type = reg_type_prefix + "_" + type + reg_type_suffix + "_t"
-    size = "MIPP_N_" + type.upper()
-    res = template.render(func=func, dt_ext=type, reg_type=reg_type, size=size, type=scalar_type)
+    reg_type = reg_type_prefix + "_" + scalar_type + reg_type_suffix + "_t"
+    size = "MIPP_N_" + scalar_type.upper()
+    dt_ext = scalar_type
+    op = gen_test_dict[func]["op"]
+    res = template.render(func=func, dt_ext=dt_ext, reg_type=reg_type, size=size, type=scalar_type, op=op)
     
     return res+"\n"
 
@@ -112,7 +116,7 @@ def gen_c_funcs_all_datatypes(func):
 def gen_c_file(func):
     res = gen_c_headers()
     res += gen_c_funcs_all_datatypes(func)
-    res += gen_c_test_type_guards(func)
+    res += gen_c_test_type_guards(func, gen_test_dict[func]["long_name"], gen_test_dict[func]["short_name"])
     
     #template = Template(res, undefined=StrictUndefined)
     
@@ -124,8 +128,9 @@ def gen_c_files_all_funcs():
     #mkdir
     if not os.path.exists(tmp_path):
         os.makedirs(tmp_path)
-    for func in bodies_dict.keys():
-        with open(f"{tmp_path}test_{func}.cpp", "w") as f:
+    for func in gen_test_dict.keys():
+        file_name = tmp_path + func + "_test.cpp"
+        with open(file_name, "w") as f:
             f.write(gen_c_file(func))
             
 gen_c_files_all_funcs()

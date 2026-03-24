@@ -11,12 +11,12 @@ sys.path.insert(1,path + '/../')
 tpl_bodies = {
     "arithmetic_2args": """
 \tconst int vectorSize = {{size}};
-\tint32_t inputs1[vectorSize],inputs2[vectorSize];
+\t{{dt_ext}}_t inputs1[vectorSize],inputs2[vectorSize];
 \tfor(int i = 0; i < vectorSize; i++)
 \t{
 \t\t//todo : randomize inputs or smth
-\t\tinputs1[i] = 1;
-\t\tinputs2[i] = 2;
+\t\tinputs1[i] = 2;
+\t\tinputs2[i] = 1;
 \t}
 
 \t{{reg_type}} r1 = mipp_load_{{dt_ext}}(inputs1);
@@ -25,7 +25,7 @@ tpl_bodies = {
 
 \tfor (int i = 0; i < vectorSize; i++)
 \t{
-\t\t{{dt_ext}}_t res = inputs1[i] + inputs2[i];
+\t\t{{dt_ext}}_t res = inputs1[i] {{op}}  inputs2[i];
 \t\tREQUIRE(mipp_get_{{dt_ext}}(r3, i) == res);
 \t}    
 """,
@@ -38,18 +38,10 @@ tpl_bodies = {
     "store": """\t\t//TODO: generate test body for store\n""",
 }
 
-bodies_dict = {
-    "add" : tpl_bodies["arithmetic_2args"],
-    "sub" : tpl_bodies["arithmetic_2args"],
-    "mul" : tpl_bodies["arithmetic_2args"],
-    "div" : tpl_bodies["arithmetic_2args"],
-    
-    "and" : tpl_bodies["logical_2args"],
-    "or" : tpl_bodies["logical_2args"],
-    "xor" : tpl_bodies["logical_2args"],
-    "not" : tpl_bodies["logical_2args"],
+gen_test_dict = {
+    "add" : {"template" : tpl_bodies["arithmetic_2args"], "long_name" : "Addition", "short_name" : "add", "op" : "+"},
+    "sub" : {"template" : tpl_bodies["arithmetic_2args"], "long_name" : "Subtraction", "short_name" : "sub", "op" : "-"},
+    "mul" : {"template" : tpl_bodies["arithmetic_2args"], "long_name" : "Multiplication", "short_name" : "mul", "op" : "*"},
+    "div" : {"template" : tpl_bodies["arithmetic_2args"], "long_name" : "Division", "short_name" : "div", "op" : "/"},
 }
 
-types_dict = {}
-for type in all_datatypes:
-    types_dict[type] = type + "mipp_t"
