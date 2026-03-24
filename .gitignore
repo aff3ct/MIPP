@@ -13,3 +13,10 @@ build*
 __pycache__
 .venv
 include*/
+tests/CMakeCache.txt
+tests/CMakeFiles/
+tests/CTestTestfile.cmake
+tests/Makefile
+tests/bin/
+tests/cmake_install.cmake
+
