@@ -19,4 +19,3 @@ tests/CTestTestfile.cmake
 tests/Makefile
 tests/bin/
 tests/cmake_install.cmake
-
