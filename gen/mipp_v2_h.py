@@ -92,6 +92,8 @@ typedef float float32_t;
 
 #ifdef __riscv_v_intrinsic
 #define MIPP_RVV
+#define MIPP_64BIT
+#define MIPP_BW
 #endif
 
 // end utiles pour l'instant pour les tests...
