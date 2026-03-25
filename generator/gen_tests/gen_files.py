@@ -1,3 +1,4 @@
+#!/bin/python3
 import os
 import sys
 from jinja2 import Template, StrictUndefined
@@ -145,7 +146,7 @@ def gen_headers(kind="c"):
     res += '\n#include <catch2/catch_test_macros.hpp>\n\n'
     return res
 
-def gen_func(func, scalar_type, reg_type,kind="c"):
+def gen_func(func, scalar_type, reg_type,kind="c",msk_type=""):
     #we need to render twice because we have 2 levels of templates :)
     func_dict = gen_test_dict[func]["protos"][kind]
     func_template = gen_test_dict[func]["template"]
@@ -162,42 +163,63 @@ def gen_func(func, scalar_type, reg_type,kind="c"):
     
     func_template = Template(res, undefined=StrictUndefined)
     res = func_template.render(func=func, dt_ext=scalar_type, op=gen_test_dict[func]["op"], 
-                               reg_type=reg_type,
+                               reg_type=reg_type, msk_type=msk_type,
                                 size="MIPP_N_" + scalar_type.upper())
 #Warning : this doesn't pose "portability" issues bc cpp/obj don't use the size argument. 
 #but it's unelegant
     return res+"\n"
 
-def gen_funcs_all_datatypes(func, kind="c"):
+def gen_funcs_all_datatypes(func, kind="c", register="rvd", mask="rvm"):
     res = ""
     datatypes = mipp_funcs[func]["datatypes"]
     if kind == "c":
         for dt in datatypes:
-            res += gen_func(func, dt, reg_type="rvd_"+dt+"_t", kind=kind)
+            res += gen_func(func, dt, reg_type=f"{register}_"+dt+"_t", kind=kind, msk_type=f'{mask}_'+dt+'_t')
     elif kind == "cpp":#template so no need to loop over datatypes
-        res += gen_func(func, "T", reg_type="mipp::rvd<T>", kind=kind)
+        res += gen_func(func, "T", reg_type=f"mipp::{register}<T>", kind=kind, msk_type=f"mipp::{mask}<T>")
     elif kind == "obj":#template so no need to loop over datatypes
-        res += gen_func(func, "T", reg_type="mipp::Rvd<T>", kind=kind)
+        res += gen_func(func, "T", reg_type=f"mipp::{register}<T>", kind=kind, msk_type=f"mipp::{mask}<T>")
     return res
 
 def gen_file(func,kind="c"):
-    res = gen_funcs_all_datatypes(func,kind=kind)
+    register="rvd"
+    mask="rvm"
+
+    if kind =="obj":
+        register = register.capitalize()#obj types are Rvd, Rvm instead of rvd, rvm
+        mask = mask.capitalize()
+    res = gen_funcs_all_datatypes(func,kind=kind, register=register,mask=mask)
     res += gen_test_type_guards(func, gen_test_dict[func]["long_name"], gen_test_dict[func]["short_name"],kind=kind)
     
     #template = Template(res, undefined=StrictUndefined)
     
     return res
 
-tmp_path = "test_files/"
+tmp_path = "../../tests/src/"
 cpath = tmp_path + "c_tests/"
 cpppath = tmp_path + "cpp_tests/"
 objpath = tmp_path + "obj_tests/"
 #we want to generate 3 files for each func : c test, cpp test and obj test.
+
+
+#func to change file only if content is different to avoid recompilation of unchanged files
+#returns bool indicating if the file was written or not
+def write_file_if_different(path, content):
+    if os.path.exists(path):
+        with open(path, 'r') as f:
+            existing_content = f.read()
+        if existing_content == content:
+            return False #no need to write the file
+    with open(path, 'w') as f:
+        f.write(content)
+    return True #file was written
+
 def gen_test_files_all_funcs():
     for func in gen_test_dict.keys():
-        c_file = gen_file(func, kind="c")
-        cpp_file = gen_file(func, kind="cpp")
-        obj_file = gen_file(func, kind="obj")
+        #concat headers and func for each kind of test and write to file
+        c_file = gen_headers(kind="c") + gen_file(func, kind="c")
+        cpp_file = gen_headers(kind="cpp") + gen_file(func, kind="cpp")
+        obj_file = gen_headers(kind="obj") + gen_file(func, kind="obj")
         
         #mkdir if not exists
         os.makedirs(cpath, exist_ok=True)
@@ -205,16 +227,13 @@ def gen_test_files_all_funcs():
         os.makedirs(objpath, exist_ok=True)
         
         with open(cpath + f'test_c{func}.cpp', 'w') as f:
-            f.write(gen_headers(kind="c"))
-            f.write(c_file)
+            write_file_if_different(cpath + f'test_c{func}.cpp', c_file)
         
         with open(cpppath + f'test_{func}.cpp', 'w') as f:
-            f.write(gen_headers(kind="cpp"))
-            f.write(cpp_file)
+            write_file_if_different(cpppath + f'test_{func}.cpp', cpp_file)
         
         with open(objpath + f'test_obj_{func}.cpp', 'w') as f:
-            f.write(gen_headers(kind="obj"))
-            f.write(obj_file)
+            write_file_if_different(objpath + f'test_obj_{func}.cpp', obj_file)
             
 gen_test_files_all_funcs()
 #testing gen load func for c
