@@ -52,6 +52,11 @@ implem_dict = {
 
 #helper to get the datatypes for 1 func in 1 implem
 def get_defined_dttypes(func, implem):
+    """
+    func: implem key, e.g. "add", "mul", ...
+    implem: dict of the implem, e.g. implems_avx512
+    returns a list of datatypes for which the func is defined in the implem
+    """
     func_dt = implem[func]
     datatypes = []
     for dt in func_dt:
@@ -60,22 +65,39 @@ def get_defined_dttypes(func, implem):
     return datatypes
 
 #add the type guard for 1 func in 1 implem
-#TODO : more generic to support c and cpp tests
 def add_type_guards(func, implem, function,kind="c"):
+    """
+    func: implem key, e.g. "add", "mul", ...
+    implem: dict of the implem, e.g. implems_avx512
+    function: part of the name of the fn to call. Should prolly be changed 
+    kind: "c" for c test, "cpp" for cpp test, "obj" for obj test
+    
+    returns a string with the type guards for the func in the implem
+    """
     datatypes = get_defined_dttypes(func, implem)
     ret = ""  
-    print("addtype guards for func ", func, "function ", function, "kind ", kind)
+    section = ''
     
     if kind == "c":
-        for dt in datatypes:
-            ret += f'SECTION ("datatype = {dt}") {{ {function}_{dt}(); }}\n' 
-    elif kind == "cpp":
-        for dt in datatypes:
-            ret += f'SECTION ("datatype = {dt}") {{ {function}<{dt}_t>(); }}\n'
-    elif kind == "obj":
-       ret += "//not done yet"
-    return ret
+        section = 'SECTION ("datatype = {dt}") {{ {function}_{dt}(); }}\n{endif}'
+    elif kind == "cpp" or kind == "obj":
+        section = 'SECTION ("datatype = {dt}") {{ {function}<{dt}_t>(); }}\n{endif}'
+
+    
+    #TODO: change this to have 1 
+    #define mipp_64bit/mipp_bw when needed
+    for dt in datatypes:
+        endif = ""
+        if dt in ["int64", "uint64", "float64"]:
+            ret+=f'#if defined (MIPP_64BIT)\n'
+            endif="#endif\n"
+        elif dt in ["int8", "uint8", "int16", "uint16"]:
+            ret+=f'#if defined (MIPP_BW)\n'
+            endif="#endif\n"
         
+        ret += section.format(dt=dt, function=function, endif=endif)
+    
+    return ret
 
 #generate type guards for 1 func in all implems
 #this isn't very elegant, we could "factorise" common guards ig
@@ -97,6 +119,9 @@ def gen_test_type_guards(func, long_name, short_name, kind="c"):
     return res
 
 def gen_headers():
+    """
+    simple helper to return headers for the test files
+    """
     return f'#include <exception>\
             \n#include <algorithm>\
             \n#include <numeric>\
@@ -105,7 +130,7 @@ def gen_headers():
             \n#include <cmath>\
             \n#include <mipp.h>\
             \n#include <mipp.hpp>\
-            \n//#include <mipp_obj.hpp>\
+            \n#include <mipp_obj.hpp>\
             \n#include <catch2/catch_test_macros.hpp>\n\n'
 
 def gen_func(func, scalar_type, reg_type,kind="c"):
@@ -122,9 +147,9 @@ def gen_func(func, scalar_type, reg_type,kind="c"):
                                 loop_assert=func_dict["tpl_body_loop_assert"])
     
     func_template = Template(res, undefined=StrictUndefined)
-    #print(res)
     res = func_template.render(func=func, dt_ext=scalar_type, op=gen_test_dict[func]["op"], 
                                reg_type=reg_type,
+                               #todo protable (use mipp::N or smth for cpp)
                                size="MIPP_N_" + scalar_type.upper())
     return res+"\n"
 
@@ -138,24 +163,12 @@ def gen_funcs_all_datatypes(func, kind="c"):
     elif kind == "cpp":#template so no need to loop over datatypes
         res += gen_func(func, "T", reg_type="mipp::rvd<T>", kind=kind)
     elif kind == "obj":#template so no need to loop over datatypes
-        res += gen_func(func, "T", reg_type="", kind=kind)
+        res += gen_func(func, "T", reg_type="mipp::Rvd<T>", kind=kind)
     return res
 
-
-def gen_c_file(func):
-    res = gen_headers()
-    res += gen_funcs_all_datatypes(func)
-    res += gen_test_type_guards(func, gen_test_dict[func]["long_name"], gen_test_dict[func]["short_name"])
-    
-    #template = Template(res, undefined=StrictUndefined)
-    
-    return res
-#gen_c_file("add")
-
-def gen_cpp_file(func):
-    print(func)
-    res = gen_funcs_all_datatypes(func,kind="cpp")
-    res += gen_test_type_guards(func, gen_test_dict[func]["long_name"], gen_test_dict[func]["short_name"],kind="cpp")
+def gen_file(func,kind="c"):
+    res = gen_funcs_all_datatypes(func,kind=kind)
+    res += gen_test_type_guards(func, gen_test_dict[func]["long_name"], gen_test_dict[func]["short_name"],kind=kind)
     
     #template = Template(res, undefined=StrictUndefined)
     
@@ -169,7 +182,9 @@ def gen_test_files_all_funcs():
     for func in gen_test_dict.keys():
         file_name = tmp_path + func + "_test.cpp"
         with open(file_name, "w") as f:
-            f.write(gen_c_file(func))
-            f.write(gen_cpp_file(func))
+            f.write(gen_headers())
+            f.write(gen_file(func, kind="c"))
+            f.write(gen_file(func, kind="cpp"))
+            f.write(gen_file(func, kind="obj"))
             
 gen_test_files_all_funcs()

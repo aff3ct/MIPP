@@ -7,6 +7,13 @@ from tools import all_datatypes
 
 sys.path.insert(1,path + '/../')
 
+#this file contains templates for generating test functions, 
+#the philosophy is to have very small template for each past of the 
+#test function declaration. In order to have a lot of genericity 
+
+#there is also a huge dict w template info
+#but that dict might be split at some point 
+
 tpl_func_declaration = {
     "c_operator_2args": """void test_cmipp_{{func}}_{{dt_ext}}(){""",
     "cpp_operator_2args": """template <typename T>\nvoid test_cppmipp_{{func}}(){""",
@@ -45,13 +52,17 @@ tpl_body_load = {
 \t{{reg_type}} r3 = mipp_load_{{dt_ext}}(inputs3);""",
 
     "cpp2args": """\t{{reg_type}} r1 = mipp::load<{{dt_ext}}>(inputs1), r2 = mipp::load<{{dt_ext}}>(inputs2);""",
+    
+    "obj2args":
+"""\t//{{reg_type}} r1(inputs1), r2(inputs2);//waiting for load to be fixed in obj layer
+\t{{reg_type}} r1, r2; r1.r = mipp::load<T>(inputs1); r2.r = mipp::load<T>(inputs2);""",
 
 }
 
 tpl_body_operation = {
     "c_operator_2args": """\t{{reg_type}} r3 = mipp_{{func}}_{{dt_ext}}(r1, r2);""",
     "cpp_operator_2args": """\t{{reg_type}} r3 = mipp::{{func}}(r1, r2);""",
-    "obj_operator_2args": """\t{{reg_type}} r3 = r1.{{func}}(r2);""",
+    "obj_operator_2args": """\t{{reg_type}} r3 = r1 {{op}} r2;""",
 }
 
 tpl_body_loop_body = {
@@ -121,43 +132,103 @@ gen_test_dict = {
              "obj": {
              
                     "tpl_func_declaration" : tpl_func_declaration["obj_operator_2args"], 
+                    "tpl_body_declaration" : tpl_body_declaration["cpp2args"], 
+                    "tpl_body_initialization" : tpl_body_init["2args"], 
+                    "tpl_body_load" : tpl_body_load["obj2args"], 
+                    "tpl_body_loop_body" : tpl_body_loop_body["cpp_operator_2args"], 
+                    "tpl_body_loop_assert" : tpl_body_loop_assert["obj_operator_2args"], 
+                    "tpl_body_operation" : tpl_body_operation["obj_operator_2args"]}
+
+             },
+    "sub" : {"template" : tpl_bodies["arithmetic_2args"], "long_name" : "Subtraction", "short_name" : "sub",
+             "op" : "-",
+             "c": {
+                    "tpl_func_declaration" : tpl_func_declaration["c_operator_2args"], 
                     "tpl_body_declaration" : tpl_body_declaration["c2args"], 
                     "tpl_body_initialization" : tpl_body_init["2args"], 
                     "tpl_body_load" : tpl_body_load["c2args"], 
+                    "tpl_body_loop_body" : tpl_body_loop_body["c_operator_2args"], 
+                    "tpl_body_loop_assert" : tpl_body_loop_assert["c_operator_2args"], 
+                    "tpl_body_operation" : tpl_body_operation["c_operator_2args"]},
+            "cpp": {
+                    "tpl_func_declaration" : tpl_func_declaration["cpp_operator_2args"], 
+                    "tpl_body_declaration" : tpl_body_declaration["cpp2args"], 
+                    "tpl_body_initialization" : tpl_body_init["2args"], 
+                    "tpl_body_load" : tpl_body_load["cpp2args"], 
+                    "tpl_body_loop_body" : tpl_body_loop_body["cpp_operator_2args"], 
+                    "tpl_body_loop_assert" : tpl_body_loop_assert["cpp_operator_2args"], 
+                    "tpl_body_operation" : tpl_body_operation["cpp_operator_2args"]},
+             "obj": {
+             
+                    "tpl_func_declaration" : tpl_func_declaration["obj_operator_2args"], 
+                    "tpl_body_declaration" : tpl_body_declaration["cpp2args"], 
+                    "tpl_body_initialization" : tpl_body_init["2args"], 
+                    "tpl_body_load" : tpl_body_load["obj2args"], 
+                    "tpl_body_loop_body" : tpl_body_loop_body["cpp_operator_2args"], 
+                    "tpl_body_loop_assert" : tpl_body_loop_assert["obj_operator_2args"], 
+                    "tpl_body_operation" : tpl_body_operation["obj_operator_2args"]}
+
+             },
+    
+    "mul" : {"template" : tpl_bodies["arithmetic_2args"], "long_name" : "Multiplication", "short_name" : "mul",
+             "op" : "*",
+            "c": {
+                    "tpl_func_declaration" : tpl_func_declaration["c_operator_2args"], 
+                    "tpl_body_declaration" : tpl_body_declaration["c2args"], 
+                    "tpl_body_initialization" : tpl_body_init["2args"], 
+                    "tpl_body_load" : tpl_body_load["c2args"], 
+                    "tpl_body_loop_body" : tpl_body_loop_body["c_operator_2args"], 
+                    "tpl_body_loop_assert" : tpl_body_loop_assert["c_operator_2args"], 
+                    "tpl_body_operation" : tpl_body_operation["c_operator_2args"]},
+            "cpp": {
+                    "tpl_func_declaration" : tpl_func_declaration["cpp_operator_2args"], 
+                    "tpl_body_declaration" : tpl_body_declaration["cpp2args"], 
+                    "tpl_body_initialization" : tpl_body_init["2args"], 
+                    "tpl_body_load" : tpl_body_load["cpp2args"], 
+                    "tpl_body_loop_body" : tpl_body_loop_body["cpp_operator_2args"], 
+                    "tpl_body_loop_assert" : tpl_body_loop_assert["cpp_operator_2args"], 
+                    "tpl_body_operation" : tpl_body_operation["cpp_operator_2args"]},
+             "obj": {
+             
+                    "tpl_func_declaration" : tpl_func_declaration["obj_operator_2args"], 
+                    "tpl_body_declaration" : tpl_body_declaration["cpp2args"], 
+                    "tpl_body_initialization" : tpl_body_init["2args"], 
+                    "tpl_body_load" : tpl_body_load["obj2args"], 
+                    "tpl_body_loop_body" : tpl_body_loop_body["cpp_operator_2args"], 
+                    "tpl_body_loop_assert" : tpl_body_loop_assert["obj_operator_2args"], 
+                    "tpl_body_operation" : tpl_body_operation["obj_operator_2args"]}
+
+            
+            },
+    "div" : {"template" : tpl_bodies["arithmetic_2args"], "long_name" : "Division", "short_name" : "div",
+             "op" : "/",
+             "c": {
+                    "tpl_func_declaration" : tpl_func_declaration["c_operator_2args"], 
+                    "tpl_body_declaration" : tpl_body_declaration["c2args"], 
+                    "tpl_body_initialization" : tpl_body_init["2args"], 
+                    "tpl_body_load" : tpl_body_load["c2args"], 
+                    "tpl_body_loop_body" : tpl_body_loop_body["c_operator_2args"], 
+                    "tpl_body_loop_assert" : tpl_body_loop_assert["c_operator_2args"], 
+                    "tpl_body_operation" : tpl_body_operation["c_operator_2args"]},
+            "cpp": {
+                    "tpl_func_declaration" : tpl_func_declaration["cpp_operator_2args"], 
+                    "tpl_body_declaration" : tpl_body_declaration["cpp2args"], 
+                    "tpl_body_initialization" : tpl_body_init["2args"], 
+                    "tpl_body_load" : tpl_body_load["cpp2args"], 
+                    "tpl_body_loop_body" : tpl_body_loop_body["cpp_operator_2args"], 
+                    "tpl_body_loop_assert" : tpl_body_loop_assert["cpp_operator_2args"], 
+                    "tpl_body_operation" : tpl_body_operation["cpp_operator_2args"]},
+             "obj": {
+             
+                    "tpl_func_declaration" : tpl_func_declaration["obj_operator_2args"], 
+                    "tpl_body_declaration" : tpl_body_declaration["cpp2args"], 
+                    "tpl_body_initialization" : tpl_body_init["2args"], 
+                    "tpl_body_load" : tpl_body_load["obj2args"], 
                     "tpl_body_loop_body" : tpl_body_loop_body["cpp_operator_2args"], 
                     "tpl_body_loop_assert" : tpl_body_loop_assert["obj_operator_2args"], 
                     "tpl_body_operation" : tpl_body_operation["obj_operator_2args"]}
 
              },
 }
-"""
-    "sub" : {"template" : tpl_bodies["arithmetic_2args"], "long_name" : "Subtraction", "short_name" : "sub",
-             "op" : "-",
-             "tpl_func_declaration" : tpl_func_declaration["c_operator_2args"],
-             "tpl_body_declaration" : tpl_body_declaration["c2args"],
-             "tpl_body_initialization" : tpl_body_init["2args"],
-             "tpl_body_load" : tpl_body_load["c2args"],
-             "tpl_body_loop_body" : tpl_body_loop_body["operator_2args"], 
-             "tpl_body_loop_assert" : tpl_body_loop_assert["c_operator_2args"],
-             "tpl_body_operation" : tpl_body_operation["c_operator_2args"]},
-    "mul" : {"template" : tpl_bodies["arithmetic_2args"], "long_name" : "Multiplication", "short_name" : "mul",
-             "op" : "*",
-             "tpl_func_declaration" : tpl_func_declaration["c_operator_2args"],
-             "tpl_body_declaration" : tpl_body_declaration["c2args"],
-             "tpl_body_initialization" : tpl_body_init["2args"],
-             "tpl_body_load" : tpl_body_load["c2args"],
-             "tpl_body_loop_body" : tpl_body_loop_body["operator_2args"], 
-             "tpl_body_loop_assert" : tpl_body_loop_assert["c_operator_2args"],
-             "tpl_body_operation" : tpl_body_operation["c_operator_2args"]},
-    "div" : {"template" : tpl_bodies["arithmetic_2args"], "long_name" : "Division", "short_name" : "div",
-             "op" : "/",
-             "tpl_func_declaration" : tpl_func_declaration["c_operator_2args"],
-             "tpl_body_declaration" : tpl_body_declaration["c2args"],
-             "tpl_body_initialization" : tpl_body_init["2args"],
-             "tpl_body_load" : tpl_body_load["c2args"],
-             "tpl_body_loop_body" : tpl_body_loop_body["operator_2args"], 
-             "tpl_body_loop_assert" : tpl_body_loop_assert["c_operator_2args"],
-             "tpl_body_operation" : tpl_body_operation["c_operator_2args"]},
-"""
 
 
