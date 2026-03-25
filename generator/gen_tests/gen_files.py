@@ -85,7 +85,6 @@ def add_type_guards(func, implem, function,kind="c"):
     list_64 = []
     list_bw = []
     for dt in datatypes:
-        print(dt)
         if dt in ["int64", "uint64", "float64"]:
             list_64.append(dt)
         elif dt in ["int8", "uint8", "int16", "uint16"]:
@@ -150,6 +149,8 @@ def gen_func(func, scalar_type, reg_type,kind="c"):
     #we need to render twice because we have 2 levels of templates :)
     func_dict = gen_test_dict[func]["protos"][kind]
     func_template = gen_test_dict[func]["template"]
+    
+    
     func_template = Template(func_template, undefined=StrictUndefined)
     res = func_template.render( func_declaration=func_dict["tpl_func_declaration"],
                                 declaration=func_dict["tpl_body_declaration"],
@@ -203,7 +204,7 @@ def gen_test_files_all_funcs():
         os.makedirs(cpppath, exist_ok=True)
         os.makedirs(objpath, exist_ok=True)
         
-        with open(cpath + f'test_{func}.c', 'w') as f:
+        with open(cpath + f'test_c{func}.cpp', 'w') as f:
             f.write(gen_headers(kind="c"))
             f.write(c_file)
         
@@ -211,8 +212,10 @@ def gen_test_files_all_funcs():
             f.write(gen_headers(kind="cpp"))
             f.write(cpp_file)
         
-        with open(objpath + f'test_{func}.cpp', 'w') as f:
+        with open(objpath + f'test_obj_{func}.cpp', 'w') as f:
             f.write(gen_headers(kind="obj"))
             f.write(obj_file)
             
 gen_test_files_all_funcs()
+#testing gen load func for c
+#print(gen_file("load", kind="c"))
