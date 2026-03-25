@@ -9,14 +9,14 @@ sys.path.insert(1,path + '/../')
 
 tpl_func_declaration = {
     "c_operator_2args": """void test_cmipp_{{func}}_{{dt_ext}}(){""",
-    "cpp_operator_2args": """void test_cppmipp_{{func}}(){""",
-    "obj_operator_2args": """void test_objmipp_{{func}}(){""",
+    "cpp_operator_2args": """template <typename T>\nvoid test_cppmipp_{{func}}(){""",
+    "obj_operator_2args": """template <typename T>\nvoid test_objmipp_{{func}}(){""",
 }
 
 tpl_body_declaration = {
     "c1arg": """\tconst int vectorSize = {{size}}; {{dt_ext}}_t inputs[vectorSize];""",
     "c2args": """\tconst int vectorSize = {{size}};\n\t{{dt_ext}}_t inputs1[vectorSize],inputs2[vectorSize];""",
-    "cpp2args": """\tT inputs1[vectorSize],inputs2[vectorSize];""",
+    "cpp2args": """\tconst int vectorSize = mipp::N<T>(); T inputs1[vectorSize],inputs2[vectorSize];""",
     "cpp3args": """\tT inputs1[vectorSize],inputs2[vectorSize],inputs3[vectorSize];""",
 }
 
@@ -44,17 +44,19 @@ tpl_body_load = {
 \t{{reg_type}} r2 = mipp_load_{{dt_ext}}(inputs2);
 \t{{reg_type}} r3 = mipp_load_{{dt_ext}}(inputs3);""",
 
+    "cpp2args": """\t{{reg_type}} r1 = mipp::load<{{dt_ext}}>(inputs1), r2 = mipp::load<{{dt_ext}}>(inputs2);""",
 
 }
 
 tpl_body_operation = {
     "c_operator_2args": """\t{{reg_type}} r3 = mipp_{{func}}_{{dt_ext}}(r1, r2);""",
-    "cpp_operator_2args": """\t{{reg_type}} r3 = mipp::{{func}}<{{reg_type}}>(r1, r2);""",
+    "cpp_operator_2args": """\t{{reg_type}} r3 = mipp::{{func}}(r1, r2);""",
     "obj_operator_2args": """\t{{reg_type}} r3 = r1.{{func}}(r2);""",
 }
 
 tpl_body_loop_body = {
-    "operator_2args": """\t\t{{dt_ext}}_t res = inputs1[i] {{op}}  inputs2[i];""",
+    "c_operator_2args": """\t\t{{dt_ext}}_t res = inputs1[i] {{op}}  inputs2[i];""",
+    "cpp_operator_2args": """\t\tT res = inputs1[i] {{op}}  inputs2[i];""",
     "fn_call_2args": """\t\t{{dt_ext}}_t res = {{func}}(inputs1[i], inputs2[i]);""",
     "operator_1arg": """\t\t{{dt_ext}}_t res = {{op}} inputs[i];""",
     "fn_call_1arg": """\t\t{{dt_ext}}_t res = {{func}}(inputs[i]);""",
@@ -62,7 +64,7 @@ tpl_body_loop_body = {
 
 tpl_body_loop_assert = {
     "c_operator_2args": """\t\tREQUIRE(mipp_get_{{dt_ext}}(r3, i) == res);""",
-    "cpp_operator_2args": """\t\tREQUIRE(mipp::get<{{reg_type}}>(r3, i) == res);""",
+    "cpp_operator_2args": """\t\tREQUIRE(mipp::get(r3, i) == res);""",
     "obj_operator_2args": """\t\tREQUIRE(r3[i] == res);""",
     "mask_2args": """\t\tif(res) REQUIRE(mipp_get_{{dt_ext}}(r3, i) != 0); else REQUIRE(mipp_get_{{dt_ext}}(r3, i) == 0);""",
 }
@@ -96,14 +98,39 @@ tpl_bodies = {
 gen_test_dict = {
     "add" : {"template" : tpl_bodies["arithmetic_2args"], "long_name" : "Addition", "short_name" : "add",
              "op" : "+", 
-             "tpl_func_declaration" : tpl_func_declaration["c_operator_2args"],
-             "tpl_body_declaration" : tpl_body_declaration["c2args"],
-             "tpl_body_initialization" : tpl_body_init["2args"],
-             "tpl_body_load" : tpl_body_load["c2args"],
-             "tpl_body_loop_body" : tpl_body_loop_body["operator_2args"], 
-             "tpl_body_loop_assert" : tpl_body_loop_assert["c_operator_2args"], 
-             "tpl_body_operation" : tpl_body_operation["c_operator_2args"]},
-    
+             #actually we want to change the order of things 
+             #instead of template {c,cpp,obj} 
+             #we want c{templates}, cpp{templates}, obj{templates} to avoid having to repeat the same template for each implem
+             
+             "c": {
+                    "tpl_func_declaration" : tpl_func_declaration["c_operator_2args"], 
+                    "tpl_body_declaration" : tpl_body_declaration["c2args"], 
+                    "tpl_body_initialization" : tpl_body_init["2args"], 
+                    "tpl_body_load" : tpl_body_load["c2args"], 
+                    "tpl_body_loop_body" : tpl_body_loop_body["c_operator_2args"], 
+                    "tpl_body_loop_assert" : tpl_body_loop_assert["c_operator_2args"], 
+                    "tpl_body_operation" : tpl_body_operation["c_operator_2args"]},
+            "cpp": {
+                    "tpl_func_declaration" : tpl_func_declaration["cpp_operator_2args"], 
+                    "tpl_body_declaration" : tpl_body_declaration["cpp2args"], 
+                    "tpl_body_initialization" : tpl_body_init["2args"], 
+                    "tpl_body_load" : tpl_body_load["cpp2args"], 
+                    "tpl_body_loop_body" : tpl_body_loop_body["cpp_operator_2args"], 
+                    "tpl_body_loop_assert" : tpl_body_loop_assert["cpp_operator_2args"], 
+                    "tpl_body_operation" : tpl_body_operation["cpp_operator_2args"]},
+             "obj": {
+             
+                    "tpl_func_declaration" : tpl_func_declaration["obj_operator_2args"], 
+                    "tpl_body_declaration" : tpl_body_declaration["c2args"], 
+                    "tpl_body_initialization" : tpl_body_init["2args"], 
+                    "tpl_body_load" : tpl_body_load["c2args"], 
+                    "tpl_body_loop_body" : tpl_body_loop_body["cpp_operator_2args"], 
+                    "tpl_body_loop_assert" : tpl_body_loop_assert["obj_operator_2args"], 
+                    "tpl_body_operation" : tpl_body_operation["obj_operator_2args"]}
+
+             },
+}
+"""
     "sub" : {"template" : tpl_bodies["arithmetic_2args"], "long_name" : "Subtraction", "short_name" : "sub",
              "op" : "-",
              "tpl_func_declaration" : tpl_func_declaration["c_operator_2args"],
@@ -131,5 +158,6 @@ gen_test_dict = {
              "tpl_body_loop_body" : tpl_body_loop_body["operator_2args"], 
              "tpl_body_loop_assert" : tpl_body_loop_assert["c_operator_2args"],
              "tpl_body_operation" : tpl_body_operation["c_operator_2args"]},
-}
+"""
+
 
