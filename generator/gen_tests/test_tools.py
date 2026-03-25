@@ -14,12 +14,17 @@ sys.path.insert(1,path + '/../')
 #there is also a huge dict w template info
 #but that dict might be split at some point 
 
+
+#template for the function declaration
+#e.g. void test_cmipp_add_i8() or template <typename T> void test_cppmipp_add()
 tpl_func_declaration = {
     "c_operator_2args": """void test_cmipp_{{func}}_{{dt_ext}}(){""",
     "cpp_operator_2args": """template <typename T>\nvoid test_cppmipp_{{func}}(){""",
     "obj_operator_2args": """template <typename T>\nvoid test_objmipp_{{func}}(){""",
 }
 
+#template for the variable declaration and initialization
+#e.g. defining the input arrays
 tpl_body_declaration = {
     "c1arg": """\tconst int vectorSize = {{size}}; {{dt_ext}}_t inputs[vectorSize];""",
     "c2args": """\tconst int vectorSize = {{size}};\n\t{{dt_ext}}_t inputs1[vectorSize],inputs2[vectorSize];""",
@@ -27,6 +32,8 @@ tpl_body_declaration = {
     "cpp3args": """\tT inputs1[vectorSize],inputs2[vectorSize],inputs3[vectorSize];""",
 }
 
+#template for the initialization of the input arrays
+#e.g. filling them with some values
 tpl_body_init = {
     "1arg": """\tfor(int i = 0; i < vectorSize; i++)
 \t{
@@ -41,6 +48,7 @@ tpl_body_init = {
 \t}""",
 }
 
+#template for loading the input arrays into mipp registers
 tpl_body_load = {
     "c1arg": """\t{{reg_type}} r1 = mipp_load_{{dt_ext}}(inputs);""",
     
@@ -59,12 +67,16 @@ tpl_body_load = {
 
 }
 
+#template for the operation on the registers
+#e.g. r3 = r1 + r2 or r3 = mipp::add(r1, r2)
 tpl_body_operation = {
     "c_operator_2args": """\t{{reg_type}} r3 = mipp_{{func}}_{{dt_ext}}(r1, r2);""",
     "cpp_operator_2args": """\t{{reg_type}} r3 = mipp::{{func}}(r1, r2);""",
     "obj_operator_2args": """\t{{reg_type}} r3 = r1 {{op}} r2;""",
 }
 
+#template for the body of the loop that performs the op on the scalar inputs
+#TODO : some asserts don't use loop think about it @ some point
 tpl_body_loop_body = {
     "c_operator_2args": """\t\t{{dt_ext}}_t res = inputs1[i] {{op}}  inputs2[i];""",
     "cpp_operator_2args": """\t\tT res = inputs1[i] {{op}}  inputs2[i];""",
@@ -73,6 +85,8 @@ tpl_body_loop_body = {
     "fn_call_1arg": """\t\t{{dt_ext}}_t res = {{func}}(inputs[i]);""",
 }
 
+#template for the body of the loop that performs the assertion
+#TODO : some asserts don't use loop think about it @ some point
 tpl_body_loop_assert = {
     "c_operator_2args": """\t\tREQUIRE(mipp_get_{{dt_ext}}(r3, i) == res);""",
     "cpp_operator_2args": """\t\tREQUIRE(mipp::get(r3, i) == res);""",
@@ -80,6 +94,10 @@ tpl_body_loop_assert = {
     "mask_2args": """\t\tif(res) REQUIRE(mipp_get_{{dt_ext}}(r3, i) != 0); else REQUIRE(mipp_get_{{dt_ext}}(r3, i) == 0);""",
 }
 
+
+#"high level" template for the whole test
+#when rendered, creates a "specialized" template 
+#that is rendered again with the specific func, datatype, op, etc to create the final test function body
 tpl_bodies = {
     "arithmetic_2args": 
 """{{func_declaration}}
@@ -106,72 +124,12 @@ tpl_bodies = {
     "store": """\t\t//TODO: generate test body for store\n""",
 }
 
-gen_test_dict = {
-    "add" : {"template" : tpl_bodies["arithmetic_2args"], "long_name" : "Addition", "short_name" : "add",
-             "op" : "+", 
-             #actually we want to change the order of things 
-             #instead of template {c,cpp,obj} 
-             #we want c{templates}, cpp{templates}, obj{templates} to avoid having to repeat the same template for each implem
-             
-             "c": {
-                    "tpl_func_declaration" : tpl_func_declaration["c_operator_2args"], 
-                    "tpl_body_declaration" : tpl_body_declaration["c2args"], 
-                    "tpl_body_initialization" : tpl_body_init["2args"], 
-                    "tpl_body_load" : tpl_body_load["c2args"], 
-                    "tpl_body_loop_body" : tpl_body_loop_body["c_operator_2args"], 
-                    "tpl_body_loop_assert" : tpl_body_loop_assert["c_operator_2args"], 
-                    "tpl_body_operation" : tpl_body_operation["c_operator_2args"]},
-            "cpp": {
-                    "tpl_func_declaration" : tpl_func_declaration["cpp_operator_2args"], 
-                    "tpl_body_declaration" : tpl_body_declaration["cpp2args"], 
-                    "tpl_body_initialization" : tpl_body_init["2args"], 
-                    "tpl_body_load" : tpl_body_load["cpp2args"], 
-                    "tpl_body_loop_body" : tpl_body_loop_body["cpp_operator_2args"], 
-                    "tpl_body_loop_assert" : tpl_body_loop_assert["cpp_operator_2args"], 
-                    "tpl_body_operation" : tpl_body_operation["cpp_operator_2args"]},
-             "obj": {
-             
-                    "tpl_func_declaration" : tpl_func_declaration["obj_operator_2args"], 
-                    "tpl_body_declaration" : tpl_body_declaration["cpp2args"], 
-                    "tpl_body_initialization" : tpl_body_init["2args"], 
-                    "tpl_body_load" : tpl_body_load["obj2args"], 
-                    "tpl_body_loop_body" : tpl_body_loop_body["cpp_operator_2args"], 
-                    "tpl_body_loop_assert" : tpl_body_loop_assert["obj_operator_2args"], 
-                    "tpl_body_operation" : tpl_body_operation["obj_operator_2args"]}
 
-             },
-    "sub" : {"template" : tpl_bodies["arithmetic_2args"], "long_name" : "Subtraction", "short_name" : "sub",
-             "op" : "-",
-             "c": {
-                    "tpl_func_declaration" : tpl_func_declaration["c_operator_2args"], 
-                    "tpl_body_declaration" : tpl_body_declaration["c2args"], 
-                    "tpl_body_initialization" : tpl_body_init["2args"], 
-                    "tpl_body_load" : tpl_body_load["c2args"], 
-                    "tpl_body_loop_body" : tpl_body_loop_body["c_operator_2args"], 
-                    "tpl_body_loop_assert" : tpl_body_loop_assert["c_operator_2args"], 
-                    "tpl_body_operation" : tpl_body_operation["c_operator_2args"]},
-            "cpp": {
-                    "tpl_func_declaration" : tpl_func_declaration["cpp_operator_2args"], 
-                    "tpl_body_declaration" : tpl_body_declaration["cpp2args"], 
-                    "tpl_body_initialization" : tpl_body_init["2args"], 
-                    "tpl_body_load" : tpl_body_load["cpp2args"], 
-                    "tpl_body_loop_body" : tpl_body_loop_body["cpp_operator_2args"], 
-                    "tpl_body_loop_assert" : tpl_body_loop_assert["cpp_operator_2args"], 
-                    "tpl_body_operation" : tpl_body_operation["cpp_operator_2args"]},
-             "obj": {
-             
-                    "tpl_func_declaration" : tpl_func_declaration["obj_operator_2args"], 
-                    "tpl_body_declaration" : tpl_body_declaration["cpp2args"], 
-                    "tpl_body_initialization" : tpl_body_init["2args"], 
-                    "tpl_body_load" : tpl_body_load["obj2args"], 
-                    "tpl_body_loop_body" : tpl_body_loop_body["cpp_operator_2args"], 
-                    "tpl_body_loop_assert" : tpl_body_loop_assert["obj_operator_2args"], 
-                    "tpl_body_operation" : tpl_body_operation["obj_operator_2args"]}
-
-             },
-    
-    "mul" : {"template" : tpl_bodies["arithmetic_2args"], "long_name" : "Multiplication", "short_name" : "mul",
-             "op" : "*",
+#used to store "common" template patterns. 
+#for instance, arith_2args is a valid 
+#pattern for all arithmetic/logical operators with 2 args.
+prototype_registry = {
+    "arith_2args" : {
             "c": {
                     "tpl_func_declaration" : tpl_func_declaration["c_operator_2args"], 
                     "tpl_body_declaration" : tpl_body_declaration["c2args"], 
@@ -198,37 +156,34 @@ gen_test_dict = {
                     "tpl_body_loop_assert" : tpl_body_loop_assert["obj_operator_2args"], 
                     "tpl_body_operation" : tpl_body_operation["obj_operator_2args"]}
 
-            
-            },
-    "div" : {"template" : tpl_bodies["arithmetic_2args"], "long_name" : "Division", "short_name" : "div",
-             "op" : "/",
-             "c": {
-                    "tpl_func_declaration" : tpl_func_declaration["c_operator_2args"], 
-                    "tpl_body_declaration" : tpl_body_declaration["c2args"], 
-                    "tpl_body_initialization" : tpl_body_init["2args"], 
-                    "tpl_body_load" : tpl_body_load["c2args"], 
-                    "tpl_body_loop_body" : tpl_body_loop_body["c_operator_2args"], 
-                    "tpl_body_loop_assert" : tpl_body_loop_assert["c_operator_2args"], 
-                    "tpl_body_operation" : tpl_body_operation["c_operator_2args"]},
-            "cpp": {
-                    "tpl_func_declaration" : tpl_func_declaration["cpp_operator_2args"], 
-                    "tpl_body_declaration" : tpl_body_declaration["cpp2args"], 
-                    "tpl_body_initialization" : tpl_body_init["2args"], 
-                    "tpl_body_load" : tpl_body_load["cpp2args"], 
-                    "tpl_body_loop_body" : tpl_body_loop_body["cpp_operator_2args"], 
-                    "tpl_body_loop_assert" : tpl_body_loop_assert["cpp_operator_2args"], 
-                    "tpl_body_operation" : tpl_body_operation["cpp_operator_2args"]},
-             "obj": {
-             
-                    "tpl_func_declaration" : tpl_func_declaration["obj_operator_2args"], 
-                    "tpl_body_declaration" : tpl_body_declaration["cpp2args"], 
-                    "tpl_body_initialization" : tpl_body_init["2args"], 
-                    "tpl_body_load" : tpl_body_load["obj2args"], 
-                    "tpl_body_loop_body" : tpl_body_loop_body["cpp_operator_2args"], 
-                    "tpl_body_loop_assert" : tpl_body_loop_assert["obj_operator_2args"], 
-                    "tpl_body_operation" : tpl_body_operation["obj_operator_2args"]}
+    },
+}
 
-             },
+
+#contains necessary info to generate tests for a specific mipp function.
+gen_test_dict = {
+    "add" : {"template" : tpl_bodies["arithmetic_2args"], 
+             "long_name" : "Addition", "short_name" : "add",
+             "op" : "+", 
+             "protos" : prototype_registry["arith_2args"]
+            },
+             
+    "sub" : {"template" : tpl_bodies["arithmetic_2args"], 
+             "long_name" : "Subtraction", "short_name" : "sub",
+             "op" : "-",
+             "protos" : prototype_registry["arith_2args"]
+            },
+    
+    "mul" : {"template" : tpl_bodies["arithmetic_2args"], 
+             "long_name" : "Multiplication", "short_name" : "mul",
+             "op" : "*",
+             "protos" : prototype_registry["arith_2args"]
+            },
+    "div" : {"template" : tpl_bodies["arithmetic_2args"], 
+             "long_name" : "Division", "short_name" : "div",
+             "op" : "/",
+             "protos" : prototype_registry["arith_2args"]
+            },
 }
 
 
