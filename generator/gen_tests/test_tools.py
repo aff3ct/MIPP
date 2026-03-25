@@ -7,28 +7,83 @@ from tools import all_datatypes
 
 sys.path.insert(1,path + '/../')
 
+tpl_func_declaration = {
+    "c_operator_2args": """void test_cmipp_{{func}}_{{dt_ext}}(){""",
+    "cpp_operator_2args": """void test_cppmipp_{{func}}(){""",
+    "obj_operator_2args": """void test_objmipp_{{func}}(){""",
+}
 
-tpl_bodies = {
-    "arithmetic_2args": """
-\tconst int vectorSize = {{size}};
-\t{{dt_ext}}_t inputs1[vectorSize],inputs2[vectorSize];
-\tfor(int i = 0; i < vectorSize; i++)
+tpl_body_declaration = {
+    "c1arg": """\tconst int vectorSize = {{size}}; {{dt_ext}}_t inputs[vectorSize];""",
+    "c2args": """\tconst int vectorSize = {{size}};\n\t{{dt_ext}}_t inputs1[vectorSize],inputs2[vectorSize];""",
+    "cpp2args": """\tT inputs1[vectorSize],inputs2[vectorSize];""",
+    "cpp3args": """\tT inputs1[vectorSize],inputs2[vectorSize],inputs3[vectorSize];""",
+}
+
+tpl_body_init = {
+    "1arg": """\tfor(int i = 0; i < vectorSize; i++)
+\t{
+\t\t//todo : randomize inputs or smth
+\t\tinputs[i] = 2;
+\t}""",
+    "2args": """\tfor(int i = 0; i < vectorSize; i++)
 \t{
 \t\t//todo : randomize inputs or smth
 \t\tinputs1[i] = 2;
 \t\tinputs2[i] = 1;
-\t}
+\t}""",
+}
 
-\t{{reg_type}} r1 = mipp_load_{{dt_ext}}(inputs1);
+tpl_body_load = {
+    "c1arg": """\t{{reg_type}} r1 = mipp_load_{{dt_ext}}(inputs);""",
+    
+    "c2args": """\t{{reg_type}} r1 = mipp_load_{{dt_ext}}(inputs1);
+\t{{reg_type}} r2 = mipp_load_{{dt_ext}}(inputs2);""",
+
+    "c3args": """\t{{reg_type}} r1 = mipp_load_{{dt_ext}}(inputs1);
 \t{{reg_type}} r2 = mipp_load_{{dt_ext}}(inputs2);
-\t{{reg_type}} r3 = mipp_{{func}}_{{dt_ext}}(r1, r2);
+\t{{reg_type}} r3 = mipp_load_{{dt_ext}}(inputs3);""",
 
-\tfor (int i = 0; i < vectorSize; i++)
+
+}
+
+tpl_body_operation = {
+    "c_operator_2args": """\t{{reg_type}} r3 = mipp_{{func}}_{{dt_ext}}(r1, r2);""",
+    "cpp_operator_2args": """\t{{reg_type}} r3 = mipp::{{func}}<{{reg_type}}>(r1, r2);""",
+    "obj_operator_2args": """\t{{reg_type}} r3 = r1.{{func}}(r2);""",
+}
+
+tpl_body_loop_body = {
+    "operator_2args": """\t\t{{dt_ext}}_t res = inputs1[i] {{op}}  inputs2[i];""",
+    "fn_call_2args": """\t\t{{dt_ext}}_t res = {{func}}(inputs1[i], inputs2[i]);""",
+    "operator_1arg": """\t\t{{dt_ext}}_t res = {{op}} inputs[i];""",
+    "fn_call_1arg": """\t\t{{dt_ext}}_t res = {{func}}(inputs[i]);""",
+}
+
+tpl_body_loop_assert = {
+    "c_operator_2args": """\t\tREQUIRE(mipp_get_{{dt_ext}}(r3, i) == res);""",
+    "cpp_operator_2args": """\t\tREQUIRE(mipp::get<{{reg_type}}>(r3, i) == res);""",
+    "obj_operator_2args": """\t\tREQUIRE(r3[i] == res);""",
+    "mask_2args": """\t\tif(res) REQUIRE(mipp_get_{{dt_ext}}(r3, i) != 0); else REQUIRE(mipp_get_{{dt_ext}}(r3, i) == 0);""",
+}
+
+tpl_bodies = {
+    "arithmetic_2args": 
+"""{{func_declaration}}
+{{declaration}}
+{{init}}
+
+{{load}}
+{{operation}}
+
+\tfor(int i = 0; i < vectorSize; i++)
 \t{
-\t\t{{dt_ext}}_t res = inputs1[i] {{op}}  inputs2[i];
-\t\tREQUIRE(mipp_get_{{dt_ext}}(r3, i) == res);
-\t}    
+\t{{loop_body}}
+\t{{loop_assert}}
+\t}
+}
 """,
+
     "arithmetic_3args": """\t\t//TODO: generate test body for arithmetic 3 args\n""",
     "logical_2args": """\t\t//TODO: generate test body for logical 2 args\n""",
     "logical_3args": """\t\t//TODO: generate test body for logical 3 args\n""",
@@ -39,9 +94,42 @@ tpl_bodies = {
 }
 
 gen_test_dict = {
-    "add" : {"template" : tpl_bodies["arithmetic_2args"], "long_name" : "Addition", "short_name" : "add", "op" : "+"},
-    "sub" : {"template" : tpl_bodies["arithmetic_2args"], "long_name" : "Subtraction", "short_name" : "sub", "op" : "-"},
-    "mul" : {"template" : tpl_bodies["arithmetic_2args"], "long_name" : "Multiplication", "short_name" : "mul", "op" : "*"},
-    "div" : {"template" : tpl_bodies["arithmetic_2args"], "long_name" : "Division", "short_name" : "div", "op" : "/"},
+    "add" : {"template" : tpl_bodies["arithmetic_2args"], "long_name" : "Addition", "short_name" : "add",
+             "op" : "+", 
+             "tpl_func_declaration" : tpl_func_declaration["c_operator_2args"],
+             "tpl_body_declaration" : tpl_body_declaration["c2args"],
+             "tpl_body_initialization" : tpl_body_init["2args"],
+             "tpl_body_load" : tpl_body_load["c2args"],
+             "tpl_body_loop_body" : tpl_body_loop_body["operator_2args"], 
+             "tpl_body_loop_assert" : tpl_body_loop_assert["c_operator_2args"], 
+             "tpl_body_operation" : tpl_body_operation["c_operator_2args"]},
+    
+    "sub" : {"template" : tpl_bodies["arithmetic_2args"], "long_name" : "Subtraction", "short_name" : "sub",
+             "op" : "-",
+             "tpl_func_declaration" : tpl_func_declaration["c_operator_2args"],
+             "tpl_body_declaration" : tpl_body_declaration["c2args"],
+             "tpl_body_initialization" : tpl_body_init["2args"],
+             "tpl_body_load" : tpl_body_load["c2args"],
+             "tpl_body_loop_body" : tpl_body_loop_body["operator_2args"], 
+             "tpl_body_loop_assert" : tpl_body_loop_assert["c_operator_2args"],
+             "tpl_body_operation" : tpl_body_operation["c_operator_2args"]},
+    "mul" : {"template" : tpl_bodies["arithmetic_2args"], "long_name" : "Multiplication", "short_name" : "mul",
+             "op" : "*",
+             "tpl_func_declaration" : tpl_func_declaration["c_operator_2args"],
+             "tpl_body_declaration" : tpl_body_declaration["c2args"],
+             "tpl_body_initialization" : tpl_body_init["2args"],
+             "tpl_body_load" : tpl_body_load["c2args"],
+             "tpl_body_loop_body" : tpl_body_loop_body["operator_2args"], 
+             "tpl_body_loop_assert" : tpl_body_loop_assert["c_operator_2args"],
+             "tpl_body_operation" : tpl_body_operation["c_operator_2args"]},
+    "div" : {"template" : tpl_bodies["arithmetic_2args"], "long_name" : "Division", "short_name" : "div",
+             "op" : "/",
+             "tpl_func_declaration" : tpl_func_declaration["c_operator_2args"],
+             "tpl_body_declaration" : tpl_body_declaration["c2args"],
+             "tpl_body_initialization" : tpl_body_init["2args"],
+             "tpl_body_load" : tpl_body_load["c2args"],
+             "tpl_body_loop_body" : tpl_body_loop_body["operator_2args"], 
+             "tpl_body_loop_assert" : tpl_body_loop_assert["c_operator_2args"],
+             "tpl_body_operation" : tpl_body_operation["c_operator_2args"]},
 }
 
