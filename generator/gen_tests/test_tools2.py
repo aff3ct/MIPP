@@ -12,13 +12,13 @@ sys.path.insert(1, path + "/../")
 # test function declaration. In order to have a lot of genericity
 
 # not complete obv
-set_mask_op = {"set_k", "set1_k", "set0_k", "andb_k", "orb_k", "xorb_k"}
+set_mask_op = {"set_k", "set1_k", "set0_k", "andb_k", "orb_k", "xorb_k", "andnb_k", "notb_k"}
 
 #what's annoying is that andb_k exists in cmipp
 #but in cpp it's an overload of andb. So ig we can manually 
 #filter out the "_k" when passing the func to the template creator. 
 #I don't like this solution tbh
-set_remove_k = {"andb_k", "orb_k", "xorb_k"}
+set_remove_k = {"andb_k", "orb_k", "xorb_k", "andnb_k", "notb_k"}
 
 # -----------------------------------------------------------------------------
 # Template fragments
@@ -110,9 +110,13 @@ tpl_body_load = {
     "obj2args": """\t//{{reg_type}} r1(inputs1), r2(inputs2);//waiting for load to be fixed in obj layer
 \t{{reg_type}} r1, r2; r1.r = mipp::load<T>(inputs1); r2.r = mipp::load<T>(inputs2);""",
 
-    "c1arg_msk": """\t{{msk_type}} m1 = mipp_{{func}}_{{dt_ext}}(inputs1); {{reg_type}} r1 = mipp_toreg_{{dt_ext}}(m1);""",
-    "cpp1arg_msk": """\t{{msk_type}} m1 = mipp::{{func}}<{{dt_ext}}>(inputs1); {{reg_type}} r1 = mipp::toreg(m1);""",
-    "obj1arg_msk": """\t{{msk_type}} m1; m1.m = mipp::{{func}}<{{dt_ext}}>(inputs1); {{reg_type}} r1; r1.r = mipp::toreg(m1.m);""",
+    "c1arg_msk": """\t{{msk_type}} m1 = mipp_set_k_{{dt_ext}}(inputs1); //{{reg_type}} r1 = mipp_toreg_{{dt_ext}}(m1);""",
+    "cpp1arg_msk": """\t{{msk_type}} m1 = mipp::set_k<{{dt_ext}}>(inputs1); //{{reg_type}} r1 = mipp::toreg(m1);""",
+    "obj1arg_msk": """\t{{msk_type}} m1; m1.m = mipp::set_k<{{dt_ext}}>(inputs1); //{{reg_type}} r1; r1.r = mipp::toreg(m1.m);""",
+    
+    "c1arg_set1k": """\t{{msk_type}} m1 = mipp_set1_k_{{dt_ext}}(inputs1); {{reg_type}} r1 = mipp_toreg_{{dt_ext}}(m1);""",
+    "cpp1arg_set1k": """\t{{msk_type}} m1 = mipp::set1_k<{{dt_ext}}>(inputs1); {{reg_type}} r1 = mipp::toreg(m1);""",
+    "obj1arg_set1k": """\t{{msk_type}} m1; m1.m = mipp::set1_k<{{dt_ext}}>(inputs1); {{reg_type}} r1; r1.r = mipp::toreg(m1.m);""",
     
     "c2args_msk": """\t{{msk_type}} m1 = mipp_set_k_{{dt_ext}}(inputs1); {{msk_type}} m2 = mipp_set_k_{{dt_ext}}(inputs2);""",
     "cpp2args_msk": """\t{{msk_type}} m1 = mipp::set_k<T>(inputs1); {{msk_type}} m2 = mipp::set_k<T>(inputs2);""",
@@ -124,13 +128,25 @@ tpl_body_load = {
 }
 
 tpl_body_operation = {
+    
+    "c_operator_1arg": """\tr1 = mipp_{{func}}_{{dt_ext}}(r1);""",
+    "cpp_operator_1arg": """\tr1 = mipp::{{func}}(r1);""",
+    "obj_operator_1arg": """\tr1.r = mipp::{{func}}(r1.r);""",
+    
     "c_operator_2args": """\t{{reg_type}} r3 = mipp_{{func}}_{{dt_ext}}(r1, r2);""",
     "cpp_operator_2args": """\t{{reg_type}} r3 = mipp::{{func}}(r1, r2);""",
     "obj_operator_2args": """\t{{reg_type}} r3 = r1 {{op}} r2;""",
     
+    "obj_fn_call_2args": """\t{{reg_type}} r3; r3.r = mipp::{{func}}(r1.r, r2.r);""",
+    
     "c_store": """\tmipp_store_{{dt_ext}}(inputs2, r1);""",
     "cpp_store": """\tmipp::store(inputs2, r1);""",
     "obj_store": """\tmipp::store(inputs2, r1.r);""",
+    
+    
+    "c_msk_operator_1arg": """\t{{msk_type}} m2 = mipp_{{func}}_{{dt_ext}}(m1); {{reg_type}} r1 = mipp_toreg_{{dt_ext}}(m2);""",
+    "cpp_msk_operator_1arg": """\t{{msk_type}} m2 = mipp::{{func}}(m1); {{reg_type}} r1 = mipp::toreg(m2);""",
+    "obj_msk_operator_1arg": """\t{{msk_type}} m2; m2.m = mipp::{{func}}(m1.m); {{reg_type}} r1; r1.r = mipp::toreg(m2.m);""",
     
     
     "c_msk_operator_2args": """\t{{msk_type}} m3 = mipp_{{func}}_{{dt_ext}}(m1, m2); {{reg_type}} r1 = mipp_toreg_{{dt_ext}}(m3);""",
@@ -347,7 +363,7 @@ def mk_prototype_registry() -> dict:
     
     #andb can be derived from arith I think? 
     #we have to override a few things w the new templates though
-    andb_k = {
+    logical_2ops_msk = {
         "c": lang_proto(
             func_decl=tpl_func_declaration["c"],
             decl=tpl_body_declaration["c2args_int32"],
@@ -375,6 +391,19 @@ def mk_prototype_registry() -> dict:
             loop_assert=tpl_body_loop_assert["obj_mask_2args"],
             op=tpl_body_operation["obj_msk_operator_2args"],
         ),
+    }
+    #andnb_k is ~inputs1[i] & inputs2[i] so we can overload elegantly hopefuly
+    andnb_k = {
+        "c": override(logical_2ops_msk["c"], **{K_LOOP_BODY: "\t\tbool res = (~inputs1[i]) &  inputs2[i];"}),
+        "cpp": override(logical_2ops_msk["cpp"], **{K_LOOP_BODY: "\t\tbool res = (~inputs1[i]) &  inputs2[i];"}),
+        "obj": override(logical_2ops_msk["obj"], **{K_LOOP_BODY: "\t\tbool res = (~inputs1[i]) &  inputs2[i];"}),
+    }
+    
+    #same for andnb without mask, it's just ~inputs1[i] & inputs2[i]
+    andnb = {
+        "c": override(c_arith_2args, **{K_LOOP_BODY: "\t\t{{dt_ext}}_t res = (~inputs1[i]) &  inputs2[i];"}),
+        "cpp": override(cpp_arith_2args, **{K_LOOP_BODY: "\t\tT res = (~inputs1[i]) &  inputs2[i];"}),
+        "obj": override(obj_arith_2args, **{K_LOOP_BODY: "\t\tT res = (~inputs1[i]) &  inputs2[i];", K_OP : tpl_body_operation["obj_fn_call_2args"]}),
     }
 
     set_ = {
@@ -442,7 +471,7 @@ def mk_prototype_registry() -> dict:
             func_decl=tpl_func_declaration["c"],
             decl=tpl_body_declaration["c_scalar_1arg"],
             init="",
-            load=tpl_body_load["c1arg_msk"],
+            load=tpl_body_load["c1arg_set1k"],
             loop_body="\t\t{{dt_ext}}_t res = inputs1;",
             loop_assert=tpl_body_loop_assert["c_mask_2args"],
             op="",
@@ -451,7 +480,7 @@ def mk_prototype_registry() -> dict:
             func_decl=tpl_func_declaration["cpp"],
             decl=tpl_body_declaration["cpp_scalar_1arg"],
             init="",
-            load=tpl_body_load["cpp1arg_msk"],
+            load=tpl_body_load["cpp1arg_set1k"],
             loop_body="\t\tT res = inputs1;",
             loop_assert=tpl_body_loop_assert["cpp_mask_2args"],
             op="",
@@ -460,7 +489,7 @@ def mk_prototype_registry() -> dict:
             func_decl=tpl_func_declaration["obj"],
             decl=tpl_body_declaration["cpp_scalar_1arg"],
             init="",
-            load=tpl_body_load["obj1arg_msk"],
+            load=tpl_body_load["obj1arg_set1k"],
             loop_body="\t\tT res = inputs1;",
             loop_assert=tpl_body_loop_assert["obj_mask_2args"],
             op="",
@@ -589,6 +618,66 @@ def mk_prototype_registry() -> dict:
             op="\t{{reg_type}} r3; r3.r = mipp::blend(r1.r, r2.r, m1.m);",
         ),
     }
+    
+    arith_1arg = {
+        "c": lang_proto(
+            func_decl=tpl_func_declaration["c"],
+            decl=tpl_body_declaration["c1arg"],
+            init=tpl_body_init["1arg"],
+            load=tpl_body_load["c1arg"],
+            loop_body=tpl_body_loop_body["c_operator_1arg"],
+            loop_assert=tpl_body_loop_assert["c_operator_1arg"],
+            op=tpl_body_operation["c_operator_1arg"],
+        ),
+        "cpp": lang_proto(
+            func_decl=tpl_func_declaration["cpp"],
+            decl=tpl_body_declaration["cpp1arg"],
+            init=tpl_body_init["1arg"],
+            load=tpl_body_load["cpp1arg"],
+            loop_body=tpl_body_loop_body["cpp_operator_1arg"],
+            loop_assert=tpl_body_loop_assert["cpp_operator_1arg"],
+            op=tpl_body_operation["cpp_operator_1arg"],
+        ),
+        "obj": lang_proto(
+            func_decl=tpl_func_declaration["obj"],
+            decl=tpl_body_declaration["cpp1arg"],
+            init=tpl_body_init["1arg"],
+            load=tpl_body_load["obj1arg"],
+            loop_body=tpl_body_loop_body["obj_operator_1arg"],
+            loop_assert=tpl_body_loop_assert["obj_operator_1arg"],
+            op=tpl_body_operation["obj_operator_1arg"],
+        ),
+    }
+    
+    logi_1op_msk = {
+        "c": lang_proto(
+            func_decl=tpl_func_declaration["c"],
+            decl=tpl_body_declaration["c1arg_int32"],
+            init=tpl_body_init["1arg_msk"],
+            load=tpl_body_load["c1arg_msk"],
+            loop_body="\t\tbool res = ~inputs1[i];",
+            loop_assert=tpl_body_loop_assert["c_mask_2args"],
+            op=tpl_body_operation["c_msk_operator_1arg"],
+        ),
+        "cpp": lang_proto(
+            func_decl=tpl_func_declaration["cpp"],
+            decl=tpl_body_declaration["cpp1arg_int32"],
+            init=tpl_body_init["1arg_msk"],
+            load=tpl_body_load["cpp1arg_msk"],
+            loop_body="\t\tbool res = ~inputs1[i];",
+            loop_assert=tpl_body_loop_assert["cpp_mask_2args"],
+            op=tpl_body_operation["cpp_msk_operator_1arg"],
+        ),
+        "obj": lang_proto(
+            func_decl=tpl_func_declaration["obj"],
+            decl=tpl_body_declaration["cpp1arg_int32"],
+            init=tpl_body_init["1arg_msk"],
+            load=tpl_body_load["obj1arg_msk"],
+            loop_body="\t\tbool res = ~inputs1[i];",
+            loop_assert=tpl_body_loop_assert["obj_mask_2args"],
+            op=tpl_body_operation["obj_msk_operator_1arg"]
+        ),
+    }
 
     return {
         "arith_2args": arith_2args,
@@ -603,7 +692,11 @@ def mk_prototype_registry() -> dict:
         "set0_k": set0_k,
         "getfirst": getfirst,
         "blend": blend,
-        "andb_k": andb_k,
+        "logical_2ops_msk": logical_2ops_msk,
+        "andnb_k": andnb_k,
+        "andnb": andnb,
+        "arith_1arg": arith_1arg,
+        "logi_1op_msk": logi_1op_msk,
     }
 
 prototype_registry = mk_prototype_registry()
@@ -614,7 +707,7 @@ set_skip_float = {
     "orb",
     "xorb",
     "notb",
-    "andnotb",
+    "andnb",
 }
 
 def mk_gen_test_dict() -> dict:
@@ -652,7 +745,16 @@ def mk_gen_test_dict() -> dict:
         "get": spec("get", "Get", "get", "", "load"),
         "getfirst": spec("getfirst", "Get First Lane", "getfirst", "", "getfirst"),
         "blend": spec("blend", "Blend", "blend", "", "blend"),
-        "andb_k": spec("andb_k", "Bitwise And with Mask", "andb_k", "&", "andb_k"),
+        "andb_k": spec("andb_k", "Bitwise And with Mask", "andb_k", "&", "logical_2ops_msk"),
+        "orb_k": spec("orb_k", "Bitwise Or with Mask", "orb_k", "|", "logical_2ops_msk"),
+        "xorb_k": spec("xorb_k", "Bitwise Xor with Mask", "xorb_k", "^", "logical_2ops_msk"),
+        
+        "andnb_k": spec("andnb_k", "Bitwise And Not with Mask", "andnb_k", "", "andnb_k"),
+        "andnb": spec("andnb", "Bitwise And Not", "andnb", "", "andnb"),
+        
+        "notb": spec("notb", "Bitwise Not", "notb", "~", "arith_1arg"),
+        "notb_k": spec("notb_k", "Bitwise Not with Mask", "notb_k", "~", "logi_1op_msk"),
+        
     }
 
 gen_test_dict = mk_gen_test_dict()

@@ -245,6 +245,10 @@ def write_file_if_different(path, content):
 set_no_regen = {
     "blend", #blend broken on avx
     "set_k",
+    "andb_k",
+    "orb_k",
+    "xorb_k"
+    "notb_k"
 }
 
 #"main" func to regenerate all test files 
