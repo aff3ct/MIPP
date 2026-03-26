@@ -20,7 +20,7 @@ from implem_sve import implems_sve
 from implem_rvv import implems_rvv
 from headers_def import mipp_funcs
 from tools import *
-from test_tools import *
+from test_tools2 import *
 
 from implem_emu_sse import implems_emu_sse
 from implem_emu_avx import implems_emu_avx
@@ -121,9 +121,17 @@ def gen_test_type_guards(func, long_name, short_name, kind="c"):
             if kind == "c":
                 res += add_type_guards(func, implems["implem"], function=f'test_cmipp_{func}', kind=kind)
             elif kind == "cpp":
-                res += add_type_guards(func, implems["implem"], function=f'test_cppmipp_{func}', kind=kind)
+                if func in set_remove_k:
+                    #for cpp/obj we have to remove the "_k" from the function name in the test call because it's just an overload, not a separate function like in c. 
+                    res += add_type_guards(func, implems["implem"], function=f'test_cppmipp_{func.replace("_k", "")}', kind=kind)
+                else:
+                    res += add_type_guards(func, implems["implem"], function=f'test_cppmipp_{func}', kind=kind)
             elif kind == "obj":
-                res += add_type_guards(func, implems["implem"], function=f'test_objmipp_{func}', kind=kind)
+                    if func in set_remove_k:
+                        #for cpp/obj we have to remove the "_k" from the function name in the test call because it's just an overload, not a separate function like in c. 
+                        res += add_type_guards(func, implems["implem"], function=f'test_objmipp_{func.replace("_k", "")}', kind=kind)
+                    else:
+                        res += add_type_guards(func, implems["implem"], function=f'test_objmipp_{func}', kind=kind)
     res += "#else\n"
     res += f'#error "No implementation for {func} in any of the supported architectures"\n'
     res += "#endif\n"
@@ -168,7 +176,17 @@ def gen_func(func, scalar_type, reg_type,kind="c",msk_type=""):
                                 loop_assert=func_dict["tpl_body_loop_assert"])
     
     func_template = Template(res, undefined=StrictUndefined)
-    res = func_template.render(func=func, dt_ext=scalar_type, op=gen_test_dict[func]["op"], 
+    
+    
+    #terrible horrible hack to support the fact 
+    #that in cpp/obj the [logical]_k func is just an overload of [logical], so it doesn't have the "_k" in its name.
+    #explained at the beginning of test_tools2.py. Once I've got a good enough 
+    #number of tests going I will refactor the two files...
+    func_old = func
+    if kind != "c" and func in set_remove_k:
+        func = func.replace("_k", "")
+    
+    res = func_template.render(func=func, dt_ext=scalar_type, op=gen_test_dict[func_old]["op"], 
                                reg_type=reg_type, msk_type=msk_type,
                                 size="MIPP_N_" + scalar_type.upper())
 #Warning : this doesn't pose "portability" issues bc cpp/obj don't use the size argument. 
@@ -217,7 +235,7 @@ def write_file_if_different(path, content):
         with open(path, 'r') as f:
             existing_content = f.read()
         if existing_content == content:
-            print(f"No changes for {path}, skipping write.")
+            #print(f"No changes for {path}, skipping write.")
             return False
     with open(path, 'w') as f:
         f.write(content)
@@ -236,7 +254,7 @@ set_no_regen = {
 def gen_test_files_all_funcs():
     for func in gen_test_dict.keys():
         if func in set_no_regen:
-            print(f"Skipping regeneration of {func} tests.")
+            #print(f"Skipping regeneration of {func} tests.")
             continue
         c_file = gen_headers(kind="c") + gen_file(func, kind="c")
         cpp_file = gen_headers(kind="cpp") + gen_file(func, kind="cpp")
