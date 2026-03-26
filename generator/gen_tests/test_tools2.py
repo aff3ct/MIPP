@@ -77,12 +77,12 @@ tpl_body_init = {
 \t}""",
 
     "1arg_msk": """\tfor (auto i = 0; i < vectorSize; i++)
-\t\tinputs1[i] = i % 2 ? 1 : 0;
+\t\tinputs1[i] = i % 2 ? -1 : 0;
 """,
 
     "2args_msk": """\tfor (auto i = 0; i < vectorSize; i++){
-\t\tinputs1[i] = i % 2 ? 1 : 0;
-\t\tinputs2[i] = (i+1) % 2 ? 1 : 0;}
+\t\tinputs1[i] = i % 2 ? -1 : 0;
+\t\tinputs2[i] = (i+1) % 2 ? -1 : 0;}
 \tstd::mt19937 g;
 \tstd::shuffle(inputs1, inputs1 + vectorSize, g);
 \tstd::shuffle(inputs2, inputs2 + vectorSize, g);
@@ -360,9 +360,7 @@ def mk_prototype_registry() -> dict:
             op="",
         ),
     }
-    
-    #andb can be derived from arith I think? 
-    #we have to override a few things w the new templates though
+ 
     logical_2ops_msk = {
         "c": lang_proto(
             func_decl=tpl_func_declaration["c"],
@@ -678,6 +676,12 @@ def mk_prototype_registry() -> dict:
             op=tpl_body_operation["obj_msk_operator_1arg"]
         ),
     }
+    #only difference w arithmetic is that the return value of the op is mask type
+    comparison_2args = {
+        "c": override(arith_2args["c"], **{K_LOOP_BODY: "\t\tbool res = inputs1[i] == inputs2[i];", K_OP: "\t{{msk_type}} m3 = mipp_{{func}}_{{dt_ext}}(r1, r2); {{reg_type}} r3 = mipp_toreg_{{dt_ext}}(m3);"}),
+        "cpp": override(arith_2args["cpp"], **{K_LOOP_BODY: "\t\tbool res = inputs1[i] == inputs2[i];", K_OP: "\t{{msk_type}} m3 = mipp::{{func}}(r1, r2); {{reg_type}} r3 = mipp::toreg(m3);"}),
+        "obj": override(arith_2args["obj"], **{K_LOOP_BODY: "\t\tbool res = inputs1[i] == inputs2[i];", K_OP: "\t{{msk_type}} m3; m3.m = mipp::{{func}}(r1.m, r2.m); {{reg_type}} r3; r3.r = mipp::toreg(m3.m);"}),
+    }
 
     return {
         "arith_2args": arith_2args,
@@ -698,6 +702,8 @@ def mk_prototype_registry() -> dict:
         "arith_1arg": arith_1arg,
         "logi_1op_msk": logi_1op_msk,
     }
+    
+    
 
 prototype_registry = mk_prototype_registry()
 
@@ -754,6 +760,8 @@ def mk_gen_test_dict() -> dict:
         
         "notb": spec("notb", "Bitwise Not", "notb", "~", "arith_1arg"),
         "notb_k": spec("notb_k", "Bitwise Not with Mask", "notb_k", "~", "logi_1op_msk"),
+        
+        # "cmpeq": spec("cmpeq", "Compare Equal", "cmpeq", "==", "arith_2args"),
         
     }
 
