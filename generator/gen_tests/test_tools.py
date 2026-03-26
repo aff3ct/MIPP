@@ -220,7 +220,7 @@ prototype_registry = {
                     "tpl_body_loop_assert" : tpl_body_loop_assert["obj_operator_2args"], 
                     "tpl_body_operation" : tpl_body_operation["obj_operator_2args"]}
 
-    },
+    },      
     
     "sub_2args" : {
             "c": {
@@ -488,11 +488,88 @@ prototype_registry = {
             "tpl_body_operation" : ""
         },
     },
+    
+    
+    "getfirst" : {
+        "c" : {
+            "tpl_func_declaration" : tpl_func_declaration["c"], 
+            "tpl_body_declaration" : tpl_body_declaration["c1arg"], 
+            "tpl_body_initialization" : tpl_body_init["1arg"], 
+            "tpl_body_load" : tpl_body_load["c1arg"], 
+            "tpl_body_loop_body" : "\t\t{{dt_ext}}_t res = mipp_getfirst_{{dt_ext}}(r1);", 
+            "tpl_body_loop_assert" : "\t\tREQUIRE(res == inputs1[0]);", 
+            "tpl_body_operation" : ""
+        },
+        "cpp" : {
+            "tpl_func_declaration" : tpl_func_declaration["cpp"], 
+            "tpl_body_declaration" : tpl_body_declaration["cpp1arg"], 
+            "tpl_body_initialization" : tpl_body_init["1arg"], 
+            "tpl_body_load" : tpl_body_load["cpp1arg"], 
+            "tpl_body_loop_body" : "\t\tT res = mipp::getfirst(r1);", 
+            "tpl_body_loop_assert" : "\t\tREQUIRE(res == inputs1[0]);", 
+            "tpl_body_operation" : ""
+        },
+        "obj" : {
+            "tpl_func_declaration" : tpl_func_declaration["obj"], 
+            "tpl_body_declaration" : tpl_body_declaration["cpp1arg"], 
+            "tpl_body_initialization" : tpl_body_init["1arg"], 
+            "tpl_body_load" : tpl_body_load["obj1arg"], 
+            "tpl_body_loop_body" : "\t\tT res = r1[0];", 
+            "tpl_body_loop_assert" : "\t\tREQUIRE(res == inputs1[0]);", 
+            "tpl_body_operation" : ""
+        },
+    },
+    
+    #this is what the generated test for blend should look like 
+    #in the cpp version.
+    
+    
+    "blend" : {
+        "c" : {
+            "tpl_func_declaration" : tpl_func_declaration["c"], 
+            "tpl_body_declaration" : tpl_body_declaration["c2args"] + """\nint32_t mask1[vectorSize] = {0};""", 
+            "tpl_body_initialization" : tpl_body_init["2args"] + """\tfor (unsigned i = 0; i < vectorSize; i++)mask1[i] = i % 2 ? 1 : 0;\n""",
+            "tpl_body_load" : "\t{{msk_type}} m1 = mipp_set_k_{{dt_ext}}(mask1); {{reg_type}} r1 = mipp_set1_{{dt_ext}}(1); {{reg_type}} r2 = mipp_set1_{{dt_ext}}(2);",
+            "tpl_body_loop_body" : "\t\t{{dt_ext}}_t res = mipp_get_k_{{dt_ext}}(m1,i) ? mipp_get_{{dt_ext}}(r1, i) : mipp_get_{{dt_ext}}(r2, i);",
+            "tpl_body_loop_assert" : "\t\tREQUIRE(mipp_get_{{dt_ext}}(r3, i) == res);", 
+            "tpl_body_operation" : "\t{{reg_type}} r3 = mipp_blend_{{dt_ext}}(r1, r2, m1);"
+        },
+        "cpp" : {
+            "tpl_func_declaration" : tpl_func_declaration["cpp"], 
+            "tpl_body_declaration" : tpl_body_declaration["cpp2args"] + """\nint32_t mask1[vectorSize] = {0};""", 
+            "tpl_body_initialization" : tpl_body_init["2args"] + """\tfor (unsigned i = 0; i < vectorSize; i++)mask1[i] = i % 2 ? 1 : 0;\n""",
+            "tpl_body_load" : "\t{{msk_type}} m1 = mipp::set_k<{{dt_ext}}>(mask1); {{reg_type}} r1 = mipp::set1<{{dt_ext}}>(1); {{reg_type}} r2 = mipp::set1<{{dt_ext}}>(2);",
+            "tpl_body_loop_body" : "\t\t{{dt_ext}} res = mipp::get(m1,i) ? mipp::get(r1, i) : mipp::get(r2, i);",
+            "tpl_body_loop_assert" : "\t\tREQUIRE(mipp::get(r3, i) == res);", 
+            "tpl_body_operation" : "\t{{reg_type}} r3 = mipp::blend(r1, r2, m1);"
+        },
+        "obj" : {
+            "tpl_func_declaration" : tpl_func_declaration["obj"], 
+            "tpl_body_declaration" : tpl_body_declaration["cpp2args"] + """\nint32_t mask1[vectorSize] = {0};""", 
+            "tpl_body_initialization" : tpl_body_init["2args"] + """\tfor (unsigned i = 0; i < vectorSize; i++)mask1[i] = i % 2 ? 1 : 0;\n""",
+            "tpl_body_load" : "\t{{msk_type}} m1; m1.m = mipp::set_k<{{dt_ext}}>(mask1); {{reg_type}} r1; r1.r = mipp::set1<{{dt_ext}}>(1); {{reg_type}} r2; r2.r = mipp::set1<{{dt_ext}}>(2);",
+            "tpl_body_loop_body" : "\t\t{{dt_ext}} res = mipp::get(m1.m,i) ? mipp::get(r1.r, i) : mipp::get(r2.r, i);",
+            "tpl_body_loop_assert" : "\t\tREQUIRE(r3[i] == res);", 
+            "tpl_body_operation" : "\t{{reg_type}} r3; r3.r = mipp::blend(r1.r, r2.r, m1.m);"
+        }
+    },
 }
 
+#float support of logical operators 
+#is odd. Will come back to them later.
+set_skip_float = {
+    "andb",
+    "orb",
+    "xorb",
+    "notb",
+    "andnotb",
+}
 
 #contains necessary info to generate tests for a specific mipp function.
 gen_test_dict = {
+    
+    #arithmetic functions
+    
     "add" : {"template" : tpl_bodies["generic_for_loop"], 
              "long_name" : "Addition", "short_name" : "add",
              "op" : "+", 
@@ -515,6 +592,24 @@ gen_test_dict = {
              "op" : "/",
              "protos" : prototype_registry["arith_2args"]
             },
+    "andb" : {"template" : tpl_bodies["generic_for_loop"], 
+             "long_name" : "Bitwise And", "short_name" : "andb",
+             "op" : "&",
+             "protos" : prototype_registry["arith_2args"]
+            },
+    "orb" : {"template" : tpl_bodies["generic_for_loop"], 
+             "long_name" : "Bitwise Or", "short_name" : "orb",
+             "op" : "|",
+             "protos" : prototype_registry["arith_2args"]
+            },
+    "xorb" : {"template" : tpl_bodies["generic_for_loop"], 
+             "long_name" : "Bitwise Xor", "short_name" : "xorb",
+             "op" : "^",
+             "protos" : prototype_registry["arith_2args"]
+            },
+
+    
+    # memory access functions
     "load" : {"template" : tpl_bodies["generic_for_loop"], 
              "long_name" : "Load", "short_name" : "load",
              "op" : "",
@@ -523,7 +618,7 @@ gen_test_dict = {
     "loadu" : {"template" : tpl_bodies["generic_for_loop"], 
              "long_name" : "Load Unaligned", "short_name" : "loadu",
              "op" : "",
-             "protos" : prototype_registry["load"]#loadu has the same prototype as load
+             "protos" : prototype_registry["load"]
             },
     
     "store" : {"template" : tpl_bodies["generic_for_loop"],
@@ -574,6 +669,37 @@ gen_test_dict = {
                 "op" : "",
                 "protos" : prototype_registry["set0_k"]
     },
+    
+    "get" : {"template" : tpl_bodies["generic_for_loop"],
+             "long_name" : "Get", "short_name" : "get",
+             "op" : "",
+             "protos" : prototype_registry["load"]
+    },
+    
+    "getfirst" : {"template" : tpl_bodies["generic_for_loop"],
+                  "long_name" : "Get First Lane", "short_name" : "getfirst",
+                   "op" : "",
+                   "protos" : prototype_registry["getfirst"]
+    },
+    
+    "blend" : {"template" : tpl_bodies["generic_for_loop"],
+             "long_name" : "Blend", "short_name" : "blend",
+             "op" : "",
+             "protos" : prototype_registry["blend"]
+    },
+    
+    "andb_k" : {"template" : tpl_bodies["generic_for_loop"],
+             "long_name" : "Bitwise And with Mask", "short_name" : "andb_k",
+             "op" : "",
+             "protos" : prototype_registry["set_k"]
+    },
+    #"orb_k" : {"template" : tpl_bodies["generic_for_loop"],
+    #         "long_name" : "Bitwise Or with Mask", "short_name" : "orb_k",
+    #         "op" : "",
+    #         "protos" : prototype_registry["set_k"]
+    #},
+    
+    #"get_k" : {}
 }
 
 

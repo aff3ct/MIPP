@@ -3,6 +3,7 @@ import os
 import sys
 from jinja2 import Template, StrictUndefined
 
+
 path = os.getcwd()
 
 sys.path.insert(1,path +'/../simd_ext/avx512/')
@@ -63,6 +64,8 @@ def get_defined_dttypes(func, implem):
     for dt in func_dt:
             datatypes.append(dt["datatypes"])
     datatypes = list(set([item for sublist in datatypes for item in sublist]))
+    if func in set_skip_float:
+        datatypes = [dt for dt in datatypes if dt not in ["float32", "float64"]]
     return datatypes
 
 #add the type guard for 1 func in 1 implem
@@ -85,6 +88,7 @@ def add_type_guards(func, implem, function,kind="c"):
 
     list_64 = []
     list_bw = []
+    datatypes.sort()
     for dt in datatypes:
         if dt in ["int64", "uint64", "float64"]:
             list_64.append(dt)
@@ -94,12 +98,14 @@ def add_type_guards(func, implem, function,kind="c"):
             res += section.format(dt=dt, function=function)
     
     if list_64 != []:
+        list_64.sort()
         res += f'#if defined(MIPP_64BIT)\n'
         for dt in list_64:
             res += section.format(dt=dt, function=function)
         res += "#endif\n"
     
     if list_bw != []:
+        list_bw.sort()
         res += f'#if defined(MIPP_BW)\n'
         for dt in list_bw:
             res += section.format(dt=dt, function=function)
@@ -110,8 +116,8 @@ def add_type_guards(func, implem, function,kind="c"):
 def gen_test_type_guards(func, long_name, short_name, kind="c"):
     res = f'\nTEST_CASE("{long_name} - {kind}", "[{short_name}]") {{\n'
     for implems in implem_dict.values():
+        res += implems["guard"] + "\n"
         if func in implems["implem"]:
-            res += implems["guard"] + "\n"
             if kind == "c":
                 res += add_type_guards(func, implems["implem"], function=f'test_cmipp_{func}', kind=kind)
             elif kind == "cpp":
@@ -172,6 +178,8 @@ def gen_func(func, scalar_type, reg_type,kind="c",msk_type=""):
 def gen_funcs_all_datatypes(func, kind="c", register="rvd", mask="rvm"):
     res = ""
     datatypes = mipp_funcs[func]["datatypes"]
+    if func in set_skip_float:
+        datatypes = [dt for dt in datatypes if dt not in ["float32", "float64"]]
     if kind == "c":
         for dt in datatypes:
             res += gen_func(func, dt, reg_type=f"{register}_"+dt+"_t", kind=kind, msk_type=f'{mask}_'+dt+'_t')
@@ -209,31 +217,43 @@ def write_file_if_different(path, content):
         with open(path, 'r') as f:
             existing_content = f.read()
         if existing_content == content:
-            return False #no need to write the file
+            print(f"No changes for {path}, skipping write.")
+            return False
     with open(path, 'w') as f:
         f.write(content)
-    return True #file was written
+    return True
 
+
+set_no_regen = {
+    "blend", #blend broken on avx
+    "set_k",
+}
+
+#"main" func to regenerate all test files 
+#for all funcs. 
+#n.b: only write files if they were changed. Allows to avoid 
+#recompiling everything all the time
 def gen_test_files_all_funcs():
     for func in gen_test_dict.keys():
-        #concat headers and func for each kind of test and write to file
+        if func in set_no_regen:
+            print(f"Skipping regeneration of {func} tests.")
+            continue
         c_file = gen_headers(kind="c") + gen_file(func, kind="c")
         cpp_file = gen_headers(kind="cpp") + gen_file(func, kind="cpp")
         obj_file = gen_headers(kind="obj") + gen_file(func, kind="obj")
         
-        #mkdir if not exists
-        os.makedirs(cpath, exist_ok=True)
-        os.makedirs(cpppath, exist_ok=True)
-        os.makedirs(objpath, exist_ok=True)
-        
-        with open(cpath + f'test_c{func}.cpp', 'w') as f:
-            write_file_if_different(cpath + f'test_c{func}.cpp', c_file)
-        
-        with open(cpppath + f'test_{func}.cpp', 'w') as f:
-            write_file_if_different(cpppath + f'test_{func}.cpp', cpp_file)
-        
-        with open(objpath + f'test_obj_{func}.cpp', 'w') as f:
-            write_file_if_different(objpath + f'test_obj_{func}.cpp', obj_file)
+        if not os.path.exists(tmp_path):
+            os.makedirs(tmp_path)
+        if not os.path.exists(cpath):
+            os.makedirs(cpath)
+        if not os.path.exists(cpppath):
+            os.makedirs(cpppath)
+        if not os.path.exists(objpath):
+            os.makedirs(objpath)
+
+        write_file_if_different(cpath + f'test_c{func}.cpp', c_file)
+        write_file_if_different(cpppath + f'test_{func}.cpp', cpp_file)
+        write_file_if_different(objpath + f'test_obj_{func}.cpp', obj_file)
             
 gen_test_files_all_funcs()
 #testing gen load func for c
