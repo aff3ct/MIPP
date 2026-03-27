@@ -1,9 +1,6 @@
 from .common import set_skip_float, set_remove_k, test_function_name
-#from .layer_c import gen_test_dict as gen_test_dict_c
-#from .layer_cpp import gen_test_dict as gen_test_dict_cpp
-#from .layer_obj import gen_test_dict as gen_test_dict_obj
 
-def get_gen_test_dict(kind: str) -> dict:
+def get_gen_test_dict(kind: str):
     if kind == "c":
         from . import layer_c
         return layer_c.gen_test_dict

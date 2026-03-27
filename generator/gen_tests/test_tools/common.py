@@ -1,15 +1,13 @@
-# Shared helpers + function catalog (layer-agnostic)
+from __future__ import annotations
 
-# float support of logical operators is odd. Will come back to them later.
-set_skip_float = {
-    "andb",
-    "orb",
-    "xorb",
-    "notb",
-    "andnb",
-}
+from dataclasses import dataclass
+from typing import Optional
 
-# In cpp/obj some *_k are overloads without "_k" in the function name.
+# --------------------------------------------
+# Miscelaneous utilities for layers
+# --------------------------------------------
+
+set_skip_float = {"andb", "orb", "xorb", "notb", "andnb"}
 set_remove_k = {"andb_k", "orb_k", "xorb_k", "andnb_k", "notb_k"}
 
 def test_function_name(kind: str, func: str):
@@ -17,111 +15,164 @@ def test_function_name(kind: str, func: str):
         return func.replace("_k", "")
     return func
 
-# -----------------------------------------------------------------------------
-# Template key names (kept close to old code, but simplified)
-# -----------------------------------------------------------------------------
-K_FUNC_DECL = "func_decl"
-K_DECL = "decl"
-K_INIT = "init"
-K_LOAD = "load"
-K_OP = "operation"
-K_LOOP_BODY = "loop_body"
-K_LOOP_ASRT = "loop_assert"
 
-def lang_proto(*, func_decl, decl, init, load, operation, loop_body, loop_assert):
-    return {
-        K_FUNC_DECL: func_decl,
-        K_DECL: decl,
-        K_INIT: init,
-        K_LOAD: load,
-        K_OP: operation,
-        K_LOOP_BODY: loop_body,
-        K_LOOP_ASRT: loop_assert,
-    }
+# --------------------------------------------
+# Shapes 
+# --------------------------------------------
 
-def override(proto: dict, **updates):
-    out = dict(proto)
-    out.update(updates)
-    return out
+SHAPE_RET_REG_1ARG_PTR = "ret_reg_1arg_ptr"
+SHAPE_RET_REG_2ARGS_MASK_PTR = "ret_reg_2args_mask_ptr"
+SHAPE_RET_VOID_3ARGS_PTR_MSK_REG = "ret_void_3args_ptr_msk_reg"
+SHAPE_RET_VOID_2ARGS_PTR_REG = "ret_void_2args_ptr_reg"
+SHAPE_RET_REG_2ARGS_PTR_VINDEX = "ret_reg_2args_ptr_vindex"
+SHAPE_RET_REG_3ARGS_PTR_VINDEX_MSK = "ret_reg_3args_ptr_vindex_msk"
+SHAPE_RET_REG_1ARG_VAL = "ret_reg_1arg_val"
+SHAPE_RET_REG_1ARG_NELE = "ret_reg_1arg_Nele"
+SHAPE_RET_MSK_1ARG_NELE = "ret_msk_1arg_Nele"
+SHAPE_RET_REG_1ARG_I32 = "ret_reg_1arg_i32"
+SHAPE_RET_MSK_1ARG_I32 = "ret_msk_1arg_i32"
+SHAPE_RET_MSK_1ARG_VAL = "ret_msk_1 arg_val"
+SHAPE_RET_REG_0ARG = "ret_reg_0arg"
+SHAPE_RET_MSK_0ARG = "ret_msk_0arg"
+SHAPE_RET_REG_1ARG_REG = "ret_reg_1arg_reg"
+SHAPE_RET_VAL_1ARG_REG = "ret_val_1arg_reg"
+SHAPE_RET_MSK_1ARG_MSK = "ret_msk_1arg_msk"
+SHAPE_RET_MSK_1ARG_REG = "ret_msk_1arg_reg"
+SHAPE_RET_REG_1ARG_MSK = "ret_reg_1arg_msk"
+SHAPE_RET_REG_2ARGS_REG = "ret_reg_2args_reg"
+SHAPE_RET_REG_2ARGS_REG_MSK = "ret_reg_2args_reg_msk"
+SHAPE_RET_MSK_2ARGS_REG = "ret_msk_2args_reg"
+SHAPE_RET_MSK_2ARGS_MSK = "ret_msk_2args_msk"
+SHAPE_RET_REG_2ARGS_REG_VAL = "ret_reg_2args_reg_val"
+SHAPE_RET_REG_3ARGS_REG = "ret_reg_3args_reg"
+SHAPE_RET_REG_3ARGS_2REG_1MSK = "ret_reg_3args_2reg_1msk"
+SHAPE_RET_REG_3ARGS_1REG = "ret_reg_3args_1reg_2val"
+SHAPE_RET_REG_3ARGS_2REG_1MSK = "ret_reg_3args_2reg_1msk"
+SHAPE_RET_REG_3ARGS_1MSK_2REG = "ret_reg_3args_1msk_2reg"
+SHAPE_RET_I32_1ARG_MSK = "ret_i32_1arg_msk"
+SHAPE_RET_I32_2ARGS_MSK = "ret_i32_2args_msk"
+SHAPE_RET_VAL_2ARGS_REG_VAL = "ret_val_2args_reg_val"
+SHAPE_RET_VAL_2ARGS_MSK_VAL = "ret_val_2args_msk_val"
 
-def classify_proto(proto: dict):
-    ret_t = proto["ret"]["type"]          # "reg", "msk", "val", False
+
+SUPPORTED_SHAPES = {
+    SHAPE_RET_REG_2ARGS_REG, #shape for airthmetic and bitwise binary operators
+    SHAPE_RET_MSK_2ARGS_REG, #shape for comparison operators (cmp_2reg)
+    SHAPE_RET_REG_1ARG_PTR,
+    SHAPE_RET_VOID_2ARGS_PTR_REG,
+    SHAPE_RET_REG_1ARG_NELE, #shape for set only
+}
+
+def classify_mipp_proto(proto: dict):
+    """
+    proto is one of headers_def.protos[...] (ret/args with "type" keys).
+    """
+    ret_t = proto["ret"]["type"]              # "reg", "msk", "val", or False
     args_t = [a["type"] for a in proto["args"]]
 
     if ret_t == "reg" and args_t == ["reg", "reg"]:
-        return "reg_2reg_binop"
+        return SHAPE_RET_REG_2ARGS_REG
     if ret_t == "msk" and args_t == ["reg", "reg"]:
-        return "cmp_2reg"          # cmpeq/cmpgt/...
-    if ret_t == "msk" and args_t == ["msk", "msk"]:
-        return "msk_2msk_binop"
+        return SHAPE_RET_MSK_2ARGS_REG
     if ret_t == "reg" and args_t == ["ptr"]:
-        return "load"
+        return SHAPE_RET_REG_1ARG_PTR
     if ret_t is False and args_t == ["ptr", "reg"]:
-        return "store"
-    ...
-    return "unknown"
+        return SHAPE_RET_VOID_2ARGS_PTR_REG
+    if ret_t == "reg" and args_t == ["Nele"]:
+        return SHAPE_RET_REG_1ARG_NELE
 
-# -----------------------------------------------------------------------------
-# Function catalog (shared for all layers)
-# proto_key selects which prototype to use for that layer.
-# op is used in the 2-level templating in gen_files.py.
-# -----------------------------------------------------------------------------
-FUNCTION_SPECS = {
-    # arithmetic
-    "add":     dict(long_name="Addition",     short_name="add",     op="+",  proto_key="arith_2args"),
-    "sub":     dict(long_name="Subtraction",  short_name="sub",     op="-",  proto_key="sub_2args"),
-    "mul":     dict(long_name="Multiplication", short_name="mul",   op="*",  proto_key="arith_2args"),
-    "div":     dict(long_name="Division",     short_name="div",     op="/",  proto_key="arith_2args"),
-    "andb":    dict(long_name="Bitwise And",  short_name="andb",    op="&",  proto_key="arith_2args"),
-    "orb":     dict(long_name="Bitwise Or",   short_name="orb",     op="|",  proto_key="arith_2args"),
-    "xorb":    dict(long_name="Bitwise Xor",  short_name="xorb",    op="^",  proto_key="arith_2args"),
+    return None
 
-    # memory access
-    "load":    dict(long_name="Load",         short_name="load",    op="",   proto_key="load"),
-    "loadu":   dict(long_name="Load Unaligned", short_name="loadu", op="",   proto_key="load"),
-    "store":   dict(long_name="Store",        short_name="store",   op="",   proto_key="store"),
-    "storeu":  dict(long_name="Store Unaligned", short_name="storeu", op="", proto_key="store"),
+# --------------------------------------------
+# Template contract expected by gen_files.py
+# --------------------------------------------
 
-    # set / get
-    "set":     dict(long_name="Set",          short_name="set",     op="",   proto_key="set"),
-    "set_k":   dict(long_name="Set Mask",     short_name="set_k",   op="",   proto_key="set_k"),
-    "set1":    dict(long_name="Set to scalar", short_name="set1",   op="",   proto_key="set1"),
-    "set1_k":  dict(long_name="Set Mask to scalar", short_name="set1_k", op="", proto_key="set1_k"),
-    "set0":    dict(long_name="Set to zero",  short_name="set0",    op="",   proto_key="set0"),
-    "set0_k":  dict(long_name="Set Mask to zero", short_name="set0_k", op="", proto_key="set0_k"),
+@dataclass(frozen=True)
+class TemplateParts:
+    func_decl: str
+    decl: str
+    init: str
+    load: str
+    operation: str
+    loop_body: str
+    loop_assert: str
 
-    "get":     dict(long_name="Get",          short_name="get",     op="",   proto_key="load"),
-    "getfirst":dict(long_name="Get First Lane", short_name="getfirst", op="", proto_key="getfirst"),
-    "blend":   dict(long_name="Blend",        short_name="blend",   op="",   proto_key="blend"),
+# --------------------------------------------
+# 
+# --------------------------------------------
 
-    # mask logical ops
-    "andb_k":  dict(long_name="Bitwise And with Mask", short_name="andb_k", op="&", proto_key="logical_2ops_msk"),
-    "orb_k":   dict(long_name="Bitwise Or with Mask",  short_name="orb_k",  op="|", proto_key="logical_2ops_msk"),
-    "xorb_k":  dict(long_name="Bitwise Xor with Mask", short_name="xorb_k", op="^", proto_key="logical_2ops_msk"),
+def infer_op(func: str):
+    """
+    For arithmetic/binary/order operators, get the C++ operator symbol from tools.py maps.
+    Returns "" for non-operators
+    """
+    from tools import operators_arithm, operators_binary, operators_order
 
-    "andnb_k": dict(long_name="Bitwise And Not with Mask", short_name="andnb_k", op="", proto_key="andnb_k"),
-    "andnb":   dict(long_name="Bitwise And Not", short_name="andnb", op="", proto_key="andnb"),
+    if func in operators_arithm:
+        return operators_arithm[func]["operation"]
+    if func in operators_binary:
+        return operators_binary[func]["operation"]
+    if func in operators_order:
+        return operators_order[func]["operation"]
+    return ""
 
-    "notb":    dict(long_name="Bitwise Not", short_name="notb", op="~", proto_key="arith_1arg"),
-    "notb_k":  dict(long_name="Bitwise Not with Mask", short_name="notb_k", op="~", proto_key="logi_1op_msk"),
-    
-    "cmpeq" : dict(long_name="Comparison equal", short_name="cmpeq", op="==", proto_key="arith_2args_r3msk"),
-}
+# --------------------------------------------
+# 
+# --------------------------------------------
 
-def mk_gen_test_dict(*, template: str, prototype_registry: dict):
+def infer_long_name(func: str):
+    return func
+
+def infer_short_name(func: str):
+    return func
+
+# --------------------------------------------
+# Build gen_test_dict for a layer from mipp_funcs + shapes
+# --------------------------------------------
+
+def build_layer_gen_test_dict(
+    *,
+    layer_name: str,
+    template: str,
+    mipp_funcs: dict,
+    shape_templates: dict[str, TemplateParts],
+    deny_funcs: Optional[set[str]] = None,
+):
+    """
+    Returns dict[func] with keys: template/long_name/short_name/op/proto.
+    Skips funcs whose shape isn't implemented by this layer.
+    """
     out = {}
-    for func, spec in FUNCTION_SPECS.items():
-        proto_key = spec["proto_key"]
-        proto = prototype_registry.get(proto_key)
-        if proto is None:
-            print(KeyError + proto_key)
+    deny_funcs = deny_funcs or set()
+
+    for func, meta in mipp_funcs.items():
+        if func in deny_funcs:
+            continue
+
+        proto = meta["proto"]
+        shape = classify_mipp_proto(proto)
+        if shape is None:
+            continue
+
+        parts = shape_templates.get(shape)
+        if parts is None:
+            # layer doesn't implement this shape
             continue
 
         out[func] = {
             "template": template,
-            "long_name": spec["long_name"],
-            "short_name": spec["short_name"],
-            "op": spec["op"],
-            "proto": proto,
+            "long_name": infer_long_name(func),
+            "short_name": infer_short_name(func),
+            "op": infer_op(func),
+            "proto": {
+                "func_decl": parts.func_decl,
+                "decl": parts.decl,
+                "init": parts.init,
+                "load": parts.load,
+                "operation": parts.operation,
+                "loop_body": parts.loop_body,
+                "loop_assert": parts.loop_assert,
+            },
         }
+
     return out

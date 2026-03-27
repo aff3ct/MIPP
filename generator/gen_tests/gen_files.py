@@ -282,7 +282,7 @@ set_skip_testing = {
     "andnb_k"
 }
 
-def comment_out_cpp_file(content: str, reason: str) -> str:
+def comment_out_cpp_file(content: str, reason: str):
     # Wrap whole file as a comment so it becomes an inert translation unit.
     # Keep a short header outside the comment so it's obvious in diffs.
     header = (
@@ -296,8 +296,10 @@ def gen_test_files_all_funcs(kind="c"):
     """
     kind: "c", "cpp", "obj", or "all"
     Regenerates only the requested layer(s) for all functions.
+
+    Important: functions available can differ per layer, so we iterate over the
+    union of keys from the enabled layer dictionaries.
     """
-    print("kind is : " + kind)
     if kind not in {"c", "cpp", "obj", "all"}:
         raise ValueError(f"Invalid kind: {kind!r}")
 
@@ -305,54 +307,65 @@ def gen_test_files_all_funcs(kind="c"):
     regen_cpp = kind in {"cpp", "all"}
     regen_obj = kind in {"obj", "all"}
 
-    # Create dirs only if needed
-    if regen_c and not os.path.exists(cpath):
-        os.makedirs(cpath, exist_ok=True)
-    if regen_cpp and not os.path.exists(cpppath):
-        os.makedirs(cpppath, exist_ok=True)
-    if regen_obj and not os.path.exists(objpath):
-        os.makedirs(objpath, exist_ok=True)
+    c_dict = get_gen_test_dict("c") if regen_c else {}
+    cpp_dict = get_gen_test_dict("cpp") if regen_cpp else {}
+    obj_dict = get_gen_test_dict("obj") if regen_obj else {}
 
-    # tmp_path is a parent of the above; keep it for safety
+    funcs = set()
+    if regen_c:
+        funcs |= set(c_dict.keys())
+    if regen_cpp:
+        funcs |= set(cpp_dict.keys())
+    if regen_obj:
+        funcs |= set(obj_dict.keys())
+
+    # Create dirs only if needed
     if not os.path.exists(tmp_path):
         os.makedirs(tmp_path, exist_ok=True)
+    if regen_c:
+        os.makedirs(cpath, exist_ok=True)
+    if regen_cpp:
+        os.makedirs(cpppath, exist_ok=True)
+    if regen_obj:
+        os.makedirs(objpath, exist_ok=True)
 
-    for func in get_gen_test_dict("c").keys():
+    for func in sorted(funcs):
         disable = func in set_skip_testing
-        reason = f"{func} is in set_skip_testing. if it's blend. It's because it's broken on avx two. Otherwise, \
-            It's likely because get_k/set_k is used in it and doesn't work well on avx2" 
+        reason = (
+            f"{func} is in set_skip_testing. "
+            "If it's blend it's because it's broken on AVX2; otherwise it's likely "
+            "because get_k/set_k is used and doesn't work well on AVX2."
+        )
 
-        
-        if regen_c:
+        if regen_c and func in c_dict:
             c_file = gen_headers(kind="c") + gen_file(func, kind="c")
-            if disable :
+            if disable:
                 c_file = comment_out_cpp_file(c_file, reason)
             write_file_if_different(cpath + f"test_c{func}.cpp", c_file)
 
-        if regen_cpp:
+        if regen_cpp and func in cpp_dict:
             cpp_file = gen_headers(kind="cpp") + gen_file(func, kind="cpp")
-            if disable : 
+            if disable:
                 cpp_file = comment_out_cpp_file(cpp_file, reason)
             write_file_if_different(cpppath + f"test_{func}.cpp", cpp_file)
 
-        if regen_obj:
+        if regen_obj and func in obj_dict:
             obj_file = gen_headers(kind="obj") + gen_file(func, kind="obj")
-            if disable :
+            if disable:
                 obj_file = comment_out_cpp_file(obj_file, reason)
-
-            write_file_if_different(objpath + f"test_obj_{func}.cpp", obj_file)  
+            write_file_if_different(objpath + f"test_obj_{func}.cpp", obj_file)
 
 def main():
     parser = argparse.ArgumentParser(description="Generate MIPP test files.")
     parser.add_argument(
         "kind",
         nargs="?",
-        default="c",
+        default="all",
         choices=["c", "cpp", "obj", "all"],
         help="Which layer to regenerate (default: all).",
     )
     args = parser.parse_args()
-    gen_test_files_all_funcs(kind="c")
+    gen_test_files_all_funcs(kind=args.kind)
 
 
 if __name__ == "__main__":

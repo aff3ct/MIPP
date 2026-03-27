@@ -1,267 +1,149 @@
-from .common import (
-    K_FUNC_DECL, K_DECL, K_INIT, K_LOAD, K_OP, K_LOOP_BODY, K_LOOP_ASRT,
-    lang_proto, override, mk_gen_test_dict
-)
+from headers_def import mipp_funcs
 from .templates import GENERIC_FOR_LOOP
+from .common import (
+    TemplateParts,
+    build_layer_gen_test_dict,
+    SHAPE_RET_REG_2ARGS_REG,
+    SHAPE_RET_MSK_2ARGS_REG,
+    SHAPE_RET_REG_1ARG_PTR,
+    SHAPE_RET_VOID_2ARGS_PTR_REG,
+)
 
-# --------------------------
-# C++ fragments
-# --------------------------
-tpl_func_decl = """template <typename T>\nvoid test_cppmipp_{{func}}(){"""
+FUNC_DECL = """template <typename T>\nvoid test_cppmipp_{{func}}(){"""
 
-tpl_decl = {
-    "1arg_int32": """\tconst int vectorSize = mipp::N<T>(); int32_t inputs1[vectorSize] = {0};""",
-    "2args_int32": """\tconst int vectorSize = mipp::N<T>();\n\tint32_t inputs1[vectorSize] = {0},inputs2[vectorSize] = {0};""",
+DECL_2ARGS = """\tconst int vectorSize = mipp::N<T>(); T inputs1[vectorSize],inputs2[vectorSize];"""
+DECL_1ARG = """\tconst int vectorSize = mipp::N<T>(); T inputs1[vectorSize];"""
+DECL_2ARGS_FOR_STORE = """\tconst int vectorSize = mipp::N<T>(); T inputs1[vectorSize],inputs2[vectorSize];"""
 
-    "1arg": """\tconst int vectorSize = mipp::N<T>(); T inputs1[vectorSize];""",
-    "2args": """\tconst int vectorSize = mipp::N<T>(); T inputs1[vectorSize],inputs2[vectorSize];""",
-    "scalar_1arg": """\tT inputs1 = 0; const int vectorSize = mipp::N<T>();""",
-}
-
-tpl_init = {
-    "1arg": """\tstd::iota(inputs1, inputs1 + vectorSize, 1);
-\tstd::mt19937 g;
-\tstd::shuffle(inputs1, inputs1 + vectorSize, g);
-""",
-    "2args": """\tstd::iota(inputs1, inputs1 + vectorSize, 1);
+INIT_2ARGS = """\tstd::iota(inputs1, inputs1 + vectorSize, 1);
 \tstd::iota(inputs2, inputs2 + vectorSize, 1);
 
 \tstd::mt19937 g;
 \tstd::shuffle(inputs1, inputs1 + vectorSize, g);
 \tstd::shuffle(inputs2, inputs2 + vectorSize, g);
-""",
-    "2args_sub": """\tstd::iota(inputs1, inputs1 + vectorSize, 1);
-\tstd::iota(inputs2, inputs2 + vectorSize, 1);
-\tstd::mt19937 g;
-\tstd::shuffle(inputs1, inputs1 + vectorSize, g);
-\tstd::shuffle(inputs2, inputs2 + vectorSize, g);
-\tfor(int i = 0; i < vectorSize; i++)
+"""
+
+INIT_2ARGS_NOUFLOW = INIT_2ARGS + """\tfor(int i = 0; i < vectorSize; i++)
 \t{
 \t\tinputs1[i] += inputs2[i];
-\t}""",
+\t}
+"""
 
-    "1arg_msk": """\tfor (auto i = 0; i < vectorSize; i++)
-\t\tinputs1[i] = i % 2 ? -1 : 0;
-""",
-    "2args_msk": """\tfor (auto i = 0; i < vectorSize; i++){
-\t\tinputs1[i] = i % 2 ? -1 : 0;
-\t\tinputs2[i] = (i+1) % 2 ? -1 : 0;}
+INIT_1ARG = """\tstd::iota(inputs1, inputs1 + vectorSize, 1);
 \tstd::mt19937 g;
 \tstd::shuffle(inputs1, inputs1 + vectorSize, g);
-\tstd::shuffle(inputs2, inputs2 + vectorSize, g);
-""",
-    "constant_input_1arg": """\tfor (auto i = 0; i < vectorSize; i++)
-\t\tinputs1[i] = 0;
-""",
+"""
+
+LOAD_2ARGS = """\t{{reg_type}} r1 = mipp::load<{{dt_ext}}>(inputs1), r2 = mipp::load<{{dt_ext}}>(inputs2);"""
+LOAD_1ARG = """\t{{reg_type}} r1 = mipp::load<{{dt_ext}}>(inputs1);"""
+
+OP_REG_BINOP = """\t{{reg_type}} r3 = mipp::{{func}}(r1, r2);"""
+OP_STORE = """\tmipp::store(inputs2, r1);"""
+
+LB_REG_BINOP = """\t\tT res = inputs1[i] {{op}} inputs2[i];"""
+AS_REG_BINOP = """\t\tREQUIRE(mipp::get(r3, i) == res);"""
+
+LB_LOAD = """\t\tT res = inputs1[i];"""
+AS_LOAD = """\t\tREQUIRE(mipp::get(r1, i) == res);"""
+
+LB_STORE = """\t\tT res = inputs1[i];"""
+AS_STORE = """\t\tREQUIRE(inputs2[i] == res);"""
+
+shape_templates = {
+    SHAPE_RET_REG_2ARGS_REG: TemplateParts(
+        func_decl=FUNC_DECL,
+        decl=DECL_2ARGS,
+        init=INIT_2ARGS,
+        load=LOAD_2ARGS,
+        operation=OP_REG_BINOP,
+        loop_body=LB_REG_BINOP,
+        loop_assert=AS_REG_BINOP,
+    ),
+
+    SHAPE_RET_REG_1ARG_PTR: TemplateParts(
+        func_decl=FUNC_DECL,
+        decl=DECL_1ARG,
+        init=INIT_1ARG,
+        load=LOAD_1ARG,
+        operation="",  # load is in LOAD_1ARG line already
+        loop_body=LB_LOAD,
+        loop_assert=AS_LOAD,
+    ),
+    SHAPE_RET_VOID_2ARGS_PTR_REG: TemplateParts(
+        func_decl=FUNC_DECL,
+        decl=DECL_2ARGS_FOR_STORE,
+        init=INIT_1ARG,     # only inputs1 needs init; inputs2 is output
+        load=LOAD_1ARG,     # store uses r1 loaded from inputs1
+        operation=OP_STORE,
+        loop_body=LB_STORE,
+        loop_assert=AS_STORE,
+    ),
 }
 
-tpl_load = {
-    "1arg": """\t{{reg_type}} r1 = mipp::load<{{dt_ext}}>(inputs1);""",
-    "2args": """\t{{reg_type}} r1 = mipp::load<{{dt_ext}}>(inputs1), r2 = mipp::load<{{dt_ext}}>(inputs2);""",
 
-    "1arg_msk": """\t{{msk_type}} m1 = mipp::set_k<{{dt_ext}}>(inputs1); //{{reg_type}} r1 = mipp::toreg(m1);""",
-    "2args_msk": """\t{{msk_type}} m1 = mipp::set_k<T>(inputs1); {{msk_type}} m2 = mipp::set_k<T>(inputs2);""",
-
-    "1arg_set": """\t{{reg_type}} r1 = mipp::{{func}}<{{dt_ext}}>(inputs1);""",
-    "1arg_set1k": """\t{{msk_type}} m1 = mipp::set1_k<{{dt_ext}}>(inputs1); {{reg_type}} r1 = mipp::toreg(m1);""",
+deny = {
+    # same philosophy: keep small for now
+    "cast", "cast_k", "toreg", "tomsk",
+    "maskzld", "maskst",
+    "gather", "scatter",
+    "blend", "getfirst", "get_k", "set_k", "set0_k", "set1_k",
+    "testz", "testz_2",
+    "sqrt", "rsqrt",
+    "hadd", "hmul", "hmin", "hmax", "hadd_to_scal",
+    "notb", "notb_k",
+    "andb_k", "orb_k", "xorb_k", "andnb_k",
+    # and all comparisons for cpp *for now* (layer doesn't implement SHAPE_CMP_2REG)
+    "cmpeq", "cmpneq", "cmplt", "cmple", "cmpgt", "cmpge",
+    
+    "max", "min"
 }
 
-tpl_op = {
-    "operator_1arg": """\tr1 = mipp::{{func}}(r1);""",
-    "operator_2args": """\t{{reg_type}} r3 = mipp::{{func}}(r1, r2);""",
+LAYER_OVERRIDES = {
+    # Non-operator function: expected scalar expression override
+    "andnb": {
+        "loop_body": """\t\tT res = ~(inputs1[i]) & (inputs2[i]);"""
+    },
 
-    "store": """\tmipp::store(inputs2, r1);""",
-
-    "msk_operator_1arg": """\t{{msk_type}} m2 = mipp::{{func}}(m1); {{reg_type}} r1 = mipp::toreg(m2);""",
-    "msk_operator_2args": """\t{{msk_type}} m3 = mipp::{{func}}(m1, m2); {{reg_type}} r1 = mipp::toreg(m3);""",
+    "sub": {
+        "init": INIT_2ARGS_NOUFLOW
+    },
 }
 
-tpl_loop_body = {
-    "operator_2args": """\t\tT res = inputs1[i] {{op}}  inputs2[i];""",
-    "operator_1arg": """\t\tT res = {{op}} inputs1[i];""",
+def apply_overrides(gen_dict):
+    for func, entry in gen_dict.items():
+        ovr = LAYER_OVERRIDES.get(func)
+        if not ovr:
+            continue
 
-    "store": """\t\tT res = inputs1[i];""",
-    "bool_2args": """\t\tbool res = inputs1[i] {{op}}  inputs2[i];""",
-}
+        if "func_decl" in ovr:
+            decl = ovr["func_decl"]
+            entry["proto"]["func_decl"] = decl
+        if "decl" in ovr:
+            decl = ovr["decl"]
+            entry["proto"]["decl"] = decl
+        if "init" in ovr:
+            strat = ovr["init"]
+            entry["proto"]["init"] = strat
+        if "load" in ovr:
+            load = ovr["load"]
+            entry["proto"]["load"] = load
+        if "operation" in ovr:
+            op = ovr["operation"]
+            entry["proto"]["operation"] = op
+        if "loop_assert" in ovr:
+            assert_ = ovr["loop_assert"]
+            entry["proto"]["loop_assert"] = assert_
+        if "loop_body" in ovr:
+            body = ovr["loop_body"]
+            entry["proto"]["loop_body"] = body
+    return gen_dict
 
-tpl_assert = {
-    "operator_2args": """\t\tREQUIRE(mipp::get(r3, i) == res);""",
-    "operator_1arg": """\t\tREQUIRE(mipp::get(r1, i) == res);""",
-    "store": """\t\tREQUIRE(inputs2[i] == res);""",
+gen_test_dict = build_layer_gen_test_dict(
+    layer_name="cpp",
+    template=GENERIC_FOR_LOOP,
+    mipp_funcs=mipp_funcs,
+    shape_templates=shape_templates,
+    deny_funcs=deny,
+)
 
-    "mask_2args": """\t\tif(res) REQUIRE(mipp::get(r1, i) != 0); else REQUIRE(mipp::get(r1, i) == 0);""",
-}
-
-def mk_prototype_registry() -> dict:
-    arith_2args = lang_proto(
-        func_decl=tpl_func_decl,
-        decl=tpl_decl["2args"],
-        init=tpl_init["2args"],
-        load=tpl_load["2args"],
-        operation=tpl_op["operator_2args"],
-        loop_body=tpl_loop_body["operator_2args"],
-        loop_assert=tpl_assert["operator_2args"],
-    )
-
-    sub_2args = override(arith_2args, **{K_INIT: tpl_init["2args_sub"]})
-
-    load = lang_proto(
-        func_decl=tpl_func_decl,
-        decl=tpl_decl["1arg"],
-        init=tpl_init["1arg"],
-        load=tpl_load["1arg"],
-        operation="",
-        loop_body=tpl_loop_body["operator_1arg"],
-        loop_assert=tpl_assert["operator_1arg"],
-    )
-
-    store = lang_proto(
-        func_decl=tpl_func_decl,
-        decl=tpl_decl["2args"],
-        init=tpl_init["1arg"],
-        load=tpl_load["1arg"],
-        operation=tpl_op["store"],
-        loop_body=tpl_loop_body["store"],
-        loop_assert=tpl_assert["store"],
-    )
-
-    set_k = lang_proto(
-        func_decl=tpl_func_decl,
-        decl=tpl_decl["1arg_int32"],
-        init=tpl_init["1arg_msk"],
-        load=tpl_load["1arg_msk"],
-        operation="",
-        loop_body=tpl_loop_body["store"],
-        loop_assert=tpl_assert["mask_2args"],
-    )
-
-    logical_2ops_msk = lang_proto(
-        func_decl=tpl_func_decl,
-        decl=tpl_decl["2args_int32"],
-        init=tpl_init["2args_msk"],
-        load=tpl_load["2args_msk"],
-        operation=tpl_op["msk_operator_2args"],
-        loop_body=tpl_loop_body["bool_2args"],
-        loop_assert=tpl_assert["mask_2args"],
-    )
-
-    andnb_k = override(logical_2ops_msk, **{
-        K_LOOP_BODY: "\t\tbool res = (~inputs1[i]) &  inputs2[i];"
-    })
-
-    andnb = override(arith_2args, **{
-        K_LOOP_BODY: "\t\tT res = (~inputs1[i]) &  inputs2[i];",
-    })
-
-    set_ = lang_proto(
-        func_decl=tpl_func_decl,
-        decl=tpl_decl["1arg"],
-        init=tpl_init["constant_input_1arg"],
-        load=tpl_load["1arg_set"],
-        operation="",
-        loop_body=tpl_loop_body["operator_1arg"],
-        loop_assert=tpl_assert["operator_1arg"],
-    )
-
-    set1 = lang_proto(
-        func_decl=tpl_func_decl,
-        decl=tpl_decl["scalar_1arg"],
-        init="",
-        load=tpl_load["1arg_set"],
-        operation="",
-        loop_body="\t\tT res = inputs1;",
-        loop_assert=tpl_assert["operator_1arg"],
-    )
-
-    set1_k = lang_proto(
-        func_decl=tpl_func_decl,
-        decl=tpl_decl["scalar_1arg"],
-        init="",
-        load=tpl_load["1arg_set1k"],
-        operation="",
-        loop_body="\t\tT res = inputs1;",
-        loop_assert=tpl_assert["mask_2args"],
-    )
-
-    set0 = lang_proto(
-        func_decl=tpl_func_decl,
-        decl=tpl_decl["scalar_1arg"],
-        init="",
-        load="\t{{reg_type}} r1 = mipp::{{func}}<{{dt_ext}}>();",
-        operation="",
-        loop_body="\t\tT res = inputs1;",
-        loop_assert="\t\tREQUIRE(res == 0);",
-    )
-
-    set0_k = lang_proto(
-        func_decl=tpl_func_decl,
-        decl=tpl_decl["scalar_1arg"],
-        init="",
-        load="\t{{msk_type}} m1 = mipp::{{func}}<{{dt_ext}}>(); {{reg_type}} r1 = mipp::toreg(m1);",
-        operation="",
-        loop_body="\t\tT res = inputs1;",
-        loop_assert=tpl_assert["mask_2args"],
-    )
-
-    getfirst = lang_proto(
-        func_decl=tpl_func_decl,
-        decl=tpl_decl["1arg"],
-        init=tpl_init["1arg"],
-        load=tpl_load["1arg"],
-        operation="",
-        loop_body="\t\tT res = mipp::getfirst(r1);",
-        loop_assert="\t\tREQUIRE(res == inputs1[0]);",
-    )
-
-    blend = lang_proto(
-        func_decl=tpl_func_decl,
-        decl=tpl_decl["2args"] + """\nint32_t mask1[vectorSize] = {0};""",
-        init=tpl_init["2args"] + """\tfor (unsigned i = 0; i < vectorSize; i++)mask1[i] = i % 2 ? 1 : 0;\n""",
-        load="\t{{msk_type}} m1 = mipp::set_k<{{dt_ext}}>(mask1); {{reg_type}} r1 = mipp::set1<{{dt_ext}}>(1); {{reg_type}} r2 = mipp::set1<{{dt_ext}}>(2);",
-        operation="\t{{reg_type}} r3 = mipp::blend(r1, r2, m1);",
-        loop_body="\t\t{{dt_ext}} res = mipp::get(m1,i) ? mipp::get(r1, i) : mipp::get(r2, i);",
-        loop_assert="\t\tREQUIRE(mipp::get(r3, i) == res);",
-    )
-
-    arith_1arg = lang_proto(
-        func_decl=tpl_func_decl,
-        decl=tpl_decl["1arg"],
-        init=tpl_init["1arg"],
-        load=tpl_load["1arg"],
-        operation=tpl_op["operator_1arg"],
-        loop_body=tpl_loop_body["operator_1arg"],
-        loop_assert=tpl_assert["operator_1arg"],
-    )
-
-    logi_1op_msk = lang_proto(
-        func_decl=tpl_func_decl,
-        decl=tpl_decl["1arg_int32"],
-        init=tpl_init["1arg_msk"],
-        load=tpl_load["1arg_msk"],
-        operation=tpl_op["msk_operator_1arg"],
-        loop_body="\t\tbool res = ~inputs1[i];",
-        loop_assert=tpl_assert["mask_2args"],
-    )
-
-    return {
-        "arith_2args": arith_2args,
-        "sub_2args": sub_2args,
-        "load": load,
-        "store": store,
-        "set_k": set_k,
-        "logical_2ops_msk": logical_2ops_msk,
-        "andnb_k": andnb_k,
-        "andnb": andnb,
-        "set": set_,
-        "set1": set1,
-        "set1_k": set1_k,
-        "set0": set0,
-        "set0_k": set0_k,
-        "getfirst": getfirst,
-        "blend": blend,
-        "arith_1arg": arith_1arg,
-        "logi_1op_msk": logi_1op_msk,
-    }
-
-prototype_registry = mk_prototype_registry()
-gen_test_dict = mk_gen_test_dict(template=GENERIC_FOR_LOOP, prototype_registry=prototype_registry)
+gen_test_dict = apply_overrides(gen_test_dict)
