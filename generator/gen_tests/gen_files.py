@@ -76,6 +76,11 @@ def add_type_guards(func, implem, function, kind="c"):
     kind: "c" for c test, "cpp" for cpp test, "obj" for obj test
 
     returns a string with the type guards for the func in the implem
+    
+    N.B : WILL NOT GENERATE TESTS FOR DTTYPES IF THE FUNC IS NOT DEFINED
+    FOR THOSE DTTYPES IN IMPLEM. EVEN IF THE FUNC IS DEFINED FOR THOSE 
+    DTTYPES IN headers_def.mipp_funcs[func]["datatypes"].
+    THIS IS FORE EASE OF TESTS.
     """
     datatypes = get_defined_dttypes(func, implem)
     section = ""
@@ -274,7 +279,6 @@ def write_file_if_different(path, content):
 set_skip_testing = {
     "blend",   # blend broken on avx
     "getfirst", #getfirst broken 
-    "set_k",
     "andb_k",
     "orb_k",
     "xorb_k",

@@ -61,6 +61,11 @@ SUPPORTED_SHAPES = {
     SHAPE_RET_REG_1ARG_PTR,
     SHAPE_RET_VOID_2ARGS_PTR_REG,
     SHAPE_RET_REG_1ARG_NELE, #shape for set only
+    SHAPE_RET_MSK_1ARG_NELE, #shape for set_k only
+    SHAPE_RET_REG_1ARG_VAL,
+    SHAPE_RET_MSK_1ARG_I32,
+    SHAPE_RET_REG_0ARG,
+    SHAPE_RET_MSK_0ARG,
 }
 
 def classify_mipp_proto(proto: dict):
@@ -69,6 +74,7 @@ def classify_mipp_proto(proto: dict):
     """
     ret_t = proto["ret"]["type"]              # "reg", "msk", "val", or False
     args_t = [a["type"] for a in proto["args"]]
+    args_dt = [a["fixeddatatype"] for a in proto["args"]]
 
     if ret_t == "reg" and args_t == ["reg", "reg"]:
         return SHAPE_RET_REG_2ARGS_REG
@@ -80,7 +86,16 @@ def classify_mipp_proto(proto: dict):
         return SHAPE_RET_VOID_2ARGS_PTR_REG
     if ret_t == "reg" and args_t == ["Nele"]:
         return SHAPE_RET_REG_1ARG_NELE
-
+    if ret_t == "msk" and args_t == ["Nele"]:
+        return SHAPE_RET_MSK_1ARG_NELE
+    if ret_t == "reg" and args_t == ["val"]:
+        return SHAPE_RET_REG_1ARG_VAL
+    if ret_t == "msk" and args_t == ["val"] and args_dt == ["int32"]:
+        return SHAPE_RET_MSK_1ARG_I32
+    if ret_t == "reg" and args_t == []:
+        return SHAPE_RET_REG_0ARG
+    if ret_t == "msk" and args_t == []:
+        return SHAPE_RET_MSK_0ARG
     return None
 
 # --------------------------------------------

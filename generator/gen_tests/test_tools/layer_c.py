@@ -7,7 +7,13 @@ from .common import (
     SHAPE_RET_MSK_2ARGS_REG,
     SHAPE_RET_REG_1ARG_PTR,
     SHAPE_RET_VOID_2ARGS_PTR_REG,
-    SHAPE_RET_REG_1ARG_NELE,
+    #those are only backed by 1 function ;(
+    SHAPE_RET_REG_1ARG_NELE,#set only
+    SHAPE_RET_MSK_1ARG_NELE,#setk 
+    SHAPE_RET_REG_1ARG_VAL, #only set1 :o
+    SHAPE_RET_MSK_1ARG_I32,#set1_k
+    SHAPE_RET_REG_0ARG,#set0
+    SHAPE_RET_MSK_0ARG,#set0_k
 )
 
 # --------------------------
@@ -24,10 +30,14 @@ FUNC_DECL = """void test_cmipp_{{func}}_{{dt_ext}}(){"""
 # --------------------------------------------
 # SCALAR VEC DECL
 # --------------------------------------------
-
-DECL_2ARGS = """\tconst int vectorSize = {{size}};\n\t{{dt_ext}}_t inputs1[vectorSize],inputs2[vectorSize];"""
+DECL_0ARGS = "\tconst int vectorSize = {{size}};"
 DECL_1ARG = """\tconst int vectorSize = {{size}}; {{dt_ext}}_t inputs1[vectorSize];"""
+DECL_1ARG_INT32 = """\tconst int vectorSize = {{size}}; int32_t inputs1[vectorSize];"""
+DECL_1ARG_SCALAR = """\tconst int vectorSize = {{size}}; \t{{dt_ext}}_t input1 = 12;"""
+DECL_1ARG_SCALAR_INT32 = """\tconst int vectorSize = {{size}}; \tint32_t input1 = 12;"""
+
 DECL_2ARGS_FOR_STORE = """\tconst int vectorSize = {{size}};\n\t{{dt_ext}}_t inputs1[vectorSize],inputs2[vectorSize];"""
+DECL_2ARGS = """\tconst int vectorSize = {{size}};\n\t{{dt_ext}}_t inputs1[vectorSize],inputs2[vectorSize];"""
 
 # --------------------------------------------
 # SCALAR VEC INIT
@@ -55,16 +65,25 @@ INIT_2ARGS_NOUFLOW = INIT_2ARGS + """\tfor(int i = 0; i < vectorSize; i++)
 # LOADS
 # --------------------------------------------
 
-LOAD_2ARGS = """\t{{reg_type}} r1 = mipp_load_{{dt_ext}}(inputs1);
+LOAD_2ARGS_REG = """\t{{reg_type}} r1 = mipp_load_{{dt_ext}}(inputs1);
 \t{{reg_type}} r2 = mipp_load_{{dt_ext}}(inputs2);"""
 
-LOAD_1ARG = """\t{{reg_type}} r1 = mipp_load_{{dt_ext}}(inputs1);"""
+LOAD_1ARG_REG = """\t{{reg_type}} r1 = mipp_load_{{dt_ext}}(inputs1);"""
+LOAD_1SCALAR_REG = """\t{{reg_type}} r1 = mipp_set1_{{dt_ext}}(input1);"""
+LOAD_SET0_REG = """\t{{reg_type}} r1 = mipp_set0_{{dt_ext}}();"""
 
+LOAD_2ARGS_MASK = """\t{{msk_type}} m1 = mipp_set_k_{{dt_ext}}(inputs1); 
+\t{{msk_type}} m2 = mipp_set_k_{{dt_ext}}(inputs2);"""
+
+LOAD_1ARG_MASK = """\t{{msk_type}} m1 = mipp_set_k_{{dt_ext}}(inputs1);"""
+LOAD_1SCALAR_MASK = """\t{{msk_type}} m1 = mipp_set1_k_{{dt_ext}}(input1);"""
+LOAD_SET0_MASK = """\t{{msk_type}} m1 = mipp_set0_k_{{dt_ext}}();"""
 
 # --------------------------------------------
 # OPERATIONS
 # --------------------------------------------
 
+OP_REG_NOOP = """\t{{reg_type}} r3 = r1;"""
 OP_REG_UNOP = """\t{{reg_type}} r3 = mipp_{{func}}_{{dt_ext}}(r1);"""
 OP_REG_BINOP = """\t{{reg_type}} r3 = mipp_{{func}}_{{dt_ext}}(r1, r2);"""
 
@@ -72,13 +91,14 @@ OP_CMP_2REG = """\t{{msk_type}} m3 = mipp_{{func}}_{{dt_ext}}(r1, r2); {{reg_typ
 
 OP_STORE = """\tmipp_store_{{dt_ext}}(inputs2, r1);"""
 
-
+OP_TOREG = """\t{{reg_type}} r3 = mipp_toreg_{{dt_ext}}(m1);"""
 
 # --------------------------------------------
 # OPERATION IN LOOP BODY
 # ------------------------------------------
 
 LB_SET_OP = """\t\t{{dt_ext}}_t res = inputs1[i];"""
+LB_SET_SCALAR_OP = """\t\t{{dt_ext}}_t res = input1;"""
 
 LB_REG_BINOP = """\t\t{{dt_ext}}_t res = inputs1[i] {{op}} inputs2[i];"""
 AS_REG_BINOP = """\t\tREQUIRE(mipp_get_{{dt_ext}}(r3, i) == res);"""
@@ -97,7 +117,7 @@ shape_templates = {
         func_decl=FUNC_DECL,
         decl=DECL_2ARGS,
         init=INIT_2ARGS,
-        load=LOAD_2ARGS,
+        load=LOAD_2ARGS_REG,
         operation=OP_REG_BINOP,
         loop_body=LB_REG_BINOP,
         loop_assert=AS_REG_BINOP,
@@ -106,7 +126,7 @@ shape_templates = {
         func_decl=FUNC_DECL,
         decl=DECL_2ARGS,
         init=INIT_2ARGS,
-        load=LOAD_2ARGS,
+        load=LOAD_2ARGS_REG,
         operation=OP_CMP_2REG,
         loop_body=LB_CMP_2REG,
         loop_assert=AS_CMP_2REG,
@@ -115,8 +135,8 @@ shape_templates = {
         func_decl=FUNC_DECL,
         decl=DECL_1ARG,
         init=INIT_1ARG,
-        load=LOAD_1ARG,
-        operation="",  # load is in LOAD_1ARG line already
+        load=LOAD_1ARG_REG,
+        operation="",  # load is in LOAD_1ARG_REG line already
         loop_body=LB_LOAD,
         loop_assert=AS_LOAD,
     ),
@@ -124,20 +144,70 @@ shape_templates = {
         func_decl=FUNC_DECL,
         decl=DECL_2ARGS_FOR_STORE,
         init=INIT_1ARG,     # only inputs1 needs init; inputs2 is output
-        load=LOAD_1ARG,     # store uses r1 loaded from inputs1
+        load=LOAD_1ARG_REG,     # store uses r1 loaded from inputs1
         operation=OP_STORE,
         loop_body=LB_STORE,
         loop_assert=AS_STORE,
     ),
-     #only used for set so non-existing templates are written as plain text
+
     SHAPE_RET_REG_1ARG_NELE: TemplateParts(
         func_decl=FUNC_DECL,
         decl=DECL_1ARG,
         init=INIT_1ARG,
         load="""\t{{reg_type}} r1 = mipp_{{func}}_{{dt_ext}}(inputs1);""",
-        operation="""\t{{reg_type}} r3 = r1;""",  # no-op, just to have the reg available for assert
+        operation=OP_REG_NOOP,
         loop_body=LB_SET_OP,
         loop_assert=AS_REG_BINOP,
+    ),
+    
+    SHAPE_RET_MSK_1ARG_NELE: TemplateParts(
+        func_decl=FUNC_DECL,
+        decl=DECL_1ARG_INT32,
+        init=INIT_1ARG,
+        load=LOAD_1ARG_MASK,
+        operation=OP_TOREG,
+        loop_body=LB_SET_OP,
+        loop_assert=AS_CMP_2REG,
+    ),
+    
+    SHAPE_RET_REG_1ARG_VAL: TemplateParts(
+        func_decl=FUNC_DECL,
+        decl=DECL_1ARG_SCALAR,
+        init="",
+        load=LOAD_1SCALAR_REG,
+        operation=OP_REG_NOOP,
+        loop_body=LB_SET_SCALAR_OP,
+        loop_assert=AS_REG_BINOP,
+    ),
+    
+    SHAPE_RET_MSK_1ARG_I32: TemplateParts(
+        func_decl=FUNC_DECL,
+        decl=DECL_1ARG_SCALAR_INT32,
+        init="",
+        load=LOAD_1SCALAR_MASK,
+        operation=OP_TOREG,
+        loop_body=LB_SET_SCALAR_OP,
+        loop_assert=AS_CMP_2REG,
+    ),
+    
+    SHAPE_RET_REG_0ARG: TemplateParts(
+        func_decl=FUNC_DECL,
+        decl=DECL_0ARGS,
+        init="",
+        load=LOAD_SET0_REG,
+        operation=OP_REG_NOOP,
+        loop_body="\t\t{{dt_ext}}_t res = 0;",
+        loop_assert=AS_REG_BINOP,
+    ),
+    
+    SHAPE_RET_MSK_0ARG: TemplateParts(
+        func_decl=FUNC_DECL,
+        decl=DECL_0ARGS,
+        init="",
+        load=LOAD_SET0_MASK,
+        operation=OP_TOREG,
+        loop_body="\t\t{{dt_ext}}_t res = 0;",
+        loop_assert=AS_CMP_2REG,
     ),
 }
 
@@ -146,13 +216,11 @@ deny = {
     "cast", "cast_k", "toreg", "tomsk",
     "maskzld", "maskst",
     "gather", "scatter",
-    "blend", "getfirst", "get_k", "set_k", "set0_k", "set1_k",
+    "blend", "getfirst", "get_k",
     "testz", "testz_2",
     "sqrt", "rsqrt",
     "hadd", "hmul", "hmin", "hmax", "hadd_to_scal",
-    # keep notb/notb_k out until you add unop shape
     "notb", "notb_k",
-    # mask binops are different signature
     "andb_k", "orb_k", "xorb_k", "andnb_k", 
     "max", "min"
 }
