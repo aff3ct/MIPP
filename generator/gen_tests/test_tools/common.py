@@ -22,6 +22,11 @@ operators_binary_mask = {
     "andb_k"   : {"operation" : "&", "option"  : "&="},
 }
 
+operators_reduction = {
+    "hadd" : {"operation" : "+="},
+    "hmul" : {"operation" : "*="},
+}
+
 # --------------------------------------------
 # Shapes 
 # --------------------------------------------
@@ -123,6 +128,8 @@ def classify_mipp_proto(proto: dict):
         return SHAPE_RET_MSK_1ARG_MSK
     if ret_t == "reg" and args_t == ["msk"]:
         return SHAPE_RET_REG_1ARG_MSK
+    if ret_t == "reg" and args_t == ["reg", "reg", "reg"]:
+        return SHAPE_RET_REG_3ARGS_REG
     return None
 
 # --------------------------------------------
@@ -158,6 +165,8 @@ def infer_op(func: str):
         return operators_order[func]["operation"]
     if func in operators_binary_mask:
         return operators_binary_mask[func]["operation"]
+    if func in operators_reduction:
+        return operators_reduction[func]["operation"]
     return ""
 
 # --------------------------------------------

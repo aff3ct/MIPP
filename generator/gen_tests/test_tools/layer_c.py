@@ -1,5 +1,5 @@
 from headers_def import mipp_funcs
-from .templates import GENERIC_FOR_LOOP
+from .templates import GENERIC_FOR_LOOP, GENERIC_NO_LOOP
 from .common import (
     TemplateParts,
     build_layer_gen_test_dict,
@@ -22,6 +22,8 @@ from .common import (
     SHAPE_RET_REG_1ARG_REG, #notb, sqrt, cast
     SHAPE_RET_MSK_1ARG_MSK, #notb_k, and cast_k
     SHAPE_RET_REG_1ARG_MSK, #toreg only
+    
+    SHAPE_RET_REG_3ARGS_REG, #fmadd, fmsub
 )
 
 # --------------------------
@@ -48,6 +50,8 @@ DECL_2ARGS_FOR_STORE = """\tconst int vectorSize = {{size}};\n\t{{dt_ext}}_t inp
 DECL_2ARGS = """\tconst int vectorSize = {{size}};\n\t{{dt_ext}}_t inputs1[vectorSize],inputs2[vectorSize];"""
 
 DECL_2ARGS_INT32 = """\tconst int vectorSize = {{size}};\n\tint32_t inputs1[vectorSize],inputs2[vectorSize];"""
+
+DECL_3ARGS = """\tconst int vectorSize = {{size}};\n\t{{dt_ext}}_t inputs1[vectorSize],inputs2[vectorSize],inputs3[vectorSize];"""
 
 #never used on it's own, but used alongisde other snippets :)
 DECL_G_SNIPPET = """\tstd::mt19937 g;\n\tstd::uniform_int_distribution<uint16_t> dis(0, 1);"""
@@ -87,6 +91,11 @@ INIT_2ARGS_DIS = """\tfor(int i = 0; i < vectorSize; i++)
 \t\tinputs2[i] = dis(g) ? -1 : 0;
 \t}"""
 
+
+INIT_3ARGS = """\tstd::iota(inputs1, inputs1 + vectorSize, 1);
+\tstd::iota(inputs2, inputs2 + vectorSize, 1);
+\tstd::iota(inputs3, inputs3 + vectorSize, 1);"""
+
 # --------------------------------------------
 # LOADS
 # --------------------------------------------
@@ -109,6 +118,9 @@ LOAD_SET0_MASK = """\t{{msk_type}} m1 = mipp_set0_k_{{dt_ext}}();"""
 #used for blend
 LOAD_SET1_2ARGS_REG = """\t{{reg_type}} r1 = mipp_set1_{{dt_ext}}(1); \n\t{{reg_type}} r2 = mipp_set1_{{dt_ext}}(2);"""
 
+LOAD_3ARGS_REG = """\t{{reg_type}} r1 = mipp_load_{{dt_ext}}(inputs1);
+\t{{reg_type}} r2 = mipp_load_{{dt_ext}}(inputs2);
+\t{{reg_type}} r3 = mipp_load_{{dt_ext}}(inputs3);"""
 
 # --------------------------------------------
 # OPERATIONS
@@ -132,6 +144,8 @@ OP_3ARGS_2REG_1MSK = """\t{{reg_type}} r3 = mipp_{{func}}_{{dt_ext}}(r1, r2, m1)
 OP_1ARG_1MASK = """\t{{msk_type}} m3 = mipp_{{func}}_{{dt_ext}}(m1); {{reg_type}} r3 = mipp_toreg_{{dt_ext}}(m3);"""
 OP_2ARGS_2MASK = """\t{{msk_type}} m3 = mipp_{{func}}_{{dt_ext}}(m1, m2);\n\t{{reg_type}} r3 = mipp_toreg_{{dt_ext}}(m3);"""
 
+OP_3ARGS_REG = """\t{{reg_type}} r4 = mipp_{{func}}_{{dt_ext}}(r1, r2, r3);"""
+
 # --------------------------------------------
 # OPERATION IN LOOP BODY
 # ------------------------------------------
@@ -150,6 +164,8 @@ AS_LOAD = """\t\tREQUIRE(mipp_get_{{dt_ext}}(r1, i) == res);"""
 
 LB_STORE = """\t\t{{dt_ext}}_t res = inputs1[i];"""
 AS_STORE = """\t\tREQUIRE(inputs2[i] == res);"""
+
+AS_3ARGS = """\t\tREQUIRE(mipp_get_{{dt_ext}}(r4, i) == res);"""
 
 shape_templates = {
     SHAPE_RET_REG_2ARGS_REG: TemplateParts(
@@ -303,7 +319,7 @@ shape_templates = {
     #various different functions 
     #i.e : notb, sqrt, cast, hadd, hmul, hmin, hmax, round
     #since the asserts for these function will vary
-    #we will override the loop_assert / loop_body parts of the template for these functions in LAYER_OVERRIDES
+    #each func will override some parts of the template 
     SHAPE_RET_REG_1ARG_REG: TemplateParts(
         func_decl=FUNC_DECL,
         decl=DECL_1ARG,
@@ -333,6 +349,18 @@ shape_templates = {
         loop_body=LB_SET_OP,
         loop_assert=AS_CMP_2REG,
     ),
+    
+    #loop body will be overridden 
+    #by each func using this shape
+    SHAPE_RET_REG_3ARGS_REG: TemplateParts(
+        func_decl=FUNC_DECL,
+        decl=DECL_3ARGS,
+        init=INIT_3ARGS,
+        load=LOAD_3ARGS_REG,
+        operation=OP_3ARGS_REG,
+        loop_body="",
+        loop_assert=AS_3ARGS,
+    ),
 }
 
 deny = {
@@ -344,7 +372,7 @@ deny = {
     "max", "min",
     
     "cast", "sqrt", "rsqrt", "msb", "round",
-    "hadd", "hmul", "hmin", "hmax", 
+    "hmin", "hmax", 
     "hadd_to_scal",
 }
 
@@ -370,7 +398,31 @@ LAYER_OVERRIDES = {
     "notb_k": {
         "loop_body": """\t\t{{dt_ext}}_t res = ~(inputs1[i]);"""
     },
+    
+    "hadd": {
+        "loop_body": """\t{{dt_ext}}_t res = 0;
+\tfor(int j = 0; j < vectorSize; j++)
+\t\tres {{op}} inputs1[j];""",
+        "loop_assert": """\tREQUIRE(mipp_get_{{dt_ext}}(r3, 0) == res);""",
+    },
+    
+    "hmul": {
+        "loop_body":"""\t{{dt_ext}}_t res = 1;
+\tfor(int j = 0; j < vectorSize; j++)
+\t\tres {{op}} inputs1[j];""",
+        "loop_assert": """\tREQUIRE(mipp_get_{{dt_ext}}(r3, 0) == res);""",
+    },
+    
+    "fmadd": {
+        "loop_body": """\t\t{{dt_ext}}_t res = inputs1[i] * inputs2[i] + inputs3[i];""",
+    },
+    
+    "fmsub": {
+        "loop_body": """\t\t{{dt_ext}}_t res = inputs1[i] * inputs2[i] - inputs3[i];""",
+    },
 }
+
+NO_LOOP_FUNCS = {"hadd", "hmul", "hmin", "hmax", "hadd_to_scal", "getfirst"}
 
 def apply_overrides(gen_dict):
     for func, entry in gen_dict.items():
@@ -399,6 +451,9 @@ def apply_overrides(gen_dict):
         if "loop_body" in ovr:
             body = ovr["loop_body"]
             entry["proto"]["loop_body"] = body
+    for f in NO_LOOP_FUNCS:
+        if f in gen_test_dict:
+            gen_test_dict[f]["template"] = GENERIC_NO_LOOP
     return gen_dict
 
 gen_test_dict = build_layer_gen_test_dict(

@@ -61,6 +61,9 @@ set_skip_testing = {
     "andnb_k", #uses get_k
     "notb_k", #uses get_k
     "toreg", #uses get_k.
+    
+    "hadd", #overflow for i8 u8. Test is good though
+    
 }
 
 # helper to get the datatypes for 1 func in 1 implem
