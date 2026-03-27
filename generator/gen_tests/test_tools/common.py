@@ -7,7 +7,7 @@ from typing import Optional
 # Miscelaneous utilities for layers
 # --------------------------------------------
 
-set_skip_float = {"andb", "orb", "xorb", "notb", "andnb"}
+set_skip_float = {"andb", "orb", "xorb", "notb", "andnb", "notb_k"}
 set_remove_k = {"andb_k", "orb_k", "xorb_k", "andnb_k", "notb_k"}
 
 def test_function_name(kind: str, func: str):
@@ -15,6 +15,12 @@ def test_function_name(kind: str, func: str):
         return func.replace("_k", "")
     return func
 
+
+operators_binary_mask = {
+    "xorb_k"   : {"operation" : "^", "option"  : "^="},
+    "orb_k"    : {"operation" : "|", "option"  : "|="},
+    "andb_k"   : {"operation" : "&", "option"  : "&="},
+}
 
 # --------------------------------------------
 # Shapes 
@@ -47,7 +53,6 @@ SHAPE_RET_REG_2ARGS_REG_VAL = "ret_reg_2args_reg_val"
 SHAPE_RET_REG_3ARGS_REG = "ret_reg_3args_reg"
 SHAPE_RET_REG_3ARGS_2REG_1MSK = "ret_reg_3args_2reg_1msk"
 SHAPE_RET_REG_3ARGS_1REG = "ret_reg_3args_1reg_2val"
-SHAPE_RET_REG_3ARGS_2REG_1MSK = "ret_reg_3args_2reg_1msk"
 SHAPE_RET_REG_3ARGS_1MSK_2REG = "ret_reg_3args_1msk_2reg"
 SHAPE_RET_I32_1ARG_MSK = "ret_i32_1arg_msk"
 SHAPE_RET_I32_2ARGS_MSK = "ret_i32_2args_msk"
@@ -66,6 +71,12 @@ SUPPORTED_SHAPES = {
     SHAPE_RET_MSK_1ARG_I32,
     SHAPE_RET_REG_0ARG,
     SHAPE_RET_MSK_0ARG,
+    SHAPE_RET_VAL_2ARGS_REG_VAL,
+    SHAPE_RET_VAL_2ARGS_MSK_VAL,
+    SHAPE_RET_VAL_1ARG_REG, #getfirst, hadd, hmul,...
+    SHAPE_RET_REG_3ARGS_2REG_1MSK, #blend only
+    SHAPE_RET_MSK_2ARGS_MSK, #shape for andb_k orb_k xorb_k andnb_k
+    SHAPE_RET_MSK_1ARG_MSK, #shape for notb_k and cast_k
 }
 
 def classify_mipp_proto(proto: dict):
@@ -96,6 +107,22 @@ def classify_mipp_proto(proto: dict):
         return SHAPE_RET_REG_0ARG
     if ret_t == "msk" and args_t == []:
         return SHAPE_RET_MSK_0ARG
+    if ret_t == "val" and args_t == ["reg", "val"]:
+        return SHAPE_RET_VAL_2ARGS_REG_VAL
+    if ret_t == "val" and args_t == ["msk", "val"]:
+        return SHAPE_RET_VAL_2ARGS_MSK_VAL
+    if ret_t == "val" and args_t == ["reg"]:
+        return SHAPE_RET_VAL_1ARG_REG
+    if ret_t == "reg" and args_t == ["reg", "reg", "msk"]:
+        return SHAPE_RET_REG_3ARGS_2REG_1MSK
+    if ret_t == "msk" and args_t == ["msk", "msk"]:
+        return SHAPE_RET_MSK_2ARGS_MSK
+    if ret_t == "reg" and args_t == ["reg"]:
+        return SHAPE_RET_REG_1ARG_REG
+    if ret_t == "msk" and args_t == ["msk"]:
+        return SHAPE_RET_MSK_1ARG_MSK
+    if ret_t == "reg" and args_t == ["msk"]:
+        return SHAPE_RET_REG_1ARG_MSK
     return None
 
 # --------------------------------------------
@@ -129,6 +156,8 @@ def infer_op(func: str):
         return operators_binary[func]["operation"]
     if func in operators_order:
         return operators_order[func]["operation"]
+    if func in operators_binary_mask:
+        return operators_binary_mask[func]["operation"]
     return ""
 
 # --------------------------------------------

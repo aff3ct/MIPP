@@ -51,6 +51,18 @@ implem_dict = {
     "rvv": {"implem": implems_rvv, "guard": rvv_guard},
 }
 
+set_skip_testing = {
+    "get_k", #missing uint
+    "getfirst", #getfirst broken on avx2
+    "blend", #blend broken on avx2 + uses get_k :(
+    "andb_k", #uses get_k n.b : get_k not defined for uint on avx2
+    "orb_k", #uses get_k
+    "xorb_k", #uses get_k
+    "andnb_k", #uses get_k
+    "notb_k", #uses get_k
+    "toreg", #uses get_k.
+}
+
 # helper to get the datatypes for 1 func in 1 implem
 def get_defined_dttypes(func, implem):
     """
@@ -275,16 +287,6 @@ def write_file_if_different(path, content):
     with open(path, "w") as f:
         f.write(content)
     return True
-
-set_skip_testing = {
-    "blend",   # blend broken on avx
-    "getfirst", #getfirst broken 
-    "andb_k",
-    "orb_k",
-    "xorb_k",
-    "notb_k",
-    "andnb_k"
-}
 
 def comment_out_cpp_file(content: str, reason: str):
     # Wrap whole file as a comment so it becomes an inert translation unit.

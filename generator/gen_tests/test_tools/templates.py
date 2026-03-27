@@ -12,3 +12,14 @@ GENERIC_FOR_LOOP = """{{func_decl}}
 \t}
 }
 """
+
+GENERIC_NO_LOOP = """{{func_decl}}
+{{decl}}
+{{init}}
+{{load}}
+{{operation}}
+
+{{loop_body}}
+{{loop_assert}}
+}
+"""
