@@ -89,6 +89,22 @@ def get_defined_dttypes(func, implem):
         datatypes = [dt for dt in datatypes if dt not in ["float32", "float64"]]
     return datatypes
 
+def dt_to_suffix(dt: str):
+    # Used to convert cast format t1,t2 to t1_t2. 
+    #for other dttypes this is a no-op.
+    return dt.replace(",", "_")
+
+def split_dt_pair(dt: str) :
+    # "uint32,float32" -> ["uint32","float32"]
+    return dt.split(",") if "," in dt else [dt]
+
+def is_64bit_dt(dt: str):
+    return dt in {"int64", "uint64", "float64"}
+
+def is_bw_dt(dt: str):
+    return dt in {"int8", "uint8", "int16", "uint16"}
+
+
 # add the type guard for 1 func in 1 implem
 def add_type_guards(func, implem, function, kind="c"):
     """
@@ -108,7 +124,7 @@ def add_type_guards(func, implem, function, kind="c"):
     section = ""
     res = ""
     if kind == "c":
-        section = 'SECTION ("datatype = {dt}") {{ {function}_{dt}(); }}\n'
+        section = 'SECTION ("datatype = {dt}") {{ {function}_{dt_suffix}(); }}\n'
     elif kind == "cpp" or kind == "obj":
         section = 'SECTION ("datatype = {dt}") {{ {function}<{dt}_t>(); }}\n'
 
@@ -116,30 +132,62 @@ def add_type_guards(func, implem, function, kind="c"):
     list_bw = []
     datatypes.sort()
     for dt in datatypes:
-        if dt in ["int64", "uint64", "float64"]:
+        dt_suffix = dt_to_suffix(dt)
+        parts = split_dt_pair(dt)
+        if any(is_64bit_dt(part) for part in parts):
             list_64.append(dt)
-        elif dt in ["int8", "uint8", "int16", "uint16"]:
+        elif any(is_bw_dt(part) for part in parts):
             list_bw.append(dt)
         else:
-            res += section.format(dt=dt, function=function)
+            res += section.format(dt=dt, dt_suffix=dt_suffix, function=function)
 
     if list_64 != []:
         list_64.sort()
         res += f"#if defined(MIPP_64BIT)\n"
         for dt in list_64:
-            res += section.format(dt=dt, function=function)
+            dt_suffix = dt_to_suffix(dt)
+            res += section.format(dt=dt, dt_suffix=dt_suffix, function=function)
         res += "#endif\n"
 
     if list_bw != []:
         list_bw.sort()
         res += f"#if defined(MIPP_BW)\n"
         for dt in list_bw:
-            res += section.format(dt=dt, function=function)
+            dt_suffix = dt_to_suffix(dt)
+            res += section.format(dt=dt, dt_suffix=dt_suffix, function=function)
         res += "#endif\n"
 
     return res
 
 def gen_test_type_guards(func, long_name, short_name, kind="c"):
+    layer_dict = get_gen_test_dict(kind)
+    res = f'\nTEST_CASE("{long_name} - {kind}", "[{short_name}]") {{\n'
+    for implems in implem_dict.values():
+        res += implems["guard"] + "\n"
+        if func in implems["implem"]:
+            if kind == "c":
+                res += add_type_guards(func, implems["implem"], function=f"test_cmipp_{func}", kind=kind)
+            elif kind == "cpp":
+                res += add_type_guards(
+                    func,
+                    implems["implem"],
+                    function=f"test_cppmipp_{test_function_name(kind, func)}",
+                    kind=kind,
+                )
+            elif kind == "obj":
+                res += add_type_guards(
+                    func,
+                    implems["implem"],
+                    function=f"test_objmipp_{test_function_name(kind, func)}",
+                    kind=kind,
+                )
+    res += "#else\n"
+    res += f'#error "No implementation for {func} in any of the supported architectures"\n'
+    res += "#endif\n"
+    res += "}\n"
+    return res
+
+def gen_cast_test_type_guards(func, long_name, short_name, kind="c"):
     layer_dict = get_gen_test_dict(kind)
     res = f'\nTEST_CASE("{long_name} - {kind}", "[{short_name}]") {{\n'
     for implems in implem_dict.values():
@@ -226,6 +274,61 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type=""):
     # but it's unelegant
     return res + "\n"
 
+def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="c", msk1_type="", msk2_type=""):
+    res = ""
+    layer_dict = get_gen_test_dict(kind)
+    func_dict = layer_dict["cast"]["proto"]
+    func_template = layer_dict["cast"]["template"]
+    
+    func_template = Template(func_template, undefined=StrictUndefined)
+    res = func_template.render(
+        func_decl=func_dict["func_decl"],
+        decl=func_dict["decl"],
+        init=func_dict["init"],
+        load=func_dict["load"],
+        operation=func_dict["operation"],
+        loop_body=func_dict["loop_body"],
+        loop_assert=func_dict["loop_assert"],
+    )
+    func_template = Template(res, undefined=StrictUndefined)
+    func_old = "cast"
+    func = test_function_name(kind, func)
+    res = func_template.render(
+        func=func,
+        dt1_ext=scalar1_type,
+        dt2_ext=scalar2_type,
+        op=layer_dict[func_old]["op"],
+        reg1_type=reg1_type,
+        msk1_type=msk1_type,
+        reg2_type=reg2_type,
+        msk2_type=msk2_type,
+        size="MIPP_N_" + scalar1_type.upper(),
+        #size2="MIPP_N_" + scalar2_type.upper(),
+    )
+    
+    return res+ "\n"
+
+def gen_cast_funcs_all_datatypes(func, kind="c", register="rvd", mask="rvm"):
+    layer_dict = get_gen_test_dict(kind)
+    datatypes = mipp_funcs[func]["datatypes"]
+    res = ""
+    if kind == "c":
+        for dt in datatypes:
+            dt1, dt2 = dt.split(",")
+            func_name = f"{func}_{dt1}_{dt2}"
+            res+= gen_cast_func(func_name, 
+                                scalar1_type=dt1,
+                                scalar2_type=dt2,
+                                reg1_type=f"{register}_" + dt1 + "_t",
+                                reg2_type=f"{register}_" + dt2 + "_t",
+                                kind=kind, 
+                                msk1_type=f"{mask}_" + dt1 + "_t",
+                                msk2_type=f"{mask}_" + dt2 + "_t")
+            
+    elif kind == "cpp" or kind == "obj":  # template so no need
+        res += ""
+    return res
+
 def gen_funcs_all_datatypes(func, kind="c", register="rvd", mask="rvm"):
     layer_dict = get_gen_test_dict(kind)
 
@@ -279,6 +382,27 @@ def gen_file(func, kind="c"):
     )
     return res
 
+#cast are special bc they 
+#are defined on the products of datatypes instead of on 1 datatypes
+
+def gen_cast_file(func,kind="c"):
+    layer_dict = get_gen_test_dict(kind)
+
+    register = "rvd"
+    mask = "rvm"
+
+    if kind == "obj":
+        register = register.capitalize()  # obj types are Rvd, Rvm instead of rvd, rvm
+        mask = mask.capitalize()
+
+    res = gen_cast_funcs_all_datatypes(func, kind=kind, register=register, mask=mask)
+    res += gen_cast_test_type_guards(
+        func,
+        layer_dict[func]["long_name"],
+        layer_dict[func]["short_name"],
+        kind=kind,
+    )
+    return res
 tmp_path = "../../tests/src/"
 cpath = tmp_path + "c_tests/"
 cpppath = tmp_path + "cpp_tests/"
@@ -355,19 +479,29 @@ def gen_test_files_all_funcs(kind="c"):
         )
 
         if regen_c and func in c_dict:
-            c_file = gen_headers(kind="c") + gen_file(func, kind="c")
+            if func == "cast" or func == "cast_k":
+                c_file = gen_headers(kind="c") + gen_cast_file(func, kind="c")
+            else:
+                c_file = gen_headers(kind="c") + gen_file(func, kind="c")
             if disable:
                 c_file = comment_out_cpp_file(c_file, reason)
             write_file_if_different(cpath + f"test_c{func}.cpp", c_file)
 
         if regen_cpp and func in cpp_dict:
-            cpp_file = gen_headers(kind="cpp") + gen_file(func, kind="cpp")
+            if func == "cast" or func == "cast_k":
+                cpp_file = gen_headers(kind="cpp") + gen_cast_file(func, kind="cpp")
+            else:
+                cpp_file = gen_headers(kind="cpp") + gen_file(func, kind="cpp")
+                
             if disable:
                 cpp_file = comment_out_cpp_file(cpp_file, reason)
             write_file_if_different(cpppath + f"test_{func}.cpp", cpp_file)
 
         if regen_obj and func in obj_dict:
-            obj_file = gen_headers(kind="obj") + gen_file(func, kind="obj")
+            if func == "cast" or func == "cast_k":
+                obj_file = gen_headers(kind="obj") + gen_cast_file(func, kind="obj")
+            else:
+                obj_file = gen_headers(kind="obj") + gen_file(func, kind="obj")
             if disable:
                 obj_file = comment_out_cpp_file(obj_file, reason)
             write_file_if_different(objpath + f"test_obj_{func}.cpp", obj_file)

@@ -64,6 +64,9 @@ DECL_3ARGS = """\tconst int vectorSize = {{size}};\n\t{{dt_ext}}_t inputs1[vecto
 #never used on it's own, but used alongisde other snippets :)
 DECL_G_SNIPPET = """\tstd::mt19937 g;\n\tstd::uniform_int_distribution<uint16_t> dis(0, 1);"""
 
+#we want inputs2 to store the same amount of bytes as inputs1 since we'll be memcpying from inputs1 to inputs2 for the cast tests, so if dt2 is smaller than dt1 we need more lanes in inputs2
+DECL_CAST_2ARGS = """\tconst int vectorSize = {{size}};\n\t{{dt1_ext}}_t inputs1[vectorSize];\n\t{{dt2_ext}}_t inputs2[sizeof(inputs1) / sizeof({{dt2_ext}}_t)];"""
+
 # --------------------------------------------
 # SCALAR VEC INIT
 # --------------------------------------------
@@ -104,6 +107,10 @@ INIT_3ARGS = """\tstd::iota(inputs1, inputs1 + vectorSize, 1);
 \tstd::iota(inputs2, inputs2 + vectorSize, 1);
 \tstd::iota(inputs3, inputs3 + vectorSize, 1);"""
 
+#to cast we want to memcpy from inputs1 to inputs2 
+#to compare inputs2 to what we got after casting in the loop body.
+INIT_CAST_2ARGS = """\tstd::iota(inputs1, inputs1 + vectorSize, 1);\n\tmemcpy(inputs2, inputs1, sizeof(inputs1));"""
+
 # --------------------------------------------
 # LOADS
 # --------------------------------------------
@@ -130,6 +137,8 @@ LOAD_3ARGS_REG = """\t{{reg_type}} r1 = mipp_load_{{dt_ext}}(inputs1);
 \t{{reg_type}} r2 = mipp_load_{{dt_ext}}(inputs2);
 \t{{reg_type}} r3 = mipp_load_{{dt_ext}}(inputs3);"""
 
+LOAD_CAST_2ARGS = """\t{{reg1_type}} r1 = mipp_load_{{dt1_ext}}(inputs1);"""
+
 # --------------------------------------------
 # OPERATIONS
 # --------------------------------------------
@@ -155,6 +164,8 @@ OP_2ARGS_2MASK = """\t{{msk_type}} m3 = mipp_{{func}}_{{dt_ext}}(m1, m2);\n\t{{r
 
 OP_3ARGS_REG = """\t{{reg_type}} r4 = mipp_{{func}}_{{dt_ext}}(r1, r2, r3);"""
 
+
+OP_CAST = """\t{{reg2_type}} r2 = mipp_cast_{{dt1_ext}}_{{dt2_ext}}(r1);"""
 # --------------------------------------------
 # OPERATION IN LOOP BODY
 # ------------------------------------------
@@ -170,6 +181,8 @@ LB_LOAD = """\t\t{{dt_ext}}_t res = inputs1[i];"""
 
 LB_STORE = """\t\t{{dt_ext}}_t res = inputs1[i];"""
 
+LB_CAST_2ARGS = """\t\t{{dt2_ext}}_t res = inputs2[i];"""
+
 # --------------------------------------------
 # ASSERTS IN LOOP BODY
 # ------------------------------------------
@@ -179,6 +192,8 @@ AS_CMP_2REG = """\t\tif(res) REQUIRE(mipp_get_{{dt_ext}}(r3, i) != 0); else REQU
 AS_LOAD = """\t\tREQUIRE(mipp_get_{{dt_ext}}(r1, i) == res);"""
 AS_STORE = """\t\tREQUIRE(inputs2[i] == res);"""
 AS_3ARGS = """\t\tREQUIRE(mipp_get_{{dt_ext}}(r4, i) == res);"""
+
+AS_CAST_2ARGS = """\t\tREQUIRE(mipp_get_{{dt2_ext}}(r2, i) == res);"""
 
 
 shape_templates = {
@@ -444,8 +459,6 @@ shape_templates = {
 
 deny = {
     "cast_k", 
-    "cast", 
-        
     "round", #round is not implemented on rvv or avx2 (oops)
 }
 
@@ -537,11 +550,22 @@ LAYER_OVERRIDES = {
 \t\tres1 += inputs1[j];""",
         "loop_assert": """\tREQUIRE(res == res1);""",
     },
+    
+    "cast": {
+        "func_decl": """void test_cmipp_cast_{{dt1_ext}}_{{dt2_ext}}(){""",
+        "decl": DECL_CAST_2ARGS,
+        "init": INIT_CAST_2ARGS,
+        "load": LOAD_CAST_2ARGS,
+        "operation": OP_CAST,
+        "loop_body": """\tfor(int i = 0 ; i < vectorSize * sizeof({{dt1_ext}}_t) / sizeof({{dt2_ext}}_t); i++){\n"""+ LB_CAST_2ARGS,
+        "loop_assert": AS_CAST_2ARGS+ "\n\t}",
+    },
 
 }
 
 NO_LOOP_FUNCS = {"hadd", "hmul", "hmin", "hmax", 
-                 "hadd_to_scal", "getfirst", "testz", "testz_2", }
+                 "hadd_to_scal", "getfirst", "testz", 
+                 "testz_2", "cast","cast_k"}
 
 def apply_overrides(gen_dict):
     for func, entry in gen_dict.items():
