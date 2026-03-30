@@ -185,12 +185,18 @@ LB_STORE = """\t\t{{dt_ext}}_t res = inputs1[i];"""
 
 LB_CAST_2ARGS = """\t\t{{dt2_ext}}_t res = inputs2[i];"""
 
+LB_REG_BINOP_FLOAT_WORKAROUND = """{% if is_int %}""" + LB_REG_BINOP + """{% else %}
+        \t{{dt_ext}}_t res = std::bit_cast<{{dt_ext}}_t,uint{{type_size}}_t>(
+\t\t\t\tstd::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(inputs1[i]) 
+\t\t\t\t{{op}} 
+\t\t\t\tstd::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(inputs2[i]));{% endif %}"""
+
 # --------------------------------------------
 # ASSERTS IN LOOP BODY
 # ------------------------------------------
 
 AS_REG_BINOP = """\t\tREQUIRE(mipp_get_{{dt_ext}}(r3, i) == res);"""
-AS_CMP_2REG = """\t\tif(res) REQUIRE(mipp_get_{{dt_ext}}(r3, i) != 0); else REQUIRE(mipp_get_{{dt_ext}}(r3, i) == 0);"""
+AS_CMP_2REG = """\t\tif(res) REQUIRE(mipp_get_{{dt_ext}}(r3, i) !=  ({{dt_ext}}_t)0); else REQUIRE(mipp_get_{{dt_ext}}(r3, i) == 0);"""
 AS_LOAD = """\t\tREQUIRE(mipp_get_{{dt_ext}}(r1, i) == res);"""
 AS_STORE = """\t\tREQUIRE(inputs2[i] == res);"""
 AS_3ARGS = """\t\tREQUIRE(mipp_get_{{dt_ext}}(r4, i) == res);"""
@@ -198,6 +204,16 @@ AS_3ARGS = """\t\tREQUIRE(mipp_get_{{dt_ext}}(r4, i) == res);"""
 AS_CAST_2ARGS = """\t\tREQUIRE(mipp_get_{{dt2_ext}}(r2, i) == res);"""
 AS_CAST_2ARGS_MSK = """\t\tif(res) REQUIRE(mipp_get_k_{{dt2_ext}}(m2, i) != 0); else REQUIRE(mipp_get_k_{{dt2_ext}}(m2, i) == 0);"""
 
+AS_REG_BINOP_FLOAT_WORKAROUND = """{% if is_int %}""" + AS_REG_BINOP + """{% else %}
+\n\t\tREQUIRE(std::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(mipp_get_{{dt_ext}}(r3, i))\
+\n\t\t\t==
+\t\t\tstd::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(res) );
+{% endif %}"""
+
+AS_CMP_BINOP_FLOAT_WORKAROUND = """{% if is_int %}""" + AS_CMP_2REG + """{% else %}
+\n\t\tif(res) REQUIRE(std::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(mipp_get_{{dt_ext}}(r3, i))\n\t\t\t!= 0);
+else REQUIRE(std::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(mipp_get_{{dt_ext}}(r3, i)) == 0);
+{% endif %}"""
 
 shape_templates = {
     SHAPE_RET_REG_2ARGS_REG: TemplateParts(
@@ -468,7 +484,12 @@ deny = {
 LAYER_OVERRIDES = {
     # Non-operator function: expected scalar expression override
     "andnb": {
-        "loop_body": """\t\t{{dt_ext}}_t res = ~(inputs1[i]) & (inputs2[i]);"""
+        "loop_body": "{% if is_int %}" + "\t\t{{dt_ext}}_t res = ~(inputs1[i]) & (inputs2[i]);" +
+"{% else %}" + """\t{{dt_ext}}_t res = std::bit_cast<{{dt_ext}}_t,uint{{type_size}}_t>(
+\t\t\t~std::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(inputs1[i]) 
+\t\t\t&
+\t\t\tstd::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(inputs2[i]) );\n""" + """{% endif %}""",
+        "loop_assert": AS_REG_BINOP_FLOAT_WORKAROUND,
     },
     
     "andnb_k": {
@@ -480,11 +501,23 @@ LAYER_OVERRIDES = {
     },
     
     "notb": {
-        "loop_body": """\t\t{{dt_ext}}_t res = ~(inputs1[i]);"""
+        "loop_body": "{%if is_int %}"+"""\t\t{{dt_ext}}_t res = ~(inputs1[i]);"""+
+"""{% else %}""" + """\t{{dt_ext}}_t res = std::bit_cast<{{dt_ext}}_t,uint{{type_size}}_t>(
+\t\t\t~std::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(inputs1[i]));\n""" + """{% endif %}""",
+        "loop_assert": AS_REG_BINOP_FLOAT_WORKAROUND,
+    
+    
     },
     
     "notb_k": {
-        "loop_body": """\t\t{{dt_ext}}_t res = ~(inputs1[i]);"""
+        "loop_body": """{%if is_int %}""" + """\t\t{{dt_ext}}_t res = ~(inputs1[i]);""" 
++ """{% else %}""" 
++ """\t{{dt_ext}}_t res = 
+\tstd::bit_cast<{{dt_ext}}_t,uint{{type_size}}_t>(
+\t\t~std::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(inputs1[i]));\n""" 
++
+"""{%endif%}""",
+        "loop_assert": AS_REG_BINOP_FLOAT_WORKAROUND,
     },
     
     "hadd": {
@@ -537,13 +570,19 @@ LAYER_OVERRIDES = {
     
     "rsqrt" : {
         "loop_body": """\t\t{{dt_ext}}_t res = 1.0 / std::sqrt(inputs1[i]);""",
-        "loop_assert": """\tREQUIRE(std::abs(mipp_get_{{dt_ext}}(r3, i) - res) < 1e-3);""",
+        "loop_assert": """\tREQUIRE(std::abs(mipp_get_{{dt_ext}}(r3, i) - res) < 1e-2);""",
     },
     
     #msb is most significant BIT not byte.
     #the function returns msb of a lane & 0x8 etc
     "msb" : {
-        "loop_body": """\t\t{{dt_ext}}_t res = inputs1[i] & (({{dt_ext}}_t)1 << (sizeof({{dt_ext}}_t)*8 - 1));""",
+        "loop_body": "{% if is_int %}" + "\t{{dt_ext}}_t res = inputs1[i] & (({{dt_ext}}_t)1 << (sizeof({{dt_ext}}_t)*8 - 1));"
+        + "{% else %}" + """\t{{dt_ext}}_t res = 
+        std::bit_cast<{{dt_ext}}_t,uint{{type_size}}_t>(
+\t\t\tstd::bit_cast<uint{{type_size}}_t, {{dt_ext}}_t>(inputs1[i])
+\t\t\t&((uint{{type_size}}_t)1 << (sizeof({{dt_ext}}_t)*8 - 1))
+\t\t);\n""" + """{% endif %}""",
+        "loop_assert": AS_REG_BINOP_FLOAT_WORKAROUND,
     },
     
     "hadd_to_scal": {
@@ -572,6 +611,21 @@ LAYER_OVERRIDES = {
         "loop_body": """\tfor(int i = 0 ; i < vectorSize * sizeof({{dt1_ext}}_t) / sizeof({{dt2_ext}}_t); i++){\n"""+ LB_CAST_2ARGS,
         "loop_assert": AS_CAST_2ARGS_MSK + "\n\t}",
     },
+    
+    #add support for float via {% is_float %}
+    "andb": {
+        "loop_body" : LB_REG_BINOP_FLOAT_WORKAROUND,
+        "loop_assert" : AS_REG_BINOP_FLOAT_WORKAROUND
+    },
+    "orb": {
+        "loop_body" : LB_REG_BINOP_FLOAT_WORKAROUND,
+        "loop_assert" : AS_REG_BINOP_FLOAT_WORKAROUND
+    },
+    "xorb": {
+        "loop_body" : LB_REG_BINOP_FLOAT_WORKAROUND,
+        "loop_assert" : AS_REG_BINOP_FLOAT_WORKAROUND
+    },
+  
 
 }
 

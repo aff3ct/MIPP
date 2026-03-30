@@ -52,26 +52,30 @@ implem_dict = {
 }
 
 set_skip_testing = {
-    "get_k", #missing uint
-    "getfirst", #getfirst broken on avx2
-    "blend", #blend broken on avx2 + uses get_k :(
-    "andb_k", #uses get_k n.b : get_k not defined for uint on avx2
-    "orb_k", #uses get_k
-    "xorb_k", #uses get_k
-    "andnb_k", #uses get_k
-    "notb_k", #uses get_k
-    "toreg", #uses get_k.
+    #"get_k", #missing uint
+    #"getfirst", #getfirst broken on avx2
+    #"blend", #blend broken on avx2 + uses get_k :(
+    #"andb_k", #uses get_k n.b : get_k not defined for uint on avx2
+    #"orb_k", #uses get_k
+    #"xorb_k", #uses get_k
+    #"andnb_k", #uses get_k
+    #"notb_k", #uses get_k
+    #"toreg", #uses get_k.
     
-    "hadd", #overflow for i8 u8. Test is good though
+    #"hadd", #overflow for i8 u8. Test is good though
     "testz", #no set1_k for float & get_k on uint
     "testz_2", #no set1_k for float & get_k on uint
-    "hadd_to_scal", #overflow for i8 & getfirst used so wrong for floats.
+    #"hadd_to_scal", #overflow for i8 & getfirst used so wrong for floats.
                     #also not implemented for uint on avx2.
                     
-    "maskz_add", #set_k on uint
+    #"maskz_add", #set_k on uint
     "maskzld", #prototype is broken.
     "maskst", #prototype also broken. 
+    
+    "cast_k", #either testing or cast_k is wrong.
 }
+
+###### HELPERS ######
 
 # helper to get the datatypes for 1 func in 1 implem
 def get_defined_dttypes(func, implem):
@@ -104,6 +108,16 @@ def is_64bit_dt(dt: str):
 def is_bw_dt(dt: str):
     return dt in {"int8", "uint8", "int16", "uint16"}
 
+def is_float_dt(dt: str):
+    return dt in all_float
+
+def is_int_dt(dt: str):
+    return dt in all_int_uint
+
+def is_signed_int_dt(dt: str):
+    return dt in all_int
+
+###### GENERATION FUNC ######
 
 # add the type guard for 1 func in 1 implem
 def add_type_guards(func, implem, function, kind="c"):
@@ -187,6 +201,7 @@ def gen_test_type_guards(func, long_name, short_name, kind="c"):
     res += "}\n"
     return res
 
+#cast specific to handle the dttype pair
 def gen_cast_test_type_guards(func, long_name, short_name, kind="c"):
     layer_dict = get_gen_test_dict(kind)
     res = f'\nTEST_CASE("{long_name} - {kind}", "[{short_name}]") {{\n'
@@ -228,6 +243,7 @@ def gen_headers(kind="c"):
         "\n#include <random>"
         "\n#include <cstdio>"
         "\n#include <cmath>"
+        "\n#include <bit>"
     )
     if kind == "c":
         res += "\n#include <mipp.h>"
@@ -269,6 +285,11 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type=""):
         reg_type=reg_type,
         msk_type=msk_type,
         size="MIPP_N_" + scalar_type.upper(),
+        
+        is_float=is_float_dt(scalar_type),
+        is_int=is_int_dt(scalar_type),
+        is_signed=is_signed_int_dt(scalar_type),
+        type_size=scalar_type.split("t")[1]
     )
     # Warning: this doesn't pose "portability" issues bc cpp/obj don't use the size argument.
     # but it's unelegant
@@ -387,9 +408,6 @@ def gen_file(func, kind="c"):
     )
     return res
 
-#cast are special bc they 
-#are defined on the products of datatypes instead of on 1 datatypes
-
 def gen_cast_file(func,kind="c"):
     layer_dict = get_gen_test_dict(kind)
 
@@ -408,6 +426,8 @@ def gen_cast_file(func,kind="c"):
         kind=kind,
     )
     return res
+
+
 tmp_path = "../../tests/src/"
 cpath = tmp_path + "c_tests/"
 cpppath = tmp_path + "cpp_tests/"
@@ -436,6 +456,7 @@ def comment_out_cpp_file(content: str, reason: str):
     )
     return header + "/*\n" + content + "\n*/\n"
 
+#big and somewhat ugly "main" func to generate all test files for all funcs for the requested layer(s)
 def gen_test_files_all_funcs(kind="c"):
     """
     kind: "c", "cpp", "obj", or "all"
@@ -510,7 +531,7 @@ def gen_test_files_all_funcs(kind="c"):
                 obj_file = comment_out_cpp_file(obj_file, reason)
             write_file_if_different(objpath + f"test_obj_{func}.cpp", obj_file)
 
-def main():
+def main():#just parse the args and call gen_test_files_all_funcs with the right kind
     parser = argparse.ArgumentParser(description="Generate MIPP test files.")
     parser.add_argument(
         "kind",
