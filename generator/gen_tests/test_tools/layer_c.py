@@ -24,6 +24,8 @@ from .common import (
     SHAPE_RET_REG_1ARG_MSK, #toreg only
     
     SHAPE_RET_REG_3ARGS_REG, #fmadd, fmsub
+    SHAPE_RET_I32_2ARGS_MSK,# testz
+    SHAPE_RET_I32_1ARG_MSK, #testz2
 )
 
 # --------------------------
@@ -361,19 +363,37 @@ shape_templates = {
         loop_body="",
         loop_assert=AS_3ARGS,
     ),
+    
+    #testz, ugly template but only used for testz so ig it's fine
+    SHAPE_RET_I32_2ARGS_MSK : TemplateParts(
+        func_decl=FUNC_DECL,
+        decl="",
+        init="",
+        load="\t{{msk_type}} m1 = mipp_set1_k_{{dt_ext}}(1); \n\t{{msk_type}} m2 = mipp_set1_k_{{dt_ext}}(0);",
+        operation="",
+        loop_body="",
+        loop_assert="\tREQUIRE(mipp_testz_{{dt_ext}}(m1, m1) == 0);\n\tREQUIRE(mipp_testz_{{dt_ext}}(m2, m2) != 0);",
+    ),
+    
+    SHAPE_RET_I32_1ARG_MSK : TemplateParts(
+        func_decl=FUNC_DECL,
+        decl="",
+        init="",
+        load="\t{{msk_type}} m1 = mipp_set1_k_{{dt_ext}}(1); \n\t{{msk_type}} m2 = mipp_set1_k_{{dt_ext}}(0);",
+        operation="",
+        loop_body="",
+        loop_assert="\tREQUIRE(mipp_testz_2_{{dt_ext}}(m1) == 0);\n\tREQUIRE(mipp_testz_2_{{dt_ext}}(m2) != 0);",
+    ),
 }
 
 deny = {
-    # casts / masks / gather / reductions etc (for now)
-    "cast_k", "tomsk",
-    "maskzld", "maskst",
-    "gather", "scatter",
-    "testz", "testz_2",
-    "max", "min",
+    "tomsk",
+    "maskzld", 
+    "maskst",
+    "cast_k", 
+    "cast", 
     
-    "cast", "sqrt", "rsqrt", "msb", "round",
-    "hmin", "hmax", 
-    "hadd_to_scal",
+    "round", #round is not implemented on rvv or avx2 (oops)
 }
 
 
@@ -413,6 +433,21 @@ LAYER_OVERRIDES = {
         "loop_assert": """\tREQUIRE(mipp_get_{{dt_ext}}(r3, 0) == res);""",
     },
     
+    "hmin": {
+        "loop_body": """\t{{dt_ext}}_t res = inputs1[0];
+\tfor(int j = 1; j < vectorSize; j++)
+\t\tres = std::min(res, inputs1[j]);""",
+        "loop_assert": """\tREQUIRE(mipp_get_{{dt_ext}}(r3, 0) == res);""",
+    },
+    
+    
+    "hmax": {
+        "loop_body": """\t{{dt_ext}}_t res = inputs1[0];
+\tfor(int j = 1; j < vectorSize; j++)
+\t\tres = std::max(res, inputs1[j]);""",
+        "loop_assert": """\tREQUIRE(mipp_get_{{dt_ext}}(r3, 0) == res);""",
+    },
+    
     "fmadd": {
         "loop_body": """\t\t{{dt_ext}}_t res = inputs1[i] * inputs2[i] + inputs3[i];""",
     },
@@ -420,9 +455,40 @@ LAYER_OVERRIDES = {
     "fmsub": {
         "loop_body": """\t\t{{dt_ext}}_t res = inputs1[i] * inputs2[i] - inputs3[i];""",
     },
+    
+    "max" : {
+        "loop_body": """\t\t{{dt_ext}}_t res = std::max(inputs1[i], inputs2[i]);""",
+    },
+    "min" : {
+        "loop_body": """\t\t{{dt_ext}}_t res = std::min(inputs1[i], inputs2[i]);""",
+    },
+    
+    "sqrt" : {
+        "loop_body": """\t\t{{dt_ext}}_t res = std::sqrt(inputs1[i]);""",
+    },
+    
+    "rsqrt" : {
+        "loop_body": """\t\t{{dt_ext}}_t res = 1.0 / std::sqrt(inputs1[i]);""",
+        "loop_assert": """\tREQUIRE(std::abs(mipp_get_{{dt_ext}}(r3, i) - res) < 1e-3);""",
+    },
+    
+    #msb is most significant BIT not byte.
+    #the function returns msb of a lane & 0x8 etc
+    "msb" : {
+        "loop_body": """\t\t{{dt_ext}}_t res = inputs1[i] & (({{dt_ext}}_t)1 << (sizeof({{dt_ext}}_t)*8 - 1));""",
+    },
+    
+    "hadd_to_scal": {
+        "loop_body": """\t{{dt_ext}}_t res1 = 0;
+\tfor(int j = 0; j < vectorSize; j++)
+\t\tres1 += inputs1[j];""",
+        "loop_assert": """\tREQUIRE(res == res1);""",
+    },
+
 }
 
-NO_LOOP_FUNCS = {"hadd", "hmul", "hmin", "hmax", "hadd_to_scal", "getfirst"}
+NO_LOOP_FUNCS = {"hadd", "hmul", "hmin", "hmax", 
+                 "hadd_to_scal", "getfirst", "testz", "testz_2", }
 
 def apply_overrides(gen_dict):
     for func, entry in gen_dict.items():

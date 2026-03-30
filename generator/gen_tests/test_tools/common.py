@@ -7,7 +7,7 @@ from typing import Optional
 # Miscelaneous utilities for layers
 # --------------------------------------------
 
-set_skip_float = {"andb", "orb", "xorb", "notb", "andnb", "notb_k"}
+set_skip_float = {"andb", "orb", "xorb", "notb", "andnb", "notb_k", "msb"}
 set_remove_k = {"andb_k", "orb_k", "xorb_k", "andnb_k", "notb_k"}
 
 def test_function_name(kind: str, func: str):
@@ -82,6 +82,8 @@ SUPPORTED_SHAPES = {
     SHAPE_RET_REG_3ARGS_2REG_1MSK, #blend only
     SHAPE_RET_MSK_2ARGS_MSK, #shape for andb_k orb_k xorb_k andnb_k
     SHAPE_RET_MSK_1ARG_MSK, #shape for notb_k and cast_k
+    SHAPE_RET_I32_2ARGS_MSK, #testz
+    SHAPE_RET_I32_1ARG_MSK, #testz2
 }
 
 def classify_mipp_proto(proto: dict):
@@ -91,6 +93,7 @@ def classify_mipp_proto(proto: dict):
     ret_t = proto["ret"]["type"]              # "reg", "msk", "val", or False
     args_t = [a["type"] for a in proto["args"]]
     args_dt = [a["fixeddatatype"] for a in proto["args"]]
+    ret_dt = proto["ret"]["fixeddatatype"]
 
     if ret_t == "reg" and args_t == ["reg", "reg"]:
         return SHAPE_RET_REG_2ARGS_REG
@@ -130,6 +133,10 @@ def classify_mipp_proto(proto: dict):
         return SHAPE_RET_REG_1ARG_MSK
     if ret_t == "reg" and args_t == ["reg", "reg", "reg"]:
         return SHAPE_RET_REG_3ARGS_REG
+    if ret_t == "val" and args_t == ["msk", "msk"] and ret_dt == "int32":
+        return SHAPE_RET_I32_2ARGS_MSK
+    if ret_t == "val" and args_t == ["msk"] and ret_dt == "int32":
+        return SHAPE_RET_I32_1ARG_MSK
     return None
 
 # --------------------------------------------

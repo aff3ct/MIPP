@@ -63,7 +63,10 @@ set_skip_testing = {
     "toreg", #uses get_k.
     
     "hadd", #overflow for i8 u8. Test is good though
-    
+    "testz", #no set1_k for float & get_k on uint
+    "testz_2", #no set1_k for float & get_k on uint
+    "hadd_to_scal", #overflow for i8 & getfirst used so wrong for floats.
+                    #also not implemented for uint on avx2.
 }
 
 # helper to get the datatypes for 1 func in 1 implem
@@ -339,6 +342,7 @@ def gen_test_files_all_funcs(kind="c"):
         os.makedirs(objpath, exist_ok=True)
 
     for func in sorted(funcs):
+        
         disable = func in set_skip_testing
         reason = (
             f"{func} is in set_skip_testing. "
@@ -369,7 +373,7 @@ def main():
     parser.add_argument(
         "kind",
         nargs="?",
-        default="all",
+        default="c",
         choices=["c", "cpp", "obj", "all"],
         help="Which layer to regenerate (default: all).",
     )
