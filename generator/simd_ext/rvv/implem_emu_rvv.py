@@ -209,6 +209,11 @@ tpl_implem_emu_rvv = {
     "set0_k" : {"format" : "long", "code" : """        
         return %set1_k<tp>%(0);
     """},
+    "float_set0_k" : {"format" : "long", "code" : """
+        int32_t vals[%N<tp>%];
+        memset(vals,0,%N<tp>%*sizeof(int32_t));
+        return %set_k<tp>%(vals);
+    """},
     
     #from implem_emu_SVE.py
     "toreg-64" : { "format": "long", "code":"""
@@ -343,7 +348,7 @@ tpl_implem_emu_rvv = {
     
     "notb_k":{"format":"long", "code": """
         %m<tp>% ret;
-        ret = %set1_k<tp>%(0);
+        ret = %set0_k<tp>%();
         ret.m = {{isa.prefix}}_v{{instr_name}}_mm_{{isa_dt_par.data_ext_msk}}(ret.m,m0.m, %N<tp>%);
         return ret;
    """},
@@ -470,7 +475,8 @@ implems_emu_rvv = {
     # error when generating for all dttypes : Panic: unsupported type for 'set1_k<float64,float64>' function.
     # "set1_k" : [{"instr_name" : "set1_k", "datatypes": all_datatypes, "template": tpl_implem_emu_rvv["set1_k"]}],
     "set1_k" : [{"instr_name" : "set1_k", "datatypes": all_int_uint, "template": tpl_implem_emu_rvv["set1_k"]}],
-    "set0_k" : [{"instr_name" : "set0_k", "datatypes": all_datatypes, "template": tpl_implem_emu_rvv["set0_k"]}],
+    "set0_k" : [{"instr_name" : "set0_k", "datatypes": all_int_uint, "template": tpl_implem_emu_rvv["set0_k"]},
+              {"instr_name" : "set0_k", "datatypes": all_float, "template": tpl_implem_emu_rvv["float_set0_k"]}],
     
     "toreg":[ 
         # verifier genaralisation autres types
@@ -530,7 +536,7 @@ implems_emu_rvv = {
         {"instr_name": "fredmax", "datatypes": [float64], "template": tpl_implem_emu_rvv["hmax_float64"]},
    ],
    
-   "notb_k" : [{"instr_name" : "morn", "datatypes" : all_datatypes, "template" : tpl_implem_emu_rvv["notb_k"]}],
+   "notb_k" : [{"instr_name" : "morn", "datatypes" : all_datatypes, "template" : tpl_implem_emu_rvv["notb_k"]},],
    
    #pourquoi testz_2?
    "testz" : [{"instr_name" : "cpop", "datatypes" : all_datatypes, "template" : tpl_implem_emu_rvv["testz"]}],

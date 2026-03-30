@@ -159,7 +159,21 @@ tpl_implem_rvv = {
     "testz_2" : {"format": "short", "code": "   int32_t res = !({{isa.prefix}}_v{{instr_name}}_m_{{isa_dt_par.data_ext_msk}}(m0.m, %N<tp>%));"},
 
    "round_intuint": {"format": "short", "code": "res = r0;"},
-   "round_float": {"format": "short", "code": "{{isa.prefix}}_{{instr_name}}_x_f_v_{{isa_dt_par.int_data_ext}}(r0.r,__RISCV_FRM_RNE,%N<tp>%)"}
+   "round_float": {"format": "short", "code": "{{isa.prefix}}_{{instr_name}}_x_f_v_{{isa_dt_par.int_data_ext}}(r0.r,__RISCV_FRM_RNE,%N<tp>%)"},
+
+
+
+   "fmadd_int" : {"format" : "long", "code" : """
+    %r<tp>% res = %mul<tp>%(r0, r1);
+    res = %add<tp>%(res, r2);
+    return res;
+   """},
+   
+   "fmsub_int" : {"format" : "long", "code" : """
+    %r<tp>% res = %mul<tp>%(r0, r1);
+    res = %sub<tp>%(res, r2);
+    return res;
+    """},
 }
 
 """
@@ -218,9 +232,13 @@ implems_rvv = {
     
     #"cvt": [{"instr_name": "cvt", "datatypes": all_datatypes, "template" : tpl_implem_rvv["cvt"]}],
     
-    "fmadd": [{"instr_name": "fmadd", "datatypes": all_float, "template" : tpl_implem_rvv["arith_3args"]}],
+    "fmadd": [{"instr_name": "fmadd", "datatypes": all_float, "template" : tpl_implem_rvv["arith_3args"]}, 
+              {"instr_name": "fmadd", "datatypes": [int32], "template" : tpl_implem_rvv["fmadd_int"]}
+    ],
     #"fnmadd": [{"instr_name": "fnmadd", "datatypes": all_float, "template" : tpl_implem_rvv["arith_3args"]}],
-    "fmsub": [{"instr_name": "fmsub", "datatypes": all_float, "template" : tpl_implem_rvv["arith_3args"]}],
+    "fmsub": [{"instr_name": "fmsub", "datatypes": all_float, "template" : tpl_implem_rvv["arith_3args"]},
+              {"instr_name": "fmadd", "datatypes": [int32], "template" : tpl_implem_rvv["fmsub_int"]}
+    ],
     #"fnmsub": [{"instr_name": "fnmsub", "datatypes": all_float, "template" : tpl_implem_rvv["arith_3args"]}],
     
     "cmplt" : [
