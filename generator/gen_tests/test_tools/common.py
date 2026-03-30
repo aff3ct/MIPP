@@ -32,7 +32,7 @@ operators_reduction = {
 # --------------------------------------------
 
 SHAPE_RET_REG_1ARG_PTR = "ret_reg_1arg_ptr"
-SHAPE_RET_REG_2ARGS_MASK_PTR = "ret_reg_2args_mask_ptr"
+SHAPE_RET_REG_2ARGS_MASK_PTR = "ret_reg_2args_msk_ptr"
 SHAPE_RET_VOID_3ARGS_PTR_MSK_REG = "ret_void_3args_ptr_msk_reg"
 SHAPE_RET_VOID_2ARGS_PTR_REG = "ret_void_2args_ptr_reg"
 SHAPE_RET_REG_2ARGS_PTR_VINDEX = "ret_reg_2args_ptr_vindex"
@@ -84,6 +84,10 @@ SUPPORTED_SHAPES = {
     SHAPE_RET_MSK_1ARG_MSK, #shape for notb_k and cast_k
     SHAPE_RET_I32_2ARGS_MSK, #testz
     SHAPE_RET_I32_1ARG_MSK, #testz2
+    SHAPE_RET_REG_3ARGS_1MSK_2REG, #for maskz_add. I wonder if its normal that's it's the "opposite order" from blend
+    SHAPE_RET_MSK_1ARG_REG, #tomsk
+    SHAPE_RET_REG_2ARGS_MASK_PTR, #maskz load
+    SHAPE_RET_VOID_3ARGS_PTR_MSK_REG #shape for mask store (maskst)
 }
 
 def classify_mipp_proto(proto: dict):
@@ -137,6 +141,14 @@ def classify_mipp_proto(proto: dict):
         return SHAPE_RET_I32_2ARGS_MSK
     if ret_t == "val" and args_t == ["msk"] and ret_dt == "int32":
         return SHAPE_RET_I32_1ARG_MSK
+    if ret_t == "reg" and args_t == ["msk", "reg", "reg"]:
+        return SHAPE_RET_REG_3ARGS_1MSK_2REG
+    if ret_t == "msk" and args_t == ["reg"]:
+        return SHAPE_RET_MSK_1ARG_REG
+    if ret_t == "reg" and args_t == ["msk", "ptr"] and args_dt == ["int32", False]:
+        return SHAPE_RET_REG_2ARGS_MASK_PTR
+    if ret_t is False and args_t == ["ptr", "msk", "reg"]:
+        return SHAPE_RET_VOID_3ARGS_PTR_MSK_REG
     return None
 
 # --------------------------------------------

@@ -26,6 +26,12 @@ from .common import (
     SHAPE_RET_REG_3ARGS_REG, #fmadd, fmsub
     SHAPE_RET_I32_2ARGS_MSK,# testz
     SHAPE_RET_I32_1ARG_MSK, #testz2
+    
+    SHAPE_RET_REG_3ARGS_1MSK_2REG, #maskz_add only
+    SHAPE_RET_MSK_1ARG_REG, #tomsk only
+    SHAPE_RET_REG_2ARGS_MASK_PTR, #maskz load only
+    SHAPE_RET_VOID_3ARGS_PTR_MSK_REG, #mask store (maskst) only
+
 )
 
 # --------------------------
@@ -141,6 +147,7 @@ OP_TOREG = """\t{{reg_type}} r3 = mipp_toreg_{{dt_ext}}(m1);"""
 OP_SCAL_UNOP = """\t{{dt_ext}}_t res = mipp_{{func}}_{{dt_ext}}(r1);"""
 
 OP_3ARGS_2REG_1MSK = """\t{{reg_type}} r3 = mipp_{{func}}_{{dt_ext}}(r1, r2, m1);"""
+OP_3ARGS_1MSK_2REG = """\t{{reg_type}} r3 = mipp_{{func}}_{{dt_ext}}(m1, r1, r2);"""
 
 
 OP_1ARG_1MASK = """\t{{msk_type}} m3 = mipp_{{func}}_{{dt_ext}}(m1); {{reg_type}} r3 = mipp_toreg_{{dt_ext}}(m3);"""
@@ -156,18 +163,23 @@ LB_SET_OP = """\t\t{{dt_ext}}_t res = inputs1[i];"""
 LB_SET_SCALAR_OP = """\t\t{{dt_ext}}_t res = input1;"""
 
 LB_REG_BINOP = """\t\t{{dt_ext}}_t res = inputs1[i] {{op}} inputs2[i];"""
-AS_REG_BINOP = """\t\tREQUIRE(mipp_get_{{dt_ext}}(r3, i) == res);"""
 
 LB_CMP_2REG = """\t\tbool res = inputs1[i] {{op}} inputs2[i];"""
-AS_CMP_2REG = """\t\tif(res) REQUIRE(mipp_get_{{dt_ext}}(r3, i) != 0); else REQUIRE(mipp_get_{{dt_ext}}(r3, i) == 0);"""
 
 LB_LOAD = """\t\t{{dt_ext}}_t res = inputs1[i];"""
-AS_LOAD = """\t\tREQUIRE(mipp_get_{{dt_ext}}(r1, i) == res);"""
 
 LB_STORE = """\t\t{{dt_ext}}_t res = inputs1[i];"""
-AS_STORE = """\t\tREQUIRE(inputs2[i] == res);"""
 
+# --------------------------------------------
+# ASSERTS IN LOOP BODY
+# ------------------------------------------
+
+AS_REG_BINOP = """\t\tREQUIRE(mipp_get_{{dt_ext}}(r3, i) == res);"""
+AS_CMP_2REG = """\t\tif(res) REQUIRE(mipp_get_{{dt_ext}}(r3, i) != 0); else REQUIRE(mipp_get_{{dt_ext}}(r3, i) == 0);"""
+AS_LOAD = """\t\tREQUIRE(mipp_get_{{dt_ext}}(r1, i) == res);"""
+AS_STORE = """\t\tREQUIRE(inputs2[i] == res);"""
 AS_3ARGS = """\t\tREQUIRE(mipp_get_{{dt_ext}}(r4, i) == res);"""
+
 
 shape_templates = {
     SHAPE_RET_REG_2ARGS_REG: TemplateParts(
@@ -318,7 +330,7 @@ shape_templates = {
     ),
     
     #this shape covers 
-    #various different functions 
+    #various functions 
     #i.e : notb, sqrt, cast, hadd, hmul, hmin, hmax, round
     #since the asserts for these function will vary
     #each func will override some parts of the template 
@@ -384,15 +396,56 @@ shape_templates = {
         loop_body="",
         loop_assert="\tREQUIRE(mipp_testz_2_{{dt_ext}}(m1) == 0);\n\tREQUIRE(mipp_testz_2_{{dt_ext}}(m2) != 0);",
     ),
+    
+    SHAPE_RET_REG_3ARGS_1MSK_2REG : TemplateParts(
+        func_decl=FUNC_DECL,
+        decl=DECL_1ARG_INT32,
+        init=INIT_1ARG,
+        load=LOAD_1ARG_MASK + "\n" + LOAD_SET1_2ARGS_REG,
+        operation=OP_3ARGS_1MSK_2REG,
+        loop_body="\t\t{{dt_ext}}_t res = mipp_get_k_{{dt_ext}}(m1, i) ? 3 : 0;",
+        loop_assert=AS_REG_BINOP,
+    ),
+    
+    #tomsk
+    SHAPE_RET_MSK_1ARG_REG : TemplateParts(
+        func_decl=FUNC_DECL,
+        decl=DECL_1ARG,
+        init=INIT_1ARG,
+        load=LOAD_1ARG_REG,
+        operation="\t{{msk_type}} m1 = mipp_tomsk_{{dt_ext}}(r1);\n{{reg_type}} r3 = mipp_toreg_{{dt_ext}}(m1);",
+        loop_body="\t\t{{dt_ext}}_t res = inputs1[i] ? 1 : 0;",
+        loop_assert=AS_CMP_2REG,
+    ),
+    
+    
+    #maskzld
+    SHAPE_RET_REG_2ARGS_MASK_PTR : TemplateParts(
+        func_decl="",
+        decl="",
+        init="",
+        load="",
+        operation="",
+        loop_body="",
+        loop_assert="",
+    ),
+    
+    #maskst
+    SHAPE_RET_VOID_3ARGS_PTR_MSK_REG : TemplateParts(
+        func_decl="",
+        decl="",
+        init="",
+        load="",
+        operation="",
+        loop_body="",
+        loop_assert="",
+    ),
 }
 
 deny = {
-    "tomsk",
-    "maskzld", 
-    "maskst",
     "cast_k", 
     "cast", 
-    
+        
     "round", #round is not implemented on rvv or avx2 (oops)
 }
 

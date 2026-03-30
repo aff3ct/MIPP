@@ -67,6 +67,10 @@ set_skip_testing = {
     "testz_2", #no set1_k for float & get_k on uint
     "hadd_to_scal", #overflow for i8 & getfirst used so wrong for floats.
                     #also not implemented for uint on avx2.
+                    
+    "maskz_add", #set_k on uint
+    "maskzld", #prototype is broken.
+    "maskst", #prototype also broken. 
 }
 
 # helper to get the datatypes for 1 func in 1 implem
