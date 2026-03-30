@@ -277,8 +277,13 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type=""):
 def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="c", msk1_type="", msk2_type=""):
     res = ""
     layer_dict = get_gen_test_dict(kind)
-    func_dict = layer_dict["cast"]["proto"]
-    func_template = layer_dict["cast"]["template"]
+    #from func, get "cast" or "cast_k" to get the right template and proto
+    
+    is_cast_k = func.startswith("cast_k")
+    fname = "cast_k" if is_cast_k else "cast"
+    
+    func_dict = layer_dict[fname]["proto"]
+    func_template = layer_dict[fname]["template"]
     
     func_template = Template(func_template, undefined=StrictUndefined)
     res = func_template.render(
@@ -416,7 +421,6 @@ def write_file_if_different(path, content):
         with open(path, "r") as f:
             existing_content = f.read()
         if existing_content == content:
-            # print(f"No changes for {path}, skipping write.")
             return False
     with open(path, "w") as f:
         f.write(content)

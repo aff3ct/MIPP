@@ -66,7 +66,7 @@ DECL_G_SNIPPET = """\tstd::mt19937 g;\n\tstd::uniform_int_distribution<uint16_t>
 
 #we want inputs2 to store the same amount of bytes as inputs1 since we'll be memcpying from inputs1 to inputs2 for the cast tests, so if dt2 is smaller than dt1 we need more lanes in inputs2
 DECL_CAST_2ARGS = """\tconst int vectorSize = {{size}};\n\t{{dt1_ext}}_t inputs1[vectorSize];\n\t{{dt2_ext}}_t inputs2[sizeof(inputs1) / sizeof({{dt2_ext}}_t)];"""
-
+DECL_CAST_2ARGS_MSK = """\tconst int vectorSize = {{size}};\n\tint32_t inputs1[vectorSize];\n\t{{dt2_ext}}_t inputs2[sizeof(inputs1) / sizeof({{dt2_ext}}_t)];"""
 # --------------------------------------------
 # SCALAR VEC INIT
 # --------------------------------------------
@@ -138,6 +138,7 @@ LOAD_3ARGS_REG = """\t{{reg_type}} r1 = mipp_load_{{dt_ext}}(inputs1);
 \t{{reg_type}} r3 = mipp_load_{{dt_ext}}(inputs3);"""
 
 LOAD_CAST_2ARGS = """\t{{reg1_type}} r1 = mipp_load_{{dt1_ext}}(inputs1);"""
+LOAD_CAST_2ARGS_MASK = """\t{{msk1_type}} m1 = mipp_set_k_{{dt1_ext}}(inputs1);"""
 
 # --------------------------------------------
 # OPERATIONS
@@ -166,6 +167,7 @@ OP_3ARGS_REG = """\t{{reg_type}} r4 = mipp_{{func}}_{{dt_ext}}(r1, r2, r3);"""
 
 
 OP_CAST = """\t{{reg2_type}} r2 = mipp_cast_{{dt1_ext}}_{{dt2_ext}}(r1);"""
+OP_CAST_MSK = """\t{{msk2_type}} m2 = mipp_cast_k_{{dt1_ext}}_{{dt2_ext}}(m1);"""
 # --------------------------------------------
 # OPERATION IN LOOP BODY
 # ------------------------------------------
@@ -194,6 +196,7 @@ AS_STORE = """\t\tREQUIRE(inputs2[i] == res);"""
 AS_3ARGS = """\t\tREQUIRE(mipp_get_{{dt_ext}}(r4, i) == res);"""
 
 AS_CAST_2ARGS = """\t\tREQUIRE(mipp_get_{{dt2_ext}}(r2, i) == res);"""
+AS_CAST_2ARGS_MSK = """\t\tif(res) REQUIRE(mipp_get_k_{{dt2_ext}}(m2, i) != 0); else REQUIRE(mipp_get_k_{{dt2_ext}}(m2, i) == 0);"""
 
 
 shape_templates = {
@@ -457,8 +460,7 @@ shape_templates = {
     ),
 }
 
-deny = {
-    "cast_k", 
+deny = { 
     "round", #round is not implemented on rvv or avx2 (oops)
 }
 
@@ -559,6 +561,16 @@ LAYER_OVERRIDES = {
         "operation": OP_CAST,
         "loop_body": """\tfor(int i = 0 ; i < vectorSize * sizeof({{dt1_ext}}_t) / sizeof({{dt2_ext}}_t); i++){\n"""+ LB_CAST_2ARGS,
         "loop_assert": AS_CAST_2ARGS+ "\n\t}",
+    },
+    
+    "cast_k": {
+        "func_decl": """void test_cmipp_cast_k_{{dt1_ext}}_{{dt2_ext}}(){""",
+        "decl": DECL_CAST_2ARGS_MSK,
+        "init": INIT_CAST_2ARGS,
+        "load": LOAD_CAST_2ARGS_MASK,
+        "operation": OP_CAST_MSK,
+        "loop_body": """\tfor(int i = 0 ; i < vectorSize * sizeof({{dt1_ext}}_t) / sizeof({{dt2_ext}}_t); i++){\n"""+ LB_CAST_2ARGS,
+        "loop_assert": AS_CAST_2ARGS_MSK + "\n\t}",
     },
 
 }
