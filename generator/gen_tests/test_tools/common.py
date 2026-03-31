@@ -7,7 +7,7 @@ from typing import Optional
 # Miscelaneous utilities for layers
 # --------------------------------------------
 
-set_skip_float = {"notb_k", "andb", "orb", "xorb", "andnb", "notb"}
+set_skip_float = {"notb_k", "andb", "orb", "xorb", "andnb", "notb", "msb"}
 set_remove_k = {"andb_k", "orb_k", "xorb_k", "andnb_k", "notb_k"}
 
 def test_function_name(kind: str, func: str):

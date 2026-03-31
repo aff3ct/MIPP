@@ -60,7 +60,7 @@ set_skip_testing = {
     "xorb_k", #uses get_k
     "andnb_k", #uses get_k
     "notb_k", #uses get_k
-    #"toreg", #uses get_k.
+    "toreg", #uses get_k.
     
     "hadd", #overflow for i8 u8. Test is good though
     "testz", #no set1_k for float & get_k on uint
