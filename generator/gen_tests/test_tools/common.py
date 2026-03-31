@@ -7,7 +7,7 @@ from typing import Optional
 # Miscelaneous utilities for layers
 # --------------------------------------------
 
-set_skip_float = {"notb_k", "andb", "orb", "xorb", "andnb", "notb", "msb"}
+set_skip_float = {"notb_k", "andb", "orb", "xorb", "andnb", "notb"}
 set_remove_k = {"andb_k", "orb_k", "xorb_k", "andnb_k", "notb_k"}
 
 def test_function_name(kind: str, func: str):
@@ -76,9 +76,9 @@ SUPPORTED_SHAPES = {
     SHAPE_RET_MSK_1ARG_I32,
     SHAPE_RET_REG_0ARG,
     SHAPE_RET_MSK_0ARG,
-    SHAPE_RET_VAL_2ARGS_REG_VAL,
+    SHAPE_RET_VAL_2ARGS_REG_VAL,#get
     SHAPE_RET_VAL_2ARGS_MSK_VAL,
-    SHAPE_RET_VAL_1ARG_REG, #getfirst, hadd, hmul,...
+    SHAPE_RET_VAL_1ARG_REG, #getfirst, hadd_to_scal
     SHAPE_RET_REG_3ARGS_2REG_1MSK, #blend only
     SHAPE_RET_MSK_2ARGS_MSK, #shape for andb_k orb_k xorb_k andnb_k
     SHAPE_RET_MSK_1ARG_MSK, #shape for notb_k and cast_k

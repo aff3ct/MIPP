@@ -52,23 +52,23 @@ implem_dict = {
 }
 
 set_skip_testing = {
-    #"get_k", #missing uint
-    #"getfirst", #getfirst broken on avx2
-    #"blend", #blend broken on avx2 + uses get_k :(
-    #"andb_k", #uses get_k n.b : get_k not defined for uint on avx2
-    #"orb_k", #uses get_k
-    #"xorb_k", #uses get_k
-    #"andnb_k", #uses get_k
-    #"notb_k", #uses get_k
-    #"toreg", #uses get_k.
+    "get_k", #missing uint
+    #"getfirst", #getfirst broken on avx2 for floats
+    "blend", #blend broken on avx2 + uses get_k :(
+    "andb_k", #uses get_k n.b : get_k not defined for uint on avx2
+    "orb_k", #uses get_k
+    "xorb_k", #uses get_k
+    "andnb_k", #uses get_k
+    "notb_k", #uses get_k
+    "toreg", #uses get_k.
     
-    #"hadd", #overflow for i8 u8. Test is good though
+    "hadd", #overflow for i8 u8. Test is good though
     "testz", #no set1_k for float & get_k on uint
     "testz_2", #no set1_k for float & get_k on uint
-    #"hadd_to_scal", #overflow for i8 & getfirst used so wrong for floats.
+    "hadd_to_scal", #overflow for i8 & getfirst used so wrong for floats.
                     #also not implemented for uint on avx2.
                     
-    #"maskz_add", #set_k on uint
+    "maskz_add", #set_k on uint
     "maskzld", #prototype is broken.
     "maskst", #prototype also broken. 
     
@@ -277,6 +277,10 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type=""):
 
     func_old = func
     func = test_function_name(kind, func)
+    type_size=""
+    if kind=="c": 
+        type_size = scalar_type.split("t")[1]
+ 
 
     res = func_template.render(
         func=func,
@@ -289,7 +293,7 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type=""):
         is_float=is_float_dt(scalar_type),
         is_int=is_int_dt(scalar_type),
         is_signed=is_signed_int_dt(scalar_type),
-        type_size=scalar_type.split("t")[1]
+        type_size=type_size,
     )
     # Warning: this doesn't pose "portability" issues bc cpp/obj don't use the size argument.
     # but it's unelegant
@@ -536,7 +540,7 @@ def main():#just parse the args and call gen_test_files_all_funcs with the right
     parser.add_argument(
         "kind",
         nargs="?",
-        default="c",
+        default="cpp",
         choices=["c", "cpp", "obj", "all"],
         help="Which layer to regenerate (default: all).",
     )

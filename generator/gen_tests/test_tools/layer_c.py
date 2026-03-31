@@ -7,7 +7,6 @@ from .common import (
     SHAPE_RET_MSK_2ARGS_REG,
     SHAPE_RET_REG_1ARG_PTR,
     SHAPE_RET_VOID_2ARGS_PTR_REG,
-    #those are only backed by 1 function ;(
     SHAPE_RET_REG_1ARG_NELE,#set only
     SHAPE_RET_MSK_1ARG_NELE,#setk 
     SHAPE_RET_REG_1ARG_VAL, #only set1 :o
@@ -179,10 +178,6 @@ LB_REG_BINOP = """\t\t{{dt_ext}}_t res = inputs1[i] {{op}} inputs2[i];"""
 
 LB_CMP_2REG = """\t\tbool res = inputs1[i] {{op}} inputs2[i];"""
 
-LB_LOAD = """\t\t{{dt_ext}}_t res = inputs1[i];"""
-
-LB_STORE = """\t\t{{dt_ext}}_t res = inputs1[i];"""
-
 LB_CAST_2ARGS = """\t\t{{dt2_ext}}_t res = inputs2[i];"""
 
 LB_REG_BINOP_FLOAT_WORKAROUND = """{% if is_int %}""" + LB_REG_BINOP + """{% else %}
@@ -240,7 +235,7 @@ shape_templates = {
         init=INIT_1ARG,
         load=LOAD_1ARG_REG,
         operation="",  # load is in LOAD_1ARG_REG line already
-        loop_body=LB_LOAD,
+        loop_body=LB_SET_OP,
         loop_assert=AS_LOAD,
     ),
     SHAPE_RET_VOID_2ARGS_PTR_REG: TemplateParts(
@@ -249,7 +244,7 @@ shape_templates = {
         init=INIT_1ARG,     # only inputs1 needs init; inputs2 is output
         load=LOAD_1ARG_REG,     # store uses r1 loaded from inputs1
         operation=OP_STORE,
-        loop_body=LB_STORE,
+        loop_body=LB_SET_OP,
         loop_assert=AS_STORE,
     ),
 
