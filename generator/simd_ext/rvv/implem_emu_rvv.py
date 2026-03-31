@@ -273,14 +273,14 @@ tpl_implem_emu_rvv = {
     "float_andnb" : {"format" : "long", "code" : """
         {{isa_dt_par.to_uint}} tmp0,tmp1, tmpm1;
         
-        tmp0 = {{isa.prefix}}_vfcvt_xu_f_v_{{isa_dt_par.uint_data_ext}}(r0.r, %N<tp>%);
-        tmp1 = {{isa.prefix}}_vfcvt_xu_f_v_{{isa_dt_par.uint_data_ext}}(r1.r, %N<tp>%);
+        tmp0 = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(r0.r);
+        tmp1 = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(r1.r);
         tmpm1 = {{isa.prefix}}_vmv_s_x_{{isa_dt_par.uint_data_ext}}(-1,%N<tp>%);
         
         tmp0 = {{ isa.prefix }}_vxor_vv_{{ isa_dt_par.uint_data_ext }}(tmp0, tmpm1, %N<tp>%);
         tmp0 = {{ isa.prefix }}_vand_vv_{{ isa_dt_par.uint_data_ext }}(tmp0, tmp1, %N<tp>%);
         %r<tp>% ret;
-        ret.r = {{ isa.prefix }}_vfcvt_f_xu_v_{{isa_dt_par.data_ext}}(tmp0, %N<tp>%);
+        ret.r = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.uint_data_ext}}_{{isa_dt_par.data_ext}}(tmp0);
         return ret;
     """},
     
