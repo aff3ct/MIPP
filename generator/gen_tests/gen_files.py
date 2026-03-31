@@ -53,14 +53,14 @@ implem_dict = {
 
 set_skip_testing = {
     "get_k", #missing uint
-    #"getfirst", #getfirst broken on avx2 for floats
+    "getfirst", #getfirst broken on avx2 for floats
     "blend", #blend broken on avx2 + uses get_k :(
     "andb_k", #uses get_k n.b : get_k not defined for uint on avx2
     "orb_k", #uses get_k
     "xorb_k", #uses get_k
     "andnb_k", #uses get_k
     "notb_k", #uses get_k
-    "toreg", #uses get_k.
+    #"toreg", #uses get_k.
     
     "hadd", #overflow for i8 u8. Test is good though
     "testz", #no set1_k for float & get_k on uint

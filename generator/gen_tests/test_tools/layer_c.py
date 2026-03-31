@@ -500,8 +500,6 @@ LAYER_OVERRIDES = {
 """{% else %}""" + """\t{{dt_ext}}_t res = std::bit_cast<{{dt_ext}}_t,uint{{type_size}}_t>(
 \t\t\t~std::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(inputs1[i]));\n""" + """{% endif %}""",
         "loop_assert": AS_REG_BINOP_FLOAT_WORKAROUND,
-    
-    
     },
     
     "notb_k": {

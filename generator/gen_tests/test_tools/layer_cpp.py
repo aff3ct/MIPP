@@ -4,7 +4,7 @@ from .common import (
     TemplateParts,
     build_layer_gen_test_dict,
     SHAPE_RET_REG_2ARGS_REG,
-    SHAPE_RET_MSK_2ARGS_REG,
+    SHAPE_RET_MSK_2ARGS_REG, #cmple, cmplt, cmpgt, cmpge, cmpeq, cmpneq
     SHAPE_RET_REG_1ARG_PTR,
     SHAPE_RET_VOID_2ARGS_PTR_REG,
     SHAPE_RET_VAL_2ARGS_REG_VAL,#get only
@@ -16,11 +16,17 @@ from .common import (
     SHAPE_RET_MSK_0ARG,#set0_k
     SHAPE_RET_VAL_2ARGS_MSK_VAL, #get_k
     SHAPE_RET_VAL_1ARG_REG,#getfirst,hadd_to_scal
+    SHAPE_RET_REG_3ARGS_2REG_1MSK, #blend
+    SHAPE_RET_MSK_2ARGS_MSK, #andb_k orb_k xorb_k andnb_k
+    SHAPE_RET_REG_1ARG_REG, #notb
+    SHAPE_RET_MSK_1ARG_MSK, #notb_k and cast_k
+    SHAPE_RET_REG_1ARG_MSK, #toreg only
 )
 
 FUNC_DECL = """template <typename T>\nvoid test_cppmipp_{{func}}(){"""
 
 DECL_VECTOR_SIZE = """\tconst int vectorSize = mipp::N<T>();"""
+DECL_G_SNIPPET = """\tstd::mt19937 g;\n\tstd::uniform_int_distribution<uint16_t> dis(0, 1);"""
 
 DECL_1ARG_INT32 = DECL_VECTOR_SIZE + """ int32_t inputs1[vectorSize];"""
 DECL_1ARG_SCALAR = DECL_VECTOR_SIZE + """ \t T input1 = 12;"""
@@ -29,6 +35,9 @@ DECL_1ARG_SCALAR_INT32 = DECL_VECTOR_SIZE + """ \tint32_t input1 = 12;"""
 DECL_2ARGS = DECL_VECTOR_SIZE + """ T inputs1[vectorSize],inputs2[vectorSize];"""
 DECL_1ARG = DECL_VECTOR_SIZE + """ T inputs1[vectorSize];"""
 DECL_2ARGS_FOR_STORE = DECL_VECTOR_SIZE + """ T inputs1[vectorSize],inputs2[vectorSize];"""
+
+DECL_2ARGS_INT32 = DECL_VECTOR_SIZE + "\n\tint32_t inputs1[vectorSize],inputs2[vectorSize];"
+
 
 INIT_2ARGS = """\tstd::iota(inputs1, inputs1 + vectorSize, 1);
 \tstd::iota(inputs2, inputs2 + vectorSize, 1);
@@ -49,7 +58,19 @@ INIT_1ARG = """\tstd::iota(inputs1, inputs1 + vectorSize, 1);
 \tstd::shuffle(inputs1, inputs1 + vectorSize, g);
 """
 
-LOAD_2ARGS = """\t{{reg_type}} r1 = mipp::load<{{dt_ext}}>(inputs1), r2 = mipp::load<{{dt_ext}}>(inputs2);"""
+INIT_1ARG_DIS = """\tstd::iota(inputs1, inputs1 + vectorSize, 1);
+\tfor(int i = 0; i < vectorSize; i++)
+\t{
+\t\tinputs1[i] = dis(g) ? -1 : 0;
+\t}"""
+
+INIT_2ARGS_DIS = """\tfor(int i = 0; i < vectorSize; i++)
+\t{
+\t\tinputs1[i] = dis(g) ? -1 : 0;
+\t\tinputs2[i] = dis(g) ? -1 : 0;
+\t}"""
+
+LOAD_2ARGS_REG = """\t{{reg_type}} r1 = mipp::load<{{dt_ext}}>(inputs1), r2 = mipp::load<{{dt_ext}}>(inputs2);"""
 LOAD_1ARG_REG = """\t{{reg_type}} r1 = mipp::load<{{dt_ext}}>(inputs1);"""
 LOAD_1ARG_MASK = """\t{{msk_type}} m1 = mipp::set_k<T>(inputs1);"""
 LOAD_1SCALAR_REG = """\t{{reg_type}} r1 = mipp::set1(input1);"""
@@ -57,6 +78,10 @@ LOAD_1SCALAR_MASK = """\t{{msk_type}} m1 = mipp::set1_k<T>(input1);"""
 LOAD_SET0_REG = """\t{{reg_type}} r1 = mipp::set0<T>();"""
 LOAD_SET0_MASK = """\t{{msk_type}} m1 = mipp::set0_k<T>();"""
 
+LOAD_SET1_2ARGS_REG = """\t{{reg_type}} r1 = mipp::set1((T)1); \n\t{{reg_type}} r2 = mipp::set1((T)2);"""
+
+LOAD_2ARGS_MASK = """\t{{msk_type}} m1 = mipp::set_k<T>(inputs1); 
+\t{{msk_type}} m2 = mipp::set_k<T>(inputs2);"""
 
 OP_REG_BINOP = """\t{{reg_type}} r3 = mipp::{{func}}(r1, r2);"""
 OP_STORE = """\tmipp::store(inputs2, r1);"""
@@ -64,10 +89,22 @@ OP_REG_NOOP = """\t{{reg_type}} r3 = r1;"""
 OP_TOREG = """\t{{reg_type}} r3 = mipp::toreg(m1);"""
 OP_SCAL_UNOP = """\tT res = mipp::{{func}}(r1);"""
 
+OP_3ARGS_2REG_1MSK = """\t{{reg_type}} r3 = mipp::{{func}}(r1, r2, m1);"""
+OP_2ARGS_2MASK = """\t{{msk_type}} m3 = mipp::{{func}}(m1, m2);\n\t{{reg_type}} r3 = mipp::toreg(m3);"""
+
+OP_REG_UNOP = """\t{{reg_type}} r3 = mipp::{{func}}(r1);"""
+OP_1ARG_1MASK = """\t{{msk_type}} m3 = mipp::{{func}}(m1); {{reg_type}} r3 = mipp::toreg(m3);"""
+
+OP_CMP_2REG = """\t{{msk_type}} m3 = mipp::{{func}}(r1, r2); {{reg_type}} r3 = mipp::toreg(m3);"""
+
+
+
 
 LB_REG_BINOP = """\t\tT res = inputs1[i] {{op}} inputs2[i];"""
 LB_SET_OP = """\t\tT res = inputs1[i];"""
 LB_SET_SCALAR_OP = """\t\tT res = input1;"""
+
+LB_CMP_2REG = """\t\tbool res = inputs1[i] {{op}} inputs2[i];"""
 
 
 AS_REG_BINOP = """\t\tREQUIRE(mipp::get(r3, i) == res);"""
@@ -82,10 +119,20 @@ shape_templates = {
         func_decl=FUNC_DECL,
         decl=DECL_2ARGS,
         init=INIT_2ARGS,
-        load=LOAD_2ARGS,
+        load=LOAD_2ARGS_REG,
         operation=OP_REG_BINOP,
         loop_body=LB_REG_BINOP,
         loop_assert=AS_REG_BINOP,
+    ),
+    
+    SHAPE_RET_MSK_2ARGS_REG: TemplateParts(
+        func_decl=FUNC_DECL,
+        decl=DECL_2ARGS,
+        init=INIT_2ARGS,
+        load=LOAD_2ARGS_REG,
+        operation=OP_CMP_2REG,
+        loop_body=LB_CMP_2REG,
+        loop_assert=AS_CMP_2REG,
     ),
 
     SHAPE_RET_REG_1ARG_PTR: TemplateParts(
@@ -196,24 +243,70 @@ shape_templates = {
         loop_body="",
         loop_assert="\t\tREQUIRE(res == inputs1[0]);",
     ),
+    
+    SHAPE_RET_REG_3ARGS_2REG_1MSK: TemplateParts(
+        func_decl=FUNC_DECL,
+        decl=DECL_1ARG_INT32,
+        init=INIT_1ARG,
+        load=LOAD_1ARG_MASK + "\n" + LOAD_SET1_2ARGS_REG,
+        operation=OP_3ARGS_2REG_1MSK,
+        loop_body="\t\tT res = mipp::get(m1, i) ? mipp::get(r1, i) : mipp::get(r2, i);",
+        loop_assert=AS_REG_BINOP,
+    ),
+    
+    SHAPE_RET_MSK_2ARGS_MSK: TemplateParts(
+        func_decl=FUNC_DECL,
+        decl=DECL_2ARGS_INT32+DECL_G_SNIPPET,
+        init=INIT_2ARGS_DIS,
+        load=LOAD_2ARGS_MASK,
+        operation=OP_2ARGS_2MASK,
+        loop_body=LB_REG_BINOP,
+        loop_assert=AS_CMP_2REG,
+    ),
+    
+    SHAPE_RET_REG_1ARG_REG: TemplateParts(
+        func_decl=FUNC_DECL,
+        decl=DECL_1ARG,
+        init=INIT_1ARG,
+        load=LOAD_1ARG_REG,
+        operation=OP_REG_UNOP,
+        loop_body=LB_SET_OP,
+        loop_assert=AS_REG_BINOP,
+    ),
+    
+    SHAPE_RET_MSK_1ARG_MSK: TemplateParts(
+        func_decl=FUNC_DECL,
+        decl=DECL_1ARG_INT32+DECL_G_SNIPPET,
+        init=INIT_1ARG_DIS,
+        load=LOAD_1ARG_MASK,
+        operation=OP_1ARG_1MASK,
+        loop_body=LB_SET_OP,
+        loop_assert=AS_CMP_2REG,
+    ),
+    
+    SHAPE_RET_REG_1ARG_MSK: TemplateParts(
+        func_decl=FUNC_DECL,
+        decl=DECL_1ARG_INT32+DECL_G_SNIPPET,
+        init=INIT_1ARG_DIS,
+        load=LOAD_1ARG_MASK,
+        operation=OP_TOREG,
+        loop_body=LB_SET_OP,
+        loop_assert=AS_CMP_2REG,
+    ),
 }
 
 
 deny = {
     # same philosophy: keep small for now
-    "cast", "cast_k", "toreg", "tomsk",
+    "cast_k", "tomsk",
     "maskzld", "maskst",
     "gather", "scatter",
-    "blend",
     "testz", "testz_2",
-    "sqrt", "rsqrt",
-    "hadd", "hmul", "hmin", "hmax", "hadd_to_scal",
-    "notb", "notb_k",
-    "andb_k", "orb_k", "xorb_k", "andnb_k",
+    "hadd_to_scal",
     # and all comparisons for cpp *for now* (layer doesn't implement SHAPE_CMP_2REG)
-    "cmpeq", "cmpneq", "cmplt", "cmple", "cmpgt", "cmpge",
     
-    "max", "min"
+    "max", "min",
+    "cast","sqrt","rsqrt","round","msb","hadd","hmul","hmin","hmax"
 }
 
 LAYER_OVERRIDES = {
@@ -224,6 +317,14 @@ LAYER_OVERRIDES = {
 
     "sub": {
         "init": INIT_2ARGS_NOUFLOW
+    },
+    
+    "andnb_k": {
+        "loop_body": """\t\tT res = ~(inputs1[i]) & (inputs2[i]);"""
+    },
+    
+    "notb": {
+        "loop_body": """\t\tT res = ~(inputs1[i]);"""
     },
 }
 
