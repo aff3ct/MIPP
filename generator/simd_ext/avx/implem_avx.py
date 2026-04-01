@@ -83,8 +83,8 @@ tpl_implem_avx = {
 	tmp.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, _CMP_LT_OS);
 	return %tomsk<tp>%(tmp);""" },
 	"cmp_int":      { "format": "short", "code": " {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r);" },
-	"blend_float":  { "format": "short", "code":"{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, m0.m);"},
-	"blend_int":    { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_epi8(r0.r, r1.r, m0.m);" },
+	"blend_float":  { "format": "short", "code":"{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r1.r, r0.r, m0.m);"},
+	"blend_int":    { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_epi8(r1.r, r0.r, m0.m);" },
 	"logi_2args_e": { "format": "long", "code":
 """	%r<c:float|b:32>% r0f = %cast<tp,c:float|b:32>%(r0);
 	%r<c:float|b:32>% r1f = %cast<tp,c:float|b:32>%(r1);

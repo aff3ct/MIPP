@@ -574,13 +574,16 @@ LAYER_OVERRIDES = {
     "notb_k": {
         "func_decl" : FUNC_DECL_FLOAT_WORKAROUND,
         "loop_body": """{%if is_int %}""" + """\t\tT res = ~(inputs1[i]);""" 
-+ """{% else %}""" 
-+ """\tT res = 
-\tstd::bit_cast<T,uint{{type_size}}_t>(
-\t\t~std::bit_cast<uint{{type_size}}_t,T>(inputs1[i]));\n""" 
++ """{% else %} 
+uint{{type_size}}_t expected_bits = (inputs1[i] != 0)
+  ? 0
+  : -1;
+
+uint{{type_size}}_t got_bits = std::bit_cast<uint{{type_size}}_t>(mipp::get(r3, i));
+REQUIRE(got_bits == expected_bits);""" 
 +
 """{%endif%}""",
-        "loop_assert": AS_REG_BINOP_FLOAT_WORKAROUND,
+        "loop_assert": "{% if is_int %}" + AS_REG_BINOP + "{% else %} REQUIRE(got_bits == expected_bits); {% endif %}",
     },
     
 }

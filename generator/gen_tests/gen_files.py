@@ -52,10 +52,8 @@ implem_dict = {
 }
 
 set_skip_testing = {
-    "blend", #blend broken on avx2 + uses get_k :(
     
-    "notb_k", #uses get_k
-    "hadd", #overflow for i8 u8. Test is good though
+#    "hadd", #overflow for i8 u8. Test is good though
     "testz", #no set1_k for float & get_k on uint
     "testz_2", #no set1_k for float & get_k on uint
     "hadd_to_scal", #overflow for i8 & getfirst used so wrong for floats.
