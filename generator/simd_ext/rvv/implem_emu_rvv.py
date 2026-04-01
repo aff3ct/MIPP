@@ -475,7 +475,7 @@ implems_emu_rvv = {
     "set_k" : [
         { "instr_name" : "set_k", "datatypes" : all_datatypes, "template" : tpl_implem_emu_rvv["set_k"]}],
     "set1_k" : [
-        { "instr_name" : "set1_k", "datatypes" : all_int_uint, "template" : tpl_implem_emu_rvv["set1_k"]}],
+        { "instr_name" : "set1_k", "datatypes" : all_datatypes, "template" : tpl_implem_emu_rvv["set1_k"]}],
     "set0_k" : [
         { "instr_name" : "set0_k", "datatypes" : all_int_uint, "template" : tpl_implem_emu_rvv["set0_k"]},
         { "instr_name" : "set0_k", "datatypes" : all_float, "template" : tpl_implem_emu_rvv["float_set0_k"]}],

@@ -51,11 +51,7 @@ implem_dict = {
     "rvv": {"implem": implems_rvv, "guard": rvv_guard},
 }
 
-set_skip_testing = {
-    
-    "testz", #no set1_k for float & get_k on uint
-    "testz_2", #no set1_k for float & get_k on uint
-                    
+set_skip_testing = {                    
     "maskzld", #prototype is broken.
     "maskst", #prototype also broken. 
     "cast_k", #either testing or cast_k is wrong.    
