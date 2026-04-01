@@ -477,7 +477,6 @@ deny = {
 
 
 LAYER_OVERRIDES = {
-    # Non-operator function: expected scalar expression override
     "andnb": {
         "loop_body": "{% if is_int %}" + "\t\t{{dt_ext}}_t res = ~(inputs1[i]) & (inputs2[i]);" +
 "{% else %}" + """\t{{dt_ext}}_t res = std::bit_cast<{{dt_ext}}_t,uint{{type_size}}_t>(

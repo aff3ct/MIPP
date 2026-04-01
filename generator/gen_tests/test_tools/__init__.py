@@ -1,4 +1,4 @@
-from .common import set_skip_float, set_remove_k, test_function_name
+from .common import set_float_workaround, set_remove_k, test_function_name
 
 def get_gen_test_dict(kind: str):
     if kind == "c":

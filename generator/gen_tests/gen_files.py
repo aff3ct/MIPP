@@ -20,7 +20,7 @@ from implem_sve import implems_sve
 from implem_rvv import implems_rvv
 from headers_def import mipp_funcs
 from tools import *
-from test_tools import get_gen_test_dict, set_skip_float, test_function_name
+from test_tools import get_gen_test_dict, set_float_workaround, test_function_name
 
 from implem_emu_sse import implems_emu_sse
 from implem_emu_avx import implems_emu_avx
@@ -59,7 +59,7 @@ set_skip_testing = {
     "orb_k", #uses get_k
     "xorb_k", #uses get_k
     "andnb_k", #uses get_k
-    "notb_k", #uses get_k
+    #"notb_k", #uses get_k
     "toreg", #uses get_k.
     
     "hadd", #overflow for i8 u8. Test is good though
@@ -72,7 +72,7 @@ set_skip_testing = {
     "maskzld", #prototype is broken.
     "maskst", #prototype also broken. 
     
-    #"cast_k", #either testing or cast_k is wrong.
+    "cast_k", #either testing or cast_k is wrong.    
 }
 
 ###### HELPERS ######
@@ -89,8 +89,8 @@ def get_defined_dttypes(func, implem):
     for dt in func_dt:
         datatypes.append(dt["datatypes"])
     datatypes = list(set([item for sublist in datatypes for item in sublist]))
-    if func in set_skip_float:
-        datatypes = [dt for dt in datatypes if dt not in ["float32", "float64"]]
+    #if func in set_float_workaround:
+    #    datatypes = [dt for dt in datatypes if dt not in ["float32", "float64"]]
     return datatypes
 
 def dt_to_suffix(dt):
@@ -149,7 +149,7 @@ def add_type_guards(func, implem, function, kind="c"):
     if kind == "c":
         section = 'SECTION ("datatype = {dt}") {{ {function}_{dt_suffix}(); }}\n'
     elif kind == "cpp" or kind == "obj":
-        section = 'SECTION ("datatype = {dt}") {{ {function}{dt}(); }}\n'
+        section = 'SECTION ("datatype = {dt}") {{ {function}{dt_suffix}(); }}\n'
 
     list_64 = []
     list_bw = []
@@ -163,7 +163,11 @@ def add_type_guards(func, implem, function, kind="c"):
             list_bw.append(dt)
         else:
             if kind == "cpp" or kind == "obj":
-                dt = product_type_format_cpp(dt)
+                dt_suffix = product_type_format_cpp(dt)
+                if func in set_float_workaround and is_float_dt(dt):
+                    #this is hacky. It's to generate proper name to call float 
+                    #versions of andb etc...
+                    dt_suffix = f"_float{dt_suffix.split('t')[1].split("_")[0]}{dt_suffix}"
             res += section.format(dt=dt, dt_suffix=dt_suffix, function=function)
 
     if list_64 != []:
@@ -172,7 +176,9 @@ def add_type_guards(func, implem, function, kind="c"):
         for dt in list_64:
             dt_suffix = dt_to_suffix(dt)
             if kind == "cpp" or kind == "obj":
-                dt = product_type_format_cpp(dt)
+                dt_suffix = product_type_format_cpp(dt)
+                if func in set_float_workaround and is_float_dt(dt):
+                    dt_suffix = f"_float{dt_suffix.split('t')[1].split("_")[0]}{dt_suffix}"
             res += section.format(dt=dt, dt_suffix=dt_suffix, function=function)
         res += "#endif\n"
 
@@ -182,7 +188,10 @@ def add_type_guards(func, implem, function, kind="c"):
         for dt in list_bw:
             dt_suffix = dt_to_suffix(dt)
             if kind == "cpp" or kind == "obj":
-                dt = product_type_format_cpp(dt)
+                dt_suffix = product_type_format_cpp(dt)
+                if func in set_float_workaround and is_float_dt(dt):
+                    dt_suffix = f"_float{dt_suffix.split('t')[1].split("_")[0]}{dt_suffix}"
+
             res += section.format(dt=dt, dt_suffix=dt_suffix, function=function)
         res += "#endif\n"
 
@@ -269,7 +278,7 @@ def gen_headers(kind="c"):
     res += "\n#include <catch2/catch_test_macros.hpp>\n\n"
     return res
 
-def gen_func(func, scalar_type, reg_type, kind="c", msk_type=""):
+def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False):
     # Pick per-layer dictionary
     layer_dict = get_gen_test_dict(kind)
 
@@ -295,21 +304,48 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type=""):
     type_size=""
     if kind=="c": 
         type_size = scalar_type.split("t")[1]
- 
-
-    res = func_template.render(
-        func=func,
-        dt_ext=scalar_type,
-        op=layer_dict[func_old]["op"],
-        reg_type=reg_type,
-        msk_type=msk_type,
-        size="MIPP_N_" + scalar_type.upper(),
         
-        is_float=is_float_dt(scalar_type),
-        is_int=is_int_dt(scalar_type),
-        is_signed=is_signed_int_dt(scalar_type),
-        type_size=type_size,
-    )
+    if not float and kind=="c":
+        res = func_template.render(
+            func=func,
+            dt_ext=scalar_type,
+            op=layer_dict[func_old]["op"],
+            reg_type=reg_type,
+            msk_type=msk_type,
+            size="MIPP_N_" + scalar_type.upper(),
+            
+            is_float=is_float_dt(scalar_type),
+            is_int=is_int_dt(scalar_type),
+            is_signed=is_signed_int_dt(scalar_type),
+            type_size=type_size,
+        )
+    if not float and kind=="cpp" :
+        res = func_template.render(
+            func=func,
+            dt_ext=scalar_type,
+            op=layer_dict[func_old]["op"],
+            reg_type=reg_type,
+            msk_type=msk_type,
+            size="MIPP_N_" + scalar_type.upper(),
+            
+            is_float=False,
+            is_int=True,
+        )
+    if float and kind=="cpp" :
+        print(func)
+        res = func_template.render(
+            func=func,
+            dt_ext=scalar_type,
+            op=layer_dict[func_old]["op"],
+            reg_type=reg_type,
+            msk_type=msk_type,
+            size="MIPP_N_" + scalar_type.upper(),
+            
+            is_float=True,
+            is_int=False,
+            is_signed=False,
+            type_size=float.split("t")[1],
+        )
     # Warning: this doesn't pose "portability" issues bc cpp/obj don't use the size argument.
     # but it's unelegant
     return res + "\n"
@@ -424,7 +460,7 @@ def gen_funcs_all_datatypes(func, kind="c", register="rvd", mask="rvm"):
 
     res = ""
     datatypes = mipp_funcs[func]["datatypes"]
-    if func in set_skip_float:
+    if func in set_float_workaround and not func == "andb":
         datatypes = [dt for dt in datatypes if dt not in ["float32", "float64"]]
     if kind == "c":
         for dt in datatypes:
@@ -443,6 +479,23 @@ def gen_funcs_all_datatypes(func, kind="c", register="rvd", mask="rvm"):
             kind=kind,
             msk_type=f"mipp::{mask}<T>",
         )
+        if func in set_float_workaround:
+            res += gen_func(
+                func,
+                "T",
+                reg_type=f"mipp::{register}<T>",
+                kind=kind,
+                msk_type=f"mipp::{mask}<T>",
+                float="float32",
+            )
+            res += gen_func(
+                func,
+                "T",
+                reg_type=f"mipp::{register}<T>",
+                kind=kind,
+                msk_type=f"mipp::{mask}<T>",
+                float="float64",
+            )
     elif kind == "obj":  # template so no need to loop over datatypes
         res += gen_func(
             func,

@@ -29,6 +29,8 @@ from .common import (
 )
 
 FUNC_DECL = """template <typename T>\nvoid test_cppmipp_{{func}}(){"""
+FUNC_DECL_FLOAT_WORKAROUND = " {% if is_int %} " + FUNC_DECL + " {% else %} template <typename T>\nvoid test_cppmipp_{{func}}_float{{type_size}}(){  {% endif %}"
+
 
 DECL_VECTOR_SIZE = """\tconst int vectorSize = mipp::N<T>();"""
 DECL_G_SNIPPET = """\tstd::mt19937 g;\n\tstd::uniform_int_distribution<uint16_t> dis(0, 1);"""
@@ -140,6 +142,12 @@ LB_SET_SCALAR_OP = """\t\tT res = input1;"""
 LB_CMP_2REG = """\t\tbool res = inputs1[i] {{op}} inputs2[i];"""
 LB_CAST_2ARGS = """\t\t{{dt1_ext}}_t res = inputs2[i];"""
 
+LB_REG_BINOP_FLOAT_WORKAROUND = """{% if is_int %}""" + LB_REG_BINOP + """{% else %}
+        \tT res = std::bit_cast<T,uint{{type_size}}_t>(
+\t\t\t\tstd::bit_cast<uint{{type_size}}_t,T>(inputs1[i]) 
+\t\t\t\t{{op}} 
+\t\t\t\tstd::bit_cast<uint{{type_size}}_t,T>(inputs2[i]));{% endif %}"""
+
 
 
 AS_REG_BINOP = """\t\tREQUIRE(mipp::get(r3, i) == res);"""
@@ -151,6 +159,17 @@ AS_3ARGS = """\t\tREQUIRE(mipp::get(r4, i) == res);"""
 AS_CAST_2ARGS = """\t\tREQUIRE(mipp::get(r2, i) == res);"""
 AS_CAST_2ARGS_MSK = """\t\tif(res) REQUIRE(mipp::get(m2, i) != 0); else REQUIRE(mipp::get(m2, i) == 0);"""
 
+
+AS_REG_BINOP_FLOAT_WORKAROUND = """{% if is_int %}""" + AS_REG_BINOP + """{% else %}
+\n\t\tREQUIRE(std::bit_cast<uint{{type_size}}_t,T>(mipp::get(r3, i))\
+\n\t\t\t==
+\t\t\tstd::bit_cast<uint{{type_size}}_t,T>(res) );
+{% endif %}"""
+
+AS_CMP_BINOP_FLOAT_WORKAROUND = """{% if is_int %}""" + AS_CMP_2REG + """{% else %}
+\n\t\tif(res) REQUIRE(std::bit_cast<uint{{type_size}}_t,T>(mipp::get(r3, i))\n\t\t\t!= 0);
+else REQUIRE(std::bit_cast<uint{{type_size}}_t,T>(mipp::get(r3, i)) == 0);
+{% endif %}"""
 
 
 shape_templates = {
@@ -394,11 +413,6 @@ deny = {
 }
 
 LAYER_OVERRIDES = {
-    # Non-operator function: expected scalar expression override
-    "andnb": {
-        "loop_body": """\t\tT res = ~(inputs1[i]) & (inputs2[i]);"""
-    },
-
     "sub": {
         "init": INIT_2ARGS_NOUFLOW
     },
@@ -495,6 +509,65 @@ LAYER_OVERRIDES = {
         "loop_assert": AS_CAST_2ARGS_MSK + "\n\t}",
     },
     
+    #Ugly hacky float workarounds....
+    "andb": {
+        "func_decl" : FUNC_DECL_FLOAT_WORKAROUND,
+        "loop_body" : LB_REG_BINOP_FLOAT_WORKAROUND,
+        "loop_assert" : AS_REG_BINOP_FLOAT_WORKAROUND
+    },
+    "orb": {
+        "func_decl" : FUNC_DECL_FLOAT_WORKAROUND,
+        "loop_body" : LB_REG_BINOP_FLOAT_WORKAROUND,
+        "loop_assert" : AS_REG_BINOP_FLOAT_WORKAROUND
+    },
+    "xorb": {
+        "func_decl" : FUNC_DECL_FLOAT_WORKAROUND,
+        "loop_body" : LB_REG_BINOP_FLOAT_WORKAROUND,
+        "loop_assert" : AS_REG_BINOP_FLOAT_WORKAROUND
+    },
+    
+    "notb": {
+        "func_decl" : FUNC_DECL_FLOAT_WORKAROUND,
+        "loop_body": "{%if is_int %}"+"""\t\tT res = ~(inputs1[i]);"""+
+"""{% else %}""" + """\tT res = std::bit_cast<T,uint{{type_size}}_t>(
+\t\t\t~std::bit_cast<uint{{type_size}}_t,T>(inputs1[i]));\n""" + """{% endif %}""",
+        "loop_assert": AS_REG_BINOP_FLOAT_WORKAROUND,
+    },
+    
+    "andnb": {
+        "func_decl" : FUNC_DECL_FLOAT_WORKAROUND,
+        "loop_body": "{% if is_int %}" + "\t\tT res = ~(inputs1[i]) & (inputs2[i]);" +
+"{% else %}" + """\tT res = std::bit_cast<T,uint{{type_size}}_t>(
+\t\t\t~std::bit_cast<uint{{type_size}}_t,T>(inputs1[i]) 
+\t\t\t&
+\t\t\tstd::bit_cast<uint{{type_size}}_t,T>(inputs2[i]) );\n""" + """{% endif %}""",
+        "loop_assert": AS_REG_BINOP_FLOAT_WORKAROUND,
+    },
+    
+    #msb is most significant BIT not byte.
+    #the function returns msb of a lane & 0x8 etc
+    "msb" : {
+        "func_decl" : FUNC_DECL_FLOAT_WORKAROUND,
+        "loop_body": "{% if is_int %}" + "\tT res = inputs1[i] & ((T)1 << (sizeof(T)*8 - 1));"
+        + "{% else %}" + """\tT res = 
+        std::bit_cast<T,uint{{type_size}}_t>(
+\t\t\tstd::bit_cast<uint{{type_size}}_t, T>(inputs1[i])
+\t\t\t&((uint{{type_size}}_t)1 << (sizeof(T)*8 - 1))
+\t\t);\n""" + """{% endif %}""",
+        "loop_assert": AS_REG_BINOP_FLOAT_WORKAROUND,
+    },
+    
+    "notb_k": {
+        "func_decl" : FUNC_DECL_FLOAT_WORKAROUND,
+        "loop_body": """{%if is_int %}""" + """\t\tT res = ~(inputs1[i]);""" 
++ """{% else %}""" 
++ """\tT res = 
+\tstd::bit_cast<T,uint{{type_size}}_t>(
+\t\t~std::bit_cast<uint{{type_size}}_t,T>(inputs1[i]));\n""" 
++
+"""{%endif%}""",
+        "loop_assert": AS_REG_BINOP_FLOAT_WORKAROUND,
+    },
     
 }
 

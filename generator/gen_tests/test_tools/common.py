@@ -7,10 +7,13 @@ from typing import Optional
 # Miscelaneous utilities for layers
 # --------------------------------------------
 
-set_skip_float = {"notb_k", "andb", "orb", "xorb", "andnb", "notb", "msb"}
+set_float_workaround = {"notb_k", "andb", "orb", "xorb", "andnb", "notb", "msb"}
 set_remove_k = {"andb_k", "orb_k", "xorb_k", "andnb_k", "notb_k"}
 
-def test_function_name(kind: str, func: str):
+#function names are sometimes overloaded in mipp cpp to 
+#work on both mask and vector types.
+#In all honesty, I'm not positive this code is used.
+def test_function_name(kind, func):
     if kind in ("cpp", "obj") and func in set_remove_k:
         return func.replace("_k", "")
     return func
