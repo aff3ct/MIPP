@@ -166,8 +166,27 @@ tpl_implem_avx = {
 	%r<tp>% rs5 = %cast<c:int|b:8,tp>%(rsi);
 	rs5.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs4.r, rs5.r);
 	return rs5;""" },
-}
 
+	"set1_u": { "format": "long", "code": 
+"""%r<c:int|b:tp>% r0u; 
+    r0u = %set1<c:int|b:tp>%(v0);
+    return %cast<c:int|b:tp,tp>%(r0u);"""},
+ 
+	"arith_2args_u":  { "format": "long", "code": 
+"""%r<c:int|b:tp>% r0u = %cast<tp,c:int|b:tp>%(r0);
+	%r<c:int|b:tp>% r1u = %cast<tp,c:int|b:tp>%(r1);
+	%r<c:int|b:tp>% res = %{{ instr_name }}<c:int|b:tp>%(r0u, r1u);
+ 	return %cast<c:int|b:tp,tp>%(res);"""},
+ 
+ 	"getfirst_float64": { "format": "long",  "code":
+""" __m128d low = _mm256_castpd256_pd128(r0.r);
+    return _mm_cvtsd_f64(low);"""},
+
+ 	"getfirst_float32": { "format": "long",  "code":
+"""__m128 low = _mm256_castps256_ps128(r0.r);
+    return _mm_cvtss_f32(low);"""},
+
+}
 """
 "implems_avx" dictionary:
 
@@ -197,7 +216,8 @@ implems_avx = {
 	"set1": [
 		{ "instr_name": "set1", "datatypes": all_float, "template": tpl_implem_avx["set1"] },
 		{ "instr_name": "set1", "datatypes": [int64], "template": tpl_implem_avx["set1x"] },
-		{ "instr_name": "set1", "datatypes": [int32, int16, int8], "template": tpl_implem_avx["set1"] } ],
+		{ "instr_name": "set1", "datatypes": [int32, int16, int8], "template": tpl_implem_avx["set1"] },
+		{ "instr_name": "set1", "datatypes": [uint64, uint32, uint16, uint8], "template": tpl_implem_avx["set1_u"] } ],
 	"maskzld":[
 	    { "instr_name": "maskload", "datatypes": all_float, "template": tpl_implem_avx["maskzld"] },
 		{ "instr_name": "maskload", "datatypes": [int32], "template": tpl_implem_avx["maskzld"],"if": "defined(__AVX2__)" } ],
@@ -209,8 +229,10 @@ implems_avx = {
 	"set0_k": [
 		{ "instr_name": "setzero", "datatypes": all_datatypes, "template": tpl_implem_avx["set0_k"] } ],
 	"getfirst": [
-	 	{ "instr_name": "extract", "datatypes": all_float+[int64, int32, uint64, uint32], "template": tpl_implem_avx["getfirst"] },
-	 	{ "instr_name": "extract", "datatypes": [int16, int8, uint16, uint8], "template": tpl_implem_avx["getfirst"], "if": "defined(__AVX2__)" } ],
+	 	{ "instr_name": "extract", "datatypes": [int64, int32, uint64, uint32], "template": tpl_implem_avx["getfirst"] },
+	 	{ "instr_name": "extract", "datatypes": [int16, int8, uint16, uint8], "template": tpl_implem_avx["getfirst"], "if": "defined(__AVX2__)" },
+   		{ "instr_name": "extract", "datatypes": [float64], "template": tpl_implem_avx["getfirst_float64"] },
+   		{ "instr_name": "extract", "datatypes": [float32], "template": tpl_implem_avx["getfirst_float32"] }],
 	"sqrt": [
 		{ "instr_name": "sqrt", "datatypes": all_float, "template": tpl_implem_avx["arith_1arg"] } ],
 	"rsqrt": [
@@ -218,7 +240,8 @@ implems_avx = {
 	"add": [
 		{ "instr_name": "add", "datatypes": all_float, "template": tpl_implem_avx["arith_2args"] },
 		{ "instr_name": "add", "datatypes": [int64, int32], "template": tpl_implem_avx["arith_2args"], "if": "defined(__AVX2__)" },
-		{ "instr_name": "adds", "datatypes": [int16, int8, uint16, uint8], "template": tpl_implem_avx["arith_2args"], "if": "defined(__AVX2__)" } ],
+		{ "instr_name": "adds","datatypes": [int16, int8, uint16, uint8], "template": tpl_implem_avx["arith_2args"], "if": "defined(__AVX2__)" },
+  		{ "instr_name": "add", "datatypes": [uint64, uint32], "template": tpl_implem_avx["arith_2args_u"], "if": "defined(__AVX2__)" },],
 	"sub": [
 		{ "instr_name": "sub", "datatypes": all_float, "template": tpl_implem_avx["arith_2args"] },
 		{ "instr_name": "sub", "datatypes": [int64, int32], "template": tpl_implem_avx["arith_2args"], "if": "defined(__AVX2__)" },
