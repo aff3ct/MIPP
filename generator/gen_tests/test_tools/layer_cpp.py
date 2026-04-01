@@ -45,6 +45,10 @@ DECL_2ARGS_INT32 = DECL_VECTOR_SIZE + "\n\tint32_t inputs1[vectorSize],inputs2[v
 
 DECL_3ARGS = DECL_VECTOR_SIZE + """\n\tT inputs1[vectorSize],inputs2[vectorSize],inputs3[vectorSize];"""
 
+DECL_CAST_2ARGS = DECL_VECTOR_SIZE + "\n\t{{dt2_ext}} inputs1[vectorSize];\n\t{{dt1_ext}}_t inputs2[sizeof(inputs1) / sizeof({{dt1_ext}}_t)];"
+
+DECL_CAST_2ARGS_MSK = DECL_VECTOR_SIZE +"\n\tint32_t inputs1[vectorSize];\n\t{{dt1_ext}}_t inputs2[sizeof(inputs1) / sizeof({{dt1_ext}}_t)];"
+
 
 INIT_2ARGS = """\tstd::iota(inputs1, inputs1 + vectorSize, 1);
 \tstd::iota(inputs2, inputs2 + vectorSize, 1);
@@ -82,6 +86,9 @@ INIT_3ARGS = """\tstd::iota(inputs1, inputs1 + vectorSize, 1);
 \tstd::iota(inputs2, inputs2 + vectorSize, 1);
 \tstd::iota(inputs3, inputs3 + vectorSize, 1);"""
 
+INIT_CAST_2ARGS = """\tstd::iota(inputs1, inputs1 + vectorSize, 1);\n\tmemcpy(inputs2, inputs1, sizeof(inputs1));"""
+
+
 
 LOAD_2ARGS_REG = """\t{{reg_type}} r1 = mipp::load<{{dt_ext}}>(inputs1), r2 = mipp::load<{{dt_ext}}>(inputs2);"""
 LOAD_1ARG_REG = """\t{{reg_type}} r1 = mipp::load<{{dt_ext}}>(inputs1);"""
@@ -99,6 +106,10 @@ LOAD_2ARGS_MASK = """\t{{msk_type}} m1 = mipp::set_k<T>(inputs1);
 LOAD_3ARGS_REG = """\t{{reg_type}} r1 = mipp::load(inputs1);
 \t{{reg_type}} r2 = mipp::load(inputs2);
 \t{{reg_type}} r3 = mipp::load(inputs3);"""
+
+LOAD_CAST_2ARGS = """\t{{reg1_type}} r1 = mipp::load(inputs1);"""
+LOAD_CAST_2ARGS_MASK = """\t{{msk1_type}} m1 = mipp::set_k<T>(inputs1);"""
+
 
 OP_REG_BINOP = """\t{{reg_type}} r3 = mipp::{{func}}(r1, r2);"""
 OP_STORE = """\tmipp::store(inputs2, r1);"""
@@ -118,6 +129,8 @@ OP_CMP_2REG = """\t{{msk_type}} m3 = mipp::{{func}}(r1, r2); {{reg_type}} r3 = m
 
 OP_3ARGS_REG = """\t{{reg_type}} r4 = mipp::{{func}}(r1, r2, r3);"""
 
+OP_CAST = """\t{{reg2_type}} r2 = mipp::cast_{{dt1_ext}}(r1);"""
+OP_CAST_MSK = """\t{{msk2_type}} m2 = mipp::cast_{{dt1_ext}}(m1);"""
 
 
 LB_REG_BINOP = """\t\tT res = inputs1[i] {{op}} inputs2[i];"""
@@ -125,6 +138,8 @@ LB_SET_OP = """\t\tT res = inputs1[i];"""
 LB_SET_SCALAR_OP = """\t\tT res = input1;"""
 
 LB_CMP_2REG = """\t\tbool res = inputs1[i] {{op}} inputs2[i];"""
+LB_CAST_2ARGS = """\t\t{{dt1_ext}}_t res = inputs2[i];"""
+
 
 
 AS_REG_BINOP = """\t\tREQUIRE(mipp::get(r3, i) == res);"""
@@ -132,6 +147,10 @@ AS_LOAD = """\t\tREQUIRE(mipp::get(r1, i) == res);"""
 AS_STORE = """\t\tREQUIRE(inputs2[i] == res);"""
 AS_CMP_2REG = """\t\tif(res) REQUIRE(mipp::get(r3, i) !=  ({{dt_ext}})0); else REQUIRE(mipp::get(r3, i) == 0);"""
 AS_3ARGS = """\t\tREQUIRE(mipp::get(r4, i) == res);"""
+
+AS_CAST_2ARGS = """\t\tREQUIRE(mipp::get(r2, i) == res);"""
+AS_CAST_2ARGS_MSK = """\t\tif(res) REQUIRE(mipp::get(m2, i) != 0); else REQUIRE(mipp::get(m2, i) == 0);"""
+
 
 
 shape_templates = {
@@ -366,15 +385,11 @@ shape_templates = {
         loop_body="\t\tT res = inputs1[i] ? 1 : 0;",
         loop_assert=AS_CMP_2REG,
     ),
+
 }
 
 
 deny = {
-    # same philosophy: keep small for now
-    "cast_k", "tomsk",
-    # and all comparisons for cpp *for now* (layer doesn't implement SHAPE_CMP_2REG)
-    "cast",
-    
     "round", "maskzld", "maskst",
 }
 
@@ -460,6 +475,26 @@ LAYER_OVERRIDES = {
     "msb" : {
         "loop_body": "\tT res = inputs1[i] & ((T)1 << (sizeof(T)*8 - 1));"
     },
+    
+    "cast": {
+        "decl": DECL_CAST_2ARGS,
+        "init": INIT_CAST_2ARGS,
+        "load": LOAD_CAST_2ARGS,
+        "operation": OP_CAST,
+        "loop_body": """\tfor(int i = 0 ; i < vectorSize * sizeof({{dt2_ext}}) / sizeof({{dt1_ext}}_t); i++){\n"""+ LB_CAST_2ARGS,
+        "loop_assert": AS_CAST_2ARGS+ "\n\t}",
+    },
+    
+    
+    "cast_k": {
+        "decl": DECL_CAST_2ARGS_MSK,
+        "init": INIT_CAST_2ARGS,
+        "load": LOAD_CAST_2ARGS_MASK,
+        "operation": OP_CAST_MSK,
+        "loop_body": """\tfor(int i = 0 ; i < vectorSize * sizeof(int32_t) / sizeof({{dt1_ext}}_t); i++){\n"""+ LB_CAST_2ARGS,
+        "loop_assert": AS_CAST_2ARGS_MSK + "\n\t}",
+    },
+    
     
 }
 

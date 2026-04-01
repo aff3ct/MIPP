@@ -72,7 +72,7 @@ set_skip_testing = {
     "maskzld", #prototype is broken.
     "maskst", #prototype also broken. 
     
-    "cast_k", #either testing or cast_k is wrong.
+    #"cast_k", #either testing or cast_k is wrong.
 }
 
 ###### HELPERS ######
@@ -93,28 +93,37 @@ def get_defined_dttypes(func, implem):
         datatypes = [dt for dt in datatypes if dt not in ["float32", "float64"]]
     return datatypes
 
-def dt_to_suffix(dt: str):
+def dt_to_suffix(dt):
     # Used to convert cast format t1,t2 to t1_t2. 
     #for other dttypes this is a no-op.
     return dt.replace(",", "_")
 
-def split_dt_pair(dt: str) :
+def product_type_format_cpp(dt):
+    #convert factor type "uint32,float32" to "uint32<float32_t>"
+    #converts single type "uint32" to "uint32_t" for cpp tests
+    if "," in dt:
+        dt1, dt2 = dt.split(",")
+        return f"_{dt1}<{dt2}_t>"
+    else:
+        return f"<{dt}_t>"
+
+def split_dt_pair(dt) :
     # "uint32,float32" -> ["uint32","float32"]
     return dt.split(",") if "," in dt else [dt]
 
-def is_64bit_dt(dt: str):
+def is_64bit_dt(dt):
     return dt in {"int64", "uint64", "float64"}
 
-def is_bw_dt(dt: str):
+def is_bw_dt(dt):
     return dt in {"int8", "uint8", "int16", "uint16"}
 
-def is_float_dt(dt: str):
+def is_float_dt(dt):
     return dt in all_float
 
-def is_int_dt(dt: str):
+def is_int_dt(dt):
     return dt in all_int_uint
 
-def is_signed_int_dt(dt: str):
+def is_signed_int_dt(dt):
     return dt in all_int
 
 ###### GENERATION FUNC ######
@@ -140,7 +149,7 @@ def add_type_guards(func, implem, function, kind="c"):
     if kind == "c":
         section = 'SECTION ("datatype = {dt}") {{ {function}_{dt_suffix}(); }}\n'
     elif kind == "cpp" or kind == "obj":
-        section = 'SECTION ("datatype = {dt}") {{ {function}<{dt}_t>(); }}\n'
+        section = 'SECTION ("datatype = {dt}") {{ {function}{dt}(); }}\n'
 
     list_64 = []
     list_bw = []
@@ -153,6 +162,8 @@ def add_type_guards(func, implem, function, kind="c"):
         elif any(is_bw_dt(part) for part in parts):
             list_bw.append(dt)
         else:
+            if kind == "cpp" or kind == "obj":
+                dt = product_type_format_cpp(dt)
             res += section.format(dt=dt, dt_suffix=dt_suffix, function=function)
 
     if list_64 != []:
@@ -160,6 +171,8 @@ def add_type_guards(func, implem, function, kind="c"):
         res += f"#if defined(MIPP_64BIT)\n"
         for dt in list_64:
             dt_suffix = dt_to_suffix(dt)
+            if kind == "cpp" or kind == "obj":
+                dt = product_type_format_cpp(dt)
             res += section.format(dt=dt, dt_suffix=dt_suffix, function=function)
         res += "#endif\n"
 
@@ -168,6 +181,8 @@ def add_type_guards(func, implem, function, kind="c"):
         res += f"#if defined(MIPP_BW)\n"
         for dt in list_bw:
             dt_suffix = dt_to_suffix(dt)
+            if kind == "cpp" or kind == "obj":
+                dt = product_type_format_cpp(dt)
             res += section.format(dt=dt, dt_suffix=dt_suffix, function=function)
         res += "#endif\n"
 
@@ -303,38 +318,70 @@ def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="
     res = ""
     layer_dict = get_gen_test_dict(kind)
     #from func, get "cast" or "cast_k" to get the right template and proto
-    
-    is_cast_k = func.startswith("cast_k")
-    fname = "cast_k" if is_cast_k else "cast"
-    
-    func_dict = layer_dict[fname]["proto"]
-    func_template = layer_dict[fname]["template"]
-    
-    func_template = Template(func_template, undefined=StrictUndefined)
-    res = func_template.render(
-        func_decl=func_dict["func_decl"],
-        decl=func_dict["decl"],
-        init=func_dict["init"],
-        load=func_dict["load"],
-        operation=func_dict["operation"],
-        loop_body=func_dict["loop_body"],
-        loop_assert=func_dict["loop_assert"],
-    )
-    func_template = Template(res, undefined=StrictUndefined)
-    func_old = "cast"
-    func = test_function_name(kind, func)
-    res = func_template.render(
-        func=func,
-        dt1_ext=scalar1_type,
-        dt2_ext=scalar2_type,
-        op=layer_dict[func_old]["op"],
-        reg1_type=reg1_type,
-        msk1_type=msk1_type,
-        reg2_type=reg2_type,
-        msk2_type=msk2_type,
-        size="MIPP_N_" + scalar1_type.upper(),
-        #size2="MIPP_N_" + scalar2_type.upper(),
-    )
+    if kind == "c":
+        is_cast_k = func.startswith("cast_k")
+        fname = "cast_k" if is_cast_k else "cast"
+        
+        func_dict = layer_dict[fname]["proto"]
+        func_template = layer_dict[fname]["template"]
+        
+        func_template = Template(func_template, undefined=StrictUndefined)
+        res = func_template.render(
+            func_decl=func_dict["func_decl"],
+            decl=func_dict["decl"],
+            init=func_dict["init"],
+            load=func_dict["load"],
+            operation=func_dict["operation"],
+            loop_body=func_dict["loop_body"],
+            loop_assert=func_dict["loop_assert"],
+        )
+        func_template = Template(res, undefined=StrictUndefined)
+        func_old = "cast"
+        func = test_function_name(kind, func)
+        res = func_template.render(
+            func=func,
+            dt1_ext=scalar1_type,
+            dt2_ext=scalar2_type,
+            op=layer_dict[func_old]["op"],
+            reg1_type=reg1_type,
+            msk1_type=msk1_type,
+            reg2_type=reg2_type,
+            msk2_type=msk2_type,
+            size="MIPP_N_" + scalar1_type.upper(),
+            #size2="MIPP_N_" + scalar2_type.upper(),
+        )
+    elif kind == "cpp": 
+        is_cast_k = func.startswith("cast_k")
+        fname = "cast_k" if is_cast_k else "cast"
+        func_dict = layer_dict[fname]["proto"]
+        func_template = layer_dict[fname]["template"]   
+        func_template = Template(func_template, undefined=StrictUndefined)
+        res = func_template.render(
+            func_decl=func_dict["func_decl"],
+            decl=func_dict["decl"],
+            init=func_dict["init"],
+            load=func_dict["load"],
+            operation=func_dict["operation"],
+            loop_body=func_dict["loop_body"],
+            loop_assert=func_dict["loop_assert"],
+        )
+        func_template = Template(res, undefined=StrictUndefined)
+        func_old = "cast"
+        func = test_function_name(kind, func)
+        res = func_template.render(
+            func=func + "_" + scalar2_type,
+            dt1_ext=scalar2_type,
+            dt2_ext=scalar1_type,
+            op=layer_dict[func_old]["op"],
+            reg1_type=reg1_type,
+            msk1_type=msk1_type,
+            reg2_type=reg2_type,
+            msk2_type=msk2_type,
+            size="MIPP_N_" + scalar1_type.upper(),
+            #size2="MIPP_N_" + scalar2_type.upper(),
+        )
+    else :#obj
+        res = ""
     
     return res+ "\n"
 
@@ -355,7 +402,20 @@ def gen_cast_funcs_all_datatypes(func, kind="c", register="rvd", mask="rvm"):
                                 msk1_type=f"{mask}_" + dt1 + "_t",
                                 msk2_type=f"{mask}_" + dt2 + "_t")
             
-    elif kind == "cpp" or kind == "obj":  # template so no need
+    elif kind == "cpp" :  # template so no need
+        
+        for dt in all_datatypes:
+            dt1 = dt
+            func_name = f"{func}_{dt1}"
+            res += gen_cast_func(func, 
+                            scalar1_type="T",
+                            scalar2_type=dt1,
+                            reg1_type=f"mipp::{register}<T>",
+                            reg2_type=f"mipp::{register}<{dt1}_t>",
+                            kind=kind,
+                            msk1_type=f"mipp::{mask}<T>",
+                            msk2_type=f"mipp::{mask}<{dt1}_t>")
+    elif kind == "obj" :  # template so no need
         res += ""
     return res
 
