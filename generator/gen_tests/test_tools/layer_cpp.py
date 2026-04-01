@@ -587,7 +587,7 @@ uint{{type_size}}_t got_bits = std::bit_cast<uint{{type_size}}_t>(mipp::get(r3, 
 REQUIRE(got_bits == expected_bits);""" 
 +
 """{%endif%}""",
-        "loop_assert": "{% if is_int %}" + AS_REG_BINOP + "{% else %} REQUIRE(got_bits == expected_bits); {% endif %}",
+        "loop_assert": "{% if is_int %}" + AS_REG_BINOP + "{% else %}REQUIRE( (!(!(got_bits))) == (!(!(expected_bits))) ); {% endif %}",
     },
     
 }

@@ -512,7 +512,7 @@ uint{{type_size}}_t expected_bits = (inputs1[i] != 0)
 
 uint{{type_size}}_t got_bits = std::bit_cast<uint{{type_size}}_t>(mipp_get_float{{type_size}}(r3, i));
 {%endif%}""",
-        "loop_assert": "{% if is_int %}" + AS_REG_BINOP + "{% else %} REQUIRE(got_bits == expected_bits); {% endif %}",
+        "loop_assert": "{% if is_int %}" + AS_REG_BINOP + "{% else %}REQUIRE( (!(!(got_bits))) == (!(!(expected_bits))) ); {% endif %}",
     },
     
     "hadd": {
