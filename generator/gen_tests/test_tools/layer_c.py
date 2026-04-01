@@ -516,10 +516,12 @@ uint{{type_size}}_t got_bits = std::bit_cast<uint{{type_size}}_t>(mipp_get_float
     },
     
     "hadd": {
-        "loop_body": """\t{{dt_ext}}_t res = 0;
-\tfor(int j = 0; j < vectorSize; j++)
-\t\tres {{op}} inputs1[j];""",
-        "loop_assert": """\tREQUIRE(mipp_get_{{dt_ext}}(r3, 0) == res);""",
+        "loop_body": """\t{{dt_ext}}_t res = 0; uint64_t ures = 0;
+\tfor(int j = 0; j < vectorSize; j++){
+\t\tres {{op}} inputs1[j];
+\t\tures{{op}} inputs1[j];
+\t}""",
+        "loop_assert": """\tif(ures == res) REQUIRE(mipp_get_{{dt_ext}}(r3, 0) == res);""",
     },
     
     "hmul": {
@@ -581,10 +583,12 @@ uint{{type_size}}_t got_bits = std::bit_cast<uint{{type_size}}_t>(mipp_get_float
     },
     
     "hadd_to_scal": {
-        "loop_body": """\t{{dt_ext}}_t res1 = 0;
-\tfor(int j = 0; j < vectorSize; j++)
-\t\tres1 += inputs1[j];""",
-        "loop_assert": """\tREQUIRE(res == res1);""",
+        "loop_body": """\t{{dt_ext}}_t res1 = 0; uint64_t ures1 = 0;
+\tfor(int j = 0; j < vectorSize; j++){
+\t\tres1 += inputs1[j];
+\t\tures1 += inputs1[j];
+\t}""",
+        "loop_assert": """\tif(res1 == ures1) REQUIRE(res == res1);""",
     },
     
     "cast": {

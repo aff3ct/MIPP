@@ -185,6 +185,32 @@ tpl_implem_avx = {
  	"getfirst_float32": { "format": "long",  "code":
 """__m128 low = _mm256_castps256_ps128(r0.r);
     return _mm_cvtss_f32(low);"""},
+  
+  
+  	"reduce_64_u": { "format": "long", "code":
+"""	%r<c:float|b:32>% rsf;
+	rsf.r = _mm256_permute2f128_ps(%cast<tp,c:float|b:32>%(r0).r, %cast<tp,c:float|b:32>%(r0).r, _MM_SHUFFLE(0,0,0,1));
+	%r<tp>% rs1 = %cast<c:float|b:32,tp>%(rsf);
+	rs1.r = {{ isa.prefix }}_{{ instr_name }}_epi64(r0.r, rs1.r);
+	rsf = %cast<tp,c:float|b:32>%(rs1);
+	rsf.r = _mm256_shuffle_ps(rsf.r, rsf.r, _MM_SHUFFLE(1,0,3,2));
+	%r<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);
+	rs2.r = {{ isa.prefix }}_{{ instr_name }}_epi64(rs1.r, rs2.r);
+	return rs2;""" },
+	"reduce_32_u": { "format": "long", "code":
+"""	%r<c:float|b:32>% rsf;
+	rsf.r = _mm256_permute2f128_ps(%cast<tp,c:float|b:32>%(r0).r, %cast<tp,c:float|b:32>%(r0).r, _MM_SHUFFLE(0,0,0,1));
+	%r<tp>% rs1 = %cast<c:float|b:32,tp>%(rsf);
+	rs1.r = {{ isa.prefix }}_{{ instr_name }}_epi32(r0.r, rs1.r);
+	rsf = %cast<tp,c:float|b:32>%(rs1);
+	rsf.r = _mm256_shuffle_ps(rsf.r, rsf.r, _MM_SHUFFLE(1,0,3,2));
+	%r<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);
+	rs2.r = {{ isa.prefix }}_{{ instr_name }}_epi32(rs1.r, rs2.r);
+	rsf = %cast<tp,c:float|b:32>%(rs2);
+	rsf.r = _mm256_shuffle_ps(rsf.r, rsf.r, _MM_SHUFFLE(2,3,0,1));
+	%r<tp>% rs3 = %cast<c:float|b:32,tp>%(rsf);
+	rs3.r = {{ isa.prefix }}_{{ instr_name }}_epi32(rs2.r, rs3.r);
+	return rs3;""" },
 
 }
 """
@@ -314,7 +340,9 @@ implems_avx = {
 		{ "instr_name": "add", "datatypes": [float32], "template": tpl_implem_avx["reduce_32"] },
 		{ "instr_name": "add", "datatypes": [int32], "template": tpl_implem_avx["reduce_32"], "if": "defined(__AVX2__)" },
 		{ "instr_name": "adds", "datatypes": [int16, uint16], "template": tpl_implem_avx["reduce_16"], "if": "defined(__AVX2__)" },
-		{ "instr_name": "adds", "datatypes": [int8, uint8], "template": tpl_implem_avx["reduce_8"], "if": "defined(__AVX2__)" } ],
+		{ "instr_name": "adds", "datatypes": [int8, uint8], "template": tpl_implem_avx["reduce_8"], "if": "defined(__AVX2__)" },
+		{ "instr_name": "add", "datatypes": [uint64], "template": tpl_implem_avx["reduce_64_u"], "if": "defined(__AVX2__)" },
+  		{ "instr_name": "add", "datatypes": [uint32], "template": tpl_implem_avx["reduce_32_u"], "if": "defined(__AVX2__)" } ],
 	"hmul": [
 		{ "instr_name": "mul", "datatypes": [float64], "template": tpl_implem_avx["reduce_64"] },
 		{ "instr_name": "mul", "datatypes": [float32], "template": tpl_implem_avx["reduce_32"] },

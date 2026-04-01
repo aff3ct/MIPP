@@ -53,11 +53,8 @@ implem_dict = {
 
 set_skip_testing = {
     
-#    "hadd", #overflow for i8 u8. Test is good though
     "testz", #no set1_k for float & get_k on uint
     "testz_2", #no set1_k for float & get_k on uint
-    "hadd_to_scal", #overflow for i8 & getfirst used so wrong for floats.
-                    #also not implemented for uint on avx2.
                     
     "maskzld", #prototype is broken.
     "maskst", #prototype also broken. 

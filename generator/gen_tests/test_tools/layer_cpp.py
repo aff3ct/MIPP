@@ -465,10 +465,12 @@ LAYER_OVERRIDES = {
     },
     
     "hadd": {
-        "loop_body": """\tT res = 0;
-\tfor(int j = 0; j < vectorSize; j++)
-\t\tres {{op}} inputs1[j];""",
-        "loop_assert": """\tREQUIRE(mipp::get(r3, 0) == res);""",
+        "loop_body": """\tT res = 0; uint64_t ures = 0;
+\tfor(int j = 0; j < vectorSize; j++){
+\t\tres {{op}} inputs1[j];
+\t\tures{{op}} inputs1[j];
+\t}""",
+        "loop_assert": """if(res==ures)\tREQUIRE(mipp::get(r3, 0) == res);""",
     },
     
     "hmul": {
@@ -494,10 +496,12 @@ LAYER_OVERRIDES = {
     },
     
     "hadd_to_scal": {
-        "loop_body": """\tT res1 = 0;
-\tfor(int j = 0; j < vectorSize; j++)
-\t\tres1 += inputs1[j];""",
-        "loop_assert": """\tREQUIRE(res == res1);""",
+        "loop_body": """\tT res1 = 0; uint64_t ures1 = 0;
+\tfor(int j = 0; j < vectorSize; j++){
+\t\tres1 += inputs1[j];
+\t\tures1 += inputs1[j];
+\t}""",
+        "loop_assert": """\t\tif(res1 == ures1) REQUIRE(res == res1);""",
     },
     
     "msb" : {
