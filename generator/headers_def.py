@@ -313,7 +313,7 @@ mipp_funcs = {
 	"set" :    { "proto": protos["ret_reg_1arg_Nele"           ], "datatypes": all_datatypes          , "horizontal": True },
 	"set_k" :  { "proto": protos["ret_msk_1arg_Nele"           ], "datatypes": all_datatypes          , "horizontal": False },	
 	"set1":    { "proto": protos["ret_reg_1arg_val"            ], "datatypes": all_datatypes          , "horizontal": False },
-	"set1_k":  { "proto": protos["ret_msk_1arg_i32"            ], "datatypes": all_int_uint           , "horizontal": False },
+	"set1_k":  { "proto": protos["ret_msk_1arg_i32"            ], "datatypes": all_datatypes          , "horizontal": False },
 	"maskzld": { "proto": protos["ret_reg_2args_msk_ptr"       ], "datatypes": all_datatypes          , "horizontal": False },
 	"maskst":  { "proto": protos["ret_void_3args_ptr_msk_reg"  ], "datatypes": all_datatypes          , "horizontal": False },
 	"set0":    { "proto": protos["ret_reg_0arg"                ], "datatypes": all_datatypes          , "horizontal": False },
