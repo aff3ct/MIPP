@@ -221,6 +221,13 @@ tpl_implem_emu_avx = {
 """%r<tp>% reduced = %hadd<tp>%(r0);
 	return %getfirst<tp>%(reduced);"""
 	},
+ 
+ 	"set1_k-32f": { "format": "short", "code":
+"""  _mm256_set1_ps(v0 ? 0xFFFFFFFF : 0); """
+	 },
+	"set1_k-64f": { "format": "short", "code":
+"""  _mm256_set1_pd(v0 ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0); """
+	 },
 }
 """ "implems_emu" dictionary:
     -Purpose: This dictionary contains implementation models for various emulated functions.
@@ -248,8 +255,8 @@ implems_emu_avx = {
 		{ "datatypes": [int16, uint16] , "template": tpl_implem_emu_avx["set1_k-16"] } ,
 		{ "datatypes": [int32, uint32] , "template": tpl_implem_emu_avx["set1_k-32"]} ,
 		{ "datatypes": [int64, uint64] , "template": tpl_implem_emu_avx["set1_k-64"] } ,
-		#{ "datatypes": [float64] , "template": tpl_implem_emu_avx["set1_k-64f"] } ,
-		#{ "datatypes": [float32] , "template": tpl_implem_emu_avx["set1_k-32f"] } ,
+		{ "datatypes": [float64] , "template": tpl_implem_emu_avx["set1_k-64f"] } ,
+		{ "datatypes": [float32] , "template": tpl_implem_emu_avx["set1_k-32f"] } ,
 		],
 	"blend": [
 		{ "datatypes": [int64, int32, uint64, uint32], "template": tpl_implem_emu_avx["blend-1"]},

@@ -211,6 +211,15 @@ tpl_implem_avx = {
 	%r<tp>% rs3 = %cast<c:float|b:32,tp>%(rsf);
 	rs3.r = {{ isa.prefix }}_{{ instr_name }}_epi32(rs2.r, rs3.r);
 	return rs3;""" },
+	
+	#_mm256_testz_ps / _mm256_testz_pd 
+	#don't have the same behavior as _mm256_testz_si256.
+	#I propose we do hacky casting to have a unified behavior.
+	"testz_2argsf": { "format": "long", "code":
+"""%m<c:int|b:tp>% m0i = %cast_k<tp,c:int|b:tp>%(m0);
+	%m<c:int|b:tp>% m1i = %cast_k<tp,c:int|b:tp>%(m1);	
+	return _mm256_testz_si256(m0i.m, m1i.m);
+""" },
 
 }
 """
@@ -333,7 +342,8 @@ implems_avx = {
 		{ "instr_name": "blendv", "datatypes": all_float, "template": tpl_implem_avx["blend_float"] },
 		{ "instr_name": "blendv", "datatypes": all_int_uint, "template": tpl_implem_avx["blend_int"], "if": "defined(__AVX2__)" } ],
 	"testz": [
-		{ "instr_name": "testz", "datatypes": all_datatypes, "template": tpl_implem_avx["testz_2args"] } ],
+		{ "instr_name": "testz", "datatypes": all_int_uint, "template": tpl_implem_avx["testz_2args"] }, 
+  		{ "instr_name": "testz", "datatypes": all_float, "template": tpl_implem_avx["testz_2argsf"] },],
 	"hadd": [
 		{ "instr_name": "add", "datatypes": [float64], "template": tpl_implem_avx["reduce_64"] },
 		{ "instr_name": "add", "datatypes": [int64], "template": tpl_implem_avx["reduce_64"], "if": "defined(__AVX2__)" },
