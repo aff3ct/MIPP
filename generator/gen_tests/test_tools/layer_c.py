@@ -66,9 +66,11 @@ DECL_G_SNIPPET = """\tstd::mt19937 g;\n\tstd::uniform_int_distribution<uint16_t>
 #we want inputs2 to store the same amount of bytes as inputs1 since we'll be memcpying from inputs1 to inputs2 for the cast tests, so if dt2 is smaller than dt1 we need more lanes in inputs2
 DECL_CAST_2ARGS = """\tconst int vectorSize = {{size}};\n\t{{dt1_ext}}_t inputs1[vectorSize];\n\t{{dt2_ext}}_t inputs2[sizeof(inputs1) / sizeof({{dt2_ext}}_t)];"""
 DECL_CAST_2ARGS_MSK = """\tconst int vectorSize = {{size}};\n\tint32_t inputs1[vectorSize];\n\t{{dt2_ext}}_t inputs2[sizeof(inputs1) / sizeof({{dt2_ext}}_t)];"""
+
 # --------------------------------------------
 # SCALAR VEC INIT
 # --------------------------------------------
+
 INIT_2ARGS = """\tstd::iota(inputs1, inputs1 + vectorSize, 1);
 \tstd::iota(inputs2, inputs2 + vectorSize, 1);
 

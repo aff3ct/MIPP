@@ -88,7 +88,6 @@ shape_templates = {
 deny = {
     "cast", "cast_k", "toreg", "tomsk",
     "maskzld", "maskst",
-    "gather", "scatter",
     "blend", "getfirst", "get_k", "set_k", "set0_k", "set1_k",
     "testz", "testz_2",
     "sqrt", "rsqrt",
@@ -97,6 +96,7 @@ deny = {
     "andb_k", "orb_k", "xorb_k", "andnb_k",
     "cmpeq", "cmpneq", "cmplt", "cmple", "cmpgt", "cmpge",
     "max", "min", 
+    "orb", "xorb", "andb",
     "andnb", #andnb broken in object layer.
 }
 

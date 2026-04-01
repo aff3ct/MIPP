@@ -28,9 +28,20 @@ from .common import (
     SHAPE_RET_MSK_1ARG_REG, #tomsk
 )
 
+# --------------------------
+# CPP fragments
+# --------------------------
+
+# --------------------------------------------
+# FN decl 
+# --------------------------------------------
+
 FUNC_DECL = """template <typename T>\nvoid test_cppmipp_{{func}}(){"""
 FUNC_DECL_FLOAT_WORKAROUND = " {% if is_int %} " + FUNC_DECL + " {% else %} template <typename T>\nvoid test_cppmipp_{{func}}_float{{type_size}}(){  {% endif %}"
 
+# --------------------------------------------
+# SCALAR VEC DECL
+# --------------------------------------------
 
 DECL_VECTOR_SIZE = """\tconst int vectorSize = mipp::N<T>();"""
 DECL_G_SNIPPET = """\tstd::mt19937 g;\n\tstd::uniform_int_distribution<uint16_t> dis(0, 1);"""
@@ -51,6 +62,9 @@ DECL_CAST_2ARGS = DECL_VECTOR_SIZE + "\n\t{{dt2_ext}} inputs1[vectorSize];\n\t{{
 
 DECL_CAST_2ARGS_MSK = DECL_VECTOR_SIZE +"\n\tint32_t inputs1[vectorSize];\n\t{{dt1_ext}}_t inputs2[sizeof(inputs1) / sizeof({{dt1_ext}}_t)];"
 
+# --------------------------------------------
+# SCALAR VEC INIT
+# --------------------------------------------
 
 INIT_2ARGS = """\tstd::iota(inputs1, inputs1 + vectorSize, 1);
 \tstd::iota(inputs2, inputs2 + vectorSize, 1);

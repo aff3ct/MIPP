@@ -59,7 +59,7 @@ set_skip_testing = {
     "orb_k", #uses get_k
     "xorb_k", #uses get_k
     "andnb_k", #uses get_k
-    #"notb_k", #uses get_k
+    "notb_k", #uses get_k
     "toreg", #uses get_k.
     
     "hadd", #overflow for i8 u8. Test is good though
@@ -89,18 +89,18 @@ def get_defined_dttypes(func, implem):
     for dt in func_dt:
         datatypes.append(dt["datatypes"])
     datatypes = list(set([item for sublist in datatypes for item in sublist]))
-    #if func in set_float_workaround:
-    #    datatypes = [dt for dt in datatypes if dt not in ["float32", "float64"]]
     return datatypes
 
 def dt_to_suffix(dt):
-    # Used to convert cast format t1,t2 to t1_t2. 
-    #for other dttypes this is a no-op.
+    """Used to convert cast format t1,t2 to t1_t2. 
+    for other dttypes this is a no-op.
+    """
     return dt.replace(",", "_")
 
 def product_type_format_cpp(dt):
-    #convert factor type "uint32,float32" to "uint32<float32_t>"
-    #converts single type "uint32" to "uint32_t" for cpp tests
+    """convert factor type "uint32,float32" to "uint32<float32_t>"
+    converts single type "uint32" to "uint32_t" for cpp tests
+    """
     if "," in dt:
         dt1, dt2 = dt.split(",")
         return f"_{dt1}<{dt2}_t>"
@@ -108,7 +108,9 @@ def product_type_format_cpp(dt):
         return f"<{dt}_t>"
 
 def split_dt_pair(dt) :
-    # "uint32,float32" -> ["uint32","float32"]
+    """ 
+    "uint32,float32" -> ["uint32","float32"]
+    """
     return dt.split(",") if "," in dt else [dt]
 
 def is_64bit_dt(dt):
@@ -151,6 +153,8 @@ def add_type_guards(func, implem, function, kind="c"):
     elif kind == "cpp" or kind == "obj":
         section = 'SECTION ("datatype = {dt}") {{ {function}{dt_suffix}(); }}\n'
 
+    #lists to store the dttypes that need to be 
+    #wrapped in #if defined(MIPP_64BIT) or #if defined(MIPP_BW)
     list_64 = []
     list_bw = []
     datatypes.sort()
@@ -162,14 +166,17 @@ def add_type_guards(func, implem, function, kind="c"):
         elif any(is_bw_dt(part) for part in parts):
             list_bw.append(dt)
         else:
+            
+            #this is the ugly part
             if kind == "cpp" or kind == "obj":
-                dt_suffix = product_type_format_cpp(dt)
+                dt_suffix = product_type_format_cpp(dt)#used to handle cast
                 if func in set_float_workaround and is_float_dt(dt):
                     #this is hacky. It's to generate proper name to call float 
                     #versions of andb etc...
                     dt_suffix = f"_float{dt_suffix.split('t')[1].split("_")[0]}{dt_suffix}"
             res += section.format(dt=dt, dt_suffix=dt_suffix, function=function)
 
+    #same logic for these
     if list_64 != []:
         list_64.sort()
         res += f"#if defined(MIPP_64BIT)\n"
@@ -198,6 +205,11 @@ def add_type_guards(func, implem, function, kind="c"):
     return res
 
 def gen_test_type_guards(func, long_name, short_name, kind="c"):
+    """
+    Adds type guards to the test 
+    case for the different implementations of a func.
+    Only generates tests for the dttypes for which the func is defined in the implem.
+    """
     layer_dict = get_gen_test_dict(kind)
     res = f'\nTEST_CASE("{long_name} - {kind}", "[{short_name}]") {{\n'
     for implems in implem_dict.values():
@@ -227,6 +239,11 @@ def gen_test_type_guards(func, long_name, short_name, kind="c"):
 
 #cast specific to handle the dttype pair
 def gen_cast_test_type_guards(func, long_name, short_name, kind="c"):
+    """
+    Cast is a "product type". 
+    The logic is mostly the same as gen_test_type_guards 
+    but we need to handle the dttype pairs properly.
+    """
     layer_dict = get_gen_test_dict(kind)
     res = f'\nTEST_CASE("{long_name} - {kind}", "[{short_name}]") {{\n'
     for implems in implem_dict.values():
@@ -279,6 +296,9 @@ def gen_headers(kind="c"):
     return res
 
 def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False):
+    """
+    generates the test function(s) for 1 func, 1 datatype, 1 layer.
+    """
     # Pick per-layer dictionary
     layer_dict = get_gen_test_dict(kind)
 
@@ -304,8 +324,11 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False):
     type_size=""
     if kind=="c": 
         type_size = scalar_type.split("t")[1]
-        
-    if not float and kind=="c":
+    
+    
+    #hacky workaround to handle float versions of andb etc... in cpp tests.
+    #nb: float is set to != False only for CPP
+    if kind=="c":
         res = func_template.render(
             func=func,
             dt_ext=scalar_type,
@@ -332,7 +355,6 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False):
             is_int=True,
         )
     if float and kind=="cpp" :
-        print(func)
         res = func_template.render(
             func=func,
             dt_ext=scalar_type,
@@ -346,8 +368,20 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False):
             is_signed=False,
             type_size=float.split("t")[1],
         )
-    # Warning: this doesn't pose "portability" issues bc cpp/obj don't use the size argument.
-    # but it's unelegant
+    if kind == "obj" :
+        res = func_template.render(
+            func=func,
+            dt_ext=scalar_type,
+            op=layer_dict[func_old]["op"],
+            reg_type=reg_type,
+            msk_type=msk_type,
+            size="MIPP_N_" + scalar_type.upper(),
+            
+            is_float=is_float_dt(scalar_type),
+            is_int=is_int_dt(scalar_type),
+            is_signed=is_signed_int_dt(scalar_type),
+            type_size=type_size,
+        )
     return res + "\n"
 
 def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="c", msk1_type="", msk2_type=""):
@@ -456,12 +490,14 @@ def gen_cast_funcs_all_datatypes(func, kind="c", register="rvd", mask="rvm"):
     return res
 
 def gen_funcs_all_datatypes(func, kind="c", register="rvd", mask="rvm"):
+    """
+    generate the test function(s) for 1 func, all datatypes, 1 layer.
+    """
     layer_dict = get_gen_test_dict(kind)
 
     res = ""
     datatypes = mipp_funcs[func]["datatypes"]
-    if func in set_float_workaround and not func == "andb":
-        datatypes = [dt for dt in datatypes if dt not in ["float32", "float64"]]
+
     if kind == "c":
         for dt in datatypes:
             res += gen_func(
@@ -507,6 +543,10 @@ def gen_funcs_all_datatypes(func, kind="c", register="rvd", mask="rvm"):
     return res
 
 def gen_file(func, kind="c"):
+    """
+    generates the test file for 1 func, all datatypes, 1 layer.
+    Calls gen_headers -> gen_funcs_all_datatypes -> gen_test_type_guards
+    """
     layer_dict = get_gen_test_dict(kind)
 
     register = "rvd"
@@ -549,11 +589,12 @@ tmp_path = "../../tests/src/"
 cpath = tmp_path + "c_tests/"
 cpppath = tmp_path + "cpp_tests/"
 objpath = tmp_path + "obj_tests/"
-# we want to generate 3 files for each func : c test, cpp test and obj test.
 
-# func to change file only if content is different to avoid recompilation of unchanged files
-# returns bool indicating if the file was written or not
 def write_file_if_different(path, content):
+    """
+    helper to avoid rewriting files if the content is the same 
+    to avoid unnecessary recompilation.
+    """
     if os.path.exists(path):
         with open(path, "r") as f:
             existing_content = f.read()
@@ -564,8 +605,10 @@ def write_file_if_different(path, content):
     return True
 
 def comment_out_cpp_file(content: str, reason: str):
-    # Wrap whole file as a comment so it becomes an inert translation unit.
-    # Keep a short header outside the comment so it's obvious in diffs.
+    """
+    simple way to skip testing for a func 
+    without removing the generated file
+    """
     header = (
         "// THIS FILE IS AUTO-GENERATED.\n"
         f"// Tests are currently disabled: {reason}\n"
@@ -653,7 +696,7 @@ def main():#just parse the args and call gen_test_files_all_funcs with the right
     parser.add_argument(
         "kind",
         nargs="?",
-        default="cpp",
+        default="all",
         choices=["c", "cpp", "obj", "all"],
         help="Which layer to regenerate (default: all).",
     )
