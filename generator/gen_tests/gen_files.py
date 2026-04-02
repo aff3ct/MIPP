@@ -18,7 +18,7 @@ from implem_avx import implems_avx
 from implem_avx512 import implems_avx512
 from implem_sve import implems_sve
 from implem_rvv import implems_rvv
-from headers_def import mipp_funcs
+from headers_def import mipp_funcs,mipp_funcs_concepts
 from tools import *
 from test_tools import get_gen_test_dict, set_float_workaround, test_function_name
 
@@ -109,6 +109,20 @@ def is_int_dt(dt):
 
 def is_signed_int_dt(dt):
     return dt in all_int
+
+def match_concept(func):
+    """
+    helper to match a func to an 
+    entry in mipp_funcs_concepts. 
+    This is used to write files in the relevant 
+    subdir for their concept.
+    """
+    for concept in mipp_funcs_concepts:
+        if func in mipp_funcs_concepts[concept]:
+            if concept == "a_trier":
+                return "miscellaneous"
+            return concept
+    return "miscellaneous"
 
 ###### GENERATION FUNC ######
 
@@ -631,10 +645,22 @@ def gen_test_files_all_funcs(kind="c"):
         os.makedirs(tmp_path, exist_ok=True)
     if regen_c:
         os.makedirs(cpath, exist_ok=True)
+        for concept in mipp_funcs_concepts:
+            if concept != "a_trier":
+                os.makedirs(cpath + concept + "/", exist_ok=True)
+        os.makedirs(cpath + "miscellaneous/", exist_ok=True)
     if regen_cpp:
         os.makedirs(cpppath, exist_ok=True)
+        for concept in mipp_funcs_concepts:
+            if concept != "a_trier":
+                os.makedirs(cpppath + concept + "/", exist_ok=True)
+        os.makedirs(cpppath + "miscellaneous/", exist_ok=True)
     if regen_obj:
         os.makedirs(objpath, exist_ok=True)
+        for concept in mipp_funcs_concepts:
+            if concept != "a_trier":
+                os.makedirs(objpath + concept + "/", exist_ok=True)
+        os.makedirs(objpath + "miscellaneous/", exist_ok=True)
 
     for func in sorted(funcs):
         
@@ -652,7 +678,8 @@ def gen_test_files_all_funcs(kind="c"):
                 c_file = gen_headers(kind="c") + gen_file(func, kind="c")
             if disable:
                 c_file = comment_out_cpp_file(c_file, reason)
-            write_file_if_different(cpath + f"test_c{func}.cpp", c_file)
+            file_path = cpath + match_concept(func) + f"/test_c{func}.cpp"
+            write_file_if_different(file_path, c_file)
 
         if regen_cpp and func in cpp_dict:
             if func == "cast" or func == "cast_k":
@@ -662,7 +689,8 @@ def gen_test_files_all_funcs(kind="c"):
                 
             if disable:
                 cpp_file = comment_out_cpp_file(cpp_file, reason)
-            write_file_if_different(cpppath + f"test_{func}.cpp", cpp_file)
+            file_path = cpppath + match_concept(func) + f"/test_{func}.cpp"
+            write_file_if_different(file_path, cpp_file)
 
         if regen_obj and func in obj_dict:
             if func == "cast" or func == "cast_k":
@@ -671,7 +699,9 @@ def gen_test_files_all_funcs(kind="c"):
                 obj_file = gen_headers(kind="obj") + gen_file(func, kind="obj")
             if disable:
                 obj_file = comment_out_cpp_file(obj_file, reason)
-            write_file_if_different(objpath + f"test_obj_{func}.cpp", obj_file)
+
+            file_path = objpath + match_concept(func) + f"/test_obj_{func}.cpp"
+            write_file_if_different(file_path, obj_file)
 
 def main():#just parse the args and call gen_test_files_all_funcs with the right kind
     parser = argparse.ArgumentParser(description="Generate MIPP test files.")

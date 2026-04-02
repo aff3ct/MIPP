@@ -10,7 +10,7 @@ def generate_mipp_h():
 #define MIPP
 
 #include <stdint.h>
-//#include <iostream>
+#include <stdio.h>
 #include <stdlib.h>
 
 typedef double float64_t;
