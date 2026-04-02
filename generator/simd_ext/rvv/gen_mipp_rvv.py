@@ -37,9 +37,11 @@ def gen_c_structures_rvv_ls(file, rvv_size):
     #also, mask type technically does not depend on dt type but on EEW/LMUL. 
     #i.e both uint8m2 and uint16m1 should use vbool16. This might make lmul support 
     #trickier to generate...
-    dt_list = {uint64 : "4", uint32 : "8", uint16 : "16", uint8 : "32"}
+    dt_list = {uint64, uint32, uint16, uint8}
     for dt in dt_list:
-        print(j2_template.render(rvv_size=rvv_size, isa_datatype=isa_rvv["datatypes"][dt], nb_elem=dt_list[dt]), file=file)
+        n_bits = datatypes[dt]["n_bits"]
+        nb_elem = int(rvv_size / n_bits)
+        print(j2_template.render(rvv_size=rvv_size, isa_datatype=isa_rvv["datatypes"][dt], nb_elem=nb_elem), file=file)
     
     template = """typedef struct { fixed_{{ rvv_size }}_{{isa_datatype.to_ptr }} r; } rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
     j2_template = Template(template, undefined=StrictUndefined)
@@ -54,7 +56,7 @@ def gen_c_structures_rvv_ls(file, rvv_size):
 
 
 #taken from gen_mipp_avx.py (changed)
-def gen_mipp_rvv(vl=32*8):
+def gen_mipp_rvv(vl=256):
     #for iemu in implems_emu_rvv:
     #	for sub_iemu in implems_emu_rvv[iemu]:
     #		if "type" not in sub_iemu:
