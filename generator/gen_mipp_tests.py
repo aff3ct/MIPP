@@ -6,12 +6,12 @@ from jinja2 import Template, StrictUndefined
 
 path = os.getcwd()
 
-sys.path.insert(1, path + "/../simd_ext/avx512/")
-sys.path.insert(1, path + "/../simd_ext/avx/")
-sys.path.insert(1, path + "/../simd_ext/sse/")
-sys.path.insert(1, path + "/../simd_ext/sve/")
-sys.path.insert(1, path + "/../simd_ext/rvv/")
-sys.path.insert(1, path + "/../")
+sys.path.insert(1, path + "/simd_ext/avx512/")
+sys.path.insert(1, path + "/simd_ext/avx/")
+sys.path.insert(1, path + "/simd_ext/sse/")
+sys.path.insert(1, path + "/simd_ext/sve/")
+sys.path.insert(1, path + "/simd_ext/rvv/")
+sys.path.insert(1, path + "/")
 
 from implem_sse import implems_sse
 from implem_avx import implems_avx
@@ -20,7 +20,7 @@ from implem_sve import implems_sve
 from implem_rvv import implems_rvv
 from headers_def import mipp_funcs,mipp_funcs_concepts
 from tools import *
-from test_tools import get_gen_test_dict, set_float_workaround, test_function_name
+from tests_utils import get_gen_test_dict, set_float_workaround, test_function_name
 
 from implem_emu_sse import implems_emu_sse
 from implem_emu_avx import implems_emu_avx
@@ -581,7 +581,7 @@ def gen_cast_file(func,kind="c"):
     return res
 
 
-tmp_path = "../../tests/src/"
+tmp_path = "../tests/src/"
 cpath = tmp_path + "c_tests/"
 cpppath = tmp_path + "cpp_tests/"
 objpath = tmp_path + "obj_tests/"

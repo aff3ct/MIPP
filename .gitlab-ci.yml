@@ -14,6 +14,13 @@ before_script:
   - whoami
 # - pwd
 
+.matrix-linux-common:
+  parallel:
+    matrix:
+      - OS: [linux]
+        COMPILER: ["gcc-14", "clang-20"]
+        ARCH: [sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2, avx2-fma, avx512f, avx512bw]
+
 # GENERATION ----------------------------------------------------------------------------------------------------------
 
 generation-headers:
@@ -34,7 +41,7 @@ generation-headers:
     - python3 -m venv .venv
     - source .venv/bin/activate
     - pip3 install -r requirements.txt
-    - ./gen_mipp.py
+    - ./gen_mipp_headers.py
 
 generation-tests:
   image: registry.gitlab.com/aff3ct/aff3ct/mipp_linux:latest
@@ -56,8 +63,7 @@ generation-tests:
     - python3 -m venv .venv
     - source .venv/bin/activate
     - pip3 install -r requirements.txt
-    - cd gen_tests
-    - ./gen_files.py
+    - ./gen_mipp_tests.py
 
 # ANALYSIS ------------------------------------------------------------------------------------------------------------
 
@@ -82,7 +88,8 @@ analysis-cppcheck:
 
 # BUILDS --------------------------------------------------------------------------------------------------------------
 
-build-generic:
+.build-common:
+  extends: .matrix-linux-common
   image: registry.gitlab.com/aff3ct/aff3ct/mipp_${OS}:${COMPILER}_${ARCH}
   stage: build
   needs:
@@ -91,20 +98,10 @@ build-generic:
     - job: generation-tests
       artifacts: true
   allow_failure: false
-  parallel:
-    matrix:
-      - OS: [linux]
-        COMPILER: ["gcc-14", "clang-20"]
-        ARCH: [sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2, avx2-fma, avx512f, avx512bw]
   tags:
     - $OS
     - $ARCH
     - docker
-  artifacts:
-    name: build-$OS-$COMPILER-$ARCH
-    when: always
-    paths:
-      - ./tests/build_${OS}_${COMPILER}_${ARCH}/bin/
   rules:
     - if: '$ARCH == "sse2"'
       variables:
@@ -163,6 +160,14 @@ build-generic:
         exit 1
         ;;
     esac
+
+build-cpp-tests:
+  extends: .build-common
+  artifacts:
+    name: build-$OS-$COMPILER-$ARCH
+    when: always
+    paths:
+      - ./tests/build_${OS}_${COMPILER}_${ARCH}/bin/
   script:
     - echo "Debug -- Job=$CI_NODE_INDEX/$CI_NODE_TOTAL"
     - echo "Debug -- OS=$OS"
@@ -175,23 +180,32 @@ build-generic:
     - cmake -S . -B build_${OS}_${COMPILER}_${ARCH} -DCMAKE_CXX_COMPILER=$COMPILER_EXE -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-Wall -funroll-loops -finline-functions $SIMD_EXT" -DCMAKE_EXE_LINKER_FLAGS="-static -static-libgcc -static-libstdc++"
     - cmake --build build_${OS}_${COMPILER}_${ARCH} -j $THREADS
 
+build-c-dumb:
+  extends: .build-common
+  script:
+    - echo "Debug -- Job=$CI_NODE_INDEX/$CI_NODE_TOTAL"
+    - echo "Debug -- OS=$OS"
+    - echo "Debug -- COMPILER=$COMPILER"
+    - echo "Debug -- ARCH=$ARCH"
+    - echo "Debug -- SIMD_EXT=$SIMD_EXT"
+    - echo "Debug -- THREADS=$THREADS"
+    - cd tests/dumb
+    - $COMPILER -std=c99 -Wall -Wextra -Wpedantic -Wno-unused-parameter -O3 -funroll-loops $SIMD_EXT -I../../include -o dumb dumb.c
+    - ./dumb
+
 # TESTS ---------------------------------------------------------------------------------------------------------------
 
 test-generic:
+  extends: .matrix-linux-common
   image: registry.gitlab.com/aff3ct/aff3ct/mipp_${OS}:${COMPILER}_${ARCH}
   stage: test
   allow_failure: false
-  parallel:
-    matrix:
-      - OS: [linux]
-        COMPILER: ["gcc-14", "clang-20"]
-        ARCH: [sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2, avx2-fma, avx512f, avx512bw]
   tags:
     - $OS
     - $ARCH
     - docker
   needs:
-    - job: build-generic
+    - job: build-cpp-tests
       artifacts: true
       parallel:
         matrix:

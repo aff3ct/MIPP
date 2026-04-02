@@ -16,12 +16,12 @@ deactivate
 
 ```bash
 source .venv/bin/activate
-./gen_mipp.py
+./gen_mipp_headers.py
 ```
 
 ## Generate MIPP Tests
+
 ```bash
 source .venv/bin/activate
-cd gen_tests
-./gen_files.py
+./gen_mipp_tests.py
 ```
