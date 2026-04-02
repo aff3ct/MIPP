@@ -36,6 +36,29 @@ generation-headers:
     - pip3 install -r requirements.txt
     - ./gen_mipp.py
 
+generation-tests:
+  image: registry.gitlab.com/aff3ct/aff3ct/mipp_linux:latest
+  stage: generation
+  allow_failure: false
+  artifacts:
+    name: mipp_tests
+    when: always
+    paths:
+      - tests/src/c_tests
+      - tests/src/cpp_tests
+      - tests/src/obj_tests
+  tags:
+    - x86_64
+    - linux
+    - docker
+  script:
+    - cd generator
+    - python3 -m venv .venv
+    - source .venv/bin/activate
+    - pip3 install -r requirements.txt
+    - cd gen_tests
+    - ./gen_files.py
+
 # ANALYSIS ------------------------------------------------------------------------------------------------------------
 
 analysis-cppcheck:
@@ -64,6 +87,8 @@ build-generic:
   stage: build
   needs:
     - job: generation-headers
+      artifacts: true
+    - job: generation-tests
       artifacts: true
   allow_failure: false
   parallel:

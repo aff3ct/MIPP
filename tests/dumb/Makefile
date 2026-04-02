@@ -5,6 +5,6 @@ RELEASE_FLAGS=-O3 -funroll-loops
 VPATH=./include
 
 dumb :
-	$(CC) $(CPPFLAGS) $(RELEASE_FLAGS) -o dumb dumb.cpp
+	$(CC) $(CPPFLAGS) $(RELEASE_FLAGS) -o dumb dumb.c
 
 

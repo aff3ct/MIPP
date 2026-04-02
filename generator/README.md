@@ -12,8 +12,16 @@ pip3 install -r requirements.txt
 deactivate
 ```
 
-Generate MIPP headers:
+## Generate MIPP Headers
+
 ```bash
 source .venv/bin/activate
 ./gen_mipp.py
+```
+
+## Generate MIPP Tests
+```bash
+source .venv/bin/activate
+cd gen_tests
+./gen_files.py
 ```
