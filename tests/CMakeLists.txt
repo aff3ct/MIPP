@@ -4,8 +4,8 @@ project(MIPP_tests CXX)
 
 set (CMAKE_MACOSX_RPATH 1)
 
-# Enable C++14
-set (CMAKE_CXX_STANDARD 14)
+# Enable C++20 (for std::bit_cast)
+set (CMAKE_CXX_STANDARD 20)
 
 # Specify bin path
 set (EXECUTABLE_OUTPUT_PATH bin/)
