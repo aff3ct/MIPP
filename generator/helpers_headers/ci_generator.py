@@ -164,7 +164,7 @@ def gen_ci_functions(isa_list, file, funcs):
 				func_name = build_func_name_short(isa_list[0], dt_par, f, False);
 			else:
 				func_name = build_func_name(isa_list[0], dt_par, dt_ret, f, False);
-			print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name, 0, False) + " {", file=file)
+			print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name, 0, False) + " {", file=file)
 			for i, isa in  enumerate(isa_list):
 				if i == 0:
 					print("#if defined(" + isa["define"] + ")", file=file)
@@ -184,12 +184,12 @@ def gen_ci_functions(isa_list, file, funcs):
 
 			print("}", file=file)
 
-			print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name+"_m1", 1, False) + " {", file=file)
+			print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name+"_m1", 1, False) + " {", file=file)
 			print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name) + ";", file=file)
 			print("}", file=file)
 			
 			for lmul in all_lmul[1:]:
-				print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name+"_m"+str(lmul), lmul, False) + " {", file=file)
+				print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name+"_m"+str(lmul), lmul, False) + " {", file=file)
 				if not funcs[f]["horizontal"]:
 					lmul_2 = int(lmul / 2)
 					print(build_call_lmul(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name+"_m"+str(lmul_2), lmul, False), file=file)
@@ -201,14 +201,14 @@ def gen_ci_functions(isa_list, file, funcs):
 			if not funcs[f]["horizontal"]: #and funcs[f]["half_regiser"]:
 				for ldiv in all_ldiv:
 					print("#if defined(MIPP_ENABLE_LDIV"+str(ldiv)+")", file=file)
-					print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name+"_d"+str(ldiv), -ldiv, False) + " {", file=file)
+					print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name+"_d"+str(ldiv), -ldiv, False) + " {", file=file)
 					for i, isa in  enumerate(isa_list):
 						sub_isa = sub_isa = get_sub_isa(isa, ldiv, isa_list)
 						if sub_isa :
 							if i == 0:
-								print("#if defined(" + isa["define"] + ") and defined(" + sub_isa["define"] + ")", file=file)
+								print("#if defined(" + isa["define"] + ") && defined(" + sub_isa["define"] + ")", file=file)
 							else:
-								print("#elif defined(" + isa["define"] + ") and defined(" + sub_isa["define"] + ")", file=file)
+								print("#elif defined(" + isa["define"] + ") && defined(" + sub_isa["define"] + ")", file=file)
 						   
 							if len(dt.split(',')) <= 1:
 								func_name_impl = build_func_name_short(sub_isa, dt_par, f);
@@ -225,7 +225,7 @@ def gen_ci_functions(isa_list, file, funcs):
 			else :
 				for ldiv in all_ldiv:
 					print("#if defined(MIPP_ENABLE_LDIV"+str(ldiv)+")", file=file)
-					print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name+"_d"+str(ldiv), -ldiv, False) + " {", file=file)
+					print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name+"_d"+str(ldiv), -ldiv, False) + " {", file=file)
 					print("\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \""+func_name+"_d"+str(ldiv)+"\");", file=file);
 					print("\texit(-1);", file=file);
 					print("}", file=file)

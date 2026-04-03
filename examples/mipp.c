@@ -1,14 +1,14 @@
-// gcc mipp.c -mavx2 -o mipp_c.bin
+// gcc mipp.c -I../include -Wall -mavx2 -o mipp_c.bin
 
 #include <stdio.h>
 
-#include "../../include/mipp.h"
+#include <mipp.h>
 
 void print_v(int32_t* v, char* name)
 {
 	int i;
 	printf("%s = [", name);
-	for (i = 0; i < MIPP_N_INT32_M4; i++)
+	for (i = 0; i < MIPP_N_INT32 * 4; i++)
 		printf("%d,", v[i]);
 	printf("]\n");
 }
@@ -16,15 +16,15 @@ void print_v(int32_t* v, char* name)
 int main(int argc, char** argv)
 {
 	int i;
-	int32_t a1[MIPP_N_INT32_M4];
-	int32_t a2[MIPP_N_INT32_M4];
-	int32_t a3[MIPP_N_INT32_M4];
+	int32_t a1[MIPP_N_INT32 * 4];
+	int32_t a2[MIPP_N_INT32 * 4];
+	int32_t a3[MIPP_N_INT32 * 4];
 
 	rvd_int32_m4_t rvd1;
 	rvd_int32_m4_t rvd2;
 	rvd_int32_m4_t rvd3;
 
-	for (i = 0; i < MIPP_N_INT32_M4; i++) {
+	for (i = 0; i < MIPP_N_INT32 * 4; i++) {
 		a1[i] = i+0;
 		a2[i] = i+1;
 	}
