@@ -7,11 +7,12 @@ import argparse
 
 path = os.getcwd()
 
-sys.path.insert(1,path +'/simd_ext/avx512/')
-sys.path.insert(1,path + '/simd_ext/avx/')
-sys.path.insert(1,path + '/simd_ext/sse/')
-sys.path.insert(1,path + '/simd_ext/sve/')
-sys.path.insert(1,path + '/simd_ext/rvv/')
+sys.path.insert(1, path + "/helpers_headers/")
+sys.path.insert(1, path + "/simd_ext/avx512/")
+sys.path.insert(1, path + "/simd_ext/avx/")
+sys.path.insert(1, path + "/simd_ext/sse/")
+sys.path.insert(1, path + "/simd_ext/sve/")
+sys.path.insert(1, path + "/simd_ext/rvv/")
 
 from implem_sse import isa_sse
 from implem_avx import isa_avx
