@@ -64,8 +64,8 @@ DECL_3ARGS = """\tconst int vectorSize = {{size}};\n\t{{dt_ext}}_t inputs1[vecto
 DECL_G_SNIPPET = """\tstd::mt19937 g;\n\tstd::uniform_int_distribution<uint16_t> dis(0, 1);"""
 
 #we want inputs2 to store the same amount of bytes as inputs1 since we'll be memcpying from inputs1 to inputs2 for the cast tests, so if dt2 is smaller than dt1 we need more lanes in inputs2
-DECL_CAST_2ARGS = """\tconst int vectorSize = {{size}};\n\t{{dt1_ext}}_t inputs1[vectorSize];\n\t{{dt2_ext}}_t inputs2[sizeof(inputs1) / sizeof({{dt2_ext}}_t)];"""
-DECL_CAST_2ARGS_MSK = """\tconst int vectorSize = {{size}};\n\tint32_t inputs1[vectorSize];\n\t{{dt2_ext}}_t inputs2[sizeof(inputs1) / sizeof({{dt2_ext}}_t)];"""
+DECL_CAST_2ARGS = """\tconst int vectorSize = {{size}};\n\t{{dt1_ext}}_t inputs1[vectorSize];\n\tconstexpr size_t bytes = sizeof(inputs1);\n\t{{dt2_ext}}_t inputs2[bytes / sizeof({{dt2_ext}}_t)];"""
+DECL_CAST_2ARGS_MSK = """\tconst int vectorSize = {{size}};\n\tint32_t inputs1[vectorSize];\n\tconstexpr size_t bytes = sizeof(inputs1);\n\t{{dt2_ext}}_t inputs2[bytes / sizeof({{dt2_ext}}_t)];"""
 
 # --------------------------------------------
 # SCALAR VEC INIT
@@ -521,7 +521,7 @@ uint{{type_size}}_t got_bits = std::bit_cast<uint{{type_size}}_t>(mipp_get_float
 \t\tres {{op}} inputs1[j];
 \t\tures{{op}} inputs1[j];
 \t}""",
-        "loop_assert": """\tif(ures == res) REQUIRE(mipp_get_{{dt_ext}}(r3, 0) == res);""",
+        "loop_assert": """\tif(ures == (uint64_t)res) REQUIRE(mipp_get_{{dt_ext}}(r3, 0) == res);""",
     },
     
     "hmul": {
@@ -588,7 +588,7 @@ uint{{type_size}}_t got_bits = std::bit_cast<uint{{type_size}}_t>(mipp_get_float
 \t\tres1 += inputs1[j];
 \t\tures1 += inputs1[j];
 \t}""",
-        "loop_assert": """\tif(res1 == ures1) REQUIRE(res == res1);""",
+        "loop_assert": """\tif((uint64_t)res1 == ures1) REQUIRE(res == res1);""",
     },
     
     "cast": {
@@ -597,7 +597,7 @@ uint{{type_size}}_t got_bits = std::bit_cast<uint{{type_size}}_t>(mipp_get_float
         "init": INIT_CAST_2ARGS,
         "load": LOAD_CAST_2ARGS,
         "operation": OP_CAST,
-        "loop_body": """\tfor(int i = 0 ; i < vectorSize * sizeof({{dt1_ext}}_t) / sizeof({{dt2_ext}}_t); i++){\n"""+ LB_CAST_2ARGS,
+        "loop_body": """\tfor(size_t i = 0; i < vectorSize * sizeof({{dt1_ext}}_t) / sizeof({{dt2_ext}}_t); i++){\n"""+ LB_CAST_2ARGS,
         "loop_assert": AS_CAST_2ARGS+ "\n\t}",
     },
     
@@ -607,7 +607,7 @@ uint{{type_size}}_t got_bits = std::bit_cast<uint{{type_size}}_t>(mipp_get_float
         "init": INIT_CAST_2ARGS,
         "load": LOAD_CAST_2ARGS_MASK,
         "operation": OP_CAST_MSK,
-        "loop_body": """\tfor(int i = 0 ; i < vectorSize * sizeof({{dt1_ext}}_t) / sizeof({{dt2_ext}}_t); i++){\n"""+ LB_CAST_2ARGS,
+        "loop_body": """\tfor(size_t i = 0; i < vectorSize * sizeof({{dt1_ext}}_t) / sizeof({{dt2_ext}}_t); i++){\n"""+ LB_CAST_2ARGS,
         "loop_assert": AS_CAST_2ARGS_MSK + "\n\t}",
     },
     

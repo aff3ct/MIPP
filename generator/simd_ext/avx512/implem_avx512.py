@@ -128,7 +128,7 @@ tpl_implem_avx512 = {
 	%r<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);
 	rs2.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs1.r, rs2.r);
 
-	rsi32.r = _mm512_shuffle_epi32(rsi32.r, _MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));
+	rsi32.r = _mm512_shuffle_epi32(%cast<tp,c:int|b:32>%(rs2).r, _MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));
 	%r<tp>% rs3 = %cast<c:int|b:32,tp>%(rsi32);
 	rs3.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs2.r, rs3.r);
 
@@ -146,7 +146,7 @@ tpl_implem_avx512 = {
 	%r<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);
 	rs2.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs1.r, rs2.r);
 
-	rsi32.r = _mm512_shuffle_epi32(rsi32.r, _MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));
+	rsi32.r = _mm512_shuffle_epi32(%cast<tp,c:int|b:32>%(rs2).r, _MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));
 	%r<tp>% rs3 = %cast<c:int|b:32,tp>%(rsi32);
 	rs3.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs2.r, rs3.r);
 
@@ -169,7 +169,7 @@ tpl_implem_avx512 = {
 	%r<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);
 	rs2.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs1.r, rs2.r);
 
-	rsi32.r = _mm512_shuffle_epi32(rsi32.r, _MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));
+	rsi32.r = _mm512_shuffle_epi32(%cast<tp,c:int|b:32>%(rs2).r, _MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));
 	%r<tp>% rs3 = %cast<c:int|b:32,tp>%(rsi32);
 	rs3.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs2.r, rs3.r);
 
@@ -200,7 +200,7 @@ tpl_implem_avx512 = {
 	%r<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);
 	rs2.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs1.r, rs2.r);
 
-	rsi32.r = _mm512_shuffle_epi32(rsi32.r, _MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));
+	rsi32.r = _mm512_shuffle_epi32(%cast<tp,c:int|b:32>%(rs2).r, _MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));
 	%r<tp>% rs3 = %cast<c:int|b:32,tp>%(rsi32);
 	rs3.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs2.r, rs3.r);
 
