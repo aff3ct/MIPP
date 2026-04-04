@@ -34,7 +34,7 @@ typedef float float32_t;
 #endif
 
 #if defined(__riscv_v_intrinsic)
-#include "rvv/mipp_impl_RVV_gen.h"
+#include "rvv/mipp_impl_rvv_gen.h"
 #endif
 
 // utiles pour l'instant pour les tests

@@ -62,7 +62,7 @@ def gen_mipp_rvv(vl=256):
     #		if "type" not in sub_iemu:
     #			sub_iemu["type"] = "emulated"
     # implementation C
-    file = open("../include/rvv/mipp_impl_RVV_gen.h", "w")
+    file = open("../include/rvv/mipp_impl_rvv_gen.h", "w")
 
     tpl_header_rvv = """#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_RVV_H_
 #define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_RVV_H_
