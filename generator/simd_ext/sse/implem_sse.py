@@ -11,7 +11,7 @@ isa_sse = {
     "name": "sse",
     "prefix": "_mm",
     "size": 128,
-    "define": "__SSE__",
+    "define": "defined(__SSE__)",
     "architecture": "x86",
     "hw_lmul": False,
     "datatypes": {

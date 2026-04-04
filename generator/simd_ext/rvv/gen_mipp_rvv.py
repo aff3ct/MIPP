@@ -81,7 +81,7 @@ def gen_mipp_rvv(vl=256):
     #for function prototypes that use arrays declared w macros like MIPP_RVV256_N_FLOAT64 
     #we want the name to contain size. This is optional atm 
     #but if we want smtg similar to sve it will become useful
-    isa_rvv["name"] = ref_isa_name+str(vl) 
+    isa_rvv["name"] = ref_isa_name #+str(vl) # Adrien: I commented "+str(vl)" because I use this field to generate "#if define(MIPP_RVV)" in the interfaces
     gen_c_defines_rvv_ls(file,ref_isa_name,vl)
     gen_c_structures_rvv_ls(file,vl)
     print("Generate RVV")

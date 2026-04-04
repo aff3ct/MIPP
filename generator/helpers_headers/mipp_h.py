@@ -83,6 +83,7 @@ typedef float float32_t;
 #endif
 
 #elif defined(__ARM_FEATURE_SVE)
+#define MIPP_SVE
 #define MIPP_FMA
 #define MIPP_64BIT
 // not yet generated

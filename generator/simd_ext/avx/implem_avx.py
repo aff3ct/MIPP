@@ -11,7 +11,7 @@ isa_avx = {
 	"name": "avx",
 	"prefix": "_mm256",
 	"size": 256,
-	"define": "__AVX__",
+	"define": "defined(__AVX__)",
 	"hw_lmul": False,
     "architecture": "x86",
 	"datatypes": {
