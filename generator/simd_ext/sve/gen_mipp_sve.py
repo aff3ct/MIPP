@@ -45,7 +45,7 @@ def gen_mipp_sve():
 
     file = open("../include/sve/mipp_impl_sve_gen.h", "w")
     
-    print("#if defined("+isa_sve["define"]+")", file=file)
+    print("#if "+isa_sve["define"], file=file)
     
     all_sve_sizes = sorted(isa_sve["size"], reverse=True)
     for index, sve_size in enumerate(all_sve_sizes):
@@ -58,7 +58,7 @@ def gen_mipp_sve():
         #for sub_size in all_sve_sizes[index:]:
         print("#include \"../include/sve/mipp_impl_sve"+str(sve_size)+"_gen.h\"", file=file)
         #for sub_size in all_sve_sizes[index:]:
-        print("#define MIPP_USE_ARM_SVE_"+str(sve_size), file=file)
+        print("#define MIPP_SVE_"+str(sve_size), file=file)
     
     template = """#else
 #error Only -msve-vector-bits = {{all_sve_sizes}} is supported)
@@ -82,7 +82,7 @@ def gen_mipp_sve():
         
         tpl_header_sve = """#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SVE{{ sve_size }}_H_
 #define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SVE{{ sve_size }}_H_
-#if defined({{sve_define}})
+#if {{sve_define}}
 #include <arm_sve.h>"""
         j2_template = Template(tpl_header_sve, undefined=StrictUndefined)
         print(j2_template.render(sve_size=current_sve_size, sve_define=isa_sve["define"]), file=file)# better take value isa_sve size
