@@ -306,28 +306,28 @@ implems_avx = {
         { "instr_name": "andb",           "datatypes": all_int_uint,                                "template": tpl_implem_avx["logi_2args_e"],     "if": "!defined(__AVX2__)"           },
         { "instr_name": "and",            "datatypes": all_int_uint,                                "template": tpl_implem_avx["logi_2args"],       "if": "defined(__AVX2__)"            } ], # andb
     "andb_k": [
-        { "instr_name": "andb",           "datatypes": all_int_uint,                                "template": tpl_implem_avx["logi_m_2args_e"],   "if": "!defined(__AVX2__)"           },
+        { "instr_name": "andb",           "datatypes": all_datatypes,                               "template": tpl_implem_avx["logi_m_2args_e"],   "if": "!defined(__AVX2__)"           },
         { "instr_name": "and",            "datatypes": all_datatypes,                               "template": tpl_implem_avx["logi_m_2args"],     "if": "defined(__AVX2__)"            } ], # andb_k
     "andnb": [
         { "instr_name": "andnot",         "datatypes": all_float,                                   "template": tpl_implem_avx["logi_2args"],                                            },
         { "instr_name": "andnb",          "datatypes": all_int_uint,                                "template": tpl_implem_avx["logi_2args_e"],     "if": "!defined(__AVX2__)"           },
         { "instr_name": "andnot",         "datatypes": all_int_uint,                                "template": tpl_implem_avx["logi_2args"],       "if": "defined(__AVX2__)"            } ], # andnb
     "andnb_k": [
-        { "instr_name": "andnb",          "datatypes": all_int_uint,                                "template": tpl_implem_avx["logi_m_2args_e"],   "if": "!defined(__AVX2__)"           },
+        { "instr_name": "andnb",          "datatypes": all_datatypes,                               "template": tpl_implem_avx["logi_m_2args_e"],   "if": "!defined(__AVX2__)"           },
         { "instr_name": "andnot",         "datatypes": all_datatypes,                               "template": tpl_implem_avx["logi_m_2args"],     "if": "defined(__AVX2__)"            } ], # andnb_k
     "orb": [
         { "instr_name": "or",             "datatypes": all_float,                                   "template": tpl_implem_avx["logi_2args"],                                            },
         { "instr_name": "orb",            "datatypes": all_int_uint,                                "template": tpl_implem_avx["logi_2args_e"],     "if": "!defined(__AVX2__)"           },
         { "instr_name": "or",             "datatypes": all_int_uint,                                "template": tpl_implem_avx["logi_2args"],       "if": "defined(__AVX2__)"            } ], # orb
     "orb_k": [
-        { "instr_name": "orb",            "datatypes": all_int_uint,                                "template": tpl_implem_avx["logi_m_2args_e"],   "if": "!defined(__AVX2__)"           },
+        { "instr_name": "orb",            "datatypes": all_datatypes,                               "template": tpl_implem_avx["logi_m_2args_e"],   "if": "!defined(__AVX2__)"           },
         { "instr_name": "or",             "datatypes": all_datatypes,                               "template": tpl_implem_avx["logi_m_2args"],     "if": "defined(__AVX2__)"            } ], # orb_k
     "xorb": [
         { "instr_name": "xor",            "datatypes": all_float,                                   "template": tpl_implem_avx["logi_2args"],                                            },
         { "instr_name": "xorb",           "datatypes": all_int_uint,                                "template": tpl_implem_avx["logi_2args_e"],     "if": "!defined(__AVX2__)"           },
         { "instr_name": "xor",            "datatypes": all_int_uint,                                "template": tpl_implem_avx["logi_2args"],       "if": "defined(__AVX2__)"            } ], # xorb
     "xorb_k": [
-        { "instr_name": "xorb",           "datatypes": all_int_uint,                                "template": tpl_implem_avx["logi_m_2args_e"],   "if": "!defined(__AVX2__)"           },
+        { "instr_name": "xorb",           "datatypes": all_datatypes,                               "template": tpl_implem_avx["logi_m_2args_e"],   "if": "!defined(__AVX2__)"           },
         { "instr_name": "xor",            "datatypes": all_datatypes,                               "template": tpl_implem_avx["logi_m_2args"],     "if": "defined(__AVX2__)"            } ], # xorb_k
     "cmpeq": [
         { "instr_name": "cmp",            "datatypes": all_float,                                   "template": tpl_implem_avx["cmpeq_float"],                                           },

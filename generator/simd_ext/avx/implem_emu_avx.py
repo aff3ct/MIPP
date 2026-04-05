@@ -214,67 +214,73 @@ tpl_implem_emu_avx = {
 """
 implems_emu_avx = {
     "set" :[
-        { "datatypes": [float64],                      "template": tpl_implem_emu_avx["set-64f"],      },
-        { "datatypes": [float32],                      "template": tpl_implem_emu_avx["set-32f"],      },
-        { "datatypes": [int32, uint32],                "template": tpl_implem_emu_avx["set-32"],       },
-        { "datatypes": [int64, uint64],                "template": tpl_implem_emu_avx["set-64"],       },
-        { "datatypes": [int16, uint16],                "template": tpl_implem_emu_avx["set-16"],       },
-        { "datatypes": [int8, uint8],                  "template": tpl_implem_emu_avx["set-8"],        } ], # set
+        { "datatypes": [float64],                      "template": tpl_implem_emu_avx["set-64f"],                                },
+        { "datatypes": [float32],                      "template": tpl_implem_emu_avx["set-32f"],                                },
+        { "datatypes": [int32, uint32],                "template": tpl_implem_emu_avx["set-32"],                                 },
+        { "datatypes": [int64, uint64],                "template": tpl_implem_emu_avx["set-64"],                                 },
+        { "datatypes": [int16, uint16],                "template": tpl_implem_emu_avx["set-16"],                                 },
+        { "datatypes": [int8, uint8],                  "template": tpl_implem_emu_avx["set-8"],                                  } ], # set
     "set_k" : [
-        { "datatypes": [int8, uint8],                  "template": tpl_implem_emu_avx["set_k-8"],      },
-        { "datatypes": [int16, uint16],                "template": tpl_implem_emu_avx["set_k-16"],     },
-        { "datatypes": [int32, uint32],                "template": tpl_implem_emu_avx["set_k-32"],     },
-        { "datatypes": [int64, uint64],                "template": tpl_implem_emu_avx["set_k-64"],     },
-        { "datatypes": [float64],                      "template": tpl_implem_emu_avx["set_k-64f"],    },
-        { "datatypes": [float32],                      "template": tpl_implem_emu_avx["set_k-32f"],    } ], # set_k
+        { "datatypes": [int8, uint8],                  "template": tpl_implem_emu_avx["set_k-8"],                                },
+        { "datatypes": [int16, uint16],                "template": tpl_implem_emu_avx["set_k-16"],                               },
+        { "datatypes": [int32, uint32],                "template": tpl_implem_emu_avx["set_k-32"],                               },
+        { "datatypes": [int64, uint64],                "template": tpl_implem_emu_avx["set_k-64"],                               },
+        { "datatypes": [float64],                      "template": tpl_implem_emu_avx["set_k-64f"],                              },
+        { "datatypes": [float32],                      "template": tpl_implem_emu_avx["set_k-32f"],                              } ], # set_k
     "set1_k":[
-        { "datatypes": [int8, uint8],                  "template": tpl_implem_emu_avx["set1_k-8"],     } ,
-        { "datatypes": [int16, uint16],                "template": tpl_implem_emu_avx["set1_k-16"],    },
-        { "datatypes": [int32, uint32, float32],       "template": tpl_implem_emu_avx["set1_k-32"],    },
-        { "datatypes": [int64, uint64, float64],       "template": tpl_implem_emu_avx["set1_k-64"],    } ], # set1_k
+        { "datatypes": [int8, uint8],                  "template": tpl_implem_emu_avx["set1_k-8"],                               },
+        { "datatypes": [int16, uint16],                "template": tpl_implem_emu_avx["set1_k-16"],                              },
+        { "datatypes": [int32, uint32, float32],       "template": tpl_implem_emu_avx["set1_k-32"],                              },
+        { "datatypes": [int64, uint64, float64],       "template": tpl_implem_emu_avx["set1_k-64"],                              } ], # set1_k
     "blend": [
-        { "datatypes": [int64, int32, uint64, uint32], "template": tpl_implem_emu_avx["blend-1"],      },
-        { "datatypes": [int16, int8, uint16, uint8],   "template": tpl_implem_emu_avx["blend-2"],      } ], # blend
+        { "datatypes": [int64, int32, uint64, uint32], "template": tpl_implem_emu_avx["blend-1"],                                },
+        { "datatypes": [int16, int8, uint16, uint8],   "template": tpl_implem_emu_avx["blend-2"],                                } ], # blend
     "fmadd": [
-        { "datatypes": all_float,                      "template": tpl_implem_emu_avx["fmadd"],        } ], # fmadd
+        { "datatypes": all_float,                      "template": tpl_implem_emu_avx["fmadd"],                                  } ], # fmadd
     "fmsub": [
-        { "datatypes": all_float,                      "template": tpl_implem_emu_avx["fmsub"],        } ], # fmsub
+        { "datatypes": all_float,                      "template": tpl_implem_emu_avx["fmsub"],                                  } ], # fmsub
     "msb": [
-        { "datatypes": [float64, int64, uint64],       "template": tpl_implem_emu_avx["msb-64"],       },
-        { "datatypes": [float32, int32, uint32],       "template": tpl_implem_emu_avx["msb-32"],       },
-        { "datatypes": [int16, uint16],                "template": tpl_implem_emu_avx["msb-16"],       },
-        { "datatypes": [int8, uint8],                  "template": tpl_implem_emu_avx["msb-8"],        } ], # msb
+        { "datatypes": [float64, int64, uint64],       "template": tpl_implem_emu_avx["msb-64"],                                 },
+        { "datatypes": [float32, int32, uint32],       "template": tpl_implem_emu_avx["msb-32"],                                 },
+        { "datatypes": [int16, uint16],                "template": tpl_implem_emu_avx["msb-16"],                                 },
+        { "datatypes": [int8, uint8],                  "template": tpl_implem_emu_avx["msb-8"],                                  } ], # msb
     "notb": [
-        { "datatypes": [float64, int64, uint64],       "template": tpl_implem_emu_avx["notb-64"],      },
-        { "datatypes": [float32, int32, uint32],       "template": tpl_implem_emu_avx["notb-32"],      },
-        { "datatypes": [int16, uint16],                "template": tpl_implem_emu_avx["notb-16"],      },
-        { "datatypes": [int8, uint8],                  "template": tpl_implem_emu_avx["notb-8"],       } ], # notb
+        { "datatypes": [float64, int64, uint64],       "template": tpl_implem_emu_avx["notb-64"],                                },
+        { "datatypes": [float32, int32, uint32],       "template": tpl_implem_emu_avx["notb-32"],                                },
+        { "datatypes": [int16, uint16],                "template": tpl_implem_emu_avx["notb-16"],                                },
+        { "datatypes": [int8, uint8],                  "template": tpl_implem_emu_avx["notb-8"],                                 } ], # notb
     "notb_k": [
-        { "datatypes": [float64, int64, uint64],       "template": tpl_implem_emu_avx["notb_k-64"],    },
-        { "datatypes": [float32, int32, uint32],       "template": tpl_implem_emu_avx["notb_k-32"],    },
-        { "datatypes": [int16, uint16],                "template": tpl_implem_emu_avx["notb_k-16"],    },
-        { "datatypes": [int8, uint8],                  "template": tpl_implem_emu_avx["notb_k-8"],     } ], # notb_k
+        { "datatypes": [float64, int64, uint64],       "template": tpl_implem_emu_avx["notb_k-64"],                              },
+        { "datatypes": [float32, int32, uint32],       "template": tpl_implem_emu_avx["notb_k-32"],                              },
+        { "datatypes": [int16, uint16],                "template": tpl_implem_emu_avx["notb_k-16"],                              },
+        { "datatypes": [int8, uint8],                  "template": tpl_implem_emu_avx["notb_k-8"],                               } ], # notb_k
     "cmpeq": [
-        { "datatypes": [int64, int32, uint64, uint32], "template": tpl_implem_emu_avx["cmpeq-1"],      },
-        { "datatypes": [uint16, uint8],                "template": tpl_implem_emu_avx["cmpeq-2"],      } ], # cmpeq
+        { "datatypes": [int64, int32, uint64, uint32], "template": tpl_implem_emu_avx["cmpeq-1"],                                },
+        { "datatypes": [uint16, uint8],                "template": tpl_implem_emu_avx["cmpeq-2"],                                } ], # cmpeq
     "cmpneq": [
-        { "datatypes": all_datatypes,                  "template": tpl_implem_emu_avx["cmpneq"],       } ], # cmpneq
+        { "datatypes": all_datatypes,                  "template": tpl_implem_emu_avx["cmpneq"],                                 } ], # cmpneq
     "testz_2": [
-        { "datatypes": all_datatypes,                  "template": tpl_implem_emu_avx["testz_2"],      } ], # testz_2
+        { "datatypes": all_datatypes,                  "template": tpl_implem_emu_avx["testz_2"],                                } ], # testz_2
     "get": [
-        { "datatypes": all_datatypes,                  "template": tpl_implem_emu_avx["get"],          } ], # get
+        { "datatypes": all_datatypes,                  "template": tpl_implem_emu_avx["get"],                                    } ], # get
     "get_k": [
-        { "datatypes": all_datatypes,                  "template": tpl_implem_emu_avx["get_k"],        } ], # get_k
+        { "datatypes": all_datatypes,                  "template": tpl_implem_emu_avx["get_k"],                                  } ], # get_k
     "getfirst": [
-        { "datatypes": all_datatypes,                  "template": tpl_implem_emu_avx["getfirst"],     } ], # getfirst
+        { "datatypes": all_datatypes,                  "template": tpl_implem_emu_avx["getfirst"],                               } ], # getfirst
     "maskz_add": [
-        { "datatypes": all_datatypes,                  "template": tpl_implem_emu_avx["maskz_add"],    } ], # maskz_add
+        { "datatypes": all_float,                      "template": tpl_implem_emu_avx["maskz_add"],                              },
+        { "datatypes": [int64, int32],                 "template": tpl_implem_emu_avx["maskz_add"],    "if": "defined(__AVX2__)" },
+        { "datatypes": [int16, int8, uint16, uint8],   "template": tpl_implem_emu_avx["maskz_add"],    "if": "defined(__AVX2__)" },
+        { "datatypes": [uint64, uint32],               "template": tpl_implem_emu_avx["maskz_add"],    "if": "defined(__AVX2__)" } ], # maskz_add
     "hadd_to_scal": [
-        { "datatypes": all_datatypes,                  "template": tpl_implem_emu_avx["hadd_to_scal"], } ], # hadd_to_scal
+        { "datatypes": all_float,                      "template": tpl_implem_emu_avx["hadd_to_scal"],                           },
+        { "datatypes": [int64, int32],                 "template": tpl_implem_emu_avx["hadd_to_scal"], "if": "defined(__AVX2__)" },
+        { "datatypes": [int16, int8, uint16, uint8],   "template": tpl_implem_emu_avx["hadd_to_scal"], "if": "defined(__AVX2__)" },
+        { "datatypes": [uint64, uint32],               "template": tpl_implem_emu_avx["hadd_to_scal"], "if": "defined(__AVX2__)" } ], # hadd_to_scal
 #   "gather": [
-#       { "datatypes": all_datatypes,                  "template": tpl_implem_emu_avx["gather_seq"],   } ], # gather
+#       { "datatypes": all_datatypes,                  "template": tpl_implem_emu_avx["gather_seq"],                             } ], # gather
 #   "mask_gather": [
-#       { "datatypes": all_datatypes,                  "template": tpl_implem_emu_avx["maskz_gather"], } ], # mask_gather
+#       { "datatypes": all_datatypes,                  "template": tpl_implem_emu_avx["maskz_gather"],                           } ], # mask_gather
 #   "gather_seq": [
-#       { "datatypes": all_int_uint,                   "template": tpl_implem_emu["gather_seq"],       } ], # gather_seq
+#       { "datatypes": all_int_uint,                   "template": tpl_implem_emu["gather_seq"],                                 } ], # gather_seq
 }
