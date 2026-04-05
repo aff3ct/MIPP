@@ -12,31 +12,42 @@ tpl_implem_emu_avx512 = {
 """// long format
 	%m<tr>% res;
 	%r<c:int>% zero = %set0<c:int>%();
-	res = %cast_k<c:int,tr>%(%cmpeq<c:int>%(%cast<tp,c:int>%(r0), zero));
+	res = %cast_k<c:int,tr>%(%cmpneq<c:int>%(%cast<tp,c:int>%(r0), zero));
 	return res;""" },
+    "get": { "format": "long", "code":
+"""// long format
+	%v<tp>% t[%N<tp>%];
+	%storeu<tp>%(t, r0);
+	return t[v0];""" },
+    "get_k": { "format": "long", "code":
+"""// long format
+	%v<tp>% tmp[%N<tp>%];
+	%r<tp>% rmsk = %toreg<tp>%(m0);
+	%storeu<tp>%(tmp, rmsk);
+	return (int32_t) tmp[v0];""" },
     "set1_k-8": { "format": "long", "code":
 """// long format
 	%r<c:int|b:tp>% r0_32 = %set1<c:int|b:tp>%(v0 ? 0xFFFFFFFFFFFFFFFF : 0);
 	%r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%(     0xFFFFFFFFFFFFFFFF    );
-	return %cmpneq<c:int|b:tp>%(r0_32, r1_32);""" },
+	return %cast_k<c:int|b:tp,tp>%(%cmpeq<c:int|b:tp>%(r0_32, r1_32));""" },
     "set1_k-16": { "format": "long", "code":
 """// long format
 	%r<c:int|b:tp>% r0_32 = %set1<c:int|b:tp>%(v0 ? 0xFFFFFFFF : 0);
 	%r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%(     0xFFFFFFFF    );
-	return %cmpneq<c:int|b:tp>%(r0_32, r1_32);""" },
+	return %cast_k<c:int|b:tp,tp>%(%cmpeq<c:int|b:tp>%(r0_32, r1_32));""" },
     "set1_k-32": { "format": "long", "code":
 """// long format
 	%r<c:int|b:tp>% r0_32 = %set1<c:int|b:tp>%(v0 ? 0xFFFF : 0);
 	%r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%(     0xFFFF    );
-	return %cmpneq<c:int|b:tp>%(r0_32, r1_32);""" },
+	return %cast_k<c:int|b:tp,tp>%(%cmpeq<c:int|b:tp>%(r0_32, r1_32));""" },
     "set1_k-64": { "format": "long", "code":
 """// long format
 	%r<c:int|b:tp>% r0_32 = %set1<c:int|b:tp>%(v0 ? 0xFF : 0);
 	%r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%(     0xFF    );
-	return %cmpneq<c:int|b:tp>%(r0_32, r1_32); """ },
+	return %cast_k<c:int|b:tp,tp>%(%cmpeq<c:int|b:tp>%(r0_32, r1_32)); """ },
     "set_k-64": { "format": "long", "code":
 """// long format
-	%v<tp>% t[%N<tp>%] = {
+	%v<c:int|b:tp>% t[%N<tp>%] = {
 		(int64_t)(vals[0] ? 0xFFFFFFFFFFFFFFFF : 0),
 		(int64_t)(vals[1] ? 0xFFFFFFFFFFFFFFFF : 0),
 		(int64_t)(vals[2] ? 0xFFFFFFFFFFFFFFFF : 0),
@@ -47,10 +58,10 @@ tpl_implem_emu_avx512 = {
 		(int64_t)(vals[7] ? 0xFFFFFFFFFFFFFFFF : 0) };
 	%r<c:int|b:tp>% r0_32 = %set<c:int|b:tp>%(t);
 	%r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%(0xFFFFFFFFFFFFFFFF);
-	return %cmpneq<c:int|b:tp>%(r0_32, r1_32);""" },
+	return %cast_k<c:int|b:tp,tp>%(%cmpeq<c:int|b:tp>%(r0_32, r1_32));""" },
     "set_k-32": { "format": "long", "code":
 """// long format
-	%v<tp>% t[%N<tp>%] = {
+	%v<c:int|b:tp>% t[%N<tp>%] = {
 		(int32_t)(vals[ 0] ? 0xFFFFFFFF : 0), (int32_t)(vals[ 1] ? 0xFFFFFFFF : 0),
 		(int32_t)(vals[ 2] ? 0xFFFFFFFF : 0), (int32_t)(vals[ 3] ? 0xFFFFFFFF : 0),
 		(int32_t)(vals[ 4] ? 0xFFFFFFFF : 0), (int32_t)(vals[ 5] ? 0xFFFFFFFF : 0),
@@ -61,10 +72,10 @@ tpl_implem_emu_avx512 = {
 		(int32_t)(vals[14] ? 0xFFFFFFFF : 0), (int32_t)(vals[15] ? 0xFFFFFFFF : 0) };
 	%r<c:int|b:tp>% r0_32 = %set<c:int|b:tp>%(t);
 	%r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%(0xFFFFFFFF);
-	return %cmpneq<c:int|b:tp>%(r0_32, r1_32);""" },
+	return %cast_k<c:int|b:tp,tp>%(%cmpeq<c:int|b:tp>%(r0_32, r1_32));""" },
     "set_k-16": { "format": "long", "code":
 """// long format
-	%v<tp>% t[%N<tp>%] = {
+	%v<c:int|b:tp>% t[%N<tp>%] = {
 		(int16_t)(vals[ 0] ? 0xFFFF : 0), (int16_t)(vals[ 1] ? 0xFFFF : 0),
 		(int16_t)(vals[ 2] ? 0xFFFF : 0), (int16_t)(vals[ 3] ? 0xFFFF : 0),
 		(int16_t)(vals[ 4] ? 0xFFFF : 0), (int16_t)(vals[ 5] ? 0xFFFF : 0),
@@ -83,10 +94,10 @@ tpl_implem_emu_avx512 = {
 		(int16_t)(vals[30] ? 0xFFFF : 0), (int16_t)(vals[31] ? 0xFFFF : 0) };
 	%r<c:int|b:tp>% r0_32 = %set<c:int|b:tp>%(t);
 	%r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%(0xFFFF);
-	return %cmpneq<c:int|b:tp>%(r0_32, r1_32);""" },
+	return %cast_k<c:int|b:tp,tp>%(%cmpeq<c:int|b:tp>%(r0_32, r1_32));""" },
     "set_k-8": {"format": "long", "code":
 """// long format
-	%v<tp>% t[%N<tp>%] = {
+	%v<c:int|b:tp>% t[%N<tp>%] = {
 		(int8_t)(vals[ 0] ? 0xFF : 0), (int8_t)(vals[ 1] ? 0xFF : 0), (int8_t)(vals[ 2] ? 0xFF : 0), (int8_t)(vals[ 3] ? 0xFF : 0),
 		(int8_t)(vals[ 4] ? 0xFF : 0), (int8_t)(vals[ 5] ? 0xFF : 0), (int8_t)(vals[ 6] ? 0xFF : 0), (int8_t)(vals[ 7] ? 0xFF : 0),
 		(int8_t)(vals[ 8] ? 0xFF : 0), (int8_t)(vals[ 9] ? 0xFF : 0), (int8_t)(vals[10] ? 0xFF : 0), (int8_t)(vals[11] ? 0xFF : 0),
@@ -98,10 +109,14 @@ tpl_implem_emu_avx512 = {
 		(int8_t)(vals[32] ? 0xFF : 0), (int8_t)(vals[33] ? 0xFF : 0), (int8_t)(vals[34] ? 0xFF : 0), (int8_t)(vals[35] ? 0xFF : 0),
 		(int8_t)(vals[36] ? 0xFF : 0), (int8_t)(vals[37] ? 0xFF : 0), (int8_t)(vals[38] ? 0xFF : 0), (int8_t)(vals[39] ? 0xFF : 0),
 		(int8_t)(vals[40] ? 0xFF : 0), (int8_t)(vals[41] ? 0xFF : 0), (int8_t)(vals[42] ? 0xFF : 0), (int8_t)(vals[43] ? 0xFF : 0),
-		(int8_t)(vals[44] ? 0xFF : 0), (int8_t)(vals[45] ? 0xFF : 0), (int8_t)(vals[46] ? 0xFF : 0), (int8_t)(vals[47] ? 0xFF : 0) };
+		(int8_t)(vals[44] ? 0xFF : 0), (int8_t)(vals[45] ? 0xFF : 0), (int8_t)(vals[46] ? 0xFF : 0), (int8_t)(vals[47] ? 0xFF : 0),
+		(int8_t)(vals[48] ? 0xFF : 0), (int8_t)(vals[49] ? 0xFF : 0), (int8_t)(vals[50] ? 0xFF : 0), (int8_t)(vals[51] ? 0xFF : 0),
+		(int8_t)(vals[52] ? 0xFF : 0), (int8_t)(vals[53] ? 0xFF : 0), (int8_t)(vals[54] ? 0xFF : 0), (int8_t)(vals[55] ? 0xFF : 0),
+		(int8_t)(vals[56] ? 0xFF : 0), (int8_t)(vals[57] ? 0xFF : 0), (int8_t)(vals[58] ? 0xFF : 0), (int8_t)(vals[59] ? 0xFF : 0),
+		(int8_t)(vals[60] ? 0xFF : 0), (int8_t)(vals[61] ? 0xFF : 0), (int8_t)(vals[62] ? 0xFF : 0), (int8_t)(vals[63] ? 0xFF : 0) };
 	%r<c:int|b:tp>% r0_32 = %set<c:int|b:tp>%(t);
 	%r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%(0xFF);
-	return %cmpneq<c:int|b:tp>%(r0_32, r1_32);""" },
+	return %cast_k<c:int|b:tp,tp>%(%cmpeq<c:int|b:tp>%(r0_32, r1_32));""" },
     "andb_k" : { "format": "long",  "code":
 """// long format
 	return (m0 & m1);""" },
@@ -163,16 +178,20 @@ implems_emu_avx512 = {
         { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["toreg"]                                                                                 } ], # toreg
     "tomsk": [
         { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["tomsk"]                                                                                 } ], # tomsk
+    "get": [
+        { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["get"]                                                                                   } ], # get
+    "get_k": [
+        { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["get_k"]                                                                                 } ], # get_k
     "set1_k":[
-        { "datatypes": [int64],                      "template": tpl_implem_emu_avx512["set1_k-8"]                                                                              },
-        { "datatypes": [int32],                      "template": tpl_implem_emu_avx512["set1_k-16"]                                                                             },
-        { "datatypes": [int16],                      "template": tpl_implem_emu_avx512["set1_k-32"]                                                                             },
-        { "datatypes": [int8],                       "template": tpl_implem_emu_avx512["set1_k-64"]                                                                             } ], # set1_k
+        { "datatypes": all_64bit,                    "template": tpl_implem_emu_avx512["set1_k-8"]                                                                              },
+        { "datatypes": all_32bit,                    "template": tpl_implem_emu_avx512["set1_k-16"]                                                                             },
+        { "datatypes": all_16bit,                    "template": tpl_implem_emu_avx512["set1_k-32"]                                                                             },
+        { "datatypes": all_8bit,                     "template": tpl_implem_emu_avx512["set1_k-64"]                                                                             } ], # set1_k
     "set_k" : [
-        { "datatypes": [int64],                      "template": tpl_implem_emu_avx512["set_k-64"],                                                                             },
-        { "datatypes": [int32],                      "template": tpl_implem_emu_avx512["set_k-32"],                                                                             },
-        { "datatypes": [int16],                      "template": tpl_implem_emu_avx512["set_k-16"],                                                                             },
-        { "datatypes": [int8],                       "template": tpl_implem_emu_avx512["set_k-8"],                                                                              } ], # set_k
+        { "datatypes": all_64bit,                    "template": tpl_implem_emu_avx512["set_k-64"],                                                                             },
+        { "datatypes": all_32bit,                    "template": tpl_implem_emu_avx512["set_k-32"],                                                                             },
+        { "datatypes": all_16bit,                    "template": tpl_implem_emu_avx512["set_k-16"],                                                                             },
+        { "datatypes": all_8bit,                     "template": tpl_implem_emu_avx512["set_k-8"],                                                                              } ], # set_k
 #   "andb_k": [
 #       { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["andb_k"],       "if": "defined(__AVX512BW__)"                                           } ], # andb_k
 #   "andnb_k": [

@@ -32,8 +32,7 @@ avx512_guard = "#if defined(MIPP_AVX512)"
 avx2_guard = "#elif defined(MIPP_AVX2)"
 avx_guard = "#elif defined(MIPP_AVX)"
 sse_guard = "#elif defined(MIPP_SSE)"
-# for some reason MIPP_SVE isnt defined idk
-sve_guard = "#elif defined(__ARM_FEATURE_SVE)"
+sve_guard = "#elif defined(MIPP_SVE)"
 rvv_guard = "#elif defined(MIPP_RVV)"
 
 implems_avx512.update(implems_emu_avx512)

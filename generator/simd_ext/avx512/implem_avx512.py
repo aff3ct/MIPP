@@ -44,7 +44,7 @@ tpl_implem_avx512 = {
     "cmple_float":      { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(r0.r, r1.r, _CMP_LE_OS);" },
     "cmpgt_float":      { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(r0.r, r1.r, _CMP_GT_OS);" },
     "cmpge_float":      { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(r0.r, r1.r, _CMP_GE_OS);" },
-    "blend":            { "format": "short", "code": "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext }}(m0.m, r0.r, r1.r);" },
+    "blend":            { "format": "short", "code": "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext }}(m0.m, r1.r, r0.r);" },
     "round":            { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, _MM_FROUND_TO_NEAREST_INT);" },
     "roundf":           { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC, _MM_EXPADJ_NONE);" },
     "bitwise_1arg":     { "format": "short", "code": "_{{ instr_name }}_{{ isa_dt_par.msk_short }}(m0.m);" },
@@ -128,7 +128,11 @@ tpl_implem_avx512 = {
 	%r<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);
 	rs2.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs1.r, rs2.r);
 
+#ifdef __cplusplus
 	rsi32.r = _mm512_shuffle_epi32(%cast<tp,c:int|b:32>%(rs2).r, _MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));
+#else
+	rsi32.r = _mm512_shuffle_epi32(%cast<tp,c:int|b:32>%(rs2).r, _MM_SHUFFLE(1,0,3,2));
+#endif
 	%r<tp>% rs3 = %cast<c:int|b:32,tp>%(rsi32);
 	rs3.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs2.r, rs3.r);
 
@@ -146,11 +150,19 @@ tpl_implem_avx512 = {
 	%r<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);
 	rs2.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs1.r, rs2.r);
 
+#ifdef __cplusplus
 	rsi32.r = _mm512_shuffle_epi32(%cast<tp,c:int|b:32>%(rs2).r, _MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));
+#else
+	rsi32.r = _mm512_shuffle_epi32(%cast<tp,c:int|b:32>%(rs2).r, _MM_SHUFFLE(1,0,3,2));
+#endif
 	%r<tp>% rs3 = %cast<c:int|b:32,tp>%(rsi32);
 	rs3.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs2.r, rs3.r);
 
-	rsi32.r = _mm512_shuffle_epi32(%cast<tp,c:int|b:32>%(rs3).r, _MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));
+#ifdef __cplusplus
+	rsi32.r = _mm512_shuffle_epi32(%cast<tp,c:int|b:32>%(rs3).r, _MM_PERM_ENUM(_MM_SHUFFLE(2,3,0,1)));
+#else
+	rsi32.r = _mm512_shuffle_epi32(%cast<tp,c:int|b:32>%(rs3).r, _MM_SHUFFLE(2,3,0,1));
+#endif
 	%r<tp>% rs4 = %cast<c:int|b:32,tp>%(rsi32);
 	rs4.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs3.r, rs4.r);
 
@@ -169,11 +181,19 @@ tpl_implem_avx512 = {
 	%r<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);
 	rs2.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs1.r, rs2.r);
 
+#ifdef __cplusplus
 	rsi32.r = _mm512_shuffle_epi32(%cast<tp,c:int|b:32>%(rs2).r, _MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));
+#else
+	rsi32.r = _mm512_shuffle_epi32(%cast<tp,c:int|b:32>%(rs2).r, _MM_SHUFFLE(1,0,3,2));
+#endif
 	%r<tp>% rs3 = %cast<c:int|b:32,tp>%(rsi32);
 	rs3.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs2.r, rs3.r);
 
-	rsi32.r = _mm512_shuffle_epi32(%cast<tp,c:int|b:32>%(rs3).r, _MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));
+#ifdef __cplusplus
+	rsi32.r = _mm512_shuffle_epi32(%cast<tp,c:int|b:32>%(rs3).r, _MM_PERM_ENUM(_MM_SHUFFLE(2,3,0,1)));
+#else
+	rsi32.r = _mm512_shuffle_epi32(%cast<tp,c:int|b:32>%(rs3).r, _MM_SHUFFLE(2,3,0,1));
+#endif
 	%r<tp>% rs4 = %cast<c:int|b:32,tp>%(rsi32);
 	rs4.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs3.r, rs4.r);
 
@@ -200,11 +220,19 @@ tpl_implem_avx512 = {
 	%r<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);
 	rs2.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs1.r, rs2.r);
 
+#ifdef __cplusplus
 	rsi32.r = _mm512_shuffle_epi32(%cast<tp,c:int|b:32>%(rs2).r, _MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));
+#else
+	rsi32.r = _mm512_shuffle_epi32(%cast<tp,c:int|b:32>%(rs2).r, _MM_SHUFFLE(1,0,3,2));
+#endif
 	%r<tp>% rs3 = %cast<c:int|b:32,tp>%(rsi32);
 	rs3.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs2.r, rs3.r);
 
-	rsi32.r = _mm512_shuffle_epi32(%cast<tp,c:int|b:32>%(rs3).r, _MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));
+#ifdef __cplusplus
+	rsi32.r = _mm512_shuffle_epi32(%cast<tp,c:int|b:32>%(rs3).r, _MM_PERM_ENUM(_MM_SHUFFLE(2,3,0,1)));
+#else
+	rsi32.r = _mm512_shuffle_epi32(%cast<tp,c:int|b:32>%(rs3).r, _MM_SHUFFLE(2,3,0,1));
+#endif
 	%r<tp>% rs4 = %cast<c:int|b:32,tp>%(rsi32);
 	rs4.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs3.r, rs4.r);
 
@@ -389,7 +417,9 @@ implems_avx512 = {
         { "instr_name": "adds",       "datatypes": [int8, uint8],                "template": tpl_implem_avx512["reduce_8"],       "if": "defined(__AVX512BW__)"                                                                 } ], # hadd
     "hmul": [
         { "instr_name": "mul",        "datatypes": [float64],                    "template": tpl_implem_avx512["reduce_64"],      "if": "defined(__AVX512F__)"                                                                  },
-        { "instr_name": "mul",        "datatypes": [float32, int32],             "template": tpl_implem_avx512["reduce_32"],      "if": "defined(__AVX512F__)"                                                                  },
+        { "instr_name": "mul",        "datatypes": [float32],                    "template": tpl_implem_avx512["reduce_32"],      "if": "defined(__AVX512F__)"                                                                  },
+#       # this cannot work on (u)int32 because "_mm512_mul_epi32" is working on 64-bit elements
+#       { "instr_name": "mul",        "datatypes": [int32],                      "template": tpl_implem_avx512["reduce_32"],      "if": "defined(__AVX512F__)"                                                                  },
         { "instr_name": "mullo",      "datatypes": [int16],                      "template": tpl_implem_avx512["reduce_16"],      "if": "defined(__AVX512BW__)"                                                                 } ], # hmul
     "hmin": [
         { "instr_name": "min",        "datatypes": [float64],                    "template": tpl_implem_avx512["reduce_64"],      "if": "defined(__AVX512F__)"                                                                  },
