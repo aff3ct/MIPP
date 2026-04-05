@@ -123,6 +123,16 @@ def match_concept(func):
             return concept
     return "miscellaneous"
 
+def gen_func_defines(func, dt, implem):
+    func_defines = ""
+    for sub_implem in implem[func]:
+        if dt in sub_implem["datatypes"]:
+            if "if" in sub_implem:
+                if func_defines:
+                    func_defines += " || "
+                func_defines += "(" + sub_implem["if"] + ")"
+    return func_defines
+
 ###### GENERATION FUNC ######
 
 # add the type guard for 1 func in 1 implem
@@ -154,6 +164,7 @@ def add_type_guards(func, implem, function, kind="c"):
     list_bw = []
     datatypes.sort()
     for dt in datatypes:
+        func_defines = gen_func_defines(func, dt, implem)
         dt_suffix = dt_to_suffix(dt)
         parts = split_dt_pair(dt)
         if any(is_64bit_dt(part) for part in parts):
@@ -169,33 +180,46 @@ def add_type_guards(func, implem, function, kind="c"):
                     #this is hacky. It's to generate proper name to call float 
                     #versions of andb etc...
                     dt_suffix = f"_float{dt_suffix.split('t')[1].split("_")[0]}{dt_suffix}"
+            if func_defines:
+                res += f"#if {func_defines}\n"
             res += section.format(dt=dt, dt_suffix=dt_suffix, function=function)
+            if func_defines:
+                res += f"#endif // {func_defines}\n"
 
     #same logic for these
     if list_64 != []:
         list_64.sort()
         res += f"#if defined(MIPP_64BIT)\n"
         for dt in list_64:
+            func_defines = gen_func_defines(func, dt, implem)
             dt_suffix = dt_to_suffix(dt)
             if kind == "cpp" or kind == "obj":
                 dt_suffix = product_type_format_cpp(dt)
                 if func in set_float_workaround and is_float_dt(dt):
                     dt_suffix = f"_float{dt_suffix.split('t')[1].split("_")[0]}{dt_suffix}"
+            if func_defines:
+                res += f"#if {func_defines}\n"
             res += section.format(dt=dt, dt_suffix=dt_suffix, function=function)
-        res += "#endif\n"
+            if func_defines:
+                res += f"#endif // {func_defines}\n"
+        res += "#endif // defined(MIPP_64BIT)\n"
 
     if list_bw != []:
         list_bw.sort()
         res += f"#if defined(MIPP_BW)\n"
         for dt in list_bw:
+            func_defines = gen_func_defines(func, dt, implem)
             dt_suffix = dt_to_suffix(dt)
             if kind == "cpp" or kind == "obj":
                 dt_suffix = product_type_format_cpp(dt)
                 if func in set_float_workaround and is_float_dt(dt):
                     dt_suffix = f"_float{dt_suffix.split('t')[1].split("_")[0]}{dt_suffix}"
-
+            if func_defines:
+                res += f"#if {func_defines}\n"
             res += section.format(dt=dt, dt_suffix=dt_suffix, function=function)
-        res += "#endif\n"
+            if func_defines:
+                res += f"#endif // {func_defines}\n"
+        res += "#endif // defined(MIPP_BW)\n"
 
     return res
 

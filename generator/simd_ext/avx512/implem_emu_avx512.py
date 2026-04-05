@@ -203,16 +203,25 @@ implems_emu_avx512 = {
 #   "notb_k": [
 #       { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["notb_k"]                                      } ], # notb_k
     "msb": [
-        { "datatypes": [float64, int64, uint64],     "template": tpl_implem_emu_avx512["msb-64"]                                      },
-        { "datatypes": [float32, int32, uint32],     "template": tpl_implem_emu_avx512["msb-32"]                                      },
-        { "datatypes": [int16, uint16],              "template": tpl_implem_emu_avx512["msb-16"]                                      },
-        { "datatypes": [int8, uint8],                "template": tpl_implem_emu_avx512["msb-8"]                                       } ], # msb
+        { "datatypes": [float64],                    "template": tpl_implem_emu_avx512["msb-64"],       "if": "defined(__AVX512DQ__)" },
+        { "datatypes": [int64, uint64],              "template": tpl_implem_emu_avx512["msb-64"],                                     },
+        { "datatypes": [float32],                    "template": tpl_implem_emu_avx512["msb-32"],       "if": "defined(__AVX512DQ__)" },
+        { "datatypes": [int32, uint32],              "template": tpl_implem_emu_avx512["msb-32"],                                     },
+        { "datatypes": [int16, uint16],              "template": tpl_implem_emu_avx512["msb-16"],       "if": "defined(__AVX512BW__)" },
+        { "datatypes": [int8, uint8],                "template": tpl_implem_emu_avx512["msb-8"],        "if": "defined(__AVX512BW__)" } ], # msb
     "notb": [
-        { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["notb"]                                        } ], # notb
+        { "datatypes": all_float,                    "template": tpl_implem_emu_avx512["notb"],         "if": "defined(__AVX512DQ__)" },
+        { "datatypes": [int64, uint64],              "template": tpl_implem_emu_avx512["notb"],                                       },
+        { "datatypes": [int32, uint32],              "template": tpl_implem_emu_avx512["notb"],                                       },
+        { "datatypes": [int16, uint16],              "template": tpl_implem_emu_avx512["notb"],         "if": "defined(__AVX512BW__)" },
+        { "datatypes": [int8, uint8],                "template": tpl_implem_emu_avx512["notb"],         "if": "defined(__AVX512BW__)" } ], # notb
     "maskz_add": [
-        { "datatypes" : all_int,                     "template": tpl_implem_emu_avx512["maskz_add"]                                   } ], # maskz_add
+        { "datatypes": all_int,                      "template": tpl_implem_emu_avx512["maskz_add"]                                   } ], # maskz_add
     "getfirst": [
-        { "datatypes" : all_datatypes,               "template": tpl_implem_emu_avx512["getfirst_fromstore"]                          } ], # getfirst
+        { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["getfirst_fromstore"]                          } ], # getfirst
     "hadd_to_scal": [
-        { "datatypes" : all_datatypes,               "template": tpl_implem_emu_avx512["hadd_to_scal"]                                } ], # hadd_to_scal
+        { "datatypes": [float64, int64],             "template": tpl_implem_emu_avx512["hadd_to_scal"]                                },
+        { "datatypes": [float32, int32],             "template": tpl_implem_emu_avx512["hadd_to_scal"]                                },
+        { "datatypes": [int16, uint16],              "template": tpl_implem_emu_avx512["hadd_to_scal"]                                },
+        { "datatypes": [int8, uint8],                "template": tpl_implem_emu_avx512["hadd_to_scal"]                                } ], # hadd_to_scal
 }
