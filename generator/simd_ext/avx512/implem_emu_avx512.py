@@ -175,44 +175,44 @@ tpl_implem_emu_avx512 = {
 
 implems_emu_avx512 = {
     "toreg"  : [
-        { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["toreg"]                                                                                 } ], # toreg
+        { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["toreg"]                                       } ], # toreg
     "tomsk": [
-        { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["tomsk"]                                                                                 } ], # tomsk
+        { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["tomsk"]                                       } ], # tomsk
     "get": [
-        { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["get"]                                                                                   } ], # get
+        { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["get"]                                         } ], # get
     "get_k": [
-        { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["get_k"]                                                                                 } ], # get_k
+        { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["get_k"]                                       } ], # get_k
     "set1_k":[
-        { "datatypes": all_64bit,                    "template": tpl_implem_emu_avx512["set1_k-8"]                                                                              },
-        { "datatypes": all_32bit,                    "template": tpl_implem_emu_avx512["set1_k-16"]                                                                             },
-        { "datatypes": all_16bit,                    "template": tpl_implem_emu_avx512["set1_k-32"]                                                                             },
-        { "datatypes": all_8bit,                     "template": tpl_implem_emu_avx512["set1_k-64"]                                                                             } ], # set1_k
+        { "datatypes": all_64bit,                    "template": tpl_implem_emu_avx512["set1_k-8"]                                    },
+        { "datatypes": all_32bit,                    "template": tpl_implem_emu_avx512["set1_k-16"]                                   },
+        { "datatypes": all_16bit,                    "template": tpl_implem_emu_avx512["set1_k-32"]                                   },
+        { "datatypes": all_8bit,                     "template": tpl_implem_emu_avx512["set1_k-64"]                                   } ], # set1_k
     "set_k" : [
-        { "datatypes": all_64bit,                    "template": tpl_implem_emu_avx512["set_k-64"],                                                                             },
-        { "datatypes": all_32bit,                    "template": tpl_implem_emu_avx512["set_k-32"],                                                                             },
-        { "datatypes": all_16bit,                    "template": tpl_implem_emu_avx512["set_k-16"],                                                                             },
-        { "datatypes": all_8bit,                     "template": tpl_implem_emu_avx512["set_k-8"],                                                                              } ], # set_k
+        { "datatypes": all_64bit,                    "template": tpl_implem_emu_avx512["set_k-64"],                                   },
+        { "datatypes": all_32bit,                    "template": tpl_implem_emu_avx512["set_k-32"],                                   },
+        { "datatypes": all_16bit,                    "template": tpl_implem_emu_avx512["set_k-16"],                                   },
+        { "datatypes": all_8bit,                     "template": tpl_implem_emu_avx512["set_k-8"],                                    } ], # set_k
 #   "andb_k": [
-#       { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["andb_k"],       "if": "defined(__AVX512BW__)"                                           } ], # andb_k
+#       { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["andb_k"],       "if": "defined(__AVX512BW__)" } ], # andb_k
 #   "andnb_k": [
-#       { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["andnb_k"],      "if": "defined(__AVX512BW__)"                                           } ], # andnb_k
+#       { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["andnb_k"],      "if": "defined(__AVX512BW__)" } ], # andnb_k
 #   "xorb_k": [
-#       { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["xorb_k"],       "if": "defined(__AVX512BW__)"                                           } ], # xorb_k
+#       { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["xorb_k"],       "if": "defined(__AVX512BW__)" } ], # xorb_k
 #   "orb_k": [
-#       { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["orb_k"],        "if": "defined(__AVX512BW__)"                                           } ], # orb_k
+#       { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["orb_k"],        "if": "defined(__AVX512BW__)" } ], # orb_k
 #   "notb_k": [
-#       { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["notb_k"]                                                                                } ], # notb_k
+#       { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["notb_k"]                                      } ], # notb_k
     "msb": [
-        { "datatypes": [float64, int64, uint64],     "template": tpl_implem_emu_avx512["msb-64"]                                                                                },
-        { "datatypes": [float32, int32, uint32],     "template": tpl_implem_emu_avx512["msb-32"]                                                                                },
-        { "datatypes": [int16, uint16],              "template": tpl_implem_emu_avx512["msb-16"]                                                                                },
-        { "datatypes": [int8, uint8],                "template": tpl_implem_emu_avx512["msb-8"]                                                                                 } ], # msb
+        { "datatypes": [float64, int64, uint64],     "template": tpl_implem_emu_avx512["msb-64"]                                      },
+        { "datatypes": [float32, int32, uint32],     "template": tpl_implem_emu_avx512["msb-32"]                                      },
+        { "datatypes": [int16, uint16],              "template": tpl_implem_emu_avx512["msb-16"]                                      },
+        { "datatypes": [int8, uint8],                "template": tpl_implem_emu_avx512["msb-8"]                                       } ], # msb
     "notb": [
-        { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["notb"]                                                                                  } ], # notb
+        { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["notb"]                                        } ], # notb
     "maskz_add": [
-        { "datatypes" : all_int,                     "template": tpl_implem_emu_avx512["maskz_add"]                                                                             } ], # maskz_add
+        { "datatypes" : all_int,                     "template": tpl_implem_emu_avx512["maskz_add"]                                   } ], # maskz_add
     "getfirst": [
-        { "datatypes" : all_datatypes,               "template": tpl_implem_emu_avx512["getfirst_fromstore"]                                                                    } ], # getfirst
+        { "datatypes" : all_datatypes,               "template": tpl_implem_emu_avx512["getfirst_fromstore"]                          } ], # getfirst
     "hadd_to_scal": [
-        { "datatypes" : all_datatypes,               "template": tpl_implem_emu_avx512["hadd_to_scal"]                                                                          } ], # hadd_to_scal
+        { "datatypes" : all_datatypes,               "template": tpl_implem_emu_avx512["hadd_to_scal"]                                } ], # hadd_to_scal
 }

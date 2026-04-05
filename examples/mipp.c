@@ -9,7 +9,7 @@ void print_v(float32_t* v, char* name)
 	int i;
 	printf("%s = [", name);
 	for (i = 0; i < MIPP_N_FLOAT32 * 4; i++)
-		printf("%d,", v[i]);
+		printf("%f,", v[i]);
 	printf("]\n");
 }
 

@@ -2,10 +2,9 @@ from tools import *
 
 """
 "isa_sse" dictionary:
-
-    -Purpose: This dictionary defines architectural characteristics specific to the "AVX" architecture.
-    -Content: It includes detailed information about data types, their properties, and other specific details relevant to the AVX architecture. 
-    -These details are essential for generating optimized SIMD instructions
+    - Purpose: This dictionary defines architectural characteristics specific to the "AVX" architecture.
+    - Content: It includes detailed information about data types, their properties, and other specific details relevant to the AVX architecture.
+    - These details are essential for generating optimized SIMD instructions
 """
 isa_sse = {
     "name": "sse",
