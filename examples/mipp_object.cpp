@@ -11,7 +11,7 @@
 void print_v(float32_t* v, const std::string &name)
 {
 	std::cout << name << " = [";
-	for (uint32_t i = 0; i < mipp::N<float32_t,LMUL>(); i++)
+	for (size_t i = 0; i < mipp::N<float32_t,LMUL>(); i++)
 		std::cout << v[i] << ",";
 	std::cout << "]" << std::endl;
 }
