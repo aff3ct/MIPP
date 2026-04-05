@@ -281,7 +281,9 @@ implems_sse = {
         { "instr_name": "cmplt",   "datatypes": [int16,int32,float64],   "template": tpl_implem_sse["compare"],            "if": "defined(__SSE2__)"                                } ], # cmplt
     "cmpgt": [
         { "instr_name": "cmpgt",   "datatypes": [float32],               "template": tpl_implem_sse["compare"]                                                                      },
-        { "instr_name": "cmpgt",   "datatypes": all_int + [float64],     "template": tpl_implem_sse["compare"],            "if": "defined(__SSE2__)"                                } ], # cmpgt
+        { "instr_name": "cmpgt",   "datatypes": [float64],               "template": tpl_implem_sse["compare"],            "if": "defined(__SSE2__)"                                },
+        { "instr_name": "cmpgt",   "datatypes": [int64],                 "template": tpl_implem_sse["compare"],            "if": "defined(__SSE4_2__)"                              },
+        { "instr_name": "cmpgt",   "datatypes": [int32,int16,int8],      "template": tpl_implem_sse["compare"],            "if": "defined(__SSE2__)"                                } ], # cmpgt
     "cmple": [
         { "instr_name": "cmple",   "datatypes": [float32],               "template": tpl_implem_sse["compare"]                                                                      },
         { "instr_name": "cmple",   "datatypes": [float64],               "template": tpl_implem_sse["compare"],            "if": "defined(__SSE2__)"                                } ], # cmple
