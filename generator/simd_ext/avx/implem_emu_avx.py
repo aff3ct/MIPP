@@ -104,51 +104,51 @@ tpl_implem_emu_avx = {
 	return %{{ instr_name }}<tp>%(r0, r1, m0, rz);""" },
     "msb-64": { "format": "long", "code":
 """// long format
-	%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%(0x8000000000000000));
+	%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%((int64_t)0x8000000000000000));
 	return %andb<tp>%(r0, rm);""" },
     "msb-32": { "format": "long", "code":
 """// long format
-	%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%(0x80000000));
+	%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%((int32_t)0x80000000));
 	return %andb<tp>%(r0, rm);""" },
     "msb-16": { "format": "long", "code":
 """// long format
-	%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%(0x8000));
+	%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%((int16_t)0x8000));
 	return %andb<tp>%(r0, rm);""" },
     "msb-8": { "format": "long", "code":
 """// long format
-	%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%(0x80));
+	%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%((int8_t)0x80));
 	return %andb<tp>%(r0, rm);""" },
     "notb-64": { "format": "long", "code":
 """// long format
-	%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%(0xFFFFFFFFFFFFFFFF));
+	%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%((int64_t)0xFFFFFFFFFFFFFFFF));
 	return %andnb<tp>%(r0, rm);""" },
     "notb-32": { "format": "long", "code":
 """// long format
-	%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%(0xFFFFFFFF));
+	%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%((int32_t)0xFFFFFFFF));
 	return %andnb<tp>%(r0, rm);""" },
     "notb-16": { "format": "long", "code":
 """// long format
-	%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%(0xFFFF));
+	%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%((int16_t)0xFFFF));
 	return %andnb<tp>%(r0, rm);""" },
     "notb-8": { "format": "long", "code":
 """// long format
-	%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%(0xFF));
+	%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%((int8_t)0xFF));
 	return %andnb<tp>%(r0, rm);""" },
     "notb_k-64": { "format": "long", "code":
 """// long format
-	%m<tp>% mm = %cast_k<c:int|b:tp,tp>%(%tomsk<c:int|b:tp>%(%set1<c:int|b:tp>%(0xFFFFFFFFFFFFFFFF)));
+	%m<tp>% mm = %cast_k<c:int|b:tp,tp>%(%tomsk<c:int|b:tp>%(%set1<c:int|b:tp>%((int64_t)0xFFFFFFFFFFFFFFFF)));
 	return %andnb_k<tp>%(m0, mm);""" },
     "notb_k-32": { "format": "long", "code":
 """// long format
-	%m<tp>% mm = %cast_k<c:int|b:tp,tp>%(%tomsk<c:int|b:tp>%(%set1<c:int|b:tp>%(0xFFFFFFFF)));
+	%m<tp>% mm = %cast_k<c:int|b:tp,tp>%(%tomsk<c:int|b:tp>%(%set1<c:int|b:tp>%((int32_t)0xFFFFFFFF)));
 	return %andnb_k<tp>%(m0, mm);""" },
     "notb_k-16": { "format": "long", "code":
 """// long format
-	%m<tp>% mm = %cast_k<c:int|b:tp,tp>%(%tomsk<c:int|b:tp>%(%set1<c:int|b:tp>%(0xFFFF)));
+	%m<tp>% mm = %cast_k<c:int|b:tp,tp>%(%tomsk<c:int|b:tp>%(%set1<c:int|b:tp>%((int16_t)0xFFFF)));
 	return %andnb_k<tp>%(m0, mm);""" },
     "notb_k-8": { "format": "long", "code":
 """// long format
-	%m<tp>% mm = %cast_k<c:int|b:tp,tp>%(%tomsk<c:int|b:tp>%(%set1<c:int|b:tp>%(0xFF)));
+	%m<tp>% mm = %cast_k<c:int|b:tp,tp>%(%tomsk<c:int|b:tp>%(%set1<c:int|b:tp>%((int8_t)0xFF)));
 	return %andnb_k<tp>%(m0, mm);""" },
     "testz_2": { "format": "long", "code":
 """// long format
