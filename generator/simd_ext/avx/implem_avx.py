@@ -1,10 +1,9 @@
 from tools import *
 
 """isa_avx" dictionary:
-
-    -Purpose: This dictionary defines architectural characteristics specific to the "AVX" architecture.
-    -Content: It includes detailed information about data types, their properties, and other specific details relevant to the AVX architecture. 
-    -These details are essential for generating optimized SIMD instructions
+	- Purpose: This dictionary defines architectural characteristics specific to the "AVX" architecture.
+    - Content: It includes detailed information about data types, their properties, and other specific details relevant to the AVX architecture.
+    - These details are essential for generating optimized SIMD instructions
 """
 
 isa_avx = {
@@ -29,11 +28,10 @@ isa_avx = {
 }
 
 """tpl_implem_avx dictionary:
-
-    -Purpose: This dictionary contains implementation models for various functions.
-    -Use: During the generation phase, this dictionary is used to select the appropriate implementation model for a specific function.
-    -Content: The implementation models in this dictionary are adapted to the AVX architecture and define the structure and behavior of the generated SIMD code.
-    -The notation convention involves using the letter "m" to designate masks, "r" for registers, "v" for values, and "p" for pointers.
+    - Purpose: This dictionary contains implementation models for various functions.
+    - Use: During the generation phase, this dictionary is used to select the appropriate implementation model for a specific function.
+    - Content: The implementation models in this dictionary are adapted to the AVX architecture and define the structure and behavior of the generated SIMD code.
+    - The notation convention involves using the letter "m" to designate masks, "r" for registers, "v" for values, and "p" for pointers.
 """
 tpl_implem_avx = {
     "cast":           { "format": "short", "code": "{% if isa_dt_par.data_ext_logi != isa_dt_ret.data_ext_logi -%} {{ isa.prefix }}_{{ instr_name }}{{isa_dt_par.data_ext_logi}}_{{isa_dt_ret.data_ext_logi}}(r0.r);{% else -%} r0.r;{% endif %}"},
@@ -232,10 +230,9 @@ tpl_implem_avx = {
 
 """
 "implems_avx" dictionary:
-
-    -Purpose: This dictionary associates each function with its SIMD instruction name (as it appears in the official Intel Intrinsics guide), the data types for which the SIMD instruction should be generated, and the implementation template to be used for code generation.
-    -Usage: It serves as a mapping between functions and the specific SIMD instructions and implementation templates required for each function.
-    -Macros: Conditional preprocessor macros are used for certain functions to automatically adjust the generated code based on the hardware architecture capabilities and the compiler's supported instruction sets.
+    - Purpose: This dictionary associates each function with its SIMD instruction name (as it appears in the official Intel Intrinsics guide), the data types for which the SIMD instruction should be generated, and the implementation template to be used for code generation.
+    - Usage: It serves as a mapping between functions and the specific SIMD instructions and implementation templates required for each function.
+    - Macros: Conditional preprocessor macros are used for certain functions to automatically adjust the generated code based on the hardware architecture capabilities and the compiler's supported instruction sets.
 """
 implems_avx = {
     "cast": [
