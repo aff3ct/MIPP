@@ -5,12 +5,6 @@ from tools import *
     - Use: it is used to implement emulation for specific SIMD instructions that are not directly available in the AVX architecture.
 """
 tpl_implem_emu_avx = {
-    "set1_k-32f": { "format": "short", "code": "_mm256_set1_ps(v0 ? 0xFFFFFFFF : 0);" },
-    "set1_k-64f": { "format": "short", "code": "_mm256_set1_pd(v0 ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0);" },
-    "set1_k-8":   { "format": "short", "code": "_mm256_set1_epi8(v0 ? 0xFF : 0);" },
-    "set1_k-16":  { "format": "short", "code": "_mm256_set1_epi16(v0 ? 0xFFFF : 0);" },
-    "set1_k-32":  { "format": "short", "code": "_mm256_set1_epi32(v0 ? 0xFFFFFFFF : 0);" },
-    "set1_k-64":  { "format": "short", "code": "_mm256_set1_epi64x(v0 ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0);" },
     "hadd_2":     { "format": "long",  "code": "return %getfirst<tp>%(%hadd<tp>%(r0));" },
     "hmul_2":     { "format": "long",  "code": "return %getfirst<tp>%(%hmul<tp>%(r0));" },
     "hmin_2":     { "format": "long",  "code": "return %getfirst<tp>%(%hmin<tp>%(r0));" },
@@ -67,6 +61,30 @@ tpl_implem_emu_avx = {
 		vals[11] ? 0xFF : 0, vals[10] ? 0xFF : 0, vals[ 9] ? 0xFF : 0, vals[ 8] ? 0xFF : 0,
 		vals[ 7] ? 0xFF : 0, vals[ 6] ? 0xFF : 0, vals[ 5] ? 0xFF : 0, vals[ 4] ? 0xFF : 0,
 		vals[ 3] ? 0xFF : 0, vals[ 2] ? 0xFF : 0, vals[ 1] ? 0xFF : 0, vals[ 0] ? 0xFF : 0);""" },
+    "set1_k-8": { "format": "long", "code":
+"""// long format
+	%r<c:int>% tmp1;
+	tmp1.r = _mm256_set1_epi8(v0 ? (int8_t)0xFF : (int8_t)0);
+	%r<tp>% tmp2 = %cast<c:int,tp>%(tmp1);
+	return %tomsk<tp>%(tmp2);""" },
+    "set1_k-16": { "format": "long", "code":
+"""// long format
+	%r<c:int>% tmp1;
+	tmp1.r = _mm256_set1_epi16(v0 ? (int16_t)0xFFFF : (int16_t)0);
+	%r<tp>% tmp2 = %cast<c:int,tp>%(tmp1);
+	return %tomsk<tp>%(tmp2);""" },
+    "set1_k-32": { "format": "long", "code":
+"""// long format
+	%r<c:int>% tmp1;
+	tmp1.r = _mm256_set1_epi32(v0 ? (int32_t)0xFFFFFFFF : (int32_t)0);
+	%r<tp>% tmp2 = %cast<c:int,tp>%(tmp1);
+	return %tomsk<tp>%(tmp2);""" },
+    "set1_k-64": { "format": "long", "code":
+"""// long format
+	%r<c:int>% tmp1;
+	tmp1.r = _mm256_set1_epi64x(v0 ? (int64_t)0xFFFFFFFFFFFFFFFF : (int64_t)0);
+	%r<tp>% tmp2 = %cast<c:int,tp>%(tmp1);
+	return %tomsk<tp>%(tmp2);""" },
     "blend-1": { "format": "long", "code":
 """// long format
 	%r<c:float|b:tp>% r0f = %cast<tp,c:float|b:tp>%(r0);
@@ -212,10 +230,8 @@ implems_emu_avx = {
     "set1_k":[
         { "datatypes": [int8, uint8],                  "template": tpl_implem_emu_avx["set1_k-8"],     } ,
         { "datatypes": [int16, uint16],                "template": tpl_implem_emu_avx["set1_k-16"],    },
-        { "datatypes": [int32, uint32],                "template": tpl_implem_emu_avx["set1_k-32"],    },
-        { "datatypes": [int64, uint64],                "template": tpl_implem_emu_avx["set1_k-64"],    },
-        { "datatypes": [float64],                      "template": tpl_implem_emu_avx["set1_k-64f"],   },
-        { "datatypes": [float32],                      "template": tpl_implem_emu_avx["set1_k-32f"],   } ], # set1_k
+        { "datatypes": [int32, uint32, float32],       "template": tpl_implem_emu_avx["set1_k-32"],    },
+        { "datatypes": [int64, uint64, float64],       "template": tpl_implem_emu_avx["set1_k-64"],    } ], # set1_k
     "blend": [
         { "datatypes": [int64, int32, uint64, uint32], "template": tpl_implem_emu_avx["blend-1"],      },
         { "datatypes": [int16, int8, uint16, uint8],   "template": tpl_implem_emu_avx["blend-2"],      } ], # blend
