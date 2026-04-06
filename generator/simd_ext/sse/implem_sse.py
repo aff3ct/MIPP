@@ -77,7 +77,7 @@ tpl_implem_sse = {
 		(int8_t)vals[11], (int8_t)vals[10], (int8_t)vals[ 9], (int8_t)vals[ 8],
 		(int8_t)vals[ 7], (int8_t)vals[ 6], (int8_t)vals[ 5], (int8_t)vals[ 4],
 		(int8_t)vals[ 3], (int8_t)vals[ 2], (int8_t)vals[ 1], (int8_t)vals[ 0]);""" },
-    "cmpeq_float":        { "format": "long", "code":
+    "cmpeq_float": { "format": "long", "code":
 """// long format
 	%r<tp>% tmp;
 	tmp.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, _CMP_EQ_OQ);

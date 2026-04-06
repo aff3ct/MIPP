@@ -37,6 +37,10 @@ typedef float float32_t;
 #include "rvv/mipp_impl_rvv_gen.h"
 #endif
 
+#if defined(__ARM_NEON__) || defined(__ARM_NEON)
+#include "neon/mipp_impl_neon_gen.h"
+#endif
+
 // utiles pour l'instant pour les tests
 // pourrait clairement etre utile pour les generateurs au dela du if #define
 
@@ -85,6 +89,19 @@ typedef float float32_t;
 // not yet generated
 //#define MIPP_BW
 #define MIPP_INSTR_VERSION 1
+
+#elif defined(__ARM_NEON__) || defined(__ARM_NEON)
+#define MIPP_NEON
+#define MIPP_BW
+#if defined(__ARM_FEATURE_FMA)
+#define MIPP_FMA
+#endif
+#if defined(__aarch64__)
+#define MIPP_64BIT
+#define MIPP_INSTR_VERSION 2
+#else
+#define MIPP_INSTR_VERSION 1
+#endif
 #endif
 
 #ifdef __riscv_v_intrinsic

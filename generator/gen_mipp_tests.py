@@ -11,6 +11,7 @@ sys.path.insert(1, path + "/simd_ext/avx/")
 sys.path.insert(1, path + "/simd_ext/sse/")
 sys.path.insert(1, path + "/simd_ext/sve/")
 sys.path.insert(1, path + "/simd_ext/rvv/")
+sys.path.insert(1, path + "/simd_ext/neon/")
 sys.path.insert(1, path + "/helpers_headers/")
 
 from implem_sse import implems_sse
@@ -18,6 +19,7 @@ from implem_avx import implems_avx
 from implem_avx512 import implems_avx512
 from implem_sve import implems_sve
 from implem_rvv import implems_rvv
+from implem_neon import implems_neon
 from headers_def import mipp_funcs,mipp_funcs_concepts
 from tools import *
 from helpers_tests import get_gen_test_dict, set_float_workaround, test_function_name
@@ -27,6 +29,7 @@ from implem_emu_avx import implems_emu_avx
 from implem_emu_avx512 import implems_emu_avx512
 from implem_emu_sve import implems_emu_sve
 from implem_emu_rvv import implems_emu_rvv
+from implem_emu_neon import implems_emu_neon
 
 avx512_guard = "#if defined(MIPP_AVX512)"
 avx2_guard = "#elif defined(MIPP_AVX2)"
@@ -34,12 +37,14 @@ avx_guard = "#elif defined(MIPP_AVX)"
 sse_guard = "#elif defined(MIPP_SSE)"
 sve_guard = "#elif defined(MIPP_SVE)"
 rvv_guard = "#elif defined(MIPP_RVV)"
+neon_guard = "#elif defined(MIPP_NEON)"
 
 implems_avx512.update(implems_emu_avx512)
 implems_avx.update(implems_emu_avx)
 implems_sse.update(implems_emu_sse)
 implems_sve.update(implems_emu_sve)
 implems_rvv.update(implems_emu_rvv)
+implems_neon.update(implems_emu_neon)
 
 implem_dict = {
     # avx512 has to be first bc it's the one w the #if
@@ -48,6 +53,7 @@ implem_dict = {
     "sse": {"implem": implems_sse, "guard": sse_guard},
     "sve": {"implem": implems_sve, "guard": sve_guard},
     "rvv": {"implem": implems_rvv, "guard": rvv_guard},
+    "neon": {"implem": implems_neon, "guard": neon_guard},
 }
 
 set_skip_testing = {                    
