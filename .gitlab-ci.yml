@@ -208,8 +208,8 @@ build-test-examples:
     - cd examples
     - $COMPILER -std=c99 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Wno-strict-prototypes -Werror -O3 -funroll-loops $SIMD_EXT -I../include -o dumb dumb.c
     - $COMPILER -std=c99 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Wno-strict-prototypes -Werror -O3 -funroll-loops $SIMD_EXT -I../include -o mipp_c mipp.c
-    - $COMPILER_CPP -Wall -Wextra -Wpedantic -O3 -Wno-unused-parameter -Werror -funroll-loops $SIMD_EXT -I../include -o mipp_cpp mipp.cpp
-    - $COMPILER_CPP -Wall -Wextra -Wpedantic -O3 -Wno-unused-parameter -Werror -funroll-loops $SIMD_EXT -I../include -o mipp_object_cpp mipp_object.cpp
+    - $COMPILER_CPP -std=c++11 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Werror -O3 -funroll-loops $SIMD_EXT -I../include -o mipp_cpp mipp.cpp
+    - $COMPILER_CPP -std=c++11 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Werror -O3 -funroll-loops $SIMD_EXT -I../include -o mipp_object_cpp mipp_object.cpp
 
 # TESTS ---------------------------------------------------------------------------------------------------------------
 
