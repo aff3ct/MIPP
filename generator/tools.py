@@ -486,12 +486,15 @@ def build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul=2, isa_name=True
 	return str_code;
 
 # Build other functions build_func_name_short & build_cpp_func_name_short
-def build_func_name_short(isa, dt, mipp_name, isa_name=True):
+def build_func_name_short(isa, dt, mipp_name, isa_name=True, lmul=0):
 	param_type = datatypes[dt]["category"] + str(datatypes[dt]["n_bits"])
+	lmul_str = ""
+	if lmul :
+		lmul_str = "_m" + str(int(lmul))
 	if isa_name:
-		return "mipp_" + isa["name"] + "_" + mipp_name + "_" +  param_type
+		return "mipp_" + isa["name"] + "_" + mipp_name + "_" +  param_type + lmul_str
 	else:
-		return "mipp_" + mipp_name + "_" +  param_type
+		return "mipp_" + mipp_name + "_" +  param_type + lmul_str
 
 def build_cpp_func_name_short(proto, dt_ret, mipp_name):
 	if type_specialized(proto):
@@ -504,13 +507,16 @@ def build_cpp_func_name_short(proto, dt_ret, mipp_name):
 		return mipp_name 
 
 # Build cast's functions build_func_name & build_cpp_func_name
-def build_func_name(isa, dt_par, dt_ret, mipp_name, isa_name=True):
+def build_func_name(isa, dt_par, dt_ret, mipp_name, isa_name=True, lmul=0):
 	param_type = datatypes[dt_par]["category"] + str(datatypes[dt_par]["n_bits"])
 	return_type = datatypes[dt_ret]["category"] + str(datatypes[dt_ret]["n_bits"])
+	lmul_str = ""
+	if lmul :
+		lmul_str = "_m" + str(int(lmul))
 	if isa_name:
-		return "mipp_" + isa["name"] + "_" + mipp_name + "_" + param_type + "_" + return_type
+		return "mipp_" + isa["name"] + "_" + mipp_name + "_" + param_type + "_" + return_type + lmul_str
 	else:
-		return "mipp_" + mipp_name + "_" + param_type + "_" + return_type
+		return "mipp_" + mipp_name + "_" + param_type + "_" + return_type + lmul_str
 
 def build_cpp_func_name(dt_ret, mipp_name):
 	mipp_name = mipp_name.replace("_mz", "")
@@ -654,7 +660,7 @@ def dump_dict_json(di, filename):
 	print(json_object, file=fj)
 	fj.close()
 
-def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret):
+def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret,lmul=0):
 	dt_key = dt_par + "," + dt_ret
 	converted_ir = ir
 	ar_substitute = re.findall(r'\%([^%]*)\%', ir)
@@ -673,7 +679,7 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret):
 			if dt not in isa["datatypes"]:
 				print("Panic: '" + dt + "' is not available.")
 				exit(-1)
-			converted_ir = converted_ir.replace("%" + s + "%", build_reg(datatypes[dt], isa))
+			converted_ir = converted_ir.replace("%" + s + "%", build_reg(datatypes[dt], isa,lmul=lmul))
 		elif item_type == "m":
 			dt_info = re.findall(r'\<(.*)\>', s)[0]
 			dt_info_params = dt_info.split(",")
@@ -683,7 +689,7 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret):
 			if dt not in isa["datatypes"]:
 				print("Panic: '" + dt + "' is not available.")
 				exit(-1)
-			converted_ir = converted_ir.replace("%" + s + "%", build_msk(datatypes[dt], isa))
+			converted_ir = converted_ir.replace("%" + s + "%", build_msk(datatypes[dt], isa,lmul=lmul))
 		elif item_type == "v":
 			dt_info = re.findall(r'\<(.*)\>', s)[0]
 			dt_info_params = dt_info.split(",")
@@ -693,7 +699,7 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret):
 			if dt not in isa["datatypes"]:
 				print("Panic: '" + dt + "' is not available.")
 				exit(-1)
-			converted_ir = converted_ir.replace("%" + s + "%", build_val(datatypes[dt], isa))
+			converted_ir = converted_ir.replace("%" + s + "%", build_val(datatypes[dt], isa,lmul=lmul))
 		elif item_type == "N":
 			dt_info = re.findall(r'\<(.*)\>', s)[0]
 			dt_info_params = dt_info.split(",")
@@ -703,7 +709,7 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret):
 			if dt not in isa["datatypes"]:
 				print("Panic: '" + dt + "' is not available.")
 				exit(-1)
-			converted_ir = converted_ir.replace("%" + s + "%", build_N(datatypes[dt], isa))
+			converted_ir = converted_ir.replace("%" + s + "%", build_N(datatypes[dt], isa,lmul=lmul))
 		else:
 			f_name = item_type
 			if f_name not in funcs:
@@ -716,12 +722,12 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret):
 			if len(dt_info_params) == 1:
 				dt = build_dt(dt_info_params[0], isa, dt_par, dt_ret)
 				fdt_key = dt + "," + dt
-				f_full_name = build_func_name_short(isa, dt, f_name);
+				f_full_name = build_func_name_short(isa, dt, f_name,lmul=lmul);
 			elif len(dt_info_params) == 2:
 				dt_1 = build_dt(dt_info_params[0], isa, dt_par, dt_ret)
 				dt_2 = build_dt(dt_info_params[1], isa, dt_par, dt_ret)
 				fdt_key = dt_1 + "," + dt_2
-				f_full_name = build_func_name(isa, dt_1, dt_2, f_name);
+				f_full_name = build_func_name(isa, dt_1, dt_2, f_name,lmul=lmul);
 			else:
 				print("Panic: '" + f_name + "' has incompatible format.")
 				exit(-1)

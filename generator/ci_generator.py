@@ -5,7 +5,6 @@ import re
 from tools import *
 from headers_def import *
 
-
 def get_sub_isa(isa, ldiv, isa_list):
 	for sub_isa in isa_list:
 		if isa["architecture"] == "AArch64":
@@ -77,6 +76,8 @@ def gen_ci_defines(isa_list, file):
 
 
 def gen_ci_structures(isa_list, file):
+    
+	isa_rvv = next((isa for isa in isa_list if isa["name"].startswith("rvv")), None)
 	
 	for index, isa in enumerate(isa_list):
 		
@@ -134,7 +135,20 @@ def gen_ci_structures(isa_list, file):
 
 	for dt in isa["datatypes"]:
 		print(j2_template.render(isa=isa, datatype=datatypes[dt]), file=file)
-
+	
+	print("//#if defined(__riscv_v_intrinsic)",file=file)
+	for lmul in all_lmul[1:]:
+		template = """//typedef rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t rvd_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t;"""
+		j2_template = Template(template, undefined=StrictUndefined)
+		for dt in isa_rvv["datatypes"]:
+			print(j2_template.render(isa=isa_rvv, datatype=datatypes[dt], lmul=str(lmul)), file=file)
+	for lmul in all_lmul[1:]:
+		template = """//typedef rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t rvm_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t;"""
+		j2_template = Template(template, undefined=StrictUndefined)
+		for dt in isa_rvv["datatypes"]:
+			print(j2_template.render(isa=isa_rvv, datatype=datatypes[dt], lmul=str(lmul)), file=file)
+	print("//#else",file=file)
+ 
 	for lmul in all_lmul[1:]:
 		lmul_2 = int(lmul / 2)
 		template = """typedef struct { rvd_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul_2 }}_t r1, r2; } rvd_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t;"""
@@ -147,8 +161,10 @@ def gen_ci_structures(isa_list, file):
 		j2_template = Template(template, undefined=StrictUndefined)
 		for dt in isa["datatypes"]:
 			print(j2_template.render(isa=isa, datatype=datatypes[dt], lmul=str(lmul), lmul_2=str(lmul_2)), file=file)
+	print("//#endif // MIPP_RVV", file=file)
 
 def gen_ci_functions(isa_list, file, funcs):
+	isa_rvv = next((isa for isa in isa_list if isa["name"].startswith("rvv")), None)
 	for f in funcs:
 		for dt in funcs[f]["datatypes"]:
 			if len(dt.split(',')) <= 1:
@@ -189,13 +205,24 @@ def gen_ci_functions(isa_list, file, funcs):
 			print("}", file=file)
 			
 			for lmul in all_lmul[1:]:
+				
+				func_name_rvv = ""
+				if len(dt.split(',')) <= 1:
+					func_name_rvv = build_func_name_short(isa_rvv, dt_par, f);
+				else:
+					func_name_rvv = build_func_name(isa_rvv, dt_par, dt_ret, f);
+
 				print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name+"_m"+str(lmul), lmul, False) + " {", file=file)
+				print("//#if defined(__riscv_v_intrinsic)",file=file)
+				print("//\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa_rvv, func_name_rvv+"_m"+str(lmul)) + ";", file=file)
+				print("//#else",file=file)
 				if not funcs[f]["horizontal"]:
 					lmul_2 = int(lmul / 2)
 					print(build_call_lmul(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name+"_m"+str(lmul_2), lmul, False), file=file)
 				else:
 					print("\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \""+func_name+"_m"+str(lmul)+"\");", file=file);
 					print("\texit(-1);", file=file);
+				print("//#endif // MIPP_RVV", file=file)
 				print("}", file=file)
 			
 			if not funcs[f]["horizontal"]: #and funcs[f]["half_regiser"]:
