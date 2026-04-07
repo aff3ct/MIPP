@@ -21,3 +21,4 @@ tests/bin/
 tests/cmake_install.cmake
 *.DS_Store
 tests/src/*_tests
+examples/*.bin

@@ -6,12 +6,12 @@ from jinja2 import Template, StrictUndefined
 
 path = os.getcwd()
 
-sys.path.insert(1, path + "/../simd_ext/avx512/")
-sys.path.insert(1, path + "/../simd_ext/avx/")
-sys.path.insert(1, path + "/../simd_ext/sse/")
-sys.path.insert(1, path + "/../simd_ext/sve/")
-sys.path.insert(1, path + "/../simd_ext/rvv/")
-sys.path.insert(1, path + "/../")
+sys.path.insert(1, path + "/simd_ext/avx512/")
+sys.path.insert(1, path + "/simd_ext/avx/")
+sys.path.insert(1, path + "/simd_ext/sse/")
+sys.path.insert(1, path + "/simd_ext/sve/")
+sys.path.insert(1, path + "/simd_ext/rvv/")
+sys.path.insert(1, path + "/helpers_headers/")
 
 from implem_sse import implems_sse
 from implem_avx import implems_avx
@@ -20,7 +20,7 @@ from implem_sve import implems_sve
 from implem_rvv import implems_rvv
 from headers_def import mipp_funcs,mipp_funcs_concepts
 from tools import *
-from test_tools import get_gen_test_dict, set_float_workaround, test_function_name
+from helpers_tests import get_gen_test_dict, set_float_workaround, test_function_name
 
 from implem_emu_sse import implems_emu_sse
 from implem_emu_avx import implems_emu_avx
@@ -32,8 +32,7 @@ avx512_guard = "#if defined(MIPP_AVX512)"
 avx2_guard = "#elif defined(MIPP_AVX2)"
 avx_guard = "#elif defined(MIPP_AVX)"
 sse_guard = "#elif defined(MIPP_SSE)"
-# for some reason MIPP_SVE isnt defined idk
-sve_guard = "#elif defined(__ARM_FEATURE_SVE)"
+sve_guard = "#elif defined(MIPP_SVE)"
 rvv_guard = "#elif defined(MIPP_RVV)"
 
 implems_avx512.update(implems_emu_avx512)
@@ -124,6 +123,16 @@ def match_concept(func):
             return concept
     return "miscellaneous"
 
+def gen_func_defines(func, dt, implem):
+    func_defines = ""
+    for sub_implem in implem[func]:
+        if dt in sub_implem["datatypes"]:
+            if "if" in sub_implem:
+                if func_defines:
+                    func_defines += " || "
+                func_defines += "(" + sub_implem["if"] + ")"
+    return func_defines
+
 ###### GENERATION FUNC ######
 
 # add the type guard for 1 func in 1 implem
@@ -155,6 +164,7 @@ def add_type_guards(func, implem, function, kind="c"):
     list_bw = []
     datatypes.sort()
     for dt in datatypes:
+        func_defines = gen_func_defines(func, dt, implem)
         dt_suffix = dt_to_suffix(dt)
         parts = split_dt_pair(dt)
         if any(is_64bit_dt(part) for part in parts):
@@ -170,33 +180,46 @@ def add_type_guards(func, implem, function, kind="c"):
                     #this is hacky. It's to generate proper name to call float 
                     #versions of andb etc...
                     dt_suffix = f"_float{dt_suffix.split('t')[1].split("_")[0]}{dt_suffix}"
+            if func_defines:
+                res += f"#if {func_defines}\n"
             res += section.format(dt=dt, dt_suffix=dt_suffix, function=function)
+            if func_defines:
+                res += f"#endif // {func_defines}\n"
 
     #same logic for these
     if list_64 != []:
         list_64.sort()
         res += f"#if defined(MIPP_64BIT)\n"
         for dt in list_64:
+            func_defines = gen_func_defines(func, dt, implem)
             dt_suffix = dt_to_suffix(dt)
             if kind == "cpp" or kind == "obj":
                 dt_suffix = product_type_format_cpp(dt)
                 if func in set_float_workaround and is_float_dt(dt):
                     dt_suffix = f"_float{dt_suffix.split('t')[1].split("_")[0]}{dt_suffix}"
+            if func_defines:
+                res += f"#if {func_defines}\n"
             res += section.format(dt=dt, dt_suffix=dt_suffix, function=function)
-        res += "#endif\n"
+            if func_defines:
+                res += f"#endif // {func_defines}\n"
+        res += "#endif // defined(MIPP_64BIT)\n"
 
     if list_bw != []:
         list_bw.sort()
         res += f"#if defined(MIPP_BW)\n"
         for dt in list_bw:
+            func_defines = gen_func_defines(func, dt, implem)
             dt_suffix = dt_to_suffix(dt)
             if kind == "cpp" or kind == "obj":
                 dt_suffix = product_type_format_cpp(dt)
                 if func in set_float_workaround and is_float_dt(dt):
                     dt_suffix = f"_float{dt_suffix.split('t')[1].split("_")[0]}{dt_suffix}"
-
+            if func_defines:
+                res += f"#if {func_defines}\n"
             res += section.format(dt=dt, dt_suffix=dt_suffix, function=function)
-        res += "#endif\n"
+            if func_defines:
+                res += f"#endif // {func_defines}\n"
+        res += "#endif // defined(MIPP_BW)\n"
 
     return res
 
@@ -581,7 +604,7 @@ def gen_cast_file(func,kind="c"):
     return res
 
 
-tmp_path = "../../tests/src/"
+tmp_path = "../tests/src/"
 cpath = tmp_path + "c_tests/"
 cpppath = tmp_path + "cpp_tests/"
 objpath = tmp_path + "obj_tests/"

@@ -24,14 +24,15 @@ def duplicate_isa_sve_along_size(isa_list):
 			isa_sve = isa
 			current_index = index
 			all_sve_sizes = list(isa["size"])
-			break
+		else:
+			isa["gen_define"] = "defined(MIPP_" + isa["name"].upper() + ")"
 	del isa_list_copy[current_index]
 	all_sve_sizes = sorted(isa_sve["size"], reverse=True)
 	for reg_size in all_sve_sizes:
 		isa_sve_copy = copy.deepcopy(isa_sve)
+		isa_sve_copy["gen_define"]="defined(MIPP_" + isa_sve_copy["name"].upper() + "_" + str(reg_size) + ")"
 		isa_sve_copy["name"]="sve"+str(reg_size)
 		isa_sve_copy["size"]=reg_size
-		isa_sve_copy["define"]="MIPP_USE_ARM_SVE_"+str(reg_size)
 		isa_list_copy.append(isa_sve_copy)
 	return isa_list_copy
 
@@ -58,9 +59,9 @@ def generate_c_interface(isa_list):
 def gen_ci_defines(isa_list, file):
 	for i, isa in enumerate(isa_list):
 		if i == 0:
-			print("#if defined(" + isa["define"] + ")", file=file)
+			print("#if " + isa["gen_define"], file=file)
 		else:
-			print("#elif defined(" + isa["define"] + ")", file=file)
+			print("#elif " + isa["gen_define"], file=file)
 			
 		print("#define MIPP_RVD_SIZE_BYTE MIPP_"+isa["name"].upper()+"_RVD_SIZE_BYTE", file=file)
 
@@ -82,9 +83,9 @@ def gen_ci_structures(isa_list, file):
 	for index, isa in enumerate(isa_list):
 		
 		if index == 0:
-			print("#if defined(" + isa["define"] + ")", file=file)
+			print("#if " + isa["gen_define"], file=file)
 		else:
-			print("#elif defined(" + isa["define"] + ")", file=file)
+			print("#elif " + isa["gen_define"], file=file)
 
 		template = """typedef rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t rvd_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
 		j2_template = Template(template, undefined=StrictUndefined)
@@ -103,7 +104,7 @@ def gen_ci_structures(isa_list, file):
 		for ldiv in all_ldiv:
 			sub_isa = get_sub_isa(isa, ldiv, isa_list)
 			if sub_isa :
-				print("#if defined(" + sub_isa["define"] + ")", file=file)
+				print("#if " + sub_isa["define"], file=file)
 				used_sub_isa = sub_isa
 				print("#define MIPP_ENABLE_LDIV"+str(ldiv), file=file)
 			else :
@@ -119,7 +120,7 @@ def gen_ci_structures(isa_list, file):
 				print(j2_template.render(used_sub_isa=used_sub_isa, datatype=datatypes[dt], ldiv=str(ldiv)), file=file)
 			
 			if sub_isa :	
-				print("#endif /** "+sub_isa["define"]+" under "+isa["define"]+" **/", file=file)
+				print("#endif /** '"+sub_isa["define"]+"' under '"+isa["define"]+"' **/", file=file)
 			
 		if index == len(isa_list)-1:
 			print("#endif", file=file)
@@ -180,12 +181,12 @@ def gen_ci_functions(isa_list, file, funcs):
 				func_name = build_func_name_short(isa_list[0], dt_par, f, False);
 			else:
 				func_name = build_func_name(isa_list[0], dt_par, dt_ret, f, False);
-			print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name, 0, False) + " {", file=file)
+			print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name, 0, False) + " {", file=file)
 			for i, isa in  enumerate(isa_list):
 				if i == 0:
-					print("#if defined(" + isa["define"] + ")", file=file)
+					print("#if " + isa["gen_define"], file=file)
 				else:
-					print("#elif defined(" + isa["define"] + ")", file=file)
+					print("#elif " + isa["gen_define"], file=file)
    
 				if len(dt.split(',')) <= 1:
 					func_name_impl = build_func_name_short(isa, dt_par, f);
@@ -200,7 +201,7 @@ def gen_ci_functions(isa_list, file, funcs):
 
 			print("}", file=file)
 
-			print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name+"_m1", 1, False) + " {", file=file)
+			print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name+"_m1", 1, False) + " {", file=file)
 			print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name) + ";", file=file)
 			print("}", file=file)
 			
@@ -212,7 +213,7 @@ def gen_ci_functions(isa_list, file, funcs):
 				else:
 					func_name_rvv = build_func_name(isa_rvv, dt_par, dt_ret, f);
 
-				print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name+"_m"+str(lmul), lmul, False) + " {", file=file)
+				print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name+"_m"+str(lmul), lmul, False) + " {", file=file)
 				print("#if defined(__riscv_v_intrinsic)",file=file)
 				print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa_rvv, func_name_rvv+"_m"+str(lmul)) + ";", file=file)
 				print("#else",file=file)
@@ -228,14 +229,14 @@ def gen_ci_functions(isa_list, file, funcs):
 			if not funcs[f]["horizontal"]: #and funcs[f]["half_regiser"]:
 				for ldiv in all_ldiv:
 					print("#if defined(MIPP_ENABLE_LDIV"+str(ldiv)+")", file=file)
-					print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name+"_d"+str(ldiv), -ldiv, False) + " {", file=file)
+					print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name+"_d"+str(ldiv), -ldiv, False) + " {", file=file)
 					for i, isa in  enumerate(isa_list):
 						sub_isa = sub_isa = get_sub_isa(isa, ldiv, isa_list)
 						if sub_isa :
 							if i == 0:
-								print("#if defined(" + isa["define"] + ") and defined(" + sub_isa["define"] + ")", file=file)
+								print("#if " + isa["gen_define"] + " && " + sub_isa["define"], file=file)
 							else:
-								print("#elif defined(" + isa["define"] + ") and defined(" + sub_isa["define"] + ")", file=file)
+								print("#elif " + isa["gen_define"] + " && " + sub_isa["define"], file=file)
 						   
 							if len(dt.split(',')) <= 1:
 								func_name_impl = build_func_name_short(sub_isa, dt_par, f);
@@ -252,7 +253,7 @@ def gen_ci_functions(isa_list, file, funcs):
 			else :
 				for ldiv in all_ldiv:
 					print("#if defined(MIPP_ENABLE_LDIV"+str(ldiv)+")", file=file)
-					print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name+"_d"+str(ldiv), -ldiv, False) + " {", file=file)
+					print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name+"_d"+str(ldiv), -ldiv, False) + " {", file=file)
 					print("\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \""+func_name+"_d"+str(ldiv)+"\");", file=file);
 					print("\texit(-1);", file=file);
 					print("}", file=file)

@@ -34,12 +34,8 @@ typedef float float32_t;
 #endif
 
 #if defined(__riscv_v_intrinsic)
-#include "rvv/mipp_v2_impl_RVV_gen.h"
+#include "rvv/mipp_impl_rvv_gen.h"
 #endif
-
-//#include "mipp.hpp"
-
-//#include "mipp_object_gen.hpp"
 
 // utiles pour l'instant pour les tests
 // pourrait clairement etre utile pour les generateurs au dela du if #define
@@ -83,6 +79,7 @@ typedef float float32_t;
 #endif
 
 #elif defined(__ARM_FEATURE_SVE)
+#define MIPP_SVE
 #define MIPP_FMA
 #define MIPP_64BIT
 // not yet generated

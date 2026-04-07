@@ -400,7 +400,7 @@ def gen_mipp_rvv(vlen="__riscv_v_fixed_vlen"):
     #		if "type" not in sub_iemu:
     #			sub_iemu["type"] = "emulated"
     # implementation C
-    file = open("../include/rvv/mipp_v2_impl_RVV_gen.h", "w")
+    file = open("../include/rvv/mipp_impl_rvv_gen.h", "w")
 
     tpl_header_rvv = """#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_RVV_H_
 #define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_RVV_H_
@@ -420,7 +420,7 @@ typedef double float64_t;//remove after debug"""
     #for function prototypes that use arrays declared w macros like MIPP_RVV256_N_FLOAT64 
     #we want the name to contain size. This is optional atm 
     #but if we want smtg similar to sve it will become useful
-    #isa_rvv["name"] = ref_isa_name+str(vlen) 
+    isa_rvv["name"] = ref_isa_name #+str(vl) # Adrien: I commented "+str(vl)" because I use this field to generate "#if define(MIPP_RVV)" in the interfaces
     gen_c_defines_rvv_ls(file,ref_isa_name,vlen)
     gen_c_structures_rvv_ls(file,vlen)
     print("Generate RVV")

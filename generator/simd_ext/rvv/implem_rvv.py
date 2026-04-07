@@ -31,7 +31,7 @@ isa_rvv = {
     "name" : "rvv",#idk
     "prefix" : "__riscv", #to prefix intrinsics, not used for types
     "size" : {128 , 256 , 512 , 1024 , 2048}, #Support lmul at some point
-    "define" : "__riscv_v_intrinsic", #define to check is isa exists
+    "define" : "defined(__riscv_v_intrinsic)", #define to check is isa exists
     "architecture" : "Risc-V",#used for smth ig
     "hw_lmul" : True, #yeah
     

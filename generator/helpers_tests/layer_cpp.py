@@ -58,9 +58,9 @@ DECL_2ARGS_INT32 = DECL_VECTOR_SIZE + "\n\tint32_t inputs1[vectorSize],inputs2[v
 
 DECL_3ARGS = DECL_VECTOR_SIZE + """\n\tT inputs1[vectorSize],inputs2[vectorSize],inputs3[vectorSize];"""
 
-DECL_CAST_2ARGS = DECL_VECTOR_SIZE + "\n\t{{dt2_ext}} inputs1[vectorSize];\n\t{{dt1_ext}}_t inputs2[sizeof(inputs1) / sizeof({{dt1_ext}}_t)];"
+DECL_CAST_2ARGS = DECL_VECTOR_SIZE + "\n\t{{dt2_ext}} inputs1[vectorSize];\n\tconstexpr size_t bytes = sizeof(inputs1);\n\t{{dt1_ext}}_t inputs2[bytes / sizeof({{dt1_ext}}_t)];"
 
-DECL_CAST_2ARGS_MSK = DECL_VECTOR_SIZE +"\n\tint32_t inputs1[vectorSize];\n\t{{dt1_ext}}_t inputs2[sizeof(inputs1) / sizeof({{dt1_ext}}_t)];"
+DECL_CAST_2ARGS_MSK = DECL_VECTOR_SIZE +"\n\tint32_t inputs1[vectorSize];\n\tconstexpr size_t bytes = sizeof(inputs1);\n\t{{dt1_ext}}_t inputs2[bytes / sizeof({{dt1_ext}}_t)];"
 
 # --------------------------------------------
 # SCALAR VEC INIT
@@ -470,7 +470,7 @@ LAYER_OVERRIDES = {
 \t\tres {{op}} inputs1[j];
 \t\tures{{op}} inputs1[j];
 \t}""",
-        "loop_assert": """if(res==ures)\tREQUIRE(mipp::get(r3, 0) == res);""",
+        "loop_assert": """if((uint64_t)res==ures)\tREQUIRE(mipp::get(r3, 0) == res);""",
     },
     
     "hmul": {
@@ -501,7 +501,7 @@ LAYER_OVERRIDES = {
 \t\tres1 += inputs1[j];
 \t\tures1 += inputs1[j];
 \t}""",
-        "loop_assert": """\t\tif(res1 == ures1) REQUIRE(res == res1);""",
+        "loop_assert": """\t\tif((uint64_t)res1 == ures1) REQUIRE(res == res1);""",
     },
     
     "msb" : {
@@ -513,7 +513,7 @@ LAYER_OVERRIDES = {
         "init": INIT_CAST_2ARGS,
         "load": LOAD_CAST_2ARGS,
         "operation": OP_CAST,
-        "loop_body": """\tfor(int i = 0 ; i < vectorSize * sizeof({{dt2_ext}}) / sizeof({{dt1_ext}}_t); i++){\n"""+ LB_CAST_2ARGS,
+        "loop_body": """\tfor(size_t i = 0; i < vectorSize * sizeof({{dt2_ext}}) / sizeof({{dt1_ext}}_t); i++){\n"""+ LB_CAST_2ARGS,
         "loop_assert": AS_CAST_2ARGS+ "\n\t}",
     },
     
@@ -523,7 +523,7 @@ LAYER_OVERRIDES = {
         "init": INIT_CAST_2ARGS,
         "load": LOAD_CAST_2ARGS_MASK,
         "operation": OP_CAST_MSK,
-        "loop_body": """\tfor(int i = 0 ; i < vectorSize * sizeof(int32_t) / sizeof({{dt1_ext}}_t); i++){\n"""+ LB_CAST_2ARGS,
+        "loop_body": """\tfor(size_t i = 0; i < vectorSize * sizeof(int32_t) / sizeof({{dt1_ext}}_t); i++){\n"""+ LB_CAST_2ARGS,
         "loop_assert": AS_CAST_2ARGS_MSK + "\n\t}",
     },
     
