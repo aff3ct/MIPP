@@ -22,6 +22,9 @@ To generate the documentation, just do:
 
 ```bash
 source .venv/bin/activate
+cd generator
+./gen_mipp_infos.py
+cd ..
 mkdocs serve
 ```
 
