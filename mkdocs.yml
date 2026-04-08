@@ -60,6 +60,9 @@ markdown_extensions:
       alternate_style: true
   - pymdownx.arithmatex:
       generic: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - abbr
 
 plugins: 
@@ -76,3 +79,19 @@ extra_javascript:
 nav:
   - Home: 
     - index.md
+  - Isas_support:
+    - isas_support/sse.md
+    - isas_support/sse2.md
+    - isas_support/sse3.md
+    - isas_support/ssse3.md
+    - isas_support/sse4_1.md
+    - isas_support/sse4_2.md
+
+    - isas_support/avx.md
+    - isas_support/avx2.md
+    - isas_support/avx2_fma.md
+
+    - isas_support/avx512f.md
+    - isas_support/avx512_bw_bq.md
+    - isas_support/rvv1_0.md
+    
