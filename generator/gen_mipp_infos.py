@@ -168,6 +168,39 @@ class MippInfo:
     
     def write_mipp_infos(self, base_dir):
         write_mipp_infos(self, base_dir)
+        
+    def get_intersection(self):
+        #creates an IsaInfo with the intersection of all isa_infos
+        #i.e only the functions AND dttypes that are supported by all isa_infos
+        #If a function is emulated in one isa and native in another, we consider it as emulated in the intersection
+        intersection = IsaInfo()
+        intersection.isa_name = "intersection"
+        for func in mipp_funcs:
+            func_info = FuncInfo()
+            func_info.func_name = func
+            if func == "cast" or func == "cast_k":
+                func_info.datatypes = all_datatypes_cart_prod
+            else :
+                func_info.datatypes = all_datatypes
+            func_info.emulated = False
+            #check if func is mising in any isa, if it is we skip it
+            missing = False
+            for isa_info in self.isa_infos:
+                if isa_info.is_missing(func):
+                    missing = True
+                    break
+            if missing:
+                continue
+            #remove datatypes in func_info that are not supported by isa_info
+            for isa_info in self.isa_infos:
+                isa_func_info = isa_info.get_func_info(func)
+                if isa_func_info is not None:
+                    func_info.datatypes = list(set(func_info.datatypes) & set(isa_func_info.datatypes))
+                    if isa_func_info.emulated:
+                        func_info.emulated = True
+            #add func_info to intersection
+            intersection.func_infos.append(func_info)
+        return intersection
 
 
 def write_mipp_infos(mipp_infos, base_dir):
@@ -400,6 +433,12 @@ def main():
     if not os.path.exists("../docs/isas_support/"):
         os.makedirs("../docs/isas_support/")
     write_mipp_infos(mipp_infos, "../docs/isas_support/")
+    
+    intersection = mipp_infos.get_intersection()
+    int_mipp_infos = MippInfo()
+    int_mipp_infos.isa_infos.append(intersection)
+    write_mipp_infos(int_mipp_infos, "../docs/isas_support/")
+    #write intersection info in a md file in ../docs/isas_support/intersection.md
     
     #write each func prototype in a md file in ../docs/funcs_support/
     if not os.path.exists("../docs/funcs_support/"):
