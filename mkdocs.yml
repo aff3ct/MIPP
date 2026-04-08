@@ -67,6 +67,7 @@ markdown_extensions:
 
 plugins: 
   - search
+  - awesome-pages
 
 extra_css:
   - css/extra.css
@@ -75,23 +76,3 @@ extra_javascript:
   - javascripts/mathjax.js
   - https://polyfill.io/v3/polyfill.min.js?features=es6
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
-
-nav:
-  - Home: 
-    - index.md
-  - Isas_support:
-    - isas_support/sse.md
-    - isas_support/sse2.md
-    - isas_support/sse3.md
-    - isas_support/ssse3.md
-    - isas_support/sse4_1.md
-    - isas_support/sse4_2.md
-
-    - isas_support/avx.md
-    - isas_support/avx2.md
-    - isas_support/avx2_fma.md
-
-    - isas_support/avx512f.md
-    - isas_support/avx512_bw_bq.md
-    - isas_support/rvv1_0.md
-    

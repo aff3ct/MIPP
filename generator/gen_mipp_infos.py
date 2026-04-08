@@ -28,8 +28,9 @@ from implem_emu_avx512 import implems_emu_avx512
 from implem_rvv import isa_rvv, implems_rvv
 from implem_emu_rvv import implems_emu_rvv
 
-from headers_def import mipp_funcs
+from headers_def import mipp_funcs, mipp_funcs_concepts
 from headers_def import all_datatypes, all_datatypes_cart_prod
+from tools import *
 
 from gen_mipp_sse import gen_mipp_sse
 from gen_mipp_avx import gen_mipp_avx
@@ -237,17 +238,177 @@ def write_mipp_infos(mipp_infos, base_dir):
                         else:
                             print(color_red+":material-close:" + color_end + " | ", end="", file=f)
                     print("", file=f)
+
+
+def match_args_type_cpp(arg_type, cast=False, ret=False):
+    if arg_type == "msk":
+        if cast:
+            if ret:
+                return "rvm<T2>"
+            else : 
+                return "rvm<T1>"
+        else :
+            return "rvm<T>"
+    elif arg_type == "reg":
+        if cast:
+            if ret :
+                return "rvd<T2>"
+            else :
+                return "rvd<T1>"
+        else : 
+            return "rvd<T>"
+    elif arg_type == "val" :
+        return "T"
+    elif arg_type == "ptr":
+        return "T*"
+    else:
+        return "int32_t"
+
+def match_args_type_c(arg_type, cast=False, ret=False):
+    if arg_type == "msk":
+        if cast:
+            if ret:
+                return "rvm_{type 2}_t"
+            else : 
+                return "rvm_{type 1}_t"
+        else :
+            return "rvm_{type}_t"
+    elif arg_type == "reg":
+        if cast:
+            if ret :
+                return "rvd_{type 2}_t"
+            else :
+                return "rvd_{type 1}_t"
+        else : 
+            return "rvd_{type}_t"
+    elif arg_type == "val" :
+        return "{type}_t"
+    elif arg_type == "ptr":
+        return "{type}_t*"
+    else:
+        return "int32_t"
+
+class SpecFuncInfo:
+    
+    def __init__(self):
+        self.args = []
+        self.ret = None
+        self.dttypes = []
+        self.concept = None
+    
+    def gen_spec_func_info(self, func, mipp_funcs, mipp_funcs_concepts):
+        self.func_name = func
+        self.args = mipp_funcs[func]["proto"]["args"]
+        self.ret = mipp_funcs[func]["proto"]["ret"]
+        self.dttypes = mipp_funcs[func]["datatypes"]
+        
+        self.concept = "miscellaneous"
+        for concept in mipp_funcs_concepts:
+            if concept == "a_trier": 
+                continue
+            if func in mipp_funcs_concepts[concept]:
+                self.concept = concept
+                break
+            
+    def func_to_str_cpp(self, mipp_funcs):
+        #lambda to match reg -> rvd 
+        #mask -> rvm 
+        # val -> T
+        cast = False
+        ret = False
+        if self.func_name in ["cast", "cast_k"]:
+            cast = True
+        args_str = ", ".join([match_args_type_cpp(arg["type"], cast, ret) for arg in self.args])
+        ret_str = match_args_type_cpp(self.ret["type"], cast, True)
+        ret_str = "inline " + ret_str
+        func_proto_str = " " + ret_str + " " + self.func_name + "(" + args_str + ")"
+        return func_proto_str
+    
+    def func_to_str_c(self, mipp_funcs):
+        cast = False
+        ret = False
+        if self.func_name in ["cast", "cast_k"]:
+            cast = True
+        ret = ""
+        args_str = ", ".join([match_args_type_c(arg["type"],cast,ret) for arg in self.args])
+        ret_str = match_args_type_c(self.ret["type"], cast, True)
+        ret_str = "inline " + ret_str
+        if cast :
+            func_proto_str = " " + ret_str + " " + self.func_name + "_{type 1}_{type 2}" + "(" + args_str + ")"
+        else :
+            func_proto_str = " " + ret_str + " " + self.func_name + "_{type}" + "(" + args_str + ")"
+        for dt in self.dttypes:
+            if cast:
+                dt_par = dt.split(',')[0]
+                dt_ret = dt.split(',')[1]
+                func_proto_str_dt = func_proto_str.replace("{type 1}", dt_par).replace("{type 2}", dt_ret)
+                ret += func_proto_str_dt + ";\n"
+            else :
+                ret += func_proto_str.format(type=dt) + ";\n"
+        return ret
+        
+    
+        
+        
+    def write_spec_func_info(self, base_dir):
+        #path is base_dire + concept + "/" + func_name + ".md
+        file_path = os.path.join(base_dir, self.concept, self.func_name + ".md")
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        with open(file_path, "w") as f:
+            print("## Prototype", file=f)
+            print("### CPP : \n", file=f)
+            print("```", file=f)
+            print(self.func_to_str_cpp(mipp_funcs), file=f)
+            print("```", file=f)
+            
+            #print("\n\n```c", file=f)
+            #print(self.func_to_str_c(mipp_funcs), file=f)
+            #print("```", file=f)
+            print("\n\n### C", file=f)
+            cstr = self.func_to_str_c(mipp_funcs)
+            cstr = cstr.replace("\n", "```\n\n```")
+            #remove last ```
+            cstr = cstr[:-4]
+            cstr = "```" + cstr
+            print("\n\n" + cstr, file=f)
+            
+            print("\n\n## Supported datatypes", file=f)
+            for dtype in self.dttypes:
+                print("- " + dtype, file=f)
+       
+class SpecFuncInfos:
+    
+    def __init__(self):
+        self.spec_func_infos = []
+    
+    def gen_spec_func_infos(self, mipp_funcs, mipp_funcs_concepts):
+        for func in mipp_funcs:
+            spec_func_info = SpecFuncInfo()
+            spec_func_info.gen_spec_func_info(func, mipp_funcs, mipp_funcs_concepts)
+            self.spec_func_infos.append(spec_func_info)
+    
+    def write_spec_func_infos(self, base_dir):
+        for spec_func_info in self.spec_func_infos:
+            spec_func_info.write_spec_func_info(base_dir)
+  
 def main():
     print("Generate MIPP infos")
     mipp_infos = MippInfo()
     mipp_infos.gen_mipp_infos(mipp_funcs, implems_dict)
     
+    #write each isa info in a md file in ../docs/isas_support/
     if not os.path.exists("../docs/isas_support/"):
         os.makedirs("../docs/isas_support/")
     write_mipp_infos(mipp_infos, "../docs/isas_support/")
     
-            
-
+    #write each func prototype in a md file in ../docs/funcs_support/
+    if not os.path.exists("../docs/funcs_support/"):
+        os.makedirs("../docs/funcs_support/")
+    
+    spec_func_infos = SpecFuncInfos()
+    spec_func_infos.gen_spec_func_infos(mipp_funcs, mipp_funcs_concepts)
+    spec_func_infos.write_spec_func_infos("../docs/funcs_support/")
+    
 if __name__ == "__main__":
     main()
     
