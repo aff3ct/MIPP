@@ -49,25 +49,37 @@ rvv_path = os.path.join(include_gen_path, "rvv")
 
 
 implems_dict = {
-    "sse" : { "implems" : [implems_sse, implems_emu_sse], "defines" : {}},
-    "sse2" : { "implems" : [implems_sse, implems_emu_sse], "defines" : {"SSE2"}},
-    "sse3" : { "implems" : [implems_sse, implems_emu_sse], "defines" : {"SSE2", "SSE3"}},
-    "ssse3" : { "implems" : [implems_sse, implems_emu_sse], "defines" : {"SSE2", "SSE3", "SSSE3"}},
-    "sse4_1" : { "implems" : [implems_sse, implems_emu_sse], "defines" : {"SSE2", "SSE3", "SSSE3", "SSE4_1"}},
-    "sse4_2" : { "implems" : [implems_sse, implems_emu_sse], "defines" : {"SSE2", "SSE3", "SSSE3", "SSE4_1", "SSE4_2"}},
-    "avx" : { "implems" : [implems_avx, implems_emu_avx], "defines": {"!defined(__AVX2__)"}},
-    "avx2" : { "implems" : [implems_avx, implems_emu_avx], "defines": {"AVX2"}},
-    "avx2_fma" : { "implems" : [implems_avx, implems_emu_avx], "defines": {"AVX2", "FMA"}},
-    "avx512f" : { "implems" : [implems_avx512, implems_emu_avx512], "defines": {"AVX512F", "AVX512"}},
-    "avx512_bw_bq" : { "implems" : [implems_avx512, implems_emu_avx512], "defines": {"AVX512BW", "AVX512F", "AVX512", "AVX512DQ"}},
-    "avx512_kncni" : { "implems" : [implems_avx512, implems_emu_avx512], "defines" :{"KCNI", "MIC"}},
-    "rvv1_0" : { "implems": [implems_rvv, implems_emu_rvv], "defines": {}},
+    "SSE" : { "implems" : [implems_sse, implems_emu_sse], "defines" : {}},
+    "SSE2" : { "implems" : [implems_sse, implems_emu_sse], "defines" : {"SSE2"}},
+    "SSE3" : { "implems" : [implems_sse, implems_emu_sse], "defines" : {"SSE2", "SSE3"}},
+    "SSSE3" : { "implems" : [implems_sse, implems_emu_sse], "defines" : {"SSE2", "SSE3", "SSSE3"}},
+    "SSE4.1" : { "implems" : [implems_sse, implems_emu_sse], "defines" : {"SSE2", "SSE3", "SSSE3", "SSE4_1"}},
+    "SSE4.2" : { "implems" : [implems_sse, implems_emu_sse], "defines" : {"SSE2", "SSE3", "SSSE3", "SSE4_1", "SSE4_2"}},
+    "AVX" : { "implems" : [implems_avx, implems_emu_avx], "defines": {"!defined(__AVX2__)"}},
+    "AVX2" : { "implems" : [implems_avx, implems_emu_avx], "defines": {"AVX2"}},
+    "AVX2_FMA" : { "implems" : [implems_avx, implems_emu_avx], "defines": {"AVX2", "FMA"}},
+    "AVX512F" : { "implems" : [implems_avx512, implems_emu_avx512], "defines": {"AVX512F", "AVX512"}},
+    "AVX512_BW_BQ" : { "implems" : [implems_avx512, implems_emu_avx512], "defines": {"AVX512BW", "AVX512F", "AVX512", "AVX512DQ"}},
+    "AVX512_KCNI" : { "implems" : [implems_avx512, implems_emu_avx512], "defines" :{"KCNI", "MIC"}},
+    "RVV1.0" : { "implems": [implems_rvv, implems_emu_rvv], "defines": {}},
 
     #"sve" { "implems" :[implems_sve, implem_emu_sve],"defines": {}},
     #"sve2" { "implems" :[implems_sve, implem_emu_sve], "defines": {}},
     #"neonv1" : { "implems" :[implems_neonv, implems_emu_neonv], "defines": {}},
     #"neonv2" : { "implems" :[implems_neonv, implems_emu_neonv], "defines": {}},
 }
+
+#used to generate intersection
+implems_dict_small = implems_dict.copy()
+implems_dict_small.pop("SSE")
+implems_dict_small.pop("SSE2")
+implems_dict_small.pop("SSE3")
+implems_dict_small.pop("SSSE3")
+implems_dict_small.pop("SSE4.1")
+implems_dict_small.pop("AVX")
+implems_dict_small.pop("AVX2")
+implems_dict_small.pop("AVX512F")
+implems_dict_small.pop("AVX512_KCNI")
 
 
 mipp_funcs_description = {
@@ -132,8 +144,28 @@ mipp_funcs_description = {
 	#"hmul_to_scal":    "",
 	#"hmin_to_scal":    "",
 	#"hmax_to_scal":    "",
-	"maskz_add":{},
+	"maskz_add": "",
 }
+
+
+dict_datatypes_short = {
+    "int8" : "i8",
+    "int16" : "i16",
+    "int32" : "i32",
+    "int64" : "i64",
+    "uint8" : "u8",
+    "uint16" : "u16",
+    "uint32" : "u32",
+    "uint64" : "u64",
+    "float32" : "f32",
+    "float64" : "f64",
+}
+
+all_datatypes_short = [dict_datatypes_short[dt] for dt in all_datatypes]
+all_datatypes_short_cart_prod = []
+for dt1 in all_datatypes:
+    for dt2 in all_datatypes:
+        all_datatypes_short_cart_prod.append(dict_datatypes_short[dt1] + "," + dict_datatypes_short[dt2])
 
 if_ignored_set = {
     "MIPP_ALIGNED_LOADS",
@@ -265,7 +297,7 @@ class MippInfo:
         return intersection
 
 
-def write_mipp_infos(mipp_infos, base_dir):
+def write_mipp_infos(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_funcs_concepts = mipp_funcs_concepts):
     #for each isa write a md file with the list of functions and their supported types
     #we put functions in a table where x is dttype
     # y is function name,
@@ -274,65 +306,104 @@ def write_mipp_infos(mipp_infos, base_dir):
     
     # we write :material-check-all:  if the function is not emulated for the given dtype
     # we write :material-close: if the function is not supported for the given dtype
-    
-    #nb : we don't generate table entries for cast, cast_k
-    
-    # we also want the square to be green code : 28A745
-    # if the function is native, orange code : FD7E14 if emulated 
-    #and red : DC3545 if not supported.
-    
+    #the function is very very boilerplatey but that's ok ig
     
     color_green ='<span style="color: #28A745; font-weight: 600;">'
-    color_orange = '<span style="color: #FD7E14; font-weight: 600;">'
+    color_blue = '<span style="color: #3B42F5; font-weight: 600;">'
     color_red = '<span style="color: #DC3545; font-weight: 600;">'
+    color_black = '<span style="color: #000000; font-weight: 600;">'
     color_end = '</span>'
     
     for isa_info in mipp_infos.isa_infos:
         file_path = os.path.join(base_dir, isa_info.isa_name + ".md")
         with open(file_path, "w") as f:
             dttypes = all_datatypes
-            print("| Function | " + " | ".join(dttypes) + " |", file=f)
+            for concept in mipp_funcs_concepts:
+                if concept == "a_trier":
+                    continue
+                #we write one table per concept
+                print("\n## " + concept + "\n", file=f)
+                #we want the list of dtypes in the same order but shortened using all_datatypes_short
+                print("| Function | " + " | ".join(all_datatypes_short) + " |", file=f)
+                print("| --- | " + " | ".join(["---"]*len(dttypes)) + " |", file=f)
+                for func in mipp_funcs:
+                    if func == "cast" or func == "cast_k":
+                        continue
+                    if func in mipp_funcs_concepts[concept]:
+                        func_info = isa_info.get_func_info(func)
+                        if func_info is not None:
+                            line = "| " + func + " | "
+                            for dtype in dttypes:
+                                if dtype in func_info.datatypes:
+                                    if func_info.emulated:
+                                        line += color_blue + ":material-check:" + color_end + " | "
+                                    else :
+                                        line += color_green + ":material-check-all:" + color_end + " | "
+                                elif dtype in mipp_funcs[func]["datatypes"]:
+                                    line += color_red + ":material-close:" + color_end + " | "
+                                else :
+                                    line += color_black + ":material-minus:" + color_end + " | "
+                            print(line, file=f)
+                        else :
+                            line = "| " + func + " | "
+                            for dtype in dttypes:
+                                line += color_red + ":material-close:" + color_end + " | "
+                            print(line, file=f)
+            
+            #miscellaneous gets everything not in any concept or in the "a_trier" concept
+            print("\n## miscellaneous\n", file=f)
+            print("| Function | " + " | ".join(all_datatypes_short) + " |", file=f)
             print("| --- | " + " | ".join(["---"]*len(dttypes)) + " |", file=f)
             for func in mipp_funcs:
-                func_info = isa_info.get_func_info(func)
-                if func_info is None:
-                    #generate missing for all dttypes
-                    if func in ["cast", "cast_k"]:
-                        continue
-                    print("| " + func + " | " + " | ".join([color_red+":material-close:" + color_end]*len(dttypes)) + " |", file=f)
-                else : 
-                    if func_info.func_name in ["cast", "cast_k"]:
-                        continue
-                    print("| " + func_info.func_name + " | ", end="", file=f)
-                    for dtype in dttypes:
-                        if dtype in func_info.datatypes:
-                            if func_info.emulated:
-                                print(color_orange+":material-check:" + color_end + " | ", end="", file=f)
-                            else:
-                                print(color_green+":material-check-all:" + color_end + " | ", end="", file=f)
-                        else:
-                            print(color_red+":material-close:" + color_end + " | ", end="", file=f)
-                    print("", file=f)
-            #special table for cast and cast_k because they operate on product of datatypes
+                if func == "cast" or func == "cast_k":
+                    continue                
+                if func not in mipp_funcs_concepts["a_trier"] and all(func not in mipp_funcs_concepts[concept] for concept in mipp_funcs_concepts if concept != "a_trier"):
+                    func_info = isa_info.get_func_info(func)
+                    if func_info is not None:
+                        line = "| " + func + " | "
+                        for dtype in dttypes:
+                            if dtype in func_info.datatypes:
+                                if func_info.emulated:
+                                    line += color_blue + ":material-check:" + color_end + " | "
+                                else :
+                                    line += color_green + ":material-check-all:" + color_end + " | "
+                            elif dtype in mipp_funcs[func]["datatypes"]:
+                                line += color_red + ":material-close:" + color_end + " | "
+                            else :
+                                line += color_black + ":material-minus:" + color_end + " | "
+                        print(line, file=f)
+                    else :
+                        line = "| " + func + " | "
+                        for dtype in dttypes:
+                            line += color_red + ":material-close:" + color_end + " | "
+                        print(line, file=f)
             dttypes = all_datatypes_cart_prod
-            print("\n\n| Function | " + " | ".join(dttypes) + " |", file=f)
+            
+            #cast and cast_k get their own tables bc they are defined on cartesian product of dt types
+            print("\n## cast and cast_k\n", file=f)
+            print("| Function | " + " | ".join(all_datatypes_short_cart_prod) + " |", file=f)
             print("| --- | " + " | ".join(["---"]*len(dttypes)) + " |", file=f)
             for func in ["cast", "cast_k"]:
                 func_info = isa_info.get_func_info(func)
-                if func_info is None:
-                    #generate missing for all dttypes
-                    print("| " + func + " | " + " | ".join([color_red+":material-close:" + color_end]*len(dttypes)) + " |", file=f)
-                else : 
-                    print("| " + func_info.func_name + " | ", end="", file=f)
+                if func_info is not None:
+                    line = "| " + func + " | "
                     for dtype in dttypes:
                         if dtype in func_info.datatypes:
                             if func_info.emulated:
-                                print(color_orange+":material-check:" + color_end + " | ", end="", file=f)
-                            else:
-                                print(color_green+":material-check-all:" + color_end + " | ", end="", file=f)
-                        else:
-                            print(color_red+":material-close:" + color_end + " | ", end="", file=f)
-                    print("", file=f)
+                                line += color_blue + ":material-check:" + color_end + " | "
+                            else :
+                                line += color_green + ":material-check-all:" + color_end + " | "
+                        elif dtype in mipp_funcs[func]["datatypes"]:
+                            line += color_red + ":material-close:" + color_end + " | "
+                        else :
+                            line += color_black + ":material-minus:" + color_end + " | "
+                    print(line, file=f)
+                else :
+                    line = "| " + func + " | "
+                    for dtype in dttypes:
+                        line += color_red + ":material-close:" + color_end + " | "
+                    print(line, file=f)
+    
 
 
 def match_args_type_cpp(arg_type, cast=False, ret=False, fixed_dtype=False):
@@ -528,9 +599,17 @@ def main():
         os.makedirs("../docs/isas_support/")
     write_mipp_infos(mipp_infos, "../docs/isas_support/")
     
+    
+    #we want the intersection to be done on 
+    #sse4.2, avx2fma, avx512bwbq, rvv1.0
+    mipp_infos = MippInfo()
+    mipp_infos.gen_mipp_infos(mipp_funcs, implems_dict_small)
+    
+    
     intersection = mipp_infos.get_intersection()
     int_mipp_infos = MippInfo()
     int_mipp_infos.isa_infos.append(intersection)
+    
     write_mipp_infos(int_mipp_infos, "../docs/isas_support/")
     #write intersection info in a md file in ../docs/isas_support/intersection.md
     
