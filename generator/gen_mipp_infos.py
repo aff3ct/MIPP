@@ -357,7 +357,7 @@ def write_mipp_infos(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_funcs_c
             for func in mipp_funcs:
                 if func == "cast" or func == "cast_k":
                     continue                
-                if func not in mipp_funcs_concepts["a_trier"] and all(func not in mipp_funcs_concepts[concept] for concept in mipp_funcs_concepts if concept != "a_trier"):
+                if func in mipp_funcs_concepts["a_trier"] or all(func not in mipp_funcs_concepts[concept] for concept in mipp_funcs_concepts if concept != "a_trier"):
                     func_info = isa_info.get_func_info(func)
                     if func_info is not None:
                         line = "| " + func + " | "
