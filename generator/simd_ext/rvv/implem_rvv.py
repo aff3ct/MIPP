@@ -46,7 +46,7 @@ isa_rvv = {
                    "to_float" : "vfloat64m{lmul}_t", "reg_dt_ext"    : "f64",        "uint_data_ext" : "u64m{lmul}",      "int_data_ext" : "i64m{lmul}", "width": "64" } ,#added to_int_ptr to convert float to int before bitwise operations. I'll see if I can find a better solution later.
         
         float32 : {"data_ext" : "f32m{lmul}",        "data_ext_logi" : "b{eew_emul}",         "data_ext_msk"  : "b32",        "reg" : "vfloat32m{lmul}_t", "msk" : "vbool{eew_emul}_t",
-                   "to_ptr"   : "float32_t",    "to_int"        : "vint64m{lmul}_t", "to_uint"       : "vuint32m{lmul}_t", 
+                   "to_ptr"   : "float32_t",    "to_int"        : "vint32m{lmul}_t", "to_uint"       : "vuint32m{lmul}_t", 
                    "to_float" : "vfloat32m{lmul}_t", "reg_dt_ext"    : "f32",        "uint_data_ext" : "u32m{lmul}",      "int_data_ext" : "i32m{lmul}", "width" : "32" } ,#added to_int_ptr to convert float to int before bitwise operations. I'll see if I can find a better solution later.
         
         int64   : {"data_ext" : "i64m{lmul}",        "data_ext_logi" : "b{eew_emul}",         "data_ext_msk"  : "b64",        "reg" : "vint64m{lmul}_t",   "msk" : "vbool{eew_emul}_t",
@@ -113,11 +113,10 @@ tpl_implem_rvv = {
     "maskst"               : { "format" : "short", "code" : "{{ isa.prefix }}_vse{{ isa_dt_par.width }}_v_{{ isa_dt_par.data_ext }}_m(m0.m,({{isa_dt_par.to_ptr}}*)p0, r0.r, %N<tp>%);"},
     "scalar_getfirst"      : { "format" : "short", "code" : "{{isa_dt_par.to_ptr}} res = {{ isa.prefix }}_v{{ instr_name }}_x_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(r0.r);"},
     "float_getfirst"       : { "format" : "short", "code" : "{{isa_dt_par.to_ptr}} res = {{ isa.prefix }}_v{{ instr_name }}_f_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(r0.r);"},
+    "round_int"            : { "format" : "short", "code" : "r0.r;"},
 
     "testz_2"              : { "format" : "short", "code" : "   int32_t res = !({{isa.prefix}}_v{{instr_name}}_m_{{isa_dt_par.data_ext_logi}}(m0.m, %N<tp>%));"},
 
-    "round_intuint"        : { "format" : "short", "code" : "res = r0;"},
-    "round_float"          : { "format" : "short", "code" : "{{isa.prefix}}_{{instr_name}}_x_f_v_{{isa_dt_par.int_data_ext}}(r0.r,__RISCV_FRM_RNE,%N<tp>%)"},
     "scalar_notb"          : { "format" : "short", "code" : "{{isa.prefix}}_v{{instr_name}}_vx_{{isa_dt_par.data_ext}}(r0.r, -1, %N<tp>%);"},
 
 
@@ -164,6 +163,13 @@ tpl_implem_rvv = {
         %r<tp>% res = %mul<tp>%(r0, r1);
         res = %sub<tp>%(res, r2);
         return res;
+    """},
+    
+    "round_float" : { "format" : "long", "code" : """
+        {{isa_dt_par.to_int}} tmp = {{isa.prefix}}_{{instr_name}}_x_f_v_{{isa_dt_par.int_data_ext}}_rm(r0.r,__RISCV_FRM_RNE,%N<tp>%);
+        %r<tp>% ret;
+        ret.r = {{isa.prefix}}_{{instr_name}}_f_x_v_{{isa_dt_par.data_ext}}(tmp,%N<tp>%);
+        return ret;
     """},
 }
 
@@ -271,9 +277,8 @@ implems_rvv = {
         { "instr_name" : "xor",    "datatypes" : all_float,      "template" : tpl_implem_rvv["float_notb"]},],   
    "testz_2" : [
         { "instr_name" : "cpop",   "datatypes" : all_datatypes,  "template" : tpl_implem_rvv["testz_2"]}],
-   #"round" :  [
-   #        { "instr_name" : "vfcvt",   "datatypes" : all_float, "template" : tpl_implem_rvv["round_float"]},
-   #        { "instr_name" : "",   "datatypes" : all_int_uint, "template" : tpl_implem_rvv["round_intuint"]},       
-   #], 
+   "round" :  [
+        { "instr_name" : "vfcvt",   "datatypes" : all_float, "template" : tpl_implem_rvv["round_float"]},
+        { "instr_name" : "vfcvt",   "datatypes" : all_int_uint, "template" : tpl_implem_rvv["round_int"]},],
 
 }
