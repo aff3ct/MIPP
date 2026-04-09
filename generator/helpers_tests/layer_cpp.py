@@ -423,7 +423,8 @@ shape_templates = {
 
 
 deny = {
-    "round", "maskzld", "maskst",
+    #"round", 
+    "maskzld", "maskst",
 }
 
 LAYER_OVERRIDES = {
@@ -588,6 +589,18 @@ REQUIRE(got_bits == expected_bits);"""
 +
 """{%endif%}""",
         "loop_assert": "{% if is_int %}" + AS_REG_BINOP + "{% else %}REQUIRE( (!(!(got_bits))) == (!(!(expected_bits))) ); {% endif %}",
+    },
+    
+    "round": {
+        
+        "init" : """\tstd::iota(inputs1, inputs1 + vectorSize, 1);
+\tstd::mt19937 g;
+std::uniform_real_distribution<float> dis(0.0, 1.0);
+\tfor(int i = 0; i < vectorSize; i++)
+\t{
+\t\tinputs1[i] += dis(g);
+\t}""",
+        "loop_body": """\t\tT res = std::round(inputs1[i]);""",
     },
     
 }
