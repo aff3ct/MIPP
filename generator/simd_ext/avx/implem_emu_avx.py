@@ -107,10 +107,24 @@ tpl_implem_emu_avx = {
 	%r<tp>% rmul = %mul<tp>%(r0, r1);
 	%r<tp>% res = %add<tp>%(rmul, r2);
 	return res;""" },
+    "fnmadd": { "format": "long", "code":
+"""// long format
+	%r<tp>% rmul = %mul<tp>%(r0, r1);
+	%r<tp>% tmp = %set0<tp>%();
+	tmp = %sub<tp>%(tmp, rmul);
+	%r<tp>% res = %add<tp>%(tmp, r2);
+	return res;""" },
     "fmsub": { "format": "long", "code":
 """// long format
 	%r<tp>% rmul = %mul<tp>%(r0, r1);
 	%r<tp>% res = %sub<tp>%(rmul, r2);
+	return res;""" },
+    "fnmsub": { "format": "long", "code":
+"""//long format
+	%r<tp>% rmul = %mul<tp>%(r0, r1);
+	%r<tp>% tmp = %set0<tp>%();
+	tmp = %sub<tp>%(tmp, rmul);
+	%r<tp>% res = %sub<tp>%(tmp, r2);
 	return res;""" },
     "arith_2args_1msk": { "format": "long", "code":
 """// long format
@@ -237,8 +251,12 @@ implems_emu_avx = {
         { "datatypes": [int16, int8, uint16, uint8],   "template": tpl_implem_emu_avx["blend-2"],                                } ], # blend
     "fmadd": [
         { "datatypes": all_float,                      "template": tpl_implem_emu_avx["fmadd"],                                  } ], # fmadd
+    "fnmadd": [
+		{ "datatypes": all_float,                      "template": tpl_implem_emu_avx["fnmadd"],                                  } ], # fnmadd (same as fmadd but with negation of the result, which can be done by blending with zero)
     "fmsub": [
         { "datatypes": all_float,                      "template": tpl_implem_emu_avx["fmsub"],                                  } ], # fmsub
+    "fnmsub": [
+		{ "datatypes": all_float,                      "template": tpl_implem_emu_avx["fnmsub"],                                  } ], # fnmsub (same as fms
     "msb": [
         { "datatypes": [float64, int64, uint64],       "template": tpl_implem_emu_avx["msb-64"],                                 },
         { "datatypes": [float32, int32, uint32],       "template": tpl_implem_emu_avx["msb-32"],                                 },

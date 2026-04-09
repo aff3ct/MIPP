@@ -444,8 +444,16 @@ LAYER_OVERRIDES = {
         "loop_body": """\t\tT res = inputs1[i] * inputs2[i] + inputs3[i];""",
     },
     
+    "fnmadd": {
+        "loop_body": """\t\tT res = -(inputs1[i] * inputs2[i]) + inputs3[i];""",
+    },
+    
     "fmsub": {
         "loop_body": """\t\tT res = inputs1[i] * inputs2[i] - inputs3[i];""",
+    },
+    
+    "fnmsub": {
+        "loop_body": """\t\tT res = -(inputs1[i] * inputs2[i]) - inputs3[i];""",
     },
     
     "max" : {

@@ -293,7 +293,7 @@ mipp_funcs_concepts = {
 	"all_loads": ["load","loadu","set","set_k","set1","set0","set0_k","maskzld","gather"],
 	"all_acces": ["store","storeu","get", "getfirst","scatter","maskst"],
 	"all_arithm_op": ["add","sub","mul","div"],
-	"all_fused_arithm_op":["fmadd","fmsub"],
+	"all_fused_arithm_op":["fmadd","fmsub", "fnmadd","fnmsub"],
 	"all_order_op":["cmpeq","cmpneq","cmplt","cmpge","cmpgt"],
 	"all_maths_functions":["sqrt","rsqrt"],
 	"all_binary_op":["andb","andb_k","andnb","andnb_k","orb","orb_k","xorb","xorb_k","msb","notb","notb_k"],
@@ -364,6 +364,8 @@ mipp_funcs = {
 	#"hmin_to_scal":    { "proto": protos["ret_val_1arg_reg"            ], "datatypes": all_datatypes          , "horizontal": True  },
 	#"hmax_to_scal":    { "proto": protos["ret_val_1arg_reg"            ], "datatypes": all_datatypes          , "horizontal": True  },
 	"maskz_add":{ "proto": protos["ret_reg_3args_1msk_2reg" ], "datatypes": all_datatypes          , "horizontal": True  },
+	"fnmadd":   { "proto": protos["ret_reg_3args_reg"           ], "datatypes": all_float+[int32]      , "horizontal": False },
+	"fnmsub":   { "proto": protos["ret_reg_3args_reg"           ], "datatypes": all_float+[int32]      , "horizontal": False },
 }
 
 copy_mipp_funcs = copy.deepcopy(mipp_funcs)

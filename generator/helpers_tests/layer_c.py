@@ -550,8 +550,16 @@ uint{{type_size}}_t got_bits = std::bit_cast<uint{{type_size}}_t>(mipp_get_float
         "loop_body": """\t\t{{dt_ext}}_t res = inputs1[i] * inputs2[i] + inputs3[i];""",
     },
     
+    "fnmadd": {
+        "loop_body": """\t\t{{dt_ext}}_t res = -(inputs1[i] * inputs2[i]) + inputs3[i];""",
+    },
+    
     "fmsub": {
         "loop_body": """\t\t{{dt_ext}}_t res = inputs1[i] * inputs2[i] - inputs3[i];""",
+    },
+    
+    "fnmsub": {
+        "loop_body": """\t\t{{dt_ext}}_t res = -(inputs1[i] * inputs2[i]) - inputs3[i];""",
     },
     
     "max" : {

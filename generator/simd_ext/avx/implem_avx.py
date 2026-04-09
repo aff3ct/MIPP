@@ -304,8 +304,13 @@ implems_avx = {
         { "instr_name": "max",            "datatypes": [int32, int16, int8, uint32, uint16, uint8], "template": tpl_implem_avx["arith_2args"],      "if": "defined(__AVX2__)"            } ], # max
     "fmadd": [
         { "instr_name": "fmadd",          "datatypes": all_float,                                   "template": tpl_implem_avx["arith_3args"],      "if": "defined(__FMA__)"             } ], # fmadd
+    
+    "fnmadd": [
+        { "instr_name": "fnmadd",         "datatypes": all_float,                                   "template": tpl_implem_avx["arith_3args"],      "if": "defined(__FMA__)"             } ], # fnmadd
     "fmsub": [
         { "instr_name": "fmsub",          "datatypes": all_float,                                   "template": tpl_implem_avx["arith_3args"],      "if": "defined(__FMA__)"             } ], # fmsub
+    "fnmsub": [
+        { "instr_name": "fnmsub",         "datatypes": all_float,                                   "template": tpl_implem_avx["arith_3args"],      "if": "defined(__FMA__)"             } ], # fnmsub
     "andb": [
         { "instr_name": "and",            "datatypes": all_float,                                   "template": tpl_implem_avx["logi_2args"],                                            },
         { "instr_name": "andb",           "datatypes": all_int_uint,                                "template": tpl_implem_avx["logi_2args_e"],     "if": "!defined(__AVX2__)"           },

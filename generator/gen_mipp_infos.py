@@ -145,6 +145,8 @@ mipp_funcs_description = {
 	#"hmin_to_scal":    "",
 	#"hmax_to_scal":    "",
 	"maskz_add": "Adds two vector registers according to a mask register. Follows the pattern of the ternary operator ret[i] = (msk[i] ? rvd1[i] + rvd2[i] : 0).",
+    "fnmadd" : "Computes the fused negative multiply-add of three vector registers. Computes -(a*b)+c for each element of the registers.",
+    "fnmsub" : "Computes the fused negative multiply-subtract of three vector registers. Computes -(a*b)-c for each element of the registers.",
 }
 
 
@@ -549,9 +551,12 @@ class SpecFuncInfo:
         with open(file_path, "w") as f:
             
             #add description of the function if it exists in mipp_funcs_description
-            if self.func_name in mipp_funcs_description and mipp_funcs_description[self.func_name]:
-                print("## Description\n", file=f)
-                print(mipp_funcs_description[self.func_name] + "\n\n", file=f)
+            print("## Description\n", file=f)
+            if self.func_name in mipp_funcs_description:
+                description = mipp_funcs_description[self.func_name]
+            else :
+                description = "Uh-oh this function is not documented yet..."
+            print(description + "\n\n", file=f)
             
             print("## Prototype", file=f)
             print("### CPP : \n", file=f)

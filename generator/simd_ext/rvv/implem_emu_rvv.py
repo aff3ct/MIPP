@@ -457,7 +457,39 @@ tpl_implem_emu_rvv = {
         rtmp = %andb<tr>%(rtmp,rtmp1);
         r1 = %andb<tr>%(r1,rtmp);
         return %tomsk<tr>%(r1);
-    """}
+    """},
+    
+      
+    "fnmadd_int" : {"format" : "long", "code" : """
+        %r<tp>% res = %mul<tp>%(r0, r1);
+        %r<tp>% tmp = %set0<tp>%();
+        res = %sub<tp>%(tmp, res);
+        res = %add<tp>%(res, r2);
+        return res;
+   """},
+   
+    "fnmsub_int" : {"format" : "long", "code" : """
+        %r<tp>% res = %mul<tp>%(r0, r1);
+        %r<tp>% tmp = %set0<tp>%();
+        res = %sub<tp>%(tmp, res);
+        res = %sub<tp>%(res, r2);
+        return res;
+    """},
+    "fnmadd_float" : {"format" : "long", "code" : """
+        %r<tp>% tmp = %set0<tp>%();
+        tmp = %sub<tp>%(tmp, r0);
+        %r<tp>% res; 
+        res.r = {{isa.prefix}}_v{{instr_name}}_vv_{{isa_dt_par.data_ext}}(tmp.r, r1.r, r2.r, %N<tp>%);
+        return res;
+    """},
+
+    "fnmsub_float" : {"format" : "long", "code" : """
+        %r<tp>% tmp = %set0<tp>%();
+        tmp = %sub<tp>%(tmp, r0);
+        %r<tp>% res; 
+        res.r = {{isa.prefix}}_v{{instr_name}}_vv_{{isa_dt_par.data_ext}}(tmp.r, r1.r, r2.r, %N<tp>%);
+        return res;
+    """},
 
 }
 
@@ -545,9 +577,17 @@ implems_emu_rvv = {
 	   { "datatypes" : [int8, uint8], "template" : tpl_implem_emu_rvv["msb-8"] }, ],
     "cast_k" : [
        #no problem
-       { "instr_name" : "vid", "datatypes" : datatypes_same_size, "template" : tpl_implem_emu_rvv["cast_k_same_size"]},]
+       { "instr_name" : "vid", "datatypes" : datatypes_same_size, "template" : tpl_implem_emu_rvv["cast_k_same_size"]}],
        #use toreg->cast->vid+and(1)->tomask
        #{ "instr_name" : "vid", "datatypes" : datatypes_narrowing, "template" : tpl_implem_emu_rvv["cast_k_diff_size"]},
        #dont know how its supposed to work
        #{ "instr_name" : "vid", "datatypes" : datatypes_widening, "template" : tpl_implem_emu_rvv["cast_k_diff_size"]}],
+    #fnmadd RVV != fnmadd AVX2. 
+    #RVV is -(a*b+c) while AVX2 is -(a*b)+c lol
+    "fnmadd" : [
+       { "instr_name" : "fmadd", "datatypes" : all_float,     "template" : tpl_implem_emu_rvv["fnmadd_float"]},
+       { "instr_name" : "fmadd", "datatypes" : [int32],       "template" : tpl_implem_emu_rvv["fnmadd_int"]}],
+    "fnmsub" : [
+       { "instr_name" : "fmsub", "datatypes" : all_float,     "template" : tpl_implem_emu_rvv["fnmsub_float"]},
+       { "instr_name" : "fsub",   "datatypes" : [int32],       "template" : tpl_implem_emu_rvv["fnmsub_int"]}],
 }
