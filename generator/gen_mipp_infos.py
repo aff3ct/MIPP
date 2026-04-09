@@ -69,6 +69,72 @@ implems_dict = {
     #"neonv2" : { "implems" :[implems_neonv, implems_emu_neonv], "defines": {}},
 }
 
+
+mipp_funcs_description = {
+    "cast":   "",
+	"cast_k":  "",
+	"toreg":  "",
+	"tomsk":  "",
+	"load":   "Loads aligned data from `mem` to a register.",
+	"loadu":  "Loads unaligned data from `mem` to a register.",
+	"store":  "Stores a register in aligned data.",
+	"storeu": "Stores a register in unaligned data.",
+	"set" :   "",
+	"set_k" : "",	
+	"set1":   "",
+	"set1_k": "",
+	"maskzld":"",
+	"maskst": "",
+	"set0":   "",
+	#"low_k":  "",
+	"get":     "",
+	"get_k":   "",
+	"getfirst":"",
+	#"gather"  :"",
+	#"mask_gather": "",
+	"sqrt":   "",
+	"rsqrt":  "",
+	"add":    "",
+	"sub":    "",
+	"mul":    "",
+	"div":    "",
+	"min":    "",
+	"max":    "",
+	"fmadd":  "",
+	"fmsub":  "",
+	"andb":   "",
+	"andb_k": "",
+	"andnb":  "",
+	"andnb_k":"",
+	"orb":    "",
+	"orb_k":  "",
+	"xorb":   "",
+	"xorb_k": "",
+	"msb":    "",
+	"notb":   "",
+	"notb_k": "",
+	"cmpeq":  "",
+	"cmpneq": "",
+    "cmplt":  "",
+	"cmple":  "",
+	"cmpge":  "",
+	"cmpgt":  "",
+	"round":  "",
+	"blend":  "",
+	"set0_k": "",
+	"testz":   "",
+	"testz_2": "",
+	"hadd":    "",
+	"hmul":    "",
+	"hmin":    "",
+	"hmax":    "",
+	"hadd_to_scal":    "",
+	#"hmul_to_scal":    "",
+	#"hmin_to_scal":    "",
+	#"hmax_to_scal":    "",
+	"maskz_add":{},
+}
+
 if_ignored_set = {
     "MIPP_ALIGNED_LOADS",
 }
@@ -112,10 +178,6 @@ class FuncInfo:
                     ret.datatypes += implem["datatypes"]
                 ret.emulated = True
         
-        if func == "hadd" : 
-            print(dict_entry, ret.datatypes, ret.emulated)
-        if dict_entry == "rvv1_0" : 
-            print(func, ret.datatypes, ret.emulated)
         self.func_name = func
         self.datatypes = ret.datatypes
         self.emulated = ret.emulated
@@ -273,7 +335,7 @@ def write_mipp_infos(mipp_infos, base_dir):
                     print("", file=f)
 
 
-def match_args_type_cpp(arg_type, cast=False, ret=False):
+def match_args_type_cpp(arg_type, cast=False, ret=False, fixed_dtype=False):
     if arg_type == "msk":
         if cast:
             if ret:
@@ -291,13 +353,19 @@ def match_args_type_cpp(arg_type, cast=False, ret=False):
         else : 
             return "rvd<T>"
     elif arg_type == "val" :
+        if fixed_dtype != False:
+                return fixed_dtype + "_t"
         return "T"
     elif arg_type == "ptr":
         return "T*"
+    elif arg_type == "Nele": 
+        if fixed_dtype != False:
+                return fixed_dtype + "_t []"
+        return "T []"
     else:
         return "int32_t"
 
-def match_args_type_c(arg_type, cast=False, ret=False):
+def match_args_type_c(arg_type, cast=False, ret=False, fixed_dtype=False):
     if arg_type == "msk":
         if cast:
             if ret:
@@ -315,9 +383,15 @@ def match_args_type_c(arg_type, cast=False, ret=False):
         else : 
             return "rvd_{type}_t"
     elif arg_type == "val" :
+        if fixed_dtype != False:
+                return fixed_dtype + "_t"
         return "{type}_t"
     elif arg_type == "ptr":
         return "{type}_t*"
+    elif arg_type == "Nele": 
+        if fixed_dtype != False:
+                return fixed_dtype + "_t []"
+        return "{type}_t[]" 
     else:
         return "int32_t"
 
@@ -349,10 +423,19 @@ class SpecFuncInfo:
         # val -> T
         cast = False
         ret = False
+        fixed_dtype = []
+        for arg in self.args:
+            fixed_dtype.append(arg["fixeddatatype"])
+            
+
         if self.func_name in ["cast", "cast_k"]:
             cast = True
-        args_str = ", ".join([match_args_type_cpp(arg["type"], cast, ret) for arg in self.args])
-        ret_str = match_args_type_cpp(self.ret["type"], cast, True)
+        
+        zipped_args = zip(self.args, fixed_dtype)
+        args_str = ", ".join([match_args_type_cpp(arg["type"], cast, False, fixed) for arg, fixed in zipped_args])
+        
+        fixed_dtype = self.ret["fixeddatatype"]
+        ret_str = match_args_type_cpp(self.ret["type"], cast, True, fixed_dtype)
         ret_str = "inline " + ret_str
         func_proto_str = " " + ret_str + " " + self.func_name + "(" + args_str + ")"
         return func_proto_str
@@ -360,11 +443,16 @@ class SpecFuncInfo:
     def func_to_str_c(self, mipp_funcs):
         cast = False
         ret = False
+        fixed_dtype = []
+        for arg in self.args:
+            fixed_dtype.append(arg["fixeddatatype"])
         if self.func_name in ["cast", "cast_k"]:
             cast = True
         ret = ""
-        args_str = ", ".join([match_args_type_c(arg["type"],cast,ret) for arg in self.args])
-        ret_str = match_args_type_c(self.ret["type"], cast, True)
+        args_str = ", ".join([match_args_type_c(arg["type"], cast, False, fixed) for arg, fixed in zip(self.args, fixed_dtype)])
+        
+        fixed_dtype = self.ret["fixeddatatype"]
+        ret_str = match_args_type_c(self.ret["type"], cast, True, fixed_dtype)
         ret_str = "inline " + ret_str
         if cast :
             func_proto_str = " " + ret_str + " " + self.func_name + "_{type 1}_{type 2}" + "(" + args_str + ")"
@@ -388,6 +476,12 @@ class SpecFuncInfo:
         file_path = os.path.join(base_dir, self.concept, self.func_name + ".md")
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, "w") as f:
+            
+            #add description of the function if it exists in mipp_funcs_description
+            if self.func_name in mipp_funcs_description and mipp_funcs_description[self.func_name]:
+                print("## Description\n", file=f)
+                print(mipp_funcs_description[self.func_name] + "\n\n", file=f)
+            
             print("## Prototype", file=f)
             print("### CPP : \n", file=f)
             print("```", file=f)
@@ -423,7 +517,7 @@ class SpecFuncInfos:
     def write_spec_func_infos(self, base_dir):
         for spec_func_info in self.spec_func_infos:
             spec_func_info.write_spec_func_info(base_dir)
-  
+
 def main():
     print("Generate MIPP infos")
     mipp_infos = MippInfo()
