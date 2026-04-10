@@ -31,6 +31,7 @@ from implem_emu_rvv import implems_emu_rvv
 from headers_def import mipp_funcs, mipp_funcs_concepts
 from headers_def import all_datatypes, all_datatypes_cart_prod
 from tools import *
+from generic_emu import *
 
 from gen_mipp_sse import gen_mipp_sse
 from gen_mipp_avx import gen_mipp_avx
@@ -188,8 +189,11 @@ class FuncInfo:
     def __init__(self):
         self.func_name = None
         self.datatypes = []
-        self.emulated = False
+        self.emulated = {}
+        self.generic = {}
         
+    #this method is wrong.
+    #each datatype can have different emulations/generic values...
     def gen_infos(self, func, implems_isa, implems_emu_isa, dict_entry):
         ret = FuncInfo()
         if func in implems_isa:
@@ -197,24 +201,56 @@ class FuncInfo:
                 
                 if "if" in implem :
                     if element_in_str(implems_dict[dict_entry]["defines"], implem["if"]):
-                        #print(dict_entry, func, implems_dict[dict_entry]["defines"], implem["if"])
-                        ret.datatypes += implem["datatypes"]       
+                        ret.add_datatypes(implem["datatypes"],False,False)
+                            
                 else :
-
-                    ret.datatypes += implem["datatypes"]
-                
-        if func in implems_emu_isa and ret.datatypes == []:
+                    ret.add_datatypes(implem["datatypes"],False,False)
+        #ret.datatypes == [] allows to check if the function has already been implemented natively before checking emulated implementations  
+        if func in implems_emu_isa :
             for implem in implems_emu_isa[func]:
                 if "if" in implems_emu_isa[func] :
                     if element_in_str(implems_dict[dict_entry]["defines"], implem["if"]):
-                        ret.datatypes += implem["datatypes"]
+                        ret.add_datatypes(implem["datatypes"],True,False)
+
                 else :
-                    ret.datatypes += implem["datatypes"]
-                ret.emulated = True
+                    ret.add_datatypes(implem["datatypes"],True,False)
+
+        if func in implems_generic_emu :
+            for implem in implems_generic_emu[func]: 
+                ret.add_datatypes(implem["datatypes"],False,True)
+
+                
         
         self.func_name = func
         self.datatypes = ret.datatypes
         self.emulated = ret.emulated
+        self.generic = ret.generic
+    
+    def is_generic(self,dttype):
+        if dttype in self.generic and self.generic[dttype]:
+            return True
+        return False
+    def is_emulated(self,dttype):
+        if dttype in self.emulated and self.emulated[dttype] :
+            return True
+        return False
+    def is_native(self,dttype):
+        if not is_emulated(dttype) and not is_generic(dttype):
+            return True
+        return False
+    
+    def add_datatypes(self, datatypes, emulated = False, generic = False):
+        for dt in datatypes:
+            if dt in self.datatypes:
+                continue
+            self.datatypes.append(dt)
+            if emulated:
+                self.emulated[dt] = True
+            if generic:
+                self.generic[dt] = True
+    
+    def is_supported_dt(self, dttype):
+        return dttype in self.datatypes
         
 class IsaInfo:
     
@@ -278,13 +314,15 @@ class MippInfo:
                 func_info.datatypes = all_datatypes_cart_prod
             else :
                 func_info.datatypes = all_datatypes
-            func_info.emulated = False
+
+            for dt in func_info.datatypes:
+                func_info.emulated[dt] = False
+                func_info.generic[dt] = False
             #check if func is mising in any isa, if it is we skip it
             missing = False
             for isa_info in self.isa_infos:
                 if isa_info.is_missing(func):
                     missing = True
-                    break
             if missing:
                 continue
             #remove datatypes in func_info that are not supported by isa_info
@@ -292,8 +330,11 @@ class MippInfo:
                 isa_func_info = isa_info.get_func_info(func)
                 if isa_func_info is not None:
                     func_info.datatypes = list(set(func_info.datatypes) & set(isa_func_info.datatypes))
-                    if isa_func_info.emulated:
-                        func_info.emulated = True
+                    for dt in func_info.datatypes:
+                        if isa_func_info.is_emulated(dt):
+                            func_info.emulated[dt] = True
+                        if isa_func_info.is_generic(dt):
+                            func_info.generic[dt] = True
             #add func_info to intersection
             intersection.func_infos.append(func_info)
         return intersection
@@ -314,6 +355,7 @@ def write_mipp_infos(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_funcs_c
     color_blue = '<span style="color: #3B42F5; font-weight: 600;">'
     color_red = '<span style="color: #DC3545; font-weight: 600;">'
     color_black = '<span style="color: #000000; font-weight: 600;">'
+    color_yellow = '<span style="color: #FFD20D; font-weight: 600;">'
     color_end = '</span>'
     
     for isa_info in mipp_infos.isa_infos:
@@ -337,7 +379,9 @@ def write_mipp_infos(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_funcs_c
                             line = "| " + func + " | "
                             for dtype in dttypes:
                                 if dtype in func_info.datatypes:
-                                    if func_info.emulated:
+                                    if func_info.is_generic(dtype):
+                                        line += color_yellow + ":material-check:" + color_end + " | "
+                                    elif func_info.is_emulated(dtype):
                                         line += color_blue + ":material-check:" + color_end + " | "
                                     else :
                                         line += color_green + ":material-check-all:" + color_end + " | "
@@ -365,7 +409,9 @@ def write_mipp_infos(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_funcs_c
                         line = "| " + func + " | "
                         for dtype in dttypes:
                             if dtype in func_info.datatypes:
-                                if func_info.emulated:
+                                if func_info.is_generic(dtype):
+                                    line += color_yellow + ":material-check:" + color_end + " | "
+                                elif func_info.is_emulated(dtype):
                                     line += color_blue + ":material-check:" + color_end + " | "
                                 else :
                                     line += color_green + ":material-check-all:" + color_end + " | "
@@ -391,7 +437,9 @@ def write_mipp_infos(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_funcs_c
                     line = "| " + func + " | "
                     for dtype in dttypes:
                         if dtype in func_info.datatypes:
-                            if func_info.emulated:
+                            if func_info.is_generic(dtype):
+                                line += color_yellow + ":material-check:" + color_end + " | "
+                            elif func_info.is_emulated(dtype):
                                 line += color_blue + ":material-check:" + color_end + " | "
                             else :
                                 line += color_green + ":material-check-all:" + color_end + " | "
@@ -604,12 +652,20 @@ def main():
         os.makedirs("../docs/isas_support/")
     write_mipp_infos(mipp_infos, "../docs/isas_support/")
     
+        
+    #print sse info for debugging
+    for isa_info in mipp_infos.isa_infos:
+        if isa_info.isa_name == "SSE":
+            print("SSE info : ")
+            for func_info in isa_info.func_infos:
+                print(func_info.func_name, func_info.datatypes)
+    
     
     #we want the intersection to be done on 
     #sse4.2, avx2fma, avx512bwbq, rvv1.0
     mipp_infos = MippInfo()
     mipp_infos.gen_mipp_infos(mipp_funcs, implems_dict_small)
-    
+
     
     intersection = mipp_infos.get_intersection()
     int_mipp_infos = MippInfo()
