@@ -643,6 +643,13 @@ std::uniform_real_distribution<float> dis(0.0, 1.0);
 \t}""",
         "loop_body": """\t\t{{dt_ext}}_t res = std::round(inputs1[i]);""",
     },
+    "div2": {
+        "loop_body": """\t\t{{dt_ext}}_t res = inputs1[i] / 2;""",
+    },
+    
+    "div4": {
+        "loop_body": """\t\t{{dt_ext}}_t res = inputs1[i] / 4;""",
+    },
 }
 
 NO_LOOP_FUNCS = {"hadd", "hmul", "hmin", "hmax", 

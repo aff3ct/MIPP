@@ -364,8 +364,12 @@ mipp_funcs = {
 	#"hmin_to_scal":    { "proto": protos["ret_val_1arg_reg"            ], "datatypes": all_datatypes          , "horizontal": True  },
 	#"hmax_to_scal":    { "proto": protos["ret_val_1arg_reg"            ], "datatypes": all_datatypes          , "horizontal": True  },
 	"maskz_add":{ "proto": protos["ret_reg_3args_1msk_2reg" ], "datatypes": all_datatypes          , "horizontal": True  },
-	"fnmadd":   { "proto": protos["ret_reg_3args_reg"           ], "datatypes": all_float+[int32]      , "horizontal": False },
-	"fnmsub":   { "proto": protos["ret_reg_3args_reg"           ], "datatypes": all_float+[int32]      , "horizontal": False },
+	"fnmadd":  { "proto": protos["ret_reg_3args_reg"           ], "datatypes": all_float+[int32]      , "horizontal": False },
+	"fnmsub":  { "proto": protos["ret_reg_3args_reg"           ], "datatypes": all_float+[int32]      , "horizontal": False },
+	"div2":    { "proto": protos["ret_reg_1arg_reg"            ], "datatypes": all_float              , "horizontal": False },
+	"div4":	   { "proto": protos["ret_reg_1arg_reg"            ], "datatypes": all_float              , "horizontal": False },
+	"rshift":  { "proto": protos["ret_reg_2args_reg_val"       ], "datatypes": all_int                , "horizontal": False },
+	"lshift":  { "proto": protos["ret_reg_2args_reg_val"       ], "datatypes": all_int                , "horizontal": False },
 }
 
 copy_mipp_funcs = copy.deepcopy(mipp_funcs)

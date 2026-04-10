@@ -611,6 +611,14 @@ std::uniform_real_distribution<float> dis(0.0, 1.0);
         "loop_body": """\t\tT res = std::round(inputs1[i]);""",
     },
     
+    "div2": {
+        "loop_body": """\t\tT res = inputs1[i] / 2;""",
+    },
+    
+    "div4": {
+        "loop_body": """\t\tT res = inputs1[i] / 4;""",
+    },
+    
 }
 
 NO_LOOP_FUNCS = {"hadd", "hmul", "hmin", "hmax", 

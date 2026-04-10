@@ -9,6 +9,7 @@ from headers_def import *
 from implem_avx import *
 from implem_emu_avx import *
 from c_generator import *
+from generic_emu import *
 
 
 def gen_mipp_avx():
@@ -31,6 +32,7 @@ def gen_mipp_avx():
 	copy_mipp_funcs = copy.deepcopy(mipp_funcs)
 	gen_c_functions(isa_avx, file, copy_mipp_funcs, implems_avx)
 	gen_c_functions(isa_avx, file, copy_mipp_funcs, implems_emu_avx)
+	gen_c_generic_functions(isa_avx, file, copy_mipp_funcs, implems_generic_emu) 
 	gen_c_missing_functions(isa_avx, file, copy_mipp_funcs)
 
 	tpl_footer_avx = """#endif /* MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX_H_ */"""

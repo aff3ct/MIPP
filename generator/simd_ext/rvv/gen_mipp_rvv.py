@@ -10,6 +10,7 @@ from tools import *
 from headers_def import *
 from implem_rvv import *
 from implem_emu_rvv import *
+from generic_emu import *
 
 
 
@@ -100,7 +101,7 @@ def fix_reductions(isa, isa_lmul1, funcs, implems_dict, lmul):
 def seen_lmul(funcs, f, dt_key, lmul):
 	if "implem_status" in funcs[f] :
 		if "lmul" in funcs[f]["implem_status"] :
-			if lmul in funcs[f]["implem_status"]["lmul"]:
+			if (lmul,dt_key) in funcs[f]["implem_status"]["lmul"]:
 				return True
 	return False
 
@@ -238,10 +239,11 @@ def gen_c_functions_rvv(isa, file, funcs, implems,lmul=0, reductions_fix=False):
 
 						if "type" in ff and ff["type"] == "emulated":
 							print(" -> '" + f + "<" + dt_key + ">' has been implemented.")
-			if "lmul" in funcs[f]["implem_status"]:
-				funcs[f]["implem_status"]["lmul"].add(lmul)
-			else :
-				funcs[f]["implem_status"]["lmul"] = {lmul}
+						
+						if "lmul" in funcs[f]["implem_status"]:
+							funcs[f]["implem_status"]["lmul"].add((lmul,dt_key))
+						else :
+							funcs[f]["implem_status"]["lmul"] = {(lmul,dt_key)}
 		else:
 			print("Panic: '" + f + "' function does not exist.")
 			exit(-1)
@@ -434,6 +436,11 @@ typedef double float64_t;//remove after debug"""
         ret = fix_reductions(resolved_isa, isa_rvv_lmul1, copy_mipp_funcs, implems_emu_rvv, lmul)
 
         gen_c_functions_rvv(resolved_isa, file, copy_mipp_funcs, implems_emu_rvv, lmul=lmul, reductions_fix=ret)
+        
+        #rvv doesn't have any "if" so we can get away with calling gen_c_functions rvv instead of a
+        #separate gen_c_generic_functions_rvv FOR NOW.
+        #change this line if this ever changes.
+        gen_c_functions_rvv(resolved_isa, file, copy_mipp_funcs, implems_generic_emu, lmul=lmul)
         gen_c_missing_functions_rvv(resolved_isa, file, copy_mipp_funcs, lmul=lmul)
 
     tpl_footer_rvv = """#endif /* MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_RVV_H_ */"""

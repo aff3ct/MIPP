@@ -7,6 +7,7 @@ from headers_def import *
 from implem_sse import *
 from implem_emu_sse import *
 from c_generator import *
+from generic_emu import *
 
 
 def gen_mipp_sse():
@@ -29,6 +30,7 @@ def gen_mipp_sse():
 	copy_mipp_funcs = copy.deepcopy(mipp_funcs)
 	gen_c_functions(isa_sse, file, copy_mipp_funcs, implems_sse)
 	gen_c_functions(isa_sse, file, copy_mipp_funcs, implems_emu_sse)
+	gen_c_generic_functions(isa_sse, file, copy_mipp_funcs, implems_generic_emu)
 	gen_c_missing_functions(isa_sse, file, copy_mipp_funcs)
 
 	tpl_footer_sse = """#endif /* MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SSE_H_ */"""
