@@ -20,7 +20,7 @@ tpl_generic_emu = {
             return res;
     """},
   "div2_scalar" : { "format" :"long", "code" :"""
-            {{isa_dt_par.to_ptr}} ptr[%N<tp>%];
+            %v<tp>% ptr[%N<tp>%];
             %store<tp>%(ptr, r0);        
             for(unsigned i = 0; i < %N<tp>%; i++)
                 ptr[i] /= 2;
@@ -28,7 +28,7 @@ tpl_generic_emu = {
     """},
   
     "set1_scalar" : { "format" :"long", "code" :"""
-            {{isa_dt_par.to_ptr}} ptr[%N<tp>%];
+            %v<tp>% ptr[%N<tp>%];
             for(unsigned i = 0; i < %N<tp>%; i++)
                 ptr[i] = v0;
             return %load<tp>%(ptr);
