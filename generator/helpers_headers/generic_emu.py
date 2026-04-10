@@ -26,9 +26,19 @@ tpl_generic_emu = {
                 ptr[i] /= 2;
             return %load<tp>%(ptr);
     """},
+  
+    "set1_scalar" : { "format" :"long", "code" :"""
+            {{isa_dt_par.to_ptr}} ptr[%N<tp>%];
+            for(unsigned i = 0; i < %N<tp>%; i++)
+                ptr[i] = v0;
+            return %load<tp>%(ptr);
+    """},
 }
 
 implems_generic_emu = {
+    
+    "set1" : [
+        { "instr_name": "set1",  "datatypes" : all_datatypes, "template" : tpl_generic_emu["set1_scalar"]}],
     
     "div" : [
         { "instr_name": "div",  "datatypes" : all_float, "template" : tpl_generic_emu["div_scalar"]}],
@@ -66,6 +76,28 @@ def add_guard_if_isdef(funcs, f, dt_key, file):
 def add_endif_if_isdef(funcs, f, dt_key, file):
     if is_ifdef(funcs, f, dt_key):
         print("#endif", file=file)
+        
+        
+#to prevent gen_c_missing_functions to generate the missing prototypes
+def remove_cond_implem_status(funcs, f, dt_key):
+    if "implem_status" in funcs[f] and dt_key in funcs[f]["implem_status"] :
+        for implem in funcs[f]["implem_status"][dt_key]:
+            if "if" in implem and implem["if"]:
+                implem["if"] = ""
+
+#same...
+def mark_as_implemented(funcs, f, dt_key):
+    done_implem_status = { "if": "", "requirements": {} }
+    if "implem_status" in funcs[f] and dt_key in funcs[f]["implem_status"] :
+        for implem in funcs[f]["implem_status"][dt_key]:
+            if "if" in implem and implem["if"]:
+                done_implem_status["if"] = implem["if"]
+            if "requirements" in implem and implem["requirements"]:
+                done_implem_status["requirements"] = implem["requirements"]
+    if "implem_status" not in funcs[f]:
+        funcs[f]["implem_status"] = {}
+    funcs[f]["implem_status"][dt_key] = [done_implem_status]
+
 
 def gen_c_generic_functions(isa, file, funcs, implems):
     	for f in implems:
@@ -89,18 +121,13 @@ def gen_c_generic_functions(isa, file, funcs, implems):
                                 exit(-1)
                         dt_key = dt_par + "," + dt_ret
 
-                        if isa["name"] == "sse" and 'instr_name' in ff and ff['instr_name'] == "div" and "float64" in dt:
-                            print(ff)
-
                         if not is_missing_func(funcs, f, dt_key):
                             print("// Generic '" + f + "<" + dt_key + ">' has been skipped (reason: \"Info: It has been implemented before.\").",file=file)
                        
                         else:
                             #if implementation is guarded by conditions, generic implmentation should be guarded by the negation of these conditions
                             add_guard_if_isdef(funcs, f, dt_key, file)
-                                
-                            if isa["name"] == "sse" and 'instr_name' in ff and ff['instr_name'] == "div" and "float64" in dt:
-                                    print(f,dt_key, funcs[f])
+
                             j2_template = Template(ff["template"]["code"], undefined=StrictUndefined)
                             instr_name = ""
                             if "instr_name" in ff:
@@ -114,56 +141,18 @@ def gen_c_generic_functions(isa, file, funcs, implems):
                                 print(" -> " + err_message)
                                 print("// " + err_message,file=file)
                                 continue
-
-                            ifd = ""
-                            if "type" in ff and ff["type"] == "emulated":
-                                if "implem_status" in funcs[f] and dt_key in funcs[f]["implem_status"]:
-                                    is_first = True
-                                    i = 0
-                                    for implem in funcs[f]["implem_status"][dt_key]:
-                                        ifd_sub = build_ifdef(funcs, f, dt_key, i)
-                                        if ifd_sub:
-                                            if not is_first:
-                                                ifd = ifd + " && "
-                                            ifd = ifd + "!( "
-                                            ifd = ifd + ifd_sub
-                                            ifd = ifd + " )"
-                                            is_first = False
-                                        i = i +1
-
-                            cur_implem_status = { "if": "", "requirements": {} }
-                            if "if" in ff:
-                                cur_implem_status["if"] = ff["if"]
-                            cur_implem_status["requirements"] = ph_ret["requirements"]
-
-                            if "implem_status" not in funcs[f]:
-                                funcs[f]["implem_status"] = {}
-                            if dt_key not in funcs[f]["implem_status"]:
-                                funcs[f]["implem_status"][dt_key] = []
-                            funcs[f]["implem_status"][dt_key].append(cur_implem_status)
-
+                            
                             post_rendering = ph_ret["converted_ir"]
-
-                            ifd_cur = build_ifdef(funcs, f, dt_key, len(funcs[f]["implem_status"][dt_key])-1)
-                            if ifd and ifd_cur:
-                                ifd = ifd + " && "+ ifd_cur
-                            elif ifd_cur:
-                                ifd = ifd_cur
-                            if ifd:
-                                print("#if " + ifd, file=file)
-                                if "type" in ff and ff["type"] == "emulated":
-                                    funcs[f]["implem_status"][dt_key][len(funcs[f]["implem_status"][dt_key])-1]["if"] = ifd
-
                             if len(dt.split(',')) <= 1:
                                 func_name = build_func_name_short(isa, dt_par, f,True);
                             else:
                                 func_name = build_func_name(isa, dt_par, dt_ret, f,True);
-                            
+
                             print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name) + " {", file=file)
-                            
+
                             if ff["template"]["format"] == "short":
                                 if funcs[f]["proto"]["args"]:
-                                    # Toreg 
+                                # Toreg 
                                     if funcs[f]["proto"]["ret"]["type"] == "reg":
                                         print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file)
                                         print("\tres.r = ", end='', file=file)
@@ -176,29 +165,26 @@ def gen_c_generic_functions(isa, file, funcs, implems):
                                 #Other functions
                                 else:
                                     if (funcs[f]["proto"]["ret"]["type"] == "reg"):
-                                            print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file);
-                                            print("\tres.r = ", end='', file=file)
+                                    	print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file);
+                                    	print("\tres.r = ", end='', file=file)
 
                                     elif (funcs[f]["proto"]["ret"]["type"] == "msk"):
-                                            print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file);
-                                            print("\tres.m = ", end='', file=file)
-                            
+                                    	print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file);
+                                    	print("\tres.m = ", end='', file=file)
+
                             else:
                                 print("\t", end='', file=file)
-
+                            
                             print(post_rendering, file=file)
                             if ff["template"]["format"] == "short":
-                                if funcs[f]["proto"]["ret"]["type"]:
-                                    print("\treturn res;", file=file);
+	                            if funcs[f]["proto"]["ret"]["type"]:
+		                            print("\treturn res;", file=file);
                             print("}", file=file)
-                    
-                            if ifd:
-                                print("#endif", file=file)
 
-                            if "type" in ff and ff["type"] == "emulated":
-                                print(" -> '" + f + "<" + dt_key + ">' has been implemented.")
-                            
                             add_endif_if_isdef(funcs, f, dt_key, file)
+
+                            remove_cond_implem_status(funcs, f, dt_key)
+                            mark_as_implemented(funcs, f, dt_key)
                 
             else:
                 print("Panic: '" + f + "' function does not exist.")
