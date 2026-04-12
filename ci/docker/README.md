@@ -44,7 +44,6 @@ docker tag linux_x86_64_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_l
 
 docker tag linux_armhf_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_linux:gcc-14_armv7-neon
 docker tag linux_armhf_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_linux:gcc-14_armv7-neon-fma
-
 docker tag linux_armhf_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_armv7-neon
 docker tag linux_armhf_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_armv7-neon-fma
 

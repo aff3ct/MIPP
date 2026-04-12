@@ -8,16 +8,16 @@ isa_neon = {
     "architecture": "arm",
     "hw_lmul": False,
     "datatypes": {
-        float64: { "data_ext": "f64", "data_ext_logi": "u64", "data_ext_msk": "u64", "reg": "float64x2_t", "msk": "uint64x2_t", "to_ptr": "float64_t" },
-        float32: { "data_ext": "f32", "data_ext_logi": "u32", "data_ext_msk": "u32", "reg": "float32x4_t", "msk": "uint32x4_t", "to_ptr": "float32_t" },
-        int64:   { "data_ext": "s64", "data_ext_logi": "u64", "data_ext_msk": "u64", "reg": "int64x2_t",   "msk": "uint64x2_t", "to_ptr": "int64_t"   },
-        int32:   { "data_ext": "s32", "data_ext_logi": "u32", "data_ext_msk": "u32", "reg": "int32x4_t",   "msk": "uint32x4_t", "to_ptr": "int32_t"   },
-        int16:   { "data_ext": "s16", "data_ext_logi": "u16", "data_ext_msk": "u16", "reg": "int16x8_t",   "msk": "uint16x8_t", "to_ptr": "int16_t"   },
-        int8:    { "data_ext": "s8",  "data_ext_logi": "u8",  "data_ext_msk": "u8",  "reg": "int8x16_t",   "msk": "uint8x16_t", "to_ptr": "int8_t"    },
-        uint64:  { "data_ext": "u64", "data_ext_logi": "u64", "data_ext_msk": "u64", "reg": "uint64x2_t",  "msk": "uint64x2_t", "to_ptr": "uint64_t"  },
-        uint32:  { "data_ext": "u32", "data_ext_logi": "u32", "data_ext_msk": "u32", "reg": "uint32x4_t",  "msk": "uint32x4_t", "to_ptr": "uint32_t"  },
-        uint16:  { "data_ext": "u16", "data_ext_logi": "u16", "data_ext_msk": "u16", "reg": "uint16x8_t",  "msk": "uint16x8_t", "to_ptr": "uint16_t"  },
-        uint8:   { "data_ext": "u8",  "data_ext_logi": "u8",  "data_ext_msk": "u8",  "reg": "uint8x16_t",  "msk": "uint8x16_t", "to_ptr": "uint8_t"   },
+        float64: { "data_ext": "f64", "data_ext_logi": "u64", "data_ext_msk": "u64", "reg": "float64x2_t", "msk": "uint64x2_t", "to_ptr": "float64_t", "if": "defined(__aarch64__)" },
+        float32: { "data_ext": "f32", "data_ext_logi": "u32", "data_ext_msk": "u32", "reg": "float32x4_t", "msk": "uint32x4_t", "to_ptr": "float32_t"                               },
+        int64:   { "data_ext": "s64", "data_ext_logi": "u64", "data_ext_msk": "u64", "reg": "int64x2_t",   "msk": "uint64x2_t", "to_ptr": "int64_t"                                 },
+        int32:   { "data_ext": "s32", "data_ext_logi": "u32", "data_ext_msk": "u32", "reg": "int32x4_t",   "msk": "uint32x4_t", "to_ptr": "int32_t"                                 },
+        int16:   { "data_ext": "s16", "data_ext_logi": "u16", "data_ext_msk": "u16", "reg": "int16x8_t",   "msk": "uint16x8_t", "to_ptr": "int16_t"                                 },
+        int8:    { "data_ext": "s8",  "data_ext_logi": "u8",  "data_ext_msk": "u8",  "reg": "int8x16_t",   "msk": "uint8x16_t", "to_ptr": "int8_t"                                  },
+        uint64:  { "data_ext": "u64", "data_ext_logi": "u64", "data_ext_msk": "u64", "reg": "uint64x2_t",  "msk": "uint64x2_t", "to_ptr": "uint64_t"                                },
+        uint32:  { "data_ext": "u32", "data_ext_logi": "u32", "data_ext_msk": "u32", "reg": "uint32x4_t",  "msk": "uint32x4_t", "to_ptr": "uint32_t"                                },
+        uint16:  { "data_ext": "u16", "data_ext_logi": "u16", "data_ext_msk": "u16", "reg": "uint16x8_t",  "msk": "uint16x8_t", "to_ptr": "uint16_t"                                },
+        uint8:   { "data_ext": "u8",  "data_ext_logi": "u8",  "data_ext_msk": "u8",  "reg": "uint8x16_t",  "msk": "uint8x16_t", "to_ptr": "uint8_t"                                 },
     },
 }
 
@@ -60,74 +60,78 @@ tpl_implem_neon = {
 
 implems_neon = {
     "cast": [
-        { "instr_name": "reinterpretq", "datatypes": all_datatypes_cart_prod,          "template": tpl_implem_neon["cast"]                                              } ], # cast
+        { "instr_name": "reinterpretq", "datatypes": all_datatypes_cart_prod_inc_f64,    "template": tpl_implem_neon["cast"],               "if": "defined(__aarch64__)"  },
+        { "instr_name": "reinterpretq", "datatypes": all_datatypes_cart_prod_except_f64, "template": tpl_implem_neon["cast"],                                             } ], # cast
     "cast_k": [
-        { "instr_name": "reinterpretq", "datatypes": all_datatypes_cart_prod,          "template": tpl_implem_neon["cast_k"]                                            } ], # cast_k
+        { "instr_name": "reinterpretq", "datatypes": all_datatypes_cart_prod_inc_f64,    "template": tpl_implem_neon["cast_k"],             "if": "defined(__aarch64__)"  },
+        { "instr_name": "reinterpretq", "datatypes": all_datatypes_cart_prod_except_f64, "template": tpl_implem_neon["cast_k"],                                           } ], # cast_k
     "toreg": [
-        { "instr_name": "reinterpretq", "datatypes": all_datatypes,                    "template": tpl_implem_neon["toreg"]                                             } ], # toreg
+        { "instr_name": "reinterpretq", "datatypes": [float64],                          "template": tpl_implem_neon["toreg"],              "if": "defined(__aarch64__)"  },
+        { "instr_name": "reinterpretq", "datatypes": all_int + all_uint + [float32],     "template": tpl_implem_neon["toreg"],                                            } ], # toreg
     "tomsk": [
-        { "instr_name": "reinterpretq", "datatypes": all_datatypes,                    "template": tpl_implem_neon["tomsk"]                                             } ], # tomsk
+        { "instr_name": "reinterpretq", "datatypes": [float64],                          "template": tpl_implem_neon["tomsk"],              "if": "defined(__aarch64__)"  },
+        { "instr_name": "reinterpretq", "datatypes": all_int + all_uint + [float32],     "template": tpl_implem_neon["tomsk"],                                            } ], # tomsk
     "load": [
-        { "instr_name": "ld1q",         "datatypes": all_64bit,                        "template": tpl_implem_neon["load"],               "if": "defined(__aarch64__)"  },
-        { "instr_name": "ld1q",         "datatypes": all_32bit + all_16bit + all_8bit, "template": tpl_implem_neon["load"],                                             } ], # load
+        { "instr_name": "ld1q",         "datatypes": all_64bit,                          "template": tpl_implem_neon["load"],               "if": "defined(__aarch64__)"  },
+        { "instr_name": "ld1q",         "datatypes": all_32bit + all_16bit + all_8bit,   "template": tpl_implem_neon["load"],                                             } ], # load
     "loadu": [
-        { "instr_name": "ld1q",         "datatypes": all_64bit,                        "template": tpl_implem_neon["load"],               "if": "defined(__aarch64__)"  },
-        { "instr_name": "ld1q",         "datatypes": all_32bit + all_16bit + all_8bit, "template": tpl_implem_neon["load"],                                             } ], # loadu
+        { "instr_name": "ld1q",         "datatypes": all_64bit,                          "template": tpl_implem_neon["load"],               "if": "defined(__aarch64__)"  },
+        { "instr_name": "ld1q",         "datatypes": all_32bit + all_16bit + all_8bit,   "template": tpl_implem_neon["load"],                                             } ], # loadu
     "store": [
-        { "instr_name": "st1q",         "datatypes": all_64bit,                        "template": tpl_implem_neon["store"],              "if": "defined(__aarch64__)"  },
-        { "instr_name": "st1q",         "datatypes": all_32bit + all_16bit + all_8bit, "template": tpl_implem_neon["store"],                                            } ], # store
+        { "instr_name": "st1q",         "datatypes": all_64bit,                          "template": tpl_implem_neon["store"],              "if": "defined(__aarch64__)"  },
+        { "instr_name": "st1q",         "datatypes": all_32bit + all_16bit + all_8bit,   "template": tpl_implem_neon["store"],                                            } ], # store
     "storeu": [
-        { "instr_name": "st1q",         "datatypes": all_64bit,                        "template": tpl_implem_neon["store"],              "if": "defined(__aarch64__)"  },
-        { "instr_name": "st1q",         "datatypes": all_32bit + all_16bit + all_8bit, "template": tpl_implem_neon["store"],                                            } ], # storeu
+        { "instr_name": "st1q",         "datatypes": all_64bit,                          "template": tpl_implem_neon["store"],              "if": "defined(__aarch64__)"  },
+        { "instr_name": "st1q",         "datatypes": all_32bit + all_16bit + all_8bit,   "template": tpl_implem_neon["store"],                                            } ], # storeu
     "set1": [
-        { "instr_name": "dupq_n",       "datatypes": all_64bit,                        "template": tpl_implem_neon["set1"],               "if": "defined(__aarch64__)"  },
-        { "instr_name": "dupq_n",       "datatypes": all_32bit + all_16bit + all_8bit, "template": tpl_implem_neon["set1"],                                             } ], # set1
+        { "instr_name": "dupq_n",       "datatypes": all_64bit,                          "template": tpl_implem_neon["set1"],               "if": "defined(__aarch64__)"  },
+        { "instr_name": "dupq_n",       "datatypes": all_32bit + all_16bit + all_8bit,   "template": tpl_implem_neon["set1"],                                             } ], # set1
     "add": [
-        { "instr_name": "addq",         "datatypes": [float64],                        "template": tpl_implem_neon["arith_2args"],        "if": "defined(__aarch64__)"  },
-        { "instr_name": "addq",         "datatypes": all_int + all_uint + [float32],   "template": tpl_implem_neon["arith_2args"],                                      } ], # add
+        { "instr_name": "addq",         "datatypes": [float64],                          "template": tpl_implem_neon["arith_2args"],        "if": "defined(__aarch64__)"  },
+        { "instr_name": "addq",         "datatypes": all_int + all_uint + [float32],     "template": tpl_implem_neon["arith_2args"],                                      } ], # add
     "sub": [
-        { "instr_name": "subq",         "datatypes": [float64],                        "template": tpl_implem_neon["arith_2args"],        "if": "defined(__aarch64__)"  },
-        { "instr_name": "subq",         "datatypes": all_int + all_uint + [float32],   "template": tpl_implem_neon["arith_2args"],                                      } ], # sub
+        { "instr_name": "subq",         "datatypes": [float64],                          "template": tpl_implem_neon["arith_2args"],        "if": "defined(__aarch64__)"  },
+        { "instr_name": "subq",         "datatypes": all_int + all_uint + [float32],     "template": tpl_implem_neon["arith_2args"],                                      } ], # sub
     "mul": [
-        { "instr_name": "mulq",         "datatypes": [float64],                        "template": tpl_implem_neon["arith_2args"],        "if": "defined(__aarch64__)"  },
-        { "instr_name": "mulq",         "datatypes": all_32bit + all_16bit + all_8bit, "template": tpl_implem_neon["arith_2args"],                                      } ], # mul
+        { "instr_name": "mulq",         "datatypes": [float64],                          "template": tpl_implem_neon["arith_2args"],        "if": "defined(__aarch64__)"  },
+        { "instr_name": "mulq",         "datatypes": all_32bit + all_16bit + all_8bit,   "template": tpl_implem_neon["arith_2args"],                                      } ], # mul
     "div": [
-        { "instr_name": "divq",         "datatypes": all_float,                        "template": tpl_implem_neon["arith_2args"],        "if": "defined(__aarch64__)"  },
-#       { "instr_name": "recpeq",       "datatypes": [uint32],                         "template": tpl_implem_neon["arith_2args_recp"],                                 },
-        { "instr_name": "recpeq",       "datatypes": [float32],                        "template": tpl_implem_neon["arith_2args_recp"],   "if": "!defined(__aarch64__)" } ], # div
+        { "instr_name": "divq",         "datatypes": all_float,                          "template": tpl_implem_neon["arith_2args"],        "if": "defined(__aarch64__)"  },
+#       { "instr_name": "recpeq",       "datatypes": [uint32],                           "template": tpl_implem_neon["arith_2args_recp"],                                 },
+        { "instr_name": "recpeq",       "datatypes": [float32],                          "template": tpl_implem_neon["arith_2args_recp"],   "if": "!defined(__aarch64__)" } ], # div
     "andb": [
-        { "instr_name": "andq",         "datatypes": all_uint + all_int,               "template": tpl_implem_neon["logi_2args"],                                       },
-        { "instr_name": "andq",         "datatypes": all_float,                        "template": tpl_implem_neon["logi_2args_fxx"],                                   } ], # andb
+        { "instr_name": "andq",         "datatypes": all_uint + all_int,                 "template": tpl_implem_neon["logi_2args"],                                       },
+        { "instr_name": "andq",         "datatypes": all_float,                          "template": tpl_implem_neon["logi_2args_fxx"],                                   } ], # andb
     "andb_k": [
-        { "instr_name": "andq",         "datatypes": all_datatypes,                    "template": tpl_implem_neon["logi_m_2args"]                                      } ], # andb_k
+        { "instr_name": "andq",         "datatypes": all_datatypes,                      "template": tpl_implem_neon["logi_m_2args"]                                      } ], # andb_k
     "andnb": [
-        { "instr_name": "bicq",         "datatypes": all_uint + all_int,               "template": tpl_implem_neon["logi_2args_rev"],                                   },
-        { "instr_name": "bicq",         "datatypes": all_float,                        "template": tpl_implem_neon["logi_2args_rev_fxx"],                               } ], # andnb
+        { "instr_name": "bicq",         "datatypes": all_uint + all_int,                 "template": tpl_implem_neon["logi_2args_rev"],                                   },
+        { "instr_name": "bicq",         "datatypes": all_float,                          "template": tpl_implem_neon["logi_2args_rev_fxx"],                               } ], # andnb
     "andnb_k": [
-        { "instr_name": "bicq",         "datatypes": all_datatypes,                    "template": tpl_implem_neon["logi_m_2args_rev"]                                  } ], # andnb_k
+        { "instr_name": "bicq",         "datatypes": all_datatypes,                      "template": tpl_implem_neon["logi_m_2args_rev"]                                  } ], # andnb_k
     "orb": [
-        { "instr_name": "orrq",         "datatypes": all_uint + all_int,               "template": tpl_implem_neon["logi_2args"],                                       },
-        { "instr_name": "orrq",         "datatypes": all_float,                        "template": tpl_implem_neon["logi_2args_fxx"],                                   } ], # orb
+        { "instr_name": "orrq",         "datatypes": all_uint + all_int,                 "template": tpl_implem_neon["logi_2args"],                                       },
+        { "instr_name": "orrq",         "datatypes": all_float,                          "template": tpl_implem_neon["logi_2args_fxx"],                                   } ], # orb
     "orb_k": [
-        { "instr_name": "orrq",         "datatypes": all_datatypes,                    "template": tpl_implem_neon["logi_m_2args"]                                      } ], # orb_k
+        { "instr_name": "orrq",         "datatypes": all_datatypes,                      "template": tpl_implem_neon["logi_m_2args"]                                      } ], # orb_k
     "xorb": [
-        { "instr_name": "eorq",         "datatypes": all_uint + all_int,               "template": tpl_implem_neon["logi_2args"],                                       },
-        { "instr_name": "eorq",         "datatypes": all_float,                        "template": tpl_implem_neon["logi_2args_fxx"],                                   } ], # xorb
+        { "instr_name": "eorq",         "datatypes": all_uint + all_int,                 "template": tpl_implem_neon["logi_2args"],                                       },
+        { "instr_name": "eorq",         "datatypes": all_float,                          "template": tpl_implem_neon["logi_2args_fxx"],                                   } ], # xorb
     "xorb_k": [
-        { "instr_name": "eorq",         "datatypes": all_datatypes,                    "template": tpl_implem_neon["logi_m_2args"]                                      } ], # xorb_k
+        { "instr_name": "eorq",         "datatypes": all_datatypes,                      "template": tpl_implem_neon["logi_m_2args"]                                      } ], # xorb_k
     "cmpeq": [
-        { "instr_name": "ceqq",         "datatypes": all_64bit,                        "template": tpl_implem_neon["compare"],            "if": "defined(__aarch64__)"  },
-        { "instr_name": "ceqq",         "datatypes": all_32bit + all_16bit + all_8bit, "template": tpl_implem_neon["compare"],                                          } ], # cmpeq
+        { "instr_name": "ceqq",         "datatypes": all_64bit,                          "template": tpl_implem_neon["compare"],            "if": "defined(__aarch64__)"  },
+        { "instr_name": "ceqq",         "datatypes": all_32bit + all_16bit + all_8bit,   "template": tpl_implem_neon["compare"],                                          } ], # cmpeq
     "cmplt": [
-        { "instr_name": "cltq",         "datatypes": all_64bit,                        "template": tpl_implem_neon["compare"],            "if": "defined(__aarch64__)"  },
-        { "instr_name": "cltq",         "datatypes": all_32bit + all_16bit + all_8bit, "template": tpl_implem_neon["compare"],                                          } ], # cmplt
+        { "instr_name": "cltq",         "datatypes": all_64bit,                          "template": tpl_implem_neon["compare"],            "if": "defined(__aarch64__)"  },
+        { "instr_name": "cltq",         "datatypes": all_32bit + all_16bit + all_8bit,   "template": tpl_implem_neon["compare"],                                          } ], # cmplt
     "cmpgt": [
-        { "instr_name": "cgtq",         "datatypes": all_64bit,                        "template": tpl_implem_neon["compare"],            "if": "defined(__aarch64__)"  },
-        { "instr_name": "cgtq",         "datatypes": all_32bit + all_16bit + all_8bit, "template": tpl_implem_neon["compare"],                                          } ], # cmpgt
+        { "instr_name": "cgtq",         "datatypes": all_64bit,                          "template": tpl_implem_neon["compare"],            "if": "defined(__aarch64__)"  },
+        { "instr_name": "cgtq",         "datatypes": all_32bit + all_16bit + all_8bit,   "template": tpl_implem_neon["compare"],                                          } ], # cmpgt
     "cmple": [
-        { "instr_name": "cleq",         "datatypes": all_64bit,                        "template": tpl_implem_neon["compare"],            "if": "defined(__aarch64__)"  },
-        { "instr_name": "cleq",         "datatypes": all_32bit + all_16bit + all_8bit, "template": tpl_implem_neon["compare"],                                          } ], # cmple
+        { "instr_name": "cleq",         "datatypes": all_64bit,                          "template": tpl_implem_neon["compare"],            "if": "defined(__aarch64__)"  },
+        { "instr_name": "cleq",         "datatypes": all_32bit + all_16bit + all_8bit,   "template": tpl_implem_neon["compare"],                                          } ], # cmple
     "cmpge": [
-        { "instr_name": "cgeq",         "datatypes": all_64bit,                        "template": tpl_implem_neon["compare"],            "if": "defined(__aarch64__)"  },
-        { "instr_name": "cgeq",         "datatypes": all_32bit + all_16bit + all_8bit, "template": tpl_implem_neon["compare"],                                          } ], # cmpge
+        { "instr_name": "cgeq",         "datatypes": all_64bit,                          "template": tpl_implem_neon["compare"],            "if": "defined(__aarch64__)"  },
+        { "instr_name": "cgeq",         "datatypes": all_32bit + all_16bit + all_8bit,   "template": tpl_implem_neon["compare"],                                          } ], # cmpge
 }

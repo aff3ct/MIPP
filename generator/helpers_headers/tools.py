@@ -40,6 +40,24 @@ for dt_ret in all_datatypes:
 		new_entry = [dt_par, dt_ret]
 		if new_entry not in all_datatypes_cart_prod:
 			all_datatypes_cart_prod.append(dt_par + "," + dt_ret);
+
+
+all_datatypes_cart_prod_except_f64 = []
+for dt_ret in all_datatypes:
+    if (dt_ret != "float64"):
+        for dt_par in all_datatypes:
+            if (dt_par != "float64"):
+                new_entry = [dt_par, dt_ret]
+                if new_entry not in all_datatypes_cart_prod_except_f64:
+                    all_datatypes_cart_prod_except_f64.append(dt_par + "," + dt_ret);
+
+all_datatypes_cart_prod_inc_f64 = [];
+for dt_ret in all_datatypes:
+    for dt_par in all_datatypes:
+        new_entry = [dt_par, dt_ret]
+        if new_entry not in all_datatypes_cart_prod_inc_f64:
+            if (dt_par == "float64" or dt_ret == "float64"):
+                all_datatypes_cart_prod_inc_f64.append(dt_par + "," + dt_ret);
 			
 def find_data_types_from(criteria):
 	all_types = dict(datatypes);

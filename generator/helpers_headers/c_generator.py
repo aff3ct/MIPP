@@ -23,7 +23,14 @@ def gen_c_structures(isa, file):
 	j2_template = Template(template, undefined=StrictUndefined)
 
 	for dt in isa["datatypes"]:
+		if "if" in isa["datatypes"][dt]:
+			print("#if " + isa["datatypes"][dt]["if"], file=file)
 		print(j2_template.render(isa=isa, isa_datatype=isa["datatypes"][dt], datatype=datatypes[dt]), file=file)
+		if "if" in isa["datatypes"][dt]:
+			print("#else // this is a hack to compile when the datatype is not suported by the SIMD extension", file=file)
+			fake_datatype = { "reg": "int" }
+			print(j2_template.render(isa=isa, isa_datatype=fake_datatype, datatype=datatypes[dt]), file=file)
+			print("#endif // " + isa["datatypes"][dt]["if"], file=file)
 
 	template = """typedef struct { {{ isa_datatype.msk }} m; } rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
 	j2_template = Template(template, undefined=StrictUndefined)
