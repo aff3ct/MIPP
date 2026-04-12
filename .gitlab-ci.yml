@@ -28,6 +28,8 @@ generation-headers:
   image: registry.gitlab.com/aff3ct/aff3ct/mipp_linux:latest
   stage: generation
   allow_failure: false
+  rules:
+    - when: always
   artifacts:
     name: mipp_headers
     when: always
@@ -48,6 +50,8 @@ generation-tests:
   image: registry.gitlab.com/aff3ct/aff3ct/mipp_linux:latest
   stage: generation
   allow_failure: false
+  rules:
+    - when: always
   artifacts:
     name: mipp_tests
     when: always
@@ -75,6 +79,8 @@ analysis-cppcheck:
     - job: generation-headers
       artifacts: true
   allow_failure: false
+  rules:
+    - when: always
   artifacts:
     name: analysis-cppcheck-logs
     when: always
@@ -232,6 +238,8 @@ test-unit:
   image: registry.gitlab.com/aff3ct/aff3ct/mipp_${OS}:${COMPILER}_${ARCH}
   stage: test
   allow_failure: false
+  rules:
+    - when: always
   tags:
     - $OS
     - $ARCH
