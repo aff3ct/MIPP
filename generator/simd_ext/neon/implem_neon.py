@@ -23,9 +23,9 @@ isa_neon = {
 
 tpl_implem_neon = {
     "cast":             { "format": "short", "code": "{% if isa_dt_par.data_ext != isa_dt_ret.data_ext -%}{{ isa.prefix }}{{ instr_name }}_{{isa_dt_ret.data_ext}}_{{isa_dt_par.data_ext}}(r0.r);{% else -%} r0.r;{% endif %}" },
-    "cast_k":           { "format": "short", "code": "{% if isa_dt_par.data_ext_msk != isa_dt_ret.data_ext_msk -%}{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext_msk }}_{{ isa_dt_ret.data_ext_msk }}(m0.m);{% else -%} m0.m;{% endif %}" },
-    "toreg":            { "format": "short", "code": "{% if isa_dt_par.data_ext_msk != isa_dt_ret.data_ext -%}{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext_msk }}_{{ isa_dt_ret.data_ext }}(m0.m);{% else -%} m0.m;{% endif %}" },
-    "tomsk":            { "format": "short", "code": "{% if isa_dt_par.data_ext != isa_dt_ret.data_ext_msk -%}{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_{{ isa_dt_ret.data_ext_msk }}(r0.r);{% else -%} r0.r;{% endif %}" },
+    "cast_k":           { "format": "short", "code": "{% if isa_dt_par.data_ext_msk != isa_dt_ret.data_ext_msk -%}{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_ret.data_ext_msk }}_{{ isa_dt_par.data_ext_msk }}(m0.m);{% else -%} m0.m;{% endif %}" },
+    "toreg":            { "format": "short", "code": "{% if isa_dt_par.data_ext_msk != isa_dt_ret.data_ext -%}{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_ret.data_ext }}_{{ isa_dt_par.data_ext_msk }}(m0.m);{% else -%} m0.m;{% endif %}" },
+    "tomsk":            { "format": "short", "code": "{% if isa_dt_par.data_ext != isa_dt_ret.data_ext_msk -%}{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_ret.data_ext_msk }}_{{ isa_dt_par.data_ext }}(r0.r);{% else -%} r0.r;{% endif %}" },
     "load":             { "format": "short", "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(p0);" },
     "store":            { "format": "short", "code": "\t{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(p0, r0.r);" },
     "set1":             { "format": "short", "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(v0);"},
