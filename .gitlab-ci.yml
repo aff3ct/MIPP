@@ -19,7 +19,7 @@ before_script:
     matrix:
       - OS: [linux]
         COMPILER: ["gcc-14", "clang-20"]
-        ARCH: [sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2, avx2-fma, avx512f, avx512bw, avx512dq, arm64]
+        ARCH: [sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2, avx2-fma, avx512f, avx512bw, avx512dq, armv8-neon]
 
 # GENERATION ----------------------------------------------------------------------------------------------------------
 
@@ -130,7 +130,7 @@ analysis-cppcheck:
     - if: '$ARCH == "avx512dq"'
       variables:
         SIMD_EXT: "-mavx512f -mavx512bw -mavx512dq"
-    - if: '$ARCH == "arm64"'
+    - if: '$ARCH == "armv8-neon"'
       variables:
         SIMD_EXT: "-march=armv8.1-a+simd"
   before_script:

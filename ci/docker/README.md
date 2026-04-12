@@ -37,8 +37,8 @@ docker tag linux_x86_64_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_l
 docker tag linux_x86_64_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_avx512bw
 docker tag linux_x86_64_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_avx512dq
 
-docker tag linux_arm64_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_linux:gcc-14_arm64
-docker tag linux_arm64_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_arm64
+docker tag linux_arm64_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_linux:gcc-14_armv8-neon
+docker tag linux_arm64_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_armv8-neon
 ```
 
 Login to Gitlab.com registry:
@@ -74,6 +74,6 @@ docker push registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_avx512f
 docker push registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_avx512bw
 docker push registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_avx512dq
 
-docker push registry.gitlab.com/aff3ct/aff3ct/mipp_linux:gcc-14_arm64
-docker push registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_arm64
+docker push registry.gitlab.com/aff3ct/aff3ct/mipp_linux:gcc-14_armv8-neon
+docker push registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_armv8-neon
 ```
