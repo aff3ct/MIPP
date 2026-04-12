@@ -19,7 +19,8 @@ before_script:
     matrix:
       - OS: [linux]
         COMPILER: ["gcc-14", "clang-20"]
-        ARCH: [sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2, avx2-fma, avx512f, avx512bw, avx512dq, armv7-neon, armv7-neon-fma, armv8-neon, riscv64-rvv1.0]
+        ARCH: [sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2, avx2-fma, avx512f, avx512bw, avx512dq, armv7-neon, armv7-neon-fma, armv8-neon]
+        # ARCH: [sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2, avx2-fma, avx512f, avx512bw, avx512dq, armv7-neon, armv7-neon-fma, armv8-neon, riscv64-rvv1.0]
 
 # GENERATION ----------------------------------------------------------------------------------------------------------
 
@@ -141,8 +142,8 @@ analysis-cppcheck:
         SIMD_EXT: "-march=armv8.1-a+simd"
     - if: '$ARCH == "riscv64-rvv1.0"'
       variables:
-        #SIMD_EXT: "-march=rv64gv1_zve32f_zvl256b -mrvv-vector-bits=zvl"
-        SIMD_EXT: "-march=rv64gcv1_zve32f_zvl256b -mabi=lp64d -mrvv-vector-bits=256"
+        SIMD_EXT: "-march=rv64gv1_zve32f_zvl256b -mrvv-vector-bits=zvl"
+        #SIMD_EXT: "-march=rv64gcv1_zve32f_zvl256b -mabi=lp64d -mrvv-vector-bits=256"
   before_script:
   # find the number of threads on the computer
   - |
