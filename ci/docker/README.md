@@ -4,6 +4,11 @@ Build images:
 ```bash
 cd linux/x86_64/gcc-14_clang-20
 docker build --platform linux/amd64 -t linux_x86_64_gcc-14_clang-20 .
+
+cd ../../..
+cd linux/armhf/gcc-14_clang-20
+docker build --platform linux/armhf -t linux_armhf_gcc-14_clang-20 .
+
 cd ../../..
 cd linux/arm64/gcc-14_clang-20
 docker build --platform linux/arm64 -t linux_arm64_gcc-14_clang-20 .
@@ -36,6 +41,12 @@ docker tag linux_x86_64_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_l
 docker tag linux_x86_64_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_avx512f
 docker tag linux_x86_64_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_avx512bw
 docker tag linux_x86_64_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_avx512dq
+
+docker tag linux_armhf_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_linux:gcc-14_armv7-neon
+docker tag linux_armhf_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_linux:gcc-14_armv7-neon-fma
+
+docker tag linux_armhf_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_armv7-neon
+docker tag linux_armhf_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_armv7-neon-fma
 
 docker tag linux_arm64_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_linux:gcc-14_armv8-neon
 docker tag linux_arm64_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_armv8-neon
@@ -76,4 +87,9 @@ docker push registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_avx512dq
 
 docker push registry.gitlab.com/aff3ct/aff3ct/mipp_linux:gcc-14_armv8-neon
 docker push registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_armv8-neon
+
+docker push registry.gitlab.com/aff3ct/aff3ct/mipp_linux:gcc-14_armv7-neon
+docker push registry.gitlab.com/aff3ct/aff3ct/mipp_linux:gcc-14_armv7-neon-fma
+docker push registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_armv7-neon
+docker push registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_armv7-neon-fma
 ```
