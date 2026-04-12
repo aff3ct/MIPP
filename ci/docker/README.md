@@ -12,6 +12,10 @@ docker build --platform linux/armhf -t linux_armhf_gcc-14_clang-20 .
 cd ../../..
 cd linux/arm64/gcc-14_clang-20
 docker build --platform linux/arm64 -t linux_arm64_gcc-14_clang-20 .
+
+cd ../../..
+cd linux/riscv64/gcc-14_clang-20
+docker build --platform linux/riscv64 -t linux_riscv64_gcc-14_clang-20 .
 ```
 
 Create images aliases:
@@ -49,6 +53,9 @@ docker tag linux_armhf_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_li
 
 docker tag linux_arm64_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_linux:gcc-14_armv8-neon
 docker tag linux_arm64_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_armv8-neon
+
+docker tag linux_riscv64_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_linux:gcc-14_riscv64-rvv1.0
+docker tag linux_riscv64_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_riscv64-rvv1.0
 ```
 
 Login to Gitlab.com registry:
@@ -84,11 +91,14 @@ docker push registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_avx512f
 docker push registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_avx512bw
 docker push registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_avx512dq
 
-docker push registry.gitlab.com/aff3ct/aff3ct/mipp_linux:gcc-14_armv8-neon
-docker push registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_armv8-neon
-
 docker push registry.gitlab.com/aff3ct/aff3ct/mipp_linux:gcc-14_armv7-neon
 docker push registry.gitlab.com/aff3ct/aff3ct/mipp_linux:gcc-14_armv7-neon-fma
 docker push registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_armv7-neon
 docker push registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_armv7-neon-fma
+
+docker push registry.gitlab.com/aff3ct/aff3ct/mipp_linux:gcc-14_armv8-neon
+docker push registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_armv8-neon
+
+docker push registry.gitlab.com/aff3ct/aff3ct/mipp_linux:gcc-14_riscv64-rvv1.0
+docker push registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_riscv64-rvv1.0
 ```
