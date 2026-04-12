@@ -5,3 +5,4 @@ mkdocs-material==9.5.13
 mkdocs-charts-plugin==0.0.10
 markdown-grid-tables
 mkdocs-glightbox==0.5.2
+mkdocs-awesome-pages-plugin==2.10.1

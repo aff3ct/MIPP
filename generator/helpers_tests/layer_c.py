@@ -474,7 +474,7 @@ shape_templates = {
 }
 
 deny = { 
-    "round", #round is not implemented on rvv or avx2 (oops)
+    #"round", #round is not implemented on avx2 (oops)
 }
 
 
@@ -550,8 +550,16 @@ uint{{type_size}}_t got_bits = std::bit_cast<uint{{type_size}}_t>(mipp_get_float
         "loop_body": """\t\t{{dt_ext}}_t res = inputs1[i] * inputs2[i] + inputs3[i];""",
     },
     
+    "fnmadd": {
+        "loop_body": """\t\t{{dt_ext}}_t res = -(inputs1[i] * inputs2[i]) + inputs3[i];""",
+    },
+    
     "fmsub": {
         "loop_body": """\t\t{{dt_ext}}_t res = inputs1[i] * inputs2[i] - inputs3[i];""",
+    },
+    
+    "fnmsub": {
+        "loop_body": """\t\t{{dt_ext}}_t res = -(inputs1[i] * inputs2[i]) - inputs3[i];""",
     },
     
     "max" : {
@@ -624,8 +632,24 @@ uint{{type_size}}_t got_bits = std::bit_cast<uint{{type_size}}_t>(mipp_get_float
         "loop_body" : LB_REG_BINOP_FLOAT_WORKAROUND,
         "loop_assert" : AS_REG_BINOP_FLOAT_WORKAROUND
     },
-  
-
+    
+    "round": {
+        "init" : """\tstd::iota(inputs1, inputs1 + vectorSize, 1);
+\tstd::mt19937 g;
+std::uniform_real_distribution<float> dis(0.0, 1.0);
+\tfor(int i = 0; i < vectorSize; i++)
+\t{
+\t\tinputs1[i] += dis(g);
+\t}""",
+        "loop_body": """\t\t{{dt_ext}}_t res = std::round(inputs1[i]);""",
+    },
+    "div2": {
+        "loop_body": """\t\t{{dt_ext}}_t res = inputs1[i] / 2;""",
+    },
+    
+    "div4": {
+        "loop_body": """\t\t{{dt_ext}}_t res = inputs1[i] / 4;""",
+    },
 }
 
 NO_LOOP_FUNCS = {"hadd", "hmul", "hmin", "hmax", 

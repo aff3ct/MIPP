@@ -117,22 +117,22 @@ tpl_implem_emu_rvv = {
     """
         if ((((uint64_t)p0) & (8 - 1)) == 0) {
             %r<tp>% out;
-            out.r = {{isa.prefix}}_vle{{isa_dt_par.data_ext_logi}}_v_{{isa_dt_par.data_ext}}(({{ isa_dt_par.to_ptr }}*)p0, %N<tp>%);
+            out.r = {{isa.prefix}}_vle{{isa_dt_par.width}}_v_{{isa_dt_par.data_ext}}(({{ isa_dt_par.to_ptr }}*)p0, %N<tp>%);
             return out;
         } else {
-            alignas(8) {{isa_dt_par.to_ptr}} tmp[%N<tp>%];
+            {{isa_dt_par.to_ptr}} tmp[%N<tp>%];
             memcpy(tmp, p0, %N<tp>%);
             %r<tp>% out;
-            out.r = {{ isa.prefix }}_vle{{ isa_dt_par.data_ext_logi }}_v_{{ isa_dt_par.data_ext }}(({{ isa_dt_par.to_ptr }}*) tmp, %N<tp>%);
+            out.r = {{ isa.prefix }}_vle{{ isa_dt_par.width}}_v_{{ isa_dt_par.data_ext }}(({{ isa_dt_par.to_ptr }}*) tmp, %N<tp>%);
             return out;
         } """},
     "storeu" : { "format" : "long", "code" :
     """
         if ((((uint64_t)p0) & (8 - 1)) == 0) {
-            return {{isa.prefix}}_vse{{isa_dt_par.data_ext_logi}}_v_{{isa_dt_par.data_ext}}(({{ isa_dt_par.to_ptr }}*)p0, r0.r, %N<tp>%);
+            return {{isa.prefix}}_vse{{isa_dt_par.width}}_v_{{isa_dt_par.data_ext}}(({{ isa_dt_par.to_ptr }}*)p0, r0.r, %N<tp>%);
         } else {
-            alignas(8) {{isa_dt_par.to_ptr}} tmp[%N<tp>%];
-            {{ isa.prefix }}_vse{{ isa_dt_par.data_ext_logi }}_v_{{ isa_dt_par.data_ext }}(({{ isa_dt_par.to_ptr }}*) tmp, r0.r, %N<tp>%);
+            {{isa_dt_par.to_ptr}} tmp[%N<tp>%];
+            {{ isa.prefix }}_vse{{ isa_dt_par.width }}_v_{{ isa_dt_par.data_ext }}(({{ isa_dt_par.to_ptr }}*) tmp, r0.r, %N<tp>%);
             memcpy(p0, tmp, %N<tp>%);
             return;
         }"""},
@@ -159,13 +159,13 @@ tpl_implem_emu_rvv = {
     """
         if ((((uint64_t)vals) & (8 - 1)) == 0) {
             %r<tp>% out;
-            out.r = {{isa.prefix}}_vle{{isa_dt_par.data_ext_logi}}_v_{{isa_dt_par.data_ext}}(({{ isa_dt_par.to_ptr }}*)vals, %N<tp>%);
+            out.r = {{isa.prefix}}_vle{{isa_dt_par.width}}_v_{{isa_dt_par.data_ext}}(({{ isa_dt_par.to_ptr }}*)vals, %N<tp>%);
             return out;
         } else {
             alignas(8) {{isa_dt_par.to_ptr}} tmp[%N<tp>%];
             memcpy(tmp, vals, %N<tp>%);
             %r<tp>% out;
-            out.r = {{ isa.prefix }}_vle{{ isa_dt_par.data_ext_logi }}_v_{{ isa_dt_par.data_ext }}(({{ isa_dt_par.to_ptr }}*) tmp, %N<tp>%);
+            out.r = {{ isa.prefix }}_vle{{ isa_dt_par.width }}_v_{{ isa_dt_par.data_ext }}(({{ isa_dt_par.to_ptr }}*) tmp, %N<tp>%);
             return out;
         } """},
     
@@ -178,7 +178,7 @@ tpl_implem_emu_rvv = {
             if (vals[i] != 0) packed[i >> 3] |= (uint8_t)1 << (i & 7);
         }
         %m<tp>% out;
-        out.m = {{isa.prefix}}_vlm_v_{{isa_dt_par.data_ext_msk}}(packed, %N<tp>%);
+        out.m = {{isa.prefix}}_vlm_v_{{isa_dt_par.data_ext_logi}}(packed, %N<tp>%);
         return out;"""},
     
     "set1_k" : { "format" : "long", "code" :
@@ -275,70 +275,72 @@ tpl_implem_emu_rvv = {
     "maskzld" : { "format" : "long", "code" :
     """
         %r<tp>% ret = %set1<tp>%(0);
-        ret.r = {{ isa.prefix }}_vle{{ isa_dt_par.data_ext_logi }}_v_{{ isa_dt_par.data_ext }}_mu(m0.m,ret.r,({{isa_dt_par.to_ptr}}*)p0, %N<tp>%);
+        ret.r = {{ isa.prefix }}_vle{{ isa_dt_par.width }}_v_{{ isa_dt_par.data_ext }}_mu(m0.m,ret.r,({{isa_dt_par.to_ptr}}*)p0, %N<tp>%);
         return ret;"""},  
     
      #suitable for hadd and hmax on unsigned ints
     "hadd_hmax_uint" : { "format" : "long", "code" :
     """
-        %r<tp>% ret = %set1<tp>%(0);
-        ret.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.data_ext}}(r0.r,ret.r,%N<tp>%);
+        {{isa_dt_par.reg}} tmp = %set1<tp>%(0).r;
+        tmp = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1(r0.r,tmp,%N<tp>%);
+        %r<tp>% ret; ret.r = tmp;
         return ret;"""},
     
     "hmax_int" : { "format" : "long", "code" :
     """
-        %r<tp>% ret = %set1<tp>%(INT{{isa_dt_par.data_ext_logi}}_MIN);
-        ret.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.data_ext}}(r0.r,ret.r,%N<tp>%);
-        return ret;
-    """},
+        {{isa_dt_par.reg}} tmp = %set1<tp>%(INT{{isa_dt_par.width}}_MIN).r;
+        tmp = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1(r0.r,tmp,%N<tp>%);
+        %r<tp>% ret;ret.r = tmp;
+        return ret;"""},
     
     "hmax_float32" : { "format" : "long", "code" :
     """
-        %r<tp>% ret = %set1<tp>%(FLT_MIN);
-        ret.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.data_ext}}(r0.r,ret.r,%N<tp>%);
-        return ret;
-    """},
+        {{isa_dt_par.reg}} tmp = %set1<tp>%(FLT_MIN).r;
+        tmp = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1(r0.r,tmp,%N<tp>%);
+        %r<tp>% ret;ret.r = tmp;
+        return ret;"""},
     
     "hmax_float64" : { "format" : "long", "code" :
     """
-        %r<tp>% ret = %set1<tp>%(DBL_MIN);
-        ret.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.data_ext}}(r0.r,ret.r,%N<tp>%);
+        {{isa_dt_par.reg}} tmp = %set1<tp>%(DBL_MIN).r;
+        tmp = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1(r0.r,tmp,%N<tp>%);
+        %r<tp>% ret;ret.r = tmp;
         return ret;
     """},
     
     "hmin_int" : { "format" : "long", "code" :
     """
-        %r<tp>% ret = %set1<tp>%(INT{{isa_dt_par.data_ext_logi}}_MAX);
-        ret.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.data_ext}}(r0.r,ret.r,%N<tp>%);
-        return ret;
-    """},
+        {{isa_dt_par.reg}} tmp = %set1<tp>%(INT{{isa_dt_par.width}}_MAX).r;
+        tmp = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1(r0.r,tmp,%N<tp>%);
+        %r<tp>% ret;ret.r = tmp;
+        return ret; """},
     
     "hmin_uint" : { "format" : "long", "code" :
     """
-        %r<tp>% ret = %set1<tp>%(UINT{{isa_dt_par.data_ext_logi}}_MAX);
-        ret.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.data_ext}}(r0.r,ret.r,%N<tp>%);
-        return ret;
-    """},
+        {{isa_dt_par.reg}} tmp = %set1<tp>%(UINT{{isa_dt_par.width}}_MAX).r;
+        tmp = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1(r0.r,tmp,%N<tp>%);
+        %r<tp>% ret;ret.r = tmp;
+        return ret;"""},
     
     "hmin_float32" : { "format" : "long", "code" :
     """
-        %r<tp>% ret = %set1<tp>%(FLT_MAX);
-        ret.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.data_ext}}(r0.r,ret.r,%N<tp>%);
-        return ret;
-    """},
+        {{isa_dt_par.reg}} tmp = %set1<tp>%(FLT_MAX).r;
+        tmp = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1(r0.r,tmp,%N<tp>%);
+        %r<tp>% ret;ret.r = tmp;
+        return ret;"""},
     
     "hmin_float64" : { "format" : "long", "code" :
     """
-        %r<tp>% ret = %set1<tp>%(DBL_MAX);
-        ret.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.data_ext}}(r0.r,ret.r,%N<tp>%);
-        return ret;
-    """},  
+        {{isa_dt_par.reg}} tmp = %set1<tp>%(DBL_MAX).r;
+        tmp = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1(r0.r,tmp,%N<tp>%);
+        %r<tp>% ret;ret.r = tmp;
+        return ret;"""},  
     
     "notb_k" : { "format" :"long", "code" :
     """
         %m<tp>% ret;
         ret = %set0_k<tp>%();
-        ret.m = {{isa.prefix}}_v{{instr_name}}_mm_{{isa_dt_par.data_ext_msk}}(ret.m,m0.m, %N<tp>%);
+        ret.m = {{isa.prefix}}_v{{instr_name}}_mm_{{isa_dt_par.data_ext_logi}}(ret.m,m0.m, %N<tp>%);
         return ret;
    """},
     
@@ -429,12 +431,13 @@ tpl_implem_emu_rvv = {
  
     "cast_k_same_size" : { "format" :"short", "code" :"m0.m;"},
     
+    #those cast_k are wrong. I'm gonna leave them as is for now.
     "cast_k_diff_size" : { "format" :"long", "code" :
     """
         %r<tp>% r0 =  %toreg<tp>%(m0);
         %r<tr>% r1 = %cast<tp,tr>%(r0);
         %r<c:uint|b:tr>% rtmp0;
-        rtmp0.r = {{isa.prefix}}_vid_v_u{{isa_dt_ret.data_ext_logi}}m1(%N<tp>%);
+        rtmp0.r = {{isa.prefix}}_vid_v_{{isa_dt_ret.data_ext}}(%N<tp>%);
         %r<tr>% rtmp = %cast<c:uint|b:tr,tr>%(rtmp0);
         %r<tr>% rtmp1;
         rtmp1 = %set0<tr>%();
@@ -448,13 +451,45 @@ tpl_implem_emu_rvv = {
         %r<tp>% r0 = %toreg<tp>%(m0);
         %r<tr>% r1 = %cast<tp,tr>%(r0);
         %r<tr>% rtmp;
-        rtmp.r = {{isa.prefix}}_vid_v_u{{isa_dt_re.data_ext_logi}}m1(%N<tr>%);
+        rtmp.r = {{isa.prefix}}_vid_v_{{isa_dt_ret.data_ext}}(%N<tr>%);
         %r<tr>% rtmp1;
         rtmp1 = %set0<tr>%(1);
         rtmp = %andb<tr>%(rtmp,rtmp1);
         r1 = %andb<tr>%(r1,rtmp);
         return %tomsk<tr>%(r1);
-    """}
+    """},
+    
+      
+    "fnmadd_int" : {"format" : "long", "code" : """
+        %r<tp>% res = %mul<tp>%(r0, r1);
+        %r<tp>% tmp = %set0<tp>%();
+        res = %sub<tp>%(tmp, res);
+        res = %add<tp>%(res, r2);
+        return res;
+   """},
+   
+    "fnmsub_int" : {"format" : "long", "code" : """
+        %r<tp>% res = %mul<tp>%(r0, r1);
+        %r<tp>% tmp = %set0<tp>%();
+        res = %sub<tp>%(tmp, res);
+        res = %sub<tp>%(res, r2);
+        return res;
+    """},
+    "fnmadd_float" : {"format" : "long", "code" : """
+        %r<tp>% tmp = %set0<tp>%();
+        tmp = %sub<tp>%(tmp, r0);
+        %r<tp>% res; 
+        res.r = {{isa.prefix}}_v{{instr_name}}_vv_{{isa_dt_par.data_ext}}(tmp.r, r1.r, r2.r, %N<tp>%);
+        return res;
+    """},
+
+    "fnmsub_float" : {"format" : "long", "code" : """
+        %r<tp>% tmp = %set0<tp>%();
+        tmp = %sub<tp>%(tmp, r0);
+        %r<tp>% res; 
+        res.r = {{isa.prefix}}_v{{instr_name}}_vv_{{isa_dt_par.data_ext}}(tmp.r, r1.r, r2.r, %N<tp>%);
+        return res;
+    """},
 
 }
 
@@ -542,9 +577,17 @@ implems_emu_rvv = {
 	   { "datatypes" : [int8, uint8], "template" : tpl_implem_emu_rvv["msb-8"] }, ],
     "cast_k" : [
        #no problem
-       { "instr_name" : "vid", "datatypes" : datatypes_same_size, "template" : tpl_implem_emu_rvv["cast_k_same_size"]},
+       { "instr_name" : "vid", "datatypes" : datatypes_same_size, "template" : tpl_implem_emu_rvv["cast_k_same_size"]}],
        #use toreg->cast->vid+and(1)->tomask
-       { "instr_name" : "vid", "datatypes" : datatypes_narrowing, "template" : tpl_implem_emu_rvv["cast_k_diff_size"]},
+       #{ "instr_name" : "vid", "datatypes" : datatypes_narrowing, "template" : tpl_implem_emu_rvv["cast_k_diff_size"]},
        #dont know how its supposed to work
-       { "instr_name" : "vid", "datatypes" : datatypes_widening, "template" : tpl_implem_emu_rvv["cast_k_diff_size"]}],
+       #{ "instr_name" : "vid", "datatypes" : datatypes_widening, "template" : tpl_implem_emu_rvv["cast_k_diff_size"]}],
+    #fnmadd RVV != fnmadd AVX2. 
+    #RVV is -(a*b+c) while AVX2 is -(a*b)+c lol
+    "fnmadd" : [
+       { "instr_name" : "fmadd", "datatypes" : all_float,     "template" : tpl_implem_emu_rvv["fnmadd_float"]},
+       { "instr_name" : "fmadd", "datatypes" : [int32],       "template" : tpl_implem_emu_rvv["fnmadd_int"]}],
+    "fnmsub" : [
+       { "instr_name" : "fmsub", "datatypes" : all_float,     "template" : tpl_implem_emu_rvv["fnmsub_float"]},
+       { "instr_name" : "fsub",   "datatypes" : [int32],       "template" : tpl_implem_emu_rvv["fnmsub_int"]}],
 }

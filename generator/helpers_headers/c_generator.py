@@ -56,6 +56,8 @@ def gen_c_functions(isa, file, funcs, implems):
 					if not is_missing_func(funcs, f, dt_key):
 						print("// '" + f + "<" + dt_key + ">' has been skipped (reason: \"Info: It has been implemented before.\").",file=file)
 					else:
+						if isa["name"] == "sse" and 'instr_name' in ff and ff['instr_name'] == "div" and "float64" in dt:
+        						print(f,dt_key, funcs[f])
 						j2_template = Template(ff["template"]["code"], undefined=StrictUndefined)
 						instr_name = ""
 						if "instr_name" in ff:

@@ -31,6 +31,8 @@ from implem_emu_sve import implems_emu_sve
 from implem_emu_rvv import implems_emu_rvv
 from implem_emu_neon import implems_emu_neon
 
+from generic_emu import implems_generic_emu
+
 avx512_guard = "#if defined(MIPP_AVX512)"
 avx2_guard = "#elif defined(MIPP_AVX2)"
 avx_guard = "#elif defined(MIPP_AVX)"
@@ -45,6 +47,13 @@ implems_sse.update(implems_emu_sse)
 implems_sve.update(implems_emu_sve)
 implems_rvv.update(implems_emu_rvv)
 implems_neon.update(implems_emu_neon)
+
+#implems_avx512.update(implems_generic_emu)
+implems_avx.update(implems_generic_emu)
+implems_sse.update(implems_generic_emu)
+#implems_sve.update(implems_generic_emu)
+implems_rvv.update(implems_generic_emu)
+
 
 implem_dict = {
     # avx512 has to be first bc it's the one w the #if

@@ -59,6 +59,10 @@ tpl_implem_avx = {
     "cmp_int":        { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r);" },
     "blend_float":    { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r1.r, r0.r, m0.m);"},
     "blend_int":      { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_epi8(r1.r, r0.r, m0.m);" },
+    
+    "round_float":    { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r,(_MM_FROUND_TO_NEAREST_INT |_MM_FROUND_NO_EXC));" },
+    "round_int":      { "format": "short", "code": "r0.r;" },
+    
     "testz_2args":    { "format": "long",  "code": "return {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_msk }}(m0.m, m1.m);" },
     "cmpeq_float":    { "format": "long", "code":
 """// long format
@@ -226,6 +230,7 @@ tpl_implem_avx = {
 	%m<c:int|b:tp>% m0i = %cast_k<tp,c:int|b:tp>%(m0);
 	%m<c:int|b:tp>% m1i = %cast_k<tp,c:int|b:tp>%(m1);	
 	return _mm256_testz_si256(m0i.m, m1i.m);""" },
+
 }
 
 """
@@ -299,8 +304,13 @@ implems_avx = {
         { "instr_name": "max",            "datatypes": [int32, int16, int8, uint32, uint16, uint8], "template": tpl_implem_avx["arith_2args"],      "if": "defined(__AVX2__)"            } ], # max
     "fmadd": [
         { "instr_name": "fmadd",          "datatypes": all_float,                                   "template": tpl_implem_avx["arith_3args"],      "if": "defined(__FMA__)"             } ], # fmadd
+    
+    "fnmadd": [
+        { "instr_name": "fnmadd",         "datatypes": all_float,                                   "template": tpl_implem_avx["arith_3args"],      "if": "defined(__FMA__)"             } ], # fnmadd
     "fmsub": [
         { "instr_name": "fmsub",          "datatypes": all_float,                                   "template": tpl_implem_avx["arith_3args"],      "if": "defined(__FMA__)"             } ], # fmsub
+    "fnmsub": [
+        { "instr_name": "fnmsub",         "datatypes": all_float,                                   "template": tpl_implem_avx["arith_3args"],      "if": "defined(__FMA__)"             } ], # fnmsub
     "andb": [
         { "instr_name": "and",            "datatypes": all_float,                                   "template": tpl_implem_avx["logi_2args"],                                            },
         { "instr_name": "andb",           "datatypes": all_int_uint,                                "template": tpl_implem_avx["logi_2args_e"],     "if": "!defined(__AVX2__)"           },
@@ -375,6 +385,9 @@ implems_avx = {
         { "instr_name": "max",            "datatypes": [int32, uint32],                             "template": tpl_implem_avx["reduce_32"],        "if": "defined(__AVX2__)"            },
         { "instr_name": "max",            "datatypes": [int16, uint16],                             "template": tpl_implem_avx["reduce_16"],        "if": "defined(__AVX2__)"            },
         { "instr_name": "max",            "datatypes": [int8, uint8],                               "template": tpl_implem_avx["reduce_8"],         "if": "defined(__AVX2__)"            } ], # hmax
+    "round" : [
+        { "instr_name": "round",          "datatypes": all_float,                                   "template": tpl_implem_avx["round_float"],                                                 },
+        { "instr_name" : "",              "datatypes": all_int_uint,                                "template": tpl_implem_avx["round_int"]                                         }], # round
 #   "gather": [
 #       { "instr_name": "gather",         "datatypes": [float64, float32, int64, int32],            "template": tpl_implem_avx["gather"],           "if": "defined(__AVX2__)"            } ], # gather
 #   "mask_gather": [

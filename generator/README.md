@@ -25,3 +25,11 @@ source .venv/bin/activate
 source .venv/bin/activate
 ./gen_mipp_tests.py
 ```
+
+
+## Generate MIPP Documentation
+
+```bash
+source .venv/bin/activate
+./gen_mipp_infos.py
+```
