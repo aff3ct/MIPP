@@ -251,7 +251,7 @@ analysis-cppcheck:
 #     - $COMPILER_CPP -std=c++11 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Werror -O3 -funroll-loops $SIMD_EXT -I../include -o mipp_cpp mipp.cpp
 #     - $COMPILER_CPP -std=c++11 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Werror -O3 -funroll-loops $SIMD_EXT -I../include -o mipp_object_cpp mipp_object.cpp
 
-# RVV examples build: C++ only (do NOT compile any C examples for RVV)
+# RVV examples build: C++ only
 build-test-examples-rvv:
   extends: .build-common-rvv
   needs:
@@ -265,6 +265,9 @@ build-test-examples-rvv:
       - ./examples/mipp_cpp
       - ./examples/mipp_object_cpp
   script:
+    - echo "arch=$(uname -m)"
+    - echo "cpuinfo ISA:"
+    - grep -i 'isa' /proc/cpuinfo || true
     - echo "Debug -- Job=$CI_NODE_INDEX/$CI_NODE_TOTAL"
     - echo "Debug -- OS=$OS"
     - echo "Debug -- COMPILER=$COMPILER"
@@ -316,6 +319,9 @@ build-test-unit-rvv:
     paths:
       - ./tests/build_${OS}_${COMPILER}_${ARCH}/bin/
   script:
+    - echo "arch=$(uname -m)"
+    - echo "cpuinfo ISA:"
+    - grep -i 'isa' /proc/cpuinfo || true
     - echo "Debug -- Job=$CI_NODE_INDEX/$CI_NODE_TOTAL"
     - echo "Debug -- OS=$OS"
     - echo "Debug -- COMPILER=$COMPILER"
@@ -409,7 +415,7 @@ test-unit-rvv:
 #     - ./examples/mipp_cpp
 #     - ./examples/mipp_object_cpp
 
-# RVV examples tests: run only the C++ examples (no C binaries for RVV)
+# RVV examples tests: run only the C++ examples
 test-examples-rvv:
   extends: .matrix-linux-rvv
   image: registry.gitlab.com/aff3ct/aff3ct/mipp_${OS}:${COMPILER}_${ARCH}
