@@ -164,6 +164,21 @@ def gen_ci_structures(isa_list, file):
 			print(j2_template.render(isa=isa, datatype=datatypes[dt], lmul=str(lmul), lmul_2=str(lmul_2)), file=file)
 	print("#endif // MIPP_RVV", file=file)
 
+def gen_ci_mask_functions(func, dt_par, dt_ret, isa, file,lmul=0):
+	maskable = "maskable" in mipp_funcs[func] and mipp_funcs[func]["maskable"]
+	maskzable = "maskzable" in mipp_funcs[func] and mipp_funcs[func]["maskzable"]
+	
+	if maskable:
+		proto = build_proto(mipp_funcs[func]["proto"], dt_par, dt_ret, isa, func, lmul, False, False, "mask")
+		template = f'/*maskable:  {proto} {func} {lmul} hai:)*/'
+		j2_template = Template(template, undefined=StrictUndefined)
+		print(j2_template.render(), file=file)
+	if maskzable:
+		proto = build_proto(mipp_funcs[func]["proto"], dt_par, dt_ret, isa, func, lmul, False, False, "maskz")
+		template = f'/*maskzable: {proto} {func} {lmul} hai:)*/'
+		j2_template = Template(template, undefined=StrictUndefined)
+		print(j2_template.render(), file=file)
+
 def gen_ci_functions(isa_list, file, funcs):
 	isa_rvv = next((isa for isa in isa_list if isa["name"].startswith("rvv")), None)
 	for f in funcs:
@@ -204,6 +219,8 @@ def gen_ci_functions(isa_list, file, funcs):
 			print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name+"_m1", 1, False) + " {", file=file)
 			print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name) + ";", file=file)
 			print("}", file=file)
+   
+			gen_ci_mask_functions(f, dt_par, dt_ret, isa_list[0], file, 0)
 			
 			for lmul in all_lmul[1:]:
 				

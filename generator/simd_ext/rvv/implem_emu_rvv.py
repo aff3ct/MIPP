@@ -162,7 +162,8 @@ tpl_implem_emu_rvv = {
             out.r = {{isa.prefix}}_vle{{isa_dt_par.width}}_v_{{isa_dt_par.data_ext}}(({{ isa_dt_par.to_ptr }}*)vals, %N<tp>%);
             return out;
         } else {
-            alignas(8) {{isa_dt_par.to_ptr}} tmp[%N<tp>%];
+            //alignas(8) {{isa_dt_par.to_ptr}} tmp[%N<tp>%];
+            {{isa_dt_par.to_ptr}} tmp[%N<tp>%];
             memcpy(tmp, vals, %N<tp>%);
             %r<tp>% out;
             out.r = {{ isa.prefix }}_vle{{ isa_dt_par.width }}_v_{{ isa_dt_par.data_ext }}(({{ isa_dt_par.to_ptr }}*) tmp, %N<tp>%);
@@ -172,13 +173,15 @@ tpl_implem_emu_rvv = {
     "set_k" : { "format" : "long", "code" :
     """     
         size_t nbytes = (%N<tp>% + 7) / 8;  
-        uint8_t packed[nbytes];
+        //c++ doesn't want me to use vla.
+        uint8_t *packed =  (uint8_t * ) malloc(sizeof(uint8_t) * nbytes);
         memset(packed, 0, nbytes);    
         for(unsigned i = 0 ; i < %N<tp>%; i++){
             if (vals[i] != 0) packed[i >> 3] |= (uint8_t)1 << (i & 7);
         }
         %m<tp>% out;
         out.m = {{isa.prefix}}_vlm_v_{{isa_dt_par.data_ext_logi}}(packed, %N<tp>%);
+        free(packed);
         return out;"""},
     
     "set1_k" : { "format" : "long", "code" :
@@ -200,7 +203,7 @@ tpl_implem_emu_rvv = {
     #from implem_emu_SVE.py
     "toreg-64" : { "format" : "long", "code" :
     """
-        %r<tp>% one  = %set1<tp>%(0xFFFFFFFFFFFFFFFF);
+        %r<tp>% one  = %set1<tp>%((%v<tp>%)0xFFFFFFFFFFFFFFFF);
         %r<tp>% zero = %set1<tp>%(0);
         
         %r<tp>% ret;
@@ -208,14 +211,14 @@ tpl_implem_emu_rvv = {
         return ret;"""},
     "toreg-32" : { "format" : "long", "code" :
     """
-        %r<tp>% one  = %set1<tp>%(0xFFFFFFFF);
+        %r<tp>% one  = %set1<tp>%((%v<tp>%)0xFFFFFFFF);
         %r<tp>% zero = %set1<tp>%(0);
         %r<tp>% ret;
         ret.r = {{ isa.prefix }}_vmerge_vvm_{{ isa_dt_par.data_ext }}(zero.r, one.r, m0.m, %N<tp>%);
         return ret;"""},
     "toreg-16" : { "format" : "long", "code" :
     """
-        %r<tp>% one  = %set1<tp>%(0xFFFF);
+        %r<tp>% one  = %set1<tp>%((%v<tp>%)0xFFFF);
         %r<tp>% zero = %set1<tp>%(0);
         
         %r<tp>% ret;
@@ -224,7 +227,7 @@ tpl_implem_emu_rvv = {
     
     "toreg-8" : { "format" : "long", "code" :
     """
-        %r<tp>% one  = %set1<tp>%(0xFF);
+        %r<tp>% one  = %set1<tp>%((%v<tp>%)0xFF);
         %r<tp>% zero = %set1<tp>%(0);
         %r<tp>% ret;
         ret.r = {{ isa.prefix }}_vmerge_vvm_{{ isa_dt_par.data_ext }}(zero.r, one.r, m0.m, %N<tp>%);
@@ -251,13 +254,26 @@ tpl_implem_emu_rvv = {
         ret = %andb<tp>%(r1, ret);  
         return ret;  """},
     
-    "float_andnb" : { "format" : "long", "code" :
+    "float32_andnb" : { "format" : "long", "code" :
     """
         {{isa_dt_par.to_uint}} tmp0,tmp1, tmpm1;
         
         tmp0 = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(r0.r);
         tmp1 = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(r1.r);
-        tmpm1 = {{isa.prefix}}_vmv_s_x_{{isa_dt_par.uint_data_ext}}(-1,%N<tp>%);
+        tmpm1 = {{isa.prefix}}_vmv_v_x_{{isa_dt_par.uint_data_ext}}((%v<c:uint|b:tp>%)UINT32_MAX,%N<tp>%);
+        
+        tmp0 = {{ isa.prefix }}_vxor_vv_{{ isa_dt_par.uint_data_ext }}(tmp0, tmpm1, %N<tp>%);
+        tmp0 = {{ isa.prefix }}_vand_vv_{{ isa_dt_par.uint_data_ext }}(tmp0, tmp1, %N<tp>%);
+        %r<tp>% ret;
+        ret.r = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.uint_data_ext}}_{{isa_dt_par.data_ext}}(tmp0);
+        return ret;"""},
+    "float64_andnb" : { "format" : "long", "code" :
+    """
+        {{isa_dt_par.to_uint}} tmp0,tmp1, tmpm1;
+        
+        tmp0 = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(r0.r);
+        tmp1 = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(r1.r);
+        tmpm1 = {{isa.prefix}}_vmv_v_x_{{isa_dt_par.uint_data_ext}}((%v<c:uint|b:tp>%)UINT64_MAX,%N<tp>%);
         
         tmp0 = {{ isa.prefix }}_vxor_vv_{{ isa_dt_par.uint_data_ext }}(tmp0, tmpm1, %N<tp>%);
         tmp0 = {{ isa.prefix }}_vand_vv_{{ isa_dt_par.uint_data_ext }}(tmp0, tmp1, %N<tp>%);
@@ -410,22 +426,22 @@ tpl_implem_emu_rvv = {
     
     "msb-64" : { "format" : "long", "code" :
     """
-    %r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%(0x8000000000000000));
+    %r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%((%v<c:int|b:tp>%) 0x8000000000000000));
 	return %andb<tp>%(r0, rm);"""
 	},
 	"msb-32" : { "format" : "long", "code" :
     """	
-    %r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%(0x80000000));
+    %r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%((%v<c:int|b:tp>%)0x80000000));
 	return %andb<tp>%(r0, rm);"""
 	},
 	"msb-16" : { "format" : "long", "code" :
     """	
-    %r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%(0x8000));
+    %r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%((%v<c:int|b:tp>%)0x8000));
 	return %andb<tp>%(r0, rm);"""
 	},
 	"msb-8" : { "format" : "long", "code" :
     """	
-    %r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%(0x80));
+    %r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%((%v<c:int|b:tp>%)0x80));
 	return %andb<tp>%(r0, rm);"""
 	},
  
@@ -524,7 +540,8 @@ implems_emu_rvv = {
 
     "andnb" : [
         { "instr_name" : "", "datatypes" : all_int_uint, "template" : tpl_implem_emu_rvv["scalar_andnb"]},
-        { "instr_name" : "", "datatypes" : all_float, "template" : tpl_implem_emu_rvv["float_andnb"]}],
+        { "instr_name" : "", "datatypes" : [float32], "template" : tpl_implem_emu_rvv["float32_andnb"]},
+        { "instr_name" : "", "datatypes" : [float64], "template" : tpl_implem_emu_rvv["float64_andnb"]},],
     "andnb_k" :[
         { "instr_name" : "andnb_k", "datatypes" : all_int_uint, "template" : tpl_implem_emu_rvv["andnb_k"]}],
     "maskz_add" : [

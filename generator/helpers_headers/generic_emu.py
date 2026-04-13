@@ -189,3 +189,91 @@ def gen_c_generic_functions(isa, file, funcs, implems):
             else:
                 print("Panic: '" + f + "' function does not exist.")
                 exit(-1)
+         
+## We want to emulate a blend with only andb and set0 
+SNIPPET_END_MSK = """
+    %r<tp>% res = %blend<tp>%(op, r0, m0);
+    return res;
+"""       
+
+SNIPPET_END_MSKZ = """
+    %r<tp>% tmp = %toreg<tp>%(m0);
+    %r<tp>% res = %andb<tp>%(op, tmp);
+    return res;
+"""
+    
+                
+tpl_mask_generic_emu = {
+    "ret_reg_2args_reg" : { "format" :"long", "code" :"""
+        %r<tp>% op = %{{func_name}}<tp>%(r0, r1);
+    """},
+    
+    "ret_reg_3args_reg" : { "format" :"long", "code" :"""
+        %r<tp>% op = %{{func_name}}<tp>%(r0, r1, r2);
+    """},
+    
+    "ret_reg_1arg_reg" : { "format" :"long", "code" :"""
+        %r<tp>% op = %{{func_name}}<tp>%(r0);
+    """},
+    
+    "load" : { "format" :"long", "code" :"""
+        %r<tp>% op = %load<tp>%(p0);
+    """},
+    
+    "set" : { "format" :"long", "code" :"""
+        %r<tp>% op = %set<tp>%(vals);
+    """},
+    
+    "set1" : { "format" :"long", "code" :"""
+        %r<tp>% op = %set1<tp>%(v0);
+    """},
+    
+        
+    "ret_msk_2args_reg" : { "format" :"long", "code" :"""
+        %m<tp>% op = %{{func_name}}<tp>%(r0, r1);
+    """},
+    
+    #will need a custom thing
+    "store" : { "format" :"long", "code" :"""
+        exit(-1); //huuuuh idk
+    """},
+    
+
+    "reductions" : { "format" :"long", "code" :"""
+        exit(-1); //huuuuh idk
+    """},
+   
+}
+
+implem_mask_generic_emu = {
+    
+}
+
+def gen_c_generic_masked_functions(isa, file, funcs, implems):
+    for f in implems:
+        if f in funcs:
+            if not funcs[f]["maskable"] and not funcs[f]["maskzable"]: 
+                continue
+            for ff in implems[f]:
+                for dt in ff["datatypes"]:
+                    print("// ----------------------------------------------------------------------------------------------------------------------------------------------", f ,file=file)
+                    if len(dt.split(',')) <= 1:
+                        dt_par = dt.split(',')[0]
+                        dt_ret = dt.split(',')[0]
+                        if dt_par not in funcs[f]["datatypes"]:
+                            print("Panic: unsupported type for '" + f + "<" + dt_par + "," + dt_par + ">' function.")
+                            exit(-1)
+                    else:
+                        dt_par = dt.split(',')[0]
+                        dt_ret = dt.split(',')[1]
+
+                    dtk = dt_par + "," + dt_ret
+                    if dtk not in funcs[f]["datatypes"]:
+                        print("Panic: unsupported type for '" + f + "<" + dt_par + "," + dt_ret + ">' function.")
+                        exit(-1)
+                    dt_key = dt_par + "," + dt_ret
+                        
+                        #add mask to is missing or smth
+                        #if not is_missing_func(funcs, f, dt_key):
+                        #    print("// Generic '" + f + "<" + dt_key + ">' has been skipped (reason: \"Info: It has been implemented before.\").",file=file)
+    return 

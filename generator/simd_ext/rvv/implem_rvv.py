@@ -185,8 +185,9 @@ implems_rvv = {
         { "instr_name" : "store",   "datatypes" : all_datatypes, "template" : tpl_implem_rvv["store"] }],
     #arith_2args functions
     "add" : [
-	{ "instr_name" : "fadd",    "datatypes" : all_float,    "template" : tpl_implem_rvv["arith_2args"]},
-	{ "instr_name" : "add",     "datatypes" : all_int_uint, "template" : tpl_implem_rvv["arith_2args"] }],
+	    { "instr_name" : "fadd",    "datatypes" : all_float,    "template" : tpl_implem_rvv["arith_2args"]},
+	    { "instr_name" : "add",     "datatypes" : all_int_uint, "template" : tpl_implem_rvv["arith_2args"]}],
+        #{ "instr_name" : "add",     "datatypes" : all_int_uint, "template" : tpl_implem_rvv["arith_msk_type_2args"], version : "mask"}],
     "sub" : [
         { "instr_name" : "fsub",    "datatypes" : all_float,    "template" : tpl_implem_rvv["arith_2args"]},
         { "instr_name" : "sub",     "datatypes" : all_int_uint, "template" : tpl_implem_rvv["arith_2args"]}],
