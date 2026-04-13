@@ -33,7 +33,7 @@ before_script:
 # GENERATION ----------------------------------------------------------------------------------------------------------
 
 generation-headers:
-  image: dummy/mipp_linux:latest
+  image: registry.gitlab.com/aff3ct/aff3ct/mipp_linux:latest
   stage: generation
   allow_failure: false
   rules:
@@ -55,7 +55,7 @@ generation-headers:
     - ./gen_mipp_headers.py
 
 generation-tests:
-  image: dummy/mipp_linux:latest
+  image: registry.gitlab.com/aff3ct/aff3ct/mipp_linux:latest
   stage: generation
   allow_failure: false
   rules:
@@ -81,7 +81,7 @@ generation-tests:
 # ANALYSIS ------------------------------------------------------------------------------------------------------------
 
 analysis-cppcheck:
-  image: dummy/mipp_linux:latest
+  image: registry.gitlab.com/aff3ct/aff3ct/mipp_linux:latest
   stage: analysis
   needs:
     - job: generation-headers
@@ -105,7 +105,7 @@ analysis-cppcheck:
 
 .build-common:
   extends: .matrix-linux-common
-  image: dummy/mipp_${OS}:${COMPILER}_${ARCH}
+  image: registry.gitlab.com/aff3ct/aff3ct/mipp_${OS}:${COMPILER}_${ARCH}
   stage: build
   tags:
     - $OS
@@ -185,7 +185,7 @@ analysis-cppcheck:
 # RVV build template: C++ only compilers (g++/clang++)
 .build-common-rvv:
   extends: .matrix-linux-rvv
-  image: dummy/mipp_${OS}:${COMPILER}_${ARCH}
+  image: registry.gitlab.com/aff3ct/aff3ct/mipp_${OS}:${COMPILER}_${ARCH}
   stage: build
   tags:
     - $OS
@@ -319,7 +319,7 @@ build-test-examples-rvv:
 
 test-unit:
   extends: .matrix-linux-common
-  image: dummy/mipp_${OS}:${COMPILER}_${ARCH}
+  image: registry.gitlab.com/aff3ct/aff3ct/mipp_${OS}:${COMPILER}_${ARCH}
   stage: test
   allow_failure: false
   rules:
@@ -345,7 +345,7 @@ test-unit:
 
 test-unit-rvv:
   extends: .matrix-linux-rvv
-  image: dummy/mipp_${OS}:${COMPILER}_${ARCH}
+  image: registry.gitlab.com/aff3ct/aff3ct/mipp_${OS}:${COMPILER}_${ARCH}
   stage: test
   allow_failure: false
   rules:
@@ -371,7 +371,7 @@ test-unit-rvv:
 
 test-examples:
   extends: .matrix-linux-common
-  image: dummy/mipp_${OS}:${COMPILER}_${ARCH}
+  image: registry.gitlab.com/aff3ct/aff3ct/mipp_${OS}:${COMPILER}_${ARCH}
   stage: test
   allow_failure: false
   tags:
@@ -399,7 +399,7 @@ test-examples:
 # RVV examples tests: run only the C++ examples (no C binaries for RVV)
 test-examples-rvv:
   extends: .matrix-linux-rvv
-  image: dummy/mipp_${OS}:${COMPILER}_${ARCH}
+  image: registry.gitlab.com/aff3ct/aff3ct/mipp_${OS}:${COMPILER}_${ARCH}
   stage: test
   allow_failure: false
   tags:
