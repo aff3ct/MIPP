@@ -14,13 +14,13 @@ before_script:
   - whoami
 # - pwd
 
-# .matrix-linux-common:
-#   parallel:
-#     matrix:
-#       - OS: [linux]
-#         COMPILER: ["gcc-14", "clang-20"]
-#         #ARCH: [sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2, avx2-fma, avx512f, avx512bw, avx512dq, armv7-neon, armv7-neon-fma, armv8-neon]
-#         ARCH: [sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2, avx2-fma, avx512f, avx512bw, avx512dq]
+.matrix-linux-common:
+  parallel:
+    matrix:
+      - OS: [linux]
+        COMPILER: ["gcc-14", "clang-20"]
+        ARCH: [sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2, avx2-fma, avx512f, avx512bw, avx512dq, armv7-neon, armv7-neon-fma, armv8-neon]
+        #ARCH: [sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2, avx2-fma, avx512f, avx512bw, avx512dq]
 
 .matrix-linux-rvv:
   parallel:
@@ -103,84 +103,84 @@ analysis-cppcheck:
 
 # BUILDS --------------------------------------------------------------------------------------------------------------
 
-# .build-common:
-#   extends: .matrix-linux-common
-#   image: registry.gitlab.com/aff3ct/aff3ct/mipp_${OS}:${COMPILER}_${ARCH}
-#   stage: build
-#   tags:
-#     - $OS
-#     - $ARCH
-#     - docker
-#   rules:
-#     - if: '$ARCH == "sse2"'
-#       variables:
-#         SIMD_EXT: "-msse2"
-#     - if: '$ARCH == "sse3"'
-#       variables:
-#         SIMD_EXT: "-msse3"
-#     - if: '$ARCH == "ssse3"'
-#       variables:
-#         SIMD_EXT: "-mssse3"
-#     - if: '$ARCH == "sse4.1"'
-#       variables:
-#         SIMD_EXT: "-msse4.1"
-#     - if: '$ARCH == "sse4.2"'
-#       variables:
-#         SIMD_EXT: "-msse4.2"
-#     - if: '$ARCH == "avx"'
-#       variables:
-#         SIMD_EXT: "-mavx"
-#     - if: '$ARCH == "avx2"'
-#       variables:
-#         SIMD_EXT: "-mavx2"
-#     - if: '$ARCH == "avx2-fma"'
-#       variables:
-#         SIMD_EXT: "-mavx2 -mfma"
-#     - if: '$ARCH == "avx512f"'
-#       variables:
-#         SIMD_EXT: "-mavx512f"
-#     - if: '$ARCH == "avx512bw"'
-#       variables:
-#         SIMD_EXT: "-mavx512f -mavx512bw"
-#     - if: '$ARCH == "avx512dq"'
-#       variables:
-#         SIMD_EXT: "-mavx512f -mavx512bw -mavx512dq"
-#     - if: '$ARCH == "armv7-neon"'
-#       variables:
-#         SIMD_EXT: "-march=armv7-a -mfpu=neon"
-#     - if: '$ARCH == "armv7-neon-fma"'
-#       variables:
-#         SIMD_EXT: "-march=armv7-a -mfpu=neon-vfpv4"
-#     - if: '$ARCH == "armv8-neon"'
-#       variables:
-#         SIMD_EXT: "-march=armv8.1-a+simd"
-#   before_script:
-#   # find the number of threads on the computer
-#   - |
-#     if [ -z "$THREADS" ]; then
-#       if command -v nproc >/dev/null 2>&1; then
-#         THREADS=$(nproc)
-#       elif [ -f /proc/cpuinfo ]; then
-#         THREADS=$(grep -c ^processor /proc/cpuinfo)
-#       else
-#         THREADS=1
-#       fi
-#       export THREADS
-#     fi
-#   # define the real compiler executable name (because we compile in C++ and not in C)
-#   - |
-#     case "$COMPILER" in
-#       gcc-14)
-#         export COMPILER_CPP="g++-14"
-#         ;;
-#       clang-20)
-#         export COMPILER_CPP="clang++-20"
-#         ;;
-#       *)
-#         echo "Unknown value of COMPILER: $COMPILER"
-#         exit 1
-#         ;;
-#     esac
+.build-common:
+  extends: .matrix-linux-common
+  image: registry.gitlab.com/aff3ct/aff3ct/mipp_${OS}:${COMPILER}_${ARCH}
+  stage: build
+  tags:
+    - $OS
+    - $ARCH
+    - docker
+  rules:
+    - if: '$ARCH == "sse2"'
+      variables:
+        SIMD_EXT: "-msse2"
+    - if: '$ARCH == "sse3"'
+      variables:
+        SIMD_EXT: "-msse3"
+    - if: '$ARCH == "ssse3"'
+      variables:
+        SIMD_EXT: "-mssse3"
+    - if: '$ARCH == "sse4.1"'
+      variables:
+        SIMD_EXT: "-msse4.1"
+    - if: '$ARCH == "sse4.2"'
+      variables:
+        SIMD_EXT: "-msse4.2"
+    - if: '$ARCH == "avx"'
+      variables:
+        SIMD_EXT: "-mavx"
+    - if: '$ARCH == "avx2"'
+      variables:
+        SIMD_EXT: "-mavx2"
+    - if: '$ARCH == "avx2-fma"'
+      variables:
+        SIMD_EXT: "-mavx2 -mfma"
+    - if: '$ARCH == "avx512f"'
+      variables:
+        SIMD_EXT: "-mavx512f"
+    - if: '$ARCH == "avx512bw"'
+      variables:
+        SIMD_EXT: "-mavx512f -mavx512bw"
+    - if: '$ARCH == "avx512dq"'
+      variables:
+        SIMD_EXT: "-mavx512f -mavx512bw -mavx512dq"
+    - if: '$ARCH == "armv7-neon"'
+      variables:
+        SIMD_EXT: "-march=armv7-a -mfpu=neon"
+    - if: '$ARCH == "armv7-neon-fma"'
+      variables:
+        SIMD_EXT: "-march=armv7-a -mfpu=neon-vfpv4"
+    - if: '$ARCH == "armv8-neon"'
+      variables:
+        SIMD_EXT: "-march=armv8.1-a+simd"
+  before_script:
+  # find the number of threads on the computer
+  - |
+    if [ -z "$THREADS" ]; then
+      if command -v nproc >/dev/null 2>&1; then
+        THREADS=$(nproc)
+      elif [ -f /proc/cpuinfo ]; then
+        THREADS=$(grep -c ^processor /proc/cpuinfo)
+      else
+        THREADS=1
+      fi
+      export THREADS
+    fi
+  # define the real compiler executable name (because we compile in C++ and not in C)
+  - |
+    case "$COMPILER" in
+      gcc-14)
+        export COMPILER_CPP="g++-14"
+        ;;
+      clang-20)
+        export COMPILER_CPP="clang++-20"
+        ;;
+      *)
+        echo "Unknown value of COMPILER: $COMPILER"
+        exit 1
+        ;;
+    esac
 
 # RVV build template: C++ only compilers (g++/clang++)
 .build-common-rvv:
@@ -223,33 +223,33 @@ analysis-cppcheck:
         ;;
     esac
 
-#build-test-examples:
-#   extends: .build-common
-#   needs:
-#     - job: generation-headers
-#       artifacts: true
-#   allow_failure: false
-#   artifacts:
-#     name: build-$OS-$COMPILER-$ARCH-examples
-#     when: always
-#     paths:
-#       - ./examples/dumb
-#       - ./examples/mipp_c
-#       - ./examples/mipp_cpp
-#       - ./examples/mipp_object_cpp
-#   script:
-#     - echo "Debug -- Job=$CI_NODE_INDEX/$CI_NODE_TOTAL"
-#     - echo "Debug -- OS=$OS"
-#     - echo "Debug -- COMPILER=$COMPILER"
-#     - echo "Debug -- COMPILER_CPP=$COMPILER_CPP"
-#     - echo "Debug -- ARCH=$ARCH"
-#     - echo "Debug -- SIMD_EXT=$SIMD_EXT"
-#     - echo "Debug -- THREADS=$THREADS"
-#     - cd examples
-#     - $COMPILER -std=c99 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Wno-strict-prototypes -Werror -O3 -funroll-loops $SIMD_EXT -I../include -o dumb dumb.c
-#     - $COMPILER -std=c99 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Wno-strict-prototypes -Werror -O3 -funroll-loops $SIMD_EXT -I../include -o mipp_c mipp.c
-#     - $COMPILER_CPP -std=c++11 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Werror -O3 -funroll-loops $SIMD_EXT -I../include -o mipp_cpp mipp.cpp
-#     - $COMPILER_CPP -std=c++11 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Werror -O3 -funroll-loops $SIMD_EXT -I../include -o mipp_object_cpp mipp_object.cpp
+build-test-examples:
+  extends: .build-common
+  needs:
+    - job: generation-headers
+      artifacts: true
+  allow_failure: false
+  artifacts:
+    name: build-$OS-$COMPILER-$ARCH-examples
+    when: always
+    paths:
+      - ./examples/dumb
+      - ./examples/mipp_c
+      - ./examples/mipp_cpp
+      - ./examples/mipp_object_cpp
+  script:
+    - echo "Debug -- Job=$CI_NODE_INDEX/$CI_NODE_TOTAL"
+    - echo "Debug -- OS=$OS"
+    - echo "Debug -- COMPILER=$COMPILER"
+    - echo "Debug -- COMPILER_CPP=$COMPILER_CPP"
+    - echo "Debug -- ARCH=$ARCH"
+    - echo "Debug -- SIMD_EXT=$SIMD_EXT"
+    - echo "Debug -- THREADS=$THREADS"
+    - cd examples
+    - $COMPILER -std=c99 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Wno-strict-prototypes -Werror -O3 -funroll-loops $SIMD_EXT -I../include -o dumb dumb.c
+    - $COMPILER -std=c99 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Wno-strict-prototypes -Werror -O3 -funroll-loops $SIMD_EXT -I../include -o mipp_c mipp.c
+    - $COMPILER_CPP -std=c++11 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Werror -O3 -funroll-loops $SIMD_EXT -I../include -o mipp_cpp mipp.cpp
+    - $COMPILER_CPP -std=c++11 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Werror -O3 -funroll-loops $SIMD_EXT -I../include -o mipp_object_cpp mipp_object.cpp
 
 # RVV examples build: C++ only
 build-test-examples-rvv:
@@ -280,30 +280,30 @@ build-test-examples-rvv:
     - $COMPILER_CPP -std=c++11 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Werror -O3 -funroll-loops $SIMD_EXT -I../include -o mipp_object_cpp mipp_object.cpp
 
 
-# build-test-unit:
-#   extends: .build-common
-#   needs:
-#     - job: generation-headers
-#       artifacts: true
-#     - job: generation-tests
-#       artifacts: true
-#   allow_failure: false
-#   artifacts:
-#     name: build-$OS-$COMPILER-$ARCH-unit
-#     when: always
-#     paths:
-#       - ./tests/build_${OS}_${COMPILER}_${ARCH}/bin/
-#   script:
-#     - echo "Debug -- Job=$CI_NODE_INDEX/$CI_NODE_TOTAL"
-#     - echo "Debug -- OS=$OS"
-#     - echo "Debug -- COMPILER=$COMPILER"
-#     - echo "Debug -- COMPILER_CPP=$COMPILER_CPP"
-#     - echo "Debug -- ARCH=$ARCH"
-#     - echo "Debug -- SIMD_EXT=$SIMD_EXT"
-#     - echo "Debug -- THREADS=$THREADS"
-#     - cd tests
-#     - cmake -S . -B build_${OS}_${COMPILER}_${ARCH} -DCMAKE_CXX_COMPILER=$COMPILER_CPP -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-Wall -Werror -funroll-loops -finline-functions $SIMD_EXT" -DCMAKE_EXE_LINKER_FLAGS="-static -static-libgcc -static-libstdc++"
-#     - cmake --build build_${OS}_${COMPILER}_${ARCH} -j $THREADS
+build-test-unit:
+  extends: .build-common
+  needs:
+    - job: generation-headers
+      artifacts: true
+    - job: generation-tests
+      artifacts: true
+  allow_failure: false
+  artifacts:
+    name: build-$OS-$COMPILER-$ARCH-unit
+    when: always
+    paths:
+      - ./tests/build_${OS}_${COMPILER}_${ARCH}/bin/
+  script:
+    - echo "Debug -- Job=$CI_NODE_INDEX/$CI_NODE_TOTAL"
+    - echo "Debug -- OS=$OS"
+    - echo "Debug -- COMPILER=$COMPILER"
+    - echo "Debug -- COMPILER_CPP=$COMPILER_CPP"
+    - echo "Debug -- ARCH=$ARCH"
+    - echo "Debug -- SIMD_EXT=$SIMD_EXT"
+    - echo "Debug -- THREADS=$THREADS"
+    - cd tests
+    - cmake -S . -B build_${OS}_${COMPILER}_${ARCH} -DCMAKE_CXX_COMPILER=$COMPILER_CPP -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-Wall -Werror -funroll-loops -finline-functions $SIMD_EXT" -DCMAKE_EXE_LINKER_FLAGS="-static -static-libgcc -static-libstdc++"
+    - cmake --build build_${OS}_${COMPILER}_${ARCH} -j $THREADS
 
 build-test-unit-rvv:
   extends: .build-common-rvv
@@ -336,31 +336,31 @@ build-test-unit-rvv:
 
 # TESTS ---------------------------------------------------------------------------------------------------------------
 
-# test-unit:
-#   extends: .matrix-linux-common
-#   image: registry.gitlab.com/aff3ct/aff3ct/mipp_${OS}:${COMPILER}_${ARCH}
-#   stage: test
-#   allow_failure: false
-#   rules:
-#     - when: always
-#   tags:
-#     - $OS
-#     - $ARCH
-#     - docker
-#   needs:
-#     - job: build-test-unit
-#       artifacts: true
-#       parallel:
-#         matrix:
-#           - OS: ['$[[ matrix.OS ]]']
-#             COMPILER: ['$[[ matrix.COMPILER ]]']
-#             ARCH: ['$[[ matrix.ARCH ]]']
-#   script:
-#     - echo "Debug -- Job=$CI_NODE_INDEX/$CI_NODE_TOTAL"
-#     - echo "Debug -- OS=$OS"
-#     - echo "Debug -- COMPILER=$COMPILER"
-#     - echo "Debug -- ARCH=$ARCH"
-#     - ./tests/build_${OS}_${COMPILER}_${ARCH}/bin/run-tests
+test-unit:
+  extends: .matrix-linux-common
+  image: registry.gitlab.com/aff3ct/aff3ct/mipp_${OS}:${COMPILER}_${ARCH}
+  stage: test
+  allow_failure: false
+  rules:
+    - when: always
+  tags:
+    - $OS
+    - $ARCH
+    - docker
+  needs:
+    - job: build-test-unit
+      artifacts: true
+      parallel:
+        matrix:
+          - OS: ['$[[ matrix.OS ]]']
+            COMPILER: ['$[[ matrix.COMPILER ]]']
+            ARCH: ['$[[ matrix.ARCH ]]']
+  script:
+    - echo "Debug -- Job=$CI_NODE_INDEX/$CI_NODE_TOTAL"
+    - echo "Debug -- OS=$OS"
+    - echo "Debug -- COMPILER=$COMPILER"
+    - echo "Debug -- ARCH=$ARCH"
+    - ./tests/build_${OS}_${COMPILER}_${ARCH}/bin/run-tests
 
 test-unit-rvv:
   extends: .matrix-linux-rvv
@@ -388,32 +388,32 @@ test-unit-rvv:
     - echo "Debug -- ARCH=$ARCH"
     - ./tests/build_${OS}_${COMPILER}_${ARCH}/bin/run-tests
 
-# test-examples:
-#   extends: .matrix-linux-common
-#   image: registry.gitlab.com/aff3ct/aff3ct/mipp_${OS}:${COMPILER}_${ARCH}
-#   stage: test
-#   allow_failure: false
-#   tags:
-#     - $OS
-#     - $ARCH
-#     - docker
-#   needs:
-#     - job: build-test-examples
-#       artifacts: true
-#       parallel:
-#         matrix:
-#           - OS: ['$[[ matrix.OS ]]']
-#             COMPILER: ['$[[ matrix.COMPILER ]]']
-#             ARCH: ['$[[ matrix.ARCH ]]']
-#   script:
-#     - echo "Debug -- Job=$CI_NODE_INDEX/$CI_NODE_TOTAL"
-#     - echo "Debug -- OS=$OS"
-#     - echo "Debug -- COMPILER=$COMPILER"
-#     - echo "Debug -- ARCH=$ARCH"
-#     - ./examples/dumb
-#     - ./examples/mipp_c
-#     - ./examples/mipp_cpp
-#     - ./examples/mipp_object_cpp
+test-examples:
+  extends: .matrix-linux-common
+  image: registry.gitlab.com/aff3ct/aff3ct/mipp_${OS}:${COMPILER}_${ARCH}
+  stage: test
+  allow_failure: false
+  tags:
+    - $OS
+    - $ARCH
+    - docker
+  needs:
+    - job: build-test-examples
+      artifacts: true
+      parallel:
+        matrix:
+          - OS: ['$[[ matrix.OS ]]']
+            COMPILER: ['$[[ matrix.COMPILER ]]']
+            ARCH: ['$[[ matrix.ARCH ]]']
+  script:
+    - echo "Debug -- Job=$CI_NODE_INDEX/$CI_NODE_TOTAL"
+    - echo "Debug -- OS=$OS"
+    - echo "Debug -- COMPILER=$COMPILER"
+    - echo "Debug -- ARCH=$ARCH"
+    - ./examples/dumb
+    - ./examples/mipp_c
+    - ./examples/mipp_cpp
+    - ./examples/mipp_object_cpp
 
 # RVV examples tests: run only the C++ examples
 test-examples-rvv:
