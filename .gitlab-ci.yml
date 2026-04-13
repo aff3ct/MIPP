@@ -27,7 +27,7 @@ before_script:
     matrix:
       - OS: [linux]
         # Only use C++ compilers for RVV (no C compiler usage in RVV jobs)
-        COMPILER: ["gpp-14", "clangpp-20"]
+        COMPILER: ["gcc-14", "clang-20"]
         ARCH: [riscv64-rvv1.0]
 
 # GENERATION ----------------------------------------------------------------------------------------------------------
