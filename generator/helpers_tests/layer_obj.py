@@ -110,6 +110,16 @@ LAYER_OVERRIDES = {
     "sub": {
         "init": INIT_2ARGS_NOUFLOW
     },
+
+    "div" : {
+        "loop_assert": """\tREQUIRE(
+#if defined(MIPP_NEON) && !defined(__aarch64__)
+            std::abs(r3[i] - res) < 1e-2
+#else
+            r3[i] == res
+#endif
+        );""",
+    },
 }
 
 def apply_overrides(gen_dict):

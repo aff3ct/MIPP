@@ -432,6 +432,16 @@ LAYER_OVERRIDES = {
         "init": INIT_2ARGS_NOUFLOW
     },
     
+    "div" : {
+        "loop_assert": """\tREQUIRE(
+#if defined(MIPP_NEON) && !defined(__aarch64__)
+			std::abs(mipp::get(r3, i) - res) < 1e-2
+#else
+			mipp::get(r3, i) == res
+#endif
+		);""",
+    },
+
     "andnb_k": {
         "loop_body": """\t\tT res = ~(inputs1[i]) & (inputs2[i]);"""
     },

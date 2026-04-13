@@ -12,6 +12,7 @@ sys.path.insert(1, path + "/simd_ext/avx/")
 sys.path.insert(1, path + "/simd_ext/sse/")
 sys.path.insert(1, path + "/simd_ext/sve/")
 sys.path.insert(1, path + "/simd_ext/rvv/")
+sys.path.insert(1, path + "/simd_ext/neon/")
 
 from implem_sse import isa_sse, implems_sse
 from implem_emu_sse import implems_emu_sse
@@ -22,11 +23,14 @@ from implem_emu_avx import implems_emu_avx
 from implem_avx512 import isa_avx512, implems_avx512
 from implem_emu_avx512 import implems_emu_avx512
 
-#from implem_sve import isa_sve
-#from implem_emu_sve import implem_emu_sve
-
 from implem_rvv import isa_rvv, implems_rvv
 from implem_emu_rvv import implems_emu_rvv
+
+from implem_neon import isa_neon, implems_neon
+from implem_emu_neon import implems_emu_neon
+
+#from implem_sve import isa_sve
+#from implem_emu_sve import implem_emu_sve
 
 from headers_def import mipp_funcs, mipp_funcs_concepts
 from headers_def import all_datatypes, all_datatypes_cart_prod
@@ -47,6 +51,7 @@ avx_path = os.path.join(include_gen_path, "avx")
 avx512_path = os.path.join(include_gen_path, "avx512")
 sve_path = os.path.join(include_gen_path, "sve")
 rvv_path = os.path.join(include_gen_path, "rvv")
+neon_path = os.path.join(include_gen_path, "neon")
 
 
 implems_dict = {
@@ -63,11 +68,10 @@ implems_dict = {
     "AVX512_BW_BQ" : { "implems" : [implems_avx512, implems_emu_avx512], "defines": {"AVX512BW", "AVX512F", "AVX512", "AVX512DQ"}},
     "AVX512_KCNI" : { "implems" : [implems_avx512, implems_emu_avx512], "defines" :{"KCNI", "MIC"}},
     "RVV1.0" : { "implems": [implems_rvv, implems_emu_rvv], "defines": {}},
-
+    "NEONv1" : { "implems" :[implems_neon, implems_emu_neon], "defines": {}},
+    "NEONv2" : { "implems" :[implems_neon, implems_emu_neon], "defines": {"__aarch64__"}},
     #"sve" { "implems" :[implems_sve, implem_emu_sve],"defines": {}},
     #"sve2" { "implems" :[implems_sve, implem_emu_sve], "defines": {}},
-    #"neonv1" : { "implems" :[implems_neonv, implems_emu_neonv], "defines": {}},
-    #"neonv2" : { "implems" :[implems_neonv, implems_emu_neonv], "defines": {}},
 }
 
 #used to generate intersection
@@ -81,6 +85,7 @@ implems_dict_small.pop("AVX")
 implems_dict_small.pop("AVX2")
 implems_dict_small.pop("AVX512F")
 implems_dict_small.pop("AVX512_KCNI")
+implems_dict_small.pop("NEONv1")
 
 
 mipp_funcs_description = {

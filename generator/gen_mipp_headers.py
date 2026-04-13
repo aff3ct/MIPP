@@ -13,20 +13,21 @@ sys.path.insert(1, path + "/simd_ext/avx/")
 sys.path.insert(1, path + "/simd_ext/sse/")
 sys.path.insert(1, path + "/simd_ext/sve/")
 sys.path.insert(1, path + "/simd_ext/rvv/")
+sys.path.insert(1, path + "/simd_ext/neon/")
 
 from implem_sse import isa_sse
 from implem_avx import isa_avx
 from implem_avx512 import isa_avx512
 from implem_sve import isa_sve
 from implem_rvv import isa_rvv
+from implem_neon import isa_neon
 
 from gen_mipp_sse import gen_mipp_sse
 from gen_mipp_avx import gen_mipp_avx
 from gen_mipp_avx512 import gen_mipp_avx512
 from gen_mipp_sve import gen_mipp_sve
 from gen_mipp_rvv import gen_mipp_rvv
-
-
+from gen_mipp_neon import gen_mipp_neon
 
 from mipp_h import generate_mipp_h
 from ci_generator import generate_c_interface
@@ -43,6 +44,7 @@ avx_path = os.path.join(include_gen_path, "avx")
 avx512_path = os.path.join(include_gen_path, "avx512")
 sve_path = os.path.join(include_gen_path, "sve")
 rvv_path = os.path.join(include_gen_path, "rvv")
+neon_path = os.path.join(include_gen_path, "neon")
 
 def create_folder(folder_path):
     if not os.path.exists(folder_path):
@@ -67,18 +69,20 @@ def main():
     create_folder(avx512_path)
     create_folder(sve_path)
     create_folder(rvv_path)
+    create_folder(neon_path)
     # generate all avalaible simd and wrapp
     gen_mipp_sse()
     gen_mipp_avx()
     gen_mipp_avx512()
     gen_mipp_sve()
     gen_mipp_rvv()
+    gen_mipp_neon()
     # generate mipp_v2.h
     generate_mipp_h()
     # warning order
     # interface all simd  in c
     # generate mipp_v2_interface_gen.h
-    generate_c_interface([isa_avx512,isa_avx,isa_sse,isa_sve,isa_rvv])
+    generate_c_interface([isa_avx512,isa_avx,isa_sse,isa_sve,isa_rvv,isa_neon])
     # C++ template wrapper interface with specialization
     # generate mipp.hpp
     generate_cpp()

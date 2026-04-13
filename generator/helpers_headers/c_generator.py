@@ -22,8 +22,20 @@ def gen_c_structures(isa, file):
 	template = """typedef struct { {{ isa_datatype.reg }} r; } rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
 	j2_template = Template(template, undefined=StrictUndefined)
 
+	template_alt = """typedef struct {
+#if {{ isa_datatype.if }}
+	{{ isa_datatype.reg }} r;
+#else
+	int r; // this is a hack to compile when the datatype is not suported by the SIMD extension
+#endif // {{ isa_datatype.if }}
+} rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
+	j2_template_alt = Template(template_alt, undefined=StrictUndefined)
+
 	for dt in isa["datatypes"]:
-		print(j2_template.render(isa=isa, isa_datatype=isa["datatypes"][dt], datatype=datatypes[dt]), file=file)
+		if "if" not in isa["datatypes"][dt]:
+			print(j2_template.render(isa=isa, isa_datatype=isa["datatypes"][dt], datatype=datatypes[dt]), file=file)
+		else:
+			print(j2_template_alt.render(isa=isa, isa_datatype=isa["datatypes"][dt], datatype=datatypes[dt]), file=file)
 
 	template = """typedef struct { {{ isa_datatype.msk }} m; } rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
 	j2_template = Template(template, undefined=StrictUndefined)
@@ -106,6 +118,21 @@ def gen_c_functions(isa, file, funcs, implems):
 							ifd = ifd + " && "+ ifd_cur
 						elif ifd_cur:
 							ifd = ifd_cur
+
+						# # NEW
+						# ifd_type = ""
+						# if "if" in isa["datatypes"][dt_par]:
+						# 	ifd_type += "(" + isa["datatypes"][dt_par]["if"] + ")"
+						# if "if" in isa["datatypes"][dt_ret]:
+						# 	if "if" in isa["datatypes"][dt_par]:
+						# 		ifd_type += " && "
+						# 	ifd_type += "(" + isa["datatypes"][dt_ret]["if"] + ")"
+						# if ifd and ifd_type:
+						# 	ifd = ifd + " && "+ ifd_type
+						# else:
+						# 	ifd = ifd_type
+
+
 						if ifd:
 							print("#if " + ifd, file=file)
 							if "type" in ff and ff["type"] == "emulated":

@@ -19,7 +19,8 @@ before_script:
     matrix:
       - OS: [linux]
         COMPILER: ["gcc-14", "clang-20"]
-        ARCH: [sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2, avx2-fma, avx512f, avx512bw, avx512dq]
+        ARCH: [sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2, avx2-fma, avx512f, avx512bw, avx512dq, armv7-neon, armv7-neon-fma, armv8-neon]
+        # ARCH: [sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2, avx2-fma, avx512f, avx512bw, avx512dq, armv7-neon, armv7-neon-fma, armv8-neon, riscv64-rvv1.0]
 
 # GENERATION ----------------------------------------------------------------------------------------------------------
 
@@ -27,6 +28,8 @@ generation-headers:
   image: registry.gitlab.com/aff3ct/aff3ct/mipp_linux:latest
   stage: generation
   allow_failure: false
+  rules:
+    - when: always
   artifacts:
     name: mipp_headers
     when: always
@@ -47,6 +50,8 @@ generation-tests:
   image: registry.gitlab.com/aff3ct/aff3ct/mipp_linux:latest
   stage: generation
   allow_failure: false
+  rules:
+    - when: always
   artifacts:
     name: mipp_tests
     when: always
@@ -74,6 +79,8 @@ analysis-cppcheck:
     - job: generation-headers
       artifacts: true
   allow_failure: false
+  rules:
+    - when: always
   artifacts:
     name: analysis-cppcheck-logs
     when: always
@@ -130,6 +137,19 @@ analysis-cppcheck:
     - if: '$ARCH == "avx512dq"'
       variables:
         SIMD_EXT: "-mavx512f -mavx512bw -mavx512dq"
+    - if: '$ARCH == "armv7-neon"'
+      variables:
+        SIMD_EXT: "-march=armv7-a -mfpu=neon"
+    - if: '$ARCH == "armv7-neon-fma"'
+      variables:
+        SIMD_EXT: "-march=armv7-a -mfpu=neon-vfpv4"
+    - if: '$ARCH == "armv8-neon"'
+      variables:
+        SIMD_EXT: "-march=armv8.1-a+simd"
+    - if: '$ARCH == "riscv64-rvv1.0"'
+      variables:
+        SIMD_EXT: "-march=rv64gv1_zve32f_zvl256b -mrvv-vector-bits=zvl"
+        #SIMD_EXT: "-march=rv64gcv1_zve32f_zvl256b -mabi=lp64d -mrvv-vector-bits=256"
   before_script:
   # find the number of threads on the computer
   - |
@@ -208,8 +228,8 @@ build-test-examples:
     - cd examples
     - $COMPILER -std=c99 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Wno-strict-prototypes -Werror -O3 -funroll-loops $SIMD_EXT -I../include -o dumb dumb.c
     - $COMPILER -std=c99 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Wno-strict-prototypes -Werror -O3 -funroll-loops $SIMD_EXT -I../include -o mipp_c mipp.c
-    - $COMPILER_CPP -Wall -Wextra -Wpedantic -O3 -Wno-unused-parameter -Werror -funroll-loops $SIMD_EXT -I../include -o mipp_cpp mipp.cpp
-    - $COMPILER_CPP -Wall -Wextra -Wpedantic -O3 -Wno-unused-parameter -Werror -funroll-loops $SIMD_EXT -I../include -o mipp_object_cpp mipp_object.cpp
+    - $COMPILER_CPP -std=c++11 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Werror -O3 -funroll-loops $SIMD_EXT -I../include -o mipp_cpp mipp.cpp
+    - $COMPILER_CPP -std=c++11 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Werror -O3 -funroll-loops $SIMD_EXT -I../include -o mipp_object_cpp mipp_object.cpp
 
 # TESTS ---------------------------------------------------------------------------------------------------------------
 
@@ -218,6 +238,8 @@ test-unit:
   image: registry.gitlab.com/aff3ct/aff3ct/mipp_${OS}:${COMPILER}_${ARCH}
   stage: test
   allow_failure: false
+  rules:
+    - when: always
   tags:
     - $OS
     - $ARCH
