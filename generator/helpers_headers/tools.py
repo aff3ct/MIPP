@@ -301,7 +301,7 @@ def gen_set_func_error(func_name,file):
 		print(f"template <typename T, int LMULT=1> inline rvd<T, LMULT> {func_name}(const T* p0) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
 
 
-def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False):
+def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, masked_version=False):
 	"""if lmul and (not cpp or (cpp and not lmul_specialized(proto))):
 		func_name += "_m" + str(int(lmul))"""
 
@@ -318,12 +318,23 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
 	realdatatype = datatypes[dt_ret]
 	if (proto["ret"]["fixeddatatype"]):
 		realdatatype = datatypes[proto["ret"]["fixeddatatype"]]
-	p = "inline " + build_type(proto["ret"]["type"], realdatatype, isa, lmul, isa_name, cpp) + " " + func_name + "("
+	if not masked_version:
+		p = "inline " + build_type(proto["ret"]["type"], realdatatype, isa, lmul, isa_name, cpp) + " " + func_name + "("
+	else : #we assume "mask" or "maskz" is passed in masked_version if it's not false.
+		p = "inline " + build_type(proto["ret"]["type"], realdatatype, isa, lmul, isa_name, cpp) + " " + func_name + "_" + masked_version + "("
 	cnt_reg = 0
 	cnt_msk = 0
 	cnt_val = 0
 	cnt_ptr = 0
 	is_first = True
+	
+	#add m0 as first argument for masked version of function
+	if masked_version:
+		p += build_msk(datatypes[dt_par], isa, lmul, isa_name, cpp) + " m0"
+		is_first = False
+		cnt_msk = cnt_msk +1
+		print(p, "cpp=", cpp)
+
 	for arg in proto["args"]:
 		if not is_first:
 			p += ", "
@@ -350,7 +361,8 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
 		elif arg["type"] == "vindex":
 			p += " vi"
 		is_first = False
-
+	if masked_version:	
+ 		print(p)
 	return p + ")";
 
 
