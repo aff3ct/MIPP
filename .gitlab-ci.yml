@@ -6,8 +6,7 @@ stages:
   - analysis
   - build
   - test
-  # - coverage
-  # - deploy
+  - deploy
 
 before_script:
   - hostname
@@ -68,6 +67,29 @@ generation-tests:
     - source .venv/bin/activate
     - pip3 install -r requirements.txt
     - ./gen_mipp_tests.py
+
+generation-docs:
+  image: registry.gitlab.com/aff3ct/aff3ct/mipp_linux:latest
+  stage: generation
+  allow_failure: false
+  rules:
+    - when: always
+  artifacts:
+    name: mipp_docs
+    when: always
+    paths:
+      - docs/funcs_support
+      - docs/isas_support
+  tags:
+    - x86_64
+    - linux
+    - docker
+  script:
+    - cd generator
+    - python3 -m venv .venv
+    - source .venv/bin/activate
+    - pip3 install -r requirements.txt
+    - ./gen_mipp_docs.py
 
 # ANALYSIS ------------------------------------------------------------------------------------------------------------
 
@@ -318,3 +340,29 @@ test-examples:
       fi
     - ./examples/mipp_cpp
     - ./examples/mipp_object_cpp
+
+# DEPLOY --------------------------------------------------------------------------------------------------------------
+
+deploy-docs-html:
+  image: registry.gitlab.com/aff3ct/aff3ct/mipp_linux:latest
+  stage: deploy
+  needs:
+    - job: generation-docs
+      artifacts: true
+  allow_failure: false
+  rules:
+    - when: always
+  artifacts:
+    name: deploy-docs-html
+    when: always
+    paths:
+      - site/
+  tags:
+    - x86_64
+    - linux
+    - docker
+  script:
+    - python3 -m venv .venv
+    - source .venv/bin/activate
+    - pip3 install -r docs/requirements.txt
+    - mkdocs build

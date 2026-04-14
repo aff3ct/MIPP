@@ -28,3 +28,6 @@ ARMIE-BN-UBUNT-r25p0-00rel0.tgz
 site/
 *.asm
 *Adrien*
+docs/funcs_support
+docs/isas_support
+upload_site.sh
