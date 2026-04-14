@@ -41,45 +41,35 @@ isa_rvv = {
     
     #I'm adding fields to it rn. It makes it more crowded and less legible. But it works.
     "datatypes" : {
-        float64 : {"data_ext" : "f64m{lmul}",        "data_ext_logi" : "b{eew_emul}",         "data_ext_msk"  : "b64",        "reg" : "vfloat64m{lmul}_t", "msk" : "vbool{eew_emul}_t",
-                   "to_ptr"   : "float64_t",    "to_int"        : "vint64m{lmul}_t", "to_uint"       : "vuint64m{lmul}_t", 
-                   "to_float" : "vfloat64m{lmul}_t", "reg_dt_ext"    : "f64",        "uint_data_ext" : "u64m{lmul}",      "int_data_ext" : "i64m{lmul}", "width": "64" } ,#added to_int_ptr to convert float to int before bitwise operations. I'll see if I can find a better solution later.
+        float64 : {"data_ext" : "f64m{lmul}", "data_ext_logi" : "b{eew_emul}",         "data_ext_msk"  : "b64",        "reg" : "vfloat64m{lmul}_t", "msk" : "vbool{eew_emul}_t",
+                   "to_ptr"   : "float64_t",  "reg_dt_ext"    : "f64",        "uint_data_ext" : "u64m{lmul}",      "int_data_ext" : "i64m{lmul}", "width": "64" } ,#added to_int_ptr to convert float to int before bitwise operations. I'll see if I can find a better solution later.
         
-        float32 : {"data_ext" : "f32m{lmul}",        "data_ext_logi" : "b{eew_emul}",         "data_ext_msk"  : "b32",        "reg" : "vfloat32m{lmul}_t", "msk" : "vbool{eew_emul}_t",
-                   "to_ptr"   : "float32_t",    "to_int"        : "vint32m{lmul}_t", "to_uint"       : "vuint32m{lmul}_t", 
-                   "to_float" : "vfloat32m{lmul}_t", "reg_dt_ext"    : "f32",        "uint_data_ext" : "u32m{lmul}",      "int_data_ext" : "i32m{lmul}", "width" : "32" } ,#added to_int_ptr to convert float to int before bitwise operations. I'll see if I can find a better solution later.
+        float32 : {"data_ext" : "f32m{lmul}", "data_ext_logi" : "b{eew_emul}",         "data_ext_msk"  : "b32",        "reg" : "vfloat32m{lmul}_t", "msk" : "vbool{eew_emul}_t",
+                   "to_ptr"   : "float32_t",  "reg_dt_ext"    : "f32",        "uint_data_ext" : "u32m{lmul}",      "int_data_ext" : "i32m{lmul}", "width" : "32" } ,#added to_int_ptr to convert float to int before bitwise operations. I'll see if I can find a better solution later.
         
-        int64   : {"data_ext" : "i64m{lmul}",        "data_ext_logi" : "b{eew_emul}",         "data_ext_msk"  : "b64",        "reg" : "vint64m{lmul}_t",   "msk" : "vbool{eew_emul}_t",
-                   "to_ptr"   : "int64_t",      "to_int"        : "vint64m{lmul}_t", "to_uint"       : "vuint64m{lmul}_t",
-                   "to_float" : "vfloat64m{lmul}_t", "reg_dt_ext"    : "i64", "width" : "64"} ,
+        int64   : {"data_ext" : "i64m{lmul}", "data_ext_logi" : "b{eew_emul}",         "data_ext_msk"  : "b64",        "reg" : "vint64m{lmul}_t",   "msk" : "vbool{eew_emul}_t",
+                   "to_ptr"   : "int64_t",    "reg_dt_ext"    : "i64", "width" : "64"} ,
         
-        int32   : {"data_ext" : "i32m{lmul}",        "data_ext_logi" : "b{eew_emul}",         "data_ext_msk" : "b32",         "reg" : "vint32m{lmul}_t",   "msk" : "vbool{eew_emul}_t",
-                   "to_ptr"   : "int32_t",      "to_int"        : "vint32m{lmul}_t", "to_uint"      : "vuint32m{lmul}_t",
-                   "to_float" : "vfloat32m{lmul}_t", "reg_dt_ext"    : "i32", "width" : "32"} ,
+        int32   : {"data_ext" : "i32m{lmul}", "data_ext_logi" : "b{eew_emul}",         "data_ext_msk" : "b32",         "reg" : "vint32m{lmul}_t",   "msk" : "vbool{eew_emul}_t",
+                   "to_ptr"   : "int32_t",    "reg_dt_ext"    : "i32", "width" : "32"} ,
         
-        int16   : {"data_ext" : "i16m{lmul}",        "data_ext_logi" : "b{eew_emul}",         "data_ext_msk" : "b16",         "reg" : "vint16m{lmul}_t",   "msk" : "vbool{eew_emul}_t",
-                   "to_ptr"   : "int16_t",      "to_int"        : "vint16m{lmul}_t", "to_uint"      : "vuint16m{lmul}_t",
-                   "to_float" : "vfloat32m{lmul}_t", "reg_dt_ext"    : "i16", "width" : "16"} ,
+        int16   : {"data_ext" : "i16m{lmul}", "data_ext_logi" : "b{eew_emul}",         "data_ext_msk" : "b16",         "reg" : "vint16m{lmul}_t",   "msk" : "vbool{eew_emul}_t",
+                   "to_ptr"   : "int16_t",    "reg_dt_ext"    : "i16", "width" : "16"} ,
         
-        int8    : {"data_ext" : "i8m{lmul}",         "data_ext_logi" : "b{eew_emul}",         "data_ext_msk"  : "b8",          "reg" : "vint8m{lmul}_t",    "msk" : "vbool{eew_emul}_t",
-                   "to_ptr"   : "int8_t",       "to_int"        : "vint8m{lmul}_t", "to_uint"       : "vuint8m{lmul}_t",
-                   "to_float" : "vfloat32m{lmul}_t", "reg_dt_ext"    : "i8", "width" : "8"} ,
+        int8    : {"data_ext" : "i8m{lmul}",  "data_ext_logi" : "b{eew_emul}",         "data_ext_msk"  : "b8",          "reg" : "vint8m{lmul}_t",    "msk" : "vbool{eew_emul}_t",
+                   "to_ptr"   : "int8_t",     "reg_dt_ext"    : "i8", "width" : "8"} ,
         
-        uint64  : {"data_ext" : "u64m{lmul}",        "data_ext_logi" : "b{eew_emul}",         "data_ext_msk" : "b64",         "reg" : "vuint64m{lmul}_t",  "msk" : "vbool{eew_emul}_t",
-                   "to_ptr"   : "uint64_t",     "to_int"        : "vint64m{lmul}_t", "to_uint"      : "vuint64m{lmul}_t",
-                   "to_float" : "vfloat64m{lmul}_t", "reg_dt_ext"    : "u64", "width" : "64"} ,
+        uint64  : {"data_ext" : "u64m{lmul}", "data_ext_logi" : "b{eew_emul}",         "data_ext_msk" : "b64",         "reg" : "vuint64m{lmul}_t",  "msk" : "vbool{eew_emul}_t",
+                   "to_ptr"   : "uint64_t",   "reg_dt_ext"    : "u64", "width" : "64"} ,
         
-        uint32  : {"data_ext" : "u32m{lmul}",        "data_ext_logi" : "b{eew_emul}",         "data_ext_msk" : "b32",         "reg" : "vuint32m{lmul}_t",  "msk" : "vbool{eew_emul}_t",
-                   "to_ptr"   : "uint32_t",     "to_int"        : "vint32m{lmul}_t", "to_uint"      : "vuint32m{lmul}_t",
-                   "to_float" : "vfloat32m{lmul}_t", "reg_dt_ext"    : "u32", "width" : "32"} ,
+        uint32  : {"data_ext" : "u32m{lmul}", "data_ext_logi" : "b{eew_emul}",         "data_ext_msk" : "b32",         "reg" : "vuint32m{lmul}_t",  "msk" : "vbool{eew_emul}_t",
+                   "to_ptr"   : "uint32_t",   "reg_dt_ext"    : "u32", "width" : "32"} ,
         
-        uint16  : {"data_ext" : "u16m{lmul}",        "data_ext_logi" : "b{eew_emul}",         "data_ext_msk" : "b16",         "reg" : "vuint16m{lmul}_t",  "msk" : "vbool{eew_emul}_t",
-                   "to_ptr"   : "uint16_t",     "to_int"        : "vint16m{lmul}_t", "to_uint"      : "vuint16m{lmul}_t",
-                   "to_float" : "vfloat32m{lmul}_t", "reg_dt_ext"    : "u16", "width" : "16"} ,
+        uint16  : {"data_ext" : "u16m{lmul}", "data_ext_logi" : "b{eew_emul}",         "data_ext_msk" : "b16",         "reg" : "vuint16m{lmul}_t",  "msk" : "vbool{eew_emul}_t",
+                   "to_ptr"   : "uint16_t",   "reg_dt_ext"    : "u16", "width" : "16"} ,
         
-        uint8   : {"data_ext" : "u8m{lmul}",         "data_ext_logi" : "b{eew_emul}",         "data_ext_msk" : "b8",           "reg" : "vuint8m{lmul}_t",   "msk" : "vbool{eew_emul}_t",
-                   "to_ptr"   : "uint8_t",      "to_int"        : "vint8m{lmul}_t", "to_uint"      : "vuint8m{lmul}_t",
-                   "to_float" : "vfloat32m{lmul}_t", "reg_dt_ext"    : "u8", "width" : "8"} ,
+        uint8   : {"data_ext" : "u8m{lmul}",  "data_ext_logi" : "b{eew_emul}",         "data_ext_msk" : "b8",           "reg" : "vuint8m{lmul}_t",   "msk" : "vbool{eew_emul}_t",
+                   "to_ptr"   : "uint8_t",    "reg_dt_ext"    : "u8", "width" : "8"} ,
     },
 }#I added a bunch of keys to datatypes dictionnary bc they will be necessary for conversion.
 #this solution is really unelegant and I might want to do it differently.
@@ -121,12 +111,12 @@ tpl_implem_rvv = {
 
 
     "float_bitwise"        : { "format" : "long", "code" : """
-                {{isa_dt_par.to_uint}} tmp1, tmp2;
-                tmp1 = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(r0.r);
-                tmp2 = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(r1.r);
-                tmp1 = {{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.uint_data_ext }}(tmp1, tmp2, %N<tp>%);
+                %r<c:uint|b:tp>% tmp1, tmp2;
+                tmp1.r = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(r0.r);
+                tmp2.r = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(r1.r);
+                tmp1.r = {{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.uint_data_ext }}(tmp1.r, tmp2.r, %N<tp>%);
                 %r<tp>% ret;
-                 ret.r = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.uint_data_ext}}_{{isa_dt_par.data_ext}}(tmp1);
+                ret.r = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.uint_data_ext}}_{{isa_dt_par.data_ext}}(tmp1.r);
                 return ret;
                 """},
 
@@ -146,10 +136,11 @@ tpl_implem_rvv = {
       
 
     "float_notb" :{"format" : "long", "code" : """
-        {{isa_dt_par.to_uint}} tmp = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(r0.r);
-        tmp = {{isa.prefix}}_v{{instr_name}}_vx_{{isa_dt_par.uint_data_ext}}(tmp, -1, %N<tp>%);
+        %r<c:uint|b:tp>% tmp;
+        tmp.r = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(r0.r);
+        tmp.r = {{isa.prefix}}_v{{instr_name}}_vx_{{isa_dt_par.uint_data_ext}}(tmp.r, -1, %N<tp>%);
         %r<tp>% ret;
-        ret.r = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.uint_data_ext}}_{{isa_dt_par.data_ext}}(tmp);
+        ret.r = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.uint_data_ext}}_{{isa_dt_par.data_ext}}(tmp.r);
         return ret;
     """},
 
@@ -167,9 +158,10 @@ tpl_implem_rvv = {
   
     
     "round_float" : { "format" : "long", "code" : """
-        {{isa_dt_par.to_int}} tmp = {{isa.prefix}}_{{instr_name}}_x_f_v_{{isa_dt_par.int_data_ext}}_rm(r0.r,__RISCV_FRM_RNE,%N<tp>%);
+        %r<c:int|b:tp>%  tmp;
+        tmp.r = {{isa.prefix}}_{{instr_name}}_x_f_v_{{isa_dt_par.int_data_ext}}_rm(r0.r,__RISCV_FRM_RNE,%N<tp>%);
         %r<tp>% ret;
-        ret.r = {{isa.prefix}}_{{instr_name}}_f_x_v_{{isa_dt_par.data_ext}}(tmp,%N<tp>%);
+        ret.r = {{isa.prefix}}_{{instr_name}}_f_x_v_{{isa_dt_par.data_ext}}(tmp.r,%N<tp>%);
         return ret;
     """},
 }

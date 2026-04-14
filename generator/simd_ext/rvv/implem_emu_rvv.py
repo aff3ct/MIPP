@@ -256,29 +256,29 @@ tpl_implem_emu_rvv = {
     
     "float32_andnb" : { "format" : "long", "code" :
     """
-        {{isa_dt_par.to_uint}} tmp0,tmp1, tmpm1;
+        %r<c:uint|b:tp>% tmp0,tmp1, tmpm1;
         
-        tmp0 = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(r0.r);
-        tmp1 = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(r1.r);
-        tmpm1 = {{isa.prefix}}_vmv_v_x_{{isa_dt_par.uint_data_ext}}((%v<c:uint|b:tp>%)UINT32_MAX,%N<tp>%);
+        tmp0.r = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(r0.r);
+        tmp1.r = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(r1.r);
+        tmpm1.r = {{isa.prefix}}_vmv_v_x_{{isa_dt_par.uint_data_ext}}((%v<c:uint|b:tp>%)UINT32_MAX,%N<tp>%);
         
-        tmp0 = {{ isa.prefix }}_vxor_vv_{{ isa_dt_par.uint_data_ext }}(tmp0, tmpm1, %N<tp>%);
-        tmp0 = {{ isa.prefix }}_vand_vv_{{ isa_dt_par.uint_data_ext }}(tmp0, tmp1, %N<tp>%);
+        tmp0.r = {{ isa.prefix }}_vxor_vv_{{ isa_dt_par.uint_data_ext }}(tmp0.r, tmpm1.r, %N<tp>%);
+        tmp0.r = {{ isa.prefix }}_vand_vv_{{ isa_dt_par.uint_data_ext }}(tmp0.r, tmp1.r, %N<tp>%);
         %r<tp>% ret;
-        ret.r = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.uint_data_ext}}_{{isa_dt_par.data_ext}}(tmp0);
+        ret.r = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.uint_data_ext}}_{{isa_dt_par.data_ext}}(tmp0.r);
         return ret;"""},
     "float64_andnb" : { "format" : "long", "code" :
     """
-        {{isa_dt_par.to_uint}} tmp0,tmp1, tmpm1;
+        %r<c:uint|b:tp>% tmp0,tmp1, tmpm1;
         
-        tmp0 = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(r0.r);
-        tmp1 = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(r1.r);
-        tmpm1 = {{isa.prefix}}_vmv_v_x_{{isa_dt_par.uint_data_ext}}((%v<c:uint|b:tp>%)UINT64_MAX,%N<tp>%);
+        tmp0.r = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(r0.r);
+        tmp1.r = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(r1.r);
+        tmpm1.r = {{isa.prefix}}_vmv_v_x_{{isa_dt_par.uint_data_ext}}((%v<c:uint|b:tp>%)UINT64_MAX,%N<tp>%);
         
-        tmp0 = {{ isa.prefix }}_vxor_vv_{{ isa_dt_par.uint_data_ext }}(tmp0, tmpm1, %N<tp>%);
-        tmp0 = {{ isa.prefix }}_vand_vv_{{ isa_dt_par.uint_data_ext }}(tmp0, tmp1, %N<tp>%);
+        tmp0.r = {{ isa.prefix }}_vxor_vv_{{ isa_dt_par.uint_data_ext }}(tmp0.r, tmpm1.r, %N<tp>%);
+        tmp0.r = {{ isa.prefix }}_vand_vv_{{ isa_dt_par.uint_data_ext }}(tmp0.r, tmp1.r, %N<tp>%);
         %r<tp>% ret;
-        ret.r = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.uint_data_ext}}_{{isa_dt_par.data_ext}}(tmp0);
+        ret.r = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.uint_data_ext}}_{{isa_dt_par.data_ext}}(tmp0.r);
         return ret;"""},
     
     "andnb_k" : { "format" : "long", "code" :
