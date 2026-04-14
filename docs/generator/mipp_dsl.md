@@ -1,87 +1,99 @@
-# dsl
+# Small DSL for Templating
 
-The MIPP generator uses a domain specific language (DSL) as well as Jinja2 templates to generate the files in `include/`.
+The MIPP generator uses a domain specific language (DSL) as well as Jinja2 
+templates to generate the files in `include/`.
 
 ## Syntax
 
-The DSL offers a way to declare templated variables for different MIPP types (registers, masks, scalars,...) and to write templated calls to MIPP functions.
+The DSL offers a way to declare templated variables for different MIPP types 
+(registers, masks, scalars,...) and to write templated calls to MIPP functions.
 
-The declarations must be put between `%`. For instance : `%r<tp>%`. 
+The declarations must be put between `%`. For instance: 
+```
+%r<tp>%
+``` 
 
 ### Types
 
 The parser will recognize these types : 
 
-- r : rvd type (value register)
-- m : rvm type (mask register)
-- v : scalar value
-- N : constant, number of elements in a register
+- `r`: rvd type (value register)
+- `m`: rvm type (mask register)
+- `v`: scalar value
+- `N`: constant, number of elements in a register
 
-Every other string put between `%` is assumed to be a function call. For instance `%add<tp>%`.
-
+Every other string put between `%` is assumed to be a function call. For 
+instance: 
+```
+%add<tp>%
+```
 
 ### Examples
 
-Declaring a MIPP value register of the same type and same size as the parameters of the function : 
+- Declaring a MIPP value register of the same type and same size as the 
+  parameters of the function: 
+  ```
+  %r<tp>%
+  ```
+- Declaring a MIPP mask register of rvm_uint32_t: 
+  ```
+  %m<c:uint|b:32|>
+  ```
+- Declaring a MIPP value register of the same type but as the return value of 
+  the function but of size 32: 
+  ```
+  %r<c:tr|b:32>%
+  ```
+- Calling the set1 function of the same type as the parameters of the function: 
+  ```
+  %set1<tp>%
+  ```
+- Declaring a scalar of the "equivalent" type to the return type of the 
+  function:
+  ```
+  %v<tr>%
+  ```
 
-`%r<tp>%`
+This template is used for the addition on uint32 and uint64 in AVX:
 
-Declaring a MIPP mask register of rvm_uint32_t : 
+```Python title="Extracted from the 'generator/simd_ext/avx/implem_emu_avx.py' file"
+"arith_2args_u": { "format": "long", "code":
+"""// long format
+	%r<c:int|b:tp>% r0u = %cast<tp,c:int|b:tp>%(r0);
+	%r<c:int|b:tp>% r1u = %cast<tp,c:int|b:tp>%(r1);
+	%r<c:int|b:tp>% res = %{{ instr_name }}<c:int|b:tp>%(r0u, r1u);
+	return %cast<c:int|b:tp,tp>%(res);"""},
+```
 
-`%m<c:uint|b:32|>`
+```c title="Extracted from the 'include/avx/mipp_impl_avx_gen.h' generated file"
+#if defined(__AVX2__) && defined(__AVX2__)
+static inline rvd_avx_uint64_t mipp_avx_add_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
+	// long format
+	rvd_avx_int64_t r0u = mipp_avx_cast_uint64_int64(r0);
+	rvd_avx_int64_t r1u = mipp_avx_cast_uint64_int64(r1);
+	rvd_avx_int64_t res = mipp_avx_add_int64(r0u, r1u);
+	return mipp_avx_cast_int64_uint64(res);
+}
+#endif
+#if defined(__AVX2__) && defined(__AVX2__)
+static inline rvd_avx_uint32_t mipp_avx_add_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
+	// long format
+	rvd_avx_int32_t r0u = mipp_avx_cast_uint32_int32(r0);
+	rvd_avx_int32_t r1u = mipp_avx_cast_uint32_int32(r1);
+	rvd_avx_int32_t res = mipp_avx_add_int32(r0u, r1u);
+	return mipp_avx_cast_int32_uint32(res);
+}
+#endif
+```
 
-Declaring a MIPP value register of the same type but as the return value of the function but of size 32 : 
-
-`%r<c:tr|b:32>%`
-
-Calling the set1 function of the same type as the parameters of the function : 
-
-`%set1<tp>%`
-
-Declaring a scalar of the "equivalent" type to the return type of the function :
-
-`%v<tr>%`
-
-This template is used for the addition on uint32 and uint64 in AVX :
-
-<code>
-    <br/>"arith_2args_u":  { "format": "long", "code":
-    <br/>"""// long format
-    <br/>	%r<c:int|b:tp>% r0u = %cast<tp,c:int|b:tp>%(r0);
-    <br/>	%r<c:int|b:tp>% r1u = %cast<tp,c:int|b:tp>%(r1);
-    <br/>	%r<c:int|b:tp>% res = %{{ instr_name }}<c:int|b:tp\>%(r0u, r1u);
-    <br/>	return %cast<c:int|b:tp,tp>%(res);"""},
-</code>
-
-*taken from implem_emu_avx.py*
-
-<code>
-    <br/>#if defined(__AVX2__) && defined(__AVX2__)
-    <br/>static inline rvd_avx_uint64_t mipp_avx_add_uint64(const rvd_avx_uint64_t r0, const rvd_avx_uint64_t r1) {
-    <br/>	// long format
-    <br/>	rvd_avx_int64_t r0u = mipp_avx_cast_uint64_int64(r0);
-    <br/>	rvd_avx_int64_t r1u = mipp_avx_cast_uint64_int64(r1);
-    <br/>	rvd_avx_int64_t res = mipp_avx_add_int64(r0u, r1u);
-    <br/>	return mipp_avx_cast_int64_uint64(res);
-    <br/>}
-    <br/>#endif
-    <br/><br/>#if defined(__AVX2__) && defined(__AVX2__)
-    <br/>static inline rvd_avx_uint32_t mipp_avx_add_uint32(const rvd_avx_uint32_t r0, const rvd_avx_uint32_t r1) {
-    <br/>	// long format
-    <br/>	rvd_avx_int32_t r0u = mipp_avx_cast_uint32_int32(r0);
-    <br/>	rvd_avx_int32_t r1u = mipp_avx_cast_uint32_int32(r1);
-    <br/>	rvd_avx_int32_t res = mipp_avx_add_int32(r0u, r1u);
-    <br/>	return mipp_avx_cast_int32_uint32(res);
-    <br/>}
-    <br/>#endif
-</code>
-
-*taken from mipp_impl_avx_gen.h*
-*The bodies of these functions are generated by "specializing" these templates*
+!!! info
+    The bodies of these functions are generated by "specializing" these 
+    templates.
 
 ### Grammar
 
-Assume that any symbol without a corresponding rule (i.e r,m, tp, 64, ":", "|", ...) is a litteral.
+Assume that any symbol without a corresponding rule (i.e r,m, tp, 64, ":", "|", 
+...) is a litteral.
 
 S = V
 

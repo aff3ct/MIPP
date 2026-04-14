@@ -1,4 +1,4 @@
-# MIPP Documentation
+# Introduction
 
 ![](assets/images/mipp.jpg)
 

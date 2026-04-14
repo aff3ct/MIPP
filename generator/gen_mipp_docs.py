@@ -653,8 +653,9 @@ def main():
     mipp_infos.gen_mipp_infos(mipp_funcs, implems_dict)
     
     #write each isa info in a md file in ../docs/isas_support/
-    if not os.path.exists("../docs/isas_support/"):
-        os.makedirs("../docs/isas_support/")
+    if os.path.exists("../docs/isas_support/"):
+        shutil.rmtree("../docs/isas_support/")
+    os.makedirs("../docs/isas_support/")
     write_mipp_infos(mipp_infos, "../docs/isas_support/")
     
         
@@ -680,8 +681,9 @@ def main():
     #write intersection info in a md file in ../docs/isas_support/intersection.md
     
     #write each func prototype in a md file in ../docs/funcs_support/
-    if not os.path.exists("../docs/funcs_support/"):
-        os.makedirs("../docs/funcs_support/")
+    if os.path.exists("../docs/funcs_support/"):
+        shutil.rmtree("../docs/funcs_support/")
+    os.makedirs("../docs/funcs_support/")
     
     spec_func_infos = SpecFuncInfos()
     spec_func_infos.gen_spec_func_infos(mipp_funcs, mipp_funcs_concepts)

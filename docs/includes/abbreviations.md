@@ -23,6 +23,7 @@
 *[CSV]: Comma-Separated Values
 *[DFS]: Depth-First Search
 *[DSEL]: Domain-Specific Embedded Language
+*[DSL]: Domain-Specific Language
 *[EOF]: End Of File
 *[FER]: Frame Error Rate
 *[GNU]: GNU's Not Unix!

@@ -1,16 +1,26 @@
-`simd_ext/` is the directory where the implementation of MIPP for specific ISAs live. 
-These are the current subdirectories of `simd_ext/` :
+# TITLE?
 
-- avx : avx, avx2 and avx2fma implementations of MIPP
-- avx512 : avx512f, avx512 bw bq, avx512 kcni, implementations of MIPP
-- neon : neon 32 bit and 64 bits implementations of MIPP
-- rvv : RVV1.0 implementation of MIPP
-- sse : sse, sse2, sse3, ssse3, sse4.1, sse4.2 implementations of MIPP
-- sve : sve implementation of MIPP
+`simd_ext/` is the directory where the implementation of MIPP for specific ISAs 
+live. These are the current subdirectories of `simd_ext/`:
 
-In each of these subdirectories, we find three files. 
-n.b : "isa" should be replaced by the extension name, like implem_avx.py for avx, implem_rvv.py for RVV and so on.
+- `avx`: AVX, AVX2 and AVX2+FMA implementations of MIPP
+- `avx512`: AVX-512F, AVX-512BW, AVX-512DQ, AVX-512DQ KNCI, implementations of 
+  MIPP
+- `neon`: NEON 32 bit and 64 bits implementations of MIPP
+- `rvv`: RVV1.0 implementation of MIPP
+- `sse`: SSE, SSE2, SSE3, SSSE3, SSE4.1, SSE4.2 implementations of MIPP
+- `sve`: SVE implementation of MIPP
 
-- implem_isa.py : defines MIPP functions where an intrinsic equivalent exists in the ISA.
-- implem_emu_isa.py : defines MIPP functions that need to be emulated in the ISA.
-- gen_mipp_isa.py : "glue" function that uses `c_generator.gen_c_functions` (or a function similar to it) and `generic_emu.gen_c_generic_functions` to generate the `include/isa/mipp_impl_isa_gen.h` header.
+In each of these subdirectories, we find three files:
+
+- implem_`[isa]`.py : defines MIPP functions where an intrinsic equivalent 
+  exists in the ISA.
+- implem_emu_`[isa]`.py : defines MIPP functions that need to be emulated in the 
+  ISA.
+- gen_mipp_`[isa]`.py : "glue" function that uses `c_generator.gen_c_functions` 
+  (or a function similar to it) and `generic_emu.gen_c_generic_functions` to 
+  generate the `include/isa/mipp_impl_isa_gen.h` header.
+
+!!! info
+    `[isa]` should be replaced by the extension name, like implem_avx.py for 
+    avx, implem_rvv.py for RVV and so on.
