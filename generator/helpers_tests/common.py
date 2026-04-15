@@ -93,7 +93,7 @@ SUPPORTED_SHAPES = {
     SHAPE_RET_VOID_3ARGS_PTR_MSK_REG #shape for mask store (maskst)
 }
 
-def classify_mipp_proto(proto: dict):
+def classify_mipp_proto(proto):
     """
     proto is one of headers_def.protos[...] (ret/args with "type" keys).
     """

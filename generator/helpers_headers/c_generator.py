@@ -43,188 +43,416 @@ def gen_c_structures(isa, file):
 	for dt in isa["datatypes"]:
 		print(j2_template.render(isa=isa, isa_datatype=isa["datatypes"][dt], datatype=datatypes[dt]), file=file)
 
+
+def _skip_masked_implem(f, ff):
+    	# start to handle masks. Skip for now.
+	if "version" in ff and ff["version"]:
+		print(
+			"Info: '" + f + "<" + ff["version"] + ">' has been skipped (reason: \"Info: Masked functions are not supported yet.\")."
+		)
+		return True
+	return False
+
+
+def _compute_dt_par_dt_ret_and_validate(funcs, f, dt):
+	# Returns (dt_par, dt_ret) or exits on unsupported type (same behavior as original).
+	if len(dt.split(',')) <= 1:
+		dt_par = dt.split(',')[0]
+		dt_ret = dt.split(',')[0]
+		if dt_par not in funcs[f]["datatypes"]:
+			print("Panic: unsupported type for '" + f + "<" + dt_par + "," + dt_par + ">' function.")
+			exit(-1)
+	else:
+		dt_par = dt.split(',')[0]
+		dt_ret = dt.split(',')[1]
+
+		dtk = dt_par + "," + dt_ret
+		if dtk not in funcs[f]["datatypes"]:
+			print("Panic: unsupported type for '" + f + "<" + dt_par + "," + dt_ret + ">' function.")
+			exit(-1)
+
+	return dt_par, dt_ret
+
+
+def _render_template_or_raise(isa, ff, dt_par, dt_ret):
+	j2_template = Template(ff["template"]["code"], undefined=StrictUndefined)
+	instr_name = ""
+	if "instr_name" in ff:
+		instr_name = ff["instr_name"]
+
+	return j2_template.render(
+		isa=isa,
+		instr_name=instr_name,
+		dt_par=datatypes[dt_par],
+		dt_ret=datatypes[dt_ret],
+		isa_dt_par=isa["datatypes"][dt_par],
+		isa_dt_ret=isa["datatypes"][dt_ret],
+		cstdint_ret=datatypes[dt_ret]["cstd"],
+	)
+
+
+def _parse_placeholders_or_skip(pre_rendering, isa, funcs, f, dt_par, dt_ret, dt_key, file):
+	try:
+		return parse_placeholders(pre_rendering, isa, funcs, f, dt_par, dt_ret)
+	except Exception as err:
+		err_message = "'" + f + "<" + dt_key + ">' has been skipped (reason: \"{0}\").".format(err)
+		print(" -> " + err_message)
+		print("// " + err_message, file=file)
+		return None
+
+
+def _build_previous_emulated_exclusion_ifdef(funcs, f, dt_key, ff):
+	# Reproduces the original "ifd" computation for prior emulated implementations.
+	ifd = ""
+	if "type" in ff and ff["type"] == "emulated":
+		if "implem_status" in funcs[f] and dt_key in funcs[f]["implem_status"]:
+			is_first = True
+			i = 0
+			for _implem in funcs[f]["implem_status"][dt_key]:
+				ifd_sub = build_ifdef(funcs, f, dt_key, i)
+				if ifd_sub:
+					if not is_first:
+						ifd = ifd + " && "
+					ifd = ifd + "!( "
+					ifd = ifd + ifd_sub
+					ifd = ifd + " )"
+					is_first = False
+				i = i + 1
+	return ifd
+
+
+def _append_implem_status(funcs, f, dt_key, ff, requirements):
+	cur_implem_status = {"if": "", "requirements": {}}
+	if "if" in ff:
+		cur_implem_status["if"] = ff["if"]
+	cur_implem_status["requirements"] = requirements
+
+	if "implem_status" not in funcs[f]:
+		funcs[f]["implem_status"] = {}
+	if dt_key not in funcs[f]["implem_status"]:
+		funcs[f]["implem_status"][dt_key] = []
+	funcs[f]["implem_status"][dt_key].append(cur_implem_status)
+
+
+def _combine_current_ifdefs(funcs, f, dt_key, ifd_prev):
+	ifd_cur = build_ifdef(funcs, f, dt_key, len(funcs[f]["implem_status"][dt_key]) - 1)
+	if ifd_prev and ifd_cur:
+		return ifd_prev + " && " + ifd_cur
+	elif ifd_cur:
+		return ifd_cur
+	return ifd_prev
+
+
+def _emit_ifdef_begin_and_update_emulated(funcs, f, dt_key, ff, ifd, file):
+	if ifd:
+		print("#if " + ifd, file=file)
+		if "type" in ff and ff["type"] == "emulated":
+			funcs[f]["implem_status"][dt_key][len(funcs[f]["implem_status"][dt_key]) - 1]["if"] = ifd
+
+
+def _build_func_name(isa, dt, dt_par, dt_ret, f):
+	if len(dt.split(',')) <= 1:
+		return build_func_name_short(isa, dt_par, f, True)
+	else:
+		return build_func_name(isa, dt_par, dt_ret, f, True)
+
+
+def _emit_short_format_prologue(funcs, dt_ret, isa, file):
+	# This block matches the nested conditions exactly (including indentation and end='').
+	if funcs["proto"]["args"]:
+		# Toreg
+		if funcs["proto"]["ret"]["type"] == "reg":
+			print("\t" + build_type(funcs["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file)
+			print("\tres.r = ", end='', file=file)
+
+		# Tomsk
+		elif funcs["proto"]["ret"]["type"] == "msk":
+			print("\t" + build_type(funcs["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file)
+			print("\tres.m = ", end='', file=file)
+
+	# Other functions
+	else:
+		if funcs["proto"]["ret"]["type"] == "reg":
+			print("\t" + build_type(funcs["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file)
+			print("\tres.r = ", end='', file=file)
+
+		elif funcs["proto"]["ret"]["type"] == "msk":
+			print("\t" + build_type(funcs["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file)
+			print("\tres.m = ", end='', file=file)
+
+
+def _emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rendering, file):
+	func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
+
+	print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name) + " {", file=file)
+
+	if ff["template"]["format"] == "short":
+		if funcs[f]["proto"]["args"] or (not funcs[f]["proto"]["args"]):
+			_emit_short_format_prologue(funcs[f], dt_ret, isa, file)
+	else:
+		print("\t", end='', file=file)
+
+	print(post_rendering, file=file)
+
+	if ff["template"]["format"] == "short":
+		if funcs[f]["proto"]["ret"]["type"]:
+			print("\treturn res;", file=file)
+
+	print("}", file=file)
+
+
+def _emit_ifdef_end(ifd, file):
+	if ifd:
+		print("#endif", file=file)
+
+
+def _maybe_print_emulated_implemented(f, dt_key, ff):
+	if "type" in ff and ff["type"] == "emulated":
+		print(" -> '" + f + "<" + dt_key + ">' has been implemented.")
+
+
 def gen_c_functions(isa, file, funcs, implems):
 	for f in implems:
 		if f in funcs:
 			for ff in implems[f]:
-				for dt in ff["datatypes"]:
-					print("// ----------------------------------------------------------------------------------------------------------------------------------------------", f ,file=file)
-					if len(dt.split(',')) <= 1:
-						dt_par = dt.split(',')[0]
-						dt_ret = dt.split(',')[0]
-						if dt_par not in funcs[f]["datatypes"]:
-							print("Panic: unsupported type for '" + f + "<" + dt_par + "," + dt_par + ">' function.")
-							exit(-1)
-					else:
-						dt_par = dt.split(',')[0]
-						dt_ret = dt.split(',')[1]
 
-						dtk = dt_par + "," + dt_ret
-						if dtk not in funcs[f]["datatypes"]:
-							print("Panic: unsupported type for '" + f + "<" + dt_par + "," + dt_ret + ">' function.")
-							exit(-1)
+				if _skip_masked_implem(f, ff):
+					continue
+
+				for dt in ff["datatypes"]:
+					print("// --------------------------------------------------------------------------------------------------------", f, file=file)
+
+					dt_par, dt_ret = _compute_dt_par_dt_ret_and_validate(funcs, f, dt)
 					dt_key = dt_par + "," + dt_ret
 
 					if not is_missing_func(funcs, f, dt_key):
-						print("// '" + f + "<" + dt_key + ">' has been skipped (reason: \"Info: It has been implemented before.\").",file=file)
-					else:
-						if isa["name"] == "sse" and 'instr_name' in ff and ff['instr_name'] == "div" and "float64" in dt:
-        						print(f,dt_key, funcs[f])
-						j2_template = Template(ff["template"]["code"], undefined=StrictUndefined)
-						instr_name = ""
-						if "instr_name" in ff:
-							instr_name = ff["instr_name"]
-						pre_rendering = j2_template.render(isa=isa, instr_name=instr_name, dt_par=datatypes[dt_par], dt_ret=datatypes[dt_ret], isa_dt_par=isa["datatypes"][dt_par], isa_dt_ret=isa["datatypes"][dt_ret], cstdint_ret=datatypes[dt_ret]["cstd"])
+						print("// '" + f + "<" + dt_key + ">' has been skipped (reason: \"Info: It has been implemented before.\").", file=file)
+						continue
 
-						try:
-							ph_ret = parse_placeholders(pre_rendering, isa, funcs, f, dt_par, dt_ret)
-						except Exception as err:
-							err_message = "'" + f + "<" + dt_key + ">' has been skipped (reason: \"{0}\").".format(err)
-							print(" -> " + err_message)
-							print("// " + err_message,file=file)
-							continue
+					pre_rendering = _render_template_or_raise(isa, ff, dt_par, dt_ret)
 
-						ifd = ""
-						if "type" in ff and ff["type"] == "emulated":
-							if "implem_status" in funcs[f] and dt_key in funcs[f]["implem_status"]:
-								is_first = True
-								i = 0
-								for implem in funcs[f]["implem_status"][dt_key]:
-									ifd_sub = build_ifdef(funcs, f, dt_key, i)
-									if ifd_sub:
-										if not is_first:
-											ifd = ifd + " && "
-										ifd = ifd + "!( "
-										ifd = ifd + ifd_sub
-										ifd = ifd + " )"
-										is_first = False
-									i = i +1
+					ph_ret = _parse_placeholders_or_skip(
+						pre_rendering=pre_rendering,
+						isa=isa,
+						funcs=funcs,
+						f=f,
+						dt_par=dt_par,
+						dt_ret=dt_ret,
+						dt_key=dt_key,
+						file=file,
+					)
+					if ph_ret is None:
+						continue
 
-						cur_implem_status = { "if": "", "requirements": {} }
-						if "if" in ff:
-							cur_implem_status["if"] = ff["if"]
-						cur_implem_status["requirements"] = ph_ret["requirements"]
+					ifd_prev = _build_previous_emulated_exclusion_ifdef(funcs, f, dt_key, ff)
 
-						if "implem_status" not in funcs[f]:
-						 	funcs[f]["implem_status"] = {}
-						if dt_key not in funcs[f]["implem_status"]:
-						 	funcs[f]["implem_status"][dt_key] = []
-						funcs[f]["implem_status"][dt_key].append(cur_implem_status)
+					_append_implem_status(funcs, f, dt_key, ff, ph_ret["requirements"])
 
-						post_rendering = ph_ret["converted_ir"]
+					post_rendering = ph_ret["converted_ir"]
 
-						ifd_cur = build_ifdef(funcs, f, dt_key, len(funcs[f]["implem_status"][dt_key])-1)
-						if ifd and ifd_cur:
-							ifd = ifd + " && "+ ifd_cur
-						elif ifd_cur:
-							ifd = ifd_cur
+					ifd = _combine_current_ifdefs(funcs, f, dt_key, ifd_prev)
+					_emit_ifdef_begin_and_update_emulated(funcs, f, dt_key, ff, ifd, file)
 
-						# # NEW
-						# ifd_type = ""
-						# if "if" in isa["datatypes"][dt_par]:
-						# 	ifd_type += "(" + isa["datatypes"][dt_par]["if"] + ")"
-						# if "if" in isa["datatypes"][dt_ret]:
-						# 	if "if" in isa["datatypes"][dt_par]:
-						# 		ifd_type += " && "
-						# 	ifd_type += "(" + isa["datatypes"][dt_ret]["if"] + ")"
-						# if ifd and ifd_type:
-						# 	ifd = ifd + " && "+ ifd_type
-						# else:
-						# 	ifd = ifd_type
+					_emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rendering, file)
 
+					_emit_ifdef_end(ifd, file)
+					_maybe_print_emulated_implemented(f, dt_key, ff)
 
-						if ifd:
-							print("#if " + ifd, file=file)
-							if "type" in ff and ff["type"] == "emulated":
-								funcs[f]["implem_status"][dt_key][len(funcs[f]["implem_status"][dt_key])-1]["if"] = ifd
-
-						if len(dt.split(',')) <= 1:
-							func_name = build_func_name_short(isa, dt_par, f,True);
-						else:
-							func_name = build_func_name(isa, dt_par, dt_ret, f,True);
-						
-						print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name) + " {", file=file)
-						
-						if ff["template"]["format"] == "short":
-							if funcs[f]["proto"]["args"]:
-								# Toreg 
-								if funcs[f]["proto"]["ret"]["type"] == "reg":
-									print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file)
-									print("\tres.r = ", end='', file=file)
-
-								# Tomsk
-								elif (funcs[f]["proto"]["ret"]["type"] == "msk"):
-									print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file);
-									print("\tres.m = ", end='', file=file)
-
-							#Other functions
-							else:
-								if (funcs[f]["proto"]["ret"]["type"] == "reg"):
-										print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file);
-										print("\tres.r = ", end='', file=file)
-
-								elif (funcs[f]["proto"]["ret"]["type"] == "msk"):
-										print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file);
-										print("\tres.m = ", end='', file=file)
-						
-						else:
-							print("\t", end='', file=file)
-
-						print(post_rendering, file=file)
-						if ff["template"]["format"] == "short":
-							if funcs[f]["proto"]["ret"]["type"]:
-								print("\treturn res;", file=file);
-						print("}", file=file)
-				
-						if ifd:
-							print("#endif", file=file)
-
-						if "type" in ff and ff["type"] == "emulated":
-							print(" -> '" + f + "<" + dt_key + ">' has been implemented.")
-			
 		else:
 			print("Panic: '" + f + "' function does not exist.")
 			exit(-1)
 
+
+def gen_isdef_neg(funcs, f, dt_key):
+	guard = "#if "
+	if "implem_status" in funcs[f] and dt_key in funcs[f]["implem_status"] :
+		for implem in funcs[f]["implem_status"][dt_key]:
+			if "if" in implem and implem["if"]:
+				guard = guard + "!(" + implem["if"] + ") && "
+	#remove last " && "
+	guard = guard[:-4]
+	return guard
+
+def add_guard_if_isdef(funcs, f, dt_key, file):
+	if is_ifdef(funcs, f, dt_key):
+		guard = gen_isdef_neg(funcs, f, dt_key)
+		print(guard, file=file)
+
+def add_endif_if_isdef(funcs, f, dt_key, file):
+	if is_ifdef(funcs, f, dt_key):
+		print("#endif", file=file)
+		
+		
+#to prevent gen_c_missing_functions to generate the missing prototypes
+def remove_cond_implem_status(funcs, f, dt_key):
+	if "implem_status" in funcs[f] and dt_key in funcs[f]["implem_status"] :
+		for implem in funcs[f]["implem_status"][dt_key]:
+			if "if" in implem and implem["if"]:
+				implem["if"] = ""
+
+#same...
+def mark_as_implemented(funcs, f, dt_key):
+	done_implem_status = { "if": "", "requirements": {} }
+	if "implem_status" in funcs[f] and dt_key in funcs[f]["implem_status"] :
+		for implem in funcs[f]["implem_status"][dt_key]:
+			if "if" in implem and implem["if"]:
+				done_implem_status["if"] = implem["if"]
+			if "requirements" in implem and implem["requirements"]:
+				done_implem_status["requirements"] = implem["requirements"]
+	if "implem_status" not in funcs[f]:
+		funcs[f]["implem_status"] = {}
+	funcs[f]["implem_status"][dt_key] = [done_implem_status]
+ 
+def _emit_generic_separator(f, file):
+    	# Must match the original output exactly.
+	print("// ------------------------------------------------------------------------------------------------------------------", f, file=file)
+
+
+def _emit_generic_already_implemented_message(f, dt_key, file):
+	# Must match the original message exactly.
+	print(
+		"// Generic '" + f + "<" + dt_key + ">' has been skipped (reason: \"Info: It has been implemented before.\").",
+		file=file,
+	)
+
+
+def _gen_c_generic_one(isa, file, funcs, f, ff, dt):
+	_emit_generic_separator(f, file)
+
+	# Same dt parsing/validation logic as original, delegated.
+	dt_par, dt_ret = _compute_dt_par_dt_ret_and_validate(funcs, f, dt)
+	dt_key = dt_par + "," + dt_ret
+
+	if not is_missing_func(funcs, f, dt_key):
+		_emit_generic_already_implemented_message(f, dt_key, file)
+		return
+
+	# Guard generic implementation with negation of previous guarded implementations, if any.
+	# (Uses your helpers; preserves exact behavior/output.)
+	add_guard_if_isdef(funcs, f, dt_key, file)
+
+	# Same Jinja pre-rendering as original, delegated.
+	pre_rendering = _render_template_or_raise(isa, ff, dt_par, dt_ret)
+
+	# Same placeholder parse try/except printing + comment emission + skip semantics, delegated.
+	ph_ret = _parse_placeholders_or_skip(
+		pre_rendering=pre_rendering,
+		isa=isa,
+		funcs=funcs,
+		f=f,
+		dt_par=dt_par,
+		dt_ret=dt_ret,
+		dt_key=dt_key,
+		file=file,
+	)
+	if ph_ret is None:
+		return
+
+	post_rendering = ph_ret["converted_ir"]
+
+	# Same C function emission as original, delegated (proto + body + short/long formatting).
+	_emit_function_body(
+		funcs=funcs,
+		f=f,
+		isa=isa,
+		dt=dt,
+		dt_par=dt_par,
+		dt_ret=dt_ret,
+		ff=ff,
+		post_rendering=post_rendering,
+		file=file,
+	)
+
+	# Close guard (uses your helper; preserves exact output).
+	add_endif_if_isdef(funcs, f, dt_key, file)
+
+	# Preserve exact side effects/order from your original function.
+	remove_cond_implem_status(funcs, f, dt_key)
+	mark_as_implemented(funcs, f, dt_key)
+
+
+def gen_c_generic_functions(isa, file, funcs, implems):
+	for f in implems:
+		if f in funcs:
+			for ff in implems[f]:
+				for dt in ff["datatypes"]:
+					_gen_c_generic_one(isa, file, funcs, f, ff, dt)
+		else:
+			print("Panic: '" + f + "' function does not exist.")
+			exit(-1)
+def _missing_compute_dt_par_dt_ret(dt):
+    	# Exact same splitting logic as original (no validation / no exits).
+	if len(dt.split(',')) <= 1:
+		dt_par = dt.split(',')[0]
+		dt_ret = dt.split(',')[0]
+	else:
+		dt_par = dt.split(',')[0]
+		dt_ret = dt.split(',')[1]
+	return dt_par, dt_ret
+
+
+def _missing_build_negated_ifdef_for_existing_implems(funcs, f, dt_key):
+	# Direct extraction of the original ifdef-negation logic (NO gating on ff["type"]).
+	ifd = ""
+	if "implem_status" in funcs[f] and dt_key in funcs[f]["implem_status"]:
+		is_first = True
+		i = 0
+		for _implem in funcs[f]["implem_status"][dt_key]:
+			ifd_sub = build_ifdef(funcs, f, dt_key, i)
+			if ifd_sub:
+				if not is_first:
+					ifd = ifd + " && "
+				ifd = ifd + "!( "
+				ifd = ifd + ifd_sub
+				ifd = ifd + " )"
+				is_first = False
+			i = i + 1
+	return ifd
+
+
+def _missing_emit_ifdef_begin(ifd, file):
+	if ifd:
+		print("#if " + ifd, file=file)
+
+
+def _missing_build_func_name(isa, dt, dt_par, dt_ret, f):
+	# Keep the same branching condition as original (based on dt string).
+	if len(dt.split(',')) <= 1:
+		return build_func_name_short(isa, dt_par, f)
+	else:
+		return build_func_name(isa, dt_par, dt_ret, f)
+
+
+def _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name):
+	print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, {}, True) + " {", file=file)
+	print("\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \"" + func_name + "\");", file=file)
+	print("\texit(-1);", file=file)
+	print("}", file=file)
+
+
+def _missing_emit_ifdef_end(ifd, file):
+	if ifd:
+		print("#endif", file=file)
+
+
+def _gen_c_missing_one_dt(isa, file, funcs, f, dt):
+	dt_par, dt_ret = _missing_compute_dt_par_dt_ret(dt)
+	dt_key = dt_par + "," + dt_ret
+
+	# Preserve the original (unused) local exactly.
+	defines = []
+
+	if is_missing_func(funcs, f, dt_key):
+		ifd = _missing_build_negated_ifdef_for_existing_implems(funcs, f, dt_key)
+		_missing_emit_ifdef_begin(ifd, file)
+
+		func_name = _missing_build_func_name(isa, dt, dt_par, dt_ret, f)
+		_missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name)
+
+		_missing_emit_ifdef_end(ifd, file)
+
+
 def gen_c_missing_functions(isa, file, funcs):
 	for f in funcs:
 		for dt in funcs[f]["datatypes"]:
-			if len(dt.split(',')) <= 1:
-				dt_par = dt.split(',')[0]
-				dt_ret = dt.split(',')[0]
-			else:
-				dt_par = dt.split(',')[0]
-				dt_ret = dt.split(',')[1]
-			dt_key = dt_par + "," + dt_ret
-			defines = []
-
-			if is_missing_func(funcs, f, dt_key):
-				ifd = ""
-				if "implem_status" in funcs[f] and dt_key in funcs[f]["implem_status"]:
-					is_first = True
-					i = 0
-					for implem in funcs[f]["implem_status"][dt_key]:
-						ifd_sub = build_ifdef(funcs, f, dt_key, i)
-						if ifd_sub:
-							if not is_first:
-								ifd = ifd + " && "
-							ifd = ifd + "!( "
-							ifd = ifd + ifd_sub
-							ifd = ifd + " )"
-							is_first = False
-						i = i +1
-				if ifd:
-					print("#if " + ifd, file=file)
-
-				if len(dt.split(',')) <= 1:
-					func_name = build_func_name_short(isa, dt_par, f)
-
-				else:
-					func_name = build_func_name(isa, dt_par, dt_ret, f)
-				print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name,{},True) + " {", file=file)
-				print("\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \""+func_name+"\");", file=file);
-				print("\texit(-1);", file=file);
-				print("}", file=file);
-
-				if ifd:
-					print("#endif", file=file)
+			_gen_c_missing_one_dt(isa, file, funcs, f, dt)

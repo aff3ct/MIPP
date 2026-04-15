@@ -111,12 +111,13 @@ def gen_c_functions_rvv(isa, file, funcs, implems,lmul=0, reductions_fix=False):
 	What changes is that calls to helper function pass the current lmul. 
 	And lmul suffix (_mX) is put "by hand" when the helper function can't generate 
 	it (for instance build_proto can't generate _mX so it's added in the function). 
- 
-	Also 
  	"""
 	for f in implems:
 		if f in funcs:
 			for ff in implems[f]:
+				if "version" in ff and ff["version"] : 
+					print("Info: '" + f + "<" + ff["version"] + ">' has been skipped (reason: \"Info: Masked functions are not supported yet.\").")
+					continue
 				for dt in ff["datatypes"]:
 					print("// ----------------------------------------------------------------------------------------------------------------------------------------------", f ,file=file)
 					if len(dt.split(',')) <= 1:
@@ -442,6 +443,8 @@ typedef double float64_t;//remove after debug"""
         #change this line if this ever changes.
         gen_c_functions_rvv(resolved_isa, file, copy_mipp_funcs, implems_generic_emu, lmul=lmul)
         gen_c_missing_functions_rvv(resolved_isa, file, copy_mipp_funcs, lmul=lmul)
+        
+        gen_c_generic_masked_functions(resolved_isa, file, copy_mipp_funcs, implem_mask_generic_emu, lmul=lmul)
 
     tpl_footer_rvv = """#endif /* MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_RVV_H_ */"""
     j2_template = Template(tpl_footer_rvv, undefined=StrictUndefined)

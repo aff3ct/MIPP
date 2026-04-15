@@ -623,6 +623,7 @@ def is_fully_missing_func(funcs, func_name, dt_key):
 			is_missing = True
 	else:
 		is_missing = True
+	
 	return is_missing
 
 def is_missing_func(funcs, func_name, dt_key):
