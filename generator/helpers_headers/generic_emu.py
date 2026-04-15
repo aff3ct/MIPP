@@ -33,6 +33,12 @@ tpl_generic_emu = {
                 ptr[i] = v0;
             return %load<tp>%(ptr);
     """},
+    
+    "fmadd" : { "format" :"long", "code" :"""
+            %r<tp>% res = %mul<tp>%(r0, r1);
+            res = %add<tp>%(res, r2);
+            return res;
+    """},
 }
 
 implems_generic_emu = {
@@ -46,6 +52,9 @@ implems_generic_emu = {
     "div2" : [
         { "instr_name": "div2",  "datatypes" : all_float, "template" : tpl_generic_emu["div2"]},
         { "instr_name": "div2",  "datatypes" : all_float, "template" : tpl_generic_emu["div2_scalar"]}],
+    
+    "fmadd" : [
+        { "instr_name": "fmadd",  "datatypes" : all_float, "template" : tpl_generic_emu["fmadd"]}],
 }
 
 #for functions with conditition, we want a way to generate the global not of the condition to be used 
@@ -104,7 +113,7 @@ def gen_c_generic_functions(isa, file, funcs, implems):
             if f in funcs:
                 for ff in implems[f]:
                     for dt in ff["datatypes"]:
-                        print("// ----------------------------------------------------------------------------------------------------------------------------------------------", f ,file=file)
+                        print("// ------------------------------------------------------------------------------------------------------------------", f ,file=file)
                         if len(dt.split(',')) <= 1:
                             dt_par = dt.split(',')[0]
                             dt_ret = dt.split(',')[0]
@@ -152,7 +161,7 @@ def gen_c_generic_functions(isa, file, funcs, implems):
 
                             if ff["template"]["format"] == "short":
                                 if funcs[f]["proto"]["args"]:
-                                # Toreg 
+                                    # Toreg 
                                     if funcs[f]["proto"]["ret"]["type"] == "reg":
                                         print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file)
                                         print("\tres.r = ", end='', file=file)
@@ -189,7 +198,10 @@ def gen_c_generic_functions(isa, file, funcs, implems):
             else:
                 print("Panic: '" + f + "' function does not exist.")
                 exit(-1)
-         
+
+
+################################# MASKED FUNCTION ############################################
+
 ## We want to emulate a blend with only andb and set0 
 SNIPPET_END_MSK = """
     %r<tp>% res = %blend<tp>%(op, r0, m0);

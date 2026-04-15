@@ -249,8 +249,8 @@ implems_emu_avx = {
     "blend": [
         { "datatypes": [int64, int32, uint64, uint32], "template": tpl_implem_emu_avx["blend-1"],                                },
         { "datatypes": [int16, int8, uint16, uint8],   "template": tpl_implem_emu_avx["blend-2"],                                } ], # blend
-    "fmadd": [
-        { "datatypes": all_float,                      "template": tpl_implem_emu_avx["fmadd"],                                  } ], # fmadd
+    #"fmadd": [
+    #    { "datatypes": all_float,                      "template": tpl_implem_emu_avx["fmadd"],                                  } ], # fmadd
     "fnmadd": [
 		{ "datatypes": all_float,                      "template": tpl_implem_emu_avx["fnmadd"],                                  } ], # fnmadd (same as fmadd but with negation of the result, which can be done by blending with zero)
     "fmsub": [

@@ -348,10 +348,15 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
 	
 	#add m0 as first argument for masked version of function
 	if masked_version:
-		p += build_msk(datatypes[dt_par], isa, lmul, isa_name, cpp) + " m0"
+		if masked_version == "mask" or masked_version == "maskz":
+			p += build_msk(datatypes[dt_par], isa, lmul, isa_name, cpp) + " m0"
+			
+		elif masked_version == "masks" :
+			p += "const " + build_msk(datatypes[dt_par], isa, lmul, isa_name, cpp) + " m0"
+			p += ", " + build_reg(datatypes[dt_par], isa, lmul, isa_name, cpp) + " rsrc"
+		cnt_msk = cnt_msk +1		
 		is_first = False
-		cnt_msk = cnt_msk +1
-		print(p, "cpp=", cpp)
+		#print(p, "cpp=", cpp)
 
 	for arg in proto["args"]:
 		if not is_first:
@@ -379,8 +384,7 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
 		elif arg["type"] == "vindex":
 			p += " vi"
 		is_first = False
-	if masked_version:	
- 		print(p)
+	
 	return p + ")";
 
 
@@ -520,15 +524,20 @@ def build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul=2, isa_name=True
 	return str_code;
 
 # Build other functions build_func_name_short & build_cpp_func_name_short
-def build_func_name_short(isa, dt, mipp_name, isa_name=True, lmul=0):
+def build_func_name_short(isa, dt, mipp_name, isa_name=True, lmul=0, masked_version=False):
 	param_type = datatypes[dt]["category"] + str(datatypes[dt]["n_bits"])
 	lmul_str = ""
 	if lmul :
 		lmul_str = "_m" + str(int(lmul))
+
+	mask_str = ""
+	if masked_version:
+		mask_str = "_" + masked_version
+
 	if isa_name:
-		return "mipp_" + isa["name"] + "_" + mipp_name + "_" +  param_type + lmul_str
+		return "mipp_" + isa["name"] + "_" + mipp_name + "_" +  param_type + mask_str + lmul_str
 	else:
-		return "mipp_" + mipp_name + "_" +  param_type + lmul_str
+		return "mipp_" + mipp_name + "_" +  param_type + mask_str + lmul_str
 
 def build_cpp_func_name_short(proto, dt_ret, mipp_name):
 	if type_specialized(proto):
@@ -541,16 +550,21 @@ def build_cpp_func_name_short(proto, dt_ret, mipp_name):
 		return mipp_name 
 
 # Build cast's functions build_func_name & build_cpp_func_name
-def build_func_name(isa, dt_par, dt_ret, mipp_name, isa_name=True, lmul=0):
+def build_func_name(isa, dt_par, dt_ret, mipp_name, isa_name=True, lmul=0, masked_version=False):
 	param_type = datatypes[dt_par]["category"] + str(datatypes[dt_par]["n_bits"])
 	return_type = datatypes[dt_ret]["category"] + str(datatypes[dt_ret]["n_bits"])
 	lmul_str = ""
 	if lmul :
 		lmul_str = "_m" + str(int(lmul))
+
+	mask_str = ""
+	if masked_version:
+		mask_str = "_" + masked_version
+  
 	if isa_name:
-		return "mipp_" + isa["name"] + "_" + mipp_name + "_" + param_type + "_" + return_type + lmul_str
+		return "mipp_" + isa["name"] + "_" + mipp_name + "_" + param_type + "_" + return_type + mask_str + lmul_str
 	else:
-		return "mipp_" + mipp_name + "_" + param_type + "_" + return_type + lmul_str
+		return "mipp_" + mipp_name + "_" + param_type + "_" + return_type + mask_str + lmul_str
 
 def build_cpp_func_name(dt_ret, mipp_name):
 	mipp_name = mipp_name.replace("_mz", "")

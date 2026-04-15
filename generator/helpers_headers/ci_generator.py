@@ -77,7 +77,7 @@ def gen_ci_defines(isa_list, file):
 
 
 def gen_ci_structures(isa_list, file):
-    
+
 	isa_rvv = next((isa for isa in isa_list if isa["name"].startswith("rvv")), None)
 	
 	for index, isa in enumerate(isa_list):
@@ -163,21 +163,50 @@ def gen_ci_structures(isa_list, file):
 		for dt in isa["datatypes"]:
 			print(j2_template.render(isa=isa, datatype=datatypes[dt], lmul=str(lmul), lmul_2=str(lmul_2)), file=file)
 	print("#endif // MIPP_RVV", file=file)
+ 
 
-def gen_ci_mask_functions(func, dt_par, dt_ret, isa, file,lmul=0):
-	maskable = "maskable" in mipp_funcs[func] and mipp_funcs[func]["maskable"]
-	maskzable = "maskzable" in mipp_funcs[func] and mipp_funcs[func]["maskzable"]
+def ci_mask_writer(func, dt, isa_list, file, mask_type, func_name="", lmul=0):
+    
+	if len(dt.split(',')) <= 1:
+		dt_par = dt.split(',')[0]
+		dt_ret = dt.split(',')[0]
+	else :
+		dt_par = dt.split(',')[0]
+		dt_ret = dt.split(',')[1]
+  
+	proto = build_proto(mipp_funcs[func]["proto"], dt_par, dt_ret, isa_list[0], func_name, lmul, False, False, mask_type)
+	template = f'/*static {proto} {func} {lmul} {{'
+	j2_template = Template(template, undefined=StrictUndefined)
+	print(j2_template.render(), file=file)
+	for i, isa in  enumerate(isa_list):
+		if i == 0:
+			print("#if " + isa["gen_define"], file=file)
+		else:
+			print("#elif " + isa["gen_define"], file=file)
+
+		if len(dt.split(',')) <= 1:
+			func_name_impl = build_func_name_short(isa, dt_par, func, True, lmul, mask_type);
+		else:
+			func_name_impl = build_func_name(isa, dt_par, dt_ret, f, True, lmul, mask_type);
+		print("\t" + build_call(mipp_funcs[func]["proto"], dt_par, dt_ret, isa, func_name_impl) + ";", file=file)
+		if i == len(isa_list)-1:
+			print("#else", file=file)
+			print("\tprintf(\"MIPP panic: '%s', unsupported case, this should never happen.\\n\", \""+func_name+"\");", file=file);
+			print("\texit(-1);", file=file);
+			print("#endif", file=file)
+			print("}*/", file=file)
+
+def gen_ci_mask_functions(func, dt, isa_list, file,lmul=0, func_name=""):
+	maskable = "mask_support" in mipp_funcs[func] and mipp_funcs[func]["mask_support"].is_maskable()
+	maskzable = "mask_support" in mipp_funcs[func] and mipp_funcs[func]["mask_support"].is_maskzable()
+	masksable = "mask_support" in mipp_funcs[func] and mipp_funcs[func]["mask_support"].is_masksable()
 	
 	if maskable:
-		proto = build_proto(mipp_funcs[func]["proto"], dt_par, dt_ret, isa, func, lmul, False, False, "mask")
-		template = f'/*maskable:  {proto} {func} {lmul} hai:)*/'
-		j2_template = Template(template, undefined=StrictUndefined)
-		print(j2_template.render(), file=file)
+		ci_mask_writer(func, dt, isa_list, file, "mask", func_name, lmul)
 	if maskzable:
-		proto = build_proto(mipp_funcs[func]["proto"], dt_par, dt_ret, isa, func, lmul, False, False, "maskz")
-		template = f'/*maskzable: {proto} {func} {lmul} hai:)*/'
-		j2_template = Template(template, undefined=StrictUndefined)
-		print(j2_template.render(), file=file)
+		ci_mask_writer(func, dt, isa_list, file, "maskz", func_name, lmul)
+	if masksable:
+		ci_mask_writer(func, dt, isa_list, file, "masks", func_name, lmul)
 
 def gen_ci_functions(isa_list, file, funcs):
 	isa_rvv = next((isa for isa in isa_list if isa["name"].startswith("rvv")), None)
@@ -220,7 +249,7 @@ def gen_ci_functions(isa_list, file, funcs):
 			print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name) + ";", file=file)
 			print("}", file=file)
    
-			gen_ci_mask_functions(f, dt_par, dt_ret, isa_list[0], file, 0)
+			gen_ci_mask_functions(f, dt, isa_list, file, 0, func_name=func_name)
 			
 			for lmul in all_lmul[1:]:
 				
