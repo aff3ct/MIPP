@@ -444,7 +444,7 @@ typedef double float64_t;//remove after debug"""
         gen_c_functions_rvv(resolved_isa, file, copy_mipp_funcs, implems_generic_emu, lmul=lmul)
         gen_c_missing_functions_rvv(resolved_isa, file, copy_mipp_funcs, lmul=lmul)
         
-        gen_c_generic_masked_functions(resolved_isa, file, copy_mipp_funcs, implem_mask_generic_emu, lmul=lmul)
+        #gen_c_generic_masked_functions(resolved_isa, file, copy_mipp_funcs, implem_mask_generic_emu, lmul=lmul)
 
     tpl_footer_rvv = """#endif /* MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_RVV_H_ */"""
     j2_template = Template(tpl_footer_rvv, undefined=StrictUndefined)
