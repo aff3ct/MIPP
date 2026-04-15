@@ -798,3 +798,130 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret,lmul=0):
 	ret_pack = { "converted_ir": converted_ir, "requirements": requirements }
 
 	return ret_pack
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Masked stuff
+# ----------------------------------------------------------------------------------------------------------------------
+
+"""
+Parallel to 
+	funcs[f]["implem_status"][dt_key] = [
+		{
+			"if" : "some condition",
+			"requirements" : {"some_requirements" : "some values"},
+		},
+	]
+we have
+	funcs[f]["implem_status_masked"][dt_key][mask_kind] = [
+		{
+			"if" : "some condition",
+			"requirements" : {"some_requirements" : "some values"},
+		},
+	]
+Where mask_kind is "mask", "maskz" or "masks". 
+
+What's cool about it is that it doesn't break anything for non masked algos 
+but still looks same-ish.
+"""
+
+def _get_masked_bucket(funcs, func_name, dt_key, mask_kind):
+    	# Returns the list or None (no bucket)
+	if "implem_status_masked" in funcs[func_name]:
+		if dt_key in funcs[func_name]["implem_status_masked"]:
+			if mask_kind in funcs[func_name]["implem_status_masked"][dt_key]:
+				return funcs[func_name]["implem_status_masked"][dt_key][mask_kind]
+	return None
+
+
+def build_ifdef_rec_masked(funcs, func_name, dt_key, mask_kind):
+	# Same algorithm as build_ifdef_rec, but reading from implem_status_masked and
+	# recursing on the same mask_kind
+	str_ifdef = ""
+	bucket = _get_masked_bucket(funcs, func_name, dt_key, mask_kind)
+	if bucket is not None:
+		is_first_or = True
+		str_ifdef_sub = ""
+		str_end_sub_token = ""
+		for implem in bucket:
+			if not is_first_or:
+				str_ifdef_sub = "( " + str_ifdef_sub + " || "
+				str_end_sub_token = " )"
+			is_first_and = True
+			str_ifdef_sub_sub = ""
+			for f_name in implem["requirements"]:
+				for fdt_key in implem["requirements"][f_name]:
+					ret = build_ifdef_rec_masked(funcs, f_name, fdt_key, mask_kind)
+					if ret:
+						if not is_first_and:
+							str_ifdef_sub_sub = str_ifdef_sub_sub + " && "
+						str_ifdef_sub_sub = str_ifdef_sub_sub + ret
+						is_first_and = False
+
+			if implem["if"] and str_ifdef_sub_sub:
+				str_ifdef_sub = str_ifdef_sub + implem["if"] + str_end_sub_token + " && " + str_ifdef_sub_sub
+			if implem["if"] and not str_ifdef_sub_sub:
+				str_ifdef_sub = str_ifdef_sub + implem["if"] + str_end_sub_token
+			if str_ifdef_sub_sub and not implem["if"]:
+				str_ifdef_sub = str_ifdef_sub + str_ifdef_sub_sub + str_end_sub_token
+
+			if implem["if"] or str_ifdef_sub_sub:
+				is_first_or = False
+
+		if str_ifdef_sub:
+			str_ifdef = str_ifdef_sub
+	return str_ifdef
+
+
+def is_ifdef_masked(funcs, func_name, dt_key, mask_kind):
+	ifdef = build_ifdef_rec_masked(funcs, func_name, dt_key, mask_kind)
+	if ifdef:
+		return True
+	else:
+		return False
+
+
+def is_fully_missing_masked_func(funcs, func_name, dt_key, mask_kind):
+	bucket = _get_masked_bucket(funcs, func_name, dt_key, mask_kind)
+	if bucket is None:
+		return True
+	return len(bucket) == 0
+
+
+def is_missing_masked_func(funcs, func_name, dt_key, mask_kind):
+	return is_fully_missing_masked_func(funcs, func_name, dt_key, mask_kind) or is_ifdef_masked(funcs, func_name, dt_key, mask_kind)
+
+def build_ifdef_masked(funcs, func_name, dt_key, mask_kind, implem_id):
+	"""
+	Masked counterpart of build_ifdef(funcs, func_name, dt_key, implem_id).
+
+	Same behavior, but:
+	- reads implem from funcs[func_name]["implem_status_masked"][dt_key][mask_kind][implem_id]
+	- requirements use build_ifdef_rec_masked(..., mask_kind) (same mask kind)
+	"""
+	str_ifdef = ""
+	bucket = _get_masked_bucket(funcs, func_name, dt_key, mask_kind)
+	# If caller uses it, bucket should exist; keep behavior predictable.
+	if bucket is None:
+		return ""
+
+	if "if" in bucket[implem_id]:
+		str_ifdef = str_ifdef + bucket[implem_id]["if"]
+
+	is_first_and = True
+	str_ifdef_and = ""
+	for f in bucket[implem_id]["requirements"]:
+		for fdt in bucket[implem_id]["requirements"][f]:
+			ret = build_ifdef_rec_masked(funcs, f, fdt, mask_kind)
+			if ret:
+				if not is_first_and:
+					str_ifdef_and = str_ifdef_and + " && "
+				str_ifdef_and = str_ifdef_and + ret
+				is_first_and = False
+
+	if str_ifdef and str_ifdef_and:
+		str_ifdef = str_ifdef + " && " + str_ifdef_and
+	if str_ifdef_and and not str_ifdef:
+		str_ifdef = str_ifdef_and
+
+	return str_ifdef

@@ -1,24 +1,39 @@
-
 from jinja2 import Template, StrictUndefined
 import json
 import re
 
 from tools import *
 
+
 def gen_c_defines(isa, file):
-	
+	"""
+	Writes the number of elements in the SIMD 
+	register for each supported datatype for a given ISA.
+	"""
 	print("#define MIPP_" + isa["name"].upper() + "_RVD_SIZE_BIT " + str(isa["size"]), file=file)
 	print("#define MIPP_" + isa["name"].upper() + "_RVD_SIZE_BYTE " + str(int(isa["size"] / 8)), file=file)
-
 
 	template = """#define MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{n_bits}} {{n_elmts}}"""
 	j2_template = Template(template, undefined=StrictUndefined)
 
 	for dt in isa["datatypes"]:
 		n_elmts = int(isa["size"] / datatypes[dt]["n_bits"])
-		print(j2_template.render(isa_name_upper=isa["name"].upper(), type_category_upper=datatypes[dt]["category"].upper(), n_bits=datatypes[dt]["n_bits"], n_elmts=n_elmts), file=file)
+		print(
+			j2_template.render(
+				isa_name_upper=isa["name"].upper(),
+				type_category_upper=datatypes[dt]["category"].upper(),
+				n_bits=datatypes[dt]["n_bits"],
+				n_elmts=n_elmts,
+			),
+			file=file,
+		)
+
 
 def gen_c_structures(isa, file):
+	"""
+	Writes the C structures corresponding to the supported datatypes for a given ISA, for both vector and mask types.
+	"""
+	
 	template = """typedef struct { {{ isa_datatype.reg }} r; } rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
 	j2_template = Template(template, undefined=StrictUndefined)
 
@@ -44,8 +59,20 @@ def gen_c_structures(isa, file):
 		print(j2_template.render(isa=isa, isa_datatype=isa["datatypes"][dt], datatype=datatypes[dt]), file=file)
 
 
+# ----------------------------------------------------------------------------------------------------------------------
+# Shared helpers
+# ----------------------------------------------------------------------------------------------------------------------
+def _emit_separator(f, file):
+	"""
+	Writes a separator comment for a given function name, to improve readability of the generated code.
+	"""
+	print("// --------------------------------------------------------------------------------------------------------", f, file=file)
+
+
 def _skip_masked_implem(f, ff):
-    	# start to handle masks. Skip for now.
+	"""
+	temporary skip of masks
+	"""
 	if "version" in ff and ff["version"]:
 		print(
 			"Info: '" + f + "<" + ff["version"] + ">' has been skipped (reason: \"Info: Masked functions are not supported yet.\")."
@@ -54,7 +81,10 @@ def _skip_masked_implem(f, ff):
 	return False
 
 
-def _compute_dt_par_dt_ret_and_validate(funcs, f, dt):
+def _compute_dt_par_dt_ret(funcs, f, dt):
+	"""
+	returns dt_par and dt_ret based on dt.  len(dt.split(',')) > 1 for cast and cast_k 
+	"""
 	# Returns (dt_par, dt_ret) or exits on unsupported type (same behavior as original).
 	if len(dt.split(',')) <= 1:
 		dt_par = dt.split(',')[0]
@@ -74,7 +104,11 @@ def _compute_dt_par_dt_ret_and_validate(funcs, f, dt):
 	return dt_par, dt_ret
 
 
-def _render_template_or_raise(isa, ff, dt_par, dt_ret):
+def _render_template(isa, ff, dt_par, dt_ret):
+	"""
+	renders the Jinja template. Can raise exceptions 
+	if the template is not well formed!
+	"""
 	j2_template = Template(ff["template"]["code"], undefined=StrictUndefined)
 	instr_name = ""
 	if "instr_name" in ff:
@@ -102,7 +136,6 @@ def _parse_placeholders_or_skip(pre_rendering, isa, funcs, f, dt_par, dt_ret, dt
 
 
 def _build_previous_emulated_exclusion_ifdef(funcs, f, dt_key, ff):
-	# Reproduces the original "ifd" computation for prior emulated implementations.
 	ifd = ""
 	if "type" in ff and ff["type"] == "emulated":
 		if "implem_status" in funcs[f] and dt_key in funcs[f]["implem_status"]:
@@ -187,6 +220,7 @@ def _emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rendering, f
 	print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name) + " {", file=file)
 
 	if ff["template"]["format"] == "short":
+		# Original code had a redundant always-true condition; keep behavior identical.
 		if funcs[f]["proto"]["args"] or (not funcs[f]["proto"]["args"]):
 			_emit_short_format_prologue(funcs[f], dt_ret, isa, file)
 	else:
@@ -211,89 +245,46 @@ def _maybe_print_emulated_implemented(f, dt_key, ff):
 		print(" -> '" + f + "<" + dt_key + ">' has been implemented.")
 
 
-def gen_c_functions(isa, file, funcs, implems):
-	for f in implems:
-		if f in funcs:
-			for ff in implems[f]:
+def _emit_already_implemented_message(f, dt_key, file, generic=False):
+	# Centralize the message string to avoid drift; must remain identical.
+	generic_str = "Generic " if generic else ""
+	print("// '" + generic_str +  f + "<" + dt_key + ">' has been skipped (reason: \"Info: It has been implemented before.\").", file=file)
+ 
+ 
 
-				if _skip_masked_implem(f, ff):
-					continue
-
-				for dt in ff["datatypes"]:
-					print("// --------------------------------------------------------------------------------------------------------", f, file=file)
-
-					dt_par, dt_ret = _compute_dt_par_dt_ret_and_validate(funcs, f, dt)
-					dt_key = dt_par + "," + dt_ret
-
-					if not is_missing_func(funcs, f, dt_key):
-						print("// '" + f + "<" + dt_key + ">' has been skipped (reason: \"Info: It has been implemented before.\").", file=file)
-						continue
-
-					pre_rendering = _render_template_or_raise(isa, ff, dt_par, dt_ret)
-
-					ph_ret = _parse_placeholders_or_skip(
-						pre_rendering=pre_rendering,
-						isa=isa,
-						funcs=funcs,
-						f=f,
-						dt_par=dt_par,
-						dt_ret=dt_ret,
-						dt_key=dt_key,
-						file=file,
-					)
-					if ph_ret is None:
-						continue
-
-					ifd_prev = _build_previous_emulated_exclusion_ifdef(funcs, f, dt_key, ff)
-
-					_append_implem_status(funcs, f, dt_key, ff, ph_ret["requirements"])
-
-					post_rendering = ph_ret["converted_ir"]
-
-					ifd = _combine_current_ifdefs(funcs, f, dt_key, ifd_prev)
-					_emit_ifdef_begin_and_update_emulated(funcs, f, dt_key, ff, ifd, file)
-
-					_emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rendering, file)
-
-					_emit_ifdef_end(ifd, file)
-					_maybe_print_emulated_implemented(f, dt_key, ff)
-
-		else:
-			print("Panic: '" + f + "' function does not exist.")
-			exit(-1)
-
-
-def gen_isdef_neg(funcs, f, dt_key):
+def _gen_isdef_neg(funcs, f, dt_key):
 	guard = "#if "
-	if "implem_status" in funcs[f] and dt_key in funcs[f]["implem_status"] :
+	if "implem_status" in funcs[f] and dt_key in funcs[f]["implem_status"]:
 		for implem in funcs[f]["implem_status"][dt_key]:
 			if "if" in implem and implem["if"]:
 				guard = guard + "!(" + implem["if"] + ") && "
-	#remove last " && "
+	# remove last " && "
 	guard = guard[:-4]
 	return guard
 
-def add_guard_if_isdef(funcs, f, dt_key, file):
+
+def _add_guard_if_isdef(funcs, f, dt_key, file):
 	if is_ifdef(funcs, f, dt_key):
-		guard = gen_isdef_neg(funcs, f, dt_key)
+		guard = _gen_isdef_neg(funcs, f, dt_key)
 		print(guard, file=file)
 
-def add_endif_if_isdef(funcs, f, dt_key, file):
+
+def _add_endif_if_isdef(funcs, f, dt_key, file):
 	if is_ifdef(funcs, f, dt_key):
 		print("#endif", file=file)
-		
-		
-#to prevent gen_c_missing_functions to generate the missing prototypes
-def remove_cond_implem_status(funcs, f, dt_key):
-	if "implem_status" in funcs[f] and dt_key in funcs[f]["implem_status"] :
+
+# to prevent gen_c_missing_functions to generate the missing prototypes
+def _remove_cond_implem_status(funcs, f, dt_key):
+	if "implem_status" in funcs[f] and dt_key in funcs[f]["implem_status"]:
 		for implem in funcs[f]["implem_status"][dt_key]:
 			if "if" in implem and implem["if"]:
 				implem["if"] = ""
 
-#same...
-def mark_as_implemented(funcs, f, dt_key):
-	done_implem_status = { "if": "", "requirements": {} }
-	if "implem_status" in funcs[f] and dt_key in funcs[f]["implem_status"] :
+
+# same...
+def _mark_as_implemented(funcs, f, dt_key):
+	done_implem_status = {"if": "", "requirements": {}}
+	if "implem_status" in funcs[f] and dt_key in funcs[f]["implem_status"]:
 		for implem in funcs[f]["implem_status"][dt_key]:
 			if "if" in implem and implem["if"]:
 				done_implem_status["if"] = implem["if"]
@@ -303,85 +294,9 @@ def mark_as_implemented(funcs, f, dt_key):
 		funcs[f]["implem_status"] = {}
 	funcs[f]["implem_status"][dt_key] = [done_implem_status]
  
-def _emit_generic_separator(f, file):
-    	# Must match the original output exactly.
-	print("// ------------------------------------------------------------------------------------------------------------------", f, file=file)
 
-
-def _emit_generic_already_implemented_message(f, dt_key, file):
-	# Must match the original message exactly.
-	print(
-		"// Generic '" + f + "<" + dt_key + ">' has been skipped (reason: \"Info: It has been implemented before.\").",
-		file=file,
-	)
-
-
-def _gen_c_generic_one(isa, file, funcs, f, ff, dt):
-	_emit_generic_separator(f, file)
-
-	# Same dt parsing/validation logic as original, delegated.
-	dt_par, dt_ret = _compute_dt_par_dt_ret_and_validate(funcs, f, dt)
-	dt_key = dt_par + "," + dt_ret
-
-	if not is_missing_func(funcs, f, dt_key):
-		_emit_generic_already_implemented_message(f, dt_key, file)
-		return
-
-	# Guard generic implementation with negation of previous guarded implementations, if any.
-	# (Uses your helpers; preserves exact behavior/output.)
-	add_guard_if_isdef(funcs, f, dt_key, file)
-
-	# Same Jinja pre-rendering as original, delegated.
-	pre_rendering = _render_template_or_raise(isa, ff, dt_par, dt_ret)
-
-	# Same placeholder parse try/except printing + comment emission + skip semantics, delegated.
-	ph_ret = _parse_placeholders_or_skip(
-		pre_rendering=pre_rendering,
-		isa=isa,
-		funcs=funcs,
-		f=f,
-		dt_par=dt_par,
-		dt_ret=dt_ret,
-		dt_key=dt_key,
-		file=file,
-	)
-	if ph_ret is None:
-		return
-
-	post_rendering = ph_ret["converted_ir"]
-
-	# Same C function emission as original, delegated (proto + body + short/long formatting).
-	_emit_function_body(
-		funcs=funcs,
-		f=f,
-		isa=isa,
-		dt=dt,
-		dt_par=dt_par,
-		dt_ret=dt_ret,
-		ff=ff,
-		post_rendering=post_rendering,
-		file=file,
-	)
-
-	# Close guard (uses your helper; preserves exact output).
-	add_endif_if_isdef(funcs, f, dt_key, file)
-
-	# Preserve exact side effects/order from your original function.
-	remove_cond_implem_status(funcs, f, dt_key)
-	mark_as_implemented(funcs, f, dt_key)
-
-
-def gen_c_generic_functions(isa, file, funcs, implems):
-	for f in implems:
-		if f in funcs:
-			for ff in implems[f]:
-				for dt in ff["datatypes"]:
-					_gen_c_generic_one(isa, file, funcs, f, ff, dt)
-		else:
-			print("Panic: '" + f + "' function does not exist.")
-			exit(-1)
 def _missing_compute_dt_par_dt_ret(dt):
-    	# Exact same splitting logic as original (no validation / no exits).
+	# Exact same splitting logic as original (no validation / no exits).
 	if len(dt.split(',')) <= 1:
 		dt_par = dt.split(',')[0]
 		dt_ret = dt.split(',')[0]
@@ -434,7 +349,99 @@ def _missing_emit_ifdef_end(ifd, file):
 	if ifd:
 		print("#endif", file=file)
 
+# ----------------------------------------------------------------------------------------------------------------------
+# Generator of one function 
+# ----------------------------------------------------------------------------------------------------------------------
 
+def _gen_c_functions_one_dt_unmasked(isa, file, funcs, f, ff, dt):
+	dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
+	dt_key = dt_par + "," + dt_ret
+
+	if not is_missing_func(funcs, f, dt_key):
+		_emit_already_implemented_message(f, dt_key, file)
+		return
+
+	pre_rendering = _render_template(isa, ff, dt_par, dt_ret)
+
+	ph_ret = _parse_placeholders_or_skip(
+		pre_rendering=pre_rendering,
+		isa=isa,
+		funcs=funcs,
+		f=f,
+		dt_par=dt_par,
+		dt_ret=dt_ret,
+		dt_key=dt_key,
+		file=file,
+	)
+	if ph_ret is None:
+		return
+
+	ifd_prev = _build_previous_emulated_exclusion_ifdef(funcs, f, dt_key, ff)
+
+	_append_implem_status(funcs, f, dt_key, ff, ph_ret["requirements"])
+
+	post_rendering = ph_ret["converted_ir"]
+
+	ifd = _combine_current_ifdefs(funcs, f, dt_key, ifd_prev)
+	_emit_ifdef_begin_and_update_emulated(funcs, f, dt_key, ff, ifd, file)
+
+	_emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rendering, file)
+
+	_emit_ifdef_end(ifd, file)
+	_maybe_print_emulated_implemented(f, dt_key, ff)
+ 
+def _gen_c_generic_one(isa, file, funcs, f, ff, dt):
+	_emit_separator(f, file)
+
+	dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
+	dt_key = dt_par + "," + dt_ret
+
+	if not is_missing_func(funcs, f, dt_key):
+		_emit_already_implemented_message(f, dt_key, file)
+		return
+
+	# Guard generic implementation with negation of previous guarded implementations, if any.
+	_add_guard_if_isdef(funcs, f, dt_key, file)
+
+	# Same Jinja pre-rendering as original, delegated.
+	pre_rendering = _render_template(isa, ff, dt_par, dt_ret)
+
+	# Same placeholder parse try/except printing + comment emission + skip semantics, delegated.
+	ph_ret = _parse_placeholders_or_skip(
+		pre_rendering=pre_rendering,
+		isa=isa,
+		funcs=funcs,
+		f=f,
+		dt_par=dt_par,
+		dt_ret=dt_ret,
+		dt_key=dt_key,
+		file=file,
+	)
+	if ph_ret is None:
+		return
+
+	post_rendering = ph_ret["converted_ir"]
+
+	# Same C function emission as original, delegated (proto + body + short/long formatting).
+	_emit_function_body(
+		funcs=funcs,
+		f=f,
+		isa=isa,
+		dt=dt,
+		dt_par=dt_par,
+		dt_ret=dt_ret,
+		ff=ff,
+		post_rendering=post_rendering,
+		file=file,
+	)
+
+	# Close guard (uses your helper; preserves exact output).
+	_add_endif_if_isdef(funcs, f, dt_key, file)
+
+	# Preserve exact side effects/order from your original function.
+	_remove_cond_implem_status(funcs, f, dt_key)
+	_mark_as_implemented(funcs, f, dt_key)
+ 
 def _gen_c_missing_one_dt(isa, file, funcs, f, dt):
 	dt_par, dt_ret = _missing_compute_dt_par_dt_ret(dt)
 	dt_key = dt_par + "," + dt_ret
@@ -451,6 +458,34 @@ def _gen_c_missing_one_dt(isa, file, funcs, f, dt):
 
 		_missing_emit_ifdef_end(ifd, file)
 
+# ----------------------------------------------------------------------------------------------------------------------
+# Generators
+# ----------------------------------------------------------------------------------------------------------------------
+def gen_c_functions(isa, file, funcs, implems):
+	for f in implems:
+		if f in funcs:
+			for ff in implems[f]:
+				if _skip_masked_implem(f, ff):
+					continue
+
+				for dt in ff["datatypes"]:
+					_emit_separator(f, file)
+					_gen_c_functions_one_dt_unmasked(isa, file, funcs, f, ff, dt)
+
+		else:
+			print("Panic: '" + f + "' function does not exist.")
+			exit(-1)
+
+
+def gen_c_generic_functions(isa, file, funcs, implems):
+	for f in implems:
+		if f in funcs:
+			for ff in implems[f]:
+				for dt in ff["datatypes"]:
+					_gen_c_generic_one(isa, file, funcs, f, ff, dt)
+		else:
+			print("Panic: '" + f + "' function does not exist.")
+			exit(-1)
 
 def gen_c_missing_functions(isa, file, funcs):
 	for f in funcs:
