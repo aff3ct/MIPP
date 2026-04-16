@@ -175,7 +175,7 @@ def ci_mask_writer(func, dt, isa_list, file, mask_type, func_name="", lmul=0):
 		dt_ret = dt.split(',')[1]
   
 	proto = build_proto(mipp_funcs[func]["proto"], dt_par, dt_ret, isa_list[0], func_name, lmul, False, False, mask_type)
-	template = f'/*static {proto} {func} {lmul} {{'
+	template = f'static {proto} {{'
 	j2_template = Template(template, undefined=StrictUndefined)
 	print(j2_template.render(), file=file)
 	for i, isa in  enumerate(isa_list):
@@ -188,13 +188,13 @@ def ci_mask_writer(func, dt, isa_list, file, mask_type, func_name="", lmul=0):
 			func_name_impl = build_func_name_short(isa, dt_par, func, True, lmul, mask_type);
 		else:
 			func_name_impl = build_func_name(isa, dt_par, dt_ret, f, True, lmul, mask_type);
-		print("\t" + build_call(mipp_funcs[func]["proto"], dt_par, dt_ret, isa, func_name_impl) + ";", file=file)
+		print("\t" + build_call(mipp_funcs[func]["proto"], dt_par, dt_ret, isa, func_name_impl, masked_version = mask_type) + ";", file=file)
 		if i == len(isa_list)-1:
 			print("#else", file=file)
 			print("\tprintf(\"MIPP panic: '%s', unsupported case, this should never happen.\\n\", \""+func_name+"\");", file=file);
 			print("\texit(-1);", file=file);
 			print("#endif", file=file)
-			print("}*/", file=file)
+			print("}", file=file)
 
 def gen_ci_mask_functions(func, dt, isa_list, file,lmul=0, func_name=""):
 	maskable = "mask_support" in mipp_funcs[func] and mipp_funcs[func]["mask_support"].is_maskable()

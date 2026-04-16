@@ -433,7 +433,7 @@ def build_proto_object(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=F
 	return p + ")";
 
 
-def build_call(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True):
+def build_call(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, masked_version=False):
 	"""if lmul:
 		func_name += "_m" + str(int(lmul))"""
 	p = ""
@@ -446,6 +446,14 @@ def build_call(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True):
 	cnt_val = 0
 	cnt_ptr = 0
 	is_first = True
+ 
+	if masked_version:
+		if masked_version == "mask" or masked_version == "maskz":
+    			p += "m0"
+		elif masked_version == "masks" :
+			p += "m0, rsrc"
+		cnt_msk = cnt_msk +1		
+		is_first = False
 	for arg in proto["args"]:
 		if not is_first:
 			p += ", "

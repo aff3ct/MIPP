@@ -410,8 +410,11 @@ def _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, masked_ve
 	writes the "body" of the missing function. 
 	Which prints a panic messages and terminates the program.
 	"""
+	mask_str = ""
+	if masked_version:
+		mask_str = "_" + masked_version
 	print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, {}, True, masked_version=masked_version) + " {", file=file)
-	print("\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \"" + func_name + "\");", file=file)
+	print("\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \"" + func_name + mask_str + "\");", file=file)
 	print("\texit(-1);", file=file)
 	print("}", file=file)
 
@@ -668,16 +671,20 @@ def _gen_c_missing_one_masked(isa, file, funcs, f, dt, mask_kind):
 	if not is_supported_mask_kind(mask_support, mask_kind):
 		print("Panic: unsupported mask kind '" + mask_kind + "' for '" + f + "<" + dt_key + ">' function.")
 		exit(-1)
-
-	if is_missing_masked_func(funcs, f, dt_key, mask_kind):
+ 
+	fully_missing = is_fully_missing_masked_func(funcs, f, dt_key, mask_kind)
+	ifdef_guarded = is_ifdef_masked(funcs, f, dt_key, mask_kind)
+	#if is fully mising => no guard, emit directly the stub
+	#if is ifdef guarded missing => guard with the negation of the ifdef conditions of existing implementations and emit the stub in this guard
+	if fully_missing:
+		func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
+		_missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, masked_version=mask_kind)
+	elif ifdef_guarded:
 		ifd = _missing_build_negated_ifdef_for_existing_implems(funcs, f, dt_key)
-
 		_missing_emit_ifdef_begin(ifd, file)
 
-		func_name = _build_func_name(isa, dt, dt_par, dt_ret, f, masked_version=mask_kind)
-		_missing_emit_stub(file, funcs, f , dt_par, dt_ret, isa, func_name, masked_version=mask_kind)
-		#print("wawawa")
-		#print implem_status_masked for debug
+		func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
+		_missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, masked_version=mask_kind)
 
 		_missing_emit_ifdef_end(ifd, file)
 
@@ -721,6 +728,7 @@ def gen_c_missing_functions(isa, file, funcs):
 			_emit_separator(f, file)
 			_gen_c_missing_one_dt(isa, file, funcs, f, dt)
 			if "mask_support" in funcs[f]:
+				#print(f,"haiii")
 				support = funcs[f]["mask_support"]
 				if support.is_maskable(): 
 					_gen_c_missing_one_masked(isa, file, funcs, f, dt, "mask")
