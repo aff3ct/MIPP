@@ -423,6 +423,44 @@ def _missing_emit_ifdef_end(ifd, file):
 	if ifd:
 		print("#endif", file=file)
 
+
+def _append_implem_status_masked(funcs, f, dt_key, mask_kind, ff, requirements):
+	"""
+	updates masked implem status in funcs[f][dt_key][mask_kind] with the conditions 
+	i.e the guard in "if" key and the 
+	function that f depends on in "requirements" key.
+	"""
+	cur_implem_status = {"if": "", "requirements": {}}
+	if "if" in ff:
+		cur_implem_status["if"] = ff["if"]
+	cur_implem_status["requirements"] = requirements
+
+	bucket = get_masked_bucket(funcs, f, dt_key, mask_kind, create_missing_bucket=True)
+	bucket.append(cur_implem_status)
+
+
+def _build_previous_masked_emulated_exclusion_ifdef(funcs, f, dt_key, mask_kind, ff):
+	"""
+	?
+	"""
+	ifd = ""
+	if "type" in ff and ff["type"] == "emulated":
+		bucket = get_masked_bucket(funcs, f, dt_key, mask_kind)
+		if bucket is not None:
+			is_first = True
+			i = 0
+			for _implem in bucket:
+				ifd_sub = build_ifdef_masked(funcs, f, dt_key, mask_kind, i)
+				if ifd_sub:
+					if not is_first:
+						ifd = ifd + " && "
+					ifd = ifd + "!( "
+					ifd = ifd + ifd_sub
+					ifd = ifd + " )"
+					is_first = False
+				i = i + 1
+	return ifd
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Generator of one function 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -488,7 +526,6 @@ def _gen_c_function_one_masked(isa, file, funcs, f, ff, dt):
 
 	pre_rendering = _render_template(isa, ff, dt_par, dt_ret, func_name = f)
 	
-	print(f)
 	ph_ret = _parse_placeholders_or_skip(
 		pre_rendering=pre_rendering,
 		isa=isa,
@@ -503,6 +540,12 @@ def _gen_c_function_one_masked(isa, file, funcs, f, ff, dt):
 		return
 	post_rendering = ph_ret["converted_ir"]
 
+	ifd_prev = _build_previous_masked_emulated_exclusion_ifdef(funcs, f, dt_key, mask_kind, ff)
+
+	_append_implem_status_masked(funcs, f, dt_key, mask_kind, ff, ph_ret["requirements"])
+ 
+	ifd = _combine_current_ifdefs(funcs, f, dt_key, ifd_prev)
+	_emit_ifdef_begin_and_update_emulated(funcs, f, dt_key, ff, ifd, file)
 	_emit_function_body(
 		funcs=funcs,
 		f=f,
@@ -515,6 +558,9 @@ def _gen_c_function_one_masked(isa, file, funcs, f, ff, dt):
 		file=file,
   		masked_version=mask_kind,
 	)
+	
+	_emit_ifdef_end(ifd, file)
+	_maybe_print_emulated_implemented(f + "<" + mask_kind + ">", dt_key, ff)
  
 def _gen_c_generic_one(isa, file, funcs, f, ff, dt):
 	"""
