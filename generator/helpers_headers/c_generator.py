@@ -9,6 +9,7 @@ def gen_c_defines(isa, file):
 	"""
 	Writes the number of elements in the SIMD 
 	register for each supported datatype for a given ISA.
+	Also writes the size of the SIMD register in bits and bytes.
 	"""
 	print("#define MIPP_" + isa["name"].upper() + "_RVD_SIZE_BIT " + str(isa["size"]), file=file)
 	print("#define MIPP_" + isa["name"].upper() + "_RVD_SIZE_BYTE " + str(int(isa["size"] / 8)), file=file)
@@ -126,6 +127,10 @@ def _render_template(isa, ff, dt_par, dt_ret):
 
 
 def _parse_placeholders_or_skip(pre_rendering, isa, funcs, f, dt_par, dt_ret, dt_key, file):
+	"""
+	tries to parse placeholders in pre-rendered and returns converted IR. In gen c_funcs 
+	it was the call to parse_placeholders + affectation post_rendering = ph_ret["converted_ir"]
+	"""
 	try:
 		return parse_placeholders(pre_rendering, isa, funcs, f, dt_par, dt_ret)
 	except Exception as err:
@@ -136,6 +141,9 @@ def _parse_placeholders_or_skip(pre_rendering, isa, funcs, f, dt_par, dt_ret, dt
 
 
 def _build_previous_emulated_exclusion_ifdef(funcs, f, dt_key, ff):
+	"""
+	?
+	"""
 	ifd = ""
 	if "type" in ff and ff["type"] == "emulated":
 		if "implem_status" in funcs[f] and dt_key in funcs[f]["implem_status"]:
@@ -155,6 +163,11 @@ def _build_previous_emulated_exclusion_ifdef(funcs, f, dt_key, ff):
 
 
 def _append_implem_status(funcs, f, dt_key, ff, requirements):
+	"""
+	updates implem_status in funcs[f][dt_key] with the conditions 
+	i.e the guard in "if" key and the 
+	function that f depends on in "requirements" key.
+	"""
 	cur_implem_status = {"if": "", "requirements": {}}
 	if "if" in ff:
 		cur_implem_status["if"] = ff["if"]
@@ -168,6 +181,9 @@ def _append_implem_status(funcs, f, dt_key, ff, requirements):
 
 
 def _combine_current_ifdefs(funcs, f, dt_key, ifd_prev):
+	"""
+	straightforward.
+	"""
 	ifd_cur = build_ifdef(funcs, f, dt_key, len(funcs[f]["implem_status"][dt_key]) - 1)
 	if ifd_prev and ifd_cur:
 		return ifd_prev + " && " + ifd_cur
@@ -177,6 +193,10 @@ def _combine_current_ifdefs(funcs, f, dt_key, ifd_prev):
 
 
 def _emit_ifdef_begin_and_update_emulated(funcs, f, dt_key, ff, ifd, file):
+	"""
+	adds ifdef conditions to "if" in implem_status
+	also prints the #if condition to file
+	"""
 	if ifd:
 		print("#if " + ifd, file=file)
 		if "type" in ff and ff["type"] == "emulated":
@@ -184,6 +204,11 @@ def _emit_ifdef_begin_and_update_emulated(funcs, f, dt_key, ff, ifd, file):
 
 
 def _build_func_name(isa, dt, dt_par, dt_ret, f):
+	"""
+	wrapper around build_func_name and build_func_name_short. 
+	Which function to call is decided if the type isn't a "double type"
+	(i.e the function is not cast or cast_k)
+	"""
 	if len(dt.split(',')) <= 1:
 		return build_func_name_short(isa, dt_par, f, True)
 	else:
@@ -191,7 +216,9 @@ def _build_func_name(isa, dt, dt_par, dt_ret, f):
 
 
 def _emit_short_format_prologue(funcs, dt_ret, isa, file):
-	# This block matches the nested conditions exactly (including indentation and end='').
+	"""
+	kept the same code. Not sure of the first if condition.
+	"""
 	if funcs["proto"]["args"]:
 		# Toreg
 		if funcs["proto"]["ret"]["type"] == "reg":
@@ -236,16 +263,19 @@ def _emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rendering, f
 
 
 def _emit_ifdef_end(ifd, file):
+	"""writes #endif to a file."""
 	if ifd:
 		print("#endif", file=file)
 
 
 def _maybe_print_emulated_implemented(f, dt_key, ff):
+	"""print implemented message in cli for emulated functions."""
 	if "type" in ff and ff["type"] == "emulated":
 		print(" -> '" + f + "<" + dt_key + ">' has been implemented.")
 
 
 def _emit_already_implemented_message(f, dt_key, file, generic=False):
+	"""print skip message because function already exists in file"""
 	# Centralize the message string to avoid drift; must remain identical.
 	generic_str = "Generic " if generic else ""
 	print("// '" + generic_str +  f + "<" + dt_key + ">' has been skipped (reason: \"Info: It has been implemented before.\").", file=file)
@@ -253,6 +283,9 @@ def _emit_already_implemented_message(f, dt_key, file, generic=False):
  
 
 def _gen_isdef_neg(funcs, f, dt_key):
+	"""
+	generates the negation of an ifdef.
+	"""
 	guard = "#if "
 	if "implem_status" in funcs[f] and dt_key in funcs[f]["implem_status"]:
 		for implem in funcs[f]["implem_status"][dt_key]:
@@ -264,17 +297,38 @@ def _gen_isdef_neg(funcs, f, dt_key):
 
 
 def _add_guard_if_isdef(funcs, f, dt_key, file):
+	"""
+	used in gen_c_generic_functions, creates the negation of an ifdef and writes it to the file. 
+	It's used to guard the generic implementation with the negation of the conditions of previous implementations, if any.
+	"""
 	if is_ifdef(funcs, f, dt_key):
 		guard = _gen_isdef_neg(funcs, f, dt_key)
 		print(guard, file=file)
 
 
 def _add_endif_if_isdef(funcs, f, dt_key, file):
+	"""
+	used in combination with _add_guard_if_isdef, writes #endif to file if there was an ifdef.
+	"""
 	if is_ifdef(funcs, f, dt_key):
 		print("#endif", file=file)
 
 # to prevent gen_c_missing_functions to generate the missing prototypes
 def _remove_cond_implem_status(funcs, f, dt_key):
+	"""
+	Removes the "if" condition in implem_status for a given function + dt_key
+	If you don't do that, gen_c_missing_functions will generate the 
+	fn prototype as a missing function. 
+	
+	Used in gen_c_generic_functions after adding the generic implementation. 
+	Since the guard of the function made by gen_c_generic_functions 
+	is the negation of the conditions of previous implementations, 
+	it's as if you have if A && !A which is false.
+	
+	This feels "cleaner" than adding the negation to implem_status and then having 
+	gen_c_missing_functions generate a fn  with a guard that
+	prevents it from being reached.....
+	"""
 	if "implem_status" in funcs[f] and dt_key in funcs[f]["implem_status"]:
 		for implem in funcs[f]["implem_status"][dt_key]:
 			if "if" in implem and implem["if"]:
@@ -283,6 +337,13 @@ def _remove_cond_implem_status(funcs, f, dt_key):
 
 # same...
 def _mark_as_implemented(funcs, f, dt_key):
+	"""
+	adds/create the "if" and "requirements" keys in implem_status for 
+	a given function + dt_key and initializes them to the correct values 
+	("" and {} if there is no conditions or the correct ifdef and requirements)
+	
+	I'm not sure this is correct tbh
+	"""
 	done_implem_status = {"if": "", "requirements": {}}
 	if "implem_status" in funcs[f] and dt_key in funcs[f]["implem_status"]:
 		for implem in funcs[f]["implem_status"][dt_key]:
@@ -296,7 +357,12 @@ def _mark_as_implemented(funcs, f, dt_key):
  
 
 def _missing_compute_dt_par_dt_ret(dt):
-	# Exact same splitting logic as original (no validation / no exits).
+	"""
+	similar to _compute_dt_par_dt_ret
+	but doesn't check for type support and emit error 
+	because gen_c_missing_functions's job is 
+	to create prototypes/bodies for unimplemented functions.
+	"""
 	if len(dt.split(',')) <= 1:
 		dt_par = dt.split(',')[0]
 		dt_ret = dt.split(',')[0]
@@ -307,7 +373,12 @@ def _missing_compute_dt_par_dt_ret(dt):
 
 
 def _missing_build_negated_ifdef_for_existing_implems(funcs, f, dt_key):
-	# Direct extraction of the original ifdef-negation logic (NO gating on ff["type"]).
+	"""
+	adds guard to missing function for when the ifdef conditions 
+	are not met. Documenting this makes me realize that gen_c_generic_functions 
+	and gen_c_missing functions do the same thing but don't share the 
+	same helpers. Oops. I'll change it.
+ 	"""
 	ifd = ""
 	if "implem_status" in funcs[f] and dt_key in funcs[f]["implem_status"]:
 		is_first = True
@@ -326,19 +397,18 @@ def _missing_build_negated_ifdef_for_existing_implems(funcs, f, dt_key):
 
 
 def _missing_emit_ifdef_begin(ifd, file):
+	"""
+	ifd != is_ifdef so not the same helper....
+	"""
 	if ifd:
 		print("#if " + ifd, file=file)
 
 
-def _missing_build_func_name(isa, dt, dt_par, dt_ret, f):
-	# Keep the same branching condition as original (based on dt string).
-	if len(dt.split(',')) <= 1:
-		return build_func_name_short(isa, dt_par, f)
-	else:
-		return build_func_name(isa, dt_par, dt_ret, f)
-
-
 def _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name):
+	"""
+	writes the "body" of the missing function. 
+	Which prints a panic messages and terminates the program.
+	"""
 	print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, {}, True) + " {", file=file)
 	print("\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \"" + func_name + "\");", file=file)
 	print("\texit(-1);", file=file)
@@ -346,6 +416,9 @@ def _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name):
 
 
 def _missing_emit_ifdef_end(ifd, file):
+	"""
+	ifd != is_ifdef so not the same helper....
+	"""
 	if ifd:
 		print("#endif", file=file)
 
@@ -354,6 +427,11 @@ def _missing_emit_ifdef_end(ifd, file):
 # ----------------------------------------------------------------------------------------------------------------------
 
 def _gen_c_functions_one_dt_unmasked(isa, file, funcs, f, ff, dt):
+	"""
+	the big glue guy that calls all the helpers 
+	to generate 1 fn for 1 dt. It's the logic of the big inner loop 
+	of gen_c_functions.
+	"""
 	dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
 	dt_key = dt_par + "," + dt_ret
 
@@ -391,7 +469,13 @@ def _gen_c_functions_one_dt_unmasked(isa, file, funcs, f, ff, dt):
 	_maybe_print_emulated_implemented(f, dt_key, ff)
  
 def _gen_c_generic_one(isa, file, funcs, f, ff, dt):
-	_emit_separator(f, file)
+	"""
+	same as _gen_c_functions_one_dt_unmasked but for gen_c_generic_functions. 
+	The logic difference is that it adds a guard for 
+	the generic implementation if they are previous implementations 
+	guarded by ifdefs. The generic implementation is guarded 
+	by the negation of the conditions of previous implementations.
+	"""
 
 	dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
 	dt_key = dt_par + "," + dt_ret
@@ -403,7 +487,6 @@ def _gen_c_generic_one(isa, file, funcs, f, ff, dt):
 	# Guard generic implementation with negation of previous guarded implementations, if any.
 	_add_guard_if_isdef(funcs, f, dt_key, file)
 
-	# Same Jinja pre-rendering as original, delegated.
 	pre_rendering = _render_template(isa, ff, dt_par, dt_ret)
 
 	# Same placeholder parse try/except printing + comment emission + skip semantics, delegated.
@@ -435,10 +518,12 @@ def _gen_c_generic_one(isa, file, funcs, f, ff, dt):
 		file=file,
 	)
 
-	# Close guard (uses your helper; preserves exact output).
 	_add_endif_if_isdef(funcs, f, dt_key, file)
 
-	# Preserve exact side effects/order from your original function.
+	# The whole purpose of generic implementations is that 
+	# they don't have "if" conditions. 
+	# removing "requirements" MIGHT be an issue. 
+	# Not sure.
 	_remove_cond_implem_status(funcs, f, dt_key)
 	_mark_as_implemented(funcs, f, dt_key)
  
@@ -446,14 +531,11 @@ def _gen_c_missing_one_dt(isa, file, funcs, f, dt):
 	dt_par, dt_ret = _missing_compute_dt_par_dt_ret(dt)
 	dt_key = dt_par + "," + dt_ret
 
-	# Preserve the original (unused) local exactly.
-	defines = []
-
 	if is_missing_func(funcs, f, dt_key):
 		ifd = _missing_build_negated_ifdef_for_existing_implems(funcs, f, dt_key)
 		_missing_emit_ifdef_begin(ifd, file)
 
-		func_name = _missing_build_func_name(isa, dt, dt_par, dt_ret, f)
+		func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
 		_missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name)
 
 		_missing_emit_ifdef_end(ifd, file)
@@ -462,6 +544,9 @@ def _gen_c_missing_one_dt(isa, file, funcs, f, dt):
 # Generators
 # ----------------------------------------------------------------------------------------------------------------------
 def gen_c_functions(isa, file, funcs, implems):
+	"""
+	Looking leaner now.
+	"""
 	for f in implems:
 		if f in funcs:
 			for ff in implems[f]:
@@ -482,6 +567,7 @@ def gen_c_generic_functions(isa, file, funcs, implems):
 		if f in funcs:
 			for ff in implems[f]:
 				for dt in ff["datatypes"]:
+					_emit_separator(f, file)
 					_gen_c_generic_one(isa, file, funcs, f, ff, dt)
 		else:
 			print("Panic: '" + f + "' function does not exist.")
