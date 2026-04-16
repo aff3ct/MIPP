@@ -924,7 +924,7 @@ def build_ifdef_rec_masked(funcs, func_name, dt_key, mask_kind):
 			str_ifdef_sub_sub = ""
 			for f_name in implem["requirements"]:
 				for fdt_key in implem["requirements"][f_name]:
-					ret = build_ifdef_rec_masked(funcs, f_name, fdt_key, mask_kind)
+					ret = build_ifdef_rec(funcs, f_name, fdt_key)
 					if ret:
 						if not is_first_and:
 							str_ifdef_sub_sub = str_ifdef_sub_sub + " && "

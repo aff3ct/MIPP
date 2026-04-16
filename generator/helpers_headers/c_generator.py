@@ -204,16 +204,16 @@ def _emit_ifdef_begin_and_update_emulated(funcs, f, dt_key, ff, ifd, file):
 			funcs[f]["implem_status"][dt_key][len(funcs[f]["implem_status"][dt_key]) - 1]["if"] = ifd
 
 
-def _build_func_name(isa, dt, dt_par, dt_ret, f):
+def _build_func_name(isa, dt, dt_par, dt_ret, f, masked_version=False):
 	"""
 	wrapper around build_func_name and build_func_name_short. 
 	Which function to call is decided if the type isn't a "double type"
 	(i.e the function is not cast or cast_k)
 	"""
 	if len(dt.split(',')) <= 1:
-		return build_func_name_short(isa, dt_par, f, True)
+		return build_func_name_short(isa, dt_par, f, True, masked_version=masked_version)
 	else:
-		return build_func_name(isa, dt_par, dt_ret, f, True)
+		return build_func_name(isa, dt_par, dt_ret, f, True, masked_version=masked_version)
 
 
 def _emit_short_format_prologue(funcs, dt_ret, isa, file):
@@ -405,12 +405,12 @@ def _missing_emit_ifdef_begin(ifd, file):
 		print("#if " + ifd, file=file)
 
 
-def _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name):
+def _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, masked_version = None):
 	"""
 	writes the "body" of the missing function. 
 	Which prints a panic messages and terminates the program.
 	"""
-	print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, {}, True) + " {", file=file)
+	print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, {}, True, masked_version=masked_version) + " {", file=file)
 	print("\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \"" + func_name + "\");", file=file)
 	print("\texit(-1);", file=file)
 	print("}", file=file)
@@ -460,6 +460,28 @@ def _build_previous_masked_emulated_exclusion_ifdef(funcs, f, dt_key, mask_kind,
 					is_first = False
 				i = i + 1
 	return ifd
+
+
+def _combine_current_ifdefs_masked(funcs, f, dt_key, mask_kind, ifd_prev):
+	bucket = get_masked_bucket(funcs, f, dt_key, mask_kind)
+	if bucket is None:
+		return ifd_prev
+
+	ifd_cur = build_ifdef_masked(funcs, f, dt_key, mask_kind, len(bucket) - 1)
+	if ifd_prev and ifd_cur:
+		return ifd_prev + " && " + ifd_cur
+	elif ifd_cur:
+		return ifd_cur
+	return ifd_prev
+
+
+def _emit_ifdef_begin_and_update_emulated_masked(funcs, f, dt_key, mask_kind, ff, ifd, file):
+	if ifd:
+		print("#if " + ifd, file=file)
+		if "type" in ff and ff["type"] == "emulated":
+			bucket = get_masked_bucket(funcs, f, dt_key, mask_kind)
+			# bucket exists because masked append happened before this call
+			bucket[len(bucket) - 1]["if"] = ifd
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Generator of one function 
@@ -544,8 +566,10 @@ def _gen_c_function_one_masked(isa, file, funcs, f, ff, dt):
 
 	_append_implem_status_masked(funcs, f, dt_key, mask_kind, ff, ph_ret["requirements"])
  
-	ifd = _combine_current_ifdefs(funcs, f, dt_key, ifd_prev)
-	_emit_ifdef_begin_and_update_emulated(funcs, f, dt_key, ff, ifd, file)
+	ifd = _combine_current_ifdefs_masked(funcs, f, dt_key, mask_kind, ifd_prev)
+	#print debug infos
+ 
+	_emit_ifdef_begin_and_update_emulated_masked(funcs, f, dt_key, mask_kind, ff, ifd, file)
 	_emit_function_body(
 		funcs=funcs,
 		f=f,
@@ -634,7 +658,28 @@ def _gen_c_missing_one_dt(isa, file, funcs, f, dt):
 
 		_missing_emit_ifdef_end(ifd, file)
   
+def _gen_c_missing_one_masked(isa, file, funcs, f, dt, mask_kind):
+	dt_par, dt_ret = _missing_compute_dt_par_dt_ret(dt)
+	dt_key = dt_par + "," + dt_ret
 
+	mask_support = funcs[f]["mask_support"] if "mask_support" in funcs[f] else None
+ 
+	#maybe not a panic but a skip would be more reasonable idk
+	if not is_supported_mask_kind(mask_support, mask_kind):
+		print("Panic: unsupported mask kind '" + mask_kind + "' for '" + f + "<" + dt_key + ">' function.")
+		exit(-1)
+
+	if is_missing_masked_func(funcs, f, dt_key, mask_kind):
+		ifd = _missing_build_negated_ifdef_for_existing_implems(funcs, f, dt_key)
+
+		_missing_emit_ifdef_begin(ifd, file)
+
+		func_name = _build_func_name(isa, dt, dt_par, dt_ret, f, masked_version=mask_kind)
+		_missing_emit_stub(file, funcs, f , dt_par, dt_ret, isa, func_name, masked_version=mask_kind)
+		#print("wawawa")
+		#print implem_status_masked for debug
+
+		_missing_emit_ifdef_end(ifd, file)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Generators
@@ -673,4 +718,13 @@ def gen_c_generic_functions(isa, file, funcs, implems):
 def gen_c_missing_functions(isa, file, funcs):
 	for f in funcs:
 		for dt in funcs[f]["datatypes"]:
+			_emit_separator(f, file)
 			_gen_c_missing_one_dt(isa, file, funcs, f, dt)
+			if "mask_support" in funcs[f]:
+				support = funcs[f]["mask_support"]
+				if support.is_maskable(): 
+					_gen_c_missing_one_masked(isa, file, funcs, f, dt, "mask")
+				if support.is_maskzable():
+					_gen_c_missing_one_masked(isa, file, funcs, f, dt, "maskz")
+				if support.is_masksable():
+					_gen_c_missing_one_masked(isa, file, funcs, f, dt, "masks")
