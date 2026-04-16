@@ -70,14 +70,14 @@ def _emit_separator(f, file):
 	print("// --------------------------------------------------------------------------------------------------------", f, file=file)
 
 
-def _skip_masked_implem(f, ff):
+def _is_masked_implem(f, ff):
 	"""
 	temporary skip of masks
 	"""
 	if "version" in ff and ff["version"]:
-		print(
-			"Info: '" + f + "<" + ff["version"] + ">' has been skipped (reason: \"Info: Masked functions are not supported yet.\")."
-		)
+		#print(
+		#	"Info: '" + f + "<" + ff["version"] + ">' has been skipped (reason: \"Info: Masked functions are not supported yet.\")."
+		#)
 		return True
 	return False
 
@@ -105,7 +105,7 @@ def _compute_dt_par_dt_ret(funcs, f, dt):
 	return dt_par, dt_ret
 
 
-def _render_template(isa, ff, dt_par, dt_ret):
+def _render_template(isa, ff, dt_par, dt_ret, func_name=""):
 	"""
 	renders the Jinja template. Can raise exceptions 
 	if the template is not well formed!
@@ -123,6 +123,7 @@ def _render_template(isa, ff, dt_par, dt_ret):
 		isa_dt_par=isa["datatypes"][dt_par],
 		isa_dt_ret=isa["datatypes"][dt_ret],
 		cstdint_ret=datatypes[dt_ret]["cstd"],
+		func_name = func_name,
 	)
 
 
@@ -241,10 +242,10 @@ def _emit_short_format_prologue(funcs, dt_ret, isa, file):
 			print("\tres.m = ", end='', file=file)
 
 
-def _emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rendering, file):
+def _emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rendering, file, masked_version=None):
 	func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
 
-	print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name) + " {", file=file)
+	print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, masked_version = masked_version) + " {", file=file)
 
 	if ff["template"]["format"] == "short":
 		# Original code had a redundant always-true condition; keep behavior identical.
@@ -426,7 +427,7 @@ def _missing_emit_ifdef_end(ifd, file):
 # Generator of one function 
 # ----------------------------------------------------------------------------------------------------------------------
 
-def _gen_c_functions_one_dt_unmasked(isa, file, funcs, f, ff, dt):
+def _gen_c_functions_one_unmasked(isa, file, funcs, f, ff, dt):
 	"""
 	the big glue guy that calls all the helpers 
 	to generate 1 fn for 1 dt. It's the logic of the big inner loop 
@@ -467,10 +468,57 @@ def _gen_c_functions_one_dt_unmasked(isa, file, funcs, f, ff, dt):
 
 	_emit_ifdef_end(ifd, file)
 	_maybe_print_emulated_implemented(f, dt_key, ff)
+
+def _gen_c_function_one_masked(isa, file, funcs, f, ff, dt):
+	
+	dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
+	dt_key = dt_par + "," + dt_ret
+
+	mask_kind = ff["version"]
+	mask_support = funcs[f]["mask_support"] if "mask_support" in funcs[f] else None
+ 
+	#maybe not a panic but a skip would be more reasonable idk
+	if not is_supported_mask_kind(mask_support, mask_kind):
+		print("Panic: unsupported mask kind '" + mask_kind + "' for '" + f + "<" + dt_key + ">' function.")
+		exit(-1)
+
+	if not is_missing_masked_func(funcs, f, dt_key, mask_kind):
+		_emit_already_implemented_message(f + "<" + mask_kind + ">", dt_key, file)
+		return
+
+	pre_rendering = _render_template(isa, ff, dt_par, dt_ret, func_name = f)
+	
+	print(f)
+	ph_ret = _parse_placeholders_or_skip(
+		pre_rendering=pre_rendering,
+		isa=isa,
+		funcs=funcs,
+		f=f,
+		dt_par=dt_par,
+		dt_ret=dt_ret,
+		dt_key=dt_key,
+		file=file,
+	)
+	if ph_ret is None:
+		return
+	post_rendering = ph_ret["converted_ir"]
+
+	_emit_function_body(
+		funcs=funcs,
+		f=f,
+		isa=isa,
+		dt=dt,
+		dt_par=dt_par,
+		dt_ret=dt_ret,
+		ff=ff,
+		post_rendering=post_rendering,
+		file=file,
+  		masked_version=mask_kind,
+	)
  
 def _gen_c_generic_one(isa, file, funcs, f, ff, dt):
 	"""
-	same as _gen_c_functions_one_dt_unmasked but for gen_c_generic_functions. 
+	same as _gen_c_functions_one_unmasked but for gen_c_generic_functions. 
 	The logic difference is that it adds a guard for 
 	the generic implementation if they are previous implementations 
 	guarded by ifdefs. The generic implementation is guarded 
@@ -539,6 +587,8 @@ def _gen_c_missing_one_dt(isa, file, funcs, f, dt):
 		_missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name)
 
 		_missing_emit_ifdef_end(ifd, file)
+  
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Generators
@@ -550,12 +600,13 @@ def gen_c_functions(isa, file, funcs, implems):
 	for f in implems:
 		if f in funcs:
 			for ff in implems[f]:
-				if _skip_masked_implem(f, ff):
-					continue
-
+				
 				for dt in ff["datatypes"]:
 					_emit_separator(f, file)
-					_gen_c_functions_one_dt_unmasked(isa, file, funcs, f, ff, dt)
+					if _is_masked_implem(f, ff):
+						_gen_c_function_one_masked(isa, file, funcs, f, ff, dt)
+					else :
+						_gen_c_functions_one_unmasked(isa, file, funcs, f, ff, dt)
 
 		else:
 			print("Panic: '" + f + "' function does not exist.")

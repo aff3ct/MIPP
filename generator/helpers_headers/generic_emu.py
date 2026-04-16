@@ -82,19 +82,24 @@ SNIPPET_END_MSKZ = """
 	%r<tp>% res = %andb<tp>%(op, tmp);
 	return res;
 """
+
+SNIPPET_END_MSKS = """
+	%r<tp>% res = %blend<tp>%(op, rsrc, m0);
+	return res;
+"""
 	
 				
 tpl_mask_generic_emu = {
 	"ret_reg_2args_reg" : { "format" :"long", "code" :"""
-		%r<tp>% op = %{{func_name}}<tp>%(m0, r0, r1);
+		%r<tp>% op = %{{func_name}}<tp>%(r0, r1);
 	"""},
 	
 	"ret_reg_3args_reg" : { "format" :"long", "code" :"""
-		%r<tp>% op = %{{func_name}}<tp>%(m0, r0, r1, r2);
+		%r<tp>% op = %{{func_name}}<tp>%( r0, r1, r2);
 	"""},
 	
 	"ret_reg_1arg_reg" : { "format" :"long", "code" :"""
-		%r<tp>% op = %{{func_name}}<tp>%(m0,r0);
+		%r<tp>% op = %{{func_name}}<tp>%(r0);
 	"""},
 	
 	"load" : { "format" :"long", "code" :"""
@@ -126,10 +131,11 @@ tpl_mask_generic_emu = {
    
 }
 
-implem_mask_generic_emu = {
+implems_mask_generic_emu = {
 	"add" : [
 		#add SNIPPEt_END_MSK to the template code
 		{ "instr_name": "add",  "datatypes" : all_datatypes, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSK}},
-		#{ "instr_name": "add",  "datatypes" : all_datatypes, "template" : tpl_mask_generic_emu["ret_reg_3args_reg"], "version" : "maskz"}
-	],
+		{ "instr_name": "add",  "datatypes" : all_datatypes, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKZ}},
+		{ "instr_name": "add",  "datatypes" : all_datatypes, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKS}},
+ 	],
 }

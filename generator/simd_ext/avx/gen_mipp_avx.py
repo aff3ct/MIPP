@@ -33,6 +33,9 @@ def gen_mipp_avx():
 	gen_c_functions(isa_avx, file, copy_mipp_funcs, implems_avx)
 	gen_c_functions(isa_avx, file, copy_mipp_funcs, implems_emu_avx)
 	gen_c_generic_functions(isa_avx, file, copy_mipp_funcs, implems_generic_emu) 
+ 
+	gen_c_functions(isa_avx, file, copy_mipp_funcs, implems_mask_generic_emu)
+ 
 	gen_c_missing_functions(isa_avx, file, copy_mipp_funcs)
 
 	tpl_footer_avx = """#endif /* MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX_H_ */"""

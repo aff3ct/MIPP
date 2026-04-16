@@ -826,3 +826,167 @@ but still looks same-ish.
 """
 
 #TODO
+
+
+# Masks in mipp_funcs and in implems are not defined the same way.
+# This might be bad idk.
+
+# ff is an entry in implems
+def is_masked_implem(ff):
+		return "version" in ff and ff["version"]
+
+def mask_kind_from_ff(ff):
+	# Expected: "mask", "maskz", "masks"
+	return ff["version"]
+
+def is_supported_mask_kind(mask_support, mask_kind):
+	"""
+	mask_support is an entry in mipp_funcs[f]["mask_support"] 
+	and mask_kind is "mask", "maskz" or "masks".
+ 	"""
+	if mask_support is None:
+		return False
+	if mask_kind == "mask":
+		return mask_support.is_maskable()
+	if mask_kind == "maskz":
+		return mask_support.is_maskzable()
+	if mask_kind == "masks":
+		return mask_support.is_masksable()
+	return False
+
+
+#initialize the bucket for masked status if it does not exist yet
+def ensure_masked_status_bucket(funcs, f, dt_key, mask_kind):
+	"""
+	implem_status_masked is similar to implem 
+	status. But has one more level of dict. 
+	which corresponds to the kind of mask (mask, maskz or masks).
+	The entries in funcs[f][implem_status_masked][dt_key][mask_kind] are 
+	"if" and "requirements" just like in implem_status.
+	
+	This functions initializes implem_status_masked for a 
+	given function + dt_key + mask_kind if it does not exist yet.
+	"""
+	if "implem_status_masked" not in funcs[f]:
+		funcs[f]["implem_status_masked"] = {}
+	if dt_key not in funcs[f]["implem_status_masked"]:
+		funcs[f]["implem_status_masked"][dt_key] = {}
+	if mask_kind not in funcs[f]["implem_status_masked"][dt_key]:
+		funcs[f]["implem_status_masked"][dt_key][mask_kind] = []
+
+
+def _get_masked_bucket_create(funcs, func_name, dt_key, mask_kind):
+	"""
+	getter for funcs[f][implem_status_masked][dt_key][mask_kind] 
+	that initializes the bucket if it does not exist yet.
+	"""
+	ensure_masked_status_bucket(funcs, func_name, dt_key, mask_kind)
+	return funcs[func_name]["implem_status_masked"][dt_key][mask_kind]
+
+
+def _get_masked_bucket_nocreate(funcs, func_name, dt_key, mask_kind):
+	"""
+	getter for funcs[f][implem_status_masked][dt_key][mask_kind]
+ 	that returns None if the bucket does not exist.
+ 	"""
+	if "implem_status_masked" in funcs[func_name]:
+		if dt_key in funcs[func_name]["implem_status_masked"]:
+			if mask_kind in funcs[func_name]["implem_status_masked"][dt_key]:
+				return funcs[func_name]["implem_status_masked"][dt_key][mask_kind]
+	return None
+
+def get_masked_bucket(funcs, func_name, dt_key, mask_kind, create_missing_bucket=False):
+	"""
+	getter for the bucket of masked implem status for a given func_name + dt_key + mask_kind.
+	If create_missing_bucket is False, returns None if the bucket does not exist.
+	If create_missing_bucket is True, creates the bucket if it does not exist and returns it.
+ 	"""
+	if create_missing_bucket:
+		return _get_masked_bucket_create(funcs, func_name, dt_key, mask_kind)
+	else:
+		return _get_masked_bucket_nocreate(funcs, func_name, dt_key, mask_kind)
+
+
+def build_ifdef_rec_masked(funcs, func_name, dt_key, mask_kind):
+	# Same algorithm as build_ifdef_rec, but reading from implem_status_masked and
+	# recursing on the same mask_kind.
+	str_ifdef = ""
+	bucket = get_masked_bucket(funcs, func_name, dt_key, mask_kind)
+	if bucket is not None:
+		is_first_or = True
+		str_ifdef_sub = ""
+		str_end_sub_token = ""
+		for implem in bucket:
+			if not is_first_or:
+				str_ifdef_sub = "( " + str_ifdef_sub + " || "
+				str_end_sub_token = " )"
+			is_first_and = True
+			str_ifdef_sub_sub = ""
+			for f_name in implem["requirements"]:
+				for fdt_key in implem["requirements"][f_name]:
+					ret = build_ifdef_rec_masked(funcs, f_name, fdt_key, mask_kind)
+					if ret:
+						if not is_first_and:
+							str_ifdef_sub_sub = str_ifdef_sub_sub + " && "
+						str_ifdef_sub_sub = str_ifdef_sub_sub + ret
+						is_first_and = False
+
+			if implem["if"] and str_ifdef_sub_sub:
+				str_ifdef_sub = str_ifdef_sub + implem["if"] + str_end_sub_token + " && " + str_ifdef_sub_sub
+			if implem["if"] and not str_ifdef_sub_sub:
+				str_ifdef_sub = str_ifdef_sub + implem["if"] + str_end_sub_token
+			if str_ifdef_sub_sub and not implem["if"]:
+				str_ifdef_sub = str_ifdef_sub + str_ifdef_sub_sub + str_end_sub_token
+
+			if implem["if"] or str_ifdef_sub_sub:
+				is_first_or = False
+
+		if str_ifdef_sub:
+			str_ifdef = str_ifdef_sub
+	return str_ifdef
+
+
+def is_ifdef_masked(funcs, func_name, dt_key, mask_kind):
+	ifdef = build_ifdef_rec_masked(funcs, func_name, dt_key, mask_kind)
+	if ifdef:
+		return True
+	else:
+		return False
+
+
+def is_fully_missing_masked_func(funcs, func_name, dt_key, mask_kind):
+	bucket = get_masked_bucket(funcs, func_name, dt_key, mask_kind)
+	if bucket is None:
+		return True
+	return len(bucket) == 0
+
+
+def is_missing_masked_func(funcs, func_name, dt_key, mask_kind):
+	return is_fully_missing_masked_func(funcs, func_name, dt_key, mask_kind) or is_ifdef_masked(funcs, func_name, dt_key, mask_kind)
+
+
+def build_ifdef_masked(funcs, func_name, dt_key, mask_kind, implem_id):
+	# Masked counterpart of build_ifdef() that uses same-mask-kind requirements recursion.
+	str_ifdef = ""
+	bucket = get_masked_bucket(funcs, func_name, dt_key, mask_kind, create_missing_bucket=True)
+
+	if "if" in bucket[implem_id]:
+		str_ifdef = str_ifdef + bucket[implem_id]["if"]
+
+	is_first_and = True
+	str_ifdef_and = ""
+	for f in bucket[implem_id]["requirements"]:
+		for fdt in bucket[implem_id]["requirements"][f]:
+			ret = build_ifdef_rec_masked(funcs, f, fdt, mask_kind)
+			if ret:
+				if not is_first_and:
+					str_ifdef_and = str_ifdef_and + " && "
+				str_ifdef_and = str_ifdef_and + ret
+				is_first_and = False
+
+	if str_ifdef and str_ifdef_and:
+		str_ifdef = str_ifdef + " && " + str_ifdef_and
+	if str_ifdef_and and not str_ifdef:
+		str_ifdef = str_ifdef_and
+
+	return str_ifdef
