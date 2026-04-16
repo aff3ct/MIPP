@@ -252,7 +252,9 @@ tpl_implem_avx512 = {
 	%r<tp>% rs6 = %cast<c:int|b:8,tp>%(rsi8);
 	rs6.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs5.r, rs6.r);
 
-	return rs6;""" }
+	return rs6;""" },
+    
+    "arith_2args_msk": { "format": "short", "code": "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, m0.m, r0.r, r1.r);" },
 }
 
 implems_avx512 = {
@@ -297,7 +299,8 @@ implems_avx512 = {
     "add": [
         { "instr_name": "add",        "datatypes": all_float + [int32],          "template": tpl_implem_avx512["arith_2args"],                                                                                                  },
         { "instr_name": "add",        "datatypes": [int64],                      "template": tpl_implem_avx512["arith_2args"],                                                                                                  },
-        { "instr_name": "adds",       "datatypes": [int16, int8, uint16, uint8], "template": tpl_implem_avx512["arith_2args"],    "if": "defined(__AVX512BW__)"                                                                 } ], # add
+        { "instr_name": "adds",       "datatypes": [int16, int8, uint16, uint8], "template": tpl_implem_avx512["arith_2args"],    "if": "defined(__AVX512BW__)"                                                                 }, 
+        { "instr_name": "add",        "datatypes": all_float,                    "template": tpl_implem_avx512["arith_2args_msk"], "version" : "mask"}], # add
     "sub": [
         { "instr_name": "sub",        "datatypes": all_float,                    "template": tpl_implem_avx512["arith_2args"],                                                                                                  },
         { "instr_name": "sub",        "datatypes": [int64, int32],               "template": tpl_implem_avx512["arith_2args"],                                                                                                  },
