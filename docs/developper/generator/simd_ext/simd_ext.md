@@ -1,4 +1,4 @@
-# TITLE?
+# SIMD Extensions
 
 `simd_ext/` is the directory where the implementation of MIPP for specific ISAs 
 live. These are the current subdirectories of `simd_ext/`:

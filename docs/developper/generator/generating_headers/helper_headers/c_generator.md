@@ -1,4 +1,4 @@
-# c_generator 
+# c_generator.py 
 
 The `c_generator.py` file contains four functions. 
 

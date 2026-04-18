@@ -1,4 +1,4 @@
-# ci_generator
+# ci_generator.py
 
 `ci_generator.py` is the file that generates `mipp.h`. `mipp.h` is a fairly 
 straightforward file. Depending on which architecture you use MIPP on, the MIPP 

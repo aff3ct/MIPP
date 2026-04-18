@@ -1,3 +1,3 @@
-# cpp_generator
+# cpp_generator.py
 
 Not done yet.

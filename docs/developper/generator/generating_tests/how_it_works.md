@@ -1,4 +1,4 @@
-# TITLE?
+# How it Works
 
 `common.py` defines utility functions to generate tests SHAPES as well as the 
 TemplateParts class.
