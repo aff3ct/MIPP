@@ -302,7 +302,7 @@ mipp_funcs_concepts = {
 	}
 
 class MaskSupport:
-	def __init__(self, maskable, maskzable, masksable):
+	def __init__(self, maskable=False, maskzable=False, masksable=False):
 		self.maskable = maskable
 		self.maskzable = maskzable
 		self.masksable = masksable
@@ -314,6 +314,9 @@ class MaskSupport:
    
 	def is_masksable(self):
 		return self.masksable
+
+	def is_any_mask(self):
+		return self.maskable or self.maskzable or self.masksable
 
 only_maskz = MaskSupport(maskable=False, maskzable=True, masksable=False)
 only_mask = MaskSupport(maskable=True, maskzable=False, masksable=False)

@@ -405,7 +405,7 @@ def _missing_emit_ifdef_begin(ifd, file):
 		print("#if " + ifd, file=file)
 
 
-def _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, masked_version = None):
+def _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, masked_version = None, lmul=None):
 	"""
 	writes the "body" of the missing function. 
 	Which prints a panic messages and terminates the program.
@@ -413,7 +413,11 @@ def _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, masked_ve
 	mask_str = ""
 	if masked_version:
 		mask_str = "_" + masked_version
-	print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, {}, True, masked_version=masked_version) + " {", file=file)
+	#adds the lmul string to fn name
+	if lmul is not None and lmul > 0:
+		mask_str = mask_str + "_m" + str(lmul)
+
+	print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul, True, masked_version=masked_version) + " {", file=file)
 	print("\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \"" + func_name + mask_str + "\");", file=file)
 	print("\texit(-1);", file=file)
 	print("}", file=file)
@@ -485,6 +489,34 @@ def _emit_ifdef_begin_and_update_emulated_masked(funcs, f, dt_key, mask_kind, ff
 			bucket = get_masked_bucket(funcs, f, dt_key, mask_kind)
 			# bucket exists because masked append happened before this call
 			bucket[len(bucket) - 1]["if"] = ifd
+   
+def _missing_build_negated_masked_ifdef_for_existing_implems(funcs, f, dt_key, mask_kind):
+	"""
+	same as _missing_build_negated_ifdef_for_existing_implems but for masked functions. 
+	Which means it builds the negation of the ifdef conditions for all previous implementations of the same masked function.
+	"""
+	ifd = ""
+	bucket = get_masked_bucket(funcs, f, dt_key, mask_kind)
+	if bucket is not None:
+		is_first = True
+		i = 0
+		for _implem in bucket:
+			ifd_sub = build_ifdef_masked(funcs, f, dt_key, mask_kind, i)
+			if ifd_sub:
+				if not is_first:
+					ifd = ifd + " && "
+				ifd = ifd + "!( "
+				ifd = ifd + ifd_sub
+				ifd = ifd + " )"
+				is_first = False
+			i = i + 1
+	return ifd
+
+def _missing_emit_ifdef_begin_masked(ifd, file):
+	if ifd:
+		print("#if " + ifd, file=file)
+	return ifd
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Generator of one function 
@@ -648,7 +680,7 @@ def _gen_c_generic_one(isa, file, funcs, f, ff, dt):
 	_remove_cond_implem_status(funcs, f, dt_key)
 	_mark_as_implemented(funcs, f, dt_key)
  
-def _gen_c_missing_one_dt(isa, file, funcs, f, dt):
+def _gen_c_missing_one_dt(isa, file, funcs, f, dt, lmul=0):
 	dt_par, dt_ret = _missing_compute_dt_par_dt_ret(dt)
 	dt_key = dt_par + "," + dt_ret
 
@@ -657,11 +689,13 @@ def _gen_c_missing_one_dt(isa, file, funcs, f, dt):
 		_missing_emit_ifdef_begin(ifd, file)
 
 		func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
-		_missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name)
+		if lmul > 0:
+			func_name = func_name + "_m" + str(lmul)
+		_missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, lmul=lmul)
 
 		_missing_emit_ifdef_end(ifd, file)
   
-def _gen_c_missing_one_masked(isa, file, funcs, f, dt, mask_kind):
+def _gen_c_missing_one_masked(isa, file, funcs, f, dt, mask_kind, lmul=0):
 	dt_par, dt_ret = _missing_compute_dt_par_dt_ret(dt)
 	dt_key = dt_par + "," + dt_ret
 
@@ -676,18 +710,18 @@ def _gen_c_missing_one_masked(isa, file, funcs, f, dt, mask_kind):
 	ifdef_guarded = is_ifdef_masked(funcs, f, dt_key, mask_kind)
 	#if is fully mising => no guard, emit directly the stub
 	#if is ifdef guarded missing => guard with the negation of the ifdef conditions of existing implementations and emit the stub in this guard
+	func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
+
 	if fully_missing:
-		func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
-		_missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, masked_version=mask_kind)
+		_missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, masked_version=mask_kind, lmul=lmul)
+
 	elif ifdef_guarded:
-		ifd = _missing_build_negated_ifdef_for_existing_implems(funcs, f, dt_key)
-		_missing_emit_ifdef_begin(ifd, file)
-
-		func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
-		_missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, masked_version=mask_kind)
-
+		ifd = _missing_build_negated_masked_ifdef_for_existing_implems(funcs, f, dt_key, mask_kind)
+		_missing_emit_ifdef_begin_masked(ifd, file)
+  
+		_missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, masked_version=mask_kind, lmul=lmul)
+  
 		_missing_emit_ifdef_end(ifd, file)
-
 # ----------------------------------------------------------------------------------------------------------------------
 # Generators
 # ----------------------------------------------------------------------------------------------------------------------
@@ -709,7 +743,6 @@ def gen_c_functions(isa, file, funcs, implems):
 		else:
 			print("Panic: '" + f + "' function does not exist.")
 			exit(-1)
-
 
 def gen_c_generic_functions(isa, file, funcs, implems):
 	for f in implems:
@@ -736,3 +769,22 @@ def gen_c_missing_functions(isa, file, funcs):
 					_gen_c_missing_one_masked(isa, file, funcs, f, dt, "maskz")
 				if support.is_masksable():
 					_gen_c_missing_one_masked(isa, file, funcs, f, dt, "masks")
+
+def gen_c_missing_functions_lmul(isa, file, funcs, lmul):
+	"""
+	Generate missing variants for a given LMUL, including masked+LMUL missing stubs.
+	Intended for RVV (explicit _mX entrypoints).
+	"""
+	for f in funcs:
+		for dt in funcs[f]["datatypes"]:
+			_emit_separator(f, file)
+			_gen_c_missing_one_dt(isa, file, funcs, f, dt, lmul=lmul)
+
+			if "mask_support" in funcs[f]:
+				support = funcs[f]["mask_support"]
+				if support.is_maskable():
+					_gen_c_missing_one_masked(isa, file, funcs, f, dt, "mask", lmul=lmul)
+				if support.is_maskzable():
+					_gen_c_missing_one_masked(isa, file, funcs, f, dt, "maskz", lmul=lmul)
+				if support.is_masksable():
+					_gen_c_missing_one_masked(isa, file, funcs, f, dt, "masks", lmul=lmul)

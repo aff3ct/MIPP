@@ -166,7 +166,7 @@ def gen_ci_structures(isa_list, file):
  
 
 def ci_mask_writer(func, dt, isa_list, file, mask_type, func_name="", lmul=0):
-    
+	
 	if len(dt.split(',')) <= 1:
 		dt_par = dt.split(',')[0]
 		dt_ret = dt.split(',')[0]
@@ -207,6 +207,79 @@ def gen_ci_mask_functions(func, dt, isa_list, file,lmul=0, func_name=""):
 		ci_mask_writer(func, dt, isa_list, file, "maskz", func_name, lmul)
 	if masksable:
 		ci_mask_writer(func, dt, isa_list, file, "masks", func_name, lmul)
+  
+  
+def ci_lmul_writer(f,func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_type=None, lmul=0):
+	
+	
+	mask_str = ""
+	if mask_type == "mask":
+		mask_str = "_mask"
+	elif mask_type == "maskz":
+		mask_str = "_maskz"
+	elif mask_type == "masks":
+		mask_str = "_masks"
+	
+	if lmul == 1:
+		#call non_lmul version
+		print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name, lmul, False, masked_version=mask_type) + " {", file=file)
+		print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name+mask_str, masked_version=mask_type) + ";", file=file)
+		print("}", file=file)
+		return
+
+	isa_rvv = next((isa for isa in isa_list if isa["name"].startswith("rvv")), None)
+	func_name_rvv = ""
+	if len(dt.split(',')) <= 1:
+		func_name_rvv = build_func_name_short(isa_rvv, dt_par, f, lmul=lmul, masked_version=mask_type);
+	else:
+		func_name_rvv = build_func_name(isa_rvv, dt_par, dt_ret, f, lmul=lmul, masked_version=mask_type);
+  
+
+	print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name,lmul=lmul,isa_name=False, masked_version=mask_type) + " {", file=file)
+	print("#if defined(__riscv_v_intrinsic)",file=file)
+	print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa_rvv, func_name_rvv, lmul=lmul, masked_version=mask_type) + ";", file=file)
+	print("#else",file=file)
+	if not funcs[f]["horizontal"]:
+		lmul_2 = int(lmul / 2)
+		print(build_call_lmul(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name+mask_str+"_m"+str(lmul_2), lmul, False, masked_version=mask_type), file=file)
+	else:
+		print("\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \""+func_name+"\");", file=file);
+		print("\texit(-1);", file=file);
+	print("#endif // MIPP_RVV", file=file)
+	print("}", file=file)
+ 
+
+def ci_ldiv_writer(f,func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_type=None, ldiv=0):
+	if not funcs[f]["horizontal"]: #and funcs[f]["half_regiser"]:
+		print("#if defined(MIPP_ENABLE_LDIV"+str(ldiv)+")", file=file)
+		print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name+"_d"+str(ldiv), -ldiv, False) + " {", file=file)
+		for i, isa in  enumerate(isa_list):
+			sub_isa = sub_isa = get_sub_isa(isa, ldiv, isa_list)
+			if sub_isa :
+				if i == 0:
+					print("#if " + isa["gen_define"] + " && " + sub_isa["define"], file=file)
+				else:
+					print("#elif " + isa["gen_define"] + " && " + sub_isa["define"], file=file)
+						   
+				if len(dt.split(',')) <= 1:
+					func_name_impl = build_func_name_short(sub_isa, dt_par, f);
+				else:
+					func_name_impl = build_func_name(sub_isa, dt_par, dt_ret, f);
+				print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, sub_isa, func_name_impl) + ";", file=file)	
+					
+		print("#else", file=file)
+		print("\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \""+func_name+"_d"+str(ldiv)+"\");", file=file);
+		print("\texit(-1);", file=file);
+		print("#endif", file=file)
+		print("}", file=file)
+		print("#endif // defined(MIPP_ENABLE_LDIV"+str(ldiv)+")", file=file)
+	else :
+		print("#if defined(MIPP_ENABLE_LDIV"+str(ldiv)+")", file=file)
+		print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name+"_d"+str(ldiv), -ldiv, False) + " {", file=file)
+		print("\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \""+func_name+"_d"+str(ldiv)+"\");", file=file);
+		print("\texit(-1);", file=file);
+		print("}", file=file)
+		print("#endif // defined(MIPP_ENABLE_LDIV"+str(ldiv)+")"+")", file=file)
 
 def gen_ci_functions(isa_list, file, funcs):
 	isa_rvv = next((isa for isa in isa_list if isa["name"].startswith("rvv")), None)
@@ -245,62 +318,32 @@ def gen_ci_functions(isa_list, file, funcs):
 
 			print("}", file=file)
 
-			print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name+"_m1", 1, False) + " {", file=file)
+			print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name, 1, False) + " {", file=file)
 			print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name) + ";", file=file)
 			print("}", file=file)
    
 			gen_ci_mask_functions(f, dt, isa_list, file, 0, func_name=func_name)
 			
 			for lmul in all_lmul[1:]:
+				ci_lmul_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, lmul=lmul)
 				
-				func_name_rvv = ""
-				if len(dt.split(',')) <= 1:
-					func_name_rvv = build_func_name_short(isa_rvv, dt_par, f);
-				else:
-					func_name_rvv = build_func_name(isa_rvv, dt_par, dt_ret, f);
+	
+			for lmul in all_lmul:
+				mask_status = ""
+				if "mask_support" in funcs[f] :
+					mask_status = funcs[f]["mask_support"]
+				else :
+					mask_status = MaskSupport()
 
-				print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name+"_m"+str(lmul), lmul, False) + " {", file=file)
-				print("#if defined(__riscv_v_intrinsic)",file=file)
-				print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa_rvv, func_name_rvv+"_m"+str(lmul)) + ";", file=file)
-				print("#else",file=file)
-				if not funcs[f]["horizontal"]:
-					lmul_2 = int(lmul / 2)
-					print(build_call_lmul(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name+"_m"+str(lmul_2), lmul, False), file=file)
-				else:
-					print("\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \""+func_name+"_m"+str(lmul)+"\");", file=file);
-					print("\texit(-1);", file=file);
-				print("#endif // MIPP_RVV", file=file)
-				print("}", file=file)
+				if not mask_status.is_any_mask() :
+					continue
+				if mask_status.is_maskable() :
+					ci_lmul_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_type="mask", lmul=lmul)
+				
+				if mask_status.is_maskzable() :
+					ci_lmul_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_type="maskz", lmul=lmul)
+				if mask_status.is_masksable() :			
+					ci_lmul_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_type="masks", lmul=lmul)
 			
-			if not funcs[f]["horizontal"]: #and funcs[f]["half_regiser"]:
-				for ldiv in all_ldiv:
-					print("#if defined(MIPP_ENABLE_LDIV"+str(ldiv)+")", file=file)
-					print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name+"_d"+str(ldiv), -ldiv, False) + " {", file=file)
-					for i, isa in  enumerate(isa_list):
-						sub_isa = sub_isa = get_sub_isa(isa, ldiv, isa_list)
-						if sub_isa :
-							if i == 0:
-								print("#if " + isa["gen_define"] + " && " + sub_isa["define"], file=file)
-							else:
-								print("#elif " + isa["gen_define"] + " && " + sub_isa["define"], file=file)
-						   
-							if len(dt.split(',')) <= 1:
-								func_name_impl = build_func_name_short(sub_isa, dt_par, f);
-							else:
-								func_name_impl = build_func_name(sub_isa, dt_par, dt_ret, f);
-							print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, sub_isa, func_name_impl) + ";", file=file)	
-					
-					print("#else", file=file)
-					print("\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \""+func_name+"_d"+str(ldiv)+"\");", file=file);
-					print("\texit(-1);", file=file);
-					print("#endif", file=file)
-					print("}", file=file)
-					print("#endif // defined(MIPP_ENABLE_LDIV"+str(ldiv)+")", file=file)
-			else :
-				for ldiv in all_ldiv:
-					print("#if defined(MIPP_ENABLE_LDIV"+str(ldiv)+")", file=file)
-					print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name+"_d"+str(ldiv), -ldiv, False) + " {", file=file)
-					print("\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \""+func_name+"_d"+str(ldiv)+"\");", file=file);
-					print("\texit(-1);", file=file);
-					print("}", file=file)
-					print("#endif // defined(MIPP_ENABLE_LDIV"+str(ldiv)+")"+")", file=file)
+			for ldiv in all_ldiv:
+				ci_ldiv_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, ldiv=ldiv)

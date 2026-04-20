@@ -447,9 +447,16 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
 	if (proto["ret"]["fixeddatatype"]):
 		realdatatype = datatypes[proto["ret"]["fixeddatatype"]]
 	if not masked_version:
-		p = "inline " + build_type(proto["ret"]["type"], realdatatype, isa, lmul, isa_name, cpp) + " " + func_name + "("
+		lmul_str = ""
+		if lmul > 0 and (not cpp ):
+			lmul_str = "_m" + str(int(lmul))
+		p = "inline " + build_type(proto["ret"]["type"], realdatatype, isa, lmul, isa_name, cpp) + " " + func_name + lmul_str + "("
+
 	else : #we assume "mask" or "maskz" is passed in masked_version if it's not false.
-		p = "inline " + build_type(proto["ret"]["type"], realdatatype, isa, lmul, isa_name, cpp) + " " + func_name + "_" + masked_version + "("
+		lmul_str = ""
+		if lmul > 0 and (not cpp or (cpp and not lmul_specialized(proto))):
+			lmul_str = "_m" + str(int(lmul))
+		p = "inline " + build_type(proto["ret"]["type"], realdatatype, isa, lmul, isa_name, cpp) + " " + func_name + "_" + masked_version + lmul_str + "("
 	cnt_reg = 0
 	cnt_msk = 0
 	cnt_val = 0
@@ -494,7 +501,7 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
 		elif arg["type"] == "vindex":
 			p += " vi"
 		is_first = False
-	
+
 	return p + ")";
 
 
@@ -587,7 +594,7 @@ def build_call(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, mas
 	return p + ")";
 
 # build call function  
-def _build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul, part):
+def _build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul, part, masked_version=False):
 	"""if lmul:
 		func_name += "_m" + str(int(lmul))"""
 	p = ""
@@ -595,13 +602,22 @@ def _build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul, part):
 		p += "res.r" + str(int(part)) + " = "
 	elif proto["ret"]["type"] == "msk":
 		p += "msk.m"  + str(int(part))+ " = "
-
+  
 	p += func_name + "("
 	cnt_reg = 0
 	cnt_msk = 0
 	cnt_val = 0
 	cnt_ptr = 0
 	is_first = True
+ 
+	if masked_version:
+		if masked_version == "mask" or masked_version == "maskz":
+			p += "m0.m" + str(int(part))
+		elif masked_version == "masks" :
+			p += "m0.m" + str(int(part)) + ", rsrc.r" + str(int(part))
+		cnt_msk = cnt_msk +1		
+		is_first = False
+
 	for arg in proto["args"]:
 		if not is_first:
 			p += ", "
@@ -622,7 +638,7 @@ def _build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul, part):
 		is_first = False
 	return p + ")";
 
-def build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul=2, isa_name=True):
+def build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul=2, isa_name=True, masked_version=False):
 	lmul_2 = int(lmul / 2)
 	str_code = ""
 	realdatatype = datatypes[dt_ret]
@@ -633,8 +649,8 @@ def build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul=2, isa_name=True
 	elif proto["ret"]["type"] == "msk":
 		str_code += "\t" + build_type(proto["ret"]["type"], realdatatype, isa, lmul, isa_name) + " msk;\n"
 	
-	str_code += "\t" + _build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul_2, 1) + ";\n"
-	str_code += "\t" + _build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul_2, 2) + ";"
+	str_code += "\t" + _build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul_2, 1, masked_version=masked_version) + ";\n"
+	str_code += "\t" + _build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul_2, 2, masked_version=masked_version) + ";"
 	if proto["ret"]["type"] == "reg":
 		str_code += "\n\t" + "return res;";
 	elif proto["ret"]["type"] == "msk":
@@ -676,8 +692,7 @@ def build_func_name(isa, dt_par, dt_ret, mipp_name, isa_name=True, lmul=0, maske
 		lmul_str = "_m" + str(int(lmul))
 
 	mask_str = ""
-	if masked_version:
-		mask_str = "_" + masked_version
+
   
 	if isa_name:
 		return "mipp_" + isa["name"] + "_" + mipp_name + "_" + param_type + "_" + return_type + mask_str + lmul_str

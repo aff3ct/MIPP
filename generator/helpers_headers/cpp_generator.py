@@ -98,20 +98,20 @@ def gen_cpp_constexpr_functions(file):
 # -------------------------------------------------------------------------------------------------
 # Masked C++ wrappers (proto-driven: correct names m0/rsrc/r0..., correct arity)
 # -------------------------------------------------------------------------------------------------
-def _cpp_masked_c_symbol_base(dt_par, dt_ret, f, is_cast):
+def _masked_c_symbol(dt_par, dt_ret, f, is_cast):
 	# Base C symbol without lmul suffix.
 	if not is_cast:
 		return build_func_name_short("", dt_par, f, False)
 	return build_func_name("", dt_par, dt_ret, f, False)
 
 
-def _cpp_tpl_scalar_for_arg(arg):
+def _tpl_scalar_for_arg(arg):
 		# Returns a string type name usable in C++ template decls: "T" or "int32_t" etc.
 	if arg.get("fixeddatatype"):
 		return datatypes[arg["fixeddatatype"]]["cstd"]
 	return "T"
 
-def _cpp_emit_generic_mask_decl(file, cpp_func_name, proto, mask_kind):
+def _generic_mask_decl(file, cpp_func_name, proto, mask_kind):
 	"""
 	Emit a generic template declaration with correct *names* (m0/rsrc/r0/v0/p0...),
 	but *types* expressed in terms of T and LMUL.
@@ -156,7 +156,7 @@ def _cpp_emit_generic_mask_decl(file, cpp_func_name, proto, mask_kind):
 			s += "const "
 
 		# decide the scalar type for this argument
-		A = _cpp_tpl_scalar_for_arg(arg)  # "T" or fixed type like "int32_t"
+		A = _tpl_scalar_for_arg(arg)
 
 		if arg["type"] == "reg":
 			s += f"rvd<{A},LMUL> r{cnt_reg}"
@@ -171,10 +171,8 @@ def _cpp_emit_generic_mask_decl(file, cpp_func_name, proto, mask_kind):
 			s += f"{A}* p{cnt_ptr}"
 			cnt_ptr += 1
 		elif arg["type"] == "Nele":
-			# Array element type should also respect fixed datatype if present
 			s += f"{A} vals[N<{A},LMUL>()]"
 		elif arg["type"] == "vindex":
-			# If you ever fix vindex datatype, plug it here; keep as-is for now.
 			s += "rvd<int32_t,LMUL> vi"
 		else:
 			s += "void* _"
@@ -186,7 +184,7 @@ def _cpp_emit_generic_mask_decl(file, cpp_func_name, proto, mask_kind):
 	print(s, file=file)
 
 
-def _cpp_emit_mask_template_specialization(file, proto, dt_par, dt_ret, cpp_func_name, c_base, mk_letter, mask_kind):
+def _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, mk_letter, mask_kind):
 	"""
 	Emit:
 	  template <>
@@ -201,8 +199,6 @@ def _cpp_emit_mask_template_specialization(file, proto, dt_par, dt_ret, cpp_func
 	#in their custom helpers. I'm afraid to change it.
 	print("template <>", file=file)
 
-	# Start from the correct masked signature (has m0/rsrc/r0... and correct types),
-	# then rewrite function name to the template specialization name.
 	sig = build_proto(proto, dt_par, dt_ret, {}, cpp_func_name, 1, False, True, masked_version=mask_kind)
 	sig = sig.replace(f"{cpp_func_name}_{mask_kind}(", f"{cpp_func_name}<{mk_letter}, {Tret}, 1>(")
 	print(sig + " {", file=file)
@@ -218,16 +214,15 @@ def gen_cpp_functions(file, funcs):
 	set_functions = ["set0", "set0_k", "set", "set_k", "set1", "set1_k", "load", "loadu"]
 	for f in funcs:
 		   
-		# generating generic template for masked versions 
 		if "mask_support" in funcs[f] and funcs[f]["mask_support"] is not None:
 				is_cast = f == "cast" or f == "cast_k"
 
 				ms = funcs[f]["mask_support"]
 				proto = funcs[f]["proto"]
 				if (ms.is_maskable()) or (ms.is_maskzable()):
-					_cpp_emit_generic_mask_decl(file, f, proto, "mask")
+					_generic_mask_decl(file, f, proto, "mask")
 				if (ms.is_masksable()):
-					_cpp_emit_generic_mask_decl(file, f, proto, "masks")
+					_generic_mask_decl(file, f, proto, "masks")
 
 		if f in set_functions:
 			gen_set_func_error(f, file)
@@ -267,7 +262,7 @@ def gen_cpp_functions(file, funcs):
 				print("#endif // defined(MIPP_ENABLE_LDIV" + str(ldiv) + ")", file=file)
 
 			# -------------------------
-			# Masked (NEW): LMUL=1 only, skip LDIV, skip casts for now
+			# Masked (NEW): LMUL=1 only
 			# -------------------------
 			if is_cast:
 				continue
@@ -280,11 +275,11 @@ def gen_cpp_functions(file, funcs):
 				continue
 
 			proto = funcs[f]["proto"]
-			c_base = _cpp_masked_c_symbol_base(dt_par, dt_ret, f, is_cast=False)
+			c_base = _masked_c_symbol(dt_par, dt_ret, f, is_cast=False)
 
 			if ms.is_maskable():
-				_cpp_emit_mask_template_specialization(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "M", "mask")
+				_mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "M", "mask")
 			if ms.is_maskzable():
-				_cpp_emit_mask_template_specialization(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "Z", "maskz")
+				_mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "Z", "maskz")
 			if ms.is_masksable():
-				_cpp_emit_mask_template_specialization(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "S", "masks")
+				_mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "S", "masks")
