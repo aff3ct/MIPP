@@ -196,8 +196,8 @@ def gen_c_functions_rvv(isa, file, funcs, implems,lmul=0, reductions_fix=False):
 							func_name = build_func_name_short(isa, dt_par, f,True);
 						else:
 							func_name = build_func_name(isa, dt_par, dt_ret, f,True);
-						if lmul != 0:
-							func_name = func_name+"_m"+str(lmul)
+						# if lmul != 0:
+    					# 		func_name = func_name+"_m"+str(lmul)
 						print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name,lmul=lmul) + " {", file=file)
 						if ff["template"]["format"] == "short":
 							if funcs[f]["proto"]["args"]:

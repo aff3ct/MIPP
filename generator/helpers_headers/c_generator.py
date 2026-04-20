@@ -414,8 +414,11 @@ def _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, masked_ve
 	if masked_version:
 		mask_str = "_" + masked_version
 	#adds the lmul string to fn name
+	#if lmul is not None and lmul > 0:
+	#	mask_str = mask_str + "_m" + str(lmul)
+  
 	if lmul is not None and lmul > 0:
-		mask_str = mask_str + "_m" + str(lmul)
+		print(func_name)
 
 	print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul, True, masked_version=masked_version) + " {", file=file)
 	print("\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \"" + func_name + mask_str + "\");", file=file)
@@ -689,8 +692,7 @@ def _gen_c_missing_one_dt(isa, file, funcs, f, dt, lmul=0):
 		_missing_emit_ifdef_begin(ifd, file)
 
 		func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
-		if lmul > 0:
-			func_name = func_name + "_m" + str(lmul)
+		
 		_missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, lmul=lmul)
 
 		_missing_emit_ifdef_end(ifd, file)
