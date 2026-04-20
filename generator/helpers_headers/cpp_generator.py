@@ -184,28 +184,37 @@ def _generic_mask_decl(file, cpp_func_name, proto, mask_kind):
 	print(s, file=file)
 
 
-def _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, mk_letter, mask_kind):
+def _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, mk_letter, mask_kind, lmul=1):
 	"""
-	Emit:
-	  template <>
-	  inline rvd<T,1> fname<M, T, 1>(...) { return c_base_<mask_kind>_m1(...); }
+	Emit explicit specialization for masked template for a given LMUL.
 
-	Signature is proto-driven and uses the same parameter names (m0/rsrc/r0...)
-	as build_proto/build_call, so no hardcoded arity.
+	Example (storeu, uint32_t, LMUL=2):
+	  template <>
+	  inline void storeu<M, uint32_t, 2>(rvm<uint32_t,2> m0, uint32_t* p0, const rvd<uint32_t,2> r0) {
+		  mipp_storeu_uint32_mask_m2(m0, p0, r0);
+	  }
 	"""
 	Tret = datatypes[dt_ret]["cstd"]
- 
-	#idk why but in tools, their prototype comes prepaked w template <> 
-	#in their custom helpers. I'm afraid to change it.
+
 	print("template <>", file=file)
 
-	sig = build_proto(proto, dt_par, dt_ret, {}, cpp_func_name, 1, False, True, masked_version=mask_kind)
-	sig = sig.replace(f"{cpp_func_name}_{mask_kind}(", f"{cpp_func_name}<{mk_letter}, {Tret}, 1>(")
+	# Build the masked signature at the right LMUL, then rewrite the name into the template-id form.
+	sig = build_proto(proto, dt_par, dt_ret, {}, cpp_func_name, lmul, False, True, masked_version=mask_kind)
+	sig = sig.replace(
+		f"{cpp_func_name}_{mask_kind}(",
+		f"{cpp_func_name}<{mk_letter}, {Tret}, {lmul}>("
+	)
 	print(sig + " {", file=file)
-	c_symbol = f"{c_base}_{mask_kind}"
 
-	call = build_call(proto, dt_par, dt_ret, "", c_symbol, 1, False, masked_version=mask_kind)
+	# C masked symbol naming:
+	# - if your C layer has no _m1 for masked: use base for LMUL=1, and add _mX for LMUL>1
+	# - if it DOES have _m1 too, change this to always suffix.
+	if int(lmul) == 1:
+		c_symbol = f"{c_base}_{mask_kind}"
+	else:
+		c_symbol = f"{c_base}_{mask_kind}_m{int(lmul)}"
 
+	call = build_call(proto, dt_par, dt_ret, "", c_symbol, lmul, False, masked_version=mask_kind)
 	print("\t" + call + ";", file=file)
 	print("}", file=file)
 
@@ -246,9 +255,7 @@ def gen_cpp_functions(file, funcs):
 				c_func_name = build_func_name("", dt_par, dt_ret, f, False)
 				cpp_func_name = build_cpp_func_name(dt_ret, f)
 
-			# -------------------------
-			# Unmasked (unchanged)
-			# -------------------------
+	
 			for lmul in all_lmul:
 				print(build_proto(funcs[f]["proto"], dt_par, dt_ret, {}, cpp_func_name, lmul, False, True) + " {", file=file)
 				print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, "", c_func_name + "_m" + str(lmul), lmul, False) + ";", file=file)
@@ -261,9 +268,7 @@ def gen_cpp_functions(file, funcs):
 				print("}", file=file)
 				print("#endif // defined(MIPP_ENABLE_LDIV" + str(ldiv) + ")", file=file)
 
-			# -------------------------
-			# Masked (NEW): LMUL=1 only
-			# -------------------------
+
 			if is_cast:
 				continue
 
@@ -277,9 +282,10 @@ def gen_cpp_functions(file, funcs):
 			proto = funcs[f]["proto"]
 			c_base = _masked_c_symbol(dt_par, dt_ret, f, is_cast=False)
 
-			if ms.is_maskable():
-				_mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "M", "mask")
-			if ms.is_maskzable():
-				_mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "Z", "maskz")
-			if ms.is_masksable():
-				_mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "S", "masks")
+			for lmul in all_lmul:
+				if ms.is_maskable():
+					_mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "M", "mask",lmul=lmul)
+				if ms.is_maskzable():
+					_mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "Z", "maskz",lmul=lmul)
+				if ms.is_masksable():
+					_mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "S", "masks",lmul=lmul)
