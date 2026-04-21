@@ -38,6 +38,8 @@ from .common import (
 
 FUNC_DECL = """template <typename T>\nvoid test_cppmipp_{{func}}(){"""
 FUNC_DECL_FLOAT_WORKAROUND = " {% if is_int %} " + FUNC_DECL + " {% else %} template <typename T>\nvoid test_cppmipp_{{func}}_float{{type_size}}(){  {% endif %}"
+FUNC_DECL_LMUL = """void test_cppmipp_{{func}}_{{lmul}}(){"""
+
 
 # --------------------------------------------
 # SCALAR VEC DECL

@@ -22,7 +22,7 @@ from implem_rvv import implems_rvv
 from implem_neon import implems_neon
 from headers_def import mipp_funcs,mipp_funcs_concepts
 from tools import *
-from helpers_tests import get_gen_test_dict, set_float_workaround, test_function_name
+from helpers_tests import get_gen_test_dict, set_float_workaround, test_function_name, get_gen_test_dict_lmul
 
 from implem_emu_sse import implems_emu_sse
 from implem_emu_avx import implems_emu_avx
@@ -71,6 +71,13 @@ set_skip_testing = {
     "cast_k", #either testing or cast_k is wrong.    
 }
 
+#every func that has the key "horizontal" set to false
+#in headers_def.mipp_funcs will be generated with lmuls
+#except for RVV which where lmul variants will be generated for 
+#every function.
+mipp_funcs_lmul = {
+    func : meta for func, meta in mipp_funcs.items() if meta["horizontal"] == False
+}
 ###### HELPERS ######
 
 # helper to get the datatypes for 1 func in 1 implem
@@ -147,6 +154,24 @@ def gen_func_defines(func, dt, implem):
                     func_defines += " || "
                 func_defines += "(" + sub_implem["if"] + ")"
     return func_defines
+
+def lmul_to_str(lmul):
+    #1-> m1 
+    #2-> m2
+    #4-> m4
+    #8-> m8
+    #1/2 -> d2
+    #1/4 -> d4
+    #1/8 -> d8
+    match lmul:
+        case 0 : return ""
+        case 1 : return "m1"
+        case 2 : return "m2"
+        case 4 : return "m4"
+        case 8 : return "m8"
+        case 0.5 : return "d2"
+        case 0.25 : return "d4"
+        case 0.125 : return "d8"
 
 ###### GENERATION FUNC ######
 
@@ -329,14 +354,19 @@ def gen_headers(kind="c"):
     res += "\n#include <catch2/catch_test_macros.hpp>\n\n"
     return res
 
-def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False):
+def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False, lmul=0):
     """
     generates the test function(s) for 1 func, 1 datatype, 1 layer.
     """
     # Pick per-layer dictionary
     layer_dict = get_gen_test_dict(kind)
+    if lmul != 0:
+        layer_dict = get_gen_test_dict_lmul(kind)
 
     # we need to render twice because we have 2 levels of templates :)
+    
+    if lmul != 0 and kind != "c" : 
+        return ""
     func_dict = layer_dict[func]["proto"]
     func_template = layer_dict[func]["template"]
 
@@ -363,6 +393,8 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False):
     #hacky workaround to handle float versions of andb etc... in cpp tests.
     #nb: float is set to != False only for CPP
     if kind=="c":
+        lmul_suffix = lmul_to_str(lmul)
+        lmul_coeff = lmul
         res = func_template.render(
             func=func,
             dt_ext=scalar_type,
@@ -375,6 +407,8 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False):
             is_int=is_int_dt(scalar_type),
             is_signed=is_signed_int_dt(scalar_type),
             type_size=type_size,
+            lmul_suffix=lmul_suffix,
+            lmul_coeff=lmul_coeff,
         )
     if not float and kind=="cpp" :
         res = func_template.render(
@@ -418,9 +452,11 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False):
         )
     return res + "\n"
 
-def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="c", msk1_type="", msk2_type=""):
+def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="c", msk1_type="", msk2_type="", lmul=0):
     res = ""
     layer_dict = get_gen_test_dict(kind)
+    if lmul != 0:
+        layer_dict = get_gen_test_dict_lmul(kind)
     #from func, get "cast" or "cast_k" to get the right template and proto
     if kind == "c":
         is_cast_k = func.startswith("cast_k")
@@ -442,8 +478,14 @@ def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="
         func_template = Template(res, undefined=StrictUndefined)
         func_old = "cast"
         func = test_function_name(kind, func)
+        
+        
+        
+        lmul_suffix = lmul_to_str(lmul)
+        lmul_coeff = lmul
         res = func_template.render(
             func=func,
+            dt_ext=scalar1_type,
             dt1_ext=scalar1_type,
             dt2_ext=scalar2_type,
             op=layer_dict[func_old]["op"],
@@ -452,6 +494,8 @@ def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="
             reg2_type=reg2_type,
             msk2_type=msk2_type,
             size="MIPP_N_" + scalar1_type.upper(),
+            lmul_suffix=lmul_suffix,
+            lmul_coeff=lmul_coeff,
             #size2="MIPP_N_" + scalar2_type.upper(),
         )
     elif kind == "cpp": 
@@ -489,66 +533,129 @@ def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="
     
     return res+ "\n"
 
-def gen_cast_funcs_all_datatypes(func, kind="c", register="rvd", mask="rvm"):
+def gen_cast_funcs_all_datatypes(func, kind="c", register="rvd", mask="rvm",lmul=0):
     layer_dict = get_gen_test_dict(kind)
+    if lmul != 0:
+        layer_dict = get_gen_test_dict_lmul(kind)
     datatypes = mipp_funcs[func]["datatypes"]
+    
     res = ""
     if kind == "c":
         for dt in datatypes:
             dt1, dt2 = dt.split(",")
             func_name = f"{func}_{dt1}_{dt2}"
-            res+= gen_cast_func(func_name, 
-                                scalar1_type=dt1,
-                                scalar2_type=dt2,
-                                reg1_type=f"{register}_" + dt1 + "_t",
-                                reg2_type=f"{register}_" + dt2 + "_t",
-                                kind=kind, 
-                                msk1_type=f"{mask}_" + dt1 + "_t",
-                                msk2_type=f"{mask}_" + dt2 + "_t")
             
+            
+            
+            if lmul > 0:
+                reg1_type = f"{register}_" + dt1 + f"m{lmul}_t"
+                reg2_type = f"{register}_" + dt2 + f"m{lmul}_t"
+                msk1_type = f"{mask}_" + dt1 + f"m{lmul}_t"
+                msk2_type = f"{mask}_" + dt2 + f"m{lmul}_t"
+                
+                res+= gen_cast_func(func_name, 
+                                    scalar1_type=dt1,
+                                    scalar2_type=dt2,
+                                    reg1_type=reg1_type,
+                                    reg2_type=reg2_type,
+                                    kind=kind, 
+                                    msk1_type=msk1_type,
+                                    msk2_type=msk2_type,
+                                    lmul=lmul,
+                )
+            
+            else : 
+                
+                reg1_type = f"{register}_" + dt1 + "_t"
+                reg2_type = f"{register}_" + dt2 + "_t"
+            
+                msk1_type = f"{mask}_" + dt1 + "_t"
+                msk2_type = f"{mask}_" + dt2 + "_t"
+            
+                res+= gen_cast_func(func_name, 
+                                    scalar1_type=dt1,
+                                    scalar2_type=dt2,
+                                    reg1_type=reg1_type,
+                                    reg2_type=reg2_type,
+                                    kind=kind, 
+                                    msk1_type=msk1_type,
+                                    msk2_type=msk2_type,
+                                    lmul=lmul,
+                )
     elif kind == "cpp" :  # template so no need
         
         for dt in all_datatypes:
             dt1 = dt
             func_name = f"{func}_{dt1}"
+            
+            
+            reg1_type = f"mipp::{register}<T>"
+            reg2_type = f"mipp::{register}<{dt1}_t>"
+            
+            msk1_type = f"mipp::{mask}<T>"
+            msk2_type = f"mipp::{mask}<{dt1}_t>"
+            
+            if lmul > 0:
+                reg1_type = f"mipp::{register}<T, {lmul}>"
+                reg2_type = f"mipp::{register}<{dt1}_t, {lmul}>"
+                msk1_type = f"mipp::{mask}<T, {lmul}>"
+                msk2_type = f"mipp::{mask}<{dt1}_t, {lmul}>"
+            
             res += gen_cast_func(func, 
                             scalar1_type="T",
                             scalar2_type=dt1,
-                            reg1_type=f"mipp::{register}<T>",
-                            reg2_type=f"mipp::{register}<{dt1}_t>",
+                            reg1_type=reg1_type,
+                            reg2_type=reg2_type,
                             kind=kind,
-                            msk1_type=f"mipp::{mask}<T>",
-                            msk2_type=f"mipp::{mask}<{dt1}_t>")
+                            msk1_type=msk1_type,
+                            msk2_type=msk2_type,
+                            lmul=lmul,
+            )
     elif kind == "obj" :  # template so no need
         res += ""
     return res
 
-def gen_funcs_all_datatypes(func, kind="c", register="rvd", mask="rvm"):
+def gen_funcs_all_datatypes(func, kind="c", register="rvd", mask="rvm",lmul=0):
     """
     generate the test function(s) for 1 func, all datatypes, 1 layer.
     """
     layer_dict = get_gen_test_dict(kind)
+    if lmul != 0:
+        layer_dict = get_gen_test_dict_lmul(kind)
 
     res = ""
     datatypes = mipp_funcs[func]["datatypes"]
 
     if kind == "c":
         for dt in datatypes:
-            res += gen_func(
-                func,
-                dt,
-                reg_type=f"{register}_" + dt + "_t",
-                kind=kind,
-                msk_type=f"{mask}_" + dt + "_t",
-            )
+            reg_type =f"{register}_" + dt + "_t"
+            msk_type = f"{mask}_" + dt + "_t"
+            if lmul > 0:
+                reg_type = f"{register}_" + dt + f"_m{lmul}_t"
+                msk_type = f"{mask}_" + dt + f"_m{lmul}_t"
+            for dt in datatypes:
+                res += gen_func(
+                    func,
+                    dt,
+                    reg_type=reg_type,
+                    kind=kind,
+                    msk_type=msk_type,
+                    lmul=lmul,
+                    
+                )
     elif kind == "cpp":  # template so no need to loop over datatypes
+        
+        reg_type = f"mipp::{register}<T>"
+        msk_type = f"mipp::{mask}<T>"
+      
         res += gen_func(
             func,
             "T",
-            reg_type=f"mipp::{register}<T>",
+            reg_type=reg_type,
             kind=kind,
-            msk_type=f"mipp::{mask}<T>",
+            msk_type=msk_type,
         )
+        
         if func in set_float_workaround:
             res += gen_func(
                 func,
@@ -565,6 +672,7 @@ def gen_funcs_all_datatypes(func, kind="c", register="rvd", mask="rvm"):
                 kind=kind,
                 msk_type=f"mipp::{mask}<T>",
                 float="float64",
+                lmul=lmul,
             )
     elif kind == "obj":  # template so no need to loop over datatypes
         res += gen_func(
@@ -576,7 +684,7 @@ def gen_funcs_all_datatypes(func, kind="c", register="rvd", mask="rvm"):
         )
     return res
 
-def gen_file(func, kind="c"):
+def gen_file(func, kind="c", lmul=0):
     """
     generates the test file for 1 func, all datatypes, 1 layer.
     Calls gen_headers -> gen_funcs_all_datatypes -> gen_test_type_guards
@@ -590,7 +698,7 @@ def gen_file(func, kind="c"):
         register = register.capitalize()  # obj types are Rvd, Rvm instead of rvd, rvm
         mask = mask.capitalize()
 
-    res = gen_funcs_all_datatypes(func, kind=kind, register=register, mask=mask)
+    res = gen_funcs_all_datatypes(func, kind=kind, register=register, mask=mask, lmul=lmul)
     res += gen_test_type_guards(
         func,
         layer_dict[func]["long_name"],
@@ -599,7 +707,7 @@ def gen_file(func, kind="c"):
     )
     return res
 
-def gen_cast_file(func,kind="c"):
+def gen_cast_file(func,kind="c", lmul=0):
     layer_dict = get_gen_test_dict(kind)
 
     register = "rvd"
@@ -609,7 +717,7 @@ def gen_cast_file(func,kind="c"):
         register = register.capitalize()  # obj types are Rvd, Rvm instead of rvd, rvm
         mask = mask.capitalize()
 
-    res = gen_cast_funcs_all_datatypes(func, kind=kind, register=register, mask=mask)
+    res = gen_cast_funcs_all_datatypes(func, kind=kind, register=register, mask=mask, lmul=lmul)
     res += gen_cast_test_type_guards(
         func,
         layer_dict[func]["long_name"],
@@ -651,7 +759,7 @@ def comment_out_cpp_file(content: str, reason: str):
     return header + "/*\n" + content + "\n*/\n"
 
 #big and somewhat ugly "main" func to generate all test files for all funcs for the requested layer(s)
-def gen_test_files_all_funcs(kind="c"):
+def gen_test_files_all_funcs(kind="c", lmul=0):
     """
     kind: "c", "cpp", "obj", or "all"
     Regenerates only the requested layer(s) for all functions.
@@ -661,6 +769,19 @@ def gen_test_files_all_funcs(kind="c"):
     """
     if kind not in {"c", "cpp", "obj", "all"}:
         raise ValueError(f"Invalid kind: {kind!r}")
+    
+    if kind != "c" and lmul != 0:
+        print("lmul doesn't work in cpp & obj atm, try again later :'(")
+        if kind == "all":
+            print("kind set to all, but only regenerating c tests because of lmul")
+            kind = "c"
+        else:
+            return
+    
+    if kind == "c" and lmul != 0:
+        print("generating tests with lmul!=0 in C WOULD work but support for mipp::get is not there for lmul!=0, sorry! Try again later :'(")
+        return
+            
 
     regen_c = kind in {"c", "all"}
     regen_cpp = kind in {"cpp", "all"}
@@ -677,6 +798,18 @@ def gen_test_files_all_funcs(kind="c"):
         funcs |= set(cpp_dict.keys())
     if regen_obj:
         funcs |= set(obj_dict.keys())
+        
+        
+    #if lmul != "" add it to the path to generate lmul specific tests in a separate folder
+    if lmul != 0:
+        lmul_str = lmul_to_str(lmul)
+        cpath = tmp_path + "c_tests_" + lmul_str + "/"
+        cpppath = tmp_path + "cpp_tests_" + lmul_str + "/"
+        objpath = tmp_path + "obj_tests_" + lmul_str + "/"
+    else :
+        cpath = tmp_path + "c_tests/"
+        cpppath = tmp_path + "cpp_tests/"
+        objpath = tmp_path + "obj_tests/"
 
     # Create dirs only if needed
     if not os.path.exists(tmp_path):
@@ -711,9 +844,9 @@ def gen_test_files_all_funcs(kind="c"):
 
         if regen_c and func in c_dict:
             if func == "cast" or func == "cast_k":
-                c_file = gen_headers(kind="c") + gen_cast_file(func, kind="c")
+                c_file = gen_headers(kind="c") + gen_cast_file(func, kind="c",lmul=lmul)
             else:
-                c_file = gen_headers(kind="c") + gen_file(func, kind="c")
+                c_file = gen_headers(kind="c") + gen_file(func, kind="c",lmul=lmul)
             if disable:
                 c_file = comment_out_cpp_file(c_file, reason)
             file_path = cpath + match_concept(func) + f"/test_c{func}.cpp"
@@ -751,7 +884,8 @@ def main():#just parse the args and call gen_test_files_all_funcs with the right
         help="Which layer to regenerate (default: all).",
     )
     args = parser.parse_args()
-    gen_test_files_all_funcs(kind=args.kind)
+    for lmul in [0, 1, 2, 4, 8]:
+        gen_test_files_all_funcs(kind=args.kind, lmul=lmul)
 
 
 if __name__ == "__main__":

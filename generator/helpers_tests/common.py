@@ -67,7 +67,6 @@ SHAPE_RET_I32_2ARGS_MSK = "ret_i32_2args_msk"
 SHAPE_RET_VAL_2ARGS_REG_VAL = "ret_val_2args_reg_val"
 SHAPE_RET_VAL_2ARGS_MSK_VAL = "ret_val_2args_msk_val"
 
-
 SUPPORTED_SHAPES = {
     SHAPE_RET_REG_2ARGS_REG, #shape for airthmetic and bitwise binary operators
     SHAPE_RET_MSK_2ARGS_REG, #shape for comparison operators (cmp_2reg)
