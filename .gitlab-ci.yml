@@ -111,6 +111,19 @@ analysis-cppcheck:
     - x86_64
     - linux
     - docker
+  before_script:
+  # find the number of threads on the computer
+  - |
+    if [ -z "$THREADS" ]; then
+      if command -v nproc >/dev/null 2>&1; then
+        THREADS=$(nproc)
+      elif [ -f /proc/cpuinfo ]; then
+        THREADS=$(grep -c ^processor /proc/cpuinfo)
+      else
+        THREADS=1
+      fi
+      export THREADS
+    fi
   script:
     - ./ci/analysis-cppcheck.sh
 
