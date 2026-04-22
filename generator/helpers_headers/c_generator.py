@@ -416,9 +416,6 @@ def _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, masked_ve
 	#adds the lmul string to fn name
 	#if lmul is not None and lmul > 0:
 	#	mask_str = mask_str + "_m" + str(lmul)
-  
-	if lmul is not None and lmul > 0:
-		print(func_name)
 
 	print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul, True, masked_version=masked_version) + " {", file=file)
 	print("\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \"" + func_name + mask_str + "\");", file=file)
