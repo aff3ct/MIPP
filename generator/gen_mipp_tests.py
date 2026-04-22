@@ -645,8 +645,7 @@ def gen_funcs_all_datatypes(func, kind="c", register="rvd", mask="rvm",lmul=0):
             if lmul > 0:
                 reg_type = f"{register}_" + dt + f"_m{lmul}_t"
                 msk_type = f"{mask}_" + dt + f"_m{lmul}_t"
-            for dt in datatypes:
-                res += gen_func(
+            res += gen_func(
                     func,
                     dt,
                     reg_type=reg_type,
@@ -654,7 +653,7 @@ def gen_funcs_all_datatypes(func, kind="c", register="rvd", mask="rvm",lmul=0):
                     msk_type=msk_type,
                     lmul=lmul,
                     
-                )
+            )
     elif kind == "cpp":  # template so no need to loop over datatypes
         
         reg_type = f"mipp::{register}<T>"
