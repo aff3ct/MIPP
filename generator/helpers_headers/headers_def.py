@@ -317,6 +317,8 @@ class MaskSupport:
 
 	def is_any_mask(self):
 		return self.maskable or self.maskzable or self.masksable
+	def is_none(self):
+		return not self.is_any_mask()
 
 only_maskz = MaskSupport(maskable=False, maskzable=True, masksable=False)
 only_mask = MaskSupport(maskable=True, maskzable=False, masksable=False)

@@ -46,7 +46,7 @@ FUNC_DECL = """void test_cmipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}()
 # --------------------------------------------
 # SCALAR VEC DECL
 # --------------------------------------------
-DECL_VECTOR_SIZE = "\tconst int vectorSize = {{size}};"
+DECL_VECTOR_SIZE = "\tconst int vectorSize = {{size}} * {{lmul_coeff}};"
 
 DECL_0ARGS = DECL_VECTOR_SIZE
 DECL_1ARG = DECL_VECTOR_SIZE + """ {{dt_ext}}_t inputs1[vectorSize];"""
@@ -114,26 +114,26 @@ INIT_CAST_2ARGS = """\tstd::iota(inputs1, inputs1 + vectorSize, 1);\n\tmemcpy(in
 # --------------------------------------------
 # LOADS (masked: create m0 + optionally rsrc)
 # --------------------------------------------
-LOAD_2ARGS_REG = """\t{{reg_type}} r1 = mipp_load_{{dt_ext}}{{lmul}}(inputs1);
-\t{{reg_type}} r2 = mipp_load_{{dt_ext}}{{lmul}}(inputs2);"""
+LOAD_2ARGS_REG = """\t{{reg_type}} r1 = mipp_load_{{dt_ext}}{{lmul_suffix}}(inputs1);
+\t{{reg_type}} r2 = mipp_load_{{dt_ext}}{{lmul_suffix}}(inputs2);"""
 
-LOAD_1ARG_REG = """\t{{reg_type}} r1 = mipp_load_{{dt_ext}}{{lmul}}(inputs1);"""
-LOAD_1SCALAR_REG = """\t{{reg_type}} r1 = mipp_set1_{{dt_ext}}{{lmul}}(input1);"""
-LOAD_SET0_REG = """\t{{reg_type}} r1 = mipp_set0_{{dt_ext}}{{lmul}}();"""
+LOAD_1ARG_REG = """\t{{reg_type}} r1 = mipp_load_{{dt_ext}}{{lmul_suffix}}(inputs1);"""
+LOAD_1SCALAR_REG = """\t{{reg_type}} r1 = mipp_set1_{{dt_ext}}{{lmul_suffix}}(input1);"""
+LOAD_SET0_REG = """\t{{reg_type}} r1 = mipp_set0_{{dt_ext}}{{lmul_suffix}}();"""
 
-LOAD_2ARGS_MASK = """\t{{msk_type}} m1 = mipp_set_k_{{dt_ext}}{{lmul}}(inputs1);
-\t{{msk_type}} m2 = mipp_set_k_{{dt_ext}}{{lmul}}(inputs2);"""
+LOAD_2ARGS_MASK = """\t{{msk_type}} m1 = mipp_set_k_{{dt_ext}}{{lmul_suffix}}(inputs1);
+\t{{msk_type}} m2 = mipp_set_k_{{dt_ext}}{{lmul_suffix}}(inputs2);"""
 
-LOAD_1ARG_MASK = """\t{{msk_type}} m1 = mipp_set_k_{{dt_ext}}{{lmul}}(inputs1);"""
-LOAD_1SCALAR_MASK = """\t{{msk_type}} m1 = mipp_set1_k_{{dt_ext}}{{lmul}}(input1);"""
-LOAD_SET0_MASK = """\t{{msk_type}} m1 = mipp_set0_k_{{dt_ext}}{{lmul}}();"""
+LOAD_1ARG_MASK = """\t{{msk_type}} m1 = mipp_set_k_{{dt_ext}}{{lmul_suffix}}(inputs1);"""
+LOAD_1SCALAR_MASK = """\t{{msk_type}} m1 = mipp_set1_k_{{dt_ext}}{{lmul_suffix}}(input1);"""
+LOAD_SET0_MASK = """\t{{msk_type}} m1 = mipp_set0_k_{{dt_ext}}{{lmul_suffix}}();"""
 
 # Used for blend
-LOAD_SET1_2ARGS_REG = """\t{{reg_type}} r1 = mipp_set1_{{dt_ext}}{{lmul}}(1);\n\t{{reg_type}} r2 = mipp_set1_{{dt_ext}}{{lmul}}(2);"""
+LOAD_SET1_2ARGS_REG = """\t{{reg_type}} r1 = mipp_set1_{{dt_ext}}{{lmul_suffix}}(1);\n\t{{reg_type}} r2 = mipp_set1_{{dt_ext}}{{lmul_suffix}}(2);"""
 
-LOAD_3ARGS_REG = """\t{{reg_type}} r1 = mipp_load_{{dt_ext}}{{lmul}}(inputs1);
-\t{{reg_type}} r2 = mipp_load_{{dt_ext}}{{lmul}}(inputs2);
-\t{{reg_type}} r3 = mipp_load_{{dt_ext}}{{lmul}}(inputs3);"""
+LOAD_3ARGS_REG = """\t{{reg_type}} r1 = mipp_load_{{dt_ext}}{{lmul_suffix}}(inputs1);
+\t{{reg_type}} r2 = mipp_load_{{dt_ext}}{{lmul_suffix}}(inputs2);
+\t{{reg_type}} r3 = mipp_load_{{dt_ext}}{{lmul_suffix}}(inputs3);"""
 
 LOAD_CAST_2ARGS = """\t{{reg1_type}} r1 = mipp_load_{{dt1_ext}}(inputs1);"""
 LOAD_CAST_2ARGS_MASK = """\t{{msk1_type}} m1 = mipp_set_k_{{dt1_ext}}(inputs1);"""
@@ -141,34 +141,34 @@ LOAD_CAST_2ARGS_MASK = """\t{{msk1_type}} m1 = mipp_set_k_{{dt1_ext}}(inputs1);"
 # Mask inputs for masked wrappers:
 # - choose mask m0 (we'll base it on inputs1 for convenience)
 # - rsrc for "masks" kind (use r1 where available, otherwise set0)
-LOAD_MASK_AND_RSRC_FROM_INPUTS = """\t{{msk_type}} m0 = mipp_set_k_{{dt_ext}}{{lmul}}(inputs1);
-\t{{reg_type}} rsrc = mipp_set0_{{dt_ext}}{{lmul}}();"""
+LOAD_MASK_AND_RSRC_FROM_INPUTS = """\t{{msk_type}} mpred = mipp_set_k_{{dt_ext}}{{lmul_suffix}}(inputs1);
+\t{{reg_type}} rsrc = mipp_set0_{{dt_ext}}{{lmul_suffix}}();"""
 
-LOAD_MASK_AND_RSRC_FROM_REG1 = """\t{{msk_type}} m0 = mipp_set_k_{{dt_ext}}{{lmul}}(inputs1);
+LOAD_MASK_AND_RSRC_FROM_REG1 = """\t{{msk_type}} mpred = mipp_set_k_{{dt_ext}}{{lmul_suffix}}(inputs1);
 \t{{reg_type}} rsrc = r1;"""
 
 # --------------------------------------------
 # OPERATIONS (masked)
 # --------------------------------------------
 OP_REG_NOOP = """\t{{reg_type}} r3 = r1;"""
-OP_REG_UNOP = """\t{{reg_type}} r3 = mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul}}({{mask_args}} r1);"""
-OP_REG_BINOP = """\t{{reg_type}} r3 = mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul}}({{mask_args}} r1, r2);"""
+OP_REG_UNOP = """\t{{reg_type}} r3 = mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args}} r1);"""
+OP_REG_BINOP = """\t{{reg_type}} r3 = mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args}} r1, r2);"""
 
-OP_CMP_2REG = """\t{{msk_type}} m3 = mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul}}({{mask_args}} r1, r2); {{reg_type}} r3 = mipp_toreg_{{dt_ext}}(m3);"""
+OP_CMP_2REG = """\t{{msk_type}} m3 = mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args}} r1, r2); {{reg_type}} r3 = mipp_toreg_{{dt_ext}}(m3);"""
 
 OP_STORE = """\tmipp_store_{{dt_ext}}(inputs2, r1);"""
 
 OP_TOREG = """\t{{reg_type}} r3 = mipp_toreg_{{dt_ext}}(m1);"""
 
-OP_SCAL_UNOP = """\t{{dt_ext}}_t res = mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul}}({{mask_args}} r1);"""
+OP_SCAL_UNOP = """\t{{dt_ext}}_t res = mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args}} r1);"""
 
-OP_3ARGS_2REG_1MSK = """\t{{reg_type}} r3 = mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul}}({{mask_args}} r1, r2, m1);"""
-OP_3ARGS_1MSK_2REG = """\t{{reg_type}} r3 = mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul}}({{mask_args}} m1, r1, r2);"""
+OP_3ARGS_2REG_1MSK = """\t{{reg_type}} r3 = mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args}} r1, r2, m1);"""
+OP_3ARGS_1MSK_2REG = """\t{{reg_type}} r3 = mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args}} m1, r1, r2);"""
 
-OP_1ARG_1MASK = """\t{{msk_type}} m3 = mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul}}({{mask_args}} m1); {{reg_type}} r3 = mipp_toreg_{{dt_ext}}(m3);"""
-OP_2ARGS_2MASK = """\t{{msk_type}} m3 = mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul}}({{mask_args}} m1, m2);\n\t{{reg_type}} r3 = mipp_toreg_{{dt_ext}}(m3);"""
+OP_1ARG_1MASK = """\t{{msk_type}} m3 = mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args}} m1); {{reg_type}} r3 = mipp_toreg_{{dt_ext}}(m3);"""
+OP_2ARGS_2MASK = """\t{{msk_type}} m3 = mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args}} m1, m2);\n\t{{reg_type}} r3 = mipp_toreg_{{dt_ext}}(m3);"""
 
-OP_3ARGS_REG = """\t{{reg_type}} r4 = mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul}}({{mask_args}} r1, r2, r3);"""
+OP_3ARGS_REG = """\t{{reg_type}} r4 = mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args}} r1, r2, r3);"""
 
 OP_CAST = """\t{{reg2_type}} r2 = mipp_cast_{{dt1_ext}}_{{dt2_ext}}(r1);"""
 OP_CAST_MSK = """\t{{msk2_type}} m2 = mipp_cast_k_{{dt1_ext}}_{{dt2_ext}}(m1);"""
@@ -191,24 +191,24 @@ LB_REG_BINOP_FLOAT_WORKAROUND = """{% if is_int %}""" + LB_REG_BINOP + """{% els
 # --------------------------------------------
 # ASSERTS IN LOOP BODY
 # ------------------------------------------
-AS_REG_BINOP = """\t\tREQUIRE(mipp_get_{{dt_ext}}{{lmul}}(r3, i) == res);"""
-AS_CMP_2REG = """\t\tif(res) REQUIRE(mipp_get_{{dt_ext}}{{lmul}}(r3, i) !=  ({{dt_ext}}_t)0); else REQUIRE(mipp_get_{{dt_ext}}{{lmul}}(r3, i) == 0);"""
-AS_LOAD = """\t\tREQUIRE(mipp_get_{{dt_ext}}{{lmul}}(r1, i) == res);"""
+AS_REG_BINOP = """\t\tREQUIRE(mipp_get_{{dt_ext}}{{lmul_suffix}}(r3, i) == res);"""
+AS_CMP_2REG = """\t\tif(res) REQUIRE(mipp_get_{{dt_ext}}{{lmul_suffix}}(r3, i) !=  ({{dt_ext}}_t)0); else REQUIRE(mipp_get_{{dt_ext}}{{lmul_suffix}}(r3, i) == 0);"""
+AS_LOAD = """\t\tREQUIRE(mipp_get_{{dt_ext}}{{lmul_suffix}}(r1, i) == res);"""
 AS_STORE = """\t\tREQUIRE(inputs2[i] == res);"""
-AS_3ARGS = """\t\tREQUIRE(mipp_get_{{dt_ext}}{{lmul}}(r4, i) == res);"""
+AS_3ARGS = """\t\tREQUIRE(mipp_get_{{dt_ext}}{{lmul_suffix}}(r4, i) == res);"""
 
 AS_CAST_2ARGS = """\t\tREQUIRE(mipp_get_{{dt2_ext}}(r2, i) == res);"""
 AS_CAST_2ARGS_MSK = """\t\tif(res) REQUIRE(mipp_get_k_{{dt2_ext}}(m2, i) != 0); else REQUIRE(mipp_get_k_{{dt2_ext}}(m2, i) == 0);"""
 
 AS_REG_BINOP_FLOAT_WORKAROUND = """{% if is_int %}""" + AS_REG_BINOP + """{% else %}
-\n\t\tREQUIRE(std::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(mipp_get_{{dt_ext}}{{lmul}}(r3, i))\
+\n\t\tREQUIRE(std::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(mipp_get_{{dt_ext}}{{lmul_suffix}}(r3, i))\
 \n\t\t\t==
 \t\t\tstd::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(res) );
 {% endif %}"""
 
 AS_CMP_BINOP_FLOAT_WORKAROUND = """{% if is_int %}""" + AS_CMP_2REG + """{% else %}
-\n\t\tif(res) REQUIRE(std::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(mipp_get_{{dt_ext}}{{lmul}}(r3, i))\n\t\t\t!= 0);
-else REQUIRE(std::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(mipp_get_{{dt_ext}}{{lmul}}(r3, i)) == 0);
+\n\t\tif(res) REQUIRE(std::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(mipp_get_{{dt_ext}}{{lmul_suffix}}(r3, i))\n\t\t\t!= 0);
+else REQUIRE(std::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(mipp_get_{{dt_ext}}{{lmul_suffix}}(r3, i)) == 0);
 {% endif %}"""
 
 # --------------------------------------------
@@ -255,7 +255,7 @@ shape_templates = {
         func_decl=FUNC_DECL,
         decl=DECL_1ARG,
         init=INIT_1ARG,
-        load="""\t{{reg_type}} r1 = mipp_{{func}}_{{dt_ext}}(inputs1);\n""" + LOAD_MASK_AND_RSRC_FROM_REG1,
+        load="""\t{{reg_type}} r1 = mipp_{{func}}_{{dt_ext}}{{lmul_suffix}}(inputs1);\n""" + LOAD_MASK_AND_RSRC_FROM_REG1,
         operation=OP_REG_NOOP,
         loop_body=LB_SET_OP,
         loop_assert=AS_REG_BINOP,
@@ -338,7 +338,7 @@ shape_templates = {
         init=INIT_1ARG,
         load=LOAD_1ARG_MASK + "\n" + LOAD_SET1_2ARGS_REG + "\n" + LOAD_MASK_AND_RSRC_FROM_INPUTS,
         operation=OP_3ARGS_2REG_1MSK,
-        loop_body="\t\t{{dt_ext}}_t res = mipp_get_k_{{dt_ext}}(m1, i) ? mipp_get_{{dt_ext}}(r1, i) : mipp_get_{{dt_ext}}(r2, i);",
+        loop_body="\t\t{{dt_ext}}_t res = mipp_get_k_{{dt_ext}}{{lmul_suffix}}(m1, i) ? mipp_get_{{dt_ext}}{{lmul_suffix}}(r1, i) : mipp_get_{{dt_ext}}{{lmul_suffix}}(r2, i);",
         loop_assert=AS_REG_BINOP,
     ),
     SHAPE_RET_MSK_2ARGS_MSK: TemplateParts(
@@ -390,21 +390,21 @@ shape_templates = {
         func_decl=FUNC_DECL,
         decl="",
         init="",
-        load="\t{{msk_type}} m1 = mipp_set1_k_{{dt_ext}}(1); \n\t{{msk_type}} m2 = mipp_set1_k_{{dt_ext}}(0);\n"
+        load="\t{{msk_type}} m1 = mipp_set1_k_{{dt_ext}}{{lmul_suffix}}(1); \n\t{{msk_type}} m2 = mipp_set1_k_{{dt_ext}}{{lmul_suffix}}(0);\n"
         + LOAD_MASK_AND_RSRC_FROM_INPUTS,
         operation="",
         loop_body="",
-        loop_assert="\tREQUIRE(mipp_testz_{{dt_ext}}(m1, m1) == 0);\n\tREQUIRE(mipp_testz_{{dt_ext}}(m2, m2) != 0);",
+        loop_assert="\tREQUIRE(mipp_testz_{{dt_ext}}{{lmul_suffix}}(m1, m1) == 0);\n\tREQUIRE(mipp_testz_{{dt_ext}}{{lmul_suffix}}(m2, m2) != 0);",
     ),
     SHAPE_RET_I32_1ARG_MSK: TemplateParts(
         func_decl=FUNC_DECL,
         decl="",
         init="",
-        load="\t{{msk_type}} m1 = mipp_set1_k_{{dt_ext}}(1); \n\t{{msk_type}} m2 = mipp_set1_k_{{dt_ext}}(0);\n"
+        load="\t{{msk_type}} m1 = mipp_set1_k_{{dt_ext}}{{lmul_suffix}}(1); \n\t{{msk_type}} m2 = mipp_set1_k_{{dt_ext}}{{lmul_suffix}}(0);\n"
         + LOAD_MASK_AND_RSRC_FROM_INPUTS,
         operation="",
         loop_body="",
-        loop_assert="\tREQUIRE(mipp_testz_2_{{dt_ext}}(m1) == 0);\n\tREQUIRE(mipp_testz_2_{{dt_ext}}(m2) != 0);",
+        loop_assert="\tREQUIRE(mipp_testz_2_{{dt_ext}}{{lmul_suffix}}(m1) == 0);\n\tREQUIRE(mipp_testz_2_{{dt_ext}}{{lmul_suffix}}(m2) != 0);",
     ),
     SHAPE_RET_REG_3ARGS_1MSK_2REG: TemplateParts(
         func_decl=FUNC_DECL,
@@ -412,7 +412,7 @@ shape_templates = {
         init=INIT_1ARG,
         load=LOAD_1ARG_MASK + "\n" + LOAD_SET1_2ARGS_REG + "\n" + LOAD_MASK_AND_RSRC_FROM_INPUTS,
         operation=OP_3ARGS_1MSK_2REG,
-        loop_body="\t\t{{dt_ext}}_t res = mipp_get_k_{{dt_ext}}(m1, i) ? 3 : 0;",
+        loop_body="\t\t{{dt_ext}}_t res = mipp_get_k_{{dt_ext}}{{lmul_suffix}}(m1, i) ? 3 : 0;",
         loop_assert=AS_REG_BINOP,
     ),
     SHAPE_RET_MSK_1ARG_REG: TemplateParts(
@@ -420,7 +420,7 @@ shape_templates = {
         decl=DECL_1ARG,
         init=INIT_1ARG,
         load=LOAD_1ARG_REG + "\n" + LOAD_MASK_AND_RSRC_FROM_REG1,
-        operation="\t{{msk_type}} m1 = mipp_tomsk_{{dt_ext}}(r1);\n{{reg_type}} r3 = mipp_toreg_{{dt_ext}}(m1);",
+        operation="\t{{msk_type}} m1 = mipp_tomsk_{{dt_ext}}{{lmul_suffix}}(r1);\n{{reg_type}} r3 = mipp_toreg_{{dt_ext}}{{lmul_suffix}}(m1);",
         loop_body="\t\t{{dt_ext}}_t res = inputs1[i] ? 1 : 0;",
         loop_assert=AS_CMP_2REG,
     ),

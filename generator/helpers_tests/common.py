@@ -195,6 +195,7 @@ def infer_op(func: str):
 # --------------------------------------------
 
 def infer_long_name(func: str):
+    
     return func
 
 def infer_short_name(func: str):
