@@ -231,9 +231,6 @@ def add_type_guards(func, implem, function, kind="c", lmul=0, mkind=""):
 	DTTYPES IN headers_def.mipp_funcs[func]["datatypes"].
 	THIS IS FORE EASE OF TESTS.
 	"""
- 
-	if lmul != 0 or mkind != "" :
-		print("func:", func, "lmul:", lmul, "mkind:", mkind)
 	datatypes = get_defined_dttypes(func, implem)
 	section = ""
 	res = ""
@@ -885,9 +882,9 @@ def gen_test_files_all_funcs(kind="c", lmul=0, mkind=""):
 	if kind not in {"c", "cpp", "obj", "all"}:
 		raise ValueError(f"Invalid kind: {kind!r}")
 	
-	if lmul != 0 or mkind != "" :
-		print("lmul lacks the get function atm testing is not really possible, masks are no good either, so we skip for now")
-		return
+	# if lmul != 0 or mkind != "" :
+	# 	print("lmul lacks the get function atm testing is not really possible, masks are no good either, so we skip for now")
+	# 	return
 
 
 
@@ -936,13 +933,18 @@ def gen_test_files_all_funcs(kind="c", lmul=0, mkind=""):
 				os.makedirs(objpath + concept + "/", exist_ok=True)
 		os.makedirs(objpath + "miscellaneous/", exist_ok=True)
 
+	dict_mask = get_gen_test_dict_mask("c")
+	print(dict_mask.keys())
 	for func in sorted(funcs):
+		
 		
 		mask_support = mipp_funcs[func]["mask_support"]
 		if mkind != "" and mask_support.is_none():
 			print(f"Skipping {func} for {mkind} because it doesn't support it")
 			continue
-
+		if mkind != "" and kind != "c":
+			#hacky fix for now 
+			continue
 		
 		disable = func in set_skip_testing
 		reason = (

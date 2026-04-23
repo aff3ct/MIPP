@@ -11,6 +11,7 @@ from headers_def import *
 from implem_rvv import *
 from implem_emu_rvv import *
 from generic_emu import *
+from c_generator import gen_c_functions_rvv, gen_c_missing_functions_lmul
 
 
 
@@ -105,198 +106,149 @@ def seen_lmul(funcs, f, dt_key, lmul):
 				return True
 	return False
 
-def gen_c_functions_rvv(isa, file, funcs, implems,lmul=0, reductions_fix=False):
-	"""
-	Logic is the same than gen_c_functions in c_generator.py. 
-	What changes is that calls to helper function pass the current lmul. 
-	And lmul suffix (_mX) is put "by hand" when the helper function can't generate 
-	it (for instance build_proto can't generate _mX so it's added in the function). 
- 	"""
-	for f in implems:
-		if f in funcs:
-			for ff in implems[f]:
-				if "version" in ff and ff["version"] : 
-					print("Info: '" + f + "<" + ff["version"] + ">' has been skipped (reason: \"Info: Masked functions are not supported yet.\").")
-					continue
-				for dt in ff["datatypes"]:
-					print("// ----------------------------------------------------------------------------------------------------------------------------------------------", f ,file=file)
-					if len(dt.split(',')) <= 1:
-						dt_par = dt.split(',')[0]
-						dt_ret = dt.split(',')[0]
-						if dt_par not in funcs[f]["datatypes"]:
-							print("Panic: unsupported type for '" + f + "<" + dt_par + "," + dt_par + ">' function.")
-							exit(-1)
-					else:
-						dt_par = dt.split(',')[0]
-						dt_ret = dt.split(',')[1]
+# def gen_c_functions_rvv_old(isa, file, funcs, implems,lmul=0, reductions_fix=False):
+# 	"""
+# 	Logic is the same than gen_c_functions in c_generator.py. 
+# 	What changes is that calls to helper function pass the current lmul. 
+# 	And lmul suffix (_mX) is put "by hand" when the helper function can't generate 
+# 	it (for instance build_proto can't generate _mX so it's added in the function). 
+#  	"""
+# 	for f in implems:
+# 		if f in funcs:
+# 			for ff in implems[f]:
+# 				if "version" in ff and ff["version"] : 
+# 					print("Info: '" + f + "<" + ff["version"] + ">' has been skipped (reason: \"Info: Masked functions are not supported yet.\").")
+# 					continue
+# 				for dt in ff["datatypes"]:
+# 					print("// ----------------------------------------------------------------------------------------------------------------------------------------------", f ,file=file)
+# 					if len(dt.split(',')) <= 1:
+# 						dt_par = dt.split(',')[0]
+# 						dt_ret = dt.split(',')[0]
+# 						if dt_par not in funcs[f]["datatypes"]:
+# 							print("Panic: unsupported type for '" + f + "<" + dt_par + "," + dt_par + ">' function.")
+# 							exit(-1)
+# 					else:
+# 						dt_par = dt.split(',')[0]
+# 						dt_ret = dt.split(',')[1]
 
-						dtk = dt_par + "," + dt_ret
-						if dtk not in funcs[f]["datatypes"]:
-							print("Panic: unsupported type for '" + f + "<" + dt_par + "," + dt_ret + ">' function.")
-							exit(-1)
-					dt_key = dt_par + "," + dt_ret
+# 						dtk = dt_par + "," + dt_ret
+# 						if dtk not in funcs[f]["datatypes"]:
+# 							print("Panic: unsupported type for '" + f + "<" + dt_par + "," + dt_ret + ">' function.")
+# 							exit(-1)
+# 					dt_key = dt_par + "," + dt_ret
 
-					if not is_missing_func(funcs, f, dt_key) and seen_lmul(funcs, f, dt_key, lmul):
-					#print(f, dt_key)
-					#if False:
-						print("// '" + f + "<" + dt_key + ">'" + str(lmul) + "has been skipped (reason: \"Info: It has been implemented before.\").",file=file)
-					else:
-						j2_template = Template(ff["template"]["code"], undefined=StrictUndefined)
-						instr_name = ""
-						if "instr_name" in ff:
-							instr_name = ff["instr_name"]
-						pre_rendering = j2_template.render(isa=isa, instr_name=instr_name, dt_par=datatypes[dt_par], dt_ret=datatypes[dt_ret], isa_dt_par=isa["datatypes"][dt_par], isa_dt_ret=isa["datatypes"][dt_ret], cstdint_ret=datatypes[dt_ret]["cstd"])
-						#print(pre_rendering)
-						try:
-							ph_ret = parse_placeholders(pre_rendering, isa, funcs, f, dt_par, dt_ret,lmul=lmul)
-						except Exception as err:
-							err_message = "'" + f + "<" + dt_key + ">' has been skipped (reason: \"{0}\").".format(err)
-							print(" -> " + err_message)
-							print("// " + err_message,file=file)
-							continue
+# 					if not is_missing_func(funcs, f, dt_key) and seen_lmul(funcs, f, dt_key, lmul):
+# 					#print(f, dt_key)
+# 					#if False:
+# 						print("// '" + f + "<" + dt_key + ">'" + str(lmul) + "has been skipped (reason: \"Info: It has been implemented before.\").",file=file)
+# 					else:
+# 						j2_template = Template(ff["template"]["code"], undefined=StrictUndefined)
+# 						instr_name = ""
+# 						if "instr_name" in ff:
+# 							instr_name = ff["instr_name"]
+# 						pre_rendering = j2_template.render(isa=isa, instr_name=instr_name, dt_par=datatypes[dt_par], dt_ret=datatypes[dt_ret], isa_dt_par=isa["datatypes"][dt_par], isa_dt_ret=isa["datatypes"][dt_ret], cstdint_ret=datatypes[dt_ret]["cstd"])
+# 						#print(pre_rendering)
+# 						try:
+# 							ph_ret = parse_placeholders(pre_rendering, isa, funcs, f, dt_par, dt_ret,lmul=lmul)
+# 						except Exception as err:
+# 							err_message = "'" + f + "<" + dt_key + ">' has been skipped (reason: \"{0}\").".format(err)
+# 							print(" -> " + err_message)
+# 							print("// " + err_message,file=file)
+# 							continue
 
-						ifd = ""
-						if "type" in ff and ff["type"] == "emulated":
-							if "implem_status" in funcs[f] and dt_key in funcs[f]["implem_status"]:
-								is_first = True
-								i = 0
-								for implem in funcs[f]["implem_status"][dt_key]:
-									ifd_sub = build_ifdef(funcs, f, dt_key, i)
-									if ifd_sub:
-										if not is_first:
-											ifd = ifd + " && "
-										ifd = ifd + "!( "
-										ifd = ifd + ifd_sub
-										ifd = ifd + " )"
-										is_first = False
-									i = i +1
+# 						ifd = ""
+# 						if "type" in ff and ff["type"] == "emulated":
+# 							if "implem_status" in funcs[f] and dt_key in funcs[f]["implem_status"]:
+# 								is_first = True
+# 								i = 0
+# 								for implem in funcs[f]["implem_status"][dt_key]:
+# 									ifd_sub = build_ifdef(funcs, f, dt_key, i)
+# 									if ifd_sub:
+# 										if not is_first:
+# 											ifd = ifd + " && "
+# 										ifd = ifd + "!( "
+# 										ifd = ifd + ifd_sub
+# 										ifd = ifd + " )"
+# 										is_first = False
+# 									i = i +1
 
-						cur_implem_status = { "if": "", "requirements": {}}
-						if "if" in ff:
-							cur_implem_status["if"] = ff["if"]
-						cur_implem_status["requirements"] = ph_ret["requirements"]
+# 						cur_implem_status = { "if": "", "requirements": {}}
+# 						if "if" in ff:
+# 							cur_implem_status["if"] = ff["if"]
+# 						cur_implem_status["requirements"] = ph_ret["requirements"]
 
-						if "implem_status" not in funcs[f]:
-						 	funcs[f]["implem_status"] = {}
-						if dt_key not in funcs[f]["implem_status"]:
-						 	funcs[f]["implem_status"][dt_key] = []
-						funcs[f]["implem_status"][dt_key].append(cur_implem_status)
+# 						if "implem_status" not in funcs[f]:
+# 						 	funcs[f]["implem_status"] = {}
+# 						if dt_key not in funcs[f]["implem_status"]:
+# 						 	funcs[f]["implem_status"][dt_key] = []
+# 						funcs[f]["implem_status"][dt_key].append(cur_implem_status)
 	  
-						post_rendering = ph_ret["converted_ir"]
-						ifd_cur = build_ifdef(funcs, f, dt_key, len(funcs[f]["implem_status"][dt_key])-1)
-						if ifd and ifd_cur:
-							ifd = ifd + " && "+ ifd_cur
-						elif ifd_cur:
-							ifd = ifd_cur
-						if ifd:
-							print("#if " + ifd, file=file)
-							if "type" in ff and ff["type"] == "emulated":
-								funcs[f]["implem_status"][dt_key][len(funcs[f]["implem_status"][dt_key])-1]["if"] = ifd
-						if len(dt.split(',')) <= 1:
-							func_name = build_func_name_short(isa, dt_par, f,True);
-						else:
-							func_name = build_func_name(isa, dt_par, dt_ret, f,True);
-						# if lmul != 0:
-    					# 		func_name = func_name+"_m"+str(lmul)
-						print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name,lmul=lmul) + " {", file=file)
-						if ff["template"]["format"] == "short":
-							if funcs[f]["proto"]["args"]:
-								# Toreg 
-								if funcs[f]["proto"]["ret"]["type"] == "reg":
-									print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa,lmul=lmul) + " res;", file=file)
-									print("\tres.r = ", end='', file=file)
+# 						post_rendering = ph_ret["converted_ir"]
+# 						ifd_cur = build_ifdef(funcs, f, dt_key, len(funcs[f]["implem_status"][dt_key])-1)
+# 						if ifd and ifd_cur:
+# 							ifd = ifd + " && "+ ifd_cur
+# 						elif ifd_cur:
+# 							ifd = ifd_cur
+# 						if ifd:
+# 							print("#if " + ifd, file=file)
+# 							if "type" in ff and ff["type"] == "emulated":
+# 								funcs[f]["implem_status"][dt_key][len(funcs[f]["implem_status"][dt_key])-1]["if"] = ifd
+# 						if len(dt.split(',')) <= 1:
+# 							func_name = build_func_name_short(isa, dt_par, f,True);
+# 						else:
+# 							func_name = build_func_name(isa, dt_par, dt_ret, f,True);
+# 						# if lmul != 0:
+#     					# 		func_name = func_name+"_m"+str(lmul)
+# 						print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name,lmul=lmul) + " {", file=file)
+# 						if ff["template"]["format"] == "short":
+# 							if funcs[f]["proto"]["args"]:
+# 								# Toreg 
+# 								if funcs[f]["proto"]["ret"]["type"] == "reg":
+# 									print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa,lmul=lmul) + " res;", file=file)
+# 									print("\tres.r = ", end='', file=file)
 
-								# Tomsk
-								elif (funcs[f]["proto"]["ret"]["type"] == "msk"):
-									print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa,lmul=lmul) + " res;", file=file);
-									print("\tres.m = ", end='', file=file)
+# 								# Tomsk
+# 								elif (funcs[f]["proto"]["ret"]["type"] == "msk"):
+# 									print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa,lmul=lmul) + " res;", file=file);
+# 									print("\tres.m = ", end='', file=file)
 
-							#Other functions
-							else:
-								if (funcs[f]["proto"]["ret"]["type"] == "reg"):
-										print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa,lmul=lmul) + " res;", file=file);
-										print("\tres.r = ", end='', file=file)
+# 							#Other functions
+# 							else:
+# 								if (funcs[f]["proto"]["ret"]["type"] == "reg"):
+# 										print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa,lmul=lmul) + " res;", file=file);
+# 										print("\tres.r = ", end='', file=file)
 
-								elif (funcs[f]["proto"]["ret"]["type"] == "msk"):
-										print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa,lmul=lmul) + " res;", file=file);
-										print("\tres.m = ", end='', file=file)
+# 								elif (funcs[f]["proto"]["ret"]["type"] == "msk"):
+# 										print("\t" + build_type(funcs[f]["proto"]["ret"]["type"], datatypes[dt_ret], isa,lmul=lmul) + " res;", file=file);
+# 										print("\tres.m = ", end='', file=file)
 						
-						else:
-							print("\t", end='', file=file)
+# 						else:
+# 							print("\t", end='', file=file)
 						
-	  					#this should probably be done BEFORE rendering the wrong template ...
-						if lmul > 1 and f in mipp_funcs_concepts["all_reductions"] and f != "hmul":
-							print(reductions_fix[f][dt], file=file)
-						else : 
-							print(post_rendering, file=file)
+# 	  					#this should probably be done BEFORE rendering the wrong template ...
+# 						if lmul > 1 and f in mipp_funcs_concepts["all_reductions"] and f != "hmul":
+# 							print(reductions_fix[f][dt], file=file)
+# 						else : 
+# 							print(post_rendering, file=file)
 
-						if ff["template"]["format"] == "short":
-							if funcs[f]["proto"]["ret"]["type"]:
-								print("\treturn res;", file=file);
-						print("}", file=file)
+# 						if ff["template"]["format"] == "short":
+# 							if funcs[f]["proto"]["ret"]["type"]:
+# 								print("\treturn res;", file=file);
+# 						print("}", file=file)
 				
-						if ifd:
-							print("#endif", file=file)
+# 						if ifd:
+# 							print("#endif", file=file)
 
-						if "type" in ff and ff["type"] == "emulated":
-							print(" -> '" + f + "<" + dt_key + ">' has been implemented.")
+# 						if "type" in ff and ff["type"] == "emulated":
+# 							print(" -> '" + f + "<" + dt_key + ">' has been implemented.")
 						
-						if "lmul" in funcs[f]["implem_status"]:
-							funcs[f]["implem_status"]["lmul"].add((lmul,dt_key))
-						else :
-							funcs[f]["implem_status"]["lmul"] = {(lmul,dt_key)}
-		else:
-			print("Panic: '" + f + "' function does not exist.")
-			exit(-1)
-
-def gen_c_missing_functions_rvv(isa, file, funcs,lmul=0):
-	if lmul==0 : 
-		gen_c_missing_functions(isa, file, funcs)
-		return
-	for f in funcs:
-		for dt in funcs[f]["datatypes"]:
-			if len(dt.split(',')) <= 1:
-				dt_par = dt.split(',')[0]
-				dt_ret = dt.split(',')[0]
-			else:
-				dt_par = dt.split(',')[0]
-				dt_ret = dt.split(',')[1]
-			dt_key = dt_par + "," + dt_ret
-			defines = []
-
-			if is_missing_func(funcs, f, dt_key):
-				ifd = ""
-				if "implem_status" in funcs[f] and dt_key in funcs[f]["implem_status"]:
-					is_first = True
-					i = 0
-					for implem in funcs[f]["implem_status"][dt_key]:
-						ifd_sub = build_ifdef(funcs, f, dt_key, i)
-						if ifd_sub:
-							if not is_first:
-								ifd = ifd + " && "
-							ifd = ifd + "!( "
-							ifd = ifd + ifd_sub
-							ifd = ifd + " )"
-							is_first = False
-						i = i +1
-				if ifd:
-					print("#if " + ifd, file=file)
-
-				if len(dt.split(',')) <= 1:
-					func_name = build_func_name_short(isa, dt_par, f)
-
-				else:
-					func_name = build_func_name(isa, dt_par, dt_ret, f)
-				if lmul != 0:
-					func_name = func_name+"_m"+str(lmul)
-				print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name,lmul=lmul,isa_name=True, cpp=False) + " {", file=file)
-				print("\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \""+func_name+"\");", file=file);
-				print("\texit(-1);", file=file);
-				print("}", file=file);
-
-				if ifd:
-					print("#endif", file=file)
-
+# 						if "lmul" in funcs[f]["implem_status"]:
+# 							funcs[f]["implem_status"]["lmul"].add((lmul,dt_key))
+# 						else :
+# 							funcs[f]["implem_status"]["lmul"] = {(lmul,dt_key)}
+# 		else:
+# 			print("Panic: '" + f + "' function does not exist.")
+# 			exit(-1)
 
 def gen_c_defines_rvv_ls(file, isa_name, rvv_size):
 	print("#define MIPP_" + isa_name.upper() + "_RVD_SIZE_BIT " + str(rvv_size), file=file)
@@ -445,8 +397,6 @@ typedef double float64_t;//remove after debug"""
 		#separate gen_c_generic_functions_rvv FOR NOW.
 		#change this line if this ever changes.
 		gen_c_functions_rvv(resolved_isa, file, copy_mipp_funcs, implems_generic_emu, lmul=lmul)
-		#gen_c_missing_functions_rvv(resolved_isa, file, copy_mipp_funcs, lmul=lmul)
-		#gen_c_missing_functions(resolved_isa, file, copy_mipp_funcs)
 		gen_c_missing_functions_lmul(resolved_isa, file, copy_mipp_funcs, lmul=lmul)
 
 	tpl_footer_rvv = """#endif /* MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_RVV_H_ */"""

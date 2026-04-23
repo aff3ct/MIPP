@@ -92,6 +92,8 @@ tpl_implem_rvv = {
     "mask_2args"           : { "format" : "short", "code" : "{{ isa.prefix }}_v{{ instr_name }}(m0.m, m1.m, %N<tp>%);" },
     #arith_2args but with mask dt extension at the end
     "arith_msk_type_2args" : { "format" : "short", "code" : "{{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}_{{isa_dt_par.data_ext_logi}}(r0.r, r1.r, %N<tp>%);"},
+    "test_tpl_add_msk"     : { "format" : "short", "code" : "{{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}_mu(m0.m, r0.r, r0.r, r1.r, %N<tp>%);"},
+
 
     "float_set0"           : { "format" : "short", "code" : "{{isa.prefix}}_{{ instr_name }}_v_f_{{isa_dt_par.data_ext}}(0.f,%N<tp>%);"},
     "scalar_set0"          : { "format" : "short", "code" : "{{isa.prefix}}_{{ instr_name }}_v_x_{{isa_dt_par.data_ext}}(0,%N<tp>%);"},
@@ -179,7 +181,7 @@ implems_rvv = {
     "add" : [
 	    { "instr_name" : "fadd",    "datatypes" : all_float,    "template" : tpl_implem_rvv["arith_2args"]},
 	    { "instr_name" : "add",     "datatypes" : all_int_uint, "template" : tpl_implem_rvv["arith_2args"]},#],
-        { "instr_name" : "add",     "datatypes" : all_int_uint, "template" : tpl_implem_rvv["arith_msk_type_2args"], "version" : "mask"}],
+        { "instr_name" : "add",     "datatypes" : all_int_uint, "template" : tpl_implem_rvv["test_tpl_add_msk"], "version" : "mask"}],
     "sub" : [
         { "instr_name" : "fsub",    "datatypes" : all_float,    "template" : tpl_implem_rvv["arith_2args"]},
         { "instr_name" : "sub",     "datatypes" : all_int_uint, "template" : tpl_implem_rvv["arith_2args"]}],

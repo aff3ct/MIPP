@@ -127,13 +127,13 @@ def _render_template(isa, ff, dt_par, dt_ret, func_name=""):
 	)
 
 
-def _parse_placeholders_or_skip(pre_rendering, isa, funcs, f, dt_par, dt_ret, dt_key, file):
+def _parse_placeholders_or_skip(pre_rendering, isa, funcs, f, dt_par, dt_ret, dt_key, file,lmul=0):
 	"""
 	tries to parse placeholders in pre-rendered and returns converted IR. In gen c_funcs 
 	it was the call to parse_placeholders + affectation post_rendering = ph_ret["converted_ir"]
 	"""
 	try:
-		return parse_placeholders(pre_rendering, isa, funcs, f, dt_par, dt_ret)
+		return parse_placeholders(pre_rendering, isa, funcs, f, dt_par, dt_ret, lmul=lmul)
 	except Exception as err:
 		err_message = "'" + f + "<" + dt_key + ">' has been skipped (reason: \"{0}\").".format(err)
 		print(" -> " + err_message)
@@ -216,41 +216,45 @@ def _build_func_name(isa, dt, dt_par, dt_ret, f, masked_version=False):
 		return build_func_name(isa, dt_par, dt_ret, f, True, masked_version=masked_version)
 
 
-def _emit_short_format_prologue(funcs, dt_ret, isa, file):
-	"""
-	kept the same code. Not sure of the first if condition.
-	"""
-	if funcs["proto"]["args"]:
-		# Toreg
-		if funcs["proto"]["ret"]["type"] == "reg":
-			print("\t" + build_type(funcs["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file)
-			print("\tres.r = ", end='', file=file)
-
-		# Tomsk
-		elif funcs["proto"]["ret"]["type"] == "msk":
-			print("\t" + build_type(funcs["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file)
-			print("\tres.m = ", end='', file=file)
-
-	# Other functions
+def _emit_short_format_prologue(funcs_for_f, dt_ret, isa, file, lmul=0):
+		# Keep same layout as original.
+	if funcs_for_f["proto"]["args"]:
+		if funcs_for_f["proto"]["ret"]["type"] == "reg":
+			print(
+				"\t" + build_type(funcs_for_f["proto"]["ret"]["type"], datatypes[dt_ret], isa, lmul=lmul) + " res;",
+				file=file,
+			)
+			print("\tres.r = ", end="", file=file)
+		elif funcs_for_f["proto"]["ret"]["type"] == "msk":
+			print(
+				"\t" + build_type(funcs_for_f["proto"]["ret"]["type"], datatypes[dt_ret], isa, lmul=lmul) + " res;",
+				file=file,
+			)
+			print("\tres.m = ", end="", file=file)
 	else:
-		if funcs["proto"]["ret"]["type"] == "reg":
-			print("\t" + build_type(funcs["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file)
-			print("\tres.r = ", end='', file=file)
+		if funcs_for_f["proto"]["ret"]["type"] == "reg":
+			print(
+				"\t" + build_type(funcs_for_f["proto"]["ret"]["type"], datatypes[dt_ret], isa, lmul=lmul) + " res;",
+				file=file,
+			)
+			print("\tres.r = ", end="", file=file)
+		elif funcs_for_f["proto"]["ret"]["type"] == "msk":
+			print(
+				"\t" + build_type(funcs_for_f["proto"]["ret"]["type"], datatypes[dt_ret], isa, lmul=lmul) + " res;",
+				file=file,
+			)
+			print("\tres.m = ", end="", file=file)
 
-		elif funcs["proto"]["ret"]["type"] == "msk":
-			print("\t" + build_type(funcs["proto"]["ret"]["type"], datatypes[dt_ret], isa) + " res;", file=file)
-			print("\tres.m = ", end='', file=file)
 
-
-def _emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rendering, file, masked_version=None):
+def _emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rendering, file, masked_version=None, lmul=0):
 	func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
 
-	print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, masked_version = masked_version) + " {", file=file)
+	print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, masked_version = masked_version, lmul=lmul) + " {", file=file)
 
 	if ff["template"]["format"] == "short":
 		# Original code had a redundant always-true condition; keep behavior identical.
 		if funcs[f]["proto"]["args"] or (not funcs[f]["proto"]["args"]):
-			_emit_short_format_prologue(funcs[f], dt_ret, isa, file)
+			_emit_short_format_prologue(funcs[f], dt_ret, isa, file,lmul=lmul)
 	else:
 		print("\t", end='', file=file)
 
@@ -787,3 +791,200 @@ def gen_c_missing_functions_lmul(isa, file, funcs, lmul):
 					_gen_c_missing_one_masked(isa, file, funcs, f, dt, "maskz", lmul=lmul)
 				if support.is_masksable():
 					_gen_c_missing_one_masked(isa, file, funcs, f, dt, "masks", lmul=lmul)
+	 
+	 
+# ----------------------------------------------------------------------------------------------------------------------
+# RVV lmul bookkeeping helpers (moved from gen_mipp_rvv.py)
+# ----------------------------------------------------------------------------------------------------------------------
+def _rvv_seen_lmul(funcs, f, dt_key, lmul):
+	if "implem_status" in funcs[f]:
+		if "lmul" in funcs[f]["implem_status"]:
+			if (lmul, dt_key) in funcs[f]["implem_status"]["lmul"]:
+				return True
+	return False
+
+
+def _rvv_mark_lmul_seen(funcs, f, dt_key, lmul):
+	if "lmul" in funcs[f]["implem_status"]:
+		funcs[f]["implem_status"]["lmul"].add((lmul, dt_key))
+	else:
+		funcs[f]["implem_status"]["lmul"] = {(lmul, dt_key)}
+  
+def _rvv_seen_lmul_masked(funcs, f, dt_key, mask_kind, lmul):
+	bucket = get_masked_bucket(funcs, f, dt_key, mask_kind)
+	if bucket is not None and "lmul" in bucket:
+		if (lmul, dt_key) in bucket["lmul"]:
+			return True
+	return False
+
+def _rvv_mark_lmul_seen_masked(funcs, f, dt_key, mask_kind, lmul):
+	bucket = get_masked_bucket(funcs, f, dt_key, mask_kind)
+	if bucket is not None:
+		print("marking lmul " + str(lmul) + " as seen for masked function '" + f + "<" + mask_kind + "><" + dt_key + ">'")
+		print(bucket)
+		if "lmul" in bucket:
+			bucket[-1]["lmul"].add((lmul, dt_key))
+		else:
+			bucket[-1]["lmul"] = {(lmul, dt_key)}
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# RVV function generator (refactored)
+# ----------------------------------------------------------------------------------------------------------------------
+def gen_c_functions_rvv(isa, file, funcs, implems, lmul=0, reductions_fix=False):
+	"""
+	Refactored version of gen_c_functions_rvv originally in gen_mipp_rvv.py.
+	"""
+
+	for f in implems:
+		if f not in funcs:
+			print("Panic: '" + f + "' function does not exist.")
+			exit(-1)
+
+		for ff in implems[f]:
+			# skip masked versions entirely.
+			if _is_masked_implem(f, ff):
+				for dt in ff["datatypes"]:
+					print("// ----------------------------------------------------------------------------------------------------------------------------------------------", f, file=file)
+
+					dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
+					dt_key = dt_par + "," + dt_ret
+					mask_kind = ff["version"]
+
+					if (not is_missing_masked_func(funcs, f, dt_key, mask_kind)) and _rvv_seen_lmul_masked(funcs, f, dt_key, mask_kind, lmul):
+						print(
+							"// '"
+							+ f
+							+ "<" + mask_kind + "><"
+							+ dt_key
+							+ ">'"
+							+ str(lmul)
+							+ 'has been skipped (reason: "Info: It has been implemented before.").',
+							file=file,
+						)
+						continue
+					# Render & parse placeholders with lmul
+					pre_rendering = _render_template(isa, ff, dt_par, dt_ret, func_name=f)
+					ph_ret = _parse_placeholders_or_skip(
+						pre_rendering=pre_rendering,
+						isa=isa,
+						funcs=funcs,
+						f=f,
+						dt_par=dt_par,
+						dt_ret=dt_ret,
+						dt_key=dt_key,
+						file=file,						
+	  					lmul=lmul,
+					)
+					if ph_ret is None:
+							continue
+					
+					ifd_prev = _build_previous_masked_emulated_exclusion_ifdef(funcs, f, dt_key, mask_kind, ff)
+
+					# Append implem status *before* building current ifdef
+					_append_implem_status_masked(funcs, f, dt_key, mask_kind, ff, ph_ret["requirements"])
+
+					# Combine ifdefs and emit #if if needed (and update emulated status)
+					ifd = _combine_current_ifdefs_masked(funcs, f, dt_key, mask_kind, ifd_prev)
+					_emit_ifdef_begin_and_update_emulated_masked(funcs, f, dt_key, mask_kind, ff, ifd, file)
+					# Pick body: reductions_fix override for RVV reductions with lmul>1
+					post_rendering = ph_ret["converted_ir"]
+					if lmul > 1 and reductions_fix and (f in reductions_fix) and (dt in reductions_fix[f]):
+						post_rendering_to_emit = reductions_fix[f][dt]
+					else:
+						post_rendering_to_emit = post_rendering
+		 
+					# Emit the function body using shared helper (includes lmul in name/proto/calls)
+					_emit_function_body(
+						funcs=funcs,
+						f=f,
+						isa=isa,
+						dt=dt,
+						dt_par=dt_par,
+						dt_ret=dt_ret,
+						ff=ff,
+						post_rendering=post_rendering_to_emit,
+						file=file,
+						masked_version=mask_kind,
+						lmul=lmul,
+					)
+	 
+					_emit_ifdef_end(ifd, file)
+					_maybe_print_emulated_implemented(f + "<" + mask_kind + ">", dt_key, ff)
+	 
+					# Preserve original tracking of LMUL implementations for masked functions
+					_rvv_mark_lmul_seen_masked(funcs, f, dt_key, mask_kind, lmul)
+
+				
+			else : 
+				for dt in ff["datatypes"]:
+					print("// ----------------------------------------------------------------------------------------------------------------------------------------------", f, file=file)
+
+					dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
+					dt_key = dt_par + "," + dt_ret
+
+					if (not is_missing_func(funcs, f, dt_key)) and _rvv_seen_lmul(funcs, f, dt_key, lmul):
+						print(
+							"// '"
+							+ f
+							+ "<"
+							+ dt_key
+							+ ">'"
+							+ str(lmul)
+							+ 'has been skipped (reason: "Info: It has been implemented before.").',
+							file=file,
+						)
+						continue
+
+					# Render & parse placeholders with lmul
+					pre_rendering = _render_template(isa, ff, dt_par, dt_ret)
+					ph_ret = _parse_placeholders_or_skip(
+						pre_rendering=pre_rendering,
+						isa=isa,
+						funcs=funcs,
+						f=f,
+						dt_par=dt_par,
+						dt_ret=dt_ret,
+						dt_key=dt_key,
+						file=file,
+						lmul=lmul,
+					)
+					if ph_ret is None:
+						continue
+
+					ifd_prev = _build_previous_emulated_exclusion_ifdef(funcs, f, dt_key, ff)
+
+					# Append implem status *before* building current ifdef
+					_append_implem_status(funcs, f, dt_key, ff, ph_ret["requirements"])
+
+					# Combine ifdefs and emit #if if needed (and update emulated status)
+					ifd = _combine_current_ifdefs(funcs, f, dt_key, ifd_prev)
+					_emit_ifdef_begin_and_update_emulated(funcs, f, dt_key, ff, ifd, file)
+
+					# Pick body: reductions_fix override for RVV reductions with lmul>1
+					post_rendering = ph_ret["converted_ir"]
+					if lmul > 1 and reductions_fix and (f in reductions_fix) and (dt in reductions_fix[f]):
+						post_rendering_to_emit = reductions_fix[f][dt]
+					else:
+						post_rendering_to_emit = post_rendering
+
+					# Emit the function body using shared helper (includes lmul in name/proto/calls)
+					_emit_function_body(
+						funcs=funcs,
+						f=f,
+						isa=isa,
+						dt=dt,
+						dt_par=dt_par,
+						dt_ret=dt_ret,
+						ff=ff,
+						post_rendering=post_rendering_to_emit,
+						file=file,
+						masked_version=None,
+						lmul=lmul,
+					)
+
+					_emit_ifdef_end(ifd, file)
+					_maybe_print_emulated_implemented(f, dt_key, ff)
+
+					# Preserve original tracking of LMUL implementations
+					_rvv_mark_lmul_seen(funcs, f, dt_key, lmul)

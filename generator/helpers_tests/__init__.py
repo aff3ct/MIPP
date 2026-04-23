@@ -10,7 +10,7 @@ def get_gen_test_dict(kind: str):
     if kind == "obj":
         from . import layer_obj
         return layer_obj.gen_test_dict
-    raise ValueError(f"Unknown kind: {kind!r}")
+    raise ValueError(f"Unknown kind: {kind}")
 
 def get_gen_test_dict_lmul(kind: str):
     if kind == "c":
@@ -22,7 +22,7 @@ def get_gen_test_dict_lmul(kind: str):
     if kind == "obj":
         from . import layer_obj_lmul
         return layer_obj_lmul.gen_test_dict_lmul
-    raise ValueError(f"Unknown kind: {kind!r}")
+    raise ValueError(f"Unknown kind: {kind}")
 
 def get_gen_test_dict_mask(kind: str):
     if kind == "c":
@@ -32,4 +32,4 @@ def get_gen_test_dict_mask(kind: str):
         return {}
     if kind == "obj":
         return {}
-    raise ValueError(f"Unknown kind: {kind!r}")
+    raise ValueError(f"Unknown kind: {kind}")
