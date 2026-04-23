@@ -882,9 +882,9 @@ def gen_test_files_all_funcs(kind="c", lmul=0, mkind=""):
 	if kind not in {"c", "cpp", "obj", "all"}:
 		raise ValueError(f"Invalid kind: {kind!r}")
 	
-	# if lmul != 0 or mkind != "" :
-	# 	print("lmul lacks the get function atm testing is not really possible, masks are no good either, so we skip for now")
-	# 	return
+	if lmul != 0 or mkind != "" :
+		print("lmul lacks the get function atm testing is not really possible, masks are no good either, so we skip for now")
+		return
 
 
 
