@@ -630,10 +630,10 @@ def gen_cast_funcs_all_datatypes(func, kind="c", register="rvd", mask="rvm",lmul
 			
 			
 			if lmul > 0:
-				reg1_type = f"{register}_" + dt1 + f"m{lmul}_t"
-				reg2_type = f"{register}_" + dt2 + f"m{lmul}_t"
-				msk1_type = f"{mask}_" + dt1 + f"m{lmul}_t"
-				msk2_type = f"{mask}_" + dt2 + f"m{lmul}_t"
+				reg1_type = f"{register}_" + dt1 + f"_m{lmul}_t"
+				reg2_type = f"{register}_" + dt2 + f"_m{lmul}_t"
+				msk1_type = f"{mask}_" + dt1 + f"_m{lmul}_t"
+				msk2_type = f"{mask}_" + dt2 + f"_m{lmul}_t"
 				
 				res+= gen_cast_func(func_name, 
 									scalar1_type=dt1,
