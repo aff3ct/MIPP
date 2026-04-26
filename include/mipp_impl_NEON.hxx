@@ -2713,6 +2713,13 @@
 		return vrsqrteq_f32(v1);
 	}
 
+	template <>
+	inline reg rsqrt_prec<float>(const reg v1) {
+		float32x4_t approx = vrsqrteq_f32(v1);
+		return vrsqrtsq_f32(v1 * approx, approx) * approx;
+	}
+
+
 	// ----------------------------------------------------------------------------------------------------------- sqrt
 #ifdef __aarch64__
 	template <>

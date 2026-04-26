@@ -204,6 +204,7 @@ public:
 	inline Reg<T>      abs          ()                                     const { return mipp::abs          <T>(r);              }
 	inline Reg<T>      sqrt         ()                                     const { return mipp::sqrt         <T>(r);              }
 	inline Reg<T>      rsqrt        ()                                     const { return mipp::rsqrt        <T>(r);              }
+	inline Reg<T>      rsqrt_prec   ()                                     const { return mipp::rsqrt_prec   <T>(r);              }
 	inline Reg<T>      log          ()                                     const { return mipp::log          <T>(r);              }
 	inline Reg<T>      exp          ()                                     const { return mipp::exp          <T>(r);              }
 	inline Reg<T>      sin          ()                                     const { return mipp::sin          <T>(r);              }
@@ -305,6 +306,7 @@ public:
 	inline Reg<T>      abs          ()                                     const { return std::abs(r);                            }
 	inline Reg<T>      sqrt         ()                                     const { return (T)std::sqrt(r);                        }
 	inline Reg<T>      rsqrt        ()                                     const { return (T)(1 / std::sqrt(r));                  }
+	inline Reg<T>      rsqrt_prec   ()                                     const { return (T)(1 / std::sqrt(r));                  }
 	inline Reg<T>      log          ()                                     const { return (T)std::log(r);                         }
 	inline Reg<T>      exp          ()                                     const { return (T)std::exp(r);                         }
 	inline Reg<T>      sin          ()                                     const { return (T)std::sin(r);                         }
@@ -920,6 +922,7 @@ template <typename T>        inline Reg<T>      copysign     (const Reg<T> v1, c
 template <typename T>        inline Reg<T>      abs          (const Reg<T> v)                                        { return v.abs();                    }
 template <typename T>        inline Reg<T>      sqrt         (const Reg<T> v)                                        { return v.sqrt();                   }
 template <typename T>        inline Reg<T>      rsqrt        (const Reg<T> v)                                        { return v.rsqrt();                  }
+template <typename T>        inline Reg<T>      rsqrt_prec   (const Reg<T> v)                                        { return v.rsqrt_prec();             }
 template <typename T>        inline Reg<T>      log          (const Reg<T> v)                                        { return v.log();                    }
 template <typename T>        inline Reg<T>      exp          (const Reg<T> v)                                        { return v.exp();                    }
 template <typename T>        inline Reg<T>      sin          (const Reg<T> v)                                        { return v.sin();                    }

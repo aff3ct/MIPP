@@ -793,6 +793,7 @@ template <typename T> inline reg   neg          (const reg, const msk)          
 template <typename T> inline reg   abs          (const reg)                       { errorMessage<T>("abs");           exit(-1); }
 template <typename T> inline reg   sqrt         (const reg)                       { errorMessage<T>("sqrt");          exit(-1); }
 template <typename T> inline reg   rsqrt        (const reg)                       { errorMessage<T>("rsqrt");         exit(-1); }
+template <typename T> inline reg   rsqrt_prec   (const reg v)                     { return rsqrt<T>(v); }
 template <typename T> inline reg   log          (const reg)                       { errorMessage<T>("log");           exit(-1); }
 template <typename T> inline reg   exp          (const reg)                       { errorMessage<T>("exp");           exit(-1); }
 template <typename T> inline reg   sin          (const reg)                       { errorMessage<T>("sin");           exit(-1); }
