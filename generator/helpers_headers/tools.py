@@ -892,6 +892,12 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret,lmul=0):
 				print("Panic: '" + dt + "' is not available.")
 				exit(-1)
 			converted_ir = converted_ir.replace("%" + s + "%", build_N(datatypes[dt], isa,lmul=lmul))
+		elif item_type == "!pred_cond!":
+			converted_ir = converted_ir.replace("%!pred_cond!% ", "") # temporary hack
+			converted_ir = converted_ir.replace("%!pred_cond!%", "") # temporary hack
+		elif item_type == "!pred_alt!":
+			converted_ir = converted_ir.replace(" %!pred_alt!%", "") # temporary hack
+			converted_ir = converted_ir.replace("%!pred_alt!%", "") # temporary hack
 		else:
 			f_name = item_type
 			if f_name not in funcs:
