@@ -6,7 +6,6 @@ from tools import *
 
 from include_gen import *
 
-
 def gen_c_defines(isa, file):
     """
     Writes the number of elements in the SIMD 
@@ -454,7 +453,6 @@ def _append_implem_status_masked(funcs, f, dt_key, mask_kind, ff, requirements):
     bucket.append(cur_implem_status)
     #Updated maprint("Updated masked implem status for '" + f + "<" + mask_kind + "><" + dt_key + ">' with conditions: " + str(cur_implem_status))
 
-
 def _build_previous_masked_emulated_exclusion_ifdef(funcs, f, dt_key, mask_kind, ff):
     """
     ?
@@ -730,6 +728,8 @@ def _gen_c_missing_one_masked(isa, file, funcs, f, dt, mask_kind, lmul=0):
         _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, masked_version=mask_kind, lmul=lmul)
   
         _missing_emit_ifdef_end(ifd, file)
+        
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Generators
 # ----------------------------------------------------------------------------------------------------------------------
@@ -737,54 +737,101 @@ def gen_c_functions(isa, file, funcs, implems):
     """
     Looking leaner now.
     """
-    for f in implems:
-        if f in funcs:
-            for ff in implems[f]:
-                
-                for dt in ff["datatypes"]:
-                    _emit_separator(f, file)
-                    if _is_masked_implem(f, ff):
-                        _gen_c_function_one_masked(isa, file, funcs, f, ff, dt)
-                    else :
-                        _gen_c_functions_one_unmasked(isa, file, funcs, f, ff, dt)
+    
+    if isa["name"] != "avx":
+        for f in implems:
+            if f in funcs:
+                for ff in implems[f]:
+                    
+                    for dt in ff["datatypes"]:
+                        _emit_separator(f, file)
+                        if _is_masked_implem(f, ff):
+                            _gen_c_function_one_masked(isa, file, funcs, f, ff, dt)
+                        else :
+                            _gen_c_functions_one_unmasked(isa, file, funcs, f, ff, dt)
 
-        else:
-            print("Panic: '" + f + "' function does not exist.")
-            exit(-1)
+            else:
+                print("Panic: '" + f + "' function does not exist.")
+                exit(-1)
+    else:
+        #in that case file is actually an include manager, so we need to get the right file for each function
+        for f in implems:
+            if f in funcs:
+                file_w = file.get_fd(isa["name"], f)
+                for ff in implems[f]:
+                    for dt in ff["datatypes"]:
+                        _emit_separator(f, file_w)
+                        if _is_masked_implem(f, ff):
+                            _gen_c_function_one_masked(isa, file_w, funcs, f, ff, dt)
+                        else :
+                            _gen_c_functions_one_unmasked(isa, file_w, funcs, f, ff, dt)
+            else:
+                print("Panic: '" + f + "' function does not exist.")
+                exit(-1)
 
 def gen_c_generic_functions(isa, file, funcs, implems):
-    for f in implems:
-        if f in funcs:
-            for ff in implems[f]:
-                for dt in ff["datatypes"]:
-                    _emit_separator(f, file)
-                    _gen_c_generic_one(isa, file, funcs, f, ff, dt)
-        else:
-            print("Panic: '" + f + "' function does not exist.")
-            exit(-1)
+    
+    if isa["name"] != "avx":
+        for f in implems:
+            if f in funcs:
+                for ff in implems[f]:
+                    for dt in ff["datatypes"]:
+                        _emit_separator(f, file)
+                        _gen_c_generic_one(isa, file, funcs, f, ff, dt)
+            else:
+                print("Panic: '" + f + "' function does not exist.")
+                exit(-1)
+    else:
+        #in that case file is actually an include manager, so we need to get the right file for each function
+        for f in implems:
+            if f in funcs:
+                file_w = file.get_fd(isa["name"], f)
+                for ff in implems[f]:
+                    for dt in ff["datatypes"]:
+                        _emit_separator(f, file_w)
+                        _gen_c_generic_one(isa, file_w, funcs, f, ff, dt)
+            else:
+                print("Panic: '" + f + "' function does not exist.")
+                exit(-1)
 
 def gen_c_missing_functions(isa, file, funcs):
-    for f in funcs:
-        for dt in funcs[f]["datatypes"]:
-            _emit_separator(f, file)
-            _gen_c_missing_one_dt(isa, file, funcs, f, dt)
-            if "mask_support" in funcs[f]:
-                #print(f,"haiii")
-                support = funcs[f]["mask_support"]
-                if support.is_maskable(): 
-                    _gen_c_missing_one_masked(isa, file, funcs, f, dt, "mask")
-                if support.is_maskzable():
-                    _gen_c_missing_one_masked(isa, file, funcs, f, dt, "maskz")
-                if support.is_masksable():
-                    _gen_c_missing_one_masked(isa, file, funcs, f, dt, "masks")
+    if isa["name"] != "avx":
+        for f in funcs:
+            for dt in funcs[f]["datatypes"]:
+                _emit_separator(f, file)
+                _gen_c_missing_one_dt(isa, file, funcs, f, dt)
+                if "mask_support" in funcs[f]:
+                    #print(f,"haiii")
+                    support = funcs[f]["mask_support"]
+                    if support.is_maskable(): 
+                        _gen_c_missing_one_masked(isa, file, funcs, f, dt, "mask")
+                    if support.is_maskzable():
+                        _gen_c_missing_one_masked(isa, file, funcs, f, dt, "maskz")
+                    if support.is_masksable():
+                        _gen_c_missing_one_masked(isa, file, funcs, f, dt, "masks")
+    else:
+        #in that case file is actually an include manager, so we need to get the right file for each function
+        for f in funcs:
+            file_w = file.get_fd(isa["name"], f)
+            for dt in funcs[f]["datatypes"]:
+                _emit_separator(f, file_w)
+                _gen_c_missing_one_dt(isa, file_w, funcs, f, dt)
+                if "mask_support" in funcs[f]:
+                    support = funcs[f]["mask_support"]
+                    if support.is_maskable(): 
+                        _gen_c_missing_one_masked(isa, file_w, funcs, f, dt, "mask")
+                    if support.is_maskzable():
+                        _gen_c_missing_one_masked(isa, file_w, funcs, f, dt, "maskz")
+                    if support.is_masksable():
+                        _gen_c_missing_one_masked(isa, file_w, funcs, f, dt, "masks")
 
 def gen_c_missing_functions_lmul(isa, file, funcs, lmul):
     """
     Generate missing variants for a given LMUL, including masked+LMUL missing stubs.
     Intended for RVV (explicit _mX entrypoints).
     """
- 
-    if isa["name"] != "rvv":
+    #hack while moving from single file to include manager.
+    if isa["name"] != "rvv" and isa["name"] != "avx":
         for f in funcs:
             for dt in funcs[f]["datatypes"]:
                 _emit_separator(f, file)

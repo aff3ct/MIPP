@@ -64,28 +64,51 @@ def _get_dependencies_regular(func, mipp_funcs, layer="c"):
             requirements[req] = req_include_name
     return requirements
 
-def _get_dependencies_mask(func, mipp_funcs, mask_kind):
-    # bucket = get_masked_bucket(mipp_funcs, func, "", mask_kind)
-    # if bucket is None:
-    #     return []
-    # if "requirements" not in bucket:
-    #     return []
-    # requirements = bucket["requirements"]
-    # for req in requirements:
-    #     if req in mipp_funcs:
-    #         req_concept = match_concept(req)
-    #         req_include_name = get_include_name(req, mipp_funcs_concepts)
-    #         req_include_path = get_include_path(req, mipp_funcs_concepts)
-    #         requirements[req] = req_include_path
-    # return requirements
-    return []
-                             
+def _get_all_dt_keys_masked(funcs, f, mask_kind):
+    """
+    returns all dt_keys for a given function and mask kind. 
     
-def _get_dependencies_lmul(func, mipp_funcs, lmul, isa_name):
-    # currently empty but will be used to add lmul/2 dependencies for lmul functions.
-    if isa_name == "rvv": 
-        return []
-    return []
+    """
+    dt_keys = []
+    if "mask_support" in funcs[f] and is_supported_mask_kind(funcs[f]["mask_support"], mask_kind):
+        #dt keys live in implem_status_masked
+        # print(f"Function {f} supports mask kind {mask_kind}, checking implem_status_masked for dt_keys")
+        if "implem_status_masked" in funcs[f] :
+            for dt_key in funcs[f]["implem_status_masked"]:
+                
+                dt_keys.append(dt_key)
+    # print(f"Function {f} supports mask kind {mask_kind}, dt_keys found: {dt_keys}")
+    return dt_keys
+
+def _get_implem_status_requirements_mask_dt_keys(funcs, f, mask_kind):
+    """
+    returns the list of func that are required by the implementations of f for a given mask_kind for every dt_key. 
+    Simple getter, doesn't modify anything.
+    """
+    requirements = {}
+    for dt_key in _get_all_dt_keys_masked(funcs, f, mask_kind):
+        bucket = get_masked_bucket(funcs, f, dt_key, mask_kind)
+        if bucket is not None:
+            for implem in bucket:
+                if "requirements" in implem and implem["requirements"]:
+                    print(f"Function {f} has masked implementation for dt_key {dt_key} and mask kind {mask_kind} with requirements: {implem['requirements']}")
+                    for req in implem["requirements"]:
+                        requirements[req] = implem["requirements"][req]
+    return requirements
+
+def _get_dependencies_mask(func, mipp_funcs, mask_kind, layer="c"):
+    
+    # path is functions/func.h and dependencies are in the requirements key of mipp_funcs[func]["implem_status"] for all dt_keys and mask_kind.
+    if func not in mipp_funcs:
+        return {}
+    requirements = _get_implem_status_requirements_mask_dt_keys(mipp_funcs, func, mask_kind)
+    for req in requirements:
+        if req in mipp_funcs:
+            req_include_name = get_include_name(req, layer)
+            requirements[req] = req_include_name
+    return requirements
+                             
+
 
 def get_dependencies(func, mipp_funcs, lmul=0, mask_kind="", layer=""):
     """
@@ -108,20 +131,26 @@ def get_dependencies(func, mipp_funcs, lmul=0, mask_kind="", layer=""):
         dependencies.add("common.h")
     
     #print(f"Getting dependencies for {func} in layer {layer} with lmul {lmul} and mask kind {mask_kind}")
-    print(f"Getting dependencies for {func} in layer {layer} with lmul {lmul} and mask kind {mask_kind}")
+
     regular_deps = _get_dependencies_regular(func, mipp_funcs, layer=layer)
     for dep in regular_deps:
+        if dep == func:
+            continue
         dependencies.add(regular_deps[dep])
     
-    masked_deps = _get_dependencies_mask(func, mipp_funcs, mask_kind)
+    masked_deps = _get_dependencies_mask(func, mipp_funcs, mask_kind, layer=layer)
     for dep in masked_deps:
+        if dep == func:
+            continue
         dependencies.add(masked_deps[dep])
-    
-    lmul_deps = _get_dependencies_lmul(func, mipp_funcs, lmul, "")
-    for dep in lmul_deps:
-        dependencies.add(dep)
-    
-    print(f"Dependencies for {func} in layer {layer} with lmul {lmul} and mask kind {mask_kind}: {dependencies}")
+        
+    # if layer == "avx":
+    #     print(f"Getting dependencies for {func} in layer {layer} with lmul {lmul} and mask kind {mask_kind}, regular deps: {regular_deps}, masked deps: {masked_deps}")
+    #remove entry in requirement if it's func 
+    if func in dependencies:
+        dependencies.remove(func)
+    if func == "add" : 
+        print(f"Dependencies for {func} in layer {layer} with lmul {lmul} and mask kind {mask_kind}: {dependencies}")
     return dependencies
     
 
@@ -280,6 +309,8 @@ class IncludeManager:
 
             include_path = self.layers[layer_name].includes[func]
             include_path.resolve_dependencies(funcs, lmul=0, mask_kind="", layer=layer_name)
+            for mask in ["mask", "maskz", "masks"]:
+                include_path.resolve_dependencies(funcs, lmul=0, mask_kind=mask, layer=layer_name)
             include_path.write_prefix(f"{self.base_dir}/{layer_name}/functions")
     
     def close_fd(self, layer_name, func):
