@@ -435,9 +435,15 @@ implems_scalar = {
         { "type": "vector-wide", "datatypes": for_all_defs, "implem":
 """
 %r<tr>% res;
-%v<tr>%* ptr = (%v<tr>%*)r0.r;
-for (size_t i = 0; i < %N<tr>%; i++)
-	res.r[i] = ptr[i];
+
+// The commented snippet code below produces "error: dereferencing type-punned pointer will break strict-aliasing rules"
+// %v<tr>%* ptr = (%v<tr>%*)r0.r;
+// for (size_t i = 0; i < %N<tr>%; i++)
+//	res.r[i] = ptr[i];
+
+// requires #include <string.h>
+memcpy(res.r, r0.r, sizeof(%v<tr>%) * %N<tr>%); // C / C++ compilers should be able to optimize this in -O2 or -O3
+
 return res;
 """
         },
@@ -446,9 +452,15 @@ return res;
         { "type": "vector-wide", "datatypes": for_all_defs, "implem":
 """
 %m<tr>% res;
-{{isa_dt_ret.msk}}* ptr = ({{isa_dt_ret.msk}}*)m0.m;
-for (size_t i = 0; i < %N<tr>%; i++)
-	res.m[i] = ptr[i];
+
+// The commented snippet code below produces "error: dereferencing type-punned pointer will break strict-aliasing rules"
+// {{isa_dt_ret.msk}}* ptr = ({{isa_dt_ret.msk}}*)m0.m;
+// for (size_t i = 0; i < %N<tr>%; i++)
+// 	res.m[i] = ptr[i];
+
+// requires #include <string.h>
+memcpy(res.m, m0.m, sizeof({{isa_dt_ret.msk}}) * %N<tr>%); // C / C++ compilers should be able to optimize this in -O2 or -O3
+
 return res;
 """
         },
@@ -457,9 +469,17 @@ return res;
         { "type": "vector-wide", "datatypes": for_all_defs, "implem":
 """
 %r<tr>% res;
-{{isa_dt_ret.reg}}* ptr = ({{isa_dt_ret.reg}}*)m0.m;
+
+// The commented snippet code below produces "error: dereferencing type-punned pointer will break strict-aliasing rules"
+// {{isa_dt_ret.reg}}* ptr = ({{isa_dt_ret.reg}}*)m0.m;
+// for (size_t i = 0; i < %N<tr>%; i++)
+// 	res.r[i] = ptr[i];
+
 for (size_t i = 0; i < %N<tr>%; i++)
-	res.r[i] = ptr[i];
+	// compiler should identify the following pattern: res.r[i] = std::bit_cast<{{isa_dt_ret.reg}}>(m0.m[i]);
+	// requires #include <string.h>
+	memcpy(&res.r[i], &m0.m[i], sizeof({{isa_dt_ret.reg}}));
+
 return res;
 """
         },
@@ -468,9 +488,17 @@ return res;
         { "type": "vector-wide", "datatypes": for_all_defs, "implem":
 """
 %m<tr>% res;
-{{isa_dt_ret.msk}}* ptr = ({{isa_dt_ret.msk}}*)r0.r;
+
+// The commented snippet code below produces "error: dereferencing type-punned pointer will break strict-aliasing rules"
+// {{isa_dt_ret.msk}}* ptr = ({{isa_dt_ret.msk}}*)r0.r;
+// for (size_t i = 0; i < %N<tr>%; i++)
+// 	res.m[i] = ptr[i];
+
 for (size_t i = 0; i < %N<tr>%; i++)
-	res.m[i] = ptr[i];
+	// compiler should identify the following pattern: res.m[i] = std::bit_cast<{{isa_dt_ret.msk}}>(r0.r[i]);
+	// requires #include <string.h>
+	memcpy(&res.m[i], &r0.r[i], sizeof({{isa_dt_ret.msk}}));
+
 return res;
 """
         },
@@ -514,7 +542,9 @@ res.r[i] = %!pred_cond!% vals[i] %!pred_alt!%;
         { "type": "element-wide", "datatypes": for_all_defs, "implem":
 """
 %v<c:int|b:tr>% m_tmp = vals[i] ? -1 : 0;
-res.m[i] = *({{isa_dt_ret.msk}}*)((void*)(&m_tmp));
+// res.m[i] = *({{isa_dt_ret.msk}}*)((void*)(&m_tmp));
+// requires #include <string.h>
+memcpy(&res.m[i], &m_tmp, sizeof({{isa_dt_ret.msk}}));
 """
         },
     ],
@@ -531,7 +561,12 @@ res.r[i] = %!pred_cond!% v0 %!pred_alt!%;
 %m<tr>% res;
 %v<c:int|b:tr>% m_tmp = v0 ? -1 : 0;
 for (size_t i = 0; i < %N<tp>%; i++)
-	res.m[i] = *({{isa_dt_ret.msk}}*)((void*)(&m_tmp));
+	// The commented snippet code below produces "error: dereferencing type-punned pointer will break strict-aliasing rules"
+	// res.m[i] = *({{isa_dt_ret.msk}}*)((void*)(&m_tmp));
+
+	// compiler should identify the following pattern: res.m[i] = std::bit_cast<{{isa_dt_ret.msk}}>(m_tmp);
+	// requires #include <string.h>
+	memcpy(&res.m[i], &m_tmp, sizeof({{isa_dt_ret.msk}}));
 return res;
 """
         },
@@ -670,10 +705,24 @@ res.r[i] = %!pred_cond!% r0.r[i] & r1.r[i] %!pred_alt!%;
         },
         { "type": "element-wide", "datatypes": all_float, "implem":
 """
-%v<c:uint|b:tp>% r0i = *({{isa_dt_par.msk}}*)((void*)&r0.r[i]);
-%v<c:uint|b:tp>% r1i = *({{isa_dt_par.msk}}*)((void*)&r1.r[i]);
+// The commented snippet code below produces "error: dereferencing type-punned pointer will break strict-aliasing rules"
+// %v<c:uint|b:tp>% r0i = *({{isa_dt_par.msk}}*)((void*)&r0.r[i]);
+// %v<c:uint|b:tp>% r1i = *({{isa_dt_par.msk}}*)((void*)&r1.r[i]);
+
+%v<c:uint|b:tp>% r0i, r1i;
+// compiler should identify the following pattern: rxi = std::bit_cast<{{isa_dt_par.msk}}>(rx.r[i]);
+// requires #include <string.h>
+memcpy(&r0i, &r0.r[i], sizeof({{isa_dt_par.msk}}));
+memcpy(&r1i, &r1.r[i], sizeof({{isa_dt_par.msk}}));
+
 %v<c:uint|b:tp>% resi = r0i & r1i;
-res.r[i] = %!pred_cond!% *({{isa_dt_ret.reg}}*)((void*)&resi) %!pred_alt!%;
+
+%v<tr>% resv;
+// compiler should identify the following pattern: resv = std::bit_cast<{{isa_dt_ret.reg}}>(resi);
+// requires #include <string.h>
+memcpy(&resv, &resi, sizeof({{isa_dt_ret.reg}}));
+
+res.r[i] = %!pred_cond!% resv %!pred_alt!%;
 """
         },
     ],
@@ -692,10 +741,24 @@ res.r[i] = %!pred_cond!% (~r0.r[i]) & r1.r[i] %!pred_alt!%;
         },
         { "type": "element-wide", "datatypes": all_float, "implem":
 """
-%v<c:uint|b:tp>% r0i = *({{isa_dt_par.msk}}*)((void*)&r0.r[i]);
-%v<c:uint|b:tp>% r1i = *({{isa_dt_par.msk}}*)((void*)&r1.r[i]);
+// The commented snippet code below produces "error: dereferencing type-punned pointer will break strict-aliasing rules"
+// %v<c:uint|b:tp>% r0i = *({{isa_dt_par.msk}}*)((void*)&r0.r[i]);
+// %v<c:uint|b:tp>% r1i = *({{isa_dt_par.msk}}*)((void*)&r1.r[i]);
+
+%v<c:uint|b:tp>% r0i, r1i;
+// compiler should identify the following pattern: rxi = std::bit_cast<{{isa_dt_par.msk}}>(rx.r[i]);
+// requires #include <string.h>
+memcpy(&r0i, &r0.r[i], sizeof({{isa_dt_par.msk}}));
+memcpy(&r1i, &r1.r[i], sizeof({{isa_dt_par.msk}}));
+
 %v<c:uint|b:tp>% resi = (~r0i) & r1i;
-res.r[i] = %!pred_cond!% *({{isa_dt_ret.reg}}*)((void*)&resi) %!pred_alt!%;
+
+%v<tr>% resv;
+// compiler should identify the following pattern: resv = std::bit_cast<{{isa_dt_ret.reg}}>(resi);
+// requires #include <string.h>
+memcpy(&resv, &resi, sizeof({{isa_dt_ret.reg}}));
+
+res.r[i] = %!pred_cond!% resv %!pred_alt!%;
 """
         },
     ],
@@ -714,10 +777,24 @@ res.r[i] = %!pred_cond!% r0.r[i] | r1.r[i] %!pred_alt!%;
         },
         { "type": "element-wide", "datatypes": all_float, "implem":
 """
-%v<c:uint|b:tp>% r0i = *({{isa_dt_par.msk}}*)((void*)&r0.r[i]);
-%v<c:uint|b:tp>% r1i = *({{isa_dt_par.msk}}*)((void*)&r1.r[i]);
+// The commented snippet code below produces "error: dereferencing type-punned pointer will break strict-aliasing rules"
+// %v<c:uint|b:tp>% r0i = *({{isa_dt_par.msk}}*)((void*)&r0.r[i]);
+// %v<c:uint|b:tp>% r1i = *({{isa_dt_par.msk}}*)((void*)&r1.r[i]);
+
+%v<c:uint|b:tp>% r0i, r1i;
+// compiler should identify the following pattern: rxi = std::bit_cast<{{isa_dt_par.msk}}>(rx.r[i]);
+// requires #include <string.h>
+memcpy(&r0i, &r0.r[i], sizeof({{isa_dt_par.msk}}));
+memcpy(&r1i, &r1.r[i], sizeof({{isa_dt_par.msk}}));
+
 %v<c:uint|b:tp>% resi = r0i | r1i;
-res.r[i] = %!pred_cond!% *({{isa_dt_ret.reg}}*)((void*)&resi) %!pred_alt!%;
+
+%v<tr>% resv;
+// compiler should identify the following pattern: resv = std::bit_cast<{{isa_dt_ret.reg}}>(resi);
+// requires #include <string.h>
+memcpy(&resv, &resi, sizeof({{isa_dt_ret.reg}}));
+
+res.r[i] = %!pred_cond!% resv %!pred_alt!%;
 """
         },
     ],
@@ -736,10 +813,24 @@ res.r[i] = %!pred_cond!% r0.r[i] ^ r1.r[i] %!pred_alt!%;
         },
         { "type": "element-wide", "datatypes": all_float, "implem":
 """
-%v<c:uint|b:tp>% r0i = *({{isa_dt_par.msk}}*)((void*)&r0.r[i]);
-%v<c:uint|b:tp>% r1i = *({{isa_dt_par.msk}}*)((void*)&r1.r[i]);
+// The commented snippet code below produces "error: dereferencing type-punned pointer will break strict-aliasing rules"
+// %v<c:uint|b:tp>% r0i = *({{isa_dt_par.msk}}*)((void*)&r0.r[i]);
+// %v<c:uint|b:tp>% r1i = *({{isa_dt_par.msk}}*)((void*)&r1.r[i]);
+
+%v<c:uint|b:tp>% r0i, r1i;
+// compiler should identify the following pattern: rxi = std::bit_cast<{{isa_dt_par.msk}}>(rx.r[i]);
+// requires #include <string.h>
+memcpy(&r0i, &r0.r[i], sizeof({{isa_dt_par.msk}}));
+memcpy(&r1i, &r1.r[i], sizeof({{isa_dt_par.msk}}));
+
 %v<c:uint|b:tp>% resi = r0i ^ r1i;
-res.r[i] = %!pred_cond!% *({{isa_dt_ret.reg}}*)((void*)&resi) %!pred_alt!%;
+
+%v<tr>% resv;
+// compiler should identify the following pattern: resv = std::bit_cast<{{isa_dt_ret.reg}}>(resi);
+// requires #include <string.h>
+memcpy(&resv, &resi, sizeof({{isa_dt_ret.reg}}));
+
+res.r[i] = %!pred_cond!% resv %!pred_alt!%;
 """
         },
     ],
@@ -754,33 +845,89 @@ res.m[i] = m0.m[i] ^ m1.m[i];
         { "type": "element-wide", "datatypes": all_64bit, "implem":
 """
 %v<c:uint|b:tp>% msk = 0x8000000000000000ULL;
-%v<c:uint|b:tp>% ri = *({{isa_dt_par.msk}}*)((void*)&r0.r[i]);
+
+// The commented snippet code below produces "error: dereferencing type-punned pointer will break strict-aliasing rules"
+// %v<c:uint|b:tp>% ri = *({{isa_dt_par.msk}}*)((void*)&r0.r[i]);
+
+%v<c:uint|b:tp>% ri;
+// compiler should identify the following pattern: ri = std::bit_cast<{{isa_dt_par.msk}}>(r0.r[i]);
+// requires #include <string.h>
+memcpy(&ri, &r0.r[i], sizeof({{isa_dt_par.msk}}));
+
 %v<c:uint|b:tp>% resi = ri & msk;
-res.r[i] = %!pred_cond!% *({{isa_dt_ret.reg}}*)((void*)&resi) %!pred_alt!%;
+
+%v<tr>% resv;
+// compiler should identify the following pattern: resv = std::bit_cast<{{isa_dt_ret.reg}}>(resi);
+// requires #include <string.h>
+memcpy(&resv, &resi, sizeof({{isa_dt_ret.reg}}));
+
+res.r[i] = %!pred_cond!% resv %!pred_alt!%;
 """
         },
         { "type": "element-wide", "datatypes": all_32bit, "implem":
 """
 %v<c:uint|b:tp>% msk = 0x80000000;
-%v<c:uint|b:tp>% ri = *({{isa_dt_par.msk}}*)((void*)&r0.r[i]);
+
+// The commented snippet code below produces "error: dereferencing type-punned pointer will break strict-aliasing rules"
+// %v<c:uint|b:tp>% ri = *({{isa_dt_par.msk}}*)((void*)&r0.r[i]);
+
+%v<c:uint|b:tp>% ri;
+// compiler should identify the following pattern: ri = std::bit_cast<{{isa_dt_par.msk}}>(r0.r[i]);
+// requires #include <string.h>
+memcpy(&ri, &r0.r[i], sizeof({{isa_dt_par.msk}}));
+
 %v<c:uint|b:tp>% resi = ri & msk;
-res.r[i] = %!pred_cond!% *({{isa_dt_ret.reg}}*)((void*)&resi) %!pred_alt!%;
+
+%v<tr>% resv;
+// compiler should identify the following pattern: resv = std::bit_cast<{{isa_dt_ret.reg}}>(resi);
+// requires #include <string.h>
+memcpy(&resv, &resi, sizeof({{isa_dt_ret.reg}}));
+
+res.r[i] = %!pred_cond!% resv %!pred_alt!%;
 """
         },
         { "type": "element-wide", "datatypes": all_16bit, "implem":
 """
 %v<c:uint|b:tp>% msk = 0x8000;
-%v<c:uint|b:tp>% ri = *({{isa_dt_par.msk}}*)((void*)&r0.r[i]);
+
+// The commented snippet code below produces "error: dereferencing type-punned pointer will break strict-aliasing rules"
+// %v<c:uint|b:tp>% ri = *({{isa_dt_par.msk}}*)((void*)&r0.r[i]);
+
+%v<c:uint|b:tp>% ri;
+// compiler should identify the following pattern: ri = std::bit_cast<{{isa_dt_par.msk}}>(r0.r[i]);
+// requires #include <string.h>
+memcpy(&ri, &r0.r[i], sizeof({{isa_dt_par.msk}}));
+
 %v<c:uint|b:tp>% resi = ri & msk;
-res.r[i] = %!pred_cond!% *({{isa_dt_ret.reg}}*)((void*)&resi) %!pred_alt!%;
+
+%v<tr>% resv;
+// compiler should identify the following pattern: resv = std::bit_cast<{{isa_dt_ret.reg}}>(resi);
+// requires #include <string.h>
+memcpy(&resv, &resi, sizeof({{isa_dt_ret.reg}}));
+
+res.r[i] = %!pred_cond!% resv %!pred_alt!%;
 """
         },
         { "type": "element-wide", "datatypes": all_8bit, "implem":
 """
 %v<c:uint|b:tp>% msk = 0x80;
-%v<c:uint|b:tp>% ri = *({{isa_dt_par.msk}}*)((void*)&r0.r[i]);
+
+// The commented snippet code below produces "error: dereferencing type-punned pointer will break strict-aliasing rules"
+// %v<c:uint|b:tp>% ri = *({{isa_dt_par.msk}}*)((void*)&r0.r[i]);
+
+%v<c:uint|b:tp>% ri;
+// compiler should identify the following pattern: ri = std::bit_cast<{{isa_dt_par.msk}}>(r0.r[i]);
+// requires #include <string.h>
+memcpy(&ri, &r0.r[i], sizeof({{isa_dt_par.msk}}));
+
 %v<c:uint|b:tp>% resi = ri & msk;
-res.r[i] = %!pred_cond!% *({{isa_dt_ret.reg}}*)((void*)&resi) %!pred_alt!%;
+
+%v<tr>% resv;
+// compiler should identify the following pattern: resv = std::bit_cast<{{isa_dt_ret.reg}}>(resi);
+// requires #include <string.h>
+memcpy(&resv, &resi, sizeof({{isa_dt_ret.reg}}));
+
+res.r[i] = %!pred_cond!% resv %!pred_alt!%;
 """
         },
     ],
@@ -792,9 +939,22 @@ res.r[i] = %!pred_cond!% ~r0.r[i] %!pred_alt!%;
         },
         { "type": "element-wide", "datatypes": all_float, "implem":
 """
-%v<c:uint|b:tp>% r0i = *({{isa_dt_par.msk}}*)((void*)&r0.r[i]);
+// The commented snippet code below produces "error: dereferencing type-punned pointer will break strict-aliasing rules"
+// %v<c:uint|b:tp>% r0i = *({{isa_dt_par.msk}}*)((void*)&r0.r[i]);
+
+%v<c:uint|b:tp>% r0i;
+// compiler should identify the following pattern: rxi = std::bit_cast<{{isa_dt_par.msk}}>(rx.r[i]);
+// requires #include <string.h>
+memcpy(&r0i, &r0.r[i], sizeof({{isa_dt_par.msk}}));
+
 %v<c:uint|b:tp>% resi = ~r0i;
-res.r[i] = %!pred_cond!% *({{isa_dt_ret.reg}}*)((void*)&resi) %!pred_alt!%;
+
+%v<tr>% resv;
+// compiler should identify the following pattern: resv = std::bit_cast<{{isa_dt_ret.reg}}>(resi);
+// requires #include <string.h>
+memcpy(&resv, &resi, sizeof({{isa_dt_ret.reg}}));
+
+res.r[i] = %!pred_cond!% resv %!pred_alt!%;
 """
         },
     ],
@@ -811,10 +971,19 @@ res.m[i] = ~m0.m[i];
 res.m[i] = %!pred_cond!% (r0.r[i] == r1.r[i]) ? -1 : 0 %!pred_alt!%;
 """
         },
-        { "type": "element-wide", "datatypes": all_uint + all_float, "implem":
+        { "type": "vector-wide", "datatypes": all_uint + all_float, "implem":
 """
-%v<c:int|b:tp>% ones = -1;
-res.m[i] = %!pred_cond!% (r0.r[i] == r1.r[i]) ? *({{isa_dt_ret.reg}}*)((void*)&ones) : 0 %!pred_alt!%;
+%v<c:int|b:tp>% onesi = -1;
+
+%v<tr>% ones;
+// compiler should identify the following pattern: ones = std::bit_cast<{{isa_dt_ret.reg}}>(onesi);
+// requires #include <string.h>
+memcpy(&ones, &onesi, sizeof({{isa_dt_ret.reg}}));
+
+%m<tr>% res;
+for (size_t i = 0; i < %N<tr>%; i++)
+	res.m[i] = %!pred_cond!% (r0.r[i] == r1.r[i]) ? ones : 0 %!pred_alt!%;
+return res;
 """
         },
     ],
@@ -824,10 +993,19 @@ res.m[i] = %!pred_cond!% (r0.r[i] == r1.r[i]) ? *({{isa_dt_ret.reg}}*)((void*)&o
 res.m[i] = %!pred_cond!% (r0.r[i] != r1.r[i]) ? -1 : 0 %!pred_alt!%;
 """
         },
-        { "type": "element-wide", "datatypes": all_uint + all_float, "implem":
+        { "type": "vector-wide", "datatypes": all_uint + all_float, "implem":
 """
-%v<c:int|b:tp>% ones = -1;
-res.m[i] = %!pred_cond!% (r0.r[i] != r1.r[i]) ? *({{isa_dt_ret.reg}}*)((void*)&ones) : 0 %!pred_alt!%;
+%v<c:int|b:tp>% onesi = -1;
+
+%v<tr>% ones;
+// compiler should identify the following pattern: ones = std::bit_cast<{{isa_dt_ret.reg}}>(onesi);
+// requires #include <string.h>
+memcpy(&ones, &onesi, sizeof({{isa_dt_ret.reg}}));
+
+%m<tr>% res;
+for (size_t i = 0; i < %N<tr>%; i++)
+	res.m[i] = %!pred_cond!% (r0.r[i] != r1.r[i]) ? ones : 0 %!pred_alt!%;
+return res;
 """
         },
     ],
@@ -837,10 +1015,19 @@ res.m[i] = %!pred_cond!% (r0.r[i] != r1.r[i]) ? *({{isa_dt_ret.reg}}*)((void*)&o
 res.m[i] = %!pred_cond!% (r0.r[i] < r1.r[i]) ? -1 : 0 %!pred_alt!%;
 """
         },
-        { "type": "element-wide", "datatypes": all_uint + all_float, "implem":
+        { "type": "vector-wide", "datatypes": all_uint + all_float, "implem":
 """
-%v<c:int|b:tp>% ones = -1;
-res.m[i] = %!pred_cond!% (r0.r[i] < r1.r[i]) ? *({{isa_dt_ret.reg}}*)((void*)&ones) : 0 %!pred_alt!%;
+%v<c:int|b:tp>% onesi = -1;
+
+%v<tr>% ones;
+// compiler should identify the following pattern: ones = std::bit_cast<{{isa_dt_ret.reg}}>(onesi);
+// requires #include <string.h>
+memcpy(&ones, &onesi, sizeof({{isa_dt_ret.reg}}));
+
+%m<tr>% res;
+for (size_t i = 0; i < %N<tr>%; i++)
+	res.m[i] = %!pred_cond!% (r0.r[i] < r1.r[i]) ? ones : 0 %!pred_alt!%;
+return res;
 """
         },
     ],
@@ -850,10 +1037,19 @@ res.m[i] = %!pred_cond!% (r0.r[i] < r1.r[i]) ? *({{isa_dt_ret.reg}}*)((void*)&on
 res.m[i] = %!pred_cond!% (r0.r[i] <= r1.r[i]) ? -1 : 0 %!pred_alt!%;
 """
         },
-        { "type": "element-wide", "datatypes": all_uint + all_float, "implem":
+        { "type": "vector-wide", "datatypes": all_uint + all_float, "implem":
 """
-%v<c:int|b:tp>% ones = -1;
-res.m[i] = %!pred_cond!% (r0.r[i] <= r1.r[i]) ? *({{isa_dt_ret.reg}}*)((void*)&ones) : 0 %!pred_alt!%;
+%v<c:int|b:tp>% onesi = -1;
+
+%v<tr>% ones;
+// compiler should identify the following pattern: ones = std::bit_cast<{{isa_dt_ret.reg}}>(onesi);
+// requires #include <string.h>
+memcpy(&ones, &onesi, sizeof({{isa_dt_ret.reg}}));
+
+%m<tr>% res;
+for (size_t i = 0; i < %N<tr>%; i++)
+	res.m[i] = %!pred_cond!% (r0.r[i] <= r1.r[i]) ? ones : 0 %!pred_alt!%;
+return res;
 """
         },
     ],
@@ -863,10 +1059,19 @@ res.m[i] = %!pred_cond!% (r0.r[i] <= r1.r[i]) ? *({{isa_dt_ret.reg}}*)((void*)&o
 res.m[i] = %!pred_cond!% (r0.r[i] >= r1.r[i]) ? -1 : 0 %!pred_alt!%;
 """
         },
-        { "type": "element-wide", "datatypes": all_uint + all_float, "implem":
+        { "type": "vector-wide", "datatypes": all_uint + all_float, "implem":
 """
-%v<c:int|b:tp>% ones = -1;
-res.m[i] = %!pred_cond!% (r0.r[i] >= r1.r[i]) ? *({{isa_dt_ret.reg}}*)((void*)&ones) : 0 %!pred_alt!%;
+%v<c:int|b:tp>% onesi = -1;
+
+%v<tr>% ones;
+// compiler should identify the following pattern: ones = std::bit_cast<{{isa_dt_ret.reg}}>(onesi);
+// requires #include <string.h>
+memcpy(&ones, &onesi, sizeof({{isa_dt_ret.reg}}));
+
+%m<tr>% res;
+for (size_t i = 0; i < %N<tr>%; i++)
+	res.m[i] = %!pred_cond!% (r0.r[i] >= r1.r[i]) ? ones : 0 %!pred_alt!%;
+return res;
 """
         },
     ],
@@ -876,10 +1081,19 @@ res.m[i] = %!pred_cond!% (r0.r[i] >= r1.r[i]) ? *({{isa_dt_ret.reg}}*)((void*)&o
 res.m[i] = %!pred_cond!% (r0.r[i] > r1.r[i]) ? -1 : 0 %!pred_alt!%;
 """
         },
-        { "type": "element-wide", "datatypes": all_uint + all_float, "implem":
+        { "type": "vector-wide", "datatypes": all_uint + all_float, "implem":
 """
-%v<c:int|b:tp>% ones = -1;
-res.m[i] = %!pred_cond!% (r0.r[i] > r1.r[i]) ? *({{isa_dt_ret.reg}}*)((void*)&ones) : 0 %!pred_alt!%;
+%v<c:int|b:tp>% onesi = -1;
+
+%v<tr>% ones;
+// compiler should identify the following pattern: ones = std::bit_cast<{{isa_dt_ret.reg}}>(onesi);
+// requires #include <string.h>
+memcpy(&ones, &onesi, sizeof({{isa_dt_ret.reg}}));
+
+%m<tr>% res;
+for (size_t i = 0; i < %N<tr>%; i++)
+	res.m[i] = %!pred_cond!% (r0.r[i] > r1.r[i]) ? ones : 0 %!pred_alt!%;
+return res;
 """
         },
     ],
@@ -1066,9 +1280,22 @@ res.r[i] = %!pred_cond!% r0.r[i] >> v0 %!pred_alt!%;
         },
         { "type": "element-wide", "datatypes": all_float, "implem":
 """
-%v<c:uint|b:tp>% r0i = *({{isa_dt_par.msk}}*)((void*)&r0.r[i]);
+// The commented snippet code below produces "error: dereferencing type-punned pointer will break strict-aliasing rules"
+// %v<c:uint|b:tp>% r0i = *({{isa_dt_par.msk}}*)((void*)&r0.r[i]);
+
+%v<c:uint|b:tp>% r0i;
+// compiler should identify the following pattern: rxi = std::bit_cast<{{isa_dt_par.msk}}>(rx.r[i]);
+// requires #include <string.h>
+memcpy(&r0i, &r0.r[i], sizeof({{isa_dt_par.msk}}));
+
 r0i >>= v0;
-res.r[i] = %!pred_cond!% *({{isa_dt_ret.reg}}*)((void*)&r0i) %!pred_alt!%;
+
+%v<tr>% resv;
+// compiler should identify the following pattern: resv = std::bit_cast<{{isa_dt_ret.reg}}>(r0i);
+// requires #include <string.h>
+memcpy(&resv, &r0i, sizeof({{isa_dt_ret.reg}}));
+
+res.r[i] = %!pred_cond!% resv %!pred_alt!%;
 """
         },
     ],
@@ -1080,9 +1307,22 @@ res.r[i] = %!pred_cond!% r0.r[i] << v0 %!pred_alt!%;
         },
         { "type": "element-wide", "datatypes": all_float, "implem":
 """
-%v<c:uint|b:tp>% r0i = *({{isa_dt_par.msk}}*)((void*)&r0.r[i]);
+// The commented snippet code below produces "error: dereferencing type-punned pointer will break strict-aliasing rules"
+// %v<c:uint|b:tp>% r0i = *({{isa_dt_par.msk}}*)((void*)&r0.r[i]);
+
+%v<c:uint|b:tp>% r0i;
+// compiler should identify the following pattern: rxi = std::bit_cast<{{isa_dt_par.msk}}>(rx.r[i]);
+// requires #include <string.h>
+memcpy(&r0i, &r0.r[i], sizeof({{isa_dt_par.msk}}));
+
 r0i <<= v0;
-res.r[i] = %!pred_cond!% *({{isa_dt_ret.reg}}*)((void*)&r0i) %!pred_alt!%;
+
+%v<tr>% resv;
+// compiler should identify the following pattern: resv = std::bit_cast<{{isa_dt_ret.reg}}>(r0i);
+// requires #include <string.h>
+memcpy(&resv, &r0i, sizeof({{isa_dt_ret.reg}}));
+
+res.r[i] = %!pred_cond!% resv %!pred_alt!%;
 """
         },
     ],

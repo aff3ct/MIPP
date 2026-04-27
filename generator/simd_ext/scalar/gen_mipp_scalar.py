@@ -129,12 +129,14 @@ def _emit_function_body_scalar(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rende
         # cleaning
         post_rendering = post_rendering.lstrip()
         post_rendering = post_rendering.replace("\n", "\n\t\t")
+        post_rendering = post_rendering.replace("\t\t\n", "\n")
         post_rendering = "\t\t" + post_rendering
     elif ff["type"] == "vector-wide":
         print("\t", end='', file=file)
         # cleaning
         post_rendering = post_rendering.lstrip()
         post_rendering = post_rendering.replace("\n", "\n\t")
+        post_rendering = post_rendering.replace("\t\n", "\n")
         # post_rendering = "\t" + post_rendering
     else:
         print("Panic: unsupported type '" + ff["type"] + "' in '_emit_function_body_scalar' function.")
@@ -213,14 +215,15 @@ def gen_c_functions_scalar(isa, file, funcs, implems):
     """
     for f in implems:
         if f in funcs:
+            _emit_separator_scalar(f, file)
             for ff in implems[f]:
                 if ff["datatypes"]:
                     for dt in ff["datatypes"]:
-                        _emit_separator_scalar(f, file)
+                        # _emit_separator_scalar(f, file)
                         _gen_c_functions_one_unmasked_scalar(isa, file, funcs, f, ff, dt)
                 else:
                     for dt in funcs[f]["datatypes"]:
-                        _emit_separator_scalar(f, file)
+                        # _emit_separator_scalar(f, file)
                         _gen_c_functions_one_unmasked_scalar(isa, file, funcs, f, ff, dt)
 
         else:
@@ -233,7 +236,8 @@ def gen_mipp_scalar():
 
     tpl_header_avx = """#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SCALAR_H_
 #define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SCALAR_H_
-#include <math.h>
+#include <math.h> // sqrt, sqrtf, round, roundf
+#include <string.h> // memcpy
 #if !defined(MIPP_SCALAR_SIZE)
 	#if defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)
 		#define MIPP_SCALAR_SIZE 512
