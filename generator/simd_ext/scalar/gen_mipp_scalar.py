@@ -199,7 +199,12 @@ def _emit_separator_scalar(f, file):
     """
     Writes a separator comment for a given function name, to improve readability of the generated code.
     """
-    print("// --------------------------------------------------------------------------------------------------------", f, file=file)
+    n_dashes = 120 - 5 - len(f)
+    print("// ", end="", file=file)
+    while n_dashes > 0:
+        print("-", end="", file=file)
+        n_dashes = n_dashes - 1
+    print(f" {f}", file=file)
 
 # Important changes here!!
 def gen_c_functions_scalar(isa, file, funcs, implems):
@@ -229,31 +234,39 @@ def gen_mipp_scalar():
     tpl_header_avx = """#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SCALAR_H_
 #define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SCALAR_H_
 #include <math.h>
-#if defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)
-	#define MIPP_SCALAR_SIZE 512
-#elif defined(__AVX__)
-	#define MIPP_SCALAR_SIZE 256
-#elif defined(__SSE__)
-	#define MIPP_SCALAR_SIZE 128
-#elif defined(__ARM_FEATURE_SVE)
-	#if defined(MIPP_SVE_2048)
-		#define MIPP_SCALAR_SIZE 2048
-	#elif defined(MIPP_SVE_1024)
-		#define MIPP_SCALAR_SIZE 1024
-	#elif defined(MIPP_SVE_512)
+#if !defined(MIPP_SCALAR_SIZE)
+	#if defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)
 		#define MIPP_SCALAR_SIZE 512
-	#elif defined(MIPP_SVE_256)
+	#elif defined(__AVX__)
 		#define MIPP_SCALAR_SIZE 256
-	#elif defined(MIPP_SVE_128)
+	#elif defined(__SSE__)
 		#define MIPP_SCALAR_SIZE 128
+	#elif defined(__ARM_FEATURE_SVE)
+		#if defined(MIPP_SVE_2048)
+			#define MIPP_SCALAR_SIZE 2048
+		#elif defined(MIPP_SVE_1024)
+			#define MIPP_SCALAR_SIZE 1024
+		#elif defined(MIPP_SVE_512)
+			#define MIPP_SCALAR_SIZE 512
+		#elif defined(MIPP_SVE_256)
+			#define MIPP_SCALAR_SIZE 256
+		#elif defined(MIPP_SVE_128)
+			#define MIPP_SCALAR_SIZE 128
+		#else
+			#error "MIPP_SVE_[SIZE] (SIZE in {128, 256, 512, 1024, 2048}) is undefined, user should define -DMIPP_SVE_[SIZE] at compile time!"
+		#endif
+	#elif defined(__ARM_NEON__) || defined(__ARM_NEON)
+		#define MIPP_SCALAR_SIZE 128
+	#elif __riscv_v_intrinsic
+		#define MIPP_SCALAR_SIZE __riscv_v_fixed_vlen
 	#else
-		#error "MIPP_SVE_[SIZE in {128, 256, 512, 1024, 2048}] undefined :-("
+		#if defined(MIPP_SCALAR)
+			#error "You probably forgot to define -DMIPP_SCALAR_SIZE=[bits]"
+		#else
+			#error "Your architecture is not supported by MIPP (yet), you can fallback to the scalar mode with -DMIPP_SCALAR and -DMIPP_SCALAR_SIZE=[bits] definitions"
+		#endif
 	#endif
-#elif defined(__ARM_NEON__) || defined(__ARM_NEON)
-	#define MIPP_SCALAR_SIZE 128
-#elif __riscv_v_intrinsic
-	#define MIPP_SCALAR_SIZE __riscv_v_fixed_vlen
-#endif
+#endif // !defined(MIPP_SCALAR_SIZE)
 """
     j2_template = Template(tpl_header_avx, undefined=StrictUndefined)
     print(j2_template.render(), file=file)
@@ -272,4 +285,3 @@ def gen_mipp_scalar():
 
     file.close()
     print("Done.")
-

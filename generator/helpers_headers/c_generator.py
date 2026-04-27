@@ -94,7 +94,12 @@ def _emit_separator(f, file):
 	"""
 	Writes a separator comment for a given function name, to improve readability of the generated code.
 	"""
-	print("// --------------------------------------------------------------------------------------------------------", f, file=file)
+	n_dashes = 120 - 5 - len(f)
+	print("// ", end="", file=file)
+	while n_dashes > 0:
+		print("-", end="", file=file)
+		n_dashes = n_dashes - 1
+	print(f" {f}", file=file)
 
 
 def _is_masked_implem(f, ff):

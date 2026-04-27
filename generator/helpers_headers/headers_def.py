@@ -282,11 +282,6 @@ protos = {
         ]
     },
 }
-"""
-    "mipp_funcs" dictionnary : contains different MIPP functions specific to the "AVX/AVX2" architecture.
-        -Each function is associated with a prototype model based on its key in the "protos" dictionary, with the data types
-        (for which the function is to be generated are specified, along with other parameters such as the parameters such as the "horizontal" flag
-"""
 
 mipp_funcs_concepts = {
     "all_casts": ["cast","cast_k","toreg","tomsk"],
@@ -329,6 +324,11 @@ maskz_and_masks = MaskSupport(maskable=False, maskzable=True, masksable=True)
 all_mask = MaskSupport(maskable=True, maskzable=True, masksable=True)
 no_mask = MaskSupport(maskable=False, maskzable=False, masksable=False)
 
+"""
+    "mipp_funcs" dictionary: contains different MIPP functions for all the SIMD extension, it is the MIPP interface.
+    - Each function is associated with a prototype model based on its key in the "protos" dictionary, with the data types
+     (for which the function is to be generated are specified, along with other parameters such as the parameters such as the "horizontal" flag
+"""
 mipp_funcs = {
     "cast":         { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes_cart_prod, "horizontal": False, "mask_support": no_mask        },
     "cast_k":       { "proto": protos["ret_msk_1arg_msk"],             "datatypes": all_datatypes_cart_prod, "horizontal": False, "mask_support": no_mask        },
@@ -338,7 +338,7 @@ mipp_funcs = {
     "loadu":        { "proto": protos["ret_reg_1arg_ptr"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask       },
     "store":        { "proto": protos["ret_void_2args_ptr_reg"],       "datatypes": all_datatypes,           "horizontal": False, "mask_support": mask_and_maskz },
     "storeu":       { "proto": protos["ret_void_2args_ptr_reg"],       "datatypes": all_datatypes,           "horizontal": False, "mask_support": mask_and_maskz },
-    "set" :         { "proto": protos["ret_reg_1arg_Nele"],            "datatypes": all_datatypes,           "horizontal": True,  "mask_support": only_masks     },
+    "set":          { "proto": protos["ret_reg_1arg_Nele"],            "datatypes": all_datatypes,           "horizontal": True,  "mask_support": only_masks     },
     "set_k":        { "proto": protos["ret_msk_1arg_Nele"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": no_mask        },
     "set1":         { "proto": protos["ret_reg_1arg_val"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": only_masks     },
     "set1_k":       { "proto": protos["ret_msk_1arg_i32"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": no_mask        },
