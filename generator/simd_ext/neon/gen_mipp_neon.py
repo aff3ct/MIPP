@@ -16,7 +16,7 @@ def gen_mipp_neon(include_manager):
             if "type" not in sub_iemu:
                 sub_iemu["type"] = "emulated"
 
-    file_common = include_manager.get_fd(isa_avx["name"], "common")
+    file_common = include_manager.get_fd(isa_neon["name"], "common")
 
 
     tpl_header_neon = """#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_NEON_H_
