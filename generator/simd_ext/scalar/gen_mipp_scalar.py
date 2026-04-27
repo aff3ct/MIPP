@@ -37,15 +37,10 @@ def _render_template_scalar(isa, ff, dt_par, dt_ret, func_name=""):
     renders the Jinja template. Can raise exceptions
     if the template is not well formed!
     """
-    # j2_template = Template(ff["template"]["code"], undefined=StrictUndefined)
     j2_template = Template(ff["implem"], undefined=StrictUndefined)
-    # instr_name = ""
-    # if "instr_name" in ff:
-    #     instr_name = ff["instr_name"]
 
     return j2_template.render(
         isa=isa,
-        # instr_name=instr_name,
         dt_par=datatypes[dt_par],
         dt_ret=datatypes[dt_ret],
         isa_dt_par=isa["datatypes"][dt_par],
@@ -87,13 +82,11 @@ def _emit_short_format_prologue_scalar(funcs_for_f, dt_ret, isa, file, lmul=0):
                 "\t" + build_type(funcs_for_f["proto"]["ret"]["type"], datatypes[dt_ret], isa, lmul=lmul) + " res;",
                 file=file,
             )
-            # print("\tres.r = ", end="", file=file)
         elif funcs_for_f["proto"]["ret"]["type"] == "msk":
             print(
                 "\t" + build_type(funcs_for_f["proto"]["ret"]["type"], datatypes[dt_ret], isa, lmul=lmul) + " res;",
                 file=file,
             )
-            # print("\tres.m = ", end="", file=file)
     else:
         if funcs_for_f["proto"]["ret"]["type"] == "reg":
             print(
@@ -106,7 +99,6 @@ def _emit_short_format_prologue_scalar(funcs_for_f, dt_ret, isa, file, lmul=0):
                 "\t" + build_type(funcs_for_f["proto"]["ret"]["type"], datatypes[dt_ret], isa, lmul=lmul) + " res;",
                 file=file,
             )
-            # print("\tres.m = ", end="", file=file)
 
 # Important changes here!!
 def _emit_function_body_scalar(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rendering, file, masked_version=None, lmul=0):
@@ -114,19 +106,10 @@ def _emit_function_body_scalar(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rende
 
     print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, masked_version = masked_version, lmul=lmul) + " {", file=file)
 
-    # if ff["template"]["format"] == "short":
-    #     # Original code had a redundant always-true condition; keep behavior identical.
-    #     if funcs[f]["proto"]["args"] or (not funcs[f]["proto"]["args"]):
-    #         _emit_short_format_prologue(funcs[f], dt_ret, isa, file,lmul=lmul)
-    # else:
-    #     print("\t", end='', file=file)
     if ff["type"] == "element-wide":
         # Original code had a redundant always-true condition; keep behavior identical.
         if funcs[f]["proto"]["args"] or (not funcs[f]["proto"]["args"]):
-            print(f"\tstatic_assert(MIPP_SCALAR_N_{dt_par.upper()} > 0, \"MIPP_SCALAR_N_{dt_par.upper()} must be > 0\");", end="\n", file=file)
-            if dt_par.upper() != dt_ret.upper():
-                print(f"\tstatic_assert(MIPP_SCALAR_N_{dt_ret.upper()} > 0, \"MIPP_SCALAR_N_{dt_ret.upper()} must be > 0\");", end="\n", file=file)
-            print("", end="\n", file=file)
+            print("\t// cppcheck-suppress uninitvar", file=file);
             _emit_short_format_prologue_scalar(funcs[f], dt_ret, isa, file, lmul=lmul)
             print(f"\tfor (size_t i = 0; i < MIPP_SCALAR_N_{dt_par.upper()}; i++)", file=file)
             print("\t{", file=file)
@@ -136,25 +119,18 @@ def _emit_function_body_scalar(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rende
         post_rendering = post_rendering.replace("\t\t\n", "\n")
         post_rendering = "\t\t" + post_rendering
     elif ff["type"] == "vector-wide":
-        print(f"\tstatic_assert(MIPP_SCALAR_N_{dt_par.upper()} > 0, \"MIPP_SCALAR_N_{dt_par.upper()} must be > 0\");", end="\n", file=file)
-        if dt_par.upper() != dt_ret.upper():
-            print(f"\tstatic_assert(MIPP_SCALAR_N_{dt_ret.upper()} > 0, \"MIPP_SCALAR_N_{dt_ret.upper()} must be > 0\");", end="\n", file=file)
-        print("", end="\n", file=file)
+        print("\t// cppcheck-suppress uninitvar", file=file);
         print("\t", end='', file=file)
         # cleaning
         post_rendering = post_rendering.lstrip()
         post_rendering = post_rendering.replace("\n", "\n\t")
         post_rendering = post_rendering.replace("\t\n", "\n")
-        # post_rendering = "\t" + post_rendering
     else:
         print("Panic: unsupported type '" + ff["type"] + "' in '_emit_function_body_scalar' function.")
         exit(-1)
 
     print(post_rendering, file=file)
 
-    # if ff["template"]["format"] == "short":
-    #     if funcs[f]["proto"]["ret"]["type"]:
-    #         print("\treturn res;", file=file)
     if ff["type"] == "element-wide":
         print("\t}", file=file)
         if funcs[f]["proto"]["ret"]["type"]:
@@ -163,47 +139,77 @@ def _emit_function_body_scalar(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rende
     print("}", file=file)
 
 # Important changes here!!
-def _gen_c_functions_one_unmasked_scalar(isa, file, funcs, f, ff, dt):
-    """
-    the big glue guy that calls all the helpers
-    to generate 1 fn for 1 dt. It's the logic of the big inner loop
-    of gen_c_functions.
-    """
-    dt_par, dt_ret = _compute_dt_par_dt_ret_scalar(funcs, f, dt)
-    dt_key = dt_par + "," + dt_ret
+def _gen_c_functions_scalar(isa, file, funcs, f, ff, dt):
+    if ff["mask_variants"]:
+        mask_variants = ff["mask_variants"]
+    else:
+        mask_variants = ["no_mask"]
+        if "mask_support" in mipp_funcs[f]:
+            support = mipp_funcs[f]["mask_support"]
+            if support.is_maskable():
+                mask_variants = mask_variants + ["mask"]
+            if support.is_maskzable():
+                mask_variants = mask_variants + ["maskz"]
+            if support.is_masksable():
+                mask_variants = mask_variants + ["masks"]
 
-    # if not is_missing_func(funcs, f, dt_key):
-    #     _emit_already_implemented_message(f, dt_key, file)
-    #     return
+    for mask_variant in mask_variants:
 
-    pre_rendering = _render_template_scalar(isa, ff, dt_par, dt_ret)
+        dt_par, dt_ret = _compute_dt_par_dt_ret_scalar(funcs, f, dt)
+        dt_key = dt_par + "," + dt_ret
 
-    ph_ret = _parse_placeholders_or_skip_scalar(
-        pre_rendering=pre_rendering,
-        isa=isa,
-        funcs=funcs,
-        f=f,
-        dt_par=dt_par,
-        dt_ret=dt_ret,
-        dt_key=dt_key,
-        file=file,
-    )
-    if ph_ret is None:
-        return
+        pre_rendering = _render_template_scalar(isa, ff, dt_par, dt_ret)
 
-    #ifd_prev = _build_previous_emulated_exclusion_ifdef(funcs, f, dt_key, ff)
+        if mask_variant == "no_mask":
+            pre_rendering = pre_rendering.replace("%!pred_cond!% ", "")
+            pre_rendering = pre_rendering.replace("%!pred_cond!%", "")
+            pre_rendering = pre_rendering.replace(" %!pred_alt!%", "")
+            pre_rendering = pre_rendering.replace("%!pred_alt!%", "")
+        else:
+            pre_rendering = pre_rendering.replace("%!pred_cond!% ", "m0.m[i] ? (")
+            pre_rendering = pre_rendering.replace("%!pred_cond!%", "m0.m[i] ? (")
+            if mask_variant == "mask":
+                pre_rendering = pre_rendering.replace(" %!pred_alt!%", ") : r0.r[i]")
+                pre_rendering = pre_rendering.replace("%!pred_alt!%", ") : r0.r[i]")
+            elif mask_variant == "maskz":
+                pre_rendering = pre_rendering.replace(" %!pred_alt!%", ") : 0")
+                pre_rendering = pre_rendering.replace("%!pred_alt!%", ") : 0")
+            elif mask_variant == "masks":
+                pre_rendering = pre_rendering.replace(" %!pred_alt!%", ") : rsrc.r[i]")
+                pre_rendering = pre_rendering.replace("%!pred_alt!%", ") : rsrc.r[i]")
 
-    #_append_implem_status(funcs, f, dt_key, ff, ph_ret["requirements"])
+        ph_ret = _parse_placeholders_or_skip_scalar(
+            pre_rendering=pre_rendering,
+            isa=isa,
+            funcs=funcs,
+            f=f,
+            dt_par=dt_par,
+            dt_ret=dt_ret,
+            dt_key=dt_key,
+            file=file,
+        )
+        if ph_ret is None:
+            return
 
-    post_rendering = ph_ret["converted_ir"]
+        post_rendering = ph_ret["converted_ir"]
 
-    #ifd = _combine_current_ifdefs(funcs, f, dt_key, ifd_prev)
-    #_emit_ifdef_begin_and_update_emulated(funcs, f, dt_key, ff, ifd, file)
+        if mask_variant == "no_mask":
+            mask_kind = None
+        else:
+            mask_kind = mask_variant
 
-    _emit_function_body_scalar(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rendering, file)
-
-    #_emit_ifdef_end(ifd, file)
-    #_maybe_print_emulated_implemented(f, dt_key, ff)
+        _emit_function_body_scalar(
+            funcs=funcs,
+            f=f,
+            isa=isa,
+            dt=dt,
+            dt_par=dt_par,
+            dt_ret=dt_ret,
+            ff=ff,
+            post_rendering=post_rendering,
+            file=file,
+            masked_version=mask_kind,
+        )
 
 def _emit_separator_scalar(f, file):
     """
@@ -218,20 +224,16 @@ def _emit_separator_scalar(f, file):
 
 # Important changes here!!
 def gen_c_functions_scalar(isa, file, funcs, implems):
-    """
-    Looking leaner now.
-    """
     for f in implems:
         if f in funcs:
             _emit_separator_scalar(f, file)
             for ff in implems[f]:
                 if ff["datatypes"]:
-                    for dt in ff["datatypes"]:
-                        _gen_c_functions_one_unmasked_scalar(isa, file, funcs, f, ff, dt)
+                    datatypes = ff["datatypes"]
                 else:
-                    for dt in funcs[f]["datatypes"]:
-                        _gen_c_functions_one_unmasked_scalar(isa, file, funcs, f, ff, dt)
-
+                    datatypes = funcs[f]["datatypes"]
+                for dt in datatypes:
+                    _gen_c_functions_scalar(isa, file, funcs, f, ff, dt)
         else:
             print("Panic: '" + f + "' function does not exist.")
             exit(-1)
@@ -240,7 +242,7 @@ def gen_mipp_scalar():
     # implementation C
     file = open("../include/scalar/mipp_impl_scalar_gen.h", "w")
 
-    tpl_header_avx = """#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SCALAR_H_
+    tpl_header_scalar = """#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SCALAR_H_
 #define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SCALAR_H_
 #include <math.h> // sqrt, sqrtf, round, roundf
 #include <string.h> // memcpy
@@ -283,14 +285,8 @@ def gen_mipp_scalar():
 
 #define BIT_CAST_1(dst_ptr, src_ptr) \\
 	memcpy((dst_ptr), (src_ptr), sizeof(*(dst_ptr)))
-
-#ifndef __cplusplus
-	#ifndef static_assert
-		#define static_assert _Static_assert
-	#endif
-#endif
 """
-    j2_template = Template(tpl_header_avx, undefined=StrictUndefined)
+    j2_template = Template(tpl_header_scalar, undefined=StrictUndefined)
     print(j2_template.render(), file=file)
 
     gen_c_defines(isa_scalar, file)
@@ -299,10 +295,8 @@ def gen_mipp_scalar():
     copy_mipp_funcs = copy.deepcopy(mipp_funcs)
     gen_c_functions_scalar(isa_scalar, file, copy_mipp_funcs, implems_scalar)
 
-    # gen_c_missing_functions(isa_scalar, file, copy_mipp_funcs)
-
-    tpl_footer_avx = """#endif /* MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SCALAR_H_ */"""
-    j2_template = Template(tpl_footer_avx, undefined=StrictUndefined)
+    tpl_footer_scalar = """#endif /* MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SCALAR_H_ */"""
+    j2_template = Template(tpl_footer_scalar, undefined=StrictUndefined)
     print(j2_template.render(), file=file)
 
     file.close()
