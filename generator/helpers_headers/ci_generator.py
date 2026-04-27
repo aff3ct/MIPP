@@ -37,25 +37,70 @@ def duplicate_isa_sve_along_size(isa_list):
         isa_list_copy.append(isa_sve_copy)
     return isa_list_copy
 
+def custom_prefix_generator(func, isa_list, is_common=False):
+    """
+    Creates custom prefix for the function inside of c/functions/name.h 
+    
+    These function should include every isa/common.h 
+    and the relevant isa/function/name.h 
+    also adds #pragma once @ the start of the file.
+    
+    returns a string with the content of the prefix.
+    """
+    content = "#pragma once\n\n"
+    if is_common:
+        is_first = True
+
+        for isa in isa_list:
+            if is_first:
+                content += "#if " + "defined(MIPP_" + isa["name"].upper() + ")\n"
+                is_first = False
+            else:
+                content += "#elif " + "defined(MIPP_" + isa["name"].upper() + ")\n"
+            content += "\n#include \"../"+isa["name"]+"/" + isa["name"] + "_common.h\"\n"
+        content += "#else\n#error \"Unsupported architecture, MIPP may not work properly\"\n#endif\n"
+        
+        
+    else : 
+        is_first = True
+
+        content += "#include \"../c_common.h\"\n"
+        for isa in isa_list:
+            if is_first:
+                content += "\n#if " + "defined(MIPP_" + isa["name"].upper() + ")\n"
+                is_first = False
+            else:
+                content += "\n#elif " + "defined(MIPP_" + isa["name"].upper() + ")\n"
+                
+            content += "#include \"../../"+isa["name"]+"/" + "functions/" + isa["name"] + "_" + func + ".h\"\n"
+        content += "#endif\n"
+        
+    return content
+    
+    
+
 def generate_c_interface(isa_list, include_manager=None):
     
-    file = open("../include/mipp.h", "a")
-
+    # file = open("../include/mipp.h", "a")
+    file_common = include_manager.get_fd("c", "common")
+    custom_prefix = custom_prefix_generator("common", isa_list, is_common=True)
+    print(custom_prefix, file=file_common)
+    
     tpl_header_interface = """#ifndef MY_INTRINSICS_PLUS_PLUS_INTERFACE_H_
 #define MY_INTRINSICS_PLUS_PLUS_INTERFACE_H_ """
     j2_template = Template(tpl_header_interface, undefined=StrictUndefined)
-    print(j2_template.render(), file=file)
+    print(j2_template.render(), file=file_common)
     # use try ldiv sve
     isa_list = duplicate_isa_sve_along_size(isa_list)
-    gen_ci_defines(isa_list, file)
-    gen_ci_structures(isa_list, file)
-    gen_ci_functions(isa_list, file, copy_mipp_funcs)
-
+    gen_ci_defines(isa_list, file_common)
+    gen_ci_structures(isa_list, file_common)
+    
     tpl_footer_interface = """#endif /* MY_INTRINSICS_PLUS_PLUS_INTERFACE_H_ */"""
     j2_template = Template(tpl_footer_interface, undefined=StrictUndefined)
-    print(j2_template.render(), file=file)
-
-    file.close()
+    print(j2_template.render(), file=file_common)
+    
+    
+    gen_ci_functions(isa_list, include_manager, copy_mipp_funcs)
 
 def gen_ci_defines(isa_list, file):
     for i, isa in enumerate(isa_list):
@@ -282,9 +327,10 @@ def ci_ldiv_writer(f,func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_
         print("}", file=file)
         print("#endif // defined(MIPP_ENABLE_LDIV"+str(ldiv)+")"+")", file=file)
 
-def gen_ci_functions(isa_list, file, funcs):
+def gen_ci_functions(isa_list, include_manager, funcs):
     isa_rvv = next((isa for isa in isa_list if isa["name"].startswith("rvv")), None)
     for f in funcs:
+        file = include_manager.get_fd("c", f)
         for dt in funcs[f]["datatypes"]:
             if len(dt.split(',')) <= 1:
                 dt_par = dt.split(',')[0]
@@ -299,6 +345,7 @@ def gen_ci_functions(isa_list, file, funcs):
                 func_name = build_func_name_short(isa_list[0], dt_par, f, False);
             else:
                 func_name = build_func_name(isa_list[0], dt_par, dt_ret, f, False);
+            print("func is "+f+" with dt "+dt+" and func_name "+func_name + "and file "+file.name , file.mode , file.closed)
             print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name, 0, False) + " {", file=file)
             for i, isa in  enumerate(isa_list):
                 if i == 0:
@@ -348,3 +395,6 @@ def gen_ci_functions(isa_list, file, funcs):
             
             for ldiv in all_ldiv:
                 ci_ldiv_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, ldiv=ldiv)
+                
+        custom_prefix = custom_prefix_generator(f, isa_list)
+        include_manager.write_custom_prefix("c", f, custom_prefix)

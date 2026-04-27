@@ -1,6 +1,7 @@
 from jinja2 import Template, StrictUndefined
 
 from include_gen import IncludeManager
+from headers_def import mipp_funcs
 
 def generate_mipp_h(include_manager=None):
 
@@ -20,28 +21,28 @@ typedef float float32_t;
 
 // ------------------------------------------------------------------------------------------------- includes files
 
-#if defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)
-#include "avx512/mipp_impl_avx512_gen.h"
-#endif
-#if defined(__AVX__)
-#include "avx/mipp_impl_avx_gen.h"
-#endif
+//#if defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)
+//#include "avx512/mipp_impl_avx512_gen.h"
+//#endif
+//#if defined(__AVX__)
+//#include "avx/mipp_impl_avx_gen.h"
+//#endif
 
-#if defined(__SSE__)
-#include "sse/mipp_impl_sse_gen.h"
-#endif
+//#if defined(__SSE__)
+//#include "sse/mipp_impl_sse_gen.h"
+//#endif
 
-#if defined(__ARM_FEATURE_SVE)
-#include "sve/mipp_impl_sve_gen.h"
-#endif
+//#if defined(__ARM_FEATURE_SVE)
+//#include "sve/mipp_impl_sve_gen.h"
+//#endif
 
-#if defined(__riscv_v_intrinsic)
-#include "rvv/mipp_impl_rvv_gen.h"
-#endif
+//#if defined(__riscv_v_intrinsic)
+//#include "rvv/mipp_impl_rvv_gen.h"
+//#endif
 
-#if defined(__ARM_NEON__) || defined(__ARM_NEON)
-#include "neon/mipp_impl_neon_gen.h"
-#endif
+//#if defined(__ARM_NEON__) || defined(__ARM_NEON)
+//#include "neon/mipp_impl_neon_gen.h"
+//#endif
 
 // utiles pour l'instant pour les tests
 // pourrait clairement etre utile pour les generateurs au dela du if #define
@@ -114,7 +115,15 @@ typedef float float32_t;
 
 // end utiles pour l'instant pour les tests...
 
-#endif /* MY_INTRINSICS_PLUS_PLUS_H_ */"""
+#include "c/c_common.h"
+"""
+
+	include_list = ""
+	for func in mipp_funcs:
+		include_list += "#include \"c/functions/" + "c_" + func + ".h\"\n"
+	postfix = """#endif /* MY_INTRINSICS_PLUS_PLUS_H_ */"""
+ 
+	template_file += include_list + "\n" + postfix
 
 	j2_template = Template(template_file, undefined=StrictUndefined)
 	print(j2_template.render(), file=file)

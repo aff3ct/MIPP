@@ -227,6 +227,37 @@ class IncludePath:
     #     fd = self.get_fd(base_dir)
     #     print(content, file=fd)
     #     self.close_fd()
+    
+    def write_custom_prefix(self, custom_prefix, base_dir):
+        full_path = f"{base_dir}/{self.name}"
+        os.makedirs(os.path.dirname(full_path), exist_ok=True)
+
+        # Ensure current generated body is on disk
+        if self.file is not None:
+            self.file.flush()
+            self.file.seek(0)
+
+        # Read current contents (from the same handle if present, otherwise from disk)
+        if self.file is not None:
+            old = self.file.read()
+            self.file.close()
+            self.file = None
+        else:
+            try:
+                with open(full_path, "r", encoding="utf-8", newline="") as f:
+                    old = f.read()
+            except FileNotFoundError:
+                old = ""
+
+        # Build prefix
+        prefix = custom_prefix + "\n"
+
+        # Rewrite file from scratch with prefix + old
+        with open(full_path, "w", encoding="utf-8", newline="") as f:
+            f.write(prefix)
+            f.write(old)
+        # Reopen for further appends
+        self.file = open(full_path, "a+", encoding="utf-8", newline="")
         
 class IncludeLayer:
     # all the includes path for 1 layer (simd_ext, c, cpp, obj) and their dependencies.
@@ -336,3 +367,9 @@ class IncludeManager:
                         f.write(f'#include "functions/{include_path.name}"\n')
                     else :
                         f.write(f'#include "{include_path.name}"\n')
+    
+    def write_custom_prefix(self, layer_name, func, custom_prefix):
+        if layer_name in self.layers:
+            layer = self.layers[layer_name]
+            if func in layer.includes:
+                layer.includes[func].write_custom_prefix(custom_prefix, f"{self.base_dir}/{layer_name}/functions")
