@@ -4,6 +4,8 @@ import re
 
 from tools import *
 
+from include_gen import *
+
 
 def gen_c_defines(isa, file):
 	"""
@@ -448,6 +450,7 @@ def _append_implem_status_masked(funcs, f, dt_key, mask_kind, ff, requirements):
 
 	bucket = get_masked_bucket(funcs, f, dt_key, mask_kind, create_missing_bucket=True)
 	bucket.append(cur_implem_status)
+	print("Updated masked implem status for '" + f + "<" + mask_kind + "><" + dt_key + ">' with conditions: " + str(cur_implem_status))
 
 
 def _build_previous_masked_emulated_exclusion_ifdef(funcs, f, dt_key, mask_kind, ff):
@@ -883,6 +886,7 @@ def gen_c_functions_rvv(isa, file, funcs, implems, lmul=0, reductions_fix=False)
 
 					# Append implem status *before* building current ifdef
 					_append_implem_status_masked(funcs, f, dt_key, mask_kind, ff, ph_ret["requirements"])
+					#print("requirements for '" + f + "<" + mask_kind + "><" + dt_key + ">' implementation: " + str(ph_ret["requirements"]))
 
 					# Combine ifdefs and emit #if if needed (and update emulated status)
 					ifd = _combine_current_ifdefs_masked(funcs, f, dt_key, mask_kind, ifd_prev)
