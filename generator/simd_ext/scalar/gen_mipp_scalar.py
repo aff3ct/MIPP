@@ -269,6 +269,12 @@ def gen_mipp_scalar():
 		#endif
 	#endif
 #endif // !defined(MIPP_SCALAR_SIZE)
+
+#define BIT_CAST_N(dst, src, n) \\
+	memcpy((dst), (src), (n) * sizeof(*(dst)))
+
+#define BIT_CAST_1(dst_ptr, src_ptr) \\
+	memcpy((dst_ptr), (src_ptr), sizeof(*(dst_ptr)))
 """
     j2_template = Template(tpl_header_avx, undefined=StrictUndefined)
     print(j2_template.render(), file=file)
