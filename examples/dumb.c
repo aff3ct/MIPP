@@ -6,6 +6,9 @@
 
 int main()
 {
+	mipp_info();
+	printf("\n");
+
 	rvd_float32_t r1 = mipp_set1_float32(1.0);
 	rvd_float32_t r2 = mipp_set1_float32(2.0);
 	rvd_float32_t r3 = mipp_add_float32(r1, r2);

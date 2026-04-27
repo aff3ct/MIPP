@@ -21,6 +21,7 @@ docker build --platform linux/riscv64 -t linux_riscv64_gcc-14_clang-20 .
 Create images aliases:
 ```bash
 docker tag linux_x86_64_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_linux:latest
+docker tag linux_x86_64_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_linux:scalar
 
 docker tag linux_x86_64_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_linux:gcc-14_sse2
 docker tag linux_x86_64_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_linux:gcc-14_sse3

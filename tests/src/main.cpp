@@ -10,16 +10,10 @@ static void force_enable_rvv() {
 }
 #endif
 
-
-
 int main(int argc, char* argv[])
 {
-    std::cout << "MIPP tests" << std::endl;
-    std::cout << "----------" << std::endl << std::endl;
-
-    // TODO: display MIPP infos here
-
+    mipp_info();
+    std::cout << std::endl << "Run MIPP tests..." << std::endl;
     int result = Catch::Session().run(argc, argv);
-
     return result;
 }

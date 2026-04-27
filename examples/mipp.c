@@ -15,6 +15,9 @@ void print_v(float32_t* v, char* name)
 
 int main(int argc, char** argv)
 {
+	mipp_info();
+	printf("\n");
+
 	int i;
 	float32_t a1[MIPP_N_FLOAT32 * 4];
 	float32_t a2[MIPP_N_FLOAT32 * 4];

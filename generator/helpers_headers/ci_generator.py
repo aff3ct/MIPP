@@ -1,4 +1,4 @@
-from jinja2 import Template, StrictUndefined
+from jinja2 import Template, StrictUndefined, Environment, FileSystemLoader
 import json
 import re
 
@@ -48,6 +48,13 @@ def generate_c_interface(isa_list):
 	isa_list = duplicate_isa_sve_along_size(isa_list)
 	gen_ci_defines(isa_list, file)
 	gen_ci_structures(isa_list, file)
+
+	# Add mipp_info function to mipp.h
+	env = Environment(loader=FileSystemLoader("./helpers_headers/templates/"))
+	template_mipp_info = env.get_template("mipp_info.tpl.h")
+	str_mipp_info = template_mipp_info.render(name="Unused for now :-)")
+	print(str_mipp_info, file=file)
+
 	gen_ci_functions(isa_list, file, copy_mipp_funcs)
 
 	tpl_footer_interface = """#endif /* MY_INTRINSICS_PLUS_PLUS_INTERFACE_H_ */"""

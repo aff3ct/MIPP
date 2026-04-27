@@ -18,7 +18,7 @@ before_script:
     matrix:
       - OS: [linux]
         COMPILER: ["gcc-14", "clang-20"]
-        ARCH: [sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2, avx2-fma, avx512f, avx512bw, avx512dq, armv7-neon, armv7-neon-fma, armv8-neon, riscv64-rvv1.0]
+        ARCH: [sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2, avx2-fma, avx512f, avx512bw, avx512dq, armv7-neon, armv7-neon-fma, armv8-neon, riscv64-rvv1.0, scalar]
 
 # GENERATION ----------------------------------------------------------------------------------------------------------
 
@@ -183,6 +183,9 @@ analysis-cppcheck:
     - if: '$ARCH == "riscv64-rvv1.0"'
       variables:
         SIMD_EXT: "-march=rv64gv1_zve32f_zvl256b -mrvv-vector-bits=zvl"
+    - if: '$ARCH == "scalar"'
+      variables:
+        SIMD_EXT: "-march=native -DMIPP_SCALAR"
   before_script:
   # find the number of threads on the computer
   - |
