@@ -100,7 +100,7 @@ static inline void mipp_info()
 	simd_ext = "RVV1.0";
 #elif defined(MIPP_SCALAR)
 	simd_ext = "SCALAR";
-#elif
+#else
 	#error "This case should never happen, there is a design problem :-("
 #endif
 
