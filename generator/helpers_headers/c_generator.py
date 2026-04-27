@@ -738,7 +738,7 @@ def gen_c_functions(isa, file, funcs, implems):
     Looking leaner now.
     """
     
-    if isa["name"] != "avx":
+    if isa["name"] != "avx" and isa["name"] != "sse":
         for f in implems:
             if f in funcs:
                 for ff in implems[f]:
@@ -771,7 +771,7 @@ def gen_c_functions(isa, file, funcs, implems):
 
 def gen_c_generic_functions(isa, file, funcs, implems):
     
-    if isa["name"] != "avx":
+    if isa["name"] != "avx" and isa["name"] != "sse":
         for f in implems:
             if f in funcs:
                 for ff in implems[f]:
@@ -795,7 +795,7 @@ def gen_c_generic_functions(isa, file, funcs, implems):
                 exit(-1)
 
 def gen_c_missing_functions(isa, file, funcs):
-    if isa["name"] != "avx":
+    if isa["name"] != "avx" and isa["name"] != "sse":
         for f in funcs:
             for dt in funcs[f]["datatypes"]:
                 _emit_separator(f, file)
@@ -831,7 +831,7 @@ def gen_c_missing_functions_lmul(isa, file, funcs, lmul):
     Intended for RVV (explicit _mX entrypoints).
     """
     #hack while moving from single file to include manager.
-    if isa["name"] != "rvv" and isa["name"] != "avx":
+    if isa["name"] != "rvv" and isa["name"] != "avx" and isa["name"] != "sse":
         for f in funcs:
             for dt in funcs[f]["datatypes"]:
                 _emit_separator(f, file)
