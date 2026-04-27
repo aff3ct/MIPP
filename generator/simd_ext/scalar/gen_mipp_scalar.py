@@ -123,6 +123,10 @@ def _emit_function_body_scalar(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rende
     if ff["type"] == "element-wide":
         # Original code had a redundant always-true condition; keep behavior identical.
         if funcs[f]["proto"]["args"] or (not funcs[f]["proto"]["args"]):
+            print(f"\tstatic_assert(MIPP_SCALAR_N_{dt_par.upper()} > 0, \"MIPP_SCALAR_N_{dt_par.upper()} must be > 0\");", end="\n", file=file)
+            if dt_par.upper() != dt_ret.upper():
+                print(f"\tstatic_assert(MIPP_SCALAR_N_{dt_ret.upper()} > 0, \"MIPP_SCALAR_N_{dt_ret.upper()} must be > 0\");", end="\n", file=file)
+            print("", end="\n", file=file)
             _emit_short_format_prologue_scalar(funcs[f], dt_ret, isa, file, lmul=lmul)
             print(f"\tfor (size_t i = 0; i < MIPP_SCALAR_N_{dt_par.upper()}; i++)", file=file)
             print("\t{", file=file)
@@ -132,6 +136,10 @@ def _emit_function_body_scalar(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rende
         post_rendering = post_rendering.replace("\t\t\n", "\n")
         post_rendering = "\t\t" + post_rendering
     elif ff["type"] == "vector-wide":
+        print(f"\tstatic_assert(MIPP_SCALAR_N_{dt_par.upper()} > 0, \"MIPP_SCALAR_N_{dt_par.upper()} must be > 0\");", end="\n", file=file)
+        if dt_par.upper() != dt_ret.upper():
+            print(f"\tstatic_assert(MIPP_SCALAR_N_{dt_ret.upper()} > 0, \"MIPP_SCALAR_N_{dt_ret.upper()} must be > 0\");", end="\n", file=file)
+        print("", end="\n", file=file)
         print("\t", end='', file=file)
         # cleaning
         post_rendering = post_rendering.lstrip()
@@ -270,11 +278,17 @@ def gen_mipp_scalar():
 	#endif
 #endif // !defined(MIPP_SCALAR_SIZE)
 
-#define BIT_CAST_N(dst, src, n) \\
-	memcpy((dst), (src), (n) * sizeof(*(dst)))
+#define BIT_CAST_N(dst_ptr, src_ptr, n) \\
+	memcpy((dst_ptr), (src_ptr), (n) * sizeof(*(dst_ptr)))
 
 #define BIT_CAST_1(dst_ptr, src_ptr) \\
 	memcpy((dst_ptr), (src_ptr), sizeof(*(dst_ptr)))
+
+#ifndef __cplusplus
+	#ifndef static_assert
+		#define static_assert _Static_assert
+	#endif
+#endif
 """
     j2_template = Template(tpl_header_avx, undefined=StrictUndefined)
     print(j2_template.render(), file=file)

@@ -526,7 +526,7 @@ res.r[i] = %!pred_cond!% v0 %!pred_alt!%;
 """
 %m<tr>% res;
 %v<c:int|b:tr>% m_tmp = v0 ? -1 : 0;
-for (size_t i = 0; i < %N<tp>%; i++)
+for (size_t i = 0; i < %N<tr>%; i++)
 	BIT_CAST_1(&res.m[i], &m_tmp);
 return res;
 """
