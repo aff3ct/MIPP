@@ -4,9 +4,10 @@ import re
 
 from tools import *
 from headers_def import *
+from include_gen import IncludeManager
 
 # cpp wrapper
-def generate_cpp():
+def generate_cpp(include_manager=None):
 	file = open("../include/mipp.hpp", "w")
 
 	tpl_header_cpp = """#ifndef MY_INTRINSICS_PLUS_PLUS_HPP_

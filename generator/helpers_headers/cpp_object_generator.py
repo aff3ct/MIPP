@@ -4,6 +4,7 @@ import re
 
 from headers_def import *
 from tools import *
+from include_gen import IncludeManager
 
 def gen_cpp_reg_operators(file):
 	tpl_class_Rvd = """
@@ -110,7 +111,7 @@ public:
 
 """ -----------------------------------------------------------------------------------------------------"""
 
-def generate_cpp_object():
+def generate_cpp_object(include_manager=None):
 	
 	file = open("../include/mipp_obj.hpp", "w")
 	

@@ -5,6 +5,7 @@ import shutil
 import struct
 import argparse
 
+
 path = os.getcwd()
 
 sys.path.insert(1, path + "/helpers_headers/")
@@ -34,6 +35,9 @@ from ci_generator import generate_c_interface
 from cpp_generator import generate_cpp
 from cpp_object_generator import generate_cpp_object
 
+from include_gen import IncludeManager
+
+
 from tools import all_lmul, all_ldiv
 
 include_gen_path = "../include/"
@@ -45,6 +49,9 @@ avx512_path = os.path.join(include_gen_path, "avx512")
 sve_path = os.path.join(include_gen_path, "sve")
 rvv_path = os.path.join(include_gen_path, "rvv")
 neon_path = os.path.join(include_gen_path, "neon")
+c_path = os.path.join(include_gen_path, "c")
+cpp_path = os.path.join(include_gen_path, "cpp")
+obj_path = os.path.join(include_gen_path, "obj")
 
 def create_folder(folder_path):
     if not os.path.exists(folder_path):
@@ -70,25 +77,33 @@ def main():
     create_folder(sve_path)
     create_folder(rvv_path)
     create_folder(neon_path)
+    # LAYERS
+    create_folder(c_path)
+    create_folder(cpp_path)
+    create_folder(obj_path)
+    
+    # CREATE INCLUDE MANAGER
+    include_manager = IncludeManager(["avx512", "avx", "sse", "sve", "rvv", "neon"])
+    
     # generate all avalaible simd and wrapp
-    gen_mipp_sse()
-    gen_mipp_avx()
-    gen_mipp_avx512()
-    gen_mipp_sve()
-    gen_mipp_rvv()
-    gen_mipp_neon()
+    gen_mipp_sse(include_manager)
+    gen_mipp_avx(include_manager)
+    gen_mipp_avx512(include_manager)
+    gen_mipp_sve(include_manager)
+    gen_mipp_rvv(include_manager)
+    gen_mipp_neon(include_manager)
     # generate mipp_v2.h
-    generate_mipp_h()
+    generate_mipp_h(include_manager)
     # warning order
     # interface all simd  in c
     # generate mipp_v2_interface_gen.h
-    generate_c_interface([isa_avx512,isa_avx,isa_sse,isa_sve,isa_rvv,isa_neon])
+    generate_c_interface([isa_avx512,isa_avx,isa_sse,isa_sve,isa_rvv,isa_neon], include_manager)
     # C++ template wrapper interface with specialization
     # generate mipp.hpp
-    generate_cpp()
+    generate_cpp(include_manager)
     # C++ object wrapper using template specialization
     # generate mipp_object_gen.h
-    generate_cpp_object()
+    generate_cpp_object(include_manager)
 
     print("Generating MIPP code for sse, avx2, avx512, rvv and sve with size in " + str(isa_sve["size"]))
     print("With lmul in "+str(all_lmul)+ " and ldiv in "+str(all_ldiv))

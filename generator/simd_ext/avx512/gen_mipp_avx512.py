@@ -10,7 +10,9 @@ from implem_avx512 import *
 from implem_emu_avx512 import *
 from c_generator import *
 
-def gen_mipp_avx512():
+from include_gen import IncludeManager
+
+def gen_mipp_avx512(include_manager=None):
 	for iemu in implems_emu_avx512:
 		for sub_iemu in implems_emu_avx512[iemu]:
 			if "type" not in sub_iemu:

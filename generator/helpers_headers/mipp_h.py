@@ -1,6 +1,8 @@
 from jinja2 import Template, StrictUndefined
 
-def generate_mipp_h():
+from include_gen import IncludeManager
+
+def generate_mipp_h(include_manager=None):
 
 	file = open("../include/mipp.h", "w")
 

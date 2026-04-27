@@ -7,6 +7,8 @@ from implem_sve import *
 from implem_emu_sve import *
 from c_generator import *
 
+from include_gen import IncludeManager
+
 def gen_c_defines_sve_ls(file, isa_name, sve_size):
     print("#define MIPP_" + isa_name.upper() + str(sve_size) + "_RVD_SIZE_BIT " + str(sve_size), file=file)
     print("#define MIPP_" + isa_name.upper() + str(sve_size) + "_RVD_SIZE_BYTE " + str(int(sve_size / 8)), file=file)
@@ -37,7 +39,7 @@ def gen_c_structures_sve_ls(file, sve_size):
     for dt in isa_sve["datatypes"]:
         print(j2_template.render(isa=isa_sve,sve_size=sve_size,isa_datatype=isa_sve["datatypes"][dt], datatype=datatypes[dt]), file=file)
 
-def gen_mipp_sve():
+def gen_mipp_sve(include_manager=None):
     for iemu in implems_emu_sve:
         for sub_iemu in implems_emu_sve[iemu]:
             if "type" not in sub_iemu:
