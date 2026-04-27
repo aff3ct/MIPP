@@ -219,11 +219,9 @@ def gen_c_functions_scalar(isa, file, funcs, implems):
             for ff in implems[f]:
                 if ff["datatypes"]:
                     for dt in ff["datatypes"]:
-                        # _emit_separator_scalar(f, file)
                         _gen_c_functions_one_unmasked_scalar(isa, file, funcs, f, ff, dt)
                 else:
                     for dt in funcs[f]["datatypes"]:
-                        # _emit_separator_scalar(f, file)
                         _gen_c_functions_one_unmasked_scalar(isa, file, funcs, f, ff, dt)
 
         else:

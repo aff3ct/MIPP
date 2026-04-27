@@ -766,14 +766,20 @@ def gen_c_functions(isa, file, funcs, implems):
 	"""
 	for f in implems:
 		if f in funcs:
+			_emit_separator(f, file)
 			for ff in implems[f]:
-				
-				for dt in ff["datatypes"]:
-					_emit_separator(f, file)
-					if _is_masked_implem(f, ff):
-						_gen_c_function_one_masked(isa, file, funcs, f, ff, dt)
-					else :
-						_gen_c_functions_one_unmasked(isa, file, funcs, f, ff, dt)
+				if ff["datatypes"]:
+					for dt in ff["datatypes"]:
+						if _is_masked_implem(f, ff):
+							_gen_c_function_one_masked(isa, file, funcs, f, ff, dt)
+						else :
+							_gen_c_functions_one_unmasked(isa, file, funcs, f, ff, dt)
+				else:
+					for dt in funcs[f]["datatypes"]:
+						if _is_masked_implem(f, ff):
+							_gen_c_function_one_masked(isa, file, funcs, f, ff, dt)
+						else :
+							_gen_c_functions_one_unmasked(isa, file, funcs, f, ff, dt)
 
 		else:
 			print("Panic: '" + f + "' function does not exist.")
