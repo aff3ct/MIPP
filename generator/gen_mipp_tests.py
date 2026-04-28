@@ -391,53 +391,50 @@ def match_func_headers(func, kind="c"):
     issues with conflicting types etc...
     """
     headers = ""
-    if kind == "c":
-        headers += "\n#include <c/c_common.h>\n"
-        headers += f'#include <c/functions/c_{func}.h>\n'
+    if kind == "c" or kind == "cpp":
+        headers += f"\n#include <{kind}/{kind}_common.h>\n"
+        headers += f'#include <{kind}/functions/{kind}_{func}.h>\n'
         #also include load, get 
-        headers += f'#include <c/functions/c_load.h>\n'
-        headers += f'#include <c/functions/c_get.h>\n'
+        headers += f'#include <{kind}/functions/{kind}_load.h>\n'
+        headers += f'#include <{kind}/functions/{kind}_get.h>\n'
         if func.endswith("_k"):
-            headers += f'#include <c/functions/c_get_k.h>\n'
-            headers += f'#include <c/functions/c_set_k.h>\n'
-            headers += f'#include <c/functions/c_toreg.h>\n'
+            headers += f'#include <{kind}/functions/{kind}_get_k.h>\n'
+            headers += f'#include <{kind}/functions/{kind}_set_k.h>\n'
+            headers += f'#include <{kind}/functions/{kind}_toreg.h>\n'
         if func == "tomsk" : 
-            headers += f'#include <c/functions/c_toreg.h>\n'            
+            headers += f'#include <{kind}/functions/{kind}_toreg.h>\n'            
             
         if func == "storeu" : 
-            headers += f'#include <c/functions/c_store.h>\n'
+            headers += f'#include <{kind}/functions/{kind}_store.h>\n'
             
         if func in {"fmadd", "fmsub", "fnmadd", "fnmsub"} :
-            headers += f'#include <c/functions/c_mul.h>\n'
-            headers += f'#include <c/functions/c_add.h>\n'
-            headers += f'#include <c/functions/c_sub.h>\n'
+            headers += f'#include <{kind}/functions/{kind}_mul.h>\n'
+            headers += f'#include <{kind}/functions/{kind}_add.h>\n'
+            headers += f'#include <{kind}/functions/{kind}_sub.h>\n'
         
         if func == "toreg" : 
-            headers += f'#include <c/functions/c_get_k.h>\n'
-            headers += f'#include <c/functions/c_set_k.h>\n'
+            headers += f'#include <{kind}/functions/{kind}_get_k.h>\n'
+            headers += f'#include <{kind}/functions/{kind}_set_k.h>\n'
         
         if func in {"cmpeq", "cmpneq", "cmpgt", "cmpge", "cmplt", "cmple"} :
-            headers += f'#include <c/functions/c_toreg.h>\n'
+            headers += f'#include <{kind}/functions/{kind}_toreg.h>\n'
             
         if func == "blend" :
-            headers += f'#include <c/functions/c_get_k.h>\n'
-            headers += f'#include <c/functions/c_set_k.h>\n'
-            headers += f'#include <c/functions/c_set1.h>\n'
+            headers += f'#include <{kind}/functions/{kind}_get_k.h>\n'
+            headers += f'#include <{kind}/functions/{kind}_set_k.h>\n'
+            headers += f'#include <{kind}/functions/{kind}_set1.h>\n'
             
         if func == "maskz_add" : 
-            headers += f'#include <c/functions/c_set1.h>\n'
-            headers += f'#include <c/functions/c_set_k.h>\n'
-            headers += f'#include <c/functions/c_get_k.h>\n'
+            headers += f'#include <{kind}/functions/{kind}_set1.h>\n'
+            headers += f'#include <{kind}/functions/{kind}_set_k.h>\n'
+            headers += f'#include <{kind}/functions/{kind}_get_k.h>\n'
             
         if func == "testz" :
-            headers += f'#include <c/functions/c_set1_k.h>\n'
+            headers += f'#include <{kind}/functions/{kind}_set1_k.h>\n'
         
         if func == "testz_2" :
-            headers += f'#include <c/functions/c_set1_k.h>\n'
+            headers += f'#include <{kind}/functions/{kind}_set1_k.h>\n'
     
-    
-    elif kind == "cpp":
-        headers += "#include <mipp.hpp>\n"
     elif kind == "obj":
         headers += "#include <mipp_obj.hpp>\n"
     return headers
@@ -459,7 +456,7 @@ def gen_headers(kind="c", func=""):
         
         res += match_func_headers(func, kind)
     elif kind == "cpp":
-        res += "\n#include <mipp.hpp>"
+        res += match_func_headers(func, kind)
     elif kind == "obj":
         res += "\n#include <mipp_obj.hpp>"
     res += "\n#include <catch2/catch_test_macros.hpp>\n\n"
@@ -1026,9 +1023,9 @@ def gen_test_files_all_funcs(kind="c", lmul=0, mkind=""):
 
         if regen_cpp and func in cpp_dict:
             if func == "cast" or func == "cast_k":
-                cpp_file = gen_headers(kind="cpp") + gen_cast_file(func, kind="cpp",lmul=lmul, mkind=mkind)
+                cpp_file = gen_headers(kind="cpp", func=func) + gen_cast_file(func, kind="cpp",lmul=lmul, mkind=mkind)
             else:
-                cpp_file = gen_headers(kind="cpp") + gen_file(func, kind="cpp",lmul=lmul, mkind=mkind)
+                cpp_file = gen_headers(kind="cpp", func=func) + gen_file(func, kind="cpp",lmul=lmul, mkind=mkind)
                 
             if disable:
                 cpp_file = comment_out_cpp_file(cpp_file, reason)
