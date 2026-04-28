@@ -56,19 +56,19 @@ implems_rvv.update(implems_generic_emu)
 
 
 implem_dict = {
-	# avx512 has to be first bc it's the one w the #if
-	"avx512": {"implem": implems_avx512, "guard": avx512_guard},
-	"avx": {"implem": implems_avx, "guard": avx_guard},
-	"sse": {"implem": implems_sse, "guard": sse_guard},
-	"sve": {"implem": implems_sve, "guard": sve_guard},
-	"rvv": {"implem": implems_rvv, "guard": rvv_guard},
-	"neon": {"implem": implems_neon, "guard": neon_guard},
+    # avx512 has to be first bc it's the one w the #if
+    "avx512": {"implem": implems_avx512, "guard": avx512_guard},
+    "avx": {"implem": implems_avx, "guard": avx_guard},
+    "sse": {"implem": implems_sse, "guard": sse_guard},
+    "sve": {"implem": implems_sve, "guard": sve_guard},
+    "rvv": {"implem": implems_rvv, "guard": rvv_guard},
+    "neon": {"implem": implems_neon, "guard": neon_guard},
 }
 
 set_skip_testing = {                    
-	"maskzld", #prototype is broken.
-	"maskst", #prototype also broken. 
-	"cast_k", #either testing or cast_k is wrong.    
+    "maskzld", #prototype is broken.
+    "maskst", #prototype also broken. 
+    "cast_k", #either testing or cast_k is wrong.    
 }
 
 #every func that has the key "horizontal" set to false
@@ -76,750 +76,811 @@ set_skip_testing = {
 #except for RVV which where lmul variants will be generated for 
 #every function.
 mipp_funcs_lmul = {
-	func : meta for func, meta in mipp_funcs.items() if meta["horizontal"] == False
+    func : meta for func, meta in mipp_funcs.items() if meta["horizontal"] == False
 }
 ###### HELPERS ######
 
 # helper to get the datatypes for 1 func in 1 implem
 def get_defined_dttypes(func, implem):
-	"""
-	func: implem key, e.g. "add", "mul", ...
-	implem: dict of the implem, e.g. implems_avx512
-	returns a list of datatypes for which the func is defined in the implem
-	"""
-	func_dt = implem[func]
-	datatypes = []
-	for dt in func_dt:
-		datatypes.append(dt["datatypes"])
-	datatypes = list(set([item for sublist in datatypes for item in sublist]))
-	return datatypes
+    """
+    func: implem key, e.g. "add", "mul", ...
+    implem: dict of the implem, e.g. implems_avx512
+    returns a list of datatypes for which the func is defined in the implem
+    """
+    func_dt = implem[func]
+    datatypes = []
+    for dt in func_dt:
+        datatypes.append(dt["datatypes"])
+    datatypes = list(set([item for sublist in datatypes for item in sublist]))
+    return datatypes
 
 def dt_to_suffix(dt):
-	"""Used to convert cast format t1,t2 to t1_t2. 
-	for other dttypes this is a no-op.
-	"""
-	return dt.replace(",", "_")
+    """Used to convert cast format t1,t2 to t1_t2. 
+    for other dttypes this is a no-op.
+    """
+    return dt.replace(",", "_")
 
 def product_type_format_cpp(dt):
-	"""convert factor type "uint32,float32" to "uint32<float32_t>"
-	converts single type "uint32" to "uint32_t" for cpp tests
-	"""
-	if "," in dt:
-		dt1, dt2 = dt.split(",")
-		return f"_{dt1}<{dt2}_t>"
-	else:
-		return f"<{dt}_t>"
+    """convert factor type "uint32,float32" to "uint32<float32_t>"
+    converts single type "uint32" to "uint32_t" for cpp tests
+    """
+    if "," in dt:
+        dt1, dt2 = dt.split(",")
+        return f"_{dt1}<{dt2}_t>"
+    else:
+        return f"<{dt}_t>"
 
 def split_dt_pair(dt) :
-	""" 
-	"uint32,float32" -> ["uint32","float32"]
-	"""
-	return dt.split(",") if "," in dt else [dt]
+    """ 
+    "uint32,float32" -> ["uint32","float32"]
+    """
+    return dt.split(",") if "," in dt else [dt]
 
 def is_64bit_dt(dt):
-	return dt in {"int64", "uint64", "float64"}
+    return dt in {"int64", "uint64", "float64"}
 
 def is_bw_dt(dt):
-	return dt in {"int8", "uint8", "int16", "uint16"}
+    return dt in {"int8", "uint8", "int16", "uint16"}
 
 def is_float_dt(dt):
-	return dt in all_float
+    return dt in all_float
 
 def is_int_dt(dt):
-	return dt in all_int_uint
+    return dt in all_int_uint
 
 def is_signed_int_dt(dt):
-	return dt in all_int
+    return dt in all_int
 
 def match_concept(func):
-	"""
-	helper to match a func to an 
-	entry in mipp_funcs_concepts. 
-	This is used to write files in the relevant 
-	subdir for their concept.
-	"""
-	for concept in mipp_funcs_concepts:
-		if func in mipp_funcs_concepts[concept]:
-			if concept == "a_trier":
-				return "miscellaneous"
-			return concept
-	return "miscellaneous"
+    """
+    helper to match a func to an 
+    entry in mipp_funcs_concepts. 
+    This is used to write files in the relevant 
+    subdir for their concept.
+    """
+    for concept in mipp_funcs_concepts:
+        if func in mipp_funcs_concepts[concept]:
+            if concept == "a_trier":
+                return "miscellaneous"
+            return concept
+    return "miscellaneous"
 
 def gen_func_defines(func, dt, implem):
-	func_defines = ""
-	for sub_implem in implem[func]:
-		if dt in sub_implem["datatypes"]:
-			if "if" in sub_implem:
-				if func_defines:
-					func_defines += " || "
-				func_defines += "(" + sub_implem["if"] + ")"
-	return func_defines
+    func_defines = ""
+    for sub_implem in implem[func]:
+        if dt in sub_implem["datatypes"]:
+            if "if" in sub_implem:
+                if func_defines:
+                    func_defines += " || "
+                func_defines += "(" + sub_implem["if"] + ")"
+    return func_defines
 
 def lmul_to_str(lmul, mkind=""):
-	#1-> m1 
-	#2-> m2
-	#4-> m4
-	#8-> m8
-	#1/2 -> d2
-	#1/4 -> d4
-	#1/8 -> d8
-	
-	#temporary fix. Every generator will be handled by 
-	#layer_X_mask at some point. But we'll keep it that way for now.
-	if mkind == "":
-		match lmul:
-			case 0 : return ""
-			case 1 : return "m1"
-			case 2 : return "m2"
-			case 4 : return "m4"
-			case 8 : return "m8"
-			case 0.5 : return "d2"
-			case 0.25 : return "d4"
-			case 0.125 : return "d8"
-	else:
-		match lmul:
-			case 0 : return ""
-			case 1 : return "_m1"
-			case 2 : return "_m2"
-			case 4 : return "_m4"
-			case 8 : return "_m8"
-			case 0.5 : return "_d2"
-			case 0.25 : return "_d4"
-			case 0.125 : return "_d8"
+    #1-> m1 
+    #2-> m2
+    #4-> m4
+    #8-> m8
+    #1/2 -> d2
+    #1/4 -> d4
+    #1/8 -> d8
+    
+    #temporary fix. Every generator will be handled by 
+    #layer_X_mask at some point. But we'll keep it that way for now.
+    if mkind == "":
+        match lmul:
+            case 0 : return ""
+            case 1 : return "m1"
+            case 2 : return "m2"
+            case 4 : return "m4"
+            case 8 : return "m8"
+            case 0.5 : return "d2"
+            case 0.25 : return "d4"
+            case 0.125 : return "d8"
+    else:
+        match lmul:
+            case 0 : return ""
+            case 1 : return "_m1"
+            case 2 : return "_m2"
+            case 4 : return "_m4"
+            case 8 : return "_m8"
+            case 0.5 : return "_d2"
+            case 0.25 : return "_d4"
+            case 0.125 : return "_d8"
 def mask_to_str(mkind, kind):
-	if kind == "c" : 
-		if mkind == "" :
-			return ""
-		else :
-			return f"_{mkind}"
-	elif kind == "cpp" :
-		if mkind == "" :
-			return ""
-		else :
-			if mkind == "mask" :
-				return "<M>"
-			elif mask == "maskz" :
-				return "<Z>"
-			elif mask == "masks" :
-				return "<S>"
-			else : 
-				raise ValueError(f"Unknown mask: {mask!r}")
+    if kind == "c" : 
+        if mkind == "" :
+            return ""
+        else :
+            return f"_{mkind}"
+    elif kind == "cpp" :
+        if mkind == "" :
+            return ""
+        else :
+            if mkind == "mask" :
+                return "<M>"
+            elif mask == "maskz" :
+                return "<Z>"
+            elif mask == "masks" :
+                return "<S>"
+            else : 
+                raise ValueError(f"Unknown mask: {mask!r}")
 
 def get_mask_args(mkind): 
-	if mkind == "" :
-		return ""
-	else :
-		if mkind== "mask" or mkind == "maskz" : 
-			return "mpred,"
-		elif mkind == "masks," :
-			return "mpred, rsrc,"
+    if mkind == "" :
+        return ""
+    else :
+        if mkind== "mask" or mkind == "maskz" : 
+            return "mpred,"
+        elif mkind == "masks," :
+            return "mpred, rsrc,"
 
 ###### GENERATION FUNC ######
 
 # add the type guard for 1 func in 1 implem
 def add_type_guards(func, implem, function, kind="c", lmul=0, mkind=""):
-	"""
-	func: implem key, e.g. "add", "mul", ...
-	implem: dict of the implem, e.g. implems_avx512
-	function: part of the name of the fn to call. Should prolly be changed
-	kind: "c" for c test, "cpp" for cpp test, "obj" for obj test
+    """
+    func: implem key, e.g. "add", "mul", ...
+    implem: dict of the implem, e.g. implems_avx512
+    function: part of the name of the fn to call. Should prolly be changed
+    kind: "c" for c test, "cpp" for cpp test, "obj" for obj test
 
-	returns a string with the type guards for the func in the implem
-	
-	N.B : WILL NOT GENERATE TESTS FOR DTTYPES IF THE FUNC IS NOT DEFINED
-	FOR THOSE DTTYPES IN IMPLEM. EVEN IF THE FUNC IS DEFINED FOR THOSE 
-	DTTYPES IN headers_def.mipp_funcs[func]["datatypes"].
-	THIS IS FORE EASE OF TESTS.
-	"""
-	datatypes = get_defined_dttypes(func, implem)
-	section = ""
-	res = ""
-	lmul_str = lmul_to_str(lmul, "")
-	lmul_str = "_" + lmul_str if lmul_str else ""
-	mask_str = mask_to_str(mkind, kind)
-	if kind == "c":
-		section = 'SECTION ("datatype = {dt}") {{ {function}_{dt_suffix}{mask_str}{lmul_str}(); }}\n'
-	elif kind == "cpp" or kind == "obj":
-		section = 'SECTION ("datatype = {dt}") {{ {function}{dt_suffix}(); }}\n'
+    returns a string with the type guards for the func in the implem
+    
+    N.B : WILL NOT GENERATE TESTS FOR DTTYPES IF THE FUNC IS NOT DEFINED
+    FOR THOSE DTTYPES IN IMPLEM. EVEN IF THE FUNC IS DEFINED FOR THOSE 
+    DTTYPES IN headers_def.mipp_funcs[func]["datatypes"].
+    THIS IS FORE EASE OF TESTS.
+    """
+    datatypes = get_defined_dttypes(func, implem)
+    section = ""
+    res = ""
+    lmul_str = lmul_to_str(lmul, "")
+    lmul_str = "_" + lmul_str if lmul_str else ""
+    mask_str = mask_to_str(mkind, kind)
+    if kind == "c":
+        section = 'SECTION ("datatype = {dt}") {{ {function}_{dt_suffix}{mask_str}{lmul_str}(); }}\n'
+    elif kind == "cpp" or kind == "obj":
+        section = 'SECTION ("datatype = {dt}") {{ {function}{dt_suffix}(); }}\n'
 
-	#lists to store the dttypes that need to be 
-	#wrapped in #if defined(MIPP_64BIT) or #if defined(MIPP_BW)
-	list_64 = []
-	list_bw = []
-	datatypes.sort()
-	for dt in datatypes:
-		func_defines = gen_func_defines(func, dt, implem)
-		dt_suffix = dt_to_suffix(dt)
-		parts = split_dt_pair(dt)
-		if any(is_64bit_dt(part) for part in parts):
-			list_64.append(dt)
-		elif any(is_bw_dt(part) for part in parts):
-			list_bw.append(dt)
-		else:
-			
-			#this is the ugly part
-			if kind == "cpp" or kind == "obj":
-				dt_suffix = product_type_format_cpp(dt)#used to handle cast
-				if func in set_float_workaround and is_float_dt(dt):
-					#this is hacky. It's to generate proper name to call float 
-					#versions of andb etc...
-					dt_suffix = f"_float{dt_suffix.split('t')[1].split("_")[0]}{dt_suffix}"
-			if func_defines:
-				res += f"#if {func_defines}\n"
-			res += section.format(dt=dt, dt_suffix=dt_suffix, function=function, lmul_str=lmul_str, mask_str=mask_str)
-			if func_defines:
-				res += f"#endif // {func_defines}\n"
+    #lists to store the dttypes that need to be 
+    #wrapped in #if defined(MIPP_64BIT) or #if defined(MIPP_BW)
+    list_64 = []
+    list_bw = []
+    datatypes.sort()
+    for dt in datatypes:
+        func_defines = gen_func_defines(func, dt, implem)
+        dt_suffix = dt_to_suffix(dt)
+        parts = split_dt_pair(dt)
+        if any(is_64bit_dt(part) for part in parts):
+            list_64.append(dt)
+        elif any(is_bw_dt(part) for part in parts):
+            list_bw.append(dt)
+        else:
+            
+            #this is the ugly part
+            if kind == "cpp" or kind == "obj":
+                dt_suffix = product_type_format_cpp(dt)#used to handle cast
+                if func in set_float_workaround and is_float_dt(dt):
+                    #this is hacky. It's to generate proper name to call float 
+                    #versions of andb etc...
+                    dt_suffix = f"_float{dt_suffix.split('t')[1].split("_")[0]}{dt_suffix}"
+            if func_defines:
+                res += f"#if {func_defines}\n"
+            res += section.format(dt=dt, dt_suffix=dt_suffix, function=function, lmul_str=lmul_str, mask_str=mask_str)
+            if func_defines:
+                res += f"#endif // {func_defines}\n"
 
-	#same logic for these
-	if list_64 != []:
-		list_64.sort()
-		res += f"#if defined(MIPP_64BIT)\n"
-		for dt in list_64:
-			func_defines = gen_func_defines(func, dt, implem)
-			dt_suffix = dt_to_suffix(dt)
-			if kind == "cpp" or kind == "obj":
-				dt_suffix = product_type_format_cpp(dt)
-				if func in set_float_workaround and is_float_dt(dt):
-					dt_suffix = f"_float{dt_suffix.split('t')[1].split("_")[0]}{dt_suffix}"
-			if func_defines:
-				res += f"#if {func_defines}\n"
-			res += section.format(dt=dt, dt_suffix=dt_suffix, function=function, lmul_str=lmul_str, mask_str=mask_str)
-			if func_defines:
-				res += f"#endif // {func_defines}\n"
-		res += "#endif // defined(MIPP_64BIT)\n"
+    #same logic for these
+    if list_64 != []:
+        list_64.sort()
+        res += f"#if defined(MIPP_64BIT)\n"
+        for dt in list_64:
+            func_defines = gen_func_defines(func, dt, implem)
+            dt_suffix = dt_to_suffix(dt)
+            if kind == "cpp" or kind == "obj":
+                dt_suffix = product_type_format_cpp(dt)
+                if func in set_float_workaround and is_float_dt(dt):
+                    dt_suffix = f"_float{dt_suffix.split('t')[1].split("_")[0]}{dt_suffix}"
+            if func_defines:
+                res += f"#if {func_defines}\n"
+            res += section.format(dt=dt, dt_suffix=dt_suffix, function=function, lmul_str=lmul_str, mask_str=mask_str)
+            if func_defines:
+                res += f"#endif // {func_defines}\n"
+        res += "#endif // defined(MIPP_64BIT)\n"
 
-	if list_bw != []:
-		list_bw.sort()
-		res += f"#if defined(MIPP_BW)\n"
-		for dt in list_bw:
-			func_defines = gen_func_defines(func, dt, implem)
-			dt_suffix = dt_to_suffix(dt)
-			if kind == "cpp" or kind == "obj":
-				dt_suffix = product_type_format_cpp(dt)
-				if func in set_float_workaround and is_float_dt(dt):
-					dt_suffix = f"_float{dt_suffix.split('t')[1].split("_")[0]}{dt_suffix}"
-			if func_defines:
-				res += f"#if {func_defines}\n"
-			res += section.format(dt=dt, dt_suffix=dt_suffix, function=function, lmul_str=lmul_str, mask_str=mask_str)
-			if func_defines:
-				res += f"#endif // {func_defines}\n"
-		res += "#endif // defined(MIPP_BW)\n"
+    if list_bw != []:
+        list_bw.sort()
+        res += f"#if defined(MIPP_BW)\n"
+        for dt in list_bw:
+            func_defines = gen_func_defines(func, dt, implem)
+            dt_suffix = dt_to_suffix(dt)
+            if kind == "cpp" or kind == "obj":
+                dt_suffix = product_type_format_cpp(dt)
+                if func in set_float_workaround and is_float_dt(dt):
+                    dt_suffix = f"_float{dt_suffix.split('t')[1].split("_")[0]}{dt_suffix}"
+            if func_defines:
+                res += f"#if {func_defines}\n"
+            res += section.format(dt=dt, dt_suffix=dt_suffix, function=function, lmul_str=lmul_str, mask_str=mask_str)
+            if func_defines:
+                res += f"#endif // {func_defines}\n"
+        res += "#endif // defined(MIPP_BW)\n"
 
-	return res
+    return res
 
 def gen_test_type_guards(func, long_name, short_name, kind="c", lmul=0, mkind=""):
-	"""
-	Adds type guards to the test 
-	case for the different implementations of a func.
-	Only generates tests for the dttypes for which the func is defined in the implem.
-	"""
-	layer_dict = get_gen_test_dict(kind)
-	res = f'\nTEST_CASE("{long_name} - {kind}", "[{short_name}]") {{\n'
-	for implems in implem_dict.values():
-		res += implems["guard"] + "\n"
-		if func in implems["implem"]:
-			if kind == "c":
-				res += add_type_guards(func, implems["implem"], function=f"test_cmipp_{func}", kind=kind, lmul=lmul, mkind=mkind)
-			elif kind == "cpp":
-				res += add_type_guards(
-					func,
-					implems["implem"],
-					function=f"test_cppmipp_{test_function_name(kind, func)}",
-					kind=kind,
-					lmul=lmul,
-     				mkind=mkind,	
-				)
-			elif kind == "obj":
-				res += add_type_guards(
-					func,
-					implems["implem"],
-					function=f"test_objmipp_{test_function_name(kind, func)}",
-					kind=kind,
-				)
-	res += "#else\n"
-	res += f'#error "No implementation for {func} in any of the supported architectures"\n'
-	res += "#endif\n"
-	res += "}\n"
-	return res
+    """
+    Adds type guards to the test 
+    case for the different implementations of a func.
+    Only generates tests for the dttypes for which the func is defined in the implem.
+    """
+    layer_dict = get_gen_test_dict(kind)
+    res = f'\nTEST_CASE("{long_name} - {kind}", "[{short_name}]") {{\n'
+    for implems in implem_dict.values():
+        res += implems["guard"] + "\n"
+        if func in implems["implem"]:
+            if kind == "c":
+                res += add_type_guards(func, implems["implem"], function=f"test_cmipp_{func}", kind=kind, lmul=lmul, mkind=mkind)
+            elif kind == "cpp":
+                res += add_type_guards(
+                    func,
+                    implems["implem"],
+                    function=f"test_cppmipp_{test_function_name(kind, func)}",
+                    kind=kind,
+                    lmul=lmul,
+                     mkind=mkind,	
+                )
+            elif kind == "obj":
+                res += add_type_guards(
+                    func,
+                    implems["implem"],
+                    function=f"test_objmipp_{test_function_name(kind, func)}",
+                    kind=kind,
+                )
+    res += "#else\n"
+    res += f'#error "No implementation for {func} in any of the supported architectures"\n'
+    res += "#endif\n"
+    res += "}\n"
+    return res
 
 #cast specific to handle the dttype pair
 def gen_cast_test_type_guards(func, long_name, short_name, kind="c", lmul=0, mkind=""):
-	"""
-	Cast is a "product type". 
-	The logic is mostly the same as gen_test_type_guards 
-	but we need to handle the dttype pairs properly.
-	"""
-	layer_dict = get_gen_test_dict(kind)
-	res = f'\nTEST_CASE("{long_name} - {kind}", "[{short_name}]") {{\n'
-	for implems in implem_dict.values():
-		res += implems["guard"] + "\n"
-		if func in implems["implem"]:
-			if kind == "c":
-				res += add_type_guards(func, implems["implem"], function=f"test_cmipp_{func}", kind=kind, lmul=lmul, mkind=mkind)
-			elif kind == "cpp":
-				res += add_type_guards(
-					func,
-					implems["implem"],
-					function=f"test_cppmipp_{test_function_name(kind, func)}",
-					kind=kind,
-					lmul=lmul,
-					mkind=mkind,	
-				)
-			elif kind == "obj":
-				res += add_type_guards(
-					func,
-					implems["implem"],
-					function=f"test_objmipp_{test_function_name(kind, func)}",
-					kind=kind,
-					lmul=lmul, 
-					mkind=mkind,
-				)
-	res += "#else\n"
-	res += f'#error "No implementation for {func} in any of the supported architectures"\n'
-	res += "#endif\n"
-	res += "}\n"
-	return res
+    """
+    Cast is a "product type". 
+    The logic is mostly the same as gen_test_type_guards 
+    but we need to handle the dttype pairs properly.
+    """
+    layer_dict = get_gen_test_dict(kind)
+    res = f'\nTEST_CASE("{long_name} - {kind}", "[{short_name}]") {{\n'
+    for implems in implem_dict.values():
+        res += implems["guard"] + "\n"
+        if func in implems["implem"]:
+            if kind == "c":
+                res += add_type_guards(func, implems["implem"], function=f"test_cmipp_{func}", kind=kind, lmul=lmul, mkind=mkind)
+            elif kind == "cpp":
+                res += add_type_guards(
+                    func,
+                    implems["implem"],
+                    function=f"test_cppmipp_{test_function_name(kind, func)}",
+                    kind=kind,
+                    lmul=lmul,
+                    mkind=mkind,	
+                )
+            elif kind == "obj":
+                res += add_type_guards(
+                    func,
+                    implems["implem"],
+                    function=f"test_objmipp_{test_function_name(kind, func)}",
+                    kind=kind,
+                    lmul=lmul, 
+                    mkind=mkind,
+                )
+    res += "#else\n"
+    res += f'#error "No implementation for {func} in any of the supported architectures"\n'
+    res += "#endif\n"
+    res += "}\n"
+    return res
 
 # TODO : for C compatibiliy, use
 # math.h stdio.h etc instead of cmath, cstdio, etc.
-def gen_headers(kind="c"):
-	"""
-	simple helper to return headers for the test files
-	"""
-	res = (
-		"#include <exception>"
-		"\n#include <algorithm>"
-		"\n#include <numeric>"
-		"\n#include <random>"
-		"\n#include <cstdio>"
-		"\n#include <cmath>"
-		"\n#include <bit>"
-	)
-	if kind == "c":
-		res += "\n#include <mipp.h>"
-	elif kind == "cpp":
-		res += "\n#include <mipp.hpp>"
-	elif kind == "obj":
-		res += "\n#include <mipp_obj.hpp>"
-	res += "\n#include <catch2/catch_test_macros.hpp>\n\n"
-	return res
+
+
+def match_func_headers(func, kind="c"):
+    """
+    helper to match a func to the relevant headers to include in the test file.
+    This is used to avoid including all headers in all test files, which can cause 
+    issues with conflicting types etc...
+    """
+    headers = ""
+    if kind == "c":
+        headers += "\n#include <c/c_common.h>\n"
+        headers += f'#include <c/functions/c_{func}.h>\n'
+        #also include load, get 
+        headers += f'#include <c/functions/c_load.h>\n'
+        headers += f'#include <c/functions/c_get.h>\n'
+        if func.endswith("_k"):
+            headers += f'#include <c/functions/c_get_k.h>\n'
+            headers += f'#include <c/functions/c_set_k.h>\n'
+            headers += f'#include <c/functions/c_toreg.h>\n'
+        if func == "tomsk" : 
+            headers += f'#include <c/functions/c_toreg.h>\n'            
+            
+        if func == "storeu" : 
+            headers += f'#include <c/functions/c_store.h>\n'
+            
+        if func in {"fmadd", "fmsub", "fnmadd", "fnmsub"} :
+            headers += f'#include <c/functions/c_mul.h>\n'
+            headers += f'#include <c/functions/c_add.h>\n'
+            headers += f'#include <c/functions/c_sub.h>\n'
+        
+        if func == "toreg" : 
+            headers += f'#include <c/functions/c_get_k.h>\n'
+            headers += f'#include <c/functions/c_set_k.h>\n'
+        
+        if func in {"cmpeq", "cmpneq", "cmpgt", "cmpge", "cmplt", "cmple"} :
+            headers += f'#include <c/functions/c_toreg.h>\n'
+            
+        if func == "blend" :
+            headers += f'#include <c/functions/c_get_k.h>\n'
+            headers += f'#include <c/functions/c_set_k.h>\n'
+            headers += f'#include <c/functions/c_set1.h>\n'
+            
+        if func == "maskz_add" : 
+            headers += f'#include <c/functions/c_set1.h>\n'
+            headers += f'#include <c/functions/c_set_k.h>\n'
+            headers += f'#include <c/functions/c_get_k.h>\n'
+            
+        if func == "testz" :
+            headers += f'#include <c/functions/c_set1_k.h>\n'
+        
+        if func == "testz_2" :
+            headers += f'#include <c/functions/c_set1_k.h>\n'
+    
+    
+    elif kind == "cpp":
+        headers += "#include <mipp.hpp>\n"
+    elif kind == "obj":
+        headers += "#include <mipp_obj.hpp>\n"
+    return headers
+
+def gen_headers(kind="c", func=""):
+    """
+    simple helper to return headers for the test files
+    """
+    res = (
+        "#include <exception>"
+        "\n#include <algorithm>"
+        "\n#include <numeric>"
+        "\n#include <random>"
+        "\n#include <cstdio>"
+        "\n#include <cmath>"
+        "\n#include <bit>"
+    )
+    if kind == "c":
+        
+        res += match_func_headers(func, kind)
+    elif kind == "cpp":
+        res += "\n#include <mipp.hpp>"
+    elif kind == "obj":
+        res += "\n#include <mipp_obj.hpp>"
+    res += "\n#include <catch2/catch_test_macros.hpp>\n\n"
+    return res
 
 def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False, lmul=0, mkind=""):
-	"""
-	generates the test function(s) for 1 func, 1 datatype, 1 layer.
-	"""
-	# Pick per-layer dictionary
-	layer_dict = get_gen_test_dict(kind)
-	if lmul != 0:
-		layer_dict = get_gen_test_dict_lmul(kind)
-	if mkind != "":
-		layer_dict = get_gen_test_dict_mask(kind)
+    """
+    generates the test function(s) for 1 func, 1 datatype, 1 layer.
+    """
+    # Pick per-layer dictionary
+    layer_dict = get_gen_test_dict(kind)
+    if lmul != 0:
+        layer_dict = get_gen_test_dict_lmul(kind)
+    if mkind != "":
+        layer_dict = get_gen_test_dict_mask(kind)
 
-	# we need to render twice because we have 2 levels of templates :)
-	func_dict = layer_dict[func]["proto"]
-	func_template = layer_dict[func]["template"]
+    # we need to render twice because we have 2 levels of templates :)
+    func_dict = layer_dict[func]["proto"]
+    func_template = layer_dict[func]["template"]
 
-	func_template = Template(func_template, undefined=StrictUndefined)
-	res = func_template.render(
-		func_decl=func_dict["func_decl"],
-		decl=func_dict["decl"],
-		init=func_dict["init"],
-		load=func_dict["load"],
-		operation=func_dict["operation"],
-		loop_body=func_dict["loop_body"],
-		loop_assert=func_dict["loop_assert"],
-	)
+    func_template = Template(func_template, undefined=StrictUndefined)
+    res = func_template.render(
+        func_decl=func_dict["func_decl"],
+        decl=func_dict["decl"],
+        init=func_dict["init"],
+        load=func_dict["load"],
+        operation=func_dict["operation"],
+        loop_body=func_dict["loop_body"],
+        loop_assert=func_dict["loop_assert"],
+    )
 
-	func_template = Template(res, undefined=StrictUndefined)
+    func_template = Template(res, undefined=StrictUndefined)
 
-	func_old = func
-	func = test_function_name(kind, func)
-	type_size=""
-	if kind=="c": 
-		type_size = scalar_type.split("t")[1]
-	
-	
-	#hacky workaround to handle float versions of andb etc... in cpp tests.
-	#nb: float is set to != False only for CPP
-	lmul_suffix = lmul_to_str(lmul, mkind)
-	lmul_coeff = 1
-	if lmul != 0 :
-		lmul_coeff = lmul
-	if kind=="c":
+    func_old = func
+    func = test_function_name(kind, func)
+    type_size=""
+    if kind=="c": 
+        type_size = scalar_type.split("t")[1]
+    
+    
+    #hacky workaround to handle float versions of andb etc... in cpp tests.
+    #nb: float is set to != False only for CPP
+    lmul_suffix = lmul_to_str(lmul, mkind)
+    lmul_coeff = 1
+    if lmul != 0 :
+        lmul_coeff = lmul
+    if kind=="c":
 
-		res = func_template.render(
-			func=func,
-			dt_ext=scalar_type,
-			op=layer_dict[func_old]["op"],
-			reg_type=reg_type,
-			msk_type=msk_type,
-			size="MIPP_N_" + scalar_type.upper(),
-			
-			is_float=is_float_dt(scalar_type),
-			is_int=is_int_dt(scalar_type),
-			is_signed=is_signed_int_dt(scalar_type),
-			type_size=type_size,
-			lmul_suffix=lmul_suffix,
-			lmul_coeff=lmul_coeff,
-			mask_args=get_mask_args(mkind),
-			mask_kind=mask_to_str(mkind, kind),
-		)
-	if not float and kind=="cpp" :
-		res = func_template.render(
-			func=func,
-			dt_ext=scalar_type,
-			op=layer_dict[func_old]["op"],
-			reg_type=reg_type,
-			msk_type=msk_type,
-			size="MIPP_N_" + scalar_type.upper(),
-			
-			is_float=False,
-			is_int=True,
-			
-			lmul_suffix=lmul_suffix,
-			lmul_coeff=lmul_coeff,
-			
-			mask_args=get_mask_args(mkind),
-			mask_kind=mask_to_str(mkind, kind),
-		)
-	if float and kind=="cpp" :
-	 
-		res = func_template.render(
-			func=func,
-			dt_ext=scalar_type,
-			op=layer_dict[func_old]["op"],
-			reg_type=reg_type,
-			msk_type=msk_type,
-			size="MIPP_N_" + scalar_type.upper(),
-			
-			is_float=True,
-			is_int=False,
-			is_signed=False,
-			type_size=float.split("t")[1],
-			lmul_suffix=lmul_suffix,
-			lmul_coeff=lmul_coeff,
-			
-			mask_args=get_mask_args(mkind),
-			mask_kind=mask_to_str(mkind, kind),
-		)
-	if kind == "obj" : #obsolete :(
-		res = func_template.render(
-			func=func,
-			dt_ext=scalar_type,
-			op=layer_dict[func_old]["op"],
-			reg_type=reg_type,
-			msk_type=msk_type,
-			size="MIPP_N_" + scalar_type.upper(),
-			
-			is_float=is_float_dt(scalar_type),
-			is_int=is_int_dt(scalar_type),
-			is_signed=is_signed_int_dt(scalar_type),
-			type_size=type_size,
-		)
-	return res + "\n"
+        res = func_template.render(
+            func=func,
+            dt_ext=scalar_type,
+            op=layer_dict[func_old]["op"],
+            reg_type=reg_type,
+            msk_type=msk_type,
+            size="MIPP_N_" + scalar_type.upper(),
+            
+            is_float=is_float_dt(scalar_type),
+            is_int=is_int_dt(scalar_type),
+            is_signed=is_signed_int_dt(scalar_type),
+            type_size=type_size,
+            lmul_suffix=lmul_suffix,
+            lmul_coeff=lmul_coeff,
+            mask_args=get_mask_args(mkind),
+            mask_kind=mask_to_str(mkind, kind),
+        )
+    if not float and kind=="cpp" :
+        res = func_template.render(
+            func=func,
+            dt_ext=scalar_type,
+            op=layer_dict[func_old]["op"],
+            reg_type=reg_type,
+            msk_type=msk_type,
+            size="MIPP_N_" + scalar_type.upper(),
+            
+            is_float=False,
+            is_int=True,
+            
+            lmul_suffix=lmul_suffix,
+            lmul_coeff=lmul_coeff,
+            
+            mask_args=get_mask_args(mkind),
+            mask_kind=mask_to_str(mkind, kind),
+        )
+    if float and kind=="cpp" :
+     
+        res = func_template.render(
+            func=func,
+            dt_ext=scalar_type,
+            op=layer_dict[func_old]["op"],
+            reg_type=reg_type,
+            msk_type=msk_type,
+            size="MIPP_N_" + scalar_type.upper(),
+            
+            is_float=True,
+            is_int=False,
+            is_signed=False,
+            type_size=float.split("t")[1],
+            lmul_suffix=lmul_suffix,
+            lmul_coeff=lmul_coeff,
+            
+            mask_args=get_mask_args(mkind),
+            mask_kind=mask_to_str(mkind, kind),
+        )
+    if kind == "obj" : #obsolete :(
+        res = func_template.render(
+            func=func,
+            dt_ext=scalar_type,
+            op=layer_dict[func_old]["op"],
+            reg_type=reg_type,
+            msk_type=msk_type,
+            size="MIPP_N_" + scalar_type.upper(),
+            
+            is_float=is_float_dt(scalar_type),
+            is_int=is_int_dt(scalar_type),
+            is_signed=is_signed_int_dt(scalar_type),
+            type_size=type_size,
+        )
+    return res + "\n"
 
 def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="c", msk1_type="", msk2_type="", lmul=0, mkind=""):
-	res = ""
-	layer_dict = get_gen_test_dict(kind)
-	if lmul != 0:
-		layer_dict = get_gen_test_dict_lmul(kind)
-	if mkind != "":
-		layer_dict = get_gen_test_dict_mask(kind)
-	#from func, get "cast" or "cast_k" to get the right template and proto
-	if kind == "c":
-		is_cast_k = func.startswith("cast_k")
-		fname = "cast_k" if is_cast_k else "cast"
-		
-		func_dict = layer_dict[fname]["proto"]
-		func_template = layer_dict[fname]["template"]
-		
-		func_template = Template(func_template, undefined=StrictUndefined)
-		res = func_template.render(
-			func_decl=func_dict["func_decl"],
-			decl=func_dict["decl"],
-			init=func_dict["init"],
-			load=func_dict["load"],
-			operation=func_dict["operation"],
-			loop_body=func_dict["loop_body"],
-			loop_assert=func_dict["loop_assert"],
-		)
-		func_template = Template(res, undefined=StrictUndefined)
-		func_old = "cast"
-		func = test_function_name(kind, func)
-		
-		
-		
-		lmul_suffix = lmul_to_str(lmul, mkind)
-		lmul_coeff = 1 
-		if lmul != 0 :
-			lmul_coeff = lmul
-		res = func_template.render(
-			func=func,
-			dt_ext=scalar1_type,
-			dt1_ext=scalar1_type,
-			dt2_ext=scalar2_type,
-			op=layer_dict[func_old]["op"],
-			reg1_type=reg1_type,
-			msk1_type=msk1_type,
-			reg2_type=reg2_type,
-			msk2_type=msk2_type,
-			size="MIPP_N_" + scalar1_type.upper(),
-			lmul_suffix=lmul_suffix,
-			lmul_coeff=lmul_coeff,
-			#size2="MIPP_N_" + scalar2_type.upper(),
-			
-			mask_args=get_mask_args(mkind),
-			mask_kind=mask_to_str(mkind, kind),
-		)
-	elif kind == "cpp": 
-		is_cast_k = func.startswith("cast_k")
-		fname = "cast_k" if is_cast_k else "cast"
-		
-		func_dict = layer_dict[fname]["proto"]
-		func_template = layer_dict[fname]["template"]   
-		func_template = Template(func_template, undefined=StrictUndefined)
-		
-		res = func_template.render(
-			func_decl=func_dict["func_decl"],
-			decl=func_dict["decl"],
-			init=func_dict["init"],
-			load=func_dict["load"],
-			operation=func_dict["operation"],
-			loop_body=func_dict["loop_body"],
-			loop_assert=func_dict["loop_assert"],
-			mask_args=get_mask_args(mkind),
-			mask_kind=mask_to_str(mkind, kind),
-		)
-		func_template = Template(res, undefined=StrictUndefined)
-		func_old = "cast"
-		
-		lmul_suffix = lmul_to_str(lmul, mkind)
-		lmul_coeff = lmul
-		
-		func = test_function_name(kind, func)
-		res = func_template.render(
-			func=func + "_" + scalar2_type,
-			dt1_ext=scalar2_type,
-			dt2_ext=scalar1_type,
-			op=layer_dict[func_old]["op"],
-			reg1_type=reg1_type,
-			msk1_type=msk1_type,
-			reg2_type=reg2_type,
-			msk2_type=msk2_type,
-			size="MIPP_N_" + scalar1_type.upper(),
-			lmul_suffix=lmul_suffix,
-			lmul_coeff=lmul_coeff,
-			mask_args=get_mask_args(mkind),
-			mask_kind=mask_to_str(mkind, kind),
-		)
-	else :#obj
-		res = ""
-	
-	return res+ "\n"
+    res = ""
+    layer_dict = get_gen_test_dict(kind)
+    if lmul != 0:
+        layer_dict = get_gen_test_dict_lmul(kind)
+    if mkind != "":
+        layer_dict = get_gen_test_dict_mask(kind)
+    #from func, get "cast" or "cast_k" to get the right template and proto
+    if kind == "c":
+        is_cast_k = func.startswith("cast_k")
+        fname = "cast_k" if is_cast_k else "cast"
+        
+        func_dict = layer_dict[fname]["proto"]
+        func_template = layer_dict[fname]["template"]
+        
+        func_template = Template(func_template, undefined=StrictUndefined)
+        res = func_template.render(
+            func_decl=func_dict["func_decl"],
+            decl=func_dict["decl"],
+            init=func_dict["init"],
+            load=func_dict["load"],
+            operation=func_dict["operation"],
+            loop_body=func_dict["loop_body"],
+            loop_assert=func_dict["loop_assert"],
+        )
+        func_template = Template(res, undefined=StrictUndefined)
+        func_old = "cast"
+        func = test_function_name(kind, func)
+        
+        
+        
+        lmul_suffix = lmul_to_str(lmul, mkind)
+        lmul_coeff = 1 
+        if lmul != 0 :
+            lmul_coeff = lmul
+        res = func_template.render(
+            func=func,
+            dt_ext=scalar1_type,
+            dt1_ext=scalar1_type,
+            dt2_ext=scalar2_type,
+            op=layer_dict[func_old]["op"],
+            reg1_type=reg1_type,
+            msk1_type=msk1_type,
+            reg2_type=reg2_type,
+            msk2_type=msk2_type,
+            size="MIPP_N_" + scalar1_type.upper(),
+            lmul_suffix=lmul_suffix,
+            lmul_coeff=lmul_coeff,
+            #size2="MIPP_N_" + scalar2_type.upper(),
+            
+            mask_args=get_mask_args(mkind),
+            mask_kind=mask_to_str(mkind, kind),
+        )
+    elif kind == "cpp": 
+        is_cast_k = func.startswith("cast_k")
+        fname = "cast_k" if is_cast_k else "cast"
+        
+        func_dict = layer_dict[fname]["proto"]
+        func_template = layer_dict[fname]["template"]   
+        func_template = Template(func_template, undefined=StrictUndefined)
+        
+        res = func_template.render(
+            func_decl=func_dict["func_decl"],
+            decl=func_dict["decl"],
+            init=func_dict["init"],
+            load=func_dict["load"],
+            operation=func_dict["operation"],
+            loop_body=func_dict["loop_body"],
+            loop_assert=func_dict["loop_assert"],
+            mask_args=get_mask_args(mkind),
+            mask_kind=mask_to_str(mkind, kind),
+        )
+        func_template = Template(res, undefined=StrictUndefined)
+        func_old = "cast"
+        
+        lmul_suffix = lmul_to_str(lmul, mkind)
+        lmul_coeff = lmul
+        
+        func = test_function_name(kind, func)
+        res = func_template.render(
+            func=func + "_" + scalar2_type,
+            dt1_ext=scalar2_type,
+            dt2_ext=scalar1_type,
+            op=layer_dict[func_old]["op"],
+            reg1_type=reg1_type,
+            msk1_type=msk1_type,
+            reg2_type=reg2_type,
+            msk2_type=msk2_type,
+            size="MIPP_N_" + scalar1_type.upper(),
+            lmul_suffix=lmul_suffix,
+            lmul_coeff=lmul_coeff,
+            mask_args=get_mask_args(mkind),
+            mask_kind=mask_to_str(mkind, kind),
+        )
+    else :#obj
+        res = ""
+    
+    return res+ "\n"
 
 def gen_cast_funcs_all_datatypes(func, kind="c", register="rvd", mask="rvm",lmul=0, mkind=""):
 
-	datatypes = mipp_funcs[func]["datatypes"]
-	
-	res = ""
-	if kind == "c":
-		for dt in datatypes:
-			dt1, dt2 = dt.split(",")
-			func_name = f"{func}_{dt1}_{dt2}"
-			
-			
-			
-			if lmul > 0:
-				reg1_type = f"{register}_" + dt1 + f"_m{lmul}_t"
-				reg2_type = f"{register}_" + dt2 + f"_m{lmul}_t"
-				msk1_type = f"{mask}_" + dt1 + f"_m{lmul}_t"
-				msk2_type = f"{mask}_" + dt2 + f"_m{lmul}_t"
-				
-				res+= gen_cast_func(func_name, 
-									scalar1_type=dt1,
-									scalar2_type=dt2,
-									reg1_type=reg1_type,
-									reg2_type=reg2_type,
-									kind=kind, 
-									msk1_type=msk1_type,
-									msk2_type=msk2_type,
-									lmul=lmul,
-									mkind=mkind,
-				)
-			
-			else : 
-				
-				reg1_type = f"{register}_" + dt1 + "_t"
-				reg2_type = f"{register}_" + dt2 + "_t"
-			
-				msk1_type = f"{mask}_" + dt1 + "_t"
-				msk2_type = f"{mask}_" + dt2 + "_t"
-			
-				res+= gen_cast_func(func_name, 
-									scalar1_type=dt1,
-									scalar2_type=dt2,
-									reg1_type=reg1_type,
-									reg2_type=reg2_type,
-									kind=kind, 
-									msk1_type=msk1_type,
-									msk2_type=msk2_type,
-									lmul=lmul,
-									mkind=mkind,
-				)
-	elif kind == "cpp" :
-		
-		for dt in all_datatypes:
-			dt1 = dt
-			func_name = f"{func}_{dt1}"
-			
-			
-			reg1_type = f"mipp::{register}<T>"
-			reg2_type = f"mipp::{register}<{dt1}_t>"
-			
-			msk1_type = f"mipp::{mask}<T>"
-			msk2_type = f"mipp::{mask}<{dt1}_t>"
-			
-			if lmul > 0:
-				reg1_type = f"mipp::{register}<T, {lmul}>"
-				reg2_type = f"mipp::{register}<{dt1}_t, {lmul}>"
-				msk1_type = f"mipp::{mask}<T, {lmul}>"
-				msk2_type = f"mipp::{mask}<{dt1}_t, {lmul}>"
-			
-			res += gen_cast_func(func, 
-							scalar1_type="T",
-							scalar2_type=dt1,
-							reg1_type=reg1_type,
-							reg2_type=reg2_type,
-							kind=kind,
-							msk1_type=msk1_type,
-							msk2_type=msk2_type,
-							lmul=lmul,
-							mkind=mkind,
-			)
-	elif kind == "obj" :
-		res += ""
-	return res
+    datatypes = mipp_funcs[func]["datatypes"]
+    
+    res = ""
+    if kind == "c":
+        for dt in datatypes:
+            dt1, dt2 = dt.split(",")
+            func_name = f"{func}_{dt1}_{dt2}"
+            
+            
+            
+            if lmul > 0:
+                reg1_type = f"{register}_" + dt1 + f"_m{lmul}_t"
+                reg2_type = f"{register}_" + dt2 + f"_m{lmul}_t"
+                msk1_type = f"{mask}_" + dt1 + f"_m{lmul}_t"
+                msk2_type = f"{mask}_" + dt2 + f"_m{lmul}_t"
+                
+                res+= gen_cast_func(func_name, 
+                                    scalar1_type=dt1,
+                                    scalar2_type=dt2,
+                                    reg1_type=reg1_type,
+                                    reg2_type=reg2_type,
+                                    kind=kind, 
+                                    msk1_type=msk1_type,
+                                    msk2_type=msk2_type,
+                                    lmul=lmul,
+                                    mkind=mkind,
+                )
+            
+            else : 
+                
+                reg1_type = f"{register}_" + dt1 + "_t"
+                reg2_type = f"{register}_" + dt2 + "_t"
+            
+                msk1_type = f"{mask}_" + dt1 + "_t"
+                msk2_type = f"{mask}_" + dt2 + "_t"
+            
+                res+= gen_cast_func(func_name, 
+                                    scalar1_type=dt1,
+                                    scalar2_type=dt2,
+                                    reg1_type=reg1_type,
+                                    reg2_type=reg2_type,
+                                    kind=kind, 
+                                    msk1_type=msk1_type,
+                                    msk2_type=msk2_type,
+                                    lmul=lmul,
+                                    mkind=mkind,
+                )
+    elif kind == "cpp" :
+        
+        for dt in all_datatypes:
+            dt1 = dt
+            func_name = f"{func}_{dt1}"
+            
+            
+            reg1_type = f"mipp::{register}<T>"
+            reg2_type = f"mipp::{register}<{dt1}_t>"
+            
+            msk1_type = f"mipp::{mask}<T>"
+            msk2_type = f"mipp::{mask}<{dt1}_t>"
+            
+            if lmul > 0:
+                reg1_type = f"mipp::{register}<T, {lmul}>"
+                reg2_type = f"mipp::{register}<{dt1}_t, {lmul}>"
+                msk1_type = f"mipp::{mask}<T, {lmul}>"
+                msk2_type = f"mipp::{mask}<{dt1}_t, {lmul}>"
+            
+            res += gen_cast_func(func, 
+                            scalar1_type="T",
+                            scalar2_type=dt1,
+                            reg1_type=reg1_type,
+                            reg2_type=reg2_type,
+                            kind=kind,
+                            msk1_type=msk1_type,
+                            msk2_type=msk2_type,
+                            lmul=lmul,
+                            mkind=mkind,
+            )
+    elif kind == "obj" :
+        res += ""
+    return res
 
 def gen_funcs_all_datatypes(func, kind="c", register="rvd", mask="rvm",lmul=0, mkind=""):
-	"""
-	generate the test function(s) for 1 func, all datatypes, 1 layer.
-	"""
+    """
+    generate the test function(s) for 1 func, all datatypes, 1 layer.
+    """
 
-	res = ""
-	datatypes = mipp_funcs[func]["datatypes"]
+    res = ""
+    datatypes = mipp_funcs[func]["datatypes"]
 
-	if kind == "c":
-		for dt in datatypes:
-			reg_type =f"{register}_" + dt + "_t"
-			msk_type = f"{mask}_" + dt + "_t"
-			if lmul > 0:
-				reg_type = f"{register}_" + dt + f"_m{lmul}_t"
-				msk_type = f"{mask}_" + dt + f"_m{lmul}_t"
-			res += gen_func(
-					func,
-					dt,
-					reg_type=reg_type,
-					kind=kind,
-					msk_type=msk_type,
-					lmul=lmul,
-					mkind=mkind,
-					
-			)
-	elif kind == "cpp":  # template so no need to loop over datatypes
-		
-		reg_type = f"mipp::{register}<T>"
-		msk_type = f"mipp::{mask}<T>"
-		
-		if lmul > 0:
-			reg_type = f"mipp::{register}<T, {lmul}>"
-			msk_type = f"mipp::{mask}<T, {lmul}>"
-	  
-		res += gen_func(
-			func,
-			"T",
-			reg_type=reg_type,
-			kind=kind,
-			msk_type=msk_type,
-			lmul=lmul,
-			mkind=mkind,
-		)
-		
-		if func in set_float_workaround:
-			res += gen_func(
-				func,
-				"T",
-				reg_type=reg_type,
-				kind=kind,
-				msk_type=msk_type,
-				float="float32",
-				lmul=lmul,
-				mkind=mkind,
-			)
-			res += gen_func(
-				func,
-				"T",
-				reg_type=reg_type,
-				kind=kind,
-				msk_type=msk_type,
-				float="float64",
-				lmul=lmul,
-				mkind=mkind,
-			)
-	elif kind == "obj":  # template so no need to loop over datatypes
-		res += gen_func(
-			func,
-			"T",
-			reg_type=f"mipp::{register}<T>",
-			kind=kind,
-			msk_type=f"mipp::{mask}<T>",
-		)
-	return res
+    if kind == "c":
+        for dt in datatypes:
+            reg_type =f"{register}_" + dt + "_t"
+            msk_type = f"{mask}_" + dt + "_t"
+            if lmul > 0:
+                reg_type = f"{register}_" + dt + f"_m{lmul}_t"
+                msk_type = f"{mask}_" + dt + f"_m{lmul}_t"
+            res += gen_func(
+                    func,
+                    dt,
+                    reg_type=reg_type,
+                    kind=kind,
+                    msk_type=msk_type,
+                    lmul=lmul,
+                    mkind=mkind,
+                    
+            )
+    elif kind == "cpp":  # template so no need to loop over datatypes
+        
+        reg_type = f"mipp::{register}<T>"
+        msk_type = f"mipp::{mask}<T>"
+        
+        if lmul > 0:
+            reg_type = f"mipp::{register}<T, {lmul}>"
+            msk_type = f"mipp::{mask}<T, {lmul}>"
+      
+        res += gen_func(
+            func,
+            "T",
+            reg_type=reg_type,
+            kind=kind,
+            msk_type=msk_type,
+            lmul=lmul,
+            mkind=mkind,
+        )
+        
+        if func in set_float_workaround:
+            res += gen_func(
+                func,
+                "T",
+                reg_type=reg_type,
+                kind=kind,
+                msk_type=msk_type,
+                float="float32",
+                lmul=lmul,
+                mkind=mkind,
+            )
+            res += gen_func(
+                func,
+                "T",
+                reg_type=reg_type,
+                kind=kind,
+                msk_type=msk_type,
+                float="float64",
+                lmul=lmul,
+                mkind=mkind,
+            )
+    elif kind == "obj":  # template so no need to loop over datatypes
+        res += gen_func(
+            func,
+            "T",
+            reg_type=f"mipp::{register}<T>",
+            kind=kind,
+            msk_type=f"mipp::{mask}<T>",
+        )
+    return res
 
 def gen_file(func, kind="c", lmul=0, mkind=""):
-	"""
-	generates the test file for 1 func, all datatypes, 1 layer.
-	Calls gen_headers -> gen_funcs_all_datatypes -> gen_test_type_guards
-	"""
-	layer_dict = get_gen_test_dict(kind)
+    """
+    generates the test file for 1 func, all datatypes, 1 layer.
+    Calls gen_headers -> gen_funcs_all_datatypes -> gen_test_type_guards
+    """
+    layer_dict = get_gen_test_dict(kind)
 
-	register = "rvd"
-	mask = "rvm"
+    register = "rvd"
+    mask = "rvm"
 
-	if kind == "obj":
-		register = register.capitalize()  # obj types are Rvd, Rvm instead of rvd, rvm
-		mask = mask.capitalize()
+    if kind == "obj":
+        register = register.capitalize()  # obj types are Rvd, Rvm instead of rvd, rvm
+        mask = mask.capitalize()
 
-	res = gen_funcs_all_datatypes(func, kind=kind, register=register, mask=mask, lmul=lmul, mkind=mkind)
-	res += gen_test_type_guards(
-		func,
-		layer_dict[func]["long_name"],
-		layer_dict[func]["short_name"],
-		kind=kind,
-		lmul=lmul,
-		mkind=mkind,
-	)
-	return res
+    res = gen_funcs_all_datatypes(func, kind=kind, register=register, mask=mask, lmul=lmul, mkind=mkind)
+    res += gen_test_type_guards(
+        func,
+        layer_dict[func]["long_name"],
+        layer_dict[func]["short_name"],
+        kind=kind,
+        lmul=lmul,
+        mkind=mkind,
+    )
+    return res
 
 def gen_cast_file(func,kind="c", lmul=0, mkind=""):
-	layer_dict = get_gen_test_dict(kind)
+    layer_dict = get_gen_test_dict(kind)
 
-	register = "rvd"
-	mask = "rvm"
+    register = "rvd"
+    mask = "rvm"
 
-	if kind == "obj":
-		register = register.capitalize()  # obj types are Rvd, Rvm instead of rvd, rvm
-		mask = mask.capitalize()
+    if kind == "obj":
+        register = register.capitalize()  # obj types are Rvd, Rvm instead of rvd, rvm
+        mask = mask.capitalize()
 
-	res = gen_cast_funcs_all_datatypes(func, kind=kind, register=register, mask=mask, lmul=lmul, mkind=mkind)
-	res += gen_cast_test_type_guards(
-		func,
-		layer_dict[func]["long_name"],
-		layer_dict[func]["short_name"],
-		kind=kind,
-  		lmul=lmul,
-    	mkind=mkind,
-	)
-	return res
+    res = gen_cast_funcs_all_datatypes(func, kind=kind, register=register, mask=mask, lmul=lmul, mkind=mkind)
+    res += gen_cast_test_type_guards(
+        func,
+        layer_dict[func]["long_name"],
+        layer_dict[func]["short_name"],
+        kind=kind,
+          lmul=lmul,
+        mkind=mkind,
+    )
+    return res
 
 
 tmp_path = "../tests/src/"
@@ -828,177 +889,177 @@ cpppath = tmp_path + "cpp_tests/"
 objpath = tmp_path + "obj_tests/"
 
 def write_file_if_different(path, content):
-	"""
-	helper to avoid rewriting files if the content is the same 
-	to avoid unnecessary recompilation.
-	"""
-	if os.path.exists(path):
-		with open(path, "r") as f:
-			existing_content = f.read()
-		if existing_content == content:
-			return False
-	with open(path, "w") as f:
-		f.write(content)
-	return True
+    """
+    helper to avoid rewriting files if the content is the same 
+    to avoid unnecessary recompilation.
+    """
+    if os.path.exists(path):
+        with open(path, "r") as f:
+            existing_content = f.read()
+        if existing_content == content:
+            return False
+    with open(path, "w") as f:
+        f.write(content)
+    return True
 
 def comment_out_cpp_file(content: str, reason: str):
-	"""
-	simple way to skip testing for a func 
-	without removing the generated file
-	"""
-	header = (
-		"// THIS FILE IS AUTO-GENERATED.\n"
-		f"// Tests are currently disabled: {reason}\n"
-		"// To re-enable, remove the function from set_skip_testing in gen_files.py\n\n"
-	)
-	return header + "/*\n" + content + "\n*/\n"
+    """
+    simple way to skip testing for a func 
+    without removing the generated file
+    """
+    header = (
+        "// THIS FILE IS AUTO-GENERATED.\n"
+        f"// Tests are currently disabled: {reason}\n"
+        "// To re-enable, remove the function from set_skip_testing in gen_files.py\n\n"
+    )
+    return header + "/*\n" + content + "\n*/\n"
 
 
 def get_str_path(tmp_path, lmul=0, mkind=""):
-	a = tmp_path + "c_tests/"
-	b = tmp_path + "cpp_tests/"
-	c = tmp_path + "obj_tests/"
-	if mkind != "" :
-		a += mkind + "/"
-		b += mkind + "/"
-		c += mkind + "/"
-	if lmul != 0 :
-		lmul_str = lmul_to_str(lmul, mkind)
-		a += lmul_str + "/"
-		b += lmul_str + "/"
-		c += lmul_str + "/"
-	return a, b, c
+    a = tmp_path + "c_tests/"
+    b = tmp_path + "cpp_tests/"
+    c = tmp_path + "obj_tests/"
+    if mkind != "" :
+        a += mkind + "/"
+        b += mkind + "/"
+        c += mkind + "/"
+    if lmul != 0 :
+        lmul_str = lmul_to_str(lmul, mkind)
+        a += lmul_str + "/"
+        b += lmul_str + "/"
+        c += lmul_str + "/"
+    return a, b, c
 
 
 #big and somewhat ugly "main" func to generate all test files for all funcs for the requested layer(s)
 def gen_test_files_all_funcs(kind="c", lmul=0, mkind=""):
-	"""
-	kind: "c", "cpp", "obj", or "all"
-	Regenerates only the requested layer(s) for all functions.
+    """
+    kind: "c", "cpp", "obj", or "all"
+    Regenerates only the requested layer(s) for all functions.
 
-	Important: functions available can differ per layer, so we iterate over the
-	union of keys from the enabled layer dictionaries.
-	"""
-	if kind not in {"c", "cpp", "obj", "all"}:
-		raise ValueError(f"Invalid kind: {kind!r}")
-	
-	if lmul != 0 or mkind != "" :
-		print("lmul lacks the get function atm testing is not really possible, masks are no good either, so we skip for now")
-		return
+    Important: functions available can differ per layer, so we iterate over the
+    union of keys from the enabled layer dictionaries.
+    """
+    if kind not in {"c", "cpp", "obj", "all"}:
+        raise ValueError(f"Invalid kind: {kind!r}")
+    
+    if lmul != 0 or mkind != "" :
+        print("lmul lacks the get function atm testing is not really possible, masks are no good either, so we skip for now")
+        return
 
 
 
-	regen_c = kind in {"c", "all"}
-	regen_cpp = kind in {"cpp", "all"}
-	regen_obj = kind in {"obj", "all"}
-	if lmul != 0 : 
-		regen_obj = False
+    regen_c = kind in {"c", "all"}
+    regen_cpp = kind in {"cpp", "all"}
+    regen_obj = kind in {"obj", "all"}
+    if lmul != 0 : 
+        regen_obj = False
 
-	c_dict = get_gen_test_dict("c") if regen_c else {}
-	cpp_dict = get_gen_test_dict("cpp") if regen_cpp else {}
-	obj_dict = get_gen_test_dict("obj") if regen_obj else {}
+    c_dict = get_gen_test_dict("c") if regen_c else {}
+    cpp_dict = get_gen_test_dict("cpp") if regen_cpp else {}
+    obj_dict = get_gen_test_dict("obj") if regen_obj else {}
 
-	funcs = set()
-	if regen_c:
-		funcs |= set(c_dict.keys())
-	if regen_cpp:
-		funcs |= set(cpp_dict.keys())
-	if regen_obj:
-		funcs |= set(obj_dict.keys())
-		
-		
-		
-	#if lmul != "" add it to the path to generate lmul specific tests in a separate folder
-	cpath, cpppath, objpath = get_str_path(tmp_path, lmul=lmul, mkind=mkind)
+    funcs = set()
+    if regen_c:
+        funcs |= set(c_dict.keys())
+    if regen_cpp:
+        funcs |= set(cpp_dict.keys())
+    if regen_obj:
+        funcs |= set(obj_dict.keys())
+        
+        
+        
+    #if lmul != "" add it to the path to generate lmul specific tests in a separate folder
+    cpath, cpppath, objpath = get_str_path(tmp_path, lmul=lmul, mkind=mkind)
 
-	# Create dirs only if needed
-	if not os.path.exists(tmp_path):
-		os.makedirs(tmp_path, exist_ok=True)
-	if regen_c:
-		os.makedirs(cpath, exist_ok=True)
-		for concept in mipp_funcs_concepts:
-			if concept != "a_trier":
-				os.makedirs(cpath + concept + "/", exist_ok=True)
-		os.makedirs(cpath + "miscellaneous/", exist_ok=True)
-	if regen_cpp:
-		os.makedirs(cpppath, exist_ok=True)
-		for concept in mipp_funcs_concepts:
-			if concept != "a_trier":
-				os.makedirs(cpppath + concept + "/", exist_ok=True)
-		os.makedirs(cpppath + "miscellaneous/", exist_ok=True)
-	if regen_obj:
-		os.makedirs(objpath, exist_ok=True)
-		for concept in mipp_funcs_concepts:
-			if concept != "a_trier":
-				os.makedirs(objpath + concept + "/", exist_ok=True)
-		os.makedirs(objpath + "miscellaneous/", exist_ok=True)
+    # Create dirs only if needed
+    if not os.path.exists(tmp_path):
+        os.makedirs(tmp_path, exist_ok=True)
+    if regen_c:
+        os.makedirs(cpath, exist_ok=True)
+        for concept in mipp_funcs_concepts:
+            if concept != "a_trier":
+                os.makedirs(cpath + concept + "/", exist_ok=True)
+        os.makedirs(cpath + "miscellaneous/", exist_ok=True)
+    if regen_cpp:
+        os.makedirs(cpppath, exist_ok=True)
+        for concept in mipp_funcs_concepts:
+            if concept != "a_trier":
+                os.makedirs(cpppath + concept + "/", exist_ok=True)
+        os.makedirs(cpppath + "miscellaneous/", exist_ok=True)
+    if regen_obj:
+        os.makedirs(objpath, exist_ok=True)
+        for concept in mipp_funcs_concepts:
+            if concept != "a_trier":
+                os.makedirs(objpath + concept + "/", exist_ok=True)
+        os.makedirs(objpath + "miscellaneous/", exist_ok=True)
 
-	dict_mask = get_gen_test_dict_mask("c")
-	print(dict_mask.keys())
-	for func in sorted(funcs):
-		
-		
-		mask_support = mipp_funcs[func]["mask_support"]
-		if mkind != "" and mask_support.is_none():
-			print(f"Skipping {func} for {mkind} because it doesn't support it")
-			continue
-		if mkind != "" and kind != "c":
-			#hacky fix for now 
-			continue
-		
-		disable = func in set_skip_testing
-		reason = (
-			f"{func} is in set_skip_testing. "
-			"If it's blend it's because it's broken on AVX2; otherwise it's likely "
-			"because get_k/set_k is used and doesn't work well on AVX2."
-		)
+    dict_mask = get_gen_test_dict_mask("c")
+    print(dict_mask.keys())
+    for func in sorted(funcs):
+        
+        
+        mask_support = mipp_funcs[func]["mask_support"]
+        if mkind != "" and mask_support.is_none():
+            print(f"Skipping {func} for {mkind} because it doesn't support it")
+            continue
+        if mkind != "" and kind != "c":
+            #hacky fix for now 
+            continue
+        
+        disable = func in set_skip_testing
+        reason = (
+            f"{func} is in set_skip_testing. "
+            "If it's blend it's because it's broken on AVX2; otherwise it's likely "
+            "because get_k/set_k is used and doesn't work well on AVX2."
+        )
 
-		if regen_c and func in c_dict:
-			if func == "cast" or func == "cast_k":
-				c_file = gen_headers(kind="c") + gen_cast_file(func, kind="c",lmul=lmul, mkind=mkind)
-			else:
-				c_file = gen_headers(kind="c") + gen_file(func, kind="c",lmul=lmul, mkind=mkind)
-			if disable:
-				c_file = comment_out_cpp_file(c_file, reason)
-			file_path = cpath + match_concept(func) + f"/test_c{func}.cpp"
-			write_file_if_different(file_path, c_file)
+        if regen_c and func in c_dict:
+            if func == "cast" or func == "cast_k":
+                c_file = gen_headers(kind="c",func=func) + gen_cast_file(func, kind="c",lmul=lmul, mkind=mkind)
+            else:
+                c_file = gen_headers(kind="c",func=func) + gen_file(func, kind="c",lmul=lmul, mkind=mkind)
+            if disable:
+                c_file = comment_out_cpp_file(c_file, reason)
+            file_path = cpath + match_concept(func) + f"/test_c{func}.cpp"
+            write_file_if_different(file_path, c_file)
 
-		if regen_cpp and func in cpp_dict:
-			if func == "cast" or func == "cast_k":
-				cpp_file = gen_headers(kind="cpp") + gen_cast_file(func, kind="cpp",lmul=lmul, mkind=mkind)
-			else:
-				cpp_file = gen_headers(kind="cpp") + gen_file(func, kind="cpp",lmul=lmul, mkind=mkind)
-				
-			if disable:
-				cpp_file = comment_out_cpp_file(cpp_file, reason)
-			file_path = cpppath + match_concept(func) + f"/test_{func}.cpp"
-			write_file_if_different(file_path, cpp_file)
+        if regen_cpp and func in cpp_dict:
+            if func == "cast" or func == "cast_k":
+                cpp_file = gen_headers(kind="cpp") + gen_cast_file(func, kind="cpp",lmul=lmul, mkind=mkind)
+            else:
+                cpp_file = gen_headers(kind="cpp") + gen_file(func, kind="cpp",lmul=lmul, mkind=mkind)
+                
+            if disable:
+                cpp_file = comment_out_cpp_file(cpp_file, reason)
+            file_path = cpppath + match_concept(func) + f"/test_{func}.cpp"
+            write_file_if_different(file_path, cpp_file)
 
-		if regen_obj and func in obj_dict:
-			if func == "cast" or func == "cast_k":
-				obj_file = gen_headers(kind="obj") + gen_cast_file(func, kind="obj")
-			else:
-				obj_file = gen_headers(kind="obj") + gen_file(func, kind="obj")
-			if disable:
-				obj_file = comment_out_cpp_file(obj_file, reason)
+        if regen_obj and func in obj_dict:
+            if func == "cast" or func == "cast_k":
+                obj_file = gen_headers(kind="obj") + gen_cast_file(func, kind="obj")
+            else:
+                obj_file = gen_headers(kind="obj") + gen_file(func, kind="obj")
+            if disable:
+                obj_file = comment_out_cpp_file(obj_file, reason)
 
-			file_path = objpath + match_concept(func) + f"/test_obj_{func}.cpp"
-			write_file_if_different(file_path, obj_file)
+            file_path = objpath + match_concept(func) + f"/test_obj_{func}.cpp"
+            write_file_if_different(file_path, obj_file)
 
 def main():#just parse the args and call gen_test_files_all_funcs with the right kind
-	parser = argparse.ArgumentParser(description="Generate MIPP test files.")
-	parser.add_argument(
-		"kind",
-		nargs="?",
-		default="all",
-		choices=["c", "cpp", "obj", "all"],
-		help="Which layer to regenerate (default: all).",
-	)
-	args = parser.parse_args()
-	for lmul in [0, 1, 2, 4, 8]:
-		for mkind in ["", "mask", "maskz", "masks"]:
-			gen_test_files_all_funcs(kind=args.kind, lmul=lmul, mkind=mkind)
+    parser = argparse.ArgumentParser(description="Generate MIPP test files.")
+    parser.add_argument(
+        "kind",
+        nargs="?",
+        default="all",
+        choices=["c", "cpp", "obj", "all"],
+        help="Which layer to regenerate (default: all).",
+    )
+    args = parser.parse_args()
+    for lmul in [0, 1, 2, 4, 8]:
+        for mkind in ["", "mask", "maskz", "masks"]:
+            gen_test_files_all_funcs(kind=args.kind, lmul=lmul, mkind=mkind)
 
 
 if __name__ == "__main__":
-	main()
+    main()

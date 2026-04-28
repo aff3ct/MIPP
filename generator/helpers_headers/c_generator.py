@@ -196,6 +196,18 @@ def _combine_current_ifdefs(funcs, f, dt_key, ifd_prev):
     return ifd_prev
 
 
+def _update_emulated(funcs, f, dt_key, ff, ifd):
+    """
+    only updates the "if" condition in implem_status for emulated functions. 
+    Used in gen_c_generic_functions after printing the #if condition for the generic implementation. 
+    Since generic implementations are supposed to be the last ones and have no conditions, 
+    it's as if you have if A && !A which is false. 
+    So you want to update the "if" condition of the generic implementation with the guard that was printed before it.
+    """
+    if "type" in ff and ff["type"] == "emulated":
+        funcs[f]["implem_status"][dt_key][len(funcs[f]["implem_status"][dt_key]) - 1]["if"] = ifd
+
+
 def _emit_ifdef_begin_and_update_emulated(funcs, f, dt_key, ff, ifd, file):
     """
     adds ifdef conditions to "if" in implem_status
@@ -203,8 +215,8 @@ def _emit_ifdef_begin_and_update_emulated(funcs, f, dt_key, ff, ifd, file):
     """
     if ifd:
         print("#if " + ifd, file=file)
-        if "type" in ff and ff["type"] == "emulated":
-            funcs[f]["implem_status"][dt_key][len(funcs[f]["implem_status"][dt_key]) - 1]["if"] = ifd
+        _update_emulated(funcs, f, dt_key, ff, ifd)
+
 
 
 def _build_func_name(isa, dt, dt_par, dt_ret, f, masked_version=False):
@@ -294,14 +306,18 @@ def _gen_isdef_neg(funcs, f, dt_key):
     """
     generates the negation of an ifdef.
     """
-    guard = "#if "
-    if "implem_status" in funcs[f] and dt_key in funcs[f]["implem_status"]:
-        for implem in funcs[f]["implem_status"][dt_key]:
-            if "if" in implem and implem["if"]:
-                guard = guard + "!(" + implem["if"] + ") && "
-    # remove last " && "
-    guard = guard[:-4]
-    return guard
+    ret =  build_ifdef_rec(funcs, f, dt_key)
+    print(ret)
+    # ret ends with || remove it
+    # if ret.endswith(" || "):
+    #     ret = ret[:-4]
+    
+    # # ret may or may not start with a parenthesis for some reason. If it does only add the negation, if it doesn't add the parenthesis and the negation.
+    # if ret and not ret.startswith("("):
+    #     ret = "(" + ret + ")"
+    
+        
+    return "#if !" + ret + "" if ret else ""
 
 
 def _add_guard_if_isdef(funcs, f, dt_key, file):
@@ -627,7 +643,7 @@ def _gen_c_function_one_masked(isa, file, funcs, f, ff, dt):
     
     _emit_ifdef_end(ifd, file)
     _maybe_print_emulated_implemented(f + "<" + mask_kind + ">", dt_key, ff)
- 
+    
 def _gen_c_generic_one(isa, file, funcs, f, ff, dt):
     """
     same as _gen_c_functions_one_unmasked but for gen_c_generic_functions. 
@@ -645,7 +661,7 @@ def _gen_c_generic_one(isa, file, funcs, f, ff, dt):
         return
 
     # Guard generic implementation with negation of previous guarded implementations, if any.
-    _add_guard_if_isdef(funcs, f, dt_key, file)
+    _add_guard_if_isdef(funcs, f, dt_key, "", file)
 
     pre_rendering = _render_template(isa, ff, dt_par, dt_ret)
 
@@ -683,9 +699,14 @@ def _gen_c_generic_one(isa, file, funcs, f, ff, dt):
     # The whole purpose of generic implementations is that 
     # they don't have "if" conditions. 
     # removing "requirements" MIGHT be an issue. 
-    # Not sure.
+    # Not sure. 
+    # Update : it was an issue.
     _remove_cond_implem_status(funcs, f, dt_key)
     _mark_as_implemented(funcs, f, dt_key)
+    # add requirements to implem_status to prevent future generic implementations and to keep track of the fact that this function is now implemented
+    _append_implem_status(funcs, f, dt_key, ff, ph_ret["requirements"])
+
+    
  
 def _gen_c_missing_one_dt(isa, file, funcs, f, dt, lmul=0):
     dt_par, dt_ret = _missing_compute_dt_par_dt_ret(dt)
