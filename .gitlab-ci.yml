@@ -185,7 +185,7 @@ analysis-cppcheck:
         SIMD_EXT: "-march=rv64gv1_zve32f_zvl256b -mrvv-vector-bits=zvl"
     - if: '$ARCH == "x86-scalar"'
       variables:
-        SIMD_EXT: "-march=native -DMIPP_SCALAR"
+        SIMD_EXT: "-DMIPP_SCALAR -DMIPP_SCALAR_SIZE=1024"
   before_script:
   # find the number of threads on the computer
   - |
