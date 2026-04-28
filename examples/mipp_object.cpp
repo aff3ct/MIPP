@@ -18,8 +18,10 @@ void print_v(float32_t* v, const std::string &name)
 
 int main(int argc, char** argv)
 {
+#if defined(MIPP_PRINT_INFO)
 	mipp_info();
 	std::cout << std::endl;
+#endif
 
 	mipp::Rvd<float32_t,LMUL> rvd1, rvd2, rvd3;
 

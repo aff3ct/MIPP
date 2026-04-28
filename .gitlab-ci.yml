@@ -248,16 +248,16 @@ build-test-examples:
       if [ "$SKIP_C_EXAMPLES" = "true" ]; then
         echo "Skipping 'dumb.c' C example"
       else
-        $COMPILER -std=c11 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Wno-strict-prototypes -Werror -O3 -funroll-loops $SIMD_EXT -I../include -o dumb dumb.c
+        $COMPILER -std=c11 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Wno-strict-prototypes -Werror -O3 -funroll-loops $SIMD_EXT -DMIPP_PRINT_INFO -I../include -o dumb dumb.c
       fi
     - |
       if [ "$SKIP_C_EXAMPLES" = "true" ]; then
         echo "Skipping 'mipp.c' C example"
       else
-        $COMPILER -std=c11 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Wno-strict-prototypes -Werror -O3 -funroll-loops $SIMD_EXT -I../include -o mipp_c mipp.c
+        $COMPILER -std=c11 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Wno-strict-prototypes -Werror -O3 -funroll-loops $SIMD_EXT -DMIPP_PRINT_INFO -I../include -o mipp_c mipp.c
       fi
-    - $COMPILER_CPP -std=c++11 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Werror -O3 -funroll-loops $SIMD_EXT -I../include -o mipp_cpp mipp.cpp
-    - $COMPILER_CPP -std=c++11 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Werror -O3 -funroll-loops $SIMD_EXT -I../include -o mipp_object_cpp mipp_object.cpp
+    - $COMPILER_CPP -std=c++11 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Werror -O3 -funroll-loops $SIMD_EXT -DMIPP_PRINT_INFO -I../include -o mipp_cpp mipp.cpp
+    - $COMPILER_CPP -std=c++11 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Werror -O3 -funroll-loops $SIMD_EXT -DMIPP_PRINT_INFO -I../include -o mipp_object_cpp mipp_object.cpp
 
 build-test-unit:
   extends: .build-common
