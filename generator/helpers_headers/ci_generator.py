@@ -39,24 +39,24 @@ def duplicate_isa_sve_along_size(isa_list):
 
 
 def _isa_include_common(isa):
-    content =  "\n#include \"../"+isa["name"]+"/" + isa["name"] + "_common.h\"\n"
+    content =  "\n#include \"../simd_ext/"+isa["name"]+"/" + isa["name"] + "_common.h\"\n"
     if isa["name"] == "avx" : 
         # also include sse common for avx since it relies on sse types
-        content +=  "\n#include \"../sse/sse_common.h\"\n"
+        content +=  "\n#include \"../simd_ext/sse/sse_common.h\"\n"
     elif isa["name"] == "avx512" :
         # also include avx common for avx512 since it relies on avx types
-        content +=  "\n#include \"../avx/avx_common.h\"\n"
+        content +=  "\n#include \"../simd_ext/avx/avx_common.h\"\n"
     return content
 
 
 def _isa_include_function(isa, func):
-    content = "\n#include \"../../"+isa["name"]+"/" + "functions/" + isa["name"] + "_" + func + ".h\"\n"
+    content = "\n#include \"../../simd_ext/"+isa["name"]+"/" + "functions/" + isa["name"] + "_" + func + ".h\"\n"
     if isa["name"] == "avx" : 
         # also include sse functions for avx since it relies on sse types
-        content += "\n#include \"../../sse/" + "functions/" + "sse_" + func + ".h\"\n"
+        content += "\n#include \"../../simd_ext/sse/" + "functions/" + "sse_" + func + ".h\"\n"
     elif isa["name"] == "avx512" :
         # also include avx functions for avx512 since it relies on avx types
-        content += "\n#include \"../../avx/" + "functions/" + "avx_" + func + ".h\"\n"
+        content += "\n#include \"../../simd_ext/avx/" + "functions/" + "avx_" + func + ".h\"\n"
     return content
 
 
@@ -462,6 +462,8 @@ def ci_ldiv_writer(f,func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_
 
 def gen_ci_functions(isa_list, include_manager, funcs):
     isa_rvv = next((isa for isa in isa_list if isa["name"].startswith("rvv")), None)
+    
+    include_manager.move_to_new_dir("simd_ext", [isa["name"] for isa in isa_list ])
     for f in funcs:
         file = include_manager.get_fd("c", f)
         for dt in funcs[f]["datatypes"]:

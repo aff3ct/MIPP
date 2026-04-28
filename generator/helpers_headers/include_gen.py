@@ -336,10 +336,13 @@ class IncludeManager:
     def get_fd(self, layer_name, func):
         if layer_name in self.layers:
             layer = self.layers[layer_name]
+            
+            cur_dir = self.base_dir
+            
             if func in layer.includes:
-                base_dir = f"{self.base_dir}/{layer_name}"
+                base_dir = f"{cur_dir}/{layer_name}"
                 if func != "common" : 
-                    base_dir = f"{self.base_dir}/{layer_name}/functions"
+                    base_dir = f"{cur_dir}/{layer_name}/functions"
                 return layer.includes[func].get_fd(base_dir)
         return None
     
@@ -387,3 +390,18 @@ class IncludeManager:
             layer = self.layers[layer_name]
             if func in layer.includes:
                 layer.includes[func].write_custom_prefix(custom_prefix, f"{self.base_dir}/{layer_name}/functions")
+    
+    def move_to_new_dir(self, new_dir, isa_sublist):
+        # move generated dirs from isa_sublist to base_dir/new_dir/isa. This is used for simd_ext where we want to group all the isa together in a subdir.
+        for isa in isa_sublist:
+            old_path = f"{self.base_dir}/{isa}"
+            new_path = f"{self.base_dir}/{new_dir}/{isa}"
+            if os.path.exists(old_path):
+                os.makedirs(os.path.dirname(new_path), exist_ok=True)
+                shutil.move(old_path, new_path)
+            # call rmdir on old_path to remove it if it's empty
+            try:
+                os.rmdir(old_path)
+            except OSError:
+                pass
+        
