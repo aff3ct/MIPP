@@ -106,10 +106,13 @@ def _emit_function_body_scalar(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rende
 
     print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, masked_version = masked_version, lmul=lmul) + " {", file=file)
 
+    print("\t// cppcheck is outputing a lot of false positive \"uninitvar\" errors about res variable", file=file);
+    print("\t// this is why the following comment block disables the \"uninitvar\" errors", file=file);
+    print("\t// cppcheck-suppress-begin uninitvar", file=file);
+
     if ff["type"] == "element-wide":
         # Original code had a redundant always-true condition; keep behavior identical.
         if funcs[f]["proto"]["args"] or (not funcs[f]["proto"]["args"]):
-            print("\t// cppcheck-suppress uninitvar", file=file);
             _emit_short_format_prologue_scalar(funcs[f], dt_ret, isa, file, lmul=lmul)
             print(f"\tfor (size_t i = 0; i < MIPP_SCALAR_N_{dt_par.upper()}; i++)", file=file)
             print("\t{", file=file)
@@ -119,7 +122,6 @@ def _emit_function_body_scalar(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rende
         post_rendering = post_rendering.replace("\t\t\n", "\n")
         post_rendering = "\t\t" + post_rendering
     elif ff["type"] == "vector-wide":
-        print("\t// cppcheck-suppress uninitvar", file=file);
         print("\t", end='', file=file)
         # cleaning
         post_rendering = post_rendering.lstrip()
@@ -136,6 +138,7 @@ def _emit_function_body_scalar(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rende
         if funcs[f]["proto"]["ret"]["type"]:
             print("\treturn res;", file=file)
 
+    print("\t// cppcheck-suppress-end uninitvar", file=file);
     print("}", file=file)
 
 # Important changes here!!
