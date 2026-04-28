@@ -149,8 +149,7 @@ def get_dependencies(func, mipp_funcs, lmul=0, mask_kind="", layer=""):
     #remove entry in requirement if it's func 
     if func in dependencies:
         dependencies.remove(func)
-    if func == "add" : 
-        print(f"Dependencies for {func} in layer {layer} with lmul {lmul} and mask kind {mask_kind}: {dependencies}")
+
     return dependencies
     
 
