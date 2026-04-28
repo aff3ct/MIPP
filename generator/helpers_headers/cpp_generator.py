@@ -149,8 +149,7 @@ def _generic_mask_decl(file, cpp_func_name, proto, mask_kind):
                       "rvm<T,LMUL>" if proto["ret"]["type"] == "msk" else
                       "T" if proto["ret"]["type"] == "val" else
                       "void")
-    if cpp_func_name == "loadu":
-        print(cpp_func_name)
+
     s = f"{ret} {cpp_func_name}("
 
     is_first = True

@@ -821,7 +821,6 @@ def gen_c_missing_functions(isa, file, funcs):
                 _emit_separator(f, file)
                 _gen_c_missing_one_dt(isa, file, funcs, f, dt)
                 if "mask_support" in funcs[f]:
-                    #print(f,"haiii")
                     support = funcs[f]["mask_support"]
                     if support.is_maskable(): 
                         _gen_c_missing_one_masked(isa, file, funcs, f, dt, "mask")
@@ -910,7 +909,6 @@ def _rvv_seen_lmul_masked(funcs, f, dt_key, mask_kind, lmul):
 def _rvv_mark_lmul_seen_masked(funcs, f, dt_key, mask_kind, lmul):
     bucket = get_masked_bucket(funcs, f, dt_key, mask_kind)
     if bucket is not None:
-        #print("marking lmul " + str(lmul) + " as seen for masked function '" + f + "<" + mask_kind + "><" + dt_key + ">'")
         #print(bucket)
         if "lmul" in bucket:
             bucket[-1]["lmul"].add((lmul, dt_key))
