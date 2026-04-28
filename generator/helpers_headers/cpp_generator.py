@@ -12,9 +12,9 @@ def generate_mipp_hpp(include_manager=None):
     file = open("../include/mipp.hpp", "w")
 
     content = "#pragma once\n"
-    content += '#include "cpp/cpp_common.h"\n'
+    content += '#include "cpp/common.hpp"\n'
     for func in mipp_funcs:
-        content += f'#include "cpp/functions/cpp_{func}.h"\n'
+        content += f'#include "cpp/functions/{func}.hpp"\n'
     print(content, file=file)
 
 def generate_cpp(include_manager=None):
@@ -24,7 +24,7 @@ def generate_cpp(include_manager=None):
 #define MY_INTRINSICS_PLUS_PLUS_HPP_
 
 // #include "mipp.h"
-#include "c/c_common.h"
+#include "c/common.h"
 #include <iostream>
 
 namespace mipp
@@ -241,8 +241,8 @@ def _cpp_custom_prefix_generator(func):
     include c_mipp version of the function + set namespace to mipp for the cpp wrapper.
     """
     s = "#pragma once\n"
-    s += '#include "../cpp_common.h"\n'
-    s += f'#include "../../c/functions/c_{func}.h"\n'
+    s += '#include "../common.hpp"\n'
+    s += f'#include "../../c/functions/{func}.h"\n'
     s += "namespace mipp {\n"
     return s
 

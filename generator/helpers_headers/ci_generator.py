@@ -197,7 +197,7 @@ def _custom_prefix_generator(func, isa_list, is_common=False):
     else : 
         is_first = True
 
-        content += "#include \"../c_common.h\"\n"
+        content += "#include \"../common.h\"\n"
         for isa in isa_list:
             if is_first:
                 content += "\n#if " + "defined(MIPP_" + isa["name"].upper() + ")\n"

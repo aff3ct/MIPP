@@ -10,12 +10,12 @@ def generate_mipp_h(include_manager=None):
 	template_file = """#ifndef MY_INTRINSICS_PLUS_PLUS_H_
 #define MY_INTRINSICS_PLUS_PLUS_H_
 
-#include "c/c_common.h"
+#include "c/common.h"
 """
 
 	include_list = ""
 	for func in mipp_funcs:
-		include_list += "#include \"c/functions/" + "c_" + func + ".h\"\n"
+		include_list += "#include \"c/functions/" +  func + ".h\"\n"
 	postfix = """#endif /* MY_INTRINSICS_PLUS_PLUS_H_ */"""
  
 	template_file += include_list + "\n" + postfix

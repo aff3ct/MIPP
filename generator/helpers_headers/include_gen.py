@@ -7,6 +7,10 @@ from headers_def import *
 def get_include_name(func, layer=""):
     if layer == "":
         return f"{func}.h"
+    elif layer == "c":
+        return f"{func}.h"
+    elif layer == "cpp":
+        return f"{func}.hpp"
     else : 
         return f"{layer}_{func}.h"
 
@@ -129,7 +133,12 @@ def get_dependencies(func, mipp_funcs, lmul=0, mask_kind="", layer=""):
         return set()
     
     dependencies = set()
-    if layer != "" :
+    
+    if layer == "c" :
+        dependencies.add("../common.h")
+    elif layer == "cpp" :
+        dependencies.add("../common.hpp")
+    elif layer != "" :
         dependencies.add(f"../{layer}_common.h")
     else :
         dependencies.add("common.h")

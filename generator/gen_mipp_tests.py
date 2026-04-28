@@ -391,52 +391,53 @@ def match_func_headers(func, kind="c"):
     issues with conflicting types etc...
     """
     headers = ""
+    hsufix = ".h" if kind == "c" else ".hpp"
     if kind == "c" or kind == "cpp":
-        headers += f"\n#include <{kind}/{kind}_common.h>\n"
-        headers += f'#include <{kind}/functions/{kind}_{func}.h>\n'
+        headers += f"\n#include <{kind}/common{hsufix}>\n"
+        headers += f'#include <{kind}/functions/{func}{hsufix}>\n'
         #also include load, get 
-        headers += f'#include <{kind}/functions/{kind}_load.h>\n'
-        headers += f'#include <{kind}/functions/{kind}_get.h>\n'
+        headers += f'#include <{kind}/functions/load{hsufix}>\n'
+        headers += f'#include <{kind}/functions/get{hsufix}>\n'
         if func.endswith("_k"):
-            headers += f'#include <{kind}/functions/{kind}_get_k.h>\n'
-            headers += f'#include <{kind}/functions/{kind}_set_k.h>\n'
-            headers += f'#include <{kind}/functions/{kind}_toreg.h>\n'
+            headers += f'#include <{kind}/functions/get_k{hsufix}>\n'
+            headers += f'#include <{kind}/functions/set_k{hsufix}>\n'
+            headers += f'#include <{kind}/functions/toreg{hsufix}>\n'
         if func == "tomsk" : 
-            headers += f'#include <{kind}/functions/{kind}_toreg.h>\n'            
+            headers += f'#include <{kind}/functions/toreg{hsufix}>\n'            
             
         if func == "storeu" : 
-            headers += f'#include <{kind}/functions/{kind}_store.h>\n'
+            headers += f'#include <{kind}/functions/store{hsufix}>\n'
             
         if func in {"fmadd", "fmsub", "fnmadd", "fnmsub"} :
-            headers += f'#include <{kind}/functions/{kind}_mul.h>\n'
-            headers += f'#include <{kind}/functions/{kind}_add.h>\n'
-            headers += f'#include <{kind}/functions/{kind}_sub.h>\n'
+            headers += f'#include <{kind}/functions/mul{hsufix}>\n'
+            headers += f'#include <{kind}/functions/add{hsufix}>\n'
+            headers += f'#include <{kind}/functions/sub{hsufix}>\n'
         
         if func == "toreg" : 
-            headers += f'#include <{kind}/functions/{kind}_get_k.h>\n'
-            headers += f'#include <{kind}/functions/{kind}_set_k.h>\n'
+            headers += f'#include <{kind}/functions/get_k{hsufix}>\n'
+            headers += f'#include <{kind}/functions/set_k{hsufix}>\n'
         
         if func in {"cmpeq", "cmpneq", "cmpgt", "cmpge", "cmplt", "cmple"} :
-            headers += f'#include <{kind}/functions/{kind}_toreg.h>\n'
+            headers += f'#include <{kind}/functions/toreg{hsufix}>\n'
             
         if func == "blend" :
-            headers += f'#include <{kind}/functions/{kind}_get_k.h>\n'
-            headers += f'#include <{kind}/functions/{kind}_set_k.h>\n'
-            headers += f'#include <{kind}/functions/{kind}_set1.h>\n'
+            headers += f'#include <{kind}/functions/get_k{hsufix}>\n'
+            headers += f'#include <{kind}/functions/set_k{hsufix}>\n'
+            headers += f'#include <{kind}/functions/set1{hsufix}>\n'
             
         if func == "maskz_add" : 
-            headers += f'#include <{kind}/functions/{kind}_set1.h>\n'
-            headers += f'#include <{kind}/functions/{kind}_set_k.h>\n'
-            headers += f'#include <{kind}/functions/{kind}_get_k.h>\n'
+            headers += f'#include <{kind}/functions/set1{hsufix}>\n'
+            headers += f'#include <{kind}/functions/set_k{hsufix}>\n'
+            headers += f'#include <{kind}/functions/get_k{hsufix}>\n'
             
         if func == "testz" :
-            headers += f'#include <{kind}/functions/{kind}_set1_k.h>\n'
+            headers += f'#include <{kind}/functions/set1_k{hsufix}>\n'
         
         if func == "testz_2" :
-            headers += f'#include <{kind}/functions/{kind}_set1_k.h>\n'
+            headers += f'#include <{kind}/functions/set1_k{hsufix}>\n'
     
     elif kind == "obj":
-        headers += "#include <mipp_obj.hpp>\n"
+        headers += "#include <mipp_obj{hsufix}pp>\n"
     return headers
 
 def gen_headers(kind="c", func=""):
