@@ -106,10 +106,6 @@ def _emit_function_body_scalar(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rende
 
     print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, masked_version = masked_version, lmul=lmul) + " {", file=file)
 
-    print("\t// cppcheck is outputing a lot of false positive \"uninitvar\" errors about res variable", file=file);
-    print("\t// this is why the following comment block disables the \"uninitvar\" errors", file=file);
-    print("\t// cppcheck-suppress-begin uninitvar", file=file);
-
     if ff["type"] == "element-wide":
         # Original code had a redundant always-true condition; keep behavior identical.
         if funcs[f]["proto"]["args"] or (not funcs[f]["proto"]["args"]):
@@ -138,7 +134,6 @@ def _emit_function_body_scalar(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rende
         if funcs[f]["proto"]["ret"]["type"]:
             print("\treturn res;", file=file)
 
-    print("\t// cppcheck-suppress-end uninitvar", file=file);
     print("}", file=file)
 
 # Important changes here!!
@@ -283,11 +278,16 @@ def gen_mipp_scalar():
 	#endif
 #endif // !defined(MIPP_SCALAR_SIZE)
 
+#if MIPP_SCALAR_SIZE == 0
+	#error "MIPP_SCALAR_SIZE can't be null"
+#endif
+
 #define BIT_CAST_N(dst_ptr, src_ptr, n) \\
 	memcpy((dst_ptr), (src_ptr), (n) * sizeof(*(dst_ptr)))
 
 #define BIT_CAST_1(dst_ptr, src_ptr) \\
 	memcpy((dst_ptr), (src_ptr), sizeof(*(dst_ptr)))
+
 """
     j2_template = Template(tpl_header_scalar, undefined=StrictUndefined)
     print(j2_template.render(), file=file)
