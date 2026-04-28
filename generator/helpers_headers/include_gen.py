@@ -91,7 +91,7 @@ def _get_implem_status_requirements_mask_dt_keys(funcs, f, mask_kind):
         if bucket is not None:
             for implem in bucket:
                 if "requirements" in implem and implem["requirements"]:
-                    print(f"Function {f} has masked implementation for dt_key {dt_key} and mask kind {mask_kind} with requirements: {implem['requirements']}")
+                    #print(f"Function {f} has masked implementation for dt_key {dt_key} and mask kind {mask_kind} with requirements: {implem['requirements']}")
                     for req in implem["requirements"]:
                         requirements[req] = implem["requirements"][req]
     return requirements

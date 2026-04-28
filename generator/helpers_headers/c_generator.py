@@ -307,7 +307,6 @@ def _gen_isdef_neg(funcs, f, dt_key):
     generates the negation of an ifdef.
     """
     ret =  build_ifdef_rec(funcs, f, dt_key)
-    print(ret)
     # ret ends with || remove it
     # if ret.endswith(" || "):
     #     ret = ret[:-4]
@@ -661,7 +660,7 @@ def _gen_c_generic_one(isa, file, funcs, f, ff, dt):
         return
 
     # Guard generic implementation with negation of previous guarded implementations, if any.
-    _add_guard_if_isdef(funcs, f, dt_key, "", file)
+    _add_guard_if_isdef(funcs, f, dt_key, file)
 
     pre_rendering = _render_template(isa, ff, dt_par, dt_ret)
 
