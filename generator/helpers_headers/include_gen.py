@@ -57,6 +57,10 @@ def _get_dependencies_regular(func, mipp_funcs, layer="c"):
     if func not in mipp_funcs:
         return {}
     requirements = _get_implem_status_requirements_all_dt_keys(mipp_funcs, func)
+    
+    # if func == "set_k": 
+    #     print(f"Requirements for {func} in regular: {requirements}")
+    #     print(mipp_funcs[func])
     for req in requirements:
         if req in mipp_funcs:
             req_concept = match_concept(req)

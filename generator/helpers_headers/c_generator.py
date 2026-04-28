@@ -574,6 +574,8 @@ def _gen_c_functions_one_unmasked(isa, file, funcs, f, ff, dt):
 
     ifd_prev = _build_previous_emulated_exclusion_ifdef(funcs, f, dt_key, ff)
 
+    # if f == "set_k" : 
+    #     print("Debug: requirements for '" + f + "<" + dt_key + ">' function: " + str(ph_ret["requirements"]))
     _append_implem_status(funcs, f, dt_key, ff, ph_ret["requirements"])
 
     post_rendering = ph_ret["converted_ir"]
