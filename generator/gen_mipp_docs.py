@@ -461,23 +461,27 @@ def write_mipp_infos(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_funcs_c
     
 
 
-def match_args_type_cpp(arg_type, cast=False, ret=False, fixed_dtype=False):
+def match_args_type_cpp(arg_type, cast=False, ret=False, fixed_dtype=False, lmul=0):
+    
+    lmul_str = ""
+    if lmul >= 1:
+        lmul_str = "," + str(lmul)
     if arg_type == "msk":
         if cast:
             if ret:
-                return "rvm<T2>"
+                return "rvm<T2" + lmul_str + ">"
             else : 
-                return "rvm<T1>"
+                return "rvm<T1" + lmul_str + ">"
         else :
-            return "rvm<T>"
+            return "rvm<T" + lmul_str + ">"
     elif arg_type == "reg":
         if cast:
             if ret :
-                return "rvd<T2>"
+                return "rvd<T2" + lmul_str + ">"
             else :
-                return "rvd<T1>"
+                return "rvd<T1" + lmul_str + ">"
         else : 
-            return "rvd<T>"
+            return "rvd<T" + lmul_str + ">"
     elif arg_type == "val" :
         if fixed_dtype != False:
                 return fixed_dtype + "_t"
@@ -534,6 +538,7 @@ class SpecFuncInfo:
         self.args = mipp_funcs[func]["proto"]["args"]
         self.ret = mipp_funcs[func]["proto"]["ret"]
         self.dttypes = mipp_funcs[func]["datatypes"]
+        self.mask_support = mipp_funcs[func]["mask_support"]
         
         self.concept = "miscellaneous"
         for concept in mipp_funcs_concepts:
@@ -543,10 +548,11 @@ class SpecFuncInfo:
                 self.concept = concept
                 break
             
-    def func_to_str_cpp(self, mipp_funcs):
+    def func_to_str_cpp(self, mipp_funcs, lmul=0):
         #lambda to match reg -> rvd 
         #mask -> rvm 
         # val -> T
+        
         cast = False
         ret = False
         fixed_dtype = []
@@ -558,15 +564,23 @@ class SpecFuncInfo:
             cast = True
         
         zipped_args = zip(self.args, fixed_dtype)
-        args_str = ", ".join([match_args_type_cpp(arg["type"], cast, False, fixed) for arg, fixed in zipped_args])
+        args_str = ", ".join([match_args_type_cpp(arg["type"], cast, False, fixed, lmul=lmul) for arg, fixed in zipped_args])
         
         fixed_dtype = self.ret["fixeddatatype"]
-        ret_str = match_args_type_cpp(self.ret["type"], cast, True, fixed_dtype)
+        ret_str = match_args_type_cpp(self.ret["type"], cast, True, fixed_dtype, lmul=lmul)
         ret_str = "inline " + ret_str
+        print("ret_str : " + ret_str)
         func_proto_str = " " + ret_str + " " + self.func_name + "(" + args_str + ")"
         return func_proto_str
     
-    def func_to_str_c(self, mipp_funcs):
+    def func_to_str_c(self, mipp_funcs, lmul=0):
+        
+        lmul_str = ""
+        if lmul >= 1:
+            lmul_str = "_m" + str(lmul)
+        elif lmul < 1 and lmul > 0:
+            lmul_str = "_d" + str(int(1/lmul))
+
         cast = False
         ret = False
         fixed_dtype = []
@@ -581,9 +595,9 @@ class SpecFuncInfo:
         ret_str = match_args_type_c(self.ret["type"], cast, True, fixed_dtype)
         ret_str = "inline " + ret_str
         if cast :
-            func_proto_str = " " + ret_str + " " + self.func_name + "_{type 1}_{type 2}" + "(" + args_str + ")"
+            func_proto_str = " " + ret_str + " " + self.func_name + "_{type 1}_{type 2}" + lmul_str + "(" + args_str + ")"
         else :
-            func_proto_str = " " + ret_str + " " + self.func_name + "_{type}" + "(" + args_str + ")"
+            func_proto_str = " " + ret_str + " " + self.func_name + "_{type}" + lmul_str + "(" + args_str + ")"
         for dt in self.dttypes:
             if cast:
                 dt_par = dt.split(',')[0]
@@ -613,24 +627,37 @@ class SpecFuncInfo:
             
             print("## Prototype", file=f)
             print("### CPP : \n", file=f)
-            print("```", file=f)
-            print(self.func_to_str_cpp(mipp_funcs), file=f)
+            print("```cpp\n", file=f)
+            for lmul in [0, 1, 2, 4, 8]:
+                print(self.func_to_str_cpp(mipp_funcs,lmul), file=f)
             print("```", file=f)
             
             #print("\n\n```c", file=f)
             #print(self.func_to_str_c(mipp_funcs), file=f)
             #print("```", file=f)
-            print("\n\n### C", file=f)
-            cstr = self.func_to_str_c(mipp_funcs)
-            cstr = cstr.replace("\n", "```\n\n```")
+            print("\n\n### C\n", file=f)
+            cstr = "```c\n"
+            for lmul in [0, 1, 2, 4, 8]:
+                cstr += "// LMUL = " + str(lmul) + "\n"
+                cstr += self.func_to_str_c(mipp_funcs,lmul)
+            #cstr = cstr.replace("\n", "```\n\n```")
             #remove last ```
-            cstr = cstr[:-4]
-            cstr = "```" + cstr
+            #cstr = cstr[:-4]
+            cstr += "\n```"
             print("\n\n" + cstr, file=f)
             
             print("\n\n## Supported datatypes", file=f)
             for dtype in self.dttypes:
                 print("- " + dtype, file=f)
+            
+            if self.mask_support.is_any_mask():
+                print("\n\n## Mask support", file=f)
+            if self.mask_support.is_maskable():
+                print("This function supports masked variants.", file=f)
+            if self.mask_support.is_maskzable():
+                print("This function supports zero-masking variants.", file=f)
+            if self.mask_support.is_masksable():
+                print("This function supports source masking variants.", file=f)
        
 class SpecFuncInfos:
     
