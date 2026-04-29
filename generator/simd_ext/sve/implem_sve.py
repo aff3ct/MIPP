@@ -67,13 +67,13 @@ implems_sve = {
     "load" : [
         { "instr_name": "ld1", "datatypes": all_datatypes, "template": tpl_implem_sve["load"]},],
     "maskzld" : [
-        { "instr_name": "ld1", "datatypes": all_datatypes, "template": tpl_implem_sve["mask_load"]},],
+        { "instr_name": "ld1", "datatypes": all_defs, "template": tpl_implem_sve["mask_load"]},],
     "loadu"  : [
         { "instr_name": "ld1", "datatypes": all_datatypes, "template": tpl_implem_sve["load"]},],
     "store" : [
         { "instr_name": "st1", "datatypes": all_datatypes, "template": tpl_implem_sve["store"]},],
     "maskst" : [
-        { "instr_name": "st1", "datatypes": all_datatypes, "template": tpl_implem_sve["mask_store"]},],
+        { "instr_name": "st1", "datatypes": all_defs, "template": tpl_implem_sve["mask_store"]},],
     "storeu" : [
         { "instr_name": "st1", "datatypes": all_datatypes, "template": tpl_implem_sve["store"]},],
     # ok with bool array

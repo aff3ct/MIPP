@@ -1,4 +1,4 @@
-from jinja2 import Template, StrictUndefined
+from jinja2 import Template, StrictUndefined, Environment, FileSystemLoader
 import json
 import re
 
@@ -114,41 +114,41 @@ def _custom_prefix_generator(func, isa_list, is_common=False):
 // pourrait clairement etre utile pour les generateurs au dela du if #define
 
 #if defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)
-	#define MIPP_AVX512
-	#define MIPP_INSTR_VERSION 1
-	#define MIPP_64BIT
+    #define MIPP_AVX512
+    #define MIPP_INSTR_VERSION 1
+    #define MIPP_64BIT
 #ifdef __AVX512BW__
-	#define MIPP_BW
+    #define MIPP_BW
 #endif
 #ifdef __AVX512VBMI2__
-	#define MIPP_BMI2
+    #define MIPP_BMI2
 #endif
 #ifdef __FMA__
-	#define MIPP_FMA
+    #define MIPP_FMA
 #endif
 
 #elif defined(__AVX__)
     #define MIPP_AVX
-	#define MIPP_64BIT
+    #define MIPP_64BIT
 #ifdef __AVX2__
     #define MIPP_AVX2
-	#define MIPP_INSTR_VERSION 2
-	#define MIPP_BW
+    #define MIPP_INSTR_VERSION 2
+    #define MIPP_BW
 #else
-	#define MIPP_INSTR_VERSION 1
+    #define MIPP_INSTR_VERSION 1
 #endif
 #ifdef __BMI2__
-	#define MIPP_BMI2
+    #define MIPP_BMI2
 #endif
 #ifdef __FMA__
-	#define MIPP_FMA
+    #define MIPP_FMA
 #endif
 
 #elif defined(__SSE__)
-	#define MIPP_SSE
+    #define MIPP_SSE
 #ifdef __SSE2__
-	#define MIPP_64BIT
-	#define MIPP_BW
+    #define MIPP_64BIT
+    #define MIPP_BW
 #endif
 
 #elif defined(__ARM_FEATURE_SVE)
@@ -227,13 +227,18 @@ def generate_c_interface(isa_list, include_manager=None):
     isa_list = duplicate_isa_sve_along_size(isa_list)
     gen_ci_defines(isa_list, file_common)
     gen_ci_structures(isa_list, file_common)
-    
+
+    # Add mipp_info function to mipp.h
+    env = Environment(loader=FileSystemLoader("./helpers_headers/templates/"))
+    template_mipp_info = env.get_template("mipp_info.tpl.h")
+    str_mipp_info = template_mipp_info.render(name="Unused for now :-)")
+    print(str_mipp_info, file=file_common)
+
+    gen_ci_functions(isa_list, include_manager, copy_mipp_funcs)
+
     tpl_footer_interface = """#endif /* MY_INTRINSICS_PLUS_PLUS_INTERFACE_H_ */"""
     j2_template = Template(tpl_footer_interface, undefined=StrictUndefined)
     print(j2_template.render(), file=file_common)
-    
-    
-    gen_ci_functions(isa_list, include_manager, copy_mipp_funcs)
 
 def gen_ci_defines(isa_list, file):
     for i, isa in enumerate(isa_list):

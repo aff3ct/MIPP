@@ -15,6 +15,7 @@ sys.path.insert(1, path + "/simd_ext/sse/")
 sys.path.insert(1, path + "/simd_ext/sve/")
 sys.path.insert(1, path + "/simd_ext/rvv/")
 sys.path.insert(1, path + "/simd_ext/neon/")
+sys.path.insert(1, path + "/simd_ext/scalar/")
 
 from implem_sse import isa_sse
 from implem_avx import isa_avx
@@ -22,6 +23,9 @@ from implem_avx512 import isa_avx512
 from implem_sve import isa_sve
 from implem_rvv import isa_rvv
 from implem_neon import isa_neon
+from headers_def import isa_scalar
+from headers_def import implems_scalar
+from headers_def import mipp_funcs
 
 from gen_mipp_sse import gen_mipp_sse
 from gen_mipp_avx import gen_mipp_avx
@@ -29,6 +33,7 @@ from gen_mipp_avx512 import gen_mipp_avx512
 from gen_mipp_sve import gen_mipp_sve
 from gen_mipp_rvv import gen_mipp_rvv
 from gen_mipp_neon import gen_mipp_neon
+from gen_mipp_scalar import gen_mipp_scalar
 
 from mipp_h import generate_mipp_h
 from ci_generator import generate_c_interface
@@ -52,6 +57,7 @@ neon_path = os.path.join(include_gen_path, "neon")
 c_path = os.path.join(include_gen_path, "c")
 cpp_path = os.path.join(include_gen_path, "cpp")
 obj_path = os.path.join(include_gen_path, "obj")
+scalar_path = os.path.join(include_gen_path, "scalar")
 
 def create_folder(folder_path):
     if not os.path.exists(folder_path):
@@ -67,7 +73,59 @@ def clean_folder(folder_path):
     except Exception as e:
         print(f"Failed to delete folder: {folder_path}. Reason: {e}")
 
+def check_mipp_funcs_scalar_implems():
+    should_exit_at_the_end = False
+    for f in mipp_funcs:
+        mipp_funcs_datatypes = mipp_funcs[f]["datatypes"]
+        mipp_funcs_mask_variants = ["no_mask"]
+        if ("mask_support" in mipp_funcs[f]):
+            if mipp_funcs[f]["mask_support"].is_maskable():
+                mipp_funcs_mask_variants = mipp_funcs_mask_variants + ["mask"]
+            if mipp_funcs[f]["mask_support"].is_maskzable():
+                mipp_funcs_mask_variants = mipp_funcs_mask_variants + ["maskz"]
+            if mipp_funcs[f]["mask_support"].is_masksable():
+                mipp_funcs_mask_variants = mipp_funcs_mask_variants + ["masks"]
+
+        if f not in implems_scalar:
+            print("Panic: '" + f + "' function does not exist in 'implems_scalar'.")
+            should_exit_at_the_end = True
+            continue
+
+        for mv in mipp_funcs_mask_variants:
+            for dt in mipp_funcs_datatypes:
+                found = False
+                for ff in implems_scalar[f]:
+                    if "datatypes" not in ff:
+                        print("Panic: '" + f + "<" + dt + "," + mv + ">': \"datatypes\" field is missing in 'implems_scalar'.")
+                        should_exit_at_the_end = True
+                        continue
+                    if "mask_variants" not in ff:
+                        print("Panic: '" + f + "<" + dt + "," + mv + ">': \"mask_variants\" field is missing in 'implems_scalar'.")
+                        should_exit_at_the_end = True
+                        continue
+                    if not ff["datatypes"] and not ff["mask_variants"]:
+                        found = True
+                        break
+                    if dt in ff["datatypes"] and not ff["mask_variants"]:
+                        found = True
+                        break
+                    if mv in ff["mask_variants"] and not ff["datatypes"]:
+                        found = True
+                        break
+                    if dt in ff["datatypes"] and mv in ff["mask_variants"]:
+                        found = True
+                        break
+                if not found:
+                    print("Panic: '" + f + "<" + dt + "," + mv + ">' function is not defined in 'implems_scalar'.")
+                    should_exit_at_the_end = True
+                    continue
+
+    if should_exit_at_the_end:
+        sys.exit(-1)
+
 def main():
+    # check that all mipp funcs have a scalar implem before to start
+    check_mipp_funcs_scalar_implems()
     #clean all
     clean_folder(include_gen_path)
     #create folders
@@ -92,12 +150,14 @@ def main():
     gen_mipp_sve(include_manager)
     gen_mipp_rvv(include_manager)
     gen_mipp_neon(include_manager)
+    gen_mipp_scalar(include_manager)
+
     # generate mipp_v2.h
     generate_mipp_h(include_manager)
     # warning order
     # interface all simd  in c
     # generate mipp_v2_interface_gen.h
-    generate_c_interface([isa_avx512,isa_avx,isa_sse,isa_sve,isa_rvv,isa_neon], include_manager)
+    generate_c_interface([isa_avx512,isa_avx,isa_sse,isa_sve,isa_rvv,isa_neon,isa_scalar], include_manager)
     # C++ template wrapper interface with specialization
     # generate mipp.hpp
     generate_cpp(include_manager)

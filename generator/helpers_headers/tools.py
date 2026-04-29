@@ -33,6 +33,7 @@ all_64bit = [float64, int64, uint64]
 all_32bit = [float32, int32, uint32]
 all_16bit = [int16, uint16]
 all_8bit = [int8, uint8]
+all_defs = []
 
 all_datatypes_cart_prod = [];
 for dt_ret in all_datatypes:

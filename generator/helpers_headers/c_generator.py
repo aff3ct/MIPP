@@ -13,13 +13,38 @@ def gen_c_defines(isa, file):
     Also writes the size of the SIMD register in bits and bytes.
     """
     print("#define MIPP_" + isa["name"].upper() + "_RVD_SIZE_BIT " + str(isa["size"]), file=file)
-    print("#define MIPP_" + isa["name"].upper() + "_RVD_SIZE_BYTE " + str(int(isa["size"] / 8)), file=file)
 
-    template = """#define MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{n_bits}} {{n_elmts}}"""
-    j2_template = Template(template, undefined=StrictUndefined)
+    if isinstance(isa["size"], str):
+        print("#if MIPP_" + isa["name"].upper() + "_RVD_SIZE_BIT == 0", file=file)
+        print("\t#error \"MIPP_" + isa["name"].upper() + "_RVD_SIZE_BIT can't be null\"", file=file)
+        print("#endif", file=file)
+
+    if isinstance(isa["size"], str):
+        print("#define MIPP_" + isa["name"].upper() + "_RVD_SIZE_BYTE " + isa["size"] + "/8", file=file)
+    else:
+        print("#define MIPP_" + isa["name"].upper() + "_RVD_SIZE_BYTE " + str(int(isa["size"] / 8)), file=file)
+
+    if isinstance(isa["size"], str):
+        print("#if MIPP_" + isa["name"].upper() + "_RVD_SIZE_BYTE == 0", file=file)
+        print("\t#error \"MIPP_" + isa["name"].upper() + "_RVD_SIZE_BYTE can't be null\"", file=file)
+        print("#endif", file=file)
+
+    template1 = """#define MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{n_bits}} {{n_elmts}}"""
+    template2 = """#define MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{n_bits}} {{n_elmts}}
+#if MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{n_bits}} == 0
+    #error "MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{n_bits}} can't be null\"
+#endif"""
+
+    if isinstance(isa["size"], str):
+        j2_template = Template(template2, undefined=StrictUndefined)
+    else:
+        j2_template = Template(template1, undefined=StrictUndefined)
 
     for dt in isa["datatypes"]:
-        n_elmts = int(isa["size"] / datatypes[dt]["n_bits"])
+        if isinstance(isa["size"], str):
+            n_elmts = isa["size"] + "/" + str(datatypes[dt]["n_bits"])
+        else:
+            n_elmts = int(isa["size"] / datatypes[dt]["n_bits"])
         print(
             j2_template.render(
                 isa_name_upper=isa["name"].upper(),
@@ -31,12 +56,15 @@ def gen_c_defines(isa, file):
         )
 
 
-def gen_c_structures(isa, file):
+def gen_c_structures(isa, file, is_scalar=False):
     """
     Writes the C structures corresponding to the supported datatypes for a given ISA, for both vector and mask types.
     """
     
-    template = """typedef struct { {{ isa_datatype.reg }} r; } rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
+    if is_scalar:
+        template = """typedef struct { {{ isa_datatype.reg }} r[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}]; } rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
+    else:
+        template = """typedef struct { {{ isa_datatype.reg }} r; } rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
     j2_template = Template(template, undefined=StrictUndefined)
 
     template_alt = """typedef struct {
@@ -50,16 +78,34 @@ def gen_c_structures(isa, file):
 
     for dt in isa["datatypes"]:
         if "if" not in isa["datatypes"][dt]:
-            print(j2_template.render(isa=isa, isa_datatype=isa["datatypes"][dt], datatype=datatypes[dt]), file=file)
+            print(
+                j2_template.render(
+                    isa=isa,
+                    isa_datatype=isa["datatypes"][dt],
+                    datatype=datatypes[dt],
+                    isa_name_upper=isa["name"].upper(),
+                    type_category_upper=datatypes[dt]["category"].upper(),
+                    ),
+                    file=file)
         else:
             print(j2_template_alt.render(isa=isa, isa_datatype=isa["datatypes"][dt], datatype=datatypes[dt]), file=file)
 
-    template = """typedef struct { {{ isa_datatype.msk }} m; } rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
+    if is_scalar:
+        template = """typedef struct { {{ isa_datatype.msk }} m[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}]; } rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
+    else:
+        template = """typedef struct { {{ isa_datatype.msk }} m; } rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
     j2_template = Template(template, undefined=StrictUndefined)
 
     for dt in isa["datatypes"]:
-        print(j2_template.render(isa=isa, isa_datatype=isa["datatypes"][dt], datatype=datatypes[dt]), file=file)
-
+        print(
+            j2_template.render(
+                isa=isa,
+                isa_datatype=isa["datatypes"][dt],
+                datatype=datatypes[dt],
+                isa_name_upper=isa["name"].upper(),
+                type_category_upper=datatypes[dt]["category"].upper(),
+            ),
+            file=file)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Shared helpers
@@ -68,7 +114,12 @@ def _emit_separator(f, file):
     """
     Writes a separator comment for a given function name, to improve readability of the generated code.
     """
-    print("// --------------------------------------------------------------------------------------------------------", f, file=file)
+    n_dashes = 120 - 5 - len(f)
+    print("// ", end="", file=file)
+    while n_dashes > 0:
+        print("-", end="", file=file)
+        n_dashes = n_dashes - 1
+    print(f" {f}", file=file)
 
 
 def _is_masked_implem(f, ff):

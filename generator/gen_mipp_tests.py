@@ -20,6 +20,7 @@ from implem_avx512 import implems_avx512
 from implem_sve import implems_sve
 from implem_rvv import implems_rvv
 from implem_neon import implems_neon
+from headers_def import implems_scalar
 from headers_def import mipp_funcs,mipp_funcs_concepts
 from tools import *
 from helpers_tests import get_gen_test_dict, set_float_workaround, test_function_name, get_gen_test_dict_lmul, get_gen_test_dict_mask
@@ -40,6 +41,7 @@ sse_guard = "#elif defined(MIPP_SSE)"
 sve_guard = "#elif defined(MIPP_SVE)"
 rvv_guard = "#elif defined(MIPP_RVV)"
 neon_guard = "#elif defined(MIPP_NEON)"
+scalar_guard = "#elif defined(MIPP_SCALAR)"
 
 implems_avx512.update(implems_emu_avx512)
 implems_avx.update(implems_emu_avx)
@@ -54,15 +56,15 @@ implems_sse.update(implems_generic_emu)
 #implems_sve.update(implems_generic_emu)
 implems_rvv.update(implems_generic_emu)
 
-
 implem_dict = {
-    # avx512 has to be first bc it's the one w the #if
-    "avx512": {"implem": implems_avx512, "guard": avx512_guard},
-    "avx": {"implem": implems_avx, "guard": avx_guard},
-    "sse": {"implem": implems_sse, "guard": sse_guard},
-    "sve": {"implem": implems_sve, "guard": sve_guard},
-    "rvv": {"implem": implems_rvv, "guard": rvv_guard},
-    "neon": {"implem": implems_neon, "guard": neon_guard},
+	# avx512 has to be first bc it's the one w the #if
+	"avx512": {"implem": implems_avx512, "guard": avx512_guard},
+	"avx": {"implem": implems_avx, "guard": avx_guard},
+	"sse": {"implem": implems_sse, "guard": sse_guard},
+	"sve": {"implem": implems_sve, "guard": sve_guard},
+	"rvv": {"implem": implems_rvv, "guard": rvv_guard},
+	"neon": {"implem": implems_neon, "guard": neon_guard},
+    "scalar": {"implem": implems_scalar, "guard": scalar_guard},
 }
 
 set_skip_testing = {                    
@@ -82,17 +84,19 @@ mipp_funcs_lmul = {
 
 # helper to get the datatypes for 1 func in 1 implem
 def get_defined_dttypes(func, implem):
-    """
-    func: implem key, e.g. "add", "mul", ...
-    implem: dict of the implem, e.g. implems_avx512
-    returns a list of datatypes for which the func is defined in the implem
-    """
-    func_dt = implem[func]
-    datatypes = []
-    for dt in func_dt:
-        datatypes.append(dt["datatypes"])
-    datatypes = list(set([item for sublist in datatypes for item in sublist]))
-    return datatypes
+	"""
+	func: implem key, e.g. "add", "mul", ...
+	implem: dict of the implem, e.g. implems_avx512
+	returns a list of datatypes for which the func is defined in the implem
+	"""
+	func_dt = implem[func]
+	datatypes = []
+	for dt in func_dt:
+		datatypes.append(dt["datatypes"])
+	datatypes = list(set([item for sublist in datatypes for item in sublist]))
+	if not datatypes:
+		datatypes = mipp_funcs[func]["datatypes"]
+	return datatypes
 
 def dt_to_suffix(dt):
     """Used to convert cast format t1,t2 to t1_t2. 
