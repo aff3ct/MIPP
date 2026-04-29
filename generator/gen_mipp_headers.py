@@ -123,51 +123,134 @@ def check_mipp_funcs_scalar_implems():
     if should_exit_at_the_end:
         sys.exit(-1)
 
-def main():
+def _parse_layers(layers_raw):
+    """
+    layers_raw: list[str] coming from argparse.
+    Returns a set of normalized layer tokens.
+    """
+    if not layers_raw:
+        return {"all"}
+
+    normalized = set()
+    for item in layers_raw:
+        # allow comma-separated too: --layers sse,avx
+        for tok in item.split(","):
+            tok = tok.strip().lower()
+            if tok:
+                normalized.add(tok)
+    return normalized
+
+def _expand_layer_keywords(selected):
+    """
+    Expand convenience keywords into concrete actions.
+    Returns: (isa_layers_to_run, run_wrappers: bool)
+      - isa_layers_to_run is a set among: sse,avx,avx512,sve,rvv,neon,scalar
+      - run_wrappers means run generate_mipp_h + generate_c_interface + generate_cpp + generate_cpp_object
+    """
+    isa_all = {"sse", "avx", "avx512", "sve", "rvv", "neon", "scalar"}
+
+    # default == all
+    if "all" in selected:
+        return (set(isa_all), True)
+
+    isa_layers = set()
+    run_wrappers = False
+
+    if "all_isas" in selected:
+        isa_layers |= isa_all
+
+    if "wrappers" in selected:
+        run_wrappers = True
+
+    # direct ISA tokens
+    for tok in selected:
+        if tok in isa_all:
+            isa_layers.add(tok)
+
+    # If user selected only ISA(s) and no explicit wrapper keyword, we keep wrappers off.
+    # If you'd rather always regenerate wrappers whenever any ISA is regenerated,
+    # uncomment the next line:
+    # run_wrappers = run_wrappers or bool(isa_layers)
+
+    unknown = selected - (isa_all | {"all", "all_isas", "wrappers"})
+    if unknown:
+        raise ValueError(f"Unknown layer keyword(s): {', '.join(sorted(unknown))}")
+
+    return (isa_layers, run_wrappers)
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(prog='gen_mipp.py', description='MIPP generator')
+    parser.add_argument(
+        "-l", "--layers",
+        nargs="+",
+        help=(
+            "Which layer(s) to regenerate. "
+            "Values: sse avx avx512 sve rvv neon scalar wrappers all_isas all. "
+            "Default: all. You can also pass comma-separated lists (e.g. --layers sse,avx)."
+        ),
+        default=None,
+    )
+    parser.add_argument(
+        "--no-clean",
+        action="store_true",
+        help="Do not delete ../include/ before generating (useful when regenerating only one layer).",
+    )
+    
+    args = parser.parse_args(argv)
+
     # check that all mipp funcs have a scalar implem before to start
     check_mipp_funcs_scalar_implems()
-    #clean all
-    clean_folder(include_gen_path)
-    #create folders
+
+    selected = _parse_layers(args.layers)
+    isa_layers, run_wrappers = _expand_layer_keywords(selected)
+
+    # clean all (optional)
+    if not args.no_clean:
+        clean_folder(include_gen_path)
+
+    # create folders (always ensure these exist)
     create_folder(sse_path)
     create_folder(avx_path)
     create_folder(avx512_path)
     create_folder(sve_path)
     create_folder(rvv_path)
     create_folder(neon_path)
-    # LAYERS
+    create_folder(scalar_path)
+
+    # wrappers/layers folders
     create_folder(c_path)
     create_folder(cpp_path)
     create_folder(obj_path)
-    
-    # CREATE INCLUDE MANAGER
-    include_manager = IncludeManager(["avx512", "avx", "sse", "sve", "rvv", "neon"])
-    
-    # generate all avalaible simd and wrapp
-    gen_mipp_sse(include_manager)
-    gen_mipp_avx(include_manager)
-    gen_mipp_avx512(include_manager)
-    gen_mipp_sve(include_manager)
-    gen_mipp_rvv(include_manager)
-    gen_mipp_neon(include_manager)
-    gen_mipp_scalar(include_manager)
 
-    # generate mipp_v2.h
-    generate_mipp_h(include_manager)
-    # warning order
-    # interface all simd  in c
-    # generate mipp_v2_interface_gen.h
-    generate_c_interface([isa_avx512,isa_avx,isa_sse,isa_sve,isa_rvv,isa_neon,isa_scalar], include_manager)
-    # C++ template wrapper interface with specialization
-    # generate mipp.hpp
-    generate_cpp(include_manager)
-    # C++ object wrapper using template specialization
-    # generate mipp_object_gen.h
-    generate_cpp_object(include_manager)
+    # CREATE INCLUDE MANAGER
+    include_manager = IncludeManager(["avx512", "avx", "sse", "sve", "rvv", "neon", "scalar"])
+
+    # ISA generators
+    if "sse" in isa_layers:
+        gen_mipp_sse(include_manager)
+    if "avx" in isa_layers:
+        gen_mipp_avx(include_manager)
+    if "avx512" in isa_layers:
+        gen_mipp_avx512(include_manager)
+    if "sve" in isa_layers:
+        gen_mipp_sve(include_manager)
+    if "rvv" in isa_layers:
+        gen_mipp_rvv(include_manager)
+    if "neon" in isa_layers:
+        gen_mipp_neon(include_manager)
+    if "scalar" in isa_layers:
+        gen_mipp_scalar(include_manager)
+
+    # Wrappers / top-level headers
+    if run_wrappers:
+        generate_mipp_h(include_manager)
+        generate_c_interface([isa_avx512, isa_avx, isa_sse, isa_sve, isa_rvv, isa_neon, isa_scalar], include_manager)
+        generate_cpp(include_manager)
+        generate_cpp_object(include_manager)
 
     print("Generating MIPP code for sse, avx2, avx512, rvv and sve with size in " + str(isa_sve["size"]))
-    print("With lmul in "+str(all_lmul)+ " and ldiv in "+str(all_ldiv))
+    print("With lmul in " + str(all_lmul) + " and ldiv in " + str(all_ldiv))
     
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(prog='gen_mipp.py', description='MIPP generator')
+    #parser = argparse.ArgumentParser(prog='gen_mipp.py', description='MIPP generator')
     main()
