@@ -249,6 +249,7 @@ def gen_mipp_scalar(include_manager):
 #define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SCALAR_H_
 #include <math.h> // sqrt, sqrtf, round, roundf
 #include <string.h> // memcpy
+#include <stdint.h>
 #if !defined(MIPP_SCALAR_SIZE)
 	#if defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)
 		#define MIPP_SCALAR_SIZE 512
@@ -293,6 +294,8 @@ def gen_mipp_scalar(include_manager):
 #define BIT_CAST_1(dst_ptr, src_ptr) \\
 	memcpy((dst_ptr), (src_ptr), sizeof(*(dst_ptr)))
 
+typedef float float32_t;
+typedef double float64_t;
 """
     j2_template = Template(tpl_header_scalar, undefined=StrictUndefined)
     print(j2_template.render(), file=file_common)
