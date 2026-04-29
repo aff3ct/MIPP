@@ -963,8 +963,8 @@ def _gen_c_horiz_lmul_one(isa, file, funcs, f, ff, dt, lmul):
         if dep_dt_key not in funcs[func_name]["implem_status"]:
             funcs[func_name]["implem_status"][dep_dt_key] = [{"if": "", "requirements": {}}]
 
-    if f == "set":
-        _ensure_fake_implemented("set", dt_key)
+   
+    _ensure_fake_implemented(f, dt_key)
     # -------------------------------------------------------------------------------
 
     ff_local = dict(ff)

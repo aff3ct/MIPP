@@ -154,7 +154,40 @@ tpl_horiz_lmul_generic_emu = {
 	%v<tp>% *ptr = vals + %N<tp>% / 2;
 	res.r2 = %set<c:tp|b:tp|m:tp/2>%(ptr);
 	return res;
-
+{% endif %}"""},
+    
+    
+    "tpl_get" : { "format" :"long", "code" :"""
+{% if lmul == 1 %}
+	return %get<tp>%(r0, v0);
+{% else %}
+	if(v0 < %N<tp>% / 2)
+		return %get<c:tp|b:tp|m:tp/2>%(r0.r1, v0);
+	else {
+		%v<tp>% tmp = v0 - %N<tp>% / 2;
+		return %get<c:tp|b:tp|m:tp/2>%(r0.r2, tmp);
+	}
+{% endif %}"""},
+    
+    
+    "tpl_get_k" : { "format" :"long", "code" :"""
+{% if lmul == 1 %}
+	return %get_k<tp>%(m0, v0);
+{% else %}
+	if(v0 < %N<tp>% / 2)
+		return %get_k<c:tp|b:tp|m:tp/2>%(m0.m1, v0);
+	else {
+		%v<tp>% tmp = v0 - %N<tp>% / 2;
+		return %get_k<c:tp|b:tp|m:tp/2>%(m0.m2, tmp);
+	}
+{% endif %}"""},
+    
+    
+    "tpl_getfirst" : { "format" :"long", "code" :"""
+{% if lmul == 1 %}
+	return %getfirst<tp>%(r0);
+{% else %}
+	return %getfirst<c:tp|b:tp|m:tp/2>%(r0.r1);
 {% endif %}"""},
 
 }
@@ -164,9 +197,15 @@ implems_horiz_lmul_generic_emu = {
 	"set" : [ 
 		{ "instr_name": "set",  "datatypes" : all_datatypes, "version" : "horiz_lmul", "template" : tpl_horiz_lmul_generic_emu["tpl_set"]},
 	],
-	# "get" : [],
-	# "get_k" : [],
-	# "getfirst" : [],
+	"get" : [ 
+     	{ "instr_name": "get",  "datatypes" : all_datatypes, "version" : "horiz_lmul", "template" : tpl_horiz_lmul_generic_emu["tpl_get"]},
+	],
+	"get_k" : [
+     	{ "instr_name": "get_k",  "datatypes" : all_datatypes, "version" : "horiz_lmul", "template" : tpl_horiz_lmul_generic_emu["tpl_get_k"]},
+	],
+	"getfirst" : [
+	 	{ "instr_name": "getfirst",  "datatypes" : all_datatypes, "version" : "horiz_lmul", "template" : tpl_horiz_lmul_generic_emu["tpl_getfirst"]},
+	],
  
 	# "testz" : [],
 	# "testz_2" : [],

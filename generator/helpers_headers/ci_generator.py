@@ -253,8 +253,15 @@ def gen_ci_defines(isa_list, file):
         print("#define MIPP_RVD_SIZE_BYTE MIPP_"+isa["name"].upper()+"_RVD_SIZE_BYTE", file=file)
 
         template = """#define MIPP_N_{{type_category_upper}}{{n_bits}} MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{n_bits}}"""
+        
+        for lmul in all_lmul:
+            tmp = "\n#define MIPP_N_{{type_category_upper}}{{n_bits}}_M{ lmul } MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{n_bits}} * { lmul }"
+            tmp = tmp.replace("{ lmul }", str(lmul))
+            template += tmp
+            
         for dt in isa["datatypes"]:
             j2_template = Template(template, undefined=StrictUndefined)
+            
             print(j2_template.render(isa_name_upper=isa["name"].upper(), n_bits=datatypes[dt]["n_bits"], type_category_upper=datatypes[dt]["category"].upper()), file=file)
 
         if i == len(isa_list)-1:
