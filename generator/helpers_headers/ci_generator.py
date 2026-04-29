@@ -6,6 +6,9 @@ from tools import *
 from headers_def import *
 from include_gen import IncludeManager
 
+from c_generator import gen_c_horiz_lmul 
+from generic_emu import implems_horiz_lmul_generic_emu
+
 def get_sub_isa(isa, ldiv, isa_list):
     for sub_isa in isa_list:
         if isa["architecture"] == "AArch64":
@@ -427,8 +430,20 @@ def ci_lmul_writer(f,func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_
         lmul_2 = int(lmul / 2)
         print(build_call_lmul(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name+mask_str+"_m"+str(lmul_2), lmul, False, masked_version=mask_type), file=file)
     else:
-        print("\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \""+func_name+"\");", file=file);
-        print("\texit(-1);", file=file);
+        # print("\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \""+func_name+"\");", file=file);
+        # print("\texit(-1);", file=file);
+        
+        gen_c_horiz_lmul(
+            isa=isa_list[0],
+            file=file,
+            funcs=funcs,
+            f=f,
+            dt=dt,
+            lmul=lmul,
+            implems_horiz_lmul_generic_emu=implems_horiz_lmul_generic_emu,
+            func_name_for_panic=func_name,  # so the runtime message matches the wrapper name
+            mask_type=mask_type,            # kept for future; currently stubs if not None
+        )
     print("#endif // MIPP_RVV", file=file)
     print("}", file=file)
  

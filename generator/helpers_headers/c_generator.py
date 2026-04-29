@@ -180,13 +180,13 @@ def _render_template(isa, ff, dt_par, dt_ret, func_name="", lmul=0):
     )
 
 
-def _parse_placeholders_or_skip(pre_rendering, isa, funcs, f, dt_par, dt_ret, dt_key, file,lmul=0):
+def _parse_placeholders_or_skip(pre_rendering, isa, funcs, f, dt_par, dt_ret, dt_key, file,lmul=0, isa_name=True):
     """
     tries to parse placeholders in pre-rendered and returns converted IR. In gen c_funcs 
     it was the call to parse_placeholders + affectation post_rendering = ph_ret["converted_ir"]
     """
     try:
-        return parse_placeholders(pre_rendering, isa, funcs, f, dt_par, dt_ret, lmul=lmul)
+        return parse_placeholders(pre_rendering, isa, funcs, f, dt_par, dt_ret, lmul=lmul, isa_name=isa_name)
     except Exception as err:
         err_message = "'" + f + "<" + dt_key + ">' has been skipped (reason: \"{0}\").".format(err)
         print(" -> " + err_message)
@@ -803,29 +803,6 @@ def _gen_c_missing_one_masked(isa, file, funcs, f, dt, mask_kind, lmul=0):
   
         _missing_emit_ifdef_end(ifd, file)
   
-def _gen_c_horiz_lmul_one(isa, file, funcs, f, ff, dt, lmul):
-    dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
-    dt_key = dt_par + "," + dt_ret
-
-    pre_rendering = _render_template(isa, ff, dt_par, dt_ret, lmul=lmul)
-
-    ph_ret = _parse_placeholders_or_skip(
-        pre_rendering=pre_rendering,
-        isa=isa,
-        funcs=funcs,
-        f=f,
-        dt_par=dt_par,
-        dt_ret=dt_ret,
-        dt_key=dt_key,
-        file=file,
-        lmul=lmul,
-    )
-    if ph_ret is None:
-        return
-
-    post_rendering = ph_ret["converted_ir"]
-
-    _emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rendering, file, lmul=lmul)  
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Generators
@@ -958,26 +935,122 @@ def gen_c_missing_functions_lmul(isa, file, funcs, lmul):
                     if support.is_masksable():
                         _gen_c_missing_one_masked(isa, file_w, funcs, f, dt, "masks", lmul=lmul)
      
-def gen_c_horiz_lmul_func(isa, file, func, funcs, lmul, implem):
+def _gen_c_horiz_lmul_one(isa, file, funcs, f, ff, dt, lmul):
     """
-    Generate emulated version of 
-    horizontal reduction functions for lmul>1.
-    
-    No ISA bc the functions will live in the generic C layer.
-    Different API than the other generators bc it's only for 1 function. 
-    And called @ a different time.
+    Emit one horizontal LMUL variant body (LMUL>1) for one function+datatype,
+    using custom generic emulation templates (implems_horiz_lmul_generic_emu).
+
+    Option-B workaround: pre-mark certain dependencies as "implemented" in funcs
+    so parse_placeholders() does not skip.
     """
-    print("Params are func: " + func + ", lmul: " + str(lmul) + ", implem: " + str(implem))
-    if func not in implem:
-        print("Panic: '" + func + "' function does not exist in implem.")
+    dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
+    dt_key = dt_par + "," + dt_ret
+
+    if _rvv_seen_lmul(funcs, f, dt_key, lmul):
+        return
+
+    # --- Option B: pre-mark deps as implemented so parse_placeholders doesn't raise ---
+    # Current horiz templates (tpl_set) reference %set<...>% recursively (tp/2).
+    # parse_placeholders requires funcs["set"].implem_status[dep_dt_key] to exist.
+    #
+    # We mark base set<dt,dt> as implemented; this is enough to avoid the exception.
+    # (If you later add more horiz templates that reference other functions, extend this.)
+    def _ensure_fake_implemented(func_name, dep_dt_key):
+        if func_name not in funcs:
+            return
+        if "implem_status" not in funcs[func_name]:
+            funcs[func_name]["implem_status"] = {}
+        if dep_dt_key not in funcs[func_name]["implem_status"]:
+            funcs[func_name]["implem_status"][dep_dt_key] = [{"if": "", "requirements": {}}]
+
+    if f == "set":
+        _ensure_fake_implemented("set", dt_key)
+    # -------------------------------------------------------------------------------
+
+    ff_local = dict(ff)
+    ff_local["type"] = "emulated"
+
+    pre_rendering = _render_template(isa, ff_local, dt_par, dt_ret, func_name=f, lmul=lmul)
+
+    ph_ret = _parse_placeholders_or_skip(
+        pre_rendering=pre_rendering,
+        isa=isa,
+        funcs=funcs,
+        f=f,
+        dt_par=dt_par,
+        dt_ret=dt_ret,
+        dt_key=dt_key,
+        file=file,
+        lmul=lmul,
+        isa_name = False,
+    )
+    if ph_ret is None:
+        return
+
+
+    print("\t", end="", file=file)
+    print(ph_ret["converted_ir"], file=file)
+
+
+    _rvv_mark_lmul_seen(funcs, f, dt_key, lmul)
+
+
+def gen_c_horiz_lmul(isa, file, funcs, f, dt, lmul, implems_horiz_lmul_generic_emu, func_name_for_panic=None, mask_type=None):
+    """
+    Generate LMUL variants for *horizontal* functions by leveraging custom generic emulation
+    templates defined in implems_horiz_lmul_generic_emu.
+
+    Intended to be called from ci_generator.py inside the non-RVV path for LMUL>1.
+
+    If there is no template available, we emit a runtime stub (printf + exit),
+    instead of hard-panicking during codegen.
+
+    Notes:
+      - For now: unmasked only. (mask_type is accepted for future extension but ignored unless you add templates)
+    """
+    if lmul <= 1:
+        return
+
+    if f not in funcs:
+        # If ci_generator calls us with a bad key, keep existing behavior.
+        print("Panic: '" + f + "' function does not exist.")
         exit(-1)
-    imp = implem[func]
-    for ff in imp:
-        for dt in ff["datatypes"]:
-            _emit_separator(func, file)
-            _gen_c_horiz_lmul_one(isa, file, funcs, func, ff, dt, lmul)
-    
-     
+
+    if not funcs[f].get("horizontal", False):
+        return
+
+    # For future: if you pass mask_type, we currently just stub out (unless you add templates).
+    if mask_type is not None:
+        name = func_name_for_panic or f
+        print(f"\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \"{name}_m{int(lmul)}\");", file=file)
+        print("\texit(-1);", file=file)
+        return
+
+    # No template available => emit stub (runtime panic), not a codegen panic.
+    if f not in implems_horiz_lmul_generic_emu:
+        name = func_name_for_panic or f
+        print(f"\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \"{name}_m{int(lmul)}\");", file=file)
+        print("\texit(-1);", file=file)
+        return
+
+    emitted_any = False
+    for ff in implems_horiz_lmul_generic_emu[f]:
+        # Accept only the dedicated horiz_lmul templates (defensive)
+        if "version" in ff and ff["version"] not in (None, "", "horiz_lmul"):
+            continue
+
+        # Respect datatype list when present
+        if "datatypes" in ff and dt not in ff["datatypes"]:
+            continue
+
+        _gen_c_horiz_lmul_one(isa=isa, file=file, funcs=funcs, f=f, ff=ff, dt=dt, lmul=lmul)
+        emitted_any = True
+
+    if not emitted_any:
+        # Template exists but doesn't cover this dt => stub.
+        name = func_name_for_panic or f
+        print(f"\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \"{name}_m{int(lmul)}\");", file=file)
+        print("\texit(-1);", file=file)
 # ----------------------------------------------------------------------------------------------------------------------
 # RVV lmul bookkeeping helpers (moved from gen_mipp_rvv.py)
 # ----------------------------------------------------------------------------------------------------------------------
@@ -1060,7 +1133,7 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                         dt_ret=dt_ret,
                         dt_key=dt_key,
                         file=file,						
-                          lmul=lmul,
+                        lmul=lmul,
                     )
                     if ph_ret is None:
                             continue

@@ -787,7 +787,7 @@ def build_ifdef(funcs, func_name, dt_key, implem_id):
     return str_ifdef
 
 def _parse_lmul_expression(expr, dt_par, dt_ret, isa, base_lmul):
-    print("debug: parsing lmul expression '" + expr + "' with base_lmul=" + str(base_lmul))
+    # print("debug: parsing lmul expression '" + expr + "' with base_lmul=" + str(base_lmul))
     # expression can be a simple 
     # tp or tr or a more complex one like tp*2 or tr/4
     # can also be a literal in 1,2,4,8 or 1/2, 1/4, 1/8
@@ -804,7 +804,7 @@ def _parse_lmul_expression(expr, dt_par, dt_ret, isa, base_lmul):
         p1 = int(parts[1])
         return p0 / p1
     else:
-        print("else case for lmul expression: " + expr)
+        #print("else case for lmul expression: " + expr)
         match = re.match(r'^(tp|tr)([*/])(\d+)$', expr)
         if match:				
             base = match.group(1)
@@ -910,7 +910,8 @@ def _parse_lmul(input_str, isa, dt_par, dt_ret, base_lmul):
         else :
             return base_lmul
 
-def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret,lmul=0):
+def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret,lmul=0, isa_name=True):
+    #print("debug: parsing placeholders in ir '" + ir + "' with dt_par='" + dt_par + "' and dt_ret='" + dt_ret + "' and lmul=" + str(lmul))
     dt_key = dt_par + "," + dt_ret
     converted_ir = ir
     ar_substitute = re.findall(r'\%([^%]*)\%', ir)
@@ -929,7 +930,7 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret,lmul=0):
             if dt not in isa["datatypes"]:
                 print("Panic: '" + dt + "' is not available.")
                 exit(-1)
-            converted_ir = converted_ir.replace("%" + s + "%", build_reg(datatypes[dt], isa,lmul=_parse_lmul(dt_info, isa, dt_par, dt_ret, lmul)))
+            converted_ir = converted_ir.replace("%" + s + "%", build_reg(datatypes[dt], isa,lmul=_parse_lmul(dt_info, isa, dt_par, dt_ret, lmul), isa_name=isa_name))
         elif item_type == "m":
             dt_info = re.findall(r'\<(.*)\>', s)[0]
             dt_info_params = dt_info.split(",")
@@ -939,7 +940,7 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret,lmul=0):
             if dt not in isa["datatypes"]:
                 print("Panic: '" + dt + "' is not available.")
                 exit(-1)
-            converted_ir = converted_ir.replace("%" + s + "%", build_msk(datatypes[dt], isa,lmul=_parse_lmul(dt_info, isa, dt_par, dt_ret, lmul)))
+            converted_ir = converted_ir.replace("%" + s + "%", build_msk(datatypes[dt], isa,lmul=_parse_lmul(dt_info, isa, dt_par, dt_ret, lmul), isa_name=isa_name))
         elif item_type == "v":
             dt_info = re.findall(r'\<(.*)\>', s)[0]
             dt_info_params = dt_info.split(",")
@@ -959,7 +960,7 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret,lmul=0):
             if dt not in isa["datatypes"]:
                 print("Panic: '" + dt + "' is not available.")
                 exit(-1)
-            converted_ir = converted_ir.replace("%" + s + "%", build_N(datatypes[dt], isa,lmul=lmul))
+            converted_ir = converted_ir.replace("%" + s + "%", build_N(datatypes[dt], isa,lmul=_parse_lmul(dt_info, isa, dt_par, dt_ret, lmul)))
         else:
             f_name = item_type
             if f_name not in funcs:
@@ -972,12 +973,12 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret,lmul=0):
             if len(dt_info_params) == 1:
                 dt = build_dt(dt_info_params[0], isa, dt_par, dt_ret)
                 fdt_key = dt + "," + dt
-                f_full_name = build_func_name_short(isa, dt, f_name,lmul=lmul);
+                f_full_name = build_func_name_short(isa, dt, f_name,lmul=_parse_lmul(dt_info, isa, dt_par, dt_ret, lmul), isa_name=isa_name)
             elif len(dt_info_params) == 2:
                 dt_1 = build_dt(dt_info_params[0], isa, dt_par, dt_ret)
                 dt_2 = build_dt(dt_info_params[1], isa, dt_par, dt_ret)
                 fdt_key = dt_1 + "," + dt_2
-                f_full_name = build_func_name(isa, dt_1, dt_2, f_name,lmul=lmul);
+                f_full_name = build_func_name(isa, dt_1, dt_2, f_name,lmul=_parse_lmul(dt_info, isa, dt_par, dt_ret, lmul), isa_name=isa_name)
             else:
                 print("Panic: '" + f_name + "' has incompatible format.")
                 exit(-1)
