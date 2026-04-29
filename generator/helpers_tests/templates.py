@@ -1,19 +1,22 @@
 GENERIC_FOR_LOOP = """{{func_decl}}
+for(unsigned n = 0; n < N_ITER; n++){
 {{decl}}
 {{init}}
 
 {{load}}
 {{operation}}
-
-\tfor(int i = 0; i < vectorSize; i++)
-\t{
-\t{{loop_body}}
-\t{{loop_assert}}
-\t}
+for(int i = 0; i < vectorSize; i++)
+{
+{{loop_body}}
+{{loop_assert}}
+}
+}
 }
 """
 
 GENERIC_NO_LOOP = """{{func_decl}}
+
+for(unsigned n = 0; n < N_ITER; n++){
 {{decl}}
 {{init}}
 {{load}}
@@ -21,5 +24,6 @@ GENERIC_NO_LOOP = """{{func_decl}}
 
 {{loop_body}}
 {{loop_assert}}
+}
 }
 """

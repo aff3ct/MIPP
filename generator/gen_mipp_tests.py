@@ -12,6 +12,7 @@ sys.path.insert(1, path + "/simd_ext/sse/")
 sys.path.insert(1, path + "/simd_ext/sve/")
 sys.path.insert(1, path + "/simd_ext/rvv/")
 sys.path.insert(1, path + "/simd_ext/neon/")
+# sys.path.insert(1, path + "/simd_ext/scalar/")
 sys.path.insert(1, path + "/helpers_headers/")
 
 from implem_sse import implems_sse
@@ -398,53 +399,88 @@ def match_func_headers(func, kind="c"):
     hsufix = ".h" if kind == "c" else ".hpp"
     if kind == "c" or kind == "cpp":
         headers += f"\n#include <{kind}/common{hsufix}>\n"
+        headers += f'#include <simd_ext/scalar/scalar_common.h>\n'
+        
         headers += f'#include <{kind}/functions/{func}{hsufix}>\n'
+        
+        headers += f'#include <simd_ext/scalar/functions/scalar_{func}.h>\n'
         #also include load, get 
         headers += f'#include <{kind}/functions/load{hsufix}>\n'
         headers += f'#include <{kind}/functions/get{hsufix}>\n'
+        
+        headers += f'#include <simd_ext/scalar/functions/scalar_load.h>\n'
+        headers += f'#include <simd_ext/scalar/functions/scalar_get.h>\n'
+
         if func.endswith("_k"):
             headers += f'#include <{kind}/functions/get_k{hsufix}>\n'
             headers += f'#include <{kind}/functions/set_k{hsufix}>\n'
             headers += f'#include <{kind}/functions/toreg{hsufix}>\n'
+            
+            headers += f'#include <simd_ext/scalar/functions/scalar_get_k.h>\n'
+            headers += f'#include <simd_ext/scalar/functions/scalar_set_k.h>\n'
+            headers += f'#include <simd_ext/scalar/functions/scalar_toreg.h>\n'
+            
         if func == "tomsk" : 
-            headers += f'#include <{kind}/functions/toreg{hsufix}>\n'            
+            headers += f'#include <{kind}/functions/toreg{hsufix}>\n'
+            headers += f'#include <simd_ext/scalar/functions/scalar_toreg.h>\n'            
             
         if func == "storeu" : 
             headers += f'#include <{kind}/functions/store{hsufix}>\n'
+            headers += f'#include <simd_ext/scalar/functions/scalar_store.h>\n'
             
         if func in {"fmadd", "fmsub", "fnmadd", "fnmsub"} :
             headers += f'#include <{kind}/functions/mul{hsufix}>\n'
             headers += f'#include <{kind}/functions/add{hsufix}>\n'
             headers += f'#include <{kind}/functions/sub{hsufix}>\n'
         
+            headers += f'#include <simd_ext/scalar/functions/scalar_mul.h>\n'
+            headers += f'#include <simd_ext/scalar/functions/scalar_add.h>\n'
+            headers += f'#include <simd_ext/scalar/functions/scalar_sub.h>\n'
+
         if func == "toreg" : 
             headers += f'#include <{kind}/functions/get_k{hsufix}>\n'
             headers += f'#include <{kind}/functions/set_k{hsufix}>\n'
+            
+            headers += f'#include <simd_ext/scalar/functions/scalar_get_k.h>\n'
+            headers += f'#include <simd_ext/scalar/functions/scalar_set_k.h>\n'
+
         
         if func in {"cmpeq", "cmpneq", "cmpgt", "cmpge", "cmplt", "cmple"} :
             headers += f'#include <{kind}/functions/toreg{hsufix}>\n'
+            headers += f'#include <simd_ext/scalar/functions/scalar_toreg.h>\n'
             
         if func == "blend" :
             headers += f'#include <{kind}/functions/get_k{hsufix}>\n'
             headers += f'#include <{kind}/functions/set_k{hsufix}>\n'
             headers += f'#include <{kind}/functions/set1{hsufix}>\n'
             
+            headers += f'#include <simd_ext/scalar/functions/scalar_get_k.h>\n'
+            headers += f'#include <simd_ext/scalar/functions/scalar_set_k.h>\n'
+            headers += f'#include <simd_ext/scalar/functions/scalar_set1.h>\n'
+            
         if func == "maskz_add" : 
             headers += f'#include <{kind}/functions/set1{hsufix}>\n'
             headers += f'#include <{kind}/functions/set_k{hsufix}>\n'
             headers += f'#include <{kind}/functions/get_k{hsufix}>\n'
             
+            headers += f'#include <simd_ext/scalar/functions/scalar_set1.h>\n'
+            headers += f'#include <simd_ext/scalar/functions/scalar_set_k.h>\n'
+            headers += f'#include <simd_ext/scalar/functions/scalar_get_k.h>\n'
+            
         if func == "testz" :
             headers += f'#include <{kind}/functions/set1_k{hsufix}>\n'
+            headers += f'#include <simd_ext/scalar/functions/scalar_set1_k.h>\n'
         
         if func == "testz_2" :
             headers += f'#include <{kind}/functions/set1_k{hsufix}>\n'
+            headers += f'#include <simd_ext/scalar/functions/scalar_set1_k.h>\n'
     
     elif kind == "obj":
         headers += "#include <mipp_obj{hsufix}pp>\n"
+
     return headers
 
-def gen_headers(kind="c", func=""):
+def gen_headers(kind="c", func="", N=10):
     """
     simple helper to return headers for the test files
     """
@@ -456,6 +492,10 @@ def gen_headers(kind="c", func=""):
         "\n#include <cstdio>"
         "\n#include <cmath>"
         "\n#include <bit>"
+        '\n#include "../../uniform.hpp"'
+        '\n#include "../../overflow_helpers.hpp"'
+        f"\n#define N_ITER {N}\n"
+
     )
     if kind == "c":
         
@@ -464,7 +504,8 @@ def gen_headers(kind="c", func=""):
         res += match_func_headers(func, kind)
     elif kind == "obj":
         res += "\n#include <mipp_obj.hpp>"
-    res += "\n#include <catch2/catch_test_macros.hpp>\n\n"
+    res += "\n#include <catch2/catch_test_macros.hpp>"
+    res += "\n#include <catch2/catch_get_random_seed.hpp>\n\n" # getSeed()
     return res
 
 def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False, lmul=0, mkind=""):
@@ -509,6 +550,12 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False, lm
     if lmul != 0 :
         lmul_coeff = lmul
     if kind=="c":
+        # append scalar after the first "_" in reg type 
+        # nb : there can be a different amount of "_" in reg type like : rvd_int64_t
+        # rvd_int64_m1_t etc
+        split = reg_type.split("_", 1)
+        reg_type_scalar = split[0] + "_scalar_" + split[1]
+        scalar_ext = "scalar_" + scalar_type
 
         res = func_template.render(
             func=func,
@@ -526,6 +573,9 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False, lm
             lmul_coeff=lmul_coeff,
             mask_args=get_mask_args(mkind),
             mask_kind=mask_to_str(mkind, kind),
+            
+            reg_type_scalar=reg_type_scalar,
+            scalar_ext=scalar_ext,
         )
     if not float and kind=="cpp" :
         res = func_template.render(
@@ -934,7 +984,7 @@ def get_str_path(tmp_path, lmul=0, mkind=""):
 
 
 #big and somewhat ugly "main" func to generate all test files for all funcs for the requested layer(s)
-def gen_test_files_all_funcs(kind="c", lmul=0, mkind=""):
+def gen_test_files_all_funcs(kind="c", lmul=0, mkind="", N=10):
     """
     kind: "c", "cpp", "obj", or "all"
     Regenerates only the requested layer(s) for all functions.
@@ -1018,7 +1068,7 @@ def gen_test_files_all_funcs(kind="c", lmul=0, mkind=""):
 
         if regen_c and func in c_dict:
             if func == "cast" or func == "cast_k":
-                c_file = gen_headers(kind="c",func=func) + gen_cast_file(func, kind="c",lmul=lmul, mkind=mkind)
+                c_file = gen_headers(kind="c",func=func, N=N) + gen_cast_file(func, kind="c",lmul=lmul, mkind=mkind)
             else:
                 c_file = gen_headers(kind="c",func=func) + gen_file(func, kind="c",lmul=lmul, mkind=mkind)
             if disable:
@@ -1057,10 +1107,17 @@ def main():#just parse the args and call gen_test_files_all_funcs with the right
         choices=["c", "cpp", "obj", "all"],
         help="Which layer to regenerate (default: all).",
     )
+    # add arg for number of iteration of random tests 
+    parser.add_argument(
+        "-N" "--num-iterations",
+        type=int,
+        default=10,
+        help="Number of iterations for random tests (default: 10).",
+    )
     args = parser.parse_args()
     for lmul in [0, 1, 2, 4, 8]:
         for mkind in ["", "mask", "maskz", "masks"]:
-            gen_test_files_all_funcs(kind=args.kind, lmul=lmul, mkind=mkind)
+            gen_test_files_all_funcs(kind=args.kind, lmul=lmul, mkind=mkind, N=args.N__num_iterations)
 
 
 if __name__ == "__main__":
