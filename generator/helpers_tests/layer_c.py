@@ -163,7 +163,9 @@ OP_REG_BINOP = """\t{{reg_type}} r3 = mipp_{{func}}_{{dt_ext}}(r1, r2);
 \t{{reg_type_scalar}} s3 = mipp_scalar_{{func}}_{{dt_ext}}(s1, s2);
 """
 
-OP_CMP_2REG = """\t{{msk_type}} m3 = mipp_{{func}}_{{dt_ext}}(r1, r2); {{reg_type}} r3 = mipp_toreg_{{dt_ext}}(m3);"""
+OP_CMP_2REG = """\t{{msk_type}} m3 = mipp_{{func}}_{{dt_ext}}(r1, r2); {{reg_type}} r3 = mipp_toreg_{{dt_ext}}(m3);
+{{msk_type_scalar}} ms3 = mipp_scalar_{{func}}_{{dt_ext}}(s1, s2); {{reg_type_scalar}} s3 = mipp_scalar_toreg_{{dt_ext}}(ms3);
+"""
 
 OP_STORE = """\tmipp_store_{{dt_ext}}(inputs2, r1);"""
 
@@ -207,7 +209,7 @@ LB_REG_BINOP_FLOAT_WORKAROUND = """{% if is_int %}""" + LB_REG_BINOP + """{% els
 # ------------------------------------------
 
 AS_REG_BINOP = """\t\tREQUIRE(mipp_get_{{dt_ext}}(r3, i) == mipp_scalar_get_{{dt_ext}}(s3, i));"""
-AS_CMP_2REG = """\t\tif(res) REQUIRE(mipp_get_{{dt_ext}}(r3, i) !=  ({{dt_ext}}_t)0); else REQUIRE(mipp_get_{{dt_ext}}(r3, i) == 0);"""
+AS_CMP_2REG = """REQUIRE(mipp_get_{{dt_ext}}(r3, i) == mipp_scalar_get_{{dt_ext}}(s3, i));"""
 AS_LOAD = """\t\tREQUIRE(mipp_get_{{dt_ext}}(r1, i) == res);"""
 AS_STORE = """\t\tREQUIRE(inputs2[i] == res);"""
 AS_3ARGS = """\t\tREQUIRE(mipp_get_{{dt_ext}}(r4, i) == res);"""
@@ -222,8 +224,9 @@ AS_REG_BINOP_FLOAT_WORKAROUND = """{% if is_int %}""" + AS_REG_BINOP + """{% els
 {% endif %}"""
 
 AS_CMP_BINOP_FLOAT_WORKAROUND = """{% if is_int %}""" + AS_CMP_2REG + """{% else %}
-\n\t\tif(res) REQUIRE(std::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(mipp_get_{{dt_ext}}(r3, i))\n\t\t\t!= 0);
-else REQUIRE(std::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(mipp_get_{{dt_ext}}(r3, i)) == 0);
+\n\t\tREQUIRE(std::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(mipp_get_{{dt_ext}}(r3, i))\
+    \n\t\t\t==
+    \t\tstd::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(mipp_scalar_get_{{dt_ext}}(s3,i)) );
 {% endif %}"""
 
 shape_templates = {
@@ -233,18 +236,18 @@ shape_templates = {
         init=INIT_2ARGS,
         load=LOAD_2ARGS_REG,
         operation=OP_REG_BINOP,
-        loop_body=LB_REG_BINOP,
+        loop_body="",
         loop_assert=AS_REG_BINOP,
     ),
-    # SHAPE_RET_MSK_2ARGS_REG: TemplateParts(
-    #     func_decl=FUNC_DECL,
-    #     decl=DECL_2ARGS,
-    #     init=INIT_2ARGS,
-    #     load=LOAD_2ARGS_REG,
-    #     operation=OP_CMP_2REG,
-    #     loop_body=LB_CMP_2REG,
-    #     loop_assert=AS_CMP_2REG,
-    # ),
+    SHAPE_RET_MSK_2ARGS_REG: TemplateParts(
+        func_decl=FUNC_DECL,
+        decl=DECL_2ARGS,
+        init=INIT_2ARGS,
+        load=LOAD_2ARGS_REG,
+        operation=OP_CMP_2REG,
+        loop_body="",
+        loop_assert=AS_CMP_BINOP_FLOAT_WORKAROUND,
+    ),
     # SHAPE_RET_REG_1ARG_PTR: TemplateParts(
     #     func_decl=FUNC_DECL,
     #     decl=DECL_1ARG,
@@ -489,46 +492,14 @@ shape_templates = {
 
 deny = { 
     #"round", #round is not implemented on avx2 (oops)
-    "andb", 
-    "orb",
-    "xorb",
-    "andnb",
-    "andnb_k",
-    "notb",
-    "notb_k",
-    "hadd",
-    "max",
-    "min",
+
 }
 
 
 LAYER_OVERRIDES = {
-#     "andnb": {
-#         "loop_body": "{% if is_int %}" + "\t\t{{dt_ext}}_t res = ~(inputs1[i]) & (inputs2[i]);" +
-# "{% else %}" + """\t{{dt_ext}}_t res = std::bit_cast<{{dt_ext}}_t,uint{{type_size}}_t>(
-# \t\t\t~std::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(inputs1[i]) 
-# \t\t\t&
-# \t\t\tstd::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(inputs2[i]) );\n""" + """{% endif %}""",
-#         "loop_assert": AS_REG_BINOP_FLOAT_WORKAROUND,
-#     },
-    
 #     "andnb_k": {
 #         "loop_body": """\t\t{{dt_ext}}_t res = ~(inputs1[i]) & (inputs2[i]);"""
 #     },
-
-#     "sub": {
-#         "init": INIT_2ARGS_NOUFLOW
-#     },
-
-#     "div" : {
-#         "loop_assert": """\tREQUIRE(
-# #if defined(MIPP_NEON) && !defined(__aarch64__)
-# 			std::abs(mipp_get_{{dt_ext}}(r3, i) - res) < 1e-2
-# #else
-# 			mipp_get_{{dt_ext}}(r3, i) == res
-# #endif
-# 		);""",
-# 	},
     
 #     "notb": {
 #         "loop_body": "{%if is_int %}"+"""\t\t{{dt_ext}}_t res = ~(inputs1[i]);"""+
@@ -596,13 +567,6 @@ LAYER_OVERRIDES = {
 #         "loop_body": """\t\t{{dt_ext}}_t res = -(inputs1[i] * inputs2[i]) - inputs3[i];""",
 #     },
     
-#     "max" : {
-#         "loop_body": """\t\t{{dt_ext}}_t res = std::max(inputs1[i], inputs2[i]);""",
-#     },
-#     "min" : {
-#         "loop_body": """\t\t{{dt_ext}}_t res = std::min(inputs1[i], inputs2[i]);""",
-#     },
-    
 #     "sqrt" : {
 #         "loop_body": """\t\t{{dt_ext}}_t res = std::sqrt(inputs1[i]);""",
 #     },
@@ -651,20 +615,6 @@ LAYER_OVERRIDES = {
 #         "operation": OP_CAST_MSK,
 #         "loop_body": """\tfor(size_t i = 0; i < vectorSize * sizeof({{dt1_ext}}_t) / sizeof({{dt2_ext}}_t); i++){\n"""+ LB_CAST_2ARGS,
 #         "loop_assert": AS_CAST_2ARGS_MSK + "\n\t}",
-#     },
-    
-#     #add support for float via {% is_float %}
-#     "andb": {
-#         "loop_body" : LB_REG_BINOP_FLOAT_WORKAROUND,
-#         "loop_assert" : AS_REG_BINOP_FLOAT_WORKAROUND
-#     },
-#     "orb": {
-#         "loop_body" : LB_REG_BINOP_FLOAT_WORKAROUND,
-#         "loop_assert" : AS_REG_BINOP_FLOAT_WORKAROUND
-#     },
-#     "xorb": {
-#         "loop_body" : LB_REG_BINOP_FLOAT_WORKAROUND,
-#         "loop_assert" : AS_REG_BINOP_FLOAT_WORKAROUND
 #     },
     
 #     "round": {

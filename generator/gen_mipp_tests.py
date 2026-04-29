@@ -556,6 +556,9 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False, lm
         split = reg_type.split("_", 1)
         reg_type_scalar = split[0] + "_scalar_" + split[1]
         scalar_ext = "scalar_" + scalar_type
+        
+        split = msk_type.split("_", 1)
+        msk_type_scalar = split[0] + "_scalar_" + split[1]
 
         res = func_template.render(
             func=func,
@@ -576,6 +579,7 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False, lm
             
             reg_type_scalar=reg_type_scalar,
             scalar_ext=scalar_ext,
+            msk_type_scalar=msk_type_scalar,
         )
     if not float and kind=="cpp" :
         res = func_template.render(
