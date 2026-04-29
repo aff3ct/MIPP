@@ -151,7 +151,7 @@ tpl_horiz_lmul_generic_emu = {
 	// pass first half of the vector to 
 	%r<tp>% res;
 	res.r1 = %set<c:tp|b:tp|m:tp/2>%(vals);
-	%v<tp>% *ptr = vals + %N<tp>% / 2;
+	const %v<tp>% *ptr = vals + %N<tp>% / 2;
 	res.r2 = %set<c:tp|b:tp|m:tp/2>%(ptr);
 	return res;
 {% endif %}"""},
