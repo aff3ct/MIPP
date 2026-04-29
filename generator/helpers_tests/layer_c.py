@@ -190,7 +190,7 @@ OP_CAST_MSK = """\t{{msk2_type}} m2 = mipp_cast_k_{{dt1_ext}}_{{dt2_ext}}(m1);""
 LB_SET_OP = """\t\t{{dt_ext}}_t res = inputs1[i];"""
 LB_SET_SCALAR_OP = """\t\t{{dt_ext}}_t res = input1;"""
 
-LB_REG_BINOP = """\t\t{{dt_ext}}_t res = inputs1[i] {{op}} inputs2[i];"""
+LB_REG_BINOP = """"""
 
 LB_CMP_2REG = """\t\tbool res = inputs1[i] {{op}} inputs2[i];"""
 
@@ -688,34 +688,30 @@ LAYER_OVERRIDES = {
     "add" : {
         "loop_assert" :
 """
-bool ov = ovf::will_add_overflow<{{dt_ext}}_t>(mipp_get_{{dt_ext}}(r1, i), mipp_get_{{dt_ext}}(r2, i));
-if(ov) {
-    INFO("Overflow occurred, skipping assert");
-}else{ """+ AS_REG_BINOP + """
-
-}
-"""},
+\t\tbool ov = ovf::will_add_overflow<{{dt_ext}}_t>(mipp_get_{{dt_ext}}(r1, i), mipp_get_{{dt_ext}}(r2, i));
+\t\tif(ov) {
+\t\t\tINFO("Overflow occurred, skipping assert");
+\t\t}else{\n\t"""+ AS_REG_BINOP + """\n\t\t}"""},
+    
     "sub" : {
         "loop_assert" :"""
-bool ov = ovf::will_sub_overflow<{{dt_ext}}_t>(mipp_get_{{dt_ext}}(r1, i), mipp_get_{{dt_ext}}(r2, i));
-if(ov) {
-    INFO("Overflow occurred, skipping assert");
-}else{ """+ AS_REG_BINOP + """
-}"""},
+\tbool ov = ovf::will_sub_overflow<{{dt_ext}}_t>(mipp_get_{{dt_ext}}(r1, i), mipp_get_{{dt_ext}}(r2, i));
+\t\tif(ov) {
+\t\t\tINFO("Overflow occurred, skipping assert");
+\t\t}else{\n\t"""+ AS_REG_BINOP + """\n\t\t}"""},
     
-#     "mul" : {
-#         "loop_assert" :"""
-# bool ov = ovf::will_mul_overflow<{{dt_ext}}_t>(mipp_get_{{dt_ext}}(r1, i), mipp_get_{{dt_ext}}(r2, i));
-# if(ov) {
-#     INFO("Overflow occurred, skipping assert");
-# }else{ """+ AS_REG_BINOP + """
-# }"""},
+    "mul" : {
+        "loop_assert" :"""
+\t\tbool ov = ovf::will_mul_overflow<{{dt_ext}}_t>(mipp_get_{{dt_ext}}(r1, i), mipp_get_{{dt_ext}}(r2, i));
+\t\tif(ov) {
+\t\t\tINFO("Overflow occurred, skipping assert");
+\t\t}else{\n\t"""+ AS_REG_BINOP + """\n\t\t}"""},
     
     "div" : {
         "loop_assert" :"""
-if(mipp_get_{{dt_ext}}(r2, i) == 0) {
-    INFO("Division by zero, skipping assert");
-}else{ """+ AS_REG_BINOP + """}"""},
+\t\tif(mipp_get_{{dt_ext}}(r2, i) == 0) {
+\t\t\tINFO("Division by zero, skipping assert");
+\t\t}else{\n\t"""+ AS_REG_BINOP + """\n\t\t}"""},
 
 }
 

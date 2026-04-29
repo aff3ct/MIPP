@@ -5,13 +5,13 @@ for(unsigned n = 0; n < N_ITER; n++){
 
 {{load}}
 {{operation}}
-for(int i = 0; i < vectorSize; i++)
-{
+\tfor(int i = 0; i < vectorSize; i++)
+\t{
 {{loop_body}}
 {{loop_assert}}
+\t}
 }
-}
-}
+}\n
 """
 
 GENERIC_NO_LOOP = """{{func_decl}}
