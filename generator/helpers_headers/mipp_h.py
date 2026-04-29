@@ -9,7 +9,7 @@ def generate_mipp_h(include_manager=None):
 
 	template_file = """#ifndef MY_INTRINSICS_PLUS_PLUS_H_
 #define MY_INTRINSICS_PLUS_PLUS_H_
-#include "scalar/mipp_impl_scalar_gen.h"
+#include "simd_ext/scalar/mipp_impl_scalar_gen.h"
 #include "c/common.h"
 """
 
