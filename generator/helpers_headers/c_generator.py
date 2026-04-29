@@ -157,7 +157,7 @@ def _compute_dt_par_dt_ret(funcs, f, dt):
     return dt_par, dt_ret
 
 
-def _render_template(isa, ff, dt_par, dt_ret, func_name=""):
+def _render_template(isa, ff, dt_par, dt_ret, func_name="", lmul=0):
     """
     renders the Jinja template. Can raise exceptions 
     if the template is not well formed!
@@ -176,6 +176,7 @@ def _render_template(isa, ff, dt_par, dt_ret, func_name=""):
         isa_dt_ret=isa["datatypes"][dt_ret],
         cstdint_ret=datatypes[dt_ret]["cstd"],
         func_name = func_name,
+        lmul = lmul
     )
 
 
@@ -801,7 +802,30 @@ def _gen_c_missing_one_masked(isa, file, funcs, f, dt, mask_kind, lmul=0):
         _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, masked_version=mask_kind, lmul=lmul)
   
         _missing_emit_ifdef_end(ifd, file)
-        
+  
+def _gen_c_horiz_lmul_one(isa, file, funcs, f, ff, dt, lmul):
+    dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
+    dt_key = dt_par + "," + dt_ret
+
+    pre_rendering = _render_template(isa, ff, dt_par, dt_ret, lmul=lmul)
+
+    ph_ret = _parse_placeholders_or_skip(
+        pre_rendering=pre_rendering,
+        isa=isa,
+        funcs=funcs,
+        f=f,
+        dt_par=dt_par,
+        dt_ret=dt_ret,
+        dt_key=dt_key,
+        file=file,
+        lmul=lmul,
+    )
+    if ph_ret is None:
+        return
+
+    post_rendering = ph_ret["converted_ir"]
+
+    _emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rendering, file, lmul=lmul)  
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Generators
@@ -934,6 +958,25 @@ def gen_c_missing_functions_lmul(isa, file, funcs, lmul):
                     if support.is_masksable():
                         _gen_c_missing_one_masked(isa, file_w, funcs, f, dt, "masks", lmul=lmul)
      
+def gen_c_horiz_lmul_func(isa, file, func, funcs, lmul, implem):
+    """
+    Generate emulated version of 
+    horizontal reduction functions for lmul>1.
+    
+    No ISA bc the functions will live in the generic C layer.
+    Different API than the other generators bc it's only for 1 function. 
+    And called @ a different time.
+    """
+    print("Params are func: " + func + ", lmul: " + str(lmul) + ", implem: " + str(implem))
+    if func not in implem:
+        print("Panic: '" + func + "' function does not exist in implem.")
+        exit(-1)
+    imp = implem[func]
+    for ff in imp:
+        for dt in ff["datatypes"]:
+            _emit_separator(func, file)
+            _gen_c_horiz_lmul_one(isa, file, funcs, func, ff, dt, lmul)
+    
      
 # ----------------------------------------------------------------------------------------------------------------------
 # RVV lmul bookkeeping helpers (moved from gen_mipp_rvv.py)

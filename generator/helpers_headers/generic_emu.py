@@ -139,3 +139,40 @@ implems_mask_generic_emu = {
 		{ "instr_name": "add",  "datatypes" : all_datatypes, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKS}},
  	],
 }
+
+################################# HORIZONTAL LMUL FUNCTIONS ############################################
+
+tpl_horiz_lmul_generic_emu = {
+    "tpl_set" : { "format" :"long", "code" :"""
+{% if lmul == 1 %}
+	%r<tp>% res = %set<tp>%(vals);
+	return res;
+{% else %}
+	// pass first half of the vector to 
+	%r<tp>% res;
+	res.r1 = %set<m:tp/2>%(vals);
+	%v<tp>% *ptr = vals + %N<tp2>% / 2;
+	res.r2 = %set<m:tp/2>%(ptr);
+	return res;
+
+{% endif %}"""},
+
+}
+
+implems_horiz_lmul_generic_emu = {
+    
+	"set" : [ 
+		{ "instr_name": "set",  "datatypes" : all_datatypes, "version" : "horiz_lmul", "template" : tpl_horiz_lmul_generic_emu["tpl_set"]},
+	],
+	# "get" : [],
+	# "get_k" : [],
+	# "getfirst" : [],
+ 
+	# "testz" : [],
+	# "testz_2" : [],
+	# "hadd" : [],
+	# "hmul" : [],
+	# "hmin" : [],
+	# "hmax" : [],
+	# "hadd_to_scal" : []
+}
