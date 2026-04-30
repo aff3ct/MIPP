@@ -488,7 +488,7 @@ LAYER_OVERRIDES = {
     
     "hadd": {
         "loop_body": """\tT res = 0; uint64_t ures = 0;
-\tfor(int j = 0; j < {{size}}; j++){
+\tfor(size_t j = 0; j < {{size}}; j++){
 \t\tres {{op}} inputs1[j];
 \t\tures{{op}} inputs1[j];
 \t}""",
@@ -497,14 +497,14 @@ LAYER_OVERRIDES = {
     
     "hmul": {
         "loop_body":"""\tT res = 1;
-\tfor(int j = 0; j < {{size}}; j++)
+\tfor(size_t j = 0; j < {{size}}; j++)
 \t\tres {{op}} inputs1[j];""",
         "loop_assert": """\tREQUIRE(mipp::get(r3, 0) == res);""",
     },
     
     "hmin": {
         "loop_body": """\tT res = inputs1[0];
-\tfor(int j = 1; j < {{size}}; j++)
+\tfor(size_t j = 1; j < {{size}}; j++)
 \t\tres = std::min(res, inputs1[j]);""",
         "loop_assert": """\tREQUIRE(mipp::get(r3, 0) == res);""",
     },
@@ -512,14 +512,14 @@ LAYER_OVERRIDES = {
     
     "hmax": {
         "loop_body": """\tT res = inputs1[0];
-\tfor(int j = 1; j < {{size}}; j++)
+\tfor(size_t j = 1; j < {{size}}; j++)
 \t\tres = std::max(res, inputs1[j]);""",
         "loop_assert": """\tREQUIRE(mipp::get(r3, 0) == res);""",
     },
     
     "hadd_to_scal": {
         "loop_body": """\tT res1 = 0; uint64_t ures1 = 0;
-\tfor(int j = 0; j < {{size}}; j++){
+\tfor(size_t j = 0; j < {{size}}; j++){
 \t\tres1 += inputs1[j];
 \t\tures1 += inputs1[j];
 \t}""",
