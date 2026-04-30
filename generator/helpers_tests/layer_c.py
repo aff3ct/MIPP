@@ -655,7 +655,7 @@ LAYER_OVERRIDES = {
 \t\tif(ov) {
 \t\t\tINFO("Overflow occurred, skipping assert");
 \t\t}else{\n\t"""
-+ "\t\t {{dt_ext}}_t res1 = mipp_get_{{dt_ext}}( mipp_{{func}}_{{dt_ext}}(r1),0);\n \t\t{{dt_ext}}_t res2 = mipp_scalar_get_{{dt_ext}}( mipp_scalar_{{func}}_{{dt_ext}}(s1),0);\n"
++ "\t\t {{dt_ext}}_t res1 = mipp_get_{{dt_ext}}( r3,0);\n \t\t{{dt_ext}}_t res2 = mipp_scalar_get_{{dt_ext}}(s3,0);\n"
 + "{% if is_int%}"
 + "\t\tREQUIRE(abs_diff::abs_diff(res1,res2) == 0);"
 + "{% else %}"
@@ -675,7 +675,7 @@ LAYER_OVERRIDES = {
 \t\t}
 \t\tif(ov) {
 \t\t\tINFO("Overflow occurred, skipping assert");
-\t\t}else{\n\t"""+ "\t\t {{dt_ext}}_t res1 = mipp_get_{{dt_ext}}( mipp_{{func}}_{{dt_ext}}(r1),0);\n \t\t{{dt_ext}}_t res2 = mipp_scalar_get_{{dt_ext}}( mipp_scalar_{{func}}_{{dt_ext}}(s1),0);\n"
+\t\t}else{\n\t"""+ "\t\t {{dt_ext}}_t res1 = mipp_get_{{dt_ext}}(r3,0);\n \t\t{{dt_ext}}_t res2 = mipp_scalar_get_{{dt_ext}}(s3,0);\n"
 + "{% if is_int%}"
 + "\t\tREQUIRE(abs_diff::abs_diff(res1,res2) == 0);"
 + "{% else %}"
