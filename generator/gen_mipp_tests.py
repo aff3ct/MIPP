@@ -524,6 +524,11 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False, lm
     func_dict = layer_dict[func]["proto"]
     func_template = layer_dict[func]["template"]
 
+
+    size = "MIPP_N_" + scalar_type.upper()
+    if kind != "c": 
+        size = "mipp::N<T>()"
+
     func_template = Template(func_template, undefined=StrictUndefined)
     res = func_template.render(
         func_decl=func_dict["func_decl"],
@@ -533,7 +538,7 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False, lm
         operation=func_dict["operation"],
         loop_body=func_dict["loop_body"],
         loop_assert=func_dict["loop_assert"],
-        size="MIPP_N_" + scalar_type.upper(),
+        size=size,
     )
 
     func_template = Template(res, undefined=StrictUndefined)
@@ -568,7 +573,7 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False, lm
             op=layer_dict[func_old]["op"],
             reg_type=reg_type,
             msk_type=msk_type,
-            size="MIPP_N_" + scalar_type.upper(),
+            size=size,
             
             is_float=is_float_dt(scalar_type),
             is_int=is_int_dt(scalar_type),
@@ -590,7 +595,7 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False, lm
             op=layer_dict[func_old]["op"],
             reg_type=reg_type,
             msk_type=msk_type,
-            size="MIPP_N_" + scalar_type.upper(),
+            size=size,
             
             is_float=False,
             is_int=True,
@@ -609,7 +614,7 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False, lm
             op=layer_dict[func_old]["op"],
             reg_type=reg_type,
             msk_type=msk_type,
-            size="MIPP_N_" + scalar_type.upper(),
+            size=size,
             
             is_float=True,
             is_int=False,
@@ -628,7 +633,7 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False, lm
             op=layer_dict[func_old]["op"],
             reg_type=reg_type,
             msk_type=msk_type,
-            size="MIPP_N_" + scalar_type.upper(),
+            size=size,
             
             is_float=is_float_dt(scalar_type),
             is_int=is_int_dt(scalar_type),
@@ -697,6 +702,8 @@ def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="
         msk2_type_scalar = split[0] + "_scalar_" + split[1]
         msk2_ext = "scalar_" + scalar2_type
         
+        size = "MIPP_N_" + scalar1_type.upper()
+        
         res = func_template.render(
             func=func,
             dt_ext=scalar1_type,
@@ -707,7 +714,7 @@ def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="
             msk1_type=msk1_type,
             reg2_type=reg2_type,
             msk2_type=msk2_type,
-            size="MIPP_N_" + scalar1_type.upper(),
+            size=size,
             lmul_suffix=lmul_suffix,
             lmul_coeff=lmul_coeff,
             #size2="MIPP_N_" + scalar2_type.upper(),
@@ -721,6 +728,8 @@ def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="
             msk2_scalar_type=msk2_type_scalar,
         )
     elif kind == "cpp": 
+        
+        size = "mipp::N<T>()"
         is_cast_k = func.startswith("cast_k")
         fname = "cast_k" if is_cast_k else "cast"
         
@@ -755,7 +764,7 @@ def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="
             msk1_type=msk1_type,
             reg2_type=reg2_type,
             msk2_type=msk2_type,
-            size="MIPP_N_" + scalar1_type.upper(),
+            size=size,
             lmul_suffix=lmul_suffix,
             lmul_coeff=lmul_coeff,
             mask_args=get_mask_args(mkind),

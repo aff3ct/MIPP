@@ -38,73 +38,73 @@ from .common import (
 
 FUNC_DECL = """template <typename T>\nvoid test_cppmipp_{{func}}(){"""
 FUNC_DECL_FLOAT_WORKAROUND = " {% if is_int %} " + FUNC_DECL + " {% else %} template <typename T>\nvoid test_cppmipp_{{func}}_float{{type_size}}(){  {% endif %}"
-FUNC_DECL_LMUL = """void test_cppmipp_{{func}}_{{lmul}}(){"""
 
 
 # --------------------------------------------
 # SCALAR VEC DECL
 # --------------------------------------------
+# DECL_GET_CATCH_SEED = "\n\tstd::mt19937 seed(Catch::getSeed()+n);\n"
+DECL_GET_CATCH_SEED = ""
 
-DECL_VECTOR_SIZE = """\tconst int vectorSize = mipp::N<T>();"""
-DECL_G_SNIPPET = """\tstd::mt19937 g;\n\tstd::uniform_int_distribution<uint16_t> dis(0, 1);"""
+DECL_G_SNIPPET = DECL_GET_CATCH_SEED + """\tstd::mt19937 g;\n\tstd::uniform_int_distribution<uint16_t> dis(0, 1);"""
 
-DECL_1ARG_INT32 = DECL_VECTOR_SIZE + """ int32_t inputs1[vectorSize];"""
-DECL_1ARG_SCALAR = DECL_VECTOR_SIZE + """ \t T input1 = 12;"""
-DECL_1ARG_SCALAR_INT32 = DECL_VECTOR_SIZE + """ \tint32_t input1 = 12;"""
+DECL_1ARG_INT32 = DECL_GET_CATCH_SEED + """ int32_t inputs1[{{size}}];"""
+DECL_1ARG_SCALAR = DECL_GET_CATCH_SEED + """ \t T input1 = 12;"""
+DECL_1ARG_SCALAR_INT32 = DECL_GET_CATCH_SEED + """ \tint32_t input1 = 12;"""
 
-DECL_2ARGS = DECL_VECTOR_SIZE + """ T inputs1[vectorSize],inputs2[vectorSize];"""
-DECL_1ARG = DECL_VECTOR_SIZE + """ T inputs1[vectorSize];"""
-DECL_2ARGS_FOR_STORE = DECL_VECTOR_SIZE + """ T inputs1[vectorSize],inputs2[vectorSize];"""
+DECL_2ARGS = DECL_GET_CATCH_SEED + """ T inputs1[{{size}}],inputs2[{{size}}];"""
+DECL_1ARG = DECL_GET_CATCH_SEED + """ T inputs1[{{size}}];"""
+DECL_2ARGS_FOR_STORE = DECL_GET_CATCH_SEED + """ T inputs1[{{size}}],inputs2[{{size}}];"""
 
-DECL_2ARGS_INT32 = DECL_VECTOR_SIZE + "\n\tint32_t inputs1[vectorSize],inputs2[vectorSize];"
+DECL_2ARGS_INT32 = DECL_GET_CATCH_SEED +  "\n\tint32_t inputs1[{{size}}],inputs2[{{size}}];"
 
-DECL_3ARGS = DECL_VECTOR_SIZE + """\n\tT inputs1[vectorSize],inputs2[vectorSize],inputs3[vectorSize];"""
+DECL_3ARGS = DECL_GET_CATCH_SEED + """\n\tT inputs1[{{size}}],inputs2[{{size}}],inputs3[{{size}}];"""
 
-DECL_CAST_2ARGS = DECL_VECTOR_SIZE + "\n\t{{dt2_ext}} inputs1[vectorSize];\n\tconstexpr size_t bytes = sizeof(inputs1);\n\t{{dt1_ext}}_t inputs2[bytes / sizeof({{dt1_ext}}_t)];"
+DECL_CAST_2ARGS = DECL_GET_CATCH_SEED +  "\n\t{{dt2_ext}} inputs1[{{size}}];\n\tconstexpr size_t bytes = sizeof(inputs1);\n\t{{dt1_ext}}_t inputs2[bytes / sizeof({{dt1_ext}}_t)];"
 
-DECL_CAST_2ARGS_MSK = DECL_VECTOR_SIZE +"\n\tint32_t inputs1[vectorSize];\n\tconstexpr size_t bytes = sizeof(inputs1);\n\t{{dt1_ext}}_t inputs2[bytes / sizeof({{dt1_ext}}_t)];"
+DECL_CAST_2ARGS_MSK = DECL_GET_CATCH_SEED + "\n\tint32_t inputs1[{{size}}];\n\tconstexpr size_t bytes = sizeof(inputs1);\n\t{{dt1_ext}}_t inputs2[bytes / sizeof({{dt1_ext}}_t)];"
 
 # --------------------------------------------
 # SCALAR VEC INIT
 # --------------------------------------------
 
-INIT_2ARGS = """\tstd::iota(inputs1, inputs1 + vectorSize, 1);
-\tstd::iota(inputs2, inputs2 + vectorSize, 1);
+INIT_2ARGS = """\tstd::iota(inputs1, inputs1 + {{size}}, 1);
+\tstd::iota(inputs2, inputs2 + {{size}}, 1);
 
 \tstd::mt19937 g;
-\tstd::shuffle(inputs1, inputs1 + vectorSize, g);
-\tstd::shuffle(inputs2, inputs2 + vectorSize, g);
+\tstd::shuffle(inputs1, inputs1 + {{size}}, g);
+\tstd::shuffle(inputs2, inputs2 + {{size}}, g);
 """
 
-INIT_2ARGS_NOUFLOW = INIT_2ARGS + """\tfor(int i = 0; i < vectorSize; i++)
+INIT_2ARGS_NOUFLOW = INIT_2ARGS + """\tfor(int i = 0; i < {{size}}; i++)
 \t{
 \t\tinputs1[i] += inputs2[i];
 \t}
 """
 
-INIT_1ARG = """\tstd::iota(inputs1, inputs1 + vectorSize, 1);
+INIT_1ARG = """\tstd::iota(inputs1, inputs1 + {{size}}, 1);
 \tstd::mt19937 g;
-\tstd::shuffle(inputs1, inputs1 + vectorSize, g);
+\tstd::shuffle(inputs1, inputs1 + {{size}}, g);
 """
 
-INIT_1ARG_DIS = """\tstd::iota(inputs1, inputs1 + vectorSize, 1);
-\tfor(int i = 0; i < vectorSize; i++)
+INIT_1ARG_DIS = """\tstd::iota(inputs1, inputs1 + {{size}}, 1);
+\tfor(int i = 0; i < {{size}}; i++)
 \t{
 \t\tinputs1[i] = dis(g) ? -1 : 0;
 \t}"""
 
-INIT_2ARGS_DIS = """\tfor(int i = 0; i < vectorSize; i++)
+INIT_2ARGS_DIS = """\tfor(int i = 0; i < {{size}}; i++)
 \t{
 \t\tinputs1[i] = dis(g) ? -1 : 0;
 \t\tinputs2[i] = dis(g) ? -1 : 0;
 \t}"""
 
 
-INIT_3ARGS = """\tstd::iota(inputs1, inputs1 + vectorSize, 1);
-\tstd::iota(inputs2, inputs2 + vectorSize, 1);
-\tstd::iota(inputs3, inputs3 + vectorSize, 1);"""
+INIT_3ARGS = """\tstd::iota(inputs1, inputs1 + {{size}}, 1);
+\tstd::iota(inputs2, inputs2 + {{size}}, 1);
+\tstd::iota(inputs3, inputs3 + {{size}}, 1);"""
 
-INIT_CAST_2ARGS = """\tstd::iota(inputs1, inputs1 + vectorSize, 1);\n\tmemcpy(inputs2, inputs1, sizeof(inputs1));"""
+INIT_CAST_2ARGS = """\tstd::iota(inputs1, inputs1 + {{size}}, 1);\n\tmemcpy(inputs2, inputs1, sizeof(inputs1));"""
 
 
 
@@ -280,7 +280,7 @@ shape_templates = {
      
     SHAPE_RET_REG_0ARG: TemplateParts(
         func_decl=FUNC_DECL,
-        decl=DECL_VECTOR_SIZE,
+        decl="",
         init="",
         load=LOAD_SET0_REG,
         operation=OP_REG_NOOP,
@@ -290,7 +290,7 @@ shape_templates = {
     
     SHAPE_RET_MSK_0ARG: TemplateParts(
         func_decl=FUNC_DECL,
-        decl=DECL_VECTOR_SIZE,
+        decl="",
         init="",
         load=LOAD_SET0_MASK,
         operation=OP_TOREG,
@@ -368,8 +368,8 @@ shape_templates = {
         loop_assert=AS_CMP_2REG,
     ),
 
-    #loop body will be overridden 
-    #by each func using this shape
+    # #loop body will be overridden 
+    # #by each func using this shape
     SHAPE_RET_REG_3ARGS_REG: TemplateParts(
         func_decl=FUNC_DECL,
         decl=DECL_3ARGS,
@@ -426,6 +426,7 @@ shape_templates = {
 
 deny = {
     #"round", 
+    
     "maskzld", "maskst",
 }
 
@@ -487,7 +488,7 @@ LAYER_OVERRIDES = {
     
     "hadd": {
         "loop_body": """\tT res = 0; uint64_t ures = 0;
-\tfor(int j = 0; j < vectorSize; j++){
+\tfor(int j = 0; j < {{size}}; j++){
 \t\tres {{op}} inputs1[j];
 \t\tures{{op}} inputs1[j];
 \t}""",
@@ -496,14 +497,14 @@ LAYER_OVERRIDES = {
     
     "hmul": {
         "loop_body":"""\tT res = 1;
-\tfor(int j = 0; j < vectorSize; j++)
+\tfor(int j = 0; j < {{size}}; j++)
 \t\tres {{op}} inputs1[j];""",
         "loop_assert": """\tREQUIRE(mipp::get(r3, 0) == res);""",
     },
     
     "hmin": {
         "loop_body": """\tT res = inputs1[0];
-\tfor(int j = 1; j < vectorSize; j++)
+\tfor(int j = 1; j < {{size}}; j++)
 \t\tres = std::min(res, inputs1[j]);""",
         "loop_assert": """\tREQUIRE(mipp::get(r3, 0) == res);""",
     },
@@ -511,14 +512,14 @@ LAYER_OVERRIDES = {
     
     "hmax": {
         "loop_body": """\tT res = inputs1[0];
-\tfor(int j = 1; j < vectorSize; j++)
+\tfor(int j = 1; j < {{size}}; j++)
 \t\tres = std::max(res, inputs1[j]);""",
         "loop_assert": """\tREQUIRE(mipp::get(r3, 0) == res);""",
     },
     
     "hadd_to_scal": {
         "loop_body": """\tT res1 = 0; uint64_t ures1 = 0;
-\tfor(int j = 0; j < vectorSize; j++){
+\tfor(int j = 0; j < {{size}}; j++){
 \t\tres1 += inputs1[j];
 \t\tures1 += inputs1[j];
 \t}""",
@@ -534,7 +535,7 @@ LAYER_OVERRIDES = {
         "init": INIT_CAST_2ARGS,
         "load": LOAD_CAST_2ARGS,
         "operation": OP_CAST,
-        "loop_body": """\tfor(size_t i = 0; i < vectorSize * sizeof({{dt2_ext}}) / sizeof({{dt1_ext}}_t); i++){\n"""+ LB_CAST_2ARGS,
+        "loop_body": """\tfor(size_t i = 0; i < {{size}} * sizeof({{dt2_ext}}) / sizeof({{dt1_ext}}_t); i++){\n"""+ LB_CAST_2ARGS,
         "loop_assert": AS_CAST_2ARGS+ "\n\t}",
     },
     
@@ -544,7 +545,7 @@ LAYER_OVERRIDES = {
         "init": INIT_CAST_2ARGS,
         "load": LOAD_CAST_2ARGS_MASK,
         "operation": OP_CAST_MSK,
-        "loop_body": """\tfor(size_t i = 0; i < vectorSize * sizeof(int32_t) / sizeof({{dt1_ext}}_t); i++){\n"""+ LB_CAST_2ARGS,
+        "loop_body": """\tfor(size_t i = 0; i < {{size}} * sizeof(int32_t) / sizeof({{dt1_ext}}_t); i++){\n"""+ LB_CAST_2ARGS,
         "loop_assert": AS_CAST_2ARGS_MSK + "\n\t}",
     },
     
@@ -613,10 +614,10 @@ REQUIRE(got_bits == expected_bits);"""
     
     "round": {
         
-        "init" : """\tstd::iota(inputs1, inputs1 + vectorSize, 1);
+        "init" : """\tstd::iota(inputs1, inputs1 + {{size}}, 1);
 \tstd::mt19937 g;
 std::uniform_real_distribution<float> dis(0.0, 1.0);
-\tfor(int i = 0; i < vectorSize; i++)
+\tfor(int i = 0; i < {{size}}; i++)
 \t{
 \t\tinputs1[i] += dis(g);
 \t}""",

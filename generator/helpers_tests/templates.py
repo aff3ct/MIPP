@@ -7,6 +7,7 @@ for(unsigned n = 0; n < N_ITER; n++){
 {{operation}}
 \tfor(int i = 0; i < {{size}}; i++)
 \t{
+{{loop_body}}
 {{loop_assert}}
 \t}
 }
