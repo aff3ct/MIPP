@@ -139,7 +139,7 @@ def _emit_function_body_scalar(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rende
     print("}", file=file)
 
 # Important changes here!!
-def _gen_c_functions_scalar(isa, file, funcs, f, ff, dt):
+def _gen_c_functions_scalar(isa, file, funcs, f, ff, dt, lmul=0):
     if ff["mask_variants"]:
         mask_variants = ff["mask_variants"]
     else:
@@ -187,6 +187,7 @@ def _gen_c_functions_scalar(isa, file, funcs, f, ff, dt):
             dt_ret=dt_ret,
             dt_key=dt_key,
             file=file,
+            lmul=lmul,
         )
         if ph_ret is None:
             return
@@ -209,6 +210,7 @@ def _gen_c_functions_scalar(isa, file, funcs, f, ff, dt):
             post_rendering=post_rendering,
             file=file,
             masked_version=mask_kind,
+            lmul=lmul,
         )
 
 def _emit_separator_scalar(f, file):
@@ -223,7 +225,7 @@ def _emit_separator_scalar(f, file):
     print(f" {f}", file=file)
 
 # Important changes here!!
-def gen_c_functions_scalar(isa, include_manager, funcs, implems):
+def gen_c_functions_scalar(isa, include_manager, funcs, implems, lmul=0):
     for f in implems:
         file = include_manager.get_fd(isa["name"], f)
         if f in funcs:
@@ -234,12 +236,158 @@ def gen_c_functions_scalar(isa, include_manager, funcs, implems):
                 else:
                     datatypes = funcs[f]["datatypes"]
                 for dt in datatypes:
-                    _gen_c_functions_scalar(isa, file, funcs, f, ff, dt)
+                    _gen_c_functions_scalar(isa, file, funcs, f, ff, dt, lmul=lmul)
         else:
             print("Panic: '" + f + "' function does not exist.")
             exit(-1)
 
+
+def gen_c_defines_scalar(isa, file):
+    """
+    Writes the number of elements in the SIMD 
+    register for each supported datatype for a given ISA.
+    Also writes the size of the SIMD register in bits and bytes.
+    """
+    print("#define MIPP_" + isa["name"].upper() + "_RVD_SIZE_BIT " + str(isa["size"]), file=file)
+
+    if isinstance(isa["size"], str):
+        print("#if MIPP_" + isa["name"].upper() + "_RVD_SIZE_BIT == 0", file=file)
+        print("\t#error \"MIPP_" + isa["name"].upper() + "_RVD_SIZE_BIT can't be null\"", file=file)
+        print("#endif", file=file)
+
+    if isinstance(isa["size"], str):
+        print("#define MIPP_" + isa["name"].upper() + "_RVD_SIZE_BYTE " + isa["size"] + "/8", file=file)
+    else:
+        print("#define MIPP_" + isa["name"].upper() + "_RVD_SIZE_BYTE " + str(int(isa["size"] / 8)), file=file)
+
+    if isinstance(isa["size"], str):
+        print("#if MIPP_" + isa["name"].upper() + "_RVD_SIZE_BYTE == 0", file=file)
+        print("\t#error \"MIPP_" + isa["name"].upper() + "_RVD_SIZE_BYTE can't be null\"", file=file)
+        print("#endif", file=file)
+
+    template1 = """#define MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{n_bits}} {{n_elmts}}"""
+    template2 = """#define MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{n_bits}} {{n_elmts}}
+#if MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{n_bits}} == 0
+    #error "MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{n_bits}} can't be null\"
+#endif"""
+
+    if isinstance(isa["size"], str):
+        j2_template = Template(template2, undefined=StrictUndefined)
+    else:
+        j2_template = Template(template1, undefined=StrictUndefined)
+
+    for dt in isa["datatypes"]:
+        if isinstance(isa["size"], str):
+            n_elmts = isa["size"] + "/" + str(datatypes[dt]["n_bits"])
+        else:
+            n_elmts = int(isa["size"] / datatypes[dt]["n_bits"])
+        print(
+            j2_template.render(
+                isa_name_upper=isa["name"].upper(),
+                type_category_upper=datatypes[dt]["category"].upper(),
+                n_bits=datatypes[dt]["n_bits"],
+                n_elmts=n_elmts,
+            ),
+            file=file,
+        )  
+    for lmul in all_lmul:
+        for dt in isa["datatypes"]:
+            if isinstance(isa["size"], str):
+                n_elmts = f'{isa["size"]}/{datatypes[dt]["n_bits"]}*{lmul}'
+            else:
+                n_elmts = int(isa["size"] / datatypes[dt]["n_bits"])*lmul
+            template = """#define MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{n_bits}}_M{{lmul}} {{n_elmts}}"""
+            j2_template = Template(template, undefined=StrictUndefined)
+            print(
+                j2_template.render(
+                    isa_name_upper=isa["name"].upper(),
+                    type_category_upper=datatypes[dt]["category"].upper(),
+                    n_bits=datatypes[dt]["n_bits"],
+                    n_elmts=n_elmts,
+                    lmul=lmul,
+                ),
+                file=file,
+            )          
+            
+def gen_c_structures_scalar(isa, file):
+    """
+    Writes the C structures corresponding to the supported datatypes for a given ISA, for both vector and mask types.
+    """
+    template = """typedef struct { {{ isa_datatype.reg }} r[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}]; } rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
+
+    template_alt = """typedef struct {
+#if {{ isa_datatype.if }}
+    {{ isa_datatype.reg }} r;
+#else
+    int r; // this is a hack to compile when the datatype is not suported by the SIMD extension
+#endif // {{ isa_datatype.if }}
+} rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
+    j2_template_alt = Template(template_alt, undefined=StrictUndefined)
+    j2_template = Template(template, undefined=StrictUndefined)
+
+    for dt in isa["datatypes"]:
+        if "if" not in isa["datatypes"][dt]:
+            print(
+                j2_template.render(
+                    isa=isa,
+                    isa_datatype=isa["datatypes"][dt],
+                    datatype=datatypes[dt],
+                    isa_name_upper=isa["name"].upper(),
+                    type_category_upper=datatypes[dt]["category"].upper(),
+                    ),
+                    file=file)
+        else:
+            print(j2_template_alt.render(isa=isa, isa_datatype=isa["datatypes"][dt], datatype=datatypes[dt]), file=file)
+
+
+    template = """typedef struct { {{ isa_datatype.msk }} m[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}]; } rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
+    j2_template = Template(template, undefined=StrictUndefined)
+
+    for dt in isa["datatypes"]:
+        print(
+            j2_template.render(
+                isa=isa,
+                isa_datatype=isa["datatypes"][dt],
+                datatype=datatypes[dt],
+                isa_name_upper=isa["name"].upper(),
+                type_category_upper=datatypes[dt]["category"].upper(),
+            ),
+            file=file)
+        
+    for lmul in all_lmul:
+        template = """typedef struct { {{ isa_datatype.reg }} r[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}_M{{lmul}}]; } rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m{{lmul}}_t;"""
+        template_msk = """typedef struct { {{ isa_datatype.msk }} m[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}_M{{lmul}}]; } rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m{{lmul}}_t;"""
+        
+        j2_template = Template(template, undefined=StrictUndefined)
+        j2_template_msk = Template(template_msk, undefined=StrictUndefined)
+        for dt in isa["datatypes"]:
+            print(
+                j2_template.render(
+                    isa=isa,
+                    isa_datatype=isa["datatypes"][dt],
+                    datatype=datatypes[dt],
+                    isa_name_upper=isa["name"].upper(),
+                    type_category_upper=datatypes[dt]["category"].upper(),
+                    lmul=lmul,
+                ),
+                file=file,
+            )
+        for dt in isa["datatypes"]:
+            print(
+                j2_template_msk.render(
+                    isa=isa,
+                    isa_datatype=isa["datatypes"][dt],
+                    datatype=datatypes[dt],
+                    isa_name_upper=isa["name"].upper(),
+                    type_category_upper=datatypes[dt]["category"].upper(),
+                    lmul=lmul,
+                ),
+                file=file,
+            )
+            
+
 def gen_mipp_scalar(include_manager):
+    
     # implementation C
     
     file_common = include_manager.get_fd(isa_scalar["name"], "common")
@@ -300,8 +448,8 @@ typedef double float64_t;
     j2_template = Template(tpl_header_scalar, undefined=StrictUndefined)
     print(j2_template.render(), file=file_common)
 
-    gen_c_defines(isa_scalar, file_common)
-    gen_c_structures(isa_scalar, file_common, is_scalar=True)
+    gen_c_defines_scalar(isa_scalar, file_common)
+    gen_c_structures_scalar(isa_scalar, file_common)
     print("Generate Scalar...", end=" ")
     copy_mipp_funcs = copy.deepcopy(mipp_funcs)
     gen_c_functions_scalar(isa_scalar, include_manager, copy_mipp_funcs, implems_scalar)

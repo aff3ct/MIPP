@@ -319,7 +319,8 @@ def gen_test_type_guards(func, long_name, short_name, kind="c", lmul=0, mkind=""
     Only generates tests for the dttypes for which the func is defined in the implem.
     """
     layer_dict = get_gen_test_dict(kind)
-    res = f'\nTEST_CASE("{long_name} - {kind}", "[{short_name}]") {{\n'
+    lmul_str = "" if lmul == 0 else lmul_to_str(lmul, "")
+    res = f'\nTEST_CASE("{long_name} - {kind} {lmul_str}", "[{short_name}]") {{\n'
     for implems in implem_dict.values():
         res += implems["guard"] + "\n"
         if func in implems["implem"]:
@@ -480,10 +481,13 @@ def match_func_headers(func, kind="c"):
 
     return headers
 
-def gen_headers(kind="c", func="", N=10):
+def gen_headers(kind="c", func="", N=10, lmul=0, mkind=""):
     """
     simple helper to return headers for the test files
     """
+    path_ext_hack = ""
+    if lmul != 0 : 
+        path_ext_hack = "../"
     res = (
         "#include <exception>"
         "\n#include <algorithm>"
@@ -492,9 +496,9 @@ def gen_headers(kind="c", func="", N=10):
         "\n#include <cstdio>"
         "\n#include <cmath>"
         "\n#include <bit>"
-        '\n#include "../../uniform.hpp"'
-        '\n#include "../../overflow_helpers.hpp"'
-        '\n#include "../../abs_diff.hpp"'
+        f'\n#include "{path_ext_hack}../../uniform.hpp"'
+        f'\n#include "{path_ext_hack}../../overflow_helpers.hpp"'
+        f'\n#include "{path_ext_hack}../../abs_diff.hpp"'
         f"\n#define N_ITER {N}\n"
 
     )
@@ -521,6 +525,8 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False, lm
         layer_dict = get_gen_test_dict_mask(kind)
 
     # we need to render twice because we have 2 levels of templates :)
+    # if func not in layer_dict:
+    #     return f"// No template for {func} in {kind} tests\n"
     func_dict = layer_dict[func]["proto"]
     func_template = layer_dict[func]["template"]
 
@@ -654,7 +660,11 @@ def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="
         is_cast_k = func.startswith("cast_k")
         fname = "cast_k" if is_cast_k else "cast"
         
+        
+        # if fname not in layer_dict:
+        #     return f"// No template for {fname} in {kind} tests\n"
         func_dict = layer_dict[fname]["proto"]
+        
         func_template = layer_dict[fname]["template"]
         
         func_template = Template(func_template, undefined=StrictUndefined)
@@ -677,7 +687,6 @@ def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="
         lmul_coeff = 1 
         if lmul != 0 :
             lmul_coeff = lmul
-        print(res)
         
         # split = reg_type.split("_", 1)
         # reg_type_scalar = split[0] + "_scalar_" + split[1]
@@ -1041,7 +1050,9 @@ def gen_test_files_all_funcs(kind="c", lmul=0, mkind="", N=10):
         raise ValueError(f"Invalid kind: {kind!r}")
     
     if lmul != 0 or mkind != "" :
-        print("lmul lacks the get function atm testing is not really possible, masks are no good either, so we skip for now")
+    # if mkind != "" :
+    
+        print("masks are no good, so we skip for now")
         return
 
 
@@ -1055,6 +1066,11 @@ def gen_test_files_all_funcs(kind="c", lmul=0, mkind="", N=10):
     c_dict = get_gen_test_dict("c") if regen_c else {}
     cpp_dict = get_gen_test_dict("cpp") if regen_cpp else {}
     obj_dict = get_gen_test_dict("obj") if regen_obj else {}
+    
+    if lmul != 0:
+        c_dict = get_gen_test_dict_lmul("c") if regen_c else {}
+        cpp_dict = get_gen_test_dict_lmul("cpp") if regen_cpp else {}
+        obj_dict = get_gen_test_dict_lmul("obj") if regen_obj else {}
 
     funcs = set()
     if regen_c:
@@ -1113,9 +1129,9 @@ def gen_test_files_all_funcs(kind="c", lmul=0, mkind="", N=10):
 
         if regen_c and func in c_dict:
             if func == "cast" or func == "cast_k":
-                c_file = gen_headers(kind="c",func=func, N=N) + gen_cast_file(func, kind="c",lmul=lmul, mkind=mkind)
+                c_file = gen_headers(kind="c",func=func, N=N, lmul=lmul, mkind=mkind) + gen_cast_file(func, kind="c",lmul=lmul, mkind=mkind)
             else:
-                c_file = gen_headers(kind="c",func=func) + gen_file(func, kind="c",lmul=lmul, mkind=mkind)
+                c_file = gen_headers(kind="c",func=func, N=N, lmul=lmul, mkind=mkind) + gen_file(func, kind="c",lmul=lmul, mkind=mkind)
             if disable:
                 c_file = comment_out_cpp_file(c_file, reason)
             file_path = cpath + match_concept(func) + f"/test_c{func}.cpp"
@@ -1123,9 +1139,9 @@ def gen_test_files_all_funcs(kind="c", lmul=0, mkind="", N=10):
 
         if regen_cpp and func in cpp_dict:
             if func == "cast" or func == "cast_k":
-                cpp_file = gen_headers(kind="cpp", func=func) + gen_cast_file(func, kind="cpp",lmul=lmul, mkind=mkind)
+                cpp_file = gen_headers(kind="cpp", func=func,  lmul=lmul, mkind=mkind) + gen_cast_file(func, kind="cpp",lmul=lmul, mkind=mkind)
             else:
-                cpp_file = gen_headers(kind="cpp", func=func) + gen_file(func, kind="cpp",lmul=lmul, mkind=mkind)
+                cpp_file = gen_headers(kind="cpp", func=func,  lmul=lmul, mkind=mkind) + gen_file(func, kind="cpp",lmul=lmul, mkind=mkind)
                 
             if disable:
                 cpp_file = comment_out_cpp_file(cpp_file, reason)
