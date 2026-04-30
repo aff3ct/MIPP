@@ -76,7 +76,7 @@ INIT_2ARGS = """\tstd::iota(inputs1, inputs1 + {{size}}, 1);
 \tstd::shuffle(inputs2, inputs2 + {{size}}, g);
 """
 
-INIT_2ARGS_NOUFLOW = INIT_2ARGS + """\tfor(int i = 0; i < {{size}}; i++)
+INIT_2ARGS_NOUFLOW = INIT_2ARGS + """\tfor(auto i = 0; i < {{size}}; i++)
 \t{
 \t\tinputs1[i] += inputs2[i];
 \t}
@@ -88,12 +88,12 @@ INIT_1ARG = """\tstd::iota(inputs1, inputs1 + {{size}}, 1);
 """
 
 INIT_1ARG_DIS = """\tstd::iota(inputs1, inputs1 + {{size}}, 1);
-\tfor(int i = 0; i < {{size}}; i++)
+\tfor(auto i = 0; i < {{size}}; i++)
 \t{
 \t\tinputs1[i] = dis(g) ? -1 : 0;
 \t}"""
 
-INIT_2ARGS_DIS = """\tfor(int i = 0; i < {{size}}; i++)
+INIT_2ARGS_DIS = """\tfor(auto i = 0; i < {{size}}; i++)
 \t{
 \t\tinputs1[i] = dis(g) ? -1 : 0;
 \t\tinputs2[i] = dis(g) ? -1 : 0;
@@ -617,7 +617,7 @@ REQUIRE(got_bits == expected_bits);"""
         "init" : """\tstd::iota(inputs1, inputs1 + {{size}}, 1);
 \tstd::mt19937 g;
 std::uniform_real_distribution<float> dis(0.0, 1.0);
-\tfor(int i = 0; i < {{size}}; i++)
+\tfor(auto i = 0; i < {{size}}; i++)
 \t{
 \t\tinputs1[i] += dis(g);
 \t}""",
