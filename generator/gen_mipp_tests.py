@@ -672,6 +672,31 @@ def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="
         lmul_coeff = 1 
         if lmul != 0 :
             lmul_coeff = lmul
+        print(res)
+        
+        # split = reg_type.split("_", 1)
+        # reg_type_scalar = split[0] + "_scalar_" + split[1]
+        # scalar_ext = "scalar_" + scalar_type
+        
+        # split = msk_type.split("_", 1)
+        # msk_type_scalar = split[0] + "_scalar_" + split[1]
+        
+        split = reg1_type.split("_", 1)
+        reg1_type_scalar = split[0] + "_scalar_" + split[1]
+        scalar1_ext = "scalar_" + scalar1_type
+        
+        split = reg2_type.split("_", 1)
+        reg2_type_scalar = split[0] + "_scalar_" + split[1]
+        scalar2_ext = "scalar_" + scalar2_type
+        
+        split = msk1_type.split("_", 1)
+        msk1_type_scalar = split[0] + "_scalar_" + split[1]
+        msk1_ext = "scalar_" + scalar1_type
+        
+        split = msk2_type.split("_", 1)
+        msk2_type_scalar = split[0] + "_scalar_" + split[1]
+        msk2_ext = "scalar_" + scalar2_type
+        
         res = func_template.render(
             func=func,
             dt_ext=scalar1_type,
@@ -689,6 +714,11 @@ def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="
             
             mask_args=get_mask_args(mkind),
             mask_kind=mask_to_str(mkind, kind),
+            
+            reg1_scalar_type=reg1_type_scalar,
+            reg2_scalar_type=reg2_type_scalar,
+            msk1_scalar_type=msk1_type_scalar,
+            msk2_scalar_type=msk2_type_scalar,
         )
     elif kind == "cpp": 
         is_cast_k = func.startswith("cast_k")
