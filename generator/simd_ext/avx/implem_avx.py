@@ -152,6 +152,7 @@ tpl_implem_avx = {
 	%r<tp>% rs4 = %cast<c:int|b:8,tp>%(rsi);
 	rs4.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs3.r, rs4.r);
 	return rs4;""" },
+
     "reduce_8": { "format": "long", "code":
 """// long format
 	%r<c:float|b:32>% rsf;
@@ -364,8 +365,11 @@ implems_avx = {
         { "instr_name": "add",            "datatypes": [int64],                                     "template": tpl_implem_avx["reduce_64"],        "if": "defined(__AVX2__)"            },
         { "instr_name": "add",            "datatypes": [float32],                                   "template": tpl_implem_avx["reduce_32"],                                             },
         { "instr_name": "add",            "datatypes": [int32],                                     "template": tpl_implem_avx["reduce_32"],        "if": "defined(__AVX2__)"            },
-        { "instr_name": "adds",           "datatypes": [int16, uint16],                             "template": tpl_implem_avx["reduce_16"],        "if": "defined(__AVX2__)"            },
-        { "instr_name": "adds",           "datatypes": [int8, uint8],                               "template": tpl_implem_avx["reduce_8"],         "if": "defined(__AVX2__)"            },
+        { "instr_name": "add",            "datatypes": [int16],                                     "template": tpl_implem_avx["reduce_16"],        "if": "defined(__AVX2__)"            },
+        { "instr_name": "adds",           "datatypes": [uint16],                                    "template": tpl_implem_avx["reduce_16"],        "if": "defined(__AVX2__)"            },
+        { "instr_name": "add",            "datatypes": [int8],                                      "template": tpl_implem_avx["reduce_8"],         "if": "defined(__AVX2__)"            },
+
+        { "instr_name": "adds",           "datatypes": [uint8],                                     "template": tpl_implem_avx["reduce_8"],         "if": "defined(__AVX2__)"            },
         { "instr_name": "add",            "datatypes": [uint64],                                    "template": tpl_implem_avx["reduce_64_u"],      "if": "defined(__AVX2__)"            },
         { "instr_name": "add",            "datatypes": [uint32],                                    "template": tpl_implem_avx["reduce_32_u"],      "if": "defined(__AVX2__)"            } ], # hadd
     "hmul": [

@@ -5,7 +5,7 @@ for(unsigned n = 0; n < N_ITER; n++){
 
 {{load}}
 {{operation}}
-\tfor(int i = 0; i < vectorSize; i++)
+\tfor(int i = 0; i < {{size}}; i++)
 \t{
 {{loop_assert}}
 \t}

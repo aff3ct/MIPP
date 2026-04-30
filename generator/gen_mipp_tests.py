@@ -494,6 +494,7 @@ def gen_headers(kind="c", func="", N=10):
         "\n#include <bit>"
         '\n#include "../../uniform.hpp"'
         '\n#include "../../overflow_helpers.hpp"'
+        '\n#include "../../abs_diff.hpp"'
         f"\n#define N_ITER {N}\n"
 
     )
@@ -532,6 +533,7 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False, lm
         operation=func_dict["operation"],
         loop_body=func_dict["loop_body"],
         loop_assert=func_dict["loop_assert"],
+        size="MIPP_N_" + scalar_type.upper(),
     )
 
     func_template = Template(res, undefined=StrictUndefined)
