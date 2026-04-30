@@ -55,7 +55,7 @@ float32_t vecadd_mask_red2(const float32_t* a1, const float32_t* a2)
 		rvm_float32_t m1 = mipp_cmplt_float32(r1, r2);
 		rvd_float32_t r3 = mipp_add_float32_maskz(m1, r1, r2);
 
-		sum += mipp_scalar_hadd_to_scal_float32(r3);
+		sum += mipp_hadd_to_scal_float32(r3);
 	}
 	return sum;
 }
@@ -69,13 +69,14 @@ int main()
 
 	srand(time(NULL));
 
-	float32_t a1[BUFF_SIZE], a2[BUFF_SIZE], a3[BUFF_SIZE];
+	float32_t a1[BUFF_SIZE], a2[BUFF_SIZE];
 	for (size_t i = 0; i < BUFF_SIZE; i++)
 	{
 		a1[i] = (float32_t)rand() / (float32_t)RAND_MAX;
 		a2[i] = (float32_t)rand() / (float32_t)RAND_MAX;
 	}
 
+	// float32_t a3[BUFF_SIZE];
 	// vecadd_mask(a1, a2, a3);
 	// float32_t sum = 0.f;
 	// for (size_t i = 0; i < BUFF_SIZE; i++)
