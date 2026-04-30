@@ -77,7 +77,7 @@ DECL_CAST_2ARGS_MSK = """\n\tint32_t inputs1[{{size}}];\n\tconstexpr size_t byte
 
 # init using values generated with the seed taken from Catch::getSeed()
 INIT_2ARGS = """
-\tfor(sizet_t i = 0; i < {{size}}; i++)
+\tfor(size_t i = 0; i < {{size}}; i++)
 \t{
 \t\tinputs1[i] = rnd::uniform<{{dt_ext}}_t>(seed);
 \t\tinputs2[i] = rnd::uniform<{{dt_ext}}_t>(seed);
@@ -85,13 +85,13 @@ INIT_2ARGS = """
 """
 
 INIT_1ARG = """
-\tfor(sizet_t i = 0; i < {{size}}; i++)
+\tfor(size_t i = 0; i < {{size}}; i++)
 \t{
 \t\tinputs1[i] = rnd::uniform<{{dt_ext}}_t>(seed);
 \t}
 """
 
-INIT_2ARGS_NOUFLOW = INIT_2ARGS + """\tfor(sizet_t i = 0; i < {{size}}; i++)
+INIT_2ARGS_NOUFLOW = INIT_2ARGS + """\tfor(size_t i = 0; i < {{size}}; i++)
 \t{
 \t\tinputs1[i] += inputs2[i];
 \t}
@@ -99,19 +99,19 @@ INIT_2ARGS_NOUFLOW = INIT_2ARGS + """\tfor(sizet_t i = 0; i < {{size}}; i++)
 
 
 INIT_1ARG_DIS = """\tstd::iota(inputs1, inputs1 + {{size}}, 1);
-\tfor(sizet_t i = 0; i < {{size}}; i++)
+\tfor(size_t i = 0; i < {{size}}; i++)
 \t{
 \t\tinputs1[i] = dis(g) ? -1 : 0;
 \t}"""
 
-INIT_2ARGS_DIS = """\tfor(sizet_t i = 0; i < {{size}}; i++)
+INIT_2ARGS_DIS = """\tfor(size_t i = 0; i < {{size}}; i++)
 \t{
 \t\tinputs1[i] = dis(g) ? -1 : 0;
 \t\tinputs2[i] = dis(g) ? -1 : 0;
 \t}"""
 
 
-INIT_3ARGS = """\tfor(sizet_t i = 0; i < {{size}}; i++)
+INIT_3ARGS = """\tfor(size_t i = 0; i < {{size}}; i++)
 \t{
 \t\tinputs1[i] = rnd::uniform<{{dt_ext}}_t>(seed);
 \t\tinputs2[i] = rnd::uniform<{{dt_ext}}_t>(seed);
