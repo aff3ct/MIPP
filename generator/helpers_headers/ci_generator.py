@@ -116,7 +116,9 @@ def _custom_prefix_generator(func, isa_list, is_common=False):
 // utiles pour l'instant pour les tests
 // pourrait clairement etre utile pour les generateurs au dela du if #define
 
-#if defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)
+#if defined(MIPP_SCALAR)
+
+#elif defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)
     #define MIPP_AVX512
     #define MIPP_INSTR_VERSION 1
     #define MIPP_64BIT
