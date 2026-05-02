@@ -254,6 +254,14 @@ AS_CMP_BINOP_FLOAT_WORKAROUND = """{% if is_int %}""" + AS_CMP_2REG + """{% else
     \t\tstd::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(mipp_scalar_get_{{dt_ext}}(s3,i)) );
 {% endif %}"""
 
+# both value must be either 0 or non-zero. 
+AS_CMP_2REG_LOGI = """REQUIRE( (!!mipp_get_{{dt_ext}}(r3, i)) == (!!mipp_scalar_get_{{dt_ext}}(s3, i)) );"""
+AS_CMP_BINOP_LOGI_FLOAT_WORKAROUND = """{% if is_int %}""" + AS_CMP_2REG + """{% else %} 
+\n\t\tREQUIRE( (!!mipp_get_{{dt_ext}}(r3, i)) == (!!mipp_scalar_get_{{dt_ext}}(s3,i)) );
+{% endif %}"""
+
+AS_CMP_TOMSK="""\t\tREQUIRE( (!!mipp_get_{{dt_ext}}(r3, i)) == (!!mipp_scalar_get_{{dt_ext}}(s3,i)) );"""
+
 shape_templates = {
     SHAPE_RET_REG_2ARGS_REG: TemplateParts( # add, sub, div, mul
         func_decl=FUNC_DECL,
@@ -271,7 +279,7 @@ shape_templates = {
         load=LOAD_2ARGS_REG,
         operation=OP_CMP_2REG,
         loop_body="",
-        loop_assert=AS_CMP_BINOP_FLOAT_WORKAROUND,
+        loop_assert=AS_CMP_BINOP_LOGI_FLOAT_WORKAROUND,
     ),
     SHAPE_RET_REG_1ARG_PTR: TemplateParts( # load, loadu
         func_decl=FUNC_DECL,
@@ -309,7 +317,7 @@ shape_templates = {
         load=LOAD_1ARG_MASK,
         operation=OP_TOREG,
         loop_body="",
-        loop_assert=AS_CMP_BINOP_FLOAT_WORKAROUND,
+        loop_assert=AS_CMP_BINOP_LOGI_FLOAT_WORKAROUND,
     ),
     
     SHAPE_RET_REG_1ARG_VAL: TemplateParts( # set1
@@ -329,7 +337,7 @@ shape_templates = {
         load=LOAD_1SCALAR_MASK,
         operation=OP_TOREG,
         loop_body="",
-        loop_assert=AS_CMP_BINOP_FLOAT_WORKAROUND,
+        loop_assert=AS_CMP_BINOP_LOGI_FLOAT_WORKAROUND,
     ),
     
     SHAPE_RET_REG_0ARG: TemplateParts( # set0
@@ -349,7 +357,7 @@ shape_templates = {
         load=LOAD_SET0_MASK,
         operation=OP_TOREG,
         loop_body="",
-        loop_assert= AS_CMP_BINOP_FLOAT_WORKAROUND,
+        loop_assert= AS_CMP_BINOP_LOGI_FLOAT_WORKAROUND
     ),
     
     SHAPE_RET_VAL_2ARGS_REG_VAL: TemplateParts( # get
@@ -369,7 +377,7 @@ shape_templates = {
         load=LOAD_1ARG_MASK,
         operation=OP_TOREG,
         loop_body="",
-        loop_assert= AS_CMP_BINOP_FLOAT_WORKAROUND,
+        loop_assert= AS_CMP_BINOP_LOGI_FLOAT_WORKAROUND,
     ),
     
     SHAPE_RET_VAL_1ARG_REG: TemplateParts( # getfirst, hadd_to_scal
@@ -399,7 +407,7 @@ shape_templates = {
         load=LOAD_2ARGS_MASK,
         operation=OP_2ARGS_2MASK,
         loop_body="",
-        loop_assert=AS_CMP_BINOP_FLOAT_WORKAROUND,
+        loop_assert=AS_CMP_BINOP_LOGI_FLOAT_WORKAROUND,
     ),
     
     # #this shape covers 
@@ -490,7 +498,7 @@ shape_templates = {
         operation="""\t{{msk_type}} m1 = mipp_tomsk_{{dt_ext}}(r1);\n{{reg_type}} r3 = mipp_toreg_{{dt_ext}}(m1);
 {{msk_type_scalar}} ms1 = mipp_scalar_tomsk_{{dt_ext}}(s1);\n\t{{reg_type_scalar}} s3 = mipp_scalar_toreg_{{dt_ext}}(ms1);""",
         loop_body="",
-        loop_assert=AS_CMP_2REG,
+        loop_assert=AS_CMP_TOMSK,
     ),
     
     
