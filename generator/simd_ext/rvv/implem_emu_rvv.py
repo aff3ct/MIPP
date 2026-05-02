@@ -559,9 +559,6 @@ implems_emu_rvv = {
     "set0_k" : [
         { "instr_name" : "set0_k", "datatypes" : all_int_uint, "template" : tpl_implem_emu_rvv["set0_k"]},
         { "instr_name" : "set0_k", "datatypes" : all_float, "template" : tpl_implem_emu_rvv["float_set0_k"]}],
-    "get_k" :[
-        { "instr_name" : "get_k", "datatypes" : all_datatypes, "template" : tpl_implem_emu_rvv["get_k"]}],
-
     "andnb" : [
         { "instr_name" : "", "datatypes" : all_int_uint, "template" : tpl_implem_emu_rvv["scalar_andnb"]},
         { "instr_name" : "", "datatypes" : [float32], "template" : tpl_implem_emu_rvv["float32_andnb"]},
@@ -617,7 +614,8 @@ implems_emu_rvv = {
         { "datatypes" :  [float64], "template" : tpl_implem_emu_rvv["toreg-64f"]  } ,
         { "datatypes" :  [uint16, int16], "template" : tpl_implem_emu_rvv["toreg-16"]  } ,
         { "datatypes" :  [uint8, int8], "template" : tpl_implem_emu_rvv["toreg-8"]  } ,],
-    
+    "get_k" :[
+        { "instr_name" : "get_k", "datatypes" : all_datatypes, "template" : tpl_implem_emu_rvv["get_k"]}],
     "tomsk"  : [
        { "instr_name" : "tomsk", "datatypes" : all_datatypes, "template" : tpl_implem_emu_rvv["tomsk"]}],       
     "msb" : [
