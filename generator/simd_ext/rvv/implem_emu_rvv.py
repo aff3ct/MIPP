@@ -216,6 +216,35 @@ tpl_implem_emu_rvv = {
         %r<tp>% ret;
         ret.r = {{ isa.prefix }}_vmerge_vvm_{{ isa_dt_par.data_ext }}(zero.r, one.r, m0.m, %N<tp>%);
         return ret;"""},
+
+     "toreg-64f" : { "format" : "long", "code" :
+    """
+        %r<c:uint|b:tp>% one  = %set1<c:uint|b:tp>%(0xFFFFFFFFFFFFFFFF);
+        %r<c:uint|b:tp>% zero = %set1<c:uint|b:tp>%(0);
+        
+        %m<c:uint|b:tp>% mtmp;
+        mtmp.m = m0.m;
+        %r<c:uint|b:tp>% tmp;
+        
+        %r<tp>% ret;
+        tmp = %blend<c:uint|b:tp>% (one, zero, mtmp);
+        ret = %cast<c:uint|b:tp,tp>%(tmp);
+        return ret;"""},
+    "toreg-32f" : { "format" : "long", "code" :
+    """
+        %r<c:uint|b:tp>% one  = %set1<c:uint|b:tp>%(0xFFFFFFFF);
+        %r<c:uint|b:tp>% zero = %set1<c:uint|b:tp>%(0);
+        
+        %m<c:uint|b:tp>% mtmp;
+        mtmp.m = m0.m;
+        %r<c:uint|b:tp>% tmp;
+        
+        %r<tp>% ret;
+        tmp = %blend<c:uint|b:tp>% (one, zero, mtmp);
+        ret = %cast<c:uint|b:tp,tp>%(tmp);
+        return ret;
+        
+    """},
     "toreg-16" : { "format" : "long", "code" :
     """
         %r<tp>% one  = %set1<tp>%((%v<tp>%)0xFFFF);
@@ -311,14 +340,14 @@ tpl_implem_emu_rvv = {
     
     "hmax_float32" : { "format" : "long", "code" :
     """
-        {{isa_dt_par.reg}} tmp = %set1<tp>%(FLT_MIN).r;
+        {{isa_dt_par.reg}} tmp = %set1<tp>%(-FLT_MAX).r;
         tmp = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1(r0.r,tmp,%N<tp>%);
         %r<tp>% ret;ret.r = tmp;
         return ret;"""},
     
     "hmax_float64" : { "format" : "long", "code" :
     """
-        {{isa_dt_par.reg}} tmp = %set1<tp>%(DBL_MIN).r;
+        {{isa_dt_par.reg}} tmp = %set1<tp>%(-DBL_MAX).r;
         tmp = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1(r0.r,tmp,%N<tp>%);
         %r<tp>% ret;ret.r = tmp;
         return ret;
@@ -530,11 +559,6 @@ implems_emu_rvv = {
     "set0_k" : [
         { "instr_name" : "set0_k", "datatypes" : all_int_uint, "template" : tpl_implem_emu_rvv["set0_k"]},
         { "instr_name" : "set0_k", "datatypes" : all_float, "template" : tpl_implem_emu_rvv["float_set0_k"]}],
-    "toreg" :[ 
-        { "datatypes" :  [uint64, int64, float64], "template" : tpl_implem_emu_rvv["toreg-64"]  } ,
-        { "datatypes" :  [uint32, int32, float32], "template" : tpl_implem_emu_rvv["toreg-32"]  } ,
-        { "datatypes" :  [uint16, int16], "template" : tpl_implem_emu_rvv["toreg-16"]  } ,
-        { "datatypes" :  [uint8, int8], "template" : tpl_implem_emu_rvv["toreg-8"]  } ,],
     "get_k" :[
         { "instr_name" : "get_k", "datatypes" : all_datatypes, "template" : tpl_implem_emu_rvv["get_k"]}],
 
@@ -585,6 +609,15 @@ implems_emu_rvv = {
        { "instr_name" : "vreinterpret", "datatypes" : datatypes_intuint_cart_prod, "template" : tpl_implem_emu_rvv["cast_intuint_other"]},
        { "instr_name" : "vreinterpret", "datatypes" : datatypes_float_float_cart_prod, "template" : tpl_implem_emu_rvv["cast_float_other"]},
        { "instr_name" : "vreinterpret", "datatypes" : datatypes_float_intuint_cart_prod, "template" : tpl_implem_emu_rvv["cast_float_other"]},],
+    
+    "toreg" :[ 
+        { "datatypes" :  [uint64, int64], "template" : tpl_implem_emu_rvv["toreg-64"]  } ,
+        { "datatypes" :  [uint32, int32], "template" : tpl_implem_emu_rvv["toreg-32"]  } ,
+        { "datatypes" :  [float32], "template" : tpl_implem_emu_rvv["toreg-32f"]  } ,
+        { "datatypes" :  [float64], "template" : tpl_implem_emu_rvv["toreg-64f"]  } ,
+        { "datatypes" :  [uint16, int16], "template" : tpl_implem_emu_rvv["toreg-16"]  } ,
+        { "datatypes" :  [uint8, int8], "template" : tpl_implem_emu_rvv["toreg-8"]  } ,],
+    
     "tomsk"  : [
        { "instr_name" : "tomsk", "datatypes" : all_datatypes, "template" : tpl_implem_emu_rvv["tomsk"]}],       
     "msb" : [
