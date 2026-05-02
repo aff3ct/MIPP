@@ -625,11 +625,22 @@ LAYER_OVERRIDES = {
 \t\t\tINFO("Overflow occurred, skipping assert");
 \t\t}else{\n\t"""+ AS_REG_BINOP + """\n\t\t}"""},
     
+    # division by zero is skipped + add some 
+    # tolerance for float division to avoid precision issues.
     "div" : {
         "loop_assert" :"""
 \t\tif(mipp_get_{{dt_ext}}(r2, i) == 0) {
 \t\t\tINFO("Division by zero, skipping assert");
-\t\t}else{\n\t"""+ AS_REG_BINOP + """\n\t\t}"""},
+\t\t}else{\n\t"""+ "\t\t {{dt_ext}}_t res1 = mipp_get_{{dt_ext}}(r3, i);\n \t\t{{dt_ext}}_t res2 = mipp_scalar_get_{{dt_ext}}(s3, i);\n"
++ "{% if is_int%}"
++ "\t\tREQUIRE(abs_diff::abs_diff(res1,res2) == 0);"
++ "{% else %}"
++ "\n\t\t{{dt_ext}}_t tol  = 1e-5f * abs_diff::abs_diff(res2) + 1.0f;"
++ "\n\t\t{{dt_ext}}_t diff = abs_diff::abs_diff(res1, res2);"
++ "\n\t\tREQUIRE(diff <= tol);"
++ "{% endif %}"
++ """\n\t\t}""",
+    },
     
     "hadd_to_scal" : {
         "loop_assert" :"""\t\tbool ov = false; {{dt_ext}}_t res = 0;
