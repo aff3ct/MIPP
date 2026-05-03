@@ -67,12 +67,16 @@ static inline void mipp_info()
 		simd_ext = "Intel KNCI";
 	#elif defined(__AVX512__) || defined(__AVX512F__)
 		simd_ext = "x86_64 AVX-512";
+	#else
+		simd_ext = "UNKNOWN (this case should never happen)";
 	#endif
 #elif defined(MIPP_AVX)
 	#if defined(__AVX2__)
 		simd_ext = "x86_64 AVX2";
 	#elif defined(__AVX__)
 		simd_ext = "x86_64 AVX";
+	#else
+		simd_ext = "UNKNOWN (this case should never happen)";
 	#endif
 #elif defined(MIPP_SSE)
 	#if defined(__SSE4_2__)
@@ -87,6 +91,8 @@ static inline void mipp_info()
 		simd_ext = "x86_64 SSE2";
 	#elif defined(__SSE__)
 		simd_ext = "x86 SSE";
+	#else
+		simd_ext = "UNKNOWN (this case should never happen)";
 	#endif
 #elif defined(MIPP_SVE)
 	simd_ext = "ARM SVE";
@@ -101,7 +107,7 @@ static inline void mipp_info()
 #elif defined(MIPP_SCALAR)
 	simd_ext = "SCALAR";
 #else
-	#error "This case should never happen, there is a design problem :-("
+	simd_ext = "UNKNOWN (this case should never happen)";
 #endif
 
 #if defined(MIPP_FMA)
