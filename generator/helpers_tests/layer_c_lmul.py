@@ -472,14 +472,14 @@ shape_templates = {
 
 deny = set()
 LAYER_OVERRIDES = {
-    "andnb": {
-        "loop_body": "{% if is_int %}" + "\t\t{{dt_ext}}_t res = ~(inputs1[i]) & (inputs2[i]);" +
-"{% else %}" + """\t{{dt_ext}}_t res = std::bit_cast<{{dt_ext}}_t,uint{{type_size}}_t>(
-\t\t\t~std::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(inputs1[i]) 
-\t\t\t&
-\t\t\tstd::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(inputs2[i]) );\n""" + """{% endif %}""",
-        "loop_assert": AS_REG_BINOP_FLOAT_WORKAROUND,
-    },
+#     "andnb": {
+#         "loop_body": "{% if is_int %}" + "\t\t{{dt_ext}}_t res = ~(inputs1[i]) & (inputs2[i]);" +
+# "{% else %}" + """\t{{dt_ext}}_t res = std::bit_cast<{{dt_ext}}_t,uint{{type_size}}_t>(
+# \t\t\t~std::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(inputs1[i]) 
+# \t\t\t&
+# \t\t\tstd::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(inputs2[i]) );\n""" + """{% endif %}""",
+#         "loop_assert": AS_REG_BINOP_FLOAT_WORKAROUND,
+#     },
     
 #     "andnb_k": {
 #         "loop_body": """\t\t{{dt_ext}}_t res = ~(inputs1[i]) & (inputs2[i]);"""
