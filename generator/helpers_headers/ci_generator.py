@@ -439,16 +439,22 @@ def ci_lmul_writer(f,func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_
         return
 
     isa_rvv = next((isa for isa in isa_list if isa["name"].startswith("rvv")), None)
+    isa_scalar = next((isa for isa in isa_list if isa["name"].startswith("scalar")), None)
     func_name_rvv = ""
+    func_name_scalar = ""
     if len(dt.split(',')) <= 1:
         func_name_rvv = build_func_name_short(isa_rvv, dt_par, f, lmul=lmul, masked_version=mask_type);
+        func_name_scalar = build_func_name_short(isa_scalar, dt_par, f, lmul=lmul, masked_version=mask_type);
     else:
         func_name_rvv = build_func_name(isa_rvv, dt_par, dt_ret, f, lmul=lmul, masked_version=mask_type);
+        func_name_scalar = build_func_name(isa_scalar, dt_par, dt_ret, f, lmul=lmul, masked_version=mask_type);
   
 
     print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name,lmul=lmul,isa_name=False, masked_version=mask_type) + " {", file=file)
     print("#if defined(__riscv_v_intrinsic)",file=file)
     print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa_rvv, func_name_rvv, lmul=lmul, masked_version=mask_type) + ";", file=file)
+    print("#elif defined(MIPP_SCALAR)",file=file)
+    print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa_scalar, func_name_scalar, lmul=lmul, masked_version=mask_type) + ";", file=file)
     print("#else",file=file)
     if not funcs[f]["horizontal"]:
         lmul_2 = int(lmul / 2)
@@ -506,6 +512,7 @@ def ci_ldiv_writer(f,func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_
 
 def gen_ci_functions(isa_list, include_manager, funcs):
     isa_rvv = next((isa for isa in isa_list if isa["name"].startswith("rvv")), None)
+    isa_scalar = next((isa for isa in isa_list if isa["name"].startswith("scalar")), None)
     
     include_manager.move_to_new_dir("simd_ext", [isa["name"] for isa in isa_list ])
     for f in funcs:
