@@ -243,7 +243,7 @@ AS_CMP_BINOP_LOGI_FLOAT_WORKAROUND = """{% if is_int %}""" + AS_CMP_2REG + """{%
 \n\t\tREQUIRE( (!!mipp_get_{{dt_ext}}_{{lmul_suffix}}(r3, i)) == (!!mipp_scalar_get_{{dt_ext}}_{{lmul_suffix}}(s3,i)) );
 {% endif %}"""
 
-AS_TOMSK = """\t\tREQUIRE(!!mipp_get_{{dt_ext}}_{{lmul_suffix}}(r3, i) == !!mipp_scalar_get_{{dt_ext}}_{{lmul_suffix}}(ms1,i));"""
+AS_TOMSK = """\t\tREQUIRE(!!mipp_get_{{dt_ext}}_{{lmul_suffix}}(r3, i) == !!mipp_scalar_get_{{dt_ext}}_{{lmul_suffix}}(s3,i));"""
 
 AS_3ARGS_TOL = """\t\t{{dt_ext}}_t res1 = mipp_get_{{dt_ext}}_{{lmul_suffix}}(r4, i);
 \t\t{{dt_ext}}_t res2 = mipp_scalar_get_{{dt_ext}}_{{lmul_suffix}}(s4, i);
