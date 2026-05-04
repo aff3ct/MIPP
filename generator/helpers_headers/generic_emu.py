@@ -265,7 +265,6 @@ tpl_horiz_lmul_generic_emu = {
 	return %hadd_to_scal<tp>%(r0);
 {% else %}
 	
-	%r<tp>% tmp;
   	%v<tp>% v0 = %hadd_to_scal<c:tp|b:tp|m:tp/2>%(r0.r1);
 	%v<tp>% v1 = %hadd_to_scal<c:tp|b:tp|m:tp/2>%(r0.r2);	
 	return v0 + v1;
