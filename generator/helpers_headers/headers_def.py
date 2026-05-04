@@ -284,17 +284,15 @@ protos = {
 }
 
 mipp_funcs_concepts = {
-    "cast":             ["cast", "cast_k", "toreg", "tomsk"],
-    "load":             ["load", "loadu", "set", "set_k", "set1", "set1_k", "set0", "set0_k", "maskzld", "gather"],
-    "store":            ["store", "storeu", "get", "get_k", "getfirst", "scatter", "maskst"],
-    "arithmetic":       ["add", "adds", "sub", "subs", "mul", "div", "div2", "div4", "maskz_add"],
-    "fused_arithmetic": ["fmadd", "fmsub", "fnmadd", "fnmsub"],
-    "comparison":       ["cmpeq", "cmpneq", "cmple", "cmplt", "cmpge", "cmpgt"],
-    "math":             ["sqrt", "rsqrt", "round"],
-    "logic":            ["andb", "andb_k", "andnb", "andnb_k", "orb", "orb_k", "xorb", "xorb_k", "msb", "notb", "notb_k"],
-    "reduction":        ["hadd", "hadds", "hmul", "hmin", "hmax", "hadd_to_scal", "hadds_to_scal", "testz", "testz_2"],
-    "ordering":         ["min", "max"],
-    "selection":        ["blend"],
+    "reinterpret": [ "cast", "cast_k", "toreg", "tomsk" ],
+    "load":        [ "load", "loadu", "set", "set_k", "set1", "set1_k", "set0", "set0_k", "maskzld", "gather" ],
+    "store":       [ "store", "storeu", "get", "get_k", "getfirst", "scatter", "maskst" ],
+    "arithmetic":  [ "add", "adds", "sub", "subs", "mul", "div", "div2", "div4", "maskz_add", "fmadd", "fmsub", "fnmadd", "fnmsub" ],
+    "comparison":  [ "cmpeq", "cmpneq", "cmple", "cmplt", "cmpge", "cmpgt" ],
+    "math":        [ "sqrt", "rsqrt", "round" ],
+    "logic":       [ "andb", "andb_k", "andnb", "andnb_k", "orb", "orb_k", "xorb", "xorb_k", "msb", "notb", "notb_k" ],
+    "reduction":   [ "hadd", "hadds", "hmul", "hmin", "hmax", "hadd_to_scal", "hadds_to_scal", "testz", "testz_2" ],
+    "selection":   [ "blend", "min", "max" ],
 }
 
 class MaskSupport:
