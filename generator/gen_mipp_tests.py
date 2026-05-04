@@ -1061,6 +1061,7 @@ def gen_test_files_all_funcs(kind="c", lmul=0, mkind="", N=10):
     regen_cpp = kind in {"cpp", "all"}
     regen_obj = kind in {"obj", "all"}
     if lmul != 0 : 
+        regen_cpp = False
         regen_obj = False
 
     c_dict = get_gen_test_dict("c") if regen_c else {}
