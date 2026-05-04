@@ -368,8 +368,7 @@ def write_mipp_infos(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_funcs_c
         with open(file_path, "w") as f:
             dttypes = all_datatypes
             for concept in mipp_funcs_concepts:
-                if concept == "a_trier":
-                    continue
+
                 #we write one table per concept
                 print("\n## " + concept + "\n", file=f)
                 #we want the list of dtypes in the same order but shortened using all_datatypes_short
@@ -401,14 +400,13 @@ def write_mipp_infos(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_funcs_c
                                 line += color_red + ":material-close:" + color_end + " | "
                             print(line, file=f)
             
-            #miscellaneous gets everything not in any concept or in the "a_trier" concept
             print("\n## miscellaneous\n", file=f)
             print("| Function | " + " | ".join(all_datatypes_short) + " |", file=f)
             print("| --- | " + " | ".join(["---"]*len(dttypes)) + " |", file=f)
             for func in mipp_funcs:
                 if func == "cast" or func == "cast_k":
                     continue                
-                if func in mipp_funcs_concepts["a_trier"] or all(func not in mipp_funcs_concepts[concept] for concept in mipp_funcs_concepts if concept != "a_trier"):
+                if all(func not in mipp_funcs_concepts[concept] for concept in mipp_funcs_concepts):
                     func_info = isa_info.get_func_info(func)
                     if func_info is not None:
                         line = "| " + func + " | "
@@ -542,8 +540,6 @@ class SpecFuncInfo:
         
         self.concept = "miscellaneous"
         for concept in mipp_funcs_concepts:
-            if concept == "a_trier": 
-                continue
             if func in mipp_funcs_concepts[concept]:
                 self.concept = concept
                 break

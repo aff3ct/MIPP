@@ -72,7 +72,12 @@ implem_dict = {
 set_skip_testing = {                    
     "maskzld", #prototype is broken.
     "maskst", #prototype also broken. 
-    "cast_k", #either testing or cast_k is wrong.    
+    "cast_k", #either testing or cast_k is wrong.  
+    # THESE FUNCTIONS ARE NOT IMPLEMENTED YET (they are only in scalar)
+    "adds",
+    "subs" ,
+    "hadds_to_scal",
+    "hadds", 
 }
 
 #every func that has the key "horizontal" set to false
