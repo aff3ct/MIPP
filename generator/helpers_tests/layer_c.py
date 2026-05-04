@@ -42,7 +42,6 @@ from .common import (
 # FN decl 
 # --------------------------------------------
 FUNC_DECL = """void test_cmipp_{{func}}_{{dt_ext}}(){"""
-FUNC_DECL_LMUL = """void test_cmipp_{{func}}_{{dt_ext}}_{{lmul}}(){"""
 
 
 # --------------------------------------------
@@ -183,7 +182,7 @@ OP_STORE = """\tmipp_store_{{dt_ext}}(inputs2, r1);"""
 
 OP_TOREG = """\t{{reg_type}} r3 = mipp_toreg_{{dt_ext}}(m1);\n\t{{reg_type_scalar}} s3 = mipp_scalar_toreg_{{dt_ext}}(ms1);"""
 
-OP_SCAL_UNOP = """\t{{dt_ext}}_t res = mipp_{{func}}_{{dt_ext}}(r1);"""
+#OP_SCAL_UNOP = """\t{{dt_ext}}_t res = mipp_{{func}}_{{dt_ext}}(r1);"""
 
 OP_3ARGS_2REG_1MSK = """\t{{reg_type}} r3 = mipp_{{func}}_{{dt_ext}}(r1, r2, m1);\n\t{{reg_type_scalar}} s3 = mipp_scalar_{{func}}_{{dt_ext}}(s1, s2, ms1);"""
 OP_3ARGS_1MSK_2REG = """\t{{reg_type}} r3 = mipp_{{func}}_{{dt_ext}}(m1, r1, r2);\n\t{{reg_type_scalar}} s3 = mipp_scalar_{{func}}_{{dt_ext}}(ms1, s1, s2);"""

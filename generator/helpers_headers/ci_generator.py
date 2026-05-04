@@ -275,6 +275,7 @@ def gen_ci_defines(isa_list, file):
 def gen_ci_structures(isa_list, file):
 
     isa_rvv = next((isa for isa in isa_list if isa["name"].startswith("rvv")), None)
+    isa_scalar = next((isa for isa in isa_list if isa["name"].startswith("scalar")), None)
     
     for index, isa in enumerate(isa_list):
         
@@ -344,6 +345,20 @@ def gen_ci_structures(isa_list, file):
         j2_template = Template(template, undefined=StrictUndefined)
         for dt in isa_rvv["datatypes"]:
             print(j2_template.render(isa=isa_rvv, datatype=datatypes[dt], lmul=str(lmul)), file=file)
+    print("#elif defined(MIPP_SCALAR)",file=file)
+    
+    # same as rvv in logic. Single big register.
+    for lmul in all_lmul[1:]:
+        template = """typedef rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t rvd_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t;"""
+        j2_template = Template(template, undefined=StrictUndefined)
+        for dt in isa_scalar["datatypes"]:
+            print(j2_template.render(isa=isa_scalar, datatype=datatypes[dt], lmul=str(lmul)), file=file)
+    for lmul in all_lmul[1:]:
+        template = """typedef rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t rvm_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t;"""
+        j2_template = Template(template, undefined=StrictUndefined)
+        for dt in isa_scalar["datatypes"]:
+            print(j2_template.render(isa=isa_scalar, datatype=datatypes[dt], lmul=str(lmul)), file=file)
+
     print("#else",file=file)
  
     for lmul in all_lmul[1:]:

@@ -108,11 +108,19 @@ def _emit_function_body_scalar(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rende
 
     print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, masked_version = masked_version, lmul=lmul) + " {", file=file)
 
+    lmul_str = ""
+    if lmul == 0:
+        lmul_str = ""
+    elif lmul >= 1:
+        lmul_str = "_M" + str(lmul)
+    elif lmul > 0 and lmul < 1:
+        lmul_str = "_D" + str(int(1/lmul))
+
     if ff["type"] == "element-wide":
         # Original code had a redundant always-true condition; keep behavior identical.
         if funcs[f]["proto"]["args"] or (not funcs[f]["proto"]["args"]):
             _emit_short_format_prologue_scalar(funcs[f], dt_ret, isa, file, lmul=lmul)
-            print(f"\tfor (size_t i = 0; i < MIPP_SCALAR_N_{dt_par.upper()}; i++)", file=file)
+            print(f"\tfor (size_t i = 0; i < MIPP_SCALAR_N_{dt_par.upper()}{lmul_str}; i++)", file=file)
             print("\t{", file=file)
         # cleaning
         post_rendering = post_rendering.lstrip()
@@ -140,6 +148,7 @@ def _emit_function_body_scalar(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rende
 
 # Important changes here!!
 def _gen_c_functions_scalar(isa, file, funcs, f, ff, dt, lmul=0):
+        
     if ff["mask_variants"]:
         mask_variants = ff["mask_variants"]
     else:
@@ -290,6 +299,7 @@ def gen_c_defines_scalar(isa, file):
             ),
             file=file,
         )  
+    
     for lmul in all_lmul:
         for dt in isa["datatypes"]:
             if isinstance(isa["size"], str):
@@ -452,7 +462,10 @@ typedef double float64_t;
     gen_c_structures_scalar(isa_scalar, file_common)
     print("Generate Scalar...", end=" ")
     copy_mipp_funcs = copy.deepcopy(mipp_funcs)
+    
     gen_c_functions_scalar(isa_scalar, include_manager, copy_mipp_funcs, implems_scalar)
+    for lmul in all_lmul:
+        gen_c_functions_scalar(isa_scalar, include_manager, copy_mipp_funcs, implems_scalar, lmul=lmul)
 
     tpl_footer_scalar = """#endif /* MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SCALAR_H_ */"""
     j2_template = Template(tpl_footer_scalar, undefined=StrictUndefined)
