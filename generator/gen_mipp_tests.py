@@ -356,7 +356,9 @@ def gen_cast_test_type_guards(func, long_name, short_name, kind="c", lmul=0, mki
     but we need to handle the dttype pairs properly.
     """
     layer_dict = get_gen_test_dict(kind)
-    res = f'\nTEST_CASE("{long_name} - {kind}", "[{short_name}]") {{\n'
+    lmul_str = "" if lmul == 0 else lmul_to_str(lmul, "")
+    res = f'\nTEST_CASE("{long_name} - {kind} {lmul_str}", "[{short_name}]") {{\n'
+
     for implems in implem_dict.values():
         res += implems["guard"] + "\n"
         if func in implems["implem"]:

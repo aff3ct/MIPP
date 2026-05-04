@@ -53,6 +53,12 @@ def _isa_include_common(isa):
 
 
 def _isa_include_function(isa, func):
+    
+    
+    if isa == "c":
+        content = "\n#include \"" + func + ".h\"\n"
+        return content
+    
     content = "\n#include \"../../simd_ext/"+isa["name"]+"/" + "functions/" + isa["name"] + "_" + func + ".h\"\n"
     if isa["name"] == "avx" : 
         # also include sse functions for avx since it relies on sse types
@@ -212,6 +218,16 @@ def _custom_prefix_generator(func, isa_list, is_common=False):
                 
             content += _isa_include_function(isa, func)
         content += "#endif\n"
+    
+        # here we go through implems_horiz_lmul_generic_emu to check for "dependencies" of the lmul variants 
+        # this is a hacky fix bc we don't do dependency resolution in the C layer and above. 
+        if func in implems_horiz_lmul_generic_emu:
+            
+            for implem in implems_horiz_lmul_generic_emu[func]:
+                if "dependencies" in implem:
+                    for dep in implem["dependencies"]:
+                        content += _isa_include_function("c", dep)
+
         
     return content
     

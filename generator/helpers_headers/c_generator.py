@@ -934,7 +934,8 @@ def gen_c_missing_functions_lmul(isa, file, funcs, lmul):
                         _gen_c_missing_one_masked(isa, file_w, funcs, f, dt, "maskz", lmul=lmul)
                     if support.is_masksable():
                         _gen_c_missing_one_masked(isa, file_w, funcs, f, dt, "masks", lmul=lmul)
-     
+
+ 
 def _gen_c_horiz_lmul_one(isa, file, funcs, f, ff, dt, lmul):
     """
     Emit one horizontal LMUL variant body (LMUL>1) for one function+datatype,
@@ -949,12 +950,13 @@ def _gen_c_horiz_lmul_one(isa, file, funcs, f, ff, dt, lmul):
     if _rvv_seen_lmul(funcs, f, dt_key, lmul):
         return
 
-    # --- Option B: pre-mark deps as implemented so parse_placeholders doesn't raise ---
     # Current horiz templates (tpl_set) reference %set<...>% recursively (tp/2).
     # parse_placeholders requires funcs["set"].implem_status[dep_dt_key] to exist.
     #
     # We mark base set<dt,dt> as implemented; this is enough to avoid the exception.
     # (If you later add more horiz templates that reference other functions, extend this.)
+    
+    
     def _ensure_fake_implemented(func_name, dep_dt_key):
         if func_name not in funcs:
             return
@@ -964,13 +966,29 @@ def _gen_c_horiz_lmul_one(isa, file, funcs, f, ff, dt, lmul):
             funcs[func_name]["implem_status"][dep_dt_key] = [{"if": "", "requirements": {}}]
 
    
-    _ensure_fake_implemented(f, dt_key)
+    #_ensure_fake_implemented(f, dt_key)
     # -------------------------------------------------------------------------------
 
     ff_local = dict(ff)
     ff_local["type"] = "emulated"
 
     pre_rendering = _render_template(isa, ff_local, dt_par, dt_ret, func_name=f, lmul=lmul)
+    requirements = get_requirements(
+        ir=pre_rendering,
+        isa=isa,
+        funcs=funcs,
+        func_name=f,
+        dt_par=dt_par,
+        dt_ret=dt_ret,
+        lmul=lmul,
+        isa_name=False,
+    )
+    
+    for req in requirements: # we still need to include the 
+    # requirements != to f. This is done in ci_generator for simplicity's sake.
+        for req_dt_key in requirements[req]:
+            _ensure_fake_implemented(req, req_dt_key)
+    
 
     ph_ret = _parse_placeholders_or_skip(
         pre_rendering=pre_rendering,
@@ -991,8 +1009,7 @@ def _gen_c_horiz_lmul_one(isa, file, funcs, f, ff, dt, lmul):
     print("\t", end="", file=file)
     print(ph_ret["converted_ir"], file=file)
 
-
-    _rvv_mark_lmul_seen(funcs, f, dt_key, lmul)
+    _rvv_mark_lmul_seen(funcs, f, dt_key, lmul)    
 
 
 def gen_c_horiz_lmul(isa, file, funcs, f, dt, lmul, implems_horiz_lmul_generic_emu, func_name_for_panic=None, mask_type=None):

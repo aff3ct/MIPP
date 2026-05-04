@@ -1001,6 +1001,51 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret,lmul=0, isa_nam
 
     return ret_pack
 
+def get_requirements(ir, isa, funcs, func_name, dt_par, dt_ret,lmul=0, isa_name=True):
+    """
+    get requirements for a given ir + func_name + dt_par + dt_ret.
+    Same logic as parse_placeholders but we just build the requirements. We also 
+    don't raise an exception if a required function is missing, we just add it to the requirements and let the caller handle it.
+    """
+    dt_key = dt_par + "," + dt_ret
+    ar_substitute = re.findall(r'\%([^%]*)\%', ir)
+    requirements = {}
+
+    for s in ar_substitute:
+        item_type = s.split('<')[0]
+
+        if item_type not in ["r", "m", "v", "N"]:
+            f_name = item_type
+            if f_name not in funcs:
+                print("Panic: '" + f_name + "' is not in the available MIPP functions.")
+                exit(-1)
+
+            fdt_key = ""
+            dt_info = re.findall(r'\<(.*)\>', s)[0]
+            dt_info_params = dt_info.split(",")
+            if len(dt_info_params) == 1:
+                dt = build_dt(dt_info_params[0], isa, dt_par, dt_ret)
+                fdt_key = dt + "," + dt
+            elif len(dt_info_params) == 2:
+                dt_1 = build_dt(dt_info_params[0], isa, dt_par, dt_ret)
+                dt_2 = build_dt(dt_info_params[1], isa, dt_par, dt_ret)
+                fdt_key = dt_1 + "," + dt_2
+            else:
+                print("Panic: '" + f_name + "' has incompatible format.")
+                exit(-1)
+
+            if f_name not in funcs:
+                print("Panic: '" + f_name + "' is not in the available MIPP functions.")
+                exit(-1)
+
+            if f_name not in requirements:
+                requirements[f_name] = []
+            if fdt_key not in requirements[f_name]:
+                requirements[f_name].append(fdt_key)
+
+    return requirements
+    
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Masked stuff

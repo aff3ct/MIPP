@@ -189,9 +189,91 @@ tpl_horiz_lmul_generic_emu = {
 {% else %}
 	return %getfirst<c:tp|b:tp|m:tp/2>%(r0.r1);
 {% endif %}"""},
+    
+    "tpl_testz" : { "format" :"long", "code" :"""
+{% if lmul == 1 %}
+	return %testz<tp>%(m0, m1);
+{% else %}
+	return %testz<c:tp|b:tp|m:tp/2>%(m0.m1, m0.m2) && %testz<c:tp|b:tp|m:tp/2>%(m1.m1, m1.m2);
+{% endif %}"""},
+    
+    "tpl_testz_2" : { "format" :"long", "code" :"""
+{% if lmul == 1 %}
+	return %testz_2<tp>%(m0);
+{% else %}
+	return %testz_2<c:tp|b:tp|m:tp/2>%(m0.m1) && %testz_2<c:tp|b:tp|m:tp/2>%(m0.m2);
+{% endif %}"""},
+    
+    "hadd" : { "format" :"long", "code" :"""
+{% if lmul == 1 %}
+	return %hadd<tp>%(r0);
+{% else %}
+	
+	%r<tp>% ret;
+  	ret.r1 = %hadd<c:tp|b:tp|m:tp/2>%(r0.r1);
+	ret.r2 = %hadd<c:tp|b:tp|m:tp/2>%(r0.r2);
+	// we know that lane 0 of r0.r1 contains the sum of the first half of the vector and lane 0 of r0.r2 contains the sum of the second half of the vector
+	// we do a full add of these two lanes, with ret.r1 containing the final result of the hadd.
+	ret.r1 = %add<c:tp|b:tp|m:tp/2>%(ret.r1, ret.r2);
+	return ret;
+{% endif %}"""},
+	
+	"hmul" : { "format" :"long", "code" :"""
+{% if lmul == 1 %}
+	return %hmul<tp>%(r0);
+{% else %}
+	
+	%r<tp>% ret;
+  	ret.r1 = %hmul<c:tp|b:tp|m:tp/2>%(r0.r1);
+	ret.r2 = %hmul<c:tp|b:tp|m:tp/2>%(r0.r2);
+	// we know that lane 0 of r0.r1 contains the product of the first half of the vector and lane 0 of r0.r2 contains the product of the second half of the vector
+	// we do a full mul of these two lanes, with ret.r1 containing the final result of the hmul.
+	ret.r1 = %mul<c:tp|b:tp|m:tp/2>%(ret.r1, ret.r2);
+	return ret;
+{% endif %}"""},
+ 
+	"hmin" : { "format" :"long", "code" :"""
+{% if lmul == 1 %}
+	return %hmin<tp>%(r0);
+{% else %}
+	
+	%r<tp>% ret;
+  	ret.r1 = %hmin<c:tp|b:tp|m:tp/2>%(r0.r1);
+	ret.r2 = %hmin<c:tp|b:tp|m:tp/2>%(r0.r2);
+	// we know that lane 0 of r0.r1 contains the min of the first half of the vector and lane 0 of r0.r2 contains the min of the second half of the vector
+	// we do a full min of these two lanes, with ret.r1 containing the final result of the hmin.
+	ret.r1 = %min<c:tp|b:tp|m:tp/2>%(ret.r1, ret.r2);
+	return ret;
+{% endif %}"""},
+	
+	"hmax" : { "format" :"long", "code" :"""
+{% if lmul == 1 %}
+	return %hmax<tp>%(r0);
+{% else %}
+	
+	%r<tp>% ret;
+  	ret.r1 = %hmax<c:tp|b:tp|m:tp/2>%(r0.r1);
+	ret.r2 = %hmax<c:tp|b:tp|m:tp/2>%(r0.r2);
+	// we know that lane 0 of r0.r1 contains the max of the first half of the vector and lane 0 of r0.r2 contains the max of the second half of the vector
+	// we do a full max of these two lanes, with ret.r1 containing the final result of the hmax.
+	ret.r1 = %max<c:tp|b:tp|m:tp/2>%(ret.r1, ret.r2);
+	return ret;
+{% endif %}"""},
+	
+	"hadd_to_scal" : { "format" :"long", "code" :"""
+{% if lmul == 1 %}
+	return %hadd_to_scal<tp>%(r0);
+{% else %}
+	
+	%r<tp>% tmp;
+  	%v<tp>% v0 = %hadd_to_scal<c:tp|b:tp|m:tp/2>%(r0.r1);
+	%v<tp>% v1 = %hadd_to_scal<c:tp|b:tp|m:tp/2>%(r0.r2);	
+	return v0 + v1;
+{% endif %}"""},
 
 }
 
+# dependencies key is a hacky solution but that's life.
 implems_horiz_lmul_generic_emu = {
     
 	"set" : [ 
@@ -207,11 +289,26 @@ implems_horiz_lmul_generic_emu = {
 	 	{ "instr_name": "getfirst",  "datatypes" : all_datatypes, "version" : "horiz_lmul", "template" : tpl_horiz_lmul_generic_emu["tpl_getfirst"]},
 	],
  
-	# "testz" : [],
-	# "testz_2" : [],
-	# "hadd" : [],
-	# "hmul" : [],
-	# "hmin" : [],
-	# "hmax" : [],
-	# "hadd_to_scal" : []
+	"testz" : [
+		{ "instr_name": "testz",  "datatypes" : all_datatypes, "version" : "horiz_lmul", "template" : tpl_horiz_lmul_generic_emu["tpl_testz"]},
+	],
+		
+ 	"testz_2" : [
+		{ "instr_name": "testz_2",  "datatypes" : all_datatypes, "version" : "horiz_lmul", "template" : tpl_horiz_lmul_generic_emu["tpl_testz_2"]},
+	],
+	"hadd" : [
+     		{ "instr_name": "hadd",  "datatypes" : all_datatypes, "version" : "horiz_lmul", "template" : tpl_horiz_lmul_generic_emu["hadd"], "dependencies" : {"add"}},
+	],
+	"hmul" : [
+     		{ "instr_name": "hmul",  "datatypes" : all_datatypes, "version" : "horiz_lmul", "template" : tpl_horiz_lmul_generic_emu["hmul"], "dependencies" : {"mul"}},
+	],
+ 	"hmin" : [
+	 		{ "instr_name": "hmin",  "datatypes" : all_datatypes, "version" : "horiz_lmul", "template" : tpl_horiz_lmul_generic_emu["hmin"], "dependencies" : {"min"}},
+	],
+	"hmax" : [
+     	 	{ "instr_name": "hmax",  "datatypes" : all_datatypes, "version" : "horiz_lmul", "template" : tpl_horiz_lmul_generic_emu["hmax"], "dependencies" : {"max"}},
+	],
+	"hadd_to_scal" : [
+     	 	{ "instr_name": "hadd_to_scal",  "datatypes" : all_datatypes, "version" : "horiz_lmul", "template" : tpl_horiz_lmul_generic_emu["hadd_to_scal"]},
+	],
 }
