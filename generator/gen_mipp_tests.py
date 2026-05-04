@@ -2,6 +2,7 @@
 import os
 import sys
 import argparse
+import shutil
 from jinja2 import Template, StrictUndefined
 
 path = os.getcwd()
@@ -1039,6 +1040,13 @@ def get_str_path(tmp_path, lmul=0, mkind=""):
     return a, b, c
 
 
+def clean_folder(folder_path):
+    try:
+        shutil.rmtree(folder_path)
+        print(f"Successfully deleted folder: {folder_path}")
+    except Exception as e:
+        print(f"Failed to delete folder: {folder_path}. Reason: {e}")
+
 #big and somewhat ugly "main" func to generate all test files for all funcs for the requested layer(s)
 def gen_test_files_all_funcs(kind="c", lmul=0, mkind="", N=10):
     """
@@ -1179,6 +1187,11 @@ def main():#just parse the args and call gen_test_files_all_funcs with the right
         help="Number of iterations for random tests (default: 10).",
     )
     args = parser.parse_args()
+
+    clean_folder(cpath)
+    clean_folder(cpppath)
+    clean_folder(objpath)
+
     for lmul in [0, 1, 2, 4, 8]:
         for mkind in ["", "mask", "maskz", "masks"]:
             gen_test_files_all_funcs(kind=args.kind, lmul=lmul, mkind=mkind, N=args.N__num_iterations)

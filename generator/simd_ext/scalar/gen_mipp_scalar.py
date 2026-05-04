@@ -408,6 +408,7 @@ def gen_mipp_scalar(include_manager):
 #include <math.h> // sqrt, sqrtf, round, roundf
 #include <string.h> // memcpy
 #include <stdint.h>
+#include <limits.h>
 #if !defined(MIPP_SCALAR_SIZE)
 	#if defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)
 		#define MIPP_SCALAR_SIZE 512

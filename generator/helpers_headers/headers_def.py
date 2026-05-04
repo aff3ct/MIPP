@@ -284,16 +284,15 @@ protos = {
 }
 
 mipp_funcs_concepts = {
-    "all_casts": ["cast","cast_k","toreg","tomsk"],
-    "all_loads": ["load","loadu","set","set_k","set1","set0","set0_k","maskzld","gather"],
-    "all_acces": ["store","storeu","get", "getfirst","scatter","maskst"],
-    "all_arithm_op": ["add","sub","mul","div"],
-    "all_fused_arithm_op":["fmadd","fmsub", "fnmadd","fnmsub"],
-    "all_order_op":["cmpeq","cmpneq","cmplt","cmpge","cmpgt"],
-    "all_maths_functions":["sqrt","rsqrt"],
-    "all_binary_op":["andb","andb_k","andnb","andnb_k","orb","orb_k","xorb","xorb_k","msb","notb","notb_k"],
-    "all_reductions":["hadd","hmul","hmin","hmax"],
-    "a_trier":["round","blend","testz","testz_2"]
+    "reinterpret": [ "cast", "cast_k", "toreg", "tomsk" ],
+    "load":        [ "load", "loadu", "set", "set_k", "set1", "set1_k", "set0", "set0_k", "maskzld", "gather" ],
+    "store":       [ "store", "storeu", "get", "get_k", "getfirst", "scatter", "maskst" ],
+    "arithmetic":  [ "add", "adds", "sub", "subs", "mul", "div", "div2", "div4", "maskz_add", "fmadd", "fmsub", "fnmadd", "fnmsub" ],
+    "comparison":  [ "cmpeq", "cmpneq", "cmple", "cmplt", "cmpge", "cmpgt" ],
+    "math":        [ "sqrt", "rsqrt", "round" ],
+    "logic":       [ "andb", "andb_k", "andnb", "andnb_k", "orb", "orb_k", "xorb", "xorb_k", "msb", "notb", "notb_k" ],
+    "reduction":   [ "hadd", "hadds", "hmul", "hmin", "hmax", "hadd_to_scal", "hadds_to_scal", "testz", "testz_2" ],
+    "selection":   [ "blend", "min", "max" ],
 }
 
 class MaskSupport:
@@ -330,84 +329,79 @@ no_mask = MaskSupport(maskable=False, maskzable=False, masksable=False)
      (for which the function is to be generated are specified, along with other parameters such as the parameters such as the "horizontal" flag
 """
 mipp_funcs = {
-    "cast":         { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes_cart_prod, "horizontal": False, "mask_support": no_mask         },
-    "cast_k":       { "proto": protos["ret_msk_1arg_msk"],             "datatypes": all_datatypes_cart_prod, "horizontal": False, "mask_support": no_mask         },
-    "toreg":        { "proto": protos["ret_reg_1arg_msk"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": no_mask         },
-    "tomsk":        { "proto": protos["ret_msk_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": no_mask         },
-    "load":         { "proto": protos["ret_reg_1arg_ptr"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": maskz_and_masks },
-    "loadu":        { "proto": protos["ret_reg_1arg_ptr"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": maskz_and_masks },
-    "store":        { "proto": protos["ret_void_2args_ptr_reg"],       "datatypes": all_datatypes,           "horizontal": False, "mask_support": mask_and_maskz  },
-    "storeu":       { "proto": protos["ret_void_2args_ptr_reg"],       "datatypes": all_datatypes,           "horizontal": False, "mask_support": mask_and_maskz  },
-    "set":          { "proto": protos["ret_reg_1arg_Nele"],            "datatypes": all_datatypes,           "horizontal": True,  "mask_support": only_masks      },
-    "set_k":        { "proto": protos["ret_msk_1arg_Nele"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": no_mask         },
-    "set1":         { "proto": protos["ret_reg_1arg_val"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": only_masks      },
-    "set1_k":       { "proto": protos["ret_msk_1arg_i32"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": no_mask         },
-    "maskzld":      { "proto": protos["ret_reg_2args_msk_ptr"],        "datatypes": all_32bit+all_64bit,     "horizontal": False, "mask_support": no_mask         },
-    "maskst":       { "proto": protos["ret_void_3args_ptr_msk_reg"],   "datatypes": all_32bit+all_64bit,     "horizontal": False, "mask_support": no_mask         },
-    "set0":         { "proto": protos["ret_reg_0arg"],                 "datatypes": all_datatypes,           "horizontal": False, "mask_support": only_masks      },
-#   "low_k":        { "proto": protos["ret_msk_0arg"],                 "datatypes": all_datatypes,           "horizontal": False                                  },
-    "get":          { "proto": protos["ret_val_2args_reg_val"],        "datatypes": all_datatypes,           "horizontal": True,  "mask_support": no_mask         },
-    "get_k":        { "proto": protos["ret_val_2args_msk_val"],        "datatypes": all_datatypes,           "horizontal": True,  "mask_support": no_mask         },
-    "getfirst":     { "proto": protos["ret_val_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": True,  "mask_support": no_mask         },
-#   "gather":       { "proto": protos["ret_reg_2args_ptr_vindex"],     "datatypes": all_datatypes,           "horizontal": False                                  },
-#   "mask_gather":  { "proto": protos["ret_reg_3args_ptr_vindex_msk"], "datatypes": all_datatypes,           "horizontal": False                                  },
-    "sqrt":         { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_float,               "horizontal": False, "mask_support": all_mask        },
-    "rsqrt":        { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_float,               "horizontal": False, "mask_support": all_mask        },
-    "add":          { "proto": protos["ret_reg_2args_reg"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
-    "sub":          { "proto": protos["ret_reg_2args_reg"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
-    "mul":          { "proto": protos["ret_reg_2args_reg"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
-    "div":          { "proto": protos["ret_reg_2args_reg"],            "datatypes": all_float,               "horizontal": False, "mask_support": all_mask        },
-    "min":          { "proto": protos["ret_reg_2args_reg"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
-    "max":          { "proto": protos["ret_reg_2args_reg"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
-    "fmadd":        { "proto": protos["ret_reg_3args_reg"],            "datatypes": all_float+[int32],       "horizontal": False, "mask_support": all_mask        },
-    "fmsub":        { "proto": protos["ret_reg_3args_reg"],            "datatypes": all_float+[int32],       "horizontal": False, "mask_support": all_mask        },
-    "andb":         { "proto": protos["ret_reg_2args_reg"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
-    "andb_k":       { "proto": protos["ret_msk_2args_msk"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": no_mask         },
-    "andnb":        { "proto": protos["ret_reg_2args_reg"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
-    "andnb_k":      { "proto": protos["ret_msk_2args_msk"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": no_mask         },
-    "orb":          { "proto": protos["ret_reg_2args_reg"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
-    "orb_k":        { "proto": protos["ret_msk_2args_msk"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": no_mask         },
-    "xorb":         { "proto": protos["ret_reg_2args_reg"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
-    "xorb_k":       { "proto": protos["ret_msk_2args_msk"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": no_mask         },
-    "msb":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
-    "notb":         { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
-    "notb_k":       { "proto": protos["ret_msk_1arg_msk"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": no_mask         },
-    "cmpeq":        { "proto": protos["ret_msk_2args_reg"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": only_maskz      },
-    "cmpneq":       { "proto": protos["ret_msk_2args_reg"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": only_maskz      },
-    "cmplt":        { "proto": protos["ret_msk_2args_reg"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": only_maskz      },
-    "cmple":        { "proto": protos["ret_msk_2args_reg"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": only_maskz      },
-    "cmpge":        { "proto": protos["ret_msk_2args_reg"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": only_maskz      },
-    "cmpgt":        { "proto": protos["ret_msk_2args_reg"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": only_maskz      },
-    "round":        { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
-    "blend":        { "proto": protos["ret_reg_3args_2reg_1msk"],      "datatypes": all_datatypes,           "horizontal": False, "mask_support": no_mask         },
-    "set0_k":       { "proto": protos["ret_msk_0arg"],                 "datatypes": all_datatypes,           "horizontal": False, "mask_support": no_mask         },
-    "testz":        { "proto": protos["ret_i32_2args_msk"],            "datatypes": all_datatypes,           "horizontal": True,  "mask_support": no_mask         },
-    "testz_2":      { "proto": protos["ret_i32_1arg_msk"],             "datatypes": all_datatypes,           "horizontal": True,  "mask_support": no_mask         },
-    "hadd":         { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": True,  "mask_support": only_mask       },
-    "hmul":         { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": True,  "mask_support": only_mask       },
-    "hmin":         { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": True,  "mask_support": only_mask       },
-    "hmax":         { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": True,  "mask_support": only_mask       },
-    "hadd_to_scal": { "proto": protos["ret_val_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": True,  "mask_support": no_mask         },
-#   "hmul_to_scal": { "proto": protos["ret_val_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": True                                   },
-#   "hmin_to_scal": { "proto": protos["ret_val_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": True                                   },
-#   "hmax_to_scal": { "proto": protos["ret_val_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": True                                   },
-    "maskz_add":    { "proto": protos["ret_reg_3args_1msk_2reg"],      "datatypes": all_datatypes,           "horizontal": True,  "mask_support": no_mask         },
-    "fnmadd":       { "proto": protos["ret_reg_3args_reg"],            "datatypes": all_float+[int32],       "horizontal": False, "mask_support": all_mask        },
-    "fnmsub":       { "proto": protos["ret_reg_3args_reg"],            "datatypes": all_float+[int32],       "horizontal": False, "mask_support": all_mask        },
-    "div2":         { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
-    "div4":         { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
-    "rshift":       { "proto": protos["ret_reg_2args_reg_val"],        "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
-    "lshift":       { "proto": protos["ret_reg_2args_reg_val"],        "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
+    "cast":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes_cart_prod, "horizontal": False, "mask_support": no_mask         },
+    "cast_k":        { "proto": protos["ret_msk_1arg_msk"],             "datatypes": all_datatypes_cart_prod, "horizontal": False, "mask_support": no_mask         },
+    "toreg":         { "proto": protos["ret_reg_1arg_msk"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": no_mask         },
+    "tomsk":         { "proto": protos["ret_msk_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": no_mask         },
+    "load":          { "proto": protos["ret_reg_1arg_ptr"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": maskz_and_masks },
+    "loadu":         { "proto": protos["ret_reg_1arg_ptr"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": maskz_and_masks },
+    "store":         { "proto": protos["ret_void_2args_ptr_reg"],       "datatypes": all_datatypes,           "horizontal": False, "mask_support": mask_and_maskz  },
+    "storeu":        { "proto": protos["ret_void_2args_ptr_reg"],       "datatypes": all_datatypes,           "horizontal": False, "mask_support": mask_and_maskz  },
+    "set":           { "proto": protos["ret_reg_1arg_Nele"],            "datatypes": all_datatypes,           "horizontal": True,  "mask_support": only_masks      },
+    "set_k":         { "proto": protos["ret_msk_1arg_Nele"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": no_mask         },
+    "set1":          { "proto": protos["ret_reg_1arg_val"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": only_masks      },
+    "set1_k":        { "proto": protos["ret_msk_1arg_i32"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": no_mask         },
+    "maskzld":       { "proto": protos["ret_reg_2args_msk_ptr"],        "datatypes": all_32bit+all_64bit,     "horizontal": False, "mask_support": no_mask         },
+    "maskst":        { "proto": protos["ret_void_3args_ptr_msk_reg"],   "datatypes": all_32bit+all_64bit,     "horizontal": False, "mask_support": no_mask         },
+    "set0":          { "proto": protos["ret_reg_0arg"],                 "datatypes": all_datatypes,           "horizontal": False, "mask_support": only_masks      },
+#   "low_k":         { "proto": protos["ret_msk_0arg"],                 "datatypes": all_datatypes,           "horizontal": False                                  },
+    "get":           { "proto": protos["ret_val_2args_reg_val"],        "datatypes": all_datatypes,           "horizontal": True,  "mask_support": no_mask         },
+    "get_k":         { "proto": protos["ret_val_2args_msk_val"],        "datatypes": all_datatypes,           "horizontal": True,  "mask_support": no_mask         },
+    "getfirst":      { "proto": protos["ret_val_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": True,  "mask_support": no_mask         },
+#   "gather":        { "proto": protos["ret_reg_2args_ptr_vindex"],     "datatypes": all_datatypes,           "horizontal": False                                  },
+#   "mask_gather":   { "proto": protos["ret_reg_3args_ptr_vindex_msk"], "datatypes": all_datatypes,           "horizontal": False                                  },
+    "sqrt":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_float,               "horizontal": False, "mask_support": all_mask        },
+    "rsqrt":         { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_float,               "horizontal": False, "mask_support": all_mask        },
+    "add":           { "proto": protos["ret_reg_2args_reg"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
+    "adds":          { "proto": protos["ret_reg_2args_reg"],            "datatypes": all_uint+all_int,        "horizontal": False, "mask_support": all_mask        },
+    "sub":           { "proto": protos["ret_reg_2args_reg"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
+    "subs":          { "proto": protos["ret_reg_2args_reg"],            "datatypes": all_uint+all_int,        "horizontal": False, "mask_support": all_mask        },
+    "mul":           { "proto": protos["ret_reg_2args_reg"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
+    "div":           { "proto": protos["ret_reg_2args_reg"],            "datatypes": all_float,               "horizontal": False, "mask_support": all_mask        },
+    "min":           { "proto": protos["ret_reg_2args_reg"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
+    "max":           { "proto": protos["ret_reg_2args_reg"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
+    "fmadd":         { "proto": protos["ret_reg_3args_reg"],            "datatypes": all_float+[int32],       "horizontal": False, "mask_support": all_mask        },
+    "fmsub":         { "proto": protos["ret_reg_3args_reg"],            "datatypes": all_float+[int32],       "horizontal": False, "mask_support": all_mask        },
+    "andb":          { "proto": protos["ret_reg_2args_reg"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
+    "andb_k":        { "proto": protos["ret_msk_2args_msk"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": no_mask         },
+    "andnb":         { "proto": protos["ret_reg_2args_reg"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
+    "andnb_k":       { "proto": protos["ret_msk_2args_msk"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": no_mask         },
+    "orb":           { "proto": protos["ret_reg_2args_reg"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
+    "orb_k":         { "proto": protos["ret_msk_2args_msk"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": no_mask         },
+    "xorb":          { "proto": protos["ret_reg_2args_reg"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
+    "xorb_k":        { "proto": protos["ret_msk_2args_msk"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": no_mask         },
+    "msb":           { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
+    "notb":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
+    "notb_k":        { "proto": protos["ret_msk_1arg_msk"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": no_mask         },
+    "cmpeq":         { "proto": protos["ret_msk_2args_reg"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": only_maskz      },
+    "cmpneq":        { "proto": protos["ret_msk_2args_reg"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": only_maskz      },
+    "cmplt":         { "proto": protos["ret_msk_2args_reg"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": only_maskz      },
+    "cmple":         { "proto": protos["ret_msk_2args_reg"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": only_maskz      },
+    "cmpge":         { "proto": protos["ret_msk_2args_reg"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": only_maskz      },
+    "cmpgt":         { "proto": protos["ret_msk_2args_reg"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": only_maskz      },
+    "round":         { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
+    "blend":         { "proto": protos["ret_reg_3args_2reg_1msk"],      "datatypes": all_datatypes,           "horizontal": False, "mask_support": no_mask         },
+    "set0_k":        { "proto": protos["ret_msk_0arg"],                 "datatypes": all_datatypes,           "horizontal": False, "mask_support": no_mask         },
+    "testz":         { "proto": protos["ret_i32_2args_msk"],            "datatypes": all_datatypes,           "horizontal": True,  "mask_support": no_mask         },
+    "testz_2":       { "proto": protos["ret_i32_1arg_msk"],             "datatypes": all_datatypes,           "horizontal": True,  "mask_support": no_mask         },
+    "hadd":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": True,  "mask_support": only_mask       },
+    "hadds":         { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_uint+all_int,        "horizontal": True,  "mask_support": only_mask       },
+    "hmul":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": True,  "mask_support": only_mask       },
+    "hmin":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": True,  "mask_support": only_mask       },
+    "hmax":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": True,  "mask_support": only_mask       },
+    "hadd_to_scal":  { "proto": protos["ret_val_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": True,  "mask_support": no_mask         },
+    "hadds_to_scal": { "proto": protos["ret_val_1arg_reg"],             "datatypes": all_uint+all_int,        "horizontal": True,  "mask_support": no_mask         },
+#   "hmul_to_scal":  { "proto": protos["ret_val_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": True                                   },
+#   "hmin_to_scal":  { "proto": protos["ret_val_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": True                                   },
+#   "hmax_to_scal":  { "proto": protos["ret_val_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": True                                   },
+    "maskz_add":     { "proto": protos["ret_reg_3args_1msk_2reg"],      "datatypes": all_datatypes,           "horizontal": True,  "mask_support": no_mask         },
+    "fnmadd":        { "proto": protos["ret_reg_3args_reg"],            "datatypes": all_float+[int32],       "horizontal": False, "mask_support": all_mask        },
+    "fnmsub":        { "proto": protos["ret_reg_3args_reg"],            "datatypes": all_float+[int32],       "horizontal": False, "mask_support": all_mask        },
+    "div2":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
+    "div4":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
+    "rshift":        { "proto": protos["ret_reg_2args_reg_val"],        "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
+    "lshift":        { "proto": protos["ret_reg_2args_reg_val"],        "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
 }
-
-# === WARNING ===                                    === WARNING ===                                    === WARNING ===
-# We need to have a distinction for:
-#  - 'add' and 'adds'
-#  - 'sub' and 'subs'
-#  - 'hadd' and 'hadds'
-#  - 'hsub' and 'hsubs'
-# For int/uint on 8-bit and 16-bit. This is very important to implement well the following scalar dictionary.
-# === WARNING ===                                    === WARNING ===                                    === WARNING ===
 
 isa_scalar = {
     "name": "scalar",
@@ -619,10 +613,64 @@ res.r[i] = %!pred_cond!% r0.r[i] + r1.r[i] %!pred_alt!%;
 """
         },
     ],
+    "adds": [ # -------------------------------------------------------------------------------------------------- adds
+        { "type": "element-wide", "datatypes": all_int, "mask_variants": all_defs, "implem":
+"""
+int{{ dt_par.n_bits }}_t a = r0.r[i];
+int{{ dt_par.n_bits }}_t b = r1.r[i];
+
+int{{ dt_par.n_bits }}_t c =
+	(b > 0 && a > INT{{ dt_par.n_bits }}_MAX - b) ? (int{{ dt_par.n_bits }}_t)INT{{ dt_par.n_bits }}_MAX :
+	(b < 0 && a < INT{{ dt_par.n_bits }}_MIN - b) ? (int{{ dt_par.n_bits }}_t)INT{{ dt_par.n_bits }}_MIN :
+	(int{{ dt_par.n_bits }}_t)(a + b);
+
+res.r[i] = %!pred_cond!% c %!pred_alt!%;
+"""
+        },
+        { "type": "element-wide", "datatypes": all_uint, "mask_variants": all_defs, "implem":
+"""
+uint{{ dt_par.n_bits }}_t a = r0.r[i];
+uint{{ dt_par.n_bits }}_t b = r1.r[i];
+
+uint{{ dt_par.n_bits }}_t c =
+	(a > UINT{{ dt_par.n_bits }}_MAX - b) ? UINT{{ dt_par.n_bits }}_MAX :
+	(uint{{ dt_par.n_bits }}_t)(a + b);
+
+res.r[i] = %!pred_cond!% c %!pred_alt!%;
+"""
+        },
+    ],
     "sub": [ # ---------------------------------------------------------------------------------------------------- sub
         { "type": "element-wide", "datatypes": all_defs, "mask_variants": all_defs, "implem":
 """
 res.r[i] = %!pred_cond!% r0.r[i] - r1.r[i] %!pred_alt!%;
+"""
+        },
+    ],
+    "subs": [ # -------------------------------------------------------------------------------------------------- subs
+{ "type": "element-wide", "datatypes": all_int, "mask_variants": all_defs, "implem":
+"""
+int{{ dt_par.n_bits }}_t a = r0.r[i];
+int{{ dt_par.n_bits }}_t b = r1.r[i];
+
+int{{ dt_par.n_bits }}_t c =
+	(b < 0 && a > INT{{ dt_par.n_bits }}_MAX + b) ? INT{{ dt_par.n_bits }}_MAX :
+	(b > 0 && a < INT{{ dt_par.n_bits }}_MIN + b) ? INT{{ dt_par.n_bits }}_MIN :
+	(int{{ dt_par.n_bits }}_t)(a - b);
+
+res.r[i] = %!pred_cond!% c %!pred_alt!%;
+"""
+        },
+        { "type": "element-wide", "datatypes": all_uint, "mask_variants": all_defs, "implem":
+"""
+uint{{ dt_par.n_bits }}_t a = r0.r[i];
+uint{{ dt_par.n_bits }}_t b = r1.r[i];
+
+uint{{ dt_par.n_bits }}_t c =
+	(a < b) ? 0 :
+	(uint{{ dt_par.n_bits }}_t)(a - b);
+
+res.r[i] = %!pred_cond!% c %!pred_alt!%;
 """
         },
     ],
@@ -948,6 +996,79 @@ return res;
 """
         },
     ],
+    "hadds": [ # ------------------------------------------------------------------------------------------------ hadds
+        { "type": "vector-wide", "datatypes": [uint64], "mask_variants": all_defs, "implem":
+"""
+uint64_t resv64 = 0;
+for (size_t i = 0; i < %N<tp>%; i++)
+{
+	uint64_t a = r0.r[i];
+	uint64_t b = resv64;
+	resv64 =
+		(a > UINT64_MAX - b) ? UINT64_MAX :
+		(uint64_t)(a + b);
+}
+
+%r<tr>% res;
+for (size_t i = 0; i < %N<tp>%; i++)
+	res.r[i] = %!pred_cond!% resv64 %!pred_alt!%;
+return res;
+"""
+        },
+        { "type": "vector-wide", "datatypes": [uint32,uint16,uint8], "mask_variants": all_defs, "implem":
+"""
+uint64_t resv64 = 0;
+for (size_t i = 0; i < %N<tp>%; i++)
+	resv64 += r0.r[i];
+
+%v<tr>% resv =
+	(resv64 > UINT{{ dt_par.n_bits }}_MAX) ? (%v<tr>%)UINT{{ dt_par.n_bits }}_MAX :
+	(%v<tr>%)resv64;
+
+%r<tr>% res;
+for (size_t i = 0; i < %N<tp>%; i++)
+	res.r[i] = %!pred_cond!% resv %!pred_alt!%;
+return res;
+"""
+        },
+        { "type": "vector-wide", "datatypes": [int64], "mask_variants": all_defs, "implem":
+"""
+int64_t resv64 = 0;
+for (size_t i = 0; i < %N<tp>%; i++)
+{
+	int64_t a = r0.r[i];
+	int64_t b = resv64;
+
+	resv64 =
+		(b > 0 && a > INT64_MAX - b) ? (int64_t)INT64_MAX :
+		(b < 0 && a < INT64_MIN - b) ? (int64_t)INT64_MIN :
+		(int64_t)(a + b);
+}
+
+%r<tr>% res;
+for (size_t i = 0; i < %N<tp>%; i++)
+	res.r[i] = %!pred_cond!% resv64 %!pred_alt!%;
+return res;
+"""
+        },
+        { "type": "vector-wide", "datatypes": [int32,int16,int8], "mask_variants": all_defs, "implem":
+"""
+int64_t resv64 = 0;
+for (size_t i = 0; i < %N<tp>%; i++)
+	resv64 += r0.r[i];
+
+%v<tr>% resv =
+	resv64 > INT{{ dt_par.n_bits }}_MAX ? (%v<tr>%)INT{{ dt_par.n_bits }}_MAX :
+	resv64 < INT{{ dt_par.n_bits }}_MIN ? (%v<tr>%)INT{{ dt_par.n_bits }}_MIN :
+	(%v<tr>%)resv64;
+
+%r<tr>% res;
+for (size_t i = 0; i < %N<tp>%; i++)
+	res.r[i] = %!pred_cond!% resv %!pred_alt!%;
+return res;
+"""
+        },
+    ],
     "hmul": [ # -------------------------------------------------------------------------------------------------- hmul
         { "type": "vector-wide", "datatypes": all_defs, "mask_variants": all_defs, "implem":
 """
@@ -996,6 +1117,65 @@ return res;
 %v<tr>% resv = 0;
 for (size_t i = 0; i < %N<tp>%; i++)
 	resv += r0.r[i];
+return resv;
+"""
+        },
+    ],
+     "hadds_to_scal": [ # ------------------------------------------------------------------------------- hadds_to_scal
+        { "type": "vector-wide", "datatypes": [uint64], "mask_variants": all_defs, "implem":
+"""
+uint64_t resv64 = 0;
+for (size_t i = 0; i < %N<tp>%; i++)
+{
+	uint64_t a = r0.r[i];
+	uint64_t b = resv64;
+	resv64 =
+		(a > UINT64_MAX - b) ? UINT64_MAX :
+		(uint64_t)(a + b);
+}
+return resv64;
+"""
+        },
+        { "type": "vector-wide", "datatypes": [uint32,uint16,uint8], "mask_variants": all_defs, "implem":
+"""
+uint64_t resv64 = 0;
+for (size_t i = 0; i < %N<tp>%; i++)
+	resv64 += r0.r[i];
+
+%v<tr>% resv =
+	resv64 > UINT{{ dt_par.n_bits }}_MAX ? (%v<tr>%)UINT{{ dt_par.n_bits }}_MAX :
+	(%v<tr>%)resv64;
+
+return resv;
+"""
+        },
+        { "type": "vector-wide", "datatypes": [int64], "mask_variants": all_defs, "implem":
+"""
+int64_t resv64 = 0;
+for (size_t i = 0; i < %N<tp>%; i++)
+{
+	int64_t a = r0.r[i];
+	int64_t b = resv64;
+
+	resv64 =
+		(b > 0 && a > INT64_MAX - b) ? (int64_t)INT64_MAX :
+		(b < 0 && a < INT64_MIN - b) ? (int64_t)INT64_MIN :
+		(int64_t)(a + b);
+}
+return resv64;
+"""
+        },
+        { "type": "vector-wide", "datatypes": [int32,int16,int8], "mask_variants": all_defs, "implem":
+"""
+int64_t resv64 = 0;
+for (size_t i = 0; i < %N<tp>%; i++)
+	resv64 += r0.r[i];
+
+%v<tr>% resv =
+	resv64 > INT{{ dt_par.n_bits }}_MAX ? (%v<tr>%)INT{{ dt_par.n_bits }}_MAX :
+	resv64 < INT{{ dt_par.n_bits }}_MIN ? (%v<tr>%)INT{{ dt_par.n_bits }}_MIN :
+	(%v<tr>%)resv64;
+
 return resv;
 """
         },
