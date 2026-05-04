@@ -307,24 +307,24 @@ shape_templates = {
         loop_body="",
         loop_assert=AS_CMP_BINOP_LOGI_FLOAT_WORKAROUND,
     ),
-    # SHAPE_RET_REG_0ARG: TemplateParts(
-    #     func_decl=FUNC_DECL,
-    #     decl=DECL_0ARGS,
-    #     init="",
-    #     load=LOAD_SET0_REG,
-    #     operation=OP_REG_NOOP,
-    #     loop_body="\t\t{{dt_ext}}_t res = 0;",
-    #     loop_assert=AS_REG_BINOP,
-    # ),
-    # SHAPE_RET_MSK_0ARG: TemplateParts(
-    #     func_decl=FUNC_DECL,
-    #     decl=DECL_0ARGS,
-    #     init="",
-    #     load=LOAD_SET0_MASK,
-    #     operation=OP_TOREG,
-    #     loop_body="\t\t{{dt_ext}}_t res = 0;",
-    #     loop_assert=AS_CMP_2REG,
-    # ),
+    SHAPE_RET_REG_0ARG: TemplateParts( # set0
+        func_decl=FUNC_DECL,
+        decl=DECL_0ARGS,
+        init="",
+        load=LOAD_SET0_REG,
+        operation=OP_REG_NOOP,
+        loop_body="",
+        loop_assert=AS_REG_BINOP,
+    ),
+    SHAPE_RET_MSK_0ARG: TemplateParts( # set0_k
+        func_decl=FUNC_DECL,
+        decl=DECL_0ARGS,
+        init="",
+        load=LOAD_SET0_MASK,
+        operation=OP_TOREG,
+        loop_body="",
+        loop_assert=AS_CMP_BINOP_LOGI_FLOAT_WORKAROUND
+    ),
     
     ### FIRST PUSH HERE, THEN WE CAN UNCOMMENT AND ADJUST THE ONES BELOW
     
