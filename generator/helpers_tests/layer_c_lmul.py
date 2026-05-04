@@ -396,7 +396,7 @@ shape_templates = {
     #     init=INIT_1ARG,
     #     load=LOAD_1ARG_REG,
     #     operation=OP_REG_UNOP,
-    #     loop_body=LB_SET_OP,
+    #     loop_body="",
     #     loop_assert=AS_REG_BINOP,
     # ),
     # SHAPE_RET_MSK_1ARG_MSK: TemplateParts( # notb_k, cast_k
@@ -405,7 +405,7 @@ shape_templates = {
     #     init=INIT_1ARG_DIS,
     #     load=LOAD_1ARG_MASK,
     #     operation=OP_1ARG_1MASK,
-    #     loop_body=LB_SET_OP,
+    #     loop_body="",
     #     loop_assert=AS_CMP_BINOP_FLOAT_WORKAROUND,
     # ),
     SHAPE_RET_REG_1ARG_MSK: TemplateParts( # toreg
@@ -444,6 +444,22 @@ shape_templates = {
     #     loop_body="",
     #     loop_assert="\tREQUIRE(mipp_testz_2_{{dt_ext}}_{{lmul_suffix}}(m1) == 0);\n\tREQUIRE(mipp_testz_2_{{dt_ext}}_{{lmul_suffix}}(m2) != 0);",
     # ),
+    
+
+    SHAPE_RET_MSK_1ARG_REG: TemplateParts( # tomsk
+        func_decl=FUNC_DECL,
+        decl=DECL_1ARG,
+        init=INIT_1ARG,
+        load=LOAD_1ARG_REG,
+        operation="""\t{{msk_type}} m1 = mipp_tomsk_{{dt_ext}}_{{lmul_suffix}}(r1);\n{{reg_type}} r3 = mipp_toreg_{{dt_ext}}_{{lmul_suffix}}(m1);
+{{msk_type_scalar}} ms1 = mipp_scalar_tomsk_{{dt_ext}}_{{lmul_suffix}}(s1);\n\t{{reg_type_scalar}} s3 = mipp_scalar_toreg_{{dt_ext}}_{{lmul_suffix}}(ms1);""",
+        loop_body="",
+        loop_assert=AS_CMP_BINOP_LOGI_FLOAT_WORKAROUND,
+    ),
+    
+    
+    # Nu-uh
+    
     # SHAPE_RET_REG_3ARGS_1MSK_2REG: TemplateParts( # maskz_add
     #     func_decl=FUNC_DECL,
     #     decl=DECL_1ARG_INT32,
@@ -452,15 +468,6 @@ shape_templates = {
     #     operation=OP_3ARGS_1MSK_2REG,
     #     loop_body="\t\t{{dt_ext}}_t res = mipp_get_k_{{dt_ext}}(m1, i) ? 3 : 0;",
     #     loop_assert=AS_REG_BINOP,
-    # ),
-    # SHAPE_RET_MSK_1ARG_REG: TemplateParts( # tomsk
-    #     func_decl=FUNC_DECL,
-    #     decl=DECL_1ARG,
-    #     init=INIT_1ARG,
-    #     load=LOAD_1ARG_REG,
-    #     operation="\t{{msk_type}} m1 = mipp_tomsk_{{dt_ext}}_{{lmul_suffix}}(r1);\n{{reg_type}} r3 = mipp_toreg_{{dt_ext}}_{{lmul_suffix}}(m1);",
-    #     loop_body="\t\t{{dt_ext}}_t res = inputs1[i] ? 1 : 0;",
-    #     loop_assert=AS_CMP_2REG,
     # ),
     
     # #maskzld
