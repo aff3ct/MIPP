@@ -411,7 +411,7 @@ shape_templates = {
     
     # #this shape covers 
     # #various functions 
-    # #i.e : notb, sqrt, cast, hadd, hmul, hmin, hmax, round
+    # #i.e : notb, sqrt, cast, hadd, hmul, hmin, hmax, round, cast
     # #since the asserts for these function will vary
     # #each func will override some parts of the template 
     SHAPE_RET_REG_1ARG_REG: TemplateParts(
@@ -478,7 +478,7 @@ shape_templates = {
         loop_assert="\tREQUIRE(mipp_testz_2_{{dt_ext}}(m1) == 0);\n\tREQUIRE(mipp_testz_2_{{dt_ext}}(m2) != 0);",
     ),
     
-    SHAPE_RET_REG_3ARGS_1MSK_2REG : TemplateParts(
+    SHAPE_RET_REG_3ARGS_1MSK_2REG : TemplateParts( # maskz_add
         func_decl=FUNC_DECL,
         decl=DECL_1ARG_INT32,
         init=INIT_1ARG,
