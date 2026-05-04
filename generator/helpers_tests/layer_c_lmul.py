@@ -243,6 +243,8 @@ AS_CMP_BINOP_LOGI_FLOAT_WORKAROUND = """{% if is_int %}""" + AS_CMP_2REG + """{%
 \n\t\tREQUIRE( (!!mipp_get_{{dt_ext}}_{{lmul_suffix}}(r3, i)) == (!!mipp_scalar_get_{{dt_ext}}_{{lmul_suffix}}(s3,i)) );
 {% endif %}"""
 
+AS_TOMSK = """\t\tREQUIRE(!!mipp_get_{{dt_ext}}_{{lmul_suffix}}(r3, i) == !!mipp_scalar_get_k_{{dt_ext}}_{{lmul_suffix}}(ms1,i));"""
+
 AS_3ARGS_TOL = """\t\t{{dt_ext}}_t res1 = mipp_get_{{dt_ext}}_{{lmul_suffix}}(r4, i);
 \t\t{{dt_ext}}_t res2 = mipp_scalar_get_{{dt_ext}}_{{lmul_suffix}}(s4, i);
 \t\t{{dt_ext}}_t tol  = 1e-5f * abs_diff::abs_diff(res2) + 1.0f;
@@ -456,7 +458,7 @@ shape_templates = {
         operation="""\t{{msk_type}} m1 = mipp_tomsk_{{dt_ext}}_{{lmul_suffix}}(r1);\n{{reg_type}} r3 = mipp_toreg_{{dt_ext}}_{{lmul_suffix}}(m1);
 {{msk_type_scalar}} ms1 = mipp_scalar_tomsk_{{dt_ext}}_{{lmul_suffix}}(s1);\n\t{{reg_type_scalar}} s3 = mipp_scalar_toreg_{{dt_ext}}_{{lmul_suffix}}(ms1);""",
         loop_body="",
-        loop_assert=AS_CMP_BINOP_LOGI_FLOAT_WORKAROUND,
+        loop_assert=AS_TOMSK,
     ),
     
     
