@@ -287,7 +287,7 @@ shape_templates = {
         load=LOAD_1ARG_MASK,
         operation=OP_TOREG,
         loop_body="",
-        loop_assert=AS_CMP_2REG,
+        loop_assert=AS_CMP_BINOP_LOGI_FLOAT_WORKAROUND,
     ),
     SHAPE_RET_REG_1ARG_VAL: TemplateParts( # set1
         func_decl=FUNC_DECL,
@@ -305,7 +305,7 @@ shape_templates = {
         load=LOAD_1SCALAR_MASK,
         operation=OP_TOREG,
         loop_body="",
-        loop_assert=AS_CMP_2REG,
+        loop_assert=AS_CMP_BINOP_LOGI_FLOAT_WORKAROUND,
     ),
     # SHAPE_RET_REG_0ARG: TemplateParts(
     #     func_decl=FUNC_DECL,
