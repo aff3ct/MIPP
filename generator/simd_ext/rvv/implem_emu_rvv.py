@@ -187,7 +187,7 @@ tpl_implem_emu_rvv = {
     "set1_k" : { "format" : "long", "code" :
     """
         int32_t vals[%N<tp>%];
-        %v<c:int|b:32>% tmp = v0 ? 1 : 0;
+        %v<c:int|b:32>% tmp = v0 ? 255 : 0;
         memset(vals,tmp,%N<tp>%*sizeof(int32_t));
         return %set_k<tp>%(vals);"""},
     
