@@ -197,6 +197,8 @@ class FuncInfo:
         self.emulated = {}
         self.generic = {}
         self.mask_kind = {}
+        self.mask_emulated = { "mask" : {}, "maskz" : {}, "masks" : {}}
+        self.mask_generic = { "mask" : {}, "maskz" : {}, "masks" : {}}
         
     #this method is wrong.
     #each datatype can have different emulations/generic values...
@@ -208,10 +210,14 @@ class FuncInfo:
                 if "version" in implem:
                     mask_kind = implem["version"]
                 
-                for dt in implem["datatypes"]:
-                    if dt not in ret.mask_kind:
-                        ret.mask_kind[dt] = []
-                    ret.mask_kind[dt].append(mask_kind)
+                if mask_kind != "unmasked":
+                    for dt in implem["datatypes"]:
+                        if dt not in ret.mask_kind:
+                            ret.mask_kind[dt] = []
+                        ret.mask_kind[dt].append(mask_kind)
+                        ret.mask_emulated[mask_kind][dt] = False
+                        ret.mask_generic[mask_kind][dt] = False
+                    continue
                 
                 if "if" in implem :
                     if element_in_str(implems_dict[dict_entry]["defines"], implem["if"]):
@@ -224,10 +230,15 @@ class FuncInfo:
                 mask_kind = "unmasked"
                 if "version" in implem:
                     mask_kind = implem["version"]
-                for dt in implem["datatypes"]:
-                    if dt not in ret.mask_kind:
-                        ret.mask_kind[dt] = []
-                    ret.mask_kind[dt].append(mask_kind)
+                
+                if mask_kind != "unmasked":
+                    for dt in implem["datatypes"]:
+                        if dt not in ret.mask_kind:
+                            ret.mask_kind[dt] = []
+                        ret.mask_kind[dt].append(mask_kind)
+                        ret.mask_emulated[mask_kind][dt] = True
+                        ret.mask_generic[mask_kind][dt] = False
+                    continue
                 
                 if "if" in implems_emu_isa[func] :
                     if element_in_str(implems_dict[dict_entry]["defines"], implem["if"]):
@@ -238,6 +249,23 @@ class FuncInfo:
         if func in implems_generic_emu :
             for implem in implems_generic_emu[func]: 
                 ret.add_datatypes(implem["datatypes"],False,True)
+                
+        if func in implems_mask_generic_emu :
+            for implem in implems_mask_generic_emu[func]: 
+                mask_kind = "unmasked"
+                if "version" in implem:
+                    mask_kind = implem["version"]
+                if mask_kind == "unmasked":
+                    continue
+                for dt in implem["datatypes"]:
+                # don't add if already emulated or natively supported
+
+                    if dt not in ret.mask_kind:
+                        ret.mask_kind[dt] = []
+                    if mask_kind not in ret.mask_kind[dt]:
+                        ret.mask_kind[dt].append(mask_kind)
+                        ret.mask_emulated[mask_kind][dt] = False
+                        ret.mask_generic[mask_kind][dt] = True
      
         
         self.func_name = func
@@ -245,6 +273,8 @@ class FuncInfo:
         self.emulated = ret.emulated
         self.generic = ret.generic
         self.mask_kind = ret.mask_kind
+        self.mask_emulated = ret.mask_emulated
+        self.mask_generic = ret.mask_generic
     
     def is_generic(self,dttype):
         if dttype in self.generic and self.generic[dttype]:
@@ -257,6 +287,17 @@ class FuncInfo:
     def is_native(self,dttype):
         if not is_emulated(dttype) and not is_generic(dttype):
             return True
+        return False
+    
+    def is_generic_mkind(self, dttype, mkind):
+        if dttype in self.mask_generic[mkind] and self.mask_generic[mkind][dttype]:
+            if dttype in self.mask_kind and mkind in self.mask_kind[dttype]:
+                return True
+        return False
+    def is_emulated_mkind(self, dttype, mkind):
+        if dttype in self.mask_emulated[mkind] and self.mask_emulated[mkind][dttype]:
+            if dttype in self.mask_kind and mkind in self.mask_kind[dttype]:
+                return True
         return False
     
     def add_datatypes(self, datatypes, emulated = False, generic = False):
@@ -506,6 +547,36 @@ def write_mipp_infos(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_funcs_c
                             line += color_black + ":material-minus:" + color_end + " | "
                     print(line, file=f)
 
+def exists_any_msk_in_concept(concept):
+    for func in mipp_funcs_concepts[concept]:
+        if "mask_support" in mipp_funcs[func]:
+            if mipp_funcs[func]["mask_support"].is_any_mask():
+                return True
+    return False
+
+def exists_msk_in_concept(concept, mkind):
+    for func in mipp_funcs_concepts[concept]:
+        if func not in mipp_funcs:
+            continue
+        if "mask_support" in mipp_funcs[func]:
+            if mipp_funcs[func]["mask_support"].is_supported(mkind):
+                return True
+    return False
+
+def exists_any_msk_in_func(func):
+    if "mask_support" in mipp_funcs[func]:
+        if mipp_funcs[func]["mask_support"].is_any_mask():
+            return True
+    return False
+
+def exists_msk_in_func(func, mkind):
+    if func not in mipp_funcs:
+        return False
+    if "mask_support" in mipp_funcs[func]:
+        if mipp_funcs[func]["mask_support"].is_supported(mkind):
+            return True
+    return False
+
 def write_mipp_infos_masked(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_funcs_concepts = mipp_funcs_concepts):
     #same as write_mipp_infos but we write a table for each mask kind (mask, maskz, masks)
     color_green ='<span style="color: #28A745; font-weight: 600;">'
@@ -523,10 +594,14 @@ def write_mipp_infos_masked(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_
             for mkind in ["mask", "maskz", "masks"]:
                 print("\n## " + mkind + "\n", file=f)
                 for concept in mipp_funcs_concepts:
+                    if not exists_msk_in_concept(concept, mkind):
+                        continue
                     print("\n### " + concept + "\n", file=f)
                     print("| Function | " + " | ".join(all_datatypes_short) + " |", file=f)
                     print("| --- | " + " | ".join(["---"]*len(dttypes)) + " |", file=f)
                     for func in mipp_funcs:
+                        if not exists_msk_in_func(func, mkind):
+                            continue
                         if func == "cast" or func == "cast_k":
                             continue
                         if func in mipp_funcs_concepts[concept]:
@@ -535,9 +610,9 @@ def write_mipp_infos_masked(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_
                                 line = "| " + func + " | "
                                 for dtype in dttypes:
                                     if dtype in func_info.datatypes and func_info.is_def_mkind(dtype, mkind):
-                                        if func_info.is_generic(dtype):
+                                        if func_info.is_generic_mkind(dtype, mkind):
                                             line += color_yellow + ":material-check:" + color_end + " | "
-                                        elif func_info.is_emulated(dtype):
+                                        elif func_info.is_emulated_mkind(dtype, mkind):
                                             line += color_blue + ":material-check:" + color_end + " | "
                                         else :
                                             line += color_green + ":material-check-all:" + color_end + " | "
@@ -559,16 +634,18 @@ def write_mipp_infos_masked(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_
                 print("| --- | " + " | ".join(["---"]*len(dttypes)) + " |", file=f)
                 for func in mipp_funcs:
                     if func == "cast" or func == "cast_k":
-                        continue                
+                        continue  
+                    if not exists_msk_in_func(func, mkind):
+                        continue              
                     if all(func not in mipp_funcs_concepts[concept] for concept in mipp_funcs_concepts):
                         func_info = isa_info.get_func_info(func)
                         if func_info is not None :
                             line = "| " + func + " | "
                             for dtype in dttypes:
                                 if dtype in func_info.datatypes and func_info.is_def_mkind(dtype, mkind):
-                                    if func_info.is_generic(dtype):
+                                    if func_info.is_generic_mkind(dtype, mkind):
                                         line += color_yellow + ":material-check:" + color_end + " | "
-                                    elif func_info.is_emulated(dtype):
+                                    elif func_info.is_emulated_mkind(dtype, mkind):
                                         line += color_blue + ":material-check:" + color_end + " | "
                                     else :
                                         line += color_green + ":material-check-all:" + color_end + " | "
@@ -697,7 +774,6 @@ class SpecFuncInfo:
         fixed_dtype = self.ret["fixeddatatype"]
         ret_str = match_args_type_cpp(self.ret["type"], cast, True, fixed_dtype, lmul=lmul)
         ret_str = "inline " + ret_str
-        print("ret_str : " + ret_str)
         func_proto_str = " " + ret_str + " " + self.func_name + "(" + args_str + ")"
         return func_proto_str
     
