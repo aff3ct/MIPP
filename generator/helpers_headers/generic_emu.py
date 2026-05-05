@@ -317,9 +317,9 @@ implems_mask_generic_emu = {
 	# ],
  
 	"msb" : [
-		{ "instr_name": "msb",  "datatypes" : all_datatypes, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSK}},
-		{ "instr_name": "msb",  "datatypes" : all_datatypes, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKZ}},
-		{ "instr_name": "msb",  "datatypes" : all_datatypes, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKS}},
+		{ "instr_name": "msb",  "datatypes" : all_datatypes, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_1arg_reg"]["code"] + SNIPPET_END_MSK}},
+		{ "instr_name": "msb",  "datatypes" : all_datatypes, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_1arg_reg"]["code"] + SNIPPET_END_MSKZ}},
+		{ "instr_name": "msb",  "datatypes" : all_datatypes, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_1arg_reg"]["code"] + SNIPPET_END_MSKS}},
 	],
 	
 	"notb" : [
