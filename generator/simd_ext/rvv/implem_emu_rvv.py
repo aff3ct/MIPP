@@ -392,7 +392,7 @@ tpl_implem_emu_rvv = {
     
     "testz" : { "format" :"long", "code" :
     """
-        return %testz_2<tp>%(m0) && %testz_2<tp>%(m1);
+        return %testz_2<b:tp|c:tp|m:tp>%(m0) && %testz_2<b:tp|c:tp|m:tp>%(m1);
     """},
     
     "hmul_int_uint" : { "format" :"long", "code" :

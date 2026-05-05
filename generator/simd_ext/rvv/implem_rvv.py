@@ -324,6 +324,7 @@ implems_rvv = {
         { "instr_name" : "xor",    "datatypes" : all_float,      "template" : tpl_implem_rvv["float_notb"]},],   
    "testz_2" : [
         { "instr_name" : "cpop",   "datatypes" : all_datatypes,  "template" : tpl_implem_rvv["testz_2"]}],
+   
    "round" :  [
         { "instr_name" : "vfcvt",   "datatypes" : all_float, "template" : tpl_implem_rvv["round_float"]},
         { "instr_name" : "vfcvt",   "datatypes" : all_int_uint, "template" : tpl_implem_rvv["round_int"]},],

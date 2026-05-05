@@ -22,13 +22,16 @@ tpl_generic_emu = {
 			%r<tp>% res = %div<tp>%(r0, tmp);
 			return res;
 	"""},
-  "div2_scalar" : { "format" :"long", "code" :"""
-			%v<tp>% ptr[%N<tp>%];
-			%store<tp>%(ptr, r0);        
-			for(unsigned i = 0; i < %N<tp>%; i++)
-				ptr[i] /= 2;
-			return %load<tp>%(ptr);
+
+  
+  
+	"div4" : { "format" :"long", "code" :"""
+        %r<tp>% tmp = %set1<tp>%(4);
+        %r<tp>% res = %div<tp>%(r0, tmp);
+		return res;
 	"""},
+ 
+
   
 	"set1_scalar" : { "format" :"long", "code" :"""
 			%v<tp>% ptr[%N<tp>%];
@@ -54,7 +57,11 @@ implems_generic_emu = {
 	
 	"div2" : [
 		{ "instr_name": "div2",  "datatypes" : all_float, "template" : tpl_generic_emu["div2"]},
-		{ "instr_name": "div2",  "datatypes" : all_float, "template" : tpl_generic_emu["div2_scalar"]}],
+	],
+ 
+	"div4" : [
+		{ "instr_name": "div4",  "datatypes" : all_float, "template" : tpl_generic_emu["div4"]},
+	],
 	
 	"fmadd" : [
 		{ "instr_name": "fmadd",  "datatypes" : all_float, "template" : tpl_generic_emu["fmadd"]}],
@@ -132,12 +139,88 @@ tpl_mask_generic_emu = {
 }
 
 implems_mask_generic_emu = {
+    
+    # ARITHMETIC
+    
 	"add" : [
 		#add SNIPPEt_END_MSK to the template code
 		{ "instr_name": "add",  "datatypes" : all_datatypes, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSK}},
 		{ "instr_name": "add",  "datatypes" : all_datatypes, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKZ}},
 		{ "instr_name": "add",  "datatypes" : all_datatypes, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKS}},
  	],
+ 
+ 	"sub" : [
+		{ "instr_name": "sub",  "datatypes" : all_datatypes, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSK}},
+		{ "instr_name": "sub",  "datatypes" : all_datatypes, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKZ}},
+		{ "instr_name": "sub",  "datatypes" : all_datatypes, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKS}},
+ 	],
+  
+	"mul" : [
+		{ "instr_name": "mul",  "datatypes" : all_datatypes, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSK}},
+		{ "instr_name": "mul",  "datatypes" : all_datatypes, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKZ}},
+		{ "instr_name": "mul",  "datatypes" : all_datatypes, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKS}},
+	],
+ 
+ 	"div" : [
+		{ "instr_name": "div",  "datatypes" : all_float, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSK}},
+		{ "instr_name": "div",  "datatypes" : all_float, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKZ}},
+		{ "instr_name": "div",  "datatypes" : all_float, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKS}},
+	],
+  
+	"div2" : [
+		{ "instr_name": "div2",  "datatypes" : all_float, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_1arg_reg"]["code"] + SNIPPET_END_MSK}},
+		{ "instr_name": "div2",  "datatypes" : all_float, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_1arg_reg"]["code"] + SNIPPET_END_MSKZ}},
+		{ "instr_name": "div2",  "datatypes" : all_float, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_1arg_reg"]["code"] + SNIPPET_END_MSKS}},
+  	],
+ 
+	"fmadd" : [
+		{ "instr_name": "fmadd",  "datatypes" : all_float, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_3args_reg"]["code"] + SNIPPET_END_MSK}},
+		{ "instr_name": "fmadd",  "datatypes" : all_float, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_3args_reg"]["code"] + SNIPPET_END_MSKZ}},
+		{ "instr_name": "fmadd",  "datatypes" : all_float, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_3args_reg"]["code"] + SNIPPET_END_MSKS}},
+	],
+ 
+	"fmsub" : [
+		{ "instr_name": "fmsub",  "datatypes" : all_float, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_3args_reg"]["code"] + SNIPPET_END_MSK}},
+		{ "instr_name": "fmsub",  "datatypes" : all_float, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_3args_reg"]["code"] + SNIPPET_END_MSKZ}},
+		{ "instr_name": "fmsub",  "datatypes" : all_float, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_3args_reg"]["code"] + SNIPPET_END_MSKS}},
+	],
+ 
+	"fnmadd" : [
+		{ "instr_name": "fnmadd",  "datatypes" : all_float, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_3args_reg"]["code"] + SNIPPET_END_MSK}},
+		{ "instr_name": "fnmadd",  "datatypes" : all_float, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_3args_reg"]["code"] + SNIPPET_END_MSKZ}},
+		{ "instr_name": "fnmadd",  "datatypes" : all_float, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_3args_reg"]["code"] + SNIPPET_END_MSKS}},
+	],
+ 
+	"fnmsub" : [
+		{ "instr_name": "fnmsub",  "datatypes" : all_float, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_3args_reg"]["code"] + SNIPPET_END_MSK}},
+		{ "instr_name": "fnmsub",  "datatypes" : all_float, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_3args_reg"]["code"] + SNIPPET_END_MSKZ}},
+		{ "instr_name": "fnmsub",  "datatypes" : all_float, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_3args_reg"]["code"] + SNIPPET_END_MSKS}},
+	],
+ 
+	"div4" : [
+		{ "instr_name": "div4",  "datatypes" : all_float, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_1arg_reg"]["code"] + SNIPPET_END_MSK}},
+		{ "instr_name": "div4",  "datatypes" : all_float, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_1arg_reg"]["code"] + SNIPPET_END_MSKZ}},
+		{ "instr_name": "div4",  "datatypes" : all_float, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_1arg_reg"]["code"] + SNIPPET_END_MSKS}},
+	],
+ 
+	# MATH 
+	"sqrt" : [
+		{ "instr_name": "sqrt",  "datatypes" : all_float, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_1arg_reg"]["code"] + SNIPPET_END_MSK}},
+		{ "instr_name": "sqrt",  "datatypes" : all_float, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_1arg_reg"]["code"] + SNIPPET_END_MSKZ}},
+		{ "instr_name": "sqrt",  "datatypes" : all_float, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_1arg_reg"]["code"] + SNIPPET_END_MSKS}},
+	],
+	
+	"rsqrt" : [
+		{ "instr_name": "rsqrt",  "datatypes" : all_float, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_1arg_reg"]["code"] + SNIPPET_END_MSK}},
+		{ "instr_name": "rsqrt",  "datatypes" : all_float, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_1arg_reg"]["code"] + SNIPPET_END_MSKZ}},
+		{ "instr_name": "rsqrt",  "datatypes" : all_float, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_1arg_reg"]["code"] + SNIPPET_END_MSKS}},
+  	],
+ 
+	"round" : [
+		{ "instr_name": "round",  "datatypes" : all_float, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_1arg_reg"]["code"] + SNIPPET_END_MSK}},
+		{ "instr_name": "round",  "datatypes" : all_float, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_1arg_reg"]["code"] + SNIPPET_END_MSKZ}},
+		{ "instr_name": "round",  "datatypes" : all_float, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_1arg_reg"]["code"] + SNIPPET_END_MSKS}},
+  	],
 }
 
 ################################# HORIZONTAL LMUL FUNCTIONS ############################################

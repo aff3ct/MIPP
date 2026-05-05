@@ -52,7 +52,7 @@ def fix_reductions(isa, isa_lmul1, funcs, implems_dict, lmul):
         return {}
     reductions = mipp_funcs_concepts["reduction"]
     for f in reductions:
-        if f == "hmul":
+        if f == "hmul" or f == "testz" or f == "testz_2" or f == "hadd_to_scal":
             continue
         ret[f] = {}
         if f in implems_dict:
