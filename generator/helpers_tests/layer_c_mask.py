@@ -184,9 +184,12 @@ LOAD_MASK_AND_RSRC_FROM_INPUTS = """\t{{msk_type}} mpred = mipp_set_k_{{dt_ext}}
 
 
 LOAD_MASK_AND_RSRC_FROM_REG1 = """\t{{msk_type}} mpred = mipp_set_k_{{dt_ext}}{{lmul_suffix}}(inpred);
-\t{{reg_type}} rsrc = r1;
 \t{{msk_type_scalar}} smpred = mipp_scalar_set_k_{{dt_ext}}{{lmul_suffix}}(inpred);
-\t{{reg_type_scalar}} srsrc = s1;"""
+{% if mkind == "masks" %}
+\t{{reg_type}} rsrc = r1;
+\t{{reg_type_scalar}} srsrc = s1;
+{% endif %}
+"""
 
 
 # --------------------------------------------

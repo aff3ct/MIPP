@@ -635,6 +635,7 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False, lm
             reg_type_scalar=reg_type_scalar,
             scalar_ext=scalar_ext,
             msk_type_scalar=msk_type_scalar,
+            mkind=mkind, # used to know wether to define mpred or not
         )
     if not float and kind=="cpp" :
         res = func_template.render(
