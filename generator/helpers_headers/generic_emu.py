@@ -109,8 +109,28 @@ tpl_mask_generic_emu = {
 		%r<tp>% op = %{{func_name}}<tp>%(r0);
 	"""},
 	
-	"load" : { "format" :"long", "code" :"""
-		%r<tp>% op = %load<tp>%(m0,p0);
+	"load_msks" : { "format" :"long", "code" :"""
+		// we want to guarantee that load doesn't touch the memory of masked out elems
+		%v<tp>% buff[%N<tp>%];
+  
+		for(unsigned i = 0; i < %N<tp>%; i++){
+			if(%get_k<tp>%(m0, i))
+				buff[i] = p0[i];
+			else
+				buff[i] = %get<tp>%(rsrc, i);
+		}
+		return %load<tp>%(buff);
+	"""},
+	"load_mskz" : { "format" :"long", "code" :"""
+		// we want to guarantee that load doesn't touch the memory of masked out elems
+		%v<tp>% buff[%N<tp>%];
+		for(unsigned i = 0; i < %N<tp>%; i++){
+			if(%get_k<tp>%(m0, i))
+				buff[i] = p0[i];
+			else
+				buff[i] = 0;
+		}
+		return %load<tp>%(buff);
 	"""},
 	
 	"set" : { "format" :"long", "code" :"""
@@ -126,10 +146,21 @@ tpl_mask_generic_emu = {
 		%m<tp>% op = %{{func_name}}<tp>%(r0, r1);
 	"""},
 	
-	#will need a custom thing
-	"store" : { "format" :"long", "code" :"""
-		exit(-1); //huuuuh idk
+	"store_msk" : { "format" :"long", "code" :"""
+		for(unsigned i = 0; i < %N<tp>%; i++){
+			if(%get_k<tp>%(m0, i))
+				p0[i] = %get<tp>%(r0, i);
+		}
 	"""},
+ 
+	"store_mskz" : { "format" :"long", "code" :"""
+        for(unsigned i = 0; i < %N<tp>%; i++){
+            if(%get_k<tp>%(m0, i))
+				p0[i] = %get<tp>%(r0, i);
+			else
+				p0[i] = 0;
+		}
+  	"""},
 	
 
 	"reductions" : { "format" :"long", "code" :"""
@@ -140,8 +171,36 @@ tpl_mask_generic_emu = {
 
 implems_mask_generic_emu = {
     
-    # ARITHMETIC
     
+    # STORE 
+	"store" : [
+		{ "instr_name": "store",  "datatypes" : all_datatypes, "version" : "mask", "template" : tpl_mask_generic_emu["store_msk"]},
+		{ "instr_name": "store",  "datatypes" : all_datatypes, "version" : "maskz", "template" : tpl_mask_generic_emu["store_mskz"]},
+	],
+	
+ 	# uses get
+	# "storeu" : [
+	# 	{ "instr_name": "storeu",  "datatypes" : all_datatypes, "version" : "mask", "template" : tpl_mask_generic_emu["store_msk"]},
+	# 	{ "instr_name": "storeu",  "datatypes" : all_datatypes, "version" : "maskz", "template" : tpl_mask_generic_emu["store_mskz"]},
+	# ],
+ 
+ 	# LOAD 
+	"load" : [
+		{ "instr_name": "load",  "datatypes" : all_datatypes, "version" : "masks", "template" : tpl_mask_generic_emu["load_msks"]},
+		{ "instr_name": "load",  "datatypes" : all_datatypes, "version" : "maskz", "template" : tpl_mask_generic_emu["load_mskz"]},
+	],
+	
+	"loadu" : [
+		{ "instr_name": "loadu",  "datatypes" : all_datatypes, "version" : "masks", "template" : tpl_mask_generic_emu["load_msks"]},
+		{ "instr_name": "loadu",  "datatypes" : all_datatypes, "version" : "maskz", "template" : tpl_mask_generic_emu["load_mskz"]},
+	],
+ 
+	#set
+	#set1
+	#set0
+ 
+    
+    # ARITHMETIC
 	"add" : [
 		#add SNIPPEt_END_MSK to the template code
 		{ "instr_name": "add",  "datatypes" : all_datatypes, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSK}},
@@ -203,6 +262,10 @@ implems_mask_generic_emu = {
 		{ "instr_name": "div4",  "datatypes" : all_float, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_1arg_reg"]["code"] + SNIPPET_END_MSKS}},
 	],
  
+ 
+	# COMPARISON
+	# only maskz for comparison
+ 
 	# MATH 
 	"sqrt" : [
 		{ "instr_name": "sqrt",  "datatypes" : all_float, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_1arg_reg"]["code"] + SNIPPET_END_MSK}},
@@ -224,17 +287,22 @@ implems_mask_generic_emu = {
  
 	# LOGIC 
  
-	"andb" : [
-		{ "instr_name": "andb",  "datatypes" : all_datatypes, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSK}},
-		{ "instr_name": "andb",  "datatypes" : all_datatypes, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKZ}},
-		{ "instr_name": "andb",  "datatypes" : all_datatypes, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKS}},
-	],
+	# blend uses andb, andnb, xorb for avx2. So we can't really include blend.h in andb.h, xorb.h or andnb.h ...
+	# afaik it's only an issue with avx2 since no other isa uses those functions for blend. The easiest 
+	# solution might be to change blend in avx2 and add an implicit rule which would be 
+	# "blend can't be emulated by calling other mipp functions" or smtg like that.
  
-	"andnb" : [
-		{ "instr_name": "andnb",  "datatypes" : all_datatypes, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSK}},
-		{ "instr_name": "andnb",  "datatypes" : all_datatypes, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKZ}},
-		{ "instr_name": "andnb",  "datatypes" : all_datatypes, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKS}},
-	],
+	# "andb" : [
+	# 	{ "instr_name": "andb",  "datatypes" : all_datatypes, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSK}},
+	# 	{ "instr_name": "andb",  "datatypes" : all_datatypes, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKZ}},
+	# 	{ "instr_name": "andb",  "datatypes" : all_datatypes, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKS}},
+	# ],
+ 
+	# "andnb" : [
+	# 	{ "instr_name": "andnb",  "datatypes" : all_datatypes, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSK}},
+	# 	{ "instr_name": "andnb",  "datatypes" : all_datatypes, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKZ}},
+	# 	{ "instr_name": "andnb",  "datatypes" : all_datatypes, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKS}},
+	# ],
  
 	"orb" : [
 		{ "instr_name": "orb",  "datatypes" : all_datatypes, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSK}},
@@ -242,11 +310,11 @@ implems_mask_generic_emu = {
 		{ "instr_name": "orb",  "datatypes" : all_datatypes, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKS}},
 	],
  
-	"xorb" : [
-		{ "instr_name": "xorb",  "datatypes" : all_datatypes, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSK}},
-		{ "instr_name": "xorb",  "datatypes" : all_datatypes, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKZ}},
-		{ "instr_name": "xorb",  "datatypes" : all_datatypes, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKS}},
-	],
+	# "xorb" : [
+	# 	{ "instr_name": "xorb",  "datatypes" : all_datatypes, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSK}},
+	# 	{ "instr_name": "xorb",  "datatypes" : all_datatypes, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKZ}},
+	# 	{ "instr_name": "xorb",  "datatypes" : all_datatypes, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKS}},
+	# ],
  
 	"msb" : [
 		{ "instr_name": "msb",  "datatypes" : all_datatypes, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSK}},
