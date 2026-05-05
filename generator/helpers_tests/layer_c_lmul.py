@@ -508,61 +508,12 @@ LAYER_OVERRIDES = {
 # \t\t\tstd::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(inputs2[i]) );\n""" + """{% endif %}""",
 #         "loop_assert": AS_REG_BINOP_FLOAT_WORKAROUND,
 #     },
-    
-#     "andnb_k": {
-#         "loop_body": """\t\t{{dt_ext}}_t res = ~(inputs1[i]) & (inputs2[i]);"""
-#     },
-
-    
-#     "notb": {
-#         "loop_body": "{%if is_int %}"+"""\t\t{{dt_ext}}_t res = ~(inputs1[i]);"""+
-# """{% else %}""" + """\t{{dt_ext}}_t res = std::bit_cast<{{dt_ext}}_t,uint{{type_size}}_t>(
-# \t\t\t~std::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(inputs1[i]));\n""" + """{% endif %}""",
-#         "loop_assert": AS_REG_BINOP_FLOAT_WORKAROUND,
-#     },
-    
-#     "notb_k": {
-#         "loop_body": """{%if is_int %}""" + """\t\t{{dt_ext}}_t res = ~(inputs1[i]);""" 
-# + """{% else %} 
-# uint{{type_size}}_t expected_bits = (inputs1[i] != 0)
-#   ? 0
-#   : -1;
 
 # uint{{type_size}}_t got_bits = std::bit_cast<uint{{type_size}}_t>(mipp_get_float{{type_size}}(r3, i));
 # {%endif%}""",
 #         "loop_assert": "{% if is_int %}" + AS_REG_BINOP + "{% else %}REQUIRE( (!(!(got_bits))) == (!(!(expected_bits))) ); {% endif %}",
 #     },
-    
-#     "hadd": {
-#         "loop_body": """\t{{dt_ext}}_t res = 0; uint64_t ures = 0;
-# \tfor(int j = 0; j < vectorSize; j++){
-# \t\tres {{op}} inputs1[j];
-# \t\tures{{op}} inputs1[j];
-# \t}""",
-#         "loop_assert": """\tif(ures == (uint64_t)res) REQUIRE(mipp_get_{{dt_ext}}_{{lmul_suffix}}(r3, 0) == res);""",
-#     },
-    
-#     "hmul": {
-#         "loop_body":"""\t{{dt_ext}}_t res = 1;
-# \tfor(int j = 0; j < vectorSize; j++)
-# \t\tres {{op}} inputs1[j];""",
-#         "loop_assert": """\tREQUIRE(mipp_get_{{dt_ext}}_{{lmul_suffix}}(r3, 0) == res);""",
-#     },
-    
-#     "hmin": {
-#         "loop_body": """\t{{dt_ext}}_t res = inputs1[0];
-# \tfor(int j = 1; j < vectorSize; j++)
-# \t\tres = std::min(res, inputs1[j]);""",
-#         "loop_assert": """\tREQUIRE(mipp_get_{{dt_ext}}_{{lmul_suffix}}(r3, 0) == res);""",
-#     },
-    
-    
-#     "hmax": {
-#         "loop_body": """\t{{dt_ext}}_t res = inputs1[0];
-# \tfor(int j = 1; j < vectorSize; j++)
-# \t\tres = std::max(res, inputs1[j]);""",
-#         "loop_assert": """\tREQUIRE(mipp_get_{{dt_ext}}_{{lmul_suffix}}(r3, 0) == res);""",
-#     },
+
     
 #     "fmadd": {
 #         "loop_body": """\t\t{{dt_ext}}_t res = inputs1[i] * inputs2[i] + inputs3[i];""",
@@ -581,15 +532,6 @@ LAYER_OVERRIDES = {
 #     },
     
     
-#     "sqrt" : {
-#         "loop_body": """\t\t{{dt_ext}}_t res = std::sqrt(inputs1[i]);""",
-#     },
-    
-#     "rsqrt" : {
-#         "loop_body": """\t\t{{dt_ext}}_t res = 1.0 / std::sqrt(inputs1[i]);""",
-#         "loop_assert": """\tREQUIRE(std::abs(mipp_get_{{dt_ext}}_{{lmul_suffix}}(r3, i) - res) < 1e-2);""",
-#     },
-    
 #     #msb is most significant BIT not byte.
 #     #the function returns msb of a lane & 0x8 etc
 #     "msb" : {
@@ -601,55 +543,7 @@ LAYER_OVERRIDES = {
 # \t\t);\n""" + """{% endif %}""",
 #         "loop_assert": AS_REG_BINOP_FLOAT_WORKAROUND,
 #     },
-    
-#     "hadd_to_scal": {
-#         "loop_body": """\t{{dt_ext}}_t res1 = 0; uint64_t ures1 = 0;
-# \tfor(int j = 0; j < vectorSize; j++){
-# \t\tres1 += inputs1[j];
-# \t\tures1 += inputs1[j];
-# \t}""",
-#         "loop_assert": """\tif((uint64_t)res1 == ures1) REQUIRE(res == res1);""",
-#     },
-    
-#     "cast": {
-#         "func_decl": """void test_cmipp_cast_{{dt1_ext}}_{{dt2_ext}}(){""",
-#         "decl": DECL_CAST_2ARGS,
-#         "init": INIT_CAST_2ARGS,
-#         "load": LOAD_CAST_2ARGS,
-#         "operation": OP_CAST,
-#         "loop_body": """\tfor(size_t i = 0; i < vectorSize * sizeof({{dt1_ext}}_t) / sizeof({{dt2_ext}}_t); i++){\n"""+ LB_CAST_2ARGS,
-#         "loop_assert": AS_CAST_2ARGS+ "\n\t}",
-#     },
-    
-#     "cast_k": {
-#         "func_decl": """void test_cmipp_cast_k_{{dt1_ext}}_{{dt2_ext}}(){""",
-#         "decl": DECL_CAST_2ARGS_MSK,
-#         "init": INIT_CAST_2ARGS,
-#         "load": LOAD_CAST_2ARGS_MASK,
-#         "operation": OP_CAST_MSK,
-#         "loop_body": """\tfor(size_t i = 0; i < vectorSize * sizeof({{dt1_ext}}_t) / sizeof({{dt2_ext}}_t); i++){\n"""+ LB_CAST_2ARGS,
-#         "loop_assert": AS_CAST_2ARGS_MSK + "\n\t}",
-#     },
-    
-    #add support for float via {% is_float %}
 
-#     "round": {
-#         "init" : """\tstd::iota(inputs1, inputs1 + vectorSize, 1);
-# \tstd::mt19937 g;
-# std::uniform_real_distribution<float> dis(0.0, 1.0);
-# \tfor(int i = 0; i < vectorSize; i++)
-# \t{
-# \t\tinputs1[i] += dis(g);
-# \t}""",
-#         "loop_body": """\t\t{{dt_ext}}_t res = std::round(inputs1[i]);""",
-#     },
-#     "div2": {
-#         "loop_body": """\t\t{{dt_ext}}_t res = inputs1[i] / 2;""",
-#     },
-    
-#     "div4": {
-#         "loop_body": """\t\t{{dt_ext}}_t res = inputs1[i] / 4;""",
-#     },
 
         # Define CUSTOM overflow workarounds
     "add" : {
@@ -701,6 +595,7 @@ LAYER_OVERRIDES = {
         "loop_assert" : AS_REG_BINOP_FLOAT_WORKAROUND
     },
     
+    # more tolerance than 1e-5 for hadd since on floats since it sums more stuff w lmul
     "hadd_to_scal" : {
         "loop_assert" :"""\t\tbool ov = false; {{dt_ext}}_t res = 0;
 \t\tfor(int j = 0; j < {{size}} * {{lmul_coeff}}; j++){
@@ -715,7 +610,7 @@ LAYER_OVERRIDES = {
 + "{% if is_int%}"
 + "\t\tREQUIRE(abs_diff::abs_diff(res1,res2) == 0);"
 + "{% else %}"
-+ "\n\t\t{{dt_ext}}_t tol  = 1e-5f * abs_diff::abs_diff(res2) + 1.0f;"
++ "\n\t\t{{dt_ext}}_t tol  = 1e-3f * abs_diff::abs_diff(res2) + 1.0f;"
 + "\n\t\t{{dt_ext}}_t diff = abs_diff::abs_diff(res1, res2);"
 + "\n\t\tREQUIRE(diff <= tol);"
 + "{% endif %}"
@@ -737,7 +632,7 @@ LAYER_OVERRIDES = {
 + "{% if is_int%}"
 + "\t\tREQUIRE(abs_diff::abs_diff(res1,res2) == 0);"
 + "{% else %}"
-+ "\n\t\t{{dt_ext}}_t tol  = 1e-5f * abs_diff::abs_diff(res2) + 1.0f;"
++ "\n\t\t{{dt_ext}}_t tol  = 1e-3f * abs_diff::abs_diff(res2) + 1.0f;"
 + "\n\t\t{{dt_ext}}_t diff = abs_diff::abs_diff(res1, res2);"
 + "\n\t\tREQUIRE(diff <= tol);;"
 + "{% endif %}"
