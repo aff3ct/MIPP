@@ -313,6 +313,16 @@ class MaskSupport:
         return self.maskable or self.maskzable or self.masksable
     def is_none(self):
         return not self.is_any_mask()
+    
+    def is_supported(self, mask_str):
+        if mask_str == "mask":
+            return self.maskable
+        elif mask_str == "maskz":
+            return self.maskzable
+        elif mask_str == "masks":
+            return self.masksable
+        else:
+            raise ValueError(f"Invalid mask type: {mask_str}")
 
 only_maskz = MaskSupport(maskable=False, maskzable=True, masksable=False)
 only_mask = MaskSupport(maskable=True, maskzable=False, masksable=False)

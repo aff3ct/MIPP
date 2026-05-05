@@ -86,13 +86,23 @@ for details
 """
 tpl_implem_rvv = {
     "load"                 : { "format" : "short", "code" : "{{ isa.prefix }}_vle{{ isa_dt_par.width }}_v_{{ isa_dt_par.data_ext }}(({{ isa_dt_par.to_ptr }}*) p0, %N<tp>%);"},
+    "load_msks"            : { "format" : "short", "code" : "{{ isa.prefix }}_vle{{ isa_dt_par.width }}_v_{{ isa_dt_par.data_ext }}_mu(m0.m, rsrc.r, ({{ isa_dt_par.to_ptr }}*) p0, %N<tp>%);"},
+    
     "store"                : { "format" : "short", "code" : "{{ isa.prefix }}_vse{{ isa_dt_par.width}}_v_{{ isa_dt_par.data_ext }}(({{ isa_dt_par.to_ptr }}*) p0, r0.r , %N<tp>%);"},
+    "store_msk"            : { "format" : "short", "code" : "{{ isa.prefix }}_vse{{ isa_dt_par.width}}_v_{{ isa_dt_par.data_ext }}_m(m0.m, ({{ isa_dt_par.to_ptr }}*) p0, r0.r , %N<tp>%);"},
+    
     "arith_1arg"           : { "format" : "short", "code" : "{{ isa.prefix }}_v{{ instr_name }}_v_{{ isa_dt_par.data_ext }}(r0.r, %N<tp>%);"},
+    "arith_1arg_msk"       : { "format" : "short", "code" : "{{ isa.prefix }}_v{{ instr_name }}_v_{{ isa_dt_par.data_ext }}_mu(m0.m, r0.r, r0.r, %N<tp>%);"},
+    "arith_1arg_msks"      : { "format" : "short", "code" : "{{ isa.prefix }}_v{{ instr_name }}_v_{{ isa_dt_par.data_ext }}_mu(m0.m, rsrc.r, r0.r, %N<tp>%);"},
+    
     "arith_2args"          : { "format" : "short", "code" : "{{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}(r0.r, r1.r, %N<tp>%);"},
+    "arith_2args_msk"     : { "format" : "short", "code" : "{{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}_mu(m0.m, r0.r, r0.r, r1.r, %N<tp>%);"},
+    "arith_2args_msks"    : { "format" : "short", "code" : "{{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}_mu(m0.m, rsrc.r, r0.r, r1.r, %N<tp>%);"},
+
     "mask_2args"           : { "format" : "short", "code" : "{{ isa.prefix }}_v{{ instr_name }}(m0.m, m1.m, %N<tp>%);" },
+    
     #arith_2args but with mask dt extension at the end
     "arith_msk_type_2args" : { "format" : "short", "code" : "{{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}_{{isa_dt_par.data_ext_logi}}(r0.r, r1.r, %N<tp>%);"},
-    "test_tpl_add_msk"     : { "format" : "short", "code" : "{{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}_mu(m0.m, r0.r, r0.r, r1.r, %N<tp>%);"},
 
 
     "float_set0"           : { "format" : "short", "code" : "{{isa.prefix}}_{{ instr_name }}_v_f_{{isa_dt_par.data_ext}}(0.f,%N<tp>%);"},
@@ -100,9 +110,12 @@ tpl_implem_rvv = {
     #same as arith_2args except "vvm" instead of "vv"
     "merge"                : { "format" : "short", "code" : "{{ isa.prefix }}_v{{ instr_name }}_vvm_{{ isa_dt_par.data_ext }}(r1.r, r0.r, m0.m, %N<tp>%);"},
     #arithmetic w predicate (mask)
-    "arithmsk_2args"       : { "format" : "short", "code" : "{{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}_mu(m0.m, r0.r, r0.r, r1.r, %N<tp>%);"},
+    #"arithmsk_2args"       : { "format" : "short", "code" : "{{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}_mu(m0.m, r0.r, r0.r, r1.r, %N<tp>%);"},
+    
     "arith_3args"          : { "format" : "short", "code" : "{{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}(r0.r, r1.r, r2.r, %N<tp>%);"},
-    "maskst"               : { "format" : "short", "code" : "{{ isa.prefix }}_vse{{ isa_dt_par.width }}_v_{{ isa_dt_par.data_ext }}_m(m0.m,({{isa_dt_par.to_ptr}}*)p0, r0.r, %N<tp>%);"},
+    "arith_3args_msk"      : { "format" : "short", "code" : "{{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}_mu(m0.m, r0.r, r1.r, r2.r, %N<tp>%);"},
+    #"maskst"               : { "format" : "short", "code" : "{{ isa.prefix }}_vse{{ isa_dt_par.width }}_v_{{ isa_dt_par.data_ext }}_m(m0.m,({{isa_dt_par.to_ptr}}*)p0, r0.r, %N<tp>%);"},
+    
     "scalar_getfirst"      : { "format" : "short", "code" : "{{isa_dt_par.to_ptr}} res = {{ isa.prefix }}_v{{ instr_name }}_x_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(r0.r);"},
     "float_getfirst"       : { "format" : "short", "code" : "{{isa_dt_par.to_ptr}} res = {{ isa.prefix }}_v{{ instr_name }}_f_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(r0.r);"},
     "round_int"            : { "format" : "short", "code" : "r0.r;"},
@@ -174,14 +187,18 @@ Which template to use to generate them. Which type should be used w which templa
 """
 implems_rvv = {
     "load" : [
-        { "instr_name" : "load",    "datatypes" : all_datatypes, "template" : tpl_implem_rvv["load"] }],
+        { "instr_name" : "load",    "datatypes" : all_datatypes, "template" : tpl_implem_rvv["load"] },
+        { "instr_name" : "load",    "datatypes" : all_datatypes, "template" : tpl_implem_rvv["load_msks"], "version" : "masks"}
+    ],
     "store" : [
         { "instr_name" : "store",   "datatypes" : all_datatypes, "template" : tpl_implem_rvv["store"] }],
     #arith_2args functions
     "add" : [
 	    { "instr_name" : "fadd",    "datatypes" : all_float,    "template" : tpl_implem_rvv["arith_2args"]},
 	    { "instr_name" : "add",     "datatypes" : all_int_uint, "template" : tpl_implem_rvv["arith_2args"]},#],
-        { "instr_name" : "add",     "datatypes" : all_int_uint, "template" : tpl_implem_rvv["test_tpl_add_msk"], "version" : "mask"}],
+        { "instr_name" : "add",     "datatypes" : all_int_uint, "template" : tpl_implem_rvv["arith_2args_msk"], "version" : "mask"},
+        { "instr_name" : "fadd",    "datatypes" : all_float,    "template" : tpl_implem_rvv["arith_2args_msk"], "version" : "mask"}
+    ],
     "sub" : [
         { "instr_name" : "fsub",    "datatypes" : all_float,    "template" : tpl_implem_rvv["arith_2args"]},
         { "instr_name" : "sub",     "datatypes" : all_int_uint, "template" : tpl_implem_rvv["arith_2args"]}],
