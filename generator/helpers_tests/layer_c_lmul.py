@@ -176,7 +176,8 @@ OP_REG_BINOP = """\t{{reg_type}} r3 = mipp_{{func}}_{{dt_ext}}_{{lmul_suffix}}(r
 OP_CMP_2REG = """\t{{msk_type}} m3 = mipp_{{func}}_{{dt_ext}}_{{lmul_suffix}}(r1, r2); {{reg_type}} r3 = mipp_toreg_{{dt_ext}}_{{lmul_suffix}}(m3);
 {{msk_type_scalar}} ms3 = mipp_scalar_{{func}}_{{dt_ext}}_{{lmul_suffix}}(s1, s2); {{reg_type_scalar}} s3 = mipp_scalar_toreg_{{dt_ext}}_{{lmul_suffix}}(ms3);"""
 
-OP_STORE = """\tmipp_store_{{dt_ext}}_{{lmul_suffix}}(inputs2, r1);\n\tmipp_scalar_store_{{dt_ext}}_{{lmul_suffix}}(inputs2, s1);"""
+# WRONG
+OP_STORE = """\tmipp_store_{{dt_ext}}_{{lmul_suffix}}(inputs2, r1);\n\t//mipp_scalar_store_{{dt_ext}}_{{lmul_suffix}}(inputs2, s1);"""
 
 OP_TOREG = """\t{{reg_type}} r3 = mipp_toreg_{{dt_ext}}_{{lmul_suffix}}(m1);\n\t{{reg_type_scalar}} s3 = mipp_scalar_toreg_{{dt_ext}}_{{lmul_suffix}}(ms1);"""
 

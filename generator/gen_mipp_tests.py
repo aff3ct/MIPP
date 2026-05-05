@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+from pathlib import Path
 import sys
 import argparse
 import shutil
@@ -222,8 +223,16 @@ def get_mask_args(mkind):
     else :
         if mkind== "mask" or mkind == "maskz" : 
             return "mpred,"
-        elif mkind == "masks," :
+        elif mkind == "masks" :
             return "mpred, rsrc,"
+def get_scalar_mask_args(mkind):
+    if mkind == "" :
+        return ""
+    else :
+        if mkind== "mask" or mkind == "maskz" : 
+            return "smpred,"
+        elif mkind == "masks" :
+            return "smpred, srsrc,"
 
 ###### GENERATION FUNC ######
 
@@ -326,7 +335,7 @@ def gen_test_type_guards(func, long_name, short_name, kind="c", lmul=0, mkind=""
     """
     layer_dict = get_gen_test_dict(kind)
     lmul_str = "" if lmul == 0 else lmul_to_str(lmul, "")
-    res = f'\nTEST_CASE("{long_name} - {kind} {lmul_str}", "[{short_name}]") {{\n'
+    res = f'\nTEST_CASE("{long_name} - {kind} {lmul_str} {mkind}", "[{short_name}]") {{\n'
     for implems in implem_dict.values():
         res += implems["guard"] + "\n"
         if func in implems["implem"]:
@@ -398,7 +407,7 @@ def gen_cast_test_type_guards(func, long_name, short_name, kind="c", lmul=0, mki
 # math.h stdio.h etc instead of cmath, cstdio, etc.
 
 
-def match_func_headers(func, kind="c"):
+def match_func_headers(func, kind="c", mkind=""):
     """
     helper to match a func to the relevant headers to include in the test file.
     This is used to avoid including all headers in all test files, which can cause 
@@ -407,6 +416,7 @@ def match_func_headers(func, kind="c"):
     headers = ""
     hsufix = ".h" if kind == "c" else ".hpp"
     if kind == "c" or kind == "cpp":
+            
         headers += f"\n#include <{kind}/common{hsufix}>\n"
         headers += f'#include <simd_ext/scalar/scalar_common.h>\n'
         
@@ -419,6 +429,16 @@ def match_func_headers(func, kind="c"):
         
         headers += f'#include <simd_ext/scalar/functions/scalar_load.h>\n'
         headers += f'#include <simd_ext/scalar/functions/scalar_get.h>\n'
+        
+        if mkind != "" :
+            headers += f"\n#include <{kind}/functions/set1_k{hsufix}>\n"
+            headers += f'#include <simd_ext/scalar/functions/scalar_set1_k.h>\n'
+            
+            headers += f"\n#include <{kind}/functions/get_k{hsufix}>\n"
+            headers += f'#include <simd_ext/scalar/functions/scalar_get_k.h>\n'
+            
+            headers += f"\n#include <{kind}/functions/set_k{hsufix}>\n"
+            headers += f'#include <simd_ext/scalar/functions/scalar_set_k.h>\n'
 
         if func.endswith("_k"):
             headers += f'#include <{kind}/functions/get_k{hsufix}>\n'
@@ -495,7 +515,9 @@ def gen_headers(kind="c", func="", N=10, lmul=0, mkind=""):
     """
     path_ext_hack = ""
     if lmul != 0 : 
-        path_ext_hack = "../"
+        path_ext_hack += "../"
+    if mkind != "" :
+        path_ext_hack += "../"
     res = (
         "#include <exception>"
         "\n#include <algorithm>"
@@ -512,9 +534,9 @@ def gen_headers(kind="c", func="", N=10, lmul=0, mkind=""):
     )
     if kind == "c":
         
-        res += match_func_headers(func, kind)
+        res += match_func_headers(func, kind, mkind)
     elif kind == "cpp":
-        res += match_func_headers(func, kind)
+        res += match_func_headers(func, kind, mkind)
     elif kind == "obj":
         res += "\n#include <mipp_obj.hpp>"
     res += "\n#include <catch2/catch_test_macros.hpp>"
@@ -580,6 +602,9 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False, lm
         
         split = msk_type.split("_", 1)
         msk_type_scalar = split[0] + "_scalar_" + split[1]
+        
+        # if mkind == "masks" : 
+        #     print("Debug : mkind is masks, mask_args is", get_mask_args(mkind), "and mask_args_scalar is", get_scalar_mask_args(mkind))
 
         res = func_template.render(
             func=func,
@@ -596,6 +621,7 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False, lm
             lmul_suffix=lmul_suffix,
             lmul_coeff=lmul_coeff,
             mask_args=get_mask_args(mkind),
+            mask_args_scalar=get_scalar_mask_args(mkind),
             mask_kind=mask_to_str(mkind, kind),
             
             reg_type_scalar=reg_type_scalar,
@@ -1002,18 +1028,26 @@ cpath = tmp_path + "c_tests/"
 cpppath = tmp_path + "cpp_tests/"
 objpath = tmp_path + "obj_tests/"
 
-def write_file_if_different(path, content):
+def write_file_if_different(path, content, encoding="utf-8"):
     """
-    helper to avoid rewriting files if the content is the same 
-    to avoid unnecessary recompilation.
+    Write only if the on-disk bytes would differ from what we'd write.
+    Returns True if wrote, False if unchanged.
     """
-    if os.path.exists(path):
-        with open(path, "r") as f:
-            existing_content = f.read()
-        if existing_content == content:
+    p = Path(path)
+    new_bytes = content.encode(encoding)
+
+    try:
+        old_bytes = p.read_bytes()
+        print(f"Comparing existing file: {p}")
+        if old_bytes == new_bytes:
             return False
-    with open(path, "w") as f:
-        f.write(content)
+    except FileNotFoundError:
+        print(f"File not found (will create): {p}")
+        pass
+
+    p.parent.mkdir(parents=True, exist_ok=True)
+    print(f"Writing file: {p}")
+    p.write_bytes(new_bytes)
     return True
 
 def comment_out_cpp_file(content: str, reason: str):
@@ -1065,9 +1099,9 @@ def gen_test_files_all_funcs(kind="c", lmul=0, mkind="", N=10):
         raise ValueError(f"Invalid kind: {kind!r}")
     
     # if lmul != 0 or mkind != "" :
-    if mkind != "" :
-    
-        print("masks are no good, so we skip for now")
+    # if mkind != "" :
+    if lmul != 0 :
+        print("wip zone :)")
         return
 
 
@@ -1075,7 +1109,11 @@ def gen_test_files_all_funcs(kind="c", lmul=0, mkind="", N=10):
     regen_c = kind in {"c", "all"}
     regen_cpp = kind in {"cpp", "all"}
     regen_obj = kind in {"obj", "all"}
+    
     if lmul != 0 : 
+        regen_cpp = False
+        regen_obj = False
+    if mkind != "" :
         regen_cpp = False
         regen_obj = False
 
@@ -1087,6 +1125,11 @@ def gen_test_files_all_funcs(kind="c", lmul=0, mkind="", N=10):
         c_dict = get_gen_test_dict_lmul("c") if regen_c else {}
         cpp_dict = get_gen_test_dict_lmul("cpp") if regen_cpp else {}
         obj_dict = get_gen_test_dict_lmul("obj") if regen_obj else {}
+        
+    if mkind != "" :
+        c_dict = get_gen_test_dict_mask("c") if regen_c else {}
+        cpp_dict = get_gen_test_dict_mask("cpp") if regen_cpp else {}
+        obj_dict = get_gen_test_dict_mask("obj") if regen_obj else {}
 
     funcs = set()
     if regen_c:
@@ -1131,9 +1174,6 @@ def gen_test_files_all_funcs(kind="c", lmul=0, mkind="", N=10):
         mask_support = mipp_funcs[func]["mask_support"]
         if mkind != "" and mask_support.is_none():
             print(f"Skipping {func} for {mkind} because it doesn't support it")
-            continue
-        if mkind != "" and kind != "c":
-            #hacky fix for now 
             continue
         
         disable = func in set_skip_testing
@@ -1191,11 +1231,18 @@ def main():#just parse the args and call gen_test_files_all_funcs with the right
         default=10,
         help="Number of iterations for random tests (default: 10).",
     )
+    # clean dir option default : false
+    parser.add_argument(
+        "--clean",
+        action="store_true",
+        help="Clean the test folders before generating new files (default: false).",
+    )
     args = parser.parse_args()
 
-    clean_folder(cpath)
-    clean_folder(cpppath)
-    clean_folder(objpath)
+    if args.clean:
+        clean_folder(cpath)
+        clean_folder(cpppath)
+        clean_folder(objpath)
 
     for lmul in [0, 1, 2, 4, 8]:
         for mkind in ["", "mask", "maskz", "masks"]:
