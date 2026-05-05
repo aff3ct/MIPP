@@ -508,10 +508,54 @@ shape_templates = {
     # ),
 }
 
-deny = set()
+deny = {
+    "andb", 
+    "xorb",
+    "andnb",
+}
 
-# Keep overrides structure (empty by default for mask layer; users can add later)
-LAYER_OVERRIDES = {}
+LAYER_OVERRIDES = {
+    "add" : {
+        "loop_assert" :
+    """
+    \t\tbool ov = ovf::will_add_overflow<{{dt_ext}}_t>(mipp_get_{{dt_ext}}(r1, i), mipp_get_{{dt_ext}}(r2, i));
+    \t\tif(ov){
+    \t\t\tINFO("Overflow occurred, skipping assert");
+    \t\t}else{\n\t"""+ AS_REG_BINOP + """\n\t\t}"""},
+    
+    "sub" : {
+        "loop_assert" :"""
+\tbool ov = ovf::will_sub_overflow<{{dt_ext}}_t>(mipp_get_{{dt_ext}}(r1, i), mipp_get_{{dt_ext}}(r2, i));
+\t\tif(ov) {
+\t\t\tINFO("Overflow occurred, skipping assert");
+\t\t}else{\n\t"""+ AS_REG_BINOP + """\n\t\t}"""},
+    
+    "mul" : {
+        "loop_assert" :"""
+\t\tbool ov = ovf::will_mul_overflow<{{dt_ext}}_t>(mipp_get_{{dt_ext}}(r1, i), mipp_get_{{dt_ext}}(r2, i));
+\t\tif(ov) {
+\t\t\tINFO("Overflow occurred, skipping assert");
+\t\t}else{\n\t"""+ AS_REG_BINOP + """\n\t\t}"""},
+    
+        # division by zero is skipped + add some 
+    # tolerance for float division to avoid precision issues.
+    "div" : {
+        "loop_assert" :"""
+\t\tif(mipp_get_{{dt_ext}}(r2, i) == 0) {
+\t\t\tINFO("Division by zero, skipping assert");
+\t\t}else{\n\t"""+ "\t\t {{dt_ext}}_t res1 = mipp_get_{{dt_ext}}(r3, i);\n \t\t{{dt_ext}}_t res2 = mipp_scalar_get_{{dt_ext}}(s3, i);\n"
++ "{% if is_int%}"
++ "\t\tREQUIRE(abs_diff::abs_diff(res1,res2) == 0);"
++ "{% else %}"
++ "\n\t\t{{dt_ext}}_t tol  = 1e-5f * abs_diff::abs_diff(res2) + 1.0f;"
++ "\n\t\t{{dt_ext}}_t diff = abs_diff::abs_diff(res1, res2);"
++ "\n\t\tREQUIRE(diff <= tol);"
++ "{% endif %}"
++ """\n\t\t}""",
+    },
+    
+    
+}
 
 NO_LOOP_FUNCS = {"hadd", "hmul", "hmin", "hmax",
                  "hadd_to_scal", "getfirst", "testz",

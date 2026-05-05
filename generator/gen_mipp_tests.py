@@ -334,6 +334,10 @@ def gen_test_type_guards(func, long_name, short_name, kind="c", lmul=0, mkind=""
     Only generates tests for the dttypes for which the func is defined in the implem.
     """
     layer_dict = get_gen_test_dict(kind)
+    if lmul != 0 : 
+        layer_dict = get_gen_test_dict_lmul(kind)
+    if mkind != "" :
+        layer_dict = get_gen_test_dict_mask(kind)
     lmul_str = "" if lmul == 0 else lmul_to_str(lmul, "")
     res = f'\nTEST_CASE("{long_name} - {kind} {lmul_str} {mkind}", "[{short_name}]") {{\n'
     for implems in implem_dict.values():
@@ -371,6 +375,10 @@ def gen_cast_test_type_guards(func, long_name, short_name, kind="c", lmul=0, mki
     but we need to handle the dttype pairs properly.
     """
     layer_dict = get_gen_test_dict(kind)
+    if lmul != 0 :
+        layer_dict = get_gen_test_dict_lmul(kind)
+    if mkind != "" :
+        layer_dict = get_gen_test_dict_mask(kind)
     lmul_str = "" if lmul == 0 else lmul_to_str(lmul, "")
     res = f'\nTEST_CASE("{long_name} - {kind} {lmul_str}", "[{short_name}]") {{\n'
 
@@ -982,6 +990,10 @@ def gen_file(func, kind="c", lmul=0, mkind=""):
     Calls gen_headers -> gen_funcs_all_datatypes -> gen_test_type_guards
     """
     layer_dict = get_gen_test_dict(kind)
+    if lmul != 0 :
+        layer_dict = get_gen_test_dict_lmul(kind)
+    if mkind != "" :
+        layer_dict = get_gen_test_dict_mask(kind)
 
     register = "rvd"
     mask = "rvm"
@@ -1003,6 +1015,10 @@ def gen_file(func, kind="c", lmul=0, mkind=""):
 
 def gen_cast_file(func,kind="c", lmul=0, mkind=""):
     layer_dict = get_gen_test_dict(kind)
+    if lmul != 0 :
+        layer_dict = get_gen_test_dict_lmul(kind)
+    if mkind != "" :
+        layer_dict = get_gen_test_dict_mask(kind)
 
     register = "rvd"
     mask = "rvm"
@@ -1100,7 +1116,7 @@ def gen_test_files_all_funcs(kind="c", lmul=0, mkind="", N=10):
     
     # if lmul != 0 or mkind != "" :
     # if mkind != "" :
-    if lmul != 0 :
+    if lmul != 0 and mkind != "" :
         print("wip zone :)")
         return
 
@@ -1110,6 +1126,7 @@ def gen_test_files_all_funcs(kind="c", lmul=0, mkind="", N=10):
     regen_cpp = kind in {"cpp", "all"}
     regen_obj = kind in {"obj", "all"}
     
+    # WIP
     if lmul != 0 : 
         regen_cpp = False
         regen_obj = False
