@@ -52,10 +52,9 @@ tpl_generic_emu = {
            %v<tp>% ptr1[%N<tp>%];
            %v<tp>% ptr2[%N<tp>%];
            %store<tp>%(ptr1, r0);
-           %store<tp>%(ptr2, rsrc);
+           %store<tp>%(ptr2, r1);
            for(unsigned i = 0; i < %N<tp>%; i++){
-               if(%get_k<tp>%(m0, i))
-				   ptr1[i] = ptr2[i];
+               ptr1[i] = %get_k<tp>%(m0, i) ? ptr1[i] : ptr2[i];
 		   }
 		   return %load<tp>%(ptr1);
     """},
