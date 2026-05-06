@@ -45,6 +45,15 @@ tpl_generic_emu = {
 			res = %add<tp>%(res, r2);
 			return res;
 	"""},
+ 
+	"blend": { "format" :"long", "code" :"""
+           	%r<tp>% res = r0;
+			for(unsigned i = 0; i < %N<tp>%; i++){
+				if(%get_k<tp>%(m0, i))
+					%set<tp>%(res, i, %get<tp>%(r1, i));
+			}
+   			return res;
+    """},
 }
 
 implems_generic_emu = {
@@ -65,6 +74,10 @@ implems_generic_emu = {
 	
 	"fmadd" : [
 		{ "instr_name": "fmadd",  "datatypes" : all_float, "template" : tpl_generic_emu["fmadd"]}],
+ 
+	"blend" : [
+		{ "instr_name": "blend",  "datatypes" : all_datatypes, "version" : "mask", "template" : tpl_generic_emu["blend"]},
+	],
 }
 
 #for functions with conditition, we want a way to generate the global not of the condition to be used 

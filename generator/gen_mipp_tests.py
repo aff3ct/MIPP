@@ -60,13 +60,13 @@ implems_sse.update(implems_generic_emu)
 implems_rvv.update(implems_generic_emu)
 
 implem_dict = {
-	# avx512 has to be first bc it's the one w the #if
-	"avx512": {"implem": implems_avx512, "guard": avx512_guard},
-	"avx": {"implem": implems_avx, "guard": avx_guard},
-	"sse": {"implem": implems_sse, "guard": sse_guard},
-	"sve": {"implem": implems_sve, "guard": sve_guard},
-	"rvv": {"implem": implems_rvv, "guard": rvv_guard},
-	"neon": {"implem": implems_neon, "guard": neon_guard},
+    # avx512 has to be first bc it's the one w the #if
+    "avx512": {"implem": implems_avx512, "guard": avx512_guard},
+    "avx": {"implem": implems_avx, "guard": avx_guard},
+    "sse": {"implem": implems_sse, "guard": sse_guard},
+    "sve": {"implem": implems_sve, "guard": sve_guard},
+    "rvv": {"implem": implems_rvv, "guard": rvv_guard},
+    "neon": {"implem": implems_neon, "guard": neon_guard},
     "scalar": {"implem": implems_scalar, "guard": scalar_guard},
 }
 
@@ -91,20 +91,22 @@ mipp_funcs_lmul = {
 ###### HELPERS ######
 
 # helper to get the datatypes for 1 func in 1 implem
-def get_defined_dttypes(func, implem):
-	"""
-	func: implem key, e.g. "add", "mul", ...
-	implem: dict of the implem, e.g. implems_avx512
-	returns a list of datatypes for which the func is defined in the implem
-	"""
-	func_dt = implem[func]
-	datatypes = []
-	for dt in func_dt:
-		datatypes.append(dt["datatypes"])
-	datatypes = list(set([item for sublist in datatypes for item in sublist]))
-	if not datatypes:
-		datatypes = mipp_funcs[func]["datatypes"]
-	return datatypes
+def get_defined_dttypes(func, implem, mkind=""):
+    """
+    func: implem key, e.g. "add", "mul", ...
+    implem: dict of the implem, e.g. implems_avx512
+    returns a list of datatypes for which the func is defined in the implem
+    """
+    func_dt = implem[func]
+    if mkind != "" :
+        print("Debug " + func, func_dt)
+    datatypes = []
+    for dt in func_dt:
+        datatypes.append(dt["datatypes"])
+    datatypes = list(set([item for sublist in datatypes for item in sublist]))
+    if not datatypes:
+        datatypes = mipp_funcs[func]["datatypes"]
+    return datatypes
 
 def dt_to_suffix(dt):
     """Used to convert cast format t1,t2 to t1_t2. 
@@ -251,7 +253,7 @@ def add_type_guards(func, implem, function, kind="c", lmul=0, mkind=""):
     DTTYPES IN headers_def.mipp_funcs[func]["datatypes"].
     THIS IS FORE EASE OF TESTS.
     """
-    datatypes = get_defined_dttypes(func, implem)
+    datatypes = get_defined_dttypes(func, implem, mkind)
     section = ""
     res = ""
     lmul_str = lmul_to_str(lmul, "")
@@ -1115,9 +1117,9 @@ def gen_test_files_all_funcs(kind="c", lmul=0, mkind="", N=10):
     if kind not in {"c", "cpp", "obj", "all"}:
         raise ValueError(f"Invalid kind: {kind!r}")
     
-    # if lmul != 0 or mkind != "" :
+    if lmul != 0 or mkind != "" :
     # if mkind != "" :
-    if lmul != 0 and mkind != "" :
+    # if lmul != 0 and mkind != "" :
         print("wip zone :)")
         return
 
