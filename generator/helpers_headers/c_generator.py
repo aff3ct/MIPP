@@ -549,8 +549,11 @@ def _combine_current_ifdefs_masked(funcs, f, dt_key, mask_kind, ifd_prev):
         return ifd_prev
 
     ifd_cur = build_ifdef_masked(funcs, f, dt_key, mask_kind, len(bucket) - 1)
+    
+    # if f == "orb":
+    #     print("Debug: current ifdef for '" + f + "<" + mask_kind + "><" + dt_key + ">' is: " + str(ifd_cur) + " and previous ifdef is: " + str(ifd_prev))
     if ifd_prev and ifd_cur:
-        return ifd_prev + " && " + ifd_cur
+        return ifd_prev + " && (" + ifd_cur + ")"
     elif ifd_cur:
         return ifd_cur
     return ifd_prev
@@ -674,6 +677,9 @@ def _gen_c_function_one_masked(isa, file, funcs, f, ff, dt):
     post_rendering = ph_ret["converted_ir"]
 
     ifd_prev = _build_previous_masked_emulated_exclusion_ifdef(funcs, f, dt_key, mask_kind, ff)
+    
+    if f == "orb" : 
+        print("Debug: requirements for '" + f + "<" + mask_kind + "><" + dt_key + ">' function: " + str(ph_ret["requirements"]))
 
     _append_implem_status_masked(funcs, f, dt_key, mask_kind, ff, ph_ret["requirements"])
  
