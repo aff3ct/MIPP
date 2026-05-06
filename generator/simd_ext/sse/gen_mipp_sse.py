@@ -41,6 +41,8 @@ def gen_mipp_sse(include_manager):
     gen_c_functions(isa_sse, include_manager, copy_mipp_funcs, implems_sse)
     gen_c_functions(isa_sse, include_manager, copy_mipp_funcs, implems_emu_sse)
     gen_c_generic_functions(isa_sse, include_manager, copy_mipp_funcs, implems_generic_emu)
+    gen_c_functions(isa_sse, include_manager, copy_mipp_funcs, implems_mask_generic_emu)
+
     gen_c_missing_functions(isa_sse, include_manager, copy_mipp_funcs)
     
     include_manager.resolve_all_dependencies(isa_sse["name"], copy_mipp_funcs)

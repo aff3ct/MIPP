@@ -262,10 +262,13 @@ typedef double float64_t;//remove after debug"""
 
         gen_c_functions_rvv(resolved_isa, include_manager, copy_mipp_funcs, implems_emu_rvv, lmul=lmul, reductions_fix=ret)
         
-        #rvv doesn't have any "if" so we can get away with calling gen_c_functions rvv instead of a
+        #rvv doesn't have any "if" in implems rvv so we can get away with calling gen_c_functions rvv instead of a
         #separate gen_c_generic_functions_rvv FOR NOW.
         #change this line if this ever changes.
         gen_c_functions_rvv(resolved_isa, include_manager, copy_mipp_funcs, implems_generic_emu, lmul=lmul)
+        
+        gen_c_functions_rvv(resolved_isa, include_manager, copy_mipp_funcs, implems_mask_generic_emu, lmul=lmul)
+
         gen_c_missing_functions_lmul(resolved_isa, include_manager, copy_mipp_funcs, lmul=lmul)
     
     #now that dependencies are resolved and functions are generated we can generate the headers for the functions with the correct includes

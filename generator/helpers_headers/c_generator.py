@@ -1085,21 +1085,40 @@ def _rvv_mark_lmul_seen(funcs, f, dt_key, lmul):
     else:
         funcs[f]["implem_status"]["lmul"] = {(lmul, dt_key)}
   
+# def _rvv_seen_lmul_masked(funcs, f, dt_key, mask_kind, lmul):
+#     bucket = get_masked_bucket(funcs, f, dt_key, mask_kind)
+#     if bucket is not None and "lmul" in bucket:
+#         if (lmul, dt_key) in bucket["lmul"]:
+#             return True
+#     return False
+
+# def _rvv_mark_lmul_seen_masked(funcs, f, dt_key, mask_kind, lmul):
+#     bucket = get_masked_bucket(funcs, f, dt_key, mask_kind)
+#     if bucket is not None:
+#         #print(bucket)
+#         if "lmul" in bucket:
+#             bucket[-1]["lmul"].add((lmul, dt_key))
+#         else:
+#             bucket[-1]["lmul"] = {(lmul, dt_key)}
+
 def _rvv_seen_lmul_masked(funcs, f, dt_key, mask_kind, lmul):
     bucket = get_masked_bucket(funcs, f, dt_key, mask_kind)
-    if bucket is not None and "lmul" in bucket:
-        if (lmul, dt_key) in bucket["lmul"]:
-            return True
-    return False
+    if not bucket:
+        return False
+
+    last = bucket[-1]
+    return "lmul" in last and (lmul, dt_key) in last["lmul"]
 
 def _rvv_mark_lmul_seen_masked(funcs, f, dt_key, mask_kind, lmul):
     bucket = get_masked_bucket(funcs, f, dt_key, mask_kind)
-    if bucket is not None:
-        #print(bucket)
-        if "lmul" in bucket:
-            bucket[-1]["lmul"].add((lmul, dt_key))
-        else:
-            bucket[-1]["lmul"] = {(lmul, dt_key)}
+    if not bucket:
+        return
+
+    last = bucket[-1]
+    if "lmul" in last:
+        last["lmul"].add((lmul, dt_key))
+    else:
+        last["lmul"] = {(lmul, dt_key)}
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -1118,7 +1137,6 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
         
         
         for ff in implems[f]:
-            # skip masked versions entirely.
             if _is_masked_implem(f, ff):
                 for dt in ff["datatypes"]:
                     print("// ----------------------------------------------------------------------------------------------------------------------------------------------", f, file=file)
@@ -1126,7 +1144,11 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                     dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
                     dt_key = dt_par + "," + dt_ret
                     mask_kind = ff["version"]
-
+                    if f == "add" : 
+                        is_missing = is_missing_masked_func(funcs, f, dt_key, mask_kind)
+                        seenlmul = _rvv_seen_lmul_masked(funcs, f, dt_key, mask_kind, lmul)
+                        strv = "Debug: is_missing_masked_func for '" + f + "<" + mask_kind + "><" + dt_key + ">' : " + str(is_missing)+ "_rvv_seen_lmul_masked for '" + f + "<" + mask_kind + "><" + dt_key + ">' lmul=" + str(lmul) + " : " + str(seenlmul)
+                        print(strv)
                     if (not is_missing_masked_func(funcs, f, dt_key, mask_kind)) and _rvv_seen_lmul_masked(funcs, f, dt_key, mask_kind, lmul):
                         print(
                             "// '"

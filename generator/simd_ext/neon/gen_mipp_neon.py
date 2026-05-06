@@ -6,6 +6,7 @@ from tools import *
 from headers_def import *
 from implem_neon import *
 from implem_emu_neon import *
+from generic_emu import *
 from c_generator import *
 from include_gen import IncludeManager
 
@@ -36,6 +37,9 @@ def gen_mipp_neon(include_manager):
     copy_mipp_funcs = copy.deepcopy(mipp_funcs)
     gen_c_functions(isa_neon, include_manager, copy_mipp_funcs, implems_neon)
     gen_c_functions(isa_neon, include_manager, copy_mipp_funcs, implems_emu_neon)
+    
+    gen_c_functions(isa_neon, include_manager, copy_mipp_funcs, implems_mask_generic_emu)
+
     gen_c_missing_functions(isa_neon, include_manager, copy_mipp_funcs)
 
     include_manager.resolve_all_dependencies(isa_neon["name"], copy_mipp_funcs)
