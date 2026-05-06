@@ -80,7 +80,7 @@ implems_generic_emu = {
 		{ "instr_name": "fmadd",  "datatypes" : all_float, "template" : tpl_generic_emu["fmadd"]}],
  
 	"blend" : [
-		{ "instr_name": "blend",  "datatypes" : all_datatypes, "version" : "mask", "template" : tpl_generic_emu["blend"]},
+		{ "instr_name": "blend",  "datatypes" : all_datatypes, "template" : tpl_generic_emu["blend"]},
 	],
 }
 
