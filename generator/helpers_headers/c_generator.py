@@ -788,6 +788,8 @@ def _gen_c_missing_one_masked(isa, file, funcs, f, dt, mask_kind, lmul=0):
  
     fully_missing = is_fully_missing_masked_func(funcs, f, dt_key, mask_kind)
     ifdef_guarded = is_ifdef_masked(funcs, f, dt_key, mask_kind)
+    # if f == "store":
+    #     print("Debug: for '" + f + "<" + mask_kind + "><" + dt_key + ">' function: fully_missing = " + str(fully_missing) + ", ifdef_guarded = " + str(ifdef_guarded))
     #if is fully mising => no guard, emit directly the stub
     #if is ifdef guarded missing => guard with the negation of the ifdef conditions of existing implementations and emit the stub in this guard
     func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
@@ -797,6 +799,16 @@ def _gen_c_missing_one_masked(isa, file, funcs, f, dt, mask_kind, lmul=0):
 
     elif ifdef_guarded:
         ifd = _missing_build_negated_masked_ifdef_for_existing_implems(funcs, f, dt_key, mask_kind)
+        # check that ifd isn't a blank line 
+        # if f == "store" :
+        #     print("Debug: built negated ifdef for '" + f + "<" + mask_kind + "><" + dt_key + ">' function: " + ifd)
+    
+        # use a regex to check if there are actual characters in a-z A-Z 0-9 or _ in ifd, if not consider it as blank
+        if not re.search(r'[a-zA-Z0-9_]', ifd):
+            # if f == "store" :
+            #     print("Debug: negated ifdef for '" + f + "<" + mask_kind + "><" + dt_key + ">' function is blank, emitting stub without guard.")
+            return
+       
         _missing_emit_ifdef_begin_masked(ifd, file)
   
         _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, masked_version=mask_kind, lmul=lmul)

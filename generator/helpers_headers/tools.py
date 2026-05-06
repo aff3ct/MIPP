@@ -1203,6 +1203,9 @@ def is_ifdef_masked(funcs, func_name, dt_key, mask_kind):
 
 def is_fully_missing_masked_func(funcs, func_name, dt_key, mask_kind):
     bucket = get_masked_bucket(funcs, func_name, dt_key, mask_kind)
+    # if func_name == "store":
+    #     print("debug: bucket for func '" + func_name + "' dt_key '" + dt_key + "' mask_kind '" + mask_kind + "' is: " + str(bucket))
+
     if bucket is None:
         return True
     return len(bucket) == 0
