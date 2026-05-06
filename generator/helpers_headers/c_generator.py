@@ -240,9 +240,13 @@ def _combine_current_ifdefs(funcs, f, dt_key, ifd_prev):
     """
     straightforward.
     """
+
     ifd_cur = build_ifdef(funcs, f, dt_key, len(funcs[f]["implem_status"][dt_key]) - 1)
+    if f == "orb" :
+        # print ifd cur & prev
+        print("Debug: print ifdef conditions for '" + f + "<" + dt_key + ">' function: previous ifdef condition is: " + str(ifd_prev) + " and current ifdef condition is: " + str(ifd_cur))
     if ifd_prev and ifd_cur:
-        return ifd_prev + " && " + ifd_cur
+        return ifd_prev + " && (" + ifd_cur + ")"
     elif ifd_cur:
         return ifd_cur
     return ifd_prev
@@ -684,7 +688,6 @@ def _gen_c_function_one_masked(isa, file, funcs, f, ff, dt):
     _append_implem_status_masked(funcs, f, dt_key, mask_kind, ff, ph_ret["requirements"])
  
     ifd = _combine_current_ifdefs_masked(funcs, f, dt_key, mask_kind, ifd_prev)
-    #print debug infos
  
     _emit_ifdef_begin_and_update_emulated_masked(funcs, f, dt_key, mask_kind, ff, ifd, file)
     _emit_function_body(
