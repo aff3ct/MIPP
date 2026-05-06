@@ -45,14 +45,19 @@ tpl_generic_emu = {
 			res = %add<tp>%(res, r2);
 			return res;
 	"""},
- 
+	
+	# This is annoying. Doing it w loads and stores. 
+	# >:(
 	"blend": { "format" :"long", "code" :"""
-           	%r<tp>% res = r0;
-			for(unsigned i = 0; i < %N<tp>%; i++){
-				if(%get_k<tp>%(m0, i))
-					%set<tp>%(res, i, %get<tp>%(r1, i));
-			}
-   			return res;
+           %v<tp>% ptr1[%N<tp>%];
+           %v<tp>% ptr2[%N<tp>%];
+           %store<tp>%(ptr1, r0);
+           %store<tp>%(ptr2, rsrc);
+           for(unsigned i = 0; i < %N<tp>%; i++){
+               if(%get_k<tp>%(m0, i))
+				   ptr1[i] = ptr2[i];
+		   }
+		   return %load<tp>%(ptr1);
     """},
 }
 

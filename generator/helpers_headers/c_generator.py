@@ -803,7 +803,7 @@ def _gen_c_missing_one_masked(isa, file, funcs, f, dt, mask_kind, lmul=0):
         # if f == "store" :
         #     print("Debug: built negated ifdef for '" + f + "<" + mask_kind + "><" + dt_key + ">' function: " + ifd)
     
-        # use a regex to check if there are actual characters in a-z A-Z 0-9 or _ in ifd, if not consider it as blank
+        # use a regex to check if there are actual characters in a-z A-Z 0-9 or _ in ifd, if not consider it as blankmipp_sse_set_uint16
         if not re.search(r'[a-zA-Z0-9_]', ifd):
             # if f == "store" :
             #     print("Debug: negated ifdef for '" + f + "<" + mask_kind + "><" + dt_key + ">' function is blank, emitting stub without guard.")
