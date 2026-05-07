@@ -1117,13 +1117,12 @@ def gen_test_files_all_funcs(kind="c", lmul=0, mkind="", N=10):
     if kind not in {"c", "cpp", "obj", "all"}:
         raise ValueError(f"Invalid kind: {kind!r}")
     
-    if lmul != 0 or mkind != "" :
+    # if lmul != 0 or mkind != "" :
     # if mkind != "" :
-    # if lmul != 0 and mkind != "" :
+    if lmul != 0 and mkind != "" :
+    # if lmul != 0 :
         print("wip zone :)")
         return
-
-
 
     regen_c = kind in {"c", "all"}
     regen_cpp = kind in {"cpp", "all"}
