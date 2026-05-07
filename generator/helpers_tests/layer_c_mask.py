@@ -301,7 +301,7 @@ shape_templates = {
     SHAPE_RET_REG_1ARG_PTR: TemplateParts(  # load, loadu
         func_decl=FUNC_DECL,
         decl=DECL_1ARG,
-        init=INIT_1ARG,
+        init=INIT_PRED+INIT_1ARG,
         load=LOAD_MASK_AND_RSRC_FROM_REG1,
         #delegate "load" to operation
         operation="""{{reg_type}} r1 = mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args}} inputs1); 

@@ -67,13 +67,14 @@ def gen_c_structures(isa, file, is_scalar=False):
         template = """typedef struct { {{ isa_datatype.reg }} r; } rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
     j2_template = Template(template, undefined=StrictUndefined)
 
-    template_alt = """typedef struct {
+    template_alt = """
 #if {{ isa_datatype.if }}
-    {{ isa_datatype.reg }} r;
+    typedef struct { {{ isa_datatype.reg }} r; } rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;
 #else
-    int r; // this is a hack to compile when the datatype is not suported by the SIMD extension
+    #include "../scalar/scalar_common.h"
+    typedef  rvd_scalar_{{ datatype.category }}{{ datatype.n_bits }}_t rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;
 #endif // {{ isa_datatype.if }}
-} rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
+"""
     j2_template_alt = Template(template_alt, undefined=StrictUndefined)
 
     for dt in isa["datatypes"]:
@@ -781,6 +782,57 @@ def _gen_c_missing_one_dt(isa, file, funcs, f, dt, lmul=0):
         func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
         
         _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, lmul=lmul)
+
+        _missing_emit_ifdef_end(ifd, file)
+
+def _fallback_emit_func(file, funcs, f, dt_par, dt_ret, isa, func_name, masked_version=None, lmul=0):
+    """
+    fallback will rely on the scalar implementation. We force the scalar implementation 
+    to contain everything in the mipp specification. 
+    The logic of the fallback fn is
+    -> if type is always defined at the isa level
+    
+        -> if RVD : 
+            -> declare scalar reg(s)
+            -> store args in the scalar reg with STORE 
+            -> call the scalar implementation with the scalar reg(s) as argument(s)
+            -> if result == rvd
+                -> load the result with LOAD
+                -> return the result
+            -> elif result == rvm
+                -> return SET_K of the result
+            -> else :
+                -> return the value or void
+        -> if RVM
+            -> declare scalar reg(s)
+            -> convert isa rvm to rvd with TOREG
+            -> store converted registers in the scalar rvms with scalar SET_K (works)
+            -> call the scalar implementation with the scalar reg(s) as argument(s)
+            -> if result == rvd
+                -> load the result with LOAD
+                -> return the result
+            -> elif result == rvm
+                -> return SET_K of the result
+            -> else :
+                -> return the value or void
+    -> else 
+        actually idk...
+    """
+    
+    is_def_type = "if" not in isa["datatypes"][dt_par]
+    
+
+def _gen_c_fallback_one_dt(isa, file, funcs, f, dt, lmul=0):
+    dt_par, dt_ret = _missing_compute_dt_par_dt_ret(dt)
+    dt_key = dt_par + "," + dt_ret
+
+    if is_missing_func(funcs, f, dt_key):
+        ifd = _missing_build_negated_ifdef_for_existing_implems(funcs, f, dt_key)
+        _missing_emit_ifdef_begin(ifd, file)
+
+        func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
+
+        _fallback_emit_func(file, funcs, f, dt_par, dt_ret, isa, func_name, lmul=lmul)
 
         _missing_emit_ifdef_end(ifd, file)
   
