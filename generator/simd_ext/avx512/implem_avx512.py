@@ -274,6 +274,12 @@ tpl_implem_avx512 = {
     tmp0 = %blend<c:int|b:tp>%(tmp0, tmp1, mtmp);
     return %cast<c:int|b:tp,tp>%(tmp0);"""
     },
+    "set1_emu": {"format": "long", "code":
+"""// long format
+    %r<c:int|b:tp>% tmp0;
+    tmp0 = %set1<c:int|b:tp>%( (%v<c:int|b:tp>%)v0);
+    return %cast<c:int|b:tp,tp>%(tmp0);"""
+    },
 }
 
 implems_avx512 = {
@@ -302,7 +308,8 @@ implems_avx512 = {
         { "instr_name": "cvtsd_f64",  "datatypes": [int64, uint64],              "template": tpl_implem_avx512["getfirst-hack64"],                                                                                              },
         { "instr_name": "cvtss_f32",  "datatypes": [int32, uint32],              "template": tpl_implem_avx512["getfirst-hack32"],                                                                                              } ], # getfirst
     "set1": [
-        { "instr_name": "set1",       "datatypes": all_float + all_int,          "template": tpl_implem_avx512["set1"],                                                                                                         } ], # set1
+        { "instr_name": "set1",       "datatypes": all_float + all_int,          "template": tpl_implem_avx512["set1"],                                                                                                         }, 
+        { "instr_name": "set1",       "datatypes": all_uint,                     "template": tpl_implem_avx512["set1_emu"]                                                                                                      }], # set1
     "set0": [
         { "instr_name": "setzero",    "datatypes": all_datatypes,                "template": tpl_implem_avx512["set0"],                                                                                                         } ], # set0
     "set0_k": [
