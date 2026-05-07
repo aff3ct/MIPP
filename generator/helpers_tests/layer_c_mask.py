@@ -186,8 +186,8 @@ LOAD_MASK_AND_RSRC_FROM_INPUTS = """\t{{msk_type}} mpred = mipp_set_k_{{dt_ext}}
 LOAD_MASK_AND_RSRC_FROM_REG1 = """\t{{msk_type}} mpred = mipp_set_k_{{dt_ext}}{{lmul_suffix}}(inpred);
 \t{{msk_type_scalar}} smpred = mipp_scalar_set_k_{{dt_ext}}{{lmul_suffix}}(inpred);
 {% if mkind == "masks" %}
-\t{{reg_type}} rsrc = r1;
-\t{{reg_type_scalar}} srsrc = s1;
+\t{{reg_type}} rsrc = mipp_load_{{dt_ext}}{{lmul_suffix}}(inputs1);
+\t{{reg_type_scalar}} srsrc = mipp_scalar_load_{{dt_ext}}{{lmul_suffix}}(inputs1);
 {% endif %}
 """
 
@@ -256,8 +256,8 @@ OP_3ARGS_REG = """\t{{reg_type}} r4 = mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmu
 AS_REG_BINOP = """\t\tREQUIRE(mipp_get_{{dt_ext}}{{lmul_suffix}}(r3, i) == mipp_scalar_get_{{dt_ext}}{{lmul_suffix}}(s3, i));"""
 AS_CMP_2REG = AS_REG_BINOP
 
-AS_LOAD = """\t\tREQUIRE(mipp_get_{{dt_ext}}_{{lmul_suffix}}(r1, i) == mipp_scalar_get_{{dt_ext}}_{{lmul_suffix}}(s1,i));"""
-AS_STORE = """\t\tREQUIRE(inputs2[i] == mipp_scalar_get_{{dt_ext}}_{{lmul_suffix}}(s1,i));"""
+AS_LOAD = """\t\tREQUIRE(mipp_get_{{dt_ext}}{{lmul_suffix}}(r1, i) == mipp_scalar_get_{{dt_ext}}{{lmul_suffix}}(s1,i));"""
+AS_STORE = """\t\tREQUIRE(inputs2[i] == mipp_scalar_get_{{dt_ext}}{{lmul_suffix}}(s1,i));"""
 
 
 AS_3ARGS = """\t\tREQUIRE(mipp_get_{{dt_ext}}{{lmul_suffix}}(r4, i) == mipp_scalar_get_{{dt_ext}}{{lmul_suffix}}(s4, i));"""
@@ -280,7 +280,7 @@ else REQUIRE(std::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(mipp_get_{{dt_ext}}
 # Shapes
 # --------------------------------------------
 shape_templates = {
-    SHAPE_RET_REG_2ARGS_REG: TemplateParts(
+    SHAPE_RET_REG_2ARGS_REG: TemplateParts( # add, mul, sub, div, min, max, andb, orb, xorb
         func_decl=FUNC_DECL,
         decl=DECL_2ARGS,
         init=INIT_PRED+INIT_2ARGS,
@@ -289,7 +289,7 @@ shape_templates = {
         loop_body="",
         loop_assert=AS_REG_BINOP,
     ),
-    # SHAPE_RET_MSK_2ARGS_REG: TemplateParts(
+    # SHAPE_RET_MSK_2ARGS_REG: TemplateParts( # cmpeq, cmpneq, cmpgt, cmpge, cmplt, cmple
     #     func_decl=FUNC_DECL,
     #     decl=DECL_2ARGS,
     #     init=INIT_2ARGS,
@@ -298,15 +298,17 @@ shape_templates = {
     #     loop_body="",
     #     loop_assert=AS_CMP_2REG,
     # ),
-    # SHAPE_RET_REG_1ARG_PTR: TemplateParts(
-    #     func_decl=FUNC_DECL,
-    #     decl=DECL_1ARG,
-    #     init=INIT_1ARG,
-    #     load=LOAD_1ARG_REG + "\n" + LOAD_MASK_AND_RSRC_FROM_REG1,
-    #     operation="",
-    #     loop_body="",
-    #     loop_assert=AS_LOAD,
-    # ),
+    SHAPE_RET_REG_1ARG_PTR: TemplateParts(  # load, loadu
+        func_decl=FUNC_DECL,
+        decl=DECL_1ARG,
+        init=INIT_1ARG,
+        load=LOAD_MASK_AND_RSRC_FROM_REG1,
+        #delegate "load" to operation
+        operation="""{{reg_type}} r1 = mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args}} inputs1); 
+\t{{reg_type_scalar}} s1 = mipp_scalar_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args_scalar}} inputs1);""",
+        loop_body="",
+        loop_assert=AS_LOAD,
+    ),
     # SHAPE_RET_VOID_2ARGS_PTR_REG: TemplateParts(
     #     func_decl=FUNC_DECL,
     #     decl=DECL_2ARGS_FOR_STORE,
@@ -512,8 +514,8 @@ shape_templates = {
 }
 
 deny = {
-    "andb", 
-    "xorb",
+    "andb", # circular dependency w blend for generic emu.
+    "xorb", # I think avx2 causes issues w these two bc of how blend is implemented ?
     "andnb",
 }
 

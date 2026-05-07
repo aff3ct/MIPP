@@ -1191,7 +1191,7 @@ def gen_test_files_all_funcs(kind="c", lmul=0, mkind="", N=10):
         
         
         mask_support = mipp_funcs[func]["mask_support"]
-        if mkind != "" and mask_support.is_none():
+        if mkind != "" and not mask_support.is_supported(mkind) :
             print(f"Skipping {func} for {mkind} because it doesn't support it")
             continue
         
