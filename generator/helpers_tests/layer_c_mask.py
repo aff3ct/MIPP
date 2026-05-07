@@ -205,8 +205,16 @@ OP_REG_BINOP = """\t{{reg_type}} r3 = mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmu
 OP_CMP_2REG = """\t{{msk_type}} m3 = mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args}} r1, r2); {{reg_type}} r3 = mipp_toreg_{{dt_ext}}(m3);
 \t{{msk_type_scalar}} sm3 = mipp_scalar_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args_scalar}} s1, s2); {{reg_type_scalar}} s3 = mipp_toreg_{{dt_ext}}(sm3);"""
 
-OP_STORE = """\tmipp_store_{{dt_ext}}(inputs2, r1);
-\t//mipp_scalar_store_{{dt_ext}}(inputs2, s1);"""
+OP_STORE = """
+\t{{dt_ext}}_t output[{{size}}*{{lmul_coeff}}];
+\t{{dt_ext}}_t output_scalar[{{size}}*{{lmul_coeff}}];
+\tfor(size_t i = 0; i < {{size}}*{{lmul_coeff}}; i++){
+    //dummy init to compare 
+    output[i] = i;
+    output_scalar[i] = i;
+}
+\tmipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args}} output, r1);
+\tmipp_scalar_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args_scalar}} output_scalar, s1);"""
 
 
 OP_TOREG = """\t{{reg_type}} r3 = mipp_toreg_{{dt_ext}}(m1);\n\t{{reg_type_scalar}} s3 = mipp_scalar_toreg_{{dt_ext}}(ms1);"""
@@ -257,8 +265,7 @@ AS_REG_BINOP = """\t\tREQUIRE(mipp_get_{{dt_ext}}{{lmul_suffix}}(r3, i) == mipp_
 AS_CMP_2REG = AS_REG_BINOP
 
 AS_LOAD = """\t\tREQUIRE(mipp_get_{{dt_ext}}{{lmul_suffix}}(r1, i) == mipp_scalar_get_{{dt_ext}}{{lmul_suffix}}(s1,i));"""
-AS_STORE = """\t\tREQUIRE(inputs2[i] == mipp_scalar_get_{{dt_ext}}{{lmul_suffix}}(s1,i));"""
-
+AS_STORE = """\t\tREQUIRE(output[i] == output_scalar[i]);"""
 
 AS_3ARGS = """\t\tREQUIRE(mipp_get_{{dt_ext}}{{lmul_suffix}}(r4, i) == mipp_scalar_get_{{dt_ext}}{{lmul_suffix}}(s4, i));"""
 
@@ -309,34 +316,34 @@ shape_templates = {
         loop_body="",
         loop_assert=AS_LOAD,
     ),
-    # SHAPE_RET_VOID_2ARGS_PTR_REG: TemplateParts(
-    #     func_decl=FUNC_DECL,
-    #     decl=DECL_2ARGS_FOR_STORE,
-    #     init=INIT_1ARG,
-    #     load=LOAD_1ARG_REG + "\n" + LOAD_MASK_AND_RSRC_FROM_REG1,
-    #     operation=OP_STORE,
-    #     loop_body="" #LB_SET_OP,
-    #     loop_assert=AS_STORE,
-    # ),
-    # SHAPE_RET_REG_1ARG_NELE: TemplateParts(
+    SHAPE_RET_VOID_2ARGS_PTR_REG: TemplateParts( # store, storeu
+        func_decl=FUNC_DECL,
+        decl=DECL_1ARG,
+        init=INIT_PRED + INIT_1ARG,
+        load=LOAD_1ARG_REG + "\n" + LOAD_MASK_AND_RSRC_FROM_REG1,
+        operation=OP_STORE,
+        loop_body="",
+        loop_assert=AS_STORE,
+    ),
+    # SHAPE_RET_REG_1ARG_NELE: TemplateParts( # set
     #     func_decl=FUNC_DECL,
     #     decl=DECL_1ARG,
     #     init=INIT_1ARG,
     #     load="""\t{{reg_type}} r1 = mipp_{{func}}_{{dt_ext}}{{lmul_suffix}}(inputs1);\n""" + LOAD_MASK_AND_RSRC_FROM_REG1,
     #     operation=OP_REG_NOOP,
-    #     loop_body="" #LB_SET_OP,
+    #     loop_body="",
     #     loop_assert=AS_REG_BINOP,
     # ),
-    # SHAPE_RET_MSK_1ARG_NELE: TemplateParts(
+    # SHAPE_RET_MSK_1ARG_NELE: TemplateParts( # set_k
     #     func_decl=FUNC_DECL,
     #     decl=DECL_1ARG_INT32,
     #     init=INIT_1ARG,
     #     load=LOAD_1ARG_MASK + "\n" + LOAD_MASK_AND_RSRC_FROM_INPUTS,
     #     operation=OP_TOREG,
-    #     loop_body="" #LB_SET_OP,
+    #     loop_body="",
     #     loop_assert=AS_CMP_2REG,
     # ),
-    # SHAPE_RET_REG_1ARG_VAL: TemplateParts(
+    # SHAPE_RET_REG_1ARG_VAL: TemplateParts( # set1
     #     func_decl=FUNC_DECL,
     #     decl=DECL_1ARG_SCALAR,
     #     init="",
@@ -345,7 +352,7 @@ shape_templates = {
     #     loop_body="" #LB_SET_SCALAR_OP,
     #     loop_assert=AS_REG_BINOP,
     # ),
-    # SHAPE_RET_MSK_1ARG_I32: TemplateParts(
+    # SHAPE_RET_MSK_1ARG_I32: TemplateParts( # set1_k
     #     func_decl=FUNC_DECL,
     #     decl=DECL_1ARG_SCALAR_INT32,
     #     init="",
@@ -517,6 +524,7 @@ deny = {
     "andb", # circular dependency w blend for generic emu.
     "xorb", # I think avx2 causes issues w these two bc of how blend is implemented ?
     "andnb",
+    "storeu",
 }
 
 LAYER_OVERRIDES = {

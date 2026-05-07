@@ -98,8 +98,6 @@ def get_defined_dttypes(func, implem, mkind=""):
     returns a list of datatypes for which the func is defined in the implem
     """
     func_dt = implem[func]
-    if mkind != "" :
-        print("Debug " + func, func_dt)
     datatypes = []
     for dt in func_dt:
         datatypes.append(dt["datatypes"])
@@ -612,9 +610,6 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False, lm
         
         split = msk_type.split("_", 1)
         msk_type_scalar = split[0] + "_scalar_" + split[1]
-        
-        # if mkind == "masks" : 
-        #     print("Debug : mkind is masks, mask_args is", get_mask_args(mkind), "and mask_args_scalar is", get_scalar_mask_args(mkind))
 
         res = func_template.render(
             func=func,
