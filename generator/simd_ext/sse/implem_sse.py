@@ -254,7 +254,7 @@ implems_sse = {
     "andb": [
         { "instr_name": "and",     "datatypes": [float32],               "template": tpl_implem_sse["logi_2args"]                                                                   },
         { "instr_name": "and",     "datatypes": [float64],               "template": tpl_implem_sse["logi_2args"],         "if": "defined(__SSE2__)"                                },
-        { "instr_name": "and",     "datatypes": [int16,int32,int64],     "template": tpl_implem_sse["logi_2args_si128"],   "if": "defined(__SSE2__)"                                } ], # andb
+        { "instr_name": "and",     "datatypes": all_int_uint,            "template": tpl_implem_sse["logi_2args_si128"],   "if": "defined(__SSE2__)"                                } ], # andb
     "andb_k": [
         { "instr_name": "and",     "datatypes": [float32],               "template": tpl_implem_sse["logi_m_2args"]                                                                 },
         { "instr_name": "and",     "datatypes": [float64],               "template": tpl_implem_sse["logi_m_2args"],       "if": "defined(__SSE2__)"                                },
