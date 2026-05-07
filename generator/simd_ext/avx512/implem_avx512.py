@@ -255,6 +255,15 @@ tpl_implem_avx512 = {
 	return rs6;""" },
     
     "arith_2args_msk": { "format": "short", "code": "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, m0.m, r0.r, r1.r);" },
+    
+    "andb_emu": {"format": "long", "code":
+"""// long format
+    %r<c:int|b:tp>% tmp0, tmp1;
+    tmp0 = %cast<tp,c:int|b:tp>%(r0);
+    tmp1 = %cast<tp,c:int|b:tp>%(r1);
+    tmp0 = %andb<c:int|b:tp>%(tmp0, tmp1);
+    return %cast<c:int|b:tp,tp>%(tmp0);"""
+    }
 }
 
 implems_avx512 = {
@@ -334,7 +343,8 @@ implems_avx512 = {
         { "instr_name": "and",        "datatypes": [int64, uint64],              "template": tpl_implem_avx512["logi_2args"],                                                                                                   },
         { "instr_name": "and",        "datatypes": [int32, uint32],              "template": tpl_implem_avx512["logi_2args"],                                                                                                   },
         { "instr_name": "and",        "datatypes": [int16, uint16],              "template": tpl_implem_avx512["logi_2args"],     "if": "defined(__AVX512BW__)"                                                                 },
-        { "instr_name": "and",        "datatypes": [int8, uint8],                "template": tpl_implem_avx512["logi_2args"],     "if": "defined(__AVX512BW__)"                                                                 } ], # andb
+        { "instr_name": "and",        "datatypes": [int8, uint8],                "template": tpl_implem_avx512["logi_2args"],     "if": "defined(__AVX512BW__)"                                                                 }, 
+        { "instr_name": "and",        "datatypes": all_float,                    "template": tpl_implem_avx512["andb_emu"],       "if": "!defined(__AVX512DQ__)"                                                                },], # andb
     "andb_k": [
         { "instr_name": "kand",       "datatypes": all_64bit,                    "template": tpl_implem_avx512["bitwise_2args"],  "if": "defined(__AVX512DQ__)"                                                                 },
         { "instr_name": "kand",       "datatypes": all_32bit,                    "template": tpl_implem_avx512["bitwise_2args"],                                                                                                },
