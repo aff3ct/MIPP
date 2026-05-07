@@ -36,6 +36,7 @@ tpl_implem_neon = {
     "logi_m_2args_rev": { "format": "short", "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext_msk }}(m1.m, m0.m);" },
     "compare":          { "format": "short", "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r);" },
     "logi_2args_rev":   { "format": "short", "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r1.r, r0.r);" },
+    "blend":            { "format": "short", "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(m0.m, r0.r, r1.r);" },
     "arith_2args_recp": { "format": "long", "code":
 """// long format
 	%r<tp>% recp;
@@ -56,6 +57,18 @@ tpl_implem_neon = {
 	%r<c:uint>% resi;
 	resi.r = {{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(r1i.r, r0i.r);
 	return %cast<c:uint,tp>%(resi);""" },
+    
+    "blend_f32-emu": { "format": "long", "code":
+"""// long format
+    %r<c:uint>% m0i = %cast_k<tp,c:uint>%(m0);
+    %r<c:uint>% r0i = %cast<tp,c:uint>%(r0);
+    %r<c:uint>% r1i = %cast<tp,c:uint>%(r1);
+    %r<c:uint>% resi;
+    resi = %blend<c:uint>%(r0i, r1i, m0i);
+    return %cast<c:uint,tp>%(resi);""" },
+
+
+
 }
 
 implems_neon = {
@@ -134,4 +147,7 @@ implems_neon = {
     "cmpge": [
         { "instr_name": "cgeq",         "datatypes": all_64bit,                          "template": tpl_implem_neon["compare"],            "if": "defined(__aarch64__)"  },
         { "instr_name": "cgeq",         "datatypes": all_32bit + all_16bit + all_8bit,   "template": tpl_implem_neon["compare"],                                          } ], # cmpge
+    "blend": [
+        { "instr_name": "bslq",         "datatypes": all_int_uint+ [float32],            "template": tpl_implem_neon["blend"],                                            }, 
+        { "instr_name": "bslq",         "datatypes": [float64],                          "template": tpl_implem_neon["blend"],              "if": "defined(__aarch64__)"  },], # blend
 }
