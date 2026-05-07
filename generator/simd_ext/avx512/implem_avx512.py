@@ -263,7 +263,17 @@ tpl_implem_avx512 = {
     tmp1 = %cast<tp,c:int|b:tp>%(r1);
     tmp0 = %andb<c:int|b:tp>%(tmp0, tmp1);
     return %cast<c:int|b:tp,tp>%(tmp0);"""
-    }
+    },
+
+    "blend_emu": {"format": "long", "code":
+"""// long format
+    %r<c:int|b:tp>% tmp0, tmp1;
+    tmp0 = %cast<tp,c:int|b:tp>%(r0);
+    tmp1 = %cast<tp,c:int|b:tp>%(r1);
+    %m<c:int|b:tp>% mtmp = %cast_k<tp,c:int|b:tp>%(m0);
+    tmp0 = %blend<c:int|b:tp>%(tmp0, tmp1, mtmp);
+    return %cast<c:int|b:tp,tp>%(tmp0);"""
+    },
 }
 
 implems_avx512 = {
@@ -422,7 +432,8 @@ implems_avx512 = {
         { "instr_name": "roundscale", "datatypes": all_float,                    "template": tpl_implem_avx512["round"],          "if": "defined(__AVX512F__)"                                                                  } ], # round
     "blend": [
         { "instr_name": "blend",      "datatypes": all_float + [int64, int32],   "template": tpl_implem_avx512["blend"],          "if": "(defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__))" },
-        { "instr_name": "blend",      "datatypes": [int8, int16],                "template": tpl_implem_avx512["blend"],          "if": "defined(__AVX512BW__)"                                                                 } ], # blend
+        { "instr_name": "blend",      "datatypes": [int8, int16],                "template": tpl_implem_avx512["blend"],          "if": "defined(__AVX512BW__)"                                                                 },
+        { "instr_name": "blend",      "datatypes": all_uint,                     "template": tpl_implem_avx512["blend_emu"]                                                                                                     },], # blend
     "hadd": [
         { "instr_name": "add",        "datatypes": [float64, int64],             "template": tpl_implem_avx512["reduce_64"],                                                                                                    },
         { "instr_name": "add",        "datatypes": [float32, int32],             "template": tpl_implem_avx512["reduce_32"],                                                                                                    },
