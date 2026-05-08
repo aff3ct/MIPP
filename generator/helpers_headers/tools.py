@@ -111,6 +111,18 @@ operators_order = {
     "cmpge"  : {"operation" : ">=", "option" : ">="},
 }
 
+def _lmul_to_str(lmul):
+    if lmul == 0 :
+        return ""
+    elif lmul >= 1 :
+        return "_m" + str(int(lmul))
+    elif lmul < 1 and lmul > 0 :
+        return "_d" + str(int(1/lmul))
+    elif lmul < 0 :
+        return "_d" + str(int(-1*lmul))
+    else:
+        return ""
+
 def build_reg(datatype, isa, lmul=0, isa_name=True, cpp=False):
     if cpp:
         str_reg = "rvd"
@@ -207,6 +219,7 @@ def build_N(datatype, isa, lmul=0, isa_name=True):
     """	str_N = "MIPP_"
     if isa_name:
         str_N += isa["name"].upper() + "_"""
+    
     if isa_name:
         isa_name_upper = isa["name"].upper()+"_"
     else:
@@ -214,7 +227,7 @@ def build_N(datatype, isa, lmul=0, isa_name=True):
     
     str_N = "MIPP_"+isa_name_upper+"N_" + datatype["category"].upper() + str(datatype["n_bits"]).upper()
     if lmul:
-        str_N += "_M" + str(int(lmul))
+        str_N += _lmul_to_str(lmul).upper()
     return str_N
 
 def build_type(type, datatype, isa,lmul=0, isa_name=True, cpp=False):
@@ -297,6 +310,7 @@ def build_proto_set0(dt_ret, lmul, func_name, masked_version=False):
 
 # Build prototype of set
 def build_proto_set(dt_ret, lmul, func_name, masked_version=False):
+    lmul_str = _lmul_to_str(lmul)
     dt_par = None
     template = f"<{dt_ret}_t, {lmul}>"
     if func_name == "set":
@@ -321,22 +335,23 @@ def build_proto_set(dt_ret, lmul, func_name, masked_version=False):
             print("error: masked_version should be mask, maskz or masks")
             exit(-1)
 
+
         if masked_version in ("mask", "maskz"):
             return (
                 f"inline {reg_type}<{dt_ret}_t, {lmul}> {func_name}{template}("
                 f"const rvm<{dt_par},{lmul}> m0, "
-                f"const {dt_par} vals[MIPP_N_{dt_ret.upper()}]"
+                f"const {dt_par} vals[N<{dt_ret}_t, {lmul}>()]"
             )
         elif masked_version == "masks":
             return (
                 f"inline {reg_type}<{dt_ret}_t, {lmul}> {func_name}{template}("
                 f"const rvm<{dt_par},{lmul}> m0, "
                 f"const rvd<{dt_par},{lmul}> rsrc, "
-                f"const {dt_par} vals[MIPP_N_{dt_ret.upper()}]"
+                f"const {dt_par} vals[N<{dt_ret}_t, {lmul}>()]"
             )
 
     # unmasked (unchanged)
-    return f"template <>\ninline {reg_type}<{dt_ret}_t, {lmul}> {func_name}{template}(const {dt_par} vals[MIPP_N_{dt_ret.upper()}]"
+    return f"template <>\ninline {reg_type}<{dt_ret}_t, {lmul}> {func_name}{template}(const {dt_par} vals[N<{dt_ret}_t, {lmul}>()]"
 
 
 def build_proto_set1(dt_ret, lmul, func_name, masked_version=False):
@@ -498,7 +513,7 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
             p += " p" + str(cnt_ptr)
             cnt_ptr = cnt_ptr +1
         elif arg["type"] == "Nele":
-            p += " vals["+build_N(datatypes[dt_par],isa,{},isa_name)+"]"
+            p += " vals["+build_N(datatypes[dt_par],isa,lmul,isa_name)+"]"
         elif arg["type"] == "vindex":
             p += " vi"
         is_first = False

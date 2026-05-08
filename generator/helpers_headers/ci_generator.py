@@ -277,6 +277,11 @@ def gen_ci_defines(isa_list, file):
             tmp = tmp.replace("{ lmul }", str(lmul))
             template += tmp
             
+        for ldiv in all_ldiv:
+            tmp = "\n#define MIPP_N_{{type_category_upper}}{{n_bits}}_D{ ldiv } MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{n_bits}} / { ldiv }"
+            tmp = tmp.replace("{ ldiv }", str(ldiv))
+            template += tmp
+            
         for dt in isa["datatypes"]:
             j2_template = Template(template, undefined=StrictUndefined)
             
