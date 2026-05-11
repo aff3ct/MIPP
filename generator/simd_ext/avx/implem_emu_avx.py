@@ -95,15 +95,15 @@ tpl_implem_emu_avx = {
     # use intrinsics for or and andnot 
     "blend-2": { "format": "long", "code":
 """// long format
-	%r<c:int|b:tp>% rmi = %cast<tp,c:int|b:tp>%(%toreg<tp>%(m0));
-	%r<c:int|b:tp>% r0i = %cast<tp,c:int|b:tp>%(r0);
-	%r<c:int|b:tp>% r1i = %cast<tp,c:int|b:tp>%(r1);
+	%r<c:float|b:32>% rmi = %cast<tp,c:float|b:32>%(%toreg<tp>%(m0));
+	%r<c:float|b:32>% r0i = %cast<tp,c:float|b:32>%(r0);
+	%r<c:float|b:32>% r1i = %cast<tp,c:float|b:32>%(r1);
 
-	%r<c:int|b:tp>% resi;
-    resi.r =  _mm256_or_si256(
-        _mm256_and_si256(r1i.r, rmi.r),
-        _mm256_andnot_si256(rmi.r, r0i.r));
-	%r<tr>% res = %cast<c:int|b:tr,tr>%(resi);
+	%r<c:float|b:32>% resi;
+    resi.r =  _mm256_or_ps(
+        _mm256_and_ps(r1i.r, rmi.r),
+        _mm256_andnot_ps(rmi.r, r0i.r));
+	%r<tr>% res = %cast<c:float|b:32,tr>%(resi);
 	return res;""" },
     "fmadd": { "format": "long", "code":
 """// long format
