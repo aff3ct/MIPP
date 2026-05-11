@@ -53,7 +53,7 @@ DECL_PRED_ARG = """int32_t inpred[{{size}}*{{lmul_coeff}}];\n"""
 DECL_0ARGS = DECL_GET_CATCH_SEED + DECL_PRED_ARG
 DECL_1ARG = DECL_GET_CATCH_SEED + DECL_PRED_ARG + """ {{dt_ext}}_t inputs1[{{size}}*{{lmul_coeff}}];"""
 DECL_1ARG_INT32 = DECL_GET_CATCH_SEED + DECL_PRED_ARG + """ int32_t inputs1[{{size}}*{{lmul_coeff}}];"""
-DECL_1ARG_SCALAR = DECL_GET_CATCH_SEED + DECL_PRED_ARG + """ \t{{dt_ext}}_t input1 = 12;"""
+DECL_1ARG_SCALAR = DECL_GET_CATCH_SEED + DECL_PRED_ARG + """ \t{{dt_ext}}_t input1 = 12;\n\t {{dt_ext}}_t inputs1[{{size}}*{{lmul_coeff}}];"""
 DECL_1ARG_SCALAR_INT32 = DECL_GET_CATCH_SEED + DECL_PRED_ARG + """ \tint32_t input1 = 12;"""
 
 DECL_2ARGS_FOR_STORE = DECL_GET_CATCH_SEED + DECL_PRED_ARG + """\n\t{{dt_ext}}_t inputs1[{{size}}*{{lmul_coeff}}],inputs2[{{size}}*{{lmul_coeff}}];"""
@@ -275,7 +275,7 @@ AS_3ARGS = """\t\tREQUIRE(mipp_get_{{dt_ext}}{{lmul_suffix}}(r4, i) == mipp_scal
 AS_REG_BINOP_FLOAT_WORKAROUND = """{% if is_int %}""" + AS_REG_BINOP + """{% else %}
 \n\t\tREQUIRE(std::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(mipp_get_{{dt_ext}}{{lmul_suffix}}(r3, i))\
 \n\t\t\t==
-\t\t\tstd::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(res) );
+\t\t\tstd::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(mipp_scalar_get_{{dt_ext}}{{lmul_suffix}}(s3, i)) );
 {% endif %}"""
 
 AS_CMP_BINOP_FLOAT_WORKAROUND = """{% if is_int %}""" + AS_CMP_2REG + """{% else %}
@@ -325,60 +325,39 @@ shape_templates = {
         loop_body="",
         loop_assert=AS_STORE,
     ),
-    # SHAPE_RET_REG_1ARG_NELE: TemplateParts( # set
-    #     func_decl=FUNC_DECL,
-    #     decl=DECL_1ARG,
-    #     init=INIT_1ARG,
-    #     load="""\t{{reg_type}} r1 = mipp_{{func}}_{{dt_ext}}{{lmul_suffix}}(inputs1);\n""" + LOAD_MASK_AND_RSRC_FROM_REG1,
-    #     operation=OP_REG_NOOP,
-    #     loop_body="",
-    #     loop_assert=AS_REG_BINOP,
-    # ),
-    # SHAPE_RET_MSK_1ARG_NELE: TemplateParts( # set_k
-    #     func_decl=FUNC_DECL,
-    #     decl=DECL_1ARG_INT32,
-    #     init=INIT_1ARG,
-    #     load=LOAD_1ARG_MASK + "\n" + LOAD_MASK_AND_RSRC_FROM_INPUTS,
-    #     operation=OP_TOREG,
-    #     loop_body="",
-    #     loop_assert=AS_CMP_2REG,
-    # ),
-    # SHAPE_RET_REG_1ARG_VAL: TemplateParts( # set1
-    #     func_decl=FUNC_DECL,
-    #     decl=DECL_1ARG_SCALAR,
-    #     init="",
-    #     load=LOAD_1SCALAR_REG + "\n" + LOAD_MASK_AND_RSRC_FROM_REG1,
-    #     operation=OP_REG_NOOP,
-    #     loop_body="" #LB_SET_SCALAR_OP,
-    #     loop_assert=AS_REG_BINOP,
-    # ),
-    # SHAPE_RET_MSK_1ARG_I32: TemplateParts( # set1_k
-    #     func_decl=FUNC_DECL,
-    #     decl=DECL_1ARG_SCALAR_INT32,
-    #     init="",
-    #     load=LOAD_1SCALAR_MASK + "\n" + LOAD_MASK_AND_RSRC_FROM_INPUTS,
-    #     operation=OP_TOREG,
-    #     loop_body="" #LB_SET_SCALAR_OP,
-    #     loop_assert=AS_CMP_2REG,
-    # ),
-    # SHAPE_RET_REG_0ARG: TemplateParts(
-    #     func_decl=FUNC_DECL,
-    #     decl=DECL_0ARGS,
-    #     init="",
-    #     load=LOAD_SET0_REG + "\n" + LOAD_MASK_AND_RSRC_FROM_INPUTS,
-    #     operation=OP_REG_NOOP,
-    #     loop_body="" #"\t\t{{dt_ext}}_t res = 0;",
-    #     loop_assert=AS_REG_BINOP,
-    # ),
-    # SHAPE_RET_MSK_0ARG: TemplateParts(
-    #     func_decl=FUNC_DECL,
-    #     decl=DECL_0ARGS,
-    #     init="",
-    #     load=LOAD_SET0_MASK + "\n" + LOAD_MASK_AND_RSRC_FROM_INPUTS,
-    #     operation=OP_TOREG,
-    #     loop_body="" #"\t\t{{dt_ext}}_t res = 0;",
-    #     loop_assert=AS_CMP_2REG,
-    # ),
+    SHAPE_RET_REG_1ARG_NELE: TemplateParts( # set
+        func_decl=FUNC_DECL,
+        decl=DECL_1ARG,
+        init=INIT_PRED+INIT_1ARG,
+        load=LOAD_MASK_AND_RSRC_FROM_REG1,
+        operation="""\t{{reg_type}} r1 = mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args}} inputs1);
+\t{{reg_type_scalar}} s1 = mipp_scalar_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args_scalar}} inputs1);\n""" + OP_REG_NOOP,
+        loop_body="",
+        loop_assert=AS_REG_BINOP_FLOAT_WORKAROUND
+    ),
+    SHAPE_RET_REG_1ARG_VAL: TemplateParts( # set1
+        func_decl=FUNC_DECL,
+        decl=DECL_1ARG_SCALAR,
+        init=INIT_PRED+INIT_1ARG,
+        load=LOAD_MASK_AND_RSRC_FROM_REG1,
+        operation="""{{reg_type}} r1 = mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args}} input1);
+\t{{reg_type_scalar}} s1 = mipp_scalar_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args_scalar}} input1);\n""" + OP_REG_NOOP,
+        loop_body="",
+        loop_assert=AS_REG_BINOP_FLOAT_WORKAROUND,
+    ),
+    SHAPE_RET_REG_0ARG: TemplateParts( # set0
+        func_decl=FUNC_DECL,
+        decl=DECL_1ARG, # used for rsrc initialization
+        init=INIT_PRED+INIT_1ARG,
+        load=LOAD_MASK_AND_RSRC_FROM_REG1,
+        # args hardcoded by hand bc templates end them w a comma ....
+        # fine bc there is only 1 type of mask support for set0 ...
+        operation="""\t{{reg_type}} r1 = mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}(mpred,rsrc);
+\t{{reg_type_scalar}} s1 = mipp_scalar_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}(smpred,srsrc);\n""" + OP_REG_NOOP,
+        loop_body="",
+        loop_assert=AS_REG_BINOP_FLOAT_WORKAROUND,
+    ),
+
     # SHAPE_RET_VAL_2ARGS_REG_VAL: TemplateParts(
     #     func_decl=FUNC_DECL,
     #     decl=DECL_1ARG,

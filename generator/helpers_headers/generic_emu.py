@@ -157,6 +157,10 @@ tpl_mask_generic_emu = {
 	"set1" : { "format" :"long", "code" :"""
 		%r<tp>% op = %set1<tp>%(v0);
 	"""},
+    
+	"set0" : { "format" :"long", "code" :"""
+		%r<tp>% op = %set0<tp>%();
+	"""},
 	
 		
 	"ret_msk_2args_reg" : { "format" :"long", "code" :"""
@@ -183,6 +187,7 @@ tpl_mask_generic_emu = {
 	"reductions" : { "format" :"long", "code" :"""
 		exit(-1); //huuuuh idk
 	"""},
+
    
 }
 
@@ -211,11 +216,19 @@ implems_mask_generic_emu = {
 		{ "instr_name": "loadu",  "datatypes" : all_datatypes, "version" : "masks", "template" : tpl_mask_generic_emu["load_msks"]},
 		{ "instr_name": "loadu",  "datatypes" : all_datatypes, "version" : "maskz", "template" : tpl_mask_generic_emu["load_mskz"]},
 	],
- 
-	#set
-	#set1
-	#set0
- 
+
+	"set" : [
+		{ "instr_name": "set",  "datatypes" : all_datatypes, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["set"]["code"] + SNIPPET_END_MSKS}},
+	],
+    
+	"set1" : [
+		{ "instr_name": "set1",  "datatypes" : all_datatypes, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["set1"]["code"] + SNIPPET_END_MSKS}},
+	],
+
+	"set0" : [
+		{ "instr_name": "set0",  "datatypes" : all_datatypes, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["set0"]["code"] + SNIPPET_END_MSKS}},
+	],
+
     
     # ARITHMETIC
 	"add" : [
