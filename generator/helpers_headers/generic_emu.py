@@ -348,17 +348,17 @@ implems_mask_generic_emu = {
 	# solution might be to change blend in avx2 and add an implicit rule which would be 
 	# "blend can't be emulated by calling other mipp functions" or smtg like that.
  
-	# "andb" : [
-	# 	{ "instr_name": "andb",  "datatypes" : all_datatypes, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSK}},
-	# 	{ "instr_name": "andb",  "datatypes" : all_datatypes, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKZ}},
-	# 	{ "instr_name": "andb",  "datatypes" : all_datatypes, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKS}},
-	# ],
+	"andb" : [
+		{ "instr_name": "andb",  "datatypes" : all_datatypes, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSK}},
+		{ "instr_name": "andb",  "datatypes" : all_datatypes, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKZ}},
+		{ "instr_name": "andb",  "datatypes" : all_datatypes, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKS}},
+	],
  
-	# "andnb" : [
-	# 	{ "instr_name": "andnb",  "datatypes" : all_datatypes, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSK}},
-	# 	{ "instr_name": "andnb",  "datatypes" : all_datatypes, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKZ}},
-	# 	{ "instr_name": "andnb",  "datatypes" : all_datatypes, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKS}},
-	# ],
+	"andnb" : [
+		{ "instr_name": "andnb",  "datatypes" : all_datatypes, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSK}},
+		{ "instr_name": "andnb",  "datatypes" : all_datatypes, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKZ}},
+		{ "instr_name": "andnb",  "datatypes" : all_datatypes, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKS}},
+	],
  
 	"orb" : [
 		{ "instr_name": "orb",  "datatypes" : all_datatypes, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSK}},
@@ -366,11 +366,11 @@ implems_mask_generic_emu = {
 		{ "instr_name": "orb",  "datatypes" : all_datatypes, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKS}},
 	],
  
-	# "xorb" : [
-	# 	{ "instr_name": "xorb",  "datatypes" : all_datatypes, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSK}},
-	# 	{ "instr_name": "xorb",  "datatypes" : all_datatypes, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKZ}},
-	# 	{ "instr_name": "xorb",  "datatypes" : all_datatypes, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKS}},
-	# ],
+	"xorb" : [
+		{ "instr_name": "xorb",  "datatypes" : all_datatypes, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSK}},
+		{ "instr_name": "xorb",  "datatypes" : all_datatypes, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKZ}},
+		{ "instr_name": "xorb",  "datatypes" : all_datatypes, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKS}},
+	],
  
 	"msb" : [
 		{ "instr_name": "msb",  "datatypes" : all_datatypes, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_1arg_reg"]["code"] + SNIPPET_END_MSK}},
