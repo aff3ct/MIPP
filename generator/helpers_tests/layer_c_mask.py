@@ -203,7 +203,7 @@ OP_REG_BINOP = """\t{{reg_type}} r3 = mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmu
 \t{{reg_type_scalar}} s3 = mipp_scalar_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args_scalar}} s1, s2);"""
 
 OP_CMP_2REG = """\t{{msk_type}} m3 = mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args}} r1, r2); {{reg_type}} r3 = mipp_toreg_{{dt_ext}}(m3);
-\t{{msk_type_scalar}} sm3 = mipp_scalar_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args_scalar}} s1, s2); {{reg_type_scalar}} s3 = mipp_toreg_{{dt_ext}}(sm3);"""
+\t{{msk_type_scalar}} sm3 = mipp_scalar_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args_scalar}} s1, s2); {{reg_type_scalar}} s3 = mipp_scalar_toreg_{{dt_ext}}(sm3);"""
 
 OP_STORE = """
 \t{{dt_ext}}_t output[{{size}}*{{lmul_coeff}}];
@@ -238,26 +238,6 @@ OP_3ARGS_REG = """\t{{reg_type}} r4 = mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmu
 \t{{reg_type_scalar}} s4 = mipp_scalar_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args_scalar}} s1, s2, s3);"""
 
 
-# OP_CAST = """\t{{reg2_type}} r2 = mipp_cast_{{dt1_ext}}_{{dt2_ext}}(r1);
-# """
-# OP_CAST_MSK = """\t{{msk2_type}} m2 = mipp_cast_k_{{dt1_ext}}_{{dt2_ext}}(m1);"""
-
-# --------------------------------------------
-# OPERATION IN LOOP BODY
-# ------------------------------------------
-
-# LB_SET_OP = """\t\t{{dt_ext}}_t res = inputs1[i];"""
-# LB_SET_SCALAR_OP = """\t\t{{dt_ext}}_t res = input1;"""
-# LB_REG_BINOP = """\t\t{{dt_ext}}_t res = inputs1[i] {{op}} inputs2[i];"""
-# LB_CMP_2REG = """\t\tbool res = inputs1[i] {{op}} inputs2[i];"""
-# LB_CAST_2ARGS = """\t\t{{dt2_ext}}_t res = inputs2[i];"""
-
-# LB_REG_BINOP_FLOAT_WORKAROUND = """{% if is_int %}""" + LB_REG_BINOP + """{% else %}
-#         \t{{dt_ext}}_t res = std::bit_cast<{{dt_ext}}_t,uint{{type_size}}_t>(
-# \t\t\t\tstd::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(inputs1[i])
-# \t\t\t\t{{op}}
-# \t\t\t\tstd::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(inputs2[i]));{% endif %}"""
-
 # --------------------------------------------
 # ASSERTS IN LOOP BODY
 # ------------------------------------------
@@ -269,18 +249,14 @@ AS_STORE = """\t\tREQUIRE(output[i] == output_scalar[i]);"""
 
 AS_3ARGS = """\t\tREQUIRE(mipp_get_{{dt_ext}}{{lmul_suffix}}(r4, i) == mipp_scalar_get_{{dt_ext}}{{lmul_suffix}}(s4, i));"""
 
-# AS_CAST_2ARGS = """\t\tREQUIRE(mipp_get_{{dt2_ext}}(r2, i) == inputs2[i]);"""
-# AS_CAST_2ARGS_MSK = """\t\tif(res) REQUIRE(mipp_get_k_{{dt2_ext}}(m2, i) != 0); else REQUIRE(mipp_get_k_{{dt2_ext}}(m2, i) == 0);"""
-
 AS_REG_BINOP_FLOAT_WORKAROUND = """{% if is_int %}""" + AS_REG_BINOP + """{% else %}
 \n\t\tREQUIRE(std::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(mipp_get_{{dt_ext}}{{lmul_suffix}}(r3, i))\
 \n\t\t\t==
 \t\t\tstd::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(mipp_scalar_get_{{dt_ext}}{{lmul_suffix}}(s3, i)) );
 {% endif %}"""
 
-AS_CMP_BINOP_FLOAT_WORKAROUND = """{% if is_int %}""" + AS_CMP_2REG + """{% else %}
-\n\t\tif(res) REQUIRE(std::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(mipp_get_{{dt_ext}}{{lmul_suffix}}(r3, i))\n\t\t\t!= 0);
-else REQUIRE(std::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(mipp_get_{{dt_ext}}{{lmul_suffix}}(r3, i)) == 0);
+AS_CMP_BINOP_LOGI_FLOAT_WORKAROUND = """{% if is_int %}""" + AS_CMP_2REG + """{% else %} 
+\n\t\tREQUIRE( (!!mipp_get_{{dt_ext}}{{lmul_suffix}}(r3, i)) == (!!mipp_scalar_get_{{dt_ext}}{{lmul_suffix}}(s3,i)) );
 {% endif %}"""
 
 AS_3ARGS_TOL = """\t\t{{dt_ext}}_t res1 = mipp_get_{{dt_ext}}{{lmul_suffix}}(r4, i);
@@ -302,15 +278,16 @@ shape_templates = {
         loop_body="",
         loop_assert=AS_REG_BINOP,
     ),
-    # SHAPE_RET_MSK_2ARGS_REG: TemplateParts( # cmpeq, cmpneq, cmpgt, cmpge, cmplt, cmple
-    #     func_decl=FUNC_DECL,
-    #     decl=DECL_2ARGS,
-    #     init=INIT_2ARGS,
-    #     load=LOAD_2ARGS_REG + "\n" + LOAD_MASK_AND_RSRC_FROM_REG1,
-    #     operation=OP_CMP_2REG,
-    #     loop_body="",
-    #     loop_assert=AS_CMP_2REG,
-    # ),
+    SHAPE_RET_MSK_2ARGS_REG: TemplateParts( # cmpeq, cmpneq, cmpgt, cmpge, cmplt, cmple
+        func_decl=FUNC_DECL,
+        decl=DECL_2ARGS,
+        init=INIT_PRED+INIT_2ARGS,
+        load=LOAD_2ARGS_REG + "\n" + LOAD_MASK_AND_RSRC_FROM_REG1,
+        operation=OP_CMP_2REG,
+        loop_body="",
+        loop_assert=AS_CMP_BINOP_LOGI_FLOAT_WORKAROUND,
+    ),
+
     SHAPE_RET_REG_1ARG_PTR: TemplateParts(  # load, loadu
         func_decl=FUNC_DECL,
         decl=DECL_1ARG,
@@ -377,7 +354,7 @@ shape_templates = {
     SHAPE_RET_REG_3ARGS_REG: TemplateParts( # fmadd, fmsub, fnmadd, fnmsub
         func_decl=FUNC_DECL,
         decl=DECL_3ARGS,
-        init=INIT_3ARGS,
+        init=INIT_PRED+INIT_3ARGS,
         load=LOAD_3ARGS_REG + "\n" + LOAD_MASK_AND_RSRC_FROM_REG1,
         operation=OP_3ARGS_REG,
         loop_body="",
@@ -390,6 +367,10 @@ deny = {
     "xorb", # I think avx2 causes issues w these two bc of how blend is implemented ?
     "andnb",
     "storeu",
+    "hadd", 
+    "hmul",
+    "hmin",
+    "hmax",
 }
 
 LAYER_OVERRIDES = {

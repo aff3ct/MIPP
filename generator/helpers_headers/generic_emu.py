@@ -182,6 +182,13 @@ tpl_mask_generic_emu = {
 				p0[i] = 0;
 		}
   	"""},
+      
+
+	"cmp_2args" : { "format" :"long", "code" :"""
+	%m<tp>% op = %{{func_name}}<tp>%(r0, r1);
+    %m<tp>% res = %andb_k<tp>%(op, m0);
+    return res;
+	"""},
 	
 
 	"reductions" : { "format" :"long", "code" :"""
@@ -296,13 +303,25 @@ implems_mask_generic_emu = {
 	# COMPARISON
 	# only maskz for comparison
     
-    # cmpeq 
-    # cmpneq 
-    # cmpgt 
-    # cmpge 
-    # cmplt 
-    # cmple
- 
+    "cmpeq" : [
+        {"instr_name": "cmpeq",  "datatypes" : all_datatypes, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["cmp_2args"]["code"]}},
+	],
+    "cmpneq" : [
+        {"instr_name": "cmpneq",  "datatypes" : all_datatypes, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["cmp_2args"]["code"]}},
+	],
+    "cmpgt" : [
+		{"instr_name": "cmpgt",  "datatypes" : all_datatypes, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["cmp_2args"]["code"]}},
+	],
+    "cmpge" : [
+		{"instr_name": "cmpge",  "datatypes" : all_datatypes, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["cmp_2args"]["code"]}},
+	],
+	"cmplt" : [
+		{"instr_name": "cmplt",  "datatypes" : all_datatypes, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["cmp_2args"]["code"]}},
+	],
+	"cmple" : [
+		{"instr_name": "cmple",  "datatypes" : all_datatypes, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["cmp_2args"]["code"]}},
+	],
+
 	# MATH 
 	"sqrt" : [
 		{ "instr_name": "sqrt",  "datatypes" : all_float, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_1arg_reg"]["code"] + SNIPPET_END_MSK}},
@@ -367,11 +386,19 @@ implems_mask_generic_emu = {
  
 	
  	# REDUCTIONS
-	# NOT DONE 
-    # hadd 
-    # hmul 
-    # hmin 
-    # hmax
+	# only mask. Policy for reduction is to apply reduction + broadcast and then select elements based on the mask. Only support mask.
+    "hadd" : [
+		{ "instr_name": "hadd",  "datatypes" : all_datatypes, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_1arg_reg"]["code"] + SNIPPET_END_MSK}},
+	],
+    "hmul" : [
+		{ "instr_name": "hmul",  "datatypes" : all_datatypes, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_1arg_reg"]["code"] + SNIPPET_END_MSK}},
+	],
+	"hmin" : [
+		{ "instr_name": "hmin",  "datatypes" : all_datatypes, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_1arg_reg"]["code"] + SNIPPET_END_MSK}},
+	],
+	"hmax" : [
+		{ "instr_name": "hmax",  "datatypes" : all_datatypes, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_1arg_reg"]["code"] + SNIPPET_END_MSK}},
+	],
  
 	# SELECTION
 	"min" : [
