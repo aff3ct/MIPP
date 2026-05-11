@@ -101,8 +101,8 @@ tpl_implem_emu_avx = {
 
 	%r<c:int|b:tp>% resi;
     resi.r =  _mm256_or_si256(
-        _mm256_and_si256(r1.r, rmi.m),
-        _mm256_andnot_si256(rmi.m, r0.r));
+        _mm256_and_si256(r1.r, rmi.r),
+        _mm256_andnot_si256(rmi.r, r0.r));
 	%r<tr>% res = %cast<c:int|b:tr,tr>%(resi);
 	return res;""" },
     "fmadd": { "format": "long", "code":
