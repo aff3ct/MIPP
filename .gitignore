@@ -2,6 +2,7 @@
 .cproject
 .project
 cppcheck/
+.vscode
 examples/a.out
 htdocs/
 .settings/

@@ -295,6 +295,13 @@ implems_mask_generic_emu = {
  
 	# COMPARISON
 	# only maskz for comparison
+    
+    # cmpeq 
+    # cmpneq 
+    # cmpgt 
+    # cmpge 
+    # cmplt 
+    # cmple
  
 	# MATH 
 	"sqrt" : [
@@ -361,6 +368,10 @@ implems_mask_generic_emu = {
 	
  	# REDUCTIONS
 	# NOT DONE 
+    # hadd 
+    # hmul 
+    # hmin 
+    # hmax
  
 	# SELECTION
 	"min" : [

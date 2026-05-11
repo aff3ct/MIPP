@@ -283,6 +283,12 @@ AS_CMP_BINOP_FLOAT_WORKAROUND = """{% if is_int %}""" + AS_CMP_2REG + """{% else
 else REQUIRE(std::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(mipp_get_{{dt_ext}}{{lmul_suffix}}(r3, i)) == 0);
 {% endif %}"""
 
+AS_3ARGS_TOL = """\t\t{{dt_ext}}_t res1 = mipp_get_{{dt_ext}}{{lmul_suffix}}(r4, i);
+\t\t{{dt_ext}}_t res2 = mipp_scalar_get_{{dt_ext}}{{lmul_suffix}}(s4, i);
+\t\t{{dt_ext}}_t tol  = 1e-5f * abs_diff::abs_diff(res2) + 1.0f;
+\t\t{{dt_ext}}_t diff = abs_diff::abs_diff(res1, res2);
+\t\tREQUIRE(diff <= tol);"""
+
 # --------------------------------------------
 # Shapes
 # --------------------------------------------
@@ -358,52 +364,7 @@ shape_templates = {
         loop_assert=AS_REG_BINOP_FLOAT_WORKAROUND,
     ),
 
-    # SHAPE_RET_VAL_2ARGS_REG_VAL: TemplateParts(
-    #     func_decl=FUNC_DECL,
-    #     decl=DECL_1ARG,
-    #     init=INIT_1ARG,
-    #     load=LOAD_1ARG_REG + "\n" + LOAD_MASK_AND_RSRC_FROM_REG1,
-    #     operation=OP_REG_NOOP,
-    #     loop_body="" #LB_SET_OP,
-    #     loop_assert=AS_REG_BINOP,
-    # ),
-    # SHAPE_RET_VAL_2ARGS_MSK_VAL: TemplateParts(
-    #     func_decl=FUNC_DECL,
-    #     decl=DECL_1ARG_INT32,
-    #     init=INIT_1ARG,
-    #     load=LOAD_1ARG_MASK + "\n" + LOAD_MASK_AND_RSRC_FROM_INPUTS,
-    #     operation=OP_TOREG,
-    #     loop_body="" #LB_SET_OP,
-    #     loop_assert=AS_CMP_2REG,
-    # ),
-    # SHAPE_RET_VAL_1ARG_REG: TemplateParts(
-    #     func_decl=FUNC_DECL,
-    #     decl=DECL_1ARG,
-    #     init=INIT_1ARG,
-    #     load=LOAD_1ARG_REG + "\n" + LOAD_MASK_AND_RSRC_FROM_REG1,
-    #     operation=OP_SCAL_UNOP,
-    #     loop_body="" #"",
-    #     loop_assert="\t\tREQUIRE(res == inputs1[0]);",
-    # ),
-    # SHAPE_RET_REG_3ARGS_2REG_1MSK: TemplateParts(
-    #     func_decl=FUNC_DECL,
-    #     decl=DECL_1ARG_INT32,
-    #     init=INIT_1ARG,
-    #     load=LOAD_1ARG_MASK + "\n" + LOAD_SET1_2ARGS_REG + "\n" + LOAD_MASK_AND_RSRC_FROM_INPUTS,
-    #     operation=OP_3ARGS_2REG_1MSK,
-    #     loop_body="" #"\t\t{{dt_ext}}_t res = mipp_get_k_{{dt_ext}}{{lmul_suffix}}(m1, i) ? mipp_get_{{dt_ext}}{{lmul_suffix}}(r1, i) : mipp_get_{{dt_ext}}{{lmul_suffix}}(r2, i);",
-    #     loop_assert=AS_REG_BINOP,
-    # ),
-    # SHAPE_RET_MSK_2ARGS_MSK: TemplateParts(
-    #     func_decl=FUNC_DECL,
-    #     decl=DECL_2ARGS_INT32 + DECL_G_SNIPPET,
-    #     init=INIT_2ARGS_DIS,
-    #     load=LOAD_2ARGS_MASK + "\n" + LOAD_MASK_AND_RSRC_FROM_INPUTS,
-    #     operation=OP_2ARGS_2MASK,
-    #     loop_body="" #LB_REG_BINOP,
-    #     loop_assert=AS_CMP_2REG,
-    # ),
-    # SHAPE_RET_REG_1ARG_REG: TemplateParts(
+    # SHAPE_RET_REG_1ARG_REG: TemplateParts( # hadd, hmul, hmax, hmin, round, cast, sqrt, rsqrt, notb
     #     func_decl=FUNC_DECL,
     #     decl=DECL_1ARG,
     #     init=INIT_1ARG,
@@ -412,91 +373,16 @@ shape_templates = {
     #     loop_body="" #LB_SET_OP,
     #     loop_assert=AS_REG_BINOP,
     # ),
-    # SHAPE_RET_MSK_1ARG_MSK: TemplateParts(
-    #     func_decl=FUNC_DECL,
-    #     decl=DECL_1ARG_INT32 + DECL_G_SNIPPET,
-    #     init=INIT_1ARG_DIS,
-    #     load=LOAD_1ARG_MASK + "\n" + LOAD_MASK_AND_RSRC_FROM_INPUTS,
-    #     operation=OP_1ARG_1MASK,
-    #     loop_body="" #LB_SET_OP,
-    #     loop_assert=AS_CMP_2REG,
-    # ),
-    # SHAPE_RET_REG_1ARG_MSK: TemplateParts(
-    #     func_decl=FUNC_DECL,
-    #     decl=DECL_1ARG_INT32 + DECL_G_SNIPPET,
-    #     init=INIT_1ARG_DIS,
-    #     load=LOAD_1ARG_MASK + "\n" + LOAD_MASK_AND_RSRC_FROM_INPUTS,
-    #     operation=OP_TOREG,
-    #     loop_body="" #LB_SET_OP,
-    #     loop_assert=AS_CMP_2REG,
-    # ),
-    # SHAPE_RET_REG_3ARGS_REG: TemplateParts(
-    #     func_decl=FUNC_DECL,
-    #     decl=DECL_3ARGS,
-    #     init=INIT_3ARGS,
-    #     load=LOAD_3ARGS_REG + "\n" + LOAD_MASK_AND_RSRC_FROM_REG1,
-    #     operation=OP_3ARGS_REG,
-    #     loop_body="" #"",
-    #     loop_assert=AS_3ARGS,
-    # ),
-    # SHAPE_RET_I32_2ARGS_MSK: TemplateParts(
-    #     func_decl=FUNC_DECL,
-    #     decl="",
-    #     init="",
-    #     load="\t{{msk_type}} m1 = mipp_set1_k_{{dt_ext}}{{lmul_suffix}}(1); \n\t{{msk_type}} m2 = mipp_set1_k_{{dt_ext}}{{lmul_suffix}}(0);\n"
-    #     + LOAD_MASK_AND_RSRC_FROM_INPUTS,
-    #     operation="",
-    #     loop_body="" #"",
-    #     loop_assert="\tREQUIRE(mipp_testz_{{dt_ext}}{{lmul_suffix}}(m1, m1) == 0);\n\tREQUIRE(mipp_testz_{{dt_ext}}{{lmul_suffix}}(m2, m2) != 0);",
-    # ),
-    # SHAPE_RET_I32_1ARG_MSK: TemplateParts(
-    #     func_decl=FUNC_DECL,
-    #     decl="",
-    #     init="",
-    #     load="\t{{msk_type}} m1 = mipp_set1_k_{{dt_ext}}{{lmul_suffix}}(1); \n\t{{msk_type}} m2 = mipp_set1_k_{{dt_ext}}{{lmul_suffix}}(0);\n"
-    #     + LOAD_MASK_AND_RSRC_FROM_INPUTS,
-    #     operation="",
-    #     loop_body="" #"",
-    #     loop_assert="\tREQUIRE(mipp_testz_2_{{dt_ext}}{{lmul_suffix}}(m1) == 0);\n\tREQUIRE(mipp_testz_2_{{dt_ext}}{{lmul_suffix}}(m2) != 0);",
-    # ),
-    # SHAPE_RET_REG_3ARGS_1MSK_2REG: TemplateParts(
-    #     func_decl=FUNC_DECL,
-    #     decl=DECL_1ARG_INT32,
-    #     init=INIT_1ARG,
-    #     load=LOAD_1ARG_MASK + "\n" + LOAD_SET1_2ARGS_REG + "\n" + LOAD_MASK_AND_RSRC_FROM_INPUTS,
-    #     operation=OP_3ARGS_1MSK_2REG,
-    #     loop_body="" #"\t\t{{dt_ext}}_t res = mipp_get_k_{{dt_ext}}{{lmul_suffix}}(m1, i) ? 3 : 0;",
-    #     loop_assert=AS_REG_BINOP,
-    # ),
-    # SHAPE_RET_MSK_1ARG_REG: TemplateParts(
-    #     func_decl=FUNC_DECL,
-    #     decl=DECL_1ARG,
-    #     init=INIT_1ARG,
-    #     load=LOAD_1ARG_REG + "\n" + LOAD_MASK_AND_RSRC_FROM_REG1,
-    #     operation="\t{{msk_type}} m1 = mipp_tomsk_{{dt_ext}}{{lmul_suffix}}(r1);\n{{reg_type}} r3 = mipp_toreg_{{dt_ext}}{{lmul_suffix}}(m1);",
-    #     loop_body="" #"\t\t{{dt_ext}}_t res = inputs1[i] ? 1 : 0;",
-    #     loop_assert=AS_CMP_2REG,
-    # ),
-    # # maskz load
-    # SHAPE_RET_REG_2ARGS_MASK_PTR: TemplateParts(
-    #     func_decl="",
-    #     decl="",
-    #     init="",
-    #     load="",
-    #     operation="",
-    #     loop_body="" #"",
-    #     loop_assert="",
-    # ),
-    # # mask store (maskst)
-    # SHAPE_RET_VOID_3ARGS_PTR_MSK_REG: TemplateParts(
-    #     func_decl="",
-    #     decl="",
-    #     init="",
-    #     load="",
-    #     operation="",
-    #     loop_body="" #"",
-    #     loop_assert="",
-    # ),
+
+    SHAPE_RET_REG_3ARGS_REG: TemplateParts( # fmadd, fmsub, fnmadd, fnmsub
+        func_decl=FUNC_DECL,
+        decl=DECL_3ARGS,
+        init=INIT_3ARGS,
+        load=LOAD_3ARGS_REG + "\n" + LOAD_MASK_AND_RSRC_FROM_REG1,
+        operation=OP_3ARGS_REG,
+        loop_body="",
+        loop_assert=AS_3ARGS_TOL
+    ),
 }
 
 deny = {
@@ -529,7 +415,7 @@ LAYER_OVERRIDES = {
 \t\t\tINFO("Overflow occurred, skipping assert");
 \t\t}else{\n\t"""+ AS_REG_BINOP + """\n\t\t}"""},
     
-        # division by zero is skipped + add some 
+    # division by zero is skipped + add some 
     # tolerance for float division to avoid precision issues.
     "div" : {
         "loop_assert" :"""

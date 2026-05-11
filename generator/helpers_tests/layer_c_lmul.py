@@ -501,50 +501,6 @@ shape_templates = {
 
 deny = set()
 LAYER_OVERRIDES = {
-#     "andnb": {
-#         "loop_body": "{% if is_int %}" + "\t\t{{dt_ext}}_t res = ~(inputs1[i]) & (inputs2[i]);" +
-# "{% else %}" + """\t{{dt_ext}}_t res = std::bit_cast<{{dt_ext}}_t,uint{{type_size}}_t>(
-# \t\t\t~std::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(inputs1[i]) 
-# \t\t\t&
-# \t\t\tstd::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(inputs2[i]) );\n""" + """{% endif %}""",
-#         "loop_assert": AS_REG_BINOP_FLOAT_WORKAROUND,
-#     },
-
-# uint{{type_size}}_t got_bits = std::bit_cast<uint{{type_size}}_t>(mipp_get_float{{type_size}}(r3, i));
-# {%endif%}""",
-#         "loop_assert": "{% if is_int %}" + AS_REG_BINOP + "{% else %}REQUIRE( (!(!(got_bits))) == (!(!(expected_bits))) ); {% endif %}",
-#     },
-
-    
-#     "fmadd": {
-#         "loop_body": """\t\t{{dt_ext}}_t res = inputs1[i] * inputs2[i] + inputs3[i];""",
-#     },
-    
-#     "fnmadd": {
-#         "loop_body": """\t\t{{dt_ext}}_t res = -(inputs1[i] * inputs2[i]) + inputs3[i];""",
-#     },
-    
-#     "fmsub": {
-#         "loop_body": """\t\t{{dt_ext}}_t res = inputs1[i] * inputs2[i] - inputs3[i];""",
-#     },
-    
-#     "fnmsub": {
-#         "loop_body": """\t\t{{dt_ext}}_t res = -(inputs1[i] * inputs2[i]) - inputs3[i];""",
-#     },
-    
-    
-#     #msb is most significant BIT not byte.
-#     #the function returns msb of a lane & 0x8 etc
-#     "msb" : {
-#         "loop_body": "{% if is_int %}" + "\t{{dt_ext}}_t res = inputs1[i] & (({{dt_ext}}_t)1 << (sizeof({{dt_ext}}_t)*8 - 1));"
-#         + "{% else %}" + """\t{{dt_ext}}_t res = 
-#         std::bit_cast<{{dt_ext}}_t,uint{{type_size}}_t>(
-# \t\t\tstd::bit_cast<uint{{type_size}}_t, {{dt_ext}}_t>(inputs1[i])
-# \t\t\t&((uint{{type_size}}_t)1 << (sizeof({{dt_ext}}_t)*8 - 1))
-# \t\t);\n""" + """{% endif %}""",
-#         "loop_assert": AS_REG_BINOP_FLOAT_WORKAROUND,
-#     },
-
 
         # Define CUSTOM overflow workarounds
     "add" : {
