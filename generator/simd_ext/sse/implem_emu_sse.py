@@ -62,6 +62,13 @@ tpl_implem_emu_sse = {
 		vals[11] ? 0xFF : 0, vals[10] ? 0xFF : 0, vals[ 9] ? 0xFF : 0, vals[ 8] ? 0xFF : 0,
 		vals[ 7] ? 0xFF : 0, vals[ 6] ? 0xFF : 0, vals[ 5] ? 0xFF : 0, vals[ 4] ? 0xFF : 0,
 		vals[ 3] ? 0xFF : 0, vals[ 2] ? 0xFF : 0, vals[ 1] ? 0xFF : 0, vals[ 0] ? 0xFF : 0);""" },
+        
+	"andb_k_emu": { "format": "long", "code":
+"""// long format
+	%r<tp>% tmp1 = %toreg<tp>%(m0);
+	%r<tp>% tmp2 = %toreg<tp>%(m1);
+	%r<tp>% res = %andb<tp>%(tmp1, tmp2);
+	return %tomsk<tp>%(res);""" },
 }
 
 implems_emu_sse = {
@@ -85,4 +92,6 @@ implems_emu_sse = {
         { "datatypes": [int64, uint64],                "template": tpl_implem_emu_sse["set_k-64"],   "if": "defined(__SSE2__)"  },
         { "datatypes": [float64],                      "template": tpl_implem_emu_sse["set_k-xxf"],  "if": "defined(__SSE2__)"  },
         { "datatypes": [float32],                      "template": tpl_implem_emu_sse["set_k-xxf"],  "if": "defined(__SSE2__)"  } ], # set_k
+    "andb_k": [
+		{ "datatypes": all_datatypes,                "template": tpl_implem_emu_sse["andb_k_emu"], "if": "defined(__SSE2__)"	} ], # andb_k
 }
