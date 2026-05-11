@@ -363,9 +363,6 @@ shape_templates = {
 }
 
 deny = {
-    "andb", # circular dependency w blend for generic emu.
-    "xorb", # I think avx2 causes issues w these two bc of how blend is implemented ?
-    "andnb",
     "storeu",
     "hadd", 
     "hmul",
