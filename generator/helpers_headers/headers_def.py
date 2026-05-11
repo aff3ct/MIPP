@@ -394,11 +394,11 @@ mipp_funcs = {
     "set0_k":        { "proto": protos["ret_msk_0arg"],                 "datatypes": all_datatypes,           "horizontal": False, "mask_support": no_mask         },
     "testz":         { "proto": protos["ret_i32_2args_msk"],            "datatypes": all_datatypes,           "horizontal": True,  "mask_support": no_mask         },
     "testz_2":       { "proto": protos["ret_i32_1arg_msk"],             "datatypes": all_datatypes,           "horizontal": True,  "mask_support": no_mask         },
-    "hadd":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": True,  "mask_support": only_mask       },
-    "hadds":         { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_uint+all_int,        "horizontal": True,  "mask_support": only_mask       },
-    "hmul":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": True,  "mask_support": only_mask       },
-    "hmin":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": True,  "mask_support": only_mask       },
-    "hmax":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": True,  "mask_support": only_mask       },
+    "hadd":          { "proto": protos["ret_val_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": True,  "mask_support": only_mask       },
+    "hadds":         { "proto": protos["ret_val_1arg_reg"],             "datatypes": all_uint+all_int,        "horizontal": True,  "mask_support": only_mask       },
+    "hmul":          { "proto": protos["ret_val_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": True,  "mask_support": only_mask       },
+    "hmin":          { "proto": protos["ret_val_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": True,  "mask_support": only_mask       },
+    "hmax":          { "proto": protos["ret_val_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": True,  "mask_support": only_mask       },
     "hadd_to_scal":  { "proto": protos["ret_val_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": True,  "mask_support": no_mask         },
     "hadds_to_scal": { "proto": protos["ret_val_1arg_reg"],             "datatypes": all_uint+all_int,        "horizontal": True,  "mask_support": no_mask         },
 #   "hmul_to_scal":  { "proto": protos["ret_val_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": True                                   },
@@ -997,12 +997,8 @@ return res ? 0 : 1;
 """
 %v<tr>% resv = 0;
 for (size_t i = 0; i < %N<tp>%; i++)
-	resv += r0.r[i];
-
-%r<tr>% res;
-for (size_t i = 0; i < %N<tp>%; i++)
-	res.r[i] = %!pred_cond!% resv %!pred_alt!%;
-return res;
+	resv +=  %!pred_cond!%  r0.r[i] %!pred_alt!%;
+return resv;
 """
         },
     ],
@@ -1014,31 +1010,28 @@ for (size_t i = 0; i < %N<tp>%; i++)
 {
 	uint64_t a = r0.r[i];
 	uint64_t b = resv64;
+    
 	resv64 =
 		(a > UINT64_MAX - b) ? UINT64_MAX :
 		(uint64_t)(a + b);
 }
-
-%r<tr>% res;
-for (size_t i = 0; i < %N<tp>%; i++)
-	res.r[i] = %!pred_cond!% resv64 %!pred_alt!%;
-return res;
+    return resv64;
 """
         },
         { "type": "vector-wide", "datatypes": [uint32,uint16,uint8], "mask_variants": all_defs, "implem":
 """
 uint64_t resv64 = 0;
-for (size_t i = 0; i < %N<tp>%; i++)
+%v<tr>% resv;
+for (size_t i = 0; i < %N<tp>%; i++){
 	resv64 += r0.r[i];
 
-%v<tr>% resv =
-	(resv64 > UINT{{ dt_par.n_bits }}_MAX) ? (%v<tr>%)UINT{{ dt_par.n_bits }}_MAX :
-	(%v<tr>%)resv64;
+    resv =
+        resv64 > UINT{{ dt_par.n_bits }}_MAX ? (%v<tr>%)UINT{{ dt_par.n_bits }}_MAX :
+        (%v<tr>%)resv64;
+}
+return resv;
 
-%r<tr>% res;
-for (size_t i = 0; i < %N<tp>%; i++)
-	res.r[i] = %!pred_cond!% resv %!pred_alt!%;
-return res;
+
 """
         },
         { "type": "vector-wide", "datatypes": [int64], "mask_variants": all_defs, "implem":
@@ -1054,28 +1047,22 @@ for (size_t i = 0; i < %N<tp>%; i++)
 		(b < 0 && a < INT64_MIN - b) ? (int64_t)INT64_MIN :
 		(int64_t)(a + b);
 }
-
-%r<tr>% res;
-for (size_t i = 0; i < %N<tp>%; i++)
-	res.r[i] = %!pred_cond!% resv64 %!pred_alt!%;
-return res;
+return resv64;
 """
         },
         { "type": "vector-wide", "datatypes": [int32,int16,int8], "mask_variants": all_defs, "implem":
 """
 int64_t resv64 = 0;
-for (size_t i = 0; i < %N<tp>%; i++)
+%v<tr>% resv;
+for (size_t i = 0; i < %N<tp>%; i++){
 	resv64 += r0.r[i];
 
-%v<tr>% resv =
-	resv64 > INT{{ dt_par.n_bits }}_MAX ? (%v<tr>%)INT{{ dt_par.n_bits }}_MAX :
-	resv64 < INT{{ dt_par.n_bits }}_MIN ? (%v<tr>%)INT{{ dt_par.n_bits }}_MIN :
-	(%v<tr>%)resv64;
-
-%r<tr>% res;
-for (size_t i = 0; i < %N<tp>%; i++)
-	res.r[i] = %!pred_cond!% resv %!pred_alt!%;
-return res;
+    resv =
+	    resv64 > INT{{ dt_par.n_bits }}_MAX ? (%v<tr>%)INT{{ dt_par.n_bits }}_MAX :
+	    resv64 < INT{{ dt_par.n_bits }}_MIN ? (%v<tr>%)INT{{ dt_par.n_bits }}_MIN :
+        (%v<tr>%)resv64;
+}
+return resv;
 """
         },
     ],
@@ -1086,10 +1073,7 @@ return res;
 for (size_t i = 0; i < %N<tp>%; i++)
 	resv *= r0.r[i];
 
-%r<tr>% res;
-for (size_t i = 0; i < %N<tp>%; i++)
-	res.r[i] = %!pred_cond!% resv %!pred_alt!%;
-return res;
+return resv;
 """
         },
     ],
@@ -1100,10 +1084,7 @@ return res;
 for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec
 	resv = (r0.r[i] < resv) ? r0.r[i] : resv;
 
-%r<tr>% res;
-for (size_t i = 0; i < %N<tp>%; i++)
-	res.r[i] = %!pred_cond!% resv %!pred_alt!%;
-return res;
+return resv;
 """
         },
     ],
@@ -1114,10 +1095,7 @@ return res;
 for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec
 	resv = (r0.r[i] > resv) ? r0.r[i] : resv;
 
-%r<tr>% res;
-for (size_t i = 0; i < %N<tp>%; i++)
-	res.r[i] = %!pred_cond!% resv %!pred_alt!%;
-return res;
+return resv;
 """
         },
     ],

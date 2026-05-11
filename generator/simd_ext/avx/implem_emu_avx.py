@@ -221,8 +221,7 @@ tpl_implem_emu_avx = {
 	return %andb<tp>%(rmsk, rgather);""" },
     "hadd_to_scal": { "format": "long", "code":
 """// long format
-	%r<tp>% reduced = %hadd<tp>%(r0);
-	return %getfirst<tp>%(reduced);""" },
+	return  %hadd<tp>%(r0);""" },
 }
 
 """ "implems_emu" dictionary:

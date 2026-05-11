@@ -15,7 +15,7 @@ from .common import (
     SHAPE_RET_REG_0ARG, #set0
     SHAPE_RET_MSK_0ARG,#set0_k
     SHAPE_RET_VAL_2ARGS_MSK_VAL, #get_k
-    SHAPE_RET_VAL_1ARG_REG,#getfirst,hadd_to_scal
+    SHAPE_RET_VAL_1ARG_REG,#getfirst,hadd_to_scal, hadd,
     SHAPE_RET_REG_3ARGS_2REG_1MSK, #blend
     SHAPE_RET_MSK_2ARGS_MSK, #andb_k orb_k xorb_k andnb_k
     SHAPE_RET_REG_1ARG_REG, #notb
@@ -486,38 +486,39 @@ LAYER_OVERRIDES = {
         "loop_assert": """\tREQUIRE(std::abs(mipp::get(r3, i) - res) < 1e-2);""",
     },
     
-    "hadd": {
-        "loop_body": """\tT res = 0; uint64_t ures = 0;
-\tfor(size_t j = 0; j < {{size}}; j++){
-\t\tres {{op}} inputs1[j];
-\t\tures{{op}} inputs1[j];
-\t}""",
-        "loop_assert": """if((uint64_t)res==ures)\tREQUIRE(mipp::get(r3, 0) == res);""",
-    },
-    
     "hmul": {
-        "loop_body":"""\tT res = 1;
+        "loop_body":"""\tT res1 = 1;
 \tfor(size_t j = 0; j < {{size}}; j++)
-\t\tres {{op}} inputs1[j];""",
-        "loop_assert": """\tREQUIRE(mipp::get(r3, 0) == res);""",
+\t\tres1 {{op}} inputs1[j];""",
+        "loop_assert": """\tREQUIRE(res1 == res);""",
     },
     
     "hmin": {
-        "loop_body": """\tT res = inputs1[0];
+        "loop_body": """\tT res1 = inputs1[0];
 \tfor(size_t j = 1; j < {{size}}; j++)
-\t\tres = std::min(res, inputs1[j]);""",
-        "loop_assert": """\tREQUIRE(mipp::get(r3, 0) == res);""",
+\t\tres1 = std::min(res1, inputs1[j]);""",
+        "loop_assert": """\tREQUIRE(res1 == res);""",
     },
     
     
     "hmax": {
-        "loop_body": """\tT res = inputs1[0];
+        "loop_body": """\tT res1 = inputs1[0];
 \tfor(size_t j = 1; j < {{size}}; j++)
-\t\tres = std::max(res, inputs1[j]);""",
-        "loop_assert": """\tREQUIRE(mipp::get(r3, 0) == res);""",
+\t\tres1 = std::max(res1, inputs1[j]);""",
+        "loop_assert": """\tREQUIRE(res1 == res);""",
     },
     
     "hadd_to_scal": {
+        "loop_body": """\tT res1 = 0; uint64_t ures1 = 0;
+\tfor(size_t j = 0; j < {{size}}; j++){
+\t\tres1 += inputs1[j];
+\t\tures1 += inputs1[j];
+\t}""",
+        "loop_assert": """\t\tif((uint64_t)res1 == ures1) REQUIRE(res == res1);""",
+    },
+
+
+    "hadd": {
         "loop_body": """\tT res1 = 0; uint64_t ures1 = 0;
 \tfor(size_t j = 0; j < {{size}}; j++){
 \t\tres1 += inputs1[j];

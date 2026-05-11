@@ -116,7 +116,8 @@ tpl_implem_avx = {
 	rsf.r = _mm256_shuffle_ps(rsf.r, rsf.r, _MM_SHUFFLE(1,0,3,2));
 	%r<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);
 	rs2.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs1.r, rs2.r);
-	return rs2;""" },
+    // extract lane 0 and return it. 
+    return %getfirst<tp>%(rs2);""" },
     "reduce_32": { "format": "long", "code":
 """// long format
 	%r<c:float|b:32>% rsf;
@@ -131,7 +132,7 @@ tpl_implem_avx = {
 	rsf.r = _mm256_shuffle_ps(rsf.r, rsf.r, _MM_SHUFFLE(2,3,0,1));
 	%r<tp>% rs3 = %cast<c:float|b:32,tp>%(rsf);
 	rs3.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs2.r, rs3.r);
-	return rs3;""" },
+	return %getfirst<tp>%(rs3);""" },
     "reduce_16": { "format": "long", "code":
 """// long format
 	%r<c:float|b:32>% rsf;
@@ -151,7 +152,7 @@ tpl_implem_avx = {
 	rsi.r = _mm256_shuffle_epi8(rsi.r, mask_16);
 	%r<tp>% rs4 = %cast<c:int|b:8,tp>%(rsi);
 	rs4.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs3.r, rs4.r);
-	return rs4;""" },
+	return %getfirst<tp>%(rs4);""" },
 
     "reduce_8": { "format": "long", "code":
 """// long format
@@ -177,7 +178,7 @@ tpl_implem_avx = {
 	rsi.r = _mm256_shuffle_epi8(rsi.r, mask_8);
 	%r<tp>% rs5 = %cast<c:int|b:8,tp>%(rsi);
 	rs5.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs4.r, rs5.r);
-	return rs5;""" },
+	return %getfirst<tp>%(rs5);""" },
     "set1_u": { "format": "long", "code":
 """// long format
 	%r<c:int|b:tp>% r0u;
@@ -207,7 +208,7 @@ tpl_implem_avx = {
 	rsf.r = _mm256_shuffle_ps(rsf.r, rsf.r, _MM_SHUFFLE(1,0,3,2));
 	%r<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);
 	rs2.r = {{ isa.prefix }}_{{ instr_name }}_epi64(rs1.r, rs2.r);
-	return rs2;""" },
+	return %getfirst<tp>%(rs2);""" },
     "reduce_32_u": { "format": "long", "code":
 """// long format
 	%r<c:float|b:32>% rsf;
@@ -222,7 +223,7 @@ tpl_implem_avx = {
 	rsf.r = _mm256_shuffle_ps(rsf.r, rsf.r, _MM_SHUFFLE(2,3,0,1));
 	%r<tp>% rs3 = %cast<c:float|b:32,tp>%(rsf);
 	rs3.r = {{ isa.prefix }}_{{ instr_name }}_epi32(rs2.r, rs3.r);
-	return rs3;""" },
+	return %getfirst<tp>%(rs3);""" },
 	#_mm256_testz_ps / _mm256_testz_pd 
 	#don't have the same behavior as _mm256_testz_si256.
 	#I propose we do hacky casting to have a unified behavior.

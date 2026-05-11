@@ -191,9 +191,22 @@ tpl_mask_generic_emu = {
 	"""},
 	
 
-	"reductions" : { "format" :"long", "code" :"""
-		exit(-1); //huuuuh idk
+	"hadd_mask" : { "format" :"long", "code" :"""
+	%r<tp>% zero = %set0<tp>%();
+	%r<tp>% blended = %blend<tp>%(zero, r0, m0);
+	%v<tp>% op = %hadd<tp>%(blended);
+    return op;
 	"""},
+
+	"hmul_mask" : { "format" :"long", "code" :"""
+    %r<tp>% ones = %set1<tp>%(1);
+    %r<tp>% blended = %blend<tp>%(ones, r0, m0);
+    %v<tp>% op = %hmul<tp>%(blended);
+    return op;
+	"""},
+    
+	"tmp_hmin_hmax_mask" : { "format" :"long", "code" :"""
+    return 0;"""},
 
    
 }
@@ -388,16 +401,16 @@ implems_mask_generic_emu = {
  	# REDUCTIONS
 	# only mask. Policy for reduction is to apply reduction + broadcast and then select elements based on the mask. Only support mask.
     "hadd" : [
-		{ "instr_name": "hadd",  "datatypes" : all_datatypes, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_1arg_reg"]["code"] + SNIPPET_END_MSK}},
+		{ "instr_name": "hadd",  "datatypes" : all_datatypes, "version" : "mask", "template" : tpl_mask_generic_emu["hadd_mask"]},
 	],
     "hmul" : [
-		{ "instr_name": "hmul",  "datatypes" : all_datatypes, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_1arg_reg"]["code"] + SNIPPET_END_MSK}},
+		{ "instr_name": "hmul",  "datatypes" : all_datatypes, "version" : "mask", "template" : tpl_mask_generic_emu["hmul_mask"]},
 	],
 	"hmin" : [
-		{ "instr_name": "hmin",  "datatypes" : all_datatypes, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_1arg_reg"]["code"] + SNIPPET_END_MSK}},
+		{ "instr_name": "hmin",  "datatypes" : all_datatypes, "version" : "mask", "template" : tpl_mask_generic_emu["tmp_hmin_hmax_mask"]},
 	],
 	"hmax" : [
-		{ "instr_name": "hmax",  "datatypes" : all_datatypes, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_1arg_reg"]["code"] + SNIPPET_END_MSK}},
+		{ "instr_name": "hmax",  "datatypes" : all_datatypes, "version" : "mask", "template" : tpl_mask_generic_emu["tmp_hmin_hmax_mask"]},
 	],
  
 	# SELECTION
@@ -477,62 +490,7 @@ tpl_horiz_lmul_generic_emu = {
 {% else %}
 	return %testz_2<c:tp|b:tp|m:tp/2>%(m0.m1) && %testz_2<c:tp|b:tp|m:tp/2>%(m0.m2);
 {% endif %}"""},
-    
-    "hadd" : { "format" :"long", "code" :"""
-{% if lmul == 1 %}
-	return %hadd<tp>%(r0);
-{% else %}
-	
-	%r<tp>% ret;
-  	ret.r1 = %hadd<c:tp|b:tp|m:tp/2>%(r0.r1);
-	ret.r2 = %hadd<c:tp|b:tp|m:tp/2>%(r0.r2);
-	// we know that lane 0 of r0.r1 contains the sum of the first half of the vector and lane 0 of r0.r2 contains the sum of the second half of the vector
-	// we do a full add of these two lanes, with ret.r1 containing the final result of the hadd.
-	ret.r1 = %add<c:tp|b:tp|m:tp/2>%(ret.r1, ret.r2);
-	return ret;
-{% endif %}"""},
-	
-	"hmul" : { "format" :"long", "code" :"""
-{% if lmul == 1 %}
-	return %hmul<tp>%(r0);
-{% else %}
-	
-	%r<tp>% ret;
-  	ret.r1 = %hmul<c:tp|b:tp|m:tp/2>%(r0.r1);
-	ret.r2 = %hmul<c:tp|b:tp|m:tp/2>%(r0.r2);
-	// we know that lane 0 of r0.r1 contains the product of the first half of the vector and lane 0 of r0.r2 contains the product of the second half of the vector
-	// we do a full mul of these two lanes, with ret.r1 containing the final result of the hmul.
-	ret.r1 = %mul<c:tp|b:tp|m:tp/2>%(ret.r1, ret.r2);
-	return ret;
-{% endif %}"""},
- 
-	"hmin" : { "format" :"long", "code" :"""
-{% if lmul == 1 %}
-	return %hmin<tp>%(r0);
-{% else %}
-	
-	%r<tp>% ret;
-  	ret.r1 = %hmin<c:tp|b:tp|m:tp/2>%(r0.r1);
-	ret.r2 = %hmin<c:tp|b:tp|m:tp/2>%(r0.r2);
-	// we know that lane 0 of r0.r1 contains the min of the first half of the vector and lane 0 of r0.r2 contains the min of the second half of the vector
-	// we do a full min of these two lanes, with ret.r1 containing the final result of the hmin.
-	ret.r1 = %min<c:tp|b:tp|m:tp/2>%(ret.r1, ret.r2);
-	return ret;
-{% endif %}"""},
-	
-	"hmax" : { "format" :"long", "code" :"""
-{% if lmul == 1 %}
-	return %hmax<tp>%(r0);
-{% else %}
-	
-	%r<tp>% ret;
-  	ret.r1 = %hmax<c:tp|b:tp|m:tp/2>%(r0.r1);
-	ret.r2 = %hmax<c:tp|b:tp|m:tp/2>%(r0.r2);
-	// we know that lane 0 of r0.r1 contains the max of the first half of the vector and lane 0 of r0.r2 contains the max of the second half of the vector
-	// we do a full max of these two lanes, with ret.r1 containing the final result of the hmax.
-	ret.r1 = %max<c:tp|b:tp|m:tp/2>%(ret.r1, ret.r2);
-	return ret;
-{% endif %}"""},
+
 	
 	"hadd_to_scal" : { "format" :"long", "code" :"""
 {% if lmul == 1 %}
@@ -542,6 +500,52 @@ tpl_horiz_lmul_generic_emu = {
   	%v<tp>% v0 = %hadd_to_scal<c:tp|b:tp|m:tp/2>%(r0.r1);
 	%v<tp>% v1 = %hadd_to_scal<c:tp|b:tp|m:tp/2>%(r0.r2);	
 	return v0 + v1;
+{% endif %}"""},
+
+	"hadd" : { "format" :"long", "code" :"""
+{% if lmul == 1 %}
+	return %hadd_to_scal<tp>%(r0);
+{% else %}
+	
+  	%v<tp>% v0 = %hadd<c:tp|b:tp|m:tp/2>%(r0.r1);
+	%v<tp>% v1 = %hadd<c:tp|b:tp|m:tp/2>%(r0.r2);	
+	return v0 + v1;
+{% endif %}"""},
+
+	
+	"hmul" : { "format" :"long", "code" :"""
+{% if lmul == 1 %}
+	return %hmul<tp>%(r0);
+{% else %}
+	
+	%v<tp>% v1, v2;
+  	v1 = %hmul<c:tp|b:tp|m:tp/2>%(r0.r1);
+	v2 = %hmul<c:tp|b:tp|m:tp/2>%(r0.r2);	
+	return v1 * v2;
+{% endif %}"""},
+
+ 
+	"hmin" : { "format" :"long", "code" :"""
+{% if lmul == 1 %}
+	return %hmin<tp>%(r0);
+{% else %}
+	
+	%v<tp>% v1, v2;
+  	v1 = %hmin<c:tp|b:tp|m:tp/2>%(r0.r1);
+	v2 = %hmin<c:tp|b:tp|m:tp/2>%(r0.r2);
+
+	return v1 < v2 ? v1 : v2;
+{% endif %}"""},
+	
+	"hmax" : { "format" :"long", "code" :"""
+{% if lmul == 1 %}
+	return %hmax<tp>%(r0);
+{% else %}
+	
+	%v<tp>% v1, v2;
+  	v1 = %hmax<c:tp|b:tp|m:tp/2>%(r0.r1);
+	v2 = %hmax<c:tp|b:tp|m:tp/2>%(r0.r2);
+	return v1 > v2 ? v1 : v2;
 {% endif %}"""},
 
 }
