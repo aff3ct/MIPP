@@ -327,62 +327,67 @@ tpl_implem_emu_rvv = {
      #suitable for hadd and hmax on unsigned ints
     "hadd_hmax_uint" : { "format" : "long", "code" :
     """
-        %r<tp>% tmp;
-        tmp.r = %set1<tp>%(0).r;
-        tmp.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.data_ext}}(r0.r,tmp.r,%N<tp>%);
-
-        return {{ isa.prefix }}_vmv_x_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(tmp.r);"""},
+        %r<c:tp|b:tp|m:1>% tmp;
+        tmp.r = %set1<c:tp|b:tp|m:1>%(0).r;
+        %r<tp>% res;
+        res.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1(r0.r,tmp.r,%N<tp>%);
+        return {{ isa.prefix }}_vmv_x_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(res.r);"""},
     
     "hmax_int" : { "format" : "long", "code" :
     """
-        %r<tp>% tmp;
-        tmp.r = %set1<tp>%(INT{{isa_dt_par.width}}_MIN).r;
-        tmp.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.data_ext}}(r0.r,tmp.r,%N<tp>%);
-        return {{ isa.prefix }}_vmv_x_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(tmp.r);"""},
+        %r<c:tp|b:tp|m:1>% tmp;
+        tmp.r = %set1<c:tp|b:tp|m:1>%(INT{{isa_dt_par.width}}_MIN).r;
+        %r<tp>% res;
+        res.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1(r0.r,tmp.r,%N<tp>%);
+        return {{ isa.prefix }}_vmv_x_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(res.r);"""},
     
     "hmax_float32" : { "format" : "long", "code" :
     """
-        %r<tp>% tmp;
-        tmp.r = %set1<tp>%(-FLT_MAX).r;
-        tmp.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.data_ext}}(r0.r,tmp.r,%N<tp>%);
-        return {{ isa.prefix }}_vfmv_f_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(tmp.r);"""},
+        %r<c:tp|b:tp|m:1>% tmp;
+        tmp.r = %set1<c:tp|b:tp|m:1>%(-FLT_MAX).r;
+        %r<tp>% res;
+        res.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1(r0.r,tmp.r,%N<tp>%);
+        return {{ isa.prefix }}_vfmv_f_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(res.r);"""},
     
     "hmax_float64" : { "format" : "long", "code" :
     """
-        %r<tp>% tmp;
-        tmp.r = %set1<tp>%(-DBL_MAX).r;
-        tmp.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.data_ext}}(r0.r,tmp.r,%N<tp>%);
-        return {{ isa.prefix }}_vfmv_f_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(tmp.r);"""},
+        %r<c:tp|b:tp|m:1>% tmp;
+        tmp.r = %set1<c:tp|b:tp|m:1>%(-DBL_MAX).r;
+        %r<tp>% res;
+        res.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1(r0.r,tmp.r,%N<tp>%);
+        return {{ isa.prefix }}_vfmv_f_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(res.r);"""},
     
     "hmin_int" : { "format" : "long", "code" :
     """
-        %r<tp>% tmp;
-        tmp.r = %set1<tp>%(INT{{isa_dt_par.width}}_MAX).r;
-        tmp.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.data_ext}}(r0.r,tmp.r,%N<tp>%);
-        return {{ isa.prefix }}_vmv_x_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(tmp.r);"""},
+        %r<c:tp|b:tp|m:1>% tmp;
+        tmp.r = %set1<c:tp|b:tp|m:1>%(INT{{isa_dt_par.width}}_MAX).r;
+        %r<tp>% res;
+        res.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1(r0.r,tmp.r,%N<tp>%);
+        return {{ isa.prefix }}_vmv_x_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(res.r);"""},
     
     "hmin_uint" : { "format" : "long", "code" :
     """
-        %r<tp>% tmp;
-        tmp.r = %set1<tp>%(UINT{{isa_dt_par.width}}_MAX).r;
-        tmp.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.data_ext}}(r0.r,tmp.r,%N<tp>%);
-        return {{ isa.prefix }}_vmv_x_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(tmp.r);"""},
+        %r<c:tp|b:tp|m:1>% tmp;
+        tmp.r = %set1<c:tp|b:tp|m:1>%(UINT{{isa_dt_par.width}}_MAX).r;
+        %r<tp>% res;
+        res.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1(r0.r,tmp.r,%N<tp>%);
+        return {{ isa.prefix }}_vmv_x_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(res.r);"""},
     
     "hmin_float32" : { "format" : "long", "code" :
     """
-        %r<tp>% tmp;
-        tmp.r = %set1<tp>%(FLT_MAX).r;
-        tmp.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.data_ext}}(r0.r,tmp.r,%N<tp>%);
-        %r<tp>% ret;ret.r = tmp;
-        return {{ isa.prefix }}_vfmv_f_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(tmp.r);"""},
+        %r<c:tp|b:tp|m:1>% tmp;
+        tmp.r = %set1<c:tp|b:tp|m:1>%(FLT_MAX).r;
+        %r<tp>% res;
+        res.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1(r0.r,tmp.r,%N<tp>%);
+        return {{ isa.prefix }}_vfmv_f_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(res.r);"""},
     
     "hmin_float64" : { "format" : "long", "code" :
     """
-        %r<tp>% tmp;
-        tmp.r = %set1<tp>%(DBL_MAX).r;
-        tmp.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.data_ext}}(r0.r,tmp.r,%N<tp>%);
-        %r<tp>% ret;ret.r = tmp;
-        return {{ isa.prefix }}_vfmv_f_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(tmp.r);"""},  
+        %r<c:tp|b:tp|m:1>% tmp;
+        tmp.r = %set1<c:tp|b:tp|m:1>%(DBL_MAX).r;
+        %r<tp>% res;
+        res.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1(r0.r,tmp.r,%N<tp>%);
+        return {{ isa.prefix }}_vfmv_f_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(res.r);"""},  
     
     "notb_k" : { "format" :"long", "code" :
     """
