@@ -188,9 +188,9 @@ tpl_mask_generic_emu = {
 		%v<tp>% mask_buff[%N<tp>%];
         %r<tp>% msk_reg = %toreg<tp>%(m0);
         
-        %store<tp>%(buff, r0);
-        %store<tp>%(mask_buff, msk_reg);
-		for(unsigned i = 0; i < %N<tp>%; i++){
+        %storeu<tp>%(buff, r0);
+        %storeu<tp>%(mask_buff, msk_reg);
+		for(unsigned i = 0; i < %N<tp>%; i++)
             if(mask_buff[i])
                 p0[i] = buff[i];   
     """},
@@ -200,9 +200,9 @@ tpl_mask_generic_emu = {
 		%v<tp>% mask_buff[%N<tp>%];
         %r<tp>% msk_reg = %toreg<tp>%(m0);
         
-        %store<tp>%(buff, r0);
-        %store<tp>%(mask_buff, msk_reg);
-		for(unsigned i = 0; i < %N<tp>%; i++){
+        %storeu<tp>%(buff, r0);
+        %storeu<tp>%(mask_buff, msk_reg);
+		for(unsigned i = 0; i < %N<tp>%; i++)
             if(mask_buff[i])
                 p0[i] = buff[i];  
             else
@@ -342,10 +342,10 @@ implems_mask_generic_emu = {
 	],
 	
  	# uses get
-	# "storeu" : [
-	# 	{ "instr_name": "storeu",  "datatypes" : all_datatypes, "version" : "mask", "template" : tpl_mask_generic_emu["store_msk"]},
-	# 	{ "instr_name": "storeu",  "datatypes" : all_datatypes, "version" : "maskz", "template" : tpl_mask_generic_emu["store_mskz"]},
-	# ],
+	"storeu" : [
+		{ "instr_name": "storeu",  "datatypes" : all_datatypes, "version" : "mask", "template" : tpl_mask_generic_emu["storeu_msk"]},
+		{ "instr_name": "storeu",  "datatypes" : all_datatypes, "version" : "maskz", "template" : tpl_mask_generic_emu["storeu_mskz"]},
+	],
  
  	# LOAD 
 	"load" : [

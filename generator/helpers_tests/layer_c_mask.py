@@ -373,7 +373,7 @@ shape_templates = {
 }
 
 deny = {
-    "storeu",
+    #"storeu",
 }
 
 LAYER_OVERRIDES = {
