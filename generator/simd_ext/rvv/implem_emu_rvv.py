@@ -330,52 +330,52 @@ tpl_implem_emu_rvv = {
         {{isa_dt_par.reg}} tmp = %set1<tp>%(0).r;
         tmp = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1(r0.r,tmp,%N<tp>%);
 
-        return {{ isa.prefix }}_vmv_x_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(tmp.r);"""},
+        return {{ isa.prefix }}_vmv_x_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(tmp);"""},
     
     "hmax_int" : { "format" : "long", "code" :
     """
         {{isa_dt_par.reg}} tmp = %set1<tp>%(INT{{isa_dt_par.width}}_MIN).r;
         tmp = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1(r0.r,tmp,%N<tp>%);
-        return {{ isa.prefix }}_vmv_x_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(tmp.r);"""},
+        return {{ isa.prefix }}_vmv_x_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(tmp);"""},
     
     "hmax_float32" : { "format" : "long", "code" :
     """
         {{isa_dt_par.reg}} tmp = %set1<tp>%(-FLT_MAX).r;
         tmp = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1(r0.r,tmp,%N<tp>%);
         %r<tp>% ret;ret.r = tmp;
-        return {{ isa.prefix }}_vfmv_f_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(tmp.r);"""},
+        return {{ isa.prefix }}_vfmv_f_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(tmp);"""},
     
     "hmax_float64" : { "format" : "long", "code" :
     """
         {{isa_dt_par.reg}} tmp = %set1<tp>%(-DBL_MAX).r;
         tmp = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1(r0.r,tmp,%N<tp>%);
-        return {{ isa.prefix }}_vfmv_f_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(tmp.r);"""},
+        return {{ isa.prefix }}_vfmv_f_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(tmp);"""},
     
     "hmin_int" : { "format" : "long", "code" :
     """
         {{isa_dt_par.reg}} tmp = %set1<tp>%(INT{{isa_dt_par.width}}_MAX).r;
         tmp = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1(r0.r,tmp,%N<tp>%);
-        return {{ isa.prefix }}_vmv_x_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(tmp.r);"""},
+        return {{ isa.prefix }}_vmv_x_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(tmp);"""},
     
     "hmin_uint" : { "format" : "long", "code" :
     """
         {{isa_dt_par.reg}} tmp = %set1<tp>%(UINT{{isa_dt_par.width}}_MAX).r;
         tmp = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1(r0.r,tmp,%N<tp>%);
-        return {{ isa.prefix }}_vmv_x_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(tmp.r);"""},
+        return {{ isa.prefix }}_vmv_x_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(tmp);"""},
     
     "hmin_float32" : { "format" : "long", "code" :
     """
         {{isa_dt_par.reg}} tmp = %set1<tp>%(FLT_MAX).r;
         tmp = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1(r0.r,tmp,%N<tp>%);
         %r<tp>% ret;ret.r = tmp;
-        return {{ isa.prefix }}_vfmv_f_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(tmp.r);"""},
+        return {{ isa.prefix }}_vfmv_f_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(tmp);"""},
     
     "hmin_float64" : { "format" : "long", "code" :
     """
         {{isa_dt_par.reg}} tmp = %set1<tp>%(DBL_MAX).r;
         tmp = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1(r0.r,tmp,%N<tp>%);
         %r<tp>% ret;ret.r = tmp;
-        return {{ isa.prefix }}_vfmv_f_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(tmp.r);"""},  
+        return {{ isa.prefix }}_vfmv_f_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(tmp);"""},  
     
     "notb_k" : { "format" :"long", "code" :
     """
