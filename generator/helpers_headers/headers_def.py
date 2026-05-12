@@ -1071,30 +1071,70 @@ return resv;
 """
 %v<tr>% resv = 1;
 for (size_t i = 0; i < %N<tp>%; i++)
-	resv *= r0.r[i];
+	resv *=  %!pred_cond!% r0.r[i] %!pred_alt!%;
 
 return resv;
 """
         },
     ],
     "hmin": [ # -------------------------------------------------------------------------------------------------- hmin
-        { "type": "vector-wide", "datatypes": all_defs, "mask_variants": all_defs, "implem":
+        { "type": "vector-wide", "datatypes": all_uint, "mask_variants": all_defs, "implem":
 """
-%v<tr>% resv = r0.r[0];
+%v<tr>% resv = UINT{{ dt_par.n_bits }}_MAX;
 for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec
-	resv = (r0.r[i] < resv) ? r0.r[i] : resv;
-
+	resv = %!pred_cond!% (r0.r[i] < resv) ? r0.r[i] : resv %!pred_alt!%;
+return resv;
+"""
+        },
+        { "type": "vector-wide", "datatypes": all_int, "mask_variants": all_defs, "implem":
+"""%v<tr>% resv = INT{{ dt_par.n_bits }}_MAX;
+for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec
+    resv = %!pred_cond!% (r0.r[i] < resv) ? r0.r[i] : resv %!pred_alt!%;
+return resv;
+"""
+        },
+        { "type": "vector-wide", "datatypes": [float32], "mask_variants": all_defs, "implem":
+"""%v<tr>% resv = FLT_MAX;
+for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec
+    resv = %!pred_cond!% (r0.r[i] < resv) ? r0.r[i] : resv %!pred_alt!%;
+return resv;
+"""
+        },
+        { "type": "vector-wide", "datatypes": [float64], "mask_variants": all_defs, "implem":
+"""%v<tr>% resv = DBL_MAX;
+for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec
+    resv = %!pred_cond!% (r0.r[i] < resv) ? r0.r[i] : resv %!pred_alt!%;
 return resv;
 """
         },
     ],
     "hmax": [ # -------------------------------------------------------------------------------------------------- hmax
-        { "type": "vector-wide", "datatypes": all_defs, "mask_variants": all_defs, "implem":
+        { "type": "vector-wide", "datatypes": all_uint, "mask_variants": all_defs, "implem":
 """
-%v<tr>% resv = r0.r[0];
+%v<tr>% resv = 0;
 for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec
-	resv = (r0.r[i] > resv) ? r0.r[i] : resv;
-
+	resv =   %!pred_cond!% (r0.r[i] > resv) ? r0.r[i] : resv %!pred_alt!%;
+return resv;
+"""
+        },
+        { "type": "vector-wide", "datatypes": all_int, "mask_variants": all_defs, "implem":
+"""%v<tr>% resv = INT{{ dt_par.n_bits }}_MIN;
+for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec
+    resv = %!pred_cond!% (r0.r[i] > resv) ? r0.r[i] : resv %!pred_alt!%;
+return resv;
+"""
+        },
+        { "type": "vector-wide", "datatypes": [float32], "mask_variants": all_defs, "implem":
+"""%v<tr>% resv = -FLT_MAX;
+for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec
+    resv = %!pred_cond!% (r0.r[i] > resv) ? r0.r[i] : resv %!pred_alt!%;
+return resv;
+"""
+        },
+        { "type": "vector-wide", "datatypes": [float64], "mask_variants": all_defs, "implem":
+"""%v<tr>% resv = -DBL_MAX;
+for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec
+    resv = %!pred_cond!% (r0.r[i] > resv) ? r0.r[i] : resv %!pred_alt!%;
 return resv;
 """
         },

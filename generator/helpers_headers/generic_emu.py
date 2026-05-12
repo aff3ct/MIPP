@@ -182,8 +182,33 @@ tpl_mask_generic_emu = {
 				p0[i] = 0;
 		}
   	"""},
-      
 
+	"storeu_msk" : { "format" :"long", "code" :"""
+    	%v<tp>% buff[%N<tp>%];
+		%v<tp>% mask_buff[%N<tp>%];
+        %r<tp>% msk_reg = %toreg<tp>%(m0);
+        
+        %store<tp>%(buff, r0);
+        %store<tp>%(mask_buff, msk_reg);
+		for(unsigned i = 0; i < %N<tp>%; i++){
+            if(mask_buff[i])
+                p0[i] = buff[i];   
+    """},
+    
+	"storeu_mskz" : { "format" :"long", "code" :"""
+    	%v<tp>% buff[%N<tp>%];
+		%v<tp>% mask_buff[%N<tp>%];
+        %r<tp>% msk_reg = %toreg<tp>%(m0);
+        
+        %store<tp>%(buff, r0);
+        %store<tp>%(mask_buff, msk_reg);
+		for(unsigned i = 0; i < %N<tp>%; i++){
+            if(mask_buff[i])
+                p0[i] = buff[i];  
+            else
+				p0[i] = 0;
+    """},
+    
 	"cmp_2args" : { "format" :"long", "code" :"""
 	%m<tp>% op = %{{func_name}}<tp>%(r0, r1);
     %m<tp>% res = %andb_k<tp>%(op, m0);
@@ -193,14 +218,14 @@ tpl_mask_generic_emu = {
 
 	"hadd_maskz" : { "format" :"long", "code" :"""
 	%r<tp>% zero = %set0<tp>%();
-	%r<tp>% blended = %blend<tp>%(zero, r0, m0);
+	%r<tp>% blended = %blend<tp>%(r0, zero, m0);
 	%v<tp>% op = %hadd<tp>%(blended);
     return op;
 	"""},
 
 	"hmul_maskz" : { "format" :"long", "code" :"""
     %r<tp>% ones = %set1<tp>%(1);
-    %r<tp>% blended = %blend<tp>%(ones, r0, m0);
+    %r<tp>% blended = %blend<tp>%(r0, ones, m0);
     %v<tp>% op = %hmul<tp>%(blended);
     return op;
 	"""},
@@ -210,98 +235,98 @@ tpl_mask_generic_emu = {
 
 	"hmin_maskz_u" : { "format" :"long", "code" :"""
 	%r<tp>% max = %set1<tp>%((%v<tp>%)~0u);
-	%r<tp>% blended = %blend<tp>%(max, r0, m0);
+	%r<tp>% blended = %blend<tp>%(r0, max, m0);
 	%v<tp>% op = %hmin<tp>%(blended);
 	return op;
 	"""},
     
 	"hmin_maskz_f32" : { "format" :"long", "code" :"""
 	%r<tp>% max = %set1<tp>%(FLT_MAX);
-	%r<tp>% blended = %blend<tp>%(max, r0, m0);
+	%r<tp>% blended = %blend<tp>%(r0, max, m0);
 	%v<tp>% op = %hmin<tp>%(blended);
 	return op;
 	"""},
     
 	"hmin_maskz_f64" : { "format" :"long", "code" :"""
 	%r<tp>% max = %set1<tp>%(DBL_MAX);
-	%r<tp>% blended = %blend<tp>%(max, r0, m0);
+	%r<tp>% blended = %blend<tp>%(r0, max, m0);
 	%v<tp>% op = %hmin<tp>%(blended);
 	return op;
 	"""},
 
 	"hmin_maskz_i64" : { "format" :"long", "code" :"""
 	%r<tp>% max = %set1<tp>%(INT64_MAX);
-	%r<tp>% blended = %blend<tp>%(max, r0, m0);
+	%r<tp>% blended = %blend<tp>%(r0, max, m0);
 	%v<tp>% op = %hmin<tp>%(blended);
 	return op;
 	"""},
 
     "hmin_maskz_i32" : { "format" :"long", "code" :"""
 	%r<tp>% max = %set1<tp>%(INT32_MAX);
-	%r<tp>% blended = %blend<tp>%(max, r0, m0);
+	%r<tp>% blended = %blend<tp>%(r0, max, m0);
 	%v<tp>% op = %hmin<tp>%(blended);
 	return op;
 	"""},
 
 	"hmin_maskz_i16" : { "format" :"long", "code" :"""
 	%r<tp>% max = %set1<tp>%(INT16_MAX);
-	%r<tp>% blended = %blend<tp>%(max, r0, m0);
+	%r<tp>% blended = %blend<tp>%(r0, max, m0);
 	%v<tp>% op = %hmin<tp>%(blended);
 	return op;
 	"""},
 
 	"hmin_maskz_i8" : { "format" :"long", "code" :"""
 	%r<tp>% max = %set1<tp>%(INT8_MAX);
-	%r<tp>% blended = %blend<tp>%(max, r0, m0);
+	%r<tp>% blended = %blend<tp>%(r0, max, m0);
 	%v<tp>% op = %hmin<tp>%(blended);
 	return op;
 	"""},
     
 	"hmax_maskz_u" : { "format" :"long", "code" :"""
 	%r<tp>% min = %set1<tp>%(0u);
-	%r<tp>% blended = %blend<tp>%(min, r0, m0);
+	%r<tp>% blended = %blend<tp>%(r0, min, m0);
 	%v<tp>% op = %hmax<tp>%(blended);
 	return op;
 	"""},
 
 	"hmax_maskz_f32" : { "format" :"long", "code" :"""
 	%r<tp>% min = %set1<tp>%(-FLT_MAX);
-	%r<tp>% blended = %blend<tp>%(min, r0, m0);
+	%r<tp>% blended = %blend<tp>%(r0, min, m0);
 	%v<tp>% op = %hmax<tp>%(blended);
 	return op;
 	"""},
 
 	"hmax_maskz_f64" : { "format" :"long", "code" :"""
 	%r<tp>% min = %set1<tp>%(-DBL_MAX);
-	%r<tp>% blended = %blend<tp>%(min, r0, m0);
+	%r<tp>% blended = %blend<tp>%(r0, min, m0);
 	%v<tp>% op = %hmax<tp>%(blended);
 	return op;
 	"""},
     
 	"hmax_maskz_i64" : { "format" :"long", "code" :"""
 	%r<tp>% min = %set1<tp>%(INT64_MIN);
-	%r<tp>% blended = %blend<tp>%(min, r0, m0);
+	%r<tp>% blended = %blend<tp>%(r0, min, m0);
 	%v<tp>% op = %hmax<tp>%(blended);
 	return op;
 	"""},
 
 	"hmax_maskz_i32" : { "format" :"long", "code" :"""
 	%r<tp>% min = %set1<tp>%(INT32_MIN);
-	%r<tp>% blended = %blend<tp>%(min, r0, m0);
+	%r<tp>% blended = %blend<tp>%(r0, min, m0);
 	%v<tp>% op = %hmax<tp>%(blended);
 	return op;
 	"""},
 
 	"hmax_maskz_i16" : { "format" :"long", "code" :"""
 	%r<tp>% min = %set1<tp>%(INT16_MIN);
-	%r<tp>% blended = %blend<tp>%(min, r0, m0);
+	%r<tp>% blended = %blend<tp>%(r0, min, m0);
 	%v<tp>% op = %hmax<tp>%(blended);
 	return op;
 	"""},
     
 	"hmax_maskz_i8" : { "format" :"long", "code" :"""
 	%r<tp>% min = %set1<tp>%(INT8_MIN);
-	%r<tp>% blended = %blend<tp>%(min, r0, m0);
+	%r<tp>% blended = %blend<tp>%(r0, min, m0);
 	%v<tp>% op = %hmax<tp>%(blended);
 	return op;
 	"""},

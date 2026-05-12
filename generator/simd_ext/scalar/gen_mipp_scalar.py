@@ -181,8 +181,13 @@ def _gen_c_functions_scalar(isa, file, funcs, f, ff, dt, lmul=0):
                 pre_rendering = pre_rendering.replace(" %!pred_alt!%", ") : r0.r[i]")
                 pre_rendering = pre_rendering.replace("%!pred_alt!%", ") : r0.r[i]")
             elif mask_variant == "maskz":
-                pre_rendering = pre_rendering.replace(" %!pred_alt!%", ") : 0")
-                pre_rendering = pre_rendering.replace("%!pred_alt!%", ") : 0")
+                if f == "hmax" or f == "hmin":
+                    pre_rendering = pre_rendering.replace(" %!pred_alt!%", ") : resv")
+                elif f == "hmul":
+                    pre_rendering = pre_rendering.replace(" %!pred_alt!%", ") : 1")
+                else:
+                    pre_rendering = pre_rendering.replace(" %!pred_alt!%", ") : 0")
+                    pre_rendering = pre_rendering.replace("%!pred_alt!%", ") : 0")
             elif mask_variant == "masks":
                 pre_rendering = pre_rendering.replace(" %!pred_alt!%", ") : rsrc.r[i]")
                 pre_rendering = pre_rendering.replace("%!pred_alt!%", ") : rsrc.r[i]")
@@ -408,6 +413,7 @@ def gen_mipp_scalar(include_manager):
 #include <math.h> // sqrt, sqrtf, round, roundf
 #include <string.h> // memcpy
 #include <stdint.h>
+#include <float.h> // FLT_MAX, DBL_MAX
 #include <limits.h>
 #if !defined(MIPP_SCALAR_SIZE)
 	#if defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)

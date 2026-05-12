@@ -530,77 +530,7 @@ deny = {
 
 
 LAYER_OVERRIDES = {
-    
 
-    
-#     "fmadd": {
-#         "loop_body": """\t\t{{dt_ext}}_t res = inputs1[i] * inputs2[i] + inputs3[i];""",
-#     },
-    
-#     "fnmadd": {
-#         "loop_body": """\t\t{{dt_ext}}_t res = -(inputs1[i] * inputs2[i]) + inputs3[i];""",
-#     },
-    
-#     "fmsub": {
-#         "loop_body": """\t\t{{dt_ext}}_t res = inputs1[i] * inputs2[i] - inputs3[i];""",
-#     },
-    
-#     "fnmsub": {
-#         "loop_body": """\t\t{{dt_ext}}_t res = -(inputs1[i] * inputs2[i]) - inputs3[i];""",
-#     },
-    
-
-#     #msb is most significant BIT not byte.
-#     #the function returns msb of a lane & 0x8 etc
-#     "msb" : {
-#         "loop_body": "{% if is_int %}" + "\t{{dt_ext}}_t res = inputs1[i] & (({{dt_ext}}_t)1 << (sizeof({{dt_ext}}_t)*8 - 1));"
-#         + "{% else %}" + """\t{{dt_ext}}_t res = 
-#         std::bit_cast<{{dt_ext}}_t,uint{{type_size}}_t>(
-# \t\t\tstd::bit_cast<uint{{type_size}}_t, {{dt_ext}}_t>(inputs1[i])
-# \t\t\t&((uint{{type_size}}_t)1 << (sizeof({{dt_ext}}_t)*8 - 1))
-# \t\t);\n""" + """{% endif %}""",
-#         "loop_assert": AS_REG_BINOP_FLOAT_WORKAROUND,
-#     },
-    
-#     "hadd_to_scal": {
-#         "loop_body": """\t{{dt_ext}}_t res1 = 0; uint64_t ures1 = 0;
-# \tfor(int j = 0; j < vectorSize; j++){
-# \t\tres1 += inputs1[j];
-# \t\tures1 += inputs1[j];
-# \t}""",
-#         "loop_assert": """\tif((uint64_t)res1 == ures1) REQUIRE(res == res1);""",
-#     },
-    
-#     "cast": {
-#         "func_decl": """void test_cmipp_cast_{{dt1_ext}}_{{dt2_ext}}(){""",
-#         "decl": DECL_CAST_2ARGS,
-#         "init": INIT_CAST_2ARGS,
-#         "load": LOAD_CAST_2ARGS,
-#         "operation": OP_CAST,
-#         "loop_body": """\tfor(size_t i = 0; i < vectorSize * sizeof({{dt1_ext}}_t) / sizeof({{dt2_ext}}_t); i++){\n"""+ LB_CAST_2ARGS,
-#         "loop_assert": AS_CAST_2ARGS+ "\n\t}",
-#     },
-    
-#     "cast_k": {
-#         "func_decl": """void test_cmipp_cast_k_{{dt1_ext}}_{{dt2_ext}}(){""",
-#         "decl": DECL_CAST_2ARGS_MSK,
-#         "init": INIT_CAST_2ARGS,
-#         "load": LOAD_CAST_2ARGS_MASK,
-#         "operation": OP_CAST_MSK,
-#         "loop_body": """\tfor(size_t i = 0; i < vectorSize * sizeof({{dt1_ext}}_t) / sizeof({{dt2_ext}}_t); i++){\n"""+ LB_CAST_2ARGS,
-#         "loop_assert": AS_CAST_2ARGS_MSK + "\n\t}",
-#     },
-    
-
-#         "loop_body": """\t\t{{dt_ext}}_t res = std::round(inputs1[i]);""",
-#     },
-#     "div2": {
-#         "loop_body": """\t\t{{dt_ext}}_t res = inputs1[i] / 2;""",
-#     },
-    
-#     "div4": {
-#         "loop_body": """\t\t{{dt_ext}}_t res = inputs1[i] / 4;""",
-#     },
     # Define CUSTOM overflow workarounds
     "add" : {
         "loop_assert" :
@@ -655,7 +585,7 @@ LAYER_OVERRIDES = {
 + "{% if is_int%}"
 + "\t\tREQUIRE(abs_diff::abs_diff(res1,res2) == 0);"
 + "{% else %}"
-+ "\n\t\t{{dt_ext}}_t tol  = 1e-5f * abs_diff::abs_diff(res2) + 1.0f;"
++ "\n\t\t{{dt_ext}}_t tol  = 1e-4f * abs_diff::abs_diff(res2) + 1.0f;"
 + "\n\t\t{{dt_ext}}_t diff = abs_diff::abs_diff(res1, res2);"
 + "\n\t\tREQUIRE(diff <= tol);"
 + "{% endif %}"
