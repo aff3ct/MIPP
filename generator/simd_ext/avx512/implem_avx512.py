@@ -136,7 +136,7 @@ tpl_implem_avx512 = {
 	%r<tp>% rs3 = %cast<c:int|b:32,tp>%(rsi32);
 	rs3.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs2.r, rs3.r);
 
-	return rs3;""" },
+	return %getfirst<tp>%(rs3);""" },
     "reduce_32": { "format": "long", "code":
 """// long format
 	%r<c:float|b:32>% rsf;
@@ -166,7 +166,7 @@ tpl_implem_avx512 = {
 	%r<tp>% rs4 = %cast<c:int|b:32,tp>%(rsi32);
 	rs4.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs3.r, rs4.r);
 
-	return rs4;""" },
+	return %getfirst<tp>%(rs4);""" },
     "reduce_16": { "format": "long", "code":
 """// long format
 	%r<c:float|b:32>% rsf;
@@ -205,7 +205,7 @@ tpl_implem_avx512 = {
 	%r<tp>% rs5 = %cast<c:int|b:8,tp>%(rsi8);
 	rs5.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs4.r, rs5.r);
 
-	return rs5;"""},
+	return %getfirst<tp>%(rs5);"""},
     "reduce_8": { "format": "long", "code":
 """// long format
 	%r<c:float|b:32>% rsf;
@@ -252,7 +252,7 @@ tpl_implem_avx512 = {
 	%r<tp>% rs6 = %cast<c:int|b:8,tp>%(rsi8);
 	rs6.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs5.r, rs6.r);
 
-	return rs6;""" },
+	return %getfirst<tp>%(rs6);""" },
     
     "arith_2args_msk": { "format": "short", "code": "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, m0.m, r0.r, r1.r);" },
     

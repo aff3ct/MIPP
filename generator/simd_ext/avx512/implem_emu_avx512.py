@@ -169,8 +169,7 @@ tpl_implem_emu_avx512 = {
 	return tmp[0];""" },
     "hadd_to_scal": { "format": "long", "code":
 """// long format
-	%r<tp>% reduced = %hadd<tp>%(r0);
-	return %getfirst<tp>%(reduced);""" },
+	return %hadd<tp>%(r0);""" },
 
 	"andb_k_emu": { "format": "long", "code":
 """// long format
