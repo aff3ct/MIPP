@@ -280,6 +280,11 @@ tpl_implem_avx512 = {
     tmp0 = %set1<c:int|b:tp>%( (%v<c:int|b:tp>%)v0);
     return %cast<c:int|b:tp,tp>%(tmp0);"""
     },
+    "getfirst-fromstore": { "format": "long", "code":
+"""// long format
+	%v<tp>% tmp[%N<tp>%];
+	%store<tp>%(tmp, r0);
+	return tmp[0];""" },
 }
 
 implems_avx512 = {
@@ -306,7 +311,8 @@ implems_avx512 = {
         { "instr_name": "cvtsd_f64",  "datatypes": [float64],                    "template": tpl_implem_avx512["getfirst"],                                                                                                     },
         { "instr_name": "cvtss_f32",  "datatypes": [float32],                    "template": tpl_implem_avx512["getfirst"],                                                                                                     },
         { "instr_name": "cvtsd_f64",  "datatypes": [int64, uint64],              "template": tpl_implem_avx512["getfirst-hack64"],                                                                                              },
-        { "instr_name": "cvtss_f32",  "datatypes": [int32, uint32],              "template": tpl_implem_avx512["getfirst-hack32"],                                                                                              } ], # getfirst
+        { "instr_name": "cvtss_f32",  "datatypes": [int32, uint32],              "template": tpl_implem_avx512["getfirst-hack32"],                                                                                              },          
+        {                             "datatypes": [int16, uint16, int8, uint8], "template": tpl_implem_avx512["getfirst-fromstore"],                                                                                           } ], # getfirst
     "set1": [
         { "instr_name": "set1",       "datatypes": all_float + all_int,          "template": tpl_implem_avx512["set1"],                                                                                                         }, 
         { "instr_name": "set1",       "datatypes": all_uint,                     "template": tpl_implem_avx512["set1_emu"]                                                                                                      }], # set1

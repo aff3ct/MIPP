@@ -162,11 +162,7 @@ tpl_implem_emu_avx512 = {
 	%r<tp>% radd = %add<tp>%(r0, r1);
 	%r<tp>% rmsk = %toreg<tp>%(m0);
 	return %andb<tp>%(rmsk, radd);""" },
-    "getfirst_fromstore": { "format": "long", "code":
-"""// long format
-	%v<tp>% tmp[%N<tp>%];
-	%store<tp>%(tmp, r0);
-	return tmp[0];""" },
+
     "hadd_to_scal": { "format": "long", "code":
 """// long format
 	return %hadd<tp>%(r0);""" },
@@ -226,8 +222,7 @@ implems_emu_avx512 = {
         { "datatypes": [int8, uint8],                "template": tpl_implem_emu_avx512["notb"],         "if": "defined(__AVX512BW__)" } ], # notb
     "maskz_add": [
         { "datatypes": all_int,                      "template": tpl_implem_emu_avx512["maskz_add"]                                   } ], # maskz_add
-    "getfirst": [
-        { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["getfirst_fromstore"]                          } ], # getfirst
+
     "hadd_to_scal": [
         { "datatypes": [float64, int64],             "template": tpl_implem_emu_avx512["hadd_to_scal"]                                },
         { "datatypes": [float32, int32],             "template": tpl_implem_emu_avx512["hadd_to_scal"]                                },
