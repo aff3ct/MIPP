@@ -13,6 +13,7 @@ sys.path.insert(1, path + "/simd_ext/sse/")
 sys.path.insert(1, path + "/simd_ext/sve/")
 sys.path.insert(1, path + "/simd_ext/rvv/")
 sys.path.insert(1, path + "/simd_ext/neon/")
+sys.path.insert(1, path + "/simd_ext/scalar/")
 
 from implem_sse import isa_sse, implems_sse
 from implem_emu_sse import implems_emu_sse
@@ -32,7 +33,7 @@ from implem_emu_neon import implems_emu_neon
 #from implem_sve import isa_sve
 #from implem_emu_sve import implem_emu_sve
 
-from headers_def import mipp_funcs, mipp_funcs_concepts
+from headers_def import mipp_funcs, mipp_funcs_concepts, isa_scalar, implems_scalar
 from headers_def import all_datatypes, all_datatypes_cart_prod
 from tools import *
 from generic_emu import *
@@ -42,6 +43,8 @@ from gen_mipp_avx import gen_mipp_avx
 from gen_mipp_avx512 import gen_mipp_avx512
 from gen_mipp_sve import gen_mipp_sve
 from gen_mipp_rvv import gen_mipp_rvv
+
+from gen_mipp_scalar import gen_c_functions_scalar_one # generate pseudocode of fn in doc using this
 
 include_gen_path = "../include/"
 
@@ -813,8 +816,26 @@ class SpecFuncInfo:
         return ret
         
     
-        
-        
+    def write_func_algo(self, file):
+        func_scalar = implems_scalar[self.func_name]
+        # render first implem in the function and write it as an algo. Func is called by write_spec_func_info.
+
+        isa = isa_scalar
+        # file = file
+        funcs = mipp_funcs
+        f = self.func_name
+        ff = implems_scalar[self.func_name][0]
+
+        if ff["datatypes"]:
+            datatypes = ff["datatypes"]
+        else:
+            datatypes = funcs[f]["datatypes"]
+        dt = datatypes[0]
+        print("```c\n", file=file)
+        gen_c_functions_scalar_one(isa, file, funcs, f, ff, dt, lmul=0)
+        print("```\n", file=file)
+
+
     def write_spec_func_info(self, base_dir):
         #path is base_dire + concept + "/" + func_name + ".md
         file_path = os.path.join(base_dir, self.concept, self.func_name + ".md")
@@ -862,6 +883,10 @@ class SpecFuncInfo:
                 print("This function supports zero-masking variants.", file=f)
             if self.mask_support.is_masksable():
                 print("This function supports source masking variants.", file=f)
+
+            print("\n\n## Algorithm", file=f)
+            print("Note : the algorithm is provided for one example type but is the same for all supported types.", file=f)
+            self.write_func_algo(f)
        
 class SpecFuncInfos:
     

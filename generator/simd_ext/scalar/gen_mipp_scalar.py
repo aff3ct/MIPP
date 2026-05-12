@@ -147,7 +147,7 @@ def _emit_function_body_scalar(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rende
     print("}", file=file)
 
 # Important changes here!!
-def _gen_c_functions_scalar(isa, file, funcs, f, ff, dt, lmul=0):
+def gen_c_functions_scalar_one(isa, file, funcs, f, ff, dt, lmul=0):
         
     if ff["mask_variants"]:
         mask_variants = ff["mask_variants"]
@@ -250,7 +250,7 @@ def gen_c_functions_scalar(isa, include_manager, funcs, implems, lmul=0):
                 else:
                     datatypes = funcs[f]["datatypes"]
                 for dt in datatypes:
-                    _gen_c_functions_scalar(isa, file, funcs, f, ff, dt, lmul=lmul)
+                    gen_c_functions_scalar_one(isa, file, funcs, f, ff, dt, lmul=lmul)
         else:
             print("Panic: '" + f + "' function does not exist.")
             exit(-1)
