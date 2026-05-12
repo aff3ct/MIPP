@@ -191,24 +191,120 @@ tpl_mask_generic_emu = {
 	"""},
 	
 
-	"hadd_mask" : { "format" :"long", "code" :"""
+	"hadd_maskz" : { "format" :"long", "code" :"""
 	%r<tp>% zero = %set0<tp>%();
 	%r<tp>% blended = %blend<tp>%(zero, r0, m0);
 	%v<tp>% op = %hadd<tp>%(blended);
     return op;
 	"""},
 
-	"hmul_mask" : { "format" :"long", "code" :"""
+	"hmul_maskz" : { "format" :"long", "code" :"""
     %r<tp>% ones = %set1<tp>%(1);
     %r<tp>% blended = %blend<tp>%(ones, r0, m0);
     %v<tp>% op = %hmul<tp>%(blended);
     return op;
 	"""},
     
-	"tmp_hmin_hmax_mask" : { "format" :"long", "code" :"""
+	"tmp_hmin_hmax_maskz" : { "format" :"long", "code" :"""
     return 0;"""},
 
-   
+	"hmin_maskz_u" : { "format" :"long", "code" :"""
+	%r<tp>% max = %set1<tp>%((%v<tp>%)~0u);
+	%r<tp>% blended = %blend<tp>%(max, r0, m0);
+	%v<tp>% op = %hmin<tp>%(blended);
+	return op;
+	"""},
+    
+	"hmin_maskz_f32" : { "format" :"long", "code" :"""
+	%r<tp>% max = %set1<tp>%(FLT_MAX);
+	%r<tp>% blended = %blend<tp>%(max, r0, m0);
+	%v<tp>% op = %hmin<tp>%(blended);
+	return op;
+	"""},
+    
+	"hmin_maskz_f64" : { "format" :"long", "code" :"""
+	%r<tp>% max = %set1<tp>%(DBL_MAX);
+	%r<tp>% blended = %blend<tp>%(max, r0, m0);
+	%v<tp>% op = %hmin<tp>%(blended);
+	return op;
+	"""},
+
+	"hmin_maskz_i64" : { "format" :"long", "code" :"""
+	%r<tp>% max = %set1<tp>%(INT64_MAX);
+	%r<tp>% blended = %blend<tp>%(max, r0, m0);
+	%v<tp>% op = %hmin<tp>%(blended);
+	return op;
+	"""},
+
+    "hmin_maskz_i32" : { "format" :"long", "code" :"""
+	%r<tp>% max = %set1<tp>%(INT32_MAX);
+	%r<tp>% blended = %blend<tp>%(max, r0, m0);
+	%v<tp>% op = %hmin<tp>%(blended);
+	return op;
+	"""},
+
+	"hmin_maskz_i16" : { "format" :"long", "code" :"""
+	%r<tp>% max = %set1<tp>%(INT16_MAX);
+	%r<tp>% blended = %blend<tp>%(max, r0, m0);
+	%v<tp>% op = %hmin<tp>%(blended);
+	return op;
+	"""},
+
+	"hmin_maskz_i8" : { "format" :"long", "code" :"""
+	%r<tp>% max = %set1<tp>%(INT8_MAX);
+	%r<tp>% blended = %blend<tp>%(max, r0, m0);
+	%v<tp>% op = %hmin<tp>%(blended);
+	return op;
+	"""},
+    
+	"hmax_maskz_u" : { "format" :"long", "code" :"""
+	%r<tp>% min = %set1<tp>%(0u);
+	%r<tp>% blended = %blend<tp>%(min, r0, m0);
+	%v<tp>% op = %hmax<tp>%(blended);
+	return op;
+	"""},
+
+	"hmax_maskz_f32" : { "format" :"long", "code" :"""
+	%r<tp>% min = %set1<tp>%(-FLT_MAX);
+	%r<tp>% blended = %blend<tp>%(min, r0, m0);
+	%v<tp>% op = %hmax<tp>%(blended);
+	return op;
+	"""},
+
+	"hmax_maskz_f64" : { "format" :"long", "code" :"""
+	%r<tp>% min = %set1<tp>%(-DBL_MAX);
+	%r<tp>% blended = %blend<tp>%(min, r0, m0);
+	%v<tp>% op = %hmax<tp>%(blended);
+	return op;
+	"""},
+    
+	"hmax_maskz_i64" : { "format" :"long", "code" :"""
+	%r<tp>% min = %set1<tp>%(INT64_MIN);
+	%r<tp>% blended = %blend<tp>%(min, r0, m0);
+	%v<tp>% op = %hmax<tp>%(blended);
+	return op;
+	"""},
+
+	"hmax_maskz_i32" : { "format" :"long", "code" :"""
+	%r<tp>% min = %set1<tp>%(INT32_MIN);
+	%r<tp>% blended = %blend<tp>%(min, r0, m0);
+	%v<tp>% op = %hmax<tp>%(blended);
+	return op;
+	"""},
+
+	"hmax_maskz_i16" : { "format" :"long", "code" :"""
+	%r<tp>% min = %set1<tp>%(INT16_MIN);
+	%r<tp>% blended = %blend<tp>%(min, r0, m0);
+	%v<tp>% op = %hmax<tp>%(blended);
+	return op;
+	"""},
+    
+	"hmax_maskz_i8" : { "format" :"long", "code" :"""
+	%r<tp>% min = %set1<tp>%(INT8_MIN);
+	%r<tp>% blended = %blend<tp>%(min, r0, m0);
+	%v<tp>% op = %hmax<tp>%(blended);
+	return op;
+	"""},
 }
 
 implems_mask_generic_emu = {
@@ -401,16 +497,29 @@ implems_mask_generic_emu = {
  	# REDUCTIONS
 	# only mask. Policy for reduction is to apply reduction + broadcast and then select elements based on the mask. Only support mask.
     "hadd" : [
-		{ "instr_name": "hadd",  "datatypes" : all_datatypes, "version" : "mask", "template" : tpl_mask_generic_emu["hadd_mask"]},
+		{ "instr_name": "hadd",  "datatypes" : all_datatypes, "version" : "maskz", "template" : tpl_mask_generic_emu["hadd_maskz"]},
 	],
     "hmul" : [
-		{ "instr_name": "hmul",  "datatypes" : all_datatypes, "version" : "mask", "template" : tpl_mask_generic_emu["hmul_mask"]},
+		{ "instr_name": "hmul",  "datatypes" : all_datatypes, "version" : "maskz", "template" : tpl_mask_generic_emu["hmul_maskz"]},
 	],
 	"hmin" : [
-		{ "instr_name": "hmin",  "datatypes" : all_datatypes, "version" : "mask", "template" : tpl_mask_generic_emu["tmp_hmin_hmax_mask"]},
+		{ "instr_name": "hmin",  "datatypes" : all_uint,  "version" : "maskz", "template" : tpl_mask_generic_emu["hmin_maskz_u"]},
+        { "instr_name": "hmin",  "datatypes" : [float32], "version" : "maskz", "template" : tpl_mask_generic_emu["hmin_maskz_f32"]},
+        { "instr_name": "hmin",  "datatypes" : [float64], "version" : "maskz", "template" : tpl_mask_generic_emu["hmin_maskz_f64"]},
+        { "instr_name": "hmin",  "datatypes" : [int64],   "version" : "maskz", "template" : tpl_mask_generic_emu["hmin_maskz_i64"]},
+		{ "instr_name": "hmin",  "datatypes" : [int32],   "version" : "maskz", "template" : tpl_mask_generic_emu["hmin_maskz_i32"]},
+        { "instr_name": "hmin",  "datatypes" : [int16],   "version" : "maskz", "template" : tpl_mask_generic_emu["hmin_maskz_i16"]},
+		{ "instr_name": "hmin",  "datatypes" : [int8],    "version" : "maskz", "template" : tpl_mask_generic_emu["hmin_maskz_i8"]},
+        
 	],
 	"hmax" : [
-		{ "instr_name": "hmax",  "datatypes" : all_datatypes, "version" : "mask", "template" : tpl_mask_generic_emu["tmp_hmin_hmax_mask"]},
+		{"instr_name": "hmax",  "datatypes" : all_uint,  "version" : "maskz", "template" : tpl_mask_generic_emu["hmax_maskz_u"]},
+		{"instr_name": "hmax",  "datatypes" : [float32], "version" : "maskz", "template" : tpl_mask_generic_emu["hmax_maskz_f32"]},
+		{"instr_name": "hmax",  "datatypes" : [float64], "version" : "maskz", "template" : tpl_mask_generic_emu["hmax_maskz_f64"]},
+		{"instr_name": "hmax",  "datatypes" : [int64],   "version" : "maskz", "template" : tpl_mask_generic_emu["hmax_maskz_i64"]},
+		{"instr_name": "hmax",  "datatypes" : [int32],   "version" : "maskz", "template" : tpl_mask_generic_emu["hmax_maskz_i32"]},
+		{"instr_name": "hmax",  "datatypes" : [int16],   "version" : "maskz", "template" : tpl_mask_generic_emu["hmax_maskz_i16"]},
+		{"instr_name": "hmax",  "datatypes" : [int8],    "version" : "maskz", "template" : tpl_mask_generic_emu["hmax_maskz_i8"]},
 	],
  
 	# SELECTION

@@ -88,6 +88,7 @@ def _custom_prefix_generator(func, isa_list, is_common=False):
 #define MIPP
 
 #include <stdint.h>
+#include <float.h>
 #include <stdio.h>
 #include <stdlib.h>
 
