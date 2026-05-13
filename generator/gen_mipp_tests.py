@@ -46,6 +46,9 @@ rvv_guard = "#elif defined(MIPP_RVV)"
 neon_guard = "#elif defined(MIPP_NEON)"
 scalar_guard = "#elif defined(MIPP_SCALAR)"
 
+# .update can lead to bugs if there 
+# are less types in the emu implem than in non emu implem. 
+# this was the case for fmadd in RVV.
 implems_avx512.update(implems_emu_avx512)
 implems_avx.update(implems_emu_avx)
 implems_sse.update(implems_emu_sse)
@@ -252,6 +255,7 @@ def add_type_guards(func, implem, function, kind="c", lmul=0, mkind=""):
     THIS IS FORE EASE OF TESTS.
     """
     datatypes = get_defined_dttypes(func, implem, mkind)
+
     section = ""
     res = ""
     lmul_str = lmul_to_str(lmul, "")
@@ -341,6 +345,7 @@ def gen_test_type_guards(func, long_name, short_name, kind="c", lmul=0, mkind=""
     lmul_str = "" if lmul == 0 else lmul_to_str(lmul, "")
     res = f'\nTEST_CASE("{long_name} - {kind} {lmul_str} {mkind}", "[{short_name}]") {{\n'
     for implems in implem_dict.values():
+
         res += implems["guard"] + "\n"
         if func in implems["implem"]:
             if kind == "c":
@@ -1052,15 +1057,15 @@ def write_file_if_different(path, content, encoding="utf-8"):
 
     try:
         old_bytes = p.read_bytes()
-        print(f"Comparing existing file: {p}")
+        #print(f"Comparing existing file: {p}")
         if old_bytes == new_bytes:
             return False
     except FileNotFoundError:
-        print(f"File not found (will create): {p}")
+        #print(f"File not found (will create): {p}")
         pass
 
     p.parent.mkdir(parents=True, exist_ok=True)
-    print(f"Writing file: {p}")
+    #print(f"Writing file: {p}")
     p.write_bytes(new_bytes)
     return True
 

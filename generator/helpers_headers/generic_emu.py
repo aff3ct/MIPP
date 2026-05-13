@@ -77,7 +77,7 @@ implems_generic_emu = {
 	],
 	
 	"fmadd" : [
-		{ "instr_name": "fmadd",  "datatypes" : all_float, "template" : tpl_generic_emu["fmadd"]}],
+		{ "instr_name": "fmadd",  "datatypes" : all_float+[int32], "template" : tpl_generic_emu["fmadd"]}],
  
 	"blend" : [
 		{ "instr_name": "blend",  "datatypes" : all_datatypes, "template" : tpl_generic_emu["blend"]},
@@ -404,27 +404,27 @@ implems_mask_generic_emu = {
   	],
  
 	"fmadd" : [
-		{ "instr_name": "fmadd",  "datatypes" : all_float, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_3args_reg"]["code"] + SNIPPET_END_MSK}},
-		{ "instr_name": "fmadd",  "datatypes" : all_float, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_3args_reg"]["code"] + SNIPPET_END_MSKZ}},
-		{ "instr_name": "fmadd",  "datatypes" : all_float, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_3args_reg"]["code"] + SNIPPET_END_MSKS}},
+		{ "instr_name": "fmadd",  "datatypes" : all_float+[int32], "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_3args_reg"]["code"] + SNIPPET_END_MSK}},
+		{ "instr_name": "fmadd",  "datatypes" : all_float+[int32], "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_3args_reg"]["code"] + SNIPPET_END_MSKZ}},
+		{ "instr_name": "fmadd",  "datatypes" : all_float+[int32], "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_3args_reg"]["code"] + SNIPPET_END_MSKS}},
 	],
  
 	"fmsub" : [
-		{ "instr_name": "fmsub",  "datatypes" : all_float, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_3args_reg"]["code"] + SNIPPET_END_MSK}},
-		{ "instr_name": "fmsub",  "datatypes" : all_float, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_3args_reg"]["code"] + SNIPPET_END_MSKZ}},
-		{ "instr_name": "fmsub",  "datatypes" : all_float, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_3args_reg"]["code"] + SNIPPET_END_MSKS}},
+		{ "instr_name": "fmsub",  "datatypes" : all_float+[int32], "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_3args_reg"]["code"] + SNIPPET_END_MSK}},
+		{ "instr_name": "fmsub",  "datatypes" : all_float+[int32], "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_3args_reg"]["code"] + SNIPPET_END_MSKZ}},
+		{ "instr_name": "fmsub",  "datatypes" : all_float+[int32], "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_3args_reg"]["code"] + SNIPPET_END_MSKS}},
 	],
  
 	"fnmadd" : [
-		{ "instr_name": "fnmadd",  "datatypes" : all_float, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_3args_reg"]["code"] + SNIPPET_END_MSK}},
-		{ "instr_name": "fnmadd",  "datatypes" : all_float, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_3args_reg"]["code"] + SNIPPET_END_MSKZ}},
-		{ "instr_name": "fnmadd",  "datatypes" : all_float, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_3args_reg"]["code"] + SNIPPET_END_MSKS}},
+		{ "instr_name": "fnmadd",  "datatypes" : all_float+[int32], "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_3args_reg"]["code"] + SNIPPET_END_MSK}},
+		{ "instr_name": "fnmadd",  "datatypes" : all_float+[int32], "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_3args_reg"]["code"] + SNIPPET_END_MSKZ}},
+		{ "instr_name": "fnmadd",  "datatypes" : all_float+[int32], "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_3args_reg"]["code"] + SNIPPET_END_MSKS}},
 	],
  
 	"fnmsub" : [
-		{ "instr_name": "fnmsub",  "datatypes" : all_float, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_3args_reg"]["code"] + SNIPPET_END_MSK}},
-		{ "instr_name": "fnmsub",  "datatypes" : all_float, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_3args_reg"]["code"] + SNIPPET_END_MSKZ}},
-		{ "instr_name": "fnmsub",  "datatypes" : all_float, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_3args_reg"]["code"] + SNIPPET_END_MSKS}},
+		{ "instr_name": "fnmsub",  "datatypes" : all_float+[int32], "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_3args_reg"]["code"] + SNIPPET_END_MSK}},
+		{ "instr_name": "fnmsub",  "datatypes" : all_float+[int32], "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_3args_reg"]["code"] + SNIPPET_END_MSKZ}},
+		{ "instr_name": "fnmsub",  "datatypes" : all_float+[int32], "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_3args_reg"]["code"] + SNIPPET_END_MSKS}},
 	],
  
 	"div4" : [
