@@ -166,8 +166,10 @@ tpl_implem_rvv = {
    """},
    
     "fmsub_int" : {"format" : "long", "code" : """
-        %r<tp>% res; 
-        res.r = {{isa.prefix}}_{{instr_name}}_vv_{{isa_dt_par.int_data_ext}}(r0.r, r1.r, r2.r, %N<tp>%);
+        /*%r<tp>% neg_r2 = %sub<tp>%(%set0<tp>%(), r2));
+        res.r = {{isa.prefix}}_{{instr_name}}_vv_{{isa_dt_par.data_ext}}(r0.r, r1.r, r2.r, %N<tp>%);*/
+        %r<tp>% res = %mul<tp>%(r0, r1);
+        res = %sub<tp>%(res, r2);
         return res;
     """},
   
@@ -272,7 +274,7 @@ implems_rvv = {
     
     "fmsub" : [
         { "instr_name" : "fmsub",   "datatypes" : all_float,     "template" : tpl_implem_rvv["arith_3args"]},
-        { "instr_name" : "nmsub",   "datatypes" : [int32],       "template" : tpl_implem_rvv["arith_3args"]},],
+        { "instr_name" : "madd",   "datatypes" : [int32],        "template" : tpl_implem_rvv["fmsub_int"]},],
     "cmplt" : [
         { "instr_name" : "mslt",    "datatypes" : all_int,       "template" : tpl_implem_rvv["arith_msk_type_2args"]},
         { "instr_name" : "msltu",   "datatypes" : all_uint,      "template" : tpl_implem_rvv["arith_msk_type_2args"]},

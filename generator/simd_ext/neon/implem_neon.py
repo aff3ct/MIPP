@@ -150,4 +150,5 @@ implems_neon = {
     "blend": [
         { "instr_name": "bslq",         "datatypes": all_int_uint+ [float32],            "template": tpl_implem_neon["blend"],                                            }, 
         { "instr_name": "bslq",         "datatypes": [float64],                          "template": tpl_implem_neon["blend"],              "if": "defined(__aarch64__)"  },], # blend
+
 }

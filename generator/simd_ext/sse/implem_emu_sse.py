@@ -69,6 +69,12 @@ tpl_implem_emu_sse = {
 	%r<tp>% tmp2 = %toreg<tp>%(m1);
 	%r<tp>% res = %andb<tp>%(tmp1, tmp2);
 	return %tomsk<tp>%(res);""" },
+    
+	"fmadd": { "format": "long", "code":
+"""// long format
+	%r<tp>% res = %mul<tp>%(r0, r1);
+	res = %add<tp>%(res, r2);
+	return res;""" },
 }
 
 implems_emu_sse = {
@@ -94,4 +100,7 @@ implems_emu_sse = {
         { "datatypes": [float32],                      "template": tpl_implem_emu_sse["set_k-xxf"],  "if": "defined(__SSE2__)"  } ], # set_k
     "andb_k": [
 		{ "datatypes": all_datatypes,                "template": tpl_implem_emu_sse["andb_k_emu"], "if": "defined(__SSE2__)"	} ], # andb_k
+        
+    "fmadd" : [
+		{ "datatypes": all_float,          "template": tpl_implem_emu_sse["fmadd"] } ], # fmadd
 }
