@@ -570,6 +570,31 @@ LAYER_OVERRIDES = {
 + "{% endif %}"
 + """\n\t\t}""",
     },
+
+    # always divivde by 2 so no 0 check
+    "div2" : {
+        "loop_assert" :"""
+\t\t {{dt_ext}}_t res1 = mipp_get_{{dt_ext}}(r3, i);\n \t\t{{dt_ext}}_t res2 = mipp_scalar_get_{{dt_ext}}(s3, i);\n"""
++ "{% if is_int%}"
++ "\t\tREQUIRE(abs_diff::abs_diff(res1,res2) == 0 );"
++ "{% else %}"
++ "\n\t\t{{dt_ext}}_t tol  = 1e-5f * abs_diff::abs_diff(res2) + 1.0f;"
++ "\n\t\t{{dt_ext}}_t diff = abs_diff::abs_diff(res1, res2);"
++ "\n\t\tREQUIRE(diff <= tol);"
++ "{% endif %}"
+    },
+
+    "div4" : {
+        "loop_assert" :"""\t\t {{dt_ext}}_t res1 = mipp_get_{{dt_ext}}(r3, i);\n \t\t{{dt_ext}}_t res2 = mipp_scalar_get_{{dt_ext}}(s3, i);\n"""
++ "{% if is_int%}"
++ "\t\tREQUIRE(abs_diff::abs_diff(res1,res2) == 0 );"
++ "{% else %}"
++ "\n\t\t{{dt_ext}}_t tol  = 1e-5f * abs_diff::abs_diff(res2) + 1.0f;"
++ "\n\t\t{{dt_ext}}_t diff = abs_diff::abs_diff(res1, res2);"
++ "\n\t\tREQUIRE(diff <= tol);"
++ "{% endif %}"
+    },
+
     
     "hadd_to_scal" : {
         "loop_assert" :"""\t\tbool ov = false; {{dt_ext}}_t res = 0;

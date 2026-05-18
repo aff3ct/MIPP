@@ -123,7 +123,11 @@ tpl_implem_rvv = {
     "testz_2"              : { "format" : "short", "code" : "   int32_t res = !({{isa.prefix}}_v{{instr_name}}_m_{{isa_dt_par.data_ext_logi}}(m0.m, %N<tp>%));"},
 
     "scalar_notb"          : { "format" : "short", "code" : "{{isa.prefix}}_v{{instr_name}}_vx_{{isa_dt_par.data_ext}}(r0.r, -1, %N<tp>%);"},
-
+    "shift_scalar"         : { "format" : "short", "code" : "{{isa.prefix}}_v{{instr_name}}_vx_{{isa_dt_par.data_ext}}(r0.r, v0, %N<tp>%);"},
+    "div2_scalar"          : { "format" : "short", "code" : "{{isa.prefix}}_v{{instr_name}}_vx_{{isa_dt_par.data_ext}}(r0.r, 1, %N<tp>%);"},
+    "div4_scalar"          : { "format" : "short", "code" : "{{isa.prefix}}_v{{instr_name}}_vx_{{isa_dt_par.data_ext}}(r0.r, 2, %N<tp>%);"},
+    "div2_float"    : { "format" : "short", "code" : "{{isa.prefix}}_v{{instr_name}}_vf_{{isa_dt_par.data_ext}}(r0.r, 2, %N<tp>%);"},
+    "div4_float"    : { "format" : "short", "code" : "{{isa.prefix}}_v{{instr_name}}_vf_{{isa_dt_par.data_ext}}(r0.r, 4, %N<tp>%);"},
 
     "float_bitwise"        : { "format" : "long", "code" : """
                 %r<c:uint|b:tp>% tmp1, tmp2;
@@ -181,6 +185,17 @@ tpl_implem_rvv = {
         ret.r = {{isa.prefix}}_{{instr_name}}_f_x_v_{{isa_dt_par.data_ext}}(tmp.r,%N<tp>%);
         return ret;
     """},
+
+    "shift_float" : { "format" : "long", "code" : """
+        %r<c:uint|b:tp>% tmp1;
+        tmp1.r = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(r0.r);
+        tmp1.r = {{ isa.prefix }}_v{{ instr_name }}_vx_{{ isa_dt_par.uint_data_ext }}(tmp1.r, v0, %N<tp>%);
+        %r<tp>% ret;
+        ret.r = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.uint_data_ext}}_{{isa_dt_par.data_ext}}(tmp1.r);
+        return ret;
+    """},
+
+
 }
 
 """
@@ -302,7 +317,7 @@ implems_rvv = {
         { "instr_name" : "mv",     "datatypes" : all_int_uint,   "template" : tpl_implem_rvv["scalar_getfirst"]},
         { "instr_name" : "fmv",    "datatypes" : all_float,      "template" : tpl_implem_rvv["float_getfirst"]},],
     #"maskst" :[{ "instr_name" : "maskload",   "datatypes" : all_datatypes,      "template" : tpl_implem_rvv["maskst"] }],
-   "min" : [
+    "min" : [
         { "instr_name" : "min",    "datatypes" : all_int,        "template" : tpl_implem_rvv["arith_2args"]},
         { "instr_name" : "minu",   "datatypes" : all_uint,       "template" : tpl_implem_rvv["arith_2args"]},
         { "instr_name" : "fmin",   "datatypes" : all_float,      "template" : tpl_implem_rvv["arith_2args"]},
@@ -310,25 +325,52 @@ implems_rvv = {
         
         { "instr_name" : "min",    "datatypes" : all_int,        "template" : tpl_implem_rvv["arith_2args_msk"], "version" : "mask"},
         { "instr_name" : "minu",   "datatypes" : all_uint,       "template" : tpl_implem_rvv["arith_2args_msk"], "version" : "mask"},
-        { "instr_name" : "fmin",   "datatypes" : all_float,      "template" : tpl_implem_rvv["arith_2args_msk"], "version" : "mask"},
-    ],
-   "max" : [
+        { "instr_name" : "fmin",   "datatypes" : all_float,      "template" : tpl_implem_rvv["arith_2args_msk"], "version" : "mask"}],
+    "max" : [
         { "instr_name" : "max",    "datatypes" : all_int,        "template" : tpl_implem_rvv["arith_2args"]},
         { "instr_name" : "maxu",   "datatypes" : all_uint,       "template" : tpl_implem_rvv["arith_2args"]},
         { "instr_name" : "fmax",   "datatypes" : all_float,      "template" : tpl_implem_rvv["arith_2args"]},
         
         { "instr_name" : "max",    "datatypes" : all_int,        "template" : tpl_implem_rvv["arith_2args_msk"], "version" : "mask"},
         { "instr_name" : "maxu",   "datatypes" : all_uint,       "template" : tpl_implem_rvv["arith_2args_msk"], "version" : "mask"},
-        { "instr_name" : "fmax",   "datatypes" : all_float,      "template" : tpl_implem_rvv["arith_2args_msk"], "version" : "mask"},
-    ],
-   "notb" : [
-        { "instr_name" : "xor",    "datatypes" : all_int_uint,   "template" : tpl_implem_rvv["scalar_notb"]},
-        { "instr_name" : "xor",    "datatypes" : all_float,      "template" : tpl_implem_rvv["float_notb"]},],   
-   "testz_2" : [
-        { "instr_name" : "cpop",   "datatypes" : all_datatypes,  "template" : tpl_implem_rvv["testz_2"]}],
-   
-   "round" :  [
-        { "instr_name" : "vfcvt",   "datatypes" : all_float, "template" : tpl_implem_rvv["round_float"]},
-        { "instr_name" : "vfcvt",   "datatypes" : all_int_uint, "template" : tpl_implem_rvv["round_int"]},],
+        { "instr_name" : "fmax",   "datatypes" : all_float,      "template" : tpl_implem_rvv["arith_2args_msk"], "version" : "mask"}],
 
+    "notb" : [
+        { "instr_name" : "xor",    "datatypes" : all_int_uint,   "template" : tpl_implem_rvv["scalar_notb"]},
+        { "instr_name" : "xor",    "datatypes" : all_float,      "template" : tpl_implem_rvv["float_notb"]},],
+
+    "testz_2" : [
+        { "instr_name" : "cpop",   "datatypes" : all_datatypes,  "template" : tpl_implem_rvv["testz_2"]}],
+
+   
+    "round" :  [
+        { "instr_name" : "vfcvt",   "datatypes" : all_float,     "template" : tpl_implem_rvv["round_float"]},
+        { "instr_name" : "vfcvt",   "datatypes" : all_int_uint,  "template" : tpl_implem_rvv["round_int"]},],
+    
+    "adds" : [
+        { "instr_name" : "sadd",   "datatypes" : all_int,        "template" : tpl_implem_rvv["arith_2args"]}, 
+        { "instr_name" : "saddu",  "datatypes" : all_uint,       "template" : tpl_implem_rvv["arith_2args"]}],
+    
+    "subs" : [
+        { "instr_name" : "ssub",   "datatypes" : all_int,  "template" : tpl_implem_rvv["arith_2args"]},
+        { "instr_name" : "ssubu",  "datatypes" : all_uint, "template" : tpl_implem_rvv["arith_2args"]}],
+
+    "lshift" : [
+        { "instr_name" : "sll",     "datatypes" : all_int_uint,  "template" : tpl_implem_rvv["shift_scalar"]},
+        { "instr_name" : "sll",     "datatypes" : all_float,     "template" : tpl_implem_rvv["shift_float"] }],
+
+    "rshift" : [
+        { "instr_name" : "srl",     "datatypes" : all_uint,  "template" : tpl_implem_rvv["shift_scalar"]},
+        { "instr_name" : "sra",     "datatypes" : all_int,   "template" : tpl_implem_rvv["shift_scalar"]},
+        { "instr_name" : "srl",     "datatypes" : all_float,     "template" : tpl_implem_rvv["shift_float"]}],
+
+    "div2" : [
+        { "instr_name" : "srl",     "datatypes" : all_uint,      "template" : tpl_implem_rvv["div2_scalar"]},
+        { "instr_name" : "sra",     "datatypes" : all_int,       "template" : tpl_implem_rvv["div2_scalar"]},
+        { "instr_name" : "fdiv",    "datatypes" : all_float,     "template" : tpl_implem_rvv["div2_float"]}],
+
+    "div4" : [
+        { "instr_name" : "srl",     "datatypes" : all_uint,      "template" : tpl_implem_rvv["div4_scalar"]},
+        { "instr_name" : "sra",     "datatypes" : all_int,       "template" : tpl_implem_rvv["div4_scalar"]},
+        { "instr_name" : "fdiv",    "datatypes" : all_float,     "template" : tpl_implem_rvv["div4_float"]}],
 }

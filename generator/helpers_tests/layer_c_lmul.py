@@ -541,6 +541,29 @@ LAYER_OVERRIDES = {
 + "{% endif %}"
 + """\n\t\t}""",
     },
+
+    # alwyas divide by 2 so no 0 check needed, but add some tolerance for float division to avoid precision issues.
+    "div2" : {
+        "loop_assert" :"""\t\t {{dt_ext}}_t res1 = mipp_get_{{dt_ext}}_{{lmul_suffix}}(r3, i);\n \t\t{{dt_ext}}_t res2 = mipp_scalar_get_{{dt_ext}}_{{lmul_suffix}}(s3, i);\n"""
++ "{% if is_int%}"
++ "\t\tREQUIRE(abs_diff::abs_diff(res1,res2) == 0);"
++ "{% else %}"
++ "\n\t\t{{dt_ext}}_t tol  = 1e-5f * abs_diff::abs_diff(res2) + 1.0f;"
++ "\n\t\t{{dt_ext}}_t diff = abs_diff::abs_diff(res1, res2);"
++ "\n\t\tREQUIRE(diff <= tol);"
++ "{% endif %}"
+    },
+
+    "div4" : {
+        "loop_assert" :"""\t\t {{dt_ext}}_t res1 = mipp_get_{{dt_ext}}_{{lmul_suffix}}(r3, i);\n \t\t{{dt_ext}}_t res2 = mipp_scalar_get_{{dt_ext}}_{{lmul_suffix}}(s3, i);\n"""
++ "{% if is_int%}"
++ "\t\tREQUIRE(abs_diff::abs_diff(res1,res2) == 0);"
++ "{% else %}"
++ "\n\t\t{{dt_ext}}_t tol  = 1e-5f * abs_diff::abs_diff(res2) + 1.0f;"
++ "\n\t\t{{dt_ext}}_t diff = abs_diff::abs_diff(res1, res2);"
++ "\n\t\tREQUIRE(diff <= tol);"
++ "{% endif %}"
+    },
     
     "andb": {
         "loop_assert" : AS_REG_BINOP_FLOAT_WORKAROUND
