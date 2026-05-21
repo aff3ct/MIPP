@@ -658,7 +658,7 @@ tpl_horiz_lmul_generic_emu = {
 
 	"hadd" : { "format" :"long", "code" :"""
 {% if lmul == 1 %}
-	return %hadd_to_scal<tp>%(r0);
+	return %hadd<tp>%(r0);
 {% else %}
 	
   	%v<tp>% v0 = %hadd<c:tp|b:tp|m:tp/2>%(r0.r1);
@@ -702,9 +702,57 @@ tpl_horiz_lmul_generic_emu = {
 	return v1 > v2 ? v1 : v2;
 {% endif %}"""},
 
+
+	"hadd_maskz" : { "format" :"long", "code" :"""
+{% if lmul == 1 %}
+	return %hadd<tp>%(r0);
+{% else %}
+	
+  	%v<tp>% v0 = %hadd<c:tp|b:tp|m:tp/2>%(r0.r1);
+	%v<tp>% v1 = %hadd<c:tp|b:tp|m:tp/2>%(r0.r2);	
+	return v0 + v1;
+{% endif %}"""},
+
+	
+	"hmul_maskz" : { "format" :"long", "code" :"""
+{% if lmul == 1 %}
+	return %hmul<tp>%(r0);
+{% else %}
+	
+	%v<tp>% v1, v2;
+  	v1 = %hmul<c:tp|b:tp|m:tp/2>%(r0.r1);
+	v2 = %hmul<c:tp|b:tp|m:tp/2>%(r0.r2);	
+	return v1 * v2;
+{% endif %}"""},
+
+ 
+	"hmin_maskz" : { "format" :"long", "code" :"""
+{% if lmul == 1 %}
+	return %hmin<tp>%(r0);
+{% else %}
+	
+	%v<tp>% v1, v2;
+  	v1 = %hmin<c:tp|b:tp|m:tp/2>%(r0.r1);
+	v2 = %hmin<c:tp|b:tp|m:tp/2>%(r0.r2);
+
+	return v1 < v2 ? v1 : v2;
+{% endif %}"""},
+	
+	"hmax_maskz" : { "format" :"long", "code" :"""
+{% if lmul == 1 %}
+	return %hmax<tp>%(r0);
+{% else %}
+	
+	%v<tp>% v1, v2;
+  	v1 = %hmax<c:tp|b:tp|m:tp/2>%(r0.r1);
+	v2 = %hmax<c:tp|b:tp|m:tp/2>%(r0.r2);
+	return v1 > v2 ? v1 : v2;
+{% endif %}"""},
+
 }
 
 # dependencies key is a hacky solution but that's life.
+# the maskz versions are likely useless. Currently their template are "wrong" and the generation only works bc of a hack.
 implems_horiz_lmul_generic_emu = {
     
 	"set" : [ 
@@ -729,15 +777,19 @@ implems_horiz_lmul_generic_emu = {
 	],
 	"hadd" : [
      		{ "instr_name": "hadd",  "datatypes" : all_datatypes, "version" : "horiz_lmul", "template" : tpl_horiz_lmul_generic_emu["hadd"], "dependencies" : {"add"}},
+        	{ "instr_name": "hadd",  "datatypes" : all_datatypes, "version" : "maskz", 		"template" : tpl_horiz_lmul_generic_emu["hadd_maskz"], "dependencies" : {"add"}},
 	],
 	"hmul" : [
      		{ "instr_name": "hmul",  "datatypes" : all_datatypes, "version" : "horiz_lmul", "template" : tpl_horiz_lmul_generic_emu["hmul"], "dependencies" : {"mul"}},
+        	{ "instr_name": "hmul",  "datatypes" : all_datatypes, "version" : "maskz", 		"template" : tpl_horiz_lmul_generic_emu["hmul_maskz"], "dependencies" : {"mul"}},
 	],
  	"hmin" : [
 	 		{ "instr_name": "hmin",  "datatypes" : all_datatypes, "version" : "horiz_lmul", "template" : tpl_horiz_lmul_generic_emu["hmin"], "dependencies" : {"min"}},
+			{ "instr_name": "hmin",  "datatypes" : all_datatypes, "version" : "maskz", 		"template" : tpl_horiz_lmul_generic_emu["hmin_maskz"], "dependencies" : {"min"}},
 	],
 	"hmax" : [
      	 	{ "instr_name": "hmax",  "datatypes" : all_datatypes, "version" : "horiz_lmul", "template" : tpl_horiz_lmul_generic_emu["hmax"], "dependencies" : {"max"}},
+			{ "instr_name": "hmax",  "datatypes" : all_datatypes, "version" : "maskz", 		"template" : tpl_horiz_lmul_generic_emu["hmax_maskz"], "dependencies" : {"max"}},
 	],
 	"hadd_to_scal" : [
      	 	{ "instr_name": "hadd_to_scal",  "datatypes" : all_datatypes, "version" : "horiz_lmul", "template" : tpl_horiz_lmul_generic_emu["hadd_to_scal"]},

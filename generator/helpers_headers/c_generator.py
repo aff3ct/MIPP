@@ -1009,7 +1009,7 @@ def gen_c_missing_functions_lmul(isa, file, funcs, lmul):
                         _gen_c_missing_one_masked(isa, file_w, funcs, f, dt, "masks", lmul=lmul)
 
  
-def _gen_c_horiz_lmul_one(isa, file, funcs, f, ff, dt, lmul):
+def _gen_c_horiz_lmul_one(isa, file, funcs, f, ff, dt, lmul, mkind=None):
     """
     Emit one horizontal LMUL variant body (LMUL>1) for one function+datatype,
     using custom generic emulation templates (implems_horiz_lmul_generic_emu).
@@ -1020,7 +1020,7 @@ def _gen_c_horiz_lmul_one(isa, file, funcs, f, ff, dt, lmul):
     dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
     dt_key = dt_par + "," + dt_ret
 
-    if _rvv_seen_lmul(funcs, f, dt_key, lmul):
+    if _rvv_seen_lmul(funcs, f, dt_key, lmul) and mkind is None:
         return
 
     # Current horiz templates (tpl_set) reference %set<...>% recursively (tp/2).
@@ -1078,6 +1078,13 @@ def _gen_c_horiz_lmul_one(isa, file, funcs, f, ff, dt, lmul):
     if ph_ret is None:
         return
 
+    # Hack : change the function call name in the generated ir. For instance 
+    # hadd_float32_m2 -> hadd_float32_maskz_m2 for the maskz version of the template.
+    if mkind is not None and lmul >= 2:
+        l2 = int(lmul) // 2
+        ph_ret["converted_ir"] = ph_ret["converted_ir"].replace(f"{f}_{dt_par}_m{int(l2)}", f"{f}_{dt_par}_{mkind}_m{int(l2)}")
+
+
 
     print("\t", end="", file=file)
     print(ph_ret["converted_ir"], file=file)
@@ -1109,12 +1116,12 @@ def gen_c_horiz_lmul(isa, file, funcs, f, dt, lmul, implems_horiz_lmul_generic_e
     if not funcs[f].get("horizontal", False):
         return
 
-    # For future: if you pass mask_type, we currently just stub out (unless you add templates).
-    if mask_type is not None:
-        name = func_name_for_panic or f
-        print(f"\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \"{name}_m{int(lmul)}\");", file=file)
-        print("\texit(-1);", file=file)
-        return
+    if mask_type is not None: # I think only hadd, hmul hmin and hmax are masked + horizontal. 
+        mask_support = funcs[f]["mask_support"]
+        if not mask_support.is_supported(mask_type):
+            print(f"Panic: unsupported mask type '{mask_type}' for '{f}' function.")
+            exit(-1)
+        
 
     # No template available => emit stub (runtime panic), not a codegen panic.
     if f not in implems_horiz_lmul_generic_emu:
@@ -1129,11 +1136,14 @@ def gen_c_horiz_lmul(isa, file, funcs, f, dt, lmul, implems_horiz_lmul_generic_e
         if "version" in ff and ff["version"] not in (None, "", "horiz_lmul"):
             continue
 
+        if "version" == "maskz": 
+            print("Debug: found maskz version for '" + f)
+
         # Respect datatype list when present
         if "datatypes" in ff and dt not in ff["datatypes"]:
             continue
 
-        _gen_c_horiz_lmul_one(isa=isa, file=file, funcs=funcs, f=f, ff=ff, dt=dt, lmul=lmul)
+        _gen_c_horiz_lmul_one(isa=isa, file=file, funcs=funcs, f=f, ff=ff, dt=dt, lmul=lmul, mkind=mask_type)
         emitted_any = True
 
     if not emitted_any:
