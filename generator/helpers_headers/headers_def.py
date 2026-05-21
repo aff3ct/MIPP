@@ -348,7 +348,7 @@ mipp_funcs = {
     "store":         { "proto": protos["ret_void_2args_ptr_reg"],       "datatypes": all_datatypes,           "horizontal": False, "mask_support": mask_and_maskz  },
     "storeu":        { "proto": protos["ret_void_2args_ptr_reg"],       "datatypes": all_datatypes,           "horizontal": False, "mask_support": mask_and_maskz  },
     "set":           { "proto": protos["ret_reg_1arg_Nele"],            "datatypes": all_datatypes,           "horizontal": True,  "mask_support": only_masks      },
-    "set_k":         { "proto": protos["ret_msk_1arg_Nele"],            "datatypes": all_datatypes,           "horizontal": False, "mask_support": no_mask         },
+    "set_k":         { "proto": protos["ret_msk_1arg_Nele"],            "datatypes": all_datatypes,           "horizontal": True, "mask_support": no_mask         },
     "set1":          { "proto": protos["ret_reg_1arg_val"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": only_masks      },
     "set1_k":        { "proto": protos["ret_msk_1arg_i32"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": no_mask         },
     "maskzld":       { "proto": protos["ret_reg_2args_msk_ptr"],        "datatypes": all_32bit+all_64bit,     "horizontal": False, "mask_support": no_mask         },

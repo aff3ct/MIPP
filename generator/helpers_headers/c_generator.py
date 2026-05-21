@@ -1080,9 +1080,38 @@ def _gen_c_horiz_lmul_one(isa, file, funcs, f, ff, dt, lmul, mkind=None):
 
     # Hack : change the function call name in the generated ir. For instance 
     # hadd_float32_m2 -> hadd_float32_maskz_m2 for the maskz version of the template.
-    if mkind is not None and lmul >= 2:
+
+    # We also need to add the extra argument / arguments after start of the function 
+    # i.e : 
+    # if mask / maskz : 
+    # -> hadd_float32_m2(r0.r1); 
+    #    hadd_float32_m2(r0.r2);
+    #   becomes:
+    # hadd_float32_maskz_m2(m0.m1, r0.r1)
+    # hadd_float32_maskz_m2(m0.m2, r0.r2)
+
+    # masks : 
+    # -> set_float32_m2(vals);
+    #    set_float32_m2(vals+n);
+    #    becomes:
+    # set_float32_masks_m2(m0.m1, rsrc.r1, vals);
+    # set_float32_masks_m2(m0.m2, rsrc.r2, vals+n);
+
+    # if mkind is not None and lmul >= 2:
+    #     l2 = int(lmul) // 2
+    #     ph_ret["converted_ir"] = ph_ret["converted_ir"].replace(f"{f}_{dt_par}_m{int(l2)}", f"{f}_{dt_par}_{mkind}_m{int(l2)}")
+    
+    if (mkind == "maskz" or mkind == "mask") and lmul >= 2:
         l2 = int(lmul) // 2
-        ph_ret["converted_ir"] = ph_ret["converted_ir"].replace(f"{f}_{dt_par}_m{int(l2)}", f"{f}_{dt_par}_{mkind}_m{int(l2)}")
+        # This is a bit hacky but we want to add the mask argument at the right place in the generated IR. 
+        # We look for the first occurrence of the function call in the generated IR and we add the mask argument after the opening parenthesis. 
+        # This relies on the fact that in our templates, the first occurrence of the function call is the one we want to modify, which is true for our current horiz_lmul templates.
+        ph_ret["converted_ir"] = ph_ret["converted_ir"].replace(f"{f}_{dt_par}_m{int(l2)}(", f"{f}_{dt_par}_{mkind}_m{int(l2)}(m0.m1, ", 1)
+        ph_ret["converted_ir"] = ph_ret["converted_ir"].replace(f"{f}_{dt_par}_m{int(l2)}(", f"{f}_{dt_par}_{mkind}_m{int(l2)}(m0.m2, ", 1)
+    if (mkind == "masks") and lmul >= 2:
+        l2 = int(lmul) // 2
+        ph_ret["converted_ir"] = ph_ret["converted_ir"].replace(f"{f}_{dt_par}_m{int(l2)}(", f"{f}_{dt_par}_{mkind}_m{int(l2)}(m0.m1, rsrc.r1, ", 1)
+        ph_ret["converted_ir"] = ph_ret["converted_ir"].replace(f"{f}_{dt_par}_m{int(l2)}(", f"{f}_{dt_par}_{mkind}_m{int(l2)}(m0.m2, rsrc.r2, ", 1)
 
 
 

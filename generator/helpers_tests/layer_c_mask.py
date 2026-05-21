@@ -202,8 +202,8 @@ OP_REG_UNOP = """\t{{reg_type}} r3 = mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul
 OP_REG_BINOP = """\t{{reg_type}} r3 = mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args}} r1, r2);
 \t{{reg_type_scalar}} s3 = mipp_scalar_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args_scalar}} s1, s2);"""
 
-OP_CMP_2REG = """\t{{msk_type}} m3 = mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args}} r1, r2); {{reg_type}} r3 = mipp_toreg_{{dt_ext}}(m3);
-\t{{msk_type_scalar}} sm3 = mipp_scalar_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args_scalar}} s1, s2); {{reg_type_scalar}} s3 = mipp_scalar_toreg_{{dt_ext}}(sm3);"""
+OP_CMP_2REG = """\t{{msk_type}} m3 = mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args}} r1, r2); {{reg_type}} r3 = mipp_toreg_{{dt_ext}}{{lmul_suffix}}(m3);
+\t{{msk_type_scalar}} sm3 = mipp_scalar_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args_scalar}} s1, s2); {{reg_type_scalar}} s3 = mipp_scalar_toreg_{{dt_ext}}{{lmul_suffix}}(sm3);"""
 
 OP_STORE = """
 \t{{dt_ext}}_t output[{{size}}*{{lmul_coeff}}];
@@ -368,7 +368,7 @@ shape_templates = {
         load=LOAD_1ARG_REG + "\n" + LOAD_MASK_AND_RSRC_FROM_REG1,
         operation="",
         loop_body="",
-        loop_assert="\t\tREQUIRE(mipp_{{func}}_{{dt_ext}}{{lmul_suffix}}{{mask_kind}}({{mask_args}} r1) == mipp_scalar_{{func}}_{{dt_ext}}{{lmul_suffix}}{{mask_kind}}({{mask_args_scalar}} s1));",
+        loop_assert="\t\tREQUIRE(mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args}} r1) == mipp_scalar_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args_scalar}} s1));",
     ),
 }
 
@@ -476,7 +476,7 @@ LAYER_OVERRIDES = {
 
      "hadd" : {
         "loop_assert" :"""\t\tbool ov = false; {{dt_ext}}_t res = 0;
-\t\tfor(int j = 0; j < {{size}}; j++){
+\t\tfor(int j = 0; j < {{size}} * {{lmul_coeff}}; j++){
 \t\t\tov |= ovf::will_add_overflow<{{dt_ext}}_t>(res, inputs1[j]);
 \t\t\tif(ov) break;
 \t\t\tres += inputs1[j];
@@ -484,7 +484,7 @@ LAYER_OVERRIDES = {
 \t\tif(ov) {
 \t\t\tINFO("Overflow occurred, skipping assert");
 \t\t}else{\n\t"""
-+ "\t\t {{dt_ext}}_t res1 = mipp_{{func}}_{{dt_ext}}{{lmul_suffix}}{{mask_kind}}({{mask_args}}r1);\n \t\t{{dt_ext}}_t res2 = mipp_scalar_{{func}}_{{dt_ext}}{{lmul_suffix}}{{mask_kind}}({{mask_args_scalar}}s1);\n"
++ "\t\t {{dt_ext}}_t res1 = mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args}}r1);\n \t\t{{dt_ext}}_t res2 = mipp_scalar_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args_scalar}}s1);\n"
 + "{% if is_int%}"
 + "\t\tREQUIRE(abs_diff::abs_diff(res1,res2) == 0);"
 + "{% else %}"
@@ -497,7 +497,7 @@ LAYER_OVERRIDES = {
     
     "hmul": {
         "loop_assert": """\t\tbool ov = false; {{dt_ext}}_t res = 1;
-\t\tfor(int j = 0; j < {{size}}; j++){
+\t\tfor(int j = 0; j < {{size}} * {{lmul_coeff}}; j++){
 \t\t\tov |= ovf::will_mul_overflow<{{dt_ext}}_t>(res, inputs1[j]);
 \t\t\tif(ov) break;
 \t\t\tres *= inputs1[j];
@@ -505,7 +505,7 @@ LAYER_OVERRIDES = {
 \t\tif(ov) {
 \t\t\tINFO("Overflow occurred, skipping assert");
 \t\t}else{"""
-+ "\t\t {{dt_ext}}_t res1 = mipp_{{func}}_{{dt_ext}}{{lmul_suffix}}{{mask_kind}}({{mask_args}}r1);\n \t\t{{dt_ext}}_t res2 = mipp_scalar_{{func}}_{{dt_ext}}{{lmul_suffix}}{{mask_kind}}({{mask_args_scalar}}s1);\n"
++ "\t\t {{dt_ext}}_t res1 = mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args}}r1);\n \t\t{{dt_ext}}_t res2 = mipp_scalar_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args_scalar}}s1);\n"
 + "{% if is_int%}"
 + "\t\tREQUIRE(abs_diff::abs_diff(res1,res2) == 0);"
 + "{% else %}"

@@ -579,6 +579,7 @@ implems_mask_generic_emu = {
 		{ "instr_name": "max",  "datatypes" : all_datatypes, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKZ}},
 		{ "instr_name": "max",  "datatypes" : all_datatypes, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg"]["code"] + SNIPPET_END_MSKS}},
 	],
+    
 }
 
 ################################# HORIZONTAL LMUL FUNCTIONS ############################################
@@ -703,50 +704,17 @@ tpl_horiz_lmul_generic_emu = {
 {% endif %}"""},
 
 
-	"hadd_maskz" : { "format" :"long", "code" :"""
+	"set_k" : { "format" :"long", "code" :"""
 {% if lmul == 1 %}
-	return %hadd<tp>%(r0);
+	%m<tp>% res = %set_k<tp>%(vals);
+	return res;
 {% else %}
-	
-  	%v<tp>% v0 = %hadd<c:tp|b:tp|m:tp/2>%(r0.r1);
-	%v<tp>% v1 = %hadd<c:tp|b:tp|m:tp/2>%(r0.r2);	
-	return v0 + v1;
-{% endif %}"""},
-
-	
-	"hmul_maskz" : { "format" :"long", "code" :"""
-{% if lmul == 1 %}
-	return %hmul<tp>%(r0);
-{% else %}
-	
-	%v<tp>% v1, v2;
-  	v1 = %hmul<c:tp|b:tp|m:tp/2>%(r0.r1);
-	v2 = %hmul<c:tp|b:tp|m:tp/2>%(r0.r2);	
-	return v1 * v2;
-{% endif %}"""},
-
- 
-	"hmin_maskz" : { "format" :"long", "code" :"""
-{% if lmul == 1 %}
-	return %hmin<tp>%(r0);
-{% else %}
-	
-	%v<tp>% v1, v2;
-  	v1 = %hmin<c:tp|b:tp|m:tp/2>%(r0.r1);
-	v2 = %hmin<c:tp|b:tp|m:tp/2>%(r0.r2);
-
-	return v1 < v2 ? v1 : v2;
-{% endif %}"""},
-	
-	"hmax_maskz" : { "format" :"long", "code" :"""
-{% if lmul == 1 %}
-	return %hmax<tp>%(r0);
-{% else %}
-	
-	%v<tp>% v1, v2;
-  	v1 = %hmax<c:tp|b:tp|m:tp/2>%(r0.r1);
-	v2 = %hmax<c:tp|b:tp|m:tp/2>%(r0.r2);
-	return v1 > v2 ? v1 : v2;
+	// pass first half of the vector to 
+	%m<tp>% res;
+	res.m1 = %set_k<c:tp|b:tp|m:tp/2>%(vals);
+	const int32_t *ptr = vals + %N<tp>% / 2;
+	res.m2 = %set_k<c:tp|b:tp|m:tp/2>%(ptr);
+	return res;
 {% endif %}"""},
 
 }
@@ -777,21 +745,21 @@ implems_horiz_lmul_generic_emu = {
 	],
 	"hadd" : [
      		{ "instr_name": "hadd",  "datatypes" : all_datatypes, "version" : "horiz_lmul", "template" : tpl_horiz_lmul_generic_emu["hadd"], "dependencies" : {"add"}},
-        	{ "instr_name": "hadd",  "datatypes" : all_datatypes, "version" : "maskz", 		"template" : tpl_horiz_lmul_generic_emu["hadd_maskz"], "dependencies" : {"add"}},
 	],
 	"hmul" : [
      		{ "instr_name": "hmul",  "datatypes" : all_datatypes, "version" : "horiz_lmul", "template" : tpl_horiz_lmul_generic_emu["hmul"], "dependencies" : {"mul"}},
-        	{ "instr_name": "hmul",  "datatypes" : all_datatypes, "version" : "maskz", 		"template" : tpl_horiz_lmul_generic_emu["hmul_maskz"], "dependencies" : {"mul"}},
 	],
  	"hmin" : [
 	 		{ "instr_name": "hmin",  "datatypes" : all_datatypes, "version" : "horiz_lmul", "template" : tpl_horiz_lmul_generic_emu["hmin"], "dependencies" : {"min"}},
-			{ "instr_name": "hmin",  "datatypes" : all_datatypes, "version" : "maskz", 		"template" : tpl_horiz_lmul_generic_emu["hmin_maskz"], "dependencies" : {"min"}},
 	],
 	"hmax" : [
      	 	{ "instr_name": "hmax",  "datatypes" : all_datatypes, "version" : "horiz_lmul", "template" : tpl_horiz_lmul_generic_emu["hmax"], "dependencies" : {"max"}},
-			{ "instr_name": "hmax",  "datatypes" : all_datatypes, "version" : "maskz", 		"template" : tpl_horiz_lmul_generic_emu["hmax_maskz"], "dependencies" : {"max"}},
 	],
 	"hadd_to_scal" : [
      	 	{ "instr_name": "hadd_to_scal",  "datatypes" : all_datatypes, "version" : "horiz_lmul", "template" : tpl_horiz_lmul_generic_emu["hadd_to_scal"]},
+	],
+    
+	"set_k" : [
+		{ "instr_name": "set_k",  "datatypes" : all_datatypes, "version" : "horiz_lmul", "template" : tpl_horiz_lmul_generic_emu["set_k"]},
 	],
 }
