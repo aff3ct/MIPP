@@ -68,13 +68,13 @@ def gen_cpp_structures(file):
 
     print("template<typename T, int LMUL=1, ISA ISA_TYPE=ISA::DEFAULT> struct rvd_type{};", file=file)
 
-    template = """template<> struct rvd_type<{{ datatype.cstd }}, {{ lmul }}, ISA::DEFAULT>{ using type = rvd_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t; };"""
+    template = """template<> struct rvd_type<{{ datatype.cstd }}, {{ lmul }}>{ using type = rvd_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t; };"""
     j2_template = Template(template, undefined=StrictUndefined)
     for lmul in all_lmul:
         for dt in datatypes:
             print(j2_template.render(datatype=datatypes[dt], lmul=str(lmul)), file=file)
 
-    template = """template<> struct rvd_type<{{ datatype.cstd }}, -{{ ldiv }}, ISA::DEFAULT>{ using type = rvd_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t; };"""
+    template = """template<> struct rvd_type<{{ datatype.cstd }}, -{{ ldiv }}>{ using type = rvd_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t; };"""
     j2_template = Template(template, undefined=StrictUndefined)
     for ldiv in all_ldiv:
         print("#if defined(MIPP_ENABLE_LDIV" + str(ldiv) + ")", file=file)
@@ -87,13 +87,13 @@ def gen_cpp_structures(file):
     print("// should throw an exception", file=file)
     print("template<typename T, int LMUL=1, ISA ISA_TYPE=ISA::DEFAULT> struct rvm_type{};", file=file)
 
-    template = """template<> struct rvm_type<{{ datatype.cstd }}, {{ lmul }}, ISA::DEFAULT>{ using type = rvm_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t; };"""
+    template = """template<> struct rvm_type<{{ datatype.cstd }}, {{ lmul }}>{ using type = rvm_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t; };"""
     j2_template = Template(template, undefined=StrictUndefined)
     for lmul in all_lmul:
         for dt in datatypes:
             print(j2_template.render(datatype=datatypes[dt], lmul=str(lmul)), file=file)
 
-    template = """template<> struct rvm_type<{{ datatype.cstd }}, -{{ ldiv }}, ISA::DEFAULT>{ using type = rvm_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t; };"""
+    template = """template<> struct rvm_type<{{ datatype.cstd }}, -{{ ldiv }}>{ using type = rvm_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t; };"""
     j2_template = Template(template, undefined=StrictUndefined)
     for ldiv in all_ldiv:
         print("#if defined(MIPP_ENABLE_LDIV" + str(ldiv) + ")", file=file)
@@ -142,7 +142,7 @@ def gen_cpp_structures(file):
 
 def gen_cpp_constexpr_functions(file):
     print("// should throw an exception", file=file)
-    print("template<typename T, int LMUL=1> constexpr uint32_t N(){ return 0; }", file=file)
+    print("template<typename T, int LMUL=1, ISA ISA_TYPE=ISA::DEFAULT> constexpr uint32_t N(){ return 0; }", file=file)
 
     template = """template<> constexpr uint32_t N<{{ datatype.cstd }}, {{ lmul }}>(){ return MIPP_N_{{type_category_upper}}{{ datatype.n_bits }}{{ lmul_suffix }}; }"""
     j2_template = Template(template, undefined=StrictUndefined)
@@ -165,6 +165,18 @@ def gen_cpp_constexpr_functions(file):
         for dt in datatypes:
             print(j2_template.render(datatype=datatypes[dt], ldiv=str(ldiv), type_category_upper=datatypes[dt]["category"].upper(), ldiv_suffix=ldiv_suffix), file=file)
         print("#endif // defined(MIPP_ENABLE_LDIV" + str(ldiv) + ")", file=file)
+    
+        # lmul constexpr for scalar 
+    template = """template<> constexpr uint32_t N<{{ datatype.cstd }}, {{ lmul }}, ISA::SCALAR>(){ return MIPP_SCALAR_N_{{type_category_upper}}{{ datatype.n_bits }}{{ lmul_suffix }}; }"""
+    j2_template = Template(template, undefined=StrictUndefined)
+    for lmul in all_lmul:
+        if lmul == 1:
+            lmul_suffix = ""
+        else:
+            lmul_suffix = "_M" + str(lmul)
+        for dt in datatypes:
+            print(j2_template.render(datatype=datatypes[dt], lmul=str(lmul), type_category_upper=datatypes[dt]["category"].upper(), lmul_suffix=lmul_suffix), file=file)
+
 
 
 # -------------------------------------------------------------------------------------------------
@@ -297,6 +309,7 @@ def _cpp_custom_prefix_generator(func):
     s = "#pragma once\n"
     s += '#include "../common.hpp"\n'
     s += f'#include "../../c/functions/{func}.h"\n'
+    s+= f'#include "../../simd_ext/scalar/functions/scalar_{func}.h"\n'
     s += "namespace mipp {\n"
     return s
 
@@ -341,7 +354,6 @@ def gen_cpp_functions(include_manager, funcs):
             else:
                 c_func_name = build_func_name("", dt_par, dt_ret, f, False)
                 cpp_func_name = build_cpp_func_name(dt_ret, f)
-
     
             for lmul in all_lmul:
                 print(build_proto(funcs[f]["proto"], dt_par, dt_ret, {}, cpp_func_name, lmul, False, True) + " {", file=file)
