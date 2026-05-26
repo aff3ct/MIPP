@@ -810,9 +810,28 @@ def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="
         )
         func_template = Template(res, undefined=StrictUndefined)
         func_old = "cast"
+        lst = list(layer_dict.keys())
+        lst.sort()
+        print("Debug", f"keys={lst}, lmul={lmul}, mkind={mkind}")
         
         lmul_suffix = lmul_to_str(lmul, mkind)
         lmul_coeff = lmul
+
+       
+        # add the 1, ISA::SCALAR 
+        split = reg1_type.split(">", 1)
+        reg1_type_scalar = split[0] + ",1,mipp::ISA::SCALAR>"
+
+        split = msk1_type.split(">", 1)
+        msk1_type_scalar = split[0] + ",1,mipp::ISA::SCALAR>"
+
+
+        split = reg2_type.split(">", 1)
+        reg2_type_scalar = split[0] + ",1,mipp::ISA::SCALAR>"
+        
+        split = msk2_type.split(">", 1)
+        msk2_type_scalar = split[0] + ",1,mipp::ISA::SCALAR>"
+
         
         func = test_function_name(kind, func)
         res = func_template.render(
@@ -829,6 +848,10 @@ def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="
             lmul_coeff=lmul_coeff,
             mask_args=get_mask_args(mkind),
             mask_kind=mask_to_str(mkind, kind),
+            reg1_type_scalar=reg1_type_scalar,
+            reg2_type_scalar=reg2_type_scalar,
+            msk1_type_scalar=msk1_type_scalar,
+            msk2_type_scalar=msk2_type_scalar,
         )
     else :#obj
         res = ""

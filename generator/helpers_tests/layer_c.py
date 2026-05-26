@@ -201,24 +201,6 @@ OP_3ARGS_REG = """\t{{reg_type}} r4 = mipp_{{func}}_{{dt_ext}}(r1, r2, r3);
 
 OP_CAST = """\t{{reg2_type}} r2 = mipp_cast_{{dt1_ext}}_{{dt2_ext}}(r1);\n\t{{reg2_scalar_type}} s2 = mipp_scalar_cast_{{dt1_ext}}_{{dt2_ext}}(s1);"""
 OP_CAST_MSK = """\t{{msk2_type}} m2 = mipp_cast_k_{{dt1_ext}}_{{dt2_ext}}(m1);\n\t{{msk2_scalar_type}} ms2 = mipp_scalar_cast_k_{{dt1_ext}}_{{dt2_ext}}(ms1);"""
-# --------------------------------------------
-# OPERATION IN LOOP BODY
-# ------------------------------------------
-
-# LB_SET_OP = """\t\t{{dt_ext}}_t res = inputs1[i];"""
-# LB_SET_SCALAR_OP = """\t\t{{dt_ext}}_t res = input1;"""
-
-# LB_REG_BINOP = """"""
-
-# LB_CMP_2REG = """\t\tbool res = inputs1[i] {{op}} inputs2[i];"""
-
-# LB_CAST_2ARGS = """\t\t{{dt2_ext}}_t res = inputs2[i];"""
-
-# LB_REG_BINOP_FLOAT_WORKAROUND = """{% if is_int %}""" + LB_REG_BINOP + """{% else %}
-#         \t{{dt_ext}}_t res = std::bit_cast<{{dt_ext}}_t,uint{{type_size}}_t>(
-# \t\t\t\tstd::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(inputs1[i]) 
-# \t\t\t\t{{op}} 
-# \t\t\t\tstd::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(inputs2[i]));{% endif %}"""
 
 # --------------------------------------------
 # ASSERTS IN LOOP BODY
@@ -241,11 +223,6 @@ AS_3ARGS_TOL = """\t\t{{dt_ext}}_t res1 = mipp_get_{{dt_ext}}(r4, i);
 AS_CAST_2ARGS = """\t\tREQUIRE(mipp_get_{{dt2_ext}}(r2, i) == mipp_scalar_get_{{dt2_ext}}(s2, i));"""
 AS_CAST_2ARGS_MSK = """\t\tif(res) REQUIRE( (!!mipp_get_k_{{dt2_ext}}(m2, i)) == (!!mipp_scalar_get_k_{{dt2_ext}}(s2, i)) );"""
 
-AS_REG_BINOP_FLOAT_WORKAROUND = """{% if is_int %}""" + AS_REG_BINOP + """{% else %}
-\n\t\tREQUIRE(std::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(mipp_get_{{dt_ext}}(r3, i))\
-\n\t\t\t==
-\t\t\tstd::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(res) );
-{% endif %}"""
 
 AS_CMP_BINOP_FLOAT_WORKAROUND = """{% if is_int %}""" + AS_CMP_2REG + """{% else %}
 \n\t\tREQUIRE(std::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(mipp_get_{{dt_ext}}(r3, i))\
@@ -379,7 +356,7 @@ shape_templates = {
         loop_assert= AS_CMP_BINOP_LOGI_FLOAT_WORKAROUND,
     ),
     
-    SHAPE_RET_VAL_1ARG_REG: TemplateParts( # getfirst, hadd_to_scal
+    SHAPE_RET_VAL_1ARG_REG: TemplateParts( # getfirst, hadd_to_scal, hadd, hmul, hmin, hmax
         func_decl=FUNC_DECL,
         decl=DECL_1ARG,
         init=INIT_1ARG,
@@ -411,7 +388,7 @@ shape_templates = {
     
     # #this shape covers 
     # #various functions 
-    # #i.e : notb, sqrt, cast, hadd, hmul, hmin, hmax, round, cast
+    # #i.e : notb, sqrt, cast, round, cast
     # #since the asserts for these function will vary
     # #each func will override some parts of the template 
     SHAPE_RET_REG_1ARG_REG: TemplateParts(
@@ -499,29 +476,6 @@ shape_templates = {
         loop_body="",
         loop_assert=AS_CMP_TOMSK,
     ),
-    
-    
-    # #maskzld
-    # SHAPE_RET_REG_2ARGS_MASK_PTR : TemplateParts(
-    #     func_decl="",
-    #     decl="",
-    #     init="",
-    #     load="",
-    #     operation="",
-    #     loop_body="",
-    #     loop_assert="",
-    # ),
-    
-    # #maskst
-    # SHAPE_RET_VOID_3ARGS_PTR_MSK_REG : TemplateParts(
-    #     func_decl="",
-    #     decl="",
-    #     init="",
-    #     load="",
-    #     operation="",
-    #     loop_body="",
-    #     loop_assert="",
-    # ),
 }
 
 deny = {
@@ -670,6 +624,18 @@ LAYER_OVERRIDES = {
     },
     
     "rsqrt" : {
+# if inputs1[i] < 0 the result is a NaN and the assert will fail bc of how nan comparison works. 
+# so skip in that case
+        "loop_assert": """\t\tif(inputs1[i] < 0) {
+\t\t\tINFO("Input is negative, result is NaN, skipping assert");
+\t\t}else{\n\t"""+ "\t\t {{dt_ext}}_t res1 = mipp_get_{{dt_ext}}(r3,i);\n \t\t{{dt_ext}}_t res2 = mipp_scalar_get_{{dt_ext}}(s3,i);\n"
++ "\n\t\t{{dt_ext}}_t tol  = 1e-5f * abs_diff::abs_diff(res2) + 1.0f;"
++ "\n\t\t{{dt_ext}}_t diff = abs_diff::abs_diff(res1, res2);"
++ "\n\t\tREQUIRE(diff <= tol);;"
++ """\n\t\t}""",
+    },
+
+    "sqrt" : {
 # if inputs1[i] < 0 the result is a NaN and the assert will fail bc of how nan comparison works. 
 # so skip in that case
         "loop_assert": """\t\tif(inputs1[i] < 0) {
