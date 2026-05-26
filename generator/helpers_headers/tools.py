@@ -126,11 +126,14 @@ def _lmul_to_str(lmul):
 def build_reg(datatype, isa, lmul=0, isa_name=True, cpp=False):
     if cpp:
         str_reg = "rvd"
-        if isa_name:
-            str_reg += "_"+isa["name"]
+
         str_reg += "<" + datatype["cstd"]
         if lmul:
             str_reg += "," + str(int(lmul))
+        if isa_name:
+            str_reg += "," + isa["name"].upper()
+        else:
+            str_reg += ",DEFAULT"
         str_reg += ">"
         return str_reg
     else:
@@ -150,11 +153,14 @@ def build_reg(datatype, isa, lmul=0, isa_name=True, cpp=False):
 def build_msk(datatype, isa, lmul=0, isa_name=True, cpp=False):
     if cpp:
         str_msk = "rvm"
-        if isa_name:
-            str_msk += "_"+isa["name"]
+
         str_msk += "<" + datatype["cstd"]
         if lmul:
             str_msk += "," + str(int(lmul))
+        if isa_name:
+            str_msk += "," + isa["name"].upper()
+        else:
+            str_msk += ",DEFAULT"
         str_msk += ">"
         return str_msk
     else:
@@ -277,8 +283,11 @@ def type_specialized(proto):
     return n_type_spe
 
 # Build prototype of set0
-def build_proto_set0(dt_ret, lmul, func_name, masked_version=False):
-    template = f"<{dt_ret}_t, {lmul}>"
+def build_proto_set0(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, masked_version=False):
+    isa_type = "DEFAULT"
+    if isa_name:
+        isa_type = isa["name"].upper()
+    template = f"<{dt_ret}_t, {lmul}, {isa_type}>"
     if func_name == "set0":
         reg_type = "rvd"
     elif func_name == "set0_k":
@@ -289,30 +298,33 @@ def build_proto_set0(dt_ret, lmul, func_name, masked_version=False):
     # masked template form (no template<>)
     if masked_version:
         if masked_version == "mask":
-            template = f"<M, {dt_ret}_t, {lmul}>"
+            template = f"<M, {dt_ret}_t, {lmul}, {isa_type}>"
         elif masked_version == "maskz":
-            template = f"<Z, {dt_ret}_t, {lmul}>"
+            template = f"<Z, {dt_ret}_t, {lmul}, {isa_type}>"
         elif masked_version == "masks":
-            template = f"<S, {dt_ret}_t, {lmul}>"
+            template = f"<S, {dt_ret}_t, {lmul}, {isa_type}>"
         else:
             print("error: masked_version should be mask, maskz or masks")
             exit(-1)
 
         # set0 has no other args, but masked forms still take m0 (and maybe rsrc)
         if masked_version in ("mask", "maskz"):
-            return f"inline {reg_type}<{dt_ret}_t, {lmul}> {func_name}{template}(const rvm<{dt_ret}_t,{lmul}> m0"
+            return f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const rvm<{dt_ret}_t,{lmul}, {isa_type}> m0"
         elif masked_version == "masks":
-            return f"inline {reg_type}<{dt_ret}_t, {lmul}> {func_name}{template}(const rvm<{dt_ret}_t,{lmul}> m0, const {reg_type}<{dt_ret}_t,{lmul}> rsrc"
+            return f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const rvm<{dt_ret}_t,{lmul}, {isa_type}> m0, const {reg_type}<{dt_ret}_t,{lmul}, {isa_type}> rsrc"
 
     # unmasked (unchanged)
-    return f"template <>\ninline {reg_type}<{dt_ret}_t, {lmul}> {func_name}{template}("
+    return f"template <>\ninline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}("
 
 
 # Build prototype of set
-def build_proto_set(dt_ret, lmul, func_name, masked_version=False):
+def build_proto_set(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, masked_version=False):
+    isa_type = "DEFAULT"
+    if isa_name:
+        isa_type = isa["name"].upper()
     lmul_str = _lmul_to_str(lmul)
     dt_par = None
-    template = f"<{dt_ret}_t, {lmul}>"
+    template = f"<{dt_ret}_t, {lmul}, {isa_type}>"
     if func_name == "set":
         dt_par = f"{dt_ret}_t"
         reg_type = "rvd"
@@ -326,11 +338,11 @@ def build_proto_set(dt_ret, lmul, func_name, masked_version=False):
 
     if masked_version:
         if masked_version == "mask":
-            template = f"<M, {dt_ret}_t, {lmul}>"
+            template = f"<M, {dt_ret}_t, {lmul}, {isa_type}>"
         elif masked_version == "maskz":
-            template = f"<Z, {dt_ret}_t, {lmul}>"
+            template = f"<Z, {dt_ret}_t, {lmul}, {isa_type}>"
         elif masked_version == "masks":
-            template = f"<S, {dt_ret}_t, {lmul}>"
+            template = f"<S, {dt_ret}_t, {lmul}, {isa_type}>"
         else:
             print("error: masked_version should be mask, maskz or masks")
             exit(-1)
@@ -338,24 +350,28 @@ def build_proto_set(dt_ret, lmul, func_name, masked_version=False):
 
         if masked_version in ("mask", "maskz"):
             return (
-                f"inline {reg_type}<{dt_ret}_t, {lmul}> {func_name}{template}("
-                f"const rvm<{dt_par},{lmul}> m0, "
-                f"const {dt_par} vals[N<{dt_ret}_t, {lmul}>()]"
+                f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}("
+                f"const rvm<{dt_par},{lmul}, {isa_type}> m0, "
+                f"const {dt_par} vals[N<{dt_ret}_t, {lmul}, {isa_type}>()]"
             )
         elif masked_version == "masks":
             return (
-                f"inline {reg_type}<{dt_ret}_t, {lmul}> {func_name}{template}("
-                f"const rvm<{dt_par},{lmul}> m0, "
-                f"const rvd<{dt_par},{lmul}> rsrc, "
-                f"const {dt_par} vals[N<{dt_ret}_t, {lmul}>()]"
+                f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}("
+                f"const rvm<{dt_par},{lmul}, {isa_type}> m0, "
+                f"const rvd<{dt_par},{lmul}, {isa_type}> rsrc, "
+                f"const {dt_par} vals[N<{dt_ret}_t, {lmul}, {isa_type}>()]"
             )
 
     # unmasked (unchanged)
-    return f"template <>\ninline {reg_type}<{dt_ret}_t, {lmul}> {func_name}{template}(const {dt_par} vals[N<{dt_ret}_t, {lmul}>()]"
+    return f"template <>\ninline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const {dt_par} vals[N<{dt_ret}_t, {lmul}, {isa_type}>()]"
 
 
-def build_proto_set1(dt_ret, lmul, func_name, masked_version=False):
-    template = f"<{dt_ret}_t, {lmul}>"
+def build_proto_set1(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, masked_version=False):
+    isa_type = "DEFAULT"
+    if isa_name:
+        isa_type = isa["name"].upper()
+    lmul_str = _lmul_to_str(lmul)
+    template = f"<{dt_ret}_t, {lmul}, {isa_type}>"
     if func_name == "set1":
         dt_par = f"{dt_ret}_t"
         reg_type = "rvd"
@@ -368,45 +384,46 @@ def build_proto_set1(dt_ret, lmul, func_name, masked_version=False):
 
     if masked_version:
         if masked_version == "mask":
-            template = f"<M, {dt_ret}_t, {lmul}>"
+            template = f"<M, {dt_ret}_t, {lmul}, {isa_type}>"
         elif masked_version == "maskz":
-            template = f"<Z, {dt_ret}_t, {lmul}>"
+            template = f"<Z, {dt_ret}_t, {lmul}, {isa_type}>"
         elif masked_version == "masks":
-            template = f"<S, {dt_ret}_t, {lmul}>"
+            template = f"<S, {dt_ret}_t, {lmul}, {isa_type}>"
         else:
             print("error: masked_version should be mask, maskz or masks")
             exit(-1)
 
         if masked_version in ("mask", "maskz"):
             return (
-                f"inline {reg_type}<{dt_ret}_t, {lmul}> {func_name}{template}("
-                f"const rvm<{dt_par},{lmul}> m0, "
+                f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}("
+                f"const rvm<{dt_par},{lmul}, {isa_type}> m0, "
                 f"const {dt_par} v0"
             )
         elif masked_version == "masks":
             return (
-                f"inline {reg_type}<{dt_ret}_t, {lmul}> {func_name}{template}("
-                f"const rvm<{dt_par},{lmul}> m0, "
-                f"const rvd<{dt_par},{lmul}> rsrc, "
+                f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}("
+                f"const rvm<{dt_par},{lmul}, {isa_type}> m0, "
+                f"const rvd<{dt_par},{lmul}, {isa_type}> rsrc, "
                 f"const {dt_par} v0"
             )
 
     # unmasked (unchanged)
-    return f"template <>\ninline {reg_type}<{dt_ret}_t, {lmul}> {func_name}{template}(const {dt_par} v0"
+    return f"template <>\ninline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const {dt_par} v0"
 
-def build_proto_load(dt_ret, lmul, func_name, masked_version=False):
-    
-
+def build_proto_load(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, masked_version=False):
+    isa_type = "DEFAULT"
+    if isa_name:
+        isa_type = isa["name"].upper()
     if func_name == "load" or func_name == "loadu":
         dt_par = f"{dt_ret}_t"
-        template = f"<{dt_ret}_t, {lmul}>"
+        template = f"<{dt_ret}_t, {lmul}, {isa_type}>"
         if masked_version:
             if masked_version == "mask" :
-                template = f"<M, {dt_ret}_t, {lmul}>"
+                template = f"<M, {dt_ret}_t, {lmul}, {isa_type}>"
             elif masked_version == "maskz" :
-                template = f"<Z, {dt_ret}_t, {lmul}>"
+                template = f"<Z, {dt_ret}_t, {lmul}, {isa_type}>"
             elif masked_version == "masks" :
-                template = f"<S, {dt_ret}_t, {lmul}>"
+                template = f"<S, {dt_ret}_t, {lmul}, {isa_type}>"
             else :
                 print("error: masked_version should be mask, maskz or masks")
                 exit(-1)
@@ -414,35 +431,35 @@ def build_proto_load(dt_ret, lmul, func_name, masked_version=False):
   
     if masked_version:
         if masked_version == "mask" :
-            ret = f"inline {reg_type}<{dt_ret}_t, {lmul}> {func_name}{template}(const rvm<{dt_par},{lmul}> m0, const {dt_par}* p0"
+            ret = f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const rvm<{dt_par},{lmul}, {isa_type}> m0, const {dt_par}* p0"
         elif masked_version == "maskz" :
-            ret = f"inline {reg_type}<{dt_ret}_t, {lmul}> {func_name}{template}(const rvm<{dt_par},{lmul}> m0, const {dt_par}* p0"
+            ret = f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const rvm<{dt_par},{lmul}, {isa_type}> m0, const {dt_par}* p0"
         elif masked_version == "masks" :
-            ret = f"inline {reg_type}<{dt_ret}_t, {lmul}> {func_name}{template}(const rvm<{dt_par},{lmul}> m0, const rvd<{dt_par},{lmul}> rsrc, const {dt_par}* p0"
+            ret = f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const rvm<{dt_par},{lmul}, {isa_type}> m0, const rvd<{dt_par},{lmul}, {isa_type}> rsrc, const {dt_par}* p0"
         else : 
             print("error: masked_version should be mask, maskz or masks")
             exit(-1)
     else :
-        ret = f"template <>\ninline {reg_type}<{dt_ret}_t, {lmul}> {func_name}{template}(const {dt_par}* p0"
+        ret = f"template <>\ninline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const {dt_par}* p0"
     return  ret
     
 
 #function message error set functions
 def gen_set_func_error(func_name,file):
     if func_name == "set":
-        print(f"template <typename T, int LMULT=1> inline rvd<T, LMULT> {func_name}(const T[N<T>()]) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
+        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT> inline rvd<T, LMUL, ISA_TYPE> {func_name}(const T[N<T>()]) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
     if func_name == "set1":
-        print(f"template <typename T, int LMULT=1> inline rvd<T, LMULT> {func_name}(const T) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
+        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT> inline rvd<T, LMUL, ISA_TYPE> {func_name}(const T) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
     if func_name == "set0":
-        print(f"template <typename T, int LMULT=1> inline rvd<T, LMULT> {func_name}() {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
+        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT> inline rvd<T, LMUL, ISA_TYPE> {func_name}() {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
     if func_name == "set_k":
-        print(f"template <typename T, int LMULT=1> inline rvm<T, LMULT> {func_name}(const int32_t[N<T>()]) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
+        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT> inline rvm<T, LMUL, ISA_TYPE> {func_name}(const int32_t[N<T>()]) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
     if func_name == "set0_k":
-        print(f"template <typename T, int LMULT=1> inline rvm<T, LMULT> {func_name}() {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
+        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT> inline rvm<T, LMUL, ISA_TYPE> {func_name}() {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
     if func_name == "set1_k":
-        print(f"template <typename T, int LMULT=1> inline rvm<T, LMULT> {func_name}(const int32_t v0) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
+        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT> inline rvm<T, LMUL, ISA_TYPE> {func_name}(const int32_t v0) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
     if func_name == "load" or func_name == "loadu":
-        print(f"template <typename T, int LMULT=1> inline rvd<T, LMULT> {func_name}(const T* p0) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
+        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT> inline rvd<T, LMUL, ISA_TYPE> {func_name}(const T* p0) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
 
 
 def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, masked_version=False):
@@ -451,13 +468,13 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
 
     #build proto for set functions
     if func_name == "set0" or func_name =="set0_k":
-        return  build_proto_set0(dt_ret, lmul, func_name, masked_version) +')'
+        return  build_proto_set0(dt_ret, isa, func_name, lmul=lmul, isa_name=isa_name, cpp=cpp, masked_version=masked_version) +')'
     if func_name == "set" or func_name =="set_k":
-        return  build_proto_set(dt_ret, lmul, func_name, masked_version) +')'
+        return  build_proto_set(dt_ret, isa, func_name, lmul=lmul, isa_name=isa_name, cpp=cpp, masked_version=masked_version) +')'
     if func_name =="set1_k" or func_name =="set1":
-        return  build_proto_set1(dt_ret, lmul, func_name, masked_version) +')'
+        return  build_proto_set1(dt_ret, isa, func_name, lmul=lmul, isa_name=isa_name, cpp=cpp, masked_version=masked_version) +')'
     if func_name =="load" or func_name =="loadu":
-        return  build_proto_load(dt_ret, lmul, func_name, masked_version) +')'
+        return  build_proto_load(dt_ret, isa, func_name, lmul=lmul, isa_name=isa_name, cpp=cpp, masked_version=masked_version) +')'
 
     realdatatype = datatypes[dt_ret]
     if (proto["ret"]["fixeddatatype"]):

@@ -26,7 +26,7 @@ from implem_neon import implems_neon
 from headers_def import implems_scalar
 from headers_def import mipp_funcs,mipp_funcs_concepts
 from tools import *
-from helpers_tests import get_gen_test_dict, set_float_workaround, test_function_name, get_gen_test_dict_lmul, get_gen_test_dict_mask
+from helpers_tests import get_gen_test_dict, test_function_name, get_gen_test_dict_lmul, get_gen_test_dict_mask
 
 from implem_emu_sse import implems_emu_sse
 from implem_emu_avx import implems_emu_avx
@@ -284,10 +284,7 @@ def add_type_guards(func, implem, function, kind="c", lmul=0, mkind=""):
             #this is the ugly part
             if kind == "cpp" or kind == "obj":
                 dt_suffix = product_type_format_cpp(dt)#used to handle cast
-                if func in set_float_workaround and is_float_dt(dt):
-                    #this is hacky. It's to generate proper name to call float 
-                    #versions of andb etc...
-                    dt_suffix = f"_float{dt_suffix.split('t')[1].split("_")[0]}{dt_suffix}"
+                
             if func_defines:
                 res += f"#if {func_defines}\n"
             res += section.format(dt=dt, dt_suffix=dt_suffix, function=function, lmul_str=lmul_str, mask_str=mask_str)
@@ -303,8 +300,7 @@ def add_type_guards(func, implem, function, kind="c", lmul=0, mkind=""):
             dt_suffix = dt_to_suffix(dt)
             if kind == "cpp" or kind == "obj":
                 dt_suffix = product_type_format_cpp(dt)
-                if func in set_float_workaround and is_float_dt(dt):
-                    dt_suffix = f"_float{dt_suffix.split('t')[1].split("_")[0]}{dt_suffix}"
+            
             if func_defines:
                 res += f"#if {func_defines}\n"
             res += section.format(dt=dt, dt_suffix=dt_suffix, function=function, lmul_str=lmul_str, mask_str=mask_str)
@@ -320,8 +316,7 @@ def add_type_guards(func, implem, function, kind="c", lmul=0, mkind=""):
             dt_suffix = dt_to_suffix(dt)
             if kind == "cpp" or kind == "obj":
                 dt_suffix = product_type_format_cpp(dt)
-                if func in set_float_workaround and is_float_dt(dt):
-                    dt_suffix = f"_float{dt_suffix.split('t')[1].split("_")[0]}{dt_suffix}"
+               
             if func_defines:
                 res += f"#if {func_defines}\n"
             res += section.format(dt=dt, dt_suffix=dt_suffix, function=function, lmul_str=lmul_str, mask_str=mask_str)
@@ -640,6 +635,10 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False, lm
             mkind=mkind, # used to know wether to define mpred or not
         )
     if not float and kind=="cpp" :
+        
+        reg_type_scalar = "mipp::rvd<T,1,mipp::ISA::SCALAR>"
+        msk_type_scalar = "mipp::rvm<T,1,mipp::ISA::SCALAR>"
+
         res = func_template.render(
             func=func,
             dt_ext=scalar_type,
@@ -656,8 +655,12 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False, lm
             
             mask_args=get_mask_args(mkind),
             mask_kind=mask_to_str(mkind, kind),
+            reg_type_scalar=reg_type_scalar,
+            msk_type_scalar=msk_type_scalar,
         )
     if float and kind=="cpp" :
+        reg_type_scalar = "mipp::rvd<T,1,mipp::ISA::SCALAR>"
+        msk_type_scalar = "mipp::rvm<T,1,mipp::ISA::SCALAR>"
      
         res = func_template.render(
             func=func,
@@ -676,6 +679,9 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False, lm
             
             mask_args=get_mask_args(mkind),
             mask_kind=mask_to_str(mkind, kind),
+
+            reg_type_scalar=reg_type_scalar,
+            msk_type_scalar=msk_type_scalar,
         )
     if kind == "obj" : #obsolete :(
         res = func_template.render(
@@ -956,27 +962,27 @@ def gen_funcs_all_datatypes(func, kind="c", register="rvd", mask="rvm",lmul=0, m
             mkind=mkind,
         )
         
-        if func in set_float_workaround:
-            res += gen_func(
-                func,
-                "T",
-                reg_type=reg_type,
-                kind=kind,
-                msk_type=msk_type,
-                float="float32",
-                lmul=lmul,
-                mkind=mkind,
-            )
-            res += gen_func(
-                func,
-                "T",
-                reg_type=reg_type,
-                kind=kind,
-                msk_type=msk_type,
-                float="float64",
-                lmul=lmul,
-                mkind=mkind,
-            )
+        # if func in set_float_workaround:
+        #     res += gen_func(
+        #         func,
+        #         "T",
+        #         reg_type=reg_type,
+        #         kind=kind,
+        #         msk_type=msk_type,
+        #         float="float32",
+        #         lmul=lmul,
+        #         mkind=mkind,
+        #     )
+        #     res += gen_func(
+        #         func,
+        #         "T",
+        #         reg_type=reg_type,
+        #         kind=kind,
+        #         msk_type=msk_type,
+        #         float="float64",
+        #         lmul=lmul,
+        #         mkind=mkind,
+        #     )
     elif kind == "obj":  # template so no need to loop over datatypes
         res += gen_func(
             func,
