@@ -5,6 +5,7 @@ import re
 from tools import *
 
 from include_gen import *
+from generic_emu import *
 
 def gen_c_defines(isa, file):
     """
@@ -738,6 +739,56 @@ def _gen_c_function_one_masked(isa, file, funcs, f, ff, dt):
     
     _emit_ifdef_end(ifd, file)
     _maybe_print_emulated_implemented(f + "<" + mask_kind + ">", dt_key, ff)
+
+
+#### WIP 
+
+def _c_lmul_writer(f, dt, dt_par, dt_ret, isa, funcs, file, mask_type=None, lmul=0):
+
+    mask_str = ""
+    if mask_type == "mask":
+        mask_str = "_mask"
+    elif mask_type == "maskz":
+        mask_str = "_maskz"
+    elif mask_type == "masks":
+        mask_str = "_masks"
+
+
+    if len(dt.split(',')) <= 1:
+        func_name = build_func_name_short(isa, dt_par, f, lmul=0, masked_version=mask_type);
+    else:
+        func_name = build_func_name(isa, dt_par, dt_ret, f, lmul=0, masked_version=mask_type);
+  
+    
+    if lmul == 1:
+        #call non_lmul version
+        print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul=lmul, isa_name=True, masked_version=mask_type) + " {", file=file)
+        print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa, func_name+mask_str, lmul=0, isa_name=True, masked_version=mask_type) + ";", file=file)
+        print("}", file=file)
+        return
+
+    if not funcs[f]["horizontal"]:
+        print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul=lmul, isa_name=True, masked_version=mask_type) + " {", file=file)
+
+        lmul_2 = int(lmul / 2)
+        print(build_call_lmul(funcs[f]["proto"], dt_par, dt_ret, isa, func_name+mask_str+"_m"+str(lmul_2), lmul=lmul, isa_name=True, masked_version=mask_type), file=file)
+        print("}", file=file)
+    else:
+        # print("\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \""+func_name+"\");", file=file);
+        # print("\texit(-1);", file=file);
+        
+        gen_c_horiz_lmul(
+            isa=isa,
+            file=file,
+            funcs=funcs,
+            f=f,
+            dt=dt,
+            lmul=lmul,
+            implems_horiz_lmul_generic_emu=implems_horiz_lmul_generic_emu,
+            func_name_for_panic=func_name,  # so the runtime message matches the wrapper name
+            mask_type=mask_type,            # kept for future; currently stubs if not None
+            dummy = True, # dummy argument to differentiate from version used in ci_generator. Will be removed asp
+        )
     
 def _gen_c_generic_one(isa, file, funcs, f, ff, dt):
     """
@@ -800,7 +851,6 @@ def _gen_c_generic_one(isa, file, funcs, f, ff, dt):
     _mark_as_implemented(funcs, f, dt_key)
     # add requirements to implem_status to prevent future generic implementations and to keep track of the fact that this function is now implemented
     _append_implem_status(funcs, f, dt_key, ff, ph_ret["requirements"])
-
     
  
 def _gen_c_missing_one_dt(isa, file, funcs, f, dt, lmul=0):
@@ -817,56 +867,56 @@ def _gen_c_missing_one_dt(isa, file, funcs, f, dt, lmul=0):
 
         _missing_emit_ifdef_end(ifd, file)
 
-def _fallback_emit_func(file, funcs, f, dt_par, dt_ret, isa, func_name, masked_version=None, lmul=0):
-    """
-    fallback will rely on the scalar implementation. We force the scalar implementation 
-    to contain everything in the mipp specification. 
-    The logic of the fallback fn is
-    -> if type is always defined at the isa level
+# def _fallback_emit_func(file, funcs, f, dt_par, dt_ret, isa, func_name, masked_version=None, lmul=0):
+#     """
+#     fallback will rely on the scalar implementation. We force the scalar implementation 
+#     to contain everything in the mipp specification. 
+#     The logic of the fallback fn is
+#     -> if type is always defined at the isa level
     
-        -> if RVD : 
-            -> declare scalar reg(s)
-            -> store args in the scalar reg with STORE 
-            -> call the scalar implementation with the scalar reg(s) as argument(s)
-            -> if result == rvd
-                -> load the result with LOAD
-                -> return the result
-            -> elif result == rvm
-                -> return SET_K of the result
-            -> else :
-                -> return the value or void
-        -> if RVM
-            -> declare scalar reg(s)
-            -> convert isa rvm to rvd with TOREG
-            -> store converted registers in the scalar rvms with scalar SET_K (works)
-            -> call the scalar implementation with the scalar reg(s) as argument(s)
-            -> if result == rvd
-                -> load the result with LOAD
-                -> return the result
-            -> elif result == rvm
-                -> return SET_K of the result
-            -> else :
-                -> return the value or void
-    -> else 
-        actually idk...
-    """
+#         -> if RVD : 
+#             -> declare scalar reg(s)
+#             -> store args in the scalar reg with STORE 
+#             -> call the scalar implementation with the scalar reg(s) as argument(s)
+#             -> if result == rvd
+#                 -> load the result with LOAD
+#                 -> return the result
+#             -> elif result == rvm
+#                 -> return SET_K of the result
+#             -> else :
+#                 -> return the value or void
+#         -> if RVM
+#             -> declare scalar reg(s)
+#             -> convert isa rvm to rvd with TOREG
+#             -> store converted registers in the scalar rvms with scalar SET_K (works)
+#             -> call the scalar implementation with the scalar reg(s) as argument(s)
+#             -> if result == rvd
+#                 -> load the result with LOAD
+#                 -> return the result
+#             -> elif result == rvm
+#                 -> return SET_K of the result
+#             -> else :
+#                 -> return the value or void
+#     -> else 
+#         actually idk...
+#     """
     
-    is_def_type = "if" not in isa["datatypes"][dt_par]
+#     is_def_type = "if" not in isa["datatypes"][dt_par]
     
 
-def _gen_c_fallback_one_dt(isa, file, funcs, f, dt, lmul=0):
-    dt_par, dt_ret = _missing_compute_dt_par_dt_ret(dt)
-    dt_key = dt_par + "," + dt_ret
+# def _gen_c_fallback_one_dt(isa, file, funcs, f, dt, lmul=0):
+#     dt_par, dt_ret = _missing_compute_dt_par_dt_ret(dt)
+#     dt_key = dt_par + "," + dt_ret
 
-    if is_missing_func(funcs, f, dt_key):
-        ifd = _missing_build_negated_ifdef_for_existing_implems(funcs, f, dt_key)
-        _missing_emit_ifdef_begin(ifd, file)
+#     if is_missing_func(funcs, f, dt_key):
+#         ifd = _missing_build_negated_ifdef_for_existing_implems(funcs, f, dt_key)
+#         _missing_emit_ifdef_begin(ifd, file)
 
-        func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
+#         func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
 
-        _fallback_emit_func(file, funcs, f, dt_par, dt_ret, isa, func_name, lmul=lmul)
+#         _fallback_emit_func(file, funcs, f, dt_par, dt_ret, isa, func_name, lmul=lmul)
 
-        _missing_emit_ifdef_end(ifd, file)
+#         _missing_emit_ifdef_end(ifd, file)
   
 def _gen_c_missing_one_masked(isa, file, funcs, f, dt, mask_kind, lmul=0):
     dt_par, dt_ret = _missing_compute_dt_par_dt_ret(dt)
@@ -907,7 +957,7 @@ def _gen_c_missing_one_masked(isa, file, funcs, f, dt, mask_kind, lmul=0):
         _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, masked_version=mask_kind, lmul=lmul)
   
         _missing_emit_ifdef_end(ifd, file)
-  
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Generators
@@ -916,8 +966,8 @@ def gen_c_functions(isa, file, funcs, implems):
     """
     Looking leaner now.
     """
-    
-    if isa["name"] != "avx" and isa["name"] != "sse" and isa["name"] != "avx512" and isa["name"] != "neon":
+    #hack while moving from single file to include manager.  
+    if isa["name"].startswith("sve"):
         for f in implems:
             if f in funcs:
                 for ff in implems[f]:
@@ -928,7 +978,6 @@ def gen_c_functions(isa, file, funcs, implems):
                             _gen_c_function_one_masked(isa, file, funcs, f, ff, dt)
                         else :
                             _gen_c_functions_one_unmasked(isa, file, funcs, f, ff, dt)
-
             else:
                 print("Panic: '" + f + "' function does not exist.")
                 exit(-1)
@@ -949,8 +998,8 @@ def gen_c_functions(isa, file, funcs, implems):
                 exit(-1)
 
 def gen_c_generic_functions(isa, file, funcs, implems):
-    
-    if isa["name"] != "avx" and isa["name"] != "sse" and isa["name"] != "avx512" and isa["name"] != "neon":
+    #hack while moving from single file to include manager.  
+    if isa["name"].startswith("sve"):
         for f in implems:
             if f in funcs:
                 for ff in implems[f]:
@@ -974,7 +1023,8 @@ def gen_c_generic_functions(isa, file, funcs, implems):
                 exit(-1)
 
 def gen_c_missing_functions(isa, file, funcs):
-    if isa["name"] != "avx" and isa["name"] != "sse" and isa["name"] != "avx512" and isa["name"] != "neon":
+    #hack while moving from single file to include manager.
+    if isa["name"].startswith("sve"):
         for f in funcs:
             for dt in funcs[f]["datatypes"]:
                 _emit_separator(f, file)
@@ -1009,7 +1059,7 @@ def gen_c_missing_functions_lmul(isa, file, funcs, lmul):
     Intended for RVV.
     """
     #hack while moving from single file to include manager.
-    if isa["name"] != "rvv" and isa["name"] != "avx" and isa["name"] != "sse" and isa["name"] != "avx512" and isa["name"] != "neon":
+    if isa["name"].startswith("sve"):
         for f in funcs:
             for dt in funcs[f]["datatypes"]:
                 _emit_separator(f, file)
@@ -1041,7 +1091,7 @@ def gen_c_missing_functions_lmul(isa, file, funcs, lmul):
                         _gen_c_missing_one_masked(isa, file_w, funcs, f, dt, "masks", lmul=lmul)
 
  
-def _gen_c_horiz_lmul_one(isa, file, funcs, f, ff, dt, lmul, mkind=None):
+def _gen_c_horiz_lmul_one(isa, file, funcs, f, ff, dt, lmul, mkind=None, dummy=False):
     """
     Emit one horizontal LMUL variant body (LMUL>1) for one function+datatype,
     using custom generic emulation templates (implems_horiz_lmul_generic_emu).
@@ -1095,6 +1145,7 @@ def _gen_c_horiz_lmul_one(isa, file, funcs, f, ff, dt, lmul, mkind=None):
             _ensure_fake_implemented(req, req_dt_key)
     
 
+    isa_name = dummy
     ph_ret = _parse_placeholders_or_skip(
         pre_rendering=pre_rendering,
         isa=isa,
@@ -1105,7 +1156,7 @@ def _gen_c_horiz_lmul_one(isa, file, funcs, f, ff, dt, lmul, mkind=None):
         dt_key=dt_key,
         file=file,
         lmul=lmul,
-        isa_name = False,
+        isa_name = isa_name,
     )
     if ph_ret is None:
         return
@@ -1132,6 +1183,16 @@ def _gen_c_horiz_lmul_one(isa, file, funcs, f, ff, dt, lmul, mkind=None):
     # if mkind is not None and lmul >= 2:
     #     l2 = int(lmul) // 2
     #     ph_ret["converted_ir"] = ph_ret["converted_ir"].replace(f"{f}_{dt_par}_m{int(l2)}", f"{f}_{dt_par}_{mkind}_m{int(l2)}")
+
+
+    # if dummy is true, then add prototype of the function 
+    if dummy:
+        dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
+        func_name = _build_func_name(isa, dt, dt_par, dt_ret, f, masked_version=mkind)
+        
+        proto = build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul=lmul, isa_name=True, masked_version=mkind)
+        print("static " + proto + " {", file=file)
+
     
     if (mkind == "maskz" or mkind == "mask") and lmul >= 2:
         l2 = int(lmul) // 2
@@ -1145,15 +1206,16 @@ def _gen_c_horiz_lmul_one(isa, file, funcs, f, ff, dt, lmul, mkind=None):
         ph_ret["converted_ir"] = ph_ret["converted_ir"].replace(f"{f}_{dt_par}_m{int(l2)}(", f"{f}_{dt_par}_{mkind}_m{int(l2)}(m0.m1, rsrc.r1, ", 1)
         ph_ret["converted_ir"] = ph_ret["converted_ir"].replace(f"{f}_{dt_par}_m{int(l2)}(", f"{f}_{dt_par}_{mkind}_m{int(l2)}(m0.m2, rsrc.r2, ", 1)
 
-
-
     print("\t", end="", file=file)
     print(ph_ret["converted_ir"], file=file)
+
+    if dummy:
+        print("}", file=file)
 
     _rvv_mark_lmul_seen(funcs, f, dt_key, lmul)    
 
 
-def gen_c_horiz_lmul(isa, file, funcs, f, dt, lmul, implems_horiz_lmul_generic_emu, func_name_for_panic=None, mask_type=None):
+def gen_c_horiz_lmul(isa, file, funcs, f, dt, lmul, implems_horiz_lmul_generic_emu, func_name_for_panic=None, mask_type=None, dummy=False):
     """
     Generate LMUL variants for *horizontal* functions by leveraging custom generic emulation
     templates defined in implems_horiz_lmul_generic_emu.
@@ -1204,7 +1266,7 @@ def gen_c_horiz_lmul(isa, file, funcs, f, dt, lmul, implems_horiz_lmul_generic_e
         if "datatypes" in ff and dt not in ff["datatypes"]:
             continue
 
-        _gen_c_horiz_lmul_one(isa=isa, file=file, funcs=funcs, f=f, ff=ff, dt=dt, lmul=lmul, mkind=mask_type)
+        _gen_c_horiz_lmul_one(isa=isa, file=file, funcs=funcs, f=f, ff=ff, dt=dt, lmul=lmul, mkind=mask_type, dummy=dummy)
         emitted_any = True
 
     if not emitted_any:
@@ -1212,6 +1274,34 @@ def gen_c_horiz_lmul(isa, file, funcs, f, dt, lmul, implems_horiz_lmul_generic_e
         name = func_name_for_panic or f
         print(f"\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \"{name}_m{int(lmul)}\");", file=file)
         print("\texit(-1);", file=file)
+
+
+def gen_c_lmul(isa, file, funcs):
+    """
+    Generate LMUL variants for all functions and datatypes by leveraging the _c_lmul_writer helper.
+
+    Intended to be called from ci_generator.py inside the non-RVV path for LMUL>1.
+
+    For horizontal functions, this will generate direct LMUL variants (e.g., hadd_float32_m4)
+    that call the corresponding horiz_lmul generic emulation templates (e.g., hadd_float32_horiz_lmul_m4).
+    The horiz_lmul templates are responsible for the actual emulation logic, and can be shared across multiple functions.
+    This avoids codegen-time combinatorial explosion while still providing LMUL support for horizontal functions.
+    For non-horizontal functions, it generates direct LMUL variants that call the corresponding non-LMUL version (e.g., add_float32_m4 calls add_float32).
+
+    Notes:
+      - For now: unmasked only. (mask_type is accepted for future extension but ignored unless you add templates)
+      - This is separate from gen_c_horiz_lmul() because we want to generate direct LMUL variants for all functions, not just horizontal ones, and we want to keep the horiz_lmul template logic separate.
+    """
+    for f in funcs:
+        file_w = file.get_fd(isa["name"], f)
+
+        for dt in funcs[f]["datatypes"]:
+            dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
+
+
+            for lmul in all_lmul:
+                _c_lmul_writer(f=f, dt=dt, dt_par=dt_par, dt_ret=dt_ret, isa=isa, funcs=funcs, file=file_w, lmul=lmul)
+
 # ----------------------------------------------------------------------------------------------------------------------
 # RVV lmul bookkeeping helpers (moved from gen_mipp_rvv.py)
 # ----------------------------------------------------------------------------------------------------------------------
