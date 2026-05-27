@@ -41,8 +41,8 @@ def gen_c_defines(isa, file):
     else:
         j2_template = Template(template1, undefined=StrictUndefined)
 
-    for lmul in all_lmul:
-        lmul_suffix = "_M" + str(lmul) if lmul > 1 else ""
+    for lmul in [0] + all_lmul: # 0 to generate size w/o lmul suffix
+        lmul_suffix = "_M" + str(lmul) if lmul >= 1 else ""
         coeff = "*" + str(lmul) if lmul > 1 else ""
         for dt in isa["datatypes"]:
             if isinstance(isa["size"], str):

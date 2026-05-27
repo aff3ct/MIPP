@@ -404,7 +404,7 @@ mipp_funcs = {
 #   "hmul_to_scal":  { "proto": protos["ret_val_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": True                                   },
 #   "hmin_to_scal":  { "proto": protos["ret_val_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": True                                   },
 #   "hmax_to_scal":  { "proto": protos["ret_val_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": True                                   },
-    "maskz_add":     { "proto": protos["ret_reg_3args_1msk_2reg"],      "datatypes": all_datatypes,           "horizontal": True,  "mask_support": no_mask         },
+    "maskz_add":     { "proto": protos["ret_reg_3args_1msk_2reg"],      "datatypes": all_datatypes,           "horizontal": False,  "mask_support": no_mask         },
     "fnmadd":        { "proto": protos["ret_reg_3args_reg"],            "datatypes": all_float+[int32],       "horizontal": False, "mask_support": all_mask        },
     "fnmsub":        { "proto": protos["ret_reg_3args_reg"],            "datatypes": all_float+[int32],       "horizontal": False, "mask_support": all_mask        },
     "div2":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },

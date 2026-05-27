@@ -667,6 +667,38 @@ tpl_horiz_lmul_generic_emu = {
 	return v0 + v1;
 {% endif %}"""},
 
+
+	"hadds_to_scal" : { "format" :"long", "code" :"""
+{% if lmul == 1 %}
+	return %hadds_to_scal<tp>%(r0);
+{% else %}
+	
+  	%v<tp>% v0 = %hadds_to_scal<c:tp|b:tp|m:tp/2>%(r0.r1);
+	%v<tp>% v1 = %hadds_to_scal<c:tp|b:tp|m:tp/2>%(r0.r2);	
+	return v0 + v1;
+{% endif %}"""},
+
+
+	"hadd" : { "format" :"long", "code" :"""
+{% if lmul == 1 %}
+	return %hadd<tp>%(r0);
+{% else %}
+	
+  	%v<tp>% v0 = %hadd<c:tp|b:tp|m:tp/2>%(r0.r1);
+	%v<tp>% v1 = %hadd<c:tp|b:tp|m:tp/2>%(r0.r2);	
+	return v0 + v1;
+{% endif %}"""},
+
+	"hadds" : { "format" :"long", "code" :"""
+{% if lmul == 1 %}
+	return %hadds<tp>%(r0);
+{% else %}
+	
+  	%v<tp>% v0 = %hadds<c:tp|b:tp|m:tp/2>%(r0.r1);
+	%v<tp>% v1 = %hadds<c:tp|b:tp|m:tp/2>%(r0.r2);	
+	return v0 + v1;
+{% endif %}"""},
+
 	
 	"hmul" : { "format" :"long", "code" :"""
 {% if lmul == 1 %}
@@ -757,6 +789,14 @@ implems_horiz_lmul_generic_emu = {
 	],
 	"hadd_to_scal" : [
      	 	{ "instr_name": "hadd_to_scal",  "datatypes" : all_datatypes, "version" : "horiz_lmul", "template" : tpl_horiz_lmul_generic_emu["hadd_to_scal"]},
+	],
+    
+	"hadds" : [
+	 	 	{ "instr_name": "hadds",  "datatypes" : all_datatypes, "version" : "horiz_lmul", "template" : tpl_horiz_lmul_generic_emu["hadds"], "dependencies" : {"add"}},
+	],
+    
+	"hadds_to_scal" : [
+     	 	{ "instr_name": "hadds_to_scal",  "datatypes" : all_datatypes, "version" : "horiz_lmul", "template" : tpl_horiz_lmul_generic_emu["hadds_to_scal"]},
 	],
     
 	"set_k" : [
