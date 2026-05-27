@@ -285,7 +285,6 @@ def gen_ci_defines(isa_list, file):
             
         for dt in isa["datatypes"]:
             j2_template = Template(template, undefined=StrictUndefined)
-            
             print(j2_template.render(isa_name_upper=isa["name"].upper(), n_bits=datatypes[dt]["n_bits"], type_category_upper=datatypes[dt]["category"].upper()), file=file)
 
         if i == len(isa_list)-1:

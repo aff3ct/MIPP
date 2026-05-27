@@ -29,8 +29,8 @@ def gen_c_defines(isa, file):
         print("\t#error \"MIPP_" + isa["name"].upper() + "_RVD_SIZE_BYTE can't be null\"", file=file)
         print("#endif", file=file)
 
-    template1 = """#define MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{n_bits}} {{n_elmts}}"""
-    template2 = """#define MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{n_bits}} {{n_elmts}}
+    template1 = """#define MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{n_bits}}{{lmul_suffix}} {{n_elmts}}{{coeff}}"""
+    template2 = """#define MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{n_bits}}{{lmul_suffix}} {{n_elmts}}{{coeff}}"""
 #if MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{n_bits}} == 0
     #error "MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{n_bits}} can't be null\"
 #endif"""
@@ -40,20 +40,25 @@ def gen_c_defines(isa, file):
     else:
         j2_template = Template(template1, undefined=StrictUndefined)
 
-    for dt in isa["datatypes"]:
-        if isinstance(isa["size"], str):
-            n_elmts = isa["size"] + "/" + str(datatypes[dt]["n_bits"])
-        else:
-            n_elmts = int(isa["size"] / datatypes[dt]["n_bits"])
-        print(
-            j2_template.render(
-                isa_name_upper=isa["name"].upper(),
-                type_category_upper=datatypes[dt]["category"].upper(),
-                n_bits=datatypes[dt]["n_bits"],
-                n_elmts=n_elmts,
-            ),
-            file=file,
-        )
+    for lmul in all_lmul:
+        lmul_suffix = "_M" + str(lmul) if lmul > 1 else ""
+        coeff = "*" + str(lmul) if lmul > 1 else ""
+        for dt in isa["datatypes"]:
+            if isinstance(isa["size"], str):
+                n_elmts = isa["size"] + "/" + str(datatypes[dt]["n_bits"])
+            else:
+                n_elmts = int(isa["size"] / datatypes[dt]["n_bits"])
+            print(
+                j2_template.render(
+                    isa_name_upper=isa["name"].upper(),
+                    type_category_upper=datatypes[dt]["category"].upper(),
+                    n_bits=datatypes[dt]["n_bits"],
+                    n_elmts=n_elmts,
+                    lmul_suffix=lmul_suffix,
+                    coeff=coeff
+                ),
+                file=file,
+            )
 
 
 def gen_c_structures(isa, file, is_scalar=False):
@@ -107,6 +112,33 @@ def gen_c_structures(isa, file, is_scalar=False):
                 type_category_upper=datatypes[dt]["category"].upper(),
             ),
             file=file)
+
+    # if isa doesn't support hw_lmul -> gen generic lmul / ldiv types
+    if isa["hw_lmul"] == False:
+
+        template = """typedef rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m1_t;"""
+        j2_template = Template(template, undefined=StrictUndefined)
+
+        for dt in isa["datatypes"]:
+            print(j2_template.render(isa=isa, datatype=datatypes[dt]), file=file)
+
+        template = """typedef rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m1_t;"""
+        j2_template = Template(template, undefined=StrictUndefined)
+
+        for dt in isa["datatypes"]:
+            print(j2_template.render(isa=isa, datatype=datatypes[dt]), file=file)
+        for lmul in all_lmul[1:]:
+            lmul_2 = int(lmul / 2)
+            template = """typedef struct { rvd_{{isa.name}}_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul_2 }}_t r1, r2; } rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t;"""
+            j2_template = Template(template, undefined=StrictUndefined)
+            for dt in isa["datatypes"]:
+                print(j2_template.render(isa=isa, datatype=datatypes[dt], lmul=str(lmul), lmul_2=str(lmul_2)), file=file)
+        for lmul in all_lmul[1:]:
+            lmul_2 = int(lmul / 2)
+            template = """typedef struct { rvm_{{isa.name}}_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul_2 }}_t m1, m2; } rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t;"""
+            j2_template = Template(template, undefined=StrictUndefined)
+            for dt in isa["datatypes"]:
+                print(j2_template.render(isa=isa, datatype=datatypes[dt], lmul=str(lmul), lmul_2=str(lmul_2)), file=file)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Shared helpers
@@ -974,7 +1006,7 @@ def gen_c_missing_functions(isa, file, funcs):
 def gen_c_missing_functions_lmul(isa, file, funcs, lmul):
     """
     Generate missing variants for a given LMUL, including masked+LMUL missing stubs.
-    Intended for RVV (explicit _mX entrypoints).
+    Intended for RVV.
     """
     #hack while moving from single file to include manager.
     if isa["name"] != "rvv" and isa["name"] != "avx" and isa["name"] != "sse" and isa["name"] != "avx512" and isa["name"] != "neon":
