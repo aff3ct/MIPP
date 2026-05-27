@@ -755,9 +755,9 @@ def _c_lmul_writer(f, dt, dt_par, dt_ret, isa, funcs, file, mask_type=None, lmul
 
 
     if len(dt.split(',')) <= 1:
-        func_name = build_func_name_short(isa, dt_par, f, lmul=0, masked_version=mask_type);
+        func_name = build_func_name_short(isa, dt_par, f, lmul=0);
     else:
-        func_name = build_func_name(isa, dt_par, dt_ret, f, lmul=0, masked_version=mask_type);
+        func_name = build_func_name(isa, dt_par, dt_ret, f, lmul=0);
   
     
     if lmul == 1:
@@ -1188,12 +1188,10 @@ def _gen_c_horiz_lmul_one(isa, file, funcs, f, ff, dt, lmul, mkind=None, dummy=F
     # if dummy is true, then add prototype of the function 
     if dummy:
         dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
-        func_name = _build_func_name(isa, dt, dt_par, dt_ret, f, masked_version=mkind)
-        
+        func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
         proto = build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul=lmul, isa_name=True, masked_version=mkind)
         print("static " + proto + " {", file=file)
 
-    
     if (mkind == "maskz" or mkind == "mask") and lmul >= 2:
         l2 = int(lmul) // 2
         # This is a bit hacky but we want to add the mask argument at the right place in the generated IR. 
@@ -1201,6 +1199,7 @@ def _gen_c_horiz_lmul_one(isa, file, funcs, f, ff, dt, lmul, mkind=None, dummy=F
         # This relies on the fact that in our templates, the first occurrence of the function call is the one we want to modify, which is true for our current horiz_lmul templates.
         ph_ret["converted_ir"] = ph_ret["converted_ir"].replace(f"{f}_{dt_par}_m{int(l2)}(", f"{f}_{dt_par}_{mkind}_m{int(l2)}(m0.m1, ", 1)
         ph_ret["converted_ir"] = ph_ret["converted_ir"].replace(f"{f}_{dt_par}_m{int(l2)}(", f"{f}_{dt_par}_{mkind}_m{int(l2)}(m0.m2, ", 1)
+        # if dummy mkind already in
     if (mkind == "masks") and lmul >= 2:
         l2 = int(lmul) // 2
         ph_ret["converted_ir"] = ph_ret["converted_ir"].replace(f"{f}_{dt_par}_m{int(l2)}(", f"{f}_{dt_par}_{mkind}_m{int(l2)}(m0.m1, rsrc.r1, ", 1)
@@ -1259,8 +1258,8 @@ def gen_c_horiz_lmul(isa, file, funcs, f, dt, lmul, implems_horiz_lmul_generic_e
         if "version" in ff and ff["version"] not in (None, "", "horiz_lmul"):
             continue
 
-        if "version" == "maskz": 
-            print("Debug: found maskz version for '" + f)
+        # if "version" == "maskz": 
+        #     print("Debug: found maskz version for '" + f)
 
         # Respect datatype list when present
         if "datatypes" in ff and dt not in ff["datatypes"]:
@@ -1276,7 +1275,7 @@ def gen_c_horiz_lmul(isa, file, funcs, f, dt, lmul, implems_horiz_lmul_generic_e
         print("\texit(-1);", file=file)
 
 
-def gen_c_lmul(isa, file, funcs):
+def gen_c_lmul(isa, include_manager, funcs):
     """
     Generate LMUL variants for all functions and datatypes by leveraging the _c_lmul_writer helper.
 
@@ -1293,7 +1292,7 @@ def gen_c_lmul(isa, file, funcs):
       - This is separate from gen_c_horiz_lmul() because we want to generate direct LMUL variants for all functions, not just horizontal ones, and we want to keep the horiz_lmul template logic separate.
     """
     for f in funcs:
-        file_w = file.get_fd(isa["name"], f)
+        file_w = include_manager.get_fd(isa["name"], f)
 
         for dt in funcs[f]["datatypes"]:
             dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
@@ -1301,6 +1300,23 @@ def gen_c_lmul(isa, file, funcs):
 
             for lmul in all_lmul:
                 _c_lmul_writer(f=f, dt=dt, dt_par=dt_par, dt_ret=dt_ret, isa=isa, funcs=funcs, file=file_w, lmul=lmul)
+        
+            for lmul in all_lmul:
+                mask_status = ""
+                if "mask_support" in funcs[f] :
+                    mask_status = funcs[f]["mask_support"]
+                else :
+                    mask_status = MaskSupport()
+
+                if not mask_status.is_any_mask() :
+                    continue
+                if mask_status.is_maskable() :
+                    _c_lmul_writer(f, dt, dt_par, dt_ret, isa, funcs, file_w, mask_type="mask", lmul=lmul)
+                
+                if mask_status.is_maskzable() :
+                    _c_lmul_writer(f, dt, dt_par, dt_ret, isa, funcs, file_w, mask_type="maskz", lmul=lmul)
+                if mask_status.is_masksable() :			
+                    _c_lmul_writer(f, dt, dt_par, dt_ret, isa, funcs, file_w, mask_type="masks", lmul=lmul)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # RVV lmul bookkeeping helpers (moved from gen_mipp_rvv.py)

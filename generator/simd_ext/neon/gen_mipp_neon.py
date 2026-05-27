@@ -41,6 +41,8 @@ def gen_mipp_neon(include_manager):
     gen_c_functions(isa_neon, include_manager, copy_mipp_funcs, implems_mask_generic_emu)
 
     gen_c_missing_functions(isa_neon, include_manager, copy_mipp_funcs)
+    gen_c_lmul(isa_neon, include_manager, copy_mipp_funcs)
+
 
     include_manager.resolve_all_dependencies(isa_neon["name"], copy_mipp_funcs)
     include_manager.create_glue_file(isa_neon["name"], "../include/neon/mipp_impl_neon_gen.h")

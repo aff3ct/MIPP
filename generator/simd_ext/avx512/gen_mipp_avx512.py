@@ -43,6 +43,7 @@ def gen_mipp_avx512(include_manager):
     gen_c_functions(isa_avx512, include_manager, copy_mipp_funcs, implems_mask_generic_emu)
     
     gen_c_missing_functions(isa_avx512, include_manager, copy_mipp_funcs)
+    gen_c_lmul(isa_avx512, include_manager, copy_mipp_funcs)
 
 
  
