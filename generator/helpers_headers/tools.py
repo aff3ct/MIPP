@@ -447,13 +447,13 @@ def build_proto_load(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, m
 #function message error set functions
 def gen_set_func_error(func_name,file):
     if func_name == "set":
-        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT> inline rvd<T, LMUL, ISA_TYPE> {func_name}(const T[N<T>()]) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
+        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT> inline rvd<T, LMUL, ISA_TYPE> {func_name}(const T[N<T, LMUL, ISA_TYPE>()]) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
     if func_name == "set1":
         print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT> inline rvd<T, LMUL, ISA_TYPE> {func_name}(const T) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
     if func_name == "set0":
         print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT> inline rvd<T, LMUL, ISA_TYPE> {func_name}() {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
     if func_name == "set_k":
-        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT> inline rvm<T, LMUL, ISA_TYPE> {func_name}(const int32_t[N<T>()]) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
+        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT> inline rvm<T, LMUL, ISA_TYPE> {func_name}(const int32_t[N<T, LMUL, ISA_TYPE>()]) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
     if func_name == "set0_k":
         print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT> inline rvm<T, LMUL, ISA_TYPE> {func_name}() {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
     if func_name == "set1_k":
