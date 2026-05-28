@@ -74,13 +74,13 @@ def gen_cpp_structures(file):
         for dt in datatypes:
             print(j2_template.render(datatype=datatypes[dt], lmul=str(lmul)), file=file)
 
-    template = """template<> struct rvd_type<{{ datatype.cstd }}, -{{ ldiv }}>{ using type = rvd_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t; };"""
-    j2_template = Template(template, undefined=StrictUndefined)
-    for ldiv in all_ldiv:
-        print("#if defined(MIPP_ENABLE_LDIV" + str(ldiv) + ")", file=file)
-        for dt in datatypes:
-            print(j2_template.render(datatype=datatypes[dt], ldiv=str(ldiv)), file=file)
-        print("#endif // defined(MIPP_ENABLE_LDIV" + str(ldiv) + ")", file=file)
+    # template = """template<> struct rvd_type<{{ datatype.cstd }}, -{{ ldiv }}>{ using type = rvd_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t; };"""
+    # j2_template = Template(template, undefined=StrictUndefined)
+    # for ldiv in all_ldiv:
+    #     print("#if defined(MIPP_ENABLE_LDIV" + str(ldiv) + ")", file=file)
+    #     for dt in datatypes:
+    #         print(j2_template.render(datatype=datatypes[dt], ldiv=str(ldiv)), file=file)
+    #     print("#endif // defined(MIPP_ENABLE_LDIV" + str(ldiv) + ")", file=file)
 
     print("template <typename T, int LMUL=1, ISA ISA_TYPE=ISA::DEFAULT> using rvd = typename rvd_type<T,LMUL,ISA_TYPE>::type;", file=file)
 
@@ -93,13 +93,13 @@ def gen_cpp_structures(file):
         for dt in datatypes:
             print(j2_template.render(datatype=datatypes[dt], lmul=str(lmul)), file=file)
 
-    template = """template<> struct rvm_type<{{ datatype.cstd }}, -{{ ldiv }}>{ using type = rvm_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t; };"""
-    j2_template = Template(template, undefined=StrictUndefined)
-    for ldiv in all_ldiv:
-        print("#if defined(MIPP_ENABLE_LDIV" + str(ldiv) + ")", file=file)
-        for dt in datatypes:
-            print(j2_template.render(datatype=datatypes[dt], ldiv=str(ldiv)), file=file)
-        print("#endif // defined(MIPP_ENABLE_LDIV" + str(ldiv) + ")", file=file)
+    # template = """template<> struct rvm_type<{{ datatype.cstd }}, -{{ ldiv }}>{ using type = rvm_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t; };"""
+    # j2_template = Template(template, undefined=StrictUndefined)
+    # for ldiv in all_ldiv:
+    #     print("#if defined(MIPP_ENABLE_LDIV" + str(ldiv) + ")", file=file)
+    #     for dt in datatypes:
+    #         print(j2_template.render(datatype=datatypes[dt], ldiv=str(ldiv)), file=file)
+    #     print("#endif // defined(MIPP_ENABLE_LDIV" + str(ldiv) + ")", file=file)
 
     print("template <typename T, int LMUL=1, ISA ISA_TYPE=ISA::DEFAULT> using rvm = typename rvm_type<T,LMUL,ISA_TYPE>::type;", file=file)
 
@@ -112,14 +112,6 @@ def gen_cpp_structures(file):
         for dt in datatypes:
             print(j2_template.render(datatype=datatypes[dt], lmul=str(lmul)), file=file)
 
-    # ldiv types not generated for scalar :/
-    # template = """template<> struct rvd_type<{{ datatype.cstd }}, -{{ ldiv }}, ISA::SCALAR>{ using type = rvd_scalar_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t; };"""
-    # j2_template = Template(template, undefined=StrictUndefined)
-    # for ldiv in all_ldiv:
-    #     print("#if defined(MIPP_ENABLE_LDIV" + str(ldiv) + ")", file=file)
-    #     for dt in datatypes:
-    #         print(j2_template.render(datatype=datatypes[dt], ldiv=str(ldiv)), file=file)
-    #     print("#endif // defined(MIPP_ENABLE_LDIV" + str(ldiv) + ")", file=file)
 
     print("template <typename T, int LMUL=1, ISA ISA_TYPE=ISA::SCALAR> using rvd_isa = typename rvd_type<T,LMUL,ISA_TYPE>::type;", file=file)
     # rvm lmul
@@ -129,15 +121,6 @@ def gen_cpp_structures(file):
         for dt in datatypes:
             print(j2_template.render(datatype=datatypes[dt], lmul=str(lmul)), file=file)
 
-    # rvm ldiv scalar ldiv not generated smh
-    # template = """template<> struct rvm_type<{{ datatype.cstd }}, -{{ ldiv }}, ISA::SCALAR>{ using type = rvm_scalar_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t; };"""
-    # j2_template = Template(template, undefined=StrictUndefined)
-    # for ldiv in all_ldiv:
-    #     print("#if defined(MIPP_ENABLE_LDIV" + str(ldiv) + ")", file=file)
-    #     for dt in datatypes:
-    #         print(j2_template.render(datatype=datatypes[dt], ldiv=str(ldiv)), file=file)
-    #     print("#endif // defined(MIPP_ENABLE_LDIV" + str(ldiv) + ")", file=file)
-    # print("template <typename T, int LMUL=1, ISA ISA_TYPE=ISA::SCALAR> using rvm_isa = typename rvm_type<T,LMUL,ISA_TYPE>::type;", file=file)
 
 
 def gen_cpp_constexpr_functions(file):
@@ -154,17 +137,17 @@ def gen_cpp_constexpr_functions(file):
         for dt in datatypes:
             print(j2_template.render(datatype=datatypes[dt], lmul=str(lmul), type_category_upper=datatypes[dt]["category"].upper(), lmul_suffix=lmul_suffix), file=file)
 
-    template = """template<> constexpr uint32_t N<{{ datatype.cstd }}, -{{ ldiv }}>(){ return MIPP_N_{{type_category_upper}}{{ datatype.n_bits }}{{ ldiv_suffix }}; }"""
-    j2_template = Template(template, undefined=StrictUndefined)
-    for ldiv in all_ldiv:
-        if ldiv == 1:
-            ldiv_suffix = ""
-        else:            
-            ldiv_suffix = "_D" + str(ldiv)
-        print("#if defined(MIPP_ENABLE_LDIV" + str(ldiv) + ")", file=file)
-        for dt in datatypes:
-            print(j2_template.render(datatype=datatypes[dt], ldiv=str(ldiv), type_category_upper=datatypes[dt]["category"].upper(), ldiv_suffix=ldiv_suffix), file=file)
-        print("#endif // defined(MIPP_ENABLE_LDIV" + str(ldiv) + ")", file=file)
+    # template = """template<> constexpr uint32_t N<{{ datatype.cstd }}, -{{ ldiv }}>(){ return MIPP_N_{{type_category_upper}}{{ datatype.n_bits }}{{ ldiv_suffix }}; }"""
+    # j2_template = Template(template, undefined=StrictUndefined)
+    # for ldiv in all_ldiv:
+    #     if ldiv == 1:
+    #         ldiv_suffix = ""
+    #     else:            
+    #         ldiv_suffix = "_D" + str(ldiv)
+    #     print("#if defined(MIPP_ENABLE_LDIV" + str(ldiv) + ")", file=file)
+    #     for dt in datatypes:
+    #         print(j2_template.render(datatype=datatypes[dt], ldiv=str(ldiv), type_category_upper=datatypes[dt]["category"].upper(), ldiv_suffix=ldiv_suffix), file=file)
+    #     print("#endif // defined(MIPP_ENABLE_LDIV" + str(ldiv) + ")", file=file)
     
         # lmul constexpr for scalar 
     template = """template<> constexpr uint32_t N<{{ datatype.cstd }}, {{ lmul }}, ISA::SCALAR>(){ return MIPP_SCALAR_N_{{type_category_upper}}{{ datatype.n_bits }}{{ lmul_suffix }}; }"""
@@ -368,12 +351,12 @@ def gen_cpp_functions(include_manager, funcs):
                 print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, "", c_scalar_func_name + "_m" + str(lmul), lmul, True) + ";", file=file)
                 print("}", file=file)
 
-            for ldiv in all_ldiv:
-                print("#if defined(MIPP_ENABLE_LDIV" + str(ldiv) + ")", file=file)
-                print(build_proto(funcs[f]["proto"], dt_par, dt_ret, {}, cpp_func_name, -ldiv, False, True) + " {", file=file)
-                print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, "", c_func_name + "_d" + str(ldiv), lmul, False) + ";", file=file)
-                print("}", file=file)
-                print("#endif // defined(MIPP_ENABLE_LDIV" + str(ldiv) + ")", file=file)
+            # for ldiv in all_ldiv:
+            #     print("#if defined(MIPP_ENABLE_LDIV" + str(ldiv) + ")", file=file)
+            #     print(build_proto(funcs[f]["proto"], dt_par, dt_ret, {}, cpp_func_name, -ldiv, False, True) + " {", file=file)
+            #     print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, "", c_func_name + "_d" + str(ldiv), lmul, False) + ";", file=file)
+            #     print("}", file=file)
+            #     print("#endif // defined(MIPP_ENABLE_LDIV" + str(ldiv) + ")", file=file)
 
 
             # if is_cast:
