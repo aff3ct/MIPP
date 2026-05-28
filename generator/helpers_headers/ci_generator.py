@@ -414,7 +414,7 @@ def gen_ci_mask_functions(func, dt, isa_list, file,lmul=0, func_name=""):
 def ci_lmul_writer(f,func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_type=None, lmul=0):
     # now that lmul funcs have been moved to simd_ext layer, this is just a wrapper to call the correct function depending on the ISA.
 
-    print(build_proto(funcs[f]["proto"], dt_par, dt_ret, {}, func_name, lmul, False, False, mask_type) + " {", file=file)
+    print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, {}, func_name, lmul, False, False, mask_type) + " {", file=file)
     for i, isa in  enumerate(isa_list):
         if i == 0:
             print("#if " + isa["gen_define"], file=file)
