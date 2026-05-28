@@ -323,7 +323,7 @@ class IncludeManager:
     def __init__(self, isa_list, base_dir="../include"):
         self.layers = {} #key is layer name, value is IncludeLayer object
         self.base_dir = base_dir
-        for layer in ["c", "cpp", "obj", "scalar"]:
+        for layer in ["c", "cpp", "obj", "scalar", "templates"]:
             self.layers[layer] = IncludeLayer(layer)
         for isa in isa_list:
             self.layers[isa] = IncludeLayer(isa)
