@@ -349,52 +349,22 @@ def gen_ci_structures(isa_list, file):
     for dt in isa["datatypes"]:
         print(j2_template.render(isa=isa, datatype=datatypes[dt]), file=file)
 
-    template = """typedef rvm_{{ datatype.category }}{{ datatype.n_bits }}_t rvm_{{ datatype.category }}{{ datatype.n_bits }}_m1_t;"""
-    j2_template = Template(template, undefined=StrictUndefined)
-
-    for dt in isa["datatypes"]:
-        print(j2_template.render(isa=isa, datatype=datatypes[dt]), file=file)
-    
-    print("#if defined(__riscv_v_intrinsic)",file=file)
-    for lmul in all_lmul[1:]:
-        template = """typedef rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t rvd_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t;"""
-        j2_template = Template(template, undefined=StrictUndefined)
-        for dt in isa_rvv["datatypes"]:
-            print(j2_template.render(isa=isa_rvv, datatype=datatypes[dt], lmul=str(lmul)), file=file)
-    for lmul in all_lmul[1:]:
-        template = """typedef rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t rvm_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t;"""
-        j2_template = Template(template, undefined=StrictUndefined)
-        for dt in isa_rvv["datatypes"]:
-            print(j2_template.render(isa=isa_rvv, datatype=datatypes[dt], lmul=str(lmul)), file=file)
-    print("#elif defined(MIPP_SCALAR)",file=file)
-    
-    # same as rvv in logic. Single big register.
-    for lmul in all_lmul[1:]:
-        template = """typedef rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t rvd_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t;"""
-        j2_template = Template(template, undefined=StrictUndefined)
-        for dt in isa_scalar["datatypes"]:
-            print(j2_template.render(isa=isa_scalar, datatype=datatypes[dt], lmul=str(lmul)), file=file)
-    for lmul in all_lmul[1:]:
-        template = """typedef rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t rvm_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t;"""
-        j2_template = Template(template, undefined=StrictUndefined)
-        for dt in isa_scalar["datatypes"]:
-            print(j2_template.render(isa=isa_scalar, datatype=datatypes[dt], lmul=str(lmul)), file=file)
-
-    print("#else",file=file)
- 
-    for lmul in all_lmul[1:]:
-        lmul_2 = int(lmul / 2)
-        template = """typedef struct { rvd_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul_2 }}_t r1, r2; } rvd_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t;"""
-        j2_template = Template(template, undefined=StrictUndefined)
-        for dt in isa["datatypes"]:
-            print(j2_template.render(isa=isa, datatype=datatypes[dt], lmul=str(lmul), lmul_2=str(lmul_2)), file=file)
-    for lmul in all_lmul[1:]:
-        lmul_2 = int(lmul / 2)
-        template = """typedef struct { rvm_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul_2 }}_t m1, m2; } rvm_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t;"""
-        j2_template = Template(template, undefined=StrictUndefined)
-        for dt in isa["datatypes"]:
-            print(j2_template.render(isa=isa, datatype=datatypes[dt], lmul=str(lmul), lmul_2=str(lmul_2)), file=file)
-    print("#endif // MIPP_RVV", file=file)
+    for index, isa in enumerate(isa_list):
+        if index == 0:
+            print("#if " + isa["gen_define"], file=file)
+        else:
+            print("#elif " + isa["gen_define"], file=file)
+        for lmul in all_lmul:
+            template = """typedef rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t rvd_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t;"""
+            j2_template = Template(template, undefined=StrictUndefined)
+            for dt in isa["datatypes"]:
+                print(j2_template.render(isa=isa, datatype=datatypes[dt], lmul=str(lmul)), file=file)
+            template = """typedef rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t rvm_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t;"""
+            j2_template = Template(template, undefined=StrictUndefined)
+            for dt in isa["datatypes"]:
+                print(j2_template.render(isa=isa, datatype=datatypes[dt], lmul=str(lmul)), file=file)
+    print("#endif", file=file)    
+   
  
 
 def ci_mask_writer(func, dt, isa_list, file, mask_type, func_name="", lmul=0):
@@ -442,61 +412,31 @@ def gen_ci_mask_functions(func, dt, isa_list, file,lmul=0, func_name=""):
   
   
 def ci_lmul_writer(f,func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_type=None, lmul=0):
-    
-    
+    # now that lmul funcs have been moved to simd_ext layer, this is just a wrapper to call the correct function depending on the ISA.
+
+    print(build_proto(funcs[f]["proto"], dt_par, dt_ret, {}, func_name, lmul, False, False, mask_type) + " {", file=file)
+    for i, isa in  enumerate(isa_list):
+        if i == 0:
+            print("#if " + isa["gen_define"], file=file)
+        else:
+            print("#elif " + isa["gen_define"], file=file)
+                       
+        if len(dt.split(',')) <= 1:
+            func_name_impl = build_func_name_short(isa, dt_par, f, True, lmul, mask_type)
+        else:
+            func_name_impl = build_func_name(isa, dt_par, dt_ret, f, True, lmul, mask_type)
+        print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa, func_name_impl, masked_version=mask_type) + ";", file=file)
+    print("#else", file=file)
+
     mask_str = ""
-    if mask_type == "mask":
-        mask_str = "_mask"
-    elif mask_type == "maskz":
-        mask_str = "_maskz"
-    elif mask_type == "masks":
-        mask_str = "_masks"
-    
-    if lmul == 1:
-        #call non_lmul version
-        print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name, lmul, False, masked_version=mask_type) + " {", file=file)
-        print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name+mask_str, masked_version=mask_type) + ";", file=file)
-        print("}", file=file)
-        return
-
-    isa_rvv = next((isa for isa in isa_list if isa["name"].startswith("rvv")), None)
-    isa_scalar = next((isa for isa in isa_list if isa["name"].startswith("scalar")), None)
-    func_name_rvv = ""
-    func_name_scalar = ""
-    if len(dt.split(',')) <= 1:
-        func_name_rvv = build_func_name_short(isa_rvv, dt_par, f, lmul=lmul, masked_version=mask_type);
-        func_name_scalar = build_func_name_short(isa_scalar, dt_par, f, lmul=lmul, masked_version=mask_type);
-    else:
-        func_name_rvv = build_func_name(isa_rvv, dt_par, dt_ret, f, lmul=lmul, masked_version=mask_type);
-        func_name_scalar = build_func_name(isa_scalar, dt_par, dt_ret, f, lmul=lmul, masked_version=mask_type);
-  
-
-    print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name,lmul=lmul,isa_name=False, masked_version=mask_type) + " {", file=file)
-    print("#if defined(__riscv_v_intrinsic)",file=file)
-    print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa_rvv, func_name_rvv, lmul=lmul, masked_version=mask_type) + ";", file=file)
-    print("#elif defined(MIPP_SCALAR)",file=file)
-    print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa_scalar, func_name_scalar, lmul=lmul, masked_version=mask_type) + ";", file=file)
-    print("#else",file=file)
-    if not funcs[f]["horizontal"]:
-        lmul_2 = int(lmul / 2)
-        print(build_call_lmul(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name+mask_str+"_m"+str(lmul_2), lmul, False, masked_version=mask_type), file=file)
-    else:
-        # print("\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \""+func_name+"\");", file=file);
-        # print("\texit(-1);", file=file);
-        
-        gen_c_horiz_lmul(
-            isa=isa_list[0],
-            file=file,
-            funcs=funcs,
-            f=f,
-            dt=dt,
-            lmul=lmul,
-            implems_horiz_lmul_generic_emu=implems_horiz_lmul_generic_emu,
-            func_name_for_panic=func_name,  # so the runtime message matches the wrapper name
-            mask_type=mask_type,            # kept for future; currently stubs if not None
-        )
-    print("#endif // MIPP_RVV", file=file)
+    if mask_type is not None:
+        mask_str = "_" + mask_type
+    print("\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \""+func_name+"_m"+str(lmul)+mask_str+"\");", file=file);
+    print("\texit(-1);", file=file);
+    print("#endif", file=file)
     print("}", file=file)
+
+  
  
 
 def ci_ldiv_writer(f,func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_type=None, ldiv=0):
@@ -599,8 +539,8 @@ def gen_ci_functions(isa_list, include_manager, funcs):
                 if mask_status.is_masksable() :			
                     ci_lmul_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_type="masks", lmul=lmul)
             
-            for ldiv in all_ldiv:
-                ci_ldiv_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, ldiv=ldiv)
+            # for ldiv in all_ldiv:
+            #     ci_ldiv_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, ldiv=ldiv)
                 
         custom_prefix = _custom_prefix_generator(f, isa_list)
         include_manager.write_custom_prefix("c", f, custom_prefix)
