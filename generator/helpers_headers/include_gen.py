@@ -11,6 +11,8 @@ def get_include_name(func, layer=""):
         return f"{func}.h"
     elif layer == "cpp":
         return f"{func}.hpp"
+    elif layer.endswith("_cpp"):
+        return f"{layer}_{func}.hpp"
     else : 
         return f"{layer}_{func}.h"
 
@@ -136,7 +138,7 @@ def get_dependencies(func, mipp_funcs, lmul=0, mask_kind="", layer=""):
     
     if layer == "c" :
         dependencies.add("../common.h")
-    elif layer == "cpp" :
+    elif layer == "cpp":
         dependencies.add("../common.hpp")
     elif layer != "" :
         dependencies.add(f"../{layer}_common.h")

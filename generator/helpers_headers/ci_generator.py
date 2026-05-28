@@ -18,7 +18,7 @@ def get_sub_isa(isa, ldiv, isa_list):
             if isinstance(isa["size"], int) and isa["size"]/ldiv == sub_isa["size"] :
                 return sub_isa
             
-def duplicate_isa_sve_along_size(isa_list):			
+def duplicate_isa_sve_along_size(isa_list):
     isa_list_copy = copy.deepcopy(isa_list)
     isa_sve = []
     current_index = -1
