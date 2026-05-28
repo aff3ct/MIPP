@@ -325,6 +325,9 @@ class IncludeManager:
             self.layers[layer] = IncludeLayer(layer)
         for isa in isa_list:
             self.layers[isa] = IncludeLayer(isa)
+        for isa in isa_list:
+            name = isa + "_cpp"
+            self.layers[name] = IncludeLayer(name)
         
         for layer in self.layers:
             for func in ["common"] + list(mipp_funcs.keys()):

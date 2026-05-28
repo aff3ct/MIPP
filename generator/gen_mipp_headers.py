@@ -245,7 +245,7 @@ def main(argv=None):
     if run_wrappers:
         generate_mipp_h(include_manager)
         generate_c_interface([isa_avx512, isa_avx, isa_sse, isa_sve, isa_rvv, isa_neon, isa_scalar], include_manager)
-        generate_cpp(include_manager)
+        generate_cpp(include_manager, [isa_avx512, isa_avx, isa_sse, isa_sve, isa_rvv, isa_neon, isa_scalar])
         generate_cpp_object(include_manager)
 
     print("Generating MIPP code for sse, avx2, avx512, rvv and sve with size in " + str(isa_sve["size"]))

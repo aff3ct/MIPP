@@ -1158,13 +1158,13 @@ def gen_test_files_all_funcs(kind="c", lmul=0, mkind="", N=10):
     # regen_obj = kind in {"obj", "all"}
 
     # disabled during rewrite of C layer stuff
-    regen_cpp = False 
+    regen_cpp = kind in {"cpp", "all"}
     regen_obj = False
     
     # WIP
-    # if lmul != 0 : 
-    #     regen_cpp = False
-    #     regen_obj = False
+    if lmul != 0 : 
+        regen_cpp = False
+        regen_obj = False
     # if mkind != "" :
     #     regen_cpp = False
     #     regen_obj = False
