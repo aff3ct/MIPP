@@ -343,11 +343,11 @@ def gen_ci_structures(isa_list, file):
         if index == len(isa_list)-1:
             print("#endif", file=file)
 
-    template = """typedef rvd_{{ datatype.category }}{{ datatype.n_bits }}_t rvd_{{ datatype.category }}{{ datatype.n_bits }}_m1_t;"""
-    j2_template = Template(template, undefined=StrictUndefined)
+    # template = """typedef rvd_{{ datatype.category }}{{ datatype.n_bits }}_t rvd_{{ datatype.category }}{{ datatype.n_bits }}_m1_t;"""
+    # j2_template = Template(template, undefined=StrictUndefined)
 
-    for dt in isa["datatypes"]:
-        print(j2_template.render(isa=isa, datatype=datatypes[dt]), file=file)
+    # for dt in isa["datatypes"]:
+    #     print(j2_template.render(isa=isa, datatype=datatypes[dt]), file=file)
 
     for index, isa in enumerate(isa_list):
         if index == 0:
@@ -512,13 +512,13 @@ def gen_ci_functions(isa_list, include_manager, funcs):
 
             print("}", file=file)
 
-            print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name, 1, False) + " {", file=file)
-            print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name) + ";", file=file)
-            print("}", file=file)
+            # print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name, 1, False) + " {", file=file)
+            # print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name) + ";", file=file)
+            # print("}", file=file)
    
             gen_ci_mask_functions(f, dt, isa_list, file, 0, func_name=func_name)
             
-            for lmul in all_lmul[1:]:
+            for lmul in all_lmul:
                 ci_lmul_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, lmul=lmul)
                 
     
