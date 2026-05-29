@@ -346,13 +346,7 @@ def gen_cpp_generic_templates(include_manager, isa, funcs):
         if f in set_functions:
             gen_set_func_error(f, file)
 
-        if "mask_support" not in funcs[f] or funcs[f]["mask_support"] is None:
-            continue
         ms = funcs[f]["mask_support"]
-
-        if not ms.is_any_mask():
-            continue
-
         proto = funcs[f]["proto"]
 
         dt_par, dr_ret = _compute_dt_par_dt_ret(funcs, f, funcs[f]["datatypes"][0]) # we just need one dt to build the template since it's generic on T
