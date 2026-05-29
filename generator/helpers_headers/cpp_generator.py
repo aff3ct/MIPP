@@ -335,23 +335,23 @@ def gen_cpp_generic_templates(include_manager, isa, funcs):
             continue
         ms = funcs[f]["mask_support"]
 
-        if (not ms.is_maskable()) and (not ms.is_maskzable()) and (not ms.is_masksable()):
-            continue
+        # if (not ms.is_maskable()) and (not ms.is_maskzable()) and (not ms.is_masksable()):
+        #     continue
 
-        proto = funcs[f]["proto"]
+        # proto = funcs[f]["proto"]
 
   
 
 
-        dt_par, dr_ret = _compute_dt_par_dt_ret(funcs, f, funcs[f]["datatypes"][0]) # we just need one dt to build the template since it's generic on T
-        cpp_func_name = build_cpp_func_name_short(funcs[f]["proto"], dt_par, f) # THIS IS A HACK BC build_cpp_func_name_short explodes w/o concrete type ...
+        # dt_par, dr_ret = _compute_dt_par_dt_ret(funcs, f, funcs[f]["datatypes"][0]) # we just need one dt to build the template since it's generic on T
+        # cpp_func_name = build_cpp_func_name_short(funcs[f]["proto"], dt_par, f) # THIS IS A HACK BC build_cpp_func_name_short explodes w/o concrete type ...
 
-        if ms.is_maskable():
-            _generic_mask_decl(file, cpp_func_name, proto, "mask")
-        if ms.is_maskzable():
-            _generic_mask_decl(file, cpp_func_name, proto, "maskz")
-        if ms.is_masksable():
-            _generic_mask_decl(file, cpp_func_name, proto, "masks")
+        # if ms.is_maskable():
+        #     _generic_mask_decl(file, cpp_func_name, proto, "mask")
+        # if ms.is_maskzable():
+        #     _generic_mask_decl(file, cpp_func_name, proto, "maskz")
+        # if ms.is_masksable():
+        #     _generic_mask_decl(file, cpp_func_name, proto, "masks")
 
         print("}\n", file=file)
 def gen_cpp_structures_isa(file, isa):
@@ -421,17 +421,17 @@ def gen_cpp_functions_isa(include_manager, isa, funcs):
                 print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, cpp_func_name, lmul, isa_name=True, cpp=True) + " {", file=file)
                 print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, "", c_func_name + "_m" + str(lmul), lmul, False) + ";", file=file)
                 print("}", file=file)
-            mask_status = funcs[f]["mask_support"]
-            if mask_status and (mask_status.is_maskable() or mask_status.is_maskzable() or mask_status.is_masksable()):
-                proto = funcs[f]["proto"]
-                c_base = _masked_c_symbol(dt_par, dt_ret, f, is_cast, isa=isa, isa_name=True)
+            # mask_status = funcs[f]["mask_support"]
+            # if mask_status and (mask_status.is_maskable() or mask_status.is_maskzable() or mask_status.is_masksable()):
+            #     proto = funcs[f]["proto"]
+            #     c_base = _masked_c_symbol(dt_par, dt_ret, f, is_cast, isa=isa, isa_name=True)
 
-                for lmul in all_lmul:
-                    if mask_status.is_maskable():
-                        _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "M", "mask", lmul=lmul, isa = isa, isa_name=True)
-                    if mask_status.is_maskzable():
-                        _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "Z", "maskz", lmul=lmul, isa = isa, isa_name=True)
-                    if mask_status.is_masksable():
-                        _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "S", "masks", lmul=lmul, isa = isa, isa_name=True)
+            #     for lmul in all_lmul:
+            #         if mask_status.is_maskable():
+            #             _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "M", "mask", lmul=lmul, isa = isa, isa_name=True)
+            #         if mask_status.is_maskzable():
+            #             _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "Z", "maskz", lmul=lmul, isa = isa, isa_name=True)
+            #         if mask_status.is_masksable():
+            #             _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "S", "masks", lmul=lmul, isa = isa, isa_name=True)
 
         print(_cpp_close_namespace(), file=file)
