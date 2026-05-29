@@ -150,28 +150,35 @@ def _compute_dt_par_dt_ret(funcs, f, dt):
 
     return dt_par, dt_ret
 
-def _cpp_custom_prefix_generator(func,isa_name=""):
+def _cpp_custom_prefix_generator(f,isa_name="", funcs=None):
     """
     include c_mipp version of the function + set namespace to mipp for the cpp wrapper.
     """
     s = "#pragma once\n"
 
     if isa_name:
-        if func is None: # common file
+        if f is None: # common file
             s += f'#include "../common.hpp"\n'
             s += f'#include "../../simd_ext/{isa_name}/{isa_name}_common.h"\n'
         
-        if func is not None: # function file
+        if f is not None: # function file
             s += f'#include "../{isa_name}_cpp_common.hpp"\n'
-            s += f'#include "../../../simd_ext/{isa_name}/functions/{isa_name}_{func}.h"\n'
-            if func in set_functions:
+            s += f'#include "../../../simd_ext/{isa_name}/functions/{isa_name}_{f}.h"\n'
+
+            masks_support = None
+            if funcs is not None:
+                mask_support = funcs[f]["mask_support"]
+            
+            if f in set_functions:
+                 s+= f'#include "../../templates/functions/templates_{f}.hpp"\n'
+            elif mask_support and mask_support.is_any_mask():
+                s+= f'#include "../../templates/functions/templates_{f}.hpp"\n'
                 # include the template 
-                s+= f'#include "../../templates/functions/templates_{func}.hpp"\n'
 
     else: 
         s += f'#include "../{isa_name}common.hpp"\n'
-        s += f'#include "../../c/functions/{func}.h"\n'
-        s+= f'#include "../../simd_ext/scalar/functions/scalar_{func}.h"\n'
+        s += f'#include "../../c/functions/{f}.h"\n'
+        s+= f'#include "../../simd_ext/scalar/functions/scalar_{f}.h"\n'
     s += "namespace mipp {\n"
     return s
 
@@ -285,19 +292,27 @@ def _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, mk_letter
 
     # Build the masked signature at the right LMUL, then rewrite the name into the template-id form.
     sig = build_proto(proto, dt_par, dt_ret, isa, cpp_func_name, lmul, isa_name=isa_name, cpp=True, masked_version=mask_kind)
-    sig = sig.replace(
-        f"{cpp_func_name}_{mask_kind}(",
-        f"{cpp_func_name}<{mk_letter}, {Tret}, {lmul}>("
-    )
+
+    if isa is not None:
+        sig = sig.replace(
+            f"{cpp_func_name}_{mask_kind}(",
+            f"{cpp_func_name}<{mk_letter}, {Tret}, {lmul}, {isa["name"].upper()}>("
+        )
+    else :
+        sig = sig.replace(
+            f"{cpp_func_name}_{mask_kind}(",
+            f"{cpp_func_name}<{mk_letter}, {Tret}, {lmul}>("
+        )
+
     print(sig + " {", file=file)
 
-    # C masked symbol naming:
-    # - if your C layer has no _m1 for masked: use base for LMUL=1, and add _mX for LMUL>1
-    # - if it DOES have _m1 too, change this to always suffix.
-    if int(lmul) == 1:
-        c_symbol = f"{c_base}_{mask_kind}"
-    else:
-        c_symbol = f"{c_base}_{mask_kind}_m{int(lmul)}"
+    # # C masked symbol naming:
+    # # - if your C layer has no _m1 for masked: use base for LMUL=1, and add _mX for LMUL>1
+    # # - if it DOES have _m1 too, change this to always suffix.
+    # if int(lmul) == 1:
+    #     c_symbol = f"{c_base}_{mask_kind}"
+    # else:
+    c_symbol = f"{c_base}_{mask_kind}_m{int(lmul)}"
 
     call = build_call(proto, dt_par, dt_ret, isa, c_symbol, lmul, isa_name=isa_name, masked_version=mask_kind)
     print("\t" + call + ";", file=file)
@@ -318,7 +333,7 @@ def gen_cpp_generic_templates(include_manager, isa, funcs):
     # this function will generate the generic template of every masked function in separate headers 4 each func
     for f in funcs:
 
-        if ( f not in set_functions ) or ( "mask_support" not in funcs[f] or funcs[f]["mask_support"] is None ):
+        if ( f not in set_functions ) and ( "mask_support" not in funcs[f] or funcs[f]["mask_support"] is None ):
             continue
         
         file = include_manager.get_fd("templates", f)
@@ -335,23 +350,19 @@ def gen_cpp_generic_templates(include_manager, isa, funcs):
             continue
         ms = funcs[f]["mask_support"]
 
-        # if (not ms.is_maskable()) and (not ms.is_maskzable()) and (not ms.is_masksable()):
-        #     continue
+        if not ms.is_any_mask():
+            continue
 
-        # proto = funcs[f]["proto"]
+        proto = funcs[f]["proto"]
 
-  
+        dt_par, dr_ret = _compute_dt_par_dt_ret(funcs, f, funcs[f]["datatypes"][0]) # we just need one dt to build the template since it's generic on T
+        cpp_func_name = build_cpp_func_name_short(funcs[f]["proto"], dt_par, f) # THIS IS A HACK BC build_cpp_func_name_short explodes w/o concrete type ...
 
+        if ms.is_maskable() or ms.is_maskzable():
+            _generic_mask_decl(file, cpp_func_name, proto, "mask")
 
-        # dt_par, dr_ret = _compute_dt_par_dt_ret(funcs, f, funcs[f]["datatypes"][0]) # we just need one dt to build the template since it's generic on T
-        # cpp_func_name = build_cpp_func_name_short(funcs[f]["proto"], dt_par, f) # THIS IS A HACK BC build_cpp_func_name_short explodes w/o concrete type ...
-
-        # if ms.is_maskable():
-        #     _generic_mask_decl(file, cpp_func_name, proto, "mask")
-        # if ms.is_maskzable():
-        #     _generic_mask_decl(file, cpp_func_name, proto, "maskz")
-        # if ms.is_masksable():
-        #     _generic_mask_decl(file, cpp_func_name, proto, "masks")
+        if ms.is_masksable():
+            _generic_mask_decl(file, cpp_func_name, proto, "masks")
 
         print("}\n", file=file)
 def gen_cpp_structures_isa(file, isa):
@@ -396,7 +407,7 @@ def gen_cpp_functions_isa(include_manager, isa, funcs):
 
 
         file = include_manager.get_fd(layer_name, f)
-        prefix = _cpp_custom_prefix_generator(f, isa["name"])
+        prefix = _cpp_custom_prefix_generator(f, isa["name"], funcs)
         print(prefix, file=file)
 
         for dt in funcs[f]["datatypes"]:
@@ -421,17 +432,18 @@ def gen_cpp_functions_isa(include_manager, isa, funcs):
                 print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, cpp_func_name, lmul, isa_name=True, cpp=True) + " {", file=file)
                 print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, "", c_func_name + "_m" + str(lmul), lmul, False) + ";", file=file)
                 print("}", file=file)
-            # mask_status = funcs[f]["mask_support"]
-            # if mask_status and (mask_status.is_maskable() or mask_status.is_maskzable() or mask_status.is_masksable()):
-            #     proto = funcs[f]["proto"]
-            #     c_base = _masked_c_symbol(dt_par, dt_ret, f, is_cast, isa=isa, isa_name=True)
+            mask_status = funcs[f]["mask_support"]
+            
+            if mask_status and mask_status.is_any_mask():
+                proto = funcs[f]["proto"]
+                c_base = _masked_c_symbol(dt_par, dt_ret, f, is_cast, isa=isa, isa_name=True)
 
-            #     for lmul in all_lmul:
-            #         if mask_status.is_maskable():
-            #             _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "M", "mask", lmul=lmul, isa = isa, isa_name=True)
-            #         if mask_status.is_maskzable():
-            #             _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "Z", "maskz", lmul=lmul, isa = isa, isa_name=True)
-            #         if mask_status.is_masksable():
-            #             _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "S", "masks", lmul=lmul, isa = isa, isa_name=True)
+                for lmul in all_lmul:
+                    if mask_status.is_maskable():
+                        _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "M", "mask", lmul=lmul, isa = isa, isa_name=True)
+                    if mask_status.is_maskzable():
+                        _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "Z", "maskz", lmul=lmul, isa = isa, isa_name=True)
+                    if mask_status.is_masksable():
+                        _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "S", "masks", lmul=lmul, isa = isa, isa_name=True)
 
         print(_cpp_close_namespace(), file=file)
