@@ -489,8 +489,8 @@ def match_func_headers(func, kind="c", mkind=""):
             headers += f'#include <{kind}/functions/get_k{hsufix}>\n'
             headers += f'#include <{kind}/functions/set_k{hsufix}>\n'
             
-            headers += f'#include <simd_ext/scalar/functions/scalar_get_k.h>\n'
-            headers += f'#include <simd_ext/scalar/functions/scalar_set_k.h>\n'
+            headers += f'#{func_scalprefix}get_k{hsufix}>\n'
+            headers += f'#{func_scalprefix}set_k{hsufix}>\n'
 
         
         if func in {"cmpeq", "cmpneq", "cmpgt", "cmpge", "cmplt", "cmple"} :

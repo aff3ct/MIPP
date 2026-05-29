@@ -447,19 +447,19 @@ def build_proto_load(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, m
 #function message error set functions
 def gen_set_func_error(func_name,file):
     if func_name == "set":
-        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline rvd<T, LMUL, ISA_TYPE> {func_name}(const T[N<T, LMUL, ISA_TYPE>()]) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
+        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline rvd<T, LMUL, ISA_TYPE> {func_name}(const T[N<T, LMUL, ISA_TYPE>()]);", file=file) #{{ std::cerr << \"{func_name} checkout tools.gen_set_func_error\" << std::endl; exit(-1);}}\n",file=file)
     if func_name == "set1":
-        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline rvd<T, LMUL, ISA_TYPE> {func_name}(const T) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
+        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline rvd<T, LMUL, ISA_TYPE> {func_name}(const T);", file=file) #{{ std::cerr << \"{func_name} checkout tools.gen_set_func_error\" << std::endl; exit(-1);}}\n",file=file)
     if func_name == "set0":
-        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline rvd<T, LMUL, ISA_TYPE> {func_name}() {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
+        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline rvd<T, LMUL, ISA_TYPE> {func_name}();", file=file) #{{ std::cerr << \"{func_name} checkout tools.gen_set_func_error\" << std::endl; exit(-1);}}\n",file=file)
     if func_name == "set_k":
-        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline rvm<T, LMUL, ISA_TYPE> {func_name}(const int32_t[N<T, LMUL, ISA_TYPE>()]) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
+        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline rvm<T, LMUL, ISA_TYPE> {func_name}(const int32_t[N<T, LMUL, ISA_TYPE>()]);", file=file) #{{ std::cerr << \"{func_name} checkout tools.gen_set_func_error\" << std::endl; exit(-1);}}\n",file=file)
     if func_name == "set0_k":
-        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline rvm<T, LMUL, ISA_TYPE> {func_name}() {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
+        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline rvm<T, LMUL, ISA_TYPE> {func_name}();", file=file) #{{ std::cerr << \"{func_name} checkout tools.gen_set_func_error\" << std::endl; exit(-1);}}\n",file=file)
     if func_name == "set1_k":
-        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline rvm<T, LMUL, ISA_TYPE> {func_name}(const int32_t v0) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
+        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline rvm<T, LMUL, ISA_TYPE> {func_name}(const int32_t v0);", file=file) #{{ std::cerr << \"{func_name} checkout tools.gen_set_func_error\" << std::endl; exit(-1);}}\n",file=file)
     if func_name == "load" or func_name == "loadu":
-        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline rvd<T, LMUL, ISA_TYPE> {func_name}(const T* p0) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
+        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline rvd<T, LMUL, ISA_TYPE> {func_name}(const T* p0);", file=file) #{{ std::cerr << \"{func_name} checkout tools.gen_set_func_error\" << std::endl; exit(-1);}}\n",file=file)
 
 
 def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, masked_version=False):
