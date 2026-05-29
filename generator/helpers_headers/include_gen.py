@@ -11,7 +11,7 @@ def get_include_name(func, layer=""):
         return f"{func}.h"
     elif layer == "cpp":
         return f"{func}.hpp"
-    elif layer.endswith("_cpp"):
+    elif layer.endswith("_cpp") or layer == "templates":
         return f"{layer}_{func}.hpp"
     else : 
         return f"{layer}_{func}.h"
@@ -370,6 +370,11 @@ class IncludeManager:
         if layer_name in self.layers:
             layer = self.layers[layer_name]
             if func in layer.includes:
+                layer.includes[func].close_fd()
+    def close_layer_fds(self, layer_name):
+        if layer_name in self.layers:
+            layer = self.layers[layer_name]
+            for func in layer.includes:
                 layer.includes[func].close_fd()
 
     def get_layer(self, layer_name):

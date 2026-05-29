@@ -423,20 +423,30 @@ def match_func_headers(func, kind="c", mkind=""):
     """
     headers = ""
     hsufix = ".h" if kind == "c" else ".hpp"
+    
+    cpp_func_scalprefix = "#include <simd_ext_cpp/scalar_cpp/functions/scalar_cpp_"
+    c_func_scalprefix = "#include <simd_ext/scalar/functions/scalar_"
+    func_scalprefix = cpp_func_scalprefix if kind == "cpp" else c_func_scalprefix
+
+    cpp_common_scalpath = "#include <simd_ext_cpp/scalar_cpp/scalar_cpp_common.hpp>\n"
+    c_common_scalpath = "#include <simd_ext/scalar/scalar_common.h>\n"
+
+    common_scalpath = cpp_common_scalpath if kind == "cpp" else c_common_scalpath
+
     if kind == "c" or kind == "cpp":
             
         headers += f"\n#include <{kind}/common{hsufix}>\n"
-        headers += f'#include <simd_ext/scalar/scalar_common.h>\n'
+        headers += common_scalpath
         
         headers += f'#include <{kind}/functions/{func}{hsufix}>\n'
         
-        headers += f'#include <simd_ext/scalar/functions/scalar_{func}.h>\n'
+        headers += f'{func_scalprefix}{func}{hsufix}>\n'
         #also include load, get 
         headers += f'#include <{kind}/functions/load{hsufix}>\n'
         headers += f'#include <{kind}/functions/get{hsufix}>\n'
         
-        headers += f'#include <simd_ext/scalar/functions/scalar_load.h>\n'
-        headers += f'#include <simd_ext/scalar/functions/scalar_get.h>\n'
+        headers += f'{func_scalprefix}load{hsufix}>\n'
+        headers += f'{func_scalprefix}get{hsufix}>\n'
         
         if mkind != "" :
             headers += f"\n#include <{kind}/functions/set1_k{hsufix}>\n"
@@ -453,26 +463,27 @@ def match_func_headers(func, kind="c", mkind=""):
             headers += f'#include <{kind}/functions/set_k{hsufix}>\n'
             headers += f'#include <{kind}/functions/toreg{hsufix}>\n'
             
-            headers += f'#include <simd_ext/scalar/functions/scalar_get_k.h>\n'
-            headers += f'#include <simd_ext/scalar/functions/scalar_set_k.h>\n'
-            headers += f'#include <simd_ext/scalar/functions/scalar_toreg.h>\n'
-            
+            # include get_k, set_k, toreg
+            headers += f'{func_scalprefix}get_k{hsufix}>\n'
+            headers += f'{func_scalprefix}set_k{hsufix}>\n'
+            headers += f'{func_scalprefix}toreg{hsufix}>\n'
+
         if func == "tomsk" : 
             headers += f'#include <{kind}/functions/toreg{hsufix}>\n'
-            headers += f'#include <simd_ext/scalar/functions/scalar_toreg.h>\n'            
+            headers += f'{func_scalprefix}toreg{hsufix}>\n'        
             
         if func == "storeu" : 
             headers += f'#include <{kind}/functions/store{hsufix}>\n'
-            headers += f'#include <simd_ext/scalar/functions/scalar_store.h>\n'
+            headers += f'{func_scalprefix}store{hsufix}>\n'
             
-        if func in {"fmadd", "fmsub", "fnmadd", "fnmsub"} :
-            headers += f'#include <{kind}/functions/mul{hsufix}>\n'
-            headers += f'#include <{kind}/functions/add{hsufix}>\n'
-            headers += f'#include <{kind}/functions/sub{hsufix}>\n'
+        # if func in {"fmadd", "fmsub", "fnmadd", "fnmsub"} :
+        #     headers += f'#include <{kind}/functions/mul{hsufix}>\n'
+        #     headers += f'#include <{kind}/functions/add{hsufix}>\n'
+        #     headers += f'#include <{kind}/functions/sub{hsufix}>\n'
         
-            headers += f'#include <simd_ext/scalar/functions/scalar_mul.h>\n'
-            headers += f'#include <simd_ext/scalar/functions/scalar_add.h>\n'
-            headers += f'#include <simd_ext/scalar/functions/scalar_sub.h>\n'
+        #     headers += f'#include <simd_ext/scalar/functions/scalar_mul.h>\n'
+        #     headers += f'#include <simd_ext/scalar/functions/scalar_add.h>\n'
+        #     headers += f'#include <simd_ext/scalar/functions/scalar_sub.h>\n'
 
         if func == "toreg" : 
             headers += f'#include <{kind}/functions/get_k{hsufix}>\n'
@@ -484,33 +495,33 @@ def match_func_headers(func, kind="c", mkind=""):
         
         if func in {"cmpeq", "cmpneq", "cmpgt", "cmpge", "cmplt", "cmple"} :
             headers += f'#include <{kind}/functions/toreg{hsufix}>\n'
-            headers += f'#include <simd_ext/scalar/functions/scalar_toreg.h>\n'
+            headers += f'{func_scalprefix}toreg{hsufix}>\n'
             
         if func == "blend" :
             headers += f'#include <{kind}/functions/get_k{hsufix}>\n'
             headers += f'#include <{kind}/functions/set_k{hsufix}>\n'
             headers += f'#include <{kind}/functions/set1{hsufix}>\n'
             
-            headers += f'#include <simd_ext/scalar/functions/scalar_get_k.h>\n'
-            headers += f'#include <simd_ext/scalar/functions/scalar_set_k.h>\n'
-            headers += f'#include <simd_ext/scalar/functions/scalar_set1.h>\n'
+            headers += f'{func_scalprefix}get_k{hsufix}>\n'
+            headers += f'{func_scalprefix}set_k{hsufix}>\n'
+            headers += f'{func_scalprefix}set1{hsufix}>\n'
             
         if func == "maskz_add" : 
             headers += f'#include <{kind}/functions/set1{hsufix}>\n'
             headers += f'#include <{kind}/functions/set_k{hsufix}>\n'
             headers += f'#include <{kind}/functions/get_k{hsufix}>\n'
             
-            headers += f'#include <simd_ext/scalar/functions/scalar_set1.h>\n'
-            headers += f'#include <simd_ext/scalar/functions/scalar_set_k.h>\n'
-            headers += f'#include <simd_ext/scalar/functions/scalar_get_k.h>\n'
+            headers += f'{func_scalprefix}set1{hsufix}>\n'
+            headers += f'{func_scalprefix}set_k{hsufix}>\n'
+            headers += f'{func_scalprefix}get_k{hsufix}>\n'
             
         if func == "testz" :
             headers += f'#include <{kind}/functions/set1_k{hsufix}>\n'
-            headers += f'#include <simd_ext/scalar/functions/scalar_set1_k.h>\n'
+            headers += f'{func_scalprefix}set1_k{hsufix}>\n'
         
         if func == "testz_2" :
             headers += f'#include <{kind}/functions/set1_k{hsufix}>\n'
-            headers += f'#include <simd_ext/scalar/functions/scalar_set1_k.h>\n'
+            headers += f'{func_scalprefix}set1_k{hsufix}>\n'
     
     elif kind == "obj":
         headers += "#include <mipp_obj{hsufix}pp>\n"
@@ -1165,9 +1176,9 @@ def gen_test_files_all_funcs(kind="c", lmul=0, mkind="", N=10):
     if lmul != 0 : 
         regen_cpp = False
         regen_obj = False
-    # if mkind != "" :
-    #     regen_cpp = False
-    #     regen_obj = False
+    if mkind != "" :
+        regen_cpp = False
+        regen_obj = False
 
     c_dict = get_gen_test_dict("c") if regen_c else {}
     cpp_dict = get_gen_test_dict("cpp") if regen_cpp else {}

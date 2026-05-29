@@ -190,6 +190,7 @@ typedef double float64_t;//remove after debug"""
     
     include_manager.resolve_all_dependencies(isa_rvv["name"], copy_mipp_funcs)
     include_manager.create_glue_file(isa_rvv["name"], "../include/rvv/mipp_impl_rvv_gen.h")
+    include_manager.close_layer_fds(isa_rvv["name"])
 
 
 

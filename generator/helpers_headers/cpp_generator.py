@@ -87,153 +87,51 @@ typedef float float32_t;
     print("template<typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> constexpr uint32_t N(){ return 0; }", file=file_common)
 
     print("}\n", file=file_common)
-
+    file_common.close()
 
     gen_cpp_generic_templates(include_manager, isa_list_copy, mipp_funcs)
-    # gen_cpp_functions(include_manager, copy_mipp_funcs)    
+    include_manager.move_to_new_dir("simd_ext_cpp", ["templates"])
+    
+    file_common_glue = include_manager.get_fd("cpp", "common")
+    gen_cpp_common(isa_list_copy, file_common_glue)
+    gen_cpp_functions(isa_list_copy, include_manager, copy_mipp_funcs)    
     generate_mipp_hpp(include_manager)
 
-# def gen_cpp_structures(file):
-#     # glue file similar to ci generator but for cpp layer, it will define the rvd and rvm templates for the generic cpp layer (not isa-specific)
-#     # template = """template<> struct rvd_type<{{ datatype.cstd }}, {{ lmul }}, ISA::DEFAULT>{ using type = rvd_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t; };"""
-#     # j2_template = Template(template, undefined=StrictUndefined)
-#     # for lmul in all_lmul:
-#     #     for dt in datatypes:
-#     #         print(j2_template.render(datatype=datatypes[dt], lmul=str(lmul)), file=file)
-
-#     # for index, isa in enumerate(isa_list):
-#     #     if index == 0:
-#     #         print("#if " + isa["gen_define"], file=file)
-#     #     else:
-#     #         print("#elif " + isa["gen_define"], file=file)
+def gen_cpp_common(isa_list, file):
+    # glue file similar to ci generator's way of generating c/common.h but for cpp layer. I don't think it needs to redefine anything, just include stuff.
+    print("#pragma once\n", file=file)
+    #print("namespace mipp {\n", file=file)
+    for index, isa in enumerate(isa_list):
+        if index == 0:
+            print("#if " + isa["gen_define"], file=file)
+        else:
+            print("#elif " + isa["gen_define"], file=file)
         
-#     #     template = 
-#     return 0
+        print(f'#include "../simd_ext_cpp/{isa["name"].lower()}_cpp/{isa["name"].lower()}_cpp_common.hpp"\n', file=file)
+    print("#else\n#error \"No ISA defined for cpp wrapper\"\n#endif", file=file)
+    #print("}\n", file=file)
 
-# def gen_cpp_constexpr_functions(file):
-#     print("// should throw an exception", file=file)
-#     print("template<typename T, int LMUL=1, ISA ISA_TYPE=ISA::DEFAULT> constexpr uint32_t N(){ return 0; }", file=file)
-
-#     template = """template<> constexpr uint32_t N<{{ datatype.cstd }}, {{ lmul }}>(){ return MIPP_N_{{type_category_upper}}{{ datatype.n_bits }}{{ lmul_suffix }}; }"""
-#     j2_template = Template(template, undefined=StrictUndefined)
-#     for lmul in all_lmul:
-#         if lmul == 1:
-#             lmul_suffix = ""
-#         else:
-#             lmul_suffix = "_M" + str(lmul)
-#         for dt in datatypes:
-#             print(j2_template.render(datatype=datatypes[dt], lmul=str(lmul), type_category_upper=datatypes[dt]["category"].upper(), lmul_suffix=lmul_suffix), file=file)
-
-#     # template = """template<> constexpr uint32_t N<{{ datatype.cstd }}, -{{ ldiv }}>(){ return MIPP_N_{{type_category_upper}}{{ datatype.n_bits }}{{ ldiv_suffix }}; }"""
-#     # j2_template = Template(template, undefined=StrictUndefined)
-#     # for ldiv in all_ldiv:
-#     #     if ldiv == 1:
-#     #         ldiv_suffix = ""
-#     #     else:            
-#     #         ldiv_suffix = "_D" + str(ldiv)
-#     #     print("#if defined(MIPP_ENABLE_LDIV" + str(ldiv) + ")", file=file)
-#     #     for dt in datatypes:
-#     #         print(j2_template.render(datatype=datatypes[dt], ldiv=str(ldiv), type_category_upper=datatypes[dt]["category"].upper(), ldiv_suffix=ldiv_suffix), file=file)
-#     #     print("#endif // defined(MIPP_ENABLE_LDIV" + str(ldiv) + ")", file=file)
-    
-#         # lmul constexpr for scalar 
-#     template = """template<> constexpr uint32_t N<{{ datatype.cstd }}, {{ lmul }}, ISA::SCALAR>(){ return MIPP_SCALAR_N_{{type_category_upper}}{{ datatype.n_bits }}{{ lmul_suffix }}; }"""
-#     j2_template = Template(template, undefined=StrictUndefined)
-#     for lmul in all_lmul:
-#         if lmul == 1:
-#             lmul_suffix = ""
-#         else:
-#             lmul_suffix = "_M" + str(lmul)
-#         for dt in datatypes:
-#             print(j2_template.render(datatype=datatypes[dt], lmul=str(lmul), type_category_upper=datatypes[dt]["category"].upper(), lmul_suffix=lmul_suffix), file=file)
-
-
-# def gen_cpp_functions(include_manager, funcs):
-#     set_functions = ["set0", "set0_k", "set", "set_k", "set1", "set1_k", "load", "loadu"]
-#     for f in funcs:
-        
-#         file = include_manager.get_fd("cpp", f)
-#         prefix = _cpp_custom_prefix_generator(f)
-#         print(prefix, file=file)
-#         if "mask_support" in funcs[f] and funcs[f]["mask_support"] is not None:
-#                 is_cast = f == "cast" or f == "cast_k"
-
-#                 ms = funcs[f]["mask_support"]
-#                 proto = funcs[f]["proto"]
-#                 if (ms.is_maskable()) or (ms.is_maskzable()):
-#                     _generic_mask_decl(file, f, proto, "mask")
-#                 if (ms.is_masksable()):
-#                     _generic_mask_decl(file, f, proto, "masks")
-
-#         if f in set_functions:
-#             gen_set_func_error(f, file)
-                    
-#         for dt in funcs[f]["datatypes"]:
-#             is_cast = len(dt.split(',')) > 1
-
-#             if not is_cast:
-#                 dt_par = dt.split(',')[0]
-#                 dt_ret = dt.split(',')[0]
-#             else:
-#                 dt_par = dt.split(',')[0]
-#                 dt_ret = dt.split(',')[1]
-
-#             dt_key = dt_par + "," + dt_ret
-
-#             if not is_cast:
-#                 c_func_name = build_func_name_short("", dt_par, f, False)
-#                 c_scalar_func_name = build_func_name_short(isa_scalar, dt_par, f, True)
-#                 cpp_func_name = build_cpp_func_name_short(funcs[f]["proto"], dt_ret, f)
-
-#             else:
-#                 c_func_name = build_func_name("", dt_par, dt_ret, f, False)
-#                 c_scalar_func_name = build_func_name(isa_scalar, dt_par, dt_ret, f, True)
-#                 cpp_func_name = build_cpp_func_name(dt_ret, f)
-    
-#             for lmul in all_lmul:
-#                 print(build_proto(funcs[f]["proto"], dt_par, dt_ret, {}, cpp_func_name, lmul, False, True) + " {", file=file)
-#                 print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, "", c_func_name + "_m" + str(lmul), lmul, False) + ";", file=file)
-#                 print("}", file=file)
-
-
-#                 print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_scalar, cpp_func_name, lmul, True, True) + " {", file=file)
-#                 print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, "", c_scalar_func_name + "_m" + str(lmul), lmul, True) + ";", file=file)
-#                 print("}", file=file)
-
-#             # for ldiv in all_ldiv:
-#             #     print("#if defined(MIPP_ENABLE_LDIV" + str(ldiv) + ")", file=file)
-#             #     print(build_proto(funcs[f]["proto"], dt_par, dt_ret, {}, cpp_func_name, -ldiv, False, True) + " {", file=file)
-#             #     print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, "", c_func_name + "_d" + str(ldiv), lmul, False) + ";", file=file)
-#             #     print("}", file=file)
-#             #     print("#endif // defined(MIPP_ENABLE_LDIV" + str(ldiv) + ")", file=file)
-
-
-#             if is_cast:
-#                 continue
-
-#             if "mask_support" not in funcs[f] or funcs[f]["mask_support"] is None:
-#                 continue
-#             ms = funcs[f]["mask_support"]
-
-#             if (not ms.is_maskable()) and (not ms.is_maskzable()) and (not ms.is_masksable()):
-#                 continue
-
-#             proto = funcs[f]["proto"]
-#             c_base = _masked_c_symbol(dt_par, dt_ret, f, is_cast=False)
-
-#             for lmul in all_lmul:
-#                 if ms.is_maskable():
-#                     _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "M", "mask",lmul=lmul)
-#                 if ms.is_maskzable():
-#                     _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "Z", "maskz",lmul=lmul)
-#                 if ms.is_masksable():
-#                     _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "S", "masks",lmul=lmul)
-#         print(_cpp_close_namespace(), file=file)
-
+def gen_cpp_functions(isa_list, include_manager, funcs):
+    for f in funcs.keys():
+        file = include_manager.get_fd("cpp", f)
+        print("#pragma once\n", file=file)
+        print('#include "../common.hpp"\n', file=file)
+        #print('namespace mipp {\n', file=file)
+        for index, isa in enumerate(isa_list):
+            if index == 0:
+                print("#if " + isa["gen_define"], file=file)
+            else:
+                print("#elif " + isa["gen_define"], file=file)
+            print(f'#include "../../simd_ext_cpp/{isa["name"].lower()}_cpp/functions/{isa["name"].lower()}_cpp_{f}.hpp"\n', file=file)
+        print("#else\n#error \"No ISA defined for cpp wrapper\"\n#endif", file=file)
+        #print("}\n", file=file)
 
 # -------------------------------------------------------------------------------------------------
 # Helpers
 # -------------------------------------------------------------------------------------------------
+
+set_functions = ["set0", "set0_k", "set", "set_k", "set1", "set1_k", "load", "loadu"]
+
 
 # duplicate of c_generator ...
 def _compute_dt_par_dt_ret(funcs, f, dt):
@@ -269,10 +167,13 @@ def _cpp_custom_prefix_generator(func,isa_name=""):
         if func is None: # common file
             s += f'#include "../common.hpp"\n'
             s += f'#include "../../simd_ext/{isa_name}/{isa_name}_common.h"\n'
+        
         if func is not None: # function file
             s += f'#include "../{isa_name}_cpp_common.hpp"\n'
-            s += f'#include "../../simd_ext/{isa_name}/functions/{isa_name}_{func}.h"\n'
-        #s += f'#include "../../simd_ext/scalar/functions/scalar_{func}.h"\n'
+            s += f'#include "../../../simd_ext/{isa_name}/functions/{isa_name}_{func}.h"\n'
+            if func in set_functions:
+                # include the template 
+                s+= f'#include "../../templates/functions/templates_{func}.hpp"\n'
 
     else: 
         s += f'#include "../{isa_name}common.hpp"\n'
@@ -423,32 +324,40 @@ def gen_cpp_generic_templates(include_manager, isa, funcs):
     # this function will generate the generic template of every masked function in separate headers 4 each func
     for f in funcs:
 
-
-
-        if "mask_support" not in funcs[f] or funcs[f]["mask_support"] is None:
+        if ( f not in set_functions ) or ( "mask_support" not in funcs[f] or funcs[f]["mask_support"] is None ):
             continue
-        ms = funcs[f]["mask_support"]
-
-        if (not ms.is_maskable()) and (not ms.is_maskzable()) and (not ms.is_masksable()):
-            continue
-
-        proto = funcs[f]["proto"]
+        
         file = include_manager.get_fd("templates", f)
 
+
         print("#pragma once\n", file=file)
-        print('#include "../common.hpp"\n', file=file)
+        print('#include "../../common.hpp"\n', file=file)
         print("namespace mipp {\n", file=file)
 
+        if f in set_functions:
+            gen_set_func_error(f, file)
 
-        dt_par, dr_ret = _compute_dt_par_dt_ret(funcs, f, funcs[f]["datatypes"][0]) # we just need one dt to build the template since it's generic on T
-        cpp_func_name = build_cpp_func_name_short(funcs[f]["proto"], dt_par, f) # THIS IS A HACK BC build_cpp_func_name_short explodes w/o concrete type ...
+        # if "mask_support" not in funcs[f] or funcs[f]["mask_support"] is None:
+        #     continue
+        # ms = funcs[f]["mask_support"]
 
-        if ms.is_maskable():
-            _generic_mask_decl(file, cpp_func_name, proto, "mask")
-        if ms.is_maskzable():
-            _generic_mask_decl(file, cpp_func_name, proto, "maskz")
-        if ms.is_masksable():
-            _generic_mask_decl(file, cpp_func_name, proto, "masks")
+        # if (not ms.is_maskable()) and (not ms.is_maskzable()) and (not ms.is_masksable()):
+        #     continue
+
+        # proto = funcs[f]["proto"]
+
+  
+
+
+        # dt_par, dr_ret = _compute_dt_par_dt_ret(funcs, f, funcs[f]["datatypes"][0]) # we just need one dt to build the template since it's generic on T
+        # cpp_func_name = build_cpp_func_name_short(funcs[f]["proto"], dt_par, f) # THIS IS A HACK BC build_cpp_func_name_short explodes w/o concrete type ...
+
+        # if ms.is_maskable():
+        #     _generic_mask_decl(file, cpp_func_name, proto, "mask")
+        # if ms.is_maskzable():
+        #     _generic_mask_decl(file, cpp_func_name, proto, "maskz")
+        # if ms.is_masksable():
+        #     _generic_mask_decl(file, cpp_func_name, proto, "masks")
 
         print("}\n", file=file)
 def gen_cpp_structures_isa(file, isa):
@@ -467,8 +376,6 @@ def gen_cpp_structures_isa(file, isa):
 
     print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=ISA::{isa_cpp_type}> using rvd = typename rvd_type<T,LMUL,ISA_TYPE>::type;", file=file)
 
-    print(f"template<typename T, int LMUL=1, ISA ISA_TYPE=ISA::{isa_cpp_type}> struct rvm_type{{}};", file=file)
-
     template = """template<> struct rvm_type<{{ datatype.cstd }}, {{ lmul }}, ISA::{{isa_cpp_type}}>{ using type = rvm_{{isa_c_name}}_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t; };"""
     j2_template = Template(template, undefined=StrictUndefined)
     for lmul in all_lmul:
@@ -480,9 +387,6 @@ def gen_cpp_structures_isa(file, isa):
 
 def gen_cpp_constexpr_functions_isa(file, isa):
     isa_cpp_type = isa["name"].upper()
-    print("// should throw an exception", file=file)
-
-    print("template<typename T, int LMUL=1, ISA ISA_TYPE=ISA::" + isa_cpp_type + "> constexpr uint32_t N(){ return 0; }", file=file)
 
     template = """template<> constexpr uint32_t N<{{ datatype.cstd }}, {{ lmul }}, ISA::{{isa_cpp_type}} >(){ return MIPP_{{isa_cpp_type}}_N_{{type_category_upper}}{{ datatype.n_bits }}{{ lmul_suffix }}; }"""
     j2_template = Template(template, undefined=StrictUndefined)
@@ -499,6 +403,7 @@ def gen_cpp_constexpr_functions_isa(file, isa):
 def gen_cpp_functions_isa(include_manager, isa, funcs):
     layer_name = isa["name"] + "_cpp"
     for f in funcs:
+
 
         file = include_manager.get_fd(layer_name, f)
         prefix = _cpp_custom_prefix_generator(f, isa["name"])

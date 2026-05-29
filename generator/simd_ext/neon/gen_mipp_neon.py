@@ -46,3 +46,4 @@ def gen_mipp_neon(include_manager):
 
     include_manager.resolve_all_dependencies(isa_neon["name"], copy_mipp_funcs)
     include_manager.create_glue_file(isa_neon["name"], "../include/neon/mipp_impl_neon_gen.h")
+    include_manager.close_layer_fds(isa_neon["name"])

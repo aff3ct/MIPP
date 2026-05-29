@@ -52,5 +52,6 @@ def gen_mipp_avx(include_manager):
 
     include_manager.resolve_all_dependencies(isa_avx["name"], copy_mipp_funcs)
     include_manager.create_glue_file(isa_avx["name"], "../include/avx/mipp_impl_avx_gen.h")
+    include_manager.close_layer_fds(isa_avx["name"])
 
 

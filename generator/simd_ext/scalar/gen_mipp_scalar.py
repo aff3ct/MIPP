@@ -480,5 +480,6 @@ typedef double float64_t;
     
     include_manager.resolve_all_dependencies(isa_scalar["name"], copy_mipp_funcs)
     include_manager.create_glue_file(isa_scalar["name"], "../include/scalar/mipp_impl_scalar_gen.h")
+    include_manager.close_layer_fds(isa_scalar["name"])
 
     print("Done.")

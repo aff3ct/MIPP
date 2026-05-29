@@ -133,7 +133,7 @@ def build_reg(datatype, isa, lmul=0, isa_name=True, cpp=False):
         if isa_name:
             str_reg += "," + isa["name"].upper()
         else:
-            str_reg += ",DEFAULT"
+            str_reg += ",DEFAULT_ISA"
         str_reg += ">"
         return str_reg
     else:
@@ -160,7 +160,7 @@ def build_msk(datatype, isa, lmul=0, isa_name=True, cpp=False):
         if isa_name:
             str_msk += "," + isa["name"].upper()
         else:
-            str_msk += ",DEFAULT"
+            str_msk += ",DEFAULT_ISA"
         str_msk += ">"
         return str_msk
     else:
@@ -284,7 +284,7 @@ def type_specialized(proto):
 
 # Build prototype of set0
 def build_proto_set0(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, masked_version=False):
-    isa_type = "DEFAULT"
+    isa_type = "DEFAULT_ISA"
     if isa_name:
         isa_type = isa["name"].upper()
     template = f"<{dt_ret}_t, {lmul}, {isa_type}>"
@@ -319,7 +319,7 @@ def build_proto_set0(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, m
 
 # Build prototype of set
 def build_proto_set(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, masked_version=False):
-    isa_type = "DEFAULT"
+    isa_type = "DEFAULT_ISA"
     if isa_name:
         isa_type = isa["name"].upper()
     lmul_str = _lmul_to_str(lmul)
@@ -367,7 +367,7 @@ def build_proto_set(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, ma
 
 
 def build_proto_set1(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, masked_version=False):
-    isa_type = "DEFAULT"
+    isa_type = "DEFAULT_ISA"
     if isa_name:
         isa_type = isa["name"].upper()
     lmul_str = _lmul_to_str(lmul)
@@ -411,7 +411,7 @@ def build_proto_set1(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, m
     return f"template <>\ninline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const {dt_par} v0"
 
 def build_proto_load(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, masked_version=False):
-    isa_type = "DEFAULT"
+    isa_type = "DEFAULT_ISA"
     if isa_name:
         isa_type = isa["name"].upper()
     if func_name == "load" or func_name == "loadu":
@@ -447,19 +447,19 @@ def build_proto_load(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, m
 #function message error set functions
 def gen_set_func_error(func_name,file):
     if func_name == "set":
-        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT> inline rvd<T, LMUL, ISA_TYPE> {func_name}(const T[N<T, LMUL, ISA_TYPE>()]) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
+        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline rvd<T, LMUL, ISA_TYPE> {func_name}(const T[N<T, LMUL, ISA_TYPE>()]) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
     if func_name == "set1":
-        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT> inline rvd<T, LMUL, ISA_TYPE> {func_name}(const T) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
+        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline rvd<T, LMUL, ISA_TYPE> {func_name}(const T) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
     if func_name == "set0":
-        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT> inline rvd<T, LMUL, ISA_TYPE> {func_name}() {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
+        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline rvd<T, LMUL, ISA_TYPE> {func_name}() {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
     if func_name == "set_k":
-        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT> inline rvm<T, LMUL, ISA_TYPE> {func_name}(const int32_t[N<T, LMUL, ISA_TYPE>()]) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
+        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline rvm<T, LMUL, ISA_TYPE> {func_name}(const int32_t[N<T, LMUL, ISA_TYPE>()]) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
     if func_name == "set0_k":
-        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT> inline rvm<T, LMUL, ISA_TYPE> {func_name}() {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
+        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline rvm<T, LMUL, ISA_TYPE> {func_name}() {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
     if func_name == "set1_k":
-        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT> inline rvm<T, LMUL, ISA_TYPE> {func_name}(const int32_t v0) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
+        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline rvm<T, LMUL, ISA_TYPE> {func_name}(const int32_t v0) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
     if func_name == "load" or func_name == "loadu":
-        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT> inline rvd<T, LMUL, ISA_TYPE> {func_name}(const T* p0) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
+        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline rvd<T, LMUL, ISA_TYPE> {func_name}(const T* p0) {{ std::cerr << \"{func_name}\" << std::endl; exit(-1);}}\n",file=file)
 
 
 def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, masked_version=False):

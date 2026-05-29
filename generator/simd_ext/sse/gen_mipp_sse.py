@@ -49,3 +49,4 @@ def gen_mipp_sse(include_manager):
     
     include_manager.resolve_all_dependencies(isa_sse["name"], copy_mipp_funcs)
     include_manager.create_glue_file(isa_sse["name"], "../include/sse/mipp_impl_sse_gen.h")
+    include_manager.close_layer_fds(isa_sse["name"])
