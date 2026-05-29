@@ -77,7 +77,8 @@ typedef float float32_t;
             print("#if " + isa["gen_define"], file=file_common)
         else:
             print("#elif " + isa["gen_define"], file=file_common)
-        print(f"inline constexpr ISA DEFAULT_ISA = ISA::{isa["name"].upper()};", file=file_common)
+        print(f"// uh-oh technically UB", file=file_common)
+        print(f"constexpr ISA DEFAULT_ISA = ISA::{isa["name"].upper()};", file=file_common)
     print("#else\n#error \"No ISA defined for cpp wrapper\"\n#endif", file=file_common)
 
     print("template<typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> struct rvd_type{};", file=file_common)
