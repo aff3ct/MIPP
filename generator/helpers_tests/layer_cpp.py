@@ -165,8 +165,6 @@ LOAD_3ARGS_REG = """\t{{reg_type}} r1 = mipp::load(inputs1);
 \t{{reg_type_scalar}} s3 = mipp::load<{{dt_ext}}, 1, mipp::ISA::SCALAR>(inputs3);
 """
 
-
-# NOT CHANGED
 LOAD_CAST_2ARGS = """\t{{reg1_type}} r1 = mipp::load(inputs1);\n\t{{reg1_type_scalar}} s1 = mipp::load<T, 1, mipp::ISA::SCALAR>(inputs1);"""
 
 LOAD_CAST_2ARGS_MASK = """\t{{msk1_type}} m1 = mipp::set_k<T>(inputs1);\n\t{{msk1_type_scalar}} ms1 = mipp::set_k<T, 1, mipp::ISA::SCALAR>(inputs1);"""
@@ -246,8 +244,6 @@ AS_3ARGS_TOL = """\t\t{{dt_ext}} res1 = mipp::get(r4, i);
 \t\t{{dt_ext}} tol  = 1e-5f * abs_diff::abs_diff(res2) + 1.0f;
 \t\t{{dt_ext}} diff = abs_diff::abs_diff(res1, res2);
 \t\tREQUIRE(diff <= tol);"""
-
-# not done
 
 AS_CAST_2ARGS = """\t\tREQUIRE(mipp::get(r2, i) == mipp::get(s2, i));"""
 AS_CAST_2ARGS_MSK = """\t\tif(res) REQUIRE(mipp::get(m2, i) != 0); else REQUIRE(mipp::get(m2, i) == 0);"""

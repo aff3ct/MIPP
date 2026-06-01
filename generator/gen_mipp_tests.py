@@ -264,7 +264,7 @@ def add_type_guards(func, implem, function, kind="c", lmul=0, mkind=""):
     if kind == "c":
         section = 'SECTION ("datatype = {dt}") {{ {function}_{dt_suffix}{mask_str}{lmul_str}(); }}\n'
     elif kind == "cpp" or kind == "obj":
-        section = 'SECTION ("datatype = {dt}") {{ {function}{dt_suffix}(); }}\n'
+        section = 'SECTION ("datatype = {dt}") {{ {function}{lmul_str}{dt_suffix}(); }}\n'
 
     #lists to store the dttypes that need to be 
     #wrapped in #if defined(MIPP_64BIT) or #if defined(MIPP_BW)
@@ -645,10 +645,13 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False, lm
             msk_type_scalar=msk_type_scalar,
             mkind=mkind, # used to know wether to define mpred or not
         )
-    if not float and kind=="cpp" :
+    if kind=="cpp" :
         
-        reg_type_scalar = "mipp::rvd<T,1,mipp::ISA::SCALAR>"
-        msk_type_scalar = "mipp::rvm<T,1,mipp::ISA::SCALAR>"
+        lmul_coeff = lmul
+        if lmul == 0:
+            lmul_coeff = 1
+        reg_type_scalar = f"mipp::rvd<T,{lmul_coeff},mipp::ISA::SCALAR>"
+        msk_type_scalar = f"mipp::rvm<T,{lmul_coeff},mipp::ISA::SCALAR>"
 
         res = func_template.render(
             func=func,
@@ -669,31 +672,31 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False, lm
             reg_type_scalar=reg_type_scalar,
             msk_type_scalar=msk_type_scalar,
         )
-    if float and kind=="cpp" :
-        reg_type_scalar = "mipp::rvd<T,1,mipp::ISA::SCALAR>"
-        msk_type_scalar = "mipp::rvm<T,1,mipp::ISA::SCALAR>"
+    # if float and kind=="cpp" :
+    #     reg_type_scalar = "mipp::rvd<T,1,mipp::ISA::SCALAR>"
+    #     msk_type_scalar = "mipp::rvm<T,1,mipp::ISA::SCALAR>"
      
-        res = func_template.render(
-            func=func,
-            dt_ext=scalar_type,
-            op=layer_dict[func_old]["op"],
-            reg_type=reg_type,
-            msk_type=msk_type,
-            size=size,
+    #     res = func_template.render(
+    #         func=func,
+    #         dt_ext=scalar_type,
+    #         op=layer_dict[func_old]["op"],
+    #         reg_type=reg_type,
+    #         msk_type=msk_type,
+    #         size=size,
             
-            is_float=True,
-            is_int=False,
-            is_signed=False,
-            type_size=float.split("t")[1],
-            lmul_suffix=lmul_suffix,
-            lmul_coeff=lmul_coeff,
+    #         is_float=True,
+    #         is_int=False,
+    #         is_signed=False,
+    #         type_size=float.split("t")[1],
+    #         lmul_suffix=lmul_suffix,
+    #         lmul_coeff=lmul_coeff,
             
-            mask_args=get_mask_args(mkind),
-            mask_kind=mask_to_str(mkind, kind),
+    #         mask_args=get_mask_args(mkind),
+    #         mask_kind=mask_to_str(mkind, kind),
 
-            reg_type_scalar=reg_type_scalar,
-            msk_type_scalar=msk_type_scalar,
-        )
+    #         reg_type_scalar=reg_type_scalar,
+    #         msk_type_scalar=msk_type_scalar,
+    #     )
     if kind == "obj" : #obsolete :(
         res = func_template.render(
             func=func,
@@ -1155,7 +1158,7 @@ def gen_test_files_all_funcs(kind="c", lmul=0, mkind="", N=10):
     union of keys from the enabled layer dictionaries.
     """
     if kind not in {"c", "cpp", "obj", "all"}:
-        raise ValueError(f"Invalid kind: {kind!r}")
+        raise ValueError(f"Invalid kind: {kind}")
     
     # if lmul != 0 or mkind != "" :
     # if mkind != "" :
@@ -1170,14 +1173,14 @@ def gen_test_files_all_funcs(kind="c", lmul=0, mkind="", N=10):
 
     # disabled during rewrite of C layer stuff
     regen_cpp = kind in {"cpp", "all"}
-    regen_obj = False
+    regen_obj = kind in {"obj", "all"}
     
     # WIP
     if lmul != 0 : 
-        regen_cpp = False
+        # regen_cpp = False
         regen_obj = False
     if mkind != "" :
-        regen_cpp = False
+        # regen_cpp = False
         regen_obj = False
 
     c_dict = get_gen_test_dict("c") if regen_c else {}
