@@ -177,10 +177,10 @@ LOAD_CAST_2ARGS_MASK = """\t{{msk1_type}} m1 = mipp_set_k_{{dt1_ext}}{{lmul_suff
 # Mask inputs for masked wrappers:
 # - choose mask m0 (we'll base it on inputs1 for convenience)
 # - rsrc for "masks" kind (use r1 where available, otherwise set0)
-LOAD_MASK_AND_RSRC_FROM_INPUTS = """\t{{msk_type}} mpred = mipp_set_k_{{dt_ext}}{{lmul_suffix}}(inpred);
-\t{{reg_type}} rsrc = mipp_set0_{{dt_ext}}{{lmul_suffix}}();
-\t{{msk_type_scalar}} smpred = mipp_scalar_set_k_{{dt_ext}}{{lmul_suffix}}(inpred);
-\t{{reg_type_scalar}} srsrc = mipp_scalar_set0_{{dt_ext}}{{lmul_suffix}}();"""
+# LOAD_MASK_AND_RSRC_FROM_INPUTS = """\t{{msk_type}} mpred = mipp_set_k_{{dt_ext}}{{lmul_suffix}}(inpred);
+# \t{{reg_type}} rsrc = mipp_set0_{{dt_ext}}{{lmul_suffix}}();
+# \t{{msk_type_scalar}} smpred = mipp_scalar_set_k_{{dt_ext}}{{lmul_suffix}}(inpred);
+# \t{{reg_type_scalar}} srsrc = mipp_scalar_set0_{{dt_ext}}{{lmul_suffix}}();"""
 
 
 LOAD_MASK_AND_RSRC_FROM_REG1 = """\t{{msk_type}} mpred = mipp_set_k_{{dt_ext}}{{lmul_suffix}}(inpred);
@@ -299,6 +299,7 @@ shape_templates = {
         loop_body="",
         loop_assert=AS_LOAD,
     ),
+    
     SHAPE_RET_VOID_2ARGS_PTR_REG: TemplateParts( # store, storeu
         func_decl=FUNC_DECL,
         decl=DECL_1ARG,

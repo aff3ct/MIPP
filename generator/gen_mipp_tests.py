@@ -25,6 +25,7 @@ from implem_rvv import implems_rvv
 from implem_neon import implems_neon
 from headers_def import implems_scalar
 from headers_def import mipp_funcs,mipp_funcs_concepts
+from cpp_generator import set_functions # used to force template specialisation in cpp mask tests 
 from tools import *
 from helpers_tests import get_gen_test_dict, test_function_name, get_gen_test_dict_lmul, get_gen_test_dict_mask
 
@@ -204,7 +205,7 @@ def lmul_to_str(lmul, mkind=""):
             case 0.5 : return "_d2"
             case 0.25 : return "_d4"
             case 0.125 : return "_d8"
-def mask_to_str(mkind, kind):
+def mask_to_str(mkind, kind, lmul=False, isa=False) :
     if kind == "c" : 
         if mkind == "" :
             return ""
@@ -214,12 +215,19 @@ def mask_to_str(mkind, kind):
         if mkind == "" :
             return ""
         else :
+            msuffix = ""
+            if (lmul != False) :
+                msuffix += f', {lmul}'
+            if (isa != False) :
+                msuffix += f', mipp::{isa.upper()}'
+            msuffix += ">"
+
             if mkind == "mask" :
-                return "<M>"
+                return "<mipp::M, T" + msuffix
             elif mkind == "maskz" :
-                return "<Z>"
+                return "<mipp::Z, T" + msuffix
             elif mkind == "masks" :
-                return "<S>"
+                return "<mipp::S, T" + msuffix
             else : 
                 raise ValueError(f"Unknown mask: {mkind!r}")
 
@@ -263,13 +271,13 @@ def add_type_guards(func, implem, function, kind="c", lmul=0, mkind=""):
     res = ""
     lmul_str = lmul_to_str(lmul, "")
     lmul_str = "_" + lmul_str if lmul_str else ""
-    mask_str = mask_to_str(mkind, kind)
+    mask_str = mask_to_str(mkind, "c") #, kind)
     if kind == "c":
         section = 'SECTION ("datatype = {dt}") {{ {function}_{dt_suffix}{mask_str}{lmul_str}(); }}\n'
     elif (kind == "cpp"  and (func != "cast") and (func != "cast_k")) or (kind == "obj") :
-        section = 'SECTION ("datatype = {dt}") {{ {function}{lmul_str}{dt_suffix}(); }}\n'
+        section = 'SECTION ("datatype = {dt}") {{ {function}{mask_str}{lmul_str}{dt_suffix}(); }}\n'
     elif kind == "cpp" and (func == "cast" or func == "cast_k") :
-        section = 'SECTION ("datatype = {dt}") {{ {function}{dt_suffix}(); }}\n'
+        section = 'SECTION ("datatype = {dt}") {{ {function}{mask_str}{dt_suffix}(); }}\n'
 
 
     #lists to store the dttypes that need to be 
@@ -457,13 +465,13 @@ def match_func_headers(func, kind="c", mkind=""):
         
         if mkind != "" :
             headers += f"\n#include <{kind}/functions/set1_k{hsufix}>\n"
-            headers += f'#include <simd_ext/scalar/functions/scalar_set1_k.h>\n'
+            headers += f'{func_scalprefix}set1_k{hsufix}>\n'
             
             headers += f"\n#include <{kind}/functions/get_k{hsufix}>\n"
-            headers += f'#include <simd_ext/scalar/functions/scalar_get_k.h>\n'
+            headers += f'{func_scalprefix}get_k{hsufix}>\n'
             
             headers += f"\n#include <{kind}/functions/set_k{hsufix}>\n"
-            headers += f'#include <simd_ext/scalar/functions/scalar_set_k.h>\n'
+            headers += f'{func_scalprefix}set_k{hsufix}>\n'
 
         if func.endswith("_k"):
             headers += f'#include <{kind}/functions/get_k{hsufix}>\n'
@@ -673,11 +681,19 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False, lm
             
             lmul_suffix=lmul_suffix,
             lmul_coeff=lmul_coeff,
+            # Hack 0 == FALSE
+            # Second hack : load, set and so on require to use explicit specialization w 4 templates arguments 
+            # since their unmasked declaration already are 3 args tpl specialization.
+            mask_kind=mask_to_str(mkind, kind, lmul=lmul) if func not in set_functions else mask_to_str(mkind, kind, lmul=lmul_coeff, isa="DEFAULT_ISA"),
+            mask_kind_scalar=mask_to_str(mkind, kind, lmul=lmul_coeff, isa="scalar"),
+            mkind=mkind,
             
             mask_args=get_mask_args(mkind),
-            mask_kind=mask_to_str(mkind, kind),
+            mask_args_scalar=get_scalar_mask_args(mkind),
+
             reg_type_scalar=reg_type_scalar,
             msk_type_scalar=msk_type_scalar,
+            mask_str=mask_to_str(mkind, "c"), # used for function name. we want the c style suffix
         )
     # if float and kind=="cpp" :
     #     reg_type_scalar = "mipp::rvd<T,1,mipp::ISA::SCALAR>"
@@ -833,7 +849,6 @@ def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="
         func_old = "cast"
         lst = list(layer_dict.keys())
         lst.sort()
-        print("Debug", f"keys={lst}, lmul={lmul}, mkind={mkind}")
         
         lmul_suffix = lmul_to_str(lmul, mkind)
 
