@@ -115,13 +115,16 @@ def dt_to_suffix(dt):
     """
     return dt.replace(",", "_")
 
-def product_type_format_cpp(dt):
+def product_type_format_cpp(dt, lmul=0, write_lmul=False):
     """convert factor type "uint32,float32" to "uint32<float32_t>"
     converts single type "uint32" to "uint32_t" for cpp tests
     """
     if "," in dt:
         dt1, dt2 = dt.split(",")
-        return f"_{dt1}<{dt2}_t>"
+        if write_lmul :
+            return f"_{dt1}{lmul_to_str(lmul, 'm')}<{dt2}_t>"
+        else :
+            return f"_{dt1}<{dt2}_t>"
     else:
         return f"<{dt}_t>"
 
@@ -213,12 +216,12 @@ def mask_to_str(mkind, kind):
         else :
             if mkind == "mask" :
                 return "<M>"
-            elif mask == "maskz" :
+            elif mkind == "maskz" :
                 return "<Z>"
-            elif mask == "masks" :
+            elif mkind == "masks" :
                 return "<S>"
             else : 
-                raise ValueError(f"Unknown mask: {mask!r}")
+                raise ValueError(f"Unknown mask: {mkind!r}")
 
 def get_mask_args(mkind): 
     if mkind == "" :
@@ -263,13 +266,17 @@ def add_type_guards(func, implem, function, kind="c", lmul=0, mkind=""):
     mask_str = mask_to_str(mkind, kind)
     if kind == "c":
         section = 'SECTION ("datatype = {dt}") {{ {function}_{dt_suffix}{mask_str}{lmul_str}(); }}\n'
-    elif kind == "cpp" or kind == "obj":
+    elif (kind == "cpp"  and (func != "cast") and (func != "cast_k")) or (kind == "obj") :
         section = 'SECTION ("datatype = {dt}") {{ {function}{lmul_str}{dt_suffix}(); }}\n'
+    elif kind == "cpp" and (func == "cast" or func == "cast_k") :
+        section = 'SECTION ("datatype = {dt}") {{ {function}{dt_suffix}(); }}\n'
+
 
     #lists to store the dttypes that need to be 
     #wrapped in #if defined(MIPP_64BIT) or #if defined(MIPP_BW)
     list_64 = []
     list_bw = []
+    write_lmul = lmul != 0 and (kind == "cpp")
     datatypes.sort()
     for dt in datatypes:
         func_defines = gen_func_defines(func, dt, implem)
@@ -283,7 +290,7 @@ def add_type_guards(func, implem, function, kind="c", lmul=0, mkind=""):
             
             #this is the ugly part
             if kind == "cpp" or kind == "obj":
-                dt_suffix = product_type_format_cpp(dt)#used to handle cast
+                dt_suffix = product_type_format_cpp(dt, lmul, write_lmul=write_lmul)#used to handle cast
                 
             if func_defines:
                 res += f"#if {func_defines}\n"
@@ -299,7 +306,7 @@ def add_type_guards(func, implem, function, kind="c", lmul=0, mkind=""):
             func_defines = gen_func_defines(func, dt, implem)
             dt_suffix = dt_to_suffix(dt)
             if kind == "cpp" or kind == "obj":
-                dt_suffix = product_type_format_cpp(dt)
+                dt_suffix = product_type_format_cpp(dt, lmul, write_lmul=write_lmul) #used to handle cast
             
             if func_defines:
                 res += f"#if {func_defines}\n"
@@ -315,7 +322,7 @@ def add_type_guards(func, implem, function, kind="c", lmul=0, mkind=""):
             func_defines = gen_func_defines(func, dt, implem)
             dt_suffix = dt_to_suffix(dt)
             if kind == "cpp" or kind == "obj":
-                dt_suffix = product_type_format_cpp(dt)
+                dt_suffix = product_type_format_cpp(dt, lmul, write_lmul=write_lmul) #used to handle cast
                
             if func_defines:
                 res += f"#if {func_defines}\n"
@@ -829,31 +836,48 @@ def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="
         print("Debug", f"keys={lst}, lmul={lmul}, mkind={mkind}")
         
         lmul_suffix = lmul_to_str(lmul, mkind)
-        lmul_coeff = lmul
 
        
         # add the 1, ISA::SCALAR 
-        split = reg1_type.split(">", 1)
-        reg1_type_scalar = split[0] + ",1,mipp::ISA::SCALAR>"
 
-        split = msk1_type.split(">", 1)
-        msk1_type_scalar = split[0] + ",1,mipp::ISA::SCALAR>"
+        lmul_coeff = 1 if lmul == 0 else lmul
+
+        if lmul == 0: 
+            split = reg1_type.split(">", 1)
+        else :
+            split = reg1_type.split(",", 1)
+        reg1_type_scalar = split[0] + f",{lmul_coeff},mipp::ISA::SCALAR>"
+
+        if lmul == 0:
+             split = msk1_type.split(">", 1)
+        else :
+            split = msk1_type.split(",", 1)
+        msk1_type_scalar = split[0] + f",{lmul_coeff},mipp::ISA::SCALAR>"
 
 
-        split = reg2_type.split(">", 1)
-        reg2_type_scalar = split[0] + ",1,mipp::ISA::SCALAR>"
+        if lmul == 0:
+             split = reg2_type.split(">", 1)
+        else :
+            split = reg2_type.split(",", 1)
+        reg2_type_scalar = split[0] + f",{lmul_coeff},mipp::ISA::SCALAR>"
         
-        split = msk2_type.split(">", 1)
-        msk2_type_scalar = split[0] + ",1,mipp::ISA::SCALAR>"
+        if lmul == 0:
+             split = msk2_type.split(">", 1)
+        else :
+            split = msk2_type.split(",", 1)
+        msk2_type_scalar = split[0] + f",{lmul_coeff},mipp::ISA::SCALAR>"
 
         
         func = test_function_name(kind, func)
         res = func_template.render(
             func=func + "_" + scalar2_type,
+            dt_ext=scalar1_type,
             dt1_ext=scalar2_type,
             dt2_ext=scalar1_type,
             op=layer_dict[func_old]["op"],
+            reg_type=reg1_type,
             reg1_type=reg1_type,
+            msk_type=msk1_type,
             msk1_type=msk1_type,
             reg2_type=reg2_type,
             msk2_type=msk2_type,
@@ -862,8 +886,10 @@ def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="
             lmul_coeff=lmul_coeff,
             mask_args=get_mask_args(mkind),
             mask_kind=mask_to_str(mkind, kind),
+            reg_type_scalar=reg1_type_scalar,
             reg1_type_scalar=reg1_type_scalar,
             reg2_type_scalar=reg2_type_scalar,
+            msk_type_scalar=msk1_type_scalar,
             msk1_type_scalar=msk1_type_scalar,
             msk2_type_scalar=msk2_type_scalar,
         )
