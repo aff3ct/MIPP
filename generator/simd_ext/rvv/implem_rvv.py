@@ -199,7 +199,7 @@ tpl_implem_rvv = {
     """
         %r<tp>% tmp; 
         tmp = %set0<tp>%();
-        {{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}_mu(m0.m, tmp.r, r0.r, r1.r, %N<tp>%);
+        tmp.r ={{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}_mu(m0.m, tmp.r, r0.r, r1.r, %N<tp>%);
         return tmp;
     """},
 
