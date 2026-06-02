@@ -195,6 +195,18 @@ def main(argv=None):
         action="store_true",
         help="Do not delete ../include/ before generating (useful when regenerating only one layer).",
     )
+
+    parser.add_argument(
+        "--header-type",
+        choices=["function_header", "category_header"],
+        default="function_header",
+        nargs="?",
+        help=(
+            "Type of header to generate. Affects how the IncludeManager resolves dependencies and organizes files. "
+            "Choices: function_header (default) generates one header per function, organized in folders by ISA. "
+            "category_header generates one header per ISA category (e.g. all float64 functions in one header), organized in folders by ISA."
+        ),
+    )
     
     args = parser.parse_args(argv)
 
@@ -223,7 +235,7 @@ def main(argv=None):
     create_folder(obj_path)
 
     # CREATE INCLUDE MANAGER
-    include_manager = IncludeManager(["avx512", "avx", "sse", "sve", "rvv", "neon", "scalar"])
+    include_manager = IncludeManager(["avx512", "avx", "sse", "sve", "rvv", "neon", "scalar"], mode=args.header_type)
 
     # ISA generators
     if "sse" in isa_layers:

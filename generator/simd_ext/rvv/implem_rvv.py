@@ -195,6 +195,13 @@ tpl_implem_rvv = {
         return ret;
     """},
 
+    "arith_2args_mskz"   : { "format" : "long", "code" : 
+    """
+        %r<tp>% tmp; 
+        tmp = %set0<tp>%();
+        {{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}_mu(m0.m, tmp.r, r0.r, r1.r, %N<tp>%);
+        return tmp;
+    """},
 
 }
 
@@ -214,15 +221,29 @@ implems_rvv = {
 	    { "instr_name" : "fadd",    "datatypes" : all_float,    "template" : tpl_implem_rvv["arith_2args"]},
 	    { "instr_name" : "add",     "datatypes" : all_int_uint, "template" : tpl_implem_rvv["arith_2args"]},#],
         
-        { "instr_name" : "add",     "datatypes" : all_int_uint, "template" : tpl_implem_rvv["arith_2args_msk"], "version" : "mask"},
-        { "instr_name" : "fadd",    "datatypes" : all_float,    "template" : tpl_implem_rvv["arith_2args_msk"], "version" : "mask"}
+        { "instr_name" : "add",     "datatypes" : all_int_uint, "template" : tpl_implem_rvv["arith_2args_msk" ], "version" : "mask"},
+        { "instr_name" : "fadd",    "datatypes" : all_float,    "template" : tpl_implem_rvv["arith_2args_msk" ], "version" : "mask"},
+
+        { "instr_name" : "add",     "datatypes" : all_int_uint, "template" : tpl_implem_rvv["arith_2args_mskz"], "version" : "maskz"},
+        { "instr_name" : "fadd",    "datatypes" : all_float,    "template" : tpl_implem_rvv["arith_2args_mskz"], "version" : "maskz"},
+
+        { "instr_name" : "add",     "datatypes" : all_int_uint, "template" : tpl_implem_rvv["arith_2args_msks"], "version" : "masks"},
+        { "instr_name" : "fadd",    "datatypes" : all_float,    "template" : tpl_implem_rvv["arith_2args_msks"], "version" : "masks"},
     ],
     "sub" : [
         { "instr_name" : "fsub",    "datatypes" : all_float,    "template" : tpl_implem_rvv["arith_2args"]},
         { "instr_name" : "sub",     "datatypes" : all_int_uint, "template" : tpl_implem_rvv["arith_2args"]},
         
         { "instr_name" : "sub",     "datatypes" : all_int_uint, "template" : tpl_implem_rvv["arith_2args_msk"], "version" : "mask"},
-        { "instr_name" : "fsub",    "datatypes" : all_float,    "template" : tpl_implem_rvv["arith_2args_msk"], "version" : "mask"}
+        { "instr_name" : "fsub",    "datatypes" : all_float,    "template" : tpl_implem_rvv["arith_2args_msk"], "version" : "mask"},
+
+        { "instr_name" : "sub",     "datatypes" : all_int_uint, "template" : tpl_implem_rvv["arith_2args_mskz"], "version" : "maskz"},
+        { "instr_name" : "fsub",    "datatypes" : all_float,    "template" : tpl_implem_rvv["arith_2args_mskz"], "version" : "maskz"},
+
+        { "instr_name" : "sub",     "datatypes" : all_int_uint, "template" : tpl_implem_rvv["arith_2args_msks"], "version" : "masks"},
+        { "instr_name" : "fsub",    "datatypes" : all_float,    "template" : tpl_implem_rvv["arith_2args_msks"], "version" : "masks"},
+
+
     ],
     "mul" : [
         { "instr_name" : "fmul",    "datatypes" : all_float,    "template" : tpl_implem_rvv["arith_2args"]},
@@ -230,10 +251,19 @@ implems_rvv = {
 
         { "instr_name" : "mul",     "datatypes" : all_int_uint, "template" : tpl_implem_rvv["arith_2args_msk"], "version" : "mask"},
         { "instr_name" : "fmul",    "datatypes" : all_float,    "template" : tpl_implem_rvv["arith_2args_msk"], "version" : "mask"},
+
+        { "instr_name" : "mul",     "datatypes" : all_int_uint, "template" : tpl_implem_rvv["arith_2args_mskz"], "version" : "maskz"},
+        { "instr_name" : "fmul",    "datatypes" : all_float,    "template" : tpl_implem_rvv["arith_2args_mskz"], "version" : "maskz"},
+
+        { "instr_name" : "mul",     "datatypes" : all_int_uint, "template" : tpl_implem_rvv["arith_2args_msks"], "version" : "masks"},
+        { "instr_name" : "fmul",    "datatypes" : all_float,    "template" : tpl_implem_rvv["arith_2args_msks"], "version" : "masks"},
     ],
+
     "div" : [
         { "instr_name" : "fdiv",    "datatypes" : all_float,    "template" : tpl_implem_rvv["arith_2args"]},
-        { "instr_name" : "fdiv",    "datatypes" : all_float,    "template" : tpl_implem_rvv["arith_2args_msk"], "version" : "mask"},
+        { "instr_name" : "fdiv",    "datatypes" : all_float,    "template" : tpl_implem_rvv["arith_2args_msk"],  "version" : "mask"},
+        { "instr_name" : "fdiv",    "datatypes" : all_float,    "template" : tpl_implem_rvv["arith_2args_mskz"], "version" : "maskz"},
+        { "instr_name" : "fdiv",    "datatypes" : all_float,    "template" : tpl_implem_rvv["arith_2args_msks"], "version" : "masks"},
     ],
     "sqrt" : [
         { "instr_name" : "fsqrt",   "datatypes" : all_float,    "template" : tpl_implem_rvv["arith_1arg"]},
@@ -248,20 +278,27 @@ implems_rvv = {
         { "instr_name" : "and",     "datatypes" : all_int_uint,  "template" : tpl_implem_rvv["arith_2args"]},
         { "instr_name" : "and",     "datatypes" : all_float,     "template" : tpl_implem_rvv["float_bitwise"]},
         
-        {"instr_name" : "and",     "datatypes" : all_int_uint,  "template" : tpl_implem_rvv["arith_2args_msk"], "version" : "mask"},
+        {"instr_name" : "and",     "datatypes"  : all_int_uint,  "template" : tpl_implem_rvv["arith_2args_msk" ], "version" : "mask"},
+        { "instr_name" : "and",     "datatypes" : all_int_uint,  "template" : tpl_implem_rvv["arith_2args_mskz"], "version" : "maskz"},
+        { "instr_name" : "and",     "datatypes" : all_int_uint,  "template" : tpl_implem_rvv["arith_2args_msks"], "version" : "masks"},
     ],
     "orb" :[
         { "instr_name" : "or",      "datatypes" : all_int_uint,  "template" : tpl_implem_rvv["arith_2args"]},
         { "instr_name" : "or",      "datatypes" : all_float,     "template" : tpl_implem_rvv["float_bitwise"]},
         
-        { "instr_name" : "or",      "datatypes" : all_int_uint,  "template" : tpl_implem_rvv["arith_2args_msk"], "version" : "mask"},
+        { "instr_name" : "or",      "datatypes" : all_int_uint,  "template" : tpl_implem_rvv["arith_2args_msk"  ], "version" : "mask"},
+        { "instr_name" : "or",     "datatypes"  : all_int_uint,   "template" : tpl_implem_rvv["arith_2args_mskz"], "version" : "maskz"},
+        { "instr_name" : "or",     "datatypes"  : all_int_uint,   "template" : tpl_implem_rvv["arith_2args_msks"], "version" : "masks"},
     ],
     "xorb" :[
         { "instr_name" : "xor",     "datatypes" : all_int_uint,  "template" : tpl_implem_rvv["arith_2args"]},
         { "instr_name" : "xor",     "datatypes" : all_float,     "template" : tpl_implem_rvv["float_bitwise"]},
         
-        { "instr_name" : "xor",     "datatypes" : all_int_uint,  "template" : tpl_implem_rvv["arith_2args_msk"], "version" : "mask"},
+        { "instr_name" : "xor",     "datatypes" : all_int_uint,  "template" : tpl_implem_rvv["arith_2args_msk" ], "version" : "mask"},
+        { "instr_name" : "xor",     "datatypes" : all_int_uint,  "template" : tpl_implem_rvv["arith_2args_mskz"], "version" : "maskz"},
+        { "instr_name" : "xor",     "datatypes" : all_int_uint,  "template" : tpl_implem_rvv["arith_2args_msks"], "version" : "masks"},
     ],
+
     #masked ops
     "andb_k" :[
         { "instr_name" : "mand",    "datatypes" : all_datatypes, "template" : tpl_implem_rvv["mask_2args"]}],

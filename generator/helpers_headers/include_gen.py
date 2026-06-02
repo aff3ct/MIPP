@@ -67,14 +67,26 @@ def _get_implem_status_requirements_all_dt_keys(funcs, f):
 
 
 def _get_dependencies_regular_category_header(func, mipp_funcs, layer="c"):
-    print("Stub, not done :(")
-    return
+    
+    requirements = _get_implem_status_requirements_all_dt_keys(mipp_funcs, func)
+    for req in requirements:
+        if req in mipp_funcs:
+            req_concept = match_concept(req)
+            req_include_name = get_include_name(req_concept, layer)
+            requirements[req] = req_include_name
+    return requirements
+    
+def _get_dependencies_mask_category_header(func, mipp_funcs, mask_kind, layer="c"):
+    requirements = _get_implem_status_requirements_mask_dt_keys(mipp_funcs, func, mask_kind)
+    for req in requirements:
+        if req in mipp_funcs:
+            req_concept = match_concept(req)
+            req_include_name = get_include_name(req_concept, layer)
+            requirements[req] = req_include_name
+    return requirements
+
 
 def _get_dependencies_regular_single_header(func, mipp_funcs, layer="c"):
-    print("Stub, not done :(")
-    return
-
-def _get_dependencies_mask_category_header(func, mipp_funcs, mask_kind, layer="c"):
     print("Stub, not done :(")
     return
 
@@ -82,15 +94,18 @@ def _get_dependencies_mask_single_header(func, mipp_funcs, mask_kind, layer="c")
     print("Stub, not done :(")
     return   
 
-def _get_dependencies_regular(func, mipp_funcs, layer="c", mode="funciont_header"):
+def _get_dependencies_regular(func, mipp_funcs, layer="c", mode="function_header"):
     # path is functions/func.h and dependencies are in the requirements key of mipp_funcs[func]["implem_status"] for all dt_keys.
+    
+    if mode == "category_header":
+        return _get_dependencies_regular_category_header(func, mipp_funcs, layer=layer)
+    elif mode == "single_header":
+        return _get_dependencies_regular_single_header(func, mipp_funcs, layer=layer)
+    
     if func not in mipp_funcs:
         return {}
     requirements = _get_implem_status_requirements_all_dt_keys(mipp_funcs, func)
     
-    # if func == "set_k": 
-    #     print(f"Requirements for {func} in regular: {requirements}")
-    #     print(mipp_funcs[func])
     for req in requirements:
         if req in mipp_funcs:
             req_concept = match_concept(req)
@@ -135,6 +150,12 @@ def _get_dependencies_mask(func, mipp_funcs, mask_kind, layer="c", mode="functio
     # path is functions/func.h and dependencies are in the requirements key of mipp_funcs[func]["implem_status"] for all dt_keys and mask_kind.
     if func not in mipp_funcs:
         return {}
+
+    if mode == "category_header":
+        return _get_dependencies_mask_category_header(func, mipp_funcs, mask_kind, layer=layer)
+    elif mode == "single_header":
+        return _get_dependencies_mask_single_header(func, mipp_funcs, mask_kind, layer=layer)
+
     requirements = _get_implem_status_requirements_mask_dt_keys(mipp_funcs, func, mask_kind)
     for req in requirements:
         if req in mipp_funcs:
@@ -171,21 +192,23 @@ def get_dependencies(func, mipp_funcs, lmul=0, mask_kind="", layer="", mode="fun
     
     #print(f"Getting dependencies for {func} in layer {layer} with lmul {lmul} and mask kind {mask_kind}")
 
-    regular_deps = _get_dependencies_regular(func, mipp_funcs, layer=layer)
+    regular_deps = _get_dependencies_regular(func, mipp_funcs, layer=layer, mode=mode)
+    # remove duplicates
+    # set_regular_deps = set(regular_deps.values())
     for dep in regular_deps:
         if dep == func:
             continue
         dependencies.add(regular_deps[dep])
     
-    masked_deps = _get_dependencies_mask(func, mipp_funcs, mask_kind, layer=layer)
+    masked_deps = _get_dependencies_mask(func, mipp_funcs, mask_kind, layer=layer, mode=mode)
+    # remove duplicates
+    # set_regular_deps = set(regular_deps.values())
+
     for dep in masked_deps:
         if dep == func:
             continue
         dependencies.add(masked_deps[dep])
-        
-    # if layer == "avx":
-    #     print(f"Getting dependencies for {func} in layer {layer} with lmul {lmul} and mask kind {mask_kind}, regular deps: {regular_deps}, masked deps: {masked_deps}")
-    #remove entry in requirement if it's func 
+
     if func in dependencies:
         dependencies.remove(func)
 
@@ -195,30 +218,53 @@ def get_dependencies(func, mipp_funcs, lmul=0, mask_kind="", layer="", mode="fun
 class IncludePath:
     # ONE include path and it's dependencies
     # is_common used to specify if it's not a func header for instance w macros / struct definitions that are shared.
-    def __init__(self, func, layer):
+    def __init__(self, func, layer,mode="function_header"):
         self.func = func
-        self.name = get_include_name(func, layer)
+        if mode == "function_header":
+            self.name = get_include_name(func, layer)
+        elif mode == "category_header":
+            category = match_concept(func)
+            self.name = get_include_name(category, layer)
+        elif mode == "single_header":
+            print("Stub, not done :(")
         self.dependencies = set()
         self.file = None
         self._is_prefixed = False
+        self.mode = mode
         
     def resolve_dependencies(self, mipp_funcs,  lmul, mask_kind, layer):
         #get regular dependencies
-        
-        
-        deps = get_dependencies(self.func, mipp_funcs, lmul=lmul, mask_kind=mask_kind, layer=layer)
+        deps = get_dependencies(self.func, mipp_funcs, lmul=lmul, mask_kind=mask_kind, layer=layer, mode=self.mode)
         for dep in deps:
             self.dependencies.add(dep)
     
     def get_fd(self, base_dir):
-        full_path = f"{base_dir}/{self.name}"
-        os.makedirs(os.path.dirname(full_path), exist_ok=True)
+        if self.mode == "function_header":
+            # print(f"Getting file descriptor for {self.name} in layer {base_dir} with mode {mode}")
 
-        if self.file is None:
-        # DO NOT use "w+" here; it truncates and will remove any prefix you wrote.
-            self.file = open(full_path, "a+", encoding="utf-8", newline="")
+            full_path = f"{base_dir}/{self.name}"
+            os.makedirs(os.path.dirname(full_path), exist_ok=True)
 
-        return self.file
+            if self.file is None:
+            # DO NOT use "w+" here; it truncates and will remove any prefix you wrote.
+                self.file = open(full_path, "a+", encoding="utf-8", newline="")
+
+            return self.file
+        elif self.mode == "category_header":
+
+            category = match_concept(self.func)
+            # print(f"Getting file descriptor for {category} in layer {base_dir} with mode {mode}")
+
+            full_path = f"{base_dir}/{category}.h"
+            os.makedirs(os.path.dirname(full_path), exist_ok=True)
+
+            if self.file is None:
+            # DO NOT use "w+" here; it truncates and will remove any prefix you wrote.
+                self.file = open(full_path, "a+", encoding="utf-8", newline="")
+
+            return self.file
+        elif self.mode == "single_header":
+            print("Stub, not done :(")
 
     def close_fd(self):
         if self.file is not None:
@@ -262,53 +308,83 @@ class IncludePath:
         # Reopen for further appends
         self.file = open(full_path, "a+", encoding="utf-8", newline="")
         self._is_prefixed = True
-        
-    # def write(self, content, base_dir):
-    #     fd = self.get_fd(base_dir)
-    #     print(content, file=fd)
-    #     self.close_fd()
+
     
-    def write_custom_prefix(self, custom_prefix, base_dir):
-        full_path = f"{base_dir}/{self.name}"
-        os.makedirs(os.path.dirname(full_path), exist_ok=True)
+    def write_custom_prefix(self, custom_prefix, base_dir, mode="function_header"):
+        if mode == "function_header":
+            full_path = f"{base_dir}/{self.name}"
+            os.makedirs(os.path.dirname(full_path), exist_ok=True)
 
-        # Ensure current generated body is on disk
-        if self.file is not None:
-            self.file.flush()
-            self.file.seek(0)
+            # Ensure current generated body is on disk
+            if self.file is not None:
+                self.file.flush()
+                self.file.seek(0)
 
-        # Read current contents (from the same handle if present, otherwise from disk)
-        if self.file is not None:
-            old = self.file.read()
-            self.file.close()
-            self.file = None
-        else:
-            try:
-                with open(full_path, "r", encoding="utf-8", newline="") as f:
-                    old = f.read()
-            except FileNotFoundError:
-                old = ""
+            # Read current contents (from the same handle if present, otherwise from disk)
+            if self.file is not None:
+                old = self.file.read()
+                self.file.close()
+                self.file = None
+            else:
+                try:
+                    with open(full_path, "r", encoding="utf-8", newline="") as f:
+                        old = f.read()
+                except FileNotFoundError:
+                    old = ""
 
-        # Build prefix
-        prefix = custom_prefix + "\n"
+            # Build prefix
+            prefix = custom_prefix + "\n"
 
-        # Rewrite file from scratch with prefix + old
-        with open(full_path, "w", encoding="utf-8", newline="") as f:
-            f.write(prefix)
-            f.write(old)
-        # Reopen for further appends
-        self.file = open(full_path, "a+", encoding="utf-8", newline="")
+            # Rewrite file from scratch with prefix + old
+            with open(full_path, "w", encoding="utf-8", newline="") as f:
+                f.write(prefix)
+                f.write(old)
+            # Reopen for further appends
+            self.file = open(full_path, "a+", encoding="utf-8", newline="")
+        elif mode == "category_header":
+            category = match_concept(self.func)
+            full_path = f"{base_dir}/{category}.h"
+            os.makedirs(os.path.dirname(full_path), exist_ok=True)
+
+            # Ensure current generated body is on disk
+            if self.file is not None:
+                self.file.flush()
+                self.file.seek(0)
+
+            # Read current contents (from the same handle if present, otherwise from disk)
+            if self.file is not None:
+                old = self.file.read()
+                self.file.close()
+                self.file = None
+            else:
+                try:
+                    with open(full_path, "r", encoding="utf-8", newline="") as f:
+                        old = f.read()
+                except FileNotFoundError:
+                    old = ""
+
+            # Build prefix
+            prefix = custom_prefix + "\n"
+
+            # Rewrite file from scratch with prefix + old
+            with open(full_path, "w", encoding="utf-8", newline="") as f:
+                f.write(prefix)
+                f.write(old)
+            # Reopen for further appends
+            self.file = open(full_path, "a+", encoding="utf-8", newline="")
+            self._is_prefixed = True
         
 class IncludeLayer:
     # all the includes path for 1 layer (simd_ext, c, cpp, obj) and their dependencies.
-    def __init__(self, layer_name=""):
+    def __init__(self, layer_name="", mode="function_header"):
         self.layer_name = layer_name
         self.includes = {} #key is func name, value is IncludePath object
         self.dir = None
+        self.mode = mode
     
     def add_includes(self, func, mipp_funcs, concepts):
         if func not in self.includes:
-            include_path = IncludePath(func, self.layer_name)
+            include_path = IncludePath(func, self.layer_name, mode=self.mode)
             include_path.resolve_dependencies(mipp_funcs, lmul=0, mask_kind="", layer=self.layer_name)
             self.includes[func] = include_path
     
@@ -318,7 +394,7 @@ class IncludeLayer:
         for func in self.includes:
             if func != "common":
                 self.includes[func].dependencies.add(f"{self.layer_name}/common.h")
-            self.includes[func].get_fd(base_dir)
+            self.includes[func].get_fd(base_dir, mode=self.mode)
             
     def get_sorted_includes(self):
         # returns the include paths sorted by dependencies order. 
@@ -344,16 +420,17 @@ class IncludeLayer:
 
 class IncludeManager:
     # all the include layers
-    def __init__(self, isa_list, base_dir="../include"):
+    def __init__(self, isa_list, base_dir="../include", mode="function_header"):
         self.layers = {} #key is layer name, value is IncludeLayer object
         self.base_dir = base_dir
+        self.mode = mode
         for layer in ["c", "cpp", "obj", "scalar", "templates"]:
-            self.layers[layer] = IncludeLayer(layer)
+            self.layers[layer] = IncludeLayer(layer,mode=mode)
         for isa in isa_list:
-            self.layers[isa] = IncludeLayer(isa)
+            self.layers[isa] = IncludeLayer(isa, mode=mode)
         for isa in isa_list:
             name = isa + "_cpp"
-            self.layers[name] = IncludeLayer(name)
+            self.layers[name] = IncludeLayer(name, mode=mode)
         
         for layer in self.layers:
             for func in ["common"] + list(mipp_funcs.keys()):
@@ -395,6 +472,7 @@ class IncludeManager:
             layer = self.layers[layer_name]
             if func in layer.includes:
                 layer.includes[func].close_fd()
+
     def close_layer_fds(self, layer_name):
         if layer_name in self.layers:
             layer = self.layers[layer_name]
@@ -423,7 +501,7 @@ class IncludeManager:
         if layer_name in self.layers:
             layer = self.layers[layer_name]
             if func in layer.includes:
-                layer.includes[func].write_custom_prefix(custom_prefix, f"{self.base_dir}/{layer_name}/functions")
+                layer.includes[func].write_custom_prefix(custom_prefix, f"{self.base_dir}/{layer_name}/functions", mode=self.mode)
     
     def move_to_new_dir(self, new_dir, isa_sublist):
         # move generated dirs from isa_sublist to base_dir/new_dir/isa. This is used for simd_ext where we want to group all the isa together in a subdir.
@@ -438,4 +516,3 @@ class IncludeManager:
                 os.rmdir(old_path)
             except OSError:
                 pass
-        

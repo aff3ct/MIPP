@@ -69,7 +69,7 @@ def _isa_include_function(isa, func):
     return content
 
 
-def _custom_prefix_generator(func, isa_list, is_common=False):
+def _custom_prefix_generator(func, isa_list, is_common=False, mode="function_header"):
     """
     Creates custom prefix for the function inside of c/functions/name.h 
     
