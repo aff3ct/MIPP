@@ -218,6 +218,7 @@ analysis-cppcheck:
     case "$ARCH" in
       riscv64-rvv1.0)
         export SKIP_C_EXAMPLES="true"
+        export THREADS=6
         ;;
     esac
 
