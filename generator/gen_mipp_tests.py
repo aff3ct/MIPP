@@ -1326,14 +1326,14 @@ def main():#just parse the args and call gen_test_files_all_funcs with the right
     parser = argparse.ArgumentParser(description="Generate MIPP test files.")
     parser.add_argument(
         "kind",
-        nargs="?",
-        default="all",
-        choices=["c", "cpp", "obj", "all"],
+        nargs="+",
+        default=["c", "cpp", "obj"],
+        choices=["c", "cpp", "obj"],
         help="Which layer to regenerate (default: all).",
     )
     # add arg for number of iteration of random tests 
     parser.add_argument(
-        "-N" "--num-iterations",
+        "-N", "--num-iterations",
         type=int,
         default=10,
         help="Number of iterations for random tests (default: 10).",
@@ -1344,6 +1344,35 @@ def main():#just parse the args and call gen_test_files_all_funcs with the right
         action="store_true",
         help="Clean the test folders before generating new files (default: false).",
     )
+    parser.add_argument(
+        "--lmul",
+        type=int,
+        nargs="+",              # one or more values
+        choices=[0, 1, 2, 4, 8],
+        default=[0, 1, 2, 4, 8],
+        help="Generate tests for the specified LMUL values.",
+    )
+    parser.add_argument(
+        "--mask-kind",
+        type=str,
+        nargs="+",              # one or more values
+        choices=["", "mask", "maskz", "masks"],
+        default=["", "mask", "maskz", "masks"],
+        help="Generate tests for the specified mask kinds.",
+    )
+
+    parser.add_argument(
+        "--skip-lmul-cpp",
+        action="store_true",
+        help="Skip generating C++ tests for LMUL > 0 (default: false).",
+    )
+
+    parser.add_argument(
+        "--skip-mask-cpp",
+        action="store_true",
+        help="Skip generating C++ tests for masked functions (default: false).",
+    )
+
     args = parser.parse_args()
 
     if args.clean:
@@ -1351,9 +1380,17 @@ def main():#just parse the args and call gen_test_files_all_funcs with the right
         clean_folder(cpppath)
         clean_folder(objpath)
 
-    for lmul in [0, 1, 2, 4, 8]:
-        for mkind in ["", "mask", "maskz", "masks"]:
-            gen_test_files_all_funcs(kind=args.kind, lmul=lmul, mkind=mkind, N=args.N__num_iterations)
+    for kind in args.kind:
+            if kind == "cpp" or kind == "obj":
+                if args.skip_lmul_cpp and kind == "cpp" and args.lmul != [0]:
+                    print("Skipping C++ tests for LMUL > 0")
+                    continue
+                if args.skip_mask_cpp and kind == "cpp" and args.mask_kind != [""]:
+                    print("Skipping C++ tests for masked functions")
+                    continue
+            for lmul in args.lmul:
+                for mkind in args.mask_kind:
+                    gen_test_files_all_funcs(kind=kind, lmul=lmul, mkind=mkind, N=args.num_iterations)
 
 
 if __name__ == "__main__":
