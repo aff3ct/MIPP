@@ -3,6 +3,13 @@ import os, tempfile, shutil
 from tools import *
 from headers_def import *
 
+# WIP : This is not actually implemented **YET**
+# dependencies mode in : 
+# function_header -> each function lives in it's own header, dependencies are included in that header.
+# category_header -> each category (concept) lives in a header, functions are defined in that header, dependencies are included in that header.
+#   for instance, all functions in the "arithmetic" concept would be defined in arithmetic.h and include their dependencies.
+# single_header -> all functions live in a single header, dependencies are included in that header.
+
 # The helpers 
 def get_include_name(func, layer=""):
     if layer == "":
@@ -58,7 +65,24 @@ def _get_implem_status_requirements_all_dt_keys(funcs, f):
                         requirements[req] = implem["requirements"][req]
     return requirements
 
-def _get_dependencies_regular(func, mipp_funcs, layer="c"):
+
+def _get_dependencies_regular_category_header(func, mipp_funcs, layer="c"):
+    print("Stub, not done :(")
+    return
+
+def _get_dependencies_regular_single_header(func, mipp_funcs, layer="c"):
+    print("Stub, not done :(")
+    return
+
+def _get_dependencies_mask_category_header(func, mipp_funcs, mask_kind, layer="c"):
+    print("Stub, not done :(")
+    return
+
+def _get_dependencies_mask_single_header(func, mipp_funcs, mask_kind, layer="c"):
+    print("Stub, not done :(")
+    return   
+
+def _get_dependencies_regular(func, mipp_funcs, layer="c", mode="funciont_header"):
     # path is functions/func.h and dependencies are in the requirements key of mipp_funcs[func]["implem_status"] for all dt_keys.
     if func not in mipp_funcs:
         return {}
@@ -90,7 +114,7 @@ def _get_all_dt_keys_masked(funcs, f, mask_kind):
     # print(f"Function {f} supports mask kind {mask_kind}, dt_keys found: {dt_keys}")
     return dt_keys
 
-def _get_implem_status_requirements_mask_dt_keys(funcs, f, mask_kind):
+def _get_implem_status_requirements_mask_dt_keys(funcs, f, mask_kind, mode="function_header"):
     """
     returns the list of func that are required by the implementations of f for a given mask_kind for every dt_key. 
     Simple getter, doesn't modify anything.
@@ -106,7 +130,7 @@ def _get_implem_status_requirements_mask_dt_keys(funcs, f, mask_kind):
                         requirements[req] = implem["requirements"][req]
     return requirements
 
-def _get_dependencies_mask(func, mipp_funcs, mask_kind, layer="c"):
+def _get_dependencies_mask(func, mipp_funcs, mask_kind, layer="c", mode="function_header"):
     
     # path is functions/func.h and dependencies are in the requirements key of mipp_funcs[func]["implem_status"] for all dt_keys and mask_kind.
     if func not in mipp_funcs:
@@ -120,7 +144,7 @@ def _get_dependencies_mask(func, mipp_funcs, mask_kind, layer="c"):
                              
 
 
-def get_dependencies(func, mipp_funcs, lmul=0, mask_kind="", layer=""):
+def get_dependencies(func, mipp_funcs, lmul=0, mask_kind="", layer="", mode="function_header"):
     """
     using the requirements key in mipp_funcs, get the list of dependencies for a given func.
     
