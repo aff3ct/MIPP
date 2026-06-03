@@ -1393,8 +1393,8 @@ def main():#just parse the args and call gen_test_files_all_funcs with the right
         "--mask-kind",
         type=str,
         nargs="+",              # one or more values
-        choices=["", "mask", "maskz", "masks"],
-        default=["", "mask", "maskz", "masks"],
+        choices=["unmasked", "mask", "maskz", "masks"],
+        default=["unmasked", "mask", "maskz", "masks"],
         help="Generate tests for the specified mask kinds.",
     )
 
@@ -1428,6 +1428,10 @@ def main():#just parse the args and call gen_test_files_all_funcs with the right
 
     if type(args.kind) == str:
         args.kind = [args.kind]
+    if("unmasked" in args.mask_kind): 
+        # replace with empty string to simplify the code later on
+        args.mask_kind = [k if k != "unmasked" else "" for k in args.mask_kind]
+
     for kind in args.kind:
             if kind == "cpp" or kind == "obj":
                 if args.skip_lmul_cpp and kind == "cpp" and args.lmul != [0]:
