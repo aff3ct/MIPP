@@ -1426,6 +1426,8 @@ def main():#just parse the args and call gen_test_files_all_funcs with the right
         clean_folder(cpppath)
         clean_folder(objpath)
 
+    if type(args.kind) == str:
+        args.kind = [args.kind]
     for kind in args.kind:
             if kind == "cpp" or kind == "obj":
                 if args.skip_lmul_cpp and kind == "cpp" and args.lmul != [0]:
