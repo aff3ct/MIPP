@@ -103,7 +103,6 @@ tpl_implem_rvv = {
     
     #arith_2args but with mask dt extension at the end
     "arith_msk_type_2args" : { "format" : "short", "code" : "{{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}_{{isa_dt_par.data_ext_logi}}(r0.r, r1.r, %N<tp>%);"},
-    "arith_msk_type_2args_msk" : { "format" : "short", "code" : "{{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}_{{isa_dt_par.data_ext_logi}}_mu(m0.m, r0.r, r0.r, r1.r, %N<tp>%);"},
 
     "float_set0"           : { "format" : "short", "code" : "{{isa.prefix}}_{{ instr_name }}_v_f_{{isa_dt_par.data_ext}}(0.f,%N<tp>%);"},
     "scalar_set0"          : { "format" : "short", "code" : "{{isa.prefix}}_{{ instr_name }}_v_x_{{isa_dt_par.data_ext}}(0,%N<tp>%);"},
@@ -271,7 +270,14 @@ tpl_implem_rvv = {
         tmp = %set0<tp>%();
         tmp.r = {{isa.prefix}}_v{{instr_name}}_vx_{{isa_dt_par.data_ext}}_mu(m0.m, tmp.r, r0.r, v0, %N<tp>%);
         return tmp;
-    """}
+    """},
+
+    "arith_msk_type_2args_msk" : { "format" : "long", "code" : """
+        %m<tp>% tmp;
+        tmp = %tomsk<tp>%(r0);
+        {{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}_{{isa_dt_par.data_ext_logi}}_mu(m0.m, tmp.m, r0.r, r1.r, %N<tp>%);
+    """},
+
 
 }
 
