@@ -172,6 +172,7 @@ tpl_implem_rvv = {
         %r<c:uint|b:tp>% tmp;
         tmp.r = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(r0.r);
         tmp.r = {{isa.prefix}}_v{{instr_name}}_vx_{{isa_dt_par.uint_data_ext}}_mu(m0.m, tmp.r, tmp.r, -1, %N<tp>%);
+        %r<tp>% ret;
         ret.r = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.uint_data_ext}}_{{isa_dt_par.data_ext}}(tmp.r);
         return ret;
     """},
@@ -181,7 +182,8 @@ tpl_implem_rvv = {
         %r<c:uint|b:tp>% tmp, tmp1;
         tmp1.r = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(rsrc.r);
         tmp.r = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(r0.r);
-        tmp.r = {{isa.prefix}}_v{{instr_name}}_vx_{{isa_dt_par.uint_data_ext}}_mu(m0.m, tmp1.r, tmp.r, -1, %N<tp>%); 
+        tmp.r = {{isa.prefix}}_v{{instr_name}}_vx_{{isa_dt_par.uint_data_ext}}_mu(m0.m, tmp1.r, tmp.r, -1, %N<tp>%);
+        %r<tp>% ret; 
         ret.r = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.uint_data_ext}}_{{isa_dt_par.data_ext}}(tmp.r);
         return ret;
     """},
