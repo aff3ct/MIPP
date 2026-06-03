@@ -430,12 +430,49 @@ def gen_cast_test_type_guards(func, long_name, short_name, kind="c", lmul=0, mki
 # math.h stdio.h etc instead of cmath, cstdio, etc.
 
 
-def match_func_headers(func, kind="c", mkind=""):
+def _match_func_headers_category(func, kind="c", mkind="") :
+    headers = ""
+    hsufix = ".h" if kind == "c" else ".hpp"
+    
+    cpp_func_scalprefix = "#include <simd_ext_cpp/scalar_cpp/functions/scalar_cpp_"
+    c_func_scalprefix = "#include <simd_ext/scalar/functions/scalar_"
+    func_scalprefix = cpp_func_scalprefix if kind == "cpp" else c_func_scalprefix
+
+    cpp_common_scalpath = "#include <simd_ext_cpp/scalar_cpp/scalar_cpp_common.hpp>\n"
+    c_common_scalpath = "#include <simd_ext/scalar/scalar_common.h>\n"
+
+    common_scalpath = cpp_common_scalpath if kind == "cpp" else c_common_scalpath
+
+    headers += f"\n#include <{kind}/common{hsufix}>\n"
+    headers += common_scalpath
+
+    category = match_concept(func)
+
+    headers += f'#include <{kind}/functions/{category}{hsufix}>\n'
+    headers += f'{func_scalprefix}{category}{hsufix}>\n'
+
+    headers += f'#include <{kind}/functions/load{hsufix}>\n'
+    headers += f'#include <{kind}/functions/store{hsufix}>\n'
+
+    headers += f'{func_scalprefix}load{hsufix}>\n'
+    headers += f'{func_scalprefix}store{hsufix}>\n'
+
+
+    if mkind != "" or func.endswith("_k") or func == "tomsk" \
+        or func == "toreg" or func in {"cmpeq", "cmpneq", "cmpgt", "cmpge", "cmplt", "cmple"} \
+        or func == "blend" or func == "maskz_add" or func in {"testz", "testz_2"} :
+        headers += f"\n#include <{kind}/functions/reinterpret{hsufix}>\n"
+        headers += f'{func_scalprefix}reinterpret{hsufix}>\n'
+    return headers
+
+def match_func_headers(func, kind="c", mkind="", mode="function"):
     """
     helper to match a func to the relevant headers to include in the test file.
     This is used to avoid including all headers in all test files, which can cause 
     issues with conflicting types etc...
     """
+    if mode == "category" and kind != "obj" :
+        return _match_func_headers_category(func, kind, mkind)
     headers = ""
     hsufix = ".h" if kind == "c" else ".hpp"
     
@@ -543,7 +580,7 @@ def match_func_headers(func, kind="c", mkind=""):
 
     return headers
 
-def gen_headers(kind="c", func="", N=10, lmul=0, mkind=""):
+def gen_headers(kind="c", func="", N=10, lmul=0, mkind="", mode="function"):
     """
     simple helper to return headers for the test files
     """
@@ -568,9 +605,9 @@ def gen_headers(kind="c", func="", N=10, lmul=0, mkind=""):
     )
     if kind == "c":
         
-        res += match_func_headers(func, kind, mkind)
+        res += match_func_headers(func, kind, mkind, mode)
     elif kind == "cpp":
-        res += match_func_headers(func, kind, mkind)
+        res += match_func_headers(func, kind, mkind, mode)
     elif kind == "obj":
         res += "\n#include <mipp_obj.hpp>"
     res += "\n#include <catch2/catch_test_macros.hpp>"
@@ -1190,7 +1227,7 @@ def clean_folder(folder_path):
         print(f"Failed to delete folder: {folder_path}. Reason: {e}")
 
 #big and somewhat ugly "main" func to generate all test files for all funcs for the requested layer(s)
-def gen_test_files_all_funcs(kind="c", lmul=0, mkind="", N=10):
+def gen_test_files_all_funcs(kind="c", lmul=0, mkind="", N=10, mode="function"):
     """
     kind: "c", "cpp", "obj", or "all"
     Regenerates only the requested layer(s) for all functions.
@@ -1292,9 +1329,9 @@ def gen_test_files_all_funcs(kind="c", lmul=0, mkind="", N=10):
 
         if regen_c and func in c_dict:
             if func == "cast" or func == "cast_k":
-                c_file = gen_headers(kind="c",func=func, N=N, lmul=lmul, mkind=mkind) + gen_cast_file(func, kind="c",lmul=lmul, mkind=mkind)
+                c_file = gen_headers(kind="c",func=func, N=N, lmul=lmul, mkind=mkind, mode=mode) + gen_cast_file(func, kind="c",lmul=lmul, mkind=mkind)
             else:
-                c_file = gen_headers(kind="c",func=func, N=N, lmul=lmul, mkind=mkind) + gen_file(func, kind="c",lmul=lmul, mkind=mkind)
+                c_file = gen_headers(kind="c",func=func, N=N, lmul=lmul, mkind=mkind, mode=mode) + gen_file(func, kind="c",lmul=lmul, mkind=mkind)
             if disable:
                 c_file = comment_out_cpp_file(c_file, reason)
             file_path = cpath + match_concept(func) + f"/test_c{func}.cpp"
@@ -1302,9 +1339,9 @@ def gen_test_files_all_funcs(kind="c", lmul=0, mkind="", N=10):
 
         if regen_cpp and func in cpp_dict:
             if func == "cast" or func == "cast_k":
-                cpp_file = gen_headers(kind="cpp", func=func,  lmul=lmul, mkind=mkind) + gen_cast_file(func, kind="cpp",lmul=lmul, mkind=mkind)
+                cpp_file = gen_headers(kind="cpp", func=func,  lmul=lmul, mkind=mkind, mode=mode) + gen_cast_file(func, kind="cpp",lmul=lmul, mkind=mkind)
             else:
-                cpp_file = gen_headers(kind="cpp", func=func,  lmul=lmul, mkind=mkind) + gen_file(func, kind="cpp",lmul=lmul, mkind=mkind)
+                cpp_file = gen_headers(kind="cpp", func=func,  lmul=lmul, mkind=mkind, mode=mode) + gen_file(func, kind="cpp",lmul=lmul, mkind=mkind)
                 
             if disable:
                 cpp_file = comment_out_cpp_file(cpp_file, reason)
@@ -1326,7 +1363,7 @@ def main():#just parse the args and call gen_test_files_all_funcs with the right
     parser = argparse.ArgumentParser(description="Generate MIPP test files.")
     parser.add_argument(
         "kind",
-        nargs="+",
+        nargs="?",
         default=["c", "cpp", "obj"],
         choices=["c", "cpp", "obj"],
         help="Which layer to regenerate (default: all).",
@@ -1373,6 +1410,15 @@ def main():#just parse the args and call gen_test_files_all_funcs with the right
         help="Skip generating C++ tests for masked functions (default: false).",
     )
 
+    parser.add_argument(
+        "--header-type",
+        type=str,
+        choices=["function", "category"],
+        default="function",
+        nargs="?",
+        help="Whether to use function-specific headers or category-based headers (default: function)."
+    )
+
     args = parser.parse_args()
 
     if args.clean:
@@ -1390,7 +1436,7 @@ def main():#just parse the args and call gen_test_files_all_funcs with the right
                     continue
             for lmul in args.lmul:
                 for mkind in args.mask_kind:
-                    gen_test_files_all_funcs(kind=kind, lmul=lmul, mkind=mkind, N=args.num_iterations)
+                    gen_test_files_all_funcs(kind=kind, lmul=lmul, mkind=mkind, N=args.num_iterations, mode=args.header_type)
 
 
 if __name__ == "__main__":

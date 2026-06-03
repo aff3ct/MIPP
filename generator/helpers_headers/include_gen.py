@@ -433,7 +433,6 @@ class IncludeCategory:
 
         if self.file is None:
             self.file = open(full_path, "a+", encoding="utf-8", newline="")
-
         return self.file
 
     def resolve_dependencies(self, mipp_funcs, lmul=0, mask_kind="", layer=""):
@@ -486,6 +485,7 @@ class IncludeCategory:
             self.file = None
     
     def write_custom_prefix(self, custom_prefix, base_dir):
+        print(f"Debug: writing custom prefix for category {self.category} in layer with base dir {base_dir}")
         full_path = f"{base_dir}/{self.name}"
         os.makedirs(os.path.dirname(full_path), exist_ok=True)
 
@@ -516,6 +516,7 @@ class IncludeCategory:
         # Reopen for further appends
         self.file = open(full_path, "a+", encoding="utf-8", newline="")
         self._is_prefixed = True
+        print(f"Debug: custom prefix written successfully for category {self.category} with name {self.name} at path {full_path}")
     
 class IncludeLayer:
     # all the includes path for 1 layer (simd_ext, c, cpp, obj) and their dependencies.
@@ -687,10 +688,18 @@ class IncludeManager:
                             f.write(f'#include "{include_category.name}"\n')
     
     def write_custom_prefix(self, layer_name, func, custom_prefix):
-        if layer_name in self.layers:
-            layer = self.layers[layer_name]
-            if func in layer.includes:
-                layer.includes[func].write_custom_prefix(custom_prefix, f"{self.base_dir}/{layer_name}/functions", mode=self.mode)
+        # func is a bad name bc it's actually a category in category header mode, but let's keep it for simplicity.
+        if self.mode == "function_header":
+            if layer_name in self.layers:
+                layer = self.layers[layer_name]
+                if func in layer.includes:
+                    layer.includes[func].write_custom_prefix(custom_prefix, f"{self.base_dir}/{layer_name}/functions", mode=self.mode)
+        elif self.mode == "category_header":
+            if layer_name in self.layers:
+                layer = self.layers[layer_name]
+                category = func
+                if category in layer.categories:
+                    layer.categories[category].write_custom_prefix(custom_prefix, f"{self.base_dir}/{layer_name}/functions")
     
     def move_to_new_dir(self, new_dir, isa_sublist):
         # move generated dirs from isa_sublist to base_dir/new_dir/isa. This is used for simd_ext where we want to group all the isa together in a subdir.

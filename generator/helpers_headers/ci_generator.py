@@ -207,6 +207,7 @@ def _custom_prefix_generator(func, isa_list, is_common=False, mode="function_hea
         
         
     else : 
+        print('Generating custom prefix for function "'+func+'"')
         is_first = True
 
         content += "#include \"../common.h\"\n"
@@ -250,6 +251,10 @@ def generate_c_interface(isa_list, include_manager=None):
     gen_ci_defines(isa_list, file_common)
     gen_ci_structures(isa_list, file_common)
 
+    tpl_footer_interface = """#endif /* MY_INTRINSICS_PLUS_PLUS_INTERFACE_H_ */"""
+    j2_template = Template(tpl_footer_interface, undefined=StrictUndefined)
+    print(j2_template.render(), file=file_common)
+
     # Add mipp_info function to mipp.h
     env = Environment(loader=FileSystemLoader("./helpers_headers/templates/"))
     template_mipp_info = env.get_template("mipp_info.tpl.h")
@@ -258,9 +263,6 @@ def generate_c_interface(isa_list, include_manager=None):
 
     gen_ci_functions(isa_list, include_manager, copy_mipp_funcs)
 
-    tpl_footer_interface = """#endif /* MY_INTRINSICS_PLUS_PLUS_INTERFACE_H_ */"""
-    j2_template = Template(tpl_footer_interface, undefined=StrictUndefined)
-    print(j2_template.render(), file=file_common)
 
 def gen_ci_defines(isa_list, file):
     for i, isa in enumerate(isa_list):
@@ -542,5 +544,10 @@ def gen_ci_functions(isa_list, include_manager, funcs):
             # for ldiv in all_ldiv:
             #     ci_ldiv_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, ldiv=ldiv)
                 
-        custom_prefix = _custom_prefix_generator(f, isa_list)
-        include_manager.write_custom_prefix("c", f, custom_prefix)
+        if include_manager.mode == "function_header":
+            custom_prefix = _custom_prefix_generator(f, isa_list)
+            include_manager.write_custom_prefix("c", f, custom_prefix)
+    if include_manager.mode == "category_header":
+        for category in include_manager.layers["c"].categories:
+            custom_prefix = _custom_prefix_generator(category, isa_list)
+            include_manager.write_custom_prefix("c", category, custom_prefix)
