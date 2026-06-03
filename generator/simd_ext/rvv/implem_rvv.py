@@ -275,7 +275,8 @@ tpl_implem_rvv = {
     "arith_msk_type_2args_msk" : { "format" : "long", "code" : """
         %m<tp>% tmp;
         tmp = %tomsk<tp>%(r0);
-        return {{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}_{{isa_dt_par.data_ext_logi}}_mu(m0.m, tmp.m, r0.r, r1.r, %N<tp>%);
+        tmp.m = {{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}_{{isa_dt_par.data_ext_logi}}_mu(m0.m, tmp.m, r0.r, r1.r, %N<tp>%); 
+        return tmp;
     """},
 
 
