@@ -207,7 +207,7 @@ tpl_implem_rvv = {
     "store_mskz" : { "format" : "long", "code" : """
         %r<tp>% tmp;
         tmp = %set0<tp>%();
-        tmp.r = {{ isa.prefix }}_vmerge_vvm_{{ isa_dt_par.data_ext }}(r0.r, tmp.r, m0.m, %N<tp>%);
+        tmp.r = {{ isa.prefix }}_vmerge_vvm_{{ isa_dt_par.data_ext }}(tmp.r, r0.r, m0.m, %N<tp>%);
         // store w regular vse
         {{ isa.prefix }}_vse{{ isa_dt_par.width}}_v_{{ isa_dt_par.data_ext }}(({{ isa_dt_par.to_ptr }}*) p0, tmp.r , %N<tp>%);
     """},
