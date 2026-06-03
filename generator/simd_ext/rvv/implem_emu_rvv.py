@@ -582,6 +582,8 @@ implems_emu_rvv = {
 	#    { "instr_name" : "maskload", "datatypes" : all_float, "template" : tpl_implem_emu_rvv["maskzld"] },
 	#	{ "instr_name" : "maskload", "datatypes" : all_int_uint, "template" : tpl_implem_emu_rvv["maskzld"]}
     #],
+
+    # todo maskz masks
     "hadd" : [
         { "instr_name" : "redsum", "datatypes" : all_int_uint, "template" : tpl_implem_emu_rvv["hadd_hmax_uint"]},
         { "instr_name" : "fredosum", "datatypes" : all_float, "template" : tpl_implem_emu_rvv["hadd_hmax_float"]}],
@@ -638,6 +640,8 @@ implems_emu_rvv = {
        #{ "instr_name" : "vid", "datatypes" : datatypes_widening, "template" : tpl_implem_emu_rvv["cast_k_diff_size"]}],
     #fnmadd RVV != fnmadd AVX2. 
     #RVV is -(a*b+c) while AVX2 is -(a*b)+c lol
+    
+    # todo mask maskz masks
     "fnmadd" : [
        { "instr_name" : "fmadd", "datatypes" : all_float,     "template" : tpl_implem_emu_rvv["fnmadd_float"]},
        { "instr_name" : "fmadd", "datatypes" : [int32],       "template" : tpl_implem_emu_rvv["fnmadd_int"]}],
