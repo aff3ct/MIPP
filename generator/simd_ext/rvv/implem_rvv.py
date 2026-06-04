@@ -385,6 +385,13 @@ tpl_implem_rvv = {
         return tmp;
     """},
 
+    "round_int_mskz" : { "format" : "long", "code" : """
+        %r<tp>% tmp;
+        tmp = %set0<tp>%();
+        tmp.r = {{isa.prefix}}_vmerge_vvm_{{ isa_dt_par.data_ext }}(tmp.r, r0.r, m0.m, %N<tp>%);
+        return tmp;
+    """},
+
 }
 
 """
@@ -717,10 +724,36 @@ implems_rvv = {
     "div2" : [
         { "instr_name" : "srl",     "datatypes" : all_uint,      "template" : tpl_implem_rvv["div2_scalar"]},
         { "instr_name" : "sra",     "datatypes" : all_int,       "template" : tpl_implem_rvv["div2_scalar"]},
-        { "instr_name" : "fdiv",    "datatypes" : all_float,     "template" : tpl_implem_rvv["div2_float"]}],
+        { "instr_name" : "fdiv",    "datatypes" : all_float,     "template" : tpl_implem_rvv["div2_float"]},
+
+        { "instr_name" : "srl",     "datatypes" : all_uint,      "template" : tpl_implem_rvv["div2_scalar_msk"], "version" : "mask"},
+        { "instr_name" : "sra",     "datatypes" : all_int,       "template" : tpl_implem_rvv["div2_scalar_msk"], "version" : "mask"},
+        { "instr_name" : "fdiv",    "datatypes" : all_float,     "template" : tpl_implem_rvv["div2_float_msk"], "version" : "mask"},
+
+        { "instr_name" : "srl",     "datatypes" : all_uint,      "template" : tpl_implem_rvv["div2_scalar_mskz"], "version" : "maskz"},
+        { "instr_name" : "sra",     "datatypes" : all_int,       "template" : tpl_implem_rvv["div2_scalar_mskz"], "version" : "maskz"},
+        { "instr_name" : "fdiv",    "datatypes" : all_float,     "template" : tpl_implem_rvv["div2_float_mskz"], "version" : "maskz"},
+
+        { "instr_name" : "srl",     "datatypes" : all_uint,      "template" : tpl_implem_rvv["div2_scalar_msks"], "version" : "masks"},
+        { "instr_name" : "sra",     "datatypes" : all_int,       "template" : tpl_implem_rvv["div2_scalar_msks"], "version" : "masks"},
+        { "instr_name" : "fdiv",    "datatypes" : all_float,     "template" : tpl_implem_rvv["div2_float_msks"], "version" : "masks"},    
+    ],
 
     "div4" : [
         { "instr_name" : "srl",     "datatypes" : all_uint,      "template" : tpl_implem_rvv["div4_scalar"]},
         { "instr_name" : "sra",     "datatypes" : all_int,       "template" : tpl_implem_rvv["div4_scalar"]},
-        { "instr_name" : "fdiv",    "datatypes" : all_float,     "template" : tpl_implem_rvv["div4_float"]}],
+        { "instr_name" : "fdiv",    "datatypes" : all_float,     "template" : tpl_implem_rvv["div4_float"]},
+
+        { "instr_name" : "srl",     "datatypes" : all_uint,      "template" : tpl_implem_rvv["div4_scalar_msk"], "version" : "mask"},
+        { "instr_name" : "sra",     "datatypes" : all_int,       "template" : tpl_implem_rvv["div4_scalar_msk"], "version" : "mask"},
+        { "instr_name" : "fdiv",    "datatypes" : all_float,     "template" : tpl_implem_rvv["div4_float_msk"], "version" : "mask"},
+
+        { "instr_name" : "srl",     "datatypes" : all_uint,      "template" : tpl_implem_rvv["div4_scalar_mskz"], "version" : "maskz"},
+        { "instr_name" : "sra",     "datatypes" : all_int,       "template" : tpl_implem_rvv["div4_scalar_mskz"], "version" : "maskz"},
+        { "instr_name" : "fdiv",    "datatypes" : all_float,     "template" : tpl_implem_rvv["div4_float_mskz"], "version" : "maskz"},
+
+        { "instr_name" : "srl",     "datatypes" : all_uint,      "template" : tpl_implem_rvv["div4_scalar_msks"], "version" : "masks"},
+        { "instr_name" : "sra",     "datatypes" : all_int,       "template" : tpl_implem_rvv["div4_scalar_msks"], "version" : "masks"},
+        { "instr_name" : "fdiv",    "datatypes" : all_float,     "template" : tpl_implem_rvv["div4_float_msks"], "version" : "masks"},
+    ],
 }

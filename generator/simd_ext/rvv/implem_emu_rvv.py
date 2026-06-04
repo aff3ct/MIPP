@@ -642,9 +642,9 @@ implems_emu_rvv = {
        #{ "instr_name" : "vid", "datatypes" : datatypes_narrowing, "template" : tpl_implem_emu_rvv["cast_k_diff_size"]},
        #dont know how its supposed to work
        #{ "instr_name" : "vid", "datatypes" : datatypes_widening, "template" : tpl_implem_emu_rvv["cast_k_diff_size"]}],
+   
     #fnmadd RVV != fnmadd AVX2. 
     #RVV is -(a*b+c) while AVX2 is -(a*b)+c lol
-    
     # todo mask maskz masks
     "fnmadd" : [
        { "instr_name" : "fmadd", "datatypes" : all_float,     "template" : tpl_implem_emu_rvv["fnmadd_float"]},
