@@ -135,12 +135,15 @@ def _get_implem_status_requirements_mask_dt_keys(funcs, f, mask_kind, mode="func
     Simple getter, doesn't modify anything.
     """
     requirements = {}
+
     for dt_key in _get_all_dt_keys_masked(funcs, f, mask_kind):
         bucket = get_masked_bucket(funcs, f, dt_key, mask_kind)
+
         if bucket is not None:
             for implem in bucket:
                 if "requirements" in implem and implem["requirements"]:
-                    #print(f"Function {f} has masked implementation for dt_key {dt_key} and mask kind {mask_kind} with requirements: {implem['requirements']}")
+                    if f == "cmpeq":
+                        print(f"Function {f} has masked implementation for dt_key {dt_key} and mask kind {mask_kind} with requirements: {implem['requirements']}")
                     for req in implem["requirements"]:
                         requirements[req] = implem["requirements"][req]
     return requirements
@@ -485,7 +488,6 @@ class IncludeCategory:
             self.file = None
     
     def write_custom_prefix(self, custom_prefix, base_dir):
-        print(f"Debug: writing custom prefix for category {self.category} in layer with base dir {base_dir}")
         full_path = f"{base_dir}/{self.name}"
         os.makedirs(os.path.dirname(full_path), exist_ok=True)
 
@@ -516,7 +518,6 @@ class IncludeCategory:
         # Reopen for further appends
         self.file = open(full_path, "a+", encoding="utf-8", newline="")
         self._is_prefixed = True
-        print(f"Debug: custom prefix written successfully for category {self.category} with name {self.name} at path {full_path}")
     
 class IncludeLayer:
     # all the includes path for 1 layer (simd_ext, c, cpp, obj) and their dependencies.

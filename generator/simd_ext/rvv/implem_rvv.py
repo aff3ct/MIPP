@@ -282,6 +282,22 @@ tpl_implem_rvv = {
         return tmp;
     """},
 
+    # hack to avoid tomsk circular dep w cmpneq. 
+    # this is the symptom of a wider issue of the generator that should be fix asp
+    "arith_msk_type_2args_msk_cmpneq" : { "format" : "long", "code" : """
+        %m<tp>% tmp;
+        %r<tp>% zeroes = %set0<tp>%();
+        
+        tmp.m = {{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}_{{isa_dt_par.data_ext_logi}}(r0.r, zeroes.r, %N<tp>%);
+        tmp.m = {{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}_{{isa_dt_par.data_ext_logi}}_mu(m0.m, tmp.m, r0.r, r1.r, %N<tp>%); 
+        return tmp;
+    """},
+
+    "tomsk" : { "format" : "long", "code" : 
+    """       
+    %r<tp>% r1 = %set1<tp>%(0); 
+    return %cmpneq<tp>%(r1,r0);
+    """},
 
 }
 
@@ -485,6 +501,17 @@ implems_rvv = {
         { "instr_name" : "madd",   "datatypes" : [int32],        "template" : tpl_implem_rvv["fmsub_int"]},],
     
     # aritm_msk_type_2args templates
+    "cmpneq" : [
+        { "instr_name" : "msne",   "datatypes" : all_int_uint,   "template" : tpl_implem_rvv["arith_msk_type_2args"]},
+        { "instr_name" : "mfne",   "datatypes" : all_float,      "template" : tpl_implem_rvv["arith_msk_type_2args"]},
+
+        { "instr_name" : "msne",   "datatypes" : all_int_uint,   "template" : tpl_implem_rvv["arith_msk_type_2args_msk_cmpneq"], "version" : "mask"},
+        { "instr_name" : "mfne",   "datatypes" : all_float,      "template" : tpl_implem_rvv["arith_msk_type_2args_msk_cmpneq"], "version" : "mask"},  
+    ], 
+
+    "tomsk"  : [
+        { "instr_name" : "tomsk",  "datatypes" : all_datatypes,   "template" : tpl_implem_rvv["tomsk"]}],  
+
     "cmplt" : [
         { "instr_name" : "mslt",    "datatypes" : all_int,       "template" : tpl_implem_rvv["arith_msk_type_2args"]},
         { "instr_name" : "msltu",   "datatypes" : all_uint,      "template" : tpl_implem_rvv["arith_msk_type_2args"]},
@@ -528,13 +555,7 @@ implems_rvv = {
         { "instr_name" : "mseq",   "datatypes" : all_int_uint,   "template" : tpl_implem_rvv["arith_msk_type_2args_msk"], "version" : "mask"},
         { "instr_name" : "mfeq",   "datatypes" : all_float,      "template" : tpl_implem_rvv["arith_msk_type_2args_msk"], "version" : "mask"},
     ],
-    "cmpneq" : [
-        { "instr_name" : "msne",   "datatypes" : all_int_uint,   "template" : tpl_implem_rvv["arith_msk_type_2args"]},
-        { "instr_name" : "mfne",   "datatypes" : all_float,      "template" : tpl_implem_rvv["arith_msk_type_2args"]},
-    
-        { "instr_name" : "msne",   "datatypes" : all_int_uint,   "template" : tpl_implem_rvv["arith_msk_type_2args_msk"], "version" : "mask"},
-        { "instr_name" : "mfne",   "datatypes" : all_float,      "template" : tpl_implem_rvv["arith_msk_type_2args_msk"], "version" : "mask"},
-    ], 
+   
   
     "getfirst" : [
         { "instr_name" : "mv",     "datatypes" : all_int_uint,   "template" : tpl_implem_rvv["scalar_getfirst"]},

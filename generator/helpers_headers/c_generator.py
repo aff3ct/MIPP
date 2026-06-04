@@ -276,9 +276,7 @@ def _combine_current_ifdefs(funcs, f, dt_key, ifd_prev):
     """
 
     ifd_cur = build_ifdef(funcs, f, dt_key, len(funcs[f]["implem_status"][dt_key]) - 1)
-    if f == "orb" :
-        # print ifd cur & prev
-        print("Debug: print ifdef conditions for '" + f + "<" + dt_key + ">' function: previous ifdef condition is: " + str(ifd_prev) + " and current ifdef condition is: " + str(ifd_cur))
+
     if ifd_prev and ifd_cur:
         return ifd_prev + " && (" + ifd_cur + ")"
     elif ifd_cur:
@@ -587,9 +585,7 @@ def _combine_current_ifdefs_masked(funcs, f, dt_key, mask_kind, ifd_prev):
         return ifd_prev
 
     ifd_cur = build_ifdef_masked(funcs, f, dt_key, mask_kind, len(bucket) - 1)
-    
-    # if f == "orb":
-    #     print("Debug: current ifdef for '" + f + "<" + mask_kind + "><" + dt_key + ">' is: " + str(ifd_cur) + " and previous ifdef is: " + str(ifd_prev))
+
     if ifd_prev and ifd_cur:
         return ifd_prev + " && (" + ifd_cur + ")"
     elif ifd_cur:
@@ -667,8 +663,6 @@ def _gen_c_functions_one_unmasked(isa, file, funcs, f, ff, dt):
 
     ifd_prev = _build_previous_emulated_exclusion_ifdef(funcs, f, dt_key, ff)
 
-    # if f == "set_k" : 
-    #     print("Debug: requirements for '" + f + "<" + dt_key + ">' function: " + str(ph_ret["requirements"]))
     _append_implem_status(funcs, f, dt_key, ff, ph_ret["requirements"])
 
     post_rendering = ph_ret["converted_ir"]
@@ -715,9 +709,6 @@ def _gen_c_function_one_masked(isa, file, funcs, f, ff, dt):
     post_rendering = ph_ret["converted_ir"]
 
     ifd_prev = _build_previous_masked_emulated_exclusion_ifdef(funcs, f, dt_key, mask_kind, ff)
-    
-    if f == "orb" : 
-        print("Debug: requirements for '" + f + "<" + mask_kind + "><" + dt_key + ">' function: " + str(ph_ret["requirements"]))
 
     _append_implem_status_masked(funcs, f, dt_key, mask_kind, ff, ph_ret["requirements"])
  
@@ -931,8 +922,7 @@ def _gen_c_missing_one_masked(isa, file, funcs, f, dt, mask_kind, lmul=0):
  
     fully_missing = is_fully_missing_masked_func(funcs, f, dt_key, mask_kind)
     ifdef_guarded = is_ifdef_masked(funcs, f, dt_key, mask_kind)
-    # if f == "store":
-    #     print("Debug: for '" + f + "<" + mask_kind + "><" + dt_key + ">' function: fully_missing = " + str(fully_missing) + ", ifdef_guarded = " + str(ifdef_guarded))
+
     #if is fully mising => no guard, emit directly the stub
     #if is ifdef guarded missing => guard with the negation of the ifdef conditions of existing implementations and emit the stub in this guard
     func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
@@ -943,13 +933,10 @@ def _gen_c_missing_one_masked(isa, file, funcs, f, dt, mask_kind, lmul=0):
     elif ifdef_guarded:
         ifd = _missing_build_negated_masked_ifdef_for_existing_implems(funcs, f, dt_key, mask_kind)
         # check that ifd isn't a blank line 
-        # if f == "store" :
-        #     print("Debug: built negated ifdef for '" + f + "<" + mask_kind + "><" + dt_key + ">' function: " + ifd)
     
         # use a regex to check if there are actual characters in a-z A-Z 0-9 or _ in ifd, if not consider it as blankmipp_sse_set_uint16
         if not re.search(r'[a-zA-Z0-9_]', ifd):
-            # if f == "store" :
-            #     print("Debug: negated ifdef for '" + f + "<" + mask_kind + "><" + dt_key + ">' function is blank, emitting stub without guard.")
+
             return
        
         _missing_emit_ifdef_begin_masked(ifd, file)
@@ -1396,11 +1383,7 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                     dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
                     dt_key = dt_par + "," + dt_ret
                     mask_kind = ff["version"]
-                    if f == "add" : 
-                        is_missing = is_missing_masked_func(funcs, f, dt_key, mask_kind)
-                        seenlmul = _rvv_seen_lmul_masked(funcs, f, dt_key, mask_kind, lmul)
-                        strv = "Debug: is_missing_masked_func for '" + f + "<" + mask_kind + "><" + dt_key + ">' : " + str(is_missing)+ "_rvv_seen_lmul_masked for '" + f + "<" + mask_kind + "><" + dt_key + ">' lmul=" + str(lmul) + " : " + str(seenlmul)
-                        print(strv)
+
                     if (not is_missing_masked_func(funcs, f, dt_key, mask_kind)) and _rvv_seen_lmul_masked(funcs, f, dt_key, mask_kind, lmul):
                         print(
                             "// '"
@@ -1413,6 +1396,7 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                             file=file,
                         )
                         continue
+
                     # Render & parse placeholders with lmul
                     pre_rendering = _render_template(isa, ff, dt_par, dt_ret, func_name=f)
                     ph_ret = _parse_placeholders_or_skip(
@@ -1428,7 +1412,7 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                     )
                     if ph_ret is None:
                             continue
-                    
+
                     ifd_prev = _build_previous_masked_emulated_exclusion_ifdef(funcs, f, dt_key, mask_kind, ff)
 
                     # Append implem status *before* building current ifdef

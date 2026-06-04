@@ -453,11 +453,7 @@ tpl_implem_emu_rvv = {
     return %cast<c:tp|b:tr,c:tr|b:tr>%(r1);
     """},
     
-    "tomsk" : { "format" : "long", "code" : 
-    """       
-    %r<tp>% r1 = %set1<tp>%(0); 
-    return %cmpneq<tp>%(r1,r0);
-    """},
+
     
     "msb-64" : { "format" : "long", "code" :
     """
@@ -624,8 +620,7 @@ implems_emu_rvv = {
         { "datatypes" :  [uint8, int8], "template" : tpl_implem_emu_rvv["toreg-8"]  } ,],
     "get_k" :[
         { "instr_name" : "get_k", "datatypes" : all_datatypes, "template" : tpl_implem_emu_rvv["get_k"]}],
-    "tomsk"  : [
-       { "instr_name" : "tomsk", "datatypes" : all_datatypes, "template" : tpl_implem_emu_rvv["tomsk"]}],       
+      
     "msb" : [
 	   { "datatypes" : [float64, int64, uint64], "template" : tpl_implem_emu_rvv["msb-64"] },
 	   { "datatypes" : [float32, int32, uint32], "template" : tpl_implem_emu_rvv["msb-32"] },
