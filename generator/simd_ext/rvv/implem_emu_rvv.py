@@ -330,7 +330,7 @@ tpl_implem_emu_rvv = {
         tmp.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1(r0.r,tmp.r,%N<tp>%);
         return {{ isa.prefix }}_vmv_x_s_{{isa_dt_par.reg_dt_ext}}m1_{{isa_dt_par.reg_dt_ext}}(tmp.r);"""},
     
-    "hadd_hmax_uint_maskz" : { "format" : "long", "code" :
+    "hadd_hmax_uint_mskz" : { "format" : "long", "code" :
     """
         %r<c:tp|b:tp|m:1>% tmp;
         tmp.r = %set1<c:tp|b:tp|m:1>%(0).r;
@@ -365,6 +365,34 @@ tpl_implem_emu_rvv = {
         tmp.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1(r0.r,tmp.r,%N<tp>%);
         return {{ isa.prefix }}_vfmv_f_s_{{isa_dt_par.reg_dt_ext}}m1_{{isa_dt_par.reg_dt_ext}}(tmp.r);"""},
     
+    "hadd_hmax_float_mskz" : { "format" : "long", "code" :
+    """
+        %r<c:tp|b:tp|m:1>% tmp;
+        tmp.r = %set1<c:tp|b:tp|m:1>%(0).r;
+        tmp.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1_tum(m0.m, tmp.r, r0.r, tmp.r, %N<tp>%);
+        return {{ isa.prefix }}_vfmv_f_s_{{isa_dt_par.reg_dt_ext}}m1_{{isa_dt_par.reg_dt_ext}}(tmp.r);"""},
+    
+    "hmax_int_mskz" : { "format" : "long", "code" :
+    """
+        %r<c:tp|b:tp|m:1>% tmp;
+        tmp.r = %set1<c:tp|b:tp|m:1>%(INT{{isa_dt_par.width}}_MIN).r;
+        tmp.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1_tum(m0.m, tmp.r, r0.r, tmp.r, %N<tp>%);
+        return {{ isa.prefix }}_vmv_x_s_{{isa_dt_par.reg_dt_ext}}m1_{{isa_dt_par.reg_dt_ext}}(tmp.r);"""},
+    
+    "hmax_float32_mskz" : { "format" : "long", "code" :
+    """
+        %r<c:tp|b:tp|m:1>% tmp;
+        tmp.r = %set1<c:tp|b:tp|m:1>%(-FLT_MAX).r;
+        tmp.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1_tum(m0.m, tmp.r, r0.r, tmp.r, %N<tp>%);
+        return {{ isa.prefix }}_vfmv_f_s_{{isa_dt_par.reg_dt_ext}}m1_{{isa_dt_par.reg_dt_ext}}(tmp.r);"""},
+    
+    "hmax_float64_mskz" : { "format" : "long", "code" :
+    """
+        %r<c:tp|b:tp|m:1>% tmp;
+        tmp.r = %set1<c:tp|b:tp|m:1>%(-DBL_MAX).r;
+        tmp.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1_tum(m0.m, tmp.r, r0.r, tmp.r, %N<tp>%);
+        return {{ isa.prefix }}_vfmv_f_s_{{isa_dt_par.reg_dt_ext}}m1_{{isa_dt_par.reg_dt_ext}}(tmp.r);"""},
+
     "hmin_int" : { "format" : "long", "code" :
     """
         %r<c:tp|b:tp|m:1>% tmp;
@@ -391,6 +419,34 @@ tpl_implem_emu_rvv = {
         %r<c:tp|b:tp|m:1>% tmp;
         tmp.r = %set1<c:tp|b:tp|m:1>%(DBL_MAX).r;
         tmp.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1(r0.r,tmp.r,%N<tp>%);
+        return {{ isa.prefix }}_vfmv_f_s_{{isa_dt_par.reg_dt_ext}}m1_{{isa_dt_par.reg_dt_ext}}(tmp.r);"""},
+
+    "hmin_int_mskz" : { "format" : "long", "code" :
+    """
+        %r<c:tp|b:tp|m:1>% tmp;
+        tmp.r = %set1<c:tp|b:tp|m:1>%(INT{{isa_dt_par.width}}_MAX).r;
+        tmp.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1_tum(m0.m, tmp.r, r0.r,tmp.r,%N<tp>%);
+        return {{ isa.prefix }}_vmv_x_s_{{isa_dt_par.reg_dt_ext}}m1_{{isa_dt_par.reg_dt_ext}}(tmp.r);"""},
+    
+    "hmin_uint_mskz" : { "format" : "long", "code" :
+    """
+        %r<c:tp|b:tp|m:1>% tmp;
+        tmp.r = %set1<c:tp|b:tp|m:1>%(UINT{{isa_dt_par.width}}_MAX).r;
+        tmp.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1_tum(m0.m, tmp.r, r0.r,tmp.r,%N<tp>%);
+        return {{ isa.prefix }}_vmv_x_s_{{isa_dt_par.reg_dt_ext}}m1_{{isa_dt_par.reg_dt_ext}}(tmp.r);"""},
+    
+    "hmin_float32_mskz" : { "format" : "long", "code" :
+    """
+        %r<c:tp|b:tp|m:1>% tmp;
+        tmp.r = %set1<c:tp|b:tp|m:1>%(FLT_MAX).r;
+        tmp.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1_tum(m0.m, tmp.r, r0.r,tmp.r,%N<tp>%);
+        return {{ isa.prefix }}_vfmv_f_s_{{isa_dt_par.reg_dt_ext}}m1_{{isa_dt_par.reg_dt_ext}}(tmp.r);"""},
+    
+    "hmin_float64_mskz" : { "format" : "long", "code" :
+    """
+        %r<c:tp|b:tp|m:1>% tmp;
+        tmp.r = %set1<c:tp|b:tp|m:1>%(DBL_MAX).r;
+        tmp.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1_tum(m0.m, tmp.r, r0.r,tmp.r,%N<tp>%);
         return {{ isa.prefix }}_vfmv_f_s_{{isa_dt_par.reg_dt_ext}}m1_{{isa_dt_par.reg_dt_ext}}(tmp.r);"""},  
     
     "notb_k" : { "format" :"long", "code" :
@@ -575,29 +631,39 @@ implems_emu_rvv = {
     "maskz_add" : [
         { "instr_name" : "add", "datatypes" : all_int_uint, "template" : tpl_implem_emu_rvv["maskz_inst"]},
         { "instr_name" : "fadd", "datatypes" : all_float, "template" : tpl_implem_emu_rvv["maskz_inst"]}],
-    #"maskz_sub" : [
-    #    { "instr_name" : "add", "datatypes" : all_int_uint, "template" : tpl_implem_emu_rvv["maskz_inst"]},
-    #    { "instr_name" : "fadd", "datatypes" : all_float, "template" : tpl_implem_emu_rvv["maskz_inst"]}
-    #],
-    #"maskzld" :[
-	#    { "instr_name" : "maskload", "datatypes" : all_float, "template" : tpl_implem_emu_rvv["maskzld"] },
-	#	{ "instr_name" : "maskload", "datatypes" : all_int_uint, "template" : tpl_implem_emu_rvv["maskzld"]}
-    #],
 
+    # todo : maskz ...
     "hadd" : [
         { "instr_name" : "redsum", "datatypes" : all_int_uint, "template" : tpl_implem_emu_rvv["hadd_hmax_uint"]},
-        { "instr_name" : "fredosum", "datatypes" : all_float, "template" : tpl_implem_emu_rvv["hadd_hmax_float"]}],
+        { "instr_name" : "fredosum", "datatypes" : all_float, "template" : tpl_implem_emu_rvv["hadd_hmax_float"]},
+        
+        { "instr_name" : "redsum", "datatypes" : all_int_uint, "template" : tpl_implem_emu_rvv["hadd_hmax_uint_mskz"], "version" : "maskz"},
+        { "instr_name" : "fredosum", "datatypes" : all_float, "template" : tpl_implem_emu_rvv["hadd_hmax_float_mskz"], "version" : "maskz"},
+    ],
            
     "hmin" :[
         { "instr_name" : "redmin", "datatypes" : all_int, "template" : tpl_implem_emu_rvv["hmin_int"]},
         { "instr_name" : "redminu", "datatypes" : all_uint, "template" : tpl_implem_emu_rvv["hmin_uint"]},
         { "instr_name" : "fredmin", "datatypes" : [float32], "template" : tpl_implem_emu_rvv["hmin_float32"]},
-        { "instr_name" : "fredmin", "datatypes" : [float64], "template" : tpl_implem_emu_rvv["hmin_float64"]}],
+        { "instr_name" : "fredmin", "datatypes" : [float64], "template" : tpl_implem_emu_rvv["hmin_float64"]},
+
+        { "instr_name" : "redmin", "datatypes" :  all_int, "template" : tpl_implem_emu_rvv["hmin_int_mskz"], "version" : "maskz"},
+        { "instr_name" : "redminu", "datatypes" : all_uint, "template" : tpl_implem_emu_rvv["hmin_uint_mskz"], "version" : "maskz"},
+        { "instr_name" : "fredmin", "datatypes" : [float32], "template" : tpl_implem_emu_rvv["hmin_float32_mskz"], "version" : "maskz"},
+        { "instr_name" : "fredmin", "datatypes" : [float64], "template" : tpl_implem_emu_rvv["hmin_float64_mskz"], "version" : "maskz"},
+    ],
     "hmax" :[
         { "instr_name" : "redmax", "datatypes" : all_int, "template" : tpl_implem_emu_rvv["hmax_int"]},
         { "instr_name" : "redmaxu", "datatypes" : all_uint, "template" : tpl_implem_emu_rvv["hadd_hmax_uint"]}, 
         { "instr_name" : "fredmax", "datatypes" : [float32], "template" : tpl_implem_emu_rvv["hmax_float32"]},
-        { "instr_name" : "fredmax", "datatypes" : [float64], "template" : tpl_implem_emu_rvv["hmax_float64"]}],
+        { "instr_name" : "fredmax", "datatypes" : [float64], "template" : tpl_implem_emu_rvv["hmax_float64"]},
+
+        { "instr_name" : "redmax", "datatypes" : all_int, "template" : tpl_implem_emu_rvv["hmax_int_mskz"], "version" : "maskz"},
+        { "instr_name" : "redmaxu", "datatypes" : all_uint, "template" : tpl_implem_emu_rvv["hadd_hmax_uint_mskz"], "version" : "maskz"},
+        { "instr_name" : "fredmax", "datatypes" : [float32], "template" : tpl_implem_emu_rvv["hmax_float32_mskz"], "version" : "maskz"},
+        { "instr_name" : "fredmax", "datatypes" : [float64], "template" : tpl_implem_emu_rvv["hmax_float64_mskz"], "version" : "maskz"},
+    ],
+
     "notb_k" : [
        { "instr_name" : "morn", "datatypes" : all_datatypes, "template" : tpl_implem_emu_rvv["notb_k"]},],
     "testz" : [
@@ -605,10 +671,10 @@ implems_emu_rvv = {
     
     # w hmul since it's already very very emulated n inneficient I won't do the maskz version.
     # the emulated will do.
-
     "hmul"  : [
        { "instr_name" : "vmul", "datatypes" : all_int_uint, "template" : tpl_implem_emu_rvv["hmul_int_uint"]},
        { "instr_name" : "vfmul", "datatypes" : all_float, "template" : tpl_implem_emu_rvv["hmul_float"]}],
+    
     "hadd_to_scal" : [
        { "instr_name" : "vmv_x", "datatypes" : all_int_uint, "template" : tpl_implem_emu_rvv["hadd_to_scal"]},
        { "instr_name" : "vfmv_f", "datatypes" : all_float, "template" : tpl_implem_emu_rvv["hadd_to_scal"]},],
@@ -625,7 +691,7 @@ implems_emu_rvv = {
         { "datatypes" :  [float32], "template" : tpl_implem_emu_rvv["toreg-32f"]  } ,
         { "datatypes" :  [float64], "template" : tpl_implem_emu_rvv["toreg-64f"]  } ,
         { "datatypes" :  [uint16, int16], "template" : tpl_implem_emu_rvv["toreg-16"]  } ,
-        { "datatypes" :  [uint8, int8], "template" : tpl_implem_emu_rvv["toreg-8"]  } ,],
+        { "datatypes" :  [uint8, int8], "template" : tpl_implem_emu_rvv["toreg-8"]  }],
     "get_k" :[
         { "instr_name" : "get_k", "datatypes" : all_datatypes, "template" : tpl_implem_emu_rvv["get_k"]}],
       
@@ -635,6 +701,7 @@ implems_emu_rvv = {
 	   { "datatypes" : [float32, int32, uint32], "template" : tpl_implem_emu_rvv["msb-32"] },
 	   { "datatypes" : [int16, uint16], "template" : tpl_implem_emu_rvv["msb-16"] },
 	   { "datatypes" : [int8, uint8], "template" : tpl_implem_emu_rvv["msb-8"] }, ],
+    
     "cast_k" : [
        #no problem
        { "instr_name" : "vid", "datatypes" : datatypes_same_size, "template" : tpl_implem_emu_rvv["cast_k_same_size"]}],

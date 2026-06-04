@@ -228,6 +228,14 @@ tpl_implem_rvv = {
         res = %sub<tp>%(res, r2);
         return res;
     """},
+
+    "fmsub_int_msk" : {"format" : "long", "code" : """
+        /*%r<tp>% neg_r2 = %sub<tp>%(%set0<tp>%(), r2));
+        res.r = {{isa.prefix}}_{{instr_name}}_vv_{{isa_dt_par.data_ext}}_mu(m0.r,r0.r, r1.r, r2.r, %N<tp>%);*/
+        %r<tp>% res = %mul<tp>%(r0, r1);
+        res = %sub<tp>%(res, r2);
+        return res;
+    """},
   
     
     "round_float" : { "format" : "long", "code" : """
@@ -587,11 +595,19 @@ implems_rvv = {
     # I think maskz and masks need to be emulated for 3args funcs :-(
     "fmadd" : [
         { "instr_name" : "fmadd",   "datatypes" : all_float,     "template" : tpl_implem_rvv["arith_3args"]}, 
-        { "instr_name" : "madd",   "datatypes" : [int32],       "template" : tpl_implem_rvv["arith_3args"]},],
+        { "instr_name" : "madd",   "datatypes" : [int32],       "template" : tpl_implem_rvv["arith_3args"]},
+
+        { "instr_name" : "fmadd",   "datatypes" : all_float,     "template" : tpl_implem_rvv["arith_3args_msk"], "version" : "mask"},
+        { "instr_name" : "madd",   "datatypes" : [int32],       "template" : tpl_implem_rvv["arith_3args_msk"], "version" : "mask"},
+    ],
     
     "fmsub" : [
         { "instr_name" : "fmsub",   "datatypes" : all_float,     "template" : tpl_implem_rvv["arith_3args"]},
-        { "instr_name" : "madd",   "datatypes" : [int32],        "template" : tpl_implem_rvv["fmsub_int"]},],
+        { "instr_name" : "madd",   "datatypes" : [int32],        "template" : tpl_implem_rvv["fmsub_int"]},
+
+        { "instr_name" : "fmsub",   "datatypes" : all_float,     "template" : tpl_implem_rvv["arith_3args_msk"], "version" : "mask"},
+        # { "instr_name" : "madd",   "datatypes" : [int32],        "template" : tpl_implem_rvv["fmsub_int_msk"], "version" : "mask"},
+    ],
     
     # aritm_msk_type_2args templates
     "cmpneq" : [
