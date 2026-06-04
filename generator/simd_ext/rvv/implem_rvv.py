@@ -117,7 +117,11 @@ tpl_implem_rvv = {
     
     "scalar_getfirst"      : { "format" : "short", "code" : "{{isa_dt_par.to_ptr}} res = {{ isa.prefix }}_v{{ instr_name }}_x_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(r0.r);"},
     "float_getfirst"       : { "format" : "short", "code" : "{{isa_dt_par.to_ptr}} res = {{ isa.prefix }}_v{{ instr_name }}_f_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(r0.r);"},
+    # certainly the templates of all time
     "round_int"            : { "format" : "short", "code" : "r0.r;"},
+    "round_int_msk"       : { "format" : "short", "code" : "r0.r;"},
+    # If u think about it masks round on int/uint is technically a blend
+    "round_int_msks"      : { "format" : "short", "code" : "{{isa.prefix}}_vmerge_vvm_{{isa_dt_par.data_ext}}(rsrc.r, r0.r, m0.m, %N<tp>%);"},
 
     "testz_2"              : { "format" : "short", "code" : "   int32_t res = !({{isa.prefix}}_v{{instr_name}}_m_{{isa_dt_par.data_ext_logi}}(m0.m, %N<tp>%));"},
 
@@ -142,7 +146,7 @@ tpl_implem_rvv = {
                 %r<tp>% ret;
                 ret.r = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.uint_data_ext}}_{{isa_dt_par.data_ext}}(tmp1.r);
                 return ret;
-                """},
+    """},
 
     "float_set1" :{"format" : "long", "code" :"""
         %r<tp>% r0;
@@ -225,6 +229,38 @@ tpl_implem_rvv = {
         %r<c:uint|b:tp>% tmp1;
         tmp1.r = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(r0.r);
         tmp1.r = {{ isa.prefix }}_v{{ instr_name }}_vx_{{ isa_dt_par.uint_data_ext }}(tmp1.r, v0, %N<tp>%);
+        %r<tp>% ret;
+        ret.r = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.uint_data_ext}}_{{isa_dt_par.data_ext}}(tmp1.r);
+        return ret;
+    """},
+    # this is a bit hacky but I **THINK** that the underlying mask types r always the same for floats and uints of the same size.
+    # So it's ok to use m0.m (which is a float mask) for a uint shift.
+    "shift_float_msk" : { "format" : "long", "code" : """
+        %r<c:uint|b:tp>% tmp1;
+        tmp1.r = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(r0.r);
+        tmp1.r = {{ isa.prefix }}_v{{ instr_name }}_vx_{{ isa_dt_par.uint_data_ext }}_mu(m0.m, tmp1.r, tmp1.r, v0, %N<tp>%);
+        %r<tp>% ret;
+        ret.r = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.uint_data_ext}}_{{isa_dt_par.data_ext}}(tmp1.r);
+        return ret;
+    """},
+
+    "shift_float_mskz" : { "format" : "long", "code" : """
+        %r<c:uint|b:tp>% tmp1;
+        %r<c:uint|b:tp>% zeroes = %set0<c:uint|b:tp>%();
+        tmp1.r = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(r0.r);
+        tmp1.r = {{ isa.prefix }}_v{{ instr_name }}_vx_{{ isa_dt_par.uint_data_ext }}_mu(m0.m, zeroes.r, tmp1.r, v0, %N<tp>%);
+        %r<tp>% ret;
+        ret.r = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.uint_data_ext}}_{{isa_dt_par.data_ext}}(tmp1.r);
+        return ret;
+    """},
+
+    "shift_float_msks" : { "format" : "long", "code" : """
+        %r<c:uint|b:tp>% tmp1;
+        %r<c:uint|b:tp>% rsrc_u;
+        rsrc_u.r = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(rsrc.r);
+
+        tmp1.r = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(r0.r);
+        tmp1.r = {{ isa.prefix }}_v{{ instr_name }}_vx_{{ isa_dt_par.uint_data_ext }}_mu(m0.m, rsrc_u.r, tmp1.r, v0, %N<tp>%);
         %r<tp>% ret;
         ret.r = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.uint_data_ext}}_{{isa_dt_par.data_ext}}(tmp1.r);
         return ret;
@@ -590,24 +626,33 @@ implems_rvv = {
         { "instr_name" : "cpop",   "datatypes" : all_datatypes,  "template" : tpl_implem_rvv["testz_2"]}],
 
     
-    # todo : mask maskz masks
+    # I can't think of a better way to do masked ops than emulation bc we don't have a dedicated round and the op is currentlt cvt int -> cvt f 
     "round" :  [
         { "instr_name" : "vfcvt",   "datatypes" : all_float,     "template" : tpl_implem_rvv["round_float"]},
-        { "instr_name" : "vfcvt",   "datatypes" : all_int_uint,  "template" : tpl_implem_rvv["round_int"]},],
+        { "instr_name" : "vfcvt",   "datatypes" : all_int_uint,  "template" : tpl_implem_rvv["round_int"]},
 
-    # todo : mask maskz masks (on floats)
+        # { "instr_name" : "vfcvt",   "datatypes" : all_float,     "template" : tpl_implem_rvv["round_float_msk"],  "version" : "mask"},
+        { "instr_name" : "vfcvt",   "datatypes" : all_int_uint,  "template" : tpl_implem_rvv["round_int_msk"],    "version" : "mask"},
+
+        # { "instr_name" : "vfcvt",   "datatypes" : all_float,     "template" : tpl_implem_rvv["round_float_mskz"], "version" : "maskz"},
+        { "instr_name" : "vfcvt",   "datatypes" : all_int_uint,  "template" : tpl_implem_rvv["round_int_mskz"],   "version" : "maskz"},
+
+        # { "instr_name" : "vfcvt",   "datatypes" : all_float,     "template" : tpl_implem_rvv["round_float_msks"], "version" : "masks"},
+        { "instr_name" : "vfcvt",   "datatypes" : all_int_uint,  "template" : tpl_implem_rvv["round_int_msks"],   "version" : "masks"},
+    ],
+
     "lshift" : [
         { "instr_name" : "sll",     "datatypes" : all_int_uint,  "template" : tpl_implem_rvv["shift_scalar"]},
         { "instr_name" : "sll",     "datatypes" : all_float,     "template" : tpl_implem_rvv["shift_float"] },
         
         { "instr_name" : "sll",     "datatypes" : all_int_uint,  "template" : tpl_implem_rvv["shift_scalar_msk"], "version" : "mask"},
-        #{ "instr_name" : "sll",     "datatypes" : all_float,     "template" : tpl_implem_rvv["shift_float_msk"], "version" : "mask"},
+        { "instr_name" : "sll",     "datatypes" : all_float,     "template" : tpl_implem_rvv["shift_float_msk"], "version" : "mask"},
 
         { "instr_name" : "sll",     "datatypes" : all_int_uint,  "template" : tpl_implem_rvv["shift_scalar_mskz"], "version" : "maskz"},
-        #{ "instr_name" : "sll",     "datatypes" : all_float,     "template" : tpl_implem_rvv["shift_float_mskz"], "version" : "maskz"},
+        { "instr_name" : "sll",     "datatypes" : all_float,     "template" : tpl_implem_rvv["shift_float_mskz"], "version" : "maskz"},
 
         { "instr_name" : "sll",     "datatypes" : all_int_uint,  "template" : tpl_implem_rvv["shift_scalar_msks"], "version" : "masks"},
-        #{ "instr_name" : "sll",     "datatypes" : all_float,     "template" : tpl_implem_rvv["shift_float_msks"], "version" : "masks"},
+        { "instr_name" : "sll",     "datatypes" : all_float,     "template" : tpl_implem_rvv["shift_float_msks"], "version" : "masks"},
     ],
 
     "rshift" : [
@@ -617,18 +662,17 @@ implems_rvv = {
 
         { "instr_name" : "srl",     "datatypes" : all_uint,  "template" : tpl_implem_rvv["shift_scalar_msk"], "version" : "mask"},
         { "instr_name" : "sra",     "datatypes" : all_int,   "template" : tpl_implem_rvv["shift_scalar_msk"], "version" : "mask"},
-        #{ "instr_name" : "srl",     "datatypes" : all_float,     "template" : tpl_implem_rvv["shift_float_msk"], "version" : "mask"},
+        { "instr_name" : "srl",     "datatypes" : all_float,     "template" : tpl_implem_rvv["shift_float_msk"], "version" : "mask"},
 
         { "instr_name" : "srl",     "datatypes" : all_uint,  "template" : tpl_implem_rvv["shift_scalar_mskz"], "version" : "maskz"},
         { "instr_name" : "sra",     "datatypes" : all_int,   "template" : tpl_implem_rvv["shift_scalar_mskz"], "version" : "maskz"},
-        #{ "instr_name" : "srl",     "datatypes" : all_float,     "template" : tpl_implem_rvv["shift_float_mskz"], "version" : "maskz"},
+        { "instr_name" : "srl",     "datatypes" : all_float,     "template" : tpl_implem_rvv["shift_float_mskz"], "version" : "maskz"},
 
         { "instr_name" : "srl",     "datatypes" : all_uint,  "template" : tpl_implem_rvv["shift_scalar_msks"], "version" : "masks"},
         { "instr_name" : "sra",     "datatypes" : all_int,   "template" : tpl_implem_rvv["shift_scalar_msks"], "version" : "masks"},
-        #{ "instr_name" : "srl",     "datatypes" : all_float,     "template" : tpl_implem_rvv["shift_float_msks"], "version" : "masks"},
+        { "instr_name" : "srl",     "datatypes" : all_float,     "template" : tpl_implem_rvv["shift_float_msks"], "version" : "masks"},
     ],
 
-    
     # todo mask maskz masks
     "div2" : [
         { "instr_name" : "srl",     "datatypes" : all_uint,      "template" : tpl_implem_rvv["div2_scalar"]},
