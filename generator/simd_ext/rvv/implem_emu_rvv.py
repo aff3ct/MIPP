@@ -329,6 +329,13 @@ tpl_implem_emu_rvv = {
         tmp.r = %set1<c:tp|b:tp|m:1>%(0).r;
         tmp.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1(r0.r,tmp.r,%N<tp>%);
         return {{ isa.prefix }}_vmv_x_s_{{isa_dt_par.reg_dt_ext}}m1_{{isa_dt_par.reg_dt_ext}}(tmp.r);"""},
+    
+    "hadd_hmax_uint_maskz" : { "format" : "long", "code" :
+    """
+        %r<c:tp|b:tp|m:1>% tmp;
+        tmp.r = %set1<c:tp|b:tp|m:1>%(0).r;
+        tmp.r = {{isa.prefix}}_v{{instr_name}}_vs_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}m1_tum(m0.m, tmp.r, r0.r,tmp.r,%N<tp>%);
+        return {{ isa.prefix }}_vmv_x_s_{{isa_dt_par.reg_dt_ext}}m1_{{isa_dt_par.reg_dt_ext}}(tmp.r);"""},
 
     "hadd_hmax_float" : { "format" : "long", "code" :
     """
@@ -557,10 +564,12 @@ implems_emu_rvv = {
     "set1_k" : [
         { "instr_name" : "set1_k", "datatypes" : all_datatypes, "template" : tpl_implem_emu_rvv["set1_k"]}],
 
+    # todo mas maskz masks
     "andnb" : [
         { "instr_name" : "", "datatypes" : all_int_uint, "template" : tpl_implem_emu_rvv["scalar_andnb"]},
         { "instr_name" : "", "datatypes" : [float32], "template" : tpl_implem_emu_rvv["float32_andnb"]},
         { "instr_name" : "", "datatypes" : [float64], "template" : tpl_implem_emu_rvv["float64_andnb"]},],
+    
     "andnb_k" :[
         { "instr_name" : "andnb_k", "datatypes" : all_int_uint, "template" : tpl_implem_emu_rvv["andnb_k"]}],
     "maskz_add" : [
@@ -575,7 +584,6 @@ implems_emu_rvv = {
 	#	{ "instr_name" : "maskload", "datatypes" : all_int_uint, "template" : tpl_implem_emu_rvv["maskzld"]}
     #],
 
-    # todo maskz masks
     "hadd" : [
         { "instr_name" : "redsum", "datatypes" : all_int_uint, "template" : tpl_implem_emu_rvv["hadd_hmax_uint"]},
         { "instr_name" : "fredosum", "datatypes" : all_float, "template" : tpl_implem_emu_rvv["hadd_hmax_float"]}],
@@ -594,6 +602,10 @@ implems_emu_rvv = {
        { "instr_name" : "morn", "datatypes" : all_datatypes, "template" : tpl_implem_emu_rvv["notb_k"]},],
     "testz" : [
        { "instr_name" : "cpop", "datatypes" : all_datatypes, "template" : tpl_implem_emu_rvv["testz"]}],
+    
+    # w hmul since it's already very very emulated n inneficient I won't do the maskz version.
+    # the emulated will do.
+
     "hmul"  : [
        { "instr_name" : "vmul", "datatypes" : all_int_uint, "template" : tpl_implem_emu_rvv["hmul_int_uint"]},
        { "instr_name" : "vfmul", "datatypes" : all_float, "template" : tpl_implem_emu_rvv["hmul_float"]}],
@@ -617,6 +629,7 @@ implems_emu_rvv = {
     "get_k" :[
         { "instr_name" : "get_k", "datatypes" : all_datatypes, "template" : tpl_implem_emu_rvv["get_k"]}],
       
+    # todo mask, maskz masks
     "msb" : [
 	   { "datatypes" : [float64, int64, uint64], "template" : tpl_implem_emu_rvv["msb-64"] },
 	   { "datatypes" : [float32, int32, uint32], "template" : tpl_implem_emu_rvv["msb-32"] },
