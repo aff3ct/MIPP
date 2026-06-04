@@ -191,9 +191,7 @@ tpl_implem_emu_rvv = {
         memset(vals,tmp,%N<tp>%*sizeof(int32_t));
         return %set_k<tp>%(vals);"""},
     
-    "set0_k" : { "format" : "long", "code" :
-    """        
-        return %set1_k<tp>%(0);"""},
+
     
     "float_set0_k" : { "format" : "long", "code" :
     """
@@ -558,9 +556,7 @@ implems_emu_rvv = {
         { "instr_name" : "set_k", "datatypes" : all_datatypes, "template" : tpl_implem_emu_rvv["set_k"]}],
     "set1_k" : [
         { "instr_name" : "set1_k", "datatypes" : all_datatypes, "template" : tpl_implem_emu_rvv["set1_k"]}],
-    "set0_k" : [
-        { "instr_name" : "set0_k", "datatypes" : all_int_uint, "template" : tpl_implem_emu_rvv["set0_k"]},
-        { "instr_name" : "set0_k", "datatypes" : all_float, "template" : tpl_implem_emu_rvv["float_set0_k"]}],
+
     "andnb" : [
         { "instr_name" : "", "datatypes" : all_int_uint, "template" : tpl_implem_emu_rvv["scalar_andnb"]},
         { "instr_name" : "", "datatypes" : [float32], "template" : tpl_implem_emu_rvv["float32_andnb"]},
