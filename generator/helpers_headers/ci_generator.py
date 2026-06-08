@@ -207,7 +207,7 @@ def _custom_prefix_generator(func, isa_list, is_common=False, mode="function_hea
         
         
     else : 
-        print('Generating custom prefix for function "'+func+'"')
+        # print('Generating custom prefix for function "'+func+'"')
         is_first = True
 
         content += "#include \"../common.h\"\n"

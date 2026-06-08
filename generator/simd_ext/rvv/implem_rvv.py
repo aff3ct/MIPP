@@ -781,7 +781,7 @@ implems_rvv = {
     "gather" : [
         { "instr_name" : "luxei",  "datatypes" : all_datatypes_idx_pair, "template" : tpl_implem_rvv["gather"]},
     ],
-    "scatter" : [
-        { "instr_name" : "suxei",  "datatypes" : all_datatypes_idx_pair, "template" : tpl_implem_rvv["scatter"]},
-     ],
+    # "scatter" : [
+    #     { "instr_name" : "suxei",  "datatypes" : all_datatypes_idx_pair, "template" : tpl_implem_rvv["scatter"]},
+    #  ],
 }

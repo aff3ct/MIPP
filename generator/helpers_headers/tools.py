@@ -466,15 +466,64 @@ def build_proto_load(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, m
         ret = f"template <>\ninline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const {dt_par}* p0"
     return  ret
 
-def build_proto_gather(proto, dt_par, dt_ret, isa, func_name, lmul=1, isa_name=False, cpp=False, masked_version=False):
+def build_proto_gather(dt_par, dt_ret, isa, func_name, lmul=1, isa_name=False, cpp=False, masked_version=False):
+    isa_type = "DEFAULT_ISA"
+    msk_dt = datatypes["uint" + str(_get_dt_par_size(dt_par))]["name"]+ "_t"
+    if isa_name:
+        isa_type = isa["name"].upper()
+    template = f"<{dt_ret}_t, {dt_par}_t, {lmul}, {isa_type}>"
+    if masked_version:
+        if masked_version == "mask" :
+            template = f"<M, {dt_ret}_t, {msk_dt}, {lmul}, {isa_type}>"
+        elif masked_version == "maskz" :
+            template = f"<Z, {dt_ret}_t, {msk_dt}, {lmul}, {isa_type}>"
+        elif masked_version == "masks" :
+            template = f"<S, {dt_ret}_t, {msk_dt}, {lmul}, {isa_type}>"
+        else :
+            print("error: masked_version should be mask, maskz or masks")
+            exit(-1)
+    reg_type = "rvd"
+    if masked_version:
+        if masked_version == "mask" :
+            return f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const rvm<{msk_dt},{lmul}, {isa_type}> m0, const {dt_par}_t* base, const rvd<{msk_dt},{lmul}, {isa_type}> r0"
+        elif masked_version == "maskz" :
+            return f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const rvm<{msk_dt},{lmul}, {isa_type}> m0, const {dt_par}_t* base, const rvd<{msk_dt},{lmul}, {isa_type}> r0"
+        elif masked_version == "masks" :
+            return f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const rvm<{msk_dt},{lmul}, {isa_type}> m0, const rvd<{msk_dt},{lmul}, {isa_type}> rsrc, const {dt_par}_t* base, const rvd<{msk_dt},{lmul}, {isa_type}> r0"
+        else : 
+            print("error: masked_version should be mask, maskz or masks")
+            exit(-1)
+    else :
+        return f"template <>\ninline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const {dt_par}_t* base, const int32_t* vindex"
+
+def build_proto_scatter(dt_par, dt_ret, isa, func_name, lmul=1, isa_name=False, cpp=False, masked_version=False):
     isa_type = "DEFAULT_ISA"
     if isa_name:
         isa_type = isa["name"].upper()
-    return ""
-
-def build_proto_scatter(proto, dt_par, dt_ret, isa, func_name, lmul=1, isa_name=False, cpp=False, masked_version=False):
-    return ""
-    
+    template = f"<{dt_ret}_t, {dt_par}_t, {lmul}, {isa_type}>"
+    if masked_version:
+        if masked_version == "mask" :
+            template = f"<M, {dt_ret}_t, {dt_par}_t, {lmul}, {isa_type}>"
+        elif masked_version == "maskz" :
+            template = f"<Z, {dt_ret}_t, {dt_par}_t, {lmul}, {isa_type}>"
+        elif masked_version == "masks" :
+            template = f"<S, {dt_ret}_t, {dt_par}_t, {lmul}, {isa_type}>"
+        else :
+            print("error: masked_version should be mask, maskz or masks")
+            exit(-1)
+    reg_type = "rvd"
+    if masked_version:
+        if masked_version == "mask" :
+            return f"inline void {func_name}{template}(const rvm<{dt_par}_t,{lmul}, {isa_type}> m0, const {dt_par}_t* base, const rvd<{dt_par}_t,{lmul}, {isa_type}> r0"
+        elif masked_version == "maskz" :
+            return f"inline void {func_name}{template}(const rvm<{dt_par}_t,{lmul}, {isa_type}> m0, const {dt_par}_t* base, const rvd<{dt_par}_t,{lmul}, {isa_type}> r0"
+        elif masked_version == "masks" :
+            return f"inline void {func_name}{template}(const rvm<{dt_par}_t,{lmul}, {isa_type}> m0, const rvd<{dt_par}_t,{lmul}, {isa_type}> rsrc, const {dt_par}_t* base, const rvd<{dt_par}_t,{lmul}, {isa_type}> r0"
+        else : 
+            print("error: masked_version should be mask, maskz or masks")
+            exit(-1)
+    else :
+        return f"template <>\ninline void {func_name}{template}(const {dt_par}_t* base, const int32_t* vindex, const rvd<{dt_par}_t,{lmul}, {isa_type}> r0"
 
 #function message error set functions
 def gen_set_func_error(func_name,file):
@@ -514,10 +563,10 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
         return  build_proto_set1(dt_ret, isa, func_name, lmul=lmul, isa_name=isa_name, cpp=cpp, masked_version=masked_version) +')'
     if func_name =="load" or func_name =="loadu":
         return  build_proto_load(dt_ret, isa, func_name, lmul=lmul, isa_name=isa_name, cpp=cpp, masked_version=masked_version) +')'
-    # if func_name =="gather" :
-    #     return  build_proto_gather(proto, dt_par, dt_ret, isa, func_name, lmul=lmul, isa_name=isa_name, cpp=cpp, masked_version=masked_version) +')'
-    # if func_name =="scatter" :
-    #     return  build_proto_scatter(proto, dt_par, dt_ret, isa, func_name, lmul=lmul, isa_name=isa_name, cpp=cpp, masked_version=masked_version) +')'
+    if "gather" in func_name and masked_version and cpp:
+        return  build_proto_gather(dt_par, dt_ret, isa, func_name, lmul=lmul, isa_name=isa_name, cpp=cpp, masked_version=masked_version) +')'
+    if "scatter" in func_name and masked_version and cpp:
+        return  build_proto_scatter(dt_par, dt_ret, isa, func_name, lmul=lmul, isa_name=isa_name, cpp=cpp, masked_version=masked_version) +')'
 
     realdatatype = datatypes[dt_ret]
     if (proto["ret"]["fixeddatatype"]):
@@ -596,8 +645,8 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
             p += " vi"
         is_first = False
 
-    if "gather" in func_name : 
-        print("Debug gather proto: ", proto, build_type(proto["ret"]["type"], realdatatype, isa, lmul, isa_name, cpp), "cpp=", cpp, "realdatatype=", realdatatype)
+    # if "gather" in func_name : 
+    #     print("Debug gather proto: ", proto, build_type(proto["ret"]["type"], realdatatype, isa, lmul, isa_name, cpp), "cpp=", cpp, "realdatatype=", realdatatype)
     return p + ")";
 
 
