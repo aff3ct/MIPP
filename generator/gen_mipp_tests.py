@@ -298,7 +298,7 @@ def add_type_guards(func, implem, function, kind="c", lmul=0, mkind=""):
         section = 'SECTION ("datatype = {dt}") {{ {function}{mask_str}{lmul_str}{dt_suffix}(); }}\n'
     elif kind == "cpp" and (func == "cast" or func == "cast_k") :
         section = 'SECTION ("datatype = {dt}") {{ {function}{mask_str}{dt_suffix}(); }}\n'
-    elif kind == "cpp" and func == "gather" :
+    elif kind == "cpp" and ( func == "gather" or func == "scatter") :
         section = 'SECTION ("datatype = {dt}") {{ {function}{mask_str}{dt_suffix}(); }}\n'
     #lists to store the dttypes that need to be 
     #wrapped in #if defined(MIPP_64BIT) or #if defined(MIPP_BW)
@@ -326,10 +326,6 @@ def add_type_guards(func, implem, function, kind="c", lmul=0, mkind=""):
                 res += f"#if {func_defines}\n"
             res += section.format(dt=dt, dt_suffix=dt_suffix, function=function, lmul_str=lmul_str, mask_str=mask_str)
 
-            if func == "gather" :
-                dt_suffix = dt_suffix[0]
-                print("Debug function = " + function)
-                print("Debug : func_defines for gather : ", func_defines, " res : ", res)
             if func_defines:
                 res += f"#endif // {func_defines}\n"
 

@@ -28,7 +28,7 @@ from .common import (
     SHAPE_RET_MSK_1ARG_REG, #tomsk
 
     SHAPE_RET_REG_2ARGS_PTR_REG, #gather only
-    # SHAPE_RET_VOID_3ARGS_PTR_REG_REG, #scatter only
+    SHAPE_RET_VOID_3ARGS_PTR_REG_REG, #scatter only
 )
 
 # --------------------------
@@ -135,6 +135,15 @@ INIT_GATHER = """
 }
 """
 
+INIT_SCATTER = """
+\tfor(size_t i = 0; i < {{size}}; i++)
+{
+\t\tinputs1[i] = rnd::uniform<T>(seed);
+\t\tindexes[i] = (i * rnd::uniform<U>(seed)) % {{size}}; // ensure indexes are within bounds and not all the same
+\t\toutputs[i] = 0;
+\t\toutputs_scal[i] = 0;
+}"""
+
 # --------------------------------------------
 # LOADS
 # --------------------------------------------
@@ -197,6 +206,12 @@ LOAD_GATHER = """\t{{reg_type_uint}} ri1 = mipp::load(indexes);
 \t{{reg_type_scalar_uint}} rsi1 = mipp::load<U, 1, mipp::ISA::SCALAR>(indexes);
 """
 
+LOAD_SCATTER = """\t{{reg_type_uint}} ri1 = mipp::load(indexes);
+\t{{reg_type}} r1 = mipp::load(inputs1);
+\t{{reg_type_scalar_uint}} rsi1 = mipp::load<U, 1, mipp::ISA::SCALAR>(indexes);
+\t{{reg_type_scalar}} s1 = mipp::load<T, 1, mipp::ISA::SCALAR>(inputs1);
+"""
+
 # --------------------------------------------
 # OPERATIONS
 # --------------------------------------------
@@ -238,6 +253,8 @@ OP_CAST = """\t{{reg2_type}} r2 = mipp::cast_{{dt1_ext}}(r1);\n\t{{reg2_type_sca
 OP_CAST_MSK = """\t{{msk2_type}} m2 = mipp::cast_{{dt1_ext}}(m1);\n\t{{msk2_type_scalar}} ms2 = mipp::cast_{{dt1_ext}}(ms1);"""
 
 OP_GATHER = """\t{{reg_type}} r2 = mipp::gather_{{dt1_ext}}(inputs1, ri1);\n\t {{reg_type_scalar}} s2 = mipp::gather_{{dt1_ext}}(inputs1,rsi1);"""
+
+OP_SCATTER = """mipp::scatter_{{dt1_ext}}(outputs, ri1, r1);\n\tmipp::scatter_{{dt1_ext}}(outputs_scal, rsi1, s1);"""
 
 # --------------------------------------------
 # OPERATION IN LOOP BODY
@@ -289,6 +306,9 @@ AS_CMP_BINOP_LOGI_FLOAT_WORKAROUND = """REQUIRE(!! mipp::get(r3, i) == !!mipp::g
 
 AS_GATHER = """
 REQUIRE(mipp::get(r2,i) == mipp::get(s2,i));
+"""
+
+AS_SCATTER = """REQUIRE(outputs[i] == outputs_scal[i]);
 """
 
 shape_templates = {
@@ -528,15 +548,15 @@ shape_templates = {
         loop_assert=AS_GATHER,
     ),
 
-    # SHAPE_RET_VOID_3ARGS_PTR_REG_REG : TemplateParts( # scatter
-    #     func_decl=FUNC_DECL_SCATTER,
-    #     decl=DECL_SCATTER,
-    #     init=INIT_SCATTER,
-    #     load=LOAD_SCATTER,
-    #     operation=OP_SCATTER,
-    #     loop_body="",
-    #     loop_assert=AS_SCATTER,
-    # ),
+    SHAPE_RET_VOID_3ARGS_PTR_REG_REG : TemplateParts( # scatter
+        func_decl=FUNC_DECL_GATHER,
+        decl=DECL_SCATTER,
+        init=INIT_SCATTER,
+        load=LOAD_SCATTER,
+        operation=OP_SCATTER,
+        loop_body="",
+        loop_assert=AS_SCATTER,
+    ),
 }
 
 
