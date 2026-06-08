@@ -43,23 +43,23 @@ protos = {
             {"type": "reg", "charac": "RO", "fixeddatatype": False}
         ]
     },
-    "ret_reg_2args_ptr_vindex": {
-        "ret" :
-            {"type": "reg", "charac": "WO", "fixeddatatype": False},
-        "args" : [
-            {"type": "ptr", "charac": "WO", "fixeddatatype": False},
-            {"type": "vindex", "charac": "RO", "fixeddatatype": False}
-        ]
-    },
-    "ret_reg_3args_ptr_vindex_msk": {
-        "ret" :
-            {"type": "reg", "charac": "WO", "fixeddatatype": False},
-        "args" : [
-            {"type": "ptr", "charac": "WO", "fixeddatatype": False},
-            {"type": "vindex", "charac": "RO", "fixeddatatype": False},
-            {"type": "msk", "charac": "RO", "fixeddatatype": False}
-        ]
-    },
+    # "ret_reg_2args_ptr_vindex": {
+    #     "ret" :
+    #         {"type": "reg", "charac": "WO", "fixeddatatype": False},
+    #     "args" : [
+    #         {"type": "ptr", "charac": "WO", "fixeddatatype": False},
+    #         {"type": "vindex", "charac": "RO", "fixeddatatype": False}
+    #     ]
+    # },
+    # "ret_reg_3args_ptr_vindex_msk": {
+    #     "ret" :
+    #         {"type": "reg", "charac": "WO", "fixeddatatype": False},
+    #     "args" : [
+    #         {"type": "ptr", "charac": "WO", "fixeddatatype": False},
+    #         {"type": "vindex", "charac": "RO", "fixeddatatype": False},
+    #         {"type": "msk", "charac": "RO", "fixeddatatype": False}
+    #     ]
+    # },
     "ret_reg_1arg_val": {
         "ret" :
             {"type": "reg", "charac": "WO", "fixeddatatype": False},
@@ -379,7 +379,7 @@ mipp_funcs = {
     "get_k":         { "proto": protos["ret_val_2args_msk_val"],        "datatypes": all_datatypes,           "horizontal": True,  "mask_support": no_mask         },
     "getfirst":      { "proto": protos["ret_val_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": True,  "mask_support": no_mask         },
     "gather":        { "proto": protos["ret_reg_2args_ptr_reg"],        "datatypes": all_datatypes_idx_pair,  "horizontal": False, "mask_support": maskz_and_masks },
-    # "scatter":       { "proto": protos["ret_void_3args_ptr_reg_reg"],   "datatypes": all_datatypes_idx_pair,  "horizontal": False, "mask_support": mask_and_maskz  },
+    "scatter":       { "proto": protos["ret_void_3args_ptr_reg_reg"],   "datatypes": all_datatypes_idx_pair,  "horizontal": False, "mask_support": mask_and_maskz  },
 #   "mask_gather":   { "proto": protos["ret_reg_3args_ptr_vindex_msk"], "datatypes": all_datatypes,           "horizontal": False                                  },
     "sqrt":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_float,               "horizontal": False, "mask_support": all_mask        },
     "rsqrt":         { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_float,               "horizontal": False, "mask_support": all_mask        },
@@ -1327,12 +1327,12 @@ res.r[i] = %!pred_cond!% p0[r0.r[i]] %!pred_alt!%;
         },
     ],
 
-#     "scatter": [ # --------------------------------------------------------------------------------------------- scatter
-#         { "type": "element-wide", "datatypes": all_defs, "mask_variants": all_defs, "implem":
-# """p0[r0.r[i]] = %!pred_cond!% r1.r[i] %!pred_alt!%;
-# """
-#         },
-#     ],
+    "scatter": [ # --------------------------------------------------------------------------------------------- scatter
+        { "type": "element-wide", "datatypes": all_defs, "mask_variants": all_defs, "implem":
+"""p0[r0.r[i]] = %!pred_cond!% r1.r[i] %!pred_alt!%;
+"""
+        },
+    ],
 }
 
 copy_mipp_funcs = copy.deepcopy(mipp_funcs)

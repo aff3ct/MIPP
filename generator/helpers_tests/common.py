@@ -67,6 +67,7 @@ SHAPE_RET_I32_2ARGS_MSK = "ret_i32_2args_msk"
 SHAPE_RET_VAL_2ARGS_REG_VAL = "ret_val_2args_reg_val"
 SHAPE_RET_VAL_2ARGS_MSK_VAL = "ret_val_2args_msk_val"
 SHAPE_RET_REG_2ARGS_PTR_REG = "ret_reg_2args_ptr_reg"
+SHAPE_RET_VOID_3ARGS_PTR_REG_REG = "ret_void_3args_ptr_reg_reg"
 
 SUPPORTED_SHAPES = {
     SHAPE_RET_REG_2ARGS_REG, #shape for airthmetic and bitwise binary operators
@@ -92,6 +93,7 @@ SUPPORTED_SHAPES = {
     SHAPE_RET_REG_2ARGS_MASK_PTR, #maskz load
     SHAPE_RET_VOID_3ARGS_PTR_MSK_REG, #shape for mask store (maskst)
     SHAPE_RET_REG_2ARGS_PTR_REG, #shape for gather
+    SHAPE_RET_VOID_3ARGS_PTR_REG_REG, #shape for scatter (scatter is the only one with void return type and 3 args)
 }
 
 def classify_mipp_proto(proto):
@@ -155,6 +157,8 @@ def classify_mipp_proto(proto):
         return SHAPE_RET_VOID_3ARGS_PTR_MSK_REG
     if ret_t == "reg" and args_t == ["ptr", "reg"]:
         return SHAPE_RET_REG_2ARGS_PTR_REG
+    if ret_t is False and args_t == ["ptr", "reg", "reg"]:
+        return SHAPE_RET_VOID_3ARGS_PTR_REG_REG
     return None
 
 # --------------------------------------------

@@ -241,38 +241,43 @@ def _generic_mask_decl_gather_scatter(file, cpp_func_name, proto, mask_kind):
         s += "const rvm<U,LMUL,ISA_TYPE> m0, rvd<T,LMUL,ISA_TYPE> rsrc"
         is_first = False
     for args in proto["args"]:
+
+        tmp_str = ""
         if not is_first:
-            s += ", "
+            tmp_str += ", "
         if args["charac"] == "RO":
-            s += "const "
+            tmp_str += "const "
 
         A = _tpl_scalar_for_arg(args)
 
         if args["type"] == "reg":
-            s += "rvd<{{A}},LMUL,ISA_TYPE> r" + str(cnt_reg)
+            tmp_str += "rvd<{{A}},LMUL,ISA_TYPE> r" + str(cnt_reg)
             cnt_reg += 1
         elif args["type"] == "msk":
-            s += "rvm<{{A}},LMUL,ISA_TYPE> m" + str(cnt_msk)
+            tmp_str += "rvm<{{A}},LMUL,ISA_TYPE> m" + str(cnt_msk)
             cnt_msk += 1
         elif args["type"] == "val":
-            s += "{{A}} v" + str(cnt_val)
+            tmp_str += "{{A}} v" + str(cnt_val)
             cnt_val += 1
         elif args["type"] == "ptr":
-            s += "T* p" + str(cnt_ptr)
+            tmp_str += "T* p" + str(cnt_ptr)
             cnt_ptr += 1
         elif args["type"] == "Nele":
-            s += "{{A}} vals[N<{{A}},LMUL,ISA_TYPE>()]"
+            tmp_str += "{{A}} vals[N<{{A}},LMUL,ISA_TYPE>()]"
         elif args["type"] == "vindex":
-            s += "rvd<int32_t,LMUL,ISA_TYPE> vi"
+            tmp_str += "rvd<int32_t,LMUL,ISA_TYPE> vi"
         else:
-            s += "void* _"
+            tmp_str += "void* _"
+
+        tmp_template = Template(tmp_str, undefined=StrictUndefined)
+        s += tmp_template.render(A=A) # render the current arg to update s for the next iteration (for correct comma placement and const keywords)
 
         is_first = False
     s += ");" + "\n"
     template = Template(s, undefined=StrictUndefined)
     for dt in all_datatypes:
         cpp_fname_dt = cpp_func_name + "_" + dt
-        tpl = template.render(cpp_fname_dt=cpp_fname_dt, A=A, ret=ret)
+        tpl = template.render(cpp_fname_dt=cpp_fname_dt, ret=ret)
         print(tpl, file=file)
 
     #print(s, file=file)
@@ -368,8 +373,6 @@ def _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, mk_letter
     # Build the masked signature at the right LMUL, then rewrite the name into the template-id form.
     sig = build_proto(proto, dt_par, dt_ret, isa, cpp_func_name, lmul, isa_name=isa_name, cpp=True, masked_version=mask_kind)
 
-    if "gather" in cpp_func_name :
-        print("Debug: proto for gather specialization: ", "sig=", sig, "lmul=", lmul)
     if isa is not None:
         
         # if "gather" in cpp_func_name or "scatter" in cpp_func_name:

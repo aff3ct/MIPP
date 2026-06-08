@@ -499,33 +499,35 @@ def build_proto_gather(dt_par, dt_ret, isa, func_name, lmul=1, isa_name=False, c
 
 def build_proto_scatter(dt_par, dt_ret, isa, func_name, lmul=1, isa_name=False, cpp=False, masked_version=False):
     isa_type = "DEFAULT_ISA"
+
+    msk_dt = datatypes["uint" + str(_get_dt_par_size(dt_par))]["name"]+ "_t"
     if isa_name:
         isa_type = isa["name"].upper()
-    template = f"<{dt_ret}_t, {dt_par}_t, {lmul}, {isa_type}>"
+    template = f"<{dt_ret}_t, {msk_dt}, {lmul}, {isa_type}>"
     if masked_version:
         if masked_version == "mask" :
-            template = f"<M, {dt_ret}_t, {dt_par}_t, {lmul}, {isa_type}>"
+            template = f"<M, {dt_ret}_t, {msk_dt}, {lmul}, {isa_type}>"
         elif masked_version == "maskz" :
-            template = f"<Z, {dt_ret}_t, {dt_par}_t, {lmul}, {isa_type}>"
+            template = f"<Z, {dt_ret}_t, {msk_dt}, {lmul}, {isa_type}>"
         elif masked_version == "masks" :
-            template = f"<S, {dt_ret}_t, {dt_par}_t, {lmul}, {isa_type}>"
+            template = f"<S, {dt_ret}_t, {msk_dt}, {lmul}, {isa_type}>"
         else :
             print("error: masked_version should be mask, maskz or masks")
             exit(-1)
     reg_type = "rvd"
     if masked_version:
         if masked_version == "mask" :
-            return f"inline void {func_name}{template}(const rvm<{dt_par}_t,{lmul}, {isa_type}> m0, const {dt_par}_t* base, const rvd<{dt_par}_t,{lmul}, {isa_type}> r0"
+            return f"inline void {func_name}{template}(const rvm<{msk_dt},{lmul}, {isa_type}> m0, {dt_par}_t* p0, const rvd<{msk_dt},{lmul}, {isa_type}> r0, const rvd<{dt_ret}_t,{lmul}, {isa_type}> r1"
         elif masked_version == "maskz" :
-            return f"inline void {func_name}{template}(const rvm<{dt_par}_t,{lmul}, {isa_type}> m0, const {dt_par}_t* base, const rvd<{dt_par}_t,{lmul}, {isa_type}> r0"
+            return f"inline void {func_name}{template}(const rvm<{msk_dt},{lmul}, {isa_type}> m0, {dt_par}_t* p0, const rvd<{msk_dt},{lmul}, {isa_type}> r0, const rvd<{dt_ret}_t,{lmul}, {isa_type}> r1"
         elif masked_version == "masks" :
-            return f"inline void {func_name}{template}(const rvm<{dt_par}_t,{lmul}, {isa_type}> m0, const rvd<{dt_par}_t,{lmul}, {isa_type}> rsrc, const {dt_par}_t* base, const rvd<{dt_par}_t,{lmul}, {isa_type}> r0"
+            return f"inline void {func_name}{template}(const rvm<{msk_dt},{lmul}, {isa_type}> m0, const rvd<{msk_dt},{lmul}, {isa_type}> rsrc, const {dt_par}_t* p0, const rvd<{msk_dt},{lmul}, {isa_type}> r0, const rvd<{dt_ret}_t,{lmul}, {isa_type}> r1"
         else : 
             print("error: masked_version should be mask, maskz or masks")
             exit(-1)
     else :
-        return f"template <>\ninline void {func_name}{template}(const {dt_par}_t* base, const int32_t* vindex, const rvd<{dt_par}_t,{lmul}, {isa_type}> r0"
-
+        print("error: Unmasked scatter proto should be built by build_proto.")
+        exit(-1)
 #function message error set functions
 def gen_set_func_error(func_name,file):
     if func_name == "set":
