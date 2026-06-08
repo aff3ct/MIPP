@@ -216,16 +216,17 @@ def _tpl_scalar_for_arg(arg):
     return "T"
 
 def _generic_mask_decl_gather_scatter(file, cpp_func_name, proto, mask_kind):
-    if mask_kind == "mask" or mask_kind == "maskz":
-        print("template <MKIND MK=M, typename T, typename U,int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA>", file=file)
-    else:
-        print("template <MKIND MK=S, typename T, typename U,int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA>", file=file)
 
-    ret = "inline " + ("rvd<T,LMUL,ISA_TYPE>" if proto["ret"]["type"] == "reg" else
+    if mask_kind == "mask" or mask_kind == "maskz":
+        ret = "template <MKIND MK=M, typename T, typename U,int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA>"
+    else:
+        ret = "template <MKIND MK=S, typename T, typename U,int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA>"
+
+    ret += "inline " + ("rvd<T,LMUL,ISA_TYPE>" if proto["ret"]["type"] == "reg" else
                       "rvm<T,LMUL,ISA_TYPE>" if proto["ret"]["type"] == "msk" else
                       "T" if proto["ret"]["type"] == "val" else
                       "void")
-    s = f"{ret} {cpp_func_name}("
+    s = "{{ret}} {{cpp_fname_dt}}("
 
     is_first = True
     cnt_reg = 0
@@ -237,7 +238,7 @@ def _generic_mask_decl_gather_scatter(file, cpp_func_name, proto, mask_kind):
         s += "rvm<U,LMUL,ISA_TYPE> m0"
         is_first = False
     elif mask_kind == "masks":
-        s += "const rvm<U,LMUL,ISA_TYPE> m0, rvd<U,LMUL,ISA_TYPE> rsrc"
+        s += "const rvm<U,LMUL,ISA_TYPE> m0, rvd<T,LMUL,ISA_TYPE> rsrc"
         is_first = False
     for args in proto["args"]:
         if not is_first:
@@ -248,19 +249,19 @@ def _generic_mask_decl_gather_scatter(file, cpp_func_name, proto, mask_kind):
         A = _tpl_scalar_for_arg(args)
 
         if args["type"] == "reg":
-            s += f"rvd<{A},LMUL,ISA_TYPE> r{cnt_reg}"
+            s += "rvd<{{A}},LMUL,ISA_TYPE> r" + str(cnt_reg)
             cnt_reg += 1
         elif args["type"] == "msk":
-            s += f"rvm<{A},LMUL,ISA_TYPE> m{cnt_msk}"
+            s += "rvm<{{A}},LMUL,ISA_TYPE> m" + str(cnt_msk)
             cnt_msk += 1
         elif args["type"] == "val":
-            s += f"{A} v{cnt_val}"
+            s += "{{A}} v" + str(cnt_val)
             cnt_val += 1
         elif args["type"] == "ptr":
-            s += f"{A}* p{cnt_ptr}"
+            s += "T* p" + str(cnt_ptr)
             cnt_ptr += 1
         elif args["type"] == "Nele":
-            s += f"{A} vals[N<{A},LMUL,ISA_TYPE>()]"
+            s += "{{A}} vals[N<{{A}},LMUL,ISA_TYPE>()]"
         elif args["type"] == "vindex":
             s += "rvd<int32_t,LMUL,ISA_TYPE> vi"
         else:
@@ -268,7 +269,13 @@ def _generic_mask_decl_gather_scatter(file, cpp_func_name, proto, mask_kind):
 
         is_first = False
     s += ");" + "\n"
-    print(s, file=file)
+    template = Template(s, undefined=StrictUndefined)
+    for dt in all_datatypes:
+        cpp_fname_dt = cpp_func_name + "_" + dt
+        tpl = template.render(cpp_fname_dt=cpp_fname_dt, A=A, ret=ret)
+        print(tpl, file=file)
+
+    #print(s, file=file)
     
 def _generic_mask_decl(file, cpp_func_name, proto, mask_kind):
     """

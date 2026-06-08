@@ -485,16 +485,17 @@ def build_proto_gather(dt_par, dt_ret, isa, func_name, lmul=1, isa_name=False, c
     reg_type = "rvd"
     if masked_version:
         if masked_version == "mask" :
-            return f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const rvm<{msk_dt},{lmul}, {isa_type}> m0, const {dt_par}_t* base, const rvd<{msk_dt},{lmul}, {isa_type}> r0"
+            return f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const rvm<{msk_dt},{lmul}, {isa_type}> m0, const {dt_par}_t* p0, const rvd<{msk_dt},{lmul}, {isa_type}> r0"
         elif masked_version == "maskz" :
-            return f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const rvm<{msk_dt},{lmul}, {isa_type}> m0, const {dt_par}_t* base, const rvd<{msk_dt},{lmul}, {isa_type}> r0"
+            return f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const rvm<{msk_dt},{lmul}, {isa_type}> m0, const {dt_par}_t* p0, const rvd<{msk_dt},{lmul}, {isa_type}> r0"
         elif masked_version == "masks" :
-            return f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const rvm<{msk_dt},{lmul}, {isa_type}> m0, const rvd<{msk_dt},{lmul}, {isa_type}> rsrc, const {dt_par}_t* base, const rvd<{msk_dt},{lmul}, {isa_type}> r0"
+            return f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const rvm<{msk_dt},{lmul}, {isa_type}> m0, const rvd<{dt_par}_t,{lmul}, {isa_type}> rsrc, const {dt_par}_t* p0, const rvd<{msk_dt},{lmul}, {isa_type}> r0"
         else : 
             print("error: masked_version should be mask, maskz or masks")
             exit(-1)
     else :
-        return f"template <>\ninline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const {dt_par}_t* base, const int32_t* vindex"
+        print("error: Unmasked gather proto should be built by build_proto.")
+        exit(-1)
 
 def build_proto_scatter(dt_par, dt_ret, isa, func_name, lmul=1, isa_name=False, cpp=False, masked_version=False):
     isa_type = "DEFAULT_ISA"
