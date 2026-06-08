@@ -87,6 +87,11 @@ for details
 tpl_implem_rvv = {
     "load"                 : { "format" : "short", "code" : "{{ isa.prefix }}_vle{{ isa_dt_par.width }}_v_{{ isa_dt_par.data_ext }}(({{ isa_dt_par.to_ptr }}*) p0, %N<tp>%);"},
     "load_msks"            : { "format" : "short", "code" : "{{ isa.prefix }}_vle{{ isa_dt_par.width }}_v_{{ isa_dt_par.data_ext }}_mu(m0.m, rsrc.r, ({{ isa_dt_par.to_ptr }}*) p0, %N<tp>%);"},
+
+
+    "gather"              : { "format" : "short", "code" : "{{ isa.prefix }}_v{{ instr_name }}_v_{{ isa_dt_par.data_ext }}(p0, r0.r, %N<tp>%);"},
+    # This might be the seed of a future headache ngl
+    "scatter"              : { "format" : "short", "code" : "{{ isa.prefix }}_v{{ instr_name }}_v_{{ isa_dt_par.data_ext }}_{{isa_dt_par.data_ext}}(p0, r0.r, r1.r, %N<tp>%);"},
     
     "store"                : { "format" : "short", "code" : "{{ isa.prefix }}_vse{{ isa_dt_par.width}}_v_{{ isa_dt_par.data_ext }}(({{ isa_dt_par.to_ptr }}*) p0, r0.r , %N<tp>%);"},
     "store_msk"            : { "format" : "short", "code" : "{{ isa.prefix }}_vse{{ isa_dt_par.width}}_v_{{ isa_dt_par.data_ext }}_m(m0.m, ({{ isa_dt_par.to_ptr }}*) p0, r0.r , %N<tp>%);"},
@@ -772,4 +777,11 @@ implems_rvv = {
         { "instr_name" : "sra",     "datatypes" : all_int,       "template" : tpl_implem_rvv["div4_scalar_msks"], "version" : "masks"},
         { "instr_name" : "fdiv",    "datatypes" : all_float,     "template" : tpl_implem_rvv["div4_float_msks"], "version" : "masks"},
     ],
+
+    "gather" : [
+        { "instr_name" : "luxei",  "datatypes" : all_datatypes_idx_pair, "template" : tpl_implem_rvv["gather"]},
+    ],
+    "scatter" : [
+        { "instr_name" : "suxei",  "datatypes" : all_datatypes_idx_pair, "template" : tpl_implem_rvv["scatter"]},
+     ],
 }

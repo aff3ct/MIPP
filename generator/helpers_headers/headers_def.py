@@ -282,7 +282,7 @@ protos = {
         ]
     },
 
-    "ret_reg_2args_ptr_reg" : {
+    "ret_reg_2args_ptr_reg" : { # gather
         "ret" :
             {"type": "reg", "charac": "WO", "fixeddatatype": False},
         "args" : [
@@ -291,11 +291,11 @@ protos = {
         ]
     },
 
-    "ret_void_3args_ptr_reg_reg" : {
+    "ret_void_3args_ptr_reg_reg" : { # scatter
         "ret" :
             {"type": False, "charac": "WO", "fixeddatatype": False},
         "args" : [
-            {"type": "ptr", "charac": "RO", "fixeddatatype": False},
+            {"type": "ptr", "charac": "WO", "fixeddatatype": False},
             # I like that idx is r0 in both gather/scatter
             {"type": "reg", "charac": "RO", "fixeddatatype": "uint"},
             {"type": "reg", "charac": "RO", "fixeddatatype": False},
@@ -1322,14 +1322,14 @@ res.r[i] = %!pred_cond!% resv %!pred_alt!%;
     "gather": [ # ---------------------------------------------------------------------------------------------- gather
         { "type": "element-wide", "datatypes": all_defs, "mask_variants": all_defs, "implem":
 """
-res.r[i] = %!pred_cond!% ptr[r0.r[i]] %!pred_alt!%;
+res.r[i] = %!pred_cond!% p0[r0.r[i]] %!pred_alt!%;
 """
         },
     ],
 
     "scatter": [ # --------------------------------------------------------------------------------------------- scatter
         { "type": "element-wide", "datatypes": all_defs, "mask_variants": all_defs, "implem":
-"""ptr[r0.r[i]] = %!pred_cond!% r1.r[i] %!pred_alt!%;
+"""p0[r0.r[i]] = %!pred_cond!% r1.r[i] %!pred_alt!%;
 """
         },
     ],

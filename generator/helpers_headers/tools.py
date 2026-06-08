@@ -788,6 +788,8 @@ def build_func_name(isa, dt_par, dt_ret, mipp_name, isa_name=True, lmul=0, maske
         lmul_str = "_m" + str(int(lmul))
 
     mask_str = ""
+    if masked_version:
+        mask_str = "_" + masked_version
 
   
     if isa_name:

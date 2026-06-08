@@ -631,7 +631,6 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False, lm
     func_dict = layer_dict[func]["proto"]
     func_template = layer_dict[func]["template"]
 
-
     size = "MIPP_N_" + scalar_type.upper()
     if kind != "c": 
         size = "mipp::N<T>()"
@@ -668,6 +667,7 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False, lm
         # nb : there can be a different amount of "_" in reg type like : rvd_int64_t
         # rvd_int64_m1_t etc
         split = reg_type.split("_", 1)
+
         reg_type_scalar = split[0] + "_scalar_" + split[1]
         scalar_ext = "scalar_" + scalar_type
         
@@ -1043,8 +1043,11 @@ def gen_funcs_all_datatypes(func, kind="c", register="rvd", mask="rvm",lmul=0, m
 
     if kind == "c":
         for dt in datatypes:
+            if func in {"gather", "scatter"} :
+                dt = dt.split(",")[0]
             reg_type =f"{register}_" + dt + "_t"
             msk_type = f"{mask}_" + dt + "_t"
+        
             if lmul > 0:
                 reg_type = f"{register}_" + dt + f"_m{lmul}_t"
                 msk_type = f"{mask}_" + dt + f"_m{lmul}_t"

@@ -31,6 +31,8 @@ from .common import (
     SHAPE_RET_REG_2ARGS_MASK_PTR, #maskz load only
     SHAPE_RET_VOID_3ARGS_PTR_MSK_REG, #mask store (maskst) only
 
+    SHAPE_RET_REG_2ARGS_PTR_REG, #gather only
+
 )
 
 # --------------------------
@@ -42,6 +44,7 @@ from .common import (
 # FN decl 
 # --------------------------------------------
 FUNC_DECL = """void test_cmipp_{{func}}_{{dt_ext}}(){"""
+FUNC_DECL_GATHER = """void test_cmipp_{{func}}_{{dt_ext}}_{{dt_ext}}(){"""
 
 
 # --------------------------------------------
@@ -70,6 +73,11 @@ DECL_G_SNIPPET = """\tstd::mt19937 g;\n\tstd::uniform_int_distribution<uint16_t>
 DECL_CAST_2ARGS = """\n\t{{dt1_ext}}_t inputs1[{{size}}];\n\tconstexpr size_t bytes = sizeof(inputs1);\n\t{{dt2_ext}}_t inputs2[bytes / sizeof({{dt2_ext}}_t)];"""
 DECL_CAST_2ARGS_MSK = """\n\tint32_t inputs1[{{size}}];\n\tconstexpr size_t bytes = sizeof(inputs1);\n\t{{dt2_ext}}_t inputs2[bytes / sizeof({{dt2_ext}}_t)];"""
 
+# declare 1 dt array of dt type, another array of uint of the same size.
+DECL_GATHER = DECL_GET_CATCH_SEED + """
+{{dt_ext}}_t inputs1[{{size}}];
+uint{{type_size}}_t indexes[{{size}}];
+"""
 # --------------------------------------------
 # SCALAR VEC INIT
 # --------------------------------------------
@@ -122,6 +130,15 @@ INIT_3ARGS = """\tfor(size_t i = 0; i < {{size}}; i++)
 #to compare inputs2 to what we got after casting in the loop body.
 INIT_CAST_2ARGS = """\tstd::iota(inputs1, inputs1 + {{size}}, 1);\n\tmemcpy(inputs2, inputs1, sizeof(inputs1));"""
 
+# 1 array is random values, 1 is indexes that don't cross array boundaries
+INIT_GATHER = """
+\tfor(size_t i = 0; i < {{size}}; i++)
+{
+\t\tinputs1[i] = rnd::uniform<{{dt_ext}}_t>(seed);
+\t\tindexes[i] = (i * rnd::uniform<uint{{type_size}}_t>(seed)) % {{size}}; // ensure indexes are within bounds and not all the same
+}
+"""
+
 # --------------------------------------------
 # LOADS
 # --------------------------------------------
@@ -164,6 +181,14 @@ LOAD_3ARGS_REG = """\t{{reg_type}} r1 = mipp_load_{{dt_ext}}(inputs1);
 LOAD_CAST_2ARGS = """\t{{reg1_type}} r1 = mipp_load_{{dt1_ext}}(inputs1); {{reg1_scalar_type}} s1 = mipp_scalar_load_{{dt1_ext}}(inputs1);"""
 LOAD_CAST_2ARGS_MASK = """\t{{msk1_type}} m1 = mipp_set_k_{{dt1_ext}}(inputs1); {{msk1_scalar_type}} ms1 = mipp_scalar_set_k_{{dt1_ext}}(inputs1);"""
 
+LOAD_GATHER = """
+// {{reg_type}} r1 = mipp_load_{{dt_ext}}(inputs1);
+rvd_uint{{type_size}}_t ri1 = mipp_load_uint{{type_size}}(indexes);
+
+// {{reg_type_scalar}} s1 = mipp_scalar_load_{{dt_ext}}(inputs1);
+rvd_scalar_uint{{type_size}}_t ris1 = mipp_scalar_load_uint{{type_size}}(indexes);
+"""
+
 # --------------------------------------------
 # OPERATIONS
 # --------------------------------------------
@@ -202,6 +227,9 @@ OP_3ARGS_REG = """\t{{reg_type}} r4 = mipp_{{func}}_{{dt_ext}}(r1, r2, r3);
 OP_CAST = """\t{{reg2_type}} r2 = mipp_cast_{{dt1_ext}}_{{dt2_ext}}(r1);\n\t{{reg2_scalar_type}} s2 = mipp_scalar_cast_{{dt1_ext}}_{{dt2_ext}}(s1);"""
 OP_CAST_MSK = """\t{{msk2_type}} m2 = mipp_cast_k_{{dt1_ext}}_{{dt2_ext}}(m1);\n\t{{msk2_scalar_type}} ms2 = mipp_scalar_cast_k_{{dt1_ext}}_{{dt2_ext}}(ms1);"""
 
+
+OP_GATHER = """\t{{reg_type}} r2 = mipp_gather_{{dt_ext}}_{{dt_ext}}(inputs1, ri1);\n\t{{reg_type_scalar}} s2 = mipp_scalar_gather_{{dt_ext}}_{{dt_ext}}(inputs1, ris1);"""
+
 # --------------------------------------------
 # ASSERTS IN LOOP BODY
 # ------------------------------------------
@@ -237,6 +265,8 @@ AS_CMP_BINOP_LOGI_FLOAT_WORKAROUND = """{% if is_int %}""" + AS_CMP_2REG + """{%
 {% endif %}"""
 
 AS_CMP_TOMSK="""\t\tREQUIRE( (!!mipp_get_{{dt_ext}}(r3, i)) == (!!mipp_scalar_get_{{dt_ext}}(s3,i)) );"""
+
+AS_GATHER = """\t\tREQUIRE(mipp_get_{{dt_ext}}(r2, i) == inputs1[indexes[i]]);\n\t\tREQUIRE(mipp_scalar_get_{{dt_ext}}(s2, i) == inputs1[indexes[i]]);"""
 
 shape_templates = {
     SHAPE_RET_REG_2ARGS_REG: TemplateParts( # add, sub, div, mul
@@ -475,6 +505,16 @@ shape_templates = {
 {{msk_type_scalar}} ms1 = mipp_scalar_tomsk_{{dt_ext}}(s1);\n\t{{reg_type_scalar}} s3 = mipp_scalar_toreg_{{dt_ext}}(ms1);""",
         loop_body="",
         loop_assert=AS_CMP_TOMSK,
+    ),
+
+    SHAPE_RET_REG_2ARGS_PTR_REG : TemplateParts( # gather
+        func_decl=FUNC_DECL_GATHER,
+        decl=DECL_GATHER,
+        init=INIT_GATHER,
+        load=LOAD_GATHER,
+        operation=OP_GATHER,
+        loop_body="",
+        loop_assert=AS_GATHER,
     ),
 }
 
