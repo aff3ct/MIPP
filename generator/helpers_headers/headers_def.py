@@ -281,6 +281,26 @@ protos = {
             {"type": "reg", "charac": "RO", "fixeddatatype": False},
         ]
     },
+
+    "ret_reg_2args_ptr_reg" : {
+        "ret" :
+            {"type": "reg", "charac": "WO", "fixeddatatype": False},
+        "args" : [
+            {"type": "ptr", "charac": "RO", "fixeddatatype": False},
+            {"type": "reg", "charac": "RO", "fixeddatatype": "uint"}, # idx reg
+        ]
+    },
+
+    "ret_void_3args_ptr_reg_reg" : {
+        "ret" :
+            {"type": False, "charac": "WO", "fixeddatatype": False},
+        "args" : [
+            {"type": "ptr", "charac": "RO", "fixeddatatype": False},
+            # I like that idx is r0 in both gather/scatter
+            {"type": "reg", "charac": "RO", "fixeddatatype": "uint"},
+            {"type": "reg", "charac": "RO", "fixeddatatype": False},
+        ]
+    }
 }
 
 mipp_funcs_concepts = {
@@ -358,7 +378,8 @@ mipp_funcs = {
     "get":           { "proto": protos["ret_val_2args_reg_val"],        "datatypes": all_datatypes,           "horizontal": True,  "mask_support": no_mask         },
     "get_k":         { "proto": protos["ret_val_2args_msk_val"],        "datatypes": all_datatypes,           "horizontal": True,  "mask_support": no_mask         },
     "getfirst":      { "proto": protos["ret_val_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": True,  "mask_support": no_mask         },
-#   "gather":        { "proto": protos["ret_reg_2args_ptr_vindex"],     "datatypes": all_datatypes,           "horizontal": False                                  },
+    "gather":        { "proto": protos["ret_reg_2args_ptr_reg"],        "datatypes": all_datatypes_idx_pair,  "horizontal": False, "mask_support": maskz_and_masks },
+    "scatter":       { "proto": protos["ret_void_3args_ptr_reg_reg"],   "datatypes": all_datatypes_idx_pair,  "horizontal": False, "mask_support": mask_and_maskz  },
 #   "mask_gather":   { "proto": protos["ret_reg_3args_ptr_vindex_msk"], "datatypes": all_datatypes,           "horizontal": False                                  },
     "sqrt":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_float,               "horizontal": False, "mask_support": all_mask        },
     "rsqrt":         { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_float,               "horizontal": False, "mask_support": all_mask        },
@@ -1294,6 +1315,21 @@ r0i <<= v0;
 %v<tr>% resv;
 BIT_CAST_1(&resv, &r0i);
 res.r[i] = %!pred_cond!% resv %!pred_alt!%;
+"""
+        },
+    ],
+
+    "gather": [ # ---------------------------------------------------------------------------------------------- gather
+        { "type": "element-wide", "datatypes": all_defs, "mask_variants": all_defs, "implem":
+"""
+res.r[i] = %!pred_cond!% ptr[r0.r[i]] %!pred_alt!%;
+"""
+        },
+    ],
+
+    "scatter": [ # --------------------------------------------------------------------------------------------- scatter
+        { "type": "element-wide", "datatypes": all_defs, "mask_variants": all_defs, "implem":
+"""ptr[r0.r[i]] = %!pred_cond!% r1.r[i] %!pred_alt!%;
 """
         },
     ],

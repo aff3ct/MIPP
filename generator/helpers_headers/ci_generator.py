@@ -391,7 +391,7 @@ def ci_mask_writer(func, dt, isa_list, file, mask_type, func_name="", lmul=0):
         if len(dt.split(',')) <= 1:
             func_name_impl = build_func_name_short(isa, dt_par, func, True, lmul, mask_type);
         else:
-            func_name_impl = build_func_name(isa, dt_par, dt_ret, f, True, lmul, mask_type);
+            func_name_impl = build_func_name(isa, dt_par, dt_ret, func, True, lmul, mask_type);
         print("\t" + build_call(mipp_funcs[func]["proto"], dt_par, dt_ret, isa, func_name_impl, masked_version = mask_type) + ";", file=file)
         if i == len(isa_list)-1:
             print("#else", file=file)

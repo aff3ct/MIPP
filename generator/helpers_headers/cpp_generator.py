@@ -197,11 +197,24 @@ def _masked_c_symbol(dt_par, dt_ret, f, is_cast, isa=None, isa_name=False):
         return build_func_name_short(isa, dt_par, f, isa_name=isa_name)
     return build_func_name(isa, dt_par, dt_ret, f, isa_name=isa_name)
 
+def _get_dt_par_size(dt_par):
+    if dt_par in datatypes:
+        return datatypes[dt_par]["n_bits"]
+    else:
+        print(f"error: data type {dt_par} not found in datatypes")
+        exit(-1)
 
 def _tpl_scalar_for_arg(arg):
     # Returns a string type name usable in C++ template decls: "T" or "int32_t" etc.
     if arg.get("fixeddatatype"):
-        return datatypes[arg["fixeddatatype"]]["cstd"]
+        if arg["fixeddatatype"] not in datatypes and arg["fixeddatatype"] in all_categories:
+                dt_str =  arg["fixeddatatype"] + str(_get_dt_par_size(dt_par))
+                realdatatype = datatypes[dt_str]
+                return realdatatype["cstd"]
+        elif arg["fixeddatatype"] in datatypes:
+                realdatatype = datatypes[arg["fixeddatatype"]]
+                return realdatatype["cstd"]
+       # return datatypes[arg["fixeddatatype"]]["cstd"]
     return "T"
 
 def _generic_mask_decl(file, cpp_func_name, proto, mask_kind):

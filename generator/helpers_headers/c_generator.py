@@ -1372,7 +1372,7 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
 
         file = include_manager.get_fd(isa["name"], f)
         # print file name
-        print("Debug: generating for '" + f + "' function in file: " + file.name)
+        # print("Debug: generating for '" + f + "' function in file: " + file.name)
         
         
         for ff in implems[f]:

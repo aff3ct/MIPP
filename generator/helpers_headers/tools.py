@@ -13,6 +13,8 @@ cfloat = "float"
 cint = "int"
 cuint = "uint"
 
+all_categories = [cfloat, cint, cuint]
+
 float64 = cfloat + "64"
 float32 = cfloat + "32"
 int64 = cint + "64"
@@ -59,6 +61,21 @@ for dt_ret in all_datatypes:
         if new_entry not in all_datatypes_cart_prod_inc_f64:
             if (dt_par == "float64" or dt_ret == "float64"):
                 all_datatypes_cart_prod_inc_f64.append(dt_par + "," + dt_ret);
+
+
+# First definition of gather will use this 4 simplicity's sake
+all_datatypes_idx_pair = []
+for type in [cfloat, cint, cuint]:
+    for n_bits in [64, 32, 16, 8]:
+        if type == cfloat and n_bits in [16, 8]:
+            continue
+        dt = type + str(n_bits)
+        idx = cuint + str(n_bits)
+        all_datatypes_idx_pair.append(dt + "," + dt)
+
+# dump all_datatypes_idx_pair for debug
+with open("all_datatypes_idx_pair", "w") as f:
+    print("\n".join(all_datatypes_idx_pair), file=f)
             
 def find_data_types_from(criteria):
     all_types = dict(datatypes);
@@ -88,7 +105,6 @@ datatypes = {
      uint16 : { "name" :  uint16, "category":  cuint, "n_bits" : 16, "cstd":  "uint16_t", "literal_suffix": "", },
       uint8 : { "name" :   uint8, "category":  cuint, "n_bits" :  8, "cstd":   "uint8_t", "literal_suffix": "", },
 }
-
 
 #  Operator overloading in the object layer
 operators_arithm = {
@@ -140,6 +156,7 @@ def build_reg(datatype, isa, lmul=0, isa_name=True, cpp=False):
         str_reg = "rvd_"
         if isa_name:
             str_reg += isa["name"] + "_"
+        #print("Debug", datatype["category"], datatype["n_bits"])
         str_reg += datatype["category"] + str(datatype["n_bits"])
         if lmul:
             if int(lmul) > 0:
@@ -238,6 +255,9 @@ def build_N(datatype, isa, lmul=0, isa_name=True):
 
 def build_type(type, datatype, isa,lmul=0, isa_name=True, cpp=False):
     if type:
+
+        # print("Debug build type " ,type)
+
         if type == "reg":
             return build_reg(datatype, isa, lmul, isa_name, cpp)
         elif type == "msk":
@@ -251,6 +271,9 @@ def build_type(type, datatype, isa,lmul=0, isa_name=True, cpp=False):
         elif type == "vindex":
             same_size_integer_datatype = find_one_data_types_from({"n_bits": datatype["n_bits"], "category": cint});
             return build_reg(same_size_integer_datatype, isa, lmul, isa_name, cpp)
+        else : 
+            print("error: type should be reg, msk, val, ptr, Nele or vindex")
+            exit(-1)
     else:
         return "void"
 
@@ -442,6 +465,15 @@ def build_proto_load(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, m
     else :
         ret = f"template <>\ninline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const {dt_par}* p0"
     return  ret
+
+def build_proto_gather(proto, dt_par, dt_ret, isa, func_name, lmul=1, isa_name=False, cpp=False, masked_version=False):
+    isa_type = "DEFAULT_ISA"
+    if isa_name:
+        isa_type = isa["name"].upper()
+    return ""
+
+def build_proto_scatter(proto, dt_par, dt_ret, isa, func_name, lmul=1, isa_name=False, cpp=False, masked_version=False):
+    return ""
     
 
 #function message error set functions
@@ -462,6 +494,13 @@ def gen_set_func_error(func_name,file):
         print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline rvd<T, LMUL, ISA_TYPE> {func_name}(const T* p0);", file=file) #{{ std::cerr << \"{func_name} checkout tools.gen_set_func_error\" << std::endl; exit(-1);}}\n",file=file)
 
 
+def _get_dt_par_size(dt_par):
+    if dt_par in datatypes:
+        return datatypes[dt_par]["n_bits"]
+    else:
+        print(f"error: data type {dt_par} not found in datatypes")
+        exit(-1)
+
 def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, masked_version=False):
     """if lmul and (not cpp or (cpp and not lmul_specialized(proto))):
         func_name += "_m" + str(int(lmul))"""
@@ -475,14 +514,24 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
         return  build_proto_set1(dt_ret, isa, func_name, lmul=lmul, isa_name=isa_name, cpp=cpp, masked_version=masked_version) +')'
     if func_name =="load" or func_name =="loadu":
         return  build_proto_load(dt_ret, isa, func_name, lmul=lmul, isa_name=isa_name, cpp=cpp, masked_version=masked_version) +')'
+    # if func_name =="gather" :
+    #     return  build_proto_gather(proto, dt_par, dt_ret, isa, func_name, lmul=lmul, isa_name=isa_name, cpp=cpp, masked_version=masked_version) +')'
+    # if func_name =="scatter" :
+    #     return  build_proto_scatter(proto, dt_par, dt_ret, isa, func_name, lmul=lmul, isa_name=isa_name, cpp=cpp, masked_version=masked_version) +')'
 
     realdatatype = datatypes[dt_ret]
     if (proto["ret"]["fixeddatatype"]):
         realdatatype = datatypes[proto["ret"]["fixeddatatype"]]
+    
+    # if  "gather" in func_name or  "scatter" in func_name:
+    #     dt_str = "uint" + str(_get_dt_par_size(dt_par))
+    #     realdatatype = datatypes[dt_str]
     if not masked_version:
         lmul_str = ""
         if lmul > 0 and (not cpp ):
             lmul_str = "_m" + str(int(lmul))
+        # if "gather" in func_name or "scatter" in func_name:
+        #     print("Debug " + func_name + " proto: ", proto, build_type(proto["ret"]["type"], realdatatype, isa, lmul, isa_name, cpp), "cpp=", cpp, "realdatatype=", realdatatype)
         p = "inline " + build_type(proto["ret"]["type"], realdatatype, isa, lmul, isa_name, cpp) + " " + func_name + lmul_str + "("
 
     else : #we assume "mask" or "maskz" is passed in masked_version if it's not false.
@@ -498,11 +547,19 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
     
     #add m0 as first argument for masked version of function
     if masked_version:
+        # hack to account 4 gather / scatter 
+        # The issue I'm noticing is that the generator doesn't 
+        # acknowledge that different parameters can be of different types. 
+        # Which is fine 4 most functions but not 4 gather/scatter ...
+        msk_dt = datatypes[dt_par]
+        if "gather" in func_name or "scatter" in func_name:
+            msk_dt = datatypes["uint" + str(_get_dt_par_size(dt_par))]
+
         if masked_version == "mask" or masked_version == "maskz":
-            p += build_msk(datatypes[dt_par], isa, lmul, isa_name, cpp) + " m0"
+            p += build_msk(msk_dt, isa, lmul, isa_name, cpp) + " m0"
             
         elif masked_version == "masks" :
-            p += "const " + build_msk(datatypes[dt_par], isa, lmul, isa_name, cpp) + " m0"
+            p += "const " + build_msk(msk_dt, isa, lmul, isa_name, cpp) + " m0"
             p += ", " + build_reg(datatypes[dt_par], isa, lmul, isa_name, cpp) + " rsrc"
         cnt_msk = cnt_msk +1		
         is_first = False
@@ -513,7 +570,11 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
             p += ", "
         realdatatype = datatypes[dt_par]
         if (arg["fixeddatatype"]):
-            realdatatype = datatypes[arg["fixeddatatype"]]
+            if arg["fixeddatatype"] not in datatypes and arg["fixeddatatype"] in all_categories:
+                dt_str =  arg["fixeddatatype"] + str(_get_dt_par_size(dt_par))
+                realdatatype = datatypes[dt_str]
+            elif arg["fixeddatatype"] in datatypes:
+                realdatatype = datatypes[arg["fixeddatatype"]]
         if arg["charac"] == "RO":
             p += "const "
         p += build_type(arg["type"], realdatatype, isa, lmul, isa_name, cpp)
@@ -535,6 +596,8 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
             p += " vi"
         is_first = False
 
+    if "gather" in func_name : 
+        print("Debug gather proto: ", proto, build_type(proto["ret"]["type"], realdatatype, isa, lmul, isa_name, cpp), "cpp=", cpp, "realdatatype=", realdatatype)
     return p + ")";
 
 

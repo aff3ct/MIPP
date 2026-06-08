@@ -1425,8 +1425,7 @@ def main():#just parse the args and call gen_test_files_all_funcs with the right
         clean_folder(cpath)
         clean_folder(cpppath)
         clean_folder(objpath)
-
-    if type(args.kind) == str:
+    if isinstance(args.kind, str):
         args.kind = [args.kind]
     if("unmasked" in args.mask_kind): 
         # replace with empty string to simplify the code later on
