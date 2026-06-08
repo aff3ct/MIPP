@@ -1328,9 +1328,12 @@ res.r[i] = %!pred_cond!% p0[r0.r[i]] %!pred_alt!%;
     ],
 
     "scatter": [ # --------------------------------------------------------------------------------------------- scatter
-        { "type": "element-wide", "datatypes": all_defs, "mask_variants": all_defs, "implem":
+        { "type": "element-wide", "datatypes": all_defs, "mask_variants": ["no_mask", "maskz"], "implem":
 """p0[r0.r[i]] = %!pred_cond!% r1.r[i] %!pred_alt!%;
 """
+        },
+        { "type": "element-wide", "datatypes": all_defs, "mask_variants": ["mask"], "implem":
+"""if (m0.m[i]) p0[r0.r[i]] = r1.r[i];"""
         },
     ],
 }
