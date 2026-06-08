@@ -89,9 +89,9 @@ tpl_implem_rvv = {
     "load_msks"            : { "format" : "short", "code" : "{{ isa.prefix }}_vle{{ isa_dt_par.width }}_v_{{ isa_dt_par.data_ext }}_mu(m0.m, rsrc.r, ({{ isa_dt_par.to_ptr }}*) p0, %N<tp>%);"},
 
 
-    "gather"              : { "format" : "short", "code" : "{{ isa.prefix }}_v{{ instr_name }}_v_{{ isa_dt_par.data_ext }}(p0, r0.r, %N<tp>%);"},
+    "gather"              : { "format" : "short", "code" : "{{ isa.prefix }}_v{{ instr_name }}{{isa_dt_par.width}}_v_{{ isa_dt_par.data_ext }}(p0, r0.r, %N<tp>%);"},
     # This might be the seed of a future headache ngl
-    "scatter"              : { "format" : "short", "code" : "{{ isa.prefix }}_v{{ instr_name }}_v_{{ isa_dt_par.data_ext }}_{{isa_dt_par.data_ext}}(p0, r0.r, r1.r, %N<tp>%);"},
+    "scatter"              : { "format" : "short", "code" : "{{ isa.prefix }}_v{{ instr_name }}{{isa_dt_par.width}}_v_{{ isa_dt_par.data_ext }}_{{isa_dt_par.data_ext}}(p0, r0.r, r1.r, %N<tp>%);"},
     
     "store"                : { "format" : "short", "code" : "{{ isa.prefix }}_vse{{ isa_dt_par.width}}_v_{{ isa_dt_par.data_ext }}(({{ isa_dt_par.to_ptr }}*) p0, r0.r , %N<tp>%);"},
     "store_msk"            : { "format" : "short", "code" : "{{ isa.prefix }}_vse{{ isa_dt_par.width}}_v_{{ isa_dt_par.data_ext }}_m(m0.m, ({{ isa_dt_par.to_ptr }}*) p0, r0.r , %N<tp>%);"},

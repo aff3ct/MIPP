@@ -26,6 +26,9 @@ from .common import (
     SHAPE_RET_I32_1ARG_MSK, #testz2
     SHAPE_RET_REG_3ARGS_1MSK_2REG, #maskz_add
     SHAPE_RET_MSK_1ARG_REG, #tomsk
+
+    SHAPE_RET_REG_2ARGS_PTR_REG, #gather only
+    # SHAPE_RET_VOID_3ARGS_PTR_REG_REG, #scatter only
 )
 
 # --------------------------
@@ -39,6 +42,7 @@ from .common import (
 FUNC_DECL = """template <typename T>\nvoid test_cppmipp_{{func}}(){"""
 FUNC_DECL_FLOAT_WORKAROUND = " {% if is_int %} " + FUNC_DECL + " {% else %} template <typename T>\nvoid test_cppmipp_{{func}}_float{{type_size}}(){  {% endif %}"
 
+FUNC_DECL_GATHER = """template <typename T, typename U>\nvoid test_cppmipp_{{func}}(){"""
 
 # --------------------------------------------
 # SCALAR VEC DECL
@@ -63,6 +67,18 @@ DECL_CAST_2ARGS = DECL_GET_CATCH_SEED +  "\n\t{{dt2_ext}} inputs1[{{size}}];\n\t
 
 DECL_CAST_2ARGS_MSK = DECL_GET_CATCH_SEED + "\n\tint32_t inputs1[{{size}}];\n\tconstexpr size_t bytes = sizeof(inputs1);\n\t{{dt1_ext}}_t inputs2[bytes / sizeof({{dt1_ext}}_t)];"
 
+
+DECL_GATHER = DECL_GET_CATCH_SEED + """
+T inputs1[{{size}}];
+U indexes[{{size}}];
+"""
+
+DECL_SCATTER = DECL_GET_CATCH_SEED + """
+T inputs1[{{size}}];
+U indexes[{{size}}];
+T outputs[{{size}}];
+T outputs_scal[{{size}}];
+"""
 # --------------------------------------------
 # SCALAR VEC INIT
 # --------------------------------------------
@@ -111,6 +127,13 @@ INIT_3ARGS = """\tfor(size_t i = 0; i < {{size}}; i++)
 
 INIT_CAST_2ARGS = """\tstd::iota(inputs1, inputs1 + {{size}}, 1);\n\tmemcpy(inputs2, inputs1, sizeof(inputs1));"""
 
+INIT_GATHER = """
+\tfor(size_t i = 0; i < {{size}}; i++)
+{
+\t\tinputs1[i] = rnd::uniform<T>(seed);
+\t\tindexes[i] = (i * rnd::uniform<U>(seed)) % {{size}}; // ensure indexes are within bounds and not all the same
+}
+"""
 
 # --------------------------------------------
 # LOADS
@@ -170,6 +193,10 @@ LOAD_CAST_2ARGS = """\t{{reg1_type}} r1 = mipp::load(inputs1);\n\t{{reg1_type_sc
 
 LOAD_CAST_2ARGS_MASK = """\t{{msk1_type}} m1 = mipp::set_k<T>(inputs1);\n\t{{msk1_type_scalar}} ms1 = mipp::set_k<T, 1, mipp::ISA::SCALAR>(inputs1);"""
 
+LOAD_GATHER = """\t{{reg_type_uint}} ri1 = mipp::load(indexes);
+\t{{reg_type_scalar_uint}} rsi1 = mipp::load<U, 1, mipp::ISA::SCALAR>(indexes);
+"""
+
 # --------------------------------------------
 # OPERATIONS
 # --------------------------------------------
@@ -209,6 +236,8 @@ OP_3ARGS_REG = """\t{{reg_type}} r4 = mipp::{{func}}(r1, r2, r3);
 
 OP_CAST = """\t{{reg2_type}} r2 = mipp::cast_{{dt1_ext}}(r1);\n\t{{reg2_type_scalar}} s2 = mipp::cast_{{dt1_ext}}(s1);"""
 OP_CAST_MSK = """\t{{msk2_type}} m2 = mipp::cast_{{dt1_ext}}(m1);\n\t{{msk2_type_scalar}} ms2 = mipp::cast_{{dt1_ext}}(ms1);"""
+
+OP_GATHER = """\t{{reg_type}} r2 = mipp::gather_{{dt1_ext}}(inputs1, ri1);\n\t {{reg_type_scalar}} s2 = mipp::gather_{{dt1_ext}}(inputs1,rsi1);"""
 
 # --------------------------------------------
 # OPERATION IN LOOP BODY
@@ -257,6 +286,10 @@ AS_CMP_BINOP_LOGI_FLOAT_WORKAROUND = """REQUIRE(!! mipp::get(r3, i) == !!mipp::g
 # AS_CMP_BINOP_FLOAT_WORKAROUND ="""\n\t\tREQUIRE(std::bit_cast<uint64_t>(mipp::get(r3, i))\
 #     \n\t\t\t==
 #     \t\tstd::bit_cast<uint64_t>(mipp::get(s3, i)) );"""
+
+AS_GATHER = """
+REQUIRE(mipp::get(r2,i) == mipp::get(s2,i));
+"""
 
 shape_templates = {
     SHAPE_RET_REG_2ARGS_REG: TemplateParts( # add, sub, div, mul
@@ -484,7 +517,26 @@ shape_templates = {
         loop_body="",
         loop_assert="""\t\tREQUIRE( (!!mipp::get(r3, i)) == (!!mipp::get(s3,i)) );""",
     ),
+ 
+     SHAPE_RET_REG_2ARGS_PTR_REG : TemplateParts( # gather
+        func_decl=FUNC_DECL_GATHER,
+        decl=DECL_GATHER,
+        init=INIT_GATHER,
+        load=LOAD_GATHER,
+        operation=OP_GATHER,
+        loop_body="",
+        loop_assert=AS_GATHER,
+    ),
 
+    # SHAPE_RET_VOID_3ARGS_PTR_REG_REG : TemplateParts( # scatter
+    #     func_decl=FUNC_DECL_SCATTER,
+    #     decl=DECL_SCATTER,
+    #     init=INIT_SCATTER,
+    #     load=LOAD_SCATTER,
+    #     operation=OP_SCATTER,
+    #     loop_body="",
+    #     loop_assert=AS_SCATTER,
+    # ),
 }
 
 

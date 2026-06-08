@@ -202,10 +202,8 @@ LOAD_CAST_2ARGS = """\t{{reg1_type}} r1 = mipp_load_{{dt1_ext}}(inputs1); {{reg1
 LOAD_CAST_2ARGS_MASK = """\t{{msk1_type}} m1 = mipp_set_k_{{dt1_ext}}(inputs1); {{msk1_scalar_type}} ms1 = mipp_scalar_set_k_{{dt1_ext}}(inputs1);"""
 
 LOAD_GATHER = """
-// {{reg_type}} r1 = mipp_load_{{dt_ext}}(inputs1);
 rvd_uint{{type_size}}_t ri1 = mipp_load_uint{{type_size}}(indexes);
 
-// {{reg_type_scalar}} s1 = mipp_scalar_load_{{dt_ext}}(inputs1);
 rvd_scalar_uint{{type_size}}_t ris1 = mipp_scalar_load_uint{{type_size}}(indexes);
 """
 
