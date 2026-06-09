@@ -29,6 +29,11 @@ from .common import (
     SHAPE_RET_MSK_1ARG_REG,           # tomsk
     SHAPE_RET_REG_2ARGS_MASK_PTR,     # maskz load
     SHAPE_RET_VOID_3ARGS_PTR_MSK_REG, # mask store (maskst)
+
+
+    SHAPE_RET_REG_2ARGS_PTR_REG, #gather only
+    SHAPE_RET_VOID_3ARGS_PTR_REG_REG, #scatter only
+
 )
 
 # --------------------------
@@ -39,6 +44,9 @@ from .common import (
 # FN decl
 # --------------------------------------------
 FUNC_DECL = """void test_cmipp_{{func}}_{{dt_ext}}_{{lmul_suffix}}(){"""
+
+FUNC_DECL_GATHER = """void test_cmipp_{{func}}_{{dt_ext}}_{{dt_ext}}_{{lmul_suffix}}(){"""
+FUNC_DECL_SCATTER = """void test_cmipp_{{func}}_{{dt_ext}}_{{dt_ext}}_{{lmul_suffix}}(){"""
 
 # --------------------------------------------
 # SCALAR VEC DECL
@@ -63,6 +71,20 @@ DECL_3ARGS = DECL_GET_CATCH_SEED + """{{dt_ext}}_t inputs1[{{size}} * {{lmul_coe
 # cast: allocate inputs1 scaled by coeff; inputs2 size is computed from bytes (correctly scales)
 DECL_CAST_2ARGS = DECL_GET_CATCH_SEED + """{{dt1_ext}}_t inputs1[{{size}} * {{lmul_coeff}}];\n\tconstexpr size_t bytes = sizeof(inputs1);\n\t{{dt2_ext}}_t inputs2[bytes / sizeof({{dt2_ext}}_t)];"""
 DECL_CAST_2ARGS_MSK = DECL_GET_CATCH_SEED + """int32_t inputs1[{{size}} * {{lmul_coeff}}];\n\tconstexpr size_t bytes = sizeof(inputs1);\n\t{{dt2_ext}}_t inputs2[bytes / sizeof({{dt2_ext}}_t)];"""
+
+
+# declare 1 dt array of dt type, another array of uint of the same size.
+DECL_GATHER = DECL_GET_CATCH_SEED + """
+{{dt_ext}}_t inputs1[{{size}} * {{lmul_coeff}}];
+uint{{type_size}}_t indexes[{{size}} * {{lmul_coeff}}];
+"""
+
+DECL_SCATTER = DECL_GET_CATCH_SEED + """
+{{dt_ext}}_t inputs1[{{size}} * {{lmul_coeff}}];
+uint{{type_size}}_t indexes[{{size}} * {{lmul_coeff}}];
+{{dt_ext}}_t outputs[{{size}} * {{lmul_coeff}}];
+{{dt_ext}}_t outputs_scal[{{size}} * {{lmul_coeff}}];
+"""
 
 # --------------------------------------------
 # SCALAR VEC INIT (unchanged)
@@ -111,6 +133,25 @@ INIT_3ARGS = """\tfor(size_t i = 0; i < {{size}} * {{lmul_coeff}}; i++)
 """
 
 INIT_CAST_2ARGS = """\tstd::iota(inputs1, inputs1 + {{size}} * {{lmul_coeff}}, 1);\n\tmemcpy(inputs2, inputs1, sizeof(inputs1));"""
+
+# 1 array is random values, 1 is indexes that don't cross array boundaries
+INIT_GATHER = """
+\tfor(size_t i = 0; i < {{size}} * {{lmul_coeff}}; i++)
+{
+\t\tinputs1[i] = rnd::uniform<{{dt_ext}}_t>(seed);
+\t\tindexes[i] = (i * rnd::uniform<uint{{type_size}}_t>(seed)) % ({{size}} * {{lmul_coeff}}); // ensure indexes are within bounds and not all the same
+}
+"""
+
+INIT_SCATTER = """
+\tfor(size_t i = 0; i < {{size}} * {{lmul_coeff}}; i++)
+{
+\t\tinputs1[i] = rnd::uniform<{{dt_ext}}_t>(seed);
+\t\tindexes[i] = (i * rnd::uniform<uint{{type_size}}_t>(seed)) % ({{size}} * {{lmul_coeff}}); // ensure indexes are within bounds and not all the same
+\t\toutputs[i] = 0;
+\t\toutputs_scal[i] = 0;
+}
+"""
 
 # --------------------------------------------
 # LOADS (suffix)
@@ -162,6 +203,20 @@ LOAD_CAST_2ARGS = """\t{{reg1_type}} r1 = mipp_load_{{dt1_ext}}_{{lmul_suffix}}(
 LOAD_CAST_2ARGS_MASK = """\t{{msk1_type}} m1 = mipp_set_k_{{dt1_ext}}_{{lmul_suffix}}(inputs1);
 \n\t{{msk1_scalar_type}} ms1 = mipp_scalar_set_k_{{dt1_ext}}_{{lmul_suffix}}(inputs1);"""
 
+LOAD_GATHER = """
+rvd_uint{{type_size}}_{{lmul_suffix}}_t ri1 = mipp_load_uint{{type_size}}_{{lmul_suffix}}(indexes);
+
+rvd_scalar_uint{{type_size}}_{{lmul_suffix}}_t ris1 = mipp_scalar_load_uint{{type_size}}_{{lmul_suffix}}(indexes);
+"""
+
+LOAD_SCATTER = """
+{{reg_type}} r1 = mipp_load_{{dt_ext}}_{{lmul_suffix}}(inputs1);
+rvd_uint{{type_size}}_{{lmul_suffix}}_t ri1 = mipp_load_uint{{type_size}}_{{lmul_suffix}}(indexes);
+
+{{reg_type_scalar}} rs1 = mipp_scalar_load_{{dt_ext}}_{{lmul_suffix}}(inputs1);
+rvd_scalar_uint{{type_size}}_{{lmul_suffix}}_t ris1 = mipp_scalar_load_uint{{type_size}}_{{lmul_suffix}}(indexes);
+"""
+
 # --------------------------------------------
 # OPERATIONS (suffix)
 # --------------------------------------------
@@ -203,21 +258,9 @@ OP_CAST = """\t{{reg2_type}} r2 = mipp_cast_{{dt1_ext}}_{{dt2_ext}}_{{lmul_suffi
 OP_CAST_MSK = """\t{{msk2_type}} m2 = mipp_cast_k_{{dt1_ext}}_{{dt2_ext}}_{{lmul_suffix}}(m1);
 \t{{msk2_scalar_type}} ms2 = mipp_scalar_cast_k_{{dt1_ext}}_{{dt2_ext}}_{{lmul_suffix}}(ms1);"""
 
-# --------------------------------------------
-# OPERATION IN LOOP BODY (unchanged)
-# ------------------------------------------
+OP_GATHER = """\t{{reg_type}} r2 = mipp_gather_{{dt_ext}}_{{dt_ext}}_{{lmul_suffix}}(inputs1, ri1);\n\t{{reg_type_scalar}} s2 = mipp_scalar_gather_{{dt_ext}}_{{dt_ext}}_{{lmul_suffix}}(inputs1, ris1);"""
 
-# LB_SET_OP = """\t\t{{dt_ext}}_t res = inputs1[i];"""
-# LB_SET_SCALAR_OP = """\t\t{{dt_ext}}_t res = input1;"""
-# LB_REG_BINOP = """\t\t{{dt_ext}}_t res = inputs1[i] {{op}} inputs2[i];"""
-# LB_CMP_2REG = """\t\tbool res = inputs1[i] {{op}} inputs2[i];"""
-# LB_CAST_2ARGS = """\t\t{{dt2_ext}}_t res = inputs2[i];"""
-
-# LB_REG_BINOP_FLOAT_WORKAROUND = """{% if is_int %}""" + LB_REG_BINOP + """{% else %}
-#         \t{{dt_ext}}_t res = std::bit_cast<{{dt_ext}}_t,uint{{type_size}}_t>(
-# \t\t\t\tstd::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(inputs1[i]) 
-# \t\t\t\t{{op}} 
-# \t\t\t\tstd::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(inputs2[i]));{% endif %}"""
+OP_SCATTER = """\tmipp_scatter_{{dt_ext}}_{{dt_ext}}_{{lmul_suffix}}(outputs, ri1, r1);\n\tmipp_scalar_scatter_{{dt_ext}}_{{dt_ext}}_{{lmul_suffix}}(outputs_scal, ris1, rs1);"""
 
 # --------------------------------------------
 # ASSERTS IN LOOP BODY (unchanged)
@@ -251,6 +294,11 @@ AS_3ARGS_TOL = """\t\t{{dt_ext}}_t res1 = mipp_get_{{dt_ext}}_{{lmul_suffix}}(r4
 \t\t{{dt_ext}}_t tol  = 1e-5f * abs_diff::abs_diff(res2) + 1.0f;
 \t\t{{dt_ext}}_t diff = abs_diff::abs_diff(res1, res2);
 \t\tREQUIRE(diff <= tol);"""
+
+AS_GATHER = """\t\tREQUIRE(mipp_get_{{dt_ext}}_{{lmul_suffix}}(r2, i) == inputs1[indexes[i]]);\n\t\tREQUIRE(mipp_scalar_get_{{dt_ext}}_{{lmul_suffix}}(s2, i) == inputs1[indexes[i]]);"""
+AS_SCATTER = """
+\t\tREQUIRE(outputs[i] == outputs_scal[i]);
+"""
 
 
 AS_CMP_BINOP_FLOAT_WORKAROUND = AS_REG_BINOP_FLOAT_WORKAROUND
@@ -462,40 +510,25 @@ shape_templates = {
         loop_assert=AS_TOMSK,
     ),
     
-    
-    # Nu-uh
-    
-    # SHAPE_RET_REG_3ARGS_1MSK_2REG: TemplateParts( # maskz_add
-    #     func_decl=FUNC_DECL,
-    #     decl=DECL_1ARG_INT32,
-    #     init=INIT_1ARG,
-    #     load=LOAD_1ARG_MASK + "\n" + LOAD_SET1_2ARGS_REG,
-    #     operation=OP_3ARGS_1MSK_2REG,
-    #     loop_body="\t\t{{dt_ext}}_t res = mipp_get_k_{{dt_ext}}(m1, i) ? 3 : 0;",
-    #     loop_assert=AS_REG_BINOP,
-    # ),
-    
-    # #maskzld
-    # SHAPE_RET_REG_2ARGS_MASK_PTR : TemplateParts(
-    #     func_decl="",
-    #     decl="",
-    #     init="",
-    #     load="",
-    #     operation="",
-    #     loop_body="",
-    #     loop_assert="",
-    # ),
-    
-    # #maskst
-    # SHAPE_RET_VOID_3ARGS_PTR_MSK_REG : TemplateParts(
-    #     func_decl="",
-    #     decl="",
-    #     init="",
-    #     load="",
-    #     operation="",
-    #     loop_body="",
-    #     loop_assert="",
-    # ),
+    SHAPE_RET_REG_2ARGS_PTR_REG : TemplateParts( # gather
+        func_decl=FUNC_DECL_GATHER,
+        decl=DECL_GATHER,
+        init=INIT_GATHER,
+        load=LOAD_GATHER,
+        operation=OP_GATHER,
+        loop_body="",
+        loop_assert=AS_GATHER,
+    ),
+
+    SHAPE_RET_VOID_3ARGS_PTR_REG_REG : TemplateParts( # scatter
+        func_decl=FUNC_DECL_SCATTER,
+        decl=DECL_SCATTER,
+        init=INIT_SCATTER,
+        load=LOAD_SCATTER,
+        operation=OP_SCATTER,
+        loop_body="",
+        loop_assert=AS_SCATTER,
+    ),
 
 }
 

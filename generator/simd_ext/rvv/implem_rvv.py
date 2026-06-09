@@ -410,6 +410,7 @@ tpl_implem_rvv = {
         res.r ={{ isa.prefix }}_v{{ instr_name }}{{isa_dt_par.width}}_v_{{ isa_dt_par.data_ext }}(p0, tmp.r, %N<tp>%);
         return res;
     """},
+
     "gather_masks" : { "format" : "long", "code" : """
         %r<c:uint|b:tp>% tmp;
         tmp.r = {{isa.prefix}}_vmul_vx_{{isa_dt_par.uint_data_ext}}(r0.r, sizeof({{isa_dt_par.to_ptr}}), %N<tp>%);
@@ -436,6 +437,22 @@ tpl_implem_rvv = {
         {{ isa.prefix }}_v{{ instr_name }}{{isa_dt_par.width}}_v_{{ isa_dt_par.data_ext }}(p0, tmp.r, r1.r, %N<tp>%);
     """},
 
+    "scatter_mask" : { "format" : "long", "code" : """
+        %r<c:uint|b:tp>% tmp;
+        tmp.r = {{isa.prefix}}_vmul_vx_{{isa_dt_par.uint_data_ext}}(r0.r, sizeof({{isa_dt_par.to_ptr}}), %N<tp>%);
+        {{ isa.prefix }}_v{{ instr_name }}{{isa_dt_par.width}}_v_{{ isa_dt_par.data_ext }}_m(m0.m, p0, tmp.r, r1.r, %N<tp>%);
+    """},
+
+    # 4 intrinsics is still native and not emulated support right ? 
+    "scatter_maskz" : { "format" : "long", "code" : """
+        %r<c:uint|b:tp>% tmp;
+        %r<tp>% zeroes, blended;
+        zeroes = %set0<tp>%();
+        blended.r = {{isa.prefix}}_vmerge_vvm_{{isa_dt_par.data_ext}}(zeroes.r, r1.r, m0.m, %N<tp>%);;             
+        
+        tmp.r = {{isa.prefix}}_vmul_vx_{{isa_dt_par.uint_data_ext}}(r0.r, sizeof({{isa_dt_par.to_ptr}}), %N<tp>%);
+        {{ isa.prefix }}_v{{ instr_name }}{{isa_dt_par.width}}_v_{{ isa_dt_par.data_ext }}(p0, tmp.r, blended.r, %N<tp>%);
+    """}
 
 }
 
@@ -818,7 +835,7 @@ implems_rvv = {
 
     "scatter" : [
         { "instr_name" : "suxei",  "datatypes" : all_datatypes_idx_pair, "template" : tpl_implem_rvv["scatter"]},
-        # { "instr_name" : "suxei",  "datatypes" : all_datatypes_idx_pair, "template" : tpl_implem_rvv["scatter_mask"], "version" : "mask"},
-        # { "instr_name" : "suxei",  "datatypes" : all_datatypes_idx_pair, "template" : tpl_implem_rvv["scatter_maskz"], "version" : "maskz"},
+        { "instr_name" : "suxei",  "datatypes" : all_datatypes_idx_pair, "template" : tpl_implem_rvv["scatter_mask"], "version" : "mask"},
+        { "instr_name" : "suxei",  "datatypes" : all_datatypes_idx_pair, "template" : tpl_implem_rvv["scatter_maskz"], "version" : "maskz"},
     ],
 }

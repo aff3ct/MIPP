@@ -1354,7 +1354,9 @@ def gen_test_files_all_funcs(kind="c", lmul=0, mkind="", N=10, mode="function"):
     dict_mask = get_gen_test_dict_mask("c")
     #print(dict_mask.keys())
     for func in sorted(funcs):
-        
+
+        # Little cli print bc it's nice :)
+        # print("Generating tests for function: " + func + "with lmul = " + str(lmul) + " and mask kind = " + mkind)
         
         mask_support = mipp_funcs[func]["mask_support"]
         if mkind != "" and not mask_support.is_supported(mkind) :
@@ -1482,6 +1484,8 @@ def main():#just parse the args and call gen_test_files_all_funcs with the right
                     continue
             for lmul in args.lmul:
                 for mkind in args.mask_kind:
+                    mkind_print = mkind if mkind != "" else "unmasked"
+                    print(f"Generating {kind} tests with lmul = {lmul} and mask kind = {mkind_print}")
                     gen_test_files_all_funcs(kind=kind, lmul=lmul, mkind=mkind, N=args.num_iterations, mode=args.header_type)
 
 

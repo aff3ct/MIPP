@@ -28,6 +28,11 @@ from .common import (
     SHAPE_RET_MSK_1ARG_REG,           # tomsk only
     SHAPE_RET_REG_2ARGS_MASK_PTR,     # maskz load only
     SHAPE_RET_VOID_3ARGS_PTR_MSK_REG, # mask store (maskst) only
+
+
+    SHAPE_RET_REG_2ARGS_PTR_REG, #gather only
+    SHAPE_RET_VOID_3ARGS_PTR_REG_REG, #scatter only
+
 )
 
 # --------------------------
@@ -42,6 +47,9 @@ from .common import (
 # FN decl
 # --------------------------------------------
 FUNC_DECL = """void test_cmipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}(){"""
+
+FUNC_DECL_GATHER = """void test_cmipp_{{func}}_{{dt_ext}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}(){"""
+FUNC_DECL_SCATTER = """void test_cmipp_{{func}}_{{dt_ext}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}(){"""
 
 # --------------------------------------------
 # SCALAR VEC DECL
@@ -64,14 +72,20 @@ DECL_3ARGS = DECL_GET_CATCH_SEED + DECL_PRED_ARG + """\n\t{{dt_ext}}_t inputs1[{
 
 DECL_G_SNIPPET = """\tstd::mt19937 g;\n\tstd::uniform_int_distribution<uint16_t> dis(0, 1);"""
 
-# DECL_CAST_2ARGS = (
-#     DECL_GET_CATCH_SEED
-#     + """\n\t{{dt1_ext}}_t inputs1[{{size}}*{{lmul_coeff}}];\n\tconstexpr size_t bytes = sizeof(inputs1);\n\t{{dt2_ext}}_t inputs2[bytes / sizeof({{dt2_ext}}_t)];"""
-# )
-# DECL_CAST_2ARGS_MSK = (
-#     DECL_GET_CATCH_SEED
-#     + """\n\tint32_t inputs1[{{size}}*{{lmul_coeff}}];\n\tconstexpr size_t bytes = sizeof(inputs1);\n\t{{dt2_ext}}_t inputs2[bytes / sizeof({{dt2_ext}}_t)];"""
-# )
+# declare 1 dt array of dt type, another array of uint of the same size.
+DECL_GATHER = DECL_GET_CATCH_SEED + DECL_PRED_ARG + """
+{{dt_ext}}_t inputs1[{{size}}*{{lmul_coeff}}];
+uint{{type_size}}_t indexes[{{size}}*{{lmul_coeff}}];
+"""
+
+DECL_SCATTER = DECL_GET_CATCH_SEED + DECL_PRED_ARG +"""
+{{dt_ext}}_t inputs1[{{size}}*{{lmul_coeff}}];
+uint{{type_size}}_t indexes[{{size}}*{{lmul_coeff}}];
+{{dt_ext}}_t outputs[{{size}}*{{lmul_coeff}}];
+{{dt_ext}}_t outputs_scal[{{size}}*{{lmul_coeff}}];
+"""
+
+
 
 # --------------------------------------------
 # SCALAR VEC INIT
@@ -126,6 +140,25 @@ INIT_3ARGS = """\tfor(size_t i = 0; i < {{size}} * {{lmul_coeff}}; i++)
 \t}
 """
 
+# 1 array is random values, 1 is indexes that don't cross array boundaries
+INIT_GATHER = """
+\tfor(size_t i = 0; i < {{size}} * {{lmul_coeff}}; i++)
+{
+\t\tinputs1[i] = rnd::uniform<{{dt_ext}}_t>(seed);
+\t\tindexes[i] = (i * rnd::uniform<uint{{type_size}}_t>(seed)) % ({{size}} * {{lmul_coeff}}); // ensure indexes are within bounds and not all the same
+}
+"""
+
+INIT_SCATTER = """
+\tfor(size_t i = 0; i < {{size}} * {{lmul_coeff}}; i++)
+{
+\t\tinputs1[i] = rnd::uniform<{{dt_ext}}_t>(seed);
+\t\tindexes[i] = (i * rnd::uniform<uint{{type_size}}_t>(seed)) % ({{size}} * {{lmul_coeff}}); // ensure indexes are within bounds and not all the same
+\t\toutputs[i] = 0;
+\t\toutputs_scal[i] = 0;
+}
+"""
+
 # --------------------------------------------
 # LOADS (masked: create m0 + optionally rsrc)
 # --------------------------------------------
@@ -158,7 +191,7 @@ LOAD_1SCALAR_MASK = """\t{{msk_type}} m1 = mipp_set1_k_{{dt_ext}}{{lmul_suffix}}
 LOAD_SET0_MASK = """\t{{msk_type}} m1 = mipp_set0_k_{{dt_ext}}{{lmul_suffix}}();
 \t{{msk_type_scalar}} ms1 = mipp_scalar_set0_k_{{dt_ext}}{{lmul_suffix}}();"""
 
-LOAD_SET1_2ARGS_REG = """\t{{reg_type}} r1 = mipp_set1_{{dt_ext}}_{{lmul_suffix}}(1); \n\t{{reg_type}} r2 = mipp_set1_{{dt_ext}}{{lmul_suffix}}(2);
+LOAD_SET1_2ARGS_REG = """\t{{reg_type}} r1 = mipp_set1_{{dt_ext}}{{lmul_suffix}}(1); \n\t{{reg_type}} r2 = mipp_set1_{{dt_ext}}{{lmul_suffix}}(2);
 \t{{reg_type_scalar}} s1 = mipp_scalar_set1_{{dt_ext}}{{lmul_suffix}}(1); \n\t{{reg_type_scalar}} s2 = mipp_scalar_set1_{{dt_ext}}{{lmul_suffix}}(2);"""
 
 LOAD_3ARGS_REG = """\t{{reg_type}} r1 = mipp_load_{{dt_ext}}{{lmul_suffix}}(inputs1);
@@ -189,6 +222,28 @@ LOAD_MASK_AND_RSRC_FROM_REG1 = """\t{{msk_type}} mpred = mipp_set_k_{{dt_ext}}{{
 \t{{reg_type}} rsrc = mipp_load_{{dt_ext}}{{lmul_suffix}}(inputs1);
 \t{{reg_type_scalar}} srsrc = mipp_scalar_load_{{dt_ext}}{{lmul_suffix}}(inputs1);
 {% endif %}
+"""
+
+# For gather / scatter
+LOAD_UINT_MASK_AND_RSRC_FROM_REG1 = """\trvm_uint{{type_size}}{{lmul_suffix}}_t mpred = mipp_set_k_uint{{type_size}}{{lmul_suffix}}(inpred);
+\trvm_scalar_uint{{type_size}}{{lmul_suffix}}_t smpred = mipp_scalar_set_k_uint{{type_size}}{{lmul_suffix}}(inpred);
+{% if mkind == "masks" %}
+\t{{reg_type}} rsrc = mipp_load_{{dt_ext}}{{lmul_suffix}}(inputs1);
+\t{{reg_type_scalar}} srsrc = mipp_scalar_load_{{dt_ext}}{{lmul_suffix}}(inputs1);
+{% endif %}
+"""
+
+LOAD_GATHER = """
+rvd_uint{{type_size}}{{lmul_suffix}}_t ri1 = mipp_load_uint{{type_size}}{{lmul_suffix}}(indexes);
+rvd_scalar_uint{{type_size}}{{lmul_suffix}}_t ris1 = mipp_scalar_load_uint{{type_size}}{{lmul_suffix}}(indexes);
+"""
+
+LOAD_SCATTER = """
+{{reg_type}} r1 = mipp_load_{{dt_ext}}{{lmul_suffix}}(inputs1);
+rvd_uint{{type_size}}{{lmul_suffix}}_t ri1 = mipp_load_uint{{type_size}}{{lmul_suffix}}(indexes);
+
+{{reg_type_scalar}} rs1 = mipp_scalar_load_{{dt_ext}}{{lmul_suffix}}(inputs1);
+rvd_scalar_uint{{type_size}}{{lmul_suffix}}_t ris1 = mipp_scalar_load_uint{{type_size}}{{lmul_suffix}}(indexes);
 """
 
 
@@ -238,6 +293,10 @@ OP_3ARGS_REG = """\t{{reg_type}} r4 = mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmu
 \t{{reg_type_scalar}} s4 = mipp_scalar_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args_scalar}} s1, s2, s3);"""
 
 
+OP_GATHER = """\t{{reg_type}} r2 = mipp_gather_{{dt_ext}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args}}inputs1, ri1);\n\t{{reg_type_scalar}} s2 = mipp_scalar_gather_{{dt_ext}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args_scalar}}inputs1, ris1);"""
+
+OP_SCATTER = """\tmipp_scatter_{{dt_ext}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args}}outputs, ri1, r1);\n\tmipp_scalar_scatter_{{dt_ext}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args_scalar}}outputs_scal, ris1, rs1);"""
+
 # --------------------------------------------
 # ASSERTS IN LOOP BODY
 # ------------------------------------------
@@ -264,6 +323,9 @@ AS_3ARGS_TOL = """\t\t{{dt_ext}}_t res1 = mipp_get_{{dt_ext}}{{lmul_suffix}}(r4,
 \t\t{{dt_ext}}_t tol  = 1e-5f * abs_diff::abs_diff(res2) + 1.0f;
 \t\t{{dt_ext}}_t diff = abs_diff::abs_diff(res1, res2);
 \t\tREQUIRE(diff <= tol);"""
+
+AS_GATHER = """\t\tREQUIRE(mipp_get_{{dt_ext}}{{lmul_suffix}}(r2, i) == mipp_scalar_get_{{dt_ext}}{{lmul_suffix}}(s2, i));"""
+AS_SCATTER = """\t\tREQUIRE(outputs[i] == outputs_scal[i]);"""
 
 # --------------------------------------------
 # Shapes
@@ -370,6 +432,26 @@ shape_templates = {
         operation="",
         loop_body="",
         loop_assert="\t\tREQUIRE(mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args}} r1) == mipp_scalar_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args_scalar}} s1));",
+    ),
+
+    SHAPE_RET_REG_2ARGS_PTR_REG : TemplateParts( # gather
+        func_decl=FUNC_DECL_GATHER,
+        decl=DECL_GATHER,
+        init=INIT_PRED + INIT_GATHER,
+        load=LOAD_GATHER + "\n" + LOAD_UINT_MASK_AND_RSRC_FROM_REG1,
+        operation=OP_GATHER,
+        loop_body="",
+        loop_assert=AS_GATHER,
+    ),
+
+    SHAPE_RET_VOID_3ARGS_PTR_REG_REG : TemplateParts( # scatter
+        func_decl=FUNC_DECL_SCATTER,
+        decl=DECL_SCATTER,
+        init=INIT_PRED + INIT_SCATTER,
+        load=LOAD_SCATTER + "\n" + LOAD_UINT_MASK_AND_RSRC_FROM_REG1,
+        operation=OP_SCATTER,
+        loop_body="",
+        loop_assert=AS_SCATTER,
     ),
 }
 
