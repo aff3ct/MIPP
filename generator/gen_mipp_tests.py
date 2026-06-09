@@ -1520,15 +1520,23 @@ def main():#just parse the args and call gen_test_files_all_funcs with the right
         args.mask_kind = [k if k != "unmasked" else "" for k in args.mask_kind]
 
     for kind in args.kind:
-            if kind == "cpp" or kind == "obj":
-                if args.skip_lmul_cpp and kind == "cpp" and args.lmul != [0]:
-                    print("Skipping C++ tests for LMUL > 0")
-                    continue
-                if args.skip_mask_cpp and kind == "cpp" and args.mask_kind != [""]:
-                    print("Skipping C++ tests for masked functions")
-                    continue
+            # if kind == "cpp" or kind == "obj":
+            #     if args.skip_lmul_cpp and kind == "cpp" and (args.lmul != [0] and args.lmul != [1]):
+            #         print("Skipping C++ tests for LMUL > 0")
+            #         continue
+            #     if args.skip_mask_cpp and kind == "cpp" and args.mask_kind != [""]:
+            #         print("Skipping C++ tests for masked functions")
+            #         continue
             for lmul in args.lmul:
+                
+                if kind == "cpp" and args.skip_lmul_cpp and lmul > 0:
+                    continue
+
                 for mkind in args.mask_kind:
+
+                    if kind == "cpp" and args.skip_mask_cpp and mkind != "":
+                        continue
+
                     mkind_print = mkind if mkind != "" else "unmasked"
                     print(f"Generating {kind} tests with lmul = {lmul} and mask kind = {mkind_print}")
                     gen_test_files_all_funcs(kind=kind, lmul=lmul, mkind=mkind, N=args.num_iterations, mode=args.header_type)

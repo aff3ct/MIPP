@@ -73,9 +73,12 @@ for type in [cfloat, cint, cuint]:
         idx = cuint + str(n_bits)
         all_datatypes_idx_pair.append(dt + "," + dt)
 
-# # dump all_datatypes_idx_pair for debug
-# with open("all_datatypes_idx_pair", "w") as f:
-#     print("\n".join(all_datatypes_idx_pair), file=f)
+avx_datatypes_idx_pair = [
+"float64,float64",
+"float32,float32",
+"int64,int64",
+"int32,int32",
+]
             
 def find_data_types_from(criteria):
     all_types = dict(datatypes);
