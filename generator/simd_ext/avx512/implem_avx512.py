@@ -51,6 +51,30 @@ tpl_implem_avx512 = {
     "bitwise_2args":    { "format": "short", "code": "_{{ instr_name }}_{{ isa_dt_par.msk_short }}(m0.m, m1.m);" },
     "testz_1arg":       { "format": "long",  "code": "return (int32_t)_{{ instr_name }}_{{ isa_dt_par.msk_short }}_u8(m0.m, m0.m);" },
     "testz_2args":      { "format": "long",  "code": "return (int32_t)_{{ instr_name }}_{{ isa_dt_par.msk_short }}_u8(m0.m, m1.m);" },
+
+    # same templates as avx2
+    "gather":           { "format": "short", "code": "{{ isa.prefix }}_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(p0,r0.r,{{dt_par.n_bits//8}});" },
+
+    "gather_masks_64":  { "format": "short", "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(rsrc.r,m0.m, r0.r, p0,8);" },
+    "gather_masks_32":  { "format": "short", "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(rsrc.r,m0.m, r0.r, p0,4);" },
+
+    "gather_maskz_64":  { "format": "short", "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(%set0<tp>%().r,m0.m, r0.r, p0,8);" },
+    "gather_maskz_32":  { "format": "short", "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(%set0<tp>%().r,m0.m, r0.r, p0,4);" },    
+
+    "scatter":          { "format": "short", "code": "{{ isa.prefix }}_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(p0,r0.r, r1.r, {{dt_par.n_bits//8}});" },
+
+    "scatter_mask_64":   { "format": "short", "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(p0, m0.m, r0.r, r1.r, 8);" },
+    "scatter_mask_32":   { "format": "short", "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(p0, m0.m, r0.r, r1.r, 4);" },
+
+    "scatter_maskz":   { "format": "long", "code": """
+        %r<tp>% zeroes;
+        zeroes = %set0<tp>%();
+        %r<tp>% blended;
+        blended.r = {{ isa.prefix }}_mask_blend_{{ isa_dt_par.data_ext }}(m0.m, zeroes.r, r1.r);
+
+        {{ isa.prefix }}_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(p0,r0.r, blended.r, {{dt_par.n_bits//8}});
+    """},
+
     "set-64": { "format": "long", "code":
 """// long format
 	%r<tp>% res;
@@ -346,11 +370,11 @@ implems_avx512 = {
     "min": [
         { "instr_name": "min",        "datatypes": all_float + [int64, int32],   "template": tpl_implem_avx512["arith_2args"],                                                                                                  },
         { "instr_name": "min",        "datatypes": [int16, int8],                "template": tpl_implem_avx512["arith_2args"],    "if": "defined(__AVX512BW__)"                                                                 },
-        { "instr_name": "gmin",       "datatypes": all_float,                    "template": tpl_implem_avx512["arith_2args"],    "if": "(defined(__MIC__) || defined(__KNCNI__))"                                                } ], # min
+        { "instr_name": "gmin",       "datatypes": all_float,                    "template": tpl_implem_avx512["arith_2args"],    "if": "(defined(__MIC__) || defined(__KNCNI__))"                                              } ], # min
     "max": [
         { "instr_name": "max",        "datatypes": all_float + [int64, int32],   "template": tpl_implem_avx512["arith_2args"],                                                                                                  },
         { "instr_name": "max",        "datatypes": [int16, int8],                "template": tpl_implem_avx512["arith_2args"],    "if": "defined(__AVX512BW__)"                                                                 },
-        { "instr_name": "gmax",       "datatypes": all_float,                    "template": tpl_implem_avx512["arith_2args"],    "if": "(defined(__MIC__) || defined(__KNCNI__))"                                                } ], # max
+        { "instr_name": "gmax",       "datatypes": all_float,                    "template": tpl_implem_avx512["arith_2args"],    "if": "(defined(__MIC__) || defined(__KNCNI__))"                                              } ], # max
     "fmadd": [
         { "instr_name": "fmadd",      "datatypes": all_float,                    "template": tpl_implem_avx512["arith_3args"],                                                                                                  },
         { "instr_name": "fmadd",      "datatypes": [int32],                      "template": tpl_implem_avx512["arith_3args"],    "if": "(defined(__MIC__) || defined(__KNCNI__))"                                                } ], # fmadd
@@ -408,12 +432,12 @@ implems_avx512 = {
         { "instr_name": "kor",        "datatypes": all_8bit,                     "template": tpl_implem_avx512["bitwise_2args"],  "if": "defined(__AVX512BW__)"                                                                 } ], # orb_k
     "testz": [
         { "instr_name": "kortestz",   "datatypes": [int64, uint64],              "template": tpl_implem_avx512["testz_2args"],    "if": "defined(__AVX512DQ__)"                                                                 },
-        { "instr_name": "kortestz",   "datatypes": [int32, uint32],              "template": tpl_implem_avx512["testz_2args"],    "if": "(defined (__AVX512F__) || defined(__MIC__) || defined(__KNCNI__))"                       },
+        { "instr_name": "kortestz",   "datatypes": [int32, uint32],              "template": tpl_implem_avx512["testz_2args"],    "if": "(defined (__AVX512F__) || defined(__MIC__) || defined(__KNCNI__))"                     },
         { "instr_name": "kortestz",   "datatypes": [int16, uint16],              "template": tpl_implem_avx512["testz_2args"],    "if": "defined (__AVX512BW__)"                                                                },
         { "instr_name": "kortestz",   "datatypes": [int8, uint8],                "template": tpl_implem_avx512["testz_2args"],    "if": "defined (__AVX512BW__)"                                                                } ], # testz
     "testz_2": [
         { "instr_name": "kortestz",   "datatypes": [int64, uint64],              "template": tpl_implem_avx512["testz_1arg"],     "if": "defined(__AVX512DQ__)"                                                                 },
-        { "instr_name": "kortestz",   "datatypes": [int32, uint32],              "template": tpl_implem_avx512["testz_1arg"],     "if": "(defined (__AVX512F__) || defined(__MIC__) || defined(__KNCNI__))"                       },
+        { "instr_name": "kortestz",   "datatypes": [int32, uint32],              "template": tpl_implem_avx512["testz_1arg"],     "if": "(defined (__AVX512F__) || defined(__MIC__) || defined(__KNCNI__))"                     },
         { "instr_name": "kortestz",   "datatypes": [int16, uint16],              "template": tpl_implem_avx512["testz_1arg"],     "if": "defined (__AVX512BW__)"                                                                },
         { "instr_name": "kortestz",   "datatypes": [int8, uint8],                "template": tpl_implem_avx512["testz_1arg"],     "if": "defined (__AVX512BW__)"                                                                } ], # testz_2
     "cmpeq": [
@@ -441,10 +465,10 @@ implems_avx512 = {
         { "instr_name": "cmpgt",      "datatypes": [int32, int64],               "template": tpl_implem_avx512["cmp_int"],                                                                                                      },
         { "instr_name": "cmpgt",      "datatypes": [int16, int8],                "template": tpl_implem_avx512["cmp_int"],        "if": "defined(__AVX512BW__)"                                                                 } ], # cmpgt
     "round": [
-        { "instr_name": "round",      "datatypes": all_float,                    "template": tpl_implem_avx512["roundf"],         "if": "(defined(__MIC__) || defined(__KNCNI__))"                                                },
+        { "instr_name": "round",      "datatypes": all_float,                    "template": tpl_implem_avx512["roundf"],         "if": "(defined(__MIC__) || defined(__KNCNI__))"                                              },
         { "instr_name": "roundscale", "datatypes": all_float,                    "template": tpl_implem_avx512["round"],          "if": "defined(__AVX512F__)"                                                                  } ], # round
     "blend": [
-        { "instr_name": "blend",      "datatypes": all_float + [int64, int32],   "template": tpl_implem_avx512["blend"],          "if": "(defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__))" },
+        { "instr_name": "blend",      "datatypes": all_float + [int64, int32],   "template": tpl_implem_avx512["blend"],          "if": "(defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__))"},
         { "instr_name": "blend",      "datatypes": [int8, int16],                "template": tpl_implem_avx512["blend"],          "if": "defined(__AVX512BW__)"                                                                 },
         { "instr_name": "blend",      "datatypes": all_uint,                     "template": tpl_implem_avx512["blend_emu"]                                                                                                     },], # blend
     "hadd": [
@@ -461,19 +485,34 @@ implems_avx512 = {
     "hmin": [
         { "instr_name": "min",        "datatypes": [float64],                    "template": tpl_implem_avx512["reduce_64"],      "if": "defined(__AVX512F__)"                                                                  },
         { "instr_name": "min",        "datatypes": [float32],                    "template": tpl_implem_avx512["reduce_32"],      "if": "defined(__AVX512F__)"                                                                  },
-        { "instr_name": "gmin",       "datatypes": [float64],                    "template": tpl_implem_avx512["reduce_64"],      "if": "(defined(__MIC__) || defined(__KNCNI__))"                                                },
-        { "instr_name": "gmin",       "datatypes": [float32],                    "template": tpl_implem_avx512["reduce_32"],      "if": "(defined(__MIC__) || defined(__KNCNI__))"                                                },
+        { "instr_name": "gmin",       "datatypes": [float64],                    "template": tpl_implem_avx512["reduce_64"],      "if": "(defined(__MIC__) || defined(__KNCNI__))"                                              },
+        { "instr_name": "gmin",       "datatypes": [float32],                    "template": tpl_implem_avx512["reduce_32"],      "if": "(defined(__MIC__) || defined(__KNCNI__))"                                              },
         { "instr_name": "min",        "datatypes": [int32],                      "template": tpl_implem_avx512["reduce_32"],      "if": "defined(__AVX512F__)"                                                                  },
         { "instr_name": "min",        "datatypes": [int16],                      "template": tpl_implem_avx512["reduce_16"],      "if": "defined(__AVX512BW__)"                                                                 },
         { "instr_name": "min",        "datatypes": [int8],                       "template": tpl_implem_avx512["reduce_8"],       "if": "defined(__AVX512BW__)"                                                                 } ], # hmin
     "hmax": [
         { "instr_name": "max",        "datatypes": [float64],                    "template": tpl_implem_avx512["reduce_64"],      "if": "defined(__AVX512F__)"                                                                  },
         { "instr_name": "max",        "datatypes": [float32],                    "template": tpl_implem_avx512["reduce_32"],      "if": "defined(__AVX512F__)"                                                                  },
-        { "instr_name": "gmax",       "datatypes": [float64],                    "template": tpl_implem_avx512["reduce_64"],      "if": "(defined(__MIC__) || defined(__KNCNI__))"                                                },
-        { "instr_name": "gmax",       "datatypes": [float32],                    "template": tpl_implem_avx512["reduce_32"],      "if": "(defined(__MIC__) || defined(__KNCNI__))"                                                },
+        { "instr_name": "gmax",       "datatypes": [float64],                    "template": tpl_implem_avx512["reduce_64"],      "if": "(defined(__MIC__) || defined(__KNCNI__))"                                              },
+        { "instr_name": "gmax",       "datatypes": [float32],                    "template": tpl_implem_avx512["reduce_32"],      "if": "(defined(__MIC__) || defined(__KNCNI__))"                                              },
         { "instr_name": "max",        "datatypes": [int32],                      "template": tpl_implem_avx512["reduce_32"],      "if": "defined(__AVX512F__)"                                                                  },
         { "instr_name": "max",        "datatypes": [int16],                      "template": tpl_implem_avx512["reduce_16"],      "if": "defined(__AVX512BW__)"                                                                 },
         { "instr_name": "max",        "datatypes": [int8],                       "template": tpl_implem_avx512["reduce_8"],       "if": "defined(__AVX512BW__)"                                                                 } ], # hmax
     "maskz_add": [
         { "instr_name": "maskz_add",  "datatypes": all_float,                    "template": tpl_implem_avx512["arithmsk_2args"], "if": "defined(__AVX512F__)"                                                                  } ], # maskz_add
+    
+    # copied from implem_avx.py
+#    "gather": [
+#         { "instr_name": "gather",         "datatypes": avx_datatypes_idx_pair,                      "template": tpl_implem_avx512["gather"],           "if": "defined(__AVX512F__)"                                                   },
+#         { "instr_name": "gather",         "datatypes": ["float64,float64", "int64,int64"],          "template": tpl_implem_avx512["gather_masks_64"],  "if": "defined(__AVX512F__)", "version" : "masks"                              },
+#         { "instr_name": "gather",         "datatypes": ["float64,float64", "int64,int64"],          "template": tpl_implem_avx512["gather_maskz_64"],  "if": "defined(__AVX512F__)", "version" : "maskz"                              },
+#         { "instr_name": "gather",         "datatypes": ["float32,float32", "int32,int32"],          "template": tpl_implem_avx512["gather_masks_32"],  "if": "defined(__AVX512F__)", "version" : "masks"                              },
+#         { "instr_name": "gather",         "datatypes": ["float32,float32", "int32,int32"],          "template": tpl_implem_avx512["gather_maskz_32"],  "if": "defined(__AVX512F__)", "version" : "maskz"                              }], # gather
+ 
+ 
+#     "scatter": [
+#         { "instr_name": "scatter",        "datatypes": avx_datatypes_idx_pair,                      "template": tpl_implem_avx512["scatter"],          "if": "defined(__AVX512F__)"                                                   },
+#         { "instr_name": "scatter",        "datatypes": ["float64,float64", "int64,int64"],          "template": tpl_implem_avx512["scatter_mask_64"],  "if": "defined(__AVX512F__)", "version" : "mask"                              },
+#         { "instr_name": "scatter",        "datatypes": ["float32,float32", "int32,int32"],          "template": tpl_implem_avx512["scatter_mask_32"],  "if": "defined(__AVX512F__)", "version" : "mask"                              },
+#         { "instr_name": "scatter",        "datatypes": avx_datatypes_idx_pair,                      "template": tpl_implem_avx512["scatter_maskz"],    "if": "defined(__AVX512F__)", "version" : "maskz"                              }], # scatter
  }

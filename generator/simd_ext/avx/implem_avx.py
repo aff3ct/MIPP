@@ -49,13 +49,24 @@ tpl_implem_avx = {
     "getfirst":       { "format": "long",  "code": "return ({{ cstdint_ret }}) {{ isa.prefix }}_{{ instr_name }}_epi{{ dt_par.n_bits }}(%cast<tp,c:int|b:tp>%(r0).r, 0);" },
     "gather":         { "format": "short", "code": "{{ isa.prefix }}_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(p0,r0.r,{{dt_par.n_bits//8}});" },
 
+    # got an error that const int64_t* isn't convertible to const long long* 
+    # idk about that gcc they kinda look the same to me but ur the one doing the compiling ig
+    "gather_i64":         { "format": "short", "code": "{{ isa.prefix }}_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}((long long*)p0,r0.r,{{dt_par.n_bits//8}});" },
+
     # In avx u have gather but no scatter. Wth
     # "scatter":         { "format": "short", "code": "{{ isa.prefix }}_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(p0,r0.r, r1.r, {{dt_par.n_bits//8}});" },
-    "gather_masks_64": { "format": "short", "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(rsrc.r,p0,r0.r,m0.m,8);" },
-    "gather_masks_32": { "format": "short", "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(rsrc.r,p0,r0.r,m0.m,4);" },
+    "gather_masks_f64": { "format": "short", "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(rsrc.r,p0,r0.r,_mm256_castsi256_pd(m0.m),8);" },
+    "gather_masks_f32": { "format": "short", "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(rsrc.r,p0,r0.r,_mm256_castsi256_ps(m0.m),4);" },
 
-    "gather_maskz_64": { "format": "short", "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(%set0<tp>%().r,p0,r0.r,m0.m,8);" },
-    "gather_maskz_32": { "format": "short", "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(%set0<tp>%().r,p0,r0.r,m0.m,4);" },
+    "gather_masks_i64": { "format": "short", "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(rsrc.r,(long long*)p0,r0.r,m0.m,8);" },
+    "gather_masks_i32": { "format": "short", "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(rsrc.r,p0,r0.r,m0.m,4);" },
+    
+
+    "gather_maskz_f64": { "format": "short", "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(%set0<tp>%().r,p0,r0.r,_mm256_castsi256_pd(m0.m),8);" },
+    "gather_maskz_f32": { "format": "short", "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(%set0<tp>%().r,p0,r0.r,_mm256_castsi256_ps(m0.m),4);" },
+
+    "gather_maskz_i64": { "format": "short", "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(%set0<tp>%().r,(long long*)p0,r0.r,m0.m,8);" },
+    "gather_maskz_i32": { "format": "short", "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(%set0<tp>%().r,p0,r0.r,m0.m,4);" },
 
     "arith_1arg":     { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r);" },
     "arith_2args":    { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r);" },
@@ -400,11 +411,25 @@ implems_avx = {
     "round" : [
         { "instr_name": "round",          "datatypes": all_float,                                   "template": tpl_implem_avx["round_float"],                                                 },
         { "instr_name" : "",              "datatypes": all_int_uint,                                "template": tpl_implem_avx["round_int"]                                         }], # round
+   
+   # the int64 versions r because according to gcc const int64_t* is not castable to const long long*.
+   # the other difference is that avx gather use mask type of the date instead of the index which is understandable ig. 
+   # but it means the mask needs to be converted bc the mipp interface passes uint masks.
    "gather": [
-        { "instr_name": "gather",         "datatypes": avx_datatypes_idx_pair,                      "template": tpl_implem_avx["gather"],           "if": "defined(__AVX2__)"            },
-        { "instr_name": "gather",         "datatypes": ["float64,float64", "int64,int64"],          "template": tpl_implem_avx["gather_masks_64"],  "if": "defined(__AVX2__)", "version" : "masks"},
-        { "instr_name": "gather",         "datatypes": ["float64,float64", "int64,int64"],          "template": tpl_implem_avx["gather_maskz_64"],  "if": "defined(__AVX2__)", "version" : "maskz"},
-        { "instr_name": "gather",         "datatypes": ["float32,float32", "int32,int32"],          "template": tpl_implem_avx["gather_masks_32"],  "if": "defined(__AVX2__)", "version" : "masks"},
-        { "instr_name": "gather",         "datatypes": ["float32,float32", "int32,int32"],          "template": tpl_implem_avx["gather_maskz_32"],  "if": "defined(__AVX2__)", "version" : "maskz"},
+        { "instr_name": "gather",         "datatypes": ["float64,float64", "float32,float32", "int32,int32"], "template": tpl_implem_avx["gather"],           "if": "defined(__AVX2__)"            },
+        { "instr_name": "gather",         "datatypes": ["int64,int64"],                                       "template": tpl_implem_avx["gather_i64"],       "if": "defined(__AVX2__)"            },
+        
+        
+        { "instr_name": "gather",         "datatypes": ["float64,float64"],                                   "template": tpl_implem_avx["gather_masks_f64"],  "if": "defined(__AVX2__)", "version" : "masks"},
+        { "instr_name": "gather",         "datatypes": ["int64,int64"],                                       "template": tpl_implem_avx["gather_masks_i64"],  "if": "defined(__AVX2__)", "version" : "masks"},
+        
+        { "instr_name": "gather",         "datatypes": ["float64,float64"]                         ,          "template": tpl_implem_avx["gather_maskz_f64"],  "if": "defined(__AVX2__)", "version" : "maskz"},
+        { "instr_name": "gather",         "datatypes": ["int64,int64"],                                       "template": tpl_implem_avx["gather_maskz_i64"], "if": "defined(__AVX2__)", "version" : "maskz"},
+        
+        { "instr_name": "gather",         "datatypes": ["float32,float32"],                                   "template": tpl_implem_avx["gather_masks_f32"],  "if": "defined(__AVX2__)", "version" : "masks"},
+        { "instr_name": "gather",         "datatypes": ["float32,float32"],                                   "template": tpl_implem_avx["gather_maskz_f32"],  "if": "defined(__AVX2__)", "version" : "maskz"},
+
+        { "instr_name": "gather",         "datatypes": ["int32,int32"],                                       "template": tpl_implem_avx["gather_masks_i32"],  "if": "defined(__AVX2__)", "version" : "masks"},
+        { "instr_name": "gather",         "datatypes": ["int32,int32"],                                       "template": tpl_implem_avx["gather_maskz_i32"],  "if": "defined(__AVX2__)", "version" : "maskz"},
     ], # gather
 }
