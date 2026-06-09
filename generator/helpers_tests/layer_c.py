@@ -210,7 +210,8 @@ rvd_scalar_uint{{type_size}}_t ris1 = mipp_scalar_load_uint{{type_size}}(indexes
 LOAD_SCATTER = """
 {{reg_type}} r1 = mipp_load_{{dt_ext}}(inputs1);
 rvd_uint{{type_size}}_t ri1 = mipp_load_uint{{type_size}}(indexes);
-{{reg_type}} rs1 = mipp_load_{{dt_ext}}(inputs1);
+
+{{reg_type_scalar}} rs1 = mipp_scalar_load_{{dt_ext}}(inputs1);
 rvd_scalar_uint{{type_size}}_t ris1 = mipp_scalar_load_uint{{type_size}}(indexes);
 """
 

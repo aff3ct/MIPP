@@ -48,28 +48,28 @@ isa_rvv = {
                    "to_ptr"   : "float32_t",  "reg_dt_ext"    : "f32",        "uint_data_ext" : "u32m{lmul}",      "int_data_ext" : "i32m{lmul}", "width" : "32" } ,#added to_int_ptr to convert float to int before bitwise operations. I'll see if I can find a better solution later.
         
         int64   : {"data_ext" : "i64m{lmul}", "data_ext_logi" : "b{eew_emul}",         "data_ext_msk"  : "b64",        "reg" : "vint64m{lmul}_t",   "msk" : "vbool{eew_emul}_t",
-                   "to_ptr"   : "int64_t",    "reg_dt_ext"    : "i64", "width" : "64"} ,
+                   "to_ptr"   : "int64_t",    "reg_dt_ext"    : "i64",        "uint_data_ext" : "u64m{lmul}",      "int_data_ext" : "i64m{lmul}", "width": "64" } ,
         
         int32   : {"data_ext" : "i32m{lmul}", "data_ext_logi" : "b{eew_emul}",         "data_ext_msk" : "b32",         "reg" : "vint32m{lmul}_t",   "msk" : "vbool{eew_emul}_t",
-                   "to_ptr"   : "int32_t",    "reg_dt_ext"    : "i32", "width" : "32"} ,
+                   "to_ptr"   : "int32_t",    "reg_dt_ext"    : "i32",        "uint_data_ext" : "u32m{lmul}",      "int_data_ext" : "i32m{lmul}", "width" : "32"} ,
         
         int16   : {"data_ext" : "i16m{lmul}", "data_ext_logi" : "b{eew_emul}",         "data_ext_msk" : "b16",         "reg" : "vint16m{lmul}_t",   "msk" : "vbool{eew_emul}_t",
-                   "to_ptr"   : "int16_t",    "reg_dt_ext"    : "i16", "width" : "16"} ,
+                   "to_ptr"   : "int16_t",    "reg_dt_ext"    : "i16",        "uint_data_ext" : "u16m{lmul}",      "int_data_ext" : "i16m{lmul}", "width" : "16"} ,
         
         int8    : {"data_ext" : "i8m{lmul}",  "data_ext_logi" : "b{eew_emul}",         "data_ext_msk"  : "b8",          "reg" : "vint8m{lmul}_t",    "msk" : "vbool{eew_emul}_t",
-                   "to_ptr"   : "int8_t",     "reg_dt_ext"    : "i8", "width" : "8"} ,
+                   "to_ptr"   : "int8_t",     "reg_dt_ext"    : "i8",        "uint_data_ext" : "u8m{lmul}",      "int_data_ext" : "i8m{lmul}", "width" : "8"} ,
         
         uint64  : {"data_ext" : "u64m{lmul}", "data_ext_logi" : "b{eew_emul}",         "data_ext_msk" : "b64",         "reg" : "vuint64m{lmul}_t",  "msk" : "vbool{eew_emul}_t",
-                   "to_ptr"   : "uint64_t",   "reg_dt_ext"    : "u64", "width" : "64"} ,
+                   "to_ptr"   : "uint64_t",   "reg_dt_ext"    : "u64",       "uint_data_ext" : "u64m{lmul}",      "int_data_ext" : "i64m{lmul}", "width" : "64"} ,
         
         uint32  : {"data_ext" : "u32m{lmul}", "data_ext_logi" : "b{eew_emul}",         "data_ext_msk" : "b32",         "reg" : "vuint32m{lmul}_t",  "msk" : "vbool{eew_emul}_t",
-                   "to_ptr"   : "uint32_t",   "reg_dt_ext"    : "u32", "width" : "32"} ,
+                   "to_ptr"   : "uint32_t",   "reg_dt_ext"    : "u32",       "uint_data_ext" : "u32m{lmul}",      "int_data_ext" : "i32m{lmul}", "width" : "32"} ,
         
         uint16  : {"data_ext" : "u16m{lmul}", "data_ext_logi" : "b{eew_emul}",         "data_ext_msk" : "b16",         "reg" : "vuint16m{lmul}_t",  "msk" : "vbool{eew_emul}_t",
-                   "to_ptr"   : "uint16_t",   "reg_dt_ext"    : "u16", "width" : "16"} ,
+                   "to_ptr"   : "uint16_t",   "reg_dt_ext"    : "u16",       "uint_data_ext" : "u16m{lmul}",      "int_data_ext" : "i16m{lmul}", "width" :"16"} ,
         
         uint8   : {"data_ext" : "u8m{lmul}",  "data_ext_logi" : "b{eew_emul}",         "data_ext_msk" : "b8",           "reg" : "vuint8m{lmul}_t",   "msk" : "vbool{eew_emul}_t",
-                   "to_ptr"   : "uint8_t",    "reg_dt_ext"    : "u8", "width" : "8"} ,
+                   "to_ptr"   : "uint8_t",    "reg_dt_ext"    : "u8",        "uint_data_ext" : "u8m{lmul}",      "int_data_ext" : "i8m{lmul}", "width" : "8"} ,
     },
 }#I added a bunch of keys to datatypes dictionnary bc they will be necessary for conversion.
 #this solution is really unelegant and I might want to do it differently.
@@ -87,11 +87,6 @@ for details
 tpl_implem_rvv = {
     "load"                 : { "format" : "short", "code" : "{{ isa.prefix }}_vle{{ isa_dt_par.width }}_v_{{ isa_dt_par.data_ext }}(({{ isa_dt_par.to_ptr }}*) p0, %N<tp>%);"},
     "load_msks"            : { "format" : "short", "code" : "{{ isa.prefix }}_vle{{ isa_dt_par.width }}_v_{{ isa_dt_par.data_ext }}_mu(m0.m, rsrc.r, ({{ isa_dt_par.to_ptr }}*) p0, %N<tp>%);"},
-
-
-    "gather"              : { "format" : "short", "code" : "{{ isa.prefix }}_v{{ instr_name }}{{isa_dt_par.width}}_v_{{ isa_dt_par.data_ext }}(p0, r0.r, %N<tp>%);"},
-    # This might be the seed of a future headache ngl
-    "scatter"              : { "format" : "short", "code" : "{{ isa.prefix }}_v{{ instr_name }}{{isa_dt_par.width}}_v_{{ isa_dt_par.data_ext }}_{{isa_dt_par.data_ext}}(p0, r0.r, r1.r, %N<tp>%);"},
     
     "store"                : { "format" : "short", "code" : "{{ isa.prefix }}_vse{{ isa_dt_par.width}}_v_{{ isa_dt_par.data_ext }}(({{ isa_dt_par.to_ptr }}*) p0, r0.r , %N<tp>%);"},
     "store_msk"            : { "format" : "short", "code" : "{{ isa.prefix }}_vse{{ isa_dt_par.width}}_v_{{ isa_dt_par.data_ext }}_m(m0.m, ({{ isa_dt_par.to_ptr }}*) p0, r0.r , %N<tp>%);"},
@@ -404,6 +399,43 @@ tpl_implem_rvv = {
         tmp.r = {{isa.prefix}}_vmerge_vvm_{{ isa_dt_par.data_ext }}(tmp.r, r0.r, m0.m, %N<tp>%);
         return tmp;
     """},
+
+    # It would be better to use shift I think. But it would also be much more annoying to templatize. So this is the current workaround.
+    "gather"              : { "format" : "long", "code" : """
+        // r0 is given as indexes => cvt to byte offsets
+        %r<c:uint|b:tp>% tmp;
+        tmp.r = {{isa.prefix}}_vmul_vx_{{isa_dt_par.uint_data_ext}}(r0.r, sizeof({{isa_dt_par.to_ptr}}), %N<tp>%);
+
+        %r<tp>% res;
+        res.r ={{ isa.prefix }}_v{{ instr_name }}{{isa_dt_par.width}}_v_{{ isa_dt_par.data_ext }}(p0, tmp.r, %N<tp>%);
+        return res;
+    """},
+    "gather_masks" : { "format" : "long", "code" : """
+        %r<c:uint|b:tp>% tmp;
+        tmp.r = {{isa.prefix}}_vmul_vx_{{isa_dt_par.uint_data_ext}}(r0.r, sizeof({{isa_dt_par.to_ptr}}), %N<tp>%);
+        %r<tp>% res;
+        res.r = {{ isa.prefix }}_v{{ instr_name }}{{isa_dt_par.width}}_v_{{ isa_dt_par.data_ext }}_mu(m0.m, rsrc.r, p0, tmp.r, %N<tp>%);
+        return res;
+    """},
+
+    "gather_maskz" : { "format" : "long", "code" : """
+        %r<tp>% zeroes, res;
+        zeroes = %set0<tp>%();
+
+        %r<c:uint|b:tp>% tmp;
+        tmp.r = {{isa.prefix}}_vmul_vx_{{isa_dt_par.uint_data_ext}}(r0.r, sizeof({{isa_dt_par.to_ptr}}), %N<tp>%);
+
+        res.r = {{ isa.prefix }}_v{{ instr_name }}{{isa_dt_par.width}}_v_{{ isa_dt_par.data_ext }}_mu(m0.m, zeroes.r, p0, tmp.r, %N<tp>%);
+        return res;
+    """},
+
+    # This might be the seed of a future headache ngl
+    "scatter"              : { "format" : "long", "code" : """
+        %r<c:uint|b:tp>% tmp;
+        tmp.r = {{isa.prefix}}_vmul_vx_{{isa_dt_par.uint_data_ext}}(r0.r, sizeof({{isa_dt_par.to_ptr}}), %N<tp>%);
+        {{ isa.prefix }}_v{{ instr_name }}{{isa_dt_par.width}}_v_{{ isa_dt_par.data_ext }}(p0, tmp.r, r1.r, %N<tp>%);
+    """},
+
 
 }
 
@@ -780,8 +812,13 @@ implems_rvv = {
 
     "gather" : [
         { "instr_name" : "luxei",  "datatypes" : all_datatypes_idx_pair, "template" : tpl_implem_rvv["gather"]},
+        { "instr_name" : "luxei",  "datatypes" : all_datatypes_idx_pair, "template" : tpl_implem_rvv["gather_maskz"], "version" : "maskz"},
+        { "instr_name" : "luxei",  "datatypes" : all_datatypes_idx_pair, "template" : tpl_implem_rvv["gather_masks"], "version" : "masks"},
     ],
-    # "scatter" : [
-    #     { "instr_name" : "suxei",  "datatypes" : all_datatypes_idx_pair, "template" : tpl_implem_rvv["scatter"]},
-    #  ],
+
+    "scatter" : [
+        { "instr_name" : "suxei",  "datatypes" : all_datatypes_idx_pair, "template" : tpl_implem_rvv["scatter"]},
+        # { "instr_name" : "suxei",  "datatypes" : all_datatypes_idx_pair, "template" : tpl_implem_rvv["scatter_mask"], "version" : "mask"},
+        # { "instr_name" : "suxei",  "datatypes" : all_datatypes_idx_pair, "template" : tpl_implem_rvv["scatter_maskz"], "version" : "maskz"},
+    ],
 }
