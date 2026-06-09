@@ -26,6 +26,9 @@ from .common import (
     SHAPE_RET_I32_1ARG_MSK,  # testz2
     SHAPE_RET_REG_3ARGS_1MSK_2REG,  # maskz_add
     SHAPE_RET_MSK_1ARG_REG,  # tomsk
+
+    SHAPE_RET_REG_2ARGS_PTR_REG, #gather only
+    SHAPE_RET_VOID_3ARGS_PTR_REG_REG, #scatter only
 )
 
 # --------------------------
@@ -37,6 +40,7 @@ from .common import (
 # --------------------------------------------
 FUNC_DECL = """template <typename T>\nvoid test_cppmipp_{{func}}{{mask_str}}{{lmul_suffix}}(){"""
 
+FUNC_DECL_GATHER = """template <typename T, typename U>\nvoid test_cppmipp_{{func}}{{mask_str}}{{lmul_suffix}}(){"""
 
 # --------------------------------------------
 # SCALAR VEC DECL
@@ -61,6 +65,21 @@ DECL_3ARGS = DECL_GET_CATCH_SEED + DECL_PRED_ARG + """\n\tT inputs1[{{size}} * {
 DECL_CAST_2ARGS = DECL_GET_CATCH_SEED + DECL_PRED_ARG +  "\n\t{{dt2_ext}} inputs1[{{size}} * {{lmul_coeff}}];\n\tconstexpr size_t bytes = sizeof(inputs1);\n\t{{dt1_ext}}_t inputs2[bytes / sizeof({{dt1_ext}}_t)];"
 
 DECL_CAST_2ARGS_MSK = DECL_GET_CATCH_SEED + DECL_PRED_ARG + "\n\tint32_t inputs1[{{size}} * {{lmul_coeff}}];\n\tconstexpr size_t bytes = sizeof(inputs1);\n\t{{dt1_ext}}_t inputs2[bytes / sizeof({{dt1_ext}}_t)];"
+
+# declare 1 dt array of dt type, another array of uint of the same size.
+DECL_GATHER = DECL_GET_CATCH_SEED + DECL_PRED_ARG + """
+T inputs1[{{size}}*{{lmul_coeff}}];
+U indexes[{{size}}*{{lmul_coeff}}];
+"""
+
+DECL_SCATTER = DECL_GET_CATCH_SEED + DECL_PRED_ARG +"""
+T inputs1[{{size}}*{{lmul_coeff}}];
+U indexes[{{size}}*{{lmul_coeff}}];
+T outputs[{{size}}*{{lmul_coeff}}];
+T outputs_scal[{{size}}*{{lmul_coeff}}];
+"""
+
+
 # --------------------------------------------
 # SCALAR VEC INIT (unchanged)
 # --------------------------------------------
@@ -114,6 +133,23 @@ INIT_3ARGS = """\tfor(size_t i = 0; i < {{size}} * {{lmul_coeff}}; i++)
 """
 
 INIT_CAST_2ARGS = """\tstd::iota(inputs1, inputs1 + {{size}} * {{lmul_coeff}}, 1);\n\tmemcpy(inputs2, inputs1, sizeof(inputs1));"""
+
+INIT_GATHER = """
+\tfor(size_t i = 0; i < {{size}} * {{lmul_coeff}}; i++)
+{
+\t\tinputs1[i] = rnd::uniform<T>(seed);
+\t\tindexes[i] = (i * rnd::uniform<U>(seed)) % ({{size}} * {{lmul_coeff}}); // ensure indexes are within bounds and not all the same
+}
+"""
+
+INIT_SCATTER = """
+\tfor(size_t i = 0; i < {{size}} * {{lmul_coeff}}; i++)
+{
+\t\tinputs1[i] = rnd::uniform<T>(seed);
+\t\tindexes[i] = (i * rnd::uniform<U>(seed)) % ({{size}} * {{lmul_coeff}}); // ensure indexes are within bounds and not all the same
+\t\toutputs[i] = 0;
+\t\toutputs_scal[i] = 0;
+}"""
 
 # --------------------------------------------
 # LOADS (LMUL-aware: second template parameter)
@@ -184,6 +220,34 @@ LOAD_MASK_AND_RSRC_FROM_REG1 = """\t{{msk_type}} mpred = mipp::set_k<T,{{lmul_co
 {% endif %}
 """
 
+# # For gather / scatter
+# LOAD_UINT_MASK_AND_RSRC_FROM_REG1 = """\trvm_uint{{type_size}}{{lmul_suffix}}_t mpred = mipp_set_k_uint{{type_size}}{{lmul_suffix}}(inpred);
+# \trvm_scalar_uint{{type_size}}{{lmul_suffix}}_t smpred = mipp_scalar_set_k_uint{{type_size}}{{lmul_suffix}}(inpred);
+# {% if mkind == "masks" %}
+# \t{{reg_type}} rsrc = mipp_load_{{dt_ext}}{{lmul_suffix}}(inputs1);
+# \t{{reg_type_scalar}} srsrc = mipp_scalar_load_{{dt_ext}}{{lmul_suffix}}(inputs1);
+# {% endif %}
+# """
+
+# make it cpp like from c version
+LOAD_UINT_MASK_AND_RSRC_FROM_REG1 = """\tmipp::rvm<U, {{lmul_coeff}}> mpred = mipp::set_k<U, {{lmul_coeff}}>(inpred);
+\tmipp::rvm<U,{{lmul_coeff}}, mipp::ISA::SCALAR> smpred = mipp::set_k<U, {{lmul_coeff}}, mipp::ISA::SCALAR>(inpred);
+{% if mkind == "masks" %}
+\t{{reg_type}} rsrc = mipp::load<T,{{lmul_coeff}}>(inputs1);
+\t{{reg_type_scalar}} srsrc = mipp::load<T, {{lmul_coeff}}, mipp::ISA::SCALAR>(inputs1);
+{% endif %}
+"""
+
+LOAD_GATHER = """\t{{reg_type_uint}} ri1 = mipp::load<U, {{lmul_coeff}}>(indexes);
+\t{{reg_type_scalar_uint}} rsi1 = mipp::load<U, {{lmul_coeff}}, mipp::ISA::SCALAR>(indexes);
+"""
+
+LOAD_SCATTER = """\t{{reg_type_uint}} ri1 = mipp::load<U, {{lmul_coeff}}>(indexes);
+\t{{reg_type}} r1 = mipp::load<T, {{lmul_coeff}}>(inputs1);
+\t{{reg_type_scalar_uint}} rsi1 = mipp::load<U, {{lmul_coeff}}, mipp::ISA::SCALAR>(indexes);
+\t{{reg_type_scalar}} s1 = mipp::load<T, {{lmul_coeff}}, mipp::ISA::SCALAR>(inputs1);
+"""
+
 # --------------------------------------------
 # OPERATIONS (LMUL via arg types; keep calls identical)
 # --------------------------------------------
@@ -233,6 +297,12 @@ OP_3ARGS_REG = """\t{{reg_type}} r4 = mipp::{{func}}{{mask_kind}}({{mask_args}}r
 \t{{reg_type_scalar}} s4 = mipp::{{func}}{{mask_kind_scalar}}({{mask_args_scalar}}s1, s2, s3);
 """
 
+
+
+OP_GATHER = """\t{{reg_type}} r2 = mipp::gather_{{dt1_ext}}{{mask_kind}}({{mask_args}}inputs1, ri1);\n\t {{reg_type_scalar}} s2 = mipp::gather_{{dt1_ext}}{{mask_kind_scalar}}({{mask_args_scalar}}inputs1,rsi1);"""
+
+OP_SCATTER = """mipp::scatter_{{dt1_ext}}{{mask_kind}}({{mask_args}}outputs, ri1, r1);\n\tmipp::scatter_{{dt1_ext}}{{mask_kind_scalar}}({{mask_args_scalar}}outputs_scal, rsi1, s1);"""
+
 # --------------------------------------------
 # ASSERTS IN LOOP BODY
 # --------------------------------------------
@@ -258,6 +328,14 @@ AS_CAST_2ARGS_MSK = """\t\tif(res) REQUIRE(mipp::get(m2, i) != 0); else REQUIRE(
 AS_CMP_BINOP_LOGI_FLOAT_WORKAROUND = """REQUIRE(!! mipp::get(r3, i) == !!mipp::get(s3, i) );"""
 
 AS_REG_BINOP_FLOAT_WORKAROUND = AS_REG_BINOP
+
+
+AS_GATHER = """
+REQUIRE(mipp::get(r2,i) == mipp::get(s2,i));
+"""
+
+AS_SCATTER = """REQUIRE(outputs[i] == outputs_scal[i]);
+"""
 
 shape_templates = {
     SHAPE_RET_REG_2ARGS_REG: TemplateParts( # add, mul, sub, div, min, max, andb, orb, xorb
@@ -370,6 +448,25 @@ shape_templates = {
         loop_assert=AS_3ARGS_TOL
     ),
 
+    SHAPE_RET_REG_2ARGS_PTR_REG : TemplateParts( # gather
+        func_decl=FUNC_DECL_GATHER,
+        decl=DECL_GATHER,
+        init=INIT_PRED + INIT_GATHER,
+        load=LOAD_GATHER + "\n" + LOAD_UINT_MASK_AND_RSRC_FROM_REG1,
+        operation=OP_GATHER,
+        loop_body="",
+        loop_assert=AS_GATHER,
+    ),
+
+    SHAPE_RET_VOID_3ARGS_PTR_REG_REG : TemplateParts( # scatter
+        func_decl=FUNC_DECL_GATHER,
+        decl=DECL_SCATTER,
+        init=INIT_PRED + INIT_SCATTER,
+        load=LOAD_SCATTER + "\n" + LOAD_UINT_MASK_AND_RSRC_FROM_REG1,
+        operation=OP_SCATTER,
+        loop_body="",
+        loop_assert=AS_SCATTER,
+    ),
 }
 
 deny = {

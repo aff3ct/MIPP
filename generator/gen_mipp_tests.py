@@ -116,7 +116,7 @@ def dt_to_suffix(dt):
     """
     return dt.replace(",", "_")
 
-def product_type_format_cpp_gather_like(dt, lmul=0, write_lmul=False):
+def product_type_format_cpp_gather_like(dt, lmul=0, write_lmul=False, mask_str=""):
     """convert factor type "uint32,float32" to "<float32_t, uint32_t>"
     converts single type "uint32" to "uint32_t" for cpp tests
     This is used for gather and scatter which have a different format in cpp tests.
@@ -128,18 +128,18 @@ def product_type_format_cpp_gather_like(dt, lmul=0, write_lmul=False):
         dt1 = dt1.split("t")[1] # keep {nbits}_t
         dt1 = "uint" + dt1
         if write_lmul :
-            return f"_{dt2}<{dt2}_t, {dt1}_t>"
+            return f"_{dt2}{mask_str}{lmul_to_str(lmul, 'm')}<{dt2}_t, {dt1}_t>"
         else :
-            return f"_{dt2}<{dt2}_t, {dt1}_t>"
+            return f"_{dt2}{mask_str}<{dt2}_t, {dt1}_t>"
     else:
         return f"<{dt}_t>"
 
-def product_type_format_cpp(dt, lmul=0, write_lmul=False, gather_like = False):
+def product_type_format_cpp(dt, lmul=0, write_lmul=False, gather_like = False, mask_str = ""):
     """convert factor type "uint32,float32" to "uint32<float32_t>"
     converts single type "uint32" to "uint32_t" for cpp tests
     """
     if gather_like :
-        return product_type_format_cpp_gather_like(dt, lmul, write_lmul)
+        return product_type_format_cpp_gather_like(dt, lmul, write_lmul, mask_str)
     if "," in dt:
         dt1, dt2 = dt.split(",")
         if write_lmul :
@@ -225,7 +225,7 @@ def lmul_to_str(lmul, mkind=""):
             case 0.5 : return "_d2"
             case 0.25 : return "_d4"
             case 0.125 : return "_d8"
-def mask_to_str(mkind, kind, lmul=False, isa=False) :
+def mask_to_str(mkind, kind, lmul=False, isa=False, gather_like = False) :
     if kind == "c" : 
         if mkind == "" :
             return ""
@@ -242,14 +242,24 @@ def mask_to_str(mkind, kind, lmul=False, isa=False) :
                 msuffix += f', mipp::{isa.upper()}'
             msuffix += ">"
 
-            if mkind == "mask" :
-                return "<mipp::M, T" + msuffix
-            elif mkind == "maskz" :
-                return "<mipp::Z, T" + msuffix
-            elif mkind == "masks" :
-                return "<mipp::S, T" + msuffix
-            else : 
-                raise ValueError(f"Unknown mask: {mkind!r}")
+            if not gather_like :
+                if mkind == "mask" :
+                    return "<mipp::M, T" + msuffix
+                elif mkind == "maskz" :
+                    return "<mipp::Z, T" + msuffix
+                elif mkind == "masks" :
+                    return "<mipp::S, T" + msuffix
+                else : 
+                    raise ValueError(f"Unknown mask: {mkind!r}")
+            else :
+                if mkind == "mask" :
+                    return "<mipp::M, T, U" + msuffix
+                elif mkind == "maskz" :
+                    return "<mipp::Z, T, U" + msuffix
+                elif mkind == "masks" :
+                    return "<mipp::S, T, U" + msuffix
+                else : 
+                    raise ValueError(f"Unknown mask: {mkind!r}")
 
 def get_mask_args(mkind): 
     if mkind == "" :
@@ -299,7 +309,7 @@ def add_type_guards(func, implem, function, kind="c", lmul=0, mkind=""):
     elif kind == "cpp" and (func == "cast" or func == "cast_k") :
         section = 'SECTION ("datatype = {dt}") {{ {function}{mask_str}{dt_suffix}(); }}\n'
     elif kind == "cpp" and ( func == "gather" or func == "scatter") :
-        section = 'SECTION ("datatype = {dt}") {{ {function}{mask_str}{dt_suffix}(); }}\n'
+        section = 'SECTION ("datatype = {dt}") {{ {function}{dt_suffix}(); }}\n'
     #lists to store the dttypes that need to be 
     #wrapped in #if defined(MIPP_64BIT) or #if defined(MIPP_BW)
     list_64 = []
@@ -320,7 +330,7 @@ def add_type_guards(func, implem, function, kind="c", lmul=0, mkind=""):
             
             #this is the ugly part
             if kind == "cpp" or kind == "obj" :
-                dt_suffix = product_type_format_cpp(dt, lmul, write_lmul=write_lmul, gather_like=(func in ["gather", "scatter"])) #used to handle cast
+                dt_suffix = product_type_format_cpp(dt, lmul, write_lmul=write_lmul, gather_like=(func in ["gather", "scatter"]), mask_str=mask_str) #used to handle cast
                 
             if func_defines:
                 res += f"#if {func_defines}\n"
@@ -338,7 +348,7 @@ def add_type_guards(func, implem, function, kind="c", lmul=0, mkind=""):
             dt_suffix = dt_to_suffix(dt)
             #this is the ugly part
             if kind == "cpp" or kind == "obj" :
-                dt_suffix = product_type_format_cpp(dt, lmul, write_lmul=write_lmul, gather_like=(func in ["gather", "scatter"])) #used to handle cast
+                dt_suffix = product_type_format_cpp(dt, lmul, write_lmul=write_lmul, gather_like=(func in ["gather", "scatter"]), mask_str=mask_str) #used to handle cast
             
             if func_defines:
                 res += f"#if {func_defines}\n"
@@ -355,7 +365,7 @@ def add_type_guards(func, implem, function, kind="c", lmul=0, mkind=""):
             dt_suffix = dt_to_suffix(dt)
             #this is the ugly part
             if kind == "cpp" or kind == "obj" :
-                dt_suffix = product_type_format_cpp(dt, lmul, write_lmul=write_lmul, gather_like=(func in ["gather", "scatter"])) #used to handle cast
+                dt_suffix = product_type_format_cpp(dt, lmul, write_lmul=write_lmul, gather_like=(func in ["gather", "scatter"]), mask_str=mask_str) #used to handle cast
                
             if func_defines:
                 res += f"#if {func_defines}\n"
@@ -420,7 +430,11 @@ def gen_cast_test_type_guards(func, long_name, short_name, kind="c", lmul=0, mki
     if mkind != "" :
         layer_dict = get_gen_test_dict_mask(kind)
     lmul_str = "" if lmul == 0 else lmul_to_str(lmul, "")
-    res = f'\nTEST_CASE("{long_name} - {kind} {lmul_str}", "[{short_name}]") {{\n'
+
+    # maybe useless idk
+    if func == "cast" or func == "cast_k" :
+        mkind = ""
+    res = f'\nTEST_CASE("{long_name} - {kind} {lmul_str} {mkind}", "[{short_name}]") {{\n'
 
     for implems in implem_dict.values():
         res += implems["guard"] + "\n"
@@ -884,7 +898,7 @@ def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="
             reg1_scalar_type=reg1_type_scalar,
             reg2_scalar_type=reg2_type_scalar,
             msk1_scalar_type=msk1_type_scalar,
-            msk2_scalar_type=msk2_type_scalar,
+            msk2_scalar_type=msk2_type_scalar
         )
     elif kind == "cpp": 
         
@@ -950,9 +964,25 @@ def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="
             split = msk2_type.split(",", 1)
         msk2_type_scalar = split[0] + f",{lmul_coeff},mipp::ISA::SCALAR>"
 
+        lmul_uint = "" if lmul == 0 else f", {lmul}"
+        reg_type_uint = f"mipp::rvd<U {lmul_uint}>"
+        reg_type_scalar_uint = "mipp::rvd<U, " f"{lmul_coeff}" + ", mipp::ISA::SCALAR>"
 
-        reg_type_uint = "mipp::rvd<U>"
-        reg_type_scalar_uint = "mipp::rvd<U, " + f"{lmul_coeff}" + ", mipp::ISA::SCALAR>"
+
+        # Hack 0 == FALSE
+        # Second hack : load, set and so on require to use explicit specialization w 4 templates arguments 
+        # since their unmasked declaration already are 3 args tpl specialization.
+        # mask_kind=mask_to_str(mkind, kind, lmul=lmul) if func not in set_functions else mask_to_str(mkind, kind, lmul=lmul_coeff, isa="DEFAULT_ISA"),
+        # mask_kind_scalar=mask_to_str(mkind, kind, lmul=lmul_coeff, isa="scalar"),
+        # mkind=mkind,
+        
+        # mask_args=get_mask_args(mkind),
+        # reg_type_scalar = f"mipp::rvd<T,{lmul_coeff},mipp::ISA::SCALAR>"
+        # msk_type_scalar = f"mipp::rvm<T,{lmul_coeff},mipp::ISA::SCALAR>"
+
+        # # reg_type_scalar=reg_type_scalar,
+        # # msk_type_scalar=msk_type_scalar,
+        # mask_str=mask_to_str(mkind, "c"), # used for function name. we want the c style suffix
 
         
         func = test_function_name(kind, func)
@@ -972,7 +1002,7 @@ def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="
             lmul_suffix=lmul_suffix,
             lmul_coeff=lmul_coeff,
             mask_args=get_mask_args(mkind),
-            mask_kind=mask_to_str(mkind, kind),
+            mask_kind=mask_to_str(mkind, kind, gather_like=(fname in ["gather", "scatter"]), lmul=lmul_coeff),
             reg_type_scalar=reg1_type_scalar,
             reg1_type_scalar=reg1_type_scalar,
             reg2_type_scalar=reg2_type_scalar,
@@ -982,6 +1012,21 @@ def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="
 
             reg_type_uint=reg_type_uint,
             reg_type_scalar_uint=reg_type_scalar_uint,
+
+
+            # Hack 0 == FALSE
+            # Second hack : load, set and so on require to use explicit specialization w 4 templates arguments 
+            # since their unmasked declaration already are 3 args tpl specialization.
+            # mask_kind=mask_to_str(mkind, kind, lmul=lmul) if func not in set_functions else mask_to_str(mkind, kind, lmul=lmul_coeff, isa="DEFAULT_ISA"),
+            mask_kind_scalar= mask_to_str(mkind, kind,  gather_like=(fname in ["gather", "scatter"]), lmul=lmul_coeff, isa="scalar"),
+            mkind= mkind,
+            
+            # mask_args=get_mask_args(mkind),
+            mask_args_scalar=get_scalar_mask_args(mkind),
+
+            # reg_type_scalar=reg_type_scalar,
+            # msk_type_scalar=msk_type_scalar,
+            mask_str=mask_to_str(mkind, "c"),
         )
     else :#obj
         res = ""
@@ -1198,7 +1243,7 @@ def gen_cast_file(func,kind="c", lmul=0, mkind=""):
         layer_dict[func]["long_name"],
         layer_dict[func]["short_name"],
         kind=kind,
-          lmul=lmul,
+        lmul=lmul,
         mkind=mkind,
     )
     return res
