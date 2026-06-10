@@ -639,7 +639,7 @@ class IncludeManager:
                     include_path.resolve_dependencies(funcs, lmul=0, mask_kind=mask, layer=layer_name)
 
                 if layer_name == "avx512" : 
-                    include_path.dependencies.add(f"<simd_ext/avx/functions/avx_{func}.h>")
+                    include_path.dependencies.add(f"simd_ext/avx/functions/avx_{func}.h")
                 include_path.write_prefix(f"{self.base_dir}/{layer_name}/functions")
 
 
