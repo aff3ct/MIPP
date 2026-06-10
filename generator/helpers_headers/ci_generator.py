@@ -344,7 +344,7 @@ def gen_ci_structures(isa_list, file):
         #     if sub_isa :	
         #         print("#endif /** '"+sub_isa["define"]+"' under '"+isa["define"]+"' **/", file=file)
         
-        # ldiv only for avx512 AT THE MOMENT.
+        # ldiv only for avx512 & scalar AT THE MOMENT.
         if isa["name"] == "avx512" :
             ldiv = 2
             template = """typedef rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t rvd_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t;"""
@@ -355,6 +355,16 @@ def gen_ci_structures(isa_list, file):
             j2_template = Template(template, undefined=StrictUndefined)
             for dt in isa["datatypes"]:
                 print(j2_template.render(isa=isa, datatype=datatypes[dt], ldiv=str(ldiv)), file=file)
+        
+        if isa["name"] == "scalar" :
+            template = """typedef rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t rvd_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
+            j2_template = Template(template, undefined=StrictUndefined)
+            for dt in isa["datatypes"]:
+                print(j2_template.render(isa=isa, datatype=datatypes[dt]), file=file)
+            template = """typedef rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t rvm_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
+            j2_template = Template(template, undefined=StrictUndefined)
+            for dt in isa["datatypes"]:
+                print(j2_template.render(isa=isa, datatype=datatypes[dt]), file=file)
 
             
 
@@ -458,7 +468,9 @@ def ci_lmul_writer(f,func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_
  
 
 def ci_ldiv_writer(f,func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_type=None, ldiv=0):
-    print("#ifdef MIPP_AVX512", file=file)
+    # temporary writer while support is added for ldiv in the simd_ext layer.
+    print("#if defined(MIPP_AVX512)", file=file)
+
     print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, {}, func_name, ldiv, False, False, mask_type) + " {", file=file)
     if len(dt.split(',')) <= 1:
         func_name_impl = build_func_name_short(isa_avx512, dt_par, f, True, ldiv, mask_type)
@@ -466,6 +478,16 @@ def ci_ldiv_writer(f,func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_
         func_name_impl = build_func_name(isa_avx512, dt_par, dt_ret, f, True,  ldiv, mask_type)
     print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa_avx512, func_name_impl, masked_version=mask_type) + ";", file=file)
     print("}", file=file)
+    print("#elif defined(MIPP_SCALAR)", file=file)
+
+    print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, {}, func_name, ldiv, False, False, mask_type) + " {", file=file)
+    if len(dt.split(',')) <= 1:
+        func_name_impl = build_func_name_short(isa_scalar, dt_par, f, True, ldiv, mask_type)
+    else:
+        func_name_impl = build_func_name(isa_scalar, dt_par, dt_ret, f, True,  ldiv, mask_type)
+    print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa_scalar, func_name_impl, masked_version=mask_type) + ";", file=file)
+    print("}", file=file)
+
     print("#endif", file=file)
 
 def gen_ci_functions(isa_list, include_manager, funcs):

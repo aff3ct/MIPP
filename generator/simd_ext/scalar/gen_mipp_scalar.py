@@ -113,8 +113,8 @@ def _emit_function_body_scalar(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rende
         lmul_str = ""
     elif lmul >= 1:
         lmul_str = "_M" + str(lmul)
-    elif lmul > 0 and lmul < 1:
-        lmul_str = "_D" + str(int(1/lmul))
+    elif lmul < 0:
+        lmul_str = "_D" + str(int(-lmul))
 
     if ff["type"] == "element-wide":
         # Original code had a redundant always-true condition; keep behavior identical.
@@ -322,7 +322,27 @@ def gen_c_defines_scalar(isa, file):
                     lmul=lmul,
                 ),
                 file=file,
-            )          
+            )    
+    # ldiv defines
+    # 
+    ldiv = 2
+    for dt in isa["datatypes"]:
+        if isinstance(isa["size"], str):
+            n_elmts = f'{isa["size"]}/{datatypes[dt]["n_bits"]}/{ldiv}'
+        else:
+            n_elmts = int(isa["size"] / datatypes[dt]["n_bits"])/ldiv
+        template = """#define MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{n_bits}}_D{{ldiv}} {{n_elmts}}"""
+        j2_template = Template(template, undefined=StrictUndefined)
+        print(
+            j2_template.render(
+                isa_name_upper=isa["name"].upper(),
+                type_category_upper=datatypes[dt]["category"].upper(),
+                n_bits=datatypes[dt]["n_bits"],
+                n_elmts=n_elmts,
+                ldiv=ldiv,
+            ),
+            file=file,
+        )      
             
 def gen_c_structures_scalar(isa, file):
     """
@@ -399,7 +419,37 @@ def gen_c_structures_scalar(isa, file):
                 ),
                 file=file,
             )
-            
+
+    ldiv = 2
+    template = """typedef struct { {{ isa_datatype.reg }} r[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}_D{{ldiv}}]; } rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d{{ldiv}}_t;"""
+    template_msk = """typedef struct { {{ isa_datatype.msk }} m[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}_D{{ldiv}}]; } rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d{{ldiv}}_t;"""
+    
+    j2_template = Template(template, undefined=StrictUndefined)
+    j2_template_msk = Template(template_msk, undefined=StrictUndefined)
+    for dt in isa["datatypes"]:
+        print(
+            j2_template.render(
+                isa=isa,
+                isa_datatype=isa["datatypes"][dt],
+                datatype=datatypes[dt],
+                isa_name_upper=isa["name"].upper(),
+                type_category_upper=datatypes[dt]["category"].upper(),
+                ldiv=ldiv,
+            ),
+            file=file,
+        )
+    for dt in isa["datatypes"]:
+        print(
+            j2_template_msk.render(
+                isa=isa,
+                isa_datatype=isa["datatypes"][dt],
+                datatype=datatypes[dt],
+                isa_name_upper=isa["name"].upper(),
+                type_category_upper=datatypes[dt]["category"].upper(),
+                ldiv=ldiv,
+            ),
+            file=file,
+        )
 
 def gen_mipp_scalar(include_manager):
     
@@ -473,6 +523,9 @@ typedef double float64_t;
     gen_c_functions_scalar(isa_scalar, include_manager, copy_mipp_funcs, implems_scalar)
     for lmul in all_lmul:
         gen_c_functions_scalar(isa_scalar, include_manager, copy_mipp_funcs, implems_scalar, lmul=lmul)
+
+    ldiv = -2
+    gen_c_functions_scalar(isa_scalar, include_manager, copy_mipp_funcs, implems_scalar, lmul=ldiv)
 
     tpl_footer_scalar = """#endif /* MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SCALAR_H_ */"""
     j2_template = Template(tpl_footer_scalar, undefined=StrictUndefined)
