@@ -321,31 +321,8 @@ def gen_ci_structures(isa_list, file):
         for dt in isa["datatypes"]:
             print(j2_template.render(isa=isa, datatype=datatypes[dt]), file=file)
         
-        #sub_isa_list = isa_list[index+1:]
-        
-        # for ldiv in all_ldiv:
-        #     sub_isa = get_sub_isa(isa, ldiv, isa_list)
-        #     if sub_isa :
-        #         print("#if " + sub_isa["define"], file=file)
-        #         used_sub_isa = sub_isa
-        #         print("#define MIPP_ENABLE_LDIV"+str(ldiv), file=file)
-        #     else :
-        #         break
-                
-        #     template = """typedef rvd_{{ used_sub_isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t rvd_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t;"""
-        #     j2_template = Template(template, undefined=StrictUndefined)
-        #     for dt in isa["datatypes"]:
-        #         print(j2_template.render(used_sub_isa=used_sub_isa, datatype=datatypes[dt], ldiv=str(ldiv)), file=file)
-        #     template = """typedef rvm_{{ used_sub_isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t rvm_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t;"""
-        #     j2_template = Template(template, undefined=StrictUndefined)
-        #     for dt in isa["datatypes"]:
-        #         print(j2_template.render(used_sub_isa=used_sub_isa, datatype=datatypes[dt], ldiv=str(ldiv)), file=file)
-            
-        #     if sub_isa :	
-        #         print("#endif /** '"+sub_isa["define"]+"' under '"+isa["define"]+"' **/", file=file)
-        
-        # ldiv only for avx512 & scalar AT THE MOMENT.
-        if isa["name"] == "avx512" :
+
+        if isa["name"] == "avx512" or isa["name"] == "scalar" :
             ldiv = 2
             template = """typedef rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t rvd_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t;"""
             j2_template = Template(template, undefined=StrictUndefined)
@@ -355,17 +332,6 @@ def gen_ci_structures(isa_list, file):
             j2_template = Template(template, undefined=StrictUndefined)
             for dt in isa["datatypes"]:
                 print(j2_template.render(isa=isa, datatype=datatypes[dt], ldiv=str(ldiv)), file=file)
-        
-        if isa["name"] == "scalar" :
-            template = """typedef rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t rvd_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
-            j2_template = Template(template, undefined=StrictUndefined)
-            for dt in isa["datatypes"]:
-                print(j2_template.render(isa=isa, datatype=datatypes[dt]), file=file)
-            template = """typedef rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t rvm_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
-            j2_template = Template(template, undefined=StrictUndefined)
-            for dt in isa["datatypes"]:
-                print(j2_template.render(isa=isa, datatype=datatypes[dt]), file=file)
-
             
 
         if index == len(isa_list)-1:
