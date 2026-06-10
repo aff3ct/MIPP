@@ -585,7 +585,7 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
         lmul_str = ""
         if lmul > 0 and (not cpp ):
             lmul_str = "_m" + str(int(lmul))
-        if lmul < 0 : # ldiv
+        if lmul < 0 and (not cpp): # ldiv
             lmul_str = "_d" + str(int(-lmul))
         # if "gather" in func_name or "scatter" in func_name:
         #     print("Debug " + func_name + " proto: ", proto, build_type(proto["ret"]["type"], realdatatype, isa, lmul, isa_name, cpp), "cpp=", cpp, "realdatatype=", realdatatype)
