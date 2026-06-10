@@ -595,7 +595,7 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
         lmul_str = ""
         if lmul > 0 and (not cpp or (cpp and not lmul_specialized(proto))):
             lmul_str = "_m" + str(int(lmul))
-        if lmul < 0 : # ldiv
+        if lmul < 0 and (not cpp or (cpp and not lmul_specialized(proto))): # ldiv
             lmul_str = "_d" + str(int(-lmul))
         p = "inline " + build_type(proto["ret"]["type"], realdatatype, isa, lmul, isa_name, cpp) + " " + func_name + "_" + masked_version + lmul_str + "("
     cnt_reg = 0
