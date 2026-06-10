@@ -373,32 +373,18 @@ def _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, mk_letter
     # Build the masked signature at the right LMUL, then rewrite the name into the template-id form.
     sig = build_proto(proto, dt_par, dt_ret, isa, cpp_func_name, lmul, isa_name=isa_name, cpp=True, masked_version=mask_kind)
 
+
     if isa is not None:
-        
-        # if "gather" in cpp_func_name or "scatter" in cpp_func_name:
-        #     print("Debug " + cpp_func_name + "_" + dt_ret + "_" + mask_kind)
-        #     sig = sig.replace(
-        #         f"{cpp_func_name}_{dt_ret}_{mask_kind}(",
-        #         f"{cpp_func_name}_{dt_ret}<{mk_letter}, {Tret}, {lmul}, ISA::{isa['name'].upper()}>("
-        #     )
-        # else : 
         sig = sig.replace(
             f"{cpp_func_name}_{mask_kind}(",
             f"{cpp_func_name}<{mk_letter}, {Tret}, {lmul}, {isa["name"].upper()}>("
         )
     else :
-        # if "gather" in cpp_func_name or "scatter" in cpp_func_name:
-        #     sig = sig.replace(
-        #         f"{cpp_func_name}_{dt_ret}_{mask_kind}(",
-        #         f"{cpp_func_name}_{dt_ret}<{mk_letter}, {Tret}, {lmul}>("
-        #     )
-        # else :
         sig = sig.replace(
             f"{cpp_func_name}_{mask_kind}(",
             f"{cpp_func_name}<{mk_letter}, {Tret}, {lmul}>("
         )
-    if "gather" in cpp_func_name :
-        print("Debug new sig for gather specialization: ", sig)
+
 
     print(sig + " {", file=file)
 
@@ -408,7 +394,10 @@ def _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, mk_letter
     # if int(lmul) == 1:
     #     c_symbol = f"{c_base}_{mask_kind}"
     # else:
-    c_symbol = f"{c_base}_{mask_kind}_m{int(lmul)}"
+    lmul_str = "m" + str(lmul)
+    if lmul < 0: 
+        lmul_str = "d" + str(-lmul)
+    c_symbol = f"{c_base}_{mask_kind}_{lmul_str}"
 
     call = build_call(proto, dt_par, dt_ret, isa, c_symbol, lmul, isa_name=isa_name, masked_version=mask_kind)
     print("\t" + call + ";", file=file)
@@ -562,4 +551,12 @@ def gen_cpp_functions_isa(include_manager, isa, funcs):
                     if mask_status.is_masksable():
                         _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "S", "masks", lmul=lmul, isa = isa, isa_name=True)
 
+                if isa["name"] == "avx512" or isa["name"] == "scalar":
+                    ldiv = -2
+                    if mask_status.is_maskable():
+                        _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "M", "mask", lmul=ldiv, isa = isa, isa_name=True)
+                    if mask_status.is_maskzable():
+                        _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "Z", "maskz", lmul=ldiv, isa = isa, isa_name=True)
+                    if mask_status.is_masksable():
+                        _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "S", "masks", lmul=ldiv, isa = isa, isa_name=True)
         print(_cpp_close_namespace(), file=file)

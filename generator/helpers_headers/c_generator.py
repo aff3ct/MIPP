@@ -999,18 +999,18 @@ def _gen_c_function_one_ldiv_avx512(isa_avx512, isa_div, file, funcs, f, ff, dt,
     dt_key = dt_par + "," + dt_ret
 
     if len(dt.split(',')) <= 1:
-        func_name = build_func_name_short(isa_avx512, dt_par, f, True)
+        func_name = build_func_name_short(isa_avx512, dt_par, f, True, masked_version=mask_kind)
     else:
-        func_name = build_func_name(isa_avx512, dt_par, dt_ret, f, True)
+        func_name = build_func_name(isa_avx512, dt_par, dt_ret, f, True, masked_version=mask_kind)
 
-    print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_avx512, func_name, lmul=-2,  isa_name=True) + " {", file=file)
+    print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_avx512, func_name, lmul=-2,  isa_name=True, masked_version=mask_kind) + " {", file=file)
    
     if len(dt.split(',')) <= 1:
-        func_name_impl = build_func_name_short(isa_div, dt_par, f)
+        func_name_impl = build_func_name_short(isa_div, dt_par, f, True, masked_version=mask_kind)
     else:
-        func_name_impl = build_func_name(isa_div, dt_par, dt_ret, f)
+        func_name_impl = build_func_name(isa_div, dt_par, dt_ret, f, True, masked_version=mask_kind)
 
-    print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa_div, func_name_impl) + ";", file=file)
+    print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa_div, func_name_impl, masked_version=mask_kind) + ";", file=file)
     print("}", file=file)
 
     
@@ -1388,6 +1388,22 @@ def gen_c_ldiv(isa, include_manager, funcs):
             dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
             _gen_c_function_one_ldiv_avx512(isa_avx512=isa, isa_div=isa_avx, file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind=None, ldiv=2)
             # _gen_c_function_one_ldiv_avx512(isa_avx512=isa, isa_div="sse", file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind=None, ldiv=4)
+        mask_support = funcs[f]["mask_support"] if "mask_support" in funcs[f] else None
+        if mask_support and mask_support.is_maskable():
+            for dt in funcs[f]["datatypes"]:
+                dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
+                _gen_c_function_one_ldiv_avx512(isa_avx512=isa, isa_div=isa_avx, file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind="mask", ldiv=2)
+                # _gen_c_function_one_ldiv_avx512(isa_avx512=isa, isa_div="sse", file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind="mask", ldiv=4)
+        if mask_support and mask_support.is_maskzable():
+            for dt in funcs[f]["datatypes"]:
+                dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
+                _gen_c_function_one_ldiv_avx512(isa_avx512=isa, isa_div=isa_avx, file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind="maskz", ldiv=2)
+                # _gen_c_function_one_ldiv_avx512(isa_avx512=isa, isa_div="sse", file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind="maskz", ldiv=4)
+        if mask_support and mask_support.is_masksable():
+            for dt in funcs[f]["datatypes"]:
+                dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
+                _gen_c_function_one_ldiv_avx512(isa_avx512=isa, isa_div=isa_avx, file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind="masks", ldiv=2)
+                # _gen_c_function_one_ldiv_avx512(isa_avx512=isa, isa_div="sse", file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind="masks", ldiv=4)
 # ----------------------------------------------------------------------------------------------------------------------
 # RVV lmul bookkeeping helpers (moved from gen_mipp_rvv.py)
 # ----------------------------------------------------------------------------------------------------------------------
