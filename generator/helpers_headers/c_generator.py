@@ -15,7 +15,13 @@ def _gen_ldiv_structs_avx512(file):
     # We want to use avx2 for ldiv emulation, so we need to define the corresponding types.
 
     # hardcoded d2 is not very good looking tbh.
-    template = """typedef rvd_{{ isa_avx.name }}_{{datatype.category}}_{{datatype.n_bits}}_t rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d2_t;"""
+    template = """typedef rvd_{{ isa_avx.name }}_{{datatype.category}}{{datatype.n_bits}}_t rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d2_t;"""
+    j2_template = Template(template, undefined=StrictUndefined)
+    for dt in isa_avx512["datatypes"]:
+        if "ldiv" in isa_avx512["datatypes"][dt] and len(isa_avx512["datatypes"][dt]["ldiv"]) > 0:
+            print(j2_template.render(isa=isa_avx512, isa_avx=isa_avx, datatype=datatypes[dt]), file=file)
+
+    template = """typedef rvm_{{ isa_avx.name }}_{{datatype.category}}{{datatype.n_bits}}_t rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d2_t;"""
     j2_template = Template(template, undefined=StrictUndefined)
     for dt in isa_avx512["datatypes"]:
         if "ldiv" in isa_avx512["datatypes"][dt] and len(isa_avx512["datatypes"][dt]["ldiv"]) > 0:
