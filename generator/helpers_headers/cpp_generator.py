@@ -474,6 +474,20 @@ def gen_cpp_structures_isa(file, isa):
             print(j2_template.render(datatype=datatypes[dt], lmul=str(lmul), isa_cpp_type=isa_cpp_type, isa_c_name=isa_c_name), file=file)
     # maybe enum shouldn't be defined here idk
 
+    #ldiv
+
+    if isa["name"] == "avx512" or isa["name"] == "scalar":
+        ldiv = 2
+        ldiv_m = -2
+        template = """template<> struct rvd_type<{{ datatype.cstd }}, {{ ldiv_m }}, ISA::{{isa_cpp_type}}>{ using type = rvd_{{isa_c_name}}_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t; };"""
+        template_msk = """template<> struct rvm_type<{{ datatype.cstd }}, {{ ldiv_m }}, ISA::{{isa_cpp_type}}>{ using type = rvm_{{isa_c_name}}_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t; };"""
+        j2_template = Template(template, undefined=StrictUndefined)
+        j2_template_msk = Template(template_msk, undefined=StrictUndefined)
+        for dt in datatypes:
+            print(j2_template.render(datatype=datatypes[dt], ldiv_m=str(ldiv_m), isa_cpp_type=isa_cpp_type, isa_c_name=isa_c_name, ldiv=str(ldiv)), file=file)
+        for dt in datatypes:
+            print(j2_template_msk.render(datatype=datatypes[dt], ldiv_m=str(ldiv_m), isa_cpp_type=isa_cpp_type, isa_c_name=isa_c_name, ldiv=str(ldiv)), file=file)
+
 def gen_cpp_constexpr_functions_isa(file, isa):
     isa_cpp_type = isa["name"].upper()
 
@@ -487,13 +501,21 @@ def gen_cpp_constexpr_functions_isa(file, isa):
         for dt in datatypes:
             print(j2_template.render(datatype=datatypes[dt], lmul=str(lmul), type_category_upper=datatypes[dt]["category"].upper(), lmul_suffix=lmul_suffix, isa_cpp_type=isa_cpp_type), file=file)
     
+    # once every isa supports ldiv. This can be moved to the loop above.
+
+    if isa["name"] == "avx512" or isa["name"] == "scalar":
+        ldiv = -2
+        ldiv_suffix = "_D" + str(-ldiv)
+        template = """template<> constexpr uint32_t N<{{ datatype.cstd }}, {{ ldiv }}, ISA::{{isa_cpp_type}} >(){ return MIPP_{{isa_cpp_type}}_N_{{type_category_upper}}{{ datatype.n_bits }}{{ ldiv_suffix }}; }"""
+        j2_template = Template(template, undefined=StrictUndefined)
+        for dt in datatypes:
+            print(j2_template.render(datatype=datatypes[dt], ldiv=str(ldiv), type_category_upper=datatypes[dt]["category"].upper(), ldiv_suffix=ldiv_suffix, isa_cpp_type=isa_cpp_type), file=file)
+
     print(_cpp_close_namespace(), file=file) # hacky -> implies it HAS to be called after gen_cpp_structures_isa ...
 
 def gen_cpp_functions_isa(include_manager, isa, funcs):
     layer_name = isa["name"] + "_cpp"
     for f in funcs:
-
-
         file = include_manager.get_fd(layer_name, f)
         prefix = _cpp_custom_prefix_generator(f, isa["name"], funcs)
         print(prefix, file=file)
@@ -521,12 +543,17 @@ def gen_cpp_functions_isa(include_manager, isa, funcs):
                 print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, "", c_func_name + "_m" + str(lmul), lmul, False) + ";", file=file)
                 print("}", file=file)
             mask_status = funcs[f]["mask_support"]
+
+            if isa["name"] == "avx512" or isa["name"] == "scalar":
+                ldiv = -2
+                print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, cpp_func_name, ldiv, isa_name=True, cpp=True) + " {", file=file)
+                print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, "", c_func_name + "_d" + str(-ldiv), ldiv, False) + ";", file=file)
+                print("}", file=file)
             
             if mask_status and mask_status.is_any_mask():
                 proto = funcs[f]["proto"]
                 c_base = _masked_c_symbol(dt_par, dt_ret, f, is_cast, isa=isa, isa_name=True)
-                if f == "gather":
-                    print("gen_cpp_function Debug "+ cpp_func_name + " c_base= " + c_base)
+
                 for lmul in all_lmul:
                     if mask_status.is_maskable():
                         _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "M", "mask", lmul=lmul, isa = isa, isa_name=True)
