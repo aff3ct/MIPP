@@ -1003,7 +1003,7 @@ def _gen_c_function_one_ldiv_avx512(isa_avx512, isa_div, file, funcs, f, ff, dt,
     else:
         func_name = build_func_name(isa_avx512, dt_par, dt_ret, f, True, masked_version=mask_kind)
 
-    print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_avx512, func_name, lmul=-2,  isa_name=True, masked_version=mask_kind) + " {", file=file)
+    print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_avx512, func_name, lmul=-2,  isa_name=True) + " {", file=file)
    
     if len(dt.split(',')) <= 1:
         func_name_impl = build_func_name_short(isa_div, dt_par, f, True, masked_version=mask_kind)
