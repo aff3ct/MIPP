@@ -472,14 +472,19 @@ def write_mipp_infos(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_funcs_c
                         if func_info is not None:
                             line = "| " + func + " | "
                             for dtype in dttypes:
-                                if dtype in func_info.datatypes:
-                                    if func_info.is_generic(dtype):
+                                dtype_check = dtype
+                                if func == "gather" or func == "scatter" :
+                                    dtype_check = dtype + "," + dtype
+                                    # print("Debug func_info.datatypes ", func_info.datatypes, "dtype_check " + dtype_check)
+                                if dtype_check in func_info.datatypes:
+
+                                    if func_info.is_generic(dtype_check):
                                         line += color_yellow + ":material-check:" + color_end + " | "
-                                    elif func_info.is_emulated(dtype):
+                                    elif func_info.is_emulated(dtype_check):
                                         line += color_blue + ":material-check:" + color_end + " | "
                                     else :
                                         line += color_green + ":material-check-all:" + color_end + " | "
-                                elif dtype in mipp_funcs[func]["datatypes"]:
+                                elif dtype_check in mipp_funcs[func]["datatypes"]:
                                     line += color_red + ":material-close:" + color_end + " | "
                                 else :
                                     line += color_black + ":material-minus:" + color_end + " | "
@@ -495,20 +500,21 @@ def write_mipp_infos(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_funcs_c
             print("| --- | " + " | ".join(["---"]*len(dttypes)) + " |", file=f)
             for func in mipp_funcs:
                 if func == "cast" or func == "cast_k":
-                    continue                
+                    continue                               
                 if all(func not in mipp_funcs_concepts[concept] for concept in mipp_funcs_concepts):
                     func_info = isa_info.get_func_info(func)
                     if func_info is not None:
                         line = "| " + func + " | "
                         for dtype in dttypes:
-                            if dtype in func_info.datatypes:
-                                if func_info.is_generic(dtype):
+                            dtype_check = dtype
+                            if dtype_check in func_info.datatypes:
+                                if func_info.is_generic(dtype_check):
                                     line += color_yellow + ":material-check:" + color_end + " | "
-                                elif func_info.is_emulated(dtype):
+                                elif func_info.is_emulated(dtype_check):
                                     line += color_blue + ":material-check:" + color_end + " | "
                                 else :
                                     line += color_green + ":material-check-all:" + color_end + " | "
-                            elif dtype in mipp_funcs[func]["datatypes"]:
+                            elif dtype_check in mipp_funcs[func]["datatypes"]:
                                 line += color_red + ":material-close:" + color_end + " | "
                             else :
                                 line += color_black + ":material-minus:" + color_end + " | "
@@ -612,14 +618,17 @@ def write_mipp_infos_masked(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_
                             if func_info is not None :
                                 line = "| " + func + " | "
                                 for dtype in dttypes:
-                                    if dtype in func_info.datatypes and func_info.is_def_mkind(dtype, mkind):
-                                        if func_info.is_generic_mkind(dtype, mkind):
+                                    dtype_check = dtype
+                                    if func == "gather" or func == "scatter" :
+                                        dtype_check = dtype + "," + dtype
+                                    if dtype_check in func_info.datatypes and func_info.is_def_mkind(dtype_check, mkind):
+                                        if func_info.is_generic_mkind(dtype_check, mkind):
                                             line += color_yellow + ":material-check:" + color_end + " | "
-                                        elif func_info.is_emulated_mkind(dtype, mkind):
+                                        elif func_info.is_emulated_mkind(dtype_check, mkind):
                                             line += color_blue + ":material-check:" + color_end + " | "
                                         else :
                                             line += color_green + ":material-check-all:" + color_end + " | "
-                                    elif dtype in mipp_funcs[func]["datatypes"] and mipp_funcs[func]["mask_support"].is_supported(mkind):
+                                    elif dtype_check in mipp_funcs[func]["datatypes"] and mipp_funcs[func]["mask_support"].is_supported(mkind):
                                         line += color_red + ":material-close:" + color_end + " | "
                                     else :
                                         line += color_black + ":material-minus:" + color_end + " | "
@@ -627,7 +636,10 @@ def write_mipp_infos_masked(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_
                             else :     
                                 line = "| " + func + " | "
                                 for dtype in dttypes:
-                                    if dtype in mipp_funcs[func]["datatypes"] and mipp_funcs[func]["mask_support"].is_supported(mkind):
+                                    dtype_check = dtype
+                                    if func == "gather" or func == "scatter" :
+                                        dtype_check = dtype + "," + dtype
+                                    if dtype_check in mipp_funcs[func]["datatypes"] and mipp_funcs[func]["mask_support"].is_supported(mkind):
                                         line += color_red + ":material-close:" + color_end + " | "
                                     else :
                                         line += color_black + ":material-minus:" + color_end + " | "
@@ -918,11 +930,11 @@ def main():
     
         
     #print sse info for debugging
-    for isa_info in mipp_infos.isa_infos:
-        if isa_info.isa_name == "SSE":
-            print("SSE info : ")
-            for func_info in isa_info.func_infos:
-                print(func_info.func_name, func_info.datatypes)
+    # for isa_info in mipp_infos.isa_infos:
+    #     if isa_info.isa_name == "SSE":
+    #         print("SSE info : ")
+    #         for func_info in isa_info.func_infos:
+    #             print(func_info.func_name, func_info.datatypes)
     
     
     #we want the intersection to be done on 
