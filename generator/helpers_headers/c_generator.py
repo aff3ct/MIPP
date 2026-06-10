@@ -976,7 +976,7 @@ def _gen_c_missing_one_masked(isa, file, funcs, f, dt, mask_kind, lmul=0):
   
         _missing_emit_ifdef_end(ifd, file)
 
-def _gen_c_function_one_ldiv_avx512(isa_avx512, isa_div, file, funcs, f, ff, dt, mask_kind, ldiv=2):
+def _gen_c_function_one_ldiv_avx512(isa_avx512, isa_div, file, funcs, f, ff, dt, mask_kind, ldiv=-2):
     """
     fairly straightforward the uint32_d2 avx function is JUST the uint32_m1 version of avx so wrapper to it.
     smth like : 
@@ -999,11 +999,11 @@ def _gen_c_function_one_ldiv_avx512(isa_avx512, isa_div, file, funcs, f, ff, dt,
     dt_key = dt_par + "," + dt_ret
 
     if len(dt.split(',')) <= 1:
-        func_name = build_func_name_short(isa_avx512, dt_par, f, True, masked_version=mask_kind)
+        func_name = build_func_name_short(isa_avx512, dt_par, f, True)
     else:
-        func_name = build_func_name(isa_avx512, dt_par, dt_ret, f, True, masked_version=mask_kind)
+        func_name = build_func_name(isa_avx512, dt_par, dt_ret, f, True)
 
-    print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_avx512, func_name, lmul=-2,  isa_name=True) + " {", file=file)
+    print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_avx512, func_name, lmul=-2,  isa_name=True, masked_version=mask_kind) + " {", file=file)
    
     if len(dt.split(',')) <= 1:
         func_name_impl = build_func_name_short(isa_div, dt_par, f, True, masked_version=mask_kind)
