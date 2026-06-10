@@ -637,7 +637,12 @@ class IncludeManager:
                 include_path.resolve_dependencies(funcs, lmul=0, mask_kind="", layer=layer_name)
                 for mask in ["mask", "maskz", "masks"]:
                     include_path.resolve_dependencies(funcs, lmul=0, mask_kind=mask, layer=layer_name)
+
+                if layer_name == "avx512" : 
+                    include_path.dependencies.add(f"../avx/functions/avx_{func}.h")
                 include_path.write_prefix(f"{self.base_dir}/{layer_name}/functions")
+
+
         elif self.mode == "category_header":
             for category in self.layers[layer_name].categories:
                 include_category = self.layers[layer_name].categories[category]

@@ -9,6 +9,8 @@ from include_gen import IncludeManager
 from c_generator import gen_c_horiz_lmul 
 from generic_emu import implems_horiz_lmul_generic_emu
 
+from implem_avx512 import isa_avx512
+
 def get_sub_isa(isa, ldiv, isa_list):
     for sub_isa in isa_list:
         if isa["architecture"] == "AArch64":
@@ -321,27 +323,41 @@ def gen_ci_structures(isa_list, file):
         
         #sub_isa_list = isa_list[index+1:]
         
-        for ldiv in all_ldiv:
-            sub_isa = get_sub_isa(isa, ldiv, isa_list)
-            if sub_isa :
-                print("#if " + sub_isa["define"], file=file)
-                used_sub_isa = sub_isa
-                print("#define MIPP_ENABLE_LDIV"+str(ldiv), file=file)
-            else :
-                break
+        # for ldiv in all_ldiv:
+        #     sub_isa = get_sub_isa(isa, ldiv, isa_list)
+        #     if sub_isa :
+        #         print("#if " + sub_isa["define"], file=file)
+        #         used_sub_isa = sub_isa
+        #         print("#define MIPP_ENABLE_LDIV"+str(ldiv), file=file)
+        #     else :
+        #         break
                 
-            template = """typedef rvd_{{ used_sub_isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t rvd_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t;"""
+        #     template = """typedef rvd_{{ used_sub_isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t rvd_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t;"""
+        #     j2_template = Template(template, undefined=StrictUndefined)
+        #     for dt in isa["datatypes"]:
+        #         print(j2_template.render(used_sub_isa=used_sub_isa, datatype=datatypes[dt], ldiv=str(ldiv)), file=file)
+        #     template = """typedef rvm_{{ used_sub_isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t rvm_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t;"""
+        #     j2_template = Template(template, undefined=StrictUndefined)
+        #     for dt in isa["datatypes"]:
+        #         print(j2_template.render(used_sub_isa=used_sub_isa, datatype=datatypes[dt], ldiv=str(ldiv)), file=file)
+            
+        #     if sub_isa :	
+        #         print("#endif /** '"+sub_isa["define"]+"' under '"+isa["define"]+"' **/", file=file)
+        
+        # ldiv only for avx512 AT THE MOMENT.
+        if isa["name"] == "avx512" :
+            ldiv = 2
+            template = """typedef rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t rvd_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t;"""
             j2_template = Template(template, undefined=StrictUndefined)
             for dt in isa["datatypes"]:
-                print(j2_template.render(used_sub_isa=used_sub_isa, datatype=datatypes[dt], ldiv=str(ldiv)), file=file)
-            template = """typedef rvm_{{ used_sub_isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t rvm_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t;"""
+                print(j2_template.render(isa=isa, datatype=datatypes[dt], ldiv=str(ldiv)), file=file)
+            template = """typedef rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t rvm_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t;"""
             j2_template = Template(template, undefined=StrictUndefined)
             for dt in isa["datatypes"]:
-                print(j2_template.render(used_sub_isa=used_sub_isa, datatype=datatypes[dt], ldiv=str(ldiv)), file=file)
+                print(j2_template.render(isa=isa, datatype=datatypes[dt], ldiv=str(ldiv)), file=file)
+
             
-            if sub_isa :	
-                print("#endif /** '"+sub_isa["define"]+"' under '"+isa["define"]+"' **/", file=file)
-            
+
         if index == len(isa_list)-1:
             print("#endif", file=file)
 
@@ -442,36 +458,15 @@ def ci_lmul_writer(f,func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_
  
 
 def ci_ldiv_writer(f,func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_type=None, ldiv=0):
-    if not funcs[f]["horizontal"]: #and funcs[f]["half_regiser"]:
-        print("#if defined(MIPP_ENABLE_LDIV"+str(ldiv)+")", file=file)
-        print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name+"_d"+str(ldiv), -ldiv, False) + " {", file=file)
-        for i, isa in  enumerate(isa_list):
-            sub_isa = sub_isa = get_sub_isa(isa, ldiv, isa_list)
-            if sub_isa :
-                if i == 0:
-                    print("#if " + isa["gen_define"] + " && " + sub_isa["define"], file=file)
-                else:
-                    print("#elif " + isa["gen_define"] + " && " + sub_isa["define"], file=file)
-                           
-                if len(dt.split(',')) <= 1:
-                    func_name_impl = build_func_name_short(sub_isa, dt_par, f);
-                else:
-                    func_name_impl = build_func_name(sub_isa, dt_par, dt_ret, f);
-                print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, sub_isa, func_name_impl) + ";", file=file)	
-                    
-        print("#else", file=file)
-        print("\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \""+func_name+"_d"+str(ldiv)+"\");", file=file);
-        print("\texit(-1);", file=file);
-        print("#endif", file=file)
-        print("}", file=file)
-        print("#endif // defined(MIPP_ENABLE_LDIV"+str(ldiv)+")", file=file)
-    else :
-        print("#if defined(MIPP_ENABLE_LDIV"+str(ldiv)+")", file=file)
-        print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name+"_d"+str(ldiv), -ldiv, False) + " {", file=file)
-        print("\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \""+func_name+"_d"+str(ldiv)+"\");", file=file);
-        print("\texit(-1);", file=file);
-        print("}", file=file)
-        print("#endif // defined(MIPP_ENABLE_LDIV"+str(ldiv)+")"+")", file=file)
+    print("#ifdef MIPP_AVX512", file=file)
+    print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, {}, func_name, ldiv, False, False, mask_type) + " {", file=file)
+    if len(dt.split(',')) <= 1:
+        func_name_impl = build_func_name_short(isa_avx512, dt_par, f, True, ldiv, mask_type)
+    else:
+        func_name_impl = build_func_name(isa_avx512, dt_par, dt_ret, f, True,  ldiv, mask_type)
+    print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa_avx512, func_name_impl, masked_version=mask_type) + ";", file=file)
+    print("}", file=file)
+    print("#endif", file=file)
 
 def gen_ci_functions(isa_list, include_manager, funcs):
     isa_rvv = next((isa for isa in isa_list if isa["name"].startswith("rvv")), None)
@@ -514,10 +509,6 @@ def gen_ci_functions(isa_list, include_manager, funcs):
 
             print("}", file=file)
 
-            # print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name, 1, False) + " {", file=file)
-            # print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name) + ";", file=file)
-            # print("}", file=file)
-   
             gen_ci_mask_functions(f, dt, isa_list, file, 0, func_name=func_name)
             
             for lmul in all_lmul:
@@ -542,7 +533,8 @@ def gen_ci_functions(isa_list, include_manager, funcs):
                     ci_lmul_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_type="masks", lmul=lmul)
             
             # for ldiv in all_ldiv:
-            #     ci_ldiv_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, ldiv=ldiv)
+            ci_ldiv_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, ldiv=-2)
+
                 
         if include_manager.mode == "function_header":
             custom_prefix = _custom_prefix_generator(f, isa_list)

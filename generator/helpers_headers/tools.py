@@ -585,6 +585,8 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
         lmul_str = ""
         if lmul > 0 and (not cpp ):
             lmul_str = "_m" + str(int(lmul))
+        if lmul < 0 : # ldiv
+            lmul_str = "_d" + str(int(-lmul))
         # if "gather" in func_name or "scatter" in func_name:
         #     print("Debug " + func_name + " proto: ", proto, build_type(proto["ret"]["type"], realdatatype, isa, lmul, isa_name, cpp), "cpp=", cpp, "realdatatype=", realdatatype)
         p = "inline " + build_type(proto["ret"]["type"], realdatatype, isa, lmul, isa_name, cpp) + " " + func_name + lmul_str + "("
@@ -815,8 +817,10 @@ def build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul=2, isa_name=True
 def build_func_name_short(isa, dt, mipp_name, isa_name=True, lmul=0, masked_version=False):
     param_type = datatypes[dt]["category"] + str(datatypes[dt]["n_bits"])
     lmul_str = ""
-    if lmul :
+    if lmul > 0:
         lmul_str = "_m" + str(int(lmul))
+    if lmul < 0 :
+        lmul_str = "_d" + str(int(-lmul))
 
     mask_str = ""
     if masked_version:
@@ -842,9 +846,10 @@ def build_func_name(isa, dt_par, dt_ret, mipp_name, isa_name=True, lmul=0, maske
     param_type = datatypes[dt_par]["category"] + str(datatypes[dt_par]["n_bits"])
     return_type = datatypes[dt_ret]["category"] + str(datatypes[dt_ret]["n_bits"])
     lmul_str = ""
-    if lmul :
+    if lmul > 0:
         lmul_str = "_m" + str(int(lmul))
-
+    if lmul < 0 : 
+        lmul_str = "_d" + str(int(-lmul))
     mask_str = ""
     if masked_version:
         mask_str = "_" + masked_version
