@@ -672,7 +672,10 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False, lm
 
     size = "MIPP_N_" + scalar_type.upper()
     if kind != "c": 
-        size = "mipp::N<T>()"
+        lmul_val = lmul
+        if lmul == 0 : 
+            lmul_val = 1
+        size = f"mipp::N<T, {lmul_val}>()"
 
     func_template = Template(func_template, undefined=StrictUndefined)
     res = func_template.render(
@@ -902,7 +905,10 @@ def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="
         )
     elif kind == "cpp": 
         
-        size = "mipp::N<T>()"
+        lmul_val = lmul
+        if lmul == 0 :
+            lmul_val = 1
+        size = f"mipp::N<T, {lmul_val}>()"
         is_cast_k = func.startswith("cast_k")
         fname = "cast_k" if is_cast_k else "cast"
 

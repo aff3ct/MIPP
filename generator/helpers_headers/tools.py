@@ -782,7 +782,10 @@ def _build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul, part, masked_v
             p += "v" + str(cnt_val)
             cnt_val = cnt_val +1
         elif arg["type"] == "ptr":
-            p += "p" + str(cnt_ptr) + " + " + str(int(part-1)) + "*MIPP_LMUL_STRIDE(sizeof(*p" + str(cnt_ptr) + "), " + str(int(lmul)) +")"
+            if "offset_lmul" not in arg or arg["offset_lmul"] == True:
+                p += "p" + str(cnt_ptr) + " + " + str(int(part-1)) + "*MIPP_LMUL_STRIDE(sizeof(*p" + str(cnt_ptr) + "), " + str(int(lmul)) +")"
+            elif "offset_lmul" in arg and arg["offset_lmul"] == False:
+                p += "p" + str(cnt_ptr)
             cnt_ptr = cnt_ptr +1
         elif arg["type"] == "Nele":
             p += "vals"

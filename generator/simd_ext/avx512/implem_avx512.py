@@ -53,7 +53,9 @@ tpl_implem_avx512 = {
     "testz_2args":      { "format": "long",  "code": "return (int32_t)_{{ instr_name }}_{{ isa_dt_par.msk_short }}_u8(m0.m, m1.m);" },
 
     # same templates as avx2
-    "gather":           { "format": "short", "code": "{{ isa.prefix }}_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(p0,r0.r,{{dt_par.n_bits//8}});" },
+    # Fun trivia : between avx512 and avx2 the order of parameters 4 gather is not the same. 
+    # its vindex, base_addr, scale for avx512, and base_addr, vindex, scale for avx2. Why not after all
+    "gather":           { "format": "short", "code": "{{ isa.prefix }}_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, p0, {{dt_par.n_bits//8}});" },
 
     "gather_masks_64":  { "format": "short", "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(rsrc.r,m0.m, r0.r, p0,8);" },
     "gather_masks_32":  { "format": "short", "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(rsrc.r,m0.m, r0.r, p0,4);" },
@@ -502,17 +504,17 @@ implems_avx512 = {
         { "instr_name": "maskz_add",  "datatypes": all_float,                    "template": tpl_implem_avx512["arithmsk_2args"], "if": "defined(__AVX512F__)"                                                                  } ], # maskz_add
     
     # copied from implem_avx.py
-#    "gather": [
-#         { "instr_name": "gather",         "datatypes": avx_datatypes_idx_pair,                      "template": tpl_implem_avx512["gather"],           "if": "defined(__AVX512F__)"                                                   },
-#         { "instr_name": "gather",         "datatypes": ["float64,float64", "int64,int64"],          "template": tpl_implem_avx512["gather_masks_64"],  "if": "defined(__AVX512F__)", "version" : "masks"                              },
-#         { "instr_name": "gather",         "datatypes": ["float64,float64", "int64,int64"],          "template": tpl_implem_avx512["gather_maskz_64"],  "if": "defined(__AVX512F__)", "version" : "maskz"                              },
-#         { "instr_name": "gather",         "datatypes": ["float32,float32", "int32,int32"],          "template": tpl_implem_avx512["gather_masks_32"],  "if": "defined(__AVX512F__)", "version" : "masks"                              },
-#         { "instr_name": "gather",         "datatypes": ["float32,float32", "int32,int32"],          "template": tpl_implem_avx512["gather_maskz_32"],  "if": "defined(__AVX512F__)", "version" : "maskz"                              }], # gather
+   "gather": [
+        { "instr_name": "gather",         "datatypes": avx_datatypes_idx_pair,                      "template": tpl_implem_avx512["gather"],           "if": "defined(__AVX512F__)"                                                   },
+        { "instr_name": "gather",         "datatypes": ["float64,float64", "int64,int64"],          "template": tpl_implem_avx512["gather_masks_64"],  "if": "defined(__AVX512F__)", "version" : "masks"                              },
+        { "instr_name": "gather",         "datatypes": ["float64,float64", "int64,int64"],          "template": tpl_implem_avx512["gather_maskz_64"],  "if": "defined(__AVX512F__)", "version" : "maskz"                              },
+        { "instr_name": "gather",         "datatypes": ["float32,float32", "int32,int32"],          "template": tpl_implem_avx512["gather_masks_32"],  "if": "defined(__AVX512F__)", "version" : "masks"                              },
+        { "instr_name": "gather",         "datatypes": ["float32,float32", "int32,int32"],          "template": tpl_implem_avx512["gather_maskz_32"],  "if": "defined(__AVX512F__)", "version" : "maskz"                              }], # gather
  
  
-#     "scatter": [
-#         { "instr_name": "scatter",        "datatypes": avx_datatypes_idx_pair,                      "template": tpl_implem_avx512["scatter"],          "if": "defined(__AVX512F__)"                                                   },
-#         { "instr_name": "scatter",        "datatypes": ["float64,float64", "int64,int64"],          "template": tpl_implem_avx512["scatter_mask_64"],  "if": "defined(__AVX512F__)", "version" : "mask"                              },
-#         { "instr_name": "scatter",        "datatypes": ["float32,float32", "int32,int32"],          "template": tpl_implem_avx512["scatter_mask_32"],  "if": "defined(__AVX512F__)", "version" : "mask"                              },
-#         { "instr_name": "scatter",        "datatypes": avx_datatypes_idx_pair,                      "template": tpl_implem_avx512["scatter_maskz"],    "if": "defined(__AVX512F__)", "version" : "maskz"                              }], # scatter
+    "scatter": [
+        { "instr_name": "scatter",        "datatypes": avx_datatypes_idx_pair,                      "template": tpl_implem_avx512["scatter"],          "if": "defined(__AVX512F__)"                                                   },
+        { "instr_name": "scatter",        "datatypes": ["float64,float64", "int64,int64"],          "template": tpl_implem_avx512["scatter_mask_64"],  "if": "defined(__AVX512F__)", "version" : "mask"                              },
+        { "instr_name": "scatter",        "datatypes": ["float32,float32", "int32,int32"],          "template": tpl_implem_avx512["scatter_mask_32"],  "if": "defined(__AVX512F__)", "version" : "mask"                              },
+        { "instr_name": "scatter",        "datatypes": avx_datatypes_idx_pair,                      "template": tpl_implem_avx512["scatter_maskz"],    "if": "defined(__AVX512F__)", "version" : "maskz"                              }], # scatter)
  }
