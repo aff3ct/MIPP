@@ -11,15 +11,7 @@ from generic_emu import implems_horiz_lmul_generic_emu
 
 from implem_avx512 import isa_avx512
 from implem_avx import isa_avx
-
-def get_sub_isa(isa, ldiv, isa_list):
-    for sub_isa in isa_list:
-        if isa["architecture"] == "AArch64":
-                return 
-        elif isa["architecture"] == sub_isa["architecture"] :
-            # pas genial sve list int x86 int (mettre un tableau de taille 1 pour x86)
-            if isinstance(isa["size"], int) and isa["size"]/ldiv == sub_isa["size"] :
-                return sub_isa
+from implem_rvv import isa_rvv
             
 def duplicate_isa_sve_along_size(isa_list):
     isa_list_copy = copy.deepcopy(isa_list)
@@ -323,7 +315,7 @@ def gen_ci_structures(isa_list, file):
             print(j2_template.render(isa=isa, datatype=datatypes[dt]), file=file)
         
 
-        if isa["name"] == "avx512" or isa["name"] == "scalar" or isa["name"] == "avx" :
+        if isa["name"] == "avx512" or isa["name"] == "scalar" or isa["name"] == "avx" or isa["name"] == "rvv":
             ldiv = 2
             template = """typedef rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t rvd_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t;"""
             j2_template = Template(template, undefined=StrictUndefined)
@@ -465,6 +457,16 @@ def ci_ldiv_writer(f,func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_
     else:
         func_name_impl = build_func_name(isa_avx, dt_par, dt_ret, f, True,  ldiv, mask_type)
     print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa_avx, func_name_impl, masked_version=mask_type) + ";", file=file)
+    print("}", file=file)
+
+    print("#elif defined(MIPP_RVV)", file=file)
+
+    print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, {}, func_name, ldiv, False, False, mask_type) + " {", file=file)
+    if len(dt.split(',')) <= 1:
+        func_name_impl = build_func_name_short(isa_rvv, dt_par, f, True, ldiv, mask_type)
+    else:
+        func_name_impl = build_func_name(isa_rvv, dt_par, dt_ret, f, True,  ldiv, mask_type)
+    print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa_rvv, func_name_impl, masked_version=mask_type) + ";", file=file)
     print("}", file=file)
 
     print("#elif defined(MIPP_SCALAR)", file=file)
