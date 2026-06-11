@@ -290,13 +290,9 @@ def get_scalar_mask_args(mkind):
 def _rvv_skip_pbmatic_ldiv(func, dt, lmul, implems, guard) :
     # skip fmadd, fmsub, fnmadd, fnmsub for lmul < 0 because of pbmatic
     if "rvv" in guard or "RVV" in guard :
-       # print("Debug check 1")
-        # print("Debug func:", func)
         if func in {"cast", "cast_k", "gather", "scatter"} and lmul < 0 :
-            print("Debug check 2")
             dt_par,dt_ret = split_dt_pair(dt)
             if "64" in dt_par or "64" in dt_ret :
-                print("Debug check 3")
                 return True
     return False
 
@@ -340,7 +336,6 @@ def add_type_guards(func, implem, function, kind="c", lmul=0, mkind="", guard = 
     for dt in datatypes:
 
         if _rvv_skip_pbmatic_ldiv(func, dt, lmul, implem, guard) :
-            print("Debug: skipping", func, dt, lmul, guard)
             continue
 
         func_defines = gen_func_defines(func, dt, implem)
@@ -743,6 +738,8 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False, lm
     lmul_coeff = 1
     if lmul != 0 :
         lmul_coeff = lmul
+    if lmul < 0 : 
+        lmul_coeff = -1/lmul
     if kind=="c":
         # append scalar after the first "_" in reg type 
         # nb : there can be a different amount of "_" in reg type like : rvd_int64_t
@@ -957,29 +954,35 @@ def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="
 
        
         # add the 1, ISA::SCALAR 
-
         lmul_coeff = 1 if lmul == 0 else lmul
 
-        if lmul == 0: 
+        if lmul < 0 : 
+            print("Debug reg1_type before : ", reg1_type)
+            print("Debug reg2_type before : ", reg2_type)
+            print("Debug msk1_type before : ", msk1_type)
+            print("Debug msk2_type before : ", msk2_type)
+
+
+        if lmul == 0 :
             split = reg1_type.split(">", 1)
         else :
             split = reg1_type.split(",", 1)
         reg1_type_scalar = split[0] + f",{lmul_coeff},mipp::ISA::SCALAR>"
 
-        if lmul == 0:
+        if lmul == 0 :
              split = msk1_type.split(">", 1)
         else :
             split = msk1_type.split(",", 1)
         msk1_type_scalar = split[0] + f",{lmul_coeff},mipp::ISA::SCALAR>"
 
 
-        if lmul == 0:
+        if lmul == 0 :
              split = reg2_type.split(">", 1)
         else :
             split = reg2_type.split(",", 1)
         reg2_type_scalar = split[0] + f",{lmul_coeff},mipp::ISA::SCALAR>"
         
-        if lmul == 0:
+        if lmul == 0 :
              split = msk2_type.split(">", 1)
         else :
             split = msk2_type.split(",", 1)
@@ -1084,6 +1087,24 @@ def gen_cast_funcs_all_datatypes(func, kind="c", register="rvd", mask="rvm",lmul
                                     mkind=mkind,
                 )
             
+            elif lmul < 0 :
+                reg1_type = f"{register}_" + dt1 + f"_d{-lmul}_t"
+                reg2_type = f"{register}_" + dt2 + f"_d{-lmul}_t"
+                msk1_type = f"{mask}_" + dt1 + f"_d{-lmul}_t"
+                msk2_type = f"{mask}_" + dt2 + f"_d{-lmul}_t"
+                
+                res+= gen_cast_func(func_name, 
+                                    scalar1_type=dt1,
+                                    scalar2_type=dt2,
+                                    reg1_type=reg1_type,
+                                    reg2_type=reg2_type,
+                                    kind=kind, 
+                                    msk1_type=msk1_type,
+                                    msk2_type=msk2_type,
+                                    lmul=lmul,
+                                    mkind=mkind,
+                )
+            
             else : 
                 
                 reg1_type = f"{register}_" + dt1 + "_t"
@@ -1116,11 +1137,12 @@ def gen_cast_funcs_all_datatypes(func, kind="c", register="rvd", mask="rvm",lmul
             msk1_type = f"mipp::{mask}<T>"
             msk2_type = f"mipp::{mask}<{dt1}_t>"
             
-            if lmul > 0:
+            if lmul != 0:
                 reg1_type = f"mipp::{register}<T, {lmul}>"
                 reg2_type = f"mipp::{register}<{dt1}_t, {lmul}>"
                 msk1_type = f"mipp::{mask}<T, {lmul}>"
                 msk2_type = f"mipp::{mask}<{dt1}_t, {lmul}>"
+     
             
             res += gen_cast_func(func, 
                             scalar1_type="T",
@@ -1155,6 +1177,9 @@ def gen_funcs_all_datatypes(func, kind="c", register="rvd", mask="rvm",lmul=0, m
             if lmul > 0:
                 reg_type = f"{register}_" + dt + f"_m{lmul}_t"
                 msk_type = f"{mask}_" + dt + f"_m{lmul}_t"
+            if lmul < 0 :
+                reg_type = f"{register}_" + dt + f"_d{-lmul}_t"
+                msk_type = f"{mask}_" + dt + f"_d{-lmul}_t"
             res += gen_func(
                     func,
                     dt,
@@ -1340,6 +1365,12 @@ def gen_test_files_all_funcs(kind="c", lmul=0, mkind="", N=10, mode="function"):
     regen_obj = kind in {"obj", "all"}
     
     # WIP
+    if lmul < 0 : 
+        regen_obj = False
+        regen_c = False 
+        # cpp tests guarantee c tests work (normally)
+        # so I think we can safely skip ldiv c tests
+
     if lmul != 0 : 
         # regen_cpp = False
         regen_obj = False

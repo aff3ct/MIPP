@@ -46,37 +46,37 @@ FUNC_DECL_GATHER = """template <typename T, typename U>\nvoid test_cppmipp_{{fun
 # SCALAR VEC DECL
 # --------------------------------------------
 DECL_GET_CATCH_SEED = "\n\tstd::mt19937 seed(Catch::getSeed()+n);\n"
-DECL_PRED_ARG = """int32_t inpred[{{size}}*{{lmul_coeff}}];\n"""
+DECL_PRED_ARG = """int32_t inpred[{{size}}];\n"""
 
 DECL_G_SNIPPET = """\tstd::mt19937 g;\n\tstd::uniform_int_distribution<uint16_t> dis(0, 1);"""
 
-DECL_1ARG_INT32 = DECL_GET_CATCH_SEED + DECL_PRED_ARG + """ int32_t inputs1[{{size}} * {{lmul_coeff}}];"""
-DECL_1ARG_SCALAR = DECL_GET_CATCH_SEED + DECL_PRED_ARG + """ \t T input1 = 12;\n\t {{dt_ext}} inputs1[{{size}}*{{lmul_coeff}}];"""
+DECL_1ARG_INT32 = DECL_GET_CATCH_SEED + DECL_PRED_ARG + """ int32_t inputs1[{{size}}];"""
+DECL_1ARG_SCALAR = DECL_GET_CATCH_SEED + DECL_PRED_ARG + """ \t T input1 = 12;\n\t {{dt_ext}} inputs1[{{size}}];"""
 DECL_1ARG_SCALAR_INT32 = DECL_GET_CATCH_SEED + DECL_PRED_ARG + """ \tint32_t input1 = 12;"""
 
-DECL_2ARGS = DECL_GET_CATCH_SEED + DECL_PRED_ARG + """ T inputs1[{{size}} * {{lmul_coeff}}],inputs2[{{size}} * {{lmul_coeff}}];"""
-DECL_1ARG = DECL_GET_CATCH_SEED + DECL_PRED_ARG + """ T inputs1[{{size}} * {{lmul_coeff}}];"""
-DECL_2ARGS_FOR_STORE = DECL_GET_CATCH_SEED + DECL_PRED_ARG + """ T inputs1[{{size}} * {{lmul_coeff}}],inputs2[{{size}} * {{lmul_coeff}}];"""
+DECL_2ARGS = DECL_GET_CATCH_SEED + DECL_PRED_ARG + """ T inputs1[{{size}}],inputs2[{{size}}];"""
+DECL_1ARG = DECL_GET_CATCH_SEED + DECL_PRED_ARG + """ T inputs1[{{size}}];"""
+DECL_2ARGS_FOR_STORE = DECL_GET_CATCH_SEED + DECL_PRED_ARG + """ T inputs1[{{size}}],inputs2[{{size}}];"""
 
-DECL_2ARGS_INT32 = DECL_GET_CATCH_SEED + DECL_PRED_ARG +  "\n\tint32_t inputs1[{{size}} * {{lmul_coeff}}],inputs2[{{size}} * {{lmul_coeff}}];"
+DECL_2ARGS_INT32 = DECL_GET_CATCH_SEED + DECL_PRED_ARG +  "\n\tint32_t inputs1[{{size}}],inputs2[{{size}}];"
 
-DECL_3ARGS = DECL_GET_CATCH_SEED + DECL_PRED_ARG + """\n\tT inputs1[{{size}} * {{lmul_coeff}}],inputs2[{{size}} * {{lmul_coeff}}],inputs3[{{size}} * {{lmul_coeff}}];"""
+DECL_3ARGS = DECL_GET_CATCH_SEED + DECL_PRED_ARG + """\n\tT inputs1[{{size}}],inputs2[{{size}}],inputs3[{{size}}];"""
 
-DECL_CAST_2ARGS = DECL_GET_CATCH_SEED + DECL_PRED_ARG +  "\n\t{{dt2_ext}} inputs1[{{size}} * {{lmul_coeff}}];\n\tconstexpr size_t bytes = sizeof(inputs1);\n\t{{dt1_ext}}_t inputs2[bytes / sizeof({{dt1_ext}}_t)];"
+DECL_CAST_2ARGS = DECL_GET_CATCH_SEED + DECL_PRED_ARG +  "\n\t{{dt2_ext}} inputs1[{{size}}];\n\tconstexpr size_t bytes = sizeof(inputs1);\n\t{{dt1_ext}}_t inputs2[bytes / sizeof({{dt1_ext}}_t)];"
 
-DECL_CAST_2ARGS_MSK = DECL_GET_CATCH_SEED + DECL_PRED_ARG + "\n\tint32_t inputs1[{{size}} * {{lmul_coeff}}];\n\tconstexpr size_t bytes = sizeof(inputs1);\n\t{{dt1_ext}}_t inputs2[bytes / sizeof({{dt1_ext}}_t)];"
+DECL_CAST_2ARGS_MSK = DECL_GET_CATCH_SEED + DECL_PRED_ARG + "\n\tint32_t inputs1[{{size}}];\n\tconstexpr size_t bytes = sizeof(inputs1);\n\t{{dt1_ext}}_t inputs2[bytes / sizeof({{dt1_ext}}_t)];"
 
 # declare 1 dt array of dt type, another array of uint of the same size.
 DECL_GATHER = DECL_GET_CATCH_SEED + DECL_PRED_ARG + """
-T inputs1[{{size}}*{{lmul_coeff}}];
-U indexes[{{size}}*{{lmul_coeff}}];
+T inputs1[{{size}}];
+U indexes[{{size}}];
 """
 
 DECL_SCATTER = DECL_GET_CATCH_SEED + DECL_PRED_ARG +"""
-T inputs1[{{size}}*{{lmul_coeff}}];
-U indexes[{{size}}*{{lmul_coeff}}];
-T outputs[{{size}}*{{lmul_coeff}}];
-T outputs_scal[{{size}}*{{lmul_coeff}}];
+T inputs1[{{size}}];
+U indexes[{{size}}];
+T outputs[{{size}}];
+T outputs_scal[{{size}}];
 """
 
 
@@ -85,46 +85,46 @@ T outputs_scal[{{size}}*{{lmul_coeff}}];
 # --------------------------------------------
 
 INIT_PRED ="""
-\tfor(size_t i = 0; i < {{size}} * {{lmul_coeff}}; i++)
+\tfor(size_t i = 0; i < {{size}}; i++)
 \t{
 \t\tinpred[i] =  rnd::uniform<int32_t>(seed) % 2 ? -1 : 0;
 \t}"""
 
-INIT_2ARGS = """\tstd::iota(inputs1, inputs1 + {{size}} * {{lmul_coeff}}, 1);
-\tfor(size_t i = 0; i < {{size}} * {{lmul_coeff}}; i++)
+INIT_2ARGS = """\tstd::iota(inputs1, inputs1 + {{size}}, 1);
+\tfor(size_t i = 0; i < {{size}}; i++)
 \t{
 \t\tinputs1[i] = rnd::uniform<{{dt_ext}}>(seed);
 \t\tinputs2[i] = rnd::uniform<{{dt_ext}}>(seed);
 \t}
 """
 
-INIT_2ARGS_NOUFLOW = INIT_2ARGS + """\tfor(size_t i = 0; i < {{size}} * {{lmul_coeff}}; i++)
+INIT_2ARGS_NOUFLOW = INIT_2ARGS + """\tfor(size_t i = 0; i < {{size}}; i++)
 \t{
 \t\tinputs1[i] += inputs2[i];
 \t}
 """
 
 INIT_1ARG = """
-\tfor(size_t i = 0; i < {{size}} * {{lmul_coeff}}; i++)
+\tfor(size_t i = 0; i < {{size}}; i++)
 \t{
 \t\tinputs1[i] = rnd::uniform<{{dt_ext}}>(seed);
 \t}
 """
 
-INIT_1ARG_DIS = """\tstd::iota(inputs1, inputs1 + {{size}} * {{lmul_coeff}}, 1);
-\tfor(size_t i = 0; i < {{size}} * {{lmul_coeff}}; i++)
+INIT_1ARG_DIS = """\tstd::iota(inputs1, inputs1 + {{size}}, 1);
+\tfor(size_t i = 0; i < {{size}}; i++)
 \t{
 \t\tinputs1[i] = dis(g) ? -1 : 0;
 \t}"""
 
-INIT_2ARGS_DIS = """\tfor(size_t i = 0; i < {{size}} * {{lmul_coeff}}; i++)
+INIT_2ARGS_DIS = """\tfor(size_t i = 0; i < {{size}}; i++)
 \t{
 \t\tinputs1[i] = dis(g) ? -1 : 0;
 \t\tinputs2[i] = dis(g) ? -1 : 0;
 \t}"""
 
 
-INIT_3ARGS = """\tfor(size_t i = 0; i < {{size}} * {{lmul_coeff}}; i++)
+INIT_3ARGS = """\tfor(size_t i = 0; i < {{size}}; i++)
 \t{
 \t\tinputs1[i] = rnd::uniform<{{dt_ext}}>(seed);
 \t\tinputs2[i] = rnd::uniform<{{dt_ext}}>(seed);
@@ -132,21 +132,21 @@ INIT_3ARGS = """\tfor(size_t i = 0; i < {{size}} * {{lmul_coeff}}; i++)
 \t}
 """
 
-INIT_CAST_2ARGS = """\tstd::iota(inputs1, inputs1 + {{size}} * {{lmul_coeff}}, 1);\n\tmemcpy(inputs2, inputs1, sizeof(inputs1));"""
+INIT_CAST_2ARGS = """\tstd::iota(inputs1, inputs1 + {{size}}, 1);\n\tmemcpy(inputs2, inputs1, sizeof(inputs1));"""
 
 INIT_GATHER = """
-\tfor(size_t i = 0; i < {{size}} * {{lmul_coeff}}; i++)
+\tfor(size_t i = 0; i < {{size}}; i++)
 {
 \t\tinputs1[i] = rnd::uniform<T>(seed);
-\t\tindexes[i] = (i * rnd::uniform<U>(seed)) % ({{size}} * {{lmul_coeff}}); // ensure indexes are within bounds and not all the same
+\t\tindexes[i] = (i * rnd::uniform<U>(seed)) % ({{size}}); // ensure indexes are within bounds and not all the same
 }
 """
 
 INIT_SCATTER = """
-\tfor(size_t i = 0; i < {{size}} * {{lmul_coeff}}; i++)
+\tfor(size_t i = 0; i < {{size}}; i++)
 {
 \t\tinputs1[i] = rnd::uniform<T>(seed);
-\t\tindexes[i] = (i * rnd::uniform<U>(seed)) % ({{size}} * {{lmul_coeff}}); // ensure indexes are within bounds and not all the same
+\t\tindexes[i] = (i * rnd::uniform<U>(seed)) % ({{size}}); // ensure indexes are within bounds and not all the same
 \t\toutputs[i] = 0;
 \t\toutputs_scal[i] = 0;
 }"""
@@ -262,9 +262,9 @@ OP_CMP_2REG = """\t{{msk_type}} m3 = mipp::{{func}}{{mask_kind}}({{mask_args}}r1
 
 ## Unchanged yet
 
-OP_STORE = """\t{{dt_ext}} output[{{size}}*{{lmul_coeff}}];
-\t{{dt_ext}} output_scalar[{{size}}*{{lmul_coeff}}];
-\tfor(size_t i = 0; i < {{size}}*{{lmul_coeff}}; i++){
+OP_STORE = """\t{{dt_ext}} output[{{size}}];
+\t{{dt_ext}} output_scalar[{{size}}];
+\tfor(size_t i = 0; i < {{size}}; i++){
     //dummy init to compare 
     output[i] = i;
     output_scalar[i] = i;
@@ -530,7 +530,7 @@ LAYER_OVERRIDES = {
 
  "hadd_to_scal" : {
         "loop_assert" :"""\t\tbool ov = false; {{dt_ext}} res = 0;
-\t\tfor(size_t j = 0; j < {{size}} * {{lmul_coeff}}; j++){
+\t\tfor(size_t j = 0; j < {{size}}; j++){
 \t\t\tov |= ovf::will_add_overflow<{{dt_ext}}>(res, inputs1[j]);
 \t\t\tif(ov) break;
 \t\t\tres += inputs1[j];
@@ -547,7 +547,7 @@ LAYER_OVERRIDES = {
 
     "hadd" : {
         "loop_assert" :"""\t\tbool ov = false; {{dt_ext}} res = 0;
-\t\tfor(size_t j = 0; j < {{size}} * {{lmul_coeff}}; j++){
+\t\tfor(size_t j = 0; j < {{size}}; j++){
 \t\t\tov |= ovf::will_add_overflow<{{dt_ext}}>(res, inputs1[j]);
 \t\t\tif(ov) break;
 \t\t\tres += inputs1[j];
@@ -564,7 +564,7 @@ LAYER_OVERRIDES = {
 
     "hmul": {
         "loop_assert": """\t\tbool ov = false; {{dt_ext}} res = 1;
-\t\tfor(size_t j = 0; j < {{size}} * {{lmul_coeff}}; j++){
+\t\tfor(size_t j = 0; j < {{size}}; j++){
 \t\t\tov |= ovf::will_mul_overflow<{{dt_ext}}>(res, inputs1[j]);
 \t\t\tif(ov) break;
 \t\t\tres *= inputs1[j];
