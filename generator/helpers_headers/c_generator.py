@@ -1135,6 +1135,12 @@ def gen_c_missing_functions_lmul(isa, file, funcs, lmul):
         for f in funcs:
             file_w = file.get_fd(isa["name"], f)
             for dt in funcs[f]["datatypes"]:
+                
+                # hack skip ldiv 4 rvv rn
+                dt_par, dt_ret = _missing_compute_dt_par_dt_ret(dt)
+                if isa["name"] == "rvv" and lmul < 0 and isa["datatypes"][dt_par]["width"] == "64":
+                    continue
+
                 _emit_separator(f, file_w)
                 _gen_c_missing_one_dt(isa, file_w, funcs, f, dt, lmul=lmul)
 
