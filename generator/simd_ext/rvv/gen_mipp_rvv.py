@@ -170,11 +170,12 @@ def resolve_lmul_in_isa(isa, lmul):
         lmul = "1"
     
     lsuffix = "m" + str(lmul)
-    lsuffix_tmp = lsuffix
-    lmul_tmp = lmul
 
     if int(lmul) < 0 : 
         lsuffix = "mf" + str(-int(lmul))
+
+    lsuffix_tmp = lsuffix
+    lmul_tmp = lmul
     resolved_isa = copy.deepcopy(isa)
     for dt in resolved_isa["datatypes"]:
         if isa_rvv["datatypes"][dt]["width"] == "64" and int(lmul) < 0:

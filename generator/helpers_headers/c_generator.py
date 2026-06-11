@@ -1497,6 +1497,7 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                                 
                         _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, lmul=lmul, masked_version=mask_kind)
                         _missing_emit_ifdef_end(ifd, file)
+                        continue
 
                     print("// ----------------------------------------------------------------------------------------------------------------------------------------------", f, file=file)
 
@@ -1586,8 +1587,6 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                         _missing_emit_ifdef_end(ifd, file)
                     
                         continue
-                    # if ("64" in dt_key) and int(lmul) < 0: 
-                    #     continue
 
                     print("// ----------------------------------------------------------------------------------------------------------------------------------------------", f, file=file)
 
