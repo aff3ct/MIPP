@@ -5,6 +5,7 @@ import sys
 import argparse
 import shutil
 from jinja2 import Template, StrictUndefined
+from copy import deepcopy
 
 path = os.getcwd()
 
@@ -72,6 +73,13 @@ implem_dict = {
     "rvv": {"implem": implems_rvv, "guard": rvv_guard},
     "neon": {"implem": implems_neon, "guard": neon_guard},
     "scalar": {"implem": implems_scalar, "guard": scalar_guard},
+}
+
+implem_dict_ldiv = {
+    "avx512" : {"implem" : implems_avx, "guard" : avx512_guard},
+    "avx" : {"implem" : implems_sse, "guard" : avx_guard},
+    "rvv" : {"implem" : implems_rvv, "guard" : rvv_guard},
+    "scalar" : {"implem" : implems_scalar, "guard" : scalar_guard}
 }
 
 set_skip_testing = {                    
@@ -199,12 +207,10 @@ def lmul_to_str(lmul, mkind=""):
     #2-> m2
     #4-> m4
     #8-> m8
-    #1/2 -> d2
-    #1/4 -> d4
-    #1/8 -> d8
-    
-    #temporary fix. Every generator will be handled by 
-    #layer_X_mask at some point. But we'll keep it that way for now.
+    #-2 -> d2
+    # temporary fix. Every generator will be handled by 
+    # layer_X_mask at some point. But we'll keep it that way for now.
+    lmul = int(lmul)
     if mkind == "":
         match lmul:
             case 0 : return ""
@@ -212,9 +218,9 @@ def lmul_to_str(lmul, mkind=""):
             case 2 : return "m2"
             case 4 : return "m4"
             case 8 : return "m8"
-            case 0.5 : return "d2"
-            case 0.25 : return "d4"
-            case 0.125 : return "d8"
+            case -2 : return "d2"
+            case -4 : return "d4"
+            case -8 : return "d8"
     else:
         match lmul:
             case 0 : return ""
@@ -222,9 +228,10 @@ def lmul_to_str(lmul, mkind=""):
             case 2 : return "_m2"
             case 4 : return "_m4"
             case 8 : return "_m8"
-            case 0.5 : return "_d2"
-            case 0.25 : return "_d4"
-            case 0.125 : return "_d8"
+            case -2 : return "_d2"
+            case -4 : return "_d4"
+            case -8 : return "_d8"
+
 def mask_to_str(mkind, kind, lmul=False, isa=False, gather_like = False) :
     if kind == "c" : 
         if mkind == "" :
@@ -280,8 +287,21 @@ def get_scalar_mask_args(mkind):
 
 ###### GENERATION FUNC ######
 
+def _rvv_skip_pbmatic_ldiv(func, dt, lmul, implems, guard) :
+    # skip fmadd, fmsub, fnmadd, fnmsub for lmul < 0 because of pbmatic
+    if "rvv" in guard or "RVV" in guard :
+       # print("Debug check 1")
+        # print("Debug func:", func)
+        if func in {"cast", "cast_k", "gather", "scatter"} and lmul < 0 :
+            print("Debug check 2")
+            dt_par,dt_ret = split_dt_pair(dt)
+            if "64" in dt_par or "64" in dt_ret :
+                print("Debug check 3")
+                return True
+    return False
+
 # add the type guard for 1 func in 1 implem
-def add_type_guards(func, implem, function, kind="c", lmul=0, mkind=""):
+def add_type_guards(func, implem, function, kind="c", lmul=0, mkind="", guard = ""):
     """
     func: implem key, e.g. "add", "mul", ...
     implem: dict of the implem, e.g. implems_avx512
@@ -318,6 +338,11 @@ def add_type_guards(func, implem, function, kind="c", lmul=0, mkind=""):
     datatypes.sort()
 
     for dt in datatypes:
+
+        if _rvv_skip_pbmatic_ldiv(func, dt, lmul, implem, guard) :
+            print("Debug: skipping", func, dt, lmul, guard)
+            continue
+
         func_defines = gen_func_defines(func, dt, implem)
         dt_suffix = dt_to_suffix(dt)
         parts = split_dt_pair(dt)
@@ -328,7 +353,7 @@ def add_type_guards(func, implem, function, kind="c", lmul=0, mkind=""):
             list_bw.append(dt)
         else:
             
-            #this is the ugly part
+            # HACK this is the ugly part
             if kind == "cpp" or kind == "obj" :
                 dt_suffix = product_type_format_cpp(dt, lmul, write_lmul=write_lmul, gather_like=(func in ["gather", "scatter"]), mask_str=mask_str) #used to handle cast
                 
@@ -389,28 +414,36 @@ def gen_test_type_guards(func, long_name, short_name, kind="c", lmul=0, mkind=""
         layer_dict = get_gen_test_dict_mask(kind)
     lmul_str = "" if lmul == 0 else lmul_to_str(lmul, "")
     res = f'\nTEST_CASE("{long_name} - {kind} {lmul_str} {mkind}", "[{short_name}]") {{\n'
-    for implems in implem_dict.values():
+
+    if lmul >= 0 :
+        cur_implem_dict  = implem_dict
+    else : 
+        cur_implem_dict = implem_dict_ldiv
+
+    for implems in cur_implem_dict.values():
 
         res += implems["guard"] + "\n"
         if func in implems["implem"]:
             if kind == "c":
-                res += add_type_guards(func, implems["implem"], function=f"test_cmipp_{func}", kind=kind, lmul=lmul, mkind=mkind)
+                res += add_type_guards(func, implems["implem"], function=f"test_cmipp_{func}", kind=kind, lmul=lmul, mkind=mkind, guard = implems["guard"])
             elif kind == "cpp":
                 res += add_type_guards(
-                    func,
-                    implems["implem"],
-                    function=f"test_cppmipp_{test_function_name(kind, func)}",
-                    kind=kind,
-                    lmul=lmul,
-                     mkind=mkind,	
+                        func,
+                        implems["implem"],
+                        function=f"test_cppmipp_{test_function_name(kind, func)}",
+                        kind=kind,
+                        lmul=lmul,
+                        mkind=mkind,	
+                        guard = implems["guard"]
                 )
             elif kind == "obj":
                 res += add_type_guards(
-                    func,
-                    implems["implem"],
-                    function=f"test_objmipp_{test_function_name(kind, func)}",
-                    kind=kind,
+                        func,
+                        implems["implem"],
+                        function=f"test_objmipp_{test_function_name(kind, func)}",
+                        kind=kind,
                 )
+
     res += "#else\n"
     res += f'#error "No implementation for {func} in any of the supported architectures"\n'
     res += "#endif\n"
@@ -436,11 +469,16 @@ def gen_cast_test_type_guards(func, long_name, short_name, kind="c", lmul=0, mki
         mkind = ""
     res = f'\nTEST_CASE("{long_name} - {kind} {lmul_str} {mkind}", "[{short_name}]") {{\n'
 
-    for implems in implem_dict.values():
+    if lmul >= 0 :
+        cur_implem_dict  = implem_dict
+    else : 
+        cur_implem_dict = implem_dict_ldiv
+
+    for implems in cur_implem_dict.values():
         res += implems["guard"] + "\n"
         if func in implems["implem"]:
             if kind == "c":
-                res += add_type_guards(func, implems["implem"], function=f"test_cmipp_{func}", kind=kind, lmul=lmul, mkind=mkind)
+                res += add_type_guards(func, implems["implem"], function=f"test_cmipp_{func}", kind=kind, lmul=lmul, mkind=mkind,  guard = implems["guard"])
             elif kind == "cpp":
                 res += add_type_guards(
                     func,
@@ -449,6 +487,7 @@ def gen_cast_test_type_guards(func, long_name, short_name, kind="c", lmul=0, mki
                     kind=kind,
                     lmul=lmul,
                     mkind=mkind,	
+                    guard = implems["guard"]
                 )
             elif kind == "obj":
                 res += add_type_guards(
@@ -774,31 +813,7 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False, lm
             msk_type_scalar=msk_type_scalar,
             mask_str=mask_to_str(mkind, "c"), # used for function name. we want the c style suffix
         )
-    # if float and kind=="cpp" :
-    #     reg_type_scalar = "mipp::rvd<T,1,mipp::ISA::SCALAR>"
-    #     msk_type_scalar = "mipp::rvm<T,1,mipp::ISA::SCALAR>"
-     
-    #     res = func_template.render(
-    #         func=func,
-    #         dt_ext=scalar_type,
-    #         op=layer_dict[func_old]["op"],
-    #         reg_type=reg_type,
-    #         msk_type=msk_type,
-    #         size=size,
-            
-    #         is_float=True,
-    #         is_int=False,
-    #         is_signed=False,
-    #         type_size=float.split("t")[1],
-    #         lmul_suffix=lmul_suffix,
-    #         lmul_coeff=lmul_coeff,
-            
-    #         mask_args=get_mask_args(mkind),
-    #         mask_kind=mask_to_str(mkind, kind),
 
-    #         reg_type_scalar=reg_type_scalar,
-    #         msk_type_scalar=msk_type_scalar,
-    #     )
     if kind == "obj" : #obsolete :(
         res = func_template.render(
             func=func,
@@ -1155,7 +1170,7 @@ def gen_funcs_all_datatypes(func, kind="c", register="rvd", mask="rvm",lmul=0, m
         reg_type = f"mipp::{register}<T>"
         msk_type = f"mipp::{mask}<T>"
         
-        if lmul > 0:
+        if lmul != 0:
             reg_type = f"mipp::{register}<T, {lmul}>"
             msk_type = f"mipp::{mask}<T, {lmul}>"
       
@@ -1168,28 +1183,7 @@ def gen_funcs_all_datatypes(func, kind="c", register="rvd", mask="rvm",lmul=0, m
             lmul=lmul,
             mkind=mkind,
         )
-        
-        # if func in set_float_workaround:
-        #     res += gen_func(
-        #         func,
-        #         "T",
-        #         reg_type=reg_type,
-        #         kind=kind,
-        #         msk_type=msk_type,
-        #         float="float32",
-        #         lmul=lmul,
-        #         mkind=mkind,
-        #     )
-        #     res += gen_func(
-        #         func,
-        #         "T",
-        #         reg_type=reg_type,
-        #         kind=kind,
-        #         msk_type=msk_type,
-        #         float="float64",
-        #         lmul=lmul,
-        #         mkind=mkind,
-        #     )
+
     elif kind == "obj":  # template so no need to loop over datatypes
         res += gen_func(
             func,
@@ -1483,6 +1477,16 @@ def main():#just parse the args and call gen_test_files_all_funcs with the right
         default=[0, 1, 2, 4, 8],
         help="Generate tests for the specified LMUL values.",
     )
+
+    parser.add_argument(
+        "--ldiv",
+        type=int,
+        nargs="+",              # one or more values
+        choices=[2],
+        default = [],
+        help="Generate tests for the specified LDIV values.",
+    )
+
     parser.add_argument(
         "--mask-kind",
         type=str,
@@ -1546,6 +1550,20 @@ def main():#just parse the args and call gen_test_files_all_funcs with the right
                     mkind_print = mkind if mkind != "" else "unmasked"
                     print(f"Generating {kind} tests with lmul = {lmul} and mask kind = {mkind_print}")
                     gen_test_files_all_funcs(kind=kind, lmul=lmul, mkind=mkind, N=args.num_iterations, mode=args.header_type)
+
+            for ldiv in args.ldiv:
+                if kind == "cpp" and args.skip_lmul_cpp and lmul > 0:
+                    continue
+
+                for mkind in args.mask_kind:
+
+                    if kind == "cpp" and args.skip_mask_cpp and mkind != "":
+                        continue
+
+                    mkind_print = mkind if mkind != "" else "unmasked"
+                    print(f"Generating {kind} tests with ldiv = {ldiv} and mask kind = {mkind_print}")
+                    gen_test_files_all_funcs(kind=kind, lmul=(-int(ldiv)), mkind=mkind, N=args.num_iterations, mode=args.header_type)
+                    
 
 
 if __name__ == "__main__":
