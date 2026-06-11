@@ -49,12 +49,12 @@ def gen_c_defines_rvv_ls(file, isa_name, rvv_size):
 def gen_c_structures_rvv_ls(file, rvv_size):
     
     #rvd type generation
-    template = """typedef {{ isa_datatype.reg }} fixed_{lsuffix}_{{isa_datatype.to_ptr}} __attribute__((riscv_rvv_vector_bits({{ rvv_size }}{lmul})));"""
+    template = """typedef {{ isa_datatype.reg }} fixed_{lsuffix_mipp}_{{isa_datatype.to_ptr}} __attribute__((riscv_rvv_vector_bits({{ rvv_size }}{lmul})));"""
     j2_template = Template(template, undefined=StrictUndefined)
     for lmul in all_lmul:
         for dt in isa_rvv["datatypes"]:
             template = j2_template.render(isa_datatype=isa_rvv["datatypes"][dt],rvv_size=rvv_size)
-            template = template.format(lsuffix = "m" + str(lmul), lmul = "*" + str(lmul)) # lmul hack ;)
+            template = template.format(lsuffix = "m" + str(lmul), lsuffix_mipp = "m" + str(lmul), lmul = "*" + str(lmul)) # lmul hack ;)
             print(template, file=file)
 
     ldiv = 2
@@ -62,7 +62,7 @@ def gen_c_structures_rvv_ls(file, rvv_size):
         if isa_rvv["datatypes"][dt]["width"] == "64":
             continue
         template = j2_template.render(isa_datatype=isa_rvv["datatypes"][dt],rvv_size=rvv_size)
-        template = template.format(lsuffix = "d" + str(ldiv), lmul = "/" + str(ldiv)) # lmul hack ;)
+        template = template.format(lsuffix = "mf" + str(ldiv), lmul = "/" + str(ldiv), lsuffix_mipp = "d" + str(ldiv)) # lmul hack ;)
         print(template, file=file)
      
     #rvm type generation
@@ -157,9 +157,12 @@ def resolve_lmul_in_isa(isa, lmul):
     
     lsuffix = "m" + str(lmul)
     if int(lmul) < 0 : 
-        lsuffix = "d" + str(-int(lmul))
+        lsuffix = "mf" + str(-int(lmul))
     resolved_isa = copy.deepcopy(isa)
     for dt in resolved_isa["datatypes"]:
+        if isa_rvv["datatypes"][dt]["width"] == "64" and int(lmul) < 0:
+            continue
+
         for key in resolved_isa["datatypes"][dt]:
             if "{lsuffix}" in resolved_isa["datatypes"][dt][key]:
                 resolved_isa["datatypes"][dt][key] = resolved_isa["datatypes"][dt][key].format(lsuffix=lsuffix)
@@ -168,6 +171,9 @@ def resolve_lmul_in_isa(isa, lmul):
                 eew_emul = 0
                 if int(lmul) == 0:
                     eew_emul = 1
+                elif int(lmul) < 0 :
+                    eew_emul = str(int(int(n_bits)*int(-lmul)))
+                    print("Debug eew_emul computation for lmul " + str(lmul) + " and n_bits " + str(n_bits) + " : " + eew_emul)
                 else :
                     eew_emul = str(int(int(n_bits)/int(lmul)))
                     #print(n_bits, lmul, eew_emul)
