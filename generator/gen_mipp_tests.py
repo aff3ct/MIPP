@@ -290,9 +290,8 @@ def get_scalar_mask_args(mkind):
 def _rvv_skip_pbmatic_ldiv(func, dt, lmul, implems, guard) :
     # skip fmadd, fmsub, fnmadd, fnmsub for lmul < 0 because of pbmatic
     if "rvv" in guard or "RVV" in guard :
-        if func in {"cast", "cast_k", "gather", "scatter"} and lmul < 0 :
-            dt_par,dt_ret = split_dt_pair(dt)
-            if "64" in dt_par or "64" in dt_ret :
+        if func in {"cast", "cast_k", "gather", "scatter", "round"} and lmul < 0 :
+            if "64" in dt :
                 return True
     return False
 
