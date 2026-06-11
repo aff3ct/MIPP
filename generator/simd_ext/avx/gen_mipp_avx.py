@@ -11,6 +11,8 @@ from implem_emu_avx import *
 from c_generator import *
 from generic_emu import *
 
+from implem_sse import isa_sse
+
 from include_gen import IncludeManager
 
 
@@ -27,7 +29,8 @@ def gen_mipp_avx(include_manager):
 
     tpl_header_avx = """#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX_H_
 #define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX_H_
-#include <immintrin.h>"""
+#include <immintrin.h>
+#include <simd_ext/sse/sse_common.h> // ldiv 2 support"""
     j2_template = Template(tpl_header_avx, undefined=StrictUndefined)
     print(j2_template.render(), file=file_common)
 
@@ -48,6 +51,7 @@ def gen_mipp_avx(include_manager):
  
     gen_c_missing_functions(isa_avx, include_manager, copy_mipp_funcs)
     gen_c_lmul(isa_avx, include_manager, copy_mipp_funcs)
+    gen_c_ldiv(isa_avx, isa_sse, include_manager, copy_mipp_funcs)
 
 
     include_manager.resolve_all_dependencies(isa_avx["name"], copy_mipp_funcs)

@@ -463,9 +463,9 @@ def gen_cpp_structures_isa(file, isa):
             print(j2_template.render(datatype=datatypes[dt], lmul=str(lmul), isa_cpp_type=isa_cpp_type, isa_c_name=isa_c_name), file=file)
     # maybe enum shouldn't be defined here idk
 
-    #ldiv
-
-    if isa["name"] == "avx512" or isa["name"] == "scalar":
+    # ldiv
+    # THE IF IS A TEMPORARY HACK
+    if isa["name"] == "avx512" or isa["name"] == "scalar" or isa["name"] == "avx" :
         ldiv = 2
         ldiv_m = -2
         template = """template<> struct rvd_type<{{ datatype.cstd }}, {{ ldiv_m }}, ISA::{{isa_cpp_type}}>{ using type = rvd_{{isa_c_name}}_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t; };"""
@@ -491,8 +491,8 @@ def gen_cpp_constexpr_functions_isa(file, isa):
             print(j2_template.render(datatype=datatypes[dt], lmul=str(lmul), type_category_upper=datatypes[dt]["category"].upper(), lmul_suffix=lmul_suffix, isa_cpp_type=isa_cpp_type), file=file)
     
     # once every isa supports ldiv. This can be moved to the loop above.
-
-    if isa["name"] == "avx512" or isa["name"] == "scalar":
+    # THE IF IS A TEMPORARY HACK
+    if isa["name"] == "avx512" or isa["name"] == "scalar" or isa["name"] == "avx":
         ldiv = -2
         ldiv_suffix = "_D" + str(-ldiv)
         template = """template<> constexpr uint32_t N<{{ datatype.cstd }}, {{ ldiv }}, ISA::{{isa_cpp_type}} >(){ return MIPP_{{isa_cpp_type}}_N_{{type_category_upper}}{{ datatype.n_bits }}{{ ldiv_suffix }}; }"""
@@ -533,7 +533,8 @@ def gen_cpp_functions_isa(include_manager, isa, funcs):
                 print("}", file=file)
             mask_status = funcs[f]["mask_support"]
 
-            if isa["name"] == "avx512" or isa["name"] == "scalar":
+            # THE IF IS A TEMPORARY HACK
+            if isa["name"] == "avx512" or isa["name"] == "scalar" or isa["name"] == "avx":
                 ldiv = -2
                 print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, cpp_func_name, ldiv, isa_name=True, cpp=True) + " {", file=file)
                 print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, "", c_func_name + "_d" + str(-ldiv), ldiv, False) + ";", file=file)
@@ -551,7 +552,8 @@ def gen_cpp_functions_isa(include_manager, isa, funcs):
                     if mask_status.is_masksable():
                         _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "S", "masks", lmul=lmul, isa = isa, isa_name=True)
 
-                if isa["name"] == "avx512" or isa["name"] == "scalar":
+                # THE IF IS A TEMPORARY HACK
+                if isa["name"] == "avx512" or isa["name"] == "scalar" or isa["name"] == "avx": 
                     ldiv = -2
                     if mask_status.is_maskable():
                         _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "M", "mask", lmul=ldiv, isa = isa, isa_name=True)

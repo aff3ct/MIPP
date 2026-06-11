@@ -10,30 +10,30 @@ from generic_emu import *
 # All of this hardcoding stuff is not looking good. I don't like it. I don't wanna break the generator just yet either though.
 from implem_avx512 import isa_avx512
 from implem_avx import isa_avx
+from implem_sse import isa_sse
 
-def _gen_ldiv_structs_avx512(file):
-    # We want to use avx2 for ldiv emulation, so we need to define the corresponding types.
-
+def _gen_ldiv_structs_avx(isa_base, isa_div, file):
     # hardcoded d2 is not very good looking tbh.
-    template = """typedef rvd_{{ isa_avx.name }}_{{datatype.category}}{{datatype.n_bits}}_t rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d2_t;"""
+    template = """typedef rvd_{{ isa_div.name }}_{{datatype.category}}{{datatype.n_bits}}_t rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d2_t;"""
     j2_template = Template(template, undefined=StrictUndefined)
-    for dt in isa_avx512["datatypes"]:
-        if "ldiv" in isa_avx512["datatypes"][dt] and len(isa_avx512["datatypes"][dt]["ldiv"]) > 0:
-            print(j2_template.render(isa=isa_avx512, isa_avx=isa_avx, datatype=datatypes[dt]), file=file)
+    for dt in isa_base["datatypes"]:
+        if "ldiv" in isa_base["datatypes"][dt] and len(isa_base["datatypes"][dt]["ldiv"]) > 0:
+            print(j2_template.render(isa=isa_base, isa_div=isa_div, datatype=datatypes[dt]), file=file)
 
-    template = """typedef rvm_{{ isa_avx.name }}_{{datatype.category}}{{datatype.n_bits}}_t rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d2_t;"""
+    template = """typedef rvm_{{ isa_div.name }}_{{datatype.category}}{{datatype.n_bits}}_t rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d2_t;"""
     j2_template = Template(template, undefined=StrictUndefined)
-    for dt in isa_avx512["datatypes"]:
-        if "ldiv" in isa_avx512["datatypes"][dt] and len(isa_avx512["datatypes"][dt]["ldiv"]) > 0:
-            print(j2_template.render(isa=isa_avx512, isa_avx=isa_avx, datatype=datatypes[dt]), file=file)
+    for dt in isa_base["datatypes"]:
+        if "ldiv" in isa_base["datatypes"][dt] and len(isa_base["datatypes"][dt]["ldiv"]) > 0:
+            print(j2_template.render(isa=isa_base, isa_div=isa_div, datatype=datatypes[dt]), file=file)
 
-def _gen_ldiv_defines_avx512(file):
+def _gen_ldiv_defines_avx(isa_base, isa_div, file):
     template = """#define MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{n_bits}}_D2 {{n_elmts_d2}}"""
     j2_template = Template(template, undefined=StrictUndefined)
-    for dt in isa_avx512["datatypes"]:
-        if "ldiv" in isa_avx512["datatypes"][dt] and len(isa_avx512["datatypes"][dt]["ldiv"]) > 0:
-            n_elmts_d2 = int(isa_avx512["size"] / (2 * datatypes[dt]["n_bits"]))
-            print(j2_template.render(isa_name_upper=isa_avx512["name"].upper(), type_category_upper=datatypes[dt]["category"].upper(), n_bits=datatypes[dt]["n_bits"], n_elmts_d2=n_elmts_d2), file=file)
+    for dt in isa_base["datatypes"]:
+        if "ldiv" in isa_base["datatypes"][dt] and len(isa_base["datatypes"][dt]["ldiv"]) > 0:
+            n_elmts_d2 = int(isa_base["size"] / (2 * datatypes[dt]["n_bits"]))
+            print(j2_template.render(isa_name_upper=isa_base["name"].upper(), type_category_upper=datatypes[dt]["category"].upper(), n_bits=datatypes[dt]["n_bits"], n_elmts_d2=n_elmts_d2), file=file)
+
 def gen_c_defines(isa, file):
     """
     Writes the number of elements in the SIMD 
@@ -169,8 +169,11 @@ def gen_c_structures(isa, file, is_scalar=False):
                 print(j2_template.render(isa=isa, datatype=datatypes[dt], lmul=str(lmul), lmul_2=str(lmul_2)), file=file)
     
     if isa["name"] == "avx512" : 
-        _gen_ldiv_structs_avx512(file)
-        _gen_ldiv_defines_avx512(file)
+        _gen_ldiv_structs_avx(isa_avx512, isa_avx, file)
+        _gen_ldiv_defines_avx(isa_avx512, isa_avx, file)
+    if isa["name"] == "avx" : 
+        _gen_ldiv_structs_avx(isa_avx, isa_sse, file)
+        _gen_ldiv_defines_avx(isa_avx, isa_sse, file)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Shared helpers
@@ -976,7 +979,7 @@ def _gen_c_missing_one_masked(isa, file, funcs, f, dt, mask_kind, lmul=0):
   
         _missing_emit_ifdef_end(ifd, file)
 
-def _gen_c_function_one_ldiv_avx512(isa_avx512, isa_div, file, funcs, f, ff, dt, mask_kind, ldiv=-2):
+def _gen_c_function_one_ldiv_avx(isa_base, isa_div, file, funcs, f, ff, dt, mask_kind, ldiv=-2):
     """
     fairly straightforward the uint32_d2 avx function is JUST the uint32_m1 version of avx so wrapper to it.
     smth like : 
@@ -999,11 +1002,11 @@ def _gen_c_function_one_ldiv_avx512(isa_avx512, isa_div, file, funcs, f, ff, dt,
     dt_key = dt_par + "," + dt_ret
 
     if len(dt.split(',')) <= 1:
-        func_name = build_func_name_short(isa_avx512, dt_par, f, True)
+        func_name = build_func_name_short(isa_base, dt_par, f, True)
     else:
-        func_name = build_func_name(isa_avx512, dt_par, dt_ret, f, True)
+        func_name = build_func_name(isa_base, dt_par, dt_ret, f, True)
 
-    print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_avx512, func_name, lmul=-2,  isa_name=True, masked_version=mask_kind) + " {", file=file)
+    print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_base, func_name, lmul=-2,  isa_name=True, masked_version=mask_kind) + " {", file=file)
    
     if len(dt.split(',')) <= 1:
         func_name_impl = build_func_name_short(isa_div, dt_par, f, True, masked_version=mask_kind)
@@ -1376,34 +1379,34 @@ def gen_c_lmul(isa, include_manager, funcs):
                 if mask_status.is_masksable() :			
                     _c_lmul_writer(f, dt, dt_par, dt_ret, isa, funcs, file_w, mask_type="masks", lmul=lmul)
 
-def gen_c_ldiv(isa, include_manager, funcs):
+def gen_c_ldiv(isa_base, isa_div, include_manager, funcs):
     """
     """
-    if isa["name"] != "avx512": 
-        print(f"in c_generator.gen_c_ldiv : error : ldiv not yet supported in {isa["name"]}")
+    if isa_base["name"] != "avx512" and isa_base["name"] != "avx": 
+        print(f"in c_generator.gen_c_ldiv : error : ldiv not yet supported in {isa_div['name']}")
         exit(-1)
     for f in funcs : 
-        file_w = include_manager.get_fd(isa["name"], f)
+        file_w = include_manager.get_fd(isa_base["name"], f)
         for dt in funcs[f]["datatypes"]:
             dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
-            _gen_c_function_one_ldiv_avx512(isa_avx512=isa, isa_div=isa_avx, file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind=None, ldiv=2)
-            # _gen_c_function_one_ldiv_avx512(isa_avx512=isa, isa_div="sse", file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind=None, ldiv=4)
+            _gen_c_function_one_ldiv_avx(isa_base=isa_base, isa_div=isa_div, file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind=None, ldiv=2)
+            # _gen_c_function_one_ldiv_avx(isa_base=isa_base, isa_div=isa_div, file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind=None, ldiv=4)
         mask_support = funcs[f]["mask_support"] if "mask_support" in funcs[f] else None
         if mask_support and mask_support.is_maskable():
             for dt in funcs[f]["datatypes"]:
                 dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
-                _gen_c_function_one_ldiv_avx512(isa_avx512=isa, isa_div=isa_avx, file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind="mask", ldiv=2)
-                # _gen_c_function_one_ldiv_avx512(isa_avx512=isa, isa_div="sse", file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind="mask", ldiv=4)
+                _gen_c_function_one_ldiv_avx(isa_base=isa_base, isa_div=isa_div, file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind="mask", ldiv=2)
+                # _gen_c_function_one_ldiv_avx(isa_base=isa_base, isa_div=isa_div, file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind="mask", ldiv=4)
         if mask_support and mask_support.is_maskzable():
             for dt in funcs[f]["datatypes"]:
                 dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
-                _gen_c_function_one_ldiv_avx512(isa_avx512=isa, isa_div=isa_avx, file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind="maskz", ldiv=2)
-                # _gen_c_function_one_ldiv_avx512(isa_avx512=isa, isa_div="sse", file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind="maskz", ldiv=4)
+                _gen_c_function_one_ldiv_avx(isa_base=isa_base, isa_div=isa_div, file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind="maskz", ldiv=2)
+                # _gen_c_function_one_ldiv_avx(isa_base=isa_base, isa_div=isa_div, file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind="maskz", ldiv=4)
         if mask_support and mask_support.is_masksable():
             for dt in funcs[f]["datatypes"]:
                 dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
-                _gen_c_function_one_ldiv_avx512(isa_avx512=isa, isa_div=isa_avx, file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind="masks", ldiv=2)
-                # _gen_c_function_one_ldiv_avx512(isa_avx512=isa, isa_div="sse", file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind="masks", ldiv=4)
+                _gen_c_function_one_ldiv_avx(isa_base=isa_base, isa_div=isa_div, file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind="masks", ldiv=2)
+                # _gen_c_function_one_ldiv_avx(isa_base=isa_base, isa_div=isa_div, file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind="masks", ldiv=4)
 # ----------------------------------------------------------------------------------------------------------------------
 # RVV lmul bookkeeping helpers (moved from gen_mipp_rvv.py)
 # ----------------------------------------------------------------------------------------------------------------------

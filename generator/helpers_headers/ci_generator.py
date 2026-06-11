@@ -10,6 +10,7 @@ from c_generator import gen_c_horiz_lmul
 from generic_emu import implems_horiz_lmul_generic_emu
 
 from implem_avx512 import isa_avx512
+from implem_avx import isa_avx
 
 def get_sub_isa(isa, ldiv, isa_list):
     for sub_isa in isa_list:
@@ -322,7 +323,7 @@ def gen_ci_structures(isa_list, file):
             print(j2_template.render(isa=isa, datatype=datatypes[dt]), file=file)
         
 
-        if isa["name"] == "avx512" or isa["name"] == "scalar" :
+        if isa["name"] == "avx512" or isa["name"] == "scalar" or isa["name"] == "avx" :
             ldiv = 2
             template = """typedef rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t rvd_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t;"""
             j2_template = Template(template, undefined=StrictUndefined)
@@ -455,6 +456,17 @@ def ci_ldiv_writer(f,func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_
         func_name_impl = build_func_name(isa_avx512, dt_par, dt_ret, f, True,  ldiv, mask_type)
     print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa_avx512, func_name_impl, masked_version=mask_type) + ";", file=file)
     print("}", file=file)
+
+    print("#elif defined(MIPP_AVX)", file=file)
+
+    print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, {}, func_name, ldiv, False, False, mask_type) + " {", file=file)
+    if len(dt.split(',')) <= 1:
+        func_name_impl = build_func_name_short(isa_avx, dt_par, f, True, ldiv, mask_type)
+    else:
+        func_name_impl = build_func_name(isa_avx, dt_par, dt_ret, f, True,  ldiv, mask_type)
+    print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa_avx, func_name_impl, masked_version=mask_type) + ";", file=file)
+    print("}", file=file)
+
     print("#elif defined(MIPP_SCALAR)", file=file)
 
     print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, {}, func_name, ldiv, False, False, mask_type) + " {", file=file)

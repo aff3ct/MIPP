@@ -48,7 +48,7 @@ def gen_mipp_avx512(include_manager):
     gen_c_missing_functions(isa_avx512, include_manager, copy_mipp_funcs)
     gen_c_lmul(isa_avx512, include_manager, copy_mipp_funcs)
 
-    gen_c_ldiv(isa_avx512, include_manager, copy_mipp_funcs)
+    gen_c_ldiv(isa_avx512, isa_avx, include_manager, copy_mipp_funcs)
 
  
     include_manager.resolve_all_dependencies(isa_avx512["name"], copy_mipp_funcs)
