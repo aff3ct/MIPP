@@ -38,20 +38,35 @@ def gen_c_defines_rvv_ls(file, isa_name, rvv_size):
             template = """#define MIPP_RVV_N_{{type_category_upper}}{{n_bits}}_M{{lmul}} {{type_size}}"""
             j2_template = Template(template, undefined=StrictUndefined)
             print(j2_template.render(rvv_size=rvv_size, n_bits=n_bits, type_size = type_size, type_category_upper=datatypes[dt]["category"].upper(), lmul=lmul), file=file)
+    ldiv = 2
+    for dt in isa_rvv["datatypes"]:
+        n_bits=datatypes[dt]["n_bits"]
+        type_size = f'{rvv_size}/{n_bits}/{ldiv}'
+        template = """#define MIPP_RVV_N_{{type_category_upper}}{{n_bits}}_D{{ldiv}} {{type_size}}"""
+        j2_template = Template(template, undefined=StrictUndefined)
+        print(j2_template.render(rvv_size=rvv_size, n_bits=n_bits, type_size = type_size, type_category_upper=datatypes[dt]["category"].upper(), ldiv=ldiv), file=file)
 
 def gen_c_structures_rvv_ls(file, rvv_size):
     
     #rvd type generation
-    template = """typedef {{ isa_datatype.reg }} fixed_m{lmul}_{{isa_datatype.to_ptr}} __attribute__((riscv_rvv_vector_bits({{ rvv_size }}*{lmul})));"""
+    template = """typedef {{ isa_datatype.reg }} fixed_{lsuffix}_{{isa_datatype.to_ptr}} __attribute__((riscv_rvv_vector_bits({{ rvv_size }}{lmul})));"""
     j2_template = Template(template, undefined=StrictUndefined)
     for lmul in all_lmul:
         for dt in isa_rvv["datatypes"]:
             template = j2_template.render(isa_datatype=isa_rvv["datatypes"][dt],rvv_size=rvv_size)
-            template = template.format(lmul = lmul)#lmul hack;)
+            template = template.format(lsuffix = "m" + str(lmul), lmul = "*" + str(lmul)) # lmul hack ;)
             print(template, file=file)
+
+    ldiv = 2
+    for dt in isa_rvv["datatypes"]:
+        if isa_rvv["datatypes"][dt]["width"] == "64":
+            continue
+        template = j2_template.render(isa_datatype=isa_rvv["datatypes"][dt],rvv_size=rvv_size)
+        template = template.format(lsuffix = "d" + str(ldiv), lmul = "/" + str(ldiv)) # lmul hack ;)
+        print(template, file=file)
      
     #rvm type generation
-    template = """typedef {{isa_datatype.msk}} fixed_m{lmul}_bool{n_bits}_t __attribute__((riscv_rvv_vector_bits({{ rvv_size }}*{lmul}/(8*sizeof({{isa_datatype.to_ptr}})))));"""
+    template = """typedef {{isa_datatype.msk}} fixed_{lsuffix}_bool{n_bits}_t __attribute__((riscv_rvv_vector_bits({{ rvv_size }}{lmul}/(8*sizeof({{isa_datatype.to_ptr}})))));"""
     j2_template = Template(template, undefined=StrictUndefined)
     dt_list = {uint64, uint32, uint16, uint8}
     for lmul in all_lmul:
@@ -59,20 +74,40 @@ def gen_c_structures_rvv_ls(file, rvv_size):
             n_bits = datatypes[dt]["n_bits"]
             nb_elem = f'{rvv_size} / {n_bits}'  	
             tmp = j2_template.render(rvv_size=rvv_size, isa_datatype=isa_rvv["datatypes"][dt], nb_elem=nb_elem)  
-            tmp = tmp.format(lmul = lmul, eew_emul = str(int(n_bits/(lmul))), n_bits = str(n_bits))#lmul hack;)   
+            tmp = tmp.format(lsuffix = "m" + str(lmul), lmul = "*" + str(lmul), eew_emul = str(int(n_bits/(lmul))), n_bits = str(n_bits))#lmul hack;)   
             print(tmp, file=file)
         print("\n", file=file)
 
-    #rvd struct generation
-    template = """typedef struct { fixed_m{lmul}_{{isa_datatype.to_ptr }} r; } rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m{lmul}_t;"""
+    # eew_emul computation is suspicious.
+    ldiv = 2 
+    for dt in dt_list:
+        if isa_rvv["datatypes"][dt]["width"] == "64":
+            continue
+        n_bits = datatypes[dt]["n_bits"]
+        nb_elem = f'{rvv_size} / {n_bits}'  	
+        tmp = j2_template.render(rvv_size=rvv_size, isa_datatype=isa_rvv["datatypes"][dt], nb_elem=nb_elem)  
+        tmp = tmp.format(lsuffix = "d" + str(ldiv), lmul = "/" + str(ldiv), eew_emul = str(int(n_bits*(ldiv))), n_bits = str(n_bits))#lmul hack;)   
+        print(tmp, file=file)
 
+    #rvd struct generation
+    template = """typedef struct { fixed_{lsuffix}_{{isa_datatype.to_ptr }} r; } rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_{lsuffix}_t;"""
     for lmul in all_lmul:
         for dt in isa_rvv["datatypes"]:
             n_bits = datatypes[dt]["n_bits"]
             nb_elem = f'{rvv_size} / {n_bits} * {lmul}'
-            tmp = template.replace("{lmul}", str(lmul))
+            tmp = template.replace("{lsuffix}", "m" + str(lmul))
             j2_template = Template(tmp, undefined=StrictUndefined)
             print(j2_template.render(isa=isa_rvv,rvv_size=rvv_size,isa_datatype=isa_rvv["datatypes"][dt], datatype=datatypes[dt], lmul=lmul), file=file)
+    
+    ldiv = 2
+    for dt in isa_rvv["datatypes"]:
+        if isa_rvv["datatypes"][dt]["width"] == "64":
+            continue
+        n_bits = datatypes[dt]["n_bits"]
+        nb_elem = f'{rvv_size} / {n_bits} / {ldiv}'
+        tmp = template.replace("{lsuffix}", "d" + str(ldiv))
+        j2_template = Template(tmp, undefined=StrictUndefined)
+        print(j2_template.render(isa=isa_rvv,rvv_size=rvv_size,isa_datatype=isa_rvv["datatypes"][dt], datatype=datatypes[dt], lmul=ldiv), file=file)
 
     #typedef of rvd m1 to no suffix
     template = """typedef rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m1_t rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
@@ -84,17 +119,28 @@ def gen_c_structures_rvv_ls(file, rvv_size):
         print(j2_template.render(isa=isa_rvv,rvv_size=rvv_size,isa_datatype=isa_rvv["datatypes"][dt], datatype=datatypes[dt], lmul=""), file=file)
     
     #rvm struct generation
-    template = """typedef struct { fixed_m{lmul}_bool{n_bits}_t m; } rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m{lmul}_t;"""
+    template = """typedef struct { fixed_{lsuffix}_bool{n_bits}_t m; } rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_{lsuffix}_t;"""
     j2_template = Template(template, undefined=StrictUndefined)
        
     for lmul in all_lmul:
         for dt in isa_rvv["datatypes"]:
             n_bits = datatypes[dt]["n_bits"]
             nb_elem = f'{rvv_size} / {n_bits} * {lmul}'
-            tmp = template.replace("{lmul}", str(lmul))
+            tmp = template.replace("{lsuffix}", "m" + str(lmul))
             tmp = tmp.replace("{n_bits}", str(n_bits))
             j2_template = Template(tmp, undefined=StrictUndefined)
             print(j2_template.render(isa=isa_rvv,rvv_size=rvv_size,isa_datatype=isa_rvv["datatypes"][dt], datatype=datatypes[dt], lmul=lmul), file=file)
+
+    ldiv = 2
+    for dt in isa_rvv["datatypes"]:
+        if isa_rvv["datatypes"][dt]["width"] == "64":
+            continue
+        n_bits = datatypes[dt]["n_bits"]
+        nb_elem = f'{rvv_size} / {n_bits} / {ldiv}'
+        tmp = template.replace("{lsuffix}", "d" + str(ldiv))
+        tmp = tmp.replace("{n_bits}", str(n_bits))
+        j2_template = Template(tmp, undefined=StrictUndefined)
+        print(j2_template.render(isa=isa_rvv,rvv_size=rvv_size,isa_datatype=isa_rvv["datatypes"][dt], datatype=datatypes[dt], lmul=ldiv), file=file)
     
     template = """typedef rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m1_t rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
     for dt in isa_rvv["datatypes"]:
@@ -108,11 +154,15 @@ def gen_c_structures_rvv_ls(file, rvv_size):
 def resolve_lmul_in_isa(isa, lmul):
     if lmul == "0" or lmul == 0:
         lmul = "1"
+    
+    lsuffix = "m" + str(lmul)
+    if int(lmul) < 0 : 
+        lsuffix = "d" + str(-int(lmul))
     resolved_isa = copy.deepcopy(isa)
     for dt in resolved_isa["datatypes"]:
         for key in resolved_isa["datatypes"][dt]:
-            if "{lmul}" in resolved_isa["datatypes"][dt][key]:
-                resolved_isa["datatypes"][dt][key] = resolved_isa["datatypes"][dt][key].format(lmul=lmul)
+            if "{lsuffix}" in resolved_isa["datatypes"][dt][key]:
+                resolved_isa["datatypes"][dt][key] = resolved_isa["datatypes"][dt][key].format(lsuffix=lsuffix)
             if "{eew_emul}" in resolved_isa["datatypes"][dt][key]:
                 n_bits = datatypes[dt]["n_bits"]
                 eew_emul = 0
@@ -184,6 +234,14 @@ typedef double float64_t;//remove after debug"""
         gen_c_functions_rvv(resolved_isa, include_manager, copy_mipp_funcs, implems_mask_generic_emu, lmul=lmul)
 
         gen_c_missing_functions_lmul(resolved_isa, include_manager, copy_mipp_funcs, lmul=lmul)
+    
+    ldiv = -2
+    resolved_isa = resolve_lmul_in_isa(isa_rvv, ldiv)
+    gen_c_functions_rvv(resolved_isa, include_manager, copy_mipp_funcs, implems_rvv, lmul=ldiv)
+    gen_c_functions_rvv(resolved_isa, include_manager, copy_mipp_funcs, implems_emu_rvv, lmul=ldiv)
+    gen_c_functions_rvv(resolved_isa, include_manager, copy_mipp_funcs, implems_generic_emu, lmul=ldiv)
+    gen_c_functions_rvv(resolved_isa, include_manager, copy_mipp_funcs, implems_mask_generic_emu, lmul=ldiv)
+    gen_c_missing_functions_lmul(resolved_isa, include_manager, copy_mipp_funcs, lmul=ldiv)
     
     #now that dependencies are resolved and functions are generated we can generate the headers for the functions with the correct includes
     #resolve all deps 

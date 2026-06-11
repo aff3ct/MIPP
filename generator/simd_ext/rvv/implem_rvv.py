@@ -41,47 +41,43 @@ isa_rvv = {
     #with the value. Useful for genericity. 
     
     #I'm adding fields to it rn. It makes it more crowded and less legible. But it works.
+
     "datatypes" : {
-        float64 : {"data_ext" : "f64m{lmul}", "data_ext_logi" : "b{eew_emul}", "data_ext_msk"  : "b64",                 "reg" : "vfloat64m{lmul}_t", "msk" : "vbool{eew_emul}_t",
-                   "to_ptr"   : "float64_t",  "reg_dt_ext"    : "f64",         "uint_data_ext" : "u64m{lmul}", "int_data_ext" : "i64m{lmul}",       "width": "64", "ldiv" : []} ,
+        float64 : {"data_ext" : "f64{lsuffix}", "data_ext_logi" : "b{eew_emul}", "data_ext_msk"  : "b64",                 "reg" : "vfloat64{lsuffix}_t", "msk" : "vbool{eew_emul}_t",
+                   "to_ptr"   : "float64_t",  "reg_dt_ext"    : "f64",         "uint_data_ext" : "u64{lsuffix}", "int_data_ext" : "i64{lsuffix}",       "width": "64", "ldiv" : [2]} ,
         
-        float32 : {"data_ext" : "f32m{lmul}", "data_ext_logi" : "b{eew_emul}","data_ext_msk"  : "b32",                  "reg" : "vfloat32m{lmul}_t", "msk" : "vbool{eew_emul}_t",
-                   "to_ptr"   : "float32_t",  "reg_dt_ext"    : "f32",        "uint_data_ext" : "u32m{lmul}",  "int_data_ext" : "i32m{lmul}",      "width" : "32", "ldiv" : [2]},
+        float32 : {"data_ext" : "f32{lsuffix}", "data_ext_logi" : "b{eew_emul}","data_ext_msk"  : "b32",                  "reg" : "vfloat32{lsuffix}_t", "msk" : "vbool{eew_emul}_t",
+                   "to_ptr"   : "float32_t",  "reg_dt_ext"    : "f32",        "uint_data_ext" : "u32{lsuffix}",  "int_data_ext" : "i32{lsuffix}",      "width" : "32", "ldiv" : [2]},
         
-        int64   : {"data_ext" : "i64m{lmul}", "data_ext_logi" : "b{eew_emul}","data_ext_msk"  : "b64",                  "reg" : "vint64m{lmul}_t",   "msk" : "vbool{eew_emul}_t",
-                   "to_ptr"   : "int64_t",    "reg_dt_ext"    : "i64",        "uint_data_ext" : "u64m{lmul}",  "int_data_ext" : "i64m{lmul}",       "width": "64", "ldiv" : [] } ,
+        int64   : {"data_ext" : "i64{lsuffix}", "data_ext_logi" : "b{eew_emul}","data_ext_msk"  : "b64",                  "reg" : "vint64{lsuffix}_t",   "msk" : "vbool{eew_emul}_t",
+                   "to_ptr"   : "int64_t",    "reg_dt_ext"    : "i64",        "uint_data_ext" : "u64{lsuffix}",  "int_data_ext" : "i64{lsuffix}",       "width": "64", "ldiv" : [2] } ,
         
-        int32   : {"data_ext" : "i32m{lmul}", "data_ext_logi" : "b{eew_emul}", "data_ext_msk" : "b32",                 "reg" : "vint32m{lmul}_t",   "msk" : "vbool{eew_emul}_t",
-                   "to_ptr"   : "int32_t",    "reg_dt_ext"    : "i32",        "uint_data_ext" : "u32m{lmul}", "int_data_ext" : "i32m{lmul}",      "width" : "32", "ldiv" : [2]} ,
+        int32   : {"data_ext" : "i32{lsuffix}", "data_ext_logi" : "b{eew_emul}", "data_ext_msk" : "b32",                 "reg" : "vint32{lsuffix}_t",   "msk" : "vbool{eew_emul}_t",
+                   "to_ptr"   : "int32_t",    "reg_dt_ext"    : "i32",        "uint_data_ext" : "u32{lsuffix}", "int_data_ext" : "i32{lsuffix}",      "width" : "32", "ldiv" : [2]} ,
         
-        int16   : {"data_ext" : "i16m{lmul}", "data_ext_logi" : "b{eew_emul}", "data_ext_msk" : "b16",                 "reg" : "vint16m{lmul}_t",   "msk" : "vbool{eew_emul}_t",
-                   "to_ptr"   : "int16_t",    "reg_dt_ext"    : "i16",        "uint_data_ext" : "u16m{lmul}", "int_data_ext" : "i16m{lmul}",      "width" : "16", "ldiv" : [2,4]} ,
+        int16   : {"data_ext" : "i16{lsuffix}", "data_ext_logi" : "b{eew_emul}", "data_ext_msk" : "b16",                 "reg" : "vint16{lsuffix}_t",   "msk" : "vbool{eew_emul}_t",
+                   "to_ptr"   : "int16_t",    "reg_dt_ext"    : "i16",        "uint_data_ext" : "u16{lsuffix}", "int_data_ext" : "i16{lsuffix}",      "width" : "16", "ldiv" : [2]} ,
         
-        int8    : {"data_ext" : "i8m{lmul}",  "data_ext_logi" : "b{eew_emul}","data_ext_msk"  : "b8",                  "reg" : "vint8m{lmul}_t",    "msk" : "vbool{eew_emul}_t",
-                   "to_ptr"   : "int8_t",     "reg_dt_ext"    : "i8",         "uint_data_ext" : "u8m{lmul}",  "int_data_ext" : "i8m{lmul}",       "width" : "8", "ldiv" : [2,4,8]} ,
+        int8    : {"data_ext" : "i8{lsuffix}",  "data_ext_logi" : "b{eew_emul}","data_ext_msk"  : "b8",                  "reg" : "vint8{lsuffix}_t",    "msk" : "vbool{eew_emul}_t",
+                   "to_ptr"   : "int8_t",     "reg_dt_ext"    : "i8",         "uint_data_ext" : "u8{lsuffix}",  "int_data_ext" : "i8{lsuffix}",       "width" : "8", "ldiv" : [2]} ,
         
-        uint64  : {"data_ext" : "u64m{lmul}", "data_ext_logi" : "b{eew_emul}","data_ext_msk" : "b64",                  "reg" : "vuint64m{lmul}_t",  "msk" : "vbool{eew_emul}_t",
-                   "to_ptr"   : "uint64_t",   "reg_dt_ext"    : "u64",       "uint_data_ext" : "u64m{lmul}",  "int_data_ext" : "i64m{lmul}",      "width" : "64", "ldiv" : []} ,
+        uint64  : {"data_ext" : "u64{lsuffix}", "data_ext_logi" : "b{eew_emul}","data_ext_msk" : "b64",                  "reg" : "vuint64{lsuffix}_t",  "msk" : "vbool{eew_emul}_t",
+                   "to_ptr"   : "uint64_t",   "reg_dt_ext"    : "u64",       "uint_data_ext" : "u64{lsuffix}",  "int_data_ext" : "i64{lsuffix}",      "width" : "64", "ldiv" : [2]} ,
         
-        uint32  : {"data_ext" : "u32m{lmul}", "data_ext_logi" : "b{eew_emul}",         "data_ext_msk" : "b32",         "reg" : "vuint32m{lmul}_t",  "msk" : "vbool{eew_emul}_t",
-                   "to_ptr"   : "uint32_t",   "reg_dt_ext"    : "u32",       "uint_data_ext" : "u32m{lmul}",  "int_data_ext" : "i32m{lmul}",      "width" : "32", "ldiv" : [2]} ,
+        uint32  : {"data_ext" : "u32{lsuffix}", "data_ext_logi" : "b{eew_emul}",         "data_ext_msk" : "b32",         "reg" : "vuint32{lsuffix}_t",  "msk" : "vbool{eew_emul}_t",
+                   "to_ptr"   : "uint32_t",   "reg_dt_ext"    : "u32",       "uint_data_ext" : "u32{lsuffix}",  "int_data_ext" : "i32{lsuffix}",      "width" : "32", "ldiv" : [2]} ,
         
-        uint16  : {"data_ext" : "u16m{lmul}", "data_ext_logi" : "b{eew_emul}",         "data_ext_msk" : "b16",         "reg" : "vuint16m{lmul}_t",  "msk" : "vbool{eew_emul}_t",
-                   "to_ptr"   : "uint16_t",   "reg_dt_ext"    : "u16",       "uint_data_ext" : "u16m{lmul}",  "int_data_ext" : "i16m{lmul}",      "width" :"16", "ldiv" : [2,4]} ,
+        uint16  : {"data_ext" : "u16{lsuffix}", "data_ext_logi" : "b{eew_emul}",         "data_ext_msk" : "b16",         "reg" : "vuint16{lsuffix}_t",  "msk" : "vbool{eew_emul}_t",
+                   "to_ptr"   : "uint16_t",   "reg_dt_ext"    : "u16",       "uint_data_ext" : "u16{lsuffix}",  "int_data_ext" : "i16{lsuffix}",      "width" :"16", "ldiv" : [2]} ,
         
-        uint8   : {"data_ext" : "u8m{lmul}",  "data_ext_logi" : "b{eew_emul}",         "data_ext_msk" : "b8",          "reg" : "vuint8m{lmul}_t",   "msk" : "vbool{eew_emul}_t",
-                   "to_ptr"   : "uint8_t",    "reg_dt_ext"    : "u8",        "uint_data_ext" : "u8m{lmul}",   "int_data_ext" : "i8m{lmul}",       "width" : "8", "ldiv" : [2,4,8]} ,
+        uint8   : {"data_ext" : "u8{lsuffix}",  "data_ext_logi" : "b{eew_emul}",         "data_ext_msk" : "b8",          "reg" : "vuint8{lsuffix}_t",   "msk" : "vbool{eew_emul}_t",
+                   "to_ptr"   : "uint8_t",    "reg_dt_ext"    : "u8",        "uint_data_ext" : "u8{lsuffix}",   "int_data_ext" : "i8{lsuffix}",       "width" : "8", "ldiv" : [2]} ,
     },
 }#I added a bunch of keys to datatypes dictionnary bc they will be necessary for conversion.
 #this solution is really unelegant and I might want to do it differently.
 
 #list of templates 4 intrinsics
 """
-Load/store currently working. 
-
-One smart thing I'll try to do is to "factorize" template 
-i.e instructions sharing the same naming convention should be regrouped as much as possible. 
-
 See : https://github.com/riscv-non-isa/riscv-rvv-intrinsic-doc/blob/main/doc/rvv-intrinsic-spec.adoc#explicit-naming-scheme 
 for details
 """

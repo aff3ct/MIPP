@@ -1016,10 +1016,6 @@ def _gen_c_function_one_ldiv_avx(isa_base, isa_div, file, funcs, f, ff, dt, mask
     print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa_div, func_name_impl, masked_version=mask_kind) + ";", file=file)
     print("}", file=file)
 
-    
-
-
-
 # ----------------------------------------------------------------------------------------------------------------------
 # Generators
 # ----------------------------------------------------------------------------------------------------------------------
@@ -1459,7 +1455,6 @@ def _rvv_mark_lmul_seen_masked(funcs, f, dt_key, mask_kind, lmul):
     else:
         last["lmul"] = {(lmul, dt_key)}
 
-
 # ----------------------------------------------------------------------------------------------------------------------
 # RVV function generator (refactored)
 # ----------------------------------------------------------------------------------------------------------------------
@@ -1480,11 +1475,16 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
         for ff in implems[f]:
             if _is_masked_implem(f, ff):
                 for dt in ff["datatypes"]:
-                    print("// ----------------------------------------------------------------------------------------------------------------------------------------------", f, file=file)
 
                     dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
                     dt_key = dt_par + "," + dt_ret
                     mask_kind = ff["version"]
+
+                    if ("64" in dt_key) and int(lmul) < 0: 
+                        continue
+
+                    print("// ----------------------------------------------------------------------------------------------------------------------------------------------", f, file=file)
+
 
                     if (not is_missing_masked_func(funcs, f, dt_key, mask_kind)) and _rvv_seen_lmul_masked(funcs, f, dt_key, mask_kind, lmul):
                         print(
@@ -1553,12 +1553,16 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                     _rvv_mark_lmul_seen_masked(funcs, f, dt_key, mask_kind, lmul)
 
                 
-            else : 
+            else : # unmasked version
                 for dt in ff["datatypes"]:
-                    print("// ----------------------------------------------------------------------------------------------------------------------------------------------", f, file=file)
-
+                    
                     dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
                     dt_key = dt_par + "," + dt_ret
+
+                    if ("64" in dt_key) and int(lmul) < 0: 
+                        continue
+
+                    print("// ----------------------------------------------------------------------------------------------------------------------------------------------", f, file=file)
 
                     if (not is_missing_func(funcs, f, dt_key)) and _rvv_seen_lmul(funcs, f, dt_key, lmul):
                         print(
