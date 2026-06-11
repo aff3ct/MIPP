@@ -59,14 +59,17 @@ def gen_c_structures_rvv_ls(file, rvv_size):
 
     ldiv = 2
     for dt in isa_rvv["datatypes"]:
+         # if size == 64 _mf2 type not define, use _m1 w smaller vl instead.
         if isa_rvv["datatypes"][dt]["width"] == "64":
-            continue
-        template = j2_template.render(isa_datatype=isa_rvv["datatypes"][dt],rvv_size=rvv_size)
-        template = template.format(lsuffix = "mf" + str(ldiv), lmul = "/" + str(ldiv), lsuffix_mipp = "d" + str(ldiv)) # lmul hack ;)
+            template = j2_template.render(isa_datatype=isa_rvv["datatypes"][dt],rvv_size=rvv_size)
+            template = template.format(lsuffix = "m1" , lmul = "", lsuffix_mipp = "d2" )
+        else :
+            template = j2_template.render(isa_datatype=isa_rvv["datatypes"][dt],rvv_size=rvv_size)
+            template = template.format(lsuffix = "mf" + str(ldiv), lmul = "/" + str(ldiv), lsuffix_mipp = "d" + str(ldiv)) # lmul hack ;)
         print(template, file=file)
      
     #rvm type generation
-    template = """typedef {{isa_datatype.msk}} fixed_{lsuffix}_bool{n_bits}_t __attribute__((riscv_rvv_vector_bits({{ rvv_size }}{lmul}/(8*sizeof({{isa_datatype.to_ptr}})))));"""
+    template = """typedef {{isa_datatype.msk}} fixed_{lsuffix_mipp}_bool{n_bits}_t __attribute__((riscv_rvv_vector_bits({{ rvv_size }}{lmul}/(8*sizeof({{isa_datatype.to_ptr}})))));"""
     j2_template = Template(template, undefined=StrictUndefined)
     dt_list = {uint64, uint32, uint16, uint8}
     for lmul in all_lmul:
@@ -74,19 +77,34 @@ def gen_c_structures_rvv_ls(file, rvv_size):
             n_bits = datatypes[dt]["n_bits"]
             nb_elem = f'{rvv_size} / {n_bits}'  	
             tmp = j2_template.render(rvv_size=rvv_size, isa_datatype=isa_rvv["datatypes"][dt], nb_elem=nb_elem)  
-            tmp = tmp.format(lsuffix = "m" + str(lmul), lmul = "*" + str(lmul), eew_emul = str(int(n_bits/(lmul))), n_bits = str(n_bits))#lmul hack;)   
+            tmp = tmp.format(lsuffix = "m" + str(lmul), 
+                             lsuffix_mipp = "m" + str(lmul), 
+                             lmul = "*" + str(lmul), 
+                             eew_emul = str(int(n_bits/(lmul))), 
+                             n_bits = str(n_bits))
             print(tmp, file=file)
         print("\n", file=file)
 
-    # eew_emul computation is suspicious.
     ldiv = 2 
     for dt in dt_list:
         if isa_rvv["datatypes"][dt]["width"] == "64":
-            continue
-        n_bits = datatypes[dt]["n_bits"]
-        nb_elem = f'{rvv_size} / {n_bits}'  	
-        tmp = j2_template.render(rvv_size=rvv_size, isa_datatype=isa_rvv["datatypes"][dt], nb_elem=nb_elem)  
-        tmp = tmp.format(lsuffix = "d" + str(ldiv), lmul = "/" + str(ldiv), eew_emul = str(int(n_bits*(ldiv))), n_bits = str(n_bits))#lmul hack;)   
+            n_bits = datatypes[dt]["n_bits"]
+            nb_elem = f'{rvv_size} / {n_bits}'  	
+            tmp = j2_template.render(rvv_size=rvv_size, isa_datatype=isa_rvv["datatypes"][dt], nb_elem=nb_elem)  
+            tmp = tmp.format(lsuffix = "m1",
+                             lsuffix_mipp = "d2",
+                             lmul = "", 
+                             eew_emul = str(int(n_bits)), 
+                             n_bits = str(n_bits))
+        else : 
+            n_bits = datatypes[dt]["n_bits"]
+            nb_elem = f'{rvv_size} / {n_bits}'  	
+            tmp = j2_template.render(rvv_size=rvv_size, isa_datatype=isa_rvv["datatypes"][dt], nb_elem=nb_elem)  
+            tmp = tmp.format(lsuffix = "d" + str(ldiv), 
+                             lsuffix_mipp = "d" + str(ldiv),  
+                             lmul = "/" + str(ldiv), 
+                             eew_emul = str(int(n_bits*(ldiv))), 
+                             n_bits = str(n_bits)) 
         print(tmp, file=file)
 
     #rvd struct generation
@@ -101,8 +119,6 @@ def gen_c_structures_rvv_ls(file, rvv_size):
     
     ldiv = 2
     for dt in isa_rvv["datatypes"]:
-        if isa_rvv["datatypes"][dt]["width"] == "64":
-            continue
         n_bits = datatypes[dt]["n_bits"]
         nb_elem = f'{rvv_size} / {n_bits} / {ldiv}'
         tmp = template.replace("{lsuffix}", "d" + str(ldiv))
@@ -133,8 +149,6 @@ def gen_c_structures_rvv_ls(file, rvv_size):
 
     ldiv = 2
     for dt in isa_rvv["datatypes"]:
-        if isa_rvv["datatypes"][dt]["width"] == "64":
-            continue
         n_bits = datatypes[dt]["n_bits"]
         nb_elem = f'{rvv_size} / {n_bits} / {ldiv}'
         tmp = template.replace("{lsuffix}", "d" + str(ldiv))
@@ -156,12 +170,19 @@ def resolve_lmul_in_isa(isa, lmul):
         lmul = "1"
     
     lsuffix = "m" + str(lmul)
+    lsuffix_tmp = lsuffix
+    lmul_tmp = lmul
+
     if int(lmul) < 0 : 
         lsuffix = "mf" + str(-int(lmul))
     resolved_isa = copy.deepcopy(isa)
     for dt in resolved_isa["datatypes"]:
         if isa_rvv["datatypes"][dt]["width"] == "64" and int(lmul) < 0:
-            continue
+            lsuffix = "m1"
+            lmul = "1"
+        else :
+            lsuffix = lsuffix_tmp
+            lmul = lmul_tmp
 
         for key in resolved_isa["datatypes"][dt]:
             if "{lsuffix}" in resolved_isa["datatypes"][dt][key]:
@@ -181,11 +202,6 @@ def resolve_lmul_in_isa(isa, lmul):
     return resolved_isa
 
 def gen_mipp_rvv(include_manager, vlen="__riscv_v_fixed_vlen"):
-    #for iemu in implems_emu_rvv:
-    #	for sub_iemu in implems_emu_rvv[iemu]:
-    #		if "type" not in sub_iemu:
-    #			sub_iemu["type"] = "emulated"
-    # implementation C
     file_common = include_manager.get_fd(isa_rvv["name"], "common")
     if file_common is None:
         print("Panic: common.h file descriptor not found for RVV.")
@@ -208,17 +224,14 @@ typedef double float64_t;//remove after debug"""
     ref_isa_name = isa_rvv["name"]
     #for function prototypes that use arrays declared w macros like MIPP_RVV256_N_FLOAT64 
     #we want the name to contain size. This is optional atm 
-    #but if we want smtg similar to sve it will become useful
+    #but if we want smth similar to sve it will become useful
     isa_rvv["name"] = ref_isa_name #+str(vl) # Adrien: I commented "+str(vl)" because I use this field to generate "#if define(MIPP_RVV)" in the interfaces
     gen_c_defines_rvv_ls(file_common,ref_isa_name,vlen)
     gen_c_structures_rvv_ls(file_common,vlen)
     
-    
     tpl_footer_rvv = """#endif /* MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_RVV_H_ */"""
     j2_template = Template(tpl_footer_rvv, undefined=StrictUndefined)
     print(j2_template.render(), file=file_common)
-    
-    
     
     print("Generate RVV")
     copy_mipp_funcs = copy.deepcopy(mipp_funcs)
@@ -238,7 +251,6 @@ typedef double float64_t;//remove after debug"""
         gen_c_functions_rvv(resolved_isa, include_manager, copy_mipp_funcs, implems_generic_emu, lmul=lmul)
         
         gen_c_functions_rvv(resolved_isa, include_manager, copy_mipp_funcs, implems_mask_generic_emu, lmul=lmul)
-
         gen_c_missing_functions_lmul(resolved_isa, include_manager, copy_mipp_funcs, lmul=lmul)
     
     ldiv = -2
@@ -250,12 +262,6 @@ typedef double float64_t;//remove after debug"""
     gen_c_missing_functions_lmul(resolved_isa, include_manager, copy_mipp_funcs, lmul=ldiv)
     
     #now that dependencies are resolved and functions are generated we can generate the headers for the functions with the correct includes
-    #resolve all deps 
-    
     include_manager.resolve_all_dependencies(isa_rvv["name"], copy_mipp_funcs)
     include_manager.create_glue_file(isa_rvv["name"], "../include/rvv/mipp_impl_rvv_gen.h")
     include_manager.close_layer_fds(isa_rvv["name"])
-
-
-
-    #file.close()

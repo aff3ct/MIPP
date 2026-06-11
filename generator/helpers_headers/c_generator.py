@@ -889,7 +889,6 @@ def _gen_c_missing_one_dt(isa, file, funcs, f, dt, lmul=0):
         func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
         
         _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, lmul=lmul)
-
         _missing_emit_ifdef_end(ifd, file)
 
 # def _fallback_emit_func(file, funcs, f, dt_par, dt_ret, isa, func_name, masked_version=None, lmul=0):
@@ -1138,8 +1137,8 @@ def gen_c_missing_functions_lmul(isa, file, funcs, lmul):
                 
                 # hack skip ldiv 4 rvv rn
                 dt_par, dt_ret = _missing_compute_dt_par_dt_ret(dt)
-                if isa["name"] == "rvv" and lmul < 0 and isa["datatypes"][dt_par]["width"] == "64":
-                    continue
+                # if isa["name"] == "rvv" and lmul < 0 and isa["datatypes"][dt_par]["width"] == "64":
+                #     continue
 
                 _emit_separator(f, file_w)
                 _gen_c_missing_one_dt(isa, file_w, funcs, f, dt, lmul=lmul)
@@ -1486,11 +1485,20 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                     dt_key = dt_par + "," + dt_ret
                     mask_kind = ff["version"]
 
-                    if ("64" in dt_key) and int(lmul) < 0: 
-                        continue
+
+                    if f in ["gather", "scatter"] and ("64" in dt_key or "64" in dt_ret) and lmul < 0:
+                        print(f"Debug: skipping '{f}<{dt_key}>' for LMUL={lmul} (reason: The functions mixes lmul and ldiv in a tough way")
+                        
+                        # HACK define the symbol anyways and force a missing implem.
+                        _emit_separator(f, file)
+                        _missing_emit_ifdef_begin(ifd, file)
+
+                        func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
+                                
+                        _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, lmul=lmul, masked_version=mask_kind)
+                        _missing_emit_ifdef_end(ifd, file)
 
                     print("// ----------------------------------------------------------------------------------------------------------------------------------------------", f, file=file)
-
 
                     if (not is_missing_masked_func(funcs, f, dt_key, mask_kind)) and _rvv_seen_lmul_masked(funcs, f, dt_key, mask_kind, lmul):
                         print(
@@ -1565,8 +1573,21 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                     dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
                     dt_key = dt_par + "," + dt_ret
 
-                    if ("64" in dt_key) and int(lmul) < 0: 
+                    if f in ["cast", "cast_k", "gather", "scatter"] and ("64" in dt_key or "64" in dt_ret) and lmul < 0:
+                        print(f"Debug: skipping '{f}<{dt_key}>' for LMUL={lmul} (reason: The functions mixes lmul and ldiv in a tough way)")
+                            
+                        # HACK define the symbol anyways and force a missing implem.
+                        _emit_separator(f, file)
+                        _missing_emit_ifdef_begin(ifd, file)
+
+                        func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
+                                
+                        _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, lmul=lmul)
+                        _missing_emit_ifdef_end(ifd, file)
+                    
                         continue
+                    # if ("64" in dt_key) and int(lmul) < 0: 
+                    #     continue
 
                     print("// ----------------------------------------------------------------------------------------------------------------------------------------------", f, file=file)
 
