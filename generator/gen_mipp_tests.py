@@ -287,13 +287,33 @@ def get_scalar_mask_args(mkind):
 
 ###### GENERATION FUNC ######
 
-def _rvv_skip_pbmatic_ldiv(func, dt, lmul, implems, guard) :
+# HACK 4 now rvv ldiv 2 doesn't support cast, cast_k, toreg, tomsk for 64 bits types.
+# This is due to the implementation of ldiv 2 for 64 bits types in mipp RVV.
+# 4 now we skip the tests of those functions and the ones that have a dependency on those functions. 
+# This is just so the tests don't trigger a MIPP panic. 
+# It will be removed once the support is added.
+def _rvv_skip_pbmatic_ldiv(func, dt, lmul, implems, guard, mkind) :
     # skip fmadd, fmsub, fnmadd, fnmsub for lmul < 0 because of pbmatic
-    if "rvv" in guard or "RVV" in guard :
-        if func in {"cast", "cast_k", "gather", "scatter", "round"} and lmul < 0 :
-            if "64" in dt :
-                return True
-    return False
+
+    b1 = "rvv" in guard or "RVV" in guard
+    b2 = "64" in dt
+    b3 = lmul < 0
+
+    b4 = func in {"cast", "cast_k", "gather", "scatter", "round"}
+    b4 = b4 or (func in {"round", "cmpeq", "cmpneq", "cmpgt", "cmpge", "cmplt", "cmple", "loadu"})
+    b4 = b4 or func in {"andb", "orb", "xorb", "andnb"}
+    b4 = b4 or (func in {"toreg", "tomsk", "msb"})
+    b4 = b4 or (func.endswith("_k"))
+    
+    b5 = mkind == "maskz" and func in {"fmadd", "fmsub", "fnmadd", "fnmsub", "load", "loadu", "storeu"}
+    b6 = mkind == "mask" and func in {"storeu"}
+    # toreg uses cast 
+    # cmpeq, cmpneq, cmpgt, cmpge, cmplt, cmple use toreg for mask generation so those r no good w float 64 
+    
+    c1 = b1 and b2 and b3 
+    c2 = b4 or b5 or b6
+
+    return c1 and c2
 
 # add the type guard for 1 func in 1 implem
 def add_type_guards(func, implem, function, kind="c", lmul=0, mkind="", guard = ""):
@@ -334,7 +354,7 @@ def add_type_guards(func, implem, function, kind="c", lmul=0, mkind="", guard = 
 
     for dt in datatypes:
 
-        if _rvv_skip_pbmatic_ldiv(func, dt, lmul, implem, guard) :
+        if _rvv_skip_pbmatic_ldiv(func, dt, lmul, implem, guard, mkind) :
             continue
 
         func_defines = gen_func_defines(func, dt, implem)
@@ -955,11 +975,11 @@ def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="
         # add the 1, ISA::SCALAR 
         lmul_coeff = 1 if lmul == 0 else lmul
 
-        if lmul < 0 : 
-            print("Debug reg1_type before : ", reg1_type)
-            print("Debug reg2_type before : ", reg2_type)
-            print("Debug msk1_type before : ", msk1_type)
-            print("Debug msk2_type before : ", msk2_type)
+        # if lmul < 0 : 
+        #     print("Debug reg1_type before : ", reg1_type)
+        #     print("Debug reg2_type before : ", reg2_type)
+        #     print("Debug msk1_type before : ", msk1_type)
+        #     print("Debug msk2_type before : ", msk2_type)
 
 
         if lmul == 0 :
@@ -1162,6 +1182,9 @@ def gen_funcs_all_datatypes(func, kind="c", register="rvd", mask="rvm",lmul=0, m
     """
     generate the test function(s) for 1 func, all datatypes, 1 layer.
     """
+
+    if func == "andb_k" : 
+        print("Debug : gen_funcs_all_datatypes called for andb_k with lmul=", lmul, " mkind=", mkind)
 
     res = ""
     datatypes = mipp_funcs[func]["datatypes"]
@@ -1382,11 +1405,13 @@ def gen_test_files_all_funcs(kind="c", lmul=0, mkind="", N=10, mode="function"):
     obj_dict = get_gen_test_dict("obj") if regen_obj else {}
     
     if lmul != 0:
+        print("Debug : regenerating for lmul=", lmul)
         c_dict = get_gen_test_dict_lmul("c") if regen_c else {}
         cpp_dict = get_gen_test_dict_lmul("cpp") if regen_cpp else {}
         obj_dict = get_gen_test_dict_lmul("obj") if regen_obj else {}
         
     if mkind != "" :
+        print("Debug : regenerating for mask kind=", mkind)
         c_dict = get_gen_test_dict_mask("c") if regen_c else {}
         cpp_dict = get_gen_test_dict_mask("cpp") if regen_cpp else {}
         obj_dict = get_gen_test_dict_mask("obj") if regen_obj else {}
@@ -1430,12 +1455,15 @@ def gen_test_files_all_funcs(kind="c", lmul=0, mkind="", N=10, mode="function"):
     #print(dict_mask.keys())
     for func in sorted(funcs):
 
+        if func.endswith("_k") : 
+            print("Debug : processing func ", func, " with lmul=", lmul, " mkind=", mkind)
+
         # Little cli print bc it's nice :)
         # print("Generating tests for function: " + func + "with lmul = " + str(lmul) + " and mask kind = " + mkind)
         
         mask_support = mipp_funcs[func]["mask_support"]
         if mkind != "" and not mask_support.is_supported(mkind) :
-            #print(f"Skipping {func} for {mkind} because it doesn't support it")
+            # print(f"Skipping {func} for {mkind} because it doesn't support it")
             continue
         
         disable = func in set_skip_testing

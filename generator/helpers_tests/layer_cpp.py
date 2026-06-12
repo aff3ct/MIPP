@@ -557,6 +557,17 @@ shape_templates = {
         loop_body="",
         loop_assert=AS_SCATTER,
     ),
+
+    # I may have forgotten about this shape when rewritting tests. Oops.
+    SHAPE_RET_MSK_2ARGS_MSK : TemplateParts( # andb_k orb_k xorb_k andnb_k
+        func_decl=FUNC_DECL,
+        decl=DECL_2ARGS_INT32 + DECL_G_SNIPPET,
+        init=INIT_2ARGS_DIS,
+        load=LOAD_2ARGS_MASK,
+        operation=OP_2ARGS_2MASK,
+        loop_body="",
+        loop_assert=AS_CMP_BINOP_LOGI_FLOAT_WORKAROUND,
+    ),
 }
 
 
