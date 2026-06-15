@@ -131,8 +131,6 @@ def product_type_format_cpp_gather_like(dt, lmul=0, write_lmul=False, mask_str="
 
     also dt1 is locked to uint in gather and scatter.
     """
-    if mask_str != "" :
-        mask_str = "_" + mask_str
 
     if "," in dt:
         dt1, dt2 = dt.split(",")
