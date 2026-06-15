@@ -299,9 +299,9 @@ OP_3ARGS_REG = """\t{{reg_type}} r4 = mipp::{{func}}{{mask_kind}}({{mask_args}}r
 
 
 
-OP_GATHER = """\t{{reg_type}} r2 = mipp::gather_{{dt1_ext}}{{mask_kind}}({{mask_args}}inputs1, ri1);\n\t {{reg_type_scalar}} s2 = mipp::gather_{{dt1_ext}}{{mask_kind_scalar}}({{mask_args_scalar}}inputs1,rsi1);"""
+OP_GATHER = """\t{{reg_type}} r2 = mipp::gather{{mask_kind}}({{mask_args}}inputs1, ri1);\n\t {{reg_type_scalar}} s2 = mipp::gather{{mask_kind_scalar}}({{mask_args_scalar}}inputs1,rsi1);"""
 
-OP_SCATTER = """mipp::scatter_{{dt1_ext}}{{mask_kind}}({{mask_args}}outputs, ri1, r1);\n\tmipp::scatter_{{dt1_ext}}{{mask_kind_scalar}}({{mask_args_scalar}}outputs_scal, rsi1, s1);"""
+OP_SCATTER = """mipp::scatter{{mask_kind}}({{mask_args}}outputs, ri1, r1);\n\tmipp::scatter{{mask_kind_scalar}}({{mask_args_scalar}}outputs_scal, rsi1, s1);"""
 
 # --------------------------------------------
 # ASSERTS IN LOOP BODY

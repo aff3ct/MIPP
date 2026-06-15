@@ -253,9 +253,9 @@ OP_CAST = """\t{{reg2_type}} r2 = mipp::cast_{{dt1_ext}}(r1);\n\t{{reg2_type_sca
 OP_CAST_MSK = """\t{{msk2_type}} m2 = mipp::cast_{{dt1_ext}}(m1);\n\t{{msk2_type_scalar}} ms2 = mipp::cast_{{dt1_ext}}(ms1);"""
 
 
-OP_GATHER = """\t{{reg_type}} r2 = mipp::gather_{{dt1_ext}}(inputs1, ri1);\n\t {{reg_type_scalar}} s2 = mipp::gather_{{dt1_ext}}(inputs1,rsi1);"""
+OP_GATHER = """\t{{reg_type}} r2 = mipp::gather(inputs1, ri1);\n\t {{reg_type_scalar}} s2 = mipp::gather(inputs1,rsi1);"""
 
-OP_SCATTER = """mipp::scatter_{{dt1_ext}}(outputs, ri1, r1);\n\tmipp::scatter_{{dt1_ext}}(outputs_scal, rsi1, s1);"""
+OP_SCATTER = """mipp::scatter(outputs, ri1, r1);\n\tmipp::scatter(outputs_scal, rsi1, s1);"""
 
 # --------------------------------------------
 # ASSERTS IN LOOP BODY (unchanged: mipp::get works with rvd<T,LMUL>)

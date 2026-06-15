@@ -57,7 +57,7 @@ typedef float float32_t;
         gen_cpp_constexpr_functions_isa(file_isa_common, isa)
         gen_cpp_functions_isa(include_manager, isa, mipp_funcs)
         include_manager.move_to_new_dir("simd_ext_cpp", [isa["name"] + "_cpp"])
-    
+
     # definition of the enum used by everyone in cpp layer
     file_common = open("../include/simd_ext_cpp/common.hpp", "w")
     print("#pragma once\n", file=file_common)
@@ -83,6 +83,9 @@ typedef float float32_t;
     print("template<typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> using rvd = typename rvd_type<T,LMUL,ISA_TYPE>::type;", file=file_common)
     print("template<typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> using rvm = typename rvm_type<T,LMUL,ISA_TYPE>::type;", file=file_common)
     print("template<typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> constexpr uint32_t N(){ return 0; }", file=file_common)
+    print("template<ISA ISA_TYPE=DEFAULT_ISA> constexpr uint32_t rvd_sz_bits(){ return 0; }", file=file_common)
+    print("template<ISA ISA_TYPE=DEFAULT_ISA> constexpr uint32_t rvd_sz_bytes(){ return 0; }", file=file_common)
+    print("template<ISA ISA_TYPE=DEFAULT_ISA> constexpr uint32_t req_alignment(){ return 0; }", file=file_common)
 
     print("}\n", file=file_common)
     file_common.close()
@@ -226,7 +229,7 @@ def _generic_mask_decl_gather_scatter(file, cpp_func_name, proto, mask_kind):
                       "rvm<T,LMUL,ISA_TYPE>" if proto["ret"]["type"] == "msk" else
                       "T" if proto["ret"]["type"] == "val" else
                       "void")
-    s = "{{ret}} {{cpp_fname_dt}}("
+    s = "{{ret}} {{cpp_func_name}}("
 
     is_first = True
     cnt_reg = 0
@@ -275,10 +278,10 @@ def _generic_mask_decl_gather_scatter(file, cpp_func_name, proto, mask_kind):
         is_first = False
     s += ");" + "\n"
     template = Template(s, undefined=StrictUndefined)
-    for dt in all_datatypes:
-        cpp_fname_dt = cpp_func_name + "_" + dt
-        tpl = template.render(cpp_fname_dt=cpp_fname_dt, ret=ret)
-        print(tpl, file=file)
+    # for dt in all_datatypes:
+        # cpp_fname_dt = cpp_func_name
+    tpl = template.render(cpp_func_name=cpp_func_name, ret=ret)
+    print(tpl, file=file)
 
     #print(s, file=file)
     
@@ -447,7 +450,6 @@ def gen_cpp_structures_isa(file, isa):
     isa_cpp_type = isa["name"].upper()
     isa_c_name = isa["name"].lower()
 
-
     print(_cpp_custom_prefix_generator(None, isa["name"]), file=file)
 
     template = """template<> struct rvd_type<{{ datatype.cstd }}, {{ lmul }}, ISA::{{isa_cpp_type}}>{ using type = rvd_{{isa_c_name}}_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t; };"""
@@ -480,6 +482,16 @@ def gen_cpp_structures_isa(file, isa):
 def gen_cpp_constexpr_functions_isa(file, isa):
     isa_cpp_type = isa["name"].upper()
 
+    template = """template<> constexpr uint32_t rvd_sz_bits<ISA::{{isa_cpp_type}}>(){ return MIPP_{{isa_cpp_type}}_RVD_SIZE_BIT; }"""
+    j2_template = Template(template, undefined=StrictUndefined)
+    print(j2_template.render(isa_cpp_type=isa_cpp_type), file=file)
+    template = """template<> constexpr uint32_t rvd_sz_bytes<ISA::{{isa_cpp_type}}>(){ return MIPP_{{isa_cpp_type}}_RVD_SIZE_BYTE; }"""
+    j2_template = Template(template, undefined=StrictUndefined)
+    print(j2_template.render(isa_cpp_type=isa_cpp_type), file=file)
+    template = """template<> constexpr uint32_t req_alignment<ISA::{{isa_cpp_type}}>(){ return MIPP_{{isa_cpp_type}}_RVD_SIZE_BYTE; } // placeholder """
+    j2_template = Template(template, undefined=StrictUndefined)
+    print(j2_template.render(isa_cpp_type=isa_cpp_type), file=file)
+
     template = """template<> constexpr uint32_t N<{{ datatype.cstd }}, {{ lmul }}, ISA::{{isa_cpp_type}} >(){ return MIPP_{{isa_cpp_type}}_N_{{type_category_upper}}{{ datatype.n_bits }}{{ lmul_suffix }}; }"""
     j2_template = Template(template, undefined=StrictUndefined)
     for lmul in all_lmul:
@@ -489,7 +501,7 @@ def gen_cpp_constexpr_functions_isa(file, isa):
             lmul_suffix = "_M" + str(lmul)
         for dt in datatypes:
             print(j2_template.render(datatype=datatypes[dt], lmul=str(lmul), type_category_upper=datatypes[dt]["category"].upper(), lmul_suffix=lmul_suffix, isa_cpp_type=isa_cpp_type), file=file)
-    
+
     # once every isa supports ldiv. This can be moved to the loop above.
     # THE IF IS A TEMPORARY HACK
     if isa["name"] == "avx512" or isa["name"] == "scalar" or isa["name"] == "avx" or isa["name"] == "rvv":
@@ -500,29 +512,39 @@ def gen_cpp_constexpr_functions_isa(file, isa):
         for dt in datatypes:
             print(j2_template.render(datatype=datatypes[dt], ldiv=str(ldiv), type_category_upper=datatypes[dt]["category"].upper(), ldiv_suffix=ldiv_suffix, isa_cpp_type=isa_cpp_type), file=file)
 
+
     print(_cpp_close_namespace(), file=file) # hacky -> implies it HAS to be called after gen_cpp_structures_isa ...
 
 def gen_cpp_functions_isa(include_manager, isa, funcs):
     layer_name = isa["name"] + "_cpp"
     for f in funcs:
+
+
         file = include_manager.get_fd(layer_name, f)
         prefix = _cpp_custom_prefix_generator(f, isa["name"], funcs)
         print(prefix, file=file)
 
         for dt in funcs[f]["datatypes"]:
             is_cast = len(dt.split(',')) > 1
+            is_gthr_scttr =  ("gather" in f) or ("scatter" in f)
+            is_cast = is_cast
 
             if not is_cast:
                 dt_par = dt.split(',')[0]
                 dt_ret = dt.split(',')[0]
+            elif is_gthr_scttr:
+                dt_par = dt.split(',')[0]
+                dt_ret = dt.split(',')[1]
             else:
                 dt_par = dt.split(',')[0]
                 dt_ret = dt.split(',')[1]
 
-            if not is_cast:
+            if not is_cast and not is_gthr_scttr:
                 c_func_name = build_func_name_short(isa, dt_par, f, isa_name=True)
                 cpp_func_name = build_cpp_func_name_short(funcs[f]["proto"], dt_ret, f)
-
+            elif is_gthr_scttr:
+                c_func_name = build_func_name(isa, dt_par, dt_ret, f, isa_name=True)                
+                cpp_func_name = build_cpp_func_name_short(funcs[f]["proto"], dt_ret, f)
             else:
                 c_func_name = build_func_name(isa, dt_par, dt_ret, f, isa_name=True)
                 cpp_func_name = build_cpp_func_name(dt_ret, f)

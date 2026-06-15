@@ -131,14 +131,17 @@ def product_type_format_cpp_gather_like(dt, lmul=0, write_lmul=False, mask_str="
 
     also dt1 is locked to uint in gather and scatter.
     """
+    if mask_str != "" :
+        mask_str = "_" + mask_str
+
     if "," in dt:
         dt1, dt2 = dt.split(",")
         dt1 = dt1.split("t")[1] # keep {nbits}_t
         dt1 = "uint" + dt1
         if write_lmul :
-            return f"_{dt2}{mask_str}{lmul_to_str(lmul, 'm')}<{dt2}_t, {dt1}_t>"
+            return f"{mask_str}{lmul_to_str(lmul, 'm')}<{dt2}_t, {dt1}_t>"
         else :
-            return f"_{dt2}{mask_str}<{dt2}_t, {dt1}_t>"
+            return f"{mask_str}<{dt2}_t, {dt1}_t>"
     else:
         return f"<{dt}_t>"
 
@@ -802,6 +805,10 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False, lm
         reg_type_scalar = f"mipp::rvd<T,{lmul_coeff},mipp::ISA::SCALAR>"
         msk_type_scalar = f"mipp::rvm<T,{lmul_coeff},mipp::ISA::SCALAR>"
 
+        lmul_uint = "" if lmul == 0 else f", {lmul}"
+        reg_type_uint = f"mipp::rvd<U {lmul_uint}>"
+        reg_type_scalar_uint = "mipp::rvd<U, " f"{lmul_coeff}" + ", mipp::ISA::SCALAR>"
+
         res = func_template.render(
             func=func,
             dt_ext=scalar_type,
@@ -828,6 +835,9 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False, lm
             reg_type_scalar=reg_type_scalar,
             msk_type_scalar=msk_type_scalar,
             mask_str=mask_to_str(mkind, "c"), # used for function name. we want the c style suffix
+
+            reg_type_uint=reg_type_uint,
+            reg_type_scalar_uint=reg_type_scalar_uint
         )
 
     if kind == "obj" : #obsolete :(
@@ -945,6 +955,7 @@ def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="
 
         if func.startswith("gather"):
             fname = "gather"
+            print("Debug : fname" , fname)
         elif func.startswith("scatter"):
             fname = "scatter"        
         
@@ -975,13 +986,6 @@ def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="
         # add the 1, ISA::SCALAR 
         lmul_coeff = 1 if lmul == 0 else lmul
 
-        # if lmul < 0 : 
-        #     print("Debug reg1_type before : ", reg1_type)
-        #     print("Debug reg2_type before : ", reg2_type)
-        #     print("Debug msk1_type before : ", msk1_type)
-        #     print("Debug msk2_type before : ", msk2_type)
-
-
         if lmul == 0 :
             split = reg1_type.split(">", 1)
         else :
@@ -1007,10 +1011,6 @@ def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="
             split = msk2_type.split(",", 1)
         msk2_type_scalar = split[0] + f",{lmul_coeff},mipp::ISA::SCALAR>"
 
-        lmul_uint = "" if lmul == 0 else f", {lmul}"
-        reg_type_uint = f"mipp::rvd<U {lmul_uint}>"
-        reg_type_scalar_uint = "mipp::rvd<U, " f"{lmul_coeff}" + ", mipp::ISA::SCALAR>"
-
 
         # Hack 0 == FALSE
         # Second hack : load, set and so on require to use explicit specialization w 4 templates arguments 
@@ -1029,8 +1029,11 @@ def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="
 
         
         func = test_function_name(kind, func)
+
+        func = func + "_" + scalar2_type
+
         res = func_template.render(
-            func=func + "_" + scalar2_type,
+            func=func,
             dt_ext=scalar1_type,
             dt1_ext=scalar2_type,
             dt2_ext=scalar1_type,
@@ -1052,10 +1055,6 @@ def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="
             msk_type_scalar=msk1_type_scalar,
             msk1_type_scalar=msk1_type_scalar,
             msk2_type_scalar=msk2_type_scalar,
-
-            reg_type_uint=reg_type_uint,
-            reg_type_scalar_uint=reg_type_scalar_uint,
-
 
             # Hack 0 == FALSE
             # Second hack : load, set and so on require to use explicit specialization w 4 templates arguments 
@@ -1147,9 +1146,8 @@ def gen_cast_funcs_all_datatypes(func, kind="c", register="rvd", mask="rvm",lmul
         
         for dt in all_datatypes:
             dt1 = dt
-            func_name = f"{func}_{dt1}"
-            
-            
+            # func_name = f"{func}_{dt1}"
+
             reg1_type = f"mipp::{register}<T>"
             reg2_type = f"mipp::{register}<{dt1}_t>"
             
@@ -1484,7 +1482,7 @@ def gen_test_files_all_funcs(kind="c", lmul=0, mkind="", N=10, mode="function"):
             write_file_if_different(file_path, c_file)
 
         if regen_cpp and func in cpp_dict:
-            if func == "cast" or func == "cast_k" or func == "gather" or func == "scatter":
+            if func == "cast" or func == "cast_k" :
                 cpp_file = gen_headers(kind="cpp", func=func,  lmul=lmul, mkind=mkind, mode=mode) + gen_cast_file(func, kind="cpp",lmul=lmul, mkind=mkind)
             else:
                 cpp_file = gen_headers(kind="cpp", func=func,  lmul=lmul, mkind=mkind, mode=mode) + gen_file(func, kind="cpp",lmul=lmul, mkind=mkind)
