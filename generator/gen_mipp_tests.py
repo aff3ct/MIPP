@@ -807,6 +807,17 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False, lm
         reg_type_uint = f"mipp::rvd<U {lmul_uint}>"
         reg_type_scalar_uint = "mipp::rvd<U, " f"{lmul_coeff}" + ", mipp::ISA::SCALAR>"
 
+        if func in set_functions:
+            mask_kind = mask_to_str(mkind, kind, lmul=lmul_coeff, isa="DEFAULT_ISA")
+            mask_kind_scalar=mask_to_str(mkind, kind, lmul=lmul_coeff, isa="scalar")
+
+        elif func in {"gather", "scatter"}:
+            mask_kind = mask_to_str(mkind, kind, lmul=lmul_coeff, isa="DEFAULT_ISA", gather_like=True)
+            mask_kind_scalar=mask_to_str(mkind, kind, lmul=lmul_coeff, isa="scalar", gather_like=True)
+        else:
+            mask_kind = mask_to_str(mkind, kind, lmul=lmul_coeff)
+            mask_kind_scalar=mask_to_str(mkind, kind, lmul=lmul_coeff, isa="scalar")
+
         res = func_template.render(
             func=func,
             dt_ext=scalar_type,
@@ -823,8 +834,8 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False, lm
             # Hack 0 == FALSE
             # Second hack : load, set and so on require to use explicit specialization w 4 templates arguments 
             # since their unmasked declaration already are 3 args tpl specialization.
-            mask_kind=mask_to_str(mkind, kind, lmul=lmul) if func not in set_functions else mask_to_str(mkind, kind, lmul=lmul_coeff, isa="DEFAULT_ISA"),
-            mask_kind_scalar=mask_to_str(mkind, kind, lmul=lmul_coeff, isa="scalar"),
+            mask_kind=mask_kind,
+            mask_kind_scalar=mask_kind_scalar,
             mkind=mkind,
             
             mask_args=get_mask_args(mkind),
