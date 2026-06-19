@@ -140,6 +140,8 @@ debugging or to bench a code.
 If you want to check the MIPP mode configuration, you can print the following 
 global variable: `mipp::InstructionFullType` (`std::string`).
 
+This is the current path used for `RISC-V` targets until a dedicated backend is added.
+
 ### Vector Register Declaration
 
 Just use the `mipp::Reg<T>` type.

@@ -34,6 +34,59 @@ SOFTWARE.
 
 #define MIPP
 
+#if defined(__riscv)
+#define MIPP_RISCV
+#if defined(__riscv_xlen) && (__riscv_xlen == 64)
+#define MIPP_RISCV64
+#endif
+// When a RISC-V target is forced during portability checks, do not inherit host SIMD feature macros.
+#ifdef __ARM_FEATURE_SVE
+#undef __ARM_FEATURE_SVE
+#endif
+#ifdef __ARM_NEON__
+#undef __ARM_NEON__
+#endif
+#ifdef __ARM_NEON
+#undef __ARM_NEON
+#endif
+#ifdef __AVX512F__
+#undef __AVX512F__
+#endif
+#ifdef __AVX512__
+#undef __AVX512__
+#endif
+#ifdef __AVX2__
+#undef __AVX2__
+#endif
+#ifdef __AVX__
+#undef __AVX__
+#endif
+#ifdef __MIC__
+#undef __MIC__
+#endif
+#ifdef __KNCNI__
+#undef __KNCNI__
+#endif
+#ifdef __SSE4_2__
+#undef __SSE4_2__
+#endif
+#ifdef __SSE4_1__
+#undef __SSE4_1__
+#endif
+#ifdef __SSSE3__
+#undef __SSSE3__
+#endif
+#ifdef __SSE3__
+#undef __SSE3__
+#endif
+#ifdef __SSE2__
+#undef __SSE2__
+#endif
+#ifdef __SSE__
+#undef __SSE__
+#endif
+#endif
+
 #ifndef MIPP_NO_INTRINSICS
 #if defined(__ARM_FEATURE_SVE)
 #include <arm_sve.h>
@@ -424,11 +477,25 @@ inline std::vector<std::string> InstructionExtensions()
 
 // ------------------------------------------------------------------------------------------------- MIPP_NO_INTRINSICS
 #else
+#if defined(MIPP_RISCV64)
+	const std::string InstructionType = "RISC-V";
+	#define MIPP_NO
+
+	const std::string InstructionFullType = "RISC-V64_NO_INTRINSICS";
+	const std::string InstructionVersion  = "1";
+#elif defined(MIPP_RISCV)
+	const std::string InstructionType = "RISC-V";
+	#define MIPP_NO
+
+	const std::string InstructionFullType = "RISC-V_NO_INTRINSICS";
+	const std::string InstructionVersion  = "1";
+#else
 	const std::string InstructionType = "NO";
 	#define MIPP_NO
 
 	const std::string InstructionFullType = "NO_INTRINSICS";
 	const std::string InstructionVersion  = "1";
+#endif
 
 	#define MIPP_NO_INTRINSICS
 	#define MIPP_REQUIRED_ALIGNMENT 1
@@ -458,11 +525,25 @@ inline std::vector<std::string> InstructionExtensions()
 
 // ------------------------------------------------------------------------------------------------- MIPP_NO_INTRINSICS
 #else
+#if defined(MIPP_RISCV64)
+	const std::string InstructionType     = "RISC-V";
+	#define MIPP_NO
+
+	const std::string InstructionFullType = "RISC-V64_NO_INTRINSICS";
+	const std::string InstructionVersion  = "1";
+#elif defined(MIPP_RISCV)
+	const std::string InstructionType     = "RISC-V";
+	#define MIPP_NO
+
+	const std::string InstructionFullType = "RISC-V_NO_INTRINSICS";
+	const std::string InstructionVersion  = "1";
+#else
 	const std::string InstructionType     = "NO";
 	#define MIPP_NO
 
 	const std::string InstructionFullType = "NO_INTRINSICS";
 	const std::string InstructionVersion  = "1";
+#endif
 
 #define MIPP_REQUIRED_ALIGNMENT 1
 #if UINTPTR_MAX == 0xffffffffffffffff
