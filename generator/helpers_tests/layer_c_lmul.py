@@ -34,6 +34,9 @@ from .common import (
     SHAPE_RET_REG_2ARGS_PTR_REG, #gather only
     SHAPE_RET_VOID_3ARGS_PTR_REG_REG, #scatter only
 
+    SHAPE_RET_REG_2ARGS_REG_VAL # lshift, rshift
+
+
 )
 
 # --------------------------
@@ -261,6 +264,9 @@ OP_CAST_MSK = """\t{{msk2_type}} m2 = mipp_cast_k_{{dt1_ext}}_{{dt2_ext}}_{{lmul
 OP_GATHER = """\t{{reg_type}} r2 = mipp_gather_{{dt_ext}}_{{dt_ext}}_{{lmul_suffix}}(inputs1, ri1);\n\t{{reg_type_scalar}} s2 = mipp_scalar_gather_{{dt_ext}}_{{dt_ext}}_{{lmul_suffix}}(inputs1, ris1);"""
 
 OP_SCATTER = """\tmipp_scatter_{{dt_ext}}_{{dt_ext}}_{{lmul_suffix}}(outputs, ri1, r1);\n\tmipp_scalar_scatter_{{dt_ext}}_{{dt_ext}}_{{lmul_suffix}}(outputs_scal, ris1, rs1);"""
+
+OP_REG_VAL = """\t{{reg_type}} r3 = mipp_{{func}}_{{dt_ext}}_{{lmul_suffix}}(r1, input1);\n\t{{reg_type_scalar}} s3 = mipp_scalar_{{func}}_{{dt_ext}}_{{lmul_suffix}}(s1, input1);"""
+
 
 # --------------------------------------------
 # ASSERTS IN LOOP BODY (unchanged)
@@ -528,6 +534,16 @@ shape_templates = {
         operation=OP_SCATTER,
         loop_body="",
         loop_assert=AS_SCATTER,
+    ),
+
+    SHAPE_RET_REG_2ARGS_REG_VAL: TemplateParts( # lshift, rshift
+        func_decl=FUNC_DECL,
+        decl=DECL_1ARG+ """ \tint32_t input1 = rnd::uniform<int32_t>(seed);""",
+        init=INIT_1ARG,
+        load=LOAD_1ARG_REG,
+        operation=OP_REG_VAL,
+        loop_body="",
+        loop_assert=AS_CMP_BINOP_FLOAT_WORKAROUND,
     ),
 
 }

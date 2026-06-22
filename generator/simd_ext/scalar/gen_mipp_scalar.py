@@ -509,6 +509,17 @@ def gen_mipp_scalar(include_manager):
 #define BIT_CAST_1(dst_ptr, src_ptr) \\
 	memcpy((dst_ptr), (src_ptr), sizeof(*(dst_ptr)))
 
+// log, exp, pow
+#include <math.h>
+
+#define EXPF(x) (expf(x))
+#define EXPD(x) (exp(x))
+#define LOGF(x) (logf(x))
+#define LOGD(x) (log(x))
+
+#define POW(x, y) (powf(x, y))
+#define POWD(x, y) (pow(x, y))
+
 typedef float float32_t;
 typedef double float64_t;
 """

@@ -313,7 +313,7 @@ mipp_funcs_concepts = {
     "store":       [ "store", "storeu", "get", "get_k", "getfirst", "scatter", "maskst" ],
     "arithmetic":  [ "add", "adds", "sub", "subs", "mul", "div", "div2", "div4", "maskz_add", "fmadd", "fmsub", "fnmadd", "fnmsub" ],
     "comparison":  [ "cmpeq", "cmpneq", "cmple", "cmplt", "cmpge", "cmpgt" ],
-    "math":        [ "sqrt", "rsqrt", "round" ],
+    "math":        [ "sqrt", "rsqrt", "round", "exp", "log", "pow"],
     "logic":       [ "andb", "andb_k", "andnb", "andnb_k", "orb", "orb_k", "xorb", "xorb_k", "msb", "notb", "notb_k" ],
     "reduction":   [ "hadd", "hadds", "hmul", "hmin", "hmax", "hadd_to_scal", "hadds_to_scal", "testz", "testz_2" ],
     "selection":   [ "blend", "min", "max" ],
@@ -436,6 +436,10 @@ mipp_funcs = {
     "div4":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
     "rshift":        { "proto": protos["ret_reg_2args_reg_val"],        "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
     "lshift":        { "proto": protos["ret_reg_2args_reg_val"],        "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
+
+    "exp":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_float,               "horizontal": False, "mask_support": all_mask        },
+    "log":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_float,               "horizontal": False, "mask_support": all_mask        },
+    # "pow":          { "proto": protos["ret_reg_2args_reg_val"],        "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
 }
 
 isa_scalar = {
@@ -462,6 +466,14 @@ isa_scalar = {
 
 # #define BIT_CAST_1(dst_ptr, src_ptr) \
 #     memcpy((dst_ptr), (src_ptr), sizeof(*(dst_ptr)))
+
+#define EXPF(x) (expf(x))
+#define EXPD(x) (exp(x))
+#define LOGF(x) (logf(x))
+#define LOGD(x) (log(x))
+
+#define POW(x, y) (powf(x, y))
+#define POWD(x, y) (pow(x, y))
 
 implems_scalar = {
     "cast": [ # -------------------------------------------------------------------------------------------------- cast
@@ -1340,6 +1352,53 @@ res.r[i] = %!pred_cond!% p0[r0.r[i]] %!pred_alt!%;
 """if (m0.m[i]) p0[r0.r[i]] = r1.r[i];"""
         },
     ],
+
+
+    "exp": [ # -------------------------------------------------------------------------------------------------- exp
+        { "type": "element-wide", "datatypes": [float32], "mask_variants": all_defs, "implem":
+"""
+res.r[i] = %!pred_cond!% EXPF(r0.r[i]) %!pred_alt!%;
+"""
+        },
+        { "type": "element-wide", "datatypes": [float64], "mask_variants": all_defs, "implem":
+"""res.r[i] = %!pred_cond!% EXP(r0.r[i]) %!pred_alt!%;
+"""
+        },
+    ],
+
+    "log": [ # -------------------------------------------------------------------------------------------------- log
+        { "type": "element-wide", "datatypes": [float32], "mask_variants": all_defs, "implem":
+"""
+res.r[i] = %!pred_cond!% LOGF(r0.r[i]) %!pred_alt!%;
+"""
+        },
+        { "type": "element-wide", "datatypes": [float64], "mask_variants": all_defs, "implem":
+"""res.r[i] = %!pred_cond!% LOG(r0.r[i]) %!pred_alt!%;
+"""
+        },
+    ],
+
+#     "pow": [ # -------------------------------------------------------------------------------------------------- pow
+#         { "type": "element-wide", "datatypes": [float32], "mask_variants": all_defs, "implem":
+# """res.r[i] = %!pred_cond!% POWF(r0.r[i], v0) %!pred_alt!%;
+# """
+#         },
+#         { "type": "element-wide", "datatypes": [float64], "mask_variants": all_defs, "implem":
+# """res.r[i] = %!pred_cond!% POW(r0.r[i], v0) %!pred_alt!%;
+# """
+#         },
+
+#         { "type": "vector-wide", "datatypes": all_int + all_uint, "mask_variants": all_defs, "implem":
+# """
+#     %r<tp>% res;
+
+#     for (size_t i = 0; i < v0; i++){
+#         for (size_t j = 0; j < %N<tp>%; j++){
+#             res.r[j] = %!pred_cond!% res.r[j] * r0.r[j] %!pred_alt!%;
+#         }
+#     }
+#     return resv;
+# """}]
 }
 
 copy_mipp_funcs = copy.deepcopy(mipp_funcs)
