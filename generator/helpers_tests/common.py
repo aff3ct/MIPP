@@ -94,6 +94,7 @@ SUPPORTED_SHAPES = {
     SHAPE_RET_VOID_3ARGS_PTR_MSK_REG, #shape for mask store (maskst)
     SHAPE_RET_REG_2ARGS_PTR_REG, #shape for gather
     SHAPE_RET_VOID_3ARGS_PTR_REG_REG, #shape for scatter (scatter is the only one with void return type and 3 args)
+    SHAPE_RET_REG_2ARGS_REG_VAL, # shape for lshift, rshift
 }
 
 def classify_mipp_proto(proto):
@@ -159,6 +160,8 @@ def classify_mipp_proto(proto):
         return SHAPE_RET_REG_2ARGS_PTR_REG
     if ret_t is False and args_t == ["ptr", "reg", "reg"]:
         return SHAPE_RET_VOID_3ARGS_PTR_REG_REG
+    if ret_t == "reg" and args_t == ["reg", "val"]:
+        return SHAPE_RET_REG_2ARGS_REG_VAL
     return None
 
 # --------------------------------------------

@@ -314,7 +314,7 @@ mipp_funcs_concepts = {
     "arithmetic":  [ "add", "adds", "sub", "subs", "mul", "div", "div2", "div4", "maskz_add", "fmadd", "fmsub", "fnmadd", "fnmsub" ],
     "comparison":  [ "cmpeq", "cmpneq", "cmple", "cmplt", "cmpge", "cmpgt" ],
     "math":        [ "sqrt", "rsqrt", "round", "exp", "log", "pow"],
-    "logic":       [ "andb", "andb_k", "andnb", "andnb_k", "orb", "orb_k", "xorb", "xorb_k", "msb", "notb", "notb_k" ],
+    "logic":       [ "andb", "andb_k", "andnb", "andnb_k", "orb", "orb_k", "xorb", "xorb_k", "msb", "notb", "notb_k", "lshift", "rshift"],
     "reduction":   [ "hadd", "hadds", "hmul", "hmin", "hmax", "hadd_to_scal", "hadds_to_scal", "testz", "testz_2" ],
     "selection":   [ "blend", "min", "max" ],
 }
@@ -1361,7 +1361,7 @@ res.r[i] = %!pred_cond!% EXPF(r0.r[i]) %!pred_alt!%;
 """
         },
         { "type": "element-wide", "datatypes": [float64], "mask_variants": all_defs, "implem":
-"""res.r[i] = %!pred_cond!% EXP(r0.r[i]) %!pred_alt!%;
+"""res.r[i] = %!pred_cond!% EXPD(r0.r[i]) %!pred_alt!%;
 """
         },
     ],
@@ -1373,7 +1373,7 @@ res.r[i] = %!pred_cond!% LOGF(r0.r[i]) %!pred_alt!%;
 """
         },
         { "type": "element-wide", "datatypes": [float64], "mask_variants": all_defs, "implem":
-"""res.r[i] = %!pred_cond!% LOG(r0.r[i]) %!pred_alt!%;
+"""res.r[i] = %!pred_cond!% LOGD(r0.r[i]) %!pred_alt!%;
 """
         },
     ],
@@ -1392,7 +1392,7 @@ res.r[i] = %!pred_cond!% LOGF(r0.r[i]) %!pred_alt!%;
 # """
 #     %r<tp>% res;
 
-#     for (size_t i = 0; i < v0; i++){
+#     for (int32_t i = 0; i < v0; i++){
 #         for (size_t j = 0; j < %N<tp>%; j++){
 #             res.r[j] = %!pred_cond!% res.r[j] * r0.r[j] %!pred_alt!%;
 #         }

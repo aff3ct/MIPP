@@ -29,6 +29,7 @@ from .common import (
 
     SHAPE_RET_REG_2ARGS_PTR_REG, #gather only
     SHAPE_RET_VOID_3ARGS_PTR_REG_REG, #scatter only
+    SHAPE_RET_REG_2ARGS_REG_VAL, # lshift, rshift
 )
 
 # --------------------------
@@ -303,6 +304,10 @@ OP_GATHER = """\t{{reg_type}} r2 = mipp::gather{{mask_kind}}({{mask_args}}inputs
 
 OP_SCATTER = """mipp::scatter{{mask_kind}}({{mask_args}}outputs, ri1, r1);\n\tmipp::scatter{{mask_kind_scalar}}({{mask_args_scalar}}outputs_scal, rsi1, s1);"""
 
+
+OP_REG_VAL = """\t{{reg_type}} r3 = mipp::{{func}}{{mask_kind}}({{mask_args}}r1, input1);\n\t{{reg_type_scalar}} s3 = mipp::{{func}}{{mask_kind_scalar}}({{mask_args_scalar}}s1, input1);"""
+
+
 # --------------------------------------------
 # ASSERTS IN LOOP BODY
 # --------------------------------------------
@@ -466,6 +471,16 @@ shape_templates = {
         operation=OP_SCATTER,
         loop_body="",
         loop_assert=AS_SCATTER,
+    ),
+
+    SHAPE_RET_REG_2ARGS_REG_VAL : TemplateParts( # lshift, rshift
+        func_decl=FUNC_DECL,
+        decl=DECL_1ARG+ """\n\tint32_t input1 = rnd::uniform<int32_t>(seed);""",
+        init=INIT_PRED+INIT_1ARG,
+        load=LOAD_1ARG_REG + "\n" + LOAD_MASK_AND_RSRC_FROM_REG1,
+        operation=OP_REG_VAL,
+        loop_body="",
+        loop_assert=AS_REG_BINOP,
     ),
 }
 

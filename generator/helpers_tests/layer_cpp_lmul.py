@@ -29,6 +29,8 @@ from .common import (
 
     SHAPE_RET_REG_2ARGS_PTR_REG, #gather only
     SHAPE_RET_VOID_3ARGS_PTR_REG_REG, #scatter only
+
+    SHAPE_RET_REG_2ARGS_REG_VAL, # lshift, rshift
 )
 
 # --------------------------
@@ -256,6 +258,9 @@ OP_CAST_MSK = """\t{{msk2_type}} m2 = mipp::cast_{{dt1_ext}}(m1);\n\t{{msk2_type
 OP_GATHER = """\t{{reg_type}} r2 = mipp::gather(inputs1, ri1);\n\t {{reg_type_scalar}} s2 = mipp::gather(inputs1,rsi1);"""
 
 OP_SCATTER = """mipp::scatter(outputs, ri1, r1);\n\tmipp::scatter(outputs_scal, rsi1, s1);"""
+
+OP_REG_VAL = """\t{{reg_type}} r3 = mipp::{{func}}(r1, input1);\n\t{{reg_type_scalar}} s3 = mipp::{{func}}(s1, input1);"""
+
 
 # --------------------------------------------
 # ASSERTS IN LOOP BODY (unchanged: mipp::get works with rvd<T,LMUL>)
@@ -532,6 +537,16 @@ shape_templates = {
         operation=OP_2ARGS_2MASK,
         loop_body="",
         loop_assert=AS_CMP_BINOP_LOGI_FLOAT_WORKAROUND,
+    ),
+
+    SHAPE_RET_REG_2ARGS_REG_VAL: TemplateParts( # lshift, rshift
+        func_decl=FUNC_DECL,
+        decl=DECL_1ARG+ """ \tint32_t input1 = rnd::uniform<int32_t>(seed);""",
+        init=INIT_1ARG,
+        load=LOAD_1ARG_REG,
+        operation=OP_REG_VAL,
+        loop_body="",
+        loop_assert=AS_REG_BINOP,
     ),
 }
 
