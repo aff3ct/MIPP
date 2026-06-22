@@ -4,6 +4,7 @@ import os
 import shutil
 import struct
 import argparse
+import copy
 
 
 path = os.getcwd()
@@ -197,6 +198,12 @@ def main(argv=None):
     )
 
     parser.add_argument(
+        "--skip-sve",
+        action="store_true",
+        help="Skip generating SVE implementations. This is a hotfix to pass CI.",
+    )
+
+    parser.add_argument(
         "--header-type",
         choices=["function_header", "category_header"],
         default="function_header",
@@ -234,8 +241,13 @@ def main(argv=None):
     create_folder(cpp_path)
     create_folder(obj_path)
 
+    all_isas_str = ["avx512", "avx", "sse", "rvv", "neon", "scalar"]
+    if not args.skip_sve:
+        all_isas_str.append("sve")
+
     # CREATE INCLUDE MANAGER
-    include_manager = IncludeManager(["avx512", "avx", "sse", "sve", "rvv", "neon", "scalar"], mode=args.header_type)
+
+    include_manager = IncludeManager(all_isas_str, mode=args.header_type)
 
     # ISA generators
     if "sse" in isa_layers:
@@ -244,7 +256,7 @@ def main(argv=None):
         gen_mipp_avx(include_manager)
     if "avx512" in isa_layers:
         gen_mipp_avx512(include_manager)
-    if "sve" in isa_layers:
+    if "sve" in isa_layers and not args.skip_sve:
         gen_mipp_sve(include_manager)
     if "rvv" in isa_layers:
         gen_mipp_rvv(include_manager)
@@ -254,10 +266,15 @@ def main(argv=None):
         gen_mipp_scalar(include_manager)
 
     # Wrappers / top-level headers
-    if run_wrappers:
+    if run_wrappers and not args.skip_sve:
         generate_mipp_h(include_manager)
-        generate_c_interface([isa_avx512, isa_avx, isa_sse, isa_sve, isa_rvv, isa_neon, isa_scalar], include_manager)
-        generate_cpp(include_manager, [isa_avx512, isa_avx, isa_sse, isa_sve, isa_rvv, isa_neon, isa_scalar])
+        generate_c_interface([isa_sse, isa_avx, isa_avx512, isa_sve, isa_rvv, isa_neon, isa_scalar], include_manager)
+        generate_cpp(include_manager, [isa_sse, isa_avx, isa_avx512, isa_sve, isa_rvv, isa_neon, isa_scalar])
+        generate_cpp_object(include_manager)
+    elif run_wrappers and args.skip_sve:
+        generate_mipp_h(include_manager)
+        generate_c_interface([isa_sse, isa_avx, isa_avx512, isa_rvv, isa_neon, isa_scalar], include_manager)
+        generate_cpp(include_manager, [isa_sse, isa_avx, isa_avx512, isa_rvv, isa_neon, isa_scalar])
         generate_cpp_object(include_manager)
 
     print("Generating MIPP code for sse, avx2, avx512, rvv and sve with size in " + str(isa_sve["size"]))

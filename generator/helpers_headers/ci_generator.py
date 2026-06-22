@@ -14,6 +14,7 @@ from implem_avx import isa_avx
 from implem_rvv import isa_rvv
             
 def duplicate_isa_sve_along_size(isa_list):
+
     isa_list_copy = copy.deepcopy(isa_list)
     isa_sve = []
     current_index = -1
@@ -25,6 +26,9 @@ def duplicate_isa_sve_along_size(isa_list):
             all_sve_sizes = list(isa["size"])
         else:
             isa["gen_define"] = "defined(MIPP_" + isa["name"].upper() + ")"
+    
+    if current_index == -1:
+        return isa_list_copy
     del isa_list_copy[current_index]
     all_sve_sizes = sorted(isa_sve["size"], reverse=True)
     for reg_size in all_sve_sizes:
@@ -261,6 +265,7 @@ def generate_c_interface(isa_list, include_manager=None):
 
 def gen_ci_defines(isa_list, file):
     for i, isa in enumerate(isa_list):
+        print(isa["name"])
         if i == 0:
             print("#if " + isa["gen_define"], file=file)
         else:
