@@ -356,6 +356,7 @@ tpl_implem_emu_avx = {
     tmp = %mul<tp>%(fx, cephes_exp_C1);
     %r<tp>% z = %mul<tp>%(x, cephes_exp_C2);
     
+    %r<tp>% y = cephes_exp_p0;
 	y = %fmadd<tp>%(y, x, cephes_exp_p1);
 	y = %fmadd<tp>%(y, x, cephes_exp_p2);
 	y = %fmadd<tp>%(y, x, cephes_exp_p3);
@@ -555,8 +556,8 @@ implems_emu_avx = {
     "blend": [
         { "datatypes": [int64, int32, uint64, uint32], "template": tpl_implem_emu_avx["blend-1"],                                },
         { "datatypes": [int16, int8, uint16, uint8],   "template": tpl_implem_emu_avx["blend-2"],                                } ], # blend
-    #"fmadd": [
-    #    { "datatypes": all_float,                      "template": tpl_implem_emu_avx["fmadd"],                                  } ], # fmadd
+    "fmadd": [
+       { "datatypes": all_float,                      "template": tpl_implem_emu_avx["fmadd"],                                  } ], # fmadd
     "fnmadd": [
 		{ "datatypes": all_float,                      "template": tpl_implem_emu_avx["fnmadd"],                                  } ], # fnmadd (same as fmadd but with negation of the result, which can be done by blending with zero)
     "fmsub": [
@@ -607,8 +608,8 @@ implems_emu_avx = {
 	# 	{ "datatypes": [float64],                      "template": tpl_implem_emu_avx["pow2_f64"],                                } ], # pow2
 	
 	"exp": [
-		{ "datatypes": [float32],                      "template": tpl_implem_emu_avx["exp_f32_nofma"], "if": "defined(__AVX2__)" },
-		{ "datatypes": [float32],                      "template": tpl_implem_emu_avx["exp_f32_fma"],   "if": "defined(__FMA__)"} ], # exp
+		{ "datatypes": [float32],                      "template": tpl_implem_emu_avx["exp_f32_fma"], "if": "defined(__AVX2__)" },],
+		# { "datatypes": [float32],                      "template": tpl_implem_emu_avx["exp_f32_fma"],   "if": "defined(__FMA__)"} ], # exp
     # "log": [
 	# 	{ "datatypes": [float32],                      "template": tpl_implem_emu_avx["log_f32"],                                },
 	# 	{ "datatypes": [float64],                      "template": tpl_implem_emu_avx["log_f64"],								} ], # log
