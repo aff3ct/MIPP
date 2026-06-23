@@ -28,11 +28,11 @@ generation-headers:
   allow_failure: false
   rules:
     - when: always
-  artifacts: # try to use tar version as artifact
+  artifacts:
     name: mipp_headers
     when: always
     paths:
-      - include.tar.gz
+      - include/
   tags:
     - x86_64
     - linux
@@ -43,11 +43,7 @@ generation-headers:
     - source .venv/bin/activate
     - pip3 install -r requirements.txt
     - ./gen_mipp_headers.py --skip-sve
-    - cd .. 
-    - tar -czf include.tar.gz include/
-    - du -h include.tar.gz
 
-  # HACK FORCE SKIP SVE TO TRY N PASS CI PLEASE
 generation-tests:
   image: registry.gitlab.com/aff3ct/aff3ct/mipp_linux:latest
   stage: generation
@@ -192,7 +188,6 @@ analysis-cppcheck:
         SIMD_EXT: "-DMIPP_SCALAR -DMIPP_SCALAR_SIZE=1024"
   before_script:
   # find the number of threads on the computer
-  - tar -xzf include.tar.gz
   - |
     if [ -z "$THREADS" ]; then
       if command -v nproc >/dev/null 2>&1; then

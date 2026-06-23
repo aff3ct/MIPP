@@ -222,6 +222,40 @@ tpl_implem_emu_avx = {
     "hadd_to_scal": { "format": "long", "code":
 """// long format
 	return  %hadd<tp>%(r0);""" },
+
+# algorithm taken from : 
+# https://github.com/shibatch/sleef/blob/master/src/libm/sleefsimdsp.c
+	"exp_f32": { "format": "long", "code":
+"""
+%r<c:int|b:tp>% rq = %round<tp>%(
+					%mul<tp>%(r0, %set1<tp>%((tp)MIPP_LOG2E)));
+%r<tp>% rs, ru;
+%r<tp>% rtmp; 
+rtmp.r = _mm256_cvtepi32_ps(rq.r);
+rs = %fmadd<tp>%(rtmp, %set1<tp>%((tp)MIPP_L2UF), r0);
+rs = %fmadd<tp>%(rtmp, %set1<tp>%((tp)MIPP_L2LF), rs);
+
+ru = %set1<tp>%(0.000198527617612853646278381f); // 1/5040
+ru = %fmadd<tp>%(ru, rs, %set1<tp>(0.00139304355252534151077271f));
+ru = %fmadd<tp>%(ru, rs, %set1<tp>(0.00833336077630519866943359f));
+ru = %fmadd<tp>%(ru, rs, %set1<tp>(0.0416664853692054748535156f));
+ru = %fmadd<tp>%(ru, rs, %set1<tp>(0.1666666716337203979492188f));
+ru = %fmadd<tp>%(ru, rs, %set1<tp>(0.5f));
+
+ru = %add<tp>%(%set1<tp>(1.0f), %fmadd<tp>%(%add<tp>%(rs, rs), ru, rs));
+
+// now we need to compute u * 2^q
+
+"""},
+
+	"exp_f64": { "format": "long", "code":
+"""// long format"""},
+
+	"log_f32": { "format": "long", "code":
+"""// long format"""},
+
+	"log_f64": { "format": "long", "code":
+"""// long format"""},
 }
 
 """ "implems_emu" dictionary:
@@ -297,10 +331,10 @@ implems_emu_avx = {
         { "datatypes": [int64, int32],                 "template": tpl_implem_emu_avx["hadd_to_scal"], "if": "defined(__AVX2__)" },
         { "datatypes": [int16, int8, uint16, uint8],   "template": tpl_implem_emu_avx["hadd_to_scal"], "if": "defined(__AVX2__)" },
         { "datatypes": [uint64, uint32],               "template": tpl_implem_emu_avx["hadd_to_scal"], "if": "defined(__AVX2__)" } ], # hadd_to_scal
-#   "gather": [
-#       { "datatypes": all_datatypes,                  "template": tpl_implem_emu_avx["gather_seq"],                             } ], # gather
-#   "mask_gather": [
-#       { "datatypes": all_datatypes,                  "template": tpl_implem_emu_avx["maskz_gather"],                           } ], # mask_gather
-#   "gather_seq": [
-#       { "datatypes": all_int_uint,                   "template": tpl_implem_emu["gather_seq"],                                 } ], # gather_seq
+	# "exp": [
+	# 	{ "datatypes": [float32],                      "template": tpl_implem_emu_avx["exp_f32"],                                },
+	# 	{ "datatypes": [float64],                      "template": tpl_implem_emu_avx["exp_f64"],                                } ], # exp
+    # "log": [
+	# 	{ "datatypes": [float32],                      "template": tpl_implem_emu_avx["log_f32"],                                },
+	# 	{ "datatypes": [float64],                      "template": tpl_implem_emu_avx["log_f64"],								} ], # log
 }
