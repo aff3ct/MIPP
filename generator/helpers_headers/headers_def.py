@@ -1321,7 +1321,7 @@ res.r[i] = %!pred_cond!% resv %!pred_alt!%;
     "lshift": [ # ---------------------------------------------------------------------------------------------- lshift
         { "type": "element-wide", "datatypes": all_int + all_uint, "mask_variants": all_defs, "implem":
 """
-res.r[i] =  %!pred_cond!% r0.r[i] << v0 %!pred_alt!% ;
+res.r[i] =  %!pred_cond!% r0.r[i] << (uint8_t)v0 %!pred_alt!% ;
 """
         },
         { "type": "element-wide", "datatypes": all_float, "mask_variants": all_defs, "implem":
