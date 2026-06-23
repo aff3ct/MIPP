@@ -339,7 +339,7 @@ AS_REG_BINOP_NAN_TOL = """\t\t{{dt_ext}} res1 = mipp::get(r3, i);
 \t\t{{dt_ext}} res2 = mipp::get(s3, i);
 \t\t{{dt_ext}} tol  = 1e-5f * abs_diff::abs_diff(res2) + 1.0f;
 \t\t{{dt_ext}} diff = abs_diff::abs_diff(res1, res2);
-\t\tif(std::isinf(tol)) continue; // skip comparison if tol is inf
+\t\tif(std::isinf(tol) || std::isnan(tol)) continue; // skip comparison if tol is inf or nan
 \t\tif(std::isnan(diff) || std::isnan(res2) || std::isnan(res1)) continue; // skip comparison if either result is nan
 \t\tREQUIRE(diff <= tol);"""
 

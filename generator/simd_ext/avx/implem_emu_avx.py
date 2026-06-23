@@ -257,68 +257,6 @@ tpl_implem_emu_avx = {
 #   3. This notice may not be removed or altered from any source distribution.
 
 #   (this is the zlib license)
-	"exp_f32_nofma": { "format": "long", "code":
-"""
-	%r<tp>% tmp = %set0<tp>%(), fx;
-    %r<c:int|b:tp>% imm0;
-    %r<tp>% one = %set1<tp>%(1.0f);
-    
-    %r<tp>% exp_hi = %set1<tp>%(88.3762626647949f),
-			exp_lo = %set1<tp>%(-88.3762626647949f);
-            
-    
-	%r<tp>% cephes_LOG2EF = %set1<tp>%(1.44269504088896341f),
-			cephes_exp_C1 = %set1<tp>%(0.693359375f),
-            cephes_exp_C2 = %set1<tp>%(-2.12194440e-4f);
-
-    %r<tp>% cephes_exp_p0 = %set1<tp>%(1.9875691500E-4f),
-			cephes_exp_p1 = %set1<tp>%(1.3981999507E-3f),
-			cephes_exp_p2 = %set1<tp>%(8.3334519073E-3f),
-			cephes_exp_p3 = %set1<tp>%(4.1665795894E-2f),
-			cephes_exp_p4 = %set1<tp>%(1.6666665459E-1f),
-			cephes_exp_p5 = %set1<tp>%(5.0000001201E-1f);
-    
-    %r<tp>% x = %min<tp>%(r0, exp_hi);
-    x = %max<tp>%(x, exp_lo);
-    
-    x = %mul<tp>%(x, cephes_LOG2EF);
-	fx = %add<tp>%(x, %set1<tp>%(0.5f));
-    
-    tmp.r =  _mm256_floor_ps(fx.r);
-    
-    %r<tp>% mask; 
-    mask.r = %cmpgt<tp>%(tmp, fx).m; // hack
-    mask = %andb<tp>%(mask, one);
-    fx = %sub<tp>%(tmp, mask);
-    
-    tmp = %mul<tp>%(fx, cephes_exp_C1);
-    %r<tp>% z = %mul<tp>%(x, cephes_exp_C2);
-    
-    %r<tp>% y = cephes_exp_p0;
-    y = %mul<tp>%(y,x);
-    y = %add<tp>%(y, cephes_exp_p1);
-    y = %mul<tp>%(y,x);
-    y = %add<tp>%(y, cephes_exp_p2);
-    y = %mul<tp>%(y,x);
-    y = %add<tp>%(y, cephes_exp_p3);
-    y = %mul<tp>%(y,x);
-    y = %add<tp>%(y, cephes_exp_p4);
-    y = %mul<tp>%(y,x);
-    y = %add<tp>%(y, cephes_exp_p5);
-    y = %mul<tp>%(y, z);
-    y = %add<tp>%(y, x);
-    y = %add<tp>%(y, one);
-    
-    imm0.r = _mm256_cvttps_epi32(fx.r);
-
-    imm0 = %add<c:int|b:tp>%(imm0, %set1<c:int|b:tp>%((int32_t)0x7f));
-    imm0.r = _mm256_slli_epi32(imm0.r, 23);
-    %r<tp>% pow2n = %cast<c:int|b:tp,tp>%(imm0);
-	y = %mul<tp>%(y, pow2n);
-    
-    return y;
-"""},
-
 	"exp_f32_fma": { "format": "long", "code":
 """
 	%r<tp>% tmp = %set0<tp>%(), fx;
@@ -457,7 +395,7 @@ tpl_implem_emu_avx = {
     
     %r<tp>% min_norm_pos = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%((int32_t)0x00800000));
     %r<tp>% inv_mant_mask = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%((int32_t)~0x7f800000));
-    %r<tp>% mant_mask = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%((int32_t)0x7f800000));
+    // %r<tp>% mant_mask = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%((int32_t)0x7f800000));
     %r<tp>% cephes_SQRTHF = %set1<tp>%(0.707106781186547524f);
     %r<tp>% cephes_log_p0 = %set1<tp>%(7.0376836292E-2f);
 	%r<tp>% cephes_log_p1 = %set1<tp>%(- 1.1514610310E-1f);
@@ -476,7 +414,7 @@ tpl_implem_emu_avx = {
     
     %r<tp>% x = %max<tp>%(r0, min_norm_pos);
     
-    imm0.r = _mm256_srli_epi32(x.r, 23);
+    imm0.r = _mm256_srli_epi32(_mm256_castps_si256(x.r), 23);
     x.r = _mm256_and_ps(x.r, inv_mant_mask.r);
 	x.r = _mm256_or_ps(x.r, %set1<tp>%((float)0.5).r);
     
@@ -496,26 +434,24 @@ tpl_implem_emu_avx = {
     %r<tp>% z = %mul<tp>%(x, x);
 
     %r<tp>% y = cephes_log_p0;
-    y = %mul<tp>%(y,x);
-	y = %add<tp>%(y, cephes_log_p1);
-    y = %mul<tp>%(y,x);
-	y = %add<tp>%(y, cephes_log_p2);
-    y = %mul<tp>%(y,x);
-	y = %add<tp>%(y, cephes_log_p3);
-    y = %mul<tp>%(y,x);
-	y = %add<tp>%(y, cephes_log_p4);
-    y = %mul<tp>%(y,x);
-	y = %add<tp>%(y, cephes_log_p5);
-    y = %mul<tp>%(y,x);
-	y = %add<tp>%(y, cephes_log_p6);
-    y = %mul<tp>%(y,x);
-	y = %add<tp>%(y, cephes_log_p7);
-    y = %mul<tp>%(y,x);
-	y = %add<tp>%(y, cephes_log_p8);
-    
+
+    y = %fmadd<tp>%(y, x, cephes_log_p1);
+    y = %fmadd<tp>%(y, x, cephes_log_p2);
+    y = %fmadd<tp>%(y, x, cephes_log_p3);
+    y = %fmadd<tp>%(y, x, cephes_log_p4);
+    y = %fmadd<tp>%(y, x, cephes_log_p5);
+    y = %fmadd<tp>%(y, x, cephes_log_p6);
+    y = %fmadd<tp>%(y, x, cephes_log_p7);
+    y = %fmadd<tp>%(y, x, cephes_log_p8);
+
     y = %mul<tp>%(y, z);
+
+    y = %fmadd<tp>%(e, cephes_log_q1, y);
+
+    tmp = %mul<tp>%(z, %set1<tp>%(0.5f));
+    y = %sub<tp>%(y, tmp);
     
-    tmp = %mul<tp>%(e, cephes_log_q1);
+    tmp = %mul<tp>%(e, cephes_log_q2);
     x = %add<tp>%(x, y);
     x = %add<tp>%(x, tmp);
     x = %orb<tp>%(x, invalid_mask);
@@ -610,7 +546,7 @@ implems_emu_avx = {
 	"exp": [
 		{ "datatypes": [float32],                      "template": tpl_implem_emu_avx["exp_f32_fma"], "if": "defined(__AVX2__)" },],
 		# { "datatypes": [float32],                      "template": tpl_implem_emu_avx["exp_f32_fma"],   "if": "defined(__FMA__)"} ], # exp
-    # "log": [
-	# 	{ "datatypes": [float32],                      "template": tpl_implem_emu_avx["log_f32"],                                },
+    "log": [
+		{ "datatypes": [float32],                      "template": tpl_implem_emu_avx["log_f32_fma"],  "if": "defined(__AVX2__)" },],
 	# 	{ "datatypes": [float64],                      "template": tpl_implem_emu_avx["log_f64"],								} ], # log
 }
