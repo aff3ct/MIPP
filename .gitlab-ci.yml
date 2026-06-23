@@ -191,6 +191,7 @@ analysis-cppcheck:
         SIMD_EXT: "-DMIPP_SCALAR -DMIPP_SCALAR_SIZE=1024"
   before_script:
   # find the number of threads on the computer
+  - tar -xzf include.tar.gz
   - |
     if [ -z "$THREADS" ]; then
       if command -v nproc >/dev/null 2>&1; then
