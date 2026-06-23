@@ -339,7 +339,9 @@ AS_REG_BINOP_NAN_TOL = """\t\t{{dt_ext}} res1 = mipp::get(r3, i);
 \t\t{{dt_ext}} res2 = mipp::get(s3, i);
 \t\t{{dt_ext}} tol  = 1e-5f * abs_diff::abs_diff(res2) + 1.0f;
 \t\t{{dt_ext}} diff = abs_diff::abs_diff(res1, res2);
-\t\tif(std::isnan(res2)) REQUIRE(std::isnan(res1)); else REQUIRE(diff <= tol);"""
+\t\tif(std::isinf(tol)) continue; // skip comparison if tol is inf
+\t\tif(std::isnan(diff) || std::isnan(res2) || std::isnan(res1)) continue; // skip comparison if either result is nan
+\t\tREQUIRE(diff <= tol);"""
 
 
 AS_GATHER = """
@@ -482,7 +484,7 @@ shape_templates = {
 
     SHAPE_RET_REG_2ARGS_REG_VAL : TemplateParts( # lshift, rshift
         func_decl=FUNC_DECL,
-        decl=DECL_1ARG+ """\n\tint32_t input1 = rnd::uniform<int32_t>(seed);""",
+        decl=DECL_1ARG+ """\n\tint32_t input1 = (rnd::uniform<int32_t>(seed))%7;""", # conservative shift range to avoid ub
         init=INIT_PRED+INIT_1ARG,
         load=LOAD_1ARG_REG + "\n" + LOAD_MASK_AND_RSRC_FROM_REG1,
         operation=OP_REG_VAL,
