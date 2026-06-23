@@ -484,7 +484,7 @@ shape_templates = {
 
     SHAPE_RET_REG_2ARGS_REG_VAL : TemplateParts( # lshift, rshift
         func_decl=FUNC_DECL,
-        decl=DECL_1ARG+ """\n\tint32_t input1 = (rnd::uniform<int32_t>(seed))%7;""", # conservative shift range to avoid ub
+        decl=DECL_1ARG+ """ \tint32_t input1 = rnd::uniform<int32_t>(seed); input1 = input1 < 0 ? -input1 : input1; input1 = input1 %((sizeof(input1) * 8)-1);""",
         init=INIT_PRED+INIT_1ARG,
         load=LOAD_1ARG_REG + "\n" + LOAD_MASK_AND_RSRC_FROM_REG1,
         operation=OP_REG_VAL,

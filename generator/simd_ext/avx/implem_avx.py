@@ -81,7 +81,7 @@ tpl_implem_avx = {
     "round_float":    { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r,(_MM_FROUND_TO_NEAREST_INT |_MM_FROUND_NO_EXC));" },
     "round_int":      { "format": "short", "code": "r0.r;" },
 
-    "sll":            { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, (uint8_t)v0);" },
+    "sll":            { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, v0);" },
     
     "testz_2args":    { "format": "long",  "code": "return {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_msk }}(m0.m, m1.m);" },
     "cmpeq_float":    { "format": "long", "code":
