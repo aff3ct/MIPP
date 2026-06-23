@@ -555,7 +555,7 @@ shape_templates = {
         load=LOAD_1ARG_REG,
         operation=OP_REG_VAL,
         loop_body="",
-        loop_assert=AS_REG_BINOP,
+        loop_assert=AS_REG_BINOP_NAN,
     ),
 }
 
