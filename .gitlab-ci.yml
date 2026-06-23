@@ -28,11 +28,11 @@ generation-headers:
   allow_failure: false
   rules:
     - when: always
-  artifacts:
+  artifacts: # try to use tar version as artifact
     name: mipp_headers
     when: always
     paths:
-      - include/
+      - include.tar.gz
   tags:
     - x86_64
     - linux
@@ -43,6 +43,9 @@ generation-headers:
     - source .venv/bin/activate
     - pip3 install -r requirements.txt
     - ./gen_mipp_headers.py --skip-sve
+    - cd .. 
+    - tar -czf include.tar.gz include/
+
   # HACK FORCE SKIP SVE TO TRY N PASS CI PLEASE
 generation-tests:
   image: registry.gitlab.com/aff3ct/aff3ct/mipp_linux:latest
