@@ -670,6 +670,9 @@ def match_func_headers(func, kind="c", mkind="", mode="function"):
     
     elif kind == "obj":
         headers += "#include <mipp_obj{hsufix}pp>\n"
+    
+    if kind == "cpp" and func in {"exp", "log"} :
+        headers += f"\n#include <cmath>\n"
 
     return headers
 

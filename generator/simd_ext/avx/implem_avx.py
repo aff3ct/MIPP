@@ -80,6 +80,8 @@ tpl_implem_avx = {
     
     "round_float":    { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r,(_MM_FROUND_TO_NEAREST_INT |_MM_FROUND_NO_EXC));" },
     "round_int":      { "format": "short", "code": "r0.r;" },
+
+    "sll":            { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, (uint8_t)v0);" },
     
     "testz_2args":    { "format": "long",  "code": "return {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_msk }}(m0.m, m1.m);" },
     "cmpeq_float":    { "format": "long", "code":
@@ -411,6 +413,10 @@ implems_avx = {
     "round" : [
         { "instr_name": "round",          "datatypes": all_float,                                   "template": tpl_implem_avx["round_float"],                                                 },
         { "instr_name" : "",              "datatypes": all_int_uint,                                "template": tpl_implem_avx["round_int"]                                         }], # round
+    
+    "sll" : [ 
+        {"instr_name": "sll",           "datatypes": [int16, int32, int64],                         "template": tpl_implem_avx["sll"],              "if": "defined(__AVX2__)"} ], # sll
+
    
    # the int64 versions r because according to gcc const int64_t* is not castable to const long long*.
    # the other difference is that avx gather use mask type of the date instead of the index which is understandable ig. 
@@ -431,5 +437,6 @@ implems_avx = {
 
         { "instr_name": "gather",         "datatypes": ["int32,int32"],                                       "template": tpl_implem_avx["gather_masks_i32"],  "if": "defined(__AVX2__)", "version" : "masks"},
         { "instr_name": "gather",         "datatypes": ["int32,int32"],                                       "template": tpl_implem_avx["gather_maskz_i32"],  "if": "defined(__AVX2__)", "version" : "maskz"},
+
     ], # gather
 }

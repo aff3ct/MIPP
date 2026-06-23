@@ -334,6 +334,13 @@ AS_CMP_BINOP_LOGI_FLOAT_WORKAROUND = """REQUIRE(!! mipp::get(r3, i) == !!mipp::g
 
 AS_REG_BINOP_FLOAT_WORKAROUND = AS_REG_BINOP
 
+AS_REG_BINOP_NAN = """\t\tif(std::isnan(mipp::get(s3, i))) REQUIRE(std::isnan(mipp::get(r3, i))); else REQUIRE(mipp::get(r3, i) == mipp::get(s3, i));"""
+AS_REG_BINOP_NAN_TOL = """\t\t{{dt_ext}} res1 = mipp::get(r3, i);
+\t\t{{dt_ext}} res2 = mipp::get(s3, i);
+\t\t{{dt_ext}} tol  = 1e-5f * abs_diff::abs_diff(res2) + 1.0f;
+\t\t{{dt_ext}} diff = abs_diff::abs_diff(res1, res2);
+\t\tif(std::isnan(res2)) REQUIRE(std::isnan(res1)); else REQUIRE(diff <= tol);"""
+
 
 AS_GATHER = """
 REQUIRE(mipp::get(r2,i) == mipp::get(s2,i));
@@ -635,6 +642,13 @@ LAYER_OVERRIDES = {
         "\t\t}else{\n\t\t\tREQUIRE(mipp::get(r3, i) == mipp::get(s3, i));\n\t\t}",
     },
 
+    "exp": {
+        "loop_assert": AS_REG_BINOP_NAN_TOL,
+    },
+
+    "log": {
+        "loop_assert": AS_REG_BINOP_NAN_TOL,
+    },
 }
 
 NO_LOOP_FUNCS = {

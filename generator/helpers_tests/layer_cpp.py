@@ -316,6 +316,14 @@ REQUIRE(mipp::get(r2,i) == mipp::get(s2,i));
 AS_SCATTER = """REQUIRE(outputs[i] == outputs_scal[i]);
 """
 
+AS_REG_BINOP_NAN = """\t\tif(std::isnan(mipp::get(s3, i))) REQUIRE(std::isnan(mipp::get(r3, i))); else REQUIRE(mipp::get(r3, i) == mipp::get(s3, i));"""
+AS_REG_BINOP_NAN_TOL = """\t\t{{dt_ext}} res1 = mipp::get(r3, i);
+\t\t{{dt_ext}} res2 = mipp::get(s3, i);
+\t\t{{dt_ext}} tol  = 1e-5f * abs_diff::abs_diff(res2) + 1.0f;
+\t\t{{dt_ext}} diff = abs_diff::abs_diff(res1, res2);
+\t\tif(std::isnan(res2)) REQUIRE(std::isnan(res1)); else REQUIRE(diff <= tol);"""
+
+
 shape_templates = {
     SHAPE_RET_REG_2ARGS_REG: TemplateParts( # add, sub, div, mul
         func_decl=FUNC_DECL,
@@ -749,6 +757,15 @@ LAYER_OVERRIDES = {
         "loop_body": """\tfor(size_t i = 0; i < {{size}} * sizeof(int32_t) / sizeof({{dt1_ext}}_t); i++){\n""",
         "loop_assert": AS_CAST_2ARGS_MSK + "\n\t}",
     },
+
+    "exp": {
+        "loop_assert": AS_CMP_NAN_TOL,
+    },
+
+    "log": {
+        "loop_assert": AS_CMP_NAN_TOL,
+    },
+
 
     
 }

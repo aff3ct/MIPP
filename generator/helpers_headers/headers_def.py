@@ -437,9 +437,10 @@ mipp_funcs = {
     "rshift":        { "proto": protos["ret_reg_2args_reg_val"],        "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
     "lshift":        { "proto": protos["ret_reg_2args_reg_val"],        "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
 
-    "exp":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_float,               "horizontal": False, "mask_support": all_mask        },
-    "log":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_float,               "horizontal": False, "mask_support": all_mask        },
+    "exp":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_float,                "horizontal": False, "mask_support": all_mask        },
+    "log":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_float,                "horizontal": False, "mask_support": all_mask        },
     # "pow":          { "proto": protos["ret_reg_2args_reg_val"],        "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
+    "pow2":         { "proto": protos["ret_reg_2args_reg_val"],        "datatypes": all_datatypes,            "horizontal": False, "mask_support": all_mask        },
 }
 
 isa_scalar = {
@@ -1377,6 +1378,31 @@ res.r[i] = %!pred_cond!% LOGF(r0.r[i]) %!pred_alt!%;
 """
         },
     ],
+    "pow2": [ # ------------------------------------------------------------------------------------------------- pow2
+        { "type": "element-wide", "datatypes": [float32], "mask_variants": all_defs, "implem":
+"""
+    res.r[i] = %!pred_cond!% POWF(2.f, r0.r[i]) %!pred_alt!%;
+"""
+        },
+        { "type": "element-wide", "datatypes": [float64], "mask_variants": all_defs, "implem":
+"""
+    res.r[i] = %!pred_cond!% POW(2., r0.r[i]) %!pred_alt!%;
+"""
+        },
+    
+        {"type": "element-wide", "datatypes": all_uint, "mask_variants": all_defs, "implem":
+"""
+    res.r[i] = %!pred_cond!% 1ULL << r0.r[i] %!pred_alt!%;
+""" },
+        {"type": "vector-wide", "datatypes": all_int, "mask_variants": all_defs, "implem":
+"""
+%r<tp>% res;
+for (size_t i = 0; i < %N<tp>%; i++){
+    res.r[i] = %!pred_cond!% 1 << (uint8_t)r0.r[i] %!pred_alt!%;
+}
+return res;
+""" },
+],
 
 #     "pow": [ # -------------------------------------------------------------------------------------------------- pow
 #         { "type": "element-wide", "datatypes": [float32], "mask_variants": all_defs, "implem":
