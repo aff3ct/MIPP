@@ -759,11 +759,11 @@ LAYER_OVERRIDES = {
     },
 
     "exp": {
-        "loop_assert": AS_CMP_NAN_TOL,
+        "loop_assert": AS_REG_BINOP_NAN_TOL,
     },
 
     "log": {
-        "loop_assert": AS_CMP_NAN_TOL,
+        "loop_assert": AS_REG_BINOP_NAN_TOL,
     },
 
 

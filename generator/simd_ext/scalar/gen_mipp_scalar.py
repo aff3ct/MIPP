@@ -517,7 +517,7 @@ def gen_mipp_scalar(include_manager):
 #define LOGF(x) (logf(x))
 #define LOGD(x) (log(x))
 
-#define POW(x, y) (powf(x, y))
+#define POWF(x, y) (powf(x, y))
 #define POWD(x, y) (pow(x, y))
 
 typedef float float32_t;

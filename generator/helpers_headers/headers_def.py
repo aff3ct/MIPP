@@ -1386,7 +1386,7 @@ res.r[i] = %!pred_cond!% LOGF(r0.r[i]) %!pred_alt!%;
         },
         { "type": "element-wide", "datatypes": [float64], "mask_variants": all_defs, "implem":
 """
-    res.r[i] = %!pred_cond!% POW(2., r0.r[i]) %!pred_alt!%;
+    res.r[i] = %!pred_cond!% POWD(2., r0.r[i]) %!pred_alt!%;
 """
         },
     

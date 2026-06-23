@@ -414,8 +414,8 @@ implems_avx = {
         { "instr_name": "round",          "datatypes": all_float,                                   "template": tpl_implem_avx["round_float"],                                                 },
         { "instr_name" : "",              "datatypes": all_int_uint,                                "template": tpl_implem_avx["round_int"]                                         }], # round
     
-    "sll" : [ 
-        {"instr_name": "sll",           "datatypes": [int16, int32, int64],                         "template": tpl_implem_avx["sll"],              "if": "defined(__AVX2__)"} ], # sll
+    "lshift" : [ 
+        {"instr_name": "slli",           "datatypes": [int16, int32, int64],                         "template": tpl_implem_avx["sll"],              "if": "defined(__AVX2__)"} ], # sll
 
    
    # the int64 versions r because according to gcc const int64_t* is not castable to const long long*.
