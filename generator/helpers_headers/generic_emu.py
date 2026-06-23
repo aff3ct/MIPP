@@ -541,10 +541,10 @@ implems_mask_generic_emu = {
 		{ "instr_name": "notb",  "datatypes" : all_datatypes, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_1arg_reg"]["code"] + SNIPPET_END_MSKS}},
 	],
     
-	"sll" : [
-		{ "instr_name": "sll",  "datatypes" : all_datatypes, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg_val"]["code"] + SNIPPET_END_MSK}},
-		{ "instr_name": "sll",  "datatypes" : all_datatypes, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg_val"]["code"] + SNIPPET_END_MSKZ}},
-		{ "instr_name": "sll",  "datatypes" : all_datatypes, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg_val"]["code"] + SNIPPET_END_MSKS}},
+	"lshift" : [
+		{ "instr_name": "lshift",  "datatypes" : all_datatypes, "version" : "mask", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg_val"]["code"] + SNIPPET_END_MSK}},
+		{ "instr_name": "lshift",  "datatypes" : all_datatypes, "version" : "maskz", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg_val"]["code"] + SNIPPET_END_MSKZ}},
+		{ "instr_name": "lshift",  "datatypes" : all_datatypes, "version" : "masks", "template" : { "format" :"long", "code" : tpl_mask_generic_emu["ret_reg_2args_reg_val"]["code"] + SNIPPET_END_MSKS}},
 	],
  
 	
