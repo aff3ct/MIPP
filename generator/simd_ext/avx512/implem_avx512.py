@@ -292,6 +292,15 @@ tpl_implem_avx512 = {
     return %cast<c:int|b:tp,tp>%(tmp0);"""
     },
 
+    "orb_emu": {"format": "long", "code":
+"""// long format
+    %r<c:int|b:tp>% tmp0, tmp1;
+    tmp0 = %cast<tp,c:int|b:tp>%(r0);
+    tmp1 = %cast<tp,c:int|b:tp>%(r1);
+    tmp0 = %orb<c:int|b:tp>%(tmp0, tmp1);
+    return %cast<c:int|b:tp,tp>%(tmp0);"""
+    },
+
     "blend_emu": {"format": "long", "code":
 """// long format
     %r<c:int|b:tp>% tmp0, tmp1;
@@ -427,7 +436,9 @@ implems_avx512 = {
         { "instr_name": "or",         "datatypes": [int64, uint64],              "template": tpl_implem_avx512["logi_2args"],                                                                                                   },
         { "instr_name": "or",         "datatypes": [int32, uint32],              "template": tpl_implem_avx512["logi_2args"],                                                                                                   },
         { "instr_name": "or",         "datatypes": [int16, uint16],              "template": tpl_implem_avx512["logi_2args"],     "if": "defined(__AVX512BW__)"                                                                 },
-        { "instr_name": "or",         "datatypes": [int8, uint8],                "template": tpl_implem_avx512["logi_2args"],     "if": "defined(__AVX512BW__)"                                                                 } ], # orb
+        { "instr_name": "or",         "datatypes": [int8, uint8],                "template": tpl_implem_avx512["logi_2args"],     "if": "defined(__AVX512BW__)"                                                                 },
+        { "instr_name": "or",         "datatypes": all_float,                    "template": tpl_implem_avx512["orb_emu"],       "if": "!defined(__AVX512DQ__)"                                                                 }], # orb
+
     "orb_k": [
         { "instr_name": "kor",        "datatypes": all_64bit,                    "template": tpl_implem_avx512["bitwise_2args"],  "if": "defined(__AVX512DQ__)"                                                                 },
         { "instr_name": "kor",        "datatypes": all_32bit,                    "template": tpl_implem_avx512["bitwise_2args"],                                                                                                },

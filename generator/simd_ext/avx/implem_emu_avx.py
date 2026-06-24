@@ -223,7 +223,6 @@ tpl_implem_emu_avx = {
 """// long format
 	return  %hadd<tp>%(r0);""" },
 
-
 # algorithm re-used from MIPPv1 
 # taken from 
 # https://github.com/reyoung/avx_mathfun/blob/master/avx_mathfun.h
@@ -280,10 +279,8 @@ tpl_implem_emu_avx = {
     
     %r<tp>% x = %min<tp>%(r0, exp_hi);
     x = %max<tp>%(x, exp_lo);
-    
-    x = %mul<tp>%(x, cephes_LOG2EF);
-	fx = %add<tp>%(x, %set1<tp>%(0.5f));
-    
+
+    fx = %fmadd<tp>%(x, cephes_LOG2EF, %set1<tp>%(0.5f));  
     tmp.r =  _mm256_floor_ps(fx.r);
     
     %r<tp>% mask; 
@@ -313,80 +310,6 @@ tpl_implem_emu_avx = {
     
     return y;
 """},
-
-
-	"log_f32_nofma": { "format": "long", "code":
-"""
-	%r<c:int|b:tp>% imm0;
-    %r<tp>% one = %set1<tp>%(1.0f);
-    
-    %r<tp>% min_norm_pos = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%((int32_t)0x00800000));
-    %r<tp>% inv_mant_mask = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%((int32_t)~0x7f800000));
-    %r<tp>% mant_mask = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%((int32_t)0x7f800000));
-    %r<tp>% cephes_SQRTHF = %set1<tp>%(0.707106781186547524f);
-    %r<tp>% cephes_log_p0 = %set1<tp>%(7.0376836292E-2f);
-	%r<tp>% cephes_log_p1 = %set1<tp>%(- 1.1514610310E-1f);
-	%r<tp>% cephes_log_p2 = %set1<tp>%(1.1676998740E-1f);
-	%r<tp>% cephes_log_p3 = %set1<tp>%(- 1.2420140846E-1f);
-	%r<tp>% cephes_log_p4 = %set1<tp>%(+ 1.4249322787E-1f);
-	%r<tp>% cephes_log_p5 = %set1<tp>%(- 1.6668057665E-1f);
-	%r<tp>% cephes_log_p6 = %set1<tp>%(+ 2.0000714765E-1f);
-	%r<tp>% cephes_log_p7 = %set1<tp>%(- 2.4999993993E-1f);
-	%r<tp>% cephes_log_p8 = %set1<tp>%(+ 3.3333331174E-1f);
-	%r<tp>% cephes_log_q1 = %set1<tp>%(-2.12194440e-4f);
-	%r<tp>% cephes_log_q2 = %set1<tp>%(0.693359375f);
-
-    %r<tp>% invalid_mask; 
-    invalid_mask.r = %cmple<tp>%(r0, %set0<tp>%()).m; // hack
-    
-    %r<tp>% x = %max<tp>%(r0, min_norm_pos);
-    
-    imm0.r = _mm256_srli_epi32(x.r, 23);
-    x.r = _mm256_and_ps(x.r, inv_mant_mask.r);
-	x.r = _mm256_or_ps(x.r, %set1<tp>%((float)0.5).r);
-    
-    imm0 = %sub<c:int|b:tp>%(imm0, %set1<c:int|b:tp>%((int32_t)0x7f));
-    
-    %r<tp>% e;
-    e.r = _mm256_cvtepi32_ps(imm0.r);
-    e = %add<tp>%(e, one);
-    
-    %r<tp>% mask;
-    mask.r = %cmplt<tp>%(x, cephes_SQRTHF).m; // hack
-	%r<tp>% tmp = %andb<tp>%(x, mask);
-    x = %sub<tp>%(x, one);
-    e = %sub<tp>%(e, %andb<tp>%(one, mask));
-    
-    x = %add<tp>%(x, tmp);
-    %r<tp>% z = %mul<tp>%(x, x);
-
-    %r<tp>% y = cephes_log_p0;
-    y = %mul<tp>%(y,x);
-	y = %add<tp>%(y, cephes_log_p1);
-    y = %mul<tp>%(y,x);
-	y = %add<tp>%(y, cephes_log_p2);
-    y = %mul<tp>%(y,x);
-	y = %add<tp>%(y, cephes_log_p3);
-    y = %mul<tp>%(y,x);
-	y = %add<tp>%(y, cephes_log_p4);
-    y = %mul<tp>%(y,x);
-	y = %add<tp>%(y, cephes_log_p5);
-    y = %mul<tp>%(y,x);
-	y = %add<tp>%(y, cephes_log_p6);
-    y = %mul<tp>%(y,x);
-	y = %add<tp>%(y, cephes_log_p7);
-    y = %mul<tp>%(y,x);
-	y = %add<tp>%(y, cephes_log_p8);
-    
-    y = %mul<tp>%(y, z);
-    
-    tmp = %mul<tp>%(e, cephes_log_q1);
-    x = %add<tp>%(x, y);
-    x = %add<tp>%(x, tmp);
-    x = %orb<tp>%(x, invalid_mask);
-	return x;
-"""},
-
 
 	"log_f32_fma": { "format": "long", "code":
 """
@@ -545,8 +468,6 @@ implems_emu_avx = {
 	
 	"exp": [
 		{ "datatypes": [float32],                      "template": tpl_implem_emu_avx["exp_f32_fma"], "if": "defined(__AVX2__)" },],
-		# { "datatypes": [float32],                      "template": tpl_implem_emu_avx["exp_f32_fma"],   "if": "defined(__FMA__)"} ], # exp
     "log": [
 		{ "datatypes": [float32],                      "template": tpl_implem_emu_avx["log_f32_fma"],  "if": "defined(__AVX2__)" },],
-	# 	{ "datatypes": [float64],                      "template": tpl_implem_emu_avx["log_f64"],								} ], # log
 }
