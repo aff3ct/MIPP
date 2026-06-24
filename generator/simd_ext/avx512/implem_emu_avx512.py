@@ -424,6 +424,15 @@ tpl_implem_emu_avx512 = {
 	return x;
 """},
 
+	# finally :)
+    "pow_f32": { "format": "long", "code":
+"""// long format
+    %r<tp>% logx = %log<tp>%(r0);
+    %r<tp>% ylogx = %mul<tp>%(r1, logx);
+    %r<tp>% res = %exp<tp>%(ylogx);
+    return res;
+"""},
+
 }
 
 implems_emu_avx512 = {
@@ -484,4 +493,6 @@ implems_emu_avx512 = {
 		{ "datatypes": [float32],                    "template": tpl_implem_emu_avx512["exp_f32_fma"]								  } ],
     "log": [
 		{ "datatypes": [float32],                    "template": tpl_implem_emu_avx512["log_f32_fma"]								  } ],
+    "pow": [
+		{ "datatypes": [float32],                    "template": tpl_implem_emu_avx512["pow_f32"]									  } ],
 }

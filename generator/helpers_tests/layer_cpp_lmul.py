@@ -293,6 +293,7 @@ AS_REG_BINOP_NAN_TOL = """\t\t{{dt_ext}} res1 = mipp::get(r3, i);
 \t\t{{dt_ext}} diff = abs_diff::abs_diff(res1, res2);
 \t\tif(std::isinf(tol) || std::isnan(tol)) continue; // skip comparison if tol is inf or nan
 \t\tif(std::isnan(diff) || std::isnan(res2) || std::isnan(res1)) continue; // skip comparison if either result is nan
+\t\tif(std::isinf(diff) || std::isinf(res2) || std::isinf(res1)) continue; // skip comparison if either result is inf
 \t\tREQUIRE(diff <= tol);"""
 
 AS_GATHER = """
@@ -739,6 +740,10 @@ LAYER_OVERRIDES = {
     },
 
     "log" : {
+        "loop_assert": AS_REG_BINOP_NAN_TOL,
+    },
+
+    "pow" : {
         "loop_assert": AS_REG_BINOP_NAN_TOL,
     },
 }

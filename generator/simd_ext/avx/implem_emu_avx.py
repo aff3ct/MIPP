@@ -386,6 +386,15 @@ tpl_implem_emu_avx = {
 
 	"log_f64": { "format": "long", "code":
 """// long format"""},
+
+    "pow_f32": { "format": "long", "code":
+"""// long format
+    %r<tp>% logx = %log<tp>%(r0);
+    %r<tp>% ylogx = %mul<tp>%(r1, logx);
+    %r<tp>% res = %exp<tp>%(ylogx);
+    return res;
+"""},
+
 }
 
 """ "implems_emu" dictionary:
@@ -470,4 +479,7 @@ implems_emu_avx = {
 		{ "datatypes": [float32],                      "template": tpl_implem_emu_avx["exp_f32_fma"], "if": "defined(__AVX2__)" },],
     "log": [
 		{ "datatypes": [float32],                      "template": tpl_implem_emu_avx["log_f32_fma"],  "if": "defined(__AVX2__)" },],
+
+    "pow": [
+        { "datatypes": [float32],                      "template": tpl_implem_emu_avx["pow_f32"]}],
 }

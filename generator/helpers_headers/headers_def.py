@@ -313,7 +313,7 @@ mipp_funcs_concepts = {
     "store":       [ "store", "storeu", "get", "get_k", "getfirst", "scatter", "maskst" ],
     "arithmetic":  [ "add", "adds", "sub", "subs", "mul", "div", "div2", "div4", "maskz_add", "fmadd", "fmsub", "fnmadd", "fnmsub" ],
     "comparison":  [ "cmpeq", "cmpneq", "cmple", "cmplt", "cmpge", "cmpgt" ],
-    "math":        [ "sqrt", "rsqrt", "round", "exp", "log", "pow"],
+    "math":        [ "sqrt", "rsqrt", "round", "exp", "log", "pow", "pow2"],
     "logic":       [ "andb", "andb_k", "andnb", "andnb_k", "orb", "orb_k", "xorb", "xorb_k", "msb", "notb", "notb_k", "lshift", "rshift"],
     "reduction":   [ "hadd", "hadds", "hmul", "hmin", "hmax", "hadd_to_scal", "hadds_to_scal", "testz", "testz_2" ],
     "selection":   [ "blend", "min", "max" ],
@@ -439,8 +439,8 @@ mipp_funcs = {
 
     "exp":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_float,                "horizontal": False, "mask_support": all_mask        },
     "log":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_float,                "horizontal": False, "mask_support": all_mask        },
-    # "pow":          { "proto": protos["ret_reg_2args_reg_val"],        "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
-    "pow2":         { "proto": protos["ret_reg_2args_reg_val"],        "datatypes": all_datatypes,            "horizontal": False, "mask_support": all_mask        },
+    "pow":          { "proto": protos["ret_reg_2args_reg"],        "datatypes": all_float+all_uint,           "horizontal": False, "mask_support": all_mask         },
+    "pow2":         { "proto": protos["ret_reg_2args_reg_val"],        "datatypes": all_float+all_uint,      "horizontal": False, "mask_support": all_mask         },
 }
 
 isa_scalar = {
@@ -1394,37 +1394,31 @@ res.r[i] = %!pred_cond!% LOGF(r0.r[i]) %!pred_alt!%;
 """
     res.r[i] = %!pred_cond!% 1ULL << r0.r[i] %!pred_alt!%;
 """ },
-        {"type": "vector-wide", "datatypes": all_int, "mask_variants": all_defs, "implem":
+],
+
+    "pow": [ # -------------------------------------------------------------------------------------------------- pow
+        { "type": "element-wide", "datatypes": [float32], "mask_variants": all_defs, "implem":
+"""
+    res.r[i] = %!pred_cond!% POWF(r0.r[i], r1.r[i]) %!pred_alt!%;
+"""
+        },
+        { "type": "element-wide", "datatypes": [float64], "mask_variants": all_defs, "implem":
+"""
+    res.r[i] = %!pred_cond!% POWD(r0.r[i], r1.r[i]) %!pred_alt!%;
+"""
+        },
+        # naive implementation w nested for loops.
+        { "type": "vector-wide", "datatypes": all_uint, "mask_variants": all_defs, "implem":
 """
 %r<tp>% res;
 for (size_t i = 0; i < %N<tp>%; i++){
-    res.r[i] = %!pred_cond!% 1 << (uint8_t)r0.r[i] %!pred_alt!%;
+    res.r[i] = 1;
+    for (size_t j = 0; j < r1.r[i]; j++)
+        res.r[i] *= r0.r[i];
 }
 return res;
-""" },
-],
-
-#     "pow": [ # -------------------------------------------------------------------------------------------------- pow
-#         { "type": "element-wide", "datatypes": [float32], "mask_variants": all_defs, "implem":
-# """res.r[i] = %!pred_cond!% POWF(r0.r[i], v0) %!pred_alt!%;
-# """
-#         },
-#         { "type": "element-wide", "datatypes": [float64], "mask_variants": all_defs, "implem":
-# """res.r[i] = %!pred_cond!% POW(r0.r[i], v0) %!pred_alt!%;
-# """
-#         },
-
-#         { "type": "vector-wide", "datatypes": all_int + all_uint, "mask_variants": all_defs, "implem":
-# """
-#     %r<tp>% res;
-
-#     for (int32_t i = 0; i < v0; i++){
-#         for (size_t j = 0; j < %N<tp>%; j++){
-#             res.r[j] = %!pred_cond!% res.r[j] * r0.r[j] %!pred_alt!%;
-#         }
-#     }
-#     return resv;
-# """}]
+"""}
+]
 }
 
 copy_mipp_funcs = copy.deepcopy(mipp_funcs)
