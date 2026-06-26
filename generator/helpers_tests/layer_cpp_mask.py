@@ -661,7 +661,7 @@ LAYER_OVERRIDES = {
 \t\tinputs1[i] = inputs1[i] < 0 ? -inputs1[i] : inputs1[i]; // make sure inputs1 is non-negative for log(x)
 \t\tinputs2[i] = rnd::uniform<{{dt_ext}}>(seed);
 \t}
-""",
+"""+INIT_PRED,
         "loop_assert": AS_REG_BINOP_NAN_TOL,
     },
 }

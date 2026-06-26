@@ -256,7 +256,7 @@ tpl_implem_emu_avx = {
 #   3. This notice may not be removed or altered from any source distribution.
 
 #   (this is the zlib license)
-	"exp_f32_fma": { "format": "long", "code":
+	"exp_f32": { "format": "long", "code":
 """
 	__m256 x = r0.r;
 	__m256 tmp = _mm256_setzero_ps(), fx;
@@ -281,7 +281,9 @@ tpl_implem_emu_avx = {
 	x = _mm256_min_ps(x, exp_hi);
 	x = _mm256_max_ps(x, exp_lo);
 
-	fx = _mm256_fmadd_ps(x, cephes_LOG2EF, half);
+    fx = _mm256_mul_ps(x, cephes_LOG2EF);
+    fx = _mm256_add_ps(fx, half);
+
 	tmp = _mm256_floor_ps(fx);
 
 	__m256 mask = _mm256_cmp_ps(tmp, fx, _CMP_GT_OS);
@@ -322,7 +324,7 @@ tpl_implem_emu_avx = {
 	return res;
 """},
 
-	"log_f32_fma": { "format": "long", "code":
+	"log_f32": { "format": "long", "code":
 """
 	__m256 x = r0.r;
 	__m256i imm0;
@@ -404,7 +406,9 @@ tpl_implem_emu_avx = {
  	x = _mm256_add_ps(x, y);
  	x = _mm256_add_ps(x, tmp);
  	x = _mm256_or_ps(x, invalid_mask); // negative arg will be NAN
- 	return (rvd_avx_float32_t){x};
+    rvd_avx_float32_t res;
+    res.r = x;
+ 	return res;
 """},
 
 	"exp_f64": { "format": "long", "code":
@@ -502,11 +506,11 @@ implems_emu_avx = {
 	# 	{ "datatypes": [float64],                      "template": tpl_implem_emu_avx["pow2_f64"],                                } ], # pow2
 	
 	"exp": [
-		{ "datatypes": [float32],                      "template": tpl_implem_emu_avx["exp_f32_fma"], "if": "defined(__AVX2__)" },],
+		{ "datatypes": [float32],                      "template": tpl_implem_emu_avx["exp_f32"], "if": "defined(__AVX2__)" },],
     "log": [
-		{ "datatypes": [float32],                      "template": tpl_implem_emu_avx["log_f32_fma"], "if": "defined(__AVX2__)" },],
+		{ "datatypes": [float32],                      "template": tpl_implem_emu_avx["log_f32"], "if": "defined(__AVX2__)" },],
 
     "pow": [
-        { "datatypes": [float32],                      "template": tpl_implem_emu_avx["pow_f32"],  "if": "defined(__AVX2__)"},],
+        { "datatypes": [float32],                      "template": tpl_implem_emu_avx["pow_f32"],  "if": "defined(__AVX2__)"},]
 }
 
