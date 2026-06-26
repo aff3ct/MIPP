@@ -207,221 +207,168 @@ tpl_implem_emu_avx512 = {
 #   3. This notice may not be removed or altered from any source distribution.
 
 #   (this is the zlib license)
-	"exp_f32_fma": { "format": "long", "code":
+	"exp_f32": { "format": "long", "code":
 """
-	%r<tp>% tmp = %set0<tp>%(), fx;
-    %r<c:int|b:tp>% imm0;
-    %r<tp>% one = %set1<tp>%(1.0f);
-    
-    %r<tp>% exp_hi = %set1<tp>%(88.3762626647949f),
-			exp_lo = %set1<tp>%(-88.3762626647949f);
-            
-    
-	%r<tp>% cephes_LOG2EF = %set1<tp>%(1.44269504088896341f),
-			cephes_exp_C1 = %set1<tp>%(0.693359375f),
-            cephes_exp_C2 = %set1<tp>%(-2.12194440e-4f);
+    __m512 x = r0.r;
+    __m512 tmp, fx;
 
-    %r<tp>% cephes_exp_p0 = %set1<tp>%(1.9875691500E-4f),
-			cephes_exp_p1 = %set1<tp>%(1.3981999507E-3f),
-			cephes_exp_p2 = %set1<tp>%(8.3334519073E-3f),
-			cephes_exp_p3 = %set1<tp>%(4.1665795894E-2f),
-			cephes_exp_p4 = %set1<tp>%(1.6666665459E-1f),
-			cephes_exp_p5 = %set1<tp>%(5.0000001201E-1f);
-    
-    %r<c:uint|b:tp>% r_0x0 = %set1<c:uint|b:tp>%((uint32_t)0);
-    %r<c:uint|b:tp>% r_0xffffffff = %set1<c:uint|b:tp>%((uint32_t)0xffffffff);
-    
-    %r<tp>% x = %min<tp>%(r0, exp_hi);
-    x = %max<tp>%(x, exp_lo);
-    
-    fx = %fmadd<tp>%(x, cephes_LOG2EF, %set1<tp>%(0.5f));
-    
-    tmp.r =  _mm512_floor_ps(fx.r);
-    
-    %m<tp>% mask2;
-    mask2 = %cmpgt<tp>%(tmp, fx); // hack
-    
-    %r<tp>% mask;
-    mask =  %blend<tp>%(%cast<c:uint|b:tp,tp>%(r_0xffffffff), %cast<c:uint|b:tp,tp>%(r_0x0), mask2);
-    mask.r = _mm512_castsi512_ps(_mm512_and_si512(_mm512_castps_si512(mask.r), _mm512_castps_si512(one.r)));
-    
-    fx = %sub<tp>%(tmp, mask);
-    
-    tmp = %mul<tp>%(fx, cephes_exp_C1);
-    %r<tp>% z = %mul<tp>%(x, cephes_exp_C2);
-    
-    x = %sub<tp>%(x, tmp);
-    x = %sub<tp>%(x, z);
-    
-    z = %mul<tp>%(x, x);
-    
-    %r<tp>% y = cephes_exp_p0;
-	y = %fmadd<tp>%(y, x, cephes_exp_p1);
-	y = %fmadd<tp>%(y, x, cephes_exp_p2);
-	y = %fmadd<tp>%(y, x, cephes_exp_p3);
-	y = %fmadd<tp>%(y, x, cephes_exp_p4);
-	y = %fmadd<tp>%(y, x, cephes_exp_p5);
+    __m512i imm0;
 
-	y = %fmadd<tp>%(y, z, x);
-	y = %add<tp>%(y, one);
-    
-    imm0.r = _mm512_cvttps_epi32(fx.r);
+    __m512 one = _mm512_set1_ps(1.0f);
 
-	%r<c:uint|b:tp>% r_0x7f = %set1<c:uint|b:tp>%((uint32_t)0x7f);
-	imm0.r = _mm512_add_epi32(imm0.r, _mm512_castps_si512(_mm512_castsi512_ps(r_0x7f.r)));
-    imm0.r =  _mm512_slli_epi32(imm0.r, 23);
-    %r<tp>% pow2n = %cast<c:int|b:tp,tp>%(imm0);
-	y = %mul<tp>%(y, pow2n);
-    
-    return y;
+    __m512 exp_hi = _mm512_set1_ps(88.3762626647949f);
+    __m512 exp_lo = _mm512_set1_ps(-88.3762626647949f);
+
+    __m512 cephes_LOG2EF = _mm512_set1_ps(1.44269504088896341f);
+    __m512 cephes_exp_C1 = _mm512_set1_ps(0.693359375f);
+    __m512 cephes_exp_C2 = _mm512_set1_ps(-2.12194440e-4f);
+
+    __m512 cephes_exp_p0 = _mm512_set1_ps(1.9875691500E-4f);
+    __m512 cephes_exp_p1 = _mm512_set1_ps(1.3981999507E-3f);
+    __m512 cephes_exp_p2 = _mm512_set1_ps(8.3334519073E-3f);
+    __m512 cephes_exp_p3 = _mm512_set1_ps(4.1665795894E-2f);
+    __m512 cephes_exp_p4 = _mm512_set1_ps(1.6666665459E-1f);
+    __m512 cephes_exp_p5 = _mm512_set1_ps(5.0000001201E-1f);
+
+    __m512i i0 = _mm512_set1_epi32(0);
+    __m512i i0xffffffff = _mm512_set1_epi32(0xFFFFFFFF);
+    __m512i i0x7f = _mm512_set1_epi32(0x7F);
+
+    x = _mm512_min_ps(x, exp_hi);
+    x = _mm512_max_ps(x, exp_lo);
+
+    fx = _mm512_mul_ps(x, cephes_LOG2EF);
+    fx = _mm512_add_ps(fx, _mm512_set1_ps(0.5f));
+
+    tmp = _mm512_floor_ps(fx);
+
+    // if greater, substract 1
+    __mmask16 mask2 = _mm512_cmp_ps_mask(tmp, fx, _CMP_GT_OS);
+    _mm512 mask = _mm512_mask_blend_ps(mask2, _mm512_castsi512_ps(i0), _mm512_castsi512_ps(i0xffffffff));
+    mask =  _mm512_castsi512_ps(_mm512_and_si512(_mm512_castps_si512(mask), _mm512_castps_si512(one)));
+    fx = _mm512_sub_ps(tmp, mask);
+
+    tmp = _mm512_mul_ps(fx, cephes_exp_C1);
+    __m512 z = _mm512_mul_ps(fx, cephes_exp_C2);
+    x = _mm512_sub_ps(x, tmp);
+    x = _mm512_sub_ps(x, z);
+
+    z = _mm512_mul_ps(x, x);
+
+    __m512 y = cephes_exp_p0;
+    y = _mm512_mul_ps(y, x);
+    y = _mm512_add_ps(y, cephes_exp_p1);
+    y = _mm512_mul_ps(y, x);
+    y = _mm512_add_ps(y, cephes_exp_p2);
+    y = _mm512_mul_ps(y, x);
+    y = _mm512_add_ps(y, cephes_exp_p3);
+    y = _mm512_mul_ps(y, x);
+    y = _mm512_add_ps(y, cephes_exp_p4);
+    y = _mm512_mul_ps(y, x);
+    y = _mm512_add_ps(y, cephes_exp_p5);
+    y = _mm512_mul_ps(y, z);
+    y = _mm512_add_ps(y, x);
+    y = _mm512_add_ps(y, one);
+
+    imm0 = _mm512_cvttps_epi32(fx);
+    imm0 = _mm512_add_epi32(imm0, i0x7f);
+    imm0 = _mm512_slli_epi32(imm0, 23);
+    __m512 pow2n = _mm512_castsi512_ps(imm0);
+    y = _mm512_mul_ps(y, pow2n);
+    rvd_avx512_float32_t res;
+    res.r = y;
+    return res;
 """},
 
 
-	"log_f32_fma": { "format": "long", "code":
+	"log_f32": { "format": "long", "code":
 """
-	%r<c:int|b:tp>% imm0;
-    %r<tp>% one = %set1<tp>%(1.0f);
-    
-    %r<tp>% min_norm_pos = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%((int32_t)0x00800000));
-    %r<tp>% inv_mant_mask = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%((int32_t)~0x7f800000));
-    // %r<tp>% mant_mask = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%((int32_t)0x7f800000));
-    %r<tp>% cephes_SQRTHF = %set1<tp>%(0.707106781186547524f);
-    %r<tp>% cephes_log_p0 = %set1<tp>%(7.0376836292E-2f);
-	%r<tp>% cephes_log_p1 = %set1<tp>%(- 1.1514610310E-1f);
-	%r<tp>% cephes_log_p2 = %set1<tp>%(1.1676998740E-1f);
-	%r<tp>% cephes_log_p3 = %set1<tp>%(- 1.2420140846E-1f);
-	%r<tp>% cephes_log_p4 = %set1<tp>%(+ 1.4249322787E-1f);
-	%r<tp>% cephes_log_p5 = %set1<tp>%(- 1.6668057665E-1f);
-	%r<tp>% cephes_log_p6 = %set1<tp>%(+ 2.0000714765E-1f);
-	%r<tp>% cephes_log_p7 = %set1<tp>%(- 2.4999993993E-1f);
-	%r<tp>% cephes_log_p8 = %set1<tp>%(+ 3.3333331174E-1f);
-	%r<tp>% cephes_log_q1 = %set1<tp>%(-2.12194440e-4f);
-	%r<tp>% cephes_log_q2 = %set1<tp>%(0.693359375f);
+    __m512 x = r0.r;
+    __m512i imm0;
+    __m512 one = _mm512_set1_ps(1.0f);
+    __m512 half = _mm512_set1_ps(0.5f);
 
-    %r<tp>% invalid_mask; 
-    invalid_mask.r = %cmple<tp>%(r0, %set0<tp>%()).m; // hack
+    __m512i i0 = _mm512_set1_epi32(0);
+    __m512i i0xffffffff = _mm512_set1_epi32(0xFFFFFFFF);
+    __m512i i0x7f = _mm512_set1_epi32(0x7F);
     
-    %r<tp>% x = %max<tp>%(r0, min_norm_pos);
-    
-    imm0.r = _mm256_srli_epi32(_mm256_castps_si256(x.r), 23);
-    x.r = _mm256_and_ps(x.r, inv_mant_mask.r);
-	x.r = _mm256_or_ps(x.r, %set1<tp>%((float)0.5).r);
-    
-    imm0 = %sub<c:int|b:tp>%(imm0, %set1<c:int|b:tp>%((int32_t)0x7f));
-    
-    %r<tp>% e;
-    e.r = _mm256_cvtepi32_ps(imm0.r);
-    e = %add<tp>%(e, one);
-    
-    %r<tp>% mask;
-    mask.r = %cmplt<tp>%(x, cephes_SQRTHF).m; // hack
-	%r<tp>% tmp = %andb<tp>%(x, mask);
-    x = %sub<tp>%(x, one);
-    e = %sub<tp>%(e, %andb<tp>%(one, mask));
-    
-    x = %add<tp>%(x, tmp);
-    %r<tp>% z = %mul<tp>%(x, x);
+    __m512i min_norm_pos = _mm512_set1_epi32(0x00800000);
+    __m512i inv_mant_mask = _mm512_set1_epi32(~0x7f800000);
 
-    %r<tp>% y = cephes_log_p0;
+    __m512 cephes_SQRTHF = _mm512_set1_ps(0.707106781186547524f);
+    __m512 cephes_log_p0 = _mm512_set1_ps(7.0376836292E-2f);
+    __m512 cephes_log_p1 = _mm512_set1_ps(-1.1514610310E-1f);
+    __m512 cephes_log_p2 = _mm512_set1_ps(1.1676998740E-1f);
+    __m512 cephes_log_p3 = _mm512_set1_ps(-1.2420140846E-1f);
+    __m512 cephes_log_p4 = _mm512_set1_ps(+1.4249322787E-1f);
+    __m512 cephes_log_p5 = _mm512_set1_ps(-1.6668057665E-1f);
+    __m512 cephes_log_p6 = _mm512_set1_ps(+2.0000714765E-1f);
+    __m512 cephes_log_p7 = _mm512_set1_ps(-2.4999993993E-1f);
+    __m512 cephes_log_p8 = _mm512_set1_ps(+3.3333331174E-1f);
+    __m512 cephes_log_q1 = _mm512_set1_ps(-2.12194440e-4f);
+    __m512 cephes_log_q2 = _mm512_set1_ps(0.693359375f);
 
-    y = %fmadd<tp>%(y, x, cephes_log_p1);
-    y = %fmadd<tp>%(y, x, cephes_log_p2);
-    y = %fmadd<tp>%(y, x, cephes_log_p3);
-    y = %fmadd<tp>%(y, x, cephes_log_p4);
-    y = %fmadd<tp>%(y, x, cephes_log_p5);
-    y = %fmadd<tp>%(y, x, cephes_log_p6);
-    y = %fmadd<tp>%(y, x, cephes_log_p7);
-    y = %fmadd<tp>%(y, x, cephes_log_p8);
+    __mmask16 invalid_mask2 = _mm512_cmp_ps_mask(x, _mm512_setzero_ps(), _CMP_LE_OS);
+    __mm512 invalid_mask = _mm512_mask_blend(invalid_mask2, _mm512_castsi512_ps(i0), _mm512_castsi512_ps(i0xffffffff));
 
-    y = %mul<tp>%(y, z);
+    x = _mm512_max_ps(x, _mm512_castsi512_ps(min_norm_pos));
 
-    y = %fmadd<tp>%(e, cephes_log_q1, y);
+    imm0 = _mm512_srli_epi32(_mm512_castps_si512(x), 23);
 
-    tmp = %mul<tp>%(z, %set1<tp>%(0.5f));
-    y = %sub<tp>%(y, tmp);
-    
-    tmp = %mul<tp>%(e, cephes_log_q2);
-    x = %add<tp>%(x, y);
-    x = %add<tp>%(x, tmp);
-    x = %orb<tp>%(x, invalid_mask);
-	return x;
-"""},
+    x = _mm512_castsi512_ps(_mm512_and_si512(_mm512_castps_si512(x), _mm512_castps_si512(inv_mant_mask)));
+    x = _mm512_castsi512_ps(_mm512_or_si512(_mm512_castps_si512(x), half));
 
-	"log_f32_fma": { "format": "long", "code":
-"""
-	%r<c:int|b:tp>% imm0;
-    %r<tp>% one = %set1<tp>%(1.0f);
-    
-    %r<tp>% min_norm_pos = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%((int32_t)0x00800000));
-    %r<tp>% inv_mant_mask = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%((int32_t)~0x7f800000));
-    %r<tp>% cephes_SQRTHF = %set1<tp>%(0.707106781186547524f);
-    %r<tp>% cephes_log_p0 = %set1<tp>%(7.0376836292E-2f);
-	%r<tp>% cephes_log_p1 = %set1<tp>%(- 1.1514610310E-1f);
-	%r<tp>% cephes_log_p2 = %set1<tp>%(1.1676998740E-1f);
-	%r<tp>% cephes_log_p3 = %set1<tp>%(- 1.2420140846E-1f);
-	%r<tp>% cephes_log_p4 = %set1<tp>%(+ 1.4249322787E-1f);
-	%r<tp>% cephes_log_p5 = %set1<tp>%(- 1.6668057665E-1f);
-	%r<tp>% cephes_log_p6 = %set1<tp>%(+ 2.0000714765E-1f);
-	%r<tp>% cephes_log_p7 = %set1<tp>%(- 2.4999993993E-1f);
-	%r<tp>% cephes_log_p8 = %set1<tp>%(+ 3.3333331174E-1f);
-	%r<tp>% cephes_log_q1 = %set1<tp>%(-2.12194440e-4f);
-	%r<tp>% cephes_log_q2 = %set1<tp>%(0.693359375f);
-    
-    // define as uint to avoid implicit cast to float bc set1 argument is type of returned register
-    %r<c:uint|b:tp>% r_0xffffffff = %set1<c:uint|b:tp>%((uint32_t)0xffffffff);
-    %r<c:uint|b:tp>% r_0x0 = %set1<c:uint|b:tp>%((uint32_t)0x0);
-	%r<c:int|b:tp>% r_0x7f = %set1<c:int|b:tp>%((uint32_t)0x7f);
+    imm0 = _mm512_sub_epi32(imm0, i0x7f);
+    __m512 e = _mm512_cvtepi32_ps(imm0);
 
-    %m<tp>% invalid_mask2 = %cmple<tp>%(r0, cephes_SQRTHF); // hack
-    %r<tp>% invalid_mask = %blend<tp>%(%cast<c:uint|b:tp,tp>%(r_0xffffffff), %cast<c:uint|b:tp,tp>%(r_0x0), invalid_mask2);
-    
-    %r<tp>% x = %max<tp>%(r0, min_norm_pos);
-    
-    imm0.r = _mm512_srli_epi32(_mm512_castps_si512(x.r), 23);
-    // todo : make mipp-like
-    x.r = _mm512_castsi512_ps(_mm512_and_si512(_mm512_castps_si512(x.r), _mm512_castps_si512(inv_mant_mask.r)));
-	x.r = _mm512_castsi512_ps(_mm512_or_si512(_mm512_castps_si512(x.r), _mm512_castps_si512(%set1<tp>%((float)0.5).r)));
-    
-    imm0 = %sub<c:int|b:tp>%(imm0, r_0x7f);
-    
-    %r<tp>% e;
-    e.r = _mm512_cvtepi32_ps(imm0.r);
-    e = %add<tp>%(e, one);
-    
-    %m<tp>% mask2 = %cmplt<tp>%(x, cephes_SQRTHF);
-    %r<tp>% mask = %blend<tp>%(%cast<c:uint|b:tp,tp>%(r_0xffffffff), %cast<c:uint|b:tp,tp>%(r_0x0), mask2);
-    
-    // MIPP andb should be defined for floats as well
-	%r<tp>% tmp = %andb<tp>%(x, mask);
-    x = %sub<tp>%(x, one);
-    e = %sub<tp>%(e, %andb<tp>%(one, mask));
-    
-    x = %add<tp>%(x, tmp);
-    %r<tp>% z = %mul<tp>%(x, x);
+    e = _mm512_add_ps(e, one);
 
-    %r<tp>% y = cephes_log_p0;
-
-    y = %fmadd<tp>%(y, x, cephes_log_p1);
-    y = %fmadd<tp>%(y, x, cephes_log_p2);
-    y = %fmadd<tp>%(y, x, cephes_log_p3);
-    y = %fmadd<tp>%(y, x, cephes_log_p4);
-    y = %fmadd<tp>%(y, x, cephes_log_p5);
-    y = %fmadd<tp>%(y, x, cephes_log_p6);
-    y = %fmadd<tp>%(y, x, cephes_log_p7);
-    y = %fmadd<tp>%(y, x, cephes_log_p8);
-
-    y = %mul<tp>%(y, z);
-
-    y = %fmadd<tp>%(e, cephes_log_q1, y);
-
-    tmp = %mul<tp>%(z, %set1<tp>%(0.5f));
-    y = %sub<tp>%(y, tmp);
+    __mmask16 mask2 = _mm512_cmp_ps_mask(x, cephes_SQRTHF, _CMP_LT_OS);
+    __mm512 mask = _mm512_mask_blend_ps(mask2, _mm512_castsi512_ps(i0), _mm512_castsi512_ps(i0xffffffff));
     
-    tmp = %mul<tp>%(e, cephes_log_q2);
-    x = %add<tp>%(x, y);
-    x = %add<tp>%(x, tmp);
-    x = %orb<tp>%(x, invalid_mask);
-	return x;
+    __mm512 tmp = _mm512_castsi512_ps(_mm512_and_si512(_mm512_castps_si512(x), _mm512_castps_si512(mask)));
+    x = _mm512_sub_ps(x, one);
+
+    e = _mm512_sub_ps(e, _mm512_castsi512_ps(_mm512_and_si512(_mm512_castps_si512(one), _mm512_castps_si512(mask))));
+    x = _mm512_add_ps(x, tmp);
+
+    __m512 z = _mm512_mul_ps(x, x);
+
+    __m512 y = cephes_log_p0;
+    y = _mm512_mul_ps(y, x);
+    y = _mm512_add_ps(y, cephes_log_p1);
+    y = _mm512_mul_ps(y, x);
+    y = _mm512_add_ps(y, cephes_log_p2);
+    y = _mm512_mul_ps(y, x);
+    y = _mm512_add_ps(y, cephes_log_p3);
+    y = _mm512_mul_ps(y, x);
+    y = _mm512_add_ps(y, cephes_log_p4);
+    y = _mm512_mul_ps(y, x);
+    y = _mm512_add_ps(y, cephes_log_p5);
+    y = _mm512_mul_ps(y, x);
+    y = _mm512_add_ps(y, cephes_log_p6);
+    y = _mm512_mul_ps(y, x);
+    y = _mm512_add_ps(y, cephes_log_p7);
+    y = _mm512_mul_ps(y, x);
+    y = _mm512_add_ps(y, cephes_log_p8);
+    y = _mm512_mul_ps(y, z);
+
+    y = _mm512_mul_ps(y, z);
+
+    tmp = _mm512_mul_ps(e, cephes_log_q1);
+    y = _mm512_add_ps(y, tmp);
+
+    tmp = _mm512_mul_ps(z, half);
+    y = _mm512_sub_ps(y, tmp);
+
+    tmp = _mm512_mul_ps(e, cephes_log_q2);
+    x = _mm512_add_ps(x, y);
+    x = _mm512_add_ps(x, tmp);
+    x = _mm512_castsi512_ps(_mm512_or_si512(_mm512_castps_si512(x), _mm512_castps_si512(invalid_mask)));
+
+    rvd_avx512_float32_t res;
+    res.r = x;
+    return res;
 """},
 
 	# finally :)
@@ -489,10 +436,10 @@ implems_emu_avx512 = {
         { "datatypes": [int16, uint16],              "template": tpl_implem_emu_avx512["hadd_to_scal"]                                },
         { "datatypes": [int8, uint8],                "template": tpl_implem_emu_avx512["hadd_to_scal"]                                } ], # hadd_to_scal
         
-	# "exp": [
-	# 	{ "datatypes": [float32],                    "template": tpl_implem_emu_avx512["exp_f32_fma"]								  } ],
-    # "log": [
-	# 	{ "datatypes": [float32],                    "template": tpl_implem_emu_avx512["log_f32_fma"]								  } ],
-    # "pow": [
-	# 	{ "datatypes": [float32],                    "template": tpl_implem_emu_avx512["pow_f32"]									  } ],
+	"exp": [
+		{ "datatypes": [float32],                    "template": tpl_implem_emu_avx512["exp_f32"]								  } ],
+    "log": [
+		{ "datatypes": [float32],                    "template": tpl_implem_emu_avx512["log_f32"]								  } ],
+    "pow": [
+		{ "datatypes": [float32],                    "template": tpl_implem_emu_avx512["pow_f32"]									  } ],
 }
