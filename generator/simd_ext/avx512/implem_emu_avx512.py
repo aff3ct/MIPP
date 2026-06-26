@@ -244,7 +244,7 @@ tpl_implem_emu_avx512 = {
 
     // if greater, substract 1
     __mmask16 mask2 = _mm512_cmp_ps_mask(tmp, fx, _CMP_GT_OS);
-    _mm512 mask = _mm512_mask_blend_ps(mask2, _mm512_castsi512_ps(i0), _mm512_castsi512_ps(i0xffffffff));
+    __m512 mask = _mm512_mask_blend_ps(mask2, _mm512_castsi512_ps(i0), _mm512_castsi512_ps(i0xffffffff));
     mask =  _mm512_castsi512_ps(_mm512_and_si512(_mm512_castps_si512(mask), _mm512_castps_si512(one)));
     fx = _mm512_sub_ps(tmp, mask);
 
@@ -309,14 +309,13 @@ tpl_implem_emu_avx512 = {
     __m512 cephes_log_q2 = _mm512_set1_ps(0.693359375f);
 
     __mmask16 invalid_mask2 = _mm512_cmp_ps_mask(x, _mm512_setzero_ps(), _CMP_LE_OS);
-    __mm512 invalid_mask = _mm512_mask_blend(invalid_mask2, _mm512_castsi512_ps(i0), _mm512_castsi512_ps(i0xffffffff));
+    __m512 invalid_mask = _mm512_mask_blend_ps(invalid_mask2, _mm512_castsi512_ps(i0), _mm512_castsi512_ps(i0xffffffff));
 
     x = _mm512_max_ps(x, _mm512_castsi512_ps(min_norm_pos));
 
     imm0 = _mm512_srli_epi32(_mm512_castps_si512(x), 23);
-
-    x = _mm512_castsi512_ps(_mm512_and_si512(_mm512_castps_si512(x), _mm512_castps_si512(inv_mant_mask)));
-    x = _mm512_castsi512_ps(_mm512_or_si512(_mm512_castps_si512(x), half));
+    x = _mm512_castsi512_ps(_mm512_and_si512(_mm512_castps_si512(x), inv_mant_mask));
+    x = _mm512_castsi512_ps(_mm512_or_si512(_mm512_castps_si512(x), _mm512_castps_si512(half)));
 
     imm0 = _mm512_sub_epi32(imm0, i0x7f);
     __m512 e = _mm512_cvtepi32_ps(imm0);
@@ -324,9 +323,9 @@ tpl_implem_emu_avx512 = {
     e = _mm512_add_ps(e, one);
 
     __mmask16 mask2 = _mm512_cmp_ps_mask(x, cephes_SQRTHF, _CMP_LT_OS);
-    __mm512 mask = _mm512_mask_blend_ps(mask2, _mm512_castsi512_ps(i0), _mm512_castsi512_ps(i0xffffffff));
+    __m512 mask = _mm512_mask_blend_ps(mask2, _mm512_castsi512_ps(i0), _mm512_castsi512_ps(i0xffffffff));
     
-    __mm512 tmp = _mm512_castsi512_ps(_mm512_and_si512(_mm512_castps_si512(x), _mm512_castps_si512(mask)));
+    __m512 tmp = _mm512_castsi512_ps(_mm512_and_si512(_mm512_castps_si512(x), _mm512_castps_si512(mask)));
     x = _mm512_sub_ps(x, one);
 
     e = _mm512_sub_ps(e, _mm512_castsi512_ps(_mm512_and_si512(_mm512_castps_si512(one), _mm512_castps_si512(mask))));
