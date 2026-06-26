@@ -489,10 +489,10 @@ implems_emu_avx512 = {
         { "datatypes": [int16, uint16],              "template": tpl_implem_emu_avx512["hadd_to_scal"]                                },
         { "datatypes": [int8, uint8],                "template": tpl_implem_emu_avx512["hadd_to_scal"]                                } ], # hadd_to_scal
         
-	"exp": [
-		{ "datatypes": [float32],                    "template": tpl_implem_emu_avx512["exp_f32_fma"]								  } ],
-    "log": [
-		{ "datatypes": [float32],                    "template": tpl_implem_emu_avx512["log_f32_fma"]								  } ],
-    "pow": [
-		{ "datatypes": [float32],                    "template": tpl_implem_emu_avx512["pow_f32"]									  } ],
+	# "exp": [
+	# 	{ "datatypes": [float32],                    "template": tpl_implem_emu_avx512["exp_f32_fma"]								  } ],
+    # "log": [
+	# 	{ "datatypes": [float32],                    "template": tpl_implem_emu_avx512["log_f32_fma"]								  } ],
+    # "pow": [
+	# 	{ "datatypes": [float32],                    "template": tpl_implem_emu_avx512["pow_f32"]									  } ],
 }

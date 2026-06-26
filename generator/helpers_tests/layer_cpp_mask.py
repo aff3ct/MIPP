@@ -654,6 +654,14 @@ LAYER_OVERRIDES = {
     },
 
     "pow": {
+        "init": """\tstd::iota(inputs1, inputs1 + {{size}}, 1);
+\tfor(size_t i = 0; i < {{size}}; i++)
+\t{
+\t\tinputs1[i] = rnd::uniform<{{dt_ext}}>(seed);
+\t\tinputs1[i] = inputs1[i] < 0 ? -inputs1[i] : inputs1[i]; // make sure inputs1 is non-negative for log(x)
+\t\tinputs2[i] = rnd::uniform<{{dt_ext}}>(seed);
+\t}
+""",
         "loop_assert": AS_REG_BINOP_NAN_TOL,
     },
 }

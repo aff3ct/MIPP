@@ -258,127 +258,153 @@ tpl_implem_emu_avx = {
 #   (this is the zlib license)
 	"exp_f32_fma": { "format": "long", "code":
 """
-	%r<tp>% tmp = %set0<tp>%(), fx;
-    %r<c:int|b:tp>% imm0;
-    %r<tp>% one = %set1<tp>%(1.0f);
-    
-    %r<tp>% exp_hi = %set1<tp>%(88.3762626647949f),
-			exp_lo = %set1<tp>%(-88.3762626647949f);
-            
-    
-	%r<tp>% cephes_LOG2EF = %set1<tp>%(1.44269504088896341f),
-			cephes_exp_C1 = %set1<tp>%(0.693359375f),
-            cephes_exp_C2 = %set1<tp>%(-2.12194440e-4f);
+	__m256 x = r0.r;
+	__m256 tmp = _mm256_setzero_ps(), fx;
+	__m256i imm0;
+	__m256 one = _mm256_set1_ps(1.0f);
+	__m256 half = _mm256_set1_ps(0.5f);
 
-    %r<tp>% cephes_exp_p0 = %set1<tp>%(1.9875691500E-4f),
-			cephes_exp_p1 = %set1<tp>%(1.3981999507E-3f),
-			cephes_exp_p2 = %set1<tp>%(8.3334519073E-3f),
-			cephes_exp_p3 = %set1<tp>%(4.1665795894E-2f),
-			cephes_exp_p4 = %set1<tp>%(1.6666665459E-1f),
-			cephes_exp_p5 = %set1<tp>%(5.0000001201E-1f);
-    
-    %r<tp>% x = %min<tp>%(r0, exp_hi);
-    x = %max<tp>%(x, exp_lo);
+	__m256 exp_hi = _mm256_set1_ps(88.3762626647949f);
+	__m256 exp_lo = _mm256_set1_ps(-88.3762626647949f);
+	__m256 cephes_LOG2EF = _mm256_set1_ps(1.44269504088896341f);
+	__m256 cephes_exp_C1 = _mm256_set1_ps(0.693359375f);
+	__m256 cephes_exp_C2 = _mm256_set1_ps(-2.12194440e-4f);
+	__m256 cephes_exp_p0 = _mm256_set1_ps(1.9875691500E-4f);
+	__m256 cephes_exp_p1 = _mm256_set1_ps(1.3981999507E-3f);
+	__m256 cephes_exp_p2 = _mm256_set1_ps(8.3334519073E-3f);
+	__m256 cephes_exp_p3 = _mm256_set1_ps(4.1665795894E-2f);
+	__m256 cephes_exp_p4 = _mm256_set1_ps(1.6666665459E-1f);
+	__m256 cephes_exp_p5 = _mm256_set1_ps(5.0000001201E-1f);
 
-    fx = %fmadd<tp>%(x, cephes_LOG2EF, %set1<tp>%(0.5f));  
-    tmp.r =  _mm256_floor_ps(fx.r);
-    
-    %r<tp>% mask; 
-    mask.r = %cmpgt<tp>%(tmp, fx).m; // hack
-    mask = %andb<tp>%(mask, one);
-    fx = %sub<tp>%(tmp, mask);
-    
-    tmp = %mul<tp>%(fx, cephes_exp_C1);
-    %r<tp>% z = %mul<tp>%(x, cephes_exp_C2);
-    
-    %r<tp>% y = cephes_exp_p0;
-	y = %fmadd<tp>%(y, x, cephes_exp_p1);
-	y = %fmadd<tp>%(y, x, cephes_exp_p2);
-	y = %fmadd<tp>%(y, x, cephes_exp_p3);
-	y = %fmadd<tp>%(y, x, cephes_exp_p4);
-	y = %fmadd<tp>%(y, x, cephes_exp_p5);
+	__m256i sevenf = _mm256_set1_epi32(0x7f);
 
-	y = %fmadd<tp>%(y, z, x);
-	y = %add<tp>%(y, one);
-    
-    imm0.r = _mm256_cvttps_epi32(fx.r);
+	x = _mm256_min_ps(x, exp_hi);
+	x = _mm256_max_ps(x, exp_lo);
 
-    imm0 = %add<c:int|b:tp>%(imm0, %set1<c:int|b:tp>%((int32_t)0x7f));
-    imm0.r = _mm256_slli_epi32(imm0.r, 23);
-    %r<tp>% pow2n = %cast<c:int|b:tp,tp>%(imm0);
-	y = %mul<tp>%(y, pow2n);
-    
-    return y;
+	fx = _mm256_fmadd_ps(x, cephes_LOG2EF, half);
+	tmp = _mm256_floor_ps(fx);
+
+	__m256 mask = _mm256_cmp_ps(tmp, fx, _CMP_GT_OS);
+	mask = _mm256_and_ps(mask, one);
+	fx = _mm256_sub_ps(tmp, mask);
+
+	tmp = _mm256_mul_ps(fx, cephes_exp_C1);
+	__m256 z = _mm256_mul_ps(x, cephes_exp_C2);
+	x = _mm256_sub_ps(x, tmp);
+	x = _mm256_sub_ps(x, z);
+
+	z = _mm256_mul_ps(x, x);
+
+	__m256 y = cephes_exp_p0;
+	y = _mm256_mul_ps(y, x);
+	y = _mm256_add_ps(y, cephes_exp_p1);
+	y = _mm256_mul_ps(y, x);
+	y = _mm256_add_ps(y, cephes_exp_p2);
+	y = _mm256_mul_ps(y, x);
+	y = _mm256_add_ps(y, cephes_exp_p3);
+	y = _mm256_mul_ps(y, x);
+	y = _mm256_add_ps(y, cephes_exp_p4);
+	y = _mm256_mul_ps(y, x);
+	y = _mm256_add_ps(y, cephes_exp_p5);
+
+	y = _mm256_mul_ps(y, z);
+	y = _mm256_add_ps(y, x);
+	y = _mm256_add_ps(y, one);
+
+	imm0 = _mm256_cvttps_epi32(fx);
+	imm0 = _mm256_add_epi32(imm0, sevenf);
+	imm0 = _mm256_slli_epi32(imm0, 23);
+	__m256 pow2n = _mm256_castsi256_ps(imm0);
+	y = _mm256_mul_ps(y, pow2n);
+
+	rvd_avx_float32_t res;
+	res.r = y;
+	return res;
 """},
 
 	"log_f32_fma": { "format": "long", "code":
 """
-	%r<c:int|b:tp>% imm0;
-    %r<tp>% one = %set1<tp>%(1.0f);
-    
-    %r<tp>% min_norm_pos = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%((int32_t)0x00800000));
-    %r<tp>% inv_mant_mask = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%((int32_t)~0x7f800000));
-    // %r<tp>% mant_mask = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%((int32_t)0x7f800000));
-    %r<tp>% cephes_SQRTHF = %set1<tp>%(0.707106781186547524f);
-    %r<tp>% cephes_log_p0 = %set1<tp>%(7.0376836292E-2f);
-	%r<tp>% cephes_log_p1 = %set1<tp>%(- 1.1514610310E-1f);
-	%r<tp>% cephes_log_p2 = %set1<tp>%(1.1676998740E-1f);
-	%r<tp>% cephes_log_p3 = %set1<tp>%(- 1.2420140846E-1f);
-	%r<tp>% cephes_log_p4 = %set1<tp>%(+ 1.4249322787E-1f);
-	%r<tp>% cephes_log_p5 = %set1<tp>%(- 1.6668057665E-1f);
-	%r<tp>% cephes_log_p6 = %set1<tp>%(+ 2.0000714765E-1f);
-	%r<tp>% cephes_log_p7 = %set1<tp>%(- 2.4999993993E-1f);
-	%r<tp>% cephes_log_p8 = %set1<tp>%(+ 3.3333331174E-1f);
-	%r<tp>% cephes_log_q1 = %set1<tp>%(-2.12194440e-4f);
-	%r<tp>% cephes_log_q2 = %set1<tp>%(0.693359375f);
+	__m256 x = r0.r;
+	__m256i imm0;
+	__m256 one = _mm256_set1_ps(1.0f);
+	__m256 half = _mm256_set1_ps(0.5f);
 
-    %r<tp>% invalid_mask; 
-    invalid_mask.r = %cmple<tp>%(r0, %set0<tp>%()).m; // hack
-    
-    %r<tp>% x = %max<tp>%(r0, min_norm_pos);
-    
-    imm0.r = _mm256_srli_epi32(_mm256_castps_si256(x.r), 23);
-    x.r = _mm256_and_ps(x.r, inv_mant_mask.r);
-	x.r = _mm256_or_ps(x.r, %set1<tp>%((float)0.5).r);
-    
-    imm0 = %sub<c:int|b:tp>%(imm0, %set1<c:int|b:tp>%((int32_t)0x7f));
-    
-    %r<tp>% e;
-    e.r = _mm256_cvtepi32_ps(imm0.r);
-    e = %add<tp>%(e, one);
-    
-    %r<tp>% mask;
-    mask.r = %cmplt<tp>%(x, cephes_SQRTHF).m; // hack
-	%r<tp>% tmp = %andb<tp>%(x, mask);
-    x = %sub<tp>%(x, one);
-    e = %sub<tp>%(e, %andb<tp>%(one, mask));
-    
-    x = %add<tp>%(x, tmp);
-    %r<tp>% z = %mul<tp>%(x, x);
+	__m256i sevenF = _mm256_set1_epi32(0x7f);
+	__m256i min_norm_pos_i = _mm256_set1_epi32(0x00800000);
+	__m256i inv_mant_mask_i = _mm256_set1_epi32(~0x7f800000);
 
-    %r<tp>% y = cephes_log_p0;
+	__m256 min_norm_pos = _mm256_castsi256_ps(min_norm_pos_i);
+	__m256 inv_mant_mask = _mm256_castsi256_ps(inv_mant_mask_i);
 
-    y = %fmadd<tp>%(y, x, cephes_log_p1);
-    y = %fmadd<tp>%(y, x, cephes_log_p2);
-    y = %fmadd<tp>%(y, x, cephes_log_p3);
-    y = %fmadd<tp>%(y, x, cephes_log_p4);
-    y = %fmadd<tp>%(y, x, cephes_log_p5);
-    y = %fmadd<tp>%(y, x, cephes_log_p6);
-    y = %fmadd<tp>%(y, x, cephes_log_p7);
-    y = %fmadd<tp>%(y, x, cephes_log_p8);
+	// __m256i mant_mask = _mm256_set1_epi32(0x7f800000);
+	__m256 cephes_SQRTHF = _mm256_set1_ps(0.707106781186547524f);
+	__m256 cephes_log_p0 = _mm256_set1_ps(7.0376836292E-2f);
+	__m256 cephes_log_p1 = _mm256_set1_ps(- 1.1514610310E-1f);
+	__m256 cephes_log_p2 = _mm256_set1_ps(1.1676998740E-1f);
+	__m256 cephes_log_p3 = _mm256_set1_ps(- 1.2420140846E-1f);
+	__m256 cephes_log_p4 = _mm256_set1_ps(+ 1.4249322787E-1f);
+	__m256 cephes_log_p5 = _mm256_set1_ps(- 1.6668057665E-1f);
+	__m256 cephes_log_p6 = _mm256_set1_ps(+ 2.0000714765E-1f);
+	__m256 cephes_log_p7 = _mm256_set1_ps(- 2.4999993993E-1f);
+	__m256 cephes_log_p8 = _mm256_set1_ps(+ 3.3333331174E-1f);
+	__m256 cephes_log_q1 = _mm256_set1_ps(-2.12194440e-4f);
+	__m256 cephes_log_q2 = _mm256_set1_ps(0.693359375f);
 
-    y = %mul<tp>%(y, z);
+	__m256 invalid_mask = _mm256_cmp_ps(x, _mm256_setzero_ps(), _CMP_LE_OS);
 
-    y = %fmadd<tp>%(e, cephes_log_q1, y);
+  	x = _mm256_max_ps(x, min_norm_pos);  /* cut off denormalized stuff */
 
-    tmp = %mul<tp>%(z, %set1<tp>%(0.5f));
-    y = %sub<tp>%(y, tmp);
-    
-    tmp = %mul<tp>%(e, cephes_log_q2);
-    x = %add<tp>%(x, y);
-    x = %add<tp>%(x, tmp);
-    x = %orb<tp>%(x, invalid_mask);
-	return x;
+  	imm0 = _mm256_srli_epi32(_mm256_castps_si256(x), 23);
+
+	x = _mm256_and_ps(x, inv_mant_mask);
+	x = _mm256_or_ps(x, half);
+
+	imm0 = _mm256_sub_epi32(imm0, sevenF);
+	__m256 e = _mm256_cvtepi32_ps(imm0);
+
+	e = _mm256_add_ps(e, one);
+
+	__m256 mask = _mm256_cmp_ps(x, cephes_SQRTHF, _CMP_LT_OS);
+	__m256 tmp = _mm256_and_ps(x, mask);
+	x = _mm256_sub_ps(x, one);
+	e = _mm256_sub_ps(e, _mm256_and_ps(one, mask));
+	x = _mm256_add_ps(x, tmp);
+	
+	__m256 z = _mm256_mul_ps(x,x);
+
+	__m256 y = cephes_log_p0;
+
+	y = _mm256_mul_ps(y, x);
+	y = _mm256_add_ps(y, cephes_log_p1);
+	y = _mm256_mul_ps(y, x);
+	y = _mm256_add_ps(y, cephes_log_p2);
+	y = _mm256_mul_ps(y, x);
+	y = _mm256_add_ps(y, cephes_log_p3);
+	y = _mm256_mul_ps(y, x);
+	y = _mm256_add_ps(y, cephes_log_p4);
+	y = _mm256_mul_ps(y, x);
+	y = _mm256_add_ps(y, cephes_log_p5);
+	y = _mm256_mul_ps(y, x);
+	y = _mm256_add_ps(y, cephes_log_p6);
+	y = _mm256_mul_ps(y, x);
+	y = _mm256_add_ps(y, cephes_log_p7);
+	y = _mm256_mul_ps(y, x);
+	y = _mm256_add_ps(y, cephes_log_p8);
+	y = _mm256_mul_ps(y, x);
+
+  	y = _mm256_mul_ps(y, z);
+
+	tmp = _mm256_mul_ps(e, cephes_log_q1);
+ 	y = _mm256_add_ps(y, tmp);
+
+	tmp = _mm256_mul_ps(z, half);
+ 	y = _mm256_sub_ps(y, tmp);
+
+	tmp = _mm256_mul_ps(e, cephes_log_q2);
+ 	x = _mm256_add_ps(x, y);
+ 	x = _mm256_add_ps(x, tmp);
+ 	x = _mm256_or_ps(x, invalid_mask); // negative arg will be NAN
+ 	return (rvd_avx_float32_t){x};
 """},
 
 	"exp_f64": { "format": "long", "code":
@@ -478,8 +504,9 @@ implems_emu_avx = {
 	"exp": [
 		{ "datatypes": [float32],                      "template": tpl_implem_emu_avx["exp_f32_fma"], "if": "defined(__AVX2__)" },],
     "log": [
-		{ "datatypes": [float32],                      "template": tpl_implem_emu_avx["log_f32_fma"],  "if": "defined(__AVX2__)" },],
+		{ "datatypes": [float32],                      "template": tpl_implem_emu_avx["log_f32_fma"], "if": "defined(__AVX2__)" },],
 
     "pow": [
-        { "datatypes": [float32],                      "template": tpl_implem_emu_avx["pow_f32"]}],
+        { "datatypes": [float32],                      "template": tpl_implem_emu_avx["pow_f32"],  "if": "defined(__AVX2__)"},],
 }
+
