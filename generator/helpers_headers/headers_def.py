@@ -1412,9 +1412,14 @@ res.r[i] = %!pred_cond!% LOGF(r0.r[i]) %!pred_alt!%;
 """
 %r<tp>% res;
 for (size_t i = 0; i < %N<tp>%; i++){
-    res.r[i] = 1;
-    for (size_t j = 0; j < r1.r[i]; j++)
-        res.r[i] *= r0.r[i];
+    %v<tp>% cur = 1;
+    %v<tp>% exp = r1.r[i];
+    while (exp > 0){
+        if(exp & 1)
+            cur *= r0.r[i];
+        exp >>= 1;
+    }
+    res.r[i] = cur;
 }
 return res;
 """}
