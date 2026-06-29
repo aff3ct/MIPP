@@ -572,7 +572,8 @@ shape_templates = {
 }
 
 deny = {
-    #"hadd_to_scal", # hadd is wrong on avx2 for int16.
+
+    "cvt", "wcvt" # their tests r in cpp though
 }
 
 

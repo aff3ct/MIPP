@@ -529,4 +529,8 @@ implems_avx512 = {
         { "instr_name": "scatter",        "datatypes": ["float64,float64", "int64,int64"],          "template": tpl_implem_avx512["scatter_mask_64"],  "if": "defined(__AVX512F__)", "version" : "mask"                              },
         { "instr_name": "scatter",        "datatypes": ["float32,float32", "int32,int32"],          "template": tpl_implem_avx512["scatter_mask_32"],  "if": "defined(__AVX512F__)", "version" : "mask"                              },
         { "instr_name": "scatter",        "datatypes": avx_datatypes_idx_pair,                      "template": tpl_implem_avx512["scatter_maskz"],    "if": "defined(__AVX512F__)", "version" : "maskz"                              }], # scatter)
+ 
+    # "wcvt": [
+    #     { "instr_name": "cvt",          "datatypes": avx_datatypes_idx_pair,                      "template": tpl_implem_avx512["wcvt"],             "if": "defined(__AVX512F__)"   }
+    # ]
  }

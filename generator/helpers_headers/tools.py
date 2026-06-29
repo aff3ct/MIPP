@@ -79,6 +79,37 @@ avx_datatypes_idx_pair = [
 "int64,int64",
 "int32,int32",
 ]
+
+
+same_dt = [
+    "float64,float64",
+    "float32,float32",
+    "int64,int64",
+    "int32,int32",
+    "uint64,uint64",
+    "uint32,uint32",
+    "int16,int16",
+    "int8,int8",
+    "uint16,uint16",
+    "uint8,uint8",
+]
+
+f2i_dt = [ "float64,int64", "float32,int32" ]
+f2u_dt = [ "float64,uint64", "float32,uint32" ]
+
+i2f_dt = [ "int64,float64", "int32,float32"]
+i2u_dt = [ "int64,uint64", "int32,uint32", "int16,uint16", "int8,uint8" ]
+
+u2f_dt = [ "uint64,float64", "uint32,float32"]
+u2i_dt = [ "uint64,int64", "uint32,int32", "uint16,int16", "uint8,int8" ]
+
+all_datatypes_same_size = same_dt + f2i_dt + f2u_dt + i2f_dt + i2u_dt + u2f_dt + u2i_dt
+
+int_dt_widenning = [ "int32,int64", "int16,int32", "int8,int16" ]
+float_dt_widenning = [ "float32,float64" ]
+uint_dt_widenning = [ "uint32,uint64", "uint16,uint32", "uint8,uint16" ]
+
+all_datatypes_widenning = int_dt_widenning + float_dt_widenning + uint_dt_widenning
             
 def find_data_types_from(criteria):
     all_types = dict(datatypes);

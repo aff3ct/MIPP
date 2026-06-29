@@ -16,14 +16,14 @@ isa_avx = {
     "datatypes": {
         float64: { "data_ext": "pd",    "data_ext_logi": "pd",    "data_ext_msk": "pd",    "reg": "__m256d", "msk": "__m256d", "to_ptr": "float64_t", "ldiv": [2] },
         float32: { "data_ext": "ps",    "data_ext_logi": "ps",    "data_ext_msk": "ps",    "reg": " __m256", "msk": "__m256",  "to_ptr": "float32_t", "ldiv": [2] },
-        int64:   { "data_ext": "epi64", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg": "__m256i", "msk": "__m256i", "to_ptr": "__m256i",   "ldiv": [2] },
-        int32:   { "data_ext": "epi32", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg": "__m256i", "msk": "__m256i", "to_ptr": "__m256i",   "ldiv": [2] },
-        int16:   { "data_ext": "epi16", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg": "__m256i", "msk": "__m256i", "to_ptr": "__m256i",   "ldiv": [2] },
-        int8:    { "data_ext": "epi8",  "data_ext_logi": "si256", "data_ext_msk": "si256", "reg": "__m256i", "msk": "__m256i", "to_ptr": "__m256i",   "ldiv": [2] },
-        uint64:  { "data_ext": "epu64", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg": "__m256i", "msk": "__m256i", "to_ptr": "__m256i",   "ldiv": [2] },
-        uint32:  { "data_ext": "epu32", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg": "__m256i", "msk": "__m256i", "to_ptr": "__m256i",   "ldiv": [2] },
-        uint16:  { "data_ext": "epu16", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg": "__m256i", "msk": "__m256i", "to_ptr": "__m256i",   "ldiv": [2] },
-        uint8:   { "data_ext": "epu8",  "data_ext_logi": "si256", "data_ext_msk": "si256", "reg": "__m256i", "msk": "__m256i", "to_ptr": "__m256i",   "ldiv": [2] },
+        int64:   { "data_ext": "epi64", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg": "__m256i", "msk": "__m256i", "to_ptr": "__m256i",   "ldiv": [2], "data_ext_var": "epi64" },
+        int32:   { "data_ext": "epi32", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg": "__m256i", "msk": "__m256i", "to_ptr": "__m256i",   "ldiv": [2], "data_ext_var": "epi32" },
+        int16:   { "data_ext": "epi16", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg": "__m256i", "msk": "__m256i", "to_ptr": "__m256i",   "ldiv": [2], "data_ext_var": "epi16" },
+        int8:    { "data_ext": "epi8",  "data_ext_logi": "si256", "data_ext_msk": "si256", "reg": "__m256i", "msk": "__m256i", "to_ptr": "__m256i",   "ldiv": [2], "data_ext_var": "epi8" },
+        uint64:  { "data_ext": "epu64", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg": "__m256i", "msk": "__m256i", "to_ptr": "__m256i",   "ldiv": [2], "data_ext_var": "epi64" },
+        uint32:  { "data_ext": "epu32", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg": "__m256i",  "msk":"__m256i", "to_ptr":"__m256i",    "ldiv": [2], "data_ext_var":"epi32"},
+        uint16:  { 'data_ext': 'epu16', 'data_ext_logi': 'si256', 'data_ext_msk': 'si256', 'reg': '__m256i', 'msk': '__m256i', 'to_ptr': '__m256i',   "ldiv": [2], 'data_ext_var': 'epi16' },
+        uint8:   { "data_ext": "epu8",  "data_ext_logi": "si256", "data_ext_msk": "si256", "reg": "__m256i", "msk": "__m256i", "to_ptr": "__m256i",   "ldiv": [2], "data_ext_var": "epi8" },
     },
 }
 
@@ -82,6 +82,24 @@ tpl_implem_avx = {
     "round_int":      { "format": "short", "code": "r0.r;" },
 
     "sll":            { "format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, v0);" },
+
+    "cvt":           {"format": "short", "code": "{{ isa.prefix }}_{{ instr_name }}{{ isa_dt_par.data_ext }}_{{ isa_dt_ret.data_ext }}(r0.r);"},
+    "no-op":         {"format": "short", "code": "r0.r;"},
+
+    "wcvt_int_uint":      {"format": "long", "code": """
+    // cast to si128 from si256 and then cvt
+    %r<tr>% res;
+    res.r = {{ isa.prefix }}_{{ instr_name }}{{ isa_dt_par.data_ext }}_{{ isa_dt_ret.data_ext_var }}({{ isa.prefix }}_cast{{ isa_dt_par.data_ext_logi }}_si128(r0.r));
+    return res;
+    """},
+
+    "wcvt_float":      {"format": "long", "code": """
+    %r<tr>% res;
+    res.r = {{ isa.prefix }}_{{ instr_name }}{{ isa_dt_par.data_ext }}_{{ isa_dt_ret.data_ext }}({{ isa.prefix }}_castps256_ps128(r0.r));
+    return res;
+    """},
+
+
     
     "testz_2args":    { "format": "long",  "code": "return {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_msk }}(m0.m, m1.m);" },
     "cmpeq_float":    { "format": "long", "code":
@@ -439,4 +457,14 @@ implems_avx = {
         { "instr_name": "gather",         "datatypes": ["int32,int32"],                                       "template": tpl_implem_avx["gather_maskz_i32"],  "if": "defined(__AVX2__)", "version" : "maskz"},
 
     ], # gather
+
+    "cvt": [
+        # {"instr_name": "cvt",             "datatypes": i2f_dt,                                                 "template": tpl_implem_avx["cvt"],            "if": "defined(__AVX2__)"            },
+        {"instr_name": "",                "datatypes": same_dt,                                                "template": tpl_implem_avx["no-op"]                                                },
+    ],
+
+    "wcvt": [
+        {"instr_name": "cvt",             "datatypes": ["uint32,uint64"],                                        "template": tpl_implem_avx["wcvt_int_uint"],            "if": "defined(__AVX2__)"            },
+        {"instr_name": "cvt",             "datatypes": ["float32,float64"],                                        "template": tpl_implem_avx["wcvt_float"],            "if": "defined(__AVX2__)"            },
+    ],
 }

@@ -251,9 +251,12 @@ OP_3ARGS_REG = """\t{{reg_type}} r4 = mipp::{{func}}(r1, r2, r3);
 \t{{reg_type_scalar}} s4 = mipp::{{func}}(s1, s2, s3);
 """
 
+# why is this not refactored
 OP_CAST = """\t{{reg2_type}} r2 = mipp::cast_{{dt1_ext}}(r1);\n\t{{reg2_type_scalar}} s2 = mipp::cast_{{dt1_ext}}(s1);"""
 OP_CAST_MSK = """\t{{msk2_type}} m2 = mipp::cast_{{dt1_ext}}(m1);\n\t{{msk2_type_scalar}} ms2 = mipp::cast_{{dt1_ext}}(ms1);"""
 
+OP_CVT = """ \t{{reg2_type}} r2 = mipp::cvt_{{dt1_ext}}(r1);\n\t{{reg2_type_scalar}} s2 = mipp::cvt_{{dt1_ext}}(s1);"""
+OP_WCVT = """ \t{{reg2_type}} r2 = mipp::wcvt_{{dt1_ext}}(r1);\n\t{{reg2_type_scalar}} s2 = mipp::wcvt_{{dt1_ext}}(s1);"""
 
 OP_GATHER = """\t{{reg_type}} r2 = mipp::gather(inputs1, ri1);\n\t {{reg_type_scalar}} s2 = mipp::gather(inputs1,rsi1);"""
 
@@ -731,6 +734,23 @@ LAYER_OVERRIDES = {
         "loop_assert": AS_CAST_2ARGS_MSK + "\n\t}",
     },
 
+    "cvt": {
+        "decl": DECL_CAST_2ARGS,
+        "init": INIT_CAST_2ARGS,
+        "load": LOAD_CAST_2ARGS,
+        "operation": OP_CVT,
+        "loop_body": """\tfor(size_t i = 0; i < {{size}} * sizeof({{dt2_ext}}) / sizeof({{dt1_ext}}_t); i++){\n""",
+        "loop_assert": AS_CAST_2ARGS+ "\n\t}",
+    },
+
+    "wcvt": {
+        "decl": DECL_CAST_2ARGS,
+        "init": INIT_CAST_2ARGS,
+        "load": LOAD_CAST_2ARGS,
+        "operation": OP_WCVT,
+        "loop_body": """\tfor(size_t i = 0; i < {{size}} * sizeof({{dt2_ext}}) / sizeof({{dt1_ext}}_t); i++){\n""",
+        "loop_assert": AS_CAST_2ARGS+ "\n\t}",
+    },
     "toreg" : {
         "loop_assert" : """\t\tREQUIRE(!!mipp::get(r3, i) == !!mipp::get(s3, i));""",
     },

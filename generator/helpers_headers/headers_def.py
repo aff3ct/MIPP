@@ -365,6 +365,8 @@ no_mask = MaskSupport(maskable=False, maskzable=False, masksable=False)
 mipp_funcs = {
     "cast":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes_cart_prod, "horizontal": False, "mask_support": no_mask         },
     "cast_k":        { "proto": protos["ret_msk_1arg_msk"],             "datatypes": all_datatypes_cart_prod, "horizontal": False, "mask_support": no_mask         },
+    "cvt":           { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes_same_size, "horizontal": False, "mask_support": no_mask         },
+    "wcvt":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes_widenning, "horizontal": False, "mask_support": no_mask         },
     "toreg":         { "proto": protos["ret_reg_1arg_msk"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": no_mask         },
     "tomsk":         { "proto": protos["ret_msk_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": no_mask         },
     "load":          { "proto": protos["ret_reg_1arg_ptr"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": maskz_and_masks },
@@ -1423,7 +1425,27 @@ for (size_t i = 0; i < %N<tp>%; i++){
 }
 return res;
 """}
-]
+],
+
+    "cvt": [ # -------------------------------------------------------------------------------------------------- pow
+        { "type": "element-wide", "datatypes": all_defs, "mask_variants": all_defs, "implem":
+"""
+    res.r[i] = (%v<tr>%)r0.r[i];
+"""
+        },
+    ],
+
+    "wcvt": [ # -------------------------------------------------------------------------------------------------- wcvt
+        { "type": "vector-wide", "datatypes": all_defs, "mask_variants": all_defs, "implem":
+"""
+    %r<tr>% res;
+    for (size_t i = 0; i < %N<tr>%; i++){
+        res.r[i] = (%v<tr>%)r0.r[i];
+    }
+    return res;
+"""
+        },
+    ],
 }
 
 copy_mipp_funcs = copy.deepcopy(mipp_funcs)

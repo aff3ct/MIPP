@@ -250,34 +250,16 @@ OP_3ARGS_REG = """\t{{reg_type}} r4 = mipp::{{func}}(r1, r2, r3);
 \t{{reg_type_scalar}} s4 = mipp::{{func}}(s1, s2, s3);
 """
 
-# not done yet
-
 OP_CAST = """\t{{reg2_type}} r2 = mipp::cast_{{dt1_ext}}(r1);\n\t{{reg2_type_scalar}} s2 = mipp::cast_{{dt1_ext}}(s1);"""
 OP_CAST_MSK = """\t{{msk2_type}} m2 = mipp::cast_{{dt1_ext}}(m1);\n\t{{msk2_type_scalar}} ms2 = mipp::cast_{{dt1_ext}}(ms1);"""
 
 OP_GATHER = """\t{{reg_type}} r2 = mipp::gather(inputs1, ri1);\n\t {{reg_type_scalar}} s2 = mipp::gather(inputs1,rsi1);"""
-
 OP_SCATTER = """mipp::scatter(outputs, ri1, r1);\n\tmipp::scatter(outputs_scal, rsi1, s1);"""
 
+OP_CVT = """ \t{{reg2_type}} r2 = mipp::cvt_{{dt1_ext}}(r1);\n\t{{reg2_type_scalar}} s2 = mipp::cvt_{{dt1_ext}}(s1);"""
+OP_WCVT = """ \t{{reg2_type}} r2 = mipp::wcvt_{{dt1_ext}}(r1);\n\t{{reg2_type_scalar}} s2 = mipp::wcvt_{{dt1_ext}}(s1);"""
+
 OP_REG_VAL = """\t{{reg_type}} r3 = mipp::{{func}}(r1, input1);\n\t{{reg_type_scalar}} s3 = mipp::{{func}}(s1, input1);"""
-
-# --------------------------------------------
-# OPERATION IN LOOP BODY
-# ------------------------------------------
-
-# LB_REG_BINOP = """\t\tT res = inputs1[i] {{op}} inputs2[i];"""
-# LB_SET_OP = """\t\tT res = inputs1[i];"""
-# LB_SET_SCALAR_OP = """\t\tT res = input1;"""
-
-# LB_CMP_2REG = """\t\tbool res = inputs1[i] {{op}} inputs2[i];"""
-# LB_CAST_2ARGS = """\t\t{{dt1_ext}}_t res = inputs2[i];"""
-
-# LB_REG_BINOP_FLOAT_WORKAROUND = """{% if is_int %}""" + LB_REG_BINOP + """{% else %}
-#         \tT res = std::bit_cast<T,uint{{type_size}}_t>(
-# \t\t\t\tstd::bit_cast<uint{{type_size}}_t,T>(inputs1[i]) 
-# \t\t\t\t{{op}} 
-# \t\t\t\tstd::bit_cast<uint{{type_size}}_t,T>(inputs2[i]));{% endif %}"""
-
 
 # --------------------------------------------
 # ASSERTS IN LOOP BODY
@@ -747,6 +729,24 @@ LAYER_OVERRIDES = {
         "init": INIT_CAST_2ARGS,
         "load": LOAD_CAST_2ARGS,
         "operation": OP_CAST,
+        "loop_body": """\tfor(size_t i = 0; i < {{size}} * sizeof({{dt2_ext}}) / sizeof({{dt1_ext}}_t); i++){\n""",
+        "loop_assert": AS_CAST_2ARGS+ "\n\t}",
+    },
+
+    "cvt": {
+        "decl": DECL_CAST_2ARGS,
+        "init": INIT_CAST_2ARGS,
+        "load": LOAD_CAST_2ARGS,
+        "operation": OP_CVT,
+        "loop_body": """\tfor(size_t i = 0; i < {{size}} * sizeof({{dt2_ext}}) / sizeof({{dt1_ext}}_t); i++){\n""",
+        "loop_assert": AS_CAST_2ARGS+ "\n\t}",
+    },
+
+    "wcvt": {
+        "decl": DECL_CAST_2ARGS,
+        "init": INIT_CAST_2ARGS,
+        "load": LOAD_CAST_2ARGS,
+        "operation": OP_WCVT,
         "loop_body": """\tfor(size_t i = 0; i < {{size}} * sizeof({{dt2_ext}}) / sizeof({{dt1_ext}}_t); i++){\n""",
         "loop_assert": AS_CAST_2ARGS+ "\n\t}",
     },
