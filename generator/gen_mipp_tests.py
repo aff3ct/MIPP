@@ -357,11 +357,12 @@ def add_type_guards(func, implem, function, kind="c", lmul=0, mkind="", guard = 
     mask_str = mask_to_str(mkind, "c") #, kind)
     if kind == "c":
         section = 'SECTION ("datatype = {dt}") {{ {function}_{dt_suffix}{mask_str}{lmul_str}(); }}\n'
-    elif (kind == "cpp"  and (func != "cast") and (func != "cast_k") and func != "gather" and func != "scatter") or (kind == "obj") :
+    elif (kind == "cpp"  and (func != "cast") and (func != "cast_k") and func != "gather" and func != "scatter")  and (func != "cvt" and func != "wcvt") or (kind == "obj") :
         section = 'SECTION ("datatype = {dt}") {{ {function}{mask_str}{lmul_str}{dt_suffix}(); }}\n'
     elif kind == "cpp" and (func == "cast" or func == "cast_k") :
         section = 'SECTION ("datatype = {dt}") {{ {function}{mask_str}{dt_suffix}(); }}\n'
-    elif kind == "cpp" and ( func == "gather" or func == "scatter") :
+    elif kind == "cpp" and ( func == "gather" or func == "scatter" or func.startswith("cvt") or func.startswith("wcvt") ) :
+        print("debug in add_type_guards for gather, scatter, cvt, wcvt func = ", func)
         section = 'SECTION ("datatype = {dt}") {{ {function}{dt_suffix}(); }}\n'
     #lists to store the dttypes that need to be 
     #wrapped in #if defined(MIPP_64BIT) or #if defined(MIPP_BW)
