@@ -366,7 +366,7 @@ mipp_funcs = {
     "cast":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes_cart_prod, "horizontal": False, "mask_support": no_mask         },
     "cast_k":        { "proto": protos["ret_msk_1arg_msk"],             "datatypes": all_datatypes_cart_prod, "horizontal": False, "mask_support": no_mask         },
     "cvt":           { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes_same_size, "horizontal": False, "mask_support": no_mask         },
-    "wcvt":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes_widenning, "horizontal": False, "mask_support": no_mask         },
+    "wcvt":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes_widenning, "horizontal": True, "mask_support": no_mask         }, # not really horizontal but easier this way
     "toreg":         { "proto": protos["ret_reg_1arg_msk"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": no_mask         },
     "tomsk":         { "proto": protos["ret_msk_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": no_mask         },
     "load":          { "proto": protos["ret_reg_1arg_ptr"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": maskz_and_masks },

@@ -778,6 +778,20 @@ tpl_horiz_lmul_generic_emu = {
 	return res;
 {% endif %}"""},
 
+	"wcvt" : { "format" :"long", "code" :"""
+{% if lmul == 1 %}
+	return %wcvt<tp>%(r0);
+{% else %}
+	// scalar backup bc we would need mipp::high to deal with it
+	%v<tp>% tmp_p[%N<tp>%];
+	%store<tp>%(&tmp_p[0], r0);
+    %v<tr>% tmp_r[%N<tr>%];
+    for(int i = 0; i < %N<tr>%; ++i) {
+           tmp_r[i] = tmp_p[i];
+	}
+    return %load<tr>%(&tmp_r[0]);
+{% endif %}
+"""}
 }
 
 # dependencies key is a hacky solution but that's life.
@@ -831,4 +845,8 @@ implems_horiz_lmul_generic_emu = {
 	"set_k" : [
 		{ "instr_name": "set_k",  "datatypes" : all_datatypes, "version" : "horiz_lmul", "template" : tpl_horiz_lmul_generic_emu["set_k"]},
 	],
+    
+	"wcvt" : [
+		{ "instr_name": "wcvt",  "datatypes" : all_datatypes_widenning, "version" : "horiz_lmul", "template" : tpl_horiz_lmul_generic_emu["wcvt"], "dependencies" : {"store", "load"}}
+    ],
 }

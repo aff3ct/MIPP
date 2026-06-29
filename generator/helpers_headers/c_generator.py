@@ -1172,6 +1172,9 @@ def _gen_c_horiz_lmul_one(isa, file, funcs, f, ff, dt, lmul, mkind=None, dummy=F
     #
     # We mark base set<dt,dt> as implemented; this is enough to avoid the exception.
     # (If you later add more horiz templates that reference other functions, extend this.)
+
+    # the generic emu entries have a "dependencies" key. That list the functions that need 2 be included for them to work. We should append 
+    # those dependencies to ensure their inclusion.
     
     
     def _ensure_fake_implemented(func_name, dep_dt_key):
@@ -1275,6 +1278,11 @@ def _gen_c_horiz_lmul_one(isa, file, funcs, f, ff, dt, lmul, mkind=None, dummy=F
 
     _rvv_mark_lmul_seen(funcs, f, dt_key, lmul)    
 
+    # add include deps
+    # print(ph_ret["requirements"]) 
+    # print("Debug: adding requirements for '" + f + "<" + dt_key + ">' function: " + str(ph_ret["requirements"]))
+    _append_implem_status(funcs, f, dt_key, ff, ph_ret["requirements"])
+
 
 def gen_c_horiz_lmul(isa, file, funcs, f, dt, lmul, implems_horiz_lmul_generic_emu, func_name_for_panic=None, mask_type=None, dummy=False):
     """
@@ -1335,6 +1343,7 @@ def gen_c_horiz_lmul(isa, file, funcs, f, dt, lmul, implems_horiz_lmul_generic_e
         name = func_name_for_panic or f
         print(f"\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \"{name}_m{int(lmul)}\");", file=file)
         print("\texit(-1);", file=file)
+    
 
 
 def gen_c_lmul(isa, include_manager, funcs):
@@ -1420,6 +1429,10 @@ def _rvv_seen_lmul(funcs, f, dt_key, lmul):
 
 
 def _rvv_mark_lmul_seen(funcs, f, dt_key, lmul):
+
+    if "implem_status" not in funcs[f]:
+        funcs[f]["implem_status"] = {}
+
     if "lmul" in funcs[f]["implem_status"]:
         funcs[f]["implem_status"]["lmul"].add((lmul, dt_key))
     else:

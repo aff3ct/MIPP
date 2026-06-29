@@ -787,6 +787,8 @@ NO_LOOP_FUNCS = {
     "getfirst",
     "testz",
     "testz_2",
+    "cvt",
+    "wcvt",
 }
 
 
