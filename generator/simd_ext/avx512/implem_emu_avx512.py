@@ -401,15 +401,6 @@ implems_emu_avx512 = {
         { "datatypes": all_16bit,                    "template": tpl_implem_emu_avx512["set_k-16"],                                   },
         { "datatypes": all_8bit,                     "template": tpl_implem_emu_avx512["set_k-8"],                                    } ], # set_k
 
-#   "andnb_k": [
-#       { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["andnb_k"],      "if": "defined(__AVX512BW__)" } ], # andnb_k
-#   "xorb_k": [
-#       { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["xorb_k"],       "if": "defined(__AVX512BW__)" } ], # xorb_k
-#   "orb_k": [
-#       { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["orb_k"],        "if": "defined(__AVX512BW__)" } ], # orb_k
-#   "notb_k": [
-#       { "datatypes": all_datatypes,                "template": tpl_implem_emu_avx512["notb_k"]                                      } ], # notb_k
-
 	"andb_k": [
         { "datatypes": all_64bit,                    "template": tpl_implem_emu_avx512["andb_k_emu"],   "if": "!defined(__AVX512DQ__)"},
         { "datatypes": all_16bit + all_8bit,         "template": tpl_implem_emu_avx512["andb_k_emu"],   "if": "!defined(__AVX512BW__)"} ], # andb_k
@@ -440,5 +431,5 @@ implems_emu_avx512 = {
     "log": [
 		{ "datatypes": [float32],                    "template": tpl_implem_emu_avx512["log_f32"]								  } ],
     "pow": [
-		{ "datatypes": [float32],                    "template": tpl_implem_emu_avx512["pow_f32"]									  } ],
+		{ "datatypes": [float32],                    "template": tpl_implem_emu_avx512["pow_f32"]								  } ],
 }
