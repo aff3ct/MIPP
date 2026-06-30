@@ -370,108 +370,9 @@ tpl_implem_emu_avx512 = {
     return res;
 """},
 
-
-# __m512d sleef_exp_avx512(__m512d x)
-# {
-#     // -----------------------------
-#     // scalar constants (kept local)
-#     // -----------------------------
-#     const double R_LN2 = 1.4426950408889634073599;
-#     const double L2U    = 0.6931471805596629;
-#     const double L2L    = 0.0000000000000002;
-
-#     const double LN_MAX = 709.782712893384;
-#     const double LN_MIN = -708.3964185322641;
-
-#     const double C0 = 0.1666666666666669072e+0;
-#     const double C1 = 0.4166666666666602598e-1;
-#     const double C2 = 0.8333333333314938210e-2;
-#     const double C3 = 0.1388888888914497797e-2;
-#     const double C4 = 0.1984126989855865850e-3;
-#     const double C5 = 0.2480158687479686264e-4;
-#     const double C6 = 0.2755723402025388239e-5;
-#     const double C7 = 0.2755762628169491192e-6;
-#     const double C8 = 0.2511210703042288022e-7;
-#     const double C9 = 0.2081276378237164457e-8;
-
-#     const __m512d vRln2  = _mm512_set1_pd(R_LN2);
-#     const __m512d vL2u   = _mm512_set1_pd(L2U);
-#     const __m512d vL2l   = _mm512_set1_pd(L2L);
-
-#     const __m512d vLnMax = _mm512_set1_pd(LN_MAX);
-#     const __m512d vLnMin = _mm512_set1_pd(LN_MIN);
-
-#     const __m512d vInf   = _mm512_set1_pd(INFINITY);
-
-#     const __m512d vC0 = _mm512_set1_pd(C0);
-#     const __m512d vC1 = _mm512_set1_pd(C1);
-#     const __m512d vC2 = _mm512_set1_pd(C2);
-#     const __m512d vC3 = _mm512_set1_pd(C3);
-#     const __m512d vC4 = _mm512_set1_pd(C4);
-#     const __m512d vC5 = _mm512_set1_pd(C5);
-#     const __m512d vC6 = _mm512_set1_pd(C6);
-#     const __m512d vC7 = _mm512_set1_pd(C7);
-#     const __m512d vC8 = _mm512_set1_pd(C8);
-#     const __m512d vC9 = _mm512_set1_pd(C9);
-
-#     // -----------------------------
-#     // special cases (early masks)
-#     // -----------------------------
-#     __mmask8 m_nan  = _mm512_cmp_pd_mask(x, x, _CMP_UNORD_Q);
-#     __mmask8 m_inf  = _mm512_cmp_pd_mask(x, vLnMax, _CMP_GT_OQ);
-#     __mmask8 m_zero = _mm512_cmp_pd_mask(x, vLnMin, _CMP_LT_OQ);
-
-#     // -----------------------------
-#     // range reduction
-#     // -----------------------------
-#     __m512d fx = _mm512_mul_pd(x, vRln2);
-
-#     __m512d n = _mm512_roundscale_pd(
-#         fx,
-#         _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC
-#     );
-
-#     // split precision reduction: s = x - n*ln2
-#     __m512d t = _mm512_fnmadd_pd(n, vL2u, x);
-#     __m512d s = _mm512_fnmadd_pd(n, vL2l, t);
-
-#     // -----------------------------
-#     // exp polynomial (Estrin form)
-#     // -----------------------------
-#     __m512d s2 = _mm512_mul_pd(s, s);
-#     __m512d s4 = _mm512_mul_pd(s2, s2);
-#     __m512d s8 = _mm512_mul_pd(s4, s4);
-
-#     __m512d p01 = _mm512_fmadd_pd(s, vC1, vC0);
-#     __m512d p23 = _mm512_fmadd_pd(s, vC3, vC2);
-#     __m512d p45 = _mm512_fmadd_pd(s, vC5, vC4);
-#     __m512d p67 = _mm512_fmadd_pd(s, vC7, vC6);
-
-#     __m512d p0123 = _mm512_fmadd_pd(s2, p23, p01);
-#     __m512d p4567 = _mm512_fmadd_pd(s2, p67, p45);
-
-#     __m512d low  = _mm512_fmadd_pd(s4, p4567, p0123);
-#     __m512d high = _mm512_fmadd_pd(s, vC9, vC8);
-
-#     __m512d y = _mm512_fmadd_pd(s8, high, low);
-
-#     // -----------------------------
-#     // reconstruction
-#     // -----------------------------
-#     __m512i ni = _mm512_cvtpd_epi64(n);
-#     __m512d r  = _mm512_scalef_pd(y, ni);
-
-#     // -----------------------------
-#     // IEEE-style corrections
-#     // -----------------------------
-#     r = _mm512_mask_mov_pd(r, m_inf, vInf);
-#     r = _mm512_mask_mov_pd(r, m_nan, x);
-#     r = _mm512_maskz_mov_pd(m_zero, r);
-
-#     return r;
-# }
-
-
+# Warning : this code was generated w an llm using 
+# sleef xexp as reference. I don't trust it yet. 
+# I'll reread it carefully at some point.
     "exp_f64": { "format": "long", "code":
 """
     // -----------------------------
@@ -577,14 +478,56 @@ tpl_implem_emu_avx512 = {
     return res;
 """},
 
+# This one I translated by hand. Doesn't mean it's correct though but I like it better.
+    "log_f64": {"format" : "long", "code" : 
+"""
+  __m512d d = r0.r;
+  __m512d x, x2;
+  __m512d t, m;
+  
+  __m512d e = _mm512_getexp_pd(_mm512_mul_pd(d, _mm512_set1_pd(1.0/0.75)));
+  e = _mm512_mask_blend_pd(_mm512_cmp_pd_mask(e, _mm512_set1_pd(DBL_MAX), _CMP_EQ_OQ), e, _mm512_set1_pd(1024.0));
+  m = _mm512_getmant_pd(d, _MM_MANT_NORM_p75_1p5, _MM_MANT_SIGN_nan);
+  
+  x = _mm512_div_pd(_mm512_sub_pd(m, _mm512_set1_pd(1)), _mm512_add_pd(_mm512_set1_pd(1), m));
+  x2 = _mm512_mul_pd(x, x);
+
+  __m512d x4 = _mm512_mul_pd(x2, x2), x8 = _mm512_mul_pd(x4, x4), x3 = _mm512_mul_pd(x, x2);
+
+
+    t = _mm512_fmadd_pd(x8, _mm512_fmadd_pd(x4,
+                                            _mm512_set1_pd(0.153487338491425068243146),
+                                            _mm512_fmadd_pd(x2,
+                                                            _mm512_set1_pd(0.152519917006351951593857),
+                                                            _mm512_set1_pd(0.181863266251982985677316))),
+                            _mm512_fmadd_pd(x4,
+                                            _mm512_fmadd_pd(x2,
+                                                            _mm512_set1_pd(0.222221366518767365905163),
+                                                            _mm512_set1_pd(0.285714294746548025383248)),
+                                            _mm512_fmadd_pd(x2,
+                                                            _mm512_set1_pd(0.399999999950799600689777), 
+                                                            _mm512_set1_pd(0.6666666666667778740063))));
+
+  x = _mm512_fmadd_pd(x, _mm512_set1_pd(2), _mm512_mul_pd(_mm512_set1_pd(0.693147180559945286226764), e));
+  x = _mm512_fmadd_pd(x3, t, x);
+
+  x = _mm512_fixupimm_pd(x, d, _mm512_set1_epi64((5 << (5*4))), 0);
+
+  rvd_avx512_float64_t res;
+  res.r = x;
+  return res;
+"""},
+
 	# finally :)
-    "pow_f32": { "format": "long", "code":
+    "pow": { "format": "long", "code":
 """// long format
     %r<tp>% logx = %log<tp>%(r0);
     %r<tp>% ylogx = %mul<tp>%(r1, logx);
     %r<tp>% res = %exp<tp>%(ylogx);
     return res;
 """},
+
+
 
 }
 
@@ -638,7 +581,9 @@ implems_emu_avx512 = {
         { "datatypes": [float64],                    "template": tpl_implem_emu_avx512["exp_f64"],  "if": "defined(__AVX512DQ__)" },
         ],
     "log": [
-		{ "datatypes": [float32],                    "template": tpl_implem_emu_avx512["log_f32"]								  } ],
+		{ "datatypes": [float32],                    "template": tpl_implem_emu_avx512["log_f32"]								  },
+        { "datatypes": [float64],                    "template": tpl_implem_emu_avx512["log_f64"],  "if": "defined(__AVX512DQ__)" },
+    ],
     "pow": [
-		{ "datatypes": [float32],                    "template": tpl_implem_emu_avx512["pow_f32"]								  } ],
+		{ "datatypes": [float32, float64],           "template": tpl_implem_emu_avx512["pow"]								  } ],
 }
