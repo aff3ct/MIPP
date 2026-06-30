@@ -372,7 +372,7 @@ tpl_implem_emu_avx512 = {
 
 # Warning : this code was generated w an llm using 
 # sleef xexp as reference. I don't trust it yet. 
-# I'll reread it carefully at some point.
+# I'll rewrite it like I did for log64 at some point.
     "exp_f64": { "format": "long", "code":
 """
     // -----------------------------
