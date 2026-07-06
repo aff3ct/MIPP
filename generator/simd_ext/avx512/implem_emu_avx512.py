@@ -585,5 +585,7 @@ implems_emu_avx512 = {
         { "datatypes": [float64],                    "template": tpl_implem_emu_avx512["log_f64"],  "if": "defined(__AVX512DQ__)" },
     ],
     "pow": [
-		{ "datatypes": [float32, float64],           "template": tpl_implem_emu_avx512["pow"]								  } ],
+		{ "datatypes": [float32],           "template": tpl_implem_emu_avx512["pow"]								  },
+        { "datatypes": [float64],           "template": tpl_implem_emu_avx512["pow"],  "if": "defined(__AVX512DQ__)" },
+    ],
 }

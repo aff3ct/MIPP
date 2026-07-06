@@ -460,7 +460,8 @@ implems_avx512 = {
         { "instr_name": "kortestz",   "datatypes": [int64, uint64],              "template": tpl_implem_avx512["testz_1arg"],     "if": "defined(__AVX512DQ__)"                                                                 },
         { "instr_name": "kortestz",   "datatypes": [int32, uint32],              "template": tpl_implem_avx512["testz_1arg"],     "if": "(defined (__AVX512F__) || defined(__MIC__) || defined(__KNCNI__))"                     },
         { "instr_name": "kortestz",   "datatypes": [int16, uint16],              "template": tpl_implem_avx512["testz_1arg"],     "if": "defined (__AVX512BW__)"                                                                },
-        { "instr_name": "kortestz",   "datatypes": [int8, uint8],                "template": tpl_implem_avx512["testz_1arg"],     "if": "defined (__AVX512BW__)"                                                                } ], # testz_2
+        { "instr_name": "kortestz",   "datatypes": [int8, uint8],                "template": tpl_implem_avx512["testz_1arg"],     "if": "defined (__AVX512BW__)"                                                                },
+        { "instr_name": "kortestz",   "datatypes": all_float,                    "template": tpl_implem_avx512["testz_1arg"],     "if": "defined(__AVX512BW__)"                                                                 } ], # testz_2
     "cmpeq": [
         { "instr_name": "cmpeq",      "datatypes": [int32, int64],               "template": tpl_implem_avx512["cmp_int"],                                                                                                      },
         { "instr_name": "cmpeq",      "datatypes": [int16, int8] ,               "template": tpl_implem_avx512["cmp_int"],        "if": "defined(__AVX512BW__)"                                                                 },
