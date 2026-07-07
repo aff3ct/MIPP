@@ -42,7 +42,7 @@ def gen_mipp_avx512(include_manager):
     copy_mipp_funcs = copy.deepcopy(mipp_funcs)
     gen_c_functions(isa_avx512, include_manager, copy_mipp_funcs, implems_avx512)
     gen_c_functions(isa_avx512, include_manager, copy_mipp_funcs, implems_emu_avx512)
- 
+    
     gen_c_functions(isa_avx512, include_manager, copy_mipp_funcs, implems_mask_generic_emu)
     
     gen_c_missing_functions(isa_avx512, include_manager, copy_mipp_funcs)

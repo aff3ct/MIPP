@@ -611,6 +611,14 @@ implems_mask_generic_emu = {
     
 }
 
+# fix to bug fix in c_generator _build_previous_masked_emulated_exclusion_ifdef
+# where the check for emulated implem at the very beginning 
+# prevented the exclusion of the emulated implem of load / store ...
+for iemu in implems_mask_generic_emu:
+	for sub_iemu in implems_mask_generic_emu[iemu]:
+		if "type" not in sub_iemu:
+			sub_iemu["type"] = "emulated"
+		
 ################################# HORIZONTAL LMUL FUNCTIONS ############################################
 
 tpl_horiz_lmul_generic_emu = {

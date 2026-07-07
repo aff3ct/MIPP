@@ -599,8 +599,7 @@ def _build_previous_masked_emulated_exclusion_ifdef(funcs, f, dt_key, mask_kind,
         bucket = get_masked_bucket(funcs, f, dt_key, mask_kind)
         if bucket is not None:
             is_first = True
-            i = 0
-            for _implem in bucket:
+            for i in range(len(bucket)):
                 ifd_sub = build_ifdef_masked(funcs, f, dt_key, mask_kind, i)
                 if ifd_sub:
                     if not is_first:
@@ -609,7 +608,6 @@ def _build_previous_masked_emulated_exclusion_ifdef(funcs, f, dt_key, mask_kind,
                     ifd = ifd + ifd_sub
                     ifd = ifd + " )"
                     is_first = False
-                i = i + 1
     return ifd
 
 
@@ -746,7 +744,7 @@ def _gen_c_function_one_masked(isa, file, funcs, f, ff, dt):
 
     _append_implem_status_masked(funcs, f, dt_key, mask_kind, ff, ph_ret["requirements"])
  
-    ifd = _combine_current_ifdefs_masked(funcs, f, dt_key, mask_kind, ifd_prev)
+    ifd = _combine_current_ifdefs_masked(funcs, f, dt_key, mask_kind, ifd_prev)        
  
     _emit_ifdef_begin_and_update_emulated_masked(funcs, f, dt_key, mask_kind, ff, ifd, file)
     _emit_function_body(
@@ -1500,7 +1498,7 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
 
 
                     if f in ["gather", "scatter"] and ("64" in dt_key or "64" in dt_ret) and lmul < 0:
-                        print(f"Debug: skipping '{f}<{dt_key}>' for LMUL={lmul} (reason: The functions mixes lmul and ldiv in a tough way")
+                        # print(f"Debug: skipping '{f}<{dt_key}>' for LMUL={lmul} (reason: The functions mixes lmul and ldiv in a tough way")
                         
                         # HACK define the symbol anyways and force a missing implem.
                         _emit_separator(f, file)
