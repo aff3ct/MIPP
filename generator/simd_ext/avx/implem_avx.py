@@ -220,7 +220,7 @@ tpl_implem_avx = {
     "set1_u": { "format": "long", "code":
 """// long format
 	%r<c:int|b:tp>% r0u;
-	r0u = %set1<c:int|b:tp>%(v0);
+	r0u = %set1<c:int|b:tp>%((int{{ dt_par.n_bits }}_t)v0);
 	return %cast<c:int|b:tp,tp>%(r0u);"""},
     "arith_2args_u":  { "format": "long", "code":
 """// long format

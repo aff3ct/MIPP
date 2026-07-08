@@ -133,6 +133,47 @@ tpl_implem_emu_sse = {
 	"cmpneq": { "format": "long", "code":
 """// long format
 	return %notb_k<tp>%(%cmpeq<tp>%(r0, r1));""" },
+	"cmpgt_u-64": { "format": "long", "code":
+"""// long format
+	%r<tp>% bias = %set1<tp>%((int64_t)0x8000000000000000);
+	%r<tp>% r0_biased = %xorb<tp>%(r0, bias);
+	%r<tp>% r1_biased = %xorb<tp>%(r1, bias);
+	%r<c:int|b:tp>% r0s = %cast<tp,c:int|b:tp>%(r0_biased);
+	%r<c:int|b:tp>% r1s = %cast<tp,c:int|b:tp>%(r1_biased);
+	return %cast_k<c:int|b:tp,tp>%(%cmpgt<c:int|b:tp>%(r0s, r1s));""" },
+	"cmpgt_u-32": { "format": "long", "code":
+"""// long format
+	%r<tp>% bias = %set1<tp>%((int32_t)0x80000000);
+	%r<tp>% r0_biased = %xorb<tp>%(r0, bias);
+	%r<tp>% r1_biased = %xorb<tp>%(r1, bias);
+	%r<c:int|b:tp>% r0s = %cast<tp,c:int|b:tp>%(r0_biased);
+	%r<c:int|b:tp>% r1s = %cast<tp,c:int|b:tp>%(r1_biased);
+	return %cast_k<c:int|b:tp,tp>%(%cmpgt<c:int|b:tp>%(r0s, r1s));""" },
+	"cmpgt_u-16": { "format": "long", "code":
+"""// long format
+	%r<tp>% bias = %set1<tp>%((int16_t)0x8000);
+	%r<tp>% r0_biased = %xorb<tp>%(r0, bias);
+	%r<tp>% r1_biased = %xorb<tp>%(r1, bias);
+	%r<c:int|b:tp>% r0s = %cast<tp,c:int|b:tp>%(r0_biased);
+	%r<c:int|b:tp>% r1s = %cast<tp,c:int|b:tp>%(r1_biased);
+	return %cast_k<c:int|b:tp,tp>%(%cmpgt<c:int|b:tp>%(r0s, r1s));""" },
+	"cmpgt_u-8": { "format": "long", "code":
+"""// long format
+	%r<tp>% bias = %set1<tp>%((int8_t)0x80);
+	%r<tp>% r0_biased = %xorb<tp>%(r0, bias);
+	%r<tp>% r1_biased = %xorb<tp>%(r1, bias);
+	%r<c:int|b:tp>% r0s = %cast<tp,c:int|b:tp>%(r0_biased);
+	%r<c:int|b:tp>% r1s = %cast<tp,c:int|b:tp>%(r1_biased);
+	return %cast_k<c:int|b:tp,tp>%(%cmpgt<c:int|b:tp>%(r0s, r1s));""" },
+	"cmplt_u_emu": { "format": "long", "code":
+"""// long format
+	return %cmpgt<tp>%(r1, r0);""" },
+	"cmple_u_emu": { "format": "long", "code":
+"""// long format
+	return %notb_k<tp>%(%cmpgt<tp>%(r0, r1));""" },
+	"cmpge_u_emu": { "format": "long", "code":
+"""// long format
+	return %notb_k<tp>%(%cmpgt<tp>%(r1, r0));""" },
 }
 
 implems_emu_sse = {
@@ -182,4 +223,18 @@ implems_emu_sse = {
         { "datatypes": [uint64],                 "template": tpl_implem_emu_sse["cmpeq_u"],     "if": "defined(__SSE4_1__)" } ], # cmpeq
     "cmpneq": [
         { "datatypes": [float64] + all_int_uint, "template": tpl_implem_emu_sse["cmpneq"],      "if": "defined(__SSE2__)"   } ], # cmpneq
+    "cmpgt": [
+        { "datatypes": [uint64],                 "template": tpl_implem_emu_sse["cmpgt_u-64"],  "if": "defined(__SSE4_2__)" },
+        { "datatypes": [uint32],                 "template": tpl_implem_emu_sse["cmpgt_u-32"],  "if": "defined(__SSE2__)"   },
+        { "datatypes": [uint16],                 "template": tpl_implem_emu_sse["cmpgt_u-16"],  "if": "defined(__SSE2__)"   },
+        { "datatypes": [uint8],                  "template": tpl_implem_emu_sse["cmpgt_u-8"],   "if": "defined(__SSE2__)"   } ], # cmpgt
+    "cmplt": [
+        { "datatypes": [uint64],                 "template": tpl_implem_emu_sse["cmplt_u_emu"], "if": "defined(__SSE4_2__)" },
+        { "datatypes": [uint32, uint16, uint8],  "template": tpl_implem_emu_sse["cmplt_u_emu"], "if": "defined(__SSE2__)"   } ], # cmplt
+    "cmple": [
+        { "datatypes": [uint64],                 "template": tpl_implem_emu_sse["cmple_u_emu"], "if": "defined(__SSE4_2__)" },
+        { "datatypes": [uint32, uint16, uint8],  "template": tpl_implem_emu_sse["cmple_u_emu"], "if": "defined(__SSE2__)"   } ], # cmple
+    "cmpge": [
+        { "datatypes": [uint64],                 "template": tpl_implem_emu_sse["cmpge_u_emu"], "if": "defined(__SSE4_2__)" },
+        { "datatypes": [uint32, uint16, uint8],  "template": tpl_implem_emu_sse["cmpge_u_emu"], "if": "defined(__SSE2__)"   } ], # cmpge
 }

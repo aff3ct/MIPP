@@ -198,6 +198,11 @@ tpl_implem_sse = {
 	%r<c:int|b:tp>% r1u = %cast<tp,c:int|b:tp>%(r1);
 	%r<c:int|b:tp>% res = %{{ instr_name }}<c:int|b:tp>%(r0u, r1u);
 	return %cast<c:int|b:tp,tp>%(res);"""},
+    "set1_u": { "format": "long", "code":
+"""// long format
+	%r<c:int|b:tp>% r0u;
+	r0u = %set1<c:int|b:tp>%((int{{ dt_par.n_bits }}_t)v0);
+	return %cast<c:int|b:tp,tp>%(r0u);"""},
 }
 
 """
@@ -230,7 +235,8 @@ implems_sse = {
         { "instr_name": "set1",    "datatypes": [float32],                  "template": tpl_implem_sse["set1"]                                                                         },
         { "instr_name": "set1",    "datatypes": [float64],                  "template": tpl_implem_sse["set1"],               "if": "defined(__SSE2__)"                                },
         { "instr_name": "set1",    "datatypes": [int8,int16,int32],         "template": tpl_implem_sse["set1"],               "if": "defined(__SSE2__)"                                },
-        { "instr_name": "set1",    "datatypes": [int64],                    "template": tpl_implem_sse["set1x"],              "if": "defined(__SSE2__)"                                } ], # set1
+        { "instr_name": "set1",    "datatypes": [int64],                    "template": tpl_implem_sse["set1x"],              "if": "defined(__SSE2__)"                                },
+        { "instr_name": "set1",    "datatypes": all_uint,                   "template": tpl_implem_sse["set1_u"],             "if": "defined(__SSE2__)"                                } ], # set1
     "set0": [
         { "instr_name": "setzero", "datatypes": [float32],                  "template": tpl_implem_sse["set0"],               "if": "defined(__SSE2__)"                                },
         { "instr_name": "setzero", "datatypes": all_int,                    "template": tpl_implem_sse["set0_si128"]                                                                   } ], # set0
