@@ -192,6 +192,12 @@ tpl_implem_sse = {
 	%r<tp>% rs5 = %cast<c:int|b:8,tp>%(rsi);
 	rs5.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs4.r, rs5.r);
 	return rs5;""" },
+    "arith_2args_u":  { "format": "long", "code":
+"""// long format
+	%r<c:int|b:tp>% r0u = %cast<tp,c:int|b:tp>%(r0);
+	%r<c:int|b:tp>% r1u = %cast<tp,c:int|b:tp>%(r1);
+	%r<c:int|b:tp>% res = %{{ instr_name }}<c:int|b:tp>%(r0u, r1u);
+	return %cast<c:int|b:tp,tp>%(res);"""},
 }
 
 """
@@ -202,111 +208,113 @@ tpl_implem_sse = {
 """
 implems_sse = {
     "cast": [
-        { "instr_name": "cast",    "datatypes": all_datatypes_cart_prod, "template": tpl_implem_sse["cast"]                                                                         } ], # cast
+        { "instr_name": "cast",    "datatypes": all_datatypes_cart_prod,    "template": tpl_implem_sse["cast"]                                                                         } ], # cast
     "cast_k": [
-        { "instr_name": "cast",    "datatypes": all_datatypes_cart_prod, "template": tpl_implem_sse["cast_k"]                                                                       } ], # cast_k
+        { "instr_name": "cast",    "datatypes": all_datatypes_cart_prod,    "template": tpl_implem_sse["cast_k"]                                                                       } ], # cast_k
     "toreg": [
-        { "instr_name": "cast",    "datatypes": all_datatypes,           "template": tpl_implem_sse["toreg"]                                                                        } ], # toreg
+        { "instr_name": "cast",    "datatypes": all_datatypes,              "template": tpl_implem_sse["toreg"]                                                                        } ], # toreg
     "tomsk": [
-        { "instr_name": "cast",    "datatypes": all_datatypes,           "template": tpl_implem_sse["tomsk"]                                                                        } ], # tomsk
+        { "instr_name": "cast",    "datatypes": all_datatypes,              "template": tpl_implem_sse["tomsk"]                                                                        } ], # tomsk
     "load": [
-        { "instr_name": "load",    "datatypes": all_int + [float32],     "template": tpl_implem_sse["load"],               "if": "defined(MIPP_ALIGNED_LOADS)"                      },
-        { "instr_name": "load",    "datatypes": [float64],               "template": tpl_implem_sse["load"],               "if": "defined(MIPP_ALIGNED_LOADS) && defined(__SSE2__)" },
-        { "instr_name": "loadu",   "datatypes": all_datatypes,           "template": tpl_implem_sse["load"],               "if": "!defined(MIPP_ALIGNED_LOADS)"                     } ], # load
+        { "instr_name": "load",    "datatypes": all_int + [float32],        "template": tpl_implem_sse["load"],               "if": "defined(MIPP_ALIGNED_LOADS)"                      },
+        { "instr_name": "load",    "datatypes": [float64],                  "template": tpl_implem_sse["load"],               "if": "defined(MIPP_ALIGNED_LOADS) && defined(__SSE2__)" },
+        { "instr_name": "loadu",   "datatypes": all_datatypes,              "template": tpl_implem_sse["load"],               "if": "!defined(MIPP_ALIGNED_LOADS)"                     } ], # load
     "loadu": [
-        { "instr_name": "loadu",   "datatypes": all_datatypes,           "template": tpl_implem_sse["load"]                                                                         } ], # loadu
+        { "instr_name": "loadu",   "datatypes": all_datatypes,              "template": tpl_implem_sse["load"]                                                                         } ], # loadu
     "store": [
-        { "instr_name": "store",   "datatypes": all_datatypes,           "template": tpl_implem_sse["store"],              "if": "defined(MIPP_ALIGNED_LOADS)"                      },
-        { "instr_name": "storeu",  "datatypes": all_datatypes,           "template": tpl_implem_sse["store"],              "if": "!defined(MIPP_ALIGNED_LOADS)"                     } ], # store
+        { "instr_name": "store",   "datatypes": all_datatypes,              "template": tpl_implem_sse["store"],              "if": "defined(MIPP_ALIGNED_LOADS)"                      },
+        { "instr_name": "storeu",  "datatypes": all_datatypes,              "template": tpl_implem_sse["store"],              "if": "!defined(MIPP_ALIGNED_LOADS)"                     } ], # store
     "storeu": [
-        { "instr_name": "storeu",  "datatypes": all_datatypes,           "template": tpl_implem_sse["store"]                                                                        } ], # storeu
+        { "instr_name": "storeu",  "datatypes": all_datatypes,              "template": tpl_implem_sse["store"]                                                                        } ], # storeu
     "set1": [
-        { "instr_name": "set1",    "datatypes": [float32],               "template": tpl_implem_sse["set1"]                                                                         },
-        { "instr_name": "set1",    "datatypes": [float64],               "template": tpl_implem_sse["set1"],               "if": "defined(__SSE2__)"                                },
-        { "instr_name": "set1",    "datatypes": [int8,int16,int32],      "template": tpl_implem_sse["set1"],               "if": "defined(__SSE2__)"                                },
-        { "instr_name": "set1",    "datatypes": [int64],                 "template": tpl_implem_sse["set1x"],              "if": "defined(__SSE2__)"                                } ], # set1
+        { "instr_name": "set1",    "datatypes": [float32],                  "template": tpl_implem_sse["set1"]                                                                         },
+        { "instr_name": "set1",    "datatypes": [float64],                  "template": tpl_implem_sse["set1"],               "if": "defined(__SSE2__)"                                },
+        { "instr_name": "set1",    "datatypes": [int8,int16,int32],         "template": tpl_implem_sse["set1"],               "if": "defined(__SSE2__)"                                },
+        { "instr_name": "set1",    "datatypes": [int64],                    "template": tpl_implem_sse["set1x"],              "if": "defined(__SSE2__)"                                } ], # set1
     "set0": [
-        { "instr_name": "setzero", "datatypes": [float32],               "template": tpl_implem_sse["set0"],               "if": "defined(__SSE2__)"                                },
-        { "instr_name": "setzero", "datatypes": all_int,                 "template": tpl_implem_sse["set0_si128"]                                                                   } ], # set0
+        { "instr_name": "setzero", "datatypes": [float32],                  "template": tpl_implem_sse["set0"],               "if": "defined(__SSE2__)"                                },
+        { "instr_name": "setzero", "datatypes": all_int,                    "template": tpl_implem_sse["set0_si128"]                                                                   } ], # set0
     "set0_k": [
-        { "instr_name": "setzero", "datatypes": all_datatypes,           "template": tpl_implem_sse["set0_k"]                                                                       } ], # set0_k
-    "set" :[
-        { "datatypes": [float64],                                        "template": tpl_implem_sse["set-64f"],            "if": "defined(__SSE2__)"                                },
-        { "datatypes": [float32],                                        "template": tpl_implem_sse["set-32f"],                                                                     },
-        { "datatypes": [int32, uint32],                                  "template": tpl_implem_sse["set-32"],             "if": "defined(__SSE2__)"                                },
-        { "datatypes": [int64, uint64],                                  "template": tpl_implem_sse["set-64"],             "if": "defined(__SSE2__)"                                },
-        { "datatypes": [int16, uint16],                                  "template": tpl_implem_sse["set-16"],             "if": "defined(__SSE2__)"                                },
-        { "datatypes": [int8, uint8],                                    "template": tpl_implem_sse["set-8"],              "if": "defined(__SSE2__)"                                } ], # set
+        { "instr_name": "setzero", "datatypes": all_datatypes,              "template": tpl_implem_sse["set0_k"]                                                                       } ], # set0_k
+    "set": [
+        {                          "datatypes": [float64],                  "template": tpl_implem_sse["set-64f"],            "if": "defined(__SSE2__)"                                },
+        {                          "datatypes": [float32],                  "template": tpl_implem_sse["set-32f"],                                                                     },
+        {                          "datatypes": [int32, uint32],            "template": tpl_implem_sse["set-32"],             "if": "defined(__SSE2__)"                                },
+        {                          "datatypes": [int64, uint64],            "template": tpl_implem_sse["set-64"],             "if": "defined(__SSE2__)"                                },
+        {                          "datatypes": [int16, uint16],            "template": tpl_implem_sse["set-16"],             "if": "defined(__SSE2__)"                                },
+        {                          "datatypes": [int8, uint8],              "template": tpl_implem_sse["set-8"],              "if": "defined(__SSE2__)"                                } ], # set
     "add": [
-        { "instr_name": "add",     "datatypes": [float32],               "template": tpl_implem_sse["arith_2args"]                                                                  },
-        { "instr_name": "add",     "datatypes": all_int + [float64],     "template": tpl_implem_sse["arith_2args"],        "if": "defined(__SSE2__)"                                } ], # add
+        { "instr_name": "add",     "datatypes": [float32],                  "template": tpl_implem_sse["arith_2args"]                                                                  },
+        { "instr_name": "add",     "datatypes": all_int + [float64],        "template": tpl_implem_sse["arith_2args"],        "if": "defined(__SSE2__)"                                },
+        { "instr_name": "add",     "datatypes": all_uint,                   "template": tpl_implem_sse["arith_2args_u"],      "if": "defined(__SSE2__)"                                } ], # add
     "sub": [
-        { "instr_name": "sub",     "datatypes": [float32],               "template": tpl_implem_sse["arith_2args"]                                                                  },
-        { "instr_name": "sub",     "datatypes": all_int + [float64],     "template": tpl_implem_sse["arith_2args"],        "if": "defined(__SSE2__)"                                } ], # sub
+        { "instr_name": "sub",     "datatypes": [float32],                  "template": tpl_implem_sse["arith_2args"]                                                                  },
+        { "instr_name": "sub",     "datatypes": all_int + [float64],        "template": tpl_implem_sse["arith_2args"],        "if": "defined(__SSE2__)"                                },
+        { "instr_name": "sub",     "datatypes": all_uint,                   "template": tpl_implem_sse["arith_2args_u"],      "if": "defined(__SSE2__)"                                } ], # sub
     "mul": [
-        { "instr_name": "mul",     "datatypes": [float32],               "template": tpl_implem_sse["arith_2args"]                                                                  },
-        { "instr_name": "mul",     "datatypes": [float64],               "template": tpl_implem_sse["arith_2args"],        "if": "defined(__SSE2__)"                                },
-        { "instr_name": "mullo",   "datatypes": [int16],                 "template": tpl_implem_sse["arith_2args"],        "if": "defined(__SSE2__)"                                },
-        { "instr_name": "mullo",   "datatypes": [int32],                 "template": tpl_implem_sse["arith_2args"],        "if": "defined(__SSE4_1__)"                              } ], # mul
+        { "instr_name": "mul",     "datatypes": [float32],                  "template": tpl_implem_sse["arith_2args"]                                                                  },
+        { "instr_name": "mul",     "datatypes": [float64],                  "template": tpl_implem_sse["arith_2args"],        "if": "defined(__SSE2__)"                                },
+        { "instr_name": "mullo",   "datatypes": [int16],                    "template": tpl_implem_sse["arith_2args"],        "if": "defined(__SSE2__)"                                },
+        { "instr_name": "mullo",   "datatypes": [int32],                    "template": tpl_implem_sse["arith_2args"],        "if": "defined(__SSE4_1__)"                              } ], # mul
     "div": [
-        { "instr_name": "div",     "datatypes": [float32],               "template": tpl_implem_sse["arith_2args"]                                                                  },
-        { "instr_name": "div",     "datatypes": [float64],               "template": tpl_implem_sse["arith_2args"],        "if": "defined(__SSE2__)"                                } ], # div
+        { "instr_name": "div",     "datatypes": [float32],                  "template": tpl_implem_sse["arith_2args"]                                                                  },
+        { "instr_name": "div",     "datatypes": [float64],                  "template": tpl_implem_sse["arith_2args"],        "if": "defined(__SSE2__)"                                } ], # div
     "andb": [
-        { "instr_name": "and",     "datatypes": [float32],               "template": tpl_implem_sse["logi_2args"]                                                                   },
-        { "instr_name": "and",     "datatypes": [float64],               "template": tpl_implem_sse["logi_2args"],         "if": "defined(__SSE2__)"                                },
-        { "instr_name": "and",     "datatypes": all_int_uint,            "template": tpl_implem_sse["logi_2args_si128"],   "if": "defined(__SSE2__)"                                } ], # andb
+        { "instr_name": "and",     "datatypes": [float32],                  "template": tpl_implem_sse["logi_2args"]                                                                   },
+        { "instr_name": "and",     "datatypes": [float64],                  "template": tpl_implem_sse["logi_2args"],         "if": "defined(__SSE2__)"                                },
+        { "instr_name": "and",     "datatypes": all_int_uint,               "template": tpl_implem_sse["logi_2args_si128"],   "if": "defined(__SSE2__)"                                } ], # andb
     "andb_k": [
-        { "instr_name": "and",     "datatypes": [float32],               "template": tpl_implem_sse["logi_m_2args"]                                                                 },
-        { "instr_name": "and",     "datatypes": [float64],               "template": tpl_implem_sse["logi_m_2args"],       "if": "defined(__SSE2__)"                                },
-        { "instr_name": "and",     "datatypes": [int16,int32,int64],     "template": tpl_implem_sse["logi_m_2args_si128"], "if": "defined(__SSE2__)"                                } ], # andb_k
+        { "instr_name": "and",     "datatypes": [float32],                  "template": tpl_implem_sse["logi_m_2args"]                                                                 },
+        { "instr_name": "and",     "datatypes": [float64],                  "template": tpl_implem_sse["logi_m_2args"],       "if": "defined(__SSE2__)"                                },
+        { "instr_name": "and",     "datatypes": all_int_uint,               "template": tpl_implem_sse["logi_m_2args_si128"], "if": "defined(__SSE2__)"                                } ], # andb_k
     "andnb": [
-        { "instr_name": "andnot",  "datatypes": [float32],               "template": tpl_implem_sse["logi_2args"]                                                                   },
-        { "instr_name": "andnot",  "datatypes": [float64],               "template": tpl_implem_sse["logi_2args"],         "if": "defined(__SSE2__)"                                },
-        { "instr_name": "andnot",  "datatypes": [int16,int32,int64],     "template": tpl_implem_sse["logi_2args_si128"],   "if": "defined(__SSE2__)"                                } ], # andnb
+        { "instr_name": "andnot",  "datatypes": [float32],                  "template": tpl_implem_sse["logi_2args"]                                                                   },
+        { "instr_name": "andnot",  "datatypes": [float64],                  "template": tpl_implem_sse["logi_2args"],         "if": "defined(__SSE2__)"                                },
+        { "instr_name": "andnot",  "datatypes": all_int_uint,               "template": tpl_implem_sse["logi_2args_si128"],   "if": "defined(__SSE2__)"                                } ], # andnb
     "andnb_k": [
-        { "instr_name": "andnot",  "datatypes": [float32],               "template": tpl_implem_sse["logi_m_2args"]                                                                 },
-        { "instr_name": "andnot",  "datatypes": [float64],               "template": tpl_implem_sse["logi_m_2args"],       "if": "defined(__SSE2__)"                                },
-        { "instr_name": "andnot",  "datatypes": [int16,int32,int64],     "template": tpl_implem_sse["logi_m_2args_si128"], "if": "defined(__SSE2__)"                                } ], # andnb_k
+        { "instr_name": "andnot",  "datatypes": [float32],                  "template": tpl_implem_sse["logi_m_2args"]                                                                 },
+        { "instr_name": "andnot",  "datatypes": [float64],                  "template": tpl_implem_sse["logi_m_2args"],       "if": "defined(__SSE2__)"                                },
+        { "instr_name": "andnot",  "datatypes": all_int_uint,               "template": tpl_implem_sse["logi_m_2args_si128"], "if": "defined(__SSE2__)"                                } ], # andnb_k
     "orb": [
-        { "instr_name": "or",      "datatypes": [float32],               "template": tpl_implem_sse["logi_2args"]                                                                   },
-        { "instr_name": "or",      "datatypes": [float64],               "template": tpl_implem_sse["logi_2args"],         "if": "defined(__SSE2__)"                                },
-        { "instr_name": "or",      "datatypes": [int16,int32,int64],     "template": tpl_implem_sse["logi_2args_si128"],   "if": "defined(__SSE2__)"                                } ], # orb
+        { "instr_name": "or",      "datatypes": [float32],                  "template": tpl_implem_sse["logi_2args"]                                                                   },
+        { "instr_name": "or",      "datatypes": [float64],                  "template": tpl_implem_sse["logi_2args"],         "if": "defined(__SSE2__)"                                },
+        { "instr_name": "or",      "datatypes": all_int_uint,               "template": tpl_implem_sse["logi_2args_si128"],   "if": "defined(__SSE2__)"                                } ], # orb
     "orb_k": [
-        { "instr_name": "or",      "datatypes": [float32],               "template": tpl_implem_sse["logi_m_2args"]                                                                 },
-        { "instr_name": "or",      "datatypes": [float64],               "template": tpl_implem_sse["logi_m_2args"],       "if": "defined(__SSE2__)"                                },
-        { "instr_name": "or",      "datatypes": [int16,int32,int64],     "template": tpl_implem_sse["logi_m_2args_si128"], "if": "defined(__SSE2__)"                                } ], # orb_k
+        { "instr_name": "or",      "datatypes": [float32],                  "template": tpl_implem_sse["logi_m_2args"]                                                                 },
+        { "instr_name": "or",      "datatypes": [float64],                  "template": tpl_implem_sse["logi_m_2args"],       "if": "defined(__SSE2__)"                                },
+        { "instr_name": "or",      "datatypes": all_int_uint,               "template": tpl_implem_sse["logi_m_2args_si128"], "if": "defined(__SSE2__)"                                } ], # orb_k
     "xorb": [
-        { "instr_name": "xor",     "datatypes": [float32],               "template": tpl_implem_sse["logi_2args"]                                                                   },
-        { "instr_name": "xor",     "datatypes": [float64],               "template": tpl_implem_sse["logi_2args"],         "if": "defined(__SSE2__)"                                },
-        { "instr_name": "xor",     "datatypes": [int16,int32,int64],     "template": tpl_implem_sse["logi_2args_si128"],   "if": "defined(__SSE2__)"                                } ], # xorb
+        { "instr_name": "xor",     "datatypes": [float32],                  "template": tpl_implem_sse["logi_2args"]                                                                   },
+        { "instr_name": "xor",     "datatypes": [float64],                  "template": tpl_implem_sse["logi_2args"],         "if": "defined(__SSE2__)"                                },
+        { "instr_name": "xor",     "datatypes": all_int_uint,               "template": tpl_implem_sse["logi_2args_si128"],   "if": "defined(__SSE2__)"                                } ], # xorb
     "xorb_k": [
-        { "instr_name": "xor",     "datatypes": [float32],               "template": tpl_implem_sse["logi_m_2args"]                                                                 },
-        { "instr_name": "xor",     "datatypes": [float64],               "template": tpl_implem_sse["logi_m_2args"],       "if": "defined(__SSE2__)"                                },
-        { "instr_name": "xor",     "datatypes": [int16,int32,int64],     "template": tpl_implem_sse["logi_m_2args_si128"], "if": "defined(__SSE2__)"                                } ], # xorb_k
+        { "instr_name": "xor",     "datatypes": [float32],                  "template": tpl_implem_sse["logi_m_2args"]                                                                 },
+        { "instr_name": "xor",     "datatypes": [float64],                  "template": tpl_implem_sse["logi_m_2args"],       "if": "defined(__SSE2__)"                                },
+        { "instr_name": "xor",     "datatypes": all_int_uint,               "template": tpl_implem_sse["logi_m_2args_si128"], "if": "defined(__SSE2__)"                                } ], # xorb_k
     "cmpeq": [
-        { "instr_name": "cmpeq",   "datatypes": [float32],               "template": tpl_implem_sse["compare"]                                                                      },
-        { "instr_name": "cmpeq",   "datatypes": [float64,int16,int32],   "template": tpl_implem_sse["compare"],            "if": "defined(__SSE2__)"                                },
-        { "instr_name": "cmpeq",   "datatypes": [int64],                 "template": tpl_implem_sse["compare"],            "if": "defined(__SSE4_1__)"                              } ], # cmpeq
+        { "instr_name": "cmpeq",   "datatypes": [float32],                  "template": tpl_implem_sse["compare"]                                                                      },
+        { "instr_name": "cmpeq",   "datatypes": [float64,int16,int32,int8], "template": tpl_implem_sse["compare"],            "if": "defined(__SSE2__)"                                },
+        { "instr_name": "cmpeq",   "datatypes": [int64],                    "template": tpl_implem_sse["compare"],            "if": "defined(__SSE4_1__)"                              } ], # cmpeq
     "cmpneq": [
-        { "instr_name": "cmpneq",  "datatypes": [float32],               "template": tpl_implem_sse["compare"]                                                                      } ], # cmpneq
-#       { "instr_name": "cmpneq",  "datatypes": [float64],               "template": tpl_implem_sse["compare"],            "if": "defined(__SSE2__)"                                } ],
+        { "instr_name": "cmpneq",  "datatypes": [float32],                  "template": tpl_implem_sse["compare"]                                                                      } ], # cmpneq
+#       { "instr_name": "cmpneq",  "datatypes": [float64],                  "template": tpl_implem_sse["compare"],            "if": "defined(__SSE2__)"                                } ],
 #       COMMENT: add all int combinate not and equals for __SSE2__
-#       { "instr_name": "cmpneq",  "datatypes": all_int,                 "template": tpl_implem_sse["not_cmpneq"],         "if": "defined(__SSE2__)"                                },
-#       { "instr_name": "cmpneq",  "datatypes": [int64],                 "template": tpl_implem_sse["compare"],            "if": "defined(__SSE4_1__)"                              } ],
+#       { "instr_name": "cmpneq",  "datatypes": all_int,                    "template": tpl_implem_sse["not_cmpneq"],         "if": "defined(__SSE2__)"                                },
+#       { "instr_name": "cmpneq",  "datatypes": [int64],                    "template": tpl_implem_sse["compare"],            "if": "defined(__SSE4_1__)"                              } ],
     "cmplt": [
-        { "instr_name": "cmplt",   "datatypes": [float32],               "template": tpl_implem_sse["compare"]                                                                      },
-        { "instr_name": "cmplt",   "datatypes": [int16,int32,float64],   "template": tpl_implem_sse["compare"],            "if": "defined(__SSE2__)"                                } ], # cmplt
+        { "instr_name": "cmplt",   "datatypes": [float32],                  "template": tpl_implem_sse["compare"]                                                                      },
+        { "instr_name": "cmplt",   "datatypes": [int16,int32,float64],      "template": tpl_implem_sse["compare"],            "if": "defined(__SSE2__)"                                } ], # cmplt
     "cmpgt": [
-        { "instr_name": "cmpgt",   "datatypes": [float32],               "template": tpl_implem_sse["compare"]                                                                      },
-        { "instr_name": "cmpgt",   "datatypes": [float64],               "template": tpl_implem_sse["compare"],            "if": "defined(__SSE2__)"                                },
-        { "instr_name": "cmpgt",   "datatypes": [int64],                 "template": tpl_implem_sse["compare"],            "if": "defined(__SSE4_2__)"                              },
-        { "instr_name": "cmpgt",   "datatypes": [int32,int16,int8],      "template": tpl_implem_sse["compare"],            "if": "defined(__SSE2__)"                                } ], # cmpgt
+        { "instr_name": "cmpgt",   "datatypes": [float32],                  "template": tpl_implem_sse["compare"]                                                                      },
+        { "instr_name": "cmpgt",   "datatypes": [float64],                  "template": tpl_implem_sse["compare"],            "if": "defined(__SSE2__)"                                },
+        { "instr_name": "cmpgt",   "datatypes": [int64],                    "template": tpl_implem_sse["compare"],            "if": "defined(__SSE4_2__)"                              },
+        { "instr_name": "cmpgt",   "datatypes": [int32,int16,int8],         "template": tpl_implem_sse["compare"],            "if": "defined(__SSE2__)"                                } ], # cmpgt
     "cmple": [
-        { "instr_name": "cmple",   "datatypes": [float32],               "template": tpl_implem_sse["compare"]                                                                      },
-        { "instr_name": "cmple",   "datatypes": [float64],               "template": tpl_implem_sse["compare"],            "if": "defined(__SSE2__)"                                } ], # cmple
-#       { "instr_name": "cmple",   "datatypes": all_int,                 "template": tpl_implem_sse["cmple_int"]                                                                    },
+        { "instr_name": "cmple",   "datatypes": [float32],                  "template": tpl_implem_sse["compare"]                                                                      },
+        { "instr_name": "cmple",   "datatypes": [float64],                  "template": tpl_implem_sse["compare"],            "if": "defined(__SSE2__)"                                } ], # cmple
+#       { "instr_name": "cmple",   "datatypes": all_int,                    "template": tpl_implem_sse["cmple_int"]                                                                    },
     "cmpge": [
-        { "instr_name": "cmpge",   "datatypes": [float32],               "template": tpl_implem_sse["compare"]                                                                      },
-        { "instr_name": "cmpge",   "datatypes": [float64],               "template": tpl_implem_sse["compare"],            "if": "defined(__SSE2__)"                                } ], # cmpge
-#       { "instr_name": "cmpge",   "datatypes": all_int,                 "template": tpl_implem_sse["cmpge_int"]                                                                    },
+        { "instr_name": "cmpge",   "datatypes": [float32],                  "template": tpl_implem_sse["compare"]                                                                      },
+        { "instr_name": "cmpge",   "datatypes": [float64],                  "template": tpl_implem_sse["compare"],            "if": "defined(__SSE2__)"                                } ], # cmpge
+#       { "instr_name": "cmpge",   "datatypes": all_int,                    "template": tpl_implem_sse["cmpge_int"]                                                                    },
 }

@@ -75,7 +75,7 @@ typedef float float32_t;
         else:
             print("#elif " + isa["gen_define"], file=file_common)
         print(f"// uh-oh technically UB", file=file_common)
-        print(f"constexpr ISA DEFAULT_ISA = ISA::{isa["name"].upper()};", file=file_common)
+        print(f"constexpr ISA DEFAULT_ISA = ISA::{isa['name'].upper()};", file=file_common)
     print("#else\n#error \"No ISA defined for cpp wrapper\"\n#endif", file=file_common)
 
     print("template<typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> struct rvd_type{};", file=file_common)
@@ -380,7 +380,7 @@ def _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, mk_letter
     if isa is not None:
         sig = sig.replace(
             f"{cpp_func_name}_{mask_kind}(",
-            f"{cpp_func_name}<{mk_letter}, {Tret}, {lmul}, {isa["name"].upper()}>("
+            f"{cpp_func_name}<{mk_letter}, {Tret}, {lmul}, {isa['name'].upper()}>("
         )
     else :
         sig = sig.replace(
