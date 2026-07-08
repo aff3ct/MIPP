@@ -4,6 +4,12 @@
 
 **TODO**
 
+## Code Generation
+
+First thing to do is to go in the `generator` folder and to follow the 
+`README.md` instructions there to generate the includes, the documentation and
+the tests.
+
 ## Documentation
 
 ### MkDocs Intallation

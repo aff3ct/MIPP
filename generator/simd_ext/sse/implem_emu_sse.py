@@ -137,48 +137,49 @@ tpl_implem_emu_sse = {
 
 implems_emu_sse = {
     "toreg"  : [
-        { "datatypes": all_datatypes,            "template": tpl_implem_emu_sse["toreg"]                                   } ], # toreg
+        { "datatypes": all_datatypes,            "template": tpl_implem_emu_sse["toreg"]                                    } ], # toreg
     "tomsk": [
-        { "datatypes": all_datatypes,            "template": tpl_implem_emu_sse["tomsk"]                                   } ], # tomsk
+        { "datatypes": all_datatypes,            "template": tpl_implem_emu_sse["tomsk"]                                    } ], # tomsk
     "get": [
-        { "datatypes": all_datatypes,            "template": tpl_implem_emu_sse["get"]                                     } ], # get
+        { "datatypes": all_datatypes,            "template": tpl_implem_emu_sse["get"]                                      } ], # get
     "get_k": [
-        { "datatypes": all_datatypes,            "template": tpl_implem_emu_sse["get_k"]                                   } ], # get_k
+        { "datatypes": all_datatypes,            "template": tpl_implem_emu_sse["get_k"]                                    } ], # get_k
     "set1_k":[
-        { "datatypes": all_8bit,                 "template": tpl_implem_emu_sse["set1_k-8"]                                },
-        { "datatypes": all_16bit,                "template": tpl_implem_emu_sse["set1_k-16"]                               },
-        { "datatypes": all_32bit,                "template": tpl_implem_emu_sse["set1_k-32"]                               },
-        { "datatypes": all_64bit,                "template": tpl_implem_emu_sse["set1_k-64"]                               } ], # set1_k
+        { "datatypes": all_8bit,                 "template": tpl_implem_emu_sse["set1_k-8"]                                 },
+        { "datatypes": all_16bit,                "template": tpl_implem_emu_sse["set1_k-16"]                                },
+        { "datatypes": all_32bit,                "template": tpl_implem_emu_sse["set1_k-32"]                                },
+        { "datatypes": all_64bit,                "template": tpl_implem_emu_sse["set1_k-64"]                                } ], # set1_k
     "set_k" : [
-        { "datatypes": all_8bit,                 "template": tpl_implem_emu_sse["set_k-8"],     "if": "defined(__SSE2__)"  },
-        { "datatypes": all_16bit,                "template": tpl_implem_emu_sse["set_k-16"],    "if": "defined(__SSE2__)"  },
-        { "datatypes": [int32, uint32],          "template": tpl_implem_emu_sse["set_k-32"],    "if": "defined(__SSE2__)"  },
-        { "datatypes": [int64, uint64],          "template": tpl_implem_emu_sse["set_k-64"],    "if": "defined(__SSE2__)"  },
-        { "datatypes": [float64],                "template": tpl_implem_emu_sse["set_k-xxf"],   "if": "defined(__SSE2__)"  },
-        { "datatypes": [float32],                "template": tpl_implem_emu_sse["set_k-xxf"],   "if": "defined(__SSE2__)"  } ], # set_k
+        { "datatypes": all_8bit,                 "template": tpl_implem_emu_sse["set_k-8"],     "if": "defined(__SSE2__)"   },
+        { "datatypes": all_16bit,                "template": tpl_implem_emu_sse["set_k-16"],    "if": "defined(__SSE2__)"   },
+        { "datatypes": [int32, uint32],          "template": tpl_implem_emu_sse["set_k-32"],    "if": "defined(__SSE2__)"   },
+        { "datatypes": [int64, uint64],          "template": tpl_implem_emu_sse["set_k-64"],    "if": "defined(__SSE2__)"   },
+        { "datatypes": [float64],                "template": tpl_implem_emu_sse["set_k-xxf"],   "if": "defined(__SSE2__)"   },
+        { "datatypes": [float32],                "template": tpl_implem_emu_sse["set_k-xxf"],   "if": "defined(__SSE2__)"   } ], # set_k
     "andb_k": [
-        { "datatypes": all_datatypes,            "template": tpl_implem_emu_sse["andb_k_emu"],  "if": "defined(__SSE2__)"  } ], # andb_k
+        { "datatypes": all_datatypes,            "template": tpl_implem_emu_sse["andb_k_emu"],  "if": "defined(__SSE2__)"   } ], # andb_k
         
     "fmadd" : [
         { "datatypes": all_float,                "template": tpl_implem_emu_sse["fmadd"]                                    } ], # fmadd
     "notb": [
-        { "datatypes": all_64bit,                "template": tpl_implem_emu_sse["notb-64"],     "if": "defined(__SSE2__)"  },
-        { "datatypes": all_32bit,                "template": tpl_implem_emu_sse["notb-32"],     "if": "defined(__SSE2__)"  },
-        { "datatypes": all_16bit,                "template": tpl_implem_emu_sse["notb-16"],     "if": "defined(__SSE2__)"  },
-        { "datatypes": all_8bit,                 "template": tpl_implem_emu_sse["notb-8"],      "if": "defined(__SSE2__)"  } ], # notb
+        { "datatypes": all_64bit,                "template": tpl_implem_emu_sse["notb-64"],     "if": "defined(__SSE2__)"   },
+        { "datatypes": all_32bit,                "template": tpl_implem_emu_sse["notb-32"],     "if": "defined(__SSE2__)"   },
+        { "datatypes": all_16bit,                "template": tpl_implem_emu_sse["notb-16"],     "if": "defined(__SSE2__)"   },
+        { "datatypes": all_8bit,                 "template": tpl_implem_emu_sse["notb-8"],      "if": "defined(__SSE2__)"   } ], # notb
     "notb_k": [
-        { "datatypes": all_64bit,                "template": tpl_implem_emu_sse["notb_k-64"],   "if": "defined(__SSE2__)"  },
-        { "datatypes": all_32bit,                "template": tpl_implem_emu_sse["notb_k-32"],   "if": "defined(__SSE2__)"  },
-        { "datatypes": all_16bit,                "template": tpl_implem_emu_sse["notb_k-16"],   "if": "defined(__SSE2__)"  },
-        { "datatypes": all_8bit,                 "template": tpl_implem_emu_sse["notb_k-8"],    "if": "defined(__SSE2__)"  } ], # notb_k
+        { "datatypes": all_64bit,                "template": tpl_implem_emu_sse["notb_k-64"],   "if": "defined(__SSE2__)"   },
+        { "datatypes": all_32bit,                "template": tpl_implem_emu_sse["notb_k-32"],   "if": "defined(__SSE2__)"   },
+        { "datatypes": all_16bit,                "template": tpl_implem_emu_sse["notb_k-16"],   "if": "defined(__SSE2__)"   },
+        { "datatypes": all_8bit,                 "template": tpl_implem_emu_sse["notb_k-8"],    "if": "defined(__SSE2__)"   } ], # notb_k
     "orb_k": [
-        { "datatypes": all_datatypes,            "template": tpl_implem_emu_sse["orb_k_emu"],   "if": "defined(__SSE2__)"  } ], # orb_k
+        { "datatypes": all_datatypes,            "template": tpl_implem_emu_sse["orb_k_emu"],   "if": "defined(__SSE2__)"   } ], # orb_k
     "xorb_k": [
-        { "datatypes": all_datatypes,            "template": tpl_implem_emu_sse["xorb_k_emu"],  "if": "defined(__SSE2__)"  } ], # xorb_k
+        { "datatypes": all_datatypes,            "template": tpl_implem_emu_sse["xorb_k_emu"],  "if": "defined(__SSE2__)"   } ], # xorb_k
     "andnb_k": [
-        { "datatypes": all_datatypes,            "template": tpl_implem_emu_sse["andnb_k_emu"], "if": "defined(__SSE2__)"  } ], # andnb_k
+        { "datatypes": all_datatypes,            "template": tpl_implem_emu_sse["andnb_k_emu"], "if": "defined(__SSE2__)"   } ], # andnb_k
     "cmpeq": [
-        { "datatypes": all_uint,                 "template": tpl_implem_emu_sse["cmpeq_u"],     "if": "defined(__SSE2__)"  } ], # cmpeq
+        { "datatypes": [uint8, uint16, uint32],  "template": tpl_implem_emu_sse["cmpeq_u"],     "if": "defined(__SSE2__)"   },
+        { "datatypes": [uint64],                 "template": tpl_implem_emu_sse["cmpeq_u"],     "if": "defined(__SSE4_1__)" } ], # cmpeq
     "cmpneq": [
-        { "datatypes": [float64] + all_int_uint, "template": tpl_implem_emu_sse["cmpneq"],      "if": "defined(__SSE2__)"  } ], # cmpneq
+        { "datatypes": [float64] + all_int_uint, "template": tpl_implem_emu_sse["cmpneq"],      "if": "defined(__SSE2__)"   } ], # cmpneq
 }
