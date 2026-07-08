@@ -222,7 +222,10 @@ implems_emu_sse = {
         { "datatypes": [uint8, uint16, uint32],  "template": tpl_implem_emu_sse["cmpeq_u"],     "if": "defined(__SSE2__)"   },
         { "datatypes": [uint64],                 "template": tpl_implem_emu_sse["cmpeq_u"],     "if": "defined(__SSE4_1__)" } ], # cmpeq
     "cmpneq": [
-        { "datatypes": [float64] + all_int_uint, "template": tpl_implem_emu_sse["cmpneq"],      "if": "defined(__SSE2__)"   } ], # cmpneq
+        { "datatypes": [float64],                "template": tpl_implem_emu_sse["cmpneq"],      "if": "defined(__SSE2__)"   },
+        { "datatypes": [int8, int16, int32],     "template": tpl_implem_emu_sse["cmpneq"],      "if": "defined(__SSE2__)"   },
+        { "datatypes": [uint8, uint16, uint32],  "template": tpl_implem_emu_sse["cmpneq"],      "if": "defined(__SSE2__)"   },
+        { "datatypes": [int64, uint64],          "template": tpl_implem_emu_sse["cmpneq"],      "if": "defined(__SSE4_1__)" } ], # cmpneq
     "cmpgt": [
         { "datatypes": [uint64],                 "template": tpl_implem_emu_sse["cmpgt_u-64"],  "if": "defined(__SSE4_2__)" },
         { "datatypes": [uint32],                 "template": tpl_implem_emu_sse["cmpgt_u-32"],  "if": "defined(__SSE2__)"   },
