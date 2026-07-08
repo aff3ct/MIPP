@@ -424,7 +424,47 @@ tpl_implem_emu_avx = {
     %r<tp>% res = %exp<tp>%(ylogx);
     return res;
 """},
-
+    "cmpgt_u-64": { "format": "long", "code":
+"""// long format
+	%r<tp>% bias = %set1<tp>%((int64_t)0x8000000000000000);
+	%r<tp>% r0_biased = %xorb<tp>%(r0, bias);
+	%r<tp>% r1_biased = %xorb<tp>%(r1, bias);
+	%r<c:int|b:tp>% r0s = %cast<tp,c:int|b:tp>%(r0_biased);
+	%r<c:int|b:tp>% r1s = %cast<tp,c:int|b:tp>%(r1_biased);
+	return %cast_k<c:int|b:tp,tp>%(%cmpgt<c:int|b:tp>%(r0s, r1s));""" },
+    "cmpgt_u-32": { "format": "long", "code":
+"""// long format
+	%r<tp>% bias = %set1<tp>%((int32_t)0x80000000);
+	%r<tp>% r0_biased = %xorb<tp>%(r0, bias);
+	%r<tp>% r1_biased = %xorb<tp>%(r1, bias);
+	%r<c:int|b:tp>% r0s = %cast<tp,c:int|b:tp>%(r0_biased);
+	%r<c:int|b:tp>% r1s = %cast<tp,c:int|b:tp>%(r1_biased);
+	return %cast_k<c:int|b:tp,tp>%(%cmpgt<c:int|b:tp>%(r0s, r1s));""" },
+    "cmpgt_u-16": { "format": "long", "code":
+"""// long format
+	%r<tp>% bias = %set1<tp>%((int16_t)0x8000);
+	%r<tp>% r0_biased = %xorb<tp>%(r0, bias);
+	%r<tp>% r1_biased = %xorb<tp>%(r1, bias);
+	%r<c:int|b:tp>% r0s = %cast<tp,c:int|b:tp>%(r0_biased);
+	%r<c:int|b:tp>% r1s = %cast<tp,c:int|b:tp>%(r1_biased);
+	return %cast_k<c:int|b:tp,tp>%(%cmpgt<c:int|b:tp>%(r0s, r1s));""" },
+    "cmpgt_u-8": { "format": "long", "code":
+"""// long format
+	%r<tp>% bias = %set1<tp>%((int8_t)0x80);
+	%r<tp>% r0_biased = %xorb<tp>%(r0, bias);
+	%r<tp>% r1_biased = %xorb<tp>%(r1, bias);
+	%r<c:int|b:tp>% r0s = %cast<tp,c:int|b:tp>%(r0_biased);
+	%r<c:int|b:tp>% r1s = %cast<tp,c:int|b:tp>%(r1_biased);
+	return %cast_k<c:int|b:tp,tp>%(%cmpgt<c:int|b:tp>%(r0s, r1s));""" },
+    "cmplt_u_emu": { "format": "long", "code":
+"""// long format
+	return %cmpgt<tp>%(r1, r0);""" },
+    "cmple_u_emu": { "format": "long", "code":
+"""// long format
+	return %notb_k<tp>%(%cmpgt<tp>%(r0, r1));""" },
+    "cmpge_u_emu": { "format": "long", "code":
+"""// long format
+	return %notb_k<tp>%(%cmpgt<tp>%(r1, r0));""" },
 }
 
 """ "implems_emu" dictionary:
@@ -511,6 +551,17 @@ implems_emu_avx = {
 		{ "datatypes": [float32],                      "template": tpl_implem_emu_avx["log_f32"], "if": "defined(__AVX2__)" },],
 
     "pow": [
-        { "datatypes": [float32],                      "template": tpl_implem_emu_avx["pow_f32"],  "if": "defined(__AVX2__)"},]
+        { "datatypes": [float32],                      "template": tpl_implem_emu_avx["pow_f32"],  "if": "defined(__AVX2__)"},],
+    "cmpgt": [
+        { "datatypes": [uint64],                       "template": tpl_implem_emu_avx["cmpgt_u-64"],   "if": "defined(__AVX2__)" },
+        { "datatypes": [uint32],                       "template": tpl_implem_emu_avx["cmpgt_u-32"],   "if": "defined(__AVX2__)" },
+        { "datatypes": [uint16],                       "template": tpl_implem_emu_avx["cmpgt_u-16"],   "if": "defined(__AVX2__)" },
+        { "datatypes": [uint8],                        "template": tpl_implem_emu_avx["cmpgt_u-8"],    "if": "defined(__AVX2__)" } ], # cmpgt
+    "cmplt": [
+        { "datatypes": all_uint,                       "template": tpl_implem_emu_avx["cmplt_u_emu"],  "if": "defined(__AVX2__)" } ], # cmplt
+    "cmple": [
+        { "datatypes": all_uint,                       "template": tpl_implem_emu_avx["cmple_u_emu"],  "if": "defined(__AVX2__)" } ], # cmple
+    "cmpge": [
+        { "datatypes": all_uint,                       "template": tpl_implem_emu_avx["cmpge_u_emu"],  "if": "defined(__AVX2__)" } ], # cmpge
 }
 

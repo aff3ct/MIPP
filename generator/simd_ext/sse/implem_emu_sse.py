@@ -199,7 +199,6 @@ implems_emu_sse = {
         { "datatypes": [float32],                "template": tpl_implem_emu_sse["set_k-xxf"],   "if": "defined(__SSE2__)"   } ], # set_k
     "andb_k": [
         { "datatypes": all_datatypes,            "template": tpl_implem_emu_sse["andb_k_emu"],  "if": "defined(__SSE2__)"   } ], # andb_k
-        
     "fmadd" : [
         { "datatypes": all_float,                "template": tpl_implem_emu_sse["fmadd"]                                    } ], # fmadd
     "notb": [
