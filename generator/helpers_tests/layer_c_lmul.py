@@ -548,7 +548,7 @@ shape_templates = {
 
 }
 
-deny = set()
+deny = { "cvt", "wcvt" }
 LAYER_OVERRIDES = {
 
         # Define CUSTOM overflow workarounds

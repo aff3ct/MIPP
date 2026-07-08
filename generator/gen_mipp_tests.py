@@ -895,6 +895,7 @@ def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="
         layer_dict = get_gen_test_dict_mask(kind)
     #from func, get "cast" or "cast_k" to get the right template and proto
     if kind == "c":
+        size = "MIPP_N_" + scalar1_type.upper()
         is_cast_k = func.startswith("cast_k")
         is_cvt = func.startswith("cvt")
         is_wcvt = func.startswith("wcvt")
@@ -925,6 +926,7 @@ def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="
             operation=func_dict["operation"],
             loop_body=func_dict["loop_body"],
             loop_assert=func_dict["loop_assert"],
+            size=size,
         )
         func_template = Template(res, undefined=StrictUndefined)
         func_old = "cast" if is_cast_k else "cvt" if is_cvt else "wcvt" if is_wcvt else "cast"
