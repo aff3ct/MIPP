@@ -46,29 +46,6 @@ tpl_generic_emu = {
 		ptr1[i] = %get_k<tp>%(m0, i) ? ptr1[i] : ptr2[i];
 	}
 	return %load<tp>%(ptr1);""" },
-    "exp_emu": { "format": "long", "code":
-"""// long format
-	{{isa_dt_par.to_ptr}} t[%N<tp>%];
-	%storeu<tp>%(t, r0);
-	for (unsigned i = 0; i < %N<tp>%; i++)
-		t[i] = std::exp(t[i]);
-	return %loadu<tp>%(t);""" },
-    "log_emu": { "format": "long", "code":
-"""// long format
-	{{isa_dt_par.to_ptr}} t[%N<tp>%];
-	%storeu<tp>%(t, r0);
-	for (unsigned i = 0; i < %N<tp>%; i++)
-		t[i] = std::log(t[i]);
-	return %loadu<tp>%(t);""" },
-    "pow_emu": { "format": "long", "code":
-"""// long format
-	{{isa_dt_par.to_ptr}} t1[%N<tp>%];
-	{{isa_dt_par.to_ptr}} t2[%N<tp>%];
-	%storeu<tp>%(t1, r0);
-	%storeu<tp>%(t2, r1);
-	for (unsigned i = 0; i < %N<tp>%; i++)
-		t1[i] = std::pow(t1[i], t2[i]);
-	return %loadu<tp>%(t1);""" },
 }
 
 implems_generic_emu = {
@@ -84,12 +61,6 @@ implems_generic_emu = {
 #       { "instr_name": "fmadd",  "datatypes": all_float+[int32], "template": tpl_generic_emu["fmadd"]      } ], # fmadd
     "blend": [
         { "instr_name": "blend",  "datatypes": all_datatypes,     "template": tpl_generic_emu["blend"]      } ], # blend
-    "exp": [
-        { "instr_name": "exp",    "datatypes": all_float,         "template": tpl_generic_emu["exp_emu"]    } ], # exp
-    "log": [
-        { "instr_name": "log",    "datatypes": all_float,         "template": tpl_generic_emu["log_emu"]    } ], # log
-    "pow": [
-        { "instr_name": "pow",    "datatypes": all_float,         "template": tpl_generic_emu["pow_emu"]    } ], # pow
 }
 
 #for functions with conditition, we want a way to generate the global not of the condition to be used 
