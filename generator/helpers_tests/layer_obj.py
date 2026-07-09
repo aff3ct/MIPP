@@ -98,6 +98,7 @@ deny = {
     "max", "min", 
     "orb", "xorb", "andb",
     "andnb", #andnb broken in object layer.
+    "pow",
 }
 
 LAYER_OVERRIDES = {

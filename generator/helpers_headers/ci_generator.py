@@ -90,6 +90,7 @@ def _custom_prefix_generator(func, isa_list, is_common=False, mode="function_hea
 #include <float.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 //typedef double float64_t;
 //typedef float float32_t;

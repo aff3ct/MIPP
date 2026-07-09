@@ -3,6 +3,7 @@ import json
 import re
 
 from tools import *
+from tools import _get_dt_par_size
 
 from include_gen import *
 from generic_emu import *
@@ -1016,96 +1017,364 @@ def _gen_c_function_one_ldiv_avx(isa_base, isa_div, file, funcs, f, ff, dt, mask
 # ----------------------------------------------------------------------------------------------------------------------
 # Generators
 # ----------------------------------------------------------------------------------------------------------------------
-def gen_c_functions(isa, file, funcs, implems):
-    """
-    Looking leaner now.
-    """
-    #hack while moving from single file to include manager.  
-    if isa["name"].startswith("sve"):
-        for f in implems:
-            if f in funcs:
-                for ff in implems[f]:
-                    
-                    for dt in ff["datatypes"]:
-                        _emit_separator(f, file)
-                        if _is_masked_implem(f, ff):
-                            _gen_c_function_one_masked(isa, file, funcs, f, ff, dt)
-                        else :
-                            _gen_c_functions_one_unmasked(isa, file, funcs, f, ff, dt)
-            else:
-                print("Panic: '" + f + "' function does not exist.")
-                exit(-1)
+def _get_candidate_reqs(cand, isa, funcs):
+    if "reqs" in cand:
+        return cand["reqs"]
+    f = cand["f"]
+    ff = cand["ff"]
+    dt = cand["dt"]
+    dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
+    pre_rendering = _render_template(isa, ff, dt_par, dt_ret, func_name=f)
+    try:
+        reqs = get_requirements(pre_rendering, isa, funcs, f, dt_par, dt_ret)
+    except Exception:
+        reqs = {}
+    cand["reqs"] = reqs
+    return reqs
+
+def _append_resolved_status(funcs, f, dt_key, mask_kind, cond, reqs):
+    cur_implem_status = {"if": cond, "requirements": reqs}
+    if mask_kind is None:
+        if "implem_status" not in funcs[f]:
+            funcs[f]["implem_status"] = {}
+        if dt_key not in funcs[f]["implem_status"]:
+            funcs[f]["implem_status"][dt_key] = []
+        funcs[f]["implem_status"][dt_key].append(cur_implem_status)
     else:
-        #in that case file is actually an include manager, so we need to get the right file for each function
-        for f in implems:
-            if f in funcs:
-                file_w = file.get_fd(isa["name"], f)
-                for ff in implems[f]:
-                    for dt in ff["datatypes"]:
-                        _emit_separator(f, file_w)
-                        if _is_masked_implem(f, ff):
-                            _gen_c_function_one_masked(isa, file_w, funcs, f, ff, dt)
-                        else :
-                            _gen_c_functions_one_unmasked(isa, file_w, funcs, f, ff, dt)
-            else:
-                print("Panic: '" + f + "' function does not exist.")
-                exit(-1)
+        bucket = get_masked_bucket(funcs, f, dt_key, mask_kind, create_missing_bucket=True)
+        bucket.append(cur_implem_status)
+
+def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond):
+    dt_par, dt_ret = _missing_compute_dt_par_dt_ret(dt)
+    dt_key = dt_par + "," + dt_ret
+    func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
+    
+    if cond:
+        print(f"#if {cond}", file=file)
+        
+    proto_str = build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, masked_version=mask_kind)
+    print("static " + proto_str + " {", file=file)
+    
+    proto = funcs[f]["proto"]
+    cnt_reg = 0
+    cnt_msk = 0
+    cnt_val = 0
+    cnt_ptr = 0
+    
+    call_args = []
+    
+    if mask_kind:
+        msk_dt = datatypes[dt_par]
+        if "gather" in func_name or "scatter" in func_name:
+            msk_dt = datatypes["uint" + str(_get_dt_par_size(dt_par))]
+            
+        m0_vector_type = build_msk(msk_dt, isa, 0, True, False)
+        m0_scalar_type = build_msk(msk_dt, isa_scalar, 0, True, False)
+        print(f"\t{m0_scalar_type} s_m0;", file=file)
+        print(f"\tmemcpy(&s_m0, &m0, sizeof(s_m0));", file=file)
+        call_args.append("s_m0")
+        cnt_msk += 1
+        
+        if mask_kind == "masks":
+            rsrc_vector_type = build_reg(datatypes[dt_par], isa, 0, True, False)
+            rsrc_scalar_type = build_reg(datatypes[dt_par], isa_scalar, 0, True, False)
+            print(f"\t{rsrc_scalar_type} s_rsrc;", file=file)
+            print(f"\tmemcpy(&s_rsrc, &rsrc, sizeof(s_rsrc));", file=file)
+            call_args.append("s_rsrc")
+            
+    for arg in proto["args"]:
+        realdatatype = datatypes[dt_par]
+        if arg["fixeddatatype"]:
+            if arg["fixeddatatype"] not in datatypes and arg["fixeddatatype"] in all_categories:
+                dt_str = arg["fixeddatatype"] + str(_get_dt_par_size(dt_par))
+                realdatatype = datatypes[dt_str]
+            elif arg["fixeddatatype"] in datatypes:
+                realdatatype = datatypes[arg["fixeddatatype"]]
+                
+        arg_type_name = arg["type"]
+        if arg_type_name == "reg":
+            arg_name = f"r{cnt_reg}"
+            cnt_reg += 1
+            vector_type = build_type("reg", realdatatype, isa, 0, True, False)
+            scalar_type = build_type("reg", realdatatype, isa_scalar, 0, True, False)
+            print(f"\t{scalar_type} s_{arg_name};", file=file)
+            print(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof(s_{arg_name}));", file=file)
+            call_args.append(f"s_{arg_name}")
+        elif arg_type_name == "msk":
+            arg_name = f"m{cnt_msk}"
+            cnt_msk += 1
+            vector_type = build_type("msk", realdatatype, isa, 0, True, False)
+            scalar_type = build_type("msk", realdatatype, isa_scalar, 0, True, False)
+            print(f"\t{scalar_type} s_{arg_name};", file=file)
+            print(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof(s_{arg_name}));", file=file)
+            call_args.append(f"s_{arg_name}")
+        elif arg_type_name == "vindex":
+            arg_name = "vi"
+            same_size_integer_datatype = find_one_data_types_from({"n_bits": realdatatype["n_bits"], "category": cint})
+            vector_type = build_reg(same_size_integer_datatype, isa, 0, True, False)
+            scalar_type = build_reg(same_size_integer_datatype, isa_scalar, 0, True, False)
+            print(f"\t{scalar_type} s_vi;", file=file)
+            print(f"\tmemcpy(&s_vi, &vi, sizeof(s_vi));", file=file)
+            call_args.append("s_vi")
+        elif arg_type_name == "val":
+            arg_name = f"v{cnt_val}"
+            cnt_val += 1
+            call_args.append(arg_name)
+        elif arg_type_name == "ptr":
+            arg_name = f"p{cnt_ptr}"
+            cnt_ptr += 1
+            call_args.append(arg_name)
+        elif arg_type_name == "Nele":
+            call_args.append("vals")
+            
+    scalar_func_name = _build_func_name(isa_scalar, dt, dt_par, dt_ret, f, masked_version=mask_kind)
+    call_args_str = ", ".join(call_args)
+    
+    ret_type_name = proto["ret"]["type"]
+    if ret_type_name == "reg" or ret_type_name == "msk":
+        realdatatype_ret = datatypes[dt_ret]
+        if proto["ret"]["fixeddatatype"]:
+            realdatatype_ret = datatypes[proto["ret"]["fixeddatatype"]]
+        scalar_ret_type = build_type(ret_type_name, realdatatype_ret, isa_scalar, 0, True, False)
+        vector_ret_type = build_type(ret_type_name, realdatatype_ret, isa, 0, True, False)
+        
+        print(f"\t{scalar_ret_type} sres = {scalar_func_name}({call_args_str});", file=file)
+        print(f"\t{vector_ret_type} res;", file=file)
+        print(f"\tmemcpy(&res, &sres, sizeof(res));", file=file)
+        print(f"\treturn res;", file=file)
+    elif ret_type_name == "val":
+        print(f"\treturn {scalar_func_name}({call_args_str});", file=file)
+    else:
+        print(f"\t{scalar_func_name}({call_args_str});", file=file)
+        
+    print("}", file=file)
+    if cond:
+        print("#endif", file=file)
+
+def gen_c_functions(isa, file, funcs, implems):
+    if "candidates" not in isa:
+        isa["candidates"] = []
+    for f in implems:
+        if f in funcs:
+            for ff in implems[f]:
+                for dt in ff["datatypes"]:
+                    isa["candidates"].append({
+                        "type": "native_or_emu",
+                        "f": f,
+                        "ff": ff,
+                        "dt": dt,
+                        "level": 1 if ("type" in ff and ff["type"] == "emulated") else 0
+                    })
+        else:
+            print("Panic: '" + f + "' function does not exist.")
+            exit(-1)
 
 def gen_c_generic_functions(isa, file, funcs, implems):
-    #hack while moving from single file to include manager.  
-    if isa["name"].startswith("sve"):
-        for f in implems:
-            if f in funcs:
-                for ff in implems[f]:
-                    for dt in ff["datatypes"]:
-                        _emit_separator(f, file)
-                        _gen_c_generic_one(isa, file, funcs, f, ff, dt)
-            else:
-                print("Panic: '" + f + "' function does not exist.")
-                exit(-1)
-    else:
-        #in that case file is actually an include manager, so we need to get the right file for each function
-        for f in implems:
-            if f in funcs:
-                file_w = file.get_fd(isa["name"], f)
-                for ff in implems[f]:
-                    for dt in ff["datatypes"]:
-                        _emit_separator(f, file_w)
-                        _gen_c_generic_one(isa, file_w, funcs, f, ff, dt)
-            else:
-                print("Panic: '" + f + "' function does not exist.")
-                exit(-1)
+    if "candidates" not in isa:
+        isa["candidates"] = []
+    for f in implems:
+        if f in funcs:
+            for ff in implems[f]:
+                for dt in ff["datatypes"]:
+                    isa["candidates"].append({
+                        "type": "generic_emu",
+                        "f": f,
+                        "ff": ff,
+                        "dt": dt,
+                        "level": 2
+                    })
+        else:
+            print("Panic: '" + f + "' function does not exist.")
+            exit(-1)
 
 def gen_c_missing_functions(isa, file, funcs):
-    #hack while moving from single file to include manager.
-    if isa["name"].startswith("sve"):
-        for f in funcs:
-            for dt in funcs[f]["datatypes"]:
-                _emit_separator(f, file)
-                _gen_c_missing_one_dt(isa, file, funcs, f, dt)
-                if "mask_support" in funcs[f]:
-                    support = funcs[f]["mask_support"]
-                    if support.is_maskable(): 
-                        _gen_c_missing_one_masked(isa, file, funcs, f, dt, "mask")
-                    if support.is_maskzable():
-                        _gen_c_missing_one_masked(isa, file, funcs, f, dt, "maskz")
-                    if support.is_masksable():
-                        _gen_c_missing_one_masked(isa, file, funcs, f, dt, "masks")
-    else:
-        #in that case file is actually an include manager, so we need to get the right file for each function
-        for f in funcs:
-            file_w = file.get_fd(isa["name"], f)
-            for dt in funcs[f]["datatypes"]:
-                _emit_separator(f, file_w)
-                _gen_c_missing_one_dt(isa, file_w, funcs, f, dt)
-                if "mask_support" in funcs[f]:
-                    support = funcs[f]["mask_support"]
-                    if support.is_maskable(): 
-                        _gen_c_missing_one_masked(isa, file_w, funcs, f, dt, "mask")
-                    if support.is_maskzable():
-                        _gen_c_missing_one_masked(isa, file_w, funcs, f, dt, "maskz")
-                    if support.is_masksable():
-                        _gen_c_missing_one_masked(isa, file_w, funcs, f, dt, "masks")
+    is_inc_mgr = hasattr(file, "get_fd")
+    
+    candidates_map = {}
+    collected_candidates = isa.get("candidates", [])
+    
+    for f in funcs:
+        for dt in funcs[f]["datatypes"]:
+            dt_par, dt_ret = _missing_compute_dt_par_dt_ret(dt)
+            dt_key = dt_par + "," + dt_ret
+            
+            mask_kinds = [None]
+            if "mask_support" in funcs[f]:
+                support = funcs[f]["mask_support"]
+                if support.is_maskable():
+                    mask_kinds.append("mask")
+                if support.is_maskzable():
+                    mask_kinds.append("maskz")
+                if support.is_masksable():
+                    mask_kinds.append("masks")
+                    
+            for mask_kind in mask_kinds:
+                key = (f, dt_key, mask_kind)
+                candidates_map[key] = []
+                
+                for c in collected_candidates:
+                    c_f = c["f"]
+                    c_dt = c["dt"]
+                    c_dt_par, c_dt_ret = _compute_dt_par_dt_ret(funcs, c_f, c_dt)
+                    c_dt_key = c_dt_par + "," + c_dt_ret
+                    c_mask_kind = c["ff"].get("version", None)
+                    if c_f == f and c_dt_key == dt_key and c_mask_kind == mask_kind:
+                        candidates_map[key].append(c)
+                
+                if isa["name"] != "scalar":
+                    candidates_map[key].append({
+                        "type": "auto_scalar",
+                        "f": f,
+                        "dt_key": dt_key,
+                        "dt_par": dt_par,
+                        "dt_ret": dt_ret,
+                        "mask_kind": mask_kind,
+                        "level": 3,
+                        "reqs": {}
+                    })
+                    
+                candidates_map[key].append({
+                    "type": "stub",
+                    "f": f,
+                    "dt_key": dt_key,
+                    "dt_par": dt_par,
+                    "dt_ret": dt_ret,
+                    "mask_kind": mask_kind,
+                    "level": 4,
+                    "reqs": {}
+                })
+                
+                candidates_map[key].sort(key=lambda c: c["level"])
+                
+    def is_req_satisfied(req_f, req_dt_key, target_cond, working_impls):
+        if target_cond is None:
+            return True
+        req_key = (req_f, req_dt_key, None)
+        if req_key not in working_impls:
+            return False
+        if "" in working_impls[req_key]:
+            return True
+        if target_cond in working_impls[req_key]:
+            return True
+        return False
+        
+    def intersect_conds(c1, c2):
+        if c1 is None or c2 is None:
+            return None
+        if c1 == "":
+            return c2
+        if c2 == "":
+            return c1
+        if c1 == c2:
+            return c1
+        return f"({c1}) && ({c2})"
+
+    def negate_cond(c):
+        if c == "":
+            return None
+        return f"!( {c} )"
+        
+    resolved = {key: [] for key in candidates_map}
+    remaining_conds = {key: "" for key in candidates_map}
+    working_impls = {key: [] for key in candidates_map}
+    
+    changed = True
+    while changed:
+        changed = False
+        for key in candidates_map:
+            f, dt_key, mask_kind = key
+            rem_cond = remaining_conds[key]
+            if rem_cond is None:
+                continue
+                
+            for cand in candidates_map[key]:
+                if cand.get("resolved", False):
+                    continue
+                    
+                cand_if = ""
+                if cand["type"] in ["native_or_emu", "generic_emu"]:
+                    cand_if = cand["ff"].get("if", "")
+                    
+                target_cond = intersect_conds(cand_if, rem_cond)
+                if target_cond is None:
+                    continue
+                    
+                reqs = _get_candidate_reqs(cand, isa, funcs)
+                deps_satisfied = True
+                for req_f in reqs:
+                    for req_dt_key in reqs[req_f]:
+                        if not is_req_satisfied(req_f, req_dt_key, target_cond, working_impls):
+                            deps_satisfied = False
+                            break
+                    if not deps_satisfied:
+                        break
+                        
+                if deps_satisfied:
+                    resolved[key].append((cand, target_cond))
+                    cand["resolved"] = True
+                    
+                    if cand["level"] < 4:
+                        working_impls[key].append(target_cond)
+                        if target_cond == "":
+                            working_impls[key] = [""]
+                            
+                    neg_cand_if = negate_cond(cand_if)
+                    new_rem = intersect_conds(rem_cond, neg_cand_if)
+                    remaining_conds[key] = new_rem
+                    
+                    changed = True
+                    break
+                    
+    # 1. Register resolved statuses upfront so parse_placeholders knows what is implemented
+    for key in resolved:
+        f, dt_key, mask_kind = key
+        for cand, cond in resolved[key]:
+            reqs = _get_candidate_reqs(cand, isa, funcs)
+            _append_resolved_status(funcs, f, dt_key, mask_kind, cond, reqs)
+
+    # 2. Write code to files
+    for f in funcs:
+        file_w = file.get_fd(isa["name"], f) if is_inc_mgr else file
+        for dt in funcs[f]["datatypes"]:
+            dt_par, dt_ret = _missing_compute_dt_par_dt_ret(dt)
+            dt_key = dt_par + "," + dt_ret
+            
+            mask_kinds = [None]
+            if "mask_support" in funcs[f]:
+                support = funcs[f]["mask_support"]
+                if support.is_maskable():
+                    mask_kinds.append("mask")
+                if support.is_maskzable():
+                    mask_kinds.append("maskz")
+                if support.is_masksable():
+                    mask_kinds.append("masks")
+                    
+            for mask_kind in mask_kinds:
+                key = (f, dt_key, mask_kind)
+                for cand, cond in resolved[key]:
+                    _emit_separator(f, file_w)
+                    
+                    if cand["type"] in ["native_or_emu", "generic_emu"]:
+                        pre_rendering = _render_template(isa, cand["ff"], dt_par, dt_ret, func_name=f)
+                        ph_ret = parse_placeholders(pre_rendering, isa, funcs, f, dt_par, dt_ret)
+                        post_rendering = ph_ret["converted_ir"]
+                        
+                        if cond != "":
+                            print(f"#if {cond}", file=file_w)
+                        _emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, cand["ff"], post_rendering, file_w, masked_version=mask_kind)
+                        if cond != "":
+                            print("#endif", file=file_w)
+                            
+                    elif cand["type"] == "auto_scalar":
+                        _gen_c_auto_scalar_fallback_one(isa, file_w, funcs, f, dt, mask_kind, cond)
+                        
+                    elif cand["type"] == "stub":
+                        if cond != "":
+                            print(f"#if {cond}", file=file_w)
+                        func_name = _build_func_name(isa, dt, dt_par, dt_ret, f, masked_version=mask_kind)
+                        _missing_emit_stub(file_w, funcs, f, dt_par, dt_ret, isa, func_name, masked_version=mask_kind)
+                        if cond != "":
+                            print("#endif", file=file_w)
 
 def gen_c_missing_functions_lmul(isa, file, funcs, lmul):
     """

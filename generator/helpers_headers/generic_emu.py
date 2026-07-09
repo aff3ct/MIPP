@@ -5,14 +5,6 @@ from c_generator import *
 ################################# GENERIC FUNCTIONS ############################################
 
 tpl_generic_emu = {
-    "div_scalar": { "format": "long", "code":
-"""// long format
-	{{isa_dt_par.to_ptr}} ptr1[%N<tp>%];
-	{{isa_dt_par.to_ptr}} ptr2[%N<tp>%];
-	%storeu<tp>%(ptr1, r0);
-	for(unsigned i = 0; i < %N<tp>%; i++)
-		ptr2[i] = ptr1[i] / 2;
-	return %loadu<tp>%(ptr2);""" },
     "div2": { "format": "long", "code":
 """// long format
 	%r<tp>% tmp = %set1<tp>%(2);
@@ -23,12 +15,6 @@ tpl_generic_emu = {
 	%r<tp>% tmp = %set1<tp>%(4);
 	%r<tp>% res = %div<tp>%(r0, tmp);
 	return res;""" },
-    "set1_scalar": { "format": "long", "code":
-"""// long format
-	%v<tp>% ptr[%N<tp>%];
-	for(unsigned i = 0; i < %N<tp>%; i++)
-		ptr[i] = v0;
-	return %load<tp>%(ptr);""" },
     "fmadd": { "format": "long", "code":
 """// long format
 	%r<tp>% res = %mul<tp>%(r0, r1);
@@ -49,10 +35,6 @@ tpl_generic_emu = {
 }
 
 implems_generic_emu = {
-    "set1": [
-        { "instr_name": "set1",   "datatypes": all_datatypes,     "template": tpl_generic_emu["set1_scalar"]} ], # set1
-    "div": [
-        { "instr_name": "div",    "datatypes": all_float,         "template": tpl_generic_emu["div_scalar"] } ], # div
     "div2": [
         { "instr_name": "div2",   "datatypes": all_float,         "template": tpl_generic_emu["div2"]       } ], # div2
     "div4": [

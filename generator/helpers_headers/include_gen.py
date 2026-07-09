@@ -643,6 +643,10 @@ class IncludeManager:
                     include_path.dependencies.add(f"simd_ext/avx/functions/avx_{func}.h")
                 elif layer_name == "avx" : 
                     include_path.dependencies.add(f"simd_ext/sse/functions/sse_{func}.h")
+                
+                # auto-scalar fallback requires the scalar variant to be included
+                if layer_name != "scalar" and layer_name != "scalar_cpp" and layer_name != "c":
+                    include_path.dependencies.add(f"simd_ext/scalar/functions/scalar_{func}.h")
                 include_path.write_prefix(f"{self.base_dir}/{layer_name}/functions")
 
 
