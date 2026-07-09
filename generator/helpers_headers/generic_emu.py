@@ -59,8 +59,6 @@ implems_generic_emu = {
         { "instr_name": "div4",   "datatypes": all_float,         "template": tpl_generic_emu["div4"]       } ], # div4
 #   "fmadd": [
 #       { "instr_name": "fmadd",  "datatypes": all_float+[int32], "template": tpl_generic_emu["fmadd"]      } ], # fmadd
-    "blend": [
-        { "instr_name": "blend",  "datatypes": all_datatypes,     "template": tpl_generic_emu["blend"]      } ], # blend
 }
 
 #for functions with conditition, we want a way to generate the global not of the condition to be used 

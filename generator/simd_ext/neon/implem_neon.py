@@ -163,11 +163,11 @@ implems_neon = {
         { "instr_name": "",             "datatypes": all_int + all_uint,                 "template": tpl_implem_neon["lshift"]                                            } ], # lshift
     "round": [
         { "instr_name": "",             "datatypes": [float64],                          "template": tpl_implem_neon["round_float"],        "if": "defined(__aarch64__)"  },
-        { "instr_name": "",             "datatypes": [float32],                          "template": tpl_implem_neon["round_float"]                                       },
+        { "instr_name": "",             "datatypes": [float32],                          "template": tpl_implem_neon["round_float"],       "if": "defined(__aarch64__) || (defined(__ARM_ARCH) && __ARM_ARCH >= 8)" },
         { "instr_name": "",             "datatypes": all_int + all_uint,                 "template": tpl_implem_neon["round_int"]                                         } ], # round
     "sqrt": [
         { "instr_name": "",             "datatypes": [float64],                          "template": tpl_implem_neon["sqrt"],               "if": "defined(__aarch64__)"  },
-        { "instr_name": "",             "datatypes": [float32],                          "template": tpl_implem_neon["sqrt"]                                              } ], # sqrt
+        { "instr_name": "",             "datatypes": [float32],                          "template": tpl_implem_neon["sqrt"],              "if": "defined(__aarch64__) || (defined(__ARM_ARCH) && __ARM_ARCH >= 8)" } ], # sqrt
     "rsqrt": [
         { "instr_name": "",             "datatypes": [float64],                          "template": tpl_implem_neon["rsqrt"],              "if": "defined(__aarch64__)"  },
         { "instr_name": "",             "datatypes": [float32],                          "template": tpl_implem_neon["rsqrt"]                                             } ], # rsqrt
