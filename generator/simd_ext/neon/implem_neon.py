@@ -37,6 +37,11 @@ tpl_implem_neon = {
     "compare":          { "format": "short", "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r);" },
     "logi_2args_rev":   { "format": "short", "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r1.r, r0.r);" },
     "blend":            { "format": "short", "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(m0.m, r0.r, r1.r);" },
+    "round_float":      { "format": "short", "code": "{{ isa.prefix }}rndnq_{{ isa_dt_par.data_ext }}(r0.r);" },
+    "round_int":        { "format": "short", "code": "r0.r;" },
+    "lshift":           { "format": "short", "code": "{% if isa_dt_par.to_ptr == 'int64_t' or isa_dt_par.to_ptr == 'uint64_t' -%}{{ isa.prefix }}shlq_{{ isa_dt_par.data_ext }}(r0.r, vdupq_n_s64(v0));{% elif isa_dt_par.to_ptr == 'int32_t' or isa_dt_par.to_ptr == 'uint32_t' -%}{{ isa.prefix }}shlq_{{ isa_dt_par.data_ext }}(r0.r, vdupq_n_s32(v0));{% elif isa_dt_par.to_ptr == 'int16_t' or isa_dt_par.to_ptr == 'uint16_t' -%}{{ isa.prefix }}shlq_{{ isa_dt_par.data_ext }}(r0.r, vdupq_n_s16(v0));{% else -%}{{ isa.prefix }}shlq_{{ isa_dt_par.data_ext }}(r0.r, vdupq_n_s8(v0));{% endif %}" },
+    "sqrt":             { "format": "short", "code": "{{ isa.prefix }}sqrtq_{{ isa_dt_par.data_ext }}(r0.r);" },
+    "rsqrt":            { "format": "short", "code": "{{ isa.prefix }}rsqrteq_{{ isa_dt_par.data_ext }}(r0.r);" },
     "arith_2args_recp": { "format": "long", "code":
 """// long format
 	%r<tp>% recp;
@@ -57,18 +62,14 @@ tpl_implem_neon = {
 	%r<c:uint>% resi;
 	resi.r = {{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(r1i.r, r0i.r);
 	return %cast<c:uint,tp>%(resi);""" },
-    
     "blend_f32-emu": { "format": "long", "code":
 """// long format
-    %r<c:uint>% m0i = %cast_k<tp,c:uint>%(m0);
-    %r<c:uint>% r0i = %cast<tp,c:uint>%(r0);
-    %r<c:uint>% r1i = %cast<tp,c:uint>%(r1);
-    %r<c:uint>% resi;
-    resi = %blend<c:uint>%(r0i, r1i, m0i);
-    return %cast<c:uint,tp>%(resi);""" },
-
-
-
+	%r<c:uint>% m0i = %cast_k<tp,c:uint>%(m0);
+	%r<c:uint>% r0i = %cast<tp,c:uint>%(r0);
+	%r<c:uint>% r1i = %cast<tp,c:uint>%(r1);
+	%r<c:uint>% resi;
+	resi = %blend<c:uint>%(r0i, r1i, m0i);
+	return %cast<c:uint,tp>%(resi);""" },
 }
 
 implems_neon = {
@@ -150,5 +151,24 @@ implems_neon = {
     "blend": [
         { "instr_name": "bslq",         "datatypes": all_int_uint+ [float32],            "template": tpl_implem_neon["blend"],                                            }, 
         { "instr_name": "bslq",         "datatypes": [float64],                          "template": tpl_implem_neon["blend"],              "if": "defined(__aarch64__)"  },], # blend
-
+    "min": [
+        { "instr_name": "minq",         "datatypes": [float64],                          "template": tpl_implem_neon["arith_2args"],        "if": "defined(__aarch64__)"  },
+        { "instr_name": "minq",         "datatypes": [float32, int32, int16, int8],      "template": tpl_implem_neon["arith_2args"]                                       },
+    	{ "instr_name": "minq",         "datatypes": [uint32, uint16, uint8],            "template": tpl_implem_neon["arith_2args"]                                       } ], # min
+    "max": [
+        { "instr_name": "maxq",         "datatypes": [float64],                          "template": tpl_implem_neon["arith_2args"],        "if": "defined(__aarch64__)"  },
+        { "instr_name": "maxq",         "datatypes": [float32, int32, int16, int8],      "template": tpl_implem_neon["arith_2args"]                                       },
+        { "instr_name": "maxq",         "datatypes": [uint32, uint16, uint8],            "template": tpl_implem_neon["arith_2args"]                                       } ], # max
+    "lshift": [
+        { "instr_name": "",             "datatypes": all_int + all_uint,                 "template": tpl_implem_neon["lshift"]                                            } ], # lshift
+    "round": [
+        { "instr_name": "",             "datatypes": [float64],                          "template": tpl_implem_neon["round_float"],        "if": "defined(__aarch64__)"  },
+        { "instr_name": "",             "datatypes": [float32],                          "template": tpl_implem_neon["round_float"]                                       },
+        { "instr_name": "",             "datatypes": all_int + all_uint,                 "template": tpl_implem_neon["round_int"]                                         } ], # round
+    "sqrt": [
+        { "instr_name": "",             "datatypes": [float64],                          "template": tpl_implem_neon["sqrt"],               "if": "defined(__aarch64__)"  },
+        { "instr_name": "",             "datatypes": [float32],                          "template": tpl_implem_neon["sqrt"]                                              } ], # sqrt
+    "rsqrt": [
+        { "instr_name": "",             "datatypes": [float64],                          "template": tpl_implem_neon["rsqrt"],              "if": "defined(__aarch64__)"  },
+        { "instr_name": "",             "datatypes": [float32],                          "template": tpl_implem_neon["rsqrt"]                                             } ], # rsqrt
 }
