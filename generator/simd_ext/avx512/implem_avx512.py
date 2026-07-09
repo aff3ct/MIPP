@@ -343,14 +343,16 @@ implems_avx512 = {
     "load": [
         { "instr_name": "load",       "datatypes": all_datatypes,                      "template": tpl_implem_avx512["load"],              "if": "defined(MIPP_ALIGNED_LOADS)"                                                                                 },
         { "instr_name": "loadu",      "datatypes": all_datatypes,                      "template": tpl_implem_avx512["load"],              "if": "!defined(MIPP_ALIGNED_LOADS)"                                                                                },
-        { "instr_name": "load",       "datatypes": all_float+[int32, int64],           "template": tpl_implem_avx512["load_msks"],         "if": "defined(__AVX512F__)",                                                                   "version" : "masks" },
+        { "instr_name": "load",       "datatypes": all_float+[int32, int64],           "template": tpl_implem_avx512["load_msks"],         "if": "defined(__AVX512F__) && defined(MIPP_ALIGNED_LOADS)",                                    "version" : "masks" },
+        { "instr_name": "loadu",      "datatypes": all_float+[int32, int64],           "template": tpl_implem_avx512["load_msks"],         "if": "defined(__AVX512F__) && !defined(MIPP_ALIGNED_LOADS)",                                   "version" : "masks" },
         { "instr_name": "loadu",      "datatypes": [int8, int16],                      "template": tpl_implem_avx512["load_msks"],         "if": "defined(__AVX512BW__)",                                                                  "version" : "masks" } ], # load
     "loadu": [
         { "instr_name": "loadu",      "datatypes": all_datatypes,                      "template": tpl_implem_avx512["load"],                                                                                                                                  } ], # loadu
     "store": [
         { "instr_name": "store",      "datatypes": all_datatypes,                      "template": tpl_implem_avx512["store"],             "if": "defined(MIPP_ALIGNED_LOADS)"                                                                                 },
         { "instr_name": "storeu",     "datatypes": all_datatypes,                      "template": tpl_implem_avx512["store"],             "if": "!defined(MIPP_ALIGNED_LOADS)"                                                                                },
-        { "instr_name": "store",      "datatypes": all_float+[int32, int64],           "template": tpl_implem_avx512["store_msk"],         "if": "defined(__AVX512F__)",                                                                   "version" : "mask"  },
+        { "instr_name": "store",      "datatypes": all_float+[int32, int64],           "template": tpl_implem_avx512["store_msk"],         "if": "defined(__AVX512F__) && defined(MIPP_ALIGNED_LOADS)",                                    "version" : "mask"  },
+        { "instr_name": "storeu",     "datatypes": all_float+[int32, int64],           "template": tpl_implem_avx512["store_msk"],         "if": "defined(__AVX512F__) && !defined(MIPP_ALIGNED_LOADS)",                                   "version" : "mask"  },
         { "instr_name": "storeu",     "datatypes": [int8, int16],                      "template": tpl_implem_avx512["store_msk"],         "if": "defined(__AVX512BW__)",                                                                  "version" : "mask"  } ], # store
     "storeu": [
         { "instr_name": "storeu",     "datatypes": all_datatypes,                      "template": tpl_implem_avx512["store"],                                                                                                                                 } ], # storeu
