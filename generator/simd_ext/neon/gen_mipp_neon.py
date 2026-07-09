@@ -38,7 +38,7 @@ def gen_mipp_neon(include_manager):
     gen_c_functions(isa_neon, include_manager, copy_mipp_funcs, implems_neon)
     gen_c_functions(isa_neon, include_manager, copy_mipp_funcs, implems_emu_neon)
     
-    gen_c_generic_functions(isa_neon, include_manager, copy_mipp_funcs, implems_generic_emu)
+    #gen_c_generic_functions(isa_neon, include_manager, copy_mipp_funcs, implems_generic_emu)
     gen_c_functions(isa_neon, include_manager, copy_mipp_funcs, implems_mask_generic_emu)
 
     gen_c_missing_functions(isa_neon, include_manager, copy_mipp_funcs)
