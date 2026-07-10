@@ -2,6 +2,293 @@ from jinja2 import Template, StrictUndefined
 import json
 import re
 
+class Expr:
+    pass
+
+class Term(Expr):
+    def __init__(self, value):
+        self.value = value.strip()
+    def __repr__(self):
+        return f"Term({self.value!r})"
+    def to_str(self):
+        return self.value
+    def __eq__(self, other):
+        return isinstance(other, Term) and self.value == other.value
+    def __hash__(self):
+        return hash(self.value)
+
+class Not(Expr):
+    def __init__(self, child):
+        self.child = child
+    def __repr__(self):
+        return f"Not({self.child!r})"
+    def to_str(self):
+        if isinstance(self.child, Term):
+            return f"!{self.child.to_str()}"
+        return f"!( {self.child.to_str()} )"
+    def __eq__(self, other):
+        return isinstance(other, Not) and self.child == other.child
+    def __hash__(self):
+        return hash(("Not", self.child))
+
+class And(Expr):
+    def __init__(self, children):
+        self.children = children
+    def __repr__(self):
+        return f"And({self.children!r})"
+    def to_str(self):
+        parts = []
+        for c in self.children:
+            s = c.to_str()
+            if isinstance(c, (Or, And)):
+                parts.append(f"({s})")
+            else:
+                parts.append(s)
+        return " && ".join(parts)
+    def __eq__(self, other):
+        return isinstance(other, And) and set(self.children) == set(other.children)
+    def __hash__(self):
+        return hash(("And", tuple(sorted(self.children, key=lambda x: str(x)))))
+
+class Or(Expr):
+    def __init__(self, children):
+        self.children = children
+    def __repr__(self):
+        return f"Or({self.children!r})"
+    def to_str(self):
+        parts = []
+        for c in self.children:
+            s = c.to_str()
+            if isinstance(c, (Or, And)):
+                parts.append(f"({s})")
+            else:
+                parts.append(s)
+        return " || ".join(parts)
+    def __eq__(self, other):
+        return isinstance(other, Or) and set(self.children) == set(other.children)
+    def __hash__(self):
+        return hash(("Or", tuple(sorted(self.children, key=lambda x: str(x)))))
+
+def tokenize(s):
+    pattern = r"(defined\s*\(\s*[a-zA-Z0-9_]+\s*\)|&&|\|\||!|\(|\)|[a-zA-Z0-9_]+)"
+    tokens = []
+    for m in re.finditer(pattern, s):
+        tokens.append(m.group(1))
+    return tokens
+
+def parse(tokens):
+    pos = 0
+
+    def parse_or():
+        nonlocal pos
+        left = parse_and()
+        while pos < len(tokens) and tokens[pos] == "||":
+            pos += 1
+            right = parse_and()
+            if isinstance(left, Or):
+                if isinstance(right, Or):
+                    left = Or(left.children + right.children)
+                else:
+                    left = Or(left.children + [right])
+            elif isinstance(right, Or):
+                left = Or([left] + right.children)
+            else:
+                left = Or([left, right])
+        return left
+
+    def parse_and():
+        nonlocal pos
+        left = parse_not()
+        while pos < len(tokens) and tokens[pos] == "&&":
+            pos += 1
+            right = parse_not()
+            if isinstance(left, And):
+                if isinstance(right, And):
+                    left = And(left.children + right.children)
+                else:
+                    left = And(left.children + [right])
+            elif isinstance(right, And):
+                left = And([left] + right.children)
+            else:
+                left = And([left, right])
+        return left
+
+    def parse_not():
+        nonlocal pos
+        if pos < len(tokens) and tokens[pos] == "!":
+            pos += 1
+            child = parse_primary()
+            return Not(child)
+        return parse_primary()
+
+    def parse_primary():
+        nonlocal pos
+        if pos >= len(tokens):
+            return Term("")
+        
+        tok = tokens[pos]
+        if tok == "(":
+            pos += 1
+            expr = parse_or()
+            if pos < len(tokens) and tokens[pos] == ")":
+                pos += 1
+            return expr
+        else:
+            pos += 1
+            return Term(tok)
+
+    return parse_or()
+
+def substitute_known_true(expr, known_true_exprs):
+    """Replace any sub-expression that matches a known-true expression with Term("1").
+    This handles both direct matches and matching of individual terms within Or/And."""
+    if not known_true_exprs:
+        return expr
+    # Check if the whole expression matches any known-true expression
+    for kt in known_true_exprs:
+        if expr == kt:
+            return Term("1")
+    # For Or: if all children of a known-true Or appear in the current Or, the whole Or is true
+    if isinstance(expr, Or):
+        new_children = [substitute_known_true(c, known_true_exprs) for c in expr.children]
+        result = Or(new_children)
+        for kt in known_true_exprs:
+            if result == kt:
+                return Term("1")
+        return result
+    if isinstance(expr, And):
+        new_children = [substitute_known_true(c, known_true_exprs) for c in expr.children]
+        return And(new_children)
+    if isinstance(expr, Not):
+        new_child = substitute_known_true(expr.child, known_true_exprs)
+        return Not(new_child)
+    return expr
+
+def simplify(expr):
+    if isinstance(expr, Term):
+        return expr
+        
+    if isinstance(expr, Not):
+        child = simplify(expr.child)
+        if isinstance(child, Not):
+            return simplify(child.child)
+        if child == Term("0"):
+            return Term("1")
+        if child == Term("1"):
+            return Term("0")
+        return Not(child)
+        
+    if isinstance(expr, And):
+        new_children = []
+        for c in expr.children:
+            sc = simplify(c)
+            if isinstance(sc, And):
+                new_children.extend(sc.children)
+            else:
+                new_children.append(sc)
+                
+        unique_children = []
+        seen = set()
+        for c in new_children:
+            if c not in seen:
+                seen.add(c)
+                unique_children.append(c)
+                
+        has_contradiction = False
+        for c in unique_children:
+            if isinstance(c, Not):
+                if c.child in seen:
+                    has_contradiction = True
+                    break
+                if isinstance(c.child, And) and all(child in seen for child in c.child.children):
+                    has_contradiction = True
+                    break
+            else:
+                if Not(c) in seen:
+                    has_contradiction = True
+                    break
+                    
+        if has_contradiction or any(c == Term("0") for c in unique_children):
+            return Term("0")
+            
+        unique_children = [c for c in unique_children if c != Term("1")]
+        if not unique_children:
+            return Term("1")
+            
+        if len(unique_children) == 1:
+            return unique_children[0]
+            
+        return And(unique_children)
+
+    if isinstance(expr, Or):
+        new_children = []
+        for c in expr.children:
+            sc = simplify(c)
+            if isinstance(sc, Or):
+                new_children.extend(sc.children)
+            else:
+                new_children.append(sc)
+                
+        unique_children = []
+        seen = set()
+        for c in new_children:
+            if c not in seen:
+                seen.add(c)
+                unique_children.append(c)
+                
+        has_tautology = False
+        for c in unique_children:
+            if isinstance(c, Not):
+                if c.child in seen:
+                    has_tautology = True
+                    break
+                if isinstance(c.child, Or) and all(child in seen for child in c.child.children):
+                    has_tautology = True
+                    break
+            else:
+                if Not(c) in seen:
+                    has_tautology = True
+                    break
+                    
+        if has_tautology or any(c == Term("1") for c in unique_children):
+            return Term("1")
+            
+        unique_children = [c for c in unique_children if c != Term("0")]
+        if not unique_children:
+            return Term("0")
+            
+        if len(unique_children) == 1:
+            return unique_children[0]
+            
+        return Or(unique_children)
+
+    return expr
+
+def simplify_cond_str(s, known_true_conds=None):
+    if not s or s.strip() == "":
+        return ""
+    tokens = tokenize(s)
+    if not tokens:
+        return s
+    expr = parse(tokens)
+    # Substitute known-true conditions before simplifying
+    if known_true_conds:
+        known_true_exprs = []
+        for kt_str in known_true_conds:
+            if kt_str and kt_str.strip():
+                kt_tokens = tokenize(kt_str)
+                if kt_tokens:
+                    known_true_exprs.append(parse(kt_tokens))
+        if known_true_exprs:
+            expr = substitute_known_true(expr, known_true_exprs)
+    simplified = simplify(expr)
+    res = simplified.to_str()
+    if res == "0":
+        return "0"
+    if res == "1":
+        return ""
+    return res
+
 from tools import *
 from tools import _get_dt_par_size
 
@@ -1314,26 +1601,25 @@ def gen_c_missing_functions(isa, file, funcs):
                 
                 candidates_map[key].sort(key=lambda c: c["level"])
                 
+    isa_known_true = [isa["define"]] if "define" in isa and isa["define"] else []
+
     def normalize_cond(c):
-        if not c:
-            return ""
-        c = c.strip()
-        while c.startswith("(") and c.endswith(")"):
-            depth = 0
-            balanced = True
-            for i in range(len(c) - 1):
-                if c[i] == '(':
-                    depth += 1
-                elif c[i] == ')':
-                    depth -= 1
-                    if depth == 0:
-                        balanced = False
-                        break
-            if depth == 1 and c[-1] == ')':
-                c = c[1:-1].strip()
-            else:
-                break
-        return c
+        return simplify_cond_str(c, known_true_conds=isa_known_true)
+
+    def are_conds_mutually_exclusive(c1, c2):
+        n1 = normalize_cond(c1)
+        n2 = normalize_cond(c2)
+        if n1 == "0" or n2 == "0":
+            return True
+        if n1 == "" or n2 == "":
+            return False
+        if n1 == negate_cond(n2) or n2 == negate_cond(n1):
+            return True
+        if n1.startswith("!") and normalize_cond(n1[1:]) == n2:
+            return True
+        if n2.startswith("!") and normalize_cond(n2[1:]) == n1:
+            return True
+        return False
 
     def is_req_satisfied(req_f, req_dt_key, target_cond, working_impls):
         if target_cond is None:
@@ -1367,6 +1653,19 @@ def gen_c_missing_functions(isa, file, funcs):
         if c == "":
             return None
         return f"!( {c} )"
+
+    def are_conds_mutually_exclusive(c1, c2):
+        n1 = normalize_cond(c1)
+        n2 = normalize_cond(c2)
+        if n1 == "" or n2 == "":
+            return False
+        if n1 == negate_cond(n2) or n2 == negate_cond(n1):
+            return True
+        if n1.startswith("!") and normalize_cond(n1[1:]) == n2:
+            return True
+        if n2.startswith("!") and normalize_cond(n2[1:]) == n1:
+            return True
+        return False
         
     resolved = {key: [] for key in candidates_map}
     remaining_conds = {key: "" for key in candidates_map}
@@ -1400,25 +1699,43 @@ def gen_c_missing_functions(isa, file, funcs):
                     
                 reqs = _get_candidate_reqs(cand, isa, funcs)
                 deps_satisfied = True
+                restricted_target_cond = target_cond
                 for req_f in reqs:
                     for req_dt_key in reqs[req_f]:
-                        if not is_req_satisfied(req_f, req_dt_key, target_cond, working_impls):
+                        req_key = (req_f, req_dt_key, None)
+                        if req_key not in working_impls:
+                            deps_satisfied = False
+                            break
+                        compat_conds = []
+                        for w_cond in working_impls[req_key]:
+                            if not are_conds_mutually_exclusive(restricted_target_cond, w_cond):
+                                compat_conds.append(w_cond)
+                        if not compat_conds:
+                            deps_satisfied = False
+                            break
+                        if "" in compat_conds:
+                            union_cond = ""
+                        else:
+                            union_cond = " || ".join(f"({w})" for w in compat_conds)
+                        restricted_target_cond = intersect_conds(restricted_target_cond, union_cond)
+                        if restricted_target_cond is None:
                             deps_satisfied = False
                             break
                     if not deps_satisfied:
                         break
                         
                 if deps_satisfied:
-                    resolved[key].append((cand, target_cond))
+                    restricted_target_cond = normalize_cond(restricted_target_cond)
+                    resolved[key].append((cand, restricted_target_cond))
                     cand["resolved"] = True
                     
                     if cand["level"] < 4:
-                        working_impls[key].append(target_cond)
-                        if target_cond == "":
+                        working_impls[key].append(restricted_target_cond)
+                        if restricted_target_cond == "":
                             working_impls[key] = [""]
                             
-                    neg_cand_if = negate_cond(cand_if)
-                    new_rem = intersect_conds(rem_cond, neg_cand_if)
+                    neg_resolved = negate_cond(restricted_target_cond)
+                    new_rem = intersect_conds(rem_cond, neg_resolved)
                     remaining_conds[key] = new_rem
                     
                     changed = True
@@ -1432,6 +1749,8 @@ def gen_c_missing_functions(isa, file, funcs):
     for key in resolved:
         f, dt_key, mask_kind = key
         for cand, cond in resolved[key]:
+            if cond == "0":
+                continue
             reqs = _get_candidate_reqs(cand, isa, funcs)
             _append_resolved_status(funcs, f, dt_key, mask_kind, cond, reqs)
 
@@ -1456,14 +1775,12 @@ def gen_c_missing_functions(isa, file, funcs):
                     
             for mask_kind in mask_kinds:
                 key = (f, dt_key, mask_kind)
-                for cand, cond in resolved[key]:
-                    func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
-                    proto_str = build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, masked_version=mask_kind)
-                    if cond != "":
-                        print(f"#if {cond}", file=file_w)
-                    print("static " + proto_str + ";", file=file_w)
-                    if cond != "":
-                        print("#endif", file=file_w)
+                if resolved[key]:
+                    has_active = any(cond != "0" for cand, cond in resolved[key])
+                    if has_active:
+                        func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
+                        proto_str = build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, masked_version=mask_kind)
+                        print("static " + proto_str + ";", file=file_w)
                         
         print("", file=file_w)
         for dt in funcs[f]["datatypes"]:
@@ -1483,6 +1800,8 @@ def gen_c_missing_functions(isa, file, funcs):
             for mask_kind in mask_kinds:
                 key = (f, dt_key, mask_kind)
                 for cand, cond in resolved[key]:
+                    if cond == "0":
+                        continue
                     _emit_separator(f, file_w)
                     
                     if cand["type"] in ["native_or_emu", "generic_emu"]:
