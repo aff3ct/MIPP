@@ -1278,6 +1278,7 @@ def gen_c_missing_functions(isa, file, funcs):
     remaining_conds = {key: "" for key in candidates_map}
     working_impls = {key: [] for key in candidates_map}
     
+    max_level = 2
     changed = True
     while changed:
         changed = False
@@ -1289,6 +1290,8 @@ def gen_c_missing_functions(isa, file, funcs):
                 
             for cand in candidates_map[key]:
                 if cand.get("resolved", False):
+                    continue
+                if cand["level"] > max_level:
                     continue
                     
                 cand_if = ""
@@ -1324,6 +1327,10 @@ def gen_c_missing_functions(isa, file, funcs):
                     
                     changed = True
                     break
+                    
+        if not changed and max_level < 4:
+            max_level += 1
+            changed = True
                     
     # 1. Register resolved statuses upfront so parse_placeholders knows what is implemented
     for key in resolved:
@@ -1362,6 +1369,7 @@ def gen_c_missing_functions(isa, file, funcs):
                     if cond != "":
                         print("#endif", file=file_w)
                         
+        print("", file=file_w)
         for dt in funcs[f]["datatypes"]:
             dt_par, dt_ret = _missing_compute_dt_par_dt_ret(dt)
             dt_key = dt_par + "," + dt_ret
