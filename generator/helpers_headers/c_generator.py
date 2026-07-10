@@ -1323,9 +1323,10 @@ def gen_c_missing_functions(isa, file, funcs):
         if norm_target == "":
             return True
         for w_cond in working_impls[req_key]:
-            if normalize_cond(w_cond) == "":
+            norm_w = normalize_cond(w_cond)
+            if norm_w == "" or ("define" in isa and isa["define"] and norm_w == normalize_cond(isa["define"])):
                 return True
-            if normalize_cond(w_cond) == norm_target:
+            if norm_w == norm_target:
                 return True
         return False
         

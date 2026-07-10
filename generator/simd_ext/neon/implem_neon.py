@@ -46,6 +46,8 @@ tpl_implem_neon = {
 """// long format
 	%r<tp>% recp;
 	recp.r = {{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r1.r);
+	recp.r = vmulq_{{ isa_dt_par.data_ext }}(recp.r, vrecpsq_{{ isa_dt_par.data_ext }}(r1.r, recp.r));
+	recp.r = vmulq_{{ isa_dt_par.data_ext }}(recp.r, vrecpsq_{{ isa_dt_par.data_ext }}(r1.r, recp.r));
 	%r<tp>% res = %mul<tp>%(r0, recp);
 	return res;""" },
     "logi_2args_fxx": { "format": "long", "code":
