@@ -70,16 +70,16 @@ SNIPPET_END_MSKS = """
 
 tpl_mask_generic_emu = {
     "ret_reg_2args_reg": { "format": "long", "code":
-"""
+"""// long format
 	%r<tp>% op = %{{func_name}}<tp>%(r0, r1);""" },
     "ret_reg_3args_reg": { "format": "long", "code":
-"""
+"""// long format
 	%r<tp>% op = %{{func_name}}<tp>%( r0, r1, r2);""" },
     "ret_reg_1arg_reg": { "format": "long", "code":
-"""
+"""// long format
 	%r<tp>% op = %{{func_name}}<tp>%(r0);""" },
     "load_msks": { "format": "long", "code":
-"""
+"""// long format
 	// we want to guarantee that load doesn't touch the memory of masked out elems
 	%v<tp>% buff[%N<tp>%];
 	for(unsigned i = 0; i < %N<tp>%; i++){
@@ -90,7 +90,7 @@ tpl_mask_generic_emu = {
 	}
 	return %load<tp>%(buff);""" },
     "load_mskz": { "format": "long", "code":
-"""
+"""// long format
 	// we want to guarantee that load doesn't touch the memory of masked out elems
 	%v<tp>% buff[%N<tp>%];
 	for (unsigned i = 0; i < %N<tp>%; i++) {
@@ -101,25 +101,25 @@ tpl_mask_generic_emu = {
 	}
 	return %load<tp>%(buff);""" },
     "set": { "format": "long", "code":
-"""
+"""// long format
 	%r<tp>% op = %set<tp>%(vals);""" },
     "set1": { "format": "long", "code":
-"""
+"""// long format
 	%r<tp>% op = %set1<tp>%(v0);""" },
     "set0": { "format": "long", "code":
-"""
+"""// long format
 	%r<tp>% op = %set0<tp>%();""" },
     "ret_msk_2args_reg": { "format": "long", "code":
-"""
+"""// long format
 	%m<tp>% op = %{{func_name}}<tp>%(r0, r1);""" },
     "store_msk": { "format": "long", "code":
-"""
+"""// long format
 	for (unsigned i = 0; i < %N<tp>%; i++) {
 		if (%get_k<tp>%(m0, i))
 			p0[i] = %get<tp>%(r0, i);
 	}""" },
     "store_mskz": { "format": "long", "code":
-"""
+"""// long format
 	for(unsigned i = 0; i < %N<tp>%; i++) {
 		if (%get_k<tp>%(m0, i))
 			p0[i] = %get<tp>%(r0, i);
@@ -127,7 +127,7 @@ tpl_mask_generic_emu = {
 			p0[i] = 0;
 	}""" },
     "storeu_msk": { "format": "long", "code":
-"""
+"""// long format
 	%v<tp>% buff[%N<tp>%];
 	%v<tp>% mask_buff[%N<tp>%];
 	%r<tp>% msk_reg = %toreg<tp>%(m0);
@@ -138,7 +138,7 @@ tpl_mask_generic_emu = {
 		if (mask_buff[i])
 			p0[i] = buff[i];""" },
     "storeu_mskz": { "format": "long", "code":
-"""
+"""// long format
 	%v<tp>% buff[%N<tp>%];
 	%v<tp>% mask_buff[%N<tp>%];
 	%r<tp>% msk_reg = %toreg<tp>%(m0);
@@ -151,126 +151,126 @@ tpl_mask_generic_emu = {
 		else
 			p0[i] = 0;""" },
     "cmp_2args": { "format": "long", "code":
-"""
+"""// long format
 	%m<tp>% op = %{{func_name}}<tp>%(r0, r1);
 	%m<tp>% res = %andb_k<tp>%(op, m0);
 	return res;""" },
     "hadd_maskz": { "format": "long", "code":
-"""
+"""// long format
 	%r<tp>% zero = %set0<tp>%();
 	%r<tp>% blended = %blend<tp>%(r0, zero, m0);
 	%v<tp>% op = %hadd<tp>%(blended);
 	return op;""" },
     "hmul_maskz": { "format": "long", "code":
-"""
+"""// long format
 	%r<tp>% ones = %set1<tp>%(1);
 	%r<tp>% blended = %blend<tp>%(r0, ones, m0);
 	%v<tp>% op = %hmul<tp>%(blended);
 	return op;""" },
     "hmin_maskz_u64": { "format": "long", "code":
-"""
+"""// long format
 	%r<tp>% max = %set1<tp>%(UINT64_MAX);
 	%r<tp>% blended = %blend<tp>%(r0, max, m0);
 	%v<tp>% op = %hmin<tp>%(blended);
 	return op;""" },
     "hmin_maskz_u32": { "format": "long", "code":
-"""
+"""// long format
 	%r<tp>% max = %set1<tp>%(UINT32_MAX);
 	%r<tp>% blended = %blend<tp>%(r0, max, m0);
 	%v<tp>% op = %hmin<tp>%(blended);
 	return op;""" },
     "hmin_maskz_u16": { "format": "long", "code":
-"""
+"""// long format
 	%r<tp>% max = %set1<tp>%(UINT16_MAX);
 	%r<tp>% blended = %blend<tp>%(r0, max, m0);
 	%v<tp>% op = %hmin<tp>%(blended);
 	return op;""" },
     "hmin_maskz_u8": { "format": "long", "code":
-"""
+"""// long format
 	%r<tp>% max = %set1<tp>%(UINT8_MAX);
 	%r<tp>% blended = %blend<tp>%(r0, max, m0);
 	%v<tp>% op = %hmin<tp>%(blended);
 	return op;""" },
     "hmin_maskz_f32": { "format": "long", "code":
-"""
+"""// long format
 	%r<tp>% max = %set1<tp>%(FLT_MAX);
 	%r<tp>% blended = %blend<tp>%(r0, max, m0);
 	%v<tp>% op = %hmin<tp>%(blended);
 	return op;""" },
     "hmin_maskz_f64": { "format":"long", "code":
-"""
+"""// long format
 	%r<tp>% max = %set1<tp>%(DBL_MAX);
 	%r<tp>% blended = %blend<tp>%(r0, max, m0);
 	%v<tp>% op = %hmin<tp>%(blended);
 	return op;""" },
     "hmin_maskz_i64": { "format": "long", "code":
-"""
+"""// long format
 	%r<tp>% max = %set1<tp>%(INT64_MAX);
 	%r<tp>% blended = %blend<tp>%(r0, max, m0);
 	%v<tp>% op = %hmin<tp>%(blended);
 	return op;""" },
     "hmin_maskz_i32": { "format": "long", "code":
-"""
+"""// long format
 	%r<tp>% max = %set1<tp>%(INT32_MAX);
 	%r<tp>% blended = %blend<tp>%(r0, max, m0);
 	%v<tp>% op = %hmin<tp>%(blended);
 	return op;""" },
     "hmin_maskz_i16": { "format": "long", "code":
-"""
+"""// long format
 	%r<tp>% max = %set1<tp>%(INT16_MAX);
 	%r<tp>% blended = %blend<tp>%(r0, max, m0);
 	%v<tp>% op = %hmin<tp>%(blended);
 	return op;""" },
     "hmin_maskz_i8": { "format": "long", "code":
-"""
+"""// long format
 	%r<tp>% max = %set1<tp>%(INT8_MAX);
 	%r<tp>% blended = %blend<tp>%(r0, max, m0);
 	%v<tp>% op = %hmin<tp>%(blended);
 	return op;""" },
     "hmax_maskz_u": { "format": "long", "code":
-"""
+"""// long format
 	%r<tp>% min = %set1<tp>%(0u);
 	%r<tp>% blended = %blend<tp>%(r0, min, m0);
 	%v<tp>% op = %hmax<tp>%(blended);
 	return op; """},
     "hmax_maskz_f32": { "format": "long", "code":
-"""
+"""// long format
 	%r<tp>% min = %set1<tp>%(-FLT_MAX);
 	%r<tp>% blended = %blend<tp>%(r0, min, m0);
 	%v<tp>% op = %hmax<tp>%(blended);
 	return op;""" },
     "hmax_maskz_f64": { "format": "long", "code":
-"""
+"""// long format
 	%r<tp>% min = %set1<tp>%(-DBL_MAX);
 	%r<tp>% blended = %blend<tp>%(r0, min, m0);
 	%v<tp>% op = %hmax<tp>%(blended);
 	return op;""" },
     "hmax_maskz_i64": { "format": "long", "code":
-"""
+"""// long format
 	%r<tp>% min = %set1<tp>%(INT64_MIN);
 	%r<tp>% blended = %blend<tp>%(r0, min, m0);
 	%v<tp>% op = %hmax<tp>%(blended);
 	return op;""" },
     "hmax_maskz_i32": { "format": "long", "code":
-"""
+"""// long format
 	%r<tp>% min = %set1<tp>%(INT32_MIN);
 	%r<tp>% blended = %blend<tp>%(r0, min, m0);
 	%v<tp>% op = %hmax<tp>%(blended);
 	return op;""" },
     "hmax_maskz_i16": { "format": "long", "code":
-"""
+"""// long format
 	%r<tp>% min = %set1<tp>%(INT16_MIN);
 	%r<tp>% blended = %blend<tp>%(r0, min, m0);
 	%v<tp>% op = %hmax<tp>%(blended);
 	return op;""" },
     "hmax_maskz_i8": { "format": "long", "code":
-"""
+"""// long format
 	%r<tp>% min = %set1<tp>%(INT8_MIN);
 	%r<tp>% blended = %blend<tp>%(r0, min, m0);
 	%v<tp>% op = %hmax<tp>%(blended);
 	return op;""" },
     "ret_reg_2args_reg_val": { "format": "long", "code":
-"""
+"""// long format
 	%r<tp>% op = %{{func_name}}<tp>%(r0, v0);""" },
 }
 
