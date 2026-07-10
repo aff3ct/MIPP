@@ -550,7 +550,7 @@ def _missing_emit_ifdef_begin(ifd, file):
         print("#if " + ifd, file=file)
 
 
-def _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, masked_version = None, lmul=None):
+def _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, masked_version = None, lmul=0):
     """
     writes the "body" of the missing function. 
     Which prints a panic messages and terminates the program.
@@ -1071,7 +1071,19 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond):
         m0_vector_type = build_msk(msk_dt, isa, 0, True, False)
         m0_scalar_type = build_msk(msk_dt, isa_scalar, 0, True, False)
         print(f"\t{m0_scalar_type} s_m0;", file=file)
-        print(f"\tmemcpy(&s_m0, &m0, sizeof(s_m0));", file=file)
+        use_safe_conversion = isa["name"] in ["avx512", "rvv"] or isa["name"].startswith("sve")
+        if use_safe_conversion:
+            msk_dt_name = msk_dt["name"]
+            m0_reg_vector_type = build_reg(msk_dt, isa, 0, True, False)
+            m0_reg_scalar_type = build_reg(msk_dt, isa_scalar, 0, True, False)
+            toreg_func = _build_func_name(isa, msk_dt_name, msk_dt_name, msk_dt_name, "toreg")
+            scalar_tomsk_func = _build_func_name(isa_scalar, msk_dt_name, msk_dt_name, msk_dt_name, "tomsk")
+            print(f"\t{m0_reg_vector_type} r_m0 = {toreg_func}(m0);", file=file)
+            print(f"\t{m0_reg_scalar_type} s_r_m0;", file=file)
+            print(f"\tmemcpy(&s_r_m0, &r_m0, sizeof(s_r_m0));", file=file)
+            print(f"\ts_m0 = {scalar_tomsk_func}(s_r_m0);", file=file)
+        else:
+            print(f"\tmemcpy(&s_m0, &m0, sizeof(s_m0));", file=file)
         call_args.append("s_m0")
         cnt_msk += 1
         
@@ -1106,7 +1118,19 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond):
             vector_type = build_type("msk", realdatatype, isa, 0, True, False)
             scalar_type = build_type("msk", realdatatype, isa_scalar, 0, True, False)
             print(f"\t{scalar_type} s_{arg_name};", file=file)
-            print(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof(s_{arg_name}));", file=file)
+            use_safe_conversion = isa["name"] in ["avx512", "rvv"] or isa["name"].startswith("sve")
+            if use_safe_conversion:
+                realdatatype_name = realdatatype["name"]
+                reg_vector_type = build_reg(realdatatype, isa, 0, True, False)
+                reg_scalar_type = build_reg(realdatatype, isa_scalar, 0, True, False)
+                toreg_func = _build_func_name(isa, realdatatype_name, realdatatype_name, realdatatype_name, "toreg")
+                scalar_tomsk_func = _build_func_name(isa_scalar, realdatatype_name, realdatatype_name, realdatatype_name, "tomsk")
+                print(f"\t{reg_vector_type} r_{arg_name} = {toreg_func}({arg_name});", file=file)
+                print(f"\t{reg_scalar_type} s_r_{arg_name};", file=file)
+                print(f"\tmemcpy(&s_r_{arg_name}, &r_{arg_name}, sizeof(s_r_{arg_name}));", file=file)
+                print(f"\ts_{arg_name} = {scalar_tomsk_func}(s_r_{arg_name});", file=file)
+            else:
+                print(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof(s_{arg_name}));", file=file)
             call_args.append(f"s_{arg_name}")
         elif arg_type_name == "vindex":
             arg_name = "vi"
@@ -1139,8 +1163,20 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond):
         vector_ret_type = build_type(ret_type_name, realdatatype_ret, isa, 0, True, False)
         
         print(f"\t{scalar_ret_type} sres = {scalar_func_name}({call_args_str});", file=file)
-        print(f"\t{vector_ret_type} res;", file=file)
-        print(f"\tmemcpy(&res, &sres, sizeof(res));", file=file)
+        use_safe_conversion = (ret_type_name == "msk") and (isa["name"] in ["avx512", "rvv"] or isa["name"].startswith("sve"))
+        if use_safe_conversion:
+            realdatatype_ret_name = realdatatype_ret["name"]
+            reg_vector_type = build_reg(realdatatype_ret, isa, 0, True, False)
+            reg_scalar_type = build_reg(realdatatype_ret, isa_scalar, 0, True, False)
+            scalar_toreg_func = _build_func_name(isa_scalar, realdatatype_ret_name, realdatatype_ret_name, realdatatype_ret_name, "toreg")
+            tomsk_func = _build_func_name(isa, realdatatype_ret_name, realdatatype_ret_name, realdatatype_ret_name, "tomsk")
+            print(f"\t{reg_scalar_type} s_r_res = {scalar_toreg_func}(sres);", file=file)
+            print(f"\t{reg_vector_type} r_res;", file=file)
+            print(f"\tmemcpy(&r_res, &s_r_res, sizeof(r_res));", file=file)
+            print(f"\t{vector_ret_type} res = {tomsk_func}(r_res);", file=file)
+        else:
+            print(f"\t{vector_ret_type} res;", file=file)
+            print(f"\tmemcpy(&res, &sres, sizeof(res));", file=file)
         print(f"\treturn res;", file=file)
     elif ret_type_name == "val":
         print(f"\treturn {scalar_func_name}({call_args_str});", file=file)
@@ -1222,6 +1258,16 @@ def gen_c_missing_functions(isa, file, funcs):
                         candidates_map[key].append(c)
                 
                 if isa["name"] != "scalar":
+                    auto_scalar_reqs = {}
+                    has_msk = (mask_kind is not None)
+                    for arg in funcs[f]["proto"]["args"]:
+                        if arg["type"] == "msk":
+                            has_msk = True
+                    if funcs[f]["proto"]["ret"]["type"] == "msk":
+                        has_msk = True
+                    if has_msk and (isa["name"] in ["avx512", "rvv"] or isa["name"].startswith("sve")):
+                        auto_scalar_reqs = {"toreg": [dt_key], "tomsk": [dt_key]}
+
                     candidates_map[key].append({
                         "type": "auto_scalar",
                         "f": f,
@@ -1230,7 +1276,7 @@ def gen_c_missing_functions(isa, file, funcs):
                         "dt_ret": dt_ret,
                         "mask_kind": mask_kind,
                         "level": 3,
-                        "reqs": {}
+                        "reqs": auto_scalar_reqs
                     })
                     
                 candidates_map[key].append({
@@ -1246,16 +1292,41 @@ def gen_c_missing_functions(isa, file, funcs):
                 
                 candidates_map[key].sort(key=lambda c: c["level"])
                 
+    def normalize_cond(c):
+        if not c:
+            return ""
+        c = c.strip()
+        while c.startswith("(") and c.endswith(")"):
+            depth = 0
+            balanced = True
+            for i in range(len(c) - 1):
+                if c[i] == '(':
+                    depth += 1
+                elif c[i] == ')':
+                    depth -= 1
+                    if depth == 0:
+                        balanced = False
+                        break
+            if depth == 1 and c[-1] == ')':
+                c = c[1:-1].strip()
+            else:
+                break
+        return c
+
     def is_req_satisfied(req_f, req_dt_key, target_cond, working_impls):
         if target_cond is None:
             return True
         req_key = (req_f, req_dt_key, None)
         if req_key not in working_impls:
             return False
-        if "" in working_impls[req_key]:
+        norm_target = normalize_cond(target_cond)
+        if norm_target == "":
             return True
-        if target_cond in working_impls[req_key]:
-            return True
+        for w_cond in working_impls[req_key]:
+            if normalize_cond(w_cond) == "":
+                return True
+            if normalize_cond(w_cond) == norm_target:
+                return True
         return False
         
     def intersect_conds(c1, c2):
@@ -1297,6 +1368,8 @@ def gen_c_missing_functions(isa, file, funcs):
                 cand_if = ""
                 if cand["type"] in ["native_or_emu", "generic_emu"]:
                     cand_if = cand["ff"].get("if", "")
+                    if cand["type"] == "native_or_emu" and not cand_if and "define" in isa and isa["define"]:
+                        cand_if = isa["define"]
                     
                 target_cond = intersect_conds(cand_if, rem_cond)
                 if target_cond is None:
