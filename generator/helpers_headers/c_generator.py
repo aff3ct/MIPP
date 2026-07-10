@@ -1073,15 +1073,21 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond):
         print(f"\t{m0_scalar_type} s_m0;", file=file)
         use_safe_conversion = isa["name"] in ["avx512", "rvv"] or isa["name"].startswith("sve")
         if use_safe_conversion:
-            msk_dt_name = msk_dt["name"]
-            m0_reg_vector_type = build_reg(msk_dt, isa, 0, True, False)
-            m0_reg_scalar_type = build_reg(msk_dt, isa_scalar, 0, True, False)
-            toreg_func = _build_func_name(isa, msk_dt_name, msk_dt_name, msk_dt_name, "toreg")
-            scalar_tomsk_func = _build_func_name(isa_scalar, msk_dt_name, msk_dt_name, msk_dt_name, "tomsk")
-            print(f"\t{m0_reg_vector_type} r_m0 = {toreg_func}(m0);", file=file)
-            print(f"\t{m0_reg_scalar_type} s_r_m0;", file=file)
-            print(f"\tmemcpy(&s_r_m0, &r_m0, sizeof(s_r_m0));", file=file)
-            print(f"\ts_m0 = {scalar_tomsk_func}(s_r_m0);", file=file)
+            if isa["name"] == "avx512" and f in ["toreg", "tomsk", "cast_k"]:
+                n_elements = 512 // _get_dt_par_size(dt_par)
+                print(f"\tfor (int i = 0; i < {n_elements}; ++i) {{", file=file)
+                print(f"\t\ts_m0.m[i] = (m0.m & (1ULL << i)) ? ~0 : 0;", file=file)
+                print(f"\t}}", file=file)
+            else:
+                msk_dt_name = msk_dt["name"]
+                m0_reg_vector_type = build_reg(msk_dt, isa, 0, True, False)
+                m0_reg_scalar_type = build_reg(msk_dt, isa_scalar, 0, True, False)
+                toreg_func = _build_func_name(isa, msk_dt_name, msk_dt_name, msk_dt_name, "toreg")
+                scalar_tomsk_func = _build_func_name(isa_scalar, msk_dt_name, msk_dt_name, msk_dt_name, "tomsk")
+                print(f"\t{m0_reg_vector_type} r_m0 = {toreg_func}(m0);", file=file)
+                print(f"\t{m0_reg_scalar_type} s_r_m0;", file=file)
+                print(f"\tmemcpy(&s_r_m0, &r_m0, sizeof(s_r_m0));", file=file)
+                print(f"\ts_m0 = {scalar_tomsk_func}(s_r_m0);", file=file)
         else:
             print(f"\tmemcpy(&s_m0, &m0, sizeof(s_m0));", file=file)
         call_args.append("s_m0")
@@ -1120,15 +1126,21 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond):
             print(f"\t{scalar_type} s_{arg_name};", file=file)
             use_safe_conversion = isa["name"] in ["avx512", "rvv"] or isa["name"].startswith("sve")
             if use_safe_conversion:
-                realdatatype_name = realdatatype["name"]
-                reg_vector_type = build_reg(realdatatype, isa, 0, True, False)
-                reg_scalar_type = build_reg(realdatatype, isa_scalar, 0, True, False)
-                toreg_func = _build_func_name(isa, realdatatype_name, realdatatype_name, realdatatype_name, "toreg")
-                scalar_tomsk_func = _build_func_name(isa_scalar, realdatatype_name, realdatatype_name, realdatatype_name, "tomsk")
-                print(f"\t{reg_vector_type} r_{arg_name} = {toreg_func}({arg_name});", file=file)
-                print(f"\t{reg_scalar_type} s_r_{arg_name};", file=file)
-                print(f"\tmemcpy(&s_r_{arg_name}, &r_{arg_name}, sizeof(s_r_{arg_name}));", file=file)
-                print(f"\ts_{arg_name} = {scalar_tomsk_func}(s_r_{arg_name});", file=file)
+                if isa["name"] == "avx512" and f in ["toreg", "tomsk", "cast_k"]:
+                    n_elements = 512 // _get_dt_par_size(realdatatype["name"])
+                    print(f"\tfor (int i = 0; i < {n_elements}; ++i) {{", file=file)
+                    print(f"\t\ts_{arg_name}.m[i] = ({arg_name}.m & (1ULL << i)) ? ~0 : 0;", file=file)
+                    print(f"\t}}", file=file)
+                else:
+                    realdatatype_name = realdatatype["name"]
+                    reg_vector_type = build_reg(realdatatype, isa, 0, True, False)
+                    reg_scalar_type = build_reg(realdatatype, isa_scalar, 0, True, False)
+                    toreg_func = _build_func_name(isa, realdatatype_name, realdatatype_name, realdatatype_name, "toreg")
+                    scalar_tomsk_func = _build_func_name(isa_scalar, realdatatype_name, realdatatype_name, realdatatype_name, "tomsk")
+                    print(f"\t{reg_vector_type} r_{arg_name} = {toreg_func}({arg_name});", file=file)
+                    print(f"\t{reg_scalar_type} s_r_{arg_name};", file=file)
+                    print(f"\tmemcpy(&s_r_{arg_name}, &r_{arg_name}, sizeof(s_r_{arg_name}));", file=file)
+                    print(f"\ts_{arg_name} = {scalar_tomsk_func}(s_r_{arg_name});", file=file)
             else:
                 print(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof(s_{arg_name}));", file=file)
             call_args.append(f"s_{arg_name}")
@@ -1165,15 +1177,24 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond):
         print(f"\t{scalar_ret_type} sres = {scalar_func_name}({call_args_str});", file=file)
         use_safe_conversion = (ret_type_name == "msk") and (isa["name"] in ["avx512", "rvv"] or isa["name"].startswith("sve"))
         if use_safe_conversion:
-            realdatatype_ret_name = realdatatype_ret["name"]
-            reg_vector_type = build_reg(realdatatype_ret, isa, 0, True, False)
-            reg_scalar_type = build_reg(realdatatype_ret, isa_scalar, 0, True, False)
-            scalar_toreg_func = _build_func_name(isa_scalar, realdatatype_ret_name, realdatatype_ret_name, realdatatype_ret_name, "toreg")
-            tomsk_func = _build_func_name(isa, realdatatype_ret_name, realdatatype_ret_name, realdatatype_ret_name, "tomsk")
-            print(f"\t{reg_scalar_type} s_r_res = {scalar_toreg_func}(sres);", file=file)
-            print(f"\t{reg_vector_type} r_res;", file=file)
-            print(f"\tmemcpy(&r_res, &s_r_res, sizeof(r_res));", file=file)
-            print(f"\t{vector_ret_type} res = {tomsk_func}(r_res);", file=file)
+            if isa["name"] == "avx512" and f in ["toreg", "tomsk", "cast_k"]:
+                n_elements = 512 // _get_dt_par_size(realdatatype_ret["name"])
+                print(f"\tres.m = 0;", file=file)
+                print(f"\tfor (int i = 0; i < {n_elements}; ++i) {{", file=file)
+                print(f"\t\tif (sres.m[i]) {{", file=file)
+                print(f"\t\t\tres.m |= (1ULL << i);", file=file)
+                print(f"\t\t}}", file=file)
+                print(f"\t}}", file=file)
+            else:
+                realdatatype_ret_name = realdatatype_ret["name"]
+                reg_vector_type = build_reg(realdatatype_ret, isa, 0, True, False)
+                reg_scalar_type = build_reg(realdatatype_ret, isa_scalar, 0, True, False)
+                scalar_toreg_func = _build_func_name(isa_scalar, realdatatype_ret_name, realdatatype_ret_name, realdatatype_ret_name, "toreg")
+                tomsk_func = _build_func_name(isa, realdatatype_ret_name, realdatatype_ret_name, realdatatype_ret_name, "tomsk")
+                print(f"\t{reg_scalar_type} s_r_res = {scalar_toreg_func}(sres);", file=file)
+                print(f"\t{reg_vector_type} r_res;", file=file)
+                print(f"\tmemcpy(&r_res, &s_r_res, sizeof(r_res));", file=file)
+                print(f"\t{vector_ret_type} res = {tomsk_func}(r_res);", file=file)
         else:
             print(f"\t{vector_ret_type} res;", file=file)
             print(f"\tmemcpy(&res, &sres, sizeof(res));", file=file)
@@ -1266,7 +1287,8 @@ def gen_c_missing_functions(isa, file, funcs):
                     if funcs[f]["proto"]["ret"]["type"] == "msk":
                         has_msk = True
                     if has_msk and (isa["name"] in ["avx512", "rvv"] or isa["name"].startswith("sve")):
-                        auto_scalar_reqs = {"toreg": [dt_key], "tomsk": [dt_key]}
+                        if not (isa["name"] == "avx512" and f in ["toreg", "tomsk", "cast_k"]):
+                            auto_scalar_reqs = {"toreg": [dt_key], "tomsk": [dt_key]}
 
                     candidates_map[key].append({
                         "type": "auto_scalar",
