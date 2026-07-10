@@ -88,7 +88,7 @@ tpl_mask_generic_emu = {
 		else
 			buff[i] = %get<tp>%(rsrc, i);
 	}
-	return %load<tp>%(buff);""" },
+	return %{{func_name}}<tp>%(buff);""" },
     "load_mskz": { "format": "long", "code":
 """// long format
 	// we want to guarantee that load doesn't touch the memory of masked out elems
@@ -99,7 +99,7 @@ tpl_mask_generic_emu = {
 		else
 			buff[i] = 0;
 	}
-	return %load<tp>%(buff);""" },
+	return %{{func_name}}<tp>%(buff);""" },
     "set": { "format": "long", "code":
 """// long format
 	%r<tp>% op = %set<tp>%(vals);""" },
