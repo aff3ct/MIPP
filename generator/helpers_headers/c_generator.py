@@ -1335,6 +1335,33 @@ def gen_c_missing_functions(isa, file, funcs):
     # 2. Write code to files
     for f in funcs:
         file_w = file.get_fd(isa["name"], f) if is_inc_mgr else file
+        
+        # Emit forward declarations first to prevent order-of-declaration issues (e.g. set_k float64 calling set_k int64)
+        for dt in funcs[f]["datatypes"]:
+            dt_par, dt_ret = _missing_compute_dt_par_dt_ret(dt)
+            dt_key = dt_par + "," + dt_ret
+            
+            mask_kinds = [None]
+            if "mask_support" in funcs[f]:
+                support = funcs[f]["mask_support"]
+                if support.is_maskable():
+                    mask_kinds.append("mask")
+                if support.is_maskzable():
+                    mask_kinds.append("maskz")
+                if support.is_masksable():
+                    mask_kinds.append("masks")
+                    
+            for mask_kind in mask_kinds:
+                key = (f, dt_key, mask_kind)
+                for cand, cond in resolved[key]:
+                    func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
+                    proto_str = build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, masked_version=mask_kind)
+                    if cond != "":
+                        print(f"#if {cond}", file=file_w)
+                    print("static " + proto_str + ";", file=file_w)
+                    if cond != "":
+                        print("#endif", file=file_w)
+                        
         for dt in funcs[f]["datatypes"]:
             dt_par, dt_ret = _missing_compute_dt_par_dt_ret(dt)
             dt_key = dt_par + "," + dt_ret
