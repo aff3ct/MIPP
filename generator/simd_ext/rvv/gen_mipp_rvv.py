@@ -195,10 +195,8 @@ def resolve_lmul_in_isa(isa, lmul):
                     eew_emul = 1
                 elif int(lmul) < 0 :
                     eew_emul = str(int(int(n_bits)*int(-lmul)))
-                    print("Debug eew_emul computation for lmul " + str(lmul) + " and n_bits " + str(n_bits) + " : " + eew_emul)
                 else :
                     eew_emul = str(int(int(n_bits)/int(lmul)))
-                    #print(n_bits, lmul, eew_emul)
                 resolved_isa["datatypes"][dt][key] = resolved_isa["datatypes"][dt][key].format(eew_emul=eew_emul)
     return resolved_isa
 
@@ -234,7 +232,6 @@ typedef double float64_t;//remove after debug"""
     j2_template = Template(tpl_footer_rvv, undefined=StrictUndefined)
     print(j2_template.render(), file=file_common)
     
-    print("Generate RVV")
     copy_mipp_funcs = copy.deepcopy(mipp_funcs)
         
     isa_rvv_lmul1 = resolve_lmul_in_isa(isa_rvv, "1")

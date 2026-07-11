@@ -33,7 +33,6 @@ def gen_mipp_neon(include_manager):
     j2_template = Template(tpl_footer_neon, undefined=StrictUndefined)
     print(j2_template.render(), file=file_common)
     
-    print("Generate NEON")
     copy_mipp_funcs = copy.deepcopy(mipp_funcs)
     gen_c_functions(isa_neon, include_manager, copy_mipp_funcs, implems_neon)
     gen_c_functions(isa_neon, include_manager, copy_mipp_funcs, implems_emu_neon)

@@ -35,8 +35,7 @@ def gen_mipp_sse(include_manager):
     tpl_footer_sse = """#endif /* MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SSE_H_ */"""
     j2_template = Template(tpl_footer_sse, undefined=StrictUndefined)
     print(j2_template.render(), file=file_common)
-    
-    print("Generate SSE")
+
     copy_mipp_funcs = copy.deepcopy(mipp_funcs)
     gen_c_functions(isa_sse, include_manager, copy_mipp_funcs, implems_sse)
     gen_c_functions(isa_sse, include_manager, copy_mipp_funcs, implems_emu_sse)

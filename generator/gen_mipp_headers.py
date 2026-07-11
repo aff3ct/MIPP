@@ -5,6 +5,7 @@ import shutil
 import struct
 import argparse
 import copy
+import time
 
 
 path = os.getcwd()
@@ -63,14 +64,10 @@ scalar_path = os.path.join(include_gen_path, "scalar")
 def create_folder(folder_path):
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
-        print(folder_path + " folder successfully created")
-    else:
-        print("The " + folder_path + " folder already exists.")
 
 def clean_folder(folder_path):
     try:
         shutil.rmtree(folder_path)
-        print(f"Successfully deleted folder: {folder_path}")
     except Exception as e:
         print(f"Failed to delete folder: {folder_path}. Reason: {e}")
 
@@ -228,63 +225,203 @@ def main(argv=None):
     selected = _parse_layers(args.layers)
     isa_layers, run_wrappers = _expand_layer_keywords(selected)
 
+    print("=" * 85)
+    print(" MIPP Header Generator")
+    print("=" * 85)
+    print(f"  Target sizes for SVE: {sorted(isa_sve['size'], reverse=True)}")
+    print(f"  LMUL options: {all_lmul} | LDIV options: {all_ldiv}")
+    print("-" * 85)
+
     # clean all (optional)
     if not args.no_clean:
+        print("  ➔ Cleaning old generated files...", end="", flush=True)
+        t0 = time.perf_counter()
         clean_folder(include_gen_path)
+        print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
 
     # create folders (always ensure these exist)
-    create_folder(sse_path)
-    create_folder(avx_path)
-    create_folder(avx512_path)
-    create_folder(sve_path)
-    create_folder(rvv_path)
-    create_folder(neon_path)
-    create_folder(scalar_path)
-
-    # wrappers/layers folders
-    create_folder(c_path)
-    create_folder(cpp_path)
-    create_folder(obj_path)
+    for folder in [sse_path, avx_path, avx512_path, sve_path, rvv_path, neon_path, scalar_path, c_path, cpp_path, obj_path]:
+        create_folder(folder)
 
     all_isas_str = ["avx512", "avx", "sse", "rvv", "neon", "scalar"]
     if not args.skip_sve:
         all_isas_str.append("sve")
 
     # CREATE INCLUDE MANAGER
-
     include_manager = IncludeManager(all_isas_str, mode=args.header_type)
 
     # ISA generators
-    if "sse" in isa_layers:
-        gen_mipp_sse(include_manager)
-    if "avx" in isa_layers:
-        gen_mipp_avx(include_manager)
-    if "avx512" in isa_layers:
-        gen_mipp_avx512(include_manager)
-    if "sve" in isa_layers and not args.skip_sve:
-        gen_mipp_sve(include_manager)
-    if "rvv" in isa_layers:
-        gen_mipp_rvv(include_manager)
-    if "neon" in isa_layers:
-        gen_mipp_neon(include_manager)
     if "scalar" in isa_layers:
+        print("  ➔ Generating Scalar...", end="", flush=True)
+        t0 = time.perf_counter()
         gen_mipp_scalar(include_manager)
+        print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
+    if "sse" in isa_layers:
+        print("  ➔ Generating SSE...", end="", flush=True)
+        t0 = time.perf_counter()
+        gen_mipp_sse(include_manager)
+        print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
+    if "avx" in isa_layers:
+        print("  ➔ Generating AVX...", end="", flush=True)
+        t0 = time.perf_counter()
+        gen_mipp_avx(include_manager)
+        print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
+    if "avx512" in isa_layers:
+        print("  ➔ Generating AVX-512...", end="", flush=True)
+        t0 = time.perf_counter()
+        gen_mipp_avx512(include_manager)
+        print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
+    if "sve" in isa_layers and not args.skip_sve:
+        print("  ➔ Generating SVE...", end="", flush=True)
+        t0 = time.perf_counter()
+        gen_mipp_sve(include_manager)
+        print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
+    if "rvv" in isa_layers:
+        print("  ➔ Generating RVV...", end="", flush=True)
+        t0 = time.perf_counter()
+        gen_mipp_rvv(include_manager)
+        print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
+    if "neon" in isa_layers:
+        print("  ➔ Generating Neon...", end="", flush=True)
+        t0 = time.perf_counter()
+        gen_mipp_neon(include_manager)
+        print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
 
     # Wrappers / top-level headers
-    if run_wrappers and not args.skip_sve:
-        generate_mipp_h(include_manager)
-        generate_c_interface([isa_sse, isa_avx, isa_avx512, isa_sve, isa_rvv, isa_neon, isa_scalar], include_manager)
-        generate_cpp(include_manager, [isa_sse, isa_avx, isa_avx512, isa_sve, isa_rvv, isa_neon, isa_scalar])
-        generate_cpp_object(include_manager)
-    elif run_wrappers and args.skip_sve:
-        generate_mipp_h(include_manager)
-        generate_c_interface([isa_sse, isa_avx, isa_avx512, isa_rvv, isa_neon, isa_scalar], include_manager)
-        generate_cpp(include_manager, [isa_sse, isa_avx, isa_avx512, isa_rvv, isa_neon, isa_scalar])
-        generate_cpp_object(include_manager)
+    if run_wrappers:
+        print("  ➔ Generating wrappers & C/C++ interface...", end="", flush=True)
+        t0 = time.perf_counter()
+        if not args.skip_sve:
+            generate_mipp_h(include_manager)
+            generate_c_interface([isa_sse, isa_avx, isa_avx512, isa_sve, isa_rvv, isa_neon, isa_scalar], include_manager)
+            generate_cpp(include_manager, [isa_sse, isa_avx, isa_avx512, isa_sve, isa_rvv, isa_neon, isa_scalar])
+            generate_cpp_object(include_manager)
+        else:
+            generate_mipp_h(include_manager)
+            generate_c_interface([isa_sse, isa_avx, isa_avx512, isa_rvv, isa_neon, isa_scalar], include_manager)
+            generate_cpp(include_manager, [isa_sse, isa_avx, isa_avx512, isa_rvv, isa_neon, isa_scalar])
+            generate_cpp_object(include_manager)
+        print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
 
-    print("Generating MIPP code for sse, avx2, avx512, rvv and sve with size in " + str(isa_sve["size"]))
-    print("With lmul in " + str(all_lmul) + " and ldiv in " + str(all_ldiv))
+    # Print summary table at the end
+    print_summary_table(include_gen_path)
+
+def print_summary_table(include_dir):
+    import os
+    import glob
+    import re
+
+    def classify_func_name(func_name):
+        if re.search(r'_(m|d)\d+', func_name):
+            return "LM/D"
+        if func_name.endswith(("_mask", "_maskz", "_masks")):
+            return "Msk"
+        return "Std"
+
+    # Define the ISAs to check
+    isas = ["scalar", "sse", "avx", "avx512", "neon", "rvv", "sve"]
     
+    # We want to check which ISAs have files generated
+    existing_isas = []
+    for isa in isas:
+        if isa == "sve":
+            sve_dir = os.path.join(include_dir, "sve")
+            if os.path.isdir(sve_dir) and glob.glob(os.path.join(sve_dir, "mipp_impl_sve*_gen.h")):
+                existing_isas.append(isa)
+        else:
+            isa_dir = os.path.join(include_dir, "simd_ext", isa, "functions")
+            if os.path.isdir(isa_dir):
+                existing_isas.append(isa)
+
+    if not existing_isas:
+        return
+
+    # Print Table Header
+    print("\n" + "="*167)
+    print(" MIPP IMPLEMENTATION LEVEL SUMMARY")
+    print("="*167)
+    
+    # Header row 1: Levels
+    h1 = f"{'Extension':<12} | {f'{'Level 0 (Nat)':^33}'} | {f'{'Level 1 (SpE)':^33}'} | {f'{'Level 2 (GeE)':^33}'} | {f'{'Level 3 (Sca)':^33}'} | {'Stubs':>8}"
+    print(h1)
+    
+    # Header row 2: Sub-columns
+    sub_cols = f"{'Std':^5} {'Msk':^5} {'LM/D':^6} | {'Total':^12}"
+    h2 = f"{'':<12} | {sub_cols} | {sub_cols} | {sub_cols} | {sub_cols} | {'':>8}"
+    print(h2)
+    print("-" * 167)
+
+    for isa in existing_isas:
+        stats = {
+            0: {"Std": 0, "Msk": 0, "LM/D": 0},
+            1: {"Std": 0, "Msk": 0, "LM/D": 0},
+            2: {"Std": 0, "Msk": 0, "LM/D": 0},
+            3: {"Std": 0, "Msk": 0, "LM/D": 0},
+            "stub": 0
+        }
+        
+        if isa == "sve":
+            sve_dir = os.path.join(include_dir, "sve")
+            files = glob.glob(os.path.join(sve_dir, "mipp_impl_sve*_gen.h"))
+        else:
+            isa_dir = os.path.join(include_dir, "simd_ext", isa, "functions")
+            files = glob.glob(os.path.join(isa_dir, "*.h"))
+            
+        # Read all files and extract function levels and categories
+        for filepath in files:
+            try:
+                with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
+                    current_func = None
+                    for line in f:
+                        if line.startswith("static ") or line.startswith("inline ") or (" static " in line) or (" inline " in line):
+                            m = re.search(r'(mipp_\w+)\s*\(', line)
+                            if m:
+                                current_func = m.group(1)
+                        
+                        if "Level 0" in line:
+                            if current_func:
+                                stats[0][classify_func_name(current_func)] += 1
+                        elif "Level 1" in line:
+                            if current_func:
+                                stats[1][classify_func_name(current_func)] += 1
+                        elif "Level 2" in line:
+                            if current_func:
+                                stats[2][classify_func_name(current_func)] += 1
+                        elif "Level 3" in line:
+                            if current_func:
+                                stats[3][classify_func_name(current_func)] += 1
+                        elif "MIPP panic" in line:
+                            stats["stub"] += 1
+            except Exception:
+                pass
+                
+        # Calculate totals for each category to compute percentages
+        totals = {
+            "Std": sum(stats[lvl]["Std"] for lvl in [0, 1, 2, 3]),
+            "Msk": sum(stats[lvl]["Msk"] for lvl in [0, 1, 2, 3]),
+            "LM/D": sum(stats[lvl]["LM/D"] for lvl in [0, 1, 2, 3])
+        }
+        
+        def fmt_tot_cell(val, total):
+            if total == 0:
+                pct_str = "(0%)"
+            else:
+                pct = (val / total) * 100
+                pct_str = f"({pct:.0f}%)"
+            return f"{val:>5} {pct_str:>6}"
+
+        def fmt_level(level):
+            std_val = stats[level]["Std"]
+            msk_val = stats[level]["Msk"]
+            lmd_val = stats[level]["LM/D"]
+            tot_val = std_val + msk_val + lmd_val
+            
+            total_all = totals["Std"] + totals["Msk"] + totals["LM/D"]
+            
+            return f"{std_val:>5} {msk_val:>5} {lmd_val:>6} | {fmt_tot_cell(tot_val, total_all)}"
+
+        print(f"{isa:<12} | {fmt_level(0)} | {fmt_level(1)} | {fmt_level(2)} | {fmt_level(3)} | {stats['stub']:>8}")
+    print("="*167 + "\n")
+
 if __name__ == "__main__":
-    #parser = argparse.ArgumentParser(prog='gen_mipp.py', description='MIPP generator')
     main()

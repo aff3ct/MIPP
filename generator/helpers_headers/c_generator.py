@@ -268,7 +268,6 @@ def _parse_placeholders_or_skip(pre_rendering, isa, funcs, f, dt_par, dt_ret, dt
         return parse_placeholders(pre_rendering, isa, funcs, f, dt_par, dt_ret, lmul=lmul, isa_name=isa_name)
     except Exception as err:
         err_message = "'" + f + "<" + dt_key + ">' has been skipped (reason: \"{0}\").".format(err)
-        print(" -> " + err_message)
         print("// " + err_message, file=file)
         return None
 
@@ -433,11 +432,6 @@ def _emit_ifdef_end(ifd, file):
     if ifd:
         print("#endif", file=file)
 
-
-def _maybe_print_emulated_implemented(f, dt_key, ff):
-    """print implemented message in cli for emulated functions."""
-    if "type" in ff and ff["type"] == "emulated":
-        print(" -> '" + f + "<" + dt_key + ">' has been implemented.")
 
 
 def _emit_already_implemented_message(f, dt_key, file, generic=False):
@@ -729,7 +723,6 @@ def _gen_c_functions_one_unmasked(isa, file, funcs, f, ff, dt):
     _emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rendering, file)
 
     _emit_ifdef_end(ifd, file)
-    _maybe_print_emulated_implemented(f, dt_key, ff)
 
 def _gen_c_function_one_masked(isa, file, funcs, f, ff, dt):
     
@@ -785,7 +778,6 @@ def _gen_c_function_one_masked(isa, file, funcs, f, ff, dt):
     )
     
     _emit_ifdef_end(ifd, file)
-    _maybe_print_emulated_implemented(f + "<" + mask_kind + ">", dt_key, ff)
 
 
 #### WIP 
@@ -1969,8 +1961,6 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
 
 
                     if f in ["gather", "scatter"] and ("64" in dt_key or "64" in dt_ret) and lmul < 0:
-                        # print(f"Debug: skipping '{f}<{dt_key}>' for LMUL={lmul} (reason: The functions mixes lmul and ldiv in a tough way")
-                        
                         # HACK define the symbol anyways and force a missing implem.
                         print("", file=file)
                         _missing_emit_ifdef_begin(ifd, file)
@@ -2044,7 +2034,6 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                     )
      
                     _emit_ifdef_end(ifd, file)
-                    _maybe_print_emulated_implemented(f + "<" + mask_kind + ">", dt_key, ff)
      
                     # Preserve original tracking of LMUL implementations for masked functions
                     _rvv_mark_lmul_seen_masked(funcs, f, dt_key, mask_kind, lmul)
@@ -2057,8 +2046,6 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                     dt_key = dt_par + "," + dt_ret
 
                     if f in ["cast", "cast_k", "gather", "scatter"] and ("64" in dt_key or "64" in dt_ret) and lmul < 0:
-                        print(f"Debug: skipping '{f}<{dt_key}>' for LMUL={lmul} (reason: The functions mixes lmul and ldiv in a tough way)")
-                            
                         # HACK define the symbol anyways and force a missing implem.
                         print("", file=file)
                         _missing_emit_ifdef_begin(ifd, file)
@@ -2133,7 +2120,6 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                     )
 
                     _emit_ifdef_end(ifd, file)
-                    _maybe_print_emulated_implemented(f, dt_key, ff)
 
                     # Preserve original tracking of LMUL implementations
                     _rvv_mark_lmul_seen(funcs, f, dt_key, lmul)

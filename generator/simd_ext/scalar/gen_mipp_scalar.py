@@ -107,6 +107,7 @@ def _emit_function_body_scalar(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rende
     func_name = _build_func_name_scalar(isa, dt, dt_par, dt_ret, f)
 
     print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, masked_version = masked_version, lmul=lmul) + " {", file=file)
+    print("\t// Level 3 (Auto Scalar Fallback)", file=file)
 
     lmul_str = ""
     if lmul == 0:
@@ -528,7 +529,6 @@ typedef double float64_t;
 
     gen_c_defines_scalar(isa_scalar, file_common)
     gen_c_structures_scalar(isa_scalar, file_common)
-    print("Generate Scalar...", end=" ")
     copy_mipp_funcs = copy.deepcopy(mipp_funcs)
     
     gen_c_functions_scalar(isa_scalar, include_manager, copy_mipp_funcs, implems_scalar)
@@ -545,5 +545,3 @@ typedef double float64_t;
     include_manager.resolve_all_dependencies(isa_scalar["name"], copy_mipp_funcs)
     include_manager.create_glue_file(isa_scalar["name"], "../include/scalar/mipp_impl_scalar_gen.h")
     include_manager.close_layer_fds(isa_scalar["name"])
-
-    print("Done.")

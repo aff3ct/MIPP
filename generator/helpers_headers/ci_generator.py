@@ -266,7 +266,6 @@ def generate_c_interface(isa_list, include_manager=None):
 
 def gen_ci_defines(isa_list, file):
     for i, isa in enumerate(isa_list):
-        print(isa["name"])
         if i == 0:
             print("#if " + isa["gen_define"], file=file)
         else:

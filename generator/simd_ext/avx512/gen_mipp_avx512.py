@@ -37,8 +37,7 @@ def gen_mipp_avx512(include_manager):
     tpl_footer_avx = """#endif /* MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX512_H_ */"""
     j2_template = Template(tpl_footer_avx, undefined=StrictUndefined)
     print(j2_template.render(), file=file_common)
- 
-    print("Generate AVX512")
+
     copy_mipp_funcs = copy.deepcopy(mipp_funcs)
     gen_c_functions(isa_avx512, include_manager, copy_mipp_funcs, implems_avx512)
     gen_c_functions(isa_avx512, include_manager, copy_mipp_funcs, implems_emu_avx512)

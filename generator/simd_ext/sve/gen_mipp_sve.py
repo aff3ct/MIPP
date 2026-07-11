@@ -78,7 +78,6 @@ def gen_mipp_sve(include_manager=None):
         
         isa_sve["name"] = ref_isa_name+str(current_sve_size)
         isa_sve["size"] = current_sve_size
-        print("Generate SVE"+str(current_sve_size))
         
         file = open("../include/sve/mipp_impl_sve"+str(current_sve_size)+"_gen.h", "w")
         
