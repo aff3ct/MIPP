@@ -305,19 +305,37 @@ class IncludePath:
             except FileNotFoundError:
                 old = ""
 
+        # Extract forward declarations (lines like "static inline ... ;")
+        # and move them before the #include directives to break circular deps.
+        fwd_decls = []
+        body_lines = []
+        for line in old.split("\n"):
+            stripped = line.strip()
+            if (stripped.startswith("static inline ") and stripped.endswith(";")
+                    and "{" not in stripped):
+                fwd_decls.append(line)
+            else:
+                body_lines.append(line)
+
         # Build prefix
-        prefix = "#pragma once\n"
+        prefix = "#pragma once\n\n"
         # sort dependencies to ensure deterministic order in includes
         dep_list = list(self.dependencies)
         dep_list.sort()
+
+        # Forward declarations first (before includes to break circular deps)
+        if fwd_decls:
+            for decl in fwd_decls:
+                prefix += decl + "\n"
+            prefix += "\n"
+
         for dep in dep_list:
             prefix += f'#include "{dep}"\n'
-        prefix += "\n"
 
-        # Rewrite file from scratch with prefix + old
+        # Rewrite file from scratch with prefix + remaining body
         with open(full_path, "w", encoding="utf-8", newline="") as f:
             f.write(prefix)
-            f.write(old)
+            f.write("\n".join(body_lines))
         # Reopen for further appends
         self.file = open(full_path, "a+", encoding="utf-8", newline="")
         self._is_prefixed = True

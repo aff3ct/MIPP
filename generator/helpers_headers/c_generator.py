@@ -1179,6 +1179,7 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond):
         if use_safe_conversion:
             if isa["name"] == "avx512" and f in ["toreg", "tomsk", "cast_k"]:
                 n_elements = 512 // _get_dt_par_size(realdatatype_ret["name"])
+                print(f"\t{vector_ret_type} res;", file=file)
                 print(f"\tres.m = 0;", file=file)
                 print(f"\tfor (int i = 0; i < {n_elements}; ++i) {{", file=file)
                 print(f"\t\tif (sres.m[i]) {{", file=file)

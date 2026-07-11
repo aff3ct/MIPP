@@ -1502,7 +1502,9 @@ class Or(Expr):
         return hash(("Or", tuple(sorted(self.children, key=lambda x: str(x)))))
 
 def tokenize(s):
-    pattern = r"(defined\s*\(\s*[a-zA-Z0-9_]+\s*\)|&&|\|\||!|\(|\)|[a-zA-Z0-9_]+)"
+    # Capture comparison sub-expressions (e.g. "__ARM_ARCH >= 8") as single atomic tokens,
+    # then defined(...), boolean operators, parentheses, and identifiers.
+    pattern = r"([a-zA-Z_][a-zA-Z0-9_]*\s*(?:>=|<=|==|!=|>|<)\s*[a-zA-Z0-9_]+|defined\s*\(\s*[a-zA-Z0-9_]+\s*\)|&&|\|\||!|\(|\)|[a-zA-Z0-9_]+)"
     tokens = []
     for m in re.finditer(pattern, s):
         tokens.append(m.group(1))
