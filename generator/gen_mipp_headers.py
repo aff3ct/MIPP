@@ -220,6 +220,11 @@ def main(argv=None):
     # check that all mipp funcs have a scalar implem before to start
     check_mipp_funcs_scalar_implems()
 
+    # Clear tracking sets for separators to handle multiple runs/interactive environments cleanly
+    from c_generator import seen_lmul_separators, seen_ldiv_separators
+    seen_lmul_separators.clear()
+    seen_ldiv_separators.clear()
+
     selected = _parse_layers(args.layers)
     isa_layers, run_wrappers = _expand_layer_keywords(selected)
 

@@ -452,6 +452,11 @@ for iemu in implems_mask_generic_emu:
     for sub_iemu in implems_mask_generic_emu[iemu]:
         if "type" not in sub_iemu:
             sub_iemu["type"] = "emulated"
+        sub_iemu["level"] = 2
+
+for iemu in implems_generic_emu:
+    for sub_iemu in implems_generic_emu[iemu]:
+        sub_iemu["level"] = 2
 
 ################################# HORIZONTAL LMUL FUNCTIONS ############################################
 
@@ -651,3 +656,7 @@ implems_horiz_lmul_generic_emu = {
     "wcvt": [
         { "instr_name": "wcvt",          "datatypes": all_datatypes_widenning, "version": "horiz_lmul", "template": tpl_horiz_lmul_generic_emu["wcvt"],         "dependencies" : {"store", "load"} } ], # wcvt
 }
+
+for iemu in implems_horiz_lmul_generic_emu:
+    for sub_iemu in implems_horiz_lmul_generic_emu[iemu]:
+        sub_iemu["level"] = 2

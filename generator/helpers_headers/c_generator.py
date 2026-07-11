@@ -13,6 +13,27 @@ from implem_avx512 import isa_avx512
 from implem_avx import isa_avx
 from implem_sse import isa_sse
 
+seen_lmul_separators = set()
+seen_ldiv_separators = set()
+
+def _maybe_emit_lmul_separator(isa_name, f, file):
+    key = (isa_name, f)
+    if key not in seen_lmul_separators:
+        seen_lmul_separators.add(key)
+        print("", file=file)
+        print("// " + "=" * 117, file=file)
+        print("// " + " " * 113 + "LMUL", file=file)
+        print("// " + "=" * 117, file=file)
+
+def _maybe_emit_ldiv_separator(isa_name, f, file):
+    key = (isa_name, f)
+    if key not in seen_ldiv_separators:
+        seen_ldiv_separators.add(key)
+        print("", file=file)
+        print("// " + "=" * 117, file=file)
+        print("// " + " " * 113 + "LDIV", file=file)
+        print("// " + "=" * 117, file=file)
+
 def _gen_ldiv_structs_avx(isa_base, isa_div, file):
     # hardcoded d2 is not very good looking tbh.
     template = """typedef rvd_{{ isa_div.name }}_{{datatype.category}}{{datatype.n_bits}}_t rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d2_t;"""
@@ -179,17 +200,6 @@ def gen_c_structures(isa, file, is_scalar=False):
 # ----------------------------------------------------------------------------------------------------------------------
 # Shared helpers
 # ----------------------------------------------------------------------------------------------------------------------
-def _emit_separator(f, file):
-    """
-    Writes a separator comment for a given function name, to improve readability of the generated code.
-    """
-    n_dashes = 120 - 5 - len(f)
-    print("// ", end="", file=file)
-    while n_dashes > 0:
-        print("-", end="", file=file)
-        n_dashes = n_dashes - 1
-    print(f" {f}", file=file)
-
 
 def _is_masked_implem(f, ff):
     """
@@ -384,10 +394,23 @@ def _emit_short_format_prologue(funcs_for_f, dt_ret, isa, file, lmul=0):
             print("\tres.m = ", end="", file=file)
 
 
-def _emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rendering, file, masked_version=None, lmul=0):
+def _emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rendering, file, masked_version=None, lmul=0, level=None):
     func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
 
     print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, masked_version = masked_version, lmul=lmul) + " {", file=file)
+
+    if level is None and ff is not None:
+        level = ff.get("level", 1 if ("type" in ff and ff["type"] == "emulated") else 0)
+
+    if level is not None:
+        level_comments = {
+            0: "Level 0 (Optimal / Native)",
+            1: "Level 1 (Specific Emulated)",
+            2: "Level 2 (Generic Emulated)",
+            3: "Level 3 (Auto Scalar Fallback)"
+        }
+        if level in level_comments:
+            print(f"\t// {level_comments[level]}", file=file)
 
     if ff["template"]["format"] == "short":
         # Original code had a redundant always-true condition; keep behavior identical.
@@ -768,6 +791,8 @@ def _gen_c_function_one_masked(isa, file, funcs, f, ff, dt):
 #### WIP 
 
 def _c_lmul_writer(f, dt, dt_par, dt_ret, isa, funcs, file, mask_type=None, lmul=0):
+    _maybe_emit_lmul_separator(isa["name"], f, file)
+    print("", file=file)
 
     mask_str = ""
     if mask_type == "mask":
@@ -862,6 +887,7 @@ def _gen_c_generic_one(isa, file, funcs, f, ff, dt):
         ff=ff,
         post_rendering=post_rendering,
         file=file,
+        level=2,
     )
 
     _add_endif_if_isdef(funcs, f, dt_key, file)
@@ -978,6 +1004,8 @@ def _gen_c_missing_one_masked(isa, file, funcs, f, dt, mask_kind, lmul=0):
         _missing_emit_ifdef_end(ifd, file)
 
 def _gen_c_function_one_ldiv_avx(isa_base, isa_div, file, funcs, f, ff, dt, mask_kind, ldiv=-2):
+    _maybe_emit_ldiv_separator(isa_base["name"], f, file)
+    print("", file=file)
     """
     fairly straightforward the uint32_d2 avx function is JUST the uint32_m1 version of avx so wrapper to it.
     smth like : 
@@ -1054,6 +1082,7 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond):
         
     proto_str = build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, masked_version=mask_kind)
     print("static " + proto_str + " {", file=file)
+    print("\t// Level 3 (Auto Scalar Fallback)", file=file)
     
     proto = funcs[f]["proto"]
     cnt_reg = 0
@@ -1221,7 +1250,7 @@ def gen_c_functions(isa, file, funcs, implems):
                         "f": f,
                         "ff": ff,
                         "dt": dt,
-                        "level": 1 if ("type" in ff and ff["type"] == "emulated") else 0
+                        "level": ff.get("level", 1 if ("type" in ff and ff["type"] == "emulated") else 0)
                     })
         else:
             print("Panic: '" + f + "' function does not exist.")
@@ -1516,7 +1545,7 @@ def gen_c_missing_functions(isa, file, funcs):
                 for cand, cond in resolved[key]:
                     if cond == "0":
                         continue
-                    _emit_separator(f, file_w)
+                    print("", file=file_w)
                     
                     if cand["type"] in ["native_or_emu", "generic_emu"]:
                         pre_rendering = _render_template(isa, cand["ff"], dt_par, dt_ret, func_name=f)
@@ -1525,7 +1554,7 @@ def gen_c_missing_functions(isa, file, funcs):
                         
                         if cond != "":
                             print(f"#if {cond}", file=file_w)
-                        _emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, cand["ff"], post_rendering, file_w, masked_version=mask_kind)
+                        _emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, cand["ff"], post_rendering, file_w, masked_version=mask_kind, level=cand["level"])
                         if cond != "":
                             print("#endif", file=file_w)
                             
@@ -1549,7 +1578,7 @@ def gen_c_missing_functions_lmul(isa, file, funcs, lmul):
     if isa["name"].startswith("sve"):
         for f in funcs:
             for dt in funcs[f]["datatypes"]:
-                _emit_separator(f, file)
+                print("", file=file)
                 _gen_c_missing_one_dt(isa, file, funcs, f, dt, lmul=lmul)
 
                 if "mask_support" in funcs[f]:
@@ -1564,6 +1593,10 @@ def gen_c_missing_functions_lmul(isa, file, funcs, lmul):
         #in that case file is actually an include manager, so we need to get the right file for each function
         for f in funcs:
             file_w = file.get_fd(isa["name"], f)
+            if lmul in [2, 4, 8]:
+                _maybe_emit_lmul_separator(isa["name"], f, file_w)
+            elif lmul < 0:
+                _maybe_emit_ldiv_separator(isa["name"], f, file_w)
             for dt in funcs[f]["datatypes"]:
                 
                 # hack skip ldiv 4 rvv rn
@@ -1571,7 +1604,7 @@ def gen_c_missing_functions_lmul(isa, file, funcs, lmul):
                 # if isa["name"] == "rvv" and lmul < 0 and isa["datatypes"][dt_par]["width"] == "64":
                 #     continue
 
-                _emit_separator(f, file_w)
+                print("", file=file_w)
                 _gen_c_missing_one_dt(isa, file_w, funcs, f, dt, lmul=lmul)
 
                 if "mask_support" in funcs[f]:
@@ -1687,6 +1720,7 @@ def _gen_c_horiz_lmul_one(isa, file, funcs, f, ff, dt, lmul, mkind=None, dummy=F
         func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
         proto = build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul=lmul, isa_name=True, masked_version=mkind)
         print("static " + proto + " {", file=file)
+        print("\t// Level 2 (Generic Emulated)", file=file)
 
     if (mkind == "maskz" or mkind == "mask") and lmul >= 2:
         l2 = int(lmul) // 2
@@ -1917,6 +1951,10 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
             exit(-1)
 
         file = include_manager.get_fd(isa["name"], f)
+        if lmul in [2, 4, 8]:
+            _maybe_emit_lmul_separator(isa["name"], f, file)
+        elif lmul < 0:
+            _maybe_emit_ldiv_separator(isa["name"], f, file)
         # print file name
         # print("Debug: generating for '" + f + "' function in file: " + file.name)
         
@@ -1934,7 +1972,7 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                         # print(f"Debug: skipping '{f}<{dt_key}>' for LMUL={lmul} (reason: The functions mixes lmul and ldiv in a tough way")
                         
                         # HACK define the symbol anyways and force a missing implem.
-                        _emit_separator(f, file)
+                        print("", file=file)
                         _missing_emit_ifdef_begin(ifd, file)
 
                         func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
@@ -1943,7 +1981,7 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                         _missing_emit_ifdef_end(ifd, file)
                         continue
 
-                    print("// ----------------------------------------------------------------------------------------------------------------------------------------------", f, file=file)
+                    print("", file=file)
 
                     if (not is_missing_masked_func(funcs, f, dt_key, mask_kind)) and _rvv_seen_lmul_masked(funcs, f, dt_key, mask_kind, lmul):
                         print(
@@ -2022,7 +2060,7 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                         print(f"Debug: skipping '{f}<{dt_key}>' for LMUL={lmul} (reason: The functions mixes lmul and ldiv in a tough way)")
                             
                         # HACK define the symbol anyways and force a missing implem.
-                        _emit_separator(f, file)
+                        print("", file=file)
                         _missing_emit_ifdef_begin(ifd, file)
 
                         func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
@@ -2032,7 +2070,7 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                     
                         continue
 
-                    print("// ----------------------------------------------------------------------------------------------------------------------------------------------", f, file=file)
+                    print("", file=file)
 
                     if (not is_missing_func(funcs, f, dt_key)) and _rvv_seen_lmul(funcs, f, dt_key, lmul):
                         print(
