@@ -373,8 +373,10 @@ def _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, mk_letter
 
     print("template <>", file=file)
 
-    # Build the masked signature at the right LMUL, then rewrite the name into the template-id form.
-    sig = build_proto(proto, dt_par, dt_ret, isa, cpp_func_name, lmul, isa_name=isa_name, cpp=True, masked_version=mask_kind)
+    full_cpp_func_name = cpp_func_name
+    if mask_kind:
+        full_cpp_func_name += "_" + mask_kind
+    sig = build_proto(proto, dt_par, dt_ret, isa, full_cpp_func_name, lmul, isa_name=isa_name, cpp=True, masked_version=mask_kind)
 
 
     if isa is not None:

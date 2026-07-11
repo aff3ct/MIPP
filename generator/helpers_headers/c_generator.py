@@ -322,10 +322,10 @@ def _combine_current_ifdefs(funcs, f, dt_key, ifd_prev):
     ifd_cur = build_ifdef(funcs, f, dt_key, len(funcs[f]["implem_status"][dt_key]) - 1)
 
     if ifd_prev and ifd_cur:
-        return ifd_prev + " && (" + ifd_cur + ")"
+        return simplify_cond_str(ifd_prev + " && (" + ifd_cur + ")")
     elif ifd_cur:
-        return ifd_cur
-    return ifd_prev
+        return simplify_cond_str(ifd_cur)
+    return simplify_cond_str(ifd_prev)
 
 
 def _update_emulated(funcs, f, dt_key, ff, ifd):
@@ -351,16 +351,16 @@ def _emit_ifdef_begin_and_update_emulated(funcs, f, dt_key, ff, ifd, file):
 
 
 
-def _build_func_name(isa, dt, dt_par, dt_ret, f, masked_version=False):
+def _build_func_name(isa, dt, dt_par, dt_ret, f, masked_version=False, lmul=0):
     """
     wrapper around build_func_name and build_func_name_short. 
     Which function to call is decided if the type isn't a "double type"
     (i.e the function is not cast or cast_k)
     """
     if len(dt.split(',')) <= 1:
-        return build_func_name_short(isa, dt_par, f, True, masked_version=masked_version)
+        return build_func_name_short(isa, dt_par, f, True, masked_version=masked_version, lmul=lmul)
     else:
-        return build_func_name(isa, dt_par, dt_ret, f, True, masked_version=masked_version)
+        return build_func_name(isa, dt_par, dt_ret, f, True, masked_version=masked_version, lmul=lmul)
 
 
 def _emit_short_format_prologue(funcs_for_f, dt_ret, isa, file, lmul=0):
@@ -394,7 +394,7 @@ def _emit_short_format_prologue(funcs_for_f, dt_ret, isa, file, lmul=0):
 
 
 def _emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rendering, file, masked_version=None, lmul=0, level=None):
-    func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
+    func_name = _build_func_name(isa, dt, dt_par, dt_ret, f, masked_version=masked_version, lmul=lmul)
 
     print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, masked_version = masked_version, lmul=lmul) + " {", file=file)
 
@@ -572,15 +572,9 @@ def _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, masked_ve
     writes the "body" of the missing function. 
     Which prints a panic messages and terminates the program.
     """
-    mask_str = ""
-    if masked_version:
-        mask_str = "_" + masked_version
-    #adds the lmul string to fn name
-    #if lmul is not None and lmul > 0:
-    #	mask_str = mask_str + "_m" + str(lmul)
-
+    full_func_name = _build_func_name(isa, dt_par, dt_par, dt_ret, f, masked_version=masked_version, lmul=lmul)
     print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul, True, masked_version=masked_version) + " {", file=file)
-    print("\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \"" + func_name + mask_str + "\");", file=file)
+    print("\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \"" + full_func_name + "\");", file=file)
     print("\texit(-1);", file=file)
     print("}", file=file)
 
@@ -637,10 +631,10 @@ def _combine_current_ifdefs_masked(funcs, f, dt_key, mask_kind, ifd_prev):
     ifd_cur = build_ifdef_masked(funcs, f, dt_key, mask_kind, len(bucket) - 1)
 
     if ifd_prev and ifd_cur:
-        return ifd_prev + " && (" + ifd_cur + ")"
+        return simplify_cond_str(ifd_prev + " && (" + ifd_cur + ")")
     elif ifd_cur:
-        return ifd_cur
-    return ifd_prev
+        return simplify_cond_str(ifd_cur)
+    return simplify_cond_str(ifd_prev)
 
 
 def _emit_ifdef_begin_and_update_emulated_masked(funcs, f, dt_key, mask_kind, ff, ifd, file):
@@ -718,6 +712,7 @@ def _gen_c_functions_one_unmasked(isa, file, funcs, f, ff, dt):
     post_rendering = ph_ret["converted_ir"]
 
     ifd = _combine_current_ifdefs(funcs, f, dt_key, ifd_prev)
+    print("", file=file)
     _emit_ifdef_begin_and_update_emulated(funcs, f, dt_key, ff, ifd, file)
 
     _emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rendering, file)
@@ -762,7 +757,7 @@ def _gen_c_function_one_masked(isa, file, funcs, f, ff, dt):
     _append_implem_status_masked(funcs, f, dt_key, mask_kind, ff, ph_ret["requirements"])
  
     ifd = _combine_current_ifdefs_masked(funcs, f, dt_key, mask_kind, ifd_prev)        
- 
+    print("", file=file)
     _emit_ifdef_begin_and_update_emulated_masked(funcs, f, dt_key, mask_kind, ff, ifd, file)
     _emit_function_body(
         funcs=funcs,
@@ -786,33 +781,27 @@ def _c_lmul_writer(f, dt, dt_par, dt_ret, isa, funcs, file, mask_type=None, lmul
     _maybe_emit_lmul_separator(isa["name"], f, file)
     print("", file=file)
 
-    mask_str = ""
-    if mask_type == "mask":
-        mask_str = "_mask"
-    elif mask_type == "maskz":
-        mask_str = "_maskz"
-    elif mask_type == "masks":
-        mask_str = "_masks"
-
-
     if len(dt.split(',')) <= 1:
-        func_name = build_func_name_short(isa, dt_par, f, lmul=0);
+        func_name = build_func_name_short(isa, dt_par, f, lmul=0, masked_version=mask_type)
+        func_name_lmul = build_func_name_short(isa, dt_par, f, lmul=lmul, masked_version=mask_type)
+        func_name_half_lmul = build_func_name_short(isa, dt_par, f, lmul=int(lmul/2), masked_version=mask_type)
     else:
-        func_name = build_func_name(isa, dt_par, dt_ret, f, lmul=0);
+        func_name = build_func_name(isa, dt_par, dt_ret, f, lmul=0, masked_version=mask_type)
+        func_name_lmul = build_func_name(isa, dt_par, dt_ret, f, lmul=lmul, masked_version=mask_type)
+        func_name_half_lmul = build_func_name(isa, dt_par, dt_ret, f, lmul=int(lmul/2), masked_version=mask_type)
   
     
     if lmul == 1:
         #call non_lmul version
-        print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul=lmul, isa_name=True, masked_version=mask_type) + " {", file=file)
-        print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa, func_name+mask_str, lmul=0, isa_name=True, masked_version=mask_type) + ";", file=file)
+        print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name_lmul, lmul=lmul, isa_name=True, masked_version=mask_type) + " {", file=file)
+        print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, masked_version=mask_type) + ";", file=file)
         print("}", file=file)
         return
 
     if not funcs[f]["horizontal"]:
-        print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul=lmul, isa_name=True, masked_version=mask_type) + " {", file=file)
+        print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name_lmul, lmul=lmul, isa_name=True, masked_version=mask_type) + " {", file=file)
 
-        lmul_2 = int(lmul / 2)
-        print(build_call_lmul(funcs[f]["proto"], dt_par, dt_ret, isa, func_name+mask_str+"_m"+str(lmul_2), lmul=lmul, isa_name=True, masked_version=mask_type), file=file)
+        print(build_call_lmul(funcs[f]["proto"], dt_par, dt_ret, isa, func_name_half_lmul, lmul=lmul, isa_name=True, masked_version=mask_type), file=file)
         print("}", file=file)
     else:
         # print("\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \""+func_name+"\");", file=file);
@@ -869,6 +858,7 @@ def _gen_c_generic_one(isa, file, funcs, f, ff, dt):
     post_rendering = ph_ret["converted_ir"]
 
     # Same C function emission as original, delegated (proto + body + short/long formatting).
+    print("", file=file)
     _emit_function_body(
         funcs=funcs,
         f=f,
@@ -1020,9 +1010,9 @@ def _gen_c_function_one_ldiv_avx(isa_base, isa_div, file, funcs, f, ff, dt, mask
     dt_key = dt_par + "," + dt_ret
 
     if len(dt.split(',')) <= 1:
-        func_name = build_func_name_short(isa_base, dt_par, f, True)
+        func_name = build_func_name_short(isa_base, dt_par, f, True, masked_version=mask_kind, lmul=-2)
     else:
-        func_name = build_func_name(isa_base, dt_par, dt_ret, f, True)
+        func_name = build_func_name(isa_base, dt_par, dt_ret, f, True, masked_version=mask_kind, lmul=-2)
 
     print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_base, func_name, lmul=-2,  isa_name=True, masked_version=mask_kind) + " {", file=file)
    
@@ -1064,51 +1054,58 @@ def _append_resolved_status(funcs, f, dt_key, mask_kind, cond, reqs):
         bucket = get_masked_bucket(funcs, f, dt_key, mask_kind, create_missing_bucket=True)
         bucket.append(cur_implem_status)
 
-def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond):
+def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond, lmul=0):
     dt_par, dt_ret = _missing_compute_dt_par_dt_ret(dt)
     dt_key = dt_par + "," + dt_ret
-    func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
+    func_name = _build_func_name(isa, dt, dt_par, dt_ret, f, masked_version=mask_kind, lmul=lmul)
     
     if cond:
         print(f"#if {cond}", file=file)
         
-    proto_str = build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, masked_version=mask_kind)
+    proto_str = build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul=lmul, isa_name=True, masked_version=mask_kind)
     print("static " + proto_str + " {", file=file)
     print("\t// Level 3 (Auto Scalar Fallback)", file=file)
     
     proto = funcs[f]["proto"]
+    
+    call_args = []
+    
     cnt_reg = 0
     cnt_msk = 0
     cnt_val = 0
     cnt_ptr = 0
     
-    call_args = []
-    
-    if mask_kind:
+    if mask_kind is not None:
         msk_dt = datatypes[dt_par]
-        if "gather" in func_name or "scatter" in func_name:
+        if "gather" in f or "scatter" in f:
             msk_dt = datatypes["uint" + str(_get_dt_par_size(dt_par))]
-            
-        m0_vector_type = build_msk(msk_dt, isa, 0, True, False)
-        m0_scalar_type = build_msk(msk_dt, isa_scalar, 0, True, False)
+        elif funcs[f]["proto"]["ret"].get("fixeddatatype"):
+            msk_dt = datatypes[funcs[f]["proto"]["ret"]["fixeddatatype"]]
+        m0_scalar_type = build_type("msk", msk_dt, isa_scalar, 0, True, False)
         print(f"\t{m0_scalar_type} s_m0;", file=file)
-        use_safe_conversion = isa["name"] in ["avx512", "rvv"] or isa["name"].startswith("sve")
-        if use_safe_conversion:
-            if isa["name"] == "avx512" and f in ["toreg", "tomsk", "cast_k"]:
-                n_elements = 512 // _get_dt_par_size(dt_par)
+        if isa.get("hw_mask", False):
+            msk_dt_name = msk_dt["name"]
+            reg_vector_type = build_reg(msk_dt, isa, 0, True, False)
+            reg_scalar_type = build_reg(msk_dt, isa_scalar, 0, True, False)
+            scalar_tomsk_func = _build_func_name(isa_scalar, msk_dt_name, msk_dt_name, msk_dt_name, "tomsk")
+            if isa["name"] == "avx512":
+                n_elements = 512 // _get_dt_par_size(msk_dt_name)
                 print(f"\tfor (int i = 0; i < {n_elements}; ++i) {{", file=file)
                 print(f"\t\ts_m0.m[i] = (m0.m & (1ULL << i)) ? ~0 : 0;", file=file)
                 print(f"\t}}", file=file)
             else:
-                msk_dt_name = msk_dt["name"]
-                m0_reg_vector_type = build_reg(msk_dt, isa, 0, True, False)
-                m0_reg_scalar_type = build_reg(msk_dt, isa_scalar, 0, True, False)
-                toreg_func = _build_func_name(isa, msk_dt_name, msk_dt_name, msk_dt_name, "toreg")
-                scalar_tomsk_func = _build_func_name(isa_scalar, msk_dt_name, msk_dt_name, msk_dt_name, "tomsk")
-                print(f"\t{m0_reg_vector_type} r_m0 = {toreg_func}(m0);", file=file)
-                print(f"\t{m0_reg_scalar_type} s_r_m0;", file=file)
+                toreg_func = _build_func_name(isa, msk_dt_name, msk_dt_name, msk_dt_name, "toreg", lmul=lmul)
+                guard = isa["datatypes"].get(dt_par, {}).get("if", None)
+                if guard:
+                    print(f"#if {guard}", file=file)
+                print(f"\t{reg_vector_type} r_m0 = {toreg_func}(m0);", file=file)
+                print(f"\t{reg_scalar_type} s_r_m0;", file=file)
                 print(f"\tmemcpy(&s_r_m0, &r_m0, sizeof(s_r_m0));", file=file)
                 print(f"\ts_m0 = {scalar_tomsk_func}(s_r_m0);", file=file)
+                if guard:
+                    print(f"#else", file=file)
+                    print(f"\tmemcpy(&s_m0, &m0, sizeof(s_m0));", file=file)
+                    print(f"#endif", file=file)
         else:
             print(f"\tmemcpy(&s_m0, &m0, sizeof(s_m0));", file=file)
         call_args.append("s_m0")
@@ -1122,16 +1119,18 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond):
             call_args.append("s_rsrc")
             
     for arg in proto["args"]:
+        arg_type_name = arg["type"]
         realdatatype = datatypes[dt_par]
-        if arg["fixeddatatype"]:
+        if arg.get("fixeddatatype"):
             if arg["fixeddatatype"] not in datatypes and arg["fixeddatatype"] in all_categories:
                 dt_str = arg["fixeddatatype"] + str(_get_dt_par_size(dt_par))
                 realdatatype = datatypes[dt_str]
             elif arg["fixeddatatype"] in datatypes:
                 realdatatype = datatypes[arg["fixeddatatype"]]
-                
-        arg_type_name = arg["type"]
-        if arg_type_name == "reg":
+        elif arg_type_name == "ret":
+            realdatatype = datatypes[dt_ret]
+            
+        if arg_type_name == "reg" or arg_type_name == "ret":
             arg_name = f"r{cnt_reg}"
             cnt_reg += 1
             vector_type = build_type("reg", realdatatype, isa, 0, True, False)
@@ -1145,9 +1144,8 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond):
             vector_type = build_type("msk", realdatatype, isa, 0, True, False)
             scalar_type = build_type("msk", realdatatype, isa_scalar, 0, True, False)
             print(f"\t{scalar_type} s_{arg_name};", file=file)
-            use_safe_conversion = isa["name"] in ["avx512", "rvv"] or isa["name"].startswith("sve")
-            if use_safe_conversion:
-                if isa["name"] == "avx512" and f in ["toreg", "tomsk", "cast_k"]:
+            if isa.get("hw_mask", False):
+                if isa.get("hw_mask_is_bitfield", False) and f in ["toreg", "tomsk", "cast_k"]:
                     n_elements = 512 // _get_dt_par_size(realdatatype["name"])
                     print(f"\tfor (int i = 0; i < {n_elements}; ++i) {{", file=file)
                     print(f"\t\ts_{arg_name}.m[i] = ({arg_name}.m & (1ULL << i)) ? ~0 : 0;", file=file)
@@ -1156,11 +1154,15 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond):
                     realdatatype_name = realdatatype["name"]
                     reg_vector_type = build_reg(realdatatype, isa, 0, True, False)
                     reg_scalar_type = build_reg(realdatatype, isa_scalar, 0, True, False)
-                    toreg_func = _build_func_name(isa, realdatatype_name, realdatatype_name, realdatatype_name, "toreg")
+                    toreg_func = _build_func_name(isa, realdatatype_name, realdatatype_name, realdatatype_name, "toreg", lmul=lmul)
                     scalar_tomsk_func = _build_func_name(isa_scalar, realdatatype_name, realdatatype_name, realdatatype_name, "tomsk")
                     print(f"\t{reg_vector_type} r_{arg_name} = {toreg_func}({arg_name});", file=file)
                     print(f"\t{reg_scalar_type} s_r_{arg_name};", file=file)
-                    print(f"\tmemcpy(&s_r_{arg_name}, &r_{arg_name}, sizeof(s_r_{arg_name}));", file=file)
+                    if isa.get("hw_mask_extract_via_store", False):
+                        store_func = _build_func_name(isa, realdatatype_name, realdatatype_name, realdatatype_name, "store", lmul=lmul)
+                        print(f"\t{store_func}(s_r_{arg_name}.r, r_{arg_name});", file=file)
+                    else:
+                        print(f"\tmemcpy(&s_r_{arg_name}, &r_{arg_name}, sizeof(s_r_{arg_name}));", file=file)
                     print(f"\ts_{arg_name} = {scalar_tomsk_func}(s_r_{arg_name});", file=file)
             else:
                 print(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof(s_{arg_name}));", file=file)
@@ -1171,7 +1173,12 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond):
             vector_type = build_reg(same_size_integer_datatype, isa, 0, True, False)
             scalar_type = build_reg(same_size_integer_datatype, isa_scalar, 0, True, False)
             print(f"\t{scalar_type} s_vi;", file=file)
-            print(f"\tmemcpy(&s_vi, &vi, sizeof(s_vi));", file=file)
+            if isa["name"] == "rvv":
+                vi_dt_name = same_size_integer_datatype["name"]
+                store_func = _build_func_name(isa, vi_dt_name, vi_dt_name, vi_dt_name, "store", lmul=lmul)
+                print(f"\t{store_func}(s_vi.r, vi);", file=file)
+            else:
+                print(f"\tmemcpy(&s_vi, &vi, sizeof(s_vi));", file=file)
             call_args.append("s_vi")
         elif arg_type_name == "val":
             arg_name = f"v{cnt_val}"
@@ -1184,21 +1191,21 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond):
         elif arg_type_name == "Nele":
             call_args.append("vals")
             
-    scalar_func_name = _build_func_name(isa_scalar, dt, dt_par, dt_ret, f, masked_version=mask_kind)
+    scalar_func_name = _build_func_name(isa_scalar, dt, dt_par, dt_ret, f, masked_version=mask_kind, lmul=lmul)
     call_args_str = ", ".join(call_args)
     
     ret_type_name = proto["ret"]["type"]
     if ret_type_name == "reg" or ret_type_name == "msk":
         realdatatype_ret = datatypes[dt_ret]
-        if proto["ret"]["fixeddatatype"]:
+        if proto["ret"].get("fixeddatatype"):
             realdatatype_ret = datatypes[proto["ret"]["fixeddatatype"]]
         scalar_ret_type = build_type(ret_type_name, realdatatype_ret, isa_scalar, 0, True, False)
         vector_ret_type = build_type(ret_type_name, realdatatype_ret, isa, 0, True, False)
         
         print(f"\t{scalar_ret_type} sres = {scalar_func_name}({call_args_str});", file=file)
-        use_safe_conversion = (ret_type_name == "msk") and (isa["name"] in ["avx512", "rvv"] or isa["name"].startswith("sve"))
+        use_safe_conversion = (ret_type_name == "msk") and isa.get("hw_mask", False)
         if use_safe_conversion:
-            if isa["name"] == "avx512" and f in ["toreg", "tomsk", "cast_k"]:
+            if isa.get("hw_mask_is_bitfield", False) and f in ["toreg", "tomsk", "cast_k"]:
                 n_elements = 512 // _get_dt_par_size(realdatatype_ret["name"])
                 print(f"\t{vector_ret_type} res;", file=file)
                 print(f"\tres.m = 0;", file=file)
@@ -1212,11 +1219,19 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond):
                 reg_vector_type = build_reg(realdatatype_ret, isa, 0, True, False)
                 reg_scalar_type = build_reg(realdatatype_ret, isa_scalar, 0, True, False)
                 scalar_toreg_func = _build_func_name(isa_scalar, realdatatype_ret_name, realdatatype_ret_name, realdatatype_ret_name, "toreg")
-                tomsk_func = _build_func_name(isa, realdatatype_ret_name, realdatatype_ret_name, realdatatype_ret_name, "tomsk")
+                tomsk_func = _build_func_name(isa, realdatatype_ret_name, realdatatype_ret_name, realdatatype_ret_name, "tomsk", lmul=lmul)
+                guard = isa["datatypes"].get(dt_ret, {}).get("if", None)
+                if guard:
+                    print(f"#if {guard}", file=file)
                 print(f"\t{reg_scalar_type} s_r_res = {scalar_toreg_func}(sres);", file=file)
                 print(f"\t{reg_vector_type} r_res;", file=file)
                 print(f"\tmemcpy(&r_res, &s_r_res, sizeof(r_res));", file=file)
                 print(f"\t{vector_ret_type} res = {tomsk_func}(r_res);", file=file)
+                if guard:
+                    print(f"#else", file=file)
+                    print(f"\t{vector_ret_type} res;", file=file)
+                    print(f"\tmemcpy(&res, &sres, sizeof(res));", file=file)
+                    print(f"#endif", file=file)
         else:
             print(f"\t{vector_ret_type} res;", file=file)
             print(f"\tmemcpy(&res, &sres, sizeof(res));", file=file)
@@ -1266,7 +1281,7 @@ def gen_c_generic_functions(isa, file, funcs, implems):
             print("Panic: '" + f + "' function does not exist.")
             exit(-1)
 
-def gen_c_missing_functions(isa, file, funcs):
+def _resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators=False):
     is_inc_mgr = hasattr(file, "get_fd")
     
     candidates_map = {}
@@ -1308,8 +1323,8 @@ def gen_c_missing_functions(isa, file, funcs):
                             has_msk = True
                     if funcs[f]["proto"]["ret"]["type"] == "msk":
                         has_msk = True
-                    if has_msk and (isa["name"] in ["avx512", "rvv"] or isa["name"].startswith("sve")):
-                        if not (isa["name"] == "avx512" and f in ["toreg", "tomsk", "cast_k"]):
+                    if has_msk and isa.get("hw_mask_requires_toreg", False):
+                        if not (isa.get("hw_mask_is_bitfield", False) and f in ["toreg", "tomsk", "cast_k"]):
                             auto_scalar_reqs = {"toreg": [dt_key], "tomsk": [dt_key]}
 
                     candidates_map[key].append({
@@ -1389,19 +1404,6 @@ def gen_c_missing_functions(isa, file, funcs):
             return None
         return f"!( {c} )"
 
-    def are_conds_mutually_exclusive(c1, c2):
-        n1 = normalize_cond(c1)
-        n2 = normalize_cond(c2)
-        if n1 == "" or n2 == "":
-            return False
-        if n1 == negate_cond(n2) or n2 == negate_cond(n1):
-            return True
-        if n1.startswith("!") and normalize_cond(n1[1:]) == n2:
-            return True
-        if n2.startswith("!") and normalize_cond(n2[1:]) == n1:
-            return True
-        return False
-        
     resolved = {key: [] for key in candidates_map}
     remaining_conds = {key: "" for key in candidates_map}
     working_impls = {key: [] for key in candidates_map}
@@ -1492,6 +1494,11 @@ def gen_c_missing_functions(isa, file, funcs):
     # 2. Write code to files
     for f in funcs:
         file_w = file.get_fd(isa["name"], f) if is_inc_mgr else file
+        if emit_separators and is_inc_mgr:
+            if lmul in [2, 4, 8]:
+                _maybe_emit_lmul_separator(isa["name"], f, file_w)
+            elif lmul < 0:
+                _maybe_emit_ldiv_separator(isa["name"], f, file_w)
         
         # Emit forward declarations first to prevent order-of-declaration issues (e.g. set_k float64 calling set_k int64)
         for dt in funcs[f]["datatypes"]:
@@ -1513,11 +1520,10 @@ def gen_c_missing_functions(isa, file, funcs):
                 if resolved[key]:
                     has_active = any(cond != "0" for cand, cond in resolved[key])
                     if has_active:
-                        func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
-                        proto_str = build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, masked_version=mask_kind)
+                        func_name = _build_func_name(isa, dt, dt_par, dt_ret, f, masked_version=mask_kind, lmul=lmul)
+                        proto_str = build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul=lmul, isa_name=True, masked_version=mask_kind)
                         print("static " + proto_str + ";", file=file_w)
                         
-        print("", file=file_w)
         for dt in funcs[f]["datatypes"]:
             dt_par, dt_ret = _missing_compute_dt_par_dt_ret(dt)
             dt_key = dt_par + "," + dt_ret
@@ -1537,78 +1543,41 @@ def gen_c_missing_functions(isa, file, funcs):
                 for cand, cond in resolved[key]:
                     if cond == "0":
                         continue
-                    print("", file=file_w)
                     
                     if cand["type"] in ["native_or_emu", "generic_emu"]:
-                        pre_rendering = _render_template(isa, cand["ff"], dt_par, dt_ret, func_name=f)
-                        ph_ret = parse_placeholders(pre_rendering, isa, funcs, f, dt_par, dt_ret)
+                        pre_rendering = _render_template(isa, cand["ff"], dt_par, dt_ret, func_name=f, lmul=lmul)
+                        ph_ret = parse_placeholders(pre_rendering, isa, funcs, f, dt_par, dt_ret, lmul=lmul)
                         post_rendering = ph_ret["converted_ir"]
                         
-                        if cond != "":
-                            print(f"#if {cond}", file=file_w)
-                        _emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, cand["ff"], post_rendering, file_w, masked_version=mask_kind, level=cand["level"])
-                        if cond != "":
-                            print("#endif", file=file_w)
+                        if not cand.get("emitted", False):
+                            print("", file=file_w)
+                            if cond != "":
+                                print(f"#if {cond}", file=file_w)
+                            _emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, cand["ff"], post_rendering, file_w, masked_version=mask_kind, level=cand["level"], lmul=lmul)
+                            if cond != "":
+                                print("#endif", file=file_w)
                             
                     elif cand["type"] == "auto_scalar":
-                        _gen_c_auto_scalar_fallback_one(isa, file_w, funcs, f, dt, mask_kind, cond)
+                        _gen_c_auto_scalar_fallback_one(isa, file_w, funcs, f, dt, mask_kind, cond, lmul=lmul)
                         
                     elif cand["type"] == "stub":
                         if cond != "":
                             print(f"#if {cond}", file=file_w)
-                        func_name = _build_func_name(isa, dt, dt_par, dt_ret, f, masked_version=mask_kind)
-                        _missing_emit_stub(file_w, funcs, f, dt_par, dt_ret, isa, func_name, masked_version=mask_kind)
+                        func_name = _build_func_name(isa, dt, dt_par, dt_ret, f, masked_version=mask_kind, lmul=lmul)
+                        _missing_emit_stub(file_w, funcs, f, dt_par, dt_ret, isa, func_name, masked_version=mask_kind, lmul=lmul)
                         if cond != "":
                             print("#endif", file=file_w)
+
+def gen_c_missing_functions(isa, file, funcs):
+    _resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators=False)
 
 def gen_c_missing_functions_lmul(isa, file, funcs, lmul):
     """
     Generate missing variants for a given LMUL, including masked+LMUL missing stubs.
     Intended for RVV.
     """
-    #hack while moving from single file to include manager.
-    if isa["name"].startswith("sve"):
-        for f in funcs:
-            for dt in funcs[f]["datatypes"]:
-                print("", file=file)
-                _gen_c_missing_one_dt(isa, file, funcs, f, dt, lmul=lmul)
+    _resolve_and_emit_missing_functions(isa, file, funcs, lmul=lmul, emit_separators=True)
 
-                if "mask_support" in funcs[f]:
-                    support = funcs[f]["mask_support"]
-                    if support.is_maskable():
-                        _gen_c_missing_one_masked(isa, file, funcs, f, dt, "mask", lmul=lmul)
-                    if support.is_maskzable():
-                        _gen_c_missing_one_masked(isa, file, funcs, f, dt, "maskz", lmul=lmul)
-                    if support.is_masksable():
-                        _gen_c_missing_one_masked(isa, file, funcs, f, dt, "masks", lmul=lmul)
-    else: 
-        #in that case file is actually an include manager, so we need to get the right file for each function
-        for f in funcs:
-            file_w = file.get_fd(isa["name"], f)
-            if lmul in [2, 4, 8]:
-                _maybe_emit_lmul_separator(isa["name"], f, file_w)
-            elif lmul < 0:
-                _maybe_emit_ldiv_separator(isa["name"], f, file_w)
-            for dt in funcs[f]["datatypes"]:
-                
-                # hack skip ldiv 4 rvv rn
-                dt_par, dt_ret = _missing_compute_dt_par_dt_ret(dt)
-                # if isa["name"] == "rvv" and lmul < 0 and isa["datatypes"][dt_par]["width"] == "64":
-                #     continue
-
-                print("", file=file_w)
-                _gen_c_missing_one_dt(isa, file_w, funcs, f, dt, lmul=lmul)
-
-                if "mask_support" in funcs[f]:
-                    support = funcs[f]["mask_support"]
-                    if support.is_maskable():
-                        _gen_c_missing_one_masked(isa, file_w, funcs, f, dt, "mask", lmul=lmul)
-                    if support.is_maskzable():
-                        _gen_c_missing_one_masked(isa, file_w, funcs, f, dt, "maskz", lmul=lmul)
-                    if support.is_masksable():
-                        _gen_c_missing_one_masked(isa, file_w, funcs, f, dt, "masks", lmul=lmul)
-
- 
 def _gen_c_horiz_lmul_one(isa, file, funcs, f, ff, dt, lmul, mkind=None, dummy=False):
     """
     Emit one horizontal LMUL variant body (LMUL>1) for one function+datatype,
@@ -1709,8 +1678,9 @@ def _gen_c_horiz_lmul_one(isa, file, funcs, f, ff, dt, lmul, mkind=None, dummy=F
     # if dummy is true, then add prototype of the function 
     if dummy:
         dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
-        func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
+        func_name = _build_func_name(isa, dt, dt_par, dt_ret, f, masked_version=mkind, lmul=lmul)
         proto = build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul=lmul, isa_name=True, masked_version=mkind)
+        print("", file=file)
         print("static " + proto + " {", file=file)
         print("\t// Level 2 (Generic Emulated)", file=file)
 
@@ -1933,7 +1903,7 @@ def _rvv_mark_lmul_seen_masked(funcs, f, dt_key, mask_kind, lmul):
 # ----------------------------------------------------------------------------------------------------------------------
 # RVV function generator (refactored)
 # ----------------------------------------------------------------------------------------------------------------------
-def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions_fix=False):
+def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions_fix=None, cand_type="native_or_emu"):
     """
     Refactored version of gen_c_functions_rvv originally in gen_mipp_rvv.py.
     """
@@ -1951,18 +1921,46 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
         # print("Debug: generating for '" + f + "' function in file: " + file.name)
         
         
+        if "candidates" not in isa:
+            isa["candidates"] = []
+        
         for ff in implems[f]:
             if _is_masked_implem(f, ff):
                 for dt in ff["datatypes"]:
-
+                    
                     dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
                     dt_key = dt_par + "," + dt_ret
                     mask_kind = ff["version"]
+                    ff_local = ff.copy()
+                    guards = []
+                    if cand_type == "native_or_emu":
+                        g_par = isa.get("datatypes", {}).get(dt_par, {}).get("if", None)
+                        g_ret = isa.get("datatypes", {}).get(dt_ret, {}).get("if", None)
+                        if g_par: guards.append(g_par)
+                        if g_ret and g_ret not in guards: guards.append(g_ret)
+                    guard = " && ".join(guards) if guards else None
+                    if guard:
+                        if "if" in ff_local and ff_local["if"]:
+                            ff_local["if"] = ff_local["if"] + " && " + guard
+                        else:
+                            ff_local["if"] = guard
+
+                    # Add to candidates so dependencies can be resolved later
+                    c_dict = {
+                        "type": cand_type,
+                        "f": f,
+                        "ff": ff_local,
+                        "dt": dt,
+                        "emitted": True,
+                        "level": ff.get("level", 1 if ("type" in ff and ff["type"] == "emulated") else 0)
+                    }
+                    if c_dict not in isa["candidates"]:
+                        isa["candidates"].append(c_dict)
+
 
 
                     if f in ["gather", "scatter"] and ("64" in dt_key or "64" in dt_ret) and lmul < 0:
                         # HACK define the symbol anyways and force a missing implem.
-                        print("", file=file)
                         _missing_emit_ifdef_begin(ifd, file)
 
                         func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
@@ -1971,23 +1969,11 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                         _missing_emit_ifdef_end(ifd, file)
                         continue
 
-                    print("", file=file)
-
                     if (not is_missing_masked_func(funcs, f, dt_key, mask_kind)) and _rvv_seen_lmul_masked(funcs, f, dt_key, mask_kind, lmul):
-                        print(
-                            "// '"
-                            + f
-                            + "<" + mask_kind + "><"
-                            + dt_key
-                            + ">'"
-                            + str(lmul)
-                            + 'has been skipped (reason: "Info: It has been implemented before.").',
-                            file=file,
-                        )
                         continue
 
                     # Render & parse placeholders with lmul
-                    pre_rendering = _render_template(isa, ff, dt_par, dt_ret, func_name=f)
+                    pre_rendering = _render_template(isa, ff_local, dt_par, dt_ret, func_name=f)
                     ph_ret = _parse_placeholders_or_skip(
                         pre_rendering=pre_rendering,
                         isa=isa,
@@ -2002,15 +1988,20 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                     if ph_ret is None:
                             continue
 
-                    ifd_prev = _build_previous_masked_emulated_exclusion_ifdef(funcs, f, dt_key, mask_kind, ff)
+                    ifd_prev = _build_previous_masked_emulated_exclusion_ifdef(funcs, f, dt_key, mask_kind, ff_local)
 
                     # Append implem status *before* building current ifdef
-                    _append_implem_status_masked(funcs, f, dt_key, mask_kind, ff, ph_ret["requirements"])
+                    _append_implem_status_masked(funcs, f, dt_key, mask_kind, ff_local, ph_ret["requirements"])
                     #print("requirements for '" + f + "<" + mask_kind + "><" + dt_key + ">' implementation: " + str(ph_ret["requirements"]))
 
                     # Combine ifdefs and emit #if if needed (and update emulated status)
                     ifd = _combine_current_ifdefs_masked(funcs, f, dt_key, mask_kind, ifd_prev)
-                    _emit_ifdef_begin_and_update_emulated_masked(funcs, f, dt_key, mask_kind, ff, ifd, file)
+                    
+                    if ifd == "0":
+                        continue
+
+                    print("", file=file)
+                    _emit_ifdef_begin_and_update_emulated_masked(funcs, f, dt_key, mask_kind, ff_local, ifd, file)
                     # Pick body: reductions_fix override for RVV reductions with lmul>1
                     post_rendering = ph_ret["converted_ir"]
                     if lmul > 1 and reductions_fix and (f in reductions_fix) and (dt in reductions_fix[f]):
@@ -2026,7 +2017,7 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                         dt=dt,
                         dt_par=dt_par,
                         dt_ret=dt_ret,
-                        ff=ff,
+                        ff=ff_local,
                         post_rendering=post_rendering_to_emit,
                         file=file,
                         masked_version=mask_kind,
@@ -2044,10 +2035,35 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                     
                     dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
                     dt_key = dt_par + "," + dt_ret
+                    ff_local = ff.copy()
+                    guards = []
+                    if cand_type == "native_or_emu":
+                        g_par = isa.get("datatypes", {}).get(dt_par, {}).get("if", None)
+                        g_ret = isa.get("datatypes", {}).get(dt_ret, {}).get("if", None)
+                        if g_par: guards.append(g_par)
+                        if g_ret and g_ret not in guards: guards.append(g_ret)
+                    guard = " && ".join(guards) if guards else None
+                    if guard:
+                        if "if" in ff_local and ff_local["if"]:
+                            ff_local["if"] = ff_local["if"] + " && " + guard
+                        else:
+                            ff_local["if"] = guard
+
+                    # Add to candidates so dependencies can be resolved later
+                    c_dict = {
+                        "type": cand_type,
+                        "f": f,
+                        "ff": ff_local,
+                        "dt": dt,
+                        "emitted": True,
+                        "level": ff.get("level", 1 if ("type" in ff and ff["type"] == "emulated") else 0)
+                    }
+                    if c_dict not in isa["candidates"]:
+                        isa["candidates"].append(c_dict)
+
 
                     if f in ["cast", "cast_k", "gather", "scatter"] and ("64" in dt_key or "64" in dt_ret) and lmul < 0:
                         # HACK define the symbol anyways and force a missing implem.
-                        print("", file=file)
                         _missing_emit_ifdef_begin(ifd, file)
 
                         func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
@@ -2057,23 +2073,11 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                     
                         continue
 
-                    print("", file=file)
-
                     if (not is_missing_func(funcs, f, dt_key)) and _rvv_seen_lmul(funcs, f, dt_key, lmul):
-                        print(
-                            "// '"
-                            + f
-                            + "<"
-                            + dt_key
-                            + ">'"
-                            + str(lmul)
-                            + 'has been skipped (reason: "Info: It has been implemented before.").',
-                            file=file,
-                        )
                         continue
 
                     # Render & parse placeholders with lmul
-                    pre_rendering = _render_template(isa, ff, dt_par, dt_ret)
+                    pre_rendering = _render_template(isa, ff_local, dt_par, dt_ret)
                     ph_ret = _parse_placeholders_or_skip(
                         pre_rendering=pre_rendering,
                         isa=isa,
@@ -2088,14 +2092,18 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                     if ph_ret is None:
                         continue
 
-                    ifd_prev = _build_previous_emulated_exclusion_ifdef(funcs, f, dt_key, ff)
+                    ifd_prev = _build_previous_emulated_exclusion_ifdef(funcs, f, dt_key, ff_local)
 
                     # Append implem status *before* building current ifdef
-                    _append_implem_status(funcs, f, dt_key, ff, ph_ret["requirements"])
+                    _append_implem_status(funcs, f, dt_key, ff_local, ph_ret["requirements"])
 
                     # Combine ifdefs and emit #if if needed (and update emulated status)
                     ifd = _combine_current_ifdefs(funcs, f, dt_key, ifd_prev)
-                    _emit_ifdef_begin_and_update_emulated(funcs, f, dt_key, ff, ifd, file)
+                    if ifd == "0":
+                        continue
+
+                    print("", file=file)
+                    _emit_ifdef_begin_and_update_emulated(funcs, f, dt_key, ff_local, ifd, file)
 
                     # Pick body: reductions_fix override for RVV reductions with lmul>1
                     post_rendering = ph_ret["converted_ir"]
@@ -2112,7 +2120,7 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                         dt=dt,
                         dt_par=dt_par,
                         dt_ret=dt_ret,
-                        ff=ff,
+                        ff=ff_local,
                         post_rendering=post_rendering_to_emit,
                         file=file,
                         masked_version=None,

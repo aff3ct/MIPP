@@ -3,7 +3,9 @@ from tools import *
 isa_sve = {
     "name": "sve",
     "prefix": "sv",
-    "size": {128 , 256 , 512 , 1024 , 2048},
+    "size" : {128, 256, 512, 1024, 2048},
+    "hw_mask" : True,
+    "hw_mask_requires_toreg" : True,
     "define": "defined(__ARM_FEATURE_SVE)",
     "architecture": "AArch64",
     "hw_lmul": True,

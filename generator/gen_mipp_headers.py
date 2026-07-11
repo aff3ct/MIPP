@@ -45,7 +45,7 @@ from cpp_object_generator import generate_cpp_object
 from include_gen import IncludeManager
 
 
-from tools import all_lmul, all_ldiv
+from tools import all_lmul, all_ldiv, clear_memo_caches
 
 include_gen_path = "../include/"
 
@@ -252,36 +252,43 @@ def main(argv=None):
 
     # ISA generators
     if "scalar" in isa_layers:
+        clear_memo_caches()
         print("  ➔ Generating Scalar...", end="", flush=True)
         t0 = time.perf_counter()
         gen_mipp_scalar(include_manager)
         print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
     if "sse" in isa_layers:
+        clear_memo_caches()
         print("  ➔ Generating SSE...", end="", flush=True)
         t0 = time.perf_counter()
         gen_mipp_sse(include_manager)
         print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
     if "avx" in isa_layers:
+        clear_memo_caches()
         print("  ➔ Generating AVX...", end="", flush=True)
         t0 = time.perf_counter()
         gen_mipp_avx(include_manager)
         print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
     if "avx512" in isa_layers:
+        clear_memo_caches()
         print("  ➔ Generating AVX-512...", end="", flush=True)
         t0 = time.perf_counter()
         gen_mipp_avx512(include_manager)
         print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
     if "sve" in isa_layers and not args.skip_sve:
+        clear_memo_caches()
         print("  ➔ Generating SVE...", end="", flush=True)
         t0 = time.perf_counter()
         gen_mipp_sve(include_manager)
         print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
     if "rvv" in isa_layers:
+        clear_memo_caches()
         print("  ➔ Generating RVV...", end="", flush=True)
         t0 = time.perf_counter()
         gen_mipp_rvv(include_manager)
         print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
     if "neon" in isa_layers:
+        clear_memo_caches()
         print("  ➔ Generating Neon...", end="", flush=True)
         t0 = time.perf_counter()
         gen_mipp_neon(include_manager)
@@ -410,7 +417,10 @@ def print_summary_table(include_dir):
                 pct_str = f"({pct:.0f}%)"
             return f"{val:>5} {pct_str:>6}"
 
-        def fmt_level(level):
+        def fmt_level(level, isa_name):
+            if isa_name == "scalar" and level > 0:
+                return f"{'N/A':>5} {'N/A':>5} {'N/A':>6} | {'N/A':>12}"
+
             std_val = stats[level]["Std"]
             msk_val = stats[level]["Msk"]
             lmd_val = stats[level]["LM/D"]
@@ -420,7 +430,8 @@ def print_summary_table(include_dir):
             
             return f"{std_val:>5} {msk_val:>5} {lmd_val:>6} | {fmt_tot_cell(tot_val, total_all)}"
 
-        print(f"{isa:<12} | {fmt_level(0)} | {fmt_level(1)} | {fmt_level(2)} | {fmt_level(3)} | {stats['stub']:>8}")
+        stub_print = "N/A" if isa == "scalar" else str(stats["stub"])
+        print(f"{isa:<12} | {fmt_level(0, isa)} | {fmt_level(1, isa)} | {fmt_level(2, isa)} | {fmt_level(3, isa)} | {stub_print:>8}")
     print("="*167 + "\n")
 
 if __name__ == "__main__":

@@ -315,6 +315,10 @@ class IncludePath:
             else:
                 body_lines.append(line)
 
+        # Remove any leading empty lines from body_lines to prevent double blank lines after includes
+        while body_lines and body_lines[0].strip() == "":
+            body_lines.pop(0)
+
         # Build prefix
         prefix = "#pragma once\n\n"
         # sort dependencies to ensure deterministic order in includes
@@ -333,7 +337,8 @@ class IncludePath:
         # Rewrite file from scratch with prefix + remaining body
         with open(full_path, "w", encoding="utf-8", newline="") as f:
             f.write(prefix)
-            f.write("\n".join(body_lines))
+            if body_lines:
+                f.write("\n" + "\n".join(body_lines))
         # Reopen for further appends
         self.file = open(full_path, "a+", encoding="utf-8", newline="")
         self._is_prefixed = True

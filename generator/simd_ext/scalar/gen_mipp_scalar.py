@@ -64,16 +64,16 @@ def _parse_placeholders_or_skip_scalar(pre_rendering, isa, funcs, f, dt_par, dt_
         print("// " + err_message, file=file)
         return None
 
-def _build_func_name_scalar(isa, dt, dt_par, dt_ret, f, masked_version=False):
+def _build_func_name_scalar(isa, dt, dt_par, dt_ret, f, masked_version=False, lmul=0):
     """
     wrapper around build_func_name and build_func_name_short.
     Which function to call is decided if the type isn't a "double type"
     (i.e the function is not cast or cast_k)
     """
     if len(dt.split(',')) <= 1:
-        return build_func_name_short(isa, dt_par, f, True, masked_version=masked_version)
+        return build_func_name_short(isa, dt_par, f, True, masked_version=masked_version, lmul=lmul)
     else:
-        return build_func_name(isa, dt_par, dt_ret, f, True, masked_version=masked_version)
+        return build_func_name(isa, dt_par, dt_ret, f, True, masked_version=masked_version, lmul=lmul)
 
 # Important changes here!!
 def _emit_short_format_prologue_scalar(funcs_for_f, dt_ret, isa, file, lmul=0):
@@ -104,10 +104,10 @@ def _emit_short_format_prologue_scalar(funcs_for_f, dt_ret, isa, file, lmul=0):
 
 # Important changes here!!
 def _emit_function_body_scalar(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rendering, file, masked_version=None, lmul=0):
-    func_name = _build_func_name_scalar(isa, dt, dt_par, dt_ret, f)
+    func_name = _build_func_name_scalar(isa, dt, dt_par, dt_ret, f, masked_version=masked_version, lmul=lmul)
 
     print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, masked_version = masked_version, lmul=lmul) + " {", file=file)
-    print("\t// Level 3 (Auto Scalar Fallback)", file=file)
+    print("\t// Level 0 (Optimal / Native)", file=file)
 
     lmul_str = ""
     if lmul == 0:

@@ -35,6 +35,8 @@ isa_rvv = {
     "architecture" : "Risc-V",
     "hw_lmul" : True,
     "hw_ldiv" : True,
+    "hw_mask" : True,
+    "hw_mask_extract_via_store" : True,
     
     #the datatypes dict contains k/v pairs with relevant information
     #to generate intrinsics. You can write {{isa_dt_reg.key}} and it will be replace 
@@ -44,13 +46,13 @@ isa_rvv = {
 
     "datatypes" : {
         float64 : {"data_ext" : "f64{lsuffix}", "data_ext_logi" : "b{eew_emul}", "data_ext_msk"  : "b64",                 "reg" : "vfloat64{lsuffix}_t", "msk" : "vbool{eew_emul}_t",
-                   "to_ptr"   : "float64_t",  "reg_dt_ext"    : "f64",         "uint_data_ext" : "u64{lsuffix}", "int_data_ext" : "i64{lsuffix}",       "width": "64", "ldiv" : [2]} ,
+                   "to_ptr"   : "float64_t",  "reg_dt_ext"    : "f64",         "uint_data_ext" : "u64{lsuffix}", "int_data_ext" : "i64{lsuffix}",       "width": "64", "ldiv" : [2], "if": "defined(__riscv_v_elen_fp) && __riscv_v_elen_fp >= 64"} ,
         
         float32 : {"data_ext" : "f32{lsuffix}", "data_ext_logi" : "b{eew_emul}","data_ext_msk"  : "b32",                  "reg" : "vfloat32{lsuffix}_t", "msk" : "vbool{eew_emul}_t",
                    "to_ptr"   : "float32_t",  "reg_dt_ext"    : "f32",        "uint_data_ext" : "u32{lsuffix}",  "int_data_ext" : "i32{lsuffix}",      "width" : "32", "ldiv" : [2]},
         
         int64   : {"data_ext" : "i64{lsuffix}", "data_ext_logi" : "b{eew_emul}","data_ext_msk"  : "b64",                  "reg" : "vint64{lsuffix}_t",   "msk" : "vbool{eew_emul}_t",
-                   "to_ptr"   : "int64_t",    "reg_dt_ext"    : "i64",        "uint_data_ext" : "u64{lsuffix}",  "int_data_ext" : "i64{lsuffix}",       "width": "64", "ldiv" : [2] } ,
+                   "to_ptr"   : "int64_t",    "reg_dt_ext"    : "i64",        "uint_data_ext" : "u64{lsuffix}",  "int_data_ext" : "i64{lsuffix}",       "width": "64", "ldiv" : [2], "if": "defined(__riscv_v_elen) && __riscv_v_elen >= 64" } ,
         
         int32   : {"data_ext" : "i32{lsuffix}", "data_ext_logi" : "b{eew_emul}", "data_ext_msk" : "b32",                 "reg" : "vint32{lsuffix}_t",   "msk" : "vbool{eew_emul}_t",
                    "to_ptr"   : "int32_t",    "reg_dt_ext"    : "i32",        "uint_data_ext" : "u32{lsuffix}", "int_data_ext" : "i32{lsuffix}",      "width" : "32", "ldiv" : [2]} ,
@@ -62,7 +64,7 @@ isa_rvv = {
                    "to_ptr"   : "int8_t",     "reg_dt_ext"    : "i8",         "uint_data_ext" : "u8{lsuffix}",  "int_data_ext" : "i8{lsuffix}",       "width" : "8", "ldiv" : [2]} ,
         
         uint64  : {"data_ext" : "u64{lsuffix}", "data_ext_logi" : "b{eew_emul}","data_ext_msk" : "b64",                  "reg" : "vuint64{lsuffix}_t",  "msk" : "vbool{eew_emul}_t",
-                   "to_ptr"   : "uint64_t",   "reg_dt_ext"    : "u64",       "uint_data_ext" : "u64{lsuffix}",  "int_data_ext" : "i64{lsuffix}",      "width" : "64", "ldiv" : [2]} ,
+                   "to_ptr"   : "uint64_t",   "reg_dt_ext"    : "u64",       "uint_data_ext" : "u64{lsuffix}",  "int_data_ext" : "i64{lsuffix}",      "width" : "64", "ldiv" : [2], "if": "defined(__riscv_v_elen) && __riscv_v_elen >= 64"} ,
         
         uint32  : {"data_ext" : "u32{lsuffix}", "data_ext_logi" : "b{eew_emul}",         "data_ext_msk" : "b32",         "reg" : "vuint32{lsuffix}_t",  "msk" : "vbool{eew_emul}_t",
                    "to_ptr"   : "uint32_t",   "reg_dt_ext"    : "u32",       "uint_data_ext" : "u32{lsuffix}",  "int_data_ext" : "i32{lsuffix}",      "width" : "32", "ldiv" : [2]} ,

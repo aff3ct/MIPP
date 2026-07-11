@@ -341,6 +341,7 @@ def type_specialized(proto):
 
 # Build prototype of set0
 def build_proto_set0(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, masked_version=False):
+    func_name = func_name.replace("_masks", "").replace("_maskz", "").replace("_mask", "")
     isa_type = "DEFAULT_ISA"
     if isa_name:
         isa_type = isa["name"].upper()
@@ -376,6 +377,7 @@ def build_proto_set0(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, m
 
 # Build prototype of set
 def build_proto_set(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, masked_version=False):
+    func_name = func_name.replace("_masks", "").replace("_maskz", "").replace("_mask", "")
     isa_type = "DEFAULT_ISA"
     if isa_name:
         isa_type = isa["name"].upper()
@@ -424,6 +426,7 @@ def build_proto_set(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, ma
 
 
 def build_proto_set1(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, masked_version=False):
+    func_name = func_name.replace("_masks", "").replace("_maskz", "").replace("_mask", "")
     isa_type = "DEFAULT_ISA"
     if isa_name:
         isa_type = isa["name"].upper()
@@ -468,6 +471,7 @@ def build_proto_set1(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, m
     return f"template <>\ninline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const {dt_par} v0"
 
 def build_proto_load(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, masked_version=False):
+    func_name = func_name.replace("_masks", "").replace("_maskz", "").replace("_mask", "")
     isa_type = "DEFAULT_ISA"
     if isa_name:
         isa_type = isa["name"].upper()
@@ -501,6 +505,7 @@ def build_proto_load(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, m
     return  ret
 
 def build_proto_gather(dt_par, dt_ret, isa, func_name, lmul=1, isa_name=False, cpp=False, masked_version=False):
+    func_name = func_name.replace("_masks", "").replace("_maskz", "").replace("_mask", "")
     isa_type = "DEFAULT_ISA"
     msk_dt = datatypes["uint" + str(_get_dt_par_size(dt_par))]["name"]+ "_t"
     if isa_name:
@@ -532,6 +537,7 @@ def build_proto_gather(dt_par, dt_ret, isa, func_name, lmul=1, isa_name=False, c
         exit(-1)
 
 def build_proto_scatter(dt_par, dt_ret, isa, func_name, lmul=1, isa_name=False, cpp=False, masked_version=False):
+    func_name = func_name.replace("_masks", "").replace("_maskz", "").replace("_mask", "")
     isa_type = "DEFAULT_ISA"
 
     msk_dt = datatypes["uint" + str(_get_dt_par_size(dt_par))]["name"]+ "_t"
@@ -609,26 +615,8 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
     if (proto["ret"]["fixeddatatype"]):
         realdatatype = datatypes[proto["ret"]["fixeddatatype"]]
     
-    # if  "gather" in func_name or  "scatter" in func_name:
-    #     dt_str = "uint" + str(_get_dt_par_size(dt_par))
-    #     realdatatype = datatypes[dt_str]
-    if not masked_version:
-        lmul_str = ""
-        if lmul > 0 and (not cpp ):
-            lmul_str = "_m" + str(int(lmul))
-        if lmul < 0 and (not cpp): # ldiv
-            lmul_str = "_d" + str(int(-lmul))
-        # if "gather" in func_name or "scatter" in func_name:
-        #     print("Debug " + func_name + " proto: ", proto, build_type(proto["ret"]["type"], realdatatype, isa, lmul, isa_name, cpp), "cpp=", cpp, "realdatatype=", realdatatype)
-        p = "inline " + build_type(proto["ret"]["type"], realdatatype, isa, lmul, isa_name, cpp) + " " + func_name + lmul_str + "("
 
-    else : #we assume "mask" or "maskz" is passed in masked_version if it's not false.
-        lmul_str = ""
-        if lmul > 0 and (not cpp or (cpp and not lmul_specialized(proto))):
-            lmul_str = "_m" + str(int(lmul))
-        if lmul < 0 and (not cpp or (cpp and not lmul_specialized(proto))): # ldiv
-            lmul_str = "_d" + str(int(-lmul))
-        p = "inline " + build_type(proto["ret"]["type"], realdatatype, isa, lmul, isa_name, cpp) + " " + func_name + "_" + masked_version + lmul_str + "("
+    p = "inline " + build_type(proto["ret"]["type"], realdatatype, isa, lmul, isa_name, cpp) + " " + func_name + "("
     cnt_reg = 0
     cnt_msk = 0
     cnt_val = 0
@@ -686,8 +674,7 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
             p += " vi"
         is_first = False
 
-    # if "gather" in func_name : 
-    #     print("Debug gather proto: ", proto, build_type(proto["ret"]["type"], realdatatype, isa, lmul, isa_name, cpp), "cpp=", cpp, "realdatatype=", realdatatype)
+
     return p + ")";
 
 
@@ -900,7 +887,15 @@ def build_cpp_func_name(dt_ret, mipp_name, masked_version=False):
     return_type = datatypes[dt_ret]["category"] + str(datatypes[dt_ret]["n_bits"])
     return mipp_name + "_" + return_type
 
-def build_ifdef_rec(funcs, func_name, dt_key):
+GLOBAL_MEMO_IFDEF = {}
+
+def build_ifdef_rec(funcs, func_name, dt_key, memo=None):
+    if memo is None:
+        memo = GLOBAL_MEMO_IFDEF
+    memo_key = (func_name, dt_key)
+    if memo_key in memo:
+        return memo[memo_key]
+        
     str_ifdef = ""
     if "implem_status" in funcs[func_name]:
         if dt_key in funcs[func_name]["implem_status"]:
@@ -908,19 +903,24 @@ def build_ifdef_rec(funcs, func_name, dt_key):
             str_ifdef_sub = ""
             str_end_sub_token = ""
             for implem in funcs[func_name]["implem_status"][dt_key]:
-                if not is_first_or:
-                    str_ifdef_sub = "( " + str_ifdef_sub + " || "
-                    str_end_sub_token = " )"
                 is_first_and = True
                 str_ifdef_sub_sub = ""
                 for f_name in implem["requirements"]:
                     for fdt_key in implem["requirements"][f_name]:
-                        ret = build_ifdef_rec(funcs, f_name, fdt_key)
+                        ret = build_ifdef_rec(funcs, f_name, fdt_key, memo)
                         if ret:
                             if not is_first_and:
                                 str_ifdef_sub_sub = str_ifdef_sub_sub + " && "
                             str_ifdef_sub_sub = str_ifdef_sub_sub + ret
                             is_first_and = False
+
+                if not implem["if"] and not str_ifdef_sub_sub:
+                    str_ifdef_sub = ""
+                    break
+
+                if not is_first_or:
+                    str_ifdef_sub = "( " + str_ifdef_sub + " || "
+                    str_end_sub_token = " )"
 
                 if implem["if"] and str_ifdef_sub_sub:
                     str_ifdef_sub = str_ifdef_sub + implem["if"] + str_end_sub_token + " && " + str_ifdef_sub_sub
@@ -934,6 +934,14 @@ def build_ifdef_rec(funcs, func_name, dt_key):
 
             if str_ifdef_sub:
                 str_ifdef = str_ifdef_sub
+                
+    # Basic deduplication to avoid exponential growth string
+    if " && " in str_ifdef and "||" not in str_ifdef and "(" not in str_ifdef:
+        parts = [p.strip() for p in str_ifdef.split(" && ")]
+        dedup_parts = list(dict.fromkeys(parts))
+        str_ifdef = " && ".join(dedup_parts)
+                
+    memo[memo_key] = str_ifdef
     return str_ifdef
 
 def is_ifdef(funcs, func_name, dt_key):
@@ -1343,7 +1351,15 @@ def get_masked_bucket(funcs, func_name, dt_key, mask_kind, create_missing_bucket
         return _get_masked_bucket_nocreate(funcs, func_name, dt_key, mask_kind)
 
 
-def build_ifdef_rec_masked(funcs, func_name, dt_key, mask_kind):
+GLOBAL_MEMO_IFDEF_MASKED = {}
+
+def build_ifdef_rec_masked(funcs, func_name, dt_key, mask_kind, memo=None):
+    if memo is None:
+        memo = GLOBAL_MEMO_IFDEF_MASKED
+    memo_key = (func_name, dt_key, mask_kind)
+    if memo_key in memo:
+        return memo[memo_key]
+        
     # Same algorithm as build_ifdef_rec, but reading from implem_status_masked and
     # recursing on the same mask_kind.
     str_ifdef = ""
@@ -1353,19 +1369,24 @@ def build_ifdef_rec_masked(funcs, func_name, dt_key, mask_kind):
         str_ifdef_sub = ""
         str_end_sub_token = ""
         for implem in bucket:
-            if not is_first_or:
-                str_ifdef_sub = "( " + str_ifdef_sub + " || "
-                str_end_sub_token = " )"
             is_first_and = True
             str_ifdef_sub_sub = ""
             for f_name in implem["requirements"]:
                 for fdt_key in implem["requirements"][f_name]:
-                    ret = build_ifdef_rec(funcs, f_name, fdt_key)
+                    ret = build_ifdef_rec(funcs, f_name, fdt_key, memo)
                     if ret:
                         if not is_first_and:
                             str_ifdef_sub_sub = str_ifdef_sub_sub + " && "
                         str_ifdef_sub_sub = str_ifdef_sub_sub + ret
                         is_first_and = False
+
+            if not implem["if"] and not str_ifdef_sub_sub:
+                str_ifdef_sub = ""
+                break
+
+            if not is_first_or:
+                str_ifdef_sub = "( " + str_ifdef_sub + " || "
+                str_end_sub_token = " )"
 
             if implem["if"] and str_ifdef_sub_sub:
                 str_ifdef_sub = str_ifdef_sub + implem["if"] + str_end_sub_token + " && " + str_ifdef_sub_sub
@@ -1379,6 +1400,14 @@ def build_ifdef_rec_masked(funcs, func_name, dt_key, mask_kind):
 
         if str_ifdef_sub:
             str_ifdef = str_ifdef_sub
+            
+    # Basic deduplication to avoid exponential growth string
+    if " && " in str_ifdef and "||" not in str_ifdef and "(" not in str_ifdef:
+        parts = [p.strip() for p in str_ifdef.split(" && ")]
+        dedup_parts = list(dict.fromkeys(parts))
+        str_ifdef = " && ".join(dedup_parts)
+                
+    memo[memo_key] = str_ifdef
     return str_ifdef
 
 
@@ -1800,3 +1829,7 @@ def simplify_cond_str(s, known_true_conds=None):
     if res == "1":
         return ""
     return res
+
+def clear_memo_caches():
+    GLOBAL_MEMO_IFDEF.clear()
+    GLOBAL_MEMO_IFDEF_MASKED.clear()

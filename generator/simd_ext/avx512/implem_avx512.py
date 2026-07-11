@@ -2,8 +2,11 @@ from tools import *
 
 isa_avx512 = {
     "name": "avx512",
-    "prefix": "_mm512",
-    "size": 512,
+    "prefix" : "_mm512",
+    "size" : 512,
+    "hw_mask" : True,
+    "hw_mask_requires_toreg" : True,
+    "hw_mask_is_bitfield" : True,
     "define": 'defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)',
     "architecture": "x86",
     "hw_lmul": False,
