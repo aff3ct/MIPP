@@ -62,25 +62,6 @@ for dt_ret in all_datatypes:
             if (dt_par == "float64" or dt_ret == "float64"):
                 all_datatypes_cart_prod_inc_f64.append(dt_par + "," + dt_ret);
 
-
-# First definition of gather will use this 4 simplicity's sake
-all_datatypes_idx_pair = []
-for type in [cfloat, cint, cuint]:
-    for n_bits in [64, 32, 16, 8]:
-        if type == cfloat and n_bits in [16, 8]:
-            continue
-        dt = type + str(n_bits)
-        idx = cuint + str(n_bits)
-        all_datatypes_idx_pair.append(dt + "," + dt)
-
-avx_datatypes_idx_pair = [
-"float64,float64",
-"float32,float32",
-"int64,int64",
-"int32,int32",
-]
-
-
 same_dt = [
     "float64,float64",
     "float32,float32",

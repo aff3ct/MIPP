@@ -1983,18 +1983,6 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                     if c_dict not in isa["candidates"]:
                         isa["candidates"].append(c_dict)
 
-
-
-                    if f in ["gather", "scatter"] and ("64" in dt_key or "64" in dt_ret) and lmul < 0:
-                        # HACK define the symbol anyways and force a missing implem.
-                        _missing_emit_ifdef_begin(ifd, file)
-
-                        func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
-                                
-                        _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, lmul=lmul, masked_version=mask_kind)
-                        _missing_emit_ifdef_end(ifd, file)
-                        continue
-
                     if (not is_missing_masked_func(funcs, f, dt_key, mask_kind)) and _rvv_seen_lmul_masked(funcs, f, dt_key, mask_kind, lmul):
                         continue
 
@@ -2018,11 +2006,18 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
 
                     # Append implem status *before* building current ifdef
                     _append_implem_status_masked(funcs, f, dt_key, mask_kind, ff_local, ph_ret["requirements"])
-                    #print("requirements for '" + f + "<" + mask_kind + "><" + dt_key + ">' implementation: " + str(ph_ret["requirements"]))
 
                     # Combine ifdefs and emit #if if needed (and update emulated status)
                     ifd = _combine_current_ifdefs_masked(funcs, f, dt_key, mask_kind, ifd_prev)
                     
+                    if cand_type == "generic_emu":
+                        neg_ifd_masked = _missing_build_negated_masked_ifdef_for_existing_implems(funcs, f, dt_key, mask_kind)
+                        if neg_ifd_masked:
+                            if ifd:
+                                ifd = simplify_cond_str(neg_ifd_masked + " && (" + ifd + ")")
+                            else:
+                                ifd = simplify_cond_str(neg_ifd_masked)
+
                     if ifd == "0":
                         continue
 
@@ -2087,18 +2082,6 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                     if c_dict not in isa["candidates"]:
                         isa["candidates"].append(c_dict)
 
-
-                    if f in ["cast", "cast_k", "gather", "scatter"] and ("64" in dt_key or "64" in dt_ret) and lmul < 0:
-                        # HACK define the symbol anyways and force a missing implem.
-                        _missing_emit_ifdef_begin(ifd, file)
-
-                        func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
-                                
-                        _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, lmul=lmul)
-                        _missing_emit_ifdef_end(ifd, file)
-                    
-                        continue
-
                     if (not is_missing_func(funcs, f, dt_key)) and _rvv_seen_lmul(funcs, f, dt_key, lmul):
                         continue
 
@@ -2125,6 +2108,15 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
 
                     # Combine ifdefs and emit #if if needed (and update emulated status)
                     ifd = _combine_current_ifdefs(funcs, f, dt_key, ifd_prev)
+
+                    if cand_type == "generic_emu":
+                        neg_ifd = _missing_build_negated_ifdef_for_existing_implems(funcs, f, dt_key)
+                        if neg_ifd:
+                            if ifd:
+                                ifd = simplify_cond_str(neg_ifd + " && (" + ifd + ")")
+                            else:
+                                ifd = simplify_cond_str(neg_ifd)
+
                     if ifd == "0":
                         continue
 

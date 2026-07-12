@@ -422,16 +422,16 @@ implems_avx = {
 #   the other difference is that avx gather use mask type of the date instead of the index which is understandable ig.
 #   but it means the mask needs to be converted bc the mipp interface passes uint masks.
     "gather": [
-        { "instr_name": "gather",         "datatypes": ["float64,float64", "float32,float32", "int32,int32"], "template": tpl_implem_avx["gather"],            "if": "defined(__AVX2__)"                       },
-        { "instr_name": "gather",         "datatypes": ["int64,int64"],                                       "template": tpl_implem_avx["gather_i64"],        "if": "defined(__AVX2__)"                       },
-        { "instr_name": "gather",         "datatypes": ["float64,float64"],                                   "template": tpl_implem_avx["gather_masks_f64"],  "if": "defined(__AVX2__)",  "version" : "masks" },
-        { "instr_name": "gather",         "datatypes": ["int64,int64"],                                       "template": tpl_implem_avx["gather_masks_i64"],  "if": "defined(__AVX2__)",  "version" : "masks" },
-        { "instr_name": "gather",         "datatypes": ["float64,float64"],                                   "template": tpl_implem_avx["gather_maskz_f64"],  "if": "defined(__AVX2__)",  "version" : "maskz" },
-        { "instr_name": "gather",         "datatypes": ["int64,int64"],                                       "template": tpl_implem_avx["gather_maskz_i64"],  "if": "defined(__AVX2__)",  "version" : "maskz" },
-        { "instr_name": "gather",         "datatypes": ["float32,float32"],                                   "template": tpl_implem_avx["gather_masks_f32"],  "if": "defined(__AVX2__)",  "version" : "masks" },
-        { "instr_name": "gather",         "datatypes": ["float32,float32"],                                   "template": tpl_implem_avx["gather_maskz_f32"],  "if": "defined(__AVX2__)",  "version" : "maskz" },
-        { "instr_name": "gather",         "datatypes": ["int32,int32"],                                       "template": tpl_implem_avx["gather_masks_i32"],  "if": "defined(__AVX2__)",  "version" : "masks" },
-        { "instr_name": "gather",         "datatypes": ["int32,int32"],                                       "template": tpl_implem_avx["gather_maskz_i32"],  "if": "defined(__AVX2__)",  "version" : "maskz" } ], # gather
+        { "instr_name": "gather",         "datatypes": ["float64", "float32", "int32"],                       "template": tpl_implem_avx["gather"],            "if": "defined(__AVX2__)"                       },
+        { "instr_name": "gather",         "datatypes": ["int64"],                                             "template": tpl_implem_avx["gather_i64"],        "if": "defined(__AVX2__)"                       },
+        { "instr_name": "gather",         "datatypes": ["float64"],                                           "template": tpl_implem_avx["gather_masks_f64"],  "if": "defined(__AVX2__)",  "version" : "masks" },
+        { "instr_name": "gather",         "datatypes": ["int64"],                                             "template": tpl_implem_avx["gather_masks_i64"],  "if": "defined(__AVX2__)",  "version" : "masks" },
+        { "instr_name": "gather",         "datatypes": ["float64"],                                           "template": tpl_implem_avx["gather_maskz_f64"],  "if": "defined(__AVX2__)",  "version" : "maskz" },
+        { "instr_name": "gather",         "datatypes": ["int64"],                                             "template": tpl_implem_avx["gather_maskz_i64"],  "if": "defined(__AVX2__)",  "version" : "maskz" },
+        { "instr_name": "gather",         "datatypes": ["float32"],                                           "template": tpl_implem_avx["gather_masks_f32"],  "if": "defined(__AVX2__)",  "version" : "masks" },
+        { "instr_name": "gather",         "datatypes": ["float32"],                                           "template": tpl_implem_avx["gather_maskz_f32"],  "if": "defined(__AVX2__)",  "version" : "maskz" },
+        { "instr_name": "gather",         "datatypes": ["int32"],                                             "template": tpl_implem_avx["gather_masks_i32"],  "if": "defined(__AVX2__)",  "version" : "masks" },
+        { "instr_name": "gather",         "datatypes": ["int32"],                                             "template": tpl_implem_avx["gather_maskz_i32"],  "if": "defined(__AVX2__)",  "version" : "maskz" } ], # gather
     "cvt": [
 #       {"instr_name": "cvt",             "datatypes": i2f_dt,                                                "template": tpl_implem_avx["cvt"],               "if": "defined(__AVX2__)"                       },
         {"instr_name": "",                "datatypes": same_dt,                                               "template": tpl_implem_avx["no-op"]                                                              } ], # cvt

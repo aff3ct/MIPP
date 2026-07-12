@@ -254,9 +254,9 @@ OP_3ARGS_REG = """\t{{reg_type}} r4 = mipp_{{func}}_{{dt_ext}}(r1, r2, r3);
 OP_CAST = """\t{{reg2_type}} r2 = mipp_cast_{{dt1_ext}}_{{dt2_ext}}(r1);\n\t{{reg2_scalar_type}} s2 = mipp_scalar_cast_{{dt1_ext}}_{{dt2_ext}}(s1);"""
 OP_CAST_MSK = """\t{{msk2_type}} m2 = mipp_cast_k_{{dt1_ext}}_{{dt2_ext}}(m1);\n\t{{msk2_scalar_type}} ms2 = mipp_scalar_cast_k_{{dt1_ext}}_{{dt2_ext}}(ms1);"""
 
-OP_GATHER = """\t{{reg_type}} r2 = mipp_gather_{{dt_ext}}_{{dt_ext}}(inputs1, ri1);\n\t{{reg_type_scalar}} s2 = mipp_scalar_gather_{{dt_ext}}_{{dt_ext}}(inputs1, ris1);"""
+OP_GATHER = """\t{{reg_type}} r2 = mipp_gather_{{dt_ext}}(inputs1, ri1);\n\t{{reg_type_scalar}} s2 = mipp_scalar_gather_{{dt_ext}}(inputs1, ris1);"""
 
-OP_SCATTER = """\tmipp_scatter_{{dt_ext}}_{{dt_ext}}(outputs, ri1, r1);\n\tmipp_scalar_scatter_{{dt_ext}}_{{dt_ext}}(outputs_scal, ris1, rs1);"""
+OP_SCATTER = """\tmipp_scatter_{{dt_ext}}(outputs, ri1, r1);\n\tmipp_scalar_scatter_{{dt_ext}}(outputs_scal, ris1, rs1);"""
 
 OP_REG_VAL = """\t{{reg_type}} r3 = mipp_{{func}}_{{dt_ext}}(r1, input1);\n\t{{reg_type_scalar}} s3 = mipp_scalar_{{func}}_{{dt_ext}}(s1, input1);"""
 

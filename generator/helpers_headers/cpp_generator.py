@@ -528,24 +528,16 @@ def gen_cpp_functions_isa(include_manager, isa, funcs):
 
         for dt in funcs[f]["datatypes"]:
             is_cast = len(dt.split(',')) > 1
-            is_gthr_scttr =  ("gather" in f) or ("scatter" in f)
-            is_cast = is_cast
 
             if not is_cast:
                 dt_par = dt.split(',')[0]
                 dt_ret = dt.split(',')[0]
-            elif is_gthr_scttr:
-                dt_par = dt.split(',')[0]
-                dt_ret = dt.split(',')[1]
             else:
                 dt_par = dt.split(',')[0]
                 dt_ret = dt.split(',')[1]
 
-            if not is_cast and not is_gthr_scttr:
+            if not is_cast:
                 c_func_name = build_func_name_short(isa, dt_par, f, isa_name=True)
-                cpp_func_name = build_cpp_func_name_short(funcs[f]["proto"], dt_ret, f)
-            elif is_gthr_scttr:
-                c_func_name = build_func_name(isa, dt_par, dt_ret, f, isa_name=True)                
                 cpp_func_name = build_cpp_func_name_short(funcs[f]["proto"], dt_ret, f)
             else:
                 c_func_name = build_func_name(isa, dt_par, dt_ret, f, isa_name=True)
