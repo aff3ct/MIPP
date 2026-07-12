@@ -893,7 +893,7 @@ def _gen_c_missing_one_dt(isa, file, funcs, f, dt, lmul=0):
         ifd = _missing_build_negated_ifdef_for_existing_implems(funcs, f, dt_key)
         _missing_emit_ifdef_begin(ifd, file)
 
-        func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
+        func_name = _build_func_name(isa, dt, dt_par, dt_ret, f, lmul=lmul)
         
         _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, lmul=lmul)
         _missing_emit_ifdef_end(ifd, file)
@@ -965,7 +965,7 @@ def _gen_c_missing_one_masked(isa, file, funcs, f, dt, mask_kind, lmul=0):
 
     #if is fully mising => no guard, emit directly the stub
     #if is ifdef guarded missing => guard with the negation of the ifdef conditions of existing implementations and emit the stub in this guard
-    func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
+    func_name = _build_func_name(isa, dt, dt_par, dt_ret, f, masked_version=mask_kind, lmul=lmul)
 
     if fully_missing:
         _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, masked_version=mask_kind, lmul=lmul)
@@ -1985,15 +1985,6 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
 
 
 
-                    if f in ["gather", "scatter"] and ("64" in dt_key or "64" in dt_ret) and lmul < 0:
-                        # HACK define the symbol anyways and force a missing implem.
-                        _missing_emit_ifdef_begin(ifd, file)
-
-                        func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
-                                
-                        _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, lmul=lmul, masked_version=mask_kind)
-                        _missing_emit_ifdef_end(ifd, file)
-                        continue
 
                     if (not is_missing_masked_func(funcs, f, dt_key, mask_kind)) and _rvv_seen_lmul_masked(funcs, f, dt_key, mask_kind, lmul):
                         continue
@@ -2088,16 +2079,6 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                         isa["candidates"].append(c_dict)
 
 
-                    if f in ["cast", "cast_k", "gather", "scatter"] and ("64" in dt_key or "64" in dt_ret) and lmul < 0:
-                        # HACK define the symbol anyways and force a missing implem.
-                        _missing_emit_ifdef_begin(ifd, file)
-
-                        func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
-                                
-                        _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, lmul=lmul)
-                        _missing_emit_ifdef_end(ifd, file)
-                    
-                        continue
 
                     if (not is_missing_func(funcs, f, dt_key)) and _rvv_seen_lmul(funcs, f, dt_key, lmul):
                         continue
