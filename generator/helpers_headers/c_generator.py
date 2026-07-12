@@ -1081,15 +1081,15 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond, lm
             msk_dt = datatypes["uint" + str(_get_dt_par_size(dt_par))]
         elif funcs[f]["proto"]["ret"].get("fixeddatatype"):
             msk_dt = datatypes[funcs[f]["proto"]["ret"]["fixeddatatype"]]
-        m0_scalar_type = build_type("msk", msk_dt, isa_scalar, 0, True, False)
+        m0_scalar_type = build_type("msk", msk_dt, isa_scalar, lmul, True, False)
         print(f"\t{m0_scalar_type} s_m0;", file=file)
         if isa.get("hw_mask", False):
             msk_dt_name = msk_dt["name"]
-            reg_vector_type = build_reg(msk_dt, isa, 0, True, False)
-            reg_scalar_type = build_reg(msk_dt, isa_scalar, 0, True, False)
-            scalar_tomsk_func = _build_func_name(isa_scalar, msk_dt_name, msk_dt_name, msk_dt_name, "tomsk")
-            if isa["name"] == "avx512":
-                n_elements = 512 // _get_dt_par_size(msk_dt_name)
+            reg_vector_type = build_reg(msk_dt, isa, lmul, True, False)
+            reg_scalar_type = build_reg(msk_dt, isa_scalar, lmul, True, False)
+            scalar_tomsk_func = _build_func_name(isa_scalar, msk_dt_name, msk_dt_name, msk_dt_name, "tomsk", lmul=lmul)
+            if isa.get("hw_mask_is_bitfield", False):
+                n_elements = isa["size"] // _get_dt_par_size(msk_dt_name)
                 print(f"\tfor (int i = 0; i < {n_elements}; ++i) {{", file=file)
                 print(f"\t\ts_m0.m[i] = (m0.m & (1ULL << i)) ? ~0 : 0;", file=file)
                 print(f"\t}}", file=file)
@@ -1112,8 +1112,8 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond, lm
         cnt_msk += 1
         
         if mask_kind == "masks":
-            rsrc_vector_type = build_reg(datatypes[dt_par], isa, 0, True, False)
-            rsrc_scalar_type = build_reg(datatypes[dt_par], isa_scalar, 0, True, False)
+            rsrc_vector_type = build_reg(datatypes[dt_par], isa, lmul, True, False)
+            rsrc_scalar_type = build_reg(datatypes[dt_par], isa_scalar, lmul, True, False)
             print(f"\t{rsrc_scalar_type} s_rsrc;", file=file)
             print(f"\tmemcpy(&s_rsrc, &rsrc, sizeof(s_rsrc));", file=file)
             call_args.append("s_rsrc")
@@ -1133,16 +1133,16 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond, lm
         if arg_type_name == "reg" or arg_type_name == "ret":
             arg_name = f"r{cnt_reg}"
             cnt_reg += 1
-            vector_type = build_type("reg", realdatatype, isa, 0, True, False)
-            scalar_type = build_type("reg", realdatatype, isa_scalar, 0, True, False)
+            vector_type = build_type("reg", realdatatype, isa, lmul, True, False)
+            scalar_type = build_type("reg", realdatatype, isa_scalar, lmul, True, False)
             print(f"\t{scalar_type} s_{arg_name};", file=file)
             print(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof(s_{arg_name}));", file=file)
             call_args.append(f"s_{arg_name}")
         elif arg_type_name == "msk":
             arg_name = f"m{cnt_msk}"
             cnt_msk += 1
-            vector_type = build_type("msk", realdatatype, isa, 0, True, False)
-            scalar_type = build_type("msk", realdatatype, isa_scalar, 0, True, False)
+            vector_type = build_type("msk", realdatatype, isa, lmul, True, False)
+            scalar_type = build_type("msk", realdatatype, isa_scalar, lmul, True, False)
             print(f"\t{scalar_type} s_{arg_name};", file=file)
             if isa.get("hw_mask", False):
                 if isa.get("hw_mask_is_bitfield", False) and f in ["toreg", "tomsk", "cast_k"]:
@@ -1152,10 +1152,10 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond, lm
                     print(f"\t}}", file=file)
                 else:
                     realdatatype_name = realdatatype["name"]
-                    reg_vector_type = build_reg(realdatatype, isa, 0, True, False)
-                    reg_scalar_type = build_reg(realdatatype, isa_scalar, 0, True, False)
+                    reg_vector_type = build_reg(realdatatype, isa, lmul, True, False)
+                    reg_scalar_type = build_reg(realdatatype, isa_scalar, lmul, True, False)
                     toreg_func = _build_func_name(isa, realdatatype_name, realdatatype_name, realdatatype_name, "toreg", lmul=lmul)
-                    scalar_tomsk_func = _build_func_name(isa_scalar, realdatatype_name, realdatatype_name, realdatatype_name, "tomsk")
+                    scalar_tomsk_func = _build_func_name(isa_scalar, realdatatype_name, realdatatype_name, realdatatype_name, "tomsk", lmul=lmul)
                     print(f"\t{reg_vector_type} r_{arg_name} = {toreg_func}({arg_name});", file=file)
                     print(f"\t{reg_scalar_type} s_r_{arg_name};", file=file)
                     if isa.get("hw_mask_extract_via_store", False):
@@ -1170,8 +1170,8 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond, lm
         elif arg_type_name == "vindex":
             arg_name = "vi"
             same_size_integer_datatype = find_one_data_types_from({"n_bits": realdatatype["n_bits"], "category": cint})
-            vector_type = build_reg(same_size_integer_datatype, isa, 0, True, False)
-            scalar_type = build_reg(same_size_integer_datatype, isa_scalar, 0, True, False)
+            vector_type = build_reg(same_size_integer_datatype, isa, lmul, True, False)
+            scalar_type = build_reg(same_size_integer_datatype, isa_scalar, lmul, True, False)
             print(f"\t{scalar_type} s_vi;", file=file)
             if isa["name"] == "rvv":
                 vi_dt_name = same_size_integer_datatype["name"]
@@ -1199,8 +1199,8 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond, lm
         realdatatype_ret = datatypes[dt_ret]
         if proto["ret"].get("fixeddatatype"):
             realdatatype_ret = datatypes[proto["ret"]["fixeddatatype"]]
-        scalar_ret_type = build_type(ret_type_name, realdatatype_ret, isa_scalar, 0, True, False)
-        vector_ret_type = build_type(ret_type_name, realdatatype_ret, isa, 0, True, False)
+        scalar_ret_type = build_type(ret_type_name, realdatatype_ret, isa_scalar, lmul, True, False)
+        vector_ret_type = build_type(ret_type_name, realdatatype_ret, isa, lmul, True, False)
         
         print(f"\t{scalar_ret_type} sres = {scalar_func_name}({call_args_str});", file=file)
         use_safe_conversion = (ret_type_name == "msk") and isa.get("hw_mask", False)
@@ -1216,9 +1216,9 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond, lm
                 print(f"\t}}", file=file)
             else:
                 realdatatype_ret_name = realdatatype_ret["name"]
-                reg_vector_type = build_reg(realdatatype_ret, isa, 0, True, False)
-                reg_scalar_type = build_reg(realdatatype_ret, isa_scalar, 0, True, False)
-                scalar_toreg_func = _build_func_name(isa_scalar, realdatatype_ret_name, realdatatype_ret_name, realdatatype_ret_name, "toreg")
+                reg_vector_type = build_reg(realdatatype_ret, isa, lmul, True, False)
+                reg_scalar_type = build_reg(realdatatype_ret, isa_scalar, lmul, True, False)
+                scalar_toreg_func = _build_func_name(isa_scalar, realdatatype_ret_name, realdatatype_ret_name, realdatatype_ret_name, "toreg", lmul=lmul)
                 tomsk_func = _build_func_name(isa, realdatatype_ret_name, realdatatype_ret_name, realdatatype_ret_name, "tomsk", lmul=lmul)
                 guard = isa["datatypes"].get(dt_ret, {}).get("if", None)
                 if guard:

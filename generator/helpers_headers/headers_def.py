@@ -434,10 +434,10 @@ mipp_funcs = {
     "div4":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
     "rshift":        { "proto": protos["ret_reg_2args_reg_val"],        "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
     "lshift":        { "proto": protos["ret_reg_2args_reg_val"],        "datatypes": all_datatypes,           "horizontal": False, "mask_support": all_mask        },
-    "exp":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_float,                "horizontal": False, "mask_support": all_mask        },
-    "log":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_float,                "horizontal": False, "mask_support": all_mask        },
-    "pow":          { "proto": protos["ret_reg_2args_reg"],            "datatypes": all_float+all_uint,       "horizontal": False, "mask_support": all_mask        },
-    "pow2":         { "proto": protos["ret_reg_2args_reg_val"],        "datatypes": all_float+all_uint,       "horizontal": False, "mask_support": all_mask        },
+    "exp":           { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_float,               "horizontal": False, "mask_support": all_mask        },
+    "log":           { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_float,               "horizontal": False, "mask_support": all_mask        },
+    "pow":           { "proto": protos["ret_reg_2args_reg"],            "datatypes": all_float+all_uint,      "horizontal": False, "mask_support": all_mask        },
+    "pow2":          { "proto": protos["ret_reg_2args_reg_val"],        "datatypes": all_float+all_uint,      "horizontal": False, "mask_support": all_mask        },
 }
 
 isa_scalar = {
