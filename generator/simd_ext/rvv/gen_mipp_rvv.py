@@ -64,16 +64,14 @@ def gen_c_structures_rvv_ls(file, rvv_size):
 
     ldiv = 2
     for dt in isa_rvv["datatypes"]:
-         # if size == 64 _mf2 type not define, use _m1 w smaller vl instead.
-        guard = isa_rvv["datatypes"][dt].get("if", None)
+        if "if_ldiv" in isa_rvv["datatypes"][dt] and str(ldiv) in isa_rvv["datatypes"][dt]["if_ldiv"]:
+            guard = isa_rvv["datatypes"][dt]["if_ldiv"][str(ldiv)]
+        else:
+            guard = isa_rvv["datatypes"][dt].get("if", None)
         if guard:
             print(f"#if {guard}", file=file)
-        if isa_rvv["datatypes"][dt]["width"] == "64":
-            template = j2_template.render(isa_datatype=isa_rvv["datatypes"][dt],rvv_size=rvv_size)
-            template = template.format(lsuffix = "m1" , lmul = "", lsuffix_mipp = "d2" )
-        else :
-            template = j2_template.render(isa_datatype=isa_rvv["datatypes"][dt],rvv_size=rvv_size)
-            template = template.format(lsuffix = "mf" + str(ldiv), lmul = "/" + str(ldiv), lsuffix_mipp = "d" + str(ldiv)) # lmul hack ;)
+        template = j2_template.render(isa_datatype=isa_rvv["datatypes"][dt],rvv_size=rvv_size)
+        template = template.format(lsuffix = "mf" + str(ldiv), lmul = "/" + str(ldiv), lsuffix_mipp = "d" + str(ldiv)) # lmul hack ;)
         print(template, file=file)
         if guard:
             print(f"#endif", file=file)
@@ -101,27 +99,20 @@ def gen_c_structures_rvv_ls(file, rvv_size):
 
     ldiv = 2 
     for dt in dt_list:
-        guard = isa_rvv["datatypes"][dt].get("if", None)
+        if "if_ldiv" in isa_rvv["datatypes"][dt] and str(ldiv) in isa_rvv["datatypes"][dt]["if_ldiv"]:
+            guard = isa_rvv["datatypes"][dt]["if_ldiv"][str(ldiv)]
+        else:
+            guard = isa_rvv["datatypes"][dt].get("if", None)
         if guard:
             print(f"#if {guard}", file=file)
-        if isa_rvv["datatypes"][dt]["width"] == "64":
-            n_bits = datatypes[dt]["n_bits"]
-            nb_elem = f'{rvv_size} / {n_bits}'  	
-            tmp = j2_template.render(rvv_size=rvv_size, isa_datatype=isa_rvv["datatypes"][dt], nb_elem=nb_elem)  
-            tmp = tmp.format(lsuffix = "m1",
-                             lsuffix_mipp = "d2",
-                             lmul = "", 
-                             eew_emul = str(int(n_bits)), 
-                             n_bits = str(n_bits))
-        else : 
-            n_bits = datatypes[dt]["n_bits"]
-            nb_elem = f'{rvv_size} / {n_bits}'  	
-            tmp = j2_template.render(rvv_size=rvv_size, isa_datatype=isa_rvv["datatypes"][dt], nb_elem=nb_elem)  
-            tmp = tmp.format(lsuffix = "d" + str(ldiv), 
-                             lsuffix_mipp = "d" + str(ldiv),  
-                             lmul = "/" + str(ldiv), 
-                             eew_emul = str(int(n_bits*(ldiv))), 
-                             n_bits = str(n_bits)) 
+        n_bits = datatypes[dt]["n_bits"]
+        nb_elem = f'{rvv_size} / {n_bits}'  	
+        tmp = j2_template.render(rvv_size=rvv_size, isa_datatype=isa_rvv["datatypes"][dt], nb_elem=nb_elem)  
+        tmp = tmp.format(lsuffix = "d" + str(ldiv), 
+                         lsuffix_mipp = "d" + str(ldiv),  
+                         lmul = "/" + str(ldiv), 
+                         eew_emul = str(int(n_bits*(ldiv))), 
+                         n_bits = str(n_bits)) 
         print(tmp, file=file)
         if guard:
             print(f"#endif", file=file)
@@ -150,7 +141,10 @@ def gen_c_structures_rvv_ls(file, rvv_size):
         nb_elem = f'{rvv_size} / {n_bits} / {ldiv}'
         tmp = template.replace("{lsuffix}", "d" + str(ldiv))
         j2_template = Template(tmp, undefined=StrictUndefined)
-        guard = isa_rvv["datatypes"][dt].get("if", None)
+        if "if_ldiv" in isa_rvv["datatypes"][dt] and str(ldiv) in isa_rvv["datatypes"][dt]["if_ldiv"]:
+            guard = isa_rvv["datatypes"][dt]["if_ldiv"][str(ldiv)]
+        else:
+            guard = isa_rvv["datatypes"][dt].get("if", None)
         if guard:
             print(f"#if {guard}", file=file)
         print(j2_template.render(isa=isa_rvv,rvv_size=rvv_size,isa_datatype=isa_rvv["datatypes"][dt], datatype=datatypes[dt], lmul=ldiv), file=file)
@@ -204,7 +198,10 @@ def gen_c_structures_rvv_ls(file, rvv_size):
         tmp = template.replace("{lsuffix}", "d" + str(ldiv))
         tmp = tmp.replace("{n_bits}", str(n_bits))
         j2_template = Template(tmp, undefined=StrictUndefined)
-        guard = isa_rvv["datatypes"][dt].get("if", None)
+        if "if_ldiv" in isa_rvv["datatypes"][dt] and str(ldiv) in isa_rvv["datatypes"][dt]["if_ldiv"]:
+            guard = isa_rvv["datatypes"][dt]["if_ldiv"][str(ldiv)]
+        else:
+            guard = isa_rvv["datatypes"][dt].get("if", None)
         if guard:
             print(f"#if {guard}", file=file)
         print(j2_template.render(isa=isa_rvv,rvv_size=rvv_size,isa_datatype=isa_rvv["datatypes"][dt], datatype=datatypes[dt], lmul=ldiv), file=file)
@@ -242,12 +239,8 @@ def resolve_lmul_in_isa(isa, lmul):
     lmul_tmp = lmul
     resolved_isa = copy.deepcopy(isa)
     for dt in resolved_isa["datatypes"]:
-        if isa_rvv["datatypes"][dt]["width"] == "64" and int(lmul) < 0:
-            lsuffix = "m1"
-            lmul = "1"
-        else :
-            lsuffix = lsuffix_tmp
-            lmul = lmul_tmp
+        lsuffix = lsuffix_tmp
+        lmul = lmul_tmp
 
         for key in resolved_isa["datatypes"][dt]:
             if "{lsuffix}" in resolved_isa["datatypes"][dt][key]:

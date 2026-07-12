@@ -1423,6 +1423,8 @@ def _resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separator
             return c1
         if c1 == c2:
             return c1
+        if are_conds_mutually_exclusive(c1, c2):
+            return None
         return f"({c1}) && ({c2})"
 
     def negate_cond(c):
@@ -1960,8 +1962,18 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                     ff_local = ff.copy()
                     guards = []
                     if cand_type == "native_or_emu":
-                        g_par = isa.get("datatypes", {}).get(dt_par, {}).get("if", None)
-                        g_ret = isa.get("datatypes", {}).get(dt_ret, {}).get("if", None)
+                        g_par = None
+                        g_ret = None
+                        if lmul < 0:
+                            ldiv = str(-lmul)
+                            if "if_ldiv" in isa.get("datatypes", {}).get(dt_par, {}) and ldiv in isa["datatypes"][dt_par]["if_ldiv"]:
+                                g_par = isa["datatypes"][dt_par]["if_ldiv"][ldiv]
+                            if "if_ldiv" in isa.get("datatypes", {}).get(dt_ret, {}) and ldiv in isa["datatypes"][dt_ret]["if_ldiv"]:
+                                g_ret = isa["datatypes"][dt_ret]["if_ldiv"][ldiv]
+                        if not g_par:
+                            g_par = isa.get("datatypes", {}).get(dt_par, {}).get("if", None)
+                        if not g_ret:
+                            g_ret = isa.get("datatypes", {}).get(dt_ret, {}).get("if", None)
                         if g_par: guards.append(g_par)
                         if g_ret and g_ret not in guards: guards.append(g_ret)
                     guard = " && ".join(guards) if guards else None
@@ -1977,7 +1989,7 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                         "f": f,
                         "ff": ff_local,
                         "dt": dt,
-                        "emitted": True,
+                        "emitted": False,
                         "level": ff.get("level", 1 if ("type" in ff and ff["type"] == "emulated") else 0)
                     }
                     if c_dict not in isa["candidates"]:
@@ -2040,6 +2052,7 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                         masked_version=mask_kind,
                         lmul=lmul,
                     )
+                    c_dict["emitted"] = True
      
                     _emit_ifdef_end(ifd, file)
      
@@ -2055,8 +2068,18 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                     ff_local = ff.copy()
                     guards = []
                     if cand_type == "native_or_emu":
-                        g_par = isa.get("datatypes", {}).get(dt_par, {}).get("if", None)
-                        g_ret = isa.get("datatypes", {}).get(dt_ret, {}).get("if", None)
+                        g_par = None
+                        g_ret = None
+                        if lmul < 0:
+                            ldiv = str(-lmul)
+                            if "if_ldiv" in isa.get("datatypes", {}).get(dt_par, {}) and ldiv in isa["datatypes"][dt_par]["if_ldiv"]:
+                                g_par = isa["datatypes"][dt_par]["if_ldiv"][ldiv]
+                            if "if_ldiv" in isa.get("datatypes", {}).get(dt_ret, {}) and ldiv in isa["datatypes"][dt_ret]["if_ldiv"]:
+                                g_ret = isa["datatypes"][dt_ret]["if_ldiv"][ldiv]
+                        if not g_par:
+                            g_par = isa.get("datatypes", {}).get(dt_par, {}).get("if", None)
+                        if not g_ret:
+                            g_ret = isa.get("datatypes", {}).get(dt_ret, {}).get("if", None)
                         if g_par: guards.append(g_par)
                         if g_ret and g_ret not in guards: guards.append(g_ret)
                     guard = " && ".join(guards) if guards else None
@@ -2072,7 +2095,7 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                         "f": f,
                         "ff": ff_local,
                         "dt": dt,
-                        "emitted": True,
+                        "emitted": False,
                         "level": ff.get("level", 1 if ("type" in ff and ff["type"] == "emulated") else 0)
                     }
                     if c_dict not in isa["candidates"]:
@@ -2133,6 +2156,7 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                         masked_version=None,
                         lmul=lmul,
                     )
+                    c_dict["emitted"] = True
 
                     _emit_ifdef_end(ifd, file)
 

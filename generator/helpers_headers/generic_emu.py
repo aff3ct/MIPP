@@ -456,6 +456,8 @@ for iemu in implems_mask_generic_emu:
 
 for iemu in implems_generic_emu:
     for sub_iemu in implems_generic_emu[iemu]:
+        if "type" not in sub_iemu:
+            sub_iemu["type"] = "emulated"
         sub_iemu["level"] = 2
 
 ################################# HORIZONTAL LMUL FUNCTIONS ############################################
