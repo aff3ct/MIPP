@@ -1317,15 +1317,41 @@ def _resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separator
                 
                 if isa["name"] != "scalar":
                     auto_scalar_reqs = {}
-                    has_msk = (mask_kind is not None)
-                    for arg in funcs[f]["proto"]["args"]:
-                        if arg["type"] == "msk":
-                            has_msk = True
-                    if funcs[f]["proto"]["ret"]["type"] == "msk":
-                        has_msk = True
-                    if has_msk and isa.get("hw_mask_requires_toreg", False):
+                    
+                    if isa.get("hw_mask_requires_toreg", False):
                         if not (isa.get("hw_mask_is_bitfield", False) and f in ["toreg", "tomsk", "cast_k"]):
-                            auto_scalar_reqs = {"toreg": [dt_key], "tomsk": [dt_key]}
+                            # Mask arguments need toreg/tomsk on dt_par
+                            has_msk_arg = any(arg["type"] == "msk" for arg in funcs[f]["proto"]["args"]) or mask_kind is not None
+                            if has_msk_arg:
+                                single_dt_par = dt_par.split(",")[0]
+                                req_dt_par = single_dt_par + "," + single_dt_par
+                                auto_scalar_reqs.setdefault("toreg", []).append(req_dt_par)
+                                auto_scalar_reqs.setdefault("tomsk", []).append(req_dt_par)
+                                if isa.get("hw_mask_extract_via_store", False):
+                                    auto_scalar_reqs.setdefault("store", []).append(req_dt_par)
+                            
+                            # Mask return needs toreg/tomsk on dt_ret
+                            if funcs[f]["proto"]["ret"]["type"] == "msk":
+                                single_dt_ret = dt_ret.split(",")[0]
+                                req_dt_ret = single_dt_ret + "," + single_dt_ret
+                                if req_dt_ret not in auto_scalar_reqs.get("toreg", []):
+                                    auto_scalar_reqs.setdefault("toreg", []).append(req_dt_ret)
+                                    auto_scalar_reqs.setdefault("tomsk", []).append(req_dt_ret)
+                                    if isa.get("hw_mask_extract_via_store", False):
+                                        if req_dt_ret not in auto_scalar_reqs.get("store", []):
+                                            auto_scalar_reqs.setdefault("store", []).append(req_dt_ret)
+
+                    # vindex arguments need store for the corresponding int type (RVV specific fallback logic)
+                    if isa["name"] == "rvv":
+                        for arg in funcs[f]["proto"]["args"]:
+                            if arg["type"] == "vindex":
+                                single_dt_par = dt_par.split(",")[0]
+                                c_int = datatypes[single_dt_par].get("category", "int")
+                                same_size_integer_datatype = find_one_data_types_from({"n_bits": datatypes[single_dt_par]["n_bits"], "category": c_int})
+                                vi_dt_name = same_size_integer_datatype["name"]
+                                req_vi_dt = vi_dt_name + "," + vi_dt_name
+                                if req_vi_dt not in auto_scalar_reqs.get("store", []):
+                                    auto_scalar_reqs.setdefault("store", []).append(req_vi_dt)
 
                     candidates_map[key].append({
                         "type": "auto_scalar",

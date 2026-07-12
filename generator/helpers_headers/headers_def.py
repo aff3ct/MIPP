@@ -359,10 +359,6 @@ no_mask = MaskSupport(maskable=False, maskzable=False, masksable=False)
      (for which the function is to be generated are specified, along with other parameters such as the parameters such as the "horizontal" flag
 """
 mipp_funcs = {
-    "cast":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes_cart_prod, "horizontal": False, "mask_support": no_mask         },
-    "cast_k":        { "proto": protos["ret_msk_1arg_msk"],             "datatypes": all_datatypes_cart_prod, "horizontal": False, "mask_support": no_mask         },
-    "cvt":           { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes_same_size, "horizontal": False, "mask_support": no_mask         },
-    "wcvt":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes_widenning, "horizontal": True,  "mask_support": no_mask         }, # not really horizontal but easier this way
     "toreg":         { "proto": protos["ret_reg_1arg_msk"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": no_mask         },
     "tomsk":         { "proto": protos["ret_msk_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": no_mask         },
     "load":          { "proto": protos["ret_reg_1arg_ptr"],             "datatypes": all_datatypes,           "horizontal": False, "mask_support": maskz_and_masks },
@@ -380,6 +376,10 @@ mipp_funcs = {
     "get":           { "proto": protos["ret_val_2args_reg_val"],        "datatypes": all_datatypes,           "horizontal": True,  "mask_support": no_mask         },
     "get_k":         { "proto": protos["ret_val_2args_msk_val"],        "datatypes": all_datatypes,           "horizontal": True,  "mask_support": no_mask         },
     "getfirst":      { "proto": protos["ret_val_1arg_reg"],             "datatypes": all_datatypes,           "horizontal": True,  "mask_support": no_mask         },
+    "cast":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes_cart_prod, "horizontal": False, "mask_support": no_mask         },
+    "cast_k":        { "proto": protos["ret_msk_1arg_msk"],             "datatypes": all_datatypes_cart_prod, "horizontal": False, "mask_support": no_mask         },
+    "cvt":           { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes_same_size, "horizontal": False, "mask_support": no_mask         },
+    "wcvt":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes_widenning, "horizontal": True,  "mask_support": no_mask         }, # not really horizontal but easier this way
     "gather":        { "proto": protos["ret_reg_2args_ptr_reg"],        "datatypes": all_datatypes_idx_pair,  "horizontal": False, "mask_support": maskz_and_masks },
     "scatter":       { "proto": protos["ret_void_3args_ptr_reg_reg"],   "datatypes": all_datatypes_idx_pair,  "horizontal": False, "mask_support": mask_and_maskz  },
 #   "mask_gather":   { "proto": protos["ret_reg_3args_ptr_vindex_msk"], "datatypes": all_datatypes,           "horizontal": False                                  },
