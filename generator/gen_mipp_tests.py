@@ -147,8 +147,6 @@ def product_type_format_cpp_gather_like(dt, lmul=0, write_lmul=False, mask_str="
 
 def product_type_format_cpp_wcvt_like(dt, lmul=0, write_lmul=False):
 
-    print("debug in product_type_format_cpp_wcvt_like")
-
     if "," in dt:
         dt2, dt1 = dt.split(",")
         if write_lmul :
@@ -361,8 +359,7 @@ def add_type_guards(func, implem, function, kind="c", lmul=0, mkind="", guard = 
         section = 'SECTION ("datatype = {dt}") {{ {function}{mask_str}{lmul_str}{dt_suffix}(); }}\n'
     elif kind == "cpp" and (func == "cast" or func == "cast_k") :
         section = 'SECTION ("datatype = {dt}") {{ {function}{mask_str}{dt_suffix}(); }}\n'
-    elif kind == "cpp" and ( func == "gather" or func == "scatter" or func.startswith("cvt") or func.startswith("wcvt") ) :
-        print("debug in add_type_guards for gather, scatter, cvt, wcvt func = ", func)
+    elif kind == "cpp" and (func == "gather" or func == "scatter" or func.startswith("cvt") or func.startswith("wcvt")):
         section = 'SECTION ("datatype = {dt}") {{ {function}{dt_suffix}(); }}\n'
     #lists to store the dttypes that need to be 
     #wrapped in #if defined(MIPP_64BIT) or #if defined(MIPP_BW)
@@ -1016,7 +1013,6 @@ def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="
         )
         func_template = Template(res, undefined=StrictUndefined)
         func_old = "cast" if is_cast_k else "cvt" if is_cvt else "wcvt" if is_wcvt else "cast"
-        print("debug func = ", func, " func_old = ", func_old)
         lst = list(layer_dict.keys())
         lst.sort()
         
@@ -1068,7 +1064,6 @@ def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="
         func = test_function_name(kind, func)
 
         func = func + "_" + scalar2_type
-        print("func is now = ", func, "scalar2_type = ", scalar2_type)
 
         res = func_template.render(
             func=func,
@@ -1168,8 +1163,6 @@ def gen_cast_funcs_all_datatypes(func, kind="c", register="rvd", mask="rvm",lmul
 
         dt_list = [dt.split(",")[1] for dt in datatypes]
         dt_list = set(dt_list)  # unique datatypes
-
-        print(dt_list)
         
         for dt in dt_list:
             dt1 = dt.split(",")[0]
@@ -1207,9 +1200,6 @@ def gen_funcs_all_datatypes(func, kind="c", register="rvd", mask="rvm",lmul=0, m
     """
     generate the test function(s) for 1 func, all datatypes, 1 layer.
     """
-
-    if func == "andb_k" : 
-        print("Debug : gen_funcs_all_datatypes called for andb_k with lmul=", lmul, " mkind=", mkind)
 
     res = ""
     datatypes = mipp_funcs[func]["datatypes"]
@@ -1380,12 +1370,17 @@ def get_str_path(tmp_path, lmul=0, mkind=""):
 def clean_folder(folder_path):
     try:
         shutil.rmtree(folder_path)
-        print(f"Successfully deleted folder: {folder_path}")
+        print(f"    - Deleted: {folder_path}")
+    except FileNotFoundError:
+        pass
     except Exception as e:
-        print(f"Failed to delete folder: {folder_path}. Reason: {e}")
+        print(f"    - Failed to delete: {folder_path} ({e})")
 
 #big and somewhat ugly "main" func to generate all test files for all funcs for the requested layer(s)
-def gen_test_files_all_funcs(kind="c", lmul=0, mkind="", N=10, mode="function"):
+def gen_test_files_all_funcs(kind="all", lmul=0, mkind="", N=10, mode="function_header", stats=None):
+    if stats is None:
+        stats = {"generated": 0, "skipped_mask": [], "skipped_disabled": []}
+
     """
     kind: "c", "cpp", "obj", or "all"
     Regenerates only the requested layer(s) for all functions.
@@ -1430,13 +1425,11 @@ def gen_test_files_all_funcs(kind="c", lmul=0, mkind="", N=10, mode="function"):
     obj_dict = get_gen_test_dict("obj") if regen_obj else {}
     
     if lmul != 0:
-        print("Debug : regenerating for lmul=", lmul)
         c_dict = get_gen_test_dict_lmul("c") if regen_c else {}
         cpp_dict = get_gen_test_dict_lmul("cpp") if regen_cpp else {}
         obj_dict = get_gen_test_dict_lmul("obj") if regen_obj else {}
         
     if mkind != "" :
-        print("Debug : regenerating for mask kind=", mkind)
         c_dict = get_gen_test_dict_mask("c") if regen_c else {}
         cpp_dict = get_gen_test_dict_mask("cpp") if regen_cpp else {}
         obj_dict = get_gen_test_dict_mask("obj") if regen_obj else {}
@@ -1479,19 +1472,15 @@ def gen_test_files_all_funcs(kind="c", lmul=0, mkind="", N=10, mode="function"):
     dict_mask = get_gen_test_dict_mask("c")
     #print(dict_mask.keys())
     for func in sorted(funcs):
-
-        if func.endswith("_k") : 
-            print("Debug : processing func ", func, " with lmul=", lmul, " mkind=", mkind)
-
-        # Little cli print bc it's nice :)
-        # print("Generating tests for function: " + func + "with lmul = " + str(lmul) + " and mask kind = " + mkind)
-        
         mask_support = mipp_funcs[func]["mask_support"]
         if mkind != "" and not mask_support.is_supported(mkind) :
-            # print(f"Skipping {func} for {mkind} because it doesn't support it")
+            stats["skipped_mask"].append(f"{func} ({mkind})")
             continue
         
         disable = func in set_skip_testing
+        if disable:
+            stats["skipped_disabled"].append(func)
+
         reason = (
             f"{func} is in set_skip_testing. "
             "If it's blend it's because it's broken on AVX2; otherwise it's likely "
@@ -1507,6 +1496,7 @@ def gen_test_files_all_funcs(kind="c", lmul=0, mkind="", N=10, mode="function"):
                 c_file = comment_out_cpp_file(c_file, reason)
             file_path = cpath + match_concept(func) + f"/test_c{func}.cpp"
             write_file_if_different(file_path, c_file)
+            stats["generated"] += 1
 
         if regen_cpp and func in cpp_dict:
             if func == "cast" or func == "cast_k" or func == "cvt" or func == "wcvt":
@@ -1518,6 +1508,7 @@ def gen_test_files_all_funcs(kind="c", lmul=0, mkind="", N=10, mode="function"):
                 cpp_file = comment_out_cpp_file(cpp_file, reason)
             file_path = cpppath + match_concept(func) + f"/test_{func}.cpp"
             write_file_if_different(file_path, cpp_file)
+            stats["generated"] += 1
 
         if regen_obj and func in obj_dict:
             if func == "cast" or func == "cast_k":
@@ -1529,6 +1520,7 @@ def gen_test_files_all_funcs(kind="c", lmul=0, mkind="", N=10, mode="function"):
 
             file_path = objpath + match_concept(func) + f"/test_obj_{func}.cpp"
             write_file_if_different(file_path, obj_file)
+            stats["generated"] += 1
 
 def main():#just parse the args and call gen_test_files_all_funcs with the right kind
     parser = argparse.ArgumentParser(description="Generate MIPP test files.")
@@ -1546,11 +1538,11 @@ def main():#just parse the args and call gen_test_files_all_funcs with the right
         default=10,
         help="Number of iterations for random tests (default: 10).",
     )
-    # clean dir option default : false
+    # clean dir option default : True (can be disabled with --no-clean)
     parser.add_argument(
-        "--clean",
+        "--no-clean",
         action="store_true",
-        help="Clean the test folders before generating new files (default: false).",
+        help="Do not clean the test folders before generating new files.",
     )
     parser.add_argument(
         "--lmul",
@@ -1602,52 +1594,87 @@ def main():#just parse the args and call gen_test_files_all_funcs with the right
 
     args = parser.parse_args()
 
-    if args.clean:
-        clean_folder(cpath)
-        clean_folder(cpppath)
-        clean_folder(objpath)
     if isinstance(args.kind, str):
         args.kind = [args.kind]
     if("unmasked" in args.mask_kind): 
         # replace with empty string to simplify the code later on
         args.mask_kind = [k if k != "unmasked" else "" for k in args.mask_kind]
 
+    print("=====================================================================================================")
+    print(" MIPP Test Generator")
+    print("=====================================================================================================")
+    print(f"  Layers: {args.kind} | Header type: {args.header_type}")
+    print(f"  Iterations (N): {args.num_iterations}")
+    print(f"  LMUL options: {args.lmul} | LDIV options: {args.ldiv}")
+    mask_str = [m if m != "" else "unmasked" for m in args.mask_kind]
+    print(f"  Mask kinds: {mask_str}")
+    print(f"  Skip C++ LMUL>0: {args.skip_lmul_cpp} | Skip C++ Masked: {args.skip_mask_cpp}")
+    print("-----------------------------------------------------------------------------------------------------")
+
+    if not args.no_clean:
+        import time
+        print("  ➔ Cleaning old test folders:")
+        t0 = time.perf_counter()
+        clean_folder(cpath)
+        clean_folder(cpppath)
+        clean_folder(objpath)
+        print(f"    Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
+
+    stats = {
+        "generated": 0,
+        "skipped_mask": [],
+        "skipped_disabled": []
+    }
+
+    t0_all = time.perf_counter()
+
     for kind in args.kind:
-            # if kind == "cpp" or kind == "obj":
-            #     if args.skip_lmul_cpp and kind == "cpp" and (args.lmul != [0] and args.lmul != [1]):
-            #         print("Skipping C++ tests for LMUL > 0")
-            #         continue
-            #     if args.skip_mask_cpp and kind == "cpp" and args.mask_kind != [""]:
-            #         print("Skipping C++ tests for masked functions")
-            #         continue
-            for lmul in args.lmul:
-                
-                if kind == "cpp" and args.skip_lmul_cpp and lmul > 0:
-                    continue
+        valid_lmuls = [l for l in args.lmul if not (kind == "cpp" and args.skip_lmul_cpp and l > 0)]
+        valid_ldivs = [l for l in args.ldiv if not (kind == "cpp" and args.skip_lmul_cpp and l > 0)]
+        valid_masks = [m for m in args.mask_kind if not (kind == "cpp" and args.skip_mask_cpp and m != "")]
+        
+        mask_strs = [m if m != "" else "unmasked" for m in valid_masks]
+        mask_str_formatted = "{" + ", ".join(mask_strs) + "}"
+        
+        if valid_lmuls:
+            lmul_str = "{" + ", ".join(map(str, valid_lmuls)) + "}"
+            print(f"  ➔ Generating {kind.upper()} tests [LMUL={lmul_str}, mask={mask_str_formatted}]...", end="", flush=True)
+            t0_step = time.perf_counter()
+            for lmul in valid_lmuls:
+                for mkind in valid_masks:
+                    gen_test_files_all_funcs(kind=kind, lmul=lmul, mkind=mkind, N=args.num_iterations, mode=args.header_type, stats=stats)
+            print(f" Done ({time.perf_counter() - t0_step:.3f} s)!")
 
-                for mkind in args.mask_kind:
+        if valid_ldivs:
+            ldiv_str = "{" + ", ".join(map(str, valid_ldivs)) + "}"
+            print(f"  ➔ Generating {kind.upper()} tests [LDIV={ldiv_str}, mask={mask_str_formatted}]...", end="", flush=True)
+            t0_step = time.perf_counter()
+            for ldiv in valid_ldivs:
+                for mkind in valid_masks:
+                    gen_test_files_all_funcs(kind=kind, lmul=(-int(ldiv)), mkind=mkind, N=args.num_iterations, mode=args.header_type, stats=stats)
+            print(f" Done ({time.perf_counter() - t0_step:.3f} s)!")
 
-                    if kind == "cpp" and args.skip_mask_cpp and mkind != "":
-                        continue
+    print("=====================================================================================================")
+    print(" MIPP TEST GENERATION SUMMARY")
+    print("=====================================================================================================")
+    print(f"  Total tests generated: {stats['generated']}")
 
-                    mkind_print = mkind if mkind != "" else "unmasked"
-                    print(f"Generating {kind} tests with lmul = {lmul} and mask kind = {mkind_print}")
-                    gen_test_files_all_funcs(kind=kind, lmul=lmul, mkind=mkind, N=args.num_iterations, mode=args.header_type)
+    unique_skipped_mask = sorted(list(set(stats["skipped_mask"])))
+    if unique_skipped_mask:
+        print(f"  Skipped (mask unsupported): {len(unique_skipped_mask)} configurations")
+        # Only display a few if there are many
+        for s in unique_skipped_mask[:10]:
+            print(f"    - {s}")
+        if len(unique_skipped_mask) > 10:
+            print(f"    ... and {len(unique_skipped_mask) - 10} more")
 
-            for ldiv in args.ldiv:
-                if kind == "cpp" and args.skip_lmul_cpp and lmul > 0:
-                    continue
+    unique_skipped_disabled = sorted(list(set(stats["skipped_disabled"])))
+    if unique_skipped_disabled:
+        print(f"  Skipped (disabled manually): {len(unique_skipped_disabled)} functions")
+        for s in unique_skipped_disabled:
+            print(f"    - {s}")
 
-                for mkind in args.mask_kind:
-
-                    if kind == "cpp" and args.skip_mask_cpp and mkind != "":
-                        continue
-
-                    mkind_print = mkind if mkind != "" else "unmasked"
-                    print(f"Generating {kind} tests with ldiv = {ldiv} and mask kind = {mkind_print}")
-                    gen_test_files_all_funcs(kind=kind, lmul=(-int(ldiv)), mkind=mkind, N=args.num_iterations, mode=args.header_type)
-                    
-
+    print("=====================================================================================================")
 
 if __name__ == "__main__":
     main()
