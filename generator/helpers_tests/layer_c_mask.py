@@ -295,9 +295,9 @@ OP_3ARGS_REG = """\t{{reg_type}} r4 = mipp_{{func}}_{{dt_ext}}{{mask_kind}}{{lmu
 \t{{reg_type_scalar}} s4 = mipp_scalar_{{func}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args_scalar}} s1, s2, s3);"""
 
 
-OP_GATHER = """\t{{reg_type}} r2 = mipp_gather_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args}}inputs1, ri1);\n\t{{reg_type_scalar}} s2 = mipp_scalar_gather_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args_scalar}}inputs1, ris1);"""
+OP_GATHER = """\t{{reg_type}} r2 = mipp_gather_{{dt_ext}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args}}inputs1, ri1);\n\t{{reg_type_scalar}} s2 = mipp_scalar_gather_{{dt_ext}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args_scalar}}inputs1, ris1);"""
 
-OP_SCATTER = """\tmipp_scatter_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args}}outputs, ri1, r1);\n\tmipp_scalar_scatter_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args_scalar}}outputs_scal, ris1, rs1);"""
+OP_SCATTER = """\tmipp_scatter_{{dt_ext}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args}}outputs, ri1, r1);\n\tmipp_scalar_scatter_{{dt_ext}}_{{dt_ext}}{{mask_kind}}{{lmul_suffix}}({{mask_args_scalar}}outputs_scal, ris1, rs1);"""
 
 
 

@@ -380,8 +380,8 @@ mipp_funcs = {
     "cast_k":        { "proto": protos["ret_msk_1arg_msk"],             "datatypes": all_datatypes_cart_prod, "horizontal": False, "mask_support": no_mask         },
     "cvt":           { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes_same_size, "horizontal": False, "mask_support": no_mask         },
     "wcvt":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_datatypes_widenning, "horizontal": True,  "mask_support": no_mask         }, # not really horizontal but easier this way
-    "gather":        { "proto": protos["ret_reg_2args_ptr_reg"],        "datatypes": all_datatypes,           "horizontal": False, "mask_support": maskz_and_masks },
-    "scatter":       { "proto": protos["ret_void_3args_ptr_reg_reg"],   "datatypes": all_datatypes,           "horizontal": False, "mask_support": mask_and_maskz  },
+    "gather":        { "proto": protos["ret_reg_2args_ptr_reg"],        "datatypes": all_datatypes_idx_pair,  "horizontal": False, "mask_support": maskz_and_masks },
+    "scatter":       { "proto": protos["ret_void_3args_ptr_reg_reg"],   "datatypes": all_datatypes_idx_pair,  "horizontal": False, "mask_support": mask_and_maskz  },
 #   "mask_gather":   { "proto": protos["ret_reg_3args_ptr_vindex_msk"], "datatypes": all_datatypes,           "horizontal": False                                  },
     "sqrt":          { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_float,               "horizontal": False, "mask_support": all_mask        },
     "rsqrt":         { "proto": protos["ret_reg_1arg_reg"],             "datatypes": all_float,               "horizontal": False, "mask_support": all_mask        },

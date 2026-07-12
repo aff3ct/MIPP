@@ -827,14 +827,14 @@ implems_rvv = {
     ],
 
     "gather" : [
-        { "instr_name" : "luxei",  "datatypes" : all_datatypes, "template" : tpl_implem_rvv["gather"]},
-        { "instr_name" : "luxei",  "datatypes" : all_datatypes, "template" : tpl_implem_rvv["gather_maskz"], "version" : "maskz"},
-        { "instr_name" : "luxei",  "datatypes" : all_datatypes, "template" : tpl_implem_rvv["gather_masks"], "version" : "masks"},
+        { "instr_name" : "luxei",  "datatypes" : all_datatypes_idx_pair, "template" : tpl_implem_rvv["gather"]},
+        { "instr_name" : "luxei",  "datatypes" : all_datatypes_idx_pair, "template" : tpl_implem_rvv["gather_maskz"], "version" : "maskz"},
+        { "instr_name" : "luxei",  "datatypes" : all_datatypes_idx_pair, "template" : tpl_implem_rvv["gather_masks"], "version" : "masks"},
     ],
 
     "scatter" : [
-        { "instr_name" : "suxei",  "datatypes" : all_datatypes, "template" : tpl_implem_rvv["scatter"]},
-        { "instr_name" : "suxei",  "datatypes" : all_datatypes, "template" : tpl_implem_rvv["scatter_mask"], "version" : "mask"},
-        { "instr_name" : "suxei",  "datatypes" : all_datatypes, "template" : tpl_implem_rvv["scatter_maskz"], "version" : "maskz"},
+        { "instr_name" : "suxei",  "datatypes" : all_datatypes_idx_pair, "template" : tpl_implem_rvv["scatter"]},
+        { "instr_name" : "suxei",  "datatypes" : all_datatypes_idx_pair, "template" : tpl_implem_rvv["scatter_mask"], "version" : "mask"},
+        { "instr_name" : "suxei",  "datatypes" : all_datatypes_idx_pair, "template" : tpl_implem_rvv["scatter_maskz"], "version" : "maskz"},
     ],
 }
