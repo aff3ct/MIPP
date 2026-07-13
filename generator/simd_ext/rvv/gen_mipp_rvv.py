@@ -145,14 +145,19 @@ def gen_c_structures_rvv_ls(file, rvv_size):
             guard = isa_rvv["datatypes"][dt]["if_ldiv"][str(ldiv)]
         else:
             guard = isa_rvv["datatypes"][dt].get("if", None)
-        if guard:
-            print(f"#if {guard}", file=file)
-        print(j2_template.render(isa=isa_rvv,rvv_size=rvv_size,isa_datatype=isa_rvv["datatypes"][dt], datatype=datatypes[dt], lmul=ldiv), file=file)
-        if guard:
-            print(f"#else", file=file)
-            print(f"    #include \"../scalar/scalar_common.h\"", file=file)
-            print(f"    typedef rvd_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvd_rvv_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_d{ldiv}_t;", file=file)
-            print(f"#endif", file=file)
+        if guard == "0":
+            # Native type does not exist; emit scalar alias directly
+            print(f"#include \"../scalar/scalar_common.h\"", file=file)
+            print(f"typedef rvd_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvd_rvv_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_d{ldiv}_t;", file=file)
+        else:
+            if guard:
+                print(f"#if {guard}", file=file)
+            print(j2_template.render(isa=isa_rvv,rvv_size=rvv_size,isa_datatype=isa_rvv["datatypes"][dt], datatype=datatypes[dt], lmul=ldiv), file=file)
+            if guard:
+                print(f"#else", file=file)
+                print(f"    #include \"../scalar/scalar_common.h\"", file=file)
+                print(f"    typedef rvd_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvd_rvv_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_d{ldiv}_t;", file=file)
+                print(f"#endif", file=file)
 
     #typedef of rvd m1 to no suffix
     template = """typedef rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m1_t rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
@@ -202,13 +207,17 @@ def gen_c_structures_rvv_ls(file, rvv_size):
             guard = isa_rvv["datatypes"][dt]["if_ldiv"][str(ldiv)]
         else:
             guard = isa_rvv["datatypes"][dt].get("if", None)
-        if guard:
-            print(f"#if {guard}", file=file)
-        print(j2_template.render(isa=isa_rvv,rvv_size=rvv_size,isa_datatype=isa_rvv["datatypes"][dt], datatype=datatypes[dt], lmul=ldiv), file=file)
-        if guard:
-            print(f"#else", file=file)
-            print(f"    typedef rvm_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvm_rvv_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_d{ldiv}_t;", file=file)
-            print(f"#endif", file=file)
+        if guard == "0":
+            # Native mask type does not exist; emit scalar alias directly
+            print(f"typedef rvm_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvm_rvv_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_d{ldiv}_t;", file=file)
+        else:
+            if guard:
+                print(f"#if {guard}", file=file)
+            print(j2_template.render(isa=isa_rvv,rvv_size=rvv_size,isa_datatype=isa_rvv["datatypes"][dt], datatype=datatypes[dt], lmul=ldiv), file=file)
+            if guard:
+                print(f"#else", file=file)
+                print(f"    typedef rvm_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvm_rvv_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_d{ldiv}_t;", file=file)
+                print(f"#endif", file=file)
     
     template = """typedef rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m1_t rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
     for dt in isa_rvv["datatypes"]:

@@ -1095,17 +1095,24 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond, lm
                 print(f"\t}}", file=file)
             else:
                 toreg_func = _build_func_name(isa, msk_dt_name, msk_dt_name, msk_dt_name, "toreg", lmul=lmul)
-                guard = isa["datatypes"].get(dt_par, {}).get("if", None)
-                if guard:
-                    print(f"#if {guard}", file=file)
-                print(f"\t{reg_vector_type} r_m0 = {toreg_func}(m0);", file=file)
-                print(f"\t{reg_scalar_type} s_r_m0;", file=file)
-                print(f"\tmemcpy(&s_r_m0, &r_m0, sizeof(s_r_m0));", file=file)
-                print(f"\ts_m0 = {scalar_tomsk_func}(s_r_m0);", file=file)
-                if guard:
-                    print(f"#else", file=file)
+                if lmul < 0 and "if_ldiv" in isa["datatypes"].get(dt_par, {}):
+                    guard = isa["datatypes"][dt_par]["if_ldiv"].get(str(-lmul), None)
+                else:
+                    guard = isa["datatypes"].get(dt_par, {}).get("if", None)
+                if guard == "0":
+                    # Native path does not exist; use scalar fallback directly
                     print(f"\tmemcpy(&s_m0, &m0, sizeof(s_m0));", file=file)
-                    print(f"#endif", file=file)
+                else:
+                    if guard:
+                        print(f"#if {guard}", file=file)
+                    print(f"\t{reg_vector_type} r_m0 = {toreg_func}(m0);", file=file)
+                    print(f"\t{reg_scalar_type} s_r_m0;", file=file)
+                    print(f"\tmemcpy(&s_r_m0, &r_m0, sizeof(s_r_m0));", file=file)
+                    print(f"\ts_m0 = {scalar_tomsk_func}(s_r_m0);", file=file)
+                    if guard:
+                        print(f"#else", file=file)
+                        print(f"\tmemcpy(&s_m0, &m0, sizeof(s_m0));", file=file)
+                        print(f"#endif", file=file)
         else:
             print(f"\tmemcpy(&s_m0, &m0, sizeof(s_m0));", file=file)
         call_args.append("s_m0")
@@ -1156,14 +1163,28 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond, lm
                     reg_scalar_type = build_reg(realdatatype, isa_scalar, lmul, True, False)
                     toreg_func = _build_func_name(isa, realdatatype_name, realdatatype_name, realdatatype_name, "toreg", lmul=lmul)
                     scalar_tomsk_func = _build_func_name(isa_scalar, realdatatype_name, realdatatype_name, realdatatype_name, "tomsk", lmul=lmul)
-                    print(f"\t{reg_vector_type} r_{arg_name} = {toreg_func}({arg_name});", file=file)
-                    print(f"\t{reg_scalar_type} s_r_{arg_name};", file=file)
-                    if isa.get("hw_mask_extract_via_store", False):
-                        store_func = _build_func_name(isa, realdatatype_name, realdatatype_name, realdatatype_name, "store", lmul=lmul)
-                        print(f"\t{store_func}(s_r_{arg_name}.r, r_{arg_name});", file=file)
+                    if lmul < 0 and "if_ldiv" in isa["datatypes"].get(realdatatype_name, {}):
+                        arg_guard = isa["datatypes"][realdatatype_name]["if_ldiv"].get(str(-lmul), None)
                     else:
-                        print(f"\tmemcpy(&s_r_{arg_name}, &r_{arg_name}, sizeof(s_r_{arg_name}));", file=file)
-                    print(f"\ts_{arg_name} = {scalar_tomsk_func}(s_r_{arg_name});", file=file)
+                        arg_guard = isa["datatypes"].get(realdatatype_name, {}).get("if", None)
+                    if arg_guard == "0":
+                        # Native path does not exist; use scalar fallback directly
+                        print(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof(s_{arg_name}));", file=file)
+                    else:
+                        if arg_guard:
+                            print(f"#if {arg_guard}", file=file)
+                        print(f"\t{reg_vector_type} r_{arg_name} = {toreg_func}({arg_name});", file=file)
+                        print(f"\t{reg_scalar_type} s_r_{arg_name};", file=file)
+                        if isa.get("hw_mask_extract_via_store", False):
+                            store_func = _build_func_name(isa, realdatatype_name, realdatatype_name, realdatatype_name, "store", lmul=lmul)
+                            print(f"\t{store_func}(s_r_{arg_name}.r, r_{arg_name});", file=file)
+                        else:
+                            print(f"\tmemcpy(&s_r_{arg_name}, &r_{arg_name}, sizeof(s_r_{arg_name}));", file=file)
+                        print(f"\ts_{arg_name} = {scalar_tomsk_func}(s_r_{arg_name});", file=file)
+                        if arg_guard:
+                            print(f"#else", file=file)
+                            print(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof(s_{arg_name}));", file=file)
+                            print(f"#endif", file=file)
             else:
                 print(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof(s_{arg_name}));", file=file)
             call_args.append(f"s_{arg_name}")
