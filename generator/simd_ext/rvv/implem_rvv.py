@@ -465,6 +465,12 @@ Which template to use to generate them. Which type should be used w which templa
 implems_rvv = {
 
     # Keeping those near the top bc the generator might get mad otherwise ...
+    "set1" : [
+        { "instr_name" : "vmv",     "datatypes" : all_int_uint,  "template" :tpl_implem_rvv["scalar_set1"] },
+        { "instr_name" : "vfmv",    "datatypes" : all_float,     "template" :tpl_implem_rvv["float_set1"]}],
+    "set0" : [ 
+        { "instr_name" : "vmv",     "datatypes" : all_int_uint,  "template" :tpl_implem_rvv["scalar_set0"] },
+        { "instr_name" : "vfmv",    "datatypes" : all_float,     "template" :tpl_implem_rvv["float_set0"]}],
     "load" : [
         { "instr_name" : "load",    "datatypes" : all_datatypes, "template" : tpl_implem_rvv["load"] },
         { "instr_name" : "load",    "datatypes" : all_datatypes, "template" : tpl_implem_rvv["load_msks"], "version" : "masks"},
@@ -473,13 +479,6 @@ implems_rvv = {
         { "instr_name" : "store",   "datatypes" : all_datatypes, "template" : tpl_implem_rvv["store"] },
         { "instr_name" : "store",   "datatypes" : all_datatypes, "template" : tpl_implem_rvv["store_msk"], "version"  : "mask"},
         { "instr_name" : "store",   "datatypes" : all_datatypes, "template" : tpl_implem_rvv["store_mskz"], "version" : "maskz"},],
-
-    "set1" : [
-        { "instr_name" : "vmv",     "datatypes" : all_int_uint,  "template" :tpl_implem_rvv["scalar_set1"] },
-        { "instr_name" : "vfmv",    "datatypes" : all_float,     "template" :tpl_implem_rvv["float_set1"]}],
-    "set0" : [ 
-        { "instr_name" : "vmv",     "datatypes" : all_int_uint,  "template" :tpl_implem_rvv["scalar_set0"] },
-        { "instr_name" : "vfmv",    "datatypes" : all_float,     "template" :tpl_implem_rvv["float_set0"]}],
     "blend" : [
         { "instr_name" : "merge",   "datatypes" : all_datatypes, "template" : tpl_implem_rvv["merge"]}],
 

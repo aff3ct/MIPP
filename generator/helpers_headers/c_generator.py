@@ -124,10 +124,10 @@ def gen_c_structures(isa, file, is_scalar=False):
 
     template_alt = """
 #if {{ isa_datatype.if }}
-    typedef struct { {{ isa_datatype.reg }} r; } rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;
+	typedef struct { {{ isa_datatype.reg }} r; } rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;
 #else
-    #include "../scalar/scalar_common.h"
-    typedef  rvd_scalar_{{ datatype.category }}{{ datatype.n_bits }}_t rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;
+	#include "../scalar/scalar_common.h"
+	typedef  rvd_scalar_{{ datatype.category }}{{ datatype.n_bits }}_t rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;
 #endif // {{ isa_datatype.if }}
 """
     j2_template_alt = Template(template_alt, undefined=StrictUndefined)
@@ -1241,18 +1241,28 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond, lm
                 reg_scalar_type = build_reg(realdatatype_ret, isa_scalar, lmul, True, False)
                 scalar_toreg_func = _build_func_name(isa_scalar, realdatatype_ret_name, realdatatype_ret_name, realdatatype_ret_name, "toreg", lmul=lmul)
                 tomsk_func = _build_func_name(isa, realdatatype_ret_name, realdatatype_ret_name, realdatatype_ret_name, "tomsk", lmul=lmul)
-                guard = isa["datatypes"].get(dt_ret, {}).get("if", None)
-                if guard:
-                    print(f"#if {guard}", file=file)
-                print(f"\t{reg_scalar_type} s_r_res = {scalar_toreg_func}(sres);", file=file)
-                print(f"\t{reg_vector_type} r_res;", file=file)
-                print(f"\tmemcpy(&r_res, &s_r_res, sizeof(r_res));", file=file)
-                print(f"\t{vector_ret_type} res = {tomsk_func}(r_res);", file=file)
-                if guard:
-                    print(f"#else", file=file)
+                # Read guard from if_ldiv when lmul < 0 (ldiv), just like the arg path does.
+                # This prevents infinite recursion when if_ldiv == "0" (no native type for that ldiv).
+                if lmul < 0 and "if_ldiv" in isa["datatypes"].get(realdatatype_ret_name, {}):
+                    guard = isa["datatypes"][realdatatype_ret_name]["if_ldiv"].get(str(-lmul), None)
+                else:
+                    guard = isa["datatypes"].get(dt_ret, {}).get("if", None)
+                if guard == "0":
+                    # No native type for this ldiv: use memcpy fallback directly, no recursive call
                     print(f"\t{vector_ret_type} res;", file=file)
                     print(f"\tmemcpy(&res, &sres, sizeof(res));", file=file)
-                    print(f"#endif", file=file)
+                else:
+                    if guard:
+                        print(f"#if {guard}", file=file)
+                    print(f"\t{reg_scalar_type} s_r_res = {scalar_toreg_func}(sres);", file=file)
+                    print(f"\t{reg_vector_type} r_res;", file=file)
+                    print(f"\tmemcpy(&r_res, &s_r_res, sizeof(r_res));", file=file)
+                    print(f"\t{vector_ret_type} res = {tomsk_func}(r_res);", file=file)
+                    if guard:
+                        print(f"#else", file=file)
+                        print(f"\t{vector_ret_type} res;", file=file)
+                        print(f"\tmemcpy(&res, &sres, sizeof(res));", file=file)
+                        print(f"#endif", file=file)
         else:
             print(f"\t{vector_ret_type} res;", file=file)
             print(f"\tmemcpy(&res, &sres, sizeof(res));", file=file)
@@ -1374,6 +1384,19 @@ def _resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separator
                                 if req_vi_dt not in auto_scalar_reqs.get("store", []):
                                     auto_scalar_reqs.setdefault("store", []).append(req_vi_dt)
 
+                    auto_scalar_cand_if = ""
+                    if isa["name"] == "rvv" and lmul < 0:
+                        single_dt = dt_par.split(",")[0]
+                        if "width" in isa.get("datatypes", {}).get(single_dt, {}):
+                            width = isa["datatypes"][single_dt]["width"]
+                            req_vlen = int(width) * abs(lmul)
+                            vlen_guard = f"__riscv_v_fixed_vlen >= {req_vlen}"
+                            base_guard = isa["datatypes"][single_dt].get("if", "")
+                            if base_guard:
+                                auto_scalar_cand_if = f"({base_guard}) && {vlen_guard}"
+                            else:
+                                auto_scalar_cand_if = vlen_guard
+
                     candidates_map[key].append({
                         "type": "auto_scalar",
                         "f": f,
@@ -1382,7 +1405,8 @@ def _resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separator
                         "dt_ret": dt_ret,
                         "mask_kind": mask_kind,
                         "level": 3,
-                        "reqs": auto_scalar_reqs
+                        "reqs": auto_scalar_reqs,
+                        "ff": {"if": auto_scalar_cand_if}
                     })
                     
                 candidates_map[key].append({
@@ -1457,6 +1481,27 @@ def _resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separator
     remaining_conds = {key: "" for key in candidates_map}
     working_impls = {key: [] for key in candidates_map}
     
+    # Pre-resolve candidates that were already emitted
+    for key in candidates_map:
+        for cand in candidates_map[key]:
+            if cand.get("emitted", False):
+                cand_if = cand["ff"].get("if", "")
+                if cand["type"] == "native_or_emu" and not cand_if and "define" in isa and isa["define"]:
+                    cand_if = isa["define"]
+
+                restricted_target_cond = normalize_cond(cand_if)
+                resolved[key].append((cand, restricted_target_cond))
+                cand["resolved"] = True
+
+                if cand["level"] < 4:
+                    working_impls[key].append(restricted_target_cond)
+                    if restricted_target_cond == "":
+                        working_impls[key] = [""]
+
+                neg_resolved = negate_cond(restricted_target_cond)
+                new_rem = intersect_conds(remaining_conds[key], neg_resolved)
+                remaining_conds[key] = new_rem
+
     max_level = 2
     changed = True
     while changed:
@@ -1474,7 +1519,7 @@ def _resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separator
                     continue
                     
                 cand_if = ""
-                if cand["type"] in ["native_or_emu", "generic_emu"]:
+                if cand["type"] in ["native_or_emu", "generic_emu", "auto_scalar"]:
                     cand_if = cand["ff"].get("if", "")
                     if cand["type"] == "native_or_emu" and not cand_if and "define" in isa and isa["define"]:
                         cand_if = isa["define"]
@@ -1997,6 +2042,8 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                             g_ret = isa.get("datatypes", {}).get(dt_ret, {}).get("if", None)
                         if g_par: guards.append(g_par)
                         if g_ret and g_ret not in guards: guards.append(g_ret)
+                    elif cand_type == "generic_emu":
+                        pass
                     guard = " && ".join(guards) if guards else None
                     if guard:
                         if "if" in ff_local and ff_local["if"]:
@@ -2089,6 +2136,24 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                     ff_local = ff.copy()
                     guards = []
                     if cand_type == "native_or_emu":
+                        g_par = None
+                        g_ret = None
+                        if lmul < 0:
+                            ldiv = str(-lmul)
+                            if "if_ldiv" in isa.get("datatypes", {}).get(dt_par, {}) and ldiv in isa["datatypes"][dt_par]["if_ldiv"]:
+                                g_par = isa["datatypes"][dt_par]["if_ldiv"][ldiv]
+                            if "if_ldiv" in isa.get("datatypes", {}).get(dt_ret, {}) and ldiv in isa["datatypes"][dt_ret]["if_ldiv"]:
+                                g_ret = isa["datatypes"][dt_ret]["if_ldiv"][ldiv]
+                        if not g_par:
+                            g_par = isa.get("datatypes", {}).get(dt_par, {}).get("if", None)
+                        if not g_ret:
+                            g_ret = isa.get("datatypes", {}).get(dt_ret, {}).get("if", None)
+                        if g_par: guards.append(g_par)
+                        if g_ret and g_ret not in guards: guards.append(g_ret)
+                    elif cand_type == "generic_emu":
+                        # For generic emulation (Level 2), also propagate the ISA datatype guard
+                        # so that _build_previous_emulated_exclusion_ifdef can exclude Level 2
+                        # when a Level 0 is already emitted for the same function+datatype.
                         g_par = None
                         g_ret = None
                         if lmul < 0:

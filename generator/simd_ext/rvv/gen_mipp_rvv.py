@@ -68,6 +68,8 @@ def gen_c_structures_rvv_ls(file, rvv_size):
             guard = isa_rvv["datatypes"][dt]["if_ldiv"][str(ldiv)]
         else:
             guard = isa_rvv["datatypes"][dt].get("if", None)
+        if guard == "0":
+            continue
         if guard:
             print(f"#if {guard}", file=file)
         template = j2_template.render(isa_datatype=isa_rvv["datatypes"][dt],rvv_size=rvv_size)
@@ -103,6 +105,8 @@ def gen_c_structures_rvv_ls(file, rvv_size):
             guard = isa_rvv["datatypes"][dt]["if_ldiv"][str(ldiv)]
         else:
             guard = isa_rvv["datatypes"][dt].get("if", None)
+        if guard == "0":
+            continue
         if guard:
             print(f"#if {guard}", file=file)
         n_bits = datatypes[dt]["n_bits"]
@@ -131,8 +135,8 @@ def gen_c_structures_rvv_ls(file, rvv_size):
             print(j2_template.render(isa=isa_rvv,rvv_size=rvv_size,isa_datatype=isa_rvv["datatypes"][dt], datatype=datatypes[dt], lmul=lmul), file=file)
             if guard:
                 print(f"#else", file=file)
-                print(f"    #include \"../scalar/scalar_common.h\"", file=file)
-                print(f"    typedef rvd_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvd_rvv_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m{lmul}_t;", file=file)
+                print(f"	#include \"../scalar/scalar_common.h\"", file=file)
+                print(f"	typedef rvd_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvd_rvv_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m{lmul}_t;", file=file)
                 print(f"#endif", file=file)
     
     ldiv = 2
@@ -155,8 +159,8 @@ def gen_c_structures_rvv_ls(file, rvv_size):
             print(j2_template.render(isa=isa_rvv,rvv_size=rvv_size,isa_datatype=isa_rvv["datatypes"][dt], datatype=datatypes[dt], lmul=ldiv), file=file)
             if guard:
                 print(f"#else", file=file)
-                print(f"    #include \"../scalar/scalar_common.h\"", file=file)
-                print(f"    typedef rvd_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvd_rvv_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_d{ldiv}_t;", file=file)
+                print(f"	#include \"../scalar/scalar_common.h\"", file=file)
+                print(f"	typedef rvd_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvd_rvv_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_d{ldiv}_t;", file=file)
                 print(f"#endif", file=file)
 
     #typedef of rvd m1 to no suffix
@@ -172,8 +176,8 @@ def gen_c_structures_rvv_ls(file, rvv_size):
         print(j2_template.render(isa=isa_rvv,rvv_size=rvv_size,isa_datatype=isa_rvv["datatypes"][dt], datatype=datatypes[dt], lmul=""), file=file)
         if guard:
             print(f"#else", file=file)
-            print(f"    #include \"../scalar/scalar_common.h\"", file=file)
-            print(f"    typedef rvd_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvd_rvv_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t;", file=file)
+            print(f"	#include \"../scalar/scalar_common.h\"", file=file)
+            print(f"	typedef rvd_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvd_rvv_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t;", file=file)
             print(f"#endif", file=file)
     
     #rvm struct generation
@@ -193,7 +197,7 @@ def gen_c_structures_rvv_ls(file, rvv_size):
             print(j2_template.render(isa=isa_rvv,rvv_size=rvv_size,isa_datatype=isa_rvv["datatypes"][dt], datatype=datatypes[dt], lmul=lmul), file=file)
             if guard:
                 print(f"#else", file=file)
-                print(f"    typedef rvm_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvm_rvv_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m{lmul}_t;", file=file)
+                print(f"	typedef rvm_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvm_rvv_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m{lmul}_t;", file=file)
                 print(f"#endif", file=file)
 
     ldiv = 2
@@ -216,7 +220,7 @@ def gen_c_structures_rvv_ls(file, rvv_size):
             print(j2_template.render(isa=isa_rvv,rvv_size=rvv_size,isa_datatype=isa_rvv["datatypes"][dt], datatype=datatypes[dt], lmul=ldiv), file=file)
             if guard:
                 print(f"#else", file=file)
-                print(f"    typedef rvm_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvm_rvv_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_d{ldiv}_t;", file=file)
+                print(f"	typedef rvm_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvm_rvv_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_d{ldiv}_t;", file=file)
                 print(f"#endif", file=file)
     
     template = """typedef rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m1_t rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
@@ -231,7 +235,7 @@ def gen_c_structures_rvv_ls(file, rvv_size):
         print(j2_template.render(isa=isa_rvv,rvv_size=rvv_size,isa_datatype=isa_rvv["datatypes"][dt], datatype=datatypes[dt], lmul=""), file=file)
         if guard:
             print(f"#else", file=file)
-            print(f"    typedef rvm_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvm_rvv_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t;", file=file)
+            print(f"	typedef rvm_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvm_rvv_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t;", file=file)
             print(f"#endif", file=file)
 #taken from gen_mipp_avx.py (changed)
 
