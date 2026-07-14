@@ -1534,6 +1534,20 @@ def _resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separator
                 for req_f in reqs:
                     for req_dt_key in reqs[req_f]:
                         req_key = (req_f, req_dt_key, None)
+                        # For auto_scalar candidates, toreg/tomsk/store deps on
+                        # conditional types (those with an "if" guard in the ISA)
+                        # are optional: the emitted code wraps the call in
+                        # #if <type_guard> ... #else memcpy(...) #endif,
+                        # so the function body is always valid regardless of
+                        # whether the type's native path is reachable.
+                        if cand["type"] == "auto_scalar" and req_f in ("toreg", "tomsk", "store"):
+                            req_dt_par = req_dt_key.split(",")[0]
+                            req_type_guard = isa.get("datatypes", {}).get(req_dt_par, {}).get("if", None)
+                            if req_type_guard and req_type_guard != "0":
+                                # Dep is conditional in the ISA; the fallback
+                                # memcpy branch handles the case where the native
+                                # type doesn't exist, so skip this check.
+                                continue
                         if req_key not in working_impls:
                             deps_satisfied = False
                             break
@@ -1583,6 +1597,26 @@ def _resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separator
             if cond == "0":
                 continue
             reqs = _get_candidate_reqs(cand, isa, funcs)
+            # For auto_scalar candidates, toreg/tomsk/store requirements on
+            # conditional types are handled inline with a #if guard + memcpy
+            # fallback in the generated code, and are NOT structural deps that
+            # build_ifdef_rec should follow. Strip them out before registering
+            # to avoid infinite recursion.
+            if cand["type"] == "auto_scalar":
+                filtered_reqs = {}
+                for req_f, req_dt_keys in reqs.items():
+                    if req_f in ("toreg", "tomsk", "store"):
+                        kept = []
+                        for req_dt_key in req_dt_keys:
+                            req_dt_par = req_dt_key.split(",")[0]
+                            req_type_guard = isa.get("datatypes", {}).get(req_dt_par, {}).get("if", None)
+                            if not (req_type_guard and req_type_guard != "0"):
+                                kept.append(req_dt_key)
+                        if kept:
+                            filtered_reqs[req_f] = kept
+                    else:
+                        filtered_reqs[req_f] = req_dt_keys
+                reqs = filtered_reqs
             _append_resolved_status(funcs, f, dt_key, mask_kind, cond, reqs)
 
     # 2. Write code to files
