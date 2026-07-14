@@ -36,6 +36,7 @@ isa_rvv = {
     "hw_lmul" : True,
     "hw_ldiv" : True,
     "hw_mask" : True,
+    "hw_mask_requires_toreg" : True,
     "hw_mask_extract_via_store" : True,
     
     #the datatypes dict contains k/v pairs with relevant information
