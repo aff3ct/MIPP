@@ -1054,6 +1054,18 @@ def _append_resolved_status(funcs, f, dt_key, mask_kind, cond, reqs):
         bucket = get_masked_bucket(funcs, f, dt_key, mask_kind, create_missing_bucket=True)
         bucket.append(cur_implem_status)
 
+def _is_guard_dead_under_cond(guard, cond):
+    """
+    Returns True if `guard` is always False when `cond` is True,
+    i.e. the function is compiled under #if !(<guard>), making any
+    #if <guard> block inside the body unreachable dead code.
+    """
+    if not guard or guard == "0" or not cond:
+        return False
+    # Normalize whitespace before comparing
+    neg_guard = f"!( {guard} )"
+    return (neg_guard.replace(" ", "") == cond.replace(" ", ""))
+
 def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond, lmul=0):
     dt_par, dt_ret = _missing_compute_dt_par_dt_ret(dt)
     dt_key = dt_par + "," + dt_ret
@@ -1099,8 +1111,9 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond, lm
                     guard = isa["datatypes"][dt_par]["if_ldiv"].get(str(-lmul), None)
                 else:
                     guard = isa["datatypes"].get(dt_par, {}).get("if", None)
-                if guard == "0":
-                    # Native path does not exist; use scalar fallback directly
+                if guard == "0" or _is_guard_dead_under_cond(guard, cond):
+                    # Native path does not exist (or is dead code in this
+                    # compilation context); use scalar fallback directly.
                     print(f"\tmemcpy(&s_m0, &m0, sizeof(s_m0));", file=file)
                 else:
                     if guard:
@@ -1167,8 +1180,9 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond, lm
                         arg_guard = isa["datatypes"][realdatatype_name]["if_ldiv"].get(str(-lmul), None)
                     else:
                         arg_guard = isa["datatypes"].get(realdatatype_name, {}).get("if", None)
-                    if arg_guard == "0":
-                        # Native path does not exist; use scalar fallback directly
+                    if arg_guard == "0" or _is_guard_dead_under_cond(arg_guard, cond):
+                        # Native path does not exist (or is dead code in this
+                        # compilation context); use scalar fallback directly.
                         print(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof(s_{arg_name}));", file=file)
                     else:
                         if arg_guard:
