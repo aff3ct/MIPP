@@ -504,8 +504,7 @@
             "",
             "rvd_avx512_float64_t res;",
             "res.r = r;",
-            "return res;",
-            ""
+            "return res;"
         ]
     },
     "log_f64": {
@@ -543,7 +542,8 @@
             "x = _mm512_fixupimm_pd(x, d, _mm512_set1_epi64((5 << (5*4))), 0);",
             "",
             "rvd_avx512_float64_t res;",
-            "res.r = x;"
+            "res.r = x;",
+            "return res;"
         ]
     },
     "pow": {
