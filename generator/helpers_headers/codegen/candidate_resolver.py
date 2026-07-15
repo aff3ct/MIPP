@@ -35,12 +35,16 @@ def _missing_emit_ifdef_begin(ifd, file):
     if ifd:
         print("#if " + ifd, file=file)
 
+_STUB_TEMPLATE = """static {{ proto }} {
+\tprintf("MIPP panic: '%s' is unimplemented.\\n", "{{ full_func_name }}");
+\texit(-1);
+}"""
+
 def _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, masked_version = None, lmul=0):
     full_func_name = _build_func_name(isa, dt_par, dt_par, dt_ret, f, masked_version=masked_version, lmul=lmul)
-    print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul, True, masked_version=masked_version) + " {", file=file)
-    print("\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \"" + full_func_name + "\");", file=file)
-    print("\texit(-1);", file=file)
-    print("}", file=file)
+    proto = build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul, True, masked_version=masked_version)
+    j2 = Template(_STUB_TEMPLATE, undefined=StrictUndefined)
+    print(j2.render(proto=proto, full_func_name=full_func_name), file=file)
 
 def _missing_emit_ifdef_end(ifd, file):
     if ifd:
@@ -72,17 +76,113 @@ def _parse_placeholders_or_skip(pre_rendering, isa, funcs, f, dt_par, dt_ret, dt
         print("// " + err_message, file=file)
         return None
 
+_FALLBACK_TEMPLATE = """{% if cond %}#if {{ cond }}
+{% endif %}static {{ proto }} {
+\t// Level 3 (Auto Scalar Fallback)
+{% if pre_statements %}{{ pre_statements }}
+{% endif %}\t{{ call_statement }}
+{% if post_statements %}{{ post_statements }}
+{% endif %}{% if return_statement %}\t{{ return_statement }}
+{% endif %}}
+{%- if cond %}
+#endif
+{%- endif %}"""
+
+def _prepare_mask_variable(pre_statements, isa, msk_dt, arg_name, cond, lmul, f, is_initial_mask=False):
+    msk_dt_name = msk_dt["name"]
+    m0_scalar_type = build_type("msk", msk_dt, isa_scalar, lmul, True, False)
+    pre_statements.append(f"\t{m0_scalar_type} s_{arg_name};")
+    if isa.get("hw_mask", False):
+        reg_vector_type = build_reg(msk_dt, isa, lmul, True, False)
+        reg_scalar_type = build_reg(msk_dt, isa_scalar, lmul, True, False)
+        scalar_tomsk_func = _build_func_name(isa_scalar, msk_dt_name, msk_dt_name, msk_dt_name, "tomsk", lmul=lmul)
+        
+        is_special_bitfield = False
+        if isa.get("hw_mask_is_bitfield", False):
+            if is_initial_mask or f in ["toreg", "tomsk", "cast_k"]:
+                is_special_bitfield = True
+                n_elements = isa["size"] // _get_dt_par_size(msk_dt_name)
+                
+        if is_special_bitfield:
+            pre_statements.append(f"\tfor (int i = 0; i < {n_elements}; ++i) {{")
+            pre_statements.append(f"\t\ts_{arg_name}.m[i] = ({arg_name}.m & (1ULL << i)) ? ~0 : 0;")
+            pre_statements.append(f"\t}}")
+        else:
+            toreg_func = _build_func_name(isa, msk_dt_name, msk_dt_name, msk_dt_name, "toreg", lmul=lmul)
+            if lmul < 0 and "if_ldiv" in isa["datatypes"].get(msk_dt_name, {}):
+                guard = isa["datatypes"][msk_dt_name]["if_ldiv"].get(str(-lmul), None)
+            else:
+                guard = isa["datatypes"].get(msk_dt_name, {}).get("if", None)
+                
+            if guard == "0" or _is_guard_dead_under_cond(guard, cond):
+                pre_statements.append(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof(s_{arg_name}));")
+            else:
+                if guard:
+                    pre_statements.append(f"#if {guard}")
+                pre_statements.append(f"\t{reg_vector_type} r_{arg_name} = {toreg_func}({arg_name});")
+                pre_statements.append(f"\t{reg_scalar_type} s_r_{arg_name};")
+                pre_statements.append(f"\tmemcpy(&s_r_{arg_name}, &r_{arg_name}, sizeof(s_r_{arg_name}));")
+                pre_statements.append(f"\ts_{arg_name} = {scalar_tomsk_func}(s_r_{arg_name});")
+                if guard:
+                    pre_statements.append(f"#else")
+                    pre_statements.append(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof(s_{arg_name}));")
+                    pre_statements.append(f"#endif")
+    else:
+        pre_statements.append(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof(s_{arg_name}));")
+
+def _resolve_arg_datatype(arg, dt_par, dt_ret):
+    arg_type_name = arg["type"]
+    realdatatype = datatypes[dt_par]
+    if arg.get("fixeddatatype"):
+        if arg["fixeddatatype"] not in datatypes and arg["fixeddatatype"] in all_categories:
+            dt_str = arg["fixeddatatype"] + str(_get_dt_par_size(dt_par))
+            realdatatype = datatypes[dt_str]
+        elif arg["fixeddatatype"] in datatypes:
+            realdatatype = datatypes[arg["fixeddatatype"]]
+    elif arg_type_name == "ret":
+        realdatatype = datatypes[dt_ret]
+    return realdatatype
+
+def _prepare_return_variable(post_statements, isa, dt_ret, cond, lmul, f, vector_ret_type):
+    dt_ret_name = dt_ret["name"]
+    if isa.get("hw_mask", False):
+        tomsk_func = _build_func_name(isa, dt_ret_name, dt_ret_name, dt_ret_name, "tomsk", lmul=lmul)
+        toreg_scalar_func = _build_func_name(isa_scalar, dt_ret_name, dt_ret_name, dt_ret_name, "toreg", lmul=lmul)
+        if isa.get("hw_mask_is_bitfield", False) and f in ["toreg", "tomsk", "cast_k"]:
+            post_statements.append(f"\t{vector_ret_type} res = 0;")
+            n_elements = isa["size"] // _get_dt_par_size(dt_ret_name)
+            post_statements.append(f"\tfor (int i = 0; i < {n_elements}; ++i) {{")
+            post_statements.append(f"\t\tif (sres.m[i]) res |= (1ULL << i);")
+            post_statements.append(f"\t}}")
+        else:
+            ret_guard = isa["datatypes"].get(dt_ret_name, {}).get("if", None)
+            if ret_guard == "0" or _is_guard_dead_under_cond(ret_guard, cond):
+                post_statements.append(f"\t{vector_ret_type} res;")
+                post_statements.append(f"\tmemcpy(&res, &sres, sizeof(res));")
+            else:
+                if ret_guard:
+                    post_statements.append(f"\t#if {ret_guard}")
+                reg_scalar_type = build_reg(dt_ret, isa_scalar, lmul, True, False)
+                reg_vector_type = build_reg(dt_ret, isa, lmul, True, False)
+                post_statements.append(f"\t{reg_scalar_type} s_r_res = {toreg_scalar_func}(sres);")
+                post_statements.append(f"\t{reg_vector_type} r_res;")
+                post_statements.append(f"\tmemcpy(&r_res, &s_r_res, sizeof(r_res));")
+                post_statements.append(f"\t{vector_ret_type} res = {tomsk_func}(r_res);")
+                if ret_guard:
+                    post_statements.append(f"\t#else")
+                    post_statements.append(f"\t{vector_ret_type} res;")
+                    post_statements.append(f"\tmemcpy(&res, &sres, sizeof(res));")
+                    post_statements.append(f"\t#endif")
+    else:
+        post_statements.append(f"\t{vector_ret_type} res;")
+        post_statements.append(f"\tmemcpy(&res, &sres, sizeof(res));")
+
 def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond, lmul=0):
     dt_par, dt_ret = compute_dt_par_dt_ret(None, None, dt, check_support=False)
     dt_key = dt_par + "," + dt_ret
     func_name = _build_func_name(isa, dt, dt_par, dt_ret, f, masked_version=mask_kind, lmul=lmul)
     
-    if cond:
-        print(f"#if {cond}", file=file)
-        
     proto_str = build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul=lmul, isa_name=True, masked_version=mask_kind)
-    print("static " + proto_str + " {", file=file)
-    print("\t// Level 3 (Auto Scalar Fallback)", file=file)
     
     proto = funcs[f]["proto"]
     call_args = []
@@ -91,108 +191,41 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond, lm
     cnt_val = 0
     cnt_ptr = 0
     
+    pre_statements = []
+    post_statements = []
+    return_statement = None
+    
     if mask_kind is not None:
         msk_dt = datatypes[dt_par]
         if "gather" in f or "scatter" in f:
             msk_dt = datatypes["uint" + str(_get_dt_par_size(dt_par))]
         elif funcs[f]["proto"]["ret"].get("fixeddatatype"):
             msk_dt = datatypes[funcs[f]["proto"]["ret"]["fixeddatatype"]]
-        m0_scalar_type = build_type("msk", msk_dt, isa_scalar, lmul, True, False)
-        print(f"\t{m0_scalar_type} s_m0;", file=file)
-        if isa.get("hw_mask", False):
-            msk_dt_name = msk_dt["name"]
-            reg_vector_type = build_reg(msk_dt, isa, lmul, True, False)
-            reg_scalar_type = build_reg(msk_dt, isa_scalar, lmul, True, False)
-            scalar_tomsk_func = _build_func_name(isa_scalar, msk_dt_name, msk_dt_name, msk_dt_name, "tomsk", lmul=lmul)
-            if isa.get("hw_mask_is_bitfield", False):
-                n_elements = isa["size"] // _get_dt_par_size(msk_dt_name)
-                print(f"\tfor (int i = 0; i < {n_elements}; ++i) {{", file=file)
-                print(f"\t\ts_m0.m[i] = (m0.m & (1ULL << i)) ? ~0 : 0;", file=file)
-                print(f"\t}}", file=file)
-            else:
-                toreg_func = _build_func_name(isa, msk_dt_name, msk_dt_name, msk_dt_name, "toreg", lmul=lmul)
-                if lmul < 0 and "if_ldiv" in isa["datatypes"].get(dt_par, {}):
-                    guard = isa["datatypes"][dt_par]["if_ldiv"].get(str(-lmul), None)
-                else:
-                    guard = isa["datatypes"].get(dt_par, {}).get("if", None)
-                if guard == "0" or _is_guard_dead_under_cond(guard, cond):
-                    print(f"\tmemcpy(&s_m0, &m0, sizeof(s_m0));", file=file)
-                else:
-                    if guard:
-                        print(f"#if {guard}", file=file)
-                    print(f"\t{reg_vector_type} r_m0 = {toreg_func}(m0);", file=file)
-                    print(f"\t{reg_scalar_type} s_r_m0;", file=file)
-                    print(f"\tmemcpy(&s_r_m0, &r_m0, sizeof(s_r_m0));", file=file)
-                    print(f"\ts_m0 = {scalar_tomsk_func}(s_r_m0);", file=file)
-                    if guard:
-                        print(f"#else", file=file)
-                        print(f"\tmemcpy(&s_m0, &m0, sizeof(s_m0));", file=file)
-                        print(f"#endif", file=file)
-        else:
-            print(f"\tmemcpy(&s_m0, &m0, sizeof(s_m0));", file=file)
+        _prepare_mask_variable(pre_statements, isa, msk_dt, "m0", cond, lmul, f, is_initial_mask=True)
         call_args.append("s_m0")
         cnt_msk += 1
         
         if mask_kind == "masks":
-            rsrc_vector_type = build_reg(datatypes[dt_par], isa, lmul, True, False)
             rsrc_scalar_type = build_reg(datatypes[dt_par], isa_scalar, lmul, True, False)
-            print(f"\t{rsrc_scalar_type} s_rsrc;", file=file)
-            print(f"\tmemcpy(&s_rsrc, &rsrc, sizeof(s_rsrc));", file=file)
+            pre_statements.append(f"\t{rsrc_scalar_type} s_rsrc;")
+            pre_statements.append(f"\tmemcpy(&s_rsrc, &rsrc, sizeof(s_rsrc));")
             call_args.append("s_rsrc")
             
     for arg in proto["args"]:
         arg_type_name = arg["type"]
-        realdatatype = datatypes[dt_par]
-        if arg.get("fixeddatatype"):
-            if arg["fixeddatatype"] not in datatypes and arg["fixeddatatype"] in all_categories:
-                dt_str = arg["fixeddatatype"] + str(_get_dt_par_size(dt_par))
-                realdatatype = datatypes[dt_str]
-            elif arg["fixeddatatype"] in datatypes:
-                realdatatype = datatypes[arg["fixeddatatype"]]
-        elif arg_type_name == "ret":
-            realdatatype = datatypes[dt_ret]
+        realdatatype = _resolve_arg_datatype(arg, dt_par, dt_ret)
             
         if arg_type_name == "reg" or arg_type_name == "ret":
             arg_name = f"r{cnt_reg}"
             cnt_reg += 1
-            vector_type = build_type("reg", realdatatype, isa, lmul, True, False)
             scalar_type = build_type("reg", realdatatype, isa_scalar, lmul, True, False)
-            print(f"\t{scalar_type} s_{arg_name};", file=file)
-            print(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof(s_{arg_name}));", file=file)
+            pre_statements.append(f"\t{scalar_type} s_{arg_name};")
+            pre_statements.append(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof(s_{arg_name}));")
             call_args.append(f"s_{arg_name}")
         elif arg_type_name == "msk":
             arg_name = f"m{cnt_msk}"
             cnt_msk += 1
-            vector_type = build_type("msk", realdatatype, isa, lmul, True, False)
-            scalar_type = build_type("msk", realdatatype, isa_scalar, lmul, True, False)
-            print(f"\t{scalar_type} s_{arg_name};", file=file)
-            if isa.get("hw_mask", False):
-                if isa.get("hw_mask_is_bitfield", False) and f in ["toreg", "tomsk", "cast_k"]:
-                    n_elements = 512 // _get_dt_par_size(realdatatype["name"])
-                    print(f"\tfor (int i = 0; i < {n_elements}; ++i) {{", file=file)
-                    print(f"\t\ts_{arg_name}.m[i] = ({arg_name}.m & (1ULL << i)) ? ~0 : 0;", file=file)
-                    print(f"\t}}", file=file)
-                else:
-                    toreg_func = _build_func_name(isa, realdatatype["name"], realdatatype["name"], realdatatype["name"], "toreg", lmul=lmul)
-                    scalar_tomsk_func = _build_func_name(isa_scalar, realdatatype["name"], realdatatype["name"], realdatatype["name"], "tomsk", lmul=lmul)
-                    arg_guard = isa["datatypes"].get(realdatatype["name"], {}).get("if", None)
-                    if arg_guard == "0" or _is_guard_dead_under_cond(arg_guard, cond):
-                        print(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof(s_{arg_name}));", file=file)
-                    else:
-                        if arg_guard:
-                            print(f"#if {arg_guard}", file=file)
-                        reg_vector_type = build_reg(realdatatype, isa, lmul, True, False)
-                        reg_scalar_type = build_reg(realdatatype, isa_scalar, lmul, True, False)
-                        print(f"\t{reg_vector_type} r_{arg_name} = {toreg_func}({arg_name});", file=file)
-                        print(f"\t{reg_scalar_type} s_r_{arg_name};", file=file)
-                        print(f"\tmemcpy(&s_r_{arg_name}, &r_{arg_name}, sizeof(s_r_{arg_name}));", file=file)
-                        print(f"\ts_{arg_name} = {scalar_tomsk_func}(s_r_{arg_name});", file=file)
-                        if arg_guard:
-                            print(f"#else", file=file)
-                            print(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof(s_{arg_name}));", file=file)
-                            print(f"#endif", file=file)
-            else:
-                print(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof(s_{arg_name}));", file=file)
+            _prepare_mask_variable(pre_statements, isa, realdatatype, arg_name, cond, lmul, f, is_initial_mask=False)
             call_args.append(f"s_{arg_name}")
         elif arg_type_name == "val":
             arg_name = f"v{cnt_val}"
@@ -210,48 +243,27 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond, lm
     if ret_type_name == "reg" or ret_type_name == "msk":
         vector_ret_type = build_type(ret_type_name, datatypes[dt_ret], isa, lmul, True, False)
         scalar_ret_type = build_type(ret_type_name, datatypes[dt_ret], isa_scalar, lmul, True, False)
-        print(f"\t{scalar_ret_type} sres = {scalar_func_name}({call_args_str});", file=file)
+        call_statement = f"{scalar_ret_type} sres = {scalar_func_name}({call_args_str});"
         
-        if isa.get("hw_mask", False) and ret_type_name == "msk":
-            tomsk_func = _build_func_name(isa, datatypes[dt_ret]["name"], datatypes[dt_ret]["name"], datatypes[dt_ret]["name"], "tomsk", lmul=lmul)
-            toreg_scalar_func = _build_func_name(isa_scalar, datatypes[dt_ret]["name"], datatypes[dt_ret]["name"], datatypes[dt_ret]["name"], "toreg", lmul=lmul)
-            if isa.get("hw_mask_is_bitfield", False) and f in ["toreg", "tomsk", "cast_k"]:
-                print(f"\t{vector_ret_type} res = 0;", file=file)
-                n_elements = 512 // _get_dt_par_size(datatypes[dt_ret]["name"])
-                print(f"\tfor (int i = 0; i < {n_elements}; ++i) {{", file=file)
-                print(f"\t\tif (sres.m[i]) res |= (1ULL << i);", file=file)
-                print(f"\t}}", file=file)
-            else:
-                ret_guard = isa["datatypes"].get(datatypes[dt_ret]["name"], {}).get("if", None)
-                if ret_guard == "0" or _is_guard_dead_under_cond(ret_guard, cond):
-                    print(f"\t{vector_ret_type} res;", file=file)
-                    print(f"\tmemcpy(&res, &sres, sizeof(res));", file=file)
-                else:
-                    if ret_guard:
-                        print(f"#if {ret_guard}", file=file)
-                    reg_scalar_type = build_reg(datatypes[dt_ret], isa_scalar, lmul, True, False)
-                    reg_vector_type = build_reg(datatypes[dt_ret], isa, lmul, True, False)
-                    print(f"\t{reg_scalar_type} s_r_res = {toreg_scalar_func}(sres);", file=file)
-                    print(f"\t{reg_vector_type} r_res;", file=file)
-                    print(f"\tmemcpy(&r_res, &s_r_res, sizeof(r_res));", file=file)
-                    print(f"\t{vector_ret_type} res = {tomsk_func}(r_res);", file=file)
-                    if ret_guard:
-                        print(f"#else", file=file)
-                        print(f"\t{vector_ret_type} res;", file=file)
-                        print(f"\tmemcpy(&res, &sres, sizeof(res));", file=file)
-                        print(f"#endif", file=file)
-        else:
-            print(f"\t{vector_ret_type} res;", file=file)
-            print(f"\tmemcpy(&res, &sres, sizeof(res));", file=file)
-        print(f"\treturn res;", file=file)
+        _prepare_return_variable(post_statements, isa, datatypes[dt_ret], cond, lmul, f, vector_ret_type)
+        return_statement = "return res;"
     elif ret_type_name == "val":
-        print(f"\treturn {scalar_func_name}({call_args_str});", file=file)
+        call_statement = f"return {scalar_func_name}({call_args_str});"
     else:
-        print(f"\t{scalar_func_name}({call_args_str});", file=file)
+        call_statement = f"{scalar_func_name}({call_args_str});"
         
-    print("}", file=file)
-    if cond:
-        print("#endif", file=file)
+    pre_statements_str = "\n".join(pre_statements)
+    post_statements_str = "\n".join(post_statements)
+    
+    j2 = Template(_FALLBACK_TEMPLATE, undefined=StrictUndefined)
+    print(j2.render(
+        cond=cond,
+        proto=proto_str,
+        pre_statements=pre_statements_str,
+        call_statement=call_statement,
+        post_statements=post_statements_str,
+        return_statement=return_statement
+    ), file=file)
 
 def _get_candidate_reqs(cand, isa, funcs):
     if "reqs" in cand:
