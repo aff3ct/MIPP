@@ -1830,6 +1830,8 @@ def simplify_cond_str(s, known_true_conds=None):
         return ""
     return res
 
+GLOBAL_ISA_REGISTRY = {}
+
 def clear_memo_caches():
     GLOBAL_MEMO_IFDEF.clear()
     GLOBAL_MEMO_IFDEF_MASKED.clear()

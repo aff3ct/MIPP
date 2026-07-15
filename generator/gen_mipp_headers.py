@@ -238,6 +238,11 @@ def main(argv=None):
     for folder in [simd_ext_path, simd_ext_cpp_path, c_path, cpp_path, obj_path]:
         create_folder(folder)
 
+    from tools import GLOBAL_ISA_REGISTRY
+    GLOBAL_ISA_REGISTRY["sse"] = isa_sse
+    GLOBAL_ISA_REGISTRY["avx"] = isa_avx
+    GLOBAL_ISA_REGISTRY["avx512"] = isa_avx512
+
     all_isas_str = ["avx512", "avx", "sse", "rvv", "neon", "scalar"]
     if not args.skip_sve:
         all_isas_str.append("sve")

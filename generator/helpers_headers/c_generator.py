@@ -11,10 +11,7 @@ from tools import intersect_conds as tool_intersect_conds
 from include_gen import *
 from generic_emu import *
 
-# All of this hardcoding stuff is not looking good. I don't like it. I don't wanna break the generator just yet either though.
-from implem_avx512 import isa_avx512
-from implem_avx import isa_avx
-from implem_sse import isa_sse
+
 
 seen_lmul_separators = set()
 seen_ldiv_separators = set()
@@ -193,11 +190,15 @@ def gen_c_structures(isa, file, is_scalar=False):
                 print(j2_template.render(isa=isa, datatype=datatypes[dt], lmul=str(lmul), lmul_2=str(lmul_2)), file=file)
     
     if isa["name"] == "avx512" : 
-        _gen_ldiv_structs_avx(isa_avx512, isa_avx, file)
-        _gen_ldiv_defines_avx(isa_avx512, isa_avx, file)
+        sub_isa = GLOBAL_ISA_REGISTRY.get("avx")
+        if sub_isa:
+            _gen_ldiv_structs_avx(isa, sub_isa, file)
+            _gen_ldiv_defines_avx(isa, sub_isa, file)
     if isa["name"] == "avx" : 
-        _gen_ldiv_structs_avx(isa_avx, isa_sse, file)
-        _gen_ldiv_defines_avx(isa_avx, isa_sse, file)
+        sub_isa = GLOBAL_ISA_REGISTRY.get("sse")
+        if sub_isa:
+            _gen_ldiv_structs_avx(isa, sub_isa, file)
+            _gen_ldiv_defines_avx(isa, sub_isa, file)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Shared helpers
