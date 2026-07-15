@@ -618,28 +618,38 @@ class IncludeManager:
         # for layer in self.layers:
         #     self.layers[layer].get_fd("../include")
             
+    def _get_layer_dir(self, layer_name):
+        if layer_name in ["sse", "avx", "avx512", "sve", "rvv", "neon", "scalar"]:
+            return f"{self.base_dir}/simd_ext/{layer_name}"
+        elif layer_name.endswith("_cpp") or layer_name == "templates":
+            return f"{self.base_dir}/simd_ext_cpp/{layer_name}"
+        else:
+            return f"{self.base_dir}/{layer_name}"
+
     def get_fd(self, layer_name, func):
         if self.mode == "function_header":
             if layer_name in self.layers:
                 layer = self.layers[layer_name]
                 
-                cur_dir = self.base_dir
+                target_dir = self._get_layer_dir(layer_name)
                 
                 if func in layer.includes:
-                    base_dir = f"{cur_dir}/{layer_name}"
                     if func != "common" : 
-                        base_dir = f"{cur_dir}/{layer_name}/functions"
+                        base_dir = f"{target_dir}/functions"
+                    else:
+                        base_dir = target_dir
                     return layer.includes[func].get_fd(base_dir)
         elif self.mode == "category_header":
             if layer_name in self.layers:
                 layer = self.layers[layer_name]
                 category = match_concept(func)
-                cur_dir = self.base_dir
+                target_dir = self._get_layer_dir(layer_name)
 
                 if category in layer.categories:
-                    base_dir = f"{self.base_dir}/{layer_name}"
                     if category != "common" : 
-                        base_dir = f"{self.base_dir}/{layer_name}/functions"
+                        base_dir = f"{target_dir}/functions"
+                    else:
+                        base_dir = target_dir
 
                     return layer.categories[category].get_fd(base_dir)
         return None
@@ -649,6 +659,7 @@ class IncludeManager:
         # appends pragma once and includes to each file
         # also includes common.h. 
         
+        target_dir = self._get_layer_dir(layer_name)
         if self.mode == "function_header":
             for func in self.layers[layer_name].includes:
                 if func == "common":
@@ -668,7 +679,7 @@ class IncludeManager:
                 # auto-scalar fallback requires the scalar variant to be included
                 if layer_name != "scalar" and layer_name != "scalar_cpp" and layer_name != "c":
                     include_path.dependencies.add(f"simd_ext/scalar/functions/scalar_{func}.h")
-                include_path.write_prefix(f"{self.base_dir}/{layer_name}/functions")
+                include_path.write_prefix(f"{target_dir}/functions")
 
 
         elif self.mode == "category_header":
@@ -677,7 +688,8 @@ class IncludeManager:
                 include_category.resolve_dependencies(funcs, lmul=0, mask_kind="", layer=layer_name)
                 for mask in ["mask", "maskz", "masks"]:
                     include_category.resolve_dependencies(funcs, lmul=0, mask_kind=mask, layer=layer_name)
-                include_category.write_prefix(f"{self.base_dir}/{layer_name}/functions")
+                include_category.write_prefix(f"{target_dir}/functions")
+
     def close_fd(self, layer_name, func):
         if layer_name in self.layers:
             layer = self.layers[layer_name]
@@ -697,11 +709,14 @@ class IncludeManager:
 
     def create_glue_file(self, layer_name, file_path):
         # include all the headers in a layer in a glue file
+        target_dir = self._get_layer_dir(layer_name)
+        target_path = f"{target_dir}/{os.path.basename(file_path)}"
+        os.makedirs(target_dir, exist_ok=True)
 
         if self.mode == "function_header":
             if layer_name in self.layers:
                 layer = self.layers[layer_name]
-                with open(file_path, "w", encoding="utf-8", newline="") as f:
+                with open(target_path, "w", encoding="utf-8", newline="") as f:
                     f.write("#pragma once\n")
                     for func in layer.includes:
                         include_path = layer.includes[func]
@@ -712,7 +727,7 @@ class IncludeManager:
         elif self.mode == "category_header":
             if layer_name in self.layers:
                 layer = self.layers[layer_name]
-                with open(file_path, "w", encoding="utf-8", newline="") as f:
+                with open(target_path, "w", encoding="utf-8", newline="") as f:
                     f.write("#pragma once\n")
                     for category in layer.categories:
                         include_category = layer.categories[category]
@@ -722,29 +737,16 @@ class IncludeManager:
                             f.write(f'#include "{include_category.name}"\n')
     
     def write_custom_prefix(self, layer_name, func, custom_prefix):
+        target_dir = self._get_layer_dir(layer_name)
         # func is a bad name bc it's actually a category in category header mode, but let's keep it for simplicity.
         if self.mode == "function_header":
             if layer_name in self.layers:
                 layer = self.layers[layer_name]
                 if func in layer.includes:
-                    layer.includes[func].write_custom_prefix(custom_prefix, f"{self.base_dir}/{layer_name}/functions", mode=self.mode)
+                    layer.includes[func].write_custom_prefix(custom_prefix, f"{target_dir}/functions", mode=self.mode)
         elif self.mode == "category_header":
             if layer_name in self.layers:
                 layer = self.layers[layer_name]
                 category = func
                 if category in layer.categories:
-                    layer.categories[category].write_custom_prefix(custom_prefix, f"{self.base_dir}/{layer_name}/functions")
-    
-    def move_to_new_dir(self, new_dir, isa_sublist):
-        # move generated dirs from isa_sublist to base_dir/new_dir/isa. This is used for simd_ext where we want to group all the isa together in a subdir.
-        for isa in isa_sublist:
-            old_path = f"{self.base_dir}/{isa}"
-            new_path = f"{self.base_dir}/{new_dir}/{isa}"
-            if os.path.exists(old_path):
-                os.makedirs(os.path.dirname(new_path), exist_ok=True)
-                shutil.move(old_path, new_path)
-            # call rmdir on old_path to remove it if it's empty
-            try:
-                os.rmdir(old_path)
-            except OSError:
-                pass
+                    layer.categories[category].write_custom_prefix(custom_prefix, f"{target_dir}/functions")

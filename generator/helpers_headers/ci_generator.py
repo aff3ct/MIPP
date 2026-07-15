@@ -499,7 +499,6 @@ def gen_ci_functions(isa_list, include_manager, funcs):
     isa_rvv = next((isa for isa in isa_list if isa["name"].startswith("rvv")), None)
     isa_scalar = next((isa for isa in isa_list if isa["name"].startswith("scalar")), None)
     
-    include_manager.move_to_new_dir("simd_ext", [isa["name"] for isa in isa_list ])
     for f in funcs:
         file = include_manager.get_fd("c", f)
         for dt in funcs[f]["datatypes"]:

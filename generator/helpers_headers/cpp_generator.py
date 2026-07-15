@@ -56,7 +56,6 @@ typedef float float32_t;
         gen_cpp_structures_isa(file_isa_common, isa)
         gen_cpp_constexpr_functions_isa(file_isa_common, isa)
         gen_cpp_functions_isa(include_manager, isa, mipp_funcs)
-        include_manager.move_to_new_dir("simd_ext_cpp", [isa["name"] + "_cpp"])
 
     # definition of the enum used by everyone in cpp layer
     file_common = open("../include/simd_ext_cpp/common.hpp", "w")
@@ -91,7 +90,6 @@ typedef float float32_t;
     file_common.close()
 
     gen_cpp_generic_templates(include_manager, isa_list_copy, mipp_funcs)
-    include_manager.move_to_new_dir("simd_ext_cpp", ["templates"])
     
     file_common_glue = include_manager.get_fd("cpp", "common")
     gen_cpp_common(isa_list_copy, file_common_glue)

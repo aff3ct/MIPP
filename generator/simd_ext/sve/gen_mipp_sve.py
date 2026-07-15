@@ -45,7 +45,9 @@ def gen_mipp_sve(include_manager=None):
             if "type" not in sub_iemu:
                 sub_iemu["type"] = "emulated"
 
-    file = open("../include/sve/mipp_impl_sve_gen.h", "w")
+    import os
+    os.makedirs("../include/simd_ext/sve", exist_ok=True)
+    file = open("../include/simd_ext/sve/mipp_impl_sve_gen.h", "w")
     
     print("#if "+isa_sve["define"], file=file)
     
@@ -58,7 +60,7 @@ def gen_mipp_sve(include_manager=None):
         #print("#define DEFAULT_ARM_SVE_"+ str(sve_size), file=file)
         # include lower size implems
         #for sub_size in all_sve_sizes[index:]:
-        print("#include \"../include/sve/mipp_impl_sve"+str(sve_size)+"_gen.h\"", file=file)
+        print("#include \"mipp_impl_sve"+str(sve_size)+"_gen.h\"", file=file)
         #for sub_size in all_sve_sizes[index:]:
         print("#define MIPP_SVE_"+str(sve_size), file=file)
     
@@ -79,7 +81,7 @@ def gen_mipp_sve(include_manager=None):
         isa_sve["name"] = ref_isa_name+str(current_sve_size)
         isa_sve["size"] = current_sve_size
         
-        file = open("../include/sve/mipp_impl_sve"+str(current_sve_size)+"_gen.h", "w")
+        file = open("../include/simd_ext/sve/mipp_impl_sve"+str(current_sve_size)+"_gen.h", "w")
         
         tpl_header_sve = """#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SVE{{ sve_size }}_H_
 #define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SVE{{ sve_size }}_H_

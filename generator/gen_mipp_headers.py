@@ -49,17 +49,12 @@ from tools import all_lmul, all_ldiv, clear_memo_caches
 
 include_gen_path = "../include/"
 
-# avx and avx512 folder path
-sse_path = os.path.join(include_gen_path, "sse")
-avx_path = os.path.join(include_gen_path, "avx")
-avx512_path = os.path.join(include_gen_path, "avx512")
-sve_path = os.path.join(include_gen_path, "sve")
-rvv_path = os.path.join(include_gen_path, "rvv")
-neon_path = os.path.join(include_gen_path, "neon")
+# folder paths
+simd_ext_path = os.path.join(include_gen_path, "simd_ext")
+simd_ext_cpp_path = os.path.join(include_gen_path, "simd_ext_cpp")
 c_path = os.path.join(include_gen_path, "c")
 cpp_path = os.path.join(include_gen_path, "cpp")
 obj_path = os.path.join(include_gen_path, "obj")
-scalar_path = os.path.join(include_gen_path, "scalar")
 
 def create_folder(folder_path):
     if not os.path.exists(folder_path):
@@ -240,7 +235,7 @@ def main(argv=None):
         print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
 
     # create folders (always ensure these exist)
-    for folder in [sse_path, avx_path, avx512_path, sve_path, rvv_path, neon_path, scalar_path, c_path, cpp_path, obj_path]:
+    for folder in [simd_ext_path, simd_ext_cpp_path, c_path, cpp_path, obj_path]:
         create_folder(folder)
 
     all_isas_str = ["avx512", "avx", "sse", "rvv", "neon", "scalar"]
@@ -332,7 +327,7 @@ def print_summary_table(include_dir):
     existing_isas = []
     for isa in isas:
         if isa == "sve":
-            sve_dir = os.path.join(include_dir, "sve")
+            sve_dir = os.path.join(include_dir, "simd_ext", "sve")
             if os.path.isdir(sve_dir) and glob.glob(os.path.join(sve_dir, "mipp_impl_sve*_gen.h")):
                 existing_isas.append(isa)
         else:
@@ -368,7 +363,7 @@ def print_summary_table(include_dir):
         }
         
         if isa == "sve":
-            sve_dir = os.path.join(include_dir, "sve")
+            sve_dir = os.path.join(include_dir, "simd_ext", "sve")
             files = glob.glob(os.path.join(sve_dir, "mipp_impl_sve*_gen.h"))
         else:
             isa_dir = os.path.join(include_dir, "simd_ext", isa, "functions")
