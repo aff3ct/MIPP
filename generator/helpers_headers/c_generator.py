@@ -3,7 +3,10 @@ import json
 import re
 
 from tools import *
-from tools import _get_dt_par_size
+from tools import _get_dt_par_size, _build_func_name
+from tools import negate_cond as tool_negate_cond
+from tools import are_conds_mutually_exclusive as tool_are_conds_mutually_exclusive
+from tools import intersect_conds as tool_intersect_conds
 
 from include_gen import *
 from generic_emu import *
@@ -110,7 +113,6 @@ def gen_c_defines(isa, file):
                 file=file,
             )
 
-
 def gen_c_structures(isa, file, is_scalar=False):
     """
     Writes the C structures corresponding to the supported datatypes for a given ISA, for both vector and mask types.
@@ -212,30 +214,6 @@ def _is_masked_implem(f, ff):
         return True
     return False
 
-
-def _compute_dt_par_dt_ret(funcs, f, dt):
-    """
-    returns dt_par and dt_ret based on dt.  len(dt.split(',')) > 1 for cast and cast_k 
-    """
-    # Returns (dt_par, dt_ret) or exits on unsupported type (same behavior as original).
-    if len(dt.split(',')) <= 1:
-        dt_par = dt.split(',')[0]
-        dt_ret = dt.split(',')[0]
-        if dt_par not in funcs[f]["datatypes"]:
-            print("Panic: unsupported type for '" + f + "<" + dt_par + "," + dt_par + ">' function.")
-            exit(-1)
-    else:
-        dt_par = dt.split(',')[0]
-        dt_ret = dt.split(',')[1]
-
-        dtk = dt_par + "," + dt_ret
-        if dtk not in funcs[f]["datatypes"]:
-            print("Panic: unsupported type for '" + f + "<" + dt_par + "," + dt_ret + ">' function.")
-            exit(-1)
-
-    return dt_par, dt_ret
-
-
 def _render_template(isa, ff, dt_par, dt_ret, func_name="", lmul=0):
     """
     renders the Jinja template. Can raise exceptions 
@@ -258,7 +236,6 @@ def _render_template(isa, ff, dt_par, dt_ret, func_name="", lmul=0):
         lmul = lmul
     )
 
-
 def _parse_placeholders_or_skip(pre_rendering, isa, funcs, f, dt_par, dt_ret, dt_key, file,lmul=0, isa_name=True):
     """
     tries to parse placeholders in pre-rendered and returns converted IR. In gen c_funcs 
@@ -270,7 +247,6 @@ def _parse_placeholders_or_skip(pre_rendering, isa, funcs, f, dt_par, dt_ret, dt
         err_message = "'" + f + "<" + dt_key + ">' has been skipped (reason: \"{0}\").".format(err)
         print("// " + err_message, file=file)
         return None
-
 
 def _get_implem_bucket(funcs, f, dt_key, mask_kind=None, create=False):
     if mask_kind is None:
@@ -285,13 +261,11 @@ def _get_implem_bucket(funcs, f, dt_key, mask_kind=None, create=False):
     else:
         return get_masked_bucket(funcs, f, dt_key, mask_kind, create_missing_bucket=create)
 
-
 def _build_prev_exclusion_ifdef(funcs, f, dt_key, ff, mask_kind=None):
     ifd = ""
     if "type" in ff and ff["type"] == "emulated":
         ifd = _missing_build_negated_ifdef_for_existing_implems(funcs, f, dt_key, mask_kind=mask_kind)
     return ifd
-
 
 def _append_implem_status(funcs, f, dt_key, ff, requirements, mask_kind=None):
     cur_implem_status = {"if": "", "requirements": {}}
@@ -301,7 +275,6 @@ def _append_implem_status(funcs, f, dt_key, ff, requirements, mask_kind=None):
 
     bucket = _get_implem_bucket(funcs, f, dt_key, mask_kind, create=True)
     bucket.append(cur_implem_status)
-
 
 def _combine_current_ifdefs(funcs, f, dt_key, ifd_prev, mask_kind=None):
     bucket = _get_implem_bucket(funcs, f, dt_key, mask_kind)
@@ -325,25 +298,10 @@ def _update_emulated(funcs, f, dt_key, ff, ifd, mask_kind=None):
         if bucket:
             bucket[len(bucket) - 1]["if"] = ifd
 
-
 def _emit_ifdef_begin_and_update_emulated(funcs, f, dt_key, ff, ifd, file, mask_kind=None):
     if ifd:
         print("#if " + ifd, file=file)
         _update_emulated(funcs, f, dt_key, ff, ifd, mask_kind=mask_kind)
-
-
-
-def _build_func_name(isa, dt, dt_par, dt_ret, f, masked_version=False, lmul=0):
-    """
-    wrapper around build_func_name and build_func_name_short. 
-    Which function to call is decided if the type isn't a "double type"
-    (i.e the function is not cast or cast_k)
-    """
-    if len(dt.split(',')) <= 1:
-        return build_func_name_short(isa, dt_par, f, True, masked_version=masked_version, lmul=lmul)
-    else:
-        return build_func_name(isa, dt_par, dt_ret, f, True, masked_version=masked_version, lmul=lmul)
-
 
 def _emit_short_format_prologue(funcs_for_f, dt_ret, isa, file, lmul=0):
         # Keep same layout as original.
@@ -373,7 +331,6 @@ def _emit_short_format_prologue(funcs_for_f, dt_ret, isa, file, lmul=0):
                 file=file,
             )
             print("\tres.m = ", end="", file=file)
-
 
 def _emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rendering, file, masked_version=None, lmul=0, level=None):
     func_name = _build_func_name(isa, dt, dt_par, dt_ret, f, masked_version=masked_version, lmul=lmul)
@@ -414,32 +371,18 @@ def _emit_ifdef_end(ifd, file):
     if ifd:
         print("#endif", file=file)
 
-
-
 def _emit_already_implemented_message(f, dt_key, file, generic=False):
     """print skip message because function already exists in file"""
     # Centralize the message string to avoid drift; must remain identical.
     generic_str = "Generic " if generic else ""
     print("// '" + generic_str +  f + "<" + dt_key + ">' has been skipped (reason: \"Info: It has been implemented before.\").", file=file)
- 
- 
 
 def _gen_isdef_neg(funcs, f, dt_key):
     """
     generates the negation of an ifdef.
     """
     ret =  build_ifdef_rec(funcs, f, dt_key)
-    # ret ends with || remove it
-    # if ret.endswith(" || "):
-    #     ret = ret[:-4]
-    
-    # # ret may or may not start with a parenthesis for some reason. If it does only add the negation, if it doesn't add the parenthesis and the negation.
-    # if ret and not ret.startswith("("):
-    #     ret = "(" + ret + ")"
-    
-        
     return "#if !" + ret + "" if ret else ""
-
 
 def _add_guard_if_isdef(funcs, f, dt_key, file):
     """
@@ -449,7 +392,6 @@ def _add_guard_if_isdef(funcs, f, dt_key, file):
     if is_ifdef(funcs, f, dt_key):
         guard = _gen_isdef_neg(funcs, f, dt_key)
         print(guard, file=file)
-
 
 def _add_endif_if_isdef(funcs, f, dt_key, file):
     """
@@ -479,7 +421,6 @@ def _remove_cond_implem_status(funcs, f, dt_key):
             if "if" in implem and implem["if"]:
                 implem["if"] = ""
 
-
 # same...
 def _mark_as_implemented(funcs, f, dt_key):
     """
@@ -499,23 +440,6 @@ def _mark_as_implemented(funcs, f, dt_key):
     if "implem_status" not in funcs[f]:
         funcs[f]["implem_status"] = {}
     funcs[f]["implem_status"][dt_key] = [done_implem_status]
- 
-
-def _missing_compute_dt_par_dt_ret(dt):
-    """
-    similar to _compute_dt_par_dt_ret
-    but doesn't check for type support and emit error 
-    because gen_c_missing_functions's job is 
-    to create prototypes/bodies for unimplemented functions.
-    """
-    if len(dt.split(',')) <= 1:
-        dt_par = dt.split(',')[0]
-        dt_ret = dt.split(',')[0]
-    else:
-        dt_par = dt.split(',')[0]
-        dt_ret = dt.split(',')[1]
-    return dt_par, dt_ret
-
 
 def _missing_build_negated_ifdef_for_existing_implems(funcs, f, dt_key, mask_kind=None):
     ifd = ""
@@ -533,14 +457,12 @@ def _missing_build_negated_ifdef_for_existing_implems(funcs, f, dt_key, mask_kin
                 is_first = False
     return ifd
 
-
 def _missing_emit_ifdef_begin(ifd, file):
     """
     ifd != is_ifdef so not the same helper....
     """
     if ifd:
         print("#if " + ifd, file=file)
-
 
 def _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, masked_version = None, lmul=0):
     """
@@ -553,14 +475,12 @@ def _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, masked_ve
     print("\texit(-1);", file=file)
     print("}", file=file)
 
-
 def _missing_emit_ifdef_end(ifd, file):
     """
     ifd != is_ifdef so not the same helper....
     """
     if ifd:
         print("#endif", file=file)
-
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Generator of one function 
@@ -572,7 +492,7 @@ def _gen_c_functions_one_unmasked(isa, file, funcs, f, ff, dt):
     to generate 1 fn for 1 dt. It's the logic of the big inner loop 
     of gen_c_functions.
     """
-    dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
+    dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
     dt_key = dt_par + "," + dt_ret
 
     if not is_missing_func(funcs, f, dt_key):
@@ -610,7 +530,7 @@ def _gen_c_functions_one_unmasked(isa, file, funcs, f, ff, dt):
 
 def _gen_c_function_one_masked(isa, file, funcs, f, ff, dt):
     
-    dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
+    dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
     dt_key = dt_par + "," + dt_ret
 
     mask_kind = ff["version"]
@@ -718,7 +638,7 @@ def _gen_c_generic_one(isa, file, funcs, f, ff, dt):
     by the negation of the conditions of previous implementations.
     """
 
-    dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
+    dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
     dt_key = dt_par + "," + dt_ret
 
     if not is_missing_func(funcs, f, dt_key):
@@ -775,7 +695,7 @@ def _gen_c_generic_one(isa, file, funcs, f, ff, dt):
     
  
 def _gen_c_missing_one_dt(isa, file, funcs, f, dt, lmul=0):
-    dt_par, dt_ret = _missing_compute_dt_par_dt_ret(dt)
+    dt_par, dt_ret = compute_dt_par_dt_ret(None, None, dt, check_support=False)
     dt_key = dt_par + "," + dt_ret
 
     if is_missing_func(funcs, f, dt_key):
@@ -787,59 +707,8 @@ def _gen_c_missing_one_dt(isa, file, funcs, f, dt, lmul=0):
         _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, lmul=lmul)
         _missing_emit_ifdef_end(ifd, file)
 
-# def _fallback_emit_func(file, funcs, f, dt_par, dt_ret, isa, func_name, masked_version=None, lmul=0):
-#     """
-#     fallback will rely on the scalar implementation. We force the scalar implementation 
-#     to contain everything in the mipp specification. 
-#     The logic of the fallback fn is
-#     -> if type is always defined at the isa level
-    
-#         -> if RVD : 
-#             -> declare scalar reg(s)
-#             -> store args in the scalar reg with STORE 
-#             -> call the scalar implementation with the scalar reg(s) as argument(s)
-#             -> if result == rvd
-#                 -> load the result with LOAD
-#                 -> return the result
-#             -> elif result == rvm
-#                 -> return SET_K of the result
-#             -> else :
-#                 -> return the value or void
-#         -> if RVM
-#             -> declare scalar reg(s)
-#             -> convert isa rvm to rvd with TOREG
-#             -> store converted registers in the scalar rvms with scalar SET_K (works)
-#             -> call the scalar implementation with the scalar reg(s) as argument(s)
-#             -> if result == rvd
-#                 -> load the result with LOAD
-#                 -> return the result
-#             -> elif result == rvm
-#                 -> return SET_K of the result
-#             -> else :
-#                 -> return the value or void
-#     -> else 
-#         actually idk...
-#     """
-    
-#     is_def_type = "if" not in isa["datatypes"][dt_par]
-    
-
-# def _gen_c_fallback_one_dt(isa, file, funcs, f, dt, lmul=0):
-#     dt_par, dt_ret = _missing_compute_dt_par_dt_ret(dt)
-#     dt_key = dt_par + "," + dt_ret
-
-#     if is_missing_func(funcs, f, dt_key):
-#         ifd = _missing_build_negated_ifdef_for_existing_implems(funcs, f, dt_key)
-#         _missing_emit_ifdef_begin(ifd, file)
-
-#         func_name = _build_func_name(isa, dt, dt_par, dt_ret, f)
-
-#         _fallback_emit_func(file, funcs, f, dt_par, dt_ret, isa, func_name, lmul=lmul)
-
-#         _missing_emit_ifdef_end(ifd, file)
-  
 def _gen_c_missing_one_masked(isa, file, funcs, f, dt, mask_kind, lmul=0):
-    dt_par, dt_ret = _missing_compute_dt_par_dt_ret(dt)
+    dt_par, dt_ret = compute_dt_par_dt_ret(None, None, dt, check_support=False)
     dt_key = dt_par + "," + dt_ret
 
     mask_support = funcs[f]["mask_support"] if "mask_support" in funcs[f] else None
@@ -886,7 +755,7 @@ def _gen_c_function_one_ldiv_avx(isa_base, isa_div, file, funcs, f, ff, dt, mask
     }
     a d4 function would be the sse version.
     """
-    dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
+    dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
     dt_key = dt_par + "," + dt_ret
 
     if len(dt.split(',')) <= 1:
@@ -922,7 +791,7 @@ def _get_candidate_reqs(cand, isa, funcs):
     f = cand["f"]
     ff = cand["ff"]
     dt = cand["dt"]
-    dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
+    dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
     pre_rendering = _render_template(isa, ff, dt_par, dt_ret, func_name=f)
     try:
         reqs = get_requirements(pre_rendering, isa, funcs, f, dt_par, dt_ret)
@@ -956,7 +825,7 @@ def _is_guard_dead_under_cond(guard, cond):
     return (neg_guard.replace(" ", "") == cond.replace(" ", ""))
 
 def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond, lmul=0):
-    dt_par, dt_ret = _missing_compute_dt_par_dt_ret(dt)
+    dt_par, dt_ret = compute_dt_par_dt_ret(None, None, dt, check_support=False)
     dt_key = dt_par + "," + dt_ret
     func_name = _build_func_name(isa, dt, dt_par, dt_ret, f, masked_version=mask_kind, lmul=lmul)
     
@@ -1223,7 +1092,7 @@ def _resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separator
     
     for f in funcs:
         for dt in funcs[f]["datatypes"]:
-            dt_par, dt_ret = _missing_compute_dt_par_dt_ret(dt)
+            dt_par, dt_ret = compute_dt_par_dt_ret(None, None, dt, check_support=False)
             dt_key = dt_par + "," + dt_ret
             
             mask_kinds = [None]
@@ -1243,7 +1112,7 @@ def _resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separator
                 for c in collected_candidates:
                     c_f = c["f"]
                     c_dt = c["dt"]
-                    c_dt_par, c_dt_ret = _compute_dt_par_dt_ret(funcs, c_f, c_dt)
+                    c_dt_par, c_dt_ret = compute_dt_par_dt_ret(funcs, c_f, c_dt)
                     c_dt_key = c_dt_par + "," + c_dt_ret
                     c_mask_kind = c["ff"].get("version", None)
                     if c_f == f and c_dt_key == dt_key and c_mask_kind == mask_kind:
@@ -1330,20 +1199,14 @@ def _resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separator
     def normalize_cond(c):
         return simplify_cond_str(c, known_true_conds=isa_known_true)
 
+    def negate_cond(c):
+        return tool_negate_cond(c)
+
     def are_conds_mutually_exclusive(c1, c2):
-        n1 = normalize_cond(c1)
-        n2 = normalize_cond(c2)
-        if n1 == "0" or n2 == "0":
-            return True
-        if n1 == "" or n2 == "":
-            return False
-        if n1 == negate_cond(n2) or n2 == negate_cond(n1):
-            return True
-        if n1.startswith("!") and normalize_cond(n1[1:]) == n2:
-            return True
-        if n2.startswith("!") and normalize_cond(n2[1:]) == n1:
-            return True
-        return False
+        return tool_are_conds_mutually_exclusive(c1, c2, known_true_conds=isa_known_true)
+
+    def intersect_conds(c1, c2):
+        return tool_intersect_conds(c1, c2, known_true_conds=isa_known_true)
 
     def is_req_satisfied(req_f, req_dt_key, target_cond, working_impls):
         if target_cond is None:
@@ -1361,24 +1224,6 @@ def _resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separator
             if norm_w == norm_target:
                 return True
         return False
-        
-    def intersect_conds(c1, c2):
-        if c1 is None or c2 is None:
-            return None
-        if c1 == "":
-            return c2
-        if c2 == "":
-            return c1
-        if c1 == c2:
-            return c1
-        if are_conds_mutually_exclusive(c1, c2):
-            return None
-        return f"({c1}) && ({c2})"
-
-    def negate_cond(c):
-        if c == "":
-            return None
-        return f"!( {c} )"
 
     resolved = {key: [] for key in candidates_map}
     remaining_conds = {key: "" for key in candidates_map}
@@ -1533,7 +1378,7 @@ def _resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separator
         
         # Emit forward declarations first to prevent order-of-declaration issues (e.g. set_k float64 calling set_k int64)
         for dt in funcs[f]["datatypes"]:
-            dt_par, dt_ret = _missing_compute_dt_par_dt_ret(dt)
+            dt_par, dt_ret = compute_dt_par_dt_ret(None, None, dt, check_support=False)
             dt_key = dt_par + "," + dt_ret
             
             mask_kinds = [None]
@@ -1556,7 +1401,7 @@ def _resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separator
                         print("static " + proto_str + ";", file=file_w)
                         
         for dt in funcs[f]["datatypes"]:
-            dt_par, dt_ret = _missing_compute_dt_par_dt_ret(dt)
+            dt_par, dt_ret = compute_dt_par_dt_ret(None, None, dt, check_support=False)
             dt_key = dt_par + "," + dt_ret
             
             mask_kinds = [None]
@@ -1617,7 +1462,7 @@ def _gen_c_horiz_lmul_one(isa, file, funcs, f, ff, dt, lmul, mkind=None, dummy=F
     Option-B workaround: pre-mark certain dependencies as "implemented" in funcs
     so parse_placeholders() does not skip.
     """
-    dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
+    dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
     dt_key = dt_par + "," + dt_ret
 
     if _rvv_seen_lmul(funcs, f, dt_key, lmul) and mkind is None:
@@ -1708,7 +1553,7 @@ def _gen_c_horiz_lmul_one(isa, file, funcs, f, ff, dt, lmul, mkind=None, dummy=F
 
     # if dummy is true, then add prototype of the function 
     if dummy:
-        dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
+        dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
         func_name = _build_func_name(isa, dt, dt_par, dt_ret, f, masked_version=mkind, lmul=lmul)
         proto = build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul=lmul, isa_name=True, masked_version=mkind)
         print("", file=file)
@@ -1740,7 +1585,6 @@ def _gen_c_horiz_lmul_one(isa, file, funcs, f, ff, dt, lmul, mkind=None, dummy=F
     # print(ph_ret["requirements"]) 
     # print("Debug: adding requirements for '" + f + "<" + dt_key + ">' function: " + str(ph_ret["requirements"]))
     _append_implem_status(funcs, f, dt_key, ff, ph_ret["requirements"])
-
 
 def gen_c_horiz_lmul(isa, file, funcs, f, dt, lmul, implems_horiz_lmul_generic_emu, func_name_for_panic=None, mask_type=None, dummy=False):
     """
@@ -1801,8 +1645,6 @@ def gen_c_horiz_lmul(isa, file, funcs, f, dt, lmul, implems_horiz_lmul_generic_e
         name = func_name_for_panic or f
         print(f"\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \"{name}_m{int(lmul)}\");", file=file)
         print("\texit(-1);", file=file)
-    
-
 
 def gen_c_lmul(isa, include_manager, funcs):
     """
@@ -1824,7 +1666,7 @@ def gen_c_lmul(isa, include_manager, funcs):
         file_w = include_manager.get_fd(isa["name"], f)
 
         for dt in funcs[f]["datatypes"]:
-            dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
+            dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
 
 
             for lmul in all_lmul:
@@ -1856,25 +1698,26 @@ def gen_c_ldiv(isa_base, isa_div, include_manager, funcs):
     for f in funcs : 
         file_w = include_manager.get_fd(isa_base["name"], f)
         for dt in funcs[f]["datatypes"]:
-            dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
+            dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
             _gen_c_function_one_ldiv_avx(isa_base=isa_base, isa_div=isa_div, file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind=None, ldiv=2)
             # _gen_c_function_one_ldiv_avx(isa_base=isa_base, isa_div=isa_div, file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind=None, ldiv=4)
         mask_support = funcs[f]["mask_support"] if "mask_support" in funcs[f] else None
         if mask_support and mask_support.is_maskable():
             for dt in funcs[f]["datatypes"]:
-                dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
+                dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
                 _gen_c_function_one_ldiv_avx(isa_base=isa_base, isa_div=isa_div, file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind="mask", ldiv=2)
                 # _gen_c_function_one_ldiv_avx(isa_base=isa_base, isa_div=isa_div, file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind="mask", ldiv=4)
         if mask_support and mask_support.is_maskzable():
             for dt in funcs[f]["datatypes"]:
-                dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
+                dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
                 _gen_c_function_one_ldiv_avx(isa_base=isa_base, isa_div=isa_div, file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind="maskz", ldiv=2)
                 # _gen_c_function_one_ldiv_avx(isa_base=isa_base, isa_div=isa_div, file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind="maskz", ldiv=4)
         if mask_support and mask_support.is_masksable():
             for dt in funcs[f]["datatypes"]:
-                dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
+                dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
                 _gen_c_function_one_ldiv_avx(isa_base=isa_base, isa_div=isa_div, file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind="masks", ldiv=2)
                 # _gen_c_function_one_ldiv_avx(isa_base=isa_base, isa_div=isa_div, file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind="masks", ldiv=4)
+
 # ----------------------------------------------------------------------------------------------------------------------
 # RVV lmul bookkeeping helpers (moved from gen_mipp_rvv.py)
 # ----------------------------------------------------------------------------------------------------------------------
@@ -1948,10 +1791,7 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
             _maybe_emit_lmul_separator(isa["name"], f, file)
         elif lmul < 0:
             _maybe_emit_ldiv_separator(isa["name"], f, file)
-        # print file name
-        # print("Debug: generating for '" + f + "' function in file: " + file.name)
-        
-        
+
         if "candidates" not in isa:
             isa["candidates"] = []
         
@@ -1959,7 +1799,7 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
             if _is_masked_implem(f, ff):
                 for dt in ff["datatypes"]:
                     
-                    dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
+                    dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
                     dt_key = dt_par + "," + dt_ret
                     mask_kind = ff["version"]
                     ff_local = ff.copy()
@@ -2000,9 +1840,6 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                     if c_dict not in isa["candidates"]:
                         isa["candidates"].append(c_dict)
 
-
-
-
                     if (not is_missing_masked_func(funcs, f, dt_key, mask_kind)) and _rvv_seen_lmul_masked(funcs, f, dt_key, mask_kind, lmul):
                         continue
 
@@ -2016,7 +1853,7 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                         dt_par=dt_par,
                         dt_ret=dt_ret,
                         dt_key=dt_key,
-                        file=file,						
+                        file=file,
                         lmul=lmul,
                     )
                     if ph_ret is None:
@@ -2064,11 +1901,10 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                     # Preserve original tracking of LMUL implementations for masked functions
                     _rvv_mark_lmul_seen_masked(funcs, f, dt_key, mask_kind, lmul)
 
-                
             else : # unmasked version
                 for dt in ff["datatypes"]:
                     
-                    dt_par, dt_ret = _compute_dt_par_dt_ret(funcs, f, dt)
+                    dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
                     dt_key = dt_par + "," + dt_ret
                     ff_local = ff.copy()
                     guards = []

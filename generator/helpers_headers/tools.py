@@ -1833,3 +1833,66 @@ def simplify_cond_str(s, known_true_conds=None):
 def clear_memo_caches():
     GLOBAL_MEMO_IFDEF.clear()
     GLOBAL_MEMO_IFDEF_MASKED.clear()
+
+
+def _build_func_name(isa, dt, dt_par, dt_ret, f, masked_version=False, lmul=0):
+    if len(dt.split(',')) <= 1:
+        return build_func_name_short(isa, dt_par, f, True, masked_version=masked_version, lmul=lmul)
+    else:
+        return build_func_name(isa, dt_par, dt_ret, f, True, masked_version=masked_version, lmul=lmul)
+
+
+def compute_dt_par_dt_ret(funcs, f, dt, check_support=True):
+    if len(dt.split(',')) <= 1:
+        dt_par = dt.split(',')[0]
+        dt_ret = dt.split(',')[0]
+        if check_support and funcs and f and dt_par not in funcs[f]["datatypes"]:
+            print("Panic: unsupported type for '" + f + "<" + dt_par + "," + dt_par + ">' function.")
+            exit(-1)
+    else:
+        dt_par = dt.split(',')[0]
+        dt_ret = dt.split(',')[1]
+        dtk = dt_par + "," + dt_ret
+        if check_support and funcs and f and dtk not in funcs[f]["datatypes"]:
+            print("Panic: unsupported type for '" + f + "<" + dt_par + "," + dt_ret + ">' function.")
+            exit(-1)
+    return dt_par, dt_ret
+
+
+def negate_cond(c):
+    if not c or c.strip() == "":
+        return None
+    return f"!( {c} )"
+
+
+def are_conds_mutually_exclusive(c1, c2, known_true_conds=None):
+    n1 = simplify_cond_str(c1, known_true_conds=known_true_conds)
+    n2 = simplify_cond_str(c2, known_true_conds=known_true_conds)
+    if n1 == "0" or n2 == "0":
+        return True
+    if n1 == "" or n2 == "":
+        return False
+    
+    neg_n1 = negate_cond(n1)
+    neg_n2 = negate_cond(n2)
+    if n1 == neg_n2 or n2 == neg_n1:
+        return True
+    if n1.startswith("!") and simplify_cond_str(n1[1:], known_true_conds=known_true_conds) == n2:
+        return True
+    if n2.startswith("!") and simplify_cond_str(n2[1:], known_true_conds=known_true_conds) == n1:
+        return True
+    return False
+
+
+def intersect_conds(c1, c2, known_true_conds=None):
+    if c1 is None or c2 is None:
+        return None
+    if c1 == "":
+        return c2
+    if c2 == "":
+        return c1
+    if c1 == c2:
+        return c1
+    if are_conds_mutually_exclusive(c1, c2, known_true_conds):
+        return None
+    return f"({c1}) && ({c2})"
