@@ -143,9 +143,9 @@ def _resolve_arg_datatype(arg, dt_par, dt_ret):
         realdatatype = datatypes[dt_ret]
     return realdatatype
 
-def _prepare_return_variable(post_statements, isa, dt_ret, cond, lmul, f, vector_ret_type):
+def _prepare_return_variable(post_statements, isa, dt_ret, cond, lmul, f, vector_ret_type, ret_type_name):
     dt_ret_name = dt_ret["name"]
-    if isa.get("hw_mask", False):
+    if ret_type_name == "msk" and isa.get("hw_mask", False):
         tomsk_func = _build_func_name(isa, dt_ret_name, dt_ret_name, dt_ret_name, "tomsk", lmul=lmul)
         toreg_scalar_func = _build_func_name(isa_scalar, dt_ret_name, dt_ret_name, dt_ret_name, "toreg", lmul=lmul)
         if isa.get("hw_mask_is_bitfield", False) and f in ["toreg", "tomsk", "cast_k"]:
@@ -247,7 +247,7 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond, lm
         scalar_ret_type = build_type(ret_type_name, datatypes[dt_ret], isa_scalar, lmul, True, False)
         call_statement = f"{scalar_ret_type} sres = {scalar_func_name}({call_args_str});"
         
-        _prepare_return_variable(post_statements, isa, datatypes[dt_ret], cond, lmul, f, vector_ret_type)
+        _prepare_return_variable(post_statements, isa, datatypes[dt_ret], cond, lmul, f, vector_ret_type, ret_type_name)
         return_statement = "return res;"
     elif ret_type_name == "val":
         call_statement = f"return {scalar_func_name}({call_args_str});"
