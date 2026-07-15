@@ -15,23 +15,14 @@ sys.path.insert(1, path + "/simd_ext/rvv/")
 sys.path.insert(1, path + "/simd_ext/neon/")
 sys.path.insert(1, path + "/simd_ext/scalar/")
 
-from implem_sse import isa_sse, implems_sse
-from implem_emu_sse import implems_emu_sse
+from tools import load_isa_config
 
-from implem_avx import isa_avx, implems_avx
-from implem_emu_avx import implems_emu_avx
-
-from implem_avx512 import isa_avx512, implems_avx512
-from implem_emu_avx512 import implems_emu_avx512
-
-from implem_rvv import isa_rvv, implems_rvv
-from implem_emu_rvv import implems_emu_rvv
-
-from implem_neon import isa_neon, implems_neon
-from implem_emu_neon import implems_emu_neon
-
-#from implem_sve import isa_sve
-#from implem_emu_sve import implem_emu_sve
+isa_sse, implems_sse, implems_emu_sse = load_isa_config("sse")
+isa_avx, implems_avx, implems_emu_avx = load_isa_config("avx")
+isa_avx512, implems_avx512, implems_emu_avx512 = load_isa_config("avx512")
+isa_rvv, implems_rvv, implems_emu_rvv = load_isa_config("rvv")
+isa_neon, implems_neon, implems_emu_neon = load_isa_config("neon")
+isa_sve, implems_sve, implems_emu_sve = load_isa_config("sve")
 
 from headers_def import mipp_funcs, mipp_funcs_concepts, isa_scalar, implems_scalar
 from headers_def import all_datatypes, all_datatypes_cart_prod

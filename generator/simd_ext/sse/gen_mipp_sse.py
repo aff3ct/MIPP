@@ -4,8 +4,7 @@ import json
 
 from tools import *
 from headers_def import *
-from implem_sse import *
-from implem_emu_sse import *
+isa_sse, implems_sse, implems_emu_sse = load_isa_config("sse")
 from c_generator import *
 from generic_emu import *
 

@@ -3,8 +3,7 @@ import json
 
 from tools import *
 from headers_def import *
-from implem_sve import *
-from implem_emu_sve import *
+isa_sve, implems_sve, implems_emu_sve = load_isa_config("sve")
 from c_generator import *
 
 from include_gen import IncludeManager

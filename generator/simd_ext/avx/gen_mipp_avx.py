@@ -6,12 +6,10 @@ import copy
 
 from tools import *
 from headers_def import *
-from implem_avx import *
-from implem_emu_avx import *
+isa_avx, implems_avx, implems_emu_avx = load_isa_config("avx")
+isa_sse, _, _ = load_isa_config("sse")
 from c_generator import *
 from generic_emu import *
-
-from implem_sse import isa_sse
 
 from include_gen import IncludeManager
 

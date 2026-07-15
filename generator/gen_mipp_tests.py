@@ -18,24 +18,20 @@ sys.path.insert(1, path + "/simd_ext/neon/")
 # sys.path.insert(1, path + "/simd_ext/scalar/")
 sys.path.insert(1, path + "/helpers_headers/")
 
-from implem_sse import implems_sse
-from implem_avx import implems_avx
-from implem_avx512 import implems_avx512
-from implem_sve import implems_sve
-from implem_rvv import implems_rvv
-from implem_neon import implems_neon
+from tools import load_isa_config
+
+_, implems_sse, implems_emu_sse = load_isa_config("sse")
+_, implems_avx, implems_emu_avx = load_isa_config("avx")
+_, implems_avx512, implems_emu_avx512 = load_isa_config("avx512")
+_, implems_sve, implems_emu_sve = load_isa_config("sve")
+_, implems_rvv, implems_emu_rvv = load_isa_config("rvv")
+_, implems_neon, implems_emu_neon = load_isa_config("neon")
+
 from headers_def import implems_scalar
-from headers_def import mipp_funcs,mipp_funcs_concepts
-from cpp_generator import set_functions # used to force template specialisation in cpp mask tests 
+from headers_def import mipp_funcs, mipp_funcs_concepts
+from cpp_generator import set_functions
 from tools import *
 from helpers_tests import get_gen_test_dict, test_function_name, get_gen_test_dict_lmul, get_gen_test_dict_mask
-
-from implem_emu_sse import implems_emu_sse
-from implem_emu_avx import implems_emu_avx
-from implem_emu_avx512 import implems_emu_avx512
-from implem_emu_sve import implems_emu_sve
-from implem_emu_rvv import implems_emu_rvv
-from implem_emu_neon import implems_emu_neon
 
 from generic_emu import implems_generic_emu
 

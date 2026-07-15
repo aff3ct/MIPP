@@ -1831,10 +1831,12 @@ def simplify_cond_str(s, known_true_conds=None):
     return res
 
 GLOBAL_ISA_REGISTRY = {}
+_isa_config_cache = {}
 
 def clear_memo_caches():
     GLOBAL_MEMO_IFDEF.clear()
     GLOBAL_MEMO_IFDEF_MASKED.clear()
+    _isa_config_cache.clear()
 
 
 def _build_func_name(isa, dt, dt_par, dt_ret, f, masked_version=False, lmul=0):
@@ -1996,3 +1998,27 @@ def load_implem_tables(current_file, templates_filename, implems_filename):
         resolved_implems[func] = resolved_choices
         
     return tpl_dict, resolved_implems
+
+
+def load_isa_config(isa_name):
+    import copy
+    if isa_name not in _isa_config_cache:
+        import json
+        import os
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        ext_dir = os.path.join(base_dir, "simd_ext", isa_name)
+        
+        # Load capability JSON
+        with open(os.path.join(ext_dir, f"isa_{isa_name}.json"), "r") as f:
+            isa = json.load(f)
+        if "size" in isa and isinstance(isa["size"], list):
+            isa["size"] = set(isa["size"]) # SVE backwards compatibility
+            
+        # Load native and emulation tables
+        _, implems = load_implem_tables(os.path.join(ext_dir, "__init__.py"), f"templates_{isa_name}.json", f"implems_{isa_name}.json")
+        _, implems_emu = load_implem_tables(os.path.join(ext_dir, "__init__.py"), f"templates_emu_{isa_name}.json", f"implems_emu_{isa_name}.json")
+        
+        _isa_config_cache[isa_name] = (isa, implems, implems_emu)
+        
+    isa, implems, implems_emu = _isa_config_cache[isa_name]
+    return copy.deepcopy(isa), copy.deepcopy(implems), copy.deepcopy(implems_emu)

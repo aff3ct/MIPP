@@ -9,9 +9,9 @@ from include_gen import IncludeManager
 from c_generator import gen_c_horiz_lmul 
 from generic_emu import implems_horiz_lmul_generic_emu
 
-from implem_avx512 import isa_avx512
-from implem_avx import isa_avx
-from implem_rvv import isa_rvv
+isa_avx512, _, _ = load_isa_config("avx512")
+isa_avx, _, _ = load_isa_config("avx")
+isa_rvv, _, _ = load_isa_config("rvv")
             
 def duplicate_isa_sve_along_size(isa_list):
 

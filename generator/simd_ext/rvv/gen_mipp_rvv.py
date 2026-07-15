@@ -8,8 +8,7 @@ sys.path.insert(1, '.')
 
 from tools import *
 from headers_def import *
-from implem_rvv import *
-from implem_emu_rvv import *
+isa_rvv, implems_rvv, implems_emu_rvv = load_isa_config("rvv")
 from generic_emu import *
 from c_generator import gen_c_functions_rvv, gen_c_missing_functions_lmul
 

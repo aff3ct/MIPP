@@ -4,8 +4,7 @@ import json
 
 from tools import *
 from headers_def import *
-from implem_neon import *
-from implem_emu_neon import *
+isa_neon, implems_neon, implems_emu_neon = load_isa_config("neon")
 from generic_emu import *
 from c_generator import *
 from include_gen import IncludeManager

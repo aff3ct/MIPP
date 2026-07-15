@@ -6,14 +6,13 @@ import json
 
 from tools import *
 from headers_def import *
-from implem_avx512 import *
-from implem_emu_avx512 import *
+isa_avx512, implems_avx512, implems_emu_avx512 = load_isa_config("avx512")
 from generic_emu import *
 from c_generator import *
 
 from include_gen import IncludeManager
 
-from implem_avx import isa_avx
+isa_avx, _, _ = load_isa_config("avx")
 
 def gen_mipp_avx512(include_manager):
     for iemu in implems_emu_avx512:

@@ -19,12 +19,14 @@ sys.path.insert(1, path + "/simd_ext/rvv/")
 sys.path.insert(1, path + "/simd_ext/neon/")
 sys.path.insert(1, path + "/simd_ext/scalar/")
 
-from implem_sse import isa_sse
-from implem_avx import isa_avx
-from implem_avx512 import isa_avx512
-from implem_sve import isa_sve
-from implem_rvv import isa_rvv
-from implem_neon import isa_neon
+from tools import all_lmul, all_ldiv, clear_memo_caches, load_isa_config
+
+isa_sse, _, _ = load_isa_config("sse")
+isa_avx, _, _ = load_isa_config("avx")
+isa_avx512, _, _ = load_isa_config("avx512")
+isa_sve, _, _ = load_isa_config("sve")
+isa_rvv, _, _ = load_isa_config("rvv")
+isa_neon, _, _ = load_isa_config("neon")
 from headers_def import isa_scalar
 from headers_def import implems_scalar
 from headers_def import mipp_funcs
@@ -43,9 +45,6 @@ from cpp_generator import generate_cpp
 from cpp_object_generator import generate_cpp_object
 
 from include_gen import IncludeManager
-
-
-from tools import all_lmul, all_ldiv, clear_memo_caches
 
 include_gen_path = "../include/"
 
