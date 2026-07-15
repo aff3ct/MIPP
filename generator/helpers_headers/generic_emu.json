@@ -1,0 +1,2098 @@
+{
+  "templates": {
+    "tpl_generic_emu": {
+      "div2": {
+        "format": "long",
+        "code": [
+          "%r<tp>% tmp = %set1<tp>%(2);",
+          "%r<tp>% res = %div<tp>%(r0, tmp);",
+          "return res;"
+        ]
+      },
+      "div4": {
+        "format": "long",
+        "code": [
+          "%r<tp>% tmp = %set1<tp>%(4);",
+          "%r<tp>% res = %div<tp>%(r0, tmp);",
+          "return res;"
+        ]
+      },
+      "fmadd": {
+        "format": "long",
+        "code": [
+          "%r<tp>% res = %mul<tp>%(r0, r1);",
+          "res = %add<tp>%(res, r2);",
+          "return res;"
+        ]
+      },
+      "blend": {
+        "format": "long",
+        "code": [
+          "%v<tp>% ptr1[%N<tp>%];",
+          "%v<tp>% ptr2[%N<tp>%];",
+          "%store<tp>%(ptr1, r0);",
+          "%store<tp>%(ptr2, r1);",
+          "for(unsigned i = 0; i < %N<tp>%; i++) {",
+          "\tptr1[i] = %get_k<tp>%(m0, i) ? ptr1[i] : ptr2[i];",
+          "}",
+          "return %load<tp>%(ptr1);"
+        ]
+      }
+    },
+    "tpl_mask_generic_emu": {
+      "ret_reg_2args_reg": {
+        "format": "long",
+        "code": [
+          "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);"
+        ]
+      },
+      "ret_reg_3args_reg": {
+        "format": "long",
+        "code": [
+          "%r<tp>% op = %{{func_name}}<tp>%( r0, r1, r2);"
+        ]
+      },
+      "ret_reg_1arg_reg": {
+        "format": "long",
+        "code": [
+          "%r<tp>% op = %{{func_name}}<tp>%(r0);"
+        ]
+      },
+      "load_msks": {
+        "format": "long",
+        "code": [
+          "// we want to guarantee that load doesn't touch the memory of masked out elems",
+          "%v<tp>% buff[%N<tp>%];",
+          "for(unsigned i = 0; i < %N<tp>%; i++){",
+          "\tif(%get_k<tp>%(m0, i))",
+          "\t\tbuff[i] = p0[i];",
+          "\telse",
+          "\t\tbuff[i] = %get<tp>%(rsrc, i);",
+          "}",
+          "return %{{func_name}}<tp>%(buff);"
+        ]
+      },
+      "load_mskz": {
+        "format": "long",
+        "code": [
+          "// we want to guarantee that load doesn't touch the memory of masked out elems",
+          "%v<tp>% buff[%N<tp>%];",
+          "for (unsigned i = 0; i < %N<tp>%; i++) {",
+          "\tif (%get_k<tp>%(m0, i))",
+          "\t\tbuff[i] = p0[i];",
+          "\telse",
+          "\t\tbuff[i] = 0;",
+          "}",
+          "return %{{func_name}}<tp>%(buff);"
+        ]
+      },
+      "set": {
+        "format": "long",
+        "code": [
+          "%r<tp>% op = %set<tp>%(vals);"
+        ]
+      },
+      "set1": {
+        "format": "long",
+        "code": [
+          "%r<tp>% op = %set1<tp>%(v0);"
+        ]
+      },
+      "set0": {
+        "format": "long",
+        "code": [
+          "%r<tp>% op = %set0<tp>%();"
+        ]
+      },
+      "ret_msk_2args_reg": {
+        "format": "long",
+        "code": [
+          "%m<tp>% op = %{{func_name}}<tp>%(r0, r1);"
+        ]
+      },
+      "store_msk": {
+        "format": "long",
+        "code": [
+          "for (unsigned i = 0; i < %N<tp>%; i++) {",
+          "\tif (%get_k<tp>%(m0, i))",
+          "\t\tp0[i] = %get<tp>%(r0, i);",
+          "}"
+        ]
+      },
+      "store_mskz": {
+        "format": "long",
+        "code": [
+          "for(unsigned i = 0; i < %N<tp>%; i++) {",
+          "\tif (%get_k<tp>%(m0, i))",
+          "\t\tp0[i] = %get<tp>%(r0, i);",
+          "\telse",
+          "\t\tp0[i] = 0;",
+          "}"
+        ]
+      },
+      "storeu_msk": {
+        "format": "long",
+        "code": [
+          "%v<tp>% buff[%N<tp>%];",
+          "%v<tp>% mask_buff[%N<tp>%];",
+          "%r<tp>% msk_reg = %toreg<tp>%(m0);",
+          "",
+          "%storeu<tp>%(buff, r0);",
+          "%storeu<tp>%(mask_buff, msk_reg);",
+          "for (unsigned i = 0; i < %N<tp>%; i++)",
+          "\tif (mask_buff[i])",
+          "\t\tp0[i] = buff[i];"
+        ]
+      },
+      "storeu_mskz": {
+        "format": "long",
+        "code": [
+          "%v<tp>% buff[%N<tp>%];",
+          "%v<tp>% mask_buff[%N<tp>%];",
+          "%r<tp>% msk_reg = %toreg<tp>%(m0);",
+          "",
+          "%storeu<tp>%(buff, r0);",
+          "%storeu<tp>%(mask_buff, msk_reg);",
+          "for (unsigned i = 0; i < %N<tp>%; i++)",
+          "\tif (mask_buff[i])",
+          "\t\tp0[i] = buff[i];",
+          "\telse",
+          "\t\tp0[i] = 0;"
+        ]
+      },
+      "cmp_2args": {
+        "format": "long",
+        "code": [
+          "%m<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+          "%m<tp>% res = %andb_k<tp>%(op, m0);",
+          "return res;"
+        ]
+      },
+      "hadd_maskz": {
+        "format": "long",
+        "code": [
+          "%r<tp>% zero = %set0<tp>%();",
+          "%r<tp>% blended = %blend<tp>%(r0, zero, m0);",
+          "%v<tp>% op = %hadd<tp>%(blended);",
+          "return op;"
+        ]
+      },
+      "hmul_maskz": {
+        "format": "long",
+        "code": [
+          "%r<tp>% ones = %set1<tp>%(1);",
+          "%r<tp>% blended = %blend<tp>%(r0, ones, m0);",
+          "%v<tp>% op = %hmul<tp>%(blended);",
+          "return op;"
+        ]
+      },
+      "hmin_maskz_u64": {
+        "format": "long",
+        "code": [
+          "%r<tp>% max = %set1<tp>%(UINT64_MAX);",
+          "%r<tp>% blended = %blend<tp>%(r0, max, m0);",
+          "%v<tp>% op = %hmin<tp>%(blended);",
+          "return op;"
+        ]
+      },
+      "hmin_maskz_u32": {
+        "format": "long",
+        "code": [
+          "%r<tp>% max = %set1<tp>%(UINT32_MAX);",
+          "%r<tp>% blended = %blend<tp>%(r0, max, m0);",
+          "%v<tp>% op = %hmin<tp>%(blended);",
+          "return op;"
+        ]
+      },
+      "hmin_maskz_u16": {
+        "format": "long",
+        "code": [
+          "%r<tp>% max = %set1<tp>%(UINT16_MAX);",
+          "%r<tp>% blended = %blend<tp>%(r0, max, m0);",
+          "%v<tp>% op = %hmin<tp>%(blended);",
+          "return op;"
+        ]
+      },
+      "hmin_maskz_u8": {
+        "format": "long",
+        "code": [
+          "%r<tp>% max = %set1<tp>%(UINT8_MAX);",
+          "%r<tp>% blended = %blend<tp>%(r0, max, m0);",
+          "%v<tp>% op = %hmin<tp>%(blended);",
+          "return op;"
+        ]
+      },
+      "hmin_maskz_f32": {
+        "format": "long",
+        "code": [
+          "%r<tp>% max = %set1<tp>%(FLT_MAX);",
+          "%r<tp>% blended = %blend<tp>%(r0, max, m0);",
+          "%v<tp>% op = %hmin<tp>%(blended);",
+          "return op;"
+        ]
+      },
+      "hmin_maskz_f64": {
+        "format": "long",
+        "code": [
+          "%r<tp>% max = %set1<tp>%(DBL_MAX);",
+          "%r<tp>% blended = %blend<tp>%(r0, max, m0);",
+          "%v<tp>% op = %hmin<tp>%(blended);",
+          "return op;"
+        ]
+      },
+      "hmin_maskz_i64": {
+        "format": "long",
+        "code": [
+          "%r<tp>% max = %set1<tp>%(INT64_MAX);",
+          "%r<tp>% blended = %blend<tp>%(r0, max, m0);",
+          "%v<tp>% op = %hmin<tp>%(blended);",
+          "return op;"
+        ]
+      },
+      "hmin_maskz_i32": {
+        "format": "long",
+        "code": [
+          "%r<tp>% max = %set1<tp>%(INT32_MAX);",
+          "%r<tp>% blended = %blend<tp>%(r0, max, m0);",
+          "%v<tp>% op = %hmin<tp>%(blended);",
+          "return op;"
+        ]
+      },
+      "hmin_maskz_i16": {
+        "format": "long",
+        "code": [
+          "%r<tp>% max = %set1<tp>%(INT16_MAX);",
+          "%r<tp>% blended = %blend<tp>%(r0, max, m0);",
+          "%v<tp>% op = %hmin<tp>%(blended);",
+          "return op;"
+        ]
+      },
+      "hmin_maskz_i8": {
+        "format": "long",
+        "code": [
+          "%r<tp>% max = %set1<tp>%(INT8_MAX);",
+          "%r<tp>% blended = %blend<tp>%(r0, max, m0);",
+          "%v<tp>% op = %hmin<tp>%(blended);",
+          "return op;"
+        ]
+      },
+      "hmax_maskz_u": {
+        "format": "long",
+        "code": [
+          "%r<tp>% min = %set1<tp>%(0u);",
+          "%r<tp>% blended = %blend<tp>%(r0, min, m0);",
+          "%v<tp>% op = %hmax<tp>%(blended);",
+          "return op; "
+        ]
+      },
+      "hmax_maskz_f32": {
+        "format": "long",
+        "code": [
+          "%r<tp>% min = %set1<tp>%(-FLT_MAX);",
+          "%r<tp>% blended = %blend<tp>%(r0, min, m0);",
+          "%v<tp>% op = %hmax<tp>%(blended);",
+          "return op;"
+        ]
+      },
+      "hmax_maskz_f64": {
+        "format": "long",
+        "code": [
+          "%r<tp>% min = %set1<tp>%(-DBL_MAX);",
+          "%r<tp>% blended = %blend<tp>%(r0, min, m0);",
+          "%v<tp>% op = %hmax<tp>%(blended);",
+          "return op;"
+        ]
+      },
+      "hmax_maskz_i64": {
+        "format": "long",
+        "code": [
+          "%r<tp>% min = %set1<tp>%(INT64_MIN);",
+          "%r<tp>% blended = %blend<tp>%(r0, min, m0);",
+          "%v<tp>% op = %hmax<tp>%(blended);",
+          "return op;"
+        ]
+      },
+      "hmax_maskz_i32": {
+        "format": "long",
+        "code": [
+          "%r<tp>% min = %set1<tp>%(INT32_MIN);",
+          "%r<tp>% blended = %blend<tp>%(r0, min, m0);",
+          "%v<tp>% op = %hmax<tp>%(blended);",
+          "return op;"
+        ]
+      },
+      "hmax_maskz_i16": {
+        "format": "long",
+        "code": [
+          "%r<tp>% min = %set1<tp>%(INT16_MIN);",
+          "%r<tp>% blended = %blend<tp>%(r0, min, m0);",
+          "%v<tp>% op = %hmax<tp>%(blended);",
+          "return op;"
+        ]
+      },
+      "hmax_maskz_i8": {
+        "format": "long",
+        "code": [
+          "%r<tp>% min = %set1<tp>%(INT8_MIN);",
+          "%r<tp>% blended = %blend<tp>%(r0, min, m0);",
+          "%v<tp>% op = %hmax<tp>%(blended);",
+          "return op;"
+        ]
+      },
+      "ret_reg_2args_reg_val": {
+        "format": "long",
+        "code": [
+          "%r<tp>% op = %{{func_name}}<tp>%(r0, v0);"
+        ]
+      }
+    },
+    "tpl_horiz_lmul_generic_emu": {
+      "tpl_set": {
+        "format": "long",
+        "code": [
+          "{% if lmul == 1 %}",
+          "%r<tp>% res = %set<tp>%(vals);",
+          "return res;",
+          "{% else %}",
+          "// pass first half of the vector to ",
+          "%r<tp>% res;",
+          "res.r1 = %set<c:tp|b:tp|m:tp/2>%(vals);",
+          "const %v<tp>% *ptr = vals + %N<tp>% / 2;",
+          "res.r2 = %set<c:tp|b:tp|m:tp/2>%(ptr);",
+          "return res;",
+          "{% endif %}"
+        ]
+      },
+      "tpl_get": {
+        "format": "long",
+        "code": [
+          "{% if lmul == 1 %}",
+          "return %get<tp>%(r0, v0);",
+          "{% else %}",
+          "if(v0 < %N<tp>% / 2)",
+          "\treturn %get<c:tp|b:tp|m:tp/2>%(r0.r1, v0);",
+          "else {",
+          "\t%v<tp>% tmp = v0 - %N<tp>% / 2;",
+          "\treturn %get<c:tp|b:tp|m:tp/2>%(r0.r2, tmp);",
+          "}",
+          "{% endif %}"
+        ]
+      },
+      "tpl_get_k": {
+        "format": "long",
+        "code": [
+          "{% if lmul == 1 %}",
+          "return %get_k<tp>%(m0, v0);",
+          "{% else %}",
+          "if(v0 < %N<tp>% / 2)",
+          "\treturn %get_k<c:tp|b:tp|m:tp/2>%(m0.m1, v0);",
+          "else {",
+          "\t%v<tp>% tmp = v0 - %N<tp>% / 2;",
+          "\treturn %get_k<c:tp|b:tp|m:tp/2>%(m0.m2, tmp);",
+          "}",
+          "{% endif %}"
+        ]
+      },
+      "tpl_getfirst": {
+        "format": "long",
+        "code": [
+          "{% if lmul == 1 %}",
+          "return %getfirst<tp>%(r0);",
+          "{% else %}",
+          "return %getfirst<c:tp|b:tp|m:tp/2>%(r0.r1);",
+          "{% endif %}"
+        ]
+      },
+      "tpl_testz": {
+        "format": "long",
+        "code": [
+          "{% if lmul == 1 %}",
+          "return %testz<tp>%(m0, m1);",
+          "{% else %}",
+          "return %testz<c:tp|b:tp|m:tp/2>%(m0.m1, m0.m2) && %testz<c:tp|b:tp|m:tp/2>%(m1.m1, m1.m2);",
+          "{% endif %}"
+        ]
+      },
+      "tpl_testz_2": {
+        "format": "long",
+        "code": [
+          "{% if lmul == 1 %}",
+          "return %testz_2<tp>%(m0);",
+          "{% else %}",
+          "return %testz_2<c:tp|b:tp|m:tp/2>%(m0.m1) && %testz_2<c:tp|b:tp|m:tp/2>%(m0.m2);",
+          "{% endif %}"
+        ]
+      },
+      "hadd_to_scal": {
+        "format": "long",
+        "code": [
+          "{% if lmul == 1 %}",
+          "return %hadd_to_scal<tp>%(r0);",
+          "{% else %}",
+          "%v<tp>% v0 = %hadd_to_scal<c:tp|b:tp|m:tp/2>%(r0.r1);",
+          "%v<tp>% v1 = %hadd_to_scal<c:tp|b:tp|m:tp/2>%(r0.r2);\t",
+          "return v0 + v1;",
+          "{% endif %}"
+        ]
+      },
+      "hadd": {
+        "format": "long",
+        "code": [
+          "{% if lmul == 1 %}",
+          "return %hadd<tp>%(r0);",
+          "{% else %}",
+          "%v<tp>% v0 = %hadd<c:tp|b:tp|m:tp/2>%(r0.r1);",
+          "%v<tp>% v1 = %hadd<c:tp|b:tp|m:tp/2>%(r0.r2);\t",
+          "return v0 + v1;",
+          "{% endif %}"
+        ]
+      },
+      "hadds_to_scal": {
+        "format": "long",
+        "code": [
+          "{% if lmul == 1 %}",
+          "return %hadds_to_scal<tp>%(r0);",
+          "{% else %}",
+          "%v<tp>% v0 = %hadds_to_scal<c:tp|b:tp|m:tp/2>%(r0.r1);",
+          "%v<tp>% v1 = %hadds_to_scal<c:tp|b:tp|m:tp/2>%(r0.r2);\t",
+          "return v0 + v1;",
+          "{% endif %}"
+        ]
+      },
+      "hadds": {
+        "format": "long",
+        "code": [
+          "{% if lmul == 1 %}",
+          "return %hadds<tp>%(r0);",
+          "{% else %}",
+          "%v<tp>% v0 = %hadds<c:tp|b:tp|m:tp/2>%(r0.r1);",
+          "%v<tp>% v1 = %hadds<c:tp|b:tp|m:tp/2>%(r0.r2);\t",
+          "return v0 + v1;",
+          "{% endif %}"
+        ]
+      },
+      "hmul": {
+        "format": "long",
+        "code": [
+          "{% if lmul == 1 %}",
+          "return %hmul<tp>%(r0);",
+          "{% else %}",
+          "%v<tp>% v1, v2;",
+          "v1 = %hmul<c:tp|b:tp|m:tp/2>%(r0.r1);",
+          "v2 = %hmul<c:tp|b:tp|m:tp/2>%(r0.r2);\t",
+          "return v1 * v2;",
+          "{% endif %}"
+        ]
+      },
+      "hmin": {
+        "format": "long",
+        "code": [
+          "{% if lmul == 1 %}",
+          "return %hmin<tp>%(r0);",
+          "{% else %}",
+          "%v<tp>% v1, v2;",
+          "v1 = %hmin<c:tp|b:tp|m:tp/2>%(r0.r1);",
+          "v2 = %hmin<c:tp|b:tp|m:tp/2>%(r0.r2);",
+          "return v1 < v2 ? v1 : v2;",
+          "{% endif %}"
+        ]
+      },
+      "hmax": {
+        "format": "long",
+        "code": [
+          "{% if lmul == 1 %}",
+          "return %hmax<tp>%(r0);",
+          "{% else %}",
+          "%v<tp>% v1, v2;",
+          "v1 = %hmax<c:tp|b:tp|m:tp/2>%(r0.r1);",
+          "v2 = %hmax<c:tp|b:tp|m:tp/2>%(r0.r2);",
+          "return v1 > v2 ? v1 : v2;",
+          "{% endif %}"
+        ]
+      },
+      "set_k": {
+        "format": "long",
+        "code": [
+          "{% if lmul == 1 %}",
+          "%m<tp>% res = %set_k<tp>%(vals);",
+          "return res;",
+          "{% else %}",
+          "// pass first half of the vector to ",
+          "%m<tp>% res;",
+          "res.m1 = %set_k<c:tp|b:tp|m:tp/2>%(vals);",
+          "const int32_t *ptr = vals + %N<tp>% / 2;",
+          "res.m2 = %set_k<c:tp|b:tp|m:tp/2>%(ptr);",
+          "return res;",
+          "{% endif %}"
+        ]
+      },
+      "wcvt": {
+        "format": "long",
+        "code": [
+          "{% if lmul == 1 %}",
+          "return %wcvt<tp>%(r0);",
+          "{% else %}",
+          "// scalar backup bc we would need mipp::high to deal with it",
+          "%v<tp>% tmp_p[%N<tp>%];",
+          "%store<tp>%(&tmp_p[0], r0);",
+          "%v<tr>% tmp_r[%N<tr>%];",
+          "for (int i = 0; i < %N<tr>%; i++)",
+          "\ttmp_r[i] = tmp_p[i];",
+          "return %load<tr>%(&tmp_r[0]);",
+          "{% endif %}"
+        ]
+      }
+    },
+    "SNIPPET_END_MSK": "\n\t%r<tp>% res = %blend<tp>%(op, r0, m0);\n\treturn res;",
+    "SNIPPET_END_MSKZ": "\n\t%r<tp>% tmp = %toreg<tp>%(m0);\n\t%r<tp>% res = %andb<tp>%(op, tmp);\n\treturn res;",
+    "SNIPPET_END_MSKS": "\n\t%r<tp>% res = %blend<tp>%(op, rsrc, m0);\n\treturn res;"
+  },
+  "implems_generic_emu": {
+    "div2": [
+      {
+        "instr_name": "div2",
+        "datatypes": "all_float",
+        "template_ref": "tpl_generic_emu.div2"
+      }
+    ],
+    "div4": [
+      {
+        "instr_name": "div4",
+        "datatypes": "all_float",
+        "template_ref": "tpl_generic_emu.div4"
+      }
+    ]
+  },
+  "implems_mask_generic_emu": {
+    "store": [
+      {
+        "instr_name": "store",
+        "datatypes": "all_datatypes",
+        "version": "mask",
+        "template_ref": "tpl_mask_generic_emu.store_msk"
+      },
+      {
+        "instr_name": "store",
+        "datatypes": "all_datatypes",
+        "version": "maskz",
+        "template_ref": "tpl_mask_generic_emu.store_mskz"
+      }
+    ],
+    "storeu": [
+      {
+        "instr_name": "storeu",
+        "datatypes": "all_datatypes",
+        "version": "mask",
+        "template_ref": "tpl_mask_generic_emu.storeu_msk"
+      },
+      {
+        "instr_name": "storeu",
+        "datatypes": "all_datatypes",
+        "version": "maskz",
+        "template_ref": "tpl_mask_generic_emu.storeu_mskz"
+      }
+    ],
+    "load": [
+      {
+        "instr_name": "load",
+        "datatypes": "all_datatypes",
+        "version": "masks",
+        "template_ref": "tpl_mask_generic_emu.load_msks"
+      },
+      {
+        "instr_name": "load",
+        "datatypes": "all_datatypes",
+        "version": "maskz",
+        "template_ref": "tpl_mask_generic_emu.load_mskz"
+      }
+    ],
+    "loadu": [
+      {
+        "instr_name": "loadu",
+        "datatypes": "all_datatypes",
+        "version": "masks",
+        "template_ref": "tpl_mask_generic_emu.load_msks"
+      },
+      {
+        "instr_name": "loadu",
+        "datatypes": "all_datatypes",
+        "version": "maskz",
+        "template_ref": "tpl_mask_generic_emu.load_mskz"
+      }
+    ],
+    "set": [
+      {
+        "instr_name": "set",
+        "datatypes": "all_datatypes",
+        "version": "masks",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %set<tp>%(vals);",
+            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
+            "return res;"
+          ]
+        }
+      }
+    ],
+    "set1": [
+      {
+        "instr_name": "set1",
+        "datatypes": "all_datatypes",
+        "version": "masks",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %set1<tp>%(v0);",
+            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
+            "return res;"
+          ]
+        }
+      }
+    ],
+    "set0": [
+      {
+        "instr_name": "set0",
+        "datatypes": "all_datatypes",
+        "version": "masks",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %set0<tp>%();",
+            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
+            "return res;"
+          ]
+        }
+      }
+    ],
+    "add": [
+      {
+        "instr_name": "add",
+        "datatypes": "all_datatypes",
+        "version": "mask",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "add",
+        "datatypes": "all_datatypes",
+        "version": "maskz",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% tmp = %toreg<tp>%(m0);",
+            "%r<tp>% res = %andb<tp>%(op, tmp);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "add",
+        "datatypes": "all_datatypes",
+        "version": "masks",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
+            "return res;"
+          ]
+        }
+      }
+    ],
+    "sub": [
+      {
+        "instr_name": "sub",
+        "datatypes": "all_datatypes",
+        "version": "mask",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "sub",
+        "datatypes": "all_datatypes",
+        "version": "maskz",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% tmp = %toreg<tp>%(m0);",
+            "%r<tp>% res = %andb<tp>%(op, tmp);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "sub",
+        "datatypes": "all_datatypes",
+        "version": "masks",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
+            "return res;"
+          ]
+        }
+      }
+    ],
+    "mul": [
+      {
+        "instr_name": "mul",
+        "datatypes": "all_datatypes",
+        "version": "mask",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "mul",
+        "datatypes": "all_datatypes",
+        "version": "maskz",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% tmp = %toreg<tp>%(m0);",
+            "%r<tp>% res = %andb<tp>%(op, tmp);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "mul",
+        "datatypes": "all_datatypes",
+        "version": "masks",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
+            "return res;"
+          ]
+        }
+      }
+    ],
+    "div": [
+      {
+        "instr_name": "div",
+        "datatypes": "all_float",
+        "version": "mask",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "div",
+        "datatypes": "all_float",
+        "version": "maskz",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% tmp = %toreg<tp>%(m0);",
+            "%r<tp>% res = %andb<tp>%(op, tmp);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "div",
+        "datatypes": "all_float",
+        "version": "masks",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
+            "return res;"
+          ]
+        }
+      }
+    ],
+    "div2": [
+      {
+        "instr_name": "div2",
+        "datatypes": "all_float",
+        "version": "mask",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
+            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "div2",
+        "datatypes": "all_float",
+        "version": "maskz",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
+            "%r<tp>% tmp = %toreg<tp>%(m0);",
+            "%r<tp>% res = %andb<tp>%(op, tmp);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "div2",
+        "datatypes": "all_float",
+        "version": "masks",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
+            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
+            "return res;"
+          ]
+        }
+      }
+    ],
+    "fmadd": [
+      {
+        "instr_name": "fmadd",
+        "datatypes": [
+          "all_float",
+          "int32"
+        ],
+        "version": "mask",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%( r0, r1, r2);",
+            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "fmadd",
+        "datatypes": [
+          "all_float",
+          "int32"
+        ],
+        "version": "maskz",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%( r0, r1, r2);",
+            "%r<tp>% tmp = %toreg<tp>%(m0);",
+            "%r<tp>% res = %andb<tp>%(op, tmp);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "fmadd",
+        "datatypes": [
+          "all_float",
+          "int32"
+        ],
+        "version": "masks",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%( r0, r1, r2);",
+            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
+            "return res;"
+          ]
+        }
+      }
+    ],
+    "fmsub": [
+      {
+        "instr_name": "fmsub",
+        "datatypes": [
+          "all_float",
+          "int32"
+        ],
+        "version": "mask",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%( r0, r1, r2);",
+            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "fmsub",
+        "datatypes": [
+          "all_float",
+          "int32"
+        ],
+        "version": "maskz",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%( r0, r1, r2);",
+            "%r<tp>% tmp = %toreg<tp>%(m0);",
+            "%r<tp>% res = %andb<tp>%(op, tmp);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "fmsub",
+        "datatypes": [
+          "all_float",
+          "int32"
+        ],
+        "version": "masks",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%( r0, r1, r2);",
+            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
+            "return res;"
+          ]
+        }
+      }
+    ],
+    "fnmadd": [
+      {
+        "instr_name": "fnmadd",
+        "datatypes": [
+          "all_float",
+          "int32"
+        ],
+        "version": "mask",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%( r0, r1, r2);",
+            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "fnmadd",
+        "datatypes": [
+          "all_float",
+          "int32"
+        ],
+        "version": "maskz",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%( r0, r1, r2);",
+            "%r<tp>% tmp = %toreg<tp>%(m0);",
+            "%r<tp>% res = %andb<tp>%(op, tmp);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "fnmadd",
+        "datatypes": [
+          "all_float",
+          "int32"
+        ],
+        "version": "masks",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%( r0, r1, r2);",
+            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
+            "return res;"
+          ]
+        }
+      }
+    ],
+    "fnmsub": [
+      {
+        "instr_name": "fnmsub",
+        "datatypes": [
+          "all_float",
+          "int32"
+        ],
+        "version": "mask",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%( r0, r1, r2);",
+            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "fnmsub",
+        "datatypes": [
+          "all_float",
+          "int32"
+        ],
+        "version": "maskz",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%( r0, r1, r2);",
+            "%r<tp>% tmp = %toreg<tp>%(m0);",
+            "%r<tp>% res = %andb<tp>%(op, tmp);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "fnmsub",
+        "datatypes": [
+          "all_float",
+          "int32"
+        ],
+        "version": "masks",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%( r0, r1, r2);",
+            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
+            "return res;"
+          ]
+        }
+      }
+    ],
+    "div4": [
+      {
+        "instr_name": "div4",
+        "datatypes": "all_float",
+        "version": "mask",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
+            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "div4",
+        "datatypes": "all_float",
+        "version": "maskz",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
+            "%r<tp>% tmp = %toreg<tp>%(m0);",
+            "%r<tp>% res = %andb<tp>%(op, tmp);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "div4",
+        "datatypes": "all_float",
+        "version": "masks",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
+            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
+            "return res;"
+          ]
+        }
+      }
+    ],
+    "cmpeq": [
+      {
+        "instr_name": "cmpeq",
+        "datatypes": "all_datatypes",
+        "version": "maskz",
+        "template_ref": "tpl_mask_generic_emu.cmp_2args"
+      }
+    ],
+    "cmpneq": [
+      {
+        "instr_name": "cmpneq",
+        "datatypes": "all_datatypes",
+        "version": "maskz",
+        "template_ref": "tpl_mask_generic_emu.cmp_2args"
+      }
+    ],
+    "cmpgt": [
+      {
+        "instr_name": "cmpgt",
+        "datatypes": "all_datatypes",
+        "version": "maskz",
+        "template_ref": "tpl_mask_generic_emu.cmp_2args"
+      }
+    ],
+    "cmpge": [
+      {
+        "instr_name": "cmpge",
+        "datatypes": "all_datatypes",
+        "version": "maskz",
+        "template_ref": "tpl_mask_generic_emu.cmp_2args"
+      }
+    ],
+    "cmplt": [
+      {
+        "instr_name": "cmplt",
+        "datatypes": "all_datatypes",
+        "version": "maskz",
+        "template_ref": "tpl_mask_generic_emu.cmp_2args"
+      }
+    ],
+    "cmple": [
+      {
+        "instr_name": "cmple",
+        "datatypes": "all_datatypes",
+        "version": "maskz",
+        "template_ref": "tpl_mask_generic_emu.cmp_2args"
+      }
+    ],
+    "sqrt": [
+      {
+        "instr_name": "sqrt",
+        "datatypes": "all_float",
+        "version": "mask",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
+            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "sqrt",
+        "datatypes": "all_float",
+        "version": "maskz",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
+            "%r<tp>% tmp = %toreg<tp>%(m0);",
+            "%r<tp>% res = %andb<tp>%(op, tmp);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "sqrt",
+        "datatypes": "all_float",
+        "version": "masks",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
+            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
+            "return res;"
+          ]
+        }
+      }
+    ],
+    "rsqrt": [
+      {
+        "instr_name": "rsqrt",
+        "datatypes": "all_float",
+        "version": "mask",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
+            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "rsqrt",
+        "datatypes": "all_float",
+        "version": "maskz",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
+            "%r<tp>% tmp = %toreg<tp>%(m0);",
+            "%r<tp>% res = %andb<tp>%(op, tmp);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "rsqrt",
+        "datatypes": "all_float",
+        "version": "masks",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
+            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
+            "return res;"
+          ]
+        }
+      }
+    ],
+    "round": [
+      {
+        "instr_name": "round",
+        "datatypes": "all_datatypes",
+        "version": "mask",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
+            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "round",
+        "datatypes": "all_datatypes",
+        "version": "maskz",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
+            "%r<tp>% tmp = %toreg<tp>%(m0);",
+            "%r<tp>% res = %andb<tp>%(op, tmp);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "round",
+        "datatypes": "all_datatypes",
+        "version": "masks",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
+            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
+            "return res;"
+          ]
+        }
+      }
+    ],
+    "exp": [
+      {
+        "instr_name": "exp",
+        "datatypes": "all_float",
+        "version": "mask",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
+            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "exp",
+        "datatypes": "all_float",
+        "version": "maskz",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
+            "%r<tp>% tmp = %toreg<tp>%(m0);",
+            "%r<tp>% res = %andb<tp>%(op, tmp);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "exp",
+        "datatypes": "all_float",
+        "version": "masks",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
+            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
+            "return res;"
+          ]
+        }
+      }
+    ],
+    "log": [
+      {
+        "instr_name": "log",
+        "datatypes": "all_float",
+        "version": "mask",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
+            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "log",
+        "datatypes": "all_float",
+        "version": "maskz",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
+            "%r<tp>% tmp = %toreg<tp>%(m0);",
+            "%r<tp>% res = %andb<tp>%(op, tmp);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "log",
+        "datatypes": "all_float",
+        "version": "masks",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
+            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
+            "return res;"
+          ]
+        }
+      }
+    ],
+    "pow": [
+      {
+        "instr_name": "pow",
+        "datatypes": "all_float",
+        "version": "mask",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "pow",
+        "datatypes": "all_float",
+        "version": "maskz",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% tmp = %toreg<tp>%(m0);",
+            "%r<tp>% res = %andb<tp>%(op, tmp);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "pow",
+        "datatypes": "all_float",
+        "version": "masks",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
+            "return res;"
+          ]
+        }
+      }
+    ],
+    "andb": [
+      {
+        "instr_name": "andb",
+        "datatypes": "all_datatypes",
+        "version": "mask",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "andb",
+        "datatypes": "all_datatypes",
+        "version": "maskz",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% tmp = %toreg<tp>%(m0);",
+            "%r<tp>% res = %andb<tp>%(op, tmp);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "andb",
+        "datatypes": "all_datatypes",
+        "version": "masks",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
+            "return res;"
+          ]
+        }
+      }
+    ],
+    "andnb": [
+      {
+        "instr_name": "andnb",
+        "datatypes": "all_datatypes",
+        "version": "mask",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "andnb",
+        "datatypes": "all_datatypes",
+        "version": "maskz",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% tmp = %toreg<tp>%(m0);",
+            "%r<tp>% res = %andb<tp>%(op, tmp);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "andnb",
+        "datatypes": "all_datatypes",
+        "version": "masks",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
+            "return res;"
+          ]
+        }
+      }
+    ],
+    "orb": [
+      {
+        "instr_name": "orb",
+        "datatypes": "all_datatypes",
+        "version": "mask",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "orb",
+        "datatypes": "all_datatypes",
+        "version": "maskz",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% tmp = %toreg<tp>%(m0);",
+            "%r<tp>% res = %andb<tp>%(op, tmp);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "orb",
+        "datatypes": "all_datatypes",
+        "version": "masks",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
+            "return res;"
+          ]
+        }
+      }
+    ],
+    "xorb": [
+      {
+        "instr_name": "xorb",
+        "datatypes": "all_datatypes",
+        "version": "mask",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "xorb",
+        "datatypes": "all_datatypes",
+        "version": "maskz",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% tmp = %toreg<tp>%(m0);",
+            "%r<tp>% res = %andb<tp>%(op, tmp);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "xorb",
+        "datatypes": "all_datatypes",
+        "version": "masks",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
+            "return res;"
+          ]
+        }
+      }
+    ],
+    "msb": [
+      {
+        "instr_name": "msb",
+        "datatypes": "all_datatypes",
+        "version": "mask",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
+            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "msb",
+        "datatypes": "all_datatypes",
+        "version": "maskz",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
+            "%r<tp>% tmp = %toreg<tp>%(m0);",
+            "%r<tp>% res = %andb<tp>%(op, tmp);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "msb",
+        "datatypes": "all_datatypes",
+        "version": "masks",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
+            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
+            "return res;"
+          ]
+        }
+      }
+    ],
+    "notb": [
+      {
+        "instr_name": "notb",
+        "datatypes": "all_datatypes",
+        "version": "mask",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
+            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "notb",
+        "datatypes": "all_datatypes",
+        "version": "maskz",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
+            "%r<tp>% tmp = %toreg<tp>%(m0);",
+            "%r<tp>% res = %andb<tp>%(op, tmp);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "notb",
+        "datatypes": "all_datatypes",
+        "version": "masks",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
+            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
+            "return res;"
+          ]
+        }
+      }
+    ],
+    "lshift": [
+      {
+        "instr_name": "lshift",
+        "datatypes": "all_datatypes",
+        "version": "mask",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, v0);",
+            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "lshift",
+        "datatypes": "all_datatypes",
+        "version": "maskz",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, v0);",
+            "%r<tp>% tmp = %toreg<tp>%(m0);",
+            "%r<tp>% res = %andb<tp>%(op, tmp);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "lshift",
+        "datatypes": "all_datatypes",
+        "version": "masks",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, v0);",
+            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
+            "return res;"
+          ]
+        }
+      }
+    ],
+    "hadd": [
+      {
+        "instr_name": "hadd",
+        "datatypes": "all_datatypes",
+        "version": "maskz",
+        "template_ref": "tpl_mask_generic_emu.hadd_maskz"
+      }
+    ],
+    "hmul": [
+      {
+        "instr_name": "hmul",
+        "datatypes": "all_datatypes",
+        "version": "maskz",
+        "template_ref": "tpl_mask_generic_emu.hmul_maskz"
+      }
+    ],
+    "hmin": [
+      {
+        "instr_name": "hmin",
+        "datatypes": [
+          "float32"
+        ],
+        "version": "maskz",
+        "template_ref": "tpl_mask_generic_emu.hmin_maskz_f32"
+      },
+      {
+        "instr_name": "hmin",
+        "datatypes": [
+          "float64"
+        ],
+        "version": "maskz",
+        "template_ref": "tpl_mask_generic_emu.hmin_maskz_f64"
+      },
+      {
+        "instr_name": "hmin",
+        "datatypes": [
+          "int64"
+        ],
+        "version": "maskz",
+        "template_ref": "tpl_mask_generic_emu.hmin_maskz_i64"
+      },
+      {
+        "instr_name": "hmin",
+        "datatypes": [
+          "int32"
+        ],
+        "version": "maskz",
+        "template_ref": "tpl_mask_generic_emu.hmin_maskz_i32"
+      },
+      {
+        "instr_name": "hmin",
+        "datatypes": [
+          "int16"
+        ],
+        "version": "maskz",
+        "template_ref": "tpl_mask_generic_emu.hmin_maskz_i16"
+      },
+      {
+        "instr_name": "hmin",
+        "datatypes": [
+          "int8"
+        ],
+        "version": "maskz",
+        "template_ref": "tpl_mask_generic_emu.hmin_maskz_i8"
+      },
+      {
+        "instr_name": "hmin",
+        "datatypes": [
+          "uint64"
+        ],
+        "version": "maskz",
+        "template_ref": "tpl_mask_generic_emu.hmin_maskz_u64"
+      },
+      {
+        "instr_name": "hmin",
+        "datatypes": [
+          "uint32"
+        ],
+        "version": "maskz",
+        "template_ref": "tpl_mask_generic_emu.hmin_maskz_u32"
+      },
+      {
+        "instr_name": "hmin",
+        "datatypes": [
+          "uint16"
+        ],
+        "version": "maskz",
+        "template_ref": "tpl_mask_generic_emu.hmin_maskz_u16"
+      },
+      {
+        "instr_name": "hmin",
+        "datatypes": [
+          "uint8"
+        ],
+        "version": "maskz",
+        "template_ref": "tpl_mask_generic_emu.hmin_maskz_u8"
+      }
+    ],
+    "hmax": [
+      {
+        "instr_name": "hmax",
+        "datatypes": "all_uint",
+        "version": "maskz",
+        "template_ref": "tpl_mask_generic_emu.hmax_maskz_u"
+      },
+      {
+        "instr_name": "hmax",
+        "datatypes": [
+          "float32"
+        ],
+        "version": "maskz",
+        "template_ref": "tpl_mask_generic_emu.hmax_maskz_f32"
+      },
+      {
+        "instr_name": "hmax",
+        "datatypes": [
+          "float64"
+        ],
+        "version": "maskz",
+        "template_ref": "tpl_mask_generic_emu.hmax_maskz_f64"
+      },
+      {
+        "instr_name": "hmax",
+        "datatypes": [
+          "int64"
+        ],
+        "version": "maskz",
+        "template_ref": "tpl_mask_generic_emu.hmax_maskz_i64"
+      },
+      {
+        "instr_name": "hmax",
+        "datatypes": [
+          "int32"
+        ],
+        "version": "maskz",
+        "template_ref": "tpl_mask_generic_emu.hmax_maskz_i32"
+      },
+      {
+        "instr_name": "hmax",
+        "datatypes": [
+          "int16"
+        ],
+        "version": "maskz",
+        "template_ref": "tpl_mask_generic_emu.hmax_maskz_i16"
+      },
+      {
+        "instr_name": "hmax",
+        "datatypes": [
+          "int8"
+        ],
+        "version": "maskz",
+        "template_ref": "tpl_mask_generic_emu.hmax_maskz_i8"
+      }
+    ],
+    "min": [
+      {
+        "instr_name": "min",
+        "datatypes": "all_datatypes",
+        "version": "mask",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "min",
+        "datatypes": "all_datatypes",
+        "version": "maskz",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% tmp = %toreg<tp>%(m0);",
+            "%r<tp>% res = %andb<tp>%(op, tmp);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "min",
+        "datatypes": "all_datatypes",
+        "version": "masks",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
+            "return res;"
+          ]
+        }
+      }
+    ],
+    "max": [
+      {
+        "instr_name": "max",
+        "datatypes": "all_datatypes",
+        "version": "mask",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "max",
+        "datatypes": "all_datatypes",
+        "version": "maskz",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% tmp = %toreg<tp>%(m0);",
+            "%r<tp>% res = %andb<tp>%(op, tmp);",
+            "return res;"
+          ]
+        }
+      },
+      {
+        "instr_name": "max",
+        "datatypes": "all_datatypes",
+        "version": "masks",
+        "template": {
+          "format": "long",
+          "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
+            "return res;"
+          ]
+        }
+      }
+    ]
+  },
+  "implems_horiz_lmul_generic_emu": {
+    "set": [
+      {
+        "instr_name": "set",
+        "datatypes": "all_datatypes",
+        "version": "horiz_lmul",
+        "template_ref": "tpl_horiz_lmul_generic_emu.tpl_set"
+      }
+    ],
+    "get": [
+      {
+        "instr_name": "get",
+        "datatypes": "all_datatypes",
+        "version": "horiz_lmul",
+        "template_ref": "tpl_horiz_lmul_generic_emu.tpl_get"
+      }
+    ],
+    "get_k": [
+      {
+        "instr_name": "get_k",
+        "datatypes": "all_datatypes",
+        "version": "horiz_lmul",
+        "template_ref": "tpl_horiz_lmul_generic_emu.tpl_get_k"
+      }
+    ],
+    "getfirst": [
+      {
+        "instr_name": "getfirst",
+        "datatypes": "all_datatypes",
+        "version": "horiz_lmul",
+        "template_ref": "tpl_horiz_lmul_generic_emu.tpl_getfirst"
+      }
+    ],
+    "testz": [
+      {
+        "instr_name": "testz",
+        "datatypes": "all_datatypes",
+        "version": "horiz_lmul",
+        "template_ref": "tpl_horiz_lmul_generic_emu.tpl_testz"
+      }
+    ],
+    "testz_2": [
+      {
+        "instr_name": "testz_2",
+        "datatypes": "all_datatypes",
+        "version": "horiz_lmul",
+        "template_ref": "tpl_horiz_lmul_generic_emu.tpl_testz_2"
+      }
+    ],
+    "hadd": [
+      {
+        "instr_name": "hadd",
+        "datatypes": "all_datatypes",
+        "version": "horiz_lmul",
+        "dependencies": [
+          "add"
+        ],
+        "template_ref": "tpl_horiz_lmul_generic_emu.hadd"
+      }
+    ],
+    "hmul": [
+      {
+        "instr_name": "hmul",
+        "datatypes": "all_datatypes",
+        "version": "horiz_lmul",
+        "dependencies": [
+          "mul"
+        ],
+        "template_ref": "tpl_horiz_lmul_generic_emu.hmul"
+      }
+    ],
+    "hmin": [
+      {
+        "instr_name": "hmin",
+        "datatypes": "all_datatypes",
+        "version": "horiz_lmul",
+        "dependencies": [
+          "min"
+        ],
+        "template_ref": "tpl_horiz_lmul_generic_emu.hmin"
+      }
+    ],
+    "hmax": [
+      {
+        "instr_name": "hmax",
+        "datatypes": "all_datatypes",
+        "version": "horiz_lmul",
+        "dependencies": [
+          "max"
+        ],
+        "template_ref": "tpl_horiz_lmul_generic_emu.hmax"
+      }
+    ],
+    "hadd_to_scal": [
+      {
+        "instr_name": "hadd_to_scal",
+        "datatypes": "all_datatypes",
+        "version": "horiz_lmul",
+        "template_ref": "tpl_horiz_lmul_generic_emu.hadd_to_scal"
+      }
+    ],
+    "hadds": [
+      {
+        "instr_name": "hadds",
+        "datatypes": "all_datatypes",
+        "version": "horiz_lmul",
+        "dependencies": [
+          "add"
+        ],
+        "template_ref": "tpl_horiz_lmul_generic_emu.hadds"
+      }
+    ],
+    "hadds_to_scal": [
+      {
+        "instr_name": "hadds_to_scal",
+        "datatypes": "all_datatypes",
+        "version": "horiz_lmul",
+        "template_ref": "tpl_horiz_lmul_generic_emu.hadds_to_scal"
+      }
+    ],
+    "set_k": [
+      {
+        "instr_name": "set_k",
+        "datatypes": "all_datatypes",
+        "version": "horiz_lmul",
+        "template_ref": "tpl_horiz_lmul_generic_emu.set_k"
+      }
+    ],
+    "wcvt": [
+      {
+        "instr_name": "wcvt",
+        "datatypes": "all_datatypes_widenning",
+        "version": "horiz_lmul",
+        "dependencies": [
+          "load",
+          "store"
+        ],
+        "template_ref": "tpl_horiz_lmul_generic_emu.wcvt"
+      }
+    ]
+  }
+}
