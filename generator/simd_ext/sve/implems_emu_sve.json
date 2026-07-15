@@ -1,0 +1,58 @@
+{
+    "toreg": [
+        {
+            "datatypes": "all_64bit",
+            "template": "toreg-64"
+        },
+        {
+            "datatypes": "all_32bit",
+            "template": "toreg-32"
+        }
+    ],
+    "andb": [
+        {
+            "datatypes": "all_float",
+            "template": "and_all_float"
+        }
+    ],
+    "set": [
+        {
+            "datatypes": "all_datatypes",
+            "template": "set_by_load"
+        }
+    ],
+    "set_k": [
+        {
+            "datatypes": "all_64bit",
+            "template": "set_k-64"
+        },
+        {
+            "datatypes": "all_32bit",
+            "template": "set_k-32"
+        }
+    ],
+    "hadd": [
+        {
+            "datatypes": "all_datatypes",
+            "template": "hadd"
+        }
+    ],
+    "get": [
+        {
+            "datatypes": "all_datatypes",
+            "template": "get"
+        }
+    ],
+    "getfirst": [
+        {
+            "datatypes": "all_datatypes",
+            "template": "getfirst"
+        }
+    ],
+    "get_k": [
+        {
+            "datatypes": "all_datatypes",
+            "template": "get_k"
+        }
+    ]
+}

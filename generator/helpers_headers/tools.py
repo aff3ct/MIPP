@@ -1898,3 +1898,101 @@ def intersect_conds(c1, c2, known_true_conds=None):
     if are_conds_mutually_exclusive(c1, c2, known_true_conds):
         return None
     return f"({c1}) && ({c2})"
+
+
+def load_implem_tables(current_file, templates_filename, implems_filename):
+    import json
+    import os
+    current_dir = os.path.dirname(os.path.abspath(current_file))
+    
+    # Load templates
+    with open(os.path.join(current_dir, templates_filename), "r") as f:
+        tpl_dict = json.load(f)
+    for name, tpl in tpl_dict.items():
+        if "code" in tpl:
+            code = tpl["code"]
+            fmt = tpl.get("format", "short")
+            if isinstance(code, str):
+                lines = code.split("\n")
+            else:
+                lines = code
+                
+            processed_lines = []
+            for i, line in enumerate(lines):
+                if line == "":
+                    processed_lines.append("")
+                else:
+                    if fmt == "long":
+                        processed_lines.append("\t" + line)
+                    else:
+                        if i > 0:
+                            processed_lines.append("\t" + line)
+                        else:
+                            processed_lines.append(line)
+            tpl["code"] = "\n".join(processed_lines)
+        
+    # Load implems
+    with open(os.path.join(current_dir, implems_filename), "r") as f:
+        raw_implems = json.load(f)
+        
+    # Build a lookup mapping for datatypes
+    # Make sure we use the same variables imported in tools.py
+    from tools import (
+        all_float, all_int, all_uint, all_int_uint, all_defs,
+        float64, float32, int64, int32, int16, int8, uint64, uint32, uint16, uint8,
+        all_datatypes, all_64bit, all_32bit, all_16bit, all_8bit,
+        all_datatypes_cart_prod, all_datatypes_cart_prod_except_f64,
+        all_datatypes_cart_prod_inc_f64
+    )
+    
+    DATATYPES_MAP = {
+        "all_float": all_float,
+        "all_int": all_int,
+        "all_uint": all_uint,
+        "all_int_uint": all_int_uint,
+        "all_defs": all_defs,
+        "all_datatypes": all_datatypes,
+        "all_64bit": all_64bit,
+        "all_32bit": all_32bit,
+        "all_16bit": all_16bit,
+        "all_8bit": all_8bit,
+        "all_datatypes_cart_prod": all_datatypes_cart_prod,
+        "all_datatypes_cart_prod_except_f64": all_datatypes_cart_prod_except_f64,
+        "all_datatypes_cart_prod_inc_f64": all_datatypes_cart_prod_inc_f64,
+        "float64": [float64],
+        "float32": [float32],
+        "int64": [int64],
+        "int32": [int32],
+        "int16": [int16],
+        "int8": [int8],
+        "uint64": [uint64],
+        "uint32": [uint32],
+        "uint16": [uint16],
+        "uint8": [uint8],
+    }
+    
+    resolved_implems = {}
+    for func, choices in raw_implems.items():
+        resolved_choices = []
+        for choice in choices:
+            resolved_choice = {}
+            for k, v in choice.items():
+                if k == "datatypes":
+                    if isinstance(v, str):
+                        resolved_choice[k] = DATATYPES_MAP[v]
+                    else:
+                        resolved_choice[k] = [DATATYPES_MAP.get(dt, [dt])[0] for dt in v]
+                elif k == "mask_variants":
+                    if isinstance(v, str):
+                        resolved_choice[k] = DATATYPES_MAP[v]
+                    else:
+                        resolved_choice[k] = [DATATYPES_MAP.get(dt, [dt])[0] for dt in v]
+                elif k == "template":
+                    # Retrieve the template dict from tpl_dict
+                    resolved_choice[k] = tpl_dict[v]
+                else:
+                    resolved_choice[k] = v
+            resolved_choices.append(resolved_choice)
+        resolved_implems[func] = resolved_choices
+        
+    return tpl_dict, resolved_implems

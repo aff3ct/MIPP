@@ -1,0 +1,390 @@
+{
+    "set0": [
+        {
+            "datatypes": "all_64bit",
+            "template": "set0",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32",
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
+            ],
+            "template": "set0"
+        }
+    ],
+    "set0_k": [
+        {
+            "datatypes": "all_64bit",
+            "template": "set0_k",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32",
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
+            ],
+            "template": "set0_k"
+        }
+    ],
+    "set": [
+        {
+            "datatypes": "all_64bit",
+            "template": "set",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32",
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
+            ],
+            "template": "set"
+        }
+    ],
+    "set1_k": [
+        {
+            "datatypes": "all_8bit",
+            "template": "set1_k-8"
+        },
+        {
+            "datatypes": "all_16bit",
+            "template": "set1_k-16"
+        },
+        {
+            "datatypes": "all_32bit",
+            "template": "set1_k-32"
+        },
+        {
+            "datatypes": "all_64bit",
+            "template": "set1_k-64",
+            "if": "defined(__aarch64__)"
+        }
+    ],
+    "set_k": [
+        {
+            "datatypes": "all_8bit",
+            "template": "set_k-8"
+        },
+        {
+            "datatypes": "all_16bit",
+            "template": "set_k-16"
+        },
+        {
+            "datatypes": [
+                "int32",
+                "uint32"
+            ],
+            "template": "set_k-32"
+        },
+        {
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "set_k-64",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "datatypes": [
+                "float64"
+            ],
+            "template": "set_k-xxf",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "datatypes": [
+                "float32"
+            ],
+            "template": "set_k-xxf"
+        }
+    ],
+    "get": [
+        {
+            "datatypes": "all_64bit",
+            "template": "get",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32",
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
+            ],
+            "template": "get"
+        }
+    ],
+    "get_k": [
+        {
+            "datatypes": "all_64bit",
+            "template": "get_k",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32",
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
+            ],
+            "template": "get_k"
+        }
+    ],
+    "notb": [
+        {
+            "datatypes": "all_datatypes",
+            "template": "notb"
+        }
+    ],
+    "notb_k": [
+        {
+            "datatypes": "all_datatypes",
+            "template": "notb_k"
+        }
+    ],
+    "cmpneq": [
+        {
+            "datatypes": "all_64bit",
+            "template": "cmpneq",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32",
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
+            ],
+            "template": "cmpneq"
+        }
+    ],
+    "msb": [
+        {
+            "datatypes": "all_64bit",
+            "template": "msb-64",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "datatypes": "all_32bit",
+            "template": "msb-32"
+        },
+        {
+            "datatypes": "all_16bit",
+            "template": "msb-16"
+        },
+        {
+            "datatypes": "all_8bit",
+            "template": "msb-8"
+        }
+    ],
+    "min": [
+        {
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "min_emu",
+            "if": "defined(__aarch64__)"
+        }
+    ],
+    "max": [
+        {
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "max_emu",
+            "if": "defined(__aarch64__)"
+        }
+    ],
+    "hadd": [
+        {
+            "datatypes": [
+                "float64"
+            ],
+            "template": "hadd_emu",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "datatypes": [
+                "float32",
+                "int64",
+                "int32",
+                "int16",
+                "int8",
+                "uint64",
+                "uint32",
+                "uint16",
+                "uint8"
+            ],
+            "template": "hadd_emu"
+        }
+    ],
+    "hmul": [
+        {
+            "datatypes": [
+                "float64"
+            ],
+            "template": "hmul_emu",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "datatypes": [
+                "float32",
+                "int64",
+                "int32",
+                "int16",
+                "int8",
+                "uint64",
+                "uint32",
+                "uint16",
+                "uint8"
+            ],
+            "template": "hmul_emu"
+        }
+    ],
+    "hmin": [
+        {
+            "datatypes": [
+                "float64"
+            ],
+            "template": "hmin_emu",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "datatypes": [
+                "float32",
+                "int64",
+                "int32",
+                "int16",
+                "int8",
+                "uint64",
+                "uint32",
+                "uint16",
+                "uint8"
+            ],
+            "template": "hmin_emu"
+        }
+    ],
+    "hmax": [
+        {
+            "datatypes": [
+                "float64"
+            ],
+            "template": "hmax_emu",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "datatypes": [
+                "float32",
+                "int64",
+                "int32",
+                "int16",
+                "int8",
+                "uint64",
+                "uint32",
+                "uint16",
+                "uint8"
+            ],
+            "template": "hmax_emu"
+        }
+    ],
+    "fmadd": [
+        {
+            "datatypes": [
+                "float64"
+            ],
+            "template": "fmadd",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "datatypes": [
+                "float32",
+                "int32"
+            ],
+            "template": "fmadd"
+        }
+    ],
+    "fnmadd": [
+        {
+            "datatypes": [
+                "float64"
+            ],
+            "template": "fnmadd",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "datatypes": [
+                "float32",
+                "int32"
+            ],
+            "template": "fnmadd"
+        }
+    ],
+    "fmsub": [
+        {
+            "datatypes": [
+                "float64"
+            ],
+            "template": "fmsub",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "datatypes": [
+                "float32",
+                "int32"
+            ],
+            "template": "fmsub"
+        }
+    ],
+    "fnmsub": [
+        {
+            "datatypes": [
+                "float64"
+            ],
+            "template": "fnmsub",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "datatypes": [
+                "float32",
+                "int32"
+            ],
+            "template": "fnmsub"
+        }
+    ],
+    "mul": [
+        {
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "mul_emu_64",
+            "if": "defined(__aarch64__)"
+        }
+    ]
+}

@@ -1,0 +1,184 @@
+{
+    "cast": [
+        {
+            "instr_name": "reinterpret",
+            "datatypes": "all_datatypes_cart_prod",
+            "template": "cast"
+        }
+    ],
+    "cast_k": [
+        {
+            "instr_name": "",
+            "datatypes": "all_datatypes_cart_prod",
+            "template": "cast_k"
+        }
+    ],
+    "blend": [
+        {
+            "instr_name": "sel",
+            "datatypes": "all_datatypes",
+            "template": "blend"
+        }
+    ],
+    "load": [
+        {
+            "instr_name": "ld1",
+            "datatypes": "all_datatypes",
+            "template": "load"
+        }
+    ],
+    "maskzld": [
+        {
+            "instr_name": "ld1",
+            "datatypes": [],
+            "template": "mask_load"
+        }
+    ],
+    "loadu": [
+        {
+            "instr_name": "ld1",
+            "datatypes": "all_datatypes",
+            "template": "load"
+        }
+    ],
+    "store": [
+        {
+            "instr_name": "st1",
+            "datatypes": "all_datatypes",
+            "template": "store"
+        }
+    ],
+    "maskst": [
+        {
+            "instr_name": "st1",
+            "datatypes": [],
+            "template": "mask_store"
+        }
+    ],
+    "storeu": [
+        {
+            "instr_name": "st1",
+            "datatypes": "all_datatypes",
+            "template": "store"
+        }
+    ],
+    "set1": [
+        {
+            "instr_name": "dup",
+            "datatypes": "all_datatypes",
+            "template": "set1"
+        }
+    ],
+    "set1_k": [
+        {
+            "instr_name": "dup",
+            "datatypes": "all_int_uint",
+            "template": "set1_k"
+        }
+    ],
+    "set0": [
+        {
+            "instr_name": "dup",
+            "datatypes": "all_datatypes",
+            "template": "set0"
+        }
+    ],
+    "set0_k": [
+        {
+            "instr_name": "pfalse",
+            "datatypes": "all_datatypes",
+            "template": "set0_k"
+        }
+    ],
+    "andb": [
+        {
+            "instr_name": "and",
+            "datatypes": "all_int_uint",
+            "template": "andb"
+        }
+    ],
+    "andb_k": [
+        {
+            "instr_name": "and",
+            "datatypes": "all_datatypes",
+            "template": "andb_k"
+        }
+    ],
+    "notb_k": [
+        {
+            "instr_name": "not",
+            "datatypes": "all_datatypes",
+            "template": "notb_k"
+        }
+    ],
+    "testz": [
+        {
+            "instr_name": "ptest_any",
+            "datatypes": "all_datatypes",
+            "template": "testz"
+        }
+    ],
+    "add": [
+        {
+            "instr_name": "add",
+            "datatypes": "all_datatypes",
+            "template": "std_2_reg_in_no_msk_z"
+        }
+    ],
+    "maskz_add": [
+        {
+            "instr_name": "add",
+            "datatypes": "all_datatypes",
+            "template": "std_2_reg_in_msk_z"
+        }
+    ],
+    "sub": [
+        {
+            "instr_name": "sub",
+            "datatypes": "all_datatypes",
+            "template": "std_2_reg_in_no_msk_z"
+        }
+    ],
+    "mul": [
+        {
+            "instr_name": "mul",
+            "datatypes": "all_datatypes",
+            "template": "std_2_reg_in_no_msk_z"
+        }
+    ],
+    "div": [
+        {
+            "instr_name": "div",
+            "datatypes": "all_float",
+            "template": "std_2_reg_in_no_msk_z"
+        }
+    ],
+    "fmadd": [
+        {
+            "instr_name": "mla",
+            "datatypes": "all_float",
+            "template": "std_3_reg_in_no_msk_z"
+        }
+    ],
+    "cmpeq": [
+        {
+            "instr_name": "cmpeq",
+            "datatypes": "all_datatypes",
+            "template": "std_2_reg_in_no_msk"
+        }
+    ],
+    "cmpneq": [
+        {
+            "instr_name": "cmpne",
+            "datatypes": "all_datatypes",
+            "template": "std_2_reg_in_no_msk"
+        }
+    ],
+    "hadd_to_scal": [
+        {
+            "instr_name": "addv",
+            "datatypes": "all_datatypes",
+            "template": "reduce"
+        }
+    ]
+}

@@ -1,0 +1,225 @@
+{
+    "toreg": [
+        {
+            "datatypes": "all_datatypes",
+            "template": "toreg"
+        }
+    ],
+    "tomsk": [
+        {
+            "datatypes": "all_datatypes",
+            "template": "tomsk"
+        }
+    ],
+    "get": [
+        {
+            "datatypes": "all_datatypes",
+            "template": "get"
+        }
+    ],
+    "get_k": [
+        {
+            "datatypes": "all_datatypes",
+            "template": "get_k"
+        }
+    ],
+    "set1_k": [
+        {
+            "datatypes": "all_64bit",
+            "template": "set1_k-8"
+        },
+        {
+            "datatypes": "all_32bit",
+            "template": "set1_k-16"
+        },
+        {
+            "datatypes": "all_16bit",
+            "template": "set1_k-32"
+        },
+        {
+            "datatypes": "all_8bit",
+            "template": "set1_k-64"
+        }
+    ],
+    "set_k": [
+        {
+            "datatypes": "all_64bit",
+            "template": "set_k-64"
+        },
+        {
+            "datatypes": "all_32bit",
+            "template": "set_k-32"
+        },
+        {
+            "datatypes": "all_16bit",
+            "template": "set_k-16"
+        },
+        {
+            "datatypes": "all_8bit",
+            "template": "set_k-8"
+        }
+    ],
+    "andb_k": [
+        {
+            "datatypes": "all_64bit",
+            "template": "andb_k_emu",
+            "if": "!defined(__AVX512DQ__)"
+        },
+        {
+            "datatypes": [
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
+            ],
+            "template": "andb_k_emu",
+            "if": "!defined(__AVX512BW__)"
+        }
+    ],
+    "msb": [
+        {
+            "datatypes": [
+                "float64"
+            ],
+            "template": "msb-64",
+            "if": "defined(__AVX512DQ__)"
+        },
+        {
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "msb-64"
+        },
+        {
+            "datatypes": [
+                "float32"
+            ],
+            "template": "msb-32",
+            "if": "defined(__AVX512DQ__)"
+        },
+        {
+            "datatypes": [
+                "int32",
+                "uint32"
+            ],
+            "template": "msb-32"
+        },
+        {
+            "datatypes": "all_16bit",
+            "template": "msb-16",
+            "if": "defined(__AVX512BW__)"
+        },
+        {
+            "datatypes": "all_8bit",
+            "template": "msb-8",
+            "if": "defined(__AVX512BW__)"
+        }
+    ],
+    "notb": [
+        {
+            "datatypes": "all_float",
+            "template": "notb",
+            "if": "defined(__AVX512DQ__)"
+        },
+        {
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "notb"
+        },
+        {
+            "datatypes": [
+                "int32",
+                "uint32"
+            ],
+            "template": "notb"
+        },
+        {
+            "datatypes": "all_16bit",
+            "template": "notb",
+            "if": "defined(__AVX512BW__)"
+        },
+        {
+            "datatypes": "all_8bit",
+            "template": "notb",
+            "if": "defined(__AVX512BW__)"
+        }
+    ],
+    "maskz_add": [
+        {
+            "datatypes": "all_int",
+            "template": "maskz_add"
+        }
+    ],
+    "hadd_to_scal": [
+        {
+            "datatypes": [
+                "float64",
+                "int64"
+            ],
+            "template": "hadd_to_scal"
+        },
+        {
+            "datatypes": [
+                "float32",
+                "int32"
+            ],
+            "template": "hadd_to_scal"
+        },
+        {
+            "datatypes": "all_16bit",
+            "template": "hadd_to_scal"
+        },
+        {
+            "datatypes": "all_8bit",
+            "template": "hadd_to_scal"
+        }
+    ],
+    "exp": [
+        {
+            "datatypes": [
+                "float32"
+            ],
+            "template": "exp_f32"
+        },
+        {
+            "datatypes": [
+                "float64"
+            ],
+            "template": "exp_f64",
+            "if": "defined(__AVX512DQ__)"
+        }
+    ],
+    "log": [
+        {
+            "datatypes": [
+                "float32"
+            ],
+            "template": "log_f32"
+        },
+        {
+            "datatypes": [
+                "float64"
+            ],
+            "template": "log_f64",
+            "if": "defined(__AVX512DQ__)"
+        }
+    ],
+    "pow": [
+        {
+            "datatypes": [
+                "float32"
+            ],
+            "template": "pow"
+        },
+        {
+            "datatypes": [
+                "float64"
+            ],
+            "template": "pow",
+            "if": "defined(__AVX512DQ__)"
+        }
+    ]
+}

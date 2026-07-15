@@ -1,0 +1,380 @@
+{
+    "set": [
+        {
+            "datatypes": [
+                "float64"
+            ],
+            "template": "set-64f"
+        },
+        {
+            "datatypes": [
+                "float32"
+            ],
+            "template": "set-32f"
+        },
+        {
+            "datatypes": [
+                "int32",
+                "uint32"
+            ],
+            "template": "set-32"
+        },
+        {
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "set-64"
+        },
+        {
+            "datatypes": "all_16bit",
+            "template": "set-16"
+        },
+        {
+            "datatypes": "all_8bit",
+            "template": "set-8"
+        }
+    ],
+    "set_k": [
+        {
+            "datatypes": "all_8bit",
+            "template": "set_k-8"
+        },
+        {
+            "datatypes": "all_16bit",
+            "template": "set_k-16"
+        },
+        {
+            "datatypes": [
+                "int32",
+                "uint32"
+            ],
+            "template": "set_k-32"
+        },
+        {
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "set_k-64"
+        },
+        {
+            "datatypes": [
+                "float64"
+            ],
+            "template": "set_k-64f"
+        },
+        {
+            "datatypes": [
+                "float32"
+            ],
+            "template": "set_k-32f"
+        }
+    ],
+    "set1_k": [
+        {
+            "datatypes": "all_8bit",
+            "template": "set1_k-8"
+        },
+        {
+            "datatypes": "all_16bit",
+            "template": "set1_k-16"
+        },
+        {
+            "datatypes": "all_32bit",
+            "template": "set1_k-32"
+        },
+        {
+            "datatypes": "all_64bit",
+            "template": "set1_k-64"
+        }
+    ],
+    "blend": [
+        {
+            "datatypes": [
+                "int64",
+                "int32",
+                "uint64",
+                "uint32"
+            ],
+            "template": "blend-1"
+        },
+        {
+            "datatypes": [
+                "int16",
+                "int8",
+                "uint16",
+                "uint8"
+            ],
+            "template": "blend-2"
+        }
+    ],
+    "fmadd": [
+        {
+            "datatypes": "all_float",
+            "template": "fmadd"
+        }
+    ],
+    "fnmadd": [
+        {
+            "datatypes": "all_float",
+            "template": "fnmadd"
+        }
+    ],
+    "fmsub": [
+        {
+            "datatypes": "all_float",
+            "template": "fmsub"
+        }
+    ],
+    "fnmsub": [
+        {
+            "datatypes": "all_float",
+            "template": "fnmsub"
+        }
+    ],
+    "msb": [
+        {
+            "datatypes": "all_64bit",
+            "template": "msb-64"
+        },
+        {
+            "datatypes": "all_32bit",
+            "template": "msb-32"
+        },
+        {
+            "datatypes": "all_16bit",
+            "template": "msb-16"
+        },
+        {
+            "datatypes": "all_8bit",
+            "template": "msb-8"
+        }
+    ],
+    "notb": [
+        {
+            "datatypes": "all_64bit",
+            "template": "notb-64"
+        },
+        {
+            "datatypes": "all_32bit",
+            "template": "notb-32"
+        },
+        {
+            "datatypes": "all_16bit",
+            "template": "notb-16"
+        },
+        {
+            "datatypes": "all_8bit",
+            "template": "notb-8"
+        }
+    ],
+    "notb_k": [
+        {
+            "datatypes": "all_64bit",
+            "template": "notb_k-64"
+        },
+        {
+            "datatypes": "all_32bit",
+            "template": "notb_k-32"
+        },
+        {
+            "datatypes": "all_16bit",
+            "template": "notb_k-16"
+        },
+        {
+            "datatypes": "all_8bit",
+            "template": "notb_k-8"
+        }
+    ],
+    "cmpeq": [
+        {
+            "datatypes": [
+                "int64",
+                "int32",
+                "uint64",
+                "uint32"
+            ],
+            "template": "cmpeq-1"
+        },
+        {
+            "datatypes": [
+                "uint16",
+                "uint8"
+            ],
+            "template": "cmpeq-2"
+        }
+    ],
+    "cmpneq": [
+        {
+            "datatypes": "all_datatypes",
+            "template": "cmpneq"
+        }
+    ],
+    "testz_2": [
+        {
+            "datatypes": "all_datatypes",
+            "template": "testz_2"
+        }
+    ],
+    "get": [
+        {
+            "datatypes": "all_datatypes",
+            "template": "get"
+        }
+    ],
+    "get_k": [
+        {
+            "datatypes": "all_datatypes",
+            "template": "get_k"
+        }
+    ],
+    "getfirst": [
+        {
+            "datatypes": "all_datatypes",
+            "template": "getfirst"
+        }
+    ],
+    "maskz_add": [
+        {
+            "datatypes": "all_float",
+            "template": "maskz_add"
+        },
+        {
+            "datatypes": [
+                "int64",
+                "int32"
+            ],
+            "template": "maskz_add",
+            "if": "defined(__AVX2__)"
+        },
+        {
+            "datatypes": [
+                "int16",
+                "int8",
+                "uint16",
+                "uint8"
+            ],
+            "template": "maskz_add",
+            "if": "defined(__AVX2__)"
+        },
+        {
+            "datatypes": [
+                "uint64",
+                "uint32"
+            ],
+            "template": "maskz_add",
+            "if": "defined(__AVX2__)"
+        }
+    ],
+    "hadd_to_scal": [
+        {
+            "datatypes": "all_float",
+            "template": "hadd_to_scal"
+        },
+        {
+            "datatypes": [
+                "int64",
+                "int32"
+            ],
+            "template": "hadd_to_scal",
+            "if": "defined(__AVX2__)"
+        },
+        {
+            "datatypes": [
+                "int16",
+                "int8",
+                "uint16",
+                "uint8"
+            ],
+            "template": "hadd_to_scal",
+            "if": "defined(__AVX2__)"
+        },
+        {
+            "datatypes": [
+                "uint64",
+                "uint32"
+            ],
+            "template": "hadd_to_scal",
+            "if": "defined(__AVX2__)"
+        }
+    ],
+    "exp": [
+        {
+            "datatypes": [
+                "float32"
+            ],
+            "template": "exp_f32",
+            "if": "defined(__AVX2__)"
+        }
+    ],
+    "log": [
+        {
+            "datatypes": [
+                "float32"
+            ],
+            "template": "log_f32",
+            "if": "defined(__AVX2__)"
+        }
+    ],
+    "pow": [
+        {
+            "datatypes": [
+                "float32"
+            ],
+            "template": "pow_f32",
+            "if": "defined(__AVX2__)"
+        }
+    ],
+    "cmpgt": [
+        {
+            "datatypes": [
+                "uint64"
+            ],
+            "template": "cmpgt_u-64",
+            "if": "defined(__AVX2__)"
+        },
+        {
+            "datatypes": [
+                "uint32"
+            ],
+            "template": "cmpgt_u-32",
+            "if": "defined(__AVX2__)"
+        },
+        {
+            "datatypes": [
+                "uint16"
+            ],
+            "template": "cmpgt_u-16",
+            "if": "defined(__AVX2__)"
+        },
+        {
+            "datatypes": [
+                "uint8"
+            ],
+            "template": "cmpgt_u-8",
+            "if": "defined(__AVX2__)"
+        }
+    ],
+    "cmplt": [
+        {
+            "datatypes": "all_uint",
+            "template": "cmplt_u_emu",
+            "if": "defined(__AVX2__)"
+        }
+    ],
+    "cmple": [
+        {
+            "datatypes": "all_uint",
+            "template": "cmple_u_emu",
+            "if": "defined(__AVX2__)"
+        }
+    ],
+    "cmpge": [
+        {
+            "datatypes": "all_uint",
+            "template": "cmpge_u_emu",
+            "if": "defined(__AVX2__)"
+        }
+    ]
+}

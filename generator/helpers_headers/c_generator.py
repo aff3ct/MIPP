@@ -356,7 +356,8 @@ def _emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rendering, f
         if funcs[f]["proto"]["args"] or (not funcs[f]["proto"]["args"]):
             _emit_short_format_prologue(funcs[f], dt_ret, isa, file,lmul=lmul)
     else:
-        print("\t", end='', file=file)
+        if not post_rendering.startswith("\t"):
+            print("\t", end='', file=file)
 
     print(post_rendering, file=file)
 

@@ -1,0 +1,467 @@
+{
+    "cast": {
+        "format": "short",
+        "code": "{% if isa_dt_par.data_ext_logi != isa_dt_ret.data_ext_logi -%}{{ isa.prefix }}_{{ instr_name }}{{isa_dt_par.data_ext_logi}}_{{isa_dt_ret.data_ext_logi}}(r0.r);{% else -%} r0.r;{% endif %}"
+    },
+    "cast_k": {
+        "format": "short",
+        "code": "{% if isa_dt_par.msk != isa_dt_ret.msk -%}({{ isa_dt_ret.msk }})m0.m;{% else -%}m0.m;{% endif %}"
+    },
+    "load": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(({{ isa_dt_par.to_ptr }}*) p0);"
+    },
+    "load_msks": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext_var }}(rsrc.r, m0.m, ({{ isa_dt_par.to_ptr }}*) p0);"
+    },
+    "store": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(({{ isa_dt_par.to_ptr }}*) p0, r0.r);"
+    },
+    "store_msk": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext_var }}(({{ isa_dt_par.to_ptr }}*) p0, m0.m, r0.r);"
+    },
+    "set0": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}();"
+    },
+    "set0_k": {
+        "format": "long",
+        "code": [
+            "\t%m<tp>% m;",
+            "\tm.m = 0;",
+            "\treturn m;"
+        ]
+    },
+    "set1": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(v0);"
+    },
+    "arith_1arg": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r);"
+    },
+    "arith_2args": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r);"
+    },
+    "arithmsk_2args": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(m0.m, r0.r, r1.r);"
+    },
+    "logi_2args": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(r0.r, r1.r);"
+    },
+    "logi_m_2args": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_{{ instr_name }}(m0.m, m1.m);"
+    },
+    "arith_3args": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, r2.r);"
+    },
+    "lshift": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, r2.r);"
+    },
+    "cmp_int": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(r0.r, r1.r);"
+    },
+    "cmpeq_float": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(r0.r, r1.r, _CMP_EQ_OQ);"
+    },
+    "cmpneq_float": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(r0.r, r1.r, _CMP_NEQ_OQ);"
+    },
+    "cmplt_float": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(r0.r, r1.r, _CMP_LT_OS);"
+    },
+    "cmple_float": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(r0.r, r1.r, _CMP_LE_OS);"
+    },
+    "cmpgt_float": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(r0.r, r1.r, _CMP_GT_OS);"
+    },
+    "cmpge_float": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(r0.r, r1.r, _CMP_GE_OS);"
+    },
+    "blend": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext }}(m0.m, r1.r, r0.r);"
+    },
+    "round": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, _MM_FROUND_TO_NEAREST_INT);"
+    },
+    "roundf": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC, _MM_EXPADJ_NONE);"
+    },
+    "bitwise_1arg": {
+        "format": "short",
+        "code": "_{{ instr_name }}_{{ isa_dt_par.msk_short }}(m0.m);"
+    },
+    "bitwise_2args": {
+        "format": "short",
+        "code": "_{{ instr_name }}_{{ isa_dt_par.msk_short }}(m0.m, m1.m);"
+    },
+    "testz_1arg": {
+        "format": "long",
+        "code": "return (int32_t)_{{ instr_name }}_{{ isa_dt_par.msk_short }}_u8(m0.m, m0.m);"
+    },
+    "testz_2args": {
+        "format": "long",
+        "code": "return (int32_t)_{{ instr_name }}_{{ isa_dt_par.msk_short }}_u8(m0.m, m1.m);"
+    },
+    "gather": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, p0, {{dt_par.n_bits//8}});"
+    },
+    "gather_masks_64": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(rsrc.r,m0.m, r0.r, p0,8);"
+    },
+    "gather_masks_32": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(rsrc.r,m0.m, r0.r, p0,4);"
+    },
+    "gather_maskz_64": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(%set0<tp>%().r,m0.m, r0.r, p0,8);"
+    },
+    "gather_maskz_32": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(%set0<tp>%().r,m0.m, r0.r, p0,4);"
+    },
+    "scatter": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(p0,r0.r, r1.r, {{dt_par.n_bits//8}});"
+    },
+    "scatter_mask_64": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(p0, m0.m, r0.r, r1.r, 8);"
+    },
+    "scatter_mask_32": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(p0, m0.m, r0.r, r1.r, 4);"
+    },
+    "scatter_maskz": {
+        "format": "long",
+        "code": [
+            "\t%r<tp>% zeroes;",
+            "\tzeroes = %set0<tp>%();",
+            "\t%r<tp>% blended;",
+            "\tblended.r = {{ isa.prefix }}_mask_blend_{{ isa_dt_par.data_ext }}(m0.m, zeroes.r, r1.r);",
+            "\t{{ isa.prefix }}_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(p0,r0.r, blended.r, {{dt_par.n_bits//8}});"
+        ]
+    },
+    "arith_2args_u": {
+        "format": "long",
+        "code": [
+            "\t%r<c:int|b:tp>% r0s = %cast<tp,c:int|b:tp>%(r0);",
+            "\t%r<c:int|b:tp>% r1s = %cast<tp,c:int|b:tp>%(r1);",
+            "\t%r<c:int|b:tp>% res = %{{instr_name}}<c:int|b:tp>%(r0s, r1s);",
+            "\treturn %cast<c:int|b:tp,tp>%(res);"
+        ]
+    },
+    "set-64": {
+        "format": "long",
+        "code": [
+            "\t%r<tp>% res;",
+            "\tres.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(vals[7], vals[6], vals[5], vals[4], vals[3], vals[2], vals[1], vals[0]);",
+            "\treturn res;"
+        ]
+    },
+    "set-32": {
+        "format": "long",
+        "code": [
+            "\t%r<tp>% res;",
+            "\tres.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(",
+            "\t\tvals[15], vals[14], vals[13], vals[12],vals[11], vals[10], vals[ 9], vals[ 8],",
+            "\t\tvals[ 7], vals[ 6], vals[ 5], vals[ 4],vals[ 3], vals[ 2], vals[ 1], vals[ 0]);",
+            "\treturn res;"
+        ]
+    },
+    "set-16": {
+        "format": "long",
+        "code": [
+            "\t%r<tp>% res;",
+            "\tres.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(",
+            "\t\tvals[31], vals[30], vals[29], vals[28],",
+            "\t\tvals[27], vals[26], vals[25], vals[24],",
+            "\t\tvals[23], vals[22], vals[21], vals[20],",
+            "\t\tvals[19], vals[18], vals[17], vals[16],",
+            "\t\tvals[15], vals[14], vals[13], vals[12],",
+            "\t\tvals[11], vals[10], vals[ 9], vals[ 8],",
+            "\t\tvals[ 7], vals[ 6], vals[ 5], vals[ 4],",
+            "\t\tvals[ 3], vals[ 2], vals[ 1], vals[ 0]);",
+            "\treturn res;"
+        ]
+    },
+    "set-8": {
+        "format": "long",
+        "code": [
+            "\t%r<tp>% res;",
+            "\tres.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(",
+            "\t\tvals[63], vals[62], vals[61], vals[60],",
+            "\t\tvals[59], vals[58], vals[57], vals[56],",
+            "\t\tvals[55], vals[54], vals[53], vals[52],",
+            "\t\tvals[51], vals[50], vals[49], vals[48],",
+            "\t\tvals[47], vals[46], vals[45], vals[44],",
+            "\t\tvals[43], vals[42], vals[41], vals[40],",
+            "\t\tvals[39], vals[38], vals[37], vals[36],",
+            "\t\tvals[35], vals[34], vals[33], vals[32],",
+            "\t\tvals[31], vals[30], vals[29], vals[28],",
+            "\t\tvals[27], vals[26], vals[25], vals[24],",
+            "\t\tvals[23], vals[22], vals[21], vals[20],",
+            "\t\tvals[19], vals[18], vals[17], vals[16],",
+            "\t\tvals[15], vals[14], vals[13], vals[12],",
+            "\t\tvals[11], vals[10], vals[ 9], vals[ 8],",
+            "\t\tvals[ 7], vals[ 6], vals[ 5], vals[ 4],",
+            "\t\tvals[ 3], vals[ 2], vals[ 1], vals[ 0]);",
+            "\treturn res;"
+        ]
+    },
+    "getfirst": {
+        "format": "long",
+        "code": [
+            "\treturn {{ isa.prefix }}_{{ instr_name }}(r0.r);"
+        ]
+    },
+    "getfirst-hack64": {
+        "format": "long",
+        "code": [
+            "\tfloat64_t tmp1 = {{ isa.prefix }}_{{ instr_name }}(%cast<tp,c:float>%(r0).r);",
+            "\tvoid* tmp2 = (void*)(&tmp1);",
+            "\treturn *({{isa_dt_ret.to_ptr}}*)tmp2;"
+        ]
+    },
+    "getfirst-hack32": {
+        "format": "long",
+        "code": [
+            "\tfloat32_t tmp1 = {{ isa.prefix }}_{{ instr_name }}(%cast<tp,c:float>%(r0).r);",
+            "\tvoid* tmp2 = (void*)(&tmp1);",
+            "\treturn *({{isa_dt_ret.to_ptr}}*)tmp2;"
+        ]
+    },
+    "reduce_64": {
+        "format": "long",
+        "code": [
+            "\t%r<c:float|b:32>% rsf;",
+            "\t%r<c:int|b:32>% rsi32;",
+            "",
+            "\trsf.r = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8), %cast<tp,c:float|b:32>%(r0).r);",
+            "\t%r<tp>% rs1 = %cast<c:float|b:32,tp>%(rsf);",
+            "\trs1.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, rs1.r);",
+            "",
+            "\trsf.r = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4), %cast<tp,c:float|b:32>%(rs1).r);",
+            "\t%r<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);",
+            "\trs2.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs1.r, rs2.r);",
+            "",
+            "#ifdef __cplusplus",
+            "\trsi32.r = _mm512_shuffle_epi32(%cast<tp,c:int|b:32>%(rs2).r, _MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));",
+            "#else",
+            "\trsi32.r = _mm512_shuffle_epi32(%cast<tp,c:int|b:32>%(rs2).r, _MM_SHUFFLE(1,0,3,2));",
+            "#endif",
+            "\t%r<tp>% rs3 = %cast<c:int|b:32,tp>%(rsi32);",
+            "\trs3.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs2.r, rs3.r);",
+            "",
+            "\treturn %getfirst<tp>%(rs3);"
+        ]
+    },
+    "reduce_32": {
+        "format": "long",
+        "code": [
+            "\t%r<c:float|b:32>% rsf;",
+            "\t%r<c:int|b:32>% rsi32;",
+            "",
+            "\trsf.r = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8), %cast<tp,c:float|b:32>%(r0).r);",
+            "\t%r<tp>% rs1 = %cast<c:float|b:32,tp>%(rsf);",
+            "\trs1.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, rs1.r);",
+            "",
+            "\trsf.r = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4), %cast<tp,c:float|b:32>%(rs1).r);",
+            "\t%r<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);",
+            "\trs2.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs1.r, rs2.r);",
+            "",
+            "#ifdef __cplusplus",
+            "\trsi32.r = _mm512_shuffle_epi32(%cast<tp,c:int|b:32>%(rs2).r, _MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));",
+            "#else",
+            "\trsi32.r = _mm512_shuffle_epi32(%cast<tp,c:int|b:32>%(rs2).r, _MM_SHUFFLE(1,0,3,2));",
+            "#endif",
+            "\t%r<tp>% rs3 = %cast<c:int|b:32,tp>%(rsi32);",
+            "\trs3.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs2.r, rs3.r);",
+            "",
+            "#ifdef __cplusplus",
+            "\trsi32.r = _mm512_shuffle_epi32(%cast<tp,c:int|b:32>%(rs3).r, _MM_PERM_ENUM(_MM_SHUFFLE(2,3,0,1)));",
+            "#else",
+            "\trsi32.r = _mm512_shuffle_epi32(%cast<tp,c:int|b:32>%(rs3).r, _MM_SHUFFLE(2,3,0,1));",
+            "#endif",
+            "\t%r<tp>% rs4 = %cast<c:int|b:32,tp>%(rsi32);",
+            "\trs4.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs3.r, rs4.r);",
+            "",
+            "\treturn %getfirst<tp>%(rs4);"
+        ]
+    },
+    "reduce_16": {
+        "format": "long",
+        "code": [
+            "\t%r<c:float|b:32>% rsf;",
+            "\t%r<c:int|b:32>% rsi32;",
+            "\t%r<c:int|b:8>% rsi8;",
+            "",
+            "\trsf.r = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8), %cast<tp,c:float|b:32>%(r0).r);",
+            "\t%r<tp>% rs1 = %cast<c:float|b:32,tp>%(rsf);",
+            "\trs1.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, rs1.r);",
+            "",
+            "\trsf.r = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4), %cast<tp,c:float|b:32>%(rs1).r);",
+            "\t%r<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);",
+            "\trs2.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs1.r, rs2.r);",
+            "",
+            "#ifdef __cplusplus",
+            "\trsi32.r = _mm512_shuffle_epi32(%cast<tp,c:int|b:32>%(rs2).r, _MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));",
+            "#else",
+            "\trsi32.r = _mm512_shuffle_epi32(%cast<tp,c:int|b:32>%(rs2).r, _MM_SHUFFLE(1,0,3,2));",
+            "#endif",
+            "\t%r<tp>% rs3 = %cast<c:int|b:32,tp>%(rsi32);",
+            "\trs3.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs2.r, rs3.r);",
+            "",
+            "#ifdef __cplusplus",
+            "\trsi32.r = _mm512_shuffle_epi32(%cast<tp,c:int|b:32>%(rs3).r, _MM_PERM_ENUM(_MM_SHUFFLE(2,3,0,1)));",
+            "#else",
+            "\trsi32.r = _mm512_shuffle_epi32(%cast<tp,c:int|b:32>%(rs3).r, _MM_SHUFFLE(2,3,0,1));",
+            "#endif",
+            "\t%r<tp>% rs4 = %cast<c:int|b:32,tp>%(rsi32);",
+            "\trs4.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs3.r, rs4.r);",
+            "",
+            "\t__m512i mask_16 = _mm512_set_epi8(61,60,63,62,57,56,59,58,53,52,55,54,49,48,51,50,",
+            "\t                                  45,44,47,46,41,40,43,42,37,36,39,38,33,32,35,34,",
+            "\t                                  29,28,31,30,25,24,27,26,21,20,23,22,17,16,19,18,",
+            "\t                                  13,12,15,14, 9, 8,11,10, 5, 4, 7, 6, 1, 0, 3, 2);",
+            "\trsi8.r = _mm512_shuffle_epi8(%cast<tp,c:int|b:8>%(rs4).r, mask_16);",
+            "\t%r<tp>% rs5 = %cast<c:int|b:8,tp>%(rsi8);",
+            "\trs5.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs4.r, rs5.r);",
+            "",
+            "\treturn %getfirst<tp>%(rs5);"
+        ]
+    },
+    "reduce_8": {
+        "format": "long",
+        "code": [
+            "\t%r<c:float|b:32>% rsf;",
+            "\t%r<c:int|b:32>% rsi32;",
+            "\t%r<c:int|b:8>% rsi8;",
+            "",
+            "\trsf.r = _mm512_permutexvar_ps(_mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10,9,8), %cast<tp,c:float|b:32>%(r0).r);",
+            "\t%r<tp>% rs1 = %cast<c:float|b:32,tp>%(rsf);",
+            "\trs1.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, rs1.r);",
+            "",
+            "\trsf.r = _mm512_permutexvar_ps(_mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6,5,4), %cast<tp,c:float|b:32>%(rs1).r);",
+            "\t%r<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);",
+            "\trs2.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs1.r, rs2.r);",
+            "",
+            "#ifdef __cplusplus",
+            "\trsi32.r = _mm512_shuffle_epi32(%cast<tp,c:int|b:32>%(rs2).r, _MM_PERM_ENUM(_MM_SHUFFLE(1,0,3,2)));",
+            "#else",
+            "\trsi32.r = _mm512_shuffle_epi32(%cast<tp,c:int|b:32>%(rs2).r, _MM_SHUFFLE(1,0,3,2));",
+            "#endif",
+            "\t%r<tp>% rs3 = %cast<c:int|b:32,tp>%(rsi32);",
+            "\trs3.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs2.r, rs3.r);",
+            "",
+            "#ifdef __cplusplus",
+            "\trsi32.r = _mm512_shuffle_epi32(%cast<tp,c:int|b:32>%(rs3).r, _MM_PERM_ENUM(_MM_SHUFFLE(2,3,0,1)));",
+            "#else",
+            "\trsi32.r = _mm512_shuffle_epi32(%cast<tp,c:int|b:32>%(rs3).r, _MM_SHUFFLE(2,3,0,1));",
+            "#endif",
+            "\t%r<tp>% rs4 = %cast<c:int|b:32,tp>%(rsi32);",
+            "\trs4.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs3.r, rs4.r);",
+            "",
+            "\t__m512i mask_16 = _mm512_set_epi8(61,60,63,62,57,56,59,58,53,52,55,54,49,48,51,50,",
+            "\t                                  45,44,47,46,41,40,43,42,37,36,39,38,33,32,35,34,",
+            "\t                                  29,28,31,30,25,24,27,26,21,20,23,22,17,16,19,18,",
+            "\t                                  13,12,15,14, 9, 8,11,10, 5, 4, 7, 6, 1, 0, 3, 2);",
+            "\trsi8.r = _mm512_shuffle_epi8(%cast<tp,c:int|b:8>%(rs4).r, mask_16);",
+            "\t%r<tp>% rs5 = %cast<c:int|b:8,tp>%(rsi8);",
+            "\trs5.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs4.r, rs5.r);",
+            "",
+            "\t__m512i mask_8  = _mm512_set_epi8(62,63,60,61,58,59,56,57,54,55,52,53,50,51,48,49,",
+            "\t                                  46,47,44,45,42,43,40,41,38,39,36,37,34,35,32,33,",
+            "\t                                  30,31,28,29,26,27,24,25,22,23,20,21,18,19,16,17,",
+            "\t                                  14,15,12,13,10,11, 8, 9, 6, 7, 4, 5, 2, 3, 0, 1);",
+            "\trsi8.r = _mm512_shuffle_epi8(%cast<tp,c:int|b:8>%(rs5).r, mask_8);",
+            "\t%r<tp>% rs6 = %cast<c:int|b:8,tp>%(rsi8);",
+            "\trs6.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs5.r, rs6.r);",
+            "",
+            "\treturn %getfirst<tp>%(rs6);"
+        ]
+    },
+    "arith_2args_msk": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, m0.m, r0.r, r1.r);"
+    },
+    "andb_emu": {
+        "format": "long",
+        "code": [
+            "\t%r<c:int|b:tp>% tmp0, tmp1;",
+            "\ttmp0 = %cast<tp,c:int|b:tp>%(r0);",
+            "\ttmp1 = %cast<tp,c:int|b:tp>%(r1);",
+            "\ttmp0 = %andb<c:int|b:tp>%(tmp0, tmp1);",
+            "\treturn %cast<c:int|b:tp,tp>%(tmp0);"
+        ]
+    },
+    "orb_emu": {
+        "format": "long",
+        "code": [
+            "\t%r<c:int|b:tp>% tmp0, tmp1;",
+            "\ttmp0 = %cast<tp,c:int|b:tp>%(r0);",
+            "\ttmp1 = %cast<tp,c:int|b:tp>%(r1);",
+            "\ttmp0 = %orb<c:int|b:tp>%(tmp0, tmp1);",
+            "\treturn %cast<c:int|b:tp,tp>%(tmp0);"
+        ]
+    },
+    "blend_emu": {
+        "format": "long",
+        "code": [
+            "\t%r<c:int|b:tp>% tmp0, tmp1;",
+            "\ttmp0 = %cast<tp,c:int|b:tp>%(r0);",
+            "\ttmp1 = %cast<tp,c:int|b:tp>%(r1);",
+            "\t%m<c:int|b:tp>% mtmp = %cast_k<tp,c:int|b:tp>%(m0);",
+            "\ttmp0 = %blend<c:int|b:tp>%(tmp0, tmp1, mtmp);",
+            "\treturn %cast<c:int|b:tp,tp>%(tmp0);"
+        ]
+    },
+    "set1_emu": {
+        "format": "long",
+        "code": [
+            "\t%r<c:int|b:tp>% tmp0;",
+            "\ttmp0 = %set1<c:int|b:tp>%( (%v<c:int|b:tp>%)v0);",
+            "\treturn %cast<c:int|b:tp,tp>%(tmp0);"
+        ]
+    },
+    "getfirst-fromstore": {
+        "format": "long",
+        "code": [
+            "\t%v<tp>% tmp[%N<tp>%];",
+            "\t%store<tp>%(tmp, r0);",
+            "\treturn tmp[0];"
+        ]
+    },
+    "wcvt_int_uint": {
+        "format": "long",
+        "code": [
+            "\t// cast to si128 from si256 and then cvt",
+            "\t%r<tr>% res;",
+            "\tres.r = {{ isa.prefix }}_{{ instr_name }}{{ isa_dt_par.data_ext }}_{{ isa_dt_ret.data_ext_var }}({{ isa.prefix }}_cast{{ isa_dt_par.data_ext_logi }}_si256(r0.r));",
+            "\treturn res;"
+        ]
+    }
+}

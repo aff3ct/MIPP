@@ -1,0 +1,603 @@
+{
+    "cast": [
+        {
+            "instr_name": "cast",
+            "datatypes": "all_datatypes_cart_prod",
+            "template": "cast"
+        }
+    ],
+    "cast_k": [
+        {
+            "instr_name": "cast",
+            "datatypes": "all_datatypes_cart_prod",
+            "template": "cast_k"
+        }
+    ],
+    "toreg": [
+        {
+            "instr_name": "cast",
+            "datatypes": "all_datatypes",
+            "template": "cast_k"
+        }
+    ],
+    "tomsk": [
+        {
+            "instr_name": "cast",
+            "datatypes": "all_datatypes",
+            "template": "cast"
+        }
+    ],
+    "load": [
+        {
+            "instr_name": "load",
+            "datatypes": [
+                "int64",
+                "int32",
+                "int16",
+                "int8",
+                "float32"
+            ],
+            "template": "load",
+            "if": "defined(MIPP_ALIGNED_LOADS)"
+        },
+        {
+            "instr_name": "load",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "load",
+            "if": "defined(MIPP_ALIGNED_LOADS) && defined(__SSE2__)"
+        },
+        {
+            "instr_name": "loadu",
+            "datatypes": "all_datatypes",
+            "template": "load",
+            "if": "!defined(MIPP_ALIGNED_LOADS)"
+        }
+    ],
+    "loadu": [
+        {
+            "instr_name": "loadu",
+            "datatypes": "all_datatypes",
+            "template": "load"
+        }
+    ],
+    "store": [
+        {
+            "instr_name": "store",
+            "datatypes": "all_datatypes",
+            "template": "store",
+            "if": "defined(MIPP_ALIGNED_LOADS)"
+        },
+        {
+            "instr_name": "storeu",
+            "datatypes": "all_datatypes",
+            "template": "store",
+            "if": "!defined(MIPP_ALIGNED_LOADS)"
+        }
+    ],
+    "storeu": [
+        {
+            "instr_name": "storeu",
+            "datatypes": "all_datatypes",
+            "template": "store"
+        }
+    ],
+    "set1": [
+        {
+            "instr_name": "set1",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "set1"
+        },
+        {
+            "instr_name": "set1",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "set1",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "set1",
+            "datatypes": [
+                "int8",
+                "int16",
+                "int32"
+            ],
+            "template": "set1",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "set1",
+            "datatypes": [
+                "int64"
+            ],
+            "template": "set1x",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "set1",
+            "datatypes": "all_uint",
+            "template": "set1_u",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "set0": [
+        {
+            "instr_name": "setzero",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "set0",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "setzero",
+            "datatypes": "all_int",
+            "template": "set0_si128"
+        }
+    ],
+    "set0_k": [
+        {
+            "instr_name": "setzero",
+            "datatypes": "all_datatypes",
+            "template": "set0_k"
+        }
+    ],
+    "set": [
+        {
+            "datatypes": [
+                "float64"
+            ],
+            "template": "set-64f",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "datatypes": [
+                "float32"
+            ],
+            "template": "set-32f"
+        },
+        {
+            "datatypes": [
+                "int32",
+                "uint32"
+            ],
+            "template": "set-32",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "set-64",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "datatypes": "all_16bit",
+            "template": "set-16",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "datatypes": "all_8bit",
+            "template": "set-8",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "add": [
+        {
+            "instr_name": "add",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "arith_2args"
+        },
+        {
+            "instr_name": "add",
+            "datatypes": [
+                "int64",
+                "int32",
+                "int16",
+                "int8",
+                "float64"
+            ],
+            "template": "arith_2args",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "add",
+            "datatypes": "all_uint",
+            "template": "arith_2args_u",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "sub": [
+        {
+            "instr_name": "sub",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "arith_2args"
+        },
+        {
+            "instr_name": "sub",
+            "datatypes": [
+                "int64",
+                "int32",
+                "int16",
+                "int8",
+                "float64"
+            ],
+            "template": "arith_2args",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "sub",
+            "datatypes": "all_uint",
+            "template": "arith_2args_u",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "mul": [
+        {
+            "instr_name": "mul",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "arith_2args"
+        },
+        {
+            "instr_name": "mul",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "arith_2args",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "mullo",
+            "datatypes": [
+                "int16"
+            ],
+            "template": "arith_2args",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "mullo",
+            "datatypes": [
+                "int32"
+            ],
+            "template": "arith_2args",
+            "if": "defined(__SSE4_1__)"
+        }
+    ],
+    "div": [
+        {
+            "instr_name": "div",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "arith_2args"
+        },
+        {
+            "instr_name": "div",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "arith_2args",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "andb": [
+        {
+            "instr_name": "and",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "logi_2args"
+        },
+        {
+            "instr_name": "and",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "logi_2args",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "and",
+            "datatypes": "all_int_uint",
+            "template": "logi_2args_si128",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "andb_k": [
+        {
+            "instr_name": "and",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "logi_m_2args"
+        },
+        {
+            "instr_name": "and",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "logi_m_2args",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "and",
+            "datatypes": "all_int_uint",
+            "template": "logi_m_2args_si128",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "andnb": [
+        {
+            "instr_name": "andnot",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "logi_2args"
+        },
+        {
+            "instr_name": "andnot",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "logi_2args",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "andnot",
+            "datatypes": "all_int_uint",
+            "template": "logi_2args_si128",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "andnb_k": [
+        {
+            "instr_name": "andnot",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "logi_m_2args"
+        },
+        {
+            "instr_name": "andnot",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "logi_m_2args",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "andnot",
+            "datatypes": "all_int_uint",
+            "template": "logi_m_2args_si128",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "orb": [
+        {
+            "instr_name": "or",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "logi_2args"
+        },
+        {
+            "instr_name": "or",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "logi_2args",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "or",
+            "datatypes": "all_int_uint",
+            "template": "logi_2args_si128",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "orb_k": [
+        {
+            "instr_name": "or",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "logi_m_2args"
+        },
+        {
+            "instr_name": "or",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "logi_m_2args",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "or",
+            "datatypes": "all_int_uint",
+            "template": "logi_m_2args_si128",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "xorb": [
+        {
+            "instr_name": "xor",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "logi_2args"
+        },
+        {
+            "instr_name": "xor",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "logi_2args",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "xor",
+            "datatypes": "all_int_uint",
+            "template": "logi_2args_si128",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "xorb_k": [
+        {
+            "instr_name": "xor",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "logi_m_2args"
+        },
+        {
+            "instr_name": "xor",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "logi_m_2args",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "xor",
+            "datatypes": "all_int_uint",
+            "template": "logi_m_2args_si128",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "cmpeq": [
+        {
+            "instr_name": "cmpeq",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "arith_2args"
+        },
+        {
+            "instr_name": "cmpeq",
+            "datatypes": [
+                "float64",
+                "int16",
+                "int32",
+                "int8"
+            ],
+            "template": "arith_2args",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "cmpeq",
+            "datatypes": [
+                "int64"
+            ],
+            "template": "arith_2args",
+            "if": "defined(__SSE4_1__)"
+        }
+    ],
+    "cmpneq": [
+        {
+            "instr_name": "cmpneq",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "arith_2args"
+        }
+    ],
+    "cmplt": [
+        {
+            "instr_name": "cmplt",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "arith_2args"
+        },
+        {
+            "instr_name": "cmplt",
+            "datatypes": [
+                "int16",
+                "int32",
+                "float64"
+            ],
+            "template": "arith_2args",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "cmpgt": [
+        {
+            "instr_name": "cmpgt",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "arith_2args"
+        },
+        {
+            "instr_name": "cmpgt",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "arith_2args",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "cmpgt",
+            "datatypes": [
+                "int64"
+            ],
+            "template": "arith_2args",
+            "if": "defined(__SSE4_2__)"
+        },
+        {
+            "instr_name": "cmpgt",
+            "datatypes": [
+                "int32",
+                "int16",
+                "int8"
+            ],
+            "template": "arith_2args",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "cmple": [
+        {
+            "instr_name": "cmple",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "arith_2args"
+        },
+        {
+            "instr_name": "cmple",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "arith_2args",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "cmpge": [
+        {
+            "instr_name": "cmpge",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "arith_2args"
+        },
+        {
+            "instr_name": "cmpge",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "arith_2args",
+            "if": "defined(__SSE2__)"
+        }
+    ]
+}

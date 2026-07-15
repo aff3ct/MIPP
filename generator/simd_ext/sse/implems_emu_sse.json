@@ -1,0 +1,301 @@
+{
+    "toreg": [
+        {
+            "datatypes": "all_datatypes",
+            "template": "toreg"
+        }
+    ],
+    "tomsk": [
+        {
+            "datatypes": "all_datatypes",
+            "template": "tomsk"
+        }
+    ],
+    "get": [
+        {
+            "datatypes": "all_datatypes",
+            "template": "get"
+        }
+    ],
+    "get_k": [
+        {
+            "datatypes": "all_datatypes",
+            "template": "get_k"
+        }
+    ],
+    "set1_k": [
+        {
+            "datatypes": "all_8bit",
+            "template": "set1_k-8"
+        },
+        {
+            "datatypes": "all_16bit",
+            "template": "set1_k-16"
+        },
+        {
+            "datatypes": "all_32bit",
+            "template": "set1_k-32"
+        },
+        {
+            "datatypes": "all_64bit",
+            "template": "set1_k-64"
+        }
+    ],
+    "set_k": [
+        {
+            "datatypes": "all_8bit",
+            "template": "set_k-8",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "datatypes": "all_16bit",
+            "template": "set_k-16",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "datatypes": [
+                "int32",
+                "uint32"
+            ],
+            "template": "set_k-32",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "set_k-64",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "datatypes": [
+                "float64"
+            ],
+            "template": "set_k-xxf",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "datatypes": [
+                "float32"
+            ],
+            "template": "set_k-xxf",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "andb_k": [
+        {
+            "datatypes": "all_datatypes",
+            "template": "andb_k_emu",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "fmadd": [
+        {
+            "datatypes": "all_float",
+            "template": "fmadd"
+        }
+    ],
+    "notb": [
+        {
+            "datatypes": "all_64bit",
+            "template": "notb-64",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "datatypes": "all_32bit",
+            "template": "notb-32",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "datatypes": "all_16bit",
+            "template": "notb-16",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "datatypes": "all_8bit",
+            "template": "notb-8",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "notb_k": [
+        {
+            "datatypes": "all_64bit",
+            "template": "notb_k-64",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "datatypes": "all_32bit",
+            "template": "notb_k-32",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "datatypes": "all_16bit",
+            "template": "notb_k-16",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "datatypes": "all_8bit",
+            "template": "notb_k-8",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "orb_k": [
+        {
+            "datatypes": "all_datatypes",
+            "template": "orb_k_emu",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "xorb_k": [
+        {
+            "datatypes": "all_datatypes",
+            "template": "xorb_k_emu",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "andnb_k": [
+        {
+            "datatypes": "all_datatypes",
+            "template": "andnb_k_emu",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "cmpeq": [
+        {
+            "datatypes": [
+                "uint8",
+                "uint16",
+                "uint32"
+            ],
+            "template": "cmpeq_u",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "datatypes": [
+                "uint64"
+            ],
+            "template": "cmpeq_u",
+            "if": "defined(__SSE4_1__)"
+        }
+    ],
+    "cmpneq": [
+        {
+            "datatypes": [
+                "float64"
+            ],
+            "template": "cmpneq",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "datatypes": [
+                "int8",
+                "int16",
+                "int32"
+            ],
+            "template": "cmpneq",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "datatypes": [
+                "uint8",
+                "uint16",
+                "uint32"
+            ],
+            "template": "cmpneq",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "cmpneq",
+            "if": "defined(__SSE4_1__)"
+        }
+    ],
+    "cmpgt": [
+        {
+            "datatypes": [
+                "uint64"
+            ],
+            "template": "cmpgt_u-64",
+            "if": "defined(__SSE4_2__)"
+        },
+        {
+            "datatypes": [
+                "uint32"
+            ],
+            "template": "cmpgt_u-32",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "datatypes": [
+                "uint16"
+            ],
+            "template": "cmpgt_u-16",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "datatypes": [
+                "uint8"
+            ],
+            "template": "cmpgt_u-8",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "cmplt": [
+        {
+            "datatypes": [
+                "uint64"
+            ],
+            "template": "cmplt_u_emu",
+            "if": "defined(__SSE4_2__)"
+        },
+        {
+            "datatypes": [
+                "uint32",
+                "uint16",
+                "uint8"
+            ],
+            "template": "cmplt_u_emu",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "cmple": [
+        {
+            "datatypes": [
+                "uint64"
+            ],
+            "template": "cmple_u_emu",
+            "if": "defined(__SSE4_2__)"
+        },
+        {
+            "datatypes": [
+                "uint32",
+                "uint16",
+                "uint8"
+            ],
+            "template": "cmple_u_emu",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "cmpge": [
+        {
+            "datatypes": [
+                "uint64"
+            ],
+            "template": "cmpge_u_emu",
+            "if": "defined(__SSE4_2__)"
+        },
+        {
+            "datatypes": [
+                "uint32",
+                "uint16",
+                "uint8"
+            ],
+            "template": "cmpge_u_emu",
+            "if": "defined(__SSE2__)"
+        }
+    ]
+}

@@ -1,0 +1,514 @@
+{
+    "loadu": [
+        {
+            "instr_name": "loadu",
+            "datatypes": "all_datatypes",
+            "template": "loadu"
+        }
+    ],
+    "storeu": [
+        {
+            "instr_name": "storeu",
+            "datatypes": "all_datatypes",
+            "template": "storeu"
+        }
+    ],
+    "get": [
+        {
+            "instr_name": "vmv",
+            "datatypes": "all_int_uint",
+            "template": "scalar_get"
+        },
+        {
+            "instr_name": "vfmv",
+            "datatypes": "all_float",
+            "template": "float_get"
+        }
+    ],
+    "set": [
+        {
+            "instr_name": "loadu",
+            "datatypes": "all_datatypes",
+            "template": "set"
+        }
+    ],
+    "set_k": [
+        {
+            "instr_name": "set_k",
+            "datatypes": "all_datatypes",
+            "template": "set_k"
+        }
+    ],
+    "set1_k": [
+        {
+            "instr_name": "set1_k",
+            "datatypes": "all_datatypes",
+            "template": "set1_k"
+        }
+    ],
+    "andnb": [
+        {
+            "instr_name": "",
+            "datatypes": "all_int_uint",
+            "template": "scalar_andnb"
+        },
+        {
+            "instr_name": "",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "float32_andnb"
+        },
+        {
+            "instr_name": "",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "float64_andnb"
+        }
+    ],
+    "andnb_k": [
+        {
+            "instr_name": "andnb_k",
+            "datatypes": "all_int_uint",
+            "template": "andnb_k"
+        }
+    ],
+    "maskz_add": [
+        {
+            "instr_name": "add",
+            "datatypes": "all_int_uint",
+            "template": "maskz_inst"
+        },
+        {
+            "instr_name": "fadd",
+            "datatypes": "all_float",
+            "template": "maskz_inst"
+        }
+    ],
+    "hadd": [
+        {
+            "instr_name": "redsum",
+            "datatypes": "all_int_uint",
+            "template": "hadd_hmax_uint"
+        },
+        {
+            "instr_name": "fredosum",
+            "datatypes": "all_float",
+            "template": "hadd_hmax_float"
+        },
+        {
+            "instr_name": "redsum",
+            "datatypes": "all_int_uint",
+            "template": "hadd_hmax_uint_mskz",
+            "version": "maskz"
+        },
+        {
+            "instr_name": "fredosum",
+            "datatypes": "all_float",
+            "template": "hadd_hmax_float_mskz",
+            "version": "maskz"
+        }
+    ],
+    "hmin": [
+        {
+            "instr_name": "redmin",
+            "datatypes": "all_int",
+            "template": "hmin_int"
+        },
+        {
+            "instr_name": "redminu",
+            "datatypes": "all_uint",
+            "template": "hmin_uint"
+        },
+        {
+            "instr_name": "fredmin",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "hmin_float32"
+        },
+        {
+            "instr_name": "fredmin",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "hmin_float64"
+        },
+        {
+            "instr_name": "redmin",
+            "datatypes": "all_int",
+            "template": "hmin_int_mskz",
+            "version": "maskz"
+        },
+        {
+            "instr_name": "redminu",
+            "datatypes": "all_uint",
+            "template": "hmin_uint_mskz",
+            "version": "maskz"
+        },
+        {
+            "instr_name": "fredmin",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "hmin_float32_mskz",
+            "version": "maskz"
+        },
+        {
+            "instr_name": "fredmin",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "hmin_float64_mskz",
+            "version": "maskz"
+        }
+    ],
+    "hmax": [
+        {
+            "instr_name": "redmax",
+            "datatypes": "all_int",
+            "template": "hmax_int"
+        },
+        {
+            "instr_name": "redmaxu",
+            "datatypes": "all_uint",
+            "template": "hadd_hmax_uint"
+        },
+        {
+            "instr_name": "fredmax",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "hmax_float32"
+        },
+        {
+            "instr_name": "fredmax",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "hmax_float64"
+        },
+        {
+            "instr_name": "redmax",
+            "datatypes": "all_int",
+            "template": "hmax_int_mskz",
+            "version": "maskz"
+        },
+        {
+            "instr_name": "redmaxu",
+            "datatypes": "all_uint",
+            "template": "hadd_hmax_uint_mskz",
+            "version": "maskz"
+        },
+        {
+            "instr_name": "fredmax",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "hmax_float32_mskz",
+            "version": "maskz"
+        },
+        {
+            "instr_name": "fredmax",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "hmax_float64_mskz",
+            "version": "maskz"
+        }
+    ],
+    "notb_k": [
+        {
+            "instr_name": "morn",
+            "datatypes": "all_datatypes",
+            "template": "notb_k"
+        }
+    ],
+    "testz": [
+        {
+            "instr_name": "cpop",
+            "datatypes": "all_datatypes",
+            "template": "testz"
+        }
+    ],
+    "hmul": [
+        {
+            "instr_name": "vmul",
+            "datatypes": "all_int_uint",
+            "template": "hmul_int_uint"
+        },
+        {
+            "instr_name": "vfmul",
+            "datatypes": "all_float",
+            "template": "hmul_float"
+        }
+    ],
+    "hadd_to_scal": [
+        {
+            "instr_name": "vmv_x",
+            "datatypes": "all_int_uint",
+            "template": "hadd_to_scal"
+        },
+        {
+            "instr_name": "vfmv_f",
+            "datatypes": "all_float",
+            "template": "hadd_to_scal"
+        }
+    ],
+    "cast": [
+        {
+            "instr_name": "vreinterpret",
+            "datatypes": [
+                "float64,float64",
+                "int64,float64",
+                "uint64,float64",
+                "float32,float32",
+                "int32,float32",
+                "uint32,float32",
+                "float64,int64",
+                "int64,int64",
+                "int32,int64",
+                "int16,int64",
+                "int8,int64",
+                "uint64,int64",
+                "float32,int32",
+                "int64,int32",
+                "int32,int32",
+                "int16,int32",
+                "int8,int32",
+                "uint32,int32",
+                "int64,int16",
+                "int32,int16",
+                "int16,int16",
+                "int8,int16",
+                "uint16,int16",
+                "int64,int8",
+                "int32,int8",
+                "int16,int8",
+                "int8,int8",
+                "uint8,int8",
+                "float64,uint64",
+                "int64,uint64",
+                "uint64,uint64",
+                "uint32,uint64",
+                "uint16,uint64",
+                "uint8,uint64",
+                "float32,uint32",
+                "int32,uint32",
+                "uint64,uint32",
+                "uint32,uint32",
+                "uint16,uint32",
+                "uint8,uint32",
+                "int16,uint16",
+                "uint64,uint16",
+                "uint32,uint16",
+                "uint16,uint16",
+                "uint8,uint16",
+                "int8,uint8",
+                "uint64,uint8",
+                "uint32,uint8",
+                "uint16,uint8",
+                "uint8,uint8"
+            ],
+            "template": "cast"
+        },
+        {
+            "instr_name": "vreinterpret",
+            "datatypes": [
+                "int8,float32",
+                "int16,float32",
+                "int64,float32",
+                "int8,float64",
+                "int16,float64",
+                "int32,float64",
+                "uint8,float32",
+                "uint16,float32",
+                "uint64,float32",
+                "uint8,float64",
+                "uint16,float64",
+                "uint32,float64"
+            ],
+            "template": "cast_intuint_other"
+        },
+        {
+            "instr_name": "vreinterpret",
+            "datatypes": [
+                "uint16,int8",
+                "uint32,int8",
+                "uint64,int8",
+                "uint8,int16",
+                "uint32,int16",
+                "uint64,int16",
+                "uint16,int32",
+                "uint8,int32",
+                "uint64,int32",
+                "uint16,int64",
+                "uint32,int64",
+                "uint8,int64",
+                "int8,uint16",
+                "int8,uint32",
+                "int8,uint64",
+                "int16,uint8",
+                "int16,uint32",
+                "int16,uint64",
+                "int32,uint16",
+                "int32,uint8",
+                "int32,uint64",
+                "int64,uint16",
+                "int64,uint32",
+                "int64,uint8"
+            ],
+            "template": "cast_intuint_other"
+        },
+        {
+            "instr_name": "vreinterpret",
+            "datatypes": [
+                "float64,float32",
+                "float32,float64"
+            ],
+            "template": "cast_float_other"
+        },
+        {
+            "instr_name": "vreinterpret",
+            "datatypes": [
+                "float32,int8",
+                "float32,int16",
+                "float32,int64",
+                "float64,int8",
+                "float64,int16",
+                "float64,int32",
+                "float32,uint8",
+                "float32,uint16",
+                "float32,uint64",
+                "float64,uint8",
+                "float64,uint16",
+                "float64,uint32"
+            ],
+            "template": "cast_float_other"
+        }
+    ],
+    "toreg": [
+        {
+            "datatypes": [
+                "uint64",
+                "int64"
+            ],
+            "template": "toreg-64"
+        },
+        {
+            "datatypes": [
+                "uint32",
+                "int32"
+            ],
+            "template": "toreg-32"
+        },
+        {
+            "datatypes": [
+                "float32"
+            ],
+            "template": "toreg-32f"
+        },
+        {
+            "datatypes": [
+                "float64"
+            ],
+            "template": "toreg-64f"
+        },
+        {
+            "datatypes": "all_16bit",
+            "template": "toreg-16"
+        },
+        {
+            "datatypes": "all_8bit",
+            "template": "toreg-8"
+        }
+    ],
+    "get_k": [
+        {
+            "instr_name": "get_k",
+            "datatypes": "all_datatypes",
+            "template": "get_k"
+        }
+    ],
+    "msb": [
+        {
+            "datatypes": "all_64bit",
+            "template": "msb-64"
+        },
+        {
+            "datatypes": "all_32bit",
+            "template": "msb-32"
+        },
+        {
+            "datatypes": "all_16bit",
+            "template": "msb-16"
+        },
+        {
+            "datatypes": "all_8bit",
+            "template": "msb-8"
+        }
+    ],
+    "cast_k": [
+        {
+            "instr_name": "vid",
+            "datatypes": [
+                "int8,int8",
+                "uint8,uint8",
+                "int16,int16",
+                "uint16,uint16",
+                "int32,int32",
+                "uint32,uint32",
+                "float32,float32",
+                "int64,int64",
+                "uint64,uint64",
+                "float64,float64",
+                "int8,uint8",
+                "uint8,int8",
+                "int16,uint16",
+                "uint16,int16",
+                "int32,uint32",
+                "uint32,int32",
+                "int32,float32",
+                "float32,int32",
+                "uint32,float32",
+                "float32,uint32",
+                "int64,uint64",
+                "uint64,int64",
+                "int64,float64",
+                "float64,int64",
+                "uint64,float64",
+                "float64,uint64"
+            ],
+            "template": "cast_k_same_size"
+        }
+    ],
+    "fnmadd": [
+        {
+            "instr_name": "fmadd",
+            "datatypes": "all_float",
+            "template": "fnmadd_float"
+        },
+        {
+            "instr_name": "fmadd",
+            "datatypes": [
+                "int32"
+            ],
+            "template": "fnmadd_int"
+        }
+    ],
+    "fnmsub": [
+        {
+            "instr_name": "fmsub",
+            "datatypes": "all_float",
+            "template": "fnmadd_float"
+        },
+        {
+            "instr_name": "fsub",
+            "datatypes": [
+                "int32"
+            ],
+            "template": "fnmsub_int"
+        }
+    ]
+}
