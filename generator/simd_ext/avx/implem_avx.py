@@ -6,26 +6,11 @@ from tools import *
     - These details are essential for generating optimized SIMD instructions
 """
 
-isa_avx = {
-    "name": "avx",
-    "prefix": "_mm256",
-    "size": 256,
-    "define": "defined(__AVX__)",
-    "hw_lmul": False,
-    "architecture": "x86",
-    "datatypes": {
-        float64: { "data_ext": "pd",    "data_ext_logi": "pd",    "data_ext_msk": "pd",    "reg": "__m256d", "msk": "__m256d", "to_ptr": "float64_t", "ldiv": [2]                          },
-        float32: { "data_ext": "ps",    "data_ext_logi": "ps",    "data_ext_msk": "ps",    "reg": " __m256", "msk": "__m256",  "to_ptr": "float32_t", "ldiv": [2]                          },
-        int64:   { "data_ext": "epi64", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg": "__m256i", "msk": "__m256i", "to_ptr": "__m256i",   "ldiv": [2], "data_ext_var": "epi64" },
-        int32:   { "data_ext": "epi32", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg": "__m256i", "msk": "__m256i", "to_ptr": "__m256i",   "ldiv": [2], "data_ext_var": "epi32" },
-        int16:   { "data_ext": "epi16", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg": "__m256i", "msk": "__m256i", "to_ptr": "__m256i",   "ldiv": [2], "data_ext_var": "epi16" },
-        int8:    { "data_ext": "epi8",  "data_ext_logi": "si256", "data_ext_msk": "si256", "reg": "__m256i", "msk": "__m256i", "to_ptr": "__m256i",   "ldiv": [2], "data_ext_var": "epi8"  },
-        uint64:  { "data_ext": "epu64", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg": "__m256i", "msk": "__m256i", "to_ptr": "__m256i",   "ldiv": [2], "data_ext_var": "epi64" },
-        uint32:  { "data_ext": "epu32", "data_ext_logi": "si256", "data_ext_msk": "si256", "reg": "__m256i", "msk": "__m256i", "to_ptr": "__m256i",   "ldiv": [2], "data_ext_var": "epi32" },
-        uint16:  { 'data_ext': 'epu16', 'data_ext_logi': 'si256', 'data_ext_msk': 'si256', 'reg': '__m256i', 'msk': '__m256i', 'to_ptr': '__m256i',   "ldiv": [2], 'data_ext_var': "epi16" },
-        uint8:   { "data_ext": "epu8",  "data_ext_logi": "si256", "data_ext_msk": "si256", "reg": "__m256i", "msk": "__m256i", "to_ptr": "__m256i",   "ldiv": [2], "data_ext_var": "epi8"  },
-    },
-}
+import json
+import os
+_current_dir = os.path.dirname(os.path.abspath(__file__))
+with open(os.path.join(_current_dir, "isa_avx.json"), "r") as f:
+    isa_avx = json.load(f)
 
 """tpl_implem_avx dictionary:
     - Purpose: This dictionary contains implementation models for various functions.

@@ -1,29 +1,10 @@
 from tools import *
 
-isa_avx512 = {
-    "name": "avx512",
-    "prefix" : "_mm512",
-    "size" : 512,
-    "hw_mask" : True,
-    "hw_mask_requires_toreg" : True,
-    "hw_mask_is_bitfield" : True,
-    "define": 'defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)',
-    "architecture": "x86",
-    "hw_lmul": False,
-    "hw_ldiv": True,
-    "datatypes": {
-        float64: { "data_ext": "pd",    "data_ext_logi": "pd",    "data_ext_msk": "si512", "reg": "__m512d", "msk": "__mmask8",  "msk_short": "mask8",  "to_ptr": "float64_t", "ldiv": [2], "data_ext_var": "pd"},
-        float32: { "data_ext": "ps",    "data_ext_logi": "ps",    "data_ext_msk": "si512", "reg": "__m512" , "msk": "__mmask16", "msk_short": "mask16", "to_ptr": "float32_t", "ldiv": [2], "data_ext_var": "ps"},
-        int64:   { "data_ext": "epi64", "data_ext_logi": "si512", "data_ext_msk": "si512", "reg": "__m512i", "msk": "__mmask8",  "msk_short": "mask8",  "to_ptr": "int64_t"  , "ldiv": [2], "data_ext_var": "epi64"},
-        int32:   { "data_ext": "epi32", "data_ext_logi": "si512", "data_ext_msk": "si512", "reg": "__m512i", "msk": "__mmask16", "msk_short": "mask16", "to_ptr": "int32_t"  , "ldiv": [2], "data_ext_var": "epi32"},
-        int16:   { "data_ext": "epi16", "data_ext_logi": "si512", "data_ext_msk": "si512", "reg": "__m512i", "msk": "__mmask32", "msk_short": "mask32", "to_ptr": "int16_t"  , "ldiv": [2], "data_ext_var": "epi16"},
-        int8:    { "data_ext": "epi8",  "data_ext_logi": "si512", "data_ext_msk": "si512", "reg": "__m512i", "msk": "__mmask64", "msk_short": "mask64", "to_ptr": "int8_t"   , "ldiv": [2], "data_ext_var": "epi8"},
-        uint64:  { "data_ext": "epu64", "data_ext_logi": "si512", "data_ext_msk": "si512", "reg": "__m512i", "msk": "__mmask8",  "msk_short": "mask8",  "to_ptr": "uint64_t" , "ldiv": [2], "data_ext_var": "epi64"},
-        uint32:  { "data_ext": "epu32", "data_ext_logi": "si512", "data_ext_msk": "si512", "reg": "__m512i", "msk": "__mmask16", "msk_short": "mask16", "to_ptr": "uint32_t" , "ldiv": [2], "data_ext_var": "epi32"},
-        uint16:  { "data_ext": "epu16", "data_ext_logi": "si512", "data_ext_msk": "si512", "reg": "__m512i", "msk": "__mmask32", "msk_short": "mask32", "to_ptr": "uint16_t" , "ldiv": [2], "data_ext_var": "epi16"},
-        uint8:   { "data_ext": "epu8",  "data_ext_logi": "si512", "data_ext_msk": "si512", "reg": "__m512i", "msk": "__mmask64", "msk_short": "mask64", "to_ptr": "uint8_t"  , "ldiv": [2], "data_ext_var": "epi8"}
-    }
-}
+import json
+import os
+_current_dir = os.path.dirname(os.path.abspath(__file__))
+with open(os.path.join(_current_dir, "isa_avx512.json"), "r") as f:
+    isa_avx512 = json.load(f)
 
 tpl_implem_avx512 = {
     "cast":             { "format": "short", "code": "{% if isa_dt_par.data_ext_logi != isa_dt_ret.data_ext_logi -%}{{ isa.prefix }}_{{ instr_name }}{{isa_dt_par.data_ext_logi}}_{{isa_dt_ret.data_ext_logi}}(r0.r);{% else -%} r0.r;{% endif %}" },

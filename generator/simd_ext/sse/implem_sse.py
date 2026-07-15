@@ -6,26 +6,11 @@ from tools import *
     - Content: It includes detailed information about data types, their properties, and other specific details relevant to the AVX architecture.
     - These details are essential for generating optimized SIMD instructions
 """
-isa_sse = {
-    "name": "sse",
-    "prefix": "_mm",
-    "size": 128,
-    "define": "defined(__SSE__)",
-    "architecture": "x86",
-    "hw_lmul": False,
-    "datatypes": {
-        float64: { "data_ext": "pd",    "data_ext_logi": "pd",    "data_ext_msk": "pd",    "reg": "__m128d", "msk": "__m128d", "to_ptr": "float64_t" },
-        float32: { "data_ext": "ps",    "data_ext_logi": "ps",    "data_ext_msk": "ps",    "reg": "__m128",  "msk": "__m128",  "to_ptr": "float32_t" },
-        int64:   { "data_ext": "epi64", "data_ext_logi": "si128", "data_ext_msk": "si128", "reg": "__m128i", "msk": "__m128i", "to_ptr": "__m128i"   },
-        int32:   { "data_ext": "epi32", "data_ext_logi": "si128", "data_ext_msk": "si128", "reg": "__m128i", "msk": "__m128i", "to_ptr": "__m128i"   },
-        int16:   { "data_ext": "epi16", "data_ext_logi": "si128", "data_ext_msk": "si128", "reg": "__m128i", "msk": "__m128i", "to_ptr": "__m128i"   },
-        int8:    { "data_ext": "epi8",  "data_ext_logi": "si128", "data_ext_msk": "si128", "reg": "__m128i", "msk": "__m128i", "to_ptr": "__m128i"   },
-        uint64:  { "data_ext": "epu64", "data_ext_logi": "si128", "data_ext_msk": "si128", "reg": "__m128i", "msk": "__m128i", "to_ptr": "__m128i"   },
-        uint32:  { "data_ext": "epu32", "data_ext_logi": "si128", "data_ext_msk": "si128", "reg": "__m128i", "msk": "__m128i", "to_ptr": "__m128i"   },
-        uint16:  { "data_ext": "epu16", "data_ext_logi": "si128", "data_ext_msk": "si128", "reg": "__m128i", "msk": "__m128i", "to_ptr": "__m128i"   },
-        uint8:   { "data_ext": "epu8",  "data_ext_logi": "si128", "data_ext_msk": "si128", "reg": "__m128i", "msk": "__m128i", "to_ptr": "__m128i"   },
-    },
-}
+import json
+import os
+_current_dir = os.path.dirname(os.path.abspath(__file__))
+with open(os.path.join(_current_dir, "isa_sse.json"), "r") as f:
+    isa_sse = json.load(f)
 
 """
 "tpl_implem_avx" dictionary:

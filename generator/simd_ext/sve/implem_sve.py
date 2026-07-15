@@ -1,27 +1,13 @@
 from tools import *
 
-isa_sve = {
-    "name": "sve",
-    "prefix": "sv",
-    "size" : {128, 256, 512, 1024, 2048},
-    "hw_mask" : True,
-    "hw_mask_requires_toreg" : True,
-    "define": "defined(__ARM_FEATURE_SVE)",
-    "architecture": "AArch64",
-    "hw_lmul": True,
-    "datatypes": {
-        float64 : {"data_ext": "f64" , "data_ext_logi": "b64" , "data_ext_msk": "p" ,"reg" : "svfloat64_t" , "msk": "svbool_t" , "to_ptr": "float64_t",  } ,
-        float32 : {"data_ext": "f32" , "data_ext_logi": "b32" , "data_ext_msk": "p" ,"reg" : "svfloat32_t" , "msk": "svbool_t" , "to_ptr": "float32_t",  } ,
-        int64   : {"data_ext": "s64" , "data_ext_logi": "b64" , "data_ext_msk": "p" ,"reg" : "svint64_t"   , "msk": "svbool_t" , "to_ptr": "int64_t",  } ,
-        int32   : {"data_ext": "s32" , "data_ext_logi": "b32" , "data_ext_msk": "p" ,"reg" : "svint32_t"   , "msk": "svbool_t" , "to_ptr": "int32_t",  } ,
-        int16   : {"data_ext": "s16" , "data_ext_logi": "b16" , "data_ext_msk": "p" ,"reg" : "svint16_t"   , "msk": "svbool_t" , "to_ptr": "int16_t",  } ,
-        int8    : {"data_ext": "s8"  , "data_ext_logi": "b8"  , "data_ext_msk": "p" ,"reg" : "svint8_t"    , "msk": "svbool_t" , "to_ptr": "int8_t",   } ,
-        uint64  : {"data_ext": "u64" , "data_ext_logi": "b64" , "data_ext_msk": "p" ,"reg" : "svuint64_t"  , "msk": "svbool_t" , "to_ptr": "uint64_t", } ,
-        uint32  : {"data_ext": "u32" , "data_ext_logi": "b32" , "data_ext_msk": "p" ,"reg" : "svuint32_t"  , "msk": "svbool_t" , "to_ptr": "uint32_t", } ,
-        uint16  : {"data_ext": "u16" , "data_ext_logi": "b16" , "data_ext_msk": "p" ,"reg" : "svuint16_t"  , "msk": "svbool_t" , "to_ptr": "uint16_t", } ,
-        uint8   : {"data_ext": "u8"  , "data_ext_logi": "b8"  , "data_ext_msk": "p" ,"reg" : "svuint8_t"   , "msk": "svbool_t" , "to_ptr": "uint8_t",  } ,
-    },
-}
+import json
+import os
+_current_dir = os.path.dirname(os.path.abspath(__file__))
+with open(os.path.join(_current_dir, "isa_sve.json"), "r") as f:
+    isa_sve = json.load(f)
+# Convert size list back to set to maintain backwards compatibility
+if "size" in isa_sve:
+    isa_sve["size"] = set(isa_sve["size"])
 
 tpl_implem_sve = {
     "cast"               : { "format": "short", "code":"{% if isa_dt_par.data_ext != isa_dt_ret.data_ext -%}{{ isa.prefix }}{{ instr_name }}_{{isa_dt_ret.data_ext}}_{{isa_dt_par.data_ext}}(r0.r);{% else -%} r0.r;{% endif %}" },

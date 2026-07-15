@@ -440,24 +440,11 @@ mipp_funcs = {
     "pow2":          { "proto": protos["ret_reg_2args_reg_val"],        "datatypes": all_float+all_uint,      "horizontal": False, "mask_support": all_mask        },
 }
 
-isa_scalar = {
-    "name": "scalar",
-    "size": "MIPP_SCALAR_SIZE",
-    "hw_lmul": False,
-    "architecture": "all",
-    "datatypes": {
-        float64: { "reg": "float64_t", "msk": "uint64_t", "to_ptr": "float64_t", },
-        float32: { "reg": "float32_t", "msk": "uint32_t", "to_ptr": "float32_t", },
-        int64:   { "reg": "int64_t",   "msk": "uint64_t", "to_ptr": "int64_t",   },
-        int32:   { "reg": "int32_t",   "msk": "uint32_t", "to_ptr": "int32_t",   },
-        int16:   { "reg": "int16_t",   "msk": "uint16_t", "to_ptr": "int16_t",   },
-        int8:    { "reg": "int8_t",    "msk": "uint8_t",  "to_ptr": "int8_t",    },
-        uint64:  { "reg": "uint64_t",  "msk": "uint64_t", "to_ptr": "uint64_t",  },
-        uint32:  { "reg": "uint32_t",  "msk": "uint32_t", "to_ptr": "uint32_t",  },
-        uint16:  { "reg": "uint16_t",  "msk": "uint16_t", "to_ptr": "uint16_t",  },
-        uint8:   { "reg": "uint8_t",   "msk": "uint8_t",  "to_ptr": "uint8_t",   },
-    },
-}
+import json
+import os
+_current_dir = os.path.dirname(os.path.abspath(__file__))
+with open(os.path.join(_current_dir, "isa_scalar.json"), "r") as f:
+    isa_scalar = json.load(f)
 
 # #define BIT_CAST_N(dst_ptr, src_ptr, n) \
 #     memcpy((dst_ptr), (src_ptr), (n) * sizeof(*(dst_ptr)))

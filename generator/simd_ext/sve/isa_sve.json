@@ -1,0 +1,97 @@
+{
+    "name": "sve",
+    "prefix": "sv",
+    "size": [
+        128,
+        256,
+        512,
+        1024,
+        2048
+    ],
+    "hw_mask": true,
+    "hw_mask_requires_toreg": true,
+    "define": "defined(__ARM_FEATURE_SVE)",
+    "hw_lmul": true,
+    "datatypes": {
+        "float64": {
+            "data_ext": "f64",
+            "data_ext_logi": "b64",
+            "data_ext_msk": "p",
+            "reg": "svfloat64_t",
+            "msk": "svbool_t",
+            "to_ptr": "float64_t"
+        },
+        "float32": {
+            "data_ext": "f32",
+            "data_ext_logi": "b32",
+            "data_ext_msk": "p",
+            "reg": "svfloat32_t",
+            "msk": "svbool_t",
+            "to_ptr": "float32_t"
+        },
+        "int64": {
+            "data_ext": "s64",
+            "data_ext_logi": "b64",
+            "data_ext_msk": "p",
+            "reg": "svint64_t",
+            "msk": "svbool_t",
+            "to_ptr": "int64_t"
+        },
+        "int32": {
+            "data_ext": "s32",
+            "data_ext_logi": "b32",
+            "data_ext_msk": "p",
+            "reg": "svint32_t",
+            "msk": "svbool_t",
+            "to_ptr": "int32_t"
+        },
+        "int16": {
+            "data_ext": "s16",
+            "data_ext_logi": "b16",
+            "data_ext_msk": "p",
+            "reg": "svint16_t",
+            "msk": "svbool_t",
+            "to_ptr": "int16_t"
+        },
+        "int8": {
+            "data_ext": "s8",
+            "data_ext_logi": "b8",
+            "data_ext_msk": "p",
+            "reg": "svint8_t",
+            "msk": "svbool_t",
+            "to_ptr": "int8_t"
+        },
+        "uint64": {
+            "data_ext": "u64",
+            "data_ext_logi": "b64",
+            "data_ext_msk": "p",
+            "reg": "svuint64_t",
+            "msk": "svbool_t",
+            "to_ptr": "uint64_t"
+        },
+        "uint32": {
+            "data_ext": "u32",
+            "data_ext_logi": "b32",
+            "data_ext_msk": "p",
+            "reg": "svuint32_t",
+            "msk": "svbool_t",
+            "to_ptr": "uint32_t"
+        },
+        "uint16": {
+            "data_ext": "u16",
+            "data_ext_logi": "b16",
+            "data_ext_msk": "p",
+            "reg": "svuint16_t",
+            "msk": "svbool_t",
+            "to_ptr": "uint16_t"
+        },
+        "uint8": {
+            "data_ext": "u8",
+            "data_ext_logi": "b8",
+            "data_ext_msk": "p",
+            "reg": "svuint8_t",
+            "msk": "svbool_t",
+            "to_ptr": "uint8_t"
+        }
+    }
+}

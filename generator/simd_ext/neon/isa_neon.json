@@ -1,0 +1,90 @@
+{
+    "name": "neon",
+    "prefix": "v",
+    "size": 128,
+    "define": "defined(__ARM_NEON__) || defined(__ARM_NEON)",
+    "hw_lmul": false,
+    "datatypes": {
+        "float64": {
+            "data_ext": "f64",
+            "data_ext_logi": "u64",
+            "data_ext_msk": "u64",
+            "reg": "float64x2_t",
+            "msk": "uint64x2_t",
+            "to_ptr": "float64_t",
+            "if": "defined(__aarch64__)"
+        },
+        "float32": {
+            "data_ext": "f32",
+            "data_ext_logi": "u32",
+            "data_ext_msk": "u32",
+            "reg": "float32x4_t",
+            "msk": "uint32x4_t",
+            "to_ptr": "float32_t"
+        },
+        "int64": {
+            "data_ext": "s64",
+            "data_ext_logi": "u64",
+            "data_ext_msk": "u64",
+            "reg": "int64x2_t",
+            "msk": "uint64x2_t",
+            "to_ptr": "int64_t"
+        },
+        "int32": {
+            "data_ext": "s32",
+            "data_ext_logi": "u32",
+            "data_ext_msk": "u32",
+            "reg": "int32x4_t",
+            "msk": "uint32x4_t",
+            "to_ptr": "int32_t"
+        },
+        "int16": {
+            "data_ext": "s16",
+            "data_ext_logi": "u16",
+            "data_ext_msk": "u16",
+            "reg": "int16x8_t",
+            "msk": "uint16x8_t",
+            "to_ptr": "int16_t"
+        },
+        "int8": {
+            "data_ext": "s8",
+            "data_ext_logi": "u8",
+            "data_ext_msk": "u8",
+            "reg": "int8x16_t",
+            "msk": "uint8x16_t",
+            "to_ptr": "int8_t"
+        },
+        "uint64": {
+            "data_ext": "u64",
+            "data_ext_logi": "u64",
+            "data_ext_msk": "u64",
+            "reg": "uint64x2_t",
+            "msk": "uint64x2_t",
+            "to_ptr": "uint64_t"
+        },
+        "uint32": {
+            "data_ext": "u32",
+            "data_ext_logi": "u32",
+            "data_ext_msk": "u32",
+            "reg": "uint32x4_t",
+            "msk": "uint32x4_t",
+            "to_ptr": "uint32_t"
+        },
+        "uint16": {
+            "data_ext": "u16",
+            "data_ext_logi": "u16",
+            "data_ext_msk": "u16",
+            "reg": "uint16x8_t",
+            "msk": "uint16x8_t",
+            "to_ptr": "uint16_t"
+        },
+        "uint8": {
+            "data_ext": "u8",
+            "data_ext_logi": "u8",
+            "data_ext_msk": "u8",
+            "reg": "uint8x16_t",
+            "msk": "uint8x16_t",
+            "to_ptr": "uint8_t"
+        }
+    }
+}
