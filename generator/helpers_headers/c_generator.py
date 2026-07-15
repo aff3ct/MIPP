@@ -272,54 +272,45 @@ def _parse_placeholders_or_skip(pre_rendering, isa, funcs, f, dt_par, dt_ret, dt
         return None
 
 
-def _build_previous_emulated_exclusion_ifdef(funcs, f, dt_key, ff):
-    """
-    ?
-    """
+def _get_implem_bucket(funcs, f, dt_key, mask_kind=None, create=False):
+    if mask_kind is None:
+        if create:
+            if "implem_status" not in funcs[f]:
+                funcs[f]["implem_status"] = {}
+            if dt_key not in funcs[f]["implem_status"]:
+                funcs[f]["implem_status"][dt_key] = []
+        if "implem_status" in funcs[f] and dt_key in funcs[f]["implem_status"]:
+            return funcs[f]["implem_status"][dt_key]
+        return None
+    else:
+        return get_masked_bucket(funcs, f, dt_key, mask_kind, create_missing_bucket=create)
+
+
+def _build_prev_exclusion_ifdef(funcs, f, dt_key, ff, mask_kind=None):
     ifd = ""
     if "type" in ff and ff["type"] == "emulated":
-        if "implem_status" in funcs[f] and dt_key in funcs[f]["implem_status"]:
-            is_first = True
-            i = 0
-            for _implem in funcs[f]["implem_status"][dt_key]:
-                ifd_sub = build_ifdef(funcs, f, dt_key, i)
-                if ifd_sub:
-                    if not is_first:
-                        ifd = ifd + " && "
-                    ifd = ifd + "!( "
-                    ifd = ifd + ifd_sub
-                    ifd = ifd + " )"
-                    is_first = False
-                i = i + 1
+        ifd = _missing_build_negated_ifdef_for_existing_implems(funcs, f, dt_key, mask_kind=mask_kind)
     return ifd
 
 
-def _append_implem_status(funcs, f, dt_key, ff, requirements):
-    """
-    updates implem_status in funcs[f][dt_key] with the conditions 
-    i.e the guard in "if" key and the 
-    function that f depends on in "requirements" key.
-    """
+def _append_implem_status(funcs, f, dt_key, ff, requirements, mask_kind=None):
     cur_implem_status = {"if": "", "requirements": {}}
     if "if" in ff:
         cur_implem_status["if"] = ff["if"]
     cur_implem_status["requirements"] = requirements
 
-    if "implem_status" not in funcs[f]:
-        funcs[f]["implem_status"] = {}
-    if dt_key not in funcs[f]["implem_status"]:
-        funcs[f]["implem_status"][dt_key] = []
-    funcs[f]["implem_status"][dt_key].append(cur_implem_status)
-    
+    bucket = _get_implem_bucket(funcs, f, dt_key, mask_kind, create=True)
+    bucket.append(cur_implem_status)
 
 
+def _combine_current_ifdefs(funcs, f, dt_key, ifd_prev, mask_kind=None):
+    bucket = _get_implem_bucket(funcs, f, dt_key, mask_kind)
+    if bucket is None:
+        return ifd_prev
 
-def _combine_current_ifdefs(funcs, f, dt_key, ifd_prev):
-    """
-    straightforward.
-    """
-
-    ifd_cur = build_ifdef(funcs, f, dt_key, len(funcs[f]["implem_status"][dt_key]) - 1)
+    ifd_cur = (build_ifdef_masked(funcs, f, dt_key, mask_kind, len(bucket) - 1)
+               if mask_kind is not None
+               else build_ifdef(funcs, f, dt_key, len(bucket) - 1))
 
     if ifd_prev and ifd_cur:
         return simplify_cond_str(ifd_prev + " && (" + ifd_cur + ")")
@@ -328,26 +319,17 @@ def _combine_current_ifdefs(funcs, f, dt_key, ifd_prev):
     return simplify_cond_str(ifd_prev)
 
 
-def _update_emulated(funcs, f, dt_key, ff, ifd):
-    """
-    only updates the "if" condition in implem_status for emulated functions. 
-    Used in gen_c_generic_functions after printing the #if condition for the generic implementation. 
-    Since generic implementations are supposed to be the last ones and have no conditions, 
-    it's as if you have if A && !A which is false. 
-    So you want to update the "if" condition of the generic implementation with the guard that was printed before it.
-    """
+def _update_emulated(funcs, f, dt_key, ff, ifd, mask_kind=None):
     if "type" in ff and ff["type"] == "emulated":
-        funcs[f]["implem_status"][dt_key][len(funcs[f]["implem_status"][dt_key]) - 1]["if"] = ifd
+        bucket = _get_implem_bucket(funcs, f, dt_key, mask_kind)
+        if bucket:
+            bucket[len(bucket) - 1]["if"] = ifd
 
 
-def _emit_ifdef_begin_and_update_emulated(funcs, f, dt_key, ff, ifd, file):
-    """
-    adds ifdef conditions to "if" in implem_status
-    also prints the #if condition to file
-    """
+def _emit_ifdef_begin_and_update_emulated(funcs, f, dt_key, ff, ifd, file, mask_kind=None):
     if ifd:
         print("#if " + ifd, file=file)
-        _update_emulated(funcs, f, dt_key, ff, ifd)
+        _update_emulated(funcs, f, dt_key, ff, ifd, mask_kind=mask_kind)
 
 
 
@@ -535,27 +517,20 @@ def _missing_compute_dt_par_dt_ret(dt):
     return dt_par, dt_ret
 
 
-def _missing_build_negated_ifdef_for_existing_implems(funcs, f, dt_key):
-    """
-    adds guard to missing function for when the ifdef conditions 
-    are not met. Documenting this makes me realize that gen_c_generic_functions 
-    and gen_c_missing functions do the same thing but don't share the 
-    same helpers. Oops. I'll change it.
-     """
+def _missing_build_negated_ifdef_for_existing_implems(funcs, f, dt_key, mask_kind=None):
     ifd = ""
-    if "implem_status" in funcs[f] and dt_key in funcs[f]["implem_status"]:
+    bucket = _get_implem_bucket(funcs, f, dt_key, mask_kind)
+    if bucket is not None:
         is_first = True
-        i = 0
-        for _implem in funcs[f]["implem_status"][dt_key]:
-            ifd_sub = build_ifdef(funcs, f, dt_key, i)
+        for i in range(len(bucket)):
+            ifd_sub = (build_ifdef_masked(funcs, f, dt_key, mask_kind, i)
+                       if mask_kind is not None
+                       else build_ifdef(funcs, f, dt_key, i))
             if ifd_sub:
                 if not is_first:
                     ifd = ifd + " && "
-                ifd = ifd + "!( "
-                ifd = ifd + ifd_sub
-                ifd = ifd + " )"
+                ifd = ifd + "!( " + ifd_sub + " )"
                 is_first = False
-            i = i + 1
     return ifd
 
 
@@ -585,92 +560,6 @@ def _missing_emit_ifdef_end(ifd, file):
     """
     if ifd:
         print("#endif", file=file)
-
-
-def _append_implem_status_masked(funcs, f, dt_key, mask_kind, ff, requirements):
-    """
-    updates masked implem status in funcs[f][dt_key][mask_kind] with the conditions 
-    i.e the guard in "if" key and the 
-    function that f depends on in "requirements" key.
-    """
-    cur_implem_status = {"if": "", "requirements": {}}
-    if "if" in ff:
-        cur_implem_status["if"] = ff["if"]
-    cur_implem_status["requirements"] = requirements
-
-    bucket = get_masked_bucket(funcs, f, dt_key, mask_kind, create_missing_bucket=True)
-    bucket.append(cur_implem_status)
-    #Updated maprint("Updated masked implem status for '" + f + "<" + mask_kind + "><" + dt_key + ">' with conditions: " + str(cur_implem_status))
-
-def _build_previous_masked_emulated_exclusion_ifdef(funcs, f, dt_key, mask_kind, ff):
-    """
-    ?
-    """
-    ifd = ""
-    if "type" in ff and ff["type"] == "emulated":
-        bucket = get_masked_bucket(funcs, f, dt_key, mask_kind)
-        if bucket is not None:
-            is_first = True
-            for i in range(len(bucket)):
-                ifd_sub = build_ifdef_masked(funcs, f, dt_key, mask_kind, i)
-                if ifd_sub:
-                    if not is_first:
-                        ifd = ifd + " && "
-                    ifd = ifd + "!( "
-                    ifd = ifd + ifd_sub
-                    ifd = ifd + " )"
-                    is_first = False
-    return ifd
-
-
-def _combine_current_ifdefs_masked(funcs, f, dt_key, mask_kind, ifd_prev):
-    bucket = get_masked_bucket(funcs, f, dt_key, mask_kind)
-    if bucket is None:
-        return ifd_prev
-
-    ifd_cur = build_ifdef_masked(funcs, f, dt_key, mask_kind, len(bucket) - 1)
-
-    if ifd_prev and ifd_cur:
-        return simplify_cond_str(ifd_prev + " && (" + ifd_cur + ")")
-    elif ifd_cur:
-        return simplify_cond_str(ifd_cur)
-    return simplify_cond_str(ifd_prev)
-
-
-def _emit_ifdef_begin_and_update_emulated_masked(funcs, f, dt_key, mask_kind, ff, ifd, file):
-    if ifd:
-        print("#if " + ifd, file=file)
-        if "type" in ff and ff["type"] == "emulated":
-            bucket = get_masked_bucket(funcs, f, dt_key, mask_kind)
-            # bucket exists because masked append happened before this call
-            bucket[len(bucket) - 1]["if"] = ifd
-   
-def _missing_build_negated_masked_ifdef_for_existing_implems(funcs, f, dt_key, mask_kind):
-    """
-    same as _missing_build_negated_ifdef_for_existing_implems but for masked functions. 
-    Which means it builds the negation of the ifdef conditions for all previous implementations of the same masked function.
-    """
-    ifd = ""
-    bucket = get_masked_bucket(funcs, f, dt_key, mask_kind)
-    if bucket is not None:
-        is_first = True
-        i = 0
-        for _implem in bucket:
-            ifd_sub = build_ifdef_masked(funcs, f, dt_key, mask_kind, i)
-            if ifd_sub:
-                if not is_first:
-                    ifd = ifd + " && "
-                ifd = ifd + "!( "
-                ifd = ifd + ifd_sub
-                ifd = ifd + " )"
-                is_first = False
-            i = i + 1
-    return ifd
-
-def _missing_emit_ifdef_begin_masked(ifd, file):
-    if ifd:
-        print("#if " + ifd, file=file)
-    return ifd
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -705,7 +594,7 @@ def _gen_c_functions_one_unmasked(isa, file, funcs, f, ff, dt):
     if ph_ret is None:
         return
 
-    ifd_prev = _build_previous_emulated_exclusion_ifdef(funcs, f, dt_key, ff)
+    ifd_prev = _build_prev_exclusion_ifdef(funcs, f, dt_key, ff)
 
     _append_implem_status(funcs, f, dt_key, ff, ph_ret["requirements"])
 
@@ -736,7 +625,7 @@ def _gen_c_function_one_masked(isa, file, funcs, f, ff, dt):
         _emit_already_implemented_message(f + "<" + mask_kind + ">", dt_key, file)
         return
 
-    pre_rendering = _render_template(isa, ff, dt_par, dt_ret, func_name = f)
+    pre_rendering = _render_template(isa, ff, dt_par, dt_ret)
     
     ph_ret = _parse_placeholders_or_skip(
         pre_rendering=pre_rendering,
@@ -752,13 +641,13 @@ def _gen_c_function_one_masked(isa, file, funcs, f, ff, dt):
         return
     post_rendering = ph_ret["converted_ir"]
 
-    ifd_prev = _build_previous_masked_emulated_exclusion_ifdef(funcs, f, dt_key, mask_kind, ff)
+    ifd_prev = _build_prev_exclusion_ifdef(funcs, f, dt_key, ff, mask_kind=mask_kind)
 
-    _append_implem_status_masked(funcs, f, dt_key, mask_kind, ff, ph_ret["requirements"])
+    _append_implem_status(funcs, f, dt_key, ff, ph_ret["requirements"], mask_kind=mask_kind)
  
-    ifd = _combine_current_ifdefs_masked(funcs, f, dt_key, mask_kind, ifd_prev)        
+    ifd = _combine_current_ifdefs(funcs, f, dt_key, ifd_prev, mask_kind=mask_kind)        
     print("", file=file)
-    _emit_ifdef_begin_and_update_emulated_masked(funcs, f, dt_key, mask_kind, ff, ifd, file)
+    _emit_ifdef_begin_and_update_emulated(funcs, f, dt_key, ff, ifd, file, mask_kind=mask_kind)
     _emit_function_body(
         funcs=funcs,
         f=f,
@@ -971,7 +860,7 @@ def _gen_c_missing_one_masked(isa, file, funcs, f, dt, mask_kind, lmul=0):
         _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, masked_version=mask_kind, lmul=lmul)
 
     elif ifdef_guarded:
-        ifd = _missing_build_negated_masked_ifdef_for_existing_implems(funcs, f, dt_key, mask_kind)
+        ifd = _missing_build_negated_ifdef_for_existing_implems(funcs, f, dt_key, mask_kind=mask_kind)
         # check that ifd isn't a blank line 
     
         # use a regex to check if there are actual characters in a-z A-Z 0-9 or _ in ifd, if not consider it as blankmipp_sse_set_uint16
@@ -979,7 +868,7 @@ def _gen_c_missing_one_masked(isa, file, funcs, f, dt, mask_kind, lmul=0):
 
             return
        
-        _missing_emit_ifdef_begin_masked(ifd, file)
+        _missing_emit_ifdef_begin(ifd, file)
   
         _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, masked_version=mask_kind, lmul=lmul)
   
@@ -2133,20 +2022,20 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                     if ph_ret is None:
                             continue
 
-                    ifd_prev = _build_previous_masked_emulated_exclusion_ifdef(funcs, f, dt_key, mask_kind, ff_local)
+                    ifd_prev = _build_prev_exclusion_ifdef(funcs, f, dt_key, ff_local, mask_kind=mask_kind)
 
                     # Append implem status *before* building current ifdef
-                    _append_implem_status_masked(funcs, f, dt_key, mask_kind, ff_local, ph_ret["requirements"])
+                    _append_implem_status(funcs, f, dt_key, ff_local, ph_ret["requirements"], mask_kind=mask_kind)
                     #print("requirements for '" + f + "<" + mask_kind + "><" + dt_key + ">' implementation: " + str(ph_ret["requirements"]))
 
                     # Combine ifdefs and emit #if if needed (and update emulated status)
-                    ifd = _combine_current_ifdefs_masked(funcs, f, dt_key, mask_kind, ifd_prev)
+                    ifd = _combine_current_ifdefs(funcs, f, dt_key, ifd_prev, mask_kind=mask_kind)
                     
                     if ifd == "0":
                         continue
 
                     print("", file=file)
-                    _emit_ifdef_begin_and_update_emulated_masked(funcs, f, dt_key, mask_kind, ff_local, ifd, file)
+                    _emit_ifdef_begin_and_update_emulated(funcs, f, dt_key, ff_local, ifd, file, mask_kind=mask_kind)
                     # Pick body: reductions_fix override for RVV reductions with lmul>1
                     post_rendering = ph_ret["converted_ir"]
                     if lmul > 1 and reductions_fix and (f in reductions_fix) and (dt in reductions_fix[f]):
@@ -2236,7 +2125,6 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                         isa["candidates"].append(c_dict)
 
 
-
                     if (not is_missing_func(funcs, f, dt_key)) and _rvv_seen_lmul(funcs, f, dt_key, lmul):
                         continue
 
@@ -2256,7 +2144,7 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                     if ph_ret is None:
                         continue
 
-                    ifd_prev = _build_previous_emulated_exclusion_ifdef(funcs, f, dt_key, ff_local)
+                    ifd_prev = _build_prev_exclusion_ifdef(funcs, f, dt_key, ff_local)
 
                     # Append implem status *before* building current ifdef
                     _append_implem_status(funcs, f, dt_key, ff_local, ph_ret["requirements"])
