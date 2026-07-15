@@ -97,8 +97,8 @@ def _emit_ifdef_begin(ifd, file):
         print("#if " + ifd, file=file)
 
 def _gen_ldiv_structs_avx(isa_base, isa_div, file):
-    template = """typedef struct { rvd_{{ isa_div.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t r1, r2; } rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d2_t;
-typedef struct { rvm_{{ isa_div.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t m1, m2; } rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d2_t;"""
+    template = """typedef rvd_{{ isa_div.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d2_t;
+typedef rvm_{{ isa_div.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d2_t;"""
     j2_template = Template(template, undefined=StrictUndefined)
     for dt in isa_base["datatypes"]:
         if "ldiv" in isa_base["datatypes"][dt] and len(isa_base["datatypes"][dt]["ldiv"]) > 0:

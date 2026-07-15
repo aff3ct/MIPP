@@ -235,6 +235,8 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond, lm
             arg_name = f"p{cnt_ptr}"
             cnt_ptr += 1
             call_args.append(arg_name)
+        elif arg_type_name == "Nele":
+            call_args.append("vals")
             
     call_args_str = ", ".join(call_args)
     scalar_func_name = _build_func_name(isa_scalar, dt, dt_par, dt_ret, f, masked_version=mask_kind, lmul=lmul)
