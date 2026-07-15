@@ -1,0 +1,620 @@
+"""
+Candidate Resolver Module
+Implements the core resolution/solver loop to solve missing/emulated instructions dependencies,
+and generates auto-scalar fallbacks and panic stubs.
+"""
+import sys
+import os
+
+# Add parent directory to sys.path to find tools.py
+sys.path.insert(1, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from tools import *
+from tools import negate_cond as tool_negate_cond
+from tools import are_conds_mutually_exclusive as tool_are_conds_mutually_exclusive
+from tools import intersect_conds as tool_intersect_conds
+from tools import _build_func_name, _get_dt_par_size
+from headers_def import isa_scalar
+from codegen.implem_tracker import _get_implem_bucket, _missing_build_negated_ifdef_for_existing_implems
+from codegen.emit_helpers import _emit_function_body
+
+def _is_guard_dead_under_cond(guard, cond):
+    """
+    Returns True if `guard` is always False when `cond` is True,
+    i.e. the function is compiled under #if !(<guard>), making any
+    #if <guard> block inside the body unreachable dead code.
+    """
+    if not guard or guard == "0" or not cond:
+        return False
+    # Normalize whitespace before comparing
+    neg_guard = f"!( {guard} )"
+    return (neg_guard.replace(" ", "") == cond.replace(" ", ""))
+
+
+def _missing_emit_ifdef_begin(ifd, file):
+    if ifd:
+        print("#if " + ifd, file=file)
+
+def _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, masked_version = None, lmul=0):
+    full_func_name = _build_func_name(isa, dt_par, dt_par, dt_ret, f, masked_version=masked_version, lmul=lmul)
+    print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul, True, masked_version=masked_version) + " {", file=file)
+    print("\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \"" + full_func_name + "\");", file=file)
+    print("\texit(-1);", file=file)
+    print("}", file=file)
+
+def _missing_emit_ifdef_end(ifd, file):
+    if ifd:
+        print("#endif", file=file)
+
+def _render_template(isa, ff, dt_par, dt_ret, func_name="", lmul=0):
+    j2_template = Template(ff["template"]["code"], undefined=StrictUndefined)
+    instr_name = ""
+    if "instr_name" in ff:
+        instr_name = ff["instr_name"]
+
+    return j2_template.render(
+        isa=isa,
+        instr_name=instr_name,
+        dt_par=datatypes[dt_par],
+        dt_ret=datatypes[dt_ret],
+        isa_dt_par=isa["datatypes"][dt_par],
+        isa_dt_ret=isa["datatypes"][dt_ret],
+        cstdint_ret=datatypes[dt_ret]["cstd"],
+        func_name = func_name,
+        lmul = lmul
+    )
+
+def _parse_placeholders_or_skip(pre_rendering, isa, funcs, f, dt_par, dt_ret, dt_key, file, lmul=0, isa_name=True):
+    try:
+        return parse_placeholders(pre_rendering, isa, funcs, f, dt_par, dt_ret, lmul=lmul, isa_name=isa_name)
+    except Exception as err:
+        err_message = "'" + f + "<" + dt_key + ">' has been skipped (reason: \"{0}\").".format(err)
+        print("// " + err_message, file=file)
+        return None
+
+def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond, lmul=0):
+    dt_par, dt_ret = compute_dt_par_dt_ret(None, None, dt, check_support=False)
+    dt_key = dt_par + "," + dt_ret
+    func_name = _build_func_name(isa, dt, dt_par, dt_ret, f, masked_version=mask_kind, lmul=lmul)
+    
+    if cond:
+        print(f"#if {cond}", file=file)
+        
+    proto_str = build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul=lmul, isa_name=True, masked_version=mask_kind)
+    print("static " + proto_str + " {", file=file)
+    print("\t// Level 3 (Auto Scalar Fallback)", file=file)
+    
+    proto = funcs[f]["proto"]
+    call_args = []
+    cnt_reg = 0
+    cnt_msk = 0
+    cnt_val = 0
+    cnt_ptr = 0
+    
+    if mask_kind is not None:
+        msk_dt = datatypes[dt_par]
+        if "gather" in f or "scatter" in f:
+            msk_dt = datatypes["uint" + str(_get_dt_par_size(dt_par))]
+        elif funcs[f]["proto"]["ret"].get("fixeddatatype"):
+            msk_dt = datatypes[funcs[f]["proto"]["ret"]["fixeddatatype"]]
+        m0_scalar_type = build_type("msk", msk_dt, isa_scalar, lmul, True, False)
+        print(f"\t{m0_scalar_type} s_m0;", file=file)
+        if isa.get("hw_mask", False):
+            msk_dt_name = msk_dt["name"]
+            reg_vector_type = build_reg(msk_dt, isa, lmul, True, False)
+            reg_scalar_type = build_reg(msk_dt, isa_scalar, lmul, True, False)
+            scalar_tomsk_func = _build_func_name(isa_scalar, msk_dt_name, msk_dt_name, msk_dt_name, "tomsk", lmul=lmul)
+            if isa.get("hw_mask_is_bitfield", False):
+                n_elements = isa["size"] // _get_dt_par_size(msk_dt_name)
+                print(f"\tfor (int i = 0; i < {n_elements}; ++i) {{", file=file)
+                print(f"\t\ts_m0.m[i] = (m0.m & (1ULL << i)) ? ~0 : 0;", file=file)
+                print(f"\t}}", file=file)
+            else:
+                toreg_func = _build_func_name(isa, msk_dt_name, msk_dt_name, msk_dt_name, "toreg", lmul=lmul)
+                if lmul < 0 and "if_ldiv" in isa["datatypes"].get(dt_par, {}):
+                    guard = isa["datatypes"][dt_par]["if_ldiv"].get(str(-lmul), None)
+                else:
+                    guard = isa["datatypes"].get(dt_par, {}).get("if", None)
+                if guard == "0" or _is_guard_dead_under_cond(guard, cond):
+                    print(f"\tmemcpy(&s_m0, &m0, sizeof(s_m0));", file=file)
+                else:
+                    if guard:
+                        print(f"#if {guard}", file=file)
+                    print(f"\t{reg_vector_type} r_m0 = {toreg_func}(m0);", file=file)
+                    print(f"\t{reg_scalar_type} s_r_m0;", file=file)
+                    print(f"\tmemcpy(&s_r_m0, &r_m0, sizeof(s_r_m0));", file=file)
+                    print(f"\ts_m0 = {scalar_tomsk_func}(s_r_m0);", file=file)
+                    if guard:
+                        print(f"#else", file=file)
+                        print(f"\tmemcpy(&s_m0, &m0, sizeof(s_m0));", file=file)
+                        print(f"#endif", file=file)
+        else:
+            print(f"\tmemcpy(&s_m0, &m0, sizeof(s_m0));", file=file)
+        call_args.append("s_m0")
+        cnt_msk += 1
+        
+        if mask_kind == "masks":
+            rsrc_vector_type = build_reg(datatypes[dt_par], isa, lmul, True, False)
+            rsrc_scalar_type = build_reg(datatypes[dt_par], isa_scalar, lmul, True, False)
+            print(f"\t{rsrc_scalar_type} s_rsrc;", file=file)
+            print(f"\tmemcpy(&s_rsrc, &rsrc, sizeof(s_rsrc));", file=file)
+            call_args.append("s_rsrc")
+            
+    for arg in proto["args"]:
+        arg_type_name = arg["type"]
+        realdatatype = datatypes[dt_par]
+        if arg.get("fixeddatatype"):
+            if arg["fixeddatatype"] not in datatypes and arg["fixeddatatype"] in all_categories:
+                dt_str = arg["fixeddatatype"] + str(_get_dt_par_size(dt_par))
+                realdatatype = datatypes[dt_str]
+            elif arg["fixeddatatype"] in datatypes:
+                realdatatype = datatypes[arg["fixeddatatype"]]
+        elif arg_type_name == "ret":
+            realdatatype = datatypes[dt_ret]
+            
+        if arg_type_name == "reg" or arg_type_name == "ret":
+            arg_name = f"r{cnt_reg}"
+            cnt_reg += 1
+            vector_type = build_type("reg", realdatatype, isa, lmul, True, False)
+            scalar_type = build_type("reg", realdatatype, isa_scalar, lmul, True, False)
+            print(f"\t{scalar_type} s_{arg_name};", file=file)
+            print(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof(s_{arg_name}));", file=file)
+            call_args.append(f"s_{arg_name}")
+        elif arg_type_name == "msk":
+            arg_name = f"m{cnt_msk}"
+            cnt_msk += 1
+            vector_type = build_type("msk", realdatatype, isa, lmul, True, False)
+            scalar_type = build_type("msk", realdatatype, isa_scalar, lmul, True, False)
+            print(f"\t{scalar_type} s_{arg_name};", file=file)
+            if isa.get("hw_mask", False):
+                if isa.get("hw_mask_is_bitfield", False) and f in ["toreg", "tomsk", "cast_k"]:
+                    n_elements = 512 // _get_dt_par_size(realdatatype["name"])
+                    print(f"\tfor (int i = 0; i < {n_elements}; ++i) {{", file=file)
+                    print(f"\t\ts_{arg_name}.m[i] = ({arg_name}.m & (1ULL << i)) ? ~0 : 0;", file=file)
+                    print(f"\t}}", file=file)
+                else:
+                    toreg_func = _build_func_name(isa, realdatatype["name"], realdatatype["name"], realdatatype["name"], "toreg", lmul=lmul)
+                    scalar_tomsk_func = _build_func_name(isa_scalar, realdatatype["name"], realdatatype["name"], realdatatype["name"], "tomsk", lmul=lmul)
+                    arg_guard = isa["datatypes"].get(realdatatype["name"], {}).get("if", None)
+                    if arg_guard == "0" or _is_guard_dead_under_cond(arg_guard, cond):
+                        print(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof(s_{arg_name}));", file=file)
+                    else:
+                        if arg_guard:
+                            print(f"#if {arg_guard}", file=file)
+                        reg_vector_type = build_reg(realdatatype, isa, lmul, True, False)
+                        reg_scalar_type = build_reg(realdatatype, isa_scalar, lmul, True, False)
+                        print(f"\t{reg_vector_type} r_{arg_name} = {toreg_func}({arg_name});", file=file)
+                        print(f"\t{reg_scalar_type} s_r_{arg_name};", file=file)
+                        print(f"\tmemcpy(&s_r_{arg_name}, &r_{arg_name}, sizeof(s_r_{arg_name}));", file=file)
+                        print(f"\ts_{arg_name} = {scalar_tomsk_func}(s_r_{arg_name});", file=file)
+                        if arg_guard:
+                            print(f"#else", file=file)
+                            print(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof(s_{arg_name}));", file=file)
+                            print(f"#endif", file=file)
+            else:
+                print(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof(s_{arg_name}));", file=file)
+            call_args.append(f"s_{arg_name}")
+        elif arg_type_name == "val":
+            arg_name = f"v{cnt_val}"
+            cnt_val += 1
+            call_args.append(arg_name)
+        elif arg_type_name == "ptr":
+            arg_name = f"p{cnt_ptr}"
+            cnt_ptr += 1
+            call_args.append(arg_name)
+            
+    call_args_str = ", ".join(call_args)
+    scalar_func_name = _build_func_name(isa_scalar, dt, dt_par, dt_ret, f, masked_version=mask_kind, lmul=lmul)
+    
+    ret_type_name = proto["ret"]["type"]
+    if ret_type_name == "reg" or ret_type_name == "msk":
+        vector_ret_type = build_type(ret_type_name, datatypes[dt_ret], isa, lmul, True, False)
+        scalar_ret_type = build_type(ret_type_name, datatypes[dt_ret], isa_scalar, lmul, True, False)
+        print(f"\t{scalar_ret_type} sres = {scalar_func_name}({call_args_str});", file=file)
+        
+        if isa.get("hw_mask", False) and ret_type_name == "msk":
+            tomsk_func = _build_func_name(isa, datatypes[dt_ret]["name"], datatypes[dt_ret]["name"], datatypes[dt_ret]["name"], "tomsk", lmul=lmul)
+            toreg_scalar_func = _build_func_name(isa_scalar, datatypes[dt_ret]["name"], datatypes[dt_ret]["name"], datatypes[dt_ret]["name"], "toreg", lmul=lmul)
+            if isa.get("hw_mask_is_bitfield", False) and f in ["toreg", "tomsk", "cast_k"]:
+                print(f"\t{vector_ret_type} res = 0;", file=file)
+                n_elements = 512 // _get_dt_par_size(datatypes[dt_ret]["name"])
+                print(f"\tfor (int i = 0; i < {n_elements}; ++i) {{", file=file)
+                print(f"\t\tif (sres.m[i]) res |= (1ULL << i);", file=file)
+                print(f"\t}}", file=file)
+            else:
+                ret_guard = isa["datatypes"].get(datatypes[dt_ret]["name"], {}).get("if", None)
+                if ret_guard == "0" or _is_guard_dead_under_cond(ret_guard, cond):
+                    print(f"\t{vector_ret_type} res;", file=file)
+                    print(f"\tmemcpy(&res, &sres, sizeof(res));", file=file)
+                else:
+                    if ret_guard:
+                        print(f"#if {ret_guard}", file=file)
+                    reg_scalar_type = build_reg(datatypes[dt_ret], isa_scalar, lmul, True, False)
+                    reg_vector_type = build_reg(datatypes[dt_ret], isa, lmul, True, False)
+                    print(f"\t{reg_scalar_type} s_r_res = {toreg_scalar_func}(sres);", file=file)
+                    print(f"\t{reg_vector_type} r_res;", file=file)
+                    print(f"\tmemcpy(&r_res, &s_r_res, sizeof(r_res));", file=file)
+                    print(f"\t{vector_ret_type} res = {tomsk_func}(r_res);", file=file)
+                    if ret_guard:
+                        print(f"#else", file=file)
+                        print(f"\t{vector_ret_type} res;", file=file)
+                        print(f"\tmemcpy(&res, &sres, sizeof(res));", file=file)
+                        print(f"#endif", file=file)
+        else:
+            print(f"\t{vector_ret_type} res;", file=file)
+            print(f"\tmemcpy(&res, &sres, sizeof(res));", file=file)
+        print(f"\treturn res;", file=file)
+    elif ret_type_name == "val":
+        print(f"\treturn {scalar_func_name}({call_args_str});", file=file)
+    else:
+        print(f"\t{scalar_func_name}({call_args_str});", file=file)
+        
+    print("}", file=file)
+    if cond:
+        print("#endif", file=file)
+
+def _get_candidate_reqs(cand, isa, funcs):
+    if "reqs" in cand:
+        return cand["reqs"]
+    f = cand["f"]
+    ff = cand["ff"]
+    dt = cand["dt"]
+    dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
+    pre_rendering = _render_template(isa, ff, dt_par, dt_ret, func_name=f)
+    try:
+        reqs = get_requirements(pre_rendering, isa, funcs, f, dt_par, dt_ret)
+    except Exception:
+        reqs = {}
+    cand["reqs"] = reqs
+    return reqs
+
+def _append_resolved_status(funcs, f, dt_key, mask_kind, cond, reqs):
+    cur_implem_status = {"if": cond, "requirements": reqs}
+    if mask_kind is None:
+        if "implem_status" not in funcs[f]:
+            funcs[f]["implem_status"] = {}
+        if dt_key not in funcs[f]["implem_status"]:
+            funcs[f]["implem_status"][dt_key] = []
+        funcs[f]["implem_status"][dt_key].append(cur_implem_status)
+    else:
+        bucket = get_masked_bucket(funcs, f, dt_key, mask_kind, create_missing_bucket=True)
+        bucket.append(cur_implem_status)
+
+def _resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators=False):
+    is_inc_mgr = hasattr(file, "get_fd")
+    
+    candidates_map = {}
+    collected_candidates = isa.get("candidates", [])
+    
+    for f in funcs:
+        for dt in funcs[f]["datatypes"]:
+            dt_par, dt_ret = compute_dt_par_dt_ret(None, None, dt, check_support=False)
+            dt_key = dt_par + "," + dt_ret
+            
+            mask_kinds = [None]
+            if "mask_support" in funcs[f]:
+                support = funcs[f]["mask_support"]
+                if support.is_maskable():
+                    mask_kinds.append("mask")
+                if support.is_maskzable():
+                    mask_kinds.append("maskz")
+                if support.is_masksable():
+                    mask_kinds.append("masks")
+                    
+            for mask_kind in mask_kinds:
+                key = (f, dt_key, mask_kind)
+                candidates_map[key] = []
+                
+                for c in collected_candidates:
+                    c_f = c["f"]
+                    c_dt = c["dt"]
+                    c_dt_par, c_dt_ret = compute_dt_par_dt_ret(funcs, c_f, c_dt)
+                    c_dt_key = c_dt_par + "," + c_dt_ret
+                    c_mask_kind = c["ff"].get("version", None)
+                    if c_f == f and c_dt_key == dt_key and c_mask_kind == mask_kind:
+                        candidates_map[key].append(c)
+                
+                if isa["name"] != "scalar":
+                    auto_scalar_reqs = {}
+                    
+                    if isa.get("hw_mask_requires_toreg", False):
+                        if not (isa.get("hw_mask_is_bitfield", False) and f in ["toreg", "tomsk", "cast_k"]):
+                            has_msk_arg = any(arg["type"] == "msk" for arg in funcs[f]["proto"]["args"]) or mask_kind is not None
+                            if has_msk_arg:
+                                single_dt_par = dt_par.split(",")[0]
+                                req_dt_par = single_dt_par + "," + single_dt_par
+                                auto_scalar_reqs.setdefault("toreg", []).append(req_dt_par)
+                                auto_scalar_reqs.setdefault("tomsk", []).append(req_dt_par)
+                                if isa.get("hw_mask_extract_via_store", False):
+                                    auto_scalar_reqs.setdefault("store", []).append(req_dt_par)
+                            
+                            if funcs[f]["proto"]["ret"]["type"] == "msk":
+                                single_dt_ret = dt_ret.split(",")[0]
+                                req_dt_ret = single_dt_ret + "," + single_dt_ret
+                                if req_dt_ret not in auto_scalar_reqs.get("toreg", []):
+                                    auto_scalar_reqs.setdefault("toreg", []).append(req_dt_ret)
+                                    auto_scalar_reqs.setdefault("tomsk", []).append(req_dt_ret)
+                                    if isa.get("hw_mask_extract_via_store", False):
+                                        if req_dt_ret not in auto_scalar_reqs.get("store", []):
+                                            auto_scalar_reqs.setdefault("store", []).append(req_dt_ret)
+
+                    if isa["name"] == "rvv":
+                        for arg in funcs[f]["proto"]["args"]:
+                            if arg["type"] == "vindex":
+                                single_dt_par = dt_par.split(",")[0]
+                                c_int = datatypes[single_dt_par].get("category", "int")
+                                same_size_integer_datatype = find_one_data_types_from({"n_bits": datatypes[single_dt_par]["n_bits"], "category": c_int})
+                                vi_dt_name = same_size_integer_datatype["name"]
+                                req_vi_dt = vi_dt_name + "," + vi_dt_name
+                                if req_vi_dt not in auto_scalar_reqs.get("store", []):
+                                    auto_scalar_reqs.setdefault("store", []).append(req_vi_dt)
+
+                    auto_scalar_cand_if = ""
+                    if isa["name"] == "rvv" and lmul < 0:
+                        single_dt = dt_par.split(",")[0]
+                        if "width" in isa.get("datatypes", {}).get(single_dt, {}):
+                            width = isa["datatypes"][single_dt]["width"]
+                            req_vlen = int(width) * abs(lmul)
+                            vlen_guard = f"__riscv_v_fixed_vlen >= {req_vlen}"
+                            base_guard = isa["datatypes"][single_dt].get("if", "")
+                            if base_guard:
+                                auto_scalar_cand_if = f"({base_guard}) && {vlen_guard}"
+                            else:
+                                auto_scalar_cand_if = vlen_guard
+
+                    candidates_map[key].append({
+                        "type": "auto_scalar",
+                        "f": f,
+                        "dt_key": dt_key,
+                        "dt_par": dt_par,
+                        "dt_ret": dt_ret,
+                        "mask_kind": mask_kind,
+                        "level": 3,
+                        "reqs": auto_scalar_reqs,
+                        "ff": {"if": auto_scalar_cand_if}
+                    })
+                    
+                candidates_map[key].append({
+                    "type": "stub",
+                    "f": f,
+                    "dt_key": dt_key,
+                    "dt_par": dt_par,
+                    "dt_ret": dt_ret,
+                    "mask_kind": mask_kind,
+                    "level": 4,
+                    "reqs": {}
+                })
+                
+                candidates_map[key].sort(key=lambda c: c["level"])
+                
+    isa_known_true = [isa["define"]] if "define" in isa and isa["define"] else []
+
+    def normalize_cond(c):
+        return simplify_cond_str(c, known_true_conds=isa_known_true)
+
+    def negate_cond(c):
+        return tool_negate_cond(c)
+
+    def are_conds_mutually_exclusive(c1, c2):
+        return tool_are_conds_mutually_exclusive(c1, c2, known_true_conds=isa_known_true)
+
+    def intersect_conds(c1, c2):
+        return tool_intersect_conds(c1, c2, known_true_conds=isa_known_true)
+
+    resolved = {key: [] for key in candidates_map}
+    remaining_conds = {key: "" for key in candidates_map}
+    working_impls = {key: [] for key in candidates_map}
+    
+    # Pre-resolve candidates that were already emitted
+    for key in candidates_map:
+        for cand in candidates_map[key]:
+            if cand.get("emitted", False):
+                cand_if = cand["ff"].get("if", "")
+                if cand["type"] == "native_or_emu" and not cand_if and "define" in isa and isa["define"]:
+                    cand_if = isa["define"]
+
+                restricted_target_cond = normalize_cond(cand_if)
+                resolved[key].append((cand, restricted_target_cond))
+                cand["resolved"] = True
+
+                if cand["level"] < 4:
+                    working_impls[key].append(restricted_target_cond)
+                    if restricted_target_cond == "":
+                        working_impls[key] = [""]
+
+                neg_resolved = negate_cond(restricted_target_cond)
+                new_rem = intersect_conds(remaining_conds[key], neg_resolved)
+                remaining_conds[key] = new_rem
+
+    max_level = 2
+    changed = True
+    while changed:
+        changed = False
+        for key in candidates_map:
+            f, dt_key, mask_kind = key
+            rem_cond = remaining_conds[key]
+            if rem_cond is None:
+                continue
+                
+            for cand in candidates_map[key]:
+                if cand.get("resolved", False):
+                    continue
+                if cand["level"] > max_level:
+                    continue
+                    
+                cand_if = ""
+                if cand["type"] in ["native_or_emu", "generic_emu", "auto_scalar"]:
+                    cand_if = cand["ff"].get("if", "")
+                    if cand["type"] == "native_or_emu" and not cand_if and "define" in isa and isa["define"]:
+                        cand_if = isa["define"]
+                    
+                target_cond = intersect_conds(cand_if, rem_cond)
+                if target_cond is None:
+                    continue
+                    
+                reqs = _get_candidate_reqs(cand, isa, funcs)
+                deps_satisfied = True
+                restricted_target_cond = target_cond
+                for req_f in reqs:
+                    for req_dt_key in reqs[req_f]:
+                        req_key = (req_f, req_dt_key, None)
+                        # For auto_scalar candidates, toreg/tomsk/store deps on
+                        # conditional types (those with an "if" guard in the ISA)
+                        # are optional: the emitted code wraps the call in
+                        # #if <type_guard> ... #else memcpy(...) #endif,
+                        # so the function body is always valid regardless of
+                        # whether the type's native path is reachable.
+                        if cand["type"] == "auto_scalar" and req_f in ("toreg", "tomsk", "store"):
+                            req_dt_par = req_dt_key.split(",")[0]
+                            req_type_guard = isa.get("datatypes", {}).get(req_dt_par, {}).get("if", None)
+                            if req_type_guard and req_type_guard != "0":
+                                continue
+                        if req_key not in working_impls:
+                            deps_satisfied = False
+                            break
+                        compat_conds = []
+                        for w_cond in working_impls[req_key]:
+                            if not are_conds_mutually_exclusive(restricted_target_cond, w_cond):
+                                compat_conds.append(w_cond)
+                        if not compat_conds:
+                            deps_satisfied = False
+                            break
+                        if "" in compat_conds:
+                            union_cond = ""
+                        else:
+                            union_cond = " || ".join(f"({w})" for w in compat_conds)
+                        restricted_target_cond = intersect_conds(restricted_target_cond, union_cond)
+                        if restricted_target_cond is None:
+                            deps_satisfied = False
+                            break
+                    if not deps_satisfied:
+                        break
+                        
+                if deps_satisfied:
+                    restricted_target_cond = normalize_cond(restricted_target_cond)
+                    resolved[key].append((cand, restricted_target_cond))
+                    cand["resolved"] = True
+                    
+                    if cand["level"] < 4:
+                        working_impls[key].append(restricted_target_cond)
+                        if restricted_target_cond == "":
+                            working_impls[key] = [""]
+                            
+                    neg_resolved = negate_cond(restricted_target_cond)
+                    new_rem = intersect_conds(rem_cond, neg_resolved)
+                    remaining_conds[key] = new_rem
+                    
+                    changed = True
+                    break
+                    
+        if not changed and max_level < 4:
+            max_level += 1
+            changed = True
+                    
+    # 1. Register resolved statuses upfront so parse_placeholders knows what is implemented
+    for key in resolved:
+        f, dt_key, mask_kind = key
+        for cand, cond in resolved[key]:
+            if cond == "0":
+                continue
+            reqs = _get_candidate_reqs(cand, isa, funcs)
+            # For auto_scalar candidates, toreg/tomsk/store requirements on
+            # conditional types are handled inline with a #if guard + memcpy
+            # fallback in the generated code, and are NOT structural deps that
+            # build_ifdef_rec should follow. Strip them out before registering
+            # to avoid infinite recursion.
+            if cand["type"] == "auto_scalar":
+                filtered_reqs = {}
+                for req_f, req_dt_keys in reqs.items():
+                    if req_f in ("toreg", "tomsk", "store"):
+                        kept = []
+                        for req_dt_key in req_dt_keys:
+                            req_dt_par = req_dt_key.split(",")[0]
+                            req_type_guard = isa.get("datatypes", {}).get(req_dt_par, {}).get("if", None)
+                            if not (req_type_guard and req_type_guard != "0"):
+                                kept.append(req_dt_key)
+                        if kept:
+                            filtered_reqs[req_f] = kept
+                    else:
+                        filtered_reqs[req_f] = req_dt_keys
+                reqs = filtered_reqs
+            _append_resolved_status(funcs, f, dt_key, mask_kind, cond, reqs)
+
+    # 2. Write code to files
+    for f in funcs:
+        file_w = file.get_fd(isa["name"], f) if is_inc_mgr else file
+        if emit_separators and is_inc_mgr:
+            if lmul in [2, 4, 8]:
+                from codegen.lmul_orchestrator import _maybe_emit_lmul_separator
+                _maybe_emit_lmul_separator(isa["name"], f, file_w)
+            elif lmul < 0:
+                from codegen.lmul_orchestrator import _maybe_emit_ldiv_separator
+                _maybe_emit_ldiv_separator(isa["name"], f, file_w)
+        
+        # Emit forward declarations first to prevent order-of-declaration issues
+        for dt in funcs[f]["datatypes"]:
+            dt_par, dt_ret = compute_dt_par_dt_ret(None, None, dt, check_support=False)
+            dt_key = dt_par + "," + dt_ret
+            
+            mask_kinds = [None]
+            if "mask_support" in funcs[f]:
+                support = funcs[f]["mask_support"]
+                if support.is_maskable():
+                    mask_kinds.append("mask")
+                if support.is_maskzable():
+                    mask_kinds.append("maskz")
+                if support.is_masksable():
+                    mask_kinds.append("masks")
+                    
+            for mask_kind in mask_kinds:
+                key = (f, dt_key, mask_kind)
+                if resolved[key]:
+                    has_active = any(cond != "0" for cand, cond in resolved[key])
+                    if has_active:
+                        func_name = _build_func_name(isa, dt, dt_par, dt_ret, f, masked_version=mask_kind, lmul=lmul)
+                        proto_str = build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul=lmul, isa_name=True, masked_version=mask_kind)
+                        print("static " + proto_str + ";", file=file_w)
+                        
+        for dt in funcs[f]["datatypes"]:
+            dt_par, dt_ret = compute_dt_par_dt_ret(None, None, dt, check_support=False)
+            dt_key = dt_par + "," + dt_ret
+            
+            mask_kinds = [None]
+            if "mask_support" in funcs[f]:
+                support = funcs[f]["mask_support"]
+                if support.is_maskable():
+                    mask_kinds.append("mask")
+                if support.is_maskzable():
+                    mask_kinds.append("maskz")
+                if support.is_masksable():
+                    mask_kinds.append("masks")
+                    
+            for mask_kind in mask_kinds:
+                key = (f, dt_key, mask_kind)
+                for cand, cond in resolved[key]:
+                    if cond == "0":
+                        continue
+                    
+                    if cand["type"] in ["native_or_emu", "generic_emu"]:
+                        pre_rendering = _render_template(isa, cand["ff"], dt_par, dt_ret, func_name=f, lmul=lmul)
+                        ph_ret = parse_placeholders(pre_rendering, isa, funcs, f, dt_par, dt_ret, lmul=lmul)
+                        post_rendering = ph_ret["converted_ir"]
+                        
+                        if not cand.get("emitted", False):
+                            print("", file=file_w)
+                            if cond != "":
+                                print(f"#if {cond}", file=file_w)
+                            _emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, cand["ff"], post_rendering, file_w, masked_version=mask_kind, level=cand["level"], lmul=lmul)
+                            if cond != "":
+                                print("#endif", file=file_w)
+                            
+                    elif cand["type"] == "auto_scalar":
+                        _gen_c_auto_scalar_fallback_one(isa, file_w, funcs, f, dt, mask_kind, cond, lmul=lmul)
+                        
+                    elif cand["type"] == "stub":
+                        if cond != "":
+                            print(f"#if {cond}", file=file_w)
+                        func_name = _build_func_name(isa, dt, dt_par, dt_ret, f, masked_version=mask_kind, lmul=lmul)
+                        _missing_emit_stub(file_w, funcs, f, dt_par, dt_ret, isa, func_name, masked_version=mask_kind, lmul=lmul)
+                        if cond != "":
+                            print("#endif", file=file_w)
