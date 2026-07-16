@@ -260,16 +260,18 @@ def _gen_c_function_one_ldiv_avx(isa_base, isa_div, file, funcs, f, ff, dt, mask
     print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa_div, func_name_impl, masked_version=mask_kind) + ";", file=file)
     print("}", file=file)
 
-def gen_c_lmul(isa, include_manager, funcs):
+def gen_c_lmul(isa, include_manager, funcs, sw_lmuls=None):
+    if sw_lmuls is None:
+        sw_lmuls = all_lmul
     for f in funcs:
         file_w = include_manager.get_fd(isa["name"], f)
 
         for dt in funcs[f]["datatypes"]:
             dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
-            for lmul in all_lmul:
+            for lmul in sw_lmuls:
                 _c_lmul_writer(f=f, dt=dt, dt_par=dt_par, dt_ret=dt_ret, isa=isa, funcs=funcs, file=file_w, lmul=lmul)
         
-            for lmul in all_lmul:
+            for lmul in sw_lmuls:
                 mask_status = ""
                 if "mask_support" in funcs[f]:
                     mask_status = funcs[f]["mask_support"]
@@ -308,214 +310,4 @@ def gen_c_ldiv(isa_base, isa_div, include_manager, funcs):
                 dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
                 _gen_c_function_one_ldiv_avx(isa_base=isa_base, isa_div=isa_div, file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind="masks", ldiv=2)
 
-def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions_fix=None, cand_type="native_or_emu"):
-    for f in implems:
-        if f not in funcs:
-            print("Panic: '" + f + "' function does not exist.")
-            exit(-1)
 
-        file = include_manager.get_fd(isa["name"], f)
-        if lmul in [2, 4, 8]:
-            maybe_emit_lmul_separator(isa["name"], f, file)
-        elif lmul < 0:
-            maybe_emit_ldiv_separator(isa["name"], f, file)
-
-        if "candidates" not in isa:
-            isa["candidates"] = []
-        
-        for ff in implems[f]:
-            if is_masked_implem(f, ff):
-                for dt in ff["datatypes"]:
-                    dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
-                    dt_key = dt_par + "," + dt_ret
-                    mask_kind = ff["version"]
-                    ff_local = ff.copy()
-                    guards = []
-                    if cand_type == "native_or_emu":
-                        g_par = None
-                        g_ret = None
-                        if lmul < 0:
-                            ldiv = str(-lmul)
-                            if "if_ldiv" in isa.get("datatypes", {}).get(dt_par, {}) and ldiv in isa["datatypes"][dt_par]["if_ldiv"]:
-                                g_par = isa["datatypes"][dt_par]["if_ldiv"][ldiv]
-                            if "if_ldiv" in isa.get("datatypes", {}).get(dt_ret, {}) and ldiv in isa["datatypes"][dt_ret]["if_ldiv"]:
-                                g_ret = isa["datatypes"][dt_ret]["if_ldiv"][ldiv]
-                        if not g_par:
-                            g_par = isa.get("datatypes", {}).get(dt_par, {}).get("if", None)
-                        if not g_ret:
-                            g_ret = isa.get("datatypes", {}).get(dt_ret, {}).get("if", None)
-                        if g_par: guards.append(g_par)
-                        if g_ret and g_ret not in guards: guards.append(g_ret)
-                    elif cand_type == "generic_emu":
-                        pass
-                    guard = " && ".join(guards) if guards else None
-                    if guard:
-                        if "if" in ff_local and ff_local["if"]:
-                            ff_local["if"] = ff_local["if"] + " && " + guard
-                        else:
-                            ff_local["if"] = guard
-
-                    c_dict = {
-                        "type": cand_type,
-                        "f": f,
-                        "ff": ff_local,
-                        "dt": dt,
-                        "emitted": False,
-                        "level": ff.get("level", 1 if ("type" in ff and ff["type"] == "emulated") else 0)
-                    }
-                    if c_dict not in isa["candidates"]:
-                        isa["candidates"].append(c_dict)
-
-                    if (not is_missing_masked_func(funcs, f, dt_key, mask_kind)) and _rvv_seen_lmul_masked(funcs, f, dt_key, mask_kind, lmul):
-                        continue
-
-                    pre_rendering = render_template(isa, ff_local, dt_par, dt_ret, func_name=f)
-                    ph_ret = parse_placeholders_or_skip(
-                        pre_rendering=pre_rendering,
-                        isa=isa,
-                        funcs=funcs,
-                        f=f,
-                        dt_par=dt_par,
-                        dt_ret=dt_ret,
-                        dt_key=dt_key,
-                        file=file,
-                        lmul=lmul,
-                    )
-                    if ph_ret is None:
-                        continue
-
-                    ifd_prev = build_prev_exclusion_ifdef(funcs, f, dt_key, ff_local, mask_kind=mask_kind)
-                    append_implem_status(funcs, f, dt_key, ff_local, ph_ret["requirements"], mask_kind=mask_kind)
-
-                    ifd = combine_current_ifdefs(funcs, f, dt_key, ifd_prev, mask_kind=mask_kind)
-                    if ifd == "0":
-                        continue
-
-                    print("", file=file)
-                    emit_ifdef_begin_and_update_emulated(funcs, f, dt_key, ff_local, ifd, file, mask_kind=mask_kind)
-                    post_rendering = ph_ret["converted_ir"]
-                    if lmul > 1 and reductions_fix and (f in reductions_fix) and (dt in reductions_fix[f]):
-                        post_rendering_to_emit = reductions_fix[f][dt]
-                    else:
-                        post_rendering_to_emit = post_rendering
-         
-                    emit_function_body(
-                        funcs=funcs,
-                        f=f,
-                        isa=isa,
-                        dt=dt,
-                        dt_par=dt_par,
-                        dt_ret=dt_ret,
-                        ff=ff_local,
-                        post_rendering=post_rendering_to_emit,
-                        file=file,
-                        masked_version=mask_kind,
-                        lmul=lmul,
-                    )
-                    c_dict["emitted"] = True
-                    emit_ifdef_end(ifd, file)
-                    _rvv_mark_lmul_seen_masked(funcs, f, dt_key, mask_kind, lmul)
-
-            else:
-                for dt in ff["datatypes"]:
-                    dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
-                    dt_key = dt_par + "," + dt_ret
-                    ff_local = ff.copy()
-                    guards = []
-                    if cand_type == "native_or_emu":
-                        g_par = None
-                        g_ret = None
-                        if lmul < 0:
-                            ldiv = str(-lmul)
-                            if "if_ldiv" in isa.get("datatypes", {}).get(dt_par, {}) and ldiv in isa["datatypes"][dt_par]["if_ldiv"]:
-                                g_par = isa["datatypes"][dt_par]["if_ldiv"][ldiv]
-                            if "if_ldiv" in isa.get("datatypes", {}).get(dt_ret, {}) and ldiv in isa["datatypes"][dt_ret]["if_ldiv"]:
-                                g_ret = isa["datatypes"][dt_ret]["if_ldiv"][ldiv]
-                        if not g_par:
-                            g_par = isa.get("datatypes", {}).get(dt_par, {}).get("if", None)
-                        if not g_ret:
-                            g_ret = isa.get("datatypes", {}).get(dt_ret, {}).get("if", None)
-                        if g_par: guards.append(g_par)
-                        if g_ret and g_ret not in guards: guards.append(g_ret)
-                    elif cand_type == "generic_emu":
-                        g_par = None
-                        g_ret = None
-                        if lmul < 0:
-                            ldiv = str(-lmul)
-                            if "if_ldiv" in isa.get("datatypes", {}).get(dt_par, {}) and ldiv in isa["datatypes"][dt_par]["if_ldiv"]:
-                                g_par = isa["datatypes"][dt_par]["if_ldiv"][ldiv]
-                            if "if_ldiv" in isa.get("datatypes", {}).get(dt_ret, {}) and ldiv in isa["datatypes"][dt_ret]["if_ldiv"]:
-                                g_ret = isa["datatypes"][dt_ret]["if_ldiv"][ldiv]
-                        if not g_par:
-                            g_par = isa.get("datatypes", {}).get(dt_par, {}).get("if", None)
-                        if not g_ret:
-                            g_ret = isa.get("datatypes", {}).get(dt_ret, {}).get("if", None)
-                        if g_par: guards.append(g_par)
-                        if g_ret and g_ret not in guards: guards.append(g_ret)
-                    guard = " && ".join(guards) if guards else None
-                    if guard:
-                        if "if" in ff_local and ff_local["if"]:
-                            ff_local["if"] = ff_local["if"] + " && " + guard
-                        else:
-                            ff_local["if"] = guard
-
-                    c_dict = {
-                        "type": cand_type,
-                        "f": f,
-                        "ff": ff_local,
-                        "dt": dt,
-                        "emitted": False,
-                        "level": ff.get("level", 1 if ("type" in ff and ff["type"] == "emulated") else 0)
-                    }
-                    if c_dict not in isa["candidates"]:
-                        isa["candidates"].append(c_dict)
-
-                    if (not is_missing_func(funcs, f, dt_key)) and _rvv_seen_lmul(funcs, f, dt_key, lmul):
-                        continue
-
-                    pre_rendering = render_template(isa, ff_local, dt_par, dt_ret)
-                    ph_ret = parse_placeholders_or_skip(
-                        pre_rendering=pre_rendering,
-                        isa=isa,
-                        funcs=funcs,
-                        f=f,
-                        dt_par=dt_par,
-                        dt_ret=dt_ret,
-                        dt_key=dt_key,
-                        file=file,
-                        lmul=lmul,
-                    )
-                    if ph_ret is None:
-                        continue
-
-                    ifd_prev = build_prev_exclusion_ifdef(funcs, f, dt_key, ff_local)
-                    append_implem_status(funcs, f, dt_key, ff_local, ph_ret["requirements"])
-
-                    ifd = combine_current_ifdefs(funcs, f, dt_key, ifd_prev)
-                    if ifd == "0":
-                        continue
-
-                    print("", file=file)
-                    emit_ifdef_begin_and_update_emulated(funcs, f, dt_key, ff_local, ifd, file)
-                    post_rendering = ph_ret["converted_ir"]
-                    if lmul > 1 and reductions_fix and (f in reductions_fix) and (dt in reductions_fix[f]):
-                        post_rendering_to_emit = reductions_fix[f][dt]
-                    else:
-                        post_rendering_to_emit = post_rendering
-
-                    emit_function_body(
-                        funcs=funcs,
-                        f=f,
-                        isa=isa,
-                        dt=dt,
-                        dt_par=dt_par,
-                        dt_ret=dt_ret,
-                        ff=ff_local,
-                        post_rendering=post_rendering_to_emit,
-                        file=file,
-                        masked_version=None,
-                        lmul=lmul,
-                    )
-                    c_dict["emitted"] = True
-                    emit_ifdef_end(ifd, file)
-                    _rvv_mark_lmul_seen(funcs, f, dt_key, lmul)

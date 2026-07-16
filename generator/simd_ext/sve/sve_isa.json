@@ -11,7 +11,8 @@
     "hw_mask": true,
     "hw_mask_requires_toreg": true,
     "define": "defined(__ARM_FEATURE_SVE)",
-    "hw_lmul": true,
+    "hw_lmul": [1],
+    "sw_lmul": [],
     "datatypes": {
         "float64": {
             "data_ext": "f64",

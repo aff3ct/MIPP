@@ -260,16 +260,16 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond, lm
         return_statement=return_statement
     ), file=file)
 
-def _get_candidate_reqs(cand, isa, funcs):
+def _get_candidate_reqs(cand, isa, funcs, lmul=0):
     if "reqs" in cand:
         return cand["reqs"]
     f = cand["f"]
     ff = cand["ff"]
     dt = cand["dt"]
     dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
-    pre_rendering = render_template(isa, ff, dt_par, dt_ret, func_name=f)
+    pre_rendering = render_template(isa, ff, dt_par, dt_ret, func_name=f, lmul=lmul)
     try:
-        reqs = get_requirements(pre_rendering, isa, funcs, f, dt_par, dt_ret)
+        reqs = get_requirements(pre_rendering, isa, funcs, f, dt_par, dt_ret, lmul=lmul)
     except Exception:
         reqs = {}
     cand["reqs"] = reqs
@@ -459,7 +459,7 @@ def resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators
                 if target_cond is None:
                     continue
                     
-                reqs = _get_candidate_reqs(cand, isa, funcs)
+                reqs = _get_candidate_reqs(cand, isa, funcs, lmul=lmul)
                 deps_satisfied = True
                 restricted_target_cond = target_cond
                 for req_f in reqs:
@@ -524,7 +524,7 @@ def resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators
         for cand, cond in resolved[key]:
             if cond == "0":
                 continue
-            reqs = _get_candidate_reqs(cand, isa, funcs)
+            reqs = _get_candidate_reqs(cand, isa, funcs, lmul=lmul)
             # For auto_scalar candidates, toreg/tomsk/store requirements on
             # conditional types are handled inline with a #if guard + memcpy
             # fallback in the generated code, and are NOT structural deps that
