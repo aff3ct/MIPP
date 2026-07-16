@@ -27,13 +27,13 @@ _, implems_sve, implems_emu_sve = load_isa_config("sve")
 _, implems_rvv, implems_emu_rvv = load_isa_config("rvv")
 _, implems_neon, implems_emu_neon = load_isa_config("neon")
 
-from headers_def import implems_scalar
-from headers_def import mipp_funcs, mipp_funcs_concepts
+from registry import implems_scalar
+from registry import mipp_funcs, mipp_funcs_categories
 from cpp_generator import set_functions
 from tools import *
 from helpers_tests import get_gen_test_dict, test_function_name, get_gen_test_dict_lmul, get_gen_test_dict_mask
 
-from generic_emu import implems_generic_emu
+from registry import implems_generic_emu
 
 avx512_guard = "#if defined(MIPP_AVX512)"
 avx2_guard = "#elif defined(MIPP_AVX2)"
@@ -90,7 +90,7 @@ set_skip_testing = {
 }
 
 #every func that has the key "horizontal" set to false
-#in headers_def.mipp_funcs will be generated with lmuls
+#in registry.mipp_funcs will be generated with lmuls
 #except for RVV which where lmul variants will be generated for 
 #every function.
 mipp_funcs_lmul = {
@@ -193,12 +193,12 @@ def is_signed_int_dt(dt):
 def match_concept(func):
     """
     helper to match a func to an 
-    entry in mipp_funcs_concepts. 
+    entry in mipp_funcs_categories. 
     This is used to write files in the relevant 
     subdir for their concept.
     """
-    for concept in mipp_funcs_concepts:
-        if func in mipp_funcs_concepts[concept]:
+    for concept in mipp_funcs_categories:
+        if func in mipp_funcs_categories[concept]:
             if concept == "a_trier":
                 return "miscellaneous"
             return concept
@@ -339,7 +339,7 @@ def add_type_guards(func, implem, function, kind="c", lmul=0, mkind="", guard = 
     
     N.B : WILL NOT GENERATE TESTS FOR DTTYPES IF THE FUNC IS NOT DEFINED
     FOR THOSE DTTYPES IN IMPLEM. EVEN IF THE FUNC IS DEFINED FOR THOSE 
-    DTTYPES IN headers_def.mipp_funcs[func]["datatypes"].
+    DTTYPES IN registry.mipp_funcs[func]["datatypes"].
     THIS IS FORE EASE OF TESTS.
     """
     datatypes = get_defined_dttypes(func, implem, mkind)
@@ -1448,19 +1448,19 @@ def gen_test_files_all_funcs(kind="all", lmul=0, mkind="", N=10, mode="function_
         os.makedirs(tmp_path, exist_ok=True)
     if regen_c:
         os.makedirs(cpath, exist_ok=True)
-        for concept in mipp_funcs_concepts:
+        for concept in mipp_funcs_categories:
             if concept != "a_trier":
                 os.makedirs(cpath + concept + "/", exist_ok=True)
         os.makedirs(cpath + "miscellaneous/", exist_ok=True)
     if regen_cpp:
         os.makedirs(cpppath, exist_ok=True)
-        for concept in mipp_funcs_concepts:
+        for concept in mipp_funcs_categories:
             if concept != "a_trier":
                 os.makedirs(cpppath + concept + "/", exist_ok=True)
         os.makedirs(cpppath + "miscellaneous/", exist_ok=True)
     if regen_obj:
         os.makedirs(objpath, exist_ok=True)
-        for concept in mipp_funcs_concepts:
+        for concept in mipp_funcs_categories:
             if concept != "a_trier":
                 os.makedirs(objpath + concept + "/", exist_ok=True)
         os.makedirs(objpath + "miscellaneous/", exist_ok=True)

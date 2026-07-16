@@ -3,10 +3,10 @@ from jinja2 import Template, StrictUndefined
 import json
 
 from tools import *
-from headers_def import *
+from registry import *
 isa_sse, implems_sse, implems_emu_sse = load_isa_config("sse")
 from c_generator import *
-from generic_emu import *
+
 
 from include_gen import IncludeManager
 

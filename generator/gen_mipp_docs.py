@@ -24,10 +24,10 @@ isa_rvv, implems_rvv, implems_emu_rvv = load_isa_config("rvv")
 isa_neon, implems_neon, implems_emu_neon = load_isa_config("neon")
 isa_sve, implems_sve, implems_emu_sve = load_isa_config("sve")
 
-from headers_def import mipp_funcs, mipp_funcs_concepts, isa_scalar, implems_scalar
-from headers_def import all_datatypes, all_datatypes_cart_prod
+from registry import mipp_funcs, mipp_funcs_categories, isa_scalar, implems_scalar
+from registry import all_datatypes, all_datatypes_cart_prod
 from tools import *
-from generic_emu import *
+from registry import *
 
 from gen_mipp_sse import gen_mipp_sse
 from gen_mipp_avx import gen_mipp_avx
@@ -426,7 +426,7 @@ class MippInfo:
         return intersection
 
 
-def write_mipp_infos(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_funcs_concepts = mipp_funcs_concepts):
+def write_mipp_infos(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_funcs_categories = mipp_funcs_categories):
     #for each isa write a md file with the list of functions and their supported types
     #we put functions in a table where x is dttype
     # y is function name,
@@ -448,7 +448,7 @@ def write_mipp_infos(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_funcs_c
         file_path = os.path.join(base_dir, isa_info.isa_name + ".md")
         with open(file_path, "w") as f:
             dttypes = all_datatypes
-            for concept in mipp_funcs_concepts:
+            for concept in mipp_funcs_categories:
 
                 #we write one table per concept
                 print("\n## " + concept + "\n", file=f)
@@ -458,7 +458,7 @@ def write_mipp_infos(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_funcs_c
                 for func in mipp_funcs:
                     if func == "cast" or func == "cast_k":
                         continue
-                    if func in mipp_funcs_concepts[concept]:
+                    if func in mipp_funcs_categories[concept]:
                         func_info = isa_info.get_func_info(func)
                         if func_info is not None:
                             line = "| " + func + " | "
@@ -492,7 +492,7 @@ def write_mipp_infos(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_funcs_c
             for func in mipp_funcs:
                 if func == "cast" or func == "cast_k":
                     continue                               
-                if all(func not in mipp_funcs_concepts[concept] for concept in mipp_funcs_concepts):
+                if all(func not in mipp_funcs_categories[concept] for concept in mipp_funcs_categories):
                     func_info = isa_info.get_func_info(func)
                     if func_info is not None:
                         line = "| " + func + " | "
@@ -548,14 +548,14 @@ def write_mipp_infos(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_funcs_c
                     print(line, file=f)
 
 def exists_any_msk_in_concept(concept):
-    for func in mipp_funcs_concepts[concept]:
+    for func in mipp_funcs_categories[concept]:
         if "mask_support" in mipp_funcs[func]:
             if mipp_funcs[func]["mask_support"].is_any_mask():
                 return True
     return False
 
 def exists_msk_in_concept(concept, mkind):
-    for func in mipp_funcs_concepts[concept]:
+    for func in mipp_funcs_categories[concept]:
         if func not in mipp_funcs:
             continue
         if "mask_support" in mipp_funcs[func]:
@@ -577,7 +577,7 @@ def exists_msk_in_func(func, mkind):
             return True
     return False
 
-def write_mipp_infos_masked(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_funcs_concepts = mipp_funcs_concepts):
+def write_mipp_infos_masked(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_funcs_categories = mipp_funcs_categories):
     #same as write_mipp_infos but we write a table for each mask kind (mask, maskz, masks)
     color_green ='<span style="color: #28A745; font-weight: 600;">'
     color_blue = '<span style="color: #3B42F5; font-weight: 600;">'
@@ -593,7 +593,7 @@ def write_mipp_infos_masked(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_
             dttypes = all_datatypes
             for mkind in ["mask", "maskz", "masks"]:
                 print("\n## " + mkind + "\n", file=f)
-                for concept in mipp_funcs_concepts:
+                for concept in mipp_funcs_categories:
                     if not exists_msk_in_concept(concept, mkind):
                         continue
                     print("\n### " + concept + "\n", file=f)
@@ -604,7 +604,7 @@ def write_mipp_infos_masked(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_
                             continue
                         if func == "cast" or func == "cast_k":
                             continue
-                        if func in mipp_funcs_concepts[concept]:
+                        if func in mipp_funcs_categories[concept]:
                             func_info = isa_info.get_func_info(func)
                             if func_info is not None :
                                 line = "| " + func + " | "
@@ -643,7 +643,7 @@ def write_mipp_infos_masked(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_
                         continue  
                     if not exists_msk_in_func(func, mkind):
                         continue              
-                    if all(func not in mipp_funcs_concepts[concept] for concept in mipp_funcs_concepts):
+                    if all(func not in mipp_funcs_categories[concept] for concept in mipp_funcs_categories):
                         func_info = isa_info.get_func_info(func)
                         if func_info is not None :
                             line = "| " + func + " | "
@@ -746,7 +746,7 @@ class SpecFuncInfo:
         self.dttypes = []
         self.concept = None
     
-    def gen_spec_func_info(self, func, mipp_funcs, mipp_funcs_concepts):
+    def gen_spec_func_info(self, func, mipp_funcs, mipp_funcs_categories):
         self.func_name = func
         self.args = mipp_funcs[func]["proto"]["args"]
         self.ret = mipp_funcs[func]["proto"]["ret"]
@@ -754,8 +754,8 @@ class SpecFuncInfo:
         self.mask_support = mipp_funcs[func]["mask_support"]
         
         self.concept = "miscellaneous"
-        for concept in mipp_funcs_concepts:
-            if func in mipp_funcs_concepts[concept]:
+        for concept in mipp_funcs_categories:
+            if func in mipp_funcs_categories[concept]:
                 self.concept = concept
                 break
             
@@ -896,10 +896,10 @@ class SpecFuncInfos:
     def __init__(self):
         self.spec_func_infos = []
     
-    def gen_spec_func_infos(self, mipp_funcs, mipp_funcs_concepts):
+    def gen_spec_func_infos(self, mipp_funcs, mipp_funcs_categories):
         for func in mipp_funcs:
             spec_func_info = SpecFuncInfo()
-            spec_func_info.gen_spec_func_info(func, mipp_funcs, mipp_funcs_concepts)
+            spec_func_info.gen_spec_func_info(func, mipp_funcs, mipp_funcs_categories)
             self.spec_func_infos.append(spec_func_info)
     
     def write_spec_func_infos(self, base_dir):
@@ -947,7 +947,7 @@ def main():
     os.makedirs("../docs/funcs_support/")
     
     spec_func_infos = SpecFuncInfos()
-    spec_func_infos.gen_spec_func_infos(mipp_funcs, mipp_funcs_concepts)
+    spec_func_infos.gen_spec_func_infos(mipp_funcs, mipp_funcs_categories)
     spec_func_infos.write_spec_func_infos("../docs/funcs_support/")
     
 if __name__ == "__main__":

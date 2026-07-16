@@ -5,11 +5,11 @@ import json
 import copy
 
 from tools import *
-from headers_def import *
+from registry import *
 isa_avx, implems_avx, implems_emu_avx = load_isa_config("avx")
 isa_sse, _, _ = load_isa_config("sse")
 from c_generator import *
-from generic_emu import *
+
 
 from include_gen import IncludeManager
 

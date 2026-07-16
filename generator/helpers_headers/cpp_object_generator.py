@@ -1,8 +1,13 @@
+"""
+C++ OOP Wrapper Generator Module
+Generates the C++ object-oriented wrappers (e.g. `Rvd` and `Rvm` classes)
+and overloaded operators (arithmetic, bitwise, comparison) for MIPP.
+"""
 from jinja2 import Template, StrictUndefined
 import json
 import re
 
-from headers_def import *
+from registry import *
 from tools import *
 from include_gen import IncludeManager
 

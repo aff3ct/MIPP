@@ -2,7 +2,7 @@ from jinja2 import Template, StrictUndefined
 import json
 
 from tools import *
-from headers_def import *
+from registry import *
 isa_sve, implems_sve, implems_emu_sve = load_isa_config("sve")
 from c_generator import *
 

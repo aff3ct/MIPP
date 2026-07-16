@@ -5,9 +5,9 @@ import json
 import copy
 
 from tools import *
-from headers_def import *
+from registry import *
 from c_generator import *
-from generic_emu import *
+
 
 from include_gen import IncludeManager
 

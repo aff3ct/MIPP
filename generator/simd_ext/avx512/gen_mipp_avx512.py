@@ -5,9 +5,9 @@ import json
 
 
 from tools import *
-from headers_def import *
+from registry import *
 isa_avx512, implems_avx512, implems_emu_avx512 = load_isa_config("avx512")
-from generic_emu import *
+
 from c_generator import *
 
 from include_gen import IncludeManager

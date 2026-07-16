@@ -3,9 +3,9 @@ from jinja2 import Template, StrictUndefined
 import json
 
 from tools import *
-from headers_def import *
+from registry import *
 isa_neon, implems_neon, implems_emu_neon = load_isa_config("neon")
-from generic_emu import *
+
 from c_generator import *
 from include_gen import IncludeManager
 

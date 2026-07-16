@@ -1,7 +1,12 @@
+"""
+Include Generator Module
+Manages output directories and file creation, tracking preprocessor wrappers,
+headers formatting, and dependency generation structures.
+"""
 import os, tempfile, shutil
 
 from tools import *
-from headers_def import *
+from registry import *
 
 # WIP : This is not actually implemented **YET**
 # dependencies mode in : 
@@ -37,15 +42,15 @@ def get_include_path(func, layer):
 def match_concept(func):
     """
     helper to match a func to an 
-    entry in mipp_funcs_concepts. 
+    entry in mipp_funcs_categories. 
     This is used to write files in the relevant 
     subdir for their concept.
     """
     if func == "common":
         return "common"
     
-    for concept in mipp_funcs_concepts:
-        if func in mipp_funcs_concepts[concept]:
+    for concept in mipp_funcs_categories:
+        if func in mipp_funcs_categories[concept]:
             if concept == "a_trier":
                 return "miscellaneous"
             return concept
@@ -613,7 +618,7 @@ class IncludeManager:
         
         for layer in self.layers:
             for func in ["common"] + list(mipp_funcs.keys()):
-                self.layers[layer].add_includes(func, mipp_funcs, mipp_funcs_concepts)
+                self.layers[layer].add_includes(func, mipp_funcs, mipp_funcs_categories)
         #generate fd for each include path
         # for layer in self.layers:
         #     self.layers[layer].get_fd("../include")
@@ -750,3 +755,26 @@ class IncludeManager:
                 category = func
                 if category in layer.categories:
                     layer.categories[category].write_custom_prefix(custom_prefix, f"{target_dir}/functions")
+
+def generate_mipp_h(include_manager=None):
+    from jinja2 import Template, StrictUndefined
+    from registry import mipp_funcs
+
+    file = open("../include/mipp.h", "w")
+
+    template_file = """#ifndef MY_INTRINSICS_PLUS_PLUS_H_
+#define MY_INTRINSICS_PLUS_PLUS_H_
+#include "simd_ext/scalar/mipp_impl_scalar_gen.h" // not a big fan of this.
+#include "c/common.h"
+"""
+
+    include_list = ""
+    for func in mipp_funcs:
+        include_list += "#include \"c/functions/" +  func + ".h\"\n"
+    postfix = """#endif /* MY_INTRINSICS_PLUS_PLUS_H_ */"""
+ 
+    template_file += include_list + "\n" + postfix
+
+    j2_template = Template(template_file, undefined=StrictUndefined)
+    print(j2_template.render(), file=file)
+    file.close()

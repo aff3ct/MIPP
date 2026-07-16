@@ -1,13 +1,17 @@
+"""
+C Interface Generator Module
+Generates the C-style interface wrapping MIPP functions for interoperability.
+"""
 from jinja2 import Template, StrictUndefined, Environment, FileSystemLoader
 import json
 import re
 
 from tools import *
-from headers_def import *
+from registry import *
 from include_gen import IncludeManager
 
 from c_generator import gen_c_horiz_lmul 
-from generic_emu import implems_horiz_lmul_generic_emu
+from registry import implems_horiz_lmul_generic_emu
 
 isa_avx512, _, _ = load_isa_config("avx512")
 isa_avx, _, _ = load_isa_config("avx")

@@ -216,7 +216,7 @@ def _c_lmul_writer(f, dt, dt_par, dt_ret, isa, funcs, file, mask_type=None, lmul
         print("}", file=file)
     else:
         # Avoid direct import loop by resolving dynamically or calling local gen_c_horiz_lmul
-        from generic_emu import implems_horiz_lmul_generic_emu
+        from registry import implems_horiz_lmul_generic_emu
         gen_c_horiz_lmul(
             isa=isa,
             file=file,

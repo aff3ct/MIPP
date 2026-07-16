@@ -27,9 +27,9 @@ isa_avx512, _, _ = load_isa_config("avx512")
 isa_sve, _, _ = load_isa_config("sve")
 isa_rvv, _, _ = load_isa_config("rvv")
 isa_neon, _, _ = load_isa_config("neon")
-from headers_def import isa_scalar
-from headers_def import implems_scalar
-from headers_def import mipp_funcs
+from registry import isa_scalar
+from registry import implems_scalar
+from registry import mipp_funcs
 
 from gen_mipp_sse import gen_mipp_sse
 from gen_mipp_avx import gen_mipp_avx
@@ -39,7 +39,7 @@ from gen_mipp_rvv import gen_mipp_rvv
 from gen_mipp_neon import gen_mipp_neon
 from gen_mipp_scalar import gen_mipp_scalar
 
-from mipp_h import generate_mipp_h
+from include_gen import generate_mipp_h
 from ci_generator import generate_c_interface
 from cpp_generator import generate_cpp
 from cpp_object_generator import generate_cpp_object

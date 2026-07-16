@@ -13,22 +13,10 @@ from tools import *
 from tools import negate_cond as tool_negate_cond
 from tools import are_conds_mutually_exclusive as tool_are_conds_mutually_exclusive
 from tools import intersect_conds as tool_intersect_conds
-from tools import _build_func_name, _get_dt_par_size
-from headers_def import isa_scalar
+from tools import _build_func_name, _get_dt_par_size, _is_guard_dead_under_cond
+from registry import isa_scalar
 from codegen.implem_tracker import _get_implem_bucket, _missing_build_negated_ifdef_for_existing_implems
 from codegen.emit_helpers import _emit_function_body
-
-def _is_guard_dead_under_cond(guard, cond):
-    """
-    Returns True if `guard` is always False when `cond` is True,
-    i.e. the function is compiled under #if !(<guard>), making any
-    #if <guard> block inside the body unreachable dead code.
-    """
-    if not guard or guard == "0" or not cond:
-        return False
-    # Normalize whitespace before comparing
-    neg_guard = f"!( {guard} )"
-    return (neg_guard.replace(" ", "") == cond.replace(" ", ""))
 
 
 def _missing_emit_ifdef_begin(ifd, file):

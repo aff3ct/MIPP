@@ -7,9 +7,9 @@ import sys
 sys.path.insert(1, '.')
 
 from tools import *
-from headers_def import *
+from registry import *
 isa_rvv, implems_rvv, implems_emu_rvv = load_isa_config("rvv")
-from generic_emu import *
+
 from c_generator import gen_c_functions_rvv, gen_c_missing_functions_lmul
 
 from include_gen import IncludeManager

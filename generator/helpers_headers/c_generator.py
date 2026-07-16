@@ -1,3 +1,8 @@
+"""
+C Generator Module
+Orchestrates the generation of C-style SIMD headers, registry defines, typedefs,
+and fallback implementations for each SIMD ISA.
+"""
 from jinja2 import Template, StrictUndefined
 import json
 import re
@@ -9,7 +14,7 @@ sys.path.insert(1, os.path.dirname(os.path.abspath(__file__)))
 
 from tools import *
 from include_gen import *
-from generic_emu import *
+from registry import *
 
 # Expose everything from codegen sub-modules for backwards-compatibility
 from codegen.emit_helpers import *

@@ -1,9 +1,14 @@
+"""
+C++ Header Generator Module
+Generates the C++ namespace wrapper (`mipp::`) and function overloads
+for the MIPP library.
+"""
 from jinja2 import Template, StrictUndefined
 import json
 import re
 
 from tools import *
-from headers_def import *
+from registry import *
 from include_gen import IncludeManager
 from ci_generator import duplicate_isa_sve_along_size
 
