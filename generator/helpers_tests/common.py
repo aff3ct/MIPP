@@ -99,7 +99,7 @@ SUPPORTED_SHAPES = {
 
 def classify_mipp_proto(proto):
     """
-    proto is one of headers_def.protos[...] (ret/args with "type" keys).
+    proto is one of registry.protos[...] (ret/args with "type" keys).
     """
     ret_t = proto["ret"]["type"]              # "reg", "msk", "val", or False
     args_t = [a["type"] for a in proto["args"]]

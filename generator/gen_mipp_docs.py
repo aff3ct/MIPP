@@ -25,7 +25,7 @@ isa_neon, implems_neon, implems_emu_neon = load_isa_config("neon")
 isa_sve, implems_sve, implems_emu_sve = load_isa_config("sve")
 
 from registry import mipp_funcs, mipp_funcs_categories, isa_scalar, implems_scalar
-from registry import all_datatypes, all_datatypes_cart_prod
+from datatypes import all_datatypes, all_datatypes_cart_prod
 from tools import *
 from registry import *
 

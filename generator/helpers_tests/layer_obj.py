@@ -1,4 +1,4 @@
-from headers_def import mipp_funcs
+from registry import mipp_funcs
 from .templates import GENERIC_FOR_LOOP
 from .common import (
     TemplateParts,

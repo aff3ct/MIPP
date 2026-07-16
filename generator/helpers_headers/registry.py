@@ -7,8 +7,12 @@ import os
 import json
 import copy
 
-# Import resolve_datatypes from tools
 from tools import resolve_datatypes
+from datatypes import (
+    all_float, all_uint, all_int, all_int_uint, all_datatypes, all_64bit, all_32bit, all_16bit, all_8bit,
+    all_datatypes_cart_prod, all_datatypes_widenning,
+    float64, float32, int64, int32, int16, int8, uint64, uint32, uint16, uint8
+)
 
 class MaskSupport:
     def __init__(self, maskable=False, maskzable=False, masksable=False):
