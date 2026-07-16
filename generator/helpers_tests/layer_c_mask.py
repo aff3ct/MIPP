@@ -1,4 +1,4 @@
-from registry import mipp_funcs
+from registry import interfaces
 from .templates import GENERIC_FOR_LOOP, GENERIC_NO_LOOP
 from .common import (
     TemplateParts,
@@ -651,7 +651,7 @@ def apply_overrides(gen_dict):
 gen_test_dict_mask = build_layer_gen_test_dict(
     layer_name="c_mask",
     template=GENERIC_FOR_LOOP,
-    mipp_funcs=mipp_funcs,
+    interfaces=interfaces,
     shape_templates=shape_templates,
     deny_funcs=deny,
 )

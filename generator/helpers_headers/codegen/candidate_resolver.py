@@ -14,7 +14,7 @@ from tools import negate_cond as tool_negate_cond
 from tools import are_conds_mutually_exclusive as tool_are_conds_mutually_exclusive
 from tools import intersect_conds as tool_intersect_conds
 from tools import build_func_name_internal, get_dt_par_size, is_guard_dead_under_cond
-from registry import isa_scalar
+from registry import scalar_isa
 from codegen.implem_tracker import get_implem_bucket, missing_build_negated_ifdef_for_existing_implems
 from codegen.emit_helpers import emit_function_body
 
@@ -78,12 +78,12 @@ _FALLBACK_TEMPLATE = """{% if cond %}#if {{ cond }}
 
 def _prepare_mask_variable(pre_statements, isa, msk_dt, arg_name, cond, lmul, f, is_initial_mask=False):
     msk_dt_name = msk_dt["name"]
-    m0_scalar_type = build_type("msk", msk_dt, isa_scalar, lmul, True, False)
+    m0_scalar_type = build_type("msk", msk_dt, scalar_isa, lmul, True, False)
     pre_statements.append(f"\t{m0_scalar_type} s_{arg_name};")
     if isa.get("hw_mask", False):
         reg_vector_type = build_reg(msk_dt, isa, lmul, True, False)
-        reg_scalar_type = build_reg(msk_dt, isa_scalar, lmul, True, False)
-        scalar_tomsk_func = build_func_name_internal(isa_scalar, msk_dt_name, msk_dt_name, msk_dt_name, "tomsk", lmul=lmul)
+        reg_scalar_type = build_reg(msk_dt, scalar_isa, lmul, True, False)
+        scalar_tomsk_func = build_func_name_internal(scalar_isa, msk_dt_name, msk_dt_name, msk_dt_name, "tomsk", lmul=lmul)
         
         is_special_bitfield = False
         if isa.get("hw_mask_is_bitfield", False):
@@ -135,7 +135,7 @@ def _prepare_return_variable(post_statements, isa, dt_ret, cond, lmul, f, vector
     dt_ret_name = dt_ret["name"]
     if ret_type_name == "msk" and isa.get("hw_mask", False):
         tomsk_func = build_func_name_internal(isa, dt_ret_name, dt_ret_name, dt_ret_name, "tomsk", lmul=lmul)
-        toreg_scalar_func = build_func_name_internal(isa_scalar, dt_ret_name, dt_ret_name, dt_ret_name, "toreg", lmul=lmul)
+        toreg_scalar_func = build_func_name_internal(scalar_isa, dt_ret_name, dt_ret_name, dt_ret_name, "toreg", lmul=lmul)
         if isa.get("hw_mask_is_bitfield", False) and f in ["toreg", "tomsk", "cast_k"]:
             post_statements.append(f"\t{vector_ret_type} res;")
             post_statements.append(f"\tres.m = 0;")
@@ -155,7 +155,7 @@ def _prepare_return_variable(post_statements, isa, dt_ret, cond, lmul, f, vector
             else:
                 if ret_guard:
                     post_statements.append(f"\t#if {ret_guard}")
-                reg_scalar_type = build_reg(dt_ret, isa_scalar, lmul, True, False)
+                reg_scalar_type = build_reg(dt_ret, scalar_isa, lmul, True, False)
                 reg_vector_type = build_reg(dt_ret, isa, lmul, True, False)
                 post_statements.append(f"\t{reg_scalar_type} s_r_res = {toreg_scalar_func}(sres);")
                 post_statements.append(f"\t{reg_vector_type} r_res;")
@@ -199,7 +199,7 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond, lm
         cnt_msk += 1
         
         if mask_kind == "masks":
-            rsrc_scalar_type = build_reg(datatypes[dt_par], isa_scalar, lmul, True, False)
+            rsrc_scalar_type = build_reg(datatypes[dt_par], scalar_isa, lmul, True, False)
             pre_statements.append(f"\t{rsrc_scalar_type} s_rsrc;")
             pre_statements.append(f"\tmemcpy(&s_rsrc, &rsrc, sizeof(s_rsrc));")
             call_args.append("s_rsrc")
@@ -211,7 +211,7 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond, lm
         if arg_type_name == "reg" or arg_type_name == "ret":
             arg_name = f"r{cnt_reg}"
             cnt_reg += 1
-            scalar_type = build_type("reg", realdatatype, isa_scalar, lmul, True, False)
+            scalar_type = build_type("reg", realdatatype, scalar_isa, lmul, True, False)
             pre_statements.append(f"\t{scalar_type} s_{arg_name};")
             pre_statements.append(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof(s_{arg_name}));")
             call_args.append(f"s_{arg_name}")
@@ -232,12 +232,12 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond, lm
             call_args.append("vals")
             
     call_args_str = ", ".join(call_args)
-    scalar_func_name = build_func_name_internal(isa_scalar, dt, dt_par, dt_ret, f, masked_version=mask_kind, lmul=lmul)
+    scalar_func_name = build_func_name_internal(scalar_isa, dt, dt_par, dt_ret, f, masked_version=mask_kind, lmul=lmul)
     
     ret_type_name = proto["ret"]["type"]
     if ret_type_name == "reg" or ret_type_name == "msk":
         vector_ret_type = build_type(ret_type_name, datatypes[dt_ret], isa, lmul, True, False)
-        scalar_ret_type = build_type(ret_type_name, datatypes[dt_ret], isa_scalar, lmul, True, False)
+        scalar_ret_type = build_type(ret_type_name, datatypes[dt_ret], scalar_isa, lmul, True, False)
         call_statement = f"{scalar_ret_type} sres = {scalar_func_name}({call_args_str});"
         
         _prepare_return_variable(post_statements, isa, datatypes[dt_ret], cond, lmul, f, vector_ret_type, ret_type_name)

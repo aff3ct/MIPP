@@ -20,15 +20,15 @@ sys.path.insert(1, path + "/helpers_headers/")
 
 from tools import load_isa_config
 
-_, implems_sse, implems_emu_sse = load_isa_config("sse")
-_, implems_avx, implems_emu_avx = load_isa_config("avx")
-_, implems_avx512, implems_emu_avx512 = load_isa_config("avx512")
-_, implems_sve, implems_emu_sve = load_isa_config("sve")
-_, implems_rvv, implems_emu_rvv = load_isa_config("rvv")
-_, implems_neon, implems_emu_neon = load_isa_config("neon")
+_, sse_native_implems, sse_emu_implems = load_isa_config("sse")
+_, avx_native_implems, avx_emu_implems = load_isa_config("avx")
+_, avx512_native_implems, avx512_emu_implems = load_isa_config("avx512")
+_, sve_native_implems, sve_emu_implems = load_isa_config("sve")
+_, rvv_native_implems, rvv_emu_implems = load_isa_config("rvv")
+_, neon_native_implems, neon_emu_implems = load_isa_config("neon")
 
-from registry import implems_scalar
-from registry import mipp_funcs, mipp_funcs_categories
+from registry import scalar_implems
+from registry import interfaces, categories
 from cpp_generator import set_functions
 from tools import *
 from helpers_tests import get_gen_test_dict, test_function_name, get_gen_test_dict_lmul, get_gen_test_dict_mask
@@ -47,35 +47,35 @@ scalar_guard = "#elif defined(MIPP_SCALAR)"
 # .update can lead to bugs if there 
 # are less types in the emu implem than in non emu implem. 
 # this was the case for fmadd in RVV.
-implems_avx512.update(implems_emu_avx512)
-implems_avx.update(implems_emu_avx)
-implems_sse.update(implems_emu_sse)
-implems_sve.update(implems_emu_sve)
-implems_rvv.update(implems_emu_rvv)
-implems_neon.update(implems_emu_neon)
+avx512_native_implems.update(avx512_emu_implems)
+avx_native_implems.update(avx_emu_implems)
+sse_native_implems.update(sse_emu_implems)
+sve_native_implems.update(sve_emu_implems)
+rvv_native_implems.update(rvv_emu_implems)
+neon_native_implems.update(neon_emu_implems)
 
-#implems_avx512.update(implems_generic_emu)
-implems_avx.update(implems_generic_emu)
-implems_sse.update(implems_generic_emu)
-#implems_sve.update(implems_generic_emu)
-implems_rvv.update(implems_generic_emu)
+#avx512_native_implems.update(implems_generic_emu)
+avx_native_implems.update(implems_generic_emu)
+sse_native_implems.update(implems_generic_emu)
+#sve_native_implems.update(implems_generic_emu)
+rvv_native_implems.update(implems_generic_emu)
 
 implem_dict = {
     # avx512 has to be first bc it's the one w the #if
-    "avx512": {"implem": implems_avx512, "guard": avx512_guard},
-    "avx": {"implem": implems_avx, "guard": avx_guard},
-    "sse": {"implem": implems_sse, "guard": sse_guard},
-    "sve": {"implem": implems_sve, "guard": sve_guard},
-    "rvv": {"implem": implems_rvv, "guard": rvv_guard},
-    "neon": {"implem": implems_neon, "guard": neon_guard},
-    "scalar": {"implem": implems_scalar, "guard": scalar_guard},
+    "avx512": {"implem": avx512_native_implems, "guard": avx512_guard},
+    "avx": {"implem": avx_native_implems, "guard": avx_guard},
+    "sse": {"implem": sse_native_implems, "guard": sse_guard},
+    "sve": {"implem": sve_native_implems, "guard": sve_guard},
+    "rvv": {"implem": rvv_native_implems, "guard": rvv_guard},
+    "neon": {"implem": neon_native_implems, "guard": neon_guard},
+    "scalar": {"implem": scalar_implems, "guard": scalar_guard},
 }
 
 implem_dict_ldiv = {
-    "avx512" : {"implem" : implems_avx, "guard" : avx512_guard},
-    "avx" : {"implem" : implems_sse, "guard" : avx_guard},
-    "rvv" : {"implem" : implems_rvv, "guard" : rvv_guard},
-    "scalar" : {"implem" : implems_scalar, "guard" : scalar_guard}
+    "avx512" : {"implem" : avx_native_implems, "guard" : avx512_guard},
+    "avx" : {"implem" : sse_native_implems, "guard" : avx_guard},
+    "rvv" : {"implem" : rvv_native_implems, "guard" : rvv_guard},
+    "scalar" : {"implem" : scalar_implems, "guard" : scalar_guard}
 }
 
 set_skip_testing = {                    
@@ -90,11 +90,11 @@ set_skip_testing = {
 }
 
 #every func that has the key "horizontal" set to false
-#in registry.mipp_funcs will be generated with lmuls
+#in registry.interfaces will be generated with lmuls
 #except for RVV which where lmul variants will be generated for 
 #every function.
 mipp_funcs_lmul = {
-    func : meta for func, meta in mipp_funcs.items() if meta["horizontal"] == False
+    func : meta for func, meta in interfaces.items() if meta["horizontal"] == False
 }
 ###### HELPERS ######
 
@@ -102,7 +102,7 @@ mipp_funcs_lmul = {
 def get_defined_dttypes(func, implem, mkind=""):
     """
     func: implem key, e.g. "add", "mul", ...
-    implem: dict of the implem, e.g. implems_avx512
+    implem: dict of the implem, e.g. avx512_native_implems
     returns a list of datatypes for which the func is defined in the implem
     """
     func_dt = implem[func]
@@ -111,7 +111,7 @@ def get_defined_dttypes(func, implem, mkind=""):
         datatypes.append(dt["datatypes"])
     datatypes = list(set([item for sublist in datatypes for item in sublist]))
     if not datatypes:
-        datatypes = mipp_funcs[func]["datatypes"]
+        datatypes = interfaces[func]["datatypes"]
     return datatypes
 
 def dt_to_suffix(dt):
@@ -193,12 +193,12 @@ def is_signed_int_dt(dt):
 def _match_category(func):
     """
     helper to match a func to an 
-    entry in mipp_funcs_categories. 
+    entry in categories. 
     This is used to write files in the relevant 
     subdir for their category.
     """
-    for category in mipp_funcs_categories:
-        if func in mipp_funcs_categories[category]:
+    for category in categories:
+        if func in categories[category]:
             if category == "a_trier":
                 return "miscellaneous"
             return category
@@ -331,7 +331,7 @@ def _rvv_skip_pbmatic_ldiv(func, dt, lmul, implems, guard, mkind) :
 def add_type_guards(func, implem, function, kind="c", lmul=0, mkind="", guard = ""):
     """
     func: implem key, e.g. "add", "mul", ...
-    implem: dict of the implem, e.g. implems_avx512
+    implem: dict of the implem, e.g. avx512_native_implems
     function: part of the name of the fn to call. Should prolly be changed
     kind: "c" for c test, "cpp" for cpp test, "obj" for obj test
 
@@ -339,7 +339,7 @@ def add_type_guards(func, implem, function, kind="c", lmul=0, mkind="", guard = 
     
     N.B : WILL NOT GENERATE TESTS FOR DTTYPES IF THE FUNC IS NOT DEFINED
     FOR THOSE DTTYPES IN IMPLEM. EVEN IF THE FUNC IS DEFINED FOR THOSE 
-    DTTYPES IN registry.mipp_funcs[func]["datatypes"].
+    DTTYPES IN registry.interfaces[func]["datatypes"].
     THIS IS FORE EASE OF TESTS.
     """
     datatypes = get_defined_dttypes(func, implem, mkind)
@@ -1090,7 +1090,7 @@ def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="
 
 def gen_cast_funcs_all_datatypes(func, kind="c", register="rvd", mask="rvm",lmul=0, mkind=""):
 
-    datatypes = mipp_funcs[func]["datatypes"]
+    datatypes = interfaces[func]["datatypes"]
 
     res = ""
     if kind == "c":
@@ -1198,7 +1198,7 @@ def gen_funcs_all_datatypes(func, kind="c", register="rvd", mask="rvm",lmul=0, m
     """
 
     res = ""
-    datatypes = mipp_funcs[func]["datatypes"]
+    datatypes = interfaces[func]["datatypes"]
 
     if kind == "c":
         for dt in datatypes:
@@ -1448,19 +1448,19 @@ def gen_test_files_all_funcs(kind="all", lmul=0, mkind="", N=10, mode="function_
         os.makedirs(tmp_path, exist_ok=True)
     if regen_c:
         os.makedirs(cpath, exist_ok=True)
-        for category in mipp_funcs_categories:
+        for category in categories:
             if category != "a_trier":
                 os.makedirs(cpath + category + "/", exist_ok=True)
         os.makedirs(cpath + "miscellaneous/", exist_ok=True)
     if regen_cpp:
         os.makedirs(cpppath, exist_ok=True)
-        for category in mipp_funcs_categories:
+        for category in categories:
             if category != "a_trier":
                 os.makedirs(cpppath + category + "/", exist_ok=True)
         os.makedirs(cpppath + "miscellaneous/", exist_ok=True)
     if regen_obj:
         os.makedirs(objpath, exist_ok=True)
-        for category in mipp_funcs_categories:
+        for category in categories:
             if category != "a_trier":
                 os.makedirs(objpath + category + "/", exist_ok=True)
         os.makedirs(objpath + "miscellaneous/", exist_ok=True)
@@ -1468,7 +1468,7 @@ def gen_test_files_all_funcs(kind="all", lmul=0, mkind="", N=10, mode="function_
     dict_mask = get_gen_test_dict_mask("c")
     #print(dict_mask.keys())
     for func in sorted(funcs):
-        mask_support = mipp_funcs[func]["mask_support"]
+        mask_support = interfaces[func]["mask_support"]
         if mkind != "" and not mask_support.is_supported(mkind) :
             stats["skipped_mask"].append(f"{func} ({mkind})")
             continue

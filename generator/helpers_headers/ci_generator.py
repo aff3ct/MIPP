@@ -13,19 +13,19 @@ from include_gen import IncludeManager
 from codegen.lmul_orchestrator import gen_c_horiz_lmul
 from registry import implems_horiz_lmul_generic_emu
 
-isa_avx512, _, _ = load_isa_config("avx512")
-isa_avx, _, _ = load_isa_config("avx")
-isa_rvv, _, _ = load_isa_config("rvv")
+avx512_isa, _, _ = load_isa_config("avx512")
+avx_isa, _, _ = load_isa_config("avx")
+rvv_isa, _, _ = load_isa_config("rvv")
             
 def duplicate_isa_sve_along_size(isa_list):
 
     isa_list_copy = copy.deepcopy(isa_list)
-    isa_sve = []
+    sve_isa = []
     current_index = -1
     isa_sve_size = []
     for index, isa in enumerate(isa_list_copy):
         if isa["name"]=="sve":
-            isa_sve = isa
+            sve_isa = isa
             current_index = index
             all_sve_sizes = list(isa["size"])
         else:
@@ -34,9 +34,9 @@ def duplicate_isa_sve_along_size(isa_list):
     if current_index == -1:
         return isa_list_copy
     del isa_list_copy[current_index]
-    all_sve_sizes = sorted(isa_sve["size"], reverse=True)
+    all_sve_sizes = sorted(sve_isa["size"], reverse=True)
     for reg_size in all_sve_sizes:
-        isa_sve_copy = copy.deepcopy(isa_sve)
+        isa_sve_copy = copy.deepcopy(sve_isa)
         isa_sve_copy["gen_define"]="defined(MIPP_" + isa_sve_copy["name"].upper() + "_" + str(reg_size) + ")"
         isa_sve_copy["name"]="sve"+str(reg_size)
         isa_sve_copy["size"]=reg_size
@@ -265,7 +265,7 @@ def generate_c_interface(isa_list, include_manager=None):
     str_mipp_info = template_mipp_info.render(name="Unused for now :-)")
     print(str_mipp_info, file=file_common)
 
-    _gen_ci_functions(isa_list, include_manager, copy_mipp_funcs)
+    _gen_ci_functions(isa_list, include_manager, copy_interfaces)
 
 
 def _gen_ci_defines(isa_list, file):
@@ -301,8 +301,8 @@ def _gen_ci_defines(isa_list, file):
 
 def _gen_ci_structures(isa_list, file):
 
-    isa_rvv = next((isa for isa in isa_list if isa["name"].startswith("rvv")), None)
-    isa_scalar = next((isa for isa in isa_list if isa["name"].startswith("scalar")), None)
+    rvv_isa = next((isa for isa in isa_list if isa["name"].startswith("rvv")), None)
+    scalar_isa = next((isa for isa in isa_list if isa["name"].startswith("scalar")), None)
     
     for index, isa in enumerate(isa_list):
         
@@ -385,7 +385,7 @@ def _ci_mask_writer(func, dt, isa_list, file, mask_type, func_name="", lmul=0):
         dt_ret = dt.split(',')[1]
         full_func_name = build_func_name(isa_list[0], dt_par, dt_ret, func, isa_name=False, lmul=lmul, masked_version=mask_type)
   
-    proto = build_proto(mipp_funcs[func]["proto"], dt_par, dt_ret, isa_list[0], full_func_name, lmul, False, False, mask_type)
+    proto = build_proto(interfaces[func]["proto"], dt_par, dt_ret, isa_list[0], full_func_name, lmul, False, False, mask_type)
     template = f'static {proto} {{'
     j2_template = Template(template, undefined=StrictUndefined)
     print(j2_template.render(), file=file)
@@ -399,7 +399,7 @@ def _ci_mask_writer(func, dt, isa_list, file, mask_type, func_name="", lmul=0):
             func_name_impl = build_func_name_short(isa, dt_par, func, True, lmul, mask_type)
         else:
             func_name_impl = build_func_name(isa, dt_par, dt_ret, func, True, lmul, mask_type)
-        print("\t" + build_call(mipp_funcs[func]["proto"], dt_par, dt_ret, isa, func_name_impl, masked_version = mask_type) + ";", file=file)
+        print("\t" + build_call(interfaces[func]["proto"], dt_par, dt_ret, isa, func_name_impl, masked_version = mask_type) + ";", file=file)
         if i == len(isa_list)-1:
             print("#else", file=file)
             print("\tprintf(\"MIPP panic: '%s', unsupported case, this should never happen.\\n\", \""+full_func_name+"\");", file=file);
@@ -408,9 +408,9 @@ def _ci_mask_writer(func, dt, isa_list, file, mask_type, func_name="", lmul=0):
             print("}", file=file)
 
 def _gen_ci_mask_functions(func, dt, isa_list, file,lmul=0, func_name=""):
-    maskable = "mask_support" in mipp_funcs[func] and mipp_funcs[func]["mask_support"].is_maskable()
-    maskzable = "mask_support" in mipp_funcs[func] and mipp_funcs[func]["mask_support"].is_maskzable()
-    masksable = "mask_support" in mipp_funcs[func] and mipp_funcs[func]["mask_support"].is_masksable()
+    maskable = "mask_support" in interfaces[func] and interfaces[func]["mask_support"].is_maskable()
+    maskzable = "mask_support" in interfaces[func] and interfaces[func]["mask_support"].is_maskzable()
+    masksable = "mask_support" in interfaces[func] and interfaces[func]["mask_support"].is_masksable()
     
     if maskable:
         _ci_mask_writer(func, dt, isa_list, file, "mask", func_name, lmul)
@@ -461,47 +461,47 @@ def _ci_ldiv_writer(f,func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask
 
     print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, {}, full_func_name, ldiv, False, False, mask_type) + " {", file=file)
     if len(dt.split(',')) <= 1:
-        func_name_impl = build_func_name_short(isa_avx512, dt_par, f, True, ldiv, mask_type)
+        func_name_impl = build_func_name_short(avx512_isa, dt_par, f, True, ldiv, mask_type)
     else:
-        func_name_impl = build_func_name(isa_avx512, dt_par, dt_ret, f, True,  ldiv, mask_type)
-    print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa_avx512, func_name_impl, masked_version=mask_type) + ";", file=file)
+        func_name_impl = build_func_name(avx512_isa, dt_par, dt_ret, f, True,  ldiv, mask_type)
+    print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, avx512_isa, func_name_impl, masked_version=mask_type) + ";", file=file)
     print("}", file=file)
 
     print("#elif defined(MIPP_AVX)", file=file)
 
     print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, {}, full_func_name, ldiv, False, False, mask_type) + " {", file=file)
     if len(dt.split(',')) <= 1:
-        func_name_impl = build_func_name_short(isa_avx, dt_par, f, True, ldiv, mask_type)
+        func_name_impl = build_func_name_short(avx_isa, dt_par, f, True, ldiv, mask_type)
     else:
-        func_name_impl = build_func_name(isa_avx, dt_par, dt_ret, f, True,  ldiv, mask_type)
-    print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa_avx, func_name_impl, masked_version=mask_type) + ";", file=file)
+        func_name_impl = build_func_name(avx_isa, dt_par, dt_ret, f, True,  ldiv, mask_type)
+    print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, avx_isa, func_name_impl, masked_version=mask_type) + ";", file=file)
     print("}", file=file)
 
     print("#elif defined(MIPP_RVV)", file=file)
 
     print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, {}, full_func_name, ldiv, False, False, mask_type) + " {", file=file)
     if len(dt.split(',')) <= 1:
-        func_name_impl = build_func_name_short(isa_rvv, dt_par, f, True, ldiv, mask_type)
+        func_name_impl = build_func_name_short(rvv_isa, dt_par, f, True, ldiv, mask_type)
     else:
-        func_name_impl = build_func_name(isa_rvv, dt_par, dt_ret, f, True,  ldiv, mask_type)
-    print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa_rvv, func_name_impl, masked_version=mask_type) + ";", file=file)
+        func_name_impl = build_func_name(rvv_isa, dt_par, dt_ret, f, True,  ldiv, mask_type)
+    print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, rvv_isa, func_name_impl, masked_version=mask_type) + ";", file=file)
     print("}", file=file)
 
     print("#elif defined(MIPP_SCALAR)", file=file)
 
     print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, {}, full_func_name, ldiv, False, False, mask_type) + " {", file=file)
     if len(dt.split(',')) <= 1:
-        func_name_impl = build_func_name_short(isa_scalar, dt_par, f, True, ldiv, mask_type)
+        func_name_impl = build_func_name_short(scalar_isa, dt_par, f, True, ldiv, mask_type)
     else:
-        func_name_impl = build_func_name(isa_scalar, dt_par, dt_ret, f, True,  ldiv, mask_type)
-    print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa_scalar, func_name_impl, masked_version=mask_type) + ";", file=file)
+        func_name_impl = build_func_name(scalar_isa, dt_par, dt_ret, f, True,  ldiv, mask_type)
+    print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, scalar_isa, func_name_impl, masked_version=mask_type) + ";", file=file)
     print("}", file=file)
 
     print("#endif", file=file)
 
 def _gen_ci_functions(isa_list, include_manager, funcs):
-    isa_rvv = next((isa for isa in isa_list if isa["name"].startswith("rvv")), None)
-    isa_scalar = next((isa for isa in isa_list if isa["name"].startswith("scalar")), None)
+    rvv_isa = next((isa for isa in isa_list if isa["name"].startswith("rvv")), None)
+    scalar_isa = next((isa for isa in isa_list if isa["name"].startswith("scalar")), None)
     
     for f in funcs:
         file = include_manager.get_fd("c", f)

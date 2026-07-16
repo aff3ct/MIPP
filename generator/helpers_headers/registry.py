@@ -56,13 +56,13 @@ def _load_funcs_registry():
         raw_protos = json.load(f)
 
     with open(os.path.join(current_dir, "registry_categories.json"), "r", encoding="utf-8") as f:
-        mipp_funcs_categories = json.load(f)
+        categories = json.load(f)
 
-    with open(os.path.join(current_dir, "registry_mipp_funcs.json"), "r", encoding="utf-8") as f:
-        raw_mipp_funcs = json.load(f)
+    with open(os.path.join(current_dir, "registry_interfaces.json"), "r", encoding="utf-8") as f:
+        raw_interfaces = json.load(f)
 
-    with open(os.path.join(current_dir, "registry_implems_scalar.json"), "r", encoding="utf-8") as f:
-        raw_implems_scalar = json.load(f)
+    with open(os.path.join(current_dir, "registry_scalar_implems.json"), "r", encoding="utf-8") as f:
+        raw_scalar_implems = json.load(f)
 
     def resolve_fixed_datatype(fd):
         if fd is False:
@@ -106,40 +106,47 @@ def _load_funcs_registry():
         "no_mask": no_mask
     }
 
-    # Resolve mipp_funcs
-    mipp_funcs = {}
-    for k, v in raw_mipp_funcs.items():
-        mipp_funcs[k] = {
+    # Resolve interfaces
+    interfaces = {}
+    for k, v in raw_interfaces.items():
+        interfaces[k] = {
             "proto": protos[v["proto_ref"]],
             "datatypes": resolve_datatypes(v["datatypes"]),
             "horizontal": v["horizontal"],
             "mask_support": MASK_SUPPORT_MAP[v["mask_support"]]
         }
 
-    # Resolve implems_scalar
-    implems_scalar = {}
-    for k, v in raw_implems_scalar.items():
-        implems_scalar[k] = []
+    # Resolve scalar_implems
+    scalar_implems = {}
+    for k, v in raw_scalar_implems.items():
+        scalar_implems[k] = []
         for item in v:
             implem_val = item["implem"]
             if isinstance(implem_val, list):
                 implem_val = "\n".join(implem_val)
                 # Keep leading and trailing newlines like original code
                 implem_val = "\n" + implem_val + "\n"
-            implems_scalar[k].append({
+            scalar_implems[k].append({
                 "type": item["type"],
                 "datatypes": resolve_datatypes(item["datatypes"]),
                 "mask_variants": item["mask_variants"],
                 "implem": implem_val
             })
 
-    return protos, mipp_funcs_categories, mipp_funcs, implems_scalar
+    return protos, categories, interfaces, scalar_implems
 
 def _load_generic_emu():
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    json_path = os.path.join(current_dir, "registry_emu.json")
-    with open(json_path, "r") as f:
-        data = json.load(f)
+
+    # Load templates
+    templates_path = os.path.join(current_dir, "generic_emu_templates.json")
+    with open(templates_path, "r") as f:
+        data_templates = json.load(f)
+
+    # Load implementations
+    implems_path = os.path.join(current_dir, "generic_emu_implems.json")
+    with open(implems_path, "r") as f:
+        data_implems = json.load(f)
 
     def clean_template_code(tpl):
         if not isinstance(tpl, dict) or "code" not in tpl:
@@ -152,7 +159,7 @@ def _load_generic_emu():
 
     templates_pool = {}
     for section in ["tpl_generic_emu", "tpl_mask_generic_emu", "tpl_horiz_lmul_generic_emu"]:
-        for name, tpl in data["templates"][section].items():
+        for name, tpl in data_templates[section].items():
             templates_pool[f"{section}.{name}"] = tpl
 
     def process_table(raw_table, default_type=None, default_level=None):
@@ -189,18 +196,18 @@ def _load_generic_emu():
                 processed[func_name].append(processed_item)
         return processed
 
-    implems_generic_emu = process_table(data["implems_generic_emu"], default_type="emulated", default_level=2)
-    implems_mask_generic_emu = process_table(data["implems_mask_generic_emu"], default_type="emulated", default_level=2)
-    implems_horiz_lmul_generic_emu = process_table(data["implems_horiz_lmul_generic_emu"], default_level=2)
+    implems_generic_emu = process_table(data_implems["implems_generic_emu"], default_type="emulated", default_level=2)
+    implems_mask_generic_emu = process_table(data_implems["implems_mask_generic_emu"], default_type="emulated", default_level=2)
+    implems_horiz_lmul_generic_emu = process_table(data_implems["implems_horiz_lmul_generic_emu"], default_level=2)
     
     return implems_generic_emu, implems_mask_generic_emu, implems_horiz_lmul_generic_emu
 
 # Initialize globals dynamically
-protos, mipp_funcs_categories, mipp_funcs, implems_scalar = _load_funcs_registry()
-copy_mipp_funcs = copy.deepcopy(mipp_funcs)
+protos, categories, interfaces, scalar_implems = _load_funcs_registry()
+copy_interfaces = copy.deepcopy(interfaces)
 
 _current_dir = os.path.dirname(os.path.abspath(__file__))
-with open(os.path.join(_current_dir, "registry_isa_scalar.json"), "r") as f:
-    isa_scalar = json.load(f)
+with open(os.path.join(_current_dir, "registry_scalar_isa.json"), "r") as f:
+    scalar_isa = json.load(f)
 
 implems_generic_emu, implems_mask_generic_emu, implems_horiz_lmul_generic_emu = _load_generic_emu()

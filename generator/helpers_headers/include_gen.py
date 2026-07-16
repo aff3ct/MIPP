@@ -41,16 +41,14 @@ def _get_include_path(func, layer):
 #copied from gen_mipp_tests, should prolly move all to tools.py
 def _match_category(func):
     """
-    helper to match a func to an 
-    entry in mipp_funcs_categories. 
-    This is used to write files in the relevant 
-    subdir for their category.
+    helper to match a func to an entry in categories.
+    This is used to write files in the relevant subdir for their category.
     """
     if func == "common":
         return "common"
     
-    for category in mipp_funcs_categories:
-        if func in mipp_funcs_categories[category]:
+    for category in categories:
+        if func in categories[category]:
             if category == "a_trier":
                 return "miscellaneous"
             return category
@@ -71,48 +69,48 @@ def _get_implem_status_requirements_all_dt_keys(funcs, f):
     return requirements
 
 
-def _get_dependencies_regular_category_header(func, mipp_funcs, layer="c"):
+def _get_dependencies_regular_category_header(func, interfaces, layer="c"):
     
-    requirements = _get_implem_status_requirements_all_dt_keys(mipp_funcs, func)
+    requirements = _get_implem_status_requirements_all_dt_keys(interfaces, func)
     for req in requirements:
-        if req in mipp_funcs:
+        if req in interfaces:
             req_concept = _match_category(req)
             req_include_name = _get_include_name(req_concept, layer)
             requirements[req] = req_include_name
     return requirements
     
-def _get_dependencies_mask_category_header(func, mipp_funcs, mask_kind, layer="c"):
-    requirements = _get_implem_status_requirements_mask_dt_keys(mipp_funcs, func, mask_kind)
+def _get_dependencies_mask_category_header(func, interfaces, mask_kind, layer="c"):
+    requirements = _get_implem_status_requirements_mask_dt_keys(interfaces, func, mask_kind)
     for req in requirements:
-        if req in mipp_funcs:
+        if req in interfaces:
             req_concept = _match_category(req)
             req_include_name = _get_include_name(req_concept, layer)
             requirements[req] = req_include_name
     return requirements
 
 
-def _get_dependencies_regular_single_header(func, mipp_funcs, layer="c"):
+def _get_dependencies_regular_single_header(func, interfaces, layer="c"):
     print("Stub, not done :(")
     return
 
-def _get_dependencies_mask_single_header(func, mipp_funcs, mask_kind, layer="c"):
+def _get_dependencies_mask_single_header(func, interfaces, mask_kind, layer="c"):
     print("Stub, not done :(")
     return   
 
-def _get_dependencies_regular(func, mipp_funcs, layer="c", mode="function_header"):
-    # path is functions/func.h and dependencies are in the requirements key of mipp_funcs[func]["implem_status"] for all dt_keys.
+def _get_dependencies_regular(func, interfaces, layer="c", mode="function_header"):
+    # path is functions/func.h and dependencies are in the requirements key of interfaces[func]["implem_status"] for all dt_keys.
     
     if mode == "category_header":
-        return _get_dependencies_regular_category_header(func, mipp_funcs, layer=layer)
+        return _get_dependencies_regular_category_header(func, interfaces, layer=layer)
     elif mode == "single_header":
-        return _get_dependencies_regular_single_header(func, mipp_funcs, layer=layer)
+        return _get_dependencies_regular_single_header(func, interfaces, layer=layer)
     
-    if func not in mipp_funcs:
+    if func not in interfaces:
         return {}
-    requirements = _get_implem_status_requirements_all_dt_keys(mipp_funcs, func)
+    requirements = _get_implem_status_requirements_all_dt_keys(interfaces, func)
     
     for req in requirements:
-        if req in mipp_funcs:
+        if req in interfaces:
             req_concept = _match_category(req)
             req_include_name = _get_include_name(req, layer)
             requirements[req] = req_include_name
@@ -151,29 +149,29 @@ def _get_implem_status_requirements_mask_dt_keys(funcs, f, mask_kind, mode="func
                         requirements[req] = implem["requirements"][req]
     return requirements
 
-def _get_dependencies_mask(func, mipp_funcs, mask_kind, layer="c", mode="function_header"):
+def _get_dependencies_mask(func, interfaces, mask_kind, layer="c", mode="function_header"):
     
-    # path is functions/func.h and dependencies are in the requirements key of mipp_funcs[func]["implem_status"] for all dt_keys and mask_kind.
-    if func not in mipp_funcs:
+    # path is functions/func.h and dependencies are in the requirements key of interfaces[func]["implem_status"] for all dt_keys and mask_kind.
+    if func not in interfaces:
         return {}
 
     if mode == "category_header":
-        return _get_dependencies_mask_category_header(func, mipp_funcs, mask_kind, layer=layer)
+        return _get_dependencies_mask_category_header(func, interfaces, mask_kind, layer=layer)
     elif mode == "single_header":
-        return _get_dependencies_mask_single_header(func, mipp_funcs, mask_kind, layer=layer)
+        return _get_dependencies_mask_single_header(func, interfaces, mask_kind, layer=layer)
 
-    requirements = _get_implem_status_requirements_mask_dt_keys(mipp_funcs, func, mask_kind)
+    requirements = _get_implem_status_requirements_mask_dt_keys(interfaces, func, mask_kind)
     for req in requirements:
-        if req in mipp_funcs:
+        if req in interfaces:
             req_include_name = _get_include_name(req, layer)
             requirements[req] = req_include_name
     return requirements
                              
 
 
-def _get_dependencies(func, mipp_funcs, lmul=0, mask_kind="", layer="", mode="function_header"):
+def _get_dependencies(func, interfaces, lmul=0, mask_kind="", layer="", mode="function_header"):
     """
-    using the requirements key in mipp_funcs, get the list of dependencies for a given func.
+    using the requirements key in interfaces, get the list of dependencies for a given func.
     
     n.b if the func is masked requirements are stored differently. 
     We will also assume that lmul functions additionnaly require lmul/2 versions of 
@@ -198,7 +196,7 @@ def _get_dependencies(func, mipp_funcs, lmul=0, mask_kind="", layer="", mode="fu
     
     #print(f"Getting dependencies for {func} in layer {layer} with lmul {lmul} and mask kind {mask_kind}")
 
-    regular_deps = _get_dependencies_regular(func, mipp_funcs, layer=layer, mode=mode)
+    regular_deps = _get_dependencies_regular(func, interfaces, layer=layer, mode=mode)
     # remove duplicates
     # set_regular_deps = set(regular_deps.values())
     for dep in regular_deps:
@@ -206,7 +204,7 @@ def _get_dependencies(func, mipp_funcs, lmul=0, mask_kind="", layer="", mode="fu
             continue
         dependencies.add(regular_deps[dep])
     
-    masked_deps = _get_dependencies_mask(func, mipp_funcs, mask_kind, layer=layer, mode=mode)
+    masked_deps = _get_dependencies_mask(func, interfaces, mask_kind, layer=layer, mode=mode)
     # remove duplicates
     # set_regular_deps = set(regular_deps.values())
 
@@ -245,9 +243,9 @@ class IncludePath:
         self._is_prefixed = False
         self.mode = mode
         
-    def resolve_dependencies(self, mipp_funcs,  lmul, mask_kind, layer):
+    def resolve_dependencies(self, interfaces,  lmul, mask_kind, layer):
         #get regular dependencies
-        deps = _get_dependencies(self.func, mipp_funcs, lmul=lmul, mask_kind=mask_kind, layer=layer, mode=self.mode)
+        deps = _get_dependencies(self.func, interfaces, lmul=lmul, mask_kind=mask_kind, layer=layer, mode=self.mode)
         for dep in deps:
             self.dependencies.add(dep)
     
@@ -423,16 +421,16 @@ class IncludeCategory:
         self.dependencies = set()
         self.functions = set()
         self._is_prefixed = False
-    def get_functions(self, mipp_funcs):
-        for func in mipp_funcs:
+    def get_functions(self, interfaces):
+        for func in interfaces:
             if _match_category(func) == self.category:
                 self.functions.add(func)
     
-    def add_includes(self, mipp_funcs, layer):
-        self.get_functions(mipp_funcs)
+    def add_includes(self, interfaces, layer):
+        self.get_functions(interfaces)
         for func in self.functions:
             include_path = IncludePath(func, layer, mode="category_header")
-            include_path.resolve_dependencies(mipp_funcs, lmul=0, mask_kind="", layer=layer)
+            include_path.resolve_dependencies(interfaces, lmul=0, mask_kind="", layer=layer)
             self.includes[func] = include_path
             for dep in include_path.dependencies:
                 self.dependencies.add(dep)
@@ -464,10 +462,10 @@ class IncludeCategory:
             self.file = open(full_path, "a+", encoding="utf-8", newline="")
         return self.file
 
-    def resolve_dependencies(self, mipp_funcs, lmul=0, mask_kind="", layer=""):
+    def resolve_dependencies(self, interfaces, lmul=0, mask_kind="", layer=""):
         for func in self.includes:
             include_path = self.includes[func]
-            include_path.resolve_dependencies(mipp_funcs, lmul=lmul, mask_kind=mask_kind, layer=layer)
+            include_path.resolve_dependencies(interfaces, lmul=lmul, mask_kind=mask_kind, layer=layer)
             for dep in include_path.dependencies:
                 self.dependencies.add(dep)
 
@@ -556,17 +554,17 @@ class IncludeLayer:
         if mode == "category_header":
             self.categories = {} #key is category name, value is IncludeCategory object
     
-    def add_includes(self, func, mipp_funcs, categories):
+    def add_includes(self, func, interfaces, categories):
         if self.mode == "function_header" :
             if func not in self.includes:
                 include_path = IncludePath(func, self.layer_name, mode=self.mode)
-                include_path.resolve_dependencies(mipp_funcs, lmul=0, mask_kind="", layer=self.layer_name)
+                include_path.resolve_dependencies(interfaces, lmul=0, mask_kind="", layer=self.layer_name)
                 self.includes[func] = include_path
         elif self.mode == "category_header": # code not checked, just a stub for now
             category = _match_category(func)
             if category not in self.categories:
                 include_category = IncludeCategory(category, self.layer_name)
-                include_category.add_includes(mipp_funcs, self.layer_name)
+                include_category.add_includes(interfaces, self.layer_name)
                 self.categories[category] = include_category
                 for dep in include_category.dependencies:
                     self.includes[dep] = IncludePath(dep.split("/")[-1].split(".")[0], self.layer_name, mode=self.mode)
@@ -617,8 +615,8 @@ class IncludeManager:
             self.layers[name] = IncludeLayer(name, mode=mode)
         
         for layer in self.layers:
-            for func in ["common"] + list(mipp_funcs.keys()):
-                self.layers[layer].add_includes(func, mipp_funcs, mipp_funcs_categories)
+            for func in ["common"] + list(interfaces.keys()):
+                self.layers[layer].add_includes(func, interfaces, categories)
         #generate fd for each include path
         # for layer in self.layers:
         #     self.layers[layer].get_fd("../include")
@@ -758,7 +756,7 @@ class IncludeManager:
 
 def generate_mipp_h(include_manager=None):
     from jinja2 import Template, StrictUndefined
-    from registry import mipp_funcs
+    from registry import interfaces
 
     file = open("../include/mipp.h", "w")
 
@@ -769,7 +767,7 @@ def generate_mipp_h(include_manager=None):
 """
 
     include_list = ""
-    for func in mipp_funcs:
+    for func in interfaces:
         include_list += "#include \"c/functions/" +  func + ".h\"\n"
     postfix = """#endif /* MY_INTRINSICS_PLUS_PLUS_H_ */"""
  

@@ -154,8 +154,8 @@ def gen_c_functions_scalar_one(isa, file, funcs, f, ff, dt, lmul=0):
         mask_variants = ff["mask_variants"]
     else:
         mask_variants = ["no_mask"]
-        if "mask_support" in mipp_funcs[f]:
-            support = mipp_funcs[f]["mask_support"]
+        if "mask_support" in interfaces[f]:
+            support = interfaces[f]["mask_support"]
             if support.is_maskable():
                 mask_variants = mask_variants + ["mask"]
             if support.is_maskzable():
@@ -452,11 +452,11 @@ def gen_c_structures_scalar(isa, file):
             file=file,
         )
 
-def gen_mipp_scalar(include_manager):
+def scalar_gen(include_manager):
     
     # implementation C
     
-    file_common = include_manager.get_fd(isa_scalar["name"], "common")
+    file_common = include_manager.get_fd(scalar_isa["name"], "common")
     # file = open("../include/scalar/mipp_impl_scalar_gen.h", "w")
 
     tpl_header_scalar = """#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SCALAR_H_
@@ -527,21 +527,21 @@ typedef double float64_t;
     j2_template = Template(tpl_header_scalar, undefined=StrictUndefined)
     print(j2_template.render(), file=file_common)
 
-    gen_c_defines_scalar(isa_scalar, file_common)
-    gen_c_structures_scalar(isa_scalar, file_common)
-    copy_mipp_funcs = copy.deepcopy(mipp_funcs)
+    gen_c_defines_scalar(scalar_isa, file_common)
+    gen_c_structures_scalar(scalar_isa, file_common)
+    copy_interfaces = copy.deepcopy(interfaces)
     
-    gen_c_functions_scalar(isa_scalar, include_manager, copy_mipp_funcs, implems_scalar)
+    gen_c_functions_scalar(scalar_isa, include_manager, copy_interfaces, scalar_implems)
     for lmul in all_lmul:
-        gen_c_functions_scalar(isa_scalar, include_manager, copy_mipp_funcs, implems_scalar, lmul=lmul)
+        gen_c_functions_scalar(scalar_isa, include_manager, copy_interfaces, scalar_implems, lmul=lmul)
 
     ldiv = -2
-    gen_c_functions_scalar(isa_scalar, include_manager, copy_mipp_funcs, implems_scalar, lmul=ldiv)
+    gen_c_functions_scalar(scalar_isa, include_manager, copy_interfaces, scalar_implems, lmul=ldiv)
 
     tpl_footer_scalar = """#endif /* MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SCALAR_H_ */"""
     j2_template = Template(tpl_footer_scalar, undefined=StrictUndefined)
     print(j2_template.render(), file=file_common)
     
-    include_manager.resolve_all_dependencies(isa_scalar["name"], copy_mipp_funcs)
-    include_manager.create_glue_file(isa_scalar["name"], "../include/scalar/mipp_impl_scalar_gen.h")
-    include_manager.close_layer_fds(isa_scalar["name"])
+    include_manager.resolve_all_dependencies(scalar_isa["name"], copy_interfaces)
+    include_manager.create_glue_file(scalar_isa["name"], "../include/scalar/mipp_impl_scalar_gen.h")
+    include_manager.close_layer_fds(scalar_isa["name"])

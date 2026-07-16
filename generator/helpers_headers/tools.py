@@ -506,7 +506,7 @@ but still looks same-ish.
 #TODO
 
 
-# Masks in mipp_funcs and in implems are not defined the same way.
+# Masks in interfaces and in implems are not defined the same way.
 # This might be bad idk.
 
 # ff is an entry in implems
@@ -519,7 +519,7 @@ def mask_kind_from_ff(ff):
 
 def is_supported_mask_kind(mask_support, mask_kind):
     """
-    mask_support is an entry in mipp_funcs[f]["mask_support"] 
+    mask_support is an entry in interfaces[f]["mask_support"] 
     and mask_kind is "mask", "maskz" or "masks".
      """
     if mask_support is None:
@@ -791,14 +791,14 @@ def load_isa_config(isa_name):
         ext_dir = os.path.join(base_dir, "simd_ext", isa_name)
         
         # Load capability JSON
-        with open(os.path.join(ext_dir, f"isa_{isa_name}.json"), "r") as f:
+        with open(os.path.join(ext_dir, f"{isa_name}_isa.json"), "r") as f:
             isa = json.load(f)
         if "size" in isa and isinstance(isa["size"], list):
             isa["size"] = set(isa["size"]) # SVE backwards compatibility
             
         # Load native and emulation tables
-        _, implems = load_implem_tables(os.path.join(ext_dir, "__init__.py"), f"templates_{isa_name}.json", f"implems_{isa_name}.json")
-        _, implems_emu = load_implem_tables(os.path.join(ext_dir, "__init__.py"), f"templates_emu_{isa_name}.json", f"implems_emu_{isa_name}.json")
+        _, implems = load_implem_tables(os.path.join(ext_dir, "__init__.py"), f"{isa_name}_native_templates.json", f"{isa_name}_native_implems.json")
+        _, implems_emu = load_implem_tables(os.path.join(ext_dir, "__init__.py"), f"{isa_name}_emu_templates.json", f"{isa_name}_emu_implems.json")
         
         _isa_config_cache[isa_name] = (isa, implems, implems_emu)
         

@@ -22,7 +22,7 @@ def _generate_mipp_hpp(include_manager=None):
 
     content = "#pragma once\n"
     content += '#include "cpp/common.hpp"\n'
-    for func in mipp_funcs:
+    for func in interfaces:
         content += f'#include "cpp/functions/{func}.hpp"\n'
     print(content, file=file)
 
@@ -60,7 +60,7 @@ typedef float float32_t;
         file_isa_common = include_manager.get_fd(isa["name"] + "_cpp", "common")
         _gen_cpp_structures_isa(file_isa_common, isa)
         _gen_cpp_constexpr_functions_isa(file_isa_common, isa)
-        _gen_cpp_functions_isa(include_manager, isa, mipp_funcs)
+        _gen_cpp_functions_isa(include_manager, isa, interfaces)
 
     # definition of the enum used by everyone in cpp layer
     file_common = open("../include/simd_ext_cpp/common.hpp", "w")
@@ -94,11 +94,11 @@ typedef float float32_t;
     print("}\n", file=file_common)
     file_common.close()
 
-    _gen_cpp_generic_templates(include_manager, isa_list_copy, mipp_funcs)
+    _gen_cpp_generic_templates(include_manager, isa_list_copy, interfaces)
     
     file_common_glue = include_manager.get_fd("cpp", "common")
     _gen_cpp_common(isa_list_copy, file_common_glue)
-    _gen_cpp_functions(isa_list_copy, include_manager, copy_mipp_funcs)    
+    _gen_cpp_functions(isa_list_copy, include_manager, copy_interfaces)    
     _generate_mipp_hpp(include_manager)
 
 def _gen_cpp_common(isa_list, file):

@@ -213,14 +213,14 @@ def infer_short_name(func: str):
     return func
 
 # --------------------------------------------
-# Build gen_test_dict for a layer from mipp_funcs + shapes
+# Build gen_test_dict for a layer from interfaces + shapes
 # --------------------------------------------
 
 def build_layer_gen_test_dict(
     *,
     layer_name: str,
     template: str,
-    mipp_funcs: dict,
+    interfaces: dict,
     shape_templates: dict[str, TemplateParts],
     deny_funcs: Optional[set[str]] = None,
 ):
@@ -231,7 +231,7 @@ def build_layer_gen_test_dict(
     out = {}
     deny_funcs = deny_funcs or set()
 
-    for func, meta in mipp_funcs.items():
+    for func, meta in interfaces.items():
         if func in deny_funcs:
             continue
 

@@ -1,5 +1,5 @@
 import copy
-from registry import mipp_funcs
+from registry import interfaces
 from .templates import GENERIC_FOR_LOOP, GENERIC_NO_LOOP
 from .common import (
     TemplateParts,
@@ -792,7 +792,7 @@ def apply_overrides(gen_dict):
 gen_test_dict_lmul = build_layer_gen_test_dict(
     layer_name="c_lmul",
     template=GENERIC_FOR_LOOP,
-    mipp_funcs=copy.deepcopy(mipp_funcs),
+    interfaces=copy.deepcopy(interfaces),
     shape_templates=shape_templates,
     deny_funcs=deny,
 )

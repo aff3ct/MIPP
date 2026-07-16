@@ -41,7 +41,7 @@ public:
 	template_reg = Template(tpl_class_Rvd, undefined=StrictUndefined)
 	print(template_reg.render(), file=file)
 	operator_reg_out = operators_arithm | operators_binary
-	for f in mipp_funcs:
+	for f in interfaces:
 		if f in operator_reg_out:
 			operator= operator_reg_out[f]
 			template = """

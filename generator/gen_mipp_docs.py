@@ -17,25 +17,25 @@ sys.path.insert(1, path + "/simd_ext/scalar/")
 
 from tools import load_isa_config
 
-isa_sse, implems_sse, implems_emu_sse = load_isa_config("sse")
-isa_avx, implems_avx, implems_emu_avx = load_isa_config("avx")
-isa_avx512, implems_avx512, implems_emu_avx512 = load_isa_config("avx512")
-isa_rvv, implems_rvv, implems_emu_rvv = load_isa_config("rvv")
-isa_neon, implems_neon, implems_emu_neon = load_isa_config("neon")
-isa_sve, implems_sve, implems_emu_sve = load_isa_config("sve")
+sse_isa, sse_native_implems, sse_emu_implems = load_isa_config("sse")
+avx_isa, avx_native_implems, avx_emu_implems = load_isa_config("avx")
+avx512_isa, avx512_native_implems, avx512_emu_implems = load_isa_config("avx512")
+rvv_isa, rvv_native_implems, rvv_emu_implems = load_isa_config("rvv")
+neon_isa, neon_native_implems, neon_emu_implems = load_isa_config("neon")
+sve_isa, sve_native_implems, sve_emu_implems = load_isa_config("sve")
 
-from registry import mipp_funcs, mipp_funcs_categories, isa_scalar, implems_scalar
+from registry import interfaces, categories, scalar_isa, scalar_implems
 from datatypes import all_datatypes, all_datatypes_cart_prod
 from tools import *
 from registry import *
 
-from gen_mipp_sse import gen_mipp_sse
-from gen_mipp_avx import gen_mipp_avx
-from gen_mipp_avx512 import gen_mipp_avx512
-from gen_mipp_sve import gen_mipp_sve
-from gen_mipp_rvv import gen_mipp_rvv
+from sse_gen import sse_gen
+from avx_gen import avx_gen
+from avx512_gen import avx512_gen
+from sve_gen import sve_gen
+from rvv_gen import rvv_gen
 
-from gen_mipp_scalar import gen_c_functions_scalar_one # generate pseudocode of fn in doc using this
+from scalar_gen import gen_c_functions_scalar_one # generate pseudocode of fn in doc using this
 
 include_gen_path = "../include/"
 
@@ -49,23 +49,23 @@ neon_path = os.path.join(include_gen_path, "neon")
 
 
 implems_dict = {
-    "SSE" : { "implems" : [implems_sse, implems_emu_sse], "defines" : {}},
-    "SSE2" : { "implems" : [implems_sse, implems_emu_sse], "defines" : {"SSE2"}},
-    "SSE3" : { "implems" : [implems_sse, implems_emu_sse], "defines" : {"SSE2", "SSE3"}},
-    "SSSE3" : { "implems" : [implems_sse, implems_emu_sse], "defines" : {"SSE2", "SSE3", "SSSE3"}},
-    "SSE4.1" : { "implems" : [implems_sse, implems_emu_sse], "defines" : {"SSE2", "SSE3", "SSSE3", "SSE4_1"}},
-    "SSE4.2" : { "implems" : [implems_sse, implems_emu_sse], "defines" : {"SSE2", "SSE3", "SSSE3", "SSE4_1", "SSE4_2"}},
-    "AVX" : { "implems" : [implems_avx, implems_emu_avx], "defines": {"!defined(__AVX2__)"}},
-    "AVX2" : { "implems" : [implems_avx, implems_emu_avx], "defines": {"AVX2"}},
-    "AVX2_FMA" : { "implems" : [implems_avx, implems_emu_avx], "defines": {"AVX2", "FMA"}},
-    "AVX512F" : { "implems" : [implems_avx512, implems_emu_avx512], "defines": {"AVX512F", "AVX512"}},
-    "AVX512_BW_BQ" : { "implems" : [implems_avx512, implems_emu_avx512], "defines": {"AVX512BW", "AVX512F", "AVX512", "AVX512DQ"}},
-    "AVX512_KCNI" : { "implems" : [implems_avx512, implems_emu_avx512], "defines" :{"KCNI", "MIC"}},
-    "RVV1.0" : { "implems": [implems_rvv, implems_emu_rvv], "defines": {}},
-    "NEONv1" : { "implems" :[implems_neon, implems_emu_neon], "defines": {}},
-    "NEONv2" : { "implems" :[implems_neon, implems_emu_neon], "defines": {"__aarch64__"}},
-    #"sve" { "implems" :[implems_sve, implem_emu_sve],"defines": {}},
-    #"sve2" { "implems" :[implems_sve, implem_emu_sve], "defines": {}},
+    "SSE" : { "implems" : [sse_native_implems, sse_emu_implems], "defines" : {}},
+    "SSE2" : { "implems" : [sse_native_implems, sse_emu_implems], "defines" : {"SSE2"}},
+    "SSE3" : { "implems" : [sse_native_implems, sse_emu_implems], "defines" : {"SSE2", "SSE3"}},
+    "SSSE3" : { "implems" : [sse_native_implems, sse_emu_implems], "defines" : {"SSE2", "SSE3", "SSSE3"}},
+    "SSE4.1" : { "implems" : [sse_native_implems, sse_emu_implems], "defines" : {"SSE2", "SSE3", "SSSE3", "SSE4_1"}},
+    "SSE4.2" : { "implems" : [sse_native_implems, sse_emu_implems], "defines" : {"SSE2", "SSE3", "SSSE3", "SSE4_1", "SSE4_2"}},
+    "AVX" : { "implems" : [avx_native_implems, avx_emu_implems], "defines": {"!defined(__AVX2__)"}},
+    "AVX2" : { "implems" : [avx_native_implems, avx_emu_implems], "defines": {"AVX2"}},
+    "AVX2_FMA" : { "implems" : [avx_native_implems, avx_emu_implems], "defines": {"AVX2", "FMA"}},
+    "AVX512F" : { "implems" : [avx512_native_implems, avx512_emu_implems], "defines": {"AVX512F", "AVX512"}},
+    "AVX512_BW_BQ" : { "implems" : [avx512_native_implems, avx512_emu_implems], "defines": {"AVX512BW", "AVX512F", "AVX512", "AVX512DQ"}},
+    "AVX512_KCNI" : { "implems" : [avx512_native_implems, avx512_emu_implems], "defines" :{"KCNI", "MIC"}},
+    "RVV1.0" : { "implems": [rvv_native_implems, rvv_emu_implems], "defines": {}},
+    "NEONv1" : { "implems" :[neon_native_implems, neon_emu_implems], "defines": {}},
+    "NEONv2" : { "implems" :[neon_native_implems, neon_emu_implems], "defines": {"__aarch64__"}},
+    #"sve" { "implems" :[sve_native_implems, implem_emu_sve],"defines": {}},
+    #"sve2" { "implems" :[sve_native_implems, implem_emu_sve], "defines": {}},
 }
 
 #used to generate intersection
@@ -346,8 +346,8 @@ class IsaInfo:
         
     
     def gen_isa_infos(self, isa, implems_isa, implems_emu_isa):
-        for func in mipp_funcs:
-            dict_entry = mipp_funcs[func]
+        for func in interfaces:
+            dict_entry = interfaces[func]
             func_info = FuncInfo()
             func_info.gen_infos(func, implems_isa, implems_emu_isa, isa)
             if len(func_info.datatypes) > 0:
@@ -372,7 +372,7 @@ class MippInfo:
     def __init__(self): 
         self.isa_infos = []
 
-    def gen_mipp_infos(self, mipp_funcs ,implem_dict):
+    def gen_mipp_infos(self, interfaces, implem_dict):
         isa_infos = IsaInfo()
         for isa in implem_dict:
             #print("Generating infos for " + isa)
@@ -393,7 +393,7 @@ class MippInfo:
         #If a function is emulated in one isa and native in another, we consider it as emulated in the intersection
         intersection = IsaInfo()
         intersection.isa_name = "intersection"
-        for func in mipp_funcs:
+        for func in interfaces:
             func_info = FuncInfo()
             func_info.func_name = func
             if func == "cast" or func == "cast_k":
@@ -426,7 +426,7 @@ class MippInfo:
         return intersection
 
 
-def write_mipp_infos(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_funcs_categories = mipp_funcs_categories):
+def write_mipp_infos(mipp_infos, base_dir, interfaces = interfaces, categories = categories):
     #for each isa write a md file with the list of functions and their supported types
     #we put functions in a table where x is dttype
     # y is function name,
@@ -448,17 +448,17 @@ def write_mipp_infos(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_funcs_c
         file_path = os.path.join(base_dir, isa_info.isa_name + ".md")
         with open(file_path, "w") as f:
             dttypes = all_datatypes
-            for category in mipp_funcs_categories:
+            for category in categories:
 
                 #we write one table per category
                 print("\n## " + category + "\n", file=f)
                 #we want the list of dtypes in the same order but shortened using all_datatypes_short
                 print("| Function | " + " | ".join(all_datatypes_short) + " |", file=f)
                 print("| --- | " + " | ".join(["---"]*len(dttypes)) + " |", file=f)
-                for func in mipp_funcs:
+                for func in interfaces:
                     if func == "cast" or func == "cast_k":
                         continue
-                    if func in mipp_funcs_categories[category]:
+                    if func in categories[category]:
                         func_info = isa_info.get_func_info(func)
                         if func_info is not None:
                             line = "| " + func + " | "
@@ -475,7 +475,7 @@ def write_mipp_infos(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_funcs_c
                                         line += color_blue + ":material-check:" + color_end + " | "
                                     else :
                                         line += color_green + ":material-check-all:" + color_end + " | "
-                                elif dtype_check in mipp_funcs[func]["datatypes"]:
+                                elif dtype_check in interfaces[func]["datatypes"]:
                                     line += color_red + ":material-close:" + color_end + " | "
                                 else :
                                     line += color_black + ":material-minus:" + color_end + " | "
@@ -489,10 +489,10 @@ def write_mipp_infos(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_funcs_c
             print("\n## miscellaneous\n", file=f)
             print("| Function | " + " | ".join(all_datatypes_short) + " |", file=f)
             print("| --- | " + " | ".join(["---"]*len(dttypes)) + " |", file=f)
-            for func in mipp_funcs:
+            for func in interfaces:
                 if func == "cast" or func == "cast_k":
                     continue                               
-                if all(func not in mipp_funcs_categories[category] for category in mipp_funcs_categories):
+                if all(func not in categories[category] for category in categories):
                     func_info = isa_info.get_func_info(func)
                     if func_info is not None:
                         line = "| " + func + " | "
@@ -505,7 +505,7 @@ def write_mipp_infos(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_funcs_c
                                     line += color_blue + ":material-check:" + color_end + " | "
                                 else :
                                     line += color_green + ":material-check-all:" + color_end + " | "
-                            elif dtype_check in mipp_funcs[func]["datatypes"]:
+                            elif dtype_check in interfaces[func]["datatypes"]:
                                 line += color_red + ":material-close:" + color_end + " | "
                             else :
                                 line += color_black + ":material-minus:" + color_end + " | "
@@ -533,7 +533,7 @@ def write_mipp_infos(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_funcs_c
                                 line += color_blue + ":material-check:" + color_end + " | "
                             else :
                                 line += color_green + ":material-check-all:" + color_end + " | "
-                        elif dtype in mipp_funcs[func]["datatypes"]:
+                        elif dtype in interfaces[func]["datatypes"]:
                             line += color_red + ":material-close:" + color_end + " | "
                         else :
                             line += color_black + ":material-minus:" + color_end + " | "
@@ -541,43 +541,43 @@ def write_mipp_infos(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_funcs_c
                 else :
                     line = "| " + func + " | "
                     for dtype in dttypes:
-                        if dtype in mipp_funcs[func]["datatypes"]:
+                        if dtype in interfaces[func]["datatypes"]:
                             line += color_red + ":material-close:" + color_end + " | "
                         else :
                             line += color_black + ":material-minus:" + color_end + " | "
                     print(line, file=f)
 
 def exists_any_msk_in_category(category):
-    for func in mipp_funcs_categories[category]:
-        if "mask_support" in mipp_funcs[func]:
-            if mipp_funcs[func]["mask_support"].is_any_mask():
+    for func in categories[category]:
+        if "mask_support" in interfaces[func]:
+            if interfaces[func]["mask_support"].is_any_mask():
                 return True
     return False
 
 def exists_msk_in_category(category, mkind):
-    for func in mipp_funcs_categories[category]:
-        if func not in mipp_funcs:
+    for func in categories[category]:
+        if func not in interfaces:
             continue
-        if "mask_support" in mipp_funcs[func]:
-            if mipp_funcs[func]["mask_support"].is_supported(mkind):
+        if "mask_support" in interfaces[func]:
+            if interfaces[func]["mask_support"].is_supported(mkind):
                 return True
     return False
 
 def exists_any_msk_in_func(func):
-    if "mask_support" in mipp_funcs[func]:
-        if mipp_funcs[func]["mask_support"].is_any_mask():
+    if "mask_support" in interfaces[func]:
+        if interfaces[func]["mask_support"].is_any_mask():
             return True
     return False
 
 def exists_msk_in_func(func, mkind):
-    if func not in mipp_funcs:
+    if func not in interfaces:
         return False
-    if "mask_support" in mipp_funcs[func]:
-        if mipp_funcs[func]["mask_support"].is_supported(mkind):
+    if "mask_support" in interfaces[func]:
+        if interfaces[func]["mask_support"].is_supported(mkind):
             return True
     return False
 
-def write_mipp_infos_masked(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_funcs_categories = mipp_funcs_categories):
+def write_mipp_infos_masked(mipp_infos, base_dir, interfaces = interfaces, categories = categories):
     #same as write_mipp_infos but we write a table for each mask kind (mask, maskz, masks)
     color_green ='<span style="color: #28A745; font-weight: 600;">'
     color_blue = '<span style="color: #3B42F5; font-weight: 600;">'
@@ -593,18 +593,18 @@ def write_mipp_infos_masked(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_
             dttypes = all_datatypes
             for mkind in ["mask", "maskz", "masks"]:
                 print("\n## " + mkind + "\n", file=f)
-                for category in mipp_funcs_categories:
+                for category in categories:
                     if not exists_msk_in_category(category, mkind):
                         continue
                     print("\n### " + category + "\n", file=f)
                     print("| Function | " + " | ".join(all_datatypes_short) + " |", file=f)
                     print("| --- | " + " | ".join(["---"]*len(dttypes)) + " |", file=f)
-                    for func in mipp_funcs:
+                    for func in interfaces:
                         if not exists_msk_in_func(func, mkind):
                             continue
                         if func == "cast" or func == "cast_k":
                             continue
-                        if func in mipp_funcs_categories[category]:
+                        if func in categories[category]:
                             func_info = isa_info.get_func_info(func)
                             if func_info is not None :
                                 line = "| " + func + " | "
@@ -619,7 +619,7 @@ def write_mipp_infos_masked(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_
                                             line += color_blue + ":material-check:" + color_end + " | "
                                         else :
                                             line += color_green + ":material-check-all:" + color_end + " | "
-                                    elif dtype_check in mipp_funcs[func]["datatypes"] and mipp_funcs[func]["mask_support"].is_supported(mkind):
+                                    elif dtype_check in interfaces[func]["datatypes"] and interfaces[func]["mask_support"].is_supported(mkind):
                                         line += color_red + ":material-close:" + color_end + " | "
                                     else :
                                         line += color_black + ":material-minus:" + color_end + " | "
@@ -630,7 +630,7 @@ def write_mipp_infos_masked(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_
                                     dtype_check = dtype
                                     if func == "gather" or func == "scatter" :
                                         dtype_check = dtype + "," + dtype
-                                    if dtype_check in mipp_funcs[func]["datatypes"] and mipp_funcs[func]["mask_support"].is_supported(mkind):
+                                    if dtype_check in interfaces[func]["datatypes"] and interfaces[func]["mask_support"].is_supported(mkind):
                                         line += color_red + ":material-close:" + color_end + " | "
                                     else :
                                         line += color_black + ":material-minus:" + color_end + " | "
@@ -638,12 +638,12 @@ def write_mipp_infos_masked(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_
                 print("\n### miscellaneous\n", file=f)
                 print("| Function | " + " | ".join(all_datatypes_short) + " |", file=f)
                 print("| --- | " + " | ".join(["---"]*len(dttypes)) + " |", file=f)
-                for func in mipp_funcs:
+                for func in interfaces:
                     if func == "cast" or func == "cast_k":
                         continue  
                     if not exists_msk_in_func(func, mkind):
                         continue              
-                    if all(func not in mipp_funcs_categories[category] for category in mipp_funcs_categories):
+                    if all(func not in categories[category] for category in categories):
                         func_info = isa_info.get_func_info(func)
                         if func_info is not None :
                             line = "| " + func + " | "
@@ -655,7 +655,7 @@ def write_mipp_infos_masked(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_
                                         line += color_blue + ":material-check:" + color_end + " | "
                                     else :
                                         line += color_green + ":material-check-all:" + color_end + " | "
-                                elif dtype in mipp_funcs[func]["datatypes"] and mipp_funcs[func]["mask_support"].is_supported(mkind):
+                                elif dtype in interfaces[func]["datatypes"] and interfaces[func]["mask_support"].is_supported(mkind):
                                     line += color_red + ":material-close:" + color_end + " | "
                                 else :
                                     line += color_black + ":material-minus:" + color_end + " | "
@@ -663,7 +663,7 @@ def write_mipp_infos_masked(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_
                         else :     
                             line = "| " + func + " | "
                             for dtype in dttypes:
-                                if dtype in mipp_funcs[func]["datatypes"] and mipp_funcs[func]["mask_support"].is_supported(mkind):
+                                if dtype in interfaces[func]["datatypes"] and interfaces[func]["mask_support"].is_supported(mkind):
                                     line += color_red + ":material-close:" + color_end + " | "
                                 else :
                                     line += color_black + ":material-minus:" + color_end + " | "
@@ -746,20 +746,20 @@ class SpecFuncInfo:
         self.dttypes = []
         self.category = None
     
-    def gen_spec_func_info(self, func, mipp_funcs, mipp_funcs_categories):
+    def gen_spec_func_info(self, func, interfaces, categories):
         self.func_name = func
-        self.args = mipp_funcs[func]["proto"]["args"]
-        self.ret = mipp_funcs[func]["proto"]["ret"]
-        self.dttypes = mipp_funcs[func]["datatypes"]
-        self.mask_support = mipp_funcs[func]["mask_support"]
+        self.args = interfaces[func]["proto"]["args"]
+        self.ret = interfaces[func]["proto"]["ret"]
+        self.dttypes = interfaces[func]["datatypes"]
+        self.mask_support = interfaces[func]["mask_support"]
         
         self.category = "miscellaneous"
-        for category in mipp_funcs_categories:
-            if func in mipp_funcs_categories[category]:
+        for category in categories:
+            if func in categories[category]:
                 self.category = category
                 break
             
-    def func_to_str_cpp(self, mipp_funcs, lmul=0):
+    def func_to_str_cpp(self, interfaces, lmul=0):
         #lambda to match reg -> rvd 
         #mask -> rvm 
         # val -> T
@@ -783,7 +783,7 @@ class SpecFuncInfo:
         func_proto_str = " " + ret_str + " " + self.func_name + "(" + args_str + ")"
         return func_proto_str
     
-    def func_to_str_c(self, mipp_funcs, lmul=0):
+    def func_to_str_c(self, interfaces, lmul=0):
         
         lmul_str = ""
         if lmul >= 1:
@@ -820,14 +820,14 @@ class SpecFuncInfo:
         
     
     def write_func_algo(self, file):
-        func_scalar = implems_scalar[self.func_name]
+        func_scalar = scalar_implems[self.func_name]
         # render first implem in the function and write it as an algo. Func is called by write_spec_func_info.
 
-        isa = isa_scalar
+        isa = scalar_isa
         # file = file
-        funcs = mipp_funcs
+        funcs = interfaces
         f = self.func_name
-        ff = implems_scalar[self.func_name][0]
+        ff = scalar_implems[self.func_name][0]
 
         if ff["datatypes"]:
             datatypes = ff["datatypes"]
@@ -857,17 +857,17 @@ class SpecFuncInfo:
             print("### CPP : \n", file=f)
             print("```cpp\n", file=f)
             for lmul in [0, 1, 2, 4, 8]:
-                print(self.func_to_str_cpp(mipp_funcs,lmul), file=f)
+                print(self.func_to_str_cpp(interfaces,lmul), file=f)
             print("```", file=f)
             
             #print("\n\n```c", file=f)
-            #print(self.func_to_str_c(mipp_funcs), file=f)
+            #print(self.func_to_str_c(interfaces), file=f)
             #print("```", file=f)
             print("\n\n### C\n", file=f)
             cstr = "```c\n"
             for lmul in [0, 1, 2, 4, 8]:
                 cstr += "// LMUL = " + str(lmul) + "\n"
-                cstr += self.func_to_str_c(mipp_funcs,lmul)
+                cstr += self.func_to_str_c(interfaces,lmul)
             #cstr = cstr.replace("\n", "```\n\n```")
             #remove last ```
             #cstr = cstr[:-4]
@@ -896,10 +896,10 @@ class SpecFuncInfos:
     def __init__(self):
         self.spec_func_infos = []
     
-    def gen_spec_func_infos(self, mipp_funcs, mipp_funcs_categories):
-        for func in mipp_funcs:
+    def gen_spec_func_infos(self, interfaces, categories):
+        for func in interfaces:
             spec_func_info = SpecFuncInfo()
-            spec_func_info.gen_spec_func_info(func, mipp_funcs, mipp_funcs_categories)
+            spec_func_info.gen_spec_func_info(func, interfaces, categories)
             self.spec_func_infos.append(spec_func_info)
     
     def write_spec_func_infos(self, base_dir):
@@ -909,7 +909,7 @@ class SpecFuncInfos:
 def main():
     print("Generate MIPP infos")
     mipp_infos = MippInfo()
-    mipp_infos.gen_mipp_infos(mipp_funcs, implems_dict)
+    mipp_infos.gen_mipp_infos(interfaces, implems_dict)
     
     #write each isa info in a md file in ../docs/isas_support/
     if os.path.exists("../docs/isas_support/"):
@@ -931,7 +931,7 @@ def main():
     #we want the intersection to be done on 
     #sse4.2, avx2fma, avx512bwbq, rvv1.0
     mipp_infos = MippInfo()
-    mipp_infos.gen_mipp_infos(mipp_funcs, implems_dict_small)
+    mipp_infos.gen_mipp_infos(interfaces, implems_dict_small)
 
     
     intersection = mipp_infos.get_intersection()
@@ -947,7 +947,7 @@ def main():
     os.makedirs("../docs/funcs_support/")
     
     spec_func_infos = SpecFuncInfos()
-    spec_func_infos.gen_spec_func_infos(mipp_funcs, mipp_funcs_categories)
+    spec_func_infos.gen_spec_func_infos(interfaces, categories)
     spec_func_infos.write_spec_func_infos("../docs/funcs_support/")
     
 if __name__ == "__main__":

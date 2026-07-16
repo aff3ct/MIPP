@@ -21,23 +21,23 @@ sys.path.insert(1, path + "/simd_ext/scalar/")
 
 from tools import all_lmul, all_ldiv, clear_memo_caches, load_isa_config
 
-isa_sse, _, _ = load_isa_config("sse")
-isa_avx, _, _ = load_isa_config("avx")
-isa_avx512, _, _ = load_isa_config("avx512")
-isa_sve, _, _ = load_isa_config("sve")
-isa_rvv, _, _ = load_isa_config("rvv")
-isa_neon, _, _ = load_isa_config("neon")
-from registry import isa_scalar
-from registry import implems_scalar
-from registry import mipp_funcs
+sse_isa, _, _ = load_isa_config("sse")
+avx_isa, _, _ = load_isa_config("avx")
+avx512_isa, _, _ = load_isa_config("avx512")
+sve_isa, _, _ = load_isa_config("sve")
+rvv_isa, _, _ = load_isa_config("rvv")
+neon_isa, _, _ = load_isa_config("neon")
+from registry import scalar_isa
+from registry import scalar_implems
+from registry import interfaces
 
-from gen_mipp_sse import gen_mipp_sse
-from gen_mipp_avx import gen_mipp_avx
-from gen_mipp_avx512 import gen_mipp_avx512
-from gen_mipp_sve import gen_mipp_sve
-from gen_mipp_rvv import gen_mipp_rvv
-from gen_mipp_neon import gen_mipp_neon
-from gen_mipp_scalar import gen_mipp_scalar
+from sse_gen import sse_gen
+from avx_gen import avx_gen
+from avx512_gen import avx512_gen
+from sve_gen import sve_gen
+from rvv_gen import rvv_gen
+from neon_gen import neon_gen
+from scalar_gen import scalar_gen
 
 from include_gen import generate_mipp_h
 from ci_generator import generate_c_interface
@@ -67,32 +67,32 @@ def clean_folder(folder_path):
 
 def check_mipp_funcs_scalar_implems():
     should_exit_at_the_end = False
-    for f in mipp_funcs:
-        mipp_funcs_datatypes = mipp_funcs[f]["datatypes"]
+    for f in interfaces:
+        mipp_funcs_datatypes = interfaces[f]["datatypes"]
         mipp_funcs_mask_variants = ["no_mask"]
-        if ("mask_support" in mipp_funcs[f]):
-            if mipp_funcs[f]["mask_support"].is_maskable():
+        if ("mask_support" in interfaces[f]):
+            if interfaces[f]["mask_support"].is_maskable():
                 mipp_funcs_mask_variants = mipp_funcs_mask_variants + ["mask"]
-            if mipp_funcs[f]["mask_support"].is_maskzable():
+            if interfaces[f]["mask_support"].is_maskzable():
                 mipp_funcs_mask_variants = mipp_funcs_mask_variants + ["maskz"]
-            if mipp_funcs[f]["mask_support"].is_masksable():
+            if interfaces[f]["mask_support"].is_masksable():
                 mipp_funcs_mask_variants = mipp_funcs_mask_variants + ["masks"]
 
-        if f not in implems_scalar:
-            print("Panic: '" + f + "' function does not exist in 'implems_scalar'.")
+        if f not in scalar_implems:
+            print("Panic: '" + f + "' function does not exist in 'scalar_implems'.")
             should_exit_at_the_end = True
             continue
 
         for mv in mipp_funcs_mask_variants:
             for dt in mipp_funcs_datatypes:
                 found = False
-                for ff in implems_scalar[f]:
+                for ff in scalar_implems[f]:
                     if "datatypes" not in ff:
-                        print("Panic: '" + f + "<" + dt + "," + mv + ">': \"datatypes\" field is missing in 'implems_scalar'.")
+                        print("Panic: '" + f + "<" + dt + "," + mv + ">': \"datatypes\" field is missing in 'scalar_implems'.")
                         should_exit_at_the_end = True
                         continue
                     if "mask_variants" not in ff:
-                        print("Panic: '" + f + "<" + dt + "," + mv + ">': \"mask_variants\" field is missing in 'implems_scalar'.")
+                        print("Panic: '" + f + "<" + dt + "," + mv + ">': \"mask_variants\" field is missing in 'scalar_implems'.")
                         should_exit_at_the_end = True
                         continue
                     if not ff["datatypes"] and not ff["mask_variants"]:
@@ -108,7 +108,7 @@ def check_mipp_funcs_scalar_implems():
                         found = True
                         break
                 if not found:
-                    print("Panic: '" + f + "<" + dt + "," + mv + ">' function is not defined in 'implems_scalar'.")
+                    print("Panic: '" + f + "<" + dt + "," + mv + ">' function is not defined in 'scalar_implems'.")
                     should_exit_at_the_end = True
                     continue
 
@@ -222,7 +222,7 @@ def main(argv=None):
     print("=" * 85)
     print(" MIPP Header Generator")
     print("=" * 85)
-    print(f"  Target sizes for SVE: {sorted(isa_sve['size'], reverse=True)}")
+    print(f"  Target sizes for SVE: {sorted(sve_isa['size'], reverse=True)}")
     print(f"  LMUL options: {all_lmul} | LDIV options: {all_ldiv}")
     print("-" * 85)
 
@@ -238,9 +238,9 @@ def main(argv=None):
         create_folder(folder)
 
     from tools import GLOBAL_ISA_REGISTRY
-    GLOBAL_ISA_REGISTRY["sse"] = isa_sse
-    GLOBAL_ISA_REGISTRY["avx"] = isa_avx
-    GLOBAL_ISA_REGISTRY["avx512"] = isa_avx512
+    GLOBAL_ISA_REGISTRY["sse"] = sse_isa
+    GLOBAL_ISA_REGISTRY["avx"] = avx_isa
+    GLOBAL_ISA_REGISTRY["avx512"] = avx512_isa
 
     all_isas_str = ["avx512", "avx", "sse", "rvv", "neon", "scalar"]
     if not args.skip_sve:
@@ -254,43 +254,43 @@ def main(argv=None):
         clear_memo_caches()
         print("  ➔ Generating Scalar...", end="", flush=True)
         t0 = time.perf_counter()
-        gen_mipp_scalar(include_manager)
+        scalar_gen(include_manager)
         print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
     if "sse" in isa_layers:
         clear_memo_caches()
         print("  ➔ Generating SSE...", end="", flush=True)
         t0 = time.perf_counter()
-        gen_mipp_sse(include_manager)
+        sse_gen(include_manager)
         print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
     if "avx" in isa_layers:
         clear_memo_caches()
         print("  ➔ Generating AVX...", end="", flush=True)
         t0 = time.perf_counter()
-        gen_mipp_avx(include_manager)
+        avx_gen(include_manager)
         print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
     if "avx512" in isa_layers:
         clear_memo_caches()
         print("  ➔ Generating AVX-512...", end="", flush=True)
         t0 = time.perf_counter()
-        gen_mipp_avx512(include_manager)
+        avx512_gen(include_manager)
         print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
     if "sve" in isa_layers and not args.skip_sve:
         clear_memo_caches()
         print("  ➔ Generating SVE...", end="", flush=True)
         t0 = time.perf_counter()
-        gen_mipp_sve(include_manager)
+        sve_gen(include_manager)
         print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
     if "rvv" in isa_layers:
         clear_memo_caches()
         print("  ➔ Generating RVV...", end="", flush=True)
         t0 = time.perf_counter()
-        gen_mipp_rvv(include_manager)
+        rvv_gen(include_manager)
         print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
     if "neon" in isa_layers:
         clear_memo_caches()
         print("  ➔ Generating Neon...", end="", flush=True)
         t0 = time.perf_counter()
-        gen_mipp_neon(include_manager)
+        neon_gen(include_manager)
         print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
 
     # Wrappers / top-level headers
@@ -299,13 +299,13 @@ def main(argv=None):
         t0 = time.perf_counter()
         if not args.skip_sve:
             generate_mipp_h(include_manager)
-            generate_c_interface([isa_sse, isa_avx, isa_avx512, isa_sve, isa_rvv, isa_neon, isa_scalar], include_manager)
-            generate_cpp(include_manager, [isa_sse, isa_avx, isa_avx512, isa_sve, isa_rvv, isa_neon, isa_scalar])
+            generate_c_interface([sse_isa, avx_isa, avx512_isa, sve_isa, rvv_isa, neon_isa, scalar_isa], include_manager)
+            generate_cpp(include_manager, [sse_isa, avx_isa, avx512_isa, sve_isa, rvv_isa, neon_isa, scalar_isa])
             generate_cpp_object(include_manager)
         else:
             generate_mipp_h(include_manager)
-            generate_c_interface([isa_sse, isa_avx, isa_avx512, isa_rvv, isa_neon, isa_scalar], include_manager)
-            generate_cpp(include_manager, [isa_sse, isa_avx, isa_avx512, isa_rvv, isa_neon, isa_scalar])
+            generate_c_interface([sse_isa, avx_isa, avx512_isa, rvv_isa, neon_isa, scalar_isa], include_manager)
+            generate_cpp(include_manager, [sse_isa, avx_isa, avx512_isa, rvv_isa, neon_isa, scalar_isa])
             generate_cpp_object(include_manager)
         print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
 
