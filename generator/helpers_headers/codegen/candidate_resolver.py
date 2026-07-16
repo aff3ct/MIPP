@@ -13,10 +13,10 @@ from tools import *
 from tools import negate_cond as tool_negate_cond
 from tools import are_conds_mutually_exclusive as tool_are_conds_mutually_exclusive
 from tools import intersect_conds as tool_intersect_conds
-from tools import _build_func_name, _get_dt_par_size, _is_guard_dead_under_cond
+from tools import build_func_name_internal, get_dt_par_size, is_guard_dead_under_cond
 from registry import isa_scalar
-from codegen.implem_tracker import _get_implem_bucket, _missing_build_negated_ifdef_for_existing_implems
-from codegen.emit_helpers import _emit_function_body
+from codegen.implem_tracker import get_implem_bucket, missing_build_negated_ifdef_for_existing_implems
+from codegen.emit_helpers import emit_function_body
 
 
 def _missing_emit_ifdef_begin(ifd, file):
@@ -29,7 +29,7 @@ _STUB_TEMPLATE = """static {{ proto }} {
 }"""
 
 def _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, masked_version = None, lmul=0):
-    full_func_name = _build_func_name(isa, dt_par, dt_par, dt_ret, f, masked_version=masked_version, lmul=lmul)
+    full_func_name = build_func_name_internal(isa, dt_par, dt_par, dt_ret, f, masked_version=masked_version, lmul=lmul)
     proto = build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul, True, masked_version=masked_version)
     j2 = Template(_STUB_TEMPLATE, undefined=StrictUndefined)
     print(j2.render(proto=proto, full_func_name=full_func_name), file=file)
@@ -38,7 +38,7 @@ def _missing_emit_ifdef_end(ifd, file):
     if ifd:
         print("#endif", file=file)
 
-def _render_template(isa, ff, dt_par, dt_ret, func_name="", lmul=0):
+def render_template(isa, ff, dt_par, dt_ret, func_name="", lmul=0):
     j2_template = Template(ff["template"]["code"], undefined=StrictUndefined)
     instr_name = ""
     if "instr_name" in ff:
@@ -56,7 +56,7 @@ def _render_template(isa, ff, dt_par, dt_ret, func_name="", lmul=0):
         lmul = lmul
     )
 
-def _parse_placeholders_or_skip(pre_rendering, isa, funcs, f, dt_par, dt_ret, dt_key, file, lmul=0, isa_name=True):
+def parse_placeholders_or_skip(pre_rendering, isa, funcs, f, dt_par, dt_ret, dt_key, file, lmul=0, isa_name=True):
     try:
         return parse_placeholders(pre_rendering, isa, funcs, f, dt_par, dt_ret, lmul=lmul, isa_name=isa_name)
     except Exception as err:
@@ -83,26 +83,26 @@ def _prepare_mask_variable(pre_statements, isa, msk_dt, arg_name, cond, lmul, f,
     if isa.get("hw_mask", False):
         reg_vector_type = build_reg(msk_dt, isa, lmul, True, False)
         reg_scalar_type = build_reg(msk_dt, isa_scalar, lmul, True, False)
-        scalar_tomsk_func = _build_func_name(isa_scalar, msk_dt_name, msk_dt_name, msk_dt_name, "tomsk", lmul=lmul)
+        scalar_tomsk_func = build_func_name_internal(isa_scalar, msk_dt_name, msk_dt_name, msk_dt_name, "tomsk", lmul=lmul)
         
         is_special_bitfield = False
         if isa.get("hw_mask_is_bitfield", False):
             if is_initial_mask or f in ["toreg", "tomsk", "cast_k"]:
                 is_special_bitfield = True
-                n_elements = isa["size"] // _get_dt_par_size(msk_dt_name)
+                n_elements = isa["size"] // get_dt_par_size(msk_dt_name)
                 
         if is_special_bitfield:
             pre_statements.append(f"\tfor (int i = 0; i < {n_elements}; ++i) {{")
             pre_statements.append(f"\t\ts_{arg_name}.m[i] = ({arg_name}.m & (1ULL << i)) ? ~0 : 0;")
             pre_statements.append(f"\t}}")
         else:
-            toreg_func = _build_func_name(isa, msk_dt_name, msk_dt_name, msk_dt_name, "toreg", lmul=lmul)
+            toreg_func = build_func_name_internal(isa, msk_dt_name, msk_dt_name, msk_dt_name, "toreg", lmul=lmul)
             if lmul < 0 and "if_ldiv" in isa["datatypes"].get(msk_dt_name, {}):
                 guard = isa["datatypes"][msk_dt_name]["if_ldiv"].get(str(-lmul), None)
             else:
                 guard = isa["datatypes"].get(msk_dt_name, {}).get("if", None)
                 
-            if guard == "0" or _is_guard_dead_under_cond(guard, cond):
+            if guard == "0" or is_guard_dead_under_cond(guard, cond):
                 pre_statements.append(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof(s_{arg_name}));")
             else:
                 if guard:
@@ -123,7 +123,7 @@ def _resolve_arg_datatype(arg, dt_par, dt_ret):
     realdatatype = datatypes[dt_par]
     if arg.get("fixeddatatype"):
         if arg["fixeddatatype"] not in datatypes and arg["fixeddatatype"] in all_categories:
-            dt_str = arg["fixeddatatype"] + str(_get_dt_par_size(dt_par))
+            dt_str = arg["fixeddatatype"] + str(get_dt_par_size(dt_par))
             realdatatype = datatypes[dt_str]
         elif arg["fixeddatatype"] in datatypes:
             realdatatype = datatypes[arg["fixeddatatype"]]
@@ -134,12 +134,12 @@ def _resolve_arg_datatype(arg, dt_par, dt_ret):
 def _prepare_return_variable(post_statements, isa, dt_ret, cond, lmul, f, vector_ret_type, ret_type_name):
     dt_ret_name = dt_ret["name"]
     if ret_type_name == "msk" and isa.get("hw_mask", False):
-        tomsk_func = _build_func_name(isa, dt_ret_name, dt_ret_name, dt_ret_name, "tomsk", lmul=lmul)
-        toreg_scalar_func = _build_func_name(isa_scalar, dt_ret_name, dt_ret_name, dt_ret_name, "toreg", lmul=lmul)
+        tomsk_func = build_func_name_internal(isa, dt_ret_name, dt_ret_name, dt_ret_name, "tomsk", lmul=lmul)
+        toreg_scalar_func = build_func_name_internal(isa_scalar, dt_ret_name, dt_ret_name, dt_ret_name, "toreg", lmul=lmul)
         if isa.get("hw_mask_is_bitfield", False) and f in ["toreg", "tomsk", "cast_k"]:
             post_statements.append(f"\t{vector_ret_type} res;")
             post_statements.append(f"\tres.m = 0;")
-            n_elements = isa["size"] // _get_dt_par_size(dt_ret_name)
+            n_elements = isa["size"] // get_dt_par_size(dt_ret_name)
             post_statements.append(f"\tfor (int i = 0; i < {n_elements}; ++i) {{")
             post_statements.append(f"\t\tif (sres.m[i]) res.m |= (1ULL << i);")
             post_statements.append(f"\t}}")
@@ -149,7 +149,7 @@ def _prepare_return_variable(post_statements, isa, dt_ret, cond, lmul, f, vector
             else:
                 ret_guard = isa["datatypes"].get(dt_ret_name, {}).get("if", None)
 
-            if ret_guard == "0" or _is_guard_dead_under_cond(ret_guard, cond):
+            if ret_guard == "0" or is_guard_dead_under_cond(ret_guard, cond):
                 post_statements.append(f"\t{vector_ret_type} res;")
                 post_statements.append(f"\tmemcpy(&res, &sres, sizeof(res));")
             else:
@@ -173,7 +173,7 @@ def _prepare_return_variable(post_statements, isa, dt_ret, cond, lmul, f, vector
 def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond, lmul=0):
     dt_par, dt_ret = compute_dt_par_dt_ret(None, None, dt, check_support=False)
     dt_key = dt_par + "," + dt_ret
-    func_name = _build_func_name(isa, dt, dt_par, dt_ret, f, masked_version=mask_kind, lmul=lmul)
+    func_name = build_func_name_internal(isa, dt, dt_par, dt_ret, f, masked_version=mask_kind, lmul=lmul)
     
     proto_str = build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul=lmul, isa_name=True, masked_version=mask_kind)
     
@@ -191,7 +191,7 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond, lm
     if mask_kind is not None:
         msk_dt = datatypes[dt_par]
         if "gather" in f or "scatter" in f:
-            msk_dt = datatypes["uint" + str(_get_dt_par_size(dt_par))]
+            msk_dt = datatypes["uint" + str(get_dt_par_size(dt_par))]
         elif funcs[f]["proto"]["ret"].get("fixeddatatype"):
             msk_dt = datatypes[funcs[f]["proto"]["ret"]["fixeddatatype"]]
         _prepare_mask_variable(pre_statements, isa, msk_dt, "m0", cond, lmul, f, is_initial_mask=True)
@@ -232,7 +232,7 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond, lm
             call_args.append("vals")
             
     call_args_str = ", ".join(call_args)
-    scalar_func_name = _build_func_name(isa_scalar, dt, dt_par, dt_ret, f, masked_version=mask_kind, lmul=lmul)
+    scalar_func_name = build_func_name_internal(isa_scalar, dt, dt_par, dt_ret, f, masked_version=mask_kind, lmul=lmul)
     
     ret_type_name = proto["ret"]["type"]
     if ret_type_name == "reg" or ret_type_name == "msk":
@@ -267,7 +267,7 @@ def _get_candidate_reqs(cand, isa, funcs):
     ff = cand["ff"]
     dt = cand["dt"]
     dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
-    pre_rendering = _render_template(isa, ff, dt_par, dt_ret, func_name=f)
+    pre_rendering = render_template(isa, ff, dt_par, dt_ret, func_name=f)
     try:
         reqs = get_requirements(pre_rendering, isa, funcs, f, dt_par, dt_ret)
     except Exception:
@@ -287,7 +287,7 @@ def _append_resolved_status(funcs, f, dt_key, mask_kind, cond, reqs):
         bucket = get_masked_bucket(funcs, f, dt_key, mask_kind, create_missing_bucket=True)
         bucket.append(cur_implem_status)
 
-def _resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators=False):
+def resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators=False):
     is_inc_mgr = hasattr(file, "get_fd")
     
     candidates_map = {}
@@ -552,11 +552,11 @@ def _resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separator
         file_w = file.get_fd(isa["name"], f) if is_inc_mgr else file
         if emit_separators and is_inc_mgr:
             if lmul in [2, 4, 8]:
-                from codegen.lmul_orchestrator import _maybe_emit_lmul_separator
-                _maybe_emit_lmul_separator(isa["name"], f, file_w)
+                from codegen.lmul_orchestrator import maybe_emit_lmul_separator
+                maybe_emit_lmul_separator(isa["name"], f, file_w)
             elif lmul < 0:
-                from codegen.lmul_orchestrator import _maybe_emit_ldiv_separator
-                _maybe_emit_ldiv_separator(isa["name"], f, file_w)
+                from codegen.lmul_orchestrator import maybe_emit_ldiv_separator
+                maybe_emit_ldiv_separator(isa["name"], f, file_w)
         
         # Emit forward declarations first to prevent order-of-declaration issues
         for dt in funcs[f]["datatypes"]:
@@ -578,7 +578,7 @@ def _resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separator
                 if resolved[key]:
                     has_active = any(cond != "0" for cand, cond in resolved[key])
                     if has_active:
-                        func_name = _build_func_name(isa, dt, dt_par, dt_ret, f, masked_version=mask_kind, lmul=lmul)
+                        func_name = build_func_name_internal(isa, dt, dt_par, dt_ret, f, masked_version=mask_kind, lmul=lmul)
                         proto_str = build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul=lmul, isa_name=True, masked_version=mask_kind)
                         print("static " + proto_str + ";", file=file_w)
                         
@@ -603,7 +603,7 @@ def _resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separator
                         continue
                     
                     if cand["type"] in ["native_or_emu", "generic_emu"]:
-                        pre_rendering = _render_template(isa, cand["ff"], dt_par, dt_ret, func_name=f, lmul=lmul)
+                        pre_rendering = render_template(isa, cand["ff"], dt_par, dt_ret, func_name=f, lmul=lmul)
                         ph_ret = parse_placeholders(pre_rendering, isa, funcs, f, dt_par, dt_ret, lmul=lmul)
                         post_rendering = ph_ret["converted_ir"]
                         
@@ -611,7 +611,7 @@ def _resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separator
                             print("", file=file_w)
                             if cond != "":
                                 print(f"#if {cond}", file=file_w)
-                            _emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, cand["ff"], post_rendering, file_w, masked_version=mask_kind, level=cand["level"], lmul=lmul)
+                            emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, cand["ff"], post_rendering, file_w, masked_version=mask_kind, level=cand["level"], lmul=lmul)
                             if cond != "":
                                 print("#endif", file=file_w)
                             
@@ -621,7 +621,7 @@ def _resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separator
                     elif cand["type"] == "stub":
                         if cond != "":
                             print(f"#if {cond}", file=file_w)
-                        func_name = _build_func_name(isa, dt, dt_par, dt_ret, f, masked_version=mask_kind, lmul=lmul)
+                        func_name = build_func_name_internal(isa, dt, dt_par, dt_ret, f, masked_version=mask_kind, lmul=lmul)
                         _missing_emit_stub(file_w, funcs, f, dt_par, dt_ret, isa, func_name, masked_version=mask_kind, lmul=lmul)
                         if cond != "":
                             print("#endif", file=file_w)

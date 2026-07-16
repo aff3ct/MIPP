@@ -448,17 +448,17 @@ def write_mipp_infos(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_funcs_c
         file_path = os.path.join(base_dir, isa_info.isa_name + ".md")
         with open(file_path, "w") as f:
             dttypes = all_datatypes
-            for concept in mipp_funcs_categories:
+            for category in mipp_funcs_categories:
 
-                #we write one table per concept
-                print("\n## " + concept + "\n", file=f)
+                #we write one table per category
+                print("\n## " + category + "\n", file=f)
                 #we want the list of dtypes in the same order but shortened using all_datatypes_short
                 print("| Function | " + " | ".join(all_datatypes_short) + " |", file=f)
                 print("| --- | " + " | ".join(["---"]*len(dttypes)) + " |", file=f)
                 for func in mipp_funcs:
                     if func == "cast" or func == "cast_k":
                         continue
-                    if func in mipp_funcs_categories[concept]:
+                    if func in mipp_funcs_categories[category]:
                         func_info = isa_info.get_func_info(func)
                         if func_info is not None:
                             line = "| " + func + " | "
@@ -492,7 +492,7 @@ def write_mipp_infos(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_funcs_c
             for func in mipp_funcs:
                 if func == "cast" or func == "cast_k":
                     continue                               
-                if all(func not in mipp_funcs_categories[concept] for concept in mipp_funcs_categories):
+                if all(func not in mipp_funcs_categories[category] for category in mipp_funcs_categories):
                     func_info = isa_info.get_func_info(func)
                     if func_info is not None:
                         line = "| " + func + " | "
@@ -547,15 +547,15 @@ def write_mipp_infos(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_funcs_c
                             line += color_black + ":material-minus:" + color_end + " | "
                     print(line, file=f)
 
-def exists_any_msk_in_concept(concept):
-    for func in mipp_funcs_categories[concept]:
+def exists_any_msk_in_category(category):
+    for func in mipp_funcs_categories[category]:
         if "mask_support" in mipp_funcs[func]:
             if mipp_funcs[func]["mask_support"].is_any_mask():
                 return True
     return False
 
-def exists_msk_in_concept(concept, mkind):
-    for func in mipp_funcs_categories[concept]:
+def exists_msk_in_category(category, mkind):
+    for func in mipp_funcs_categories[category]:
         if func not in mipp_funcs:
             continue
         if "mask_support" in mipp_funcs[func]:
@@ -586,17 +586,17 @@ def write_mipp_infos_masked(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_
     color_yellow = '<span style="color: #FFD20D; font-weight: 600;">'
     color_end = '</span>'
     
-    # 1 section per mask kind. Each section has tables for each concept. 
+    # 1 section per mask kind. Each section has tables for each category. 
     for isa_info in mipp_infos.isa_infos:
         file_path = os.path.join(base_dir, isa_info.isa_name + "_masked.md")
         with open(file_path, "w") as f:
             dttypes = all_datatypes
             for mkind in ["mask", "maskz", "masks"]:
                 print("\n## " + mkind + "\n", file=f)
-                for concept in mipp_funcs_categories:
-                    if not exists_msk_in_concept(concept, mkind):
+                for category in mipp_funcs_categories:
+                    if not exists_msk_in_category(category, mkind):
                         continue
-                    print("\n### " + concept + "\n", file=f)
+                    print("\n### " + category + "\n", file=f)
                     print("| Function | " + " | ".join(all_datatypes_short) + " |", file=f)
                     print("| --- | " + " | ".join(["---"]*len(dttypes)) + " |", file=f)
                     for func in mipp_funcs:
@@ -604,7 +604,7 @@ def write_mipp_infos_masked(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_
                             continue
                         if func == "cast" or func == "cast_k":
                             continue
-                        if func in mipp_funcs_categories[concept]:
+                        if func in mipp_funcs_categories[category]:
                             func_info = isa_info.get_func_info(func)
                             if func_info is not None :
                                 line = "| " + func + " | "
@@ -643,7 +643,7 @@ def write_mipp_infos_masked(mipp_infos, base_dir, mipp_funcs = mipp_funcs, mipp_
                         continue  
                     if not exists_msk_in_func(func, mkind):
                         continue              
-                    if all(func not in mipp_funcs_categories[concept] for concept in mipp_funcs_categories):
+                    if all(func not in mipp_funcs_categories[category] for category in mipp_funcs_categories):
                         func_info = isa_info.get_func_info(func)
                         if func_info is not None :
                             line = "| " + func + " | "
@@ -744,7 +744,7 @@ class SpecFuncInfo:
         self.args = []
         self.ret = None
         self.dttypes = []
-        self.concept = None
+        self.category = None
     
     def gen_spec_func_info(self, func, mipp_funcs, mipp_funcs_categories):
         self.func_name = func
@@ -753,10 +753,10 @@ class SpecFuncInfo:
         self.dttypes = mipp_funcs[func]["datatypes"]
         self.mask_support = mipp_funcs[func]["mask_support"]
         
-        self.concept = "miscellaneous"
-        for concept in mipp_funcs_categories:
-            if func in mipp_funcs_categories[concept]:
-                self.concept = concept
+        self.category = "miscellaneous"
+        for category in mipp_funcs_categories:
+            if func in mipp_funcs_categories[category]:
+                self.category = category
                 break
             
     def func_to_str_cpp(self, mipp_funcs, lmul=0):
@@ -840,8 +840,8 @@ class SpecFuncInfo:
 
 
     def write_spec_func_info(self, base_dir):
-        #path is base_dire + concept + "/" + func_name + ".md
-        file_path = os.path.join(base_dir, self.concept, self.func_name + ".md")
+        #path is base_dire + category + "/" + func_name + ".md
+        file_path = os.path.join(base_dir, self.category, self.func_name + ".md")
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, "w") as f:
             

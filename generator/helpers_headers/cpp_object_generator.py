@@ -11,7 +11,7 @@ from registry import *
 from tools import *
 from include_gen import IncludeManager
 
-def gen_cpp_reg_operators(file):
+def _gen_cpp_reg_operators(file):
 	tpl_class_Rvd = """
  
 template <typename T, int LMUL>
@@ -69,7 +69,7 @@ public:
 	print(j3_template.render(), file=file)
 	
 	# operators with mask 
-def gen_cpp_msk_operators(file):
+def _gen_cpp_msk_operators(file):
 	print("// ------------------------------------------------------------------------------------------------------ operators (Msk) ",file=file)
 
 	tpl_class_Rvm = """template <typename T, int LMUL = 1>
@@ -131,8 +131,8 @@ def generate_cpp_object(include_manager=None):
 	j2_template = Template(tpl_header_cpp, undefined=StrictUndefined)
 	print(j2_template.render(), file=file)
 	
-	gen_cpp_reg_operators(file)
-	gen_cpp_msk_operators(file)
+	_gen_cpp_reg_operators(file)
+	_gen_cpp_msk_operators(file)
 	
 	tpl_footer_cpp = """}
 	

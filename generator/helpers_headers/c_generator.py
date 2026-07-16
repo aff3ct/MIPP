@@ -16,58 +16,18 @@ from tools import *
 from include_gen import *
 from registry import *
 
-# Expose everything from codegen sub-modules for backwards-compatibility
-from codegen.emit_helpers import *
 from codegen.emit_helpers import (
-    _emit_function_body,
-    _emit_short_format_prologue,
-    _emit_ifdef_begin_and_update_emulated,
-    _emit_ifdef_end,
-    _emit_already_implemented_message,
-    _emit_ifdef_begin,
-    _gen_ldiv_defines_avx,
-    _gen_ldiv_structs_avx,
+    emit_ifdef_begin_and_update_emulated,
+    emit_short_format_prologue,
+    emit_ifdef_end,
+    emit_already_implemented_message,
+    emit_ifdef_begin,
+    gen_ldiv_defines_avx,
+    gen_ldiv_structs_avx,
 )
+from codegen.candidate_resolver import resolve_and_emit_missing_functions
+from codegen.lmul_orchestrator import gen_c_lmul, gen_c_ldiv
 
-from codegen.implem_tracker import *
-from codegen.implem_tracker import (
-    _is_masked_implem,
-    _get_implem_bucket,
-    _build_prev_exclusion_ifdef,
-    _append_implem_status,
-    _combine_current_ifdefs,
-    _update_emulated,
-    _gen_isdef_neg,
-    _add_guard_if_isdef,
-    _add_endif_if_isdef,
-)
-
-from codegen.candidate_resolver import *
-from codegen.candidate_resolver import (
-    _resolve_and_emit_missing_functions,
-    _missing_build_negated_ifdef_for_existing_implems,
-    _missing_emit_ifdef_begin,
-    _missing_emit_stub,
-    _missing_emit_ifdef_end,
-    _render_template,
-    _parse_placeholders_or_skip,
-    _gen_c_auto_scalar_fallback_one,
-)
-
-from codegen.lmul_orchestrator import *
-from codegen.lmul_orchestrator import (
-    _maybe_emit_lmul_separator,
-    _maybe_emit_ldiv_separator,
-    _gen_c_horiz_lmul_one,
-    _c_lmul_writer,
-    _gen_c_function_one_ldiv_avx,
-    _rvv_seen_lmul,
-    _rvv_mark_lmul_seen,
-    _rvv_seen_lmul_masked,
-    _rvv_mark_lmul_seen_masked,
-    seen_lmul_separators,
-    seen_ldiv_separators,
-)
 
 def gen_c_defines(isa, file):
     """
@@ -202,13 +162,13 @@ def gen_c_structures(isa, file, is_scalar=False):
     if isa["name"] == "avx512": 
         sub_isa = GLOBAL_ISA_REGISTRY.get("avx")
         if sub_isa:
-            _gen_ldiv_structs_avx(isa, sub_isa, file)
-            _gen_ldiv_defines_avx(isa, sub_isa, file)
+            gen_ldiv_structs_avx(isa, sub_isa, file)
+            gen_ldiv_defines_avx(isa, sub_isa, file)
     if isa["name"] == "avx": 
         sub_isa = GLOBAL_ISA_REGISTRY.get("sse")
         if sub_isa:
-            _gen_ldiv_structs_avx(isa, sub_isa, file)
-            _gen_ldiv_defines_avx(isa, sub_isa, file)
+            gen_ldiv_structs_avx(isa, sub_isa, file)
+            gen_ldiv_defines_avx(isa, sub_isa, file)
 
 def gen_c_functions(isa, file, funcs, implems):
     if "candidates" not in isa:
@@ -247,7 +207,7 @@ def gen_c_generic_functions(isa, file, funcs, implems):
             exit(-1)
 
 def gen_c_missing_functions(isa, file, funcs):
-    _resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators=False)
+    resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators=False)
 
 def gen_c_missing_functions_lmul(isa, file, funcs, lmul):
-    _resolve_and_emit_missing_functions(isa, file, funcs, lmul=lmul, emit_separators=True)
+    resolve_and_emit_missing_functions(isa, file, funcs, lmul=lmul, emit_separators=True)

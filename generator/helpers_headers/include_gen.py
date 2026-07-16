@@ -11,12 +11,12 @@ from registry import *
 # WIP : This is not actually implemented **YET**
 # dependencies mode in : 
 # function_header -> each function lives in it's own header, dependencies are included in that header.
-# category_header -> each category (concept) lives in a header, functions are defined in that header, dependencies are included in that header.
-#   for instance, all functions in the "arithmetic" concept would be defined in arithmetic.h and include their dependencies.
+# category_header -> each category (category) lives in a header, functions are defined in that header, dependencies are included in that header.
+#   for instance, all functions in the "arithmetic" category would be defined in arithmetic.h and include their dependencies.
 # single_header -> all functions live in a single header, dependencies are included in that header.
 
 # The helpers 
-def get_include_name(func, layer=""):
+def _get_include_name(func, layer=""):
     if layer == "":
         return f"{func}.h"
     elif layer == "c":
@@ -28,10 +28,10 @@ def get_include_name(func, layer=""):
     else : 
         return f"{layer}_{func}.h"
 
-def get_include_path(func, layer):
+def _get_include_path(func, layer):
     if func == "common":
         return f"{layer}/common.h"
-    include_name = get_include_name(func)
+    include_name = _get_include_name(func)
     
     if layer == "" :
         return include_name
@@ -39,21 +39,21 @@ def get_include_path(func, layer):
 
 
 #copied from gen_mipp_tests, should prolly move all to tools.py
-def match_concept(func):
+def _match_category(func):
     """
     helper to match a func to an 
     entry in mipp_funcs_categories. 
     This is used to write files in the relevant 
-    subdir for their concept.
+    subdir for their category.
     """
     if func == "common":
         return "common"
     
-    for concept in mipp_funcs_categories:
-        if func in mipp_funcs_categories[concept]:
-            if concept == "a_trier":
+    for category in mipp_funcs_categories:
+        if func in mipp_funcs_categories[category]:
+            if category == "a_trier":
                 return "miscellaneous"
-            return concept
+            return category
     return "miscellaneous"
 
 def _get_implem_status_requirements_all_dt_keys(funcs, f):
@@ -76,8 +76,8 @@ def _get_dependencies_regular_category_header(func, mipp_funcs, layer="c"):
     requirements = _get_implem_status_requirements_all_dt_keys(mipp_funcs, func)
     for req in requirements:
         if req in mipp_funcs:
-            req_concept = match_concept(req)
-            req_include_name = get_include_name(req_concept, layer)
+            req_concept = _match_category(req)
+            req_include_name = _get_include_name(req_concept, layer)
             requirements[req] = req_include_name
     return requirements
     
@@ -85,8 +85,8 @@ def _get_dependencies_mask_category_header(func, mipp_funcs, mask_kind, layer="c
     requirements = _get_implem_status_requirements_mask_dt_keys(mipp_funcs, func, mask_kind)
     for req in requirements:
         if req in mipp_funcs:
-            req_concept = match_concept(req)
-            req_include_name = get_include_name(req_concept, layer)
+            req_concept = _match_category(req)
+            req_include_name = _get_include_name(req_concept, layer)
             requirements[req] = req_include_name
     return requirements
 
@@ -113,8 +113,8 @@ def _get_dependencies_regular(func, mipp_funcs, layer="c", mode="function_header
     
     for req in requirements:
         if req in mipp_funcs:
-            req_concept = match_concept(req)
-            req_include_name = get_include_name(req, layer)
+            req_concept = _match_category(req)
+            req_include_name = _get_include_name(req, layer)
             requirements[req] = req_include_name
     return requirements
 
@@ -165,13 +165,13 @@ def _get_dependencies_mask(func, mipp_funcs, mask_kind, layer="c", mode="functio
     requirements = _get_implem_status_requirements_mask_dt_keys(mipp_funcs, func, mask_kind)
     for req in requirements:
         if req in mipp_funcs:
-            req_include_name = get_include_name(req, layer)
+            req_include_name = _get_include_name(req, layer)
             requirements[req] = req_include_name
     return requirements
                              
 
 
-def get_dependencies(func, mipp_funcs, lmul=0, mask_kind="", layer="", mode="function_header"):
+def _get_dependencies(func, mipp_funcs, lmul=0, mask_kind="", layer="", mode="function_header"):
     """
     using the requirements key in mipp_funcs, get the list of dependencies for a given func.
     
@@ -219,8 +219,8 @@ def get_dependencies(func, mipp_funcs, lmul=0, mask_kind="", layer="", mode="fun
         if func in dependencies:
             dependencies.remove(func)
     elif mode == "category_header":
-        category = match_concept(func)
-        include_name = get_include_name(category, layer)
+        category = _match_category(func)
+        include_name = _get_include_name(category, layer)
         if include_name in dependencies:
             dependencies.remove(include_name)
 
@@ -233,10 +233,10 @@ class IncludePath:
     def __init__(self, func, layer,mode="function_header"):
         self.func = func
         if mode == "function_header":
-            self.name = get_include_name(func, layer)
+            self.name = _get_include_name(func, layer)
         elif mode == "category_header":
-            category = match_concept(func)
-            self.name = get_include_name(category, layer)
+            category = _match_category(func)
+            self.name = _get_include_name(category, layer)
             print(f"IncludePath for func {func} in layer {layer} with mode {mode} has name {self.name}")
         elif mode == "single_header":
             print("Stub, not done :(")
@@ -247,7 +247,7 @@ class IncludePath:
         
     def resolve_dependencies(self, mipp_funcs,  lmul, mask_kind, layer):
         #get regular dependencies
-        deps = get_dependencies(self.func, mipp_funcs, lmul=lmul, mask_kind=mask_kind, layer=layer, mode=self.mode)
+        deps = _get_dependencies(self.func, mipp_funcs, lmul=lmul, mask_kind=mask_kind, layer=layer, mode=self.mode)
         for dep in deps:
             self.dependencies.add(dep)
     
@@ -381,7 +381,7 @@ class IncludePath:
             # Reopen for further appends
             self.file = open(full_path, "a+", encoding="utf-8", newline="")
         elif mode == "category_header":
-            category = match_concept(self.func)
+            category = _match_category(self.func)
             full_path = f"{base_dir}/{category}.h"
             os.makedirs(os.path.dirname(full_path), exist_ok=True)
 
@@ -414,10 +414,10 @@ class IncludePath:
             self._is_prefixed = True
 
 class IncludeCategory:
-    # a category of includes for a given concept. For instance, all functions in the "arithmetic" concept would be in the same category.
+    # a category of includes for a given category. For instance, all functions in the "arithmetic" category would be in the same category.
     def __init__(self, category, layer):
         self.category = category
-        self.name = get_include_name(category, layer)
+        self.name = _get_include_name(category, layer)
         self.includes = {} #key is func name, value is IncludePath object
         self.file = None
         self.dependencies = set()
@@ -425,7 +425,7 @@ class IncludeCategory:
         self._is_prefixed = False
     def get_functions(self, mipp_funcs):
         for func in mipp_funcs:
-            if match_concept(func) == self.category:
+            if _match_category(func) == self.category:
                 self.functions.add(func)
     
     def add_includes(self, mipp_funcs, layer):
@@ -556,14 +556,14 @@ class IncludeLayer:
         if mode == "category_header":
             self.categories = {} #key is category name, value is IncludeCategory object
     
-    def add_includes(self, func, mipp_funcs, concepts):
+    def add_includes(self, func, mipp_funcs, categories):
         if self.mode == "function_header" :
             if func not in self.includes:
                 include_path = IncludePath(func, self.layer_name, mode=self.mode)
                 include_path.resolve_dependencies(mipp_funcs, lmul=0, mask_kind="", layer=self.layer_name)
                 self.includes[func] = include_path
         elif self.mode == "category_header": # code not checked, just a stub for now
-            category = match_concept(func)
+            category = _match_category(func)
             if category not in self.categories:
                 include_category = IncludeCategory(category, self.layer_name)
                 include_category.add_includes(mipp_funcs, self.layer_name)
@@ -647,7 +647,7 @@ class IncludeManager:
         elif self.mode == "category_header":
             if layer_name in self.layers:
                 layer = self.layers[layer_name]
-                category = match_concept(func)
+                category = _match_category(func)
                 target_dir = self._get_layer_dir(layer_name)
 
                 if category in layer.categories:

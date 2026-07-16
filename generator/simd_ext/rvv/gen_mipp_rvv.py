@@ -10,7 +10,8 @@ from tools import *
 from registry import *
 isa_rvv, implems_rvv, implems_emu_rvv = load_isa_config("rvv")
 
-from c_generator import gen_c_functions_rvv, gen_c_missing_functions_lmul
+from c_generator import gen_c_missing_functions_lmul
+from codegen.lmul_orchestrator import gen_c_functions_rvv
 
 from include_gen import IncludeManager
 

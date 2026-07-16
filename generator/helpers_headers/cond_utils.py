@@ -72,7 +72,7 @@ class Or(Expr):
     def __hash__(self):
         return hash(("Or", tuple(sorted(self.children, key=lambda x: str(x)))))
 
-def tokenize(s):
+def _tokenize(s):
     # Capture comparison sub-expressions (e.g. "__ARM_ARCH >= 8") as single atomic tokens,
     # then defined(...), boolean operators, parentheses, and identifiers.
     pattern = r"([a-zA-Z_][a-zA-Z0-9_]*\s*(?:>=|<=|==|!=|>|<)\s*[a-zA-Z0-9_]+|defined\s*\(\s*[a-zA-Z0-9_]+\s*\)|&&|\|\||!|\(|\)|[a-zA-Z0-9_]+)"
@@ -81,7 +81,7 @@ def tokenize(s):
         tokens.append(m.group(1))
     return tokens
 
-def parse(tokens):
+def _parse(tokens):
     pos = 0
 
     def parse_or():
@@ -144,35 +144,35 @@ def parse(tokens):
 
     return parse_or()
 
-def substitute_known_true(expr, known_true_exprs):
+def _substitute_known_true(expr, known_true_exprs):
     if not known_true_exprs:
         return expr
     for kt in known_true_exprs:
         if expr == kt:
             return Term("1")
     if isinstance(expr, Or):
-        new_children = [substitute_known_true(c, known_true_exprs) for c in expr.children]
+        new_children = [_substitute_known_true(c, known_true_exprs) for c in expr.children]
         result = Or(new_children)
         for kt in known_true_exprs:
             if result == kt:
                 return Term("1")
         return result
     if isinstance(expr, And):
-        new_children = [substitute_known_true(c, known_true_exprs) for c in expr.children]
+        new_children = [_substitute_known_true(c, known_true_exprs) for c in expr.children]
         return And(new_children)
     if isinstance(expr, Not):
-        new_child = substitute_known_true(expr.child, known_true_exprs)
+        new_child = _substitute_known_true(expr.child, known_true_exprs)
         return Not(new_child)
     return expr
 
-def simplify(expr):
+def _simplify(expr):
     if isinstance(expr, Term):
         return expr
         
     if isinstance(expr, Not):
-        child = simplify(expr.child)
+        child = _simplify(expr.child)
         if isinstance(child, Not):
-            return simplify(child.child)
+            return _simplify(child.child)
         if child == Term("0"):
             return Term("1")
         if child == Term("1"):
@@ -182,7 +182,7 @@ def simplify(expr):
     if isinstance(expr, And):
         new_children = []
         for c in expr.children:
-            sc = simplify(c)
+            sc = _simplify(c)
             if isinstance(sc, And):
                 new_children.extend(sc.children)
             else:
@@ -241,7 +241,7 @@ def simplify(expr):
     if isinstance(expr, Or):
         new_children = []
         for c in expr.children:
-            sc = simplify(c)
+            sc = _simplify(c)
             if isinstance(sc, Or):
                 new_children.extend(sc.children)
             else:
@@ -293,7 +293,7 @@ def simplify(expr):
 
         flat_children = []
         for c in unique_children:
-            sc = simplify(c)
+            sc = _simplify(c)
             if isinstance(sc, Or):
                 flat_children.extend(sc.children)
             else:
@@ -336,20 +336,20 @@ def simplify(expr):
 def simplify_cond_str(s, known_true_conds=None):
     if not s or s.strip() == "":
         return ""
-    tokens = tokenize(s)
+    tokens = _tokenize(s)
     if not tokens:
         return s
-    expr = parse(tokens)
+    expr = _parse(tokens)
     if known_true_conds:
         known_true_exprs = []
         for kt_str in known_true_conds:
             if kt_str and kt_str.strip():
-                kt_tokens = tokenize(kt_str)
+                kt_tokens = _tokenize(kt_str)
                 if kt_tokens:
-                    known_true_exprs.append(parse(kt_tokens))
+                    known_true_exprs.append(_parse(kt_tokens))
         if known_true_exprs:
-            expr = substitute_known_true(expr, known_true_exprs)
-    simplified = simplify(expr)
+            expr = _substitute_known_true(expr, known_true_exprs)
+    simplified = _simplify(expr)
     res = simplified.to_str()
     if res == "0":
         return "0"
@@ -393,7 +393,7 @@ def intersect_conds(c1, c2, known_true_conds=None):
         return None
     return f"({c1}) && ({c2})"
 
-def _is_guard_dead_under_cond(guard, cond):
+def is_guard_dead_under_cond(guard, cond):
     if not guard or guard == "0" or not cond:
         return False
     neg_guard = f"!( {guard} )"

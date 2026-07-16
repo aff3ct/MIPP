@@ -190,18 +190,18 @@ def is_int_dt(dt):
 def is_signed_int_dt(dt):
     return dt in all_int
 
-def match_concept(func):
+def _match_category(func):
     """
     helper to match a func to an 
     entry in mipp_funcs_categories. 
     This is used to write files in the relevant 
-    subdir for their concept.
+    subdir for their category.
     """
-    for concept in mipp_funcs_categories:
-        if func in mipp_funcs_categories[concept]:
-            if concept == "a_trier":
+    for category in mipp_funcs_categories:
+        if func in mipp_funcs_categories[category]:
+            if category == "a_trier":
                 return "miscellaneous"
-            return concept
+            return category
     return "miscellaneous"
 
 def gen_func_defines(func, dt, implem):
@@ -550,7 +550,7 @@ def _match_func_headers_category(func, kind="c", mkind="") :
     headers += f"\n#include <{kind}/common{hsufix}>\n"
     headers += common_scalpath
 
-    category = match_concept(func)
+    category = _match_category(func)
 
     headers += f'#include <{kind}/functions/{category}{hsufix}>\n'
     headers += f'{func_scalprefix}{category}{hsufix}>\n'
@@ -1448,21 +1448,21 @@ def gen_test_files_all_funcs(kind="all", lmul=0, mkind="", N=10, mode="function_
         os.makedirs(tmp_path, exist_ok=True)
     if regen_c:
         os.makedirs(cpath, exist_ok=True)
-        for concept in mipp_funcs_categories:
-            if concept != "a_trier":
-                os.makedirs(cpath + concept + "/", exist_ok=True)
+        for category in mipp_funcs_categories:
+            if category != "a_trier":
+                os.makedirs(cpath + category + "/", exist_ok=True)
         os.makedirs(cpath + "miscellaneous/", exist_ok=True)
     if regen_cpp:
         os.makedirs(cpppath, exist_ok=True)
-        for concept in mipp_funcs_categories:
-            if concept != "a_trier":
-                os.makedirs(cpppath + concept + "/", exist_ok=True)
+        for category in mipp_funcs_categories:
+            if category != "a_trier":
+                os.makedirs(cpppath + category + "/", exist_ok=True)
         os.makedirs(cpppath + "miscellaneous/", exist_ok=True)
     if regen_obj:
         os.makedirs(objpath, exist_ok=True)
-        for concept in mipp_funcs_categories:
-            if concept != "a_trier":
-                os.makedirs(objpath + concept + "/", exist_ok=True)
+        for category in mipp_funcs_categories:
+            if category != "a_trier":
+                os.makedirs(objpath + category + "/", exist_ok=True)
         os.makedirs(objpath + "miscellaneous/", exist_ok=True)
 
     dict_mask = get_gen_test_dict_mask("c")
@@ -1490,7 +1490,7 @@ def gen_test_files_all_funcs(kind="all", lmul=0, mkind="", N=10, mode="function_
                 c_file = gen_headers(kind="c",func=func, N=N, lmul=lmul, mkind=mkind, mode=mode) + gen_file(func, kind="c",lmul=lmul, mkind=mkind)
             if disable:
                 c_file = comment_out_cpp_file(c_file, reason)
-            file_path = cpath + match_concept(func) + f"/test_c{func}.cpp"
+            file_path = cpath + _match_category(func) + f"/test_c{func}.cpp"
             write_file_if_different(file_path, c_file)
             stats["generated"] += 1
 
@@ -1502,7 +1502,7 @@ def gen_test_files_all_funcs(kind="all", lmul=0, mkind="", N=10, mode="function_
                 
             if disable:
                 cpp_file = comment_out_cpp_file(cpp_file, reason)
-            file_path = cpppath + match_concept(func) + f"/test_{func}.cpp"
+            file_path = cpppath + _match_category(func) + f"/test_{func}.cpp"
             write_file_if_different(file_path, cpp_file)
             stats["generated"] += 1
 
@@ -1514,7 +1514,7 @@ def gen_test_files_all_funcs(kind="all", lmul=0, mkind="", N=10, mode="function_
             if disable:
                 obj_file = comment_out_cpp_file(obj_file, reason)
 
-            file_path = objpath + match_concept(func) + f"/test_obj_{func}.cpp"
+            file_path = objpath + _match_category(func) + f"/test_obj_{func}.cpp"
             write_file_if_different(file_path, obj_file)
             stats["generated"] += 1
 
@@ -1593,7 +1593,7 @@ def main():#just parse the args and call gen_test_files_all_funcs with the right
     if isinstance(args.kind, str):
         args.kind = [args.kind]
     if("unmasked" in args.mask_kind): 
-        # replace with empty string to simplify the code later on
+        # replace with empty string to _simplify the code later on
         args.mask_kind = [k if k != "unmasked" else "" for k in args.mask_kind]
 
     print("=====================================================================================================")

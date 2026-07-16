@@ -10,24 +10,24 @@ import os
 sys.path.insert(1, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from tools import *
-from tools import _build_func_name
+from tools import build_func_name_internal
 from codegen.implem_tracker import (
-    _append_implem_status,
-    _is_masked_implem,
-    _build_prev_exclusion_ifdef,
-    _combine_current_ifdefs,
+    append_implem_status,
+    is_masked_implem,
+    build_prev_exclusion_ifdef,
+    combine_current_ifdefs,
 )
 from codegen.emit_helpers import (
-    _emit_ifdef_begin_and_update_emulated,
-    _emit_function_body,
-    _emit_ifdef_end,
+    emit_ifdef_begin_and_update_emulated,
+    emit_function_body,
+    emit_ifdef_end,
 )
-from codegen.candidate_resolver import _render_template, _parse_placeholders_or_skip
+from codegen.candidate_resolver import render_template, parse_placeholders_or_skip
 
 seen_lmul_separators = set()
 seen_ldiv_separators = set()
 
-def _maybe_emit_lmul_separator(isa_name, f, file):
+def maybe_emit_lmul_separator(isa_name, f, file):
     key = (isa_name, f)
     if key not in seen_lmul_separators:
         seen_lmul_separators.add(key)
@@ -36,7 +36,7 @@ def _maybe_emit_lmul_separator(isa_name, f, file):
         print("// " + " " * 113 + "LMUL", file=file)
         print("// " + "=" * 117, file=file)
 
-def _maybe_emit_ldiv_separator(isa_name, f, file):
+def maybe_emit_ldiv_separator(isa_name, f, file):
     key = (isa_name, f)
     if key not in seen_ldiv_separators:
         seen_ldiv_separators.add(key)
@@ -95,7 +95,7 @@ def _gen_c_horiz_lmul_one(isa, file, funcs, f, ff, dt, lmul, mkind=None, dummy=F
     ff_local = dict(ff)
     ff_local["type"] = "emulated"
 
-    pre_rendering = _render_template(isa, ff_local, dt_par, dt_ret, func_name=f, lmul=lmul)
+    pre_rendering = render_template(isa, ff_local, dt_par, dt_ret, func_name=f, lmul=lmul)
     requirements = get_requirements(
         ir=pre_rendering,
         isa=isa,
@@ -112,7 +112,7 @@ def _gen_c_horiz_lmul_one(isa, file, funcs, f, ff, dt, lmul, mkind=None, dummy=F
             _ensure_fake_implemented(req, req_dt_key)
 
     isa_name = dummy
-    ph_ret = _parse_placeholders_or_skip(
+    ph_ret = parse_placeholders_or_skip(
         pre_rendering=pre_rendering,
         isa=isa,
         funcs=funcs,
@@ -129,7 +129,7 @@ def _gen_c_horiz_lmul_one(isa, file, funcs, f, ff, dt, lmul, mkind=None, dummy=F
 
     if dummy:
         dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
-        func_name = _build_func_name(isa, dt, dt_par, dt_ret, f, masked_version=mkind, lmul=lmul)
+        func_name = build_func_name_internal(isa, dt, dt_par, dt_ret, f, masked_version=mkind, lmul=lmul)
         proto = build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul=lmul, isa_name=True, masked_version=mkind)
         print("", file=file)
         print("static " + proto + " {", file=file)
@@ -151,7 +151,7 @@ def _gen_c_horiz_lmul_one(isa, file, funcs, f, ff, dt, lmul, mkind=None, dummy=F
         print("}", file=file)
 
     _rvv_mark_lmul_seen(funcs, f, dt_key, lmul)    
-    _append_implem_status(funcs, f, dt_key, ff, ph_ret["requirements"])
+    append_implem_status(funcs, f, dt_key, ff, ph_ret["requirements"])
 
 def gen_c_horiz_lmul(isa, file, funcs, f, dt, lmul, implems_horiz_lmul_generic_emu, func_name_for_panic=None, mask_type=None, dummy=False):
     if lmul <= 1:
@@ -192,7 +192,7 @@ def gen_c_horiz_lmul(isa, file, funcs, f, dt, lmul, implems_horiz_lmul_generic_e
         print("\texit(-1);", file=file)
 
 def _c_lmul_writer(f, dt, dt_par, dt_ret, isa, funcs, file, mask_type=None, lmul=0):
-    _maybe_emit_lmul_separator(isa["name"], f, file)
+    maybe_emit_lmul_separator(isa["name"], f, file)
     print("", file=file)
 
     if len(dt.split(',')) <= 1:
@@ -231,7 +231,7 @@ def _c_lmul_writer(f, dt, dt_par, dt_ret, isa, funcs, file, mask_type=None, lmul
         )
 
 def _gen_c_function_one_ldiv_avx(isa_base, isa_div, file, funcs, f, ff, dt, mask_kind, ldiv=-2):
-    _maybe_emit_ldiv_separator(isa_base["name"], f, file)
+    maybe_emit_ldiv_separator(isa_base["name"], f, file)
     print("", file=file)
     dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
     dt_key = dt_par + "," + dt_ret
@@ -316,15 +316,15 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
 
         file = include_manager.get_fd(isa["name"], f)
         if lmul in [2, 4, 8]:
-            _maybe_emit_lmul_separator(isa["name"], f, file)
+            maybe_emit_lmul_separator(isa["name"], f, file)
         elif lmul < 0:
-            _maybe_emit_ldiv_separator(isa["name"], f, file)
+            maybe_emit_ldiv_separator(isa["name"], f, file)
 
         if "candidates" not in isa:
             isa["candidates"] = []
         
         for ff in implems[f]:
-            if _is_masked_implem(f, ff):
+            if is_masked_implem(f, ff):
                 for dt in ff["datatypes"]:
                     dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
                     dt_key = dt_par + "," + dt_ret
@@ -369,8 +369,8 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                     if (not is_missing_masked_func(funcs, f, dt_key, mask_kind)) and _rvv_seen_lmul_masked(funcs, f, dt_key, mask_kind, lmul):
                         continue
 
-                    pre_rendering = _render_template(isa, ff_local, dt_par, dt_ret, func_name=f)
-                    ph_ret = _parse_placeholders_or_skip(
+                    pre_rendering = render_template(isa, ff_local, dt_par, dt_ret, func_name=f)
+                    ph_ret = parse_placeholders_or_skip(
                         pre_rendering=pre_rendering,
                         isa=isa,
                         funcs=funcs,
@@ -384,22 +384,22 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                     if ph_ret is None:
                         continue
 
-                    ifd_prev = _build_prev_exclusion_ifdef(funcs, f, dt_key, ff_local, mask_kind=mask_kind)
-                    _append_implem_status(funcs, f, dt_key, ff_local, ph_ret["requirements"], mask_kind=mask_kind)
+                    ifd_prev = build_prev_exclusion_ifdef(funcs, f, dt_key, ff_local, mask_kind=mask_kind)
+                    append_implem_status(funcs, f, dt_key, ff_local, ph_ret["requirements"], mask_kind=mask_kind)
 
-                    ifd = _combine_current_ifdefs(funcs, f, dt_key, ifd_prev, mask_kind=mask_kind)
+                    ifd = combine_current_ifdefs(funcs, f, dt_key, ifd_prev, mask_kind=mask_kind)
                     if ifd == "0":
                         continue
 
                     print("", file=file)
-                    _emit_ifdef_begin_and_update_emulated(funcs, f, dt_key, ff_local, ifd, file, mask_kind=mask_kind)
+                    emit_ifdef_begin_and_update_emulated(funcs, f, dt_key, ff_local, ifd, file, mask_kind=mask_kind)
                     post_rendering = ph_ret["converted_ir"]
                     if lmul > 1 and reductions_fix and (f in reductions_fix) and (dt in reductions_fix[f]):
                         post_rendering_to_emit = reductions_fix[f][dt]
                     else:
                         post_rendering_to_emit = post_rendering
          
-                    _emit_function_body(
+                    emit_function_body(
                         funcs=funcs,
                         f=f,
                         isa=isa,
@@ -413,7 +413,7 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                         lmul=lmul,
                     )
                     c_dict["emitted"] = True
-                    _emit_ifdef_end(ifd, file)
+                    emit_ifdef_end(ifd, file)
                     _rvv_mark_lmul_seen_masked(funcs, f, dt_key, mask_kind, lmul)
 
             else:
@@ -473,8 +473,8 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                     if (not is_missing_func(funcs, f, dt_key)) and _rvv_seen_lmul(funcs, f, dt_key, lmul):
                         continue
 
-                    pre_rendering = _render_template(isa, ff_local, dt_par, dt_ret)
-                    ph_ret = _parse_placeholders_or_skip(
+                    pre_rendering = render_template(isa, ff_local, dt_par, dt_ret)
+                    ph_ret = parse_placeholders_or_skip(
                         pre_rendering=pre_rendering,
                         isa=isa,
                         funcs=funcs,
@@ -488,22 +488,22 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                     if ph_ret is None:
                         continue
 
-                    ifd_prev = _build_prev_exclusion_ifdef(funcs, f, dt_key, ff_local)
-                    _append_implem_status(funcs, f, dt_key, ff_local, ph_ret["requirements"])
+                    ifd_prev = build_prev_exclusion_ifdef(funcs, f, dt_key, ff_local)
+                    append_implem_status(funcs, f, dt_key, ff_local, ph_ret["requirements"])
 
-                    ifd = _combine_current_ifdefs(funcs, f, dt_key, ifd_prev)
+                    ifd = combine_current_ifdefs(funcs, f, dt_key, ifd_prev)
                     if ifd == "0":
                         continue
 
                     print("", file=file)
-                    _emit_ifdef_begin_and_update_emulated(funcs, f, dt_key, ff_local, ifd, file)
+                    emit_ifdef_begin_and_update_emulated(funcs, f, dt_key, ff_local, ifd, file)
                     post_rendering = ph_ret["converted_ir"]
                     if lmul > 1 and reductions_fix and (f in reductions_fix) and (dt in reductions_fix[f]):
                         post_rendering_to_emit = reductions_fix[f][dt]
                     else:
                         post_rendering_to_emit = post_rendering
 
-                    _emit_function_body(
+                    emit_function_body(
                         funcs=funcs,
                         f=f,
                         isa=isa,
@@ -517,5 +517,5 @@ def gen_c_functions_rvv(isa, include_manager, funcs, implems, lmul=0, reductions
                         lmul=lmul,
                     )
                     c_dict["emitted"] = True
-                    _emit_ifdef_end(ifd, file)
+                    emit_ifdef_end(ifd, file)
                     _rvv_mark_lmul_seen(funcs, f, dt_key, lmul)

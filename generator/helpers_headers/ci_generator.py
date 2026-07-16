@@ -10,7 +10,7 @@ from tools import *
 from registry import *
 from include_gen import IncludeManager
 
-from c_generator import gen_c_horiz_lmul 
+from codegen.lmul_orchestrator import gen_c_horiz_lmul
 from registry import implems_horiz_lmul_generic_emu
 
 isa_avx512, _, _ = load_isa_config("avx512")
@@ -252,8 +252,8 @@ def generate_c_interface(isa_list, include_manager=None):
     print(j2_template.render(), file=file_common)
     # use try ldiv sve
     isa_list = duplicate_isa_sve_along_size(isa_list)
-    gen_ci_defines(isa_list, file_common)
-    gen_ci_structures(isa_list, file_common)
+    _gen_ci_defines(isa_list, file_common)
+    _gen_ci_structures(isa_list, file_common)
 
     tpl_footer_interface = """#endif /* MY_INTRINSICS_PLUS_PLUS_INTERFACE_H_ */"""
     j2_template = Template(tpl_footer_interface, undefined=StrictUndefined)
@@ -265,10 +265,10 @@ def generate_c_interface(isa_list, include_manager=None):
     str_mipp_info = template_mipp_info.render(name="Unused for now :-)")
     print(str_mipp_info, file=file_common)
 
-    gen_ci_functions(isa_list, include_manager, copy_mipp_funcs)
+    _gen_ci_functions(isa_list, include_manager, copy_mipp_funcs)
 
 
-def gen_ci_defines(isa_list, file):
+def _gen_ci_defines(isa_list, file):
     for i, isa in enumerate(isa_list):
         if i == 0:
             print("#if " + isa["gen_define"], file=file)
@@ -299,7 +299,7 @@ def gen_ci_defines(isa_list, file):
     print("#define MIPP_LMUL_STRIDE(elmt_byte, m) ((MIPP_RVD_SIZE_BYTE) / (elmt_byte) * (m))", file=file)
 
 
-def gen_ci_structures(isa_list, file):
+def _gen_ci_structures(isa_list, file):
 
     isa_rvv = next((isa for isa in isa_list if isa["name"].startswith("rvv")), None)
     isa_scalar = next((isa for isa in isa_list if isa["name"].startswith("scalar")), None)
@@ -374,7 +374,7 @@ def gen_ci_structures(isa_list, file):
    
  
 
-def ci_mask_writer(func, dt, isa_list, file, mask_type, func_name="", lmul=0):
+def _ci_mask_writer(func, dt, isa_list, file, mask_type, func_name="", lmul=0):
     
     if len(dt.split(',')) <= 1:
         dt_par = dt.split(',')[0]
@@ -407,20 +407,20 @@ def ci_mask_writer(func, dt, isa_list, file, mask_type, func_name="", lmul=0):
             print("#endif", file=file)
             print("}", file=file)
 
-def gen_ci_mask_functions(func, dt, isa_list, file,lmul=0, func_name=""):
+def _gen_ci_mask_functions(func, dt, isa_list, file,lmul=0, func_name=""):
     maskable = "mask_support" in mipp_funcs[func] and mipp_funcs[func]["mask_support"].is_maskable()
     maskzable = "mask_support" in mipp_funcs[func] and mipp_funcs[func]["mask_support"].is_maskzable()
     masksable = "mask_support" in mipp_funcs[func] and mipp_funcs[func]["mask_support"].is_masksable()
     
     if maskable:
-        ci_mask_writer(func, dt, isa_list, file, "mask", func_name, lmul)
+        _ci_mask_writer(func, dt, isa_list, file, "mask", func_name, lmul)
     if maskzable:
-        ci_mask_writer(func, dt, isa_list, file, "maskz", func_name, lmul)
+        _ci_mask_writer(func, dt, isa_list, file, "maskz", func_name, lmul)
     if masksable:
-        ci_mask_writer(func, dt, isa_list, file, "masks", func_name, lmul)
+        _ci_mask_writer(func, dt, isa_list, file, "masks", func_name, lmul)
   
   
-def ci_lmul_writer(f,func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_type=None, lmul=0):
+def _ci_lmul_writer(f,func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_type=None, lmul=0):
     # now that lmul funcs have been moved to simd_ext layer, this is just a wrapper to call the correct function depending on the ISA.
 
     if len(dt.split(',')) <= 1:
@@ -450,7 +450,7 @@ def ci_lmul_writer(f,func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_
   
  
 
-def ci_ldiv_writer(f,func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_type=None, ldiv=0):
+def _ci_ldiv_writer(f,func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_type=None, ldiv=0):
     # temporary writer while support is added for ldiv in the simd_ext layer.
     if len(dt.split(',')) <= 1:
         full_func_name = build_func_name_short(isa_list[0], dt_par, f, isa_name=False, lmul=ldiv, masked_version=mask_type)
@@ -499,7 +499,7 @@ def ci_ldiv_writer(f,func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_
 
     print("#endif", file=file)
 
-def gen_ci_functions(isa_list, include_manager, funcs):
+def _gen_ci_functions(isa_list, include_manager, funcs):
     isa_rvv = next((isa for isa in isa_list if isa["name"].startswith("rvv")), None)
     isa_scalar = next((isa for isa in isa_list if isa["name"].startswith("scalar")), None)
     
@@ -539,10 +539,10 @@ def gen_ci_functions(isa_list, include_manager, funcs):
 
             print("}", file=file)
 
-            gen_ci_mask_functions(f, dt, isa_list, file, 0, func_name=func_name)
+            _gen_ci_mask_functions(f, dt, isa_list, file, 0, func_name=func_name)
             
             for lmul in all_lmul:
-                ci_lmul_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, lmul=lmul)
+                _ci_lmul_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, lmul=lmul)
                 
     
             for lmul in all_lmul:
@@ -555,15 +555,15 @@ def gen_ci_functions(isa_list, include_manager, funcs):
                 if not mask_status.is_any_mask() :
                     continue
                 if mask_status.is_maskable() :
-                    ci_lmul_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_type="mask", lmul=lmul)
+                    _ci_lmul_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_type="mask", lmul=lmul)
                 
                 if mask_status.is_maskzable() :
-                    ci_lmul_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_type="maskz", lmul=lmul)
+                    _ci_lmul_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_type="maskz", lmul=lmul)
                 if mask_status.is_masksable() :			
-                    ci_lmul_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_type="masks", lmul=lmul)
+                    _ci_lmul_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_type="masks", lmul=lmul)
             
             # for ldiv in all_ldiv:
-            ci_ldiv_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, ldiv=-2)
+            _ci_ldiv_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, ldiv=-2)
 
                 
         if include_manager.mode == "function_header":

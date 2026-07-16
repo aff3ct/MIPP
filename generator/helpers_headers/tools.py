@@ -107,7 +107,7 @@ operators_order = {
     "cmpge"  : {"operation" : ">=", "option" : ">="},
 }
 
-def _lmul_to_str(lmul):
+def lmul_to_str(lmul):
     if lmul == 0 :
         return ""
     elif lmul >= 1 :
@@ -120,7 +120,6 @@ def _lmul_to_str(lmul):
         return ""
 
 from name_builder import *
-from name_builder import _build_func_name, _get_dt_par_size, _build_call_lmul
 
 GLOBAL_MEMO_IFDEF = {}
 
@@ -316,7 +315,7 @@ def build_dt(input_str, isa, dt_par, dt_ret):
     return dt
 
 # for debug
-def dump_dict_json(di, filename):
+def _dump_dict_json(di, filename):
     # debug
     fj = open(filename, "w")
     json_object = json.dumps(di, indent = 4)
@@ -535,7 +534,7 @@ def is_supported_mask_kind(mask_support, mask_kind):
 
 
 #initialize the bucket for masked status if it does not exist yet
-def ensure_masked_status_bucket(funcs, f, dt_key, mask_kind):
+def _ensure_masked_status_bucket(funcs, f, dt_key, mask_kind):
     """
     implem_status_masked is similar to implem 
     status. But has one more level of dict. 
@@ -559,7 +558,7 @@ def _get_masked_bucket_create(funcs, func_name, dt_key, mask_kind):
     getter for funcs[f][implem_status_masked][dt_key][mask_kind] 
     that initializes the bucket if it does not exist yet.
     """
-    ensure_masked_status_bucket(funcs, func_name, dt_key, mask_kind)
+    _ensure_masked_status_bucket(funcs, func_name, dt_key, mask_kind)
     return funcs[func_name]["implem_status_masked"][dt_key][mask_kind]
 
 
@@ -588,7 +587,7 @@ def get_masked_bucket(funcs, func_name, dt_key, mask_kind, create_missing_bucket
 
 GLOBAL_MEMO_IFDEF_MASKED = {}
 
-def build_ifdef_rec_masked(funcs, func_name, dt_key, mask_kind, memo=None):
+def _build_ifdef_rec_masked(funcs, func_name, dt_key, mask_kind, memo=None):
     if memo is None:
         memo = GLOBAL_MEMO_IFDEF_MASKED
     memo_key = (func_name, dt_key, mask_kind)
@@ -646,15 +645,15 @@ def build_ifdef_rec_masked(funcs, func_name, dt_key, mask_kind, memo=None):
     return str_ifdef
 
 
-def is_ifdef_masked(funcs, func_name, dt_key, mask_kind):
-    ifdef = build_ifdef_rec_masked(funcs, func_name, dt_key, mask_kind)
+def _is_ifdef_masked(funcs, func_name, dt_key, mask_kind):
+    ifdef = _build_ifdef_rec_masked(funcs, func_name, dt_key, mask_kind)
     if ifdef:
         return True
     else:
         return False
 
 
-def is_fully_missing_masked_func(funcs, func_name, dt_key, mask_kind):
+def _is_fully_missing_masked_func(funcs, func_name, dt_key, mask_kind):
     bucket = get_masked_bucket(funcs, func_name, dt_key, mask_kind)
     # if func_name == "store":
     #     print("debug: bucket for func '" + func_name + "' dt_key '" + dt_key + "' mask_kind '" + mask_kind + "' is: " + str(bucket))
@@ -665,7 +664,7 @@ def is_fully_missing_masked_func(funcs, func_name, dt_key, mask_kind):
 
 
 def is_missing_masked_func(funcs, func_name, dt_key, mask_kind):
-    return is_fully_missing_masked_func(funcs, func_name, dt_key, mask_kind) or is_ifdef_masked(funcs, func_name, dt_key, mask_kind)
+    return _is_fully_missing_masked_func(funcs, func_name, dt_key, mask_kind) or _is_ifdef_masked(funcs, func_name, dt_key, mask_kind)
 
 
 def build_ifdef_masked(funcs, func_name, dt_key, mask_kind, implem_id):
@@ -680,7 +679,7 @@ def build_ifdef_masked(funcs, func_name, dt_key, mask_kind, implem_id):
     str_ifdef_and = ""
     for f in bucket[implem_id]["requirements"]:
         for fdt in bucket[implem_id]["requirements"][f]:
-            ret = build_ifdef_rec_masked(funcs, f, fdt, mask_kind)
+            ret = _build_ifdef_rec_masked(funcs, f, fdt, mask_kind)
             if ret:
                 if not is_first_and:
                     str_ifdef_and = str_ifdef_and + " && "
@@ -699,7 +698,7 @@ def build_ifdef_masked(funcs, func_name, dt_key, mask_kind, implem_id):
 # ---------------------------------------------------------------------------
 
 from cond_utils import *
-from cond_utils import _is_guard_dead_under_cond
+from cond_utils import is_guard_dead_under_cond
 
 GLOBAL_ISA_REGISTRY = {}
 _isa_config_cache = {}

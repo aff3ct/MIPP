@@ -17,7 +17,7 @@ from ci_generator import duplicate_isa_sve_along_size
 # Exported functions
 # -------------------------------------------------------------------------------------------------
 
-def generate_mipp_hpp(include_manager=None):
+def _generate_mipp_hpp(include_manager=None):
     file = open("../include/mipp.hpp", "w")
 
     content = "#pragma once\n"
@@ -58,9 +58,9 @@ typedef float float32_t;
 
     for isa in isa_list:
         file_isa_common = include_manager.get_fd(isa["name"] + "_cpp", "common")
-        gen_cpp_structures_isa(file_isa_common, isa)
-        gen_cpp_constexpr_functions_isa(file_isa_common, isa)
-        gen_cpp_functions_isa(include_manager, isa, mipp_funcs)
+        _gen_cpp_structures_isa(file_isa_common, isa)
+        _gen_cpp_constexpr_functions_isa(file_isa_common, isa)
+        _gen_cpp_functions_isa(include_manager, isa, mipp_funcs)
 
     # definition of the enum used by everyone in cpp layer
     file_common = open("../include/simd_ext_cpp/common.hpp", "w")
@@ -94,14 +94,14 @@ typedef float float32_t;
     print("}\n", file=file_common)
     file_common.close()
 
-    gen_cpp_generic_templates(include_manager, isa_list_copy, mipp_funcs)
+    _gen_cpp_generic_templates(include_manager, isa_list_copy, mipp_funcs)
     
     file_common_glue = include_manager.get_fd("cpp", "common")
-    gen_cpp_common(isa_list_copy, file_common_glue)
-    gen_cpp_functions(isa_list_copy, include_manager, copy_mipp_funcs)    
-    generate_mipp_hpp(include_manager)
+    _gen_cpp_common(isa_list_copy, file_common_glue)
+    _gen_cpp_functions(isa_list_copy, include_manager, copy_mipp_funcs)    
+    _generate_mipp_hpp(include_manager)
 
-def gen_cpp_common(isa_list, file):
+def _gen_cpp_common(isa_list, file):
     # glue file similar to ci generator's way of generating c/common.h but for cpp layer. I don't think it needs to redefine anything, just include stuff.
     print("#pragma once\n", file=file)
     for index, isa in enumerate(isa_list):
@@ -113,7 +113,7 @@ def gen_cpp_common(isa_list, file):
         print(f'#include "../simd_ext_cpp/{isa["name"].lower()}_cpp/{isa["name"].lower()}_cpp_common.hpp"\n', file=file)
     print("#else\n#error \"No ISA defined for cpp wrapper\"\n#endif", file=file)
 
-def gen_cpp_functions(isa_list, include_manager, funcs):
+def _gen_cpp_functions(isa_list, include_manager, funcs):
     for f in funcs.keys():
         file = include_manager.get_fd("cpp", f)
         print("#pragma once\n", file=file)
@@ -203,7 +203,7 @@ def _masked_c_symbol(dt_par, dt_ret, f, is_cast, isa=None, isa_name=False):
         return build_func_name_short(isa, dt_par, f, isa_name=isa_name)
     return build_func_name(isa, dt_par, dt_ret, f, isa_name=isa_name)
 
-def _get_dt_par_size(dt_par):
+def get_dt_par_size(dt_par):
     if dt_par in datatypes:
         return datatypes[dt_par]["n_bits"]
     else:
@@ -422,7 +422,7 @@ def _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, mk_letter
 # so we want to define the generic template in a single place n then specialize them in every header 
 # the idea is to have a directory called simd_ext_cpp/templates n put the generic templates in there
 # n then include them to every isa header and specialize them there with the correct types and names
-def gen_cpp_generic_templates(include_manager, isa, funcs):
+def _gen_cpp_generic_templates(include_manager, isa, funcs):
     # this function will generate the generic template of every masked function in separate headers 4 each func
     for f in funcs:
 
@@ -450,7 +450,7 @@ def gen_cpp_generic_templates(include_manager, isa, funcs):
             _generic_mask_decl(file, cpp_func_name, proto, "masks")
 
         print("}\n", file=file)
-def gen_cpp_structures_isa(file, isa):
+def _gen_cpp_structures_isa(file, isa):
 
     isa_cpp_type = isa["name"].upper()
     isa_c_name = isa["name"].lower()
@@ -484,7 +484,7 @@ def gen_cpp_structures_isa(file, isa):
         for dt in datatypes:
             print(j2_template_msk.render(datatype=datatypes[dt], ldiv_m=str(ldiv_m), isa_cpp_type=isa_cpp_type, isa_c_name=isa_c_name, ldiv=str(ldiv)), file=file)
 
-def gen_cpp_constexpr_functions_isa(file, isa):
+def _gen_cpp_constexpr_functions_isa(file, isa):
     isa_cpp_type = isa["name"].upper()
 
     template = """template<> constexpr uint32_t rvd_sz_bits<ISA::{{isa_cpp_type}}>(){ return MIPP_{{isa_cpp_type}}_RVD_SIZE_BIT; }"""
@@ -518,9 +518,9 @@ def gen_cpp_constexpr_functions_isa(file, isa):
             print(j2_template.render(datatype=datatypes[dt], ldiv=str(ldiv), type_category_upper=datatypes[dt]["category"].upper(), ldiv_suffix=ldiv_suffix, isa_cpp_type=isa_cpp_type), file=file)
 
 
-    print(_cpp_close_namespace(), file=file) # hacky -> implies it HAS to be called after gen_cpp_structures_isa ...
+    print(_cpp_close_namespace(), file=file) # hacky -> implies it HAS to be called after _gen_cpp_structures_isa ...
 
-def gen_cpp_functions_isa(include_manager, isa, funcs):
+def _gen_cpp_functions_isa(include_manager, isa, funcs):
     layer_name = isa["name"] + "_cpp"
     for f in funcs:
 

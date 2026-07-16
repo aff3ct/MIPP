@@ -10,9 +10,9 @@ sys.path.insert(1, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from tools import *
 
-def _missing_build_negated_ifdef_for_existing_implems(funcs, f, dt_key, mask_kind=None):
+def missing_build_negated_ifdef_for_existing_implems(funcs, f, dt_key, mask_kind=None):
     ifd = ""
-    bucket = _get_implem_bucket(funcs, f, dt_key, mask_kind)
+    bucket = get_implem_bucket(funcs, f, dt_key, mask_kind)
     if bucket is not None:
         is_first = True
         for i in range(len(bucket)):
@@ -26,7 +26,7 @@ def _missing_build_negated_ifdef_for_existing_implems(funcs, f, dt_key, mask_kin
                 is_first = False
     return ifd
 
-def _is_masked_implem(f, ff):
+def is_masked_implem(f, ff):
     """
     temporary skip of masks
     """
@@ -34,7 +34,7 @@ def _is_masked_implem(f, ff):
         return True
     return False
 
-def _get_implem_bucket(funcs, f, dt_key, mask_kind=None, create=False):
+def get_implem_bucket(funcs, f, dt_key, mask_kind=None, create=False):
     if mask_kind is None:
         if create:
             if "implem_status" not in funcs[f]:
@@ -47,23 +47,23 @@ def _get_implem_bucket(funcs, f, dt_key, mask_kind=None, create=False):
     else:
         return get_masked_bucket(funcs, f, dt_key, mask_kind, create_missing_bucket=create)
 
-def _build_prev_exclusion_ifdef(funcs, f, dt_key, ff, mask_kind=None):
+def build_prev_exclusion_ifdef(funcs, f, dt_key, ff, mask_kind=None):
     ifd = ""
     if "type" in ff and ff["type"] == "emulated":
-        ifd = _missing_build_negated_ifdef_for_existing_implems(funcs, f, dt_key, mask_kind=mask_kind)
+        ifd = missing_build_negated_ifdef_for_existing_implems(funcs, f, dt_key, mask_kind=mask_kind)
     return ifd
 
-def _append_implem_status(funcs, f, dt_key, ff, requirements, mask_kind=None):
+def append_implem_status(funcs, f, dt_key, ff, requirements, mask_kind=None):
     cur_implem_status = {"if": "", "requirements": {}}
     if "if" in ff:
         cur_implem_status["if"] = ff["if"]
     cur_implem_status["requirements"] = requirements
 
-    bucket = _get_implem_bucket(funcs, f, dt_key, mask_kind, create=True)
+    bucket = get_implem_bucket(funcs, f, dt_key, mask_kind, create=True)
     bucket.append(cur_implem_status)
 
-def _combine_current_ifdefs(funcs, f, dt_key, ifd_prev, mask_kind=None):
-    bucket = _get_implem_bucket(funcs, f, dt_key, mask_kind)
+def combine_current_ifdefs(funcs, f, dt_key, ifd_prev, mask_kind=None):
+    bucket = get_implem_bucket(funcs, f, dt_key, mask_kind)
     if bucket is None:
         return ifd_prev
 
@@ -77,9 +77,9 @@ def _combine_current_ifdefs(funcs, f, dt_key, ifd_prev, mask_kind=None):
         return simplify_cond_str(ifd_cur)
     return simplify_cond_str(ifd_prev)
 
-def _update_emulated(funcs, f, dt_key, ff, ifd, mask_kind=None):
+def update_emulated(funcs, f, dt_key, ff, ifd, mask_kind=None):
     if "type" in ff and ff["type"] == "emulated":
-        bucket = _get_implem_bucket(funcs, f, dt_key, mask_kind)
+        bucket = get_implem_bucket(funcs, f, dt_key, mask_kind)
         if bucket:
             bucket[len(bucket) - 1]["if"] = ifd
 

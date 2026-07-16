@@ -113,7 +113,7 @@ def build_N(datatype, isa, lmul=0, isa_name=True):
     
     str_N = "MIPP_"+isa_name_upper+"N_" + datatype["category"].upper() + str(datatype["n_bits"]).upper()
     if lmul:
-        str_N += tools._lmul_to_str(lmul).upper()
+        str_N += tools.lmul_to_str(lmul).upper()
     return str_N
 
 def build_type(type_str, datatype, isa, lmul=0, isa_name=True, cpp=False):
@@ -165,7 +165,7 @@ def type_specialized(proto):
             n_type_spe = n_type_spe + 1
     return n_type_spe
 
-def _get_dt_par_size(dt_par):
+def get_dt_par_size(dt_par):
     if dt_par in tools.datatypes:
         return tools.datatypes[dt_par]["n_bits"]
     else:
@@ -338,7 +338,7 @@ def build_proto_load(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, m
 def build_proto_gather(dt_par, dt_ret, isa, func_name, lmul=1, isa_name=False, cpp=False, masked_version=False):
     func_name = func_name.replace("_masks", "").replace("_maskz", "").replace("_mask", "")
     isa_type = "DEFAULT_ISA"
-    msk_dt = tools.datatypes["uint" + str(_get_dt_par_size(dt_par))]["name"]+ "_t"
+    msk_dt = tools.datatypes["uint" + str(get_dt_par_size(dt_par))]["name"]+ "_t"
     if isa_name:
         isa_type = isa["name"].upper()
     template = f"<{dt_ret}_t, {dt_par}_t, {lmul}, {isa_type}>"
@@ -370,7 +370,7 @@ def build_proto_gather(dt_par, dt_ret, isa, func_name, lmul=1, isa_name=False, c
 def build_proto_scatter(dt_par, dt_ret, isa, func_name, lmul=1, isa_name=False, cpp=False, masked_version=False):
     func_name = func_name.replace("_masks", "").replace("_maskz", "").replace("_mask", "")
     isa_type = "DEFAULT_ISA"
-    msk_dt = tools.datatypes["uint" + str(_get_dt_par_size(dt_par))]["name"]+ "_t"
+    msk_dt = tools.datatypes["uint" + str(get_dt_par_size(dt_par))]["name"]+ "_t"
     if isa_name:
         isa_type = isa["name"].upper()
     template = f"<{dt_ret}_t, {msk_dt}, {lmul}, {isa_type}>"
@@ -446,7 +446,7 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
     if masked_version:
         msk_dt = tools.datatypes[dt_par]
         if "gather" in func_name or "scatter" in func_name:
-            msk_dt = tools.datatypes["uint" + str(_get_dt_par_size(dt_par))]
+            msk_dt = tools.datatypes["uint" + str(get_dt_par_size(dt_par))]
 
         if masked_version == "mask" or masked_version == "maskz":
             p += build_msk(msk_dt, isa, lmul, isa_name, cpp) + " m0"
@@ -462,7 +462,7 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
         realdatatype = tools.datatypes[dt_par]
         if (arg["fixeddatatype"]):
             if arg["fixeddatatype"] not in tools.datatypes and arg["fixeddatatype"] in tools.all_categories:
-                dt_str =  arg["fixeddatatype"] + str(_get_dt_par_size(dt_par))
+                dt_str =  arg["fixeddatatype"] + str(get_dt_par_size(dt_par))
                 realdatatype = tools.datatypes[dt_str]
             elif arg["fixeddatatype"] in tools.datatypes:
                 realdatatype = tools.datatypes[arg["fixeddatatype"]]
@@ -687,7 +687,7 @@ def build_cpp_func_name(dt_ret, mipp_name, masked_version=False):
     return_type = tools.datatypes[dt_ret]["category"] + str(tools.datatypes[dt_ret]["n_bits"])
     return mipp_name + "_" + return_type
 
-def _build_func_name(isa, dt, dt_par, dt_ret, f, masked_version=False, lmul=0):
+def build_func_name_internal(isa, dt, dt_par, dt_ret, f, masked_version=False, lmul=0):
     if len(dt.split(',')) <= 1:
         return build_func_name_short(isa, dt_par, f, True, masked_version=masked_version, lmul=lmul)
     else:
