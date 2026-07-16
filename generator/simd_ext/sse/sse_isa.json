@@ -8,8 +8,8 @@
         "#define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SSE_H_",
         "#include <immintrin.h>"
     ],
-    "hw_lmul": [1],
-    "sw_lmul": [2, 4, 8],
+    "hw_lmul": [],
+    "sw_lmul": [1, 2, 4, 8],
     "datatypes": {
         "float64": {
             "data_ext": "pd",

@@ -6,10 +6,11 @@
     "header_template": [
         "#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX_H_",
         "#define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX_H_",
-        "#include <immintrin.h>"
+        "#include <immintrin.h>",
+        "#include <simd_ext/sse/sse_common.h> // ldiv 2 support"
     ],
-    "hw_lmul": [1],
-    "sw_lmul": [2, 4, 8],
+    "hw_lmul": [],
+    "sw_lmul": [1, 2, 4, 8],
     "datatypes": {
         "float64": {
             "data_ext": "pd",

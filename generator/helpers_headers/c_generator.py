@@ -493,32 +493,15 @@ def generate_c_layer(isa, include_manager, native_implems, emu_implems):
         print(f"Panic: common.h file descriptor not found for {isa['name']}.", file=sys.stderr)
         exit(-1)
 
-    if "header_template" in isa:
-        header_tpl_val = isa["header_template"]
-        if isinstance(header_tpl_val, list):
-            header_tpl_val = "\n".join(header_tpl_val)
-        tpl_header = Template(header_tpl_val, undefined=StrictUndefined).render(name=isa["name"], name_upper=isa["name"].upper())
-        print(tpl_header, file=file_common)
-    else:
-        # Fallback in case header_template is missing
-        if isa["name"] == "rvv":
-            tpl_header = """#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_RVV_H_
-#define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_RVV_H_
-#include <riscv_vector.h>
-#include <string.h>
-#include <float.h>
-#include <stdint.h>
-#include <stdio.h>//remove after debug
-#include <stdlib.h>//remove after debug
-#define MIPP_RVV_VLEN __riscv_v_fixed_vlen
-typedef float float32_t;//remove after debug
-typedef double float64_t;//remove after debug
-"""
-        else:
-            tpl_header = f"""#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_{isa['name'].upper()}_H_
-#define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_{isa['name'].upper()}_H_
-#include <immintrin.h>"""
-        print(tpl_header, file=file_common)
+    if "header_template" not in isa:
+        print(f"Panic: 'header_template' is missing from {isa['name']}_isa.json config file.", file=sys.stderr)
+        exit(-1)
+
+    header_tpl_val = isa["header_template"]
+    if isinstance(header_tpl_val, list):
+        header_tpl_val = "\n".join(header_tpl_val)
+    tpl_header = Template(header_tpl_val, undefined=StrictUndefined).render(name=isa["name"], name_upper=isa["name"].upper())
+    print(tpl_header, file=file_common)
 
     # 2. Émission des defines et des structures
     if isa["name"] == "rvv":
