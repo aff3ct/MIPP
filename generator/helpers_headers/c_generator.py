@@ -187,12 +187,10 @@ def register_candidates(isa, funcs, implems, cand_type="native_or_emu", lmul=0):
                 if cand_type in ["native_or_emu", "generic_emu"]:
                     g_par = None
                     g_ret = None
-                    if lmul < 0:
-                        ldiv = str(-lmul)
-                        if "if_ldiv" in isa.get("datatypes", {}).get(dt_par, {}) and ldiv in isa["datatypes"][dt_par]["if_ldiv"]:
-                            g_par = isa["datatypes"][dt_par]["if_ldiv"][ldiv]
-                        if "if_ldiv" in isa.get("datatypes", {}).get(dt_ret, {}) and ldiv in isa["datatypes"][dt_ret]["if_ldiv"]:
-                            g_ret = isa["datatypes"][dt_ret]["if_ldiv"][ldiv]
+                    if "if_lmul" in isa.get("datatypes", {}).get(dt_par, {}) and str(lmul) in isa["datatypes"][dt_par]["if_lmul"]:
+                        g_par = isa["datatypes"][dt_par]["if_lmul"][str(lmul)]
+                    if "if_lmul" in isa.get("datatypes", {}).get(dt_ret, {}) and str(lmul) in isa["datatypes"][dt_ret]["if_lmul"]:
+                        g_ret = isa["datatypes"][dt_ret]["if_lmul"][str(lmul)]
                     if not g_par:
                         g_par = isa.get("datatypes", {}).get(dt_par, {}).get("if", None)
                     if not g_ret:
@@ -235,34 +233,45 @@ def gen_c_missing_functions_lmul(isa, file, funcs, lmul):
     resolve_and_emit_missing_functions(isa, file, funcs, lmul=lmul, emit_separators=True)
 
 def resolve_lmul_in_isa(isa, lmul):
-    if lmul == "0" or lmul == 0:
-        lmul = "1"
-    
-    lsuffix = "m" + str(lmul)
-
-    if int(lmul) < 0 : 
-        lsuffix = "mf" + str(-int(lmul))
-
-    lsuffix_tmp = lsuffix
-    lmul_tmp = lmul
     resolved_isa = copy.deepcopy(isa)
     for dt in resolved_isa["datatypes"]:
-        lsuffix = lsuffix_tmp
-        lmul = lmul_tmp
+        dt_cfg = resolved_isa["datatypes"][dt]
+        
+        # 1. Scan for all placeholders in string values of this datatype
+        placeholders = set()
+        for val in dt_cfg.values():
+            if isinstance(val, str):
+                placeholders.update(re.findall(r'\{([a-zA-Z0-9_]+)\}', val))
+                
+        # 2. Resolve values for each found placeholder with strict checks
+        fmt_params = {}
+        for p in placeholders:
+            if p not in dt_cfg:
+                print(f"Error: Datatype '{dt}' in ISA '{isa['name']}' has a template referencing placeholder '{{{p}}}', "
+                      f"but '{p}' is not defined as a field in its configuration in the JSON file.", file=sys.stderr)
+                sys.exit(1)
+                
+            if isinstance(dt_cfg[p], dict):
+                # Check if current lmul exists in mapping dictionary
+                if str(lmul) not in dt_cfg[p]:
+                    print(f"Error: Datatype '{dt}' in ISA '{isa['name']}' defines a mapping for placeholder '{{{p}}}', "
+                          f"but is missing a configuration for the current lmul value '{lmul}'. "
+                          f"Available lmul keys: {list(dt_cfg[p].keys())}", file=sys.stderr)
+                    sys.exit(1)
+                fmt_params[p] = dt_cfg[p][str(lmul)]
+            else:
+                # Constant value
+                fmt_params[p] = str(dt_cfg[p])
 
-        for key in resolved_isa["datatypes"][dt]:
-            if "{lsuffix}" in resolved_isa["datatypes"][dt][key]:
-                resolved_isa["datatypes"][dt][key] = resolved_isa["datatypes"][dt][key].format(lsuffix=lsuffix)
-            if "{eew_emul}" in resolved_isa["datatypes"][dt][key]:
-                n_bits = datatypes[dt]["n_bits"]
-                eew_emul = 0
-                if int(lmul) == 0:
-                    eew_emul = 1
-                elif int(lmul) < 0 :
-                    eew_emul = str(int(int(n_bits)*-int(lmul)))
-                else :
-                    eew_emul = str(int(int(n_bits)/int(lmul)))
-                resolved_isa["datatypes"][dt][key] = resolved_isa["datatypes"][dt][key].format(eew_emul=eew_emul)
+        # 3. Format the configurations of this datatype
+        for key in list(dt_cfg.keys()):
+            if isinstance(dt_cfg[key], str):
+                # Only format if placeholders in the string are resolved
+                active_placeholders = re.findall(r'\{([a-zA-Z0-9_]+)\}', dt_cfg[key])
+                sub_params = {p: fmt_params[p] for p in active_placeholders if p in fmt_params}
+                if sub_params:
+                    dt_cfg[key] = dt_cfg[key].format(**sub_params)
+                    
     return resolved_isa
 
 def gen_c_defines_rvv_ls(file, isa_name, rvv_size, rvv_isa):
@@ -281,13 +290,14 @@ def gen_c_defines_rvv_ls(file, isa_name, rvv_size, rvv_isa):
             template = """#define MIPP_RVV_N_{{type_category_upper}}{{n_bits}}_M{{lmul}} {{type_size}}"""
             j2_template = Template(template, undefined=StrictUndefined)
             print(j2_template.render(rvv_size=rvv_size, n_bits=n_bits, type_size = type_size, type_category_upper=datatypes[dt]["category"].upper(), lmul=lmul), file=file)
-    ldiv = 2
-    for dt in rvv_isa["datatypes"]:
-        n_bits=datatypes[dt]["n_bits"]
-        type_size = f'{rvv_size}/{n_bits}/{ldiv}'
-        template = """#define MIPP_RVV_N_{{type_category_upper}}{{n_bits}}_D{{ldiv}} {{type_size}}"""
-        j2_template = Template(template, undefined=StrictUndefined)
-        print(j2_template.render(rvv_size=rvv_size, n_bits=n_bits, type_size = type_size, type_category_upper=datatypes[dt]["category"].upper(), ldiv=ldiv), file=file)
+    ldiv_options = [abs(x) for x in rvv_isa.get("hw_lmul", []) if x < 0]
+    for ldiv in ldiv_options:
+        for dt in rvv_isa["datatypes"]:
+            n_bits=datatypes[dt]["n_bits"]
+            type_size = f'{rvv_size}/{n_bits}/{ldiv}'
+            template = """#define MIPP_RVV_N_{{type_category_upper}}{{n_bits}}_D{{ldiv}} {{type_size}}"""
+            j2_template = Template(template, undefined=StrictUndefined)
+            print(j2_template.render(rvv_size=rvv_size, n_bits=n_bits, type_size = type_size, type_category_upper=datatypes[dt]["category"].upper(), ldiv=ldiv), file=file)
 
 def gen_c_structures_rvv_ls(file, rvv_size, rvv_isa):
     #rvd type generation
@@ -304,21 +314,22 @@ def gen_c_structures_rvv_ls(file, rvv_size, rvv_isa):
             if guard:
                 print(f"#endif", file=file)
 
-    ldiv = 2
-    for dt in rvv_isa["datatypes"]:
-        if "if_ldiv" in rvv_isa["datatypes"][dt] and str(ldiv) in rvv_isa["datatypes"][dt]["if_ldiv"]:
-            guard = rvv_isa["datatypes"][dt]["if_ldiv"][str(ldiv)]
-        else:
-            guard = rvv_isa["datatypes"][dt].get("if", None)
-        if guard == "0":
-            continue
-        if guard:
-            print(f"#if {guard}", file=file)
-        template_rendered = j2_template.render(isa_datatype=rvv_isa["datatypes"][dt],rvv_size=rvv_size)
-        template_rendered = template_rendered.format(lsuffix = "mf" + str(ldiv), lmul = "/" + str(ldiv), lsuffix_mipp = "d" + str(ldiv)) # lmul hack ;)
-        print(template_rendered, file=file)
-        if guard:
-            print(f"#endif", file=file)
+    ldiv_options = [abs(x) for x in rvv_isa.get("hw_lmul", []) if x < 0]
+    for ldiv in ldiv_options:
+        for dt in rvv_isa["datatypes"]:
+            if "if_lmul" in rvv_isa["datatypes"][dt] and str(-ldiv) in rvv_isa["datatypes"][dt]["if_lmul"]:
+                guard = rvv_isa["datatypes"][dt]["if_lmul"][str(-ldiv)]
+            else:
+                guard = rvv_isa["datatypes"][dt].get("if", None)
+            if guard == "0":
+                continue
+            if guard:
+                print(f"#if {guard}", file=file)
+            template_rendered = j2_template.render(isa_datatype=rvv_isa["datatypes"][dt],rvv_size=rvv_size)
+            template_rendered = template_rendered.format(lsuffix = "mf" + str(ldiv), lmul = "/" + str(ldiv), lsuffix_mipp = "d" + str(ldiv)) # lmul hack ;)
+            print(template_rendered, file=file)
+            if guard:
+                print(f"#endif", file=file)
      
     #rvm type generation
     template = """typedef {{isa_datatype.msk}} fixed_{lsuffix_mipp}_bool{n_bits}_t __attribute__((riscv_rvv_vector_bits({{ rvv_size }}{lmul}/(8*sizeof({{isa_datatype.to_ptr}})))));"""
@@ -341,27 +352,28 @@ def gen_c_structures_rvv_ls(file, rvv_size, rvv_isa):
             if guard:
                 print(f"#endif", file=file)
 
-    ldiv = 2 
-    for dt in dt_list:
-        if "if_ldiv" in rvv_isa["datatypes"][dt] and str(ldiv) in rvv_isa["datatypes"][dt]["if_ldiv"]:
-            guard = rvv_isa["datatypes"][dt]["if_ldiv"][str(ldiv)]
-        else:
-            guard = rvv_isa["datatypes"][dt].get("if", None)
-        if guard == "0":
-            continue
-        if guard:
-            print(f"#if {guard}", file=file)
-        n_bits = datatypes[dt]["n_bits"]
-        nb_elem = f'{rvv_size} / {n_bits}'  	
-        tmp = j2_template.render(rvv_size=rvv_size, isa_datatype=rvv_isa["datatypes"][dt], nb_elem=nb_elem)  
-        tmp = tmp.format(lsuffix = "d" + str(ldiv), 
-                         lsuffix_mipp = "d" + str(ldiv),  
-                         lmul = "/" + str(ldiv), 
-                         eew_emul = str(int(n_bits*(ldiv))), 
-                         n_bits = str(n_bits)) 
-        print(tmp, file=file)
-        if guard:
-            print(f"#endif", file=file)
+    ldiv_options = [abs(x) for x in rvv_isa.get("hw_lmul", []) if x < 0]
+    for ldiv in ldiv_options:
+        for dt in dt_list:
+            if "if_lmul" in rvv_isa["datatypes"][dt] and str(-ldiv) in rvv_isa["datatypes"][dt]["if_lmul"]:
+                guard = rvv_isa["datatypes"][dt]["if_lmul"][str(-ldiv)]
+            else:
+                guard = rvv_isa["datatypes"][dt].get("if", None)
+            if guard == "0":
+                continue
+            if guard:
+                print(f"#if {guard}", file=file)
+            n_bits = datatypes[dt]["n_bits"]
+            nb_elem = f'{rvv_size} / {n_bits}'  	
+            tmp = j2_template.render(rvv_size=rvv_size, isa_datatype=rvv_isa["datatypes"][dt], nb_elem=nb_elem)  
+            tmp = tmp.format(lsuffix = "d" + str(ldiv), 
+                             lsuffix_mipp = "d" + str(ldiv),  
+                             lmul = "/" + str(ldiv), 
+                             eew_emul = str(int(n_bits*(ldiv))), 
+                             n_bits = str(n_bits)) 
+            print(tmp, file=file)
+            if guard:
+                print(f"#endif", file=file)
 
     #rvd struct generation
     template = """typedef struct { fixed_{lsuffix}_{{isa_datatype.to_ptr }} r; } rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_{lsuffix}_t;"""
@@ -381,29 +393,30 @@ def gen_c_structures_rvv_ls(file, rvv_size, rvv_isa):
                 print(f"	typedef rvd_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvd_rvv_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m{lmul}_t;", file=file)
                 print(f"#endif", file=file)
     
-    ldiv = 2
-    for dt in rvv_isa["datatypes"]:
-        n_bits = datatypes[dt]["n_bits"]
-        nb_elem = f'{rvv_size} / {n_bits} / {ldiv}'
-        tmp = template.replace("{lsuffix}", "d" + str(ldiv))
-        j2_template = Template(tmp, undefined=StrictUndefined)
-        if "if_ldiv" in rvv_isa["datatypes"][dt] and str(ldiv) in rvv_isa["datatypes"][dt]["if_ldiv"]:
-            guard = rvv_isa["datatypes"][dt]["if_ldiv"][str(ldiv)]
-        else:
-            guard = rvv_isa["datatypes"][dt].get("if", None)
-        if guard == "0":
-            # Native type does not exist; emit scalar alias directly
-            print(f"#include \"../scalar/scalar_common.h\"", file=file)
-            print(f"typedef rvd_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvd_rvv_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_d{ldiv}_t;", file=file)
-        else:
-            if guard:
-                print(f"#if {guard}", file=file)
-            print(j2_template.render(isa=rvv_isa,rvv_size=rvv_size,isa_datatype=rvv_isa["datatypes"][dt], datatype=datatypes[dt], lmul=ldiv), file=file)
-            if guard:
-                print(f"#else", file=file)
-                print(f"	#include \"../scalar/scalar_common.h\"", file=file)
-                print(f"	typedef rvd_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvd_rvv_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_d{ldiv}_t;", file=file)
-                print(f"#endif", file=file)
+    ldiv_options = [abs(x) for x in rvv_isa.get("hw_lmul", []) if x < 0]
+    for ldiv in ldiv_options:
+        for dt in rvv_isa["datatypes"]:
+            n_bits = datatypes[dt]["n_bits"]
+            nb_elem = f'{rvv_size} / {n_bits} / {ldiv}'
+            tmp = template.replace("{lsuffix}", "d" + str(ldiv))
+            j2_template = Template(tmp, undefined=StrictUndefined)
+            if "if_lmul" in rvv_isa["datatypes"][dt] and str(-ldiv) in rvv_isa["datatypes"][dt]["if_lmul"]:
+                guard = rvv_isa["datatypes"][dt]["if_lmul"][str(-ldiv)]
+            else:
+                guard = rvv_isa["datatypes"][dt].get("if", None)
+            if guard == "0":
+                # Native type does not exist; emit scalar alias directly
+                print(f"#include \"../scalar/scalar_common.h\"", file=file)
+                print(f"typedef rvd_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvd_rvv_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_d{ldiv}_t;", file=file)
+            else:
+                if guard:
+                    print(f"#if {guard}", file=file)
+                print(j2_template.render(isa=rvv_isa,rvv_size=rvv_size,isa_datatype=rvv_isa["datatypes"][dt], datatype=datatypes[dt], lmul=ldiv), file=file)
+                if guard:
+                    print(f"#else", file=file)
+                    print(f"	#include \"../scalar/scalar_common.h\"", file=file)
+                    print(f"	typedef rvd_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvd_rvv_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_d{ldiv}_t;", file=file)
+                    print(f"#endif", file=file)
 
     #typedef of rvd m1 to no suffix
     template = """typedef rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m1_t rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
@@ -442,28 +455,29 @@ def gen_c_structures_rvv_ls(file, rvv_size, rvv_isa):
                 print(f"	typedef rvm_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvm_rvv_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m{lmul}_t;", file=file)
                 print(f"#endif", file=file)
 
-    ldiv = 2
-    for dt in rvv_isa["datatypes"]:
-        n_bits = datatypes[dt]["n_bits"]
-        nb_elem = f'{rvv_size} / {n_bits} / {ldiv}'
-        tmp = template.replace("{lsuffix}", "d" + str(ldiv))
-        tmp = tmp.replace("{n_bits}", str(n_bits))
-        j2_template = Template(tmp, undefined=StrictUndefined)
-        if "if_ldiv" in rvv_isa["datatypes"][dt] and str(ldiv) in rvv_isa["datatypes"][dt]["if_ldiv"]:
-            guard = rvv_isa["datatypes"][dt]["if_ldiv"][str(ldiv)]
-        else:
-            guard = rvv_isa["datatypes"][dt].get("if", None)
-        if guard == "0":
-            # Native mask type does not exist; emit scalar alias directly
-            print(f"typedef rvm_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvm_rvv_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_d{ldiv}_t;", file=file)
-        else:
-            if guard:
-                print(f"#if {guard}", file=file)
-            print(j2_template.render(isa=rvv_isa,rvv_size=rvv_size,isa_datatype=rvv_isa["datatypes"][dt], datatype=datatypes[dt], lmul=ldiv), file=file)
-            if guard:
-                print(f"#else", file=file)
-                print(f"	typedef rvm_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvm_rvv_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_d{ldiv}_t;", file=file)
-                print(f"#endif", file=file)
+    ldiv_options = [abs(x) for x in rvv_isa.get("hw_lmul", []) if x < 0]
+    for ldiv in ldiv_options:
+        for dt in rvv_isa["datatypes"]:
+            n_bits = datatypes[dt]["n_bits"]
+            nb_elem = f'{rvv_size} / {n_bits} / {ldiv}'
+            tmp = template.replace("{lsuffix}", "d" + str(ldiv))
+            tmp = tmp.replace("{n_bits}", str(n_bits))
+            j2_template = Template(tmp, undefined=StrictUndefined)
+            if "if_lmul" in rvv_isa["datatypes"][dt] and str(-ldiv) in rvv_isa["datatypes"][dt]["if_lmul"]:
+                guard = rvv_isa["datatypes"][dt]["if_lmul"][str(-ldiv)]
+            else:
+                guard = rvv_isa["datatypes"][dt].get("if", None)
+            if guard == "0":
+                # Native mask type does not exist; emit scalar alias directly
+                print(f"typedef rvm_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvm_rvv_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_d{ldiv}_t;", file=file)
+            else:
+                if guard:
+                    print(f"#if {guard}", file=file)
+                print(j2_template.render(isa=rvv_isa,rvv_size=rvv_size,isa_datatype=rvv_isa["datatypes"][dt], datatype=datatypes[dt], lmul=ldiv), file=file)
+                if guard:
+                    print(f"#else", file=file)
+                    print(f"	typedef rvm_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvm_rvv_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_d{ldiv}_t;", file=file)
+                    print(f"#endif", file=file)
     
     template = """typedef rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m1_t rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
     for dt in rvv_isa["datatypes"]:

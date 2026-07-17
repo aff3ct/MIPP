@@ -97,8 +97,8 @@ def _prepare_mask_variable(pre_statements, isa, msk_dt, arg_name, cond, lmul, f,
             pre_statements.append(f"\t}}")
         else:
             toreg_func = build_func_name_internal(isa, msk_dt_name, msk_dt_name, msk_dt_name, "toreg", lmul=lmul)
-            if lmul < 0 and "if_ldiv" in isa["datatypes"].get(msk_dt_name, {}):
-                guard = isa["datatypes"][msk_dt_name]["if_ldiv"].get(str(-lmul), None)
+            if "if_lmul" in isa["datatypes"].get(msk_dt_name, {}):
+                guard = isa["datatypes"][msk_dt_name]["if_lmul"].get(str(lmul), None)
             else:
                 guard = isa["datatypes"].get(msk_dt_name, {}).get("if", None)
                 
@@ -144,8 +144,8 @@ def _prepare_return_variable(post_statements, isa, dt_ret, cond, lmul, f, vector
             post_statements.append(f"\t\tif (sres.m[i]) res.m |= (1ULL << i);")
             post_statements.append(f"\t}}")
         else:
-            if lmul < 0 and "if_ldiv" in isa["datatypes"].get(dt_ret_name, {}):
-                ret_guard = isa["datatypes"][dt_ret_name]["if_ldiv"].get(str(-lmul), None)
+            if "if_lmul" in isa["datatypes"].get(dt_ret_name, {}):
+                ret_guard = isa["datatypes"][dt_ret_name]["if_lmul"].get(str(lmul), None)
             else:
                 ret_guard = isa["datatypes"].get(dt_ret_name, {}).get("if", None)
 
