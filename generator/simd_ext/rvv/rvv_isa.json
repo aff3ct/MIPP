@@ -38,9 +38,6 @@
             "uint_data_ext": "u64{lsuffix}",
             "int_data_ext": "i64{lsuffix}",
             "width": "64",
-            "ldiv": [
-                2
-            ],
             "if": "defined(__riscv_v_elen_fp) && __riscv_v_elen_fp >= 64",
             "lsuffix": {
                 "0": "m1",
@@ -73,9 +70,6 @@
             "uint_data_ext": "u32{lsuffix}",
             "int_data_ext": "i32{lsuffix}",
             "width": "32",
-            "ldiv": [
-                2
-            ],
             "lsuffix": {
                 "0": "m1",
                 "1": "m1",
@@ -104,9 +98,6 @@
             "uint_data_ext": "u64{lsuffix}",
             "int_data_ext": "i64{lsuffix}",
             "width": "64",
-            "ldiv": [
-                2
-            ],
             "if": "defined(__riscv_v_elen) && __riscv_v_elen >= 64",
             "lsuffix": {
                 "0": "m1",
@@ -139,9 +130,6 @@
             "uint_data_ext": "u32{lsuffix}",
             "int_data_ext": "i32{lsuffix}",
             "width": "32",
-            "ldiv": [
-                2
-            ],
             "lsuffix": {
                 "0": "m1",
                 "1": "m1",
@@ -170,9 +158,6 @@
             "uint_data_ext": "u16{lsuffix}",
             "int_data_ext": "i16{lsuffix}",
             "width": "16",
-            "ldiv": [
-                2
-            ],
             "lsuffix": {
                 "0": "m1",
                 "1": "m1",
@@ -201,9 +186,6 @@
             "uint_data_ext": "u8{lsuffix}",
             "int_data_ext": "i8{lsuffix}",
             "width": "8",
-            "ldiv": [
-                2
-            ],
             "lsuffix": {
                 "0": "m1",
                 "1": "m1",
@@ -232,9 +214,6 @@
             "uint_data_ext": "u64{lsuffix}",
             "int_data_ext": "i64{lsuffix}",
             "width": "64",
-            "ldiv": [
-                2
-            ],
             "if": "defined(__riscv_v_elen) && __riscv_v_elen >= 64",
             "lsuffix": {
                 "0": "m1",
@@ -267,9 +246,6 @@
             "uint_data_ext": "u32{lsuffix}",
             "int_data_ext": "i32{lsuffix}",
             "width": "32",
-            "ldiv": [
-                2
-            ],
             "lsuffix": {
                 "0": "m1",
                 "1": "m1",
@@ -298,9 +274,6 @@
             "uint_data_ext": "u16{lsuffix}",
             "int_data_ext": "i16{lsuffix}",
             "width": "16",
-            "ldiv": [
-                2
-            ],
             "lsuffix": {
                 "0": "m1",
                 "1": "m1",
@@ -329,9 +302,6 @@
             "uint_data_ext": "u8{lsuffix}",
             "int_data_ext": "i8{lsuffix}",
             "width": "8",
-            "ldiv": [
-                2
-            ],
             "lsuffix": {
                 "0": "m1",
                 "1": "m1",

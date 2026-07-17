@@ -14,7 +14,14 @@
         "#include <simd_ext/avx/avx_common.h> // ldiv2 support"
     ],
     "hw_lmul": [],
-    "sw_lmul": [1, 2, 4, 8],
+    "sw_lmul": [
+        1,
+        2,
+        4,
+        8,
+        -2
+    ],
+    "sw_ldiv_type": "sub_isa",
     "datatypes": {
         "float64": {
             "data_ext": "pd",
@@ -24,9 +31,6 @@
             "msk": "__mmask8",
             "msk_short": "mask8",
             "to_ptr": "float64_t",
-            "ldiv": [
-                2
-            ],
             "data_ext_var": "pd"
         },
         "float32": {
@@ -37,9 +41,6 @@
             "msk": "__mmask16",
             "msk_short": "mask16",
             "to_ptr": "float32_t",
-            "ldiv": [
-                2
-            ],
             "data_ext_var": "ps"
         },
         "int64": {
@@ -50,9 +51,6 @@
             "msk": "__mmask8",
             "msk_short": "mask8",
             "to_ptr": "int64_t",
-            "ldiv": [
-                2
-            ],
             "data_ext_var": "epi64"
         },
         "int32": {
@@ -63,9 +61,6 @@
             "msk": "__mmask16",
             "msk_short": "mask16",
             "to_ptr": "int32_t",
-            "ldiv": [
-                2
-            ],
             "data_ext_var": "epi32"
         },
         "int16": {
@@ -76,9 +71,6 @@
             "msk": "__mmask32",
             "msk_short": "mask32",
             "to_ptr": "int16_t",
-            "ldiv": [
-                2
-            ],
             "data_ext_var": "epi16"
         },
         "int8": {
@@ -89,9 +81,6 @@
             "msk": "__mmask64",
             "msk_short": "mask64",
             "to_ptr": "int8_t",
-            "ldiv": [
-                2
-            ],
             "data_ext_var": "epi8"
         },
         "uint64": {
@@ -102,9 +91,6 @@
             "msk": "__mmask8",
             "msk_short": "mask8",
             "to_ptr": "uint64_t",
-            "ldiv": [
-                2
-            ],
             "data_ext_var": "epi64"
         },
         "uint32": {
@@ -115,9 +101,6 @@
             "msk": "__mmask16",
             "msk_short": "mask16",
             "to_ptr": "uint32_t",
-            "ldiv": [
-                2
-            ],
             "data_ext_var": "epi32"
         },
         "uint16": {
@@ -128,9 +111,6 @@
             "msk": "__mmask32",
             "msk_short": "mask32",
             "to_ptr": "uint16_t",
-            "ldiv": [
-                2
-            ],
             "data_ext_var": "epi16"
         },
         "uint8": {
@@ -141,9 +121,6 @@
             "msk": "__mmask64",
             "msk_short": "mask64",
             "to_ptr": "uint8_t",
-            "ldiv": [
-                2
-            ],
             "data_ext_var": "epi8"
         }
     }

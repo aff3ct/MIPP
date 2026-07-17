@@ -96,19 +96,21 @@ def emit_ifdef_begin(ifd, file):
     if ifd:
         print("#if " + ifd, file=file)
 
-def gen_ldiv_structs_avx(isa_base, isa_div, file):
+def gen_ldiv_structs_sub_isa(isa_base, isa_div, file):
     template = """typedef rvd_{{ isa_div.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d2_t;
 typedef rvm_{{ isa_div.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d2_t;"""
     j2_template = Template(template, undefined=StrictUndefined)
-    for dt in isa_base["datatypes"]:
-        if "ldiv" in isa_base["datatypes"][dt] and len(isa_base["datatypes"][dt]["ldiv"]) > 0:
+    ldivs = [x for x in (isa_base.get("hw_lmul", []) + isa_base.get("sw_lmul", [])) if int(x) < 0]
+    if any(int(x) == -2 for x in ldivs):
+        for dt in isa_base["datatypes"]:
             print(j2_template.render(isa=isa_base, isa_div=isa_div, datatype=datatypes[dt]), file=file)
 
-def gen_ldiv_defines_avx(isa_base, isa_div, file):
+def gen_ldiv_defines_sub_isa(isa_base, isa_div, file):
     template = """#define MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{n_bits}}_D2 {{n_elmts_d2}}"""
     j2_template = Template(template, undefined=StrictUndefined)
-    for dt in isa_base["datatypes"]:
-        if "ldiv" in isa_base["datatypes"][dt] and len(isa_base["datatypes"][dt]["ldiv"]) > 0:
+    ldivs = [x for x in (isa_base.get("hw_lmul", []) + isa_base.get("sw_lmul", [])) if int(x) < 0]
+    if any(int(x) == -2 for x in ldivs):
+        for dt in isa_base["datatypes"]:
             n_elmts_d2 = int(isa_base["size"] / (2 * datatypes[dt]["n_bits"]))
             print(
                 j2_template.render(

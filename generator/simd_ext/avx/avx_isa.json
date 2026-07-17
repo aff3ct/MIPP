@@ -11,7 +11,14 @@
         "#include <simd_ext/sse/sse_common.h> // ldiv 2 support"
     ],
     "hw_lmul": [],
-    "sw_lmul": [1, 2, 4, 8],
+    "sw_lmul": [
+        1,
+        2,
+        4,
+        8,
+        -2
+    ],
+    "sw_ldiv_type": "sub_isa",
     "datatypes": {
         "float64": {
             "data_ext": "pd",
@@ -19,10 +26,7 @@
             "data_ext_msk": "pd",
             "reg": "__m256d",
             "msk": "__m256d",
-            "to_ptr": "float64_t",
-            "ldiv": [
-                2
-            ]
+            "to_ptr": "float64_t"
         },
         "float32": {
             "data_ext": "ps",
@@ -30,10 +34,7 @@
             "data_ext_msk": "ps",
             "reg": " __m256",
             "msk": "__m256",
-            "to_ptr": "float32_t",
-            "ldiv": [
-                2
-            ]
+            "to_ptr": "float32_t"
         },
         "int64": {
             "data_ext": "epi64",
@@ -42,9 +43,6 @@
             "reg": "__m256i",
             "msk": "__m256i",
             "to_ptr": "__m256i",
-            "ldiv": [
-                2
-            ],
             "data_ext_var": "epi64"
         },
         "int32": {
@@ -54,9 +52,6 @@
             "reg": "__m256i",
             "msk": "__m256i",
             "to_ptr": "__m256i",
-            "ldiv": [
-                2
-            ],
             "data_ext_var": "epi32"
         },
         "int16": {
@@ -66,9 +61,6 @@
             "reg": "__m256i",
             "msk": "__m256i",
             "to_ptr": "__m256i",
-            "ldiv": [
-                2
-            ],
             "data_ext_var": "epi16"
         },
         "int8": {
@@ -78,9 +70,6 @@
             "reg": "__m256i",
             "msk": "__m256i",
             "to_ptr": "__m256i",
-            "ldiv": [
-                2
-            ],
             "data_ext_var": "epi8"
         },
         "uint64": {
@@ -90,9 +79,6 @@
             "reg": "__m256i",
             "msk": "__m256i",
             "to_ptr": "__m256i",
-            "ldiv": [
-                2
-            ],
             "data_ext_var": "epi64"
         },
         "uint32": {
@@ -102,9 +88,6 @@
             "reg": "__m256i",
             "msk": "__m256i",
             "to_ptr": "__m256i",
-            "ldiv": [
-                2
-            ],
             "data_ext_var": "epi32"
         },
         "uint16": {
@@ -114,9 +97,6 @@
             "reg": "__m256i",
             "msk": "__m256i",
             "to_ptr": "__m256i",
-            "ldiv": [
-                2
-            ],
             "data_ext_var": "epi16"
         },
         "uint8": {
@@ -126,9 +106,6 @@
             "reg": "__m256i",
             "msk": "__m256i",
             "to_ptr": "__m256i",
-            "ldiv": [
-                2
-            ],
             "data_ext_var": "epi8"
         }
     }

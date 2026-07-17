@@ -23,8 +23,8 @@ from codegen.emit_helpers import (
     emit_ifdef_end,
     emit_already_implemented_message,
     emit_ifdef_begin,
-    gen_ldiv_defines_avx,
-    gen_ldiv_structs_avx,
+    gen_ldiv_defines_sub_isa,
+    gen_ldiv_structs_sub_isa,
 )
 from codegen.candidate_resolver import resolve_and_emit_missing_functions
 from codegen.lmul_orchestrator import gen_c_lmul, gen_c_ldiv
@@ -171,8 +171,8 @@ def gen_c_structures(isa, file, is_scalar=False):
     if sub_isa_name:
         sub_isa = load_isa_config(sub_isa_name)[0]
         if sub_isa:
-            gen_ldiv_structs_avx(isa, sub_isa, file)
-            gen_ldiv_defines_avx(isa, sub_isa, file)
+            gen_ldiv_structs_sub_isa(isa, sub_isa, file)
+            gen_ldiv_defines_sub_isa(isa, sub_isa, file)
 
 def register_candidates(isa, funcs, implems, cand_type="native_or_emu", lmul=0):
     if "candidates" not in isa:
@@ -497,13 +497,27 @@ def gen_c_structures_rvv_ls(file, rvv_size, rvv_isa):
             print(f"#endif", file=file)
 
 def generate_c_layer(isa, include_manager, native_implems, emu_implems):
+    # Validate sw_ldiv_type and negative lmuls/ldivs combo
+    sw_ldiv_type = isa.get("sw_ldiv_type", "native")
+    hw_lmuls = isa.get("hw_lmul", [1])
+    sw_lmuls = isa.get("sw_lmul", [])
+    all_ldivs = [int(x) for x in (hw_lmuls + sw_lmuls) if int(x) < 0]
+    if sw_ldiv_type == "sub_isa":
+        if "sub_isa" not in isa or not isa["sub_isa"]:
+            print(f"Error: ISA '{isa['name']}' has sw_ldiv_type='sub_isa' but is missing the 'sub_isa' field defining the underlying sub-architecture.", file=sys.stderr)
+            sys.exit(1)
+        for ldiv in all_ldivs:
+            if ldiv != -2:
+                print(f"Error: ISA '{isa['name']}' has sw_ldiv_type='sub_isa' but specifies unsupported ldiv factor '{ldiv}'. Only ldiv = -2 is supported with sub_isa.", file=sys.stderr)
+                sys.exit(1)
+
     # Pre-process emu_implems to set default type
     for iemu in emu_implems:
         for sub_iemu in emu_implems[iemu]:
             if "type" not in sub_iemu:
                 sub_iemu["type"] = "emulated"
 
-    # 1. Émission du header commun propre à l'ISA
+    # 1. Emit the common header specific to the ISA
     file_common = include_manager.get_fd(isa["name"], "common")
     if file_common is None:
         print(f"Panic: common.h file descriptor not found for {isa['name']}.", file=sys.stderr)
@@ -519,13 +533,13 @@ def generate_c_layer(isa, include_manager, native_implems, emu_implems):
     tpl_header = Template(header_tpl_val, undefined=StrictUndefined).render(name=isa["name"], name_upper=isa["name"].upper())
     print(tpl_header, file=file_common)
 
-    # 2. Émission des defines et des structures
+    # 2. Emit the defines and structures
     gen_c_defines(isa, file_common)
     gen_c_structures(isa, file_common, is_scalar=(isa["name"] == "scalar"))
 
     print(f"#endif /* MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_{isa['name'].upper()}_H_ */", file=file_common)
 
-    # 3. Enregistrement et résolution des candidats matériels (HW LMUL)
+    # 3. Register and resolve hardware candidates (HW LMUL)
     copy_interfaces = copy.deepcopy(interfaces)
     hw_lmuls = isa.get("hw_lmul", [1])
     
@@ -539,24 +553,25 @@ def generate_c_layer(isa, include_manager, native_implems, emu_implems):
         register_candidates(resolved_isa, copy_interfaces, implems_generic_emu, cand_type="generic_emu", lmul=lmul)
         register_candidates(resolved_isa, copy_interfaces, implems_mask_generic_emu, cand_type="generic_emu", lmul=lmul)
         
-        # Résolution et émission par le solver générique
+        # Resolution and emission by the generic solver
         resolve_and_emit_missing_functions(resolved_isa, include_manager, copy_interfaces, lmul=lmul, emit_separators=(lmul != 0))
 
-    # Cas ldiv = -2 pour RVV (s'il est présent)
-    if -2 in hw_lmuls or "-2" in hw_lmuls:
-        resolved_isa = resolve_lmul_in_isa(isa, "-2")
+    # Negative hw_lmul values (fractional LMUL/ldiv like -2, -4, -8, if present)
+    hw_lmuls_neg = sorted([int(x) for x in hw_lmuls if int(x) < 0])
+    for lmul_neg in hw_lmuls_neg:
+        resolved_isa = resolve_lmul_in_isa(isa, str(lmul_neg))
         resolved_isa["candidates"] = []
-        register_candidates(resolved_isa, copy_interfaces, native_implems, lmul=-2)
-        register_candidates(resolved_isa, copy_interfaces, emu_implems, lmul=-2)
-        register_candidates(resolved_isa, copy_interfaces, implems_generic_emu, cand_type="generic_emu", lmul=-2)
-        register_candidates(resolved_isa, copy_interfaces, implems_mask_generic_emu, cand_type="generic_emu", lmul=-2)
-        
-        resolve_and_emit_missing_functions(resolved_isa, include_manager, copy_interfaces, lmul=-2, emit_separators=True)
+        register_candidates(resolved_isa, copy_interfaces, native_implems, lmul=lmul_neg)
+        register_candidates(resolved_isa, copy_interfaces, emu_implems, lmul=lmul_neg)
+        register_candidates(resolved_isa, copy_interfaces, implems_generic_emu, cand_type="generic_emu", lmul=lmul_neg)
+        register_candidates(resolved_isa, copy_interfaces, implems_mask_generic_emu, cand_type="generic_emu", lmul=lmul_neg)
 
-    # 4. Génération des wrappers logiciels (SW LMUL)
+        resolve_and_emit_missing_functions(resolved_isa, include_manager, copy_interfaces, lmul=lmul_neg, emit_separators=True)
+
+    # 4. Generate software wrappers (SW LMUL)
     sw_lmuls = isa.get("sw_lmul", [])
     if sw_lmuls:
-        # Génération des wrappers logiciels (équivalant à ce que fait gen_c_lmul)
+        # Generate software wrappers
         gen_c_lmul(isa, include_manager, copy_interfaces, sw_lmuls)
 
     # Generate ldiv wrappers if sub_isa is specified
