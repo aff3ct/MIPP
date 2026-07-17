@@ -520,7 +520,7 @@ def generate_c_layer(isa, include_manager, native_implems, emu_implems):
     # Positive / non-negative hw_lmul (0 is added explicitly; negative values like -2 are processed separately)
     hw_lmuls_pos = sorted(list(set([0] + [int(x) for x in hw_lmuls if int(x) >= 0])))
     for lmul in hw_lmuls_pos:
-        resolved_isa = resolve_lmul_in_isa(isa, str(lmul)) if lmul != 0 else isa
+        resolved_isa = resolve_lmul_in_isa(isa, str(lmul))
         resolved_isa["candidates"] = []
         register_candidates(resolved_isa, copy_interfaces, native_implems, lmul=lmul)
         register_candidates(resolved_isa, copy_interfaces, emu_implems, lmul=lmul)
