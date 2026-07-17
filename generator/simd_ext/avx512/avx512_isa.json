@@ -6,6 +6,7 @@
     "hw_mask_requires_toreg": true,
     "hw_mask_is_bitfield": true,
     "define": "defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)",
+    "sub_isa": "avx",
     "header_template": [
         "#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX512_H_",
         "#define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX512_H_",

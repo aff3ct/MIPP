@@ -3,6 +3,7 @@
     "prefix": "_mm256",
     "size": 256,
     "define": "defined(__AVX__)",
+    "sub_isa": "sse",
     "header_template": [
         "#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX_H_",
         "#define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX_H_",

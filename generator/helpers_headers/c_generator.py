@@ -31,6 +31,9 @@ from codegen.lmul_orchestrator import gen_c_lmul, gen_c_ldiv
 
 
 def gen_c_defines(isa, file):
+    if isa["name"] == "rvv":
+        gen_c_defines_rvv_ls(file, isa["name"], "__riscv_v_fixed_vlen", isa)
+        return
     """
     Writes the number of elements in the SIMD 
     register for each supported datatype for a given ISA.
@@ -85,6 +88,9 @@ def gen_c_defines(isa, file):
             )
 
 def gen_c_structures(isa, file, is_scalar=False):
+    if isa["name"] == "rvv":
+        gen_c_structures_rvv_ls(file, "__riscv_v_fixed_vlen", isa)
+        return
     """
     Writes the C structures corresponding to the supported datatypes for a given ISA, for both vector and mask types.
     """
@@ -161,13 +167,9 @@ def gen_c_structures(isa, file, is_scalar=False):
             for dt in isa["datatypes"]:
                 print(j2_template.render(isa=isa, datatype=datatypes[dt], lmul=str(lmul), lmul_2=str(lmul_2)), file=file)
     
-    if isa["name"] == "avx512": 
-        sub_isa = load_isa_config("avx")[0]
-        if sub_isa:
-            gen_ldiv_structs_avx(isa, sub_isa, file)
-            gen_ldiv_defines_avx(isa, sub_isa, file)
-    if isa["name"] == "avx": 
-        sub_isa = load_isa_config("sse")[0]
+    sub_isa_name = isa.get("sub_isa", None)
+    if sub_isa_name:
+        sub_isa = load_isa_config(sub_isa_name)[0]
         if sub_isa:
             gen_ldiv_structs_avx(isa, sub_isa, file)
             gen_ldiv_defines_avx(isa, sub_isa, file)
@@ -518,12 +520,8 @@ def generate_c_layer(isa, include_manager, native_implems, emu_implems):
     print(tpl_header, file=file_common)
 
     # 2. Émission des defines et des structures
-    if isa["name"] == "rvv":
-        gen_c_defines_rvv_ls(file_common, isa["name"], "__riscv_v_fixed_vlen", isa)
-        gen_c_structures_rvv_ls(file_common, "__riscv_v_fixed_vlen", isa)
-    else:
-        gen_c_defines(isa, file_common)
-        gen_c_structures(isa, file_common, is_scalar=(isa["name"] == "scalar"))
+    gen_c_defines(isa, file_common)
+    gen_c_structures(isa, file_common, is_scalar=(isa["name"] == "scalar"))
 
     print(f"#endif /* MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_{isa['name'].upper()}_H_ */", file=file_common)
 
@@ -538,8 +536,7 @@ def generate_c_layer(isa, include_manager, native_implems, emu_implems):
         resolved_isa["candidates"] = []
         register_candidates(resolved_isa, copy_interfaces, native_implems, lmul=lmul)
         register_candidates(resolved_isa, copy_interfaces, emu_implems, lmul=lmul)
-        if resolved_isa["name"] != "avx512":
-            register_candidates(resolved_isa, copy_interfaces, implems_generic_emu, cand_type="generic_emu", lmul=lmul)
+        register_candidates(resolved_isa, copy_interfaces, implems_generic_emu, cand_type="generic_emu", lmul=lmul)
         register_candidates(resolved_isa, copy_interfaces, implems_mask_generic_emu, cand_type="generic_emu", lmul=lmul)
         
         # Résolution et émission par le solver générique
@@ -551,8 +548,7 @@ def generate_c_layer(isa, include_manager, native_implems, emu_implems):
         resolved_isa["candidates"] = []
         register_candidates(resolved_isa, copy_interfaces, native_implems, lmul=-2)
         register_candidates(resolved_isa, copy_interfaces, emu_implems, lmul=-2)
-        if resolved_isa["name"] != "avx512":
-            register_candidates(resolved_isa, copy_interfaces, implems_generic_emu, cand_type="generic_emu", lmul=-2)
+        register_candidates(resolved_isa, copy_interfaces, implems_generic_emu, cand_type="generic_emu", lmul=-2)
         register_candidates(resolved_isa, copy_interfaces, implems_mask_generic_emu, cand_type="generic_emu", lmul=-2)
         
         resolve_and_emit_missing_functions(resolved_isa, include_manager, copy_interfaces, lmul=-2, emit_separators=True)
@@ -563,13 +559,12 @@ def generate_c_layer(isa, include_manager, native_implems, emu_implems):
         # Génération des wrappers logiciels (équivalant à ce que fait gen_c_lmul)
         gen_c_lmul(isa, include_manager, copy_interfaces, sw_lmuls)
 
-    # Generate ldiv wrappers for AVX/AVX512
-    if isa["name"] == "avx":
-        sub_isa = load_isa_config("sse")[0]
-        gen_c_ldiv(isa, sub_isa, include_manager, copy_interfaces)
-    elif isa["name"] == "avx512":
-        sub_isa = load_isa_config("avx")[0]
-        gen_c_ldiv(isa, sub_isa, include_manager, copy_interfaces)
+    # Generate ldiv wrappers if sub_isa is specified
+    sub_isa_name = isa.get("sub_isa", None)
+    if sub_isa_name:
+        sub_isa = load_isa_config(sub_isa_name)[0]
+        if sub_isa:
+            gen_c_ldiv(isa, sub_isa, include_manager, copy_interfaces)
 
     # 5. Resolve dependencies and create glue file
     include_manager.resolve_all_dependencies(isa["name"], copy_interfaces)
