@@ -72,7 +72,9 @@ def gen_c_defines(isa, file, vla_size=None):
         print(f"#define MIPP_{isa_name_upper}_N_{datatypes[dt]['category'].upper()}{n_bits} {type_size}", file=file)
 
     # 3. Positive lmuls
-    lmuls = [x for x in isa.get("hw_lmul", [1]) if x > 0] if layout else [x for x in isa.get("sw_lmul", []) if int(x) > 0]
+    lmuls = [x for x in (isa.get("hw_lmul", [1]) if layout else [1]) + isa.get("sw_lmul", []) if x > 0]
+    seen = set()
+    lmuls = [x for x in lmuls if not (x in seen or seen.add(x))]
     if 1 in lmuls and "{{lsuffix_upper}}" not in template_def:
         lmuls = [x for x in lmuls if x != 1]
 

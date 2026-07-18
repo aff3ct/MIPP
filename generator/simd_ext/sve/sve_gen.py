@@ -1,81 +1,11 @@
-from jinja2 import Template, StrictUndefined
-import json
-import copy
+#!/usr/bin/env python3
+import sys
+sys.path.insert(1, '.')
 
-from tools import *
-from registry import *
+from tools import load_isa_config
+from c_generator import generate_c_layer
+
 sve_isa, sve_native_implems, sve_emu_implems = load_isa_config("sve")
-from c_generator import *
 
-from include_gen import IncludeManager
-
-def sve_gen(include_manager=None):
-    for iemu in sve_emu_implems:
-        for sub_iemu in sve_emu_implems[iemu]:
-            if "type" not in sub_iemu:
-                sub_iemu["type"] = "emulated"
-
-    import os
-    os.makedirs("../include/simd_ext/sve", exist_ok=True)
-    file = open("../include/simd_ext/sve/mipp_impl_sve_gen.h", "w")
-    
-    print("#if "+sve_isa["define"], file=file)
-    
-    all_sve_sizes = sorted(sve_isa["size"], reverse=True)
-    for index, sve_size in enumerate(all_sve_sizes):
-        if index == 0:
-            print("#if __ARM_FEATURE_SVE_BITS == "+ str(sve_size), file=file)
-        else:
-            print("#elif __ARM_FEATURE_SVE_BITS == "+ str(sve_size), file=file)
-        #print("#define DEFAULT_ARM_SVE_"+ str(sve_size), file=file)
-        # include lower size implems
-        #for sub_size in all_sve_sizes[index:]:
-        print("#include \"mipp_impl_sve"+str(sve_size)+"_gen.h\"", file=file)
-        #for sub_size in all_sve_sizes[index:]:
-        print("#define MIPP_SVE_"+str(sve_size), file=file)
-    
-    template = """#else
-#error Only -msve-vector-bits = {{all_sve_sizes}} is supported)
-#endif
-#endif"""
-    j2_template = Template(template, undefined=StrictUndefined)
-    print(j2_template.render(all_sve_sizes=str(all_sve_sizes)), file=file)
-    
-    file.close()
-    
-    
-    ref_isa_name = sve_isa["name"]
-    
-    for current_sve_size in all_sve_sizes:
-        
-        sve_isa["name"] = ref_isa_name+str(current_sve_size)
-        sve_isa["size"] = current_sve_size
-        
-        file = open("../include/simd_ext/sve/mipp_impl_sve"+str(current_sve_size)+"_gen.h", "w")
-        
-        tpl_header_sve = """#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SVE{{ sve_size }}_H_
-#define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SVE{{ sve_size }}_H_
-#if {{sve_define}}
-#include <arm_sve.h>"""
-        j2_template = Template(tpl_header_sve, undefined=StrictUndefined)
-        print(j2_template.render(sve_size=current_sve_size, sve_define=sve_isa["define"]), file=file)# better take value sve_isa size
-        
-        gen_c_defines(sve_isa, file, vla_size=current_sve_size)
-        gen_c_structures(sve_isa, file, vla_size=current_sve_size)
-        
-        copy_interfaces = copy.deepcopy(interfaces)
-        
-        gen_c_functions(sve_isa, file, copy_interfaces, sve_native_implems)
-        gen_c_functions(sve_isa, file, copy_interfaces, sve_emu_implems)
-        
-        gen_c_missing_functions(sve_isa, file, copy_interfaces)
-
-        tpl_footer_sve = """#endif /* {{ sve_define }} */
-#endif /* MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SVE{{ sve_size }}_H_ */"""
-        j2_template = Template(tpl_footer_sve, undefined=StrictUndefined)
-        print(j2_template.render(sve_size=current_sve_size, sve_define=sve_isa["define"]), file=file)
-
-        file.close()
-        
-    sve_isa["name"] = ref_isa_name 
-    sve_isa["size"] = all_sve_sizes
+def sve_gen(include_manager):
+    generate_c_layer(sve_isa, include_manager, sve_native_implems, sve_emu_implems)

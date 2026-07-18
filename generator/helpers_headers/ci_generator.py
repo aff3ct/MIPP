@@ -17,30 +17,10 @@ avx512_isa, _, _ = load_isa_config("avx512")
 avx_isa, _, _ = load_isa_config("avx")
 rvv_isa, _, _ = load_isa_config("rvv")
             
-def duplicate_isa_sve_along_size(isa_list):
-
+def prepare_isa_defines(isa_list):
     isa_list_copy = copy.deepcopy(isa_list)
-    sve_isa = []
-    current_index = -1
-    isa_sve_size = []
-    for index, isa in enumerate(isa_list_copy):
-        if isa["name"]=="sve":
-            sve_isa = isa
-            current_index = index
-            all_sve_sizes = list(isa["size"])
-        else:
-            isa["gen_define"] = "defined(MIPP_" + isa["name"].upper() + ")"
-    
-    if current_index == -1:
-        return isa_list_copy
-    del isa_list_copy[current_index]
-    all_sve_sizes = sorted(sve_isa["size"], reverse=True)
-    for reg_size in all_sve_sizes:
-        isa_sve_copy = copy.deepcopy(sve_isa)
-        isa_sve_copy["gen_define"]="defined(MIPP_" + isa_sve_copy["name"].upper() + "_" + str(reg_size) + ")"
-        isa_sve_copy["name"]="sve"+str(reg_size)
-        isa_sve_copy["size"]=reg_size
-        isa_list_copy.append(isa_sve_copy)
+    for isa in isa_list_copy:
+        isa["gen_define"] = "defined(MIPP_" + isa["name"].upper() + ")"
     return isa_list_copy
 
 
@@ -251,7 +231,7 @@ def generate_c_interface(isa_list, include_manager=None):
     j2_template = Template(tpl_header_interface, undefined=StrictUndefined)
     print(j2_template.render(), file=file_common)
     # use try ldiv sve
-    isa_list = duplicate_isa_sve_along_size(isa_list)
+    isa_list = prepare_isa_defines(isa_list)
     _gen_ci_defines(isa_list, file_common)
     _gen_ci_structures(isa_list, file_common)
 

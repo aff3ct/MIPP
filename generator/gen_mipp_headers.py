@@ -318,7 +318,8 @@ def print_summary_table(include_dir):
     import re
 
     def classify_func_name(func_name):
-        if re.search(r'_(m|d)\d+', func_name):
+        m = re.search(r'_(m|d)(\d+)', func_name)
+        if m and int(m.group(2)) != 1:
             return "LM/D"
         if func_name.endswith(("_mask", "_maskz", "_masks")):
             return "Msk"
@@ -330,14 +331,9 @@ def print_summary_table(include_dir):
     # We want to check which ISAs have files generated
     existing_isas = []
     for isa in isas:
-        if isa == "sve":
-            sve_dir = os.path.join(include_dir, "simd_ext", "sve")
-            if os.path.isdir(sve_dir) and glob.glob(os.path.join(sve_dir, "mipp_impl_sve*_gen.h")):
-                existing_isas.append(isa)
-        else:
-            isa_dir = os.path.join(include_dir, "simd_ext", isa, "functions")
-            if os.path.isdir(isa_dir):
-                existing_isas.append(isa)
+        isa_dir = os.path.join(include_dir, "simd_ext", isa, "functions")
+        if os.path.isdir(isa_dir):
+            existing_isas.append(isa)
 
     if not existing_isas:
         return
@@ -366,12 +362,8 @@ def print_summary_table(include_dir):
             "stub": 0
         }
         
-        if isa == "sve":
-            sve_dir = os.path.join(include_dir, "simd_ext", "sve")
-            files = glob.glob(os.path.join(sve_dir, "mipp_impl_sve*_gen.h"))
-        else:
-            isa_dir = os.path.join(include_dir, "simd_ext", isa, "functions")
-            files = glob.glob(os.path.join(isa_dir, "*.h"))
+        isa_dir = os.path.join(include_dir, "simd_ext", isa, "functions")
+        files = glob.glob(os.path.join(isa_dir, "*.h"))
             
         # Read all files and extract function levels and categories
         for filepath in files:

@@ -30,7 +30,7 @@
     "maskzld": [
         {
             "instr_name": "ld1",
-            "datatypes": [],
+            "datatypes": ["float64", "float32", "int64", "int32", "uint64", "uint32"],
             "template": "mask_load"
         }
     ],
@@ -179,6 +179,34 @@
             "instr_name": "addv",
             "datatypes": "all_datatypes",
             "template": "reduce"
+        }
+    ],
+    "testz_2": [
+        {
+            "instr_name": "ptest_any",
+            "datatypes": "all_datatypes",
+            "template": "testz"
+        }
+    ],
+    "orb_k": [
+        {
+            "instr_name": "or",
+            "datatypes": "all_datatypes",
+            "template": "andb_k"
+        }
+    ],
+    "xorb_k": [
+        {
+            "instr_name": "eor",
+            "datatypes": "all_datatypes",
+            "template": "andb_k"
+        }
+    ],
+    "andnb_k": [
+        {
+            "instr_name": "bic",
+            "datatypes": "all_datatypes",
+            "template": "andb_k"
         }
     ]
 }

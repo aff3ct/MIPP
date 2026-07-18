@@ -2,80 +2,105 @@
     "toreg-64": {
         "format": "long",
         "code": [
-            "\t%r<tp>% one  = %set1<tp>%(0xFFFFFFFFFFFFFFFF);",
-            "    %r<tp>% zero = %set1<tp>%(0);",
-            "    return %blend<tp>%(one, zero, m0);"
+            "%r<tp>% one  = %set1<tp>%(0xFFFFFFFFFFFFFFFF);",
+            "%r<tp>% zero = %set1<tp>%(0);",
+            "return %blend<tp>%(one, zero, m0);"
         ]
     },
     "toreg-32": {
         "format": "long",
         "code": [
-            "\t%r<tp>% one  = %set1<tp>%(0xFFFFFFFF);",
-            "    %r<tp>% zero = %set1<tp>%(0);",
-            "    return %blend<tp>%(one, zero, m0);"
+            "%r<tp>% one  = %set1<tp>%(0xFFFFFFFF);",
+            "%r<tp>% zero = %set1<tp>%(0);",
+            "return %blend<tp>%(one, zero, m0);"
+        ]
+    },
+    "toreg-16": {
+        "format": "long",
+        "code": [
+            "%r<tp>% one  = %set1<tp>%(0xFFFF);",
+            "%r<tp>% zero = %set1<tp>%(0);",
+            "return %blend<tp>%(one, zero, m0);"
+        ]
+    },
+    "toreg-8": {
+        "format": "long",
+        "code": [
+            "%r<tp>% one  = %set1<tp>%(0xFF);",
+            "%r<tp>% zero = %set1<tp>%(0);",
+            "return %blend<tp>%(one, zero, m0);"
         ]
     },
     "and_all_float": {
         "format": "long",
         "code": [
-            "\t%r<c:int>% a = %cast<tp,c:int|b:tp>%(r0);",
-            "    %r<c:int>% b = %cast<tp,c:int|b:tp>%(r1);",
-            "    %r<c:int>% res = %andb<c:int>%(a,b);",
-            "    return %cast<c:int|b:tp,tp>%(res);"
+            "%r<c:int>% a = %cast<tp,c:int|b:tp>%(r0);",
+            "%r<c:int>% b = %cast<tp,c:int|b:tp>%(r1);",
+            "%r<c:int>% res = %andb<c:int>%(a,b);",
+            "return %cast<c:int|b:tp,tp>%(res);"
         ]
     },
     "set_by_load": {
         "format": "long",
-        "code": "\treturn %load<tp>%(vals);"
+        "code": "return %load<tp>%(vals);"
     },
     "set_k-64": {
         "format": "long",
         "code": [
-            "\t%v<c:uint>% t[%N<tp>%] = { {% set nb_item = (isa.size/64)|int -1 %} {% for item in range(nb_item) %}",
-            "        t[{{ item }}] = vals[{{ item }}] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0, {% endfor %}",
-            "        t[{{ nb_item}}] = vals[{{ nb_item }}] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0 };",
-            "    %r<c:uint>% r0_32 = %set<c:uint>%((%v<c:uint>%*) t);",
-            "    %r<c:uint>% r1_32 = %set1<c:uint>%((%v<c:uint>%) 0xFFFFFFFFFFFFFFFF);",
-            "    return %cast_k<c:uint|b:tp,tp>%(%cmpeq<c:uint|b:tp>%(r0_32, r1_32));"
+            "%v<c:uint>% t[%N<tp>%];",
+            "for (int i = 0; i < %N<tp>%; ++i) {",
+            "\tt[i] = vals[i] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0;",
+            "}",
+            "%r<c:uint>% r0_32 = %set<c:uint>%((%v<c:uint>%*) t);",
+            "%r<c:uint>% r1_32 = %set1<c:uint>%((%v<c:uint>%) 0xFFFFFFFFFFFFFFFF);",
+            "return %cast_k<c:uint|b:tp,tp>%(%cmpeq<c:uint|b:tp>%(r0_32, r1_32));"
         ]
     },
     "set_k-32": {
         "format": "long",
         "code": [
-            "\t%v<c:uint>% t[%N<tp>%] = { {% set nb_item = (isa.size/32)|int - 1 %} {% for item in range(nb_item) %}",
-            "        t[{{ item }}] = vals[{{ item }}] ? 0xFFFFFFFF : 0, {% endfor %}",
-            "        t[{{ nb_item}}] = vals[{{ nb_item }}] ? 0xFFFFFFFF : 0 };",
-            "    %r<c:uint>% r0_32 = %set<c:uint>%((%v<c:uint>%*) t);",
-            "    %r<c:uint>% r1_32 = %set1<c:uint>%(0xFFFFFFFF);",
-            "    return %cast_k<c:uint|b:tp,tp>%(%cmpeq<c:uint|b:tp>%(r0_32, r1_32));"
+            "%v<c:uint>% t[%N<tp>%];",
+            "for (int i = 0; i < %N<tp>%; ++i) {",
+            "\tt[i] = vals[i] ? 0xFFFFFFFF : 0;",
+            "}",
+            "%r<c:uint>% r0_32 = %set<c:uint>%((%v<c:uint>%*) t);",
+            "%r<c:uint>% r1_32 = %set1<c:uint>%(0xFFFFFFFF);",
+            "return %cast_k<c:uint|b:tp,tp>%(%cmpeq<c:uint|b:tp>%(r0_32, r1_32));"
         ]
     },
     "hadd": {
         "format": "long",
         "code": [
-            "\tconst %v<tp>% val = %hadd_to_scal<tp>%(r0);",
-            "    return %set1<tp>%(val);"
+            "const %v<tp>% val = %hadd_to_scal<tp>%(r0);",
+            "return %set1<tp>%(val);"
         ]
     },
     "get": {
         "format": "long",
         "code": [
-            "\t%v<tp>% t[%N<tp>%];",
-            "    %storeu<tp>%(t, r0);",
-            "    return t[v0];"
+            "%v<tp>% t[%N<tp>%];",
+            "%storeu<tp>%(t, r0);",
+            "return t[v0];"
         ]
     },
     "getfirst": {
         "format": "long",
-        "code": "\t  return %get<tp>%(r0, 0);"
+        "code": "return %get<tp>%(r0, 0);"
     },
     "get_k": {
         "format": "long",
         "code": [
-            "\t %v<tp>% tmp[%N<tp>%];",
-            "    %r<tp>% rmsk =%toreg<tp>%(m0);",
-            "    %storeu<tp>%(tmp, rmsk);",
-            "    return (int32_t) tmp[v0];"
+            "%v<tp>% tmp[%N<tp>%];",
+            "%r<tp>% rmsk =%toreg<tp>%(m0);",
+            "%storeu<tp>%(tmp, rmsk);",
+            "return (int32_t) tmp[v0];"
+        ]
+    },
+    "tomsk": {
+        "format": "long",
+        "code": [
+            "%r<tp>% r1 = %set1<tp>%(0);",
+            "return %cmpneq<tp>%(r1,r0);"
         ]
     }
 }

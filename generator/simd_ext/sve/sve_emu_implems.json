@@ -7,6 +7,14 @@
         {
             "datatypes": "all_32bit",
             "template": "toreg-32"
+        },
+        {
+            "datatypes": "all_16bit",
+            "template": "toreg-16"
+        },
+        {
+            "datatypes": "all_8bit",
+            "template": "toreg-8"
         }
     ],
     "andb": [
@@ -53,6 +61,12 @@
         {
             "datatypes": "all_datatypes",
             "template": "get_k"
+        }
+    ],
+    "tomsk": [
+        {
+            "datatypes": "all_datatypes",
+            "template": "tomsk"
         }
     ]
 }

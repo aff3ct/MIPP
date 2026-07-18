@@ -10,7 +10,7 @@ import re
 from tools import *
 from registry import *
 from include_gen import IncludeManager
-from ci_generator import duplicate_isa_sve_along_size
+from ci_generator import prepare_isa_defines
 
 
 # -------------------------------------------------------------------------------------------------
@@ -69,11 +69,9 @@ typedef float float32_t;
     print("enum ISA { SCALAR, SSE, AVX, AVX512, NEON, SVE, RVV };", file=file_common)
     print("enum MKIND { NO, M, Z, S }; //mask enum for function templates", file=file_common)
 
-    isa_list_copy = duplicate_isa_sve_along_size(isa_list) # this is the function that sets the gen_define key for every ISAs for some reason
+    isa_list_copy = prepare_isa_defines(isa_list) # this is the function that sets the gen_define key for every ISAs for some reason
 
     for index, isa in enumerate(isa_list_copy):
-        if isa["name"].startswith("sve"): # idk about sve
-            continue
         if index == 0:
             print("#if " + isa["gen_define"], file=file_common)
         else:

@@ -12,15 +12,36 @@
     "hw_mask_requires_toreg": true,
     "define": "defined(__ARM_FEATURE_SVE)",
     "layout": {
-        "size_symbol": "{{vla_size}}",
-        "defines_template": "#define MIPP_SVE{{vla_size}}_N_{{type_category_upper}}{{n_bits}} {{type_size}}",
-        "vector_typedef_template": "typedef {{isa_datatype.reg}} fixed_{{vla_size}}_{{isa_datatype.to_ptr}} __attribute__((arm_sve_vector_bits({{vla_size}})));",
-        "mask_typedef_template": "typedef svbool_t fixed_{{vla_size}}_bool_t __attribute__((arm_sve_vector_bits({{vla_size}})));",
-        "rvd_struct_template": "typedef struct { fixed_{{vla_size}}_{{isa_datatype.to_ptr}} r; } rvd_{{isa.name}}_{{datatype.category}}{{datatype.n_bits}}_t;",
-        "rvm_struct_template": "typedef struct { fixed_{{vla_size}}_bool_t m; } rvm_{{isa.name}}_{{datatype.category}}{{datatype.n_bits}}_t;"
+        "size_symbol": "__ARM_FEATURE_SVE_BITS",
+        "defines_template": "#define MIPP_SVE_N_{{type_category_upper}}{{n_bits}}_{{lsuffix_upper}} {{type_size}}",
+        "vector_typedef_template": "typedef {{isa_datatype.reg}} fixed_{{lsuffix_mipp}}_{{isa_datatype.to_ptr}} __attribute__((arm_sve_vector_bits(__ARM_FEATURE_SVE_BITS)));",
+        "mask_typedef_template": "typedef svbool_t fixed_{{lsuffix_mipp}}_bool_t __attribute__((arm_sve_vector_bits(__ARM_FEATURE_SVE_BITS)));",
+        "rvd_struct_template": "typedef struct { fixed_{{lsuffix_mipp}}_{{isa_datatype.to_ptr}} r; } rvd_{{isa.name}}_{{datatype.category}}{{datatype.n_bits}}_{{lsuffix_mipp}}_t;",
+        "rvm_struct_template": "typedef struct { fixed_{{lsuffix_mipp}}_bool_t m; } rvm_{{isa.name}}_{{datatype.category}}{{datatype.n_bits}}_{{lsuffix_mipp}}_t;"
     },
-    "hw_lmul": [1],
-    "sw_lmul": [],
+    "header_template": [
+        "#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SVE_H_",
+        "#define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SVE_H_",
+        "#ifndef __ARM_FEATURE_SVE_BITS",
+        "\t#error Only -msve-vector-bits = 128-256-512-1024-2048 is supported",
+        "#endif",
+        "#include <arm_sve.h>",
+        "#include <string.h>",
+        "#include <float.h>",
+        "#include <stdint.h>",
+        "#include <stdio.h>",
+        "#include <stdlib.h>",
+        "typedef float float32_t;",
+        "typedef double float64_t;"
+    ],
+    "hw_lmul": [
+        1
+    ],
+    "sw_lmul": [
+        2,
+        4,
+        8
+    ],
     "datatypes": {
         "float64": {
             "data_ext": "f64",
