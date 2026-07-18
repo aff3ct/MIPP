@@ -1,23 +1,23 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "TemplatesSchema",
-  "anyOf": [
-    {
-      "type": "object",
-      "additionalProperties": {
-        "$ref": "#/definitions/template"
-      }
-    },
-    {
-      "type": "object",
-      "additionalProperties": {
+  "type": "object",
+  "properties": {
+    "SNIPPET_END_MSK": { "type": "string" },
+    "SNIPPET_END_MSKZ": { "type": "string" },
+    "SNIPPET_END_MSKS": { "type": "string" }
+  },
+  "additionalProperties": {
+    "anyOf": [
+      { "$ref": "#/definitions/template" },
+      {
         "type": "object",
         "additionalProperties": {
           "$ref": "#/definitions/template"
         }
       }
-    }
-  ],
+    ]
+  },
   "definitions": {
     "template": {
       "type": "object",

@@ -64,6 +64,15 @@ def _load_funcs_registry():
     with open(os.path.join(current_dir, "registry_scalar_implems.json"), "r", encoding="utf-8") as f:
         raw_scalar_implems = json.load(f)
 
+    from input_validation import (
+        validate_protos_config, validate_categories_config,
+        validate_interfaces_config, validate_scalar_implems_config
+    )
+    validate_protos_config(raw_protos)
+    validate_categories_config(categories)
+    validate_interfaces_config(raw_interfaces)
+    validate_scalar_implems_config(raw_scalar_implems)
+
     def resolve_fixed_datatype(fd):
         if fd is False:
             return False
@@ -148,6 +157,20 @@ def _load_generic_emu():
     with open(implems_path, "r") as f:
         data_implems = json.load(f)
 
+    from input_validation import (
+        validate_templates_config, validate_implems_config, validate_template_references
+    )
+    validate_templates_config(data_templates, templates_path)
+    validate_implems_config(data_implems, implems_path)
+    
+    # Verify template references across section tables
+    flat_implems = {}
+    for sect in ["implems_generic_emu", "implems_mask_generic_emu", "implems_horiz_lmul_generic_emu"]:
+        for name, items in data_implems[sect].items():
+            flat_implems[name] = items
+            
+    validate_template_references(flat_implems, data_templates, implems_path)
+
     def clean_template_code(tpl):
         if not isinstance(tpl, dict) or "code" not in tpl:
             return tpl
@@ -173,10 +196,9 @@ def _load_generic_emu():
                 }
                 if "version" in item:
                     processed_item["version"] = item["version"]
-                if "dependencies" in item:
-                    processed_item["dependencies"] = set(item["dependencies"])
                 
                 # Resolve template
+                template_code = ""
                 if "template_ref" in item:
                     ref = item["template_ref"]
                     if ref in templates_pool:
@@ -185,6 +207,36 @@ def _load_generic_emu():
                         raise ValueError(f"Template reference not found: {ref}")
                 elif "template" in item:
                     processed_item["template"] = clean_template_code(item["template"])
+
+                # Auto-resolve dependencies from template placeholders
+                auto_deps = set()
+                if "template" in processed_item:
+                    tpl = processed_item["template"]
+                    if isinstance(tpl, dict):
+                        code_val = tpl.get("code", "")
+                        if isinstance(code_val, list):
+                            template_code = "\n".join(code_val)
+                        else:
+                            template_code = str(code_val)
+                    elif isinstance(tpl, str):
+                        template_code = tpl
+
+                if template_code:
+                    import re
+                    placeholder_regex = re.compile(r'\%([^%\n]*)\%')
+                    matches = placeholder_regex.findall(template_code)
+                    for m in matches:
+                        m_clean = m.strip()
+                        if m_clean and not m_clean.startswith("{") and not m_clean.endswith("}"):
+                            dep_name = m_clean.split('<')[0].strip()
+                            if dep_name:
+                                first_word = dep_name.split()[0]
+                                if first_word not in ["if", "else", "endif", "for", "endfor"]:
+                                    if dep_name not in ["r", "m", "v", "N"] and not dep_name.startswith("{"):
+                                        if dep_name != func_name:
+                                            auto_deps.add(dep_name)
+                                            
+                processed_item["dependencies"] = auto_deps
                 
                 # Set default type/level
                 if "type" not in processed_item:
@@ -209,5 +261,7 @@ copy_interfaces = copy.deepcopy(interfaces)
 _current_dir = os.path.dirname(os.path.abspath(__file__))
 with open(os.path.join(_current_dir, "registry_scalar_isa.json"), "r") as f:
     scalar_isa = json.load(f)
+from input_validation import validate_isa_config
+validate_isa_config(scalar_isa, "scalar")
 
 implems_generic_emu, implems_mask_generic_emu, implems_horiz_lmul_generic_emu = _load_generic_emu()

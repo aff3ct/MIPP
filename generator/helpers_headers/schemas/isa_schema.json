@@ -8,6 +8,7 @@
     "size": {
       "anyOf": [
         { "type": "integer" },
+        { "type": "string" },
         { "type": "array", "items": { "type": "integer" } }
       ]
     },
@@ -61,9 +62,9 @@
           "if": { "type": "string" },
           "if_lmul": { "type": "object" }
         },
-        "required": ["data_ext", "reg", "msk", "to_ptr"]
+        "required": ["reg", "msk", "to_ptr"]
       }
     }
   },
-  "required": ["name", "prefix", "define", "datatypes"]
+  "required": ["name", "datatypes"]
 }

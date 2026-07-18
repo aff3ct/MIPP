@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "InterfacesSchema",
+  "type": "object",
+  "additionalProperties": {
+    "type": "object",
+    "properties": {
+      "proto_ref": { "type": "string" },
+      "datatypes": {
+        "anyOf": [
+          { "type": "string" },
+          { "type": "array", "items": { "type": "string" } }
+        ]
+      },
+      "horizontal": { "type": "boolean" },
+      "mask_support": {
+        "type": "string",
+        "enum": ["no_mask", "only_mask", "only_maskz", "only_masks", "mask_and_maskz", "mask_and_masks", "maskz_and_masks", "all_mask"]
+      }
+    },
+    "required": ["proto_ref", "datatypes", "horizontal", "mask_support"]
+  }
+}
