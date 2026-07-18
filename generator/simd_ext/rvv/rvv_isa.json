@@ -4,6 +4,7 @@
     "define": "defined(__riscv_v_intrinsic)",
     "layout": {
         "size_symbol": "__riscv_v_fixed_vlen",
+        "vlen_guard_template": "__riscv_v_fixed_vlen >= {{ width * abs_lmul }}",
         "defines_template": "#define MIPP_RVV_N_{{type_category_upper}}{{n_bits}}_{{lsuffix_upper}} {{type_size}}",
         "vector_typedef_template": "typedef {{isa_datatype.reg}} fixed_{{lsuffix_mipp}}_{{isa_datatype.to_ptr}} __attribute__((riscv_rvv_vector_bits({{vla_size}}{{lmul_expr}})));",
         "mask_typedef_template": "typedef {{isa_datatype.msk}} fixed_{{lsuffix_mipp}}_bool{{n_bits}}_t __attribute__((riscv_rvv_vector_bits({{vla_size}}{{lmul_expr}}/(8*sizeof({{isa_datatype.to_ptr}})))));",

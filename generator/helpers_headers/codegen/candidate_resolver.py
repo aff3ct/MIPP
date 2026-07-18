@@ -345,24 +345,26 @@ def resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators
                                         if req_dt_ret not in auto_scalar_reqs.get("store", []):
                                             auto_scalar_reqs.setdefault("store", []).append(req_dt_ret)
 
-                    if isa["name"] == "rvv":
-                        for arg in funcs[f]["proto"]["args"]:
-                            if arg["type"] == "vindex":
-                                single_dt_par = dt_par.split(",")[0]
-                                c_int = datatypes[single_dt_par].get("category", "int")
-                                same_size_integer_datatype = find_one_data_types_from({"n_bits": datatypes[single_dt_par]["n_bits"], "category": c_int})
-                                vi_dt_name = same_size_integer_datatype["name"]
-                                req_vi_dt = vi_dt_name + "," + vi_dt_name
-                                if req_vi_dt not in auto_scalar_reqs.get("store", []):
-                                    auto_scalar_reqs.setdefault("store", []).append(req_vi_dt)
+                    # Check for vindex argument type generics
+                    for arg in funcs[f]["proto"]["args"]:
+                        if arg["type"] == "vindex":
+                            single_dt_par = dt_par.split(",")[0]
+                            c_int = datatypes[single_dt_par].get("category", "int")
+                            same_size_integer_datatype = find_one_data_types_from({"n_bits": datatypes[single_dt_par]["n_bits"], "category": c_int})
+                            vi_dt_name = same_size_integer_datatype["name"]
+                            req_vi_dt = vi_dt_name + "," + vi_dt_name
+                            if req_vi_dt not in auto_scalar_reqs.get("store", []):
+                                auto_scalar_reqs.setdefault("store", []).append(req_vi_dt)
 
                     auto_scalar_cand_if = ""
-                    if isa["name"] == "rvv" and lmul < 0:
+                    layout = isa.get("layout", {})
+                    vlen_guard_tpl = layout.get("vlen_guard_template", None)
+                    if vlen_guard_tpl and lmul < 0:
                         single_dt = dt_par.split(",")[0]
                         if "width" in isa.get("datatypes", {}).get(single_dt, {}):
                             width = isa["datatypes"][single_dt]["width"]
                             req_vlen = int(width) * abs(lmul)
-                            vlen_guard = f"__riscv_v_fixed_vlen >= {req_vlen}"
+                            vlen_guard = Template(vlen_guard_tpl, undefined=StrictUndefined).render(width=int(width), abs_lmul=abs(lmul))
                             base_guard = isa["datatypes"][single_dt].get("if", "")
                             if base_guard:
                                 auto_scalar_cand_if = f"({base_guard}) && {vlen_guard}"
