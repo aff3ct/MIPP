@@ -29,12 +29,6 @@ from datatypes import all_datatypes, all_datatypes_cart_prod
 from tools import *
 from registry import *
 
-from sse_gen import sse_gen
-from avx_gen import avx_gen
-from avx512_gen import avx512_gen
-from sve_gen import sve_gen
-from rvv_gen import rvv_gen
-
 from scalar_gen import gen_c_functions_scalar_one # generate pseudocode of fn in doc using this
 
 include_gen_path = "../include/"
