@@ -69,8 +69,7 @@ def gen_c_defines(isa, file, vla_size=None):
         else:
             type_size = str(int((vla_size if vla_size is not None else isa["size"]) / n_bits))
         
-        if not layout or not "{{lsuffix_upper}}" in template_def:
-            print(f"#define MIPP_{isa_name_upper}_N_{datatypes[dt]['category'].upper()}{n_bits} {type_size}", file=file)
+        print(f"#define MIPP_{isa_name_upper}_N_{datatypes[dt]['category'].upper()}{n_bits} {type_size}", file=file)
 
     # 3. Positive lmuls
     lmuls = [x for x in isa.get("hw_lmul", [1]) if x > 0] if layout else [x for x in isa.get("sw_lmul", []) if int(x) > 0]
@@ -263,15 +262,7 @@ def gen_c_structures(isa, file, is_scalar=False, vla_size=None):
             # Emulated pairwise implementation
             lmul_2 = int(lmul / 2)
             for dt in isa["datatypes"]:
-                guard = isa["datatypes"][dt].get("if", None)
-                if guard:
-                    print(f"#if {guard}", file=file)
                 print(f"typedef struct {{ rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m{lmul_2}_t r1, r2; }} rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m{lmul}_t;", file=file)
-                if guard:
-                    print(f"#else", file=file)
-                    print(f"	#include \"../scalar/scalar_common.h\"", file=file)
-                    print(f"	typedef rvd_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m{lmul}_t;", file=file)
-                    print(f"#endif", file=file)
 
     # Negative lmuls (ldivs, VLA only)
     for ldiv in [abs(x) for x in isa.get("hw_lmul", []) if x < 0]:
@@ -343,14 +334,7 @@ def gen_c_structures(isa, file, is_scalar=False, vla_size=None):
             # Emulated pairwise implementation
             lmul_2 = int(lmul / 2)
             for dt in isa["datatypes"]:
-                guard = isa["datatypes"][dt].get("if", None)
-                if guard:
-                    print(f"#if {guard}", file=file)
                 print(f"typedef struct {{ rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m{lmul_2}_t m1, m2; }} rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m{lmul}_t;", file=file)
-                if guard:
-                    print(f"#else", file=file)
-                    print(f"	typedef rvm_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m{lmul}_t;", file=file)
-                    print(f"#endif", file=file)
 
     # Negative lmuls (ldivs, VLA only)
     for ldiv in [abs(x) for x in isa.get("hw_lmul", []) if x < 0]:
