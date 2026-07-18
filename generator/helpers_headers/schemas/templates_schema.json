@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TemplatesSchema",
+  "anyOf": [
+    {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/template"
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {
+          "$ref": "#/definitions/template"
+        }
+      }
+    }
+  ],
+  "definitions": {
+    "template": {
+      "type": "object",
+      "properties": {
+        "format": { "type": "string", "enum": ["short", "long"] },
+        "code": {
+          "anyOf": [
+            { "type": "string" },
+            { "type": "array", "items": { "type": "string" } }
+          ]
+        }
+      },
+      "required": ["code"]
+    }
+  }
+}

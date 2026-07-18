@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ImplemsSchema",
+  "anyOf": [
+    {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": { "$ref": "#/definitions/item" }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/item" }
+        }
+      }
+    }
+  ],
+  "definitions": {
+    "item": {
+      "type": "object",
+      "properties": {
+        "instr_name": { "type": "string" },
+        "datatypes": {
+          "anyOf": [
+            { "type": "string" },
+            { "type": "array", "items": { "type": "string" } }
+          ]
+        },
+        "template": { "type": "string" },
+        "template_ref": { "type": "string" },
+        "if": { "type": "string" },
+        "level": { "type": "integer" },
+        "version": { "type": "string", "enum": ["mask", "maskz", "masks"] },
+        "type": { "type": "string", "enum": ["native", "emulated"] },
+        "dependencies": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["datatypes"],
+      "anyOf": [
+        { "required": ["template"] },
+        { "required": ["template_ref"] }
+      ]
+    }
+  }
+}

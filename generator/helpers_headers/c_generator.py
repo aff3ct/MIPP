@@ -502,19 +502,7 @@ def resolve_lmul_in_isa(isa, lmul):
     return resolved_isa
 
 def generate_c_layer(isa, include_manager, native_implems, emu_implems):
-    # Validate sw_ldiv_type and negative lmuls/ldivs combo
-    sw_ldiv_type = isa.get("sw_ldiv_type", "native")
-    hw_lmuls = isa.get("hw_lmul", [1])
-    sw_lmuls = isa.get("sw_lmul", [])
-    all_ldivs = [int(x) for x in (hw_lmuls + sw_lmuls) if int(x) < 0]
-    if sw_ldiv_type == "sub_isa":
-        if "sub_isa" not in isa or not isa["sub_isa"]:
-            print(f"Error: ISA '{isa['name']}' has sw_ldiv_type='sub_isa' but is missing the 'sub_isa' field defining the underlying sub-architecture.", file=sys.stderr)
-            sys.exit(1)
-        for ldiv in all_ldivs:
-            if ldiv != -2:
-                print(f"Error: ISA '{isa['name']}' has sw_ldiv_type='sub_isa' but specifies unsupported ldiv factor '{ldiv}'. Only ldiv = -2 is supported with sub_isa.", file=sys.stderr)
-                sys.exit(1)
+
 
     # Pre-process emu_implems to set default type
     for iemu in emu_implems:

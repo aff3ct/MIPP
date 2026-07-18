@@ -731,11 +731,15 @@ def compute_dt_par_dt_ret(funcs, f, dt, check_support=True):
 def load_implem_tables(current_file, templates_filename, implems_filename):
     import json
     import os
+    from input_validation import validate_templates_config, validate_implems_config
     current_dir = os.path.dirname(os.path.abspath(current_file))
     
     # Load templates
-    with open(os.path.join(current_dir, templates_filename), "r") as f:
+    templates_path = os.path.join(current_dir, templates_filename)
+    with open(templates_path, "r") as f:
         tpl_dict = json.load(f)
+    validate_templates_config(tpl_dict, templates_path)
+
     for name, tpl in tpl_dict.items():
         if "code" in tpl:
             code = tpl["code"]
@@ -760,8 +764,12 @@ def load_implem_tables(current_file, templates_filename, implems_filename):
             tpl["code"] = "\n".join(processed_lines)
         
     # Load implems
-    with open(os.path.join(current_dir, implems_filename), "r") as f:
+    implems_path = os.path.join(current_dir, implems_filename)
+    with open(implems_path, "r") as f:
         raw_implems = json.load(f)
+    validate_implems_config(raw_implems, implems_path)
+    from input_validation import validate_template_references
+    validate_template_references(raw_implems, tpl_dict, implems_path)
         
     resolved_implems = {}
     for func, choices in raw_implems.items():
@@ -793,6 +801,8 @@ def load_isa_config(isa_name):
         # Load capability JSON
         with open(os.path.join(ext_dir, f"{isa_name}_isa.json"), "r") as f:
             isa = json.load(f)
+        from input_validation import validate_isa_config
+        validate_isa_config(isa, isa_name)
         if "size" in isa and isinstance(isa["size"], list):
             isa["size"] = set(isa["size"]) # SVE backwards compatibility
             
@@ -800,6 +810,9 @@ def load_isa_config(isa_name):
         _, implems = load_implem_tables(os.path.join(ext_dir, "__init__.py"), f"{isa_name}_native_templates.json", f"{isa_name}_native_implems.json")
         _, implems_emu = load_implem_tables(os.path.join(ext_dir, "__init__.py"), f"{isa_name}_emu_templates.json", f"{isa_name}_emu_implems.json")
         
+        from input_validation import validate_logical_integrity
+        validate_logical_integrity(isa, implems, implems_emu)
+
         _isa_config_cache[isa_name] = (isa, implems, implems_emu)
         
     isa, implems, implems_emu = _isa_config_cache[isa_name]
