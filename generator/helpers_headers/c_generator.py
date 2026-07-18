@@ -441,6 +441,12 @@ def register_candidates(isa, funcs, implems, cand_type="native_or_emu", lmul=0):
                 if c_dict not in isa["candidates"]:
                     isa["candidates"].append(c_dict)
 
+def register_all_candidates(isa, funcs, native_implems, emu_implems, lmul=0):
+    register_candidates(isa, funcs, native_implems, cand_type="native_or_emu", lmul=lmul)
+    register_candidates(isa, funcs, emu_implems, cand_type="native_or_emu", lmul=lmul)
+    register_candidates(isa, funcs, implems_generic_emu, cand_type="generic_emu", lmul=lmul)
+    register_candidates(isa, funcs, implems_mask_generic_emu, cand_type="generic_emu", lmul=lmul)
+
 def gen_c_functions(isa, file, funcs, implems, lmul=0):
     register_candidates(isa, funcs, implems, cand_type="native_or_emu", lmul=lmul)
 
@@ -547,12 +553,7 @@ def generate_c_layer(isa, include_manager, native_implems, emu_implems):
     for lmul in hw_lmuls_pos:
         resolved_isa = resolve_lmul_in_isa(isa, str(lmul))
         resolved_isa["candidates"] = []
-        register_candidates(resolved_isa, copy_interfaces, native_implems, lmul=lmul)
-        register_candidates(resolved_isa, copy_interfaces, emu_implems, lmul=lmul)
-        register_candidates(resolved_isa, copy_interfaces, implems_generic_emu, cand_type="generic_emu", lmul=lmul)
-        register_candidates(resolved_isa, copy_interfaces, implems_mask_generic_emu, cand_type="generic_emu", lmul=lmul)
-        
-        # Resolution and emission by the generic solver
+        register_all_candidates(resolved_isa, copy_interfaces, native_implems, emu_implems, lmul=lmul)
         resolve_and_emit_missing_functions(resolved_isa, include_manager, copy_interfaces, lmul=lmul, emit_separators=(lmul != 0))
 
     # Negative hw_lmul values (fractional LMUL/ldiv like -2, -4, -8, if present)
@@ -560,11 +561,7 @@ def generate_c_layer(isa, include_manager, native_implems, emu_implems):
     for lmul_neg in hw_lmuls_neg:
         resolved_isa = resolve_lmul_in_isa(isa, str(lmul_neg))
         resolved_isa["candidates"] = []
-        register_candidates(resolved_isa, copy_interfaces, native_implems, lmul=lmul_neg)
-        register_candidates(resolved_isa, copy_interfaces, emu_implems, lmul=lmul_neg)
-        register_candidates(resolved_isa, copy_interfaces, implems_generic_emu, cand_type="generic_emu", lmul=lmul_neg)
-        register_candidates(resolved_isa, copy_interfaces, implems_mask_generic_emu, cand_type="generic_emu", lmul=lmul_neg)
-
+        register_all_candidates(resolved_isa, copy_interfaces, native_implems, emu_implems, lmul=lmul_neg)
         resolve_and_emit_missing_functions(resolved_isa, include_manager, copy_interfaces, lmul=lmul_neg, emit_separators=True)
 
     # 4. Generate software wrappers (SW LMUL)
