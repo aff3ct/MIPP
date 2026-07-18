@@ -121,17 +121,7 @@ def gen_c_structures(isa, file, is_scalar=False, vla_size=None):
             rvd_tmpl = "typedef struct { {{isa_datatype.reg}} r[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}]; } rvd_{{isa.name}}_{{datatype.category}}{{datatype.n_bits}}_t;"
             rvm_tmpl = "typedef struct { {{isa_datatype.msk}} m[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}]; } rvm_{{isa.name}}_{{datatype.category}}{{datatype.n_bits}}_t;"
         else:
-            rvd_tmpl = """
-{% if isa_datatype.if is defined %}
-#if {{ isa_datatype.if }}
-	typedef struct { {{ isa_datatype.reg }} r; } rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;
-#else
-	#include "../scalar/scalar_common.h"
-	typedef rvd_scalar_{{ datatype.category }}{{ datatype.n_bits }}_t rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;
-#endif
-{% else %}
-typedef struct { {{ isa_datatype.reg }} r; } rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;
-{% endif %}"""
+            rvd_tmpl = "typedef struct { {{ isa_datatype.reg }} r; } rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"
             rvm_tmpl = "typedef struct { {{ isa_datatype.msk }} m; } rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"
         
         layout = {
@@ -145,14 +135,15 @@ typedef struct { {{ isa_datatype.reg }} r; } rvd_{{ isa.name }}_{{ datatype.cate
     if "vector_typedef_template" in layout:
         j2_vector_typedef = Template(layout["vector_typedef_template"], undefined=StrictUndefined)
         for lmul in [x for x in isa.get("hw_lmul", [1]) if x > 0]:
+            resolved_isa = resolve_lmul_in_isa(isa, lmul)
             lsuffix_mipp = f"m{lmul}"
             lmul_expr = f"*{lmul}" if lmul > 1 else ""
-            for dt in isa["datatypes"]:
-                guard = isa["datatypes"][dt].get("if", None)
+            for dt in resolved_isa["datatypes"]:
+                guard = resolved_isa["datatypes"][dt].get("if", None)
                 if guard:
                     print(f"#if {guard}", file=file)
                 print(j2_vector_typedef.render(
-                    isa_datatype=isa["datatypes"][dt],
+                    isa_datatype=resolved_isa["datatypes"][dt],
                     vla_size=size_symbol,
                     lsuffix_mipp=lsuffix_mipp,
                     lmul_expr=lmul_expr
@@ -160,19 +151,20 @@ typedef struct { {{ isa_datatype.reg }} r; } rvd_{{ isa.name }}_{{ datatype.cate
                 if guard:
                     print(f"#endif", file=file)
         for ldiv in [abs(x) for x in isa.get("hw_lmul", []) if x < 0]:
+            resolved_isa = resolve_lmul_in_isa(isa, -ldiv)
             lsuffix_mipp = f"d{ldiv}"
             lmul_expr = f"/{ldiv}"
-            for dt in isa["datatypes"]:
-                if "if_lmul" in isa["datatypes"][dt] and str(-ldiv) in isa["datatypes"][dt]["if_lmul"]:
-                    guard = isa["datatypes"][dt]["if_lmul"][str(-ldiv)]
+            for dt in resolved_isa["datatypes"]:
+                if "if_lmul" in resolved_isa["datatypes"][dt] and str(-ldiv) in resolved_isa["datatypes"][dt]["if_lmul"]:
+                    guard = resolved_isa["datatypes"][dt]["if_lmul"][str(-ldiv)]
                 else:
-                    guard = isa["datatypes"][dt].get("if", None)
+                    guard = resolved_isa["datatypes"][dt].get("if", None)
                 if guard == "0":
                     continue
                 if guard:
                     print(f"#if {guard}", file=file)
                 print(j2_vector_typedef.render(
-                    isa_datatype=isa["datatypes"][dt],
+                    isa_datatype=resolved_isa["datatypes"][dt],
                     vla_size=size_symbol,
                     lsuffix_mipp=lsuffix_mipp,
                     lmul_expr=lmul_expr
@@ -184,14 +176,15 @@ typedef struct { {{ isa_datatype.reg }} r; } rvd_{{ isa.name }}_{{ datatype.cate
     if "mask_typedef_template" in layout:
         j2_mask_typedef = Template(layout["mask_typedef_template"], undefined=StrictUndefined)
         for lmul in [x for x in isa.get("hw_lmul", [1]) if x > 0]:
+            resolved_isa = resolve_lmul_in_isa(isa, lmul)
             lsuffix_mipp = f"m{lmul}"
             lmul_expr = f"*{lmul}" if lmul > 1 else ""
-            for dt in isa["datatypes"]:
-                guard = isa["datatypes"][dt].get("if", None)
+            for dt in resolved_isa["datatypes"]:
+                guard = resolved_isa["datatypes"][dt].get("if", None)
                 if guard:
                     print(f"#if {guard}", file=file)
                 print(j2_mask_typedef.render(
-                    isa_datatype=isa["datatypes"][dt],
+                    isa_datatype=resolved_isa["datatypes"][dt],
                     vla_size=size_symbol,
                     lsuffix_mipp=lsuffix_mipp,
                     lmul_expr=lmul_expr,
@@ -200,19 +193,20 @@ typedef struct { {{ isa_datatype.reg }} r; } rvd_{{ isa.name }}_{{ datatype.cate
                 if guard:
                     print(f"#endif", file=file)
         for ldiv in [abs(x) for x in isa.get("hw_lmul", []) if x < 0]:
+            resolved_isa = resolve_lmul_in_isa(isa, -ldiv)
             lsuffix_mipp = f"d{ldiv}"
             lmul_expr = f"/{ldiv}"
-            for dt in isa["datatypes"]:
-                if "if_lmul" in isa["datatypes"][dt] and str(-ldiv) in isa["datatypes"][dt]["if_lmul"]:
-                    guard = isa["datatypes"][dt]["if_lmul"][str(-ldiv)]
+            for dt in resolved_isa["datatypes"]:
+                if "if_lmul" in resolved_isa["datatypes"][dt] and str(-ldiv) in resolved_isa["datatypes"][dt]["if_lmul"]:
+                    guard = resolved_isa["datatypes"][dt]["if_lmul"][str(-ldiv)]
                 else:
-                    guard = isa["datatypes"][dt].get("if", None)
+                    guard = resolved_isa["datatypes"][dt].get("if", None)
                 if guard == "0":
                     continue
                 if guard:
                     print(f"#if {guard}", file=file)
                 print(j2_mask_typedef.render(
-                    isa_datatype=isa["datatypes"][dt],
+                    isa_datatype=resolved_isa["datatypes"][dt],
                     vla_size=size_symbol,
                     lsuffix_mipp=lsuffix_mipp,
                     lmul_expr=lmul_expr,
@@ -234,17 +228,18 @@ typedef struct { {{ isa_datatype.reg }} r; } rvd_{{ isa.name }}_{{ datatype.cate
         lsuffix_mipp = f"m{lmul}"
         if lmul in hw_lmuls:
             # Native implementation using template
-            for dt in isa["datatypes"]:
-                guard = isa["datatypes"][dt].get("if", None)
+            resolved_isa = resolve_lmul_in_isa(isa, lmul)
+            for dt in resolved_isa["datatypes"]:
+                guard = resolved_isa["datatypes"][dt].get("if", None)
                 if guard:
                     print(f"#if {guard}", file=file)
                 print(j2_rvd_struct.render(
-                    isa=isa,
+                    isa=resolved_isa,
                     datatype=datatypes[dt],
-                    isa_datatype=isa["datatypes"][dt],
+                    isa_datatype=resolved_isa["datatypes"][dt],
                     vla_size=size_symbol,
                     lsuffix_mipp=lsuffix_mipp,
-                    isa_name_upper=isa["name"].upper(),
+                    isa_name_upper=resolved_isa["name"].upper(),
                     type_category_upper=datatypes[dt]["category"].upper(),
                 ), file=file)
                 
@@ -259,10 +254,8 @@ typedef struct { {{ isa_datatype.reg }} r; } rvd_{{ isa.name }}_{{ datatype.cate
                     print(f"#else", file=file)
                     print(f"	#include \"../scalar/scalar_common.h\"", file=file)
                     if lmul == 1:
-                        if "{{lsuffix_mipp}}" in layout["rvd_struct_template"]:
-                            print(f"	typedef rvd_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t;", file=file)
-                        else:
-                            print(f"	typedef rvd_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m1_t;", file=file)
+                        print(f"	typedef rvd_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t;", file=file)
+                        print(f"	typedef rvd_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m1_t;", file=file)
                     else:
                         print(f"	typedef rvd_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_{lsuffix_mipp}_t;", file=file)
                     print(f"#endif", file=file)
@@ -283,11 +276,12 @@ typedef struct { {{ isa_datatype.reg }} r; } rvd_{{ isa.name }}_{{ datatype.cate
     # Negative lmuls (ldivs, VLA only)
     for ldiv in [abs(x) for x in isa.get("hw_lmul", []) if x < 0]:
         lsuffix_mipp = f"d{ldiv}"
-        for dt in isa["datatypes"]:
-            if "if_lmul" in isa["datatypes"][dt] and str(-ldiv) in isa["datatypes"][dt]["if_lmul"]:
-                guard = isa["datatypes"][dt]["if_lmul"][str(-ldiv)]
+        resolved_isa = resolve_lmul_in_isa(isa, -ldiv)
+        for dt in resolved_isa["datatypes"]:
+            if "if_lmul" in resolved_isa["datatypes"][dt] and str(-ldiv) in resolved_isa["datatypes"][dt]["if_lmul"]:
+                guard = resolved_isa["datatypes"][dt]["if_lmul"][str(-ldiv)]
             else:
-                guard = isa["datatypes"][dt].get("if", None)
+                guard = resolved_isa["datatypes"][dt].get("if", None)
             if guard == "0":
                 print(f"#include \"../scalar/scalar_common.h\"", file=file)
                 print(f"typedef rvd_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_{lsuffix_mipp}_t;", file=file)
@@ -295,12 +289,12 @@ typedef struct { {{ isa_datatype.reg }} r; } rvd_{{ isa.name }}_{{ datatype.cate
                 if guard:
                     print(f"#if {guard}", file=file)
                 print(j2_rvd_struct.render(
-                    isa=isa,
+                    isa=resolved_isa,
                     datatype=datatypes[dt],
-                    isa_datatype=isa["datatypes"][dt],
+                    isa_datatype=resolved_isa["datatypes"][dt],
                     vla_size=size_symbol,
                     lsuffix_mipp=lsuffix_mipp,
-                    isa_name_upper=isa["name"].upper(),
+                    isa_name_upper=resolved_isa["name"].upper(),
                     type_category_upper=datatypes[dt]["category"].upper(),
                 ), file=file)
                 if guard:
@@ -315,17 +309,18 @@ typedef struct { {{ isa_datatype.reg }} r; } rvd_{{ isa.name }}_{{ datatype.cate
         lsuffix_mipp = f"m{lmul}"
         if lmul in hw_lmuls:
             # Native implementation using template
-            for dt in isa["datatypes"]:
-                guard = isa["datatypes"][dt].get("if", None)
+            resolved_isa = resolve_lmul_in_isa(isa, lmul)
+            for dt in resolved_isa["datatypes"]:
+                guard = resolved_isa["datatypes"][dt].get("if", None)
                 if guard:
                     print(f"#if {guard}", file=file)
                 print(j2_rvm_struct.render(
-                    isa=isa,
+                    isa=resolved_isa,
                     datatype=datatypes[dt],
-                    isa_datatype=isa["datatypes"][dt],
+                    isa_datatype=resolved_isa["datatypes"][dt],
                     vla_size=size_symbol,
                     lsuffix_mipp=lsuffix_mipp,
-                    isa_name_upper=isa["name"].upper(),
+                    isa_name_upper=resolved_isa["name"].upper(),
                     type_category_upper=datatypes[dt]["category"].upper(),
                 ), file=file)
                 
@@ -339,10 +334,8 @@ typedef struct { {{ isa_datatype.reg }} r; } rvd_{{ isa.name }}_{{ datatype.cate
                 if guard:
                     print(f"#else", file=file)
                     if lmul == 1:
-                        if "{{lsuffix_mipp}}" in layout["rvd_struct_template"]:
-                            print(f"	typedef rvm_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t;", file=file)
-                        else:
-                            print(f"	typedef rvm_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m1_t;", file=file)
+                        print(f"	typedef rvm_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t;", file=file)
+                        print(f"	typedef rvm_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m1_t;", file=file)
                     else:
                         print(f"	typedef rvm_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_{lsuffix_mipp}_t;", file=file)
                     print(f"#endif", file=file)
@@ -362,23 +355,24 @@ typedef struct { {{ isa_datatype.reg }} r; } rvd_{{ isa.name }}_{{ datatype.cate
     # Negative lmuls (ldivs, VLA only)
     for ldiv in [abs(x) for x in isa.get("hw_lmul", []) if x < 0]:
         lsuffix_mipp = f"d{ldiv}"
-        for dt in isa["datatypes"]:
-            if "if_lmul" in isa["datatypes"][dt] and str(-ldiv) in isa["datatypes"][dt]["if_lmul"]:
-                guard = isa["datatypes"][dt]["if_lmul"][str(-ldiv)]
+        resolved_isa = resolve_lmul_in_isa(isa, -ldiv)
+        for dt in resolved_isa["datatypes"]:
+            if "if_lmul" in resolved_isa["datatypes"][dt] and str(-ldiv) in resolved_isa["datatypes"][dt]["if_lmul"]:
+                guard = resolved_isa["datatypes"][dt]["if_lmul"][str(-ldiv)]
             else:
-                guard = isa["datatypes"][dt].get("if", None)
+                guard = resolved_isa["datatypes"][dt].get("if", None)
             if guard == "0":
                 print(f"typedef rvm_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_{lsuffix_mipp}_t;", file=file)
             else:
                 if guard:
                     print(f"#if {guard}", file=file)
                 print(j2_rvm_struct.render(
-                    isa=isa,
+                    isa=resolved_isa,
                     datatype=datatypes[dt],
-                    isa_datatype=isa["datatypes"][dt],
+                    isa_datatype=resolved_isa["datatypes"][dt],
                     vla_size=size_symbol,
                     lsuffix_mipp=lsuffix_mipp,
-                    isa_name_upper=isa["name"].upper(),
+                    isa_name_upper=resolved_isa["name"].upper(),
                     type_category_upper=datatypes[dt]["category"].upper(),
                 ), file=file)
                 if guard:
