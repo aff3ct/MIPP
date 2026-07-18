@@ -3,6 +3,8 @@ import os
 import sys
 from jsonschema import Draft7Validator, validators
 
+SHOW_AUDIT_WARNINGS = False
+
 def extend_with_default(validator_class):
     validate_properties = validator_class.VALIDATORS["properties"]
 
@@ -198,6 +200,184 @@ def validate_logical_integrity(isa, implems, implems_emu):
     
     # Check cycles in emulations
     check_dependency_cycles(implems_emu, isa["name"])
+
+    # Audit implementation levels
+    audit_and_validate_implementation_levels(isa, implems, implems_emu)
+
+def audit_and_validate_implementation_levels(isa, implems, implems_emu):
+    if not SHOW_AUDIT_WARNINGS:
+        return
+    import re
+    import sys
+    prefix = isa.get("prefix", "")
+
+    # Build dynamic hardware intrinsic matching set/regex from datatypes
+    hw_types = set()
+    hw_suffixes = set()
+
+    def expand_val(val_str, dt_info):
+        if not isinstance(val_str, str):
+            return {str(val_str)}
+        placeholders = re.findall(r'\{([A-Za-z0-9_]+)\}', val_str)
+        if not placeholders:
+            return {val_str}
+            
+        import itertools
+        possible_values = {}
+        for p in placeholders:
+            if p in dt_info and isinstance(dt_info[p], dict):
+                possible_values[p] = list(dt_info[p].values())
+            else:
+                val = dt_info.get(p, "")
+                possible_values[p] = [str(val)]
+                
+        keys = list(possible_values.keys())
+        value_combinations = itertools.product(*(possible_values[k] for k in keys))
+        
+        expanded = set()
+        for combo in value_combinations:
+            sub_dict = dict(zip(keys, combo))
+            try:
+                expanded.add(val_str.format(**sub_dict))
+            except Exception:
+                expanded.add(val_str)
+        return expanded
+
+    # Collect prefixes dynamically by traversing the sub_isa hierarchy
+    prefixes = []
+    curr_isa = isa
+    while curr_isa:
+        if "prefix" in curr_isa and curr_isa["prefix"]:
+            prefixes.append(curr_isa["prefix"])
+            
+        # Collect register types and suffixes for the current ISA node in the hierarchy
+        for dt_name, dt_info in curr_isa.get("datatypes", {}).items():
+            for key in ["reg", "msk", "data_ext", "data_ext_logi", "data_ext_msk", "uint_data_ext", "int_data_ext", "reg_dt_ext"]:
+                if key in dt_info:
+                    val = dt_info[key]
+                    val_list = val if isinstance(val, list) else [val]
+                    for v in val_list:
+                        expanded_vals = expand_val(v, dt_info)
+                        for ev in expanded_vals:
+                            ev_clean = ev.strip()
+                            if key in ["reg", "msk"]:
+                                hw_types.add(ev_clean)
+                            else:
+                                hw_suffixes.add(ev_clean)
+
+        sub_isa_name = curr_isa.get("sub_isa")
+        if sub_isa_name:
+            from tools import load_isa_config
+            try:
+                curr_isa, _, _ = load_isa_config(sub_isa_name)
+            except Exception:
+                curr_isa = None
+        else:
+            curr_isa = None
+
+    hw_patterns = []
+    
+    # 1. Any Jinja2 reference to register, mask, prefix, or data extension variables
+    hw_patterns.append(r'\{\{[^}]*\b(prefix|reg|msk|data_ext)\b[^}]*\}\}')
+    
+    # 2. Known register/mask types
+    if hw_types:
+        escaped_types = [re.escape(t) for t in hw_types]
+        hw_patterns.append(r'\b(' + '|'.join(escaped_types) + r')\b')
+        
+    # 3. Dynamic architecture prefixes matching
+    for p in prefixes:
+        if p:
+            if len(p) <= 2:
+                if hw_suffixes:
+                    escaped_sfx = [re.escape(s) for s in hw_suffixes]
+                    hw_patterns.append(r'\b' + re.escape(p) + r'[a-z0-9_]*_(' + '|'.join(escaped_sfx) + r')(_[a-z0-9_]+)?\b')
+            else:
+                hw_patterns.append(r'\b' + re.escape(p))
+
+    # 4. Suffix matching
+    if hw_suffixes:
+        escaped_sfx = [re.escape(s) for s in hw_suffixes]
+        hw_patterns.append(r'\b[a-zA-Z0-9_]+_(' + '|'.join(escaped_sfx) + r')(_[a-zA-Z0-9_]+)?\b')
+
+    combined_pattern = re.compile('|'.join(hw_patterns))
+
+    def has_hw(code):
+        if not code:
+            return False
+        return bool(combined_pattern.search(code))
+
+    def get_mipp_dependencies(code, func_name):
+        if not code:
+            return set()
+        deps = set()
+        placeholder_regex = re.compile(r'\%([^%\n]*)\%')
+        matches = placeholder_regex.findall(code)
+        for m in matches:
+            m_clean = m.strip()
+            if m_clean and not m_clean.startswith("{") and not m_clean.endswith("}"):
+                dep_name = m_clean.split('<')[0].strip()
+                if dep_name:
+                    first_word = dep_name.split()[0]
+                    if first_word not in ["if", "else", "endif", "for", "endfor"]:
+                        if dep_name not in ["r", "m", "v", "N"] and not dep_name.startswith("{"):
+                            if dep_name != func_name:
+                                deps.add(dep_name)
+        return deps
+
+    def get_code(choice):
+        tpl = choice.get("template", {})
+        if isinstance(tpl, dict):
+            code_val = tpl.get("code", "")
+            if isinstance(code_val, list):
+                return "\n".join(code_val)
+            return str(code_val)
+        return str(tpl)
+
+    discrepancies = []
+
+    # Check native implems (expected level 0)
+    for func, choices in implems.items():
+        for choice in choices:
+            code = get_code(choice)
+            has_hardware = has_hw(code)
+            deps = get_mipp_dependencies(code, func)
+            has_deps = len(deps) > 0
+            
+            # Detected level
+            if has_hardware:
+                detected = 1 if has_deps else 0
+            else:
+                detected = 2
+                
+            declared = choice.get("level", 0)
+            if declared != detected:
+                discrepancies.append((func, choice, "native_implems", declared, detected, deps))
+
+    # Check emu implems (expected level 1)
+    for func, choices in implems_emu.items():
+        for choice in choices:
+            code = get_code(choice)
+            has_hardware = has_hw(code)
+            deps = get_mipp_dependencies(code, func)
+            has_deps = len(deps) > 0
+            
+            # Detected level
+            if has_hardware:
+                detected = 1 if has_deps else 0
+            else:
+                detected = 2
+                
+            declared = choice.get("level", 1)
+            if declared != detected:
+                discrepancies.append((func, choice, "emu_implems", declared, detected, deps))
+
+    if discrepancies:
+        print(f"Warning: Level audit found {len(discrepancies)} implementation placement/level discrepancies for ISA '{isa['name']}':", file=sys.stderr)
+        for func, choice, table, declared, detected, deps in discrepancies:
+            dts = ", ".join(list(choice.get("datatypes", []))[:2])
+            deps_str = f" (MIPP dependencies: {list(deps)})" if deps else ""
+            print(f"  - Function '{func}' [{dts}] in '{table}' has declared/expected level {declared} but detected level {detected}{deps_str} (template code: '{get_code(choice).strip().replace('\n', ' ')[:50]}...')", file=sys.stderr)
 
 def validate_categories_config(categories_dict):
     validate_json_data(categories_dict, "categories_schema.json", label="registry_categories.json")

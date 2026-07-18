@@ -273,7 +273,16 @@ def main(argv=None):
         ),
     )
     
+    parser.add_argument(
+        "--audit-levels",
+        action="store_true",
+        help="Print warnings about implementation levels and placement discrepancies.",
+    )
+    
     args = parser.parse_args(argv)
+
+    import input_validation
+    input_validation.SHOW_AUDIT_WARNINGS = args.audit_levels
 
     # check that all mipp funcs have a scalar implem before to start
     check_mipp_funcs_scalar_implems()
