@@ -33,6 +33,11 @@
       "default": "native"
     },
     "sub_isa": { "type": "string" },
+    "is_scalar": { "type": "boolean" },
+    "mipp_definitions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
     "hw_mask": { "type": "boolean" },
     "hw_mask_requires_toreg": { "type": "boolean" },
     "hw_mask_is_bitfield": { "type": "boolean" },
@@ -40,6 +45,7 @@
       "type": "object",
       "properties": {
         "size_symbol": { "type": "string" },
+        "vlen_guard_template": { "type": "string" },
         "defines_template": { "type": "string" },
         "vector_typedef_template": { "type": "string" },
         "mask_typedef_template": { "type": "string" },

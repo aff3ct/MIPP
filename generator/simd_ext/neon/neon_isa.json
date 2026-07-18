@@ -3,6 +3,19 @@
     "prefix": "v",
     "size": 128,
     "define": "defined(__ARM_NEON__) || defined(__ARM_NEON)",
+    "mipp_definitions": [
+        "#define MIPP_NEON",
+        "#define MIPP_BW",
+        "#if defined(__ARM_FEATURE_FMA)",
+        "\t#define MIPP_FMA",
+        "#endif",
+        "#if defined(__aarch64__)",
+        "\t#define MIPP_64BIT",
+        "\t#define MIPP_INSTR_VERSION 2",
+        "#else",
+        "\t#define MIPP_INSTR_VERSION 1",
+        "#endif"
+    ],
     "header_template": [
         "#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_NEON_H_",
         "#define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_NEON_H_",

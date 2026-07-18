@@ -2,6 +2,11 @@
     "name": "rvv",
     "prefix": "__riscv",
     "define": "defined(__riscv_v_intrinsic)",
+    "mipp_definitions": [
+        "#define MIPP_RVV",
+        "#define MIPP_64BIT",
+        "#define MIPP_BW"
+    ],
     "layout": {
         "size_symbol": "__riscv_v_fixed_vlen",
         "vlen_guard_template": "__riscv_v_fixed_vlen >= {{ width * abs_lmul }}",

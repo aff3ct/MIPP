@@ -11,6 +11,12 @@
     "hw_mask": true,
     "hw_mask_requires_toreg": true,
     "define": "defined(__ARM_FEATURE_SVE)",
+    "mipp_definitions": [
+        "#define MIPP_SVE",
+        "#define MIPP_FMA",
+        "#define MIPP_64BIT",
+        "#define MIPP_INSTR_VERSION 1"
+    ],
     "layout": {
         "size_symbol": "__ARM_FEATURE_SVE_BITS",
         "defines_template": "#define MIPP_SVE_N_{{type_category_upper}}{{n_bits}}_{{lsuffix_upper}} {{type_size}}",

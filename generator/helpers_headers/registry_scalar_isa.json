@@ -1,6 +1,7 @@
 {
     "name": "scalar",
     "is_scalar": true,
+    "mipp_definitions": [],
     "size": "MIPP_SCALAR_SIZE",
     "header_template": [
         "#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SCALAR_H_",

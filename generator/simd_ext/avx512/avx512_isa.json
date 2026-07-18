@@ -6,6 +6,20 @@
     "hw_mask_requires_toreg": true,
     "hw_mask_is_bitfield": true,
     "define": "defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)",
+    "mipp_definitions": [
+        "#define MIPP_AVX512",
+        "#define MIPP_INSTR_VERSION 1",
+        "#define MIPP_64BIT",
+        "#ifdef __AVX512BW__",
+        "\t#define MIPP_BW",
+        "#endif",
+        "#ifdef __AVX512VBMI2__",
+        "\t#define MIPP_BMI2",
+        "#endif",
+        "#ifdef __FMA__",
+        "\t#define MIPP_FMA",
+        "#endif"
+    ],
     "sub_isa": "avx",
     "header_template": [
         "#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX512_H_",

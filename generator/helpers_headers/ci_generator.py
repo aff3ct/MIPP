@@ -13,16 +13,11 @@ from include_gen import IncludeManager
 from codegen.lmul_orchestrator import gen_c_horiz_lmul
 from registry import implems_horiz_lmul_generic_emu
 
-avx512_isa, _, _ = load_isa_config("avx512")
-avx_isa, _, _ = load_isa_config("avx")
-rvv_isa, _, _ = load_isa_config("rvv")
-            
 def prepare_isa_defines(isa_list):
     isa_list_copy = copy.deepcopy(isa_list)
     for isa in isa_list_copy:
         isa["gen_define"] = "defined(MIPP_" + isa["name"].upper() + ")"
     return isa_list_copy
-
 
 def _isa_include_common(isa):
     content =  "\n#include \"../simd_ext/"+isa["name"]+"/" + isa["name"] + "_common.h\"\n"
@@ -31,10 +26,7 @@ def _isa_include_common(isa):
         content +=  "\n#include \"../simd_ext/"+sub_isa+"/" + sub_isa + "_common.h\"\n"
     return content
 
-
 def _isa_include_function(isa, func):
-    
-    
     if isa == "c":
         content = "\n#include \"" + func + ".h\"\n"
         return content
@@ -44,7 +36,6 @@ def _isa_include_function(isa, func):
     if sub_isa:
         content += "\n#include \"../../simd_ext/"+sub_isa+"/" + "functions/" + sub_isa + "_" + func + ".h\"\n"
     return content
-
 
 def _custom_prefix_generator(func, isa_list, is_common=False, mode="function_header"):
     """
@@ -60,117 +51,36 @@ def _custom_prefix_generator(func, isa_list, is_common=False, mode="function_hea
     if is_common:
         is_first = True
         
-        content += """
+        # Sort ISAs by dependency depth descending (and force scalar first)
+        isa_map = {isa["name"]: isa for isa in isa_list}
+        def get_depth(isa_item):
+            if isa_item.get("is_scalar", False):
+                return 999
+            depth = 0
+            curr = isa_item.get("sub_isa", None)
+            while curr and curr in isa_map:
+                depth += 1
+                curr = isa_map[curr].get("sub_isa", None)
+            return depth
+        
+        isa_list = sorted(isa_list, key=get_depth, reverse=True)
+        
+        content += """\n#define MIPP\n\n#include <stdint.h>\n#include <float.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\n"""
 
-#define MIPP
-
-#include <stdint.h>
-#include <float.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-//typedef double float64_t;
-//typedef float float32_t;
-
-// ------------------------------------------------------------------------------------------------- includes files
-
-//#if defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)
-//#include "avx512/mipp_impl_avx512_gen.h"
-//#endif
-//#if defined(__AVX__)
-//#include "avx/mipp_impl_avx_gen.h"
-//#endif
-
-//#if defined(__SSE__)
-//#include "sse/mipp_impl_sse_gen.h"
-//#endif
-
-//#if defined(__ARM_FEATURE_SVE)
-//#include "sve/mipp_impl_sve_gen.h"
-//#endif
-
-//#if defined(__riscv_v_intrinsic)
-//#include "rvv/mipp_impl_rvv_gen.h"
-//#endif
-
-//#if defined(__ARM_NEON__) || defined(__ARM_NEON)
-//#include "neon/mipp_impl_neon_gen.h"
-//#endif
-
-// utiles pour l'instant pour les tests
-// pourrait clairement etre utile pour les generateurs au dela du if #define
-
-#if defined(MIPP_SCALAR)
-
-#elif defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)
-    #define MIPP_AVX512
-    #define MIPP_INSTR_VERSION 1
-    #define MIPP_64BIT
-#ifdef __AVX512BW__
-    #define MIPP_BW
-#endif
-#ifdef __AVX512VBMI2__
-    #define MIPP_BMI2
-#endif
-#ifdef __FMA__
-    #define MIPP_FMA
-#endif
-
-#elif defined(__AVX__)
-    #define MIPP_AVX
-    #define MIPP_64BIT
-#ifdef __AVX2__
-    #define MIPP_AVX2
-    #define MIPP_INSTR_VERSION 2
-    #define MIPP_BW
-#else
-    #define MIPP_INSTR_VERSION 1
-#endif
-#ifdef __BMI2__
-    #define MIPP_BMI2
-#endif
-#ifdef __FMA__
-    #define MIPP_FMA
-#endif
-
-#elif defined(__SSE__)
-    #define MIPP_SSE
-#ifdef __SSE2__
-    #define MIPP_64BIT
-    #define MIPP_BW
-#endif
-
-#elif defined(__ARM_FEATURE_SVE)
-#define MIPP_SVE
-#define MIPP_FMA
-#define MIPP_64BIT
-// not yet generated
-//#define MIPP_BW
-#define MIPP_INSTR_VERSION 1
-
-#elif defined(__ARM_NEON__) || defined(__ARM_NEON)
-#define MIPP_NEON
-#define MIPP_BW
-#if defined(__ARM_FEATURE_FMA)
-#define MIPP_FMA
-#endif
-#if defined(__aarch64__)
-#define MIPP_64BIT
-#define MIPP_INSTR_VERSION 2
-#else
-#define MIPP_INSTR_VERSION 1
-#endif
-#endif
-
-#ifdef __riscv_v_intrinsic
-#define MIPP_RVV
-#define MIPP_64BIT
-#define MIPP_BW
-#endif
-
-// end utiles pour l'instant pour les tests...        
-"""
+        is_first_block = True
+        for isa in isa_list:
+            is_scalar = isa.get("is_scalar", False)
+            cond = "defined(MIPP_SCALAR)" if is_scalar else isa.get("define", "")
+            if not cond:
+                continue
+            if is_first_block:
+                content += f"#if {cond}\n"
+                is_first_block = False
+            else:
+                content += f"#elif {cond}\n"
+            for line in isa.get("mipp_definitions", []):
+                content += f"\t{line}\n"
+        content += "#endif\n\n"
         content += "typedef double float64_t;\n"
         content += "typedef float float32_t;\n\n"
 
@@ -182,8 +92,6 @@ def _custom_prefix_generator(func, isa_list, is_common=False, mode="function_hea
                 content += "#elif " + "defined(MIPP_" + isa["name"].upper() + ")\n"
             content += _isa_include_common(isa)
         content += "#else\n#error \"Unsupported architecture, MIPP may not work properly\"\n#endif\n"
-        
-        
     else : 
         # print('Generating custom prefix for function "'+func+'"')
         is_first = True
@@ -208,10 +116,7 @@ def _custom_prefix_generator(func, isa_list, is_common=False, mode="function_hea
                     for dep in implem["dependencies"]:
                         content += _isa_include_function("c", dep)
 
-        
     return content
-    
-    
 
 def generate_c_interface(isa_list, include_manager=None):
     
@@ -221,7 +126,7 @@ def generate_c_interface(isa_list, include_manager=None):
     print(custom_prefix, file=file_common)
     
     tpl_header_interface = """#ifndef MY_INTRINSICS_PLUS_PLUS_INTERFACE_H_
-#define MY_INTRINSICS_PLUS_PLUS_INTERFACE_H_ """
+#define MY_INTRINSICS_PLUS_PLUS_INTERFACE_H_"""
     j2_template = Template(tpl_header_interface, undefined=StrictUndefined)
     print(j2_template.render(), file=file_common)
     # use try ldiv sve
@@ -240,7 +145,6 @@ def generate_c_interface(isa_list, include_manager=None):
     print(str_mipp_info, file=file_common)
 
     _gen_ci_functions(isa_list, include_manager, copy_interfaces)
-
 
 def _gen_ci_defines(isa_list, file):
     for i, isa in enumerate(isa_list):
@@ -296,7 +200,6 @@ def _gen_ci_structures(isa_list, file):
 
         for dt in isa["datatypes"]:
             print(j2_template.render(isa=isa, datatype=datatypes[dt]), file=file)
-        
 
         has_ldiv = isa.get("is_scalar", False) or any(x < 0 for x in isa.get("hw_lmul", []) + isa.get("sw_lmul", []))
         if has_ldiv:
@@ -320,16 +223,8 @@ def _gen_ci_structures(isa_list, file):
             for dt in isa["datatypes"]:
                 print(j2_template.render(isa=isa, datatype=datatypes[dt]), file=file)
 
-            
-
         if index == len(isa_list)-1:
             print("#endif", file=file)
-
-    # template = """typedef rvd_{{ datatype.category }}{{ datatype.n_bits }}_t rvd_{{ datatype.category }}{{ datatype.n_bits }}_m1_t;"""
-    # j2_template = Template(template, undefined=StrictUndefined)
-
-    # for dt in isa["datatypes"]:
-    #     print(j2_template.render(isa=isa, datatype=datatypes[dt]), file=file)
 
     for index, isa in enumerate(isa_list):
         if index == 0:
@@ -347,8 +242,6 @@ def _gen_ci_structures(isa_list, file):
                 print(j2_template.render(isa=isa, datatype=datatypes[dt], lmul=str(lmul)), file=file)
     print("#endif", file=file)    
    
- 
-
 def _ci_mask_writer(func, dt, isa_list, file, mask_type, func_name="", lmul=0):
     
     if len(dt.split(',')) <= 1:
@@ -422,9 +315,6 @@ def _ci_lmul_writer(f,func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask
     print("#endif", file=file)
     print("}", file=file)
 
-  
- 
-
 def _ci_ldiv_writer(f,func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_type=None, ldiv=0):
     # temporary writer while support is added for ldiv in the simd_ext layer.
     if len(dt.split(',')) <= 1:
@@ -432,52 +322,29 @@ def _ci_ldiv_writer(f,func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask
     else:
         full_func_name = build_func_name(isa_list[0], dt_par, dt_ret, f, isa_name=False, lmul=ldiv, masked_version=mask_type)
 
-    print("#if defined(MIPP_AVX512)", file=file)
+    ldiv_isas = [
+        isa for isa in isa_list
+        if isa.get("is_scalar", False) or any(x < 0 for x in isa.get("hw_lmul", []) + isa.get("sw_lmul", []))
+    ]
 
-    print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, {}, full_func_name, ldiv, False, False, mask_type) + " {", file=file)
-    if len(dt.split(',')) <= 1:
-        func_name_impl = build_func_name_short(avx512_isa, dt_par, f, True, ldiv, mask_type)
-    else:
-        func_name_impl = build_func_name(avx512_isa, dt_par, dt_ret, f, True,  ldiv, mask_type)
-    print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, avx512_isa, func_name_impl, masked_version=mask_type) + ";", file=file)
-    print("}", file=file)
+    for i, isa in enumerate(ldiv_isas):
+        if i == 0:
+            print("#if " + isa["gen_define"], file=file)
+        else:
+            print("#elif " + isa["gen_define"], file=file)
 
-    print("#elif defined(MIPP_AVX)", file=file)
+        print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, {}, full_func_name, ldiv, False, False, mask_type) + " {", file=file)
+        if len(dt.split(',')) <= 1:
+            func_name_impl = build_func_name_short(isa, dt_par, f, True, ldiv, mask_type)
+        else:
+            func_name_impl = build_func_name(isa, dt_par, dt_ret, f, True, ldiv, mask_type)
+        print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa, func_name_impl, masked_version=mask_type) + ";", file=file)
+        print("}", file=file)
 
-    print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, {}, full_func_name, ldiv, False, False, mask_type) + " {", file=file)
-    if len(dt.split(',')) <= 1:
-        func_name_impl = build_func_name_short(avx_isa, dt_par, f, True, ldiv, mask_type)
-    else:
-        func_name_impl = build_func_name(avx_isa, dt_par, dt_ret, f, True,  ldiv, mask_type)
-    print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, avx_isa, func_name_impl, masked_version=mask_type) + ";", file=file)
-    print("}", file=file)
-
-    print("#elif defined(MIPP_RVV)", file=file)
-
-    print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, {}, full_func_name, ldiv, False, False, mask_type) + " {", file=file)
-    if len(dt.split(',')) <= 1:
-        func_name_impl = build_func_name_short(rvv_isa, dt_par, f, True, ldiv, mask_type)
-    else:
-        func_name_impl = build_func_name(rvv_isa, dt_par, dt_ret, f, True,  ldiv, mask_type)
-    print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, rvv_isa, func_name_impl, masked_version=mask_type) + ";", file=file)
-    print("}", file=file)
-
-    print("#elif defined(MIPP_SCALAR)", file=file)
-
-    print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, {}, full_func_name, ldiv, False, False, mask_type) + " {", file=file)
-    if len(dt.split(',')) <= 1:
-        func_name_impl = build_func_name_short(scalar_isa, dt_par, f, True, ldiv, mask_type)
-    else:
-        func_name_impl = build_func_name(scalar_isa, dt_par, dt_ret, f, True,  ldiv, mask_type)
-    print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, scalar_isa, func_name_impl, masked_version=mask_type) + ";", file=file)
-    print("}", file=file)
-
-    print("#endif", file=file)
+    if ldiv_isas:
+        print("#endif", file=file)
 
 def _gen_ci_functions(isa_list, include_manager, funcs):
-    rvv_isa = next((isa for isa in isa_list if isa["name"].startswith("rvv")), None)
-    scalar_isa = next((isa for isa in isa_list if isa["name"].startswith("scalar")), None)
-    
     for f in funcs:
         file = include_manager.get_fd("c", f)
         for dt in funcs[f]["datatypes"]:
@@ -518,8 +385,7 @@ def _gen_ci_functions(isa_list, include_manager, funcs):
             
             for lmul in all_lmul:
                 _ci_lmul_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, lmul=lmul)
-                
-    
+
             for lmul in all_lmul:
                 mask_status = ""
                 if "mask_support" in funcs[f] :
@@ -540,7 +406,6 @@ def _gen_ci_functions(isa_list, include_manager, funcs):
             # for ldiv in all_ldiv:
             _ci_ldiv_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, ldiv=-2)
 
-                
         if include_manager.mode == "function_header":
             custom_prefix = _custom_prefix_generator(f, isa_list)
             include_manager.write_custom_prefix("c", f, custom_prefix)

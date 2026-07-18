@@ -3,6 +3,23 @@
     "prefix": "_mm256",
     "size": 256,
     "define": "defined(__AVX__)",
+    "mipp_definitions": [
+        "#define MIPP_AVX",
+        "#define MIPP_64BIT",
+        "#ifdef __AVX2__",
+        "\t#define MIPP_AVX2",
+        "\t#define MIPP_INSTR_VERSION 2",
+        "\t#define MIPP_BW",
+        "#else",
+        "\t#define MIPP_INSTR_VERSION 1",
+        "#endif",
+        "#ifdef __BMI2__",
+        "\t#define MIPP_BMI2",
+        "#endif",
+        "#ifdef __FMA__",
+        "\t#define MIPP_FMA",
+        "#endif"
+    ],
     "sub_isa": "sse",
     "header_template": [
         "#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX_H_",
