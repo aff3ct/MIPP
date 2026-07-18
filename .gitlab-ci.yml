@@ -42,7 +42,7 @@ generation-headers:
     - python3 -m venv .venv
     - source .venv/bin/activate
     - pip3 install -r requirements.txt
-    - ./gen_mipp_headers.py --skip-sve
+    - ./gen_mipp_headers.py --simd-ext sse avx avx512 rvv neon scalar
 
 generation-tests:
   image: registry.gitlab.com/aff3ct/aff3ct/mipp_linux:latest

@@ -700,7 +700,6 @@ def build_ifdef_masked(funcs, func_name, dt_key, mask_kind, implem_id):
 from cond_utils import *
 from cond_utils import is_guard_dead_under_cond
 
-GLOBAL_ISA_REGISTRY = {}
 _isa_config_cache = {}
 
 def clear_memo_caches():
@@ -808,7 +807,13 @@ def load_isa_config(isa_name):
             
         # Load native and emulation tables
         _, implems = load_implem_tables(os.path.join(ext_dir, "__init__.py"), f"{isa_name}_native_templates.json", f"{isa_name}_native_implems.json")
-        _, implems_emu = load_implem_tables(os.path.join(ext_dir, "__init__.py"), f"{isa_name}_emu_templates.json", f"{isa_name}_emu_implems.json")
+        
+        emu_tpl_path = os.path.join(ext_dir, f"{isa_name}_emu_templates.json")
+        emu_impl_path = os.path.join(ext_dir, f"{isa_name}_emu_implems.json")
+        if os.path.exists(emu_tpl_path) and os.path.exists(emu_impl_path):
+            _, implems_emu = load_implem_tables(os.path.join(ext_dir, "__init__.py"), f"{isa_name}_emu_templates.json", f"{isa_name}_emu_implems.json")
+        else:
+            implems_emu = {}
         
         from input_validation import validate_logical_integrity
         validate_logical_integrity(isa, implems, implems_emu)

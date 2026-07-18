@@ -508,7 +508,7 @@ def generate_c_layer(isa, include_manager, native_implems, emu_implems):
 
     # 2. Emit the defines and structures
     gen_c_defines(isa, file_common)
-    gen_c_structures(isa, file_common, is_scalar=(isa["name"] == "scalar"))
+    gen_c_structures(isa, file_common, is_scalar=isa.get("is_scalar", False))
 
     print(f"#endif /* MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_{isa['name'].upper()}_H_ */", file=file_common)
 

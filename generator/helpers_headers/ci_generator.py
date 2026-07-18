@@ -26,12 +26,9 @@ def prepare_isa_defines(isa_list):
 
 def _isa_include_common(isa):
     content =  "\n#include \"../simd_ext/"+isa["name"]+"/" + isa["name"] + "_common.h\"\n"
-    if isa["name"] == "avx" : 
-        # also include sse common for avx since it relies on sse types
-        content +=  "\n#include \"../simd_ext/sse/sse_common.h\"\n"
-    elif isa["name"] == "avx512" :
-        # also include avx common for avx512 since it relies on avx types
-        content +=  "\n#include \"../simd_ext/avx/avx_common.h\"\n"
+    sub_isa = isa.get("sub_isa")
+    if sub_isa:
+        content +=  "\n#include \"../simd_ext/"+sub_isa+"/" + sub_isa + "_common.h\"\n"
     return content
 
 
@@ -43,12 +40,9 @@ def _isa_include_function(isa, func):
         return content
     
     content = "\n#include \"../../simd_ext/"+isa["name"]+"/" + "functions/" + isa["name"] + "_" + func + ".h\"\n"
-    if isa["name"] == "avx" : 
-        # also include sse functions for avx since it relies on sse types
-        content += "\n#include \"../../simd_ext/sse/" + "functions/" + "sse_" + func + ".h\"\n"
-    elif isa["name"] == "avx512" :
-        # also include avx functions for avx512 since it relies on avx types
-        content += "\n#include \"../../simd_ext/avx/" + "functions/" + "avx_" + func + ".h\"\n"
+    sub_isa = isa.get("sub_isa")
+    if sub_isa:
+        content += "\n#include \"../../simd_ext/"+sub_isa+"/" + "functions/" + sub_isa + "_" + func + ".h\"\n"
     return content
 
 
@@ -304,7 +298,8 @@ def _gen_ci_structures(isa_list, file):
             print(j2_template.render(isa=isa, datatype=datatypes[dt]), file=file)
         
 
-        if isa["name"] == "avx512" or isa["name"] == "scalar" or isa["name"] == "avx" or isa["name"] == "rvv":
+        has_ldiv = isa.get("is_scalar", False) or any(x < 0 for x in isa.get("hw_lmul", []) + isa.get("sw_lmul", []))
+        if has_ldiv:
             ldiv = 2
             template = """typedef rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t rvd_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t;"""
             j2_template = Template(template, undefined=StrictUndefined)
@@ -315,7 +310,7 @@ def _gen_ci_structures(isa_list, file):
             for dt in isa["datatypes"]:
                 print(j2_template.render(isa=isa, datatype=datatypes[dt], ldiv=str(ldiv)), file=file)
         
-        if isa["name"] == "scalar" :
+        if isa.get("is_scalar", False):
             template = """typedef rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t rvd_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
             j2_template = Template(template, undefined=StrictUndefined)
             for dt in isa["datatypes"]:

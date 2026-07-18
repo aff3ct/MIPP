@@ -11,33 +11,11 @@ import time
 path = os.getcwd()
 
 sys.path.insert(1, path + "/helpers_headers/")
-sys.path.insert(1, path + "/simd_ext/avx512/")
-sys.path.insert(1, path + "/simd_ext/avx/")
-sys.path.insert(1, path + "/simd_ext/sse/")
-sys.path.insert(1, path + "/simd_ext/sve/")
-sys.path.insert(1, path + "/simd_ext/rvv/")
-sys.path.insert(1, path + "/simd_ext/neon/")
-sys.path.insert(1, path + "/simd_ext/scalar/")
 
 from tools import all_lmul, all_ldiv, clear_memo_caches, load_isa_config
-
-sse_isa, _, _ = load_isa_config("sse")
-avx_isa, _, _ = load_isa_config("avx")
-avx512_isa, _, _ = load_isa_config("avx512")
-sve_isa, _, _ = load_isa_config("sve")
-rvv_isa, _, _ = load_isa_config("rvv")
-neon_isa, _, _ = load_isa_config("neon")
 from registry import scalar_isa
 from registry import scalar_implems
 from registry import interfaces
-
-from sse_gen import sse_gen
-from avx_gen import avx_gen
-from avx512_gen import avx512_gen
-from sve_gen import sve_gen
-from rvv_gen import rvv_gen
-from neon_gen import neon_gen
-from scalar_gen import scalar_gen
 
 from include_gen import generate_mipp_h
 from ci_generator import generate_c_interface
@@ -170,6 +148,94 @@ def _expand_layer_keywords(selected):
 
     return (isa_layers, run_wrappers)
 
+def discover_and_sort_isas(path, limit_to_isas=None):
+    """
+    Scans the simd_ext directory, validates the existence of mandatory configuration files
+    for each extension, and returns:
+      - isas_dict: dict of isa_name -> isa_config
+      - implems_dict: dict of isa_name -> (native_implems, emu_implems)
+      - sorted_names: list of isa_names in topological order based on sub_isa dependencies
+    """
+    import os
+    from tools import load_isa_config
+    from registry import scalar_isa, scalar_implems
+
+    simd_ext_dir = os.path.join(path, "simd_ext")
+    subdirs = [d for d in os.listdir(simd_ext_dir) if os.path.isdir(os.path.join(simd_ext_dir, d)) and d != "__pycache__"]
+
+    # Resolve active ISAs (including dependencies)
+    if limit_to_isas is not None:
+        invalid_isas = [ext for ext in limit_to_isas if ext not in subdirs]
+        if invalid_isas:
+            raise ValueError(f"Requested invalid SIMD extension(s) that do not exist: {', '.join(invalid_isas)}")
+
+        active_isas = set(limit_to_isas)
+        active_isas.add("scalar")  # Always include fallback
+
+        changed = True
+        while changed:
+            changed = False
+            for ext in list(active_isas):
+                if ext == "scalar":
+                    continue
+                ext_dir = os.path.join(simd_ext_dir, ext)
+                isa_json_path = os.path.join(ext_dir, f"{ext}_isa.json")
+                if os.path.exists(isa_json_path):
+                    with open(isa_json_path, "r") as f:
+                        import json
+                        isa = json.load(f)
+                    sub = isa.get("sub_isa", None)
+                    if sub and sub not in active_isas:
+                        active_isas.add(sub)
+                        changed = True
+        subdirs = [d for d in subdirs if d in active_isas]
+
+    isas_dict = {}
+    implems_dict = {}
+
+    for ext in subdirs:
+        if ext == "scalar":
+            isas_dict["scalar"] = scalar_isa
+            implems_dict["scalar"] = (None, scalar_implems)
+            continue
+
+        # Validation checks
+        ext_dir = os.path.join(simd_ext_dir, ext)
+        mandatory_files = [
+            f"{ext}_isa.json",
+            f"{ext}_native_implems.json",
+            f"{ext}_native_templates.json"
+        ]
+        missing = [f for f in mandatory_files if not os.path.exists(os.path.join(ext_dir, f))]
+        if missing:
+            raise FileNotFoundError(f"Missing mandatory configuration files for SIMD extension '{ext}': {', '.join(missing)}")
+
+        # Load config
+        isa, native, emu = load_isa_config(ext)
+        isas_dict[ext] = isa
+        implems_dict[ext] = (native, emu)
+
+    # Topological sort based on sub_isa dependencies
+    sorted_names = []
+    visited = set()
+
+    def visit(name):
+        if name in visited:
+            return
+        visited.add(name)
+        # scalar is the fallback, it doesn't have dependencies
+        if name != "scalar":
+            sub = isas_dict[name].get("sub_isa", None)
+            if sub and sub in isas_dict:
+                visit(sub)
+        sorted_names.append(name)
+
+    for name in isas_dict:
+        visit(name)
+
+    return isas_dict, implems_dict, sorted_names
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(prog='gen_mipp.py', description='MIPP generator')
     parser.add_argument(
@@ -189,9 +255,10 @@ def main(argv=None):
     )
 
     parser.add_argument(
-        "--skip-sve",
-        action="store_true",
-        help="Skip generating SVE implementations. This is a hotfix to pass CI.",
+        "--simd-ext",
+        nargs="+",
+        help="List of SIMD extensions to generate (e.g. sse avx scalar). If not specified, all discovered extensions are generated.",
+        default=None,
     )
 
     parser.add_argument(
@@ -219,10 +286,27 @@ def main(argv=None):
     selected = _parse_layers(args.layers)
     isa_layers, run_wrappers = _expand_layer_keywords(selected)
 
+    # Parse limit_to_isas from --simd-ext
+    limit_to_isas = None
+    if args.simd_ext:
+        limit_to_isas = set()
+        for item in args.simd_ext:
+            for tok in item.split(","):
+                tok = tok.strip().lower()
+                if tok:
+                    limit_to_isas.add(tok)
+
+    # Auto-discovery, validation and sorting of SIMD extensions
+    isas_dict, implems_dict, sorted_names = discover_and_sort_isas(path, limit_to_isas=limit_to_isas)
+
     print("=" * 85)
     print(" MIPP Header Generator")
     print("=" * 85)
-    print(f"  Target sizes for SVE: {sorted(sve_isa['size'], reverse=True)}")
+    sve_isa = isas_dict.get("sve")
+    if sve_isa:
+        print(f"  Target sizes for SVE: {sorted(sve_isa['size'], reverse=True)}")
+    else:
+        print("  Target sizes for SVE: N/A")
     print(f"  LMUL options: {all_lmul} | LDIV options: {all_ldiv}")
     print("-" * 85)
 
@@ -237,76 +321,43 @@ def main(argv=None):
     for folder in [simd_ext_path, simd_ext_cpp_path, c_path, cpp_path, obj_path]:
         create_folder(folder)
 
-    from tools import GLOBAL_ISA_REGISTRY
-    GLOBAL_ISA_REGISTRY["sse"] = sse_isa
-    GLOBAL_ISA_REGISTRY["avx"] = avx_isa
-    GLOBAL_ISA_REGISTRY["avx512"] = avx512_isa
-
-    all_isas_str = ["avx512", "avx", "sse", "rvv", "neon", "scalar"]
-    if not args.skip_sve:
-        all_isas_str.append("sve")
 
     # CREATE INCLUDE MANAGER
-    include_manager = IncludeManager(all_isas_str, mode=args.header_type)
+    include_manager = IncludeManager(sorted_names, mode=args.header_type)
 
     # ISA generators
-    if "scalar" in isa_layers:
-        clear_memo_caches()
-        print("  ➔ Generating Scalar...", end="", flush=True)
-        t0 = time.perf_counter()
-        scalar_gen(include_manager)
-        print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
-    if "sse" in isa_layers:
-        clear_memo_caches()
-        print("  ➔ Generating SSE...", end="", flush=True)
-        t0 = time.perf_counter()
-        sse_gen(include_manager)
-        print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
-    if "avx" in isa_layers:
-        clear_memo_caches()
-        print("  ➔ Generating AVX...", end="", flush=True)
-        t0 = time.perf_counter()
-        avx_gen(include_manager)
-        print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
-    if "avx512" in isa_layers:
-        clear_memo_caches()
-        print("  ➔ Generating AVX-512...", end="", flush=True)
-        t0 = time.perf_counter()
-        avx512_gen(include_manager)
-        print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
-    if "sve" in isa_layers and not args.skip_sve:
-        clear_memo_caches()
-        print("  ➔ Generating SVE...", end="", flush=True)
-        t0 = time.perf_counter()
-        sve_gen(include_manager)
-        print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
-    if "rvv" in isa_layers:
-        clear_memo_caches()
-        print("  ➔ Generating RVV...", end="", flush=True)
-        t0 = time.perf_counter()
-        rvv_gen(include_manager)
-        print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
-    if "neon" in isa_layers:
-        clear_memo_caches()
-        print("  ➔ Generating Neon...", end="", flush=True)
-        t0 = time.perf_counter()
-        neon_gen(include_manager)
-        print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
+    from c_generator import generate_c_layer
+    for name in sorted_names:
+        if name in isa_layers:
+            clear_memo_caches()
+            display_name = name.upper() if name != 'avx512' else 'AVX-512'
+            display_name = display_name if name != 'scalar' else 'Scalar'
+            display_name = display_name if name != 'rvv' else 'RVV1.0'
+            print(f"  ➔ Generating {display_name}...", end="", flush=True)
+            t0 = time.perf_counter()
+            if name == "scalar":
+                # import scalar_gen dynamically
+                import importlib
+                scalar_path = os.path.join(path, "simd_ext", "scalar")
+                if scalar_path not in sys.path:
+                    sys.path.insert(1, scalar_path)
+                scalar_gen_module = importlib.import_module("scalar_gen")
+                scalar_gen = getattr(scalar_gen_module, "scalar_gen")
+                scalar_gen(include_manager)
+            else:
+                native, emu = implems_dict[name]
+                generate_c_layer(isas_dict[name], include_manager, native, emu)
+            print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
 
     # Wrappers / top-level headers
     if run_wrappers:
         print("  ➔ Generating wrappers & C/C++ interface...", end="", flush=True)
         t0 = time.perf_counter()
-        if not args.skip_sve:
-            generate_mipp_h(include_manager)
-            generate_c_interface([sse_isa, avx_isa, avx512_isa, sve_isa, rvv_isa, neon_isa, scalar_isa], include_manager)
-            generate_cpp(include_manager, [sse_isa, avx_isa, avx512_isa, sve_isa, rvv_isa, neon_isa, scalar_isa])
-            generate_cpp_object(include_manager)
-        else:
-            generate_mipp_h(include_manager)
-            generate_c_interface([sse_isa, avx_isa, avx512_isa, rvv_isa, neon_isa, scalar_isa], include_manager)
-            generate_cpp(include_manager, [sse_isa, avx_isa, avx512_isa, rvv_isa, neon_isa, scalar_isa])
-            generate_cpp_object(include_manager)
+        generate_mipp_h(include_manager)
+        isa_list = [isas_dict[name] for name in sorted_names]
+        generate_c_interface(isa_list, include_manager)
+        generate_cpp(include_manager, isa_list)
+        generate_cpp_object(include_manager)
         print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
 
     # Print summary table at the end
