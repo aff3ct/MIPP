@@ -11,6 +11,14 @@
     "hw_mask": true,
     "hw_mask_requires_toreg": true,
     "define": "defined(__ARM_FEATURE_SVE)",
+    "vla": {
+        "size_symbol": "{{vla_size}}",
+        "defines_template": "#define MIPP_SVE{{vla_size}}_N_{{type_category_upper}}{{n_bits}} {{type_size}}",
+        "vector_typedef_template": "typedef {{isa_datatype.reg}} fixed_{{vla_size}}_{{isa_datatype.to_ptr}} __attribute__((arm_sve_vector_bits({{vla_size}})));",
+        "mask_typedef_template": "typedef svbool_t fixed_{{vla_size}}_bool_t __attribute__((arm_sve_vector_bits({{vla_size}})));",
+        "rvd_struct_template": "typedef struct { fixed_{{vla_size}}_{{isa_datatype.to_ptr}} r; } rvd_{{isa.name}}_{{datatype.category}}{{datatype.n_bits}}_t;",
+        "rvm_struct_template": "typedef struct { fixed_{{vla_size}}_bool_t m; } rvm_{{isa.name}}_{{datatype.category}}{{datatype.n_bits}}_t;"
+    },
     "hw_lmul": [1],
     "sw_lmul": [],
     "datatypes": {

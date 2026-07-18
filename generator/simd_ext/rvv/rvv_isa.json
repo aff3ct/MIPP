@@ -2,6 +2,14 @@
     "name": "rvv",
     "prefix": "__riscv",
     "define": "defined(__riscv_v_intrinsic)",
+    "vla": {
+        "size_symbol": "__riscv_v_fixed_vlen",
+        "defines_template": "#define MIPP_RVV_N_{{type_category_upper}}{{n_bits}}_{{lsuffix_upper}} {{type_size}}",
+        "vector_typedef_template": "typedef {{isa_datatype.reg}} fixed_{{lsuffix_mipp}}_{{isa_datatype.to_ptr}} __attribute__((riscv_rvv_vector_bits({{vla_size}}{{lmul_expr}})));",
+        "mask_typedef_template": "typedef {{isa_datatype.msk}} fixed_{{lsuffix_mipp}}_bool{{n_bits}}_t __attribute__((riscv_rvv_vector_bits({{vla_size}}{{lmul_expr}}/(8*sizeof({{isa_datatype.to_ptr}})))));",
+        "rvd_struct_template": "typedef struct { fixed_{{lsuffix_mipp}}_{{isa_datatype.to_ptr}} r; } rvd_{{isa.name}}_{{datatype.category}}{{datatype.n_bits}}_{{lsuffix_mipp}}_t;",
+        "rvm_struct_template": "typedef struct { fixed_{{lsuffix_mipp}}_bool{{datatype.n_bits}}_t m; } rvm_{{isa.name}}_{{datatype.category}}{{datatype.n_bits}}_{{lsuffix_mipp}}_t;"
+    },
     "header_template": [
         "#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_RVV_H_",
         "#define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_RVV_H_",
