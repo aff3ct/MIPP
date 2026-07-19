@@ -1,18 +1,4 @@
 {
-    "cast": [
-        {
-            "instr_name": "reinterpret",
-            "datatypes": "all_datatypes_cart_prod",
-            "template": "cast"
-        }
-    ],
-    "cast_k": [
-        {
-            "instr_name": "",
-            "datatypes": "all_datatypes_cart_prod",
-            "template": "cast_k"
-        }
-    ],
     "blend": [
         {
             "instr_name": "sel",
@@ -20,32 +6,11 @@
             "template": "blend"
         }
     ],
-    "load": [
+    "cast": [
         {
-            "instr_name": "ld1",
-            "datatypes": "all_datatypes",
-            "template": "load"
-        }
-    ],
-    "maskzld": [
-        {
-            "instr_name": "ld1",
-            "datatypes": ["float64", "float32", "int64", "int32", "uint64", "uint32"],
-            "template": "mask_load"
-        }
-    ],
-    "loadu": [
-        {
-            "instr_name": "ld1",
-            "datatypes": "all_datatypes",
-            "template": "load"
-        }
-    ],
-    "store": [
-        {
-            "instr_name": "st1",
-            "datatypes": "all_datatypes",
-            "template": "store"
+            "instr_name": "reinterpret",
+            "datatypes": "all_datatypes_cart_prod",
+            "template": "cast"
         }
     ],
     "maskst": [
@@ -55,25 +20,25 @@
             "template": "mask_store"
         }
     ],
-    "storeu": [
+    "maskz_add": [
         {
-            "instr_name": "st1",
+            "instr_name": "add",
             "datatypes": "all_datatypes",
-            "template": "store"
+            "template": "std_2_reg_in_msk_z"
         }
     ],
-    "set1": [
+    "maskzld": [
         {
-            "instr_name": "dup",
-            "datatypes": "all_datatypes",
-            "template": "set1"
-        }
-    ],
-    "set1_k": [
-        {
-            "instr_name": "dup",
-            "datatypes": "all_int_uint",
-            "template": "set1_k"
+            "instr_name": "ld1",
+            "datatypes": [
+                "float64",
+                "float32",
+                "int64",
+                "int32",
+                "uint64",
+                "uint32"
+            ],
+            "template": "mask_load"
         }
     ],
     "set0": [
@@ -90,123 +55,18 @@
             "template": "set0_k"
         }
     ],
-    "andb": [
+    "set1": [
         {
-            "instr_name": "and",
+            "instr_name": "dup",
+            "datatypes": "all_datatypes",
+            "template": "set1"
+        }
+    ],
+    "set1_k": [
+        {
+            "instr_name": "dup",
             "datatypes": "all_int_uint",
-            "template": "andb"
-        }
-    ],
-    "andb_k": [
-        {
-            "instr_name": "and",
-            "datatypes": "all_datatypes",
-            "template": "andb_k"
-        }
-    ],
-    "notb_k": [
-        {
-            "instr_name": "not",
-            "datatypes": "all_datatypes",
-            "template": "notb_k"
-        }
-    ],
-    "testz": [
-        {
-            "instr_name": "ptest_any",
-            "datatypes": "all_datatypes",
-            "template": "testz"
-        }
-    ],
-    "add": [
-        {
-            "instr_name": "add",
-            "datatypes": "all_datatypes",
-            "template": "std_2_reg_in_no_msk_z"
-        }
-    ],
-    "maskz_add": [
-        {
-            "instr_name": "add",
-            "datatypes": "all_datatypes",
-            "template": "std_2_reg_in_msk_z"
-        }
-    ],
-    "sub": [
-        {
-            "instr_name": "sub",
-            "datatypes": "all_datatypes",
-            "template": "std_2_reg_in_no_msk_z"
-        }
-    ],
-    "mul": [
-        {
-            "instr_name": "mul",
-            "datatypes": "all_datatypes",
-            "template": "std_2_reg_in_no_msk_z"
-        }
-    ],
-    "div": [
-        {
-            "instr_name": "div",
-            "datatypes": "all_float",
-            "template": "std_2_reg_in_no_msk_z"
-        }
-    ],
-    "fmadd": [
-        {
-            "instr_name": "mla",
-            "datatypes": "all_float",
-            "template": "std_3_reg_in_no_msk_z"
-        }
-    ],
-    "cmpeq": [
-        {
-            "instr_name": "cmpeq",
-            "datatypes": "all_datatypes",
-            "template": "std_2_reg_in_no_msk"
-        }
-    ],
-    "cmpneq": [
-        {
-            "instr_name": "cmpne",
-            "datatypes": "all_datatypes",
-            "template": "std_2_reg_in_no_msk"
-        }
-    ],
-    "hadd_to_scal": [
-        {
-            "instr_name": "addv",
-            "datatypes": "all_datatypes",
-            "template": "reduce"
-        }
-    ],
-    "testz_2": [
-        {
-            "instr_name": "ptest_any",
-            "datatypes": "all_datatypes",
-            "template": "testz"
-        }
-    ],
-    "orb_k": [
-        {
-            "instr_name": "or",
-            "datatypes": "all_datatypes",
-            "template": "andb_k"
-        }
-    ],
-    "xorb_k": [
-        {
-            "instr_name": "eor",
-            "datatypes": "all_datatypes",
-            "template": "andb_k"
-        }
-    ],
-    "andnb_k": [
-        {
-            "instr_name": "bic",
-            "datatypes": "all_datatypes",
-            "template": "andb_k"
+            "template": "set1_k"
         }
     ]
 }

@@ -1,36 +1,4 @@
 {
-    "toreg-64": {
-        "format": "long",
-        "code": [
-            "%r<tp>% one  = %set1<tp>%(0xFFFFFFFFFFFFFFFF);",
-            "%r<tp>% zero = %set1<tp>%(0);",
-            "return %blend<tp>%(one, zero, m0);"
-        ]
-    },
-    "toreg-32": {
-        "format": "long",
-        "code": [
-            "%r<tp>% one  = %set1<tp>%(0xFFFFFFFF);",
-            "%r<tp>% zero = %set1<tp>%(0);",
-            "return %blend<tp>%(one, zero, m0);"
-        ]
-    },
-    "toreg-16": {
-        "format": "long",
-        "code": [
-            "%r<tp>% one  = %set1<tp>%(0xFFFF);",
-            "%r<tp>% zero = %set1<tp>%(0);",
-            "return %blend<tp>%(one, zero, m0);"
-        ]
-    },
-    "toreg-8": {
-        "format": "long",
-        "code": [
-            "%r<tp>% one  = %set1<tp>%(0xFF);",
-            "%r<tp>% zero = %set1<tp>%(0);",
-            "return %blend<tp>%(one, zero, m0);"
-        ]
-    },
     "and_all_float": {
         "format": "long",
         "code": [
@@ -40,20 +8,76 @@
             "return %cast<c:int|b:tp,tp>%(res);"
         ]
     },
-    "set_by_load": {
-        "format": "long",
-        "code": "return %load<tp>%(vals);"
+    "andb": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext}}_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), r0.r, r1.r);"
+        ]
     },
-    "set_k-64": {
+    "andb_k": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}{{ instr_name }}_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), m0.m, m1.m);"
+        ]
+    },
+    "cast_k": {
+        "format": "short",
+        "code": [
+            " m0.m;"
+        ]
+    },
+    "get": {
         "format": "long",
         "code": [
-            "%v<c:uint>% t[%N<tp>%];",
-            "for (int i = 0; i < %N<tp>%; ++i) {",
-            "\tt[i] = vals[i] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0;",
-            "}",
-            "%r<c:uint>% r0_32 = %set<c:uint>%((%v<c:uint>%*) t);",
-            "%r<c:uint>% r1_32 = %set1<c:uint>%((%v<c:uint>%) 0xFFFFFFFFFFFFFFFF);",
-            "return %cast_k<c:uint|b:tp,tp>%(%cmpeq<c:uint|b:tp>%(r0_32, r1_32));"
+            "%v<tp>% t[%N<tp>%];",
+            "%storeu<tp>%(t, r0);",
+            "return t[v0];"
+        ]
+    },
+    "get_k": {
+        "format": "long",
+        "code": [
+            "%v<tp>% tmp[%N<tp>%];",
+            "%r<tp>% rmsk =%toreg<tp>%(m0);",
+            "%storeu<tp>%(tmp, rmsk);",
+            "return (int32_t) tmp[v0];"
+        ]
+    },
+    "getfirst": {
+        "format": "long",
+        "code": [
+            "return %get<tp>%(r0, 0);"
+        ]
+    },
+    "hadd": {
+        "format": "long",
+        "code": [
+            "const %v<tp>% val = %hadd_to_scal<tp>%(r0);",
+            "return %set1<tp>%(val);"
+        ]
+    },
+    "load": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), ({{ isa_dt_par.to_ptr }}*) p0);"
+        ]
+    },
+    "notb_k": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}{{ instr_name }}_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), m0.m);"
+        ]
+    },
+    "reduce": {
+        "format": "long",
+        "code": [
+            "return {{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), r0.r);"
+        ]
+    },
+    "set_by_load": {
+        "format": "long",
+        "code": [
+            "return %load<tp>%(vals);"
         ]
     },
     "set_k-32": {
@@ -68,32 +92,46 @@
             "return %cast_k<c:uint|b:tp,tp>%(%cmpeq<c:uint|b:tp>%(r0_32, r1_32));"
         ]
     },
-    "hadd": {
+    "set_k-64": {
         "format": "long",
         "code": [
-            "const %v<tp>% val = %hadd_to_scal<tp>%(r0);",
-            "return %set1<tp>%(val);"
+            "%v<c:uint>% t[%N<tp>%];",
+            "for (int i = 0; i < %N<tp>%; ++i) {",
+            "\tt[i] = vals[i] ? (uint64_t)0xFFFFFFFFFFFFFFFF : (uint64_t)0;",
+            "}",
+            "%r<c:uint>% r0_32 = %set<c:uint>%((%v<c:uint>%*) t);",
+            "%r<c:uint>% r1_32 = %set1<c:uint>%((%v<c:uint>%) 0xFFFFFFFFFFFFFFFF);",
+            "return %cast_k<c:uint|b:tp,tp>%(%cmpeq<c:uint|b:tp>%(r0_32, r1_32));"
         ]
     },
-    "get": {
-        "format": "long",
+    "std_2_reg_in_no_msk": {
+        "format": "short",
         "code": [
-            "%v<tp>% t[%N<tp>%];",
-            "%storeu<tp>%(t, r0);",
-            "return t[v0];"
+            "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), r0.r, r1.r);"
         ]
     },
-    "getfirst": {
-        "format": "long",
-        "code": "return %get<tp>%(r0, 0);"
+    "std_2_reg_in_no_msk_z": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), r0.r, r1.r);"
+        ]
     },
-    "get_k": {
+    "std_3_reg_in_no_msk_z": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), r0.r, r1.r, r2.r);"
+        ]
+    },
+    "store": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), ({{ isa_dt_par.to_ptr }}*) p0, r0.r);"
+        ]
+    },
+    "testz": {
         "format": "long",
         "code": [
-            "%v<tp>% tmp[%N<tp>%];",
-            "%r<tp>% rmsk =%toreg<tp>%(m0);",
-            "%storeu<tp>%(tmp, rmsk);",
-            "return (int32_t) tmp[v0];"
+            "\treturn !{{ isa.prefix }}{{ instr_name }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), m0.m);"
         ]
     },
     "tomsk": {
@@ -101,6 +139,38 @@
         "code": [
             "%r<tp>% r1 = %set1<tp>%(0);",
             "return %cmpneq<tp>%(r1,r0);"
+        ]
+    },
+    "toreg-16": {
+        "format": "long",
+        "code": [
+            "%r<tp>% one  = %set1<tp>%(0xFFFF);",
+            "%r<tp>% zero = %set1<tp>%(0);",
+            "return %blend<tp>%(one, zero, m0);"
+        ]
+    },
+    "toreg-32": {
+        "format": "long",
+        "code": [
+            "%r<tp>% one  = %set1<tp>%(0xFFFFFFFF);",
+            "%r<tp>% zero = %set1<tp>%(0);",
+            "return %blend<tp>%(one, zero, m0);"
+        ]
+    },
+    "toreg-64": {
+        "format": "long",
+        "code": [
+            "%r<tp>% one  = %set1<tp>%(0xFFFFFFFFFFFFFFFF);",
+            "%r<tp>% zero = %set1<tp>%(0);",
+            "return %blend<tp>%(one, zero, m0);"
+        ]
+    },
+    "toreg-8": {
+        "format": "long",
+        "code": [
+            "%r<tp>% one  = %set1<tp>%(0xFF);",
+            "%r<tp>% zero = %set1<tp>%(0);",
+            "return %blend<tp>%(one, zero, m0);"
         ]
     }
 }

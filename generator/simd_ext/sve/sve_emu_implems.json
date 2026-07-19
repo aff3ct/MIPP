@@ -1,72 +1,230 @@
 {
-    "toreg": [
+    "add": [
         {
-            "datatypes": "all_64bit",
-            "template": "toreg-64"
-        },
-        {
-            "datatypes": "all_32bit",
-            "template": "toreg-32"
-        },
-        {
-            "datatypes": "all_16bit",
-            "template": "toreg-16"
-        },
-        {
-            "datatypes": "all_8bit",
-            "template": "toreg-8"
+            "instr_name": "add",
+            "datatypes": "all_datatypes",
+            "template": "std_2_reg_in_no_msk_z"
         }
     ],
     "andb": [
         {
-            "datatypes": "all_float",
-            "template": "and_all_float"
-        }
-    ],
-    "set": [
-        {
-            "datatypes": "all_datatypes",
-            "template": "set_by_load"
-        }
-    ],
-    "set_k": [
-        {
-            "datatypes": "all_64bit",
-            "template": "set_k-64"
+            "instr_name": "and",
+            "datatypes": "all_int_uint",
+            "template": "andb"
         },
         {
-            "datatypes": "all_32bit",
-            "template": "set_k-32"
+            "datatypes": "all_float",
+            "template": "and_all_float",
+            "instr_name": "andb"
         }
     ],
-    "hadd": [
+    "andb_k": [
         {
+            "instr_name": "and",
             "datatypes": "all_datatypes",
-            "template": "hadd"
+            "template": "andb_k"
+        }
+    ],
+    "andnb_k": [
+        {
+            "instr_name": "bic",
+            "datatypes": "all_datatypes",
+            "template": "andb_k"
+        }
+    ],
+    "cast_k": [
+        {
+            "instr_name": "",
+            "datatypes": "all_datatypes_cart_prod",
+            "template": "cast_k"
+        }
+    ],
+    "cmpeq": [
+        {
+            "instr_name": "cmpeq",
+            "datatypes": "all_datatypes",
+            "template": "std_2_reg_in_no_msk"
+        }
+    ],
+    "cmpneq": [
+        {
+            "instr_name": "cmpne",
+            "datatypes": "all_datatypes",
+            "template": "std_2_reg_in_no_msk"
+        }
+    ],
+    "div": [
+        {
+            "instr_name": "div",
+            "datatypes": "all_float",
+            "template": "std_2_reg_in_no_msk_z"
+        }
+    ],
+    "fmadd": [
+        {
+            "instr_name": "mla",
+            "datatypes": "all_float",
+            "template": "std_3_reg_in_no_msk_z"
         }
     ],
     "get": [
         {
             "datatypes": "all_datatypes",
-            "template": "get"
-        }
-    ],
-    "getfirst": [
-        {
-            "datatypes": "all_datatypes",
-            "template": "getfirst"
+            "template": "get",
+            "instr_name": "get"
         }
     ],
     "get_k": [
         {
             "datatypes": "all_datatypes",
-            "template": "get_k"
+            "template": "get_k",
+            "instr_name": "get_k"
+        }
+    ],
+    "getfirst": [
+        {
+            "datatypes": "all_datatypes",
+            "template": "getfirst",
+            "instr_name": "getfirst"
+        }
+    ],
+    "hadd": [
+        {
+            "datatypes": "all_datatypes",
+            "template": "hadd",
+            "instr_name": "hadd"
+        }
+    ],
+    "hadd_to_scal": [
+        {
+            "instr_name": "addv",
+            "datatypes": "all_datatypes",
+            "template": "reduce"
+        }
+    ],
+    "load": [
+        {
+            "instr_name": "ld1",
+            "datatypes": "all_datatypes",
+            "template": "load"
+        }
+    ],
+    "loadu": [
+        {
+            "instr_name": "ld1",
+            "datatypes": "all_datatypes",
+            "template": "load"
+        }
+    ],
+    "mul": [
+        {
+            "instr_name": "mul",
+            "datatypes": "all_datatypes",
+            "template": "std_2_reg_in_no_msk_z"
+        }
+    ],
+    "notb_k": [
+        {
+            "instr_name": "not",
+            "datatypes": "all_datatypes",
+            "template": "notb_k"
+        }
+    ],
+    "orb_k": [
+        {
+            "instr_name": "or",
+            "datatypes": "all_datatypes",
+            "template": "andb_k"
+        }
+    ],
+    "set": [
+        {
+            "datatypes": "all_datatypes",
+            "template": "set_by_load",
+            "instr_name": "set"
+        }
+    ],
+    "set_k": [
+        {
+            "datatypes": "all_64bit",
+            "template": "set_k-64",
+            "instr_name": "set_k"
+        },
+        {
+            "datatypes": "all_32bit",
+            "template": "set_k-32",
+            "instr_name": "set_k"
+        }
+    ],
+    "store": [
+        {
+            "instr_name": "st1",
+            "datatypes": "all_datatypes",
+            "template": "store"
+        }
+    ],
+    "storeu": [
+        {
+            "instr_name": "st1",
+            "datatypes": "all_datatypes",
+            "template": "store"
+        }
+    ],
+    "sub": [
+        {
+            "instr_name": "sub",
+            "datatypes": "all_datatypes",
+            "template": "std_2_reg_in_no_msk_z"
+        }
+    ],
+    "testz": [
+        {
+            "instr_name": "ptest_any",
+            "datatypes": "all_datatypes",
+            "template": "testz"
+        }
+    ],
+    "testz_2": [
+        {
+            "instr_name": "ptest_any",
+            "datatypes": "all_datatypes",
+            "template": "testz"
         }
     ],
     "tomsk": [
         {
             "datatypes": "all_datatypes",
-            "template": "tomsk"
+            "template": "tomsk",
+            "instr_name": "tomsk"
+        }
+    ],
+    "toreg": [
+        {
+            "datatypes": "all_64bit",
+            "template": "toreg-64",
+            "instr_name": "toreg"
+        },
+        {
+            "datatypes": "all_32bit",
+            "template": "toreg-32",
+            "instr_name": "toreg"
+        },
+        {
+            "datatypes": "all_16bit",
+            "template": "toreg-16",
+            "instr_name": "toreg"
+        },
+        {
+            "datatypes": "all_8bit",
+            "template": "toreg-8",
+            "instr_name": "toreg"
+        }
+    ],
+    "xorb_k": [
+        {
+            "instr_name": "eor",
+            "datatypes": "all_datatypes",
+            "template": "andb_k"
         }
     ]
 }
