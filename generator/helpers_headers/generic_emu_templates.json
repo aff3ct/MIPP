@@ -1,548 +1,227 @@
 {
-  "tpl_generic_emu": {
+    "blend": {
+        "format": "long",
+        "code": [
+            "%v<tp>% ptr1[%N<tp>%];",
+            "%v<tp>% ptr2[%N<tp>%];",
+            "%store<tp>%(ptr1, r0);",
+            "%store<tp>%(ptr2, r1);",
+            "for(unsigned i = 0; i < %N<tp>%; i++) {",
+            "\tptr1[i] = %get_k<tp>%(m0, i) ? ptr1[i] : ptr2[i];",
+            "}",
+            "return %load<tp>%(ptr1);"
+        ]
+    },
+    "cmpneq": {
+        "format": "long",
+        "code": "return %notb_k<tp>%(%cmpeq<tp>%(r0, r1));"
+    },
     "div2": {
-      "format": "long",
-      "code": [
-        "%r<tp>% tmp = %set1<tp>%(2);",
-        "%r<tp>% res = %div<tp>%(r0, tmp);",
-        "return res;"
-      ]
+        "format": "long",
+        "code": [
+            "%r<tp>% tmp = %set1<tp>%(2);",
+            "%r<tp>% res = %div<tp>%(r0, tmp);",
+            "return res;"
+        ]
     },
     "div4": {
-      "format": "long",
-      "code": [
-        "%r<tp>% tmp = %set1<tp>%(4);",
-        "%r<tp>% res = %div<tp>%(r0, tmp);",
-        "return res;"
-      ]
+        "format": "long",
+        "code": [
+            "%r<tp>% tmp = %set1<tp>%(4);",
+            "%r<tp>% res = %div<tp>%(r0, tmp);",
+            "return res;"
+        ]
     },
     "fmadd": {
-      "format": "long",
-      "code": [
-        "%r<tp>% res = %mul<tp>%(r0, r1);",
-        "res = %add<tp>%(res, r2);",
-        "return res;"
-      ]
+        "format": "long",
+        "code": [
+            "%r<tp>% rmul = %mul<tp>%(r0, r1);",
+            "%r<tp>% res = %add<tp>%(rmul, r2);",
+            "return res;"
+        ]
     },
-    "blend": {
-      "format": "long",
-      "code": [
-        "%v<tp>% ptr1[%N<tp>%];",
-        "%v<tp>% ptr2[%N<tp>%];",
-        "%store<tp>%(ptr1, r0);",
-        "%store<tp>%(ptr2, r1);",
-        "for(unsigned i = 0; i < %N<tp>%; i++) {",
-        "\tptr1[i] = %get_k<tp>%(m0, i) ? ptr1[i] : ptr2[i];",
-        "}",
-        "return %load<tp>%(ptr1);"
-      ]
-    }
-  },
-  "tpl_mask_generic_emu": {
-    "ret_reg_2args_reg": {
-      "format": "long",
-      "code": [
-        "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);"
-      ]
+    "fmsub": {
+        "format": "long",
+        "code": [
+            "%r<tp>% rmul = %mul<tp>%(r0, r1);",
+            "%r<tp>% res = %sub<tp>%(rmul, r2);",
+            "return res;"
+        ]
     },
-    "ret_reg_3args_reg": {
-      "format": "long",
-      "code": [
-        "%r<tp>% op = %{{func_name}}<tp>%( r0, r1, r2);"
-      ]
+    "fnmadd": {
+        "format": "long",
+        "code": [
+            "%r<tp>% rmul = %mul<tp>%(r0, r1);",
+            "%r<tp>% tmp = %set0<tp>%();",
+            "tmp = %sub<tp>%(tmp, rmul);",
+            "%r<tp>% res = %add<tp>%(tmp, r2);",
+            "return res;"
+        ]
     },
-    "ret_reg_1arg_reg": {
-      "format": "long",
-      "code": [
-        "%r<tp>% op = %{{func_name}}<tp>%(r0);"
-      ]
+    "fnmsub": {
+        "format": "long",
+        "code": [
+            "%r<tp>% rmul = %mul<tp>%(r0, r1);",
+            "%r<tp>% tmp = %set0<tp>%();",
+            "tmp = %sub<tp>%(tmp, rmul);",
+            "%r<tp>% res = %sub<tp>%(tmp, r2);",
+            "return res;"
+        ]
     },
-    "load_msks": {
-      "format": "long",
-      "code": [
-        "// we want to guarantee that load doesn't touch the memory of masked out elems",
-        "%v<tp>% buff[%N<tp>%];",
-        "for(unsigned i = 0; i < %N<tp>%; i++){",
-        "\tif(%get_k<tp>%(m0, i))",
-        "\t\tbuff[i] = p0[i];",
-        "\telse",
-        "\t\tbuff[i] = %get<tp>%(rsrc, i);",
-        "}",
-        "return %{{func_name}}<tp>%(buff);"
-      ]
+    "get": {
+        "format": "long",
+        "code": [
+            "%v<tp>% t[%N<tp>%];",
+            "%storeu<tp>%(t, r0);",
+            "return t[v0];"
+        ]
     },
-    "load_mskz": {
-      "format": "long",
-      "code": [
-        "// we want to guarantee that load doesn't touch the memory of masked out elems",
-        "%v<tp>% buff[%N<tp>%];",
-        "for (unsigned i = 0; i < %N<tp>%; i++) {",
-        "\tif (%get_k<tp>%(m0, i))",
-        "\t\tbuff[i] = p0[i];",
-        "\telse",
-        "\t\tbuff[i] = 0;",
-        "}",
-        "return %{{func_name}}<tp>%(buff);"
-      ]
+    "get_k": {
+        "format": "long",
+        "code": "return %get<tp>%(%toreg<tp>%(m0), v0);"
+    },
+    "max_emu": {
+        "format": "long",
+        "code": "return %blend<tp>%(r0, r1, %cmpgt<tp>%(r0, r1));"
+    },
+    "min_emu": {
+        "format": "long",
+        "code": "return %blend<tp>%(r0, r1, %cmplt<tp>%(r0, r1));"
+    },
+    "msb-16": {
+        "format": "long",
+        "code": [
+            "%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%((int16_t)0x8000));",
+            "return %andb<tp>%(r0, rm);"
+        ]
+    },
+    "msb-32": {
+        "format": "long",
+        "code": [
+            "%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%((int32_t)0x80000000));",
+            "return %andb<tp>%(r0, rm);"
+        ]
+    },
+    "msb-64": {
+        "format": "long",
+        "code": [
+            "%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%((int64_t)0x8000000000000000));",
+            "return %andb<tp>%(r0, rm);"
+        ]
+    },
+    "msb-8": {
+        "format": "long",
+        "code": [
+            "%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%((int8_t)0x80));",
+            "return %andb<tp>%(r0, rm);"
+        ]
+    },
+    "notb": {
+        "format": "long",
+        "code": [
+            "%r<c:int>% ones = %set1<c:int>%(-1);",
+            "%r<c:int>% r0i = %cast<tp,c:int>%(r0);",
+            "return %cast<c:int,tp>%(%andnb<c:int>%(r0i, ones));"
+        ]
+    },
+    "notb_k": {
+        "format": "long",
+        "code": [
+            "%r<c:int>% ones = %set1<c:int>%(-1);",
+            "%r<c:int>% r0i = %cast<tp,c:int>%(%toreg<tp>%(m0));",
+            "return %tomsk<tp>%(%cast<c:int,tp>%(%andnb<c:int>%(r0i, ones)));"
+        ]
+    },
+    "round_int": {
+        "format": "short",
+        "code": "r0.r;"
     },
     "set": {
-      "format": "long",
-      "code": [
-        "%r<tp>% op = %set<tp>%(vals);"
-      ]
-    },
-    "set1": {
-      "format": "long",
-      "code": [
-        "%r<tp>% op = %set1<tp>%(v0);"
-      ]
+        "format": "long",
+        "code": "return %loadu<tp>%(vals);"
     },
     "set0": {
-      "format": "long",
-      "code": [
-        "%r<tp>% op = %set0<tp>%();"
-      ]
+        "format": "long",
+        "code": "return %set1<tp>%(0);"
     },
-    "ret_msk_2args_reg": {
-      "format": "long",
-      "code": [
-        "%m<tp>% op = %{{func_name}}<tp>%(r0, r1);"
-      ]
+    "set0_k": {
+        "format": "long",
+        "code": "return %tomsk<tp>%(%set1<tp>%(0));"
     },
-    "store_msk": {
-      "format": "long",
-      "code": [
-        "for (unsigned i = 0; i < %N<tp>%; i++) {",
-        "\tif (%get_k<tp>%(m0, i))",
-        "\t\tp0[i] = %get<tp>%(r0, i);",
-        "}"
-      ]
+    "set1_k-16": {
+        "format": "long",
+        "code": [
+            "%r<c:int>% tmp1 = %set1<c:int>%(v0 ? (int16_t)0xFFFF : (int16_t)0);",
+            "%r<tp>% tmp2 = %cast<c:int,tp>%(tmp1);",
+            "return %tomsk<tp>%(tmp2);"
+        ]
     },
-    "store_mskz": {
-      "format": "long",
-      "code": [
-        "for(unsigned i = 0; i < %N<tp>%; i++) {",
-        "\tif (%get_k<tp>%(m0, i))",
-        "\t\tp0[i] = %get<tp>%(r0, i);",
-        "\telse",
-        "\t\tp0[i] = 0;",
-        "}"
-      ]
+    "set1_k-32": {
+        "format": "long",
+        "code": [
+            "%r<c:int>% tmp1 = %set1<c:int>%(v0 ? (int32_t)0xFFFFFFFF : (int32_t)0);",
+            "%r<tp>% tmp2 = %cast<c:int,tp>%(tmp1);",
+            "return %tomsk<tp>%(tmp2);"
+        ]
     },
-    "storeu_msk": {
-      "format": "long",
-      "code": [
-        "%v<tp>% buff[%N<tp>%];",
-        "%v<tp>% mask_buff[%N<tp>%];",
-        "%r<tp>% msk_reg = %toreg<tp>%(m0);",
-        "",
-        "%storeu<tp>%(buff, r0);",
-        "%storeu<tp>%(mask_buff, msk_reg);",
-        "for (unsigned i = 0; i < %N<tp>%; i++)",
-        "\tif (mask_buff[i])",
-        "\t\tp0[i] = buff[i];"
-      ]
+    "set1_k-64": {
+        "format": "long",
+        "code": [
+            "%r<c:int>% tmp1 = %set1<c:int>%(v0 ? (int64_t)0xFFFFFFFFFFFFFFFF : (int64_t)0);",
+            "%r<tp>% tmp2 = %cast<c:int,tp>%(tmp1);",
+            "return %tomsk<tp>%(tmp2);"
+        ]
     },
-    "storeu_mskz": {
-      "format": "long",
-      "code": [
-        "%v<tp>% buff[%N<tp>%];",
-        "%v<tp>% mask_buff[%N<tp>%];",
-        "%r<tp>% msk_reg = %toreg<tp>%(m0);",
-        "",
-        "%storeu<tp>%(buff, r0);",
-        "%storeu<tp>%(mask_buff, msk_reg);",
-        "for (unsigned i = 0; i < %N<tp>%; i++)",
-        "\tif (mask_buff[i])",
-        "\t\tp0[i] = buff[i];",
-        "\telse",
-        "\t\tp0[i] = 0;"
-      ]
+    "set1_k-8": {
+        "format": "long",
+        "code": [
+            "%r<c:int>% tmp1 = %set1<c:int>%(v0 ? (int8_t)0xFF : (int8_t)0);",
+            "%r<tp>% tmp2 = %cast<c:int,tp>%(tmp1);",
+            "return %tomsk<tp>%(tmp2);"
+        ]
     },
-    "cmp_2args": {
-      "format": "long",
-      "code": [
-        "%m<tp>% op = %{{func_name}}<tp>%(r0, r1);",
-        "%m<tp>% res = %andb_k<tp>%(op, m0);",
-        "return res;"
-      ]
+    "set_k-16": {
+        "format": "long",
+        "code": [
+            "uint16_t tab[%N<tp>%] = {",
+            "\tvals[ 0] ? (uint16_t)0xFFFFU : (uint16_t)0, vals[ 1] ? (uint16_t)0xFFFFU : (uint16_t)0,",
+            "\tvals[ 2] ? (uint16_t)0xFFFFU : (uint16_t)0, vals[ 3] ? (uint16_t)0xFFFFU : (uint16_t)0,",
+            "\tvals[ 4] ? (uint16_t)0xFFFFU : (uint16_t)0, vals[ 5] ? (uint16_t)0xFFFFU : (uint16_t)0,",
+            "\tvals[ 6] ? (uint16_t)0xFFFFU : (uint16_t)0, vals[ 7] ? (uint16_t)0xFFFFU : (uint16_t)0 };",
+            "return %tomsk<tp>%(%cast<c:uint,tp>%(%set<c:uint>%(tab)));"
+        ]
     },
-    "hadd_maskz": {
-      "format": "long",
-      "code": [
-        "%r<tp>% zero = %set0<tp>%();",
-        "%r<tp>% blended = %blend<tp>%(r0, zero, m0);",
-        "%v<tp>% op = %hadd<tp>%(blended);",
-        "return op;"
-      ]
+    "set_k-32": {
+        "format": "long",
+        "code": [
+            "uint32_t tab[%N<tp>%] = {",
+            "\tvals[0] ? (uint32_t)0xFFFFFFFFU : (uint32_t)0, vals[1] ? (uint32_t)0xFFFFFFFFU : (uint32_t)0,",
+            "\tvals[2] ? (uint32_t)0xFFFFFFFFU : (uint32_t)0, vals[3] ? (uint32_t)0xFFFFFFFFU : (uint32_t)0 };",
+            "return %tomsk<tp>%(%cast<c:uint,tp>%(%set<c:uint>%(tab)));"
+        ]
     },
-    "hmul_maskz": {
-      "format": "long",
-      "code": [
-        "%r<tp>% ones = %set1<tp>%(1);",
-        "%r<tp>% blended = %blend<tp>%(r0, ones, m0);",
-        "%v<tp>% op = %hmul<tp>%(blended);",
-        "return op;"
-      ]
+    "set_k-64": {
+        "format": "long",
+        "code": [
+            "uint64_t tab[%N<tp>%] = {",
+            "\tvals[0] ? (uint64_t)0xFFFFFFFFFFFFFFFFU : (uint64_t)0,",
+            "\tvals[1] ? (uint64_t)0xFFFFFFFFFFFFFFFFU : (uint64_t)0 };",
+            "return %tomsk<tp>%(%cast<c:uint,tp>%(%set<c:uint>%(tab)));"
+        ]
     },
-    "hmin_maskz_u64": {
-      "format": "long",
-      "code": [
-        "%r<tp>% max = %set1<tp>%(UINT64_MAX);",
-        "%r<tp>% blended = %blend<tp>%(r0, max, m0);",
-        "%v<tp>% op = %hmin<tp>%(blended);",
-        "return op;"
-      ]
+    "set_k-8": {
+        "format": "long",
+        "code": [
+            "uint8_t tab[%N<tp>%] = {",
+            "\tvals[ 0] ? (uint8_t)0xFFU : (uint8_t)0, vals[ 1] ? (uint8_t)0xFFU : (uint8_t)0, vals[ 2] ? (uint8_t)0xFFU : (uint8_t)0, (uint8_t)vals[ 3] ? (uint8_t)0xFFU : (uint8_t)0,",
+            "\tvals[ 4] ? (uint8_t)0xFFU : (uint8_t)0, vals[ 5] ? (uint8_t)0xFFU : (uint8_t)0, vals[ 6] ? (uint8_t)0xFFU : (uint8_t)0, (uint8_t)vals[ 7] ? (uint8_t)0xFFU : (uint8_t)0,",
+            "\tvals[ 8] ? (uint8_t)0xFFU : (uint8_t)0, vals[ 9] ? (uint8_t)0xFFU : (uint8_t)0, vals[10] ? (uint8_t)0xFFU : (uint8_t)0, (uint8_t)vals[11] ? (uint8_t)0xFFU : (uint8_t)0,",
+            "\tvals[12] ? (uint8_t)0xFFU : (uint8_t)0, vals[13] ? (uint8_t)0xFFU : (uint8_t)0, vals[14] ? (uint8_t)0xFFU : (uint8_t)0, (uint8_t)vals[15] ? (uint8_t)0xFFU : (uint8_t)0 };",
+            "return %tomsk<tp>%(%cast<c:uint,tp>%(%set<c:uint>%(tab)));"
+        ]
     },
-    "hmin_maskz_u32": {
-      "format": "long",
-      "code": [
-        "%r<tp>% max = %set1<tp>%(UINT32_MAX);",
-        "%r<tp>% blended = %blend<tp>%(r0, max, m0);",
-        "%v<tp>% op = %hmin<tp>%(blended);",
-        "return op;"
-      ]
-    },
-    "hmin_maskz_u16": {
-      "format": "long",
-      "code": [
-        "%r<tp>% max = %set1<tp>%(UINT16_MAX);",
-        "%r<tp>% blended = %blend<tp>%(r0, max, m0);",
-        "%v<tp>% op = %hmin<tp>%(blended);",
-        "return op;"
-      ]
-    },
-    "hmin_maskz_u8": {
-      "format": "long",
-      "code": [
-        "%r<tp>% max = %set1<tp>%(UINT8_MAX);",
-        "%r<tp>% blended = %blend<tp>%(r0, max, m0);",
-        "%v<tp>% op = %hmin<tp>%(blended);",
-        "return op;"
-      ]
-    },
-    "hmin_maskz_f32": {
-      "format": "long",
-      "code": [
-        "%r<tp>% max = %set1<tp>%(FLT_MAX);",
-        "%r<tp>% blended = %blend<tp>%(r0, max, m0);",
-        "%v<tp>% op = %hmin<tp>%(blended);",
-        "return op;"
-      ]
-    },
-    "hmin_maskz_f64": {
-      "format": "long",
-      "code": [
-        "%r<tp>% max = %set1<tp>%(DBL_MAX);",
-        "%r<tp>% blended = %blend<tp>%(r0, max, m0);",
-        "%v<tp>% op = %hmin<tp>%(blended);",
-        "return op;"
-      ]
-    },
-    "hmin_maskz_i64": {
-      "format": "long",
-      "code": [
-        "%r<tp>% max = %set1<tp>%(INT64_MAX);",
-        "%r<tp>% blended = %blend<tp>%(r0, max, m0);",
-        "%v<tp>% op = %hmin<tp>%(blended);",
-        "return op;"
-      ]
-    },
-    "hmin_maskz_i32": {
-      "format": "long",
-      "code": [
-        "%r<tp>% max = %set1<tp>%(INT32_MAX);",
-        "%r<tp>% blended = %blend<tp>%(r0, max, m0);",
-        "%v<tp>% op = %hmin<tp>%(blended);",
-        "return op;"
-      ]
-    },
-    "hmin_maskz_i16": {
-      "format": "long",
-      "code": [
-        "%r<tp>% max = %set1<tp>%(INT16_MAX);",
-        "%r<tp>% blended = %blend<tp>%(r0, max, m0);",
-        "%v<tp>% op = %hmin<tp>%(blended);",
-        "return op;"
-      ]
-    },
-    "hmin_maskz_i8": {
-      "format": "long",
-      "code": [
-        "%r<tp>% max = %set1<tp>%(INT8_MAX);",
-        "%r<tp>% blended = %blend<tp>%(r0, max, m0);",
-        "%v<tp>% op = %hmin<tp>%(blended);",
-        "return op;"
-      ]
-    },
-    "hmax_maskz_u": {
-      "format": "long",
-      "code": [
-        "%r<tp>% min = %set1<tp>%(0u);",
-        "%r<tp>% blended = %blend<tp>%(r0, min, m0);",
-        "%v<tp>% op = %hmax<tp>%(blended);",
-        "return op; "
-      ]
-    },
-    "hmax_maskz_f32": {
-      "format": "long",
-      "code": [
-        "%r<tp>% min = %set1<tp>%(-FLT_MAX);",
-        "%r<tp>% blended = %blend<tp>%(r0, min, m0);",
-        "%v<tp>% op = %hmax<tp>%(blended);",
-        "return op;"
-      ]
-    },
-    "hmax_maskz_f64": {
-      "format": "long",
-      "code": [
-        "%r<tp>% min = %set1<tp>%(-DBL_MAX);",
-        "%r<tp>% blended = %blend<tp>%(r0, min, m0);",
-        "%v<tp>% op = %hmax<tp>%(blended);",
-        "return op;"
-      ]
-    },
-    "hmax_maskz_i64": {
-      "format": "long",
-      "code": [
-        "%r<tp>% min = %set1<tp>%(INT64_MIN);",
-        "%r<tp>% blended = %blend<tp>%(r0, min, m0);",
-        "%v<tp>% op = %hmax<tp>%(blended);",
-        "return op;"
-      ]
-    },
-    "hmax_maskz_i32": {
-      "format": "long",
-      "code": [
-        "%r<tp>% min = %set1<tp>%(INT32_MIN);",
-        "%r<tp>% blended = %blend<tp>%(r0, min, m0);",
-        "%v<tp>% op = %hmax<tp>%(blended);",
-        "return op;"
-      ]
-    },
-    "hmax_maskz_i16": {
-      "format": "long",
-      "code": [
-        "%r<tp>% min = %set1<tp>%(INT16_MIN);",
-        "%r<tp>% blended = %blend<tp>%(r0, min, m0);",
-        "%v<tp>% op = %hmax<tp>%(blended);",
-        "return op;"
-      ]
-    },
-    "hmax_maskz_i8": {
-      "format": "long",
-      "code": [
-        "%r<tp>% min = %set1<tp>%(INT8_MIN);",
-        "%r<tp>% blended = %blend<tp>%(r0, min, m0);",
-        "%v<tp>% op = %hmax<tp>%(blended);",
-        "return op;"
-      ]
-    },
-    "ret_reg_2args_reg_val": {
-      "format": "long",
-      "code": [
-        "%r<tp>% op = %{{func_name}}<tp>%(r0, v0);"
-      ]
+    "set_k-xxf": {
+        "format": "long",
+        "code": "return %cast_k<c:int,tr>%(%set_k<c:int>%(vals));"
     }
-  },
-  "tpl_horiz_lmul_generic_emu": {
-    "tpl_set": {
-      "format": "long",
-      "code": [
-        "{% if lmul == 1 %}",
-        "%r<tp>% res = %set<tp>%(vals);",
-        "return res;",
-        "{% else %}",
-        "// pass first half of the vector to ",
-        "%r<tp>% res;",
-        "res.r1 = %set<c:tp|b:tp|m:tp/2>%(vals);",
-        "const %v<tp>% *ptr = vals + %N<tp>% / 2;",
-        "res.r2 = %set<c:tp|b:tp|m:tp/2>%(ptr);",
-        "return res;",
-        "{% endif %}"
-      ]
-    },
-    "tpl_get": {
-      "format": "long",
-      "code": [
-        "{% if lmul == 1 %}",
-        "return %get<tp>%(r0, v0);",
-        "{% else %}",
-        "if(v0 < %N<tp>% / 2)",
-        "\treturn %get<c:tp|b:tp|m:tp/2>%(r0.r1, v0);",
-        "else {",
-        "\t%v<tp>% tmp = v0 - %N<tp>% / 2;",
-        "\treturn %get<c:tp|b:tp|m:tp/2>%(r0.r2, tmp);",
-        "}",
-        "{% endif %}"
-      ]
-    },
-    "tpl_get_k": {
-      "format": "long",
-      "code": [
-        "{% if lmul == 1 %}",
-        "return %get_k<tp>%(m0, v0);",
-        "{% else %}",
-        "if(v0 < %N<tp>% / 2)",
-        "\treturn %get_k<c:tp|b:tp|m:tp/2>%(m0.m1, v0);",
-        "else {",
-        "\t%v<tp>% tmp = v0 - %N<tp>% / 2;",
-        "\treturn %get_k<c:tp|b:tp|m:tp/2>%(m0.m2, tmp);",
-        "}",
-        "{% endif %}"
-      ]
-    },
-    "tpl_getfirst": {
-      "format": "long",
-      "code": [
-        "{% if lmul == 1 %}",
-        "return %getfirst<tp>%(r0);",
-        "{% else %}",
-        "return %getfirst<c:tp|b:tp|m:tp/2>%(r0.r1);",
-        "{% endif %}"
-      ]
-    },
-    "tpl_testz": {
-      "format": "long",
-      "code": [
-        "{% if lmul == 1 %}",
-        "return %testz<tp>%(m0, m1);",
-        "{% else %}",
-        "return %testz<c:tp|b:tp|m:tp/2>%(m0.m1, m0.m2) && %testz<c:tp|b:tp|m:tp/2>%(m1.m1, m1.m2);",
-        "{% endif %}"
-      ]
-    },
-    "tpl_testz_2": {
-      "format": "long",
-      "code": [
-        "{% if lmul == 1 %}",
-        "return %testz_2<tp>%(m0);",
-        "{% else %}",
-        "return %testz_2<c:tp|b:tp|m:tp/2>%(m0.m1) && %testz_2<c:tp|b:tp|m:tp/2>%(m0.m2);",
-        "{% endif %}"
-      ]
-    },
-    "hadd_to_scal": {
-      "format": "long",
-      "code": [
-        "{% if lmul == 1 %}",
-        "return %hadd_to_scal<tp>%(r0);",
-        "{% else %}",
-        "%v<tp>% v0 = %hadd_to_scal<c:tp|b:tp|m:tp/2>%(r0.r1);",
-        "%v<tp>% v1 = %hadd_to_scal<c:tp|b:tp|m:tp/2>%(r0.r2);\t",
-        "return v0 + v1;",
-        "{% endif %}"
-      ]
-    },
-    "hadd": {
-      "format": "long",
-      "code": [
-        "{% if lmul == 1 %}",
-        "return %hadd<tp>%(r0);",
-        "{% else %}",
-        "%v<tp>% v0 = %hadd<c:tp|b:tp|m:tp/2>%(r0.r1);",
-        "%v<tp>% v1 = %hadd<c:tp|b:tp|m:tp/2>%(r0.r2);\t",
-        "return v0 + v1;",
-        "{% endif %}"
-      ]
-    },
-    "hadds_to_scal": {
-      "format": "long",
-      "code": [
-        "{% if lmul == 1 %}",
-        "return %hadds_to_scal<tp>%(r0);",
-        "{% else %}",
-        "%v<tp>% v0 = %hadds_to_scal<c:tp|b:tp|m:tp/2>%(r0.r1);",
-        "%v<tp>% v1 = %hadds_to_scal<c:tp|b:tp|m:tp/2>%(r0.r2);\t",
-        "return v0 + v1;",
-        "{% endif %}"
-      ]
-    },
-    "hadds": {
-      "format": "long",
-      "code": [
-        "{% if lmul == 1 %}",
-        "return %hadds<tp>%(r0);",
-        "{% else %}",
-        "%v<tp>% v0 = %hadds<c:tp|b:tp|m:tp/2>%(r0.r1);",
-        "%v<tp>% v1 = %hadds<c:tp|b:tp|m:tp/2>%(r0.r2);\t",
-        "return v0 + v1;",
-        "{% endif %}"
-      ]
-    },
-    "hmul": {
-      "format": "long",
-      "code": [
-        "{% if lmul == 1 %}",
-        "return %hmul<tp>%(r0);",
-        "{% else %}",
-        "%v<tp>% v1, v2;",
-        "v1 = %hmul<c:tp|b:tp|m:tp/2>%(r0.r1);",
-        "v2 = %hmul<c:tp|b:tp|m:tp/2>%(r0.r2);\t",
-        "return v1 * v2;",
-        "{% endif %}"
-      ]
-    },
-    "hmin": {
-      "format": "long",
-      "code": [
-        "{% if lmul == 1 %}",
-        "return %hmin<tp>%(r0);",
-        "{% else %}",
-        "%v<tp>% v1, v2;",
-        "v1 = %hmin<c:tp|b:tp|m:tp/2>%(r0.r1);",
-        "v2 = %hmin<c:tp|b:tp|m:tp/2>%(r0.r2);",
-        "return v1 < v2 ? v1 : v2;",
-        "{% endif %}"
-      ]
-    },
-    "hmax": {
-      "format": "long",
-      "code": [
-        "{% if lmul == 1 %}",
-        "return %hmax<tp>%(r0);",
-        "{% else %}",
-        "%v<tp>% v1, v2;",
-        "v1 = %hmax<c:tp|b:tp|m:tp/2>%(r0.r1);",
-        "v2 = %hmax<c:tp|b:tp|m:tp/2>%(r0.r2);",
-        "return v1 > v2 ? v1 : v2;",
-        "{% endif %}"
-      ]
-    },
-    "set_k": {
-      "format": "long",
-      "code": [
-        "{% if lmul == 1 %}",
-        "%m<tp>% res = %set_k<tp>%(vals);",
-        "return res;",
-        "{% else %}",
-        "// pass first half of the vector to ",
-        "%m<tp>% res;",
-        "res.m1 = %set_k<c:tp|b:tp|m:tp/2>%(vals);",
-        "const int32_t *ptr = vals + %N<tp>% / 2;",
-        "res.m2 = %set_k<c:tp|b:tp|m:tp/2>%(ptr);",
-        "return res;",
-        "{% endif %}"
-      ]
-    },
-    "wcvt": {
-      "format": "long",
-      "code": [
-        "{% if lmul == 1 %}",
-        "return %wcvt<tp>%(r0);",
-        "{% else %}",
-        "// scalar backup bc we would need mipp::high to deal with it",
-        "%v<tp>% tmp_p[%N<tp>%];",
-        "%store<tp>%(&tmp_p[0], r0);",
-        "%v<tr>% tmp_r[%N<tr>%];",
-        "for (int i = 0; i < %N<tr>%; i++)",
-        "\ttmp_r[i] = tmp_p[i];",
-        "return %load<tr>%(&tmp_r[0]);",
-        "{% endif %}"
-      ]
-    }
-  },
-  "SNIPPET_END_MSK": "\n\t%r<tp>% res = %blend<tp>%(op, r0, m0);\n\treturn res;",
-  "SNIPPET_END_MSKZ": "\n\t%r<tp>% tmp = %toreg<tp>%(m0);\n\t%r<tp>% res = %andb<tp>%(op, tmp);\n\treturn res;",
-  "SNIPPET_END_MSKS": "\n\t%r<tp>% res = %blend<tp>%(op, rsrc, m0);\n\treturn res;"
 }

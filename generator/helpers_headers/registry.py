@@ -149,19 +149,50 @@ def _load_generic_emu():
 
     # Load templates
     templates_path = os.path.join(current_dir, "generic_emu_templates.json")
+    templates_lmulh_path = os.path.join(current_dir, "generic_emu_templates_lmulh.json")
+    templates_mask_path = os.path.join(current_dir, "generic_emu_templates_mask.json")
+    
     with open(templates_path, "r") as f:
-        data_templates = json.load(f)
+        tpl_std = json.load(f)
+    with open(templates_lmulh_path, "r") as f:
+        tpl_lmulh = json.load(f)
+    with open(templates_mask_path, "r") as f:
+        tpl_mask = json.load(f)
+        
+    data_templates = {
+        "tpl_generic_emu": tpl_std,
+        "tpl_horiz_lmul_generic_emu": tpl_lmulh,
+        "tpl_mask_generic_emu": tpl_mask
+    }
 
     # Load implementations
     implems_path = os.path.join(current_dir, "generic_emu_implems.json")
+    implems_lmulh_path = os.path.join(current_dir, "generic_emu_implems_lmulh.json")
+    implems_mask_path = os.path.join(current_dir, "generic_emu_implems_mask.json")
+    
     with open(implems_path, "r") as f:
-        data_implems = json.load(f)
+        impl_std = json.load(f)
+    with open(implems_lmulh_path, "r") as f:
+        impl_lmulh = json.load(f)
+    with open(implems_mask_path, "r") as f:
+        impl_mask = json.load(f)
+        
+    data_implems = {
+        "implems_generic_emu": impl_std,
+        "implems_horiz_lmul_generic_emu": impl_lmulh,
+        "implems_mask_generic_emu": impl_mask
+    }
 
     from input_validation import (
         validate_templates_config, validate_implems_config, validate_template_references
     )
-    validate_templates_config(data_templates, templates_path)
-    validate_implems_config(data_implems, implems_path)
+    # Validate each loaded split file
+    validate_templates_config(tpl_std, templates_path)
+    validate_templates_config(tpl_lmulh, templates_lmulh_path)
+    validate_templates_config(tpl_mask, templates_mask_path)
+    validate_implems_config(impl_std, implems_path)
+    validate_implems_config(impl_lmulh, implems_lmulh_path)
+    validate_implems_config(impl_mask, implems_mask_path)
     
     # Verify template references across section tables
     flat_implems = {}

@@ -42,7 +42,19 @@
         "level": { "type": "integer" },
         "version": { "type": "string", "enum": ["mask", "maskz", "masks", "horiz_lmul"] },
         "type": { "type": "string", "enum": ["native", "emulated"] },
-        "dependencies": { "type": "array", "items": { "type": "string" } }
+        "dependencies": { "type": "array", "items": { "type": "string" } },
+        "preferred_simd_ext": {
+          "anyOf": [
+            { "type": "string" },
+            { "type": "array", "items": { "type": "string" } }
+          ]
+        },
+        "simd_size": {
+          "anyOf": [
+            { "type": "integer" },
+            { "type": "array", "items": { "type": "integer" } }
+          ]
+        }
       },
       "required": ["datatypes"],
       "anyOf": [

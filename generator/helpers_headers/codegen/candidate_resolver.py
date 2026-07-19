@@ -397,7 +397,19 @@ def resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators
                     "reqs": {}
                 })
                 
-                candidates_map[key].sort(key=lambda c: c["level"])
+                def get_cand_key(c):
+                    lvl = c.get("level", 2)
+                    pref = []
+                    if "ff" in c:
+                        pref = c["ff"].get("preferred_simd_ext", [])
+                    if isinstance(pref, str):
+                        pref = [pref]
+                    if pref:
+                        pref_score = 0 if isa["name"] in pref else 2
+                    else:
+                        pref_score = 1
+                    return (lvl, pref_score)
+                candidates_map[key].sort(key=get_cand_key)
                 
     isa_known_true = [isa["define"]] if "define" in isa and isa["define"] else []
 
@@ -453,6 +465,35 @@ def resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators
                     continue
                 if cand["level"] > max_level:
                     continue
+                    
+                # Filter by SIMD size if specified
+                cand_simd_size = None
+                if "ff" in cand:
+                    cand_simd_size = cand["ff"].get("simd_size", None)
+                if cand_simd_size is not None:
+                    isa_size = isa.get("size", None)
+                    if isa_size is None or isinstance(isa_size, list):
+                        active_size = None
+                    else:
+                        try:
+                            active_size = int(isa_size)
+                            if lmul is not None and lmul != 0:
+                                if lmul > 0:
+                                    active_size *= lmul
+                                else:
+                                    active_size //= abs(lmul)
+                        except (ValueError, TypeError):
+                            active_size = None
+                    
+                    if active_size is None:
+                        continue
+                    
+                    if isinstance(cand_simd_size, list):
+                        if active_size not in cand_simd_size:
+                            continue
+                    else:
+                        if active_size != int(cand_simd_size):
+                            continue
                     
                 cand_if = ""
                 if cand["type"] in ["native_or_emu", "generic_emu", "auto_scalar"]:

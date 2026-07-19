@@ -3,7 +3,19 @@ import os
 import sys
 from jsonschema import Draft7Validator, validators
 
-SHOW_AUDIT_WARNINGS = False
+ACTIVE_AUDITS = set()
+
+try:
+    import colorama
+    colorama.init(autoreset=True)
+    from colorama import Fore
+    HAS_COLOR = True
+except ImportError:
+    HAS_COLOR = False
+    class DummyFore:
+        BLUE = ""
+        YELLOW = ""
+    Fore = DummyFore()
 
 def extend_with_default(validator_class):
     validate_properties = validator_class.VALIDATORS["properties"]
@@ -205,7 +217,7 @@ def validate_logical_integrity(isa, implems, implems_emu):
     audit_and_validate_implementation_levels(isa, implems, implems_emu)
 
 def audit_and_validate_implementation_levels(isa, implems, implems_emu):
-    if not SHOW_AUDIT_WARNINGS:
+    if not ACTIVE_AUDITS:
         return
     import re
     import sys
@@ -401,12 +413,12 @@ def audit_and_validate_implementation_levels(isa, implems, implems_emu):
             if expected != detected:
                 discrepancies.append((func, choice, "emu_implems", expected, detected, deps))
 
-    if discrepancies:
-        print(f"Warning: Level audit found {len(discrepancies)} implementation placement/level discrepancies for ISA '{isa['name']}':", file=sys.stderr)
+    if "levels" in ACTIVE_AUDITS and discrepancies:
+        print(Fore.BLUE + f"Warning: Level audit found {len(discrepancies)} implementation placement/level discrepancies for ISA '{isa['name']}':", file=sys.stderr)
         for func, choice, table, declared, detected, deps in discrepancies:
             dts = ", ".join(list(choice.get("datatypes", []))[:2])
             deps_str = f" (MIPP dependencies: {list(deps)})" if deps else ""
-            print(f"  - Function '{func}' [{dts}] in '{table}' has declared/expected level {declared} but detected level {detected}{deps_str} (template code: '{get_code(choice).strip().replace('\n', ' ')[:50]}...')", file=sys.stderr)
+            print(Fore.BLUE + f"  - Function '{func}' [{dts}] in '{table}' has declared/expected level {declared} but detected level {detected}{deps_str} (template code: '{get_code(choice).strip().replace('\n', ' ')[:50]}...')", file=sys.stderr)
 
     # Dead templates detection
     import json
@@ -502,12 +514,12 @@ def audit_and_validate_implementation_levels(isa, implems, implems_emu):
     dead_native = sorted([name for name in native_templates if name not in visited])
     dead_emu = sorted([name for name in emu_templates if name not in visited])
 
-    if dead_native or dead_emu:
-        print(f"Warning: Found dead (unreferenced) templates for ISA '{isa['name']}':", file=sys.stderr)
+    if "dead-code" in ACTIVE_AUDITS and (dead_native or dead_emu):
+        print(Fore.YELLOW + f"Warning: Found dead (unreferenced) templates for ISA '{isa['name']}':", file=sys.stderr)
         for name in dead_native:
-            print(f"  - Template '{name}' in native_templates is never referenced.", file=sys.stderr)
+            print(Fore.YELLOW + f"  - Template '{name}' in native_templates is never referenced.", file=sys.stderr)
         for name in dead_emu:
-            print(f"  - Template '{name}' in emu_templates is never referenced.", file=sys.stderr)
+            print(Fore.YELLOW + f"  - Template '{name}' in emu_templates is never referenced.", file=sys.stderr)
 
 def validate_categories_config(categories_dict):
     validate_json_data(categories_dict, "categories_schema.json", label="registry_categories.json")

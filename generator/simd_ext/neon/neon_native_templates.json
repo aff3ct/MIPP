@@ -51,17 +51,9 @@
         "format": "short",
         "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext_msk }}(m1.m, m0.m);"
     },
-    "lshift": {
-        "format": "short",
-        "code": "{% if isa_dt_par.to_ptr == 'int64_t' or isa_dt_par.to_ptr == 'uint64_t' -%}{{ isa.prefix }}shlq_{{ isa_dt_par.data_ext }}(r0.r, vdupq_n_s64(v0));{% elif isa_dt_par.to_ptr == 'int32_t' or isa_dt_par.to_ptr == 'uint32_t' -%}{{ isa.prefix }}shlq_{{ isa_dt_par.data_ext }}(r0.r, vdupq_n_s32(v0));{% elif isa_dt_par.to_ptr == 'int16_t' or isa_dt_par.to_ptr == 'uint16_t' -%}{{ isa.prefix }}shlq_{{ isa_dt_par.data_ext }}(r0.r, vdupq_n_s16(v0));{% else -%}{{ isa.prefix }}shlq_{{ isa_dt_par.data_ext }}(r0.r, vdupq_n_s8(v0));{% endif %}"
-    },
     "round_float": {
         "format": "short",
         "code": "{{ isa.prefix }}rndnq_{{ isa_dt_par.data_ext }}(r0.r);"
-    },
-    "round_int": {
-        "format": "short",
-        "code": "r0.r;"
     },
     "rsqrt": {
         "format": "short",

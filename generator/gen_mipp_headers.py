@@ -274,15 +274,25 @@ def main(argv=None):
     )
     
     parser.add_argument(
-        "--audit-levels",
-        action="store_true",
-        help="Print warnings about implementation levels and placement discrepancies.",
+        "--audit",
+        nargs="+",
+        choices=["levels", "dead-code", "all"],
+        help="Run audits on the MIPP code database: 'levels' checks implementation level placement discrepancies, 'dead-code' checks for unreferenced templates, 'all' runs all audits.",
+        default=None,
     )
     
     args = parser.parse_args(argv)
 
     import input_validation
-    input_validation.SHOW_AUDIT_WARNINGS = args.audit_levels
+    input_validation.ACTIVE_AUDITS = set()
+    if args.audit:
+        for a in args.audit:
+            for item in a.split(","):
+                item = item.strip().lower()
+                if item == "all":
+                    input_validation.ACTIVE_AUDITS.update(["levels", "dead-code"])
+                elif item in ("levels", "dead-code"):
+                    input_validation.ACTIVE_AUDITS.add(item)
 
     # check that all mipp funcs have a scalar implem before to start
     check_mipp_funcs_scalar_implems()
@@ -298,12 +308,14 @@ def main(argv=None):
     # Parse limit_to_isas from --simd-ext
     limit_to_isas = None
     if args.simd_ext:
-        limit_to_isas = set()
+        parsed_isas = set()
         for item in args.simd_ext:
             for tok in item.split(","):
                 tok = tok.strip().lower()
                 if tok:
-                    limit_to_isas.add(tok)
+                    parsed_isas.add(tok)
+        if "all" not in parsed_isas:
+            limit_to_isas = parsed_isas
 
     # Auto-discovery, validation and sorting of SIMD extensions
     isas_dict, implems_dict, sorted_names = discover_and_sort_isas(path, limit_to_isas=limit_to_isas)
