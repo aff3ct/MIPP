@@ -1,67 +1,4 @@
 {
-    "set1": [
-        {
-            "instr_name": "vmv",
-            "datatypes": "all_int_uint",
-            "template": "scalar_set1"
-        },
-        {
-            "instr_name": "vfmv",
-            "datatypes": "all_float",
-            "template": "float_set1"
-        }
-    ],
-    "set0": [
-        {
-            "instr_name": "vmv",
-            "datatypes": "all_int_uint",
-            "template": "scalar_set0"
-        },
-        {
-            "instr_name": "vfmv",
-            "datatypes": "all_float",
-            "template": "float_set0"
-        }
-    ],
-    "load": [
-        {
-            "instr_name": "load",
-            "datatypes": "all_datatypes",
-            "template": "load"
-        },
-        {
-            "instr_name": "load",
-            "datatypes": "all_datatypes",
-            "template": "load_msks",
-            "version": "masks"
-        }
-    ],
-    "store": [
-        {
-            "instr_name": "store",
-            "datatypes": "all_datatypes",
-            "template": "store"
-        },
-        {
-            "instr_name": "store",
-            "datatypes": "all_datatypes",
-            "template": "store_msk",
-            "version": "mask"
-        },
-        {
-            "instr_name": "store",
-            "datatypes": "all_datatypes",
-            "template": "store_mskz",
-            "version": "maskz"
-        }
-    ],
-    "blend": [
-        {
-            "instr_name": "merge",
-            "datatypes": "all_datatypes",
-            "template": "merge"
-        }
-    ],
     "add": [
         {
             "instr_name": "fadd",
@@ -88,18 +25,6 @@
         {
             "instr_name": "add",
             "datatypes": "all_int_uint",
-            "template": "arith_2args_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "fadd",
-            "datatypes": "all_float",
-            "template": "arith_2args_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "add",
-            "datatypes": "all_int_uint",
             "template": "arith_2args_msks",
             "version": "masks"
         },
@@ -108,359 +33,6 @@
             "datatypes": "all_float",
             "template": "arith_2args_msks",
             "version": "masks"
-        }
-    ],
-    "sub": [
-        {
-            "instr_name": "fsub",
-            "datatypes": "all_float",
-            "template": "arith_2args"
-        },
-        {
-            "instr_name": "sub",
-            "datatypes": "all_int_uint",
-            "template": "arith_2args"
-        },
-        {
-            "instr_name": "sub",
-            "datatypes": "all_int_uint",
-            "template": "arith_2args_msk",
-            "version": "mask"
-        },
-        {
-            "instr_name": "fsub",
-            "datatypes": "all_float",
-            "template": "arith_2args_msk",
-            "version": "mask"
-        },
-        {
-            "instr_name": "sub",
-            "datatypes": "all_int_uint",
-            "template": "arith_2args_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "fsub",
-            "datatypes": "all_float",
-            "template": "arith_2args_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "sub",
-            "datatypes": "all_int_uint",
-            "template": "arith_2args_msks",
-            "version": "masks"
-        },
-        {
-            "instr_name": "fsub",
-            "datatypes": "all_float",
-            "template": "arith_2args_msks",
-            "version": "masks"
-        }
-    ],
-    "mul": [
-        {
-            "instr_name": "fmul",
-            "datatypes": "all_float",
-            "template": "arith_2args"
-        },
-        {
-            "instr_name": "mul",
-            "datatypes": "all_int_uint",
-            "template": "arith_2args"
-        },
-        {
-            "instr_name": "mul",
-            "datatypes": "all_int_uint",
-            "template": "arith_2args_msk",
-            "version": "mask"
-        },
-        {
-            "instr_name": "fmul",
-            "datatypes": "all_float",
-            "template": "arith_2args_msk",
-            "version": "mask"
-        },
-        {
-            "instr_name": "mul",
-            "datatypes": "all_int_uint",
-            "template": "arith_2args_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "fmul",
-            "datatypes": "all_float",
-            "template": "arith_2args_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "mul",
-            "datatypes": "all_int_uint",
-            "template": "arith_2args_msks",
-            "version": "masks"
-        },
-        {
-            "instr_name": "fmul",
-            "datatypes": "all_float",
-            "template": "arith_2args_msks",
-            "version": "masks"
-        }
-    ],
-    "div": [
-        {
-            "instr_name": "fdiv",
-            "datatypes": "all_float",
-            "template": "arith_2args"
-        },
-        {
-            "instr_name": "fdiv",
-            "datatypes": "all_float",
-            "template": "arith_2args_msk",
-            "version": "mask"
-        },
-        {
-            "instr_name": "fdiv",
-            "datatypes": "all_float",
-            "template": "arith_2args_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "fdiv",
-            "datatypes": "all_float",
-            "template": "arith_2args_msks",
-            "version": "masks"
-        }
-    ],
-    "andb": [
-        {
-            "instr_name": "and",
-            "datatypes": "all_int_uint",
-            "template": "arith_2args"
-        },
-        {
-            "instr_name": "and",
-            "datatypes": "all_float",
-            "template": "float_bitwise"
-        },
-        {
-            "instr_name": "and",
-            "datatypes": "all_int_uint",
-            "template": "arith_2args_msk",
-            "version": "mask"
-        },
-        {
-            "instr_name": "and",
-            "datatypes": "all_int_uint",
-            "template": "arith_2args_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "and",
-            "datatypes": "all_int_uint",
-            "template": "arith_2args_msks",
-            "version": "masks"
-        }
-    ],
-    "orb": [
-        {
-            "instr_name": "or",
-            "datatypes": "all_int_uint",
-            "template": "arith_2args"
-        },
-        {
-            "instr_name": "or",
-            "datatypes": "all_float",
-            "template": "float_bitwise"
-        },
-        {
-            "instr_name": "or",
-            "datatypes": "all_int_uint",
-            "template": "arith_2args_msk",
-            "version": "mask"
-        },
-        {
-            "instr_name": "or",
-            "datatypes": "all_int_uint",
-            "template": "arith_2args_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "or",
-            "datatypes": "all_int_uint",
-            "template": "arith_2args_msks",
-            "version": "masks"
-        }
-    ],
-    "xorb": [
-        {
-            "instr_name": "xor",
-            "datatypes": "all_int_uint",
-            "template": "arith_2args"
-        },
-        {
-            "instr_name": "xor",
-            "datatypes": "all_float",
-            "template": "float_bitwise"
-        },
-        {
-            "instr_name": "xor",
-            "datatypes": "all_int_uint",
-            "template": "arith_2args_msk",
-            "version": "mask"
-        },
-        {
-            "instr_name": "xor",
-            "datatypes": "all_int_uint",
-            "template": "arith_2args_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "xor",
-            "datatypes": "all_int_uint",
-            "template": "arith_2args_msks",
-            "version": "masks"
-        }
-    ],
-    "min": [
-        {
-            "instr_name": "min",
-            "datatypes": "all_int",
-            "template": "arith_2args"
-        },
-        {
-            "instr_name": "minu",
-            "datatypes": "all_uint",
-            "template": "arith_2args"
-        },
-        {
-            "instr_name": "fmin",
-            "datatypes": "all_float",
-            "template": "arith_2args"
-        },
-        {
-            "instr_name": "min",
-            "datatypes": "all_int",
-            "template": "arith_2args_msk",
-            "version": "mask"
-        },
-        {
-            "instr_name": "minu",
-            "datatypes": "all_uint",
-            "template": "arith_2args_msk",
-            "version": "mask"
-        },
-        {
-            "instr_name": "fmin",
-            "datatypes": "all_float",
-            "template": "arith_2args_msk",
-            "version": "mask"
-        },
-        {
-            "instr_name": "min",
-            "datatypes": "all_int",
-            "template": "arith_2args_msks",
-            "version": "masks"
-        },
-        {
-            "instr_name": "minu",
-            "datatypes": "all_uint",
-            "template": "arith_2args_msks",
-            "version": "masks"
-        },
-        {
-            "instr_name": "fmin",
-            "datatypes": "all_float",
-            "template": "arith_2args_msks",
-            "version": "masks"
-        },
-        {
-            "instr_name": "min",
-            "datatypes": "all_int",
-            "template": "arith_2args_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "minu",
-            "datatypes": "all_uint",
-            "template": "arith_2args_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "fmin",
-            "datatypes": "all_float",
-            "template": "arith_2args_mskz",
-            "version": "maskz"
-        }
-    ],
-    "max": [
-        {
-            "instr_name": "max",
-            "datatypes": "all_int",
-            "template": "arith_2args"
-        },
-        {
-            "instr_name": "maxu",
-            "datatypes": "all_uint",
-            "template": "arith_2args"
-        },
-        {
-            "instr_name": "fmax",
-            "datatypes": "all_float",
-            "template": "arith_2args"
-        },
-        {
-            "instr_name": "max",
-            "datatypes": "all_int",
-            "template": "arith_2args_msk",
-            "version": "mask"
-        },
-        {
-            "instr_name": "maxu",
-            "datatypes": "all_uint",
-            "template": "arith_2args_msk",
-            "version": "mask"
-        },
-        {
-            "instr_name": "fmax",
-            "datatypes": "all_float",
-            "template": "arith_2args_msk",
-            "version": "mask"
-        },
-        {
-            "instr_name": "max",
-            "datatypes": "all_int",
-            "template": "arith_2args_msks",
-            "version": "masks"
-        },
-        {
-            "instr_name": "maxu",
-            "datatypes": "all_uint",
-            "template": "arith_2args_msks",
-            "version": "masks"
-        },
-        {
-            "instr_name": "fmax",
-            "datatypes": "all_float",
-            "template": "arith_2args_msks",
-            "version": "masks"
-        },
-        {
-            "instr_name": "max",
-            "datatypes": "all_int",
-            "template": "arith_2args_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "maxu",
-            "datatypes": "all_uint",
-            "template": "arith_2args_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "fmax",
-            "datatypes": "all_float",
-            "template": "arith_2args_mskz",
-            "version": "maskz"
         }
     ],
     "adds": [
@@ -489,18 +61,6 @@
         {
             "instr_name": "sadd",
             "datatypes": "all_int",
-            "template": "arith_2args_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "saddu",
-            "datatypes": "all_uint",
-            "template": "arith_2args_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "sadd",
-            "datatypes": "all_int",
             "template": "arith_2args_msks",
             "version": "masks"
         },
@@ -511,101 +71,22 @@
             "version": "masks"
         }
     ],
-    "subs": [
+    "andb": [
         {
-            "instr_name": "ssub",
-            "datatypes": "all_int",
+            "instr_name": "and",
+            "datatypes": "all_int_uint",
             "template": "arith_2args"
         },
         {
-            "instr_name": "ssubu",
-            "datatypes": "all_uint",
-            "template": "arith_2args"
-        },
-        {
-            "instr_name": "ssub",
-            "datatypes": "all_int",
+            "instr_name": "and",
+            "datatypes": "all_int_uint",
             "template": "arith_2args_msk",
             "version": "mask"
         },
         {
-            "instr_name": "ssubu",
-            "datatypes": "all_uint",
-            "template": "arith_2args_msk",
-            "version": "mask"
-        },
-        {
-            "instr_name": "ssub",
-            "datatypes": "all_int",
-            "template": "arith_2args_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "ssubu",
-            "datatypes": "all_uint",
-            "template": "arith_2args_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "ssub",
-            "datatypes": "all_int",
+            "instr_name": "and",
+            "datatypes": "all_int_uint",
             "template": "arith_2args_msks",
-            "version": "masks"
-        },
-        {
-            "instr_name": "ssubu",
-            "datatypes": "all_uint",
-            "template": "arith_2args_msks",
-            "version": "masks"
-        }
-    ],
-    "sqrt": [
-        {
-            "instr_name": "fsqrt",
-            "datatypes": "all_float",
-            "template": "arith_1arg"
-        },
-        {
-            "instr_name": "fsqrt",
-            "datatypes": "all_float",
-            "template": "arith_1arg_msk",
-            "version": "mask"
-        },
-        {
-            "instr_name": "fsqrt",
-            "datatypes": "all_float",
-            "template": "arith_1arg_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "fsqrt",
-            "datatypes": "all_float",
-            "template": "arith_1arg_msks",
-            "version": "masks"
-        }
-    ],
-    "rsqrt": [
-        {
-            "instr_name": "frsqrt7",
-            "datatypes": "all_float",
-            "template": "arith_1arg"
-        },
-        {
-            "instr_name": "frsqrt7",
-            "datatypes": "all_float",
-            "template": "arith_1arg_msk",
-            "version": "mask"
-        },
-        {
-            "instr_name": "frsqrt7",
-            "datatypes": "all_float",
-            "template": "arith_1arg_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "frsqrt7",
-            "datatypes": "all_float",
-            "template": "arith_1arg_msks",
             "version": "masks"
         }
     ],
@@ -616,209 +97,81 @@
             "template": "mask_2args"
         }
     ],
-    "orb_k": [
+    "blend": [
         {
-            "instr_name": "mor",
+            "instr_name": "merge",
             "datatypes": "all_datatypes",
-            "template": "mask_2args"
+            "template": "merge"
         }
     ],
-    "xorb_k": [
+    "cast": [
         {
-            "instr_name": "mxor",
-            "datatypes": "all_datatypes",
-            "template": "mask_2args"
-        }
-    ],
-    "fmadd": [
-        {
-            "instr_name": "fmadd",
-            "datatypes": "all_float",
-            "template": "arith_3args"
-        },
-        {
-            "instr_name": "madd",
+            "instr_name": "vreinterpret",
             "datatypes": [
-                "int32"
+                "float64,float64",
+                "int64,float64",
+                "uint64,float64",
+                "float32,float32",
+                "int32,float32",
+                "uint32,float32",
+                "float64,int64",
+                "int64,int64",
+                "int32,int64",
+                "int16,int64",
+                "int8,int64",
+                "uint64,int64",
+                "float32,int32",
+                "int64,int32",
+                "int32,int32",
+                "int16,int32",
+                "int8,int32",
+                "uint32,int32",
+                "int64,int16",
+                "int32,int16",
+                "int16,int16",
+                "int8,int16",
+                "uint16,int16",
+                "int64,int8",
+                "int32,int8",
+                "int16,int8",
+                "int8,int8",
+                "uint8,int8",
+                "float64,uint64",
+                "int64,uint64",
+                "uint64,uint64",
+                "uint32,uint64",
+                "uint16,uint64",
+                "uint8,uint64",
+                "float32,uint32",
+                "int32,uint32",
+                "uint64,uint32",
+                "uint32,uint32",
+                "uint16,uint32",
+                "uint8,uint32",
+                "int16,uint16",
+                "uint64,uint16",
+                "uint32,uint16",
+                "uint16,uint16",
+                "uint8,uint16",
+                "int8,uint8",
+                "uint64,uint8",
+                "uint32,uint8",
+                "uint16,uint8",
+                "uint8,uint8"
             ],
-            "template": "arith_3args"
-        },
-        {
-            "instr_name": "fmadd",
-            "datatypes": "all_float",
-            "template": "arith_3args_msk",
-            "version": "mask"
-        },
-        {
-            "instr_name": "madd",
-            "datatypes": [
-                "int32"
-            ],
-            "template": "arith_3args_msk",
-            "version": "mask"
+            "template": "cast"
         }
     ],
-    "fmsub": [
+    "cmpeq": [
         {
-            "instr_name": "fmsub",
-            "datatypes": "all_float",
-            "template": "arith_3args"
-        },
-        {
-            "instr_name": "madd",
-            "datatypes": [
-                "int32"
-            ],
-            "template": "fmsub_int"
-        },
-        {
-            "instr_name": "fmsub",
-            "datatypes": "all_float",
-            "template": "arith_3args_msk",
-            "version": "mask"
-        }
-    ],
-    "cmpneq": [
-        {
-            "instr_name": "msne",
+            "instr_name": "mseq",
             "datatypes": "all_int_uint",
             "template": "arith_msk_type_2args"
         },
         {
-            "instr_name": "mfne",
+            "instr_name": "mfeq",
             "datatypes": "all_float",
             "template": "arith_msk_type_2args"
-        },
-        {
-            "instr_name": "msne",
-            "datatypes": "all_int_uint",
-            "template": "arith_msk_type_2args_mskz_cmpneq",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "mfne",
-            "datatypes": "all_float",
-            "template": "arith_msk_type_2args_mskz_cmpneq",
-            "version": "maskz"
-        }
-    ],
-    "set0_k": [
-        {
-            "instr_name": "set0_k",
-            "datatypes": "all_datatypes",
-            "template": "set0_k"
-        }
-    ],
-    "tomsk": [
-        {
-            "instr_name": "tomsk",
-            "datatypes": "all_datatypes",
-            "template": "tomsk"
-        }
-    ],
-    "cmplt": [
-        {
-            "instr_name": "mslt",
-            "datatypes": "all_int",
-            "template": "arith_msk_type_2args"
-        },
-        {
-            "instr_name": "msltu",
-            "datatypes": "all_uint",
-            "template": "arith_msk_type_2args"
-        },
-        {
-            "instr_name": "mflt",
-            "datatypes": "all_float",
-            "template": "arith_msk_type_2args"
-        },
-        {
-            "instr_name": "mslt",
-            "datatypes": "all_int",
-            "template": "arith_msk_type_2args_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "msltu",
-            "datatypes": "all_uint",
-            "template": "arith_msk_type_2args_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "mflt",
-            "datatypes": "all_float",
-            "template": "arith_msk_type_2args_mskz",
-            "version": "maskz"
-        }
-    ],
-    "cmple": [
-        {
-            "instr_name": "msle",
-            "datatypes": "all_int",
-            "template": "arith_msk_type_2args"
-        },
-        {
-            "instr_name": "msleu",
-            "datatypes": "all_uint",
-            "template": "arith_msk_type_2args"
-        },
-        {
-            "instr_name": "mfle",
-            "datatypes": "all_float",
-            "template": "arith_msk_type_2args"
-        },
-        {
-            "instr_name": "msle",
-            "datatypes": "all_int",
-            "template": "arith_msk_type_2args_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "msleu",
-            "datatypes": "all_uint",
-            "template": "arith_msk_type_2args_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "mfle",
-            "datatypes": "all_float",
-            "template": "arith_msk_type_2args_mskz",
-            "version": "maskz"
-        }
-    ],
-    "cmpgt": [
-        {
-            "instr_name": "msgt",
-            "datatypes": "all_int",
-            "template": "arith_msk_type_2args"
-        },
-        {
-            "instr_name": "msgtu",
-            "datatypes": "all_uint",
-            "template": "arith_msk_type_2args"
-        },
-        {
-            "instr_name": "mfgt",
-            "datatypes": "all_float",
-            "template": "arith_msk_type_2args"
-        },
-        {
-            "instr_name": "msgt",
-            "datatypes": "all_int",
-            "template": "arith_msk_type_2args_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "msgtu",
-            "datatypes": "all_uint",
-            "template": "arith_msk_type_2args_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "mfgt",
-            "datatypes": "all_float",
-            "template": "arith_msk_type_2args_mskz",
-            "version": "maskz"
         }
     ],
     "cmpge": [
@@ -836,263 +189,87 @@
             "instr_name": "mfge",
             "datatypes": "all_float",
             "template": "arith_msk_type_2args"
-        },
-        {
-            "instr_name": "msge",
-            "datatypes": "all_int",
-            "template": "arith_msk_type_2args_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "msgeu",
-            "datatypes": "all_uint",
-            "template": "arith_msk_type_2args_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "mfge",
-            "datatypes": "all_float",
-            "template": "arith_msk_type_2args_mskz",
-            "version": "maskz"
         }
     ],
-    "cmpeq": [
+    "cmpgt": [
         {
-            "instr_name": "mseq",
+            "instr_name": "msgt",
+            "datatypes": "all_int",
+            "template": "arith_msk_type_2args"
+        },
+        {
+            "instr_name": "msgtu",
+            "datatypes": "all_uint",
+            "template": "arith_msk_type_2args"
+        },
+        {
+            "instr_name": "mfgt",
+            "datatypes": "all_float",
+            "template": "arith_msk_type_2args"
+        }
+    ],
+    "cmple": [
+        {
+            "instr_name": "msle",
+            "datatypes": "all_int",
+            "template": "arith_msk_type_2args"
+        },
+        {
+            "instr_name": "msleu",
+            "datatypes": "all_uint",
+            "template": "arith_msk_type_2args"
+        },
+        {
+            "instr_name": "mfle",
+            "datatypes": "all_float",
+            "template": "arith_msk_type_2args"
+        }
+    ],
+    "cmplt": [
+        {
+            "instr_name": "mslt",
+            "datatypes": "all_int",
+            "template": "arith_msk_type_2args"
+        },
+        {
+            "instr_name": "msltu",
+            "datatypes": "all_uint",
+            "template": "arith_msk_type_2args"
+        },
+        {
+            "instr_name": "mflt",
+            "datatypes": "all_float",
+            "template": "arith_msk_type_2args"
+        }
+    ],
+    "cmpneq": [
+        {
+            "instr_name": "msne",
             "datatypes": "all_int_uint",
             "template": "arith_msk_type_2args"
         },
         {
-            "instr_name": "mfeq",
+            "instr_name": "mfne",
             "datatypes": "all_float",
             "template": "arith_msk_type_2args"
-        },
-        {
-            "instr_name": "mseq",
-            "datatypes": "all_int_uint",
-            "template": "arith_msk_type_2args_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "mfeq",
-            "datatypes": "all_float",
-            "template": "arith_msk_type_2args_mskz",
-            "version": "maskz"
         }
     ],
-    "getfirst": [
+    "div": [
         {
-            "instr_name": "mv",
-            "datatypes": "all_int_uint",
-            "template": "scalar_getfirst"
-        },
-        {
-            "instr_name": "fmv",
+            "instr_name": "fdiv",
             "datatypes": "all_float",
-            "template": "float_getfirst"
-        }
-    ],
-    "notb": [
-        {
-            "instr_name": "xor",
-            "datatypes": "all_int_uint",
-            "template": "scalar_notb"
+            "template": "arith_2args"
         },
         {
-            "instr_name": "xor",
+            "instr_name": "fdiv",
             "datatypes": "all_float",
-            "template": "float_notb"
-        },
-        {
-            "instr_name": "xor",
-            "datatypes": "all_int_uint",
-            "template": "scalar_notb_msk",
+            "template": "arith_2args_msk",
             "version": "mask"
         },
         {
-            "instr_name": "xor",
+            "instr_name": "fdiv",
             "datatypes": "all_float",
-            "template": "float_notb_msk",
-            "version": "mask"
-        },
-        {
-            "instr_name": "xor",
-            "datatypes": "all_int_uint",
-            "template": "scalar_notb_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "xor",
-            "datatypes": "all_float",
-            "template": "float_notb_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "xor",
-            "datatypes": "all_int_uint",
-            "template": "scalar_notb_msks",
-            "version": "masks"
-        },
-        {
-            "instr_name": "xor",
-            "datatypes": "all_float",
-            "template": "float_notb_msks",
-            "version": "masks"
-        }
-    ],
-    "testz_2": [
-        {
-            "instr_name": "cpop",
-            "datatypes": "all_datatypes",
-            "template": "testz_2"
-        }
-    ],
-    "round": [
-        {
-            "instr_name": "vfcvt",
-            "datatypes": "all_float",
-            "template": "round_float"
-        },
-        {
-            "instr_name": "vfcvt",
-            "datatypes": "all_int_uint",
-            "template": "round_int"
-        },
-        {
-            "instr_name": "vfcvt",
-            "datatypes": "all_int_uint",
-            "template": "round_int",
-            "version": "mask"
-        },
-        {
-            "instr_name": "vfcvt",
-            "datatypes": "all_int_uint",
-            "template": "round_int_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "vfcvt",
-            "datatypes": "all_int_uint",
-            "template": "round_int_msks",
-            "version": "masks"
-        }
-    ],
-    "lshift": [
-        {
-            "instr_name": "sll",
-            "datatypes": "all_int_uint",
-            "template": "shift_scalar"
-        },
-        {
-            "instr_name": "sll",
-            "datatypes": "all_float",
-            "template": "shift_float"
-        },
-        {
-            "instr_name": "sll",
-            "datatypes": "all_int_uint",
-            "template": "shift_scalar_msk",
-            "version": "mask"
-        },
-        {
-            "instr_name": "sll",
-            "datatypes": "all_float",
-            "template": "shift_float_msk",
-            "version": "mask"
-        },
-        {
-            "instr_name": "sll",
-            "datatypes": "all_int_uint",
-            "template": "shift_scalar_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "sll",
-            "datatypes": "all_float",
-            "template": "shift_float_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "sll",
-            "datatypes": "all_int_uint",
-            "template": "shift_scalar_msks",
-            "version": "masks"
-        },
-        {
-            "instr_name": "sll",
-            "datatypes": "all_float",
-            "template": "shift_float_msks",
-            "version": "masks"
-        }
-    ],
-    "rshift": [
-        {
-            "instr_name": "srl",
-            "datatypes": "all_uint",
-            "template": "shift_scalar"
-        },
-        {
-            "instr_name": "sra",
-            "datatypes": "all_int",
-            "template": "shift_scalar"
-        },
-        {
-            "instr_name": "srl",
-            "datatypes": "all_float",
-            "template": "shift_float"
-        },
-        {
-            "instr_name": "srl",
-            "datatypes": "all_uint",
-            "template": "shift_scalar_msk",
-            "version": "mask"
-        },
-        {
-            "instr_name": "sra",
-            "datatypes": "all_int",
-            "template": "shift_scalar_msk",
-            "version": "mask"
-        },
-        {
-            "instr_name": "srl",
-            "datatypes": "all_float",
-            "template": "shift_float_msk",
-            "version": "mask"
-        },
-        {
-            "instr_name": "srl",
-            "datatypes": "all_uint",
-            "template": "shift_scalar_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "sra",
-            "datatypes": "all_int",
-            "template": "shift_scalar_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "srl",
-            "datatypes": "all_float",
-            "template": "shift_float_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "srl",
-            "datatypes": "all_uint",
-            "template": "shift_scalar_msks",
-            "version": "masks"
-        },
-        {
-            "instr_name": "sra",
-            "datatypes": "all_int",
-            "template": "shift_scalar_msks",
-            "version": "masks"
-        },
-        {
-            "instr_name": "srl",
-            "datatypes": "all_float",
-            "template": "shift_float_msks",
+            "template": "arith_2args_msks",
             "version": "masks"
         }
     ],
@@ -1129,24 +306,6 @@
             "datatypes": "all_float",
             "template": "div2_float_msk",
             "version": "mask"
-        },
-        {
-            "instr_name": "srl",
-            "datatypes": "all_uint",
-            "template": "div2_scalar_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "sra",
-            "datatypes": "all_int",
-            "template": "div2_scalar_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "fdiv",
-            "datatypes": "all_float",
-            "template": "div2_float_mskz",
-            "version": "maskz"
         },
         {
             "instr_name": "srl",
@@ -1204,24 +363,6 @@
         {
             "instr_name": "srl",
             "datatypes": "all_uint",
-            "template": "div4_scalar_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "sra",
-            "datatypes": "all_int",
-            "template": "div4_scalar_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "fdiv",
-            "datatypes": "all_float",
-            "template": "div4_float_mskz",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "srl",
-            "datatypes": "all_uint",
             "template": "div4_scalar_msks",
             "version": "masks"
         },
@@ -1238,108 +379,488 @@
             "version": "masks"
         }
     ],
-    "gather": [
+    "fmadd": [
         {
-            "instr_name": "luxei",
-            "datatypes": [
-                "float64,float64",
-                "float32,float32",
-                "int64,int64",
-                "int32,int32",
-                "int16,int16",
-                "int8,int8",
-                "uint64,uint64",
-                "uint32,uint32",
-                "uint16,uint16",
-                "uint8,uint8"
-            ],
-            "template": "gather"
+            "instr_name": "fmadd",
+            "datatypes": "all_float",
+            "template": "arith_3args"
         },
         {
-            "instr_name": "luxei",
+            "instr_name": "madd",
             "datatypes": [
-                "float64,float64",
-                "float32,float32",
-                "int64,int64",
-                "int32,int32",
-                "int16,int16",
-                "int8,int8",
-                "uint64,uint64",
-                "uint32,uint32",
-                "uint16,uint16",
-                "uint8,uint8"
+                "int32"
             ],
-            "template": "gather_maskz",
-            "version": "maskz"
+            "template": "arith_3args"
         },
         {
-            "instr_name": "luxei",
-            "datatypes": [
-                "float64,float64",
-                "float32,float32",
-                "int64,int64",
-                "int32,int32",
-                "int16,int16",
-                "int8,int8",
-                "uint64,uint64",
-                "uint32,uint32",
-                "uint16,uint16",
-                "uint8,uint8"
-            ],
-            "template": "gather_masks",
-            "version": "masks"
-        }
-    ],
-    "scatter": [
-        {
-            "instr_name": "suxei",
-            "datatypes": [
-                "float64,float64",
-                "float32,float32",
-                "int64,int64",
-                "int32,int32",
-                "int16,int16",
-                "int8,int8",
-                "uint64,uint64",
-                "uint32,uint32",
-                "uint16,uint16",
-                "uint8,uint8"
-            ],
-            "template": "scatter"
-        },
-        {
-            "instr_name": "suxei",
-            "datatypes": [
-                "float64,float64",
-                "float32,float32",
-                "int64,int64",
-                "int32,int32",
-                "int16,int16",
-                "int8,int8",
-                "uint64,uint64",
-                "uint32,uint32",
-                "uint16,uint16",
-                "uint8,uint8"
-            ],
-            "template": "scatter_mask",
+            "instr_name": "fmadd",
+            "datatypes": "all_float",
+            "template": "arith_3args_msk",
             "version": "mask"
         },
         {
-            "instr_name": "suxei",
+            "instr_name": "madd",
             "datatypes": [
-                "float64,float64",
-                "float32,float32",
-                "int64,int64",
-                "int32,int32",
-                "int16,int16",
-                "int8,int8",
-                "uint64,uint64",
-                "uint32,uint32",
-                "uint16,uint16",
-                "uint8,uint8"
+                "int32"
             ],
-            "template": "scatter_maskz",
-            "version": "maskz"
+            "template": "arith_3args_msk",
+            "version": "mask"
+        }
+    ],
+    "fmsub": [
+        {
+            "instr_name": "fmsub",
+            "datatypes": "all_float",
+            "template": "arith_3args"
+        },
+        {
+            "instr_name": "fmsub",
+            "datatypes": "all_float",
+            "template": "arith_3args_msk",
+            "version": "mask"
+        }
+    ],
+    "getfirst": [
+        {
+            "instr_name": "mv",
+            "datatypes": "all_int_uint",
+            "template": "scalar_getfirst"
+        },
+        {
+            "instr_name": "fmv",
+            "datatypes": "all_float",
+            "template": "float_getfirst"
+        }
+    ],
+    "load": [
+        {
+            "instr_name": "load",
+            "datatypes": "all_datatypes",
+            "template": "load"
+        },
+        {
+            "instr_name": "load",
+            "datatypes": "all_datatypes",
+            "template": "load_msks",
+            "version": "masks"
+        }
+    ],
+    "lshift": [
+        {
+            "instr_name": "sll",
+            "datatypes": "all_int_uint",
+            "template": "shift_scalar"
+        },
+        {
+            "instr_name": "sll",
+            "datatypes": "all_int_uint",
+            "template": "shift_scalar_msk",
+            "version": "mask"
+        },
+        {
+            "instr_name": "sll",
+            "datatypes": "all_int_uint",
+            "template": "shift_scalar_msks",
+            "version": "masks"
+        }
+    ],
+    "max": [
+        {
+            "instr_name": "max",
+            "datatypes": "all_int",
+            "template": "arith_2args"
+        },
+        {
+            "instr_name": "maxu",
+            "datatypes": "all_uint",
+            "template": "arith_2args"
+        },
+        {
+            "instr_name": "fmax",
+            "datatypes": "all_float",
+            "template": "arith_2args"
+        },
+        {
+            "instr_name": "max",
+            "datatypes": "all_int",
+            "template": "arith_2args_msk",
+            "version": "mask"
+        },
+        {
+            "instr_name": "maxu",
+            "datatypes": "all_uint",
+            "template": "arith_2args_msk",
+            "version": "mask"
+        },
+        {
+            "instr_name": "fmax",
+            "datatypes": "all_float",
+            "template": "arith_2args_msk",
+            "version": "mask"
+        },
+        {
+            "instr_name": "max",
+            "datatypes": "all_int",
+            "template": "arith_2args_msks",
+            "version": "masks"
+        },
+        {
+            "instr_name": "maxu",
+            "datatypes": "all_uint",
+            "template": "arith_2args_msks",
+            "version": "masks"
+        },
+        {
+            "instr_name": "fmax",
+            "datatypes": "all_float",
+            "template": "arith_2args_msks",
+            "version": "masks"
+        }
+    ],
+    "min": [
+        {
+            "instr_name": "min",
+            "datatypes": "all_int",
+            "template": "arith_2args"
+        },
+        {
+            "instr_name": "minu",
+            "datatypes": "all_uint",
+            "template": "arith_2args"
+        },
+        {
+            "instr_name": "fmin",
+            "datatypes": "all_float",
+            "template": "arith_2args"
+        },
+        {
+            "instr_name": "min",
+            "datatypes": "all_int",
+            "template": "arith_2args_msk",
+            "version": "mask"
+        },
+        {
+            "instr_name": "minu",
+            "datatypes": "all_uint",
+            "template": "arith_2args_msk",
+            "version": "mask"
+        },
+        {
+            "instr_name": "fmin",
+            "datatypes": "all_float",
+            "template": "arith_2args_msk",
+            "version": "mask"
+        },
+        {
+            "instr_name": "min",
+            "datatypes": "all_int",
+            "template": "arith_2args_msks",
+            "version": "masks"
+        },
+        {
+            "instr_name": "minu",
+            "datatypes": "all_uint",
+            "template": "arith_2args_msks",
+            "version": "masks"
+        },
+        {
+            "instr_name": "fmin",
+            "datatypes": "all_float",
+            "template": "arith_2args_msks",
+            "version": "masks"
+        }
+    ],
+    "mul": [
+        {
+            "instr_name": "fmul",
+            "datatypes": "all_float",
+            "template": "arith_2args"
+        },
+        {
+            "instr_name": "mul",
+            "datatypes": "all_int_uint",
+            "template": "arith_2args"
+        },
+        {
+            "instr_name": "mul",
+            "datatypes": "all_int_uint",
+            "template": "arith_2args_msk",
+            "version": "mask"
+        },
+        {
+            "instr_name": "fmul",
+            "datatypes": "all_float",
+            "template": "arith_2args_msk",
+            "version": "mask"
+        },
+        {
+            "instr_name": "mul",
+            "datatypes": "all_int_uint",
+            "template": "arith_2args_msks",
+            "version": "masks"
+        },
+        {
+            "instr_name": "fmul",
+            "datatypes": "all_float",
+            "template": "arith_2args_msks",
+            "version": "masks"
+        }
+    ],
+    "notb": [
+        {
+            "instr_name": "xor",
+            "datatypes": "all_int_uint",
+            "template": "scalar_notb"
+        },
+        {
+            "instr_name": "xor",
+            "datatypes": "all_int_uint",
+            "template": "scalar_notb_msk",
+            "version": "mask"
+        },
+        {
+            "instr_name": "xor",
+            "datatypes": "all_int_uint",
+            "template": "scalar_notb_msks",
+            "version": "masks"
+        }
+    ],
+    "orb": [
+        {
+            "instr_name": "or",
+            "datatypes": "all_int_uint",
+            "template": "arith_2args"
+        },
+        {
+            "instr_name": "or",
+            "datatypes": "all_int_uint",
+            "template": "arith_2args_msk",
+            "version": "mask"
+        },
+        {
+            "instr_name": "or",
+            "datatypes": "all_int_uint",
+            "template": "arith_2args_msks",
+            "version": "masks"
+        }
+    ],
+    "orb_k": [
+        {
+            "instr_name": "mor",
+            "datatypes": "all_datatypes",
+            "template": "mask_2args"
+        }
+    ],
+    "round": [
+        {
+            "instr_name": "vfcvt",
+            "datatypes": "all_int_uint",
+            "template": "round_int_msks",
+            "version": "masks"
+        }
+    ],
+    "rshift": [
+        {
+            "instr_name": "srl",
+            "datatypes": "all_uint",
+            "template": "shift_scalar"
+        },
+        {
+            "instr_name": "sra",
+            "datatypes": "all_int",
+            "template": "shift_scalar"
+        },
+        {
+            "instr_name": "srl",
+            "datatypes": "all_uint",
+            "template": "shift_scalar_msk",
+            "version": "mask"
+        },
+        {
+            "instr_name": "sra",
+            "datatypes": "all_int",
+            "template": "shift_scalar_msk",
+            "version": "mask"
+        },
+        {
+            "instr_name": "srl",
+            "datatypes": "all_uint",
+            "template": "shift_scalar_msks",
+            "version": "masks"
+        },
+        {
+            "instr_name": "sra",
+            "datatypes": "all_int",
+            "template": "shift_scalar_msks",
+            "version": "masks"
+        }
+    ],
+    "rsqrt": [
+        {
+            "instr_name": "frsqrt7",
+            "datatypes": "all_float",
+            "template": "arith_1arg"
+        },
+        {
+            "instr_name": "frsqrt7",
+            "datatypes": "all_float",
+            "template": "arith_1arg_msk",
+            "version": "mask"
+        },
+        {
+            "instr_name": "frsqrt7",
+            "datatypes": "all_float",
+            "template": "arith_1arg_msks",
+            "version": "masks"
+        }
+    ],
+    "set0": [
+        {
+            "instr_name": "vmv",
+            "datatypes": "all_int_uint",
+            "template": "scalar_set0"
+        },
+        {
+            "instr_name": "vfmv",
+            "datatypes": "all_float",
+            "template": "float_set0"
+        }
+    ],
+    "sqrt": [
+        {
+            "instr_name": "fsqrt",
+            "datatypes": "all_float",
+            "template": "arith_1arg"
+        },
+        {
+            "instr_name": "fsqrt",
+            "datatypes": "all_float",
+            "template": "arith_1arg_msk",
+            "version": "mask"
+        },
+        {
+            "instr_name": "fsqrt",
+            "datatypes": "all_float",
+            "template": "arith_1arg_msks",
+            "version": "masks"
+        }
+    ],
+    "store": [
+        {
+            "instr_name": "store",
+            "datatypes": "all_datatypes",
+            "template": "store"
+        },
+        {
+            "instr_name": "store",
+            "datatypes": "all_datatypes",
+            "template": "store_msk",
+            "version": "mask"
+        }
+    ],
+    "sub": [
+        {
+            "instr_name": "fsub",
+            "datatypes": "all_float",
+            "template": "arith_2args"
+        },
+        {
+            "instr_name": "sub",
+            "datatypes": "all_int_uint",
+            "template": "arith_2args"
+        },
+        {
+            "instr_name": "sub",
+            "datatypes": "all_int_uint",
+            "template": "arith_2args_msk",
+            "version": "mask"
+        },
+        {
+            "instr_name": "fsub",
+            "datatypes": "all_float",
+            "template": "arith_2args_msk",
+            "version": "mask"
+        },
+        {
+            "instr_name": "sub",
+            "datatypes": "all_int_uint",
+            "template": "arith_2args_msks",
+            "version": "masks"
+        },
+        {
+            "instr_name": "fsub",
+            "datatypes": "all_float",
+            "template": "arith_2args_msks",
+            "version": "masks"
+        }
+    ],
+    "subs": [
+        {
+            "instr_name": "ssub",
+            "datatypes": "all_int",
+            "template": "arith_2args"
+        },
+        {
+            "instr_name": "ssubu",
+            "datatypes": "all_uint",
+            "template": "arith_2args"
+        },
+        {
+            "instr_name": "ssub",
+            "datatypes": "all_int",
+            "template": "arith_2args_msk",
+            "version": "mask"
+        },
+        {
+            "instr_name": "ssubu",
+            "datatypes": "all_uint",
+            "template": "arith_2args_msk",
+            "version": "mask"
+        },
+        {
+            "instr_name": "ssub",
+            "datatypes": "all_int",
+            "template": "arith_2args_msks",
+            "version": "masks"
+        },
+        {
+            "instr_name": "ssubu",
+            "datatypes": "all_uint",
+            "template": "arith_2args_msks",
+            "version": "masks"
+        }
+    ],
+    "testz_2": [
+        {
+            "instr_name": "cpop",
+            "datatypes": "all_datatypes",
+            "template": "testz_2"
+        }
+    ],
+    "xorb": [
+        {
+            "instr_name": "xor",
+            "datatypes": "all_int_uint",
+            "template": "arith_2args"
+        },
+        {
+            "instr_name": "xor",
+            "datatypes": "all_int_uint",
+            "template": "arith_2args_msk",
+            "version": "mask"
+        },
+        {
+            "instr_name": "xor",
+            "datatypes": "all_int_uint",
+            "template": "arith_2args_msks",
+            "version": "masks"
+        }
+    ],
+    "xorb_k": [
+        {
+            "instr_name": "mxor",
+            "datatypes": "all_datatypes",
+            "template": "mask_2args"
         }
     ]
 }
