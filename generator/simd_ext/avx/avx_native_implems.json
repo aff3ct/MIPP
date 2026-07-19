@@ -1,199 +1,4 @@
 {
-    "cast": [
-        {
-            "instr_name": "cast",
-            "datatypes": "all_datatypes_cart_prod",
-            "template": "cast"
-        }
-    ],
-    "cast_k": [
-        {
-            "instr_name": "cast",
-            "datatypes": "all_datatypes_cart_prod",
-            "template": "cast_k"
-        }
-    ],
-    "toreg": [
-        {
-            "instr_name": "cast",
-            "datatypes": "all_datatypes",
-            "template": "toreg"
-        }
-    ],
-    "tomsk": [
-        {
-            "instr_name": "cast",
-            "datatypes": "all_datatypes",
-            "template": "tomsk"
-        }
-    ],
-    "load": [
-        {
-            "instr_name": "load",
-            "datatypes": "all_datatypes",
-            "template": "load",
-            "if": "defined(MIPP_ALIGNED_LOADS)"
-        },
-        {
-            "instr_name": "loadu",
-            "datatypes": "all_datatypes",
-            "template": "load",
-            "if": "!defined(MIPP_ALIGNED_LOADS)"
-        }
-    ],
-    "loadu": [
-        {
-            "instr_name": "loadu",
-            "datatypes": "all_datatypes",
-            "template": "load"
-        }
-    ],
-    "store": [
-        {
-            "instr_name": "store",
-            "datatypes": "all_datatypes",
-            "template": "store",
-            "if": "defined(MIPP_ALIGNED_LOADS)"
-        },
-        {
-            "instr_name": "storeu",
-            "datatypes": "all_datatypes",
-            "template": "store",
-            "if": "!defined(MIPP_ALIGNED_LOADS)"
-        }
-    ],
-    "storeu": [
-        {
-            "instr_name": "storeu",
-            "datatypes": "all_datatypes",
-            "template": "store"
-        }
-    ],
-    "set1": [
-        {
-            "instr_name": "set1",
-            "datatypes": "all_float",
-            "template": "set1"
-        },
-        {
-            "instr_name": "set1",
-            "datatypes": [
-                "int64"
-            ],
-            "template": "set1x"
-        },
-        {
-            "instr_name": "set1",
-            "datatypes": [
-                "int32",
-                "int16",
-                "int8"
-            ],
-            "template": "set1"
-        },
-        {
-            "instr_name": "set1",
-            "datatypes": "all_uint",
-            "template": "set1_u"
-        }
-    ],
-    "maskzld": [
-        {
-            "instr_name": "maskload",
-            "datatypes": "all_float",
-            "template": "maskzld"
-        },
-        {
-            "instr_name": "maskload",
-            "datatypes": [
-                "int32"
-            ],
-            "template": "maskzld",
-            "if": "defined(__AVX2__)"
-        }
-    ],
-    "maskst": [
-        {
-            "instr_name": "maskstore",
-            "datatypes": "all_float",
-            "template": "maskst"
-        },
-        {
-            "instr_name": "maskstore",
-            "datatypes": [
-                "int32"
-            ],
-            "template": "maskst",
-            "if": "defined(__AVX2__)"
-        }
-    ],
-    "set0": [
-        {
-            "instr_name": "setzero",
-            "datatypes": "all_datatypes",
-            "template": "set0"
-        }
-    ],
-    "set0_k": [
-        {
-            "instr_name": "setzero",
-            "datatypes": "all_datatypes",
-            "template": "set0_k"
-        }
-    ],
-    "getfirst": [
-        {
-            "instr_name": "extract",
-            "datatypes": [
-                "int64",
-                "int32",
-                "uint64",
-                "uint32"
-            ],
-            "template": "getfirst"
-        },
-        {
-            "instr_name": "extract",
-            "datatypes": [
-                "int16",
-                "int8",
-                "uint16",
-                "uint8"
-            ],
-            "template": "getfirst",
-            "if": "defined(__AVX2__)"
-        },
-        {
-            "instr_name": "extract",
-            "datatypes": [
-                "float64"
-            ],
-            "template": "getfirst_float64"
-        },
-        {
-            "instr_name": "extract",
-            "datatypes": [
-                "float32"
-            ],
-            "template": "getfirst_float32"
-        }
-    ],
-    "sqrt": [
-        {
-            "instr_name": "sqrt",
-            "datatypes": "all_float",
-            "template": "arith_1arg"
-        }
-    ],
-    "rsqrt": [
-        {
-            "instr_name": "rsqrt",
-            "datatypes": [
-                "float32"
-            ],
-            "template": "arith_1arg"
-        }
-    ],
     "add": [
         {
             "instr_name": "add",
@@ -219,146 +24,6 @@
             ],
             "template": "arith_2args",
             "if": "defined(__AVX2__)"
-        },
-        {
-            "instr_name": "add",
-            "datatypes": [
-                "uint64",
-                "uint32"
-            ],
-            "template": "arith_2args_u",
-            "if": "defined(__AVX2__)"
-        }
-    ],
-    "sub": [
-        {
-            "instr_name": "sub",
-            "datatypes": "all_float",
-            "template": "arith_2args"
-        },
-        {
-            "instr_name": "sub",
-            "datatypes": [
-                "int64",
-                "int32"
-            ],
-            "template": "arith_2args",
-            "if": "defined(__AVX2__)"
-        },
-        {
-            "instr_name": "sub",
-            "datatypes": [
-                "uint64",
-                "uint32"
-            ],
-            "template": "arith_2args_u",
-            "if": "defined(__AVX2__)"
-        },
-        {
-            "instr_name": "subs",
-            "datatypes": [
-                "int16",
-                "int8",
-                "uint16",
-                "uint8"
-            ],
-            "template": "arith_2args",
-            "if": "defined(__AVX2__)"
-        }
-    ],
-    "mul": [
-        {
-            "instr_name": "mul",
-            "datatypes": "all_float",
-            "template": "arith_2args"
-        },
-        {
-            "instr_name": "mullo",
-            "datatypes": [
-                "int32",
-                "int16"
-            ],
-            "template": "arith_2args",
-            "if": "defined(__AVX2__)"
-        }
-    ],
-    "div": [
-        {
-            "instr_name": "div",
-            "datatypes": "all_float",
-            "template": "arith_2args"
-        }
-    ],
-    "min": [
-        {
-            "instr_name": "min",
-            "datatypes": "all_float",
-            "template": "arith_2args"
-        },
-        {
-            "instr_name": "min",
-            "datatypes": [
-                "int32",
-                "int16",
-                "int8",
-                "uint32",
-                "uint16",
-                "uint8"
-            ],
-            "template": "arith_2args",
-            "if": "defined(__AVX2__)"
-        }
-    ],
-    "max": [
-        {
-            "instr_name": "max",
-            "datatypes": "all_float",
-            "template": "arith_2args"
-        },
-        {
-            "instr_name": "max",
-            "datatypes": [
-                "int32",
-                "int16",
-                "int8",
-                "uint32",
-                "uint16",
-                "uint8"
-            ],
-            "template": "arith_2args",
-            "if": "defined(__AVX2__)"
-        }
-    ],
-    "fmadd": [
-        {
-            "instr_name": "fmadd",
-            "datatypes": "all_float",
-            "template": "arith_3args",
-            "if": "defined(__FMA__)"
-        }
-    ],
-    "fnmadd": [
-        {
-            "instr_name": "fnmadd",
-            "datatypes": "all_float",
-            "template": "arith_3args",
-            "if": "defined(__FMA__)"
-        }
-    ],
-    "fmsub": [
-        {
-            "instr_name": "fmsub",
-            "datatypes": "all_float",
-            "template": "arith_3args",
-            "if": "defined(__FMA__)"
-        }
-    ],
-    "fnmsub": [
-        {
-            "instr_name": "fnmsub",
-            "datatypes": "all_float",
-            "template": "arith_3args",
-            "if": "defined(__FMA__)"
         }
     ],
     "andb": [
@@ -427,70 +92,31 @@
             "if": "defined(__AVX2__)"
         }
     ],
-    "orb": [
+    "blend": [
         {
-            "instr_name": "or",
+            "instr_name": "blendv",
             "datatypes": "all_float",
-            "template": "logi_2args"
+            "template": "blend_float"
         },
         {
-            "instr_name": "orb",
+            "instr_name": "blendv",
             "datatypes": "all_int_uint",
-            "template": "logi_2args_e",
-            "if": "!defined(__AVX2__)"
-        },
-        {
-            "instr_name": "or",
-            "datatypes": "all_int_uint",
-            "template": "logi_2args",
+            "template": "blend_int",
             "if": "defined(__AVX2__)"
         }
     ],
-    "orb_k": [
+    "cast": [
         {
-            "instr_name": "orb",
-            "datatypes": "all_datatypes",
-            "template": "logi_m_2args_e",
-            "if": "!defined(__AVX2__)"
-        },
-        {
-            "instr_name": "or",
-            "datatypes": "all_datatypes",
-            "template": "logi_m_2args",
-            "if": "defined(__AVX2__)"
+            "instr_name": "cast",
+            "datatypes": "all_datatypes_cart_prod",
+            "template": "cast"
         }
     ],
-    "xorb": [
+    "cast_k": [
         {
-            "instr_name": "xor",
-            "datatypes": "all_float",
-            "template": "logi_2args"
-        },
-        {
-            "instr_name": "xorb",
-            "datatypes": "all_int_uint",
-            "template": "logi_2args_e",
-            "if": "!defined(__AVX2__)"
-        },
-        {
-            "instr_name": "xor",
-            "datatypes": "all_int_uint",
-            "template": "logi_2args",
-            "if": "defined(__AVX2__)"
-        }
-    ],
-    "xorb_k": [
-        {
-            "instr_name": "xorb",
-            "datatypes": "all_datatypes",
-            "template": "logi_m_2args_e",
-            "if": "!defined(__AVX2__)"
-        },
-        {
-            "instr_name": "xor",
-            "datatypes": "all_datatypes",
-            "template": "logi_m_2args",
-            "if": "defined(__AVX2__)"
+            "instr_name": "cast",
+            "datatypes": "all_datatypes_cart_prod",
+            "template": "cast_k"
         }
     ],
     "cmpeq": [
@@ -504,27 +130,6 @@
             "datatypes": "all_int",
             "template": "arith_2args",
             "if": "defined(__AVX2__)"
-        }
-    ],
-    "cmpneq": [
-        {
-            "instr_name": "cmp",
-            "datatypes": "all_float",
-            "template": "cmpneq_float"
-        }
-    ],
-    "cmplt": [
-        {
-            "instr_name": "cmp",
-            "datatypes": "all_float",
-            "template": "cmplt_float"
-        }
-    ],
-    "cmple": [
-        {
-            "instr_name": "cmp",
-            "datatypes": "all_float",
-            "template": "cmple_float"
         }
     ],
     "cmpge": [
@@ -547,239 +152,82 @@
             "if": "defined(__AVX2__)"
         }
     ],
-    "blend": [
+    "cmple": [
         {
-            "instr_name": "blendv",
+            "instr_name": "cmp",
             "datatypes": "all_float",
-            "template": "blend_float"
-        },
-        {
-            "instr_name": "blendv",
-            "datatypes": "all_int_uint",
-            "template": "blend_int",
-            "if": "defined(__AVX2__)"
+            "template": "cmple_float"
         }
     ],
-    "testz": [
+    "cmplt": [
         {
-            "instr_name": "testz",
-            "datatypes": "all_int_uint",
-            "template": "testz_2args"
-        },
-        {
-            "instr_name": "testz",
+            "instr_name": "cmp",
             "datatypes": "all_float",
-            "template": "testz_2argsf"
+            "template": "cmplt_float"
         }
     ],
-    "hadd": [
+    "cmpneq": [
         {
-            "instr_name": "add",
-            "datatypes": [
-                "float64"
-            ],
-            "template": "reduce_64"
-        },
-        {
-            "instr_name": "add",
-            "datatypes": [
-                "int64"
-            ],
-            "template": "reduce_64",
-            "if": "defined(__AVX2__)"
-        },
-        {
-            "instr_name": "add",
-            "datatypes": [
-                "float32"
-            ],
-            "template": "reduce_32"
-        },
-        {
-            "instr_name": "add",
-            "datatypes": [
-                "int32"
-            ],
-            "template": "reduce_32",
-            "if": "defined(__AVX2__)"
-        },
-        {
-            "instr_name": "add",
-            "datatypes": [
-                "int16"
-            ],
-            "template": "reduce_16",
-            "if": "defined(__AVX2__)"
-        },
-        {
-            "instr_name": "adds",
-            "datatypes": [
-                "uint16"
-            ],
-            "template": "reduce_16",
-            "if": "defined(__AVX2__)"
-        },
-        {
-            "instr_name": "add",
-            "datatypes": [
-                "int8"
-            ],
-            "template": "reduce_8",
-            "if": "defined(__AVX2__)"
-        },
-        {
-            "instr_name": "adds",
-            "datatypes": [
-                "uint8"
-            ],
-            "template": "reduce_8",
-            "if": "defined(__AVX2__)"
-        },
-        {
-            "instr_name": "add",
-            "datatypes": [
-                "uint64"
-            ],
-            "template": "reduce_64_u",
-            "if": "defined(__AVX2__)"
-        },
-        {
-            "instr_name": "add",
-            "datatypes": [
-                "uint32"
-            ],
-            "template": "reduce_32_u",
-            "if": "defined(__AVX2__)"
-        }
-    ],
-    "hmul": [
-        {
-            "instr_name": "mul",
-            "datatypes": [
-                "float64"
-            ],
-            "template": "reduce_64"
-        },
-        {
-            "instr_name": "mul",
-            "datatypes": [
-                "float32"
-            ],
-            "template": "reduce_32"
-        },
-        {
-            "instr_name": "mullo",
-            "datatypes": [
-                "int32"
-            ],
-            "template": "reduce_32",
-            "if": "defined(__AVX2__)"
-        },
-        {
-            "instr_name": "mullo",
-            "datatypes": [
-                "int16"
-            ],
-            "template": "reduce_16",
-            "if": "defined(__AVX2__)"
-        }
-    ],
-    "hmin": [
-        {
-            "instr_name": "min",
-            "datatypes": [
-                "float64"
-            ],
-            "template": "reduce_64"
-        },
-        {
-            "instr_name": "min",
-            "datatypes": [
-                "float32"
-            ],
-            "template": "reduce_32"
-        },
-        {
-            "instr_name": "min",
-            "datatypes": [
-                "int32",
-                "uint32"
-            ],
-            "template": "reduce_32",
-            "if": "defined(__AVX2__)"
-        },
-        {
-            "instr_name": "min",
-            "datatypes": "all_16bit",
-            "template": "reduce_16",
-            "if": "defined(__AVX2__)"
-        },
-        {
-            "instr_name": "min",
-            "datatypes": "all_8bit",
-            "template": "reduce_8",
-            "if": "defined(__AVX2__)"
-        }
-    ],
-    "hmax": [
-        {
-            "instr_name": "max",
-            "datatypes": [
-                "float64"
-            ],
-            "template": "reduce_64"
-        },
-        {
-            "instr_name": "max",
-            "datatypes": [
-                "float32"
-            ],
-            "template": "reduce_32"
-        },
-        {
-            "instr_name": "max",
-            "datatypes": [
-                "int32",
-                "uint32"
-            ],
-            "template": "reduce_32",
-            "if": "defined(__AVX2__)"
-        },
-        {
-            "instr_name": "max",
-            "datatypes": "all_16bit",
-            "template": "reduce_16",
-            "if": "defined(__AVX2__)"
-        },
-        {
-            "instr_name": "max",
-            "datatypes": "all_8bit",
-            "template": "reduce_8",
-            "if": "defined(__AVX2__)"
-        }
-    ],
-    "round": [
-        {
-            "instr_name": "round",
+            "instr_name": "cmp",
             "datatypes": "all_float",
-            "template": "round_float"
-        },
+            "template": "cmpneq_float"
+        }
+    ],
+    "cvt": [
         {
             "instr_name": "",
-            "datatypes": "all_int_uint",
+            "datatypes": [
+                "float64,float64",
+                "float32,float32",
+                "int64,int64",
+                "int32,int32",
+                "uint64,uint64",
+                "uint32,uint32",
+                "int16,int16",
+                "int8,int8",
+                "uint16,uint16",
+                "uint8,uint8"
+            ],
             "template": "round_int"
         }
     ],
-    "lshift": [
+    "div": [
         {
-            "instr_name": "slli",
-            "datatypes": [
-                "int16",
-                "int32",
-                "int64"
-            ],
-            "template": "sll",
-            "if": "defined(__AVX2__)"
+            "instr_name": "div",
+            "datatypes": "all_float",
+            "template": "arith_2args"
+        }
+    ],
+    "fmadd": [
+        {
+            "instr_name": "fmadd",
+            "datatypes": "all_float",
+            "template": "arith_3args",
+            "if": "defined(__FMA__)"
+        }
+    ],
+    "fmsub": [
+        {
+            "instr_name": "fmsub",
+            "datatypes": "all_float",
+            "template": "arith_3args",
+            "if": "defined(__FMA__)"
+        }
+    ],
+    "fnmadd": [
+        {
+            "instr_name": "fnmadd",
+            "datatypes": "all_float",
+            "template": "arith_3args",
+            "if": "defined(__FMA__)"
+        }
+    ],
+    "fnmsub": [
+        {
+            "instr_name": "fnmsub",
+            "datatypes": "all_float",
+            "template": "arith_3args",
+            "if": "defined(__FMA__)"
         }
     ],
     "gather": [
@@ -822,24 +270,6 @@
         {
             "instr_name": "gather",
             "datatypes": [
-                "float64,float64"
-            ],
-            "template": "gather_maskz_f64",
-            "if": "defined(__AVX2__)",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "gather",
-            "datatypes": [
-                "int64,int64"
-            ],
-            "template": "gather_maskz_i64",
-            "if": "defined(__AVX2__)",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "gather",
-            "datatypes": [
                 "float32,float32"
             ],
             "template": "gather_masks_f32",
@@ -849,47 +279,417 @@
         {
             "instr_name": "gather",
             "datatypes": [
-                "float32,float32"
-            ],
-            "template": "gather_maskz_f32",
-            "if": "defined(__AVX2__)",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "gather",
-            "datatypes": [
                 "int32,int32"
             ],
             "template": "gather_masks_i32",
             "if": "defined(__AVX2__)",
             "version": "masks"
-        },
-        {
-            "instr_name": "gather",
-            "datatypes": [
-                "int32,int32"
-            ],
-            "template": "gather_maskz_i32",
-            "if": "defined(__AVX2__)",
-            "version": "maskz"
         }
     ],
-    "cvt": [
+    "getfirst": [
+        {
+            "instr_name": "extract",
+            "datatypes": [
+                "int64",
+                "int32",
+                "uint64",
+                "uint32"
+            ],
+            "template": "getfirst"
+        },
+        {
+            "instr_name": "extract",
+            "datatypes": [
+                "int16",
+                "int8",
+                "uint16",
+                "uint8"
+            ],
+            "template": "getfirst",
+            "if": "defined(__AVX2__)"
+        },
+        {
+            "instr_name": "extract",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "getfirst_float64"
+        },
+        {
+            "instr_name": "extract",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "getfirst_float32"
+        }
+    ],
+    "load": [
+        {
+            "instr_name": "load",
+            "datatypes": "all_datatypes",
+            "template": "load",
+            "if": "defined(MIPP_ALIGNED_LOADS)"
+        },
+        {
+            "instr_name": "loadu",
+            "datatypes": "all_datatypes",
+            "template": "load",
+            "if": "!defined(MIPP_ALIGNED_LOADS)"
+        }
+    ],
+    "loadu": [
+        {
+            "instr_name": "loadu",
+            "datatypes": "all_datatypes",
+            "template": "load"
+        }
+    ],
+    "lshift": [
+        {
+            "instr_name": "slli",
+            "datatypes": [
+                "int16",
+                "int32",
+                "int64"
+            ],
+            "template": "sll",
+            "if": "defined(__AVX2__)"
+        }
+    ],
+    "maskst": [
+        {
+            "instr_name": "maskstore",
+            "datatypes": "all_float",
+            "template": "maskst"
+        },
+        {
+            "instr_name": "maskstore",
+            "datatypes": [
+                "int32"
+            ],
+            "template": "maskst",
+            "if": "defined(__AVX2__)"
+        }
+    ],
+    "maskzld": [
+        {
+            "instr_name": "maskload",
+            "datatypes": "all_float",
+            "template": "maskzld"
+        },
+        {
+            "instr_name": "maskload",
+            "datatypes": [
+                "int32"
+            ],
+            "template": "maskzld",
+            "if": "defined(__AVX2__)"
+        }
+    ],
+    "max": [
+        {
+            "instr_name": "max",
+            "datatypes": "all_float",
+            "template": "arith_2args"
+        },
+        {
+            "instr_name": "max",
+            "datatypes": [
+                "int32",
+                "int16",
+                "int8",
+                "uint32",
+                "uint16",
+                "uint8"
+            ],
+            "template": "arith_2args",
+            "if": "defined(__AVX2__)"
+        }
+    ],
+    "min": [
+        {
+            "instr_name": "min",
+            "datatypes": "all_float",
+            "template": "arith_2args"
+        },
+        {
+            "instr_name": "min",
+            "datatypes": [
+                "int32",
+                "int16",
+                "int8",
+                "uint32",
+                "uint16",
+                "uint8"
+            ],
+            "template": "arith_2args",
+            "if": "defined(__AVX2__)"
+        }
+    ],
+    "mul": [
+        {
+            "instr_name": "mul",
+            "datatypes": "all_float",
+            "template": "arith_2args"
+        },
+        {
+            "instr_name": "mullo",
+            "datatypes": [
+                "int32",
+                "int16"
+            ],
+            "template": "arith_2args",
+            "if": "defined(__AVX2__)"
+        }
+    ],
+    "orb": [
+        {
+            "instr_name": "or",
+            "datatypes": "all_float",
+            "template": "logi_2args"
+        },
+        {
+            "instr_name": "orb",
+            "datatypes": "all_int_uint",
+            "template": "logi_2args_e",
+            "if": "!defined(__AVX2__)"
+        },
+        {
+            "instr_name": "or",
+            "datatypes": "all_int_uint",
+            "template": "logi_2args",
+            "if": "defined(__AVX2__)"
+        }
+    ],
+    "orb_k": [
+        {
+            "instr_name": "orb",
+            "datatypes": "all_datatypes",
+            "template": "logi_m_2args_e",
+            "if": "!defined(__AVX2__)"
+        },
+        {
+            "instr_name": "or",
+            "datatypes": "all_datatypes",
+            "template": "logi_m_2args",
+            "if": "defined(__AVX2__)"
+        }
+    ],
+    "round": [
+        {
+            "instr_name": "round",
+            "datatypes": "all_float",
+            "template": "round_float"
+        },
         {
             "instr_name": "",
-            "datatypes": [
-                "float64,float64",
-                "float32,float32",
-                "int64,int64",
-                "int32,int32",
-                "uint64,uint64",
-                "uint32,uint32",
-                "int16,int16",
-                "int8,int8",
-                "uint16,uint16",
-                "uint8,uint8"
-            ],
+            "datatypes": "all_int_uint",
             "template": "round_int"
+        }
+    ],
+    "rsqrt": [
+        {
+            "instr_name": "rsqrt",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "arith_1arg"
+        }
+    ],
+    "set": [
+        {
+            "datatypes": [
+                "float64"
+            ],
+            "template": "set-64f"
+        },
+        {
+            "datatypes": [
+                "float32"
+            ],
+            "template": "set-32f"
+        },
+        {
+            "datatypes": [
+                "int32",
+                "uint32"
+            ],
+            "template": "set-32"
+        },
+        {
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "set-64"
+        },
+        {
+            "datatypes": "all_16bit",
+            "template": "set-16"
+        },
+        {
+            "datatypes": "all_8bit",
+            "template": "set-8"
+        }
+    ],
+    "set0": [
+        {
+            "instr_name": "setzero",
+            "datatypes": "all_datatypes",
+            "template": "set0"
+        }
+    ],
+    "set0_k": [
+        {
+            "instr_name": "setzero",
+            "datatypes": "all_datatypes",
+            "template": "set0_k"
+        }
+    ],
+    "set1": [
+        {
+            "instr_name": "set1",
+            "datatypes": "all_float",
+            "template": "set1"
+        },
+        {
+            "instr_name": "set1",
+            "datatypes": [
+                "int64"
+            ],
+            "template": "set1x"
+        },
+        {
+            "instr_name": "set1",
+            "datatypes": [
+                "int32",
+                "int16",
+                "int8"
+            ],
+            "template": "set1"
+        }
+    ],
+    "set1_k": [
+        {
+            "datatypes": "all_8bit",
+            "template": "set1_k-8"
+        },
+        {
+            "datatypes": "all_16bit",
+            "template": "set1_k-16"
+        },
+        {
+            "datatypes": "all_32bit",
+            "template": "set1_k-32"
+        },
+        {
+            "datatypes": "all_64bit",
+            "template": "set1_k-64"
+        }
+    ],
+    "set_k": [
+        {
+            "datatypes": "all_8bit",
+            "template": "set_k-8"
+        },
+        {
+            "datatypes": "all_16bit",
+            "template": "set_k-16"
+        },
+        {
+            "datatypes": [
+                "int32",
+                "uint32"
+            ],
+            "template": "set_k-32"
+        },
+        {
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "set_k-64"
+        }
+    ],
+    "sqrt": [
+        {
+            "instr_name": "sqrt",
+            "datatypes": "all_float",
+            "template": "arith_1arg"
+        }
+    ],
+    "store": [
+        {
+            "instr_name": "store",
+            "datatypes": "all_datatypes",
+            "template": "store",
+            "if": "defined(MIPP_ALIGNED_LOADS)"
+        },
+        {
+            "instr_name": "storeu",
+            "datatypes": "all_datatypes",
+            "template": "store",
+            "if": "!defined(MIPP_ALIGNED_LOADS)"
+        }
+    ],
+    "storeu": [
+        {
+            "instr_name": "storeu",
+            "datatypes": "all_datatypes",
+            "template": "store"
+        }
+    ],
+    "sub": [
+        {
+            "instr_name": "sub",
+            "datatypes": "all_float",
+            "template": "arith_2args"
+        },
+        {
+            "instr_name": "sub",
+            "datatypes": [
+                "int64",
+                "int32"
+            ],
+            "template": "arith_2args",
+            "if": "defined(__AVX2__)"
+        },
+        {
+            "instr_name": "subs",
+            "datatypes": [
+                "int16",
+                "int8",
+                "uint16",
+                "uint8"
+            ],
+            "template": "arith_2args",
+            "if": "defined(__AVX2__)"
+        }
+    ],
+    "testz": [
+        {
+            "instr_name": "testz",
+            "datatypes": "all_int_uint",
+            "template": "testz_2args"
+        },
+        {
+            "instr_name": "testz",
+            "datatypes": "all_float",
+            "template": "testz_2argsf"
+        }
+    ],
+    "tomsk": [
+        {
+            "instr_name": "cast",
+            "datatypes": "all_datatypes",
+            "template": "tomsk"
+        }
+    ],
+    "toreg": [
+        {
+            "instr_name": "cast",
+            "datatypes": "all_datatypes",
+            "template": "toreg"
         }
     ],
     "wcvt": [
@@ -900,13 +700,38 @@
             ],
             "template": "wcvt_int_uint",
             "if": "defined(__AVX2__)"
+        }
+    ],
+    "xorb": [
+        {
+            "instr_name": "xor",
+            "datatypes": "all_float",
+            "template": "logi_2args"
         },
         {
-            "instr_name": "cvt",
-            "datatypes": [
-                "float32,float64"
-            ],
-            "template": "wcvt_float",
+            "instr_name": "xorb",
+            "datatypes": "all_int_uint",
+            "template": "logi_2args_e",
+            "if": "!defined(__AVX2__)"
+        },
+        {
+            "instr_name": "xor",
+            "datatypes": "all_int_uint",
+            "template": "logi_2args",
+            "if": "defined(__AVX2__)"
+        }
+    ],
+    "xorb_k": [
+        {
+            "instr_name": "xorb",
+            "datatypes": "all_datatypes",
+            "template": "logi_m_2args_e",
+            "if": "!defined(__AVX2__)"
+        },
+        {
+            "instr_name": "xor",
+            "datatypes": "all_datatypes",
+            "template": "logi_m_2args",
             "if": "defined(__AVX2__)"
         }
     ]

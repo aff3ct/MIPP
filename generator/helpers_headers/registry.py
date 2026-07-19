@@ -191,7 +191,7 @@ def _load_generic_emu():
             processed[func_name] = []
             for item in items:
                 processed_item = {
-                    "instr_name": item["instr_name"],
+                    "instr_name": item.get("instr_name", func_name),
                     "datatypes": resolve_datatypes(item["datatypes"])
                 }
                 if "version" in item:

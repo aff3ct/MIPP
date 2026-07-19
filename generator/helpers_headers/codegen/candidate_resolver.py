@@ -39,7 +39,10 @@ def _missing_emit_ifdef_end(ifd, file):
         print("#endif", file=file)
 
 def render_template(isa, ff, dt_par, dt_ret, func_name="", lmul=0):
-    j2_template = Template(ff["template"]["code"], undefined=StrictUndefined)
+    tpl_code = ff["template"]["code"]
+    if isinstance(tpl_code, list):
+        tpl_code = "\n".join(tpl_code)
+    j2_template = Template(tpl_code, undefined=StrictUndefined)
     instr_name = ""
     if "instr_name" in ff:
         instr_name = ff["instr_name"]

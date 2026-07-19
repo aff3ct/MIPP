@@ -278,7 +278,19 @@ def audit_and_validate_implementation_levels(isa, implems, implems_emu):
     hw_patterns = []
     
     # 1. Any Jinja2 reference to register, mask, prefix, or data extension variables
-    hw_patterns.append(r'\{\{[^}]*\b(prefix|reg|msk|data_ext)\b[^}]*\}\}')
+    hw_patterns.append(r'\{\{[^}]*\b(prefix|reg|msk|data_ext|uint_data_ext|int_data_ext|reg_dt_ext|msk_short)\b[^}]*\}\}')
+    
+    # MIPP architecture-specific wrapper calls
+    helpers_dir = os.path.dirname(os.path.abspath(__file__))
+    generator_dir = os.path.dirname(helpers_dir)
+    simd_ext_dir = os.path.join(generator_dir, "simd_ext")
+    exts = []
+    if os.path.exists(simd_ext_dir):
+        exts = [d for d in os.listdir(simd_ext_dir) if os.path.isdir(os.path.join(simd_ext_dir, d)) and d != "__pycache__"]
+    if "scalar" not in exts:
+        exts.append("scalar")
+    escaped_exts = [re.escape(e) for e in exts]
+    hw_patterns.append(r'\bmipp_(' + '|'.join(escaped_exts) + r')\b')
     
     # 2. Known register/mask types
     if hw_types:
@@ -316,14 +328,25 @@ def audit_and_validate_implementation_levels(isa, implems, implems_emu):
         for m in matches:
             m_clean = m.strip()
             if m_clean and not m_clean.startswith("{") and not m_clean.endswith("}"):
+                if any(k in m_clean for k in ["isa", "dt_par", "dt_ret", "elif", "else", "endif"]):
+                    continue
                 dep_name = m_clean.split('<')[0].strip()
                 if dep_name:
                     first_word = dep_name.split()[0]
                     if first_word not in ["if", "else", "endif", "for", "endfor"]:
-                        if dep_name not in ["r", "m", "v", "N"] and not dep_name.startswith("{"):
-                            if dep_name != func_name:
-                                deps.add(dep_name)
+                        if dep_name not in ["r", "m", "v", "N", "cast", "cast_k", "toreg", "tomsk"] and not dep_name.startswith("{"):
+                            deps.add(dep_name)
         return deps
+
+    def count_useful_intrinsics(code):
+        if not code:
+            return 0
+        clean_code = re.sub(r"%[^%\n]+%", "", code)
+        clean_code = re.sub(r"\{\{[^}]*\}\}", "JINJA", clean_code)
+        calls = re.findall(r"\b([a-zA-Z0-9_]+)\s*\(", clean_code)
+        ignore = {"if", "for", "while", "switch", "return", "defined", "sizeof", "cast", "toreg", "tomsk", "cast_k"}
+        useful_calls = [c for c in calls if c.lower() not in ignore and "cast" not in c.lower()]
+        return len(useful_calls)
 
     def get_code(choice):
         tpl = choice.get("template", {})
@@ -346,13 +369,16 @@ def audit_and_validate_implementation_levels(isa, implems, implems_emu):
             
             # Detected level
             if has_hardware:
-                detected = 1 if has_deps else 0
+                if has_deps or count_useful_intrinsics(code) > 1:
+                    detected = 1
+                else:
+                    detected = 0
             else:
                 detected = 2
                 
-            declared = choice.get("level", 0)
-            if declared != detected:
-                discrepancies.append((func, choice, "native_implems", declared, detected, deps))
+            expected = 0
+            if expected != detected:
+                discrepancies.append((func, choice, "native_implems", expected, detected, deps))
 
     # Check emu implems (expected level 1)
     for func, choices in implems_emu.items():
@@ -364,13 +390,16 @@ def audit_and_validate_implementation_levels(isa, implems, implems_emu):
             
             # Detected level
             if has_hardware:
-                detected = 1 if has_deps else 0
+                if has_deps or count_useful_intrinsics(code) > 1:
+                    detected = 1
+                else:
+                    detected = 0
             else:
                 detected = 2
                 
-            declared = choice.get("level", 1)
-            if declared != detected:
-                discrepancies.append((func, choice, "emu_implems", declared, detected, deps))
+            expected = 1
+            if expected != detected:
+                discrepancies.append((func, choice, "emu_implems", expected, detected, deps))
 
     if discrepancies:
         print(f"Warning: Level audit found {len(discrepancies)} implementation placement/level discrepancies for ISA '{isa['name']}':", file=sys.stderr)
@@ -378,6 +407,107 @@ def audit_and_validate_implementation_levels(isa, implems, implems_emu):
             dts = ", ".join(list(choice.get("datatypes", []))[:2])
             deps_str = f" (MIPP dependencies: {list(deps)})" if deps else ""
             print(f"  - Function '{func}' [{dts}] in '{table}' has declared/expected level {declared} but detected level {detected}{deps_str} (template code: '{get_code(choice).strip().replace('\n', ' ')[:50]}...')", file=sys.stderr)
+
+    # Dead templates detection
+    import json
+    helpers_dir = os.path.dirname(os.path.abspath(__file__))
+    generator_dir = os.path.dirname(helpers_dir)
+    simd_ext_dir = os.path.join(generator_dir, "simd_ext")
+    isa_dir = os.path.join(simd_ext_dir, isa["name"])
+    native_tpl_path = os.path.join(isa_dir, f"{isa['name']}_native_templates.json")
+    emu_tpl_path = os.path.join(isa_dir, f"{isa['name']}_emu_templates.json")
+
+    native_templates = {}
+    if os.path.exists(native_tpl_path):
+        with open(native_tpl_path, "r") as f:
+            try:
+                native_templates = json.load(f)
+            except Exception:
+                pass
+    emu_templates = {}
+    if os.path.exists(emu_tpl_path):
+        with open(emu_tpl_path, "r") as f:
+            try:
+                emu_templates = json.load(f)
+            except Exception:
+                pass
+
+    native_impl_path = os.path.join(isa_dir, f"{isa['name']}_native_implems.json")
+    emu_impl_path = os.path.join(isa_dir, f"{isa['name']}_emu_implems.json")
+
+    native_implems = {}
+    if os.path.exists(native_impl_path):
+        with open(native_impl_path, "r") as f:
+            try:
+                native_implems = json.load(f)
+            except Exception:
+                pass
+    emu_implems_raw = {}
+    if os.path.exists(emu_impl_path):
+        with open(emu_impl_path, "r") as f:
+            try:
+                emu_implems_raw = json.load(f)
+            except Exception:
+                pass
+
+    all_raw_choices = []
+    for choices in native_implems.values():
+        all_raw_choices.extend(choices)
+    for choices in emu_implems_raw.values():
+        all_raw_choices.extend(choices)
+
+    reachable = set()
+    for choice in all_raw_choices:
+        tpl_key = choice.get("template") or choice.get("template_ref")
+        if tpl_key and isinstance(tpl_key, str):
+            if "." in tpl_key:
+                tpl_key = tpl_key.split(".", 1)[1]
+            reachable.add(tpl_key)
+
+    all_templates = {}
+    for name, info in native_templates.items():
+        if isinstance(info, dict):
+            code_val = info.get("code", "")
+            if isinstance(code_val, list):
+                all_templates[name] = "\n".join(code_val)
+            else:
+                all_templates[name] = str(code_val)
+    for name, info in emu_templates.items():
+        if isinstance(info, dict):
+            code_val = info.get("code", "")
+            if isinstance(code_val, list):
+                all_templates[name] = "\n".join(code_val)
+            else:
+                all_templates[name] = str(code_val)
+
+    placeholder_regex = re.compile(r'\%([^%\n]*)\%')
+    queue = list(reachable)
+    visited = set(reachable)
+    while queue:
+        curr = queue.pop(0)
+        code = all_templates.get(curr, "")
+        if code:
+            matches = placeholder_regex.findall(code)
+            for m in matches:
+                m_clean = m.strip()
+                if m_clean and not m_clean.startswith("{") and not m_clean.endswith("}"):
+                    if any(k in m_clean for k in ["isa", "dt_par", "dt_ret", "elif", "else", "endif"]):
+                        continue
+                    dep_name = m_clean.split('<')[0].strip()
+                    if dep_name and dep_name in all_templates:
+                        if dep_name not in visited:
+                            visited.add(dep_name)
+                            queue.append(dep_name)
+
+    dead_native = sorted([name for name in native_templates if name not in visited])
+    dead_emu = sorted([name for name in emu_templates if name not in visited])
+
+    if dead_native or dead_emu:
+        print(f"Warning: Found dead (unreferenced) templates for ISA '{isa['name']}':", file=sys.stderr)
+        for name in dead_native:
+            print(f"  - Template '{name}' in native_templates is never referenced.", file=sys.stderr)
+        for name in dead_emu:
+            print(f"  - Template '{name}' in emu_templates is never referenced.", file=sys.stderr)
 
 def validate_categories_config(categories_dict):
     validate_json_data(categories_dict, "categories_schema.json", label="registry_categories.json")
