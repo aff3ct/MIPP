@@ -33,12 +33,6 @@
             "template": "logi_2args"
         },
         {
-            "instr_name": "andb",
-            "datatypes": "all_int_uint",
-            "template": "logi_2args_e",
-            "if": "!defined(__AVX2__)"
-        },
-        {
             "instr_name": "and",
             "datatypes": "all_int_uint",
             "template": "logi_2args",
@@ -46,12 +40,6 @@
         }
     ],
     "andb_k": [
-        {
-            "instr_name": "andb",
-            "datatypes": "all_datatypes",
-            "template": "logi_m_2args_e",
-            "if": "!defined(__AVX2__)"
-        },
         {
             "instr_name": "and",
             "datatypes": "all_datatypes",
@@ -66,12 +54,6 @@
             "template": "logi_2args"
         },
         {
-            "instr_name": "andnb",
-            "datatypes": "all_int_uint",
-            "template": "logi_2args_e",
-            "if": "!defined(__AVX2__)"
-        },
-        {
             "instr_name": "andnot",
             "datatypes": "all_int_uint",
             "template": "logi_2args",
@@ -79,12 +61,6 @@
         }
     ],
     "andnb_k": [
-        {
-            "instr_name": "andnb",
-            "datatypes": "all_datatypes",
-            "template": "logi_m_2args_e",
-            "if": "!defined(__AVX2__)"
-        },
         {
             "instr_name": "andnot",
             "datatypes": "all_datatypes",
@@ -173,24 +149,7 @@
             "template": "cmpneq_float"
         }
     ],
-    "cvt": [
-        {
-            "instr_name": "",
-            "datatypes": [
-                "float64,float64",
-                "float32,float32",
-                "int64,int64",
-                "int32,int32",
-                "uint64,uint64",
-                "uint32,uint32",
-                "int16,int16",
-                "int8,int8",
-                "uint16,uint16",
-                "uint8,uint8"
-            ],
-            "template": "round_int"
-        }
-    ],
+    "cvt": [],
     "div": [
         {
             "instr_name": "div",
@@ -449,12 +408,6 @@
             "template": "logi_2args"
         },
         {
-            "instr_name": "orb",
-            "datatypes": "all_int_uint",
-            "template": "logi_2args_e",
-            "if": "!defined(__AVX2__)"
-        },
-        {
             "instr_name": "or",
             "datatypes": "all_int_uint",
             "template": "logi_2args",
@@ -462,12 +415,6 @@
         }
     ],
     "orb_k": [
-        {
-            "instr_name": "orb",
-            "datatypes": "all_datatypes",
-            "template": "logi_m_2args_e",
-            "if": "!defined(__AVX2__)"
-        },
         {
             "instr_name": "or",
             "datatypes": "all_datatypes",
@@ -480,11 +427,6 @@
             "instr_name": "round",
             "datatypes": "all_float",
             "template": "round_float"
-        },
-        {
-            "instr_name": "",
-            "datatypes": "all_int_uint",
-            "template": "round_int"
         }
     ],
     "rsqrt": [
@@ -709,12 +651,6 @@
             "template": "logi_2args"
         },
         {
-            "instr_name": "xorb",
-            "datatypes": "all_int_uint",
-            "template": "logi_2args_e",
-            "if": "!defined(__AVX2__)"
-        },
-        {
             "instr_name": "xor",
             "datatypes": "all_int_uint",
             "template": "logi_2args",
@@ -722,12 +658,6 @@
         }
     ],
     "xorb_k": [
-        {
-            "instr_name": "xorb",
-            "datatypes": "all_datatypes",
-            "template": "logi_m_2args_e",
-            "if": "!defined(__AVX2__)"
-        },
         {
             "instr_name": "xor",
             "datatypes": "all_datatypes",

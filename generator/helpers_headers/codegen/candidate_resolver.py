@@ -461,7 +461,7 @@ def resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators
                 continue
                 
             for cand in candidates_map[key]:
-                if cand.get("resolved", False):
+                if cand.get("emitted", False):
                     continue
                 if cand["level"] > max_level:
                     continue
@@ -545,8 +545,9 @@ def resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators
                         
                 if deps_satisfied:
                     restricted_target_cond = normalize_cond(restricted_target_cond)
+                    if restricted_target_cond == "0":
+                        continue
                     resolved[key].append((cand, restricted_target_cond))
-                    cand["resolved"] = True
                     
                     if cand["level"] < 4:
                         working_impls[key].append(restricted_target_cond)

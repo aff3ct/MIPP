@@ -39,12 +39,38 @@
             "return %load<tp>%(ptr1);"
         ]
     },
+    "blend_via_andnot_ps_emu": {
+        "format": "long",
+        "code": [
+            "%r<c:float|b:32>% rmi = %cast<tp,c:float|b:32>%(%toreg<tp>%(m0));",
+            "%r<c:float|b:32>% r0i = %cast<tp,c:float|b:32>%(r0);",
+            "%r<c:float|b:32>% r1i = %cast<tp,c:float|b:32>%(r1);",
+            "%r<c:float|b:32>% resi = %orb<c:float|b:32>%(%andb<c:float|b:32>%(r1i, rmi), %andnb<c:float|b:32>%(rmi, r0i));",
+            "return %cast<c:float|b:32,tr>%(resi);"
+        ]
+    },
+    "blend_via_float_emu": {
+        "format": "long",
+        "code": [
+            "%r<c:float|b:tp>% r0f = %cast<tp,c:float|b:tp>%(r0);",
+            "%r<c:float|b:tp>% r1f = %cast<tp,c:float|b:tp>%(r1);",
+            "%m<c:float|b:tp>% m0f = %cast_k<tp,c:float|b:tp>%(m0);",
+            "%r<c:float|b:tp>% resf = %blend<c:float|b:tp>%(r0f, r1f, m0f);",
+            "return %cast<c:float|b:tp,tp>%(resf);"
+        ]
+    },
     "cmpeq_u": {
         "format": "long",
         "code": [
             "%r<c:int|b:tp>% r0s = %cast<tp,c:int|b:tp>%(r0);",
             "%r<c:int|b:tp>% r1s = %cast<tp,c:int|b:tp>%(r1);",
             "return %cast_k<c:int|b:tp,tp>%(%cmpeq<c:int|b:tp>%(r0s, r1s));"
+        ]
+    },
+    "cmpeq_via_cast_emu": {
+        "format": "long",
+        "code": [
+            "return %cast_k<c:float,tp>%(%cmpeq<c:float>%(%cast<tp,c:float>%(r0), %cast<tp,c:float>%(r1)));"
         ]
     },
     "cmpge_u_emu": {
@@ -170,6 +196,32 @@
     "get_k": {
         "format": "long",
         "code": "return %get<tp>%(%toreg<tp>%(m0), v0);"
+    },
+    "getfirst": {
+        "format": "long",
+        "code": "return %get<tp>%(r0, 0);"
+    },
+    "hadd_to_scal": {
+        "format": "long",
+        "code": "return  %hadd<tp>%(r0);"
+    },
+    "logi_2args_e": {
+        "format": "long",
+        "code": [
+            "%r<c:float|b:32>% r0f = %cast<tp,c:float|b:32>%(r0);",
+            "%r<c:float|b:32>% r1f = %cast<tp,c:float|b:32>%(r1);",
+            "%r<c:float|b:32>% resf = %{{ instr_name }}<c:float|b:32>%(r0f, r1f);",
+            "return %cast<c:float|b:32,tp>%(resf);"
+        ]
+    },
+    "logi_m_2args_e": {
+        "format": "long",
+        "code": [
+            "%r<c:float|b:32>% r0f = %toreg<c:float|b:32>%(%cast_k<tp,c:float|b:32>%(m0));",
+            "%r<c:float|b:32>% r1f = %toreg<c:float|b:32>%(%cast_k<tp,c:float|b:32>%(m1));",
+            "%r<c:float|b:32>% resf = %{{ instr_name }}<c:float|b:32>%(r0f, r1f);",
+            "return %tomsk<tp>%(%cast<c:float|b:32,tp>%(resf));"
+        ]
     },
     "max_emu": {
         "format": "long",
@@ -331,6 +383,14 @@
     "set_k-xxf": {
         "format": "long",
         "code": "return %cast_k<c:int,tr>%(%set_k<c:int>%(vals));"
+    },
+    "testz_2": {
+        "format": "long",
+        "code": [
+            "%r<c:int|b:32>% r32 = %set1<c:int|b:32>%(-1);",
+            "%m<c:int|b:32>% m32 = %tomsk<c:int|b:32>%(r32);",
+            "return %testz<tp>%(m0, %cast_k<c:int|b:32,tp>%(m32));"
+        ]
     },
     "tomsk_emu": {
         "format": "long",

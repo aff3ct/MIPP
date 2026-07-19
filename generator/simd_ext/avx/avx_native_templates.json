@@ -125,27 +125,9 @@
         "format": "short",
         "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(r0.r, r1.r);"
     },
-    "logi_2args_e": {
-        "format": "long",
-        "code": [
-            "%r<c:float|b:32>% r0f = %cast<tp,c:float|b:32>%(r0);",
-            "%r<c:float|b:32>% r1f = %cast<tp,c:float|b:32>%(r1);",
-            "%r<c:float|b:32>% resf = %{{ instr_name }}<c:float|b:32>%(r0f, r1f);",
-            "return %cast<c:float|b:32,tp>%(resf);"
-        ]
-    },
     "logi_m_2args": {
         "format": "short",
         "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_msk }}(m0.m, m1.m);"
-    },
-    "logi_m_2args_e": {
-        "format": "long",
-        "code": [
-            "%r<c:float|b:32>% r0f = %toreg<c:float|b:32>%(%cast_k<tp,c:float|b:32>%(m0));",
-            "%r<c:float|b:32>% r1f = %toreg<c:float|b:32>%(%cast_k<tp,c:float|b:32>%(m1));",
-            "%r<c:float|b:32>% resf = %{{ instr_name }}<c:float|b:32>%(r0f, r1f);",
-            "return %tomsk<tp>%(%cast<c:float|b:32,tp>%(resf));"
-        ]
     },
     "maskst": {
         "format": "short",
@@ -158,10 +140,6 @@
     "round_float": {
         "format": "short",
         "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r,(_MM_FROUND_TO_NEAREST_INT |_MM_FROUND_NO_EXC));"
-    },
-    "round_int": {
-        "format": "short",
-        "code": "r0.r;"
     },
     "set-16": {
         "format": "short",

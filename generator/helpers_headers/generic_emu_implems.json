@@ -4,9 +4,20 @@
             "instr_name": "add",
             "datatypes": "all_uint",
             "preferred_simd_ext": [
-                "sse"
+                "sse",
+                "avx"
             ],
             "template_ref": "tpl_generic_emu.arith_2args_u"
+        }
+    ],
+    "andb": [
+        {
+            "instr_name": "andb",
+            "datatypes": "all_int_uint",
+            "preferred_simd_ext": [
+                "avx"
+            ],
+            "template_ref": "tpl_generic_emu.logi_2args_e"
         }
     ],
     "andb_k": [
@@ -16,6 +27,24 @@
                 "sse"
             ],
             "template_ref": "tpl_generic_emu.andb_k_emu"
+        },
+        {
+            "instr_name": "andb",
+            "datatypes": "all_datatypes",
+            "preferred_simd_ext": [
+                "avx"
+            ],
+            "template_ref": "tpl_generic_emu.logi_m_2args_e"
+        }
+    ],
+    "andnb": [
+        {
+            "instr_name": "andnb",
+            "datatypes": "all_int_uint",
+            "preferred_simd_ext": [
+                "avx"
+            ],
+            "template_ref": "tpl_generic_emu.logi_2args_e"
         }
     ],
     "andnb_k": [
@@ -25,6 +54,40 @@
                 "sse"
             ],
             "template_ref": "tpl_generic_emu.andnb_k_emu"
+        },
+        {
+            "instr_name": "andnb",
+            "datatypes": "all_datatypes",
+            "preferred_simd_ext": [
+                "avx"
+            ],
+            "template_ref": "tpl_generic_emu.logi_m_2args_e"
+        }
+    ],
+    "blend": [
+        {
+            "datatypes": [
+                "int64",
+                "int32",
+                "uint64",
+                "uint32"
+            ],
+            "preferred_simd_ext": [
+                "avx"
+            ],
+            "template_ref": "tpl_generic_emu.blend_via_float_emu"
+        },
+        {
+            "datatypes": [
+                "int16",
+                "int8",
+                "uint16",
+                "uint8"
+            ],
+            "preferred_simd_ext": [
+                "avx"
+            ],
+            "template_ref": "tpl_generic_emu.blend_via_andnot_ps_emu"
         }
     ],
     "cmpeq": [
@@ -47,6 +110,28 @@
                 "sse"
             ],
             "template_ref": "tpl_generic_emu.cmpeq_u"
+        },
+        {
+            "datatypes": [
+                "int64",
+                "int32",
+                "uint64",
+                "uint32"
+            ],
+            "preferred_simd_ext": [
+                "avx"
+            ],
+            "template_ref": "tpl_generic_emu.cmpeq_via_cast_emu"
+        },
+        {
+            "datatypes": [
+                "uint16",
+                "uint8"
+            ],
+            "preferred_simd_ext": [
+                "avx"
+            ],
+            "template_ref": "tpl_generic_emu.cmpeq_u"
         }
     ],
     "cmpge": [
@@ -67,6 +152,26 @@
             ],
             "preferred_simd_ext": [
                 "sse"
+            ],
+            "template_ref": "tpl_generic_emu.cmpge_u_emu"
+        },
+        {
+            "datatypes": [
+                "uint64"
+            ],
+            "preferred_simd_ext": [
+                "avx"
+            ],
+            "template_ref": "tpl_generic_emu.cmpge_u_emu"
+        },
+        {
+            "datatypes": [
+                "uint32",
+                "uint16",
+                "uint8"
+            ],
+            "preferred_simd_ext": [
+                "avx"
             ],
             "template_ref": "tpl_generic_emu.cmpge_u_emu"
         }
@@ -107,6 +212,42 @@
                 "sse"
             ],
             "template_ref": "tpl_generic_emu.cmpgt_u-8"
+        },
+        {
+            "datatypes": [
+                "uint8"
+            ],
+            "preferred_simd_ext": [
+                "avx"
+            ],
+            "template_ref": "tpl_generic_emu.cmpgt_u-8"
+        },
+        {
+            "datatypes": [
+                "uint16"
+            ],
+            "preferred_simd_ext": [
+                "avx"
+            ],
+            "template_ref": "tpl_generic_emu.cmpgt_u-16"
+        },
+        {
+            "datatypes": [
+                "uint32"
+            ],
+            "preferred_simd_ext": [
+                "avx"
+            ],
+            "template_ref": "tpl_generic_emu.cmpgt_u-32"
+        },
+        {
+            "datatypes": [
+                "uint64"
+            ],
+            "preferred_simd_ext": [
+                "avx"
+            ],
+            "template_ref": "tpl_generic_emu.cmpgt_u-64"
         }
     ],
     "cmple": [
@@ -127,6 +268,26 @@
             ],
             "preferred_simd_ext": [
                 "sse"
+            ],
+            "template_ref": "tpl_generic_emu.cmple_u_emu"
+        },
+        {
+            "datatypes": [
+                "uint64"
+            ],
+            "preferred_simd_ext": [
+                "avx"
+            ],
+            "template_ref": "tpl_generic_emu.cmple_u_emu"
+        },
+        {
+            "datatypes": [
+                "uint32",
+                "uint16",
+                "uint8"
+            ],
+            "preferred_simd_ext": [
+                "avx"
             ],
             "template_ref": "tpl_generic_emu.cmple_u_emu"
         }
@@ -151,6 +312,26 @@
                 "sse"
             ],
             "template_ref": "tpl_generic_emu.cmplt_u_emu"
+        },
+        {
+            "datatypes": [
+                "uint64"
+            ],
+            "preferred_simd_ext": [
+                "avx"
+            ],
+            "template_ref": "tpl_generic_emu.cmplt_u_emu"
+        },
+        {
+            "datatypes": [
+                "uint32",
+                "uint16",
+                "uint8"
+            ],
+            "preferred_simd_ext": [
+                "avx"
+            ],
+            "template_ref": "tpl_generic_emu.cmplt_u_emu"
         }
     ],
     "cmpneq": [
@@ -158,7 +339,8 @@
             "datatypes": "all_64bit",
             "preferred_simd_ext": [
                 "neon",
-                "sse"
+                "sse",
+                "avx"
             ],
             "template_ref": "tpl_generic_emu.cmpneq"
         },
@@ -174,9 +356,31 @@
             ],
             "preferred_simd_ext": [
                 "neon",
-                "sse"
+                "sse",
+                "avx"
             ],
             "template_ref": "tpl_generic_emu.cmpneq"
+        }
+    ],
+    "cvt": [
+        {
+            "instr_name": "",
+            "datatypes": [
+                "float64,float64",
+                "float32,float32",
+                "int64,int64",
+                "int32,int32",
+                "uint64,uint64",
+                "uint32,uint32",
+                "int16,int16",
+                "int8,int8",
+                "uint16,uint16",
+                "uint8,uint8"
+            ],
+            "preferred_simd_ext": [
+                "avx"
+            ],
+            "template_ref": "tpl_generic_emu.round_int"
         }
     ],
     "div2": [
@@ -200,7 +404,8 @@
             ],
             "preferred_simd_ext": [
                 "neon",
-                "sse"
+                "sse",
+                "avx"
             ],
             "template_ref": "tpl_generic_emu.fmadd"
         },
@@ -211,7 +416,8 @@
             ],
             "preferred_simd_ext": [
                 "neon",
-                "sse"
+                "sse",
+                "avx"
             ],
             "template_ref": "tpl_generic_emu.fmadd"
         }
@@ -222,7 +428,8 @@
                 "float64"
             ],
             "preferred_simd_ext": [
-                "neon"
+                "neon",
+                "avx"
             ],
             "template_ref": "tpl_generic_emu.fmsub"
         },
@@ -232,7 +439,8 @@
                 "int32"
             ],
             "preferred_simd_ext": [
-                "neon"
+                "neon",
+                "avx"
             ],
             "template_ref": "tpl_generic_emu.fmsub"
         }
@@ -243,7 +451,8 @@
                 "float64"
             ],
             "preferred_simd_ext": [
-                "neon"
+                "neon",
+                "avx"
             ],
             "template_ref": "tpl_generic_emu.fnmadd"
         },
@@ -253,7 +462,8 @@
                 "int32"
             ],
             "preferred_simd_ext": [
-                "neon"
+                "neon",
+                "avx"
             ],
             "template_ref": "tpl_generic_emu.fnmadd"
         }
@@ -264,7 +474,8 @@
                 "float64"
             ],
             "preferred_simd_ext": [
-                "neon"
+                "neon",
+                "avx"
             ],
             "template_ref": "tpl_generic_emu.fnmsub"
         },
@@ -274,7 +485,8 @@
                 "int32"
             ],
             "preferred_simd_ext": [
-                "neon"
+                "neon",
+                "avx"
             ],
             "template_ref": "tpl_generic_emu.fnmsub"
         }
@@ -284,7 +496,8 @@
             "datatypes": "all_64bit",
             "preferred_simd_ext": [
                 "neon",
-                "sse"
+                "sse",
+                "avx"
             ],
             "template_ref": "tpl_generic_emu.get"
         },
@@ -300,7 +513,8 @@
             ],
             "preferred_simd_ext": [
                 "neon",
-                "sse"
+                "sse",
+                "avx"
             ],
             "template_ref": "tpl_generic_emu.get"
         }
@@ -310,7 +524,8 @@
             "datatypes": "all_64bit",
             "preferred_simd_ext": [
                 "neon",
-                "sse"
+                "sse",
+                "avx"
             ],
             "template_ref": "tpl_generic_emu.get_k"
         },
@@ -326,9 +541,32 @@
             ],
             "preferred_simd_ext": [
                 "neon",
-                "sse"
+                "sse",
+                "avx"
             ],
             "template_ref": "tpl_generic_emu.get_k"
+        }
+    ],
+    "getfirst": [
+        {
+            "datatypes": "all_datatypes",
+            "preferred_simd_ext": [
+                "sse",
+                "neon",
+                "avx"
+            ],
+            "template_ref": "tpl_generic_emu.getfirst"
+        }
+    ],
+    "hadd_to_scal": [
+        {
+            "datatypes": "all_datatypes",
+            "preferred_simd_ext": [
+                "sse",
+                "neon",
+                "avx"
+            ],
+            "template_ref": "tpl_generic_emu.hadd_to_scal"
         }
     ],
     "max": [
@@ -359,28 +597,32 @@
         {
             "datatypes": "all_64bit",
             "preferred_simd_ext": [
-                "neon"
+                "neon",
+                "avx"
             ],
             "template_ref": "tpl_generic_emu.msb-64"
         },
         {
             "datatypes": "all_32bit",
             "preferred_simd_ext": [
-                "neon"
+                "neon",
+                "avx"
             ],
             "template_ref": "tpl_generic_emu.msb-32"
         },
         {
             "datatypes": "all_16bit",
             "preferred_simd_ext": [
-                "neon"
+                "neon",
+                "avx"
             ],
             "template_ref": "tpl_generic_emu.msb-16"
         },
         {
             "datatypes": "all_8bit",
             "preferred_simd_ext": [
-                "neon"
+                "neon",
+                "avx"
             ],
             "template_ref": "tpl_generic_emu.msb-8"
         }
@@ -390,7 +632,8 @@
             "datatypes": "all_datatypes",
             "preferred_simd_ext": [
                 "neon",
-                "sse"
+                "sse",
+                "avx"
             ],
             "template_ref": "tpl_generic_emu.notb"
         }
@@ -400,9 +643,20 @@
             "datatypes": "all_datatypes",
             "preferred_simd_ext": [
                 "neon",
-                "sse"
+                "sse",
+                "avx"
             ],
             "template_ref": "tpl_generic_emu.notb_k"
+        }
+    ],
+    "orb": [
+        {
+            "instr_name": "orb",
+            "datatypes": "all_int_uint",
+            "preferred_simd_ext": [
+                "avx"
+            ],
+            "template_ref": "tpl_generic_emu.logi_2args_e"
         }
     ],
     "orb_k": [
@@ -412,6 +666,14 @@
                 "sse"
             ],
             "template_ref": "tpl_generic_emu.orb_k_emu"
+        },
+        {
+            "instr_name": "orb",
+            "datatypes": "all_datatypes",
+            "preferred_simd_ext": [
+                "avx"
+            ],
+            "template_ref": "tpl_generic_emu.logi_m_2args_e"
         }
     ],
     "round": [
@@ -419,7 +681,8 @@
             "instr_name": "",
             "datatypes": "all_int_uint",
             "preferred_simd_ext": [
-                "neon"
+                "neon",
+                "avx"
             ],
             "template_ref": "tpl_generic_emu.round_int"
         }
@@ -510,6 +773,14 @@
                 "sse"
             ],
             "template_ref": "tpl_generic_emu.set1_u"
+        },
+        {
+            "instr_name": "set1",
+            "datatypes": "all_uint",
+            "preferred_simd_ext": [
+                "avx"
+            ],
+            "template_ref": "tpl_generic_emu.set1_u"
         }
     ],
     "set1_k": [
@@ -551,7 +822,8 @@
             "datatypes": "all_8bit",
             "preferred_simd_ext": [
                 "neon",
-                "sse"
+                "sse",
+                "avx"
             ],
             "simd_size": 128,
             "template_ref": "tpl_generic_emu.set_k-8"
@@ -560,7 +832,8 @@
             "datatypes": "all_16bit",
             "preferred_simd_ext": [
                 "neon",
-                "sse"
+                "sse",
+                "avx"
             ],
             "simd_size": 128,
             "template_ref": "tpl_generic_emu.set_k-16"
@@ -572,7 +845,8 @@
             ],
             "preferred_simd_ext": [
                 "neon",
-                "sse"
+                "sse",
+                "avx"
             ],
             "simd_size": 128,
             "template_ref": "tpl_generic_emu.set_k-32"
@@ -584,7 +858,8 @@
             ],
             "preferred_simd_ext": [
                 "neon",
-                "sse"
+                "sse",
+                "avx"
             ],
             "simd_size": 128,
             "template_ref": "tpl_generic_emu.set_k-64"
@@ -595,7 +870,8 @@
             ],
             "preferred_simd_ext": [
                 "neon",
-                "sse"
+                "sse",
+                "avx"
             ],
             "simd_size": 128,
             "template_ref": "tpl_generic_emu.set_k-xxf"
@@ -606,7 +882,8 @@
             ],
             "preferred_simd_ext": [
                 "neon",
-                "sse"
+                "sse",
+                "avx"
             ],
             "simd_size": 128,
             "template_ref": "tpl_generic_emu.set_k-xxf"
@@ -617,9 +894,21 @@
             "instr_name": "sub",
             "datatypes": "all_uint",
             "preferred_simd_ext": [
-                "sse"
+                "sse",
+                "avx"
             ],
             "template_ref": "tpl_generic_emu.arith_2args_u"
+        }
+    ],
+    "testz_2": [
+        {
+            "datatypes": "all_datatypes",
+            "preferred_simd_ext": [
+                "sse",
+                "neon",
+                "avx"
+            ],
+            "template_ref": "tpl_generic_emu.testz_2"
         }
     ],
     "tomsk": [
@@ -640,6 +929,16 @@
             "template_ref": "tpl_generic_emu.toreg_emu"
         }
     ],
+    "xorb": [
+        {
+            "instr_name": "xorb",
+            "datatypes": "all_int_uint",
+            "preferred_simd_ext": [
+                "avx"
+            ],
+            "template_ref": "tpl_generic_emu.logi_2args_e"
+        }
+    ],
     "xorb_k": [
         {
             "datatypes": "all_datatypes",
@@ -647,6 +946,14 @@
                 "sse"
             ],
             "template_ref": "tpl_generic_emu.xorb_k_emu"
+        },
+        {
+            "instr_name": "xorb",
+            "datatypes": "all_datatypes",
+            "preferred_simd_ext": [
+                "avx"
+            ],
+            "template_ref": "tpl_generic_emu.logi_m_2args_e"
         }
     ]
 }
