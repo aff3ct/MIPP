@@ -45,7 +45,7 @@
             "%r<c:float|b:32>% rmi = %cast<tp,c:float|b:32>%(%toreg<tp>%(m0));",
             "%r<c:float|b:32>% r0i = %cast<tp,c:float|b:32>%(r0);",
             "%r<c:float|b:32>% r1i = %cast<tp,c:float|b:32>%(r1);",
-            "%r<c:float|b:32>% resi = %orb<c:float|b:32>%(%andb<c:float|b:32>%(r1i, rmi), %andnb<c:float|b:32>%(rmi, r0i));",
+            "%r<c:float|b:32>% resi = %orb<c:float|b:32>%(%andb<c:float|b:32>%(r0i, rmi), %andnb<c:float|b:32>%(rmi, r1i));",
             "return %cast<c:float|b:32,tr>%(resi);"
         ]
     },
