@@ -15,6 +15,7 @@ except ImportError:
     class DummyFore:
         BLUE = ""
         YELLOW = ""
+        MAGENTA = ""
     Fore = DummyFore()
 
 def extend_with_default(validator_class):
@@ -426,6 +427,66 @@ def audit_and_validate_implementation_levels(isa, implems, implems_emu):
             deps_str = f" (MIPP dependencies: {list(deps)})" if deps else ""
             print(Fore.BLUE + f"  - Function '{func}' [{dts}] in '{table}' has declared/expected level {declared} but detected level {detected}{deps_str} (template code: '{get_code(choice).strip().replace('\n', ' ')[:50]}...')", file=sys.stderr)
 
+    # Datatype implementation duplicates check
+    from tools import resolve_datatypes
+    from cond_utils import are_conds_mutually_exclusive
+    func_impls = {}
+    
+    isa_known_true = [isa["define"]] if "define" in isa and isa["define"] else []
+    
+    def collect_impls(table, table_name, default_level):
+        for func, choices in table.items():
+            if func not in func_impls:
+                func_impls[func] = {}
+            for choice in choices:
+                lvl = choice.get("level", default_level)
+                dts = resolve_datatypes(choice.get("datatypes", []))
+                mv = choice.get("version", "no_mask")
+                if mv is None:
+                    mv = "no_mask"
+                cond = choice.get("if", "")
+                for dt in dts:
+                    key = (dt, mv)
+                    if key not in func_impls[func]:
+                        func_impls[func][key] = []
+                    func_impls[func][key].append((lvl, table_name, cond))
+
+    collect_impls(implems, "native_implems", 0)
+    collect_impls(implems_emu, "emu_implems", 1)
+    
+    dup_warnings = []
+    for func, impls_map in func_impls.items():
+        for (dt, mv), locations in impls_map.items():
+            if len(locations) > 1:
+                lvl_map = {}
+                for lvl, tbl, cond in locations:
+                    lvl_map.setdefault(lvl, []).append((tbl, cond))
+                
+                # 1. Duplicates at the same level (only if conditions are not mutually exclusive)
+                for lvl, items in lvl_map.items():
+                    for i in range(len(items)):
+                        for j in range(i + 1, len(items)):
+                            tbl1, cond1 = items[i]
+                            tbl2, cond2 = items[j]
+                            if not are_conds_mutually_exclusive(cond1, cond2, known_true_conds=isa_known_true):
+                                dup_warnings.append((func, dt, mv, f"Duplicate definitions at the same level (level {lvl} in {tbl1} and {tbl2}) with overlapping conditions: '{cond1}' and '{cond2}'"))
+                
+                # 2. Overlap across different levels (only if conditions are not mutually exclusive)
+                if len(lvl_map) > 1:
+                    levels = list(lvl_map.keys())
+                    for i in range(len(levels)):
+                        for j in range(i + 1, len(levels)):
+                            lvl1, lvl2 = levels[i], levels[j]
+                            for tbl1, cond1 in lvl_map[lvl1]:
+                                for tbl2, cond2 in lvl_map[lvl2]:
+                                    if not are_conds_mutually_exclusive(cond1, cond2, known_true_conds=isa_known_true):
+                                        dup_warnings.append((func, dt, mv, f"Overlap across different levels: level {lvl1} ({tbl1}) cond '{cond1}' overlaps with level {lvl2} ({tbl2}) cond '{cond2}'"))
+
+    if "duplicates" in ACTIVE_AUDITS and dup_warnings:
+        print(Fore.MAGENTA + f"Warning: Duplicate audit found {len(dup_warnings)} datatype implementation overlaps for ISA '{isa['name']}':", file=sys.stderr)
+        for func, dt, mv, reason in dup_warnings:
+            print(Fore.MAGENTA + f"  - Function '{func}' for ({dt}, mask: {mv}): {reason}", file=sys.stderr)
+
     # Dead templates detection
     import json
     helpers_dir = os.path.dirname(os.path.abspath(__file__))
@@ -530,11 +591,42 @@ def audit_and_validate_implementation_levels(isa, implems, implems_emu):
 def validate_categories_config(categories_dict):
     validate_json_data(categories_dict, "categories_schema.json", label="registry_categories.json")
 
+def validate_categories_logical_integrity(categories_dict, interfaces_dict):
+    # 1. Check uniqueness (a function should not be in multiple categories)
+    seen_funcs = {}
+    for cat, funcs in categories_dict.items():
+        for f in funcs:
+            if f in seen_funcs:
+                print(f"Error: Logical integrity check failed for registry_categories.json:", file=sys.stderr)
+                print(f"  - Function '{f}' is declared in multiple categories: '{seen_funcs[f]}' and '{cat}'.", file=sys.stderr)
+                sys.exit(1)
+            seen_funcs[f] = cat
+
+    # 2. Check for missing categorizations (audit warning)
+    if "dead-code" in ACTIVE_AUDITS:
+        uncategorized = []
+        for f in interfaces_dict:
+            if f not in seen_funcs:
+                uncategorized.append(f)
+        if uncategorized:
+            uncategorized.sort()
+            print(Fore.YELLOW + "Warning: Found uncategorized functions (declared in registry_interfaces.json but missing from registry_categories.json):", file=sys.stderr)
+            for f in uncategorized:
+                print(Fore.YELLOW + f"  - Function '{f}' is not assigned to any category.", file=sys.stderr)
+
+
 def validate_protos_config(protos_dict):
     validate_json_data(protos_dict, "protos_schema.json", label="registry_protos.json")
 
-def validate_interfaces_config(interfaces_dict):
+def validate_interfaces_config(interfaces_dict, protos_dict):
     validate_json_data(interfaces_dict, "interfaces_schema.json", label="registry_interfaces.json")
+    for func, val in interfaces_dict.items():
+        proto_ref = val.get("proto_ref")
+        if proto_ref not in protos_dict:
+            print(f"Error: Logical integrity check failed for registry_interfaces.json:", file=sys.stderr)
+            print(f"  - Interface '{func}' references prototype '{proto_ref}', which does not exist in registry_protos.json.", file=sys.stderr)
+            sys.exit(1)
+
 
 def validate_scalar_implems_config(scalar_implems_dict):
     validate_json_data(scalar_implems_dict, "scalar_implems_schema.json", label="registry_scalar_implems.json")
@@ -562,3 +654,17 @@ def audit_generic_templates_dead_code(flat_implems, data_templates):
                 print(Fore.YELLOW + f"Warning: Found dead (unreferenced) generic templates in '{section}':", file=sys.stderr)
                 for name in dead:
                     print(Fore.YELLOW + f"  - Template '{name}' in generic templates is never referenced.", file=sys.stderr)
+
+def audit_scalar_implems_dead_code(scalar_implems, interfaces):
+    if "dead-code" not in ACTIVE_AUDITS:
+        return
+    dead = []
+    for func in scalar_implems:
+        if func not in interfaces:
+            dead.append(func)
+    if dead:
+        dead.sort()
+        print(Fore.YELLOW + "Warning: Found dead (unreferenced) function implementations in 'registry_scalar_implems.json':", file=sys.stderr)
+        for func in dead:
+            print(Fore.YELLOW + f"  - Function '{func}' is implemented but does not exist in registry_interfaces.json.", file=sys.stderr)
+

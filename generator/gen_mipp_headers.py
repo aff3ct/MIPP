@@ -276,8 +276,8 @@ def main(argv=None):
     parser.add_argument(
         "--audit",
         nargs="+",
-        choices=["levels", "dead-code", "all", "none"],
-        help="Run audits on the MIPP code database: 'levels' checks implementation level placement discrepancies, 'dead-code' checks for unreferenced templates, 'all' (default) runs all audits, 'none' disables audits.",
+        choices=["levels", "dead-code", "duplicates", "all", "none"],
+        help="Run audits on the MIPP code database: 'levels' checks implementation level placement discrepancies, 'dead-code' checks for unreferenced templates, 'duplicates' checks for datatype implementation level overlaps, 'all' (default) runs all audits, 'none' disables audits.",
         default=["all"],
     )
     
@@ -298,7 +298,7 @@ def main(argv=None):
                     item = item.strip().lower()
                     if item == "all":
                         input_validation.ACTIVE_AUDITS.update(["levels", "dead-code"])
-                    elif item in ("levels", "dead-code"):
+                    elif item in ("levels", "dead-code", "duplicates"):
                         input_validation.ACTIVE_AUDITS.add(item)
 
     # Audit generic templates now that ACTIVE_AUDITS is populated
@@ -307,6 +307,17 @@ def main(argv=None):
         input_validation.audit_generic_templates_dead_code(
             registry.generic_flat_implems, registry.generic_data_templates
         )
+    
+    if registry.scalar_implems is not None and registry.interfaces is not None:
+        input_validation.audit_scalar_implems_dead_code(
+            registry.scalar_implems, registry.interfaces
+        )
+
+    if registry.categories is not None and registry.interfaces is not None:
+        input_validation.validate_categories_logical_integrity(
+            registry.categories, registry.interfaces
+        )
+
 
     # check that all mipp funcs have a scalar implem before to start
     check_mipp_funcs_scalar_implems()
@@ -337,11 +348,6 @@ def main(argv=None):
     print("=" * 85)
     print(" MIPP Header Generator")
     print("=" * 85)
-    sve_isa = isas_dict.get("sve")
-    if sve_isa:
-        print(f"  Target sizes for SVE: {sorted(sve_isa['size'], reverse=True)}")
-    else:
-        print("  Target sizes for SVE: N/A")
     print(f"  LMUL options: {all_lmul} | LDIV options: {all_ldiv}")
     print("-" * 85)
 

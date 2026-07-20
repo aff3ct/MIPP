@@ -86,5 +86,9 @@
     "blend",
     "min",
     "max"
+  ],
+  "converts": [
+    "cvt",
+    "wcvt"
   ]
 }

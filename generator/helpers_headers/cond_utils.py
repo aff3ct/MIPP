@@ -377,21 +377,29 @@ def negate_cond(c):
 
 @lru_cache(maxsize=None)
 def _are_conds_mutually_exclusive_cached(c1, c2, known_true_conds_tuple):
-    n1 = simplify_cond_str(c1, known_true_conds=list(known_true_conds_tuple) if known_true_conds_tuple else None)
-    n2 = simplify_cond_str(c2, known_true_conds=list(known_true_conds_tuple) if known_true_conds_tuple else None)
-    if n1 == "0" or n2 == "0":
-        return True
-    if n1 == "" or n2 == "":
+    tokens1 = _tokenize(c1)
+    tokens2 = _tokenize(c2)
+    if not tokens1 or not tokens2:
         return False
-    neg_n1 = negate_cond(n1)
-    neg_n2 = negate_cond(n2)
-    if n1 == neg_n2 or n2 == neg_n1:
-        return True
-    if n1.startswith("!") and simplify_cond_str(n1[1:], known_true_conds=list(known_true_conds_tuple) if known_true_conds_tuple else None) == n2:
-        return True
-    if n2.startswith("!") and simplify_cond_str(n2[1:], known_true_conds=list(known_true_conds_tuple) if known_true_conds_tuple else None) == n1:
-        return True
-    return False
+    
+    expr1 = _parse(tokens1)
+    expr2 = _parse(tokens2)
+    
+    if known_true_conds_tuple:
+        known_true_exprs = []
+        for kt_str in known_true_conds_tuple:
+            if kt_str and kt_str.strip():
+                kt_tokens = _tokenize(kt_str)
+                if kt_tokens:
+                    known_true_exprs.append(_parse(kt_tokens))
+        if known_true_exprs:
+            expr1 = _substitute_known_true(expr1, known_true_exprs)
+            expr2 = _substitute_known_true(expr2, known_true_exprs)
+            
+    intersection = And([expr1, expr2])
+    simplified = _simplify(intersection)
+    return isinstance(simplified, Term) and simplified.value == "0"
+
 
 def are_conds_mutually_exclusive(c1, c2, known_true_conds=None):
     key = tuple(known_true_conds) if known_true_conds else ()

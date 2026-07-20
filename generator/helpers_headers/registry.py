@@ -66,11 +66,13 @@ def _load_funcs_registry():
 
     from input_validation import (
         validate_protos_config, validate_categories_config,
-        validate_interfaces_config, validate_scalar_implems_config
+        validate_interfaces_config, validate_scalar_implems_config,
+        validate_categories_logical_integrity
     )
     validate_protos_config(raw_protos)
     validate_categories_config(categories)
-    validate_interfaces_config(raw_interfaces)
+    validate_categories_logical_integrity(categories, raw_interfaces)
+    validate_interfaces_config(raw_interfaces, raw_protos)
     validate_scalar_implems_config(raw_scalar_implems)
 
     def resolve_fixed_datatype(fd):
