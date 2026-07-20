@@ -1,19 +1,4 @@
 {
-    "hadd": [
-        {
-            "instr_name": "hadd",
-            "datatypes": "all_datatypes",
-            "preferred_simd_ext": [
-                "sve",
-                "neon",
-                "avx512",
-                "avx",
-                "rvv",
-                "sse"
-            ],
-            "template_ref": "tpl_generic_emu.hadd"
-        }
-    ],
     "add": [
         {
             "instr_name": "add",
@@ -754,19 +739,6 @@
                 "avx512"
             ],
             "template_ref": "tpl_generic_emu.getfirst"
-        }
-    ],
-    "hadd_to_scal": [
-        {
-            "datatypes": "all_datatypes",
-            "preferred_simd_ext": [
-                "sse",
-                "neon",
-                "avx",
-                "avx512",
-                "rvv"
-            ],
-            "template_ref": "tpl_generic_emu.hadd_to_scal"
         }
     ],
     "maskz_add": [

@@ -15,7 +15,7 @@ from .common import (
     SHAPE_RET_REG_0ARG,  # set0
     SHAPE_RET_MSK_0ARG,  # set0_k
     SHAPE_RET_VAL_2ARGS_MSK_VAL,  # get_k
-    SHAPE_RET_VAL_1ARG_REG,  # getfirst,hadd_to_scal
+    SHAPE_RET_VAL_1ARG_REG,  # getfirst,hadd
     SHAPE_RET_REG_3ARGS_2REG_1MSK,  # blend
     SHAPE_RET_MSK_2ARGS_MSK,  # andb_k orb_k xorb_k andnb_k
     SHAPE_RET_REG_1ARG_REG,  # notb
@@ -442,7 +442,7 @@ shape_templates = {
         loop_assert=AS_REG_BINOP,
     ),
 
-    SHAPE_RET_VAL_1ARG_REG: TemplateParts(  # getfirst, hadd_to_scal, hadd, hmul, hmin, hmax
+    SHAPE_RET_VAL_1ARG_REG: TemplateParts(  # getfirst, hadd, hmul, hmin, hmax
         func_decl=FUNC_DECL,
         decl=DECL_1ARG,
         init=INIT_PRED+INIT_1ARG,
@@ -553,22 +553,7 @@ LAYER_OVERRIDES = {
 + "\n\t\tREQUIRE(diff <= tol);"
     },
 
- "hadd_to_scal" : {
-        "loop_assert" :"""\t\tbool ov = false; {{dt_ext}} res = 0;
-\t\tfor(size_t j = 0; j < {{size}}; j++){
-\t\t\tov |= ovf::will_add_overflow<{{dt_ext}}>(res, inputs1[j]);
-\t\t\tif(ov) break;
-\t\t\tres += inputs1[j];
-\t\t}
-\t\tif(ov) {
-\t\t\tINFO("Overflow occurred, skipping assert");
-\t\t}else{\n\t"""
-+ "\t\t {{dt_ext}} res1 = mipp::{{func}}{{mask_kind}}({{mask_args}}r1);\n \t\t{{dt_ext}} res2 = mipp::{{func}}{{mask_kind_scalar}}({{mask_args_scalar}}s1);\n"
-+ "\n\t\t{{dt_ext}} tol  = 1e-4f * abs_diff::abs_diff(res2) + 1.0f;"
-+ "\n\t\t{{dt_ext}} diff = abs_diff::abs_diff(res1, res2);"
-+ "\n\t\tREQUIRE(diff <= tol);"
-+ """\n\t\t}""",
-    },
+
 
     "hadd" : {
         "loop_assert" :"""\t\tbool ov = false; {{dt_ext}} res = 0;
@@ -673,7 +658,6 @@ NO_LOOP_FUNCS = {
     "hmul",
     "hmin",
     "hmax",
-    "hadd_to_scal",
     "getfirst",
     "testz",
     "testz_2",

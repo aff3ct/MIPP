@@ -1,8 +1,4 @@
 {
-    "hadd": {
-        "format": "long",
-        "code": "return %hadd_to_scal<tp>%(r0);"
-    },
     "testz_emu": {
         "format": "long",
         "code": [
@@ -248,10 +244,6 @@
     "getfirst": {
         "format": "long",
         "code": "return %get<tp>%(r0, 0);"
-    },
-    "hadd_to_scal": {
-        "format": "long",
-        "code": "return  %hadd<tp>%(r0);"
     },
     "logi_2args_e": {
         "format": "long",

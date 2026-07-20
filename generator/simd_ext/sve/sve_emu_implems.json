@@ -64,7 +64,7 @@
             "template": "std_3_reg_in_no_msk_z"
         }
     ],
-    "hadd_to_scal": [
+    "hadd": [
         {
             "instr_name": "addv",
             "datatypes": "all_datatypes",

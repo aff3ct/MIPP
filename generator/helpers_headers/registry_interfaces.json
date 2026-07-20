@@ -383,18 +383,6 @@
     "horizontal": true,
     "mask_support": "only_maskz"
   },
-  "hadd_to_scal": {
-    "proto_ref": "ret_val_1arg_reg",
-    "datatypes": "all_datatypes",
-    "horizontal": true,
-    "mask_support": "no_mask"
-  },
-  "hadds_to_scal": {
-    "proto_ref": "ret_val_1arg_reg",
-    "datatypes": "all_int_uint",
-    "horizontal": true,
-    "mask_support": "no_mask"
-  },
   "maskz_add": {
     "proto_ref": "ret_reg_3args_1msk_2reg",
     "datatypes": "all_datatypes",

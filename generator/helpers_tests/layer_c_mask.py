@@ -617,9 +617,8 @@ LAYER_OVERRIDES = {
 
 }
 
-NO_LOOP_FUNCS = {"hadd", "hmul", "hmin", "hmax",
-                 "hadd_to_scal", "getfirst", "testz",
-                 "testz_2", "cast", "cast_k"}
+NO_LOOP_FUNCS = { "hadd", "hmul", "hmin", "hmax", "getfirst", "testz",
+                  "testz_2", "cast", "cast_k"}
 
 def apply_overrides(gen_dict):
     for func, entry in gen_dict.items():

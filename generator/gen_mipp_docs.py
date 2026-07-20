@@ -134,7 +134,6 @@ mipp_funcs_description = {
 	"hmul":    "Computes the reduction product of the elements of a register.",
 	"hmin":    "Computes the reduction minimum of the elements of a register.",
 	"hmax":    "Computes the reduction maximum of the elements of a register.",
-	"hadd_to_scal":    "Computes the reduction sum of the elements of a register and returns it as a scalar.",
 	#"hmul_to_scal":    "",
 	#"hmin_to_scal":    "",
 	#"hmax_to_scal":    "",

@@ -3,19 +3,9 @@
         "format": "long",
         "code": [
             "{% if lmul == 1 %}",
-            "return %hadd_to_scal<tp>%(r0);",
+            "return %hadd<tp>%(r0);",
             "{% else %}",
             "return %hadd<c:tp|b:tp|m:tp/2>%(r0.r1) + %hadd<c:tp|b:tp|m:tp/2>%(r0.r2);",
-            "{% endif %}"
-        ]
-    },
-    "hadd_to_scal": {
-        "format": "long",
-        "code": [
-            "{% if lmul == 1 %}",
-            "return %hadd_to_scal<tp>%(r0);",
-            "{% else %}",
-            "return %hadd_to_scal<c:tp|b:tp|m:tp/2>%(r0.r1) + %hadd_to_scal<c:tp|b:tp|m:tp/2>%(r0.r2);",
             "{% endif %}"
         ]
     },
@@ -23,19 +13,9 @@
         "format": "long",
         "code": [
             "{% if lmul == 1 %}",
-            "return %hadds_to_scal<tp>%(r0);",
+            "return %hadds<tp>%(r0);",
             "{% else %}",
             "return %hadds<c:tp|b:tp|m:tp/2>%(r0.r1) + %hadds<c:tp|b:tp|m:tp/2>%(r0.r2);",
-            "{% endif %}"
-        ]
-    },
-    "hadds_to_scal": {
-        "format": "long",
-        "code": [
-            "{% if lmul == 1 %}",
-            "return %hadds_to_scal<tp>%(r0);",
-            "{% else %}",
-            "return %hadds_to_scal<c:tp|b:tp|m:tp/2>%(r0.r1) + %hadds_to_scal<c:tp|b:tp|m:tp/2>%(r0.r2);",
             "{% endif %}"
         ]
     },

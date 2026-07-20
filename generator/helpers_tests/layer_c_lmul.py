@@ -420,7 +420,7 @@ shape_templates = {
         loop_body="",
         loop_assert=AS_CMP_BINOP_LOGI_FLOAT_WORKAROUND,
     ),
-    SHAPE_RET_VAL_1ARG_REG: TemplateParts( # getfirst, hadd_to_scal
+    SHAPE_RET_VAL_1ARG_REG: TemplateParts( # getfirst, hadd
         func_decl=FUNC_DECL,
         decl=DECL_1ARG,
         init=INIT_1ARG,
@@ -625,26 +625,7 @@ LAYER_OVERRIDES = {
     },
     
     # more tolerance than 1e-5 for hadd since on floats since it sums more stuff w lmul
-    "hadd_to_scal" : {
-        "loop_assert" :"""\t\tbool ov = false; {{dt_ext}}_t res = 0;
-\t\tfor(int j = 0; j < {{size}} * {{lmul_coeff}}; j++){
-\t\t\tov |= ovf::will_add_overflow<{{dt_ext}}_t>(res, inputs1[j]);
-\t\t\tif(ov) break;
-\t\t\tres += inputs1[j];
-\t\t}
-\t\tif(ov) {
-\t\t\tINFO("Overflow occurred, skipping assert");
-\t\t}else{\n\t"""
-+ "\t\t {{dt_ext}}_t res1 = mipp_{{func}}_{{dt_ext}}_{{lmul_suffix}}(r1);\n \t\t{{dt_ext}}_t res2 = mipp_scalar_{{func}}_{{dt_ext}}_{{lmul_suffix}}(s1);\n"
-+ "{% if is_int%}"
-+ "\t\tREQUIRE(abs_diff::abs_diff(res1,res2) == 0);"
-+ "{% else %}"
-+ "\n\t\t{{dt_ext}}_t tol  = 1e-3f * abs_diff::abs_diff(res2) + 1.0f;"
-+ "\n\t\t{{dt_ext}}_t diff = abs_diff::abs_diff(res1, res2);"
-+ "\n\t\tREQUIRE(diff <= tol);"
-+ "{% endif %}"
-+ """\n\t\t}""",
-    },
+
 
     "hadd" : {
         "loop_assert" :"""\t\tbool ov = false; {{dt_ext}}_t res = 0;
@@ -754,7 +735,7 @@ AS_CAST_2ARGS+ "\n\t}",
 }
 
 NO_LOOP_FUNCS = {"hadd", "hmul", "hmin", "hmax",
-                 "hadd_to_scal", "getfirst", "testz",
+                 "getfirst", "testz",
                  "testz_2", "cast", "cast_k"}
 
 def apply_overrides(gen_dict):

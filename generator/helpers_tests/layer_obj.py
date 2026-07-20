@@ -91,7 +91,7 @@ deny = {
     "blend", "getfirst", "get_k", "set_k", "set0_k", "set1_k",
     "testz", "testz_2",
     "sqrt", "rsqrt",
-    "hadd", "hmul", "hmin", "hmax", "hadd_to_scal",
+    "hadd", "hmul", "hmin", "hmax",
     "notb", "notb_k",
     "andb_k", "orb_k", "xorb_k", "andnb_k",
     "cmpeq", "cmpneq", "cmplt", "cmple", "cmpgt", "cmpge",

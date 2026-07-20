@@ -85,7 +85,6 @@ set_skip_testing = {
     # THESE FUNCTIONS ARE NOT IMPLEMENTED YET (they are only in scalar)
     "adds",
     "subs" ,
-    "hadds_to_scal",
     "hadds", 
 }
 

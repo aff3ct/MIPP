@@ -795,7 +795,7 @@
         "\t\t(a > UINT64_MAX - b) ? UINT64_MAX :",
         "\t\t(uint64_t)(a + b);",
         "}",
-        "    return resv64;"
+        "return resv64;"
       ]
     },
     {
@@ -964,98 +964,6 @@
         "%v<tr>% resv = -DBL_MAX;",
         "for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec",
         "\tresv = %!pred_cond!% (r0.r[i] > resv) ? r0.r[i] : resv %!pred_alt!%;",
-        "return resv;"
-      ]
-    }
-  ],
-  "hadd_to_scal": [
-    {
-      "type": "vector-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "%v<tr>% resv = 0;",
-        "for (size_t i = 0; i < %N<tp>%; i++)",
-        "\tresv += r0.r[i];",
-        "return resv;"
-      ]
-    }
-  ],
-  "hadds_to_scal": [
-    {
-      "type": "vector-wide",
-      "datatypes": "uint64",
-      "mask_variants": [],
-      "implem": [
-        "uint64_t resv64 = 0;",
-        "for (size_t i = 0; i < %N<tp>%; i++)",
-        "{",
-        "\tuint64_t a = r0.r[i];",
-        "\tuint64_t b = resv64;",
-        "\tresv64 =",
-        "\t\t(a > UINT64_MAX - b) ? UINT64_MAX :",
-        "\t\t(uint64_t)(a + b);",
-        "}",
-        "return resv64;"
-      ]
-    },
-    {
-      "type": "vector-wide",
-      "datatypes": [
-        "uint16",
-        "uint32",
-        "uint8"
-      ],
-      "mask_variants": [],
-      "implem": [
-        "uint64_t resv64 = 0;",
-        "for (size_t i = 0; i < %N<tp>%; i++)",
-        "\tresv64 += r0.r[i];",
-        "",
-        "%v<tr>% resv =",
-        "\tresv64 > UINT{{ dt_par.n_bits }}_MAX ? (%v<tr>%)UINT{{ dt_par.n_bits }}_MAX :",
-        "\t(%v<tr>%)resv64;",
-        "",
-        "return resv;"
-      ]
-    },
-    {
-      "type": "vector-wide",
-      "datatypes": "int64",
-      "mask_variants": [],
-      "implem": [
-        "int64_t resv64 = 0;",
-        "for (size_t i = 0; i < %N<tp>%; i++)",
-        "{",
-        "\tint64_t a = r0.r[i];",
-        "\tint64_t b = resv64;",
-        "",
-        "\tresv64 =",
-        "\t\t(b > 0 && a > INT64_MAX - b) ? (int64_t)INT64_MAX :",
-        "\t\t(b < 0 && a < INT64_MIN - b) ? (int64_t)INT64_MIN :",
-        "\t\t(int64_t)(a + b);",
-        "}",
-        "return resv64;"
-      ]
-    },
-    {
-      "type": "vector-wide",
-      "datatypes": [
-        "int16",
-        "int32",
-        "int8"
-      ],
-      "mask_variants": [],
-      "implem": [
-        "int64_t resv64 = 0;",
-        "for (size_t i = 0; i < %N<tp>%; i++)",
-        "\tresv64 += r0.r[i];",
-        "",
-        "%v<tr>% resv =",
-        "\tresv64 > INT{{ dt_par.n_bits }}_MAX ? (%v<tr>%)INT{{ dt_par.n_bits }}_MAX :",
-        "\tresv64 < INT{{ dt_par.n_bits }}_MIN ? (%v<tr>%)INT{{ dt_par.n_bits }}_MIN :",
-        "\t(%v<tr>%)resv64;",
-        "",
         "return resv;"
       ]
     }

@@ -79,8 +79,6 @@
     "hmul",
     "hmin",
     "hmax",
-    "hadd_to_scal",
-    "hadds_to_scal",
     "testz",
     "testz_2"
   ],

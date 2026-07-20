@@ -31,28 +31,12 @@
             "template_ref": "tpl_horiz_lmul_generic_emu.hadd"
         }
     ],
-    "hadd_to_scal": [
-        {
-            "instr_name": "hadd_to_scal",
-            "datatypes": "all_datatypes",
-            "version": "horiz_lmul",
-            "template_ref": "tpl_horiz_lmul_generic_emu.hadd_to_scal"
-        }
-    ],
     "hadds": [
         {
             "instr_name": "hadds",
             "datatypes": "all_datatypes",
             "version": "horiz_lmul",
             "template_ref": "tpl_horiz_lmul_generic_emu.hadds"
-        }
-    ],
-    "hadds_to_scal": [
-        {
-            "instr_name": "hadds_to_scal",
-            "datatypes": "all_datatypes",
-            "version": "horiz_lmul",
-            "template_ref": "tpl_horiz_lmul_generic_emu.hadds_to_scal"
         }
     ],
     "hmax": [
