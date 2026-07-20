@@ -714,12 +714,14 @@ from cond_utils import clear_cond_caches as _clear_cond_caches
 _isa_config_cache = {}
 # Cache for the no-validation fast path of compute_dt_par_dt_ret
 _dt_split_cache = {}
+_dt_validated_cache = {}
 
 def clear_memo_caches():
     GLOBAL_MEMO_IFDEF.clear()
     GLOBAL_MEMO_IFDEF_MASKED.clear()
     _isa_config_cache.clear()
     _dt_split_cache.clear()
+    _dt_validated_cache.clear()
     _clear_cond_caches()
 
 
@@ -734,21 +736,30 @@ def compute_dt_par_dt_ret(funcs, f, dt, check_support=True):
         result = (parts[0], parts[0]) if len(parts) <= 1 else (parts[0], parts[1])
         _dt_split_cache[dt] = result
         return result
-    # Slow path: with validation
-    if len(dt.split(',')) <= 1:
-        dt_par = dt.split(',')[0]
-        dt_ret = dt.split(',')[0]
+    # Slow path: with validation and cache
+    key = (f, dt)
+    cached = _dt_validated_cache.get(key)
+    if cached is not None:
+        return cached
+
+    parts = dt.split(',')
+    if len(parts) <= 1:
+        dt_par = parts[0]
+        dt_ret = parts[0]
         if check_support and funcs and f and dt_par not in funcs[f]["datatypes"]:
             print("Panic: unsupported type for '" + f + "<" + dt_par + "," + dt_par + ">" + "' function.")
             exit(-1)
     else:
-        dt_par = dt.split(',')[0]
-        dt_ret = dt.split(',')[1]
+        dt_par = parts[0]
+        dt_ret = parts[1]
         dtk = dt_par + "," + dt_ret
         if check_support and funcs and f and dtk not in funcs[f]["datatypes"]:
             print("Panic: unsupported type for '" + f + "<" + dt_par + "," + dt_ret + ">" + "' function.")
             exit(-1)
-    return dt_par, dt_ret
+    
+    result = (dt_par, dt_ret)
+    _dt_validated_cache[key] = result
+    return result
 
 
 

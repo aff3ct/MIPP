@@ -28,10 +28,19 @@ _STUB_TEMPLATE = """static {{ proto }} {
 \texit(-1);
 }"""
 
+_template_cache = {}
+
+def _get_template(code):
+    cached = _template_cache.get(code)
+    if cached is None:
+        cached = Template(code, undefined=StrictUndefined)
+        _template_cache[code] = cached
+    return cached
+
 def _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, masked_version = None, lmul=0):
     full_func_name = build_func_name_internal(isa, dt_par, dt_par, dt_ret, f, masked_version=masked_version, lmul=lmul)
     proto = build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul, True, masked_version=masked_version)
-    j2 = Template(_STUB_TEMPLATE, undefined=StrictUndefined)
+    j2 = _get_template(_STUB_TEMPLATE)
     print(j2.render(proto=proto, full_func_name=full_func_name), file=file)
 
 def _missing_emit_ifdef_end(ifd, file):
@@ -42,7 +51,7 @@ def render_template(isa, ff, dt_par, dt_ret, func_name="", lmul=0):
     tpl_code = ff["template"]["code"]
     if isinstance(tpl_code, list):
         tpl_code = "\n".join(tpl_code)
-    j2_template = Template(tpl_code, undefined=StrictUndefined)
+    j2_template = _get_template(tpl_code)
     instr_name = ""
     if "instr_name" in ff:
         instr_name = ff["instr_name"]
