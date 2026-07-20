@@ -11,11 +11,6 @@
             "instr_name": "and",
             "datatypes": "all_int_uint",
             "template": "andb"
-        },
-        {
-            "datatypes": "all_float",
-            "template": "and_all_float",
-            "instr_name": "andb"
         }
     ],
     "andb_k": [
@@ -36,7 +31,9 @@
         {
             "instr_name": "",
             "datatypes": "all_datatypes_cart_prod",
-            "template": "cast_k"
+            "template": "cast_k",
+            "skip_audit_level": true,
+            "skip_audit_level_reason": "assigns native SVE mask wrapper directly"
         }
     ],
     "cmpeq": [
@@ -65,34 +62,6 @@
             "instr_name": "mla",
             "datatypes": "all_float",
             "template": "std_3_reg_in_no_msk_z"
-        }
-    ],
-    "get": [
-        {
-            "datatypes": "all_datatypes",
-            "template": "get",
-            "instr_name": "get"
-        }
-    ],
-    "get_k": [
-        {
-            "datatypes": "all_datatypes",
-            "template": "get_k",
-            "instr_name": "get_k"
-        }
-    ],
-    "getfirst": [
-        {
-            "datatypes": "all_datatypes",
-            "template": "getfirst",
-            "instr_name": "getfirst"
-        }
-    ],
-    "hadd": [
-        {
-            "datatypes": "all_datatypes",
-            "template": "hadd",
-            "instr_name": "hadd"
         }
     ],
     "hadd_to_scal": [
@@ -137,25 +106,6 @@
             "template": "andb_k"
         }
     ],
-    "set": [
-        {
-            "datatypes": "all_datatypes",
-            "template": "set_by_load",
-            "instr_name": "set"
-        }
-    ],
-    "set_k": [
-        {
-            "datatypes": "all_64bit",
-            "template": "set_k-64",
-            "instr_name": "set_k"
-        },
-        {
-            "datatypes": "all_32bit",
-            "template": "set_k-32",
-            "instr_name": "set_k"
-        }
-    ],
     "store": [
         {
             "instr_name": "st1",
@@ -189,35 +139,6 @@
             "instr_name": "ptest_any",
             "datatypes": "all_datatypes",
             "template": "testz"
-        }
-    ],
-    "tomsk": [
-        {
-            "datatypes": "all_datatypes",
-            "template": "tomsk",
-            "instr_name": "tomsk"
-        }
-    ],
-    "toreg": [
-        {
-            "datatypes": "all_64bit",
-            "template": "toreg-64",
-            "instr_name": "toreg"
-        },
-        {
-            "datatypes": "all_32bit",
-            "template": "toreg-32",
-            "instr_name": "toreg"
-        },
-        {
-            "datatypes": "all_16bit",
-            "template": "toreg-16",
-            "instr_name": "toreg"
-        },
-        {
-            "datatypes": "all_8bit",
-            "template": "toreg-8",
-            "instr_name": "toreg"
         }
     ],
     "xorb_k": [

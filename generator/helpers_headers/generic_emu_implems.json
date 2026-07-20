@@ -1,4 +1,19 @@
 {
+    "hadd": [
+        {
+            "instr_name": "hadd",
+            "datatypes": "all_datatypes",
+            "preferred_simd_ext": [
+                "sve",
+                "neon",
+                "avx512",
+                "avx",
+                "rvv",
+                "sse"
+            ],
+            "template_ref": "tpl_generic_emu.hadd"
+        }
+    ],
     "add": [
         {
             "instr_name": "add",
@@ -37,6 +52,14 @@
                 "avx512"
             ],
             "template_ref": "tpl_generic_emu.logi_2args_e"
+        },
+        {
+            "instr_name": "andb",
+            "datatypes": "all_float",
+            "preferred_simd_ext": [
+                "sve"
+            ],
+            "template_ref": "tpl_generic_emu.arith_2args_u"
         }
     ],
     "andb_k": [
@@ -670,7 +693,8 @@
                 "neon",
                 "sse",
                 "avx",
-                "avx512"
+                "avx512",
+                "sve"
             ],
             "template_ref": "tpl_generic_emu.get"
         }
@@ -701,7 +725,8 @@
                 "sse",
                 "avx",
                 "avx512",
-                "rvv"
+                "rvv",
+                "sve"
             ],
             "template_ref": "tpl_generic_emu.get_k"
         }
@@ -712,7 +737,8 @@
             "preferred_simd_ext": [
                 "sse",
                 "neon",
-                "avx"
+                "avx",
+                "sve"
             ],
             "template_ref": "tpl_generic_emu.getfirst"
         },
@@ -857,6 +883,14 @@
                 "avx512"
             ],
             "template_ref": "tpl_generic_emu.logi_2args_e"
+        },
+        {
+            "instr_name": "orb",
+            "datatypes": "all_float",
+            "preferred_simd_ext": [
+                "sve"
+            ],
+            "template_ref": "tpl_generic_emu.arith_2args_u"
         }
     ],
     "orb_k": [
@@ -908,7 +942,8 @@
             ],
             "preferred_simd_ext": [
                 "neon",
-                "sse"
+                "sse",
+                "sve"
             ],
             "template_ref": "tpl_generic_emu.set"
         }
@@ -1110,7 +1145,8 @@
             ],
             "preferred_simd_ext": [
                 "neon",
-                "sse"
+                "sse",
+                "sve"
             ],
             "simd_size": 128,
             "template_ref": "tpl_generic_emu.set_k-xxf"
@@ -1121,7 +1157,8 @@
             ],
             "preferred_simd_ext": [
                 "avx",
-                "avx512"
+                "avx512",
+                "sve"
             ],
             "template_ref": "tpl_generic_emu.set_k_emu"
         },
@@ -1131,7 +1168,8 @@
             ],
             "preferred_simd_ext": [
                 "neon",
-                "sse"
+                "sse",
+                "sve"
             ],
             "simd_size": 128,
             "template_ref": "tpl_generic_emu.set_k-xxf"
@@ -1142,7 +1180,8 @@
             ],
             "preferred_simd_ext": [
                 "avx",
-                "avx512"
+                "avx512",
+                "sve"
             ],
             "template_ref": "tpl_generic_emu.set_k_emu"
         }
@@ -1169,6 +1208,15 @@
             "template_ref": "tpl_generic_emu.arith_2args_u"
         }
     ],
+    "testz": [
+        {
+            "datatypes": "all_datatypes",
+            "preferred_simd_ext": [
+                "rvv"
+            ],
+            "template_ref": "tpl_generic_emu.testz_emu"
+        }
+    ],
     "testz_2": [
         {
             "datatypes": "all_datatypes",
@@ -1180,22 +1228,14 @@
             "template_ref": "tpl_generic_emu.testz_2"
         }
     ],
-    "testz": [
-        {
-            "datatypes": "all_datatypes",
-            "preferred_simd_ext": [
-                "rvv"
-            ],
-            "template_ref": "tpl_generic_emu.testz_emu"
-        }
-    ],
     "tomsk": [
         {
             "datatypes": "all_datatypes",
             "preferred_simd_ext": [
                 "sse",
                 "avx512",
-                "rvv"
+                "rvv",
+                "sve"
             ],
             "template_ref": "tpl_generic_emu.tomsk_emu"
         }
@@ -1206,7 +1246,8 @@
             "preferred_simd_ext": [
                 "sse",
                 "avx512",
-                "rvv"
+                "rvv",
+                "sve"
             ],
             "template_ref": "tpl_generic_emu.toreg_emu"
         }
@@ -1219,6 +1260,22 @@
                 "avx"
             ],
             "template_ref": "tpl_generic_emu.logi_2args_e"
+        },
+        {
+            "instr_name": "xorb",
+            "datatypes": "all_float",
+            "preferred_simd_ext": [
+                "avx512"
+            ],
+            "template_ref": "tpl_generic_emu.logi_2args_e"
+        },
+        {
+            "instr_name": "xorb",
+            "datatypes": "all_float",
+            "preferred_simd_ext": [
+                "sve"
+            ],
+            "template_ref": "tpl_generic_emu.arith_2args_u"
         }
     ],
     "xorb_k": [

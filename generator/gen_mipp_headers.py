@@ -276,9 +276,9 @@ def main(argv=None):
     parser.add_argument(
         "--audit",
         nargs="+",
-        choices=["levels", "dead-code", "all"],
-        help="Run audits on the MIPP code database: 'levels' checks implementation level placement discrepancies, 'dead-code' checks for unreferenced templates, 'all' runs all audits.",
-        default=None,
+        choices=["levels", "dead-code", "all", "none"],
+        help="Run audits on the MIPP code database: 'levels' checks implementation level placement discrepancies, 'dead-code' checks for unreferenced templates, 'all' (default) runs all audits, 'none' disables audits.",
+        default=["all"],
     )
     
     args = parser.parse_args(argv)
@@ -286,13 +286,27 @@ def main(argv=None):
     import input_validation
     input_validation.ACTIVE_AUDITS = set()
     if args.audit:
+        has_none = False
         for a in args.audit:
             for item in a.split(","):
-                item = item.strip().lower()
-                if item == "all":
-                    input_validation.ACTIVE_AUDITS.update(["levels", "dead-code"])
-                elif item in ("levels", "dead-code"):
-                    input_validation.ACTIVE_AUDITS.add(item)
+                if item.strip().lower() == "none":
+                    has_none = True
+        
+        if not has_none:
+            for a in args.audit:
+                for item in a.split(","):
+                    item = item.strip().lower()
+                    if item == "all":
+                        input_validation.ACTIVE_AUDITS.update(["levels", "dead-code"])
+                    elif item in ("levels", "dead-code"):
+                        input_validation.ACTIVE_AUDITS.add(item)
+
+    # Audit generic templates now that ACTIVE_AUDITS is populated
+    import registry
+    if registry.generic_flat_implems is not None and registry.generic_data_templates is not None:
+        input_validation.audit_generic_templates_dead_code(
+            registry.generic_flat_implems, registry.generic_data_templates
+        )
 
     # check that all mipp funcs have a scalar implem before to start
     check_mipp_funcs_scalar_implems()

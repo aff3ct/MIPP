@@ -706,36 +706,6 @@
             "return res;"
         ]
     },
-    "ret_msk_2args_reg": {
-        "format": "long",
-        "code": [
-            "%m<tp>% op = %{{func_name}}<tp>%(r0, r1);"
-        ]
-    },
-    "ret_reg_1arg_reg": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0);"
-        ]
-    },
-    "ret_reg_2args_reg": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);"
-        ]
-    },
-    "ret_reg_2args_reg_val": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, v0);"
-        ]
-    },
-    "ret_reg_3args_reg": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%( r0, r1, r2);"
-        ]
-    },
     "round_mask_all_datatypes": {
         "format": "long",
         "code": [
@@ -786,30 +756,12 @@
             "return res;"
         ]
     },
-    "set": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %set<tp>%(vals);"
-        ]
-    },
-    "set0": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %set0<tp>%();"
-        ]
-    },
     "set0_masks_all_datatypes": {
         "format": "long",
         "code": [
             "%r<tp>% op = %set0<tp>%();",
             "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
             "return res;"
-        ]
-    },
-    "set1": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %set1<tp>%(v0);"
         ]
     },
     "set1_masks_all_datatypes": {

@@ -323,6 +323,8 @@ def _dump_dict_json(di, filename):
     fj.close()
     
 def _parse_lmul(input_str, isa, dt_par, dt_ret, base_lmul):
+    if base_lmul == 0:
+        return 0
     # input str is the same than in build dt. Just return 
     # the lmul suffix.
 

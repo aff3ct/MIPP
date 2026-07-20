@@ -144,7 +144,11 @@ def _load_funcs_registry():
 
     return protos, categories, interfaces, scalar_implems
 
+generic_flat_implems = None
+generic_data_templates = None
+
 def _load_generic_emu():
+    global generic_flat_implems, generic_data_templates
     current_dir = os.path.dirname(os.path.abspath(__file__))
 
     # Load templates
@@ -179,12 +183,13 @@ def _load_generic_emu():
         
     data_implems = {
         "implems_generic_emu": impl_std,
-        "implems_horiz_lmul_generic_emu": impl_lmulh,
-        "implems_mask_generic_emu": impl_mask
+        "implems_mask_generic_emu": impl_mask,
+        "implems_horiz_lmul_generic_emu": impl_lmulh
     }
 
     from input_validation import (
-        validate_templates_config, validate_implems_config, validate_template_references
+        validate_templates_config, validate_implems_config, validate_template_references,
+        audit_generic_templates_dead_code
     )
     # Validate each loaded split file
     validate_templates_config(tpl_std, templates_path)
@@ -198,9 +203,14 @@ def _load_generic_emu():
     flat_implems = {}
     for sect in ["implems_generic_emu", "implems_mask_generic_emu", "implems_horiz_lmul_generic_emu"]:
         for name, items in data_implems[sect].items():
-            flat_implems[name] = items
+            if name not in flat_implems:
+                flat_implems[name] = []
+            flat_implems[name].extend(items)
             
     validate_template_references(flat_implems, data_templates, implems_path)
+    generic_flat_implems = flat_implems
+    generic_data_templates = data_templates
+    audit_generic_templates_dead_code(flat_implems, data_templates)
 
     def clean_template_code(tpl):
         if not isinstance(tpl, dict) or "code" not in tpl:

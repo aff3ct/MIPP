@@ -1,4 +1,8 @@
 {
+    "hadd": {
+        "format": "long",
+        "code": "return %hadd_to_scal<tp>%(r0);"
+    },
     "testz_emu": {
         "format": "long",
         "code": [
@@ -70,19 +74,6 @@
             "%r<c:int|b:tp>% r1u = %cast<tp,c:int|b:tp>%(r1);",
             "%r<c:int|b:tp>% res = %{{ instr_name }}<c:int|b:tp>%(r0u, r1u);",
             "return %cast<c:int|b:tp,tp>%(res);"
-        ]
-    },
-    "blend": {
-        "format": "long",
-        "code": [
-            "%v<tp>% ptr1[%N<tp>%];",
-            "%v<tp>% ptr2[%N<tp>%];",
-            "%store<tp>%(ptr1, r0);",
-            "%store<tp>%(ptr2, r1);",
-            "for(unsigned i = 0; i < %N<tp>%; i++) {",
-            "\tptr1[i] = %get_k<tp>%(m0, i) ? ptr1[i] : ptr2[i];",
-            "}",
-            "return %load<tp>%(ptr1);"
         ]
     },
     "blend_via_andnot_ps_emu": {

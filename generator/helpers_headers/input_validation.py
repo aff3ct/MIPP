@@ -538,3 +538,27 @@ def validate_interfaces_config(interfaces_dict):
 
 def validate_scalar_implems_config(scalar_implems_dict):
     validate_json_data(scalar_implems_dict, "scalar_implems_schema.json", label="registry_scalar_implems.json")
+
+def audit_generic_templates_dead_code(flat_implems, data_templates):
+    if "dead-code" not in ACTIVE_AUDITS:
+        return
+
+    reachable = set()
+    for choices in flat_implems.values():
+        for choice in choices:
+            tpl_key = choice.get("template_ref")
+            if tpl_key and isinstance(tpl_key, str):
+                reachable.add(tpl_key)
+
+    for section in ["tpl_generic_emu", "tpl_mask_generic_emu", "tpl_horiz_lmul_generic_emu"]:
+        if section in data_templates:
+            dead = []
+            for name in data_templates[section]:
+                full_name = f"{section}.{name}"
+                if full_name not in reachable:
+                    dead.append(name)
+            if dead:
+                dead.sort()
+                print(Fore.YELLOW + f"Warning: Found dead (unreferenced) generic templates in '{section}':", file=sys.stderr)
+                for name in dead:
+                    print(Fore.YELLOW + f"  - Template '{name}' in generic templates is never referenced.", file=sys.stderr)
