@@ -388,6 +388,9 @@ def audit_and_validate_implementation_levels(isa, implems, implems_emu):
             else:
                 detected = 2
                 
+            if choice.get("skip_audit_level") == True:
+                continue
+                
             expected = 0
             if expected != detected:
                 discrepancies.append((func, choice, "native_implems", expected, detected, deps))
@@ -408,6 +411,9 @@ def audit_and_validate_implementation_levels(isa, implems, implems_emu):
                     detected = 0
             else:
                 detected = 2
+                
+            if choice.get("skip_audit_level") == True:
+                continue
                 
             expected = 1
             if expected != detected:

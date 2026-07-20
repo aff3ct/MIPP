@@ -39,7 +39,8 @@
         },
         "template_ref": { "type": "string" },
         "if": { "type": "string" },
-        "level": { "type": "integer" },
+        "skip_audit_level": { "type": "boolean" },
+        "skip_audit_level_reason": { "type": "string" },
         "version": { "type": "string", "enum": ["mask", "maskz", "masks", "horiz_lmul"] },
         "type": { "type": "string", "enum": ["native", "emulated"] },
         "dependencies": { "type": "array", "items": { "type": "string" } },
@@ -61,6 +62,17 @@
         { "required": ["template"] },
         { "required": ["template_ref"] }
       ],
+      "dependencies": {
+        "skip_audit_level_reason": ["skip_audit_level"]
+      },
+      "if": {
+        "required": ["skip_audit_level_reason"]
+      },
+      "then": {
+        "properties": {
+          "skip_audit_level": { "const": true }
+        }
+      },
       "additionalProperties": false
     },
     "embedded_template": {

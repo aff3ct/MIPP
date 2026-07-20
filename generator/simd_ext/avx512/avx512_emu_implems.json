@@ -4,7 +4,9 @@
             "datatypes": "all_64bit",
             "template": "andb_k_emu",
             "if": "!defined(__AVX512DQ__)",
-            "instr_name": "andb_k"
+            "instr_name": "andb_k",
+            "skip_audit_level": true,
+            "skip_audit_level_reason": "uses bitwise operations on native masks without hardware intrinsics"
         },
         {
             "datatypes": [
@@ -15,7 +17,9 @@
             ],
             "template": "andb_k_emu",
             "if": "!defined(__AVX512BW__)",
-            "instr_name": "andb_k"
+            "instr_name": "andb_k",
+            "skip_audit_level": true,
+            "skip_audit_level_reason": "uses bitwise operations on native masks without hardware intrinsics"
         }
     ],
     "exp": [
@@ -264,7 +268,9 @@
         {
             "instr_name": "setzero",
             "datatypes": "all_datatypes",
-            "template": "set0_k"
+            "template": "set0_k",
+            "skip_audit_level": true,
+            "skip_audit_level_reason": "assigns zero to native mask wrapper without hardware intrinsics"
         }
     ]
 }
