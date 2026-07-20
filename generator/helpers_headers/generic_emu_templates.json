@@ -1,4 +1,50 @@
 {
+    "testz_emu": {
+        "format": "long",
+        "code": [
+            "return %testz_2<b:tp|c:tp|m:tp>%(m0) && %testz_2<b:tp|c:tp|m:tp>%(m1);"
+        ]
+    },
+    "cast_k_same_size": {
+        "format": "short",
+        "code": [
+            "m0.m;"
+        ]
+    },
+    "cast_float_other": {
+        "format": "long",
+        "code": [
+            "%r<c:int|b:tp>% rint = %cast<tp,c:int|b:tp>%(r0); ",
+            "%r<c:int|b:tr>% rint2 = %cast<c:int|b:tp,c:int|b:tr>%(rint);",
+            "",
+            "return %cast<c:int|b:tr,tr>%(rint2);"
+        ]
+    },
+    "cast_intuint_other": {
+        "format": "long",
+        "code": [
+            "%r<c:tp|b:tr>% r1 = %cast<c:tp|b:tp,c:tp|b:tr>%(r0);",
+            "return %cast<c:tp|b:tr,c:tr|b:tr>%(r1);"
+        ]
+    },
+    "andnb_emu": {
+        "format": "long",
+        "code": [
+            "%r<tp>% ret = %set1<tp>%(-1);",
+            "ret = %xorb<tp>%(r0, ret);",
+            "ret = %andb<tp>%(r1, ret);",
+            "return ret;"
+        ]
+    },
+    "andnb_k_direct_emu": {
+        "format": "long",
+        "code": [
+            "%m<tp>% ret = %set1_k<tp>%(-1);",
+            "ret = %xorb_k<tp>%(m0, ret);",
+            "ret = %andb_k<tp>%(m1, ret);",
+            "return ret;"
+        ]
+    },
     "andb_k_emu": {
         "format": "long",
         "code": [

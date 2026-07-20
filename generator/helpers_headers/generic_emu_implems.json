@@ -64,6 +64,14 @@
                 "avx"
             ],
             "template_ref": "tpl_generic_emu.logi_2args_e"
+        },
+        {
+            "instr_name": "andnb",
+            "datatypes": "all_int_uint",
+            "preferred_simd_ext": [
+                "rvv"
+            ],
+            "template_ref": "tpl_generic_emu.andnb_emu"
         }
     ],
     "andnb_k": [
@@ -81,6 +89,14 @@
                 "avx"
             ],
             "template_ref": "tpl_generic_emu.logi_m_2args_e"
+        },
+        {
+            "instr_name": "andnb_k",
+            "datatypes": "all_int_uint",
+            "preferred_simd_ext": [
+                "rvv"
+            ],
+            "template_ref": "tpl_generic_emu.andnb_k_direct_emu"
         }
     ],
     "blend": [
@@ -115,6 +131,113 @@
                 "avx512"
             ],
             "template_ref": "tpl_generic_emu.blend_via_int_emu"
+        }
+    ],
+    "cast": [
+        {
+            "instr_name": "cast",
+            "datatypes": [
+                "int8,float32",
+                "int16,float32",
+                "int64,float32",
+                "int8,float64",
+                "int16,float64",
+                "int32,float64",
+                "uint8,float32",
+                "uint16,float32",
+                "uint64,float32",
+                "uint8,float64",
+                "uint16,float64",
+                "uint32,float64",
+                "uint16,int8",
+                "uint32,int8",
+                "uint64,int8",
+                "uint8,int16",
+                "uint32,int16",
+                "uint64,int16",
+                "uint16,int32",
+                "uint8,int32",
+                "uint64,int32",
+                "uint16,int64",
+                "uint32,int64",
+                "uint8,int64",
+                "int8,uint16",
+                "int8,uint32",
+                "int8,uint64",
+                "int16,uint8",
+                "int16,uint32",
+                "int16,uint64",
+                "int32,uint16",
+                "int32,uint8",
+                "int32,uint64",
+                "int64,uint16",
+                "int64,uint32",
+                "int64,uint8"
+            ],
+            "preferred_simd_ext": [
+                "rvv"
+            ],
+            "template_ref": "tpl_generic_emu.cast_intuint_other"
+        },
+        {
+            "instr_name": "cast",
+            "datatypes": [
+                "float64,float32",
+                "float32,float64",
+                "float32,int8",
+                "float32,int16",
+                "float32,int64",
+                "float64,int8",
+                "float64,int16",
+                "float64,int32",
+                "float32,uint8",
+                "float32,uint16",
+                "float32,uint64",
+                "float64,uint8",
+                "float64,uint16",
+                "float64,uint32"
+            ],
+            "preferred_simd_ext": [
+                "rvv"
+            ],
+            "template_ref": "tpl_generic_emu.cast_float_other"
+        }
+    ],
+    "cast_k": [
+        {
+            "instr_name": "cast_k",
+            "datatypes": [
+                "int8,int8",
+                "uint8,uint8",
+                "int16,int16",
+                "uint16,uint16",
+                "int32,int32",
+                "uint32,uint32",
+                "float32,float32",
+                "int64,int64",
+                "uint64,uint64",
+                "float64,float64",
+                "int8,uint8",
+                "uint8,int8",
+                "int16,uint16",
+                "uint16,int16",
+                "int32,uint32",
+                "uint32,int32",
+                "int32,float32",
+                "float32,int32",
+                "uint32,float32",
+                "float32,uint32",
+                "int64,uint64",
+                "uint64,int64",
+                "int64,float64",
+                "float64,int64",
+                "uint64,float64",
+                "float64,uint64"
+            ],
+            "preferred_simd_ext": [
+                "rvv"
+            ],
+            "template_ref": "tpl_generic_emu.cast_k_same_size"
         }
     ],
     "cmpeq": [
@@ -479,7 +602,8 @@
             ],
             "preferred_simd_ext": [
                 "neon",
-                "avx"
+                "avx",
+                "rvv"
             ],
             "template_ref": "tpl_generic_emu.fnmadd"
         },
@@ -490,7 +614,8 @@
             ],
             "preferred_simd_ext": [
                 "neon",
-                "avx"
+                "avx",
+                "rvv"
             ],
             "template_ref": "tpl_generic_emu.fnmadd"
         }
@@ -502,7 +627,8 @@
             ],
             "preferred_simd_ext": [
                 "neon",
-                "avx"
+                "avx",
+                "rvv"
             ],
             "template_ref": "tpl_generic_emu.fnmsub"
         },
@@ -513,7 +639,8 @@
             ],
             "preferred_simd_ext": [
                 "neon",
-                "avx"
+                "avx",
+                "rvv"
             ],
             "template_ref": "tpl_generic_emu.fnmsub"
         }
@@ -573,7 +700,8 @@
                 "neon",
                 "sse",
                 "avx",
-                "avx512"
+                "avx512",
+                "rvv"
             ],
             "template_ref": "tpl_generic_emu.get_k"
         }
@@ -609,7 +737,8 @@
                 "sse",
                 "neon",
                 "avx",
-                "avx512"
+                "avx512",
+                "rvv"
             ],
             "template_ref": "tpl_generic_emu.hadd_to_scal"
         }
@@ -1051,12 +1180,22 @@
             "template_ref": "tpl_generic_emu.testz_2"
         }
     ],
+    "testz": [
+        {
+            "datatypes": "all_datatypes",
+            "preferred_simd_ext": [
+                "rvv"
+            ],
+            "template_ref": "tpl_generic_emu.testz_emu"
+        }
+    ],
     "tomsk": [
         {
             "datatypes": "all_datatypes",
             "preferred_simd_ext": [
                 "sse",
-                "avx512"
+                "avx512",
+                "rvv"
             ],
             "template_ref": "tpl_generic_emu.tomsk_emu"
         }
@@ -1066,7 +1205,8 @@
             "datatypes": "all_datatypes",
             "preferred_simd_ext": [
                 "sse",
-                "avx512"
+                "avx512",
+                "rvv"
             ],
             "template_ref": "tpl_generic_emu.toreg_emu"
         }
