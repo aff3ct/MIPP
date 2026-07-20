@@ -113,7 +113,7 @@ def _custom_prefix_generator(func, isa_list, is_common=False, mode="function_hea
             
             for implem in implems_horiz_lmul_generic_emu[func]:
                 if "dependencies" in implem:
-                    for dep in implem["dependencies"]:
+                    for dep in sorted(implem["dependencies"]):
                         content += _isa_include_function("c", dep)
 
     return content

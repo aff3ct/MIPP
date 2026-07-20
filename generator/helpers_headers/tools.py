@@ -8,6 +8,14 @@ import json
 import re
 
 from datatypes import *
+
+# ---------------------------------------------------------------------------
+# Compiled regex patterns (module-level, avoid recompiling on each call)
+# ---------------------------------------------------------------------------
+_RE_PLACEHOLDER    = re.compile(r'\%([^%]*)\%')
+_RE_ANGLE          = re.compile(r'<(.*)>')
+_RE_LMUL_EXPR      = re.compile(r'^(tp|tr)([*/])(\d+)$')
+
             
 def find_data_types_from(criteria):
     all_types = dict(datatypes);
@@ -236,7 +244,7 @@ def _parse_lmul_expression(expr, dt_par, dt_ret, isa, base_lmul):
         return str(-int(expr)) # we return the string of the positive number, as we want to have ldiv in the function name if it's a division by a power of 2
     else:
         #print("else case for lmul expression: " + expr)
-        match = re.match(r'^(tp|tr)([*/])(\d+)$', expr)
+        match = _RE_LMUL_EXPR.match(expr)
         if match:				
             base = match.group(1)
             op = match.group(2)
@@ -347,14 +355,14 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret,lmul=0, isa_nam
     #print("debug: parsing placeholders in ir '" + ir + "' with dt_par='" + dt_par + "' and dt_ret='" + dt_ret + "' and lmul=" + str(lmul))
     dt_key = dt_par + "," + dt_ret
     converted_ir = ir
-    ar_substitute = re.findall(r'\%([^%]*)\%', ir)
+    ar_substitute = _RE_PLACEHOLDER.findall(ir)
     requirements = {}
 
     for s in ar_substitute:
         item_type = s.split('<')[0]
 
         if item_type == "r":
-            dt_info = re.findall(r'\<(.*)\>', s)[0]
+            dt_info = _RE_ANGLE.findall(s)[0]
             # print("dt_info: " + dt_info)
             dt_info_params = dt_info.split(",")
             dt = ""
@@ -365,7 +373,7 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret,lmul=0, isa_nam
                 exit(-1)
             converted_ir = converted_ir.replace("%" + s + "%", build_reg(datatypes[dt], isa,lmul=_parse_lmul(dt_info, isa, dt_par, dt_ret, lmul), isa_name=isa_name))
         elif item_type == "m":
-            dt_info = re.findall(r'\<(.*)\>', s)[0]
+            dt_info = _RE_ANGLE.findall(s)[0]
             dt_info_params = dt_info.split(",")
             dt = ""
             if len(dt_info_params) == 1:
@@ -375,7 +383,7 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret,lmul=0, isa_nam
                 exit(-1)
             converted_ir = converted_ir.replace("%" + s + "%", build_msk(datatypes[dt], isa,lmul=_parse_lmul(dt_info, isa, dt_par, dt_ret, lmul), isa_name=isa_name))
         elif item_type == "v":
-            dt_info = re.findall(r'\<(.*)\>', s)[0]
+            dt_info = _RE_ANGLE.findall(s)[0]
             dt_info_params = dt_info.split(",")
             dt = ""
             if len(dt_info_params) == 1:
@@ -385,7 +393,7 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret,lmul=0, isa_nam
                 exit(-1)
             converted_ir = converted_ir.replace("%" + s + "%", build_val(datatypes[dt], isa,lmul=lmul))
         elif item_type == "N":
-            dt_info = re.findall(r'\<(.*)\>', s)[0]
+            dt_info = _RE_ANGLE.findall(s)[0]
             dt_info_params = dt_info.split(",")
             dt = ""
             if len(dt_info_params) == 1:
@@ -401,7 +409,7 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret,lmul=0, isa_nam
                 exit(-1)
 
             fdt_key = ""
-            dt_info = re.findall(r'\<(.*)\>', s)[0]
+            dt_info = _RE_ANGLE.findall(s)[0]
             dt_info_params = dt_info.split(",")
             if len(dt_info_params) == 1:
                 dt = build_dt(dt_info_params[0], isa, dt_par, dt_ret)
@@ -441,7 +449,7 @@ def get_requirements(ir, isa, funcs, func_name, dt_par, dt_ret,lmul=0, isa_name=
     don't raise an exception if a required function is missing, we just add it to the requirements and let the caller handle it.
     """
     dt_key = dt_par + "," + dt_ret
-    ar_substitute = re.findall(r'\%([^%]*)\%', ir)
+    ar_substitute = _RE_PLACEHOLDER.findall(ir)
     requirements = {}
 
     for s in ar_substitute:
@@ -454,7 +462,7 @@ def get_requirements(ir, isa, funcs, func_name, dt_par, dt_ret,lmul=0, isa_name=
                 exit(-1)
 
             fdt_key = ""
-            dt_info = re.findall(r'\<(.*)\>', s)[0]
+            dt_info = _RE_ANGLE.findall(s)[0]
             dt_info_params = dt_info.split(",")
             if len(dt_info_params) == 1:
                 dt = build_dt(dt_info_params[0], isa, dt_par, dt_ret)
@@ -701,29 +709,44 @@ def build_ifdef_masked(funcs, func_name, dt_key, mask_kind, implem_id):
 
 from cond_utils import *
 from cond_utils import is_guard_dead_under_cond
+from cond_utils import clear_cond_caches as _clear_cond_caches
 
 _isa_config_cache = {}
+# Cache for the no-validation fast path of compute_dt_par_dt_ret
+_dt_split_cache = {}
 
 def clear_memo_caches():
     GLOBAL_MEMO_IFDEF.clear()
     GLOBAL_MEMO_IFDEF_MASKED.clear()
     _isa_config_cache.clear()
+    _dt_split_cache.clear()
+    _clear_cond_caches()
 
 
 
 def compute_dt_par_dt_ret(funcs, f, dt, check_support=True):
+    # Fast path: no validation needed (most common call-site)
+    if not check_support or funcs is None or f is None:
+        cached = _dt_split_cache.get(dt)
+        if cached is not None:
+            return cached
+        parts = dt.split(',')
+        result = (parts[0], parts[0]) if len(parts) <= 1 else (parts[0], parts[1])
+        _dt_split_cache[dt] = result
+        return result
+    # Slow path: with validation
     if len(dt.split(',')) <= 1:
         dt_par = dt.split(',')[0]
         dt_ret = dt.split(',')[0]
         if check_support and funcs and f and dt_par not in funcs[f]["datatypes"]:
-            print("Panic: unsupported type for '" + f + "<" + dt_par + "," + dt_par + ">' function.")
+            print("Panic: unsupported type for '" + f + "<" + dt_par + "," + dt_par + ">" + "' function.")
             exit(-1)
     else:
         dt_par = dt.split(',')[0]
         dt_ret = dt.split(',')[1]
         dtk = dt_par + "," + dt_ret
         if check_support and funcs and f and dtk not in funcs[f]["datatypes"]:
-            print("Panic: unsupported type for '" + f + "<" + dt_par + "," + dt_ret + ">' function.")
+            print("Panic: unsupported type for '" + f + "<" + dt_par + "," + dt_ret + ">" + "' function.")
             exit(-1)
     return dt_par, dt_ret
 

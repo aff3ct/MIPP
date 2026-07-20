@@ -4,6 +4,7 @@ Defines the preprocessor condition AST (Expr, Term, Not, And, Or)
 and functions for condition parsing, negation, and simplification.
 """
 import re
+from functools import lru_cache
 
 class Expr:
     pass
@@ -37,6 +38,7 @@ class Not(Expr):
 class And(Expr):
     def __init__(self, children):
         self.children = children
+        self._hash = None
     def __repr__(self):
         return f"And({self.children!r})"
     def to_str(self):
@@ -51,11 +53,14 @@ class And(Expr):
     def __eq__(self, other):
         return isinstance(other, And) and set(self.children) == set(other.children)
     def __hash__(self):
-        return hash(("And", tuple(sorted(self.children, key=lambda x: str(x)))))
+        if self._hash is None:
+            self._hash = hash(("And", frozenset(hash(c) for c in self.children)))
+        return self._hash
 
 class Or(Expr):
     def __init__(self, children):
         self.children = children
+        self._hash = None
     def __repr__(self):
         return f"Or({self.children!r})"
     def to_str(self):
@@ -70,7 +75,9 @@ class Or(Expr):
     def __eq__(self, other):
         return isinstance(other, Or) and set(self.children) == set(other.children)
     def __hash__(self):
-        return hash(("Or", tuple(sorted(self.children, key=lambda x: str(x)))))
+        if self._hash is None:
+            self._hash = hash(("Or", frozenset(hash(c) for c in self.children)))
+        return self._hash
 
 def _tokenize(s):
     # Capture comparison sub-expressions (e.g. "__ARM_ARCH >= 8") as single atomic tokens,
@@ -333,16 +340,16 @@ def _simplify(expr):
 
     return expr
 
-def simplify_cond_str(s, known_true_conds=None):
-    if not s or s.strip() == "":
-        return ""
+@lru_cache(maxsize=None)
+def _simplify_cond_str_cached(s, known_true_conds_tuple):
+    """Cached core of simplify_cond_str. Arguments must be hashable."""
     tokens = _tokenize(s)
     if not tokens:
         return s
     expr = _parse(tokens)
-    if known_true_conds:
+    if known_true_conds_tuple:
         known_true_exprs = []
-        for kt_str in known_true_conds:
+        for kt_str in known_true_conds_tuple:
             if kt_str and kt_str.strip():
                 kt_tokens = _tokenize(kt_str)
                 if kt_tokens:
@@ -357,28 +364,44 @@ def simplify_cond_str(s, known_true_conds=None):
         return ""
     return res
 
+def simplify_cond_str(s, known_true_conds=None):
+    if not s or s.strip() == "":
+        return ""
+    key = tuple(known_true_conds) if known_true_conds else ()
+    return _simplify_cond_str_cached(s, key)
+
 def negate_cond(c):
     if not c or c.strip() == "":
         return None
     return f"!( {c} )"
 
-def are_conds_mutually_exclusive(c1, c2, known_true_conds=None):
-    n1 = simplify_cond_str(c1, known_true_conds=known_true_conds)
-    n2 = simplify_cond_str(c2, known_true_conds=known_true_conds)
+@lru_cache(maxsize=None)
+def _are_conds_mutually_exclusive_cached(c1, c2, known_true_conds_tuple):
+    n1 = simplify_cond_str(c1, known_true_conds=list(known_true_conds_tuple) if known_true_conds_tuple else None)
+    n2 = simplify_cond_str(c2, known_true_conds=list(known_true_conds_tuple) if known_true_conds_tuple else None)
     if n1 == "0" or n2 == "0":
         return True
     if n1 == "" or n2 == "":
         return False
-    
     neg_n1 = negate_cond(n1)
     neg_n2 = negate_cond(n2)
     if n1 == neg_n2 or n2 == neg_n1:
         return True
-    if n1.startswith("!") and simplify_cond_str(n1[1:], known_true_conds=known_true_conds) == n2:
+    if n1.startswith("!") and simplify_cond_str(n1[1:], known_true_conds=list(known_true_conds_tuple) if known_true_conds_tuple else None) == n2:
         return True
-    if n2.startswith("!") and simplify_cond_str(n2[1:], known_true_conds=known_true_conds) == n1:
+    if n2.startswith("!") and simplify_cond_str(n2[1:], known_true_conds=list(known_true_conds_tuple) if known_true_conds_tuple else None) == n1:
         return True
     return False
+
+def are_conds_mutually_exclusive(c1, c2, known_true_conds=None):
+    key = tuple(known_true_conds) if known_true_conds else ()
+    return _are_conds_mutually_exclusive_cached(c1, c2, key)
+
+@lru_cache(maxsize=None)
+def _intersect_conds_cached(c1, c2, known_true_conds_tuple):
+    if are_conds_mutually_exclusive(c1, c2, known_true_conds=list(known_true_conds_tuple) if known_true_conds_tuple else None):
+        return None
+    return f"({c1}) && ({c2})"
 
 def intersect_conds(c1, c2, known_true_conds=None):
     if c1 is None or c2 is None:
@@ -389,12 +412,17 @@ def intersect_conds(c1, c2, known_true_conds=None):
         return c1
     if c1 == c2:
         return c1
-    if are_conds_mutually_exclusive(c1, c2, known_true_conds):
-        return None
-    return f"({c1}) && ({c2})"
+    key = tuple(known_true_conds) if known_true_conds else ()
+    return _intersect_conds_cached(c1, c2, key)
 
 def is_guard_dead_under_cond(guard, cond):
     if not guard or guard == "0" or not cond:
         return False
     neg_guard = f"!( {guard} )"
     return (neg_guard.replace(" ", "") == cond.replace(" ", ""))
+
+def clear_cond_caches():
+    """Clear all LRU caches in this module. Call between ISA generations."""
+    _simplify_cond_str_cached.cache_clear()
+    _are_conds_mutually_exclusive_cached.cache_clear()
+    _intersect_conds_cached.cache_clear()
