@@ -802,6 +802,15 @@ def load_isa_config(isa_name):
             isa = json.load(f)
         from input_validation import validate_isa_config
         validate_isa_config(isa, isa_name)
+        
+        # Merge "variables" into datatype configurations for backward-compatibility
+        if "datatypes" in isa:
+            for dt, dt_conf in isa["datatypes"].items():
+                if "variables" in dt_conf:
+                    variables = dt_conf.pop("variables")
+                    for k, v in variables.items():
+                        dt_conf[k] = v
+
         if "size" in isa and isinstance(isa["size"], list):
             isa["size"] = set(isa["size"]) # SVE backwards compatibility
             

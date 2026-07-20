@@ -1,40 +1,10 @@
 {
-    "andb_emu": {
-        "format": "long",
-        "code": [
-            "%r<c:int|b:tp>% tmp0, tmp1;",
-            "tmp0 = %cast<tp,c:int|b:tp>%(r0);",
-            "tmp1 = %cast<tp,c:int|b:tp>%(r1);",
-            "tmp0 = %andb<c:int|b:tp>%(tmp0, tmp1);",
-            "return %cast<c:int|b:tp,tp>%(tmp0);"
-        ]
-    },
     "andb_k_emu": {
         "format": "long",
         "code": [
             "%m<tp>% ret; ",
             "ret.m = m0.m & m1.m;",
             "return ret;"
-        ]
-    },
-    "arith_2args_u": {
-        "format": "long",
-        "code": [
-            "%r<c:int|b:tp>% r0s = %cast<tp,c:int|b:tp>%(r0);",
-            "%r<c:int|b:tp>% r1s = %cast<tp,c:int|b:tp>%(r1);",
-            "%r<c:int|b:tp>% res = %{{instr_name}}<c:int|b:tp>%(r0s, r1s);",
-            "return %cast<c:int|b:tp,tp>%(res);"
-        ]
-    },
-    "blend_emu": {
-        "format": "long",
-        "code": [
-            "%r<c:int|b:tp>% tmp0, tmp1;",
-            "tmp0 = %cast<tp,c:int|b:tp>%(r0);",
-            "tmp1 = %cast<tp,c:int|b:tp>%(r1);",
-            "%m<c:int|b:tp>% mtmp = %cast_k<tp,c:int|b:tp>%(m0);",
-            "tmp0 = %blend<c:int|b:tp>%(tmp0, tmp1, mtmp);",
-            "return %cast<c:int|b:tp,tp>%(tmp0);"
         ]
     },
     "exp_f32": {
@@ -230,37 +200,6 @@
             "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(%set0<tp>%().r,m0.m, r0.r, p0,8);"
         ]
     },
-    "get": {
-        "format": "long",
-        "code": [
-            "%v<tp>% t[%N<tp>%];",
-            "%storeu<tp>%(t, r0);",
-            "return t[v0];"
-        ]
-    },
-    "get_k": {
-        "format": "long",
-        "code": [
-            "%v<tp>% tmp[%N<tp>%];",
-            "%r<tp>% rmsk = %toreg<tp>%(m0);",
-            "%storeu<tp>%(tmp, rmsk);",
-            "return (int32_t) tmp[v0];"
-        ]
-    },
-    "getfirst-fromstore": {
-        "format": "long",
-        "code": [
-            "%v<tp>% tmp[%N<tp>%];",
-            "%store<tp>%(tmp, r0);",
-            "return tmp[0];"
-        ]
-    },
-    "hadd_to_scal": {
-        "format": "long",
-        "code": [
-            "return %hadd<tp>%(r0);"
-        ]
-    },
     "log_f32": {
         "format": "long",
         "code": [
@@ -388,69 +327,6 @@
             "rvd_avx512_float64_t res;",
             "res.r = x;",
             "return res;"
-        ]
-    },
-    "maskz_add": {
-        "format": "long",
-        "code": [
-            "%r<tp>% radd = %add<tp>%(r0, r1);",
-            "%r<tp>% rmsk = %toreg<tp>%(m0);",
-            "return %andb<tp>%(rmsk, radd);"
-        ]
-    },
-    "msb-16": {
-        "format": "long",
-        "code": [
-            "%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%((int16_t)0x8000));",
-            "return %andb<tp>%(r0, rm);"
-        ]
-    },
-    "msb-32": {
-        "format": "long",
-        "code": [
-            "%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%((int32_t)0x80000000));",
-            "return %andb<tp>%(r0, rm);"
-        ]
-    },
-    "msb-64": {
-        "format": "long",
-        "code": [
-            "%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%((int64_t)0x8000000000000000));",
-            "return %andb<tp>%(r0, rm);"
-        ]
-    },
-    "msb-8": {
-        "format": "long",
-        "code": [
-            "%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%((int8_t)0x80));",
-            "return %andb<tp>%(r0, rm);"
-        ]
-    },
-    "notb": {
-        "format": "long",
-        "code": [
-            "%r<tp>% rm = %cast<c:int|b:tp,tp>%(%set1<c:int|b:tp>%(~0));",
-            "return %andnb<tp>%(r0, rm);"
-        ]
-    },
-    "orb_emu": {
-        "format": "long",
-        "code": [
-            "%r<c:int|b:tp>% tmp0, tmp1;",
-            "tmp0 = %cast<tp,c:int|b:tp>%(r0);",
-            "tmp1 = %cast<tp,c:int|b:tp>%(r1);",
-            "tmp0 = %orb<c:int|b:tp>%(tmp0, tmp1);",
-            "return %cast<c:int|b:tp,tp>%(tmp0);"
-        ]
-    },
-    "pow": {
-        "format": "long",
-        "code": [
-            "%r<tp>% logx = %log<tp>%(r0);",
-            "%r<tp>% ylogx = %mul<tp>%(r1, logx);",
-            "%r<tp>% res = %exp<tp>%(ylogx);",
-            "return res;",
-            ""
         ]
     },
     "reduce_16": {
@@ -619,149 +495,6 @@
             "%m<tp>% m;",
             "m.m = 0;",
             "return m;"
-        ]
-    },
-    "set1_emu": {
-        "format": "long",
-        "code": [
-            "%r<c:int|b:tp>% tmp0;",
-            "tmp0 = %set1<c:int|b:tp>%( (%v<c:int|b:tp>%)v0);",
-            "return %cast<c:int|b:tp,tp>%(tmp0);"
-        ]
-    },
-    "set1_k-16": {
-        "format": "long",
-        "code": [
-            "%r<c:int|b:tp>% r0_32 = %set1<c:int|b:tp>%(v0 ? (int32_t)0xFFFFFFFF : 0);",
-            "%r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%(     (int32_t)0xFFFFFFFF    );",
-            "return %cast_k<c:int|b:tp,tp>%(%cmpeq<c:int|b:tp>%(r0_32, r1_32));"
-        ]
-    },
-    "set1_k-32": {
-        "format": "long",
-        "code": [
-            "%r<c:int|b:tp>% r0_32 = %set1<c:int|b:tp>%(v0 ? (int16_t)0xFFFF : 0);",
-            "%r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%(     (int16_t)0xFFFF    );",
-            "return %cast_k<c:int|b:tp,tp>%(%cmpeq<c:int|b:tp>%(r0_32, r1_32));"
-        ]
-    },
-    "set1_k-64": {
-        "format": "long",
-        "code": [
-            "%r<c:int|b:tp>% r0_32 = %set1<c:int|b:tp>%(v0 ? (int8_t)0xFF : 0);",
-            "%r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%(     (int8_t)0xFF    );",
-            "return %cast_k<c:int|b:tp,tp>%(%cmpeq<c:int|b:tp>%(r0_32, r1_32)); "
-        ]
-    },
-    "set1_k-8": {
-        "format": "long",
-        "code": [
-            "%r<c:int|b:tp>% r0_32 = %set1<c:int|b:tp>%(v0 ? (int64_t)0xFFFFFFFFFFFFFFFF : 0);",
-            "%r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%(     (int64_t)0xFFFFFFFFFFFFFFFF    );",
-            "return %cast_k<c:int|b:tp,tp>%(%cmpeq<c:int|b:tp>%(r0_32, r1_32));"
-        ]
-    },
-    "set_k-16": {
-        "format": "long",
-        "code": [
-            "%v<c:int|b:tp>% t[%N<tp>%] = {",
-            "\t(int16_t)(vals[ 0] ? 0xFFFF : 0), (int16_t)(vals[ 1] ? 0xFFFF : 0),",
-            "\t(int16_t)(vals[ 2] ? 0xFFFF : 0), (int16_t)(vals[ 3] ? 0xFFFF : 0),",
-            "\t(int16_t)(vals[ 4] ? 0xFFFF : 0), (int16_t)(vals[ 5] ? 0xFFFF : 0),",
-            "\t(int16_t)(vals[ 6] ? 0xFFFF : 0), (int16_t)(vals[ 7] ? 0xFFFF : 0),",
-            "\t(int16_t)(vals[ 8] ? 0xFFFF : 0), (int16_t)(vals[ 9] ? 0xFFFF : 0),",
-            "\t(int16_t)(vals[10] ? 0xFFFF : 0), (int16_t)(vals[11] ? 0xFFFF : 0),",
-            "\t(int16_t)(vals[12] ? 0xFFFF : 0), (int16_t)(vals[13] ? 0xFFFF : 0),",
-            "\t(int16_t)(vals[14] ? 0xFFFF : 0), (int16_t)(vals[15] ? 0xFFFF : 0),",
-            "\t(int16_t)(vals[16] ? 0xFFFF : 0), (int16_t)(vals[17] ? 0xFFFF : 0),",
-            "\t(int16_t)(vals[18] ? 0xFFFF : 0), (int16_t)(vals[19] ? 0xFFFF : 0),",
-            "\t(int16_t)(vals[20] ? 0xFFFF : 0), (int16_t)(vals[21] ? 0xFFFF : 0),",
-            "\t(int16_t)(vals[22] ? 0xFFFF : 0), (int16_t)(vals[23] ? 0xFFFF : 0),",
-            "\t(int16_t)(vals[24] ? 0xFFFF : 0), (int16_t)(vals[25] ? 0xFFFF : 0),",
-            "\t(int16_t)(vals[26] ? 0xFFFF : 0), (int16_t)(vals[27] ? 0xFFFF : 0),",
-            "\t(int16_t)(vals[28] ? 0xFFFF : 0), (int16_t)(vals[29] ? 0xFFFF : 0),",
-            "\t(int16_t)(vals[30] ? 0xFFFF : 0), (int16_t)(vals[31] ? 0xFFFF : 0) };",
-            "%r<c:int|b:tp>% r0_32 = %set<c:int|b:tp>%(t);",
-            "%r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%((int16_t)0xFFFF);",
-            "return %cast_k<c:int|b:tp,tp>%(%cmpeq<c:int|b:tp>%(r0_32, r1_32));"
-        ]
-    },
-    "set_k-32": {
-        "format": "long",
-        "code": [
-            "%v<c:int|b:tp>% t[%N<tp>%] = {",
-            "\t(int32_t)(vals[ 0] ? 0xFFFFFFFF : 0), (int32_t)(vals[ 1] ? 0xFFFFFFFF : 0),",
-            "\t(int32_t)(vals[ 2] ? 0xFFFFFFFF : 0), (int32_t)(vals[ 3] ? 0xFFFFFFFF : 0),",
-            "\t(int32_t)(vals[ 4] ? 0xFFFFFFFF : 0), (int32_t)(vals[ 5] ? 0xFFFFFFFF : 0),",
-            "\t(int32_t)(vals[ 6] ? 0xFFFFFFFF : 0), (int32_t)(vals[ 7] ? 0xFFFFFFFF : 0),",
-            "\t(int32_t)(vals[ 8] ? 0xFFFFFFFF : 0), (int32_t)(vals[ 9] ? 0xFFFFFFFF : 0),",
-            "\t(int32_t)(vals[10] ? 0xFFFFFFFF : 0), (int32_t)(vals[11] ? 0xFFFFFFFF : 0),",
-            "\t(int32_t)(vals[12] ? 0xFFFFFFFF : 0), (int32_t)(vals[13] ? 0xFFFFFFFF : 0),",
-            "\t(int32_t)(vals[14] ? 0xFFFFFFFF : 0), (int32_t)(vals[15] ? 0xFFFFFFFF : 0) };",
-            "%r<c:int|b:tp>% r0_32 = %set<c:int|b:tp>%(t);",
-            "%r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%((int32_t)0xFFFFFFFF);",
-            "return %cast_k<c:int|b:tp,tp>%(%cmpeq<c:int|b:tp>%(r0_32, r1_32));"
-        ]
-    },
-    "set_k-64": {
-        "format": "long",
-        "code": [
-            "%v<c:int|b:tp>% t[%N<tp>%] = {",
-            "\t(int64_t)(vals[0] ? 0xFFFFFFFFFFFFFFFF : 0),",
-            "\t(int64_t)(vals[1] ? 0xFFFFFFFFFFFFFFFF : 0),",
-            "\t(int64_t)(vals[2] ? 0xFFFFFFFFFFFFFFFF : 0),",
-            "\t(int64_t)(vals[3] ? 0xFFFFFFFFFFFFFFFF : 0),",
-            "\t(int64_t)(vals[4] ? 0xFFFFFFFFFFFFFFFF : 0),",
-            "\t(int64_t)(vals[5] ? 0xFFFFFFFFFFFFFFFF : 0),",
-            "\t(int64_t)(vals[6] ? 0xFFFFFFFFFFFFFFFF : 0),",
-            "\t(int64_t)(vals[7] ? 0xFFFFFFFFFFFFFFFF : 0) };",
-            "%r<c:int|b:tp>% r0_32 = %set<c:int|b:tp>%(t);",
-            "%r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%((int64_t)0xFFFFFFFFFFFFFFFF);",
-            "return %cast_k<c:int|b:tp,tp>%(%cmpeq<c:int|b:tp>%(r0_32, r1_32));"
-        ]
-    },
-    "set_k-8": {
-        "format": "long",
-        "code": [
-            "%v<c:int|b:tp>% t[%N<tp>%] = {",
-            "\t(int8_t)(vals[ 0] ? 0xFF : 0), (int8_t)(vals[ 1] ? 0xFF : 0), (int8_t)(vals[ 2] ? 0xFF : 0), (int8_t)(vals[ 3] ? 0xFF : 0),",
-            "\t(int8_t)(vals[ 4] ? 0xFF : 0), (int8_t)(vals[ 5] ? 0xFF : 0), (int8_t)(vals[ 6] ? 0xFF : 0), (int8_t)(vals[ 7] ? 0xFF : 0),",
-            "\t(int8_t)(vals[ 8] ? 0xFF : 0), (int8_t)(vals[ 9] ? 0xFF : 0), (int8_t)(vals[10] ? 0xFF : 0), (int8_t)(vals[11] ? 0xFF : 0),",
-            "\t(int8_t)(vals[12] ? 0xFF : 0), (int8_t)(vals[13] ? 0xFF : 0), (int8_t)(vals[14] ? 0xFF : 0), (int8_t)(vals[15] ? 0xFF : 0),",
-            "\t(int8_t)(vals[16] ? 0xFF : 0), (int8_t)(vals[17] ? 0xFF : 0), (int8_t)(vals[18] ? 0xFF : 0), (int8_t)(vals[19] ? 0xFF : 0),",
-            "\t(int8_t)(vals[20] ? 0xFF : 0), (int8_t)(vals[21] ? 0xFF : 0), (int8_t)(vals[22] ? 0xFF : 0), (int8_t)(vals[23] ? 0xFF : 0),",
-            "\t(int8_t)(vals[24] ? 0xFF : 0), (int8_t)(vals[25] ? 0xFF : 0), (int8_t)(vals[26] ? 0xFF : 0), (int8_t)(vals[27] ? 0xFF : 0),",
-            "\t(int8_t)(vals[28] ? 0xFF : 0), (int8_t)(vals[29] ? 0xFF : 0), (int8_t)(vals[30] ? 0xFF : 0), (int8_t)(vals[31] ? 0xFF : 0),",
-            "\t(int8_t)(vals[32] ? 0xFF : 0), (int8_t)(vals[33] ? 0xFF : 0), (int8_t)(vals[34] ? 0xFF : 0), (int8_t)(vals[35] ? 0xFF : 0),",
-            "\t(int8_t)(vals[36] ? 0xFF : 0), (int8_t)(vals[37] ? 0xFF : 0), (int8_t)(vals[38] ? 0xFF : 0), (int8_t)(vals[39] ? 0xFF : 0),",
-            "\t(int8_t)(vals[40] ? 0xFF : 0), (int8_t)(vals[41] ? 0xFF : 0), (int8_t)(vals[42] ? 0xFF : 0), (int8_t)(vals[43] ? 0xFF : 0),",
-            "\t(int8_t)(vals[44] ? 0xFF : 0), (int8_t)(vals[45] ? 0xFF : 0), (int8_t)(vals[46] ? 0xFF : 0), (int8_t)(vals[47] ? 0xFF : 0),",
-            "\t(int8_t)(vals[48] ? 0xFF : 0), (int8_t)(vals[49] ? 0xFF : 0), (int8_t)(vals[50] ? 0xFF : 0), (int8_t)(vals[51] ? 0xFF : 0),",
-            "\t(int8_t)(vals[52] ? 0xFF : 0), (int8_t)(vals[53] ? 0xFF : 0), (int8_t)(vals[54] ? 0xFF : 0), (int8_t)(vals[55] ? 0xFF : 0),",
-            "\t(int8_t)(vals[56] ? 0xFF : 0), (int8_t)(vals[57] ? 0xFF : 0), (int8_t)(vals[58] ? 0xFF : 0), (int8_t)(vals[59] ? 0xFF : 0),",
-            "\t(int8_t)(vals[60] ? 0xFF : 0), (int8_t)(vals[61] ? 0xFF : 0), (int8_t)(vals[62] ? 0xFF : 0), (int8_t)(vals[63] ? 0xFF : 0) };",
-            "%r<c:int|b:tp>% r0_32 = %set<c:int|b:tp>%(t);",
-            "%r<c:int|b:tp>% r1_32 = %set1<c:int|b:tp>%((int8_t)0xFF);",
-            "return %cast_k<c:int|b:tp,tp>%(%cmpeq<c:int|b:tp>%(r0_32, r1_32));"
-        ]
-    },
-    "tomsk": {
-        "format": "long",
-        "code": [
-            "%m<tr>% res;",
-            "%r<c:int>% zero = %set0<c:int>%();",
-            "res = %cast_k<c:int,tr>%(%cmpneq<c:int>%(%cast<tp,c:int>%(r0), zero));",
-            "return res;"
-        ]
-    },
-    "toreg": {
-        "format": "long",
-        "code": [
-            "%r<tr>% res;",
-            "%r<c:int>% zero = %set1<c:int>%(0);",
-            "%r<c:int>% one = %set1<c:int>%(~0);",
-            "res = %cast<c:int,tr>%(%blend<c:int>%(one, zero, %cast_k<tp,c:int>%(m0)));",
-            "return res;"
         ]
     }
 }

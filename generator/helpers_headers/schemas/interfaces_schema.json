@@ -18,6 +18,7 @@
         "enum": ["no_mask", "only_mask", "only_maskz", "only_masks", "mask_and_maskz", "mask_and_masks", "maskz_and_masks", "all_mask"]
       }
     },
-    "required": ["proto_ref", "datatypes", "horizontal", "mask_support"]
+    "required": ["proto_ref", "datatypes", "horizontal", "mask_support"],
+    "additionalProperties": false
   }
 }

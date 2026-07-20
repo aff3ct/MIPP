@@ -1,22 +1,4 @@
 {
-    "add": [
-        {
-            "instr_name": "add",
-            "datatypes": [
-                "uint32",
-                "uint64"
-            ],
-            "template": "arith_2args_u"
-        }
-    ],
-    "andb": [
-        {
-            "instr_name": "and",
-            "datatypes": "all_float",
-            "template": "andb_emu",
-            "if": "!defined(__AVX512DQ__)"
-        }
-    ],
     "andb_k": [
         {
             "datatypes": "all_64bit",
@@ -34,13 +16,6 @@
             "template": "andb_k_emu",
             "if": "!defined(__AVX512BW__)",
             "instr_name": "andb_k"
-        }
-    ],
-    "blend": [
-        {
-            "instr_name": "blend",
-            "datatypes": "all_uint",
-            "template": "blend_emu"
         }
     ],
     "exp": [
@@ -82,32 +57,6 @@
             "version": "maskz"
         }
     ],
-    "get": [
-        {
-            "datatypes": "all_datatypes",
-            "template": "get",
-            "instr_name": "get"
-        }
-    ],
-    "get_k": [
-        {
-            "datatypes": "all_datatypes",
-            "template": "get_k",
-            "instr_name": "get_k"
-        }
-    ],
-    "getfirst": [
-        {
-            "datatypes": [
-                "int16",
-                "uint16",
-                "int8",
-                "uint8"
-            ],
-            "template": "getfirst-fromstore",
-            "instr_name": "getfirst"
-        }
-    ],
     "hadd": [
         {
             "instr_name": "add",
@@ -136,34 +85,6 @@
             "datatypes": "all_8bit",
             "template": "reduce_8",
             "if": "defined(__AVX512BW__)"
-        }
-    ],
-    "hadd_to_scal": [
-        {
-            "datatypes": [
-                "float64",
-                "int64"
-            ],
-            "template": "hadd_to_scal",
-            "instr_name": "hadd_to_scal"
-        },
-        {
-            "datatypes": [
-                "float32",
-                "int32"
-            ],
-            "template": "hadd_to_scal",
-            "instr_name": "hadd_to_scal"
-        },
-        {
-            "datatypes": "all_16bit",
-            "template": "hadd_to_scal",
-            "instr_name": "hadd_to_scal"
-        },
-        {
-            "datatypes": "all_8bit",
-            "template": "hadd_to_scal",
-            "instr_name": "hadd_to_scal"
         }
     ],
     "hmax": [
@@ -325,120 +246,6 @@
             "instr_name": "log"
         }
     ],
-    "maskz_add": [
-        {
-            "datatypes": "all_int",
-            "template": "maskz_add",
-            "instr_name": "maskz_add"
-        }
-    ],
-    "msb": [
-        {
-            "datatypes": [
-                "float64"
-            ],
-            "template": "msb-64",
-            "if": "defined(__AVX512DQ__)",
-            "instr_name": "msb"
-        },
-        {
-            "datatypes": [
-                "int64",
-                "uint64"
-            ],
-            "template": "msb-64",
-            "instr_name": "msb"
-        },
-        {
-            "datatypes": [
-                "float32"
-            ],
-            "template": "msb-32",
-            "if": "defined(__AVX512DQ__)",
-            "instr_name": "msb"
-        },
-        {
-            "datatypes": [
-                "int32",
-                "uint32"
-            ],
-            "template": "msb-32",
-            "instr_name": "msb"
-        },
-        {
-            "datatypes": "all_16bit",
-            "template": "msb-16",
-            "if": "defined(__AVX512BW__)",
-            "instr_name": "msb"
-        },
-        {
-            "datatypes": "all_8bit",
-            "template": "msb-8",
-            "if": "defined(__AVX512BW__)",
-            "instr_name": "msb"
-        }
-    ],
-    "notb": [
-        {
-            "datatypes": "all_float",
-            "template": "notb",
-            "if": "defined(__AVX512DQ__)",
-            "instr_name": "notb"
-        },
-        {
-            "datatypes": [
-                "int64",
-                "uint64"
-            ],
-            "template": "notb",
-            "instr_name": "notb"
-        },
-        {
-            "datatypes": [
-                "int32",
-                "uint32"
-            ],
-            "template": "notb",
-            "instr_name": "notb"
-        },
-        {
-            "datatypes": "all_16bit",
-            "template": "notb",
-            "if": "defined(__AVX512BW__)",
-            "instr_name": "notb"
-        },
-        {
-            "datatypes": "all_8bit",
-            "template": "notb",
-            "if": "defined(__AVX512BW__)",
-            "instr_name": "notb"
-        }
-    ],
-    "orb": [
-        {
-            "instr_name": "or",
-            "datatypes": "all_float",
-            "template": "orb_emu",
-            "if": "!defined(__AVX512DQ__)"
-        }
-    ],
-    "pow": [
-        {
-            "datatypes": [
-                "float32"
-            ],
-            "template": "pow",
-            "instr_name": "pow"
-        },
-        {
-            "datatypes": [
-                "float64"
-            ],
-            "template": "pow",
-            "if": "defined(__AVX512DQ__)",
-            "instr_name": "pow"
-        }
-    ],
     "scatter": [
         {
             "instr_name": "scatter",
@@ -458,81 +265,6 @@
             "instr_name": "setzero",
             "datatypes": "all_datatypes",
             "template": "set0_k"
-        }
-    ],
-    "set1": [
-        {
-            "instr_name": "set1",
-            "datatypes": "all_uint",
-            "template": "set1_emu"
-        }
-    ],
-    "set1_k": [
-        {
-            "datatypes": "all_64bit",
-            "template": "set1_k-8",
-            "instr_name": "set1_k"
-        },
-        {
-            "datatypes": "all_32bit",
-            "template": "set1_k-16",
-            "instr_name": "set1_k"
-        },
-        {
-            "datatypes": "all_16bit",
-            "template": "set1_k-32",
-            "instr_name": "set1_k"
-        },
-        {
-            "datatypes": "all_8bit",
-            "template": "set1_k-64",
-            "instr_name": "set1_k"
-        }
-    ],
-    "set_k": [
-        {
-            "datatypes": "all_64bit",
-            "template": "set_k-64",
-            "instr_name": "set_k"
-        },
-        {
-            "datatypes": "all_32bit",
-            "template": "set_k-32",
-            "instr_name": "set_k"
-        },
-        {
-            "datatypes": "all_16bit",
-            "template": "set_k-16",
-            "instr_name": "set_k"
-        },
-        {
-            "datatypes": "all_8bit",
-            "template": "set_k-8",
-            "instr_name": "set_k"
-        }
-    ],
-    "sub": [
-        {
-            "instr_name": "sub",
-            "datatypes": [
-                "uint32",
-                "uint64"
-            ],
-            "template": "arith_2args_u"
-        }
-    ],
-    "tomsk": [
-        {
-            "datatypes": "all_datatypes",
-            "template": "tomsk",
-            "instr_name": "tomsk"
-        }
-    ],
-    "toreg": [
-        {
-            "datatypes": "all_datatypes",
-            "template": "toreg",
-            "instr_name": "toreg"
         }
     ]
 }

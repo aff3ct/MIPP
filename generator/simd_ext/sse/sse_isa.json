@@ -16,7 +16,12 @@
         "#include <immintrin.h>"
     ],
     "hw_lmul": [],
-    "sw_lmul": [1, 2, 4, 8],
+    "sw_lmul": [
+        1,
+        2,
+        4,
+        8
+    ],
     "datatypes": {
         "float64": {
             "data_ext": "pd",

@@ -60,7 +60,8 @@
       "anyOf": [
         { "required": ["template"] },
         { "required": ["template_ref"] }
-      ]
+      ],
+      "additionalProperties": false
     },
     "embedded_template": {
       "type": "object",
@@ -73,7 +74,8 @@
           ]
         }
       },
-      "required": ["code"]
+      "required": ["code"],
+      "additionalProperties": false
     }
   }
 }

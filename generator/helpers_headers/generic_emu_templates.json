@@ -59,6 +59,17 @@
             "return %cast<c:float|b:tp,tp>%(resf);"
         ]
     },
+    "blend_via_int_emu": {
+        "format": "long",
+        "code": [
+            "%r<c:int|b:tp>% tmp0, tmp1;",
+            "tmp0 = %cast<tp,c:int|b:tp>%(r0);",
+            "tmp1 = %cast<tp,c:int|b:tp>%(r1);",
+            "%m<c:int|b:tp>% mtmp = %cast_k<tp,c:int|b:tp>%(m0);",
+            "tmp0 = %blend<c:int|b:tp>%(tmp0, tmp1, mtmp);",
+            "return %cast<c:int|b:tp,tp>%(tmp0);"
+        ]
+    },
     "cmpeq_u": {
         "format": "long",
         "code": [
@@ -223,6 +234,14 @@
             "return %tomsk<tp>%(%cast<c:float|b:32,tp>%(resf));"
         ]
     },
+    "maskz_add": {
+        "format": "long",
+        "code": [
+            "%r<tp>% radd = %add<tp>%(r0, r1);",
+            "%r<tp>% rmsk = %toreg<tp>%(m0);",
+            "return %andb<tp>%(rmsk, radd);"
+        ]
+    },
     "max_emu": {
         "format": "long",
         "code": "return %blend<tp>%(r0, r1, %cmpgt<tp>%(r0, r1));"
@@ -383,6 +402,16 @@
     "set_k-xxf": {
         "format": "long",
         "code": "return %cast_k<c:int,tr>%(%set_k<c:int>%(vals));"
+    },
+    "set_k_emu": {
+        "format": "long",
+        "code": [
+            "%v<c:uint|b:tp>% tab[%N<tp>%];",
+            "for (unsigned i = 0; i < %N<tp>%; i++) {",
+            "\ttab[i] = vals[i] ? (%v<c:uint|b:tp>%)~0 : (%v<c:uint|b:tp>%)0;",
+            "}",
+            "return %tomsk<tp>%(%cast<c:uint|b:tp,tp>%(%set<c:uint|b:tp>%(tab)));"
+        ]
     },
     "testz_2": {
         "format": "long",

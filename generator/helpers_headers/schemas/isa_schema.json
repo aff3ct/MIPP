@@ -41,6 +41,7 @@
     "hw_mask": { "type": "boolean" },
     "hw_mask_requires_toreg": { "type": "boolean" },
     "hw_mask_is_bitfield": { "type": "boolean" },
+    "hw_mask_extract_via_store": { "type": "boolean" },
     "layout": {
       "type": "object",
       "properties": {
@@ -52,7 +53,8 @@
         "rvd_struct_template": { "type": "string" },
         "rvm_struct_template": { "type": "string" }
       },
-      "required": ["size_symbol", "defines_template", "vector_typedef_template", "mask_typedef_template", "rvd_struct_template", "rvm_struct_template"]
+      "required": ["size_symbol", "defines_template", "vector_typedef_template", "mask_typedef_template", "rvd_struct_template", "rvm_struct_template"],
+      "additionalProperties": false
     },
     "datatypes": {
       "type": "object",
@@ -66,11 +68,17 @@
           "msk": { "type": "string" },
           "to_ptr": { "type": "string" },
           "if": { "type": "string" },
-          "if_lmul": { "type": "object" }
+          "if_lmul": { "type": "object" },
+          "variables": {
+            "type": "object",
+            "additionalProperties": true
+          }
         },
-        "required": ["reg", "msk", "to_ptr"]
+        "required": ["reg", "msk", "to_ptr"],
+        "additionalProperties": false
       }
     }
   },
-  "required": ["name", "datatypes"]
+  "required": ["name", "datatypes"],
+  "additionalProperties": false
 }

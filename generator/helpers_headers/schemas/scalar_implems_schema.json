@@ -25,7 +25,8 @@
           ]
         }
       },
-      "required": ["type", "datatypes", "mask_variants", "implem"]
+      "required": ["type", "datatypes", "mask_variants", "implem"],
+      "additionalProperties": false
     }
   }
 }

@@ -225,8 +225,9 @@ def _load_generic_emu():
                     "instr_name": item.get("instr_name", func_name),
                     "datatypes": resolve_datatypes(item["datatypes"])
                 }
-                if "version" in item:
-                    processed_item["version"] = item["version"]
+                for k, v in item.items():
+                    if k not in ["instr_name", "datatypes", "template", "template_ref"]:
+                        processed_item[k] = v
                 
                 # Resolve template
                 template_code = ""

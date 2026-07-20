@@ -30,7 +30,8 @@
           ]
         }
       },
-      "required": ["code"]
+      "required": ["code"],
+      "additionalProperties": false
     }
   }
 }

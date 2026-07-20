@@ -7,7 +7,9 @@
         "#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SCALAR_H_",
         "#define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SCALAR_H_"
     ],
-    "hw_lmul": [1],
+    "hw_lmul": [
+        1
+    ],
     "sw_lmul": [],
     "datatypes": {
         "float64": {

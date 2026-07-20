@@ -11,7 +11,8 @@
         "items": { "$ref": "#/definitions/param" }
       }
     },
-    "required": ["ret", "args"]
+    "required": ["ret", "args"],
+    "additionalProperties": false
   },
   "definitions": {
     "param": {
@@ -29,9 +30,11 @@
             { "type": "string" }
           ]
         },
-        "charac": { "type": "string" }
+        "charac": { "type": "string" },
+        "offset_lmul": { "type": "boolean" }
       },
-      "required": ["type", "fixeddatatype"]
+      "required": ["type", "fixeddatatype"],
+      "additionalProperties": false
     }
   }
 }
