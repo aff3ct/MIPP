@@ -305,6 +305,7 @@ def resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators
     candidates_map = {}
     collected_candidates = isa.get("candidates", [])
     
+    # 1. Initialize map keys
     for f in funcs:
         for dt in funcs[f]["datatypes"]:
             dt_par, dt_ret = compute_dt_par_dt_ret(None, None, dt, check_support=False)
@@ -323,15 +324,36 @@ def resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators
             for mask_kind in mask_kinds:
                 key = (f, dt_key, mask_kind)
                 candidates_map[key] = []
-                
-                for c in collected_candidates:
-                    c_f = c["f"]
-                    c_dt = c["dt"]
-                    c_dt_par, c_dt_ret = compute_dt_par_dt_ret(funcs, c_f, c_dt)
-                    c_dt_key = c_dt_par + "," + c_dt_ret
-                    c_mask_kind = c["ff"].get("version", None)
-                    if c_f == f and c_dt_key == dt_key and c_mask_kind == mask_kind:
-                        candidates_map[key].append(c)
+
+    # 2. Populate with collected candidates in a single pass O(M)
+    for c in collected_candidates:
+        c_f = c["f"]
+        c_dt = c["dt"]
+        c_dt_par, c_dt_ret = compute_dt_par_dt_ret(funcs, c_f, c_dt)
+        c_dt_key = c_dt_par + "," + c_dt_ret
+        c_mask_kind = c["ff"].get("version", None)
+        key = (c_f, c_dt_key, c_mask_kind)
+        if key in candidates_map:
+            candidates_map[key].append(c)
+
+    # 3. Add auto_scalar and stub candidates, then sort
+    for f in funcs:
+        for dt in funcs[f]["datatypes"]:
+            dt_par, dt_ret = compute_dt_par_dt_ret(None, None, dt, check_support=False)
+            dt_key = dt_par + "," + dt_ret
+            
+            mask_kinds = [None]
+            if "mask_support" in funcs[f]:
+                support = funcs[f]["mask_support"]
+                if support.is_maskable():
+                    mask_kinds.append("mask")
+                if support.is_maskzable():
+                    mask_kinds.append("maskz")
+                if support.is_masksable():
+                    mask_kinds.append("masks")
+                    
+            for mask_kind in mask_kinds:
+                key = (f, dt_key, mask_kind)
                 
                 if isa["name"] != "scalar":
                     auto_scalar_reqs = {}
