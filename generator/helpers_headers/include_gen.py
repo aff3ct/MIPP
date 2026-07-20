@@ -682,6 +682,8 @@ class IncludeManager:
                 # auto-scalar fallback requires the scalar variant to be included
                 if layer_name != "scalar" and layer_name != "scalar_cpp" and layer_name != "c":
                     include_path.dependencies.add(f"simd_ext/scalar/functions/scalar_{func}.h")
+                    include_path.dependencies.add("simd_ext/scalar/functions/scalar_toreg.h")
+                    include_path.dependencies.add("simd_ext/scalar/functions/scalar_tomsk.h")
                 include_path.write_prefix(f"{target_dir}/functions")
 
 
