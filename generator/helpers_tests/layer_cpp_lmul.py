@@ -292,7 +292,7 @@ AS_CMP_BINOP_LOGI_FLOAT_WORKAROUND = """REQUIRE(!! mipp::get(r3, i) == !!mipp::g
 AS_REG_BINOP_NAN = """\t\tif(std::isnan(mipp::get(s3, i))) REQUIRE(std::isnan(mipp::get(r3, i))); else REQUIRE(mipp::get(r3, i) == mipp::get(s3, i));"""
 AS_REG_BINOP_NAN_TOL = """\t\t{{dt_ext}} res1 = mipp::get(r3, i);
 \t\t{{dt_ext}} res2 = mipp::get(s3, i);
-\t\t{{dt_ext}} tol  = 1e-5f * abs_diff::abs_diff(res2) + 1.0f;
+\t\t{{dt_ext}} tol  = 1e-4f * abs_diff::abs_diff(res2) + 1e-4f;
 \t\t{{dt_ext}} diff = abs_diff::abs_diff(res1, res2);
 \t\tif(std::isinf(tol) || std::isnan(tol)) continue; // skip comparison if tol is inf or nan
 \t\tif(std::isnan(diff) || std::isnan(res2) || std::isnan(res1)) continue; // skip comparison if either result is nan
@@ -739,10 +739,23 @@ LAYER_OVERRIDES = {
     },
 
     "exp" : {
+        "init": """\tstd::iota(inputs1, inputs1 + {{size}}, 1);
+\tfor(size_t i = 0; i < {{size}}; i++)
+\t{
+\t\tinputs1[i] = (rnd::uniform<{{dt_ext}}>(seed) / ({{dt_ext}})2147483647.0) * 10.0;
+\t}
+""",
         "loop_assert": AS_REG_BINOP_NAN_TOL,
     },
 
     "log" : {
+        "init": """\tstd::iota(inputs1, inputs1 + {{size}}, 1);
+\tfor(size_t i = 0; i < {{size}}; i++)
+\t{
+\t\tinputs1[i] = rnd::uniform<{{dt_ext}}>(seed);
+\t\tinputs1[i] = inputs1[i] < 0 ? -inputs1[i] : inputs1[i]; // make sure inputs1 is non-negative for log(x)
+\t}
+""",
         "loop_assert": AS_REG_BINOP_NAN_TOL,
     },
 
@@ -753,6 +766,16 @@ LAYER_OVERRIDES = {
 \t\tinputs1[i] = rnd::uniform<{{dt_ext}}>(seed);
 \t\tinputs1[i] = inputs1[i] < 0 ? -inputs1[i] : inputs1[i]; // make sure inputs1 is non-negative for log(x)
 \t\tinputs2[i] = rnd::uniform<{{dt_ext}}>(seed);
+\t}
+""",
+        "loop_assert": AS_REG_BINOP_NAN_TOL,
+    },
+
+    "pow2": {
+        "init": """\tstd::iota(inputs1, inputs1 + {{size}}, 1);
+\tfor(size_t i = 0; i < {{size}}; i++)
+\t{
+\t\tinputs1[i] = (rnd::uniform<{{dt_ext}}>(seed) / ({{dt_ext}})2147483647.0) * 10.0;
 \t}
 """,
         "loop_assert": AS_REG_BINOP_NAN_TOL,

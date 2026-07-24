@@ -282,7 +282,16 @@ AS_CAST_2ARGS = """\t\tREQUIRE(mipp_get_{{dt2_ext}}(r2, i) == mipp_scalar_get_{{
 AS_CAST_2ARGS_MSK = """\t\tif(res) REQUIRE( (!!mipp_get_k_{{dt2_ext}}(m2, i)) == (!!mipp_scalar_get_k_{{dt2_ext}}(s2, i)) );"""
 
 
-AS_CMP_BINOP_FLOAT_WORKAROUND = """{% if is_int %}""" + AS_CMP_2REG + """{% else %}
+AS_REG_UNOP_TOL = """\t\t{{dt_ext}}_t res1 = mipp_get_{{dt_ext}}(r3, i);
+\t\t{{dt_ext}}_t res2 = mipp_scalar_get_{{dt_ext}}(s3, i);
+\t\t{{dt_ext}}_t tol  = 1e-3f * abs_diff::abs_diff(res2) + 1e-3f;
+\t\t{{dt_ext}}_t diff = abs_diff::abs_diff(res1, res2);
+\t\tif(std::isinf(tol) || std::isnan(tol)) continue;
+\t\tif(std::isnan(diff) || std::isnan(res2) || std::isnan(res1)) continue;
+\t\tif(std::isinf(diff) || std::isinf(res2) || std::isinf(res1)) continue;
+\t\tREQUIRE(diff <= tol);"""
+
+AS_CMP_BINOP_FLOAT_WORKAROUND = """{% if func in ["exp", "log", "pow", "pow2"] %}""" + AS_REG_UNOP_TOL + """{% elif is_int %}""" + AS_CMP_2REG + """{% else %}
 \n\t\tREQUIRE(std::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(mipp_get_{{dt_ext}}(r3, i))\
     \n\t\t\t==
     \t\tstd::bit_cast<uint{{type_size}}_t,{{dt_ext}}_t>(mipp_scalar_get_{{dt_ext}}(s3,i)) );
@@ -754,9 +763,49 @@ AS_CAST_2ARGS+ "\n\t}",
         "loop_body": "",
         "loop_assert": """for(size_t i = 0; i < {{size}} * sizeof({{dt1_ext}}_t) / sizeof({{dt2_ext}}_t); i++){\n""" +AS_CAST_2ARGS_MSK + "\n\t}",
     },
-    
-#\t\tREQUIRE(std::abs(mipp_{{func}}_{{dt_ext}}(r1) - mipp_scalar_{{func}}_{{dt_ext}}(s1)) < 1e-2);
 
+    "exp": {
+        "init": """\tstd::iota(inputs1, inputs1 + {{size}}, 1);
+\tfor(size_t i = 0; i < {{size}}; i++)
+\t{
+\t\tinputs1[i] = (rnd::uniform<{{dt_ext}}_t>(seed) / ({{dt_ext}}_t)2147483647.0) * 3.0;
+\t}
+""",
+        "loop_assert": AS_REG_UNOP_TOL,
+    },
+
+    "log": {
+        "init": """\tstd::iota(inputs1, inputs1 + {{size}}, 1);
+\tfor(size_t i = 0; i < {{size}}; i++)
+\t{
+\t\tinputs1[i] = rnd::uniform<{{dt_ext}}_t>(seed);
+\t\tinputs1[i] = inputs1[i] < 0 ? -inputs1[i] : inputs1[i];
+\t}
+""",
+        "loop_assert": AS_REG_UNOP_TOL,
+    },
+
+    "pow": {
+        "init": """\tstd::iota(inputs1, inputs1 + {{size}}, 1);
+\tfor(size_t i = 0; i < {{size}}; i++)
+\t{
+\t\tinputs1[i] = rnd::uniform<{{dt_ext}}_t>(seed);
+\t\tinputs1[i] = inputs1[i] < 0 ? -inputs1[i] : inputs1[i];
+\t\tinputs2[i] = rnd::uniform<{{dt_ext}}_t>(seed);
+\t}
+""",
+        "loop_assert": AS_REG_UNOP_TOL,
+    },
+
+    "pow2": {
+        "init": """\tstd::iota(inputs1, inputs1 + {{size}}, 1);
+\tfor(size_t i = 0; i < {{size}}; i++)
+\t{
+\t\tinputs1[i] = (rnd::uniform<{{dt_ext}}_t>(seed) / ({{dt_ext}}_t)2147483647.0) * 3.0;
+\t}
+""",
+        "loop_assert": AS_REG_UNOP_TOL,
+    },
 }
 
 NO_LOOP_FUNCS = {"hadd", "hmul", "hmin", "hmax", 

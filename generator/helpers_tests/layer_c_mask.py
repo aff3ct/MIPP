@@ -324,6 +324,15 @@ AS_CMP_BINOP_LOGI_FLOAT_WORKAROUND = """{% if is_int %}""" + AS_CMP_2REG + """{%
 \n\t\tREQUIRE( (!!mipp_get_{{dt_ext}}{{lmul_suffix}}(r3, i)) == (!!mipp_scalar_get_{{dt_ext}}{{lmul_suffix}}(s3,i)) );
 {% endif %}"""
 
+AS_REG_UNOP_TOL = """\t\t{{dt_ext}}_t res1 = mipp_get_{{dt_ext}}{{lmul_suffix}}(r3, i);
+\t\t{{dt_ext}}_t res2 = mipp_scalar_get_{{dt_ext}}{{lmul_suffix}}(s3, i);
+\t\t{{dt_ext}}_t tol  = 1e-3f * abs_diff::abs_diff(res2) + 1e-3f;
+\t\t{{dt_ext}}_t diff = abs_diff::abs_diff(res1, res2);
+\t\tif(std::isinf(tol) || std::isnan(tol)) continue;
+\t\tif(std::isnan(diff) || std::isnan(res2) || std::isnan(res1)) continue;
+\t\tif(std::isinf(diff) || std::isinf(res2) || std::isinf(res1)) continue;
+\t\tREQUIRE(diff <= tol);"""
+
 AS_3ARGS_TOL = """\t\t{{dt_ext}}_t res1 = mipp_get_{{dt_ext}}{{lmul_suffix}}(r4, i);
 \t\t{{dt_ext}}_t res2 = mipp_scalar_get_{{dt_ext}}{{lmul_suffix}}(s4, i);
 \t\t{{dt_ext}}_t tol  = 1e-5f * abs_diff::abs_diff(res2) + 1.0f;
@@ -615,6 +624,48 @@ LAYER_OVERRIDES = {
 + "\n\t\t}",
     },
 
+    "exp": {
+        "init": """\tstd::iota(inputs1, inputs1 + {{size}}, 1);
+\tfor(size_t i = 0; i < {{size}}; i++)
+\t{
+\t\tinputs1[i] = (rnd::uniform<{{dt_ext}}_t>(seed) / ({{dt_ext}}_t)2147483647.0) * 3.0;
+\t}
+"""+INIT_PRED,
+        "loop_assert": AS_REG_UNOP_TOL,
+    },
+
+    "log": {
+        "init": """\tstd::iota(inputs1, inputs1 + {{size}}, 1);
+\tfor(size_t i = 0; i < {{size}}; i++)
+\t{
+\t\tinputs1[i] = rnd::uniform<{{dt_ext}}_t>(seed);
+\t\tinputs1[i] = inputs1[i] < 0 ? -inputs1[i] : inputs1[i];
+\t}
+"""+INIT_PRED,
+        "loop_assert": AS_REG_UNOP_TOL,
+    },
+
+    "pow": {
+        "init": """\tstd::iota(inputs1, inputs1 + {{size}}, 1);
+\tfor(size_t i = 0; i < {{size}}; i++)
+\t{
+\t\tinputs1[i] = rnd::uniform<{{dt_ext}}_t>(seed);
+\t\tinputs1[i] = inputs1[i] < 0 ? -inputs1[i] : inputs1[i];
+\t\tinputs2[i] = rnd::uniform<{{dt_ext}}_t>(seed);
+\t}
+"""+INIT_PRED,
+        "loop_assert": AS_REG_UNOP_TOL,
+    },
+
+    "pow2": {
+        "init": """\tstd::iota(inputs1, inputs1 + {{size}}, 1);
+\tfor(size_t i = 0; i < {{size}}; i++)
+\t{
+\t\tinputs1[i] = (rnd::uniform<{{dt_ext}}_t>(seed) / ({{dt_ext}}_t)2147483647.0) * 3.0;
+\t}
+"""+INIT_PRED,
+        "loop_assert": AS_REG_UNOP_TOL,
+    },
 }
 
 NO_LOOP_FUNCS = { "hadd", "hmul", "hmin", "hmax", "getfirst", "testz",

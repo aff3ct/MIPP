@@ -54,11 +54,12 @@ sve_native_implems.update(sve_emu_implems)
 rvv_native_implems.update(rvv_emu_implems)
 neon_native_implems.update(neon_emu_implems)
 
-#avx512_native_implems.update(implems_generic_emu)
+avx512_native_implems.update(implems_generic_emu)
 avx_native_implems.update(implems_generic_emu)
 sse_native_implems.update(implems_generic_emu)
-#sve_native_implems.update(implems_generic_emu)
+sve_native_implems.update(implems_generic_emu)
 rvv_native_implems.update(implems_generic_emu)
+neon_native_implems.update(implems_generic_emu)
 
 implem_dict = {
     # avx512 has to be first bc it's the one w the #if
