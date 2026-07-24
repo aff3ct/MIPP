@@ -11,12 +11,6 @@
             "{{ isa.prefix }}{{ instr_name }}_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), m0.m, m1.m);"
         ]
     },
-    "cast_k": {
-        "format": "short",
-        "code": [
-            " m0.m;"
-        ]
-    },
     "load": {
         "format": "short",
         "code": [

@@ -1,12 +1,4 @@
 {
-    "andb_k_emu": {
-        "format": "long",
-        "code": [
-            "%m<tp>% ret; ",
-            "ret.m = m0.m & m1.m;",
-            "return ret;"
-        ]
-    },
     "exp_f32": {
         "format": "long",
         "code": [
@@ -487,14 +479,6 @@
             "%r<tp>% blended;",
             "blended.r = {{ isa.prefix }}_mask_blend_{{ isa_dt_par.data_ext }}(m0.m, zeroes.r, r1.r);",
             "{{ isa.prefix }}_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(p0,r0.r, blended.r, {{dt_par.n_bits//8}});"
-        ]
-    },
-    "set0_k": {
-        "format": "long",
-        "code": [
-            "%m<tp>% m;",
-            "m.m = 0;",
-            "return m;"
         ]
     }
 }

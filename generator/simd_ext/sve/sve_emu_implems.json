@@ -27,15 +27,6 @@
             "template": "andb_k"
         }
     ],
-    "cast_k": [
-        {
-            "instr_name": "",
-            "datatypes": "all_datatypes_cart_prod",
-            "template": "cast_k",
-            "skip_audit_level": true,
-            "skip_audit_level_reason": "assigns native SVE mask wrapper directly"
-        }
-    ],
     "cmpeq": [
         {
             "instr_name": "cmpeq",

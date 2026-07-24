@@ -11,6 +11,12 @@
             "{% if isa_dt_par.data_ext != isa_dt_ret.data_ext -%}{{ isa.prefix }}{{ instr_name }}_{{isa_dt_ret.data_ext}}_{{isa_dt_par.data_ext}}(r0.r);{% else -%} r0.r;{% endif %}"
         ]
     },
+    "cast_k": {
+        "format": "short",
+        "code": [
+            " m0.m;"
+        ]
+    },
     "mask_load": {
         "format": "short",
         "code": [
