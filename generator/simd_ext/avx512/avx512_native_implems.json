@@ -548,7 +548,8 @@
                 "int64",
                 "int32"
             ],
-            "template": "arith_2args"
+            "template": "arith_2args",
+            "if": "!defined(__MIC__) && !defined(__KNCNI__)"
         },
         {
             "instr_name": "max",
@@ -575,7 +576,8 @@
                 "int64",
                 "int32"
             ],
-            "template": "arith_2args"
+            "template": "arith_2args",
+            "if": "!defined(__MIC__) && !defined(__KNCNI__)"
         },
         {
             "instr_name": "min",
@@ -712,7 +714,7 @@
             "instr_name": "roundscale",
             "datatypes": "all_float",
             "template": "round",
-            "if": "defined(__AVX512F__)"
+            "if": "defined(__AVX512F__) && !defined(__MIC__) && !defined(__KNCNI__)"
         }
     ],
     "rsqrt": [

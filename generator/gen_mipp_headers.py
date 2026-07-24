@@ -297,7 +297,7 @@ def main(argv=None):
                 for item in a.split(","):
                     item = item.strip().lower()
                     if item == "all":
-                        input_validation.ACTIVE_AUDITS.update(["levels", "dead-code"])
+                        input_validation.ACTIVE_AUDITS.update(["levels", "dead-code", "duplicates"])
                     elif item in ("levels", "dead-code", "duplicates"):
                         input_validation.ACTIVE_AUDITS.add(item)
 

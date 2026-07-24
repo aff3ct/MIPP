@@ -75,7 +75,7 @@
                 "float64"
             ],
             "template": "reduce_64",
-            "if": "defined(__AVX512F__)"
+            "if": "defined(__AVX512F__) && !defined(__MIC__) && !defined(__KNCNI__)"
         },
         {
             "instr_name": "max",
@@ -83,7 +83,7 @@
                 "float32"
             ],
             "template": "reduce_32",
-            "if": "defined(__AVX512F__)"
+            "if": "defined(__AVX512F__) && !defined(__MIC__) && !defined(__KNCNI__)"
         },
         {
             "instr_name": "gmax",
@@ -133,7 +133,7 @@
                 "float64"
             ],
             "template": "reduce_64",
-            "if": "defined(__AVX512F__)"
+            "if": "defined(__AVX512F__) && !defined(__MIC__) && !defined(__KNCNI__)"
         },
         {
             "instr_name": "min",
@@ -141,7 +141,7 @@
                 "float32"
             ],
             "template": "reduce_32",
-            "if": "defined(__AVX512F__)"
+            "if": "defined(__AVX512F__) && !defined(__MIC__) && !defined(__KNCNI__)"
         },
         {
             "instr_name": "gmin",
