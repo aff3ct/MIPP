@@ -7,8 +7,8 @@ set (CMAKE_MACOSX_RPATH 1)
 # Enable C++20 (for std::bit_cast)
 set (CMAKE_CXX_STANDARD 20)
 
-# Configure Unity Build batch size to avoid compiler ICE on huge translation units (e.g. GCC 14 RISC-V)
-set(CMAKE_UNITY_BUILD_BATCH_SIZE 16)
+# CMake options for tests build configuration
+option(MIPP_PRECOMPILED_HEADERS "Enable Precompiled Headers (PCH) for tests" ON)
 
 # Specify bin path
 set (EXECUTABLE_OUTPUT_PATH bin/)
@@ -25,7 +25,7 @@ find_package(Catch2 3 REQUIRED)
 target_link_libraries(tests_exe PRIVATE Catch2::Catch2)
 
 # Precompiled Headers (PCH) to accelerate compilation
-if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.16)
+if(MIPP_PRECOMPILED_HEADERS AND CMAKE_VERSION VERSION_GREATER_EQUAL 3.16)
     target_precompile_headers(tests_exe PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/../include/mipp.h"
     )
