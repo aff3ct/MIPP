@@ -125,6 +125,30 @@
         "format": "short",
         "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r2.r, r0.r, r1.r);"
     },
+    "arith_3args_acc_neg": {
+        "format": "short",
+        "code": "{{ isa.prefix }}negq_{{ isa_dt_par.data_ext }}({{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r2.r, r0.r, r1.r));"
+    },
+    "div2_float": {
+        "format": "short",
+        "code": "{{ isa.prefix }}mulq_n_{{ isa_dt_par.data_ext }}(r0.r, {% if isa_dt_par.data_ext == 'f64' -%}0.5{% else -%}0.5f{% endif %});"
+    },
+    "div2_int": {
+        "format": "short",
+        "code": "{{ isa.prefix }}shrq_n_{{ isa_dt_par.data_ext }}(r0.r, 1);"
+    },
+    "div4_float": {
+        "format": "short",
+        "code": "{{ isa.prefix }}mulq_n_{{ isa_dt_par.data_ext }}(r0.r, {% if isa_dt_par.data_ext == 'f64' -%}0.25{% else -%}0.25f{% endif %});"
+    },
+    "div4_int": {
+        "format": "short",
+        "code": "{{ isa.prefix }}shrq_n_{{ isa_dt_par.data_ext }}(r0.r, 2);"
+    },
+    "shift_var": {
+        "format": "short",
+        "code": "{% if instr_name == 'shlq' -%}{{ isa.prefix }}shlq_{{ isa_dt_par.data_ext }}(r0.r, {{ isa.prefix }}dupq_n_s{% if isa_dt_par.data_ext in ['s64','u64','f64'] %}64{% elif isa_dt_par.data_ext in ['s32','u32','f32'] %}32{% elif isa_dt_par.data_ext in ['s16','u16'] %}16{% else %}8{% endif %}(v0));{% else -%}{{ isa.prefix }}shlq_{{ isa_dt_par.data_ext }}(r0.r, {{ isa.prefix }}dupq_n_s{% if isa_dt_par.data_ext in ['s64','u64','f64'] %}64{% elif isa_dt_par.data_ext in ['s32','u32','f32'] %}32{% elif isa_dt_par.data_ext in ['s16','u16'] %}16{% else %}8{% endif %}(-v0));{% endif %}"
+    },
     "hreduce": {
         "format": "long",
         "code": "return {{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r);"

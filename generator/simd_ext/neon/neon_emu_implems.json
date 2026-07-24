@@ -87,12 +87,5 @@
             ],
             "template": "hreduc_emu"
         }
-    ],
-    "lshift": [
-        {
-            "instr_name": "",
-            "datatypes": "all_int_uint",
-            "template": "lshift"
-        }
     ]
 }

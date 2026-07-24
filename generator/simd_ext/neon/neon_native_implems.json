@@ -259,6 +259,82 @@
             "if": "defined(__aarch64__)"
         }
     ],
+    "div2": [
+        {
+            "instr_name": "",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "div2_float",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "instr_name": "",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "div2_float"
+        },
+        {
+            "instr_name": "",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "div2_int",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "instr_name": "",
+            "datatypes": [
+                "int32",
+                "uint32",
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
+            ],
+            "template": "div2_int"
+        }
+    ],
+    "div4": [
+        {
+            "instr_name": "",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "div4_float",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "instr_name": "",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "div4_float"
+        },
+        {
+            "instr_name": "",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "div4_int",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "instr_name": "",
+            "datatypes": [
+                "int32",
+                "uint32",
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
+            ],
+            "template": "div4_int"
+        }
+    ],
     "load": [
         {
             "instr_name": "ld1q",
@@ -299,6 +375,31 @@
                 "uint8"
             ],
             "template": "load"
+        }
+    ],
+    "lshift": [
+        {
+            "instr_name": "shlq",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "shift_var",
+            "if": "defined(__aarch64__)",
+            "skip_audit_level": true
+        },
+        {
+            "instr_name": "shlq",
+            "datatypes": [
+                "int32",
+                "uint32",
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
+            ],
+            "template": "shift_var",
+            "skip_audit_level": true
         }
     ],
     "max": [
@@ -417,6 +518,31 @@
             ],
             "template": "round_float",
             "if": "defined(__aarch64__) || (defined(__ARM_ARCH) && __ARM_ARCH >= 8)"
+        }
+    ],
+    "rshift": [
+        {
+            "instr_name": "shrq",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "shift_var",
+            "if": "defined(__aarch64__)",
+            "skip_audit_level": true
+        },
+        {
+            "instr_name": "shrq",
+            "datatypes": [
+                "int32",
+                "uint32",
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
+            ],
+            "template": "shift_var",
+            "skip_audit_level": true
         }
     ],
     "rsqrt": [
@@ -853,6 +979,80 @@
                 "int32"
             ],
             "template": "arith_3args_acc"
+        }
+    ],
+    "fmsub": [
+        {
+            "instr_name": "fmsq",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "arith_3args_acc_neg",
+            "if": "defined(__aarch64__)",
+            "skip_audit_level": true
+        },
+        {
+            "instr_name": "fmsq",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "arith_3args_acc_neg",
+            "if": "defined(__ARM_FEATURE_FMA) || defined(__aarch64__)",
+            "skip_audit_level": true
+        },
+        {
+            "instr_name": "mlsq",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "arith_3args_acc_neg",
+            "if": "!defined(__ARM_FEATURE_FMA) && !defined(__aarch64__)",
+            "skip_audit_level": true
+        },
+        {
+            "instr_name": "mlsq",
+            "datatypes": [
+                "int32"
+            ],
+            "template": "arith_3args_acc_neg",
+            "skip_audit_level": true
+        }
+    ],
+    "fnmsub": [
+        {
+            "instr_name": "fmaq",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "arith_3args_acc_neg",
+            "if": "defined(__aarch64__)",
+            "skip_audit_level": true
+        },
+        {
+            "instr_name": "fmaq",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "arith_3args_acc_neg",
+            "if": "defined(__ARM_FEATURE_FMA) || defined(__aarch64__)",
+            "skip_audit_level": true
+        },
+        {
+            "instr_name": "mlaq",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "arith_3args_acc_neg",
+            "if": "!defined(__ARM_FEATURE_FMA) && !defined(__aarch64__)",
+            "skip_audit_level": true
+        },
+        {
+            "instr_name": "mlaq",
+            "datatypes": [
+                "int32"
+            ],
+            "template": "arith_3args_acc_neg",
+            "skip_audit_level": true
         }
     ],
     "hadd": [
