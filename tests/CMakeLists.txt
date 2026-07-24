@@ -7,6 +7,9 @@ set (CMAKE_MACOSX_RPATH 1)
 # Enable C++20 (for std::bit_cast)
 set (CMAKE_CXX_STANDARD 20)
 
+# Configure Unity Build batch size to avoid compiler ICE on huge translation units (e.g. GCC 14 RISC-V)
+set(CMAKE_UNITY_BUILD_BATCH_SIZE 16)
+
 # Specify bin path
 set (EXECUTABLE_OUTPUT_PATH bin/)
 
