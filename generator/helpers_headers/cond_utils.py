@@ -235,6 +235,15 @@ def _simplify(expr):
                     
         if has_contradiction or any(c == Term("0") for c in unique_children):
             return Term("0")
+
+        # Check if distributing And over Or simplifies to Term("0")
+        or_children = [c for c in unique_children if isinstance(c, Or)]
+        if or_children:
+            first_or = or_children[0]
+            other_children = [c for c in unique_children if c is not first_or]
+            branches = [_simplify(And([branch] + other_children)) for branch in first_or.children]
+            if all(b == Term("0") for b in branches):
+                return Term("0")
             
         unique_children = [c for c in unique_children if c != Term("1")]
         if not unique_children:

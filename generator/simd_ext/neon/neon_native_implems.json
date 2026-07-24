@@ -113,6 +113,39 @@
             "template": "cast_k"
         }
     ],
+    "cvt": [
+        {
+            "instr_name": "cvtq",
+            "datatypes": [
+                "float64,float64",
+                "int64,int64",
+                "uint64,uint64",
+                "float64,int64",
+                "float64,uint64",
+                "int64,float64",
+                "uint64,float64"
+            ],
+            "template": "cast",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "instr_name": "cvtq",
+            "datatypes": [
+                "float32,float32",
+                "int32,int32",
+                "uint32,uint32",
+                "int16,int16",
+                "uint16,uint16",
+                "int8,int8",
+                "uint8,uint8",
+                "float32,int32",
+                "float32,uint32",
+                "int32,float32",
+                "uint32,float32"
+            ],
+            "template": "cast"
+        }
+    ],
     "cmpeq": [
         {
             "instr_name": "ceqq",
