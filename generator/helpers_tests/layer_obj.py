@@ -10,7 +10,7 @@ from .common import (
 )
 
 
-FUNC_DECL = """template <typename T>\nvoid test_objmipp_{{func}}(){"""
+FUNC_DECL = """template <typename T>\nstatic void test_objmipp_{{func}}(){"""
 
 DECL_2ARGS = """\tconst int vectorSize = mipp::N<T>(); T inputs1[vectorSize],inputs2[vectorSize];"""
 DECL_1ARG = """\tconst int vectorSize = mipp::N<T>(); T inputs1[vectorSize];"""

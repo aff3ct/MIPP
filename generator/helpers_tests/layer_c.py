@@ -45,9 +45,9 @@ from .common import (
 # --------------------------------------------
 # FN decl 
 # --------------------------------------------
-FUNC_DECL = """void test_cmipp_{{func}}_{{dt_ext}}(){"""
-FUNC_DECL_GATHER = """void test_cmipp_{{func}}_{{dt_ext}}_{{dt_ext}}(){"""
-FUNC_DECL_SCATTER = """void test_cmipp_{{func}}_{{dt_ext}}_{{dt_ext}}(){"""
+FUNC_DECL = """static void test_cmipp_{{func}}_{{dt_ext}}(){"""
+FUNC_DECL_GATHER = """static void test_cmipp_{{func}}_{{dt_ext}}_{{dt_ext}}(){"""
+FUNC_DECL_SCATTER = """static void test_cmipp_{{func}}_{{dt_ext}}_{{dt_ext}}(){"""
 
 
 # --------------------------------------------

@@ -40,14 +40,14 @@ from .common import (
 # --------------------------------------------
 # FN decl
 # --------------------------------------------
-FUNC_DECL = """template <typename T>\nvoid test_cppmipp_{{func}}_{{lmul_suffix}}(){"""
+FUNC_DECL = """template <typename T>\nstatic void test_cppmipp_{{func_raw}}_{{lmul_suffix}}(){"""
 FUNC_DECL_FLOAT_WORKAROUND = (
     " {% if is_int %} "
     + FUNC_DECL
-    + " {% else %} template <typename T>\nvoid test_cppmipp_{{func}}_float{{type_size}}_{{lmul_suffix}}(){  {% endif %}"
+    + " {% else %} template <typename T>\nstatic void test_cppmipp_{{func_raw}}_float{{type_size}}_{{lmul_suffix}}(){  {% endif %}"
 )
 
-FUNC_DECL_GATHER = """template <typename T, typename U>\nvoid test_cppmipp_{{func}}_{{lmul_suffix}}(){"""
+FUNC_DECL_GATHER = """template <typename T, typename U>\nstatic void test_cppmipp_{{func_raw}}_{{lmul_suffix}}(){"""
 
 # --------------------------------------------
 # SCALAR VEC DECL

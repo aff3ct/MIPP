@@ -455,7 +455,7 @@ def gen_test_type_guards(func, long_name, short_name, kind="c", lmul=0, mkind=""
                 res += add_type_guards(
                         func,
                         implems["implem"],
-                        function=f"test_cppmipp_{test_function_name(kind, func)}",
+                        function=f"test_cppmipp_{func}",
                         kind=kind,
                         lmul=lmul,
                         mkind=mkind,	
@@ -465,7 +465,7 @@ def gen_test_type_guards(func, long_name, short_name, kind="c", lmul=0, mkind=""
                 res += add_type_guards(
                         func,
                         implems["implem"],
-                        function=f"test_objmipp_{test_function_name(kind, func)}",
+                        function=f"test_objmipp_{func}",
                         kind=kind,
                 )
 
@@ -508,7 +508,7 @@ def gen_cast_test_type_guards(func, long_name, short_name, kind="c", lmul=0, mki
                 res += add_type_guards(
                     func,
                     implems["implem"],
-                    function=f"test_cppmipp_{test_function_name(kind, func)}",
+                    function=f"test_cppmipp_{func}",
                     kind=kind,
                     lmul=lmul,
                     mkind=mkind,	
@@ -518,7 +518,7 @@ def gen_cast_test_type_guards(func, long_name, short_name, kind="c", lmul=0, mki
                 res += add_type_guards(
                     func,
                     implems["implem"],
-                    function=f"test_objmipp_{test_function_name(kind, func)}",
+                    function=f"test_objmipp_{func}",
                     kind=kind,
                     lmul=lmul, 
                     mkind=mkind,
@@ -787,6 +787,7 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False, lm
 
         res = func_template.render(
             func=func,
+            func_raw=func_old,
             dt_ext=scalar_type,
             op=layer_dict[func_old]["op"],
             reg_type=reg_type,
@@ -833,6 +834,7 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False, lm
 
         res = func_template.render(
             func=func,
+            func_raw=func_old,
             dt_ext=scalar_type,
             op=layer_dict[func_old]["op"],
             reg_type=reg_type,
@@ -865,6 +867,7 @@ def gen_func(func, scalar_type, reg_type, kind="c", msk_type="", float=False, lm
     if kind == "obj" : #obsolete :(
         res = func_template.render(
             func=func,
+            func_raw=func_old,
             dt_ext=scalar_type,
             op=layer_dict[func_old]["op"],
             reg_type=reg_type,
@@ -958,6 +961,7 @@ def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="
         
         res = func_template.render(
             func=func,
+            func_raw=func,
             dt_ext=scalar1_type,
             dt1_ext=scalar1_type,
             dt2_ext=scalar2_type,
@@ -1062,6 +1066,7 @@ def gen_cast_func(func, scalar1_type, scalar2_type, reg1_type, reg2_type, kind="
 
         res = func_template.render(
             func=func,
+            func_raw=func,
             dt_ext=scalar1_type,
             dt1_ext=scalar2_type,
             dt2_ext=scalar1_type,

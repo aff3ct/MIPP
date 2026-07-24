@@ -21,5 +21,12 @@ target_include_directories(tests_exe PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../inc
 find_package(Catch2 3 REQUIRED)
 target_link_libraries(tests_exe PRIVATE Catch2::Catch2)
 
+# Precompiled Headers (PCH) to accelerate compilation
+if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.16)
+    target_precompile_headers(tests_exe PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/../include/mipp.h"
+    )
+endif()
+
 enable_testing()
 add_test(NAME mipp::test COMMAND tests_exe)

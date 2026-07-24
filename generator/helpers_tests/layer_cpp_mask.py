@@ -39,9 +39,9 @@ from .common import (
 # --------------------------------------------
 # FN decl
 # --------------------------------------------
-FUNC_DECL = """template <typename T>\nvoid test_cppmipp_{{func}}{{mask_str}}{{lmul_suffix}}(){"""
+FUNC_DECL = """template <typename T>\nstatic void test_cppmipp_{{func_raw}}{{mask_str}}{{lmul_suffix}}(){"""
 
-FUNC_DECL_GATHER = """template <typename T, typename U>\nvoid test_cppmipp_{{func}}{{mask_str}}{{lmul_suffix}}(){"""
+FUNC_DECL_GATHER = """template <typename T, typename U>\nstatic void test_cppmipp_{{func_raw}}{{mask_str}}{{lmul_suffix}}(){"""
 
 # --------------------------------------------
 # SCALAR VEC DECL
