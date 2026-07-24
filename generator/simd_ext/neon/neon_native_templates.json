@@ -124,5 +124,9 @@
     "arith_3args_acc": {
         "format": "short",
         "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r2.r, r0.r, r1.r);"
+    },
+    "hreduce": {
+        "format": "long",
+        "code": "return {{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r);"
     }
 }

@@ -821,5 +821,79 @@
             ],
             "template": "arith_3args_acc"
         }
+    ],
+    "hadd": [
+        {
+            "instr_name": "addvq",
+            "datatypes": [
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "hreduce",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "instr_name": "addvq",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32",
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
+            ],
+            "template": "hreduce",
+            "if": "defined(__aarch64__)"
+        }
+    ],
+    "hmax": [
+        {
+            "instr_name": "maxvq",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "hreduce",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "instr_name": "maxvq",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32",
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
+            ],
+            "template": "hreduce",
+            "if": "defined(__aarch64__)"
+        }
+    ],
+    "hmin": [
+        {
+            "instr_name": "minvq",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "hreduce",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "instr_name": "minvq",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32",
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
+            ],
+            "template": "hreduce",
+            "if": "defined(__aarch64__)"
+        }
     ]
 }

@@ -11,13 +11,7 @@
     ],
     "hadd": [
         {
-            "datatypes": [
-                "float64"
-            ],
-            "template": "hadd_emu",
-            "if": "defined(__aarch64__)"
-        },
-        {
+            "instr_name": "add",
             "datatypes": [
                 "float32",
                 "int64",
@@ -29,18 +23,13 @@
                 "uint16",
                 "uint8"
             ],
-            "template": "hadd_emu"
+            "template": "hreduc_emu",
+            "if": "!defined(__aarch64__)"
         }
     ],
     "hmax": [
         {
-            "datatypes": [
-                "float64"
-            ],
-            "template": "hmax_emu",
-            "if": "defined(__aarch64__)"
-        },
-        {
+            "instr_name": "max",
             "datatypes": [
                 "float32",
                 "int64",
@@ -52,18 +41,13 @@
                 "uint16",
                 "uint8"
             ],
-            "template": "hmax_emu"
+            "template": "hreduc_emu",
+            "if": "!defined(__aarch64__)"
         }
     ],
     "hmin": [
         {
-            "datatypes": [
-                "float64"
-            ],
-            "template": "hmin_emu",
-            "if": "defined(__aarch64__)"
-        },
-        {
+            "instr_name": "min",
             "datatypes": [
                 "float32",
                 "int64",
@@ -75,18 +59,21 @@
                 "uint16",
                 "uint8"
             ],
-            "template": "hmin_emu"
+            "template": "hreduc_emu",
+            "if": "!defined(__aarch64__)"
         }
     ],
     "hmul": [
         {
+            "instr_name": "mul",
             "datatypes": [
                 "float64"
             ],
-            "template": "hmul_emu",
+            "template": "hreduc_emu",
             "if": "defined(__aarch64__)"
         },
         {
+            "instr_name": "mul",
             "datatypes": [
                 "float32",
                 "int64",
@@ -98,7 +85,7 @@
                 "uint16",
                 "uint8"
             ],
-            "template": "hmul_emu"
+            "template": "hreduc_emu"
         }
     ],
     "lshift": [
