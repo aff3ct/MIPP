@@ -120,5 +120,9 @@
     "set1_k": {
         "format": "short",
         "code": "{{ isa.prefix }}dupq_n_{{ isa_dt_par.data_ext_msk }}(v0 ? ({% if isa_dt_par.data_ext_msk == 'u64' -%}~0ULL{% elif isa_dt_par.data_ext_msk == 'u32' -%}~0U{% elif isa_dt_par.data_ext_msk == 'u16' -%}(uint16_t)~0U{% else -%}0xFF{% endif %}) : 0);"
+    },
+    "arith_3args_acc": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r2.r, r0.r, r1.r);"
     }
 }

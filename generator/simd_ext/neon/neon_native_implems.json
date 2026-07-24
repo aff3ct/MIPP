@@ -709,5 +709,117 @@
             ],
             "template": "set1_k"
         }
+    ],
+    "adds": [
+        {
+            "instr_name": "qaddq",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "arith_2args",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "instr_name": "qaddq",
+            "datatypes": [
+                "int32",
+                "uint32",
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
+            ],
+            "template": "arith_2args"
+        }
+    ],
+    "subs": [
+        {
+            "instr_name": "qsubq",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "arith_2args",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "instr_name": "qsubq",
+            "datatypes": [
+                "int32",
+                "uint32",
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
+            ],
+            "template": "arith_2args"
+        }
+    ],
+    "fmadd": [
+        {
+            "instr_name": "fmaq",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "arith_3args_acc",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "instr_name": "fmaq",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "arith_3args_acc",
+            "if": "defined(__ARM_FEATURE_FMA) || defined(__aarch64__)"
+        },
+        {
+            "instr_name": "mlaq",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "arith_3args_acc",
+            "if": "!defined(__ARM_FEATURE_FMA) && !defined(__aarch64__)"
+        },
+        {
+            "instr_name": "mlaq",
+            "datatypes": [
+                "int32"
+            ],
+            "template": "arith_3args_acc"
+        }
+    ],
+    "fnmadd": [
+        {
+            "instr_name": "fmsq",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "arith_3args_acc",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "instr_name": "fmsq",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "arith_3args_acc",
+            "if": "defined(__ARM_FEATURE_FMA) || defined(__aarch64__)"
+        },
+        {
+            "instr_name": "mlsq",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "arith_3args_acc",
+            "if": "!defined(__ARM_FEATURE_FMA) && !defined(__aarch64__)"
+        },
+        {
+            "instr_name": "mlsq",
+            "datatypes": [
+                "int32"
+            ],
+            "template": "arith_3args_acc"
+        }
     ]
 }
