@@ -577,5 +577,137 @@
             "datatypes": "all_datatypes",
             "template": "logi_m_2args"
         }
+    ],
+    "getfirst": [
+        {
+            "instr_name": "",
+            "datatypes": "all_64bit",
+            "template": "getfirst",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "instr_name": "",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32",
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
+            ],
+            "template": "getfirst"
+        }
+    ],
+    "notb": [
+        {
+            "instr_name": "mvnq",
+            "datatypes": "all_64bit",
+            "template": "notb_fxx",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "instr_name": "mvnq",
+            "datatypes": [
+                "int32",
+                "uint32",
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
+            ],
+            "template": "notb"
+        },
+        {
+            "instr_name": "mvnq",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "notb_fxx"
+        }
+    ],
+    "notb_k": [
+        {
+            "instr_name": "mvnq",
+            "datatypes": "all_64bit",
+            "template": "notb_k_fxx",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "instr_name": "mvnq",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32",
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
+            ],
+            "template": "notb_k"
+        }
+    ],
+    "set0": [
+        {
+            "instr_name": "dupq_n",
+            "datatypes": "all_64bit",
+            "template": "set0",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "instr_name": "dupq_n",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32",
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
+            ],
+            "template": "set0"
+        }
+    ],
+    "set0_k": [
+        {
+            "instr_name": "dupq_n",
+            "datatypes": "all_64bit",
+            "template": "set0_k",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "instr_name": "dupq_n",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32",
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
+            ],
+            "template": "set0_k"
+        }
+    ],
+    "set1_k": [
+        {
+            "instr_name": "dupq_n",
+            "datatypes": "all_64bit",
+            "template": "set1_k",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "instr_name": "dupq_n",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32",
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
+            ],
+            "template": "set1_k"
+        }
     ]
 }

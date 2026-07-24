@@ -78,5 +78,47 @@
     "toreg": {
         "format": "short",
         "code": "{% if isa_dt_par.data_ext_msk != isa_dt_ret.data_ext -%}{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_ret.data_ext }}_{{ isa_dt_par.data_ext_msk }}(m0.m);{% else -%} m0.m;{% endif %}"
+    },
+    "getfirst": {
+        "format": "long",
+        "code": "return {{ isa.prefix }}getq_lane_{{ isa_dt_par.data_ext }}(r0.r, 0);"
+    },
+    "notb": {
+        "format": "short",
+        "code": "{{ isa.prefix }}mvnq_{{ isa_dt_par.data_ext }}(r0.r);"
+    },
+    "notb_fxx": {
+        "format": "long",
+        "code": [
+            "%r<c:uint|b:32>% r0i = %cast<tp,c:uint|b:32>%(r0);",
+            "%r<c:uint|b:32>% resi;",
+            "resi.r = {{ isa.prefix }}mvnq_u32(r0i.r);",
+            "return %cast<c:uint|b:32,tp>%(resi);"
+        ]
+    },
+    "notb_k": {
+        "format": "short",
+        "code": "{{ isa.prefix }}mvnq_{{ isa_dt_par.data_ext_msk }}(m0.m);"
+    },
+    "notb_k_fxx": {
+        "format": "long",
+        "code": [
+            "%m<c:uint|b:32>% m0i = %cast_k<tp,c:uint|b:32>%(m0);",
+            "%m<c:uint|b:32>% resi;",
+            "resi.m = {{ isa.prefix }}mvnq_u32(m0i.m);",
+            "return %cast_k<c:uint|b:32,tp>%(resi);"
+        ]
+    },
+    "set0": {
+        "format": "short",
+        "code": "{{ isa.prefix }}dupq_n_{{ isa_dt_par.data_ext }}({% if isa_dt_par.data_ext == 'f64' -%}0.0{% elif isa_dt_par.data_ext == 'f32' -%}0.0f{% else -%}0{% endif %});"
+    },
+    "set0_k": {
+        "format": "short",
+        "code": "{{ isa.prefix }}dupq_n_{{ isa_dt_par.data_ext_msk }}(0);"
+    },
+    "set1_k": {
+        "format": "short",
+        "code": "{{ isa.prefix }}dupq_n_{{ isa_dt_par.data_ext_msk }}(v0 ? ({% if isa_dt_par.data_ext_msk == 'u64' -%}~0ULL{% elif isa_dt_par.data_ext_msk == 'u32' -%}~0U{% elif isa_dt_par.data_ext_msk == 'u16' -%}(uint16_t)~0U{% else -%}0xFF{% endif %}) : 0);"
     }
 }

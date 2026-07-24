@@ -32,4 +32,6 @@ site/
 docs/funcs_support
 docs/isas_support
 upload_site.sh
-
+tests_golden
+*.o
+mipp_cpp
