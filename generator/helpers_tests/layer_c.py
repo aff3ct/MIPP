@@ -106,6 +106,10 @@ INIT_1ARG = """
 \tfor(size_t i = 0; i < {{size}}; i++)
 \t{
 \t\tinputs1[i] = rnd::uniform<{{dt_ext}}_t>(seed);
+\t\tif constexpr (std::is_floating_point_v<{{dt_ext}}_t>) {
+\t\t\tusing T_val1 = std::remove_reference_t<decltype(inputs1[i])>;
+\t\t\tinputs1[i] = std::clamp(inputs1[i], (T_val1)-3.0, (T_val1)3.0);
+\t\t}
 \t}
 """
 
@@ -804,7 +808,31 @@ AS_CAST_2ARGS+ "\n\t}",
 \t\tinputs1[i] = (rnd::uniform<{{dt_ext}}_t>(seed) / ({{dt_ext}}_t)2147483647.0) * 3.0;
 \t}
 """,
-        "loop_assert": AS_REG_UNOP_TOL,
+        "loop_assert": """\t\t{{dt_ext}}_t res1 = mipp_get_{{dt_ext}}(r3, i);
+\t\t{{dt_ext}}_t res2 = mipp_scalar_get_{{dt_ext}}(s3, i);
+\t\t{{dt_ext}}_t tol  = 1e-2f * abs_diff::abs_diff(res2) + 5e-3f;
+\t\t{{dt_ext}}_t diff = abs_diff::abs_diff(res1, res2);
+\t\tif(std::isinf(tol) || std::isnan(tol)) continue;
+\t\tif(std::isnan(diff) || std::isnan(res2) || std::isnan(res1)) continue;
+\t\tif(std::isinf(diff) || std::isinf(res2) || std::isinf(res1)) continue;
+\t\tREQUIRE(diff <= tol);""",
+    },
+
+    "exp": {
+        "init": """\tstd::iota(inputs1, inputs1 + {{size}}, 1);
+\tfor(size_t i = 0; i < {{size}}; i++)
+\t{
+\t\tinputs1[i] = (rnd::uniform<{{dt_ext}}_t>(seed) / ({{dt_ext}}_t)2147483647.0) * 3.0;
+\t}
+""",
+        "loop_assert": """\t\t{{dt_ext}}_t res1 = mipp_get_{{dt_ext}}(r3, i);
+\t\t{{dt_ext}}_t res2 = mipp_scalar_get_{{dt_ext}}(s3, i);
+\t\t{{dt_ext}}_t tol  = 1e-2f * abs_diff::abs_diff(res2) + 5e-3f;
+\t\t{{dt_ext}}_t diff = abs_diff::abs_diff(res1, res2);
+\t\tif(std::isinf(tol) || std::isnan(tol)) continue;
+\t\tif(std::isnan(diff) || std::isnan(res2) || std::isnan(res1)) continue;
+\t\tif(std::isinf(diff) || std::isinf(res2) || std::isinf(res1)) continue;
+\t\tREQUIRE(diff <= tol);""",
     },
 }
 

@@ -35,3 +35,4 @@ upload_site.sh
 tests_golden
 *.o
 mipp_cpp
+prompts

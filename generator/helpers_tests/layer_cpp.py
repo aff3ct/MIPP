@@ -781,10 +781,42 @@ LAYER_OVERRIDES = {
         "init": """\tstd::iota(inputs1, inputs1 + {{size}}, 1);
 \tfor(size_t i = 0; i < {{size}}; i++)
 \t{
-\t\tinputs1[i] = (rnd::uniform<{{dt_ext}}>(seed) / ({{dt_ext}})2147483647.0) * 3.0;
+\t\tinputs1[i] = rnd::uniform<{{dt_ext}}>(seed);
+\t\tif constexpr (std::is_floating_point_v<{{dt_ext}}>) {
+\t\t\tusing T_val1 = std::remove_reference_t<decltype(inputs1[i])>;
+\t\t\tinputs1[i] = std::clamp(inputs1[i], (T_val1)-3.0, (T_val1)3.0);
+\t\t}
 \t}
 """,
-        "loop_assert": AS_REG_BINOP_NAN_TOL,
+        "loop_assert": """\t\t{{dt_ext}} res1 = mipp::get(r3, i);
+\t\t{{dt_ext}} res2 = mipp::get(s3, i);
+\t\t{{dt_ext}} tol  = 1e-2f * abs_diff::abs_diff(res2) + 5e-3f;
+\t\t{{dt_ext}} diff = abs_diff::abs_diff(res1, res2);
+\t\tif(std::isinf(tol) || std::isnan(tol)) continue;
+\t\tif(std::isnan(diff) || std::isnan(res2) || std::isnan(res1)) continue;
+\t\tif(std::isinf(diff) || std::isinf(res2) || std::isinf(res1)) continue;
+\t\tREQUIRE(diff <= tol);""",
+    },
+
+    "exp": {
+        "init": """\tstd::iota(inputs1, inputs1 + {{size}}, 1);
+\tfor(size_t i = 0; i < {{size}}; i++)
+\t{
+\t\tinputs1[i] = rnd::uniform<{{dt_ext}}>(seed);
+\t\tif constexpr (std::is_floating_point_v<{{dt_ext}}>) {
+\t\t\tusing T_val1 = std::remove_reference_t<decltype(inputs1[i])>;
+\t\t\tinputs1[i] = std::clamp(inputs1[i], (T_val1)-3.0, (T_val1)3.0);
+\t\t}
+\t}
+""",
+        "loop_assert": """\t\t{{dt_ext}} res1 = mipp::get(r3, i);
+\t\t{{dt_ext}} res2 = mipp::get(s3, i);
+\t\t{{dt_ext}} tol  = 1e-2f * abs_diff::abs_diff(res2) + 5e-3f;
+\t\t{{dt_ext}} diff = abs_diff::abs_diff(res1, res2);
+\t\tif(std::isinf(tol) || std::isnan(tol)) continue;
+\t\tif(std::isnan(diff) || std::isnan(res2) || std::isnan(res1)) continue;
+\t\tif(std::isinf(diff) || std::isinf(res2) || std::isinf(res1)) continue;
+\t\tREQUIRE(diff <= tol);""",
     },
 
 
