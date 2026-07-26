@@ -446,14 +446,7 @@
             "}"
         ]
     },
-    "maskz_inst": {
-        "format": "long",
-        "code": [
-            "%r<tp>% ret = %set1<tp>%(0);",
-            "ret.r = {{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}_mu(m0.m, ret.r, r0.r, r1.r, %N<tp>%);",
-            "return ret;"
-        ]
-    },
+
     "notb_k": {
         "format": "long",
         "code": [

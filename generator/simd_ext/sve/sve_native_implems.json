@@ -22,34 +22,7 @@
             "skip_audit_level_reason": "assigns native SVE mask wrapper directly"
         }
     ],
-    "maskst": [
-        {
-            "instr_name": "st1",
-            "datatypes": [],
-            "template": "mask_store"
-        }
-    ],
-    "maskz_add": [
-        {
-            "instr_name": "add",
-            "datatypes": "all_datatypes",
-            "template": "std_2_reg_in_msk_z"
-        }
-    ],
-    "maskzld": [
-        {
-            "instr_name": "ld1",
-            "datatypes": [
-                "float64",
-                "float32",
-                "int64",
-                "int32",
-                "uint64",
-                "uint32"
-            ],
-            "template": "mask_load"
-        }
-    ],
+
     "set0": [
         {
             "instr_name": "dup",

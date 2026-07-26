@@ -21,6 +21,7 @@ from codegen.emit_helpers import (
     emit_ifdef_begin_and_update_emulated,
     emit_function_body,
     emit_ifdef_end,
+    emit_panic_stub,
 )
 from codegen.candidate_resolver import render_template, parse_placeholders_or_skip
 
@@ -172,8 +173,7 @@ def gen_c_horiz_lmul(isa, file, funcs, f, dt, lmul, implems_horiz_lmul_generic_e
 
     if f not in implems_horiz_lmul_generic_emu:
         name = func_name_for_panic or f
-        print(f"\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \"{name}_m{int(lmul)}\");", file=file)
-        print("\texit(-1);", file=file)
+        emit_panic_stub(f"{name}_m{int(lmul)}", file=file)
         return
 
     emitted_any = False
@@ -188,8 +188,7 @@ def gen_c_horiz_lmul(isa, file, funcs, f, dt, lmul, implems_horiz_lmul_generic_e
 
     if not emitted_any:
         name = func_name_for_panic or f
-        print(f"\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \"{name}_m{int(lmul)}\");", file=file)
-        print("\texit(-1);", file=file)
+        emit_panic_stub(f"{name}_m{int(lmul)}", file=file)
 
 def _c_lmul_writer(f, dt, dt_par, dt_ret, isa, funcs, file, mask_type=None, lmul=0):
     maybe_emit_lmul_separator(isa["name"], f, file)

@@ -531,14 +531,6 @@
             "template": "load"
         }
     ],
-    "maskz_add": [
-        {
-            "instr_name": "maskz_add",
-            "datatypes": "all_float",
-            "template": "arithmsk_2args",
-            "if": "defined(__AVX512F__)"
-        }
-    ],
     "max": [
         {
             "instr_name": "max",

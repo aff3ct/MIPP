@@ -1,0 +1,182 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TestSpecsSchema",
+  "type": "object",
+  "properties": {
+    "default": { "$ref": "#/definitions/spec_entry" },
+    "functions": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/definitions/spec_entry" }
+    }
+  },
+  "required": ["default", "functions"],
+  "additionalProperties": false,
+  "definitions": {
+    "domain_spec": {
+      "type": "object",
+      "properties": {
+        "min": { "type": "number" },
+        "max": { "type": "number" },
+        "exclude_zero": { "type": "boolean" },
+        "strictly_positive": { "type": "boolean" },
+        "positive": { "type": "boolean" },
+        "strictly_negative": { "type": "boolean" },
+        "negative": { "type": "boolean" }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "not": {
+            "anyOf": [
+              { "required": ["min", "strictly_positive"] },
+              { "required": ["min", "positive"] },
+              { "required": ["min", "strictly_negative"] },
+              { "required": ["min", "negative"] },
+              { "required": ["max", "strictly_positive"] },
+              { "required": ["max", "positive"] },
+              { "required": ["max", "strictly_negative"] },
+              { "required": ["max", "negative"] }
+            ]
+          }
+        }
+      ]
+    },
+    "domain_spec_or_list": {
+      "anyOf": [
+        { "$ref": "#/definitions/domain_spec" },
+        {
+          "type": "array",
+          "items": { "$ref": "#/definitions/domain_spec" }
+        }
+      ]
+    },
+    "domain_entry": {
+      "anyOf": [
+        { "$ref": "#/definitions/domain_spec" },
+        {
+          "type": "object",
+          "properties": {
+            "default": { "$ref": "#/definitions/domain_spec_or_list" },
+            "by_datatype": {
+              "type": "object",
+              "additionalProperties": { "$ref": "#/definitions/domain_spec_or_list" }
+            },
+            "by_define": {
+              "type": "object",
+              "additionalProperties": { "$ref": "#/definitions/domain_spec_or_list" }
+            },
+            "by_lmul": {
+              "type": "object",
+              "additionalProperties": { "$ref": "#/definitions/domain_spec_or_list" }
+            },
+            "rules": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/domain_rule" }
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "domain_rule": {
+      "type": "object",
+      "properties": {
+        "datatype": { "type": "string" },
+        "lmul": { "type": ["string", "number"] },
+        "define": { "type": "string" },
+        "min": { "type": "number" },
+        "max": { "type": "number" },
+        "exclude_zero": { "type": "boolean" },
+        "strictly_positive": { "type": "boolean" },
+        "positive": { "type": "boolean" },
+        "strictly_negative": { "type": "boolean" },
+        "negative": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "domain_or_list": {
+      "anyOf": [
+        { "$ref": "#/definitions/domain_entry" },
+        {
+          "type": "array",
+          "items": { "$ref": "#/definitions/domain_entry" },
+          "minItems": 1
+        }
+      ]
+    },
+    "tolerance_spec": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["exact", "relative_percent", "max_abs_diff"] },
+        "value": { "type": "number" }
+      },
+      "additionalProperties": false
+    },
+    "spec_entry": {
+      "type": "object",
+      "properties": {
+        "distribution": { "type": "string" },
+        "input_domain": { "$ref": "#/definitions/domain_or_list" },
+        "domain": { "$ref": "#/definitions/domain_or_list" },
+        "tolerance": {
+          "anyOf": [
+            { "$ref": "#/definitions/tolerance_spec" },
+            {
+              "type": "object",
+              "properties": {
+                "default": { "$ref": "#/definitions/tolerance_spec" },
+                "by_datatype": {
+                  "type": "object",
+                  "additionalProperties": { "$ref": "#/definitions/tolerance_spec" }
+                },
+                "by_define": {
+                  "type": "object",
+                  "additionalProperties": { "$ref": "#/definitions/tolerance_spec" }
+                },
+                "by_lmul": {
+                  "type": "object",
+                  "additionalProperties": { "$ref": "#/definitions/tolerance_spec" }
+                },
+                "rules": {
+                  "type": "array",
+                  "items": { "type": "object" }
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "comparison": { "type": "string", "enum": ["exact", "logical", "bitwise", "tolerance"] },
+        "overflow_check": { "type": ["string", "null"], "enum": ["add", "sub", "mul", "accumulate_add", "accumulate_mul", null] },
+        "disabled": { "type": "boolean" },
+        "disabled_reason": { "type": ["string", "null"] },
+        "extra_includes": { "type": "array", "items": { "type": "string" } },
+        "nan_inf_skip": { "type": "boolean" },
+        "skip_condition": {
+          "anyOf": [
+            { "type": ["string", "null"] },
+            {
+              "type": "object",
+              "properties": {
+                "type": { "type": "string" },
+                "value": { "type": "number" },
+                "tol": { "type": "number" }
+              },
+              "required": ["type", "value", "tol"],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "scalar_ref_expr": { "type": ["string", "null"] },
+        "support_obj": { "type": "boolean" },
+        "mask_pattern": { "type": "string", "enum": ["uniform_bool", "alternating", "all_true", "all_false", "sparse", "dense"] },
+        "domain_src": { "$ref": "#/definitions/domain_entry" },
+        "unmasked": { "$ref": "#/definitions/spec_entry" },
+        "mask": { "$ref": "#/definitions/spec_entry" },
+        "maskz": { "$ref": "#/definitions/spec_entry" },
+        "masks": { "$ref": "#/definitions/spec_entry" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

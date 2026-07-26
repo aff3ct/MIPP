@@ -1,0 +1,323 @@
+{
+  "prototypes": {
+    "ret_reg_2args_reg": {
+      "description": "Opération binaire vectorielle (ex: add, sub, mul, div, andb, orb, xorb)",
+      "is_loop": true,
+      "components": {
+        "decl": "decl_2args",
+        "init": "init_uniform",
+        "load": "load_2args_reg",
+        "operation": "op_binop",
+        "loop_body": "lb_binop",
+        "loop_assert": "as_strict_eq"
+      }
+    },
+    "ret_reg_2args_reg_val": {
+      "description": "Opération vectorielle avec scalaire (ex: lshift, rshift, pow2)",
+      "is_loop": true,
+      "components": {
+        "decl": "decl_1arg",
+        "init": "init_uniform_1arg",
+        "load": "load_1arg_reg",
+        "operation": "op_unop",
+        "loop_body": "lb_unop",
+        "loop_assert": "as_strict_eq"
+      }
+    },
+    "ret_reg_3args_reg": {
+      "description": "Opération ternaire vectorielle (ex: fmadd, fmsub, fnmadd, fnmsub)",
+      "is_loop": true,
+      "components": {
+        "decl": "decl_3args",
+        "init": "init_uniform_3args",
+        "load": "load_3args_reg",
+        "operation": "op_triop",
+        "loop_body": "lb_binop",
+        "loop_assert": "as_strict_eq_3args"
+      }
+    },
+    "ret_reg_1arg_reg": {
+      "description": "Opération unaire vectorielle (ex: notb, sqrt, rsqrt, round, abs, exp, log, pow2)",
+      "is_loop": true,
+      "components": {
+        "decl": "decl_1arg",
+        "init": "init_uniform_1arg",
+        "load": "load_1arg_reg",
+        "operation": "op_unop",
+        "loop_body": "lb_unop",
+        "loop_assert": "as_strict_eq"
+      }
+    },
+    "ret_reg_1arg_ptr": {
+      "description": "Chargement depuis pointeur (ex: load, loadu)",
+      "is_loop": true,
+      "components": {
+        "decl": "decl_1arg",
+        "init": "init_uniform_1arg",
+        "load": "load_empty",
+        "operation": "op_load",
+        "loop_body": "lb_unop",
+        "loop_assert": "as_strict_eq"
+      }
+    },
+    "ret_void_2args_ptr_reg": {
+      "description": "Stockage en mémoire (ex: store, storeu)",
+      "is_loop": true,
+      "components": {
+        "decl": "decl_1arg_store",
+        "init": "init_uniform_1arg",
+        "load": "load_1arg_reg",
+        "operation": "op_store",
+        "loop_body": "lb_unop",
+        "loop_assert": "as_store_eq"
+      }
+    },
+    "ret_val_1arg_reg": {
+      "description": "Réduction horizontale (ex: hadd, hmax, hmin, hmul, getfirst)",
+      "is_loop": false,
+      "components": {
+        "decl": "decl_1arg",
+        "init": "init_uniform_1arg",
+        "load": "load_1arg_reg",
+        "operation": "op_reduction",
+        "loop_assert": "as_reduction_eq"
+      }
+    },
+    "ret_msk_2args_reg": {
+      "description": "Comparaison vectorielle (ex: cmpeq, cmpgt, cmple, etc.)",
+      "is_loop": true,
+      "components": {
+        "decl": "decl_2args",
+        "init": "init_uniform",
+        "load": "load_2args_reg",
+        "operation": "op_cmp",
+        "loop_body": "lb_binop",
+        "loop_assert": "as_logical_eq"
+      }
+    },
+    "ret_msk_2args_msk": {
+      "description": "Opération binaire sur masques (ex: andb_k, orb_k, xorb_k, andnb_k)",
+      "is_loop": true,
+      "components": {
+        "decl": "decl_2args_msk",
+        "init": "init_uniform_2args_msk",
+        "load": "load_2args_msk",
+        "operation": "op_cmp",
+        "loop_body": "lb_binop",
+        "loop_assert": "as_logical_eq"
+      }
+    },
+    "ret_msk_1arg_msk": {
+      "description": "Opération unaire sur masques (ex: notb_k)",
+      "is_loop": true,
+      "components": {
+        "decl": "decl_1arg_msk",
+        "init": "init_uniform_1arg_msk",
+        "load": "load_1arg_msk",
+        "operation": "op_cmp",
+        "loop_body": "lb_unop",
+        "loop_assert": "as_logical_eq"
+      }
+    },
+    "ret_reg_3args_2reg_1msk": {
+      "description": "Mélange de deux registres selon un masque (ex: blend)",
+      "is_loop": true,
+      "components": {
+        "decl": "decl_3args_2reg_1msk",
+        "init": "init_uniform_3args_2reg_1msk",
+        "load": "load_3args_2reg_1msk",
+        "operation": "op_unop",
+        "loop_body": "lb_unop",
+        "loop_assert": "as_strict_eq"
+      }
+    },
+    "ret_reg_1arg_msk": {
+      "description": "Conversion masque vers registre (ex: toreg)",
+      "is_loop": true,
+      "components": {
+        "decl": "decl_1arg_msk",
+        "init": "init_uniform_1arg_msk",
+        "load": "load_1arg_msk",
+        "operation": "op_unop",
+        "loop_body": "lb_unop",
+        "loop_assert": "as_bitwise_eq"
+      }
+    },
+    "ret_msk_1arg_reg": {
+      "description": "Conversion registre vers masque (ex: tomsk)",
+      "is_loop": true,
+      "components": {
+        "decl": "decl_1arg",
+        "init": "init_uniform_1arg",
+        "load": "load_1arg_reg",
+        "operation": "op_tomsk",
+        "loop_body": "lb_unop",
+        "loop_assert": "as_logical_eq"
+      }
+    },
+    "ret_i32_2args_msk": {
+      "description": "Test masque nul entre deux masques (ex: testz)",
+      "is_loop": false,
+      "components": {
+        "decl": "decl_2args_msk",
+        "init": "init_uniform_2args_msk",
+        "load": "load_2args_msk",
+        "operation": "op_i32",
+        "loop_assert": "as_logical_scalar_eq"
+      }
+    },
+    "ret_i32_1arg_msk": {
+      "description": "Test masque nul unaire (ex: testz_2)",
+      "is_loop": false,
+      "components": {
+        "decl": "decl_1arg_msk",
+        "init": "init_uniform_1arg_msk",
+        "load": "load_1arg_msk",
+        "operation": "op_i32",
+        "loop_assert": "as_logical_scalar_eq"
+      }
+    },
+    "ret_reg_0arg": {
+      "description": "Initialisation zéro registre (ex: set0)",
+      "is_loop": true,
+      "components": {
+        "decl": "decl_1arg",
+        "init": "init_uniform_1arg",
+        "load": "load_none",
+        "operation": "op_set0",
+        "loop_body": "lb_unop",
+        "loop_assert": "as_strict_eq"
+      }
+    },
+    "ret_msk_0arg": {
+      "description": "Initialisation zéro masque (ex: set0_k)",
+      "is_loop": true,
+      "components": {
+        "decl": "decl_1arg_msk",
+        "init": "init_uniform_1arg_msk",
+        "load": "load_none",
+        "operation": "op_set0_k",
+        "loop_body": "lb_unop",
+        "loop_assert": "as_logical_eq"
+      }
+    },
+    "ret_reg_1arg_val": {
+      "description": "Initialisation valeur unique registre (ex: set1)",
+      "is_loop": true,
+      "components": {
+        "decl": "decl_1arg",
+        "init": "init_uniform_1arg",
+        "load": "load_none",
+        "operation": "op_set1",
+        "loop_body": "lb_unop",
+        "loop_assert": "as_strict_eq"
+      }
+    },
+    "ret_msk_1arg_i32": {
+      "description": "Initialisation valeur unique masque (ex: set1_k)",
+      "is_loop": true,
+      "components": {
+        "decl": "decl_1arg_msk",
+        "init": "init_uniform_1arg_msk",
+        "load": "load_none",
+        "operation": "op_set1_k",
+        "loop_body": "lb_unop",
+        "loop_assert": "as_logical_eq"
+      }
+    },
+    "ret_reg_1arg_Nele": {
+      "description": "Initialisation tableau registre (ex: set)",
+      "is_loop": true,
+      "components": {
+        "decl": "decl_1arg",
+        "init": "init_uniform_1arg",
+        "load": "load_none",
+        "operation": "op_set",
+        "loop_body": "lb_unop",
+        "loop_assert": "as_strict_eq"
+      }
+    },
+    "ret_msk_1arg_Nele": {
+      "description": "Initialisation tableau masque (ex: set_k)",
+      "is_loop": true,
+      "components": {
+        "decl": "decl_1arg_msk",
+        "init": "init_uniform_1arg_msk",
+        "load": "load_none",
+        "operation": "op_set_k",
+        "loop_body": "lb_unop",
+        "loop_assert": "as_logical_eq"
+      }
+    },
+    "ret_val_2args_reg_val": {
+      "description": "Accès élément registre (ex: get)",
+      "is_loop": true,
+      "components": {
+        "decl": "decl_1arg",
+        "init": "init_uniform_1arg",
+        "load": "load_1arg_reg",
+        "operation": "op_get",
+        "loop_body": "lb_unop",
+        "loop_assert": "as_strict_eq"
+      }
+    },
+    "ret_val_2args_msk_val": {
+      "description": "Accès élément masque (ex: get_k)",
+      "is_loop": true,
+      "components": {
+        "decl": "decl_1arg_msk",
+        "init": "init_uniform_1arg_msk",
+        "load": "load_1arg_msk",
+        "operation": "op_get_k",
+        "loop_body": "lb_unop",
+        "loop_assert": "as_logical_eq"
+      }
+    }
+  },
+  "product_types": {
+    "cast": {
+      "description": "Cast entre types (product type dt1,dt2)",
+      "is_loop": true,
+      "components": {
+        "decl": "decl_1arg",
+        "init": "init_uniform_1arg",
+        "load": "load_1arg_reg",
+        "operation": "op_unop",
+        "loop_assert": "as_bitwise_eq"
+      }
+    },
+    "cast_k": {
+      "description": "Cast de masque entre types",
+      "is_loop": true,
+      "components": {
+        "decl": "decl_1arg_msk",
+        "init": "init_uniform_1arg_msk",
+        "load": "load_1arg_msk",
+        "operation": "op_cmp",
+        "loop_assert": "as_logical_eq"
+      }
+    },
+    "cvt": {
+      "description": "Conversion de type (cvt)",
+      "is_loop": true,
+      "components": {
+        "decl": "decl_1arg",
+        "init": "init_uniform_1arg",
+        "load": "load_1arg_reg",
+        "operation": "op_unop",
+        "loop_assert": "as_strict_eq"
+      }
+    },
+    "wcvt": {
+      "description": "Widening conversion (wcvt)",
+      "is_loop": true,
+      "components": {
+        "decl": "decl_1arg",
+        "init": "init_uniform_1arg",
+        "load": "load_1arg_reg",
+        "operation": "op_unop",
+        "loop_assert": "as_strict_eq"
+      }
+    }
+  }
+}

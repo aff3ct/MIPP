@@ -4,7 +4,6 @@
     "size": 128,
     "define": "defined(__ARM_NEON__) || defined(__ARM_NEON)",
     "mipp_definitions": [
-        "#define MIPP_NEON",
         "#define MIPP_BW",
         "#if defined(__ARM_FEATURE_FMA)",
         "\t#define MIPP_FMA",

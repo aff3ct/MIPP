@@ -17,8 +17,8 @@ file (GLOB_RECURSE MIPP_SRCS_TEST ${CMAKE_CURRENT_SOURCE_DIR}/src/*)
 add_executable(tests_exe ${MIPP_SRCS_TEST})
 set_target_properties(tests_exe PROPERTIES OUTPUT_NAME run-tests POSITION_INDEPENDENT_CODE ON) # set -fpie
 
- # include MIPP headers
-target_include_directories(tests_exe PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../include/")
+ # include MIPP headers and test helpers
+target_include_directories(tests_exe PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../include/" "${CMAKE_CURRENT_SOURCE_DIR}/src/")
 
 # link with Catch2
 find_package(Catch2 3 REQUIRED)

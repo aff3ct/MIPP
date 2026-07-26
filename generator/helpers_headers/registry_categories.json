@@ -14,7 +14,6 @@
     "set1_k",
     "set0",
     "set0_k",
-    "maskzld",
     "gather"
   ],
   "store": [
@@ -23,8 +22,7 @@
     "get",
     "get_k",
     "getfirst",
-    "scatter",
-    "maskst"
+    "scatter"
   ],
   "arithmetic": [
     "add",
@@ -35,7 +33,6 @@
     "div",
     "div2",
     "div4",
-    "maskz_add",
     "fmadd",
     "fmsub",
     "fnmadd",

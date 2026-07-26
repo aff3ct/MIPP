@@ -797,19 +797,6 @@
             "template_ref": "tpl_generic_emu.getfirst"
         }
     ],
-    "maskz_add": [
-        {
-            "instr_name": "maskz_add",
-            "datatypes": "all_int",
-            "preferred_simd_ext": [
-                "sse",
-                "neon",
-                "avx",
-                "avx512"
-            ],
-            "template_ref": "tpl_generic_emu.maskz_add"
-        }
-    ],
     "max": [
         {
             "datatypes": [

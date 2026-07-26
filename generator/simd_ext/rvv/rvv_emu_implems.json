@@ -481,18 +481,6 @@
             "version": "masks"
         }
     ],
-    "maskz_add": [
-        {
-            "instr_name": "add",
-            "datatypes": "all_int_uint",
-            "template": "maskz_inst"
-        },
-        {
-            "instr_name": "fadd",
-            "datatypes": "all_float",
-            "template": "maskz_inst"
-        }
-    ],
     "max": [
         {
             "instr_name": "max",

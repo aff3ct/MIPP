@@ -158,26 +158,6 @@
       ]
     }
   ],
-  "maskzld": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = m0.m[i] ? p0[i] : 0;"
-      ]
-    }
-  ],
-  "maskst": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "if (m0.m[i]) p0[i] = r0.r[i];"
-      ]
-    }
-  ],
   "set0": [
     {
       "type": "element-wide",
@@ -965,16 +945,6 @@
         "for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec",
         "\tresv = %!pred_cond!% (r0.r[i] > resv) ? r0.r[i] : resv %!pred_alt!%;",
         "return resv;"
-      ]
-    }
-  ],
-  "maskz_add": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = m0.m[i] ? r0.r[i] + r1.r[i] : 0;"
       ]
     }
   ],

@@ -7,7 +7,6 @@
     "hw_mask_is_bitfield": true,
     "define": "defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)",
     "mipp_definitions": [
-        "#define MIPP_AVX512",
         "#define MIPP_INSTR_VERSION 1",
         "#define MIPP_64BIT",
         "#ifdef __AVX512BW__",

@@ -121,3 +121,12 @@ def gen_ldiv_defines_sub_isa(isa_base, isa_div, file):
                 ),
                 file=file,
             )
+
+def emit_panic_stub(func_name: str, file=None, indent: str = "\t") -> str:
+    """
+    Emits a single-line panic stub using the MIPP_PANIC_STUB macro.
+    """
+    line = f"{indent}MIPP_PANIC_STUB(\"MIPP panic: '{func_name}' is unimplemented.\");"
+    if file:
+        print(line, file=file)
+    return line

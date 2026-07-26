@@ -3,7 +3,6 @@
     "prefix": "__riscv",
     "define": "defined(__riscv_v_intrinsic)",
     "mipp_definitions": [
-        "#define MIPP_RVV",
         "#define MIPP_64BIT",
         "#define MIPP_BW"
     ],

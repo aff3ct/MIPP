@@ -39,7 +39,7 @@
     "proto_ref": "ret_reg_1arg_Nele",
     "datatypes": "all_datatypes",
     "horizontal": true,
-    "mask_support": "only_masks"
+    "mask_support": "no_mask"
   },
   "set_k": {
     "proto_ref": "ret_msk_1arg_Nele",
@@ -51,7 +51,7 @@
     "proto_ref": "ret_reg_1arg_val",
     "datatypes": "all_datatypes",
     "horizontal": false,
-    "mask_support": "only_masks"
+    "mask_support": "no_mask"
   },
   "set1_k": {
     "proto_ref": "ret_msk_1arg_i32",
@@ -59,35 +59,11 @@
     "horizontal": false,
     "mask_support": "no_mask"
   },
-  "maskzld": {
-    "proto_ref": "ret_reg_2args_msk_ptr",
-    "datatypes": [
-      "all_float",
-      "int32",
-      "int64",
-      "uint32",
-      "uint64"
-    ],
-    "horizontal": false,
-    "mask_support": "no_mask"
-  },
-  "maskst": {
-    "proto_ref": "ret_void_3args_ptr_msk_reg",
-    "datatypes": [
-      "all_float",
-      "int32",
-      "int64",
-      "uint32",
-      "uint64"
-    ],
-    "horizontal": false,
-    "mask_support": "no_mask"
-  },
   "set0": {
     "proto_ref": "ret_reg_0arg",
     "datatypes": "all_datatypes",
     "horizontal": false,
-    "mask_support": "only_masks"
+    "mask_support": "no_mask"
   },
   "get": {
     "proto_ref": "ret_val_2args_reg_val",
@@ -382,12 +358,6 @@
     "datatypes": "all_datatypes",
     "horizontal": true,
     "mask_support": "only_maskz"
-  },
-  "maskz_add": {
-    "proto_ref": "ret_reg_3args_1msk_2reg",
-    "datatypes": "all_datatypes",
-    "horizontal": false,
-    "mask_support": "no_mask"
   },
   "fnmadd": {
     "proto_ref": "ret_reg_3args_reg",

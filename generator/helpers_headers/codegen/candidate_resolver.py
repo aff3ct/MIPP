@@ -16,17 +16,8 @@ from tools import intersect_conds as tool_intersect_conds
 from tools import build_func_name_internal, get_dt_par_size, is_guard_dead_under_cond
 from registry import scalar_isa
 from codegen.implem_tracker import get_implem_bucket, missing_build_negated_ifdef_for_existing_implems
-from codegen.emit_helpers import emit_function_body
+from codegen.emit_helpers import emit_function_body, emit_panic_stub
 
-
-def _missing_emit_ifdef_begin(ifd, file):
-    if ifd:
-        print("#if " + ifd, file=file)
-
-_STUB_TEMPLATE = """static {{ proto }} {
-\tprintf("MIPP panic: '%s' is unimplemented.\\n", "{{ full_func_name }}");
-\texit(-1);
-}"""
 
 _template_cache = {}
 
@@ -37,11 +28,17 @@ def _get_template(code):
         _template_cache[code] = cached
     return cached
 
+
+def _missing_emit_ifdef_begin(ifd, file):
+    if ifd:
+        print("#if " + ifd, file=file)
+
 def _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, masked_version = None, lmul=0):
     full_func_name = build_func_name_internal(isa, dt_par, dt_par, dt_ret, f, masked_version=masked_version, lmul=lmul)
     proto = build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul, True, masked_version=masked_version)
-    j2 = _get_template(_STUB_TEMPLATE)
-    print(j2.render(proto=proto, full_func_name=full_func_name), file=file)
+    print(f"static {proto} {{", file=file)
+    emit_panic_stub(full_func_name, file=file)
+    print("}", file=file)
 
 def _missing_emit_ifdef_end(ifd, file):
     if ifd:

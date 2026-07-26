@@ -1,5 +1,6 @@
 // uniform.hpp
 #pragma once
+
 #include <random>
 #include <type_traits>
 #include <limits>
@@ -10,43 +11,93 @@ namespace rnd {
 
 template <class T>
 requires (std::is_integral_v<T> || std::is_floating_point_v<T>)
-T uniform(std::mt19937& rng) {
-    if constexpr (std::is_integral_v<T> && !std::is_same_v<T, bool>) {
-        // Full range of T (inclusive)
-        using Lim = std::numeric_limits<T>;
-
-        // Avoid int8_t/uint8_t being treated as char by distributions/streams
+T uniform(std::mt19937& rng, T min_val, T max_val) {
+    if constexpr (std::is_floating_point_v<T>) {
+        std::uniform_real_distribution<T> dist(min_val, max_val);
+        return dist(rng);
+    } else {
         using Wide = std::conditional_t<(sizeof(T) < 4),
                                         std::conditional_t<std::is_signed_v<T>, int, unsigned>,
                                         T>;
-
-        std::uniform_int_distribution<Wide> dist(static_cast<Wide>(Lim::min()),
-                                                 static_cast<Wide>(Lim::max()));
+        std::uniform_int_distribution<Wide> dist(static_cast<Wide>(min_val), static_cast<Wide>(max_val));
         return static_cast<T>(dist(rng));
-    } else if constexpr (std::is_floating_point_v<T>) {
-        // Default float/double range: [INT32_MIN, INT32_MAX)
-        constexpr std::int32_t lo_i = std::numeric_limits<std::int32_t>::min();
-        constexpr std::int32_t hi_i = std::numeric_limits<std::int32_t>::max();
-
-        // Step 1: generate u in [0, 1) using integer RNG bits
-        constexpr int digits = std::numeric_limits<T>::digits; // 24 for float, 53 for double
-        using UInt = std::conditional_t<(digits <= 32), std::uint32_t, std::uint64_t>;
-        constexpr UInt maxu = (digits == 64) ? ~UInt{0} : (UInt{1} << digits) - 1;
-
-        std::uniform_int_distribution<UInt> dist(0, maxu);
-        const UInt u = dist(rng);
-
-        const long double unit = static_cast<long double>(u) /
-                                 (static_cast<long double>(maxu) + 1.0L); // [0,1)
-
-        // Step 2: scale into [lo_i, hi_i)
-        const long double lo = static_cast<long double>(lo_i);
-        const long double hi = static_cast<long double>(hi_i);
-
-        return static_cast<T>(lo + (hi - lo) * unit);
-    } else {
-        static_assert(!std::is_same_v<T, T>, "rnd::uniform<T>: unsupported type (bool not supported)");
     }
+}
+
+template <class T>
+requires (std::is_integral_v<T> || std::is_floating_point_v<T>)
+T uniform(std::mt19937& rng) {
+    if constexpr (std::is_floating_point_v<T>) {
+        return uniform<T>(rng, (T)-1.0, (T)1.0);
+    } else {
+        return uniform<T>(rng, std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
+    }
+}
+
+inline bool uniform_bool(std::mt19937& rng) {
+    std::uniform_int_distribution<int> dist(0, 1);
+    return dist(rng) != 0;
+}
+
+// --- Strictly Positive (> 0) ---
+template <class T>
+requires (std::is_integral_v<T> || std::is_floating_point_v<T>)
+T uniform_strictly_positive(std::mt19937& rng) {
+    if constexpr (std::is_floating_point_v<T>) {
+        return uniform<T>(rng, std::numeric_limits<T>::min(), (T)1.0);
+    } else {
+        return uniform<T>(rng, (T)1, std::numeric_limits<T>::max());
+    }
+}
+
+// --- Positive (>= 0) ---
+template <class T>
+requires (std::is_integral_v<T> || std::is_floating_point_v<T>)
+T uniform_positive(std::mt19937& rng) {
+    if constexpr (std::is_floating_point_v<T>) {
+        return uniform<T>(rng, (T)0, (T)1.0);
+    } else {
+        return uniform<T>(rng, (T)0, std::numeric_limits<T>::max());
+    }
+}
+
+// --- Strictly Negative (< 0) ---
+template <class T>
+requires (std::is_integral_v<T> || std::is_floating_point_v<T>)
+T uniform_strictly_negative(std::mt19937& rng) {
+    if constexpr (std::is_floating_point_v<T>) {
+        return uniform<T>(rng, (T)-1.0, -std::numeric_limits<T>::min());
+    } else {
+        return uniform<T>(rng, std::numeric_limits<T>::min(), (T)-1);
+    }
+}
+
+// --- Negative (<= 0) ---
+template <class T>
+requires (std::is_integral_v<T> || std::is_floating_point_v<T>)
+T uniform_negative(std::mt19937& rng) {
+    if constexpr (std::is_floating_point_v<T>) {
+        return uniform<T>(rng, (T)-1.0, (T)0);
+    } else {
+        return uniform<T>(rng, std::numeric_limits<T>::min(), (T)0);
+    }
+}
+
+// --- Exclude Zero (!= 0) ---
+template <class T>
+requires (std::is_integral_v<T> || std::is_floating_point_v<T>)
+T uniform_exclude_zero(std::mt19937& rng) {
+    T val = uniform<T>(rng);
+    if (val == (T)0) val = (T)1;
+    return val;
+}
+
+template <class T>
+requires (std::is_integral_v<T> || std::is_floating_point_v<T>)
+T uniform_exclude_zero(std::mt19937& rng, T min_val, T max_val) {
+    T val = uniform<T>(rng, min_val, max_val);
+    if (val == (T)0) val = (T)1;
+    return val;
 }
 
 } // namespace rnd

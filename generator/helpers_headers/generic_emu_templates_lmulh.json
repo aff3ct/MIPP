@@ -15,7 +15,15 @@
             "{% if lmul == 1 %}",
             "return %hadds<tp>%(r0);",
             "{% else %}",
-            "return %hadds<c:tp|b:tp|m:tp/2>%(r0.r1) + %hadds<c:tp|b:tp|m:tp/2>%(r0.r2);",
+            "{% if dt_par.category == 'uint' %}",
+            "uint{{ dt_par.n_bits }}_t a = %hadds<c:tp|b:tp|m:tp/2>%(r0.r1);",
+            "uint{{ dt_par.n_bits }}_t b = %hadds<c:tp|b:tp|m:tp/2>%(r0.r2);",
+            "return (a > UINT{{ dt_par.n_bits }}_MAX - b) ? UINT{{ dt_par.n_bits }}_MAX : (uint{{ dt_par.n_bits }}_t)(a + b);",
+            "{% else %}",
+            "int{{ dt_par.n_bits }}_t a = %hadds<c:tp|b:tp|m:tp/2>%(r0.r1);",
+            "int{{ dt_par.n_bits }}_t b = %hadds<c:tp|b:tp|m:tp/2>%(r0.r2);",
+            "return (b > 0 && a > INT{{ dt_par.n_bits }}_MAX - b) ? (int{{ dt_par.n_bits }}_t)INT{{ dt_par.n_bits }}_MAX : (b < 0 && a < INT{{ dt_par.n_bits }}_MIN - b) ? (int{{ dt_par.n_bits }}_t)INT{{ dt_par.n_bits }}_MIN : (int{{ dt_par.n_bits }}_t)(a + b);",
+            "{% endif %}",
             "{% endif %}"
         ]
     },
@@ -136,7 +144,7 @@
             "{% if lmul == 1 %}",
             "return %testz<tp>%(m0, m1);",
             "{% else %}",
-            "return %testz<c:tp|b:tp|m:tp/2>%(m0.m1, m0.m2) && %testz<c:tp|b:tp|m:tp/2>%(m1.m1, m1.m2);",
+            "return %testz<c:tp|b:tp|m:tp/2>%(m0.m1, m1.m1) && %testz<c:tp|b:tp|m:tp/2>%(m0.m2, m1.m2);",
             "{% endif %}"
         ]
     },

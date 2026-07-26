@@ -1,0 +1,385 @@
+{
+  "default": {
+    "distribution": "uniform",
+    "domain": {},
+    "tolerance": {
+      "type": "exact"
+    },
+    "comparison": "exact",
+    "overflow_check": null,
+    "disabled": false,
+    "disabled_reason": null,
+    "extra_includes": [],
+    "nan_inf_skip": false,
+    "skip_condition": null,
+    "support_obj": false,
+    "mask_pattern": "uniform_bool"
+  },
+  "functions": {
+    "add": {
+      "overflow_check": "add",
+      "support_obj": true,
+      "unmasked": {
+        "domain": {
+          "by_datatype": {
+            "int8": [
+              { "min": -10, "max": 10 },
+              { "min": 20, "max": 50 }
+            ],
+            "int16": [
+              { "strictly_negative": true },
+              { "strictly_positive": true }
+            ],
+            "int32": { "negative": true },
+            "int64": { "strictly_negative": true },
+            "float32": { "min": -1000.0, "max": 1000.0 },
+            "float64": { "min": 0.0, "max": 500.0 }
+          }
+        }
+      },
+      "mask": {
+        "mask_pattern": "alternating",
+        "domain": {
+          "by_lmul": {
+            "m1": [
+              { "min": 10, "max": 50 },
+              { "min": 100, "max": 200 }
+            ],
+            "m2": { "min": 5, "max": 100 },
+            "m4": { "min": 1, "max": 20 },
+            "m8": { "min": 0, "max": 10 }
+          }
+        }
+      },
+      "maskz": {
+        "mask_pattern": "sparse",
+        "domain": {
+          "rules": [
+            { "datatype": "int8", "lmul": "m4", "min": -5, "max": 5 },
+            { "datatype": "int8", "min": -20, "max": 20 },
+            { "datatype": "uint8", "min": 0, "max": 50 },
+            { "datatype": "float32", "negative": true },
+            { "datatype": "float64", "strictly_negative": true }
+          ],
+          "default": { "min": -50, "max": 50 }
+        }
+      },
+      "masks": {
+        "mask_pattern": "dense",
+        "domain": {
+          "by_datatype": {
+            "float32": { "strictly_positive": true },
+            "float64": { "positive": true },
+            "int32": { "negative": true },
+            "int64": { "strictly_negative": true }
+          },
+          "default": { "min": 100, "max": 500 }
+        },
+        "domain_src": {
+          "by_datatype": {
+            "float32": { "min": 1.0, "max": 10.0 },
+            "int32": { "strictly_positive": true }
+          },
+          "default": { "strictly_positive": true }
+        }
+      }
+    },
+    "adds": {},
+    "andb": {
+      "comparison": "bitwise",
+      "support_obj": true
+    },
+    "andb_k": {},
+    "andnb": {
+      "comparison": "bitwise",
+      "extra_includes": [
+        "toreg"
+      ]
+    },
+    "andnb_k": {},
+    "blend": {},
+    "cast": {},
+    "cast_k": {},
+    "cmpeq": {
+      "comparison": "logical",
+      "support_obj": true,
+      "extra_includes": [
+        "toreg",
+        "get_k"
+      ]
+    },
+    "cmpge": {
+      "comparison": "logical",
+      "support_obj": true,
+      "extra_includes": [
+        "toreg",
+        "get_k"
+      ]
+    },
+    "cmpgt": {
+      "comparison": "logical",
+      "support_obj": true,
+      "extra_includes": [
+        "toreg",
+        "get_k"
+      ]
+    },
+    "cmple": {
+      "comparison": "logical",
+      "support_obj": true,
+      "extra_includes": [
+        "toreg",
+        "get_k"
+      ]
+    },
+    "cmplt": {
+      "comparison": "logical",
+      "support_obj": true,
+      "extra_includes": [
+        "toreg",
+        "get_k"
+      ]
+    },
+    "cmpneq": {
+      "comparison": "logical",
+      "support_obj": true,
+      "extra_includes": [
+        "toreg",
+        "get_k"
+      ]
+    },
+    "cvt": {},
+    "div": {
+      "support_obj": true,
+      "input_domain": [
+        {
+          "min": -100.0,
+          "max": 100.0
+        },
+        {
+          "min": -100.0,
+          "max": 100.0,
+          "exclude_zero": true
+        }
+      ],
+      "tolerance": {
+        "default": {
+          "type": "exact"
+        },
+        "by_datatype": {
+          "float32": {
+            "type": "max_abs_diff",
+            "value": 1e-05
+          },
+          "float64": {
+            "type": "max_abs_diff",
+            "value": 1e-10
+          }
+        }
+      },
+      "comparison": "tolerance"
+    },
+    "div2": {},
+    "div4": {},
+    "exp": {
+      "domain": {
+        "default": {
+          "min": -3.0,
+          "max": 3.0
+        }
+      },
+      "tolerance": {
+        "default": {
+          "type": "relative_percent",
+          "value": 0.01
+        }
+      },
+      "comparison": "tolerance"
+    },
+    "fmadd": {},
+    "fmsub": {},
+    "fnmadd": {},
+    "fnmsub": {},
+    "gather": {
+      "disabled": true,
+      "disabled_reason": "Requires array pointer + index vector test template"
+    },
+    "get": {},
+    "get_k": {},
+    "getfirst": {},
+    "hadd": {
+      "overflow_check": "accumulate_add",
+      "tolerance": {
+        "default": {
+          "type": "exact"
+        },
+        "by_datatype": {
+          "float32": {
+            "type": "relative_percent",
+            "value": 0.001
+          },
+          "float64": {
+            "type": "relative_percent",
+            "value": 0.0001
+          }
+        }
+      }
+    },
+    "hadds": {
+      "domain": {
+        "min": -1000,
+        "max": 1000
+      },
+      "overflow_check": "accumulate_add"
+    },
+    "hmax": {},
+    "hmin": {},
+    "hmul": {
+      "overflow_check": "accumulate_mul",
+      "tolerance": {
+        "default": {
+          "type": "exact"
+        },
+        "by_datatype": {
+          "float32": {
+            "type": "relative_percent",
+            "value": 0.001
+          },
+          "float64": {
+            "type": "relative_percent",
+            "value": 0.0001
+          }
+        }
+      }
+    },
+    "load": {},
+    "loadu": {},
+    "log": {
+      "domain": {
+        "min": 0.001,
+        "max": 1000.0
+      },
+      "tolerance": {
+        "type": "relative_percent",
+        "value": 0.01
+      },
+      "comparison": "tolerance"
+    },
+    "lshift": {},
+    "max": {},
+    "min": {},
+    "msb": {},
+    "mul": {
+      "overflow_check": "mul",
+      "support_obj": true
+    },
+    "notb": {
+      "comparison": "bitwise"
+    },
+    "notb_k": {},
+    "orb": {
+      "comparison": "bitwise",
+      "support_obj": true
+    },
+    "orb_k": {},
+    "pow": {
+      "domain": [
+        {
+          "min": 0.1,
+          "max": 5.0
+        },
+        {
+          "min": -3.0,
+          "max": 3.0
+        }
+      ],
+      "tolerance": {
+        "type": "relative_percent",
+        "value": 0.01
+      },
+      "comparison": "tolerance"
+    },
+    "pow2": {
+      "domain": {
+        "min": 0,
+        "max": 10
+      },
+      "tolerance": {
+        "default": {
+          "type": "exact"
+        },
+        "by_datatype": {
+          "float32": {
+            "type": "relative_percent",
+            "value": 0.01
+          },
+          "float64": {
+            "type": "relative_percent",
+            "value": 0.0001
+          }
+        }
+      },
+      "comparison": "tolerance"
+    },
+    "round": {
+      "skip_condition": {
+        "type": "fractional_part",
+        "value": 0.5,
+        "tol": 1e-05
+      }
+    },
+    "rshift": {},
+    "rsqrt": {
+      "domain": {
+        "min": 0.001,
+        "max": 1000.0
+      },
+      "tolerance": {
+        "type": "relative_percent",
+        "value": 0.05
+      },
+      "comparison": "tolerance",
+      "nan_inf_skip": true
+    },
+    "scatter": {
+      "disabled": true,
+      "disabled_reason": "Requires array pointer + index vector test template"
+    },
+    "set": {},
+    "set0": {},
+    "set0_k": {},
+    "set1": {},
+    "set1_k": {},
+    "set_k": {},
+    "sqrt": {
+      "domain": {
+        "strictly_positive": true
+      },
+      "tolerance": {
+        "type": "relative_percent",
+        "value": 0.001
+      },
+      "comparison": "tolerance",
+      "nan_inf_skip": true
+    },
+    "store": {},
+    "storeu": {},
+    "sub": {
+      "overflow_check": "sub",
+      "support_obj": true
+    },
+    "subs": {},
+    "testz": {},
+    "testz_2": {},
+    "tomsk": {},
+    "toreg": {
+      "comparison": "bitwise"
+    },
+    "wcvt": {},
+    "xorb": {
+      "comparison": "bitwise",
+      "support_obj": true
+    },
+    "xorb_k": {}
+  }
+}

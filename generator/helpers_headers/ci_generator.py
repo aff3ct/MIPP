@@ -11,6 +11,7 @@ from registry import *
 from include_gen import IncludeManager
 
 from codegen.lmul_orchestrator import gen_c_horiz_lmul
+from codegen.emit_helpers import emit_panic_stub
 from registry import implems_horiz_lmul_generic_emu
 
 def prepare_isa_defines(isa_list):
@@ -47,7 +48,7 @@ def _custom_prefix_generator(func, isa_list, is_common=False, mode="function_hea
     
     returns a string with the content of the prefix.
     """
-    content = "#pragma once\n\n"
+    content = "#pragma once\n"
     if is_common:
         is_first = True
         
@@ -65,7 +66,9 @@ def _custom_prefix_generator(func, isa_list, is_common=False, mode="function_hea
         
         isa_list = sorted(isa_list, key=get_depth, reverse=True)
         
-        content += """\n#define MIPP\n\n#include <stdint.h>\n#include <float.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\n"""
+        tpl_path = os.path.join(os.path.dirname(__file__), "templates", "mipp_common_head.tpl.h")
+        with open(tpl_path, "r") as f_tpl:
+            content += "\n" + f_tpl.read() + "\n"
 
         is_first_block = True
         for isa in isa_list:
@@ -78,8 +81,19 @@ def _custom_prefix_generator(func, isa_list, is_common=False, mode="function_hea
                 is_first_block = False
             else:
                 content += f"#elif {cond}\n"
-            for line in isa.get("mipp_definitions", []):
+            has_ldiv2 = (-2 in isa.get("hw_lmul", [])) or (-2 in isa.get("sw_lmul", []))
+            defs = list(isa.get("mipp_definitions", []))
+            if not is_scalar:
+                primary_def = f"#define MIPP_{isa['name'].upper()}"
+                if primary_def not in defs:
+                    content += f"\t{primary_def}\n"
+            if has_ldiv2 and "#define MIPP_LDIV_2" not in defs:
+                defs.append("#define MIPP_LDIV_2")
+
+            for line in defs:
                 content += f"\t{line}\n"
+        content += "#else\n"
+        content += '#error "No supported SIMD extension detected by compiler flags. Pass appropriate target flags (e.g. -mavx2, -march=native) or define -DMIPP_SCALAR for scalar fallback."\n'
         content += "#endif\n\n"
         content += "typedef double float64_t;\n"
         content += "typedef float float32_t;\n\n"
@@ -270,8 +284,7 @@ def _ci_mask_writer(func, dt, isa_list, file, mask_type, func_name="", lmul=0):
         print("\t" + build_call(interfaces[func]["proto"], dt_par, dt_ret, isa, func_name_impl, masked_version = mask_type) + ";", file=file)
         if i == len(isa_list)-1:
             print("#else", file=file)
-            print("\tprintf(\"MIPP panic: '%s', unsupported case, this should never happen.\\n\", \""+full_func_name+"\");", file=file);
-            print("\texit(-1);", file=file);
+            emit_panic_stub(full_func_name, file=file)
             print("#endif", file=file)
             print("}", file=file)
 
@@ -309,9 +322,7 @@ def _ci_lmul_writer(f,func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask
             func_name_impl = build_func_name(isa, dt_par, dt_ret, f, True, lmul, mask_type)
         print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa, func_name_impl, masked_version=mask_type) + ";", file=file)
     print("#else", file=file)
-
-    print("\tprintf(\"MIPP panic: '%s' is unimplemented.\\n\", \""+full_func_name+"\");", file=file);
-    print("\texit(-1);", file=file);
+    emit_panic_stub(full_func_name, file=file)
     print("#endif", file=file)
     print("}", file=file)
 
@@ -375,8 +386,7 @@ def _gen_ci_functions(isa_list, include_manager, funcs):
                 print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa, func_name_impl) + ";", file=file)
                 if i == len(isa_list)-1:
                     print("#else", file=file)
-                    print("\tprintf(\"MIPP panic: '%s', unsupported case, this should never happen.\\n\", \""+func_name+"\");", file=file);
-                    print("\texit(-1);", file=file);
+                    emit_panic_stub(func_name, file=file)
                     print("#endif", file=file)
 
             print("}", file=file)

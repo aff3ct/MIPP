@@ -315,36 +315,7 @@
             "if": "defined(__AVX2__)"
         }
     ],
-    "maskst": [
-        {
-            "instr_name": "maskstore",
-            "datatypes": "all_float",
-            "template": "maskst"
-        },
-        {
-            "instr_name": "maskstore",
-            "datatypes": [
-                "int32"
-            ],
-            "template": "maskst",
-            "if": "defined(__AVX2__)"
-        }
-    ],
-    "maskzld": [
-        {
-            "instr_name": "maskload",
-            "datatypes": "all_float",
-            "template": "maskzld"
-        },
-        {
-            "instr_name": "maskload",
-            "datatypes": [
-                "int32"
-            ],
-            "template": "maskzld",
-            "if": "defined(__AVX2__)"
-        }
-    ],
+
     "max": [
         {
             "instr_name": "max",

@@ -631,6 +631,54 @@ def validate_interfaces_config(interfaces_dict, protos_dict):
 def validate_scalar_implems_config(scalar_implems_dict):
     validate_json_data(scalar_implems_dict, "scalar_implems_schema.json", label="registry_scalar_implems.json")
 
+def validate_scalar_implems_logical_integrity(scalar_implems_dict, interfaces_dict):
+    from tools import resolve_datatypes
+    inter_funcs = set(interfaces_dict.keys())
+    scal_funcs = set(scalar_implems_dict.keys())
+
+    # 1. Function Coverage Check
+    missing_in_scal = inter_funcs - scal_funcs
+    if missing_in_scal:
+        print("Error: Logical integrity check failed for registry_scalar_implems.json:", file=sys.stderr)
+        for f in sorted(missing_in_scal):
+            print(f"  - Function '{f}' declared in registry_interfaces.json is missing from registry_scalar_implems.json.", file=sys.stderr)
+        sys.exit(1)
+
+    extra_in_scal = scal_funcs - inter_funcs
+    if extra_in_scal:
+        print("Error: Logical integrity check failed for registry_scalar_implems.json:", file=sys.stderr)
+        for f in sorted(extra_in_scal):
+            print(f"  - Function '{f}' in registry_scalar_implems.json is not declared in registry_interfaces.json.", file=sys.stderr)
+        sys.exit(1)
+
+    # 2. Datatypes Coverage Check
+    for func in sorted(inter_funcs):
+        inter_dts = set(resolve_datatypes(interfaces_dict[func]["datatypes"]))
+        choices = scalar_implems_dict[func]
+        scal_dts = set()
+        for choice in choices:
+            dt_spec = choice.get("datatypes")
+            if isinstance(dt_spec, str) and dt_spec == "all_defs":
+                scal_dts.update(inter_dts)
+            elif isinstance(dt_spec, list):
+                for item in dt_spec:
+                    if item == "all_defs":
+                        scal_dts.update(inter_dts)
+                    else:
+                        scal_dts.update(resolve_datatypes(item))
+            elif dt_spec:
+                scal_dts.update(resolve_datatypes(dt_spec))
+
+        if scal_dts != inter_dts:
+            diff_missing = inter_dts - scal_dts
+            diff_extra = scal_dts - inter_dts
+            print(f"Error: Logical integrity check failed for function '{func}':", file=sys.stderr)
+            if diff_missing:
+                print(f"  - Datatypes declared in registry_interfaces.json but missing from registry_scalar_implems.json: {sorted(diff_missing)}", file=sys.stderr)
+            if diff_extra:
+                print(f"  - Datatypes in registry_scalar_implems.json not declared in registry_interfaces.json: {sorted(diff_extra)}", file=sys.stderr)
+            sys.exit(1)
+
 def audit_generic_templates_dead_code(flat_implems, data_templates):
     if "dead-code" not in ACTIVE_AUDITS:
         return

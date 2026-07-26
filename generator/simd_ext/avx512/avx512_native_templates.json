@@ -23,12 +23,7 @@
             "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, r2.r);"
         ]
     },
-    "arithmsk_2args": {
-        "format": "short",
-        "code": [
-            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(m0.m, r0.r, r1.r);"
-        ]
-    },
+
     "bitwise_1arg": {
         "format": "short",
         "code": [

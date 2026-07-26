@@ -1,0 +1,352 @@
+{
+  "structural_templates": {
+    "generic_for_loop": [
+      "{{func_decl}}",
+      "{",
+      "\tstd::mt19937 seed(Catch::getSeed());",
+      "\tfor (unsigned n = 0; n < N_ITER; n++)",
+      "\t{",
+      "{{decl}}",
+      "",
+      "{{init}}",
+      "",
+      "{{load}}",
+      "",
+      "{{operation}}",
+      "",
+      "\t\tfor (unsigned i = 0; i < {{size_out}}; i++)",
+      "\t\t{",
+      "{{loop_body}}",
+      "{{loop_assert}}",
+      "\t\t}",
+      "\t}",
+      "}"
+    ],
+    "generic_no_loop": [
+      "{{func_decl}}",
+      "{",
+      "\tstd::mt19937 seed(Catch::getSeed());",
+      "\tfor (unsigned n = 0; n < N_ITER; n++)",
+      "\t{",
+      "{{decl}}",
+      "",
+      "{{init}}",
+      "",
+      "{{load}}",
+      "",
+      "{{operation}}",
+      "",
+      "{{loop_body}}",
+      "{{loop_assert}}",
+      "\t}",
+      "}"
+    ]
+  },
+  "declarations": {
+    "decl_2args": [
+      "T inputs1[{{size}}], inputs2[{{size}}];"
+    ],
+    "decl_1arg": [
+      "T inputs1[{{size}}];"
+    ],
+    "decl_3args": [
+      "T inputs1[{{size}}], inputs2[{{size}}], inputs3[{{size}}];"
+    ],
+    "decl_cast_2args": [
+      "{{dt1_ext}}_t inputs1[{{size}}];",
+      "constexpr size_t bytes = sizeof(inputs1);",
+      "{{dt2_ext}}_t inputs2[bytes / sizeof({{dt2_ext}}_t)];"
+    ],
+    "decl_cast_2args_msk": [
+      "{{dt1_ext}}_t inputs1[{{size}}];",
+      "constexpr size_t bytes = sizeof(inputs1);",
+      "{{dt2_ext}}_t inputs2[bytes / sizeof({{dt2_ext}}_t)];"
+    ],
+    "decl_1arg_msk": [
+      "int32_t inputs_m[{{size}}];"
+    ],
+    "decl_2args_msk": [
+      "int32_t inputs_m1[{{size}}], inputs_m2[{{size}}];"
+    ],
+    "decl_3args_2reg_1msk": [
+      "T inputs1[{{size}}], inputs2[{{size}}];",
+      "int32_t inputs_m3[{{size}}];"
+    ],
+    "decl_1arg_store": [
+      "T inputs1[{{size}}], res_r[{{size}}] = {0}, res_s[{{size}}] = {0};"
+    ],
+    "decl_3args_1msk_2reg": [
+      "int32_t inputs_m1[{{size}}];",
+      "T inputs2[{{size}}], inputs3[{{size}}];"
+    ]
+  },
+  "initializations": {
+    "init_uniform": [
+      "for (size_t i = 0; i < {{size}}; i++)",
+      "{",
+      "\tinputs1[i] = rnd::uniform<T>(seed);",
+      "\tinputs2[i] = rnd::uniform<T>(seed);",
+      "}"
+    ],
+    "init_uniform_1arg": [
+      "for (size_t i = 0; i < {{size}}; i++)",
+      "{",
+      "\tinputs1[i] = rnd::uniform<T>(seed);",
+      "}"
+    ],
+    "init_uniform_1arg_msk": [
+      "for (size_t i = 0; i < {{size}}; i++)",
+      "{",
+      "\tinputs_m[i] = rnd::uniform_bool(seed) ? -1 : 0;",
+      "}"
+    ],
+    "init_uniform_2args_msk": [
+      "for (size_t i = 0; i < {{size}}; i++)",
+      "{",
+      "\tinputs_m1[i] = rnd::uniform_bool(seed) ? -1 : 0;",
+      "\tinputs_m2[i] = rnd::uniform_bool(seed) ? -1 : 0;",
+      "}"
+    ],
+    "init_uniform_1arg_clamped_3": [
+      "std::iota(inputs1, inputs1 + {{size}}, 1);",
+      "for (size_t i = 0; i < {{size}}; i++)",
+      "{",
+      "\tinputs1[i] = rnd::uniform<T>(seed);",
+      "\tif constexpr (std::is_floating_point_v<T>)",
+      "\t{",
+      "\t\tusing T_val1 = std::remove_reference_t<decltype(inputs1[i])>;",
+      "\t\tinputs1[i] = std::clamp(inputs1[i], (T_val1)-3.0, (T_val1)3.0);",
+      "\t}",
+      "}"
+    ],
+    "init_uniform_1arg_strictly_positive": [
+      "for (size_t i = 0; i < {{size}}; i++)",
+      "{",
+      "\tinputs1[i] = rnd::uniform_strictly_positive<T>(seed);",
+      "}"
+    ],
+    "init_uniform_1arg_positive": [
+      "for (size_t i = 0; i < {{size}}; i++)",
+      "{",
+      "\tinputs1[i] = rnd::uniform_positive<T>(seed);",
+      "}"
+    ],
+    "init_uniform_1arg_strictly_negative": [
+      "for (size_t i = 0; i < {{size}}; i++)",
+      "{",
+      "\tinputs1[i] = rnd::uniform_strictly_negative<T>(seed);",
+      "}"
+    ],
+    "init_uniform_1arg_negative": [
+      "for (size_t i = 0; i < {{size}}; i++)",
+      "{",
+      "\tinputs1[i] = rnd::uniform_negative<T>(seed);",
+      "}"
+    ],
+    "init_uniform_3args": [
+      "for (size_t i = 0; i < {{size}}; i++)",
+      "{",
+      "\tinputs1[i] = rnd::uniform<T>(seed);",
+      "\tinputs2[i] = rnd::uniform<T>(seed);",
+      "\tinputs3[i] = rnd::uniform<T>(seed);",
+      "}"
+    ],
+    "init_uniform_3args_2reg_1msk": [
+      "for (size_t i = 0; i < {{size}}; i++)",
+      "{",
+      "\tinputs1[i] = rnd::uniform<T>(seed);",
+      "\tinputs2[i] = rnd::uniform<T>(seed);",
+      "\tinputs_m3[i] = rnd::uniform_bool(seed) ? -1 : 0;",
+      "}"
+    ],
+    "init_uniform_3args_1msk_2reg": [
+      "for (size_t i = 0; i < {{size}}; i++)",
+      "{",
+      "\tinputs_m1[i] = rnd::uniform_bool(seed) ? -1 : 0;",
+      "\tinputs2[i] = rnd::uniform<T>(seed);",
+      "\tinputs3[i] = rnd::uniform<T>(seed);",
+      "}"
+    ],
+    "init_cast_memcpy": [
+      "std::iota(inputs1, inputs1 + {{size}}, 1);",
+      "memcpy(inputs2, inputs1, sizeof(inputs1));"
+    ]
+  },
+  "loads": {
+    "load_2args_reg": [
+      "{{reg_type}} r1 = {{load_call1}};",
+      "{{reg_type}} r2 = {{load_call2}};",
+      "{{scalar_reg_type}} s1 = {{scalar_load_call1}};",
+      "{{scalar_reg_type}} s2 = {{scalar_load_call2}};"
+    ],
+    "load_3args_reg": [
+      "{{reg_type}} r1 = {{load_call1}};",
+      "{{reg_type}} r2 = {{load_call2}};",
+      "{{reg_type}} r3 = {{load_call3}};",
+      "{{scalar_reg_type}} s1 = {{scalar_load_call1}};",
+      "{{scalar_reg_type}} s2 = {{scalar_load_call2}};",
+      "{{scalar_reg_type}} s3 = {{scalar_load_call3}};"
+    ],
+    "load_3args_2reg_1msk": [
+      "{{reg_type}} r1 = {{load_call1}};",
+      "{{reg_type}} r2 = {{load_call2}};",
+      "{{msk_type}} m3 = {{set_k_call3}};",
+      "{{scalar_reg_type}} s1 = {{scalar_load_call1}};",
+      "{{scalar_reg_type}} s2 = {{scalar_load_call2}};",
+      "{{scalar_msk_type}} sm3 = {{scalar_set_k_call3}};"
+    ],
+    "load_1arg_reg": [
+      "{{reg_type}} r1 = {{load_call1}};",
+      "{{scalar_reg_type}} s1 = {{scalar_load_call1}};"
+    ],
+    "load_1arg_msk": [
+      "{{msk_type}} m1 = {{set_k_call}};",
+      "{{scalar_msk_type}} sm1 = {{scalar_set_k_call}};"
+    ],
+    "load_2args_msk": [
+      "{{msk_type}} m1 = {{set_k_call1}};",
+      "{{msk_type}} m2 = {{set_k_call2}};",
+      "{{scalar_msk_type}} sm1 = {{scalar_set_k_call1}};",
+      "{{scalar_msk_type}} sm2 = {{scalar_set_k_call2}};"
+    ],
+    "load_cast_2args": [
+      "{{reg_type}} r1 = {{load_call1}};"
+    ],
+    "load_3args_1msk_2reg": [
+      "{{msk_type}} m1 = {{set_k_call1}};",
+      "{{scalar_msk_type}} sm1 = {{scalar_set_k_call1}};",
+      "{{reg_type}} r2 = {{load_call2}};",
+      "{{reg_type}} r3 = {{load_call3}};",
+      "{{scalar_reg_type}} s2 = {{scalar_load_call2}};",
+      "{{scalar_reg_type}} s3 = {{scalar_load_call3}};"
+    ],
+    "load_empty": []
+  },
+  "operations": {
+    "op_binop": [
+      "{{reg_type}} r3 = {{op_call}};",
+      "{{scalar_reg_type}} s3 = {{scalar_op_call}};"
+    ],
+    "op_triop": [
+      "{{reg_type}} r4 = {{op_call}};",
+      "{{scalar_reg_type}} s4 = {{scalar_op_call}};"
+    ],
+    "op_unop": [
+      "{{reg_type_dst}} r3 = {{op_call}};",
+      "{{scalar_reg_type_dst}} s3 = {{scalar_op_call}};"
+    ],
+    "op_load": [
+      "{{reg_type}} r3 = {{op_call}};",
+      "{{scalar_reg_type}} s3 = {{scalar_op_call}};"
+    ],
+    "op_store": [
+      "{{op_call}};",
+      "{{scalar_op_call}};"
+    ],
+    "op_cmp": [
+      "{{msk_type_dst}} r3 = {{op_call}};",
+      "{{scalar_msk_type_dst}} s3 = {{scalar_op_call}};"
+    ],
+    "op_reduction": [
+      "T r3 = {{op_call}};",
+      "T s3 = {{scalar_op_call}};"
+    ],
+    "op_cast": [
+      "mipp::rvd<{{dt2_ext}}_t> r3 = mipp::cast<{{dt1_ext}}_t, {{dt2_ext}}_t>(r1);"
+    ],
+    "op_set0": [
+      "{{reg_type}} r3 = {{op_call}};",
+      "{{scalar_reg_type}} s3 = {{scalar_op_call}};"
+    ],
+    "op_set0_k": [
+      "{{msk_type}} r3 = {{op_call}};",
+      "{{scalar_msk_type}} s3 = {{scalar_op_call}};"
+    ],
+    "op_set1": [
+      "{{reg_type}} r3 = {{op_call}};",
+      "{{scalar_reg_type}} s3 = {{scalar_op_call}};"
+    ],
+    "op_set1_k": [
+      "{{msk_type}} r3 = {{op_call}};",
+      "{{scalar_msk_type}} s3 = {{scalar_op_call}};"
+    ],
+    "op_set": [
+      "{{reg_type}} r3 = {{op_call}};",
+      "{{scalar_reg_type}} s3 = {{scalar_op_call}};"
+    ],
+    "op_set_k": [
+      "{{msk_type}} r3 = {{op_call}};",
+      "{{scalar_msk_type}} s3 = {{scalar_op_call}};"
+    ],
+    "op_get": [
+      "{{reg_type}} r3 = r1;",
+      "{{scalar_reg_type}} s3 = s1;"
+    ],
+    "op_get_k": [
+      "{{msk_type}} r3 = m1;",
+      "{{scalar_msk_type}} s3 = sm1;"
+    ],
+    "op_tomsk": [
+      "{{msk_type}} r3 = {{op_call}};",
+      "{{scalar_msk_type}} s3 = {{scalar_op_call}};"
+    ],
+    "op_i32": [
+      "int32_t r3 = {{op_call}};",
+      "int32_t s3 = {{scalar_op_call}};"
+    ]
+  },
+  "loop_bodies": {
+    "lb_binop": [],
+    "lb_unop": [],
+    "lb_load": []
+  },
+  "assertions": {
+    "as_strict_eq": [
+      "REQUIRE({{get_func}}(r3, i) == {{get_scalar_func}}(s3, i));"
+    ],
+    "as_scalar_val_eq": [
+      "REQUIRE(r3 == s3);"
+    ],
+    "as_store_eq": [
+      "REQUIRE(res_r[i] == res_s[i]);"
+    ],
+    "as_strict_eq_3args": [
+      "REQUIRE({{get_func}}(r4, i) == {{get_scalar_func}}(s4, i));"
+    ],
+    "as_logical_eq": [
+      "REQUIRE((!!{{get_k_func}}(r3, i)) == (!!{{get_scalar_k_func}}(s3, i)));"
+    ],
+    "as_logical_scalar_eq": [
+      "REQUIRE((!!r3) == (!!s3));"
+    ],
+    "as_bitwise_eq": [
+      "auto v1 = {{get_func}}(r3, i);",
+      "auto v2 = {{get_scalar_func}}(s3, i);",
+      "using T_bits = std::conditional_t<sizeof(v1) == 8, uint64_t, std::conditional_t<sizeof(v1) == 4, uint32_t, std::conditional_t<sizeof(v1) == 2, uint16_t, uint8_t>>>;",
+      "T_bits u1 = 0, u2 = 0;",
+      "memcpy(&u1, &v1, sizeof(v1));",
+      "memcpy(&u2, &v2, sizeof(v2));",
+      "REQUIRE(u1 == u2);"
+    ],
+    "as_tolerance": [
+      "auto res1 = {{get_func}}(r3, i);",
+      "auto res2 = {{get_scalar_func}}(s3, i);",
+      "{{tol_decl}}",
+      "auto diff = abs_diff::abs_diff(res1, res2);",
+      "{{nan_inf_skip_lines}}",
+      "REQUIRE(diff <= tol);"
+    ],
+    "as_reduction_eq": [
+      "if constexpr (std::is_floating_point_v<T>) {",
+      "\t{{tol_decl_s3}}",
+      "\tT diff = abs_diff::abs_diff(r3, s3);",
+      "\tif (!std::isnan(diff) && !std::isinf(diff)) REQUIRE(diff <= tol);",
+      "} else {",
+      "\tREQUIRE(r3 == s3);",
+      "}"
+    ],
+    "as_cast_eq": [
+      "REQUIRE({{get_func}}(r3, i) == inputs2[i]);"
+    ]
+  }
+}

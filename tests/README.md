@@ -32,3 +32,14 @@ To run the tests:
    cmake --build build -j4
    ```
 
+## Test Execution Options
+
+- **`N_ITER` Environment Variable**: Controls the number of random test iterations per test function (default is `10`):
+  ```bash
+  # Run 100 iterations per test for intensive verification
+  N_ITER=100 ./build/bin/run-tests
+
+  # Fast sanity run with 1 iteration per test
+  N_ITER=1 ./build/bin/run-tests
+  ```
+

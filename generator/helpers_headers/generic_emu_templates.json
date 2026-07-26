@@ -2,7 +2,7 @@
     "testz_emu": {
         "format": "long",
         "code": [
-            "return %testz_2<b:tp|c:tp|m:tp>%(m0) && %testz_2<b:tp|c:tp|m:tp>%(m1);"
+            "return %testz_2<b:tp|c:tp|m:tp>%(%andb_k<b:tp|c:tp|m:tp>%(m0, m1));"
         ]
     },
     "cast_k_same_size": {
@@ -261,14 +261,6 @@
             "%r<c:float|b:32>% r1f = %toreg<c:float|b:32>%(%cast_k<tp,c:float|b:32>%(m1));",
             "%r<c:float|b:32>% resf = %{{ instr_name }}<c:float|b:32>%(r0f, r1f);",
             "return %tomsk<tp>%(%cast<c:float|b:32,tp>%(resf));"
-        ]
-    },
-    "maskz_add": {
-        "format": "long",
-        "code": [
-            "%r<tp>% radd = %add<tp>%(r0, r1);",
-            "%r<tp>% rmsk = %toreg<tp>%(m0);",
-            "return %andb<tp>%(rmsk, radd);"
         ]
     },
     "max_emu": {

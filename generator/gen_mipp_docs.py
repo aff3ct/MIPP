@@ -89,8 +89,7 @@ mipp_funcs_description = {
 	"set_k" : "Sets a mask register to the values in an array.",
 	"set1":   "Broadcasts a value to all elements of a register.",
 	"set1_k": "Broadcasts a value to all elements of a mask register.",
-	"maskzld":"Load elements from memory when the corresponding bit in the mask register is set, zeroing the other elements.",
-	"maskst": "Store elements to memory when the corresponding bit in the mask register is set, not modifying the other elements in memory.",
+
 	"set0":   "Broadcasts zero to all elements of a register.",
 	#"low_k":  "",
 	"get":     "Gets the value of a register at a given index.",
@@ -134,10 +133,6 @@ mipp_funcs_description = {
 	"hmul":    "Computes the reduction product of the elements of a register.",
 	"hmin":    "Computes the reduction minimum of the elements of a register.",
 	"hmax":    "Computes the reduction maximum of the elements of a register.",
-	#"hmul_to_scal":    "",
-	#"hmin_to_scal":    "",
-	#"hmax_to_scal":    "",
-	"maskz_add": "Adds two vector registers according to a mask register. Follows the pattern of the ternary operator ret[i] = (msk[i] ? rvd1[i] + rvd2[i] : 0).",
     "fnmadd" : "Computes the fused negative multiply-add of three vector registers. Computes -(a*b)+c for each element of the registers.",
     "fnmsub" : "Computes the fused negative multiply-subtract of three vector registers. Computes -(a*b)-c for each element of the registers.",
 }
