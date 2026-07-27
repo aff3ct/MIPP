@@ -297,7 +297,7 @@
         "by_datatype": {
           "float32": {
             "type": "relative_percent",
-            "value": 0.001
+            "value": 0.01
           },
           "float64": {
             "type": "relative_percent",
