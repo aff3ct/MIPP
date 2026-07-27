@@ -275,6 +275,34 @@ class CDialectAdapter(DialectAdapter):
             return f"mipp_scalar_{func_name}_{dt_ext}_{mkind}{suffix}({args_str})"
         return f"mipp_scalar_{func_name}_{dt_ext}{suffix}({args_str})"
 
+    def format_load_func_name(self, dt_ext: str, lmul_suffix: str = "") -> str:
+        suffix = f"_{lmul_suffix}" if lmul_suffix and lmul_suffix not in ("", "m0") else ""
+        return f"mipp_load_{dt_ext}{suffix}"
+
+    def format_scalar_load_func_name(self, dt_ext: str, lmul_suffix: str = "") -> str:
+        suffix = f"_{lmul_suffix}" if lmul_suffix and lmul_suffix not in ("", "m0") else ""
+        return f"mipp_scalar_load_{dt_ext}{suffix}"
+
+    def format_set_k_func_name(self, dt_ext: str, lmul_suffix: str = "") -> str:
+        suffix = f"_{lmul_suffix}" if lmul_suffix and lmul_suffix not in ("", "m0") else ""
+        return f"mipp_set_k_{dt_ext}{suffix}"
+
+    def format_scalar_set_k_func_name(self, dt_ext: str, lmul_suffix: str = "") -> str:
+        suffix = f"_{lmul_suffix}" if lmul_suffix and lmul_suffix not in ("", "m0") else ""
+        return f"mipp_scalar_set_k_{dt_ext}{suffix}"
+
+    def format_func_name(self, func_name: str, dt_ext: str, lmul_suffix: str = "", mkind: str = "") -> str:
+        suffix = f"_{lmul_suffix}" if lmul_suffix and lmul_suffix not in ("", "m0") else ""
+        if mkind in ("mask", "maskz", "masks"):
+            return f"mipp_{func_name}_{dt_ext}_{mkind}{suffix}"
+        return f"mipp_{func_name}_{dt_ext}{suffix}"
+
+    def format_scalar_func_name(self, func_name: str, dt_ext: str, lmul_suffix: str = "", mkind: str = "") -> str:
+        suffix = f"_{lmul_suffix}" if lmul_suffix and lmul_suffix not in ("", "m0") else ""
+        if mkind in ("mask", "maskz", "masks"):
+            return f"mipp_scalar_{func_name}_{dt_ext}_{mkind}{suffix}"
+        return f"mipp_scalar_{func_name}_{dt_ext}{suffix}"
+
     def format_tomsk(self, dt_ext: str, reg_name: str, lmul_suffix: str = "") -> str:
         suffix = f"_{lmul_suffix}" if lmul_suffix and lmul_suffix not in ("", "m0") else ""
         return f"mipp_tomsk_{dt_ext}{suffix}({reg_name})"
@@ -284,7 +312,7 @@ class CDialectAdapter(DialectAdapter):
         return f"mipp_scalar_tomsk_{dt_ext}{suffix}({reg_name})"
 
 
-class ObjDialectAdapter(DialectAdapter):
+class CppObjDialectAdapter(DialectAdapter):
     op_syms = {
         "add": "+", "sub": "-", "mul": "*", "div": "/",
         "andb": "&", "orb": "|", "xorb": "^"

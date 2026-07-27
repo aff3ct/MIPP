@@ -768,7 +768,7 @@
         "uint64_t resv64 = 0;",
         "for (size_t i = 0; i < %N<tp>%; i++)",
         "{",
-        "\tuint64_t a = r0.r[i];",
+        "\tuint64_t a = %!pred_cond!% r0.r[i] %!pred_alt!%;",
         "\tuint64_t b = resv64;",
         "",
         "\tresv64 =",
@@ -790,7 +790,7 @@
         "uint64_t resv64 = 0;",
         "for (size_t i = 0; i < %N<tp>%; i++)",
         "{",
-        "\tresv64 += r0.r[i];",
+        "\tresv64 += %!pred_cond!% r0.r[i] %!pred_alt!%;",
         "}",
         "return resv64 > UINT{{ dt_par.n_bits }}_MAX ? (%v<tr>%)UINT{{ dt_par.n_bits }}_MAX : (%v<tr>%)resv64;"
       ]
@@ -803,7 +803,7 @@
         "int64_t resv64 = 0;",
         "for (size_t i = 0; i < %N<tp>%; i++)",
         "{",
-        "\tint64_t a = r0.r[i];",
+        "\tint64_t a = %!pred_cond!% r0.r[i] %!pred_alt!%;",
         "\tint64_t b = resv64;",
         "",
         "\tresv64 =",
@@ -825,7 +825,7 @@
       "implem": [
         "int64_t resv64 = 0;",
         "for (size_t i = 0; i < %N<tp>%; i++){",
-        "\tresv64 += r0.r[i];",
+        "\tresv64 += %!pred_cond!% r0.r[i] %!pred_alt!%;",
         "}",
         "return resv64 > INT{{ dt_par.n_bits }}_MAX ? (%v<tr>%)INT{{ dt_par.n_bits }}_MAX : resv64 < INT{{ dt_par.n_bits }}_MIN ? (%v<tr>%)INT{{ dt_par.n_bits }}_MIN : (%v<tr>%)resv64;"
       ]

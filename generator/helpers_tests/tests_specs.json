@@ -284,7 +284,9 @@
       "disabled_reason": "Requires array pointer + index vector test template"
     },
     "get": {},
-    "get_k": {},
+    "get_k": {
+      "comparison": "logical"
+    },
     "getfirst": {},
     "hadd": {
       "overflow_check": "accumulate_add",
@@ -305,6 +307,7 @@
       }
     },
     "hadds": {
+      "overflow_check": "accumulate_hadds",
       "domain": {
         "by_datatype": {
           "int8": {
@@ -376,7 +379,20 @@
       },
       "comparison": "tolerance"
     },
-    "lshift": {},
+    "lshift": {
+      "domain": {
+        "by_datatype": {
+          "int8": { "min": 0, "max": 7 },
+          "uint8": { "min": 0, "max": 7 },
+          "int16": { "min": 0, "max": 15 },
+          "uint16": { "min": 0, "max": 15 },
+          "int32": { "min": 0, "max": 31 },
+          "uint32": { "min": 0, "max": 31 },
+          "int64": { "min": 0, "max": 63 },
+          "uint64": { "min": 0, "max": 63 }
+        }
+      }
+    },
     "max": {},
     "min": {},
     "msb": {},
@@ -439,7 +455,20 @@
         "tol": 1e-05
       }
     },
-    "rshift": {},
+    "rshift": {
+      "domain": {
+        "by_datatype": {
+          "int8": { "min": 0, "max": 7 },
+          "uint8": { "min": 0, "max": 7 },
+          "int16": { "min": 0, "max": 15 },
+          "uint16": { "min": 0, "max": 15 },
+          "int32": { "min": 0, "max": 31 },
+          "uint32": { "min": 0, "max": 31 },
+          "int64": { "min": 0, "max": 63 },
+          "uint64": { "min": 0, "max": 63 }
+        }
+      }
+    },
     "rsqrt": {
       "domain": {
         "min": 0.001,

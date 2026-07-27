@@ -1,10 +1,10 @@
-from .dialect_adapters import DialectAdapter, CppDialectAdapter, CDialectAdapter, ObjDialectAdapter
-from .tests_builder import TestBuilderEngine
+from .dialect_adapters import DialectAdapter, CppDialectAdapter, CDialectAdapter, CppObjDialectAdapter
+from .tests_builder import TestsBuilderEngine
 
 __all__ = [
     "DialectAdapter",
     "CppDialectAdapter",
     "CDialectAdapter",
-    "ObjDialectAdapter",
-    "TestBuilderEngine",
+    "CppObjDialectAdapter",
+    "TestsBuilderEngine",
 ]

@@ -75,7 +75,8 @@
     "proto_ref": "ret_val_2args_msk_val",
     "datatypes": "all_datatypes",
     "horizontal": true,
-    "mask_support": "no_mask"
+    "mask_support": "no_mask",
+    "cpp_name": "get"
   },
   "getfirst": {
     "proto_ref": "ret_val_1arg_reg",
@@ -207,7 +208,8 @@
     "proto_ref": "ret_msk_2args_msk",
     "datatypes": "all_datatypes",
     "horizontal": false,
-    "mask_support": "no_mask"
+    "mask_support": "no_mask",
+    "cpp_name": "andb"
   },
   "andnb": {
     "proto_ref": "ret_reg_2args_reg",
@@ -219,7 +221,8 @@
     "proto_ref": "ret_msk_2args_msk",
     "datatypes": "all_datatypes",
     "horizontal": false,
-    "mask_support": "no_mask"
+    "mask_support": "no_mask",
+    "cpp_name": "andnb"
   },
   "orb": {
     "proto_ref": "ret_reg_2args_reg",
@@ -231,7 +234,8 @@
     "proto_ref": "ret_msk_2args_msk",
     "datatypes": "all_datatypes",
     "horizontal": false,
-    "mask_support": "no_mask"
+    "mask_support": "no_mask",
+    "cpp_name": "orb"
   },
   "xorb": {
     "proto_ref": "ret_reg_2args_reg",
@@ -243,7 +247,8 @@
     "proto_ref": "ret_msk_2args_msk",
     "datatypes": "all_datatypes",
     "horizontal": false,
-    "mask_support": "no_mask"
+    "mask_support": "no_mask",
+    "cpp_name": "xorb"
   },
   "msb": {
     "proto_ref": "ret_reg_1arg_reg",
@@ -261,7 +266,8 @@
     "proto_ref": "ret_msk_1arg_msk",
     "datatypes": "all_datatypes",
     "horizontal": false,
-    "mask_support": "no_mask"
+    "mask_support": "no_mask",
+    "cpp_name": "notb"
   },
   "cmpeq": {
     "proto_ref": "ret_msk_2args_reg",

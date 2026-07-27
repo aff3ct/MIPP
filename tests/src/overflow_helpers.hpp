@@ -5,6 +5,8 @@
 #include <cstdint>
 #include <cmath>    // std::isinf
 
+#include <vector>
+
 namespace ovf {
 
 enum class Op { Add, Sub, Mul, Div };
@@ -184,7 +186,7 @@ bool will_overflow(Op op, T a, T b) {
 
 template <class T>
 requires (detail::is_supported_int_v<T> || detail::is_supported_fp_v<T>)
-bool will_reduction_add_overflow(const T* inputs, size_t size, const int32_t* mask = nullptr, bool is_maskz = false, const T* inputs_src = nullptr) {
+bool will_reduction_hadd_overflow(const T* inputs, size_t size, const int32_t* mask = nullptr, bool is_maskz = false, const T* inputs_src = nullptr) {
     if constexpr (detail::is_supported_fp_v<T>) return false;
     else {
         using L = detail::lim<T>;
@@ -207,6 +209,81 @@ bool will_reduction_add_overflow(const T* inputs, size_t size, const int32_t* ma
         }
         return (sum_pos > static_cast<int64_t>(L::max()) ||
                 sum_neg < static_cast<int64_t>(L::min()));
+    }
+}
+
+template <class T>
+requires (detail::is_supported_int_v<T> || detail::is_supported_fp_v<T>)
+bool will_reduction_hadds_overflow(const T* inputs, size_t size, const int32_t* mask = nullptr, bool is_maskz = false, const T* inputs_src = nullptr) {
+    if constexpr (detail::is_supported_fp_v<T>) return false;
+    else {
+        using L = detail::lim<T>;
+        auto sat_add = [](T a, T b) -> T {
+            if constexpr (std::is_signed_v<T>) {
+                int64_t sum = static_cast<int64_t>(a) + static_cast<int64_t>(b);
+                if (sum > static_cast<int64_t>(L::max())) return L::max();
+                if (sum < static_cast<int64_t>(L::min())) return L::min();
+                return static_cast<T>(sum);
+            } else {
+                uint64_t sum = static_cast<uint64_t>(a) + static_cast<uint64_t>(b);
+                if (sum > static_cast<uint64_t>(L::max())) return L::max();
+                return static_cast<T>(sum);
+            }
+        };
+
+        auto is_sat_overflow = [](T a, T b) -> bool {
+            if constexpr (std::is_signed_v<T>) {
+                int64_t sum = static_cast<int64_t>(a) + static_cast<int64_t>(b);
+                return (sum > static_cast<int64_t>(L::max()) || sum < static_cast<int64_t>(L::min()));
+            } else {
+                uint64_t sum = static_cast<uint64_t>(a) + static_cast<uint64_t>(b);
+                return (sum > static_cast<uint64_t>(L::max()));
+            }
+        };
+
+        std::vector<T> v(size);
+        for (size_t i = 0; i < size; i++) {
+            T val = inputs[i];
+            if (mask) {
+                if (is_maskz) {
+                    val = mask[i] ? inputs[i] : static_cast<T>(0);
+                } else if (inputs_src) {
+                    val = mask[i] ? inputs[i] : inputs_src[i];
+                }
+            }
+            v[i] = val;
+        }
+
+        // 1. Check sequential linear saturation
+        T acc_seq = v[0];
+        for (size_t i = 1; i < size; i++) {
+            if (is_sat_overflow(acc_seq, v[i])) return true;
+            acc_seq = sat_add(acc_seq, v[i]);
+        }
+
+        // 2. Check chunk-wise (LMUL sub-vector) saturation
+        size_t chunk_size = 16;
+        if (chunk_size > size) chunk_size = size;
+
+        std::vector<T> chunk_sums;
+        for (size_t c = 0; c < size; c += chunk_size) {
+            size_t end = std::min(size, c + chunk_size);
+            T acc_chunk = v[c];
+            for (size_t i = c + 1; i < end; i++) {
+                if (is_sat_overflow(acc_chunk, v[i])) return true;
+                acc_chunk = sat_add(acc_chunk, v[i]);
+            }
+            chunk_sums.push_back(acc_chunk);
+        }
+
+        // 3. Check combination of chunk sums
+        T acc_chunks = chunk_sums[0];
+        for (size_t i = 1; i < chunk_sums.size(); i++) {
+            if (is_sat_overflow(acc_chunks, chunk_sums[i])) return true;
+            acc_chunks = sat_add(acc_chunks, chunk_sums[i]);
+        }
+
+        return false;
     }
 }
 

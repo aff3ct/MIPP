@@ -21,7 +21,7 @@ if os.path.exists(simd_ext_dir):
             sys.path.insert(1, isa_path)
 
 from registry import interfaces, categories
-from helpers_tests import TestBuilderEngine
+from helpers_tests import TestsBuilderEngine
 
 engine = None
 
@@ -241,7 +241,7 @@ def main():
     print("=====================================================================================================")
 
     global engine
-    engine = TestBuilderEngine(base_dir="..", active_audits=active_audits)
+    engine = TestsBuilderEngine(base_dir="..", active_audits=active_audits)
 
     if isinstance(args.kind, str):
         args.kind = [args.kind]
