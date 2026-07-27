@@ -182,4 +182,32 @@ bool will_overflow(Op op, T a, T b) {
     return false;
 }
 
+template <class T>
+requires (detail::is_supported_int_v<T> || detail::is_supported_fp_v<T>)
+bool will_reduction_add_overflow(const T* inputs, size_t size, const int32_t* mask = nullptr, bool is_maskz = false, const T* inputs_src = nullptr) {
+    if constexpr (detail::is_supported_fp_v<T>) return false;
+    else {
+        using L = detail::lim<T>;
+        int64_t sum_pos = 0;
+        int64_t sum_neg = 0;
+        for (size_t i = 0; i < size; i++) {
+            T val = inputs[i];
+            if (mask) {
+                if (is_maskz) {
+                    val = mask[i] ? inputs[i] : static_cast<T>(0);
+                } else if (inputs_src) {
+                    val = mask[i] ? inputs[i] : inputs_src[i];
+                }
+            }
+            if (val > 0) {
+                sum_pos += static_cast<int64_t>(val);
+            } else if (val < 0) {
+                sum_neg += static_cast<int64_t>(val);
+            }
+        }
+        return (sum_pos > static_cast<int64_t>(L::max()) ||
+                sum_neg < static_cast<int64_t>(L::min()));
+    }
+}
+
 } // namespace ovf

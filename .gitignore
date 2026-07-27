@@ -36,3 +36,6 @@ tests_golden
 *.o
 mipp_cpp
 prompts
+tests/src/c
+tests/src/cpp
+tests/src/cpp_obj

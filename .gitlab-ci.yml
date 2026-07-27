@@ -54,9 +54,9 @@ generation-tests:
     name: mipp_tests
     when: always
     paths:
-      - tests/src/c_tests
-      - tests/src/cpp_tests
-      - tests/src/obj_tests
+      - tests/src/c
+      - tests/src/cpp
+      - tests/src/cpp_obj
   tags:
     - x86_64
     - linux

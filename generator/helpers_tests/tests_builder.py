@@ -618,17 +618,17 @@ class TestBuilderEngine:
         lmul_mult = f" * {lmul}" if lmul > 0 else (f" / {-lmul}" if lmul < 0 else "")
         dt_clean = dt_name.replace(',', '_')
         if dialect_name == "c":
-            func_decl = f"static void test_cmipp_{func_name}_{dt_clean}_{tag}()"
+            func_decl = f"static void test_mipp_c_{func_name}_{dt_clean}_{tag}()"
         elif dialect_name == "cpp":
             if is_product:
-                func_decl = f"static void test_cppmipp_{func_name}_{dt_clean}_{tag}()"
+                func_decl = f"static void test_mipp_cpp_{func_name}_{dt_clean}_{tag}()"
             else:
-                func_decl = f"template <typename T>\nstatic void test_cppmipp_{func_name}_{tag}()"
+                func_decl = f"template <typename T>\nstatic void test_mipp_cpp_{func_name}_{tag}()"
         else:
             if is_product:
-                func_decl = f"static void test_objmipp_{func_name}_{dt_clean}_{tag}()"
+                func_decl = f"static void test_mipp_cpp_obj_{func_name}_{dt_clean}_{tag}()"
             else:
-                func_decl = f"template <typename T>\nstatic void test_objmipp_{func_name}_{tag}()"
+                func_decl = f"template <typename T>\nstatic void test_mipp_cpp_obj_{func_name}_{tag}()"
 
         proto_ref = self.interfaces.get(func_name, {}).get("proto_ref", "")
         is_1arg = "1arg" in proto_ref or "2args_ptr_reg" in proto_ref or "2args_reg_val" in proto_ref
@@ -1062,17 +1062,31 @@ class TestBuilderEngine:
             body_lines.append("\t\t}")
         else:
             if overflow_check in ("accumulate_add", "accumulate_mul"):
-                op_symbol = "+" if overflow_check == "accumulate_add" else "*"
-                ov_func = "add" if overflow_check == "accumulate_add" else "mul"
-                body_lines.append("\t\tbool ov = false;")
-                body_lines.append("\t\t{")
-                body_lines.append(f"\t\t\t{dt_cstd} acc = inputs1[0];")
-                body_lines.append(f"\t\t\tfor (size_t i = 1; i < {size_var}; i++)")
-                body_lines.append("\t\t\t{")
-                body_lines.append(f"\t\t\t\tif (ovf::will_{ov_func}_overflow<{dt_cstd}>(acc, inputs1[i])) {{ ov = true; break; }}")
-                body_lines.append(f"\t\t\t\tacc = acc {op_symbol} inputs1[i];")
-                body_lines.append("\t\t\t}")
-                body_lines.append("\t\t}")
+                if overflow_check == "accumulate_add":
+                    mask_ptr = "inputs_m" if mkind in ("mask", "maskz", "masks") else "nullptr"
+                    is_maskz_bool = "true" if mkind == "maskz" else "false"
+                    inputs_src_ptr = "inputs_src" if mkind == "masks" else "nullptr"
+                    body_lines.append(f"\t\tbool ov = ovf::will_reduction_add_overflow<{dt_cstd}>(inputs1, {size_var}, {mask_ptr}, {is_maskz_bool}, {inputs_src_ptr});")
+                else:
+                    op_symbol = "*"
+                    val_0 = "inputs1[0]"
+                    val_i = "inputs1[i]"
+                    if mkind == "maskz":
+                        val_0 = f"(inputs_m[0] ? inputs1[0] : ({dt_cstd})0)"
+                        val_i = f"(inputs_m[i] ? inputs1[i] : ({dt_cstd})0)"
+                    elif mkind == "masks":
+                        val_0 = f"(inputs_m[0] ? inputs1[0] : inputs_src[0])"
+                        val_i = f"(inputs_m[i] ? inputs1[i] : inputs_src[i])"
+                    body_lines.append("\t\tbool ov = false;")
+                    body_lines.append("\t\t{")
+                    body_lines.append(f"\t\t\t{dt_cstd} acc = {val_0};")
+                    body_lines.append(f"\t\t\tfor (size_t i = 1; i < {size_var}; i++)")
+                    body_lines.append("\t\t\t{")
+                    body_lines.append(f"\t\t\t\t{dt_cstd} v = {val_i};")
+                    body_lines.append(f"\t\t\t\tif (ovf::will_mul_overflow<{dt_cstd}>(acc, v)) {{ ov = true; break; }}")
+                    body_lines.append(f"\t\t\t\tacc = acc * v;")
+                    body_lines.append("\t\t\t}")
+                    body_lines.append("\t\t}")
                 body_lines.append("\t\tif (ov)")
                 body_lines.append("\t\t{")
                 body_lines.append('\t\t\tINFO("Reduction overflow occurred, skipping assert");')
@@ -1125,19 +1139,19 @@ class TestBuilderEngine:
         for dt in datatypes:
             dt_clean = str(dt).replace(",", "_")
             if dialect_name == "c":
-                call_expr = f"test_cmipp_{func_name}_{dt_clean}_{tag}();"
+                call_expr = f"test_mipp_c_{func_name}_{dt_clean}_{tag}();"
             elif dialect_name == "cpp":
                 if is_product:
-                    call_expr = f"test_cppmipp_{func_name}_{dt_clean}_{tag}();"
+                    call_expr = f"test_mipp_cpp_{func_name}_{dt_clean}_{tag}();"
                 else:
                     cpp_type = self._format_cpp_type(dt)
-                    call_expr = f"test_cppmipp_{func_name}_{tag}<{cpp_type}>();"
+                    call_expr = f"test_mipp_cpp_{func_name}_{tag}<{cpp_type}>();"
             else:
                 if is_product:
-                    call_expr = f"test_objmipp_{func_name}_{dt_clean}_{tag}();"
+                    call_expr = f"test_mipp_cpp_obj_{func_name}_{dt_clean}_{tag}();"
                 else:
                     cpp_type = self._format_cpp_type(dt)
-                    call_expr = f"test_objmipp_{func_name}_{tag}<{cpp_type}>();"
+                    call_expr = f"test_mipp_cpp_obj_{func_name}_{tag}<{cpp_type}>();"
 
             lines.append(f'\tSECTION("datatype = {dt}")')
             lines.append('\t{')
@@ -1209,18 +1223,27 @@ class TestBuilderEngine:
 
         lines = []
         if not is_loop and overflow_check in ("accumulate_add", "accumulate_mul"):
-            op_symbol = "+" if overflow_check == "accumulate_add" else "*"
-            ov_func = "add" if overflow_check == "accumulate_add" else "mul"
             lines.append("bool ov = false;")
             lines.append("{")
             lines.append("\tif constexpr (!std::is_floating_point_v<T>)")
             lines.append("\t{")
-            lines.append("\t\tT acc = inputs1[0];")
-            lines.append("\t\tfor (size_t i = 1; i < size; i++)")
-            lines.append("\t\t{")
-            lines.append(f"\t\t\tif (ovf::will_{ov_func}_overflow<T>(acc, inputs1[i])) {{ ov = true; break; }}")
-            lines.append(f"\t\t\tacc = acc {op_symbol} inputs1[i];")
-            lines.append("\t\t}")
+            if overflow_check == "accumulate_add":
+                lines.append("\t\tconst int32_t* m_ptr = nullptr;")
+                lines.append("\t\tbool is_z = (MK == mipp::Z);")
+                lines.append("\t\tif constexpr (MK == mipp::Z || MK == mipp::M || MK == mipp::S) m_ptr = inputs_m;")
+                lines.append("\t\tov = ovf::will_reduction_add_overflow<T>(inputs1, size, m_ptr, is_z);")
+            else:
+                lines.append("\t\tauto get_val = [&](size_t idx) -> T {")
+                lines.append("\t\t\tif constexpr (MK == mipp::Z) return inputs_m[idx] ? inputs1[idx] : static_cast<T>(0);")
+                lines.append("\t\t\telse return inputs1[idx];")
+                lines.append("\t\t};")
+                lines.append("\t\tT acc = get_val(0);")
+                lines.append("\t\tfor (size_t i = 1; i < size; i++)")
+                lines.append("\t\t{")
+                lines.append("\t\t\tT v = get_val(i);")
+                lines.append("\t\t\tif (ovf::will_mul_overflow<T>(acc, v)) { ov = true; break; }")
+                lines.append("\t\t\tacc = acc * v;")
+                lines.append("\t\t}")
             lines.append("\t}")
             lines.append("}")
             lines.append("if (ov)")
@@ -1407,7 +1430,7 @@ class TestBuilderEngine:
 
     def render_cpp_test_case(self, dialect_name: str, func_name: str, supported_mkinds: List[str]) -> List[str]:
         lines = []
-        func_prefix = "test_cppmipp" if dialect_name == "cpp" else "test_objmipp"
+        func_prefix = "test_mipp_cpp" if dialect_name == "cpp" else "test_mipp_cpp_obj"
         mk_enum_map = {"unmasked": "mipp::U", "mask": "mipp::M", "maskz": "mipp::Z", "masks": "mipp::S"}
         mk_label_map = {"unmasked": "unmasked (U)", "mask": "mask (M)", "maskz": "maskz (Z)", "masks": "masks (S)"}
 
@@ -1485,7 +1508,7 @@ class TestBuilderEngine:
         is_1arg = "1arg" in proto_ref or "2args_reg_val" in proto_ref
         is_3arg = "3args" in proto_ref
 
-        func_prefix = "test_cppmipp" if dialect_name == "cpp" else "test_objmipp"
+        func_prefix = "test_mipp_cpp" if dialect_name == "cpp" else "test_mipp_cpp_obj"
         if is_product:
             lines.append(f"template <mipp::MKIND MK = mipp::U, typename T_src = float, typename T_dst = double, int LMUL = 1>")
         else:

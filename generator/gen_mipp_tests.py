@@ -26,9 +26,9 @@ from helpers_tests import TestBuilderEngine
 engine = None
 
 tmp_path = "../tests/src/"
-cpath = tmp_path + "c_tests/"
-cpppath = tmp_path + "cpp_tests/"
-objpath = tmp_path + "obj_tests/"
+cpath = tmp_path + "c/"
+cpppath = tmp_path + "cpp/"
+objpath = tmp_path + "cpp_obj/"
 
 
 def _match_category(func: str) -> str:
@@ -62,9 +62,9 @@ def comment_out_cpp_file(file_content: str, reason: str = "") -> str:
 
 def get_str_path(base_path: str, lmul: int = 0, mkind: str = "") -> tuple[str, str, str]:
     return (
-        f"{base_path}c_tests/",
-        f"{base_path}cpp_tests/",
-        f"{base_path}obj_tests/",
+        f"{base_path}c/",
+        f"{base_path}cpp/",
+        f"{base_path}cpp_obj/",
     )
 
 
@@ -82,12 +82,12 @@ def write_file_if_different(file_path: str, content: str, encoding: str = "utf-8
     return True
 
 
-def gen_test_files_unified_layer(kind: str = "cpp", N: int = 10, stats: dict = None) -> None:
+def gen_test_files_unified_cpp(kind: str = "cpp", N: int = 10, stats: dict = None) -> None:
     if stats is None:
         stats = {"generated": 0, "skipped_mask": [], "skipped_disabled": [], "skipped_obj": []}
 
+    base_dir = cpppath if kind == "cpp" else objpath
     funcs = set(interfaces.keys())
-    base_dir = f"{tmp_path}{kind}_tests/"
 
     for func in sorted(funcs):
         disabled, reason = engine.is_func_disabled(func, kind)
@@ -106,8 +106,7 @@ def gen_test_files_unified_layer(kind: str = "cpp", N: int = 10, stats: dict = N
         if disabled:
             content = comment_out_cpp_file(content, reason)
 
-        fname_prefix = "test_" if kind == "cpp" else "test_obj_"
-        file_path = f"{base_dir}{cat}/{fname_prefix}{func}.cpp"
+        file_path = f"{base_dir}{cat}/{func}.cpp"
         write_file_if_different(file_path, content)
         stats["generated"] += 1
 
@@ -145,7 +144,7 @@ def gen_test_files_all_funcs(kind: str = "c", lmul: int = 0, mkind: str = "", N:
             c_file = engine.build_test_file_content("c", func, lmul_suffix, mkind=mkind, lmul=lmul)
             if disabled:
                 c_file = comment_out_cpp_file(c_file, reason)
-            file_path = f"{cpath_root}{cat}/{lmul_tag}/{mask_tag}/test_c{func}.cpp"
+            file_path = f"{cpath_root}{cat}/{lmul_tag}/{mask_tag}/{func}.cpp"
             write_file_if_different(file_path, c_file)
             stats["generated"] += 1
 
@@ -299,7 +298,7 @@ def main():
         else:
             print(f"  ➔ Generating unified {kind.upper()} tests (templates [U, M, Z, S], LMUL, datatypes)...", end="", flush=True)
             t0_step = time.perf_counter()
-            gen_test_files_unified_layer(kind=kind, N=args.num_iterations, stats=stats)
+            gen_test_files_unified_cpp(kind=kind, N=args.num_iterations, stats=stats)
             print(f" Done ({time.perf_counter() - t0_step:.3f} s)!")
 
     print("\n=====================================================================================================")

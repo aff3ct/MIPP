@@ -6,9 +6,9 @@ of MIPP.
 
 It accepts the following CLI arguments:
 
-- "c": only generate `tests/src/c_tests` 
-- "cpp": only generate `tests/src/cpp_tests` 
-- "obj": only generate `tests/src/obj_tests` 
+- "c": only generate `tests/src/c` 
+- "cpp": only generate `tests/src/cpp` 
+- "obj": only generate `tests/src/cpp_obj` 
 - "all": default behavior, generates all of the tests.
 
 The script only overwrites the test files if they have changed, to avoid 
