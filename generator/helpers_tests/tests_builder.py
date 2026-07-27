@@ -13,174 +13,8 @@ import jinja2
 from typing import Dict, List, Any, Optional, Set
 
 from .dialect_adapters import DialectAdapter, CppDialectAdapter, CDialectAdapter, CppObjDialectAdapter
+from .domain_resolver import DomainResolver
 from tools import DATATYPES_MAP
-
-class DomainResolver:
-    """
-    Unified Domain and Mask Specification Engine for MIPP Test Generators.
-    Shared across C, C++ unified, and C++ Object layer test builders.
-    """
-
-    def resolve_domain_spec(self, func_spec: dict, var_name: str = "inputs1", dt: str = "", lmul: str = "") -> Optional[dict]:
-        domain_entry = None
-
-        if var_name == "inputs_src" and "domain_src" in func_spec:
-            domain_entry = func_spec["domain_src"]
-        elif "input_domain" in func_spec:
-            inp_domain = func_spec["input_domain"]
-            if isinstance(inp_domain, list):
-                idx_map = {"inputs1": 0, "inputs2": 1, "inputs3": 2}
-                idx = idx_map.get(var_name, 0)
-                if idx < len(inp_domain):
-                    domain_entry = inp_domain[idx]
-            elif isinstance(inp_domain, dict):
-                domain_entry = inp_domain
-
-        if domain_entry is None:
-            domain_entry = func_spec.get("domain", {})
-
-        if not domain_entry:
-            return None
-
-        if isinstance(domain_entry, dict):
-            if "rules" in domain_entry and isinstance(domain_entry["rules"], list):
-                raw_dt = dt.replace("_t", "")
-                for rule in domain_entry["rules"]:
-                    r_dt = rule.get("datatype")
-                    r_lmul = rule.get("lmul")
-                    dt_match = (not r_dt) or (r_dt == raw_dt)
-                    lmul_match = (not r_lmul) or (str(r_lmul) == str(lmul))
-                    if dt_match and lmul_match:
-                        return rule
-
-            raw_dt = dt.replace("_t", "")
-            if "by_datatype" in domain_entry and raw_dt in domain_entry["by_datatype"]:
-                sub = domain_entry["by_datatype"][raw_dt]
-                if isinstance(sub, dict):
-                    return sub
-                elif isinstance(sub, list) and sub:
-                    return sub[0]
-
-            if "by_lmul" in domain_entry and str(lmul) in domain_entry["by_lmul"]:
-                sub = domain_entry["by_lmul"][str(lmul)]
-                if isinstance(sub, dict):
-                    return sub
-
-            if "default" in domain_entry:
-                sub = domain_entry["default"]
-                if isinstance(sub, dict):
-                    return sub
-                elif isinstance(sub, list) and sub:
-                    return sub[0]
-
-            return domain_entry
-
-        elif isinstance(domain_entry, list) and domain_entry:
-            return domain_entry[0]
-
-        return None
-
-    def render_input_filling(self, func_spec: dict, var_name: str = "inputs1", dialect: str = "c", dt_cstd: str = "", lmul_suffix: str = "", lmul: str = "") -> List[str]:
-        is_cpp = (dialect in ("cpp", "obj"))
-        active_lmul = lmul_suffix or lmul
-
-        if not is_cpp:
-            spec = self.resolve_domain_spec(func_spec, var_name=var_name, dt=dt_cstd, lmul=active_lmul)
-            expr = self._spec_to_uniform_call(spec, is_cpp=False, dt_cstd=dt_cstd)
-            return [f"\t\t\t{var_name}[i] = {expr};"]
-        else:
-            domain_entry = func_spec.get("domain_src" if var_name == "inputs_src" else "domain", {})
-            if "input_domain" in func_spec:
-                inp_domain = func_spec["input_domain"]
-                idx_map = {"inputs1": 0, "inputs2": 1, "inputs3": 2}
-                idx = idx_map.get(var_name, 0)
-                if isinstance(inp_domain, list) and idx < len(inp_domain):
-                    domain_entry = inp_domain[idx]
-
-            by_dt = domain_entry.get("by_datatype", {}) if isinstance(domain_entry, dict) else {}
-            rules = domain_entry.get("rules", []) if isinstance(domain_entry, dict) else []
-
-            if by_dt:
-                res = []
-                first = True
-                for raw_dt, spec in by_dt.items():
-                    if isinstance(spec, dict):
-                        kw = "if constexpr" if first else "else if constexpr"
-                        first = False
-                        expr = self._spec_to_uniform_call(spec, is_cpp=True)
-                        res.append(f"\t\t\t{kw} (std::is_same_v<T, {raw_dt}_t>) {var_name}[i] = {expr};")
-                if res:
-                    default_spec = domain_entry.get("default") if isinstance(domain_entry, dict) else None
-                    def_expr = self._spec_to_uniform_call(default_spec, is_cpp=True)
-                    res.append(f"\t\t\telse {var_name}[i] = {def_expr};")
-                    return res
-
-            elif rules:
-                res = []
-                first = True
-                for rule in rules:
-                    r_dt = rule.get("datatype")
-                    if r_dt:
-                        kw = "if constexpr" if first else "else if constexpr"
-                        first = False
-                        expr = self._spec_to_uniform_call(rule, is_cpp=True)
-                        res.append(f"\t\t\t{kw} (std::is_same_v<T, {r_dt}_t>) {var_name}[i] = {expr};")
-                if res:
-                    default_spec = domain_entry.get("default") if isinstance(domain_entry, dict) else None
-                    def_expr = self._spec_to_uniform_call(default_spec, is_cpp=True)
-                    res.append(f"\t\t\telse {var_name}[i] = {def_expr};")
-                    return res
-
-            spec = self.resolve_domain_spec(func_spec, var_name=var_name, dt="", lmul=lmul)
-            expr = self._spec_to_uniform_call(spec, is_cpp=True)
-            return [f"\t\t\t{var_name}[i] = {expr};"]
-
-    def _spec_to_uniform_call(self, spec: Optional[dict], is_cpp: bool = False, dt_cstd: str = "") -> str:
-        T_str = "T" if is_cpp else dt_cstd
-        if not spec:
-            return f"rnd::uniform<{T_str}>(seed)"
-
-        mn = spec.get("min")
-        mx = spec.get("max")
-        ex_zero = spec.get("exclude_zero", False)
-        s_pos = spec.get("strictly_positive", False)
-        pos = spec.get("positive", False)
-        s_neg = spec.get("strictly_negative", False)
-        neg = spec.get("negative", False)
-
-        if ex_zero and (mn is not None) and (mx is not None):
-            return f"rnd::uniform_exclude_zero<{T_str}>(seed, static_cast<{T_str}>({mn}), static_cast<{T_str}>({mx}))"
-        elif (mn is not None) and (mx is not None):
-            return f"rnd::uniform<{T_str}>(seed, static_cast<{T_str}>({mn}), static_cast<{T_str}>({mx}))"
-        elif ex_zero:
-            return f"rnd::uniform_exclude_zero<{T_str}>(seed)"
-        elif s_pos:
-            return f"rnd::uniform_strictly_positive<{T_str}>(seed)"
-        elif pos:
-            return f"rnd::uniform_positive<{T_str}>(seed)"
-        elif s_neg:
-            return f"rnd::uniform_strictly_negative<{T_str}>(seed)"
-        elif neg:
-            return f"rnd::uniform_negative<{T_str}>(seed)"
-        else:
-            return f"rnd::uniform<{T_str}>(seed)"
-
-    def render_mask_filling(self, func_spec: dict, var_name: str = "inputs_m") -> str:
-        pattern = func_spec.get("mask_pattern", "uniform_bool")
-        if pattern == "uniform_bool":
-            return f"{var_name}[i] = rnd::uniform_bool(seed) ? -1 : 0;"
-        elif pattern == "alternating":
-            return f"{var_name}[i] = (i % 2 == 0) ? -1 : 0;"
-        elif pattern == "all_true":
-            return f"{var_name}[i] = -1;"
-        elif pattern == "all_false":
-            return f"{var_name}[i] = 0;"
-        elif pattern == "sparse":
-            return f"{var_name}[i] = (i % 4 == 0) ? -1 : 0;"
-        elif pattern == "dense":
-            return f"{var_name}[i] = (i % 4 != 0) ? -1 : 0;"
-        else:
-            return f"{var_name}[i] = rnd::uniform_bool(seed) ? -1 : 0;"
 
 
 class TestsBuilderEngine:
@@ -471,7 +305,22 @@ class TestsBuilderEngine:
         nan_inf_skip_lines = "if (std::isnan(diff) || std::isinf(diff)) continue;" if nan_inf_skip else ""
 
         val_lines = []
-        if not is_loop:
+        comp_entry = func_spec.get("comparison", default_spec.get("comparison", "exact"))
+        if isinstance(comp_entry, dict) and any(v == "bitwise" for v in comp_entry.get("by_datatype", {}).values()):
+            val_lines.append("if constexpr (std::is_floating_point_v<T>)")
+            val_lines.append("{")
+            tpl = self.component_templates.get("assertions", {}).get("as_bitwise_eq_cpp", [])
+            bw_lines = self.render_template(tpl, r_get=r_get, s_get=s_get, loop_limit=loop_limit)
+            val_lines.extend([f"\t{l}" if l else "" for l in bw_lines])
+            val_lines.append("}")
+            val_lines.append("else")
+            val_lines.append("{")
+            val_lines.append(f"\tfor (size_t i = 0; i < {loop_limit}; i++)")
+            val_lines.append("\t{")
+            val_lines.append(f"\t\tREQUIRE({r_get} == {s_get});")
+            val_lines.append("\t}")
+            val_lines.append("}")
+        elif not is_loop:
             if comp_type in ("logical", "mask"):
                 tpl = self.component_templates.get("assertions", {}).get("as_logical_scalar_eq_cpp", [])
                 for line in tpl:
@@ -670,17 +519,17 @@ class TestsBuilderEngineC:
         body_lines.append("\t\t{")
 
         # Fill inputs
-        body_lines.extend(self.engine.domain_resolver.render_input_filling(func_spec, "inputs1", dialect="c", dt_cstd=dt_cstd, lmul_suffix=lmul_suffix))
+        body_lines.extend(self.engine.domain_resolver.render_input_filling(func_spec, "inputs1", dialect="c", dt_cstd=dt_cstd, lmul_suffix=lmul_suffix, mkind=mkind))
         if not is_1arg:
-            body_lines.extend(self.engine.domain_resolver.render_input_filling(func_spec, "inputs2", dialect="c", dt_cstd=dt_cstd, lmul_suffix=lmul_suffix))
+            body_lines.extend(self.engine.domain_resolver.render_input_filling(func_spec, "inputs2", dialect="c", dt_cstd=dt_cstd, lmul_suffix=lmul_suffix, mkind=mkind))
         if is_3arg:
-            body_lines.extend(self.engine.domain_resolver.render_input_filling(func_spec, "inputs3", dialect="c", dt_cstd=dt_cstd, lmul_suffix=lmul_suffix))
+            body_lines.extend(self.engine.domain_resolver.render_input_filling(func_spec, "inputs3", dialect="c", dt_cstd=dt_cstd, lmul_suffix=lmul_suffix, mkind=mkind))
         if has_mask_var:
-            body_lines.append(f"\t\t\t{self.engine.domain_resolver.render_mask_filling(func_spec, 'inputs_m')}")
+            body_lines.extend(self.engine.domain_resolver.render_mask_filling(func_spec, "inputs_m", dialect="c", mkind=mkind))
             if n_masks >= 2:
-                body_lines.append(f"\t\t\t{self.engine.domain_resolver.render_mask_filling(func_spec, 'inputs_m2')}")
+                body_lines.extend(self.engine.domain_resolver.render_mask_filling(func_spec, "inputs_m2", dialect="c", mkind=mkind))
         if mkind == "masks":
-            body_lines.extend(self.engine.domain_resolver.render_input_filling(func_spec, "inputs_src", dialect="c", dt_cstd=dt_cstd, lmul_suffix=lmul_suffix))
+            body_lines.extend(self.engine.domain_resolver.render_input_filling(func_spec, "inputs_src", dialect="c", dt_cstd=dt_cstd, lmul_suffix=lmul_suffix, mkind=mkind))
 
         body_lines.append("\t\t}")
         body_lines.append("")
@@ -757,7 +606,12 @@ class TestsBuilderEngineC:
         body_lines.append("")
 
         overflow_check = func_spec.get("overflow_check")
-        comp_type = func_spec.get("comparison", "exact")
+        comp_entry = func_spec.get("comparison", "exact")
+        if isinstance(comp_entry, dict):
+            dt_key = dt2_raw.split("_")[-1]
+            comp_type = comp_entry.get("by_datatype", {}).get(dt_key, comp_entry.get("default", "exact"))
+        else:
+            comp_type = comp_entry
         has_tolerance = "tolerance" in func_spec or comp_type == "tolerance"
         nan_inf_skip = func_spec.get("nan_inf_skip", False)
 
@@ -1057,8 +911,8 @@ class TestsBuilderEngineCpp(TestsBuilderEngineCppBase):
         if is_3arg:
             lines.extend(self.engine.domain_resolver.render_input_filling(func_spec, "inputs3", dialect="cpp"))
 
-        lines.append(f"\t\t\t{self.engine.domain_resolver.render_mask_filling(func_spec, 'inputs_m')}")
-        lines.append(f"\t\t\t{self.engine.domain_resolver.render_mask_filling(func_spec, 'inputs_m2')}")
+        lines.extend(self.engine.domain_resolver.render_mask_filling(func_spec, "inputs_m", dialect="cpp"))
+        lines.extend(self.engine.domain_resolver.render_mask_filling(func_spec, "inputs_m2", dialect="cpp"))
         lines.extend(self.engine.domain_resolver.render_input_filling(func_spec, "inputs_src", dialect="cpp"))
         lines.append("\t\t}")
         lines.append("")
@@ -1214,7 +1068,7 @@ class TestsBuilderEngineCppObj(TestsBuilderEngineCppBase):
         if is_3arg:
             lines.extend(self.engine.domain_resolver.render_input_filling(func_spec, "inputs3", dialect="obj"))
 
-        lines.append(f"\t\t\t{self.engine.domain_resolver.render_mask_filling(func_spec, 'inputs_m')}")
+        lines.extend(self.engine.domain_resolver.render_mask_filling(func_spec, "inputs_m", dialect="obj"))
         lines.extend(self.engine.domain_resolver.render_input_filling(func_spec, "inputs_src", dialect="obj"))
         lines.append("\t\t}")
         lines.append("")

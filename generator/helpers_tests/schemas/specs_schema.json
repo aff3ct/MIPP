@@ -146,7 +146,22 @@
             }
           ]
         },
-        "comparison": { "type": "string", "enum": ["exact", "logical", "bitwise", "tolerance"] },
+        "comparison": {
+          "anyOf": [
+            { "type": "string", "enum": ["exact", "logical", "bitwise", "tolerance"] },
+            {
+              "type": "object",
+              "properties": {
+                "default": { "type": "string", "enum": ["exact", "logical", "bitwise", "tolerance"] },
+                "by_datatype": {
+                  "type": "object",
+                  "additionalProperties": { "type": "string", "enum": ["exact", "logical", "bitwise", "tolerance"] }
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
         "overflow_check": { "type": ["string", "null"], "enum": ["add", "sub", "mul", "accumulate_add", "accumulate_mul", null] },
         "disabled": { "type": "boolean" },
         "disabled_reason": { "type": ["string", "null"] },
