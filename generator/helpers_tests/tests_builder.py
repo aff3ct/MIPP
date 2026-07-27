@@ -1009,7 +1009,7 @@ class TestBuilderEngine:
         body_lines.append(func_decl)
         body_lines.append("{")
         body_lines.append("\tstd::mt19937 seed(Catch::getSeed());")
-        body_lines.append("\tfor (unsigned n = 0; n < N_ITER; n++)")
+        body_lines.append("\tfor (unsigned n = 0; n < get_n_iter(); n++)")
         body_lines.append("\t{")
 
         body_lines.extend(self.indent_lines(decl_lines, 2))

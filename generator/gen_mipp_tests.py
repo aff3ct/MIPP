@@ -297,7 +297,7 @@ def main():
                     gen_test_files_all_funcs(kind=kind, lmul=(-int(ldiv)), mkind=mkind, N=args.num_iterations, mode=args.header_type, stats=stats)
             print(f" Done ({time.perf_counter() - t0_step:.3f} s)!")
 
-    print("=====================================================================================================")
+    print("\n=====================================================================================================")
     print(" MIPP TEST GENERATION SUMMARY")
     print("=====================================================================================================")
     print(f"  Total tests generated: {stats['generated']}")
