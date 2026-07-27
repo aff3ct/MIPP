@@ -796,6 +796,7 @@
         "\tresv = ",
         "\t\tresv64 > UINT{{ dt_par.n_bits }}_MAX ? (%v<tr>%)UINT{{ dt_par.n_bits }}_MAX :",
         "\t\t(%v<tr>%)resv64;",
+        "\tresv64 = resv;",
         "}",
         "return resv;"
       ]
@@ -837,6 +838,7 @@
         "\t\tresv64 > INT{{ dt_par.n_bits }}_MAX ? (%v<tr>%)INT{{ dt_par.n_bits }}_MAX :",
         "\t\tresv64 < INT{{ dt_par.n_bits }}_MIN ? (%v<tr>%)INT{{ dt_par.n_bits }}_MIN :",
         "\t\t(%v<tr>%)resv64;",
+        "\tresv64 = resv;",
         "}",
         "return resv;"
       ]

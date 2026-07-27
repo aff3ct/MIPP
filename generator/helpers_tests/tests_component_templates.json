@@ -224,75 +224,75 @@
   },
   "operations": {
     "op_binop": [
-      "{{reg_type}} r3 = {{op_call}};",
-      "{{scalar_reg_type}} s3 = {{scalar_op_call}};"
+      "{{reg_type}} rres = {{op_call}};",
+      "{{scalar_reg_type}} sres = {{scalar_op_call}};"
     ],
     "op_triop": [
-      "{{reg_type}} r4 = {{op_call}};",
-      "{{scalar_reg_type}} s4 = {{scalar_op_call}};"
+      "{{reg_type}} rres = {{op_call}};",
+      "{{scalar_reg_type}} sres = {{scalar_op_call}};"
     ],
     "op_unop": [
-      "{{reg_type_dst}} r3 = {{op_call}};",
-      "{{scalar_reg_type_dst}} s3 = {{scalar_op_call}};"
+      "{{reg_type_dst}} rres = {{op_call}};",
+      "{{scalar_reg_type_dst}} sres = {{scalar_op_call}};"
     ],
     "op_load": [
-      "{{reg_type}} r3 = {{op_call}};",
-      "{{scalar_reg_type}} s3 = {{scalar_op_call}};"
+      "{{reg_type}} rres = {{op_call}};",
+      "{{scalar_reg_type}} sres = {{scalar_op_call}};"
     ],
     "op_store": [
       "{{op_call}};",
       "{{scalar_op_call}};"
     ],
     "op_cmp": [
-      "{{msk_type_dst}} r3 = {{op_call}};",
-      "{{scalar_msk_type_dst}} s3 = {{scalar_op_call}};"
+      "{{msk_type_dst}} rres = {{op_call}};",
+      "{{scalar_msk_type_dst}} sres = {{scalar_op_call}};"
     ],
     "op_reduction": [
-      "T r3 = {{op_call}};",
-      "T s3 = {{scalar_op_call}};"
+      "T rres = {{op_call}};",
+      "T sres = {{scalar_op_call}};"
     ],
     "op_cast": [
-      "mipp::rvd<{{dt2_ext}}_t> r3 = mipp::cast<{{dt1_ext}}_t, {{dt2_ext}}_t>(r1);"
+      "mipp::rvd<{{dt2_ext}}_t> rres = mipp::cast<{{dt1_ext}}_t, {{dt2_ext}}_t>(r1);"
     ],
     "op_set0": [
-      "{{reg_type}} r3 = {{op_call}};",
-      "{{scalar_reg_type}} s3 = {{scalar_op_call}};"
+      "{{reg_type}} rres = {{op_call}};",
+      "{{scalar_reg_type}} sres = {{scalar_op_call}};"
     ],
     "op_set0_k": [
-      "{{msk_type}} r3 = {{op_call}};",
-      "{{scalar_msk_type}} s3 = {{scalar_op_call}};"
+      "{{msk_type}} rres = {{op_call}};",
+      "{{scalar_msk_type}} sres = {{scalar_op_call}};"
     ],
     "op_set1": [
-      "{{reg_type}} r3 = {{op_call}};",
-      "{{scalar_reg_type}} s3 = {{scalar_op_call}};"
+      "{{reg_type}} rres = {{op_call}};",
+      "{{scalar_reg_type}} sres = {{scalar_op_call}};"
     ],
     "op_set1_k": [
-      "{{msk_type}} r3 = {{op_call}};",
-      "{{scalar_msk_type}} s3 = {{scalar_op_call}};"
+      "{{msk_type}} rres = {{op_call}};",
+      "{{scalar_msk_type}} sres = {{scalar_op_call}};"
     ],
     "op_set": [
-      "{{reg_type}} r3 = {{op_call}};",
-      "{{scalar_reg_type}} s3 = {{scalar_op_call}};"
+      "{{reg_type}} rres = {{op_call}};",
+      "{{scalar_reg_type}} sres = {{scalar_op_call}};"
     ],
     "op_set_k": [
-      "{{msk_type}} r3 = {{op_call}};",
-      "{{scalar_msk_type}} s3 = {{scalar_op_call}};"
+      "{{msk_type}} rres = {{op_call}};",
+      "{{scalar_msk_type}} sres = {{scalar_op_call}};"
     ],
     "op_get": [
-      "{{reg_type}} r3 = r1;",
-      "{{scalar_reg_type}} s3 = s1;"
+      "{{reg_type}} rres = r1;",
+      "{{scalar_reg_type}} sres = s1;"
     ],
     "op_get_k": [
-      "{{msk_type}} r3 = m1;",
-      "{{scalar_msk_type}} s3 = sm1;"
+      "{{msk_type}} rres = m1;",
+      "{{scalar_msk_type}} sres = sm1;"
     ],
     "op_tomsk": [
-      "{{msk_type}} r3 = {{op_call}};",
-      "{{scalar_msk_type}} s3 = {{scalar_op_call}};"
+      "{{msk_type}} rres = {{op_call}};",
+      "{{scalar_msk_type}} sres = {{scalar_op_call}};"
     ],
     "op_i32": [
-      "int32_t r3 = {{op_call}};",
-      "int32_t s3 = {{scalar_op_call}};"
+      "int32_t rres = {{op_call}};",
+      "int32_t sres = {{scalar_op_call}};"
     ]
   },
   "loop_bodies": {
@@ -302,35 +302,35 @@
   },
   "assertions": {
     "as_strict_eq": [
-      "REQUIRE({{get_func}}(r3, i) == {{get_scalar_func}}(s3, i));"
+      "REQUIRE({{get_func}}(rres, i) == {{get_scalar_func}}(sres, i));"
     ],
     "as_scalar_val_eq": [
-      "REQUIRE(r3 == s3);"
+      "REQUIRE(rres == sres);"
     ],
     "as_store_eq": [
       "REQUIRE(res_r[i] == res_s[i]);"
     ],
     "as_strict_eq_3args": [
-      "REQUIRE({{get_func}}(r4, i) == {{get_scalar_func}}(s4, i));"
+      "REQUIRE({{get_func}}(rres, i) == {{get_scalar_func}}(sres, i));"
     ],
     "as_logical_eq": [
-      "REQUIRE((!!{{get_k_func}}(r3, i)) == (!!{{get_scalar_k_func}}(s3, i)));"
+      "REQUIRE((!!{{get_k_func}}(rres, i)) == (!!{{get_scalar_k_func}}(sres, i)));"
     ],
     "as_logical_scalar_eq": [
-      "REQUIRE((!!r3) == (!!s3));"
+      "REQUIRE((!!rres) == (!!sres));"
     ],
     "as_bitwise_eq": [
-      "auto v1 = {{get_func}}(r3, i);",
-      "auto v2 = {{get_scalar_func}}(s3, i);",
-      "using T_bits = std::conditional_t<sizeof(v1) == 8, uint64_t, std::conditional_t<sizeof(v1) == 4, uint32_t, std::conditional_t<sizeof(v1) == 2, uint16_t, uint8_t>>>;",
-      "T_bits u1 = 0, u2 = 0;",
-      "memcpy(&u1, &v1, sizeof(v1));",
-      "memcpy(&u2, &v2, sizeof(v2));",
+      "auto v1 = {{get_func}}(rres, i);",
+      "auto v2 = {{get_scalar_func}}(sres, i);",
+      "size_t s_v1 = sizeof(v1);",
+      "uint64_t u1 = 0, u2 = 0;",
+      "memcpy(&u1, &v1, s_v1);",
+      "memcpy(&u2, &v2, s_v1);",
       "REQUIRE(u1 == u2);"
     ],
     "as_tolerance": [
-      "auto res1 = {{get_func}}(r3, i);",
-      "auto res2 = {{get_scalar_func}}(s3, i);",
+      "auto res1 = {{get_func}}(rres, i);",
+      "auto res2 = {{get_scalar_func}}(sres, i);",
       "{{tol_decl}}",
       "auto diff = abs_diff::abs_diff(res1, res2);",
       "{{nan_inf_skip_lines}}",
@@ -339,14 +339,14 @@
     "as_reduction_eq": [
       "if constexpr (std::is_floating_point_v<T>) {",
       "\t{{tol_decl_s3}}",
-      "\tT diff = abs_diff::abs_diff(r3, s3);",
+      "\tT diff = abs_diff::abs_diff(rres, sres);",
       "\tif (!std::isnan(diff) && !std::isinf(diff)) REQUIRE(diff <= tol);",
       "} else {",
-      "\tREQUIRE(r3 == s3);",
+      "\tREQUIRE(rres == sres);",
       "}"
     ],
     "as_cast_eq": [
-      "REQUIRE({{get_func}}(r3, i) == inputs2[i]);"
+      "REQUIRE({{get_func}}(rres, i) == inputs2[i]);"
     ]
   }
 }

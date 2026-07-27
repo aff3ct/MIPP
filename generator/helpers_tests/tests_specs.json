@@ -23,17 +23,37 @@
         "domain": {
           "by_datatype": {
             "int8": [
-              { "min": -10, "max": 10 },
-              { "min": 20, "max": 50 }
+              {
+                "min": -10,
+                "max": 10
+              },
+              {
+                "min": 20,
+                "max": 50
+              }
             ],
             "int16": [
-              { "strictly_negative": true },
-              { "strictly_positive": true }
+              {
+                "strictly_negative": true
+              },
+              {
+                "strictly_positive": true
+              }
             ],
-            "int32": { "negative": true },
-            "int64": { "strictly_negative": true },
-            "float32": { "min": -1000.0, "max": 1000.0 },
-            "float64": { "min": 0.0, "max": 500.0 }
+            "int32": {
+              "negative": true
+            },
+            "int64": {
+              "strictly_negative": true
+            },
+            "float32": {
+              "min": -1000.0,
+              "max": 1000.0
+            },
+            "float64": {
+              "min": 0.0,
+              "max": 500.0
+            }
           }
         }
       },
@@ -42,12 +62,27 @@
         "domain": {
           "by_lmul": {
             "m1": [
-              { "min": 10, "max": 50 },
-              { "min": 100, "max": 200 }
+              {
+                "min": 10,
+                "max": 50
+              },
+              {
+                "min": 100,
+                "max": 200
+              }
             ],
-            "m2": { "min": 5, "max": 100 },
-            "m4": { "min": 1, "max": 20 },
-            "m8": { "min": 0, "max": 10 }
+            "m2": {
+              "min": 5,
+              "max": 100
+            },
+            "m4": {
+              "min": 1,
+              "max": 20
+            },
+            "m8": {
+              "min": 0,
+              "max": 10
+            }
           }
         }
       },
@@ -55,32 +90,72 @@
         "mask_pattern": "sparse",
         "domain": {
           "rules": [
-            { "datatype": "int8", "lmul": "m4", "min": -5, "max": 5 },
-            { "datatype": "int8", "min": -20, "max": 20 },
-            { "datatype": "uint8", "min": 0, "max": 50 },
-            { "datatype": "float32", "negative": true },
-            { "datatype": "float64", "strictly_negative": true }
+            {
+              "datatype": "int8",
+              "lmul": "m4",
+              "min": -5,
+              "max": 5
+            },
+            {
+              "datatype": "int8",
+              "min": -20,
+              "max": 20
+            },
+            {
+              "datatype": "uint8",
+              "min": 0,
+              "max": 50
+            },
+            {
+              "datatype": "float32",
+              "negative": true
+            },
+            {
+              "datatype": "float64",
+              "strictly_negative": true
+            }
           ],
-          "default": { "min": -50, "max": 50 }
+          "default": {
+            "min": -50,
+            "max": 50
+          }
         }
       },
       "masks": {
         "mask_pattern": "dense",
         "domain": {
           "by_datatype": {
-            "float32": { "strictly_positive": true },
-            "float64": { "positive": true },
-            "int32": { "negative": true },
-            "int64": { "strictly_negative": true }
+            "float32": {
+              "strictly_positive": true
+            },
+            "float64": {
+              "positive": true
+            },
+            "int32": {
+              "negative": true
+            },
+            "int64": {
+              "strictly_negative": true
+            }
           },
-          "default": { "min": 100, "max": 500 }
+          "default": {
+            "min": 100,
+            "max": 500
+          }
         },
         "domain_src": {
           "by_datatype": {
-            "float32": { "min": 1.0, "max": 10.0 },
-            "int32": { "strictly_positive": true }
+            "float32": {
+              "min": 1.0,
+              "max": 10.0
+            },
+            "int32": {
+              "strictly_positive": true
+            }
           },
-          "default": { "strictly_positive": true }
+          "default": {
+            "strictly_positive": true
+          }
         }
       }
     },
@@ -98,8 +173,12 @@
     },
     "andnb_k": {},
     "blend": {},
-    "cast": {},
-    "cast_k": {},
+    "cast": {
+      "comparison": "bitwise"
+    },
+    "cast_k": {
+      "comparison": "logical"
+    },
     "cmpeq": {
       "comparison": "logical",
       "support_obj": true,
@@ -227,8 +306,40 @@
     },
     "hadds": {
       "domain": {
-        "min": -1000,
-        "max": 1000
+        "by_datatype": {
+          "int8": {
+            "min": -30,
+            "max": 30
+          },
+          "uint8": {
+            "min": 0,
+            "max": 40
+          },
+          "int16": {
+            "min": -1000,
+            "max": 1000
+          },
+          "uint16": {
+            "min": 0,
+            "max": 2000
+          },
+          "int32": {
+            "min": -20000,
+            "max": 20000
+          },
+          "uint32": {
+            "min": 0,
+            "max": 40000
+          },
+          "int64": {
+            "min": -2000000,
+            "max": 2000000
+          },
+          "uint64": {
+            "min": 0,
+            "max": 4000000
+          }
+        }
       },
       "overflow_check": "accumulate_add"
     },

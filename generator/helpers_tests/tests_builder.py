@@ -401,7 +401,7 @@ class TestBuilderEngine:
             tol_expr = self.resolve_tolerance_expr(func_name, dt1_raw, ref_var="res")
             if dialect_name == "cpp":
                 return [
-                    "\t(void)s3;",
+                    "\t(void)sres;",
                     "\tif constexpr (std::is_floating_point_v<T>) {",
                     f"\t\tT tol = {tol_expr};",
                     f"\t\tREQUIRE(abs_diff::abs_diff({get_r3_expr}, res) <= tol);",
@@ -413,17 +413,17 @@ class TestBuilderEngine:
                 if is_float:
                     c_tol_expr = tol_expr.replace("T", t_type)
                     return [
-                        "(void)s3;",
+                        "(void)sres;",
                         f"{t_type} tol = {c_tol_expr};",
                         f"REQUIRE(abs_diff::abs_diff({get_r3_expr}, res) <= tol);"
                     ]
                 else:
                     return [
-                        "(void)s3;",
+                        "(void)sres;",
                         f"REQUIRE({get_r3_expr} == res);"
                     ]
         else:
-            return ["(void)s3;", f"REQUIRE({get_r3_expr} == res);"]
+            return ["(void)sres;", f"REQUIRE({get_r3_expr} == res);"]
 
     def _build_skip_condition_lines(self, skip_spec: Any, var_name: str = "inputs1[i]") -> List[str]:
         if not skip_spec:
@@ -488,8 +488,11 @@ class TestBuilderEngine:
             lines.append("#include <simd_ext/scalar/functions/scalar_toreg.h>")
             lines.append("#include <simd_ext/scalar/functions/scalar_tomsk.h>")
             lines.append("#include <simd_ext/scalar/functions/scalar_set_k.h>")
-        elif dialect_name == "cpp":
-            lines.append("#include <mipp.hpp>")
+        elif dialect_name in ("cpp", "obj"):
+            if dialect_name == "cpp":
+                lines.append("#include <mipp.hpp>")
+            else:
+                lines.append("#include <mipp_obj.hpp>")
             lines.append("#include <simd_ext_cpp/scalar_cpp/scalar_cpp_common.hpp>")
             lines.append(f"#include <simd_ext_cpp/scalar_cpp/functions/scalar_cpp_{func_name}.hpp>")
             lines.append("#include <simd_ext_cpp/scalar_cpp/functions/scalar_cpp_load.hpp>")
@@ -498,15 +501,13 @@ class TestBuilderEngine:
             lines.append("#include <simd_ext_cpp/scalar_cpp/functions/scalar_cpp_toreg.hpp>")
             lines.append("#include <simd_ext_cpp/scalar_cpp/functions/scalar_cpp_tomsk.hpp>")
             lines.append("#include <simd_ext_cpp/scalar_cpp/functions/scalar_cpp_set_k.hpp>")
-        elif dialect_name == "obj":
-            lines.append("#include <mipp_obj.hpp>")
 
         extra_inc = self.specs.get("functions", {}).get(func_name, {}).get("extra_includes", [])
         for inc in extra_inc:
             if dialect_name == "c":
                 lines.append(f"#include <c/functions/{inc}.h>")
                 lines.append(f"#include <simd_ext/scalar/functions/scalar_{inc}.h>")
-            elif dialect_name == "cpp":
+            elif dialect_name in ("cpp", "obj"):
                 lines.append(f"#include <simd_ext_cpp/scalar_cpp/functions/scalar_cpp_{inc}.hpp>")
 
         lines.append("")
@@ -602,13 +603,13 @@ class TestBuilderEngine:
 
         if as_key == "as_reduction_eq" and dialect_name == "c":
             if not is_float:
-                as_raw = ["REQUIRE(r3 == s3);"]
+                as_raw = ["REQUIRE(rres == sres);"]
             else:
-                tol_expr = self.resolve_tolerance_expr(func_name, dt1_raw, ref_var="s3")
+                tol_expr = self.resolve_tolerance_expr(func_name, dt1_raw, ref_var="sres")
                 c_tol = tol_expr.replace("T", f"{dt1_raw}_t")
                 as_raw = [
                     f"{dt1_raw}_t tol = {c_tol};",
-                    f"{dt1_raw}_t diff = abs_diff::abs_diff(r3, s3);",
+                    f"{dt1_raw}_t diff = abs_diff::abs_diff(rres, sres);",
                     "if (!std::isnan(diff) && !std::isinf(diff)) REQUIRE(diff <= tol);"
                 ]
 
@@ -916,11 +917,11 @@ class TestBuilderEngine:
                 l = l.replace("{{scalar_tomsk_call2}}", adapter.format_scalar_tomsk(dt1_str, "s2", lmul_suffix))
                 l = l.replace("{{op_call}}", adapter.format_func_call(func_name, dt_clean, op_args_reg, lmul_suffix, mkind=mkind))
                 l = l.replace("{{scalar_op_call}}", adapter.format_scalar_func_call(func_name, dt_clean, op_args_scal, lmul_suffix, mkind=mkind))
-                l = l.replace("{{get_func}}(r3, i)", adapter.format_get("r3", "i", dt2_str, lmul_suffix))
+                l = l.replace("{{get_func}}(r3, i)", adapter.format_get("rres", "i", dt2_str, lmul_suffix))
                 l = l.replace("{{get_scalar_func}}(s3, i)", adapter.format_scalar_get("s3", "i", dt2_str, lmul_suffix))
                 l = l.replace("{{get_func}}(r4, i)", adapter.format_get("r4", "i", dt2_str, lmul_suffix))
                 l = l.replace("{{get_scalar_func}}(s4, i)", adapter.format_scalar_get("s4", "i", dt2_str, lmul_suffix))
-                l = l.replace("{{get_k_func}}(r3, i)", adapter.format_get_k("r3", "i", dt2_str, lmul_suffix))
+                l = l.replace("{{get_k_func}}(r3, i)", adapter.format_get_k("rres", "i", dt2_str, lmul_suffix))
                 l = l.replace("{{get_scalar_k_func}}(s3, i)", adapter.format_scalar_get_k("s3", "i", dt2_str, lmul_suffix))
                 l = l.replace("{{get_func}}", adapter.format_get_func_name(dt2_str, lmul_suffix))
                 l = l.replace("{{get_scalar_func}}", adapter.format_scalar_get_func_name(dt2_str, lmul_suffix))
@@ -932,7 +933,7 @@ class TestBuilderEngine:
                     tol_expr_typed = tol_expr.replace("T", "decltype(res2)")
                     l = l.replace("{{tol_decl}}", f"auto tol = {tol_expr_typed};")
                 if "{{tol_decl_s3}}" in l:
-                    tol_expr = self.resolve_tolerance_expr(func_name, dt1_raw, ref_var="s3")
+                    tol_expr = self.resolve_tolerance_expr(func_name, dt1_raw, ref_var="sres")
                     l = l.replace("{{tol_decl_s3}}", f"T tol = {tol_expr};")
                 if "{{nan_inf_skip_lines}}" in l:
                     if nan_inf_skip:
@@ -959,8 +960,8 @@ class TestBuilderEngine:
         if dialect_name == "obj":
             op_syms = getattr(adapter, "op_syms", {})
             cmp_syms = getattr(adapter, "cmp_syms", {})
-            get_r3_expr = adapter.format_get("r3", "i", dt1_raw, lmul_suffix)
-            get_r3_k_expr = adapter.format_get_k("r3", "i", dt1_raw, lmul_suffix)
+            get_r3_expr = adapter.format_get("rres", "i", dt1_raw, lmul_suffix)
+            get_r3_k_expr = adapter.format_get_k("rres", "i", dt1_raw, lmul_suffix)
             if func_name in cmp_syms:
                 sym = cmp_syms[func_name]
                 lb_lines = [f"\tbool res = inputs1[i] {sym} inputs2[i];"]
@@ -1149,10 +1150,704 @@ class TestBuilderEngine:
 
         lines.append("}")
         lines.append("")
+        return lines
+
+    def _is_mask_kind_supported(self, ms_val: Any, mkind: str) -> bool:
+        if mkind in ("", "unmasked"):
+            return True
+        if hasattr(ms_val, "is_supported"):
+            return ms_val.is_supported(mkind)
+        ms_str = str(ms_val)
+        if ms_str in ("all_mask", "all"):
+            return True
+        if ms_str in ("no_mask", "none"):
+            return False
+        if mkind == "mask" and ("mask_and" in ms_str or ms_str in ("mask_only", "mask")):
+            return True
+        if mkind == "maskz" and ("maskz" in ms_str):
+            return True
+        if mkind == "masks" and ("masks" in ms_str):
+            return True
+        return False
+
+    def _format_rnd_call(self, dom_dict: Dict[str, Any], var_name: str) -> str:
+        min_v = dom_dict.get("min")
+        max_v = dom_dict.get("max")
+        arg_excl_zero = dom_dict.get("exclude_zero", False)
+        arg_domain_flag = None
+        for flag in ["strictly_positive", "positive", "strictly_negative", "negative"]:
+            if dom_dict.get(flag, False):
+                arg_domain_flag = flag
+                break
+
+        if min_v is not None or max_v is not None:
+            min_str = f"(T){min_v}" if min_v is not None else "std::numeric_limits<T>::lowest()"
+            max_str = f"(T){max_v}" if max_v is not None else "std::numeric_limits<T>::max()"
+            if arg_excl_zero:
+                return f"{var_name}[i] = rnd::uniform_exclude_zero<T>(seed, {min_str}, {max_str});"
+            else:
+                return f"{var_name}[i] = rnd::uniform<T>(seed, {min_str}, {max_str});"
+        elif arg_excl_zero:
+            return f"{var_name}[i] = rnd::uniform_exclude_zero<T>(seed);"
+        elif arg_domain_flag:
+            return f"{var_name}[i] = rnd::uniform_{arg_domain_flag}<T>(seed);"
+        else:
+            return f"{var_name}[i] = rnd::uniform<T>(seed);"
+
+
+    def render_cpp_validation_block(self, func_name: str, proto_ref: str, is_product: bool = False, r_var: str = "rres", s_var: str = "sres", dialect_name: str = "cpp") -> List[str]:
+        func_spec = self.specs["functions"].get(func_name, {})
+        default_spec = self.specs.get("default", {})
+        comp_type = func_spec.get("comparison", default_spec.get("comparison", "exact"))
+        has_tolerance = (comp_type == "tolerance") or ("tolerance" in func_spec)
+        is_loop = self.func_templates.get("prototypes", {}).get(proto_ref, {}).get("is_loop", True)
+
+        r_get = f"{r_var}[i]" if dialect_name == "obj" else f"mipp::get({r_var}, i)"
+        s_get = f"mipp::get({s_var}, i)"
+
+        overflow_check = func_spec.get("overflow_check")
+
+        lines = []
+        if not is_loop and overflow_check in ("accumulate_add", "accumulate_mul"):
+            op_symbol = "+" if overflow_check == "accumulate_add" else "*"
+            ov_func = "add" if overflow_check == "accumulate_add" else "mul"
+            lines.append("bool ov = false;")
+            lines.append("{")
+            lines.append("\tif constexpr (!std::is_floating_point_v<T>)")
+            lines.append("\t{")
+            lines.append("\t\tT acc = inputs1[0];")
+            lines.append("\t\tfor (size_t i = 1; i < size; i++)")
+            lines.append("\t\t{")
+            lines.append(f"\t\t\tif (ovf::will_{ov_func}_overflow<T>(acc, inputs1[i])) {{ ov = true; break; }}")
+            lines.append(f"\t\t\tacc = acc {op_symbol} inputs1[i];")
+            lines.append("\t\t}")
+            lines.append("\t}")
+            lines.append("}")
+            lines.append("if (ov)")
+            lines.append("{")
+            lines.append('\tINFO("Reduction overflow occurred, skipping assert");')
+            lines.append("}")
+            lines.append("else")
+            lines.append("{")
+            if has_tolerance:
+                tol_expr = self.resolve_tolerance_expr(func_name, "T", ref_var=s_var)
+                lines.append("\tif constexpr (std::is_floating_point_v<T>)")
+                lines.append("\t{")
+                lines.append(f"\t\tT tol = {tol_expr};")
+                lines.append(f"\t\tT diff = abs_diff::abs_diff({r_var}, {s_var});")
+                lines.append("\t\tif (!std::isnan(diff) && !std::isinf(diff)) REQUIRE(diff <= tol);")
+                lines.append("\t}")
+                lines.append("\telse")
+                lines.append("\t{")
+                lines.append(f"\t\tREQUIRE({r_var} == {s_var});")
+                lines.append("\t}")
+            else:
+                lines.append(f"\tREQUIRE({r_var} == {s_var});")
+            lines.append("}")
+            return lines
+
+        if has_tolerance and is_loop:
+            tol_expr = self.resolve_tolerance_expr(func_name, "T", ref_var=s_get)
+            lines.append("for (size_t i = 0; i < size; i++)")
+            lines.append("{")
+            lines.append("\tif constexpr (std::is_floating_point_v<T>)")
+            lines.append("\t{")
+            lines.append(f"\t\tT tol = {tol_expr};")
+            lines.append(f"\t\tT diff = abs_diff::abs_diff({r_get}, {s_get});")
+            lines.append("\t\tif (!std::isnan(diff) && !std::isinf(diff)) REQUIRE(diff <= tol);")
+            lines.append("\t}")
+            lines.append("\telse")
+            lines.append("\t{")
+            if overflow_check in ("add", "sub", "mul"):
+                lines.append(f"\t\tbool ov = ovf::will_{overflow_check}_overflow<T>(inputs1[i], inputs2[i]);")
+                lines.append("\t\tif (ov)")
+                lines.append("\t\t{")
+                lines.append('\t\t\tINFO("Overflow occurred, skipping assert");')
+                lines.append("\t\t}")
+                lines.append("\t\telse")
+                lines.append("\t\t{")
+                lines.append(f"\t\t\tREQUIRE({r_get} == {s_get});")
+                lines.append("\t\t}")
+            else:
+                lines.append(f"\t\tREQUIRE({r_get} == {s_get});")
+            lines.append("\t}")
+            lines.append("}")
+        elif comp_type == "bitwise":
+            lines.append("for (size_t i = 0; i < size; i++)")
+            lines.append("{")
+            lines.append(f"\tauto v1 = {r_get};")
+            lines.append(f"\tauto v2 = {s_get};")
+            lines.append("\tuint64_t u1 = 0, u2 = 0;")
+            lines.append("\tstd::memcpy(&u1, &v1, sizeof(v1));")
+            lines.append("\tstd::memcpy(&u2, &v2, sizeof(v2));")
+            lines.append("\tREQUIRE(u1 == u2);")
+            lines.append("}")
+        elif comp_type in ("logical", "mask") or func_name.endswith("_k") or "ret_msk" in proto_ref:
+            lines.append("for (size_t i = 0; i < size; i++)")
+            lines.append("{")
+            lines.append(f"\tREQUIRE((!!{r_get}) == (!!{s_get}));")
+            lines.append("}")
+        elif not is_loop:
+            if has_tolerance:
+                tol_expr = self.resolve_tolerance_expr(func_name, "T", ref_var=s_var)
+                lines.append("if constexpr (std::is_floating_point_v<T>)")
+                lines.append("{")
+                lines.append(f"\tT tol = {tol_expr};")
+                lines.append(f"\tT diff = abs_diff::abs_diff({r_var}, {s_var});")
+                lines.append("\tif (!std::isnan(diff) && !std::isinf(diff)) REQUIRE(diff <= tol);")
+                lines.append("}")
+                lines.append("else")
+                lines.append("{")
+                lines.append(f"\tREQUIRE({r_var} == {s_var});")
+                lines.append("}")
+            else:
+                lines.append(f"REQUIRE({r_var} == {s_var});")
+        else:
+            lines.append("for (size_t i = 0; i < size; i++)")
+            lines.append("{")
+            lines.append(f"\tREQUIRE({r_get} == {s_get});")
+            lines.append("}")
+        return lines
+
+    def render_cpp_arg_init_branches(self, func_name: str, var_name: str, arg_idx: int = 0, is_src: bool = False, supported_mkinds: List[str] = None) -> List[str]:
+        func_spec = self.specs.get("functions", {}).get(func_name, {})
+
+        type_c_map = {
+            "float64": "double", "float32": "float",
+            "int64": "int64_t", "int32": "int32_t", "int16": "int16_t", "int8": "int8_t",
+            "uint64": "uint64_t", "uint32": "uint32_t", "uint16": "uint16_t", "uint8": "uint8_t"
+        }
+        lmul_num_map = {"m1": 1, "m2": 2, "m4": 4, "m8": 8, "d2": -2}
+
+        branches = []
+
+        if supported_mkinds is None:
+            supported_mkinds = ["unmasked", "mask", "maskz", "masks"]
+
+        for mkind in supported_mkinds:
+            mk_spec = func_spec.get(mkind, {})
+            dom_spec = mk_spec.get("domain_src" if is_src else "domain", {})
+            if not dom_spec and not is_src:
+                dom_spec = func_spec.get("domain", {})
+
+            if not dom_spec:
+                continue
+
+            mk_enum_map = {"unmasked": "mipp::U", "mask": "mipp::M", "maskz": "mipp::Z", "masks": "mipp::S"}
+            mk_cond = f"MK == {mk_enum_map[mkind]}"
+
+            if "by_datatype" in dom_spec:
+                by_dt = dom_spec["by_datatype"]
+                for dt_key, spec_val in by_dt.items():
+                    dt_c = type_c_map.get(dt_key, dt_key)
+                    type_cond = f"std::is_same_v<T, {dt_c}>"
+                    full_cond = f"{mk_cond} && {type_cond}"
+                    if isinstance(spec_val, list):
+                        target_idx = min(arg_idx, len(spec_val) - 1)
+                        sub_dict = spec_val[target_idx] if isinstance(spec_val[target_idx], dict) else {}
+                    elif isinstance(spec_val, dict):
+                        sub_dict = spec_val
+                    else:
+                        sub_dict = {}
+                    rnd_code = self._format_rnd_call(sub_dict, var_name)
+                    branches.append((full_cond, rnd_code))
+
+            elif "by_lmul" in dom_spec:
+                by_lm = dom_spec["by_lmul"]
+                for lm_key, spec_val in by_lm.items():
+                    lm_num = lmul_num_map.get(lm_key, 1)
+                    lm_cond = f"LMUL == {lm_num}"
+                    full_cond = f"{mk_cond} && {lm_cond}"
+                    if isinstance(spec_val, list):
+                        target_idx = min(arg_idx, len(spec_val) - 1)
+                        sub_dict = spec_val[target_idx] if isinstance(spec_val[target_idx], dict) else {}
+                    elif isinstance(spec_val, dict):
+                        sub_dict = spec_val
+                    else:
+                        sub_dict = {}
+                    rnd_code = self._format_rnd_call(sub_dict, var_name)
+                    branches.append((full_cond, rnd_code))
+
+            elif "rules" in dom_spec:
+                for rule in dom_spec["rules"]:
+                    cond_parts = [mk_cond]
+                    if "datatype" in rule:
+                        dt_c = type_c_map.get(rule["datatype"], rule["datatype"])
+                        cond_parts.append(f"std::is_same_v<T, {dt_c}>")
+                    if "lmul" in rule:
+                        lm_num = lmul_num_map.get(rule["lmul"], 1)
+                        cond_parts.append(f"LMUL == {lm_num}")
+                    full_cond = " && ".join(cond_parts)
+                    rnd_code = self._format_rnd_call(rule, var_name)
+                    branches.append((full_cond, rnd_code))
+
+            elif isinstance(dom_spec, dict) and dom_spec:
+                rnd_code = self._format_rnd_call(dom_spec, var_name)
+                branches.append((mk_cond, rnd_code))
+
+        if not branches:
+            return [f"{var_name}[i] = rnd::uniform<T>(seed);"]
+
+        lines = []
+        is_first = True
+        for cond, code in branches:
+            kw = "if constexpr" if is_first else "else if constexpr"
+            is_first = False
+            lines.append(f"{kw} ({cond})")
+            lines.append("{")
+            lines.append(f"\t{code}")
+            lines.append("}")
+
+        lines.append("else")
+        lines.append("{")
+        lines.append(f"\t{var_name}[i] = rnd::uniform<T>(seed);")
+        lines.append("}")
 
         return lines
 
+    def render_cpp_test_case(self, dialect_name: str, func_name: str, supported_mkinds: List[str]) -> List[str]:
+        lines = []
+        func_prefix = "test_cppmipp" if dialect_name == "cpp" else "test_objmipp"
+        mk_enum_map = {"unmasked": "mipp::U", "mask": "mipp::M", "maskz": "mipp::Z", "masks": "mipp::S"}
+        mk_label_map = {"unmasked": "unmasked (U)", "mask": "mask (M)", "maskz": "maskz (Z)", "masks": "masks (S)"}
+
+        datatypes = self._resolve_datatypes(func_name)
+        is_product = any("," in str(dt) for dt in datatypes)
+
+        lines.append(f'TEST_CASE("{func_name} - {dialect_name} tests", "[{func_name}]")')
+        lines.append("{")
+
+        for mkind in supported_mkinds:
+            mk_enum = mk_enum_map[mkind]
+            mk_label = mk_label_map[mkind]
+            lines.append(f'\tSECTION("{mk_label}")')
+            lines.append('\t{')
+
+            for dt in datatypes:
+                dt_str = str(dt)
+                if is_product and "," in dt_str:
+                    dt_src, dt_dst = dt_str.split(",")
+                    cpp_type = f"{self._format_cpp_type(dt_src)}, {self._format_cpp_type(dt_dst)}"
+                else:
+                    cpp_type = self._format_cpp_type(dt)
+
+                lines.append(f'\t\tSECTION("datatype = {dt}")')
+                lines.append('\t\t{')
+
+                lmuls_to_test = [(1, "LMUL = 1")] if dialect_name == "obj" else [(1, "LMUL = 1"), (2, "LMUL = 2"), (4, "LMUL = 4"), (8, "LMUL = 8")]
+                for lmul_val, lmul_str in lmuls_to_test:
+                    lines.append(f'\t\t\tSECTION("{lmul_str}")')
+                    lines.append('\t\t\t{')
+                    lines.append('\t\t\t\ttry {')
+                    lines.append(f'\t\t\t\t\t{func_prefix}_{func_name}<{mk_enum}, {cpp_type}, {lmul_val}>();')
+                    lines.append('\t\t\t\t} catch (const mipp::stub_exception& e) {')
+                    lines.append('\t\t\t\t\tWARN(e.what());')
+                    lines.append('\t\t\t\t}')
+                    lines.append('\t\t\t}')
+
+                if dialect_name == "cpp":
+                    lines.append('\t\t\t#if defined(MIPP_LDIV_2)')
+                    lines.append('\t\t\tSECTION("LDIV = 2")')
+                    lines.append('\t\t\t{')
+                    lines.append('\t\t\t\ttry {')
+                    lines.append(f'\t\t\t\t\t{func_prefix}_{func_name}<{mk_enum}, {cpp_type}, -2>();')
+                    lines.append('\t\t\t\t} catch (const mipp::stub_exception& e) {')
+                    lines.append('\t\t\t\t\tWARN(e.what());')
+                    lines.append('\t\t\t\t}')
+                    lines.append('\t\t\t}')
+                    lines.append('\t\t\t#endif // MIPP_LDIV_2')
+
+                lines.append('\t\t}')
+
+            lines.append('\t}')
+
+        lines.append("}")
+        lines.append("")
+        return lines
+
+    def build_unified_cpp_test_file(self, dialect_name: str, func_name: str, N: int = 10) -> str:
+        lines = []
+        lines.extend(self._render_headers(dialect_name, func_name, N=N))
+
+        mask_support = self.interfaces[func_name].get("mask_support", "all_mask")
+        supported_mkinds = []
+        if dialect_name == "obj":
+            supported_mkinds = ["unmasked"]
+        else:
+            for m in ["unmasked", "mask", "maskz", "masks"]:
+                if m == "unmasked" or self._is_mask_kind_supported(mask_support, m):
+                    supported_mkinds.append(m)
+
+        n_args = self._get_n_args(func_name)
+        proto_ref = self.interfaces.get(func_name, {}).get("proto_ref", "ret_reg_2args_reg")
+        datatypes = self._resolve_datatypes(func_name)
+        is_product = any("," in str(dt) for dt in datatypes)
+        is_1arg = "1arg" in proto_ref or "2args_reg_val" in proto_ref
+        is_3arg = "3args" in proto_ref
+
+        func_prefix = "test_cppmipp" if dialect_name == "cpp" else "test_objmipp"
+        if is_product:
+            lines.append(f"template <mipp::MKIND MK = mipp::U, typename T_src = float, typename T_dst = double, int LMUL = 1>")
+        else:
+            lines.append(f"template <mipp::MKIND MK = mipp::U, typename T = double, int LMUL = 1>")
+        lines.append(f"static void {func_prefix}_{func_name}()")
+        lines.append("{")
+        lines.append("\tstd::mt19937 seed(Catch::getSeed());")
+        lines.append("\tfor (unsigned n = 0; n < get_n_iter(); n++)")
+        lines.append("\t{")
+        if is_product:
+            lines.append("\t\tconstexpr size_t size = (LMUL > 0) ? (mipp::N<T_src>() * static_cast<size_t>(LMUL)) : (mipp::N<T_src>() / static_cast<size_t>(-LMUL));")
+            lines.append("\t\tusing T [[maybe_unused]] = T_src;")
+        else:
+            lines.append("\t\tconstexpr size_t size = (LMUL > 0) ? (mipp::N<T>() * static_cast<size_t>(LMUL)) : (mipp::N<T>() / static_cast<size_t>(-LMUL));")
+
+        proto_spec = self.func_templates.get("prototypes", {}).get(proto_ref, {})
+        comp_names = proto_spec.get("components", {})
+        decl_comp_key = comp_names.get("decl", "decl_2args")
+        load_comp_key = comp_names.get("load", "load_2args_reg")
+        op_comp_key = comp_names.get("operation", "op_binop")
+        assert_comp_key = comp_names.get("loop_assert", "as_strict_eq")
+
+        decl_raw = self.component_templates.get("declarations", {}).get(decl_comp_key, [])
+        load_raw = self.component_templates.get("loads", {}).get(load_comp_key, [])
+        op_raw = self.component_templates.get("operations", {}).get(op_comp_key, [])
+        as_raw = self.component_templates.get("assertions", {}).get(assert_comp_key, [])
+        is_loop = proto_spec.get("is_loop", True)
+
+        if is_product:
+            decl_lines = [d.replace("{{size}}", "size").replace("{{dt1_ext}}", "T_src").replace("{{dt2_ext}}", "T_dst") for d in decl_raw]
+        else:
+            decl_lines = [d.replace("{{size}}", "size").replace("{{dt1_ext}}", "T").replace("{{dt2_ext}}", "T") for d in decl_raw]
+        lines.extend(self.indent_lines(decl_lines, 2))
+
+        decl_joined = "\n".join(decl_lines)
+        if "masks" in supported_mkinds and not any("inputs_src" in d for d in decl_lines):
+            lines.append("\t\t[[maybe_unused]] T inputs_src[size];")
+        has_inputs_m = bool(re.search(r"\binputs_m\b", decl_joined))
+        if any(m in supported_mkinds for m in ["mask", "maskz", "masks"]) and not has_inputs_m:
+            has_inputs_m = True
+            lines.append("\t\t[[maybe_unused]] int32_t inputs_m[size];")
+
+        lines.append("")
+        lines.append("\t\tfor (size_t i = 0; i < size; i++)")
+        lines.append("\t\t{")
+        if "inputs1" in decl_joined:
+            init_stmt_lines = self.render_cpp_arg_init_branches(func_name, "inputs1", arg_idx=0, supported_mkinds=supported_mkinds)
+            lines.extend(self.indent_lines(init_stmt_lines, 3))
+        if "inputs2" in decl_joined:
+            init_stmt_lines = self.render_cpp_arg_init_branches(func_name, "inputs2", arg_idx=1, supported_mkinds=supported_mkinds)
+            lines.extend(self.indent_lines(init_stmt_lines, 3))
+        if "inputs3" in decl_joined:
+            init_stmt_lines = self.render_cpp_arg_init_branches(func_name, "inputs3", arg_idx=2, supported_mkinds=supported_mkinds)
+            lines.extend(self.indent_lines(init_stmt_lines, 3))
+
+        if "inputs_src" in decl_joined or "masks" in supported_mkinds:
+            src_init_lines = self.render_cpp_arg_init_branches(func_name, "inputs_src", arg_idx=0, is_src=True, supported_mkinds=supported_mkinds)
+            lines.extend(self.indent_lines(src_init_lines, 3))
+
+        if "inputs_m1" in decl_joined:
+            lines.append("\t\t\tinputs_m1[i] = rnd::uniform_bool(seed) ? -1 : 0;")
+        if "inputs_m2" in decl_joined:
+            lines.append("\t\t\tinputs_m2[i] = rnd::uniform_bool(seed) ? -1 : 0;")
+        if "inputs_m3" in decl_joined:
+            lines.append("\t\t\tinputs_m3[i] = rnd::uniform_bool(seed) ? -1 : 0;")
+        if has_inputs_m:
+            lines.append("\t\t\tinputs_m[i] = rnd::uniform_bool(seed) ? -1 : 0;")
+
+        lines.append("\t\t}")
+        lines.append("")
+
+        def expand_cpp_lines(raw_lines: List[str], mkind: str) -> List[str]:
+            out = []
+            if "0arg" in proto_ref:
+                op_args_r = ""
+                op_args_s = ""
+            elif "1arg_val" in proto_ref or "1arg_i32" in proto_ref:
+                op_args_r = "inputs_m[0]" if func_name in ("set_k", "set1_k", "set0_k") else "inputs1[0]"
+                op_args_s = "inputs_m[0]" if func_name in ("set_k", "set1_k", "set0_k") else "inputs1[0]"
+            elif "1arg_ptr" in proto_ref or "1arg_Nele" in proto_ref:
+                op_args_r = "inputs_m" if func_name in ("set_k", "set1_k", "set0_k") else "inputs1"
+                op_args_s = "inputs_m" if func_name in ("set_k", "set1_k", "set0_k") else "inputs1"
+            elif "2args_ptr_reg" in proto_ref:
+                op_args_r = "res_r, r1"
+                op_args_s = "res_s, s1"
+            elif "2args_reg_val" in proto_ref:
+                op_args_r = "r1, 2"
+                op_args_s = "s1, 2"
+            elif proto_ref == "ret_reg_3args_1msk_2reg":
+                op_args_r = "m1, r2, r3"
+                op_args_s = "sm1, s2, s3"
+            elif proto_ref == "ret_reg_3args_2reg_1msk":
+                op_args_r = "r1, r2, m3"
+                op_args_s = "s1, s2, sm3"
+            elif proto_ref in ("ret_i32_2args_msk", "ret_msk_2args_msk"):
+                op_args_r = "m1, m2"
+                op_args_s = "sm1, sm2"
+            elif proto_ref in ("ret_i32_1arg_msk", "ret_msk_1arg_msk", "ret_reg_1arg_msk"):
+                op_args_r = "m1"
+                op_args_s = "sm1"
+            elif is_1arg:
+                op_args_r = "r1"
+                op_args_s = "s1"
+            elif is_3arg:
+                op_args_r = "r1, r2, r3"
+                op_args_s = "s1, s2, s3"
+            else:
+                op_args_r = "r1, r2"
+                op_args_s = "s1, s2"
+
+            fname = func_name
+            if fname in ("andb_k", "orb_k", "xorb_k", "notb_k", "andnb_k"):
+                fname = fname[:-2]
+
+            load_type = "T_src" if is_product else "T"
+
+            if mkind == "unmasked":
+                if fname in ("set", "set_k", "set1", "set1_k", "set0", "set0_k", "load", "loadu"):
+                    op_call = f"mipp::{fname}<{load_type}, LMUL>({op_args_r})" if op_args_r else f"mipp::{fname}<{load_type}, LMUL>()"
+                    scalar_op_call = f"mipp::{fname}<{load_type}, LMUL, mipp::ISA::SCALAR>({op_args_s})" if op_args_s else f"mipp::{fname}<{load_type}, LMUL, mipp::ISA::SCALAR>()"
+                else:
+                    op_call = f"mipp::{fname}({op_args_r})"
+                    scalar_op_call = f"mipp::{fname}({op_args_s})"
+            elif mkind == "mask":
+                op_call = f"mipp::{fname}<mipp::M, {load_type}, LMUL>(m1, {op_args_r})"
+                scalar_op_call = f"mipp::{fname}<mipp::M, {load_type}, LMUL, mipp::ISA::SCALAR>(sm1, {op_args_s})"
+            elif mkind == "maskz":
+                op_call = f"mipp::{fname}<mipp::Z, {load_type}, LMUL>(m1, {op_args_r})"
+                scalar_op_call = f"mipp::{fname}<mipp::Z, {load_type}, LMUL, mipp::ISA::SCALAR>(sm1, {op_args_s})"
+            elif mkind == "masks":
+                op_call = f"mipp::{fname}<mipp::S, {load_type}, LMUL>(m1, rsrc, {op_args_r})"
+                scalar_op_call = f"mipp::{fname}<mipp::S, {load_type}, LMUL, mipp::ISA::SCALAR>(sm1, ssrc, {op_args_s})"
+
+            if dialect_name == "obj":
+                op_syms = {"add": "+", "sub": "-", "mul": "*", "div": "/", "andb": "&", "orb": "|", "xorb": "^"}
+                cmp_syms = {"cmpeq": "==", "cmpneq": "!=", "cmplt": "<", "cmple": "<=", "cmpgt": ">", "cmpge": ">="}
+                if raw_lines == load_raw:
+                    lines_out = [
+                        "mipp::Rvd<T> r1(inputs1);",
+                        "auto s1 = mipp::load<T, LMUL, mipp::ISA::SCALAR>(inputs1);"
+                    ]
+                    if not is_1arg:
+                        lines_out.extend([
+                            "mipp::Rvd<T> r2(inputs2);",
+                            "auto s2 = mipp::load<T, LMUL, mipp::ISA::SCALAR>(inputs2);"
+                        ])
+                    if is_3arg:
+                        lines_out.extend([
+                            "mipp::Rvd<T> r3(inputs3);",
+                            "auto s3 = mipp::load<T, LMUL, mipp::ISA::SCALAR>(inputs3);"
+                        ])
+                    return lines_out
+                elif raw_lines == op_raw:
+                    if fname in op_syms:
+                        return [
+                            f"auto rres = r1 {op_syms[fname]} r2;",
+                            f"auto sres = {scalar_op_call};"
+                        ]
+                    elif fname in cmp_syms:
+                        return [
+                            f"auto rres = r1 {cmp_syms[fname]} r2;",
+                            f"auto sres = {scalar_op_call};"
+                        ]
+                    else:
+                        method_args = "r2" if not is_1arg else ""
+                        return [
+                            f"auto rres = r1.{fname}({method_args});",
+                            f"auto sres = {scalar_op_call};"
+                        ]
+
+            elif is_product and raw_lines == op_raw:
+                base_fname = "cast" if fname == "cast_k" else fname
+                if fname == "wcvt":
+                    dst_type_map = [
+                        ("double", "float64"),
+                        ("int64_t", "int64"), ("int32_t", "int32"), ("int16_t", "int16"),
+                        ("uint64_t", "uint64"), ("uint32_t", "uint32"), ("uint16_t", "uint16")
+                    ]
+                else:
+                    dst_type_map = [
+                        ("double", "float64"), ("float", "float32"),
+                        ("int64_t", "int64"), ("int32_t", "int32"), ("int16_t", "int16"), ("int8_t", "int8"),
+                        ("uint64_t", "uint64"), ("uint32_t", "uint32"), ("uint16_t", "uint16"), ("uint8_t", "uint8")
+                    ]
+                func_spec = self.specs.get("functions", {}).get(func_name, {})
+                comp_type = func_spec.get("comparison", self.specs.get("default", {}).get("comparison", "exact"))
+                branch_lines = []
+                is_first = True
+                for dst_type, dst_name in dst_type_map:
+                    kw = "if constexpr" if is_first else "else if constexpr"
+                    is_first = False
+                    branch_lines.append(f"{kw} (std::is_same_v<T_dst, {dst_type}>)")
+                    branch_lines.append("{")
+                    branch_lines.append(f"\tauto rres = mipp::{base_fname}_{dst_name}({op_args_r});")
+                    branch_lines.append(f"\tauto sres = mipp::{base_fname}_{dst_name}({op_args_s});")
+                    branch_lines.append(f"\tconstexpr size_t size_dst = (LMUL > 0) ? (mipp::N<{dst_type}>() * static_cast<size_t>(LMUL)) : (mipp::N<{dst_type}>() / static_cast<size_t>(-LMUL));")
+                    branch_lines.append(f"\tfor (size_t i = 0; i < size_dst; i++)")
+                    branch_lines.append(f"\t{{")
+                    if comp_type == "bitwise":
+                        branch_lines.append(f"\t\tauto v1 = mipp::get(rres, i);")
+                        branch_lines.append(f"\t\tauto v2 = mipp::get(sres, i);")
+                        branch_lines.append(f"\t\tuint64_t u1 = 0, u2 = 0;")
+                        branch_lines.append(f"\t\tstd::memcpy(&u1, &v1, sizeof(v1));")
+                        branch_lines.append(f"\t\tstd::memcpy(&u2, &v2, sizeof(v2));")
+                        branch_lines.append(f"\t\tREQUIRE(u1 == u2);")
+                    elif comp_type in ("logical", "mask"):
+                        branch_lines.append(f"\t\tREQUIRE((!!mipp::get(rres, i)) == (!!mipp::get(sres, i)));")
+                    else:
+                        branch_lines.append(f"\t\tREQUIRE(mipp::get(rres, i) == mipp::get(sres, i));")
+                    branch_lines.append(f"\t}}")
+                    branch_lines.append("}")
+                return branch_lines
+            elif is_product and raw_lines == as_raw:
+                return []
+
+            for line in raw_lines:
+                l = line
+                if dialect_name == "obj":
+                    l = l.replace("{{reg_type}}", "mipp::Rvd<T>")
+                    l = l.replace("{{scalar_reg_type}}", "auto")
+                    l = l.replace("{{msk_type}}", "mipp::Rvm<T>")
+                    l = l.replace("{{scalar_msk_type}}", "auto")
+                    l = l.replace("{{msk_type_dst}}", "mipp::Rvd<T>")
+                    l = l.replace("{{scalar_msk_type_dst}}", "auto")
+                    l = l.replace("{{reg_type_dst}}", "mipp::Rvd<T>")
+                    l = l.replace("{{scalar_reg_type_dst}}", "auto")
+                    l = l.replace("{{load_call1}}", "inputs1")
+                    l = l.replace("{{scalar_load_call1}}", "inputs1")
+                    l = l.replace("{{load_call2}}", "inputs2")
+                    l = l.replace("{{scalar_load_call2}}", "inputs2")
+                else:
+                    l = l.replace("{{reg_type}}", "auto")
+                    l = l.replace("{{scalar_reg_type}}", "auto")
+                    l = l.replace("{{msk_type}}", "auto")
+                    l = l.replace("{{scalar_msk_type}}", "auto")
+                    l = l.replace("{{msk_type_dst}}", "auto")
+                    l = l.replace("{{scalar_msk_type_dst}}", "auto")
+                    l = l.replace("{{reg_type_dst}}", "auto")
+                    l = l.replace("{{scalar_reg_type_dst}}", "auto")
+                    l = l.replace("{{load_call1}}", f"mipp::load<{load_type}, LMUL>(inputs1)")
+                    l = l.replace("{{scalar_load_call1}}", f"mipp::load<{load_type}, LMUL, mipp::ISA::SCALAR>(inputs1)")
+                    l = l.replace("{{load_call2}}", f"mipp::load<{load_type}, LMUL>(inputs2)")
+                    l = l.replace("{{scalar_load_call2}}", f"mipp::load<{load_type}, LMUL, mipp::ISA::SCALAR>(inputs2)")
+                    l = l.replace("{{load_call3}}", f"mipp::load<{load_type}, LMUL>(inputs3)")
+                    l = l.replace("{{scalar_load_call3}}", f"mipp::load<{load_type}, LMUL, mipp::ISA::SCALAR>(inputs3)")
+                    l = l.replace("{{set_k_call}}", f"mipp::set_k<{load_type}, LMUL>(inputs_m)")
+                    l = l.replace("{{scalar_set_k_call}}", f"mipp::set_k<{load_type}, LMUL, mipp::ISA::SCALAR>(inputs_m)")
+                    l = l.replace("{{set_k_call1}}", f"mipp::set_k<{load_type}, LMUL>(inputs_m1)")
+                    l = l.replace("{{scalar_set_k_call1}}", f"mipp::set_k<{load_type}, LMUL, mipp::ISA::SCALAR>(inputs_m1)")
+                    l = l.replace("{{set_k_call2}}", f"mipp::set_k<{load_type}, LMUL>(inputs_m2)")
+                    l = l.replace("{{scalar_set_k_call2}}", f"mipp::set_k<{load_type}, LMUL, mipp::ISA::SCALAR>(inputs_m2)")
+                    l = l.replace("{{set_k_call3}}", f"mipp::set_k<{load_type}, LMUL>(inputs_m3)")
+                    l = l.replace("{{scalar_set_k_call3}}", f"mipp::set_k<{load_type}, LMUL, mipp::ISA::SCALAR>(inputs_m3)")
+                l = l.replace("{{op_call}}", op_call)
+                l = l.replace("{{scalar_op_call}}", scalar_op_call)
+                l = l.replace("{{get_func}}(rres, i)", "rres[i]" if dialect_name == "obj" else "mipp::get(rres, i)")
+                l = l.replace("{{get_scalar_func}}(sres, i)", "sres[i]" if dialect_name == "obj" else "mipp::get(sres, i)")
+                l = l.replace("{{get_k_func}}(rres, i)", "rres[i]" if dialect_name == "obj" else "mipp::get(rres, i)")
+                l = l.replace("{{get_scalar_k_func}}(sres, i)", "sres[i]" if dialect_name == "obj" else "mipp::get(sres, i)")
+                l = l.replace("{{tol_decl}}", "auto tol = (decltype(res2))0.05 * abs_diff::abs_diff(res2);")
+                l = l.replace("{{tol_decl_s3}}", "T tol = (T)0.05 * abs_diff::abs_diff(sres);")
+                l = l.replace("{{nan_inf_skip_lines}}", "if (std::isinf(tol) || std::isnan(tol)) continue;\nif (std::isnan(diff) || std::isnan(res2) || std::isnan(res1)) continue;\nif (std::isinf(diff) || std::isinf(res2) || std::isinf(res1)) continue;")
+                out.append(l)
+            return out
+
+        mk_enum_map = {"unmasked": "mipp::U", "mask": "mipp::M", "maskz": "mipp::Z", "masks": "mipp::S"}
+        is_first_mk = True
+
+        is_void = proto_ref.startswith("ret_void")
+
+        if is_product or is_void:
+            for mkind in supported_mkinds:
+                mk_enum = mk_enum_map[mkind]
+                keyword = "if constexpr" if is_first_mk else "else if constexpr"
+                is_first_mk = False
+
+                lines.append(f"\t\t{keyword} (MK == {mk_enum})")
+                lines.append("\t\t{")
+                loads_lines = expand_cpp_lines(load_raw, mkind)
+                lines.extend(self.indent_lines(loads_lines, 3))
+                if dialect_name != "obj" and mkind in ("mask", "maskz", "masks") and not any("m1" in l for l in loads_lines):
+                    lines.append("\t\t\tauto m1 = mipp::set_k<T, LMUL>(inputs_m);")
+                    lines.append("\t\t\tauto sm1 = mipp::set_k<T, LMUL, mipp::ISA::SCALAR>(inputs_m);")
+                if dialect_name != "obj" and mkind == "masks" and not any("rsrc" in l for l in loads_lines):
+                    lines.append("\t\t\tauto rsrc = mipp::load<T, LMUL>(inputs_src);")
+                    lines.append("\t\t\tauto ssrc = mipp::load<T, LMUL, mipp::ISA::SCALAR>(inputs_src);")
+                op_lines = expand_cpp_lines(op_raw, mkind)
+                lines.extend(self.indent_lines(op_lines, 3))
+                if dialect_name == "obj" and not is_void:
+                    as_lines = expand_cpp_lines(as_raw, mkind)
+                    lines.extend(self.indent_lines(as_lines, 3))
+                lines.append("\t\t}")
+
+            if is_void:
+                lines.append("")
+                lines.append("\t\tfor (size_t i = 0; i < size; i++)")
+                lines.append("\t\t{")
+                lines.append("\t\t\tREQUIRE(res_r[i] == res_s[i]);")
+                lines.append("\t\t}")
+        else:
+            loads_lines = expand_cpp_lines(load_raw, "unmasked")
+            base_loads = [l for l in loads_lines if any(v in l for v in ("r1 =", "r2 =", "r3 =", "s1 =", "s2 =", "s3 =", "m1 =", "m2 =", "m3 =", "sm1 =", "sm2 =", "sm3 =", "r1(", "r2(", "r3("))]
+            lines.extend(self.indent_lines(base_loads, 2))
+
+            r_var = "rres"
+            s_var = "sres"
+
+            lines.append(f"\t\tauto {r_var} = [&]() {{")
+            is_first_mk = True
+            for mkind in supported_mkinds:
+                mk_enum = mk_enum_map[mkind]
+                keyword = "if constexpr" if is_first_mk else "else if constexpr"
+                is_first_mk = False
+                lines.append(f"\t\t\t{keyword} (MK == {mk_enum})")
+                lines.append("\t\t\t{")
+                if mkind in ("mask", "maskz", "masks"):
+                    lines.append("\t\t\t\tauto m1 = mipp::set_k<T, LMUL>(inputs_m);")
+                if mkind == "masks":
+                    lines.append("\t\t\t\tauto rsrc = mipp::load<T, LMUL>(inputs_src);")
+                op_lines = expand_cpp_lines(op_raw, mkind)
+                op_r_matches = [l for l in op_lines if any(k in l for k in ("rres =", "res_r ="))]
+                if op_r_matches:
+                    ret_r = re.sub(r"^[\w:<>]+\s+(rres|res_r)\s*=\s*", "return ", op_r_matches[0].strip())
+                    lines.append(f"\t\t\t\t{ret_r}")
+                lines.append("\t\t\t}")
+            lines.append("\t\t}();")
+            lines.append("")
+
+            lines.append(f"\t\tauto {s_var} = [&]() {{")
+            is_first_mk = True
+            for mkind in supported_mkinds:
+                mk_enum = mk_enum_map[mkind]
+                keyword = "if constexpr" if is_first_mk else "else if constexpr"
+                is_first_mk = False
+                lines.append(f"\t\t\t{keyword} (MK == {mk_enum})")
+                lines.append("\t\t\t{")
+                if mkind in ("mask", "maskz", "masks"):
+                    lines.append("\t\t\t\tauto sm1 = mipp::set_k<T, LMUL, mipp::ISA::SCALAR>(inputs_m);")
+                if mkind == "masks":
+                    lines.append("\t\t\t\tauto ssrc = mipp::load<T, LMUL, mipp::ISA::SCALAR>(inputs_src);")
+                op_lines = expand_cpp_lines(op_raw, mkind)
+                op_s_matches = [l for l in op_lines if any(k in l for k in ("sres =", "res_s ="))]
+                if op_s_matches:
+                    ret_s = re.sub(r"^[\w:<>]+\s+(sres|res_s)\s*=\s*", "return ", op_s_matches[0].strip())
+                    lines.append(f"\t\t\t\t{ret_s}")
+                lines.append("\t\t\t}")
+            lines.append("\t\t}();")
+            lines.append("")
+
+            val_lines = self.render_cpp_validation_block(func_name, proto_ref, is_product, r_var=r_var, s_var=s_var, dialect_name=dialect_name)
+            lines.extend(self.indent_lines(val_lines, 2))
+
+        lines.append("\t}")
+        lines.append("}")
+        lines.append("")
+
+        lines.extend(self.render_cpp_test_case(dialect_name, func_name, supported_mkinds))
+        return "\n".join(lines)
+
     def build_test_file_content(self, dialect_name: str, func_name: str, lmul_suffix: str = "m1", mkind: str = "", lmul: int = 0, N: int = 10) -> str:
+        if dialect_name in ("cpp", "obj"):
+            return self.build_unified_cpp_test_file(dialect_name, func_name, N=N)
         return self.render_function_test(dialect_name, func_name, lmul_suffix, mkind=mkind, lmul=lmul, N=N)
 
     def render_function_test(self, dialect_name: str, func_name: str, lmul_suffix: str = "m1", mkind: str = "", lmul: int = 0, N: int = 10) -> str:

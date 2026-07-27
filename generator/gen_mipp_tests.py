@@ -82,18 +82,41 @@ def write_file_if_different(file_path: str, content: str, encoding: str = "utf-8
     return True
 
 
+def gen_test_files_unified_layer(kind: str = "cpp", N: int = 10, stats: dict = None) -> None:
+    if stats is None:
+        stats = {"generated": 0, "skipped_mask": [], "skipped_disabled": [], "skipped_obj": []}
+
+    funcs = set(interfaces.keys())
+    base_dir = f"{tmp_path}{kind}_tests/"
+
+    for func in sorted(funcs):
+        disabled, reason = engine.is_func_disabled(func, kind)
+        if disabled:
+            func_spec = engine.specs["functions"].get(func, {})
+            if func_spec.get("disabled"):
+                stats["skipped_disabled"].append(func)
+            elif kind == "obj":
+                stats["skipped_obj"].append(func)
+            if reason is None:
+                reason = f"{func} disabled in tests_specs.json"
+
+        cat = _match_category(func)
+        content = engine.build_test_file_content(kind, func, N=N)
+
+        if disabled:
+            content = comment_out_cpp_file(content, reason)
+
+        fname_prefix = "test_" if kind == "cpp" else "test_obj_"
+        file_path = f"{base_dir}{cat}/{fname_prefix}{func}.cpp"
+        write_file_if_different(file_path, content)
+        stats["generated"] += 1
+
+
 def gen_test_files_all_funcs(kind: str = "c", lmul: int = 0, mkind: str = "", N: int = 10, mode: str = "function", stats: dict = None) -> None:
     if stats is None:
         stats = {"generated": 0, "skipped_mask": [], "skipped_disabled": [], "skipped_obj": []}
 
     regen_c = kind == "c"
-    regen_cpp = kind == "cpp"
-    regen_obj = kind == "obj"
-
-    if lmul != 0:
-        regen_obj = False
-    if mkind != "":
-        regen_obj = False
 
     funcs = set(interfaces.keys())
     cpath_root, cpppath_root, objpath_root = get_str_path(tmp_path, lmul=lmul, mkind=mkind)
@@ -112,8 +135,6 @@ def gen_test_files_all_funcs(kind: str = "c", lmul: int = 0, mkind: str = "", N:
             func_spec = engine.specs["functions"].get(func, {})
             if func_spec.get("disabled"):
                 stats["skipped_disabled"].append(func)
-            elif kind == "obj":
-                stats["skipped_obj"].append(func)
             if reason is None:
                 reason = f"{func} disabled in tests_specs.json"
 
@@ -126,22 +147,6 @@ def gen_test_files_all_funcs(kind: str = "c", lmul: int = 0, mkind: str = "", N:
                 c_file = comment_out_cpp_file(c_file, reason)
             file_path = f"{cpath_root}{cat}/{lmul_tag}/{mask_tag}/test_c{func}.cpp"
             write_file_if_different(file_path, c_file)
-            stats["generated"] += 1
-
-        if regen_cpp:
-            cpp_file = engine.build_test_file_content("cpp", func, lmul_suffix, mkind=mkind, lmul=lmul)
-            if disabled:
-                cpp_file = comment_out_cpp_file(cpp_file, reason)
-            file_path = f"{cpppath_root}{cat}/{lmul_tag}/{mask_tag}/test_{func}.cpp"
-            write_file_if_different(file_path, cpp_file)
-            stats["generated"] += 1
-
-        if regen_obj:
-            obj_file = engine.build_test_file_content("obj", func, lmul_suffix, mkind=mkind, lmul=lmul)
-            if disabled:
-                obj_file = comment_out_cpp_file(obj_file, reason)
-            file_path = f"{objpath_root}{cat}/{lmul_tag}/{mask_tag}/test_obj_{func}.cpp"
-            write_file_if_different(file_path, obj_file)
             stats["generated"] += 1
 
 
@@ -192,20 +197,18 @@ def main():
     parser.add_argument(
         "--skip-lmul-cpp",
         action="store_true",
-        help="Skip generating C++ tests for LMUL > 0 (default: false).",
+        help="Deprecated option kept for backward compatibility.",
     )
     parser.add_argument(
         "--skip-mask-cpp",
         action="store_true",
-        help="Skip generating C++ tests for masked functions (default: false).",
+        help="Deprecated option kept for backward compatibility.",
     )
     parser.add_argument(
         "--header-type",
-        type=str,
-        choices=["function", "category"],
+        choices=["function", "full"],
         default="function",
-        nargs="?",
-        help="Whether to use function-specific headers or category-based headers (default: function)."
+        help="Generate test using individual header inclusion or global header inclusion.",
     )
     parser.add_argument(
         "--audit",
@@ -234,8 +237,12 @@ def main():
                     elif item in ("coverage", "redundancy", "consistency"):
                         active_audits.add(item)
 
+    print("=====================================================================================================")
+    print(" MIPP Tests Audits")
+    print("=====================================================================================================")
+
     global engine
-    engine = TestBuilderEngine(base_dir=os.path.dirname(path), active_audits=active_audits)
+    engine = TestBuilderEngine(base_dir="..", active_audits=active_audits)
 
     if isinstance(args.kind, str):
         args.kind = [args.kind]
@@ -243,24 +250,20 @@ def main():
         args.mask_kind = [k if k != "unmasked" else "" for k in args.mask_kind]
 
     print("=====================================================================================================")
-    print(" MIPP Test Generator")
+    print(" MIPP Tests Generator")
     print("=====================================================================================================")
-    print(f"  Layers: {args.kind} | Header type: {args.header_type}")
-    print(f"  Iterations (N): {args.num_iterations}")
-    print(f"  LMUL options: {args.lmul} | LDIV options: {args.ldiv}")
-    mask_str = [m if m != "" else "unmasked" for m in args.mask_kind]
-    print(f"  Mask kinds: {mask_str}")
-    print(f"  Skip C++ LMUL>0: {args.skip_lmul_cpp} | Skip C++ Masked: {args.skip_mask_cpp}")
-    print("-----------------------------------------------------------------------------------------------------")
 
     if not args.no_clean:
+        print("  ➔ Cleaning old test folders...", end="", flush=True)
         import time
-        print("  ➔ Cleaning old test folders:")
         t0 = time.perf_counter()
-        clean_folder(cpath)
-        clean_folder(cpppath)
-        clean_folder(objpath)
-        print(f"    Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
+        if "c" in args.kind:
+            clean_folder(cpath)
+        if "cpp" in args.kind:
+            clean_folder(cpppath)
+        if "obj" in args.kind:
+            clean_folder(objpath)
+        print(f"\n    Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
 
     stats = {
         "generated": 0,
@@ -269,36 +272,38 @@ def main():
         "skipped_obj": []
     }
 
+    import time
     for kind in args.kind:
-        valid_lmuls = [l for l in args.lmul if not (kind == "cpp" and args.skip_lmul_cpp and l > 0)]
-        valid_ldivs = [l for l in args.ldiv if not (kind == "cpp" and args.skip_lmul_cpp and l > 0)]
-        valid_masks = [m for m in args.mask_kind if not (kind == "cpp" and args.skip_mask_cpp and m != "")]
-        
-        mask_strs = [m if m != "" else "unmasked" for m in valid_masks]
-        mask_str_formatted = "{" + ", ".join(mask_strs) + "}"
-        
-        if valid_lmuls:
-            lmul_str = "{" + ", ".join(map(str, valid_lmuls)) + "}"
-            print(f"  ➔ Generating {kind.upper()} tests [LMUL={lmul_str}, mask={mask_str_formatted}]...", end="", flush=True)
-            import time
+        if kind == "c":
+            valid_lmuls = [l for l in args.lmul]
+            valid_ldivs = [l for l in args.ldiv]
+            valid_masks = [m for m in args.mask_kind]
+            mask_strs = [m if m != "" else "unmasked" for m in valid_masks]
+            mask_str_formatted = "{" + ", ".join(mask_strs) + "}"
+            if valid_lmuls:
+                lmul_str = "{" + ", ".join(map(str, valid_lmuls)) + "}"
+                print(f"  ➔ Generating C tests [LMUL={lmul_str}, mask={mask_str_formatted}]...", end="", flush=True)
+                t0_step = time.perf_counter()
+                for lmul in valid_lmuls:
+                    for mkind in valid_masks:
+                        gen_test_files_all_funcs(kind="c", lmul=lmul, mkind=mkind, N=args.num_iterations, mode=args.header_type, stats=stats)
+                print(f" Done ({time.perf_counter() - t0_step:.3f} s)!")
+            if valid_ldivs:
+                ldiv_str = "{" + ", ".join(map(str, valid_ldivs)) + "}"
+                print(f"  ➔ Generating C tests [LDIV={ldiv_str}, mask={mask_str_formatted}]...", end="", flush=True)
+                t0_step = time.perf_counter()
+                for ldiv in valid_ldivs:
+                    for mkind in valid_masks:
+                        gen_test_files_all_funcs(kind="c", lmul=(-int(ldiv)), mkind=mkind, N=args.num_iterations, mode=args.header_type, stats=stats)
+                print(f" Done ({time.perf_counter() - t0_step:.3f} s)!")
+        else:
+            print(f"  ➔ Generating unified {kind.upper()} tests (templates [U, M, Z, S], LMUL, datatypes)...", end="", flush=True)
             t0_step = time.perf_counter()
-            for lmul in valid_lmuls:
-                for mkind in valid_masks:
-                    gen_test_files_all_funcs(kind=kind, lmul=lmul, mkind=mkind, N=args.num_iterations, mode=args.header_type, stats=stats)
-            print(f" Done ({time.perf_counter() - t0_step:.3f} s)!")
-
-        if valid_ldivs:
-            ldiv_str = "{" + ", ".join(map(str, valid_ldivs)) + "}"
-            print(f"  ➔ Generating {kind.upper()} tests [LDIV={ldiv_str}, mask={mask_str_formatted}]...", end="", flush=True)
-            import time
-            t0_step = time.perf_counter()
-            for ldiv in valid_ldivs:
-                for mkind in valid_masks:
-                    gen_test_files_all_funcs(kind=kind, lmul=(-int(ldiv)), mkind=mkind, N=args.num_iterations, mode=args.header_type, stats=stats)
+            gen_test_files_unified_layer(kind=kind, N=args.num_iterations, stats=stats)
             print(f" Done ({time.perf_counter() - t0_step:.3f} s)!")
 
     print("\n=====================================================================================================")
-    print(" MIPP TEST GENERATION SUMMARY")
+    print(" MIPP Tests Generation Summary")
     print("=====================================================================================================")
     print(f"  Total tests generated: {stats['generated']}")
 

@@ -67,7 +67,7 @@ typedef float float32_t;
     print("#pragma once\n", file=file_common)
     print("namespace mipp {\n", file=file_common)
     print("enum ISA { SCALAR, SSE, AVX, AVX512, NEON, SVE, RVV };", file=file_common)
-    print("enum MKIND { NO, M, Z, S }; //mask enum for function templates", file=file_common)
+    print("enum MKIND { U, M, Z, S }; //mask enum for function templates", file=file_common)
 
     isa_list_copy = prepare_isa_defines(isa_list) # this is the function that sets the gen_define key for every ISAs for some reason
 
