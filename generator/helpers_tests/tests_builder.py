@@ -332,12 +332,7 @@ class TestsBuilderEngine:
         return [f"{tabs}{line}" if line else "" for line in lines]
 
     def _format_cpp_type(self, dt_str: str) -> str:
-        mapping = {
-            "float32": "float", "float64": "double",
-            "int8": "int8_t", "int16": "int16_t", "int32": "int32_t", "int64": "int64_t",
-            "uint8": "uint8_t", "uint16": "uint16_t", "uint32": "uint32_t", "uint64": "uint64_t"
-        }
-        return mapping.get(dt_str, dt_str)
+        return CppDialectAdapter().cpp_type(dt_str)
 
     def resolve_tolerance_expr(self, func_name: str, dt_cpp: str, ref_var: str = "res2") -> str:
         """Returns an inline C++ expression for tolerance computation.
@@ -448,7 +443,7 @@ class TestsBuilderEngine:
             else:
                 return f"(std::is_same_v<{dt_cpp}, float> ? ({dt_cpp})((float){val}) : ({dt_cpp})((double){val}))"
 
-    def render_cpp_validation_block(self, func_name: str, proto_ref: str, is_product: bool = False, r_var: str = "rres", s_var: str = "sres", dialect_name: str = "cpp") -> List[str]:
+    def render_cpp_validation_block(self, func_name: str, proto_ref: str, is_product: bool = False, r_var: str = "rres", s_var: str = "sres", adapter: DialectAdapter = None) -> List[str]:
         func_spec = self.specs.get("functions", {}).get(func_name, {})
         default_spec = self.specs.get("default", {})
         comp_type = func_spec.get("comparison", default_spec.get("comparison", "exact"))
@@ -462,8 +457,8 @@ class TestsBuilderEngine:
             r_get = f"{r_var}[i]"
             s_get = f"{s_var}[i]"
         else:
-            r_get = f"{r_var}[i]" if dialect_name == "obj" else f"mipp::get({r_var}, i)"
-            s_get = f"mipp::get({s_var}, i)"
+            r_get = adapter.format_get(r_var, "i", "", "")
+            s_get = adapter.format_scalar_get(s_var, "i", "", "")
 
         overflow_check = func_spec.get("overflow_check")
 
@@ -573,6 +568,171 @@ class TestsBuilderEngine:
     def build_test_file_content(self, dialect_name: str, func_name: str, lmul_suffix: str = "m1", mkind: str = "", lmul: int = 0, N: int = 10) -> str:
         builder = self.get_builder(dialect_name)
         return builder.build_test_file_content(func_name, lmul_suffix=lmul_suffix, mkind=mkind, lmul=lmul, N=N)
+
+    def format_cpp_op_call(self, func_name: str, mkind: str, is_scalar: bool = False) -> str:
+        """Build a C++ template call expression with symbolic params (MK, T, LMUL).
+
+        Used by TestsBuilderEngineCpp where T and LMUL are compile-time template
+        parameters, not resolved Python values. Centralises all mipp:: namespace
+        references for this dialect so dialect_adapters remain authoritative.
+        """
+        args = self._build_op_call_args(func_name, mkind, is_scalar)
+        fname = self.interfaces.get(func_name, {}).get("cpp_name", func_name)
+        call_args = ", ".join(args)
+        isa_str = ", mipp::ISA::SCALAR" if is_scalar else ""
+
+        # Masked variants: explicit MK template param
+        mk_map = {"mask": "mipp::M", "maskz": "mipp::Z", "masks": "mipp::S"}
+        if mkind in mk_map:
+            mk_sym = mk_map[mkind]
+            return f"mipp::{fname}<{mk_sym}, T, LMUL{isa_str}>({call_args})"
+
+        # Conversion functions: test_helpers wrapper
+        dt_spec = self.interfaces.get(func_name, {}).get("datatypes")
+        is_conversion = dt_spec in ("all_datatypes_cart_prod", "all_datatypes_same_size", "all_datatypes_widenning")
+        if is_conversion:
+            return f"mipp::test_helpers::{fname}<T_dst>({call_args})"
+
+        # Functions with no register/mask args (set, set0, set1…): explicit T, LMUL
+        args_info = self.get_proto_args_info(func_name)
+        has_reg_or_msk = any(arg.get("type") in ("reg", "msk") for arg in args_info)
+        if not has_reg_or_msk:
+            return f"mipp::{fname}<T, LMUL{isa_str}>({call_args})"
+
+        # Default: plain call (T is deduced from arguments)
+        return f"mipp::{fname}({call_args})"
+
+    def render_c_validation_block(
+        self,
+        func_name: str,
+        adapter: "CDialectAdapter",
+        mkind: str,
+        dt1_raw: str,
+        dt2_raw: str,
+        dt_cstd: str,
+        lmul_suffix: str,
+        is_loop: bool,
+        is_void_ret: bool,
+        is_msk_ret: bool,
+        size_out_var: str,
+        size_var: str,
+        r_var: str = "rres",
+        s_var: str = "sres",
+    ) -> List[str]:
+        """Generate assertion lines for the C dialect validation block.
+
+        Symmetric to render_cpp_validation_block but uses CDialectAdapter
+        accessor calls (mipp_get_*, mipp_scalar_get_*) and C-specific
+        assertion templates. Called by TestsBuilderEngineC to avoid duplicating
+        the bitwise/logical/tolerance/exact dispatch logic inline.
+        """
+        func_spec = self.specs.get("functions", {}).get(func_name, {})
+        overflow_check = func_spec.get("overflow_check")
+        comp_entry = func_spec.get("comparison", "exact")
+        if isinstance(comp_entry, dict):
+            dt_key = dt2_raw.split("_")[-1]
+            comp_type = comp_entry.get("by_datatype", {}).get(dt_key, comp_entry.get("default", "exact"))
+        else:
+            comp_type = comp_entry
+        has_tolerance = "tolerance" in func_spec or comp_type == "tolerance"
+        nan_inf_skip = func_spec.get("nan_inf_skip", False)
+
+        lines: List[str] = []
+
+        if is_loop:
+            lines.append(f"\t\tfor (unsigned i = 0; i < {size_out_var}; i++)")
+            lines.append("\t\t{")
+
+            if is_msk_ret:
+                r_expr_fn = lambda reg: adapter.format_get_k(reg, "i", dt2_raw, lmul_suffix)
+                s_expr_fn = lambda reg: adapter.format_scalar_get_k(reg, "i", dt2_raw, lmul_suffix)
+            else:
+                r_expr_fn = lambda reg: adapter.format_get(reg, "i", dt2_raw, lmul_suffix)
+                s_expr_fn = lambda reg: adapter.format_scalar_get(reg, "i", dt2_raw, lmul_suffix)
+
+            def _assert_stmts(r_expr: str, s_expr: str, indent: str = "\t\t\t") -> List[str]:
+                res: List[str] = []
+                if nan_inf_skip:
+                    res.append(f"{indent}if (std::isnan({r_expr}) || std::isnan({s_expr})) continue;")
+                    res.append(f"{indent}if (std::isinf({r_expr}) || std::isinf({s_expr})) continue;")
+                res.extend(self.render_skip_condition(func_name, s_expr, indent, dt_cstd=f"{dt2_raw}_t"))
+
+                if comp_type == "bitwise":
+                    tpl = self.templates.get("assertions", {}).get("c", {}).get("as_bitwise_eq", [])
+                    res.extend([f"{indent}{l}" for l in self.render_template(tpl, r_get=r_expr, s_get=s_expr)])
+                elif comp_type == "logical" or is_msk_ret or func_name.endswith("_k"):
+                    tpl = self.templates.get("assertions", {}).get("c", {}).get("as_logical_eq", [])
+                    res.extend([f"{indent}{l}" for l in self.render_template(tpl, r_get=r_expr, s_get=s_expr)])
+                elif has_tolerance and (dt2_raw in ("float32", "float64") or dt1_raw in ("float32", "float64")):
+                    for tl in self.render_tolerance_declaration(func_name, f"{dt2_raw}_t", ref_var=s_expr, indent=indent):
+                        res.append(tl)
+                    res.append(f"{indent}REQUIRE(abs_diff::abs_diff(({dt2_raw}_t)({r_expr}) - ({dt2_raw}_t)({s_expr})) <= tol);")
+                else:
+                    tpl = self.templates.get("assertions", {}).get("c", {}).get("as_strict_eq", [])
+                    res.extend([f"{indent}{l}" for l in self.render_template(tpl, r_get=r_expr, s_get=s_expr)])
+                return res
+
+            if overflow_check and not overflow_check.startswith("accumulate_"):
+                val1_expr = adapter.format_get("r1", "i", dt2_raw, lmul_suffix)
+                val2_expr = adapter.format_get("r2", "i", dt2_raw, lmul_suffix)
+                inner_lines = "\n".join(_assert_stmts(r_expr_fn(r_var), s_expr_fn(s_var), indent="\t\t\t\t"))
+                tpl_shell = self.templates.get("func_templates", {}).get("c", {}).get("overflow_check_shell", [])
+                lines.extend(self.render_template(
+                    tpl_shell,
+                    overflow_check=overflow_check, dt=dt_cstd,
+                    val1=val1_expr, val2=val2_expr, inner_lines=inner_lines,
+                ))
+            else:
+                if is_void_ret:
+                    lines.extend(_assert_stmts("res_r[i]", "res_s[i]", indent="\t\t\t"))
+                else:
+                    lines.extend(_assert_stmts(r_expr_fn(r_var), s_expr_fn(s_var), indent="\t\t\t"))
+            lines.append("\t\t}")
+
+        else:
+            # Scalar / reduction path
+            if overflow_check and overflow_check.startswith("accumulate_"):
+                kind = overflow_check.replace("accumulate_", "")
+                tpl_key = f"as_reduction_{kind}_overflow"
+                tpl = self.templates.get("assertions", {}).get("c", {}).get(tpl_key, [])
+                mask_ptr = "inputs_m" if mkind in ("mask", "maskz", "masks") else "nullptr"
+                is_maskz_bool = "true" if mkind == "maskz" else "false"
+                inputs_src_ptr = "inputs_src" if mkind == "masks" else "nullptr"
+
+                assert_lines: List[str] = []
+                if nan_inf_skip:
+                    assert_lines.append(f"\t\tif (std::isnan({r_var}) || std::isnan({s_var})) return;")
+                    assert_lines.append(f"\t\tif (std::isinf({r_var}) || std::isinf({s_var})) return;")
+
+                if comp_type == "logical" or func_name.endswith("_k") or is_msk_ret:
+                    assert_lines.append(f"\t\tREQUIRE((!!" + r_var + f") == (!!" + s_var + "));")
+                elif has_tolerance and dt1_raw in ("float32", "float64"):
+                    assert_lines.extend(self.render_tolerance_declaration(func_name, dt_cstd, ref_var=s_var, indent="\t\t"))
+                    assert_lines.append(f"\t\tREQUIRE(abs_diff::abs_diff({r_var} - {s_var}) <= tol);")
+                else:
+                    assert_lines.append(f"\t\tREQUIRE({r_var} == {s_var});")
+
+                assert_str = "\n".join(assert_lines)
+                for line in tpl:
+                    if "{{assert_lines}}" in line:
+                        lines.append(assert_str)
+                    else:
+                        formatted = (line.replace("{{dt}}", dt_cstd)
+                                         .replace("{{size_var}}", size_var)
+                                         .replace("{{mask_ptr}}", mask_ptr)
+                                         .replace("{{is_maskz_bool}}", is_maskz_bool)
+                                         .replace("{{inputs_src_ptr}}", inputs_src_ptr))
+                        lines.append(f"\t\t{formatted}")
+            else:
+                if comp_type == "logical" or func_name.endswith("_k") or is_msk_ret:
+                    lines.append(f"\t\tREQUIRE((!!" + r_var + f") == (!!" + s_var + "));")
+                elif has_tolerance and dt1_raw in ("float32", "float64"):
+                    lines.extend(self.render_tolerance_declaration(func_name, dt_cstd, ref_var=s_var, indent="\t\t"))
+                    lines.append(f"\t\tREQUIRE(abs_diff::abs_diff({r_var} - {s_var}) <= tol);")
+                else:
+                    lines.append(f"\t\tREQUIRE({r_var} == {s_var});")
+
+        return lines
 
     def _audit_specs(self) -> None:
         if "consistency" in self.active_audits:
@@ -766,117 +926,20 @@ class TestsBuilderEngineC:
             body_lines.append(f"\t\t{ret_type_s} sres = {adapter.format_scalar_func_call(func_name, dt_func_ext, ', '.join(op_args_s), lmul_suffix, mkind=mkind)};")
         body_lines.append("")
 
-        overflow_check = func_spec.get("overflow_check")
-        comp_entry = func_spec.get("comparison", "exact")
-        if isinstance(comp_entry, dict):
-            dt_key = dt2_raw.split("_")[-1]
-            comp_type = comp_entry.get("by_datatype", {}).get(dt_key, comp_entry.get("default", "exact"))
-        else:
-            comp_type = comp_entry
-        has_tolerance = "tolerance" in func_spec or comp_type == "tolerance"
-        nan_inf_skip = func_spec.get("nan_inf_skip", False)
-
-        if is_loop:
-            body_lines.append(f"\t\tfor (unsigned i = 0; i < {size_out_var}; i++)")
-            body_lines.append("\t\t{")
-            if is_msk_ret:
-                r_expr_fn = lambda reg: adapter.format_get_k(reg, "i", dt2_raw, lmul_suffix)
-                s_expr_fn = lambda reg: adapter.format_scalar_get_k(reg, "i", dt2_raw, lmul_suffix)
-            else:
-                r_expr_fn = lambda reg: adapter.format_get(reg, "i", dt2_raw, lmul_suffix)
-                s_expr_fn = lambda reg: adapter.format_scalar_get(reg, "i", dt2_raw, lmul_suffix)
-
-            def get_assert_statements(r_expr: str, s_expr: str, indent: str = "\t\t\t") -> List[str]:
-                res = []
-                if nan_inf_skip:
-                    res.append(f"{indent}if (std::isnan({r_expr}) || std::isnan({s_expr})) continue;")
-                    res.append(f"{indent}if (std::isinf({r_expr}) || std::isinf({s_expr})) continue;")
-                res.extend(self.engine.render_skip_condition(func_name, s_expr, indent, dt_cstd=f"{dt2_raw}_t"))
-
-                if comp_type == "bitwise":
-                    tpl = self.engine.templates.get("assertions", {}).get("c", {}).get("as_bitwise_eq", [])
-                    raw_lines = self.engine.render_template(tpl, r_get=r_expr, s_get=s_expr)
-                    res.extend([f"{indent}{l}" for l in raw_lines])
-                elif comp_type == "logical" or is_msk_ret or func_name.endswith("_k"):
-                    tpl = self.engine.templates.get("assertions", {}).get("c", {}).get("as_logical_eq", [])
-                    raw_lines = self.engine.render_template(tpl, r_get=r_expr, s_get=s_expr)
-                    res.extend([f"{indent}{l}" for l in raw_lines])
-                elif has_tolerance and (dt2_raw in ("float32", "float64") or dt1_raw in ("float32", "float64")):
-                    tol_lines = self.engine.render_tolerance_declaration(func_name, f"{dt2_raw}_t", ref_var=s_expr, indent=f"{indent}")
-                    for tl in tol_lines:
-                        res.append(tl)
-                    res.append(f"{indent}REQUIRE(abs_diff::abs_diff(({dt2_raw}_t)({r_expr}) - ({dt2_raw}_t)({s_expr})) <= tol);")
-                else:
-                    tpl = self.engine.templates.get("assertions", {}).get("c", {}).get("as_strict_eq", [])
-                    raw_lines = self.engine.render_template(tpl, r_get=r_expr, s_get=s_expr)
-                    res.extend([f"{indent}{l}" for l in raw_lines])
-                return res
-
-            if overflow_check and not overflow_check.startswith("accumulate_"):
-                val1_expr = adapter.format_get("r1", "i", dt2_raw, lmul_suffix)
-                val2_expr = adapter.format_get("r2", "i", dt2_raw, lmul_suffix)
-                r_expr = r_expr_fn("rres")
-                s_expr = s_expr_fn("sres")
-                inner_lines = "\n".join(get_assert_statements(r_expr, s_expr, indent="\t\t\t\t"))
-                tpl_shell = self.engine.templates.get("func_templates", {}).get("c", {}).get("overflow_check_shell", [])
-                body_lines.extend(self.engine.render_template(
-                    tpl_shell,
-                    overflow_check=overflow_check,
-                    dt=dt_cstd,
-                    val1=val1_expr,
-                    val2=val2_expr,
-                    inner_lines=inner_lines,
-                ))
-            else:
-                if is_void_ret:
-                    body_lines.extend(get_assert_statements("res_r[i]", "res_s[i]", indent="\t\t\t"))
-                else:
-                    body_lines.extend(get_assert_statements(r_expr_fn("rres"), s_expr_fn("sres"), indent="\t\t\t"))
-            body_lines.append("\t\t}")
-        else:
-            if overflow_check and overflow_check.startswith("accumulate_"):
-                kind = overflow_check.replace("accumulate_", "")
-                tpl_key = f"as_reduction_{kind}_overflow"
-                tpl = self.engine.templates.get("assertions", {}).get("c", {}).get(tpl_key, [])
-                mask_ptr = "inputs_m" if mkind in ("mask", "maskz", "masks") else "nullptr"
-                is_maskz_bool = "true" if mkind == "maskz" else "false"
-                inputs_src_ptr = "inputs_src" if mkind == "masks" else "nullptr"
-
-                assert_lines = []
-                if nan_inf_skip:
-                    assert_lines.append("\t\tif (std::isnan(rres) || std::isnan(sres)) return;")
-                    assert_lines.append("\t\tif (std::isinf(rres) || std::isinf(sres)) return;")
-
-                if comp_type == "logical" or func_name.endswith("_k") or is_msk_ret:
-                    assert_lines.append("\t\tREQUIRE((!!rres) == (!!sres));")
-                elif has_tolerance and dt1_raw in ("float32", "float64"):
-                    tol_lines = self.engine.render_tolerance_declaration(func_name, dt_cstd, ref_var="sres", indent="\t\t")
-                    assert_lines.extend(tol_lines)
-                    assert_lines.append(f"\t\tREQUIRE(abs_diff::abs_diff(rres - sres) <= tol);")
-                else:
-                    assert_lines.append("\t\tREQUIRE(rres == sres);")
-
-                assert_str = "\n".join(assert_lines)
-
-                for line in tpl:
-                    if "{{assert_lines}}" in line:
-                        body_lines.append(assert_str)
-                    else:
-                        formatted_line = (line.replace("{{dt}}", dt_cstd)
-                                              .replace("{{size_var}}", size_var)
-                                              .replace("{{mask_ptr}}", mask_ptr)
-                                              .replace("{{is_maskz_bool}}", is_maskz_bool)
-                                              .replace("{{inputs_src_ptr}}", inputs_src_ptr))
-                        body_lines.append(f"\t\t{formatted_line}")
-            else:
-                if comp_type == "logical" or func_name.endswith("_k") or is_msk_ret:
-                    body_lines.append("\t\tREQUIRE((!!rres) == (!!sres));")
-                elif has_tolerance and dt1_raw in ("float32", "float64"):
-                    tol_lines = self.engine.render_tolerance_declaration(func_name, dt_cstd, ref_var="sres", indent="\t\t")
-                    body_lines.extend(tol_lines)
-                    body_lines.append(f"\t\tREQUIRE(abs_diff::abs_diff(rres - sres) <= tol);")
-                else:
-                    body_lines.append("\t\tREQUIRE(rres == sres);")
+        body_lines.extend(self.engine.render_c_validation_block(
+            func_name=func_name,
+            adapter=adapter,
+            mkind=mkind,
+            dt1_raw=dt1_raw,
+            dt2_raw=dt2_raw,
+            dt_cstd=dt_cstd,
+            lmul_suffix=lmul_suffix,
+            is_loop=is_loop,
+            is_void_ret=is_void_ret,
+            is_msk_ret=is_msk_ret,
+            size_out_var=size_out_var,
+            size_var=size_var,
+        ))
 
         body_lines.append("\t}")
         body_lines.append("}")
@@ -905,15 +968,15 @@ class TestsBuilderEngineC:
 
 class TestsBuilderEngineCppBase:
 
+    MK_ENUM  = {"unmasked": "mipp::U", "mask": "mipp::M", "maskz": "mipp::Z", "masks": "mipp::S"}
+    MK_LABEL = {"unmasked": "unmasked (U)", "mask": "mask (M)", "maskz": "maskz (Z)", "masks": "masks (S)"}
+
     def __init__(self, engine: TestsBuilderEngine):
         self.engine = engine
 
     def render_cpp_test_case(self, dialect_name: str, func_name: str, supported_mkinds: List[str]) -> List[str]:
         lines = []
         func_prefix = "test_mipp_cpp" if dialect_name == "cpp" else "test_mipp_cpp_obj"
-        mk_enum_map = {"unmasked": "mipp::U", "mask": "mipp::M", "maskz": "mipp::Z", "masks": "mipp::S"}
-        mk_label_map = {"unmasked": "unmasked (U)", "mask": "mask (M)", "maskz": "maskz (Z)", "masks": "masks (S)"}
-
         datatypes = self.engine._resolve_datatypes(func_name)
         is_product = any("," in str(dt) for dt in datatypes)
 
@@ -922,8 +985,8 @@ class TestsBuilderEngineCppBase:
         lines.append("{")
 
         for mkind in supported_mkinds:
-            mk_enum = mk_enum_map[mkind]
-            mk_label = mk_label_map[mkind]
+            mk_enum = self.MK_ENUM[mkind]
+            mk_label = self.MK_LABEL[mkind]
             lines.append(f'\tSECTION("{mk_label}")')
             lines.append('\t{')
 
@@ -1062,7 +1125,7 @@ class TestsBuilderEngineCpp(TestsBuilderEngineCppBase):
 
         lines.extend(self.engine.domain_resolver.render_mask_filling(func_spec, "inputs_m", dialect="cpp"))
         lines.extend(self.engine.domain_resolver.render_mask_filling(func_spec, "inputs_m2", dialect="cpp"))
-        lines.extend(self.engine.domain_resolver.render_input_filling(func_spec, "inputs_src", dialect="cpp"))
+        lines.extend(self.engine.domain_resolver.render_input_filling(func_spec, "inputs_src", dialect="cpp", mkind="masks"))
         lines.append("\t\t}")
         lines.append("")
 
@@ -1075,32 +1138,7 @@ class TestsBuilderEngineCpp(TestsBuilderEngineCppBase):
             lines.append(f"\t\t[[maybe_unused]] auto r3 = {adapter.format_load('T', 'inputs3', 'LMUL')};")
             lines.append(f"\t\t[[maybe_unused]] auto s3 = {adapter.format_scalar_load('T', 'inputs3', 'LMUL')};")
 
-        mk_enum_map = {"unmasked": "mipp::U", "mask": "mipp::M", "maskz": "mipp::Z", "masks": "mipp::S"}
 
-        def format_op_call(mkind: str, is_scalar: bool = False) -> str:
-            args = self.engine._build_op_call_args(func_name, mkind, is_scalar)
-            fname = self.engine.interfaces.get(func_name, {}).get("cpp_name", func_name)
-
-            call_args = ", ".join(args)
-            isa_str = ", mipp::ISA::SCALAR" if is_scalar else ""
-
-            if mkind == "maskz":
-                return f"mipp::{fname}<mipp::Z, T, LMUL{isa_str}>({call_args})"
-            elif mkind == "masks":
-                return f"mipp::{fname}<mipp::S, T, LMUL{isa_str}>({call_args})"
-            elif mkind == "mask":
-                return f"mipp::{fname}<mipp::M, T, LMUL{isa_str}>({call_args})"
-            
-            dt_spec = self.engine.interfaces.get(func_name, {}).get("datatypes")
-            is_conversion = dt_spec in ("all_datatypes_cart_prod", "all_datatypes_same_size", "all_datatypes_widenning")
-            if is_conversion:
-                return f"mipp::test_helpers::{fname}<T_dst>({call_args})"
-            
-            args_info = self.engine.get_proto_args_info(func_name)
-            has_reg_or_msk = any(arg.get("type") in ("reg", "msk") for arg in args_info)
-            if not has_reg_or_msk:
-                return f"mipp::{fname}<T, LMUL{isa_str}>({call_args})"
-            return f"mipp::{fname}({call_args})"
 
         is_void_ret = self.engine.proto_is_void_ret(proto_ref)
         if is_void_ret:
@@ -1117,7 +1155,7 @@ class TestsBuilderEngineCpp(TestsBuilderEngineCppBase):
         lines.append(f"\t\t" + ("[&]() {" if is_void_ret else f"auto {r_var} = [&]() {{"))
         is_first_mk = True
         for mkind in supported_mkinds:
-            mk_enum = mk_enum_map[mkind]
+            mk_enum = self.MK_ENUM[mkind]
             keyword = "if constexpr" if is_first_mk else "else if constexpr"
             is_first_mk = False
             lines.append(f"\t\t\t{keyword} (MK == {mk_enum})")
@@ -1129,7 +1167,7 @@ class TestsBuilderEngineCpp(TestsBuilderEngineCppBase):
                 lines.append(f"\t\t\t\tauto m1 = {adapter.format_set_k('T', 'inputs_m', 'LMUL')};")
             if mkind == "masks":
                 lines.append(f"\t\t\t\tauto rsrc = {adapter.format_load('T', 'inputs_src', 'LMUL')};")
-            lines.append(f"\t\t\t\t{ret_prefix}{format_op_call(mkind, is_scalar=False)};")
+            lines.append(f"\t\t\t\t{ret_prefix}{self.engine.format_cpp_op_call(func_name, mkind, is_scalar=False)};")
             lines.append("\t\t\t}")
         lines.append("\t\t}();")
         lines.append("")
@@ -1137,7 +1175,7 @@ class TestsBuilderEngineCpp(TestsBuilderEngineCppBase):
         lines.append(f"\t\t" + ("[&]() {" if is_void_ret else f"auto {s_var} = [&]() {{"))
         is_first_mk = True
         for mkind in supported_mkinds:
-            mk_enum = mk_enum_map[mkind]
+            mk_enum = self.MK_ENUM[mkind]
             keyword = "if constexpr" if is_first_mk else "else if constexpr"
             is_first_mk = False
             lines.append(f"\t\t\t{keyword} (MK == {mk_enum})")
@@ -1149,12 +1187,12 @@ class TestsBuilderEngineCpp(TestsBuilderEngineCppBase):
                 lines.append(f"\t\t\t\tauto sm1 = {adapter.format_scalar_set_k('T', 'inputs_m', 'LMUL')};")
             if mkind == "masks":
                 lines.append(f"\t\t\t\tauto ssrc = {adapter.format_scalar_load('T', 'inputs_src', 'LMUL')};")
-            lines.append(f"\t\t\t\t{ret_prefix}{format_op_call(mkind, is_scalar=True)};")
+            lines.append(f"\t\t\t\t{ret_prefix}{self.engine.format_cpp_op_call(func_name, mkind, is_scalar=True)};")
             lines.append("\t\t\t}")
         lines.append("\t\t}();")
         lines.append("")
 
-        val_lines = self.engine.render_cpp_validation_block(func_name, proto_ref, is_product, r_var=r_var, s_var=s_var, dialect_name="cpp")
+        val_lines = self.engine.render_cpp_validation_block(func_name, proto_ref, is_product, r_var=r_var, s_var=s_var, adapter=adapter)
         lines.extend(self.engine.indent_lines(val_lines, 2))
 
         lines.extend(self.engine.templates.get("func_templates", {}).get("cpp_obj", {}).get("func_footer", []))
@@ -1207,12 +1245,11 @@ class TestsBuilderEngineCppObj(TestsBuilderEngineCppBase):
             lines.extend(self.engine.domain_resolver.render_input_filling(func_spec, "inputs3", dialect="obj"))
 
         lines.extend(self.engine.domain_resolver.render_mask_filling(func_spec, "inputs_m", dialect="obj"))
-        lines.extend(self.engine.domain_resolver.render_input_filling(func_spec, "inputs_src", dialect="obj"))
+        lines.extend(self.engine.domain_resolver.render_input_filling(func_spec, "inputs_src", dialect="obj", mkind="masks"))
         lines.append("\t\t}")
         lines.append("")
 
         load_key = "load_3args" if is_3arg else ("load_1arg" if is_1arg else "load_2args")
-        adapter = CppObjDialectAdapter()
         lines.extend(self.engine.render_template(
             self.engine.templates.get("func_templates", {}).get("obj", {}).get(load_key, []),
             adapter=adapter
@@ -1227,7 +1264,7 @@ class TestsBuilderEngineCppObj(TestsBuilderEngineCppBase):
             op_args_s = ["s1"] if is_1arg else (["s1", "s2", "s3"] if is_3arg else ["s1", "s2"])
 
         call_r = adapter.format_func_call(func_name, "T", ", ".join(op_args_r))
-        call_s = f"mipp::{func_name}({', '.join(op_args_s)})"
+        call_s = adapter.format_scalar_func_call(func_name, "T", ", ".join(op_args_s))
 
         r_var = "rres"
         s_var = "sres"
@@ -1236,7 +1273,7 @@ class TestsBuilderEngineCppObj(TestsBuilderEngineCppBase):
         lines.extend(self.engine.render_template(tpl_lambda, var_name=r_var, call_expr=call_r))
         lines.extend(self.engine.render_template(tpl_lambda, var_name=s_var, call_expr=call_s))
 
-        val_lines = self.engine.render_cpp_validation_block(func_name, proto_ref, is_product, r_var=r_var, s_var=s_var, dialect_name="obj")
+        val_lines = self.engine.render_cpp_validation_block(func_name, proto_ref, is_product, r_var=r_var, s_var=s_var, adapter=adapter)
         lines.extend(self.engine.indent_lines(val_lines, 2))
 
         lines.extend(self.engine.templates.get("func_templates", {}).get("cpp_obj", {}).get("func_footer", []))

@@ -106,7 +106,7 @@ class CppDialectAdapter(DialectAdapter):
     def name(self) -> str:
         return "cpp"
 
-    def _cpp_type(self, dt_ext: str) -> str:
+    def cpp_type(self, dt_ext: str) -> str:
         """Map MIPP datatype string to C++ scalar type."""
         if not dt_ext or dt_ext == "T":
             return "T"
@@ -151,14 +151,14 @@ class CppDialectAdapter(DialectAdapter):
         return f"mipp::load<T, 1, mipp::ISA::SCALAR>({ptr_name})"
 
     def format_set_k(self, dt_ext: str, ptr_name: str, lmul_suffix: str = "") -> str:
-        t_str = self._cpp_type(dt_ext)
+        t_str = self.cpp_type(dt_ext)
         coeff = self._coeff(lmul_suffix)
         if coeff != "1":
             return f"mipp::set_k<{t_str}, {coeff}>({ptr_name})"
         return f"mipp::set_k<{t_str}>({ptr_name})"
 
     def format_scalar_set_k(self, dt_ext: str, ptr_name: str, lmul_suffix: str = "") -> str:
-        t_str = self._cpp_type(dt_ext)
+        t_str = self.cpp_type(dt_ext)
         coeff = self._coeff(lmul_suffix)
         if coeff != "1":
             return f"mipp::set_k<{t_str}, {coeff}, mipp::ISA::SCALAR>({ptr_name})"
@@ -339,7 +339,8 @@ class CppObjDialectAdapter(DialectAdapter):
         return f"{reg_name}[{index_expr}]"
 
     def format_scalar_get(self, reg_name: str, index_expr: str, dt_ext: str, lmul_suffix: str = "") -> str:
-        return ""
+        """Scalar results are plain mipp registers (not Rvd), access via mipp::get()."""
+        return f"mipp::get({reg_name}, {index_expr})"
 
     def format_get_k(self, reg_name: str, index_expr: str, dt_ext: str, lmul_suffix: str = "") -> str:
         return f"{reg_name}[{index_expr}]"
@@ -360,7 +361,8 @@ class CppObjDialectAdapter(DialectAdapter):
         return f"{args_str}.{func_name}()"
 
     def format_scalar_func_call(self, func_name: str, dt_ext: str, args_str: str, lmul_suffix: str = "", mkind: str = "") -> str:
-        return ""
+        """Scalar call in the Obj dialect: delegates to the free mipp:: function."""
+        return f"mipp::{func_name}({args_str})"
 
     def format_N(self, dt_type: str) -> str:
         return f"mipp::N<{dt_type}>()"
