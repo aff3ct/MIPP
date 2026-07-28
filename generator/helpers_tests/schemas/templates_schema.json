@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TestsTemplatesSchema",
+  "description": "Reusable templates for generated test files, organised by section and dialect namespace (c, cpp, obj, cpp_obj, all).",
+  "type": "object",
+  "required": ["assertions", "headers", "func_templates"],
+  "properties": {
+    "assertions": {
+      "type": "object",
+      "description": "Assertion snippets grouped by dialect namespace.",
+      "properties": {
+        "c":       { "$ref": "#/definitions/template_map" },
+        "cpp":     { "$ref": "#/definitions/template_map" },
+        "obj":     { "$ref": "#/definitions/template_map" },
+        "cpp_obj": { "$ref": "#/definitions/template_map" },
+        "all":     { "$ref": "#/definitions/template_map" }
+      },
+      "additionalProperties": false
+    },
+    "headers": {
+      "type": "object",
+      "description": "Fixed include blocks grouped by dialect namespace.",
+      "properties": {
+        "c":       { "$ref": "#/definitions/template_map" },
+        "cpp":     { "$ref": "#/definitions/template_map" },
+        "obj":     { "$ref": "#/definitions/template_map" },
+        "cpp_obj": { "$ref": "#/definitions/template_map" },
+        "all":     { "$ref": "#/definitions/template_map" }
+      },
+      "additionalProperties": false
+    },
+    "func_templates": {
+      "type": "object",
+      "description": "Structural boilerplate (function signatures, load blocks, section wrappers, lambdas) grouped by dialect namespace.",
+      "properties": {
+        "c":       { "$ref": "#/definitions/template_map" },
+        "cpp":     { "$ref": "#/definitions/template_map" },
+        "obj":     { "$ref": "#/definitions/template_map" },
+        "cpp_obj": { "$ref": "#/definitions/template_map" },
+        "all":     { "$ref": "#/definitions/template_map" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "template_map": {
+      "type": "object",
+      "description": "Named templates: each value is an array of template strings with {{placeholder}} variables.",
+      "additionalProperties": {
+        "type": "array",
+        "items": { "type": "string" }
+      }
+    }
+  }
+}

@@ -63,7 +63,7 @@
             },
             "by_define": {
               "type": "object",
-              "additionalProperties": { "$ref": "#/definitions/domain_spec_or_list" }
+              "additionalProperties": { "$ref": "#/definitions/domain_entry" }
             },
             "by_lmul": {
               "type": "object",
@@ -115,7 +115,20 @@
     "spec_entry": {
       "type": "object",
       "properties": {
-        "distribution": { "type": "string" },
+        "distribution": {
+          "anyOf": [
+            { "type": "string", "enum": ["uniform", "normal"] },
+            {
+              "type": "object",
+              "properties": {
+                "type": { "type": "string", "enum": ["uniform", "normal"] },
+                "sigma": { "type": "number" }
+              },
+              "required": ["type"],
+              "additionalProperties": false
+            }
+          ]
+        },
         "input_domain": { "$ref": "#/definitions/domain_or_list" },
         "domain": { "$ref": "#/definitions/domain_or_list" },
         "tolerance": {
@@ -182,14 +195,19 @@
             }
           ]
         },
-        "scalar_ref_expr": { "type": ["string", "null"] },
         "support_obj": { "type": "boolean" },
         "mask_pattern": { "type": "string", "enum": ["uniform_bool", "alternating", "all_true", "all_false", "sparse", "dense"] },
         "domain_src": { "$ref": "#/definitions/domain_entry" },
         "unmasked": { "$ref": "#/definitions/spec_entry" },
         "mask": { "$ref": "#/definitions/spec_entry" },
         "maskz": { "$ref": "#/definitions/spec_entry" },
-        "masks": { "$ref": "#/definitions/spec_entry" }
+        "masks": { "$ref": "#/definitions/spec_entry" },
+        "datatypes": {
+          "anyOf": [
+            { "type": "string" },
+            { "type": "array", "items": { "type": "string" } }
+          ]
+        }
       },
       "additionalProperties": false
     }

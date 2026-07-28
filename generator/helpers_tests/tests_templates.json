@@ -1,0 +1,318 @@
+{
+  "assertions": {
+    "c": {
+      "as_bitwise_eq": [
+        "auto v1 = {{r_get}};",
+        "auto v2 = {{s_get}};",
+        "uint64_t u1 = 0, u2 = 0;",
+        "std::memcpy(&u1, &v1, sizeof(v1));",
+        "std::memcpy(&u2, &v2, sizeof(v2));",
+        "REQUIRE(u1 == u2);"
+      ],
+      "as_logical_eq": [
+        "REQUIRE((!!{{r_get}}) == (!!{{s_get}}));"
+      ],
+      "as_tolerance": [
+        "{{dt}} tol = {{tol_expr}};",
+        "REQUIRE(abs_diff::abs_diff(({{dt}})({{r_get}}) - ({{dt}})({{s_get}})) <= tol);"
+      ],
+      "as_strict_eq": [
+        "REQUIRE({{r_get}} == {{s_get}});"
+      ],
+      "as_reduction_add_overflow": [
+        "bool ov = ovf::will_reduction_hadd_overflow<{{dt}}>(inputs1, {{size_var}}, {{mask_ptr}}, {{is_maskz_bool}}, {{inputs_src_ptr}});",
+        "if (ov)",
+        "{",
+        "\tINFO(\"Reduction overflow occurred, skipping assert\");",
+        "}",
+        "else",
+        "{",
+        "{{assert_lines}}",
+        "}"
+      ],
+      "as_reduction_hadds_overflow": [
+        "bool ov = ovf::will_reduction_hadds_overflow<{{dt}}>(inputs1, {{size_var}}, {{mask_ptr}}, {{is_maskz_bool}}, {{inputs_src_ptr}});",
+        "if (ov)",
+        "{",
+        "\tINFO(\"Reduction overflow occurred, skipping assert\");",
+        "}",
+        "else",
+        "{",
+        "{{assert_lines}}",
+        "}"
+      ],
+      "as_reduction_mul_overflow": [
+        "bool ov = false;",
+        "{",
+        "\t{{dt}} acc = inputs1[0];",
+        "\tfor (size_t i = 1; i < {{size_var}}; i++)",
+        "\t{",
+        "\t\tif (ovf::will_mul_overflow<{{dt}}>(acc, inputs1[i])) { ov = true; break; }",
+        "\t\tacc = acc * inputs1[i];",
+        "\t}",
+        "}",
+        "if (ov)",
+        "{",
+        "\tINFO(\"Reduction overflow occurred, skipping assert\");",
+        "}",
+        "else",
+        "{",
+        "{{assert_lines}}",
+        "}"
+      ]
+    },
+    "cpp": {
+      "cvt_helpers": [
+        "#ifndef MIPP_TEST_HELPERS_HPP",
+        "#define MIPP_TEST_HELPERS_HPP",
+        "namespace mipp {",
+        "namespace test_helpers {",
+        "template <typename T_dst, typename Reg>",
+        "inline auto cvt(const Reg& r0) {",
+        "    if constexpr (std::is_same_v<T_dst, double>) return mipp::cvt_float64(r0);",
+        "    else if constexpr (std::is_same_v<T_dst, float>) return mipp::cvt_float32(r0);",
+        "    else if constexpr (std::is_same_v<T_dst, int64_t> || std::is_same_v<T_dst, uint64_t>) return mipp::cvt_int64(r0);",
+        "    else if constexpr (std::is_same_v<T_dst, int32_t> || std::is_same_v<T_dst, uint32_t>) return mipp::cvt_int32(r0);",
+        "    else if constexpr (std::is_same_v<T_dst, int16_t> || std::is_same_v<T_dst, uint16_t>) return mipp::cvt_int16(r0);",
+        "    else if constexpr (std::is_same_v<T_dst, int8_t> || std::is_same_v<T_dst, uint8_t>) return mipp::cvt_int8(r0);",
+        "}",
+        "template <typename T_dst, typename Reg>",
+        "inline auto wcvt(const Reg& r0) {",
+        "    if constexpr (std::is_same_v<T_dst, double>) return mipp::wcvt_float64(mipp::cast_float32(r0));",
+        "    else if constexpr (std::is_same_v<T_dst, int64_t> || std::is_same_v<T_dst, uint64_t>) return mipp::wcvt_int64(mipp::cast_int32(r0));",
+        "    else if constexpr (std::is_same_v<T_dst, int32_t> || std::is_same_v<T_dst, uint32_t>) return mipp::wcvt_int32(mipp::cast_int16(r0));",
+        "    else if constexpr (std::is_same_v<T_dst, int16_t> || std::is_same_v<T_dst, uint16_t>) return mipp::wcvt_int16(mipp::cast_int8(r0));",
+        "}",
+        "template <typename T_dst, typename Reg>",
+        "inline auto cast(const Reg& r0) {",
+        "    if constexpr (std::is_same_v<T_dst, double>) return mipp::cast_float64(r0);",
+        "    else if constexpr (std::is_same_v<T_dst, float>) return mipp::cast_float32(r0);",
+        "    else if constexpr (std::is_same_v<T_dst, int64_t> || std::is_same_v<T_dst, uint64_t>) return mipp::cast_int64(r0);",
+        "    else if constexpr (std::is_same_v<T_dst, int32_t> || std::is_same_v<T_dst, uint32_t>) return mipp::cast_int32(r0);",
+        "    else if constexpr (std::is_same_v<T_dst, int16_t> || std::is_same_v<T_dst, uint16_t>) return mipp::cast_int16(r0);",
+        "    else if constexpr (std::is_same_v<T_dst, int8_t> || std::is_same_v<T_dst, uint8_t>) return mipp::cast_int8(r0);",
+        "}",
+        "template <typename T_dst, typename Msk>",
+        "inline auto cast_k(const Msk& m0) {",
+        "    if constexpr (sizeof(T_dst) == 8) return mipp::cast_int64(m0);",
+        "    else if constexpr (sizeof(T_dst) == 4) return mipp::cast_int32(m0);",
+        "    else if constexpr (sizeof(T_dst) == 2) return mipp::cast_int16(m0);",
+        "    else if constexpr (sizeof(T_dst) == 1) return mipp::cast_int8(m0);",
+        "}",
+        "}",
+        "}",
+        "#endif"
+      ]
+    },
+    "cpp_obj": {
+      "as_bitwise_eq": [
+        "for (size_t i = 0; i < {{loop_limit}}; i++)",
+        "{",
+        "\tauto v1 = {{r_get}};",
+        "\tauto v2 = {{s_get}};",
+        "\tuint64_t u1 = 0, u2 = 0;",
+        "\tstd::memcpy(&u1, &v1, sizeof(v1));",
+        "\tstd::memcpy(&u2, &v2, sizeof(v2));",
+        "\tREQUIRE(u1 == u2);",
+        "}"
+      ],
+      "as_logical_eq": [
+        "for (size_t i = 0; i < {{loop_limit}}; i++)",
+        "{",
+        "\tREQUIRE((!!{{r_get}}) == (!!{{s_get}}));",
+        "}"
+      ],
+      "as_reduction_hadd_overflow": [
+        "bool ov = false;",
+        "{",
+        "\tif constexpr (!std::is_floating_point_v<T>)",
+        "\t{",
+        "\t\tconst int32_t* m_ptr = nullptr;",
+        "\t\tbool is_z = (MK == mipp::Z);",
+        "\t\tif constexpr (MK == mipp::Z || MK == mipp::M || MK == mipp::S) m_ptr = inputs_m;",
+        "\t\tov = ovf::will_reduction_hadd_overflow<T>(inputs1, size, m_ptr, is_z);",
+        "\t}",
+        "}",
+        "if (ov)",
+        "{",
+        "\tINFO(\"Reduction overflow occurred, skipping assert\");",
+        "}",
+        "else",
+        "{",
+        "{{validation_block}}",
+        "}"
+      ],
+      "as_reduction_mul_overflow": [
+        "bool ov = false;",
+        "{",
+        "\tif constexpr (!std::is_floating_point_v<T>)",
+        "\t{",
+        "\t\tauto get_val = [&](size_t idx) -> T {",
+        "\t\t\tif constexpr (MK == mipp::Z) return inputs_m[idx] ? inputs1[idx] : static_cast<T>(0);",
+        "\t\t\telse return inputs1[idx];",
+        "\t\t};",
+        "\t\tT acc = get_val(0);",
+        "\t\tfor (size_t i = 1; i < size; i++)",
+        "\t\t{",
+        "\t\t\tT v = get_val(i);",
+        "\t\t\tif (ovf::will_mul_overflow<T>(acc, v)) { ov = true; break; }",
+        "\t\t\tacc = acc * v;",
+        "\t\t}",
+        "\t}",
+        "}",
+        "if (ov)",
+        "{",
+        "\tINFO(\"Reduction overflow occurred, skipping assert\");",
+        "}",
+        "else",
+        "{",
+        "{{validation_block}}",
+        "}"
+      ],
+      "as_logical_scalar_eq": [
+        "REQUIRE((!!{{r_var}}) == (!!{{s_var}}));"
+      ],
+      "as_strict_scalar_eq": [
+        "REQUIRE({{r_var}} == {{s_var}});"
+      ]
+    }
+  },
+  "headers": {
+    "all": {
+      "headers_fixed": [
+        "#include <exception>",
+        "#include <algorithm>",
+        "#include <numeric>",
+        "#include <random>",
+        "#include <cstdio>",
+        "#include <cmath>",
+        "#include <cstdlib>",
+        "#include <cstring>",
+        "#include \"utils/random.hpp\"",
+        "#include \"utils/overflow_helpers.hpp\"",
+        "#include \"utils/abs_diff.hpp\"",
+        "#ifndef N_ITER",
+        "#define N_ITER {{N_ITER}}",
+        "#endif",
+        ""
+      ]
+    }
+  },
+  "func_templates": {
+    "c": {
+      "overflow_check_shell": [
+        "\t\t\tbool ov = ovf::will_{{overflow_check}}_overflow<{{dt}}>({{val1}}, {{val2}});",
+        "\t\t\tif (ov)",
+        "\t\t\t{",
+        "\t\t\t\tINFO(\"Overflow occurred, skipping assert\");",
+        "\t\t\t}",
+        "\t\t\telse",
+        "\t\t\t{",
+        "{{inner_lines}}",
+        "\t\t\t}"
+      ],
+      "test_section": [
+        "\tSECTION(\"datatype = {{dt}}\")",
+        "\t{",
+        "\t\ttry {",
+        "\t\t\t{{call_expr}}",
+        "\t\t} catch (const mipp::stub_exception& e) {",
+        "\t\t\tWARN(e.what());",
+        "\t\t}",
+        "\t}"
+      ]
+    },
+    "cpp": {
+      "func_header": [
+        "template <mipp::MKIND MK = mipp::U, typename T = double, int LMUL = 1>",
+        "static void test_mipp_cpp_{{func_name}}()",
+        "{",
+        "\tstd::mt19937 seed(Catch::getSeed());",
+        "\tfor (unsigned n = 0; n < get_n_iter(); n++)",
+        "\t{"
+      ],
+      "func_header_product": [
+        "template <mipp::MKIND MK = mipp::U, typename T_src = float, typename T_dst = double, int LMUL = 1>",
+        "static void test_mipp_cpp_{{func_name}}()",
+        "{",
+        "\tstd::mt19937 seed(Catch::getSeed());",
+        "\tfor (unsigned n = 0; n < get_n_iter(); n++)",
+        "\t{"
+      ],
+      "size_constexpr_product": [
+        "\t\tconstexpr size_t size = (LMUL > 0) ? (%N<T_src>% * static_cast<size_t>(LMUL)) : (%N<T_src>% / static_cast<size_t>(-LMUL));",
+        "\t\tconstexpr size_t size_out = (LMUL > 0) ? (%N<T_dst>% * static_cast<size_t>(LMUL)) : (%N<T_dst>% / static_cast<size_t>(-LMUL));",
+        "\t\tusing T [[maybe_unused]] = T_src;"
+      ],
+      "test_section_ldiv2": [
+        "\t\t\t#if defined(MIPP_LDIV_2)",
+        "\t\t\tSECTION(\"LDIV = 2\")",
+        "\t\t\t{",
+        "\t\t\t\ttry {",
+        "\t\t\t\t\t{{call_expr}}",
+        "\t\t\t\t} catch (const mipp::stub_exception& e) {",
+        "\t\t\t\t\tWARN(e.what());",
+        "\t\t\t\t}",
+        "\t\t\t}",
+        "\t\t\t#endif // MIPP_LDIV_2"
+      ]
+    },
+    "obj": {
+      "func_header": [
+        "template <mipp::MKIND MK = mipp::U, typename T = double, int LMUL = 1>",
+        "static void test_mipp_cpp_obj_{{func_name}}()",
+        "{",
+        "\tstd::mt19937 seed(Catch::getSeed());",
+        "\tfor (unsigned n = 0; n < get_n_iter(); n++)",
+        "\t{"
+      ],
+      "load_1arg": [
+        "\t\t%reg_type<T,LMUL>% r1(&inputs1[0]);",
+        "\t\tauto s1 = %scalar_load<T,LMUL>(inputs1)%;"
+      ],
+      "load_2args": [
+        "\t\t%reg_type<T,LMUL>% r1(&inputs1[0]);",
+        "\t\tauto s1 = %scalar_load<T,LMUL>(inputs1)%;",
+        "\t\t%reg_type<T,LMUL>% r2(&inputs2[0]);",
+        "\t\tauto s2 = %scalar_load<T,LMUL>(inputs2)%;"
+      ],
+      "load_3args": [
+        "\t\t%reg_type<T,LMUL>% r1(&inputs1[0]);",
+        "\t\tauto s1 = %scalar_load<T,LMUL>(inputs1)%;",
+        "\t\t%reg_type<T,LMUL>% r2(&inputs2[0]);",
+        "\t\tauto s2 = %scalar_load<T,LMUL>(inputs2)%;",
+        "\t\t%reg_type<T,LMUL>% r3(&inputs3[0]);",
+        "\t\tauto s3 = %scalar_load<T,LMUL>(inputs3)%;"
+      ],
+      "op_call_lambda": [
+        "\t\tauto {{var_name}} = [&]() {",
+        "\t\t\tif constexpr (MK == mipp::U)",
+        "\t\t\t{",
+        "\t\t\t\treturn {{call_expr}};",
+        "\t\t\t}",
+        "\t\t}();",
+        ""
+      ]
+    },
+    "cpp_obj": {
+      "func_footer": [
+        "\t}",
+        "}",
+        ""
+      ],
+      "size_constexpr": [
+        "\t\tconstexpr size_t size = (LMUL > 0) ? (%N<T>% * static_cast<size_t>(LMUL)) : (%N<T>% / static_cast<size_t>(-LMUL));"
+      ],
+      "test_section_lmul": [
+        "\t\t\tSECTION(\"{{lmul_str}}\")",
+        "\t\t\t{",
+        "\t\t\t\ttry {",
+        "\t\t\t\t\t{{call_expr}}",
+        "\t\t\t\t} catch (const mipp::stub_exception& e) {",
+        "\t\t\t\t\tWARN(e.what());",
+        "\t\t\t\t}",
+        "\t\t\t}"
+      ]
+    }
+  }
+}

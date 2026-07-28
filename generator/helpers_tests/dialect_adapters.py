@@ -1,9 +1,14 @@
 """
 Dialect Adapters for MIPP Test Generation.
 Provides abstract base and concrete implementations for C, C++, and C++ Obj dialects.
+
+Responsibility: pure syntax/expression formatting only.
+  - Each method formats a single expression for a given dialect.
+  - No file I/O, no template access, no structural logic.
 """
 
 from abc import ABC, abstractmethod
+from typing import List
 
 
 class DialectAdapter(ABC):
@@ -12,77 +17,87 @@ class DialectAdapter(ABC):
     def name(self) -> str:
         pass
 
+    # --- Type formatting ---
+
     @abstractmethod
     def format_reg_type(self, dt_ext: str, lmul_suffix: str = "") -> str:
+        """Return the register vector type for this dialect (e.g. 'auto', 'rvd_float32_t')."""
         pass
 
     @abstractmethod
     def format_msk_type(self, dt_ext: str, lmul_suffix: str = "") -> str:
+        """Return the mask register type."""
         pass
 
     @abstractmethod
     def format_scalar_reg_type(self, dt_ext: str, lmul_suffix: str = "") -> str:
+        """Return the scalar register type."""
         pass
 
     @abstractmethod
     def format_scalar_msk_type(self, dt_ext: str, lmul_suffix: str = "") -> str:
+        """Return the scalar mask register type."""
         pass
+
+    # --- Load / set_k expressions ---
 
     @abstractmethod
     def format_load(self, dt_ext: str, ptr_name: str, lmul_suffix: str = "") -> str:
+        """Return the full load expression: 'mipp_load_float32(ptr)' or 'mipp::load<T>(ptr)'."""
         pass
 
     @abstractmethod
     def format_scalar_load(self, dt_ext: str, ptr_name: str, lmul_suffix: str = "") -> str:
+        """Return the scalar load expression."""
         pass
 
     @abstractmethod
     def format_set_k(self, dt_ext: str, ptr_name: str, lmul_suffix: str = "") -> str:
+        """Return the mask-set expression."""
         pass
 
     @abstractmethod
     def format_scalar_set_k(self, dt_ext: str, ptr_name: str, lmul_suffix: str = "") -> str:
+        """Return the scalar mask-set expression."""
         pass
+
+    # --- Get expressions ---
 
     @abstractmethod
     def format_get(self, reg_name: str, index_expr: str, dt_ext: str, lmul_suffix: str = "") -> str:
-        return f"{self.format_get_func_name(dt_ext, lmul_suffix)}({reg_name}, {index_expr})"
+        """Return the element-get expression: 'mipp_get_float32(r, i)' or 'mipp::get(r, i)'."""
+        pass
 
+    @abstractmethod
     def format_scalar_get(self, reg_name: str, index_expr: str, dt_ext: str, lmul_suffix: str = "") -> str:
-        return f"{self.format_scalar_get_func_name(dt_ext, lmul_suffix)}({reg_name}, {index_expr})"
+        """Return the scalar element-get expression."""
+        pass
 
+    @abstractmethod
     def format_get_k(self, reg_name: str, index_expr: str, dt_ext: str, lmul_suffix: str = "") -> str:
-        return f"{self.format_get_k_func_name(dt_ext, lmul_suffix)}({reg_name}, {index_expr})"
+        """Return the mask-get expression."""
+        pass
 
+    @abstractmethod
     def format_scalar_get_k(self, reg_name: str, index_expr: str, dt_ext: str, lmul_suffix: str = "") -> str:
-        return f"{self.format_scalar_get_k_func_name(dt_ext, lmul_suffix)}({reg_name}, {index_expr})"
+        """Return the scalar mask-get expression."""
+        pass
 
-    def format_get_func_name(self, dt_ext: str, lmul_suffix: str = "") -> str:
-        return "mipp::get"
+    # --- Function call expressions ---
 
-    def format_scalar_get_func_name(self, dt_ext: str, lmul_suffix: str = "") -> str:
-        return "mipp::get"
-
-    def format_get_k_func_name(self, dt_ext: str, lmul_suffix: str = "") -> str:
-        return "mipp::get"
-
-    def format_scalar_get_k_func_name(self, dt_ext: str, lmul_suffix: str = "") -> str:
-        return "mipp::get"
+    @abstractmethod
+    def format_N(self, dt_type: str) -> str:
+        """Return the register-size expression for this dialect, e.g. 'mipp::N<T>()'."""
+        pass
 
     @abstractmethod
     def format_func_call(self, func_name: str, dt_ext: str, args_str: str, lmul_suffix: str = "", mkind: str = "") -> str:
+        """Return the full SIMD function call expression."""
         pass
 
     @abstractmethod
     def format_scalar_func_call(self, func_name: str, dt_ext: str, args_str: str, lmul_suffix: str = "", mkind: str = "") -> str:
-        pass
-
-    @abstractmethod
-    def format_tomsk(self, dt_ext: str, reg_name: str, lmul_suffix: str = "") -> str:
-        pass
-
-    @abstractmethod
-    def format_scalar_tomsk(self, dt_ext: str, reg_name: str, lmul_suffix: str = "") -> str:
+        """Return the full scalar function call expression."""
         pass
 
 
@@ -91,7 +106,8 @@ class CppDialectAdapter(DialectAdapter):
     def name(self) -> str:
         return "cpp"
 
-    def format_type(self, dt_ext: str) -> str:
+    def _cpp_type(self, dt_ext: str) -> str:
+        """Map MIPP datatype string to C++ scalar type."""
         if not dt_ext or dt_ext == "T":
             return "T"
         type_map = {
@@ -101,6 +117,15 @@ class CppDialectAdapter(DialectAdapter):
         }
         return type_map.get(dt_ext, dt_ext)
 
+    def _coeff(self, lmul_suffix: str) -> str:
+        if not lmul_suffix or lmul_suffix in ("", "m0", "m1"):
+            return "1"
+        if lmul_suffix.startswith("m"):
+            return lmul_suffix[1:]
+        if lmul_suffix.startswith("d"):
+            return f"-{lmul_suffix[1:]}"
+        return lmul_suffix  # pass-through for template param strings (e.g. "LMUL")
+
     def format_reg_type(self, dt_ext: str, lmul_suffix: str = "") -> str:
         return "auto"
 
@@ -114,28 +139,28 @@ class CppDialectAdapter(DialectAdapter):
         return "auto"
 
     def format_load(self, dt_ext: str, ptr_name: str, lmul_suffix: str = "") -> str:
-        if lmul_suffix and lmul_suffix not in ("", "m1", "m0"):
-            coeff = lmul_suffix[1:] if lmul_suffix.startswith("m") else (f"-{lmul_suffix[1:]}" if lmul_suffix.startswith("d") else "1")
+        coeff = self._coeff(lmul_suffix)
+        if coeff != "1":
             return f"mipp::load<T, {coeff}>({ptr_name})"
         return f"mipp::load<T>({ptr_name})"
 
     def format_scalar_load(self, dt_ext: str, ptr_name: str, lmul_suffix: str = "") -> str:
-        if lmul_suffix and lmul_suffix not in ("", "m1", "m0"):
-            coeff = lmul_suffix[1:] if lmul_suffix.startswith("m") else (f"-{lmul_suffix[1:]}" if lmul_suffix.startswith("d") else "1")
+        coeff = self._coeff(lmul_suffix)
+        if coeff != "1":
             return f"mipp::load<T, {coeff}, mipp::ISA::SCALAR>({ptr_name})"
         return f"mipp::load<T, 1, mipp::ISA::SCALAR>({ptr_name})"
 
     def format_set_k(self, dt_ext: str, ptr_name: str, lmul_suffix: str = "") -> str:
-        t_str = self.format_type(dt_ext)
-        if lmul_suffix and lmul_suffix not in ("", "m1", "m0"):
-            coeff = lmul_suffix[1:] if lmul_suffix.startswith("m") else (f"-{lmul_suffix[1:]}" if lmul_suffix.startswith("d") else "1")
+        t_str = self._cpp_type(dt_ext)
+        coeff = self._coeff(lmul_suffix)
+        if coeff != "1":
             return f"mipp::set_k<{t_str}, {coeff}>({ptr_name})"
         return f"mipp::set_k<{t_str}>({ptr_name})"
 
     def format_scalar_set_k(self, dt_ext: str, ptr_name: str, lmul_suffix: str = "") -> str:
-        t_str = self.format_type(dt_ext)
-        if lmul_suffix and lmul_suffix not in ("", "m1", "m0"):
-            coeff = lmul_suffix[1:] if lmul_suffix.startswith("m") else (f"-{lmul_suffix[1:]}" if lmul_suffix.startswith("d") else "1")
+        t_str = self._cpp_type(dt_ext)
+        coeff = self._coeff(lmul_suffix)
+        if coeff != "1":
             return f"mipp::set_k<{t_str}, {coeff}, mipp::ISA::SCALAR>({ptr_name})"
         return f"mipp::set_k<{t_str}, 1, mipp::ISA::SCALAR>({ptr_name})"
 
@@ -155,7 +180,7 @@ class CppDialectAdapter(DialectAdapter):
         fname = func_name
         if fname in ("andb_k", "orb_k", "xorb_k", "notb_k", "andnb_k"):
             fname = fname[:-2]
-        coeff = lmul_suffix[1:] if (lmul_suffix and lmul_suffix.startswith("m") and lmul_suffix != "m0") else (f"-{lmul_suffix[1:]}" if (lmul_suffix and lmul_suffix.startswith("d")) else "1")
+        coeff = self._coeff(lmul_suffix)
         if mkind == "mask":
             return f"mipp::{fname}<mipp::M, T, {coeff}>({args_str})"
         elif mkind == "maskz":
@@ -176,7 +201,7 @@ class CppDialectAdapter(DialectAdapter):
         fname = func_name
         if fname in ("andb_k", "orb_k", "xorb_k", "notb_k", "andnb_k"):
             fname = fname[:-2]
-        coeff = lmul_suffix[1:] if (lmul_suffix and lmul_suffix.startswith("m") and lmul_suffix != "m0") else (f"-{lmul_suffix[1:]}" if (lmul_suffix and lmul_suffix.startswith("d")) else "1")
+        coeff = self._coeff(lmul_suffix)
         if mkind == "mask":
             return f"mipp::{fname}<mipp::M, T, {coeff}, mipp::ISA::SCALAR>({args_str})"
         elif mkind == "maskz":
@@ -191,11 +216,8 @@ class CppDialectAdapter(DialectAdapter):
             return f"mipp::{fname}<T, {coeff}, mipp::ISA::SCALAR>({args_str})"
         return f"mipp::{fname}({args_str})"
 
-    def format_tomsk(self, dt_ext: str, reg_name: str, lmul_suffix: str = "") -> str:
-        return f"mipp::tomsk({reg_name})"
-
-    def format_scalar_tomsk(self, dt_ext: str, reg_name: str, lmul_suffix: str = "") -> str:
-        return f"mipp::tomsk({reg_name})"
+    def format_N(self, dt_type: str) -> str:
+        return f"mipp::N<{dt_type}>()"
 
 
 class CDialectAdapter(DialectAdapter):
@@ -203,113 +225,59 @@ class CDialectAdapter(DialectAdapter):
     def name(self) -> str:
         return "c"
 
+    def _suffix(self, lmul_suffix: str) -> str:
+        return f"_{lmul_suffix}" if lmul_suffix and lmul_suffix not in ("", "m0") else ""
+
     def format_reg_type(self, dt_ext: str, lmul_suffix: str = "") -> str:
-        suffix = f"_{lmul_suffix}" if lmul_suffix and lmul_suffix not in ("", "m0") else ""
-        return f"rvd_{dt_ext}{suffix}_t"
+        return f"rvd_{dt_ext}{self._suffix(lmul_suffix)}_t"
 
     def format_msk_type(self, dt_ext: str, lmul_suffix: str = "") -> str:
-        suffix = f"_{lmul_suffix}" if lmul_suffix and lmul_suffix not in ("", "m0") else ""
-        return f"rvm_{dt_ext}{suffix}_t"
+        return f"rvm_{dt_ext}{self._suffix(lmul_suffix)}_t"
 
     def format_scalar_reg_type(self, dt_ext: str, lmul_suffix: str = "") -> str:
-        suffix = f"_{lmul_suffix}" if lmul_suffix and lmul_suffix not in ("", "m0") else ""
-        return f"rvd_scalar_{dt_ext}{suffix}_t"
+        return f"rvd_scalar_{dt_ext}{self._suffix(lmul_suffix)}_t"
 
     def format_scalar_msk_type(self, dt_ext: str, lmul_suffix: str = "") -> str:
-        suffix = f"_{lmul_suffix}" if lmul_suffix and lmul_suffix not in ("", "m0") else ""
-        return f"rvm_scalar_{dt_ext}{suffix}_t"
+        return f"rvm_scalar_{dt_ext}{self._suffix(lmul_suffix)}_t"
 
     def format_load(self, dt_ext: str, ptr_name: str, lmul_suffix: str = "") -> str:
-        suffix = f"_{lmul_suffix}" if lmul_suffix and lmul_suffix not in ("", "m0") else ""
-        return f"mipp_load_{dt_ext}{suffix}({ptr_name})"
+        return f"mipp_load_{dt_ext}{self._suffix(lmul_suffix)}({ptr_name})"
 
     def format_scalar_load(self, dt_ext: str, ptr_name: str, lmul_suffix: str = "") -> str:
-        suffix = f"_{lmul_suffix}" if lmul_suffix and lmul_suffix not in ("", "m0") else ""
-        return f"mipp_scalar_load_{dt_ext}{suffix}({ptr_name})"
+        return f"mipp_scalar_load_{dt_ext}{self._suffix(lmul_suffix)}({ptr_name})"
 
     def format_set_k(self, dt_ext: str, ptr_name: str, lmul_suffix: str = "") -> str:
-        suffix = f"_{lmul_suffix}" if lmul_suffix and lmul_suffix not in ("", "m0") else ""
-        return f"mipp_set_k_{dt_ext}{suffix}({ptr_name})"
+        return f"mipp_set_k_{dt_ext}{self._suffix(lmul_suffix)}({ptr_name})"
 
     def format_scalar_set_k(self, dt_ext: str, ptr_name: str, lmul_suffix: str = "") -> str:
-        suffix = f"_{lmul_suffix}" if lmul_suffix and lmul_suffix not in ("", "m0") else ""
-        return f"mipp_scalar_set_k_{dt_ext}{suffix}({ptr_name})"
+        return f"mipp_scalar_set_k_{dt_ext}{self._suffix(lmul_suffix)}({ptr_name})"
 
     def format_get(self, reg_name: str, index_expr: str, dt_ext: str, lmul_suffix: str = "") -> str:
-        suffix = f"_{lmul_suffix}" if lmul_suffix and lmul_suffix not in ("", "m0") else ""
-        return f"mipp_get_{dt_ext}{suffix}({reg_name}, {index_expr})"
+        return f"mipp_get_{dt_ext}{self._suffix(lmul_suffix)}({reg_name}, {index_expr})"
 
     def format_scalar_get(self, reg_name: str, index_expr: str, dt_ext: str, lmul_suffix: str = "") -> str:
-        suffix = f"_{lmul_suffix}" if lmul_suffix and lmul_suffix not in ("", "m0") else ""
-        return f"mipp_scalar_get_{dt_ext}{suffix}({reg_name}, {index_expr})"
+        return f"mipp_scalar_get_{dt_ext}{self._suffix(lmul_suffix)}({reg_name}, {index_expr})"
 
-    def format_get_func_name(self, dt_ext: str, lmul_suffix: str = "") -> str:
-        suffix = f"_{lmul_suffix}" if lmul_suffix and lmul_suffix not in ("", "m0") else ""
-        return f"mipp_get_{dt_ext}{suffix}"
+    def format_get_k(self, reg_name: str, index_expr: str, dt_ext: str, lmul_suffix: str = "") -> str:
+        return f"mipp_get_k_{dt_ext}{self._suffix(lmul_suffix)}({reg_name}, {index_expr})"
 
-    def format_scalar_get_func_name(self, dt_ext: str, lmul_suffix: str = "") -> str:
-        suffix = f"_{lmul_suffix}" if lmul_suffix and lmul_suffix not in ("", "m0") else ""
-        return f"mipp_scalar_get_{dt_ext}{suffix}"
-
-    def format_get_k_func_name(self, dt_ext: str, lmul_suffix: str = "") -> str:
-        suffix = f"_{lmul_suffix}" if lmul_suffix and lmul_suffix not in ("", "m0") else ""
-        return f"mipp_get_k_{dt_ext}{suffix}"
-
-    def format_scalar_get_k_func_name(self, dt_ext: str, lmul_suffix: str = "") -> str:
-        suffix = f"_{lmul_suffix}" if lmul_suffix and lmul_suffix not in ("", "m0") else ""
-        return f"mipp_scalar_get_k_{dt_ext}{suffix}"
-
-    def format_scalar_get(self, reg_name: str, index_expr: str, dt_ext: str, lmul_suffix: str = "") -> str:
-        suffix = f"_{lmul_suffix}" if lmul_suffix and lmul_suffix not in ("", "m0") else ""
-        return f"mipp_scalar_get_{dt_ext}{suffix}({reg_name}, {index_expr})"
+    def format_scalar_get_k(self, reg_name: str, index_expr: str, dt_ext: str, lmul_suffix: str = "") -> str:
+        return f"mipp_scalar_get_k_{dt_ext}{self._suffix(lmul_suffix)}({reg_name}, {index_expr})"
 
     def format_func_call(self, func_name: str, dt_ext: str, args_str: str, lmul_suffix: str = "", mkind: str = "") -> str:
-        suffix = f"_{lmul_suffix}" if lmul_suffix and lmul_suffix not in ("", "m0") else ""
+        sfx = self._suffix(lmul_suffix)
         if mkind in ("mask", "maskz", "masks"):
-            return f"mipp_{func_name}_{dt_ext}_{mkind}{suffix}({args_str})"
-        return f"mipp_{func_name}_{dt_ext}{suffix}({args_str})"
+            return f"mipp_{func_name}_{dt_ext}_{mkind}{sfx}({args_str})"
+        return f"mipp_{func_name}_{dt_ext}{sfx}({args_str})"
 
     def format_scalar_func_call(self, func_name: str, dt_ext: str, args_str: str, lmul_suffix: str = "", mkind: str = "") -> str:
-        suffix = f"_{lmul_suffix}" if lmul_suffix and lmul_suffix not in ("", "m0") else ""
+        sfx = self._suffix(lmul_suffix)
         if mkind in ("mask", "maskz", "masks"):
-            return f"mipp_scalar_{func_name}_{dt_ext}_{mkind}{suffix}({args_str})"
-        return f"mipp_scalar_{func_name}_{dt_ext}{suffix}({args_str})"
+            return f"mipp_scalar_{func_name}_{dt_ext}_{mkind}{sfx}({args_str})"
+        return f"mipp_scalar_{func_name}_{dt_ext}{sfx}({args_str})"
 
-    def format_load_func_name(self, dt_ext: str, lmul_suffix: str = "") -> str:
-        suffix = f"_{lmul_suffix}" if lmul_suffix and lmul_suffix not in ("", "m0") else ""
-        return f"mipp_load_{dt_ext}{suffix}"
-
-    def format_scalar_load_func_name(self, dt_ext: str, lmul_suffix: str = "") -> str:
-        suffix = f"_{lmul_suffix}" if lmul_suffix and lmul_suffix not in ("", "m0") else ""
-        return f"mipp_scalar_load_{dt_ext}{suffix}"
-
-    def format_set_k_func_name(self, dt_ext: str, lmul_suffix: str = "") -> str:
-        suffix = f"_{lmul_suffix}" if lmul_suffix and lmul_suffix not in ("", "m0") else ""
-        return f"mipp_set_k_{dt_ext}{suffix}"
-
-    def format_scalar_set_k_func_name(self, dt_ext: str, lmul_suffix: str = "") -> str:
-        suffix = f"_{lmul_suffix}" if lmul_suffix and lmul_suffix not in ("", "m0") else ""
-        return f"mipp_scalar_set_k_{dt_ext}{suffix}"
-
-    def format_func_name(self, func_name: str, dt_ext: str, lmul_suffix: str = "", mkind: str = "") -> str:
-        suffix = f"_{lmul_suffix}" if lmul_suffix and lmul_suffix not in ("", "m0") else ""
-        if mkind in ("mask", "maskz", "masks"):
-            return f"mipp_{func_name}_{dt_ext}_{mkind}{suffix}"
-        return f"mipp_{func_name}_{dt_ext}{suffix}"
-
-    def format_scalar_func_name(self, func_name: str, dt_ext: str, lmul_suffix: str = "", mkind: str = "") -> str:
-        suffix = f"_{lmul_suffix}" if lmul_suffix and lmul_suffix not in ("", "m0") else ""
-        if mkind in ("mask", "maskz", "masks"):
-            return f"mipp_scalar_{func_name}_{dt_ext}_{mkind}{suffix}"
-        return f"mipp_scalar_{func_name}_{dt_ext}{suffix}"
-
-    def format_tomsk(self, dt_ext: str, reg_name: str, lmul_suffix: str = "") -> str:
-        suffix = f"_{lmul_suffix}" if lmul_suffix and lmul_suffix not in ("", "m0") else ""
-        return f"mipp_tomsk_{dt_ext}{suffix}({reg_name})"
-
-    def format_scalar_tomsk(self, dt_ext: str, reg_name: str, lmul_suffix: str = "") -> str:
-        suffix = f"_{lmul_suffix}" if lmul_suffix and lmul_suffix not in ("", "m0") else ""
-        return f"mipp_scalar_tomsk_{dt_ext}{suffix}({reg_name})"
+    def format_N(self, dt_type: str) -> str:
+        return ""  # not applicable in C dialect
 
 
 class CppObjDialectAdapter(DialectAdapter):
@@ -325,15 +293,24 @@ class CppObjDialectAdapter(DialectAdapter):
     def name(self) -> str:
         return "obj"
 
+    def _coeff(self, lmul_suffix: str) -> str:
+        if not lmul_suffix or lmul_suffix in ("", "m0", "m1"):
+            return "1"
+        if lmul_suffix.startswith("m"):
+            return lmul_suffix[1:]
+        if lmul_suffix.startswith("d"):
+            return f"-{lmul_suffix[1:]}"
+        return lmul_suffix  # pass-through for template param strings (e.g. "LMUL")
+
     def format_reg_type(self, dt_ext: str, lmul_suffix: str = "") -> str:
-        if lmul_suffix and lmul_suffix not in ("", "m1", "m0"):
-            coeff = lmul_suffix[1:] if lmul_suffix.startswith("m") else (f"-{lmul_suffix[1:]}" if lmul_suffix.startswith("d") else "1")
+        coeff = self._coeff(lmul_suffix)
+        if coeff != "1":
             return f"mipp::Rvd<T, {coeff}>"
         return "mipp::Rvd<T>"
 
     def format_msk_type(self, dt_ext: str, lmul_suffix: str = "") -> str:
-        if lmul_suffix and lmul_suffix not in ("", "m1", "m0"):
-            coeff = lmul_suffix[1:] if lmul_suffix.startswith("m") else (f"-{lmul_suffix[1:]}" if lmul_suffix.startswith("d") else "1")
+        coeff = self._coeff(lmul_suffix)
+        if coeff != "1":
             return f"mipp::Rvm<T, {coeff}>"
         return "mipp::Rvm<T>"
 
@@ -347,7 +324,10 @@ class CppObjDialectAdapter(DialectAdapter):
         return f"mipp::Rvd<T>({ptr_name})"
 
     def format_scalar_load(self, dt_ext: str, ptr_name: str, lmul_suffix: str = "") -> str:
-        return ""
+        coeff = self._coeff(lmul_suffix)
+        if coeff != "1":
+            return f"mipp::load<T, {coeff}, mipp::ISA::SCALAR>({ptr_name})"
+        return f"mipp::load<T, 1, mipp::ISA::SCALAR>({ptr_name})"
 
     def format_set_k(self, dt_ext: str, ptr_name: str, lmul_suffix: str = "") -> str:
         return f"mipp::Rvm<T>({ptr_name})"
@@ -367,30 +347,11 @@ class CppObjDialectAdapter(DialectAdapter):
     def format_scalar_get_k(self, reg_name: str, index_expr: str, dt_ext: str, lmul_suffix: str = "") -> str:
         return ""
 
-    def format_get_func_name(self, dt_ext: str, lmul_suffix: str = "") -> str:
-        return "mipp::get"
-
-    def format_scalar_get_func_name(self, dt_ext: str, lmul_suffix: str = "") -> str:
-        return "mipp::get"
-
-    def format_tomsk(self, dt_ext: str, reg_name: str, lmul_suffix: str = "") -> str:
-        return f"{reg_name}.tomsk()"
-
-    def format_scalar_tomsk(self, dt_ext: str, reg_name: str, lmul_suffix: str = "") -> str:
-        return ""
-
-    def format_get_k_func_name(self, dt_ext: str, lmul_suffix: str = "") -> str:
-        return "mipp::get"
-
-    def format_scalar_get_k_func_name(self, dt_ext: str, lmul_suffix: str = "") -> str:
-        return "mipp::get"
-
     def format_func_call(self, func_name: str, dt_ext: str, args_str: str, lmul_suffix: str = "", mkind: str = "") -> str:
         parts = [p.strip() for p in args_str.split(",")]
         all_syms = {**self.op_syms, **self.cmp_syms}
         if func_name in all_syms and len(parts) == 2:
             return f"{parts[0]} {all_syms[func_name]} {parts[1]}"
-
         if len(parts) == 1:
             return f"{parts[0]}.{func_name}()"
         elif len(parts) >= 2:
@@ -400,3 +361,6 @@ class CppObjDialectAdapter(DialectAdapter):
 
     def format_scalar_func_call(self, func_name: str, dt_ext: str, args_str: str, lmul_suffix: str = "", mkind: str = "") -> str:
         return ""
+
+    def format_N(self, dt_type: str) -> str:
+        return f"mipp::N<{dt_type}>()"
