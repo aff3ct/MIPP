@@ -233,6 +233,11 @@ def discover_and_sort_isas(path, limit_to_isas=None):
     for name in isas_dict:
         visit(name)
 
+    for name, isa in isas_dict.items():
+        sub_name = isa.get("sub_isa")
+        if sub_name and sub_name in isas_dict:
+            isas_dict[sub_name]["super_isa"] = isa
+
     return isas_dict, implems_dict, sorted_names
 
 

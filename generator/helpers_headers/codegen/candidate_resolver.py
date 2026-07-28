@@ -179,55 +179,50 @@ def _prepare_return_variable(post_statements, isa, dt_ret, cond, lmul, f, vector
         post_statements.append(f"\t{vector_ret_type} res;")
         post_statements.append(f"\tmemcpy(&res, &sres, sizeof(res));")
 
-def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond, lmul=0):
+def _build_fallback_statements(isa, funcs, f, dt, mask_kind, cond, lmul, target_scalar_lmul):
     dt_par, dt_ret = compute_dt_par_dt_ret(None, None, dt, check_support=False)
-    dt_key = dt_par + "," + dt_ret
-    func_name = build_func_name_internal(isa, dt, dt_par, dt_ret, f, masked_version=mask_kind, lmul=lmul)
-    
-    proto_str = build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul=lmul, isa_name=True, masked_version=mask_kind)
-    
     proto = funcs[f]["proto"]
     call_args = []
     cnt_reg = 0
     cnt_msk = 0
     cnt_val = 0
     cnt_ptr = 0
-    
+
     pre_statements = []
     post_statements = []
     return_statement = None
-    
+
     if mask_kind is not None:
         msk_dt = datatypes[dt_par]
         if "gather" in f or "scatter" in f:
             msk_dt = datatypes["uint" + str(get_dt_par_size(dt_par))]
         elif funcs[f]["proto"]["ret"].get("fixeddatatype"):
             msk_dt = datatypes[funcs[f]["proto"]["ret"]["fixeddatatype"]]
-        _prepare_mask_variable(pre_statements, isa, msk_dt, "m0", cond, lmul, f, is_initial_mask=True)
+        _prepare_mask_variable(pre_statements, isa, msk_dt, "m0", cond, target_scalar_lmul, f, is_initial_mask=True)
         call_args.append("s_m0")
         cnt_msk += 1
-        
+
         if mask_kind == "masks":
-            rsrc_scalar_type = build_reg(datatypes[dt_par], scalar_isa, lmul, True, False)
+            rsrc_scalar_type = build_reg(datatypes[dt_par], scalar_isa, target_scalar_lmul, True, False)
             pre_statements.append(f"\t{rsrc_scalar_type} s_rsrc = {{0}};")
             pre_statements.append(f"\tmemcpy(&s_rsrc, &rsrc, sizeof(rsrc));")
             call_args.append("s_rsrc")
-            
+
     for arg in proto["args"]:
         arg_type_name = arg["type"]
         realdatatype = _resolve_arg_datatype(arg, dt_par, dt_ret)
-            
+
         if arg_type_name == "reg" or arg_type_name == "ret":
             arg_name = f"r{cnt_reg}"
             cnt_reg += 1
-            scalar_type = build_type("reg", realdatatype, scalar_isa, lmul, True, False)
+            scalar_type = build_type("reg", realdatatype, scalar_isa, target_scalar_lmul, True, False)
             pre_statements.append(f"\t{scalar_type} s_{arg_name} = {{0}};")
             pre_statements.append(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof({arg_name}));")
             call_args.append(f"s_{arg_name}")
         elif arg_type_name == "msk":
             arg_name = f"m{cnt_msk}"
             cnt_msk += 1
-            _prepare_mask_variable(pre_statements, isa, realdatatype, arg_name, cond, lmul, f, is_initial_mask=False)
+            _prepare_mask_variable(pre_statements, isa, realdatatype, arg_name, cond, target_scalar_lmul, f, is_initial_mask=False)
             call_args.append(f"s_{arg_name}")
         elif arg_type_name == "val":
             arg_name = f"v{cnt_val}"
@@ -239,35 +234,61 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond, lm
             call_args.append(arg_name)
         elif arg_type_name == "Nele":
             call_args.append("vals")
-            
+
     call_args_str = ", ".join(call_args)
-    scalar_func_name = build_func_name_internal(scalar_isa, dt, dt_par, dt_ret, f, masked_version=mask_kind, lmul=lmul)
-    
+    scalar_func_name = build_func_name_internal(scalar_isa, dt, dt_par, dt_ret, f, masked_version=mask_kind, lmul=target_scalar_lmul)
+
     ret_type_name = proto["ret"]["type"]
     if ret_type_name == "reg" or ret_type_name == "msk":
         vector_ret_type = build_type(ret_type_name, datatypes[dt_ret], isa, lmul, True, False)
-        scalar_ret_type = build_type(ret_type_name, datatypes[dt_ret], scalar_isa, lmul, True, False)
+        scalar_ret_type = build_type(ret_type_name, datatypes[dt_ret], scalar_isa, target_scalar_lmul, True, False)
         call_statement = f"{scalar_ret_type} sres = {scalar_func_name}({call_args_str});"
-        
-        _prepare_return_variable(post_statements, isa, datatypes[dt_ret], cond, lmul, f, vector_ret_type, ret_type_name)
+
+        _prepare_return_variable(post_statements, isa, datatypes[dt_ret], cond, target_scalar_lmul, f, vector_ret_type, ret_type_name)
         return_statement = "return res;"
     elif ret_type_name == "val":
         call_statement = f"return {scalar_func_name}({call_args_str});"
     else:
         call_statement = f"{scalar_func_name}({call_args_str});"
-        
+
     pre_statements_str = "\n".join(pre_statements)
     post_statements_str = "\n".join(post_statements)
-    
-    j2 = Template(_FALLBACK_TEMPLATE, undefined=StrictUndefined)
-    print(j2.render(
-        cond=cond,
-        proto=proto_str,
-        pre_statements=pre_statements_str,
-        call_statement=call_statement,
-        post_statements=post_statements_str,
-        return_statement=return_statement
-    ), file=file)
+    return pre_statements_str, call_statement, post_statements_str, return_statement
+
+def _format_fallback_body(pre, call, post, ret):
+    lines = [pre] if pre else []
+    lines.append(f"\t{call}")
+    if post: lines.append(post)
+    if ret:  lines.append(f"\t{ret}")
+    return "\n".join(lines)
+
+def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond, lmul=0):
+    dt_par, dt_ret = compute_dt_par_dt_ret(None, None, dt, check_support=False)
+    func_name = build_func_name_internal(isa, dt, dt_par, dt_ret, f, masked_version=mask_kind, lmul=lmul)
+    proto_str = build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul=lmul, isa_name=True, masked_version=mask_kind)
+
+    super_isa = isa.get("super_isa", None)
+    if super_isa and -2 in super_isa.get("sw_lmul", []):
+        super_macro = f"defined(MIPP_{super_isa['name'].upper()})"
+        body_super = _format_fallback_body(*_build_fallback_statements(isa, funcs, f, dt, mask_kind, cond, lmul, -2))
+        body_std   = _format_fallback_body(*_build_fallback_statements(isa, funcs, f, dt, mask_kind, cond, lmul, lmul))
+        full_body  = f"#if {super_macro}\n{body_super}\n#else\n{body_std}\n#endif"
+    else:
+        full_body  = _format_fallback_body(*_build_fallback_statements(isa, funcs, f, dt, mask_kind, cond, lmul, lmul))
+
+
+    single_template = """{% if cond %}#if {{ cond }}
+{% endif %}static {{ proto }} {
+\t// Level 3 (Auto Scalar Fallback)
+{{ body }}
+}
+{%- if cond %}
+#endif
+{%- endif %}"""
+    j2 = Template(single_template, undefined=StrictUndefined)
+    print(j2.render(cond=cond, proto=proto_str, body=full_body), file=file)
+
+
 
 def _get_candidate_reqs(cand, isa, funcs, lmul=0):
     if "reqs" in cand:
