@@ -88,7 +88,7 @@ _FALLBACK_TEMPLATE = """{% if cond %}#if {{ cond }}
 def _prepare_mask_variable(pre_statements, isa, msk_dt, arg_name, cond, lmul, f, is_initial_mask=False):
     msk_dt_name = msk_dt["name"]
     m0_scalar_type = build_type("msk", msk_dt, scalar_isa, lmul, True, False)
-    pre_statements.append(f"\t{m0_scalar_type} s_{arg_name};")
+    pre_statements.append(f"\t{m0_scalar_type} s_{arg_name} = {{0}};")
     if isa.get("hw_mask", False):
         reg_vector_type = build_reg(msk_dt, isa, lmul, True, False)
         reg_scalar_type = build_reg(msk_dt, scalar_isa, lmul, True, False)
@@ -112,20 +112,20 @@ def _prepare_mask_variable(pre_statements, isa, msk_dt, arg_name, cond, lmul, f,
                 guard = isa["datatypes"].get(msk_dt_name, {}).get("if", None)
                 
             if guard == "0" or is_guard_dead_under_cond(guard, cond):
-                pre_statements.append(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof(s_{arg_name}));")
+                pre_statements.append(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof({arg_name}));")
             else:
                 if guard:
                     pre_statements.append(f"#if {guard}")
                 pre_statements.append(f"\t{reg_vector_type} r_{arg_name} = {toreg_func}({arg_name});")
-                pre_statements.append(f"\t{reg_scalar_type} s_r_{arg_name};")
-                pre_statements.append(f"\tmemcpy(&s_r_{arg_name}, &r_{arg_name}, sizeof(s_r_{arg_name}));")
+                pre_statements.append(f"\t{reg_scalar_type} s_r_{arg_name} = {{0}};")
+                pre_statements.append(f"\tmemcpy(&s_r_{arg_name}, &r_{arg_name}, sizeof(r_{arg_name}));")
                 pre_statements.append(f"\ts_{arg_name} = {scalar_tomsk_func}(s_r_{arg_name});")
                 if guard:
                     pre_statements.append(f"#else")
-                    pre_statements.append(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof(s_{arg_name}));")
+                    pre_statements.append(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof({arg_name}));")
                     pre_statements.append(f"#endif")
     else:
-        pre_statements.append(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof(s_{arg_name}));")
+        pre_statements.append(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof({arg_name}));")
 
 def _resolve_arg_datatype(arg, dt_par, dt_ret):
     arg_type_name = arg["type"]
@@ -209,8 +209,8 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond, lm
         
         if mask_kind == "masks":
             rsrc_scalar_type = build_reg(datatypes[dt_par], scalar_isa, lmul, True, False)
-            pre_statements.append(f"\t{rsrc_scalar_type} s_rsrc;")
-            pre_statements.append(f"\tmemcpy(&s_rsrc, &rsrc, sizeof(s_rsrc));")
+            pre_statements.append(f"\t{rsrc_scalar_type} s_rsrc = {{0}};")
+            pre_statements.append(f"\tmemcpy(&s_rsrc, &rsrc, sizeof(rsrc));")
             call_args.append("s_rsrc")
             
     for arg in proto["args"]:
@@ -221,8 +221,8 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond, lm
             arg_name = f"r{cnt_reg}"
             cnt_reg += 1
             scalar_type = build_type("reg", realdatatype, scalar_isa, lmul, True, False)
-            pre_statements.append(f"\t{scalar_type} s_{arg_name};")
-            pre_statements.append(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof(s_{arg_name}));")
+            pre_statements.append(f"\t{scalar_type} s_{arg_name} = {{0}};")
+            pre_statements.append(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof({arg_name}));")
             call_args.append(f"s_{arg_name}")
         elif arg_type_name == "msk":
             arg_name = f"m{cnt_msk}"
