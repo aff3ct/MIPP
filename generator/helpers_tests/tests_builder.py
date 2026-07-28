@@ -329,8 +329,21 @@ class TestsBuilderEngine:
         return False
 
     def indent_lines(self, lines: List[str], indent_level: int) -> List[str]:
+        """Indent each line by indent_level tabs.
+
+        Preprocessor directives (#if, #elif, #else, #endif, …) are never
+        indented — they must always start at column 0 in C/C++ output.
+        """
         tabs = "\t" * indent_level
-        return [f"{tabs}{line}" if line else "" for line in lines]
+        res = []
+        for line in lines:
+            if not line:
+                res.append("")
+            elif line.lstrip().startswith("#"):
+                res.append(line.lstrip())
+            else:
+                res.append(f"{tabs}{line}")
+        return res
 
     def _tpl(self, *path: str) -> List[str]:
         """Look up a template list by path keys.

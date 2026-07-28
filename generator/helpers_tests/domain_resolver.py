@@ -231,7 +231,10 @@ class DomainResolver:
                         res.append(f"\t\t\t{kw} ({cpp_cond})")
                         res.append("\t\t\t{")
                         for line in inner_lines:
-                            res.append(f"\t{line}")
+                            if line.lstrip().startswith("#"):
+                                res.append(line.lstrip())
+                            else:
+                                res.append(f"\t{line}")
                         res.append("\t\t\t}")
                 if res:
                     return res

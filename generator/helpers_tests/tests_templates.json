@@ -245,7 +245,7 @@
         "\t\tusing T [[maybe_unused]] = T_src;"
       ],
       "test_section_ldiv2": [
-        "\t\t\t#if defined(MIPP_LDIV_2)",
+        "#if defined(MIPP_LDIV_2)",
         "\t\t\tSECTION(\"LDIV = 2\")",
         "\t\t\t{",
         "\t\t\t\ttry {",
@@ -254,7 +254,7 @@
         "\t\t\t\t\tWARN(e.what());",
         "\t\t\t\t}",
         "\t\t\t}",
-        "\t\t\t#endif // MIPP_LDIV_2"
+        "#endif // MIPP_LDIV_2"
       ]
     },
     "obj": {
