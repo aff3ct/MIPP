@@ -437,9 +437,9 @@
     "testz_2": {
         "format": "long",
         "code": [
-            "%r<c:int|b:32>% r32 = %set1<c:int|b:32>%(-1);",
-            "%m<c:int|b:32>% m32 = %tomsk<c:int|b:32>%(r32);",
-            "return %testz<tp>%(m0, %cast_k<c:int|b:32,tp>%(m32));"
+            "%r<c:int|b:32|m:tp>% r32 = %set1<c:int|b:32|m:tp>%(-1);",
+            "%m<c:int|b:32|m:tp>% m32 = %tomsk<c:int|b:32|m:tp>%(r32);",
+            "return %testz<tp>%(m0, %cast_k<c:int|b:32|m:tp,tp>%(m32));"
         ]
     },
     "tomsk_emu": {
