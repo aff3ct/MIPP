@@ -232,9 +232,10 @@ def gen_c_structures(isa, file, is_scalar=False, vla_size=None):
             resolved_isa = resolve_lmul_in_isa(isa, lmul)
             for dt in resolved_isa["datatypes"]:
                 guard = resolved_isa["datatypes"][dt].get("if", None)
+                indent = "\t" if guard else ""
                 if guard:
                     print(f"#if {guard}", file=file)
-                print(j2_rvd_struct.render(
+                struct_str = j2_rvd_struct.render(
                     isa=resolved_isa,
                     datatype=datatypes[dt],
                     isa_datatype=resolved_isa["datatypes"][dt],
@@ -242,21 +243,26 @@ def gen_c_structures(isa, file, is_scalar=False, vla_size=None):
                     lsuffix_mipp=lsuffix_mipp,
                     isa_name_upper=resolved_isa["name"].upper(),
                     type_category_upper=datatypes[dt]["category"].upper(),
-                ), file=file)
+                )
+                print(f"{indent}{struct_str}", file=file)
                 
                 # Immediate _m1 alias generation
                 if lmul == 1:
                     if "{{lsuffix_mipp}}" in layout["rvd_struct_template"]:
-                        print(f"typedef rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m1_t rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t;", file=file)
+                        print(f"{indent}typedef rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m1_t rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t;", file=file)
                     else:
-                        print(f"typedef rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m1_t;", file=file)
+                        print(f"{indent}typedef rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m1_t;", file=file)
                 
                 if guard:
                     print(f"#else", file=file)
                     c_type = f"{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t"
                     if lmul == 1:
-                        print(f"	typedef struct {{ {c_type} r[MIPP_{isa['name'].upper()}_N_{datatypes[dt]['category'].upper()}{datatypes[dt]['n_bits']}]; }} rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t;", file=file)
-                        print(f"	typedef struct {{ {c_type} r[MIPP_{isa['name'].upper()}_N_{datatypes[dt]['category'].upper()}{datatypes[dt]['n_bits']}]; }} rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m1_t;", file=file)
+                        if "{{lsuffix_mipp}}" in layout["rvd_struct_template"]:
+                            print(f"	typedef struct {{ {c_type} r[MIPP_{isa['name'].upper()}_N_{datatypes[dt]['category'].upper()}{datatypes[dt]['n_bits']}]; }} rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m1_t;", file=file)
+                            print(f"	typedef rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m1_t rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t;", file=file)
+                        else:
+                            print(f"	typedef struct {{ {c_type} r[MIPP_{isa['name'].upper()}_N_{datatypes[dt]['category'].upper()}{datatypes[dt]['n_bits']}]; }} rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t;", file=file)
+                            print(f"	typedef rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m1_t;", file=file)
                     else:
                         print(f"	typedef struct {{ {c_type} r[MIPP_{isa['name'].upper()}_N_{datatypes[dt]['category'].upper()}{datatypes[dt]['n_bits']}_M{lmul}]; }} rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_{lsuffix_mipp}_t;", file=file)
                     print(f"#endif", file=file)
@@ -318,9 +324,10 @@ def gen_c_structures(isa, file, is_scalar=False, vla_size=None):
             resolved_isa = resolve_lmul_in_isa(isa, lmul)
             for dt in resolved_isa["datatypes"]:
                 guard = resolved_isa["datatypes"][dt].get("if", None)
+                indent = "\t" if guard else ""
                 if guard:
                     print(f"#if {guard}", file=file)
-                print(j2_rvm_struct.render(
+                struct_str = j2_rvm_struct.render(
                     isa=resolved_isa,
                     datatype=datatypes[dt],
                     isa_datatype=resolved_isa["datatypes"][dt],
@@ -328,21 +335,26 @@ def gen_c_structures(isa, file, is_scalar=False, vla_size=None):
                     lsuffix_mipp=lsuffix_mipp,
                     isa_name_upper=resolved_isa["name"].upper(),
                     type_category_upper=datatypes[dt]["category"].upper(),
-                ), file=file)
+                )
+                print(f"{indent}{struct_str}", file=file)
                 
                 # Immediate _m1 alias generation
                 if lmul == 1:
                     if "{{lsuffix_mipp}}" in layout["rvd_struct_template"]:
-                        print(f"typedef rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m1_t rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t;", file=file)
+                        print(f"{indent}typedef rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m1_t rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t;", file=file)
                     else:
-                        print(f"typedef rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m1_t;", file=file)
+                        print(f"{indent}typedef rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m1_t;", file=file)
 
                 if guard:
                     print(f"#else", file=file)
                     mask_type = f"uint{datatypes[dt]['n_bits']}_t"
                     if lmul == 1:
-                        print(f"	typedef struct {{ {mask_type} m[MIPP_{isa['name'].upper()}_N_{datatypes[dt]['category'].upper()}{datatypes[dt]['n_bits']}]; }} rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t;", file=file)
-                        print(f"	typedef struct {{ {mask_type} m[MIPP_{isa['name'].upper()}_N_{datatypes[dt]['category'].upper()}{datatypes[dt]['n_bits']}]; }} rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m1_t;", file=file)
+                        if "{{lsuffix_mipp}}" in layout["rvd_struct_template"]:
+                            print(f"	typedef struct {{ {mask_type} m[MIPP_{isa['name'].upper()}_N_{datatypes[dt]['category'].upper()}{datatypes[dt]['n_bits']}]; }} rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m1_t;", file=file)
+                            print(f"	typedef rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m1_t rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t;", file=file)
+                        else:
+                            print(f"	typedef struct {{ {mask_type} m[MIPP_{isa['name'].upper()}_N_{datatypes[dt]['category'].upper()}{datatypes[dt]['n_bits']}]; }} rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t;", file=file)
+                            print(f"	typedef rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m1_t;", file=file)
                     else:
                         print(f"	typedef struct {{ {mask_type} m[MIPP_{isa['name'].upper()}_N_{datatypes[dt]['category'].upper()}{datatypes[dt]['n_bits']}_M{lmul}]; }} rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_{lsuffix_mipp}_t;", file=file)
                     print(f"#endif", file=file)
