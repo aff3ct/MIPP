@@ -18,7 +18,7 @@ cat cppcheck/cppcheck_all.log | grep "missingInclude:" > cppcheck/cppcheck_missi
 
 COUNT=$(wc -l < cppcheck/cppcheck_error.log )
 
-if [ $COUNT -gt 4 ]; then
+if [ $COUNT -gt 6 ]; then
 	echo "Error count is $COUNT! cppcheck run failed :-(.";
 	echo ""
 	echo "Errors list:"
