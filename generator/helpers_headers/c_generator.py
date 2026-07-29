@@ -132,9 +132,6 @@ def gen_c_structures(isa, file, is_scalar=False, vla_size=None):
 
     size_symbol = str(vla_size) if vla_size is not None else layout.get("size_symbol", None)
 
-    if not is_scalar:
-        print('#include "../scalar/scalar_common.h"', file=file)
-
     # 1. Vector typedefs (VLA only)
     if "vector_typedef_template" in layout:
         j2_vector_typedef = Template(layout["vector_typedef_template"], undefined=StrictUndefined)
@@ -256,11 +253,12 @@ def gen_c_structures(isa, file, is_scalar=False, vla_size=None):
                 
                 if guard:
                     print(f"#else", file=file)
+                    c_type = f"{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t"
                     if lmul == 1:
-                        print(f"	typedef rvd_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t;", file=file)
-                        print(f"	typedef rvd_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m1_t;", file=file)
+                        print(f"	typedef struct {{ {c_type} r[MIPP_{isa['name'].upper()}_N_{datatypes[dt]['category'].upper()}{datatypes[dt]['n_bits']}]; }} rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t;", file=file)
+                        print(f"	typedef struct {{ {c_type} r[MIPP_{isa['name'].upper()}_N_{datatypes[dt]['category'].upper()}{datatypes[dt]['n_bits']}]; }} rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m1_t;", file=file)
                     else:
-                        print(f"	typedef rvd_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_{lsuffix_mipp}_t;", file=file)
+                        print(f"	typedef struct {{ {c_type} r[MIPP_{isa['name'].upper()}_N_{datatypes[dt]['category'].upper()}{datatypes[dt]['n_bits']}_M{lmul}]; }} rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_{lsuffix_mipp}_t;", file=file)
                     print(f"#endif", file=file)
         elif lmul in sw_lmuls_pos:
             # Emulated pairwise implementation
@@ -275,6 +273,7 @@ def gen_c_structures(isa, file, is_scalar=False, vla_size=None):
         for dt in resolved_isa["datatypes"]:
             dt_cat = datatypes[dt]['category']
             n_bits = datatypes[dt]['n_bits']
+            c_type = f"{dt_cat}{n_bits}_t"
             if "if_lmul" in resolved_isa["datatypes"][dt] and str(-ldiv) in resolved_isa["datatypes"][dt]["if_lmul"]:
                 guard = resolved_isa["datatypes"][dt]["if_lmul"][str(-ldiv)]
             else:
@@ -284,12 +283,12 @@ def gen_c_structures(isa, file, is_scalar=False, vla_size=None):
                 if size_symbol and ldiv > 1:
                     min_vlen = n_bits * ldiv
                     print(f"{indent}#if defined({size_symbol}) && {size_symbol} >= {min_vlen}", file=file)
-                    print(f"{indent}\ttypedef rvd_scalar_{dt_cat}{n_bits}_{lsuffix_mipp}_t rvd_{isa['name']}_{dt_cat}{n_bits}_{lsuffix_mipp}_t;", file=file)
+                    print(f"{indent}\ttypedef struct {{ {c_type} r[MIPP_{isa['name'].upper()}_N_{dt_cat.upper()}{n_bits}_D{ldiv}]; }} rvd_{isa['name']}_{dt_cat}{n_bits}_{lsuffix_mipp}_t;", file=file)
                     print(f"{indent}#else", file=file)
-                    print(f"{indent}\ttypedef rvd_scalar_{dt_cat}{n_bits}_t rvd_{isa['name']}_{dt_cat}{n_bits}_{lsuffix_mipp}_t;", file=file)
+                    print(f"{indent}\ttypedef struct {{ {c_type} r[MIPP_{isa['name'].upper()}_N_{dt_cat.upper()}{n_bits}]; }} rvd_{isa['name']}_{dt_cat}{n_bits}_{lsuffix_mipp}_t;", file=file)
                     print(f"{indent}#endif", file=file)
                 else:
-                    print(f"{indent}typedef rvd_scalar_{dt_cat}{n_bits}_t rvd_{isa['name']}_{dt_cat}{n_bits}_{lsuffix_mipp}_t;", file=file)
+                    print(f"{indent}typedef struct {{ {c_type} r[MIPP_{isa['name'].upper()}_N_{dt_cat.upper()}{n_bits}]; }} rvd_{isa['name']}_{dt_cat}{n_bits}_{lsuffix_mipp}_t;", file=file)
 
             if guard == "0":
                 print_ldiv_fallback_typedef_rvd("")
@@ -340,11 +339,12 @@ def gen_c_structures(isa, file, is_scalar=False, vla_size=None):
 
                 if guard:
                     print(f"#else", file=file)
+                    mask_type = f"uint{datatypes[dt]['n_bits']}_t"
                     if lmul == 1:
-                        print(f"	typedef rvm_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t;", file=file)
-                        print(f"	typedef rvm_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m1_t;", file=file)
+                        print(f"	typedef struct {{ {mask_type} m[MIPP_{isa['name'].upper()}_N_{datatypes[dt]['category'].upper()}{datatypes[dt]['n_bits']}]; }} rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t;", file=file)
+                        print(f"	typedef struct {{ {mask_type} m[MIPP_{isa['name'].upper()}_N_{datatypes[dt]['category'].upper()}{datatypes[dt]['n_bits']}]; }} rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m1_t;", file=file)
                     else:
-                        print(f"	typedef rvm_scalar_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_{lsuffix_mipp}_t;", file=file)
+                        print(f"	typedef struct {{ {mask_type} m[MIPP_{isa['name'].upper()}_N_{datatypes[dt]['category'].upper()}{datatypes[dt]['n_bits']}_M{lmul}]; }} rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_{lsuffix_mipp}_t;", file=file)
                     print(f"#endif", file=file)
         elif lmul in sw_lmuls_pos:
             # Emulated pairwise implementation
@@ -359,6 +359,7 @@ def gen_c_structures(isa, file, is_scalar=False, vla_size=None):
         for dt in resolved_isa["datatypes"]:
             dt_cat = datatypes[dt]['category']
             n_bits = datatypes[dt]['n_bits']
+            mask_type = f"uint{n_bits}_t"
             if "if_lmul" in resolved_isa["datatypes"][dt] and str(-ldiv) in resolved_isa["datatypes"][dt]["if_lmul"]:
                 guard = resolved_isa["datatypes"][dt]["if_lmul"][str(-ldiv)]
             else:
@@ -368,12 +369,12 @@ def gen_c_structures(isa, file, is_scalar=False, vla_size=None):
                 if size_symbol and ldiv > 1:
                     min_vlen = n_bits * ldiv
                     print(f"{indent}#if defined({size_symbol}) && {size_symbol} >= {min_vlen}", file=file)
-                    print(f"{indent}\ttypedef rvm_scalar_{dt_cat}{n_bits}_{lsuffix_mipp}_t rvm_{isa['name']}_{dt_cat}{n_bits}_{lsuffix_mipp}_t;", file=file)
+                    print(f"{indent}\ttypedef struct {{ {mask_type} m[MIPP_{isa['name'].upper()}_N_{dt_cat.upper()}{n_bits}_D{ldiv}]; }} rvm_{isa['name']}_{dt_cat}{n_bits}_{lsuffix_mipp}_t;", file=file)
                     print(f"{indent}#else", file=file)
-                    print(f"{indent}\ttypedef rvm_scalar_{dt_cat}{n_bits}_t rvm_{isa['name']}_{dt_cat}{n_bits}_{lsuffix_mipp}_t;", file=file)
+                    print(f"{indent}\ttypedef struct {{ {mask_type} m[MIPP_{isa['name'].upper()}_N_{dt_cat.upper()}{n_bits}]; }} rvm_{isa['name']}_{dt_cat}{n_bits}_{lsuffix_mipp}_t;", file=file)
                     print(f"{indent}#endif", file=file)
                 else:
-                    print(f"{indent}typedef rvm_scalar_{dt_cat}{n_bits}_t rvm_{isa['name']}_{dt_cat}{n_bits}_{lsuffix_mipp}_t;", file=file)
+                    print(f"{indent}typedef struct {{ {mask_type} m[MIPP_{isa['name'].upper()}_N_{dt_cat.upper()}{n_bits}]; }} rvm_{isa['name']}_{dt_cat}{n_bits}_{lsuffix_mipp}_t;", file=file)
 
             if guard == "0":
                 print_ldiv_fallback_typedef_rvm("")
