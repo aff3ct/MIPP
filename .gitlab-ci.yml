@@ -216,6 +216,10 @@ analysis-cppcheck:
   # C codes cannot compile on RVV for now :-(
   - |
     case "$ARCH" in
+      armv7-neon|armv7-neon-fma)
+        export THREADS=2
+        export EXTRA_CMAKE_FLAGS="-DCMAKE_UNITY_BUILD_BATCH_SIZE=4"
+        ;;
       riscv64-rvv1.0)
         export THREADS=6
         export SKIP_C_EXAMPLES="true"
