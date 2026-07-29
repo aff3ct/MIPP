@@ -29,32 +29,18 @@ def _generate_mipp_hpp(include_manager=None):
 def generate_cpp(include_manager=None, isa_list=None):
     file_common = include_manager.get_fd("cpp", "common")
 
-    tpl_header_cpp = """#ifndef MY_INTRINSICS_PLUS_PLUS_HPP_
-#define MY_INTRINSICS_PLUS_PLUS_HPP_
+    tpl_header_cpp = """#pragma once
 
-// #include "mipp.h"
 #include "c/common.h"
 #include "simd_ext/scalar/scalar_common.h"
 #include <iostream>
 
 namespace mipp
 {
-
-typedef double float64_t;
-typedef float float32_t;    
-"""
-
-    j2_template = Template(tpl_header_cpp, undefined=StrictUndefined)
-    print(j2_template.render(), file=file_common)
-
-    tpl_footer_cpp = """}
-
-#endif /* MY_INTRINSICS_PLUS_PLUS_HPP_ */"""
-    j2_template = Template(tpl_footer_cpp, undefined=StrictUndefined)
-    print(j2_template.render(), file=file_common)
- 
-
-
+	typedef double float64_t;
+	typedef float float32_t;
+}"""
+    print(tpl_header_cpp, file=file_common)
 
     for isa in isa_list:
         file_isa_common = include_manager.get_fd(isa["name"] + "_cpp", "common")
@@ -63,34 +49,34 @@ typedef float float32_t;
         _gen_cpp_functions_isa(include_manager, isa, interfaces)
 
     # definition of the enum used by everyone in cpp layer
-    file_common = open("../include/simd_ext_cpp/common.hpp", "w")
-    print("#pragma once\n", file=file_common)
-    print("namespace mipp {\n", file=file_common)
-    print("enum ISA { SCALAR, SSE, AVX, AVX512, NEON, SVE, RVV };", file=file_common)
-    print("enum MKIND { U, M, Z, S }; //mask enum for function templates", file=file_common)
+    file_common_enum = open("../include/simd_ext_cpp/common.hpp", "w")
+    print("#pragma once\n", file=file_common_enum)
+    print("namespace mipp {\n", file=file_common_enum)
+    print("enum ISA { SCALAR, SSE, AVX, AVX512, NEON, SVE, RVV };", file=file_common_enum)
+    print("enum MKIND { U, M, Z, S }; //mask enum for function templates", file=file_common_enum)
 
     isa_list_copy = prepare_isa_defines(isa_list) # this is the function that sets the gen_define key for every ISAs for some reason
 
     for index, isa in enumerate(isa_list_copy):
         if index == 0:
-            print("#if " + isa["gen_define"], file=file_common)
+            print("#if " + isa["gen_define"], file=file_common_enum)
         else:
-            print("#elif " + isa["gen_define"], file=file_common)
-        print(f"// uh-oh technically UB", file=file_common)
-        print(f"constexpr ISA DEFAULT_ISA = ISA::{isa['name'].upper()};", file=file_common)
-    print("#else\n#error \"No ISA defined for cpp wrapper\"\n#endif", file=file_common)
+            print("#elif " + isa["gen_define"], file=file_common_enum)
+        print(f"// uh-oh technically UB", file=file_common_enum)
+        print(f"constexpr ISA DEFAULT_ISA = ISA::{isa['name'].upper()};", file=file_common_enum)
+    print("#else\n#error \"No ISA defined for cpp wrapper\"\n#endif", file=file_common_enum)
 
-    print("template<typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> struct rvd_type{};", file=file_common)
-    print("template<typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> struct rvm_type{};", file=file_common)
-    print("template<typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> using rvd = typename rvd_type<T,LMUL,ISA_TYPE>::type;", file=file_common)
-    print("template<typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> using rvm = typename rvm_type<T,LMUL,ISA_TYPE>::type;", file=file_common)
-    print("template<typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> constexpr uint32_t N(){ return 0; }", file=file_common)
-    print("template<ISA ISA_TYPE=DEFAULT_ISA> constexpr uint32_t rvd_sz_bits(){ return 0; }", file=file_common)
-    print("template<ISA ISA_TYPE=DEFAULT_ISA> constexpr uint32_t rvd_sz_bytes(){ return 0; }", file=file_common)
-    print("template<ISA ISA_TYPE=DEFAULT_ISA> constexpr uint32_t req_alignment(){ return 0; }", file=file_common)
+    print("template<typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> struct rvd_type{};", file=file_common_enum)
+    print("template<typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> struct rvm_type{};", file=file_common_enum)
+    print("template<typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> using rvd = typename rvd_type<T,LMUL,ISA_TYPE>::type;", file=file_common_enum)
+    print("template<typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> using rvm = typename rvm_type<T,LMUL,ISA_TYPE>::type;", file=file_common_enum)
+    print("template<typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> constexpr uint32_t N(){ return 0; }", file=file_common_enum)
+    print("template<ISA ISA_TYPE=DEFAULT_ISA> constexpr uint32_t rvd_sz_bits(){ return 0; }", file=file_common_enum)
+    print("template<ISA ISA_TYPE=DEFAULT_ISA> constexpr uint32_t rvd_sz_bytes(){ return 0; }", file=file_common_enum)
+    print("template<ISA ISA_TYPE=DEFAULT_ISA> constexpr uint32_t req_alignment(){ return 0; }", file=file_common_enum)
 
-    print("}\n", file=file_common)
-    file_common.close()
+    print("}\n", file=file_common_enum)
+    file_common_enum.close()
 
     _gen_cpp_generic_templates(include_manager, isa_list_copy, interfaces)
     
@@ -100,15 +86,14 @@ typedef float float32_t;
     _generate_mipp_hpp(include_manager)
 
 def _gen_cpp_common(isa_list, file):
-    # glue file similar to ci generator's way of generating c/common.h but for cpp layer. I don't think it needs to redefine anything, just include stuff.
-    print("#pragma once\n", file=file)
+    print("", file=file)
     for index, isa in enumerate(isa_list):
         if index == 0:
             print("#if " + isa["gen_define"], file=file)
         else:
             print("#elif " + isa["gen_define"], file=file)
         
-        print(f'#include "../simd_ext_cpp/{isa["name"].lower()}_cpp/{isa["name"].lower()}_cpp_common.hpp"\n', file=file)
+        print(f'#include "../simd_ext_cpp/{isa["name"].lower()}_cpp/{isa["name"].lower()}_cpp_common.hpp"', file=file)
     print("#else\n#error \"No ISA defined for cpp wrapper\"\n#endif", file=file)
 
 def _gen_cpp_functions(isa_list, include_manager, funcs):
@@ -121,7 +106,7 @@ def _gen_cpp_functions(isa_list, include_manager, funcs):
                 print("#if " + isa["gen_define"], file=file)
             else:
                 print("#elif " + isa["gen_define"], file=file)
-            print(f'#include "../../simd_ext_cpp/{isa["name"].lower()}_cpp/functions/{isa["name"].lower()}_cpp_{f}.hpp"\n', file=file)
+            print(f'#include "../../simd_ext_cpp/{isa["name"].lower()}_cpp/functions/{isa["name"].lower()}_cpp_{f}.hpp"', file=file)
         print("#else\n#error \"No ISA defined for cpp wrapper\"\n#endif", file=file)
 
 # -------------------------------------------------------------------------------------------------

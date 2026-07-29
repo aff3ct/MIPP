@@ -546,10 +546,14 @@ def generate_c_layer(isa, include_manager, native_implems, emu_implems):
         header_tpl_val = "\n".join(header_tpl_val)
     tpl_header = Template(header_tpl_val, undefined=StrictUndefined).render(name=isa["name"], name_upper=isa["name"].upper())
     print(tpl_header, file=file_common)
+    print("", file=file_common)
 
     # 2. Emit the defines and structures
     gen_c_defines(isa, file_common)
+    print("", file=file_common)
+
     gen_c_structures(isa, file_common, is_scalar=isa.get("is_scalar", False))
+    print("", file=file_common)
 
     print(f"#endif /* MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_{isa['name'].upper()}_H_ */", file=file_common)
 

@@ -21,21 +21,21 @@ def prepare_isa_defines(isa_list):
     return isa_list_copy
 
 def _isa_include_common(isa):
-    content =  "\n#include \"../simd_ext/"+isa["name"]+"/" + isa["name"] + "_common.h\"\n"
+    content = "#include \"../simd_ext/"+isa["name"]+"/" + isa["name"] + "_common.h\"\n"
     sub_isa = isa.get("sub_isa")
     if sub_isa:
-        content +=  "\n#include \"../simd_ext/"+sub_isa+"/" + sub_isa + "_common.h\"\n"
+        content += "#include \"../simd_ext/"+sub_isa+"/" + sub_isa + "_common.h\"\n"
     return content
 
 def _isa_include_function(isa, func):
     if isa == "c":
-        content = "\n#include \"" + func + ".h\"\n"
+        content = "#include \"" + func + ".h\"\n"
         return content
     
-    content = "\n#include \"../../simd_ext/"+isa["name"]+"/" + "functions/" + isa["name"] + "_" + func + ".h\"\n"
+    content = "#include \"../../simd_ext/"+isa["name"]+"/" + "functions/" + isa["name"] + "_" + func + ".h\"\n"
     sub_isa = isa.get("sub_isa")
     if sub_isa:
-        content += "\n#include \"../../simd_ext/"+sub_isa+"/" + "functions/" + sub_isa + "_" + func + ".h\"\n"
+        content += "#include \"../../simd_ext/"+sub_isa+"/" + "functions/" + sub_isa + "_" + func + ".h\"\n"
     return content
 
 def _custom_prefix_generator(func, isa_list, is_common=False, mode="function_header"):
@@ -110,13 +110,13 @@ def _custom_prefix_generator(func, isa_list, is_common=False, mode="function_hea
         # print('Generating custom prefix for function "'+func+'"')
         is_first = True
 
-        content += "#include \"../common.h\"\n"
+        content += "\n#include \"../common.h\"\n\n"
         for isa in isa_list:
             if is_first:
-                content += "\n#if " + "defined(MIPP_" + isa["name"].upper() + ")\n"
+                content += "#if " + "defined(MIPP_" + isa["name"].upper() + ")\n"
                 is_first = False
             else:
-                content += "\n#elif " + "defined(MIPP_" + isa["name"].upper() + ")\n"
+                content += "#elif " + "defined(MIPP_" + isa["name"].upper() + ")\n"
                 
             content += _isa_include_function(isa, func)
         content += "#endif\n"
@@ -268,7 +268,7 @@ def _ci_mask_writer(func, dt, isa_list, file, mask_type, func_name="", lmul=0):
         full_func_name = build_func_name(isa_list[0], dt_par, dt_ret, func, isa_name=False, lmul=lmul, masked_version=mask_type)
   
     proto = build_proto(interfaces[func]["proto"], dt_par, dt_ret, isa_list[0], full_func_name, lmul, False, False, mask_type)
-    template = f'static {proto} {{'
+    template = f'\nstatic {proto} {{'
     j2_template = Template(template, undefined=StrictUndefined)
     print(j2_template.render(), file=file)
     for i, isa in  enumerate(isa_list):
@@ -309,7 +309,7 @@ def _ci_lmul_writer(f,func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask
     else:
         full_func_name = build_func_name(isa_list[0], dt_par, dt_ret, f, isa_name=False, lmul=lmul, masked_version=mask_type)
 
-    print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, {}, full_func_name, lmul, False, False, mask_type) + " {", file=file)
+    print("\nstatic " + build_proto(funcs[f]["proto"], dt_par, dt_ret, {}, full_func_name, lmul, False, False, mask_type) + " {", file=file)
     for i, isa in  enumerate(isa_list):
         if i == 0:
             print("#if " + isa["gen_define"], file=file)
@@ -344,7 +344,7 @@ def _ci_ldiv_writer(f,func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask
         else:
             print("#elif " + isa["gen_define"], file=file)
 
-        print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, {}, full_func_name, ldiv, False, False, mask_type) + " {", file=file)
+        print("\nstatic " + build_proto(funcs[f]["proto"], dt_par, dt_ret, {}, full_func_name, ldiv, False, False, mask_type) + " {", file=file)
         if len(dt.split(',')) <= 1:
             func_name_impl = build_func_name_short(isa, dt_par, f, True, ldiv, mask_type)
         else:
@@ -372,13 +372,13 @@ def _gen_ci_functions(isa_list, include_manager, funcs):
                 func_name = build_func_name_short(isa_list[0], dt_par, f, False);
             else:
                 func_name = build_func_name(isa_list[0], dt_par, dt_ret, f, False);
-            print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name, 0, False) + " {", file=file)
+            print("\nstatic " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name, 0, False) + " {", file=file)
             for i, isa in  enumerate(isa_list):
                 if i == 0:
                     print("#if " + isa["gen_define"], file=file)
                 else:
                     print("#elif " + isa["gen_define"], file=file)
-   
+
                 if len(dt.split(',')) <= 1:
                     func_name_impl = build_func_name_short(isa, dt_par, f);
                 else:

@@ -33,12 +33,12 @@ def _missing_emit_ifdef_begin(ifd, file):
     if ifd:
         print("#if " + ifd, file=file)
 
-def _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, masked_version = None, lmul=0):
+def _missing_emit_stub(file, funcs, f, dt_par, dt_ret, isa, func_name, masked_version = None, lmul=0, indent=""):
     full_func_name = build_func_name_internal(isa, dt_par, dt_par, dt_ret, f, masked_version=masked_version, lmul=lmul)
     proto = build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul, True, masked_version=masked_version)
-    print(f"static {proto} {{", file=file)
-    emit_panic_stub(full_func_name, file=file)
-    print("}", file=file)
+    print(f"{indent}static {proto} {{", file=file)
+    emit_panic_stub(full_func_name, file=file, indent=indent + "\t")
+    print(f"{indent}}}", file=file)
 
 def _missing_emit_ifdef_end(ifd, file):
     if ifd:
@@ -277,16 +277,23 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond, lm
         full_body  = _format_fallback_body(*_build_fallback_statements(isa, funcs, f, dt, mask_kind, cond, lmul, lmul))
 
 
-    single_template = """{% if cond %}#if {{ cond }}
-{% endif %}static {{ proto }} {
+    if cond:
+        ind_body = "\n".join("\t" + line if line.strip() else line for line in full_body.split("\n"))
+        single_template = """#if {{ cond }}
+\tstatic {{ proto }} {
+\t\t// Level 3 (Auto Scalar Fallback)
+{{ body }}
+\t}
+#endif"""
+        j2 = Template(single_template, undefined=StrictUndefined)
+        print(j2.render(cond=cond, proto=proto_str, body=ind_body), file=file)
+    else:
+        single_template = """static {{ proto }} {
 \t// Level 3 (Auto Scalar Fallback)
 {{ body }}
-}
-{%- if cond %}
-#endif
-{%- endif %}"""
-    j2 = Template(single_template, undefined=StrictUndefined)
-    print(j2.render(cond=cond, proto=proto_str, body=full_body), file=file)
+}"""
+        j2 = Template(single_template, undefined=StrictUndefined)
+        print(j2.render(proto=proto_str, body=full_body), file=file)
 
 
 
@@ -705,19 +712,19 @@ def resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators
                         
                         if not cand.get("emitted", False):
                             print("", file=file_w)
-                            if cond != "":
+                            if cond:
                                 print(f"#if {cond}", file=file_w)
-                            emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, cand["ff"], post_rendering, file_w, masked_version=mask_kind, level=cand["level"], lmul=lmul)
-                            if cond != "":
+                            emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, cand["ff"], post_rendering, file_w, masked_version=mask_kind, level=cand["level"], lmul=lmul, indent="\t" if cond else "")
+                            if cond:
                                 print("#endif", file=file_w)
                             
                     elif cand["type"] == "auto_scalar":
                         _gen_c_auto_scalar_fallback_one(isa, file_w, funcs, f, dt, mask_kind, cond, lmul=lmul)
                         
                     elif cand["type"] == "stub":
-                        if cond != "":
+                        if cond:
                             print(f"#if {cond}", file=file_w)
                         func_name = build_func_name_internal(isa, dt, dt_par, dt_ret, f, masked_version=mask_kind, lmul=lmul)
-                        _missing_emit_stub(file_w, funcs, f, dt_par, dt_ret, isa, func_name, masked_version=mask_kind, lmul=lmul)
-                        if cond != "":
+                        _missing_emit_stub(file_w, funcs, f, dt_par, dt_ret, isa, func_name, masked_version=mask_kind, lmul=lmul, indent="\t" if cond else "")
+                        if cond:
                             print("#endif", file=file_w)

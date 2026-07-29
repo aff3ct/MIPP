@@ -132,8 +132,7 @@ def _gen_c_horiz_lmul_one(isa, file, funcs, f, ff, dt, lmul, mkind=None, dummy=F
         dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
         func_name = build_func_name_internal(isa, dt, dt_par, dt_ret, f, masked_version=mkind, lmul=lmul)
         proto = build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul=lmul, isa_name=True, masked_version=mkind)
-        print("", file=file)
-        print("static " + proto + " {", file=file)
+        print("\nstatic " + proto + " {", file=file)
         print("\t// Level 2 (Generic Emulated)", file=file)
 
     if (mkind == "maskz" or mkind == "mask") and lmul >= 2:
@@ -145,8 +144,11 @@ def _gen_c_horiz_lmul_one(isa, file, funcs, f, ff, dt, lmul, mkind=None, dummy=F
         ph_ret["converted_ir"] = ph_ret["converted_ir"].replace(f"{f}_{dt_par}_m{int(l2)}(", f"{f}_{dt_par}_{mkind}_m{int(l2)}(m0.m1, rsrc.r1, ", 1)
         ph_ret["converted_ir"] = ph_ret["converted_ir"].replace(f"{f}_{dt_par}_m{int(l2)}(", f"{f}_{dt_par}_{mkind}_m{int(l2)}(m0.m2, rsrc.r2, ", 1)
 
-    print("\t", end="", file=file)
-    print(ph_ret["converted_ir"], file=file)
+    lines = [line for line in ph_ret["converted_ir"].split("\n") if line.strip()]
+    for line in lines:
+        if not line.startswith("\t"):
+            line = "\t" + line
+        print(line, file=file)
 
     if dummy:
         print("}", file=file)
@@ -192,7 +194,6 @@ def gen_c_horiz_lmul(isa, file, funcs, f, dt, lmul, implems_horiz_lmul_generic_e
 
 def _c_lmul_writer(f, dt, dt_par, dt_ret, isa, funcs, file, mask_type=None, lmul=0):
     maybe_emit_lmul_separator(isa["name"], f, file)
-    print("", file=file)
 
     if len(dt.split(',')) <= 1:
         func_name = build_func_name_short(isa, dt_par, f, lmul=0, masked_version=mask_type)
@@ -204,13 +205,13 @@ def _c_lmul_writer(f, dt, dt_par, dt_ret, isa, funcs, file, mask_type=None, lmul
         func_name_half_lmul = build_func_name(isa, dt_par, dt_ret, f, lmul=int(lmul/2), masked_version=mask_type)
   
     if lmul == 1:
-        print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name_lmul, lmul=lmul, isa_name=True, masked_version=mask_type) + " {", file=file)
+        print("\nstatic " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name_lmul, lmul=lmul, isa_name=True, masked_version=mask_type) + " {", file=file)
         print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, masked_version=mask_type) + ";", file=file)
         print("}", file=file)
         return
 
     if not funcs[f]["horizontal"]:
-        print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name_lmul, lmul=lmul, isa_name=True, masked_version=mask_type) + " {", file=file)
+        print("\nstatic " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name_lmul, lmul=lmul, isa_name=True, masked_version=mask_type) + " {", file=file)
         print(build_call_lmul(funcs[f]["proto"], dt_par, dt_ret, isa, func_name_half_lmul, lmul=lmul, isa_name=True, masked_version=mask_type), file=file)
         print("}", file=file)
     else:
@@ -308,5 +309,3 @@ def gen_c_ldiv(isa_base, isa_div, include_manager, funcs):
             for dt in funcs[f]["datatypes"]:
                 dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
                 _gen_c_function_one_ldiv_avx(isa_base=isa_base, isa_div=isa_div, file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind="masks", ldiv=2)
-
-
