@@ -18,39 +18,39 @@ def emit_ifdef_begin_and_update_emulated(funcs, f, dt_key, ff, ifd, file, mask_k
         print("#if " + ifd, file=file)
         update_emulated(funcs, f, dt_key, ff, ifd, mask_kind=mask_kind)
 
-def emit_short_format_prologue(funcs_for_f, dt_ret, isa, file, lmul=0, indent=""):
+def emit_short_format_prologue(funcs_for_f, dt_ret, isa, file, lmul=0):
     # Keep same layout as original.
     if funcs_for_f["proto"]["args"]:
         if funcs_for_f["proto"]["ret"]["type"] == "reg":
             print(
-                indent + "\t" + build_type(funcs_for_f["proto"]["ret"]["type"], datatypes[dt_ret], isa, lmul=lmul) + " res;",
+                "\t" + build_type(funcs_for_f["proto"]["ret"]["type"], datatypes[dt_ret], isa, lmul=lmul) + " res;",
                 file=file,
             )
-            print(indent + "\tres.r = ", end="", file=file)
+            print("\tres.r = ", end="", file=file)
         elif funcs_for_f["proto"]["ret"]["type"] == "msk":
             print(
-                indent + "\t" + build_type(funcs_for_f["proto"]["ret"]["type"], datatypes[dt_ret], isa, lmul=lmul) + " res;",
+                "\t" + build_type(funcs_for_f["proto"]["ret"]["type"], datatypes[dt_ret], isa, lmul=lmul) + " res;",
                 file=file,
             )
-            print(indent + "\tres.m = ", end="", file=file)
+            print("\tres.m = ", end="", file=file)
     else:
         if funcs_for_f["proto"]["ret"]["type"] == "reg":
             print(
-                indent + "\t" + build_type(funcs_for_f["proto"]["ret"]["type"], datatypes[dt_ret], isa, lmul=lmul) + " res;",
+                "\t" + build_type(funcs_for_f["proto"]["ret"]["type"], datatypes[dt_ret], isa, lmul=lmul) + " res;",
                 file=file,
             )
-            print(indent + "\tres.r = ", end="", file=file)
+            print("\tres.r = ", end="", file=file)
         elif funcs_for_f["proto"]["ret"]["type"] == "msk":
             print(
-                indent + "\t" + build_type(funcs_for_f["proto"]["ret"]["type"], datatypes[dt_ret], isa, lmul=lmul) + " res;",
+                "\t" + build_type(funcs_for_f["proto"]["ret"]["type"], datatypes[dt_ret], isa, lmul=lmul) + " res;",
                 file=file,
             )
-            print(indent + "\tres.m = ", end="", file=file)
+            print("\tres.m = ", end="", file=file)
 
-def emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rendering, file, masked_version=None, lmul=0, level=None, indent=""):
+def emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rendering, file, masked_version=None, lmul=0, level=None):
     func_name = build_func_name_internal(isa, dt, dt_par, dt_ret, f, masked_version=masked_version, lmul=lmul)
 
-    print(indent + "static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, masked_version = masked_version, lmul=lmul) + " {", file=file)
+    print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, masked_version = masked_version, lmul=lmul) + " {", file=file)
 
     if level is None and ff is not None:
         level = ff.get("level", 1 if ("type" in ff and ff["type"] == "emulated") else 0)
@@ -63,27 +63,31 @@ def emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rendering, fi
             3: "Level 3 (Auto Scalar Fallback)"
         }
         if level in level_comments:
-            print(f"{indent}\t// {level_comments[level]}", file=file)
+            print(f"\t// {level_comments[level]}", file=file)
 
     post_rendering = post_rendering.strip("\n")
 
     if ff["template"]["format"] == "short":
         # Original code had a redundant always-true condition; keep behavior identical.
         if funcs[f]["proto"]["args"] or (not funcs[f]["proto"]["args"]):
-            emit_short_format_prologue(funcs[f], dt_ret, isa, file, lmul=lmul, indent=indent)
-    else:
-        if not post_rendering.startswith("\t"):
-            print(f"{indent}\t", end='', file=file)
-        elif indent:
-            post_rendering = "\n".join(indent + line if line.strip() else line for line in post_rendering.split("\n"))
+            emit_short_format_prologue(funcs[f], dt_ret, isa, file, lmul=lmul)
+    
+    body_lines = []
+    for line in post_rendering.split("\n"):
+        if line.strip():
+            if not line.startswith("\t"):
+                line = "\t" + line
+            body_lines.append(line)
+        else:
+            body_lines.append("")
 
-    print(post_rendering, file=file)
+    print("\n".join(body_lines), file=file)
 
     if ff["template"]["format"] == "short":
         if funcs[f]["proto"]["ret"]["type"]:
-            print(f"{indent}\treturn res;", file=file)
+            print("\treturn res;", file=file)
 
-    print(f"{indent}}}", file=file)
+    print("}", file=file)
 
 
 def emit_ifdef_end(ifd, file):
