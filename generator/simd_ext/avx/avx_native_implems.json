@@ -7,22 +7,8 @@
         },
         {
             "instr_name": "add",
-            "datatypes": [
-                "int64",
-                "int32"
-            ],
-            "template": "arith_2args",
-            "if": "defined(__AVX2__)"
-        },
-        {
-            "instr_name": "add",
-            "datatypes": [
-                "int16",
-                "int8",
-                "uint16",
-                "uint8"
-            ],
-            "template": "arith_2args",
+            "datatypes": "all_int_uint",
+            "template": "arith_2args_int",
             "if": "defined(__AVX2__)"
         }
     ],
@@ -560,22 +546,8 @@
         },
         {
             "instr_name": "sub",
-            "datatypes": [
-                "int64",
-                "int32"
-            ],
-            "template": "arith_2args",
-            "if": "defined(__AVX2__)"
-        },
-        {
-            "instr_name": "sub",
-            "datatypes": [
-                "int16",
-                "int8",
-                "uint16",
-                "uint8"
-            ],
-            "template": "arith_2args",
+            "datatypes": "all_int_uint",
+            "template": "arith_2args_int",
             "if": "defined(__AVX2__)"
         }
     ],
