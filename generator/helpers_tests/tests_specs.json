@@ -373,6 +373,78 @@
       },
       "comparison": "tolerance"
     },
+    "fmadd": {
+      "comparison": "tolerance",
+      "tolerance": {
+        "default": {
+          "type": "exact"
+        },
+        "by_datatype": {
+          "float32": {
+            "type": "relative_percent",
+            "value": 0.001
+          },
+          "float64": {
+            "type": "relative_percent",
+            "value": 0.0001
+          }
+        }
+      }
+    },
+    "fmsub": {
+      "comparison": "tolerance",
+      "tolerance": {
+        "default": {
+          "type": "exact"
+        },
+        "by_datatype": {
+          "float32": {
+            "type": "relative_percent",
+            "value": 0.001
+          },
+          "float64": {
+            "type": "relative_percent",
+            "value": 0.0001
+          }
+        }
+      }
+    },
+    "fnmadd": {
+      "comparison": "tolerance",
+      "tolerance": {
+        "default": {
+          "type": "exact"
+        },
+        "by_datatype": {
+          "float32": {
+            "type": "relative_percent",
+            "value": 0.001
+          },
+          "float64": {
+            "type": "relative_percent",
+            "value": 0.0001
+          }
+        }
+      }
+    },
+    "fnmsub": {
+      "comparison": "tolerance",
+      "tolerance": {
+        "default": {
+          "type": "exact"
+        },
+        "by_datatype": {
+          "float32": {
+            "type": "relative_percent",
+            "value": 0.001
+          },
+          "float64": {
+            "type": "relative_percent",
+            "value": 0.0001
+          }
+        }
+      }
+    },
     "gather": {
       "disabled": true,
       "disabled_reason": "Requires array pointer + index vector test template"
