@@ -656,6 +656,15 @@
             "template_ref": "tpl_generic_emu.log_f64"
         }
     ],
+   "cos": [
+        {
+            "datatypes": [
+                "float32"
+            ],
+            "template_ref": "tpl_generic_emu.cos_f32"
+        }
+
+    ],
     "pow": [
         {
             "datatypes": [

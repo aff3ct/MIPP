@@ -521,6 +521,15 @@ def scalar_gen(include_manager):
 #define POWF(x, y) (powf(x, y))
 #define POWD(x, y) (pow(x, y))
 
+#define COSF(x) (cosf(x))
+#define COSD(x) (cos(x))
+
+#define SINF(x) (sinf(x))
+#define SIND(x) (sin(x))
+
+#define ATANF(x) (atanf(x))
+#define ATAND(x) (atan(x))
+
 typedef float float32_t;
 typedef double float64_t;
 """

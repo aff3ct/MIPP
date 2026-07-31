@@ -419,6 +419,24 @@
     "horizontal": false,
     "mask_support": "all_mask"
   },
+  "cos": {
+    "proto_ref": "ret_reg_1arg_reg",
+    "datatypes": "all_float",
+    "horizontal": false,
+    "mask_support": "all_mask"
+  },
+  "sin": {
+    "proto_ref": "ret_reg_1arg_reg",
+    "datatypes": "all_float",
+    "horizontal": false,
+    "mask_support": "all_mask"
+  },
+  "atan": {
+    "proto_ref": "ret_reg_1arg_reg",
+    "datatypes": "all_float",
+    "horizontal": false,
+    "mask_support": "all_mask"
+  },
   "pow": {
     "proto_ref": "ret_reg_2args_reg",
     "datatypes": [

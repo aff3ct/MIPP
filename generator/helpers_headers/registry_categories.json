@@ -52,6 +52,9 @@
     "round",
     "exp",
     "log",
+    "cos",
+    "sin",
+    "atan",
     "pow",
     "pow2"
   ],

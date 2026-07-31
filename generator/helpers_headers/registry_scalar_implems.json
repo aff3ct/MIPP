@@ -1124,6 +1124,60 @@
       ]
     }
   ],
+  "cos": [
+    {
+      "type": "element-wide",
+      "datatypes": "float32",
+      "mask_variants": [],
+      "implem": [
+        "res.r[i] = %!pred_cond!% COSF(r0.r[i]) %!pred_alt!%;"
+      ]
+    },
+    {
+      "type": "element-wide",
+      "datatypes": "float64",
+      "mask_variants": [],
+      "implem": [
+        "res.r[i] = %!pred_cond!% COSD(r0.r[i]) %!pred_alt!%;"
+      ]
+    }
+  ],  
+  "sin": [
+    {
+      "type": "element-wide",
+      "datatypes": "float32",
+      "mask_variants": [],
+      "implem": [
+        "res.r[i] = %!pred_cond!% SINF(r0.r[i]) %!pred_alt!%;"
+      ]
+    },
+    {
+      "type": "element-wide",
+      "datatypes": "float64",
+      "mask_variants": [],
+      "implem": [
+        "res.r[i] = %!pred_cond!% SIND(r0.r[i]) %!pred_alt!%;"
+      ]
+    }
+  ],
+  "atan": [
+    {
+      "type": "element-wide",
+      "datatypes": "float32",
+      "mask_variants": [],
+      "implem": [
+        "res.r[i] = %!pred_cond!% ATANF(r0.r[i]) %!pred_alt!%;"
+      ]
+    },
+    {
+      "type": "element-wide",
+      "datatypes": "float64",
+      "mask_variants": [],
+      "implem": [
+        "res.r[i] = %!pred_cond!% ATAND(r0.r[i]) %!pred_alt!%;"
+      ]
+    }
+  ],
   "pow2": [
     {
       "type": "element-wide",
