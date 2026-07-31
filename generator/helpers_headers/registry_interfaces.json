@@ -311,6 +311,18 @@
     "horizontal": false,
     "mask_support": "all_mask"
   },
+  "trunc": {
+    "proto_ref": "ret_reg_1arg_reg",
+    "datatypes": "all_datatypes",
+    "horizontal": false,
+    "mask_support": "all_mask"
+  },
+  "abs": {
+    "proto_ref": "ret_reg_1arg_reg",
+    "datatypes": "all_datatypes",
+    "horizontal": false,
+    "mask_support": "all_mask"
+  },
   "blend": {
     "proto_ref": "ret_reg_3args_2reg_1msk",
     "datatypes": "all_datatypes",

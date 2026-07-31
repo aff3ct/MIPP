@@ -700,6 +700,72 @@
       ]
     }
   ],
+  "trunc": [
+    {
+      "type": "element-wide",
+      "datatypes": "all_int_uint",
+      "mask_variants": [],
+      "implem": [
+        "// do nothing, it is weird to define trunc on integers...",
+        "res.r[i] = %!pred_cond!% r0.r[i] %!pred_alt!%;"
+      ]
+    },
+    {
+      "type": "element-wide",
+      "datatypes": "float64",
+      "mask_variants": [],
+      "implem": [
+        "// requires #include <math.h>",
+        "res.r[i] = %!pred_cond!% trunc(r0.r[i]) %!pred_alt!%;"
+      ]
+    },
+    {
+      "type": "element-wide",
+      "datatypes": "float32",
+      "mask_variants": [],
+      "implem": [
+        "// requires #include <math.h>",
+        "res.r[i] = %!pred_cond!% truncf(r0.r[i]) %!pred_alt!%;"
+      ]
+    }
+  ],
+  "abs": [
+    {
+      "type": "element-wide",
+      "datatypes": "all_uint",
+      "mask_variants": [],
+      "implem": [
+        "// do nothing, it is weird to define abs on unsigned integers...",
+        "res.r[i] = %!pred_cond!% r0.r[i] %!pred_alt!%;"
+      ]
+    },
+    {
+      "type": "element-wide",
+      "datatypes": "all_int",
+      "mask_variants": [],
+      "implem": [
+        "res.r[i] = %!pred_cond!% (r0.r[i] < 0) ? -r0.r[i] : r0.r[i] %!pred_alt!%;"
+      ]
+    },
+    {
+      "type": "element-wide",
+      "datatypes": "float64",
+      "mask_variants": [],
+      "implem": [
+        "// requires #include <math.h>",
+        "res.r[i] = %!pred_cond!% fabs(r0.r[i]) %!pred_alt!%;"
+      ]
+    },
+    {
+      "type": "element-wide",
+      "datatypes": "float32",
+      "mask_variants": [],
+      "implem": [
+        "// requires #include <math.h>",
+        "res.r[i] = %!pred_cond!% fabsf(r0.r[i]) %!pred_alt!%;"
+      ]
+    }
+  ],
   "blend": [
     {
       "type": "element-wide",

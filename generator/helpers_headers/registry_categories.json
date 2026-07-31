@@ -50,6 +50,8 @@
     "sqrt",
     "rsqrt",
     "round",
+    "abs",
+    "trunc",
     "exp",
     "log",
     "cos",
