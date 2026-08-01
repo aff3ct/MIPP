@@ -555,6 +555,20 @@
             "template_ref": "tpl_generic_emu.div4"
         }
     ],
+    "exp": [
+        {
+            "datatypes": [
+                "float32"
+            ],
+            "template_ref": "tpl_generic_emu.exp_f32"
+        },
+        {
+            "datatypes": [
+                "float64"
+            ],
+            "template_ref": "tpl_generic_emu.exp_f64"
+        }
+    ],
     "fmadd": [
         {
             "datatypes": [
@@ -626,62 +640,6 @@
                 "rvv"
             ],
             "template_ref": "tpl_generic_emu.fnmadd"
-        }
-    ],
-    "exp": [
-        {
-            "datatypes": [
-                "float32"
-            ],
-            "template_ref": "tpl_generic_emu.exp_f32"
-        },
-        {
-            "datatypes": [
-                "float64"
-            ],
-            "template_ref": "tpl_generic_emu.exp_f64"
-        }
-    ],
-    "log": [
-        {
-            "datatypes": [
-                "float32"
-            ],
-            "template_ref": "tpl_generic_emu.log_f32"
-        },
-        {
-            "datatypes": [
-                "float64"
-            ],
-            "template_ref": "tpl_generic_emu.log_f64"
-        }
-    ],
-    "pow": [
-        {
-            "datatypes": [
-                "float32"
-            ],
-            "template_ref": "tpl_generic_emu.pow_f32"
-        },
-        {
-            "datatypes": [
-                "float64"
-            ],
-            "template_ref": "tpl_generic_emu.pow_f64"
-        }
-    ],
-    "pow2": [
-        {
-            "datatypes": [
-                "float32"
-            ],
-            "template_ref": "tpl_generic_emu.pow2_f32"
-        },
-        {
-            "datatypes": [
-                "float64"
-            ],
-            "template_ref": "tpl_generic_emu.pow2_f64"
         }
     ],
     "fnmsub": [
@@ -795,6 +753,20 @@
                 "avx512"
             ],
             "template_ref": "tpl_generic_emu.getfirst"
+        }
+    ],
+    "log": [
+        {
+            "datatypes": [
+                "float32"
+            ],
+            "template_ref": "tpl_generic_emu.log_f32"
+        },
+        {
+            "datatypes": [
+                "float64"
+            ],
+            "template_ref": "tpl_generic_emu.log_f64"
         }
     ],
     "max": [
@@ -923,6 +895,34 @@
                 "avx"
             ],
             "template_ref": "tpl_generic_emu.logi_m_2args_e"
+        }
+    ],
+    "pow": [
+        {
+            "datatypes": [
+                "float32"
+            ],
+            "template_ref": "tpl_generic_emu.pow_f32"
+        },
+        {
+            "datatypes": [
+                "float64"
+            ],
+            "template_ref": "tpl_generic_emu.pow_f64"
+        }
+    ],
+    "pow2": [
+        {
+            "datatypes": [
+                "float32"
+            ],
+            "template_ref": "tpl_generic_emu.pow2_f32"
+        },
+        {
+            "datatypes": [
+                "float64"
+            ],
+            "template_ref": "tpl_generic_emu.pow2_f64"
         }
     ],
     "round": [

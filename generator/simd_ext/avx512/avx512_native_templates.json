@@ -1,4 +1,12 @@
 {
+    "andb_k_emu": {
+        "format": "long",
+        "code": [
+            "%m<tp>% ret; ",
+            "ret.m = m0.m & m1.m;",
+            "return ret;"
+        ]
+    },
     "arith_1arg": {
         "format": "short",
         "code": [
@@ -23,7 +31,6 @@
             "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, r2.r);"
         ]
     },
-
     "bitwise_1arg": {
         "format": "short",
         "code": [
@@ -248,6 +255,14 @@
             "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}();"
         ]
     },
+    "set0_k": {
+        "format": "long",
+        "code": [
+            "%m<tp>% m;",
+            "m.m = 0;",
+            "return m;"
+        ]
+    },
     "set1": {
         "format": "short",
         "code": [
@@ -285,22 +300,6 @@
             "%r<tr>% res;",
             "res.r = {{ isa.prefix }}_{{ instr_name }}{{ isa_dt_par.data_ext }}_{{ isa_dt_ret.data_ext_var }}({{ isa.prefix }}_cast{{ isa_dt_par.data_ext_logi }}_si256(r0.r));",
             "return res;"
-        ]
-    },
-    "andb_k_emu": {
-        "format": "long",
-        "code": [
-            "%m<tp>% ret; ",
-            "ret.m = m0.m & m1.m;",
-            "return ret;"
-        ]
-    },
-    "set0_k": {
-        "format": "long",
-        "code": [
-            "%m<tp>% m;",
-            "m.m = 0;",
-            "return m;"
         ]
     }
 }

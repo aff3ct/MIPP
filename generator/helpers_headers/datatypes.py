@@ -106,6 +106,8 @@ u2f_dt = [ "uint64,float64", "uint32,float32"]
 u2i_dt = [ "uint64,int64", "uint32,int32", "uint16,int16", "uint8,int8" ]
 
 all_datatypes_same_size = same_dt + f2i_dt + f2u_dt + i2f_dt + i2u_dt + u2f_dt + u2i_dt
+all_datatypes_same_size_except_f64 = [dt for dt in all_datatypes_same_size if "float64" not in dt]
+all_datatypes_same_size_inc_f64 = [dt for dt in all_datatypes_same_size if "float64" in dt]
 
 int_dt_widenning = [ "int32,int64", "int16,int32", "int8,int16" ]
 float_dt_widenning = [ "float32,float64" ]

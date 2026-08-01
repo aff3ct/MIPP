@@ -209,7 +209,7 @@
     "cast_k": [
         {
             "instr_name": "cast",
-            "datatypes": "all_datatypes_cart_prod",
+            "datatypes": "all_datatypes_same_size",
             "template": "cast_k"
         }
     ],
@@ -792,6 +792,15 @@
             "template": "set0"
         }
     ],
+    "set0_k": [
+        {
+            "instr_name": "setzero",
+            "datatypes": "all_datatypes",
+            "template": "set0_k",
+            "skip_audit_level": true,
+            "skip_audit_level_reason": "assigns zero to native mask wrapper without hardware intrinsics"
+        }
+    ],
     "set1": [
         {
             "instr_name": "set1",
@@ -1032,15 +1041,6 @@
             "datatypes": "all_8bit",
             "template": "bitwise_2args",
             "if": "defined(__AVX512BW__)"
-        }
-    ],
-    "set0_k": [
-        {
-            "instr_name": "setzero",
-            "datatypes": "all_datatypes",
-            "template": "set0_k",
-            "skip_audit_level": true,
-            "skip_audit_level_reason": "assigns zero to native mask wrapper without hardware intrinsics"
         }
     ]
 }

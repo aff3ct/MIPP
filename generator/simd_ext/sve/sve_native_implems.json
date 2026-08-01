@@ -16,13 +16,12 @@
     "cast_k": [
         {
             "instr_name": "",
-            "datatypes": "all_datatypes_cart_prod",
+            "datatypes": "all_datatypes_same_size",
             "template": "cast_k",
             "skip_audit_level": true,
             "skip_audit_level_reason": "assigns native SVE mask wrapper directly"
         }
     ],
-
     "set0": [
         {
             "instr_name": "dup",

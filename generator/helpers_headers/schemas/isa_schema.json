@@ -1,84 +1,171 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "ISASchema",
-  "type": "object",
-  "properties": {
-    "name": { "type": "string" },
-    "prefix": { "type": "string" },
-    "size": {
-      "anyOf": [
-        { "type": "integer" },
-        { "type": "string" },
-        { "type": "array", "items": { "type": "integer" } }
-      ]
-    },
-    "define": { "type": "string" },
-    "header_template": {
-      "anyOf": [
-        { "type": "string" },
-        { "type": "array", "items": { "type": "string" } }
-      ]
-    },
-    "hw_lmul": {
-      "type": "array",
-      "items": { "type": "integer" }
-    },
-    "sw_lmul": {
-      "type": "array",
-      "items": { "type": "integer" }
-    },
-    "sw_ldiv_type": {
-      "type": "string",
-      "enum": ["native", "sub_isa"],
-      "default": "native"
-    },
-    "sub_isa": { "type": "string" },
-    "is_scalar": { "type": "boolean" },
-    "mipp_definitions": {
-      "type": "array",
-      "items": { "type": "string" }
-    },
-    "hw_mask": { "type": "boolean" },
-    "hw_mask_requires_toreg": { "type": "boolean" },
-    "hw_mask_is_bitfield": { "type": "boolean" },
-    "hw_mask_extract_via_store": { "type": "boolean" },
-    "layout": {
-      "type": "object",
-      "properties": {
-        "size_symbol": { "type": "string" },
-        "vlen_guard_template": { "type": "string" },
-        "defines_template": { "type": "string" },
-        "vector_typedef_template": { "type": "string" },
-        "mask_typedef_template": { "type": "string" },
-        "rvd_struct_template": { "type": "string" },
-        "rvm_struct_template": { "type": "string" }
-      },
-      "required": ["size_symbol", "defines_template", "vector_typedef_template", "mask_typedef_template", "rvd_struct_template", "rvm_struct_template"],
-      "additionalProperties": false
-    },
-    "datatypes": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "object",
-        "properties": {
-          "data_ext": { "type": "string" },
-          "data_ext_logi": { "type": "string" },
-          "data_ext_msk": { "type": "string" },
-          "reg": { "type": "string" },
-          "msk": { "type": "string" },
-          "to_ptr": { "type": "string" },
-          "if": { "type": "string" },
-          "if_lmul": { "type": "object" },
-          "variables": {
-            "type": "object",
-            "additionalProperties": true
-          }
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
+    "properties": {
+        "name": {
+            "type": "string"
         },
-        "required": ["reg", "msk", "to_ptr"],
-        "additionalProperties": false
-      }
-    }
-  },
-  "required": ["name", "datatypes"],
-  "additionalProperties": false
+        "prefix": {
+            "type": "string"
+        },
+        "size": {
+            "anyOf": [
+                {
+                    "type": "integer"
+                },
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            ]
+        },
+        "define": {
+            "type": "string"
+        },
+        "header_template": {
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            ]
+        },
+        "hw_lmul": {
+            "type": "array",
+            "items": {
+                "type": "integer"
+            }
+        },
+        "sw_lmul": {
+            "type": "array",
+            "items": {
+                "type": "integer"
+            }
+        },
+        "sw_ldiv_type": {
+            "type": "string",
+            "enum": [
+                "native",
+                "sub_isa"
+            ],
+            "default": "native"
+        },
+        "sub_isa": {
+            "type": "string"
+        },
+        "is_scalar": {
+            "type": "boolean"
+        },
+        "mipp_definitions": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "hw_mask": {
+            "type": "boolean"
+        },
+        "hw_mask_requires_toreg": {
+            "type": "boolean"
+        },
+        "hw_mask_is_bitfield": {
+            "type": "boolean"
+        },
+        "hw_mask_extract_via_store": {
+            "type": "boolean"
+        },
+        "layout": {
+            "type": "object",
+            "properties": {
+                "size_symbol": {
+                    "type": "string"
+                },
+                "vlen_guard_template": {
+                    "type": "string"
+                },
+                "defines_template": {
+                    "type": "string"
+                },
+                "vector_typedef_template": {
+                    "type": "string"
+                },
+                "mask_typedef_template": {
+                    "type": "string"
+                },
+                "rvd_struct_template": {
+                    "type": "string"
+                },
+                "rvm_struct_template": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "size_symbol",
+                "defines_template",
+                "vector_typedef_template",
+                "mask_typedef_template",
+                "rvd_struct_template",
+                "rvm_struct_template"
+            ],
+            "additionalProperties": false
+        },
+        "datatypes": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "object",
+                "properties": {
+                    "data_ext": {
+                        "type": "string"
+                    },
+                    "data_ext_logi": {
+                        "type": "string"
+                    },
+                    "data_ext_msk": {
+                        "type": "string"
+                    },
+                    "reg": {
+                        "type": "string"
+                    },
+                    "msk": {
+                        "type": "string"
+                    },
+                    "to_ptr": {
+                        "type": "string"
+                    },
+                    "if": {
+                        "type": "string"
+                    },
+                    "if_lmul": {
+                        "type": "object"
+                    },
+                    "variables": {
+                        "type": "object",
+                        "additionalProperties": true
+                    }
+                },
+                "required": [
+                    "reg",
+                    "msk",
+                    "to_ptr"
+                ],
+                "additionalProperties": false
+            }
+        }
+    },
+    "required": [
+        "name",
+        "datatypes"
+    ],
+    "title": "ISASchema",
+    "type": "object"
 }

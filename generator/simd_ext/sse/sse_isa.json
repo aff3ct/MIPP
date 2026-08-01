@@ -1,26 +1,4 @@
 {
-    "name": "sse",
-    "prefix": "_mm",
-    "size": 128,
-    "define": "defined(__SSE__)",
-    "mipp_definitions": [
-        "#ifdef __SSE2__",
-        "\t#define MIPP_64BIT",
-        "\t#define MIPP_BW",
-        "#endif"
-    ],
-    "header_template": [
-        "#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SSE_H_",
-        "#define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SSE_H_",
-        "#include <immintrin.h>"
-    ],
-    "hw_lmul": [],
-    "sw_lmul": [
-        1,
-        2,
-        4,
-        8
-    ],
     "datatypes": {
         "float64": {
             "data_ext": "pd",
@@ -102,5 +80,27 @@
             "msk": "__m128i",
             "to_ptr": "__m128i"
         }
-    }
+    },
+    "define": "defined(__SSE__)",
+    "header_template": [
+        "#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SSE_H_",
+        "#define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SSE_H_",
+        "#include <immintrin.h>"
+    ],
+    "hw_lmul": [],
+    "mipp_definitions": [
+        "#ifdef __SSE2__",
+        "\t#define MIPP_64BIT",
+        "\t#define MIPP_BW",
+        "#endif"
+    ],
+    "name": "sse",
+    "prefix": "_mm",
+    "size": 128,
+    "sw_lmul": [
+        1,
+        2,
+        4,
+        8
+    ]
 }

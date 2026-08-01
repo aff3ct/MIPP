@@ -1,93 +1,182 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "ImplemsSchema",
-  "anyOf": [
-    {
-      "type": "object",
-      "additionalProperties": {
-        "type": "array",
-        "items": { "$ref": "#/definitions/item" }
-      }
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "anyOf": [
+        {
+            "type": "object",
+            "additionalProperties": {
+                "type": "array",
+                "items": {
+                    "$ref": "#/definitions/item"
+                }
+            }
+        },
+        {
+            "type": "object",
+            "additionalProperties": {
+                "type": "object",
+                "additionalProperties": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/item"
+                    }
+                }
+            }
+        }
+    ],
+    "definitions": {
+        "item": {
+            "type": "object",
+            "properties": {
+                "instr_name": {
+                    "type": "string"
+                },
+                "datatypes": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "template": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "$ref": "#/definitions/embedded_template"
+                        }
+                    ]
+                },
+                "template_ref": {
+                    "type": "string"
+                },
+                "if": {
+                    "type": "string"
+                },
+                "skip_audit_level": {
+                    "type": "boolean"
+                },
+                "skip_audit_level_reason": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string",
+                    "enum": [
+                        "mask",
+                        "maskz",
+                        "masks",
+                        "horiz_lmul"
+                    ]
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "native",
+                        "emulated"
+                    ]
+                },
+                "dependencies": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "preferred_simd_ext": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "simd_size": {
+                    "anyOf": [
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "datatypes"
+            ],
+            "anyOf": [
+                {
+                    "required": [
+                        "template"
+                    ]
+                },
+                {
+                    "required": [
+                        "template_ref"
+                    ]
+                }
+            ],
+            "dependencies": {
+                "skip_audit_level_reason": [
+                    "skip_audit_level"
+                ]
+            },
+            "if": {
+                "required": [
+                    "skip_audit_level_reason"
+                ]
+            },
+            "then": {
+                "properties": {
+                    "skip_audit_level": {
+                        "const": true
+                    }
+                }
+            },
+            "additionalProperties": false
+        },
+        "embedded_template": {
+            "type": "object",
+            "properties": {
+                "format": {
+                    "type": "string",
+                    "enum": [
+                        "short",
+                        "long"
+                    ]
+                },
+                "code": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "code"
+            ],
+            "additionalProperties": false
+        }
     },
-    {
-      "type": "object",
-      "additionalProperties": {
-        "type": "object",
-        "additionalProperties": {
-          "type": "array",
-          "items": { "$ref": "#/definitions/item" }
-        }
-      }
-    }
-  ],
-  "definitions": {
-    "item": {
-      "type": "object",
-      "properties": {
-        "instr_name": { "type": "string" },
-        "datatypes": {
-          "anyOf": [
-            { "type": "string" },
-            { "type": "array", "items": { "type": "string" } }
-          ]
-        },
-        "template": {
-          "anyOf": [
-            { "type": "string" },
-            { "$ref": "#/definitions/embedded_template" }
-          ]
-        },
-        "template_ref": { "type": "string" },
-        "if": { "type": "string" },
-        "skip_audit_level": { "type": "boolean" },
-        "skip_audit_level_reason": { "type": "string" },
-        "version": { "type": "string", "enum": ["mask", "maskz", "masks", "horiz_lmul"] },
-        "type": { "type": "string", "enum": ["native", "emulated"] },
-        "dependencies": { "type": "array", "items": { "type": "string" } },
-        "preferred_simd_ext": {
-          "anyOf": [
-            { "type": "string" },
-            { "type": "array", "items": { "type": "string" } }
-          ]
-        },
-        "simd_size": {
-          "anyOf": [
-            { "type": "integer" },
-            { "type": "array", "items": { "type": "integer" } }
-          ]
-        }
-      },
-      "required": ["datatypes"],
-      "anyOf": [
-        { "required": ["template"] },
-        { "required": ["template_ref"] }
-      ],
-      "dependencies": {
-        "skip_audit_level_reason": ["skip_audit_level"]
-      },
-      "if": {
-        "required": ["skip_audit_level_reason"]
-      },
-      "then": {
-        "properties": {
-          "skip_audit_level": { "const": true }
-        }
-      },
-      "additionalProperties": false
-    },
-    "embedded_template": {
-      "type": "object",
-      "properties": {
-        "format": { "type": "string", "enum": ["short", "long"] },
-        "code": {
-          "anyOf": [
-            { "type": "string" },
-            { "type": "array", "items": { "type": "string" } }
-          ]
-        }
-      },
-      "required": ["code"],
-      "additionalProperties": false
-    }
-  }
+    "title": "ImplemsSchema"
 }

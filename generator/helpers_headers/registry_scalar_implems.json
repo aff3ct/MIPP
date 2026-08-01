@@ -1,1214 +1,1214 @@
 {
-  "cast": [
-    {
-      "type": "vector-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "%r<tr>% res;",
-        "BIT_CAST_N(res.r, r0.r, %N<tr>%);",
-        "return res;"
-      ]
-    }
-  ],
-  "cast_k": [
-    {
-      "type": "vector-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "%m<tr>% res;",
-        "BIT_CAST_N(res.m, m0.m, %N<tr>%);",
-        "return res;"
-      ]
-    }
-  ],
-  "toreg": [
-    {
-      "type": "vector-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "%r<tr>% res;",
-        "BIT_CAST_N(res.r, m0.m, %N<tr>%);",
-        "return res;"
-      ]
-    }
-  ],
-  "tomsk": [
-    {
-      "type": "vector-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "%m<tr>% res;",
-        "BIT_CAST_N(res.m, r0.r, %N<tr>%);",
-        "return res;"
-      ]
-    }
-  ],
-  "load": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = %!pred_cond!% p0[i] %!pred_alt!%;"
-      ]
-    }
-  ],
-  "loadu": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = %!pred_cond!% p0[i] %!pred_alt!%;"
-      ]
-    }
-  ],
-  "store": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [
-        "no_mask",
-        "maskz"
-      ],
-      "implem": [
-        "p0[i] = %!pred_cond!% r0.r[i] %!pred_alt!%;"
-      ]
-    },
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [
-        "mask"
-      ],
-      "implem": [
-        "if (m0.m[i]) p0[i] = r0.r[i];"
-      ]
-    }
-  ],
-  "storeu": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [
-        "no_mask",
-        "maskz"
-      ],
-      "implem": [
-        "p0[i] = %!pred_cond!% r0.r[i] %!pred_alt!%;"
-      ]
-    },
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [
-        "mask"
-      ],
-      "implem": [
-        "if (m0.m[i]) p0[i] = r0.r[i];"
-      ]
-    }
-  ],
-  "set": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = %!pred_cond!% vals[i] %!pred_alt!%;"
-      ]
-    }
-  ],
-  "set_k": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "%v<c:int|b:tr>% m_tmp = vals[i] ? -1 : 0;",
-        "BIT_CAST_1(&res.m[i], &m_tmp);"
-      ]
-    }
-  ],
-  "set1": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = %!pred_cond!% v0 %!pred_alt!%;"
-      ]
-    }
-  ],
-  "set1_k": [
-    {
-      "type": "vector-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "%m<tr>% res;",
-        "%v<c:int|b:tr>% m_tmp = v0 ? -1 : 0;",
-        "for (size_t i = 0; i < %N<tr>%; i++)",
-        "\tBIT_CAST_1(&res.m[i], &m_tmp);",
-        "return res;"
-      ]
-    }
-  ],
-  "set0": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = %!pred_cond!% 0 %!pred_alt!%;"
-      ]
-    }
-  ],
-  "get": [
-    {
-      "type": "vector-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "return r0.r[v0];"
-      ]
-    }
-  ],
-  "get_k": [
-    {
-      "type": "vector-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "return m0.m[v0];"
-      ]
-    }
-  ],
-  "getfirst": [
-    {
-      "type": "vector-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "return r0.r[0];"
-      ]
-    }
-  ],
-  "sqrt": [
-    {
-      "type": "element-wide",
-      "datatypes": "float64",
-      "mask_variants": [],
-      "implem": [
-        "// requires #include <math.h>",
-        "res.r[i] = %!pred_cond!% sqrt(r0.r[i]) %!pred_alt!%;"
-      ]
-    },
-    {
-      "type": "element-wide",
-      "datatypes": "float32",
-      "mask_variants": [],
-      "implem": [
-        "// requires #include <math.h>",
-        "res.r[i] = %!pred_cond!% sqrtf(r0.r[i]) %!pred_alt!%;"
-      ]
-    }
-  ],
-  "rsqrt": [
-    {
-      "type": "element-wide",
-      "datatypes": "float64",
-      "mask_variants": [],
-      "implem": [
-        "// requires #include <math.h>",
-        "res.r[i] = %!pred_cond!% 1.0 / sqrt(r0.r[i]) %!pred_alt!%;"
-      ]
-    },
-    {
-      "type": "element-wide",
-      "datatypes": "float32",
-      "mask_variants": [],
-      "implem": [
-        "// requires #include <math.h>",
-        "res.r[i] = %!pred_cond!% 1.0f / sqrtf(r0.r[i]) %!pred_alt!%;"
-      ]
-    }
-  ],
-  "add": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = %!pred_cond!% r0.r[i] + r1.r[i] %!pred_alt!%;"
-      ]
-    }
-  ],
-  "adds": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_int",
-      "mask_variants": [],
-      "implem": [
-        "int{{ dt_par.n_bits }}_t a = r0.r[i];",
-        "int{{ dt_par.n_bits }}_t b = r1.r[i];",
-        "",
-        "int{{ dt_par.n_bits }}_t c =",
-        "\t(b > 0 && a > INT{{ dt_par.n_bits }}_MAX - b) ? (int{{ dt_par.n_bits }}_t)INT{{ dt_par.n_bits }}_MAX :",
-        "\t(b < 0 && a < INT{{ dt_par.n_bits }}_MIN - b) ? (int{{ dt_par.n_bits }}_t)INT{{ dt_par.n_bits }}_MIN :",
-        "\t(int{{ dt_par.n_bits }}_t)(a + b);",
-        "",
-        "res.r[i] = %!pred_cond!% c %!pred_alt!%;"
-      ]
-    },
-    {
-      "type": "element-wide",
-      "datatypes": "all_uint",
-      "mask_variants": [],
-      "implem": [
-        "uint{{ dt_par.n_bits }}_t a = r0.r[i];",
-        "uint{{ dt_par.n_bits }}_t b = r1.r[i];",
-        "",
-        "uint{{ dt_par.n_bits }}_t c =",
-        "\t(a > UINT{{ dt_par.n_bits }}_MAX - b) ? UINT{{ dt_par.n_bits }}_MAX :",
-        "\t(uint{{ dt_par.n_bits }}_t)(a + b);",
-        "",
-        "res.r[i] = %!pred_cond!% c %!pred_alt!%;"
-      ]
-    }
-  ],
-  "sub": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = %!pred_cond!% r0.r[i] - r1.r[i] %!pred_alt!%;"
-      ]
-    }
-  ],
-  "subs": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_int",
-      "mask_variants": [],
-      "implem": [
-        "int{{ dt_par.n_bits }}_t a = r0.r[i];",
-        "int{{ dt_par.n_bits }}_t b = r1.r[i];",
-        "",
-        "int{{ dt_par.n_bits }}_t c =",
-        "\t(b < 0 && a > INT{{ dt_par.n_bits }}_MAX + b) ? INT{{ dt_par.n_bits }}_MAX :",
-        "\t(b > 0 && a < INT{{ dt_par.n_bits }}_MIN + b) ? INT{{ dt_par.n_bits }}_MIN :",
-        "\t(int{{ dt_par.n_bits }}_t)(a - b);",
-        "",
-        "res.r[i] = %!pred_cond!% c %!pred_alt!%;"
-      ]
-    },
-    {
-      "type": "element-wide",
-      "datatypes": "all_uint",
-      "mask_variants": [],
-      "implem": [
-        "uint{{ dt_par.n_bits }}_t a = r0.r[i];",
-        "uint{{ dt_par.n_bits }}_t b = r1.r[i];",
-        "",
-        "uint{{ dt_par.n_bits }}_t c =",
-        "\t(a < b) ? 0 :",
-        "\t(uint{{ dt_par.n_bits }}_t)(a - b);",
-        "",
-        "res.r[i] = %!pred_cond!% c %!pred_alt!%;"
-      ]
-    }
-  ],
-  "mul": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = %!pred_cond!% r0.r[i] * r1.r[i] %!pred_alt!%;"
-      ]
-    }
-  ],
-  "div": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = %!pred_cond!% r0.r[i] / r1.r[i] %!pred_alt!%;"
-      ]
-    }
-  ],
-  "min": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = %!pred_cond!% r0.r[i] < r1.r[i] ? r0.r[i] : r1.r[i] %!pred_alt!%;"
-      ]
-    }
-  ],
-  "max": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = %!pred_cond!% r0.r[i] > r1.r[i] ? r0.r[i] : r1.r[i] %!pred_alt!%;"
-      ]
-    }
-  ],
-  "fmadd": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = %!pred_cond!% r0.r[i] * r1.r[i] + r2.r[i] %!pred_alt!%;"
-      ]
-    }
-  ],
-  "fmsub": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = %!pred_cond!% r0.r[i] * r1.r[i] - r2.r[i] %!pred_alt!%;"
-      ]
-    }
-  ],
-  "andb": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_int_uint",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = %!pred_cond!% r0.r[i] & r1.r[i] %!pred_alt!%;"
-      ]
-    },
-    {
-      "type": "element-wide",
-      "datatypes": "all_float",
-      "mask_variants": [],
-      "implem": [
-        "%v<c:uint|b:tp>% r0i, r1i;",
-        "BIT_CAST_1(&r0i, &r0.r[i]);",
-        "BIT_CAST_1(&r1i, &r1.r[i]);",
-        "%v<c:uint|b:tp>% resi = r0i & r1i;",
-        "%v<tr>% resv;",
-        "BIT_CAST_1(&resv, &resi);",
-        "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
-      ]
-    }
-  ],
-  "andb_k": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "res.m[i] = m0.m[i] & m1.m[i];"
-      ]
-    }
-  ],
-  "andnb": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_int_uint",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = %!pred_cond!% (~r0.r[i]) & r1.r[i] %!pred_alt!%;"
-      ]
-    },
-    {
-      "type": "element-wide",
-      "datatypes": "all_float",
-      "mask_variants": [],
-      "implem": [
-        "%v<c:uint|b:tp>% r0i, r1i;",
-        "BIT_CAST_1(&r0i, &r0.r[i]);",
-        "BIT_CAST_1(&r1i, &r1.r[i]);",
-        "%v<c:uint|b:tp>% resi = (~r0i) & r1i;",
-        "%v<tr>% resv;",
-        "BIT_CAST_1(&resv, &resi);",
-        "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
-      ]
-    }
-  ],
-  "andnb_k": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "res.m[i] = (~m0.m[i]) & m1.m[i];"
-      ]
-    }
-  ],
-  "orb": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_int_uint",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = %!pred_cond!% r0.r[i] | r1.r[i] %!pred_alt!%;"
-      ]
-    },
-    {
-      "type": "element-wide",
-      "datatypes": "all_float",
-      "mask_variants": [],
-      "implem": [
-        "%v<c:uint|b:tp>% r0i, r1i;",
-        "BIT_CAST_1(&r0i, &r0.r[i]);",
-        "BIT_CAST_1(&r1i, &r1.r[i]);",
-        "%v<c:uint|b:tp>% resi = r0i | r1i;",
-        "%v<tr>% resv;",
-        "BIT_CAST_1(&resv, &resi);",
-        "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
-      ]
-    }
-  ],
-  "orb_k": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "res.m[i] = m0.m[i] | m1.m[i];"
-      ]
-    }
-  ],
-  "xorb": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_int_uint",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = %!pred_cond!% r0.r[i] ^ r1.r[i] %!pred_alt!%;"
-      ]
-    },
-    {
-      "type": "element-wide",
-      "datatypes": "all_float",
-      "mask_variants": [],
-      "implem": [
-        "%v<c:uint|b:tp>% r0i, r1i;",
-        "BIT_CAST_1(&r0i, &r0.r[i]);",
-        "BIT_CAST_1(&r1i, &r1.r[i]);",
-        "%v<c:uint|b:tp>% resi = r0i ^ r1i;",
-        "%v<tr>% resv;",
-        "BIT_CAST_1(&resv, &resi);",
-        "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
-      ]
-    }
-  ],
-  "xorb_k": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "res.m[i] = m0.m[i] ^ m1.m[i];"
-      ]
-    }
-  ],
-  "msb": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_64bit",
-      "mask_variants": [],
-      "implem": [
-        "%v<c:uint|b:tp>% msk = 0x8000000000000000ULL;",
-        "%v<c:uint|b:tp>% ri;",
-        "BIT_CAST_1(&ri, &r0.r[i]);",
-        "%v<c:uint|b:tp>% resi = ri & msk;",
-        "%v<tr>% resv;",
-        "BIT_CAST_1(&resv, &resi);",
-        "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
-      ]
-    },
-    {
-      "type": "element-wide",
-      "datatypes": "all_32bit",
-      "mask_variants": [],
-      "implem": [
-        "%v<c:uint|b:tp>% msk = 0x80000000;",
-        "%v<c:uint|b:tp>% ri;",
-        "BIT_CAST_1(&ri, &r0.r[i]);",
-        "%v<c:uint|b:tp>% resi = ri & msk;",
-        "%v<tr>% resv;",
-        "BIT_CAST_1(&resv, &resi);",
-        "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
-      ]
-    },
-    {
-      "type": "element-wide",
-      "datatypes": "all_16bit",
-      "mask_variants": [],
-      "implem": [
-        "%v<c:uint|b:tp>% msk = 0x8000;",
-        "%v<c:uint|b:tp>% ri;",
-        "BIT_CAST_1(&ri, &r0.r[i]);",
-        "%v<c:uint|b:tp>% resi = ri & msk;",
-        "%v<tr>% resv;",
-        "BIT_CAST_1(&resv, &resi);",
-        "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
-      ]
-    },
-    {
-      "type": "element-wide",
-      "datatypes": "all_8bit",
-      "mask_variants": [],
-      "implem": [
-        "%v<c:uint|b:tp>% msk = 0x80;",
-        "%v<c:uint|b:tp>% ri;",
-        "BIT_CAST_1(&ri, &r0.r[i]);",
-        "%v<c:uint|b:tp>% resi = ri & msk;",
-        "%v<tr>% resv;",
-        "BIT_CAST_1(&resv, &resi);",
-        "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
-      ]
-    }
-  ],
-  "notb": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_int_uint",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = %!pred_cond!% ~r0.r[i] %!pred_alt!%;"
-      ]
-    },
-    {
-      "type": "element-wide",
-      "datatypes": "all_float",
-      "mask_variants": [],
-      "implem": [
-        "%v<c:uint|b:tp>% r0i;",
-        "BIT_CAST_1(&r0i, &r0.r[i]);",
-        "%v<c:uint|b:tp>% resi = ~r0i;",
-        "%v<tr>% resv;",
-        "BIT_CAST_1(&resv, &resi);",
-        "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
-      ]
-    }
-  ],
-  "notb_k": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "res.m[i] = ~m0.m[i];"
-      ]
-    }
-  ],
-  "cmpeq": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "res.m[i] = %!pred_cond!% (r0.r[i] == r1.r[i]) ? (%v<c:uint|b:tr>%)-1 : 0 %!pred_alt!%;"
-      ]
-    }
-  ],
-  "cmpneq": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "res.m[i] = %!pred_cond!% (r0.r[i] != r1.r[i]) ? (%v<c:uint|b:tr>%)-1 : 0 %!pred_alt!%;"
-      ]
-    }
-  ],
-  "cmplt": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "res.m[i] = %!pred_cond!% (r0.r[i] < r1.r[i]) ? (%v<c:uint|b:tr>%)-1 : 0 %!pred_alt!%;"
-      ]
-    }
-  ],
-  "cmple": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "res.m[i] = %!pred_cond!% (r0.r[i] <= r1.r[i]) ? (%v<c:uint|b:tr>%)-1 : 0 %!pred_alt!%;"
-      ]
-    }
-  ],
-  "cmpge": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "res.m[i] = %!pred_cond!% (r0.r[i] >= r1.r[i]) ? (%v<c:uint|b:tr>%)-1 : 0 %!pred_alt!%;"
-      ]
-    }
-  ],
-  "cmpgt": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "res.m[i] = %!pred_cond!% (r0.r[i] > r1.r[i]) ? (%v<c:uint|b:tr>%)-1 : 0 %!pred_alt!%;"
-      ]
-    }
-  ],
-  "round": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_int_uint",
-      "mask_variants": [],
-      "implem": [
-        "// do nothing, it is weird to define round on integers...",
-        "res.r[i] = %!pred_cond!% r0.r[i] %!pred_alt!%;"
-      ]
-    },
-    {
-      "type": "element-wide",
-      "datatypes": "float64",
-      "mask_variants": [],
-      "implem": [
-        "// requires #include <math.h>",
-        "res.r[i] = %!pred_cond!% round(r0.r[i]) %!pred_alt!%;"
-      ]
-    },
-    {
-      "type": "element-wide",
-      "datatypes": "float32",
-      "mask_variants": [],
-      "implem": [
-        "// requires #include <math.h>",
-        "res.r[i] = %!pred_cond!% roundf(r0.r[i]) %!pred_alt!%;"
-      ]
-    }
-  ],
-  "blend": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = m0.m[i] ? r0.r[i] : r1.r[i];"
-      ]
-    }
-  ],
-  "set0_k": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "res.m[i] = 0;"
-      ]
-    }
-  ],
-  "testz": [
-    {
-      "type": "vector-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "%v<c:int|b:32>% res = 0;",
-        "for (size_t i = 0; i < %N<tp>%; i++) // early termination is possible here but won't help the compiler vectorizer",
-        "\tres += (m0.m[i] & m1.m[i]) ? 1 : 0;",
-        "return res ? 0 : 1;"
-      ]
-    }
-  ],
-  "testz_2": [
-    {
-      "type": "vector-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "%v<c:int|b:32>% res = 0;",
-        "for (size_t i = 0; i < %N<tp>%; i++) // early termination is possible here but won't help the compiler vectorizer",
-        "\tres += m0.m[i] == 0 ? 0 : 1;",
-        "return res ? 0 : 1;"
-      ]
-    }
-  ],
-  "hadd": [
-    {
-      "type": "vector-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "%v<tr>% resv = 0;",
-        "for (size_t i = 0; i < %N<tp>%; i++)",
-        "\tresv +=  %!pred_cond!%  r0.r[i] %!pred_alt!%;",
-        "return resv;"
-      ]
-    }
-  ],
-  "hadds": [
-    {
-      "type": "vector-wide",
-      "datatypes": "uint64",
-      "mask_variants": [],
-      "implem": [
-        "uint64_t resv64 = 0;",
-        "for (size_t i = 0; i < %N<tp>%; i++)",
-        "{",
-        "\tuint64_t a = %!pred_cond!% r0.r[i] %!pred_alt!%;",
-        "\tuint64_t b = resv64;",
-        "",
-        "\tresv64 =",
-        "\t\t(a > UINT64_MAX - b) ? UINT64_MAX :",
-        "\t\t(uint64_t)(a + b);",
-        "}",
-        "return resv64;"
-      ]
-    },
-    {
-      "type": "vector-wide",
-      "datatypes": [
-        "uint16",
-        "uint32",
-        "uint8"
-      ],
-      "mask_variants": [],
-      "implem": [
-        "uint64_t resv64 = 0;",
-        "for (size_t i = 0; i < %N<tp>%; i++)",
-        "{",
-        "\tresv64 += %!pred_cond!% r0.r[i] %!pred_alt!%;",
-        "}",
-        "return resv64 > UINT{{ dt_par.n_bits }}_MAX ? (%v<tr>%)UINT{{ dt_par.n_bits }}_MAX : (%v<tr>%)resv64;"
-      ]
-    },
-    {
-      "type": "vector-wide",
-      "datatypes": "int64",
-      "mask_variants": [],
-      "implem": [
-        "int64_t resv64 = 0;",
-        "for (size_t i = 0; i < %N<tp>%; i++)",
-        "{",
-        "\tint64_t a = %!pred_cond!% r0.r[i] %!pred_alt!%;",
-        "\tint64_t b = resv64;",
-        "",
-        "\tresv64 =",
-        "\t\t(b > 0 && a > INT64_MAX - b) ? (int64_t)INT64_MAX :",
-        "\t\t(b < 0 && a < INT64_MIN - b) ? (int64_t)INT64_MIN :",
-        "\t\t(int64_t)(a + b);",
-        "}",
-        "return resv64;"
-      ]
-    },
-    {
-      "type": "vector-wide",
-      "datatypes": [
-        "int16",
-        "int32",
-        "int8"
-      ],
-      "mask_variants": [],
-      "implem": [
-        "int64_t resv64 = 0;",
-        "for (size_t i = 0; i < %N<tp>%; i++){",
-        "\tresv64 += %!pred_cond!% r0.r[i] %!pred_alt!%;",
-        "}",
-        "return resv64 > INT{{ dt_par.n_bits }}_MAX ? (%v<tr>%)INT{{ dt_par.n_bits }}_MAX : resv64 < INT{{ dt_par.n_bits }}_MIN ? (%v<tr>%)INT{{ dt_par.n_bits }}_MIN : (%v<tr>%)resv64;"
-      ]
-    }
-  ],
-  "hmul": [
-    {
-      "type": "vector-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "%v<tr>% resv = 1;",
-        "for (size_t i = 0; i < %N<tp>%; i++)",
-        "\tresv *=  %!pred_cond!% r0.r[i] %!pred_alt!%;",
-        "",
-        "return resv;"
-      ]
-    }
-  ],
-  "hmin": [
-    {
-      "type": "vector-wide",
-      "datatypes": "all_uint",
-      "mask_variants": [],
-      "implem": [
-        "%v<tr>% resv = UINT{{ dt_par.n_bits }}_MAX;",
-        "for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec",
-        "\tresv = %!pred_cond!% (r0.r[i] < resv) ? r0.r[i] : resv %!pred_alt!%;",
-        "return resv;"
-      ]
-    },
-    {
-      "type": "vector-wide",
-      "datatypes": "all_int",
-      "mask_variants": [],
-      "implem": [
-        "%v<tr>% resv = INT{{ dt_par.n_bits }}_MAX;",
-        "for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec",
-        "\tresv = %!pred_cond!% (r0.r[i] < resv) ? r0.r[i] : resv %!pred_alt!%;",
-        "return resv;"
-      ]
-    },
-    {
-      "type": "vector-wide",
-      "datatypes": "float32",
-      "mask_variants": [],
-      "implem": [
-        "%v<tr>% resv = FLT_MAX;",
-        "for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec",
-        "\tresv = %!pred_cond!% (r0.r[i] < resv) ? r0.r[i] : resv %!pred_alt!%;",
-        "return resv;"
-      ]
-    },
-    {
-      "type": "vector-wide",
-      "datatypes": "float64",
-      "mask_variants": [],
-      "implem": [
-        "%v<tr>% resv = DBL_MAX;",
-        "for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec",
-        "\tresv = %!pred_cond!% (r0.r[i] < resv) ? r0.r[i] : resv %!pred_alt!%;",
-        "return resv;"
-      ]
-    }
-  ],
-  "hmax": [
-    {
-      "type": "vector-wide",
-      "datatypes": "all_uint",
-      "mask_variants": [],
-      "implem": [
-        "%v<tr>% resv = 0;",
-        "for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec",
-        "\tresv = %!pred_cond!% (r0.r[i] > resv) ? r0.r[i] : resv %!pred_alt!%;",
-        "return resv;"
-      ]
-    },
-    {
-      "type": "vector-wide",
-      "datatypes": "all_int",
-      "mask_variants": [],
-      "implem": [
-        "%v<tr>% resv = INT{{ dt_par.n_bits }}_MIN;",
-        "for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec",
-        "\tresv = %!pred_cond!% (r0.r[i] > resv) ? r0.r[i] : resv %!pred_alt!%;",
-        "return resv;"
-      ]
-    },
-    {
-      "type": "vector-wide",
-      "datatypes": "float32",
-      "mask_variants": [],
-      "implem": [
-        "%v<tr>% resv = -FLT_MAX;",
-        "for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec",
-        "\tresv = %!pred_cond!% (r0.r[i] > resv) ? r0.r[i] : resv %!pred_alt!%;",
-        "return resv;"
-      ]
-    },
-    {
-      "type": "vector-wide",
-      "datatypes": "float64",
-      "mask_variants": [],
-      "implem": [
-        "%v<tr>% resv = -DBL_MAX;",
-        "for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec",
-        "\tresv = %!pred_cond!% (r0.r[i] > resv) ? r0.r[i] : resv %!pred_alt!%;",
-        "return resv;"
-      ]
-    }
-  ],
-  "fnmadd": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = %!pred_cond!% -(r0.r[i] * r1.r[i]) + r2.r[i] %!pred_alt!%;"
-      ]
-    }
-  ],
-  "fnmsub": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = %!pred_cond!% -(r0.r[i] * r1.r[i]) - r2.r[i] %!pred_alt!%;"
-      ]
-    }
-  ],
-  "div2": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_int_uint",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = %!pred_cond!% r0.r[i] >> 1 %!pred_alt!%;"
-      ]
-    },
-    {
-      "type": "element-wide",
-      "datatypes": "float64",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = %!pred_cond!% r0.r[i] / 2.0 %!pred_alt!%;"
-      ]
-    },
-    {
-      "type": "element-wide",
-      "datatypes": "float32",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = %!pred_cond!% r0.r[i] / 2.f %!pred_alt!%;"
-      ]
-    }
-  ],
-  "div4": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_int_uint",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = %!pred_cond!% r0.r[i] >> 2 %!pred_alt!%;"
-      ]
-    },
-    {
-      "type": "element-wide",
-      "datatypes": "float64",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = %!pred_cond!% r0.r[i] / 4.0 %!pred_alt!%;"
-      ]
-    },
-    {
-      "type": "element-wide",
-      "datatypes": "float32",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = %!pred_cond!% r0.r[i] / 4.f %!pred_alt!%;"
-      ]
-    }
-  ],
-  "rshift": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_int_uint",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = %!pred_cond!% r0.r[i] >> v0 %!pred_alt!%;"
-      ]
-    },
-    {
-      "type": "element-wide",
-      "datatypes": "all_float",
-      "mask_variants": [],
-      "implem": [
-        "%v<c:uint|b:tp>% r0i;",
-        "BIT_CAST_1(&r0i, &r0.r[i]);",
-        "r0i >>= v0;",
-        "%v<tr>% resv;",
-        "BIT_CAST_1(&resv, &r0i);",
-        "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
-      ]
-    }
-  ],
-  "lshift": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_int_uint",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] =  %!pred_cond!% r0.r[i] << (uint8_t)v0 %!pred_alt!% ;"
-      ]
-    },
-    {
-      "type": "element-wide",
-      "datatypes": "all_float",
-      "mask_variants": [],
-      "implem": [
-        "%v<c:uint|b:tp>% r0i;",
-        "BIT_CAST_1(&r0i, &r0.r[i]);",
-        "r0i <<= v0;",
-        "%v<tr>% resv;",
-        "BIT_CAST_1(&resv, &r0i);",
-        "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
-      ]
-    }
-  ],
-  "gather": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = %!pred_cond!% p0[r0.r[i]] %!pred_alt!%;"
-      ]
-    }
-  ],
-  "scatter": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [
-        "no_mask",
-        "maskz"
-      ],
-      "implem": [
-        "p0[r0.r[i]] = %!pred_cond!% r1.r[i] %!pred_alt!%;"
-      ]
-    },
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [
-        "mask"
-      ],
-      "implem": [
-        "if (m0.m[i]) p0[r0.r[i]] = r1.r[i];"
-      ]
-    }
-  ],
-  "exp": [
-    {
-      "type": "element-wide",
-      "datatypes": "float32",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = %!pred_cond!% EXPF(r0.r[i]) %!pred_alt!%;"
-      ]
-    },
-    {
-      "type": "element-wide",
-      "datatypes": "float64",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = %!pred_cond!% EXPD(r0.r[i]) %!pred_alt!%;"
-      ]
-    }
-  ],
-  "log": [
-    {
-      "type": "element-wide",
-      "datatypes": "float32",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = %!pred_cond!% LOGF(r0.r[i]) %!pred_alt!%;"
-      ]
-    },
-    {
-      "type": "element-wide",
-      "datatypes": "float64",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = %!pred_cond!% LOGD(r0.r[i]) %!pred_alt!%;"
-      ]
-    }
-  ],
-  "pow2": [
-    {
-      "type": "element-wide",
-      "datatypes": "float32",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = %!pred_cond!% POWF(2.f, r0.r[i]) %!pred_alt!%;"
-      ]
-    },
-    {
-      "type": "element-wide",
-      "datatypes": "float64",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = %!pred_cond!% POWD(2., r0.r[i]) %!pred_alt!%;"
-      ]
-    },
-    {
-      "type": "element-wide",
-      "datatypes": "all_uint",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = %!pred_cond!% 1ULL << r0.r[i] %!pred_alt!%;"
-      ]
-    }
-  ],
-  "pow": [
-    {
-      "type": "element-wide",
-      "datatypes": "float32",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = %!pred_cond!% POWF(r0.r[i], r1.r[i]) %!pred_alt!%;"
-      ]
-    },
-    {
-      "type": "element-wide",
-      "datatypes": "float64",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = %!pred_cond!% POWD(r0.r[i], r1.r[i]) %!pred_alt!%;"
-      ]
-    },
-    {
-      "type": "vector-wide",
-      "datatypes": "all_uint",
-      "mask_variants": [],
-      "implem": [
-        "%r<tp>% res;",
-        "for (size_t i = 0; i < %N<tp>%; i++){",
-        "\t%v<tp>% cur = 1;",
-        "\t%v<tp>% exp = r1.r[i];",
-        "\twhile (exp > 0){",
-        "\t\tif(exp & 1)",
-        "\t\t\tcur *= r0.r[i];",
-        "\t\texp >>= 1;",
-        "\t}",
-        "\tres.r[i] = cur;",
-        "}",
-        "return res;"
-      ]
-    }
-  ],
-  "cvt": [
-    {
-      "type": "element-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "res.r[i] = (%v<tr>%)r0.r[i];"
-      ]
-    }
-  ],
-  "wcvt": [
-    {
-      "type": "vector-wide",
-      "datatypes": "all_defs",
-      "mask_variants": [],
-      "implem": [
-        "%r<tr>% res;",
-        "for (size_t i = 0; i < %N<tr>%; i++){",
-        "\tres.r[i] = (%v<tr>%)r0.r[i];",
-        "}",
-        "return res;"
-      ]
-    }
-  ]
+    "add": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% r0.r[i] + r1.r[i] %!pred_alt!%;"
+            ]
+        }
+    ],
+    "adds": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_int",
+            "mask_variants": [],
+            "implem": [
+                "int{{ dt_par.n_bits }}_t a = r0.r[i];",
+                "int{{ dt_par.n_bits }}_t b = r1.r[i];",
+                "",
+                "int{{ dt_par.n_bits }}_t c =",
+                "\t(b > 0 && a > INT{{ dt_par.n_bits }}_MAX - b) ? (int{{ dt_par.n_bits }}_t)INT{{ dt_par.n_bits }}_MAX :",
+                "\t(b < 0 && a < INT{{ dt_par.n_bits }}_MIN - b) ? (int{{ dt_par.n_bits }}_t)INT{{ dt_par.n_bits }}_MIN :",
+                "\t(int{{ dt_par.n_bits }}_t)(a + b);",
+                "",
+                "res.r[i] = %!pred_cond!% c %!pred_alt!%;"
+            ]
+        },
+        {
+            "type": "element-wide",
+            "datatypes": "all_uint",
+            "mask_variants": [],
+            "implem": [
+                "uint{{ dt_par.n_bits }}_t a = r0.r[i];",
+                "uint{{ dt_par.n_bits }}_t b = r1.r[i];",
+                "",
+                "uint{{ dt_par.n_bits }}_t c =",
+                "\t(a > UINT{{ dt_par.n_bits }}_MAX - b) ? UINT{{ dt_par.n_bits }}_MAX :",
+                "\t(uint{{ dt_par.n_bits }}_t)(a + b);",
+                "",
+                "res.r[i] = %!pred_cond!% c %!pred_alt!%;"
+            ]
+        }
+    ],
+    "andb": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_int_uint",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% r0.r[i] & r1.r[i] %!pred_alt!%;"
+            ]
+        },
+        {
+            "type": "element-wide",
+            "datatypes": "all_float",
+            "mask_variants": [],
+            "implem": [
+                "%v<c:uint|b:tp>% r0i, r1i;",
+                "BIT_CAST_1(&r0i, &r0.r[i]);",
+                "BIT_CAST_1(&r1i, &r1.r[i]);",
+                "%v<c:uint|b:tp>% resi = r0i & r1i;",
+                "%v<tr>% resv;",
+                "BIT_CAST_1(&resv, &resi);",
+                "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
+            ]
+        }
+    ],
+    "andb_k": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "res.m[i] = m0.m[i] & m1.m[i];"
+            ]
+        }
+    ],
+    "andnb": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_int_uint",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% (~r0.r[i]) & r1.r[i] %!pred_alt!%;"
+            ]
+        },
+        {
+            "type": "element-wide",
+            "datatypes": "all_float",
+            "mask_variants": [],
+            "implem": [
+                "%v<c:uint|b:tp>% r0i, r1i;",
+                "BIT_CAST_1(&r0i, &r0.r[i]);",
+                "BIT_CAST_1(&r1i, &r1.r[i]);",
+                "%v<c:uint|b:tp>% resi = (~r0i) & r1i;",
+                "%v<tr>% resv;",
+                "BIT_CAST_1(&resv, &resi);",
+                "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
+            ]
+        }
+    ],
+    "andnb_k": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "res.m[i] = (~m0.m[i]) & m1.m[i];"
+            ]
+        }
+    ],
+    "blend": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = m0.m[i] ? r0.r[i] : r1.r[i];"
+            ]
+        }
+    ],
+    "cast": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "%r<tr>% res;",
+                "BIT_CAST_N(res.r, r0.r, %N<tr>%);",
+                "return res;"
+            ]
+        }
+    ],
+    "cast_k": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "%m<tr>% res;",
+                "BIT_CAST_N(res.m, m0.m, %N<tr>%);",
+                "return res;"
+            ]
+        }
+    ],
+    "cmpeq": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "res.m[i] = %!pred_cond!% (r0.r[i] == r1.r[i]) ? (%v<c:uint|b:tr>%)-1 : 0 %!pred_alt!%;"
+            ]
+        }
+    ],
+    "cmpge": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "res.m[i] = %!pred_cond!% (r0.r[i] >= r1.r[i]) ? (%v<c:uint|b:tr>%)-1 : 0 %!pred_alt!%;"
+            ]
+        }
+    ],
+    "cmpgt": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "res.m[i] = %!pred_cond!% (r0.r[i] > r1.r[i]) ? (%v<c:uint|b:tr>%)-1 : 0 %!pred_alt!%;"
+            ]
+        }
+    ],
+    "cmple": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "res.m[i] = %!pred_cond!% (r0.r[i] <= r1.r[i]) ? (%v<c:uint|b:tr>%)-1 : 0 %!pred_alt!%;"
+            ]
+        }
+    ],
+    "cmplt": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "res.m[i] = %!pred_cond!% (r0.r[i] < r1.r[i]) ? (%v<c:uint|b:tr>%)-1 : 0 %!pred_alt!%;"
+            ]
+        }
+    ],
+    "cmpneq": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "res.m[i] = %!pred_cond!% (r0.r[i] != r1.r[i]) ? (%v<c:uint|b:tr>%)-1 : 0 %!pred_alt!%;"
+            ]
+        }
+    ],
+    "cvt": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = (%v<tr>%)r0.r[i];"
+            ]
+        }
+    ],
+    "div": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% r0.r[i] / r1.r[i] %!pred_alt!%;"
+            ]
+        }
+    ],
+    "div2": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_int_uint",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% r0.r[i] >> 1 %!pred_alt!%;"
+            ]
+        },
+        {
+            "type": "element-wide",
+            "datatypes": "float64",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% r0.r[i] / 2.0 %!pred_alt!%;"
+            ]
+        },
+        {
+            "type": "element-wide",
+            "datatypes": "float32",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% r0.r[i] / 2.f %!pred_alt!%;"
+            ]
+        }
+    ],
+    "div4": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_int_uint",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% r0.r[i] >> 2 %!pred_alt!%;"
+            ]
+        },
+        {
+            "type": "element-wide",
+            "datatypes": "float64",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% r0.r[i] / 4.0 %!pred_alt!%;"
+            ]
+        },
+        {
+            "type": "element-wide",
+            "datatypes": "float32",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% r0.r[i] / 4.f %!pred_alt!%;"
+            ]
+        }
+    ],
+    "exp": [
+        {
+            "type": "element-wide",
+            "datatypes": "float32",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% EXPF(r0.r[i]) %!pred_alt!%;"
+            ]
+        },
+        {
+            "type": "element-wide",
+            "datatypes": "float64",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% EXPD(r0.r[i]) %!pred_alt!%;"
+            ]
+        }
+    ],
+    "fmadd": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% r0.r[i] * r1.r[i] + r2.r[i] %!pred_alt!%;"
+            ]
+        }
+    ],
+    "fmsub": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% r0.r[i] * r1.r[i] - r2.r[i] %!pred_alt!%;"
+            ]
+        }
+    ],
+    "fnmadd": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% -(r0.r[i] * r1.r[i]) + r2.r[i] %!pred_alt!%;"
+            ]
+        }
+    ],
+    "fnmsub": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% -(r0.r[i] * r1.r[i]) - r2.r[i] %!pred_alt!%;"
+            ]
+        }
+    ],
+    "gather": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% p0[r0.r[i]] %!pred_alt!%;"
+            ]
+        }
+    ],
+    "get": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "return r0.r[v0];"
+            ]
+        }
+    ],
+    "get_k": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "return m0.m[v0];"
+            ]
+        }
+    ],
+    "getfirst": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "return r0.r[0];"
+            ]
+        }
+    ],
+    "hadd": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "%v<tr>% resv = 0;",
+                "for (size_t i = 0; i < %N<tp>%; i++)",
+                "\tresv +=  %!pred_cond!%  r0.r[i] %!pred_alt!%;",
+                "return resv;"
+            ]
+        }
+    ],
+    "hadds": [
+        {
+            "type": "vector-wide",
+            "datatypes": "uint64",
+            "mask_variants": [],
+            "implem": [
+                "uint64_t resv64 = 0;",
+                "for (size_t i = 0; i < %N<tp>%; i++)",
+                "{",
+                "\tuint64_t a = %!pred_cond!% r0.r[i] %!pred_alt!%;",
+                "\tuint64_t b = resv64;",
+                "",
+                "\tresv64 =",
+                "\t\t(a > UINT64_MAX - b) ? UINT64_MAX :",
+                "\t\t(uint64_t)(a + b);",
+                "}",
+                "return resv64;"
+            ]
+        },
+        {
+            "type": "vector-wide",
+            "datatypes": [
+                "uint16",
+                "uint32",
+                "uint8"
+            ],
+            "mask_variants": [],
+            "implem": [
+                "uint64_t resv64 = 0;",
+                "for (size_t i = 0; i < %N<tp>%; i++)",
+                "{",
+                "\tresv64 += %!pred_cond!% r0.r[i] %!pred_alt!%;",
+                "}",
+                "return resv64 > UINT{{ dt_par.n_bits }}_MAX ? (%v<tr>%)UINT{{ dt_par.n_bits }}_MAX : (%v<tr>%)resv64;"
+            ]
+        },
+        {
+            "type": "vector-wide",
+            "datatypes": "int64",
+            "mask_variants": [],
+            "implem": [
+                "int64_t resv64 = 0;",
+                "for (size_t i = 0; i < %N<tp>%; i++)",
+                "{",
+                "\tint64_t a = %!pred_cond!% r0.r[i] %!pred_alt!%;",
+                "\tint64_t b = resv64;",
+                "",
+                "\tresv64 =",
+                "\t\t(b > 0 && a > INT64_MAX - b) ? (int64_t)INT64_MAX :",
+                "\t\t(b < 0 && a < INT64_MIN - b) ? (int64_t)INT64_MIN :",
+                "\t\t(int64_t)(a + b);",
+                "}",
+                "return resv64;"
+            ]
+        },
+        {
+            "type": "vector-wide",
+            "datatypes": [
+                "int16",
+                "int32",
+                "int8"
+            ],
+            "mask_variants": [],
+            "implem": [
+                "int64_t resv64 = 0;",
+                "for (size_t i = 0; i < %N<tp>%; i++){",
+                "\tresv64 += %!pred_cond!% r0.r[i] %!pred_alt!%;",
+                "}",
+                "return resv64 > INT{{ dt_par.n_bits }}_MAX ? (%v<tr>%)INT{{ dt_par.n_bits }}_MAX : resv64 < INT{{ dt_par.n_bits }}_MIN ? (%v<tr>%)INT{{ dt_par.n_bits }}_MIN : (%v<tr>%)resv64;"
+            ]
+        }
+    ],
+    "hmax": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_uint",
+            "mask_variants": [],
+            "implem": [
+                "%v<tr>% resv = 0;",
+                "for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec",
+                "\tresv = %!pred_cond!% (r0.r[i] > resv) ? r0.r[i] : resv %!pred_alt!%;",
+                "return resv;"
+            ]
+        },
+        {
+            "type": "vector-wide",
+            "datatypes": "all_int",
+            "mask_variants": [],
+            "implem": [
+                "%v<tr>% resv = INT{{ dt_par.n_bits }}_MIN;",
+                "for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec",
+                "\tresv = %!pred_cond!% (r0.r[i] > resv) ? r0.r[i] : resv %!pred_alt!%;",
+                "return resv;"
+            ]
+        },
+        {
+            "type": "vector-wide",
+            "datatypes": "float32",
+            "mask_variants": [],
+            "implem": [
+                "%v<tr>% resv = -FLT_MAX;",
+                "for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec",
+                "\tresv = %!pred_cond!% (r0.r[i] > resv) ? r0.r[i] : resv %!pred_alt!%;",
+                "return resv;"
+            ]
+        },
+        {
+            "type": "vector-wide",
+            "datatypes": "float64",
+            "mask_variants": [],
+            "implem": [
+                "%v<tr>% resv = -DBL_MAX;",
+                "for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec",
+                "\tresv = %!pred_cond!% (r0.r[i] > resv) ? r0.r[i] : resv %!pred_alt!%;",
+                "return resv;"
+            ]
+        }
+    ],
+    "hmin": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_uint",
+            "mask_variants": [],
+            "implem": [
+                "%v<tr>% resv = UINT{{ dt_par.n_bits }}_MAX;",
+                "for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec",
+                "\tresv = %!pred_cond!% (r0.r[i] < resv) ? r0.r[i] : resv %!pred_alt!%;",
+                "return resv;"
+            ]
+        },
+        {
+            "type": "vector-wide",
+            "datatypes": "all_int",
+            "mask_variants": [],
+            "implem": [
+                "%v<tr>% resv = INT{{ dt_par.n_bits }}_MAX;",
+                "for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec",
+                "\tresv = %!pred_cond!% (r0.r[i] < resv) ? r0.r[i] : resv %!pred_alt!%;",
+                "return resv;"
+            ]
+        },
+        {
+            "type": "vector-wide",
+            "datatypes": "float32",
+            "mask_variants": [],
+            "implem": [
+                "%v<tr>% resv = FLT_MAX;",
+                "for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec",
+                "\tresv = %!pred_cond!% (r0.r[i] < resv) ? r0.r[i] : resv %!pred_alt!%;",
+                "return resv;"
+            ]
+        },
+        {
+            "type": "vector-wide",
+            "datatypes": "float64",
+            "mask_variants": [],
+            "implem": [
+                "%v<tr>% resv = DBL_MAX;",
+                "for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec",
+                "\tresv = %!pred_cond!% (r0.r[i] < resv) ? r0.r[i] : resv %!pred_alt!%;",
+                "return resv;"
+            ]
+        }
+    ],
+    "hmul": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "%v<tr>% resv = 1;",
+                "for (size_t i = 0; i < %N<tp>%; i++)",
+                "\tresv *=  %!pred_cond!% r0.r[i] %!pred_alt!%;",
+                "",
+                "return resv;"
+            ]
+        }
+    ],
+    "load": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% p0[i] %!pred_alt!%;"
+            ]
+        }
+    ],
+    "loadu": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% p0[i] %!pred_alt!%;"
+            ]
+        }
+    ],
+    "log": [
+        {
+            "type": "element-wide",
+            "datatypes": "float32",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% LOGF(r0.r[i]) %!pred_alt!%;"
+            ]
+        },
+        {
+            "type": "element-wide",
+            "datatypes": "float64",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% LOGD(r0.r[i]) %!pred_alt!%;"
+            ]
+        }
+    ],
+    "lshift": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_int_uint",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] =  %!pred_cond!% r0.r[i] << (uint8_t)v0 %!pred_alt!% ;"
+            ]
+        },
+        {
+            "type": "element-wide",
+            "datatypes": "all_float",
+            "mask_variants": [],
+            "implem": [
+                "%v<c:uint|b:tp>% r0i;",
+                "BIT_CAST_1(&r0i, &r0.r[i]);",
+                "r0i <<= v0;",
+                "%v<tr>% resv;",
+                "BIT_CAST_1(&resv, &r0i);",
+                "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
+            ]
+        }
+    ],
+    "max": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% r0.r[i] > r1.r[i] ? r0.r[i] : r1.r[i] %!pred_alt!%;"
+            ]
+        }
+    ],
+    "min": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% r0.r[i] < r1.r[i] ? r0.r[i] : r1.r[i] %!pred_alt!%;"
+            ]
+        }
+    ],
+    "msb": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_64bit",
+            "mask_variants": [],
+            "implem": [
+                "%v<c:uint|b:tp>% msk = 0x8000000000000000ULL;",
+                "%v<c:uint|b:tp>% ri;",
+                "BIT_CAST_1(&ri, &r0.r[i]);",
+                "%v<c:uint|b:tp>% resi = ri & msk;",
+                "%v<tr>% resv;",
+                "BIT_CAST_1(&resv, &resi);",
+                "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
+            ]
+        },
+        {
+            "type": "element-wide",
+            "datatypes": "all_32bit",
+            "mask_variants": [],
+            "implem": [
+                "%v<c:uint|b:tp>% msk = 0x80000000;",
+                "%v<c:uint|b:tp>% ri;",
+                "BIT_CAST_1(&ri, &r0.r[i]);",
+                "%v<c:uint|b:tp>% resi = ri & msk;",
+                "%v<tr>% resv;",
+                "BIT_CAST_1(&resv, &resi);",
+                "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
+            ]
+        },
+        {
+            "type": "element-wide",
+            "datatypes": "all_16bit",
+            "mask_variants": [],
+            "implem": [
+                "%v<c:uint|b:tp>% msk = 0x8000;",
+                "%v<c:uint|b:tp>% ri;",
+                "BIT_CAST_1(&ri, &r0.r[i]);",
+                "%v<c:uint|b:tp>% resi = ri & msk;",
+                "%v<tr>% resv;",
+                "BIT_CAST_1(&resv, &resi);",
+                "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
+            ]
+        },
+        {
+            "type": "element-wide",
+            "datatypes": "all_8bit",
+            "mask_variants": [],
+            "implem": [
+                "%v<c:uint|b:tp>% msk = 0x80;",
+                "%v<c:uint|b:tp>% ri;",
+                "BIT_CAST_1(&ri, &r0.r[i]);",
+                "%v<c:uint|b:tp>% resi = ri & msk;",
+                "%v<tr>% resv;",
+                "BIT_CAST_1(&resv, &resi);",
+                "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
+            ]
+        }
+    ],
+    "mul": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% r0.r[i] * r1.r[i] %!pred_alt!%;"
+            ]
+        }
+    ],
+    "notb": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_int_uint",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% ~r0.r[i] %!pred_alt!%;"
+            ]
+        },
+        {
+            "type": "element-wide",
+            "datatypes": "all_float",
+            "mask_variants": [],
+            "implem": [
+                "%v<c:uint|b:tp>% r0i;",
+                "BIT_CAST_1(&r0i, &r0.r[i]);",
+                "%v<c:uint|b:tp>% resi = ~r0i;",
+                "%v<tr>% resv;",
+                "BIT_CAST_1(&resv, &resi);",
+                "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
+            ]
+        }
+    ],
+    "notb_k": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "res.m[i] = ~m0.m[i];"
+            ]
+        }
+    ],
+    "orb": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_int_uint",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% r0.r[i] | r1.r[i] %!pred_alt!%;"
+            ]
+        },
+        {
+            "type": "element-wide",
+            "datatypes": "all_float",
+            "mask_variants": [],
+            "implem": [
+                "%v<c:uint|b:tp>% r0i, r1i;",
+                "BIT_CAST_1(&r0i, &r0.r[i]);",
+                "BIT_CAST_1(&r1i, &r1.r[i]);",
+                "%v<c:uint|b:tp>% resi = r0i | r1i;",
+                "%v<tr>% resv;",
+                "BIT_CAST_1(&resv, &resi);",
+                "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
+            ]
+        }
+    ],
+    "orb_k": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "res.m[i] = m0.m[i] | m1.m[i];"
+            ]
+        }
+    ],
+    "pow": [
+        {
+            "type": "element-wide",
+            "datatypes": "float32",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% POWF(r0.r[i], r1.r[i]) %!pred_alt!%;"
+            ]
+        },
+        {
+            "type": "element-wide",
+            "datatypes": "float64",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% POWD(r0.r[i], r1.r[i]) %!pred_alt!%;"
+            ]
+        },
+        {
+            "type": "vector-wide",
+            "datatypes": "all_uint",
+            "mask_variants": [],
+            "implem": [
+                "%r<tp>% res;",
+                "for (size_t i = 0; i < %N<tp>%; i++){",
+                "\t%v<tp>% cur = 1;",
+                "\t%v<tp>% exp = r1.r[i];",
+                "\twhile (exp > 0){",
+                "\t\tif(exp & 1)",
+                "\t\t\tcur *= r0.r[i];",
+                "\t\texp >>= 1;",
+                "\t}",
+                "\tres.r[i] = cur;",
+                "}",
+                "return res;"
+            ]
+        }
+    ],
+    "pow2": [
+        {
+            "type": "element-wide",
+            "datatypes": "float32",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% POWF(2.f, r0.r[i]) %!pred_alt!%;"
+            ]
+        },
+        {
+            "type": "element-wide",
+            "datatypes": "float64",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% POWD(2., r0.r[i]) %!pred_alt!%;"
+            ]
+        },
+        {
+            "type": "element-wide",
+            "datatypes": "all_uint",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% 1ULL << r0.r[i] %!pred_alt!%;"
+            ]
+        }
+    ],
+    "round": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_int_uint",
+            "mask_variants": [],
+            "implem": [
+                "// do nothing, it is weird to define round on integers...",
+                "res.r[i] = %!pred_cond!% r0.r[i] %!pred_alt!%;"
+            ]
+        },
+        {
+            "type": "element-wide",
+            "datatypes": "float64",
+            "mask_variants": [],
+            "implem": [
+                "// requires #include <math.h>",
+                "res.r[i] = %!pred_cond!% round(r0.r[i]) %!pred_alt!%;"
+            ]
+        },
+        {
+            "type": "element-wide",
+            "datatypes": "float32",
+            "mask_variants": [],
+            "implem": [
+                "// requires #include <math.h>",
+                "res.r[i] = %!pred_cond!% roundf(r0.r[i]) %!pred_alt!%;"
+            ]
+        }
+    ],
+    "rshift": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_int_uint",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% r0.r[i] >> v0 %!pred_alt!%;"
+            ]
+        },
+        {
+            "type": "element-wide",
+            "datatypes": "all_float",
+            "mask_variants": [],
+            "implem": [
+                "%v<c:uint|b:tp>% r0i;",
+                "BIT_CAST_1(&r0i, &r0.r[i]);",
+                "r0i >>= v0;",
+                "%v<tr>% resv;",
+                "BIT_CAST_1(&resv, &r0i);",
+                "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
+            ]
+        }
+    ],
+    "rsqrt": [
+        {
+            "type": "element-wide",
+            "datatypes": "float64",
+            "mask_variants": [],
+            "implem": [
+                "// requires #include <math.h>",
+                "res.r[i] = %!pred_cond!% 1.0 / sqrt(r0.r[i]) %!pred_alt!%;"
+            ]
+        },
+        {
+            "type": "element-wide",
+            "datatypes": "float32",
+            "mask_variants": [],
+            "implem": [
+                "// requires #include <math.h>",
+                "res.r[i] = %!pred_cond!% 1.0f / sqrtf(r0.r[i]) %!pred_alt!%;"
+            ]
+        }
+    ],
+    "scatter": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [
+                "no_mask",
+                "maskz"
+            ],
+            "implem": [
+                "p0[r0.r[i]] = %!pred_cond!% r1.r[i] %!pred_alt!%;"
+            ]
+        },
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [
+                "mask"
+            ],
+            "implem": [
+                "if (m0.m[i]) p0[r0.r[i]] = r1.r[i];"
+            ]
+        }
+    ],
+    "set": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% vals[i] %!pred_alt!%;"
+            ]
+        }
+    ],
+    "set0": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% 0 %!pred_alt!%;"
+            ]
+        }
+    ],
+    "set0_k": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "res.m[i] = 0;"
+            ]
+        }
+    ],
+    "set1": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% v0 %!pred_alt!%;"
+            ]
+        }
+    ],
+    "set1_k": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "%m<tr>% res;",
+                "%v<c:int|b:tr>% m_tmp = v0 ? -1 : 0;",
+                "for (size_t i = 0; i < %N<tr>%; i++)",
+                "\tBIT_CAST_1(&res.m[i], &m_tmp);",
+                "return res;"
+            ]
+        }
+    ],
+    "set_k": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "%v<c:int|b:tr>% m_tmp = vals[i] ? -1 : 0;",
+                "BIT_CAST_1(&res.m[i], &m_tmp);"
+            ]
+        }
+    ],
+    "sqrt": [
+        {
+            "type": "element-wide",
+            "datatypes": "float64",
+            "mask_variants": [],
+            "implem": [
+                "// requires #include <math.h>",
+                "res.r[i] = %!pred_cond!% sqrt(r0.r[i]) %!pred_alt!%;"
+            ]
+        },
+        {
+            "type": "element-wide",
+            "datatypes": "float32",
+            "mask_variants": [],
+            "implem": [
+                "// requires #include <math.h>",
+                "res.r[i] = %!pred_cond!% sqrtf(r0.r[i]) %!pred_alt!%;"
+            ]
+        }
+    ],
+    "store": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [
+                "no_mask",
+                "maskz"
+            ],
+            "implem": [
+                "p0[i] = %!pred_cond!% r0.r[i] %!pred_alt!%;"
+            ]
+        },
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [
+                "mask"
+            ],
+            "implem": [
+                "if (m0.m[i]) p0[i] = r0.r[i];"
+            ]
+        }
+    ],
+    "storeu": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [
+                "no_mask",
+                "maskz"
+            ],
+            "implem": [
+                "p0[i] = %!pred_cond!% r0.r[i] %!pred_alt!%;"
+            ]
+        },
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [
+                "mask"
+            ],
+            "implem": [
+                "if (m0.m[i]) p0[i] = r0.r[i];"
+            ]
+        }
+    ],
+    "sub": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% r0.r[i] - r1.r[i] %!pred_alt!%;"
+            ]
+        }
+    ],
+    "subs": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_int",
+            "mask_variants": [],
+            "implem": [
+                "int{{ dt_par.n_bits }}_t a = r0.r[i];",
+                "int{{ dt_par.n_bits }}_t b = r1.r[i];",
+                "",
+                "int{{ dt_par.n_bits }}_t c =",
+                "\t(b < 0 && a > INT{{ dt_par.n_bits }}_MAX + b) ? INT{{ dt_par.n_bits }}_MAX :",
+                "\t(b > 0 && a < INT{{ dt_par.n_bits }}_MIN + b) ? INT{{ dt_par.n_bits }}_MIN :",
+                "\t(int{{ dt_par.n_bits }}_t)(a - b);",
+                "",
+                "res.r[i] = %!pred_cond!% c %!pred_alt!%;"
+            ]
+        },
+        {
+            "type": "element-wide",
+            "datatypes": "all_uint",
+            "mask_variants": [],
+            "implem": [
+                "uint{{ dt_par.n_bits }}_t a = r0.r[i];",
+                "uint{{ dt_par.n_bits }}_t b = r1.r[i];",
+                "",
+                "uint{{ dt_par.n_bits }}_t c =",
+                "\t(a < b) ? 0 :",
+                "\t(uint{{ dt_par.n_bits }}_t)(a - b);",
+                "",
+                "res.r[i] = %!pred_cond!% c %!pred_alt!%;"
+            ]
+        }
+    ],
+    "testz": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "%v<c:int|b:32>% res = 0;",
+                "for (size_t i = 0; i < %N<tp>%; i++) // early termination is possible here but won't help the compiler vectorizer",
+                "\tres += (m0.m[i] & m1.m[i]) ? 1 : 0;",
+                "return res ? 0 : 1;"
+            ]
+        }
+    ],
+    "testz_2": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "%v<c:int|b:32>% res = 0;",
+                "for (size_t i = 0; i < %N<tp>%; i++) // early termination is possible here but won't help the compiler vectorizer",
+                "\tres += m0.m[i] == 0 ? 0 : 1;",
+                "return res ? 0 : 1;"
+            ]
+        }
+    ],
+    "tomsk": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "%m<tr>% res;",
+                "BIT_CAST_N(res.m, r0.r, %N<tr>%);",
+                "return res;"
+            ]
+        }
+    ],
+    "toreg": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "%r<tr>% res;",
+                "BIT_CAST_N(res.r, m0.m, %N<tr>%);",
+                "return res;"
+            ]
+        }
+    ],
+    "wcvt": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "%r<tr>% res;",
+                "for (size_t i = 0; i < %N<tr>%; i++){",
+                "\tres.r[i] = (%v<tr>%)r0.r[i];",
+                "}",
+                "return res;"
+            ]
+        }
+    ],
+    "xorb": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_int_uint",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% r0.r[i] ^ r1.r[i] %!pred_alt!%;"
+            ]
+        },
+        {
+            "type": "element-wide",
+            "datatypes": "all_float",
+            "mask_variants": [],
+            "implem": [
+                "%v<c:uint|b:tp>% r0i, r1i;",
+                "BIT_CAST_1(&r0i, &r0.r[i]);",
+                "BIT_CAST_1(&r1i, &r1.r[i]);",
+                "%v<c:uint|b:tp>% resi = r0i ^ r1i;",
+                "%v<tr>% resv;",
+                "BIT_CAST_1(&resv, &resi);",
+                "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
+            ]
+        }
+    ],
+    "xorb_k": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "res.m[i] = m0.m[i] ^ m1.m[i];"
+            ]
+        }
+    ]
 }

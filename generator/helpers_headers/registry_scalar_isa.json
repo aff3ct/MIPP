@@ -1,16 +1,4 @@
 {
-    "name": "scalar",
-    "is_scalar": true,
-    "mipp_definitions": [],
-    "size": "MIPP_SCALAR_SIZE",
-    "header_template": [
-        "#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SCALAR_H_",
-        "#define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SCALAR_H_"
-    ],
-    "hw_lmul": [
-        1
-    ],
-    "sw_lmul": [],
     "datatypes": {
         "float64": {
             "reg": "float64_t",
@@ -62,5 +50,17 @@
             "msk": "uint8_t",
             "to_ptr": "uint8_t"
         }
-    }
+    },
+    "header_template": [
+        "#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SCALAR_H_",
+        "#define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SCALAR_H_"
+    ],
+    "hw_lmul": [
+        1
+    ],
+    "is_scalar": true,
+    "mipp_definitions": [],
+    "name": "scalar",
+    "size": "MIPP_SCALAR_SIZE",
+    "sw_lmul": []
 }

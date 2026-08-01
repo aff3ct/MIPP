@@ -77,7 +77,7 @@
     "cast_k": [
         {
             "instr_name": "cast",
-            "datatypes": "all_datatypes_cart_prod",
+            "datatypes": "all_datatypes_same_size",
             "template": "cast_k"
         }
     ],
@@ -135,7 +135,6 @@
             "template": "cmpneq_float"
         }
     ],
-    "cvt": [],
     "div": [
         {
             "instr_name": "div",
@@ -301,7 +300,6 @@
             "if": "defined(__AVX2__)"
         }
     ],
-
     "max": [
         {
             "instr_name": "max",

@@ -122,7 +122,7 @@
     "cast_k": [
         {
             "instr_name": "cast",
-            "datatypes": "all_datatypes_cart_prod",
+            "datatypes": "all_datatypes_same_size",
             "template": "cast_k"
         }
     ],
