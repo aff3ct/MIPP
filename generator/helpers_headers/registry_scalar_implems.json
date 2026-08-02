@@ -1226,6 +1226,60 @@
       ]
     }
   ],
+  "tan": [
+    {
+      "type": "element-wide",
+      "datatypes": "float32",
+      "mask_variants": [],
+      "implem": [
+        "res.r[i] = %!pred_cond!% TANF(r0.r[i]) %!pred_alt!%;"
+      ]
+    },
+    {
+      "type": "element-wide",
+      "datatypes": "float64",
+      "mask_variants": [],
+      "implem": [
+        "res.r[i] = %!pred_cond!% TAND(r0.r[i]) %!pred_alt!%;"
+      ]
+    }
+  ],
+  "asin": [
+    {
+      "type": "element-wide",
+      "datatypes": "float32",
+      "mask_variants": [],
+      "implem": [
+        "res.r[i] = %!pred_cond!% ASINF(r0.r[i]) %!pred_alt!%;"
+      ]
+    },
+    {
+      "type": "element-wide",
+      "datatypes": "float64",
+      "mask_variants": [],
+      "implem": [
+        "res.r[i] = %!pred_cond!% ASIND(r0.r[i]) %!pred_alt!%;"
+      ]
+    }
+  ],
+  "acos": [
+    {
+      "type": "element-wide",
+      "datatypes": "float32",
+      "mask_variants": [],
+      "implem": [
+        "res.r[i] = %!pred_cond!% ACOSF(r0.r[i]) %!pred_alt!%;"
+      ]
+    },
+    {
+      "type": "element-wide",
+      "datatypes": "float64",
+      "mask_variants": [],
+      "implem": [
+        "res.r[i] = %!pred_cond!% ACOSD(r0.r[i]) %!pred_alt!%;"
+      ]
+    }
+  ],
   "atan": [
     {
       "type": "element-wide",
@@ -1241,6 +1295,114 @@
       "mask_variants": [],
       "implem": [
         "res.r[i] = %!pred_cond!% ATAND(r0.r[i]) %!pred_alt!%;"
+      ]
+    }
+  ],
+  "cosh": [
+    {
+      "type": "element-wide",
+      "datatypes": "float32",
+      "mask_variants": [],
+      "implem": [
+        "res.r[i] = %!pred_cond!% COSHF(r0.r[i]) %!pred_alt!%;"
+      ]
+    },
+    {
+      "type": "element-wide",
+      "datatypes": "float64",
+      "mask_variants": [],
+      "implem": [
+        "res.r[i] = %!pred_cond!% COSHD(r0.r[i]) %!pred_alt!%;"
+      ]
+    }
+  ],
+  "sinh": [
+    {
+      "type": "element-wide",
+      "datatypes": "float32",
+      "mask_variants": [],
+      "implem": [
+        "res.r[i] = %!pred_cond!% SINHF(r0.r[i]) %!pred_alt!%;"
+      ]
+    },
+    {
+      "type": "element-wide",
+      "datatypes": "float64",
+      "mask_variants": [],
+      "implem": [
+        "res.r[i] = %!pred_cond!% SINHD(r0.r[i]) %!pred_alt!%;"
+      ]
+    }
+  ],
+  "tanh": [
+    {
+      "type": "element-wide",
+      "datatypes": "float32",
+      "mask_variants": [],
+      "implem": [
+        "res.r[i] = %!pred_cond!% TANHF(r0.r[i]) %!pred_alt!%;"
+      ]
+    },
+    {
+      "type": "element-wide",
+      "datatypes": "float64",
+      "mask_variants": [],
+      "implem": [
+        "res.r[i] = %!pred_cond!% TANHD(r0.r[i]) %!pred_alt!%;"
+      ]
+    }
+  ],
+  "asinh": [
+    {
+      "type": "element-wide",
+      "datatypes": "float32",
+      "mask_variants": [],
+      "implem": [
+        "res.r[i] = %!pred_cond!% ASINHF(r0.r[i]) %!pred_alt!%;"
+      ]
+    },
+    {
+      "type": "element-wide",
+      "datatypes": "float64",
+      "mask_variants": [],
+      "implem": [
+        "res.r[i] = %!pred_cond!% ASINHD(r0.r[i]) %!pred_alt!%;"
+      ]
+    }
+  ],
+  "acosh": [
+    {
+      "type": "element-wide",
+      "datatypes": "float32",
+      "mask_variants": [],
+      "implem": [
+        "res.r[i] = %!pred_cond!% ACOSHF(r0.r[i]) %!pred_alt!%;"
+      ]
+    },
+    {
+      "type": "element-wide",
+      "datatypes": "float64",
+      "mask_variants": [],
+      "implem": [
+        "res.r[i] = %!pred_cond!% ACOSHD(r0.r[i]) %!pred_alt!%;"
+      ]
+    }
+  ],
+  "atanh": [
+    {
+      "type": "element-wide",
+      "datatypes": "float32",
+      "mask_variants": [],
+      "implem": [
+        "res.r[i] = %!pred_cond!% ATANHF(r0.r[i]) %!pred_alt!%;"
+      ]
+    },
+    {
+      "type": "element-wide",
+      "datatypes": "float64",
+      "mask_variants": [],
+      "implem": [
+        "res.r[i] = %!pred_cond!% ATANHD(r0.r[i]) %!pred_alt!%;"
       ]
     }
   ],

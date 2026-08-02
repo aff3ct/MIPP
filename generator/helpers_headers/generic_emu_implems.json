@@ -685,6 +685,12 @@
             "template_ref": "tpl_generic_emu.sin_f64"
         }
     ],
+    "tan": [
+        {
+            "datatypes": "all_float",
+            "template_ref": "tpl_generic_emu.tan"
+        }
+    ],
     "pow": [
         {
             "datatypes": [

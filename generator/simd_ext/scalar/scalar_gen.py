@@ -527,8 +527,35 @@ def scalar_gen(include_manager):
 #define SINF(x) (sinf(x))
 #define SIND(x) (sin(x))
 
+#define TANF(x) (tanf(x))
+#define TAND(x) (tan(x))
+
+#define ACOSF(x) (acosf(x))
+#define ACOSD(x) (acos(x))
+
+#define ASINF(x) (asinf(x))
+#define ASIND(x) (asin(x))
+
 #define ATANF(x) (atanf(x))
 #define ATAND(x) (atan(x))
+
+#define COSHF(x) (coshf(x))
+#define COSHD(x) (cosh(x))
+
+#define SINHF(x) (sinhf(x))
+#define SINHD(x) (sinh(x))
+
+#define TANHF(x) (tanhf(x))
+#define TANHD(x) (tanh(x))
+
+#define ACOSHF(x) (acoshf(x))
+#define ACOSHD(x) (acosh(x))
+
+#define ASINHF(x) (asinhf(x))
+#define ASINHD(x) (asinh(x))
+
+#define ATANHF(x) (atanhf(x))
+#define ATANHD(x) (atanh(x))
 
 typedef float float32_t;
 typedef double float64_t;

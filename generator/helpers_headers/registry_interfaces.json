@@ -443,7 +443,61 @@
     "horizontal": false,
     "mask_support": "all_mask"
   },
+  "tan": {
+    "proto_ref": "ret_reg_1arg_reg",
+    "datatypes": "all_float",
+    "horizontal": false,
+    "mask_support": "all_mask"
+  },
+  "acos": {
+    "proto_ref": "ret_reg_1arg_reg",
+    "datatypes": "all_float",
+    "horizontal": false,
+    "mask_support": "all_mask"
+  },
+  "asin": {
+    "proto_ref": "ret_reg_1arg_reg",
+    "datatypes": "all_float",
+    "horizontal": false,
+    "mask_support": "all_mask"
+  },
   "atan": {
+    "proto_ref": "ret_reg_1arg_reg",
+    "datatypes": "all_float",
+    "horizontal": false,
+    "mask_support": "all_mask"
+  },
+  "sinh": {
+    "proto_ref": "ret_reg_1arg_reg",
+    "datatypes": "all_float",
+    "horizontal": false,
+    "mask_support": "all_mask"
+  },
+  "cosh": {
+    "proto_ref": "ret_reg_1arg_reg",
+    "datatypes": "all_float",
+    "horizontal": false,
+    "mask_support": "all_mask"
+  },
+  "tanh": {
+    "proto_ref": "ret_reg_1arg_reg",
+    "datatypes": "all_float",
+    "horizontal": false,
+    "mask_support": "all_mask"
+  },
+  "asinh": {
+    "proto_ref": "ret_reg_1arg_reg",
+    "datatypes": "all_float",
+    "horizontal": false,
+    "mask_support": "all_mask"
+  },
+  "acosh": {
+    "proto_ref": "ret_reg_1arg_reg",
+    "datatypes": "all_float",
+    "horizontal": false,
+    "mask_support": "all_mask"
+  },
+  "atanh": {
     "proto_ref": "ret_reg_1arg_reg",
     "datatypes": "all_float",
     "horizontal": false,
