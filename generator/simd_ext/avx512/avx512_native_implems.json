@@ -566,14 +566,21 @@
         {
             "instr_name": "slli",
             "datatypes": [
-                "int16",
                 "int32",
                 "int64",
-                "uint16",
                 "uint32",
                 "uint64"
             ],
             "template": "sxl"
+        },
+        {
+            "instr_name": "slli",
+            "datatypes": [
+                "int16",
+                "uint16"
+            ],
+            "template": "sxl",
+            "if": "defined(__AVX512BW__)"
         }
     ],
     "max": [
@@ -758,14 +765,21 @@
         {
             "instr_name": "srli",
             "datatypes": [
-                "int16",
                 "int32",
                 "int64",
-                "uint16",
                 "uint32",
                 "uint64"
             ],
             "template": "sxl"
+        },
+        {
+            "instr_name": "srli",
+            "datatypes": [
+                "int16",
+                "uint16"
+            ],
+            "template": "sxl",
+            "if": "defined(__AVX512BW__)"
         }
     ],
     "rsqrt": [
