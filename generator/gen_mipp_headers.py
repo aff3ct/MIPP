@@ -28,10 +28,7 @@ include_gen_path = "../include/"
 
 # folder paths
 simd_ext_path = os.path.join(include_gen_path, "simd_ext")
-simd_ext_cpp_path = os.path.join(include_gen_path, "simd_ext_cpp")
-c_path = os.path.join(include_gen_path, "c")
-cpp_path = os.path.join(include_gen_path, "cpp")
-obj_path = os.path.join(include_gen_path, "obj")
+interfaces_path = os.path.join(include_gen_path, "interfaces")
 
 def create_folder(folder_path):
     if not os.path.exists(folder_path):
@@ -374,7 +371,7 @@ def main(argv=None):
         print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
 
     # create folders (always ensure these exist)
-    for folder in [simd_ext_path, simd_ext_cpp_path, c_path, cpp_path, obj_path]:
+    for folder in [simd_ext_path, interfaces_path]:
         create_folder(folder)
 
 

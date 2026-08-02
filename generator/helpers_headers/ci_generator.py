@@ -8,7 +8,7 @@ import re
 
 from tools import *
 from registry import *
-from include_gen import IncludeManager
+from include_gen import IncludeManager, _match_category
 
 from codegen.lmul_orchestrator import gen_c_horiz_lmul
 from codegen.emit_helpers import emit_panic_stub
@@ -21,21 +21,22 @@ def prepare_isa_defines(isa_list):
     return isa_list_copy
 
 def _isa_include_common(isa):
-    content = "#include \"../simd_ext/"+isa["name"]+"/" + isa["name"] + "_common.h\"\n"
+    content = "#include \"simd_ext/"+isa["name"]+"/c/common.h\"\n"
     sub_isa = isa.get("sub_isa")
     if sub_isa:
-        content += "#include \"../simd_ext/"+sub_isa+"/" + sub_isa + "_common.h\"\n"
+        content += "#include \"simd_ext/"+sub_isa+"/c/common.h\"\n"
     return content
 
 def _isa_include_function(isa, func):
+    category = _match_category(func)
     if isa == "c":
-        content = "#include \"" + func + ".h\"\n"
+        content = "#include \"interfaces/c/functions/" + category + "/" + func + ".h\"\n"
         return content
     
-    content = "#include \"../../simd_ext/"+isa["name"]+"/" + "functions/" + isa["name"] + "_" + func + ".h\"\n"
+    content = "#include \"simd_ext/"+isa["name"]+"/c/functions/" + category + "/" + func + ".h\"\n"
     sub_isa = isa.get("sub_isa")
     if sub_isa:
-        content += "#include \"../../simd_ext/"+sub_isa+"/" + "functions/" + sub_isa + "_" + func + ".h\"\n"
+        content += "#include \"simd_ext/"+sub_isa+"/c/functions/" + category + "/" + func + ".h\"\n"
     return content
 
 def _custom_prefix_generator(func, isa_list, is_common=False, mode="function_header"):
@@ -110,7 +111,7 @@ def _custom_prefix_generator(func, isa_list, is_common=False, mode="function_hea
         # print('Generating custom prefix for function "'+func+'"')
         is_first = True
 
-        content += "\n#include \"../common.h\"\n\n"
+        content += "\n#include \"interfaces/c/common.h\"\n\n"
         for isa in isa_list:
             if is_first:
                 content += "#if " + "defined(MIPP_" + isa["name"].upper() + ")\n"

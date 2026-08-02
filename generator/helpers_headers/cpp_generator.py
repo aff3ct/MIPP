@@ -9,7 +9,7 @@ import re
 
 from tools import *
 from registry import *
-from include_gen import IncludeManager
+from include_gen import IncludeManager, _match_category
 from ci_generator import prepare_isa_defines
 
 
@@ -21,9 +21,10 @@ def _generate_mipp_hpp(include_manager=None):
     file = open("../include/mipp.hpp", "w")
 
     content = "#pragma once\n"
-    content += '#include "cpp/common.hpp"\n'
+    content += '#include "interfaces/cpp/common.hpp"\n'
     for func in interfaces:
-        content += f'#include "cpp/functions/{func}.hpp"\n'
+        category = _match_category(func)
+        content += f'#include "interfaces/cpp/functions/{category}/{func}.hpp"\n'
     print(content, file=file)
 
 def generate_cpp(include_manager=None, isa_list=None):
@@ -31,8 +32,8 @@ def generate_cpp(include_manager=None, isa_list=None):
 
     tpl_header_cpp = """#pragma once
 
-#include "c/common.h"
-#include "simd_ext/scalar/scalar_common.h"
+#include "interfaces/c/common.h"
+#include "simd_ext/scalar/c/common.h"
 #include <iostream>
 
 namespace mipp
@@ -49,7 +50,9 @@ namespace mipp
         _gen_cpp_functions_isa(include_manager, isa, interfaces)
 
     # definition of the enum used by everyone in cpp layer
-    file_common_enum = open("../include/simd_ext_cpp/common.hpp", "w")
+    common_enum_dir = "../include/simd_ext/templates/cpp"
+    os.makedirs(common_enum_dir, exist_ok=True)
+    file_common_enum = open(f"{common_enum_dir}/common.hpp", "w")
     print("#pragma once\n", file=file_common_enum)
     print("namespace mipp {\n", file=file_common_enum)
     print("enum ISA { SCALAR, SSE, AVX, AVX512, NEON, SVE, RVV };", file=file_common_enum)
@@ -93,20 +96,21 @@ def _gen_cpp_common(isa_list, file):
         else:
             print("#elif " + isa["gen_define"], file=file)
         
-        print(f'#include "../simd_ext_cpp/{isa["name"].lower()}_cpp/{isa["name"].lower()}_cpp_common.hpp"', file=file)
+        print(f'#include "simd_ext/{isa["name"].lower()}/cpp/common.hpp"', file=file)
     print("#else\n#error \"No ISA defined for cpp wrapper\"\n#endif", file=file)
 
 def _gen_cpp_functions(isa_list, include_manager, funcs):
     for f in funcs.keys():
+        category = _match_category(f)
         file = include_manager.get_fd("cpp", f)
         print("#pragma once\n", file=file)
-        print('#include "../common.hpp"\n', file=file)
+        print('#include "interfaces/cpp/common.hpp"\n', file=file)
         for index, isa in enumerate(isa_list):
             if index == 0:
                 print("#if " + isa["gen_define"], file=file)
             else:
                 print("#elif " + isa["gen_define"], file=file)
-            print(f'#include "../../simd_ext_cpp/{isa["name"].lower()}_cpp/functions/{isa["name"].lower()}_cpp_{f}.hpp"', file=file)
+            print(f'#include "simd_ext/{isa["name"].lower()}/cpp/functions/{category}/{f}.hpp"', file=file)
         print("#else\n#error \"No ISA defined for cpp wrapper\"\n#endif", file=file)
 
 # -------------------------------------------------------------------------------------------------
@@ -139,35 +143,35 @@ def _compute_dt_par_dt_ret(funcs, f, dt):
 
     return dt_par, dt_ret
 
-def _cpp_custom_prefix_generator(f,isa_name="", funcs=None):
+def _cpp_custom_prefix_generator(f, isa_name="", funcs=None):
     """
     include c_mipp version of the function + set namespace to mipp for the cpp wrapper.
     """
     s = "#pragma once\n"
 
     if isa_name:
+        category = _match_category(f) if f else ""
         if f is None: # common file
-            s += f'#include "../common.hpp"\n'
-            s += f'#include "../../simd_ext/{isa_name}/{isa_name}_common.h"\n'
+            s += '#include "simd_ext/templates/cpp/common.hpp"\n'
+            s += '#include "interfaces/cpp/common.hpp"\n'
+            s += f'#include "simd_ext/{isa_name}/c/common.h"\n'
         
         if f is not None: # function file
-            s += f'#include "../{isa_name}_cpp_common.hpp"\n'
-            s += f'#include "../../../simd_ext/{isa_name}/functions/{isa_name}_{f}.h"\n'
+            s += f'#include "simd_ext/{isa_name}/cpp/common.hpp"\n'
+            s += f'#include "simd_ext/{isa_name}/c/functions/{category}/{f}.h"\n'
 
-            masks_support = None
-            if funcs is not None:
+            mask_support = None
+            if funcs is not None and f in funcs:
                 mask_support = funcs[f]["mask_support"]
             
-            if f in set_functions:
-                 s+= f'#include "../../templates/functions/templates_{f}.hpp"\n'
-            elif mask_support and mask_support.is_any_mask():
-                s+= f'#include "../../templates/functions/templates_{f}.hpp"\n'
-                # include the template 
+            if f in set_functions or (mask_support and mask_support.is_any_mask()):
+                s += f'#include "simd_ext/templates/cpp/functions/{category}/{f}.hpp"\n'
 
     else: 
-        s += f'#include "../{isa_name}common.hpp"\n'
-        s += f'#include "../../c/functions/{f}.h"\n'
-        s+= f'#include "../../simd_ext/scalar/functions/scalar_{f}.h"\n'
+        category = _match_category(f)
+        s += '#include "interfaces/cpp/common.hpp"\n'
+        s += f'#include "interfaces/c/functions/{category}/{f}.h"\n'
+        s += f'#include "simd_ext/scalar/c/functions/{category}/{f}.h"\n'
     s += "namespace mipp {\n"
     return s
 
@@ -414,7 +418,7 @@ def _gen_cpp_generic_templates(include_manager, isa, funcs):
         file = include_manager.get_fd("templates", f)
 
         print("#pragma once\n", file=file)
-        print('#include "../../common.hpp"\n', file=file)
+        print('#include "simd_ext/templates/cpp/common.hpp"\n', file=file)
         print("namespace mipp {\n", file=file)
 
         if f in set_functions:

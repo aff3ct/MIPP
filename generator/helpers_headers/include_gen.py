@@ -17,25 +17,43 @@ from registry import *
 
 # The helpers 
 def _get_include_name(func, layer=""):
-    if layer == "":
-        return f"{func}.h"
-    elif layer == "c":
-        return f"{func}.h"
-    elif layer == "cpp":
+    if layer in ("cpp", "templates") or layer.endswith("_cpp"):
         return f"{func}.hpp"
-    elif layer.endswith("_cpp") or layer == "templates":
-        return f"{layer}_{func}.hpp"
-    else : 
-        return f"{layer}_{func}.h"
+    else:
+        return f"{func}.h"
 
 def _get_include_path(func, layer):
-    if func == "common":
-        return f"{layer}/common.h"
-    include_name = _get_include_name(func)
+    category = _match_category(func)
+    include_name = _get_include_name(func, layer)
     
-    if layer == "" :
-        return include_name
-    return f"{layer}/functions/{include_name}"
+    if func == "common":
+        if layer == "c":
+            return "interfaces/c/common.h"
+        elif layer == "cpp":
+            return "interfaces/cpp/common.hpp"
+        elif layer == "templates":
+            return "simd_ext/templates/cpp/common.hpp"
+        elif layer.endswith("_cpp"):
+            isa = layer[:-4]
+            return f"simd_ext/{isa}/cpp/common.hpp"
+        elif layer != "":
+            return f"simd_ext/{layer}/c/common.h"
+        else:
+            return "common.h"
+
+    if layer == "c":
+        return f"interfaces/c/functions/{category}/{include_name}"
+    elif layer == "cpp":
+        return f"interfaces/cpp/functions/{category}/{include_name}"
+    elif layer == "templates":
+        return f"simd_ext/templates/cpp/functions/{category}/{include_name}"
+    elif layer.endswith("_cpp"):
+        isa = layer[:-4]
+        return f"simd_ext/{isa}/cpp/functions/{category}/{include_name}"
+    elif layer != "":
+        return f"simd_ext/{layer}/c/functions/{category}/{include_name}"
+    else:
+        return f"functions/{category}/{include_name}"
 
 
 #copied from gen_mipp_tests, should prolly move all to tools.py
@@ -112,7 +130,7 @@ def _get_dependencies_regular(func, interfaces, layer="c", mode="function_header
     for req in requirements:
         if req in interfaces:
             req_concept = _match_category(req)
-            req_include_name = _get_include_name(req, layer)
+            req_include_name = _get_include_path(req, layer)
             requirements[req] = req_include_name
     return requirements
 
@@ -163,7 +181,7 @@ def _get_dependencies_mask(func, interfaces, mask_kind, layer="c", mode="functio
     requirements = _get_implem_status_requirements_mask_dt_keys(interfaces, func, mask_kind)
     for req in requirements:
         if req in interfaces:
-            req_include_name = _get_include_name(req, layer)
+            req_include_name = _get_include_path(req, layer)
             requirements[req] = req_include_name
     return requirements
                              
@@ -185,13 +203,18 @@ def _get_dependencies(func, interfaces, lmul=0, mask_kind="", layer="", mode="fu
     
     dependencies = set()
     
-    if layer == "c" :
-        dependencies.add("../common.h")
+    if layer == "c":
+        dependencies.add("interfaces/c/common.h")
     elif layer == "cpp":
-        dependencies.add("../common.hpp")
-    elif layer != "" :
-        dependencies.add(f"../{layer}_common.h")
-    else :
+        dependencies.add("interfaces/cpp/common.hpp")
+    elif layer == "templates":
+        dependencies.add("simd_ext/templates/cpp/common.hpp")
+    elif layer.endswith("_cpp"):
+        isa = layer[:-4]
+        dependencies.add(f"simd_ext/{isa}/cpp/common.hpp")
+    elif layer != "":
+        dependencies.add(f"simd_ext/{layer}/c/common.h")
+    else:
         dependencies.add("common.h")
     
     #print(f"Getting dependencies for {func} in layer {layer} with lmul {lmul} and mask kind {mask_kind}")
@@ -249,28 +272,26 @@ class IncludePath:
         for dep in deps:
             self.dependencies.add(dep)
     
+    def _get_full_path(self, base_dir):
+        if self.func == "common":
+            return f"{base_dir}/{self.name}"
+        category = _match_category(self.func)
+        return f"{base_dir}/functions/{category}/{self.name}"
+
     def get_fd(self, base_dir):
         if self.mode == "function_header":
-            # print(f"Getting file descriptor for {self.name} in layer {base_dir} with mode {mode}")
-
-            full_path = f"{base_dir}/{self.name}"
+            full_path = self._get_full_path(base_dir)
             os.makedirs(os.path.dirname(full_path), exist_ok=True)
 
             if self.file is None:
-            # DO NOT use "w+" here; it truncates and will remove any prefix you wrote.
                 self.file = open(full_path, "a+", encoding="utf-8", newline="")
 
             return self.file
         elif self.mode == "category_header":
-
-            
-            # print(f"Getting file descriptor for {category} in layer {base_dir} with mode {mode}")
-
             full_path = f"{base_dir}/{self.name}"
             os.makedirs(os.path.dirname(full_path), exist_ok=True)
 
             if self.file is None:
-            # DO NOT use "w+" here; it truncates and will remove any prefix you wrote.
                 self.file = open(full_path, "a+", encoding="utf-8", newline="")
 
             return self.file
@@ -286,7 +307,7 @@ class IncludePath:
         if self._is_prefixed:
             return
 
-        full_path = f"{base_dir}/{self.name}"
+        full_path = self._get_full_path(base_dir)
         os.makedirs(os.path.dirname(full_path), exist_ok=True)
 
         # Ensure current generated body is on disk
@@ -349,7 +370,7 @@ class IncludePath:
     
     def write_custom_prefix(self, custom_prefix, base_dir, mode="function_header"):
         if mode == "function_header":
-            full_path = f"{base_dir}/{self.name}"
+            full_path = self._get_full_path(base_dir)
             os.makedirs(os.path.dirname(full_path), exist_ok=True)
 
             # Ensure current generated body is on disk
@@ -622,26 +643,25 @@ class IncludeManager:
         #     self.layers[layer].get_fd("../include")
             
     def _get_layer_dir(self, layer_name):
-        if layer_name in ["sse", "avx", "avx512", "sve", "rvv", "neon", "scalar"]:
-            return f"{self.base_dir}/simd_ext/{layer_name}"
-        elif layer_name.endswith("_cpp") or layer_name == "templates":
-            return f"{self.base_dir}/simd_ext_cpp/{layer_name}"
+        if layer_name == "c":
+            return f"{self.base_dir}/interfaces/c"
+        elif layer_name == "cpp":
+            return f"{self.base_dir}/interfaces/cpp"
+        elif layer_name == "templates":
+            return f"{self.base_dir}/simd_ext/templates/cpp"
+        elif layer_name.endswith("_cpp"):
+            isa = layer_name[:-4]
+            return f"{self.base_dir}/simd_ext/{isa}/cpp"
         else:
-            return f"{self.base_dir}/{layer_name}"
+            return f"{self.base_dir}/simd_ext/{layer_name}/c"
 
     def get_fd(self, layer_name, func):
         if self.mode == "function_header":
             if layer_name in self.layers:
                 layer = self.layers[layer_name]
-                
                 target_dir = self._get_layer_dir(layer_name)
-                
                 if func in layer.includes:
-                    if func != "common" : 
-                        base_dir = f"{target_dir}/functions"
-                    else:
-                        base_dir = target_dir
-                    return layer.includes[func].get_fd(base_dir)
+                    return layer.includes[func].get_fd(target_dir)
         elif self.mode == "category_header":
             if layer_name in self.layers:
                 layer = self.layers[layer_name]
@@ -649,43 +669,34 @@ class IncludeManager:
                 target_dir = self._get_layer_dir(layer_name)
 
                 if category in layer.categories:
-                    if category != "common" : 
-                        base_dir = f"{target_dir}/functions"
-                    else:
-                        base_dir = target_dir
-
-                    return layer.categories[category].get_fd(base_dir)
+                    return layer.categories[category].get_fd(target_dir)
         return None
     
     def resolve_all_dependencies(self, layer_name, funcs):
-        # resolve deps for all funcs, all lmul, all mask kinds 
-        # appends pragma once and includes to each file
-        # also includes common.h. 
-        
         target_dir = self._get_layer_dir(layer_name)
         if self.mode == "function_header":
             for func in self.layers[layer_name].includes:
                 if func == "common":
                     continue
 
+                category = _match_category(func)
                 include_path = self.layers[layer_name].includes[func]
                 include_path.resolve_dependencies(funcs, lmul=0, mask_kind="", layer=layer_name)
                 for mask in ["mask", "maskz", "masks"]:
                     include_path.resolve_dependencies(funcs, lmul=0, mask_kind=mask, layer=layer_name)
 
-                # avx512 / avx hack to have access to avx functions for ldiv
-                if layer_name == "avx512" : 
-                    include_path.dependencies.add(f"simd_ext/avx/functions/avx_{func}.h")
-                elif layer_name == "avx" : 
-                    include_path.dependencies.add(f"simd_ext/sse/functions/sse_{func}.h")
+                # avx512 / avx hack to have access to avx/sse functions for ldiv
+                if layer_name == "avx512": 
+                    include_path.dependencies.add(f"simd_ext/avx/c/functions/{category}/{func}.h")
+                elif layer_name == "avx": 
+                    include_path.dependencies.add(f"simd_ext/sse/c/functions/{category}/{func}.h")
                 
                 # auto-scalar fallback requires the scalar variant to be included
-                if layer_name != "scalar" and layer_name != "scalar_cpp" and layer_name != "c":
-                    include_path.dependencies.add(f"simd_ext/scalar/functions/scalar_{func}.h")
-                    include_path.dependencies.add("simd_ext/scalar/functions/scalar_toreg.h")
-                    include_path.dependencies.add("simd_ext/scalar/functions/scalar_tomsk.h")
-                include_path.write_prefix(f"{target_dir}/functions")
-
+                if layer_name not in ("scalar", "scalar_cpp", "c", "cpp"):
+                    include_path.dependencies.add(f"simd_ext/scalar/c/functions/{category}/{func}.h")
+                    include_path.dependencies.add("simd_ext/scalar/c/functions/reinterpret/toreg.h")
+                    include_path.dependencies.add("simd_ext/scalar/c/functions/reinterpret/tomsk.h")
+                include_path.write_prefix(target_dir)
 
         elif self.mode == "category_header":
             for category in self.layers[layer_name].categories:
@@ -693,7 +704,7 @@ class IncludeManager:
                 include_category.resolve_dependencies(funcs, lmul=0, mask_kind="", layer=layer_name)
                 for mask in ["mask", "maskz", "masks"]:
                     include_category.resolve_dependencies(funcs, lmul=0, mask_kind=mask, layer=layer_name)
-                include_category.write_prefix(f"{target_dir}/functions")
+                include_category.write_prefix(target_dir)
 
     def close_fd(self, layer_name, func):
         if layer_name in self.layers:
@@ -713,7 +724,6 @@ class IncludeManager:
         return None
 
     def create_glue_file(self, layer_name, file_path):
-        # include all the headers in a layer in a glue file
         target_dir = self._get_layer_dir(layer_name)
         target_path = f"{target_dir}/{os.path.basename(file_path)}"
         os.makedirs(target_dir, exist_ok=True)
@@ -726,7 +736,8 @@ class IncludeManager:
                     for func in layer.includes:
                         include_path = layer.includes[func]
                         if func != "common":
-                            f.write(f'#include "functions/{include_path.name}"\n')
+                            category = _match_category(func)
+                            f.write(f'#include "functions/{category}/{include_path.name}"\n')
                         else :
                             f.write(f'#include "{include_path.name}"\n')
         elif self.mode == "category_header":
@@ -743,17 +754,17 @@ class IncludeManager:
     
     def write_custom_prefix(self, layer_name, func, custom_prefix):
         target_dir = self._get_layer_dir(layer_name)
-        # func is a bad name bc it's actually a category in category header mode, but let's keep it for simplicity.
         if self.mode == "function_header":
             if layer_name in self.layers:
                 layer = self.layers[layer_name]
                 if func in layer.includes:
-                    layer.includes[func].write_custom_prefix(custom_prefix, f"{target_dir}/functions", mode=self.mode)
+                    layer.includes[func].write_custom_prefix(custom_prefix, target_dir, mode=self.mode)
         elif self.mode == "category_header":
             if layer_name in self.layers:
                 layer = self.layers[layer_name]
                 category = func
                 if category in layer.categories:
+                    layer.categories[category].write_custom_prefix(custom_prefix, target_dir)
                     layer.categories[category].write_custom_prefix(custom_prefix, f"{target_dir}/functions")
 
 def generate_mipp_h(include_manager=None):
@@ -764,15 +775,16 @@ def generate_mipp_h(include_manager=None):
 
     template_file = """#ifndef MY_INTRINSICS_PLUS_PLUS_H_
 #define MY_INTRINSICS_PLUS_PLUS_H_
-#include "simd_ext/scalar/mipp_impl_scalar_gen.h" // not a big fan of this.
-#include "c/common.h"
+#include "simd_ext/scalar/c/common.h"
+#include "interfaces/c/common.h"
 """
 
     include_list = ""
     for func in interfaces:
-        include_list += "#include \"c/functions/" +  func + ".h\"\n"
+        category = _match_category(func)
+        include_list += f'#include "interfaces/c/functions/{category}/{func}.h"\n'
     postfix = """#endif /* MY_INTRINSICS_PLUS_PLUS_H_ */"""
- 
+
     template_file += include_list + "\n" + postfix
 
     j2_template = Template(template_file, undefined=StrictUndefined)
