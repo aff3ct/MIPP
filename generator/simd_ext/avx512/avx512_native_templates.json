@@ -109,6 +109,12 @@
             "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(r0.r, r1.r, _CMP_NEQ_OQ);"
         ]
     },
+    "cvt": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}_{{ instr_name }}(r0.r);"
+        ]
+    },
     "gather": {
         "format": "short",
         "code": [
@@ -285,6 +291,12 @@
         "format": "short",
         "code": [
             "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext_var }}(({{ isa_dt_par.to_ptr }}*) p0, m0.m, r0.r);"
+        ]
+    },
+    "sxl": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_var }}(r0.r, v0);"
         ]
     },
     "testz_1arg": {

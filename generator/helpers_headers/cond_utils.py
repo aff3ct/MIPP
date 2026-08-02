@@ -270,14 +270,19 @@ def _simplify(expr):
                 seen.add(c)
                 unique_children.append(c)
 
-        to_remove = set()
-        for i, c in enumerate(unique_children):
-            for j, c2 in enumerate(unique_children):
-                if i != j and j not in to_remove and isinstance(c2, And):
-                    if c in c2.children:
-                        to_remove.add(j)
-        if to_remove:
-            unique_children = [c for i, c in enumerate(unique_children) if i not in to_remove]
+        has_tautology = False
+        for c in unique_children:
+            if isinstance(c, Not) and c.child in seen:
+                has_tautology = True
+                break
+            if Not(c) in seen:
+                has_tautology = True
+                break
+            if isinstance(c, And) and all(Not(child) in seen or (isinstance(child, Not) and child.child in seen) for child in c.children):
+                has_tautology = True
+                break
+        if has_tautology or any(c == Term("1") for c in unique_children):
+            return Term("1")
 
         changed_compl = True
         while changed_compl:
@@ -296,6 +301,26 @@ def _simplify(expr):
                                 unique_children[j] = And(remaining)
                             changed_compl = True
                             break
+                else:
+                    neg_c = Not(c)
+                    for j, c2 in enumerate(unique_children):
+                        if i != j and isinstance(c2, And):
+                            to_remove_sub = set()
+                            for child in c2.children:
+                                if child == neg_c:
+                                    to_remove_sub.add(child)
+                                elif isinstance(child, Not) and isinstance(child.child, Or) and all(t in seen for t in child.child.children):
+                                    to_remove_sub.add(child)
+                            if to_remove_sub:
+                                remaining = [ch for ch in c2.children if ch not in to_remove_sub]
+                                if not remaining:
+                                    unique_children[j] = Term("1")
+                                elif len(remaining) == 1:
+                                    unique_children[j] = remaining[0]
+                                else:
+                                    unique_children[j] = And(remaining)
+                                changed_compl = True
+                                break
                 if changed_compl:
                     break
             if changed_compl:
@@ -328,6 +353,13 @@ def _simplify(expr):
                     has_tautology = True
                     break
                 if isinstance(c.child, Or) and all(child in seen for child in c.child.children):
+                    has_tautology = True
+                    break
+                if isinstance(c.child, And) and all((isinstance(ch, Not) and ch.child in seen) or Not(ch) in seen for ch in c.child.children):
+                    has_tautology = True
+                    break
+            elif isinstance(c, And):
+                if all((isinstance(ch, Not) and ch.child in seen) or Not(ch) in seen for ch in c.children):
                     has_tautology = True
                     break
             else:

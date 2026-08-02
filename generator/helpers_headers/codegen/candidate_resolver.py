@@ -510,7 +510,7 @@ def resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators
                 continue
                 
             for cand in candidates_map[key]:
-                if cand.get("emitted", False):
+                if cand.get("emitted", False) or cand.get("resolved", False):
                     continue
                 if cand["level"] > max_level:
                     continue
@@ -597,6 +597,7 @@ def resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators
                     if restricted_target_cond == "0":
                         continue
                     resolved[key].append((cand, restricted_target_cond))
+                    cand["resolved"] = True
                     
                     if cand["level"] < 4:
                         working_impls[key].append(restricted_target_cond)
@@ -610,9 +611,13 @@ def resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators
                     changed = True
                     break
                     
-        if not changed and max_level < 4:
-            max_level += 1
-            changed = True
+        if not changed:
+            if max_level < 4:
+                max_level += 1
+                changed = True
+            else:
+                unresolved = [k for k, cond in remaining_conds.items() if cond != "0"]
+                break
                     
     # 1. Register resolved statuses upfront so parse_placeholders knows what is implemented
     for key in resolved:

@@ -296,7 +296,7 @@
                 "int32",
                 "int64"
             ],
-            "template": "sll",
+            "template": "sxl",
             "if": "defined(__AVX2__)"
         }
     ],

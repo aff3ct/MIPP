@@ -380,6 +380,38 @@
             "if": "defined(__AVX512BW__)"
         }
     ],
+    "cvt": [
+        {
+            "instr_name": "cvttps_epi32",
+            "datatypes": [
+                "float32,int32"
+            ],
+            "template": "cvt"
+        },
+        {
+            "instr_name": "cvtepi32_ps",
+            "datatypes": [
+                "int32,float32"
+            ],
+            "template": "cvt"
+        },
+        {
+            "instr_name": "cvttpd_epi64",
+            "datatypes": [
+                "float64,int64"
+            ],
+            "template": "cvt",
+            "if": "defined(__AVX512DQ__)"
+        },
+        {
+            "instr_name": "cvtepi64_pd",
+            "datatypes": [
+                "int64,float64"
+            ],
+            "template": "cvt",
+            "if": "defined(__AVX512DQ__)"
+        }
+    ],
     "div": [
         {
             "instr_name": "div",
@@ -528,6 +560,20 @@
             "instr_name": "loadu",
             "datatypes": "all_datatypes",
             "template": "load"
+        }
+    ],
+    "lshift": [
+        {
+            "instr_name": "slli",
+            "datatypes": [
+                "int16",
+                "int32",
+                "int64",
+                "uint16",
+                "uint32",
+                "uint64"
+            ],
+            "template": "sxl"
         }
     ],
     "max": [
@@ -706,6 +752,20 @@
             "datatypes": "all_float",
             "template": "round",
             "if": "defined(__AVX512F__) && !defined(__MIC__) && !defined(__KNCNI__)"
+        }
+    ],
+    "rshift": [
+        {
+            "instr_name": "srli",
+            "datatypes": [
+                "int16",
+                "int32",
+                "int64",
+                "uint16",
+                "uint32",
+                "uint64"
+            ],
+            "template": "sxl"
         }
     ],
     "rsqrt": [
