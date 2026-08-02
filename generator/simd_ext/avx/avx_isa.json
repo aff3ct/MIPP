@@ -110,7 +110,7 @@
         "#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX_H_",
         "#define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX_H_",
         "#include <immintrin.h>",
-        "#include <simd_ext/sse/sse_common.h> // ldiv 2 support"
+        "#include <simd_ext/sse/c/common.h> // ldiv 2 support"
     ],
     "hw_lmul": [],
     "mipp_definitions": [

@@ -126,7 +126,7 @@
         "#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX512_H_",
         "#define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX512_H_",
         "#include <immintrin.h>",
-        "#include <simd_ext/avx/avx_common.h> // ldiv2 support"
+        "#include <simd_ext/avx/c/common.h> // ldiv2 support"
     ],
     "hw_lmul": [],
     "hw_mask": true,
