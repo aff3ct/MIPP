@@ -29,6 +29,7 @@ include_gen_path = "../include/"
 # folder paths
 simd_ext_path = os.path.join(include_gen_path, "simd_ext")
 interfaces_path = os.path.join(include_gen_path, "interfaces")
+templates_path = os.path.join(include_gen_path, "templates")
 
 def create_folder(folder_path):
     if not os.path.exists(folder_path):
@@ -371,7 +372,7 @@ def main(argv=None):
         print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
 
     # create folders (always ensure these exist)
-    for folder in [simd_ext_path, interfaces_path]:
+    for folder in [simd_ext_path, interfaces_path, templates_path]:
         create_folder(folder)
 
 

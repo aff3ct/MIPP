@@ -50,7 +50,7 @@ namespace mipp
         _gen_cpp_functions_isa(include_manager, isa, interfaces)
 
     # definition of the enum used by everyone in cpp layer
-    common_enum_dir = "../include/simd_ext/templates/cpp"
+    common_enum_dir = "../include/templates/cpp"
     os.makedirs(common_enum_dir, exist_ok=True)
     file_common_enum = open(f"{common_enum_dir}/common.hpp", "w")
     print("#pragma once\n", file=file_common_enum)
@@ -65,7 +65,6 @@ namespace mipp
             print("#if " + isa["gen_define"], file=file_common_enum)
         else:
             print("#elif " + isa["gen_define"], file=file_common_enum)
-        print(f"// uh-oh technically UB", file=file_common_enum)
         print(f"constexpr ISA DEFAULT_ISA = ISA::{isa['name'].upper()};", file=file_common_enum)
     print("#else\n#error \"No ISA defined for cpp wrapper\"\n#endif", file=file_common_enum)
 
@@ -152,7 +151,7 @@ def _cpp_custom_prefix_generator(f, isa_name="", funcs=None):
     if isa_name:
         category = _match_category(f) if f else ""
         if f is None: # common file
-            s += '#include "simd_ext/templates/cpp/common.hpp"\n'
+            s += '#include "templates/cpp/common.hpp"\n'
             s += '#include "interfaces/cpp/common.hpp"\n'
             s += f'#include "simd_ext/{isa_name}/c/common.h"\n'
         
@@ -165,7 +164,7 @@ def _cpp_custom_prefix_generator(f, isa_name="", funcs=None):
                 mask_support = funcs[f]["mask_support"]
             
             if f in set_functions or (mask_support and mask_support.is_any_mask()):
-                s += f'#include "simd_ext/templates/cpp/functions/{category}/{f}.hpp"\n'
+                s += f'#include "templates/cpp/functions/{category}/{f}.hpp"\n'
 
     else: 
         category = _match_category(f)
@@ -418,7 +417,7 @@ def _gen_cpp_generic_templates(include_manager, isa, funcs):
         file = include_manager.get_fd("templates", f)
 
         print("#pragma once\n", file=file)
-        print('#include "simd_ext/templates/cpp/common.hpp"\n', file=file)
+        print('#include "templates/cpp/common.hpp"\n', file=file)
         print("namespace mipp {\n", file=file)
 
         if f in set_functions:

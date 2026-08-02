@@ -32,7 +32,7 @@ def _get_include_path(func, layer):
         elif layer == "cpp":
             return "interfaces/cpp/common.hpp"
         elif layer == "templates":
-            return "simd_ext/templates/cpp/common.hpp"
+            return "templates/cpp/common.hpp"
         elif layer.endswith("_cpp"):
             isa = layer[:-4]
             return f"simd_ext/{isa}/cpp/common.hpp"
@@ -46,7 +46,7 @@ def _get_include_path(func, layer):
     elif layer == "cpp":
         return f"interfaces/cpp/functions/{category}/{include_name}"
     elif layer == "templates":
-        return f"simd_ext/templates/cpp/functions/{category}/{include_name}"
+        return f"templates/cpp/functions/{category}/{include_name}"
     elif layer.endswith("_cpp"):
         isa = layer[:-4]
         return f"simd_ext/{isa}/cpp/functions/{category}/{include_name}"
@@ -208,7 +208,7 @@ def _get_dependencies(func, interfaces, lmul=0, mask_kind="", layer="", mode="fu
     elif layer == "cpp":
         dependencies.add("interfaces/cpp/common.hpp")
     elif layer == "templates":
-        dependencies.add("simd_ext/templates/cpp/common.hpp")
+        dependencies.add("templates/cpp/common.hpp")
     elif layer.endswith("_cpp"):
         isa = layer[:-4]
         dependencies.add(f"simd_ext/{isa}/cpp/common.hpp")
@@ -648,7 +648,7 @@ class IncludeManager:
         elif layer_name == "cpp":
             return f"{self.base_dir}/interfaces/cpp"
         elif layer_name == "templates":
-            return f"{self.base_dir}/simd_ext/templates/cpp"
+            return f"{self.base_dir}/templates/cpp"
         elif layer_name.endswith("_cpp"):
             isa = layer_name[:-4]
             return f"{self.base_dir}/simd_ext/{isa}/cpp"
