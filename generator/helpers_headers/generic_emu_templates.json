@@ -845,7 +845,6 @@
     "cos_f64": {
         "format": "long",
         "code": [
-            "%r<tp>% trigrangemax = %set1<tp>%(1e+14);",
             "%r<tp>% minus_0p5 = %set1<tp>%(-0.5);",
             "%r<tp>% one = %set1<tp>%(1.0);",
             "%r<tp>% two = %set1<tp>%(2.0);",
@@ -887,7 +886,6 @@
             "",
             "\tquadrant = %blend<c:int|b:64>%(quadrant, quadrant_high_i,%cast_k<tp,c:int|b:64>%(small_range_mask));",
             "\treduced_x = %blend<tp>%(reduced_x, result, small_range_mask);",
-            "\tsmall_range_mask = %cmplt<tp>%(%abs<tp>%(original_x), trigrangemax);",
             "}",
             "",
             "x2 = %mul<tp>%(reduced_x, reduced_x);",
@@ -1005,7 +1003,6 @@
     "sin_f64": {
         "format": "long",
         "code": [
-            "%r<tp>% trigrangemax = %set1<tp>%(1e+14);",
             "%r<tp>% trigrangemax2 = %set1<tp>%(15);",
 
             "%r<tp>% m_1_pi = %set1<tp>%(0.318309886183790671537767526745028724);",

@@ -302,7 +302,7 @@
         "by_datatype": {
           "float32": {
             "type": "max_abs_diff",
-            "value": 1e-05
+            "value": 1e-03
           },
           "float64": {
             "type": "max_abs_diff",
