@@ -17,7 +17,7 @@
             "template": "arith_2args"
         },
         {
-            "instr_name": "adds",
+            "instr_name": "add",
             "datatypes": [
                 "int16",
                 "int8",
@@ -892,7 +892,7 @@
             "template": "arith_2args"
         },
         {
-            "instr_name": "subs",
+            "instr_name": "sub",
             "datatypes": [
                 "int16",
                 "int8",

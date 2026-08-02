@@ -1,21 +1,4 @@
 {
-    "exp": [
-        {
-            "datatypes": [
-                "float32"
-            ],
-            "template": "exp_f32",
-            "instr_name": "exp"
-        },
-        {
-            "datatypes": [
-                "float64"
-            ],
-            "template": "exp_f64",
-            "if": "defined(__AVX512DQ__)",
-            "instr_name": "exp"
-        }
-    ],
     "gather": [
         {
             "instr_name": "gather",
@@ -208,23 +191,6 @@
             ],
             "template": "reduce_16",
             "if": "defined(__AVX512BW__)"
-        }
-    ],
-    "log": [
-        {
-            "datatypes": [
-                "float32"
-            ],
-            "template": "log_f32",
-            "instr_name": "log"
-        },
-        {
-            "datatypes": [
-                "float64"
-            ],
-            "template": "log_f64",
-            "if": "defined(__AVX512DQ__)",
-            "instr_name": "log"
         }
     ],
     "scatter": [
