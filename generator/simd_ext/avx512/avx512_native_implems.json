@@ -980,7 +980,13 @@
     ],
     "testz": [
         {
-            "instr_name": "kortestz",
+            "instr_name": "ktestz",
+            "datatypes": "all_float",
+            "template": "testz_2args",
+            "if": "defined(__AVX512DQ__)"
+        },
+        {
+            "instr_name": "ktestz",
             "datatypes": [
                 "int64",
                 "uint64"
@@ -989,22 +995,22 @@
             "if": "defined(__AVX512DQ__)"
         },
         {
-            "instr_name": "kortestz",
+            "instr_name": "ktestz",
             "datatypes": [
                 "int32",
                 "uint32"
             ],
             "template": "testz_2args",
-            "if": "(defined (__AVX512F__) || defined(__MIC__) || defined(__KNCNI__))"
+            "if": "defined(__AVX512DQ__)"
         },
         {
-            "instr_name": "kortestz",
+            "instr_name": "ktestz",
             "datatypes": "all_16bit",
             "template": "testz_2args",
             "if": "defined (__AVX512BW__)"
         },
         {
-            "instr_name": "kortestz",
+            "instr_name": "ktestz",
             "datatypes": "all_8bit",
             "template": "testz_2args",
             "if": "defined (__AVX512BW__)"
