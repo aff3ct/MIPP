@@ -671,6 +671,20 @@
         }
 
     ],
+    "sin": [
+        {
+            "datatypes": [
+                "float32"
+            ],
+            "template_ref": "tpl_generic_emu.sin_f32"
+        },
+        {
+            "datatypes": [
+                "float64"
+            ],
+            "template_ref": "tpl_generic_emu.sin_f64"
+        }
+    ],
     "pow": [
         {
             "datatypes": [
