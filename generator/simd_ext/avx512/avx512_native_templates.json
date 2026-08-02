@@ -19,6 +19,12 @@
             "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r);"
         ]
     },
+    "arith_2args_int": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_var }}(r0.r, r1.r);"
+        ]
+    },
     "arith_2args_msk": {
         "format": "short",
         "code": [

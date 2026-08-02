@@ -2,19 +2,18 @@
     "add": [
         {
             "instr_name": "add",
-            "datatypes": [
-                "float64",
-                "float32",
-                "int32"
-            ],
+            "datatypes": "all_float",
             "template": "arith_2args"
         },
         {
             "instr_name": "add",
             "datatypes": [
-                "int64"
+                "int64",
+                "int32",
+                "uint64",
+                "uint32"
             ],
-            "template": "arith_2args"
+            "template": "arith_2args_int"
         },
         {
             "instr_name": "add",
@@ -24,7 +23,7 @@
                 "uint16",
                 "uint8"
             ],
-            "template": "arith_2args",
+            "template": "arith_2args_int",
             "if": "defined(__AVX512BW__)"
         },
         {
@@ -887,9 +886,11 @@
             "instr_name": "sub",
             "datatypes": [
                 "int64",
-                "int32"
+                "int32",
+                "uint64",
+                "uint32"
             ],
-            "template": "arith_2args"
+            "template": "arith_2args_int"
         },
         {
             "instr_name": "sub",
@@ -899,7 +900,7 @@
                 "uint16",
                 "uint8"
             ],
-            "template": "arith_2args",
+            "template": "arith_2args_int",
             "if": "defined(__AVX512BW__)"
         }
     ],
