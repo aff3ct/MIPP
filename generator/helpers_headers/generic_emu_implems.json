@@ -107,6 +107,14 @@
             "template_ref": "tpl_generic_emu.andnb_k_direct_emu"
         }
     ],
+    "atan": [
+        {
+            "datatypes": [
+                "float32"
+            ],
+            "template_ref": "tpl_generic_emu.atan_f32"
+        }
+    ],
     "blend": [
         {
             "datatypes": [
