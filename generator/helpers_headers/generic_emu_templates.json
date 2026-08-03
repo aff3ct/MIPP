@@ -1174,5 +1174,96 @@
             "%r<tp>% res = %xorb<tp>%(tmp1, tmp2);",
             "return %tomsk<tp>%(res);"
         ]
+    },
+    "cosh_f32": {
+        "format": "long",
+        "code": [
+            "%r<tp>% x = r0;",
+            "%r<tp>% y = %abs<tp>%(x);",
+            "%r<tp>% ey = %exp<tp>%(y);",
+            "%r<tp>% ey_inv = %div<tp>%(%set1<tp>%(1.0f), ey);",
+            "%r<tp>% res = %mul<tp>%(%add<tp>%(ey, ey_inv), %set1<tp>%(0.5f));",
+            "%m<tp>% overflow = %cmpgt<tp>%(y, %set1<tp>%(89.0f));",
+            "%r<tp>% inf = %div<tp>%(%set1<tp>%(1.0f), %set1<tp>%(0.0f));",
+            "res = %blend<tp>%(inf, res, overflow);",
+            "return res;"
+        ]
+    },
+    "cosh_f64": {
+        "format": "long",
+        "code": [
+            "%r<tp>% x = r0;",
+            "%r<tp>% y = %abs<tp>%(x);",
+            "%r<tp>% ey = %exp<tp>%(y);",
+            "%r<tp>% ey_inv = %div<tp>%(%set1<tp>%(1.0), ey);",
+            "%r<tp>% res = %mul<tp>%(%add<tp>%(ey, ey_inv), %set1<tp>%(0.5));",
+            "%m<tp>% overflow = %cmpgt<tp>%(y, %set1<tp>%(710.0));",
+            "%r<tp>% inf = %div<tp>%(%set1<tp>%(1.0), %set1<tp>%(0.0));",
+            "res = %blend<tp>%(inf, res, overflow);",
+            "return res;"
+        ]
+    },
+    "sinh_f32": {
+        "format": "long",
+        "code": [
+            "%r<tp>% x = r0;",
+            "%r<tp>% y = %abs<tp>%(x);",
+            "%r<c:float|b:64>% big_ey = %exp<c:float|b:64>%(%cvt<tp,c:float|b:64>%(y));",
+            "%r<tp>% ey = %cvt<c:float|b:64,tp>%(big_ey);",
+            "%r<tp>% ey_inv = %div<tp>%(%set1<tp>%(1.0f), ey);",
+            "%r<tp>% res = %mul<tp>%(%sub<tp>%(ey, ey_inv), %set1<tp>%(0.5f));",
+            "%m<tp>% overflow = %cmpgt<tp>%(y, %set1<tp>%(89.0f));",
+            "%r<tp>% inf = %div<tp>%(%set1<tp>%(1.0f), %set1<tp>%(0.0f));",
+            "res = %blend<tp>%(inf, res, overflow);",
+            "%r<tp>% sign_mask = %andb<tp>%(x, %set1<tp>%(-0.0f));",
+            "return %xorb<tp>%(res, sign_mask);"
+        ]
+    },
+    "sinh_f64": {
+        "format": "long",
+        "code": [
+            "%r<tp>% x = r0;",
+            "%r<tp>% y = %abs<tp>%(x);",
+            "%r<tp>% ey = %exp<tp>%(y);",
+            "%r<tp>% ey_inv = %div<tp>%(%set1<tp>%(1.0), ey);",
+            "%r<tp>% res = %mul<tp>%(%sub<tp>%(ey, ey_inv), %set1<tp>%(0.5));",
+            "%m<tp>% overflow = %cmpgt<tp>%(y, %set1<tp>%(710.0));",
+            "%r<tp>% inf = %div<tp>%(%set1<tp>%(1.0), %set1<tp>%(0.0));",
+            "res = %blend<tp>%(inf, res, overflow);",
+            "%r<tp>% sign_mask = %andb<tp>%(x, %set1<tp>%(-0.0));",
+            "return %xorb<tp>%(res, sign_mask);"
+        ]
+    },
+    "tanh_f32": {
+        "format": "long",
+        "code": [
+            "%r<tp>% x = r0;",
+            "%r<tp>% y = %abs<tp>%(x);",
+            "%r<tp>% ey = %exp<tp>%(y);",
+            "%r<tp>% ey_inv = %div<tp>%(%set1<tp>%(1.0f), ey);",
+            "%r<tp>% num = %sub<tp>%(ey, ey_inv);",
+            "%r<tp>% den = %add<tp>%(ey, ey_inv);",
+            "%r<tp>% res = %div<tp>%(num, den);",
+            "%m<tp>% sat = %cmpgt<tp>%(y, %set1<tp>%(8.664339742f));",
+            "res = %blend<tp>%(%set1<tp>%(1.0f), res, sat);",
+            "%r<tp>% sign_mask = %andb<tp>%(x, %set1<tp>%(-0.0f));",
+            "return %xorb<tp>%(res, sign_mask);"
+        ]
+    },
+    "tanh_f64": {
+        "format": "long",
+        "code": [
+            "%r<tp>% x = r0;",
+            "%r<tp>% y = %abs<tp>%(x);",
+            "%r<tp>% ey = %exp<tp>%(y);",
+            "%r<tp>% ey_inv = %div<tp>%(%set1<tp>%(1.0), ey);",
+            "%r<tp>% num = %sub<tp>%(ey, ey_inv);",
+            "%r<tp>% den = %add<tp>%(ey, ey_inv);",
+            "%r<tp>% res = %div<tp>%(num, den);",
+            "%m<tp>% sat = %cmpgt<tp>%(y, %set1<tp>%(18.714973875118524));",
+            "res = %blend<tp>%(%set1<tp>%(1.0), res, sat);",
+            "%r<tp>% sign_mask = %andb<tp>%(x, %set1<tp>%(-0.0));",
+            "return %xorb<tp>%(res, sign_mask);"
+        ]
     }
 }

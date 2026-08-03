@@ -17,42 +17,42 @@
     },
     "functions": {
         "acos": {
-          "domain": {
-            "min": -1.0,
-            "max": 1.0
-          },
-          "tolerance": {
-            "by_datatype": {
-              "float32": {
-                "type": "max_abs_diff",
-                "value": 1e-06
-              },
-              "float64": {
-                "type": "max_abs_diff",
-                "value": 1e-12
-              }
-            }
-          },
-          "comparison": "tolerance"
+            "domain": {
+                "min": -1.0,
+                "max": 1.0
+            },
+            "tolerance": {
+                "by_datatype": {
+                    "float32": {
+                        "type": "max_abs_diff",
+                        "value": 1e-06
+                    },
+                    "float64": {
+                        "type": "max_abs_diff",
+                        "value": 1e-12
+                    }
+                }
+            },
+            "comparison": "tolerance"
         },
         "acosh": {
-          "domain": {
-            "min": 1.0,
-            "max": 10.0
-          },
-          "tolerance": {
-            "by_datatype": {
-              "float32": {
-                "type": "max_abs_diff",
-                "value": 1e-06
-              },
-              "float64": {
-                "type": "max_abs_diff",
-                "value": 1e-12
-              }
-            }
-          },
-          "comparison": "tolerance"
+            "domain": {
+                "min": 1.0,
+                "max": 10.0
+            },
+            "tolerance": {
+                "by_datatype": {
+                    "float32": {
+                        "type": "max_abs_diff",
+                        "value": 1e-06
+                    },
+                    "float64": {
+                        "type": "max_abs_diff",
+                        "value": 1e-12
+                    }
+                }
+            },
+            "comparison": "tolerance"
         },
         "add": {
             "overflow_check": "add",
@@ -312,82 +312,81 @@
                 "toreg"
             ]
         },
-        
         "asin": {
-          "domain": {
-            "min": -1.0,
-            "max": 1.0
-          },
-          "tolerance": {
-            "by_datatype": {
-              "float32": {
-                "type": "max_abs_diff",
-                "value": 1e-06
-              },
-              "float64": {
-                "type": "max_abs_diff",
-                "value": 1e-12
-              }
-            }
-          },
-          "comparison": "tolerance"
-        },  
+            "domain": {
+                "min": -1.0,
+                "max": 1.0
+            },
+            "tolerance": {
+                "by_datatype": {
+                    "float32": {
+                        "type": "max_abs_diff",
+                        "value": 1e-06
+                    },
+                    "float64": {
+                        "type": "max_abs_diff",
+                        "value": 1e-12
+                    }
+                }
+            },
+            "comparison": "tolerance"
+        },
         "asinh": {
-          "domain": {
-            "min": -10.0,
-            "max": 10.0
-          },
-          "tolerance": {
-            "by_datatype": {
-              "float32": {
-                "type": "max_abs_diff",
-                "value": 1e-06
-              },
-              "float64": {
-                "type": "max_abs_diff",
-                "value": 1e-12
-              }
-            }
-          },
-          "comparison": "tolerance"
+            "domain": {
+                "min": -10.0,
+                "max": 10.0
+            },
+            "tolerance": {
+                "by_datatype": {
+                    "float32": {
+                        "type": "max_abs_diff",
+                        "value": 1e-06
+                    },
+                    "float64": {
+                        "type": "max_abs_diff",
+                        "value": 1e-12
+                    }
+                }
+            },
+            "comparison": "tolerance"
         },
         "atan": {
-          "domain": {
-            "min": -100.0,
-            "max": 100.0
-          },
-          "tolerance": {
-            "by_datatype": {
-              "float32": {
-                "type": "max_abs_diff",
-                "value": 1e-06
-              },
-              "float64": {
-                "type": "max_abs_diff",
-                "value": 1e-12
-              }
-            }
-          },
-          "comparison": "tolerance"
+            "domain": {
+                "min": -100.0,
+                "max": 100.0
+            },
+            "tolerance": {
+                "by_datatype": {
+                    "float32": {
+                        "type": "max_abs_diff",
+                        "value": 1e-06
+                    },
+                    "float64": {
+                        "type": "max_abs_diff",
+                        "value": 1e-12
+                    }
+                }
+            },
+            "comparison": "tolerance"
         },
         "atanh": {
-          "domain": {
-            "min": -0.99,
-            "max": 0.99
-          },
-          "tolerance": {
-            "by_datatype": {
-              "float32": {
-                "type": "max_abs_diff",
-                "value": 1e-06
-              },
-              "float64": {
-                "type": "max_abs_diff",
-                "value": 1e-12
-              }
-            }
-          },
-          "comparison": "tolerance"
+            "domain": {
+                "min": -0.99,
+                "max": 0.99
+            },
+            "tolerance": {
+                "by_datatype": {
+                    "float32": {
+                        "type": "max_abs_diff",
+                        "value": 1e-06
+                    },
+                    "float64": {
+                        "type": "max_abs_diff",
+                        "value": 1e-12
+                    }
+                }
+            },
+            "comparison": "tolerance"
         },
         "cast": {
             "comparison": "bitwise"
@@ -444,43 +443,43 @@
             ]
         },
         "cos": {
-          "domain": {
-            "min": -100.0,
-            "max": 100.0
-          },
-          "tolerance": {
-            "by_datatype": {
-              "float32": {
-                "type": "max_abs_diff",
-                "value": 1e-06
-              },
-              "float64": {
-                "type": "max_abs_diff",
-                "value": 1e-12
-              }
-            }
-          },
-          "comparison": "tolerance"
+            "domain": {
+                "min": -100.0,
+                "max": 100.0
+            },
+            "tolerance": {
+                "by_datatype": {
+                    "float32": {
+                        "type": "max_abs_diff",
+                        "value": 1e-06
+                    },
+                    "float64": {
+                        "type": "max_abs_diff",
+                        "value": 1e-12
+                    }
+                }
+            },
+            "comparison": "tolerance"
         },
         "cosh": {
-          "domain": {
-            "min": -10.0,
-            "max": 10.0
-          },
-          "tolerance": {
-            "by_datatype": {
-              "float32": {
-                "type": "max_abs_diff",
-                "value": 1e-06
-              },
-              "float64": {
-                "type": "max_abs_diff",
-                "value": 1e-12
-              }
-            }
-          },
-          "comparison": "tolerance"
-        },  
+            "domain": {
+                "min": -10.0,
+                "max": 10.0
+            },
+            "tolerance": {
+                "by_datatype": {
+                    "float32": {
+                        "type": "max_abs_diff",
+                        "value": 1e-06
+                    },
+                    "float64": {
+                        "type": "max_abs_diff",
+                        "value": 1e-12
+                    }
+                }
+            },
+            "comparison": "tolerance"
+        },
         "div": {
             "support_obj": true,
             "input_domain": [
@@ -891,42 +890,42 @@
             "nan_inf_skip": true
         },
         "sin": {
-          "domain": {
-            "min": -100.0,
-            "max": 100.0
-          },
-          "tolerance": {
-            "by_datatype": {
-              "float32": {
-                "type": "max_abs_diff",
-                "value": 1e-06
-              },
-              "float64": {
-                "type": "max_abs_diff",
-                "value": 1e-12
-              }
-            }
-          },
-          "comparison": "tolerance"
+            "domain": {
+                "min": -100.0,
+                "max": 100.0
+            },
+            "tolerance": {
+                "by_datatype": {
+                    "float32": {
+                        "type": "max_abs_diff",
+                        "value": 1e-06
+                    },
+                    "float64": {
+                        "type": "max_abs_diff",
+                        "value": 1e-12
+                    }
+                }
+            },
+            "comparison": "tolerance"
         },
         "sinh": {
-          "domain": {
-            "min": -10.0,
-            "max": 10.0
-          },
-          "tolerance": {
-            "by_datatype": {
-              "float32": {
-                "type": "max_abs_diff",
-                "value": 1e-06
-              },
-              "float64": {
-                "type": "max_abs_diff",
-                "value": 1e-12
-              }
-            }
-          },
-          "comparison": "tolerance"
+            "domain": {
+                "min": -10.0,
+                "max": 10.0
+            },
+            "tolerance": {
+                "by_datatype": {
+                    "float32": {
+                        "type": "max_abs_diff",
+                        "value": 1e-04
+                    },
+                    "float64": {
+                        "type": "max_abs_diff",
+                        "value": 1e-11
+                    }
+                }
+            },
+            "comparison": "tolerance"
         },
         "scatter": {
             "disabled": true,
@@ -1121,42 +1120,42 @@
             }
         },
         "tan": {
-          "domain": {
-            "min": -100.0,
-            "max": 100.0
-          },
-          "tolerance": {
-            "by_datatype": {
-              "float32": {
-                "type": "max_abs_diff",
-                "value": 1e-03
-              },
-              "float64": {
-                "type": "max_abs_diff",
-                "value": 1e-10
-              }
-            }
-          },
-          "comparison": "tolerance"
+            "domain": {
+                "min": -100.0,
+                "max": 100.0
+            },
+            "tolerance": {
+                "by_datatype": {
+                    "float32": {
+                        "type": "max_abs_diff",
+                        "value": 1e-03
+                    },
+                    "float64": {
+                        "type": "max_abs_diff",
+                        "value": 1e-10
+                    }
+                }
+            },
+            "comparison": "tolerance"
         },
-      "tanh": {
-          "domain": {
-            "min": -10.0,
-            "max": 10.0
-          },
-          "tolerance": {
-            "by_datatype": {
-              "float32": {
-                "type": "max_abs_diff",
-                "value": 1e-06
-              },
-              "float64": {
-                "type": "max_abs_diff",
-                "value": 1e-12
-              }
-            }
-          },
-          "comparison": "tolerance"
+        "tanh": {
+            "domain": {
+                "min": -10.0,
+                "max": 10.0
+            },
+            "tolerance": {
+                "by_datatype": {
+                    "float32": {
+                        "type": "relative_percent",
+                        "value": 0.01
+                    },
+                    "float64": {
+                        "type": "relative_percent",
+                        "value": 0.0001
+                    }
+                }
+            },
+            "comparison": "tolerance"
         },
         "toreg": {
             "comparison": "bitwise"

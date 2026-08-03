@@ -531,6 +531,20 @@
             "template_ref": "tpl_generic_emu.cos_f64"
         }
     ],
+    "cosh": [
+        {
+            "datatypes": [
+                "float32"
+            ],
+            "template_ref": "tpl_generic_emu.cosh_f32"
+        },
+        {
+            "datatypes": [
+                "float64"
+            ],
+            "template_ref": "tpl_generic_emu.cosh_f64"
+        }
+    ],
     "cvt": [
         {
             "instr_name": "",
@@ -1226,6 +1240,20 @@
             "template_ref": "tpl_generic_emu.sin_f64"
         }
     ],
+    "sinh": [
+        {
+            "datatypes": [
+                "float32"
+            ],
+            "template_ref": "tpl_generic_emu.sinh_f32"
+        },
+        {
+            "datatypes": [
+                "float64"
+            ],
+            "template_ref": "tpl_generic_emu.sinh_f64"
+        }
+    ],
     "sub": [
         {
             "instr_name": "sub",
@@ -1252,6 +1280,20 @@
         {
             "datatypes": "all_float",
             "template_ref": "tpl_generic_emu.tan"
+        }
+    ],
+    "tanh": [
+        {
+            "datatypes": [
+                "float32"
+            ],
+            "template_ref": "tpl_generic_emu.tanh_f32"
+        },
+        {
+            "datatypes": [
+                "float64"
+            ],
+            "template_ref": "tpl_generic_emu.tanh_f64"
         }
     ],
     "testz": [
