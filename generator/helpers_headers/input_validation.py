@@ -716,3 +716,99 @@ def audit_scalar_implems_dead_code(scalar_implems, interfaces):
         for func in dead:
             print(Fore.YELLOW + f"  - Function '{func}' is implemented but does not exist in registry_interfaces.json.", file=sys.stderr)
 
+
+def audit_json_files_structure(gen_dir):
+    if "json-structure" not in ACTIVE_AUDITS:
+        return
+
+    unsorted_files = []
+    empty_implem_files = []
+
+    for root, dirs, files in os.walk(gen_dir):
+        if ".venv" in root or ".git" in root or "build" in root or "schemas" in root:
+            continue
+        for f in files:
+            if f.endswith(".json"):
+                path = os.path.join(root, f)
+                rel_path = os.path.relpath(path, gen_dir)
+                try:
+                    with open(path, "r", encoding="utf-8") as fp:
+                        data = json.load(fp)
+                except Exception as e:
+                    print(Fore.YELLOW + f"Warning: Failed to parse JSON file '{rel_path}': {e}", file=sys.stderr)
+                    continue
+
+                if isinstance(data, dict):
+                    keys = list(data.keys())
+                    if keys != sorted(keys):
+                        unsorted_files.append(rel_path)
+
+                if "implems" in f and isinstance(data, dict):
+                    empty_keys = [k for k, v in data.items() if isinstance(v, list) and len(v) == 0]
+                    if empty_keys:
+                        empty_implem_files.append((rel_path, empty_keys))
+
+    if unsorted_files:
+        print(Fore.YELLOW + f"Warning: JSON audit found {len(unsorted_files)} file(s) with unsorted top-level keys:", file=sys.stderr)
+        for rel_path in sorted(unsorted_files):
+            print(Fore.YELLOW + f"  - '{rel_path}': top-level keys are not sorted lexicographically.", file=sys.stderr)
+
+    if empty_implem_files:
+        print(Fore.YELLOW + f"Warning: JSON audit found {len(empty_implem_files)} implementation file(s) containing empty list entries:", file=sys.stderr)
+        for rel_path, empty_keys in sorted(empty_implem_files, key=lambda x: x[0]):
+            print(Fore.YELLOW + f"  - '{rel_path}': empty function lists for {', '.join(empty_keys)}.", file=sys.stderr)
+
+
+def audit_generic_emu_dead_code(data_implems, isas_dict, implems_dict):
+    if "dead-code" not in ACTIVE_AUDITS:
+        return
+
+    from tools import resolve_datatypes
+
+    dead_choices = []
+    for sect in ["implems_generic_emu", "implems_mask_generic_emu", "implems_horiz_lmul_generic_emu"]:
+        if sect not in data_implems:
+            continue
+        for func_name, choices in data_implems[sect].items():
+            for choice_idx, choice in enumerate(choices):
+                pref_isas = choice.get("preferred_simd_ext", [])
+                target_isas = [isa_name for isa_name in pref_isas if isa_name in isas_dict] if pref_isas else list(isas_dict.keys())
+                
+                dts = choice.get("datatypes", [])
+                if isinstance(dts, str):
+                    dts = resolve_datatypes(dts)
+                
+                unreachable_dts = []
+                for dt in dts:
+                    is_reachable_for_any_isa = False
+                    for isa_name in target_isas:
+                        native_implems, _ = implems_dict.get(isa_name, (None, None))
+                        has_native = False
+                        if native_implems and func_name in native_implems:
+                            for n_choice in native_implems[func_name]:
+                                n_dts = n_choice.get("datatypes", [])
+                                if isinstance(n_dts, str):
+                                    n_dts = resolve_datatypes(n_dts)
+                                if dt in n_dts:
+                                    has_native = True
+                                    break
+                        if not has_native:
+                            is_reachable_for_any_isa = True
+                            break
+                    if not is_reachable_for_any_isa:
+                        unreachable_dts.append(dt)
+                
+                if unreachable_dts and len(unreachable_dts) == len(dts):
+                    template_ref = choice.get("template_ref", choice.get("template", f"choice #{choice_idx}"))
+                    if isinstance(template_ref, dict):
+                        template_ref = f"choice #{choice_idx}"
+                    dead_choices.append((func_name, template_ref, pref_isas, len(unreachable_dts)))
+
+    if dead_choices:
+        print(Fore.YELLOW + "Warning: Found dead (unreachable) emulation choices in generic emulation files:", file=sys.stderr)
+        for func_name, template_ref, pref_isas, dt_count in dead_choices:
+            isa_str = f" for preferred ISA(s) {pref_isas}" if pref_isas else ""
+            print(Fore.YELLOW + f"  - Function '{func_name}' template '{template_ref}'{isa_str} is dead code (all {dt_count} datatypes are already natively implemented).", file=sys.stderr)
+
+
+

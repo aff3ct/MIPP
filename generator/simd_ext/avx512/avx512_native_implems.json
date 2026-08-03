@@ -2,29 +2,28 @@
     "add": [
         {
             "instr_name": "add",
-            "datatypes": [
-                "float64",
-                "float32",
-                "int32"
-            ],
+            "datatypes": "all_float",
             "template": "arith_2args"
         },
         {
             "instr_name": "add",
             "datatypes": [
-                "int64"
+                "int64",
+                "int32",
+                "uint64",
+                "uint32"
             ],
-            "template": "arith_2args"
+            "template": "arith_2args_int"
         },
         {
-            "instr_name": "adds",
+            "instr_name": "add",
             "datatypes": [
                 "int16",
                 "int8",
                 "uint16",
                 "uint8"
             ],
-            "template": "arith_2args",
+            "template": "arith_2args_int",
             "if": "defined(__AVX512BW__)"
         },
         {
@@ -209,7 +208,7 @@
     "cast_k": [
         {
             "instr_name": "cast",
-            "datatypes": "all_datatypes_cart_prod",
+            "datatypes": "all_datatypes_same_size",
             "template": "cast_k"
         }
     ],
@@ -381,6 +380,38 @@
             "if": "defined(__AVX512BW__)"
         }
     ],
+    "cvt": [
+        {
+            "instr_name": "cvttps_epi32",
+            "datatypes": [
+                "float32,int32"
+            ],
+            "template": "cvt"
+        },
+        {
+            "instr_name": "cvtepi32_ps",
+            "datatypes": [
+                "int32,float32"
+            ],
+            "template": "cvt"
+        },
+        {
+            "instr_name": "cvttpd_epi64",
+            "datatypes": [
+                "float64,int64"
+            ],
+            "template": "cvt",
+            "if": "defined(__AVX512DQ__)"
+        },
+        {
+            "instr_name": "cvtepi64_pd",
+            "datatypes": [
+                "int64,float64"
+            ],
+            "template": "cvt",
+            "if": "defined(__AVX512DQ__)"
+        }
+    ],
     "div": [
         {
             "instr_name": "div",
@@ -529,6 +560,27 @@
             "instr_name": "loadu",
             "datatypes": "all_datatypes",
             "template": "load"
+        }
+    ],
+    "lshift": [
+        {
+            "instr_name": "slli",
+            "datatypes": [
+                "int32",
+                "int64",
+                "uint32",
+                "uint64"
+            ],
+            "template": "sxl"
+        },
+        {
+            "instr_name": "slli",
+            "datatypes": [
+                "int16",
+                "uint16"
+            ],
+            "template": "sxl",
+            "if": "defined(__AVX512BW__)"
         }
     ],
     "max": [
@@ -709,6 +761,27 @@
             "if": "defined(__AVX512F__) && !defined(__MIC__) && !defined(__KNCNI__)"
         }
     ],
+    "rshift": [
+        {
+            "instr_name": "srli",
+            "datatypes": [
+                "int32",
+                "int64",
+                "uint32",
+                "uint64"
+            ],
+            "template": "sxl"
+        },
+        {
+            "instr_name": "srli",
+            "datatypes": [
+                "int16",
+                "uint16"
+            ],
+            "template": "sxl",
+            "if": "defined(__AVX512BW__)"
+        }
+    ],
     "rsqrt": [
         {
             "instr_name": "rsqrt14",
@@ -790,6 +863,15 @@
             "instr_name": "setzero",
             "datatypes": "all_datatypes",
             "template": "set0"
+        }
+    ],
+    "set0_k": [
+        {
+            "instr_name": "setzero",
+            "datatypes": "all_datatypes",
+            "template": "set0_k",
+            "skip_audit_level": true,
+            "skip_audit_level_reason": "assigns zero to native mask wrapper without hardware intrinsics"
         }
     ],
     "set1": [
@@ -878,25 +960,33 @@
             "instr_name": "sub",
             "datatypes": [
                 "int64",
-                "int32"
+                "int32",
+                "uint64",
+                "uint32"
             ],
-            "template": "arith_2args"
+            "template": "arith_2args_int"
         },
         {
-            "instr_name": "subs",
+            "instr_name": "sub",
             "datatypes": [
                 "int16",
                 "int8",
                 "uint16",
                 "uint8"
             ],
-            "template": "arith_2args",
+            "template": "arith_2args_int",
             "if": "defined(__AVX512BW__)"
         }
     ],
     "testz": [
         {
-            "instr_name": "kortestz",
+            "instr_name": "ktestz",
+            "datatypes": "all_float",
+            "template": "testz_2args",
+            "if": "defined(__AVX512DQ__)"
+        },
+        {
+            "instr_name": "ktestz",
             "datatypes": [
                 "int64",
                 "uint64"
@@ -905,22 +995,22 @@
             "if": "defined(__AVX512DQ__)"
         },
         {
-            "instr_name": "kortestz",
+            "instr_name": "ktestz",
             "datatypes": [
                 "int32",
                 "uint32"
             ],
             "template": "testz_2args",
-            "if": "(defined (__AVX512F__) || defined(__MIC__) || defined(__KNCNI__))"
+            "if": "defined(__AVX512DQ__)"
         },
         {
-            "instr_name": "kortestz",
+            "instr_name": "ktestz",
             "datatypes": "all_16bit",
             "template": "testz_2args",
             "if": "defined (__AVX512BW__)"
         },
         {
-            "instr_name": "kortestz",
+            "instr_name": "ktestz",
             "datatypes": "all_8bit",
             "template": "testz_2args",
             "if": "defined (__AVX512BW__)"
@@ -1032,15 +1122,6 @@
             "datatypes": "all_8bit",
             "template": "bitwise_2args",
             "if": "defined(__AVX512BW__)"
-        }
-    ],
-    "set0_k": [
-        {
-            "instr_name": "setzero",
-            "datatypes": "all_datatypes",
-            "template": "set0_k",
-            "skip_audit_level": true,
-            "skip_audit_level_reason": "assigns zero to native mask wrapper without hardware intrinsics"
         }
     ]
 }

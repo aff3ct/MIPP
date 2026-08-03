@@ -1,105 +1,105 @@
 {
-  "reinterpret": [
-    "cast",
-    "cast_k",
-    "toreg",
-    "tomsk"
-  ],
-  "load": [
-    "load",
-    "loadu",
-    "set",
-    "set_k",
-    "set1",
-    "set1_k",
-    "set0",
-    "set0_k",
-    "gather"
-  ],
-  "store": [
-    "store",
-    "storeu",
-    "get",
-    "get_k",
-    "getfirst",
-    "scatter"
-  ],
-  "arithmetic": [
-    "add",
-    "adds",
-    "sub",
-    "subs",
-    "mul",
-    "div",
-    "div2",
-    "div4",
-    "fmadd",
-    "fmsub",
-    "fnmadd",
-    "fnmsub"
-  ],
-  "comparison": [
-    "cmpeq",
-    "cmpneq",
-    "cmple",
-    "cmplt",
-    "cmpge",
-    "cmpgt"
-  ],
-  "math": [
-    "sqrt",
-    "rsqrt",
-    "round",
-    "abs",
-    "trunc",
-    "exp",
-    "log",
-    "cos",
-    "sin",
-    "tan",
-    "acos",
-    "asin",
-    "atan",
-    "cosh",
-    "sinh",
-    "tanh",
-    "acosh",
-    "asinh",
-    "atanh",
-    "pow",
-    "pow2"
-  ],
-  "logic": [
-    "andb",
-    "andb_k",
-    "andnb",
-    "andnb_k",
-    "orb",
-    "orb_k",
-    "xorb",
-    "xorb_k",
-    "msb",
-    "notb",
-    "notb_k",
-    "lshift",
-    "rshift"
-  ],
-  "reduction": [
-    "hadd",
-    "hadds",
-    "hmul",
-    "hmin",
-    "hmax",
-    "testz",
-    "testz_2"
-  ],
-  "selection": [
-    "blend",
-    "min",
-    "max"
-  ],
-  "converts": [
-    "cvt",
-    "wcvt"
-  ]
+    "arithmetic": [
+        "add",
+        "adds",
+        "sub",
+        "subs",
+        "mul",
+        "div",
+        "div2",
+        "div4",
+        "fmadd",
+        "fmsub",
+        "fnmadd",
+        "fnmsub"
+    ],
+    "comparison": [
+        "cmpeq",
+        "cmpneq",
+        "cmple",
+        "cmplt",
+        "cmpge",
+        "cmpgt"
+    ],
+    "converts": [
+        "cvt",
+        "wcvt"
+    ],
+    "load": [
+        "load",
+        "loadu",
+        "set",
+        "set_k",
+        "set1",
+        "set1_k",
+        "set0",
+        "set0_k",
+        "gather"
+    ],
+    "logic": [
+        "andb",
+        "andb_k",
+        "andnb",
+        "andnb_k",
+        "orb",
+        "orb_k",
+        "xorb",
+        "xorb_k",
+        "msb",
+        "notb",
+        "notb_k",
+        "lshift",
+        "rshift"
+    ],
+    "math": [
+        "abs",
+        "acos",
+        "acosh",
+        "asin",
+        "asinh",
+        "atan",
+        "atanh",
+        "cos",
+        "cosh",
+        "exp",
+        "log",
+        "pow",
+        "pow2",
+        "round",
+        "rsqrt",
+        "sin",
+        "sinh",
+        "sqrt",
+        "tan",
+        "tanh",
+        "trunc"
+    ],
+    "reduction": [
+        "hadd",
+        "hadds",
+        "hmul",
+        "hmin",
+        "hmax",
+        "testz",
+        "testz_2"
+    ],
+    "reinterpret": [
+        "cast",
+        "cast_k",
+        "toreg",
+        "tomsk"
+    ],
+    "selection": [
+        "blend",
+        "min",
+        "max"
+    ],
+    "store": [
+        "store",
+        "storeu",
+        "get",
+        "get_k",
+        "getfirst",
+        "scatter"
+    ]
 }

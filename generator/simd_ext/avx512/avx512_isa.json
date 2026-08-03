@@ -1,40 +1,4 @@
 {
-    "name": "avx512",
-    "prefix": "_mm512",
-    "size": 512,
-    "hw_mask": true,
-    "hw_mask_requires_toreg": true,
-    "hw_mask_is_bitfield": true,
-    "define": "defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)",
-    "mipp_definitions": [
-        "#define MIPP_INSTR_VERSION 1",
-        "#define MIPP_64BIT",
-        "#ifdef __AVX512BW__",
-        "\t#define MIPP_BW",
-        "#endif",
-        "#ifdef __AVX512VBMI2__",
-        "\t#define MIPP_BMI2",
-        "#endif",
-        "#ifdef __FMA__",
-        "\t#define MIPP_FMA",
-        "#endif"
-    ],
-    "sub_isa": "avx",
-    "header_template": [
-        "#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX512_H_",
-        "#define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX512_H_",
-        "#include <immintrin.h>",
-        "#include <simd_ext/avx/avx_common.h> // ldiv2 support"
-    ],
-    "hw_lmul": [],
-    "sw_lmul": [
-        1,
-        2,
-        4,
-        8,
-        -2
-    ],
-    "sw_ldiv_type": "sub_isa",
     "datatypes": {
         "float64": {
             "data_ext": "pd",
@@ -156,5 +120,41 @@
                 "data_ext_var": "epi8"
             }
         }
-    }
+    },
+    "define": "defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)",
+    "header_template": [
+        "#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX512_H_",
+        "#define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX512_H_",
+        "#include <immintrin.h>",
+        "#include <simd_ext/avx/c/common.h> // ldiv2 support"
+    ],
+    "hw_lmul": [],
+    "hw_mask": true,
+    "hw_mask_is_bitfield": true,
+    "hw_mask_requires_toreg": true,
+    "mipp_definitions": [
+        "#define MIPP_INSTR_VERSION 1",
+        "#define MIPP_64BIT",
+        "#ifdef __AVX512BW__",
+        "\t#define MIPP_BW",
+        "#endif",
+        "#ifdef __AVX512VBMI2__",
+        "\t#define MIPP_BMI2",
+        "#endif",
+        "#ifdef __FMA__",
+        "\t#define MIPP_FMA",
+        "#endif"
+    ],
+    "name": "avx512",
+    "prefix": "_mm512",
+    "size": 512,
+    "sub_isa": "avx",
+    "sw_ldiv_type": "sub_isa",
+    "sw_lmul": [
+        1,
+        2,
+        4,
+        8,
+        -2
+    ]
 }

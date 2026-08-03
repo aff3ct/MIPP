@@ -3,6 +3,14 @@
         "format": "short",
         "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r);"
     },
+    "arith_3args_acc": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r2.r, r0.r, r1.r);"
+    },
+    "arith_3args_acc_neg": {
+        "format": "short",
+        "code": "{{ isa.prefix }}negq_{{ isa_dt_par.data_ext }}({{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r2.r, r0.r, r1.r));"
+    },
     "blend": {
         "format": "short",
         "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(m0.m, r0.r, r1.r);"
@@ -14,6 +22,30 @@
     "cast_k": {
         "format": "short",
         "code": "{% if isa_dt_par.data_ext_msk != isa_dt_ret.data_ext_msk -%}{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_ret.data_ext_msk }}_{{ isa_dt_par.data_ext_msk }}(m0.m);{% else -%} m0.m;{% endif %}"
+    },
+    "div2_float": {
+        "format": "short",
+        "code": "{{ isa.prefix }}mulq_n_{{ isa_dt_par.data_ext }}(r0.r, {% if isa_dt_par.data_ext == 'f64' -%}0.5{% else -%}0.5f{% endif %});"
+    },
+    "div2_int": {
+        "format": "short",
+        "code": "{{ isa.prefix }}shrq_n_{{ isa_dt_par.data_ext }}(r0.r, 1);"
+    },
+    "div4_float": {
+        "format": "short",
+        "code": "{{ isa.prefix }}mulq_n_{{ isa_dt_par.data_ext }}(r0.r, {% if isa_dt_par.data_ext == 'f64' -%}0.25{% else -%}0.25f{% endif %});"
+    },
+    "div4_int": {
+        "format": "short",
+        "code": "{{ isa.prefix }}shrq_n_{{ isa_dt_par.data_ext }}(r0.r, 2);"
+    },
+    "getfirst": {
+        "format": "long",
+        "code": "return {{ isa.prefix }}getq_lane_{{ isa_dt_par.data_ext }}(r0.r, 0);"
+    },
+    "hreduce": {
+        "format": "long",
+        "code": "return {{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r);"
     },
     "load": {
         "format": "short",
@@ -51,38 +83,6 @@
         "format": "short",
         "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext_msk }}(m1.m, m0.m);"
     },
-    "round_float": {
-        "format": "short",
-        "code": "{{ isa.prefix }}rndnq_{{ isa_dt_par.data_ext }}(r0.r);"
-    },
-    "rsqrt": {
-        "format": "short",
-        "code": "{{ isa.prefix }}rsqrteq_{{ isa_dt_par.data_ext }}(r0.r);"
-    },
-    "set1": {
-        "format": "short",
-        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(v0);"
-    },
-    "sqrt": {
-        "format": "short",
-        "code": "{{ isa.prefix }}sqrtq_{{ isa_dt_par.data_ext }}(r0.r);"
-    },
-    "store": {
-        "format": "short",
-        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(p0, r0.r);"
-    },
-    "tomsk": {
-        "format": "short",
-        "code": "{% if isa_dt_par.data_ext != isa_dt_ret.data_ext_msk -%}{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_ret.data_ext_msk }}_{{ isa_dt_par.data_ext }}(r0.r);{% else -%} r0.r;{% endif %}"
-    },
-    "toreg": {
-        "format": "short",
-        "code": "{% if isa_dt_par.data_ext_msk != isa_dt_ret.data_ext -%}{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_ret.data_ext }}_{{ isa_dt_par.data_ext_msk }}(m0.m);{% else -%} m0.m;{% endif %}"
-    },
-    "getfirst": {
-        "format": "long",
-        "code": "return {{ isa.prefix }}getq_lane_{{ isa_dt_par.data_ext }}(r0.r, 0);"
-    },
     "notb": {
         "format": "short",
         "code": "{{ isa.prefix }}mvnq_{{ isa_dt_par.data_ext }}(r0.r);"
@@ -109,6 +109,14 @@
             "return %cast_k<c:uint|b:32,tp>%(resi);"
         ]
     },
+    "round_float": {
+        "format": "short",
+        "code": "{{ isa.prefix }}rndnq_{{ isa_dt_par.data_ext }}(r0.r);"
+    },
+    "rsqrt": {
+        "format": "short",
+        "code": "{{ isa.prefix }}rsqrteq_{{ isa_dt_par.data_ext }}(r0.r);"
+    },
     "set0": {
         "format": "short",
         "code": "{{ isa.prefix }}dupq_n_{{ isa_dt_par.data_ext }}({% if isa_dt_par.data_ext == 'f64' -%}0.0{% elif isa_dt_par.data_ext == 'f32' -%}0.0f{% else -%}0{% endif %});"
@@ -117,40 +125,32 @@
         "format": "short",
         "code": "{{ isa.prefix }}dupq_n_{{ isa_dt_par.data_ext_msk }}(0);"
     },
+    "set1": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(v0);"
+    },
     "set1_k": {
         "format": "short",
         "code": "{{ isa.prefix }}dupq_n_{{ isa_dt_par.data_ext_msk }}(v0 ? ({% if isa_dt_par.data_ext_msk == 'u64' -%}~0ULL{% elif isa_dt_par.data_ext_msk == 'u32' -%}~0U{% elif isa_dt_par.data_ext_msk == 'u16' -%}(uint16_t)~0U{% else -%}0xFF{% endif %}) : 0);"
-    },
-    "arith_3args_acc": {
-        "format": "short",
-        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r2.r, r0.r, r1.r);"
-    },
-    "arith_3args_acc_neg": {
-        "format": "short",
-        "code": "{{ isa.prefix }}negq_{{ isa_dt_par.data_ext }}({{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r2.r, r0.r, r1.r));"
-    },
-    "div2_float": {
-        "format": "short",
-        "code": "{{ isa.prefix }}mulq_n_{{ isa_dt_par.data_ext }}(r0.r, {% if isa_dt_par.data_ext == 'f64' -%}0.5{% else -%}0.5f{% endif %});"
-    },
-    "div2_int": {
-        "format": "short",
-        "code": "{{ isa.prefix }}shrq_n_{{ isa_dt_par.data_ext }}(r0.r, 1);"
-    },
-    "div4_float": {
-        "format": "short",
-        "code": "{{ isa.prefix }}mulq_n_{{ isa_dt_par.data_ext }}(r0.r, {% if isa_dt_par.data_ext == 'f64' -%}0.25{% else -%}0.25f{% endif %});"
-    },
-    "div4_int": {
-        "format": "short",
-        "code": "{{ isa.prefix }}shrq_n_{{ isa_dt_par.data_ext }}(r0.r, 2);"
     },
     "shift_var": {
         "format": "short",
         "code": "{% if instr_name == 'shlq' -%}{{ isa.prefix }}shlq_{{ isa_dt_par.data_ext }}(r0.r, {{ isa.prefix }}dupq_n_s{% if isa_dt_par.data_ext in ['s64','u64','f64'] %}64{% elif isa_dt_par.data_ext in ['s32','u32','f32'] %}32{% elif isa_dt_par.data_ext in ['s16','u16'] %}16{% else %}8{% endif %}(v0));{% else -%}{{ isa.prefix }}shlq_{{ isa_dt_par.data_ext }}(r0.r, {{ isa.prefix }}dupq_n_s{% if isa_dt_par.data_ext in ['s64','u64','f64'] %}64{% elif isa_dt_par.data_ext in ['s32','u32','f32'] %}32{% elif isa_dt_par.data_ext in ['s16','u16'] %}16{% else %}8{% endif %}(-v0));{% endif %}"
     },
-    "hreduce": {
-        "format": "long",
-        "code": "return {{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r);"
+    "sqrt": {
+        "format": "short",
+        "code": "{{ isa.prefix }}sqrtq_{{ isa_dt_par.data_ext }}(r0.r);"
+    },
+    "store": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(p0, r0.r);"
+    },
+    "tomsk": {
+        "format": "short",
+        "code": "{% if isa_dt_par.data_ext != isa_dt_ret.data_ext_msk -%}{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_ret.data_ext_msk }}_{{ isa_dt_par.data_ext }}(r0.r);{% else -%} r0.r;{% endif %}"
+    },
+    "toreg": {
+        "format": "short",
+        "code": "{% if isa_dt_par.data_ext_msk != isa_dt_ret.data_ext -%}{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_ret.data_ext }}_{{ isa_dt_par.data_ext_msk }}(m0.m);{% else -%} m0.m;{% endif %}"
     }
 }

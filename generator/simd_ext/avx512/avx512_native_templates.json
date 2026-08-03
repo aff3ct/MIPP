@@ -1,4 +1,12 @@
 {
+    "andb_k_emu": {
+        "format": "long",
+        "code": [
+            "%m<tp>% ret; ",
+            "ret.m = m0.m & m1.m;",
+            "return ret;"
+        ]
+    },
     "arith_1arg": {
         "format": "short",
         "code": [
@@ -9,6 +17,12 @@
         "format": "short",
         "code": [
             "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r);"
+        ]
+    },
+    "arith_2args_int": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_var }}(r0.r, r1.r);"
         ]
     },
     "arith_2args_msk": {
@@ -23,7 +37,6 @@
             "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, r2.r);"
         ]
     },
-
     "bitwise_1arg": {
         "format": "short",
         "code": [
@@ -94,6 +107,12 @@
         "format": "short",
         "code": [
             "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(r0.r, r1.r, _CMP_NEQ_OQ);"
+        ]
+    },
+    "cvt": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}_{{ instr_name }}(r0.r);"
         ]
     },
     "gather": {
@@ -248,6 +267,14 @@
             "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}();"
         ]
     },
+    "set0_k": {
+        "format": "long",
+        "code": [
+            "%m<tp>% m;",
+            "m.m = 0;",
+            "return m;"
+        ]
+    },
     "set1": {
         "format": "short",
         "code": [
@@ -264,6 +291,12 @@
         "format": "short",
         "code": [
             "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext_var }}(({{ isa_dt_par.to_ptr }}*) p0, m0.m, r0.r);"
+        ]
+    },
+    "sxl": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_var }}(r0.r, v0);"
         ]
     },
     "testz_1arg": {
@@ -285,22 +318,6 @@
             "%r<tr>% res;",
             "res.r = {{ isa.prefix }}_{{ instr_name }}{{ isa_dt_par.data_ext }}_{{ isa_dt_ret.data_ext_var }}({{ isa.prefix }}_cast{{ isa_dt_par.data_ext_logi }}_si256(r0.r));",
             "return res;"
-        ]
-    },
-    "andb_k_emu": {
-        "format": "long",
-        "code": [
-            "%m<tp>% ret; ",
-            "ret.m = m0.m & m1.m;",
-            "return ret;"
-        ]
-    },
-    "set0_k": {
-        "format": "long",
-        "code": [
-            "%m<tp>% m;",
-            "m.m = 0;",
-            "return m;"
         ]
     }
 }

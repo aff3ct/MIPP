@@ -579,5 +579,5 @@ typedef double float64_t;
     print(j2_template.render(), file=file_common)
     
     include_manager.resolve_all_dependencies(scalar_isa["name"], copy_interfaces)
-    include_manager.create_glue_file(scalar_isa["name"], "../include/scalar/mipp_impl_scalar_gen.h")
+    include_manager.create_glue_file(scalar_isa["name"], "mipp_scalar.h")
     include_manager.close_layer_fds(scalar_isa["name"])

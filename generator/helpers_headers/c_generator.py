@@ -592,5 +592,5 @@ def generate_c_layer(isa, include_manager, native_implems, emu_implems):
 
     # 5. Resolve dependencies and create glue file
     include_manager.resolve_all_dependencies(isa["name"], copy_interfaces)
-    include_manager.create_glue_file(isa["name"], f"../include/{isa['name']}/mipp_impl_{isa['name']}_gen.h")
+    include_manager.create_glue_file(isa["name"], f"mipp_{isa['name']}.h")
     include_manager.close_layer_fds(isa["name"])

@@ -1,44 +1,4 @@
 {
-    "name": "rvv",
-    "prefix": "__riscv",
-    "define": "defined(__riscv_v_intrinsic)",
-    "mipp_definitions": [
-        "#define MIPP_64BIT",
-        "#define MIPP_BW"
-    ],
-    "layout": {
-        "size_symbol": "__riscv_v_fixed_vlen",
-        "vlen_guard_template": "__riscv_v_fixed_vlen >= {{ width * abs_lmul }}",
-        "defines_template": "#define MIPP_RVV_N_{{type_category_upper}}{{n_bits}}_{{lsuffix_upper}} {{type_size}}",
-        "vector_typedef_template": "typedef {{isa_datatype.reg}} fixed_{{lsuffix_mipp}}_{{isa_datatype.to_ptr}} __attribute__((riscv_rvv_vector_bits({{vla_size}}{{lmul_expr}})));",
-        "mask_typedef_template": "typedef {{isa_datatype.msk}} fixed_{{lsuffix_mipp}}_bool{{n_bits}}_t __attribute__((riscv_rvv_vector_bits({{vla_size}}{{lmul_expr}}/(8*sizeof({{isa_datatype.to_ptr}})))));",
-        "rvd_struct_template": "typedef struct { fixed_{{lsuffix_mipp}}_{{isa_datatype.to_ptr}} r; } rvd_{{isa.name}}_{{datatype.category}}{{datatype.n_bits}}_{{lsuffix_mipp}}_t;",
-        "rvm_struct_template": "typedef struct { fixed_{{lsuffix_mipp}}_bool{{datatype.n_bits}}_t m; } rvm_{{isa.name}}_{{datatype.category}}{{datatype.n_bits}}_{{lsuffix_mipp}}_t;"
-    },
-    "header_template": [
-        "#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_RVV_H_",
-        "#define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_RVV_H_",
-        "#include <riscv_vector.h>",
-        "#include <string.h>",
-        "#include <float.h>",
-        "#include <stdint.h>",
-        "#include <stdio.h>//remove after debug",
-        "#include <stdlib.h>//remove after debug",
-        "#define MIPP_RVV_VLEN __riscv_v_fixed_vlen",
-        "typedef float float32_t;//remove after debug",
-        "typedef double float64_t;//remove after debug"
-    ],
-    "hw_lmul": [
-        1,
-        2,
-        4,
-        8,
-        -2
-    ],
-    "sw_lmul": [],
-    "hw_mask": true,
-    "hw_mask_requires_toreg": true,
-    "hw_mask_extract_via_store": true,
     "datatypes": {
         "float64": {
             "data_ext": "f64{lsuffix}",
@@ -352,5 +312,45 @@
                 }
             }
         }
-    }
+    },
+    "define": "defined(__riscv_v_intrinsic)",
+    "header_template": [
+        "#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_RVV_H_",
+        "#define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_RVV_H_",
+        "#include <riscv_vector.h>",
+        "#include <string.h>",
+        "#include <float.h>",
+        "#include <stdint.h>",
+        "#include <stdio.h>//remove after debug",
+        "#include <stdlib.h>//remove after debug",
+        "#define MIPP_RVV_VLEN __riscv_v_fixed_vlen",
+        "typedef float float32_t;//remove after debug",
+        "typedef double float64_t;//remove after debug"
+    ],
+    "hw_lmul": [
+        1,
+        2,
+        4,
+        8,
+        -2
+    ],
+    "hw_mask": true,
+    "hw_mask_extract_via_store": true,
+    "hw_mask_requires_toreg": true,
+    "layout": {
+        "size_symbol": "__riscv_v_fixed_vlen",
+        "vlen_guard_template": "__riscv_v_fixed_vlen >= {{ width * abs_lmul }}",
+        "defines_template": "#define MIPP_RVV_N_{{type_category_upper}}{{n_bits}}_{{lsuffix_upper}} {{type_size}}",
+        "vector_typedef_template": "typedef {{isa_datatype.reg}} fixed_{{lsuffix_mipp}}_{{isa_datatype.to_ptr}} __attribute__((riscv_rvv_vector_bits({{vla_size}}{{lmul_expr}})));",
+        "mask_typedef_template": "typedef {{isa_datatype.msk}} fixed_{{lsuffix_mipp}}_bool{{n_bits}}_t __attribute__((riscv_rvv_vector_bits({{vla_size}}{{lmul_expr}}/(8*sizeof({{isa_datatype.to_ptr}})))));",
+        "rvd_struct_template": "typedef struct { fixed_{{lsuffix_mipp}}_{{isa_datatype.to_ptr}} r; } rvd_{{isa.name}}_{{datatype.category}}{{datatype.n_bits}}_{{lsuffix_mipp}}_t;",
+        "rvm_struct_template": "typedef struct { fixed_{{lsuffix_mipp}}_bool{{datatype.n_bits}}_t m; } rvm_{{isa.name}}_{{datatype.category}}{{datatype.n_bits}}_{{lsuffix_mipp}}_t;"
+    },
+    "mipp_definitions": [
+        "#define MIPP_64BIT",
+        "#define MIPP_BW"
+    ],
+    "name": "rvv",
+    "prefix": "__riscv",
+    "sw_lmul": []
 }

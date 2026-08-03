@@ -1,37 +1,60 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "TemplatesSchema",
-  "type": "object",
-  "properties": {
-    "SNIPPET_END_MSK": { "type": "string" },
-    "SNIPPET_END_MSKZ": { "type": "string" },
-    "SNIPPET_END_MSKS": { "type": "string" }
-  },
-  "additionalProperties": {
-    "anyOf": [
-      { "$ref": "#/definitions/template" },
-      {
-        "type": "object",
-        "additionalProperties": {
-          "$ref": "#/definitions/template"
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": {
+        "anyOf": [
+            {
+                "$ref": "#/definitions/template"
+            },
+            {
+                "type": "object",
+                "additionalProperties": {
+                    "$ref": "#/definitions/template"
+                }
+            }
+        ]
+    },
+    "definitions": {
+        "template": {
+            "type": "object",
+            "properties": {
+                "format": {
+                    "type": "string",
+                    "enum": [
+                        "short",
+                        "long"
+                    ]
+                },
+                "code": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "code"
+            ],
+            "additionalProperties": false
         }
-      }
-    ]
-  },
-  "definitions": {
-    "template": {
-      "type": "object",
-      "properties": {
-        "format": { "type": "string", "enum": ["short", "long"] },
-        "code": {
-          "anyOf": [
-            { "type": "string" },
-            { "type": "array", "items": { "type": "string" } }
-          ]
+    },
+    "properties": {
+        "SNIPPET_END_MSK": {
+            "type": "string"
+        },
+        "SNIPPET_END_MSKZ": {
+            "type": "string"
+        },
+        "SNIPPET_END_MSKS": {
+            "type": "string"
         }
-      },
-      "required": ["code"],
-      "additionalProperties": false
-    }
-  }
+    },
+    "title": "TemplatesSchema",
+    "type": "object"
 }

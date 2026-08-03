@@ -1,516 +1,516 @@
 {
-  "ret_reg_1arg_ptr": {
-    "ret": {
-      "type": "reg",
-      "fixeddatatype": false,
-      "charac": "WO"
+    "ret_i32_1arg_msk": {
+        "ret": {
+            "type": "val",
+            "fixeddatatype": "int32",
+            "charac": "WO"
+        },
+        "args": [
+            {
+                "type": "msk",
+                "fixeddatatype": false,
+                "charac": "RO"
+            }
+        ]
     },
-    "args": [
-      {
-        "type": "ptr",
-        "fixeddatatype": false,
-        "charac": "RO"
-      }
-    ]
-  },
-  "ret_void_2args_ptr_reg": {
-    "ret": {
-      "type": false,
-      "fixeddatatype": false
+    "ret_i32_2args_msk": {
+        "ret": {
+            "type": "val",
+            "fixeddatatype": "int32",
+            "charac": "WO"
+        },
+        "args": [
+            {
+                "type": "msk",
+                "fixeddatatype": false,
+                "charac": "RO"
+            },
+            {
+                "type": "msk",
+                "fixeddatatype": false,
+                "charac": "RO"
+            }
+        ]
     },
-    "args": [
-      {
-        "type": "ptr",
-        "fixeddatatype": false,
-        "charac": "WO"
-      },
-      {
-        "type": "reg",
-        "fixeddatatype": false,
-        "charac": "RO"
-      }
-    ]
-  },
-  "ret_reg_1arg_val": {
-    "ret": {
-      "type": "reg",
-      "fixeddatatype": false,
-      "charac": "WO"
+    "ret_msk_0arg": {
+        "ret": {
+            "type": "msk",
+            "fixeddatatype": false,
+            "charac": "WO"
+        },
+        "args": []
     },
-    "args": [
-      {
-        "type": "val",
-        "fixeddatatype": false,
-        "charac": "RO"
-      }
-    ]
-  },
-  "ret_reg_1arg_Nele": {
-    "ret": {
-      "type": "reg",
-      "fixeddatatype": false,
-      "charac": "WO"
+    "ret_msk_1arg_Nele": {
+        "ret": {
+            "type": "msk",
+            "fixeddatatype": false,
+            "charac": "WO"
+        },
+        "args": [
+            {
+                "type": "Nele",
+                "fixeddatatype": "int32",
+                "charac": "RO"
+            }
+        ]
     },
-    "args": [
-      {
-        "type": "Nele",
-        "fixeddatatype": false,
-        "charac": "RO"
-      }
-    ]
-  },
-  "ret_msk_1arg_Nele": {
-    "ret": {
-      "type": "msk",
-      "fixeddatatype": false,
-      "charac": "WO"
+    "ret_msk_1arg_i32": {
+        "ret": {
+            "type": "msk",
+            "fixeddatatype": false,
+            "charac": "WO"
+        },
+        "args": [
+            {
+                "type": "val",
+                "fixeddatatype": "int32",
+                "charac": "RO"
+            }
+        ]
     },
-    "args": [
-      {
-        "type": "Nele",
-        "fixeddatatype": "int32",
-        "charac": "RO"
-      }
-    ]
-  },
-  "ret_reg_1arg_i32": {
-    "ret": {
-      "type": "reg",
-      "fixeddatatype": false,
-      "charac": "WO"
+    "ret_msk_1arg_msk": {
+        "ret": {
+            "type": "msk",
+            "fixeddatatype": false,
+            "charac": "WO"
+        },
+        "args": [
+            {
+                "type": "msk",
+                "fixeddatatype": false,
+                "charac": "RO"
+            }
+        ]
     },
-    "args": [
-      {
-        "type": "val",
-        "fixeddatatype": "int32",
-        "charac": "RO"
-      }
-    ]
-  },
-  "ret_msk_1arg_i32": {
-    "ret": {
-      "type": "msk",
-      "fixeddatatype": false,
-      "charac": "WO"
+    "ret_msk_1arg_reg": {
+        "ret": {
+            "type": "msk",
+            "fixeddatatype": false,
+            "charac": "WO"
+        },
+        "args": [
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            }
+        ]
     },
-    "args": [
-      {
-        "type": "val",
-        "fixeddatatype": "int32",
-        "charac": "RO"
-      }
-    ]
-  },
-  "ret_msk_1arg_val": {
-    "ret": {
-      "type": "msk",
-      "fixeddatatype": false,
-      "charac": "WO"
+    "ret_msk_1arg_val": {
+        "ret": {
+            "type": "msk",
+            "fixeddatatype": false,
+            "charac": "WO"
+        },
+        "args": [
+            {
+                "type": "val",
+                "fixeddatatype": false,
+                "charac": "RO"
+            }
+        ]
     },
-    "args": [
-      {
-        "type": "val",
-        "fixeddatatype": false,
-        "charac": "RO"
-      }
-    ]
-  },
-  "ret_reg_0arg": {
-    "ret": {
-      "type": "reg",
-      "fixeddatatype": false,
-      "charac": "WO"
+    "ret_msk_2args_msk": {
+        "ret": {
+            "type": "msk",
+            "fixeddatatype": false,
+            "charac": "WO"
+        },
+        "args": [
+            {
+                "type": "msk",
+                "fixeddatatype": false,
+                "charac": "RO"
+            },
+            {
+                "type": "msk",
+                "fixeddatatype": false,
+                "charac": "RO"
+            }
+        ]
     },
-    "args": []
-  },
-  "ret_msk_0arg": {
-    "ret": {
-      "type": "msk",
-      "fixeddatatype": false,
-      "charac": "WO"
+    "ret_msk_2args_reg": {
+        "ret": {
+            "type": "msk",
+            "fixeddatatype": false,
+            "charac": "WO"
+        },
+        "args": [
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            },
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            }
+        ]
     },
-    "args": []
-  },
-  "ret_reg_1arg_reg": {
-    "ret": {
-      "type": "reg",
-      "fixeddatatype": false,
-      "charac": "WO"
+    "ret_reg_0arg": {
+        "ret": {
+            "type": "reg",
+            "fixeddatatype": false,
+            "charac": "WO"
+        },
+        "args": []
     },
-    "args": [
-      {
-        "type": "reg",
-        "fixeddatatype": false,
-        "charac": "RO"
-      }
-    ]
-  },
-  "ret_val_1arg_reg": {
-    "ret": {
-      "type": "val",
-      "fixeddatatype": false,
-      "charac": "WO"
+    "ret_reg_1arg_Nele": {
+        "ret": {
+            "type": "reg",
+            "fixeddatatype": false,
+            "charac": "WO"
+        },
+        "args": [
+            {
+                "type": "Nele",
+                "fixeddatatype": false,
+                "charac": "RO"
+            }
+        ]
     },
-    "args": [
-      {
-        "type": "reg",
-        "fixeddatatype": false,
-        "charac": "RO"
-      }
-    ]
-  },
-  "ret_msk_1arg_msk": {
-    "ret": {
-      "type": "msk",
-      "fixeddatatype": false,
-      "charac": "WO"
+    "ret_reg_1arg_i32": {
+        "ret": {
+            "type": "reg",
+            "fixeddatatype": false,
+            "charac": "WO"
+        },
+        "args": [
+            {
+                "type": "val",
+                "fixeddatatype": "int32",
+                "charac": "RO"
+            }
+        ]
     },
-    "args": [
-      {
-        "type": "msk",
-        "fixeddatatype": false,
-        "charac": "RO"
-      }
-    ]
-  },
-  "ret_msk_1arg_reg": {
-    "ret": {
-      "type": "msk",
-      "fixeddatatype": false,
-      "charac": "WO"
+    "ret_reg_1arg_msk": {
+        "ret": {
+            "type": "reg",
+            "fixeddatatype": false,
+            "charac": "WO"
+        },
+        "args": [
+            {
+                "type": "msk",
+                "fixeddatatype": false,
+                "charac": "RO"
+            }
+        ]
     },
-    "args": [
-      {
-        "type": "reg",
-        "fixeddatatype": false,
-        "charac": "RO"
-      }
-    ]
-  },
-  "ret_reg_1arg_msk": {
-    "ret": {
-      "type": "reg",
-      "fixeddatatype": false,
-      "charac": "WO"
+    "ret_reg_1arg_ptr": {
+        "ret": {
+            "type": "reg",
+            "fixeddatatype": false,
+            "charac": "WO"
+        },
+        "args": [
+            {
+                "type": "ptr",
+                "fixeddatatype": false,
+                "charac": "RO"
+            }
+        ]
     },
-    "args": [
-      {
-        "type": "msk",
-        "fixeddatatype": false,
-        "charac": "RO"
-      }
-    ]
-  },
-  "ret_reg_2args_reg": {
-    "ret": {
-      "type": "reg",
-      "fixeddatatype": false,
-      "charac": "WO"
+    "ret_reg_1arg_reg": {
+        "ret": {
+            "type": "reg",
+            "fixeddatatype": false,
+            "charac": "WO"
+        },
+        "args": [
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            }
+        ]
     },
-    "args": [
-      {
-        "type": "reg",
-        "fixeddatatype": false,
-        "charac": "RO"
-      },
-      {
-        "type": "reg",
-        "fixeddatatype": false,
-        "charac": "RO"
-      }
-    ]
-  },
-  "ret_reg_2args_reg_msk": {
-    "ret": {
-      "type": "reg",
-      "fixeddatatype": false,
-      "charac": "WO"
+    "ret_reg_1arg_val": {
+        "ret": {
+            "type": "reg",
+            "fixeddatatype": false,
+            "charac": "WO"
+        },
+        "args": [
+            {
+                "type": "val",
+                "fixeddatatype": false,
+                "charac": "RO"
+            }
+        ]
     },
-    "args": [
-      {
-        "type": "reg",
-        "fixeddatatype": false,
-        "charac": "RO"
-      },
-      {
-        "type": "msk",
-        "fixeddatatype": false,
-        "charac": "RO"
-      }
-    ]
-  },
-  "ret_msk_2args_reg": {
-    "ret": {
-      "type": "msk",
-      "fixeddatatype": false,
-      "charac": "WO"
+    "ret_reg_2args_ptr_reg": {
+        "ret": {
+            "type": "reg",
+            "fixeddatatype": false,
+            "charac": "WO"
+        },
+        "args": [
+            {
+                "type": "ptr",
+                "fixeddatatype": false,
+                "charac": "RO",
+                "offset_lmul": false
+            },
+            {
+                "type": "reg",
+                "fixeddatatype": "uint",
+                "charac": "RO"
+            }
+        ]
     },
-    "args": [
-      {
-        "type": "reg",
-        "fixeddatatype": false,
-        "charac": "RO"
-      },
-      {
-        "type": "reg",
-        "fixeddatatype": false,
-        "charac": "RO"
-      }
-    ]
-  },
-  "ret_msk_2args_msk": {
-    "ret": {
-      "type": "msk",
-      "fixeddatatype": false,
-      "charac": "WO"
+    "ret_reg_2args_reg": {
+        "ret": {
+            "type": "reg",
+            "fixeddatatype": false,
+            "charac": "WO"
+        },
+        "args": [
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            },
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            }
+        ]
     },
-    "args": [
-      {
-        "type": "msk",
-        "fixeddatatype": false,
-        "charac": "RO"
-      },
-      {
-        "type": "msk",
-        "fixeddatatype": false,
-        "charac": "RO"
-      }
-    ]
-  },
-  "ret_reg_2args_reg_val": {
-    "ret": {
-      "type": "reg",
-      "fixeddatatype": false,
-      "charac": "WO"
+    "ret_reg_2args_reg_msk": {
+        "ret": {
+            "type": "reg",
+            "fixeddatatype": false,
+            "charac": "WO"
+        },
+        "args": [
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            },
+            {
+                "type": "msk",
+                "fixeddatatype": false,
+                "charac": "RO"
+            }
+        ]
     },
-    "args": [
-      {
-        "type": "reg",
-        "fixeddatatype": false,
-        "charac": "RO"
-      },
-      {
-        "type": "val",
-        "fixeddatatype": "int32",
-        "charac": "RO"
-      }
-    ]
-  },
-  "ret_reg_3args_reg": {
-    "ret": {
-      "type": "reg",
-      "fixeddatatype": false,
-      "charac": "WO"
+    "ret_reg_2args_reg_val": {
+        "ret": {
+            "type": "reg",
+            "fixeddatatype": false,
+            "charac": "WO"
+        },
+        "args": [
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            },
+            {
+                "type": "val",
+                "fixeddatatype": "int32",
+                "charac": "RO"
+            }
+        ]
     },
-    "args": [
-      {
-        "type": "reg",
-        "fixeddatatype": false,
-        "charac": "RO"
-      },
-      {
-        "type": "reg",
-        "fixeddatatype": false,
-        "charac": "RO"
-      },
-      {
-        "type": "reg",
-        "fixeddatatype": false,
-        "charac": "RO"
-      }
-    ]
-  },
-  "ret_reg_3args_2reg_1msk": {
-    "ret": {
-      "type": "reg",
-      "fixeddatatype": false,
-      "charac": "WO"
+    "ret_reg_3args_1reg_2val": {
+        "ret": {
+            "type": "reg",
+            "fixeddatatype": false,
+            "charac": "WO"
+        },
+        "args": [
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            },
+            {
+                "type": "val",
+                "fixeddatatype": false,
+                "charac": "RO"
+            },
+            {
+                "type": "val",
+                "fixeddatatype": false,
+                "charac": "RO"
+            }
+        ]
     },
-    "args": [
-      {
-        "type": "reg",
-        "fixeddatatype": false,
-        "charac": "RO"
-      },
-      {
-        "type": "reg",
-        "fixeddatatype": false,
-        "charac": "RO"
-      },
-      {
-        "type": "msk",
-        "fixeddatatype": false,
-        "charac": "RO"
-      }
-    ]
-  },
-  "ret_reg_3args_1reg_2val": {
-    "ret": {
-      "type": "reg",
-      "fixeddatatype": false,
-      "charac": "WO"
+    "ret_reg_3args_2reg_1msk": {
+        "ret": {
+            "type": "reg",
+            "fixeddatatype": false,
+            "charac": "WO"
+        },
+        "args": [
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            },
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            },
+            {
+                "type": "msk",
+                "fixeddatatype": false,
+                "charac": "RO"
+            }
+        ]
     },
-    "args": [
-      {
-        "type": "reg",
-        "fixeddatatype": false,
-        "charac": "RO"
-      },
-      {
-        "type": "val",
-        "fixeddatatype": false,
-        "charac": "RO"
-      },
-      {
-        "type": "val",
-        "fixeddatatype": false,
-        "charac": "RO"
-      }
-    ]
-  },
-  "ret_reg_3args_2reg_1msk_1reg": {
-    "ret": {
-      "type": "reg",
-      "fixeddatatype": false,
-      "charac": "WO"
+    "ret_reg_3args_2reg_1msk_1reg": {
+        "ret": {
+            "type": "reg",
+            "fixeddatatype": false,
+            "charac": "WO"
+        },
+        "args": [
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            },
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            },
+            {
+                "type": "msk",
+                "fixeddatatype": false,
+                "charac": "RO"
+            },
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            }
+        ]
     },
-    "args": [
-      {
-        "type": "reg",
-        "fixeddatatype": false,
-        "charac": "RO"
-      },
-      {
-        "type": "reg",
-        "fixeddatatype": false,
-        "charac": "RO"
-      },
-      {
-        "type": "msk",
-        "fixeddatatype": false,
-        "charac": "RO"
-      },
-      {
-        "type": "reg",
-        "fixeddatatype": false,
-        "charac": "RO"
-      }
-    ]
-  },
-  "ret_i32_1arg_msk": {
-    "ret": {
-      "type": "val",
-      "fixeddatatype": "int32",
-      "charac": "WO"
+    "ret_reg_3args_reg": {
+        "ret": {
+            "type": "reg",
+            "fixeddatatype": false,
+            "charac": "WO"
+        },
+        "args": [
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            },
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            },
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            }
+        ]
     },
-    "args": [
-      {
-        "type": "msk",
-        "fixeddatatype": false,
-        "charac": "RO"
-      }
-    ]
-  },
-  "ret_i32_2args_msk": {
-    "ret": {
-      "type": "val",
-      "fixeddatatype": "int32",
-      "charac": "WO"
+    "ret_val_1arg_reg": {
+        "ret": {
+            "type": "val",
+            "fixeddatatype": false,
+            "charac": "WO"
+        },
+        "args": [
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            }
+        ]
     },
-    "args": [
-      {
-        "type": "msk",
-        "fixeddatatype": false,
-        "charac": "RO"
-      },
-      {
-        "type": "msk",
-        "fixeddatatype": false,
-        "charac": "RO"
-      }
-    ]
-  },
-  "ret_val_2args_reg_val": {
-    "ret": {
-      "type": "val",
-      "fixeddatatype": false,
-      "charac": "WO"
+    "ret_val_2args_msk_val": {
+        "ret": {
+            "type": "val",
+            "fixeddatatype": false,
+            "charac": "WO"
+        },
+        "args": [
+            {
+                "type": "msk",
+                "fixeddatatype": false,
+                "charac": "RO"
+            },
+            {
+                "type": "val",
+                "fixeddatatype": "uint32",
+                "charac": "RO"
+            }
+        ]
     },
-    "args": [
-      {
-        "type": "reg",
-        "fixeddatatype": false,
-        "charac": "RO"
-      },
-      {
-        "type": "val",
-        "fixeddatatype": "uint32",
-        "charac": "RO"
-      }
-    ]
-  },
-  "ret_val_2args_msk_val": {
-    "ret": {
-      "type": "val",
-      "fixeddatatype": false,
-      "charac": "WO"
+    "ret_val_2args_reg_val": {
+        "ret": {
+            "type": "val",
+            "fixeddatatype": false,
+            "charac": "WO"
+        },
+        "args": [
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            },
+            {
+                "type": "val",
+                "fixeddatatype": "uint32",
+                "charac": "RO"
+            }
+        ]
     },
-    "args": [
-      {
-        "type": "msk",
-        "fixeddatatype": false,
-        "charac": "RO"
-      },
-      {
-        "type": "val",
-        "fixeddatatype": "uint32",
-        "charac": "RO"
-      }
-    ]
-  },
-  "ret_reg_2args_ptr_reg": {
-    "ret": {
-      "type": "reg",
-      "fixeddatatype": false,
-      "charac": "WO"
+    "ret_void_2args_ptr_reg": {
+        "ret": {
+            "type": false,
+            "fixeddatatype": false
+        },
+        "args": [
+            {
+                "type": "ptr",
+                "fixeddatatype": false,
+                "charac": "WO"
+            },
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            }
+        ]
     },
-    "args": [
-      {
-        "type": "ptr",
-        "fixeddatatype": false,
-        "charac": "RO",
-        "offset_lmul": false
-      },
-      {
-        "type": "reg",
-        "fixeddatatype": "uint",
-        "charac": "RO"
-      }
-    ]
-  },
-  "ret_void_3args_ptr_reg_reg": {
-    "ret": {
-      "type": false,
-      "fixeddatatype": false,
-      "charac": "WO"
-    },
-    "args": [
-      {
-        "type": "ptr",
-        "fixeddatatype": false,
-        "charac": "WO",
-        "offset_lmul": false
-      },
-      {
-        "type": "reg",
-        "fixeddatatype": "uint",
-        "charac": "RO"
-      },
-      {
-        "type": "reg",
-        "fixeddatatype": false,
-        "charac": "RO"
-      }
-    ]
-  }
+    "ret_void_3args_ptr_reg_reg": {
+        "ret": {
+            "type": false,
+            "fixeddatatype": false,
+            "charac": "WO"
+        },
+        "args": [
+            {
+                "type": "ptr",
+                "fixeddatatype": false,
+                "charac": "WO",
+                "offset_lmul": false
+            },
+            {
+                "type": "reg",
+                "fixeddatatype": "uint",
+                "charac": "RO"
+            },
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            }
+        ]
+    }
 }

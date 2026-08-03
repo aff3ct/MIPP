@@ -28,10 +28,8 @@ include_gen_path = "../include/"
 
 # folder paths
 simd_ext_path = os.path.join(include_gen_path, "simd_ext")
-simd_ext_cpp_path = os.path.join(include_gen_path, "simd_ext_cpp")
-c_path = os.path.join(include_gen_path, "c")
-cpp_path = os.path.join(include_gen_path, "cpp")
-obj_path = os.path.join(include_gen_path, "obj")
+interfaces_path = os.path.join(include_gen_path, "interfaces")
+templates_path = os.path.join(include_gen_path, "templates")
 
 def create_folder(folder_path):
     if not os.path.exists(folder_path):
@@ -281,8 +279,8 @@ def main(argv=None):
     parser.add_argument(
         "--audit",
         nargs="+",
-        choices=["levels", "dead-code", "duplicates", "all", "none"],
-        help="Run audits on the MIPP code database: 'levels' checks implementation level placement discrepancies, 'dead-code' checks for unreferenced templates, 'duplicates' checks for datatype implementation level overlaps, 'all' (default) runs all audits, 'none' disables audits.",
+        choices=["levels", "dead-code", "duplicates", "json-structure", "all", "none"],
+        help="Run audits on the MIPP code database: 'levels' checks implementation level placement discrepancies, 'dead-code' checks for unreferenced templates, 'duplicates' checks for datatype implementation level overlaps, 'json-structure' checks for unsorted keys and empty lists in JSON files, 'all' (default) runs all audits, 'none' disables audits.",
         default=["all"],
     )
     
@@ -302,9 +300,11 @@ def main(argv=None):
                 for item in a.split(","):
                     item = item.strip().lower()
                     if item == "all":
-                        input_validation.ACTIVE_AUDITS.update(["levels", "dead-code", "duplicates"])
-                    elif item in ("levels", "dead-code", "duplicates"):
+                        input_validation.ACTIVE_AUDITS.update(["levels", "dead-code", "duplicates", "json-structure"])
+                    elif item in ("levels", "dead-code", "duplicates", "json-structure"):
                         input_validation.ACTIVE_AUDITS.add(item)
+
+    input_validation.audit_json_files_structure(path)
 
     # Audit generic templates now that ACTIVE_AUDITS is populated
     import registry
@@ -350,6 +350,14 @@ def main(argv=None):
     # Auto-discovery, validation and sorting of SIMD extensions
     isas_dict, implems_dict, sorted_names = discover_and_sort_isas(path, limit_to_isas=limit_to_isas)
 
+    if registry.implems_generic_emu is not None:
+        emu_dicts = {
+            "implems_generic_emu": registry.implems_generic_emu,
+            "implems_mask_generic_emu": registry.implems_mask_generic_emu,
+            "implems_horiz_lmul_generic_emu": registry.implems_horiz_lmul_generic_emu,
+        }
+        input_validation.audit_generic_emu_dead_code(emu_dicts, isas_dict, implems_dict)
+
     print("=" * 85)
     print(" MIPP Header Generator")
     print("=" * 85)
@@ -364,7 +372,7 @@ def main(argv=None):
         print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
 
     # create folders (always ensure these exist)
-    for folder in [simd_ext_path, simd_ext_cpp_path, c_path, cpp_path, obj_path]:
+    for folder in [simd_ext_path, interfaces_path, templates_path]:
         create_folder(folder)
 
 

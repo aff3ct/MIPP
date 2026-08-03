@@ -1,40 +1,63 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "ProtosSchema",
-  "type": "object",
-  "additionalProperties": {
-    "type": "object",
-    "properties": {
-      "ret": { "$ref": "#/definitions/param" },
-      "args": {
-        "type": "array",
-        "items": { "$ref": "#/definitions/param" }
-      }
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": {
+        "type": "object",
+        "properties": {
+            "ret": {
+                "$ref": "#/definitions/param"
+            },
+            "args": {
+                "type": "array",
+                "items": {
+                    "$ref": "#/definitions/param"
+                }
+            }
+        },
+        "required": [
+            "ret",
+            "args"
+        ],
+        "additionalProperties": false
     },
-    "required": ["ret", "args"],
-    "additionalProperties": false
-  },
-  "definitions": {
-    "param": {
-      "type": "object",
-      "properties": {
-        "type": {
-          "anyOf": [
-            { "type": "string" },
-            { "type": "boolean", "const": false }
-          ]
-        },
-        "fixeddatatype": {
-          "anyOf": [
-            { "type": "boolean" },
-            { "type": "string" }
-          ]
-        },
-        "charac": { "type": "string" },
-        "offset_lmul": { "type": "boolean" }
-      },
-      "required": ["type", "fixeddatatype"],
-      "additionalProperties": false
-    }
-  }
+    "definitions": {
+        "param": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "boolean",
+                            "const": false
+                        }
+                    ]
+                },
+                "fixeddatatype": {
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "charac": {
+                    "type": "string"
+                },
+                "offset_lmul": {
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "type",
+                "fixeddatatype"
+            ],
+            "additionalProperties": false
+        }
+    },
+    "title": "ProtosSchema",
+    "type": "object"
 }

@@ -586,6 +586,13 @@
             "version": "maskz"
         }
     ],
+    "round": [
+        {
+            "instr_name": "vfcvt",
+            "datatypes": "all_float",
+            "template": "round_float"
+        }
+    ],
     "rshift": [
         {
             "instr_name": "srl",
@@ -629,13 +636,6 @@
             "datatypes": "all_float",
             "template": "arith_1arg_mskz",
             "version": "maskz"
-        }
-    ],
-    "round": [
-        {
-            "instr_name": "vfcvt",
-            "datatypes": "all_float",
-            "template": "round_float"
         }
     ],
     "scatter": [
