@@ -595,9 +595,29 @@ class TestsBuilderEngine:
 
         return val_lines
 
-    def build_test_file_content(self, dialect_name: str, func_name: str, lmul_suffix: str = "m1", mkind: str = "", lmul: int = 0, N: int = 10) -> str:
+    def build_test_file_content(
+        self,
+        dialect_name: str,
+        func_name: str,
+        lmul_suffix: str = "m1",
+        mkind: str = "",
+        lmul: int = 0,
+        N: int = 10,
+        lmul_list: Optional[List[int]] = None,
+        ldiv_list: Optional[List[int]] = None,
+        mask_list: Optional[List[str]] = None,
+    ) -> str:
         builder = self.get_builder(dialect_name)
-        return builder.build_test_file_content(func_name, lmul_suffix=lmul_suffix, mkind=mkind, lmul=lmul, N=N)
+        return builder.build_test_file_content(
+            func_name,
+            lmul_suffix=lmul_suffix,
+            mkind=mkind,
+            lmul=lmul,
+            N=N,
+            lmul_list=lmul_list,
+            ldiv_list=ldiv_list,
+            mask_list=mask_list,
+        )
 
     def format_cpp_op_call(self, func_name: str, mkind: str, is_scalar: bool = False) -> str:
         """Build a C++ template call expression with symbolic params (MK, T, LMUL).
@@ -792,7 +812,17 @@ class TestsBuilderEngineC:
     def __init__(self, engine: TestsBuilderEngine):
         self.engine = engine
 
-    def build_test_file_content(self, func_name: str, lmul_suffix: str = "m1", mkind: str = "", lmul: int = 0, N: int = 10) -> str:
+    def build_test_file_content(
+        self,
+        func_name: str,
+        lmul_suffix: str = "m1",
+        mkind: str = "",
+        lmul: int = 0,
+        N: int = 10,
+        lmul_list: Optional[List[int]] = None,
+        ldiv_list: Optional[List[int]] = None,
+        mask_list: Optional[List[str]] = None,
+    ) -> str:
         lines = []
         lines.extend(self._render_headers(func_name, N=N))
 
@@ -1015,7 +1045,14 @@ class TestsBuilderEngineCppBase:
     def __init__(self, engine: TestsBuilderEngine):
         self.engine = engine
 
-    def render_cpp_test_case(self, dialect_name: str, func_name: str, supported_mkinds: List[str]) -> List[str]:
+    def render_cpp_test_case(
+        self,
+        dialect_name: str,
+        func_name: str,
+        supported_mkinds: List[str],
+        lmul_list: Optional[List[int]] = None,
+        ldiv_list: Optional[List[int]] = None,
+    ) -> List[str]:
         lines = []
         func_prefix = "test_mipp_cpp" if dialect_name == "cpp" else "test_mipp_cpp_obj"
         datatypes = self.engine._resolve_datatypes(func_name)
@@ -1042,16 +1079,29 @@ class TestsBuilderEngineCppBase:
                 lines.append(f'\t\tSECTION("datatype = {dt}")')
                 lines.append('\t\t{')
 
-                lmuls_to_test = [(1, "LMUL = 1")] if dialect_name == "obj" else [(1, "LMUL = 1"), (2, "LMUL = 2"), (4, "LMUL = 4"), (8, "LMUL = 8")]
+                if dialect_name == "obj":
+                    lmuls_to_test = [(1, "LMUL = 1")] if (lmul_list is None or 0 in lmul_list or 1 in lmul_list) else []
+                else:
+                    available_lmuls = [(1, "LMUL = 1"), (2, "LMUL = 2"), (4, "LMUL = 4"), (8, "LMUL = 8")]
+                    if lmul_list is not None:
+                        target_set = set(lmul_list)
+                        if 0 in target_set:
+                            target_set.add(1)
+                        lmuls_to_test = [item for item in available_lmuls if item[0] in target_set]
+                    else:
+                        lmuls_to_test = available_lmuls
+
                 for lmul_val, lmul_str in lmuls_to_test:
                     call_expr = f"{func_prefix}_{func_name}<{mk_enum}, {cpp_type}, {lmul_val}>();"
                     tpl_lmul = self.engine._tpl("func_templates", "cpp_obj", "test_section_lmul")
                     lines.extend(self.engine.render_template(tpl_lmul, lmul_str=lmul_str, call_expr=call_expr))
 
                 if dialect_name == "cpp":
-                    call_ldiv2 = f"{func_prefix}_{func_name}<{mk_enum}, {cpp_type}, -2>();"
-                    tpl_ldiv2 = self.engine._tpl("func_templates", "cpp", "test_section_ldiv2")
-                    lines.extend(self.engine.render_template(tpl_ldiv2, call_expr=call_ldiv2))
+                    test_ldiv2 = (ldiv_list is None or 2 in ldiv_list)
+                    if test_ldiv2:
+                        call_ldiv2 = f"{func_prefix}_{func_name}<{mk_enum}, {cpp_type}, -2>();"
+                        tpl_ldiv2 = self.engine._tpl("func_templates", "cpp", "test_section_ldiv2")
+                        lines.extend(self.engine.render_template(tpl_ldiv2, call_expr=call_ldiv2))
 
                 lines.append('\t\t}')
 
@@ -1209,7 +1259,17 @@ class TestsBuilderEngineCppBase:
 
 class TestsBuilderEngineCpp(TestsBuilderEngineCppBase):
 
-    def build_test_file_content(self, func_name: str, lmul_suffix: str = "m1", mkind: str = "", lmul: int = 0, N: int = 10) -> str:
+    def build_test_file_content(
+        self,
+        func_name: str,
+        lmul_suffix: str = "m1",
+        mkind: str = "",
+        lmul: int = 0,
+        N: int = 10,
+        lmul_list: Optional[List[int]] = None,
+        ldiv_list: Optional[List[int]] = None,
+        mask_list: Optional[List[str]] = None,
+    ) -> str:
         lines = []
         adapter = CppDialectAdapter()
         lines.extend(self._render_headers("cpp", func_name, N=N))
@@ -1217,8 +1277,9 @@ class TestsBuilderEngineCpp(TestsBuilderEngineCppBase):
         mask_support = self.engine.interfaces[func_name].get("mask_support", "all_mask")
         supported_mkinds = []
         for m in ["unmasked", "mask", "maskz", "masks"]:
-            if m == "unmasked" or self.engine._is_mask_kind_supported(mask_support, m):
-                supported_mkinds.append(m)
+            if mask_list is None or m in mask_list or (m == "unmasked" and "" in mask_list):
+                if m == "unmasked" or self.engine._is_mask_kind_supported(mask_support, m):
+                    supported_mkinds.append(m)
 
         proto_ref = self.engine.interfaces.get(func_name, {}).get("proto_ref", "ret_reg_2args_reg")
         func_spec = self.engine.specs["functions"].get(func_name, {})
@@ -1282,17 +1343,29 @@ class TestsBuilderEngineCpp(TestsBuilderEngineCppBase):
 
         lines.extend(self.engine._tpl("func_templates", "cpp_obj", "func_footer"))
 
-        lines.extend(self.render_cpp_test_case("cpp", func_name, supported_mkinds))
+        lines.extend(self.render_cpp_test_case("cpp", func_name, supported_mkinds, lmul_list=lmul_list, ldiv_list=ldiv_list))
         return "\n".join(lines)
 
 
 class TestsBuilderEngineCppObj(TestsBuilderEngineCppBase):
 
-    def build_test_file_content(self, func_name: str, lmul_suffix: str = "m1", mkind: str = "", lmul: int = 0, N: int = 10) -> str:
+    def build_test_file_content(
+        self,
+        func_name: str,
+        lmul_suffix: str = "m1",
+        mkind: str = "",
+        lmul: int = 0,
+        N: int = 10,
+        lmul_list: Optional[List[int]] = None,
+        ldiv_list: Optional[List[int]] = None,
+        mask_list: Optional[List[str]] = None,
+    ) -> str:
         lines = []
         lines.extend(self._render_headers("obj", func_name, N=N))
 
-        supported_mkinds = ["unmasked"]
+        supported_mkinds = []
+        if mask_list is None or "unmasked" in mask_list or "" in mask_list:
+            supported_mkinds.append("unmasked")
 
         proto_ref = self.engine.interfaces.get(func_name, {}).get("proto_ref", "ret_reg_2args_reg")
         func_spec = self.engine.specs["functions"].get(func_name, {})
@@ -1344,5 +1417,5 @@ class TestsBuilderEngineCppObj(TestsBuilderEngineCppBase):
 
         lines.extend(self.engine._tpl("func_templates", "cpp_obj", "func_footer"))
 
-        lines.extend(self.render_cpp_test_case("obj", func_name, supported_mkinds))
+        lines.extend(self.render_cpp_test_case("obj", func_name, supported_mkinds, lmul_list=lmul_list, ldiv_list=ldiv_list))
         return "\n".join(lines)

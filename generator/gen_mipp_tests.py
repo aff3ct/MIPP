@@ -82,7 +82,14 @@ def write_file_if_different(file_path: str, content: str, encoding: str = "utf-8
     return True
 
 
-def gen_test_files_unified_cpp(kind: str = "cpp", N: int = 10, stats: dict = None) -> None:
+def gen_test_files_unified_cpp(
+    kind: str = "cpp",
+    N: int = 10,
+    stats: dict = None,
+    lmul_list: list = None,
+    ldiv_list: list = None,
+    mask_list: list = None,
+) -> None:
     if stats is None:
         stats = {"generated": 0, "skipped_mask": [], "skipped_disabled": [], "skipped_obj": []}
 
@@ -101,7 +108,9 @@ def gen_test_files_unified_cpp(kind: str = "cpp", N: int = 10, stats: dict = Non
                 reason = f"{func} disabled in tests_specs.json"
 
         cat = _match_category(func)
-        content = engine.build_test_file_content(kind, func, N=N)
+        content = engine.build_test_file_content(
+            kind, func, N=N, lmul_list=lmul_list, ldiv_list=ldiv_list, mask_list=mask_list
+        )
 
         if disabled:
             content = comment_out_cpp_file(content, reason)
@@ -172,7 +181,7 @@ def main():
     parser.add_argument(
         "--lmul",
         type=int,
-        nargs="+",
+        nargs="*",
         choices=[0, 1, 2, 4, 8],
         default=[0, 1, 2, 4, 8],
         help="Generate tests for the specified LMUL values.",
@@ -186,9 +195,14 @@ def main():
         help="Generate tests for the specified LDIV values.",
     )
     parser.add_argument(
+        "--no-ldiv",
+        action="store_true",
+        help="Do not generate LDIV tests.",
+    )
+    parser.add_argument(
         "--mask-kind",
         type=str,
-        nargs="+",
+        nargs="*",
         choices=["unmasked", "mask", "maskz", "masks"],
         default=["unmasked", "mask", "maskz", "masks"],
         help="Generate tests for the specified mask kinds.",
@@ -218,6 +232,9 @@ def main():
     )
 
     args = parser.parse_args()
+
+    if args.no_ldiv:
+        args.ldiv = []
 
     active_audits = set()
     if args.audit:
@@ -298,7 +315,14 @@ def main():
         else:
             print(f"  ➔ Generating unified {kind.upper()} tests (templates [U, M, Z, S], LMUL, datatypes)...", end="", flush=True)
             t0_step = time.perf_counter()
-            gen_test_files_unified_cpp(kind=kind, N=args.num_iterations, stats=stats)
+            gen_test_files_unified_cpp(
+                kind=kind,
+                N=args.num_iterations,
+                stats=stats,
+                lmul_list=args.lmul,
+                ldiv_list=args.ldiv,
+                mask_list=args.mask_kind,
+            )
             print(f" Done ({time.perf_counter() - t0_step:.3f} s)!")
 
     print("\n=====================================================================================================")

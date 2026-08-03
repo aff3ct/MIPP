@@ -218,10 +218,10 @@ analysis-cppcheck:
     case "$ARCH" in
       armv7-neon|armv7-neon-fma)
         export THREADS=2
-        export EXTRA_CMAKE_FLAGS="-DCMAKE_UNITY_BUILD_BATCH_SIZE=4"
+        export EXTRA_CMAKE_FLAGS="-DCMAKE_UNITY_BUILD=OFF -DMIPP_PRECOMPILED_HEADERS=OFF"
         ;;
       riscv64-rvv1.0)
-        export THREADS=6
+        export THREADS=8
         export SKIP_C_EXAMPLES="true"
         export EXTRA_CMAKE_FLAGS="-DCMAKE_UNITY_BUILD=OFF -DMIPP_PRECOMPILED_HEADERS=OFF"
         ;;
