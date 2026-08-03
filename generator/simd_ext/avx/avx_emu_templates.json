@@ -11,7 +11,8 @@
         "format": "long",
         "code": [
             "%r<c:float|b:64>% res;",
-            "res.r = _mm256_cvtepi32_pd(_mm256_castsi256_si128(r0.r));",
+            "__m256i idx = _mm256_setr_epi32(0, 2, 4, 6, 0, 0, 0, 0);",
+            "res.r = _mm256_cvtepi32_pd(_mm256_castsi256_si128(_mm256_permutevar8x32_epi32(r0.r, idx)));",
             "return res;"
         ]
     },
