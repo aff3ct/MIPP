@@ -365,55 +365,111 @@ class TestsBuilderEngine:
     def _format_cpp_type(self, dt_str: str) -> str:
         return CppDialectAdapter().cpp_type(dt_str)
 
+    # Maps JSON 'by_*' keys to the C++ runtime variable they compare against.
+    # Add a new entry here to support a new 'by_*' axis (e.g. "by_mask": "MASK_KIND").
+    _BY_RUNTIME_KEYS: dict[str, str] = {
+        "by_lmul": "LMUL",
+    }
+
+    # The set of keys that are valid in a leaf tolerance spec.
+    # Used to safely extract a fallback spec from a by_datatype parent spec.
+    _TOLERANCE_LEAF_KEYS: frozenset = frozenset({"type", "value"})
+
+    def _leaf_tol_expr(self, ttype: str, val: float, dt_cpp: str, ref_var: str) -> str:
+        """Generates a single C++ tolerance expression for a scalar spec (no by_* keys)."""
+        if ttype == "relative_percent":
+            f32 = f"({dt_cpp})(abs_diff::abs_diff({ref_var}) * (float){val})"
+            f64 = f"({dt_cpp})(abs_diff::abs_diff({ref_var}) * (double){val})"
+        else:  # max_abs_diff
+            f32 = f"({dt_cpp})((float){val})"
+            f64 = f"({dt_cpp})((double){val})"
+
+        if dt_cpp in ("float32_t", "float"):
+            return f32
+        elif dt_cpp in ("float64_t", "double"):
+            return f64
+        else:
+            return f"(std::is_same_v<{dt_cpp}, float> ? {f32} : {f64})"
+
+    def _tol_spec_to_expr(self, spec: dict, dt_cpp: str, ref_var: str) -> str:
+        """Converts a tolerance spec dict into an inline C++ expression.
+
+        Handles nested by_datatype and by_* runtime keys recursively.
+        Does NOT handle by_define (preprocessor blocks are handled by the caller).
+        """
+        if not spec or spec.get("type") == "exact":
+            return "(T)0"
+
+        # --- by_datatype: select the sub-spec for the current datatype ---
+        if "by_datatype" in spec:
+            by_dt = spec["by_datatype"]
+            # Build fallback from only known tolerance keys (by inclusion, not exclusion)
+            # to avoid accidentally inheriting unrelated keys (e.g. "comparison").
+            valid_keys = self._TOLERANCE_LEAF_KEYS | set(self._BY_RUNTIME_KEYS.keys())
+            default_sub = (
+                spec.get("default")
+                or {k: v for k, v in spec.items() if k in valid_keys}
+                or {"type": "exact"}
+            )
+
+            if dt_cpp in ("float32_t", "float"):
+                sub = by_dt.get("float32", default_sub)
+                return self._tol_spec_to_expr(sub, dt_cpp, ref_var)
+            elif dt_cpp in ("float64_t", "double"):
+                sub = by_dt.get("float64", default_sub)
+                return self._tol_spec_to_expr(sub, dt_cpp, ref_var)
+            else:
+                # Generic type T: emit ternary covering float32 vs float64
+                f32_sub = by_dt.get("float32", default_sub)
+                f64_sub = by_dt.get("float64", default_sub)
+                f32_expr = self._tol_spec_to_expr(f32_sub, "float", ref_var)
+                f64_expr = self._tol_spec_to_expr(f64_sub, "double", ref_var)
+                return f"(std::is_same_v<{dt_cpp}, float> ? {f32_expr} : {f64_expr})"
+
+        # --- by_* runtime keys: build a nested ternary (LMUL == x ? ... : default) ---
+        for by_key, cpp_var in self._BY_RUNTIME_KEYS.items():
+            if by_key in spec:
+                by_vals = spec[by_key]
+                ttype = spec.get("type", "max_abs_diff")
+                default_val = spec.get("value", 0.001)
+                # Build list of (condition, value) pairs
+                cond_parts = [(f"({cpp_var} == {k})", float(v)) for k, v in by_vals.items()]
+                # Build nested ternary from right to left: last condition is innermost
+                expr_val_str = f"({self._cpp_cast(dt_cpp)}){default_val}"
+                for cond_str, cond_val in reversed(cond_parts):
+                    expr_val_str = f"({cond_str} ? ({self._cpp_cast(dt_cpp)}){cond_val} : {expr_val_str})"
+                if ttype == "relative_percent":
+                    return f"({dt_cpp})(abs_diff::abs_diff({ref_var}) * {expr_val_str})"
+                else:
+                    return f"({dt_cpp})({expr_val_str})"
+
+        # --- Leaf: plain type + value ---
+        ttype = spec.get("type", "max_abs_diff")
+        val = spec.get("value", 0.001)
+        return self._leaf_tol_expr(ttype, val, dt_cpp, ref_var)
+
+    def _cpp_cast(self, dt_cpp: str) -> str:
+        """Returns the C cast type to use for a numeric literal given the C++ datatype."""
+        if dt_cpp in ("float32_t", "float"):
+            return "float"
+        elif dt_cpp in ("float64_t", "double"):
+            return "double"
+        else:
+            return "T"
+
     def resolve_tolerance_expr(self, func_name: str, dt_cpp: str, ref_var: str = "res2") -> str:
         """Returns an inline C++ expression for tolerance computation.
+
         Used internally by render_tolerance_declaration(). Does not handle by_define.
         """
         func_spec = self.specs["functions"].get(func_name, {})
         tol_spec = func_spec.get("tolerance")
         if not tol_spec:
             tol_spec = self.specs.get("default", {}).get("tolerance", {"type": "exact"})
-
-        # If exact type, no tolerance needed (should not be called in this case)
-        if isinstance(tol_spec, dict) and tol_spec.get("type") == "exact":
-            return "(T)0"
-
-        if isinstance(tol_spec, dict) and "by_datatype" in tol_spec:
-            by_dt = tol_spec["by_datatype"]
-            default_spec = tol_spec.get("default", {"type": "relative_percent", "value": 0.001})
-            f32_spec = by_dt.get("float32", default_spec)
-            f64_spec = by_dt.get("float64", default_spec)
-
-            def _make_expr(spec: dict, cast_type: str, c_cast: str) -> str:
-                ttype = spec.get("type", "relative_percent")
-                val = spec.get("value", 0.001)
-                if ttype == "relative_percent":
-                    return f"({cast_type})(abs_diff::abs_diff({ref_var}) * ({c_cast}){val})"
-                else:
-                    return f"({cast_type})(({c_cast}){val})"
-
-            f32_expr = _make_expr(f32_spec, dt_cpp, "float")
-            f64_expr = _make_expr(f64_spec, dt_cpp, "double")
-
-            if dt_cpp in ("float32_t", "float"):
-                return f32_expr
-            elif dt_cpp in ("float64_t", "double"):
-                return f64_expr
-            else:
-                return f"(std::is_same_v<{dt_cpp}, float> ? {f32_expr} : {f64_expr})"
-        else:
-            val = tol_spec.get("value", 0.001)
-            ttype = tol_spec.get("type", "relative_percent")
-            f32_expr = (f"({dt_cpp})(abs_diff::abs_diff({ref_var}) * (float){val})"
-                        if ttype == "relative_percent" else f"({dt_cpp})((float){val})")
-            f64_expr = (f"({dt_cpp})(abs_diff::abs_diff({ref_var}) * (double){val})"
-                        if ttype == "relative_percent" else f"({dt_cpp})((double){val})")
-            if dt_cpp in ("float32_t", "float"):
-                return f32_expr
-            elif dt_cpp in ("float64_t", "double"):
-                return f64_expr
-            else:
-                return f"(std::is_same_v<{dt_cpp}, float> ? {f32_expr} : {f64_expr})"
+        # Strip by_define from tol_spec if present (handled at a higher level)
+        if isinstance(tol_spec, dict) and "by_define" in tol_spec:
+            tol_spec = {k: v for k, v in tol_spec.items() if k != "by_define"}
+        return self._tol_spec_to_expr(tol_spec, dt_cpp, ref_var)
 
     def render_tolerance_declaration(self, func_name: str, dt_cpp: str, ref_var: str,
                                      tol_var: str = "tol",
@@ -421,58 +477,41 @@ class TestsBuilderEngine:
         """Generates the lines declaring the tolerance variable.
 
         Handles the 'by_define' case by emitting #if/#elif/#else/#endif blocks.
-        For simple cases, emits a single inline expression.
+        For all other cases, delegates to _tol_spec_to_expr for a single expression.
         """
         func_spec = self.specs["functions"].get(func_name, {})
         default_tol = self.specs.get("default", {}).get("tolerance", {"type": "exact"})
         tol_spec = func_spec.get("tolerance", default_tol)
 
-        # by_define case: emit #if defined(...) blocks
+        # by_define: emit preprocessor #if/#elif/#else/#endif blocks
         if isinstance(tol_spec, dict) and "by_define" in tol_spec:
             by_define = tol_spec["by_define"]
-            fallback_spec = tol_spec.get("default", default_tol)
+            # The fallback is the rest of the spec (by_datatype, etc.) without by_define
+            fallback_spec = {k: v for k, v in tol_spec.items() if k != "by_define"}
+            if not fallback_spec:
+                fallback_spec = default_tol
+            # Outer by_datatype used as inheritance base for define branches
+            fallback_by_dt = fallback_spec.get("by_datatype", {})
             lines: List[str] = []
             first = True
             for define_key, define_spec in by_define.items():
-                if first:
-                    lines.append(f"#if defined({define_key})")
-                    first = False
+                lines.append(f"#if defined({define_key})" if first else f"#elif defined({define_key})")
+                first = False
+                # Merge: outer by_datatype fills in any datatype not explicitly set in define_spec
+                if "by_datatype" in define_spec and fallback_by_dt:
+                    merged_by_dt = {**fallback_by_dt, **define_spec["by_datatype"]}
+                    merged_spec = {**define_spec, "by_datatype": merged_by_dt}
                 else:
-                    lines.append(f"#elif defined({define_key})")
-                expr = self._tol_spec_to_expr(define_spec, dt_cpp, ref_var)
-                lines.append(f"{indent}auto {tol_var} = {expr};")
+                    merged_spec = define_spec
+                lines.append(f"{indent}auto {tol_var} = {self._tol_spec_to_expr(merged_spec, dt_cpp, ref_var)};")
             lines.append("#else")
-            fallback_expr = self._tol_spec_to_expr(fallback_spec, dt_cpp, ref_var)
-            lines.append(f"{indent}auto {tol_var} = {fallback_expr};")
+            lines.append(f"{indent}auto {tol_var} = {self._tol_spec_to_expr(fallback_spec, dt_cpp, ref_var)};")
             lines.append("#endif")
             return lines
 
-        # Cas standard : expression simple
-        expr = self.resolve_tolerance_expr(func_name, dt_cpp, ref_var)
+        # Standard case: single inline expression
+        expr = self._tol_spec_to_expr(tol_spec, dt_cpp, ref_var)
         return [f"{indent}auto {tol_var} = {expr};"]
-
-    def _tol_spec_to_expr(self, spec: dict, dt_cpp: str, ref_var: str) -> str:
-        """Converts a tolerance spec dict into an inline C++ expression."""
-        if not spec or spec.get("type") == "exact":
-            return "(T)0"
-        ttype = spec.get("type", "relative_percent")
-        val = spec.get("value", 0.001)
-        if ttype == "relative_percent":
-            if dt_cpp in ("float32_t", "float"):
-                return f"({dt_cpp})(abs_diff::abs_diff({ref_var}) * (float){val})"
-            elif dt_cpp in ("float64_t", "double"):
-                return f"({dt_cpp})(abs_diff::abs_diff({ref_var}) * (double){val})"
-            else:
-                return (f"(std::is_same_v<{dt_cpp}, float> "
-                        f"? ({dt_cpp})(abs_diff::abs_diff({ref_var}) * (float){val}) "
-                        f": ({dt_cpp})(abs_diff::abs_diff({ref_var}) * (double){val}))")
-        else:
-            if dt_cpp in ("float32_t", "float"):
-                return f"({dt_cpp})((float){val})"
-            elif dt_cpp in ("float64_t", "double"):
-                return f"({dt_cpp})((double){val})"
-            else:
-                return f"(std::is_same_v<{dt_cpp}, float> ? ({dt_cpp})((float){val}) : ({dt_cpp})((double){val}))"
 
     def render_cpp_validation_block(self, func_name: str, proto_ref: str, is_product: bool = False, r_var: str = "rres", s_var: str = "sres", adapter: DialectAdapter = None) -> List[str]:
         func_spec = self.specs.get("functions", {}).get(func_name, {})

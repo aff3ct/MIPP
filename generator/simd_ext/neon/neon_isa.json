@@ -97,8 +97,10 @@
         "#if defined(__aarch64__)",
         "\t#define MIPP_64BIT",
         "\t#define MIPP_INSTR_VERSION 2",
+        "\t#define MIPP_NEON_V2",
         "#else",
         "\t#define MIPP_INSTR_VERSION 1",
+        "\t#define MIPP_NEON_V1",
         "#endif"
     ],
     "name": "neon",

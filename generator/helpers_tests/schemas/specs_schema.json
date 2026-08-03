@@ -204,6 +204,18 @@
                 },
                 "value": {
                     "type": "number"
+                },
+                "by_lmul": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "number"
+                    }
+                },
+                "by_datatype": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/tolerance_spec"
+                    }
                 }
             },
             "additionalProperties": false
