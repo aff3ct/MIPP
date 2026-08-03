@@ -79,6 +79,10 @@
             "return %tomsk<tp>%(tmp);"
         ]
     },
+    "cvt": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_{{ instr_name }}(r0.r);"
+    },
     "gather": {
         "format": "short",
         "code": "{{ isa.prefix }}_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(p0,r0.r,{{dt_par.n_bits//8}});"
@@ -285,6 +289,12 @@
         "format": "short",
         "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, v0);"
     },
+    "testz_1arg": {
+        "format": "long",
+        "code": [
+            "return {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_msk }}(m0.m, m0.m);"
+        ]
+    },
     "testz_2args": {
         "format": "long",
         "code": [
@@ -306,6 +316,10 @@
     "toreg": {
         "format": "short",
         "code": "{% if isa_dt_par.data_ext_logi != isa_dt_ret.data_ext_logi -%}{{ isa.prefix }}_{{ instr_name }}{{isa_dt_par.data_ext_logi}}_{{isa_dt_ret.data_ext_logi}}(m0.m);{% else -%} m0.m;{% endif %}"
+    },
+    "trunc_float": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r,(_MM_FROUND_TO_ZERO |_MM_FROUND_NO_EXC));"
     },
     "wcvt_int_uint": {
         "format": "long",

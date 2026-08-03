@@ -1,4 +1,16 @@
 {
+    "abs": [
+        {
+            "instr_name": "abs",
+            "datatypes": [
+                "int32",
+                "int16",
+                "int8"
+            ],
+            "template": "arith_1arg",
+            "if": "defined(__AVX2__)"
+        }
+    ],
     "add": [
         {
             "instr_name": "add",
@@ -133,6 +145,22 @@
             "instr_name": "cmp",
             "datatypes": "all_float",
             "template": "cmpneq_float"
+        }
+    ],
+    "cvt": [
+        {
+            "instr_name": "cvttps_epi32",
+            "datatypes": [
+                "float32,int32"
+            ],
+            "template": "cvt"
+        },
+        {
+            "instr_name": "cvtepi32_ps",
+            "datatypes": [
+                "int32,float32"
+            ],
+            "template": "cvt"
         }
     ],
     "div": [
@@ -561,6 +589,13 @@
             "template": "testz_2argsf"
         }
     ],
+    "testz_2": [
+        {
+            "instr_name": "testz",
+            "datatypes": "all_datatypes",
+            "template": "testz_1arg"
+        }
+    ],
     "tomsk": [
         {
             "instr_name": "cast",
@@ -573,6 +608,13 @@
             "instr_name": "cast",
             "datatypes": "all_datatypes",
             "template": "toreg"
+        }
+    ],
+    "trunc": [
+        {
+            "instr_name": "round",
+            "datatypes": "all_float",
+            "template": "trunc_float"
         }
     ],
     "wcvt": [

@@ -1,4 +1,14 @@
 {
+    "abs": [
+        {
+            "datatypes": "all_float",
+            "template_ref": "tpl_generic_emu.abs_float"
+        },
+        {
+            "datatypes": "all_int",
+            "template_ref": "tpl_generic_emu.abs"
+        }
+    ],
     "add": [
         {
             "instr_name": "add",
@@ -15,9 +25,6 @@
                 "uint32",
                 "uint64"
             ],
-            "preferred_simd_ext": [
-                "avx512"
-            ],
             "template_ref": "tpl_generic_emu.arith_2args_u"
         }
     ],
@@ -25,17 +32,11 @@
         {
             "instr_name": "andb",
             "datatypes": "all_int_uint",
-            "preferred_simd_ext": [
-                "avx"
-            ],
             "template_ref": "tpl_generic_emu.logi_2args_e"
         },
         {
             "instr_name": "andb",
             "datatypes": "all_float",
-            "preferred_simd_ext": [
-                "avx512"
-            ],
             "template_ref": "tpl_generic_emu.logi_2args_e"
         },
         {
@@ -50,17 +51,11 @@
     "andb_k": [
         {
             "datatypes": "all_datatypes",
-            "preferred_simd_ext": [
-                "sse"
-            ],
             "template_ref": "tpl_generic_emu.andb_k_emu"
         },
         {
             "instr_name": "andb",
             "datatypes": "all_datatypes",
-            "preferred_simd_ext": [
-                "avx"
-            ],
             "template_ref": "tpl_generic_emu.logi_m_2args_e"
         }
     ],
@@ -68,34 +63,22 @@
         {
             "instr_name": "andnb",
             "datatypes": "all_int_uint",
-            "preferred_simd_ext": [
-                "avx"
-            ],
             "template_ref": "tpl_generic_emu.logi_2args_e"
         },
         {
             "instr_name": "andnb",
             "datatypes": "all_int_uint",
-            "preferred_simd_ext": [
-                "rvv"
-            ],
             "template_ref": "tpl_generic_emu.andnb_emu"
         }
     ],
     "andnb_k": [
         {
             "datatypes": "all_datatypes",
-            "preferred_simd_ext": [
-                "sse"
-            ],
             "template_ref": "tpl_generic_emu.andnb_k_emu"
         },
         {
             "instr_name": "andnb",
             "datatypes": "all_datatypes",
-            "preferred_simd_ext": [
-                "avx"
-            ],
             "template_ref": "tpl_generic_emu.logi_m_2args_e"
         },
         {
@@ -113,6 +96,12 @@
                 "float32"
             ],
             "template_ref": "tpl_generic_emu.atan_f32"
+        },
+        {
+            "datatypes": [
+                "float64"
+            ],
+            "template_ref": "tpl_generic_emu.atan_f64"
         }
     ],
     "blend": [
@@ -541,7 +530,6 @@
             ],
             "template_ref": "tpl_generic_emu.cos_f64"
         }
-
     ],
     "cvt": [
         {

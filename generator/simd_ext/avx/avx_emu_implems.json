@@ -1,4 +1,22 @@
 {
+    "cvt": [
+        {
+            "instr_name": "cvt",
+            "datatypes": [
+                "float64,int64"
+            ],
+            "template": "cvt_f64_i64",
+            "if": "defined(__AVX2__)"
+        },
+        {
+            "instr_name": "cvt",
+            "datatypes": [
+                "int64,float64"
+            ],
+            "template": "cvt_i64_f64",
+            "if": "defined(__AVX2__)"
+        }
+    ],
     "exp": [
         {
             "instr_name": "exp",
