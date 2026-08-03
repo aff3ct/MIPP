@@ -202,7 +202,7 @@ def main():
     parser.add_argument(
         "--mask-kind",
         type=str,
-        nargs="*",
+        nargs="+",
         choices=["unmasked", "mask", "maskz", "masks"],
         default=["unmasked", "mask", "maskz", "masks"],
         help="Generate tests for the specified mask kinds.",
@@ -313,7 +313,26 @@ def main():
                         gen_test_files_all_funcs(kind="c", lmul=(-int(ldiv)), mkind=mkind, N=args.num_iterations, mode=args.header_type, stats=stats)
                 print(f" Done ({time.perf_counter() - t0_step:.3f} s)!")
         else:
-            print(f"  ➔ Generating unified {kind.upper()} tests (templates [U, M, Z, S], LMUL, datatypes)...", end="", flush=True)
+            valid_masks = [m for m in args.mask_kind]
+            mask_strs = [m if m != "" else "unmasked" for m in valid_masks]
+            if kind == "obj":
+                mask_strs = [m for m in mask_strs if m == "unmasked"]
+            mask_str_formatted = "{" + ", ".join(mask_strs) + "}"
+
+            if kind == "cpp":
+                cpp_lmuls = []
+                for l in args.lmul:
+                    val = 1 if l in (0, 1) else l
+                    if val not in cpp_lmuls:
+                        cpp_lmuls.append(val)
+                if args.ldiv and 2 in args.ldiv:
+                    cpp_lmuls.append(-2)
+                lmul_str = "{" + ", ".join(map(str, cpp_lmuls)) + "}"
+            else:
+                obj_lmuls = [1] if any(l in (0, 1) for l in args.lmul) else []
+                lmul_str = "{" + ", ".join(map(str, obj_lmuls)) + "}"
+
+            print(f"  ➔ Generating unified {kind.upper()} tests [LMUL={lmul_str}, mask={mask_str_formatted}]...", end="", flush=True)
             t0_step = time.perf_counter()
             gen_test_files_unified_cpp(
                 kind=kind,
