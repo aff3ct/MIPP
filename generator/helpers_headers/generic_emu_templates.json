@@ -1077,7 +1077,6 @@
             "%r<tp>% m_pi_b2 = %set1<tp>%(-1.2246467991473532072e-16);",
             "%r<tp>% m_1_pi_div_sll_24 = %set1<tp>%(0.318309886183790671537767526745028724 / (1<<24));",
             "%r<tp>% one_sll_24 = %set1<tp>%((1<<24));",
-            "",
             "%r<tp>% m_pi_a = %set1<tp>%(-3.1415926218032836914);",
             "%r<tp>% m_pi_b = %set1<tp>%(-3.1786509424591713469e-08);",
             "%r<tp>% m_pi_c = %set1<tp>%(-1.2246467864107188502e-16);",
@@ -1096,6 +1095,23 @@
             "reduced_x = %fmadd<tp>%(quadrant_f, m_pi_a2, reduced_x);",
             "reduced_x = %fmadd<tp>%(quadrant_f, m_pi_b2, reduced_x);",
             "",
+            "%m<tp>% small_range_mask = %cmplt<tp>%(%abs<tp>%(original_x), trigrangemax2);",
+            "if(!%testz_2<tp>%(%notb_k<tp>%(small_range_mask))) {",
+            "\t%r<tp>% quadrant_high = %trunc<tp>%(%mul<tp>%(original_x, m_1_pi_div_sll_24));",
+            "\tquadrant_high = %mul<tp>%(quadrant_high, one_sll_24);",
+            "\t%r<tp>% quadrant_low = %round<tp>%(%fmsub<tp>%(original_x, m_1_pi, quadrant_high));",
+            "\t%r<c:int|b:64>% quadrant_high_i = %cvt<tp,c:int|b:64>%(quadrant_low);",
+            "\tresult = %fmadd<tp>%(quadrant_high, m_pi_a, original_x);",
+            "\tresult = %fmadd<tp>%(quadrant_low, m_pi_a, result);",
+            "\tresult = %fmadd<tp>%(quadrant_high, m_pi_b, result);",
+            "\tresult = %fmadd<tp>%(quadrant_low, m_pi_b, result);",
+            "\tresult = %fmadd<tp>%(quadrant_high, m_pi_c, result);",
+            "\tresult = %fmadd<tp>%(quadrant_low, m_pi_c, result);",
+            "\tresult = %fmadd<tp>%(%add<tp>%(quadrant_high, quadrant_low), m_pi_d, result);",
+            "\tquadrant = %blend<c:int|b:64>%(quadrant, quadrant_high_i, %cast_k<tp,c:int|b:64>%(small_range_mask));",
+            "\treduced_x = %blend<tp>%(reduced_x, result, small_range_mask);",
+            "}",
+            "",
             "x2 = %mul<tp>%(reduced_x, reduced_x);",
             "%r<c:int|b:64>% quadrant_mask = %andb<c:int|b:64>%(quadrant, %set1<c:int|b:64>%(1));",
             "%m<c:int|b:64>% quadrant_odd = %cmpeq<c:int|b:64>%(quadrant_mask, %set1<c:int|b:64>%(1));",
@@ -1105,7 +1121,6 @@
             "",
             "%r<tp>% x4 = %mul<tp>%(x2,x2);",
             "%r<tp>% x8 = %mul<tp>%(x4,x4);",
-            "",
             "%r<tp>% poly_a0 = %fmadd<tp>%(x2, %set1<tp>%(-7.97255955009037868891952e-18), %set1<tp>%(2.81009972710863200091251e-15));",
             "%r<tp>% poly_a1 = %fmadd<tp>%(x2, %set1<tp>%(-7.64712219118158833288484e-13), %set1<tp>%(1.60590430605664501629054e-10));",
             "%r<tp>% poly_b0 = %fmadd<tp>%(x2, %set1<tp>%(-2.50521083763502045810755e-08), %set1<tp>%(2.75573192239198747630416e-06));",
@@ -1113,14 +1128,12 @@
             "",
             "%r<tp>% poly_c0 = %fmadd<tp>%(x4, poly_a0, poly_a1);",
             "%r<tp>% poly_c1 = %fmadd<tp>%(x4, poly_b0, poly_b1);",
-            "",
             "result = %fmadd<tp>%(x8, poly_c0, poly_c1);",
             "result = %fmadd<tp>%(result, x2, %set1<tp>%(-0.166666666666666657414808));",
             "result = %fmadd<tp>%(x2, %mul<tp>%(result, reduced_x), reduced_x);",
             "",
             "%m<tp>% negzero = %cmpeq<tp>%(original_x, %set1<tp>%(-0.0));",
             "result = %blend<tp>%(original_x, result, negzero);",
-            "",
             "%r<tp>% ret = result;",
             "return ret;"
         ]
@@ -1133,18 +1146,18 @@
             "return %div<tp>%(sin_val, cos_val);"
         ]
     },
+    "testz_emu": {
+        "format": "long",
+        "code": [
+            "return %testz_2<b:tp|c:tp|m:tp>%(%andb_k<b:tp|c:tp|m:tp>%(m0, m1));"
+        ]
+    },
     "testz_2": {
         "format": "long",
         "code": [
             "%r<c:int|b:32|m:tp>% r32 = %set1<c:int|b:32|m:tp>%(-1);",
             "%m<c:int|b:32|m:tp>% m32 = %tomsk<c:int|b:32|m:tp>%(r32);",
             "return %testz<tp>%(m0, %cast_k<c:int|b:32|m:tp,tp>%(m32));"
-        ]
-    },
-    "testz_emu": {
-        "format": "long",
-        "code": [
-            "return %testz_2<b:tp|c:tp|m:tp>%(%andb_k<b:tp|c:tp|m:tp>%(m0, m1));"
         ]
     },
     "tomsk_emu": {

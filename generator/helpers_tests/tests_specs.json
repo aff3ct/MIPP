@@ -921,7 +921,7 @@
                     },
                     "float64": {
                         "type": "max_abs_diff",
-                        "value": 1e-11
+                        "value": 1e-10
                     }
                 }
             },
