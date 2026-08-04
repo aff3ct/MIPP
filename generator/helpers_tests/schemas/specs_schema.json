@@ -199,10 +199,17 @@
                     "enum": [
                         "exact",
                         "relative_percent",
-                        "max_abs_diff"
+                        "max_abs_diff",
+                        "hybrid"
                     ]
                 },
                 "value": {
+                    "type": "number"
+                },
+                "abs_value": {
+                    "type": "number"
+                },
+                "rel_value": {
                     "type": "number"
                 }
             },
