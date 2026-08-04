@@ -394,6 +394,20 @@
         "cast_k": {
             "comparison": "logical"
         },
+        "cvt": {
+            "domain": {
+                "by_datatype": {
+                    "int64": {
+                        "min": -2147483647,
+                        "max": 2147483647
+                    },
+                    "uint64": {
+                        "min": 0,
+                        "max": 2147483647
+                    }
+                }
+            }
+        },
         "cmpeq": {
             "comparison": "logical",
             "support_obj": true,
