@@ -58,6 +58,35 @@
             "return %cast<c:int|b:tp,tp>%(res);"
         ]
     },
+    "acos_f32": {
+        "format": "long",
+        "code": [
+            "%r<tp>% abs_d = %abs<tp>%(r0);",
+            "%m<tp>% o = %cmplt<tp>%(abs_d, %set1<tp>%(0.5f));",
+            "%r<tp>% x2_branch0 = %mul<tp>%(r0, r0);",
+            "%r<tp>% x2_branch1 = %mul<tp>%(%sub<tp>%(%set1<tp>%(1.0f), abs_d), %set1<tp>%(0.5f));",
+            "%r<tp>% x2 = %blend<tp>%(x2_branch0, x2_branch1, o);",
+            "%r<tp>% x = %blend<tp>%(abs_d, %sqrt<tp>%(x2), o);",
+            "x = %blend<tp>%(%set0<tp>%(), x, %cmpeq<tp>%(abs_d, %set1<tp>%(1.0f)));",
+            "",
+            "%r<tp>% u = %set1<tp>%(0.04197454825f);",
+            "u = %fmadd<tp>%(u, x2, %set1<tp>%(0.02424046025f));",
+            "u = %fmadd<tp>%(u, x2, %set1<tp>%(0.04547423869f));",
+            "u = %fmadd<tp>%(u, x2, %set1<tp>%(0.07495029271f));",
+            "u = %fmadd<tp>%(u, x2, %set1<tp>%(0.1666677296f));",
+            "u = %mul<tp>%(u, %mul<tp>%(x2, x));",
+            "",
+            "%r<tp>% sign_mask = %andb<tp>%(r0, %set1<tp>%(-0.0f));",
+            "%r<tp>% y_op2_a = %xorb<tp>%(x, sign_mask);",
+            "%r<tp>% y_op2_b = %xorb<tp>%(u, sign_mask);",
+            "%r<tp>% y_op2 = %add<tp>%(y_op2_a, y_op2_b);",
+            "%r<tp>% y = %sub<tp>%(%set1<tp>%(3.1415926535897932f/2), y_op2);",
+            "x = %add<tp>%(x, u);",
+            "%r<tp>% r = %blend<tp>%(y, %mul<tp>%(%set1<tp>%(2.0f), x), o);",
+            "%m<tp>% mask = %andnb_k<tp>%(o, %cmplt<tp>%(r0, %set0<tp>%()));",
+            "return %blend<tp>%(%sub<tp>%(%set1<tp>%(3.1415927410125732422f), r), r, mask);"
+        ]
+    },
     "asin_f32": {
         "format": "long",
         "code": [

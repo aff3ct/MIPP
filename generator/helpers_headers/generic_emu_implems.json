@@ -9,6 +9,14 @@
             "template_ref": "tpl_generic_emu.abs"
         }
     ],
+    "acos": [
+        {
+            "datatypes": [
+                "float32"
+            ],
+            "template_ref": "tpl_generic_emu.acos_f32"
+        }
+    ],
     "add": [
         {
             "instr_name": "add",
