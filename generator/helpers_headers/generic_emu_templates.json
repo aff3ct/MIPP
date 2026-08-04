@@ -87,6 +87,48 @@
             "return %blend<tp>%(%sub<tp>%(%set1<tp>%(3.1415927410125732422f), r), r, mask);"
         ]
     },
+    "acos_f64": {
+        "format": "long",
+        "code": [
+            "%r<tp>% abs_d = %abs<tp>%(r0);",
+            "%m<tp>% o = %cmplt<tp>%(abs_d, %set1<tp>%(0.5));",
+            "%r<tp>% x2_branch0 = %mul<tp>%(r0, r0);",
+            "%r<tp>% x2_branch1 = %mul<tp>%(%sub<tp>%(%set1<tp>%(1.0), abs_d), %set1<tp>%(0.5));",
+            "%r<tp>% x2 = %blend<tp>%(x2_branch0, x2_branch1, o);",
+            "%r<tp>% x = %blend<tp>%(abs_d, %sqrt<tp>%(x2), o);",
+            "x = %blend<tp>%(%set0<tp>%(), x, %cmpeq<tp>%(abs_d, %set1<tp>%(1.0)));",
+            "",
+            "%r<tp>% x4 = %mul<tp>%(x2, x2);",
+            "%r<tp>% x8 = %mul<tp>%(x4, x4);",
+            "%r<tp>% x16 = %mul<tp>%(x8,x8);",
+            "%r<tp>% p4_hi = %fmadd<tp>%(x2, %set1<tp>%(+0.3161587650653934628e-1), %set1<tp>%(-0.1581918243329996643e-1));",
+            "%r<tp>% p4_lo = %fmadd<tp>%(x2, %set1<tp>%(+0.1929045477267910674e-1), %set1<tp>%(+0.6606077476277170610e-2));",
+            "%r<tp>% poly_hi = %fmadd<tp>%(x4, p4_hi, p4_lo);",
+            "",
+            "%r<tp>% p8a_hi = %fmadd<tp>%(x2, %set1<tp>%(+0.1215360525577377331e-1), %set1<tp>%(+0.1388715184501609218e-1));",
+            "%r<tp>% p8a_lo = %fmadd<tp>%(x2, %set1<tp>%(+0.1735956991223614604e-1), %set1<tp>%(+0.2237176181932048341e-1));",
+            "%r<tp>% p8a = %fmadd<tp>%(x4, p8a_hi, p8a_lo);",
+            "",
+            "%r<tp>% p8b_hi = %fmadd<tp>%(x2, %set1<tp>%(+0.3038195928038132237e-1), %set1<tp>%(+0.4464285681377102438e-1));",
+            "%r<tp>% p8b_lo = %fmadd<tp>%(x2, %set1<tp>%(+0.7500000000378581611e-1), %set1<tp>%(+0.1666666666666497543e+0));",
+            "%r<tp>% p8b = %fmadd<tp>%(x4, p8b_hi, p8b_lo);",
+            "",
+            "%r<tp>% poly_lo = %fmadd<tp>%(x8, p8a, p8b);",
+            "%r<tp>% u = %fmadd<tp>%(x16, poly_hi, poly_lo);",
+            "",
+            "u = %mul<tp>%(u, %mul<tp>%(x2, x));",
+            "",
+            "%r<tp>% sign_mask = %andb<tp>%(r0, %set1<tp>%(-0.0f));",
+            "%r<tp>% y_op2_a = %xorb<tp>%(x, sign_mask);",
+            "%r<tp>% y_op2_b = %xorb<tp>%(u, sign_mask);",
+            "%r<tp>% y_op2 = %add<tp>%(y_op2_a, y_op2_b);",
+            "%r<tp>% y = %sub<tp>%(%set1<tp>%(3.141592653589793238462643383279502884/2), y_op2);",
+            "x = %add<tp>%(x, u);",
+            "%r<tp>% r = %blend<tp>%(y, %mul<tp>%(%set1<tp>%(2.0f), x), o);",
+            "%m<tp>% mask = %andnb_k<tp>%(o, %cmplt<tp>%(r0, %set0<tp>%()));",
+            "return %blend<tp>%(%sub<tp>%(%set1<tp>%(3.141592653589793116), r), r, mask);"
+        ]
+    },
     "asin_f32": {
         "format": "long",
         "code": [

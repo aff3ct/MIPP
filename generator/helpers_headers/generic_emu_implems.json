@@ -15,6 +15,12 @@
                 "float32"
             ],
             "template_ref": "tpl_generic_emu.acos_f32"
+        },
+                {
+            "datatypes": [
+                "float64"
+            ],
+            "template_ref": "tpl_generic_emu.acos_f64"
         }
     ],
     "add": [
