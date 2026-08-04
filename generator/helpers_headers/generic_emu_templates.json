@@ -186,6 +186,112 @@
             "return %xorb<tp>%(r, sign_mask);"
         ]
     },
+    "acosh_f32": {
+        "format": "long",
+        "code": [
+            "%r<tp>% x = r0;",
+            "%r<tp>% one = %set1<tp>%(1.0f);",
+            "%m<tp>% lt_one = %cmplt<tp>%(x, one);",
+            "%m<tp>% eq_one = %cmpeq<tp>%(x, one);",
+            "%m<tp>% gt_one = %cmpgt<tp>%(x, one);",
+            "%r<tp>% safe_x = %blend<tp>%(x, one, gt_one);",
+            "%r<tp>% inv_x = %div<tp>%(one, safe_x);",
+            "%r<tp>% sqrt_gt = %mul<tp>%(x, %sqrt<tp>%(%sub<tp>%(one, %mul<tp>%(inv_x, inv_x))));",
+            "%r<tp>% sqrt_le = %sqrt<tp>%(%mul<tp>%(%add<tp>%(x, one), %sub<tp>%(x, one)));",
+            "%r<tp>% sqrt_term = %blend<tp>%(sqrt_gt, sqrt_le, gt_one);",
+            "%r<tp>% arg_log = %add<tp>%(x, sqrt_term);",
+            "%r<tp>% res_log = %log<tp>%(arg_log);",
+            "%r<tp>% res = %blend<tp>%(%set0<tp>%( ), res_log, eq_one);",
+            "return %blend<tp>%(%set1<tp>%(0.0f/0.0f), res, lt_one);"
+        ]
+    },
+    "acosh_f64": {
+        "format": "long",
+        "code": [
+            "%r<tp>% x = r0;",
+            "%r<tp>% one = %set1<tp>%(1.0);",
+            "%m<tp>% lt_one = %cmplt<tp>%(x, one);",
+            "%m<tp>% eq_one = %cmpeq<tp>%(x, one);",
+            "%m<tp>% gt_one = %cmpgt<tp>%(x, one);",
+            "%r<tp>% safe_x = %blend<tp>%(x, one, gt_one);",
+            "%r<tp>% inv_x = %div<tp>%(one, safe_x);",
+            "%r<tp>% sqrt_gt = %mul<tp>%(x, %sqrt<tp>%(%sub<tp>%(one, %mul<tp>%(inv_x, inv_x))));",
+            "%r<tp>% sqrt_le = %sqrt<tp>%(%mul<tp>%(%add<tp>%(x, one), %sub<tp>%(x, one)));",
+            "%r<tp>% sqrt_term = %blend<tp>%(sqrt_gt, sqrt_le, gt_one);",
+            "%r<tp>% arg_log = %add<tp>%(x, sqrt_term);",
+            "%r<tp>% res_log = %log<tp>%(arg_log);",
+            "%r<tp>% res = %blend<tp>%(%set0<tp>%( ), res_log, eq_one);",
+            "return %blend<tp>%(%set1<tp>%(0.0/0.0), res, lt_one);"
+        ]
+    },
+    "asinh_f32": {
+        "format": "long",
+        "code": [
+            "%r<tp>% x = r0;",
+            "%r<tp>% abs_x = %abs<tp>%(x);",
+            "%r<tp>% one = %set1<tp>%(1.0f);",
+            "%m<tp>% gt_one = %cmpgt<tp>%(abs_x, one);",
+            "%r<tp>% safe_x = %blend<tp>%(abs_x, one, gt_one);",
+            "%r<tp>% inv_x = %div<tp>%(one, safe_x);",
+            "%r<tp>% sqrt_gt = %mul<tp>%(abs_x, %sqrt<tp>%(%fmadd<tp>%(inv_x, inv_x, one)));",
+            "%r<tp>% sqrt_le = %sqrt<tp>%(%fmadd<tp>%(abs_x, abs_x, one));",
+            "%r<tp>% sqrt_term = %blend<tp>%(sqrt_gt, sqrt_le, gt_one);",
+            "%r<tp>% arg_log = %add<tp>%(abs_x, sqrt_term);",
+            "%r<tp>% res = %log<tp>%(arg_log);",
+            "%r<tp>% sign_mask = %andb<tp>%(x, %set1<tp>%(-0.0f));",
+            "return %xorb<tp>%(res, sign_mask);"
+        ]
+    },
+    "asinh_f64": {
+        "format": "long",
+        "code": [
+            "%r<tp>% x = r0;",
+            "%r<tp>% abs_x = %abs<tp>%(x);",
+            "%r<tp>% one = %set1<tp>%(1.0);",
+            "%m<tp>% gt_one = %cmpgt<tp>%(abs_x, one);",
+            "%r<tp>% safe_x = %blend<tp>%(abs_x, one, gt_one);",
+            "%r<tp>% inv_x = %div<tp>%(one, safe_x);",
+            "%r<tp>% sqrt_gt = %mul<tp>%(abs_x, %sqrt<tp>%(%fmadd<tp>%(inv_x, inv_x, one)));",
+            "%r<tp>% sqrt_le = %sqrt<tp>%(%fmadd<tp>%(abs_x, abs_x, one));",
+            "%r<tp>% sqrt_term = %blend<tp>%(sqrt_gt, sqrt_le, gt_one);",
+            "%r<tp>% arg_log = %add<tp>%(abs_x, sqrt_term);",
+            "%r<tp>% res = %log<tp>%(arg_log);",
+            "%r<tp>% sign_mask = %andb<tp>%(x, %set1<tp>%(-0.0));",
+            "return %xorb<tp>%(res, sign_mask);"
+        ]
+    },
+    "atanh_f32": {
+        "format": "long",
+        "code": [
+            "%r<tp>% x = r0;",
+            "%r<tp>% abs_x = %abs<tp>%(x);",
+            "%r<tp>% one = %set1<tp>%(1.0f);",
+            "%r<tp>% half = %set1<tp>%(0.5f);",
+            "%r<tp>% num = %add<tp>%(one, abs_x);",
+            "%r<tp>% den = %sub<tp>%(one, abs_x);",
+            "%r<tp>% arg_log = %div<tp>%(num, den);",
+            "%r<tp>% res_log = %log<tp>%(arg_log);",
+            "%r<tp>% res = %mul<tp>%(res_log, half);",
+            "%r<tp>% sign_mask = %andb<tp>%(x, %set1<tp>%(-0.0f));",
+            "return %xorb<tp>%(res, sign_mask);"
+        ]
+    },
+    "atanh_f64": {
+        "format": "long",
+        "code": [
+            "%r<tp>% x = r0;",
+            "%r<tp>% abs_x = %abs<tp>%(x);",
+            "%r<tp>% one = %set1<tp>%(1.0);",
+            "%r<tp>% half = %set1<tp>%(0.5);",
+            "%r<tp>% num = %add<tp>%(one, abs_x);",
+            "%r<tp>% den = %sub<tp>%(one, abs_x);",
+            "%r<tp>% arg_log = %div<tp>%(num, den);",
+            "%r<tp>% res_log = %log<tp>%(arg_log);",
+            "%r<tp>% res = %mul<tp>%(res_log, half);",
+            "%r<tp>% sign_mask = %andb<tp>%(x, %set1<tp>%(-0.0));",
+            "return %xorb<tp>%(res, sign_mask);"
+        ]
+    },
     "atan_f32": {
         "format": "long",
         "code": [

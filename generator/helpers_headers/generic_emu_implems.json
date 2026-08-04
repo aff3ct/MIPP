@@ -23,6 +23,20 @@
             "template_ref": "tpl_generic_emu.acos_f64"
         }
     ],
+    "acosh": [
+        {
+            "datatypes": [
+                "float32"
+            ],
+            "template_ref": "tpl_generic_emu.acosh_f32"
+        },
+        {
+            "datatypes": [
+                "float64"
+            ],
+            "template_ref": "tpl_generic_emu.acosh_f64"
+        }
+    ],
     "add": [
         {
             "instr_name": "add",
@@ -118,6 +132,20 @@
             "template_ref": "tpl_generic_emu.asin_f64"
         }
     ],
+    "asinh": [
+        {
+            "datatypes": [
+                "float32"
+            ],
+            "template_ref": "tpl_generic_emu.asinh_f32"
+        },
+        {
+            "datatypes": [
+                "float64"
+            ],
+            "template_ref": "tpl_generic_emu.asinh_f64"
+        }
+    ],
     "atan": [
         {
             "datatypes": [
@@ -130,6 +158,20 @@
                 "float64"
             ],
             "template_ref": "tpl_generic_emu.atan_f64"
+        }
+    ],
+    "atanh": [
+        {
+            "datatypes": [
+                "float32"
+            ],
+            "template_ref": "tpl_generic_emu.atanh_f32"
+        },
+        {
+            "datatypes": [
+                "float64"
+            ],
+            "template_ref": "tpl_generic_emu.atanh_f64"
         }
     ],
     "blend": [

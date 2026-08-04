@@ -412,6 +412,18 @@
             "template": "round_float"
         }
     ],
+    "rshift": [
+        {
+            "instr_name": "srli",
+            "datatypes": [
+                "int16",
+                "int32",
+                "int64"
+            ],
+            "template": "sxl",
+            "if": "defined(__AVX2__)"
+        }
+    ],
     "rsqrt": [
         {
             "instr_name": "rsqrt",
