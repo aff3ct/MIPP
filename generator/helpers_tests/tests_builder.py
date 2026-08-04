@@ -400,6 +400,14 @@ class TestsBuilderEngine:
         if not spec or spec.get("type") == "exact":
             return "(T)0"
 
+        # If the spec is a pure "default" wrapper (no direct leaf keys or by_datatype/by_*),
+        # unwrap it. Example: {"default": {"type": "relative_percent", "value": 0.01}}
+        content_keys = self._TOLERANCE_LEAF_KEYS | set(self._BY_RUNTIME_KEYS.keys()) | {"by_datatype"}
+        if "default" in spec and not any(k in spec for k in content_keys):
+            spec = spec["default"]
+            if not spec or spec.get("type") == "exact":
+                return "(T)0"
+
         # --- by_datatype: select the sub-spec for the current datatype ---
         if "by_datatype" in spec:
             by_dt = spec["by_datatype"]
