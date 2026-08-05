@@ -74,6 +74,12 @@
       "horizontal": false,
       "mask_support": "all_mask"
     },
+    "atan2": {
+      "proto_ref": "ret_reg_2args_reg",
+      "datatypes": "all_float",
+      "horizontal": false,
+      "mask_support": "all_mask"
+    },
     "atanh": {
       "proto_ref": "ret_reg_1arg_reg",
       "datatypes": "all_float",

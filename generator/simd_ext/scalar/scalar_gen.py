@@ -539,6 +539,9 @@ def scalar_gen(include_manager):
 #define ATANF(x) (atanf(x))
 #define ATAND(x) (atan(x))
 
+#define ATAN2F(x, y) (atan2f(x, y))
+#define ATAN2D(x, y) (atan2(x, y))
+
 #define COSHF(x) (coshf(x))
 #define COSHD(x) (cosh(x))
 

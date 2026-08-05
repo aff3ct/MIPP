@@ -237,6 +237,24 @@
           ]
         }
     ],
+    "atan2": [
+        {
+          "type": "element-wide",
+          "datatypes": "float32",
+          "mask_variants": [],
+          "implem": [
+            "res.r[i] = %!pred_cond!% ATAN2F(r0.r[i], r1.r[i]) %!pred_alt!%;"
+          ]
+        },
+        {
+          "type": "element-wide",
+          "datatypes": "float64",
+          "mask_variants": [],
+          "implem": [
+            "res.r[i] = %!pred_cond!% ATAN2D(r0.r[i], r1.r[i]) %!pred_alt!%;"
+          ]
+        }
+    ],
     "atanh": [
         {
           "type": "element-wide",

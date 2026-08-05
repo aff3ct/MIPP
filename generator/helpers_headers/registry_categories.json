@@ -58,6 +58,7 @@
         "asin",
         "asinh",
         "atan",
+        "atan2",
         "atanh",
         "cos",
         "cosh",

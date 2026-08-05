@@ -369,6 +369,25 @@
             },
             "comparison": "tolerance"
         },
+        "atan2": {
+            "domain": {
+                "min": -10.0,
+                "max": 10.0
+            },
+            "tolerance": {
+                "by_datatype": {
+                    "float32": {
+                        "type": "max_abs_diff",
+                        "value": 1e-06
+                    },
+                    "float64": {
+                        "type": "max_abs_diff",
+                        "value": 1e-10
+                    }
+                }
+            },
+            "comparison": "tolerance"
+        },
         "atanh": {
             "domain": {
                 "min": -0.99,
