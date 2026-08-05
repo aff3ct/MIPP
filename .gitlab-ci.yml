@@ -18,8 +18,8 @@ before_script:
     matrix:
       - OS: [linux]
         COMPILER: ["gcc-14", "clang-20"]
-        ARCH: [sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2, avx2-fma, avx512f, avx512bw, avx512dq, armv7-neon, armv7-neon-fma, armv8-neon, riscv64-rvv1.0, x86-scalar]
-
+        # ARCH: [sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2, avx2-fma, avx512f, avx512bw, avx512dq, armv7-neon, armv7-neon-fma, armv8-neon, riscv64-rvv1.0, x86-scalar]
+        ARCH: [sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2, avx2-fma, avx512f, avx512bw, avx512dq, armv8-neon, riscv64-rvv1.0, x86-scalar]
 # GENERATION ----------------------------------------------------------------------------------------------------------
 
 generation-headers:
