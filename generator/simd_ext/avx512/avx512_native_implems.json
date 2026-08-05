@@ -1054,6 +1054,20 @@
             "if": "defined(__AVX512DQ__)"
         }
     ],
+    "trunc": [
+        {
+            "instr_name": "round",
+            "datatypes": "all_float",
+            "template": "truncf",
+            "if": "(defined(__MIC__) || defined(__KNCNI__))"
+        },
+        {
+            "instr_name": "roundscale",
+            "datatypes": "all_float",
+            "template": "trunc",
+            "if": "defined(__AVX512F__) && !defined(__MIC__) && !defined(__KNCNI__)"
+        }
+    ],
     "wcvt": [
         {
             "instr_name": "cvt",

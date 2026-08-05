@@ -311,6 +311,18 @@
             "return (int32_t)_{{ instr_name }}_{{ isa_dt_par.msk_short }}_u8(m0.m, m1.m);"
         ]
     },
+    "trunc": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, _MM_FROUND_TO_ZERO | _MM_FROUND_NO_EXC);"
+        ]
+    },
+    "truncf": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, _MM_FROUND_TO_ZERO | _MM_FROUND_NO_EXC, _MM_EXPADJ_NONE);"
+        ]
+    },
     "wcvt_int_uint": {
         "format": "long",
         "code": [
