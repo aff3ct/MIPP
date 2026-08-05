@@ -160,6 +160,20 @@
             "template_ref": "tpl_generic_emu.atan_f64"
         }
     ],
+    "atan2": [
+        {
+            "datatypes": [
+                "float32"
+            ],
+            "template_ref": "tpl_generic_emu.atan2_f32"
+        },
+        {
+            "datatypes": [
+                "float64"
+            ],
+            "template_ref": "tpl_generic_emu.atan2_f64"
+        }
+    ],
     "atanh": [
         {
             "datatypes": [
@@ -1368,20 +1382,6 @@
                 "float64"
             ],
             "template_ref": "tpl_generic_emu.tan_f64"
-        }
-    ],
-    "atan2": [
-        {
-            "datatypes": [
-                "float32"
-            ],
-            "template_ref": "tpl_generic_emu.atan2_f32"
-        },
-        {
-            "datatypes": [
-                "float64"
-            ],
-            "template_ref": "tpl_generic_emu.atan2_f64"
         }
     ],
     "tanh": [
