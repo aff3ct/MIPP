@@ -618,12 +618,6 @@
     "cosh": [
         {
             "datatypes": [
-                "float32"
-            ],
-            "template_ref": "tpl_generic_emu.cosh_f32"
-        },
-        {
-            "datatypes": [
                 "float64"
             ],
             "template_ref": "tpl_generic_emu.cosh_f64"
@@ -1335,12 +1329,6 @@
         }
     ],
     "sinh": [
-        {
-            "datatypes": [
-                "float32"
-            ],
-            "template_ref": "tpl_generic_emu.sinh_f32"
-        },
         {
             "datatypes": [
                 "float64"

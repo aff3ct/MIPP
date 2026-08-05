@@ -791,26 +791,6 @@
             "return %fmadd<tp>%(x2, %mul<tp>%(result, reduced_x), reduced_x);"
         ]
     },
-    "cosh_f32": {
-        "format": "long",
-        "code": [
-            "%r<tp>% input_x = r0;",
-            "",
-            "/* 1. Input Processing & Range Validation */",
-            "%r<tp>% abs_x = %abs<tp>%(input_x);",
-            "",
-            "/* 2. Exponential Evaluation & Formula Computation */",
-            "%r<c:float|b:64>% big_exp_x = %exp<c:float|b:64>%(%cvt<tp,c:float|b:64>%(abs_x));",
-            "%r<tp>% exp_x = %cvt<c:float|b:64,tp>%(big_exp_x);",
-            "%r<tp>% exp_x_inv = %div<tp>%(%set1<tp>%(1.0f), exp_x);",
-            "%r<tp>% result = %mul<tp>%(%add<tp>%(exp_x, exp_x_inv), %set1<tp>%(0.5f));",
-            "",
-            "/* 3. Overflow & Boundary Handling */",
-            "%m<tp>% overflow_mask = %cmpgt<tp>%(abs_x, %set1<tp>%(89.0f));",
-            "%r<tp>% inf_val = %div<tp>%(%set1<tp>%(1.0f), %set1<tp>%(0.0f));",
-            "return %blend<tp>%(inf_val, result, overflow_mask);"
-        ]
-    },
     "cosh_f64": {
         "format": "long",
         "code": [
@@ -1519,30 +1499,6 @@
             "/* 4. Negative Zero Preservation */",
             "%m<tp>% is_neg_zero_mask = %cmpeq<tp>%(input_x, %set1<tp>%(-0.0));",
             "return %blend<tp>%(input_x, result, is_neg_zero_mask);"
-        ]
-    },
-    "sinh_f32": {
-        "format": "long",
-        "code": [
-            "%r<tp>% input_x = r0;",
-            "",
-            "/* 1. Input Processing & Range Validation */",
-            "%r<tp>% abs_x = %abs<tp>%(input_x);",
-            "",
-            "/* 2. Exponential Evaluation & Formula Computation */",
-            "%r<c:float|b:64>% big_exp_x = %exp<c:float|b:64>%(%cvt<tp,c:float|b:64>%(abs_x));",
-            "%r<tp>% exp_x = %cvt<c:float|b:64,tp>%(big_exp_x);",
-            "%r<tp>% exp_x_inv = %div<tp>%(%set1<tp>%(1.0f), exp_x);",
-            "%r<tp>% result = %mul<tp>%(%sub<tp>%(exp_x, exp_x_inv), %set1<tp>%(0.5f));",
-            "",
-            "/* 3. Overflow & Boundary Handling */",
-            "%m<tp>% overflow_mask = %cmpgt<tp>%(abs_x, %set1<tp>%(89.0f));",
-            "%r<tp>% inf_val = %div<tp>%(%set1<tp>%(1.0f), %set1<tp>%(0.0f));",
-            "result = %blend<tp>%(inf_val, result, overflow_mask);",
-            "",
-            "/* 4. Sign Restoration & Return */",
-            "%r<tp>% sign_bit = %andb<tp>%(input_x, %set1<tp>%(-0.0f));",
-            "return %xorb<tp>%(result, sign_bit);"
         ]
     },
     "sinh_f64": {
