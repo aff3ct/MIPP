@@ -726,6 +726,42 @@
             "template": "float_set0"
         }
     ],
+    "neg": [
+        {
+            "instr_name": "neg",
+            "datatypes": "all_int",
+            "template": "arith_1arg"
+        },
+        {
+            "instr_name": "fneg",
+            "datatypes": "all_float",
+            "template": "arith_1arg"
+        },
+        {
+            "instr_name": "neg",
+            "datatypes": "all_int",
+            "template": "arith_1arg_msk",
+            "version": "mask"
+        },
+        {
+            "instr_name": "fneg",
+            "datatypes": "all_float",
+            "template": "arith_1arg_msk",
+            "version": "mask"
+        },
+        {
+            "instr_name": "neg",
+            "datatypes": "all_int",
+            "template": "arith_1arg_msks",
+            "version": "masks"
+        },
+        {
+            "instr_name": "fneg",
+            "datatypes": "all_float",
+            "template": "arith_1arg_msks",
+            "version": "masks"
+        }
+    ],
     "sqrt": [
         {
             "instr_name": "fsqrt",

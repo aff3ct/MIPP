@@ -315,6 +315,15 @@
         "horizontal": false,
         "mask_support": "all_mask"
     },
+    "neg": {
+        "proto_ref": "ret_reg_1arg_reg",
+        "datatypes": [
+            "all_int",
+            "all_float"
+        ],
+        "horizontal": false,
+        "mask_support": "all_mask"
+    },
     "notb": {
         "proto_ref": "ret_reg_1arg_reg",
         "datatypes": "all_datatypes",

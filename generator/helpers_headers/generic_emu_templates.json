@@ -1041,6 +1041,18 @@
         "format": "long",
         "code": "return %blend<tp>%(r0, r1, %cmplt<tp>%(r0, r1));"
     },
+    "neg_s": {
+        "format": "long",
+        "code": [
+            "return %sub<tp>%(%set0<tp>%( ), r0);"
+        ]
+    },
+    "neg_f": {
+        "format": "long",
+        "code": [
+            "return %xorb<tp>%(r0, %set1<tp>%(-0.0));"
+        ]
+    },
     "msb-16": {
         "format": "long",
         "code": [
@@ -1372,12 +1384,110 @@
             "return ret;"
         ]
     },
-    "tan": {
+    "tan_f32": {
         "format": "long",
         "code": [
-            "%r<tp>% sin_val = %sin<tp>%(r0);",
-            "%r<tp>% cos_val = %cos<tp>%(r0);",
-            "return %div<tp>%(sin_val, cos_val);"
+            "%r<tp>% d = r0;",
+            "%r<c:int|b:32>% q;",
+            "%m<tp>% o;",
+            "%r<tp>% u, s, x;",
+            "",
+            "q = %cvt<tp,c:int|b:32>%(%round<tp>%(%mul<tp>%(d, %set1<tp>%(2 * 0.318309886183790671537767526745028724f))));",
+            "u = %cvt<c:int|b:32,tp>%(q);",
+            "x = %fmadd<tp>%(u, %set1<tp>%(-3.1414794921875f*0.5f), d);",
+            "x = %fmadd<tp>%(u, %set1<tp>%(-0.00011315941810607910156f* 0.5f), x);",
+            "x = %fmadd<tp>%(u, %set1<tp>%(-1.9841872589410058936e-09f * 0.5f), x);",
+            "%m<tp>% g = %cmplt<tp>%(%abs<tp>%(d), %set1<tp>%(125.0f*0.5f));",
+            "",
+            "if(!%testz_2<tp>%(%notb_k<tp>%(g))) {",
+            "%r<c:int|b:32>% q2 = %cvt<tp,c:int|b:32>%(%round<tp>%(%mul<tp>%(d, %set1<tp>%(2 * 0.318309886183790671537767526745028724f))));",
+            "s = %cvt<c:int|b:32,tp>%(q);",
+            "u = %fmadd<tp>%(s, %set1<tp>%(-3.140625f * 0.5f), d);",
+            "u = %fmadd<tp>%(s, %set1<tp>%(-0.0009670257568359375f * 0.5f), u);",
+            "u = %fmadd<tp>%(s, %set1<tp>%(-6.2771141529083251953e-07f * 0.5f), u);",
+            "u = %fmadd<tp>%(s, %set1<tp>%(-1.2154201256553420762e-10f * 0.5f), u);",
+            "",
+            "q = %blend<c:int|b:32>%(q, q2, %cast_k<tp,c:int|b:32>%(g));",
+            "x = %blend<tp>%(x, u, g);",
+            "}",
+            "",
+            "s = %mul<tp>%(x,x);",
+            "",
+            "%r<c:int|b:32>% o_op2 = %set1<c:int|b:32>%(1);",
+            "%r<c:int|b:32>% o_op1 = %andb<c:int|b:32>%(q, o_op2);",
+            "%m<c:int|b:32>% o_i = %cmpeq<c:int|b:32>%(o_op1, o_op2);",
+            "%m<tp>% o_m = %cast_k<c:int|b:32,tp>%(o_i);",
+            "%r<tp>% o_reg = %toreg<tp>%(o_m);",
+            "x = %xorb<tp>%(x, %andb<tp>%(o_reg, %set1<tp>%(-0.0f)));",
+            "",
+            "%r<tp>% s2 = %mul<tp>%(s, s);",
+            "%r<tp>% s4 = %mul<tp>%(s2, s2);",
+            "%r<tp>% p01 = %fmadd<tp>%(s, %set1<tp>%(0.00927245803177356719970703f), %set1<tp>%(0.00331984995864331722259521f));",
+            "%r<tp>% p23 = %fmadd<tp>%(s, %set1<tp>%(0.0242998078465461730957031f), %set1<tp>%(0.0534495301544666290283203f));",
+            "%r<tp>% p45 = %fmadd<tp>%(s, %set1<tp>%(0.133383005857467651367188f), %set1<tp>%(0.333331853151321411132812f));",
+            "%r<tp>% p2345 = %fmadd<tp>%(s2, p23, p45);",
+            "u = %fmadd<tp>%(s4, p01, p2345);",
+            "",
+            "u = %fmadd<tp>%(s, %mul<tp>%(u, x), x);",
+            "%r<tp>% inv_u = %div<tp>%(%set1<tp>%(1.0f), u);",
+            "return %blend<tp>%(inv_u, u, o_m);"
+        ]
+    },
+    "tan_f64": {
+        "format": "long",
+        "code": [
+            "%r<tp>% d = r0;",
+            "%r<tp>% u, s, x, y;",
+            "%m<tp>% o_m;",
+            "%r<c:int|b:64>% ql;",
+            "",
+            "%r<tp>% dql = %round<tp>%(%mul<tp>%(d, %set1<tp>%(2 * 0.318309886183790671537767526745028724)));",
+            "ql = %cvt<tp,c:int|b:64>%(dql);",
+            "s = %fmadd<tp>%(dql, %set1<tp>%(-3.141592653589793116 * 0.5), d);",
+            "s = %fmadd<tp>%(dql, %set1<tp>%(-1.2246467991473532072e-16 * 0.5), s);",
+            "%m<tp>% g = %cmplt<tp>%(%abs<tp>%(d), %set1<tp>%(15.0));",
+            "",
+            "if(!%testz_2<tp>%(%notb_k<tp>%(g))) {",
+            "%r<tp>% dqh = %trunc<tp>%(%mul<tp>%(d, %set1<tp>%(2 * 0.318309886183790671537767526745028724 / (1<<24))));",
+            "dqh = %mul<tp>%(dqh, %set1<tp>%(1<<24));",
+            "%r<tp>% dql2 = %round<tp>%(%sub<tp>%(%mul<tp>%(d, %set1<tp>%(2 * 0.318309886183790671537767526745028724)), dqh));",
+            "u = %fmadd<tp>%(dqh, %set1<tp>%(-3.1415926218032836914 * 0.5), d);",
+            "u = %fmadd<tp>%(dql2, %set1<tp>%(-3.1415926218032836914 * 0.5), u);",
+            "u = %fmadd<tp>%(dqh, %set1<tp>%(-3.1786509424591713469e-08 * 0.5), u);",
+            "u = %fmadd<tp>%(dql2, %set1<tp>%(-3.1786509424591713469e-08 * 0.5), u);",
+            "u = %fmadd<tp>%(dqh, %set1<tp>%(-1.2246467864107188502e-16 * 0.5), u);",
+            "u = %fmadd<tp>%(dql2, %set1<tp>%(-1.2246467864107188502e-16 * 0.5), u);",
+            "u = %fmadd<tp>%(%add<tp>%(dqh, dql2), %set1<tp>%(-1.2736634327021899816e-24 * 0.5), u);",
+            "ql = %blend<c:int|b:64>%(ql, %cvt<tp,c:int|b:64>%(dql2), %cast_k<tp,c:int|b:64>%(g));",
+            "s = %blend<tp>%(s, u, g);",
+            "}",
+            "",
+            "x = %mul<tp>%(s, %set1<tp>%(0.5));",
+            "s = %mul<tp>%(x, x);",
+            "%r<tp>% s2 = %mul<tp>%(s, s);",
+            "%r<tp>% s4 = %mul<tp>%(s2, s2);",
+            "%r<tp>% p2_hi_a = %fmadd<tp>%(s, %set1<tp>%(+0.3245098826639276316e-3), %set1<tp>%(+0.5619219738114323735e-3));",
+            "%r<tp>% p2_hi_b = %fmadd<tp>%(s, %set1<tp>%(+0.1460781502402784494e-2), %set1<tp>%(+0.3591611540792499519e-2));",
+            "%r<tp>% p2_hi = %fmadd<tp>%(s2, p2_hi_a, p2_hi_b);",
+            "",
+            "%r<tp>% p2_lo_a = %fmadd<tp>%(s, %set1<tp>%(+0.8863268409563113126e-2), %set1<tp>%(+0.2186948728185535498e-1));",
+            "%r<tp>% p2_lo_b = %fmadd<tp>%(s, %set1<tp>%(+0.5396825399517272970e-1), %set1<tp>%(+0.1333333333330500581e+0));",
+            "%r<tp>% p2_lo = %fmadd<tp>%(s2, p2_lo_a, p2_lo_b);",
+            "u = %fmadd<tp>%(s4, p2_hi, p2_lo);",
+            "u = %fmadd<tp>%(u, s, %set1<tp>%(+0.3333333333333343695e+0));",
+            "u = %fmadd<tp>%(s, %mul<tp>%(u, x), x);",
+            "",
+            "y = %fmadd<tp>%(u, u, %set1<tp>%(-1.0));",
+            "x = %mul<tp>%(u, %set1<tp>%(-2.0));",
+            "",
+            "%r<c:int|b:64>% o_op2 = %set1<c:int|b:64>%(1);",
+            "%r<c:int|b:64>% o_op1 = %andb<c:int|b:64>%(ql, o_op2);",
+            "%m<c:int|b:64>% o_i = %cmpeq<c:int|b:64>%(o_op1, o_op2);",
+            "o_m = %cast_k<c:int|b:64,tp>%(o_i);",
+            "",
+            "%r<tp>% num = %blend<tp>%(%neg<tp>%(y), x, o_m);",
+            "%r<tp>% den = %blend<tp>%(x, y, o_m);",
+            "return %div<tp>%(num, den);"
         ]
     },
     "testz_emu": {

@@ -895,6 +895,19 @@
             ]
         }
     ],
+    "neg": [
+        {
+            "type": "element-wide",
+            "datatypes": [
+                "all_int",
+                "all_float"
+            ],
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% -r0.r[i] %!pred_alt!%;"
+            ]
+        }
+    ],
     "notb": [
         {
             "type": "element-wide",

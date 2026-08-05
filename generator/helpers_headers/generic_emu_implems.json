@@ -16,7 +16,7 @@
             ],
             "template_ref": "tpl_generic_emu.acos_f32"
         },
-                {
+        {
             "datatypes": [
                 "float64"
             ],
@@ -926,6 +926,16 @@
             "template_ref": "tpl_generic_emu.msb-8"
         }
     ],
+    "neg": [
+        {
+            "datatypes": "all_int",
+            "template_ref": "tpl_generic_emu.neg_s"
+        },
+        {
+            "datatypes": "all_float",
+            "template_ref": "tpl_generic_emu.neg_f"
+        }
+    ],
     "notb": [
         {
             "datatypes": "all_datatypes",
@@ -1348,8 +1358,16 @@
     ],
     "tan": [
         {
-            "datatypes": "all_float",
-            "template_ref": "tpl_generic_emu.tan"
+            "datatypes": [
+                "float32"
+            ],
+            "template_ref": "tpl_generic_emu.tan_f32"
+        },
+        {
+            "datatypes": [
+                "float64"
+            ],
+            "template_ref": "tpl_generic_emu.tan_f64"
         }
     ],
     "tanh": [

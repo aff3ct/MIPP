@@ -63,6 +63,7 @@
         "cosh",
         "exp",
         "log",
+        "neg",
         "pow",
         "pow2",
         "round",
