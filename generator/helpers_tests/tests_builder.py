@@ -465,71 +465,6 @@ class TestsBuilderEngine:
         else:
             return "T"
 
-    def resolve_tolerance_expr(self, func_name: str, dt_cpp: str, ref_var: str = "res2") -> str:
-        """Returns an inline C++ expression for tolerance computation.
-
-        Used internally by render_tolerance_declaration(). Does not handle by_define.
-        """
-        func_spec = self.specs["functions"].get(func_name, {})
-        tol_spec = func_spec.get("tolerance")
-        if not tol_spec:
-            tol_spec = self.specs.get("default", {}).get("tolerance", {"type": "exact"})
-
-        # If exact type, no tolerance needed (should not be called in this case)
-        if isinstance(tol_spec, dict) and tol_spec.get("type") == "exact":
-            return "(T)0"
-
-        if isinstance(tol_spec, dict) and "by_datatype" in tol_spec:
-            by_dt = tol_spec["by_datatype"]
-            default_spec = tol_spec.get("default", {"type": "relative_percent", "value": 0.001})
-            f32_spec = by_dt.get("float32", default_spec)
-            f64_spec = by_dt.get("float64", default_spec)
-
-            def _make_expr(spec: dict, cast_type: str, c_cast: str) -> str:
-                ttype = spec.get("type", "relative_percent")
-                if ttype == "relative_percent":
-                    val = spec.get("value", 0.001)
-                    return f"({cast_type})(abs_diff::abs_diff({ref_var}) * ({c_cast}){val})"
-                elif ttype == "hybrid":
-                    abs_val = spec.get("abs_value", 1e-6 if c_cast == "float" else 1e-12)
-                    rel_val = spec.get("rel_value", 1e-6 if c_cast == "float" else 1e-12)
-                    return f"({cast_type})(({c_cast}){abs_val} + abs_diff::abs_diff({ref_var}) * ({c_cast}){rel_val})"
-                else:
-                    val = spec.get("value", 0.001)
-                    return f"({cast_type})(({c_cast}){val})"
-
-            f32_expr = _make_expr(f32_spec, dt_cpp, "float")
-            f64_expr = _make_expr(f64_spec, dt_cpp, "double")
-
-            if dt_cpp in ("float32_t", "float"):
-                return f32_expr
-            elif dt_cpp in ("float64_t", "double"):
-                return f64_expr
-            else:
-                return f"(std::is_same_v<{dt_cpp}, float> ? {f32_expr} : {f64_expr})"
-        else:
-            ttype = tol_spec.get("type", "relative_percent")
-            if ttype == "hybrid":
-                abs_val = tol_spec.get("abs_value", 1e-6)
-                rel_val = tol_spec.get("rel_value", 1e-6)
-                f32_expr = f"({dt_cpp})((float){abs_val} + abs_diff::abs_diff({ref_var}) * (float){rel_val})"
-                f64_expr = f"({dt_cpp})((double){abs_val} + abs_diff::abs_diff({ref_var}) * (double){rel_val})"
-            else:
-                val = tol_spec.get("value", 0.001)
-                f32_expr = (f"({dt_cpp})(abs_diff::abs_diff({ref_var}) * (float){val})"
-                            if ttype == "relative_percent" else f"({dt_cpp})((float){val})")
-                f64_expr = (f"({dt_cpp})(abs_diff::abs_diff({ref_var}) * (double){val})"
-                            if ttype == "relative_percent" else f"({dt_cpp})((double){val})")
-            if dt_cpp in ("float32_t", "float"):
-                return f32_expr
-            elif dt_cpp in ("float64_t", "double"):
-                return f64_expr
-            else:
-                return f"(std::is_same_v<{dt_cpp}, float> ? {f32_expr} : {f64_expr})"
-        # Strip by_define from tol_spec if present (handled at a higher level)
-        if isinstance(tol_spec, dict) and "by_define" in tol_spec:
-            tol_spec = {k: v for k, v in tol_spec.items() if k != "by_define"}
-        return self._tol_spec_to_expr(tol_spec, dt_cpp, ref_var)
 
     def render_tolerance_declaration(self, func_name: str, dt_cpp: str, ref_var: str,
                                      tol_var: str = "tol",
@@ -573,42 +508,6 @@ class TestsBuilderEngine:
         expr = self._tol_spec_to_expr(tol_spec, dt_cpp, ref_var)
         return [f"{indent}auto {tol_var} = {expr};"]
 
-    def _tol_spec_to_expr(self, spec: dict, dt_cpp: str, ref_var: str) -> str:
-        """Converts a tolerance spec dict into an inline C++ expression."""
-        if not spec or spec.get("type") == "exact":
-            return "(T)0"
-        ttype = spec.get("type", "relative_percent")
-        if ttype == "hybrid":
-            abs_val_f32 = spec.get("abs_value", 1e-6)
-            rel_val_f32 = spec.get("rel_value", 1e-6)
-            abs_val_f64 = spec.get("abs_value", 1e-12)
-            rel_val_f64 = spec.get("rel_value", 1e-12)
-            if dt_cpp in ("float32_t", "float"):
-                return f"({dt_cpp})((float){abs_val_f32} + abs_diff::abs_diff({ref_var}) * (float){rel_val_f32})"
-            elif dt_cpp in ("float64_t", "double"):
-                return f"({dt_cpp})((double){abs_val_f64} + abs_diff::abs_diff({ref_var}) * (double){rel_val_f64})"
-            else:
-                return (f"(std::is_same_v<{dt_cpp}, float> "
-                        f"? ({dt_cpp})((float){abs_val_f32} + abs_diff::abs_diff({ref_var}) * (float){rel_val_f32}) "
-                        f": ({dt_cpp})((double){abs_val_f64} + abs_diff::abs_diff({ref_var}) * (double){rel_val_f64}))")
-        elif ttype == "relative_percent":
-            val = spec.get("value", 0.001)
-            if dt_cpp in ("float32_t", "float"):
-                return f"({dt_cpp})(abs_diff::abs_diff({ref_var}) * (float){val})"
-            elif dt_cpp in ("float64_t", "double"):
-                return f"({dt_cpp})(abs_diff::abs_diff({ref_var}) * (double){val})"
-            else:
-                return (f"(std::is_same_v<{dt_cpp}, float> "
-                        f"? ({dt_cpp})(abs_diff::abs_diff({ref_var}) * (float){val}) "
-                        f": ({dt_cpp})(abs_diff::abs_diff({ref_var}) * (double){val}))")
-        else:
-            val = spec.get("value", 0.001)
-            if dt_cpp in ("float32_t", "float"):
-                return f"({dt_cpp})((float){val})"
-            elif dt_cpp in ("float64_t", "double"):
-                return f"({dt_cpp})((double){val})"
-            else:
-                return f"(std::is_same_v<{dt_cpp}, float> ? ({dt_cpp})((float){val}) : ({dt_cpp})((double){val}))"
 
     def render_cpp_validation_block(self, func_name: str, proto_ref: str, is_product: bool = False, r_var: str = "rres", s_var: str = "sres", adapter: DialectAdapter = None) -> List[str]:
         func_spec = self.specs.get("functions", {}).get(func_name, {})
