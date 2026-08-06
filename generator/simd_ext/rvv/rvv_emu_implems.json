@@ -306,7 +306,7 @@
             "template": "hadd_hmax_uint"
         },
         {
-            "instr_name": "fredosum",
+            "instr_name": "fredusum",
             "datatypes": "all_float",
             "template": "hadd_hmax_float"
         },
@@ -317,7 +317,7 @@
             "version": "maskz"
         },
         {
-            "instr_name": "fredosum",
+            "instr_name": "fredusum",
             "datatypes": "all_float",
             "template": "hadd_hmax_float_mskz",
             "version": "maskz"

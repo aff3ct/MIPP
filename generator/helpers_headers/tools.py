@@ -274,6 +274,22 @@ def _parse_lmul_expression(expr, dt_par, dt_ret, isa, base_lmul):
             print("Panic: invalid base_lmul expression '" + expr + "'.")
             exit(-1)
 
+def _extract_mask_from_dt_info(input_str):
+    masked_ver = False
+    for part in input_str.split("|"):
+        part = part.strip()
+        if part.startswith("mk:"):
+            val = part[3:].strip()
+            if val == "Z":
+                masked_ver = "maskz"
+            elif val == "M":
+                masked_ver = "mask"
+            elif val == "S":
+                masked_ver = "masks"
+            elif val == "U":
+                masked_ver = False
+    return masked_ver
+
 def build_dt(input_str, isa, dt_par, dt_ret):
     dt = ""
     dt_info_carac = input_str.split("|")
@@ -284,7 +300,13 @@ def build_dt(input_str, isa, dt_par, dt_ret):
     elif len(dt_info_carac) >= 1:
         dt_info_carac_dic = {}
         for dtic in dt_info_carac:
-            dt_info_carac_dic[dtic.split(':')[0]] = dtic.split(':')[1]
+            dtic_strip = dtic.strip()
+            if ":" in dtic_strip:
+                key, val = dtic_strip.split(':', 1)
+            else:
+                key, val = dtic_strip, dtic_strip
+            if key != "mk":
+                dt_info_carac_dic[key] = val
 
         if "c" in dt_info_carac_dic:
             if dt_info_carac_dic["c"] == "tp":
@@ -335,8 +357,6 @@ def _dump_dict_json(di, filename):
 def _parse_lmul(input_str, isa, dt_par, dt_ret, base_lmul):
     if base_lmul == 0:
         return 0
-    # input str is the same than in build dt. Just return 
-    # the lmul suffix.
 
     dt_info_carac = input_str.split("|")
     if len(dt_info_carac) == 1 and dt_info_carac[0] == "tp":
@@ -346,7 +366,13 @@ def _parse_lmul(input_str, isa, dt_par, dt_ret, base_lmul):
     elif len(dt_info_carac) >= 1:
         dt_info_carac_dic = {}
         for dtic in dt_info_carac:
-            dt_info_carac_dic[dtic.split(':')[0]] = dtic.split(':')[1]
+            dtic_strip = dtic.strip()
+            if ":" in dtic_strip:
+                key, val = dtic_strip.split(':', 1)
+            else:
+                key, val = dtic_strip, dtic_strip
+            if key != "mk":
+                dt_info_carac_dic[key] = val
 
         if "m" in dt_info_carac_dic:
             return _parse_lmul_expression(dt_info_carac_dic["m"], dt_par, dt_ret, isa, base_lmul)
@@ -383,6 +409,7 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret,lmul=0, isa_nam
             if dt not in isa["datatypes"]:
                 print("Panic: '" + dt + "' is not available.")
                 exit(-1)
+
             converted_ir = converted_ir.replace("%" + s + "%", build_msk(datatypes[dt], isa,lmul=_parse_lmul(dt_info, isa, dt_par, dt_ret, lmul), isa_name=isa_name))
         elif item_type == "v":
             dt_info = _RE_ANGLE.findall(s)[0]
@@ -396,8 +423,8 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret,lmul=0, isa_nam
             converted_ir = converted_ir.replace("%" + s + "%", build_val(datatypes[dt], isa,lmul=lmul))
         elif item_type == "N":
             dt_info = _RE_ANGLE.findall(s)[0]
-            dt_info_params = dt_info.split(",")
             dt = ""
+            dt_info_params = dt_info.split(",")
             if len(dt_info_params) == 1:
                 dt = build_dt(dt_info_params[0], isa, dt_par, dt_ret)
             if dt not in isa["datatypes"]:
@@ -412,16 +439,17 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret,lmul=0, isa_nam
 
             fdt_key = ""
             dt_info = _RE_ANGLE.findall(s)[0]
+            masked_ver = _extract_mask_from_dt_info(dt_info)
             dt_info_params = dt_info.split(",")
             if len(dt_info_params) == 1:
                 dt = build_dt(dt_info_params[0], isa, dt_par, dt_ret)
                 fdt_key = dt + "," + dt
-                f_full_name = build_func_name_short(isa, dt, f_name,lmul=_parse_lmul(dt_info, isa, dt_par, dt_ret, lmul), isa_name=isa_name)
+                f_full_name = build_func_name_short(isa, dt, f_name, lmul=_parse_lmul(dt_info_params[0], isa, dt_par, dt_ret, lmul), isa_name=isa_name, masked_version=masked_ver)
             elif len(dt_info_params) == 2:
                 dt_1 = build_dt(dt_info_params[0], isa, dt_par, dt_ret)
                 dt_2 = build_dt(dt_info_params[1], isa, dt_par, dt_ret)
                 fdt_key = dt_1 + "," + dt_2
-                f_full_name = build_func_name(isa, dt_1, dt_2, f_name,lmul=_parse_lmul(dt_info, isa, dt_par, dt_ret, lmul), isa_name=isa_name)
+                f_full_name = build_func_name(isa, dt_1, dt_2, f_name, lmul=_parse_lmul(dt_info_params[0], isa, dt_par, dt_ret, lmul), isa_name=isa_name, masked_version=masked_ver)
             else:
                 print("Panic: '" + f_name + "' has incompatible format.")
                 exit(-1)

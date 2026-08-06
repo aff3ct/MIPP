@@ -44,7 +44,7 @@ def _missing_emit_ifdef_end(ifd, file):
     if ifd:
         print("#endif", file=file)
 
-def render_template(isa, ff, dt_par, dt_ret, func_name="", lmul=0):
+def render_template(isa, ff, dt_par, dt_ret, func_name="", lmul=0, mask_kind=None):
     tpl_code = ff["template"]["code"]
     if isinstance(tpl_code, list):
         tpl_code = "\n".join(tpl_code)
@@ -62,7 +62,8 @@ def render_template(isa, ff, dt_par, dt_ret, func_name="", lmul=0):
         isa_dt_ret=isa["datatypes"][dt_ret],
         cstdint_ret=datatypes[dt_ret]["cstd"],
         func_name = func_name,
-        lmul = lmul
+        lmul = lmul,
+        mask_kind = mask_kind
     )
 
 def parse_placeholders_or_skip(pre_rendering, isa, funcs, f, dt_par, dt_ret, dt_key, file, lmul=0, isa_name=True):

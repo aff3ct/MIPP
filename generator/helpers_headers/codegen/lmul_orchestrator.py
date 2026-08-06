@@ -96,7 +96,7 @@ def _gen_c_horiz_lmul_one(isa, file, funcs, f, ff, dt, lmul, mkind=None, dummy=F
     ff_local = dict(ff)
     ff_local["type"] = "emulated"
 
-    pre_rendering = render_template(isa, ff_local, dt_par, dt_ret, func_name=f, lmul=lmul)
+    pre_rendering = render_template(isa, ff_local, dt_par, dt_ret, func_name=f, lmul=lmul, mask_kind=mkind)
     requirements = get_requirements(
         ir=pre_rendering,
         isa=isa,
@@ -135,14 +135,6 @@ def _gen_c_horiz_lmul_one(isa, file, funcs, f, ff, dt, lmul, mkind=None, dummy=F
         print("\nstatic " + proto + " {", file=file)
         print("\t// Level 2 (Generic Emulated)", file=file)
 
-    if (mkind == "maskz" or mkind == "mask") and lmul >= 2:
-        l2 = int(lmul) // 2
-        ph_ret["converted_ir"] = ph_ret["converted_ir"].replace(f"{f}_{dt_par}_m{int(l2)}(", f"{f}_{dt_par}_{mkind}_m{int(l2)}(m0.m1, ", 1)
-        ph_ret["converted_ir"] = ph_ret["converted_ir"].replace(f"{f}_{dt_par}_m{int(l2)}(", f"{f}_{dt_par}_{mkind}_m{int(l2)}(m0.m2, ", 1)
-    if (mkind == "masks") and lmul >= 2:
-        l2 = int(lmul) // 2
-        ph_ret["converted_ir"] = ph_ret["converted_ir"].replace(f"{f}_{dt_par}_m{int(l2)}(", f"{f}_{dt_par}_{mkind}_m{int(l2)}(m0.m1, rsrc.r1, ", 1)
-        ph_ret["converted_ir"] = ph_ret["converted_ir"].replace(f"{f}_{dt_par}_m{int(l2)}(", f"{f}_{dt_par}_{mkind}_m{int(l2)}(m0.m2, rsrc.r2, ", 1)
 
     lines = [line for line in ph_ret["converted_ir"].split("\n") if line.strip()]
     for line in lines:
