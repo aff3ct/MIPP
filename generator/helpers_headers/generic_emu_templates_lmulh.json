@@ -4,8 +4,15 @@
         "code": [
             "{% if lmul == 1 %}",
             "return %hadd<tp>%(r0);",
-            "{% else %}",
-            "return %hadd<c:tp|b:tp|m:tp/2>%(r0.r1) + %hadd<c:tp|b:tp|m:tp/2>%(r0.r2);",
+            "{% endif %}",
+            "{% if lmul == 2 %}",
+            "return %hadd<c:tp|b:tp|m:tp/2>%(%add<c:tp|b:tp|m:tp/2>%(r0.r1, r0.r2));",
+            "{% endif %}",
+            "{% if lmul == 4 %}",
+            "return %hadd<c:tp|b:tp|m:tp/4>%(%add<c:tp|b:tp|m:tp/4>%(%add<c:tp|b:tp|m:tp/4>%(r0.r1.r1, r0.r1.r2), %add<c:tp|b:tp|m:tp/4>%(r0.r2.r1, r0.r2.r2)));",
+            "{% endif %}",
+            "{% if lmul == 8 %}",
+            "return %hadd<c:tp|b:tp|m:tp/8>%(%add<c:tp|b:tp|m:tp/8>%(%add<c:tp|b:tp|m:tp/8>%(%add<c:tp|b:tp|m:tp/8>%(r0.r1.r1.r1, r0.r1.r1.r2), %add<c:tp|b:tp|m:tp/8>%(r0.r1.r2.r1, r0.r1.r2.r2)), %add<c:tp|b:tp|m:tp/8>%(%add<c:tp|b:tp|m:tp/8>%(r0.r2.r1.r1, r0.r2.r1.r2), %add<c:tp|b:tp|m:tp/8>%(r0.r2.r2.r1, r0.r2.r2.r2))));",
             "{% endif %}"
         ]
     },
