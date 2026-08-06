@@ -1,0 +1,20 @@
+[
+    "if",
+    "elif",
+    "else",
+    "endif",
+    "for",
+    "endfor",
+    "set",
+    "endset",
+    "macro",
+    "endmacro",
+    "block",
+    "endblock",
+    "include",
+    "import",
+    "with",
+    "endwith",
+    "filter",
+    "endfilter"
+]

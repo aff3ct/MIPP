@@ -229,6 +229,10 @@ def _load_generic_emu():
         for name, tpl in data_templates[section].items():
             templates_pool[f"{section}.{name}"] = tpl
 
+    jinja_kw_path = os.path.join(current_dir, "jinja_keywords.json")
+    with open(jinja_kw_path, "r", encoding="utf-8") as f:
+        jinja_keywords = set(json.load(f))
+
     def process_table(raw_table, default_type=None, default_level=None):
         processed = {}
         for func_name, items in raw_table.items():
@@ -268,7 +272,7 @@ def _load_generic_emu():
 
                 if template_code:
                     import re
-                    placeholder_regex = re.compile(r'\%([^%\n]*)\%')
+                    placeholder_regex = re.compile(r'(?<!\{)\%([^%{}\n]+)\%(?!\})')
                     matches = placeholder_regex.findall(template_code)
                     for m in matches:
                         m_clean = m.strip()
@@ -276,7 +280,7 @@ def _load_generic_emu():
                             dep_name = m_clean.split('<')[0].strip()
                             if dep_name:
                                 first_word = dep_name.split()[0]
-                                if first_word not in ["if", "else", "endif", "for", "endfor"]:
+                                if first_word not in jinja_keywords:
                                     if dep_name not in ["r", "m", "v", "N"] and not dep_name.startswith("{"):
                                         if dep_name != func_name:
                                             auto_deps.add(dep_name)
