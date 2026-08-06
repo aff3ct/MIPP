@@ -365,8 +365,109 @@ class TestsBuilderEngine:
     def _format_cpp_type(self, dt_str: str) -> str:
         return CppDialectAdapter().cpp_type(dt_str)
 
+    # Maps JSON 'by_*' keys to the C++ runtime variable they compare against.
+    # Add a new entry here to support a new 'by_*' axis (e.g. "by_mask": "MASK_KIND").
+    _BY_RUNTIME_KEYS: dict[str, str] = {
+        "by_lmul": "LMUL",
+    }
+
+    # The set of keys that are valid in a leaf tolerance spec.
+    # Used to safely extract a fallback spec from a by_datatype parent spec.
+    _TOLERANCE_LEAF_KEYS: frozenset = frozenset({"type", "value"})
+
+    def _leaf_tol_expr(self, ttype: str, val: float, dt_cpp: str, ref_var: str) -> str:
+        """Generates a single C++ tolerance expression for a scalar spec (no by_* keys)."""
+        if ttype == "relative_percent":
+            f32 = f"({dt_cpp})(abs_diff::abs_diff({ref_var}) * (float){val})"
+            f64 = f"({dt_cpp})(abs_diff::abs_diff({ref_var}) * (double){val})"
+        else:  # max_abs_diff
+            f32 = f"({dt_cpp})((float){val})"
+            f64 = f"({dt_cpp})((double){val})"
+
+        if dt_cpp in ("float32_t", "float"):
+            return f32
+        elif dt_cpp in ("float64_t", "double"):
+            return f64
+        else:
+            return f"(std::is_same_v<{dt_cpp}, float> ? {f32} : {f64})"
+
+    def _tol_spec_to_expr(self, spec: dict, dt_cpp: str, ref_var: str) -> str:
+        """Converts a tolerance spec dict into an inline C++ expression.
+
+        Handles nested by_datatype and by_* runtime keys recursively.
+        Does NOT handle by_define (preprocessor blocks are handled by the caller).
+        """
+        if not spec or spec.get("type") == "exact":
+            return "(T)0"
+
+        # If the spec is a pure "default" wrapper (no direct leaf keys or by_datatype/by_*),
+        # unwrap it. Example: {"default": {"type": "relative_percent", "value": 0.01}}
+        content_keys = self._TOLERANCE_LEAF_KEYS | set(self._BY_RUNTIME_KEYS.keys()) | {"by_datatype"}
+        if "default" in spec and not any(k in spec for k in content_keys):
+            spec = spec["default"]
+            if not spec or spec.get("type") == "exact":
+                return "(T)0"
+
+        # --- by_datatype: select the sub-spec for the current datatype ---
+        if "by_datatype" in spec:
+            by_dt = spec["by_datatype"]
+            # Build fallback from only known tolerance keys (by inclusion, not exclusion)
+            # to avoid accidentally inheriting unrelated keys (e.g. "comparison").
+            valid_keys = self._TOLERANCE_LEAF_KEYS | set(self._BY_RUNTIME_KEYS.keys())
+            default_sub = (
+                spec.get("default")
+                or {k: v for k, v in spec.items() if k in valid_keys}
+                or {"type": "exact"}
+            )
+
+            if dt_cpp in ("float32_t", "float"):
+                sub = by_dt.get("float32", default_sub)
+                return self._tol_spec_to_expr(sub, dt_cpp, ref_var)
+            elif dt_cpp in ("float64_t", "double"):
+                sub = by_dt.get("float64", default_sub)
+                return self._tol_spec_to_expr(sub, dt_cpp, ref_var)
+            else:
+                # Generic type T: emit ternary covering float32 vs float64
+                f32_sub = by_dt.get("float32", default_sub)
+                f64_sub = by_dt.get("float64", default_sub)
+                f32_expr = self._tol_spec_to_expr(f32_sub, "float", ref_var)
+                f64_expr = self._tol_spec_to_expr(f64_sub, "double", ref_var)
+                return f"(std::is_same_v<{dt_cpp}, float> ? {f32_expr} : {f64_expr})"
+
+        # --- by_* runtime keys: build a nested ternary (LMUL == x ? ... : default) ---
+        for by_key, cpp_var in self._BY_RUNTIME_KEYS.items():
+            if by_key in spec:
+                by_vals = spec[by_key]
+                ttype = spec.get("type", "max_abs_diff")
+                default_val = spec.get("value", 0.001)
+                # Build list of (condition, value) pairs
+                cond_parts = [(f"({cpp_var} == {k})", float(v)) for k, v in by_vals.items()]
+                # Build nested ternary from right to left: last condition is innermost
+                expr_val_str = f"({self._cpp_cast(dt_cpp)}){default_val}"
+                for cond_str, cond_val in reversed(cond_parts):
+                    expr_val_str = f"({cond_str} ? ({self._cpp_cast(dt_cpp)}){cond_val} : {expr_val_str})"
+                if ttype == "relative_percent":
+                    return f"({dt_cpp})(abs_diff::abs_diff({ref_var}) * {expr_val_str})"
+                else:
+                    return f"({dt_cpp})({expr_val_str})"
+
+        # --- Leaf: plain type + value ---
+        ttype = spec.get("type", "max_abs_diff")
+        val = spec.get("value", 0.001)
+        return self._leaf_tol_expr(ttype, val, dt_cpp, ref_var)
+
+    def _cpp_cast(self, dt_cpp: str) -> str:
+        """Returns the C cast type to use for a numeric literal given the C++ datatype."""
+        if dt_cpp in ("float32_t", "float"):
+            return "float"
+        elif dt_cpp in ("float64_t", "double"):
+            return "double"
+        else:
+            return "T"
+
     def resolve_tolerance_expr(self, func_name: str, dt_cpp: str, ref_var: str = "res2") -> str:
         """Returns an inline C++ expression for tolerance computation.
+
         Used internally by render_tolerance_declaration(). Does not handle by_define.
         """
         func_spec = self.specs["functions"].get(func_name, {})
@@ -425,6 +526,10 @@ class TestsBuilderEngine:
                 return f64_expr
             else:
                 return f"(std::is_same_v<{dt_cpp}, float> ? {f32_expr} : {f64_expr})"
+        # Strip by_define from tol_spec if present (handled at a higher level)
+        if isinstance(tol_spec, dict) and "by_define" in tol_spec:
+            tol_spec = {k: v for k, v in tol_spec.items() if k != "by_define"}
+        return self._tol_spec_to_expr(tol_spec, dt_cpp, ref_var)
 
     def render_tolerance_declaration(self, func_name: str, dt_cpp: str, ref_var: str,
                                      tol_var: str = "tol",
@@ -432,34 +537,40 @@ class TestsBuilderEngine:
         """Generates the lines declaring the tolerance variable.
 
         Handles the 'by_define' case by emitting #if/#elif/#else/#endif blocks.
-        For simple cases, emits a single inline expression.
+        For all other cases, delegates to _tol_spec_to_expr for a single expression.
         """
         func_spec = self.specs["functions"].get(func_name, {})
         default_tol = self.specs.get("default", {}).get("tolerance", {"type": "exact"})
         tol_spec = func_spec.get("tolerance", default_tol)
 
-        # by_define case: emit #if defined(...) blocks
+        # by_define: emit preprocessor #if/#elif/#else/#endif blocks
         if isinstance(tol_spec, dict) and "by_define" in tol_spec:
             by_define = tol_spec["by_define"]
-            fallback_spec = tol_spec.get("default", default_tol)
+            # The fallback is the rest of the spec (by_datatype, etc.) without by_define
+            fallback_spec = {k: v for k, v in tol_spec.items() if k != "by_define"}
+            if not fallback_spec:
+                fallback_spec = default_tol
+            # Outer by_datatype used as inheritance base for define branches
+            fallback_by_dt = fallback_spec.get("by_datatype", {})
             lines: List[str] = []
             first = True
             for define_key, define_spec in by_define.items():
-                if first:
-                    lines.append(f"#if defined({define_key})")
-                    first = False
+                lines.append(f"#if defined({define_key})" if first else f"#elif defined({define_key})")
+                first = False
+                # Merge: outer by_datatype fills in any datatype not explicitly set in define_spec
+                if "by_datatype" in define_spec and fallback_by_dt:
+                    merged_by_dt = {**fallback_by_dt, **define_spec["by_datatype"]}
+                    merged_spec = {**define_spec, "by_datatype": merged_by_dt}
                 else:
-                    lines.append(f"#elif defined({define_key})")
-                expr = self._tol_spec_to_expr(define_spec, dt_cpp, ref_var)
-                lines.append(f"{indent}auto {tol_var} = {expr};")
+                    merged_spec = define_spec
+                lines.append(f"{indent}auto {tol_var} = {self._tol_spec_to_expr(merged_spec, dt_cpp, ref_var)};")
             lines.append("#else")
-            fallback_expr = self._tol_spec_to_expr(fallback_spec, dt_cpp, ref_var)
-            lines.append(f"{indent}auto {tol_var} = {fallback_expr};")
+            lines.append(f"{indent}auto {tol_var} = {self._tol_spec_to_expr(fallback_spec, dt_cpp, ref_var)};")
             lines.append("#endif")
             return lines
 
-        # Cas standard : expression simple
-        expr = self.resolve_tolerance_expr(func_name, dt_cpp, ref_var)
+        # Standard case: single inline expression
+        expr = self._tol_spec_to_expr(tol_spec, dt_cpp, ref_var)
         return [f"{indent}auto {tol_var} = {expr};"]
 
     def _tol_spec_to_expr(self, spec: dict, dt_cpp: str, ref_var: str) -> str:
@@ -620,9 +731,29 @@ class TestsBuilderEngine:
 
         return val_lines
 
-    def build_test_file_content(self, dialect_name: str, func_name: str, lmul_suffix: str = "m1", mkind: str = "", lmul: int = 0, N: int = 10) -> str:
+    def build_test_file_content(
+        self,
+        dialect_name: str,
+        func_name: str,
+        lmul_suffix: str = "m1",
+        mkind: str = "",
+        lmul: int = 0,
+        N: int = 10,
+        lmul_list: Optional[List[int]] = None,
+        ldiv_list: Optional[List[int]] = None,
+        mask_list: Optional[List[str]] = None,
+    ) -> str:
         builder = self.get_builder(dialect_name)
-        return builder.build_test_file_content(func_name, lmul_suffix=lmul_suffix, mkind=mkind, lmul=lmul, N=N)
+        return builder.build_test_file_content(
+            func_name,
+            lmul_suffix=lmul_suffix,
+            mkind=mkind,
+            lmul=lmul,
+            N=N,
+            lmul_list=lmul_list,
+            ldiv_list=ldiv_list,
+            mask_list=mask_list,
+        )
 
     def format_cpp_op_call(self, func_name: str, mkind: str, is_scalar: bool = False) -> str:
         """Build a C++ template call expression with symbolic params (MK, T, LMUL).
@@ -817,7 +948,17 @@ class TestsBuilderEngineC:
     def __init__(self, engine: TestsBuilderEngine):
         self.engine = engine
 
-    def build_test_file_content(self, func_name: str, lmul_suffix: str = "m1", mkind: str = "", lmul: int = 0, N: int = 10) -> str:
+    def build_test_file_content(
+        self,
+        func_name: str,
+        lmul_suffix: str = "m1",
+        mkind: str = "",
+        lmul: int = 0,
+        N: int = 10,
+        lmul_list: Optional[List[int]] = None,
+        ldiv_list: Optional[List[int]] = None,
+        mask_list: Optional[List[str]] = None,
+    ) -> str:
         lines = []
         lines.extend(self._render_headers(func_name, N=N))
 
@@ -1040,7 +1181,14 @@ class TestsBuilderEngineCppBase:
     def __init__(self, engine: TestsBuilderEngine):
         self.engine = engine
 
-    def render_cpp_test_case(self, dialect_name: str, func_name: str, supported_mkinds: List[str]) -> List[str]:
+    def render_cpp_test_case(
+        self,
+        dialect_name: str,
+        func_name: str,
+        supported_mkinds: List[str],
+        lmul_list: Optional[List[int]] = None,
+        ldiv_list: Optional[List[int]] = None,
+    ) -> List[str]:
         lines = []
         func_prefix = "test_mipp_cpp" if dialect_name == "cpp" else "test_mipp_cpp_obj"
         datatypes = self.engine._resolve_datatypes(func_name)
@@ -1067,16 +1215,29 @@ class TestsBuilderEngineCppBase:
                 lines.append(f'\t\tSECTION("datatype = {dt}")')
                 lines.append('\t\t{')
 
-                lmuls_to_test = [(1, "LMUL = 1")] if dialect_name == "obj" else [(1, "LMUL = 1"), (2, "LMUL = 2"), (4, "LMUL = 4"), (8, "LMUL = 8")]
+                if dialect_name == "obj":
+                    lmuls_to_test = [(1, "LMUL = 1")] if (lmul_list is None or 0 in lmul_list or 1 in lmul_list) else []
+                else:
+                    available_lmuls = [(1, "LMUL = 1"), (2, "LMUL = 2"), (4, "LMUL = 4"), (8, "LMUL = 8")]
+                    if lmul_list is not None:
+                        target_set = set(lmul_list)
+                        if 0 in target_set:
+                            target_set.add(1)
+                        lmuls_to_test = [item for item in available_lmuls if item[0] in target_set]
+                    else:
+                        lmuls_to_test = available_lmuls
+
                 for lmul_val, lmul_str in lmuls_to_test:
                     call_expr = f"{func_prefix}_{func_name}<{mk_enum}, {cpp_type}, {lmul_val}>();"
                     tpl_lmul = self.engine._tpl("func_templates", "cpp_obj", "test_section_lmul")
                     lines.extend(self.engine.render_template(tpl_lmul, lmul_str=lmul_str, call_expr=call_expr))
 
                 if dialect_name == "cpp":
-                    call_ldiv2 = f"{func_prefix}_{func_name}<{mk_enum}, {cpp_type}, -2>();"
-                    tpl_ldiv2 = self.engine._tpl("func_templates", "cpp", "test_section_ldiv2")
-                    lines.extend(self.engine.render_template(tpl_ldiv2, call_expr=call_ldiv2))
+                    test_ldiv2 = (ldiv_list is None or 2 in ldiv_list)
+                    if test_ldiv2:
+                        call_ldiv2 = f"{func_prefix}_{func_name}<{mk_enum}, {cpp_type}, -2>();"
+                        tpl_ldiv2 = self.engine._tpl("func_templates", "cpp", "test_section_ldiv2")
+                        lines.extend(self.engine.render_template(tpl_ldiv2, call_expr=call_ldiv2))
 
                 lines.append('\t\t}')
 
@@ -1234,7 +1395,17 @@ class TestsBuilderEngineCppBase:
 
 class TestsBuilderEngineCpp(TestsBuilderEngineCppBase):
 
-    def build_test_file_content(self, func_name: str, lmul_suffix: str = "m1", mkind: str = "", lmul: int = 0, N: int = 10) -> str:
+    def build_test_file_content(
+        self,
+        func_name: str,
+        lmul_suffix: str = "m1",
+        mkind: str = "",
+        lmul: int = 0,
+        N: int = 10,
+        lmul_list: Optional[List[int]] = None,
+        ldiv_list: Optional[List[int]] = None,
+        mask_list: Optional[List[str]] = None,
+    ) -> str:
         lines = []
         adapter = CppDialectAdapter()
         lines.extend(self._render_headers("cpp", func_name, N=N))
@@ -1242,8 +1413,9 @@ class TestsBuilderEngineCpp(TestsBuilderEngineCppBase):
         mask_support = self.engine.interfaces[func_name].get("mask_support", "all_mask")
         supported_mkinds = []
         for m in ["unmasked", "mask", "maskz", "masks"]:
-            if m == "unmasked" or self.engine._is_mask_kind_supported(mask_support, m):
-                supported_mkinds.append(m)
+            if mask_list is None or m in mask_list or (m == "unmasked" and "" in mask_list):
+                if m == "unmasked" or self.engine._is_mask_kind_supported(mask_support, m):
+                    supported_mkinds.append(m)
 
         proto_ref = self.engine.interfaces.get(func_name, {}).get("proto_ref", "ret_reg_2args_reg")
         func_spec = self.engine.specs["functions"].get(func_name, {})
@@ -1307,17 +1479,29 @@ class TestsBuilderEngineCpp(TestsBuilderEngineCppBase):
 
         lines.extend(self.engine._tpl("func_templates", "cpp_obj", "func_footer"))
 
-        lines.extend(self.render_cpp_test_case("cpp", func_name, supported_mkinds))
+        lines.extend(self.render_cpp_test_case("cpp", func_name, supported_mkinds, lmul_list=lmul_list, ldiv_list=ldiv_list))
         return "\n".join(lines)
 
 
 class TestsBuilderEngineCppObj(TestsBuilderEngineCppBase):
 
-    def build_test_file_content(self, func_name: str, lmul_suffix: str = "m1", mkind: str = "", lmul: int = 0, N: int = 10) -> str:
+    def build_test_file_content(
+        self,
+        func_name: str,
+        lmul_suffix: str = "m1",
+        mkind: str = "",
+        lmul: int = 0,
+        N: int = 10,
+        lmul_list: Optional[List[int]] = None,
+        ldiv_list: Optional[List[int]] = None,
+        mask_list: Optional[List[str]] = None,
+    ) -> str:
         lines = []
         lines.extend(self._render_headers("obj", func_name, N=N))
 
-        supported_mkinds = ["unmasked"]
+        supported_mkinds = []
+        if mask_list is None or "unmasked" in mask_list or "" in mask_list:
+            supported_mkinds.append("unmasked")
 
         proto_ref = self.engine.interfaces.get(func_name, {}).get("proto_ref", "ret_reg_2args_reg")
         func_spec = self.engine.specs["functions"].get(func_name, {})
@@ -1369,5 +1553,5 @@ class TestsBuilderEngineCppObj(TestsBuilderEngineCppBase):
 
         lines.extend(self.engine._tpl("func_templates", "cpp_obj", "func_footer"))
 
-        lines.extend(self.render_cpp_test_case("obj", func_name, supported_mkinds))
+        lines.extend(self.render_cpp_test_case("obj", func_name, supported_mkinds, lmul_list=lmul_list, ldiv_list=ldiv_list))
         return "\n".join(lines)
