@@ -1,0 +1,6 @@
+nav:
+  - Home: index.md
+  - User Guide: user
+  - Function Reference: funcs_support
+  - ISA Support: isas_support
+  - Developer Guide: developper
