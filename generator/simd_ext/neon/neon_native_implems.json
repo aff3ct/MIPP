@@ -1060,56 +1060,6 @@
             "template": "arith_2args"
         }
     ],
-    "tomsk": [
-        {
-            "instr_name": "reinterpretq",
-            "datatypes": [
-                "float64"
-            ],
-            "template": "tomsk",
-            "if": "defined(__aarch64__)"
-        },
-        {
-            "instr_name": "reinterpretq",
-            "datatypes": [
-                "int64",
-                "int32",
-                "int16",
-                "int8",
-                "uint64",
-                "uint32",
-                "uint16",
-                "uint8",
-                "float32"
-            ],
-            "template": "tomsk"
-        }
-    ],
-    "toreg": [
-        {
-            "instr_name": "reinterpretq",
-            "datatypes": [
-                "float64"
-            ],
-            "template": "toreg",
-            "if": "defined(__aarch64__)"
-        },
-        {
-            "instr_name": "reinterpretq",
-            "datatypes": [
-                "int64",
-                "int32",
-                "int16",
-                "int8",
-                "uint64",
-                "uint32",
-                "uint16",
-                "uint8",
-                "float32"
-            ],
-            "template": "toreg"
-        }
-    ],
     "xorb": [
         {
             "instr_name": "eorq",

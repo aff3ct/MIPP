@@ -1411,6 +1411,8 @@
             "datatypes": "all_datatypes",
             "preferred_simd_ext": [
                 "sse",
+                "neon",
+                "avx",
                 "avx512",
                 "rvv",
                 "sve"
@@ -1423,6 +1425,8 @@
             "datatypes": "all_datatypes",
             "preferred_simd_ext": [
                 "sse",
+                "neon",
+                "avx",
                 "avx512",
                 "rvv",
                 "sve"

@@ -608,20 +608,6 @@
             "template": "testz_1arg"
         }
     ],
-    "tomsk": [
-        {
-            "instr_name": "cast",
-            "datatypes": "all_datatypes",
-            "template": "tomsk"
-        }
-    ],
-    "toreg": [
-        {
-            "instr_name": "cast",
-            "datatypes": "all_datatypes",
-            "template": "toreg"
-        }
-    ],
     "trunc": [
         {
             "instr_name": "round",

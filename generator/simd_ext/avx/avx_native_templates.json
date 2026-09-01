@@ -309,14 +309,6 @@
             "return _mm256_testz_si256(m0i.m, m1i.m);"
         ]
     },
-    "tomsk": {
-        "format": "short",
-        "code": "{% if isa_dt_par.data_ext_logi != isa_dt_ret.data_ext_logi -%}{{ isa.prefix }}_{{ instr_name }}{{isa_dt_par.data_ext_logi}}_{{isa_dt_ret.data_ext_logi}}(r0.r);{% else -%} r0.r;{% endif %}"
-    },
-    "toreg": {
-        "format": "short",
-        "code": "{% if isa_dt_par.data_ext_logi != isa_dt_ret.data_ext_logi -%}{{ isa.prefix }}_{{ instr_name }}{{isa_dt_par.data_ext_logi}}_{{isa_dt_ret.data_ext_logi}}(m0.m);{% else -%} m0.m;{% endif %}"
-    },
     "trunc_float": {
         "format": "short",
         "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r,(_MM_FROUND_TO_ZERO |_MM_FROUND_NO_EXC));"

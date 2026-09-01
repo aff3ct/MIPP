@@ -550,20 +550,6 @@
             "if": "defined(__SSE2__)"
         }
     ],
-    "tomsk": [
-        {
-            "instr_name": "cast",
-            "datatypes": "all_datatypes",
-            "template": "cast"
-        }
-    ],
-    "toreg": [
-        {
-            "instr_name": "cast",
-            "datatypes": "all_datatypes",
-            "template": "cast_k"
-        }
-    ],
     "xorb": [
         {
             "instr_name": "xor",
