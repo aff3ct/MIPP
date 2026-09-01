@@ -1,0 +1,342 @@
+{
+  "abs": {
+    "description": "Computes the absolute value of each element in a vector register.",
+    "latex": "\\text{res}_i = |a_i|"
+  },
+  "acos": {
+    "description": "Computes the arc cosine of each floating-point element in radians.",
+    "latex": "\\text{res}_i = \\arccos(a_i)"
+  },
+  "acosh": {
+    "description": "Computes the inverse hyperbolic cosine of each floating-point element.",
+    "latex": "\\text{res}_i = \\operatorname{arcosh}(a_i)"
+  },
+  "add": {
+    "description": "Adds two vector registers element-wise.",
+    "latex": "\\text{res}_i = a_i + b_i"
+  },
+  "adds": {
+    "description": "Adds two integer vector registers element-wise with saturation to [MIN, MAX] on underflow/overflow.",
+    "latex": "\\text{res}_i = \\operatorname{saturate}(a_i + b_i)"
+  },
+  "andb": {
+    "description": "Computes the bitwise AND of two vector registers.",
+    "latex": "\\text{res}_i = a_i \\ \\& \\ b_i"
+  },
+  "andb_k": {
+    "description": "Computes the bitwise AND of two mask registers.",
+    "latex": "m_{\\text{res}, i} = m_{0, i} \\ \\& \\ m_{1, i}"
+  },
+  "andnb": {
+    "description": "Computes the bitwise AND-NOT of two vector registers (~a & b).",
+    "latex": "\\text{res}_i = (\\sim a_i) \\ \\& \\ b_i"
+  },
+  "andnb_k": {
+    "description": "Computes the bitwise AND-NOT of two mask registers (~m0 & m1).",
+    "latex": "m_{\\text{res}, i} = (\\sim m_{0, i}) \\ \\& \\ m_{1, i}"
+  },
+  "asin": {
+    "description": "Computes the arc sine of each floating-point element in radians.",
+    "latex": "\\text{res}_i = \\arcsin(a_i)"
+  },
+  "asinh": {
+    "description": "Computes the inverse hyperbolic sine of each floating-point element.",
+    "latex": "\\text{res}_i = \\operatorname{arsinh}(a_i)"
+  },
+  "atan": {
+    "description": "Computes the arc tangent of each floating-point element in radians.",
+    "latex": "\\text{res}_i = \\arctan(a_i)"
+  },
+  "atan2": {
+    "description": "Computes the four-quadrant arc tangent of y and x floating-point vector elements.",
+    "latex": "\\text{res}_i = \\operatorname{atan2}(y_i, x_i)"
+  },
+  "atanh": {
+    "description": "Computes the inverse hyperbolic tangent of each floating-point element.",
+    "latex": "\\text{res}_i = \\operatorname{artanh}(a_i)"
+  },
+  "blend": {
+    "description": "Selects elements between two vector registers based on a mask (r0 when m=0, r1 when m=1).",
+    "latex": "\\text{res}_i = m_i ? r1_i : r0_i"
+  },
+  "cast": {
+    "description": "In-register bitcast/reinterpretation of a vector register to another datatype of identical bitwidth with zero runtime instructions.",
+    "latex": "\\text{res} = \\operatorname{bit_cast}\\langle \\operatorname{rvd}\\langle T_{\\text{dst}}\\rangle \\rangle(a)"
+  },
+  "cast_k": {
+    "description": "In-register bitcast/reinterpretation of a mask register to another datatype of identical bitwidth with zero runtime instructions.",
+    "latex": "m_{\\text{dst}} = \\operatorname{bit_cast}\\langle \\operatorname{rvm}\\langle T_{\\text{dst}}\\rangle \\rangle(m_{\\text{src}})"
+  },
+  "cmpeq": {
+    "description": "Compares two vector registers element-wise for equality (a == b).",
+    "latex": "m_i = (a_i == b_i)"
+  },
+  "cmpge": {
+    "description": "Compares two vector registers element-wise for greater-than-or-equal (a >= b).",
+    "latex": "m_i = (a_i \\ge b_i)"
+  },
+  "cmpgt": {
+    "description": "Compares two vector registers element-wise for greater-than (a > b).",
+    "latex": "m_i = (a_i > b_i)"
+  },
+  "cmple": {
+    "description": "Compares two vector registers element-wise for less-than-or-equal (a <= b).",
+    "latex": "m_i = (a_i \\le b_i)"
+  },
+  "cmplt": {
+    "description": "Compares two vector registers element-wise for less-than (a < b).",
+    "latex": "m_i = (a_i < b_i)"
+  },
+  "cmpneq": {
+    "description": "Compares two vector registers element-wise for inequality (a != b).",
+    "latex": "m_i = (a_i \\neq b_i)"
+  },
+  "cos": {
+    "description": "Computes the trigonometric cosine of each floating-point element in radians.",
+    "latex": "\\text{res}_i = \\cos(a_i)"
+  },
+  "cosh": {
+    "description": "Computes the hyperbolic cosine of each floating-point element.",
+    "latex": "\\text{res}_i = \\cosh(a_i)"
+  },
+  "cvt": {
+    "description": "Converts elements of a vector register to another datatype with numerical casting.",
+    "latex": "\\text{res}_i = (T_{\\text{dst}}) a_i"
+  },
+  "div": {
+    "description": "Divides the first vector register by the second element-wise.",
+    "latex": "\\text{res}_i = \\frac{a_i}{b_i}"
+  },
+  "div2": {
+    "description": "Divides each element of a vector register by 2 (via arithmetic shift for integers or multiplication/division for floats).",
+    "latex": "\\text{res}_i = \\frac{a_i}{2}"
+  },
+  "div4": {
+    "description": "Divides each element of a vector register by 4 (via arithmetic shift for integers or multiplication/division for floats).",
+    "latex": "\\text{res}_i = \\frac{a_i}{4}"
+  },
+  "exp": {
+    "description": "Computes the base-e exponential of each floating-point element.",
+    "latex": "\\text{res}_i = e^{a_i}"
+  },
+  "fmadd": {
+    "description": "Computes the fused multiply-add of three vector registers ((a * b) + c).",
+    "latex": "\\text{res}_i = (a_i \\cdot b_i) + c_i"
+  },
+  "fmsub": {
+    "description": "Computes the fused multiply-subtract of three vector registers ((a * b) - c).",
+    "latex": "\\text{res}_i = (a_i \\cdot b_i) - c_i"
+  },
+  "fnmadd": {
+    "description": "Computes the fused negative multiply-add of three vector registers (-(a * b) + c).",
+    "latex": "\\text{res}_i = -(a_i \\cdot b_i) + c_i"
+  },
+  "fnmsub": {
+    "description": "Computes the fused negative multiply-subtract of three vector registers (-(a * b) - c).",
+    "latex": "\\text{res}_i = -(a_i \\cdot b_i) - c_i"
+  },
+  "gather": {
+    "description": "Loads elements from non-contiguous memory locations into a vector register using an index vector.",
+    "latex": "\\text{res}_i = \\text{ptr}[\\text{indices}_i]"
+  },
+  "get": {
+    "description": "Extracts a single scalar element at index idx from a vector register.",
+    "latex": "\\text{res} = a[\\text{idx}]"
+  },
+  "get_k": {
+    "description": "Extracts the boolean truthiness of a single mask element at index idx.",
+    "latex": "\\text{res} = m[\\text{idx}]"
+  },
+  "getfirst": {
+    "description": "Extracts the first scalar element (element 0) from a vector register with minimal latency.",
+    "latex": "\\text{res} = a[0]"
+  },
+  "hadd": {
+    "description": "Computes the horizontal addition (reduction sum) of all elements in a vector register.",
+    "latex": "\\text{res} = \\sum_{i=0}^{N-1} a_i"
+  },
+  "hadds": {
+    "description": "Computes the horizontal addition with saturation of all elements in a vector register.",
+    "latex": "\\text{res} = \\operatorname{saturate}\\left(\\sum_{i=0}^{N-1} a_i\\right)"
+  },
+  "hmax": {
+    "description": "Computes the horizontal maximum (reduction maximum) of all elements in a vector register.",
+    "latex": "\\text{res} = \\max_{i=0}^{N-1} a_i"
+  },
+  "hmin": {
+    "description": "Computes the horizontal minimum (reduction minimum) of all elements in a vector register.",
+    "latex": "\\text{res} = \\min_{i=0}^{N-1} a_i"
+  },
+  "hmul": {
+    "description": "Computes the horizontal multiplication (reduction product) of all elements in a vector register.",
+    "latex": "\\text{res} = \\prod_{i=0}^{N-1} a_i"
+  },
+  "load": {
+    "description": "Loads elements from an aligned memory address into a vector register.",
+    "latex": "\\text{res}_i = \\text{ptr}[i]"
+  },
+  "loadu": {
+    "description": "Loads elements from an unaligned memory address into a vector register.",
+    "latex": "\\text{res}_i = \\text{ptr}[i]"
+  },
+  "log": {
+    "description": "Computes the natural (base-e) logarithm of each floating-point element.",
+    "latex": "\\text{res}_i = \\ln(a_i)"
+  },
+  "lshift": {
+    "description": "Shifts each vector element left by a given number of bits.",
+    "latex": "\\text{res}_i = a_i \\ll \\text{count}"
+  },
+  "max": {
+    "description": "Selects the maximum value element-wise between two vector registers.",
+    "latex": "\\text{res}_i = \\max(a_i, b_i)"
+  },
+  "min": {
+    "description": "Selects the minimum value element-wise between two vector registers.",
+    "latex": "\\text{res}_i = \\min(a_i, b_i)"
+  },
+  "msb": {
+    "description": "Masks out all bits except the most significant bit (sign bit) for each vector element.",
+    "latex": "\\text{res}_i = a_i \\ \\& \\ \\text{MSB_MASK}"
+  },
+  "mul": {
+    "description": "Multiplies two vector registers element-wise.",
+    "latex": "\\text{res}_i = a_i \\cdot b_i"
+  },
+  "neg": {
+    "description": "Negates each element of a vector register.",
+    "latex": "\\text{res}_i = -a_i"
+  },
+  "notb": {
+    "description": "Computes the bitwise NOT (inversion) of a vector register.",
+    "latex": "\\text{res}_i = \\sim a_i"
+  },
+  "notb_k": {
+    "description": "Computes the bitwise NOT (inversion) of a mask register.",
+    "latex": "m_{\\text{res}, i} = \\sim m_{0, i}"
+  },
+  "orb": {
+    "description": "Computes the bitwise OR of two vector registers.",
+    "latex": "\\text{res}_i = a_i \\mid b_i"
+  },
+  "orb_k": {
+    "description": "Computes the bitwise OR of two mask registers.",
+    "latex": "m_{\\text{res}, i} = m_{0, i} \\mid m_{1, i}"
+  },
+  "pow": {
+    "description": "Computes the first vector register raised to the power of the second element-wise.",
+    "latex": "\\text{res}_i = a_i^{b_i}"
+  },
+  "pow2": {
+    "description": "Computes 2 raised to the power of each vector element.",
+    "latex": "\\text{res}_i = 2^{a_i}"
+  },
+  "round": {
+    "description": "Rounds each floating-point element to the nearest integer.",
+    "latex": "\\text{res}_i = \\operatorname{round}(a_i)"
+  },
+  "rshift": {
+    "description": "Shifts each vector element right by a given number of bits.",
+    "latex": "\\text{res}_i = a_i \\gg \\text{count}"
+  },
+  "rsqrt": {
+    "description": "Computes the reciprocal square root of each floating-point element (1 / sqrt(a)).",
+    "latex": "\\text{res}_i = \\frac{1}{\\sqrt{a_i}}"
+  },
+  "scatter": {
+    "description": "Stores vector elements into non-contiguous memory locations using an index vector.",
+    "latex": "\\text{ptr}[\\text{indices}_i] = \\text{values}_i"
+  },
+  "set": {
+    "description": "Initializes a vector register from a scalar array.",
+    "latex": "\\text{res}_i = \\text{vals}[i]"
+  },
+  "set0": {
+    "description": "Initializes a vector register with all zeros.",
+    "latex": "\\text{res}_i = 0"
+  },
+  "set0_k": {
+    "description": "Clears all elements of a mask register (all inactive).",
+    "latex": "m_i = 0"
+  },
+  "set1": {
+    "description": "Broadcasts a single scalar value to all elements of a vector register.",
+    "latex": "\\text{res}_i = \\text{val}"
+  },
+  "set1_k": {
+    "description": "Broadcasts boolean truthiness to all elements of a mask register.",
+    "latex": "m_i = (\\text{val} \\neq 0)"
+  },
+  "set_k": {
+    "description": "Initializes a mask register from an array of int32_t evaluating boolean truthiness.",
+    "latex": "m_i = (\\text{vals}[i] \\neq 0)"
+  },
+  "sin": {
+    "description": "Computes the trigonometric sine of each floating-point element in radians.",
+    "latex": "\\text{res}_i = \\sin(a_i)"
+  },
+  "sinh": {
+    "description": "Computes the hyperbolic sine of each floating-point element.",
+    "latex": "\\text{res}_i = \\sinh(a_i)"
+  },
+  "sqrt": {
+    "description": "Computes the square root of each element in a vector register.",
+    "latex": "\\text{res}_i = \\sqrt{a_i}"
+  },
+  "store": {
+    "description": "Stores vector elements into an aligned memory address.",
+    "latex": "\\text{ptr}[i] = a_i"
+  },
+  "storeu": {
+    "description": "Stores vector elements into an unaligned memory address.",
+    "latex": "\\text{ptr}[i] = a_i"
+  },
+  "sub": {
+    "description": "Subtracts the second vector register from the first element-wise.",
+    "latex": "\\text{res}_i = a_i - b_i"
+  },
+  "subs": {
+    "description": "Subtracts two integer vector registers element-wise with saturation to [MIN, MAX] on underflow/overflow.",
+    "latex": "\\text{res}_i = \\operatorname{saturate}(a_i - b_i)"
+  },
+  "tan": {
+    "description": "Computes the trigonometric tangent of each floating-point element in radians.",
+    "latex": "\\text{res}_i = \\tan(a_i)"
+  },
+  "tanh": {
+    "description": "Computes the hyperbolic tangent of each floating-point element.",
+    "latex": "\\text{res}_i = \\tanh(a_i)"
+  },
+  "testz": {
+    "description": "Tests if the bitwise AND of two mask registers is all zero (returns 1 if disjoint/all zero, 0 otherwise).",
+    "latex": "\\text{res} = \\begin{cases} 1 & \\text{if } \\forall i, \\, (m_{0, i} \\ \\& \\ m_{1, i}) == 0 \\\\ 0 & \\text{otherwise} \\end{cases}"
+  },
+  "testz_2": {
+    "description": "Tests if every element in a mask register is zero (returns 1 if all inactive, 0 otherwise).",
+    "latex": "\\text{res} = \\begin{cases} 1 & \\text{if } \\forall i, \\, m_{0, i} == 0 \\\\ 0 & \\text{otherwise} \\end{cases}"
+  },
+  "tomsk": {
+    "description": "Converts vector elements to boolean mask elements (active when non-zero).",
+    "latex": "m_i = (a_i \\neq 0)"
+  },
+  "toreg": {
+    "description": "Expands a mask register into an all-ones (~0) / all-zeros (0) vector register.",
+    "latex": "\\text{res}_i = m_i ? (\\sim 0) : 0"
+  },
+  "trunc": {
+    "description": "Truncates each floating-point element toward zero.",
+    "latex": "\\text{res}_i = \\operatorname{trunc}(a_i)"
+  },
+  "wcvt": {
+    "description": "Widening conversion: converts vector elements to a wider datatype.",
+    "latex": "\\text{res}_i = (T_{\\text{wide}}) a_i"
+  },
+  "xorb": {
+    "description": "Computes the bitwise XOR of two vector registers.",
+    "latex": "\\text{res}_i = a_i \\oplus b_i"
+  },
+  "xorb_k": {
+    "description": "Computes the bitwise XOR of two mask registers.",
+    "latex": "m_{\\text{res}, i} = m_{0, i} \\oplus m_{1, i}"
+  }
+}
