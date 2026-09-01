@@ -260,5 +260,18 @@
             "template": "log_f32",
             "if": "defined(__AVX2__)"
         }
+    ],
+    "tomsk": [
+        {
+            "instr_name": "tomsk",
+            "datatypes": "all_float",
+            "template": "tomsk_float"
+        },
+        {
+            "instr_name": "tomsk",
+            "datatypes": "all_int_uint",
+            "template": "tomsk_int",
+            "if": "defined(__AVX2__)"
+        }
     ]
 }

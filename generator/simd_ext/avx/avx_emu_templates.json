@@ -306,5 +306,19 @@
             "rs5.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs4.r, rs5.r);",
             "return %getfirst<tp>%(rs5);"
         ]
+    },
+    "tomsk_float": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_cmp_{{ isa_dt_par.data_ext }}(r0.r, {{ isa.prefix }}_setzero_{{ isa_dt_par.data_ext }}(), _CMP_NEQ_UQ);"
+    },
+    "tomsk_int": {
+        "format": "long",
+        "code": [
+            "%m<tr>% res;",
+            "__m256i zero = _mm256_setzero_si256();",
+            "__m256i eq_zero = {{ isa.prefix }}_cmpeq_{{ isa_dt_par.data_ext_var }}(r0.r, zero);",
+            "res.m = _mm256_xor_si256(eq_zero, _mm256_cmpeq_epi32(zero, zero));",
+            "return res;"
+        ]
     }
 }

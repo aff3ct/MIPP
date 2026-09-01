@@ -608,6 +608,14 @@
             "template": "testz_1arg"
         }
     ],
+    "toreg": [
+        {
+            "datatypes": "all_datatypes",
+            "template": "toreg",
+            "skip_audit_level": true,
+            "skip_audit_level_reason": "zero-overhead struct field copy for full-vector masks"
+        }
+    ],
     "trunc": [
         {
             "instr_name": "round",

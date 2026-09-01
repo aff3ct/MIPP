@@ -34,49 +34,49 @@
     "cmpeq_float": {
         "format": "long",
         "code": [
-            "%r<tp>% tmp;",
-            "tmp.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, _CMP_EQ_OQ);",
-            "return %tomsk<tp>%(tmp);"
+            "%m<tr>% res;",
+            "res.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, _CMP_EQ_OQ);",
+            "return res;"
         ]
     },
     "cmpge_float": {
         "format": "long",
         "code": [
-            "%r<tp>% tmp;",
-            "tmp.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, _CMP_GE_OS);",
-            "return %tomsk<tp>%(tmp);"
+            "%m<tr>% res;",
+            "res.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, _CMP_GE_OS);",
+            "return res;"
         ]
     },
     "cmpgt_float": {
         "format": "long",
         "code": [
-            "%r<tp>% tmp;",
-            "tmp.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, _CMP_GT_OS);",
-            "return %tomsk<tp>%(tmp);"
+            "%m<tr>% res;",
+            "res.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, _CMP_GT_OS);",
+            "return res;"
         ]
     },
     "cmple_float": {
         "format": "long",
         "code": [
-            "%r<tp>% tmp;",
-            "tmp.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, _CMP_LE_OS);",
-            "return %tomsk<tp>%(tmp);"
+            "%m<tr>% res;",
+            "res.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, _CMP_LE_OS);",
+            "return res;"
         ]
     },
     "cmplt_float": {
         "format": "long",
         "code": [
-            "%r<tp>% tmp;",
-            "tmp.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, _CMP_LT_OS);",
-            "return %tomsk<tp>%(tmp);"
+            "%m<tr>% res;",
+            "res.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, _CMP_LT_OS);",
+            "return res;"
         ]
     },
     "cmpneq_float": {
         "format": "long",
         "code": [
-            "%r<tp>% tmp;",
-            "tmp.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, _CMP_NEQ_OQ);",
-            "return %tomsk<tp>%(tmp);"
+            "%m<tr>% res;",
+            "res.m = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, _CMP_NEQ_OQ);",
+            "return res;"
         ]
     },
     "cvt": {
@@ -308,6 +308,10 @@
             "%m<c:int|b:tp>% m1i = %cast_k<tp,c:int|b:tp>%(m1);",
             "return _mm256_testz_si256(m0i.m, m1i.m);"
         ]
+    },
+    "toreg": {
+        "format": "short",
+        "code": "m0.m;"
     },
     "trunc_float": {
         "format": "short",
