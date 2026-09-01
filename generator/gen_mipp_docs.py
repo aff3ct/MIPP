@@ -7,6 +7,7 @@ import sys
 import os
 import shutil
 import json
+import copy
 
 path = os.getcwd()
 sys.path.insert(1, os.path.join(path, "helpers_headers"))
@@ -16,15 +17,21 @@ from tools import (
     load_isa_config,
     all_datatypes,
     all_datatypes_cart_prod,
+    all_datatypes_same_size,
+    all_datatypes_widenning,
+    build_func_name,
+    build_func_name_short,
+    build_proto,
 )
 from registry import (
     interfaces,
     categories,
     scalar_isa,
     scalar_implems,
-    implems_generic_emu,
-    implems_mask_generic_emu,
 )
+from gen_mipp_headers import discover_and_sort_isas
+from c_generator import resolve_lmul_in_isa, register_all_candidates
+from codegen.candidate_resolver import resolve_candidates
 from scalar_gen import gen_c_functions_scalar_one
 
 # Load Centralized Function Documentation Metadata
@@ -57,150 +64,62 @@ dict_datatypes_short = {
 }
 
 all_datatypes_short = [dict_datatypes_short[dt] for dt in all_datatypes]
-all_datatypes_short_cart_prod = []
-for dt1 in all_datatypes:
-    for dt2 in all_datatypes:
-        all_datatypes_short_cart_prod.append(f"{dict_datatypes_short[dt1]},{dict_datatypes_short[dt2]}")
 
-if_ignored_set = {"MIPP_ALIGNED_LOADS"}
+def pair_to_short(pair_str):
+    src, dst = pair_str.split(",")
+    return f"{dict_datatypes_short.get(src, src)}&rarr;{dict_datatypes_short.get(dst, dst)}"
 
-
-def element_in_str(s_set, s_str):
-    for element in s_set:
-        if element in s_str:
-            return True
-    for element in if_ignored_set:
-        if element in s_str:
-            return True
-    return False
+all_datatypes_short_cart_prod = [pair_to_short(p) for p in all_datatypes_cart_prod]
+all_datatypes_same_size_short = [pair_to_short(p) for p in all_datatypes_same_size]
+all_datatypes_widenning_short = [pair_to_short(p) for p in all_datatypes_widenning]
 
 
 # ---------------------------------------------------------------------------
-# ISA Capability Tracking
+# ISA Capability Tracking via Header Solver
 # ---------------------------------------------------------------------------
 
 class FuncInfo:
-    def __init__(self):
-        self.func_name = None
-        self.datatypes = []
-        self.emulated = {}
-        self.generic = {}
-        self.mask_kind = {}
-        self.mask_emulated = {"mask": {}, "maskz": {}, "masks": {}}
-        self.mask_generic = {"mask": {}, "maskz": {}, "masks": {}}
+    def __init__(self, func_name=""):
+        self.func_name = func_name
+        self.levels = {}  # (dt_key, mask_kind) -> int (0, 1, 2, 3, 4)
 
-    def gen_infos(self, func, implems_isa, implems_emu_isa, defines):
-        self.func_name = func
-        if func in implems_isa:
-            for implem in implems_isa[func]:
-                mask_kind = implem.get("version", "unmasked")
-                if mask_kind != "unmasked":
-                    for dt in implem["datatypes"]:
-                        if dt not in self.mask_kind:
-                            self.mask_kind[dt] = []
-                        self.mask_kind[dt].append(mask_kind)
-                        self.mask_emulated[mask_kind][dt] = False
-                        self.mask_generic[mask_kind][dt] = False
-                    continue
+    def get_level(self, dt, mask_kind=None):
+        dt_par, dt_ret = dt.split(",") if "," in dt else (dt, dt)
+        dt_key = f"{dt_par},{dt_ret}"
+        return self.levels.get((dt_key, mask_kind), 3)
 
-                if "if" in implem:
-                    if element_in_str(defines, implem["if"]):
-                        self.add_datatypes(implem["datatypes"], False, False)
-                else:
-                    self.add_datatypes(implem["datatypes"], False, False)
+    def is_generic(self, dt):
+        return self.get_level(dt, None) == 2
 
-        if func in implems_emu_isa:
-            for implem in implems_emu_isa[func]:
-                mask_kind = implem.get("version", "unmasked")
-                if mask_kind != "unmasked":
-                    for dt in implem["datatypes"]:
-                        if dt not in self.mask_kind:
-                            self.mask_kind[dt] = []
-                        self.mask_kind[dt].append(mask_kind)
-                        self.mask_emulated[mask_kind][dt] = True
-                        self.mask_generic[mask_kind][dt] = False
-                    continue
+    def is_emulated(self, dt):
+        return self.get_level(dt, None) == 1
 
-                if "if" in implem:
-                    if element_in_str(defines, implem["if"]):
-                        self.add_datatypes(implem["datatypes"], True, False)
-                else:
-                    self.add_datatypes(implem["datatypes"], True, False)
+    def is_native(self, dt):
+        return self.get_level(dt, None) == 0
 
-        if func in implems_generic_emu:
-            for implem in implems_generic_emu[func]:
-                self.add_datatypes(implem["datatypes"], False, True)
+    def is_generic_mkind(self, dt, mkind):
+        return self.get_level(dt, mkind) == 2
 
-        if func in implems_mask_generic_emu:
-            for implem in implems_mask_generic_emu[func]:
-                mask_kind = implem.get("version", "unmasked")
-                if mask_kind == "unmasked":
-                    continue
-                for dt in implem["datatypes"]:
-                    if dt not in self.mask_kind:
-                        self.mask_kind[dt] = []
-                    if mask_kind not in self.mask_kind[dt]:
-                        self.mask_kind[dt].append(mask_kind)
-                        self.mask_emulated[mask_kind][dt] = False
-                        self.mask_generic[mask_kind][dt] = True
+    def is_emulated_mkind(self, dt, mkind):
+        return self.get_level(dt, mkind) == 1
 
-    def is_generic(self, dttype):
-        return self.generic.get(dttype, False)
+    def is_native_mkind(self, dt, mkind):
+        return self.get_level(dt, mkind) == 0
 
-    def is_emulated(self, dttype):
-        return self.emulated.get(dttype, False)
+    def is_supported_dt(self, dt):
+        return self.get_level(dt, None) <= 2
 
-    def is_native(self, dttype):
-        return not self.is_emulated(dttype) and not self.is_generic(dttype)
-
-    def is_generic_mkind(self, dttype, mkind):
-        if self.mask_generic.get(mkind, {}).get(dttype, False):
-            if dttype in self.mask_kind and mkind in self.mask_kind[dttype]:
-                return True
-        return False
-
-    def is_emulated_mkind(self, dttype, mkind):
-        if self.mask_emulated.get(mkind, {}).get(dttype, False):
-            if dttype in self.mask_kind and mkind in self.mask_kind[dttype]:
-                return True
-        return False
-
-    def is_def_mkind(self, dttype, mkind):
-        return dttype in self.mask_kind and mkind in self.mask_kind[dttype]
-
-    def add_datatypes(self, datatypes, emulated=False, generic=False):
-        for dt in datatypes:
-            if dt in self.datatypes:
-                continue
-            self.datatypes.append(dt)
-            if emulated:
-                self.emulated[dt] = True
-            if generic:
-                self.generic[dt] = True
-
-    def is_supported_dt(self, dttype):
-        return dttype in self.datatypes
-
-    def get_mask_kinds(self, dttype):
-        return self.mask_kind.get(dttype, [])
+    def is_def_mkind(self, dt, mkind):
+        return self.get_level(dt, mkind) <= 2
 
 
 class IsaInfo:
     def __init__(self, isa_name):
         self.isa_name = isa_name
-        self.func_infos = []
-
-    def gen_isa_info(self, interfaces, implems, implems_emu, defines):
-        for func in interfaces:
-            func_info = FuncInfo()
-            func_info.gen_infos(func, implems, implems_emu, defines)
-            self.func_infos.append(func_info)
+        self.func_infos = {}
 
     def get_func_info(self, func_name):
-        for func_info in self.func_infos:
-            if func_info.func_name == func_name:
-                return func_info
-        return None
+        return self.func_infos.get(func_name, None)
 
 
 class MippInfo:
@@ -210,35 +129,71 @@ class MippInfo:
     def gen_mipp_infos(self, interfaces, isas_map):
         for isa_name, conf in isas_map.items():
             isa_info = IsaInfo(isa_name)
-            native_implems = conf["implems"][0] if conf["implems"][0] is not None else {}
-            emu_implems = conf["implems"][1] if conf["implems"][1] is not None else {}
-            defines = conf.get("defines", set())
-            isa_info.gen_isa_info(interfaces, native_implems, emu_implems, defines)
+            isa_conf = conf["isa_conf"]
+            native_impl, emu_impl = conf["implems"]
+
+            resolved_isa = resolve_lmul_in_isa(isa_conf, "0")
+            resolved_isa["candidates"] = []
+            copy_interfaces = copy.deepcopy(interfaces)
+            register_all_candidates(resolved_isa, copy_interfaces, native_impl, emu_impl, lmul=0)
+            resolved_map = resolve_candidates(resolved_isa, copy_interfaces, lmul=0)
+
+            for func in interfaces:
+                f_info = FuncInfo(func)
+                for dt in interfaces[func]["datatypes"]:
+                    dt_par, dt_ret = dt.split(",") if "," in dt else (dt, dt)
+                    dt_key = f"{dt_par},{dt_ret}"
+                    mask_kinds = [None]
+                    if "mask_support" in interfaces[func]:
+                        support = interfaces[func]["mask_support"]
+                        if support.is_maskable():
+                            mask_kinds.append("mask")
+                        if support.is_maskzable():
+                            mask_kinds.append("maskz")
+                        if support.is_masksable():
+                            mask_kinds.append("masks")
+
+                    for mkind in mask_kinds:
+                        cands = resolved_map.get((func, dt_key, mkind), [])
+                        active_levels = [cand["level"] for cand, cond in cands if cond != "0"]
+                        lvl = min(active_levels, default=3)
+                        f_info.levels[(dt_key, mkind)] = lvl
+                isa_info.func_infos[func] = f_info
             self.isa_infos.append(isa_info)
 
     def get_intersection(self):
         intersection = IsaInfo("intersection")
         for func in interfaces:
-            func_info = FuncInfo()
-            func_info.func_name = func
-            for dtype in interfaces[func]["datatypes"]:
-                if all(
-                    isa_info.get_func_info(func) is not None
-                    and isa_info.get_func_info(func).is_supported_dt(dtype)
-                    for isa_info in self.isa_infos
-                ):
-                    func_info.datatypes.append(dtype)
-                    if any(
-                        isa_info.get_func_info(func).is_generic(dtype)
+            f_info = FuncInfo(func)
+            for dt in interfaces[func]["datatypes"]:
+                dt_par, dt_ret = dt.split(",") if "," in dt else (dt, dt)
+                dt_key = f"{dt_par},{dt_ret}"
+                mask_kinds = [None]
+                if "mask_support" in interfaces[func]:
+                    support = interfaces[func]["mask_support"]
+                    if support.is_maskable():
+                        mask_kinds.append("mask")
+                    if support.is_maskzable():
+                        mask_kinds.append("maskz")
+                    if support.is_masksable():
+                        mask_kinds.append("masks")
+
+                for mkind in mask_kinds:
+                    isa_levels = [
+                        isa_info.get_func_info(func).get_level(dt, mkind)
                         for isa_info in self.isa_infos
-                    ):
-                        func_info.generic[dtype] = True
-                    elif any(
-                        isa_info.get_func_info(func).is_emulated(dtype)
-                        for isa_info in self.isa_infos
-                    ):
-                        func_info.emulated[dtype] = True
-            intersection.func_infos.append(func_info)
+                        if isa_info.get_func_info(func) is not None
+                    ]
+                    if isa_levels and all(lvl <= 2 for lvl in isa_levels):
+                        if any(lvl == 2 for lvl in isa_levels):
+                            f_info.levels[(dt_key, mkind)] = 2
+                        elif any(lvl == 1 for lvl in isa_levels):
+                            f_info.levels[(dt_key, mkind)] = 1
+                        else:
+                            f_info.levels[(dt_key, mkind)] = 0
+                    else:
+                        f_info.levels[(dt_key, mkind)] = 3
+            intersection.func_infos[func] = f_info
         return intersection
 
 
@@ -252,6 +207,19 @@ badge_l2 = '<span style="color: #FFD20D; font-weight: 600;">:fontawesome-solid-2
 badge_l3 = '<span style="color: #6C757D; font-weight: 600;">:fontawesome-solid-3:</span>'
 badge_na = '<span style="color: #6C757D; font-weight: 600;">:material-minus:</span>'
 
+def level_to_badge(level):
+    if level == 0:
+        return badge_l0
+    elif level == 1:
+        return badge_l1
+    elif level == 2:
+        return badge_l2
+    elif level == 3:
+        return badge_l3
+    else:
+        return badge_na
+
+
 def write_mipp_infos(mipp_infos, base_dir):
     for isa_info in mipp_infos.isa_infos:
         file_path = os.path.join(base_dir, f"{isa_info.isa_name}.md")
@@ -262,57 +230,63 @@ def write_mipp_infos(mipp_infos, base_dir):
                 print("| Function | " + " | ".join(all_datatypes_short) + " |", file=f)
                 print("| :--- | " + " | ".join([":---:"] * len(dttypes)) + " |", file=f)
                 for func in funcs:
-                    if func in ("cast", "cast_k"):
+                    if func in ("cast", "cast_k", "cvt", "wcvt"):
                         continue
                     func_info = isa_info.get_func_info(func)
-                    if func_info is not None:
-                        line = f"| [{func}](../funcs_support/{category}/{func}.md) | "
-                        for dtype in dttypes:
-                            dtype_check = f"{dtype},{dtype}" if func in ("gather", "scatter") else dtype
-                            if dtype_check in func_info.datatypes:
-                                if func_info.is_generic(dtype_check):
-                                    line += f"{badge_l2} | "
-                                elif func_info.is_emulated(dtype_check):
-                                    line += f"{badge_l1} | "
-                                else:
-                                    line += f"{badge_l0} | "
-                            elif dtype_check in interfaces[func]["datatypes"]:
-                                line += f"{badge_l3} | "
-                            else:
-                                line += f"{badge_na} | "
-                        print(line, file=f)
-                    else:
-                        line = f"| [{func}](../funcs_support/{category}/{func}.md) | "
-                        for dtype in dttypes:
-                            dtype_check = f"{dtype},{dtype}" if func in ("gather", "scatter") else dtype
-                            if dtype_check in interfaces[func]["datatypes"]:
-                                line += f"{badge_l3} | "
-                            else:
-                                line += f"{badge_na} | "
-                        print(line, file=f)
-
-            # Cartesian product table for cast and cast_k
-            dttypes_cart = all_datatypes_cart_prod
-            print("\n## Type Reinterpretations (`cast` & `cast_k`)\n", file=f)
-            print("| Function | " + " | ".join(all_datatypes_short_cart_prod) + " |", file=f)
-            print("| :--- | " + " | ".join([":---:"] * len(dttypes_cart)) + " |", file=f)
-            for func in ["cast", "cast_k"]:
-                func_info = isa_info.get_func_info(func)
-                if func_info is not None:
-                    line = f"| [{func}](../funcs_support/reinterpret/{func}.md) | "
-                    for dtype in dttypes_cart:
-                        if dtype in func_info.datatypes:
-                            if func_info.is_generic(dtype):
-                                line += f"{badge_l2} | "
-                            elif func_info.is_emulated(dtype):
-                                line += f"{badge_l1} | "
-                            else:
-                                line += f"{badge_l0} | "
-                        elif dtype in interfaces[func]["datatypes"]:
-                            line += f"{badge_l3} | "
+                    line = f"| [{func}](../funcs_support/{category}/{func}.md) | "
+                    for dtype in dttypes:
+                        dtype_check = f"{dtype},{dtype}" if func in ("gather", "scatter") else dtype
+                        if dtype_check in interfaces[func]["datatypes"]:
+                            lvl = func_info.get_level(dtype_check, None) if func_info else 3
+                            line += f"{level_to_badge(lvl)} | "
                         else:
                             line += f"{badge_na} | "
                     print(line, file=f)
+
+            # Type Conversions (cvt)
+            print("\n## Type Conversions (`cvt`)\n", file=f)
+            print("| Function | " + " | ".join(all_datatypes_same_size_short) + " |", file=f)
+            print("| :--- | " + " | ".join([":---:"] * len(all_datatypes_same_size)) + " |", file=f)
+            func = "cvt"
+            func_info = isa_info.get_func_info(func)
+            line = f"| [{func}](../funcs_support/converts/{func}.md) | "
+            for dtype in all_datatypes_same_size:
+                if dtype in interfaces[func]["datatypes"]:
+                    lvl = func_info.get_level(dtype, None) if func_info else 3
+                    line += f"{level_to_badge(lvl)} | "
+                else:
+                    line += f"{badge_na} | "
+            print(line, file=f)
+
+            # Widening Conversions (wcvt)
+            print("\n## Widening Conversions (`wcvt`)\n", file=f)
+            print("| Function | " + " | ".join(all_datatypes_widenning_short) + " |", file=f)
+            print("| :--- | " + " | ".join([":---:"] * len(all_datatypes_widenning)) + " |", file=f)
+            func = "wcvt"
+            func_info = isa_info.get_func_info(func)
+            line = f"| [{func}](../funcs_support/converts/{func}.md) | "
+            for dtype in all_datatypes_widenning:
+                if dtype in interfaces[func]["datatypes"]:
+                    lvl = func_info.get_level(dtype, None) if func_info else 3
+                    line += f"{level_to_badge(lvl)} | "
+                else:
+                    line += f"{badge_na} | "
+            print(line, file=f)
+
+            # Cartesian product table for cast and cast_k
+            print("\n## Type Reinterpretations (`cast` & `cast_k`)\n", file=f)
+            print("| Function | " + " | ".join(all_datatypes_short_cart_prod) + " |", file=f)
+            print("| :--- | " + " | ".join([":---:"] * len(all_datatypes_cart_prod)) + " |", file=f)
+            for func in ["cast", "cast_k"]:
+                func_info = isa_info.get_func_info(func)
+                line = f"| [{func}](../funcs_support/reinterpret/{func}.md) | "
+                for dtype in all_datatypes_cart_prod:
+                    if dtype in interfaces[func]["datatypes"]:
+                        lvl = func_info.get_level(dtype, None) if func_info else 3
+                        line += f"{level_to_badge(lvl)} | "
+                    else:
+                        line += f"{badge_na} | "
+                print(line, file=f)
 
 
 def exists_msk_in_category(category, mkind):
@@ -343,25 +317,18 @@ def write_mipp_infos_masked(mipp_infos, base_dir):
                     print("| Function | " + " | ".join(all_datatypes_short) + " |", file=f)
                     print("| :--- | " + " | ".join([":---:"] * len(dttypes)) + " |", file=f)
                     for func in funcs:
-                        if not exists_msk_in_func(func, mkind) or func in ("cast", "cast_k"):
+                        if not exists_msk_in_func(func, mkind) or func in ("cast", "cast_k", "cvt", "wcvt"):
                             continue
                         func_info = isa_info.get_func_info(func)
-                        if func_info is not None:
-                            line = f"| [{func}](../funcs_support/{category}/{func}.md) | "
-                            for dtype in dttypes:
-                                dtype_check = f"{dtype},{dtype}" if func in ("gather", "scatter") else dtype
-                                if dtype_check in func_info.datatypes and func_info.is_def_mkind(dtype_check, mkind):
-                                    if func_info.is_generic_mkind(dtype_check, mkind):
-                                        line += f"{badge_l2} | "
-                                    elif func_info.is_emulated_mkind(dtype_check, mkind):
-                                        line += f"{badge_l1} | "
-                                    else:
-                                        line += f"{badge_l0} | "
-                                elif dtype_check in interfaces[func]["datatypes"] and interfaces[func]["mask_support"].is_supported(mkind):
-                                    line += f"{badge_l3} | "
-                                else:
-                                    line += f"{badge_na} | "
-                            print(line, file=f)
+                        line = f"| [{func}](../funcs_support/{category}/{func}.md) | "
+                        for dtype in dttypes:
+                            dtype_check = f"{dtype},{dtype}" if func in ("gather", "scatter") else dtype
+                            if dtype_check in interfaces[func]["datatypes"] and interfaces[func]["mask_support"].is_supported(mkind):
+                                lvl = func_info.get_level(dtype_check, mkind) if func_info else 3
+                                line += f"{level_to_badge(lvl)} | "
+                            else:
+                                line += f"{badge_na} | "
+                        print(line, file=f)
 
 
 # ---------------------------------------------------------------------------
@@ -428,43 +395,37 @@ class SpecFuncInfo:
 
     def func_to_str_cpp(self, lmul=1):
         cpp_name = self.get_cpp_func_name()
-        cast = self.func_name in ("cast", "cast_k")
+        is_pair_func = self.func_name in ("cast", "cast_k", "cvt", "wcvt")
+        if is_pair_func:
+            lmul_tmpl = f"<typename T2, typename T1, int LMUL={lmul}> " if lmul != 1 else "<typename T2, typename T1> "
+            lmul_arg = f",{lmul}" if lmul != 1 else ""
+            type_name = "rvm" if self.func_name.endswith("_k") else "rvd"
+            return f"template {lmul_tmpl}inline {type_name}<T2{lmul_arg}> {cpp_name}({type_name}<T1{lmul_arg}>);"
+
         fixed_dtypes = [arg.get("fixeddatatype", False) for arg in self.args]
         args_str = ", ".join(
-            [match_args_type_cpp(arg["type"], cast, False, fixed, lmul=lmul) for arg, fixed in zip(self.args, fixed_dtypes)]
+            [match_args_type_cpp(arg["type"], False, False, fixed, lmul=lmul) for arg, fixed in zip(self.args, fixed_dtypes)]
         )
-
         ret_fixed = self.ret.get("fixeddatatype", False)
-        ret_str = match_args_type_cpp(self.ret["type"], cast, True, ret_fixed, lmul=lmul)
-        if cast:
-            lmul_tmpl = f"<typename T2, typename T1, int LMUL={lmul}> " if lmul != 1 else "<typename T2, typename T1> "
-        else:
-            lmul_tmpl = f"<typename T, int LMUL={lmul}> " if lmul != 1 else "<typename T> "
+        ret_str = match_args_type_cpp(self.ret["type"], False, True, ret_fixed, lmul=lmul)
+        lmul_tmpl = f"<typename T, int LMUL={lmul}> " if lmul != 1 else "<typename T> "
         return f"template {lmul_tmpl}inline {ret_str} {cpp_name}({args_str});"
 
     def func_to_str_c(self, lmul=1):
-        lmul_str = "" if lmul == 1 else (f"_m{lmul}" if lmul > 0 else "_d2")
-        cast = self.func_name in ("cast", "cast_k")
-        fixed_dtypes = [arg.get("fixeddatatype", False) for arg in self.args]
-        args_str = ", ".join(
-            [match_args_type_c(arg["type"], cast, False, fixed) for arg, fixed in zip(self.args, fixed_dtypes)]
-        )
-
-        ret_fixed = self.ret.get("fixeddatatype", False)
-        ret_str = match_args_type_c(self.ret["type"], cast, True, ret_fixed)
-
-        if cast:
-            func_proto_str = f"inline {ret_str} mipp_{self.func_name}_{{type 1}}_{{type 2}}{lmul_str}({args_str});"
-        else:
-            func_proto_str = f"inline {ret_str} mipp_{self.func_name}_{{type}}{lmul_str}({args_str});"
-
+        is_pair_func = self.func_name in ("cast", "cast_k", "cvt", "wcvt")
         lines = []
-        for dt in self.dttypes:
-            if cast:
-                parts = dt.split(",")
-                lines.append(func_proto_str.replace("{type 1}", parts[0]).replace("{type 2}", parts[1]))
-            else:
-                lines.append(func_proto_str.format(type=dt))
+        if is_pair_func:
+            for dt in self.dttypes:
+                dt_par, dt_ret = dt.split(",")
+                full_func_name = build_func_name({}, dt_par, dt_ret, self.func_name, isa_name=False, lmul=lmul)
+                proto = build_proto(interfaces[self.func_name]["proto"], dt_par, dt_ret, {}, full_func_name, lmul=lmul, isa_name=False)
+                lines.append(proto + ";")
+        else:
+            for dt in self.dttypes:
+                dt_single = dt.split(",")[0]
+                full_func_name = build_func_name_short({}, dt_single, self.func_name, isa_name=False, lmul=lmul)
+                proto = build_proto(interfaces[self.func_name]["proto"], dt_single, dt_single, {}, full_func_name, lmul=lmul, isa_name=False)
+                lines.append(proto + ";")
         return "\n".join(lines)
 
     def write_func_algo(self, file):
@@ -484,18 +445,12 @@ class SpecFuncInfo:
     def write_spec_func_info(self, base_dir, mipp_infos=None):
         file_path = os.path.join(base_dir, self.category, f"{self.func_name}.md")
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
-
-        doc_entry = funcs_docs.get(self.func_name, {})
-        description = doc_entry.get("description", "Function reference documentation.")
-        latex = doc_entry.get("latex", None)
-
         with open(file_path, "w", encoding="utf-8") as f:
             print(f"# `{self.func_name}`\n", file=f)
-            print("## Description\n", file=f)
-            print(f"{description}\n", file=f)
-
-            if latex:
-                print(f"$$\n{latex}\n$$\n", file=f)
+            
+            doc_entry = funcs_docs.get(self.func_name, {})
+            desc = doc_entry.get("description", "Vector function reference.")
+            print(f"{desc}\n", file=f)
 
             print("## Prototypes\n", file=f)
             print('=== "C++ API"', file=f)
@@ -519,9 +474,15 @@ class SpecFuncInfo:
             print("## Supported Datatypes\n", file=f)
             if self.func_name in ("cast", "cast_k"):
                 print("Supported between all pairwise datatype permutations of matching bitwidth.\n", file=f)
+            elif self.func_name in ("cvt", "wcvt"):
+                for dt in self.dttypes:
+                    src, dst = dt.split(",")
+                    print(f"- `{src}` &rarr; `{dst}`", file=f)
+                print("", file=f)
             else:
                 for dtype in self.dttypes:
-                    print(f"- `{dtype}`", file=f)
+                    dt_single = dtype.split(",")[0]
+                    print(f"- `{dt_single}`", file=f)
                 print("", file=f)
 
             if self.mask_support and self.mask_support.is_any_mask():
@@ -547,11 +508,20 @@ class SpecFuncInfo:
     def write_isa_matrix(self, file, mipp_infos):
         print("## Architecture & Implementation Matrix\n", file=file)
         
-        is_cast = self.func_name in ("cast", "cast_k")
-        dts = all_datatypes_cart_prod if is_cast else all_datatypes
-        dts_headers = all_datatypes_short_cart_prod if is_cast else all_datatypes_short
+        if self.func_name in ("cast", "cast_k"):
+            dts = all_datatypes_cart_prod
+            dts_headers = all_datatypes_short_cart_prod
+        elif self.func_name == "cvt":
+            dts = all_datatypes_same_size
+            dts_headers = all_datatypes_same_size_short
+        elif self.func_name == "wcvt":
+            dts = all_datatypes_widenning
+            dts_headers = all_datatypes_widenning_short
+        else:
+            dts = all_datatypes
+            dts_headers = all_datatypes_short
         
-        variants = [("Unmasked (`U`)", "unmasked")]
+        variants = [("Unmasked (`U`)", None)]
         if self.mask_support and self.mask_support.is_any_mask():
             if self.mask_support.is_maskable():
                 variants.append(("Masked (`M`)", "mask"))
@@ -570,30 +540,14 @@ class SpecFuncInfo:
                 row = f"    | **{isa_info.isa_name.upper()}** | "
                 for dt in dts:
                     dtype_check = f"{dt},{dt}" if self.func_name in ("gather", "scatter") else dt
-                    if var_kind == "unmasked":
-                        if func_info and dtype_check in func_info.datatypes:
-                            if func_info.is_generic(dtype_check):
-                                row += f"{badge_l2} | "
-                            elif func_info.is_emulated(dtype_check):
-                                row += f"{badge_l1} | "
-                            else:
-                                row += f"{badge_l0} | "
-                        elif dtype_check in interfaces[self.func_name]["datatypes"]:
-                            row += f"{badge_l3} | "
+                    if dtype_check in interfaces[self.func_name]["datatypes"]:
+                        if var_kind is None or (self.mask_support and self.mask_support.is_supported(var_kind)):
+                            lvl = func_info.get_level(dtype_check, var_kind) if func_info else 3
+                            row += f"{level_to_badge(lvl)} | "
                         else:
                             row += f"{badge_na} | "
                     else:
-                        if func_info and dtype_check in func_info.datatypes and func_info.is_def_mkind(dtype_check, var_kind):
-                            if func_info.is_generic_mkind(dtype_check, var_kind):
-                                row += f"{badge_l2} | "
-                            elif func_info.is_emulated_mkind(dtype_check, var_kind):
-                                row += f"{badge_l1} | "
-                            else:
-                                row += f"{badge_l0} | "
-                        elif dtype_check in interfaces[self.func_name]["datatypes"] and interfaces[self.func_name]["mask_support"].is_supported(var_kind):
-                            row += f"{badge_l3} | "
-                        else:
-                            row += f"{badge_na} | "
+                        row += f"{badge_na} | "
                 print(row, file=file)
             print("", file=file)
 
@@ -611,11 +565,11 @@ class SpecFuncInfo:
         print("## Test & Verification Specifications\n", file=file)
         
         # 1. Input Domain
-        print("### Test Domain & Input Range\n", file=file)
+        print("### Input Range\n", file=file)
         if "min" in domain and "max" in domain:
-            print(f"- **Input Range**: $[{domain['min']}, {domain['max']}]$", file=file)
+            print(f"- **Range**: $[{domain['min']}, {domain['max']}]$", file=file)
         elif "by_datatype" in domain:
-            print("- **Input Ranges by Datatype**:", file=file)
+            print("- **Ranges by Datatype**:", file=file)
             for dt, d_val in domain["by_datatype"].items():
                 if "min" in d_val and "max" in d_val:
                     print(f"  - `{dt}`: $[{d_val['min']}, {d_val['max']}]$", file=file)
@@ -623,26 +577,20 @@ class SpecFuncInfo:
                     vals_str = ", ".join(map(str, d_val["values"]))
                     print(f"  - `{dt}`: Discrete set $\\{{{vals_str}\\}}$", file=file)
         elif "by_variable" in domain:
-            print("- **Input Ranges by Operand**:", file=file)
+            print("- **Ranges by Operand**:", file=file)
             for var, d_val in domain["by_variable"].items():
                 if "min" in d_val and "max" in d_val:
                     print(f"  - `{var}`: $[{d_val['min']}, {d_val['max']}]$", file=file)
         else:
-            print("- **Input Range**: Full representable range of the target datatype.", file=file)
-            
-        print(f"- **Mask Test Pattern**: `{mask_pattern}`", file=file)
-        if overflow_check:
-            print(f"- **Integer Overflow Handling**: Monitored (`{overflow_check}` overflow check enabled).", file=file)
-        if nan_inf_skip:
-            print("- **Special Values**: Skips NaN and Inf inputs during verification.", file=file)
+            print("- **Range**: Full representable range of the target datatype.", file=file)
         print("", file=file)
 
         # 2. Precision & Verification Tolerances
         print("### Verification Tolerance\n", file=file)
-        if self.func_name in ("cast", "cast_k"):
+        if self.func_name in ("cast", "cast_k", "cvt", "wcvt"):
             print("| Datatype Pairs | Comparison Mode | Allowed Tolerance |", file=file)
             print("| :--- | :--- | :--- |", file=file)
-            print(f"| All bitwidth-matching pairs | `{comp}` | Bit-exact ($0$ error) |\n", file=file)
+            print(f"| All supported conversion pairs | `{comp}` | Bit-exact ($0$ error) |\n", file=file)
             return
 
         print("| Datatype | Comparison Mode | Allowed Tolerance |", file=file)
@@ -698,55 +646,53 @@ def write_isas_support_index(base_dir):
 
 MIPP provides high-performance SIMD/vector abstractions across a broad spectrum of hardware instruction set architectures (ISAs).
 
-## Capability Matrix Legend
+## Implementation Levels & Acceleration Legend
 
-| Symbol | Support Level | Technical Meaning |
+MIPP functions are classified into 4 distinct implementation tiers:
+
+| Badge | Implementation Level | Description |
 | :---: | :--- | :--- |
-| <span style="color: #28A745; font-weight: 600;">:fontawesome-solid-0:</span> | **Level 0 (Native Hardware)** | Optimal 1:1 mapping to target hardware vector instruction(s). Zero runtime translation overhead. |
-| <span style="color: #3B42F5; font-weight: 600;">:fontawesome-solid-1:</span> | **Level 1 (Dedicated Emulation)** | Hand-crafted sequence tailored specifically for this ISA to emulate missing hardware instructions efficiently. |
-| <span style="color: #FFD20D; font-weight: 600;">:fontawesome-solid-2:</span> | **Level 2 (Generic Emulation)** | Synthesized cross-ISA AST emulation constructed from portable primitive operations (e.g. `cmpneq` + `blend`). |
-| <span style="color: #6C757D; font-weight: 600;">:fontawesome-solid-3:</span> | **Level 3 (Scalar Fallback)** | Portable element-by-element scalar loop execution when vector hardware/emulation paths are absent. |
-| <span style="color: #6C757D; font-weight: 600;">:material-minus:</span> | **Not Applicable** | Variant or datatype permutation is not part of the functional interface definition. |
+| <span style="color: #28A745; font-weight: 600;">:fontawesome-solid-0:</span> | **Level 0 (Native Hardware)** | Direct 1:1 hardware intrinsic mapping with optimal throughput and latency. |
+| <span style="color: #3B42F5; font-weight: 600;">:fontawesome-solid-1:</span> | **Level 1 (Dedicated Emulation)** | Architecture-specific vector sequence emulating missing hardware operations. |
+| <span style="color: #FFD20D; font-weight: 600;">:fontawesome-solid-2:</span> | **Level 2 (Generic Emulation)** | Portable cross-ISA vector AST algorithm built from other MIPP operations. |
+| <span style="color: #6C757D; font-weight: 600;">:fontawesome-solid-3:</span> | **Level 3 (Scalar Fallback)** | Element-by-element sequential loop fallback with maximum portability. |
+| <span style="color: #6C757D; font-weight: 600;">:material-minus:</span> | **N/A (Not Applicable)** | Operation is not defined for this element datatype or masking variant. |
 
-## Masking Execution Modes
+---
 
-- **Unmasked (`U`)**: Evaluates the operation on all vector elements unconditionally.
-- **Masked (`M`)**: Active elements ($m_i = 1$) are computed; inactive elements ($m_i = 0$) preserve their previous values in the destination register.
-- **Zero-Masked (`Z`)**: Active elements ($m_i = 1$) are computed; inactive elements ($m_i = 0$) are zeroed.
-- **Source-Masked (`S`)**: Active elements ($m_i = 1$) are computed; inactive elements ($m_i = 0$) take values from a fallback source operand `src`.
+## Supported Target Architectures
 
-## Architecture Capability Matrices
+### x86 / x86-64 Architectures
+- [**SSE (Streaming SIMD Extensions)**](sse.md): 128-bit vector extensions (SSE2 through SSE4.2). ([Masked Variant Matrix](sse_masked.md))
+- [**AVX (Advanced Vector Extensions)**](avx.md): 256-bit vector extensions (AVX, AVX2, FMA3). ([Masked Variant Matrix](avx_masked.md))
+- [**AVX-512**](avx512.md): 512-bit vector extensions with native opmask registers ($k_0-k_7$). ([Masked Variant Matrix](avx512_masked.md))
 
-### Unmasked Matrices
-- [x86 SSE Family Support Matrix](sse.md)
-- [ARM NEON Support Matrix](neon.md)
-- [x86 AVX / AVX2 Support Matrix](avx.md)
-- [x86 AVX-512 Support Matrix](avx512.md)
-- [ARM SVE Support Matrix](sve.md)
-- [RISC-V Vector (RVV 1.0) Support Matrix](rvv.md)
-- [Common Portable Baseline (Intersection Matrix)](intersection.md)
+### ARM Architectures
+- [**ARM NEON**](neon.md): 128-bit fixed-length vector processing for ARMv7 and ARMv8/AArch64. ([Masked Variant Matrix](neon_masked.md))
+- [**ARM SVE (Scalable Vector Extension)**](sve.md): Variable-length vector architecture with native predicate registers ($p_0-p_{15}$). ([Masked Variant Matrix](sve_masked.md))
 
-### Masked Matrices
-- [x86 SSE Masked Matrix](sse_masked.md)
-- [ARM NEON Masked Matrix](neon_masked.md)
-- [x86 AVX / AVX2 Masked Matrix](avx_masked.md)
-- [x86 AVX-512 Masked Matrix](avx512_masked.md)
-- [RISC-V Vector (RVV 1.0) Masked Matrix](rvv_masked.md)
+### RISC-V Architectures
+- [**RISC-V Vector (RVV 1.0)**](rvv.md): Variable-length vector extension with dynamic register grouping (LMUL) and active masking ($v_0$). ([Masked Variant Matrix](rvv_masked.md))
+
+---
+
+## Portability & Intersection Capabilities
+- [**Universal Architecture Intersection Matrix**](intersection.md): Capabilities guaranteed to vectorize across **all** supported target ISAs.
 """, file=f)
 
 
 def write_funcs_support_index(base_dir, categories):
     file_path = os.path.join(base_dir, "index.md")
     with open(file_path, "w", encoding="utf-8") as f:
-        print("""# MIPP Function Reference Guide
+        print("""# Function Reference & Implementation Directory
 
-This reference directory catalogs all 85 vector functions provided by MIPP, categorized by operational domain.
+This section contains complete API reference documentation, mathematical semantics, test specifications, and architecture acceleration matrices for all MIPP functions.
 
-## Function Reference Page Structure
+## Documentation Structure for Each Function
 
 Each function reference page provides:
-1. **Description & Mathematical Formulation**: Behavior summary and formal LaTeX equation.
-2. **Prototypes**: C++ template signatures (supporting LMUL vector length scaling) and C99 type-explicit prototypes.
+1. **Description & Semantics**: Mathematical operation and vector execution behavior.
+2. **C++ & C99 Prototypes**: Complete templated C++ signatures and C99 function prototypes across all LMUL ratios.
 3. **Supported Datatypes & Mask Execution Variants**: Supported element types and masking execution modes.
 4. **ISA & Variant Support Matrix**: Per-architecture hardware capability breakdown across masking variants.
 5. **Reference Algorithm**: Scalar C reference implementation demonstrating exact arithmetic and masking semantics.
@@ -772,13 +718,8 @@ def main():
     base_generator_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.dirname(base_generator_dir)
 
-    print("[MIPP DocGen] Loading ISA configurations...")
-    try:
-        from gen_mipp_headers import discover_and_sort_isas
-        isas_dict, implems_dict_raw, sorted_names = discover_and_sort_isas(base_generator_dir)
-    except Exception:
-        from tools import discover_and_sort_isas
-        isas_dict, implems_dict_raw, sorted_names = discover_and_sort_isas(base_generator_dir)
+    print("[MIPP DocGen] Discovering and sorting target ISAs...")
+    isas_dict, implems_dict_raw, sorted_names = discover_and_sort_isas(base_generator_dir)
 
     isas_map = {}
     for isa_name in sorted_names:
@@ -786,18 +727,9 @@ def main():
             continue
         native_impl, emu_impl = implems_dict_raw[isa_name]
         isas_map[isa_name] = {
+            "isa_conf": isas_dict[isa_name],
             "implems": [native_impl, emu_impl],
-            "defines": set(),
         }
-
-    if "sse" in isas_map:
-        isas_map["sse"]["defines"] = {"SSE2", "SSE3", "SSSE3", "SSE4_1", "SSE4_2"}
-    if "avx" in isas_map:
-        isas_map["avx"]["defines"] = {"AVX2", "FMA"}
-    if "avx512" in isas_map:
-        isas_map["avx512"]["defines"] = {"AVX512BW", "AVX512F", "AVX512", "AVX512DQ"}
-    if "neon" in isas_map:
-        isas_map["neon"]["defines"] = {"__aarch64__"}
 
     print(f"[MIPP DocGen] Loaded {len(isas_map)} target ISAs: {', '.join(isas_map.keys())}")
 
@@ -807,6 +739,7 @@ def main():
         shutil.rmtree(isas_support_dir)
     os.makedirs(isas_support_dir, exist_ok=True)
 
+    print("[MIPP DocGen] Solving candidate dependencies across all target ISAs...")
     mipp_infos = MippInfo()
     mipp_infos.gen_mipp_infos(interfaces, isas_map)
 
@@ -842,4 +775,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

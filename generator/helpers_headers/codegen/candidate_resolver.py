@@ -318,9 +318,7 @@ def _append_resolved_status(funcs, f, dt_key, mask_kind, cond, reqs):
         bucket = get_masked_bucket(funcs, f, dt_key, mask_kind, create_missing_bucket=True)
         bucket.append(cur_implem_status)
 
-def resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators=False):
-    is_inc_mgr = hasattr(file, "get_fd")
-    
+def resolve_candidates(isa, funcs, lmul=0):
     candidates_map = {}
     collected_candidates = isa.get("candidates", [])
     
@@ -648,6 +646,14 @@ def resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators
                         filtered_reqs[req_f] = req_dt_keys
                 reqs = filtered_reqs
             _append_resolved_status(funcs, f, dt_key, mask_kind, cond, reqs)
+    return resolved
+
+def resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators=False):
+    resolved = resolve_candidates(isa, funcs, lmul=lmul)
+    if file is None:
+        return resolved
+
+    is_inc_mgr = hasattr(file, "get_fd")
 
     # 2. Write code to files
     for f in funcs:
