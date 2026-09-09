@@ -27,17 +27,15 @@ MIPP provides the `mipp::req_alignment<ISA>()` compile-time helper (and architec
 When allocating buffers for aligned MIPP operations, use standard aligned memory allocators:
 
 ```cpp
-// C++17 aligned allocation:
-constexpr size_t alignment = mipp::req_alignment(); // Defaults to active host ISA
-float* data = static_cast<float*>(std::aligned_alloc(alignment, N_elements * sizeof(float)));
-
 // POSIX aligned allocation (C99 / C++):
 float* data_c = NULL;
 posix_memalign((void**)&data_c, alignment, N_elements * sizeof(float));
-
-// Freeing:
-std::free(data);
 free(data_c);
+
+// C++17 aligned allocation:
+constexpr size_t alignment = mipp::req_alignment(); // Defaults to active host ISA
+float* data = static_cast<float*>(std::aligned_alloc(alignment, N_elements * sizeof(float)));
+std::free(data);
 ```
 
 ---
@@ -62,15 +60,6 @@ MIPP provides both explicit unaligned primitives (`loadu`, `storeu`) and default
     - On architectures such as **RISC-V Vector (RVV)** and **ARM SVE**, vector load instructions (`vle32.v`, `svld1`) inherently handle memory access according to the ISA specification, and the `MIPP_ALIGNED_LOADS` macro is currently not enforced.
     - Because of this non-uniformity across backends, developers should rely on explicit `loadu` / `storeu` whenever unaligned memory access must be strictly guaranteed in portable code. Future MIPP revisions may either standardize alignment toggling homogeneously across all targets or deprecate the macro.
 
-```cpp
-// C++ API:
-auto va_default   = mipp::load<float>(ptr);       // Unaligned by default; aligned if -DMIPP_ALIGNED_LOADS
-auto va_unaligned = mipp::loadu<float>(ptr);      // Always unaligned
-
-mipp::store(out_ptr, va_default);
-mipp::storeu(out_ptr, va_unaligned);
-```
-
 ```c
 // C API:
 rvd_float32_t va_default   = mipp_load_float32(ptr);
@@ -80,9 +69,29 @@ mipp_store_float32(out_ptr, va_default);
 mipp_storeu_float32(out_ptr, va_unaligned);
 ```
 
+```cpp
+// C++ API:
+auto va_default   = mipp::load<float>(ptr);       // Unaligned by default; aligned if -DMIPP_ALIGNED_LOADS
+auto va_unaligned = mipp::loadu<float>(ptr);      // Always unaligned
+
+mipp::store(out_ptr, va_default);
+mipp::storeu(out_ptr, va_unaligned);
+```
+
 ### 2.2. Masked Loads & Stores
 
 MIPP supports conditional memory access to safely read and write vector elements without accessing out-of-bounds memory at array boundaries:
+
+```c
+// C API:
+rvm_float32_t m = mipp_cmplt_float32(indices, limit_vec);
+
+rvd_float32_t v_loaded = mipp_load_float32_maskz(m, ptr);
+
+rvd_float32_t v_loaded_s = mipp_load_float32_masks(m, v_src, ptr);
+
+mipp_store_float32_mask(m, out_ptr, v_result);
+```
 
 ```cpp
 // C++ API:
@@ -98,14 +107,6 @@ auto v_loaded_s = mipp::load<mipp::S>(m, v_src, ptr);
 mipp::store<mipp::M>(m, out_ptr, v_result);
 ```
 
-```c
-// C API:
-rvm_float32_t m = mipp_cmplt_float32(indices, limit_vec);
-
-rvd_float32_t v_loaded = mipp_load_float32_maskz(m, ptr);
-mipp_store_float32_mask(m, out_ptr, v_result);
-```
-
 ---
 
 ## 3. Non-Contiguous Memory Access: Gather & Scatter
@@ -115,7 +116,15 @@ When data elements reside at non-sequential memory addresses, MIPP provides vect
 ### 3.1. Gather (Vectorized Indirect Load)
 Loads elements from a base address using a vector of integer offsets:
 
-$$\text{res}_i = \text{base\_ptr}[\text{indices}_i]$$
+$$\text{res}_i = \text{base}_{ptr}[\text{indices}_i]$$
+
+```c
+// C API:
+const float32_t* base_ptr = table;
+rvd_uint32_t indices = mipp_load_uint32(idx_ptr);
+
+rvd_float32_t res = mipp_gather_float32_float32(base_ptr, indices);
+```
 
 ```cpp
 // C++ API:
@@ -130,18 +139,20 @@ auto m = mipp::cmplt(indices, max_idx_vec);
 mipp::rvd<float> res_z = mipp::gather<mipp::Z>(m, base_ptr, indices);
 ```
 
-```c
-// C API:
-const float32_t* base_ptr = table;
-rvd_uint32_t indices = mipp_load_uint32(idx_ptr);
-
-rvd_float32_t res = mipp_gather_float32_float32(base_ptr, indices);
-```
-
 ### 3.2. Scatter (Vectorized Indirect Store)
 Writes elements of a vector into memory locations specified by a vector of integer offsets:
 
-$$\text{base\_ptr}[\text{indices}_i] = \text{val}_i$$
+$$\text{base}_{ptr}[\text{indices}_i] = \text{val}_i$$
+
+
+```c
+// C API:
+float32_t* base_ptr = output_table;
+rvd_uint32_t indices = mipp_load_uint32(idx_ptr);
+rvd_float32_t values = compute_results();
+
+mipp_scatter_float32_float32(base_ptr, indices, values);
+```
 
 ```cpp
 // C++ API:
@@ -156,15 +167,6 @@ mipp::scatter(base_ptr, indices, values);
 mipp::scatter<mipp::M>(m, base_ptr, indices, values);
 ```
 
-```c
-// C API:
-float32_t* base_ptr = output_table;
-rvd_uint32_t indices = mipp_load_uint32(idx_ptr);
-rvd_float32_t values = compute_results();
-
-mipp_scatter_float32_float32(base_ptr, indices, values);
-```
-
 ---
 
 ## 4. Scalar Element Extraction
@@ -177,17 +179,6 @@ MIPP provides primitives to extract individual scalar values from vector and mas
 | **Extract Mask Element** | `mipp_get_k_[type]_[lmul](m, idx)` | `mipp::get_k(m, idx)` | Extracts the boolean truthiness of mask element `idx`. |
 | **Get First Element** | `mipp_getfirst_[type]_[lmul](v)` | `mipp::getfirst(v)` | Optimized extraction of element 0 (`v[0]`) without shuffle overhead. |
 
-```cpp
-// C++ API:
-mipp::rvd<float> v = mipp::load<float>(ptr);
-
-float first_val = mipp::getfirst(v);       // Fast element 0 extraction
-float third_val = mipp::get(v, 2);          // Dynamic index extraction
-
-mipp::rvm<float> m = mipp::cmplt(v, limit);
-int32_t mask_val = mipp::get_k(m, 2);       // Mask element extraction
-```
-
 ```c
 // C API:
 rvd_float32_t v = mipp_load_float32(ptr);
@@ -197,4 +188,15 @@ float32_t third_val = mipp_get_float32(v, 2);
 
 rvm_float32_t m = mipp_cmplt_float32(v, limit);
 int32_t mask_val = mipp_get_k_float32(m, 2);
+```
+
+```cpp
+// C++ API:
+mipp::rvd<float> v = mipp::load<float>(ptr);
+
+float first_val = mipp::getfirst(v);       // Fast element 0 extraction
+float third_val = mipp::get(v, 2);          // Dynamic index extraction
+
+mipp::rvm<float> m = mipp::cmplt(v, limit);
+int32_t mask_val = mipp::get_k(m, 2);       // Mask element extraction
 ```

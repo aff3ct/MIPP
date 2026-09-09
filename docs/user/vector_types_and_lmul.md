@@ -67,7 +67,7 @@ On fixed-width architectures (x86, ARM), software LMUL functions as a **structur
 |                                                                             |
 |  LMUL = 2: [ Register 1 ] [ Register 2 ]                                    |
 |                                                                             |
-|  LMUL = 4: [ Register 1 ] [ Register 2 ] [ Register 3 ] [ Register 4 ]       |
+|  LMUL = 4: [ Register 1 ] [ Register 2 ] [ Register 3 ] [ Register 4 ]      |
 |                                                                             |
 |  LMUL = 8: [ Reg 1 ] [ Reg 2 ] [ Reg 3 ] [ Reg 4 ] [ Reg 5 ] ... [ Reg 8 ]  |
 +-----------------------------------------------------------------------------+
@@ -75,6 +75,7 @@ On fixed-width architectures (x86, ARM), software LMUL functions as a **structur
 
 ### 3.1. Hardware LMUL (RISC-V Vector 1.0)
 On architectures with native register grouping support (RVV `v` extension), MIPP maps directly to hardware types:
+
 - $\text{LMUL}=1$: `vfloat32m1_t`
 - $\text{LMUL}=2$: `vfloat32m2_t` (2 adjacent hardware registers)
 - $\text{LMUL}=4$: `vfloat32m4_t` (4 adjacent hardware registers)

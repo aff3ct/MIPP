@@ -500,7 +500,7 @@ class SpecFuncInfo:
                 self.write_isa_matrix(f, mipp_infos)
 
             print("## Reference Algorithm\n", file=f)
-            print("> [!NOTE]\n> The scalar reference implementation below demonstrates exact mathematical semantics across datatypes and masking modes.\n", file=f)
+            print("!!! note\n    The scalar reference implementation below demonstrates exact mathematical semantics across datatypes and masking modes.\n", file=f)
             self.write_func_algo(f)
 
             self.write_test_specs(f)
@@ -691,6 +691,7 @@ This section contains complete API reference documentation, mathematical semanti
 ## Documentation Structure for Each Function
 
 Each function reference page provides:
+
 1. **Description & Semantics**: Mathematical operation and vector execution behavior.
 2. **C++ & C99 Prototypes**: Complete templated C++ signatures and C99 function prototypes across all LMUL ratios.
 3. **Supported Datatypes & Mask Execution Variants**: Supported element types and masking execution modes.

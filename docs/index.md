@@ -1,4 +1,4 @@
-# MIPP: My Intrinsics Package for Parallelism
+# MIPP: My Intrinsics Plus Plus
 
 **MIPP** is an open-source, header-only C and C++ SIMD wrapper library designed for cross-architecture data-parallel computing. It provides a portable, zero-overhead abstraction layer over hardware SIMD instruction sets, enabling developers to write high-performance vectorized algorithms once and compile them efficiently across x86 (SSE, AVX, AVX-512), ARM (NEON, SVE) and RISC-V (RVV) targets.
 
@@ -22,7 +22,7 @@
        |  Level 0: Native Hardware Intrinsics                              |
        |  Level 1: ISA-Specific Intrinsics Emulation                       |
        |  Level 2: Generic Portable MIPP Emulation                         |
-       |  Level 3: Transparent Scalar Loop Fallback (memcpy)               |
+       |  Level 3: Transparent Scalar Loop Fallback                        |
        +-------------------------------------------------------------------+
                                          |
      +------------+------------+------------+------------+------------+------------+
@@ -57,7 +57,7 @@
 | **x86 / x86-64** | AVX-512F, AVX-512BW, AVX-512DQ | 512 bits |
 | **ARM (AArch32 / AArch64)** | NEON (ARMv7, ARMv8-A) | 128 bits |
 | **ARM (AArch64)** | SVE | Fixed / Configurable vector length |
-| **RISC-V** | RVV 1.0 (Vector Extension `v`) | Fixed / Configurable VLEN ($\ge 128\text{ bits}$) |
+| **RISC-V** | RVV 1.0 | Fixed / Configurable VLEN ($\ge 128\text{ bits}$) |
 | **Generic** | Scalar fallback | Configurable |
 
 ### Supported Datatypes

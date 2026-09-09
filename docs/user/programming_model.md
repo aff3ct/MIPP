@@ -59,6 +59,7 @@ Multi-register types (`m2`, `m4`, `m8`) map directly to native vector register g
 
 ### 2.3. Vector Capacity Macros
 Predefined compile-time constants provide the number of elements per vector type:
+
 - `MIPP_N_FLOAT32` or `MIPP_N_FLOAT32_M1`: Number of `float` elements in an $\text{LMUL}=1$ vector.
 - `MIPP_N_FLOAT32_M2`, `MIPP_N_FLOAT32_M4`, `MIPP_N_FLOAT32_M8`: Multiplied element capacities.
 - Equivalent macros exist for all 10 types (`MIPP_N_INT32`, `MIPP_N_FLOAT64`, `MIPP_N_UINT8`, etc.).
@@ -202,22 +203,21 @@ public:
 
 Below is an identical vectorized SAXPY loop ($Y[i] = a \cdot X[i] + Y[i]$) implemented across all three API tiers.
 
-=== "C++ Object API"
-    ```cpp
-    #include <mipp_obj.hpp>
+=== "C Low-Level API"
+    ```c
+    #include <mipp.h>
 
-    void saxpy_obj(size_t n, float a, const float* x, float* y)
+    void saxpy_c(size_t n, float a, const float* x, float* y)
     {
-        using RegF = mipp::Rvd<float>;
-        constexpr size_t step = RegF::size();
-        RegF va(a);
+        const size_t step = MIPP_N_FLOAT32;
+        rvd_float32_m1_t va = mipp_set1_float32_m1(a);
 
         size_t i = 0;
         for (; i + step <= n; i += step) {
-            RegF vx(x + i);
-            RegF vy(y + i);
-            RegF vres = va * vx + vy; // Uses overloaded * and +
-            mipp::store(y + i, vres.r);
+            rvd_float32_m1_t vx = mipp_loadu_float32_m1(x + i);
+            rvd_float32_m1_t vy = mipp_loadu_float32_m1(y + i);
+            rvd_float32_m1_t vres = mipp_fmadd_float32_m1(va, vx, vy);
+            mipp_storeu_float32_m1(y + i, vres);
         }
         for (; i < n; i++) {
             y[i] = a * x[i] + y[i];
@@ -248,21 +248,22 @@ Below is an identical vectorized SAXPY loop ($Y[i] = a \cdot X[i] + Y[i]$) imple
     }
     ```
 
-=== "C Low-Level API"
-    ```c
-    #include <mipp.h>
+=== "C++ Object API"
+    ```cpp
+    #include <mipp_obj.hpp>
 
-    void saxpy_c(size_t n, float a, const float* x, float* y)
+    void saxpy_obj(size_t n, float a, const float* x, float* y)
     {
-        const size_t step = MIPP_N_FLOAT32;
-        rvd_float32_m1_t va = mipp_set1_float32_m1(a);
+        using RegF = mipp::Rvd<float>;
+        constexpr size_t step = RegF::size();
+        RegF va(a);
 
         size_t i = 0;
         for (; i + step <= n; i += step) {
-            rvd_float32_m1_t vx = mipp_loadu_float32_m1(x + i);
-            rvd_float32_m1_t vy = mipp_loadu_float32_m1(y + i);
-            rvd_float32_m1_t vres = mipp_fmadd_float32_m1(va, vx, vy);
-            mipp_storeu_float32_m1(y + i, vres);
+            RegF vx(x + i);
+            RegF vy(y + i);
+            RegF vres = va * vx + vy; // Uses overloaded * and +
+            mipp::store(y + i, vres.r);
         }
         for (; i < n; i++) {
             y[i] = a * x[i] + y[i];

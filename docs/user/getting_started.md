@@ -10,9 +10,9 @@ Depending on your target programming language and preferred level of abstraction
 
 | Header File | API Tier | Description |
 | :--- | :--- | :--- |
+| `<mipp.h>` | **C Low-Level API** | Pure C99 function prototypes with explicit type suffixes (e.g., `mipp_add_float32_m1(r0, r1)`). |
 | `<mipp.hpp>` | **C++ Functional API** | Parameterized functions under namespace `mipp::` (e.g., `mipp::add<float>(r0, r1)`). |
 | `<mipp_obj.hpp>` | **C++ Object API** | Expressive `mipp::Rvd<T, LMUL>` and `mipp::Rvm<T, LMUL>` classes with operator overloading (`+`, `-`, `*`, `==`). |
-| `<mipp.h>` | **C Low-Level API** | Pure C99 function prototypes with explicit type suffixes (e.g., `mipp_add_float32_m1(r0, r1)`). |
 
 ---
 
@@ -57,7 +57,7 @@ MIPP automatically detects the target instruction set architecture (ISA) at comp
     - **`-O3`**: Activates high-level optimization passes.
     - **`-march=native`** (or target ISA flags such as `-mavx2` / `-march=armv8-a+simd`): Enables target SIMD hardware instructions.
     - **`-finline-functions`**: Ensures all MIPP `static inline` wrappers are inlined with zero function-call overhead.
-    - **`-funroll-loops`**: Maximizes throughput for software LMUL multi-register unrolling (`m2`, `m4`, `m8`).
+    - **`-funroll-loops`**: Maximizes throughput by unrolling loops aggressively.
     
     Additional flags may be enabled depending on application-specific requirements:
     
@@ -91,9 +91,47 @@ target_compile_options(my_application PRIVATE -march=native -funroll-loops -finl
 
 ## 4. Minimal Working Examples
 
-Full standalone source files for each API dialect are provided in the [`examples/`](https://gitlab.lip6.fr/mipp/mipp/-/tree/master/examples) directory of the repository (`examples/mipp.cpp`, `examples/mipp_object.cpp`, `examples/mipp.c`, `examples/vecadd.c`).
+Full standalone source files for each API dialect are provided in the [`examples/`](https://github.com/aff3ct/MIPP/tree/develop/examples) directory of the repository (`examples/mipp.cpp`, `examples/mipp_object.cpp`, `examples/mipp.c`, `examples/vecadd.c`).
 
-### 4.1. C++ Functional Template API (`<mipp.hpp>`)
+### 4.1. C Low-Level API (`<mipp.h>`)
+
+```c
+#include <stdio.h>
+#include <mipp.h>
+
+int main(void)
+{
+    const int N = MIPP_N_FLOAT32;
+    float a[N];
+    float b[N];
+    float c[N];
+
+    for (int i = 0; i < N; ++i) {
+        a[i] = (float)i;
+        b[i] = (float)(i * 10);
+    }
+
+    // Unaligned load, SIMD addition, and unaligned store
+    rvd_float32_m1_t va = mipp_loadu_float32_m1(a);
+    rvd_float32_m1_t vb = mipp_loadu_float32_m1(b);
+    rvd_float32_m1_t vc = mipp_add_float32_m1(va, vb);
+
+    mipp_storeu_float32_m1(c, vc);
+
+    printf("C API Result: c[0]=%f, c[%d]=%f\n", c[0], N - 1, c[N - 1]);
+    return 0;
+}
+```
+
+Compile with:
+```bash
+gcc -O3 -mavx2 -I/path/to/mipp/include example_c.c -o example_c
+./example_c
+```
+
+---
+
+### 4.2. C++ Functional Template API (`<mipp.hpp>`)
 
 ```cpp
 #include <iostream>
@@ -137,7 +175,7 @@ g++ -O3 -mavx2 -I/path/to/mipp/include example_cpp.cpp -o example_cpp
 
 ---
 
-### 4.2. C++ Object API (`<mipp_obj.hpp>`)
+### 4.3. C++ Object API (`<mipp_obj.hpp>`)
 
 ```cpp
 #include <iostream>
@@ -176,44 +214,6 @@ Compile with:
 ```bash
 g++ -O3 -mavx2 -I/path/to/mipp/include example_obj.cpp -o example_obj
 ./example_obj
-```
-
----
-
-### 4.3. C Low-Level API (`<mipp.h>`)
-
-```c
-#include <stdio.h>
-#include <mipp.h>
-
-int main(void)
-{
-    const int N = MIPP_N_FLOAT32;
-    float a[N];
-    float b[N];
-    float c[N];
-
-    for (int i = 0; i < N; ++i) {
-        a[i] = (float)i;
-        b[i] = (float)(i * 10);
-    }
-
-    // Unaligned load, SIMD addition, and unaligned store
-    rvd_float32_m1_t va = mipp_loadu_float32_m1(a);
-    rvd_float32_m1_t vb = mipp_loadu_float32_m1(b);
-    rvd_float32_m1_t vc = mipp_add_float32_m1(va, vb);
-
-    mipp_storeu_float32_m1(c, vc);
-
-    printf("C API Result: c[0]=%f, c[%d]=%f\n", c[0], N - 1, c[N - 1]);
-    return 0;
-}
-```
-
-Compile with:
-```bash
-gcc -O3 -mavx2 -I/path/to/mipp/include example_c.c -o example_c
-./example_c
 ```
 
 ---

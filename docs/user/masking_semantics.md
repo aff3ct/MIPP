@@ -38,14 +38,14 @@ For any binary operation $f(a, b)$ and mask vector $m \in \{0, 1\}^N$:
 | **Source Masked** | `S` | `_masks` | $\text{res}_i = \begin{cases} f(a_i, b_i) & \text{if } m_i = 1 \\ \text{src}_i & \text{if } m_i = 0 \end{cases}$ |
 
 !!! info "Per-Function Mask Support Matrix"
-    Not every MIPP function supports all four masking variants across all datatypes and architectures. Exact mask variant availability for any specific function is documented in the auto-generated reference pages under `Function Support` (e.g. [`funcs_support/arithmetic/add.md`](file:///home/ivan/Files/stage/mipp/docs/funcs_support/arithmetic/add.md)).
+    Not every MIPP function supports all four masking variants across all datatypes and architectures. Exact mask variant availability for any specific function is documented in the auto-generated reference pages under `Function Support` (e.g. [`funcs_support/arithmetic/add.md`](../funcs_support/arithmetic/add.md)).
 
 ---
 
 ## 2. API Dialect Syntax
 
 ### 2.1. C Low-Level API (`<mipp.h>`)
-Functions encode the variant directly in their identifier:
+Functions encode the variant directly in their name:
 
 ```c
 // Mask generation via comparison:
@@ -84,27 +84,14 @@ auto res_s = mipp::add<mipp::S>(m, vsrc, va, vb);
 ```
 
 ### 2.3. C++ Object API (`<mipp_obj.hpp>`)
-The Object API currently provides mask generation and boolean algebra on `Rvd` and `Rvm` instances:
 
+Direct masked arithmetic operations (`Masked`, `Zero-Masked`, `Source-Masked`) are **not yet implemented** in the C++ Object API. They are planned for a future release (likely via ternary operator or blend expressions).
+
+To perform masked operations with object handles in the interim, pass the underlying `.r` and `.m` handles to the C++ Functional API:
 ```cpp
-mipp::Rvd<float> va(ptr_a);
-mipp::Rvd<float> vb(ptr_b);
-
-// Relational operators generate Rvm<float> masks:
-mipp::Rvm<float> m = (va < vb);
-
-// Mask boolean algebra:
-mipp::Rvm<float> m_combined = m & (va > 0.0f);
+auto res_raw = mipp::add<mipp::M>(m.m, va.r, vb.r);
+mipp::Rvd<float> res(res_raw);
 ```
-
-!!! note "Masked Arithmetic in the Object Layer"
-    Direct masked arithmetic operations (`Masked`, `Zero-Masked`, `Source-Masked`) are **not yet implemented** in the C++ Object API. They are planned for a future release (likely via ternary operator or blend expressions).
-    
-    To perform masked operations with object handles in the interim, pass the underlying `.r` and `.m` handles to the C++ Functional API:
-    ```cpp
-    auto res_raw = mipp::add<mipp::M>(m.m, va.r, vb.r);
-    mipp::Rvd<float> res(res_raw);
-    ```
 
 ---
 
@@ -177,18 +164,18 @@ MIPP provides explicit primitives to convert between vector registers (`rvd`), m
 ### 6.1. Strong Mask Typing & `cast_k` (Mask-to-Mask Conversion)
 In MIPP, mask types are **strictly and strongly typed** to their corresponding numeric datatype $T$. For example, an `rvm<float>` produced by comparing floating-point vectors cannot be implicitly passed to an integer operation expecting an `rvm<int32_t>`, despite sharing the same 32-bit element size and element capacity.
 
-To convert between mask types, MIPP provides explicit mask casting primitives (`cast_[type]` in C++, `cast_k` in C):
-
-```cpp
-// C++ API: target type suffix (overloaded on rvm and rvd)
-mipp::rvm<float> m_float = mipp::cmplt(va, vb);
-mipp::rvm<int32_t> m_int = mipp::cast_int32(m_float);
-```
+To convert between mask types, MIPP provides explicit mask casting primitives (`cast_k` in C, `cast_[type]` in C++):
 
 ```c
 // C API: explicit from_to function identifier with _k suffix
 rvm_float32_t m_float = mipp_cmplt_float32(va, vb);
 rvm_int32_t   m_int   = mipp_cast_k_float32_int32(m_float);
+```
+
+```cpp
+// C++ API: target type suffix (overloaded on rvm and rvd)
+mipp::rvm<float> m_float = mipp::cmplt(va, vb);
+mipp::rvm<int32_t> m_int = mipp::cast_int32(m_float);
 ```
 
 #### Semantics
@@ -198,26 +185,26 @@ rvm_int32_t   m_int   = mipp_cast_k_float32_int32(m_float);
 Reinterprets/converts a data vector `rvd<T>` into a mask register `rvm<T>` of the matching type $T$:
 
 ```cpp
-// C++ API:
-mipp::rvd<float> raw_vector = mipp::load<float>(ptr);
-mipp::rvm<float> m = mipp::tomsk(raw_vector);
-
 // C API:
 rvd_float32_t raw_vector = mipp_load_float32(ptr);
 rvm_float32_t m = mipp_tomsk_float32(raw_vector);
+
+// C++ API:
+mipp::rvd<float> raw_vector = mipp::load<float>(ptr);
+mipp::rvm<float> m = mipp::tomsk(raw_vector);
 ```
 
 ### 6.3. `toreg` (Mask to Data Vector)
 Reinterprets/converts a mask handle `rvm<T>` into a full data vector `rvd<T>` of the matching type $T$ (where active lanes contain all-ones and inactive lanes contain `0`):
 
 ```cpp
-// C++ API:
-mipp::rvm<float> m = mipp::cmpeq(va, vb);
-mipp::rvd<float> mask_vector = mipp::toreg(m);
-
 // C API:
 rvm_float32_t m = mipp_cmpeq_float32(va, vb);
 rvd_float32_t mask_vector = mipp_toreg_float32(m);
+
+// C++ API:
+mipp::rvm<float> m = mipp::cmpeq(va, vb);
+mipp::rvd<float> mask_vector = mipp::toreg(m);
 ```
 
 ### 6.4. `blend` (Conditional Element Multiplexing)
@@ -226,11 +213,11 @@ Selects elements between two data vectors according to a mask ($r_0$ when $m_i =
 $$\text{res}_i = \begin{cases} r1_i & \text{if } m_i = 1 \\ r0_i & \text{if } m_i = 0 \end{cases}$$
 
 ```cpp
-// C++ API: (if_false, if_true, mask)
-auto chosen = mipp::blend(if_false, if_true, m);
-
 // C API: (if_false, if_true, mask)
 rvd_float32_t chosen = mipp_blend_float32(if_false, if_true, m);
+
+// C++ API: (if_false, if_true, mask)
+auto chosen = mipp::blend(if_false, if_true, m);
 ```
 
 ---
@@ -241,45 +228,36 @@ MIPP provides functions to construct and initialize mask registers from scalar v
 
 ### 7.1. Function Signatures & Semantics
 
-| Function | C++ Functional Signature | C99 Function Identifier | Semantics |
+| Function | C99 Function Identifier | C++ Functional Signature |  Semantics |
 | :--- | :--- | :--- | :--- |
-| **Array Init** | `mipp::set_k<T, LMUL>(vals)` | `mipp_set_k_[type]_[lmul](vals)` | Sets element $i$ active if `vals[i] != 0`, inactive if `vals[i] == 0`. |
-| **Broadcast** | `mipp::set1_k<T, LMUL>(val)` | `mipp_set1_k_[type]_[lmul](val)` | Broadcasts truthiness: all elements active if `val != 0`, else inactive. |
-| **Zero Init** | `mipp::set0_k<T, LMUL>()` | `mipp_set0_k_[type]_[lmul]()` | Clears all elements (all inactive). |
+| **Array Init** | `mipp_set_k_[type]_[lmul](vals)` | `mipp::set_k<T, LMUL>(vals)` | Sets element $i$ active if `vals[i] != 0`, inactive if `vals[i] == 0`. |
+| **Broadcast** | `mipp_set1_k_[type]_[lmul](val)` | `mipp::set1_k<T, LMUL>(val)` | Broadcasts truthiness: all elements active if `val != 0`, else inactive. |
+| **Zero Init** | `mipp_set0_k_[type]_[lmul]()` | `mipp::set0_k<T, LMUL>()`  | Clears all elements (all inactive). |
 
 ### 7.2. Important Semantics & Particularities
 
 1. **Fixed `int32_t` Input Array Type**:
-   - Regardless of the underlying vector datatype `T` (whether `float64`, `int8`, `uint16`, etc.), `set_k` **always expects an array of `int32_t`**:
+    - Regardless of the underlying vector datatype `T` (whether `float64`, `int8`, `uint16`, etc.), `set_k` **always expects an array of `int32_t`**:
      ```c
      // In C: array of int32_t matching capacity N
      const int32_t mask_values[8] = {1, 0, 1, 0, 1, 1, 0, 0};
      rvm_float32_t m = mipp_set_k_float32(mask_values);
      ```
 2. **C Truthiness Evaluation**:
-   - `set_k` evaluates the *truthiness* of each integer element rather than copying raw bit patterns. Any non-zero integer (`vals[i] != 0`) sets the corresponding mask element to **active** (which internally maps to a 1-bit opmask on AVX-512/RVV, or all-ones `~0` on full-vector backends). A zero integer (`vals[i] == 0`) sets the element to **inactive** (`0`).
+    - `set_k` evaluates the *truthiness* of each integer element rather than copying raw bit patterns. Any non-zero integer (`vals[i] != 0`) sets the corresponding mask element to **active** (which internally maps to a 1-bit opmask on AVX-512/RVV, or all-ones `~0` on full-vector backends). A zero integer (`vals[i] == 0`) sets the element to **inactive** (`0`).
 3. **The `_k` Suffix**:
-   - The `_k` naming convention reflects AVX-512 opmask / predicate register naming (`k1..k7`), distinguishing mask factory functions (`set_k`, `set1_k`, `set0_k`) from numeric vector factories (`set`, `set1`, `set0`).
+    - The `_k` naming convention reflects AVX-512 opmask / predicate register naming (`k1..k7`), distinguishing mask factory functions (`set_k`, `set1_k`, `set0_k`) from numeric vector factories (`set`, `set1`, `set0`).
 
 ---
 
 ## 8. Masking & Multi-Register LMUL Interoperability
 
-Masking and the Length Multiplier ($\text{LMUL}$) are orthogonal and fully composable across all MIPP interfaces. Predicated operations seamlessly execute on multi-register vectors ($\text{LMUL} \in \{2, 4, 8\}$) and fractional half-vectors ($\text{LMUL} = -2$ / `d2`).
+Masking and the Length Multiplier ($\text{LMUL}$) are orthogonal and fully composable across all MIPP interfaces. Predicated operations seamlessly execute on multi-register vectors ($\text{LMUL} \in \{2, 4, 8\}$) and fractional half-vectors (`d2` suffix in C or $\text{LMUL} = -2$ en C++).
 
 ### 8.1. Type Matching & Capacity
 A comparison evaluated on an $\text{LMUL}=k$ data vector produces an $\text{LMUL}=k$ mask containing the exact matching element capacity:
 
 $$\text{Capacity}(rvm\langle T, \text{LMUL} \rangle) = \text{Capacity}(rvd\langle T, \text{LMUL} \rangle) = N(T, \text{LMUL})$$
-
-```cpp
-// C++ API: automatic LMUL deduction
-auto va = mipp::load<float, 2>(ptr_a);       // mipp::rvd<float, 2>
-auto vb = mipp::load<float, 2>(ptr_b);       // mipp::rvd<float, 2>
-
-auto m  = mipp::cmplt(va, vb);               // Deduces mipp::rvm<float, 2>
-auto res = mipp::add<mipp::M>(m, va, vb);     // Deduces mipp::rvd<float, 2>
-```
 
 ```c
 // C API: explicit multiplied types and identifiers
@@ -288,6 +266,15 @@ rvd_float32_m2_t vb = mipp_load_float32_m2(ptr_b);
 
 rvm_float32_m2_t m   = mipp_cmplt_float32_m2(va, vb);
 rvd_float32_m2_t res = mipp_add_float32_mask_m2(m, va, vb);
+```
+
+```cpp
+// C++ API: automatic LMUL deduction
+auto va = mipp::load<float, 2>(ptr_a);       // mipp::rvd<float, 2>
+auto vb = mipp::load<float, 2>(ptr_b);       // mipp::rvd<float, 2>
+
+auto m  = mipp::cmplt(va, vb);               // Deduces mipp::rvm<float, 2>
+auto res = mipp::add<mipp::M>(m, va, vb);    // Deduces mipp::rvd<float, 2>
 ```
 
 ### 8.2. Hardware Execution on Multi-Register Vectors

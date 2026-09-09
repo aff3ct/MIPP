@@ -79,18 +79,21 @@ MIPPv2 generalizes the concept of Length Multipliers ($\text{LMUL} \in \{1, 2, 4
 
 ### 2.4. Explicit 4-Variant Masking Model
 Masking in MIPPv2 is treated as a first-class citizen with standardized semantics across all operations:
+
 - **`unmasked`**: Standard unconditional computation.
 - **`mask`**: Merges computed results with inactive elements of the destination register ($\text{res}_i = m_i \ ? \ f(a_i, b_i) : a_i$).
 - **`maskz`**: Zeroes inactive elements ($\text{res}_i = m_i \ ? \ f(a_i, b_i) : 0$).
 - **`masks`**: Preserves inactive elements from an explicit source vector ($\text{res}_i = m_i \ ? \ f(a_i, b_i) : \text{src}_i$).
 
-MIPPv2 maps these semantics to hardware opmask registers (`__mmask*` on AVX-512) and vector mask registers (`vbool*` on RVV), or full-width vector blend instructions (SSE/AVX/NEON).
+MIPPv2 maps these semantics to hardware opmask registers (`__mmask*` on AVX-512) and vector mask registers (`vbool*` on RVV), or full-width vector blend/select instructions (SSE/AVX/NEON).
 
 ### 2.5. Scalable Vector Extension Backends
 MIPPv2 incorporates native support for **RISC-V Vector 1.0** (RVV) and **ARM SVE** alongside traditional fixed-width x86/ARM extensions, accommodating architectures where vector lengths are determined by hardware implementation or runtime configuration.
+By design, only the "Length Specific" variants, where the SIMD size is decided at the compile time, are supported.
 
 ### 2.6. Tri-Dialect API Surface
 MIPPv2 provides three distinct programming interfaces catering to different software engineering requirements:
+
 1. **C API (`<mipp.h>`)**: Pure C99 API suitable for systems programming, C projects, and FFIs.
 2. **C++ Functional Template API (`<mipp.hpp>`)**: Type-safe parameterized functions (`mipp::add<float>(r0, r1)`).
 3. **C++ Object API (`<mipp_obj.hpp>`)**: High-level `mipp::Rvd<T, LMUL>` and `mipp::Rvm<T, LMUL>` classes featuring full arithmetic, bitwise, and relational operator overloading.
@@ -101,12 +104,14 @@ MIPPv2 provides three distinct programming interfaces catering to different soft
 
 ### 3.1. Generated Architecture: Robustness, Maintainability, and Correctness
 Unlike traditional hand-written SIMD wrapper libraries (which often suffer from implementation drift and incomplete fallback matrices across architectures), MIPPv2 is **entirely generated from declarative JSON databases**. This generator-driven approach provides multiple advantages:
+
 - **Exhaustive Correctness & Static Verification**: The generator enforces compile-time static audits on the database (dead-code detection, level placement consistency, and duplicate implementation checks), guaranteeing that no instruction combination produces invalid or undefined behavior.
 - **Maintainability & Rapid Extension**: Adding a new hardware intrinsic, vector instruction, or hardware backend requires only updating the declarative JSON registries without manually touching or duplicating hundreds of template definitions across headers.
 - **Automated Property-Based Testing**: Test suites are automatically synthesized across all dialects (C, C++, C++ Object), LMUL configurations, and masking variants with strict domain boundaries and precision tolerances.
 
-### 3.2. Ground-Up Design Around SOTA SIMD Extensions
-MIPPv2's abstraction layer was designed **around state-of-the-art SIMD paradigms** (AVX-512, ARM SVE, and RISC-V Vector 1.0):
+### 3.2. Ground-up Design around SOTA SIMD Extensions
+MIPPv2's abstraction layer was designed **around SOTA SIMD paradigms** (AVX-512, ARM SVE, and RISC-V Vector 1.0):
+
 - **First-Class 4-Way Masking Semantics**: Exposes native opmask and predication capabilities (`unmasked`, `mask`, `maskz`, `masks`) that map directly to hardware opmasks (`__mmask*` on AVX-512) and vector predicate registers (`vbool*` on RVV).
 - **Generalized Hardware/Software LMUL**: Seamlessly models RISC-V dynamic register grouping ($V_{\text{type}}$) while providing equivalent zero-overhead software struct unrolling on fixed-width architectures.
 
