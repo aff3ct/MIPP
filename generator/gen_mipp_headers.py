@@ -415,9 +415,9 @@ def main(argv=None):
         print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
 
     # Print summary table at the end
-    print_summary_table(include_gen_path)
+    print_summary_table(include_gen_path, sorted_names)
 
-def print_summary_table(include_dir):
+def print_summary_table(include_dir, sorted_names=None):
     import os
     import glob
     import re
@@ -430,13 +430,19 @@ def print_summary_table(include_dir):
             return "Msk"
         return "Std"
 
-    # Define the ISAs to check
-    isas = ["scalar", "sse", "avx", "avx512", "neon", "rvv", "sve"]
-    
-    # We want to check which ISAs have files generated
+    # Dynamic ISA detection: use sorted_names if provided, otherwise scan the filesystem
+    if sorted_names is not None:
+        candidate_isas = sorted_names
+    else:
+        simd_ext_dir = os.path.join(include_dir, "simd_ext")
+        if not os.path.isdir(simd_ext_dir):
+            return
+        candidate_isas = sorted(os.listdir(simd_ext_dir))
+
+    # Keep only ISAs that actually have generated C function headers
     existing_isas = []
-    for isa in isas:
-        isa_dir = os.path.join(include_dir, "simd_ext", isa, "functions")
+    for isa in candidate_isas:
+        isa_dir = os.path.join(include_dir, "simd_ext", isa, "c", "functions")
         if os.path.isdir(isa_dir):
             existing_isas.append(isa)
 
@@ -467,8 +473,8 @@ def print_summary_table(include_dir):
             "stub": 0
         }
         
-        isa_dir = os.path.join(include_dir, "simd_ext", isa, "functions")
-        files = glob.glob(os.path.join(isa_dir, "*.h"))
+        isa_dir = os.path.join(include_dir, "simd_ext", isa, "c", "functions")
+        files = glob.glob(os.path.join(isa_dir, "**", "*.h"), recursive=True)
             
         # Read all files and extract function levels and categories
         for filepath in files:

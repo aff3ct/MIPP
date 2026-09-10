@@ -453,14 +453,6 @@ class SpecFuncInfo:
             print(f"{desc}\n", file=f)
 
             print("## Prototypes\n", file=f)
-            print('=== "C++ API"', file=f)
-            print("    ```cpp", file=f)
-            for lmul in [1, 2, 4, 8, -2]:
-                lmul_label = f"LMUL = {lmul}" if lmul > 0 else "LMUL = 1/2"
-                print(f"    // {lmul_label}", file=f)
-                print(f"    {self.func_to_str_cpp(lmul)}", file=f)
-            print("    ```\n", file=f)
-
             print('=== "C99 API"', file=f)
             print("    ```c", file=f)
             for lmul in [1, 2, 4, 8, -2]:
@@ -469,6 +461,14 @@ class SpecFuncInfo:
                 c_block = self.func_to_str_c(lmul)
                 for line in c_block.splitlines():
                     print(f"    {line}", file=f)
+            print("    ```\n", file=f)
+
+            print('=== "C++ API"', file=f)
+            print("    ```cpp", file=f)
+            for lmul in [1, 2, 4, 8, -2]:
+                lmul_label = f"LMUL = {lmul}" if lmul > 0 else "LMUL = 1/2"
+                print(f"    // {lmul_label}", file=f)
+                print(f"    {self.func_to_str_cpp(lmul)}", file=f)
             print("    ```\n", file=f)
 
             print("## Supported Datatypes\n", file=f)

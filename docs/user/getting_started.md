@@ -231,3 +231,17 @@ int main()
     return 0;
 }
 ```
+
+Here is an example of output:
+```
+MIPPv2 (macOS 64-bit, clang-21.0)
+Vector/SIMD features list:
+ - Primary extension name:     ARM NEONv2
+ - Vector registers length:    128-bit
+ - Support Fused Multiply–Add: yes
+ - Support 64-bit elements:    yes
+ - Support Byte and Word (BW): yes
+Copyright (c) 2016-2026 - MIT license.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+```
