@@ -455,7 +455,7 @@ def print_summary_table(include_dir, sorted_names=None):
     print("="*167)
     
     # Header row 1: Levels
-    h1 = f"{'Extension':<12} | {f'{'Level 0 (Nat)':^33}'} | {f'{'Level 1 (SpE)':^33}'} | {f'{'Level 2 (GeE)':^33}'} | {f'{'Level 3 (Sca)':^33}'} | {'Stubs':>8}"
+    h1 = f"{'Extension':<12} | {'Level 0 (Nat)':^33} | {'Level 1 (SpE)':^33} | {'Level 2 (GeE)':^33} | {'Level 3 (Sca)':^33} | {'Stubs':>8}"
     print(h1)
     
     # Header row 2: Sub-columns
