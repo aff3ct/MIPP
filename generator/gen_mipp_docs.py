@@ -572,15 +572,15 @@ class SpecFuncInfo:
             print("- **Ranges by Datatype**:", file=file)
             for dt, d_val in domain["by_datatype"].items():
                 if "min" in d_val and "max" in d_val:
-                    print(f"  - `{dt}`: $[{d_val['min']}, {d_val['max']}]$", file=file)
+                    print(f"    - `{dt}`: $[{d_val['min']}, {d_val['max']}]$", file=file)
                 elif "values" in d_val:
                     vals_str = ", ".join(map(str, d_val["values"]))
-                    print(f"  - `{dt}`: Discrete set $\\{{{vals_str}\\}}$", file=file)
+                    print(f"    - `{dt}`: Discrete set $\\{{{vals_str}\\}}$", file=file)
         elif "by_variable" in domain:
             print("- **Ranges by Operand**:", file=file)
             for var, d_val in domain["by_variable"].items():
                 if "min" in d_val and "max" in d_val:
-                    print(f"  - `{var}`: $[{d_val['min']}, {d_val['max']}]$", file=file)
+                    print(f"    - `{var}`: $[{d_val['min']}, {d_val['max']}]$", file=file)
         else:
             print("- **Range**: Full representable range of the target datatype.", file=file)
         print("", file=file)
@@ -642,25 +642,33 @@ class SpecFuncInfos:
 def write_isas_support_index(base_dir):
     file_path = os.path.join(base_dir, "index.md")
     with open(file_path, "w", encoding="utf-8") as f:
-        print("""# Target ISA Capability & Architecture Support Guide
+        print("""# Target ISA Capability & Hardware Support Guide
 
 MIPP provides high-performance SIMD/vector abstractions across a broad spectrum of hardware instruction set architectures (ISAs).
 
 ## Implementation Levels & Acceleration Legend
 
-MIPP functions are classified into 4 distinct implementation tiers:
+Every MIPP function is evaluated against a deterministic 4-tier hierarchy:
 
-| Badge | Implementation Level | Description |
+| Badge | Implementation Level | Performance & Latency |
 | :---: | :--- | :--- |
-| <span style="color: #28A745; font-weight: 600;">:fontawesome-solid-0:</span> | **Level 0 (Native Hardware)** | Direct 1:1 hardware intrinsic mapping with optimal throughput and latency. |
-| <span style="color: #3B42F5; font-weight: 600;">:fontawesome-solid-1:</span> | **Level 1 (Dedicated Emulation)** | Architecture-specific vector sequence emulating missing hardware operations. |
-| <span style="color: #FFD20D; font-weight: 600;">:fontawesome-solid-2:</span> | **Level 2 (Generic Emulation)** | Portable cross-ISA vector AST algorithm built from other MIPP operations. |
-| <span style="color: #6C757D; font-weight: 600;">:fontawesome-solid-3:</span> | **Level 3 (Scalar Fallback)** | Element-by-element sequential loop fallback with maximum portability. |
+| <span style="color: #28A745; font-weight: 600;">:fontawesome-solid-0:</span> | **Level 0 (Native Hardware)** | Optimal 1:1 hardware intrinsic mapping with minimum latency. |
+| <span style="color: #3B42F5; font-weight: 600;">:fontawesome-solid-1:</span> | **Level 1 (Dedicated Emulation)** | Target-specific multi-instruction sequence emulating missing hardware operations. |
+| <span style="color: #FFD20D; font-weight: 600;">:fontawesome-solid-2:</span> | **Level 2 (Generic Emulation)** | Portable vector AST algorithm built from other MIPP operations. |
+| <span style="color: #6C757D; font-weight: 600;">:fontawesome-solid-3:</span> | **Level 3 (Scalar Fallback)** | Element-by-element sequential loop fallback ensuring 100% functional completeness. |
 | <span style="color: #6C757D; font-weight: 600;">:material-minus:</span> | **N/A (Not Applicable)** | Operation is not defined for this element datatype or masking variant. |
 
 ---
 
-## Supported Target Architectures
+## Universal Portability & Guaranteed Vectorization
+
+- 🚀 [**Universal Architecture Intersection Matrix**](intersection.md): Lists operations guaranteed to execute as SIMD vector instructions across **all** supported target ISAs. If an algorithm restricts its primitives to this matrix, it is guaranteed to vectorize on x86, ARM, and RISC-V targets without hitting scalar fallbacks.
+
+---
+
+## Architecture Capability Breakdowns
+
+Explore hardware acceleration matrices by instruction set architecture:
 
 ### x86 / x86-64 Architectures
 - [**SSE (Streaming SIMD Extensions)**](sse.md): 128-bit vector extensions (SSE2 through SSE4.2). ([Masked Variant Matrix](sse_masked.md))
@@ -676,8 +684,8 @@ MIPP functions are classified into 4 distinct implementation tiers:
 
 ---
 
-## Portability & Intersection Capabilities
-- [**Universal Architecture Intersection Matrix**](intersection.md): Capabilities guaranteed to vectorize across **all** supported target ISAs.
+!!! tip "Looking for a Specific Function?"
+    If you want to check the status or prototypes for a particular operation (like `add`, `mul`, or `blend`), browse the [**API Reference**](../funcs_support/index.md) where every function page displays an interactive architecture matrix.
 """, file=f)
 
 

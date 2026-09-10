@@ -6,11 +6,11 @@ MIPP is a **header-only** library. It requires no separate compilation or pre-bu
 
 ### Header Selection
 
-Depending on your target programming language and preferred level of abstraction, include the appropriate header:
+Depending on your programming language and preferred level of abstraction, include the appropriate header:
 
 | Header File | API Tier | Description |
 | :--- | :--- | :--- |
-| `<mipp.h>` | **C Low-Level API** | Pure C99 function prototypes with explicit type suffixes (e.g., `mipp_add_float32_m1(r0, r1)`). |
+| `<mipp.h>` | **C Low-Level API** | Pure C99 function prototypes with explicit type suffixes (e.g., `mipp_add_float32(r0, r1)`). |
 | `<mipp.hpp>` | **C++ Functional API** | Parameterized functions under namespace `mipp::` (e.g., `mipp::add<float>(r0, r1)`). |
 | `<mipp_obj.hpp>` | **C++ Object API** | Expressive `mipp::Rvd<T, LMUL>` and `mipp::Rvm<T, LMUL>` classes with operator overloading (`+`, `-`, `*`, `==`). |
 
@@ -31,69 +31,93 @@ MIPP automatically detects the target instruction set architecture (ISA) at comp
 | **ARM NEON (v8-A)** | `-march=armv8-a+simd` | `MIPP_NEON` | 128 bits |
 | **ARM SVE** | `-march=armv8-a+sve -msve-vector-bits=256` | `MIPP_SVE` | Fixed at compile time |
 | **RISC-V Vector 1.0** | `-march=rv64gcv_zvl256b -mrvv-vector-bits=zvl` | `MIPP_RVV` | Fixed at compile time ($\ge 128\text{ bits}$) |
-| **Scalar Target** | `-DMIPP_SCALAR [-DMIPP_SCALAR_SIZE=bits]` | `MIPP_SCALAR` | Configurable (defaults to detected host ISA width, or user-defined bitwidth) |
-
-!!! warning "Compile-Time Fixed Vector Length (No VLA)"
-    MIPP operates on **compile-time fixed-length vector registers** (where `mipp::N<T>()` is evaluated as a `constexpr` integer). MIPP does not support Vector Length Agnostic (VLA) dynamic runtime sizing.
-    
-    When targeting scalable architectures such as **RISC-V Vector (RVV 1.0)** or **ARM SVE**, it is strongly recommended to specify the target hardware vector length (`VLEN`) using compiler flags:
-    
-    - **RISC-V Vector (e.g. SpacemiT X100, $\text{VLEN}=256\text{ bits}$)**:
-      ```bash
-      -march=rv64gcv_zvl256b -mrvv-vector-bits=zvl
-      ```
-    - **ARM SVE (e.g. fixed 256-bit or 512-bit vector length)**:
-      ```bash
-      -march=armv8-a+sve -msve-vector-bits=256
-      ```
+| **Scalar Target** | `-DMIPP_SCALAR [-DMIPP_SCALAR_SIZE=bits]` | `MIPP_SCALAR` | Configurable width |
 
 !!! tip "Recommended Optimization Flags for MIPP"
-    To ensure proper inlining, vector code generation, and software LMUL unrolling, use the following recommended compiler flags:
+    To ensure proper inlining and vector code generation, compile with:
     
     ```bash
     g++ -O3 -march=native -funroll-loops -finline-functions -I/path/to/mipp/include main.cpp -o app
     ```
-    
-    - **`-O3`**: Activates high-level optimization passes.
-    - **`-march=native`** (or target ISA flags such as `-mavx2` / `-march=armv8-a+simd`): Enables target SIMD hardware instructions.
-    - **`-finline-functions`**: Ensures all MIPP `static inline` wrappers are inlined with zero function-call overhead.
-    - **`-funroll-loops`**: Maximizes throughput by unrolling loops aggressively.
-    
-    Additional flags may be enabled depending on application-specific requirements:
-    
-    - **`-flto`**: Link-time optimization for whole-program inlining across separate translation units.
-    - **`-ffast-math`**: Relaxes strict IEEE-754 precision constraints (enables reciprocal approximations and algebraic reassociation).
 
 ---
 
-## 3. CMake Integration
+## 3. Real-World Tutorial: Vectorizing a Loop & Handling Tail Loops
 
-In your `CMakeLists.txt`:
+In real applications, data arrays rarely have a size that is an exact multiple of the hardware vector register length ($N = \text{mipp::N<T>()}$). 
 
-```cmake
-cmake_minimum_required(VERSION 3.16)
-project(MippDemo CXX)
+Here is the standard, battle-tested pattern to vectorize any loop over an arbitrary array size $S$ with MIPP:
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+1. **Vector Main Loop**: Process contiguous chunks of $N$ elements with SIMD.
+2. **Tail Loop (Reliquat)**: Handle remaining $S \pmod N$ elements.
 
-# Declare application target
-add_executable(my_application main.cpp)
+### Complete Working Example (C++ Object API)
 
-# Add MIPP include directory
-target_include_directories(my_application PRIVATE /path/to/mipp/include)
+```cpp
+#include <iostream>
+#include <vector>
+#include <numeric>
+#include <mipp_obj.hpp>
 
-# Enable target architecture vector extensions & inlining
-target_compile_options(my_application PRIVATE -march=native -funroll-loops -finline-functions)
+// Computes y[i] = a * x[i] + y[i] (SAXPY) over arbitrary size S
+void saxpy_mipp(float a, const float* x, float* y, size_t size)
+{
+    using RegF = mipp::Rvd<float>;
+    constexpr size_t N = RegF::size(); // Elements per SIMD register (e.g. 8 on AVX2)
+
+    // 1. Compute the limit for full vector chunks
+    const size_t vec_limit = (size / N) * N;
+
+    // Load the scalar multiplier into a vector register (broadcast)
+    RegF va = a;
+
+    // 2. Vector main loop
+    for (size_t i = 0; i < vec_limit; i += N)
+    {
+        RegF vx = mipp::loadu<float>(&x[i]);
+        RegF vy = mipp::loadu<float>(&y[i]);
+
+        vy += va * vx; // Operator overloading compiles to native FMA / mul+add
+
+        mipp::storeu<float>(&y[i], vy);
+    }
+
+    // 3. Scalar tail loop for remaining elements
+    for (size_t i = vec_limit; i < size; ++i)
+    {
+        y[i] += a * x[i];
+    }
+}
+
+int main()
+{
+    const size_t size = 1007; // Not a multiple of vector width
+    std::vector<float> x(size, 2.0f);
+    std::vector<float> y(size, 1.0f);
+
+    saxpy_mipp(3.0f, x.data(), y.data(), size);
+
+    std::cout << "y[0] = " << y[0] << " (expected: 7.0)" << std::endl;
+    std::cout << "y[1006] = " << y[1006] << " (expected: 7.0)" << std::endl;
+    return 0;
+}
+```
+
+Compile and run:
+```bash
+g++ -O3 -mavx2 -mfma -I/path/to/mipp/include saxpy.cpp -o saxpy
+./saxpy
 ```
 
 ---
 
-## 4. Minimal Working Examples
+## 4. Minimal Working Examples by API Dialect
 
-Full standalone source files for each API dialect are provided in the [`examples/`](https://github.com/aff3ct/MIPP/tree/develop/examples) directory of the repository (`examples/mipp.cpp`, `examples/mipp_object.cpp`, `examples/mipp.c`, `examples/vecadd.c`).
+MIPP gives you three different ways to write vector code, depending on your constraints:
 
 ### 4.1. C Low-Level API (`<mipp.h>`)
+
+For pure C99 projects, drivers, or FFIs:
 
 ```c
 #include <stdio.h>
@@ -102,9 +126,7 @@ Full standalone source files for each API dialect are provided in the [`examples
 int main(void)
 {
     const int N = MIPP_N_FLOAT32;
-    float a[N];
-    float b[N];
-    float c[N];
+    float a[N], b[N], c[N];
 
     for (int i = 0; i < N; ++i) {
         a[i] = (float)i;
@@ -133,36 +155,29 @@ gcc -O3 -mavx2 -I/path/to/mipp/include example_c.c -o example_c
 
 ### 4.2. C++ Functional Template API (`<mipp.hpp>`)
 
+For generic C++ template programming:
+
 ```cpp
 #include <iostream>
-#include <vector>
 #include <mipp.hpp>
 
 int main()
 {
-    // Query compile-time element capacity and required byte alignment
     constexpr int N = mipp::N<float>();
-    constexpr int ALIGN = mipp::req_alignment();
-    std::cout << "Vector capacity (float32): " << N << " elements (" << ALIGN << "-byte alignment)" << std::endl;
-
-    // Allocate aligned data
-    alignas(ALIGN) float a[N];
-    alignas(ALIGN) float b[N];
-    alignas(ALIGN) float c[N];
+    alignas(mipp::req_alignment()) float a[N], b[N], c[N];
 
     for (int i = 0; i < N; ++i) {
-        a[i] = static_cast<float>(i);
-        b[i] = static_cast<float>(i * 2);
+        a[i] = (float)i;
+        b[i] = (float)(i * 2);
     }
 
-    // Load, compute, and store
     mipp::rvd<float> va = mipp::load<float>(a);
     mipp::rvd<float> vb = mipp::load<float>(b);
     mipp::rvd<float> vc = mipp::add(va, vb);
 
     mipp::store(c, vc);
 
-    std::cout << "Result: c[0]=" << c[0] << ", c[" << N - 1 << "]=" << c[N - 1] << std::endl;
+    std::cout << "C++ Functional API Result: c[0]=" << c[0] << ", c[" << N - 1 << "]=" << c[N - 1] << std::endl;
     return 0;
 }
 ```
@@ -177,35 +192,32 @@ g++ -O3 -mavx2 -I/path/to/mipp/include example_cpp.cpp -o example_cpp
 
 ### 4.3. C++ Object API (`<mipp_obj.hpp>`)
 
+For clean, readable, high-level code with overloaded operators:
+
 ```cpp
 #include <iostream>
-#include <numeric>
 #include <mipp_obj.hpp>
 
 int main()
 {
     using RegF = mipp::Rvd<float>;
     constexpr int N = RegF::size();
-    constexpr int ALIGN = mipp::req_alignment();
 
-    alignas(ALIGN) float a[N];
-    alignas(ALIGN) float b[N];
-    alignas(ALIGN) float c[N];
+    float a[N], b[N], c[N];
+    for (int i = 0; i < N; ++i) {
+        a[i] = (float)i;
+        b[i] = 100.0f;
+    }
 
-    std::iota(a, a + N, 10.0f);
-    std::iota(b, b + N, 20.0f);
+    RegF va = mipp::loadu<float>(a);
+    RegF vb = mipp::loadu<float>(b);
 
-    // Construct vector objects directly from pointers
-    RegF va = mipp::load<float>(a);
-    RegF vb = mipp::load<float>(b);
-
-    // Overloaded operators
+    // Natural arithmetic expressions
     RegF vc = (va + vb) * 2.0f;
 
-    // Store back
-    mipp::store(c, vc.r);
+    mipp::storeu<float>(c, vc);
 
-    std::cout << "Object API Result: c[0]=" << c[0] << " (element 0: " << vc[0] << ")" << std::endl;
+    std::cout << "C++ Object API Result: c[0]=" << c[0] << " (expected: 200.0)" << std::endl;
     return 0;
 }
 ```
@@ -218,9 +230,9 @@ g++ -O3 -mavx2 -I/path/to/mipp/include example_obj.cpp -o example_obj
 
 ---
 
-## 5. Architecture Introspection
+## 5. Architecture Introspection (`mipp_info`)
 
-You can call `mipp_info()` to output the detected OS, compiler, active SIMD extension, and vector register bitwidth to standard output:
+You can call `mipp_info()` at runtime to print the detected OS, compiler, active SIMD extension, and vector register bitwidth to `stdout`:
 
 ```cpp
 #include <mipp.hpp>
@@ -230,18 +242,4 @@ int main()
     mipp_info();
     return 0;
 }
-```
-
-Here is an example of output:
-```
-MIPPv2 (macOS 64-bit, clang-21.0)
-Vector/SIMD features list:
- - Primary extension name:     ARM NEONv2
- - Vector registers length:    128-bit
- - Support Fused Multiply–Add: yes
- - Support 64-bit elements:    yes
- - Support Byte and Word (BW): yes
-Copyright (c) 2016-2026 - MIT license.
-This is free software; see the source for copying conditions.  There is NO
-warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ```

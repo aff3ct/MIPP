@@ -1,7 +1,23 @@
-# gen_mipp_infos.py
+# Documentation Generator (`gen_mipp_docs.py`)
 
-`gen_mipp_infos.py` is a script that can be ran to generate the `isas_support` 
-and `func_support` sections of the doc. 
-Instead of writing those sections by hand, they are generated using the 
-informations contained in `helpers_headers/headers_def.py`,
-`helpers_headers/generic_emu.py` and `simd_ext/*/*.py`.
+`generator/gen_mipp_docs.py` is the orchestrator that generates the API Reference (`docs/funcs_support/`) and Hardware Support (`docs/isas_support/`) sections of the documentation.
+
+Instead of maintaining documentation tables by hand, they are synthesized directly from:
+
+- `generator/helpers_headers/registry_interfaces.json` (canonical signatures and supported datatypes)
+- `generator/helpers_headers/registry_categories.json` (functional groupings)
+- `generator/helpers_headers/funcs_docs.json` (human-readable descriptions and mathematical equations)
+- `generator/simd_ext/<isa>/<isa>_native_implems.json` (hardware support matrices)
+- `generator/helpers_headers/generic_emu_implems.json` (Level 2 emulation coverage)
+
+## Running the Documentation Generator
+
+```bash
+cd generator
+.venv/bin/python gen_mipp_docs.py
+```
+
+The script updates:
+
+- `docs/funcs_support/`: Function pages with C99 and C++ prototype tabs, parameter tables, and support matrices.
+- `docs/isas_support/`: Hardware architecture pages showing instruction mappings and support levels per data type.

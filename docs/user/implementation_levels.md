@@ -95,41 +95,12 @@ static inline rvd_rvv_int64_t mipp_rvv_wcvt_int32_int64(const rvd_rvv_int32_t r0
 }
 ```
 
-### 2.2. Generator Summary Report
-When regenerating MIPP headers via `python3 generator/gen_mipp_headers.py`, the generator produces an implementation matrix across all target ISAs.
+### 2.2. Hardware Support Documentation
+The online documentation provides complete capability breakdowns:
 
-Here is a example of output:
-```
-=====================================================================================
- MIPP Header Generator
-=====================================================================================
-  LMUL options: [1, 2, 4, 8] | LDIV options: [2]
--------------------------------------------------------------------------------------
-  ➔ Cleaning old generated files... Done (elapsed time: 0.090 sec)!
-  ➔ Generating SSE... Done (elapsed time: 0.753 sec)!
-  ➔ Generating RVV1.0... Done (elapsed time: 3.474 sec)!
-  ➔ Generating AVX... Done (elapsed time: 0.723 sec)!
-  ➔ Generating AVX-512... Done (elapsed time: 0.769 sec)!
-  ➔ Generating SVE... Done (elapsed time: 0.858 sec)!
-  ➔ Generating NEON... Done (elapsed time: 0.615 sec)!
-  ➔ Generating Scalar... Done (elapsed time: 1.552 sec)!
-  ➔ Generating wrappers & C/C++ interface... Done (elapsed time: 0.827 sec)!
-
-=======================================================================================================================================================================
- MIPP IMPLEMENTATION LEVEL SUMMARY
-=======================================================================================================================================================================
-Extension    |           Level 0 (Nat)           |           Level 1 (SpE)           |           Level 2 (GeE)           |           Level 3 (Sca)           |    Stubs
-             |  Std   Msk   LM/D  |    Total     |  Std   Msk   LM/D  |    Total     |  Std   Msk   LM/D  |    Total     |  Std   Msk   LM/D  |    Total     |         
------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-sse          |   340     0      0 |   340  (13%) |     0     0      0 |     0   (0%) |   223   426    519 |  1168  (45%) |   438   651      0 |  1089  (42%) |        0
-rvv          |  1027   325   2500 |  3852  (29%) |   520   238   1397 |  2155  (16%) |   707   269   1779 |  2755  (21%) |  1054   438   2984 |  4476  (34%) |      762
-avx          |   463     4      0 |   467  (16%) |    44     4      0 |    48   (2%) |   248   654    519 |  1421  (49%) |   304   672      0 |   976  (34%) |        0
-avx512       |   491    30      0 |   521  (18%) |    25     8      0 |    33   (1%) |   253   652    519 |  1424  (48%) |   290   690      0 |   980  (33%) |      118
-sve          |   348     0      0 |   348   (8%) |   364     0      0 |   364   (9%) |   994   654    519 |  2167  (53%) |   866   360      0 |  1226  (30%) |        0
-neon         |   537     0      0 |   537  (20%) |    32     0      0 |    32   (1%) |   140   654    519 |  1313  (49%) |   266   555      0 |   821  (30%) |        0
-scalar       |  2572  1014   7172 | 10758 (100%) |   N/A   N/A    N/A |          N/A |   N/A   N/A    N/A |          N/A |   N/A   N/A    N/A |          N/A |      N/A
-=======================================================================================================================================================================
-```
+- **[Hardware Support Dashboard](../isas_support/index.md)**: Displays implementation level breakdowns and coverage statistics across all target architectures.
+- **[Universal Intersection Matrix](../isas_support/intersection.md)**: Lists operations guaranteed to execute natively (Level 0) or via dedicated vector sequences across all platforms.
+- **[API Reference](../funcs_support/index.md)**: Each function reference page includes an interactive implementation matrix across all ISAs and masking modes.
 
 ## 3. Performance Considerations Across Levels
 

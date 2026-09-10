@@ -1,82 +1,82 @@
-# headers_def.py
+# Core Registries (`registry_*.json`)
 
-`headers_def.py` contains three dictionnaries : 
+The declarative database in `generator/helpers_headers/` defines canonical function prototypes, signatures, categories, and reference implementations across several JSON files:
 
-- `protos`
-- `mipp_funcs_concepts`
-- `mipp_funcs`
+- `registry_protos.json`: Generic function prototype templates.
+- `registry_categories.json`: Functional groupings (arithmetic, logic, comparison, etc.).
+- `registry_interfaces.json`: Canonical function definitions and signatures.
+- `registry_scalar_implems.json`: Scalar reference fallback implementations (Level 3).
 
-These three dictionnaries are very important to how MIPP is generated.
+---
 
-## protos 
+## 1. `registry_protos.json`
 
-Contains generic prototypes that are used to create mipp functions in the 
-different layers. 
+Defines abstract function prototypes used across all MIPP generators.
 
-For instance: 
+Example:
 
-```Python
+```json
 "ret_reg_2args_reg": {
-	"ret" :
-		{"type": "reg", "charac": "WO", "fixeddatatype": False},
-	"args" : [
-		{"type": "reg", "charac": "RO", "fixeddatatype": False},
-		{"type": "reg", "charac": "RO", "fixeddatatype": False},
-	]
-},
+    "ret": {
+        "type": "reg",
+        "fixeddatatype": false,
+        "charac": "WO"
+    },
+    "args": [
+        {
+            "type": "reg",
+            "fixeddatatype": false,
+            "charac": "RO"
+        },
+        {
+            "type": "reg",
+            "fixeddatatype": false,
+            "charac": "RO"
+        }
+    ]
+}
 ```
 
-Is a prototype used by every MIPP functions that takes two SIMD registers as 
-argument and that returns a register. 
+Field values:
 
-### values for each field
+- `type`:
+    - `reg`: Vector value register (`rvd`)
+    - `msk`: Vector mask register (`rvm`)
+    - `val`: Scalar value
+    - `ptr`: Memory pointer
+    - `Nele`: Array of scalar values
+- `charac`: `RO` (Read-Only) or `WO` (Write-Only).
+- `fixeddatatype`: `false` if polymorphic across vector types, or an explicit type name (e.g. `"int32"`).
 
-#### "type"
+---
 
-- `msk`: mask register (`rvm`)
-- `reg`: value register (`rvd`)
-- `Nele`: array of scalars (`N` elements)
-- `val`: scalar value
-- `ptr`: pointer
+## 2. `registry_interfaces.json`
 
-#### "charac"
+The central contract of all MIPP functions. Each entry specifies:
 
-- `WO`: write only 
-- `RO`: read only
-
-#### "fixeddatatype"
-
-- False: datatype of the return value / argument is not fixed 
-- any type in `helper_headers/tools.py` : datatype of the argument / return can 
-  only be of this type.
-
-### mipp_func_concepts
-
-is a dictionnary where keys are concepts like "all_arithm_op, all_loads" that 
-correspond to a "category" of MIPP functions, and values are a list of MIPP 
-function that belong to this category. 
-
-!!! warning
-    A MIPP function can be in at most one category. If it isn't in any category 
-    in `mipp_func_concepts`, it will generaly be put in a default 
-    "miscellaneous" category.
-
-### mipp_funcs 
-
-Is the most important dictionnary defined in this file. It can be seen as the 
-MIPP specification. It's keys are MIPP function names. It's values are 
-dictionnary that defines how these functions *should* be defined. 
-
-For instance:
-
-```Python
-"add": { "proto": protos["ret_reg_2args_reg"], "datatypes": all_datatypes, "horizontal": False , "mask" : all_mask_support},
+```json
+"add": {
+    "proto_ref": "ret_reg_2args_reg",
+    "datatypes": "all_datatypes",
+    "horizontal": false,
+    "mask_support": "all_mask"
+}
 ```
 
-Tells that the mipp `add` function should have the `"ret_reg_2args_reg"` 
-prototype. i.e take two `rvd` as argument and return one `rvd`. It should be 
-defined on every datatypes. It is not a reduction. And it supports every kind of 
-mask variants. 
+- `proto_ref`: References a prototype template from `registry_protos.json`.
+- `datatypes`: Supported datatypes (`"all_datatypes"`, `"all_float"`, `"all_int"`, `"all_int_uint"`, etc.).
+- `horizontal`: `false` for element-wise SIMD operations, `true` for horizontal reductions.
+- `mask_support`: `"all_mask"`, `"no_mask"`, `"only_mask"`, `"only_maskz"`, `"only_masks"`, `"mask_and_maskz"`, `"mask_and_masks"`, `"maskz_and_masks"`.
 
-This "specification" is used by `gen_c_funcs`, `gen_ci_funcs`, `gen_cpp_funcs` 
-etc to generate coherent MIPP prototypes for every layer of MIPP.
+---
+
+## 3. `registry_categories.json`
+
+Maps categories to function names:
+
+```json
+{
+    "arithmetic": ["add", "adds", "sub", "subs", "mul", "div"],
+    "comparison": ["cmpeq", "cmpneq", "cmple", "cmplt", "cmpge", "cmpgt"]
+}
+```
