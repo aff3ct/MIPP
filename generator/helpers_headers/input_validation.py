@@ -425,7 +425,8 @@ def audit_and_validate_implementation_levels(isa, implems, implems_emu):
         for func, choice, table, declared, detected, deps in discrepancies:
             dts = ", ".join(list(choice.get("datatypes", []))[:2])
             deps_str = f" (MIPP dependencies: {list(deps)})" if deps else ""
-            print(Fore.BLUE + f"  - Function '{func}' [{dts}] in '{table}' has declared/expected level {declared} but detected level {detected}{deps_str} (template code: '{get_code(choice).strip().replace('\n', ' ')[:50]}...')", file=sys.stderr)
+            snippet = get_code(choice).strip().replace('\n', ' ')[:50]
+            print(Fore.BLUE + f"  - Function '{func}' [{dts}] in '{table}' has declared/expected level {declared} but detected level {detected}{deps_str} (template code: '{snippet}...')", file=sys.stderr)
 
     # Datatype implementation duplicates check
     from tools import resolve_datatypes
