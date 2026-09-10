@@ -1,0 +1,169 @@
+name: MIPP CI
+
+on:
+  push:
+    branches:
+      - develop
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - develop
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # =========================================================================
+  # 1. GENERATION (Headers, Tests, Docs)
+  # =========================================================================
+  generation:
+    name: Generation (Headers, Tests, Docs)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: generator/requirements.txt
+
+      - name: Install generator dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r generator/requirements.txt
+
+      - name: Generate MIPP C/C++ headers
+        run: |
+          cd generator
+          ./gen_mipp_headers.py --simd-ext sse avx avx512 rvv neon scalar
+
+      - name: Generate MIPP tests
+        run: |
+          cd generator
+          ./gen_mipp_tests.py cpp --lmul 0 8 --ldiv 2 --mask-kind "unmasked" "mask" "maskz" "masks"
+
+      - name: Generate MIPP documentation pages
+        run: |
+          cd generator
+          ./gen_mipp_docs.py
+
+      - name: Upload headers artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mipp-headers
+          path: include/
+          retention-days: 7
+
+      - name: Upload tests artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mipp-tests
+          path: |
+            tests/src/c
+            tests/src/cpp
+            tests/src/cpp_obj
+          retention-days: 7
+
+      - name: Upload generated docs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mipp-docs
+          path: |
+            docs/funcs_support
+            docs/isas_support
+          retention-days: 7
+
+  # =========================================================================
+  # 2. DEPLOY DOCS (GitHub Pages - Tag only)
+  # =========================================================================
+  deploy-docs:
+    name: Deploy Documentation
+    needs: generation
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: docs/requirements.txt
+
+      - name: Install MkDocs dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r docs/requirements.txt
+
+      - name: Download generated docs pages
+        uses: actions/download-artifact@v4
+        with:
+          name: mipp-docs
+          path: docs
+
+      - name: Build MkDocs documentation
+        run: |
+          mkdocs build --clean --strict
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  # =========================================================================
+  # 3. GITHUB RELEASE (Headers ZIP/Tarball - Tag only)
+  # =========================================================================
+  release:
+    name: Create GitHub Release
+    needs: generation
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download generated headers
+        uses: actions/download-artifact@v4
+        with:
+          name: mipp-headers
+          path: include
+
+      - name: Package headers into distribution archives
+        run: |
+          TAG_NAME="${{ github.ref_name }}"
+          # Archive zip & tar.gz containing include/
+          zip -r "mipp-${TAG_NAME}-headers.zip" include/
+          tar -czf "mipp-${TAG_NAME}-headers.tar.gz" include/
+
+      - name: Create GitHub Release and attach archives
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            mipp-${{ github.ref_name }}-headers.zip
+            mipp-${{ github.ref_name }}-headers.tar.gz
+          generate_release_notes: true
+          draft: false
+          prerelease: false

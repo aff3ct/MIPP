@@ -1,5 +1,5 @@
 site_name: MIPP Documentation
-site_url: https://gitlab.lip6.fr/mipp/mipp/
+site_url: https://aff3ct.github.io/mipp/
 theme:
   logo: assets/images/mipp_ico.jpg
   features:
@@ -33,7 +33,7 @@ theme:
 
   language: en
 
-repo_url: https://gitlab.lip6.fr/mipp/mipp/
+repo_url: https://github.com/aff3ct/mipp/
 
 markdown_extensions:
   - toc:
