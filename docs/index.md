@@ -39,7 +39,7 @@ Unlike other SIMD libraries that force a modern C++ compiler or rely on unpredic
 
 1. **Unique Tri-Dialect API**:
 
-    - **Pure C99 API** (`<mipp.h>`): Explicit type suffixes (`mipp_add_float32`) ideal for pure C codebases, embedded systems, and foreign function interfaces (FFIs).
+    - **Pure C99 API** (`<mipp.h>`): Explicit type suffixes (`mipp_add_float32`) ideal for pure C codebases, embedded systems, and OS kernels.
     - **C++ Template Functional API** (`<mipp.hpp>`): Type-parameterized functions under namespace `mipp::` (`mipp::add<float>(r0, r1)`).
     - **C++ Object API** (`<mipp_obj.hpp>`): Expressive operator overloading (`vc = va + vb`) with zero overhead.
 

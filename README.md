@@ -62,7 +62,7 @@
 
 MIPP caters to different software engineering constraints through three distinct interfaces:
 
-* **Pure C99 API (`<mipp.h>`)**: Explicit type suffixes (e.g., `mipp_add_float32(r0, r1)`). Ideal for pure C codebases, embedded systems, OS kernels, and foreign function interfaces (FFIs like Python `ctypes`/CFFI or Rust FFI).
+* **Pure C99 API (`<mipp.h>`)**: Explicit type suffixes (e.g., `mipp_add_float32(r0, r1)`). Ideal for pure C codebases, embedded systems, and OS kernels.
 * **C++ Functional Template API (`<mipp.hpp>`)**: Generic parameterized functions under namespace `mipp::` (e.g., `mipp::add<float>(r0, r1)`).
 * **C++ Object API (`<mipp_obj.hpp>`)**: Expressive `mipp::Rvd<T, LMUL>` and `mipp::Rvm<T, LMUL>` wrapper classes featuring full arithmetic (`+`, `-`, `*`, `/`), bitwise, and relational operator overloading with zero abstraction overhead.
 
