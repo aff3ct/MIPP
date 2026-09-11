@@ -1,6 +1,6 @@
 # MIPP: My Intrinsics Plus Plus
 
-**MIPP** is an open-source, header-only C and C++ SIMD wrapper library designed for cross-architecture data-parallel computing. It provides a portable, zero-overhead abstraction layer over hardware SIMD instruction sets, enabling developers to write high-performance vectorized algorithms once and compile them efficiently across x86 (SSE, AVX, AVX-512), ARM (NEON, SVE) and RISC-V (RVV) targets.
+**MIPP** is an open-source, header-only C and C++ SIMD wrapper library designed for cross-architecture data-parallel computing. It provides a portable, zero-overhead abstraction layer over hardware SIMD instruction sets, enabling developers to write high-performance vectorized algorithms once and compile them efficiently across x86 (SSE, AVX, AVX-512), ARM (NEON, SVE in progress) and RISC-V (RVV 1.0) targets.
 
 ```
        +-------------------------------------------------------------------+
@@ -26,7 +26,7 @@
        +-------------------------------------------------------------------+
                                          |
   +------------+------------+------------+------------+------------+------------+
-  |    SSE     |    AVX     |  AVX-512   |    NEON    |    SVE     |    RVV     |
+  |    SSE     |    AVX     |  AVX-512   |    NEON    | SVE (WIP)  |    RVV     |
   |   (128b)   |   (256b)   |   (512b)   |   (128b)   | (Scalable) | (Scalable) |
   +------------+------------+------------+------------+------------+------------+
 ```
@@ -65,7 +65,7 @@ Unlike other SIMD libraries that force a modern C++ compiler or rely on unpredic
 | **x86 / x86-64** | AVX, AVX2, AVX2+FMA | 256 bits |
 | **x86 / x86-64** | AVX-512F, AVX-512BW, AVX-512DQ | 512 bits |
 | **ARM (AArch32 / AArch64)** | NEON (ARMv7, ARMv8-A) | 128 bits |
-| **ARM (AArch64)** | SVE | Fixed / Configurable compile-time vector length |
+| **ARM (AArch64)** | SVE *(WIP / in progress)* | Fixed / Configurable compile-time vector length |
 | **RISC-V** | RVV 1.0 | Fixed / Configurable VLEN ($\ge 128\text{ bits}$) |
 | **Generic** | Scalar fallback | Configurable width |
 
