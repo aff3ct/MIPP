@@ -646,6 +646,41 @@ def resolve_candidates(isa, funcs, lmul=0):
                         filtered_reqs[req_f] = req_dt_keys
                 reqs = filtered_reqs
             _append_resolved_status(funcs, f, dt_key, mask_kind, cond, reqs)
+
+    # 2. Propagate effective implementation levels through dependencies:
+    # If a composite function depends on a Level 3 (scalar fallback) operation,
+    # it inherits that bottleneck: EffectiveLevel = max(BaseLevel, max(DepLevels)).
+    memo = {}
+    visiting = set()
+
+    def _get_effective_level(cand):
+        cand_id = id(cand)
+        if cand_id in memo:
+            return memo[cand_id]
+        if cand_id in visiting:
+            return cand.get("level", 3)
+        visiting.add(cand_id)
+
+        eff_level = cand.get("level", 3)
+        reqs = _get_candidate_reqs(cand, isa, funcs, lmul=lmul)
+        for req_f, req_dt_keys in reqs.items():
+            for req_dt_key in req_dt_keys:
+                dep_key = (req_f, req_dt_key, None)
+                dep_cands = resolved.get(dep_key, [])
+                dep_active = [c for c, c_cond in dep_cands if c_cond != "0"]
+                if dep_active:
+                    dep_eff_levels = [_get_effective_level(c) for c in dep_active]
+                    eff_level = max(eff_level, min(dep_eff_levels))
+
+        visiting.remove(cand_id)
+        memo[cand_id] = eff_level
+        return eff_level
+
+    for key in resolved:
+        for cand, cond in resolved[key]:
+            if cond != "0":
+                cand["level"] = _get_effective_level(cand)
+
     return resolved
 
 def resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators=False):

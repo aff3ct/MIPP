@@ -102,7 +102,33 @@ The online documentation provides complete capability breakdowns:
 - **[Universal Intersection Matrix](../isas_support/intersection.md)**: Lists operations guaranteed to execute natively (Level 0) or via dedicated vector sequences across all platforms.
 - **[API Reference](../funcs_support/index.md)**: Each function reference page includes an interactive implementation matrix across all ISAs and masking modes.
 
-## 3. Performance Considerations Across Levels
+## 3. Transitive Dependency Propagation & Hybrid Execution
+
+In real-world SIMD code generation, algorithms are frequently composed of smaller primitives (e.g., polynomial evaluations, horizontal reductions, masking, or type casts). MIPP employs a **transitive level propagation solver** to guarantee both **optimal hybrid execution** and **honest performance reporting**:
+
+### 3.1. Hybrid Vector-Scalar Execution (Performance Preservation)
+When an operation is implemented via a composite template (such as elementary math functions or generic masked wrappers):
+
+- If the majority of sub-operations are vectorized (Levels 0, 1, or 2), but a single helper operation requires a Level 3 scalar fallback on that specific target, **MIPP does not discard the vector template**.
+- Dropping an entire multi-step function down to an element-by-element loop (`auto_scalar`) would discard the massive throughput gains provided by the 90%+ vectorized operations.
+- Instead, MIPP generates the **hybrid SIMD + scalar implementation**, preserving the hardware vector acceleration across all available instructions.
+
+### 3.2. Transitive Bottleneck Propagation (Honest Classification)
+While the hybrid implementation is emitted for optimal execution, its official **implementation level** in the API reference matrices, header comments, and dashboard is determined by the **weakest link in its dependency graph**:
+
+$$\text{EffectiveLevel}(F) = \max \Big( \text{BaseLevel}(F), \; \max_{D \in \text{Dependencies}(F)} \text{EffectiveLevel}(D) \Big)$$
+
+- **Pure Vector Path**: If a Level 2 generic algorithm only invokes Level 0, 1, or 2 sub-operations, its effective level remains **Level 2 (Generic Emulated)**.
+- **Transitive Scalar Fallback**: If a Level 2 (or Level 1) template invokes at least one operation that transitively resolves to a Level 3 scalar fallback on the target architecture, its effective level is evaluated as:
+  $$\max(2, 3) = \mathbf{3}$$
+  It is classified and documented as **Level 3 (Scalar Fallback)**.
+
+!!! note
+    **Concrete Example**: On baseline x86 SSE, native variable vector blending (`_mm_blendv_*`) is unavailable prior to SSE4.1, so floating-point `blend` resolves to Level 3. Consequently, integer `blend` (which casts to float and invokes `blend`) and masked operations like `add_mask` (which compute `add` followed by `blend`) still emit vectorized arithmetic, but their official level is classified as **Level 3** because of the scalar bottleneck.
+
+---
+
+## 4. Performance Considerations Across Levels
 
 Understanding implementation levels helps users interpret profiling data and compiler assembly:
 
@@ -114,3 +140,4 @@ Understanding implementation levels helps users interpret profiling data and com
     - While Level 3 guarantees complete API coverage and functional correctness, performance-critical inner loops should avoid relying on Level 3 fallbacks. If a hotspot hits a Level 3 implementation, consider:
         - Checking if an alternative datatype has native hardware support on that architecture (e.g., using `float32` on architectures lacking 64-bit hardware floating-point units).
         - Contributing a Level 1 (target-specific intrinsic) or Level 2 (generic SIMD decomposition) implementation to the MIPP codebase.
+
