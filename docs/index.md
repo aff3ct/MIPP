@@ -65,7 +65,7 @@ Unlike other SIMD libraries that force a modern C++ compiler or rely on unpredic
 | **x86 / x86-64** | AVX, AVX2, AVX2+FMA | 256 bits |
 | **x86 / x86-64** | AVX-512F, AVX-512BW, AVX-512DQ | 512 bits |
 | **ARM (AArch32 / AArch64)** | NEON (ARMv7, ARMv8-A) | 128 bits |
-| **ARM (AArch64)** | SVE *(WIP / in progress)* | Fixed / Configurable compile-time vector length |
+| **ARM (AArch64)** | SVE *(WIP)* | Fixed / Configurable compile-time vector length |
 | **RISC-V** | RVV 1.0 | Fixed / Configurable VLEN ($\ge 128\text{ bits}$) |
 | **Generic** | Scalar fallback | Configurable width |
 

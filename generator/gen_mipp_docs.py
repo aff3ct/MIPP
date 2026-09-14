@@ -507,6 +507,7 @@ class SpecFuncInfo:
 
     def write_isa_matrix(self, file, mipp_infos):
         print("## Architecture & Implementation Matrix\n", file=file)
+        print(f'<small>**Legend:** {badge_l0} Native &bull; {badge_l1} Dedicated Emulation &bull; {badge_l2} Generic Emulation &bull; {badge_l3} Scalar &bull; {badge_na} N/A &nbsp;—&nbsp; *[Full details & latency](../index.md#implementation-levels)*</small>\n', file=file)
         
         if self.func_name in ("cast", "cast_k"):
             dts = all_datatypes_cart_prod
@@ -646,6 +647,7 @@ def write_isas_support_index(base_dir):
 
 MIPP provides high-performance SIMD/vector abstractions across a broad spectrum of hardware instruction set architectures (ISAs).
 
+<a id="implementation-levels"></a>
 ## Implementation Levels & Acceleration Legend
 
 Every MIPP function is evaluated against a deterministic 4-tier hierarchy:
@@ -696,6 +698,21 @@ def write_funcs_support_index(base_dir, categories):
 
 This section contains complete API reference documentation, mathematical semantics, test specifications, and architecture acceleration matrices for all MIPP functions.
 
+<a id="implementation-levels"></a>
+## Implementation Levels & Acceleration Legend
+
+Every MIPP function is evaluated against a deterministic 4-tier hierarchy:
+
+| Badge | Implementation Level | Performance & Latency |
+| :---: | :--- | :--- |
+| <span style="color: #28A745; font-weight: 600;">:fontawesome-solid-0:</span> | **Level 0 (Native Hardware)** | Optimal 1:1 hardware intrinsic mapping with minimum latency. |
+| <span style="color: #3B42F5; font-weight: 600;">:fontawesome-solid-1:</span> | **Level 1 (Dedicated Emulation)** | Target-specific multi-instruction sequence emulating missing hardware operations. |
+| <span style="color: #FFD20D; font-weight: 600;">:fontawesome-solid-2:</span> | **Level 2 (Generic Emulation)** | Portable vector AST algorithm built from other MIPP operations. |
+| <span style="color: #6C757D; font-weight: 600;">:fontawesome-solid-3:</span> | **Level 3 (Scalar Fallback)** | Element-by-element sequential loop fallback ensuring 100% functional completeness. |
+| <span style="color: #6C757D; font-weight: 600;">:material-minus:</span> | **N/A (Not Applicable)** | Operation is not defined for this element datatype or masking variant. |
+
+---
+
 ## Documentation Structure for Each Function
 
 Each function reference page provides:
@@ -706,6 +723,8 @@ Each function reference page provides:
 4. **ISA & Variant Support Matrix**: Per-architecture hardware capability breakdown across masking variants.
 5. **Reference Algorithm**: Scalar C reference implementation demonstrating exact arithmetic and masking semantics.
 6. **Test & Verification Specifications**: Input value domains, validity bounds, and precision tolerances.
+
+---
 
 ## Function Directory by Category
 """, file=f)

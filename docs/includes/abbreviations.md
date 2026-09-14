@@ -89,3 +89,4 @@
 *[VLA]: Vector Length Agnostic
 *[VLEN]: Vector LENgth (in bits)
 *[VLMAX]: Vector Length MAXimum (in bits)
+*[WIP]: Work In Progress

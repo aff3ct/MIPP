@@ -8,7 +8,7 @@
   <a href="https://github.com/aff3ct/mipp/actions/workflows/ci.yml"><img src="https://github.com/aff3ct/mipp/actions/workflows/ci.yml/badge.svg" alt="MIPP CI"/></a>
   <a href="https://aff3ct.github.io/MIPP/"><img src="https://img.shields.io/badge/docs-online-blue.svg" alt="Documentation"/></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"/></a>
-  <img src="https://img.shields.io/badge/C%2B%2B-11%20%7C%2014%20%7C%2017%20%7C%2020%20%7C%2023-blue.svg" alt="C++ Standards"/>
+  <img src="https://img.shields.io/badge/C%2B%2B-11-blue.svg" alt="C++ Standards"/>
   <img src="https://img.shields.io/badge/C-C99-blue.svg" alt="C99 Standard"/>
 </p>
 
@@ -99,8 +99,6 @@ Every operation is guaranteed to compile and execute across all **10 supported n
 
 | Capability / Metric | [**MIPPv2**](https://github.com/aff3ct/mipp/tree/develop) | [**MIPPv1**](https://github.com/aff3ct/mipp/tree/master) | [**Google Highway**](https://github.com/google/highway) | [**xsimd**](https://github.com/xtensor-stack/xsimd) | [**Eve**](https://github.com/jfalcou/eve) | [**VCL**](https://github.com/vectorclass/version2) |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **GitHub Stars** | [![Stars](https://img.shields.io/github/stars/aff3ct/mipp?style=flat&label=%E2%AD%90)](https://github.com/aff3ct/mipp) | [![Stars](https://img.shields.io/github/stars/aff3ct/mipp?style=flat&label=%E2%AD%90)](https://github.com/aff3ct/mipp) | [![Stars](https://img.shields.io/github/stars/google/highway?style=flat&label=%E2%AD%90)](https://github.com/google/highway) | [![Stars](https://img.shields.io/github/stars/xtensor-stack/xsimd?style=flat&label=%E2%AD%90)](https://github.com/xtensor-stack/xsimd) | [![Stars](https://img.shields.io/github/stars/jfalcou/eve?style=flat&label=%E2%AD%90)](https://github.com/jfalcou/eve) | [![Stars](https://img.shields.io/github/stars/vectorclass/version2?style=flat&label=%E2%AD%90)](https://github.com/vectorclass/version2) |
-| **License** | [![License](https://img.shields.io/github/license/aff3ct/mipp?style=flat)](https://github.com/aff3ct/mipp/blob/develop/LICENSE) | [![License](https://img.shields.io/github/license/aff3ct/mipp?style=flat)](https://github.com/aff3ct/mipp/blob/master/LICENSE) | [![License](https://img.shields.io/badge/license-Apache_2.0_%7C_BSD--3-blue)](https://github.com/google/highway/blob/master/LICENSE) | [![License](https://img.shields.io/github/license/xtensor-stack/xsimd?style=flat)](https://github.com/xtensor-stack/xsimd/blob/master/LICENSE) | [![License](https://img.shields.io/github/license/jfalcou/eve?style=flat)](https://github.com/jfalcou/eve/blob/main/LICENSE.md) | [![License](https://img.shields.io/github/license/vectorclass/version2?style=flat)](https://github.com/vectorclass/version2/blob/master/LICENSE) |
 | **Pure C99 API (C ABI)** | ✅ **Yes (`<mipp.h>`)** | ❌ No (C++ only) | ❌ No (C++ only) | ❌ No (C++ only) | ❌ No (C++ only) | ❌ No (C++ only) |
 | **C++ Operator Overloading** | ✅ **Yes (`Rvd`)** | ✅ Yes (`Reg`) | ❌ No (Named functions) | ✅ Yes (`batch`) | ✅ Yes (`wide`) | ✅ Yes (`Vec...`) |
 | **100% Fallback Guarantee** | ✅ **Levels 0 to 3** | ❌ Incomplete | ⚠️ Partial | ❌ Compile error | ❌ Compile error | ⚠️ x86 subsets only |
@@ -108,8 +106,10 @@ Every operation is guaranteed to compile and execute across all **10 supported n
 | **Dispatch** | **Static** | **Static** | **Static & Dynamic** | **Static & Dynamic** | **Static** | **Static** *(Manual)* |
 | **Language Standard Required** | **C99 / C++11** | C++11 | C++11 | C++17 | C++20 required | C++11 / C++17 |
 | **Compilation Overhead** | ⚡ **Fast** | Medium | 🐢 Heavy | Medium | 🐌 Very heavy | ⚡ Fast |
+| **GitHub Stars** | [![Stars](https://img.shields.io/github/stars/aff3ct/mipp?style=flat&label=%E2%AD%90)](https://github.com/aff3ct/mipp) | [![Stars](https://img.shields.io/github/stars/aff3ct/mipp?style=flat&label=%E2%AD%90)](https://github.com/aff3ct/mipp) | [![Stars](https://img.shields.io/github/stars/google/highway?style=flat&label=%E2%AD%90)](https://github.com/google/highway) | [![Stars](https://img.shields.io/github/stars/xtensor-stack/xsimd?style=flat&label=%E2%AD%90)](https://github.com/xtensor-stack/xsimd) | [![Stars](https://img.shields.io/github/stars/jfalcou/eve?style=flat&label=%E2%AD%90)](https://github.com/jfalcou/eve) | [![Stars](https://img.shields.io/github/stars/vectorclass/version2?style=flat&label=%E2%AD%90)](https://github.com/vectorclass/version2) |
+| **License** | [![License](https://img.shields.io/github/license/aff3ct/mipp?style=flat)](https://github.com/aff3ct/mipp/blob/develop/LICENSE) | [![License](https://img.shields.io/github/license/aff3ct/mipp?style=flat)](https://github.com/aff3ct/mipp/blob/master/LICENSE) | [![License](https://img.shields.io/badge/license-Apache_2.0_%7C_BSD--3-blue)](https://github.com/google/highway/blob/master/LICENSE) | [![License](https://img.shields.io/github/license/xtensor-stack/xsimd?style=flat)](https://github.com/xtensor-stack/xsimd/blob/master/LICENSE) | [![License](https://img.shields.io/github/license/jfalcou/eve?style=flat)](https://github.com/jfalcou/eve/blob/main/LICENSE.md) | [![License](https://img.shields.io/github/license/vectorclass/version2?style=flat)](https://github.com/vectorclass/version2/blob/master/LICENSE) |
 
-👉 **[Read the comprehensive 10-column comparison matrix in the documentation](https://aff3ct.github.io/MIPP/user/why_mippv2/#simd-wrappers-comparison)**
+👉 **[Read the full 10+ column comparison matrix in the documentation](https://aff3ct.github.io/MIPP/user/why_mippv2/#simd-wrappers-comparison)**
 
 ---
 

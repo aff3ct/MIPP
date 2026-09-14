@@ -209,17 +209,17 @@ Below is an identical vectorized SAXPY loop ($Y[i] = a \cdot X[i] + Y[i]$) imple
 
     void saxpy_c(size_t n, float a, const float* x, float* y)
     {
-        const size_t step = MIPP_N_FLOAT32;
+        const size_t N = MIPP_N_FLOAT32;
+        const size_t vec_limit = (n / N) * N;
         rvd_float32_m1_t va = mipp_set1_float32_m1(a);
 
-        size_t i = 0;
-        for (; i + step <= n; i += step) {
+        for (size_t i = 0; i < vec_limit; i += N) {
             rvd_float32_m1_t vx = mipp_loadu_float32_m1(x + i);
             rvd_float32_m1_t vy = mipp_loadu_float32_m1(y + i);
             rvd_float32_m1_t vres = mipp_fmadd_float32_m1(va, vx, vy);
             mipp_storeu_float32_m1(y + i, vres);
         }
-        for (; i < n; i++) {
+        for (size_t i = vec_limit; i < n; i++) {
             y[i] = a * x[i] + y[i];
         }
     }
@@ -232,17 +232,17 @@ Below is an identical vectorized SAXPY loop ($Y[i] = a \cdot X[i] + Y[i]$) imple
     template <typename T = float, int LMUL = 1>
     void saxpy_cpp(size_t n, T a, const T* x, T* y)
     {
-        constexpr size_t step = mipp::N<T, LMUL>();
+        constexpr size_t N = mipp::N<T, LMUL>();
+        const size_t vec_limit = (n / N) * N;
         const auto va = mipp::set1<T, LMUL>(a);
 
-        size_t i = 0;
-        for (; i + step <= n; i += step) {
+        for (size_t i = 0; i < vec_limit; i += N) {
             auto vx = mipp::load<T, LMUL>(x + i);
             auto vy = mipp::load<T, LMUL>(y + i);
             auto vres = mipp::fmadd(va, vx, vy); // Fused multiply-add
             mipp::store(y + i, vres);
         }
-        for (; i < n; i++) {
+        for (size_t i = vec_limit; i < n; i++) {
             y[i] = a * x[i] + y[i];
         }
     }
@@ -252,20 +252,20 @@ Below is an identical vectorized SAXPY loop ($Y[i] = a \cdot X[i] + Y[i]$) imple
     ```cpp
     #include <mipp_obj.hpp>
 
-    void saxpy_obj(size_t n, float a, const float* x, float* y)
+    template <typename T = float, int LMUL = 1>
+    void saxpy_obj(size_t n, T a, const T* x, T* y)
     {
-        using RegF = mipp::Rvd<float>;
-        constexpr size_t step = RegF::size();
-        RegF va(a);
+        constexpr size_t N = mipp::Rvd<T, LMUL>::size();
+        const size_t vec_limit = (n / N) * N;
+        mipp::Rvd<T, LMUL> va(a);
 
-        size_t i = 0;
-        for (; i + step <= n; i += step) {
-            RegF vx(x + i);
-            RegF vy(y + i);
-            RegF vres = va * vx + vy; // Uses overloaded * and +
+        for (size_t i = 0; i < vec_limit; i += N) {
+            mipp::Rvd<T, LMUL> vx(x + i);
+            mipp::Rvd<T, LMUL> vy(y + i);
+            mipp::Rvd<T, LMUL> vres = va * vx + vy; // Uses overloaded * and +
             mipp::store(y + i, vres.r);
         }
-        for (; i < n; i++) {
+        for (size_t i = vec_limit; i < n; i++) {
             y[i] = a * x[i] + y[i];
         }
     }

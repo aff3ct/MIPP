@@ -62,20 +62,19 @@ Here is the standard, battle-tested pattern to vectorize any loop over an arbitr
 // Computes y[i] = a * x[i] + y[i] (SAXPY) over arbitrary size S
 void saxpy_mipp(float a, const float* x, float* y, size_t size)
 {
-    using RegF = mipp::Rvd<float>;
-    constexpr size_t N = RegF::size(); // Elements per SIMD register (e.g. 8 on AVX2)
+    constexpr size_t N = mipp::Rvd<float>::size(); // Elements per SIMD register (e.g. 8 on AVX2)
 
     // 1. Compute the limit for full vector chunks
     const size_t vec_limit = (size / N) * N;
 
     // Load the scalar multiplier into a vector register (broadcast)
-    RegF va = a;
+    mipp::Rvd<float> va = a;
 
     // 2. Vector main loop
     for (size_t i = 0; i < vec_limit; i += N)
     {
-        RegF vx = mipp::loadu<float>(&x[i]);
-        RegF vy = mipp::loadu<float>(&y[i]);
+        mipp::Rvd<float> vx = mipp::loadu<float>(&x[i]);
+        mipp::Rvd<float> vy = mipp::loadu<float>(&y[i]);
 
         vy += va * vx; // Operator overloading compiles to native FMA / mul+add
 
