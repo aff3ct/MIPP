@@ -1,10 +1,1661 @@
+/* ==========================================================================
+   MIPP Modern Documentation Stylesheet
+   High-Performance Computing & Silicon Theme
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Design Tokens & Palette Customization
+   -------------------------------------------------------------------------- */
+
+:root {
+  --mipp-font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --mipp-font-mono: "JetBrains Mono", "Fira Code", SFMono-Regular, Consolas, monospace;
+
+  /* Brand Accents */
+  --mipp-cyan: #0ea5e9;
+  --mipp-cyan-glow: rgba(14, 165, 233, 0.25);
+  --mipp-indigo: #6366f1;
+  --mipp-emerald: #10b981;
+  --mipp-emerald-glow: rgba(16, 185, 129, 0.2);
+  --mipp-amber: #f59e0b;
+  --mipp-slate-badge: #64748b;
+
+  --mipp-radius-sm: 6px;
+  --mipp-radius-md: 10px;
+  --mipp-radius-lg: 16px;
+  --mipp-transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Dark Mode (Slate / Obsidian) */
 [data-md-color-scheme="slate"] {
-  img { /* svg on an img tag */
-    -webkit-filter: invert(0.85); /* safari 6.0 - 9.0 */
-            filter: invert(0.85);
+  --md-default-bg-color: #0b0f19;
+  --md-default-bg-color--light: #111827;
+  --md-default-bg-color--lighter: #1e293b;
+  --md-default-bg-color--lightest: #334155;
+
+  --md-default-fg-color: #f1f5f9;
+  --md-default-fg-color--light: #cbd5e1;
+  --md-default-fg-color--lighter: #94a3b8;
+  --md-default-fg-color--lightest: #64748b;
+
+  --md-primary-fg-color: #0ea5e9;
+  --md-primary-fg-color--light: #38bdf8;
+  --md-primary-fg-color--dark: #0284c7;
+  --md-accent-fg-color: #38bdf8;
+  --md-typeset-a-color: #38bdf8;
+
+  --md-code-bg-color: #080c14;
+  --md-code-fg-color: #e2e8f0;
+  --md-code-hl-comment-color: #6ee7b7;
+
+  --mipp-glass-bg: rgba(11, 15, 25, 0.85);
+  --mipp-card-bg: rgba(17, 24, 39, 0.7);
+  --mipp-card-border: rgba(255, 255, 255, 0.08);
+  --mipp-card-hover-border: rgba(56, 189, 248, 0.4);
+}
+
+/* Light Mode (Crisp Clean Slate) */
+[data-md-color-scheme="default"] {
+  --md-default-bg-color: #f8fafc;
+  --md-default-bg-color--light: #ffffff;
+  --md-default-bg-color--lighter: #f1f5f9;
+
+  --md-default-fg-color: #0f172a;
+  --md-default-fg-color--light: #334155;
+  --md-default-fg-color--lighter: #64748b;
+  --md-default-fg-color--lightest: #94a3b8;
+
+  --md-primary-fg-color: #ffffff;
+  --md-primary-fg-color--light: #f8fafc;
+  --md-primary-fg-color--dark: #e2e8f0;
+  --md-accent-fg-color: #0284c7;
+  --md-typeset-a-color: #0284c7;
+
+  --md-code-bg-color: #ffffff;
+  --md-code-fg-color: #0f172a;
+  --md-code-hl-comment-color: #15803d;
+
+  --mipp-glass-bg: rgba(255, 255, 255, 0.78);
+  --mipp-card-bg: #ffffff;
+  --mipp-card-border: #e2e8f0;
+  --mipp-card-hover-border: rgba(14, 165, 233, 0.5);
+}
+
+/* --------------------------------------------------------------------------
+   2. Global Typography & Layout Polishing
+   -------------------------------------------------------------------------- */
+
+/* Expanded Layout for Spacious & Airy Reading Experience with Outer Breathing Room */
+.md-grid {
+  max-width: 84rem !important;
+  padding-left: 1.5rem !important;
+  padding-right: 1.5rem !important;
+}
+
+.md-header__inner {
+  padding-left: 1.5rem !important;
+  padding-right: 1.5rem !important;
+}
+
+.md-tabs__inner {
+  padding-left: 1.5rem !important;
+  padding-right: 1.5rem !important;
+}
+
+/* Full-width body for homepage and pages with hidden navigation */
+.md-content:only-child,
+.md-main__inner:not(:has(.md-sidebar--primary:not([hidden]))) .md-content {
+  max-width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* Width Harmony: ensure all content blocks (p, headings, pre, admonitions, tables)
+   align to the exact same maximum content width so tables never stick out wider than text */
+.md-content__inner {
+  max-width: 100% !important;
+}
+
+.md-typeset {
+  max-width: 100% !important;
+  font-family: var(--mipp-font-sans);
+  letter-spacing: -0.011em;
+}
+
+.md-typeset>* {
+  box-sizing: border-box;
+}
+
+.md-typeset p:not(.admonition-title),
+.md-typeset h1,
+.md-typeset h2,
+.md-typeset h3,
+.md-typeset h4,
+.md-typeset h5,
+.md-typeset h6,
+.md-typeset ul,
+.md-typeset ol,
+.md-typeset blockquote,
+.md-typeset pre,
+.md-typeset .highlight,
+.md-typeset .highlighttable,
+.md-content__inner > .highlight,
+.md-content__inner > pre,
+.md-typeset .admonition,
+.md-typeset .tabbed-set,
+.md-typeset__scrollwrap,
+.md-typeset__table,
+.md-typeset div.arithmatex {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Eliminate full-bleed negative margins on code blocks and formulas across all viewports */
+.md-content__inner > .highlight,
+.md-content__inner > pre,
+.md-typeset .highlight,
+.md-typeset pre,
+.md-typeset .highlighttable,
+.md-typeset div.arithmatex {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  width: 100% !important;
+}
+
+code,
+kbd,
+pre,
+.md-typeset code {
+  font-family: var(--mipp-font-mono);
+  font-feature-settings: "calt" 1, "liga" 1;
+}
+
+/* Inline Code Styling */
+.md-typeset :not(pre)>code {
+  padding: 0.15em 0.42em;
+  border-radius: var(--mipp-radius-sm);
+  font-size: 0.84em;
+  font-weight: 500;
+  white-space: break-spaces;
+}
+
+[data-md-color-scheme="default"] .md-typeset :not(pre)>code {
+  background-color: #ffffff !important;
+  color: #0284c7 !important;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+[data-md-color-scheme="slate"] .md-typeset :not(pre)>code {
+  background-color: rgba(14, 165, 233, 0.12) !important;
+  color: #38bdf8 !important;
+  border: 1px solid rgba(14, 165, 233, 0.28);
+}
+
+.md-typeset h1,
+.md-typeset h2,
+.md-typeset h3 {
+  letter-spacing: -0.025em;
+  font-weight: 700;
+}
+
+/* --------------------------------------------------------------------------
+   3. Glassmorphism Navigation & Header
+   -------------------------------------------------------------------------- */
+
+.md-header {
+  background-color: var(--mipp-glass-bg) !important;
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border-bottom: 1px solid var(--mipp-card-border);
+}
+
+.md-header__button.md-logo img {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Tabs bar shares the same unified glass header with a subtle hairline divider */
+.md-tabs {
+  background-color: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-top: 1px solid var(--mipp-card-border);
+  border-bottom: none !important;
+}
+
+.md-tabs__link {
+  font-weight: 500;
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+  transition: var(--mipp-transition);
+}
+
+/* Light Mode Header & Tabs Explicit High-Contrast Text */
+[data-md-color-scheme="default"] .md-header {
+  color: #0f172a !important;
+}
+
+[data-md-color-scheme="default"] .md-header__title,
+[data-md-color-scheme="default"] .md-header__topic,
+[data-md-color-scheme="default"] .md-header__button,
+[data-md-color-scheme="default"] .md-header .md-icon,
+[data-md-color-scheme="default"] .md-header [data-md-component="logo"]~* {
+  color: #0f172a !important;
+}
+
+[data-md-color-scheme="default"] .md-source,
+[data-md-color-scheme="default"] .md-source__repository,
+[data-md-color-scheme="default"] .md-source__facts {
+  color: #334155 !important;
+}
+
+[data-md-color-scheme="default"] .md-tabs__link {
+  color: #475569 !important;
+}
+
+[data-md-color-scheme="default"] .md-tabs__item--active .md-tabs__link,
+[data-md-color-scheme="default"] .md-tabs__link:hover {
+  color: #0284c7 !important;
+  font-weight: 600;
+}
+
+/* Light Mode Modern Clean Search Bar */
+[data-md-color-scheme="default"] .md-search__form {
+  background-color: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  border-radius: var(--mipp-radius-sm);
+  transition: var(--mipp-transition);
+}
+
+[data-md-color-scheme="default"] .md-search__form:hover,
+[data-md-color-scheme="default"] .md-search__form:focus-within {
+  background-color: #ffffff !important;
+  border-color: #0ea5e9 !important;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15) !important;
+}
+
+[data-md-color-scheme="default"] .md-search__input {
+  background-color: transparent !important;
+  color: #0f172a !important;
+  border: none !important;
+}
+
+[data-md-color-scheme="default"] .md-search__input::placeholder {
+  color: #94a3b8 !important;
+}
+
+[data-md-color-scheme="default"] .md-search__icon {
+  color: #64748b !important;
+}
+
+/* Light Mode Search Results Popup */
+[data-md-color-scheme="default"] .md-search__output {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
+}
+
+[data-md-color-scheme="default"] .md-search-result__meta {
+  background-color: #f8fafc !important;
+  color: #64748b !important;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+[data-md-color-scheme="default"] .md-search-result__link:hover {
+  background-color: #f1f5f9 !important;
+}
+
+/* Dark Mode Header & Tabs Contrast */
+[data-md-color-scheme="slate"] .md-header__title,
+[data-md-color-scheme="slate"] .md-header__button,
+[data-md-color-scheme="slate"] .md-source,
+[data-md-color-scheme="slate"] .md-source__repository,
+[data-md-color-scheme="slate"] .md-source__facts {
+  color: #f1f5f9 !important;
+}
+
+[data-md-color-scheme="slate"] .md-tabs__link {
+  color: #94a3b8 !important;
+}
+
+[data-md-color-scheme="slate"] .md-tabs__item--active .md-tabs__link,
+[data-md-color-scheme="slate"] .md-tabs__link:hover {
+  color: #38bdf8 !important;
+  font-weight: 600;
+}
+
+/* Dark Mode Search Bar */
+[data-md-color-scheme="slate"] .md-search__form {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: var(--mipp-radius-sm);
+  transition: var(--mipp-transition);
+}
+
+[data-md-color-scheme="slate"] .md-search__form:hover,
+[data-md-color-scheme="slate"] .md-search__form:focus-within {
+  background-color: rgba(255, 255, 255, 0.09) !important;
+  border-color: #38bdf8 !important;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2) !important;
+}
+
+[data-md-color-scheme="slate"] .md-search__input {
+  background-color: transparent !important;
+  color: #f1f5f9 !important;
+  border: none !important;
+}
+
+[data-md-color-scheme="slate"] .md-search__input::placeholder {
+  color: #94a3b8 !important;
+}
+
+[data-md-color-scheme="slate"] .md-search__icon {
+  color: #94a3b8 !important;
+}
+
+/* --------------------------------------------------------------------------
+   4. MIPP Implementation Levels Badges
+   -------------------------------------------------------------------------- */
+
+/* Generic badge container */
+.mipp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.18rem 0.55rem;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.1;
+  font-family: var(--mipp-font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+}
+
+/* Level 0 - Native Hardware Intrinsics */
+.mipp-lvl-0 {
+  background: rgba(16, 185, 129, 0.14);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.18);
+}
+
+/* Level 1 - ISA Dedicated Emulation */
+.mipp-lvl-1 {
+  background: rgba(59, 130, 246, 0.14);
+  color: #38bdf8;
+  border: 1px solid rgba(59, 130, 246, 0.4);
+}
+
+/* Level 2 - Generic Portable Emulation */
+.mipp-lvl-2 {
+  background: rgba(245, 158, 11, 0.14);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+/* Level 3 - Scalar Loop Fallback */
+.mipp-lvl-3 {
+  background: rgba(148, 163, 184, 0.12);
+  color: #94a3b8;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+}
+
+/* FontAwesome icon styling for levels in tables */
+.md-typeset .twemoji svg[title="fontawesome-solid-0"],
+.md-typeset [title*="solid-0"] svg {
+  color: #10b981;
+  filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.4));
+}
+
+.md-typeset .twemoji svg[title="fontawesome-solid-1"],
+.md-typeset [title*="solid-1"] svg {
+  color: #38bdf8;
+}
+
+.md-typeset .twemoji svg[title="fontawesome-solid-2"],
+.md-typeset [title*="solid-2"] svg {
+  color: #f59e0b;
+}
+
+.md-typeset .twemoji svg[title="fontawesome-solid-3"],
+.md-typeset [title*="solid-3"] svg {
+  color: #94a3b8;
+}
+
+/* --------------------------------------------------------------------------
+   5. Code Blocks & Tabs Styling
+   -------------------------------------------------------------------------- */
+
+.md-typeset pre {
+  margin: 1rem 0;
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
+.md-typeset pre>code,
+.md-content__inner > .highlight > pre > code,
+.md-content__inner > pre > code {
+  border-radius: var(--mipp-radius-md) !important;
+  border: 1px solid var(--mipp-card-border) !important;
+  border-left-width: 1px !important;
+  border-right-width: 1px !important;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  padding: 0.65rem 0.85rem;
+  box-sizing: border-box !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  overflow-x: auto !important;
+  display: block !important;
+}
+
+[data-md-color-scheme="default"] .md-typeset pre>code,
+[data-md-color-scheme="default"] .md-content__inner > .highlight > pre > code {
+  background-color: #ffffff !important;
+  color: var(--md-code-fg-color);
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+[data-md-color-scheme="default"] .highlight,
+[data-md-color-scheme="default"] .highlight>pre {
+  background-color: #ffffff !important;
+}
+
+[data-md-color-scheme="slate"] .md-typeset pre>code,
+[data-md-color-scheme="slate"] .md-content__inner > .highlight > pre > code {
+  background-color: #080c14 !important;
+  color: #e2e8f0;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+/* Distinct, high-legibility Code Comments in Light and Dark Modes */
+.highlight .c,
+.highlight .c1,
+.highlight .ch,
+.highlight .cm,
+.highlight .cs,
+.highlight .sd,
+.md-typeset code .c,
+.md-typeset code .c1,
+.md-typeset code .ch,
+.md-typeset code .cm,
+.md-typeset code .cs,
+.md-typeset code .sd {
+  color: var(--md-code-hl-comment-color) !important;
+  font-style: italic !important;
+}
+
+/* --------------------------------------------------------------------------
+   Collapsible Table of Contents (TOC)
+   -------------------------------------------------------------------------- */
+
+/* Hide TOC when toggled by user */
+body[data-toc-hidden="true"] .md-sidebar--secondary {
+  display: none !important;
+}
+
+body[data-toc-hidden="true"] .md-content {
+  margin-right: 0 !important;
+}
+
+/* TOC Collapse Button in Sidebar Header */
+.md-sidebar--secondary .md-nav__title {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+.mipp-toc-collapse-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--mipp-radius-sm);
+  border: 1px solid var(--mipp-card-border);
+  background: transparent;
+  color: var(--md-default-fg-color--lighter);
+  cursor: pointer;
+  padding: 0;
+  margin-left: auto;
+  transition: var(--mipp-transition);
+}
+
+.mipp-toc-collapse-btn:hover {
+  background: rgba(14, 165, 233, 0.12);
+  color: var(--mipp-cyan);
+  border-color: var(--mipp-cyan);
+}
+
+/* Floating Restore Button when TOC is hidden */
+.mipp-toc-restore-btn {
+  position: fixed;
+  top: 4.8rem;
+  right: 1.5rem;
+  z-index: 25;
+  display: none;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.8rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: var(--mipp-font-mono);
+  background: var(--mipp-card-bg);
+  color: var(--md-default-fg-color--light);
+  border: 1px solid var(--mipp-card-border);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: var(--mipp-transition);
+}
+
+.mipp-toc-restore-btn:hover {
+  border-color: var(--mipp-cyan);
+  color: var(--mipp-cyan);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px var(--mipp-cyan-glow);
+}
+
+/* Never show floating TOC restore button on homepage */
+body:has(.mipp-hero) .mipp-toc-restore-btn,
+body:has(.mipp-hero) #mipp-toc-restore-btn {
+  display: none !important;
+}
+
+/* Tabbed sets (Segmented Control style) */
+.md-typeset .tabbed-set {
+  border-radius: var(--mipp-radius-md) !important;
+  border: 1px solid var(--mipp-card-border) !important;
+  overflow: hidden !important;
+  background: var(--mipp-card-bg);
+}
+
+.md-typeset .tabbed-set>input:checked+label {
+  color: var(--md-accent-fg-color) !important;
+  font-weight: 600;
+  border-bottom: 2px solid var(--md-accent-fg-color) !important;
+  background: rgba(14, 165, 233, 0.08);
+}
+
+/* Remove nested margins and corner artifacts inside tabs to keep smooth outer rounded corners */
+.md-typeset .tabbed-block>.highlight,
+.md-typeset .tabbed-block pre,
+.md-typeset .tabbed-block pre>code {
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+}
+
+/* Edge-to-Edge / Flush Tables inside Tabbed Sets (removes double borders & inner margins) */
+.md-typeset .tabbed-block>.md-typeset__scrollwrap,
+.md-typeset .tabbed-block>p>.md-typeset__scrollwrap,
+.md-typeset .tabbed-block>.md-typeset__table {
+  margin: 0 !important;
+}
+
+.md-typeset .tabbed-block .md-typeset__table {
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+  background: transparent !important;
+}
+
+.md-typeset .tabbed-block table:not([class]) {
+  margin: 0 !important;
+  border: none !important;
+}
+
+.md-typeset .tabbed-block table:not([class]) th {
+  border-top: none !important;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+}
+
+.md-typeset .tabbed-block table:not([class]) tr:last-child td {
+  border-bottom: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   6. Admonitions & Compact Modern Tables
+   -------------------------------------------------------------------------- */
+
+.md-typeset .admonition,
+.md-typeset details {
+  border-radius: var(--mipp-radius-md) !important;
+  border-left-width: 4px !important;
+  overflow: hidden !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  border-top: 1px solid var(--mipp-card-border);
+  border-right: 1px solid var(--mipp-card-border);
+  border-bottom: 1px solid var(--mipp-card-border);
+}
+
+/* Admonition Title: seamless edge-to-edge color strip with matching rounded top corners */
+.md-typeset .admonition-title,
+.md-typeset summary {
+  max-width: none !important;
+  width: calc(100% + 1.2rem) !important;
+  margin: 0 -0.6rem 0.6rem -0.6rem !important;
+  border-top-left-radius: inherit !important;
+  border-top-right-radius: inherit !important;
+}
+
+/* Table wrapper: eliminate negative margins so tables align perfectly with paragraphs */
+.md-typeset__scrollwrap {
+  margin: 1.2rem 0 !important;
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
+/* Table container styling with full-width seamless scrolling */
+.md-typeset__table {
+  padding: 0 !important;
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  border-radius: var(--mipp-radius-md);
+  border: 1px solid var(--mipp-card-border);
+  margin: 0 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  background-color: var(--mipp-card-bg);
+  box-sizing: border-box !important;
+}
+
+/* Compact, dense and readable table cells */
+.md-typeset table:not([class]) {
+  border-collapse: collapse !important;
+  width: 100% !important;
+  min-width: 100% !important;
+  display: table !important;
+  font-size: 0.76rem;
+  line-height: 1.35;
+  margin: 0 !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+.md-typeset table:not([class]) thead,
+.md-typeset table:not([class]) thead tr {
+  background-color: rgba(14, 165, 233, 0.08) !important;
+}
+
+.md-typeset table:not([class]) th {
+  background-color: rgba(14, 165, 233, 0.08) !important;
+  font-weight: 700;
+  font-size: 0.74rem;
+  letter-spacing: 0.02em;
+  padding: 0.45rem 0.65rem;
+  white-space: nowrap;
+  border-bottom: 2px solid rgba(14, 165, 233, 0.3) !important;
+  color: var(--md-default-fg-color);
+  text-align: left;
+}
+
+.md-typeset table:not([class]) th:first-child {
+  border-top-left-radius: calc(var(--mipp-radius-md) - 1px);
+}
+
+.md-typeset table:not([class]) th:last-child {
+  border-top-right-radius: calc(var(--mipp-radius-md) - 1px);
+}
+
+.md-typeset table:not([class]) td {
+  padding: 0.35rem 0.55rem;
+  font-size: 0.76rem;
+  border-top: 1px solid var(--mipp-card-border);
+  vertical-align: middle;
+}
+
+.md-typeset table:not([class]) td:first-child {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Compact shield badges inside tables */
+.md-typeset table:not([class]) img {
+  max-height: 18px;
+  width: auto;
+  vertical-align: middle;
+  display: inline-block;
+}
+
+.md-typeset table:not([class]) tr:hover td {
+  background-color: rgba(14, 165, 233, 0.05);
+}
+
+/* Architecture & Implementation Matrix: Modern Status Chips */
+.md-typeset table td:has(.twemoji) {
+  text-align: center !important;
+  padding: 0.28rem 0.35rem !important;
+}
+
+.md-typeset table td>span:has(.twemoji) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 22px;
+  padding: 0 4px;
+  border-radius: var(--mipp-radius-sm, 6px);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  vertical-align: middle;
+}
+
+.md-typeset table td>span:has(.twemoji):hover {
+  transform: scale(1.18);
+}
+
+.md-typeset table td .twemoji {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.md-typeset table td .twemoji svg {
+  width: 12px;
+  height: 12px;
+  display: block;
+}
+
+/* 0: Native Hardware (Green #28A745) */
+.md-typeset table td>span[style*="28A745"],
+.md-typeset table td>span[style*="28a745"] {
+  background: rgba(34, 197, 94, 0.12) !important;
+  color: #16a34a !important;
+  border: 1px solid rgba(34, 197, 94, 0.3) !important;
+}
+
+[data-md-color-scheme="slate"] .md-typeset table td>span[style*="28A745"],
+[data-md-color-scheme="slate"] .md-typeset table td>span[style*="28a745"] {
+  background: rgba(34, 197, 94, 0.18) !important;
+  color: #4ade80 !important;
+  border-color: rgba(74, 222, 128, 0.35) !important;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.2);
+}
+
+/* 1: Dedicated Emulation (Blue #007BFF / #3B42F5) */
+.md-typeset table td>span[style*="007BFF"],
+.md-typeset table td>span[style*="007bff"],
+.md-typeset table td>span[style*="3B42F5"],
+.md-typeset table td>span[style*="3b42f5"] {
+  background: rgba(14, 165, 233, 0.12) !important;
+  color: #0284c7 !important;
+  border: 1px solid rgba(14, 165, 233, 0.3) !important;
+}
+
+[data-md-color-scheme="slate"] .md-typeset table td>span[style*="007BFF"],
+[data-md-color-scheme="slate"] .md-typeset table td>span[style*="007bff"],
+[data-md-color-scheme="slate"] .md-typeset table td>span[style*="3B42F5"],
+[data-md-color-scheme="slate"] .md-typeset table td>span[style*="3b42f5"] {
+  background: rgba(14, 165, 233, 0.18) !important;
+  color: #38bdf8 !important;
+  border-color: rgba(56, 189, 248, 0.35) !important;
+  box-shadow: 0 0 8px rgba(14, 165, 233, 0.2);
+}
+
+/* 2: Generic Emulation (Vibrant Yellow #FFD20D / #ffd20d) */
+.md-typeset table td>span[style*="FFD20D"],
+.md-typeset table td>span[style*="ffd20d"] {
+  background: rgba(255, 210, 13, 0.18) !important;
+  color: #b48200 !important;
+  border: 1px solid rgba(234, 179, 8, 0.45) !important;
+}
+
+[data-md-color-scheme="slate"] .md-typeset table td>span[style*="FFD20D"],
+[data-md-color-scheme="slate"] .md-typeset table td>span[style*="ffd20d"] {
+  background: rgba(255, 210, 13, 0.16) !important;
+  color: #ffd20d !important;
+  border-color: rgba(255, 210, 13, 0.5) !important;
+  box-shadow: 0 0 8px rgba(255, 210, 13, 0.3);
+}
+
+/* 3: Scalar Fallback & N/A (Slate/Grey #6C757D / #6c757d) */
+.md-typeset table td>span[style*="6C757D"],
+.md-typeset table td>span[style*="6c757d"] {
+  background: rgba(148, 163, 184, 0.1) !important;
+  color: #64748b !important;
+  border: 1px solid rgba(148, 163, 184, 0.2) !important;
+}
+
+[data-md-color-scheme="slate"] .md-typeset table td>span[style*="6C757D"],
+[data-md-color-scheme="slate"] .md-typeset table td>span[style*="6c757d"] {
+  background: rgba(148, 163, 184, 0.12) !important;
+  color: #94a3b8 !important;
+  border-color: rgba(148, 163, 184, 0.2) !important;
+}
+
+/* --------------------------------------------------------------------------
+   7. Hero Section & Modern Landing Page Components
+   -------------------------------------------------------------------------- */
+
+.mipp-hero {
+  padding: 2.5rem 0 2rem 0;
+  text-align: center;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.mipp-hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  background: rgba(14, 165, 233, 0.12);
+  color: #0284c7;
+  border: 1px solid rgba(14, 165, 233, 0.3);
+  margin-bottom: 1.2rem;
+  box-shadow: 0 0 16px rgba(14, 165, 233, 0.12);
+}
+
+[data-md-color-scheme="slate"] .mipp-hero-tag {
+  color: #38bdf8;
+}
+
+.mipp-hero-title {
+  font-size: 3rem;
+  line-height: 1.15;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  margin-bottom: 1rem !important;
+  background: linear-gradient(135deg, #0284c7 0%, #6366f1 50%, #9333ea 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+[data-md-color-scheme="slate"] .mipp-hero-title {
+  background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #c084fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Punchy MIPPv2 Silicon Chip Badge */
+.mipp-hero-title .mippv2,
+.mippv2 {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mipp-font-mono);
+  font-size: 0.38em;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 0.24em 0.75em;
+  margin-left: 0.5em;
+  border-radius: 9999px;
+  vertical-align: middle;
+  line-height: 1.2;
+  position: relative;
+  transition: var(--mipp-transition);
+  cursor: default;
+}
+
+/* Light Mode: Vibrant Electric Indigo / Cyan Badge */
+[data-md-color-scheme="default"] .mipp-hero-title .mippv2,
+[data-md-color-scheme="default"] .mippv2 {
+  background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  border: 1px solid rgba(14, 165, 233, 0.9);
+  box-shadow: 0 4px 14px rgba(14, 165, 233, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Dark Mode: Cyber Neon Cyan / Indigo Badge */
+[data-md-color-scheme="slate"] .mipp-hero-title .mippv2,
+[data-md-color-scheme="slate"] .mippv2 {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.25) 0%, rgba(99, 102, 241, 0.35) 100%);
+  color: #38bdf8 !important;
+  -webkit-text-fill-color: #38bdf8 !important;
+  border: 1px solid rgba(56, 189, 248, 0.75);
+  box-shadow: 0 0 18px rgba(14, 165, 233, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  text-shadow: 0 0 10px rgba(56, 189, 248, 0.7);
+}
+
+.mippv2:hover {
+  transform: translateY(-2px) scale(1.05);
+}
+
+.mipp-hero-subtitle {
+  font-size: 1.15rem;
+  line-height: 1.6;
+  color: var(--md-default-fg-color--light);
+  margin-bottom: 2rem !important;
+  max-width: 750px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Call To Action Buttons (Fixed non-breaking layout across all browsers) */
+.mipp-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 2.5rem;
+}
+
+.mipp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.65rem 1.3rem;
+  border-radius: var(--mipp-radius-sm);
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap !important;
+  flex-shrink: 0;
+  text-decoration: none !important;
+  transition: var(--mipp-transition);
+}
+
+.mipp-btn svg {
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+.mipp-btn-primary {
+  background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+  color: #ffffff !important;
+  box-shadow: 0 4px 16px rgba(14, 165, 233, 0.35);
+}
+
+.mipp-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 22px rgba(14, 165, 233, 0.5);
+  filter: brightness(1.1);
+}
+
+.mipp-btn-secondary {
+  background: var(--mipp-card-bg);
+  color: var(--md-default-fg-color) !important;
+  border: 1px solid var(--mipp-card-border);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.mipp-btn-secondary:hover {
+  transform: translateY(-2px);
+  border-color: var(--mipp-card-hover-border);
+  background: rgba(14, 165, 233, 0.08);
+}
+
+/* Hardware Target Chips */
+.mipp-chips-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-bottom: 0rem;
+}
+
+.mipp-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.78rem;
+  font-family: var(--mipp-font-mono);
+  background: var(--mipp-card-bg);
+  border: 1px solid var(--mipp-card-border);
+  color: var(--md-default-fg-color--lighter);
+  transition: var(--mipp-transition);
+}
+
+.mipp-chip:hover {
+  border-color: var(--mipp-cyan);
+  color: var(--mipp-cyan);
+  transform: translateY(-1px);
+}
+
+/* 2x2 Feature Cards Grid */
+.mipp-grid-2x2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+  margin: 2.5rem 0;
+}
+
+.mipp-card {
+  padding: 1.5rem;
+  border-radius: var(--mipp-radius-md);
+  background: var(--mipp-card-bg);
+  border: 1px solid var(--mipp-card-border);
+  transition: var(--mipp-transition);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.mipp-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--mipp-card-hover-border);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.mipp-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 0.75rem;
+}
+
+.mipp-card-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--mipp-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(14, 165, 233, 0.12);
+  color: var(--mipp-cyan);
+  font-size: 1.1rem;
+}
+
+.mipp-card-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 !important;
+  color: var(--md-default-fg-color);
+}
+
+.mipp-card-desc {
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--md-default-fg-color--lighter);
+  margin: 0 !important;
+}
+
+/* Dark mode image adjustments (selective invert only for explicitly tagged elements) */
+[data-md-color-scheme="slate"] img.invert-dark {
+  filter: invert(0.88);
+}
+
+/* Remove top GitHub button from navigation drawer / sidebar */
+.md-nav__source,
+.md-sidebar .md-source {
+  display: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   7.1 Desktop Sidebar Stabilization & Scrollbar Fix (min-width: 76.25em)
+   -------------------------------------------------------------------------- */
+
+@media screen and (min-width: 76.25em) {
+  /* Ensure the main container fills at least the available viewport height,
+     preventing sticky sidebar collapse and keeping footer at bottom on short pages */
+  .md-main__inner {
+    margin-top: 0 !important;
+    min-height: calc(100vh - 4.8rem);
   }
-  svg {
-    -webkit-filter: invert(85%); /* safari 6.0 - 9.0 */
-            filter: invert(85%);
+
+  /* Fixed/sticky sidebar bounded cleanly between tabs header and footer */
+  .md-sidebar {
+    position: sticky !important;
+    top: 4.8rem !important;
+    height: calc(100vh - 4.8rem) !important;
+    max-height: calc(100vh - 4.8rem) !important;
+    padding: 0 !important;
+    overflow: hidden;
+  }
+
+  /* Full-height scroll container with independent scrollbar ("ascenseur")
+     preventing scroll chaining and strictly stopping before footer */
+  .md-sidebar__scrollwrap {
+    height: 100% !important;
+    max-height: 100% !important;
+    padding: 1.2rem 0 !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+  }
+
+  /* Enhanced, visible scrollbar on desktop sidebar */
+  .md-sidebar__scrollwrap::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  .md-sidebar__scrollwrap::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .md-sidebar__scrollwrap::-webkit-scrollbar-thumb {
+    background-color: var(--md-default-fg-color--lighter);
+    border-radius: 4px;
+  }
+
+  .md-sidebar__scrollwrap::-webkit-scrollbar-thumb:hover {
+    background-color: var(--mipp-cyan);
+  }
+
+  /* Preserve main content top spacing when md-main__inner margin-top is 0 */
+  .md-content__inner {
+    padding-top: 1.5rem !important;
+  }
+
+  /* Keep footer layered cleanly below main content */
+  .md-footer {
+    position: relative;
+    z-index: 2;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   8. Mobile Navigation Drawer (Floating Pills - Mobile/Tablet only < 1220px)
+   -------------------------------------------------------------------------- */
+
+@media screen and (max-width: 76.1875em) {
+
+  /* Strictly hide TOC toggle links inside drawer to prevent duplicate entries */
+  .md-nav--primary .md-nav__link[for="__toc"],
+  .md-nav--primary [for="__toc"] {
+    display: none !important;
+  }
+
+  /* Seamless background for mobile drawer and submenus */
+  .md-nav--primary,
+  .md-nav--primary .md-nav {
+    background-color: var(--md-default-bg-color) !important;
+  }
+
+  [data-md-color-scheme="slate"] .md-nav--primary,
+  [data-md-color-scheme="slate"] .md-nav--primary .md-nav {
+    background-color: #0b0f19 !important;
+  }
+
+  [data-md-color-scheme="default"] .md-nav--primary,
+  [data-md-color-scheme="default"] .md-nav--primary .md-nav {
+    background-color: #f8fafc !important;
+  }
+
+  /* Modern Drawer Header (Root & Submenu headers) */
+  .md-nav--primary .md-nav__title {
+    height: auto !important;
+    padding: 1rem 1rem !important;
+    line-height: 1.4 !important;
+    font-size: 0.92rem !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.01em;
+    border-bottom: 1px solid var(--mipp-card-border) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    white-space: normal !important;
+  }
+
+  [data-md-color-scheme="default"] .md-nav--primary .md-nav__title,
+  [data-md-color-scheme="default"] .md-nav--primary .md-nav__title[for="__drawer"] {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+  }
+
+  [data-md-color-scheme="slate"] .md-nav--primary .md-nav__title,
+  [data-md-color-scheme="slate"] .md-nav--primary .md-nav__title[for="__drawer"] {
+    background: #0f172a !important;
+    color: #f8fafc !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  }
+
+  /* Logo container in mobile drawer header */
+  .md-nav--primary .md-nav__title .md-logo {
+    position: static !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0;
+  }
+
+  .md-nav--primary .md-nav__title .md-logo img {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 8px !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12) !important;
+  }
+
+  /* Submenu Back button arrow */
+  .md-nav--primary .md-nav__title .md-nav__icon {
+    position: static !important;
+    margin: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 28px !important;
+    height: 28px !important;
+    flex-shrink: 0;
+    border-radius: 6px !important;
+    background: rgba(14, 165, 233, 0.1) !important;
+    color: var(--md-accent-fg-color) !important;
+    transition: var(--mipp-transition) !important;
+  }
+
+  .md-nav--primary .md-nav__title .md-nav__icon:hover {
+    background: rgba(14, 165, 233, 0.22) !important;
+    transform: translateX(-2px);
+  }
+
+  /* Floating Pills: eliminate harsh horizontal lines */
+  .md-nav--primary .md-nav__item {
+    border-top: none !important;
+    margin: 0.15rem 0 !important;
+  }
+
+  .md-nav--primary .md-nav__title~.md-nav__list {
+    box-shadow: none !important;
+    padding: 0.5rem 0.65rem !important;
+  }
+
+  .md-nav--primary .md-nav__link:not([for="__toc"]) {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0.55rem 0.85rem !important;
+    border-radius: var(--mipp-radius-sm, 7px) !important;
+    font-size: 0.82rem !important;
+    font-weight: 500 !important;
+    color: var(--md-default-fg-color) !important;
+    transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    position: relative !important;
+    margin-top: 0 !important;
+  }
+
+  /* Hover state on items */
+  .md-nav--primary .md-nav__link:not([for="__toc"]):hover {
+    background-color: rgba(14, 165, 233, 0.08) !important;
+    color: var(--md-accent-fg-color) !important;
+    transform: translateX(3px);
+  }
+
+  [data-md-color-scheme="slate"] .md-nav--primary .md-nav__link:not([for="__toc"]):hover {
+    background-color: rgba(56, 189, 248, 0.12) !important;
+    color: #38bdf8 !important;
+  }
+
+  /* Active Page Pill with Soft Glow and Left Accent Marker */
+  .md-nav--primary .md-nav__item--active>.md-nav__link:not([for="__toc"]),
+  .md-nav--primary .md-nav__link--active:not([for="__toc"]) {
+    font-weight: 600 !important;
+    padding-left: 1.15rem !important;
+  }
+
+  [data-md-color-scheme="default"] .md-nav--primary .md-nav__item--active>.md-nav__link:not([for="__toc"]),
+  [data-md-color-scheme="default"] .md-nav--primary .md-nav__link--active:not([for="__toc"]) {
+    background-color: rgba(14, 165, 233, 0.12) !important;
+    color: #0284c7 !important;
+  }
+
+  [data-md-color-scheme="slate"] .md-nav--primary .md-nav__item--active>.md-nav__link:not([for="__toc"]),
+  [data-md-color-scheme="slate"] .md-nav--primary .md-nav__link--active:not([for="__toc"]) {
+    background-color: rgba(56, 189, 248, 0.15) !important;
+    color: #38bdf8 !important;
+    box-shadow: 0 0 16px rgba(14, 165, 233, 0.15);
+  }
+
+  /* Left glowing accent indicator */
+  .md-nav--primary .md-nav__item--active>.md-nav__link:not([for="__toc"])::before,
+  .md-nav--primary .md-nav__link--active:not([for="__toc"])::before {
+    content: "";
+    position: absolute;
+    left: 0.4rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3.5px;
+    height: 16px;
+    border-radius: 9999px;
+    background: #0ea5e9;
+    box-shadow: 0 0 8px #0ea5e9;
+  }
+
+  /* Sleek chevrons for nested menu items */
+  .md-nav--primary .md-nav__link .md-nav__icon {
+    width: 1rem !important;
+    height: 1rem !important;
+    opacity: 0.55;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    margin: 0 !important;
+  }
+
+  .md-nav--primary .md-nav__link:hover .md-nav__icon {
+    opacity: 1;
+    transform: translateX(2px);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   9. Mobile Phone & Compact Screen Optimization (< 960px & < 720px)
+   -------------------------------------------------------------------------- */
+
+@media screen and (max-width: 59.984375em) {
+
+  /* 0. Prevent any horizontal page panning / viewport scrolling on mobile */
+  html,
+  body {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+    width: 100% !important;
+  }
+
+  .md-container,
+  .md-main,
+  .md-content {
+    overflow-x: hidden;
+    max-width: 100% !important;
+  }
+
+  /* 1. Drastically reduce outer margins & paddings on mobile to maximize viewport width */
+  .md-grid {
+    padding-left: 0.4rem !important;
+    padding-right: 0.4rem !important;
+  }
+
+  .md-header__inner {
+    padding-left: 0.35rem !important;
+    padding-right: 0.35rem !important;
+  }
+
+  .md-main__inner {
+    margin-top: 0 !important;
+  }
+
+  .md-content__inner {
+    margin-left: 0.15rem !important;
+    margin-right: 0.15rem !important;
+    padding-top: 0.35rem !important;
+  }
+
+  .md-typeset {
+    padding: 0 !important;
+  }
+
+  /* 2. Header Icons: drastically reduce padding and margin left/right */
+  .md-header__button {
+    margin: 0 !important;
+    padding: 0.2rem 0.15rem !important;
+  }
+
+  .md-header__button.md-logo {
+    padding: 0.12rem 0.15rem !important;
+    margin-right: 0.15rem !important;
+  }
+
+  .md-header__button.md-logo img {
+    width: 26px !important;
+    height: 26px !important;
+  }
+
+  .md-header__title {
+    margin-left: 0.2rem !important;
+    font-size: 0.85rem !important;
+    font-weight: 700;
+  }
+
+  .md-header__topic {
+    font-size: 0.85rem !important;
+  }
+
+  .md-header .md-icon svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  [data-md-color-scheme="default"] .md-search__inner {
+    background-color: #ffffff !important;
+  }
+
+  /* 3. Slightly decrease typography on mobile */
+  .md-typeset {
+    font-size: 0.78rem !important;
+    line-height: 1.55 !important;
+  }
+
+  .md-typeset h1 {
+    font-size: 1.35rem !important;
+    line-height: 1.22 !important;
+    margin-top: 0.5rem !important;
+    margin-bottom: 0.55rem !important;
+  }
+
+  .md-typeset h2 {
+    font-size: 1.15rem !important;
+    line-height: 1.28 !important;
+    margin-top: 1.2rem !important;
+    margin-bottom: 0.45rem !important;
+  }
+
+  .md-typeset h3 {
+    font-size: 1.0rem !important;
+    line-height: 1.32 !important;
+    margin-top: 0.9rem !important;
+    margin-bottom: 0.35rem !important;
+  }
+
+  .md-typeset h4,
+  .md-typeset h5,
+  .md-typeset h6 {
+    font-size: 0.88rem !important;
+  }
+
+  .md-typeset p {
+    margin-bottom: 0.7rem !important;
+  }
+
+  /* 4. Code Blocks & Elements Width Alignment (Identical width to admonitions, tables, text) */
+  .md-content__inner > .highlight,
+  .md-content__inner > pre,
+  .md-typeset .highlight,
+  .md-typeset pre,
+  .md-typeset .highlighttable {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    margin-top: 0.55rem !important;
+    margin-bottom: 0.55rem !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Restore left and right visible borders and rounded corners on mobile */
+  .md-content__inner > .highlight > pre > code,
+  .md-content__inner > pre > code,
+  .md-typeset .highlight pre > code,
+  .md-typeset pre > code {
+    border: 1px solid var(--mipp-card-border) !important;
+    border-left-width: 1px !important;
+    border-right-width: 1px !important;
+    border-top-width: 1px !important;
+    border-bottom-width: 1px !important;
+    border-radius: var(--mipp-radius-sm) !important;
+    font-size: 0.65rem !important;
+    line-height: 1.38 !important;
+    padding: 0.45rem 0.55rem !important;
+    box-sizing: border-box !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    overflow-x: auto !important;
+    display: block !important;
+  }
+
+  [data-md-color-scheme="default"] .md-content__inner > .highlight > pre > code,
+  [data-md-color-scheme="default"] .md-typeset pre > code {
+    border-color: #e2e8f0 !important;
+    background-color: #ffffff !important;
+  }
+
+  [data-md-color-scheme="slate"] .md-content__inner > .highlight > pre > code,
+  [data-md-color-scheme="slate"] .md-typeset pre > code {
+    border-color: rgba(255, 255, 255, 0.08) !important;
+    background-color: #080c14 !important;
+  }
+
+  /* Code block filename / title header on mobile */
+  .md-typeset .highlight .filename,
+  .md-content__inner > .highlight > .filename,
+  .md-typeset .highlighttable th.filename span.filename {
+    border-top-left-radius: var(--mipp-radius-sm) !important;
+    border-top-right-radius: var(--mipp-radius-sm) !important;
+    border: 1px solid var(--mipp-card-border) !important;
+    border-bottom: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    font-size: 0.65rem !important;
+    padding: 0.35rem 0.55rem !important;
+    box-sizing: border-box !important;
+  }
+
+  .md-typeset .highlight .filename + pre > code,
+  .md-content__inner > .highlight > .filename + pre > code {
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+  }
+
+  /* Inside tabbed sets: remain flush with outer tab container without nested borders */
+  .md-typeset .tabbed-block > .highlight,
+  .md-typeset .tabbed-block pre,
+  .md-typeset .tabbed-block pre > code {
+    border: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .md-typeset :not(pre)>code {
+    font-size: 0.76em !important;
+    padding: 0.08em 0.3em !important;
+  }
+
+  /* Neutralize tabbed labels negative margins on mobile */
+  .md-typeset .tabbed-set {
+    margin: 0.55rem 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  .md-content__inner > .tabbed-set .tabbed-labels,
+  .md-typeset .tabbed-labels {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    font-size: 0.7rem !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  .md-content__inner > .tabbed-set .tabbed-labels ~ .tabbed-control--prev,
+  .md-content__inner > .tabbed-set .tabbed-labels ~ .tabbed-control--next {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  .md-typeset .tabbed-labels>label {
+    padding: 0.3rem 0.55rem !important;
+  }
+
+  /* Arithmatex / math blocks on mobile */
+  .md-typeset div.arithmatex {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+  }
+
+  /* 5. Reduce tables and matrix chips size */
+  .md-typeset__scrollwrap {
+    margin: 0.45rem 0 !important;
+  }
+
+  .md-typeset table:not([class]) {
+    font-size: 0.66rem !important;
+  }
+
+  .md-typeset table:not([class]) th {
+    padding: 0.3rem 0.35rem !important;
+    font-size: 0.66rem !important;
+  }
+
+  .md-typeset table:not([class]) td {
+    padding: 0.25rem 0.3rem !important;
+    font-size: 0.66rem !important;
+  }
+
+  .md-typeset table td:has(.twemoji) {
+    padding: 0.18rem 0.2rem !important;
+  }
+
+  .md-typeset table td>span:has(.twemoji) {
+    min-width: 18px !important;
+    height: 16px !important;
+    padding: 0 2px !important;
+    border-radius: 4px !important;
+  }
+
+  .md-typeset table td .twemoji svg {
+    width: 9px !important;
+    height: 9px !important;
+  }
+
+  /* 6. Landing Page Hero on Mobile */
+  .mipp-hero {
+    padding: 1.2rem 0.25rem 0.8rem 0.25rem !important;
+  }
+
+  .mipp-hero-tag {
+    font-size: 0.72rem !important;
+    padding: 0.2rem 0.6rem !important;
+    margin-bottom: 0.6rem !important;
+  }
+
+  .mipp-hero-title {
+    font-size: 1.75rem !important;
+    line-height: 1.15 !important;
+    letter-spacing: -0.02em !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .mipp-hero-subtitle {
+    font-size: 0.88rem !important;
+    line-height: 1.4 !important;
+  }
+
+  .mipp-chips-container {
+    gap: 0.35rem !important;
+  }
+
+  .mipp-chip {
+    font-size: 0.72rem !important;
+    padding: 0.2rem 0.55rem !important;
+  }
+
+  .mipp-grid-2x2 {
+    margin: 1.25rem 0 !important;
+    gap: 0.85rem !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  .mipp-card {
+    padding: 0.95rem !important;
   }
 }

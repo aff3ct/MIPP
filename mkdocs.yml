@@ -1,34 +1,49 @@
 site_name: MIPP Documentation
 site_url: https://aff3ct.github.io/mipp/
 theme:
+  name: material
   logo: assets/images/mipp_ico.jpg
+  font:
+    text: Inter
+    code: JetBrains Mono
   features:
-    - toc.integrate
+    - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.instant.progress
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
     - navigation.top
+    - navigation.footer
+    - toc.follow
     - search.suggest
     - search.highlight
+    - search.share
     - content.tabs.link
     - content.code.annotation
     - content.code.copy
-    - navigation.footer
-  name: material
   palette:
-    # Palette toggle for automatic mode
+    # 1. Automatic mode (adapts to system preferences by default)
     - media: "(prefers-color-scheme)"
       toggle:
         icon: material/brightness-auto
         name: Switch to light mode
-    # Palette toggle for light mode
-    - media: "(prefers-color-scheme: light)"
-      scheme: default
+    # 2. Forced light mode
+    - scheme: default
+      primary: white
+      accent: cyan
+      media: "(prefers-color-scheme: light)"
       toggle:
-        icon: material/brightness-7
+        icon: material/weather-sunny
         name: Switch to dark mode
-    # Palette toggle for dark mode
-    - media: "(prefers-color-scheme: dark)"
-      scheme: slate
+    # 3. Forced dark mode
+    - scheme: slate
+      primary: slate
+      accent: cyan
+      media: "(prefers-color-scheme: dark)"
       toggle:
-        icon: material/brightness-4
+        icon: material/weather-night
         name: Switch to system preference
 
   language: en
@@ -74,5 +89,5 @@ extra_css:
 
 extra_javascript:
   - javascripts/mathjax.js
-  - https://polyfill.io/v3/polyfill.min.js?features=es6
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+  - javascripts/toc-toggle.js
