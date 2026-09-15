@@ -119,8 +119,8 @@ def gen_c_structures(isa, file, is_scalar=False, vla_size=None):
     layout = isa.get("layout", None)
     if not layout:
         if is_scalar:
-            rvd_tmpl = "typedef struct { {{isa_datatype.reg}} r[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}]; } rvd_{{isa.name}}_{{datatype.category}}{{datatype.n_bits}}_t;"
-            rvm_tmpl = "typedef struct { {{isa_datatype.msk}} m[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}]; } rvm_{{isa.name}}_{{datatype.category}}{{datatype.n_bits}}_t;"
+            rvd_tmpl = "typedef struct __attribute__((aligned(MIPP_{{isa_name_upper}}_RVD_SIZE_BYTE))) { {{isa_datatype.reg}} r[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}]; } rvd_{{isa.name}}_{{datatype.category}}{{datatype.n_bits}}_t;"
+            rvm_tmpl = "typedef struct __attribute__((aligned(MIPP_{{isa_name_upper}}_RVD_SIZE_BYTE))) { {{isa_datatype.msk}} m[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}]; } rvm_{{isa.name}}_{{datatype.category}}{{datatype.n_bits}}_t;"
         else:
             rvd_tmpl = "typedef struct { {{ isa_datatype.reg }} r; } rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"
             rvm_tmpl = "typedef struct { {{ isa_datatype.msk }} m; } rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"
@@ -258,13 +258,13 @@ def gen_c_structures(isa, file, is_scalar=False, vla_size=None):
                     c_type = f"{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t"
                     if lmul == 1:
                         if "{{lsuffix_mipp}}" in layout["rvd_struct_template"]:
-                            print(f"	typedef struct {{ {c_type} r[MIPP_{isa['name'].upper()}_N_{datatypes[dt]['category'].upper()}{datatypes[dt]['n_bits']}]; }} rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m1_t;", file=file)
+                            print(f"	typedef struct __attribute__((aligned(MIPP_{isa['name'].upper()}_RVD_SIZE_BYTE))) {{ {c_type} r[MIPP_{isa['name'].upper()}_N_{datatypes[dt]['category'].upper()}{datatypes[dt]['n_bits']}]; }} rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m1_t;", file=file)
                             print(f"	typedef rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m1_t rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t;", file=file)
                         else:
-                            print(f"	typedef struct {{ {c_type} r[MIPP_{isa['name'].upper()}_N_{datatypes[dt]['category'].upper()}{datatypes[dt]['n_bits']}]; }} rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t;", file=file)
+                            print(f"	typedef struct __attribute__((aligned(MIPP_{isa['name'].upper()}_RVD_SIZE_BYTE))) {{ {c_type} r[MIPP_{isa['name'].upper()}_N_{datatypes[dt]['category'].upper()}{datatypes[dt]['n_bits']}]; }} rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t;", file=file)
                             print(f"	typedef rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m1_t;", file=file)
                     else:
-                        print(f"	typedef struct {{ {c_type} r[MIPP_{isa['name'].upper()}_N_{datatypes[dt]['category'].upper()}{datatypes[dt]['n_bits']}_M{lmul}]; }} rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_{lsuffix_mipp}_t;", file=file)
+                        print(f"	typedef struct __attribute__((aligned(MIPP_{isa['name'].upper()}_RVD_SIZE_BYTE))) {{ {c_type} r[MIPP_{isa['name'].upper()}_N_{datatypes[dt]['category'].upper()}{datatypes[dt]['n_bits']}_M{lmul}]; }} rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_{lsuffix_mipp}_t;", file=file)
                     print(f"#endif", file=file)
         elif lmul in sw_lmuls_pos:
             # Emulated pairwise implementation
@@ -289,12 +289,12 @@ def gen_c_structures(isa, file, is_scalar=False, vla_size=None):
                 if size_symbol and ldiv > 1:
                     min_vlen = n_bits * ldiv
                     print(f"{indent}#if defined({size_symbol}) && {size_symbol} >= {min_vlen}", file=file)
-                    print(f"{indent}\ttypedef struct {{ {c_type} r[MIPP_{isa['name'].upper()}_N_{dt_cat.upper()}{n_bits}_D{ldiv}]; }} rvd_{isa['name']}_{dt_cat}{n_bits}_{lsuffix_mipp}_t;", file=file)
+                    print(f"{indent}\ttypedef struct __attribute__((aligned((MIPP_{isa['name'].upper()}_RVD_SIZE_BYTE) / {ldiv}))) {{ {c_type} r[MIPP_{isa['name'].upper()}_N_{dt_cat.upper()}{n_bits}_D{ldiv}]; }} rvd_{isa['name']}_{dt_cat}{n_bits}_{lsuffix_mipp}_t;", file=file)
                     print(f"{indent}#else", file=file)
-                    print(f"{indent}\ttypedef struct {{ {c_type} r[MIPP_{isa['name'].upper()}_N_{dt_cat.upper()}{n_bits}]; }} rvd_{isa['name']}_{dt_cat}{n_bits}_{lsuffix_mipp}_t;", file=file)
+                    print(f"{indent}\ttypedef struct __attribute__((aligned(MIPP_{isa['name'].upper()}_RVD_SIZE_BYTE))) {{ {c_type} r[MIPP_{isa['name'].upper()}_N_{dt_cat.upper()}{n_bits}]; }} rvd_{isa['name']}_{dt_cat}{n_bits}_{lsuffix_mipp}_t;", file=file)
                     print(f"{indent}#endif", file=file)
                 else:
-                    print(f"{indent}typedef struct {{ {c_type} r[MIPP_{isa['name'].upper()}_N_{dt_cat.upper()}{n_bits}]; }} rvd_{isa['name']}_{dt_cat}{n_bits}_{lsuffix_mipp}_t;", file=file)
+                    print(f"{indent}typedef struct __attribute__((aligned(MIPP_{isa['name'].upper()}_RVD_SIZE_BYTE))) {{ {c_type} r[MIPP_{isa['name'].upper()}_N_{dt_cat.upper()}{n_bits}]; }} rvd_{isa['name']}_{dt_cat}{n_bits}_{lsuffix_mipp}_t;", file=file)
 
             if guard == "0":
                 print_ldiv_fallback_typedef_rvd("")
@@ -350,13 +350,13 @@ def gen_c_structures(isa, file, is_scalar=False, vla_size=None):
                     mask_type = f"uint{datatypes[dt]['n_bits']}_t"
                     if lmul == 1:
                         if "{{lsuffix_mipp}}" in layout["rvd_struct_template"]:
-                            print(f"	typedef struct {{ {mask_type} m[MIPP_{isa['name'].upper()}_N_{datatypes[dt]['category'].upper()}{datatypes[dt]['n_bits']}]; }} rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m1_t;", file=file)
+                            print(f"	typedef struct __attribute__((aligned(MIPP_{isa['name'].upper()}_RVD_SIZE_BYTE))) {{ {mask_type} m[MIPP_{isa['name'].upper()}_N_{datatypes[dt]['category'].upper()}{datatypes[dt]['n_bits']}]; }} rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m1_t;", file=file)
                             print(f"	typedef rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m1_t rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t;", file=file)
                         else:
-                            print(f"	typedef struct {{ {mask_type} m[MIPP_{isa['name'].upper()}_N_{datatypes[dt]['category'].upper()}{datatypes[dt]['n_bits']}]; }} rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t;", file=file)
+                            print(f"	typedef struct __attribute__((aligned(MIPP_{isa['name'].upper()}_RVD_SIZE_BYTE))) {{ {mask_type} m[MIPP_{isa['name'].upper()}_N_{datatypes[dt]['category'].upper()}{datatypes[dt]['n_bits']}]; }} rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t;", file=file)
                             print(f"	typedef rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_t rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m1_t;", file=file)
                     else:
-                        print(f"	typedef struct {{ {mask_type} m[MIPP_{isa['name'].upper()}_N_{datatypes[dt]['category'].upper()}{datatypes[dt]['n_bits']}_M{lmul}]; }} rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_{lsuffix_mipp}_t;", file=file)
+                        print(f"	typedef struct __attribute__((aligned(MIPP_{isa['name'].upper()}_RVD_SIZE_BYTE))) {{ {mask_type} m[MIPP_{isa['name'].upper()}_N_{datatypes[dt]['category'].upper()}{datatypes[dt]['n_bits']}_M{lmul}]; }} rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_{lsuffix_mipp}_t;", file=file)
                     print(f"#endif", file=file)
         elif lmul in sw_lmuls_pos:
             # Emulated pairwise implementation
@@ -381,12 +381,12 @@ def gen_c_structures(isa, file, is_scalar=False, vla_size=None):
                 if size_symbol and ldiv > 1:
                     min_vlen = n_bits * ldiv
                     print(f"{indent}#if defined({size_symbol}) && {size_symbol} >= {min_vlen}", file=file)
-                    print(f"{indent}\ttypedef struct {{ {mask_type} m[MIPP_{isa['name'].upper()}_N_{dt_cat.upper()}{n_bits}_D{ldiv}]; }} rvm_{isa['name']}_{dt_cat}{n_bits}_{lsuffix_mipp}_t;", file=file)
+                    print(f"{indent}\ttypedef struct __attribute__((aligned((MIPP_{isa['name'].upper()}_RVD_SIZE_BYTE) / {ldiv}))) {{ {mask_type} m[MIPP_{isa['name'].upper()}_N_{dt_cat.upper()}{n_bits}_D{ldiv}]; }} rvm_{isa['name']}_{dt_cat}{n_bits}_{lsuffix_mipp}_t;", file=file)
                     print(f"{indent}#else", file=file)
-                    print(f"{indent}\ttypedef struct {{ {mask_type} m[MIPP_{isa['name'].upper()}_N_{dt_cat.upper()}{n_bits}]; }} rvm_{isa['name']}_{dt_cat}{n_bits}_{lsuffix_mipp}_t;", file=file)
+                    print(f"{indent}\ttypedef struct __attribute__((aligned(MIPP_{isa['name'].upper()}_RVD_SIZE_BYTE))) {{ {mask_type} m[MIPP_{isa['name'].upper()}_N_{dt_cat.upper()}{n_bits}]; }} rvm_{isa['name']}_{dt_cat}{n_bits}_{lsuffix_mipp}_t;", file=file)
                     print(f"{indent}#endif", file=file)
                 else:
-                    print(f"{indent}typedef struct {{ {mask_type} m[MIPP_{isa['name'].upper()}_N_{dt_cat.upper()}{n_bits}]; }} rvm_{isa['name']}_{dt_cat}{n_bits}_{lsuffix_mipp}_t;", file=file)
+                    print(f"{indent}typedef struct __attribute__((aligned(MIPP_{isa['name'].upper()}_RVD_SIZE_BYTE))) {{ {mask_type} m[MIPP_{isa['name'].upper()}_N_{dt_cat.upper()}{n_bits}]; }} rvm_{isa['name']}_{dt_cat}{n_bits}_{lsuffix_mipp}_t;", file=file)
 
             if guard == "0":
                 print_ldiv_fallback_typedef_rvm("")

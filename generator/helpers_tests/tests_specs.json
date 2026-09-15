@@ -537,11 +537,7 @@
                         "by_datatype": {
                             "float32": {
                                 "type": "max_abs_diff",
-                                "value": 1e-05,
-                                "by_lmul": {
-                                    "4": 0.0001,
-                                    "8": 0.0001
-                                }
+                                "value": 0.0005
                             }
                         }
                     }

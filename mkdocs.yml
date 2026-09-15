@@ -3,6 +3,7 @@ site_url: https://aff3ct.github.io/mipp/
 theme:
   name: material
   logo: assets/images/mipp_ico.jpg
+  favicon: assets/images/mipp_ico_circle.png
   font:
     text: Inter
     code: JetBrains Mono

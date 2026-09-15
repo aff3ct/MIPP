@@ -40,7 +40,7 @@ hide:
       <h3 class="mipp-card-title">Next-Gen ISAs & Scalable Vectors</h3>
     </div>
     <p class="mipp-card-desc">
-      Native support for <b>AVX-512</b>, <b>ARM SVE</b>, and <b>RISC-V RVV</b>. Advanced features include register grouping (<b>LMUL/LDIV</b> up to x8/d2), full vector masking, and an <b>auto-generated, future-proof codebase</b>.
+      Native support for <b>AVX-512</b>, <b>ARM SVE</b>, and <b>RISC-V RVV</b>. Advanced features include register grouping (<b>LMUL/LDIV</b> up to x8/d2), full vector masking, and an <b>auto-generated</b>, <b>future-proof</b> codebase. Easily <b>extensible to new ISAs</b>.
     </p>
   </div>
   <div class="mipp-card">
@@ -150,7 +150,7 @@ See how simple and expressive vectorized code becomes with MIPP:
     }
     ```
 
-👉 **[See how MIPP compares to Google Highway, xsimd, Eve, and Auto-vectorization](user/why_mippv2.md#simd-wrappers-comparison)**
+👉 **[See how MIPP compares to Google Highway, xsimd, Eve, Auto-vectorization and more](user/why_mippv2.md#simd-wrappers-comparison)**
 
 ---
 
