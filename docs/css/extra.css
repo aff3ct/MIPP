@@ -93,6 +93,8 @@
 }
 
 .md-header__inner {
+  padding-top: 0.35rem !important;
+  padding-bottom: 0.35rem !important;
   padding-left: 1.5rem !important;
   padding-right: 1.5rem !important;
 }
@@ -998,6 +1000,90 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
   background: rgba(14, 165, 233, 0.08);
 }
 
+/* --------------------------------------------------------------------------
+   Featured MIPP API Explorer Showcase Card (Homepage)
+   -------------------------------------------------------------------------- */
+.mipp-explorer-showcase-card {
+  margin: 2rem 0;
+  padding: 1.5rem 1.75rem;
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.08) 0%, rgba(99, 102, 241, 0.08) 100%), var(--mipp-card-bg);
+  border: 1.5px solid var(--mipp-card-hover-border, #38bdf8);
+  border-radius: var(--mipp-radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  box-shadow: 0 8px 24px rgba(14, 165, 233, 0.12);
+  transition: var(--mipp-transition);
+}
+
+.mipp-explorer-showcase-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(14, 165, 233, 0.22);
+}
+
+.mipp-explorer-showcase-content {
+  flex: 1;
+}
+
+.mipp-explorer-showcase-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.18rem 0.55rem;
+  border-radius: 9999px;
+  background: var(--mipp-accent-glow);
+  color: var(--mipp-accent);
+  margin-bottom: 0.5rem;
+}
+
+.mipp-explorer-showcase-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  margin: 0 0 0.35rem 0;
+  color: var(--md-default-fg-color);
+  letter-spacing: -0.01em;
+}
+
+.mipp-explorer-showcase-desc {
+  font-size: 0.88rem;
+  color: var(--md-default-fg-color--light);
+  line-height: 1.5;
+  margin: 0 0 0.75rem 0;
+}
+
+.mipp-explorer-showcase-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  color: var(--md-default-fg-color--lighter);
+}
+
+.mipp-explorer-showcase-chips span {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  background: var(--md-default-bg-color--lighter);
+  border-radius: 6px;
+}
+
+.mipp-explorer-showcase-action {
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .mipp-explorer-showcase-card {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.25rem;
+  }
+}
+
 /* Hardware Target Chips */
 .mipp-chips-container {
   display: flex;
@@ -1035,7 +1121,7 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
   margin: 2.5rem 0;
 }
 
-.mipp-card {
+.mipp-grid-2x2 .mipp-card {
   padding: 1.5rem;
   border-radius: var(--mipp-radius-md);
   background: var(--mipp-card-bg);
@@ -1046,13 +1132,13 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
   height: 100%;
 }
 
-.mipp-card:hover {
+.mipp-grid-2x2 .mipp-card:hover {
   transform: translateY(-3px);
   border-color: var(--mipp-card-hover-border);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
 }
 
-.mipp-card-header {
+.mipp-grid-2x2 .mipp-card-header {
   display: flex;
   align-items: center;
   gap: 0.8rem;
@@ -1372,6 +1458,8 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
   }
 
   .md-header__inner {
+    padding-top: 0.25rem !important;
+    padding-bottom: 0.25rem !important;
     padding-left: 0.35rem !important;
     padding-right: 0.35rem !important;
   }
@@ -1655,7 +1743,7 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
     grid-template-columns: 1fr !important;
   }
 
-  .mipp-card {
+  .mipp-grid-2x2 .mipp-card {
     padding: 0.95rem !important;
   }
 }

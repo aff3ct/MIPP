@@ -414,7 +414,7 @@ def gen_c_structures(isa, file, is_scalar=False, vla_size=None):
             gen_ldiv_structs_sub_isa(isa, sub_isa, file)
             gen_ldiv_defines_sub_isa(isa, sub_isa, file)
 
-def register_candidates(isa, funcs, implems, cand_type="native_or_emu", lmul=0):
+def register_candidates(isa, funcs, implems, cand_type="native_or_emu", lmul=0, default_level=None):
     if "candidates" not in isa:
         isa["candidates"] = []
     for f in implems:
@@ -447,9 +447,12 @@ def register_candidates(isa, funcs, implems, cand_type="native_or_emu", lmul=0):
                     else:
                         ff_local["if"] = guard
 
-                level = ff.get("level", 1 if ("type" in ff and ff["type"] == "emulated") else 0)
-                if cand_type == "generic_emu":
-                    level = 2
+                if default_level is not None:
+                    level = ff.get("level", default_level)
+                else:
+                    level = ff.get("level", 1 if ("type" in ff and ff["type"] == "emulated") else 0)
+                    if cand_type == "generic_emu":
+                        level = 2
 
                 c_dict = {
                     "type": cand_type,
@@ -463,10 +466,10 @@ def register_candidates(isa, funcs, implems, cand_type="native_or_emu", lmul=0):
                     isa["candidates"].append(c_dict)
 
 def register_all_candidates(isa, funcs, native_implems, emu_implems, lmul=0):
-    register_candidates(isa, funcs, native_implems, cand_type="native_or_emu", lmul=lmul)
-    register_candidates(isa, funcs, emu_implems, cand_type="native_or_emu", lmul=lmul)
-    register_candidates(isa, funcs, implems_generic_emu, cand_type="generic_emu", lmul=lmul)
-    register_candidates(isa, funcs, implems_mask_generic_emu, cand_type="generic_emu", lmul=lmul)
+    register_candidates(isa, funcs, native_implems, cand_type="native_or_emu", lmul=lmul, default_level=0)
+    register_candidates(isa, funcs, emu_implems, cand_type="native_or_emu", lmul=lmul, default_level=1)
+    register_candidates(isa, funcs, implems_generic_emu, cand_type="generic_emu", lmul=lmul, default_level=2)
+    register_candidates(isa, funcs, implems_mask_generic_emu, cand_type="generic_emu", lmul=lmul, default_level=2)
 
 def gen_c_functions(isa, file, funcs, implems, lmul=0):
     register_candidates(isa, funcs, implems, cand_type="native_or_emu", lmul=lmul)

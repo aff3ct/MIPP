@@ -9,7 +9,8 @@ import shutil
 import json
 import copy
 
-path = os.getcwd()
+path = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, path)
 sys.path.insert(1, os.path.join(path, "helpers_headers"))
 sys.path.insert(1, os.path.join(path, "simd_ext", "scalar"))
 
@@ -393,38 +394,95 @@ class SpecFuncInfo:
             return self.func_name[:-2]
         return self.func_name
 
-    def func_to_str_cpp(self, lmul=1):
+    def func_to_str_cpp(self, lmul=1, mask_kind=None):
         cpp_name = self.get_cpp_func_name()
         is_pair_func = self.func_name in ("cast", "cast_k", "cvt", "wcvt")
+        
+        tmpl_parts = []
+        if mask_kind == "mask":
+            tmpl_parts.append("MKIND MK=M")
+        elif mask_kind == "maskz":
+            tmpl_parts.append("MKIND MK=Z")
+        elif mask_kind == "masks":
+            tmpl_parts.append("MKIND MK=S")
+
         if is_pair_func:
-            lmul_tmpl = f"<typename T2, typename T1, int LMUL={lmul}> " if lmul != 1 else "<typename T2, typename T1> "
+            tmpl_parts.extend(["typename T2", "typename T1"])
+            if lmul != 1:
+                tmpl_parts.append(f"int LMUL={lmul}")
             lmul_arg = f",{lmul}" if lmul != 1 else ""
             type_name = "rvm" if self.func_name.endswith("_k") else "rvd"
-            return f"template {lmul_tmpl}inline {type_name}<T2{lmul_arg}> {cpp_name}({type_name}<T1{lmul_arg}>);"
+            tmpl_str = f"template <{', '.join(tmpl_parts)}> "
+            return f"{tmpl_str}{type_name}<T2{lmul_arg}> {cpp_name}(const {type_name}<T1{lmul_arg}> r0);"
 
-        fixed_dtypes = [arg.get("fixeddatatype", False) for arg in self.args]
-        args_str = ", ".join(
-            [match_args_type_cpp(arg["type"], False, False, fixed, lmul=lmul) for arg, fixed in zip(self.args, fixed_dtypes)]
-        )
+        cnt_reg = 0
+        cnt_msk = 0
+        cnt_val = 0
+        cnt_ptr = 0
+        args_parts = []
+
+        if mask_kind:
+            lmul_arg = f",{lmul}" if lmul != 1 else ""
+            if mask_kind in ("mask", "maskz"):
+                args_parts.append(f"const rvm<T{lmul_arg}> m0")
+                cnt_msk += 1
+            elif mask_kind == "masks":
+                args_parts.append(f"const rvm<T{lmul_arg}> m0")
+                args_parts.append(f"const rvd<T{lmul_arg}> rsrc")
+                cnt_msk += 1
+
+        for arg in self.args:
+            fixed = arg.get("fixeddatatype", False)
+            arg_type = arg["type"]
+            type_str = match_args_type_cpp(arg_type, False, False, fixed, lmul=lmul)
+            is_const = arg.get("charac", "RO") == "RO"
+            const_prefix = "const " if (is_const and not type_str.startswith("const ")) else ""
+
+            if arg_type == "reg":
+                name = f"r{cnt_reg}"
+                cnt_reg += 1
+            elif arg_type == "msk":
+                name = f"m{cnt_msk}"
+                cnt_msk += 1
+            elif arg_type == "val":
+                name = f"v{cnt_val}"
+                cnt_val += 1
+            elif arg_type == "ptr":
+                name = f"p{cnt_ptr}"
+                cnt_ptr += 1
+            elif arg_type == "Nele":
+                name = "vals"
+            else:
+                name = f"a{cnt_val}"
+                cnt_val += 1
+
+            args_parts.append(f"{const_prefix}{type_str} {name}".strip())
+
+        args_str = ", ".join(args_parts)
         ret_fixed = self.ret.get("fixeddatatype", False)
         ret_str = match_args_type_cpp(self.ret["type"], False, True, ret_fixed, lmul=lmul)
-        lmul_tmpl = f"<typename T, int LMUL={lmul}> " if lmul != 1 else "<typename T> "
-        return f"template {lmul_tmpl}inline {ret_str} {cpp_name}({args_str});"
+        
+        tmpl_parts.append("typename T")
+        if lmul != 1:
+            tmpl_parts.append(f"int LMUL={lmul}")
+        tmpl_header = f"template <{', '.join(tmpl_parts)}> "
 
-    def func_to_str_c(self, lmul=1):
+        return f"{tmpl_header}{ret_str} {cpp_name}({args_str});"
+
+    def func_to_str_c(self, lmul=1, mask_kind=None):
         is_pair_func = self.func_name in ("cast", "cast_k", "cvt", "wcvt")
         lines = []
         if is_pair_func:
             for dt in self.dttypes:
                 dt_par, dt_ret = dt.split(",")
-                full_func_name = build_func_name({}, dt_par, dt_ret, self.func_name, isa_name=False, lmul=lmul)
-                proto = build_proto(interfaces[self.func_name]["proto"], dt_par, dt_ret, {}, full_func_name, lmul=lmul, isa_name=False)
+                full_func_name = build_func_name({}, dt_par, dt_ret, self.func_name, isa_name=False, lmul=lmul, masked_version=mask_kind)
+                proto = build_proto(interfaces[self.func_name]["proto"], dt_par, dt_ret, {}, full_func_name, lmul=lmul, isa_name=False, masked_version=mask_kind)
                 lines.append(proto + ";")
         else:
             for dt in self.dttypes:
                 dt_single = dt.split(",")[0]
-                full_func_name = build_func_name_short({}, dt_single, self.func_name, isa_name=False, lmul=lmul)
-                proto = build_proto(interfaces[self.func_name]["proto"], dt_single, dt_single, {}, full_func_name, lmul=lmul, isa_name=False)
+                full_func_name = build_func_name_short({}, dt_single, self.func_name, isa_name=False, lmul=lmul, masked_version=mask_kind)
+                proto = build_proto(interfaces[self.func_name]["proto"], dt_single, dt_single, {}, full_func_name, lmul=lmul, isa_name=False, masked_version=mask_kind)
                 lines.append(proto + ";")
         return "\n".join(lines)
 
@@ -698,6 +756,9 @@ def write_funcs_support_index(base_dir, categories):
 
 This section contains complete API reference documentation, mathematical semantics, test specifications, and architecture acceleration matrices for all MIPP functions.
 
+!!! tip "MIPP API Explorer"
+    Search across all 85 primitives, perform reverse lookup on vendor hardware intrinsics (AVX, NEON, RVV, SVE), filter by guaranteed acceleration levels, and switch between C99, C++ and C++ Object dialects in the [**MIPP API Explorer**](../explorer/index.md).
+
 <a id="implementation-levels"></a>
 ## Implementation Levels & Acceleration Legend
 
@@ -798,7 +859,12 @@ def main():
     # Generate Function Reference Guide Landing Page
     write_funcs_support_index(funcs_support_dir, categories)
 
-    print("[MIPP DocGen] Complete! Documentation generated in docs/isas_support/ and docs/funcs_support/.")
+    # Export Interactive API Explorer metadata
+    print("[MIPP DocGen] Exporting Interactive API Explorer metadata (docs/assets/data/mipp_api_index.json)...")
+    from gen_mipp_api_data import export_api_data
+    export_api_data(project_root)
+
+    print("[MIPP DocGen] Complete! Documentation and API Explorer dataset generated in docs/.")
 
 
 if __name__ == "__main__":

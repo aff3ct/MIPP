@@ -76,6 +76,7 @@ jobs:
           path: |
             docs/funcs_support
             docs/isas_support
+            docs/assets/data
           retention-days: 7
 
   # =========================================================================

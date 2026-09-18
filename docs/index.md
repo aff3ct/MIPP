@@ -72,6 +72,27 @@ hide:
   </div>
 </div>
 
+<!-- Featured MIPP API Explorer Showcase Card -->
+<div class="mipp-explorer-showcase-card">
+  <div class="mipp-explorer-showcase-content">
+    <div class="mipp-explorer-showcase-badge">🔍 Interactive Catalog</div>
+    <h2 class="mipp-explorer-showcase-title">MIPP API Explorer</h2>
+    <p class="mipp-explorer-showcase-desc">
+      Search and compare all <b>85 MIPP vector primitives</b> with <b>reverse vendor intrinsic lookup</b> (e.g. <code>_mm256_blendv_ps</code>, <code>vbslq_f32</code>, <code>__riscv_vmerge_vvm_f32m1</code>), live hardware acceleration matrices (L0..L3), and tri-dialect prototypes.
+    </p>
+    <div class="mipp-explorer-showcase-chips">
+      <span>🔍 Reverse Intrinsic Lookup</span>
+      <span>⚙️ SSE · AVX · AVX-512 · NEON · SVE · RVV</span>
+      <span>🔄 C99 · C++ Functional · C++ Object</span>
+    </div>
+  </div>
+  <div class="mipp-explorer-showcase-action">
+    <a href="explorer/" class="mipp-btn mipp-btn-primary">
+      Launch API Explorer &rarr;
+    </a>
+  </div>
+</div>
+
 ---
 
 ## Interactive Code Preview : One Task, Three Dialects

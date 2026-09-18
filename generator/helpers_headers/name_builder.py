@@ -449,10 +449,10 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
             msk_dt = tools.datatypes["uint" + str(get_dt_par_size(dt_par))]
 
         if masked_version == "mask" or masked_version == "maskz":
-            p += build_msk(msk_dt, isa, lmul, isa_name, cpp) + " m0"
+            p += "const " + build_msk(msk_dt, isa, lmul, isa_name, cpp) + " m0"
         elif masked_version == "masks" :
             p += "const " + build_msk(msk_dt, isa, lmul, isa_name, cpp) + " m0"
-            p += ", " + build_reg(tools.datatypes[dt_par], isa, lmul, isa_name, cpp) + " rsrc"
+            p += ", const " + build_reg(tools.datatypes[dt_par], isa, lmul, isa_name, cpp) + " rsrc"
         cnt_msk = cnt_msk + 1		
         is_first = False
 
