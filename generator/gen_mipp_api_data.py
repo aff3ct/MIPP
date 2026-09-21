@@ -485,6 +485,256 @@ def build_code_snippets(func, category, spec_info, native_avx_instr=None):
     }
 
 
+def build_isas_metadata(base_generator_dir, isas_dict):
+    """
+    Builds comprehensive metadata for all target ISAs (including scalar),
+    including display names, vector sizes, header includes, compiler settings,
+    feature switches, and hardware register/mask types per datatype.
+    """
+    canonical_order = ["sse", "avx", "avx512", "neon", "sve", "rvv", "scalar"]
+
+    features_map = {
+        "avx512": [
+            { "name": "__AVX512F__", "label": "AVX-512F", "locked": True, "default": True, "flag": "-mavx512f" },
+            { "name": "__AVX512BW__", "label": "BW", "locked": False, "default": True, "flag": "-mavx512bw" },
+            { "name": "__AVX512DQ__", "label": "DQ", "locked": False, "default": True, "flag": "-mavx512dq" },
+            { "name": "__AVX512VL__", "label": "VL", "locked": False, "default": True, "flag": "-mavx512vl" },
+            { "name": "__AVX512CD__", "label": "CD", "locked": False, "default": True, "flag": "-mavx512cd" }
+        ],
+        "avx": [
+            { "name": "__AVX__", "label": "AVX", "locked": True, "default": True, "flag": "-mavx" },
+            { "name": "__AVX2__", "label": "AVX2", "locked": False, "default": True, "flag": "-mavx2" },
+            { "name": "__FMA__", "label": "FMA", "locked": False, "default": True, "flag": "-mfma" }
+        ],
+        "sse": [
+            { "name": "__SSE__", "label": "SSE", "locked": True, "default": True, "flag": "-msse" },
+            { "name": "__SSE2__", "label": "SSE2", "locked": False, "default": True, "flag": "-msse2" },
+            { "name": "__SSE3__", "label": "SSE3", "locked": False, "default": True, "flag": "-msse3" },
+            { "name": "__SSSE3__", "label": "SSSE3", "locked": False, "default": True, "flag": "-mssse3" },
+            { "name": "__SSE4_1__", "label": "SSE4.1", "locked": False, "default": True, "flag": "-msse4.1" },
+            { "name": "__SSE4_2__", "label": "SSE4.2", "locked": False, "default": True, "flag": "-msse4.2" }
+        ],
+        "neon": [
+            { "name": "__ARM_NEON", "label": "NEON", "locked": True, "default": True, "flag": "" },
+            { "name": "__aarch64__", "label": "AArch64 (64-bit)", "locked": False, "default": True, "flag": "" },
+            { "name": "__ARM_FEATURE_FMA", "label": "FMA", "locked": False, "default": True, "flag": "+fma" },
+            { "name": "__ARM_FEATURE_DIRECTED_ROUNDING", "label": "Rounding", "locked": False, "default": True, "flag": "" }
+        ],
+        "sve": [
+            { "name": "__ARM_FEATURE_SVE", "label": "SVE", "locked": True, "default": True, "flag": "-march=armv8.2-a+sve" },
+            { "name": "__ARM_FEATURE_SVE2", "label": "SVE2", "locked": False, "default": False, "flag": "-march=armv8.2-a+sve2" }
+        ],
+        "rvv": [
+            { "name": "__riscv_v", "label": "RVV 1.0", "locked": True, "default": True, "flag": "-march=rv64gcv" }
+        ],
+        "scalar": []
+    }
+
+    compiler_map = {
+        "scalar": { "id": "g142", "arch": "x86", "base_flags": "-O3", "label": "x86-64 GCC" },
+        "sse":    { "id": "g142", "arch": "x86", "base_flags": "-O3", "label": "x86-64 GCC" },
+        "avx":    { "id": "g142", "arch": "x86", "base_flags": "-O3", "label": "x86-64 GCC" },
+        "avx512": { "id": "g142", "arch": "x86", "base_flags": "-O3", "label": "x86-64 GCC" },
+        "neon":   { "id": "aarch64-gcc-1420", "id_32": "arm-gcc-1320", "arch": "arm", "base_flags": "-O3 -march=armv8-a+simd", "flags_32": "-O3 -march=armv7-a -mfpu=neon -mfloat-abi=hard", "label": "AArch64 GCC" },
+        "sve":    { "id": "aarch64-gcc-1420", "arch": "arm", "base_flags": "-O3 -march=armv8.2-a+sve", "label": "AArch64 SVE GCC" },
+        "rvv":    { "id": "rv64-clang", "arch": "riscv", "base_flags": "-O3 -march=rv64gcv", "label": "RISC-V 64 Clang" }
+    }
+
+    display_labels = {
+        "sse": "SSE",
+        "avx": "AVX",
+        "avx512": "AVX-512",
+        "neon": "NEON",
+        "sve": "SVE",
+        "rvv": "RVV",
+        "scalar": "Scalar"
+    }
+
+    isas_meta = {}
+    for isa_name in canonical_order:
+        if isa_name not in isas_dict:
+            continue
+        conf = isas_dict[isa_name]
+        is_scl = (isa_name == "scalar") or conf.get("is_scalar", False)
+
+        # Headers extraction
+        headers = []
+        if is_scl:
+            headers = ["<stdint.h>", "<string.h>", "<math.h>"]
+        else:
+            for line in conf.get("header_template", []):
+                m = re.search(r'#include\s*(<[^>]+>)', line)
+                if m:
+                    headers.append(m.group(1))
+            if not headers:
+                if isa_name in ["sse", "avx", "avx512"]:
+                    headers = ["<immintrin.h>"]
+                elif isa_name == "neon":
+                    headers = ["<arm_neon.h>"]
+                elif isa_name == "sve":
+                    headers = ["<arm_sve.h>"]
+                elif isa_name == "rvv":
+                    headers = ["<riscv_vector.h>"]
+
+        # Datatypes (hardware reg and msk types)
+        dts_conf = conf.get("datatypes", {})
+        resolved_dts = {}
+        for dt_name, dt_val in dts_conf.items():
+            reg_type = dt_val.get("reg", "")
+            msk_type = dt_val.get("msk", "")
+            if isa_name == "rvv":
+                reg_type = reg_type.replace("{lsuffix}", "m1")
+                w = dt_val.get("variables", {}).get("width", "32")
+                msk_type = msk_type.replace("{eew_emul}", w)
+            resolved_dts[dt_name] = {
+                "reg": reg_type,
+                "msk": msk_type
+            }
+
+        raw_size = conf.get("size")
+        if is_scl:
+            vec_size = None
+        elif raw_size == "scalable" or isa_name in ["sve", "rvv"]:
+            vec_size = "scalable"
+        else:
+            try:
+                vec_size = int(raw_size)
+            except Exception:
+                vec_size = raw_size
+
+        isas_meta[isa_name] = {
+            "id": isa_name,
+            "name": isa_name,
+            "label": display_labels.get(isa_name, isa_name.upper()),
+            "is_scalar": is_scl,
+            "vector_size_bits": vec_size,
+            "define": conf.get("define", ""),
+            "sub_isa": conf.get("sub_isa", None),
+            "headers": headers,
+            "features": features_map.get(isa_name, []),
+            "compiler": compiler_map.get(isa_name, {}),
+            "buffer_sizes": [64, 128, 256, 512, 1024, 2048] if is_scl else [],
+            "hw_lmul": conf.get("hw_lmul", [1]) if conf.get("hw_lmul") else [1],
+            "sw_lmul": conf.get("sw_lmul", []),
+            "datatypes": resolved_dts
+        }
+    return isas_meta
+
+
+def build_datatypes_metadata():
+    """
+    Builds complete metadata for all MIPP datatypes dynamically from datatypes.py and tools.py.
+    """
+    from tools import datatypes as tools_dt
+    from datatypes import all_datatypes, all_float, all_int, all_uint, cfloat, cuint
+
+    res = {}
+    for dt_name in all_datatypes:
+        dt_info = tools_dt.get(dt_name, {})
+        cat = dt_info.get("category")
+        bits = dt_info.get("n_bits", 32)
+        is_flt = (cat == cfloat)
+        signed = (cat != cuint)
+
+        if dt_name in all_float:
+            c_type = "double" if bits == 64 else "float"
+            suffix = "pd" if bits == 64 else "ps"
+            group = "floats"
+        elif dt_name in all_int:
+            c_type = f"int{bits}_t"
+            suffix = f"epi{bits}"
+            group = "signed"
+        else:
+            c_type = f"uint{bits}_t"
+            suffix = f"epi{bits}"
+            group = "unsigned"
+
+        res[dt_name] = {
+            "id": dt_name,
+            "label": dt_name,
+            "group": group,
+            "bits": bits,
+            "is_float": is_flt,
+            "signed": signed,
+            "c_type": c_type,
+            "uint_type": f"uint{bits}_t",
+            "suffix": suffix
+        }
+    return res
+
+
+def build_datatype_groups_metadata():
+    """
+    Builds datatype groups metadata dynamically from datatypes.py.
+    """
+    from datatypes import all_float, all_int, all_uint
+    return {
+        "floats": {
+            "id": "floats",
+            "label": "Floats",
+            "types": list(all_float)
+        },
+        "signed": {
+            "id": "signed",
+            "label": "Signed",
+            "types": list(all_int)
+        },
+        "unsigned": {
+            "id": "unsigned",
+            "label": "Unsigned",
+            "types": list(all_uint)
+        }
+    }
+
+
+def build_mask_modes_metadata():
+    """
+    Builds mask modes metadata supported across MIPP.
+    """
+    return {
+        "unmasked": {
+            "id": "unmasked",
+            "label": "unmasked",
+            "badge_class": "mask-unmasked",
+            "description": "Unpredicated standard vector operation",
+            "cpp_obj_support": True
+        },
+        "mask": {
+            "id": "mask",
+            "label": "mask",
+            "badge_class": "mask-mask",
+            "description": "Predicated execution with blend / merge preservation",
+            "cpp_obj_support": False
+        },
+        "maskz": {
+            "id": "maskz",
+            "label": "maskz",
+            "badge_class": "mask-maskz",
+            "description": "Predicated execution with zeroing for false lanes",
+            "cpp_obj_support": False
+        },
+        "masks": {
+            "id": "masks",
+            "label": "masks",
+            "badge_class": "mask-masks",
+            "description": "Predicated execution with explicit fallback source register",
+            "cpp_obj_support": False
+        }
+    }
+
+
+def build_levels_metadata():
+    """
+    Builds metadata for MIPP implementation levels (L0 to L3).
+    """
+    return {
+        "0": { "name": "Native Hardware", "description": "Direct 1:1 hardware vector instruction mapping" },
+        "1": { "name": "Dedicated Emulation", "description": "Target-specific multi-instruction sequence" },
+        "2": { "name": "Generic Emulation", "description": "Algorithmic composition using portable MIPP primitives" },
+        "3": { "name": "Scalar Fallback", "description": "Sequential element-by-element fallback" }
+    }
+
+
 def generate_mipp_api_data(project_root=None):
     """
     Main extraction pipeline: merges metadata from registry, candidate solver,
@@ -499,6 +749,13 @@ def generate_mipp_api_data(project_root=None):
     isas_dict, implems_dict_raw, sorted_names = discover_and_sort_isas(base_generator_dir)
     target_isas = [name for name in sorted_names if name != "scalar"]
 
+    # Build top-level metadata dictionaries
+    isas_meta = build_isas_metadata(base_generator_dir, isas_dict)
+    datatypes_meta = build_datatypes_metadata()
+    datatype_groups_meta = build_datatype_groups_metadata()
+    mask_modes_meta = build_mask_modes_metadata()
+    levels_meta = build_levels_metadata()
+
     # 2. Load Docs and Test Metadata
     funcs_docs_path = os.path.join(base_generator_dir, "helpers_headers", "funcs_docs.json")
     funcs_docs = {}
@@ -512,31 +769,6 @@ def generate_mipp_api_data(project_root=None):
         with open(tests_specs_path, "r", encoding="utf-8") as f:
             tests_specs_data = json.load(f)
     default_test_spec = tests_specs_data.get("default", {})
-
-    # 3. Solve Candidates & Resolve Effective Levels per ISA
-    print(f"[gen_mipp_api_data] Resolving candidates for ISAs: {', '.join(target_isas)}...")
-    isa_solved_map = {}
-    for isa_name in target_isas:
-        native_impl, emu_impl = implems_dict_raw[isa_name]
-        isa_conf = isas_dict[isa_name]
-        resolved_isa = resolve_lmul_in_isa(isa_conf, "0")
-        resolved_isa["candidates"] = []
-        copy_interfaces = copy.deepcopy(interfaces)
-        register_all_candidates(resolved_isa, copy_interfaces, native_impl, emu_impl, lmul=0)
-        resolved_map = resolve_candidates(resolved_isa, copy_interfaces, lmul=0)
-        isa_solved_map[isa_name] = (resolved_isa, resolved_map)
-
-    # Regex to identify intrinsic calls in rendered code
-    intrinsic_call_regex = re.compile(
-        r'\b(_mm(?:256|512)?_[a-zA-Z0-9_]+|v[a-z0-9_]+|sv[a-z0-9_]+|__riscv_[a-zA-Z0-9_]+)\s*\('
-    )
-    ignored_intrinsics = {
-        'svptrue_b8', 'svptrue_b16', 'svptrue_b32', 'svptrue_b64', 'svptrue_b'
-    }
-
-    # Extract scalar macros from scalar_gen.py
-    scalar_gen_path = os.path.join(base_generator_dir, "simd_ext", "scalar", "scalar_gen.py")
-    scalar_macros = extract_scalar_macros(scalar_gen_path)
 
     # Collect ISA hardware LMUL metadata
     isa_metadata = {}
@@ -554,6 +786,35 @@ def generate_mipp_api_data(project_root=None):
             "hw_lmul": hw_l,
             "sw_lmul": sw_l
         }
+
+    # 3. Solve Candidates & Resolve Effective Levels per ISA across all hardware LMULs
+    print(f"[gen_mipp_api_data] Resolving candidates for ISAs: {', '.join(target_isas)}...")
+    isa_solved_map = {}
+    for isa_name in target_isas:
+        native_impl, emu_impl = implems_dict_raw[isa_name]
+        isa_conf = isas_dict[isa_name]
+        hw_lmuls = isa_metadata[isa_name]["hw_lmul"]
+        isa_solved_map[isa_name] = {}
+        for lm in hw_lmuls:
+            lm_str = str(lm) if lm != 1 else "0"
+            resolved_isa = resolve_lmul_in_isa(isa_conf, lm_str)
+            resolved_isa["candidates"] = []
+            copy_interfaces = copy.deepcopy(interfaces)
+            register_all_candidates(resolved_isa, copy_interfaces, native_impl, emu_impl, lmul=lm)
+            resolved_map = resolve_candidates(resolved_isa, copy_interfaces, lmul=lm)
+            isa_solved_map[isa_name][lm] = (resolved_isa, resolved_map)
+
+    # Regex to identify intrinsic calls in rendered code
+    intrinsic_call_regex = re.compile(
+        r'\b(_mm(?:256|512)?_[a-zA-Z0-9_]+|v[a-z0-9_]+|sv[a-z0-9_]+|__riscv_[a-zA-Z0-9_]+)\s*\('
+    )
+    ignored_intrinsics = {
+        'svptrue_b8', 'svptrue_b16', 'svptrue_b32', 'svptrue_b64', 'svptrue_b'
+    }
+
+    # Extract scalar macros from scalar_gen.py
+    scalar_gen_path = os.path.join(base_generator_dir, "simd_ext", "scalar", "scalar_gen.py")
+    scalar_macros = extract_scalar_macros(scalar_gen_path)
 
     # 4. Process each of the 85 functions
     api_entries = []
@@ -589,46 +850,71 @@ def generate_mipp_api_data(project_root=None):
         vendor_intrinsics_reverse_index = set()
 
         for isa_name in target_isas:
-            resolved_isa, resolved_map = isa_solved_map[isa_name]
+            hw_lmuls = isa_metadata.get(isa_name, {}).get("hw_lmul", [1])
+            # Default/base LMUL is 1
+            resolved_isa_base, resolved_map_base = isa_solved_map[isa_name].get(1, list(isa_solved_map[isa_name].values())[0])
+
             by_datatype = {}
             native_instructions = {}
             rendered_code_snippets = {}
+            native_instructions_by_lmul = {}
+            rendered_code_snippets_by_lmul = {}
             emulation_algorithms = {}
             masked_by_datatype = {"mask": {}, "maskz": {}, "masks": {}}
 
+            # 1. Process all hardware LMULs for native instructions and code snippets
+            for lm in hw_lmuls:
+                lm_key = str(lm)
+                native_instructions_by_lmul[lm_key] = {}
+                rendered_code_snippets_by_lmul[lm_key] = {}
+                if lm not in isa_solved_map[isa_name]:
+                    continue
+                res_isa_lm, res_map_lm = isa_solved_map[isa_name][lm]
+
+                for dt in func_def["datatypes"]:
+                    dt_par, dt_ret = dt.split(",") if "," in dt else (dt, dt)
+                    dt_key = f"{dt_par},{dt_ret}"
+                    cands = res_map_lm.get((func, dt_key, None), [])
+                    active_cands = [cand for cand, cond in cands if cond != "0"]
+                    for cand in active_cands:
+                        if cand["level"] == 0 and cand.get("ff") and "template" in cand["ff"]:
+                            try:
+                                rend = render_template(res_isa_lm, cand["ff"], dt_par, dt_ret, func, lmul=lm)
+                                rend_no_comments = re.sub(r'/\*.*?\*/', '', rend, flags=re.DOTALL)
+                                rend_no_comments = re.sub(r'//.*', '', rend_no_comments)
+
+                                rend_clean = rend.strip().replace("\n", " ").replace("\t", " ")
+                                rend_clean = re.sub(r'\s+', ' ', rend_clean)
+                                rendered_code_snippets_by_lmul[lm_key][dt] = rend_clean
+
+                                matches = intrinsic_call_regex.findall(rend_no_comments)
+                                for m in matches:
+                                    if m not in ignored_intrinsics:
+                                        native_instructions_by_lmul[lm_key][dt] = m
+                                        vendor_intrinsics_reverse_index.add(m)
+                                        break
+                            except Exception:
+                                pass
+
+            # Default to LMUL 1 for native_instructions and rendered_code_snippets
+            native_instructions = native_instructions_by_lmul.get("1", {})
+            rendered_code_snippets = rendered_code_snippets_by_lmul.get("1", {})
+
+            # 2. Process base LMUL (1) for by_datatype, emulation_algorithms, masked_by_datatype
             for dt in func_def["datatypes"]:
                 dt_par, dt_ret = dt.split(",") if "," in dt else (dt, dt)
                 dt_key = f"{dt_par},{dt_ret}"
 
                 # Unmasked level
-                cands = resolved_map.get((func, dt_key, None), [])
+                cands = resolved_map_base.get((func, dt_key, None), [])
                 active_cands = [cand for cand, cond in cands if cond != "0"]
                 lvl = min([cand["level"] for cand in active_cands], default=3)
                 by_datatype[dt] = lvl
 
-                # Check candidates for native instruction or emulation algorithm
                 for cand in active_cands:
-                    if cand["level"] == 0 and cand.get("ff") and "template" in cand["ff"]:
+                    if cand["level"] in [1, 2] and cand.get("ff") and "template" in cand["ff"]:
                         try:
-                            rend = render_template(resolved_isa, cand["ff"], dt_par, dt_ret, func, lmul=0)
-                            rend_no_comments = re.sub(r'/\*.*?\*/', '', rend, flags=re.DOTALL)
-                            rend_no_comments = re.sub(r'//.*', '', rend_no_comments)
-
-                            rend_clean = rend.strip().replace("\n", " ").replace("\t", " ")
-                            rend_clean = re.sub(r'\s+', ' ', rend_clean)
-                            rendered_code_snippets[dt] = rend_clean
-                            
-                            matches = intrinsic_call_regex.findall(rend_no_comments)
-                            for m in matches:
-                                if m not in ignored_intrinsics:
-                                    native_instructions[dt] = m
-                                    vendor_intrinsics_reverse_index.add(m)
-                                    break
-                        except Exception:
-                            pass
-                    elif cand["level"] in [1, 2] and cand.get("ff") and "template" in cand["ff"]:
-                        try:
-                            rend = render_template(resolved_isa, cand["ff"], dt_par, dt_ret, func, lmul=0)
+                            rend = render_template(resolved_isa_base, cand["ff"], dt_par, dt_ret, func, lmul=0)
                             s = rend
                             s = re.sub(r'%r<[^>]*>%', 'mipp::reg', s)
                             s = re.sub(r'%m<[^>]*>%', 'mipp::msk', s)
@@ -643,7 +929,7 @@ def generate_mipp_api_data(project_root=None):
                 # Masked levels
                 for mkind in ["mask", "maskz", "masks"]:
                     if mask_flags.get(mkind, False):
-                        m_cands = resolved_map.get((func, dt_key, mkind), [])
+                        m_cands = resolved_map_base.get((func, dt_key, mkind), [])
                         m_active = [cand for cand, cond in m_cands if cond != "0"]
                         m_lvl = min([cand["level"] for cand in m_active], default=3)
                         masked_by_datatype[mkind][dt] = m_lvl
@@ -656,9 +942,11 @@ def generate_mipp_api_data(project_root=None):
                 "by_datatype": by_datatype,
                 "native_instructions": native_instructions,
                 "code_snippets": rendered_code_snippets,
+                "native_instructions_by_lmul": native_instructions_by_lmul,
+                "code_snippets_by_lmul": rendered_code_snippets_by_lmul,
                 "emulation_algorithms": emulation_algorithms,
                 "masked_by_datatype": masked_by_datatype,
-                "hw_lmul": isa_metadata.get(isa_name, {}).get("hw_lmul", [1]),
+                "hw_lmul": hw_lmuls,
                 "sw_lmul": isa_metadata.get(isa_name, {}).get("sw_lmul", [])
             }
 
@@ -709,6 +997,27 @@ def generate_mipp_api_data(project_root=None):
         first_dt = func_def["datatypes"][0] if func_def["datatypes"] else "float32"
         ref_algo_default = ref_algos.get("1", {}).get(first_dt, {}).get("unmasked", "") if ref_algos else ""
 
+        # Scalar ISA support
+        scalar_snippets = {}
+        if ref_algos and "1" in ref_algos:
+            for dt in func_def["datatypes"]:
+                scalar_snippets[dt] = ref_algos["1"].get(dt, {}).get("unmasked", "")
+
+        isa_support["scalar"] = {
+            "overall_level": 3,
+            "by_datatype": { dt: 3 for dt in func_def["datatypes"] },
+            "native_instructions": {},
+            "code_snippets": scalar_snippets,
+            "emulation_algorithms": {},
+            "masked_by_datatype": {
+                "mask": { dt: 3 for dt in func_def["datatypes"] } if mask_flags.get("mask") else {},
+                "maskz": { dt: 3 for dt in func_def["datatypes"] } if mask_flags.get("maskz") else {},
+                "masks": { dt: 3 for dt in func_def["datatypes"] } if mask_flags.get("masks") else {}
+            },
+            "hw_lmul": [1],
+            "sw_lmul": []
+        }
+
         # Reproducible code snippet generator + Godbolt native sample
         native_avx = isa_support.get("avx", {}).get("native_instructions", {}).get("float32", None)
         snippets = build_code_snippets(func, cat_name, spec_info, native_avx)
@@ -751,8 +1060,18 @@ def generate_mipp_api_data(project_root=None):
     os.makedirs(output_dir, exist_ok=True)
     output_file = os.path.join(output_dir, "mipp_api_index.json")
 
+    export_payload = {
+        "isas": isas_meta,
+        "datatypes": datatypes_meta,
+        "datatype_groups": datatype_groups_meta,
+        "mask_modes": mask_modes_meta,
+        "levels": levels_meta,
+        "categories": list(categories.keys()),
+        "primitives": api_entries
+    }
+
     with open(output_file, "w", encoding="utf-8") as f:
-        json.dump(api_entries, f, indent=2, ensure_ascii=False)
+        json.dump(export_payload, f, indent=2, ensure_ascii=False)
 
     # Live sync to site/ and active MkDocs livereload temporary cache directories
     import glob, shutil
