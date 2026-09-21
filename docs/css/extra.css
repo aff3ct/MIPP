@@ -141,8 +141,8 @@
 .md-typeset pre,
 .md-typeset .highlight,
 .md-typeset .highlighttable,
-.md-content__inner > .highlight,
-.md-content__inner > pre,
+.md-content__inner>.highlight,
+.md-content__inner>pre,
 .md-typeset .admonition,
 .md-typeset .tabbed-set,
 .md-typeset__scrollwrap,
@@ -153,8 +153,8 @@
 }
 
 /* Eliminate full-bleed negative margins on code blocks and formulas across all viewports */
-.md-content__inner > .highlight,
-.md-content__inner > pre,
+.md-content__inner>.highlight,
+.md-content__inner>pre,
 .md-typeset .highlight,
 .md-typeset pre,
 .md-typeset .highlighttable,
@@ -442,8 +442,8 @@ pre,
 }
 
 .md-typeset pre>code,
-.md-content__inner > .highlight > pre > code,
-.md-content__inner > pre > code {
+.md-content__inner>.highlight>pre>code,
+.md-content__inner>pre>code {
   border-radius: var(--mipp-radius-md) !important;
   border: 1px solid var(--mipp-card-border) !important;
   border-left-width: 1px !important;
@@ -459,7 +459,7 @@ pre,
 }
 
 [data-md-color-scheme="default"] .md-typeset pre>code,
-[data-md-color-scheme="default"] .md-content__inner > .highlight > pre > code {
+[data-md-color-scheme="default"] .md-content__inner>.highlight>pre>code {
   background-color: #ffffff !important;
   color: var(--md-code-fg-color);
   border-color: #e2e8f0 !important;
@@ -472,7 +472,7 @@ pre,
 }
 
 [data-md-color-scheme="slate"] .md-typeset pre>code,
-[data-md-color-scheme="slate"] .md-content__inner > .highlight > pre > code {
+[data-md-color-scheme="slate"] .md-content__inner>.highlight>pre>code {
   background-color: #080c14 !important;
   color: #e2e8f0;
   border-color: rgba(255, 255, 255, 0.08) !important;
@@ -1172,6 +1172,17 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
   margin: 0 !important;
 }
 
+.mipp-card-desc-home {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--md-default-fg-color--lighter);
+  margin: 0 !important;
+  padding-left: 1.0rem;
+  padding-right: 1.0rem;
+  padding-top: 0.4rem;
+  padding-bottom: 0.7rem;
+}
+
 /* Dark mode image adjustments (selective invert only for explicitly tagged elements) */
 [data-md-color-scheme="slate"] img.invert-dark {
   filter: invert(0.88);
@@ -1188,6 +1199,7 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
    -------------------------------------------------------------------------- */
 
 @media screen and (min-width: 76.25em) {
+
   /* Ensure the main container fills at least the available viewport height,
      preventing sticky sidebar collapse and keeping footer at bottom on short pages */
   .md-main__inner {
@@ -1551,8 +1563,8 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
   }
 
   /* 4. Code Blocks & Elements Width Alignment (Identical width to admonitions, tables, text) */
-  .md-content__inner > .highlight,
-  .md-content__inner > pre,
+  .md-content__inner>.highlight,
+  .md-content__inner>pre,
   .md-typeset .highlight,
   .md-typeset pre,
   .md-typeset .highlighttable {
@@ -1566,10 +1578,10 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
   }
 
   /* Restore left and right visible borders and rounded corners on mobile */
-  .md-content__inner > .highlight > pre > code,
-  .md-content__inner > pre > code,
-  .md-typeset .highlight pre > code,
-  .md-typeset pre > code {
+  .md-content__inner>.highlight>pre>code,
+  .md-content__inner>pre>code,
+  .md-typeset .highlight pre>code,
+  .md-typeset pre>code {
     border: 1px solid var(--mipp-card-border) !important;
     border-left-width: 1px !important;
     border-right-width: 1px !important;
@@ -1586,21 +1598,21 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
     display: block !important;
   }
 
-  [data-md-color-scheme="default"] .md-content__inner > .highlight > pre > code,
-  [data-md-color-scheme="default"] .md-typeset pre > code {
+  [data-md-color-scheme="default"] .md-content__inner>.highlight>pre>code,
+  [data-md-color-scheme="default"] .md-typeset pre>code {
     border-color: #e2e8f0 !important;
     background-color: #ffffff !important;
   }
 
-  [data-md-color-scheme="slate"] .md-content__inner > .highlight > pre > code,
-  [data-md-color-scheme="slate"] .md-typeset pre > code {
+  [data-md-color-scheme="slate"] .md-content__inner>.highlight>pre>code,
+  [data-md-color-scheme="slate"] .md-typeset pre>code {
     border-color: rgba(255, 255, 255, 0.08) !important;
     background-color: #080c14 !important;
   }
 
   /* Code block filename / title header on mobile */
   .md-typeset .highlight .filename,
-  .md-content__inner > .highlight > .filename,
+  .md-content__inner>.highlight>.filename,
   .md-typeset .highlighttable th.filename span.filename {
     border-top-left-radius: var(--mipp-radius-sm) !important;
     border-top-right-radius: var(--mipp-radius-sm) !important;
@@ -1613,16 +1625,16 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
     box-sizing: border-box !important;
   }
 
-  .md-typeset .highlight .filename + pre > code,
-  .md-content__inner > .highlight > .filename + pre > code {
+  .md-typeset .highlight .filename+pre>code,
+  .md-content__inner>.highlight>.filename+pre>code {
     border-top-left-radius: 0 !important;
     border-top-right-radius: 0 !important;
   }
 
   /* Inside tabbed sets: remain flush with outer tab container without nested borders */
-  .md-typeset .tabbed-block > .highlight,
+  .md-typeset .tabbed-block>.highlight,
   .md-typeset .tabbed-block pre,
-  .md-typeset .tabbed-block pre > code {
+  .md-typeset .tabbed-block pre>code {
     border: none !important;
     border-radius: 0 !important;
     margin: 0 !important;
@@ -1641,7 +1653,7 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
     width: 100% !important;
   }
 
-  .md-content__inner > .tabbed-set .tabbed-labels,
+  .md-content__inner>.tabbed-set .tabbed-labels,
   .md-typeset .tabbed-labels {
     margin-left: 0 !important;
     margin-right: 0 !important;
@@ -1652,8 +1664,8 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
     width: 100% !important;
   }
 
-  .md-content__inner > .tabbed-set .tabbed-labels ~ .tabbed-control--prev,
-  .md-content__inner > .tabbed-set .tabbed-labels ~ .tabbed-control--next {
+  .md-content__inner>.tabbed-set .tabbed-labels~.tabbed-control--prev,
+  .md-content__inner>.tabbed-set .tabbed-labels~.tabbed-control--next {
     margin-left: 0 !important;
     margin-right: 0 !important;
   }
@@ -1743,7 +1755,10 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
     grid-template-columns: 1fr !important;
   }
 
-  .mipp-grid-2x2 .mipp-card {
-    padding: 0.95rem !important;
+  .mipp-card-desc-home {
+    padding-left: 0.6rem !important;
+    padding-right: 0.6rem !important;
+    padding-top: 0.2rem !important;
+    padding-bottom: 0.4rem !important;
   }
 }

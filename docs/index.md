@@ -39,7 +39,7 @@ hide:
       <div class="mipp-card-icon">🚀</div>
       <h3 class="mipp-card-title">Next-Gen ISAs & Scalable Vectors</h3>
     </div>
-    <p class="mipp-card-desc">
+    <p class="mipp-card-desc-home">
       Native support for <b>AVX-512</b>, <b>ARM SVE</b>, and <b>RISC-V RVV</b>. Advanced features include register grouping (<b>LMUL/LDIV</b> up to x8/d2), full vector masking, and an <b>auto-generated</b>, <b>future-proof</b> codebase. Easily <b>extensible to new ISAs</b>.
     </p>
   </div>
@@ -48,7 +48,7 @@ hide:
       <div class="mipp-card-icon">🎯</div>
       <h3 class="mipp-card-title">Unique Tri-Dialect API</h3>
     </div>
-    <p class="mipp-card-desc">
+    <p class="mipp-card-desc-home">
       Choose your paradigm: pure <b>C99</b> (<code>mipp_add_float32</code>) for <b>OS kernels and embedded targets</b>; generic <b>C++ Templates</b> (<code>mipp::add&lt;float&gt;</code>) for <b>HPC algorithms</b>; or expressive <b>C++ Objects</b> (<code>va + vb</code>) with full <b>operator overloading</b>.
     </p>
   </div>
@@ -57,7 +57,7 @@ hide:
       <div class="mipp-card-icon">🛡️</div>
       <h3 class="mipp-card-title">100% Fallback Guarantee</h3>
     </div>
-    <p class="mipp-card-desc">
+    <p class="mipp-card-desc-home">
       Guaranteed completeness across all <b>10 datatypes</b> through a deterministic <b>4-level fallback engine</b>: <b>L0</b> (Native Intrinsic) &rarr; <b>L1</b> (Same-ISA Emulation) &rarr; <b>L2</b> (Portable Compose) &rarr; <b>L3</b> (Scalar Loop Fallback). <b>Zero missing-instruction errors</b>.
     </p>
   </div>
@@ -66,7 +66,7 @@ hide:
       <div class="mipp-card-icon">⚡</div>
       <h3 class="mipp-card-title">Zero-Overhead & Header-Only</h3>
     </div>
-    <p class="mipp-card-desc">
+    <p class="mipp-card-desc-home">
       <b>No compilation</b>, <b>no external dependencies</b>, and <b>no linking</b> required. Simply include <code>&lt;mipp.h&gt;</code>, <code>&lt;mipp.hpp&gt;</code>, or <code>&lt;mipp_obj.hpp&gt;</code> into your include path: code inlines directly into bare-metal assembly with <b>zero runtime penalty</b>.
     </p>
   </div>
