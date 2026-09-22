@@ -55,6 +55,10 @@ docker tag linux_armhf_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_li
 
 docker tag linux_arm64_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_linux:gcc-14_armv8-neon
 docker tag linux_arm64_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_armv8-neon
+docker tag linux_arm64_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_linux:gcc-14_armv9-sve
+docker tag linux_arm64_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_armv9-sve
+docker tag linux_arm64_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_linux:gcc-14_armv9-sve2
+docker tag linux_arm64_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_armv9-sve2
 
 docker tag linux_riscv64_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_linux:gcc-14_riscv64-rvv1.0
 docker tag linux_riscv64_gcc-14_clang-20 registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_riscv64-rvv1.0
@@ -102,6 +106,10 @@ docker push registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_armv7-neon-fma
 
 docker push registry.gitlab.com/aff3ct/aff3ct/mipp_linux:gcc-14_armv8-neon
 docker push registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_armv8-neon
+docker push registry.gitlab.com/aff3ct/aff3ct/mipp_linux:gcc-14_armv9-sve
+docker push registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_armv9-sve
+docker push registry.gitlab.com/aff3ct/aff3ct/mipp_linux:gcc-14_armv9-sve2
+docker push registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_armv9-sve2
 
 docker push registry.gitlab.com/aff3ct/aff3ct/mipp_linux:gcc-14_riscv64-rvv1.0
 docker push registry.gitlab.com/aff3ct/aff3ct/mipp_linux:clang-20_riscv64-rvv1.0
