@@ -1,22 +1,62 @@
 {
+    "acos": [
+        {
+            "instr_name": "acos",
+            "datatypes": "all_float",
+            "version": "mask",
+            "template_ref": "tpl_mask_generic_emu.unary_mask_all_datatypes"
+        },
+        {
+            "instr_name": "acos",
+            "datatypes": "all_float",
+            "version": "maskz",
+            "template_ref": "tpl_mask_generic_emu.unary_maskz_all_datatypes"
+        },
+        {
+            "instr_name": "acos",
+            "datatypes": "all_float",
+            "version": "masks",
+            "template_ref": "tpl_mask_generic_emu.unary_masks_all_datatypes"
+        }
+    ],
+    "acosh": [
+        {
+            "instr_name": "acosh",
+            "datatypes": "all_float",
+            "version": "mask",
+            "template_ref": "tpl_mask_generic_emu.unary_mask_all_datatypes"
+        },
+        {
+            "instr_name": "acosh",
+            "datatypes": "all_float",
+            "version": "maskz",
+            "template_ref": "tpl_mask_generic_emu.unary_maskz_all_datatypes"
+        },
+        {
+            "instr_name": "acosh",
+            "datatypes": "all_float",
+            "version": "masks",
+            "template_ref": "tpl_mask_generic_emu.unary_masks_all_datatypes"
+        }
+    ],
     "add": [
         {
             "instr_name": "add",
             "datatypes": "all_datatypes",
             "version": "mask",
-            "template_ref": "tpl_mask_generic_emu.add_mask_all_datatypes"
+            "template_ref": "tpl_mask_generic_emu.binary_mask_all_datatypes"
         },
         {
             "instr_name": "add",
             "datatypes": "all_datatypes",
             "version": "maskz",
-            "template_ref": "tpl_mask_generic_emu.add_maskz_all_datatypes"
+            "template_ref": "tpl_mask_generic_emu.binary_maskz_all_datatypes"
         },
         {
             "instr_name": "add",
             "datatypes": "all_datatypes",
             "version": "masks",
-            "template_ref": "tpl_mask_generic_emu.add_masks_all_datatypes"
+            "template_ref": "tpl_mask_generic_emu.binary_masks_all_datatypes"
         }
     ],
     "andb": [
@@ -24,19 +64,19 @@
             "instr_name": "andb",
             "datatypes": "all_datatypes",
             "version": "mask",
-            "template_ref": "tpl_mask_generic_emu.andb_mask_all_datatypes"
+            "template_ref": "tpl_mask_generic_emu.binary_mask_all_datatypes"
         },
         {
             "instr_name": "andb",
             "datatypes": "all_datatypes",
             "version": "maskz",
-            "template_ref": "tpl_mask_generic_emu.andb_maskz_all_datatypes"
+            "template_ref": "tpl_mask_generic_emu.binary_maskz_all_datatypes"
         },
         {
             "instr_name": "andb",
             "datatypes": "all_datatypes",
             "version": "masks",
-            "template_ref": "tpl_mask_generic_emu.andb_masks_all_datatypes"
+            "template_ref": "tpl_mask_generic_emu.binary_masks_all_datatypes"
         }
     ],
     "andnb": [
@@ -44,19 +84,99 @@
             "instr_name": "andnb",
             "datatypes": "all_datatypes",
             "version": "mask",
-            "template_ref": "tpl_mask_generic_emu.andnb_mask_all_datatypes"
+            "template_ref": "tpl_mask_generic_emu.binary_mask_all_datatypes"
         },
         {
             "instr_name": "andnb",
             "datatypes": "all_datatypes",
             "version": "maskz",
-            "template_ref": "tpl_mask_generic_emu.andnb_maskz_all_datatypes"
+            "template_ref": "tpl_mask_generic_emu.binary_maskz_all_datatypes"
         },
         {
             "instr_name": "andnb",
             "datatypes": "all_datatypes",
             "version": "masks",
-            "template_ref": "tpl_mask_generic_emu.andnb_masks_all_datatypes"
+            "template_ref": "tpl_mask_generic_emu.binary_masks_all_datatypes"
+        }
+    ],
+    "asin": [
+        {
+            "instr_name": "asin",
+            "datatypes": "all_float",
+            "version": "mask",
+            "template_ref": "tpl_mask_generic_emu.unary_mask_all_datatypes"
+        },
+        {
+            "instr_name": "asin",
+            "datatypes": "all_float",
+            "version": "maskz",
+            "template_ref": "tpl_mask_generic_emu.unary_maskz_all_datatypes"
+        },
+        {
+            "instr_name": "asin",
+            "datatypes": "all_float",
+            "version": "masks",
+            "template_ref": "tpl_mask_generic_emu.unary_masks_all_datatypes"
+        }
+    ],
+    "asinh": [
+        {
+            "instr_name": "asinh",
+            "datatypes": "all_float",
+            "version": "mask",
+            "template_ref": "tpl_mask_generic_emu.unary_mask_all_datatypes"
+        },
+        {
+            "instr_name": "asinh",
+            "datatypes": "all_float",
+            "version": "maskz",
+            "template_ref": "tpl_mask_generic_emu.unary_maskz_all_datatypes"
+        },
+        {
+            "instr_name": "asinh",
+            "datatypes": "all_float",
+            "version": "masks",
+            "template_ref": "tpl_mask_generic_emu.unary_masks_all_datatypes"
+        }
+    ],
+    "atan": [
+        {
+            "instr_name": "atan",
+            "datatypes": "all_float",
+            "version": "mask",
+            "template_ref": "tpl_mask_generic_emu.unary_mask_all_datatypes"
+        },
+        {
+            "instr_name": "atan",
+            "datatypes": "all_float",
+            "version": "maskz",
+            "template_ref": "tpl_mask_generic_emu.unary_maskz_all_datatypes"
+        },
+        {
+            "instr_name": "atan",
+            "datatypes": "all_float",
+            "version": "masks",
+            "template_ref": "tpl_mask_generic_emu.unary_masks_all_datatypes"
+        }
+    ],
+    "atanh": [
+        {
+            "instr_name": "atanh",
+            "datatypes": "all_float",
+            "version": "mask",
+            "template_ref": "tpl_mask_generic_emu.unary_mask_all_datatypes"
+        },
+        {
+            "instr_name": "atanh",
+            "datatypes": "all_float",
+            "version": "maskz",
+            "template_ref": "tpl_mask_generic_emu.unary_maskz_all_datatypes"
+        },
+        {
+            "instr_name": "atanh",
+            "datatypes": "all_float",
+            "version": "masks",
+            "template_ref": "tpl_mask_generic_emu.unary_masks_all_datatypes"
         }
     ],
     "cmpeq": [
@@ -107,24 +227,64 @@
             "template_ref": "tpl_mask_generic_emu.cmp_2args"
         }
     ],
+    "cos": [
+        {
+            "instr_name": "cos",
+            "datatypes": "all_float",
+            "version": "mask",
+            "template_ref": "tpl_mask_generic_emu.unary_mask_all_datatypes"
+        },
+        {
+            "instr_name": "cos",
+            "datatypes": "all_float",
+            "version": "maskz",
+            "template_ref": "tpl_mask_generic_emu.unary_maskz_all_datatypes"
+        },
+        {
+            "instr_name": "cos",
+            "datatypes": "all_float",
+            "version": "masks",
+            "template_ref": "tpl_mask_generic_emu.unary_masks_all_datatypes"
+        }
+    ],
+    "cosh": [
+        {
+            "instr_name": "cosh",
+            "datatypes": "all_float",
+            "version": "mask",
+            "template_ref": "tpl_mask_generic_emu.unary_mask_all_datatypes"
+        },
+        {
+            "instr_name": "cosh",
+            "datatypes": "all_float",
+            "version": "maskz",
+            "template_ref": "tpl_mask_generic_emu.unary_maskz_all_datatypes"
+        },
+        {
+            "instr_name": "cosh",
+            "datatypes": "all_float",
+            "version": "masks",
+            "template_ref": "tpl_mask_generic_emu.unary_masks_all_datatypes"
+        }
+    ],
     "div": [
         {
             "instr_name": "div",
             "datatypes": "all_float",
             "version": "mask",
-            "template_ref": "tpl_mask_generic_emu.div_mask_all_float"
+            "template_ref": "tpl_mask_generic_emu.binary_mask_all_datatypes"
         },
         {
             "instr_name": "div",
             "datatypes": "all_float",
             "version": "maskz",
-            "template_ref": "tpl_mask_generic_emu.div_maskz_all_float"
+            "template_ref": "tpl_mask_generic_emu.binary_maskz_all_datatypes"
         },
         {
             "instr_name": "div",
             "datatypes": "all_float",
             "version": "masks",
-            "template_ref": "tpl_mask_generic_emu.div_masks_all_float"
+            "template_ref": "tpl_mask_generic_emu.binary_masks_all_datatypes"
         }
     ],
     "div2": [
@@ -132,19 +292,19 @@
             "instr_name": "div2",
             "datatypes": "all_float",
             "version": "mask",
-            "template_ref": "tpl_mask_generic_emu.div2_mask_all_float"
+            "template_ref": "tpl_mask_generic_emu.unary_mask_all_datatypes"
         },
         {
             "instr_name": "div2",
             "datatypes": "all_float",
             "version": "maskz",
-            "template_ref": "tpl_mask_generic_emu.div2_maskz_all_float"
+            "template_ref": "tpl_mask_generic_emu.unary_maskz_all_datatypes"
         },
         {
             "instr_name": "div2",
             "datatypes": "all_float",
             "version": "masks",
-            "template_ref": "tpl_mask_generic_emu.div2_masks_all_float"
+            "template_ref": "tpl_mask_generic_emu.unary_masks_all_datatypes"
         }
     ],
     "div4": [
@@ -152,19 +312,19 @@
             "instr_name": "div4",
             "datatypes": "all_float",
             "version": "mask",
-            "template_ref": "tpl_mask_generic_emu.div4_mask_all_float"
+            "template_ref": "tpl_mask_generic_emu.unary_mask_all_datatypes"
         },
         {
             "instr_name": "div4",
             "datatypes": "all_float",
             "version": "maskz",
-            "template_ref": "tpl_mask_generic_emu.div4_maskz_all_float"
+            "template_ref": "tpl_mask_generic_emu.unary_maskz_all_datatypes"
         },
         {
             "instr_name": "div4",
             "datatypes": "all_float",
             "version": "masks",
-            "template_ref": "tpl_mask_generic_emu.div4_masks_all_float"
+            "template_ref": "tpl_mask_generic_emu.unary_masks_all_datatypes"
         }
     ],
     "exp": [
@@ -172,19 +332,19 @@
             "instr_name": "exp",
             "datatypes": "all_float",
             "version": "mask",
-            "template_ref": "tpl_mask_generic_emu.exp_mask_all_float"
+            "template_ref": "tpl_mask_generic_emu.unary_mask_all_datatypes"
         },
         {
             "instr_name": "exp",
             "datatypes": "all_float",
             "version": "maskz",
-            "template_ref": "tpl_mask_generic_emu.exp_maskz_all_float"
+            "template_ref": "tpl_mask_generic_emu.unary_maskz_all_datatypes"
         },
         {
             "instr_name": "exp",
             "datatypes": "all_float",
             "version": "masks",
-            "template_ref": "tpl_mask_generic_emu.exp_masks_all_float"
+            "template_ref": "tpl_mask_generic_emu.unary_masks_all_datatypes"
         }
     ],
     "fmadd": [
@@ -195,7 +355,7 @@
                 "int32"
             ],
             "version": "mask",
-            "template_ref": "tpl_mask_generic_emu.fmadd_mask_all_float_int32"
+            "template_ref": "tpl_mask_generic_emu.ternary_mask_all_datatypes"
         },
         {
             "instr_name": "fmadd",
@@ -204,7 +364,7 @@
                 "int32"
             ],
             "version": "maskz",
-            "template_ref": "tpl_mask_generic_emu.fmadd_maskz_all_float_int32"
+            "template_ref": "tpl_mask_generic_emu.ternary_maskz_all_datatypes"
         },
         {
             "instr_name": "fmadd",
@@ -213,7 +373,7 @@
                 "int32"
             ],
             "version": "masks",
-            "template_ref": "tpl_mask_generic_emu.fmadd_masks_all_float_int32"
+            "template_ref": "tpl_mask_generic_emu.ternary_masks_all_datatypes"
         }
     ],
     "fmsub": [
@@ -224,7 +384,7 @@
                 "int32"
             ],
             "version": "mask",
-            "template_ref": "tpl_mask_generic_emu.fmsub_mask_all_float_int32"
+            "template_ref": "tpl_mask_generic_emu.ternary_mask_all_datatypes"
         },
         {
             "instr_name": "fmsub",
@@ -233,7 +393,7 @@
                 "int32"
             ],
             "version": "maskz",
-            "template_ref": "tpl_mask_generic_emu.fmsub_maskz_all_float_int32"
+            "template_ref": "tpl_mask_generic_emu.ternary_maskz_all_datatypes"
         },
         {
             "instr_name": "fmsub",
@@ -242,7 +402,7 @@
                 "int32"
             ],
             "version": "masks",
-            "template_ref": "tpl_mask_generic_emu.fmsub_masks_all_float_int32"
+            "template_ref": "tpl_mask_generic_emu.ternary_masks_all_datatypes"
         }
     ],
     "fnmadd": [
@@ -253,7 +413,7 @@
                 "int32"
             ],
             "version": "mask",
-            "template_ref": "tpl_mask_generic_emu.fnmadd_mask_all_float_int32"
+            "template_ref": "tpl_mask_generic_emu.ternary_mask_all_datatypes"
         },
         {
             "instr_name": "fnmadd",
@@ -262,7 +422,7 @@
                 "int32"
             ],
             "version": "maskz",
-            "template_ref": "tpl_mask_generic_emu.fnmadd_maskz_all_float_int32"
+            "template_ref": "tpl_mask_generic_emu.ternary_maskz_all_datatypes"
         },
         {
             "instr_name": "fnmadd",
@@ -271,7 +431,7 @@
                 "int32"
             ],
             "version": "masks",
-            "template_ref": "tpl_mask_generic_emu.fnmadd_masks_all_float_int32"
+            "template_ref": "tpl_mask_generic_emu.ternary_masks_all_datatypes"
         }
     ],
     "fnmsub": [
@@ -282,7 +442,7 @@
                 "int32"
             ],
             "version": "mask",
-            "template_ref": "tpl_mask_generic_emu.fnmsub_mask_all_float_int32"
+            "template_ref": "tpl_mask_generic_emu.ternary_mask_all_datatypes"
         },
         {
             "instr_name": "fnmsub",
@@ -291,7 +451,7 @@
                 "int32"
             ],
             "version": "maskz",
-            "template_ref": "tpl_mask_generic_emu.fnmsub_maskz_all_float_int32"
+            "template_ref": "tpl_mask_generic_emu.ternary_maskz_all_datatypes"
         },
         {
             "instr_name": "fnmsub",
@@ -300,7 +460,7 @@
                 "int32"
             ],
             "version": "masks",
-            "template_ref": "tpl_mask_generic_emu.fnmsub_masks_all_float_int32"
+            "template_ref": "tpl_mask_generic_emu.ternary_masks_all_datatypes"
         }
     ],
     "hadd": [
@@ -490,19 +650,19 @@
             "instr_name": "log",
             "datatypes": "all_float",
             "version": "mask",
-            "template_ref": "tpl_mask_generic_emu.log_mask_all_float"
+            "template_ref": "tpl_mask_generic_emu.unary_mask_all_datatypes"
         },
         {
             "instr_name": "log",
             "datatypes": "all_float",
             "version": "maskz",
-            "template_ref": "tpl_mask_generic_emu.log_maskz_all_float"
+            "template_ref": "tpl_mask_generic_emu.unary_maskz_all_datatypes"
         },
         {
             "instr_name": "log",
             "datatypes": "all_float",
             "version": "masks",
-            "template_ref": "tpl_mask_generic_emu.log_masks_all_float"
+            "template_ref": "tpl_mask_generic_emu.unary_masks_all_datatypes"
         }
     ],
     "lshift": [
@@ -530,19 +690,19 @@
             "instr_name": "max",
             "datatypes": "all_datatypes",
             "version": "mask",
-            "template_ref": "tpl_mask_generic_emu.max_mask_all_datatypes"
+            "template_ref": "tpl_mask_generic_emu.binary_mask_all_datatypes"
         },
         {
             "instr_name": "max",
             "datatypes": "all_datatypes",
             "version": "maskz",
-            "template_ref": "tpl_mask_generic_emu.max_maskz_all_datatypes"
+            "template_ref": "tpl_mask_generic_emu.binary_maskz_all_datatypes"
         },
         {
             "instr_name": "max",
             "datatypes": "all_datatypes",
             "version": "masks",
-            "template_ref": "tpl_mask_generic_emu.max_masks_all_datatypes"
+            "template_ref": "tpl_mask_generic_emu.binary_masks_all_datatypes"
         }
     ],
     "min": [
@@ -550,19 +710,19 @@
             "instr_name": "min",
             "datatypes": "all_datatypes",
             "version": "mask",
-            "template_ref": "tpl_mask_generic_emu.min_mask_all_datatypes"
+            "template_ref": "tpl_mask_generic_emu.binary_mask_all_datatypes"
         },
         {
             "instr_name": "min",
             "datatypes": "all_datatypes",
             "version": "maskz",
-            "template_ref": "tpl_mask_generic_emu.min_maskz_all_datatypes"
+            "template_ref": "tpl_mask_generic_emu.binary_maskz_all_datatypes"
         },
         {
             "instr_name": "min",
             "datatypes": "all_datatypes",
             "version": "masks",
-            "template_ref": "tpl_mask_generic_emu.min_masks_all_datatypes"
+            "template_ref": "tpl_mask_generic_emu.binary_masks_all_datatypes"
         }
     ],
     "msb": [
@@ -570,19 +730,19 @@
             "instr_name": "msb",
             "datatypes": "all_datatypes",
             "version": "mask",
-            "template_ref": "tpl_mask_generic_emu.msb_mask_all_datatypes"
+            "template_ref": "tpl_mask_generic_emu.unary_mask_all_datatypes"
         },
         {
             "instr_name": "msb",
             "datatypes": "all_datatypes",
             "version": "maskz",
-            "template_ref": "tpl_mask_generic_emu.msb_maskz_all_datatypes"
+            "template_ref": "tpl_mask_generic_emu.unary_maskz_all_datatypes"
         },
         {
             "instr_name": "msb",
             "datatypes": "all_datatypes",
             "version": "masks",
-            "template_ref": "tpl_mask_generic_emu.msb_masks_all_datatypes"
+            "template_ref": "tpl_mask_generic_emu.unary_masks_all_datatypes"
         }
     ],
     "mul": [
@@ -590,19 +750,19 @@
             "instr_name": "mul",
             "datatypes": "all_datatypes",
             "version": "mask",
-            "template_ref": "tpl_mask_generic_emu.mul_mask_all_datatypes"
+            "template_ref": "tpl_mask_generic_emu.binary_mask_all_datatypes"
         },
         {
             "instr_name": "mul",
             "datatypes": "all_datatypes",
             "version": "maskz",
-            "template_ref": "tpl_mask_generic_emu.mul_maskz_all_datatypes"
+            "template_ref": "tpl_mask_generic_emu.binary_maskz_all_datatypes"
         },
         {
             "instr_name": "mul",
             "datatypes": "all_datatypes",
             "version": "masks",
-            "template_ref": "tpl_mask_generic_emu.mul_masks_all_datatypes"
+            "template_ref": "tpl_mask_generic_emu.binary_masks_all_datatypes"
         }
     ],
     "notb": [
@@ -610,19 +770,19 @@
             "instr_name": "notb",
             "datatypes": "all_datatypes",
             "version": "mask",
-            "template_ref": "tpl_mask_generic_emu.notb_mask_all_datatypes"
+            "template_ref": "tpl_mask_generic_emu.unary_mask_all_datatypes"
         },
         {
             "instr_name": "notb",
             "datatypes": "all_datatypes",
             "version": "maskz",
-            "template_ref": "tpl_mask_generic_emu.notb_maskz_all_datatypes"
+            "template_ref": "tpl_mask_generic_emu.unary_maskz_all_datatypes"
         },
         {
             "instr_name": "notb",
             "datatypes": "all_datatypes",
             "version": "masks",
-            "template_ref": "tpl_mask_generic_emu.notb_masks_all_datatypes"
+            "template_ref": "tpl_mask_generic_emu.unary_masks_all_datatypes"
         }
     ],
     "orb": [
@@ -630,19 +790,19 @@
             "instr_name": "orb",
             "datatypes": "all_datatypes",
             "version": "mask",
-            "template_ref": "tpl_mask_generic_emu.orb_mask_all_datatypes"
+            "template_ref": "tpl_mask_generic_emu.binary_mask_all_datatypes"
         },
         {
             "instr_name": "orb",
             "datatypes": "all_datatypes",
             "version": "maskz",
-            "template_ref": "tpl_mask_generic_emu.orb_maskz_all_datatypes"
+            "template_ref": "tpl_mask_generic_emu.binary_maskz_all_datatypes"
         },
         {
             "instr_name": "orb",
             "datatypes": "all_datatypes",
             "version": "masks",
-            "template_ref": "tpl_mask_generic_emu.orb_masks_all_datatypes"
+            "template_ref": "tpl_mask_generic_emu.binary_masks_all_datatypes"
         }
     ],
     "pow": [
@@ -650,19 +810,19 @@
             "instr_name": "pow",
             "datatypes": "all_float",
             "version": "mask",
-            "template_ref": "tpl_mask_generic_emu.pow_mask_all_float"
+            "template_ref": "tpl_mask_generic_emu.binary_mask_all_datatypes"
         },
         {
             "instr_name": "pow",
             "datatypes": "all_float",
             "version": "maskz",
-            "template_ref": "tpl_mask_generic_emu.pow_maskz_all_float"
+            "template_ref": "tpl_mask_generic_emu.binary_maskz_all_datatypes"
         },
         {
             "instr_name": "pow",
             "datatypes": "all_float",
             "version": "masks",
-            "template_ref": "tpl_mask_generic_emu.pow_masks_all_float"
+            "template_ref": "tpl_mask_generic_emu.binary_masks_all_datatypes"
         }
     ],
     "round": [
@@ -670,19 +830,19 @@
             "instr_name": "round",
             "datatypes": "all_datatypes",
             "version": "mask",
-            "template_ref": "tpl_mask_generic_emu.round_mask_all_datatypes"
+            "template_ref": "tpl_mask_generic_emu.unary_mask_all_datatypes"
         },
         {
             "instr_name": "round",
             "datatypes": "all_datatypes",
             "version": "maskz",
-            "template_ref": "tpl_mask_generic_emu.round_maskz_all_datatypes"
+            "template_ref": "tpl_mask_generic_emu.unary_maskz_all_datatypes"
         },
         {
             "instr_name": "round",
             "datatypes": "all_datatypes",
             "version": "masks",
-            "template_ref": "tpl_mask_generic_emu.round_masks_all_datatypes"
+            "template_ref": "tpl_mask_generic_emu.unary_masks_all_datatypes"
         }
     ],
     "rsqrt": [
@@ -690,19 +850,19 @@
             "instr_name": "rsqrt",
             "datatypes": "all_float",
             "version": "mask",
-            "template_ref": "tpl_mask_generic_emu.rsqrt_mask_all_float"
+            "template_ref": "tpl_mask_generic_emu.unary_mask_all_datatypes"
         },
         {
             "instr_name": "rsqrt",
             "datatypes": "all_float",
             "version": "maskz",
-            "template_ref": "tpl_mask_generic_emu.rsqrt_maskz_all_float"
+            "template_ref": "tpl_mask_generic_emu.unary_maskz_all_datatypes"
         },
         {
             "instr_name": "rsqrt",
             "datatypes": "all_float",
             "version": "masks",
-            "template_ref": "tpl_mask_generic_emu.rsqrt_masks_all_float"
+            "template_ref": "tpl_mask_generic_emu.unary_masks_all_datatypes"
         }
     ],
     "set": [
@@ -729,24 +889,64 @@
             "template_ref": "tpl_mask_generic_emu.set1_masks_all_datatypes"
         }
     ],
+    "sin": [
+        {
+            "instr_name": "sin",
+            "datatypes": "all_float",
+            "version": "mask",
+            "template_ref": "tpl_mask_generic_emu.unary_mask_all_datatypes"
+        },
+        {
+            "instr_name": "sin",
+            "datatypes": "all_float",
+            "version": "maskz",
+            "template_ref": "tpl_mask_generic_emu.unary_maskz_all_datatypes"
+        },
+        {
+            "instr_name": "sin",
+            "datatypes": "all_float",
+            "version": "masks",
+            "template_ref": "tpl_mask_generic_emu.unary_masks_all_datatypes"
+        }
+    ],
+    "sinh": [
+        {
+            "instr_name": "sinh",
+            "datatypes": "all_float",
+            "version": "mask",
+            "template_ref": "tpl_mask_generic_emu.unary_mask_all_datatypes"
+        },
+        {
+            "instr_name": "sinh",
+            "datatypes": "all_float",
+            "version": "maskz",
+            "template_ref": "tpl_mask_generic_emu.unary_maskz_all_datatypes"
+        },
+        {
+            "instr_name": "sinh",
+            "datatypes": "all_float",
+            "version": "masks",
+            "template_ref": "tpl_mask_generic_emu.unary_masks_all_datatypes"
+        }
+    ],
     "sqrt": [
         {
             "instr_name": "sqrt",
             "datatypes": "all_float",
             "version": "mask",
-            "template_ref": "tpl_mask_generic_emu.sqrt_mask_all_float"
+            "template_ref": "tpl_mask_generic_emu.unary_mask_all_datatypes"
         },
         {
             "instr_name": "sqrt",
             "datatypes": "all_float",
             "version": "maskz",
-            "template_ref": "tpl_mask_generic_emu.sqrt_maskz_all_float"
+            "template_ref": "tpl_mask_generic_emu.unary_maskz_all_datatypes"
         },
         {
             "instr_name": "sqrt",
             "datatypes": "all_float",
             "version": "masks",
-            "template_ref": "tpl_mask_generic_emu.sqrt_masks_all_float"
+            "template_ref": "tpl_mask_generic_emu.unary_masks_all_datatypes"
         }
     ],
     "store": [
@@ -782,19 +982,59 @@
             "instr_name": "sub",
             "datatypes": "all_datatypes",
             "version": "mask",
-            "template_ref": "tpl_mask_generic_emu.sub_mask_all_datatypes"
+            "template_ref": "tpl_mask_generic_emu.binary_mask_all_datatypes"
         },
         {
             "instr_name": "sub",
             "datatypes": "all_datatypes",
             "version": "maskz",
-            "template_ref": "tpl_mask_generic_emu.sub_maskz_all_datatypes"
+            "template_ref": "tpl_mask_generic_emu.binary_maskz_all_datatypes"
         },
         {
             "instr_name": "sub",
             "datatypes": "all_datatypes",
             "version": "masks",
-            "template_ref": "tpl_mask_generic_emu.sub_masks_all_datatypes"
+            "template_ref": "tpl_mask_generic_emu.binary_masks_all_datatypes"
+        }
+    ],
+    "tan": [
+        {
+            "instr_name": "tan",
+            "datatypes": "all_float",
+            "version": "mask",
+            "template_ref": "tpl_mask_generic_emu.unary_mask_all_datatypes"
+        },
+        {
+            "instr_name": "tan",
+            "datatypes": "all_float",
+            "version": "maskz",
+            "template_ref": "tpl_mask_generic_emu.unary_maskz_all_datatypes"
+        },
+        {
+            "instr_name": "tan",
+            "datatypes": "all_float",
+            "version": "masks",
+            "template_ref": "tpl_mask_generic_emu.unary_masks_all_datatypes"
+        }
+    ],
+    "tanh": [
+        {
+            "instr_name": "tanh",
+            "datatypes": "all_float",
+            "version": "mask",
+            "template_ref": "tpl_mask_generic_emu.unary_mask_all_datatypes"
+        },
+        {
+            "instr_name": "tanh",
+            "datatypes": "all_float",
+            "version": "maskz",
+            "template_ref": "tpl_mask_generic_emu.unary_maskz_all_datatypes"
+        },
+        {
+            "instr_name": "tanh",
+            "datatypes": "all_float",
+            "version": "masks",
+            "template_ref": "tpl_mask_generic_emu.unary_masks_all_datatypes"
         }
     ],
     "xorb": [
@@ -802,19 +1042,19 @@
             "instr_name": "xorb",
             "datatypes": "all_datatypes",
             "version": "mask",
-            "template_ref": "tpl_mask_generic_emu.xorb_mask_all_datatypes"
+            "template_ref": "tpl_mask_generic_emu.binary_mask_all_datatypes"
         },
         {
             "instr_name": "xorb",
             "datatypes": "all_datatypes",
             "version": "maskz",
-            "template_ref": "tpl_mask_generic_emu.xorb_maskz_all_datatypes"
+            "template_ref": "tpl_mask_generic_emu.binary_maskz_all_datatypes"
         },
         {
             "instr_name": "xorb",
             "datatypes": "all_datatypes",
             "version": "masks",
-            "template_ref": "tpl_mask_generic_emu.xorb_masks_all_datatypes"
+            "template_ref": "tpl_mask_generic_emu.binary_masks_all_datatypes"
         }
     ]
 }

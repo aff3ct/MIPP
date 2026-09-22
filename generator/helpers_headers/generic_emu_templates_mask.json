@@ -1,5 +1,5 @@
 {
-    "add_mask_all_datatypes": {
+    "binary_mask_all_datatypes": {
         "format": "long",
         "code": [
             "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
@@ -7,7 +7,7 @@
             "return res;"
         ]
     },
-    "add_masks_all_datatypes": {
+    "binary_masks_all_datatypes": {
         "format": "long",
         "code": [
             "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
@@ -15,57 +15,7 @@
             "return res;"
         ]
     },
-    "add_maskz_all_datatypes": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
-            "%r<tp>% tmp = %toreg<tp>%(m0);",
-            "%r<tp>% res = %andb<tp>%(op, tmp);",
-            "return res;"
-        ]
-    },
-    "andb_mask_all_datatypes": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
-            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
-            "return res;"
-        ]
-    },
-    "andb_masks_all_datatypes": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
-            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
-            "return res;"
-        ]
-    },
-    "andb_maskz_all_datatypes": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
-            "%r<tp>% tmp = %toreg<tp>%(m0);",
-            "%r<tp>% res = %andb<tp>%(op, tmp);",
-            "return res;"
-        ]
-    },
-    "andnb_mask_all_datatypes": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
-            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
-            "return res;"
-        ]
-    },
-    "andnb_masks_all_datatypes": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
-            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
-            "return res;"
-        ]
-    },
-    "andnb_maskz_all_datatypes": {
+    "binary_maskz_all_datatypes": {
         "format": "long",
         "code": [
             "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
@@ -79,206 +29,6 @@
         "code": [
             "%m<tp>% op = %{{func_name}}<tp>%(r0, r1);",
             "%m<tp>% res = %andb_k<tp>%(op, m0);",
-            "return res;"
-        ]
-    },
-    "div2_mask_all_float": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
-            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
-            "return res;"
-        ]
-    },
-    "div2_masks_all_float": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
-            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
-            "return res;"
-        ]
-    },
-    "div2_maskz_all_float": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
-            "%r<tp>% tmp = %toreg<tp>%(m0);",
-            "%r<tp>% res = %andb<tp>%(op, tmp);",
-            "return res;"
-        ]
-    },
-    "div4_mask_all_float": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
-            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
-            "return res;"
-        ]
-    },
-    "div4_masks_all_float": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
-            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
-            "return res;"
-        ]
-    },
-    "div4_maskz_all_float": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
-            "%r<tp>% tmp = %toreg<tp>%(m0);",
-            "%r<tp>% res = %andb<tp>%(op, tmp);",
-            "return res;"
-        ]
-    },
-    "div_mask_all_float": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
-            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
-            "return res;"
-        ]
-    },
-    "div_masks_all_float": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
-            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
-            "return res;"
-        ]
-    },
-    "div_maskz_all_float": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
-            "%r<tp>% tmp = %toreg<tp>%(m0);",
-            "%r<tp>% res = %andb<tp>%(op, tmp);",
-            "return res;"
-        ]
-    },
-    "exp_mask_all_float": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
-            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
-            "return res;"
-        ]
-    },
-    "exp_masks_all_float": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
-            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
-            "return res;"
-        ]
-    },
-    "exp_maskz_all_float": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
-            "%r<tp>% tmp = %toreg<tp>%(m0);",
-            "%r<tp>% res = %andb<tp>%(op, tmp);",
-            "return res;"
-        ]
-    },
-    "fmadd_mask_all_float_int32": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%( r0, r1, r2);",
-            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
-            "return res;"
-        ]
-    },
-    "fmadd_masks_all_float_int32": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%( r0, r1, r2);",
-            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
-            "return res;"
-        ]
-    },
-    "fmadd_maskz_all_float_int32": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%( r0, r1, r2);",
-            "%r<tp>% tmp = %toreg<tp>%(m0);",
-            "%r<tp>% res = %andb<tp>%(op, tmp);",
-            "return res;"
-        ]
-    },
-    "fmsub_mask_all_float_int32": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%( r0, r1, r2);",
-            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
-            "return res;"
-        ]
-    },
-    "fmsub_masks_all_float_int32": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%( r0, r1, r2);",
-            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
-            "return res;"
-        ]
-    },
-    "fmsub_maskz_all_float_int32": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%( r0, r1, r2);",
-            "%r<tp>% tmp = %toreg<tp>%(m0);",
-            "%r<tp>% res = %andb<tp>%(op, tmp);",
-            "return res;"
-        ]
-    },
-    "fnmadd_mask_all_float_int32": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%( r0, r1, r2);",
-            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
-            "return res;"
-        ]
-    },
-    "fnmadd_masks_all_float_int32": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%( r0, r1, r2);",
-            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
-            "return res;"
-        ]
-    },
-    "fnmadd_maskz_all_float_int32": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%( r0, r1, r2);",
-            "%r<tp>% tmp = %toreg<tp>%(m0);",
-            "%r<tp>% res = %andb<tp>%(op, tmp);",
-            "return res;"
-        ]
-    },
-    "fnmsub_mask_all_float_int32": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%( r0, r1, r2);",
-            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
-            "return res;"
-        ]
-    },
-    "fnmsub_masks_all_float_int32": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%( r0, r1, r2);",
-            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
-            "return res;"
-        ]
-    },
-    "fnmsub_maskz_all_float_int32": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%( r0, r1, r2);",
-            "%r<tp>% tmp = %toreg<tp>%(m0);",
-            "%r<tp>% res = %andb<tp>%(op, tmp);",
             "return res;"
         ]
     },
@@ -481,31 +231,6 @@
             "return %{{func_name}}<tp>%(buff);"
         ]
     },
-    "log_mask_all_float": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
-            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
-            "return res;"
-        ]
-    },
-    "log_masks_all_float": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
-            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
-            "return res;"
-        ]
-    },
-    "log_maskz_all_float": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
-            "%r<tp>% tmp = %toreg<tp>%(m0);",
-            "%r<tp>% res = %andb<tp>%(op, tmp);",
-            "return res;"
-        ]
-    },
     "lshift_mask_all_datatypes": {
         "format": "long",
         "code": [
@@ -526,231 +251,6 @@
         "format": "long",
         "code": [
             "%r<tp>% op = %{{func_name}}<tp>%(r0, v0);",
-            "%r<tp>% tmp = %toreg<tp>%(m0);",
-            "%r<tp>% res = %andb<tp>%(op, tmp);",
-            "return res;"
-        ]
-    },
-    "max_mask_all_datatypes": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
-            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
-            "return res;"
-        ]
-    },
-    "max_masks_all_datatypes": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
-            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
-            "return res;"
-        ]
-    },
-    "max_maskz_all_datatypes": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
-            "%r<tp>% tmp = %toreg<tp>%(m0);",
-            "%r<tp>% res = %andb<tp>%(op, tmp);",
-            "return res;"
-        ]
-    },
-    "min_mask_all_datatypes": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
-            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
-            "return res;"
-        ]
-    },
-    "min_masks_all_datatypes": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
-            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
-            "return res;"
-        ]
-    },
-    "min_maskz_all_datatypes": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
-            "%r<tp>% tmp = %toreg<tp>%(m0);",
-            "%r<tp>% res = %andb<tp>%(op, tmp);",
-            "return res;"
-        ]
-    },
-    "msb_mask_all_datatypes": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
-            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
-            "return res;"
-        ]
-    },
-    "msb_masks_all_datatypes": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
-            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
-            "return res;"
-        ]
-    },
-    "msb_maskz_all_datatypes": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
-            "%r<tp>% tmp = %toreg<tp>%(m0);",
-            "%r<tp>% res = %andb<tp>%(op, tmp);",
-            "return res;"
-        ]
-    },
-    "mul_mask_all_datatypes": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
-            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
-            "return res;"
-        ]
-    },
-    "mul_masks_all_datatypes": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
-            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
-            "return res;"
-        ]
-    },
-    "mul_maskz_all_datatypes": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
-            "%r<tp>% tmp = %toreg<tp>%(m0);",
-            "%r<tp>% res = %andb<tp>%(op, tmp);",
-            "return res;"
-        ]
-    },
-    "notb_mask_all_datatypes": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
-            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
-            "return res;"
-        ]
-    },
-    "notb_masks_all_datatypes": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
-            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
-            "return res;"
-        ]
-    },
-    "notb_maskz_all_datatypes": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
-            "%r<tp>% tmp = %toreg<tp>%(m0);",
-            "%r<tp>% res = %andb<tp>%(op, tmp);",
-            "return res;"
-        ]
-    },
-    "orb_mask_all_datatypes": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
-            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
-            "return res;"
-        ]
-    },
-    "orb_masks_all_datatypes": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
-            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
-            "return res;"
-        ]
-    },
-    "orb_maskz_all_datatypes": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
-            "%r<tp>% tmp = %toreg<tp>%(m0);",
-            "%r<tp>% res = %andb<tp>%(op, tmp);",
-            "return res;"
-        ]
-    },
-    "pow_mask_all_float": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
-            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
-            "return res;"
-        ]
-    },
-    "pow_masks_all_float": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
-            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
-            "return res;"
-        ]
-    },
-    "pow_maskz_all_float": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
-            "%r<tp>% tmp = %toreg<tp>%(m0);",
-            "%r<tp>% res = %andb<tp>%(op, tmp);",
-            "return res;"
-        ]
-    },
-    "round_mask_all_datatypes": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
-            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
-            "return res;"
-        ]
-    },
-    "round_masks_all_datatypes": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
-            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
-            "return res;"
-        ]
-    },
-    "round_maskz_all_datatypes": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
-            "%r<tp>% tmp = %toreg<tp>%(m0);",
-            "%r<tp>% res = %andb<tp>%(op, tmp);",
-            "return res;"
-        ]
-    },
-    "rsqrt_mask_all_float": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
-            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
-            "return res;"
-        ]
-    },
-    "rsqrt_masks_all_float": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
-            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
-            "return res;"
-        ]
-    },
-    "rsqrt_maskz_all_float": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
             "%r<tp>% tmp = %toreg<tp>%(m0);",
             "%r<tp>% res = %andb<tp>%(op, tmp);",
             "return res;"
@@ -777,31 +277,6 @@
         "code": [
             "%r<tp>% op = %set<tp>%(vals);",
             "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
-            "return res;"
-        ]
-    },
-    "sqrt_mask_all_float": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
-            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
-            "return res;"
-        ]
-    },
-    "sqrt_masks_all_float": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
-            "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
-            "return res;"
-        ]
-    },
-    "sqrt_maskz_all_float": {
-        "format": "long",
-        "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
-            "%r<tp>% tmp = %toreg<tp>%(m0);",
-            "%r<tp>% res = %andb<tp>%(op, tmp);",
             "return res;"
         ]
     },
@@ -855,51 +330,51 @@
             "\t\tp0[i] = 0;"
         ]
     },
-    "sub_mask_all_datatypes": {
+    "ternary_mask_all_datatypes": {
         "format": "long",
         "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% op = %{{func_name}}<tp>%( r0, r1, r2);",
             "%r<tp>% res = %blend<tp>%(op, r0, m0);",
             "return res;"
         ]
     },
-    "sub_masks_all_datatypes": {
+    "ternary_masks_all_datatypes": {
         "format": "long",
         "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% op = %{{func_name}}<tp>%( r0, r1, r2);",
             "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
             "return res;"
         ]
     },
-    "sub_maskz_all_datatypes": {
+    "ternary_maskz_all_datatypes": {
         "format": "long",
         "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% op = %{{func_name}}<tp>%( r0, r1, r2);",
             "%r<tp>% tmp = %toreg<tp>%(m0);",
             "%r<tp>% res = %andb<tp>%(op, tmp);",
             "return res;"
         ]
     },
-    "xorb_mask_all_datatypes": {
+    "unary_mask_all_datatypes": {
         "format": "long",
         "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
             "%r<tp>% res = %blend<tp>%(op, r0, m0);",
             "return res;"
         ]
     },
-    "xorb_masks_all_datatypes": {
+    "unary_masks_all_datatypes": {
         "format": "long",
         "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
             "%r<tp>% res = %blend<tp>%(op, rsrc, m0);",
             "return res;"
         ]
     },
-    "xorb_maskz_all_datatypes": {
+    "unary_maskz_all_datatypes": {
         "format": "long",
         "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
+            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
             "%r<tp>% tmp = %toreg<tp>%(m0);",
             "%r<tp>% res = %andb<tp>%(op, tmp);",
             "return res;"
