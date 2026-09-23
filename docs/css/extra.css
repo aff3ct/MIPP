@@ -364,71 +364,96 @@ pre,
    4. MIPP Implementation Levels Badges
    -------------------------------------------------------------------------- */
 
-/* Generic badge container */
+/* Generic badge container (Pill shape identical to Explorer) */
 .mipp-badge {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.18rem 0.55rem;
+  justify-content: center;
+  padding: 0.14rem 0.52rem;
   border-radius: 9999px;
   font-size: 0.72rem;
   font-weight: 700;
-  line-height: 1.1;
-  font-family: var(--mipp-font-mono);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  line-height: 1.2;
+  font-family: var(--md-code-font, monospace);
   vertical-align: middle;
+  border: 1px solid transparent;
+  white-space: nowrap;
 }
 
 /* Level 0 - Native Hardware Intrinsics */
-.mipp-lvl-0 {
-  background: rgba(16, 185, 129, 0.14);
+.mipp-lvl-0,
+.lvl-0 {
+  background: rgba(16, 185, 129, 0.12);
   color: #10b981;
-  border: 1px solid rgba(16, 185, 129, 0.4);
-  box-shadow: 0 0 10px rgba(16, 185, 129, 0.18);
+  border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
 /* Level 1 - ISA Dedicated Emulation */
-.mipp-lvl-1 {
-  background: rgba(59, 130, 246, 0.14);
-  color: #38bdf8;
-  border: 1px solid rgba(59, 130, 246, 0.4);
+.mipp-lvl-1,
+.lvl-1 {
+  background: rgba(59, 130, 246, 0.12);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
 /* Level 2 - Generic Portable Emulation */
-.mipp-lvl-2 {
-  background: rgba(245, 158, 11, 0.14);
+.mipp-lvl-2,
+.lvl-2 {
+  background: rgba(245, 158, 11, 0.12);
   color: #f59e0b;
-  border: 1px solid rgba(245, 158, 11, 0.4);
+  border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
 /* Level 3 - Scalar Loop Fallback */
-.mipp-lvl-3 {
-  background: rgba(148, 163, 184, 0.12);
+.mipp-lvl-3,
+.lvl-3 {
+  background: rgba(107, 114, 128, 0.12);
+  color: #6b7280;
+  border: 1px solid rgba(107, 114, 128, 0.3);
+}
+
+/* Level NA */
+.mipp-lvl-na,
+.lvl-na {
+  background: rgba(148, 163, 184, 0.1);
   color: #94a3b8;
-  border: 1px solid rgba(148, 163, 184, 0.28);
+  border: 1px solid rgba(148, 163, 184, 0.2);
 }
 
-/* FontAwesome icon styling for levels in tables */
-.md-typeset .twemoji svg[title="fontawesome-solid-0"],
-.md-typeset [title*="solid-0"] svg {
-  color: #10b981;
-  filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.4));
+/* Dark mode palette adjustments (matching Explorer slate mode) */
+[data-md-color-scheme="slate"] .mipp-lvl-0,
+[data-md-color-scheme="slate"] .lvl-0 {
+  background: rgba(52, 211, 153, 0.15);
+  color: #34d399;
+  border-color: rgba(52, 211, 153, 0.35);
 }
 
-.md-typeset .twemoji svg[title="fontawesome-solid-1"],
-.md-typeset [title*="solid-1"] svg {
-  color: #38bdf8;
+[data-md-color-scheme="slate"] .mipp-lvl-1,
+[data-md-color-scheme="slate"] .lvl-1 {
+  background: rgba(96, 165, 250, 0.15);
+  color: #60a5fa;
+  border-color: rgba(96, 165, 250, 0.35);
 }
 
-.md-typeset .twemoji svg[title="fontawesome-solid-2"],
-.md-typeset [title*="solid-2"] svg {
-  color: #f59e0b;
+[data-md-color-scheme="slate"] .mipp-lvl-2,
+[data-md-color-scheme="slate"] .lvl-2 {
+  background: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
+  border-color: rgba(251, 191, 36, 0.35);
 }
 
-.md-typeset .twemoji svg[title="fontawesome-solid-3"],
-.md-typeset [title*="solid-3"] svg {
-  color: #94a3b8;
+[data-md-color-scheme="slate"] .mipp-lvl-3,
+[data-md-color-scheme="slate"] .lvl-3 {
+  background: rgba(156, 163, 175, 0.15);
+  color: #9ca3af;
+  border-color: rgba(156, 163, 175, 0.3);
+}
+
+[data-md-color-scheme="slate"] .mipp-lvl-na,
+[data-md-color-scheme="slate"] .lvl-na {
+  background: rgba(100, 116, 139, 0.12);
+  color: #64748b;
+  border-color: rgba(100, 116, 139, 0.25);
 }
 
 /* --------------------------------------------------------------------------
@@ -740,9 +765,30 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
 }
 
 /* Architecture & Implementation Matrix: Modern Status Chips */
+.md-typeset table td:has(.mipp-badge),
 .md-typeset table td:has(.twemoji) {
   text-align: center !important;
-  padding: 0.28rem 0.35rem !important;
+  padding: 0.25rem 0.35rem !important;
+}
+
+.md-typeset table td .mipp-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 20px;
+  padding: 0 6px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1;
+  border-radius: 9999px;
+  font-family: var(--md-code-font, monospace);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  vertical-align: middle;
+}
+
+.md-typeset table td .mipp-badge:hover {
+  transform: scale(1.15);
 }
 
 .md-typeset table td>span:has(.twemoji) {
@@ -1113,7 +1159,8 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
   transform: translateY(-1px);
 }
 
-/* 2x2 Feature Cards Grid */
+/* 2x2 Feature Cards Grid (Homepage) */
+.mipp-home-grid,
 .mipp-grid-2x2 {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -1121,8 +1168,9 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
   margin: 2.5rem 0;
 }
 
+.mipp-home-card,
 .mipp-grid-2x2 .mipp-card {
-  padding: 1.5rem;
+  padding: 1.4rem;
   border-radius: var(--mipp-radius-md);
   background: var(--mipp-card-bg);
   border: 1px solid var(--mipp-card-border);
@@ -1132,55 +1180,58 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
   height: 100%;
 }
 
+.mipp-home-card:hover,
 .mipp-grid-2x2 .mipp-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   border-color: var(--mipp-card-hover-border);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
 }
 
+.mipp-home-card-header,
 .mipp-grid-2x2 .mipp-card-header {
   display: flex;
   align-items: center;
-  gap: 0.8rem;
+  gap: 0.75rem;
   margin-bottom: 0.75rem;
 }
 
+.mipp-home-card-icon,
 .mipp-card-icon {
-  width: 38px;
-  height: 38px;
-  border-radius: var(--mipp-radius-sm);
-  display: flex;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border-radius: 8px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   background: rgba(14, 165, 233, 0.12);
+  border: 1px solid rgba(14, 165, 233, 0.22);
   color: var(--mipp-cyan);
-  font-size: 1.1rem;
+  font-size: 1.15rem;
+  line-height: 1;
 }
 
-.mipp-card-title {
-  font-size: 1.1rem;
+.mipp-home-card-title,
+.mipp-grid-2x2 .mipp-card-title {
+  font-size: 1.05rem;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
   margin: 0 !important;
   color: var(--md-default-fg-color);
+  line-height: 1.3;
 }
 
-.mipp-card-desc {
-  font-size: 0.9rem;
-  line-height: 1.55;
-  color: var(--md-default-fg-color--lighter);
-  margin: 0 !important;
-}
-
+.mipp-home-card-desc,
 .mipp-card-desc-home {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   line-height: 1.6;
   color: var(--md-default-fg-color--lighter);
   margin: 0 !important;
-  padding-left: 1.0rem;
-  padding-right: 1.0rem;
-  padding-top: 0.4rem;
-  padding-bottom: 0.7rem;
+}
+
+[data-md-color-scheme="slate"] .mipp-home-card:hover,
+[data-md-color-scheme="slate"] .mipp-grid-2x2 .mipp-card:hover {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.35);
 }
 
 /* Dark mode image adjustments (selective invert only for explicitly tagged elements) */
@@ -1749,10 +1800,15 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
     padding: 0.2rem 0.55rem !important;
   }
 
+  .mipp-home-grid,
   .mipp-grid-2x2 {
     margin: 1.25rem 0 !important;
     gap: 0.85rem !important;
     grid-template-columns: 1fr !important;
+  }
+
+  .mipp-home-card {
+    padding: 1.1rem !important;
   }
 
   .mipp-card-desc-home {

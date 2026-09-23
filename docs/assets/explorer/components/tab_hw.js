@@ -214,7 +214,7 @@ export function renderTabHw(entry) {
                     || (info.emulation_algorithms && Object.keys(info.emulation_algorithms)[0])
                     || (entry.datatypes && entry.datatypes[0])
                     || "";
-                  const btnLabel = currentMask !== "unmasked" ? `🔍 View Algorithm (${currentMask})` : "🔍 View Algorithm";
+                  const btnLabel = "🔍 View Algorithm";
                   mappingHtml = `
                     <button class="mipp-algo-modal-btn lvl-${effectiveLevel}" title="${escapeHtml(label)}" data-algo-card="${entry.name}" data-algo-func="${entry.name}" data-algo-isa="${isa}" data-algo-level="${effectiveLevel}" data-algo-dt="${defaultAlgoDt}" data-algo-mask="${currentMask}">
                       ${btnLabel}

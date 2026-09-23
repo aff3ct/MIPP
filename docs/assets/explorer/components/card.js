@@ -76,19 +76,19 @@ export function renderCardExpandedDetails(entry) {
       <!-- Internal Tab Navigation: Prototypes before Hardware Matrix -->
       <nav class="mipp-card-tabs" role="tablist">
         <button class="mipp-card-tab-btn ${activeTab === "proto" ? "active" : ""}" data-tab="proto" data-card-tab="proto" data-target-card="${escapeHtml(entry.name)}" data-card="${escapeHtml(entry.name)}">
-          📝 Prototypes
+          Prototypes
         </button>
         <button class="mipp-card-tab-btn ${activeTab === "hw" ? "active" : ""}" data-tab="hw" data-card-tab="hw" data-target-card="${escapeHtml(entry.name)}" data-card="${escapeHtml(entry.name)}">
-          ⚙️ Hardware Matrix
+          Hardware Matrix
         </button>
         <button class="mipp-card-tab-btn ${activeTab === "scalar" ? "active" : ""}" data-tab="scalar" data-card-tab="scalar" data-target-card="${escapeHtml(entry.name)}" data-card="${escapeHtml(entry.name)}">
-          📐 Scalar C Reference
+          Scalar C Reference
         </button>
         <button class="mipp-card-tab-btn ${activeTab === "specs" ? "active" : ""}" data-tab="specs" data-card-tab="specs" data-target-card="${escapeHtml(entry.name)}" data-card="${escapeHtml(entry.name)}">
-          🧪 Verification Specs
+          Verification Specs
         </button>
         <button class="mipp-card-tab-btn ${activeTab === "flat" ? "active" : ""}" data-tab="flat" data-card-tab="flat" data-target-card="${escapeHtml(entry.name)}" data-card="${escapeHtml(entry.name)}">
-          💻 Flat Specialized Code
+          Flat Specialized Code
         </button>
       </nav>
 

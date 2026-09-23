@@ -202,11 +202,11 @@ class MippInfo:
 # ISA Support Matrix Writers
 # ---------------------------------------------------------------------------
 
-badge_l0 = '<span style="color: #28A745; font-weight: 600;">:fontawesome-solid-0:</span>'
-badge_l1 = '<span style="color: #3B42F5; font-weight: 600;">:fontawesome-solid-1:</span>'
-badge_l2 = '<span style="color: #FFD20D; font-weight: 600;">:fontawesome-solid-2:</span>'
-badge_l3 = '<span style="color: #6C757D; font-weight: 600;">:fontawesome-solid-3:</span>'
-badge_na = '<span style="color: #6C757D; font-weight: 600;">:material-minus:</span>'
+badge_l0 = '<span class="mipp-badge lvl-0">L0</span>'
+badge_l1 = '<span class="mipp-badge lvl-1">L1</span>'
+badge_l2 = '<span class="mipp-badge lvl-2">L2</span>'
+badge_l3 = '<span class="mipp-badge lvl-3">L3</span>'
+badge_na = '<span class="mipp-badge lvl-na">&minus;</span>'
 
 def level_to_badge(level):
     if level == 0:
@@ -712,11 +712,11 @@ Every MIPP function is evaluated against a deterministic 4-tier hierarchy:
 
 | Badge | Implementation Level | Performance & Latency |
 | :---: | :--- | :--- |
-| <span style="color: #28A745; font-weight: 600;">:fontawesome-solid-0:</span> | **Level 0 (Native Hardware)** | Optimal 1:1 hardware intrinsic mapping with minimum latency. |
-| <span style="color: #3B42F5; font-weight: 600;">:fontawesome-solid-1:</span> | **Level 1 (Dedicated Emulation)** | Target-specific multi-instruction sequence emulating missing hardware operations. |
-| <span style="color: #FFD20D; font-weight: 600;">:fontawesome-solid-2:</span> | **Level 2 (Generic Emulation)** | Portable vector AST algorithm built from other MIPP operations. |
-| <span style="color: #6C757D; font-weight: 600;">:fontawesome-solid-3:</span> | **Level 3 (Scalar Fallback)** | Element-by-element sequential loop fallback ensuring 100% functional completeness. |
-| <span style="color: #6C757D; font-weight: 600;">:material-minus:</span> | **N/A (Not Applicable)** | Operation is not defined for this element datatype or masking variant. |
+| <span class="mipp-badge lvl-0">L0</span> | **Level 0 (Native Hardware)** | Optimal 1:1 hardware intrinsic mapping with minimum latency. |
+| <span class="mipp-badge lvl-1">L1</span> | **Level 1 (Dedicated Emulation)** | Target-specific multi-instruction sequence emulating missing hardware operations. |
+| <span class="mipp-badge lvl-2">L2</span> | **Level 2 (Generic Emulation)** | Portable vector AST algorithm built from other MIPP operations. |
+| <span class="mipp-badge lvl-3">L3</span> | **Level 3 (Scalar Fallback)** | Element-by-element sequential loop fallback ensuring 100% functional completeness. |
+| <span class="mipp-badge lvl-na">&minus;</span> | **N/A (Not Applicable)** | Operation is not defined for this element datatype or masking variant. |
 
 ---
 
@@ -766,11 +766,11 @@ Every MIPP function is evaluated against a deterministic 4-tier hierarchy:
 
 | Badge | Implementation Level | Performance & Latency |
 | :---: | :--- | :--- |
-| <span style="color: #28A745; font-weight: 600;">:fontawesome-solid-0:</span> | **Level 0 (Native Hardware)** | Optimal 1:1 hardware intrinsic mapping with minimum latency. |
-| <span style="color: #3B42F5; font-weight: 600;">:fontawesome-solid-1:</span> | **Level 1 (Dedicated Emulation)** | Target-specific multi-instruction sequence emulating missing hardware operations. |
-| <span style="color: #FFD20D; font-weight: 600;">:fontawesome-solid-2:</span> | **Level 2 (Generic Emulation)** | Portable vector AST algorithm built from other MIPP operations. |
-| <span style="color: #6C757D; font-weight: 600;">:fontawesome-solid-3:</span> | **Level 3 (Scalar Fallback)** | Element-by-element sequential loop fallback ensuring 100% functional completeness. |
-| <span style="color: #6C757D; font-weight: 600;">:material-minus:</span> | **N/A (Not Applicable)** | Operation is not defined for this element datatype or masking variant. |
+| <span class="mipp-badge lvl-0">L0</span> | **Level 0 (Native Hardware)** | Optimal 1:1 hardware intrinsic mapping with minimum latency. |
+| <span class="mipp-badge lvl-1">L1</span> | **Level 1 (Dedicated Emulation)** | Target-specific multi-instruction sequence emulating missing hardware operations. |
+| <span class="mipp-badge lvl-2">L2</span> | **Level 2 (Generic Emulation)** | Portable vector AST algorithm built from other MIPP operations. |
+| <span class="mipp-badge lvl-3">L3</span> | **Level 3 (Scalar Fallback)** | Element-by-element sequential loop fallback ensuring 100% functional completeness. |
+| <span class="mipp-badge lvl-na">&minus;</span> | **N/A (Not Applicable)** | Operation is not defined for this element datatype or masking variant. |
 
 ---
 

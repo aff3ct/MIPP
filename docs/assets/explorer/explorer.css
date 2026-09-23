@@ -2632,6 +2632,25 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
   flex-direction: column;
 }
 
+.mipp-flat-intro {
+  margin-bottom: 0.65rem;
+}
+
+.mipp-flat-intro-title {
+  margin: 0 0 0.2rem 0 !important;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--md-default-fg-color);
+  letter-spacing: -0.01em;
+}
+
+.mipp-flat-intro-desc {
+  margin: 0 !important;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--md-default-fg-color--lighter);
+}
+
 .mipp-flat-toolbar {
   display: flex;
   flex-direction: column;

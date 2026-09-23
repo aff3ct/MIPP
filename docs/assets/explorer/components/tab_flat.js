@@ -113,6 +113,14 @@ export function renderTabFlat(entry) {
 
   return `
     <div class="mipp-flat-container">
+      <!-- Specialization Parameters Header -->
+      <div class="mipp-flat-intro">
+        <h4 class="mipp-flat-intro-title">Specialization Parameters</h4>
+        <p class="mipp-flat-intro-desc">
+          Configure target SIMD architecture, datatype, and masking mode to generate a standalone, self-contained implementation with zero external dependencies.
+        </p>
+      </div>
+
       <!-- Specialization Toolbar -->
       <div class="mipp-flat-toolbar">
         <!-- Target SIMD Extension -->
