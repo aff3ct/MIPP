@@ -38,8 +38,8 @@ export function renderSidebar(catCounts, renderApp) {
   const availableMaskModes = isCppObj
     ? ALL_MASK_MODES.filter((m) => MASK_MODES_INFO[m] && MASK_MODES_INFO[m].cpp_obj_support)
     : ALL_MASK_MODES;
-  const allMasksChecked = availableMaskModes.length > 0 && availableMaskModes.every((m) => state.selectedMaskModes.includes(m));
-  const noMasksChecked = state.selectedMaskModes.length === 0;
+  const allMasksChecked = state.maskVariant === "unmasked";
+  const noMasksChecked = false;
 
   return `
     <aside class="mipp-sidebar">
@@ -146,7 +146,7 @@ export function renderSidebar(catCounts, renderApp) {
           ${ALL_MASK_MODES.map((mId) => {
     const minfo = MASK_MODES_INFO[mId] || { id: mId, label: mId, badge_class: `mask-${mId}`, cpp_obj_support: false };
     const isDisabled = isCppObj && !minfo.cpp_obj_support;
-    const isChecked = !isDisabled && state.selectedMaskModes.includes(mId);
+    const isChecked = !isDisabled && state.maskVariant === mId;
     const tooltip = isDisabled ? "Masking variants not supported in C++ Object dialect" : (minfo.description || "");
     return `
               <label class="mipp-checkbox-item ${isDisabled ? "disabled" : ""}" title="${escapeHtml(tooltip)}">
@@ -249,8 +249,8 @@ export function updateSidebarUI(sidebarEl) {
   const availableMaskModes = isCppObj
     ? ALL_MASK_MODES.filter((m) => MASK_MODES_INFO[m] && MASK_MODES_INFO[m].cpp_obj_support)
     : ALL_MASK_MODES;
-  const allMasksChecked = availableMaskModes.length > 0 && availableMaskModes.every((m) => state.selectedMaskModes.includes(m));
-  const noMasksChecked = state.selectedMaskModes.length === 0;
+  const allMasksChecked = state.maskVariant === "unmasked";
+  const noMasksChecked = false;
   const allMasksBtn = sidebarEl.querySelector("#mipp-all-masks");
   const clearMasksBtn = sidebarEl.querySelector("#mipp-clear-masks");
   if (allMasksBtn) {
@@ -266,7 +266,7 @@ export function updateSidebarUI(sidebarEl) {
     const minfo = MASK_MODES_INFO[mId] || { id: mId, label: mId, badge_class: `mask-${mId}`, cpp_obj_support: false };
     const isDisabled = isCppObj && !minfo.cpp_obj_support;
     cb.disabled = isDisabled;
-    cb.checked = !isDisabled && state.selectedMaskModes.includes(mId);
+    cb.checked = !isDisabled && state.maskVariant === mId;
     const label = cb.closest(".mipp-checkbox-item");
     if (label) {
       label.classList.toggle("disabled", isDisabled);
@@ -433,11 +433,7 @@ export function bindSidebarEvents(sidebarEl, onFilterChange) {
   const allMasksBtn = sidebarEl.querySelector("#mipp-all-masks");
   if (allMasksBtn) {
     allMasksBtn.addEventListener("click", () => {
-      if (state.flavor === "cpp_obj") {
-        state.selectedMaskModes = ["unmasked"];
-      } else {
-        state.selectedMaskModes = [...ALL_MASK_MODES];
-      }
+      state.maskVariant = "unmasked";
       syncUrlHash(true);
       onFilterChange();
     });
@@ -446,7 +442,7 @@ export function bindSidebarEvents(sidebarEl, onFilterChange) {
   const clearMasksBtn = sidebarEl.querySelector("#mipp-clear-masks");
   if (clearMasksBtn) {
     clearMasksBtn.addEventListener("click", () => {
-      state.selectedMaskModes = [];
+      state.maskVariant = "unmasked";
       syncUrlHash(true);
       onFilterChange();
     });
@@ -456,9 +452,9 @@ export function bindSidebarEvents(sidebarEl, onFilterChange) {
     cb.addEventListener("change", (e) => {
       const m = e.target.getAttribute("data-mask");
       if (e.target.checked) {
-        if (!state.selectedMaskModes.includes(m)) state.selectedMaskModes.push(m);
+        state.maskVariant = m;
       } else {
-        state.selectedMaskModes = state.selectedMaskModes.filter((x) => x !== m);
+        if (state.maskVariant === m) state.maskVariant = "unmasked";
       }
       syncUrlHash(true);
       onFilterChange();

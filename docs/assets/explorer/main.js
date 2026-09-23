@@ -180,7 +180,7 @@ function bindCardEvents(cardsContainerEl) {
       state.selectedSimdExts = [...ALL_SIMD_EXTS];
       state.selectedCategories = [...ALL_CATEGORIES];
       state.selectedTypes = ALL_DATATYPES.map((d) => d.id);
-      state.selectedMaskModes = [...ALL_MASK_MODES];
+      state.maskVariant = "unmasked";
       state.selectedLevels = [0, 1, 2, 3];
       state.intersectionMode = false;
       state.expandedCards.clear();
@@ -700,7 +700,7 @@ export async function initExplorer() {
     state.selectedSimdExts = [...ALL_SIMD_EXTS];
     state.selectedCategories = [...ALL_CATEGORIES];
     state.selectedTypes = ALL_DATATYPES.map((d) => d.id);
-    state.selectedMaskModes = [...ALL_MASK_MODES];
+    state.maskVariant = "unmasked";
     state.selectedLevels = [0, 1, 2, 3];
 
     // Read URL hash overrides
@@ -721,7 +721,7 @@ export async function initExplorer() {
       state.selectedSimdExts = [...ALL_SIMD_EXTS];
       state.selectedCategories = [...ALL_CATEGORIES];
       state.selectedTypes = ALL_DATATYPES.map((d) => d.id);
-      state.selectedMaskModes = [...ALL_MASK_MODES];
+      state.maskVariant = "unmasked";
       state.selectedLevels = [0, 1, 2, 3];
       state.query = "";
       state.searchField = "all";

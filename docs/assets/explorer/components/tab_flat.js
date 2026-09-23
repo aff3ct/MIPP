@@ -40,11 +40,13 @@ export function getCardFlatState(cardName, entry) {
 
   const maskSupport = entry.mask_support || {};
   const allVariants = ALL_MASK_MODES.filter((m) => m === "unmasked" || maskSupport[m]);
-  const activeMasks = allVariants.filter((m) => state.selectedMaskModes.includes(m));
-  const effectiveMasks = activeMasks.length > 0 ? activeMasks : allVariants;
+  const effectiveMasks = allVariants;
+  const preferredMask = (state.maskVariant && effectiveMasks.includes(state.maskVariant))
+    ? state.maskVariant
+    : (effectiveMasks[0] || "unmasked");
   const defaultMask = cur.mask && effectiveMasks.includes(cur.mask)
     ? cur.mask
-    : (effectiveMasks[0] || "unmasked");
+    : preferredMask;
 
   state.cardFlatState[cardName] = {
     isa: defaultIsa,
@@ -75,13 +77,14 @@ export function renderTabFlat(entry) {
     flatCfg.dt = availableDts[0] || "float32";
   }
 
-  // 3. Filter Mask variants to those checked in the left sidebar
+  // 3. Filter Mask variants to those supported
   const maskSupport = entry.mask_support || {};
   const allVariants = ALL_MASK_MODES.filter((m) => m === "unmasked" || maskSupport[m]);
-  const activeMasks = allVariants.filter((m) => state.selectedMaskModes.includes(m));
-  const availableMasks = activeMasks.length > 0 ? activeMasks : allVariants;
+  const availableMasks = allVariants;
   if (!availableMasks.includes(flatCfg.mask)) {
-    flatCfg.mask = availableMasks[0] || "unmasked";
+    flatCfg.mask = (state.maskVariant && availableMasks.includes(state.maskVariant))
+      ? state.maskVariant
+      : (availableMasks[0] || "unmasked");
   }
 
   // 4. Bind LMUL directly from top search bar state

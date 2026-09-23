@@ -21,7 +21,7 @@ export function getActivePrototype(entry) {
   if (state.flavor === "c99") {
     if (entry.prototypes && entry.prototypes.c99_samples && entry.prototypes.c99_samples[lmulKey]) {
       const maskSamples = entry.prototypes.c99_samples[lmulKey];
-      const selectedMask = state.selectedMaskModes[0] || "unmasked";
+      const selectedMask = state.maskVariant || "unmasked";
       const list = maskSamples[selectedMask] || maskSamples["unmasked"];
       if (Array.isArray(list)) {
         if (activeDts.length > 0) {
@@ -38,7 +38,7 @@ export function getActivePrototype(entry) {
   if (state.flavor === "cpp" && cppSamples && cppSamples[lmulKey]) {
     const sample = cppSamples[lmulKey];
     if (typeof sample === "object" && sample !== null) {
-      const selectedMask = state.selectedMaskModes[0] || "unmasked";
+      const selectedMask = state.maskVariant || "unmasked";
       return sample[selectedMask] || sample["unmasked"] || Object.values(sample)[0] || "";
     } else if (Array.isArray(sample)) {
       return sample[0] || "";
@@ -114,38 +114,32 @@ export function computeOptimisticLevel(entry, ext) {
   const selectedDts = allDts.filter((dt) => (state.selectedTypes || []).includes(dt));
   const dtsToConsider = selectedDts.length > 0 ? selectedDts : allDts;
 
-  // Active mask modes
-  const maskSupport = entry.mask_support || {};
-  const allVariants = ALL_MASK_MODES.filter((m) => m === "unmasked" || maskSupport[m]);
-  const selectedMasks = allVariants.filter((m) => (state.selectedMaskModes || []).includes(m));
-  const masksToConsider = selectedMasks.length > 0 ? selectedMasks : allVariants;
+  // Active mask mode
+  const activeMask = (state.flavor === "cpp_obj" ? "unmasked" : (state.maskVariant || "unmasked"));
 
-  if (dtsToConsider.length === 0 || masksToConsider.length === 0) {
+  if (dtsToConsider.length === 0) {
     let lvl = sup.overall_level !== undefined ? sup.overall_level : "na";
     if (lvl !== "na" && isLmulEmulated && lvl < 2) lvl = 2;
     return lvl;
   }
 
   const levels = [];
-
-  for (const mask of masksToConsider) {
-    for (const dt of dtsToConsider) {
-      let lvl;
-      if (mask === "unmasked") {
-        lvl = (sup.by_datatype && sup.by_datatype[dt] !== undefined)
-          ? sup.by_datatype[dt]
-          : (sup.overall_level !== undefined ? sup.overall_level : 3);
-      } else {
-        const maskedDict = sup.masked_by_datatype ? sup.masked_by_datatype[mask] : null;
-        lvl = (maskedDict && maskedDict[dt] !== undefined)
-          ? maskedDict[dt]
-          : 2;
-      }
-      if (isLmulEmulated && lvl < 2) {
-        lvl = 2;
-      }
-      levels.push(lvl);
+  for (const dt of dtsToConsider) {
+    let lvl;
+    if (activeMask === "unmasked") {
+      lvl = (sup.by_datatype && sup.by_datatype[dt] !== undefined)
+        ? sup.by_datatype[dt]
+        : (sup.overall_level !== undefined ? sup.overall_level : 3);
+    } else {
+      const maskedDict = sup.masked_by_datatype ? sup.masked_by_datatype[activeMask] : null;
+      lvl = (maskedDict && maskedDict[dt] !== undefined)
+        ? maskedDict[dt]
+        : 2;
     }
+    if (isLmulEmulated && lvl < 2) {
+      lvl = 2;
+    }
+    levels.push(lvl);
   }
 
   if (levels.length === 0) return "na";
@@ -209,16 +203,14 @@ export function switchCardTab(cardEl, entry, targetTab) {
   if (targetTab === "specs" && !state.cardTestVariants[entry.name]) {
     const maskSupport = entry.mask_support || {};
     const allVariants = ALL_MASK_MODES.filter((m) => m === "unmasked" || maskSupport[m]);
-    const activeMasks = allVariants.filter((m) => state.selectedMaskModes.includes(m));
-    const availableVariants = activeMasks.length > 0 ? activeMasks : allVariants;
-    state.cardTestVariants[entry.name] = availableVariants[0] || "unmasked";
+    const preferredMask = (state.maskVariant && state.maskVariant !== "unmasked") ? state.maskVariant : "unmasked";
+    state.cardTestVariants[entry.name] = allVariants.includes(preferredMask) ? preferredMask : (allVariants[0] || "unmasked");
   }
   if (targetTab === "hw" && !state.cardHwMask[entry.name]) {
     const maskSupport = entry.mask_support || {};
     const allVariants = ALL_MASK_MODES.filter((m) => m === "unmasked" || maskSupport[m]);
-    const activeMasks = allVariants.filter((m) => state.selectedMaskModes.includes(m));
-    const availableVariants = activeMasks.length > 0 ? activeMasks : allVariants;
-    state.cardHwMask[entry.name] = availableVariants[0] || "unmasked";
+    const preferredMask = (state.maskVariant && state.maskVariant !== "unmasked") ? state.maskVariant : "unmasked";
+    state.cardHwMask[entry.name] = allVariants.includes(preferredMask) ? preferredMask : (allVariants[0] || "unmasked");
   }
 
   syncUrlHash(true);

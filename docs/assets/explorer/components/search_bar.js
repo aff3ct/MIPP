@@ -10,7 +10,7 @@ function hasActiveFilters() {
     Boolean(state.query && state.query.trim().length > 0) ||
     state.selectedCategories.length < ALL_CATEGORIES.length ||
     state.selectedTypes.length < ALL_DATATYPES.length ||
-    state.selectedMaskModes.length < ALL_MASK_MODES.length ||
+    state.maskVariant !== "unmasked" ||
     state.selectedSimdExts.length < ALL_SIMD_EXTS.length ||
     state.selectedLevels.length < ALL_LEVELS.length ||
     state.lmul !== "1" ||
@@ -235,9 +235,7 @@ export function bindSearchBarEvents(headerEl, onSearchChange) {
         const prevFlavor = state.flavor;
         state.flavor = btn.getAttribute("data-flavor");
         if (state.flavor === "cpp_obj") {
-          state.selectedMaskModes = state.selectedMaskModes.filter((m) => m === "unmasked");
-        } else if (prevFlavor === "cpp_obj" && state.selectedMaskModes.length <= 1) {
-          state.selectedMaskModes = [...ALL_MASK_MODES];
+          state.maskVariant = "unmasked";
         }
         syncUrlHash(true);
         onSearchChange();
@@ -297,7 +295,7 @@ export function bindSearchBarEvents(headerEl, onSearchChange) {
       state.selectedSimdExts = [...ALL_SIMD_EXTS];
       state.selectedCategories = [...ALL_CATEGORIES];
       state.selectedTypes = ALL_DATATYPES.map((d) => d.id);
-      state.selectedMaskModes = [...ALL_MASK_MODES];
+      state.maskVariant = "unmasked";
       state.selectedLevels = [0, 1, 2, 3];
       state.intersectionMode = false;
       state.expandedCards.clear();

@@ -21,7 +21,9 @@ export function renderTabAlgos(entry) {
 
   const checkedMasks = state.flavor === "cpp_obj"
     ? ["unmasked"]
-    : ["unmasked", "mask", "maskz", "masks"].filter((m) => state.selectedMaskModes.includes(m));
+    : (state.maskVariant && state.maskVariant !== "unmasked"
+        ? [state.maskVariant]
+        : ["unmasked", "mask", "maskz", "masks"]);
 
   if (checkedMasks.length === 0) {
     return `

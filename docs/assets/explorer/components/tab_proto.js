@@ -24,15 +24,15 @@ export function renderTabProto(entry) {
   );
   if (state.flavor === "cpp_obj") {
     activeMasks = ["unmasked"];
-  } else if (state.selectedMaskModes.length > 0) {
-    activeMasks = activeMasks.filter((m) => state.selectedMaskModes.includes(m));
+  } else if (state.maskVariant && state.maskVariant !== "unmasked") {
+    activeMasks = activeMasks.filter((m) => m === state.maskVariant);
   }
 
   if (activeMasks.length === 0) {
     const availableList = Object.keys(entry.mask_support || {}).filter((k) => entry.mask_support[k]).join(", ") || "unmasked";
     return `
       <div style="padding: 1rem; color: var(--md-default-fg-color--lighter, #94a3b8); font-style: italic;">
-        ⚠️ No matching mask variant for this operation. Selected: <strong>${escapeHtml(state.selectedMaskModes.join(", "))}</strong> (Available for ${entry.name}: ${escapeHtml(availableList)})
+        ⚠️ No matching mask variant for this operation. Selected: <strong>${escapeHtml(state.maskVariant || "unmasked")}</strong> (Available for ${entry.name}: ${escapeHtml(availableList)})
       </div>
     `;
   }

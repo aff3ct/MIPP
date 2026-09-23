@@ -1,7 +1,7 @@
 /**
  * MIPP API Explorer - Multi-Criteria Filter Engine
  */
-import { allPrimitiveNamesDesc, INTRINSIC_INDEX, isIntrinsicPrefixTyped, matchesDatatype } from "./data.js";
+import { allPrimitiveNamesDesc, INTRINSIC_INDEX, isIntrinsicPrefixTyped, matchesDatatype, ALL_SIMD_EXTS } from "./data.js";
 
 function getPrimitiveFromQuery(rest) {
   for (const pName of allPrimitiveNamesDesc) {
@@ -195,11 +195,13 @@ export function filterEntries(data, state) {
   if (!data || !Array.isArray(data)) return [];
 
   // 1. Strict Filter Rule: If any active filter section has 0 selections, return 0 results
-  const selectedExts = state.selectedSimdExts || [];
-  if (selectedExts.length === 0) return [];
+  // Note: selectedSimdExts defaults to ALL_SIMD_EXTS if not specified
+  const selectedExts = (state.selectedSimdExts && state.selectedSimdExts.length > 0)
+    ? state.selectedSimdExts
+    : ALL_SIMD_EXTS;
+
   if (state.selectedCategories.length === 0) return [];
   if (state.selectedTypes.length === 0) return [];
-  if (state.selectedMaskModes.length === 0) return [];
   if (state.selectedLevels.length === 0) return [];
 
   let qClean = (state.query || "").trim().toLowerCase();
@@ -221,18 +223,15 @@ export function filterEntries(data, state) {
       continue;
     }
 
-    // C. Masking Modes Filter
-    if (state.flavor === "cpp_obj") {
-      if (!state.selectedMaskModes.includes("unmasked")) {
-        continue;
-      }
-    } else {
-      const maskSupport = entry.mask_support || {};
-      const hasMatchingMask = state.selectedMaskModes.some(
-        (m) => m === "unmasked" || maskSupport[m]
-      );
-      if (!hasMatchingMask) {
-        continue;
+    // C. Mask Variant Filter (Single-choice search parameter & eligibility filter)
+    // If flavor is cpp_obj, mask variants do not exist in C++ Object flavor (disabled)
+    if (state.flavor !== "cpp_obj") {
+      const activeMask = state.maskVariant || "unmasked";
+      if (activeMask !== "unmasked") {
+        const maskSupport = entry.mask_support || {};
+        if (!maskSupport[activeMask]) {
+          continue;
+        }
       }
     }
 

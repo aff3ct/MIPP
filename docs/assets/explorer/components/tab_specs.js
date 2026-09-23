@@ -13,12 +13,15 @@ export function renderTabSpecs(entry) {
 
   const maskSupport = entry.mask_support || {};
   const allVariants = ALL_MASK_MODES.filter((m) => m === "unmasked" || maskSupport[m]);
-  const activeMasks = allVariants.filter((m) => state.selectedMaskModes.includes(m));
-  const availableVariants = activeMasks.length > 0 ? activeMasks : allVariants;
+  const availableVariants = allVariants;
+
+  const defaultVariant = (state.maskVariant && availableVariants.includes(state.maskVariant))
+    ? state.maskVariant
+    : (availableVariants[0] || "unmasked");
 
   const currentVariant = state.cardTestVariants[cardName] && availableVariants.includes(state.cardTestVariants[cardName])
     ? state.cardTestVariants[cardName]
-    : (availableVariants[0] || "unmasked");
+    : defaultVariant;
 
   const variantSpec = variants[currentVariant] || variants.unmasked || {};
   const tableRows = variantSpec.table || testSpecs.table || [];

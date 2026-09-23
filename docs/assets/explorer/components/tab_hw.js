@@ -23,14 +23,16 @@ export function renderTabHw(entry) {
 
   const maskSupport = entry.mask_support || {};
   const allVariants = ALL_MASK_MODES.filter((m) => m === "unmasked" || maskSupport[m]);
-  const activeSidebarMasks = allVariants.filter((m) => state.selectedMaskModes.includes(m));
-  const effectiveMasks = activeSidebarMasks.length > 0 ? activeSidebarMasks : allVariants;
+  const effectiveMasks = allVariants;
 
   if (!state.cardHwMask) state.cardHwMask = {};
   const curCardMask = state.cardHwMask[entry.name];
+  const defaultMask = (state.maskVariant && effectiveMasks.includes(state.maskVariant))
+    ? state.maskVariant
+    : (effectiveMasks[0] || "unmasked");
   const currentMask = curCardMask && effectiveMasks.includes(curCardMask)
     ? curCardMask
-    : (effectiveMasks[0] || "unmasked");
+    : defaultMask;
   state.cardHwMask[entry.name] = currentMask;
 
   return `

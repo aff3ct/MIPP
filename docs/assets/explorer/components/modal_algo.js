@@ -22,8 +22,9 @@ export function renderAlgoModal(modalData) {
 
   const maskSupport = entry.mask_support || {};
   const allVariants = ALL_MASK_MODES.filter((m) => m === "unmasked" || maskSupport[m]);
-  const activeMasks = allVariants.filter((m) => state.selectedMaskModes.includes(m));
-  const defaultMask = activeMasks.length > 0 ? activeMasks[0] : (allVariants[0] || "unmasked");
+  const defaultMask = (state.maskVariant && allVariants.includes(state.maskVariant))
+    ? state.maskVariant
+    : (allVariants[0] || "unmasked");
   const currentMask = mask && allVariants.includes(mask) ? mask : defaultMask;
 
   const numLmul = Number(effectiveLmul) || 1;

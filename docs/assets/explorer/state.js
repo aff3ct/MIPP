@@ -10,12 +10,24 @@ export const state = {
   flavor: "cpp", // 'c99' | 'cpp' | 'cpp_obj'
   lmul: "1", // '1' | '2' | '4' | '8' | '-2'
   fontSize: (typeof localStorage !== "undefined" && typeof localStorage.getItem === "function" ? localStorage.getItem("mipp_font_size") : null) || (typeof window !== "undefined" && window.innerWidth <= 768 ? "sm" : "md"),
-  selectedSimdExts: [],
+  selectedSimdExts: [...ALL_SIMD_EXTS],
   selectedLevels: [0, 1, 2, 3],
   intersectionMode: false, // false: Union (∪), true: Intersection (∩)
   selectedCategories: [],
   selectedTypes: [],
-  selectedMaskModes: [],
+  maskVariant: "unmasked", // 'unmasked' | 'mask' | 'maskz' | 'masks'
+  get selectedMaskModes() {
+    return [this.maskVariant || "unmasked"];
+  },
+  set selectedMaskModes(val) {
+    if (Array.isArray(val)) {
+      this.maskVariant = val.find((x) => x !== "unmasked") || val[0] || "unmasked";
+    } else if (typeof val === "string") {
+      this.maskVariant = val;
+    } else {
+      this.maskVariant = "unmasked";
+    }
+  },
   selectedExtensionTypes: [],
   expandedCards: new Set(),
   openedCardsOrder: [], // Array tracking order in which cards were opened
@@ -72,8 +84,8 @@ export function syncUrlHash(replace = false) {
   if (state.selectedTypes && state.selectedTypes.length < ALL_DATATYPES.length) {
     params.set("types", state.selectedTypes.join(","));
   }
-  if (state.selectedMaskModes && state.selectedMaskModes.length < ALL_MASK_MODES.length) {
-    params.set("mask", state.selectedMaskModes.join(","));
+  if (state.maskVariant && state.maskVariant !== "unmasked") {
+    params.set("mask", state.maskVariant);
   }
 
   const activeFocus = (state.focusedCard && state.expandedCards.has(state.focusedCard))
@@ -121,7 +133,9 @@ export function readUrlHash(allSimdExts, allCategories, allDatatypes, allMaskMod
     if (params.has("simd_ext")) {
       const raw = params.get("simd_ext");
       const exts = raw.split(",").filter((x) => ALL_SIMD_EXTS.includes(x));
-      state.selectedSimdExts = exts;
+      state.selectedSimdExts = exts.length > 0 ? exts : [...ALL_SIMD_EXTS];
+    } else {
+      state.selectedSimdExts = [...ALL_SIMD_EXTS];
     }
     if (params.has("lvl")) {
       const lvls = params.get("lvl").split(",").map(Number).filter((n) => [0, 1, 2, 3].includes(n));
@@ -136,8 +150,18 @@ export function readUrlHash(allSimdExts, allCategories, allDatatypes, allMaskMod
     if (params.has("types")) {
       state.selectedTypes = params.get("types").split(",").filter((t) => ALL_DATATYPES.some((d) => d.id === t));
     }
-    if (params.has("mask")) {
-      state.selectedMaskModes = params.get("mask").split(",").filter((x) => ALL_MASK_MODES.includes(x));
+    const rawMask = params.get("mask") || params.get("masks");
+    if (rawMask) {
+      if (rawMask.includes(",")) {
+        const parts = rawMask.split(",").filter((x) => ALL_MASK_MODES.includes(x));
+        state.maskVariant = parts.find((x) => x !== "unmasked") || parts[0] || "unmasked";
+      } else if (ALL_MASK_MODES.includes(rawMask)) {
+        state.maskVariant = rawMask;
+      } else {
+        state.maskVariant = "unmasked";
+      }
+    } else {
+      state.maskVariant = "unmasked";
     }
     if (params.has("focus")) {
       const focusName = params.get("focus");
