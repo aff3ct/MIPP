@@ -89,20 +89,6 @@ export function renderTabAlgos(entry) {
               `).join("")}
             </select>
           </div>
-
-          <div style="display: flex; align-items: center; gap: 0.35rem; margin-left: 0.4rem; flex-wrap: wrap;">
-            <span style="font-size: 0.78rem; font-weight: 600; text-transform: uppercase; color: var(--md-default-fg-color--lighter, #94a3b8);">
-              Variants:
-            </span>
-            ${checkedMasks.map((m) => {
-              const isAvail = m === "unmasked" || (entry.mask_support && entry.mask_support[m]);
-              if (isAvail) {
-                return `<span class="mipp-mask-badge mask-${m}" title="${m} available">${m}</span>`;
-              } else {
-                return `<span class="mipp-mask-badge mask-${m} disabled" style="opacity: 0.45; filter: grayscale(1); cursor: not-allowed;" title="${m} not available for ${entry.name}">${m} (N/A)</span>`;
-              }
-            }).join("")}
-          </div>
         </div>
         <span style="font-size: 0.75rem; color: var(--md-default-fg-color--lighter);">
           LMUL=${state.lmul}

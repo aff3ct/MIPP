@@ -142,6 +142,49 @@ export function updateSearchBarUI(headerEl) {
 
 let searchDebounceTimer = null;
 
+export function scrollToSearchResults(smooth = true) {
+  const performScroll = () => {
+    const appEl = document.getElementById("mipp-explorer-app");
+    if (!appEl) return;
+    const targetEl = appEl.querySelector(".mipp-card")
+                  || appEl.querySelector(".mipp-results-bar")
+                  || appEl.querySelector("#mipp-cards-container")
+                  || appEl.querySelector(".mipp-cards-container")
+                  || appEl.querySelector(".mipp-no-results");
+    if (!targetEl) return;
+
+    const headerEl = appEl.querySelector(".mipp-explorer-header");
+    const headerBottom = headerEl ? Math.max(0, headerEl.getBoundingClientRect().bottom) : 0;
+    const targetRect = targetEl.getBoundingClientRect();
+    const gap = 12; // Espace d'aération esthétique sous le header
+    const delta = targetRect.top - (headerBottom + gap);
+
+    // Si les résultats sont déjà parfaitement visibles sous le header, éviter tout saut inutile
+    if (Math.abs(delta) < 20) return;
+
+    const targetY = Math.max(0, window.scrollY + delta);
+    window.scrollTo({
+      top: targetY,
+      behavior: smooth ? "smooth" : "auto",
+    });
+  };
+
+  // Si le clavier virtuel mobile est en train de se fermer, attendre l'adaptation du visualViewport
+  if (window.visualViewport) {
+    let executed = false;
+    const onResize = () => {
+      if (executed) return;
+      executed = true;
+      requestAnimationFrame(performScroll);
+    };
+    window.visualViewport.addEventListener("resize", onResize, { once: true });
+    setTimeout(onResize, 180);
+  } else {
+    requestAnimationFrame(performScroll);
+    setTimeout(performScroll, 100);
+  }
+}
+
 export function bindSearchBarEvents(headerEl, onSearchChange) {
   if (!headerEl) return;
   const searchInput = headerEl.querySelector("#mipp-search-input");
@@ -158,29 +201,17 @@ export function bindSearchBarEvents(headerEl, onSearchChange) {
       }, 150);
     });
 
-    // Mobile Validation on Enter key: Close virtual keyboard (blur) & Smooth scroll to first result
+    // Validation sur touche Entrée : fermeture clavier virtuel et défilement dynamique vers les résultats
     searchInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
         e.preventDefault();
-        searchInput.blur(); // Dismiss virtual keyboard on mobile
+        searchInput.blur(); // Ferme le clavier virtuel sur mobile
         state.query = searchInput.value;
         if (clearSearchBtn) clearSearchBtn.style.display = state.query ? "" : "none";
         syncUrlHash(true);
         onSearchChange();
 
-        requestAnimationFrame(() => {
-          const appEl = document.getElementById("mipp-explorer-app");
-          if (!appEl) return;
-          const firstCard = appEl.querySelector(".mipp-card");
-          if (firstCard) {
-            firstCard.scrollIntoView({ behavior: "smooth", block: "start" });
-          } else {
-            const noResultsEl = appEl.querySelector(".mipp-no-results");
-            if (noResultsEl) {
-              noResultsEl.scrollIntoView({ behavior: "smooth", block: "start" });
-            }
-          }
-        });
+        scrollToSearchResults(true);
       }
     });
   }

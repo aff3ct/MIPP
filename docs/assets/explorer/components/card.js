@@ -2,9 +2,9 @@
  * MIPP API Explorer - Card Component
  * Manages primitive card rendering and structural tab transitions.
  */
-import { escapeHtml, ICON_COPY, ICON_CHEVRON } from "../explorer.config.js";
-import { highlightCpp, getDtBadgeClass, formatCppObjProto } from "../syntax.js";
-import { LEVEL_DESCRIPTIONS, ALL_MASK_MODES, ALL_SIMD_EXTS, SIMD_EXT_DISPLAY_NAMES } from "../data.js";
+import { escapeHtml, ICON_CHEVRON } from "../explorer.config.js";
+import { formatCppObjProto } from "../syntax.js";
+import { ALL_MASK_MODES } from "../data.js";
 import { state, syncUrlHash, setFocusedCard } from "../state.js";
 import { renderTabHw } from "./tab_hw.js";
 import { renderTabProto } from "./tab_proto.js";
@@ -155,13 +155,7 @@ export function computeOptimisticLevel(entry, ext) {
 
 export function renderCard(entry, matchedIntrinsic = null, matchedC99 = null) {
   const isExpanded = state.expandedCards.has(entry.name);
-  const activeProto = getActivePrototype(entry);
   const isCompared = state.compareSet.has(entry.name);
-
-  const extsList = ALL_SIMD_EXTS;
-  const selectedExts = state.selectedSimdExts || [];
-  const extsToDisplay = selectedExts.length > 0 ? selectedExts : extsList;
-  const namesMap = SIMD_EXT_DISPLAY_NAMES;
 
   return `
     <article class="mipp-card ${isExpanded ? "expanded" : ""}" data-card-name="${escapeHtml(entry.name)}" id="card-${escapeHtml(entry.name)}">
@@ -184,35 +178,13 @@ export function renderCard(entry, matchedIntrinsic = null, matchedC99 = null) {
             }
           </div>
 
-          <!-- SIMD Extensions Strip -->
-          <div class="mipp-isa-strip mipp-simd-ext-strip">
-            ${extsToDisplay.map((ext) => {
-              const lvl = computeOptimisticLevel(entry, ext);
-              return `
-                <span class="mipp-isa-badge lvl-${lvl}"
-                      title="${namesMap[ext] || ext.toUpperCase()}: ${lvl === "na" ? "Not Supported" : `Level ${lvl} (${LEVEL_DESCRIPTIONS[lvl] || ""})`}">
-                  ${namesMap[ext] || ext.toUpperCase()}${lvl !== "na" ? `: L${lvl}` : ""}
-                </span>
-              `;
-            }).join("")}
-          </div>
-        </div>
-
-        <p class="mipp-card-desc">${escapeHtml(entry.description)}</p>
-
-        <!-- Prototype Preview Container (Prototype code box + separate Details button) -->
-        <div class="mipp-card-preview-container">
-          <div class="mipp-card-proto-box">
-            <div class="mipp-proto-code">${highlightCpp(activeProto)}</div>
-            <button class="mipp-icon-btn copy-proto-btn" data-copy="${escapeHtml(activeProto)}" title="Copy prototype" onclick="event.stopPropagation();">
-              ${ICON_COPY}
-            </button>
-          </div>
           <button class="mipp-toggle-details-btn ${isExpanded ? "is-expanded" : ""}" data-toggle-card="${escapeHtml(entry.name)}" title="Toggle expanded details">
             <span class="mipp-toggle-text">${isExpanded ? "Close" : "Details"}</span>
             ${ICON_CHEVRON}
           </button>
         </div>
+
+        <p class="mipp-card-desc">${escapeHtml(entry.description)}</p>
       </div>
 
       <!-- Card Body (Tabs with smooth slide transition) -->

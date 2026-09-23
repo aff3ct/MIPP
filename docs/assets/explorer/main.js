@@ -14,7 +14,7 @@ import {
 import { state, syncUrlHash, readUrlHash, setFocusedCard, closeCard } from "./state.js";
 import { filterEntries } from "./filters.js";
 import { renderSidebar, updateSidebarUI, bindSidebarEvents } from "./components/sidebar.js";
-import { renderSearchBar, updateSearchBarUI, bindSearchBarEvents } from "./components/search_bar.js";
+import { renderSearchBar, updateSearchBarUI, bindSearchBarEvents, scrollToSearchResults } from "./components/search_bar.js";
 import { renderCard, switchCardTab, renderCardExpandedDetails } from "./components/card.js";
 import { renderAlgoModal } from "./components/modal_algo.js";
 import { renderCompareModal } from "./components/modal_compare.js";
@@ -89,7 +89,7 @@ function mountAppShell(appEl) {
       ${renderSidebar(catCounts, renderApp)}
 
       <!-- Cards Main Area -->
-      <main class="mipp-cards-container"></main>
+      <main class="mipp-cards-container" id="mipp-cards-container"></main>
     </div>
 
     <!-- Side-by-side Compare Floating Bar -->
@@ -329,29 +329,24 @@ export function scrollToFocusedCard(cardName, smooth = false) {
     const cardEl = document.getElementById(`card-${cardName}`);
     if (!cardEl) return;
     const headerEl = document.querySelector(".mipp-explorer-header");
-    let headerStickyTop = 11;
-    let headerHeight = 135;
-    if (headerEl) {
-      headerHeight = headerEl.offsetHeight;
-      const compStyle = window.getComputedStyle(headerEl);
-      const topVal = parseFloat(compStyle.top);
-      if (!isNaN(topVal)) {
-        headerStickyTop = topVal;
-      }
-    }
-    const gapMargin = 14;
-    const totalOffset = headerStickyTop + headerHeight + gapMargin;
+    const headerBottom = headerEl ? Math.max(0, headerEl.getBoundingClientRect().bottom) : 0;
+    const gap = 12;
     const cardRect = cardEl.getBoundingClientRect();
-    const targetY = window.scrollY + cardRect.top - totalOffset;
+    const delta = cardRect.top - (headerBottom + gap);
+    if (Math.abs(delta) < 15) return;
+
+    const targetY = Math.max(0, window.scrollY + delta);
     window.scrollTo({
-      top: Math.max(0, targetY),
+      top: targetY,
       behavior: smooth ? "smooth" : "auto",
     });
   };
 
-  setTimeout(performScroll, 60);
-  setTimeout(performScroll, 220);
+  requestAnimationFrame(performScroll);
+  setTimeout(performScroll, 80);
 }
+
+export { scrollToSearchResults };
 
 function attachCardInternalListeners(cardEl, entry) {
   if (!cardEl || !entry) return;
