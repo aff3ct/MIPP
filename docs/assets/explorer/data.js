@@ -177,6 +177,8 @@ export async function loadApiData() {
 }
 
 export function initApiDataIndexes(data, metadata = null) {
+  if (data && Array.isArray(data)) apiData = data;
+  if (metadata) apiMetadata = metadata;
   const rawExts = metadata && (metadata.simd_exts || metadata.isas);
   if (rawExts && Object.keys(rawExts).length > 0) {
     // Exception for the explorer UI: do not display the "scalar" pseudo-extension

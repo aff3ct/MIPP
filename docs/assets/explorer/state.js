@@ -74,10 +74,6 @@ export function syncUrlHash(replace = false) {
   if (state.selectedSimdExts && state.selectedSimdExts.length < extsList.length) {
     params.set("simd_ext", state.selectedSimdExts.join(","));
   }
-  if (state.selectedLevels && state.selectedLevels.length > 0 && state.selectedLevels.length < ALL_LEVELS.length) {
-    params.set("lvl", state.selectedLevels.join(","));
-  }
-  if (state.intersectionMode) params.set("inter", "1");
   if (state.selectedCategories && state.selectedCategories.length < ALL_CATEGORIES.length) {
     params.set("cat", state.selectedCategories.join(","));
   }
@@ -107,6 +103,35 @@ export function syncUrlHash(replace = false) {
       const hwMask = state.cardHwMask[activeFocus] || "unmasked";
       if (hwMask !== "unmasked") {
         params.set("hw_mask", hwMask);
+      }
+    }
+  }
+
+  // Algo Modal state serialization
+  if (state.algoModalOpen && state.algoModalData) {
+    const mData = state.algoModalData;
+    const func = mData.entry ? mData.entry.name : mData.funcName;
+    if (func) {
+      params.set("algo_func", func);
+      params.set("algo_isa", mData.simdExt || mData.isa || "avx");
+      if (mData.dt) params.set("algo_dt", mData.dt);
+      if (mData.mask && mData.mask !== "unmasked") params.set("algo_mask", mData.mask);
+      if (mData.lmul && mData.lmul !== "1") params.set("algo_lmul", mData.lmul);
+      if (mData.view && mData.view !== "abstract") params.set("algo_view", mData.view);
+      if (mData.scalarSize && mData.scalarSize !== 256) params.set("algo_scalarsize", String(mData.scalarSize));
+      if (mData.features) {
+        if (mData.features.sseTarget && mData.features.sseTarget !== "SSE4.2") {
+          params.set("algo_target", mData.features.sseTarget);
+        }
+        const disabled = [];
+        for (const [k, v] of Object.entries(mData.features)) {
+          if (k !== "sseTarget" && v === false) {
+            disabled.push(k);
+          }
+        }
+        if (disabled.length > 0) {
+          params.set("algo_dis", disabled.join(","));
+        }
       }
     }
   }
@@ -170,7 +195,9 @@ export function readUrlHash(allSimdExts, allCategories, allDatatypes, allMaskMod
       if (params.has("tab")) {
         const tab = params.get("tab");
         if (VALID_CARD_TABS.includes(tab)) {
-          state.cardTabs[focusName] = (tab === "example" ? "flat" : tab);
+          state.cardTabs[focusName] = tab;
+        } else if (tab === "flat" || tab === "example") {
+          state.cardTabs[focusName] = "proto";
         }
       }
       if (params.has("scalar_dt")) {
@@ -185,6 +212,47 @@ export function readUrlHash(allSimdExts, allCategories, allDatatypes, allMaskMod
           state.cardHwMask[focusName] = m;
         }
       }
+    }
+
+    // Restore Algo Modal state
+    if (params.has("algo_func")) {
+      state.algoModalOpen = true;
+      const funcName = params.get("algo_func");
+      const isa = params.get("algo_isa") || "avx";
+      const dt = params.get("algo_dt") || null;
+      const mask = params.get("algo_mask") || "unmasked";
+      const lmul = params.get("algo_lmul") || "1";
+      const view = params.get("algo_view") || "abstract";
+      const scalarSize = params.has("algo_scalarsize") ? parseInt(params.get("algo_scalarsize"), 10) : 256;
+      const sseTarget = params.get("algo_target") || "SSE4.2";
+      const disabledList = params.has("algo_dis") ? params.get("algo_dis").split(",") : [];
+
+      const features = {
+        F: true,
+        BW: !disabledList.includes("BW"),
+        DQ: !disabledList.includes("DQ"),
+        VL: !disabledList.includes("VL"),
+        CD: !disabledList.includes("CD"),
+        AVX2: !disabledList.includes("AVX2"),
+        FMA: !disabledList.includes("FMA"),
+        sseTarget: sseTarget,
+        AArch64: !disabledList.includes("AArch64"),
+        Rounding: !disabledList.includes("Rounding"),
+        SVE: true,
+        SVE2: !disabledList.includes("SVE2")
+      };
+
+      state.algoModalData = {
+        funcName: funcName,
+        isa: isa,
+        simdExt: isa,
+        dt: dt,
+        mask: mask,
+        lmul: lmul,
+        view: view,
+        scalarSize: scalarSize,
+        features: features
+      };
     }
   } catch (err) {
     console.warn("Failed to parse URL hash:", err);

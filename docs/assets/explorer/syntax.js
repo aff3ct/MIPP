@@ -71,7 +71,7 @@ export function formatMathHtml(expr) {
 
 export function highlightCpp(code, customMacros = {}) {
   if (!code) return "";
-  const cleanCode = code.replace(/\binline\s+/g, "").trim();
+  const cleanCode = code.trim();
 
   const tokenPatterns = [
     // 1. Comments
@@ -83,9 +83,9 @@ export function highlightCpp(code, customMacros = {}) {
     // 4. Numbers
     '\\b(0x[0-9a-fA-F]+|\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?[fFulUL]*)\\b',
     // 5. Types (MIPP SIMD types, Rvd, rvd, Rvm, rvm, C/C++ primitives)
-    '\\b(MKIND|rvd_[a-z0-9_]+_t|rvm_[a-z0-9_]+_t|Rvd|rvd|Rvm|rvm|__m128[a-z0-9_]*|__m256[a-z0-9_]*|__m512[a-z0-9_]*|float32x4_t|float32x8_t|sv[a-z0-9_]+_t|v[a-z0-9_]+_t|reg|msk|void|bool|bool_t|char|int|short|long|float|double|float32_t|float64_t|uint8_t|uint16_t|uint32_t|uint64_t|int8_t|int16_t|int32_t|int64_t|size_t)\\b',
+    '\\b(MKIND|rvd_[a-z0-9_]+_t|rvm_[a-z0-9_]+_t|Rvd|rvd|Rvm|rvm|__m128[a-z0-9_]*|__m256[a-z0-9_]*|__m512[a-z0-9_]*|__mmask8|__mmask16|__mmask32|__mmask64|__mmask[0-9]+|uint8x16_t|uint16x8_t|uint32x4_t|uint64x2_t|int8x16_t|int16x8_t|int32x4_t|int64x2_t|float64x2_t|float32x4_t|float[0-9]+x[0-9]+_t|[u]?int[0-9]+x[0-9]+_t|sv[a-z0-9_]+_t|v[a-z0-9_]+_t|reg|msk|void|bool|bool_t|char|int|short|long|float|double|float32|float64|int8|int16|int32|int64|uint8|uint16|uint32|uint64|float32_t|float64_t|uint8_t|uint16_t|uint32_t|uint64_t|int8_t|int16_t|int32_t|int64_t|size_t)\\b',
     // 6. Keywords
-    '\\b(const|static|return|if|else|for|while|do|switch|case|default|break|continue|struct|class|template|typename|auto|sizeof|typedef|namespace|using|constexpr|extern)\\b',
+    '\\b(const|static|inline|return|if|else|for|while|do|switch|case|default|break|continue|struct|class|template|typename|auto|sizeof|typedef|namespace|using|constexpr|extern)\\b',
     // 7. Functions / Hardware Intrinsics / MIPP / Function declarations & calls
     '(\\b_mm256_[a-zA-Z0-9_]+|\\b_mm512_[a-zA-Z0-9_]+|\\b_mm_[a-zA-Z0-9_]+|\\bv[a-z0-9_]+|\\bsv[a-z0-9_]+|\\b__riscv_[a-z0-9_]+|\\bmipp::[a-zA-Z0-9_]+|\\bmipp_[a-zA-Z0-9_]+|\\b[a-zA-Z_][a-zA-Z0-9_]*(?=\\s*\\())',
     // 8. Template parameters (T, T1, T2, LMUL, LDIV, N, MK, M, Z, S, U)
@@ -213,3 +213,97 @@ export function hideMacroTooltip() {
     existing.remove();
   }
 }
+
+/**
+ * Splits function argument string by commas, respecting template brackets <...> and parentheses (...)
+ */
+function splitArgs(argStr) {
+  const args = [];
+  let depthAngle = 0;
+  let depthParen = 0;
+  let current = "";
+  for (let i = 0; i < argStr.length; i++) {
+    const ch = argStr[i];
+    if (ch === "<") depthAngle++;
+    else if (ch === ">") depthAngle = Math.max(0, depthAngle - 1);
+    else if (ch === "(") depthParen++;
+    else if (ch === ")") depthParen = Math.max(0, depthParen - 1);
+    else if (ch === "," && depthAngle === 0 && depthParen === 0) {
+      if (current.trim()) args.push(current.trim());
+      current = "";
+      continue;
+    }
+    current += ch;
+  }
+  if (current.trim()) args.push(current.trim());
+  return args;
+}
+
+/**
+ * Parses a parameter declaration like "const rvd<T, 1> r0" or "const float64_t* p0"
+ * into { type, name }.
+ */
+function parseParam(paramStr) {
+  const trimmed = paramStr.replace(/\s+/g, " ").trim();
+  const m = trimmed.match(/^(.*?)(\b[a-zA-Z0-9_]+)$/);
+  if (m && m[1].trim()) {
+    return { type: m[1].trim(), name: m[2] };
+  }
+  return { type: "", name: trimmed };
+}
+
+/**
+ * Exposes and formats function definition and declaration arguments across multiple lines:
+ * - Single argument stays on one line.
+ * - Multiple arguments (>= 2) split one parameter per line.
+ * - Aligns parameter names in a vertical column matching Scalar C Reference styling.
+ */
+export function formatFunctionHeaders(code) {
+  if (!code) return "";
+  const funcRegex = /^[ \t]*((?:(?:static|inline|extern)\s+)*[a-zA-Z0-9_]+(?:<[^>\r\n]+>)?(?:\s*\*+)?\s+[a-zA-Z0-9_]+)\s*\(([^;{}]+)\)(\s*(?:\{|\r?\n\{|;))/gm;
+
+  return code.replace(funcRegex, (fullMatch, declPrefix, argsStr, trailingToken) => {
+    const words = declPrefix.trim().split(/\s+/);
+    const funcName = words[words.length - 1];
+    const retType = words.slice(0, words.length - 1).join(" ");
+    if (/^(if|for|while|switch|catch|return)$/.test(funcName)) return fullMatch;
+    if (/^(if|for|while|switch|catch|return|typedef|struct)$/.test(retType.trim())) return fullMatch;
+
+    const args = splitArgs(argsStr);
+    if (args.length <= 1) {
+      if (args.length === 1) {
+        const a = parseParam(args[0]);
+        const singleArg = a.type ? `${a.type} ${a.name}` : a.name;
+        const isSemi = trailingToken.trim() === ";";
+        return `${declPrefix}(${singleArg})${isSemi ? ";" : trailingToken}`;
+      }
+      return fullMatch;
+    }
+
+    const parsedArgs = args.map(parseParam);
+    const maxTypeLen = Math.max(...parsedArgs.map((a) => a.type.length));
+
+    const linePrefix = `${declPrefix}(`;
+    const lastLineOfPrefix = linePrefix.includes("\n")
+      ? linePrefix.slice(linePrefix.lastIndexOf("\n") + 1)
+      : linePrefix;
+    const indent = " ".repeat(lastLineOfPrefix.length);
+
+    const isSemi = trailingToken.trim() === ";";
+    const formattedLines = [];
+    parsedArgs.forEach((a, i) => {
+      const alignedType = a.type ? a.type.padEnd(maxTypeLen) : "";
+      const sep = alignedType ? " " : "";
+      const isLast = i === parsedArgs.length - 1;
+      const suffix = isLast ? (isSemi ? ");" : ")") : ",";
+      if (i === 0) {
+        formattedLines.push(`${linePrefix}${alignedType}${sep}${a.name}${suffix}`);
+      } else {
+        formattedLines.push(`${indent}${alignedType}${sep}${a.name}${suffix}`);
+      }
+    });
+
+    return formattedLines.join("\n") + (isSemi ? "" : trailingToken);
+  });
+}
+

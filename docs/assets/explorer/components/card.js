@@ -10,7 +10,6 @@ import { renderTabHw } from "./tab_hw.js";
 import { renderTabProto } from "./tab_proto.js";
 import { renderTabAlgos } from "./tab_algos.js";
 import { renderTabSpecs } from "./tab_specs.js";
-import { renderTabFlat } from "./tab_flat.js";
 
 export function getActivePrototype(entry) {
   const lmulKey = state.lmul;
@@ -64,15 +63,35 @@ export function renderTabContent(entry, activeTab) {
   if (activeTab === "hw") return renderTabHw(entry);
   if (activeTab === "scalar") return renderTabAlgos(entry);
   if (activeTab === "specs") return renderTabSpecs(entry);
-  if (activeTab === "flat" || activeTab === "example") return renderTabFlat(entry);
   return renderTabProto(entry);
 }
 
 export function renderCardExpandedDetails(entry) {
   const activeTab = state.cardTabs[entry.name] || "proto";
+  const maskSupport = entry.mask_support || {};
+  const availableVariants = ALL_MASK_MODES.filter((m) => m === "unmasked" || maskSupport[m]);
+  const isUnsupported = Boolean(entry._unsupportedVariant) || (
+    state.flavor !== "cpp_obj" &&
+    state.maskVariant &&
+    state.maskVariant !== "unmasked" &&
+    !maskSupport[state.maskVariant]
+  );
+
+  const warningBanner = isUnsupported
+    ? `
+      <div class="mipp-unsupported-variant-banner" role="alert">
+        <span class="mipp-unsupported-icon">⚠️</span>
+        <span class="mipp-unsupported-text">
+          This primitive does not support the selected variant "<strong>${escapeHtml(state.maskVariant)}</strong>". Available variants: <strong>${escapeHtml(availableVariants.join(", "))}</strong>.
+        </span>
+      </div>
+    `
+    : "";
 
   return `
     <div class="mipp-card-body">
+      ${warningBanner}
+
       <!-- Internal Tab Navigation: Prototypes before Hardware Matrix -->
       <nav class="mipp-card-tabs" role="tablist">
         <button class="mipp-card-tab-btn ${activeTab === "proto" ? "active" : ""}" data-tab="proto" data-card-tab="proto" data-target-card="${escapeHtml(entry.name)}" data-card="${escapeHtml(entry.name)}">
@@ -86,9 +105,6 @@ export function renderCardExpandedDetails(entry) {
         </button>
         <button class="mipp-card-tab-btn ${activeTab === "specs" ? "active" : ""}" data-tab="specs" data-card-tab="specs" data-target-card="${escapeHtml(entry.name)}" data-card="${escapeHtml(entry.name)}">
           Verification Specs
-        </button>
-        <button class="mipp-card-tab-btn ${activeTab === "flat" ? "active" : ""}" data-tab="flat" data-card-tab="flat" data-target-card="${escapeHtml(entry.name)}" data-card="${escapeHtml(entry.name)}">
-          Flat Specialized Code
         </button>
       </nav>
 
@@ -150,9 +166,37 @@ export function computeOptimisticLevel(entry, ext) {
 export function renderCard(entry, matchedIntrinsic = null, matchedC99 = null) {
   const isExpanded = state.expandedCards.has(entry.name);
   const isCompared = state.compareSet.has(entry.name);
+  const maskSupport = entry.mask_support || {};
+  const isUnsupported = Boolean(entry._unsupportedVariant) || (
+    state.flavor !== "cpp_obj" &&
+    state.maskVariant &&
+    state.maskVariant !== "unmasked" &&
+    !maskSupport[state.maskVariant]
+  );
+
+  const VARIANT_LETTERS = { unmasked: "U", mask: "M", maskz: "Z", masks: "S" };
+  const VARIANT_TITLES = {
+    unmasked: "Unmasked",
+    mask: "Mask (merge)",
+    maskz: "Maskz (zeroing)",
+    masks: "Masks (sourcing)"
+  };
+  const supportedVariants = ["unmasked", "mask", "maskz", "masks"].filter(
+    (m) => m === "unmasked" || maskSupport[m]
+  );
+  const globalVariant = state.flavor === "cpp_obj" ? "unmasked" : (state.maskVariant || "unmasked");
+
+  const variantBadgesHtml = `
+    <div class="mipp-card-variant-badges">
+      ${supportedVariants.map((m) => {
+        const isActive = m === globalVariant;
+        return `<span class="mipp-variant-sq-badge ${isActive ? "active" : ""}" title="${VARIANT_TITLES[m] || m}">${VARIANT_LETTERS[m]}</span>`;
+      }).join("")}
+    </div>
+  `;
 
   return `
-    <article class="mipp-card ${isExpanded ? "expanded" : ""}" data-card-name="${escapeHtml(entry.name)}" id="card-${escapeHtml(entry.name)}">
+    <article class="mipp-card ${isExpanded ? "expanded" : ""} ${isUnsupported ? "unsupported-variant-pinned" : ""}" data-card-name="${escapeHtml(entry.name)}" id="card-${escapeHtml(entry.name)}">
       <!-- Card Header -->
       <div class="mipp-card-header" data-card-name="${escapeHtml(entry.name)}">
         <div class="mipp-card-top-row">
@@ -162,6 +206,7 @@ export function renderCard(entry, matchedIntrinsic = null, matchedC99 = null) {
             </label>
             <span class="mipp-card-name">${escapeHtml(entry.name)}</span>
             <span class="mipp-cat-badge">${escapeHtml(entry.category)}</span>
+            ${variantBadgesHtml}
             ${matchedIntrinsic
               ? `<span class="mipp-matched-chip" title="Matched vendor hardware intrinsic">Intrinsic: ${escapeHtml(matchedIntrinsic)}</span>`
               : ""
@@ -170,10 +215,19 @@ export function renderCard(entry, matchedIntrinsic = null, matchedC99 = null) {
               ? `<span class="mipp-matched-chip" title="Matched C99 function">C99: ${escapeHtml(matchedC99)}</span>`
               : ""
             }
+            ${isUnsupported
+              ? `<span class="mipp-matched-chip mipp-warning-chip" title="Selected variant '${escapeHtml(state.maskVariant)}' is not supported by this primitive (pinned view)">⚠️ ${escapeHtml(state.maskVariant)} unsupported</span>`
+              : ""
+            }
           </div>
 
-          <button class="mipp-toggle-details-btn ${isExpanded ? "is-expanded" : ""}" data-toggle-card="${escapeHtml(entry.name)}" title="Toggle expanded details">
-            <span class="mipp-toggle-text">${isExpanded ? "Close" : "Details"}</span>
+          <button
+            class="mipp-toggle-details-btn ${isExpanded ? "is-expanded" : ""}"
+            data-toggle-card="${escapeHtml(entry.name)}"
+            title="${isExpanded ? "Collapse details" : "Expand details"}"
+            aria-label="${isExpanded ? "Collapse details" : "Expand details"}"
+            aria-expanded="${isExpanded ? "true" : "false"}"
+          >
             ${ICON_CHEVRON}
           </button>
         </div>
@@ -199,18 +253,6 @@ export function switchCardTab(cardEl, entry, targetTab) {
     const activeDts = (entry.datatypes || []).filter((dt) => state.selectedTypes.includes(dt));
     const dtsToDisplay = activeDts.length > 0 ? activeDts : (entry.datatypes || []);
     state.cardScalarTypes[entry.name] = dtsToDisplay[0] || "float32";
-  }
-  if (targetTab === "specs" && !state.cardTestVariants[entry.name]) {
-    const maskSupport = entry.mask_support || {};
-    const allVariants = ALL_MASK_MODES.filter((m) => m === "unmasked" || maskSupport[m]);
-    const preferredMask = (state.maskVariant && state.maskVariant !== "unmasked") ? state.maskVariant : "unmasked";
-    state.cardTestVariants[entry.name] = allVariants.includes(preferredMask) ? preferredMask : (allVariants[0] || "unmasked");
-  }
-  if (targetTab === "hw" && !state.cardHwMask[entry.name]) {
-    const maskSupport = entry.mask_support || {};
-    const allVariants = ALL_MASK_MODES.filter((m) => m === "unmasked" || maskSupport[m]);
-    const preferredMask = (state.maskVariant && state.maskVariant !== "unmasked") ? state.maskVariant : "unmasked";
-    state.cardHwMask[entry.name] = allVariants.includes(preferredMask) ? preferredMask : (allVariants[0] || "unmasked");
   }
 
   syncUrlHash(true);

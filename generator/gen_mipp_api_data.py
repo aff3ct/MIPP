@@ -107,6 +107,49 @@ def build_cpp_obj_prototype(func, interfaces_dict):
     return f"inline {ret_type} r0.{method_name}({', '.join(arg_strs)}) const;"
 
 
+def extract_required_feature(cond):
+    if not cond or cond in ('0', '1'):
+        return None
+    # AVX-512 features
+    if '__AVX512BW__' in cond and '!defined(__AVX512BW__)' not in cond:
+        return 'BW'
+    if '__AVX512DQ__' in cond and '!defined(__AVX512DQ__)' not in cond:
+        return 'DQ'
+    if '__AVX512VL__' in cond and '!defined(__AVX512VL__)' not in cond:
+        return 'VL'
+    if '__AVX512CD__' in cond and '!defined(__AVX512CD__)' not in cond:
+        return 'CD'
+    # AVX features
+    if '__AVX2__' in cond and '!defined(__AVX2__)' not in cond:
+        return 'AVX2'
+    if '__FMA__' in cond and '!defined(__FMA__)' not in cond:
+        return 'FMA'
+    # SSE features
+    if '__SSE4_2__' in cond and '!defined(__SSE4_2__)' not in cond:
+        return 'SSE4.2'
+    if '__SSE4_1__' in cond and '!defined(__SSE4_1__)' not in cond:
+        return 'SSE4.1'
+    if '__SSSE3__' in cond and '!defined(__SSSE3__)' not in cond:
+        return 'SSSE3'
+    if '__SSE3__' in cond and '!defined(__SSE3__)' not in cond:
+        return 'SSE3'
+    if '__SSE2__' in cond and '!defined(__SSE2__)' not in cond:
+        return 'SSE2'
+    # ARM NEON features
+    if '__ARM_FEATURE_FMA' in cond and '!defined(__ARM_FEATURE_FMA)' not in cond:
+        return 'FMA'
+    if '__ARM_FEATURE_DIRECTED_ROUNDING' in cond and '!defined(__ARM_FEATURE_DIRECTED_ROUNDING)' not in cond:
+        return 'Rounding'
+    if '__aarch64__' in cond and '!defined(__aarch64__)' not in cond:
+        return 'AArch64'
+    # ARM SVE features
+    if '__ARM_FEATURE_SVE2' in cond and '!defined(__ARM_FEATURE_SVE2)' not in cond:
+        return 'SVE2'
+    if '__ARM_FEATURE_SVE' in cond and '!defined(__ARM_FEATURE_SVE)' not in cond:
+        return 'SVE'
+    return None
+
+
 def format_scalar_proto(code):
     """
     Formats scalar function prototypes with 'static' on the first line,
@@ -525,7 +568,7 @@ def build_isas_metadata(base_generator_dir, isas_dict):
             { "name": "__ARM_FEATURE_SVE2", "label": "SVE2", "locked": False, "default": False, "flag": "-march=armv8.2-a+sve2" }
         ],
         "rvv": [
-            { "name": "__riscv_v", "label": "RVV 1.0", "locked": True, "default": True, "flag": "-march=rv64gcv" }
+            { "name": "__riscv_v", "label": "RVV 1.0", "locked": True, "default": True, "flag": "-march=rv64gcv_zvl256b -mrvv-vector-bits=zvl" }
         ],
         "scalar": []
     }
@@ -537,7 +580,7 @@ def build_isas_metadata(base_generator_dir, isas_dict):
         "avx512": { "id": "g142", "arch": "x86", "base_flags": "-O3", "label": "x86-64 GCC" },
         "neon":   { "id": "aarch64-gcc-1420", "id_32": "arm-gcc-1320", "arch": "arm", "base_flags": "-O3 -march=armv8-a+simd", "flags_32": "-O3 -march=armv7-a -mfpu=neon -mfloat-abi=hard", "label": "AArch64 GCC" },
         "sve":    { "id": "aarch64-gcc-1420", "arch": "arm", "base_flags": "-O3 -march=armv8.2-a+sve", "label": "AArch64 SVE GCC" },
-        "rvv":    { "id": "rv64-clang", "arch": "riscv", "base_flags": "-O3 -march=rv64gcv", "label": "RISC-V 64 Clang" }
+        "rvv":    { "id": "rv64-clang", "arch": "riscv", "base_flags": "-O3 -march=rv64gcv_zvl256b -mrvv-vector-bits=zvl", "label": "RISC-V 64 Clang" }
     }
 
     display_labels = {
@@ -861,6 +904,8 @@ def generate_mipp_api_data(project_root=None):
             rendered_code_snippets_by_lmul = {}
             emulation_algorithms = {}
             masked_by_datatype = {"mask": {}, "maskz": {}, "masks": {}}
+            code_snippets_by_mask = {"mask": {}, "maskz": {}, "masks": {}}
+            native_instructions_by_mask = {"mask": {}, "maskz": {}, "masks": {}}
 
             # 1. Process all hardware LMULs for native instructions and code snippets
             for lm in hw_lmuls:
@@ -870,7 +915,6 @@ def generate_mipp_api_data(project_root=None):
                 if lm not in isa_solved_map[isa_name]:
                     continue
                 res_isa_lm, res_map_lm = isa_solved_map[isa_name][lm]
-
                 for dt in func_def["datatypes"]:
                     dt_par, dt_ret = dt.split(",") if "," in dt else (dt, dt)
                     dt_key = f"{dt_par},{dt_ret}"
@@ -899,6 +943,8 @@ def generate_mipp_api_data(project_root=None):
             # Default to LMUL 1 for native_instructions and rendered_code_snippets
             native_instructions = native_instructions_by_lmul.get("1", {})
             rendered_code_snippets = rendered_code_snippets_by_lmul.get("1", {})
+            required_features = {}
+            fallback_levels = {}
 
             # 2. Process base LMUL (1) for by_datatype, emulation_algorithms, masked_by_datatype
             for dt in func_def["datatypes"]:
@@ -910,6 +956,18 @@ def generate_mipp_api_data(project_root=None):
                 active_cands = [cand for cand, cond in cands if cond != "0"]
                 lvl = min([cand["level"] for cand in active_cands], default=3)
                 by_datatype[dt] = lvl
+
+                # Detect if level 0 candidate requires a sub-extension / feature flag
+                for cand, cond in cands:
+                    if cand.get("level") == 0:
+                        feat = extract_required_feature(cond)
+                        if feat:
+                            required_features[dt] = feat
+                            for cand_fb, cond_fb in cands:
+                                if cand_fb.get("level") != 0:
+                                    fallback_levels[dt] = cand_fb.get("level", 2)
+                                    break
+                            break
 
                 for cand in active_cands:
                     if cand["level"] in [1, 2] and cand.get("ff") and "template" in cand["ff"]:
@@ -926,7 +984,7 @@ def generate_mipp_api_data(project_root=None):
                         except Exception:
                             pass
 
-                # Masked levels
+                # Masked levels and snippets
                 for mkind in ["mask", "maskz", "masks"]:
                     if mask_flags.get(mkind, False):
                         m_cands = resolved_map_base.get((func, dt_key, mkind), [])
@@ -934,18 +992,42 @@ def generate_mipp_api_data(project_root=None):
                         m_lvl = min([cand["level"] for cand in m_active], default=3)
                         masked_by_datatype[mkind][dt] = m_lvl
 
+                        for cand in m_active:
+                            if cand["level"] in [0, 1] and cand.get("ff") and "template" in cand["ff"]:
+                                try:
+                                    rend = render_template(resolved_isa_base, cand["ff"], dt_par, dt_ret, func, lmul=1)
+                                    rend_no_comments = re.sub(r'/\*.*?\*/', '', rend, flags=re.DOTALL)
+                                    rend_no_comments = re.sub(r'//.*', '', rend_no_comments)
+                                    rend_clean = rend.strip().replace("\n", " ").replace("\t", " ")
+                                    rend_clean = re.sub(r'\s+', ' ', rend_clean)
+                                    code_snippets_by_mask[mkind][dt] = rend_clean
+
+                                    matches = intrinsic_call_regex.findall(rend_no_comments)
+                                    for m in matches:
+                                        if m not in ignored_intrinsics:
+                                            native_instructions_by_mask[mkind][dt] = m
+                                            vendor_intrinsics_reverse_index.add(m)
+                                            break
+                                    break
+                                except Exception:
+                                    pass
+
             # Overall level for this ISA (best level across all supported types)
             overall_level = min(by_datatype.values()) if by_datatype else 3
 
             isa_support[isa_name] = {
                 "overall_level": overall_level,
                 "by_datatype": by_datatype,
+                "required_features": required_features,
+                "fallback_levels": fallback_levels,
                 "native_instructions": native_instructions,
                 "code_snippets": rendered_code_snippets,
                 "native_instructions_by_lmul": native_instructions_by_lmul,
                 "code_snippets_by_lmul": rendered_code_snippets_by_lmul,
                 "emulation_algorithms": emulation_algorithms,
                 "masked_by_datatype": masked_by_datatype,
+                "code_snippets_by_mask": code_snippets_by_mask,
+                "native_instructions_by_mask": native_instructions_by_mask,
                 "hw_lmul": hw_lmuls,
                 "sw_lmul": isa_metadata.get(isa_name, {}).get("sw_lmul", [])
             }
@@ -1014,6 +1096,12 @@ def generate_mipp_api_data(project_root=None):
                 "maskz": { dt: 3 for dt in func_def["datatypes"] } if mask_flags.get("maskz") else {},
                 "masks": { dt: 3 for dt in func_def["datatypes"] } if mask_flags.get("masks") else {}
             },
+            "code_snippets_by_mask": {
+                "mask": { dt: ref_algos.get("1", {}).get(dt, {}).get("mask", "") for dt in func_def["datatypes"] } if mask_flags.get("mask") else {},
+                "maskz": { dt: ref_algos.get("1", {}).get(dt, {}).get("maskz", "") for dt in func_def["datatypes"] } if mask_flags.get("maskz") else {},
+                "masks": { dt: ref_algos.get("1", {}).get(dt, {}).get("masks", "") for dt in func_def["datatypes"] } if mask_flags.get("masks") else {}
+            },
+            "native_instructions_by_mask": {"mask": {}, "maskz": {}, "masks": {}},
             "hw_lmul": [1],
             "sw_lmul": []
         }

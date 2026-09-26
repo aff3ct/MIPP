@@ -19,7 +19,6 @@ import { renderCard, switchCardTab, renderCardExpandedDetails } from "./componen
 import { renderAlgoModal } from "./components/modal_algo.js";
 import { renderCompareModal } from "./components/modal_compare.js";
 import { showMacroTooltip, hideMacroTooltip, toggleMacroTooltip } from "./syntax.js";
-import { getCardFlatState } from "./components/tab_flat.js";
 
 let headerResizeObserver = null;
 
@@ -379,96 +378,14 @@ function attachCardInternalListeners(cardEl, entry) {
     });
   });
 
-  // 3. Verification Specs Variant Buttons
-  paneEl.querySelectorAll(".mipp-test-variant-btn, [data-test-variant]").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const variant = btn.getAttribute("data-mask") || btn.getAttribute("data-test-variant");
-      if (variant) {
-        state.cardTestVariants[entry.name] = variant;
-        setFocusedCard(entry.name);
-        syncUrlHash(true);
-        switchCardTab(cardEl, entry, "specs");
-        attachCardInternalListeners(cardEl, entry);
-      }
-    });
-  });
-
-  // 4. Flat Code Tab Toolbar Buttons
-  paneEl.querySelectorAll("[data-flat-isa], [data-flat-simd-ext]").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const ext = btn.getAttribute("data-flat-simd-ext") || btn.getAttribute("data-flat-isa");
-      const flatCfg = getCardFlatState(entry.name, entry);
-      flatCfg.isa = ext;
-      flatCfg.simdExt = ext;
-      switchCardTab(cardEl, entry, "flat");
-      attachCardInternalListeners(cardEl, entry);
-    });
-  });
-
-  paneEl.querySelectorAll("[data-flat-dt]").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const dt = btn.getAttribute("data-flat-dt");
-      const flatCfg = getCardFlatState(entry.name, entry);
-      flatCfg.dt = dt;
-      switchCardTab(cardEl, entry, "flat");
-      attachCardInternalListeners(cardEl, entry);
-    });
-  });
-
-  paneEl.querySelectorAll("[data-flat-mask]").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const m = btn.getAttribute("data-flat-mask");
-      const flatCfg = getCardFlatState(entry.name, entry);
-      flatCfg.mask = m;
-      switchCardTab(cardEl, entry, "flat");
-      attachCardInternalListeners(cardEl, entry);
-    });
-  });
-
-  paneEl.querySelectorAll("[data-flat-flag]").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const flag = btn.getAttribute("data-flat-flag");
-      const flatCfg = getCardFlatState(entry.name, entry);
-      flatCfg.defines[flag] = flatCfg.defines[flag] === false ? true : false;
-      switchCardTab(cardEl, entry, "flat");
-      attachCardInternalListeners(cardEl, entry);
-    });
-  });
-
-  paneEl.querySelectorAll("[data-flat-scalarsize]").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const sz = parseInt(btn.getAttribute("data-flat-scalarsize"), 10);
-      const flatCfg = getCardFlatState(entry.name, entry);
-      flatCfg.scalarSize = sz;
-      switchCardTab(cardEl, entry, "flat");
-      attachCardInternalListeners(cardEl, entry);
-    });
-  });
-
-  paneEl.querySelectorAll("[data-hw-mask]").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const m = btn.getAttribute("data-hw-mask");
-      if (!state.cardHwMask) state.cardHwMask = {};
-      state.cardHwMask[entry.name] = m;
-      switchCardTab(cardEl, entry, "hw");
-      attachCardInternalListeners(cardEl, entry);
-    });
-  });
-
-  // 5. "View Algorithm" Modal Trigger
+  // 3. "View Algorithm" Modal Trigger
   paneEl.querySelectorAll("[data-algo-card]").forEach((btn) => {
     btn.addEventListener("click", (e) => {
       e.stopPropagation();
       const ext = btn.getAttribute("data-algo-simd-ext") || btn.getAttribute("data-algo-isa");
       const dt = btn.getAttribute("data-algo-dt");
       const mask = btn.getAttribute("data-algo-mask") || state.cardHwMask?.[entry.name] || "unmasked";
+      const reqFeature = btn.getAttribute("data-algo-feature");
       state.algoModalOpen = true;
       state.algoModalData = {
         entry,
@@ -476,12 +393,26 @@ function attachCardInternalListeners(cardEl, entry) {
         simdExt: ext,
         dt,
         mask,
-        lmul: state.lmul || "1"
+        lmul: state.lmul || "1",
+        view: "abstract",
+        scalarSize: 256,
+        features: {
+          F: true,
+          BW: true, DQ: true, VL: true, CD: true,
+          AVX2: true, FMA: true,
+          sseTarget: "SSE4.2",
+          AArch64: true, Rounding: true,
+          SVE: true, SVE2: true,
+          ...(reqFeature ? { [reqFeature]: true } : {})
+        }
       };
       const appEl = document.getElementById("mipp-explorer-app");
       if (appEl) {
         const modalsContainerEl = appEl.querySelector("#mipp-modals-container");
-        if (modalsContainerEl) updateModals(modalsContainerEl);
+        if (modalsContainerEl) {
+          updateModals(modalsContainerEl);
+          syncUrlHash(true);
+        }
       }
     });
   });
@@ -566,6 +497,20 @@ function updateModals(modalsContainerEl) {
         state.algoModalOpen = false;
         state.algoModalData = null;
         updateModals(modalsContainerEl);
+        syncUrlHash(true);
+      });
+    }
+
+    const algoShareBtn = modalsContainerEl.querySelector("#mipp-algo-modal-share");
+    if (algoShareBtn) {
+      algoShareBtn.addEventListener("click", () => {
+        syncUrlHash(true);
+        copyToClipboard(window.location.href, "Direct link to algorithm copied to clipboard!");
+        const originalHtml = algoShareBtn.innerHTML;
+        algoShareBtn.innerHTML = "✓";
+        setTimeout(() => {
+          algoShareBtn.innerHTML = originalHtml;
+        }, 1500);
       });
     }
 
@@ -576,9 +521,50 @@ function updateModals(modalsContainerEl) {
           state.algoModalOpen = false;
           state.algoModalData = null;
           updateModals(modalsContainerEl);
+          syncUrlHash(true);
         }
       });
     }
+
+    // View Mode Switcher: Abstract C++ vs Flat C99 Code
+    modalsContainerEl.querySelectorAll("[data-modal-view]").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const v = btn.getAttribute("data-modal-view");
+        if (state.algoModalData) {
+          state.algoModalData.view = v;
+          updateModals(modalsContainerEl);
+          syncUrlHash(true);
+        }
+      });
+    });
+
+    // ISA Switcher
+    modalsContainerEl.querySelectorAll("[data-modal-isa]").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const ext = btn.getAttribute("data-modal-isa");
+        if (state.algoModalData) {
+          state.algoModalData.isa = ext;
+          state.algoModalData.simdExt = ext;
+          updateModals(modalsContainerEl);
+          syncUrlHash(true);
+        }
+      });
+    });
+
+    // SIMD Width Switcher (Scalar, RVV, SVE)
+    modalsContainerEl.querySelectorAll("[data-modal-scalarsize]").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const sz = parseInt(btn.getAttribute("data-modal-scalarsize"), 10);
+        if (state.algoModalData) {
+          state.algoModalData.scalarSize = sz;
+          updateModals(modalsContainerEl);
+          syncUrlHash(true);
+        }
+      });
+    });
 
     const dtSelect = modalsContainerEl.querySelector("#mipp-algo-modal-dt-select");
     if (dtSelect) {
@@ -586,6 +572,7 @@ function updateModals(modalsContainerEl) {
         if (state.algoModalData) {
           state.algoModalData.dt = e.target.value;
           updateModals(modalsContainerEl);
+          syncUrlHash(true);
         }
       });
     }
@@ -597,6 +584,65 @@ function updateModals(modalsContainerEl) {
         if (state.algoModalData) {
           state.algoModalData.mask = m;
           updateModals(modalsContainerEl);
+          syncUrlHash(true);
+        }
+      });
+    });
+
+    modalsContainerEl.querySelectorAll("[data-modal-lmul]").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const l = btn.getAttribute("data-modal-lmul");
+        if (state.algoModalData) {
+          state.algoModalData.lmul = l;
+          updateModals(modalsContainerEl);
+          syncUrlHash(true);
+        }
+      });
+    });
+
+    modalsContainerEl.querySelectorAll("[data-modal-toggle-feature]").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const feat = btn.getAttribute("data-modal-toggle-feature");
+        if (feat === "SVE" || feat === "F") return;
+        if (state.algoModalData) {
+          if (!state.algoModalData.features) {
+            state.algoModalData.features = {
+              F: true,
+              BW: true, DQ: true, VL: true, CD: true,
+              AVX2: true, FMA: true,
+              sseTarget: "SSE4.2",
+              AArch64: true, Rounding: true,
+              SVE: true, SVE2: true
+            };
+          }
+          const curVal = state.algoModalData.features[feat] !== false;
+          state.algoModalData.features[feat] = !curVal;
+          updateModals(modalsContainerEl);
+          syncUrlHash(true);
+        }
+      });
+    });
+
+    modalsContainerEl.querySelectorAll("[data-modal-sse-target]").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const target = btn.getAttribute("data-modal-sse-target");
+        if (state.algoModalData) {
+          if (!state.algoModalData.features) {
+            state.algoModalData.features = {
+              F: true,
+              BW: true, DQ: true, VL: true, CD: true,
+              AVX2: true, FMA: true,
+              sseTarget: "SSE4.2",
+              AArch64: true, Rounding: true,
+              SVE: true, SVE2: true
+            };
+          }
+          state.algoModalData.features.sseTarget = target;
+          updateModals(modalsContainerEl);
+          syncUrlHash(true);
         }
       });
     });
@@ -705,6 +751,18 @@ export async function initExplorer() {
 
     // Read URL hash overrides
     readUrlHash(ALL_SIMD_EXTS, ALL_CATEGORIES, ALL_DATATYPES, ALL_MASK_MODES);
+    if (state.algoModalOpen && state.algoModalData && state.algoModalData.funcName) {
+      const entry = apiData.find((x) => x.name === state.algoModalData.funcName);
+      if (entry) {
+        state.algoModalData.entry = entry;
+        if (!state.algoModalData.dt) {
+          state.algoModalData.dt = entry.datatypes?.[0] || "float32";
+        }
+      } else {
+        state.algoModalOpen = false;
+        state.algoModalData = null;
+      }
+    }
     syncUrlHash(true);
 
     // Apply UI Size class
@@ -739,6 +797,18 @@ export async function initExplorer() {
       state.cardHwMask = {};
 
       readUrlHash(ALL_SIMD_EXTS, ALL_CATEGORIES, ALL_DATATYPES, ALL_MASK_MODES);
+      if (state.algoModalOpen && state.algoModalData && state.algoModalData.funcName) {
+        const entry = apiData.find((x) => x.name === state.algoModalData.funcName);
+        if (entry) {
+          state.algoModalData.entry = entry;
+          if (!state.algoModalData.dt) {
+            state.algoModalData.dt = entry.datatypes?.[0] || "float32";
+          }
+        } else {
+          state.algoModalOpen = false;
+          state.algoModalData = null;
+        }
+      }
       renderApp();
 
       if (state.focusedCard) {
@@ -755,6 +825,7 @@ export async function initExplorer() {
         const isa = algoBtn.getAttribute("data-algo-isa");
         const dt = algoBtn.getAttribute("data-algo-dt");
         const mask = algoBtn.getAttribute("data-algo-mask") || state.cardHwMask?.[cardName] || "unmasked";
+        const reqFeature = algoBtn.getAttribute("data-algo-feature");
         const entry = apiData.find((x) => x.name === cardName);
         if (entry) {
           state.algoModalOpen = true;
@@ -763,10 +834,24 @@ export async function initExplorer() {
             isa,
             dt,
             mask,
-            lmul: state.lmul || "1"
+            lmul: state.lmul || "1",
+            view: "abstract",
+            scalarSize: 256,
+            features: {
+              F: true,
+              BW: true, DQ: true, VL: true, CD: true,
+              AVX2: true, FMA: true,
+              sseTarget: "SSE4.2",
+              AArch64: true, Rounding: true,
+              SVE: true, SVE2: true,
+              ...(reqFeature ? { [reqFeature]: true } : {})
+            }
           };
           const modalsContainerEl = document.getElementById("mipp-modals-container");
-          if (modalsContainerEl) updateModals(modalsContainerEl);
+          if (modalsContainerEl) {
+            updateModals(modalsContainerEl);
+            syncUrlHash(true);
+          }
         }
         return;
       }

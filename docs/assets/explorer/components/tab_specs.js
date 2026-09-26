@@ -12,16 +12,11 @@ export function renderTabSpecs(entry) {
   const variants = testSpecs.variants || {};
 
   const maskSupport = entry.mask_support || {};
-  const allVariants = ALL_MASK_MODES.filter((m) => m === "unmasked" || maskSupport[m]);
-  const availableVariants = allVariants;
+  const availableVariants = ALL_MASK_MODES.filter((m) => m === "unmasked" || maskSupport[m]);
 
-  const defaultVariant = (state.maskVariant && availableVariants.includes(state.maskVariant))
-    ? state.maskVariant
-    : (availableVariants[0] || "unmasked");
-
-  const currentVariant = state.cardTestVariants[cardName] && availableVariants.includes(state.cardTestVariants[cardName])
-    ? state.cardTestVariants[cardName]
-    : defaultVariant;
+  const globalVariant = state.flavor === "cpp_obj" ? "unmasked" : (state.maskVariant || "unmasked");
+  const currentVariant = availableVariants.includes(globalVariant) ? globalVariant : "unmasked";
+  const isUnsupported = !availableVariants.includes(globalVariant);
 
   const variantSpec = variants[currentVariant] || variants.unmasked || {};
   const tableRows = variantSpec.table || testSpecs.table || [];
@@ -33,17 +28,6 @@ export function renderTabSpecs(entry) {
 
   return `
     <div style="display: flex; flex-direction: column; gap: 0.8rem;">
-      <!-- Available Test Variants Badges (Clickable per-card switcher) -->
-      <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem; flex-wrap: wrap;">
-        <span style="font-size: 0.78rem; font-weight: 600; color: var(--md-default-fg-color--lighter);">Verification Variant:</span>
-        ${availableVariants.map((v) => `
-          <button class="mipp-mask-badge mask-${v} mipp-test-variant-btn ${v === currentVariant ? "active" : ""}"
-                  data-card="${escapeHtml(cardName)}" data-mask="${escapeHtml(v)}" title="Click to view specs for ${v}">
-            ${v} ${v === currentVariant ? "✓" : ""}
-          </button>
-        `).join("")}
-      </div>
-
       <!-- Overview Badges -->
       <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; font-size: 0.8rem;">
         <div style="font-size: 0.75rem; padding: 0.35rem 0.65rem; background: var(--md-default-bg-color--lighter, #f1f5f9); border-radius: 4px;">

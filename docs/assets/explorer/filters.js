@@ -195,14 +195,8 @@ export function filterEntries(data, state) {
   if (!data || !Array.isArray(data)) return [];
 
   // 1. Strict Filter Rule: If any active filter section has 0 selections, return 0 results
-  // Note: selectedSimdExts defaults to ALL_SIMD_EXTS if not specified
-  const selectedExts = (state.selectedSimdExts && state.selectedSimdExts.length > 0)
-    ? state.selectedSimdExts
-    : ALL_SIMD_EXTS;
-
   if (state.selectedCategories.length === 0) return [];
   if (state.selectedTypes.length === 0) return [];
-  if (state.selectedLevels.length === 0) return [];
 
   let qClean = (state.query || "").trim().toLowerCase();
   qClean = qClean.replace(/[\(\);]+$/, "").trim();
@@ -225,39 +219,25 @@ export function filterEntries(data, state) {
 
     // C. Mask Variant Filter (Single-choice search parameter & eligibility filter)
     // If flavor is cpp_obj, mask variants do not exist in C++ Object flavor (disabled)
+    let unsupportedVariant = false;
+    entry._unsupportedVariant = false;
     if (state.flavor !== "cpp_obj") {
       const activeMask = state.maskVariant || "unmasked";
       if (activeMask !== "unmasked") {
         const maskSupport = entry.mask_support || {};
         if (!maskSupport[activeMask]) {
-          continue;
+          // Option 1 (Card Pinning): If this card is currently expanded/opened by the user, keep it pinned in results
+          if (state.expandedCards && state.expandedCards.has(entry.name)) {
+            unsupportedVariant = true;
+            entry._unsupportedVariant = true;
+          } else {
+            continue;
+          }
         }
       }
     }
 
-    // D. SIMD Extensions & Guaranteed Acceleration Levels Filter (Union ∪ vs Intersection ∩)
-    const effectiveTypes = entryDts.filter((dt) => matchesDatatype(dt, state.selectedTypes));
-    const extMatches = selectedExts.map((ext) => {
-      const sup = entry.isa_support ? entry.isa_support[ext] : null;
-      if (!sup) return false;
-      
-      const byDt = sup.by_datatype || {};
-      const levelsToCheck = effectiveTypes.length > 0
-        ? effectiveTypes.map((dt) => byDt[dt] !== undefined ? byDt[dt] : sup.overall_level)
-        : [sup.overall_level];
-      
-      return levelsToCheck.some((lvl) => state.selectedLevels.includes(lvl));
-    });
-
-    if (state.intersectionMode) {
-      // Intersection Mode (∩): Every selected SIMD extension must support the operation at one of the selected levels
-      if (!extMatches.every(Boolean)) continue;
-    } else {
-      // Union Mode (∪): At least one selected SIMD extension must support the operation at one of the selected levels
-      if (!extMatches.some(Boolean)) continue;
-    }
-
-    // E. Search Query Filter
+    // D. Search Query Filter
     const searchRes = matchesQuery(entry, qClean, field);
     if (!searchRes.matches) {
       continue;
@@ -267,6 +247,7 @@ export function filterEntries(data, state) {
       entry,
       matchedIntrinsic: searchRes.matchedIntrinsic,
       matchedC99: searchRes.matchedC99,
+      unsupportedVariant,
     });
   }
 

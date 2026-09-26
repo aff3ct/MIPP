@@ -19,92 +19,84 @@ export function renderTabProto(entry) {
 
   const activeDts = (entry.datatypes || []).filter((dt) => state.selectedTypes.includes(dt));
 
-  let activeMasks = ["unmasked", "mask", "maskz", "masks"].filter(
-    (m) => m === "unmasked" || (entry.mask_support && entry.mask_support[m])
+  const maskSupport = entry.mask_support || {};
+  const availableVariants = ALL_MASK_MODES.filter(
+    (m) => m === "unmasked" || maskSupport[m]
   );
-  if (state.flavor === "cpp_obj") {
-    activeMasks = ["unmasked"];
-  } else if (state.maskVariant && state.maskVariant !== "unmasked") {
-    activeMasks = activeMasks.filter((m) => m === state.maskVariant);
+
+  const globalVariant = state.flavor === "cpp_obj" ? "unmasked" : (state.maskVariant || "unmasked");
+  const targetMask = availableVariants.includes(globalVariant) ? globalVariant : "unmasked";
+
+  let codeText = "";
+  if (state.flavor === "c99") {
+    const samplesForLmul = protoData.c99_samples ? protoData.c99_samples[lmulKey] : null;
+    let lines = [];
+    if (samplesForLmul) {
+      if (Array.isArray(samplesForLmul)) {
+        lines = samplesForLmul;
+      } else if (typeof samplesForLmul === "object") {
+        lines = samplesForLmul[targetMask] || samplesForLmul["unmasked"] || [];
+      }
+    }
+    if (lines.length > 0) {
+      let cleanLines = lines.map(cleanProto);
+      if (activeDts.length > 0) {
+        const filtered = cleanLines.filter((sig) =>
+          activeDts.some((dt) => sig.includes(`_${dt}_`) || sig.includes(`_${dt}(`) || sig.includes(`_${dt};`) || sig.includes(`_${dt}`))
+        );
+        if (filtered.length > 0) cleanLines = filtered;
+      }
+      codeText = cleanLines.join("\n");
+    } else {
+      codeText = cleanProto(protoData.c99 || `mipp_${entry.name}(...)`);
+    }
+  } else if (state.flavor === "cpp") {
+    const cppSample = protoData.cpp_samples ? protoData.cpp_samples[lmulKey] : null;
+    let proto = "";
+    if (typeof cppSample === "object" && cppSample !== null) {
+      proto = cleanProto(cppSample[targetMask] || cppSample["unmasked"] || "");
+    } else if (typeof cppSample === "string") {
+      proto = cleanProto(cppSample);
+    }
+    if (!proto) {
+      proto = cleanProto(protoData.cpp || `mipp::${entry.name}(...)`);
+    }
+    codeText = proto;
+  } else {
+    // C++ Object
+    let proto = "";
+    if (protoData.cpp_obj_samples && protoData.cpp_obj_samples[lmulKey]) {
+      proto = protoData.cpp_obj_samples[lmulKey];
+    } else {
+      proto = protoData.cpp_obj || `r0.${entry.name}(...)`;
+    }
+    codeText = formatCppObjProto(proto, lmulKey);
   }
 
-  if (activeMasks.length === 0) {
-    const availableList = Object.keys(entry.mask_support || {}).filter((k) => entry.mask_support[k]).join(", ") || "unmasked";
-    return `
-      <div style="padding: 1rem; color: var(--md-default-fg-color--lighter, #94a3b8); font-style: italic;">
-        ⚠️ No matching mask variant for this operation. Selected: <strong>${escapeHtml(state.maskVariant || "unmasked")}</strong> (Available for ${entry.name}: ${escapeHtml(availableList)})
-      </div>
-    `;
-  }
+  const isUnsupported = !availableVariants.includes(globalVariant);
+  const title = state.flavor === "c99"
+    ? "C99 Declarations"
+    : state.flavor === "cpp"
+      ? "C++ Function Templates"
+      : "C++ Object Methods";
 
   return `
-    <div>
-      <div class="mipp-card-sec-title">
-        <span>${state.flavor === "c99" ? "C99 Declarations" : state.flavor === "cpp" ? "C++ Function Templates" : "C++ Object Methods"}</span>
-      </div>
-      ${activeMasks.map((maskMode) => {
-        let codeText = "";
-        if (state.flavor === "c99") {
-          const samplesForLmul = protoData.c99_samples ? protoData.c99_samples[lmulKey] : null;
-          let lines = [];
-          if (samplesForLmul) {
-            if (Array.isArray(samplesForLmul)) {
-              lines = samplesForLmul;
-            } else if (typeof samplesForLmul === "object") {
-              lines = samplesForLmul[maskMode] || samplesForLmul["unmasked"] || [];
+    <div class="mipp-proto-group" style="margin-bottom: 0.75rem;">
+      <div class="mipp-code-box">
+        <div class="mipp-code-box-header">
+          <div class="mipp-code-box-header-left" style="display: flex; align-items: center; gap: 0.5rem;">
+            <span class="mipp-code-box-title">${title}</span>
+            ${isUnsupported
+              ? `<span style="font-size: 0.75rem; color: #f59e0b; font-style: italic;">(${globalVariant} unsupported, showing unmasked)</span>`
+              : ""
             }
-          }
-          if (lines.length > 0) {
-            let cleanLines = lines.map(cleanProto);
-            if (activeDts.length > 0) {
-              const filtered = cleanLines.filter((sig) =>
-                activeDts.some((dt) => sig.includes(`_${dt}_`) || sig.includes(`_${dt}(`) || sig.includes(`_${dt};`) || sig.includes(`_${dt}`))
-              );
-              if (filtered.length > 0) cleanLines = filtered;
-            }
-            codeText = cleanLines.join("\n");
-          } else {
-            codeText = cleanProto(protoData.c99 || `mipp_${entry.name}(...)`);
-          }
-        } else if (state.flavor === "cpp") {
-          const cppSample = protoData.cpp_samples ? protoData.cpp_samples[lmulKey] : null;
-          let proto = "";
-          if (typeof cppSample === "object" && cppSample !== null) {
-            proto = cleanProto(cppSample[maskMode] || cppSample["unmasked"] || "");
-          } else if (typeof cppSample === "string") {
-            proto = cleanProto(cppSample);
-          }
-          if (!proto) {
-            proto = cleanProto(protoData.cpp || `mipp::${entry.name}(...)`);
-          }
-          codeText = proto;
-        } else {
-          // C++ Object
-          let proto = "";
-          if (protoData.cpp_obj_samples && protoData.cpp_obj_samples[lmulKey]) {
-            proto = protoData.cpp_obj_samples[lmulKey];
-          } else {
-            proto = protoData.cpp_obj || `r0.${entry.name}(...)`;
-          }
-          codeText = formatCppObjProto(proto, lmulKey);
-        }
-
-        return `
-          <div class="mipp-proto-group" style="margin-bottom: 0.75rem;">
-            <div class="mipp-code-box">
-              <div class="mipp-code-box-header">
-                <div class="mipp-code-box-header-left">
-                  <span class="mipp-mask-badge mask-${maskMode}">${maskMode}</span>
-                </div>
-                <button class="mipp-icon-btn copy-proto-btn" data-copy="${escapeHtml(codeText)}" title="Copy prototype">
-                  ${ICON_COPY}
-                </button>
-              </div>
-              <pre><code>${highlightCpp(codeText)}</code></pre>
-            </div>
           </div>
-        `;
-      }).join("")}
+          <button class="mipp-icon-btn copy-proto-btn" data-copy="${escapeHtml(codeText)}" title="Copy prototype">
+            ${ICON_COPY}
+          </button>
+        </div>
+        <pre><code>${highlightCpp(codeText)}</code></pre>
+      </div>
     </div>
   `;
 }

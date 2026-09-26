@@ -3,7 +3,7 @@
  */
 import { escapeHtml, ICON_SEARCH, copyToClipboard } from "../explorer.config.js";
 import { state, syncUrlHash } from "../state.js";
-import { ALL_SIMD_EXTS, ALL_CATEGORIES, ALL_DATATYPES, ALL_MASK_MODES, ALL_LEVELS } from "../data.js";
+import { ALL_SIMD_EXTS, ALL_CATEGORIES, ALL_DATATYPES } from "../data.js";
 
 function hasActiveFilters() {
   return (
@@ -12,7 +12,6 @@ function hasActiveFilters() {
     state.selectedTypes.length < ALL_DATATYPES.length ||
     state.maskVariant !== "unmasked" ||
     state.selectedSimdExts.length < ALL_SIMD_EXTS.length ||
-    state.selectedLevels.length < ALL_LEVELS.length ||
     state.lmul !== "1" ||
     state.flavor !== "cpp" ||
     state.expandedCards.size > 0 ||
@@ -23,6 +22,8 @@ function hasActiveFilters() {
 }
 
 export function renderSearchBar() {
+  const isCppObj = state.flavor === "cpp_obj";
+
   return `
     <!-- Top Sticky Search & Dialect Controls with Integrated Brand Title -->
     <header class="mipp-explorer-header">
@@ -63,6 +64,17 @@ export function renderSearchBar() {
           </div>
         </div>
 
+        <!-- Variant Selector -->
+        <div class="mipp-controls-group">
+          <span class="mipp-control-label">Variant:</span>
+          <div class="mipp-segmented-group ${isCppObj ? "disabled" : ""}" id="mipp-mask-group" title="${isCppObj ? "Variants are not supported in C++ Object dialect (unmasked only)" : "Filter by variant"}">
+            <button class="mipp-segment-btn ${isCppObj || state.maskVariant === "unmasked" ? "active" : ""}" data-mask-variant="unmasked" title="Unmasked">U</button>
+            <button class="mipp-segment-btn ${!isCppObj && state.maskVariant === "mask" ? "active" : ""}" data-mask-variant="mask" ${isCppObj ? "disabled" : ""} title="Mask (merge)">M</button>
+            <button class="mipp-segment-btn ${!isCppObj && state.maskVariant === "maskz" ? "active" : ""}" data-mask-variant="maskz" ${isCppObj ? "disabled" : ""} title="Maskz (zeroing)">Z</button>
+            <button class="mipp-segment-btn ${!isCppObj && state.maskVariant === "masks" ? "active" : ""}" data-mask-variant="masks" ${isCppObj ? "disabled" : ""} title="Masks (sourcing)">S</button>
+          </div>
+        </div>
+
         <!-- LMUL Selector -->
         <div class="mipp-controls-group">
           <span class="mipp-control-label">LMUL:</span>
@@ -75,29 +87,39 @@ export function renderSearchBar() {
           </div>
         </div>
 
-        <!-- UI Size Selector -->
-        <div class="mipp-controls-group">
-          <span class="mipp-control-label">UI Size:</span>
-          <div class="mipp-segmented-group" id="mipp-font-size-group">
-            <button class="mipp-segment-btn ${state.fontSize === "sm" ? "active" : ""}" data-font-size="sm" title="Small font">S</button>
-            <button class="mipp-segment-btn ${state.fontSize === "md" ? "active" : ""}" data-font-size="md" title="Medium font">M</button>
-            <button class="mipp-segment-btn ${state.fontSize === "lg" ? "active" : ""}" data-font-size="lg" title="Large font">L</button>
+        <!-- Utility Actions: Ultra-compact icon buttons -->
+        <div class="mipp-controls-group mipp-actions-group">
+          <span class="mipp-control-label mipp-actions-label">Actions:</span>
+          <div class="mipp-actions-buttons">
+            <div class="mipp-header-options-wrapper">
+              <button id="mipp-options-btn" class="mipp-action-icon-btn mipp-options-btn" title="Explorer display settings (UI Size)" aria-label="Display settings" aria-expanded="false">
+                ⚙️
+              </button>
+              <div id="mipp-options-popover" class="mipp-options-popover" style="display: none;">
+                <div class="mipp-options-popover-title">Display Settings</div>
+                <div class="mipp-options-popover-row">
+                  <span class="mipp-control-label">UI Size:</span>
+                  <div class="mipp-segmented-group" id="mipp-font-size-group">
+                    <button class="mipp-segment-btn ${state.fontSize === "sm" ? "active" : ""}" data-font-size="sm" title="Small (compact)">S</button>
+                    <button class="mipp-segment-btn ${state.fontSize === "md" ? "active" : ""}" data-font-size="md" title="Medium (standard)">M</button>
+                    <button class="mipp-segment-btn ${state.fontSize === "lg" ? "active" : ""}" data-font-size="lg" title="Large (spacious)">L</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <button id="mipp-share-btn" class="mipp-action-icon-btn" title="Copy direct link to this view" aria-label="Share">
+              🔗
+            </button>
+            <button
+              id="mipp-reset-btn"
+              class="mipp-action-icon-btn ${hasActiveFilters() ? "has-active" : ""}"
+              ${hasActiveFilters() ? "" : "disabled"}
+              title="${hasActiveFilters() ? "Reset all filters" : "No filters to reset"}"
+              aria-label="Reset filters"
+            >
+              ↺
+            </button>
           </div>
-        </div>
-
-        <!-- Utility Actions -->
-        <div class="mipp-controls-group">
-          <button id="mipp-share-btn" class="mipp-action-btn" title="Copy direct link to this view">
-            🔗 Share
-          </button>
-          <button
-            id="mipp-reset-btn"
-            class="mipp-action-btn"
-            ${hasActiveFilters() ? 'style="color: #ef4444;"' : "disabled"}
-            title="${hasActiveFilters() ? "Reset all filters" : "No filters to reset"}"
-          >
-            ↺ Reset
-          </button>
         </div>
       </div>
     </header>
@@ -120,6 +142,27 @@ export function updateSearchBarUI(headerEl) {
     btn.classList.toggle("active", btn.getAttribute("data-flavor") === state.flavor);
   });
 
+  // Variant
+  const isCppObj = state.flavor === "cpp_obj";
+  if (isCppObj) {
+    state.maskVariant = "unmasked";
+  }
+  const maskGroup = headerEl.querySelector("#mipp-mask-group");
+  if (maskGroup) {
+    maskGroup.classList.toggle("disabled", isCppObj);
+    maskGroup.title = isCppObj ? "Variants are not supported in C++ Object dialect (unmasked only)" : "Filter by variant";
+    maskGroup.querySelectorAll(".mipp-segment-btn").forEach((btn) => {
+      const v = btn.getAttribute("data-mask-variant");
+      if (isCppObj) {
+        btn.disabled = (v !== "unmasked");
+        btn.classList.toggle("active", v === "unmasked");
+      } else {
+        btn.disabled = false;
+        btn.classList.toggle("active", v === state.maskVariant);
+      }
+    });
+  }
+
   // LMUL
   headerEl.querySelectorAll("#mipp-lmul-group .mipp-segment-btn").forEach((btn) => {
     btn.classList.toggle("active", btn.getAttribute("data-lmul") === state.lmul);
@@ -130,13 +173,81 @@ export function updateSearchBarUI(headerEl) {
     btn.classList.toggle("active", btn.getAttribute("data-font-size") === state.fontSize);
   });
 
-  // Reset button: always visible, disabled/grayed out if no active filters
+  // Reset button: ultra-compact icon button, disabled/grayed out if no active filters
   const resetBtn = headerEl.querySelector("#mipp-reset-btn");
   if (resetBtn) {
     const canReset = hasActiveFilters();
     resetBtn.disabled = !canReset;
-    resetBtn.style.color = canReset ? "#ef4444" : "";
+    resetBtn.classList.toggle("has-active", canReset);
     resetBtn.title = canReset ? "Reset all filters" : "No filters to reset";
+  }
+}
+
+/**
+ * Preserve the viewport position of the current focal card across filtering re-renders (Scroll Anchoring - Cas A).
+ */
+export function preserveScrollAnchor(actionFn) {
+  if (typeof window === "undefined" || typeof document === "undefined") {
+    actionFn();
+    return;
+  }
+
+  const headerEl = document.querySelector(".mipp-explorer-header");
+  const headerBottom = headerEl ? Math.max(0, headerEl.getBoundingClientRect().bottom) : 0;
+  const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 800;
+
+  let anchorEl = null;
+  let anchorTop = 0;
+
+  // 1. Prioritize any expanded card currently in viewport
+  const expandedCards = Array.from(document.querySelectorAll(".mipp-card.expanded"));
+  for (const card of expandedCards) {
+    const rect = card.getBoundingClientRect();
+    if (rect.bottom > headerBottom && rect.top < viewportHeight) {
+      anchorEl = card;
+      anchorTop = rect.top;
+      break;
+    }
+  }
+
+  // 2. Otherwise pick the card closest to top of viewport below header
+  if (!anchorEl) {
+    const allCards = Array.from(document.querySelectorAll(".mipp-card"));
+    let closestDist = Infinity;
+    for (const card of allCards) {
+      const rect = card.getBoundingClientRect();
+      if (rect.bottom > headerBottom) {
+        const dist = Math.abs(rect.top - headerBottom);
+        if (dist < closestDist) {
+          closestDist = dist;
+          anchorEl = card;
+          anchorTop = rect.top;
+        }
+      }
+    }
+  }
+
+  const anchorName = anchorEl ? anchorEl.getAttribute("data-card-name") : null;
+
+  // Execute mutation
+  actionFn();
+
+  // Scroll compensation
+  if (anchorName) {
+    const performAdjustment = () => {
+      const newAnchorEl = document.getElementById(`card-${anchorName}`)
+        || document.querySelector(`.mipp-card[data-card-name="${anchorName}"]`);
+      if (newAnchorEl) {
+        const newTop = newAnchorEl.getBoundingClientRect().top;
+        const deltaY = newTop - anchorTop;
+        if (Math.abs(deltaY) > 1) {
+          window.scrollBy({ top: deltaY, left: 0, behavior: "instant" });
+        }
+      }
+    };
+
+    requestAnimationFrame(performAdjustment);
+    setTimeout(performAdjustment, 30);
   }
 }
 
@@ -232,13 +343,33 @@ export function bindSearchBarEvents(headerEl, onSearchChange) {
   if (flavorGroup) {
     flavorGroup.querySelectorAll(".mipp-segment-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
-        const prevFlavor = state.flavor;
-        state.flavor = btn.getAttribute("data-flavor");
-        if (state.flavor === "cpp_obj") {
-          state.maskVariant = "unmasked";
-        }
-        syncUrlHash(true);
-        onSearchChange();
+        const newFlavor = btn.getAttribute("data-flavor");
+        if (state.flavor === newFlavor) return;
+        preserveScrollAnchor(() => {
+          state.flavor = newFlavor;
+          if (state.flavor === "cpp_obj") {
+            state.maskVariant = "unmasked";
+          }
+          syncUrlHash(true);
+          onSearchChange();
+        });
+      });
+    });
+  }
+
+  // Variant Switcher
+  const maskGroup = headerEl.querySelector("#mipp-mask-group");
+  if (maskGroup) {
+    maskGroup.querySelectorAll(".mipp-segment-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (state.flavor === "cpp_obj") return;
+        const newVariant = btn.getAttribute("data-mask-variant");
+        if (state.maskVariant === newVariant) return;
+        preserveScrollAnchor(() => {
+          state.maskVariant = newVariant;
+          syncUrlHash(true);
+          onSearchChange();
+        });
       });
     });
   }
@@ -248,13 +379,33 @@ export function bindSearchBarEvents(headerEl, onSearchChange) {
   if (lmulGroup) {
     lmulGroup.querySelectorAll(".mipp-segment-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
-        state.lmul = btn.getAttribute("data-lmul");
-        if (state.algoModalData) {
-          state.algoModalData.lmul = state.lmul;
-        }
-        syncUrlHash(true);
-        onSearchChange();
+        const newLmul = btn.getAttribute("data-lmul");
+        if (state.lmul === newLmul) return;
+        preserveScrollAnchor(() => {
+          state.lmul = newLmul;
+          syncUrlHash(true);
+          onSearchChange();
+        });
       });
+    });
+  }
+
+  // Options Popover Toggle (UI Size)
+  const optionsBtn = headerEl.querySelector("#mipp-options-btn");
+  const optionsPopover = headerEl.querySelector("#mipp-options-popover");
+  if (optionsBtn && optionsPopover) {
+    optionsBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isVisible = optionsPopover.style.display !== "none";
+      optionsPopover.style.display = isVisible ? "none" : "block";
+      optionsBtn.setAttribute("aria-expanded", String(!isVisible));
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!optionsPopover.contains(e.target) && e.target !== optionsBtn) {
+        optionsPopover.style.display = "none";
+        optionsBtn.setAttribute("aria-expanded", "false");
+      }
     });
   }
 
@@ -275,7 +426,7 @@ export function bindSearchBarEvents(headerEl, onSearchChange) {
     });
   }
 
-  // Share View
+  // Share View (Ultra-compact icon button)
   const shareBtn = headerEl.querySelector("#mipp-share-btn");
   if (shareBtn) {
     shareBtn.addEventListener("click", () => {
@@ -284,7 +435,7 @@ export function bindSearchBarEvents(headerEl, onSearchChange) {
     });
   }
 
-  // Reset Filters
+  // Reset Filters (Ultra-compact icon button)
   const resetBtn = headerEl.querySelector("#mipp-reset-btn");
   if (resetBtn) {
     resetBtn.addEventListener("click", () => {

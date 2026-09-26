@@ -1,5 +1,7 @@
 /**
  * MIPP API Explorer - Tab 1: Hardware Matrix
+ * Displays a streamlined support matrix per SIMD extension & datatype groups,
+ * featuring intelligent family grouping and direct links to the View Algorithm modal.
  */
 import { escapeHtml } from "../explorer.config.js";
 import { ALL_SIMD_EXTS, SIMD_EXT_DISPLAY_NAMES, ALL_MASK_MODES } from "../data.js";
@@ -12,6 +14,7 @@ export function renderTabHw(entry) {
   const selectedExts = state.selectedSimdExts || [];
   const activeExts = extsList.filter((ext) => selectedExts.includes(ext));
   const activeDts = (entry.datatypes || []).filter((dt) => state.selectedTypes.includes(dt));
+  const dtsToConsider = activeDts.length > 0 ? activeDts : (entry.datatypes || []);
 
   if (activeExts.length === 0) {
     return `
@@ -22,37 +25,58 @@ export function renderTabHw(entry) {
   }
 
   const maskSupport = entry.mask_support || {};
-  const allVariants = ALL_MASK_MODES.filter((m) => m === "unmasked" || maskSupport[m]);
-  const effectiveMasks = allVariants;
+  const effectiveMasks = ALL_MASK_MODES.filter((m) => m === "unmasked" || maskSupport[m]);
 
-  if (!state.cardHwMask) state.cardHwMask = {};
-  const curCardMask = state.cardHwMask[entry.name];
-  const defaultMask = (state.maskVariant && effectiveMasks.includes(state.maskVariant))
-    ? state.maskVariant
-    : (effectiveMasks[0] || "unmasked");
-  const currentMask = curCardMask && effectiveMasks.includes(curCardMask)
-    ? curCardMask
-    : defaultMask;
-  state.cardHwMask[entry.name] = currentMask;
+  const globalVariant = state.flavor === "cpp_obj" ? "unmasked" : (state.maskVariant || "unmasked");
+  const currentMask = effectiveMasks.includes(globalVariant) ? globalVariant : "unmasked";
+
+  const STANDARD_FLOATS = ["float64", "float32"];
+  const STANDARD_INTS = ["int64", "int32", "int16", "int8"];
+  const STANDARD_UINTS = ["uint64", "uint32", "uint16", "uint8"];
+  const ALL_STANDARD_DTS = [...STANDARD_FLOATS, ...STANDARD_INTS, ...STANDARD_UINTS];
+
+  function formatGroupBadges(groupDts, reqFeature) {
+    // 1. If every standard datatype (all 10) is in this group
+    if (ALL_STANDARD_DTS.every((d) => groupDts.includes(d))) {
+      return `
+        <div class="mipp-hw-dts-badges">
+          <span class="mipp-dt-group-badge dt-group-all">all datatypes</span>
+          ${reqFeature ? `<span class="mipp-req-feature-tag"><i>(req. ${escapeHtml(reqFeature)})</i></span>` : ""}
+        </div>
+      `;
+    }
+
+    // 2. Family groups & individual fallback
+    const badges = [];
+    const remaining = new Set(groupDts);
+
+    if (STANDARD_FLOATS.every((d) => remaining.has(d))) {
+      badges.push(`<span class="mipp-dt-group-badge dt-group-float">all float</span>`);
+      STANDARD_FLOATS.forEach((d) => remaining.delete(d));
+    }
+    if (STANDARD_INTS.every((d) => remaining.has(d))) {
+      badges.push(`<span class="mipp-dt-group-badge dt-group-int">all int</span>`);
+      STANDARD_INTS.forEach((d) => remaining.delete(d));
+    }
+    if (STANDARD_UINTS.every((d) => remaining.has(d))) {
+      badges.push(`<span class="mipp-dt-group-badge dt-group-uint">all uint</span>`);
+      STANDARD_UINTS.forEach((d) => remaining.delete(d));
+    }
+
+    for (const dt of remaining) {
+      badges.push(`<span class="mipp-dt-badge ${getDtBadgeClass(dt)}">${escapeHtml(dt)}</span>`);
+    }
+
+    return `
+      <div class="mipp-hw-dts-badges">
+        ${badges.join(" ")}
+        ${reqFeature ? `<span class="mipp-req-feature-tag"><i>(req. ${escapeHtml(reqFeature)})</i></span>` : ""}
+      </div>
+    `;
+  }
 
   return `
     <div>
-      <!-- Mask Variant Toolbar -->
-      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 0.75rem; padding-bottom: 0.35rem; border-bottom: 1px solid var(--mipp-card-border, #e2e8f0);">
-        <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
-          <span style="font-size: 0.78rem; font-weight: 600; color: var(--md-default-fg-color--lighter);">Mask Variant:</span>
-          ${effectiveMasks.map((v) => {
-            const isActive = v === currentMask;
-            return `
-              <button class="mipp-mask-badge mask-${v} mipp-test-variant-btn ${isActive ? "active" : ""}"
-                      data-hw-mask="${v}" data-card="${escapeHtml(entry.name)}" title="Switch Hardware Matrix to ${v}">
-                ${v} ${isActive ? "✓" : ""}
-              </button>
-            `;
-          }).join("")}
-        </div>
-      </div>
-
       <div class="mipp-hw-table-wrapper">
         <table class="mipp-hw-table">
           <thead>
@@ -61,19 +85,31 @@ export function renderTabHw(entry) {
                 <span class="mipp-hw-header-full">SIMD Extension</span>
                 <span class="mipp-hw-header-short">Ext</span>
               </th>
+              <th class="mipp-hw-col-dts">Datatypes</th>
               <th class="mipp-hw-col-tier">Tier</th>
-              <th class="mipp-hw-col-mapping">Hardware Mapping & Emulation Logic</th>
+              <th class="mipp-hw-col-action">Algorithm</th>
             </tr>
           </thead>
           <tbody>
             ${activeExts.map((isa) => {
               const info = entry.isa_support ? entry.isa_support[isa] : null;
+              const isaLabel = namesMap[isa] || isa.toUpperCase();
+
               if (!info) {
                 return `
-                  <tr>
-                    <td class="mipp-hw-col-ext" style="font-weight: 700; font-family: var(--md-code-font, monospace);">${namesMap[isa] || isa.toUpperCase()}</td>
-                    <td class="mipp-hw-col-tier"><span class="mipp-isa-badge lvl-na">N/A</span></td>
-                    <td class="mipp-hw-col-mapping"><span style="color: var(--md-default-fg-color--lighter, #94a3b8); font-style: italic;">Not Supported</span></td>
+                  <tr class="mipp-hw-row mipp-hw-group-first">
+                    <td class="mipp-hw-col-ext">
+                      <span class="mipp-hw-ext-name">${isaLabel}</span>
+                    </td>
+                    <td class="mipp-hw-col-dts">
+                      ${formatGroupBadges(dtsToConsider)}
+                    </td>
+                    <td class="mipp-hw-col-tier">
+                      <span class="mipp-isa-badge lvl-na">N/A</span>
+                    </td>
+                    <td class="mipp-hw-col-action">
+                      <span class="mipp-hw-no-algo">—</span>
+                    </td>
                   </tr>
                 `;
               }
@@ -81,27 +117,7 @@ export function renderTabHw(entry) {
               const currentLmul = Number(state.lmul);
               const hwLmuls = info.hw_lmul || (isa === "rvv" ? [1, 2, 4, 8, -2] : [1]);
               const isLmulEmulated = currentLmul !== 1 && !hwLmuls.includes(currentLmul) && (info.overall_level < 2);
-
-              const lmulKey = String(state.lmul);
-              const nativeDict = (info.native_instructions_by_lmul && info.native_instructions_by_lmul[lmulKey])
-                || info.native_instructions
-                || {};
-              let instrs = Object.entries(nativeDict);
-              if (activeDts.length > 0) {
-                instrs = instrs.filter(([dt]) => activeDts.includes(dt));
-              }
-
-              const snippetDict = (info.code_snippets_by_lmul && info.code_snippets_by_lmul[lmulKey])
-                || info.code_snippets
-                || {};
-              const sampleCode = snippetDict ? (
-                activeDts.length > 0 && activeDts[0] in snippetDict
-                  ? snippetDict[activeDts[0]]
-                  : Object.values(snippetDict)[0]
-              ) : null;
-
-              const hasEmulationAlgos = info.emulation_algorithms && Object.keys(info.emulation_algorithms).length > 0;
-              const dtsToConsider = activeDts.length > 0 ? activeDts : (entry.datatypes || []);
+              const reqFeatures = info.required_features || {};
 
               const getDtLevel = (dt) => {
                 let lvl;
@@ -119,125 +135,60 @@ export function renderTabHw(entry) {
                 return lvl;
               };
 
-              let baseLevel = 3;
-              if (dtsToConsider.length > 0) {
-                const levels = dtsToConsider.map(getDtLevel);
-                baseLevel = Math.min(...levels);
-              } else {
-                baseLevel = getDtLevel(activeDts[0] || "float32");
-              }
-
-              // Partition datatypes into L0 native vs. L1/L2 emulated
-              let l0Instrs = instrs.filter(([dt]) => getDtLevel(dt) === 0);
-              if (l0Instrs.length === 0 && instrs.length > 0 && baseLevel === 0) {
-                l0Instrs = instrs;
-              }
-
-              const emuDts = dtsToConsider.filter((dt) => {
+              // Group datatypes by (level, reqFeature)
+              const groupsMap = new Map();
+              for (const dt of dtsToConsider) {
                 const lvl = getDtLevel(dt);
-                return lvl === 1 || lvl === 2;
-              });
-              const emuLevels = emuDts.map(getDtLevel);
-              const emuLevel = emuLevels.length > 0 ? Math.min(...emuLevels) : 2;
+                const feat = (lvl === 0 && reqFeatures[dt]) ? reqFeatures[dt] : null;
+                const groupKey = `${lvl}::${feat || ""}`;
+                if (!groupsMap.has(groupKey)) {
+                  groupsMap.set(groupKey, { level: lvl, reqFeature: feat, dts: [] });
+                }
+                groupsMap.get(groupKey).dts.push(dt);
+              }
 
-              const l3Dts = dtsToConsider.filter((dt) => getDtLevel(dt) === 3);
-              const l3Html = (l3Dts.length > 0 && (l0Instrs.length > 0 || emuDts.length > 0)) ? `
-                <div style="margin-top: 0.35rem; color: var(--md-default-fg-color--lighter, #94a3b8); font-size: 0.72rem; font-style: italic;">
-                  Scalar fallback (L3): ${l3Dts.join(", ")}
-                </div>
-              ` : "";
+              const groups = Array.from(groupsMap.values()).sort((a, b) => a.level - b.level);
+              if (groups.length === 0) {
+                return `
+                  <tr class="mipp-hw-row mipp-hw-group-first">
+                    <td class="mipp-hw-col-ext"><span class="mipp-hw-ext-name">${isaLabel}</span></td>
+                    <td class="mipp-hw-col-dts">${formatGroupBadges(dtsToConsider)}</td>
+                    <td class="mipp-hw-col-tier"><span class="mipp-isa-badge lvl-na">N/A</span></td>
+                    <td class="mipp-hw-col-action"><span class="mipp-hw-no-algo">—</span></td>
+                  </tr>
+                `;
+              }
 
-              let mappingHtml = '<span style="color: var(--md-default-fg-color--lighter, #94a3b8); font-style: italic;">Scalar Fallback Loop (L3)</span>';
+              return groups.map((group, idx) => {
+                const isFirst = idx === 0;
+                const defaultGroupDt = group.dts[0] || "float32";
+                const reqFeatureAttr = group.reqFeature || "";
 
-              if (l0Instrs.length > 0 && emuDts.length > 0) {
-                // Heterogeneous case: some types native L0, some types emulated L1/L2
-                const nativeHtml = l0Instrs.map(([dt, iname]) => `
-                  <div style="display: flex; align-items: center; gap: 0.5rem; margin: 0.25rem 0;">
-                    <span class="mipp-dt-badge ${getDtBadgeClass(dt)}">${dt}</span>
-                    <code class="mipp-hw-intrinsic-code">${escapeHtml(iname)}</code>
-                  </div>
-                `).join("");
+                const extCell = isFirst
+                  ? `<td class="mipp-hw-col-ext" ${groups.length > 1 ? `rowspan="${groups.length}"` : ""}>
+                       <span class="mipp-hw-ext-name">${isaLabel}</span>
+                     </td>`
+                  : "";
 
-                const l0Dt = l0Instrs[0][0];
-                const l0SampleCode = (snippetDict && l0Dt in snippetDict) ? snippetDict[l0Dt] : sampleCode;
-                const sampleCodeHtml = l0SampleCode ? `
-                  <div style="margin-top: 0.35rem; font-family: var(--md-code-font, monospace); font-size: 0.72rem; opacity: 0.75; overflow-x: auto;">
-                    ↳ <code>${escapeHtml(l0SampleCode)}</code>
-                  </div>
-                ` : "";
+                const tierBadge = group.level > 3 || group.level === "na"
+                  ? `<span class="mipp-isa-badge lvl-na">N/A</span>`
+                  : `<span class="mipp-isa-badge lvl-${group.level}">L${group.level}</span>`;
 
-                const emuLabel = isLmulEmulated
-                  ? `LMUL=${state.lmul} software-emulated vector sequence`
-                  : (emuLevel === 1 ? "Target-specific multi-instruction emulation" : "Generic portable vector AST algorithm");
-                const defaultAlgoDt = emuDts[0] || "float32";
-
-                const emuBtnHtml = (hasEmulationAlgos || isLmulEmulated || currentMask !== "unmasked" || emuLevel === 1 || emuLevel === 2) ? `
-                  <div style="margin-top: 0.5rem;">
-                    <button class="mipp-algo-modal-btn lvl-${emuLevel}" title="${escapeHtml(emuLabel)}" data-algo-card="${entry.name}" data-algo-func="${entry.name}" data-algo-isa="${isa}" data-algo-level="${emuLevel}" data-algo-dt="${defaultAlgoDt}" data-algo-mask="${currentMask}">
-                      🔍 View Algorithm (${emuDts.join(", ")})
-                    </button>
-                  </div>
-                ` : `
-                  <div style="margin-top: 0.5rem;">
-                    <span style="color: ${emuLevel === 1 ? '#2563eb' : '#f59e0b'}; font-weight: 500; font-size: 0.85rem;">${emuLabel} (${emuDts.join(", ")})</span>
-                  </div>
+                const algoBtn = `
+                  <button type="button" class="mipp-icon-btn mipp-hw-algo-btn" data-algo-card="${escapeHtml(entry.name)}" data-algo-isa="${isa}" data-algo-dt="${defaultGroupDt}" data-algo-mask="${currentMask}" data-algo-feature="${escapeHtml(reqFeatureAttr)}" title="View algorithm for ${isaLabel} (${escapeHtml(group.dts.join(', '))})">
+                    🔍
+                  </button>
                 `;
 
-                mappingHtml = nativeHtml + sampleCodeHtml + emuBtnHtml + l3Html;
-
-              } else if (l0Instrs.length > 0) {
-                // Pure L0 native
-                const nativeHtml = l0Instrs.map(([dt, iname]) => `
-                  <div style="display: flex; align-items: center; gap: 0.5rem; margin: 0.25rem 0;">
-                    <span class="mipp-dt-badge ${getDtBadgeClass(dt)}">${dt}</span>
-                    <code class="mipp-hw-intrinsic-code">${escapeHtml(iname)}${currentMask !== "unmasked" ? ` (${currentMask})` : ""}</code>
-                  </div>
-                `).join("");
-
-                const l0Dt = l0Instrs[0][0];
-                const l0SampleCode = (snippetDict && l0Dt in snippetDict) ? snippetDict[l0Dt] : sampleCode;
-                const sampleCodeHtml = l0SampleCode ? `
-                  <div style="margin-top: 0.35rem; font-family: var(--md-code-font, monospace); font-size: 0.72rem; opacity: 0.75; overflow-x: auto;">
-                    ↳ <code>${escapeHtml(l0SampleCode)}</code>
-                  </div>
-                ` : "";
-
-                mappingHtml = nativeHtml + sampleCodeHtml + l3Html;
-
-              } else if (emuDts.length > 0 || baseLevel === 1 || baseLevel === 2) {
-                // Pure emulated L1/L2
-                const effectiveLevel = emuDts.length > 0 ? emuLevel : baseLevel;
-                const label = isLmulEmulated
-                  ? `LMUL=${state.lmul} software-emulated vector sequence`
-                  : (effectiveLevel === 1 ? "Target-specific multi-instruction emulation" : "Generic portable vector AST algorithm");
-
-                if (hasEmulationAlgos || isLmulEmulated || currentMask !== "unmasked" || effectiveLevel === 1 || effectiveLevel === 2) {
-                  const defaultAlgoDt = (activeDts.length > 0 ? activeDts[0] : null)
-                    || (info.emulation_algorithms && Object.keys(info.emulation_algorithms)[0])
-                    || (entry.datatypes && entry.datatypes[0])
-                    || "";
-                  const btnLabel = "🔍 View Algorithm";
-                  mappingHtml = `
-                    <button class="mipp-algo-modal-btn lvl-${effectiveLevel}" title="${escapeHtml(label)}" data-algo-card="${entry.name}" data-algo-func="${entry.name}" data-algo-isa="${isa}" data-algo-level="${effectiveLevel}" data-algo-dt="${defaultAlgoDt}" data-algo-mask="${currentMask}">
-                      ${btnLabel}
-                    </button>
-                  ` + l3Html;
-                } else {
-                  mappingHtml = `<span style="color: ${effectiveLevel === 1 ? '#2563eb' : '#f59e0b'}; font-weight: 500;">${label}</span>` + l3Html;
-                }
-              }
-
-              return `
-                <tr>
-                  <td class="mipp-hw-col-ext" style="font-weight: 700; font-family: var(--md-code-font, monospace);">${namesMap[isa] || isa.toUpperCase()}</td>
-                  <td class="mipp-hw-col-tier">
-                    <span class="mipp-isa-badge lvl-${baseLevel}">L${baseLevel}</span>
-                  </td>
-                  <td class="mipp-hw-col-mapping">
-                    ${mappingHtml}
-                  </td>
-                </tr>
-              `;
+                return `
+                  <tr class="mipp-hw-row ${isFirst ? "mipp-hw-group-first" : "mipp-hw-group-sub"}">
+                    ${extCell}
+                    <td class="mipp-hw-col-dts">${formatGroupBadges(group.dts, group.reqFeature)}</td>
+                    <td class="mipp-hw-col-tier">${tierBadge}</td>
+                    <td class="mipp-hw-col-action">${algoBtn}</td>
+                  </tr>
+                `;
+              }).join("");
             }).join("")}
           </tbody>
         </table>
