@@ -5,34 +5,34 @@ import { apiMetadata, DT_INFO, apiData } from "./data.js";
 import { formatFunctionHeaders } from "./syntax.js";
 
 export function getHwRegType(isa, dt, defines, currentLmulVal = 1) {
-  if (isa === "rvv") {
-    const lsuffix = currentLmulVal === -2 ? "mf2" : `m${currentLmulVal}`;
-    return `v${dt}${lsuffix}_t`;
-  }
   const isaMeta = apiMetadata.isas ? apiMetadata.isas[isa] : null;
-  if (isaMeta && isaMeta.datatypes && isaMeta.datatypes[dt] && isaMeta.datatypes[dt].reg) {
+  const dtMeta = isaMeta && isaMeta.datatypes && isaMeta.datatypes[dt];
+  if (dtMeta) {
     if (isa === "neon" && dt === "float64") {
-      return (defines && defines.__aarch64__ !== false) ? isaMeta.datatypes[dt].reg : "double";
+      return (defines && defines.__aarch64__ !== false) ? dtMeta.reg : "double";
     }
-    return isaMeta.datatypes[dt].reg;
+    const lmulKey = String(currentLmulVal);
+    if (dtMeta.reg_by_lmul && dtMeta.reg_by_lmul[lmulKey]) {
+      return dtMeta.reg_by_lmul[lmulKey];
+    }
+    if (dtMeta.reg) return dtMeta.reg;
   }
   const dti = (DT_INFO && DT_INFO[dt]) || { c_type: "float" };
   return dti.c_type || "__m256";
 }
 
 export function getHwMaskType(isa, dt, defines, currentLmulVal = 1) {
-  if (isa === "rvv") {
-    const dti = (DT_INFO && DT_INFO[dt]) || { bits: 32 };
-    const numLmul = currentLmulVal === -2 ? 0.5 : Number(currentLmulVal) || 1;
-    const eew = Math.round(dti.bits / numLmul);
-    return `vbool${eew}_t`;
-  }
   const isaMeta = apiMetadata.isas ? apiMetadata.isas[isa] : null;
-  if (isaMeta && isaMeta.datatypes && isaMeta.datatypes[dt] && isaMeta.datatypes[dt].msk) {
+  const dtMeta = isaMeta && isaMeta.datatypes && isaMeta.datatypes[dt];
+  if (dtMeta) {
     if (isa === "neon" && dt === "float64") {
-      return (defines && defines.__aarch64__ !== false) ? isaMeta.datatypes[dt].msk : "uint64_t";
+      return (defines && defines.__aarch64__ !== false) ? dtMeta.msk : "uint64_t";
     }
-    return isaMeta.datatypes[dt].msk;
+    const lmulKey = String(currentLmulVal);
+    if (dtMeta.msk_by_lmul && dtMeta.msk_by_lmul[lmulKey]) {
+      return dtMeta.msk_by_lmul[lmulKey];
+    }
+    if (dtMeta.msk) return dtMeta.msk;
   }
   const dti = (DT_INFO && DT_INFO[dt]) || { uint_type: "uint32_t" };
   return dti.uint_type || "__m256";
@@ -47,110 +47,136 @@ export function isFeatureSupported(info, targetDt, targetIsa, targetDefines) {
   }
   if (!req) return true;
 
-  if (targetIsa === "avx512") {
-    if (req === "BW" && targetDefines.__AVX512BW__ === false) return false;
-    if (req === "DQ" && targetDefines.__AVX512DQ__ === false) return false;
-    if (req === "VL" && targetDefines.__AVX512VL__ === false) return false;
-    if (req === "CD" && targetDefines.__AVX512CD__ === false) return false;
-  } else if (targetIsa === "avx") {
-    if (req === "AVX2" && targetDefines.__AVX2__ === false) return false;
-    if (req === "FMA" && targetDefines.__FMA__ === false) return false;
-  } else if (targetIsa === "neon") {
-    if (req === "AArch64" && targetDefines.__aarch64__ === false) return false;
-    if (req === "FMA" && (targetDefines.__ARM_FEATURE_FMA === false || targetDefines.__ARM_FEATURE_FMA === 0 || targetDefines.__FMA__ === false)) return false;
-    if (req === "Rounding" && targetDefines.__ARM_FEATURE_DIRECTED_ROUNDING === false) return false;
-  } else if (targetIsa === "sve") {
-    if (req === "SVE2" && targetDefines.__ARM_FEATURE_SVE2 === false) return false;
-  } else if (targetIsa === "sse") {
-    const SSE_RANKS = { "SSE": 1, "SSE2": 2, "SSE3": 3, "SSSE3": 4, "SSE4.1": 5, "SSE4.2": 6 };
-    const reqRank = SSE_RANKS[req] || 2;
-    let curRank = 6;
-    if (targetDefines.sseTarget) {
-      curRank = SSE_RANKS[targetDefines.sseTarget] || 6;
-    } else if (targetDefines.__SSE4_2__ === false) {
-      if (targetDefines.__SSE4_1__ !== false) curRank = 5;
-      else if (targetDefines.__SSSE3__ !== false) curRank = 4;
-      else if (targetDefines.__SSE3__ !== false) curRank = 3;
-      else curRank = 2;
+  const isaMeta = apiMetadata.isas ? apiMetadata.isas[targetIsa] : null;
+  const featuresMeta = isaMeta ? isaMeta.features : null;
+
+  if (featuresMeta && Array.isArray(featuresMeta.items)) {
+    const isHierarchy = featuresMeta.mode === "hierarchy";
+    const isMixed = featuresMeta.mode === "mixed";
+    const tierItems = featuresMeta.items.filter((it) => isHierarchy || (isMixed && it.type === "tier"));
+    const flagItems = featuresMeta.items.filter((it) => it.type === "flag" || (!isHierarchy && !isMixed));
+
+    // 1. Check if req is in tier items
+    const reqTierIdx = tierItems.findIndex((it) => it.id === req);
+    if (reqTierIdx !== -1) {
+      let curIdx = tierItems.length - 1;
+      const currentTier = targetDefines[targetIsa] || targetDefines.hierarchyTarget;
+      if (currentTier) {
+        const foundIdx = tierItems.findIndex((it) => it.id === currentTier);
+        if (foundIdx !== -1) curIdx = foundIdx;
+      } else {
+        for (let i = tierItems.length - 1; i >= 0; i--) {
+          const it = tierItems[i];
+          if (targetDefines[it.define] !== false && targetDefines[it.id] !== false) {
+            curIdx = i;
+            break;
+          }
+        }
+      }
+      return curIdx >= reqTierIdx;
     }
-    if (curRank < reqRank) return false;
+
+    // 2. Check if req is in flag items
+    const featItem = flagItems.find((it) => it.id === req);
+    if (featItem) {
+      if (targetDefines[featItem.define] === false || targetDefines[featItem.id] === false) {
+        return false;
+      }
+      return true;
+    }
   }
+
+  // Fallback if metadata not loaded
+  if (targetDefines[req] === false) return false;
   return true;
 }
 
 export function getCompilerConfigForFlat(isa, defines = {}, scalarSize = 256) {
   const isaMeta = apiMetadata.isas ? apiMetadata.isas[isa] : null;
-  const compilerMeta = (isaMeta && isaMeta.compiler) ? isaMeta.compiler : { id: "g142", arch: "x86", base_flags: "-O3", label: "x86-64 GCC" };
+  const defaultCompiler = { id: "g142", arch: "x86", base_flags: "-O3", label: "x86-64 GCC" };
+  let compilerMeta = (isaMeta && isaMeta.compiler) ? isaMeta.compiler : defaultCompiler;
 
-  let compiler = compilerMeta.id || "g142";
-  let options = compilerMeta.base_flags || "-O3";
-  let compilerLabel = compilerMeta.label || "GCC";
-  let targetDesc = "GCC / Clang (x86-64)";
+  // Handle 32-bit architecture override if requested (e.g. ARM32 NEON when __aarch64__ is false)
+  if (defines.__aarch64__ === false && compilerMeta.compiler_32) {
+    compilerMeta = compilerMeta.compiler_32;
+  }
 
-  if (isa === "scalar") {
-    let archFlags = "-march=native";
-    if (scalarSize === 128) archFlags = "-msse4.2";
-    else if (scalarSize === 256) archFlags = "-mavx2 -mfma";
-    else if (scalarSize >= 512) archFlags = "-mavx512f -mavx512bw -mavx512dq";
-    compiler = "g142";
-    options = `-O3 -DMIPP_SCALAR -DMIPP_SCALAR_SIZE=${scalarSize} ${archFlags}`;
-    compilerLabel = `x86-64 GCC (${options})`;
-    targetDesc = "GCC / Clang (x86-64)";
-  } else if (isa === "neon") {
-    if (defines.__aarch64__ !== false) {
-      compiler = "carm64g1420";
-      const archExts = [];
-      if (defines.__ARM_FEATURE_FMA !== false && defines.__ARM_FEATURE_FMA !== 0) archExts.push("+fma");
-      options = `-O3 -march=armv8-a+simd${archExts.join("")}`;
-      compilerLabel = `AArch64 GCC (${options})`;
-      targetDesc = "GCC / Clang (AArch64 NEON)";
-    } else {
-      compiler = compilerMeta.id_32 || "arm-gcc-1320";
-      const fpu = (defines && (defines.__ARM_FEATURE_FMA !== false && defines.__ARM_FEATURE_FMA !== 0)) ? "neon-vfpv4" : "neon";
-      options = `-O3 -march=armv7-a -mfpu=${fpu} -mfloat-abi=hard`;
-      compilerLabel = `ARM32 GCC (${options})`;
-      targetDesc = "GCC / Clang (ARM32 NEON)";
-    }
-  } else if (isa === "sve") {
-    compiler = "carm64g1420";
-    const sveArch = defines.__ARM_FEATURE_SVE2 ? "armv8.2-a+sve2" : "armv8.2-a+sve";
-    options = `-O3 -march=${sveArch} -msve-vector-bits=${scalarSize || 256}`;
-    compilerLabel = `AArch64 SVE GCC (${options})`;
-    targetDesc = "GCC / Clang (AArch64 SVE)";
-  } else if (isa === "rvv") {
-    compiler = compilerMeta.id || "rv64-clang";
-    const zvlWidth = scalarSize || 256;
-    options = `-O3 -march=rv64gcv_zvl${zvlWidth}b -mrvv-vector-bits=zvl`;
-    compilerLabel = `RISC-V 64 Clang (${options})`;
-    targetDesc = "Clang (RISC-V 64 RVV)";
-  } else {
-    compiler = "g142";
-    targetDesc = "GCC / Clang (x86-64)";
-    const flags = ["-O3"];
-    if (isa === "avx512") {
-      if (isaMeta && isaMeta.features) {
-        for (const f of isaMeta.features) {
-          if (defines[f.name] !== false && f.flag) flags.push(f.flag);
+  const compiler = compilerMeta.id || "g142";
+  let baseFlags = (compilerMeta.base_flags || "-O3").replace(/\{simd_width\}/g, String(scalarSize || 256));
+  const targetDesc = compilerMeta.label || "GCC / Clang";
+  const flags = [baseFlags];
+
+  // Adjust flags based on scalarSize/vectorSize if flags_by_size is provided by compiler metadata
+  if (compilerMeta.flags_by_size) {
+    const sizeKey = String(scalarSize || 256);
+    const archFlags = compilerMeta.flags_by_size[sizeKey] || (scalarSize >= 512 ? compilerMeta.flags_by_size["512"] : "-march=native");
+    if (archFlags) flags.push(archFlags);
+  }
+
+  // Append feature-specific compiler flags dynamically
+  if (isaMeta && isaMeta.features) {
+    const fMeta = isaMeta.features;
+    const isHierarchy = fMeta.mode === "hierarchy";
+    const isMixed = fMeta.mode === "mixed";
+    const tierItems = (fMeta.items || []).filter((it) => isHierarchy || (isMixed && it.type === "tier"));
+    const flagItems = (fMeta.items || []).filter((it) => it.type === "flag" || (!isHierarchy && !isMixed));
+
+    if (tierItems.length > 0) {
+      const currentTier = defines[isa] || defines.hierarchyTarget;
+      let activeItem = null;
+      if (currentTier) {
+        activeItem = tierItems.find((it) => it.id === currentTier);
+      }
+      if (!activeItem) {
+        for (let i = tierItems.length - 1; i >= 0; i--) {
+          const it = tierItems[i];
+          if (defines[it.define] !== false && defines[it.id] !== false) {
+            activeItem = it;
+            break;
+          }
         }
       }
-    } else if (isa === "avx") {
-      flags.push("-mavx");
-      if (defines.__AVX2__ !== false) flags.push("-mavx2");
-      if (defines.__FMA__ !== false) flags.push("-mfma");
-    } else if (isa === "sse") {
-      if (defines.__SSE4_2__ !== false) flags.push("-msse4.2");
-      else if (defines.__SSE4_1__ !== false) flags.push("-msse4.1");
-      else if (defines.__SSSE3__ !== false) flags.push("-mssse3");
-      else if (defines.__SSE3__ !== false) flags.push("-msse3");
-      else if (defines.__SSE2__ !== false) flags.push("-msse2");
-      else flags.push("-msse");
+      if (activeItem && activeItem.flag) {
+        flags.push(activeItem.flag);
+      }
     }
-    options = flags.join(" ");
-    compilerLabel = `x86-64 GCC (${options})`;
+
+    if (flagItems.length > 0) {
+      for (const it of flagItems) {
+        if (it.locked) continue;
+        const isActive = (defines[it.define] !== undefined)
+          ? Boolean(defines[it.define])
+          : ((defines[it.id] !== undefined)
+              ? Boolean(defines[it.id])
+              : (it.default !== false));
+
+        if (isActive && it.flag) {
+          if (it.flag.startsWith("+")) {
+            if (defines.__aarch64__ !== false) {
+              flags[0] = flags[0] + it.flag;
+            }
+          } else if (it.flag.startsWith("-march=") && flags[0].includes("-march=")) {
+            flags[0] = flags[0].replace(/-march=[^\s]+/, it.flag);
+          } else {
+            flags.push(it.flag);
+          }
+        }
+      }
+    }
   }
+
+  // Handle ARM32 FMA FPU flag
+  if (defines.__aarch64__ === false && isa === "neon") {
+    const isFma = (defines.__ARM_FEATURE_FMA !== undefined) ? Boolean(defines.__ARM_FEATURE_FMA) : true;
+    flags.push(isFma ? "-mfpu=neon-vfpv4" : "-mfpu=neon");
+  }
+
+  const options = flags.join(" ").replace(/\s+/g, " ").trim();
+  const compilerLabel = `${compilerMeta.label || "Compiler"} (${options})`;
 
   return { compiler, options, compilerLabel, targetDesc };
 }
+
 
 export function buildGodboltUrlForFlat(sourceCode, isa, defines = {}, scalarSize = 256) {
   const { compiler, options, compilerLabel } = getCompilerConfigForFlat(isa, defines, scalarSize);
@@ -355,6 +381,27 @@ export function getScalarNMacroDef(macroName) {
   return `#define ${macroName} ${expr}`;
 }
 
+export function getNMacroDef(macroName, isaMeta, simdWidth = 256) {
+  if (macroName.startsWith("MIPP_SCALAR_N_")) {
+    return getScalarNMacroDef(macroName);
+  }
+  const m = macroName.match(/^MIPP_([A-Z0-9]+)_N_([A-Z]+)(\d+)(?:_(M1|M2|M4|M8|D2))?$/);
+  if (!m) return null;
+  const isaTarget = m[1].toLowerCase();
+  const bits = Number(m[3]) || 32;
+  const lmulSuffix = m[4];
+  const targetIsaMeta = isaMeta || (apiMetadata.isas && apiMetadata.isas[isaTarget]);
+  const layout = targetIsaMeta && targetIsaMeta.layout;
+  const sizeSymbol = layout ? layout.size_symbol : `${simdWidth}`;
+
+  let expr = `(${sizeSymbol} / ${bits})`;
+  if (lmulSuffix === "M2") expr = `(${expr} * 2)`;
+  else if (lmulSuffix === "M4") expr = `(${expr} * 4)`;
+  else if (lmulSuffix === "M8") expr = `(${expr} * 8)`;
+  else if (lmulSuffix === "D2") expr = `(${expr} / 2)`;
+  return `#define ${macroName} ${expr}`;
+}
+
 
 export function generateFlatSpecializedCode(entry, cfg) {
   const { isa, defines, dt, mask, lmul, scalarSize } = cfg;
@@ -365,7 +412,7 @@ export function generateFlatSpecializedCode(entry, cfg) {
   let needsMask = mask && mask !== "unmasked";
   const numLmul = Number(lmul) || 1;
   const isaInfo = entry.isa_support ? entry.isa_support[isa] : null;
-  const hwLmuls = (isaInfo && isaInfo.hw_lmul) || (isa === "rvv" ? [1, 2, 4, 8, -2] : [1]);
+  const hwLmuls = (isaInfo && isaInfo.hw_lmul) || [1];
   const currentLmulVal = (lmul === "0.5" || lmul === 0.5 || lmul === -2 || lmul === "-2") ? -2 : numLmul;
   const isHwLmul = !isScalar && hwLmuls.includes(currentLmulVal);
   const isSoftwareLmulWrapper = !isScalar && !isHwLmul && numLmul > 1;
@@ -435,8 +482,9 @@ export function generateFlatSpecializedCode(entry, cfg) {
   const hasMath = isScalar || neededMacros.some((m) => /exp|log|pow|sin|cos|tan|asin|acos|atan/.test(m));
 
   // 1. Headers & Overview
+  const isaMeta = apiMetadata.isas ? apiMetadata.isas[isa] : null;
   const compilerConfig = getCompilerConfigForFlat(isa, defines, scalarSize);
-  const isLengthAgnostic = isScalar || isa === "rvv" || isa === "sve";
+  const isLengthAgnostic = isScalar || (isaMeta && (isaMeta.vector_size_bits === "scalable" || isaMeta.layout !== undefined));
   lines.push("// =============================================================================");
   lines.push(`// MIPP Flat Specialized Code: ${entry.name} (${isa.toUpperCase()})`);
   lines.push(`// Datatype: ${dt} | Variant: ${mask} | LMUL: ${lmul}${isLengthAgnostic ? ` | SIMD Width: ${scalarSize || 256} bits` : ""}`);
@@ -451,10 +499,7 @@ export function generateFlatSpecializedCode(entry, cfg) {
     lines.push("#include <string.h>");
     lines.push("#include <math.h>");
   } else {
-    const isaMeta = apiMetadata.isas ? apiMetadata.isas[isa] : null;
-    const headers = (isaMeta && isaMeta.headers && isaMeta.headers.length > 0)
-      ? isaMeta.headers
-      : (["sse", "avx", "avx512"].includes(isa) ? ["<immintrin.h>"] : [`<${isa}.h>`]);
+    const headers = (isaMeta && isaMeta.headers) || [];
     for (const h of headers) {
       if (!h.includes("c/common.h")) {
         lines.push(`#include ${h}`);
@@ -516,12 +561,17 @@ export function generateFlatSpecializedCode(entry, cfg) {
   const cleanSnippetForC = (snip) => {
     if (!snip) return "";
     let s = snip.replace(/;\s*$/, "");
-    if (isa === "rvv") {
-      const rvvLsuffix = currentLmulVal === -2 ? "mf2" : `m${currentLmulVal}`;
-      s = s.replace(/%N<tp>%/g, `__riscv_vsetvlmax_e${dti.bits}${rvvLsuffix}()`);
-      if (currentLmulVal !== 1) {
-        s = s.replace(/(m1|mf2|m2|m4|m8)(_mu|_tum|_tumu|_tu)?\(/g, `${rvvLsuffix}$2(`);
-      }
+    // Replace %N<...>% tokens with MIPP N macro (e.g. MIPP_RVV_N_INT16_M2, MIPP_AVX_N_INT32)
+    const lmulUpper = currentLmulVal === -2 ? "D2" : (currentLmulVal > 1 ? `M${currentLmulVal}` : "M1");
+    const lmulSuffixN = (isaMeta && (isaMeta.layout || isScalar)) ? `_${lmulUpper}` : "";
+    const dtCat = dti.category ? dti.category.toUpperCase() : (dtMain.startsWith("float") ? "FLOAT" : "INT");
+    const macroN = `MIPP_${isa.toUpperCase()}_N_${dtCat}${dti.bits}${lmulSuffixN}`;
+    s = s.replace(/%N<[^>]*>%/g, macroN);
+
+    // If ISA has layout and LMUL != 1, adjust intrinsic function call suffixes if present in snippet
+    if (isaMeta && isaMeta.layout && currentLmulVal !== 1) {
+      const lsuffix = currentLmulVal === -2 ? "mf2" : `m${currentLmulVal}`;
+      s = s.replace(/(m1|mf2|m2|m4|m8)(_mu|_tum|_tumu|_tu)?\(/g, `${lsuffix}$2(`);
     }
     s = s.replace(/%set0<[^>]*>%\(\)/g, `mipp_${isa}_set0_${dtMain}_m1()`);
     s = s.replace(/%r<[^>]*>%/g, regTypeName);
@@ -923,9 +973,10 @@ export function generateFlatSpecializedCode(entry, cfg) {
   for (const m of typeMatches) {
     const kind = m[1]; // 'd' or 'm'
     let sub = m[2];
+    const knownIsas = Object.keys(apiMetadata.isas || {});
     if (sub.startsWith(`${isa}_`)) {
       sub = sub.slice(isa.length + 1);
-    } else if (sub.startsWith("scalar_") || sub.startsWith("sse_") || sub.startsWith("avx_") || sub.startsWith("avx512_") || sub.startsWith("neon_") || sub.startsWith("rvv_") || sub.startsWith("sve_")) {
+    } else if (knownIsas.some((k) => sub.startsWith(`${k}_`))) {
       continue;
     }
     if (!sub) continue;
@@ -966,81 +1017,70 @@ export function generateFlatSpecializedCode(entry, cfg) {
         lines.push(`} rvm_scalar_${subDt}${baseLmulSuffix}_t;`);
       }
     }
-  } else if (isa === "rvv") {
+  } else if (isaMeta && isaMeta.layout) {
+    const layout = isaMeta.layout;
     const emittedFixedAliases = new Set();
-    const emitRvvReg = (dtName, lmulVal, typeName) => {
-      const hwR = getHwRegType("rvv", dtName, defines, lmulVal);
-      const lmulStr = lmulVal === -2 ? "d2" : (lmulVal === 1 ? "m1" : `m${lmulVal}`);
-      const vlenExpr = lmulVal === -2 ? "__riscv_v_fixed_vlen/2" : (lmulVal === 1 ? "__riscv_v_fixed_vlen" : `__riscv_v_fixed_vlen*${lmulVal}`);
-      const aliasName = `fixed_${lmulStr}_${dtName}_t`;
+
+    const emitLayoutReg = (dtName, lmulVal, typeName) => {
+      const hwR = getHwRegType(isa, dtName, defines, lmulVal);
+      const lsuffixMipp = lmulVal === -2 ? "d2" : (lmulVal === 1 ? "m1" : `m${lmulVal}`);
+      const lmulExpr = lmulVal === -2 ? "/2" : (lmulVal > 1 ? `*${lmulVal}` : "");
+      const dtMeta = isaMeta.datatypes && isaMeta.datatypes[dtName];
+      const toPtr = dtMeta?.to_ptr || (dtName.startsWith("float") ? `${dtName}_t` : (DT_INFO[dtName]?.c_type || `${dtName}_t`));
+
+      const tpl = layout.vector_typedef_template
+        .replace(/\{\{\s*isa_datatype\.reg\s*\}\}/g, hwR)
+        .replace(/\{\{\s*lsuffix_mipp\s*\}\}/g, lsuffixMipp)
+        .replace(/\{\{\s*isa_datatype\.to_ptr\s*\}\}/g, toPtr)
+        .replace(/\{\{\s*vla_size\s*\}\}/g, layout.size_symbol)
+        .replace(/\{\{\s*lmul_expr\s*\}\}/g, lmulExpr);
+
+      const aliasName = `fixed_${lsuffixMipp}_${toPtr}`;
       if (!emittedFixedAliases.has(aliasName)) {
-        lines.push(`typedef ${hwR} ${aliasName} __attribute__((riscv_rvv_vector_bits(${vlenExpr})));`);
+        lines.push(tpl);
         emittedFixedAliases.add(aliasName);
       }
       lines.push(`typedef struct { ${aliasName} r; } ${typeName};`);
     };
 
-    const emitRvvMask = (dtName, lmulVal, typeName) => {
-      const hwM = getHwMaskType("rvv", dtName, defines, lmulVal);
-      const lmulStr = lmulVal === -2 ? "d2" : (lmulVal === 1 ? "m1" : `m${lmulVal}`);
-      const dti = (DT_INFO && DT_INFO[dtName]) || { bits: 32, c_type: dtName.startsWith("float") ? `${dtName}_t` : `${dtName}_t` };
-      const cType = dti.c_type || `${dtName}_t`;
-      const maskVlenExpr = lmulVal === -2 ? `__riscv_v_fixed_vlen/2/(8*sizeof(${cType}))` : (lmulVal === 1 ? `__riscv_v_fixed_vlen/(8*sizeof(${cType}))` : `__riscv_v_fixed_vlen*${lmulVal}/(8*sizeof(${cType}))`);
-      const aliasName = `fixed_${lmulStr}_bool${dti.bits}_t`;
+    const emitLayoutMask = (dtName, lmulVal, typeName) => {
+      const hwM = getHwMaskType(isa, dtName, defines, lmulVal);
+      const lsuffixMipp = lmulVal === -2 ? "d2" : (lmulVal === 1 ? "m1" : `m${lmulVal}`);
+      const lmulExpr = lmulVal === -2 ? "/2" : (lmulVal > 1 ? `*${lmulVal}` : "");
+      const dti = (DT_INFO && DT_INFO[dtName]) || { bits: 32 };
+      const dtMeta = isaMeta.datatypes && isaMeta.datatypes[dtName];
+      const toPtr = dtMeta?.to_ptr || (dtName.startsWith("float") ? `${dtName}_t` : (DT_INFO[dtName]?.c_type || `${dtName}_t`));
+
+      const tpl = layout.mask_typedef_template
+        .replace(/\{\{\s*isa_datatype\.msk\s*\}\}/g, hwM)
+        .replace(/\{\{\s*lsuffix_mipp\s*\}\}/g, lsuffixMipp)
+        .replace(/\{\{\s*n_bits\s*\}\}/g, String(dti.bits || 32))
+        .replace(/\{\{\s*isa_datatype\.to_ptr\s*\}\}/g, toPtr)
+        .replace(/\{\{\s*vla_size\s*\}\}/g, layout.size_symbol)
+        .replace(/\{\{\s*lmul_expr\s*\}\}/g, lmulExpr);
+
+      const aliasName = layout.mask_typedef_template.includes("bool{{n_bits}}")
+        ? `fixed_${lsuffixMipp}_bool${dti.bits}_t`
+        : `fixed_${lsuffixMipp}_bool_t`;
       if (!emittedFixedAliases.has(aliasName)) {
-        lines.push(`typedef ${hwM} ${aliasName} __attribute__((riscv_rvv_vector_bits(${maskVlenExpr})));`);
+        lines.push(tpl);
         emittedFixedAliases.add(aliasName);
       }
       lines.push(`typedef struct { ${aliasName} m; } ${typeName};`);
     };
 
-    emitRvvReg(dtMain, currentLmulVal, regTypeName);
+    emitLayoutReg(dtMain, currentLmulVal, regTypeName);
     if (needsMaskType) {
-      emitRvvMask(dtMain, currentLmulVal, maskTypeName);
+      emitLayoutMask(dtMain, currentLmulVal, maskTypeName);
     }
 
     for (const subDt of extraDts) {
       const subLmulVal = isHwLmul ? currentLmulVal : 1;
-      const subRegName = `rvd_rvv_${subDt}${lmulSuffix}_t`;
-      emitRvvReg(subDt, subLmulVal, subRegName);
-      if (extraMasks.has(subDt) || allGeneratedCode.includes(`rvm_rvv_${subDt}`)) {
-        const subMaskName = `rvm_rvv_${subDt}${lmulSuffix}_t`;
-        emitRvvMask(subDt, subLmulVal, subMaskName);
-      }
-    }
-  } else if (isa === "sve") {
-    const emittedSveAliases = new Set();
-    const emitSveReg = (dtName, typeName) => {
-      const hwR = getHwRegType("sve", dtName, defines, 1);
-      const aliasName = `fixed_m1_${dtName}_t`;
-      if (!emittedSveAliases.has(aliasName)) {
-        lines.push(`typedef ${hwR} ${aliasName} __attribute__((arm_sve_vector_bits(__ARM_FEATURE_SVE_BITS)));`);
-        emittedSveAliases.add(aliasName);
-      }
-      lines.push(`typedef struct { ${aliasName} r; } ${typeName};`);
-    };
-
-    const emitSveMask = (dtName, typeName) => {
-      const hwM = getHwMaskType("sve", dtName, defines, 1);
-      const aliasName = `fixed_m1_bool_t`;
-      if (!emittedSveAliases.has(aliasName)) {
-        lines.push(`typedef ${hwM} ${aliasName} __attribute__((arm_sve_vector_bits(__ARM_FEATURE_SVE_BITS)));`);
-        emittedSveAliases.add(aliasName);
-      }
-      lines.push(`typedef struct { ${aliasName} m; } ${typeName};`);
-    };
-
-    emitSveReg(dtMain, regTypeName);
-    if (needsMaskType) {
-      emitSveMask(dtMain, maskTypeName);
-    }
-
-    for (const subDt of extraDts) {
-      const subRegName = `rvd_sve_${subDt}_m1_t`;
-      emitSveReg(subDt, subRegName);
-      if (extraMasks.has(subDt) || allGeneratedCode.includes(`rvm_sve_${subDt}`)) {
-        const subMaskName = `rvm_sve_${subDt}_m1_t`;
-        emitSveMask(subDt, subMaskName);
+      const subRegName = `rvd_${isa}_${subDt}${lmulSuffix}_t`;
+      emitLayoutReg(subDt, subLmulVal, subRegName);
+      if (extraMasks.has(subDt) || allGeneratedCode.includes(`rvm_${isa}_${subDt}`)) {
+        const subMaskName = `rvm_${isa}_${subDt}${lmulSuffix}_t`;
+        emitLayoutMask(subDt, subLmulVal, subMaskName);
       }
     }
   } else {
@@ -1513,9 +1553,10 @@ export function generateFlatSpecializedCode(entry, cfg) {
     }
   }
 
-  const effectiveSimdWidth = (isa === "rvv" || isa === "sve" || isa === "scalar")
+  const isSizelessOrScalar = isScalar || (isaMeta && (isaMeta.vector_size_bits === "scalable" || isaMeta.layout !== undefined));
+  const effectiveSimdWidth = isSizelessOrScalar
     ? (scalarSize || 256)
-    : (isa === "avx512" ? 512 : (isa === "avx" ? 256 : 128));
+    : ((isaMeta && typeof isaMeta.vector_size_bits === "number") ? isaMeta.vector_size_bits : 128);
 
   if (isScalar) {
     definesLines.push(`// Scalar buffer configuration (MIPP_SCALAR_SIZE=${effectiveSimdWidth} passed via -DMIPP_SCALAR_SIZE=${effectiveSimdWidth})`);
@@ -1525,6 +1566,39 @@ export function generateFlatSpecializedCode(entry, cfg) {
       if (def) definesLines.push(def);
     }
     definesLines.push("");
+  } else if (isaMeta && isaMeta.layout) {
+    const layout = isaMeta.layout;
+    const matchedIsaMacros = new Set(initialCode.match(new RegExp(`\\bMIPP_${isa.toUpperCase()}_N_[A-Z0-9_]+\\b`, "g")) || []);
+    if (initialCode.includes(`MIPP_${isa.toUpperCase()}_N_`)) {
+      const mainCat = dti.category ? dti.category.toUpperCase() : (dtMain.startsWith("float") ? "FLOAT" : "INT");
+      matchedIsaMacros.add(`MIPP_${isa.toUpperCase()}_N_${mainCat}${dti.bits}_${lmulUpper}`);
+      for (const subDt of extraDts) {
+        const subDti = (DT_INFO && DT_INFO[subDt]) || { bits: 32, category: subDt.startsWith("float") ? "float" : "int" };
+        const subCat = subDti.category ? subDti.category.toUpperCase() : (subDt.startsWith("float") ? "FLOAT" : "INT");
+        matchedIsaMacros.add(`MIPP_${isa.toUpperCase()}_N_${subCat}${subDti.bits}_${lmulUpper}`);
+      }
+    }
+    if (matchedIsaMacros.size > 0 || initialCode.includes(layout.size_symbol)) {
+      definesLines.push(`// Fixed-size vector configuration (SIMD Width: ${effectiveSimdWidth} bits)`);
+      definesLines.push(`#ifndef ${layout.size_symbol}`);
+      definesLines.push(`#define ${layout.size_symbol} ${effectiveSimdWidth}`);
+      definesLines.push(`#endif`);
+      for (const mName of Array.from(matchedIsaMacros).sort()) {
+        const def = getNMacroDef(mName, isaMeta, effectiveSimdWidth);
+        if (def) definesLines.push(def);
+      }
+      definesLines.push("");
+    }
+    if (matchedScalarMacros.size > 0 || initialCode.includes("MIPP_SCALAR_")) {
+      definesLines.push(`// Scalar fallback configuration (SIMD Width: ${effectiveSimdWidth} bits)`);
+      definesLines.push(`#define MIPP_SCALAR_SIZE ${effectiveSimdWidth}`);
+      definesLines.push("#define MIPP_SCALAR_RVD_SIZE_BYTE (MIPP_SCALAR_SIZE / 8)");
+      for (const mName of Array.from(matchedScalarMacros).sort()) {
+        const def = getScalarNMacroDef(mName);
+        if (def) definesLines.push(def);
+      }
+      definesLines.push("");
+    }
   } else if (matchedScalarMacros.size > 0 || initialCode.includes("MIPP_SCALAR_")) {
     definesLines.push(`// Scalar fallback configuration (SIMD Width: ${effectiveSimdWidth} bits)`);
     definesLines.push(`#define MIPP_SCALAR_SIZE ${effectiveSimdWidth}`);

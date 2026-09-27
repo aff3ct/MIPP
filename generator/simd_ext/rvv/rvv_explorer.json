@@ -1,0 +1,18 @@
+{
+    "$schema": "../../helpers_headers/schemas/explorer_isa_schema.json",
+    "name": "rvv",
+    "display_name": "RVV",
+    "description": "RISC-V Vector Extension (RVV 1.0 length-agnostic vector architecture)",
+    "compiler": {
+        "id": "rv64-clang",
+        "arch": "riscv",
+        "label": "RISC-V 64 Clang",
+        "base_flags": "-O3 -march=rv64gcv_zvl{simd_width}b -mrvv-vector-bits=zvl"
+    },
+    "features": {
+        "mode": "flags",
+        "items": [
+            { "id": "RVV", "label": "RVV 1.0", "define": "__riscv_v", "flag": "", "default": true, "locked": true, "description": "RISC-V Vector Extension 1.0" }
+        ]
+    }
+}

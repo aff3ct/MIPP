@@ -85,6 +85,9 @@ def validate_isa_config(isa_dict, isa_name):
             print(f"  - Referenced sub_isa '{sub_isa_name}' directory does not exist under 'simd_ext/'.", file=sys.stderr)
             sys.exit(1)
 
+def validate_explorer_isa_config(explorer_dict, file_name):
+    validate_json_data(explorer_dict, "explorer_isa_schema.json", label=os.path.basename(file_name))
+
 def validate_templates_config(templates_dict, file_name):
     validate_json_data(templates_dict, "templates_schema.json", label=os.path.basename(file_name))
 

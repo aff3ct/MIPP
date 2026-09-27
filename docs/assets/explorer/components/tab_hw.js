@@ -115,7 +115,7 @@ export function renderTabHw(entry) {
               }
 
               const currentLmul = Number(state.lmul);
-              const hwLmuls = info.hw_lmul || (isa === "rvv" ? [1, 2, 4, 8, -2] : [1]);
+              const hwLmuls = info.hw_lmul || [1];
               const isLmulEmulated = currentLmul !== 1 && !hwLmuls.includes(currentLmul) && (info.overall_level < 2);
               const reqFeatures = info.required_features || {};
 

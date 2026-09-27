@@ -1,0 +1,27 @@
+{
+    "$schema": "../../helpers_headers/schemas/explorer_isa_schema.json",
+    "name": "neon",
+    "display_name": "NEON",
+    "description": "ARM Advanced SIMD (NEON 128-bit vector extensions for ARM32 and AArch64)",
+    "compiler": {
+        "id": "carm64g1420",
+        "arch": "arm",
+        "label": "AArch64 GCC",
+        "base_flags": "-O3 -march=armv8-a+simd",
+        "compiler_32": {
+            "id": "arm-gcc-1320",
+            "arch": "arm",
+            "label": "ARM32 GCC",
+            "base_flags": "-O3 -march=armv7-a -mfloat-abi=hard"
+        }
+    },
+    "features": {
+        "mode": "flags",
+        "items": [
+            { "id": "NEON",     "label": "NEON",             "define": "__ARM_NEON",                     "flag": "",     "default": true, "locked": true,  "description": "Base ARM Advanced SIMD (NEON)" },
+            { "id": "AArch64",  "label": "AArch64",          "define": "__aarch64__",                    "flag": "",     "default": true, "locked": false, "description": "ARM 64-bit Architecture (AArch64)" },
+            { "id": "FMA",      "label": "FMA",              "define": "__ARM_FEATURE_FMA",              "flag": "+fma", "default": true, "locked": false, "description": "ARM Floating-Point Fused Multiply-Add" },
+            { "id": "Rounding", "label": "Rounding",         "define": "__ARM_FEATURE_DIRECTED_ROUNDING","flag": "",     "default": true, "locked": false, "description": "ARM Directed Rounding Instructions" }
+        ]
+    }
+}

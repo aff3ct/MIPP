@@ -1,0 +1,23 @@
+{
+    "$schema": "../../helpers_headers/schemas/explorer_isa_schema.json",
+    "name": "scalar",
+    "display_name": "Scalar",
+    "description": "Scalar fallback emulation with configurable SIMD buffer width",
+    "compiler": {
+        "id": "g142",
+        "arch": "x86",
+        "label": "x86-64 GCC",
+        "base_flags": "-O3 -DMIPP_SCALAR -DMIPP_SCALAR_SIZE={simd_width}",
+        "flags_by_size": {
+            "128": "-msse4.2",
+            "256": "-mavx2 -mfma",
+            "512": "-mavx512f -mavx512bw -mavx512dq",
+            "1024": "-mavx512f -mavx512bw -mavx512dq",
+            "2048": "-mavx512f -mavx512bw -mavx512dq"
+        }
+    },
+    "features": {
+        "mode": "none",
+        "items": []
+    }
+}

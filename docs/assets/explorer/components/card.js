@@ -122,7 +122,7 @@ export function computeOptimisticLevel(entry, ext) {
   const numLmul = Number(state.lmul) || 1;
   const isHalfLmul = state.lmul === "-2";
   const currentLmulVal = isHalfLmul ? -2 : numLmul;
-  const hwLmuls = sup.hw_lmul || (ext === "rvv" ? [1, 2, 4, 8, -2] : [1]);
+  const hwLmuls = sup.hw_lmul || [1];
   const isLmulEmulated = currentLmulVal !== 1 && !hwLmuls.includes(currentLmulVal);
 
   // Active datatypes
@@ -181,7 +181,7 @@ export function renderCard(entry, matchedIntrinsic = null, matchedC99 = null) {
     maskz: "Maskz (zeroing)",
     masks: "Masks (sourcing)"
   };
-  const supportedVariants = ["unmasked", "mask", "maskz", "masks"].filter(
+  const supportedVariants = ALL_MASK_MODES.filter(
     (m) => m === "unmasked" || maskSupport[m]
   );
   const globalVariant = state.flavor === "cpp_obj" ? "unmasked" : (state.maskVariant || "unmasked");

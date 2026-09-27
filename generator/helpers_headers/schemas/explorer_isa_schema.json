@@ -1,0 +1,161 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "MIPP ISA Explorer Metadata Schema",
+    "description": "Schema for validating <isa>_explorer.json files providing Explorer UI and Godbolt Compiler Explorer configuration",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "name",
+        "display_name",
+        "compiler",
+        "features"
+    ],
+    "properties": {
+        "$schema": {
+            "type": "string"
+        },
+        "name": {
+            "type": "string",
+            "description": "Identifier of the ISA matching the directory name"
+        },
+        "display_name": {
+            "type": "string",
+            "description": "Human-friendly display name of the ISA"
+        },
+        "description": {
+            "type": "string",
+            "description": "Optional short description or architectural notes"
+        },
+        "compiler": {
+            "type": "object",
+            "required": [
+                "id",
+                "arch",
+                "label",
+                "base_flags"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "description": "Godbolt compiler identifier (e.g. g142, carm64g1420, rv64-clang)"
+                },
+                "arch": {
+                    "type": "string",
+                    "description": "Architecture family (x86, arm, riscv)"
+                },
+                "label": {
+                    "type": "string",
+                    "description": "Human-readable label for the default compiler"
+                },
+                "base_flags": {
+                    "type": "string",
+                    "description": "Base compilation flags (can contain {simd_width} template)"
+                },
+                "compiler_32": {
+                    "type": "object",
+                    "required": [
+                        "id",
+                        "arch",
+                        "label",
+                        "base_flags"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "id": {
+                            "type": "string"
+                        },
+                        "arch": {
+                            "type": "string"
+                        },
+                        "label": {
+                            "type": "string"
+                        },
+                        "base_flags": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "flags_by_size": {
+                    "type": "object",
+                    "description": "Optional map of vector/buffer size in bits to arch-specific flags",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "features": {
+            "type": "object",
+            "required": [
+                "mode",
+                "items"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "mode": {
+                    "type": "string",
+                    "enum": [
+                        "hierarchy",
+                        "flags",
+                        "mixed",
+                        "none"
+                    ],
+                    "description": "How features are organized: 'hierarchy' (ordered tiers like SSE), 'flags' (orthogonal toggles), 'mixed' (tiers + flags), or 'none'"
+                },
+                "default": {
+                    "type": "string",
+                    "description": "Default selected tier ID if mode is 'hierarchy' or 'mixed'"
+                },
+                "items": {
+                    "type": "array",
+                    "description": "List of feature flags or hierarchical tiers",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "id",
+                            "label",
+                            "define"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                            "id": {
+                                "type": "string",
+                                "description": "Unique feature identifier within this ISA (e.g. BW, FMA, SSE4.2)"
+                            },
+                            "label": {
+                                "type": "string",
+                                "description": "Short label for UI buttons"
+                            },
+                            "define": {
+                                "type": "string",
+                                "description": "C preprocessor symbol (e.g. __AVX512BW__, __ARM_FEATURE_FMA)"
+                            },
+                            "type": {
+                                "type": "string",
+                                "enum": ["tier", "flag"],
+                                "description": "Type of item: 'tier' for hierarchical levels or 'flag' for orthogonal toggles (used in 'mixed' mode)"
+                            },
+                            "flag": {
+                                "type": "string",
+                                "description": "Compiler flag to enable this feature"
+                            },
+                            "default": {
+                                "type": "boolean",
+                                "description": "Whether this feature is active by default"
+                            },
+                            "locked": {
+                                "type": "boolean",
+                                "description": "Whether this feature is locked/read-only in the UI"
+                            },
+                            "description": {
+                                "type": "string",
+                                "description": "Tooltip or documentation string"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

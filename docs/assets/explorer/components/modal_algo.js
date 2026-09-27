@@ -7,17 +7,21 @@
  */
 import { escapeHtml, ICON_COPY, ICON_GODBOLT } from "../explorer.config.js";
 import { highlightCpp, formatFunctionHeaders } from "../syntax.js";
-import { SIMD_EXT_DISPLAY_NAMES, ALL_MASK_MODES, MASK_MODES_INFO, LEVEL_DESCRIPTIONS } from "../data.js";
+import { SIMD_EXT_DISPLAY_NAMES, ALL_MASK_MODES, MASK_MODES_INFO, LEVEL_DESCRIPTIONS, apiMetadata } from "../data.js";
 import { state } from "../state.js";
-import { generateFlatSpecializedCode, buildGodboltUrlForFlat } from "../codegen.js";
+import { generateFlatSpecializedCode, buildGodboltUrlForFlat, isFeatureSupported } from "../codegen.js";
 
-export const ALL_MODAL_ISAS = ["sse", "avx", "avx512", "neon", "sve", "rvv", "scalar"];
+export function getAllModalIsas() {
+  return Object.keys(apiMetadata.isas || {});
+}
 
 export function renderAlgoModal(modalData) {
   if (!modalData) return "";
   const { entry } = modalData;
-  const rawIsa = modalData.isa || modalData.simdExt || "avx";
-  const currentIsa = ALL_MODAL_ISAS.includes(rawIsa) ? rawIsa : "avx";
+  const allModalIsas = getAllModalIsas();
+  const defaultIsa = allModalIsas[0] || "";
+  const rawIsa = modalData.isa || modalData.simdExt || defaultIsa;
+  const currentIsa = allModalIsas.includes(rawIsa) ? rawIsa : defaultIsa;
   const currentView = modalData.view === "flat" ? "flat" : "abstract";
   const currentScalarSize = Number(modalData.scalarSize) || 256;
   const namesMap = { ...SIMD_EXT_DISPLAY_NAMES, scalar: "Scalar" };
@@ -101,22 +105,52 @@ export function renderAlgoModal(modalData) {
 
   const isScalar = currentIsa === "scalar";
   const isaInfo = isScalar ? null : (entry.isa_support ? entry.isa_support[currentIsa] : null);
-  const hwLmuls = (isaInfo && isaInfo.hw_lmul) || (currentIsa === "rvv" ? [1, 2, 4, 8, -2] : [1]);
+  const hwLmuls = (isaInfo && isaInfo.hw_lmul) || [1];
   const currentLmulVal = isHalfLmul ? -2 : numLmul;
   const isHwLmul = isScalar ? false : hwLmuls.includes(currentLmulVal);
 
   // Features resolution (contextual per ISA)
   const features = modalData.features || {};
-  const isBW = features.BW !== false;
-  const isDQ = features.DQ !== false;
-  const isVL = features.VL !== false;
-  const isCD = features.CD !== false;
-  const isAVX2 = features.AVX2 !== false;
-  const isFMA = features.FMA !== false;
-  const isAArch64 = features.AArch64 !== false;
-  const isRounding = features.Rounding !== false;
-  const isSVE2 = features.SVE2 !== false;
-  const sseTarget = features.sseTarget || "SSE4.2";
+  const isaMeta = apiMetadata.isas ? apiMetadata.isas[currentIsa] : null;
+  const featuresMeta = (isaMeta && isaMeta.features) ? isaMeta.features : { mode: "none", items: [] };
+
+  // Build flatDefines dynamically across all ISAs from explorer metadata
+  const flatDefines = {};
+  if (apiMetadata.isas) {
+    for (const [isaName, iMeta] of Object.entries(apiMetadata.isas)) {
+      const fMeta = iMeta.features;
+      if (!fMeta || !Array.isArray(fMeta.items)) continue;
+      const isHierarchy = fMeta.mode === "hierarchy";
+      const isMixed = fMeta.mode === "mixed";
+      const tierItems = fMeta.items.filter((it) => isHierarchy || (isMixed && it.type === "tier"));
+      const flagItems = fMeta.items.filter((it) => it.type === "flag" || (!isHierarchy && !isMixed));
+
+      if (tierItems.length > 0) {
+        const selectedTier = features[isaName] || fMeta.default || (tierItems.length ? tierItems[tierItems.length - 1].id : "");
+        const targetIdx = tierItems.findIndex((it) => it.id === selectedTier);
+        const effectiveIdx = targetIdx !== -1 ? targetIdx : (tierItems.length - 1);
+        tierItems.forEach((it, idx) => {
+          const isPassed = (idx <= effectiveIdx);
+          flatDefines[it.define] = isPassed;
+          flatDefines[it.id] = isPassed;
+        });
+      }
+      if (flagItems.length > 0) {
+        for (const it of flagItems) {
+          if (it.locked) {
+            flatDefines[it.define] = true;
+            flatDefines[it.id] = true;
+          } else {
+            const val = (features[it.id] !== undefined)
+              ? Boolean(features[it.id])
+              : (features[it.define] !== undefined ? Boolean(features[it.define]) : (it.default !== false));
+            flatDefines[it.define] = val;
+            flatDefines[it.id] = val;
+          }
+        }
+      }
+    }
+  }
 
   // Check if current datatype's required feature is satisfied
   const reqFeature = (isaInfo && isaInfo.required_features) ? isaInfo.required_features[currentDt] : null;
@@ -124,29 +158,7 @@ export function renderAlgoModal(modalData) {
     ? isaInfo.fallback_levels[currentDt]
     : 2;
 
-  let featureSatisfied = true;
-  if (reqFeature) {
-    if (currentIsa === "avx512") {
-      if (reqFeature === "BW" && !isBW) featureSatisfied = false;
-      else if (reqFeature === "DQ" && !isDQ) featureSatisfied = false;
-      else if (reqFeature === "VL" && !isVL) featureSatisfied = false;
-      else if (reqFeature === "CD" && !isCD) featureSatisfied = false;
-    } else if (currentIsa === "avx") {
-      if (reqFeature === "AVX2" && !isAVX2) featureSatisfied = false;
-      else if (reqFeature === "FMA" && !isFMA) featureSatisfied = false;
-    } else if (currentIsa === "neon") {
-      if (reqFeature === "AArch64" && !isAArch64) featureSatisfied = false;
-      else if (reqFeature === "FMA" && !isFMA) featureSatisfied = false;
-      else if (reqFeature === "Rounding" && !isRounding) featureSatisfied = false;
-    } else if (currentIsa === "sve") {
-      if (reqFeature === "SVE2" && !isSVE2) featureSatisfied = false;
-    } else if (currentIsa === "sse") {
-      const SSE_RANKS = { "SSE": 1, "SSE2": 2, "SSE3": 3, "SSSE3": 4, "SSE4.1": 5, "SSE4.2": 6 };
-      const reqRank = SSE_RANKS[reqFeature] || 2;
-      const targetRank = SSE_RANKS[sseTarget] || 6;
-      if (targetRank < reqRank) featureSatisfied = false;
-    }
-  }
+  const featureSatisfied = isFeatureSupported(isaInfo, currentDt, currentIsa, flatDefines);
 
   // Compute implementation level based on currentDt, currentMask, effectiveLmul, and feature satisfaction
   let currentImplLvl = "na";
@@ -189,43 +201,30 @@ export function renderAlgoModal(modalData) {
 
   const lvlDesc = LEVEL_DESCRIPTIONS[currentImplLvl] || (currentImplLvl === "na" ? "Not Supported" : `Level ${currentImplLvl}`);
 
-  const FEATURE_DEFINES_MAP = {
-    F: "__AVX512F__",
-    BW: "__AVX512BW__",
-    DQ: "__AVX512DQ__",
-    VL: "__AVX512VL__",
-    CD: "__AVX512CD__",
-    AVX2: "__AVX2__",
-    FMA: currentIsa === "neon" ? "__ARM_FEATURE_FMA" : "__FMA__",
-    "SSE4.2": "__SSE4_2__",
-    "SSE4.1": "__SSE4_1__",
-    SSSE3: "__SSSE3__",
-    SSE3: "__SSE3__",
-    SSE2: "__SSE2__",
-    AArch64: "__aarch64__",
-    Rounding: "__ARM_FEATURE_DIRECTED_ROUNDING",
-    SVE: "__ARM_FEATURE_SVE",
-    SVE2: "__ARM_FEATURE_SVE2"
+  const getFeatureMacro = (featId) => {
+    if (!featId) return "";
+    const fItem = (featuresMeta.items || []).find((it) => it.id === featId);
+    return fItem ? fItem.define : featId;
   };
 
   let requiredDefinesStr = "";
   if (isScalar) {
     requiredDefinesStr = `None (Scalar Reference | SIMD Width: ${currentScalarSize} bits)`;
   } else if (reqFeature && featureSatisfied) {
-    const macro = FEATURE_DEFINES_MAP[reqFeature] || reqFeature;
+    const macro = getFeatureMacro(reqFeature);
     requiredDefinesStr = `${reqFeature} (${macro})`;
   } else if (currentImplLvl === 0) {
     requiredDefinesStr = `None (Baseline ${namesMap[currentIsa] || currentIsa.toUpperCase()})`;
   } else if (currentImplLvl === 1 || currentImplLvl === 2) {
     if (reqFeature && !featureSatisfied) {
-      const macro = FEATURE_DEFINES_MAP[reqFeature] || reqFeature;
+      const macro = getFeatureMacro(reqFeature);
       requiredDefinesStr = `None (Fallback emulation when ${reqFeature} is disabled)`;
     } else {
       requiredDefinesStr = "None (Generic Emulation)";
     }
   } else if (currentImplLvl === 3) {
     if (reqFeature && !featureSatisfied) {
-      const macro = FEATURE_DEFINES_MAP[reqFeature] || reqFeature;
+      const macro = getFeatureMacro(reqFeature);
       requiredDefinesStr = `None (Scalar fallback when ${reqFeature} is disabled)`;
     } else {
       requiredDefinesStr = "None (Scalar Fallback)";
@@ -475,25 +474,6 @@ export function renderAlgoModal(modalData) {
   const fullCode = formatFunctionHeaders(codeLines.join("\n"));
 
   // Flat C99 Code Configuration & Generation
-  const flatDefines = {
-    __AVX512F__: true,
-    __AVX512BW__: isBW,
-    __AVX512DQ__: isDQ,
-    __AVX512VL__: isVL,
-    __AVX512CD__: isCD,
-    __AVX2__: isAVX2,
-    __FMA__: isFMA,
-    __SSE4_2__: sseTarget === "SSE4.2",
-    __SSE4_1__: ["SSE4.2", "SSE4.1"].includes(sseTarget),
-    __SSSE3__: ["SSE4.2", "SSE4.1", "SSSE3"].includes(sseTarget),
-    __SSE3__: ["SSE4.2", "SSE4.1", "SSSE3", "SSE3"].includes(sseTarget),
-    __SSE2__: true,
-    __aarch64__: isAArch64,
-    __ARM_FEATURE_FMA: isFMA,
-    __ARM_FEATURE_DIRECTED_ROUNDING: isRounding,
-    __ARM_FEATURE_SVE: true,
-    __ARM_FEATURE_SVE2: isSVE2
-  };
 
   const flatCfg = {
     isa: currentIsa,
@@ -531,65 +511,54 @@ export function renderAlgoModal(modalData) {
   `;
 
   let featureControlsHtml = "";
-  if (currentIsa === "scalar" || currentIsa === "rvv") {
-    featureControlsHtml += simdWidthHtml;
-  }
 
-  if (currentIsa === "avx512") {
-    featureControlsHtml += `
-      <div class="mipp-modal-ctrl-group">
-        <span class="mipp-control-label">HW Features:</span>
-        <div class="mipp-segmented-group" id="mipp-modal-features-group">
-          <button type="button" class="mipp-segment-btn active" data-modal-toggle-feature="F" title="AVX-512 Foundation (Base)" style="pointer-events: none; opacity: 0.85;">F</button>
-          <button type="button" class="mipp-segment-btn ${isBW ? "active" : ""}" data-modal-toggle-feature="BW" title="AVX-512 Byte and Word">BW</button>
-          <button type="button" class="mipp-segment-btn ${isDQ ? "active" : ""}" data-modal-toggle-feature="DQ" title="AVX-512 Doubleword and Quadword">DQ</button>
-          <button type="button" class="mipp-segment-btn ${isVL ? "active" : ""}" data-modal-toggle-feature="VL" title="AVX-512 Vector Length">VL</button>
-          <button type="button" class="mipp-segment-btn ${isCD ? "active" : ""}" data-modal-toggle-feature="CD" title="AVX-512 Conflict Detection">CD</button>
-        </div>
-      </div>
-    `;
-  } else if (currentIsa === "avx") {
-    featureControlsHtml += `
-      <div class="mipp-modal-ctrl-group">
-        <span class="mipp-control-label">HW Features:</span>
-        <div class="mipp-segmented-group" id="mipp-modal-features-group">
-          <button type="button" class="mipp-segment-btn ${isAVX2 ? "active" : ""}" data-modal-toggle-feature="AVX2" title="Advanced Vector Extensions 2">AVX2</button>
-          <button type="button" class="mipp-segment-btn ${isFMA ? "active" : ""}" data-modal-toggle-feature="FMA" title="Fused Multiply-Add">FMA</button>
-        </div>
-      </div>
-    `;
-  } else if (currentIsa === "sse") {
-    featureControlsHtml += `
-      <div class="mipp-modal-ctrl-group">
-        <span class="mipp-control-label">HW Features:</span>
-        <div class="mipp-segmented-group" id="mipp-modal-sse-target-group">
-          ${["SSE2", "SSE3", "SSSE3", "SSE4.1", "SSE4.2"].map((t) => `
-            <button type="button" class="mipp-segment-btn ${sseTarget === t ? "active" : ""}" data-modal-sse-target="${t}" title="${t} Target">${t}</button>
+  const isHierarchy = featuresMeta.mode === "hierarchy";
+  const isMixed = featuresMeta.mode === "mixed";
+  const tierItems = (featuresMeta.items || []).filter((it) => isHierarchy || (isMixed && it.type === "tier"));
+  const flagItems = (featuresMeta.items || []).filter((it) => it.type === "flag" || (!isHierarchy && !isMixed));
+
+  if (tierItems.length > 0 || flagItems.length > 0) {
+    let tierGroupHtml = "";
+    if (tierItems.length > 0) {
+      const activeTier = features[currentIsa] || featuresMeta.default || (tierItems.length ? tierItems[tierItems.length - 1].id : "");
+      const selectableItems = tierItems.filter((it) => !it.locked);
+      tierGroupHtml = `
+        <div class="mipp-segmented-group" id="mipp-modal-tier-group">
+          ${selectableItems.map((it) => `
+            <button type="button" class="mipp-segment-btn ${activeTier === it.id ? "active" : ""}" data-modal-tier="${it.id}" title="${escapeHtml(it.description || it.label)}">${escapeHtml(it.label)}</button>
           `).join("")}
         </div>
-      </div>
-    `;
-  } else if (currentIsa === "neon") {
+      `;
+    }
+
+    let flagGroupHtml = "";
+    if (flagItems.length > 0) {
+      flagGroupHtml = `
+        <div class="mipp-segmented-group" id="mipp-modal-features-group">
+          ${flagItems.map((it) => {
+            const isActive = flatDefines[it.define] !== false;
+            const isLocked = Boolean(it.locked);
+            const style = isLocked ? 'style="pointer-events: none; opacity: 0.85;"' : '';
+            return `
+              <button type="button" class="mipp-segment-btn ${isActive ? "active" : ""}" data-modal-toggle-feature="${it.id}" ${isLocked ? 'data-modal-locked="true"' : ""} title="${escapeHtml(it.description || it.label)}" ${style}>
+                ${escapeHtml(it.label)}
+              </button>
+            `;
+          }).join("")}
+        </div>
+      `;
+    }
+
     featureControlsHtml += `
       <div class="mipp-modal-ctrl-group">
         <span class="mipp-control-label">HW Features:</span>
-        <div class="mipp-segmented-group" id="mipp-modal-features-group">
-          <button type="button" class="mipp-segment-btn ${isAArch64 ? "active" : ""}" data-modal-toggle-feature="AArch64" title="ARM 64-bit Architecture">AArch64</button>
-          <button type="button" class="mipp-segment-btn ${isFMA ? "active" : ""}" data-modal-toggle-feature="FMA" title="ARM Fused Multiply-Add">FMA</button>
-          <button type="button" class="mipp-segment-btn ${isRounding ? "active" : ""}" data-modal-toggle-feature="Rounding" title="ARM Directed Rounding">Rounding</button>
-        </div>
+        ${tierGroupHtml}
+        ${flagGroupHtml}
       </div>
     `;
-  } else if (currentIsa === "sve") {
-    featureControlsHtml += `
-      <div class="mipp-modal-ctrl-group">
-        <span class="mipp-control-label">HW Features:</span>
-        <div class="mipp-segmented-group" id="mipp-modal-features-group">
-          <button type="button" class="mipp-segment-btn active" data-modal-toggle-feature="SVE" title="Base SVE (locked)" style="pointer-events: none; opacity: 0.85;">SVE</button>
-          <button type="button" class="mipp-segment-btn ${isSVE2 ? "active" : ""}" data-modal-toggle-feature="SVE2" title="Scalable Vector Extension 2">SVE2</button>
-        </div>
-      </div>
-    `;
+  }
+
+  if (isaMeta && (isaMeta.is_scalar || isaMeta.vector_size_bits === "scalable")) {
     featureControlsHtml += simdWidthHtml;
   }
 
@@ -614,7 +583,7 @@ export function renderAlgoModal(modalData) {
             <div class="mipp-modal-ctrl-group">
               <span class="mipp-control-label">SIMD Ext:</span>
               <div class="mipp-segmented-group" id="mipp-modal-isa-group">
-                ${ALL_MODAL_ISAS.map((ext) => `
+                ${allModalIsas.map((ext) => `
                   <button type="button" class="mipp-segment-btn ${ext === currentIsa ? "active" : ""}" data-modal-isa="${ext}" title="${namesMap[ext] || ext.toUpperCase()}">
                     ${(namesMap[ext] || ext.toUpperCase()).replace("ARM ", "")}
                   </button>

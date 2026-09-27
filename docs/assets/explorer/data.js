@@ -13,38 +13,11 @@ export let apiMetadata = {
   primitives: []
 };
 
-export let ALL_SIMD_EXTS = ["sse", "avx", "avx512", "neon", "sve", "rvv"];
-
-export let SIMD_EXT_DISPLAY_NAMES = {
-  sse: "SSE",
-  avx: "AVX",
-  avx512: "AVX-512",
-  neon: "NEON",
-  sve: "SVE",
-  rvv: "RVV"
-};
-
-export let SIMD_EXT_FEATURE_DEFINES = {};
-
-export let ALL_CATEGORIES = [
-  "arithmetic",
-  "comparison",
-  "converts",
-  "load",
-  "logic",
-  "math",
-  "reduction",
-  "reinterpret",
-  "selection",
-  "store"
-];
+export let ALL_SIMD_EXTS = [];
+export let SIMD_EXT_DISPLAY_NAMES = {};
+export let ALL_CATEGORIES = [];
 export let ALL_LEVELS = [0, 1, 2, 3];
-export let LEVEL_DESCRIPTIONS = {
-  0: "Native Hardware",
-  1: "Dedicated Emulation",
-  2: "Generic Emulation",
-  3: "Scalar Fallback",
-};
+export let LEVEL_DESCRIPTIONS = {};
 
 export function matchesDatatype(dt, selectedTypes) {
   if (!dt || !selectedTypes || selectedTypes.length === 0) return false;
@@ -184,11 +157,9 @@ export function initApiDataIndexes(data, metadata = null) {
     // Exception for the explorer UI: do not display the "scalar" pseudo-extension
     ALL_SIMD_EXTS = Object.keys(rawExts).filter((id) => id.toLowerCase() !== "scalar");
     SIMD_EXT_DISPLAY_NAMES = {};
-    SIMD_EXT_FEATURE_DEFINES = {};
     for (const [id, meta] of Object.entries(rawExts)) {
       if (id.toLowerCase() === "scalar") continue;
       SIMD_EXT_DISPLAY_NAMES[id] = meta.label || id.toUpperCase();
-      SIMD_EXT_FEATURE_DEFINES[id] = meta.features || [];
     }
   }
 
@@ -345,4 +316,41 @@ export function initApiDataIndexes(data, metadata = null) {
   }
 
   DYNAMIC_INTRINSIC_PREFIXES = Array.from(prefixSet).sort((a, b) => b.length - a.length);
+}
+
+export function getDefaultFeaturesForModal(reqFeature = null, currentIsa = null) {
+  const features = {};
+  if (apiMetadata && apiMetadata.isas) {
+    for (const [isaName, isaMeta] of Object.entries(apiMetadata.isas)) {
+      const fMeta = isaMeta.features;
+      if (!fMeta || !Array.isArray(fMeta.items)) continue;
+      const isHierarchy = fMeta.mode === "hierarchy";
+      const isMixed = fMeta.mode === "mixed";
+      const tierItems = fMeta.items.filter((it) => isHierarchy || (isMixed && it.type === "tier"));
+      const flagItems = fMeta.items.filter((it) => it.type === "flag" || (!isHierarchy && !isMixed));
+
+      if (tierItems.length > 0) {
+        const defaultTier = fMeta.default || (tierItems.length ? tierItems[tierItems.length - 1].id : "");
+        features[isaName] = defaultTier;
+      }
+      if (flagItems.length > 0) {
+        for (const it of flagItems) {
+          features[it.id] = (it.default !== false);
+        }
+      }
+    }
+  }
+  if (reqFeature) {
+    features[reqFeature] = true;
+    if (currentIsa && apiMetadata && apiMetadata.isas && apiMetadata.isas[currentIsa]) {
+      const fMeta = apiMetadata.isas[currentIsa].features;
+      if (fMeta && (fMeta.mode === "hierarchy" || fMeta.mode === "mixed")) {
+        const tierItems = (fMeta.items || []).filter((it) => fMeta.mode === "hierarchy" || it.type === "tier");
+        if (tierItems.some((it) => it.id === reqFeature)) {
+          features[currentIsa] = reqFeature;
+        }
+      }
+    }
+  }
+  return features;
 }

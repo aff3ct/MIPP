@@ -9,7 +9,8 @@ import {
   ALL_SIMD_EXTS,
   ALL_CATEGORIES,
   ALL_DATATYPES,
-  ALL_MASK_MODES
+  ALL_MASK_MODES,
+  getDefaultFeaturesForModal
 } from "./data.js";
 import { state, syncUrlHash, readUrlHash, setFocusedCard, closeCard } from "./state.js";
 import { filterEntries } from "./filters.js";
@@ -396,15 +397,7 @@ function attachCardInternalListeners(cardEl, entry) {
         lmul: state.lmul || "1",
         view: "abstract",
         scalarSize: 256,
-        features: {
-          F: true,
-          BW: true, DQ: true, VL: true, CD: true,
-          AVX2: true, FMA: true,
-          sseTarget: "SSE4.2",
-          AArch64: true, Rounding: true,
-          SVE: true, SVE2: true,
-          ...(reqFeature ? { [reqFeature]: true } : {})
-        }
+        features: getDefaultFeaturesForModal(reqFeature, ext)
       };
       const appEl = document.getElementById("mipp-explorer-app");
       if (appEl) {
@@ -604,18 +597,11 @@ function updateModals(modalsContainerEl) {
     modalsContainerEl.querySelectorAll("[data-modal-toggle-feature]").forEach((btn) => {
       btn.addEventListener("click", (e) => {
         e.stopPropagation();
+        if (btn.hasAttribute("data-modal-locked") || btn.getAttribute("data-modal-locked") === "true") return;
         const feat = btn.getAttribute("data-modal-toggle-feature");
-        if (feat === "SVE" || feat === "F") return;
         if (state.algoModalData) {
           if (!state.algoModalData.features) {
-            state.algoModalData.features = {
-              F: true,
-              BW: true, DQ: true, VL: true, CD: true,
-              AVX2: true, FMA: true,
-              sseTarget: "SSE4.2",
-              AArch64: true, Rounding: true,
-              SVE: true, SVE2: true
-            };
+            state.algoModalData.features = getDefaultFeaturesForModal();
           }
           const curVal = state.algoModalData.features[feat] !== false;
           state.algoModalData.features[feat] = !curVal;
@@ -625,22 +611,16 @@ function updateModals(modalsContainerEl) {
       });
     });
 
-    modalsContainerEl.querySelectorAll("[data-modal-sse-target]").forEach((btn) => {
+    modalsContainerEl.querySelectorAll("[data-modal-tier]").forEach((btn) => {
       btn.addEventListener("click", (e) => {
         e.stopPropagation();
-        const target = btn.getAttribute("data-modal-sse-target");
+        const target = btn.getAttribute("data-modal-tier");
         if (state.algoModalData) {
           if (!state.algoModalData.features) {
-            state.algoModalData.features = {
-              F: true,
-              BW: true, DQ: true, VL: true, CD: true,
-              AVX2: true, FMA: true,
-              sseTarget: "SSE4.2",
-              AArch64: true, Rounding: true,
-              SVE: true, SVE2: true
-            };
+            state.algoModalData.features = getDefaultFeaturesForModal();
           }
-          state.algoModalData.features.sseTarget = target;
+          const currentIsa = state.algoModalData.simdExt || state.algoModalData.isa || Object.keys(apiMetadata.isas || {})[0] || "";
+          state.algoModalData.features[currentIsa] = target;
           updateModals(modalsContainerEl);
           syncUrlHash(true);
         }
@@ -837,15 +817,7 @@ export async function initExplorer() {
             lmul: state.lmul || "1",
             view: "abstract",
             scalarSize: 256,
-            features: {
-              F: true,
-              BW: true, DQ: true, VL: true, CD: true,
-              AVX2: true, FMA: true,
-              sseTarget: "SSE4.2",
-              AArch64: true, Rounding: true,
-              SVE: true, SVE2: true,
-              ...(reqFeature ? { [reqFeature]: true } : {})
-            }
+            features: getDefaultFeaturesForModal(reqFeature, isa)
           };
           const modalsContainerEl = document.getElementById("mipp-modals-container");
           if (modalsContainerEl) {

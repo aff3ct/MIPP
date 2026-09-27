@@ -2,7 +2,7 @@
  * MIPP API Explorer - Reactive State & URL Synchronization
  */
 import { VALID_CARD_TABS } from "./explorer.config.js";
-import { ALL_SIMD_EXTS, ALL_CATEGORIES, ALL_DATATYPES, ALL_MASK_MODES, ALL_LEVELS } from "./data.js";
+import { ALL_SIMD_EXTS, ALL_CATEGORIES, ALL_DATATYPES, ALL_MASK_MODES, ALL_LEVELS, getDefaultFeaturesForModal, apiMetadata } from "./data.js";
 
 export const state = {
   query: "",
@@ -120,12 +120,18 @@ export function syncUrlHash(replace = false) {
       if (mData.view && mData.view !== "abstract") params.set("algo_view", mData.view);
       if (mData.scalarSize && mData.scalarSize !== 256) params.set("algo_scalarsize", String(mData.scalarSize));
       if (mData.features) {
-        if (mData.features.sseTarget && mData.features.sseTarget !== "SSE4.2") {
-          params.set("algo_target", mData.features.sseTarget);
+        const currentIsa = mData.simdExt || mData.isa || "avx";
+        const isaMeta = apiMetadata && apiMetadata.isas ? apiMetadata.isas[currentIsa] : null;
+        if (isaMeta && isaMeta.features && (isaMeta.features.mode === "hierarchy" || isaMeta.features.mode === "mixed")) {
+          const selectedTier = mData.features[currentIsa];
+          const defaultTier = isaMeta.features.default || (isaMeta.features.items.length ? isaMeta.features.items[isaMeta.features.items.length - 1].id : "");
+          if (selectedTier && selectedTier !== defaultTier) {
+            params.set("algo_target", selectedTier);
+          }
         }
         const disabled = [];
         for (const [k, v] of Object.entries(mData.features)) {
-          if (k !== "sseTarget" && v === false) {
+          if (k !== currentIsa && v === false) {
             disabled.push(k);
           }
         }
@@ -224,23 +230,16 @@ export function readUrlHash(allSimdExts, allCategories, allDatatypes, allMaskMod
       const lmul = params.get("algo_lmul") || "1";
       const view = params.get("algo_view") || "abstract";
       const scalarSize = params.has("algo_scalarsize") ? parseInt(params.get("algo_scalarsize"), 10) : 256;
-      const sseTarget = params.get("algo_target") || "SSE4.2";
       const disabledList = params.has("algo_dis") ? params.get("algo_dis").split(",") : [];
 
-      const features = {
-        F: true,
-        BW: !disabledList.includes("BW"),
-        DQ: !disabledList.includes("DQ"),
-        VL: !disabledList.includes("VL"),
-        CD: !disabledList.includes("CD"),
-        AVX2: !disabledList.includes("AVX2"),
-        FMA: !disabledList.includes("FMA"),
-        sseTarget: sseTarget,
-        AArch64: !disabledList.includes("AArch64"),
-        Rounding: !disabledList.includes("Rounding"),
-        SVE: true,
-        SVE2: !disabledList.includes("SVE2")
-      };
+      const features = getDefaultFeaturesForModal();
+      if (params.has("algo_target")) {
+        const target = params.get("algo_target");
+        features[isa] = target;
+      }
+      for (const d of disabledList) {
+        if (d) features[d] = false;
+      }
 
       state.algoModalData = {
         funcName: funcName,

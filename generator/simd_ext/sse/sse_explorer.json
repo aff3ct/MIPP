@@ -1,0 +1,24 @@
+{
+    "$schema": "../../helpers_headers/schemas/explorer_isa_schema.json",
+    "name": "sse",
+    "display_name": "SSE",
+    "description": "Streaming SIMD Extensions (x86 / x86-64 128-bit vector extensions)",
+    "compiler": {
+        "id": "g142",
+        "arch": "x86",
+        "label": "x86-64 GCC",
+        "base_flags": "-O3"
+    },
+    "features": {
+        "mode": "hierarchy",
+        "default": "SSE4.2",
+        "items": [
+            { "id": "SSE",    "label": "SSE",    "define": "__SSE__",    "flag": "-msse",    "default": true, "locked": true,  "description": "Streaming SIMD Extensions (Base)" },
+            { "id": "SSE2",   "label": "SSE2",   "define": "__SSE2__",   "flag": "-msse2",   "default": true, "locked": false, "description": "Streaming SIMD Extensions 2" },
+            { "id": "SSE3",   "label": "SSE3",   "define": "__SSE3__",   "flag": "-msse3",   "default": true, "locked": false, "description": "Streaming SIMD Extensions 3" },
+            { "id": "SSSE3",  "label": "SSSE3",  "define": "__SSSE3__",  "flag": "-mssse3",  "default": true, "locked": false, "description": "Supplemental Streaming SIMD Extensions 3" },
+            { "id": "SSE4.1", "label": "SSE4.1", "define": "__SSE4_1__", "flag": "-msse4.1", "default": true, "locked": false, "description": "Streaming SIMD Extensions 4.1" },
+            { "id": "SSE4.2", "label": "SSE4.2", "define": "__SSE4_2__", "flag": "-msse4.2", "default": true, "locked": false, "description": "Streaming SIMD Extensions 4.2" }
+        ]
+    }
+}

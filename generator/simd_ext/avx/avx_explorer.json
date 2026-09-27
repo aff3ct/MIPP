@@ -1,0 +1,21 @@
+{
+    "$schema": "../../helpers_headers/schemas/explorer_isa_schema.json",
+    "name": "avx",
+    "display_name": "AVX",
+    "description": "Advanced Vector Extensions (x86-64 256-bit floating-point and integer vector extensions)",
+    "compiler": {
+        "id": "g142",
+        "arch": "x86",
+        "label": "x86-64 GCC",
+        "base_flags": "-O3"
+    },
+    "features": {
+        "mode": "mixed",
+        "default": "AVX2",
+        "items": [
+            { "id": "AVX",  "label": "AVX",  "define": "__AVX__",  "flag": "-mavx",  "type": "tier", "default": true, "locked": false, "description": "Advanced Vector Extensions (Base 256-bit Float)" },
+            { "id": "AVX2", "label": "AVX2", "define": "__AVX2__", "flag": "-mavx2", "type": "tier", "default": true, "locked": false, "description": "Advanced Vector Extensions 2 (256-bit Integer)" },
+            { "id": "FMA",  "label": "FMA",  "define": "__FMA__",  "flag": "-mfma",  "type": "flag", "default": true, "locked": false, "description": "Fused Multiply-Add Extensions (FMA3)" }
+        ]
+    }
+}

@@ -1,0 +1,22 @@
+{
+    "$schema": "../../helpers_headers/schemas/explorer_isa_schema.json",
+    "name": "avx512",
+    "display_name": "AVX-512",
+    "description": "AVX-512 (x86-64 512-bit vector extensions with dedicated mask registers)",
+    "compiler": {
+        "id": "g142",
+        "arch": "x86",
+        "label": "x86-64 GCC",
+        "base_flags": "-O3 -mavx512f"
+    },
+    "features": {
+        "mode": "flags",
+        "items": [
+            { "id": "F",  "label": "F",  "define": "__AVX512F__",  "flag": "-mavx512f",  "default": true,  "locked": true,  "description": "AVX-512 Foundation (Base 512-bit)" },
+            { "id": "BW", "label": "BW", "define": "__AVX512BW__", "flag": "-mavx512bw", "default": true,  "locked": false, "description": "Byte and Word Instructions (8-bit & 16-bit)" },
+            { "id": "DQ", "label": "DQ", "define": "__AVX512DQ__", "flag": "-mavx512dq", "default": true,  "locked": false, "description": "Doubleword and Quadword Instructions (32-bit & 64-bit)" },
+            { "id": "VL", "label": "VL", "define": "__AVX512VL__", "flag": "-mavx512vl", "default": true,  "locked": false, "description": "Vector Length Extensions (128-bit & 256-bit operations)" },
+            { "id": "CD", "label": "CD", "define": "__AVX512CD__", "flag": "-mavx512cd", "default": false, "locked": false, "description": "Conflict Detection Instructions" }
+        ]
+    }
+}

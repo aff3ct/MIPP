@@ -31,6 +31,7 @@ from gen_mipp_headers import discover_and_sort_isas
 from c_generator import resolve_lmul_in_isa, register_all_candidates
 from codegen.candidate_resolver import resolve_candidates, render_template
 from scalar_gen import gen_c_functions_scalar_one
+from input_validation import validate_explorer_isa_config
 
 
 def clean_latex(latex_str):
@@ -107,9 +108,24 @@ def build_cpp_obj_prototype(func, interfaces_dict):
     return f"inline {ret_type} r0.{method_name}({', '.join(arg_strs)}) const;"
 
 
-def extract_required_feature(cond):
+def extract_required_feature(cond, isa_features=None):
     if not cond or cond in ('0', '1'):
         return None
+    if isa_features and "items" in isa_features:
+        for item in reversed(isa_features["items"]):
+            if item.get("locked"):
+                continue
+            define = item.get("define", "")
+            if not define:
+                continue
+            if define in cond:
+                neg1 = f"!defined({define})"
+                neg2 = f"!{define}"
+                if neg1 not in cond and neg2 not in cond:
+                    return item["id"]
+        return None
+
+    # Fallback to legacy hardcoded definitions if isa_features is not provided
     # AVX-512 features
     if '__AVX512BW__' in cond and '!defined(__AVX512BW__)' not in cond:
         return 'BW'
@@ -535,70 +551,20 @@ def build_isas_metadata(base_generator_dir, isas_dict):
     feature switches, and hardware register/mask types per datatype.
     """
     canonical_order = ["sse", "avx", "avx512", "neon", "sve", "rvv", "scalar"]
-
-    features_map = {
-        "avx512": [
-            { "name": "__AVX512F__", "label": "AVX-512F", "locked": True, "default": True, "flag": "-mavx512f" },
-            { "name": "__AVX512BW__", "label": "BW", "locked": False, "default": True, "flag": "-mavx512bw" },
-            { "name": "__AVX512DQ__", "label": "DQ", "locked": False, "default": True, "flag": "-mavx512dq" },
-            { "name": "__AVX512VL__", "label": "VL", "locked": False, "default": True, "flag": "-mavx512vl" },
-            { "name": "__AVX512CD__", "label": "CD", "locked": False, "default": True, "flag": "-mavx512cd" }
-        ],
-        "avx": [
-            { "name": "__AVX__", "label": "AVX", "locked": True, "default": True, "flag": "-mavx" },
-            { "name": "__AVX2__", "label": "AVX2", "locked": False, "default": True, "flag": "-mavx2" },
-            { "name": "__FMA__", "label": "FMA", "locked": False, "default": True, "flag": "-mfma" }
-        ],
-        "sse": [
-            { "name": "__SSE__", "label": "SSE", "locked": True, "default": True, "flag": "-msse" },
-            { "name": "__SSE2__", "label": "SSE2", "locked": False, "default": True, "flag": "-msse2" },
-            { "name": "__SSE3__", "label": "SSE3", "locked": False, "default": True, "flag": "-msse3" },
-            { "name": "__SSSE3__", "label": "SSSE3", "locked": False, "default": True, "flag": "-mssse3" },
-            { "name": "__SSE4_1__", "label": "SSE4.1", "locked": False, "default": True, "flag": "-msse4.1" },
-            { "name": "__SSE4_2__", "label": "SSE4.2", "locked": False, "default": True, "flag": "-msse4.2" }
-        ],
-        "neon": [
-            { "name": "__ARM_NEON", "label": "NEON", "locked": True, "default": True, "flag": "" },
-            { "name": "__aarch64__", "label": "AArch64 (64-bit)", "locked": False, "default": True, "flag": "" },
-            { "name": "__ARM_FEATURE_FMA", "label": "FMA", "locked": False, "default": True, "flag": "+fma" },
-            { "name": "__ARM_FEATURE_DIRECTED_ROUNDING", "label": "Rounding", "locked": False, "default": True, "flag": "" }
-        ],
-        "sve": [
-            { "name": "__ARM_FEATURE_SVE", "label": "SVE", "locked": True, "default": True, "flag": "-march=armv8.2-a+sve" },
-            { "name": "__ARM_FEATURE_SVE2", "label": "SVE2", "locked": False, "default": False, "flag": "-march=armv8.2-a+sve2" }
-        ],
-        "rvv": [
-            { "name": "__riscv_v", "label": "RVV 1.0", "locked": True, "default": True, "flag": "-march=rv64gcv_zvl256b -mrvv-vector-bits=zvl" }
-        ],
-        "scalar": []
-    }
-
-    compiler_map = {
-        "scalar": { "id": "g142", "arch": "x86", "base_flags": "-O3", "label": "x86-64 GCC" },
-        "sse":    { "id": "g142", "arch": "x86", "base_flags": "-O3", "label": "x86-64 GCC" },
-        "avx":    { "id": "g142", "arch": "x86", "base_flags": "-O3", "label": "x86-64 GCC" },
-        "avx512": { "id": "g142", "arch": "x86", "base_flags": "-O3", "label": "x86-64 GCC" },
-        "neon":   { "id": "aarch64-gcc-1420", "id_32": "arm-gcc-1320", "arch": "arm", "base_flags": "-O3 -march=armv8-a+simd", "flags_32": "-O3 -march=armv7-a -mfpu=neon -mfloat-abi=hard", "label": "AArch64 GCC" },
-        "sve":    { "id": "aarch64-gcc-1420", "arch": "arm", "base_flags": "-O3 -march=armv8.2-a+sve", "label": "AArch64 SVE GCC" },
-        "rvv":    { "id": "rv64-clang", "arch": "riscv", "base_flags": "-O3 -march=rv64gcv_zvl256b -mrvv-vector-bits=zvl", "label": "RISC-V 64 Clang" }
-    }
-
-    display_labels = {
-        "sse": "SSE",
-        "avx": "AVX",
-        "avx512": "AVX-512",
-        "neon": "NEON",
-        "sve": "SVE",
-        "rvv": "RVV",
-        "scalar": "Scalar"
-    }
-
     isas_meta = {}
     for isa_name in canonical_order:
         if isa_name not in isas_dict:
             continue
         conf = isas_dict[isa_name]
         is_scl = (isa_name == "scalar") or conf.get("is_scalar", False)
+
+        # Load and validate explorer configuration
+        explorer_path = os.path.join(base_generator_dir, "simd_ext", isa_name, f"{isa_name}_explorer.json")
+        explorer_conf = {}
+        if os.path.exists(explorer_path):
+            with open(explorer_path, "r", encoding="utf-8") as f:
+                explorer_conf = json.load(f)
+            validate_explorer_isa_config(explorer_conf, explorer_path)
 
         # Headers extraction
         headers = []
@@ -621,17 +587,38 @@ def build_isas_metadata(base_generator_dir, isas_dict):
 
         # Datatypes (hardware reg and msk types)
         dts_conf = conf.get("datatypes", {})
+        hw_lmul_list = conf.get("hw_lmul", [1]) if conf.get("hw_lmul") else [1]
         resolved_dts = {}
         for dt_name, dt_val in dts_conf.items():
-            reg_type = dt_val.get("reg", "")
-            msk_type = dt_val.get("msk", "")
-            if isa_name == "rvv":
-                reg_type = reg_type.replace("{lsuffix}", "m1")
-                w = dt_val.get("variables", {}).get("width", "32")
-                msk_type = msk_type.replace("{eew_emul}", w)
+            raw_reg = dt_val.get("reg", "")
+            raw_msk = dt_val.get("msk", "")
+            to_ptr = dt_val.get("to_ptr", f"{dt_name}_t")
+            vars_dict = dt_val.get("variables", {})
+            lsuffix_map = dt_val.get("lsuffix", vars_dict.get("lsuffix", {}))
+            eew_map = dt_val.get("eew_emul", vars_dict.get("eew_emul", {}))
+            width_val = dt_val.get("width", vars_dict.get("width", "32"))
+
+            reg_by_lmul = {}
+            msk_by_lmul = {}
+            for lmul_val in hw_lmul_list:
+                lmul_key = str(lmul_val)
+                lsuff = lsuffix_map.get(lmul_key, f"m{lmul_val}" if lmul_val > 0 else f"mf{abs(lmul_val)}")
+                r_type = raw_reg.replace("{lsuffix}", lsuff)
+                eew = eew_map.get(lmul_key, width_val)
+                m_type = raw_msk.replace("{eew_emul}", str(eew))
+                reg_by_lmul[lmul_key] = r_type
+                msk_by_lmul[lmul_key] = m_type
+
+            # Base reg and msk (m1 or default)
+            base_reg = reg_by_lmul.get("1", raw_reg.replace("{lsuffix}", "m1"))
+            base_msk = msk_by_lmul.get("1", raw_msk.replace("{eew_emul}", str(width_val)))
+
             resolved_dts[dt_name] = {
-                "reg": reg_type,
-                "msk": msk_type
+                "reg": base_reg,
+                "msk": base_msk,
+                "to_ptr": to_ptr,
+                "reg_by_lmul": reg_by_lmul,
+                "msk_by_lmul": msk_by_lmul
             }
 
         raw_size = conf.get("size")
@@ -645,22 +632,25 @@ def build_isas_metadata(base_generator_dir, isas_dict):
             except Exception:
                 vec_size = raw_size
 
-        isas_meta[isa_name] = {
+        isa_entry = {
             "id": isa_name,
             "name": isa_name,
-            "label": display_labels.get(isa_name, isa_name.upper()),
+            "label": explorer_conf.get("display_name", isa_name.upper()),
             "is_scalar": is_scl,
             "vector_size_bits": vec_size,
             "define": conf.get("define", ""),
             "sub_isa": conf.get("sub_isa", None),
             "headers": headers,
-            "features": features_map.get(isa_name, []),
-            "compiler": compiler_map.get(isa_name, {}),
+            "features": explorer_conf.get("features", { "mode": "none", "items": [] }),
+            "compiler": explorer_conf.get("compiler", {}),
             "buffer_sizes": [64, 128, 256, 512, 1024, 2048] if is_scl else [],
-            "hw_lmul": conf.get("hw_lmul", [1]) if conf.get("hw_lmul") else [1],
+            "hw_lmul": hw_lmul_list,
             "sw_lmul": conf.get("sw_lmul", []),
             "datatypes": resolved_dts
         }
+        if "layout" in conf:
+            isa_entry["layout"] = conf["layout"]
+        isas_meta[isa_name] = isa_entry
     return isas_meta
 
 
@@ -960,7 +950,7 @@ def generate_mipp_api_data(project_root=None):
                 # Detect if level 0 candidate requires a sub-extension / feature flag
                 for cand, cond in cands:
                     if cand.get("level") == 0:
-                        feat = extract_required_feature(cond)
+                        feat = extract_required_feature(cond, isas_meta.get(isa_name, {}).get("features"))
                         if feat:
                             required_features[dt] = feat
                             for cand_fb, cond_fb in cands:

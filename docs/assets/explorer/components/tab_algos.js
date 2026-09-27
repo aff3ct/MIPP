@@ -20,7 +20,7 @@ export function renderTabAlgos(entry) {
   const dtAlgos = lmulAlgos[selectedDt] || {};
 
   const maskSupport = entry.mask_support || {};
-  const availableVariants = ["unmasked", "mask", "maskz", "masks"].filter(
+  const availableVariants = ALL_MASK_MODES.filter(
     (m) => m === "unmasked" || maskSupport[m]
   );
 
