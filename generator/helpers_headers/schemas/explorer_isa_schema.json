@@ -26,6 +26,20 @@
             "type": "string",
             "description": "Optional short description or architectural notes"
         },
+        "order": {
+            "type": "integer",
+            "description": "Display order for UI tabs and sorting (e.g. 10 for SSE, 20 for AVX...)"
+        },
+        "headers": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Explicit C/C++ header inclusions override (e.g. for scalar)"
+        },
+        "ignored_intrinsics": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "List of vendor intrinsic function names to ignore from matching"
+        },
         "compiler": {
             "type": "object",
             "required": [

@@ -3,6 +3,8 @@
     "name": "avx512",
     "display_name": "AVX-512",
     "description": "AVX-512 (x86-64 512-bit vector extensions with dedicated mask registers)",
+    "order": 30,
+    "headers": ["<immintrin.h>"],
     "compiler": {
         "id": "g142",
         "arch": "x86",

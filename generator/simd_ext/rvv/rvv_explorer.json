@@ -3,6 +3,8 @@
     "name": "rvv",
     "display_name": "RVV",
     "description": "RISC-V Vector Extension (RVV 1.0 length-agnostic vector architecture)",
+    "order": 60,
+    "headers": ["<riscv_vector.h>"],
     "compiler": {
         "id": "rv64-clang",
         "arch": "riscv",

@@ -3,6 +3,8 @@
     "name": "neon",
     "display_name": "NEON",
     "description": "ARM Advanced SIMD (NEON 128-bit vector extensions for ARM32 and AArch64)",
+    "order": 40,
+    "headers": ["<arm_neon.h>"],
     "compiler": {
         "id": "carm64g1420",
         "arch": "arm",

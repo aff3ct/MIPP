@@ -3,6 +3,8 @@
     "name": "avx",
     "display_name": "AVX",
     "description": "Advanced Vector Extensions (x86-64 256-bit floating-point and integer vector extensions)",
+    "order": 20,
+    "headers": ["<immintrin.h>"],
     "compiler": {
         "id": "g142",
         "arch": "x86",

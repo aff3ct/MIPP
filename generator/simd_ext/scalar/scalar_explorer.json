@@ -3,6 +3,12 @@
     "name": "scalar",
     "display_name": "Scalar",
     "description": "Scalar fallback emulation with configurable SIMD buffer width",
+    "order": 70,
+    "headers": [
+        "<stdint.h>",
+        "<string.h>",
+        "<math.h>"
+    ],
     "compiler": {
         "id": "g142",
         "arch": "x86",

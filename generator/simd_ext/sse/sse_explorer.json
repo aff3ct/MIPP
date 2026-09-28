@@ -3,6 +3,8 @@
     "name": "sse",
     "display_name": "SSE",
     "description": "Streaming SIMD Extensions (x86 / x86-64 128-bit vector extensions)",
+    "order": 10,
+    "headers": ["<immintrin.h>"],
     "compiler": {
         "id": "g142",
         "arch": "x86",

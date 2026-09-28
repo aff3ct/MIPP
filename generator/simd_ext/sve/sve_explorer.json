@@ -3,6 +3,15 @@
     "name": "sve",
     "display_name": "SVE",
     "description": "ARM Scalable Vector Extension (length-agnostic vector architecture from 128 to 2048 bits)",
+    "order": 50,
+    "headers": ["<arm_sve.h>"],
+    "ignored_intrinsics": [
+        "svptrue_b8",
+        "svptrue_b16",
+        "svptrue_b32",
+        "svptrue_b64",
+        "svptrue_b"
+    ],
     "compiler": {
         "id": "carm64g1420",
         "arch": "arm",

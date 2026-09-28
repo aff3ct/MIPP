@@ -124,45 +124,6 @@ def extract_required_feature(cond, isa_features=None):
                 if neg1 not in cond and neg2 not in cond:
                     return item["id"]
         return None
-
-    # Fallback to legacy hardcoded definitions if isa_features is not provided
-    # AVX-512 features
-    if '__AVX512BW__' in cond and '!defined(__AVX512BW__)' not in cond:
-        return 'BW'
-    if '__AVX512DQ__' in cond and '!defined(__AVX512DQ__)' not in cond:
-        return 'DQ'
-    if '__AVX512VL__' in cond and '!defined(__AVX512VL__)' not in cond:
-        return 'VL'
-    if '__AVX512CD__' in cond and '!defined(__AVX512CD__)' not in cond:
-        return 'CD'
-    # AVX features
-    if '__AVX2__' in cond and '!defined(__AVX2__)' not in cond:
-        return 'AVX2'
-    if '__FMA__' in cond and '!defined(__FMA__)' not in cond:
-        return 'FMA'
-    # SSE features
-    if '__SSE4_2__' in cond and '!defined(__SSE4_2__)' not in cond:
-        return 'SSE4.2'
-    if '__SSE4_1__' in cond and '!defined(__SSE4_1__)' not in cond:
-        return 'SSE4.1'
-    if '__SSSE3__' in cond and '!defined(__SSSE3__)' not in cond:
-        return 'SSSE3'
-    if '__SSE3__' in cond and '!defined(__SSE3__)' not in cond:
-        return 'SSE3'
-    if '__SSE2__' in cond and '!defined(__SSE2__)' not in cond:
-        return 'SSE2'
-    # ARM NEON features
-    if '__ARM_FEATURE_FMA' in cond and '!defined(__ARM_FEATURE_FMA)' not in cond:
-        return 'FMA'
-    if '__ARM_FEATURE_DIRECTED_ROUNDING' in cond and '!defined(__ARM_FEATURE_DIRECTED_ROUNDING)' not in cond:
-        return 'Rounding'
-    if '__aarch64__' in cond and '!defined(__aarch64__)' not in cond:
-        return 'AArch64'
-    # ARM SVE features
-    if '__ARM_FEATURE_SVE2' in cond and '!defined(__ARM_FEATURE_SVE2)' not in cond:
-        return 'SVE2'
-    if '__ARM_FEATURE_SVE' in cond and '!defined(__ARM_FEATURE_SVE)' not in cond:
-        return 'SVE'
     return None
 
 
@@ -431,10 +392,9 @@ def parse_function_test_specs(func, dtypes, mask_flags, funcs_specs, default_spe
     }
 
 
-def build_code_snippets(func, category, spec_info, native_avx_instr=None):
+def build_code_snippets(func, category, spec_info):
     """
-    Generates minimal, self-contained reproducible code snippets for C99, C++, and C++ Object,
-    as well as a standalone native intrinsic example that compiles directly on Godbolt.
+    Generates minimal, self-contained reproducible code snippets for C99 and C++.
     """
     args = interfaces[func]["proto"]["args"]
     n_args = len(args)
@@ -507,40 +467,10 @@ def build_code_snippets(func, category, spec_info, native_avx_instr=None):
     c99_lines.append("    printf(\"First vector element: %f\\n\", mipp_get_float32_m1(res, 0));")
     c99_lines.append("    return 0;")
     c99_lines.append("}")
-
-    # Standalone Native Intrinsic demo that compiles immediately on Godbolt without external libs
-    godbolt_lines = [
-        "#include <stdio.h>",
-        "#include <immintrin.h>",
-        "",
-        "// Standalone demonstration of the underlying native instruction",
-        "// Compiles out of the box on Compiler Explorer (x86-64 GCC -O3 -mavx2)",
-        "int main() {",
-        "    __m256 v0 = _mm256_set1_ps(1.5f);",
-        "    __m256 v1 = _mm256_set1_ps(2.5f);"
-    ]
-    if native_avx_instr and "blend" in native_avx_instr:
-        godbolt_lines.append("    __m256 m0 = _mm256_setzero_ps();")
-        godbolt_lines.append(f"    __m256 res = {native_avx_instr}(v1, v0, m0);")
-    elif native_avx_instr and n_args == 1:
-        godbolt_lines.append(f"    __m256 res = {native_avx_instr}(v0);")
-    elif native_avx_instr and n_args >= 2:
-        godbolt_lines.append(f"    __m256 res = {native_avx_instr}(v0, v1);")
-    else:
-        godbolt_lines.append(f"    __m256 res = _mm256_add_ps(v0, v1); // MIPP native mapping for {func}")
-        
-    godbolt_lines.extend([
-        "    float out[8];",
-        "    _mm256_storeu_ps(out, res);",
-        "    printf(\"Native AVX execution result: %f\\n\", out[0]);",
-        "    return 0;",
-        "}"
-    ])
     
     return {
         "cpp": "\n".join(cpp_lines),
-        "c99": "\n".join(c99_lines),
-        "godbolt_native": "\n".join(godbolt_lines)
+        "c99": "\n".join(c99_lines)
     }
 
 
@@ -550,40 +480,34 @@ def build_isas_metadata(base_generator_dir, isas_dict):
     including display names, vector sizes, header includes, compiler settings,
     feature switches, and hardware register/mask types per datatype.
     """
-    canonical_order = ["sse", "avx", "avx512", "neon", "sve", "rvv", "scalar"]
-    isas_meta = {}
-    for isa_name in canonical_order:
-        if isa_name not in isas_dict:
-            continue
-        conf = isas_dict[isa_name]
-        is_scl = (isa_name == "scalar") or conf.get("is_scalar", False)
-
-        # Load and validate explorer configuration
+    # 1. Load and validate explorer configuration for each discovered ISA
+    explorer_confs = {}
+    for isa_name in isas_dict.keys():
         explorer_path = os.path.join(base_generator_dir, "simd_ext", isa_name, f"{isa_name}_explorer.json")
-        explorer_conf = {}
+        exp_conf = {}
         if os.path.exists(explorer_path):
             with open(explorer_path, "r", encoding="utf-8") as f:
-                explorer_conf = json.load(f)
-            validate_explorer_isa_config(explorer_conf, explorer_path)
+                exp_conf = json.load(f)
+            validate_explorer_isa_config(exp_conf, explorer_path)
+        explorer_confs[isa_name] = exp_conf
 
-        # Headers extraction
-        headers = []
-        if is_scl:
-            headers = ["<stdint.h>", "<string.h>", "<math.h>"]
-        else:
+    # 2. Sort ISAs by explorer 'order' attribute (default to 999 if unspecified)
+    sorted_isa_names = sorted(isas_dict.keys(), key=lambda name: explorer_confs.get(name, {}).get("order", 999))
+
+    isas_meta = {}
+    for isa_name in sorted_isa_names:
+        conf = isas_dict[isa_name]
+        is_scl = (isa_name == "scalar") or conf.get("is_scalar", False)
+        explorer_conf = explorer_confs.get(isa_name, {})
+
+        # Headers extraction: explorer config override or extracted from header_template
+        headers = explorer_conf.get("headers")
+        if not headers:
+            headers = []
             for line in conf.get("header_template", []):
                 m = re.search(r'#include\s*(<[^>]+>)', line)
                 if m:
                     headers.append(m.group(1))
-            if not headers:
-                if isa_name in ["sse", "avx", "avx512"]:
-                    headers = ["<immintrin.h>"]
-                elif isa_name == "neon":
-                    headers = ["<arm_neon.h>"]
-                elif isa_name == "sve":
-                    headers = ["<arm_sve.h>"]
-                elif isa_name == "rvv":
-                    headers = ["<riscv_vector.h>"]
 
         # Datatypes (hardware reg and msk types)
         dts_conf = conf.get("datatypes", {})
@@ -621,10 +545,11 @@ def build_isas_metadata(base_generator_dir, isas_dict):
                 "msk_by_lmul": msk_by_lmul
             }
 
+        # Scalable architecture detection: scalable if 'size' is missing, a list/set, or "scalable"
         raw_size = conf.get("size")
         if is_scl:
             vec_size = None
-        elif raw_size == "scalable" or isa_name in ["sve", "rvv"]:
+        elif raw_size is None or isinstance(raw_size, (list, set, tuple)) or raw_size == "scalable":
             vec_size = "scalable"
         else:
             try:
@@ -636,6 +561,7 @@ def build_isas_metadata(base_generator_dir, isas_dict):
             "id": isa_name,
             "name": isa_name,
             "label": explorer_conf.get("display_name", isa_name.upper()),
+            "order": explorer_conf.get("order", 999),
             "is_scalar": is_scl,
             "vector_size_bits": vec_size,
             "define": conf.get("define", ""),
@@ -643,6 +569,7 @@ def build_isas_metadata(base_generator_dir, isas_dict):
             "headers": headers,
             "features": explorer_conf.get("features", { "mode": "none", "items": [] }),
             "compiler": explorer_conf.get("compiler", {}),
+            "ignored_intrinsics": explorer_conf.get("ignored_intrinsics", []),
             "buffer_sizes": [64, 128, 256, 512, 1024, 2048] if is_scl else [],
             "hw_lmul": hw_lmul_list,
             "sw_lmul": conf.get("sw_lmul", []),
@@ -780,10 +707,10 @@ def generate_mipp_api_data(project_root=None):
 
     # 1. Discover all target ISAs
     isas_dict, implems_dict_raw, sorted_names = discover_and_sort_isas(base_generator_dir)
-    target_isas = [name for name in sorted_names if name != "scalar"]
 
-    # Build top-level metadata dictionaries
+    # Build top-level metadata dictionaries (sorted by explorer 'order')
     isas_meta = build_isas_metadata(base_generator_dir, isas_dict)
+    target_isas = [name for name in isas_meta.keys() if name != "scalar"]
     datatypes_meta = build_datatypes_metadata()
     datatype_groups_meta = build_datatype_groups_metadata()
     mask_modes_meta = build_mask_modes_metadata()
@@ -837,13 +764,15 @@ def generate_mipp_api_data(project_root=None):
             resolved_map = resolve_candidates(resolved_isa, copy_interfaces, lmul=lm)
             isa_solved_map[isa_name][lm] = (resolved_isa, resolved_map)
 
-    # Regex to identify intrinsic calls in rendered code
-    intrinsic_call_regex = re.compile(
-        r'\b(_mm(?:256|512)?_[a-zA-Z0-9_]+|v[a-z0-9_]+|sv[a-z0-9_]+|__riscv_[a-zA-Z0-9_]+)\s*\('
-    )
-    ignored_intrinsics = {
-        'svptrue_b8', 'svptrue_b16', 'svptrue_b32', 'svptrue_b64', 'svptrue_b'
-    }
+    # Dynamically build regex to identify vendor intrinsic calls based on ISA prefixes
+    all_prefixes = sorted({conf.get("prefix") for conf in isas_dict.values() if conf.get("prefix")}, key=len, reverse=True)
+    prefix_pattern = '|'.join(re.escape(p) for p in all_prefixes)
+    intrinsic_call_regex = re.compile(rf'\b((?:{prefix_pattern})[a-zA-Z0-9_]+)\s*\(')
+
+    # Aggregate ignored intrinsics from explorer configurations
+    ignored_intrinsics = set()
+    for im in isas_meta.values():
+        ignored_intrinsics.update(im.get("ignored_intrinsics", []))
 
     # Extract scalar macros from scalar_gen.py
     scalar_gen_path = os.path.join(base_generator_dir, "simd_ext", "scalar", "scalar_gen.py")
@@ -1037,7 +966,13 @@ def generate_mipp_api_data(project_root=None):
         if mask_flags.get("masks"):
             mask_variants_list.append("masks")
 
-        for lmul in [1, 2, 4, 8, -2]:
+        all_known_lmuls = sorted(list({
+            lm for im in isas_meta.values()
+            for lm in (im.get("hw_lmul", []) + im.get("sw_lmul", []))
+            if lm != 0
+        } | {1}))
+
+        for lmul in all_known_lmuls:
             lmul_key = str(lmul)
             c99_samples[lmul_key] = {}
             cpp_samples[lmul_key] = {}
@@ -1096,9 +1031,8 @@ def generate_mipp_api_data(project_root=None):
             "sw_lmul": []
         }
 
-        # Reproducible code snippet generator + Godbolt native sample
-        native_avx = isa_support.get("avx", {}).get("native_instructions", {}).get("float32", None)
-        snippets = build_code_snippets(func, cat_name, spec_info, native_avx)
+        # Reproducible code snippet generator
+        snippets = build_code_snippets(func, cat_name, spec_info)
 
         # Standardized API object
         entry = {
