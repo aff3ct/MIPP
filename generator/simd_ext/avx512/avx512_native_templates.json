@@ -31,10 +31,28 @@
             "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, m0.m, r0.r, r1.r);"
         ]
     },
+    "arith_2args_mskz": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}_maskz_{{ instr_name }}_{{ isa_dt_par.data_ext }}(m0.m, r0.r, r1.r);"
+        ]
+    },
     "arith_3args": {
         "format": "short",
         "code": [
             "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, r2.r);"
+        ]
+    },
+    "arith_3args_msk": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, m0.m, r1.r, r2.r);"
+        ]
+    },
+    "arith_3args_mskz": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}_maskz_{{ instr_name }}_{{ isa_dt_par.data_ext }}(m0.m, r0.r, r1.r, r2.r);"
         ]
     },
     "bitwise_1arg": {
@@ -165,6 +183,12 @@
         "format": "short",
         "code": [
             "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext_var }}(rsrc.r, m0.m, ({{ isa_dt_par.to_ptr }}*) p0);"
+        ]
+    },
+    "load_mskz": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}_maskz_{{ instr_name }}_{{ isa_dt_par.data_ext_var }}(m0.m, ({{ isa_dt_par.to_ptr }}*) p0);"
         ]
     },
     "logi_2args": {
