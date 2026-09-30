@@ -31,6 +31,12 @@
             "datatypes": "all_float",
             "template": "arith_2args_msk",
             "version": "mask"
+        },
+        {
+            "instr_name": "add",
+            "datatypes": "all_float",
+            "template": "arith_2args_mskz",
+            "version": "maskz"
         }
     ],
     "andb": [
@@ -418,6 +424,20 @@
             "datatypes": "all_float",
             "template": "arith_2args",
             "if": "defined(__AVX512BW__)"
+        },
+        {
+            "instr_name": "div",
+            "datatypes": "all_float",
+            "template": "arith_2args_msk",
+            "if": "defined(__AVX512BW__)",
+            "version": "mask"
+        },
+        {
+            "instr_name": "div",
+            "datatypes": "all_float",
+            "template": "arith_2args_mskz",
+            "if": "defined(__AVX512BW__)",
+            "version": "maskz"
         }
     ],
     "fmadd": [
@@ -425,6 +445,18 @@
             "instr_name": "fmadd",
             "datatypes": "all_float",
             "template": "arith_3args"
+        },
+        {
+            "instr_name": "fmadd",
+            "datatypes": "all_float",
+            "template": "arith_3args_msk",
+            "version": "mask"
+        },
+        {
+            "instr_name": "fmadd",
+            "datatypes": "all_float",
+            "template": "arith_3args_mskz",
+            "version": "maskz"
         },
         {
             "instr_name": "fmadd",
@@ -440,6 +472,18 @@
             "instr_name": "fmsub",
             "datatypes": "all_float",
             "template": "arith_3args"
+        },
+        {
+            "instr_name": "fmsub",
+            "datatypes": "all_float",
+            "template": "arith_3args_msk",
+            "version": "mask"
+        },
+        {
+            "instr_name": "fmsub",
+            "datatypes": "all_float",
+            "template": "arith_3args_mskz",
+            "version": "maskz"
         }
     ],
     "gather": [
@@ -553,6 +597,40 @@
             "template": "load_msks",
             "if": "defined(__AVX512BW__)",
             "version": "masks"
+        },
+        {
+            "instr_name": "load",
+            "datatypes": [
+                "float64",
+                "float32",
+                "int32",
+                "int64"
+            ],
+            "template": "load_mskz",
+            "if": "defined(__AVX512F__) && defined(MIPP_ALIGNED_LOADS)",
+            "version": "maskz"
+        },
+        {
+            "instr_name": "loadu",
+            "datatypes": [
+                "float64",
+                "float32",
+                "int32",
+                "int64"
+            ],
+            "template": "load_mskz",
+            "if": "defined(__AVX512F__) && !defined(MIPP_ALIGNED_LOADS)",
+            "version": "maskz"
+        },
+        {
+            "instr_name": "loadu",
+            "datatypes": [
+                "int8",
+                "int16"
+            ],
+            "template": "load_mskz",
+            "if": "defined(__AVX512BW__)",
+            "version": "maskz"
         }
     ],
     "loadu": [
@@ -644,6 +722,18 @@
             "instr_name": "mul",
             "datatypes": "all_float",
             "template": "arith_2args"
+        },
+        {
+            "instr_name": "mul",
+            "datatypes": "all_float",
+            "template": "arith_2args_msk",
+            "version": "mask"
+        },
+        {
+            "instr_name": "mul",
+            "datatypes": "all_float",
+            "template": "arith_2args_mskz",
+            "version": "maskz"
         },
         {
             "instr_name": "mullo",
@@ -955,6 +1045,18 @@
             "instr_name": "sub",
             "datatypes": "all_float",
             "template": "arith_2args"
+        },
+        {
+            "instr_name": "sub",
+            "datatypes": "all_float",
+            "template": "arith_2args_msk",
+            "version": "mask"
+        },
+        {
+            "instr_name": "sub",
+            "datatypes": "all_float",
+            "template": "arith_2args_mskz",
+            "version": "maskz"
         },
         {
             "instr_name": "sub",
