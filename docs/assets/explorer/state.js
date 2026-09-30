@@ -122,21 +122,37 @@ export function syncUrlHash(replace = false) {
       if (mData.features) {
         const currentIsa = mData.simdExt || mData.isa || "avx";
         const isaMeta = apiMetadata && apiMetadata.isas ? apiMetadata.isas[currentIsa] : null;
-        if (isaMeta && isaMeta.features && (isaMeta.features.mode === "hierarchy" || isaMeta.features.mode === "mixed")) {
-          const selectedTier = mData.features[currentIsa];
-          const defaultTier = isaMeta.features.default || (isaMeta.features.items.length ? isaMeta.features.items[isaMeta.features.items.length - 1].id : "");
-          if (selectedTier && selectedTier !== defaultTier) {
-            params.set("algo_target", selectedTier);
+        if (isaMeta && isaMeta.features) {
+          const fMeta = isaMeta.features;
+          if (fMeta.mode === "hierarchy" || fMeta.mode === "mixed") {
+            const selectedTier = mData.features[currentIsa];
+            const defaultTier = fMeta.default || (fMeta.items && fMeta.items.length ? fMeta.items[fMeta.items.length - 1].id : "");
+            if (selectedTier && selectedTier !== defaultTier) {
+              params.set("algo_target", selectedTier);
+            }
           }
-        }
-        const disabled = [];
-        for (const [k, v] of Object.entries(mData.features)) {
-          if (k !== currentIsa && v === false) {
-            disabled.push(k);
+
+          // Flags: only inspect flags belonging to the current ISA and serialize diffs against defaults
+          const flagItems = (fMeta.items || []).filter(
+            (it) => it.type === "flag" || (fMeta.mode !== "hierarchy" && fMeta.mode !== "mixed")
+          );
+          const disabled = [];
+          const enabled = [];
+          for (const item of flagItems) {
+            const isDef = item.default !== false;
+            const currentVal = mData.features[item.id];
+            if (isDef && currentVal === false) {
+              disabled.push(item.id);
+            } else if (!isDef && currentVal === true) {
+              enabled.push(item.id);
+            }
           }
-        }
-        if (disabled.length > 0) {
-          params.set("algo_dis", disabled.join(","));
+          if (disabled.length > 0) {
+            params.set("algo_dis", disabled.join(","));
+          }
+          if (enabled.length > 0) {
+            params.set("algo_en", enabled.join(","));
+          }
         }
       }
     }
@@ -231,6 +247,7 @@ export function readUrlHash(allSimdExts, allCategories, allDatatypes, allMaskMod
       const view = params.get("algo_view") || "abstract";
       const scalarSize = params.has("algo_scalarsize") ? parseInt(params.get("algo_scalarsize"), 10) : 256;
       const disabledList = params.has("algo_dis") ? params.get("algo_dis").split(",") : [];
+      const enabledList = params.has("algo_en") ? params.get("algo_en").split(",") : [];
 
       const features = getDefaultFeaturesForModal();
       if (params.has("algo_target")) {
@@ -239,6 +256,9 @@ export function readUrlHash(allSimdExts, allCategories, allDatatypes, allMaskMod
       }
       for (const d of disabledList) {
         if (d) features[d] = false;
+      }
+      for (const e of enabledList) {
+        if (e) features[e] = true;
       }
 
       state.algoModalData = {
