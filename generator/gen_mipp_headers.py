@@ -15,9 +15,9 @@ sys.path.insert(1, path + "/helpers_headers/")
 from tools import all_lmul, all_ldiv, clear_memo_caches, load_isa_config
 from registry import scalar_isa
 from registry import scalar_implems
-from registry import interfaces
+from registry import interfaces, categories
 
-from include_gen import generate_mipp_h
+from include_gen import generate_mipp_h, _match_category
 from ci_generator import generate_c_interface
 from cpp_generator import generate_cpp
 from cpp_object_generator import generate_cpp_object
@@ -25,11 +25,12 @@ from cpp_object_generator import generate_cpp_object
 from include_gen import IncludeManager
 
 include_gen_path = "../include/"
+internal_gen_path = os.path.join(include_gen_path, "mipp", "internal")
 
 # folder paths
-simd_ext_path = os.path.join(include_gen_path, "simd_ext")
-interfaces_path = os.path.join(include_gen_path, "interfaces")
-templates_path = os.path.join(include_gen_path, "templates")
+simd_ext_path = os.path.join(internal_gen_path, "simd_ext")
+interfaces_path = os.path.join(internal_gen_path, "interfaces")
+templates_path = os.path.join(internal_gen_path, "templates")
 
 def create_folder(folder_path):
     if not os.path.exists(folder_path):
@@ -239,6 +240,70 @@ def discover_and_sort_isas(path, limit_to_isas=None):
     return isas_dict, implems_dict, sorted_names
 
 
+def generate_public_headers(output_dir="../include"):
+    """
+    Generates granular public headers:
+    - include/mipp/c/cat/<cat>.h
+    - include/mipp/c/fun/<func>.h
+    - include/mipp/cpp/cat/<cat>.hpp
+    - include/mipp/cpp/fun/<func>.hpp
+    - include/mipp/cpp_obj/cat/<cat>.hpp
+    - include/mipp/cpp_obj/fun/<func>.hpp
+    """
+    mipp_dir = os.path.join(output_dir, "mipp")
+
+    # 1. Categories
+    for cat, funcs in categories.items():
+        # C category header: mipp/c/cat/<cat>.h
+        cat_c_dir = os.path.join(mipp_dir, "c", "cat")
+        os.makedirs(cat_c_dir, exist_ok=True)
+        with open(os.path.join(cat_c_dir, f"{cat}.h"), "w", encoding="utf-8") as f:
+            f.write("#pragma once\n\n")
+            f.write('#include "mipp/internal/interfaces/c/common.h"\n')
+            for fn in funcs:
+                f.write(f'#include "mipp/internal/interfaces/c/functions/{cat}/{fn}.h"\n')
+
+        # C++ category header: mipp/cpp/cat/<cat>.hpp
+        cat_cpp_dir = os.path.join(mipp_dir, "cpp", "cat")
+        os.makedirs(cat_cpp_dir, exist_ok=True)
+        with open(os.path.join(cat_cpp_dir, f"{cat}.hpp"), "w", encoding="utf-8") as f:
+            f.write("#pragma once\n\n")
+            f.write('#include "mipp/internal/interfaces/cpp/common.hpp"\n')
+            for fn in funcs:
+                f.write(f'#include "mipp/internal/interfaces/cpp/functions/{cat}/{fn}.hpp"\n')
+
+        # C++ Obj category header: mipp/cpp_obj/cat/<cat>.hpp
+        cat_cpp_obj_dir = os.path.join(mipp_dir, "cpp_obj", "cat")
+        os.makedirs(cat_cpp_obj_dir, exist_ok=True)
+        with open(os.path.join(cat_cpp_obj_dir, f"{cat}.hpp"), "w", encoding="utf-8") as f:
+            f.write("#pragma once\n\n")
+            f.write('#include "mipp/internal/interfaces/cpp_obj/common.hpp"\n')
+            for fn in funcs:
+                f.write(f'#include "mipp/internal/interfaces/cpp_obj/functions/{cat}/{fn}.hpp"\n')
+
+    # 2. Per-function headers: mipp/{c, cpp, cpp_obj}/fun/<fn>.{h, hpp}
+    for fn in interfaces:
+        cat = _match_category(fn)
+
+        # mipp/c/fun/<fn>.h
+        func_c_dir = os.path.join(mipp_dir, "c", "fun")
+        os.makedirs(func_c_dir, exist_ok=True)
+        with open(os.path.join(func_c_dir, f"{fn}.h"), "w", encoding="utf-8") as f:
+            f.write(f"#pragma once\n#include \"mipp/internal/interfaces/c/functions/{cat}/{fn}.h\"\n")
+
+        # mipp/cpp/fun/<fn>.hpp
+        func_cpp_dir = os.path.join(mipp_dir, "cpp", "fun")
+        os.makedirs(func_cpp_dir, exist_ok=True)
+        with open(os.path.join(func_cpp_dir, f"{fn}.hpp"), "w", encoding="utf-8") as f:
+            f.write(f"#pragma once\n#include \"mipp/internal/interfaces/cpp/functions/{cat}/{fn}.hpp\"\n")
+
+        # mipp/cpp_obj/fun/<fn>.hpp
+        func_cpp_obj_dir = os.path.join(mipp_dir, "cpp_obj", "fun")
+        os.makedirs(func_cpp_obj_dir, exist_ok=True)
+        with open(os.path.join(func_cpp_obj_dir, f"{fn}.hpp"), "w", encoding="utf-8") as f:
+            f.write(f"#pragma once\n#include \"mipp/internal/interfaces/cpp_obj/functions/{cat}/{fn}.hpp\"\n")
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(prog='gen_mipp.py', description='MIPP generator')
     parser.add_argument(
@@ -411,7 +476,8 @@ def main(argv=None):
         isa_list = [isas_dict[name] for name in sorted_names]
         generate_c_interface(isa_list, include_manager)
         generate_cpp(include_manager, isa_list)
-        generate_cpp_object(include_manager)
+        generate_cpp_object(include_manager, output_dir=include_gen_path)
+        generate_public_headers(output_dir=include_gen_path)
         print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
 
     # Print summary table at the end
@@ -431,10 +497,12 @@ def print_summary_table(include_dir, sorted_names=None):
         return "Std"
 
     # Dynamic ISA detection: use sorted_names if provided, otherwise scan the filesystem
+    simd_ext_dir = os.path.join(include_dir, "mipp", "internal", "simd_ext")
+    if not os.path.isdir(simd_ext_dir):
+        simd_ext_dir = os.path.join(include_dir, "simd_ext")
     if sorted_names is not None:
         candidate_isas = sorted_names
     else:
-        simd_ext_dir = os.path.join(include_dir, "simd_ext")
         if not os.path.isdir(simd_ext_dir):
             return
         candidate_isas = sorted(os.listdir(simd_ext_dir))
@@ -442,7 +510,7 @@ def print_summary_table(include_dir, sorted_names=None):
     # Keep only ISAs that actually have generated C function headers
     existing_isas = []
     for isa in candidate_isas:
-        isa_dir = os.path.join(include_dir, "simd_ext", isa, "c", "functions")
+        isa_dir = os.path.join(simd_ext_dir, isa, "c", "functions")
         if os.path.isdir(isa_dir):
             existing_isas.append(isa)
 
@@ -473,7 +541,7 @@ def print_summary_table(include_dir, sorted_names=None):
             "stub": 0
         }
         
-        isa_dir = os.path.join(include_dir, "simd_ext", isa, "c", "functions")
+        isa_dir = os.path.join(simd_ext_dir, isa, "c", "functions")
         files = glob.glob(os.path.join(isa_dir, "**", "*.h"), recursive=True)
             
         # Read all files and extract function levels and categories

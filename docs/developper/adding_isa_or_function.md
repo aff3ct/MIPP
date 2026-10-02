@@ -70,7 +70,7 @@ Key fields:
 - `datatypes`: Supported datatype alias or explicit list.
 - `mask_variants`: List of custom handled mask variants, or `[]` for automatic handling.
 - `implem`: Array of C code lines for the loop body. The placeholders `%!pred_cond!%` and `%!pred_alt!%` are automatically expanded by the generator to handle masked operations (`_mask`, `_maskz`, `_masks`).
-- The generator automatically emits the C99 scalar fallback headers in `include/simd_ext/scalar/c/functions/`.
+- The generator automatically emits the C99 scalar fallback headers in `include/mipp/internal/simd_ext/scalar/c/functions/`.
 
 ### Step 4: Add Native Hardware Acceleration (`generator/simd_ext/<isa>/`)
 

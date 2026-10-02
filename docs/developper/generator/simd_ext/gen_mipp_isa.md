@@ -17,7 +17,7 @@ Each target architecture supported by MIPP is configured via a `<isa>_isa.json` 
         "#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX_H_",
         "#define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX_H_",
         "#include <immintrin.h>",
-        "#include <simd_ext/sse/c/common.h>"
+        "#include <mipp/internal/simd_ext/sse/c/common.h>"
     ],
     "datatypes": {
         "float32": {

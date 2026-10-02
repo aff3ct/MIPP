@@ -12,19 +12,31 @@ All three tiers share the same zero-overhead inlined execution path and map to i
 
 ## 1. Header Inclusion & Organization
 
-```
+MIPP provides both convenient monolithic entry points and modular granular headers:
+
+```text
 include/
-├── mipp.h                  # Pure C entry point (includes C interface & active ISA)
-├── mipp.hpp                # C++ Functional Template entry point
-├── mipp_obj.hpp            # C++ Object API entry point (includes mipp.hpp)
-├── interfaces/
-│   ├── c/                  # C dispatch declarations & common definitions
-│   └── cpp/                # C++ namespace mipp:: template declarations
-└── simd_ext/               # Generated backend headers per ISA (sse, avx, neon, rvv, etc.)
+├── mipp.h                  # Pure C99 monolithic entry point
+├── mipp.hpp                # C++ Functional Template monolithic entry point
+├── mipp_obj.hpp            # C++ Object API monolithic entry point
+└── mipp/                   # Namespaced headers
+    ├── c/
+    │   ├── cat/<category>.h     # Granular C category header (e.g. arithmetic.h)
+    │   └── fun/<function>.h     # Granular C function header (e.g. add.h)
+    ├── cpp/
+    │   ├── cat/<category>.hpp   # Granular C++ category header
+    │   └── fun/<function>.hpp   # Granular C++ function header
+    ├── cpp_obj/
+    │   ├── cat/<category>.hpp   # Granular C++ Object category header
+    │   └── fun/<function>.hpp   # Granular C++ Object function header
+    └── internal/           # Private implementation details (do not include directly)
+        ├── interfaces/     # Architecture-independent dispatch interfaces
+        ├── simd_ext/       # Generated ISA-specific backend implementations
+        └── templates/      # Common C++ templates and enums
 ```
 
-!!! warning "Direct Inclusion of `simd_ext/` Headers"
-    The C headers under `include/simd_ext/<isa>/c/` can technically be included directly as standalone ISA-specific wrappers. However, this is **not recommended** for application code: these files are internal generator artifacts whose internal layout may evolve between MIPP releases without backward-compatibility guarantees.
+!!! tip "Granular Header Inclusion"
+    For large projects where compilation speed is paramount, you can include only the exact functions or categories you need (e.g., `#include <mipp/cpp_obj/fun/add.hpp>`) instead of the full monolithic headers. All internal backend files are encapsulated under `mipp/internal/` and must not be included directly.
 
 ---
 

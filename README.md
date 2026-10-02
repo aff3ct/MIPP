@@ -27,7 +27,7 @@
 
 ---
 
-## 🚀 Key Highlights & Architectural Differentiators
+## Key Highlights & Architectural Differentiators
 
 ```
        +-------------------------------------------------------------------+
@@ -95,7 +95,7 @@ Every operation is guaranteed to compile and execute across all **10 supported n
 
 ---
 
-## 📊 Comparison with Existing SIMD Solutions
+## Comparison with Existing SIMD Solutions
 
 | Capability / Metric | [**MIPPv2**](https://github.com/aff3ct/mipp/tree/develop) | [**MIPPv1**](https://github.com/aff3ct/mipp/tree/master) | [**Google Highway**](https://github.com/google/highway) | [**xsimd**](https://github.com/xtensor-stack/xsimd) | [**Eve**](https://github.com/jfalcou/eve) | [**VCL**](https://github.com/vectorclass/version2) |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -109,7 +109,7 @@ Every operation is guaranteed to compile and execute across all **10 supported n
 | **GitHub Stars** | [![Stars](https://img.shields.io/github/stars/aff3ct/mipp?style=flat&label=%E2%AD%90)](https://github.com/aff3ct/mipp) | [![Stars](https://img.shields.io/github/stars/aff3ct/mipp?style=flat&label=%E2%AD%90)](https://github.com/aff3ct/mipp) | [![Stars](https://img.shields.io/github/stars/google/highway?style=flat&label=%E2%AD%90)](https://github.com/google/highway) | [![Stars](https://img.shields.io/github/stars/xtensor-stack/xsimd?style=flat&label=%E2%AD%90)](https://github.com/xtensor-stack/xsimd) | [![Stars](https://img.shields.io/github/stars/jfalcou/eve?style=flat&label=%E2%AD%90)](https://github.com/jfalcou/eve) | [![Stars](https://img.shields.io/github/stars/vectorclass/version2?style=flat&label=%E2%AD%90)](https://github.com/vectorclass/version2) |
 | **License** | [![License](https://img.shields.io/github/license/aff3ct/mipp?style=flat)](https://github.com/aff3ct/mipp/blob/develop/LICENSE) | [![License](https://img.shields.io/github/license/aff3ct/mipp?style=flat)](https://github.com/aff3ct/mipp/blob/master/LICENSE) | [![License](https://img.shields.io/badge/license-Apache_2.0_%7C_BSD--3-blue)](https://github.com/google/highway/blob/master/LICENSE) | [![License](https://img.shields.io/github/license/xtensor-stack/xsimd?style=flat)](https://github.com/xtensor-stack/xsimd/blob/master/LICENSE) | [![License](https://img.shields.io/github/license/jfalcou/eve?style=flat)](https://github.com/jfalcou/eve/blob/main/LICENSE.md) | [![License](https://img.shields.io/github/license/vectorclass/version2?style=flat)](https://github.com/vectorclass/version2/blob/master/LICENSE) |
 
-👉 **[Read the full 10+ column comparison matrix in the documentation](https://aff3ct.github.io/MIPP/user/why_mippv2/#simd-wrappers-comparison)**
+**[Read the full 10+ column comparison matrix in the documentation](https://aff3ct.github.io/MIPP/user/why_mippv2/#simd-wrappers-comparison)**
 
 ---
 
@@ -190,28 +190,28 @@ g++ -O3 -march=armv8-a+simd -Iinclude main.cpp -o app
 riscv64-unknown-linux-gnu-g++ -O3 -march=rv64gcv_zvl256b -mrvv-vector-bits=zvl -Iinclude main.cpp -o app
 ```
 
-👉 **[See the Complete Getting Started Tutorial & Optimization Guide](https://aff3ct.github.io/MIPP/user/getting_started/)**
+**[See the Complete Getting Started Tutorial & Optimization Guide](https://aff3ct.github.io/MIPP/user/getting_started/)**
 
 ---
 
-## 📚 Official Documentation Hub
+## Official Documentation Hub
 
 Explore the full documentation hosted at **[https://aff3ct.github.io/MIPP/](https://aff3ct.github.io/MIPP/)**:
 
 * **User Guides**:
-    * 📘 **[Why MIPPv2](https://aff3ct.github.io/MIPP/user/why_mippv2/)**: Evolution from MIPPv1, design goals, and comparative analysis.
-    * 🚀 **[Getting Started](https://aff3ct.github.io/MIPP/user/getting_started/)**: Compiler flags, build setup, and tail-loop processing.
-    * 💡 **[Programming Models](https://aff3ct.github.io/MIPP/user/programming_model/)**: Detailed guide to C99, C++ Functional, and C++ Object APIs.
-    * 📐 **[Vector Types & LMUL](https://aff3ct.github.io/MIPP/user/vector_types_and_lmul/)**: Vector layout, register grouping, and element counting (`mipp::N<T>()`).
-    * 🎭 **[Masking Semantics](https://aff3ct.github.io/MIPP/user/masking_semantics/)**: Unconditional, merging (`mask`), zeroing (`maskz`), and source-preserving (`masks`) executions.
-    * 🛡️ **[Implementation Levels](https://aff3ct.github.io/MIPP/user/implementation_levels/)**: How the 4-tier fallback engine optimizes performance.
-    * 💾 **[Memory & Alignment](https://aff3ct.github.io/MIPP/user/memory_and_alignment/)**: Alignment constraints, load/store primitives, and gather/scatter memory access.
+    * **[Why MIPPv2](https://aff3ct.github.io/MIPP/user/why_mippv2/)**: Evolution from MIPPv1, design goals, and comparative analysis.
+    * **[Getting Started](https://aff3ct.github.io/MIPP/user/getting_started/)**: Compiler flags, build setup, and tail-loop processing.
+    * **[Programming Models](https://aff3ct.github.io/MIPP/user/programming_model/)**: Detailed guide to C99, C++ Functional, and C++ Object APIs.
+    * **[Vector Types & LMUL](https://aff3ct.github.io/MIPP/user/vector_types_and_lmul/)**: Vector layout, register grouping, and element counting (`mipp::N<T>()`).
+    * **[Masking Semantics](https://aff3ct.github.io/MIPP/user/masking_semantics/)**: Unconditional, merging (`mask`), zeroing (`maskz`), and source-preserving (`masks`) executions.
+    * **[Implementation Levels](https://aff3ct.github.io/MIPP/user/implementation_levels/)**: How the 4-tier fallback engine optimizes performance.
+    * **[Memory & Alignment](https://aff3ct.github.io/MIPP/user/memory_and_alignment/)**: Alignment constraints, load/store primitives, and gather/scatter memory access.
 * **API & Hardware References**:
-    * 📖 **[API Reference Matrix](https://aff3ct.github.io/MIPP/funcs_support/)**: Mathematical definitions, prototypes, and hardware support for every function.
-    * ⚙️ **[Hardware Support Matrix](https://aff3ct.github.io/MIPP/isas_support/)**: Complete ISA compatibility and instruction coverage.
+    * **[API Reference Matrix](https://aff3ct.github.io/MIPP/funcs_support/)**: Mathematical definitions, prototypes, and hardware support for every function.
+    * **[Hardware Support Matrix](https://aff3ct.github.io/MIPP/isas_support/)**: Complete ISA compatibility and instruction coverage.
 * **Developer & Contribution**:
-    * 🛠️ **[Developer Guide](https://aff3ct.github.io/MIPP/developper/)**: Generator architecture, declarative JSON database schema, and contribution steps.
-    * 📝 **[Templating DSL](https://aff3ct.github.io/MIPP/developper/templating_dsl/)**: Jinja2-based domain-specific language for adding new SIMD instructions.
+    * **[Developer Guide](https://aff3ct.github.io/MIPP/developper/)**: Generator architecture, declarative JSON database schema, and contribution steps.
+    * **[Templating DSL](https://aff3ct.github.io/MIPP/developper/templating_dsl/)**: Jinja2-based domain-specific language for adding new SIMD instructions.
 
 ---
 
@@ -250,7 +250,7 @@ MIPP is developed and maintained through collaborative research and engineering 
 
 ---
 
-## 🛠️ Code Generation & Local Development
+## Code Generation & Local Development
 
 MIPP headers, tests, and documentation are generated automatically via Python scripts driven by declarative JSON databases:
 
@@ -276,6 +276,6 @@ mkdocs serve
 
 ---
 
-## 📄 License
+## License
 
 MIPP is licensed under the permissive **[MIT License](LICENSE)**. You are free to use, modify, and distribute MIPP in both open-source and proprietary commercial software.

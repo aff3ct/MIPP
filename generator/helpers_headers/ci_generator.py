@@ -21,22 +21,22 @@ def prepare_isa_defines(isa_list):
     return isa_list_copy
 
 def _isa_include_common(isa):
-    content = "#include \"simd_ext/"+isa["name"]+"/c/common.h\"\n"
+    content = "#include \"mipp/internal/simd_ext/"+isa["name"]+"/c/common.h\"\n"
     sub_isa = isa.get("sub_isa")
     if sub_isa:
-        content += "#include \"simd_ext/"+sub_isa+"/c/common.h\"\n"
+        content += "#include \"mipp/internal/simd_ext/"+sub_isa+"/c/common.h\"\n"
     return content
 
 def _isa_include_function(isa, func):
     category = _match_category(func)
     if isa == "c":
-        content = "#include \"interfaces/c/functions/" + category + "/" + func + ".h\"\n"
+        content = "#include \"mipp/internal/interfaces/c/functions/" + category + "/" + func + ".h\"\n"
         return content
     
-    content = "#include \"simd_ext/"+isa["name"]+"/c/functions/" + category + "/" + func + ".h\"\n"
+    content = "#include \"mipp/internal/simd_ext/"+isa["name"]+"/c/functions/" + category + "/" + func + ".h\"\n"
     sub_isa = isa.get("sub_isa")
     if sub_isa:
-        content += "#include \"simd_ext/"+sub_isa+"/c/functions/" + category + "/" + func + ".h\"\n"
+        content += "#include \"mipp/internal/simd_ext/"+sub_isa+"/c/functions/" + category + "/" + func + ".h\"\n"
     return content
 
 def _custom_prefix_generator(func, isa_list, is_common=False, mode="function_header"):
@@ -111,7 +111,7 @@ def _custom_prefix_generator(func, isa_list, is_common=False, mode="function_hea
         # print('Generating custom prefix for function "'+func+'"')
         is_first = True
 
-        content += "\n#include \"interfaces/c/common.h\"\n\n"
+        content += "\n#include \"mipp/internal/interfaces/c/common.h\"\n\n"
         for isa in isa_list:
             if is_first:
                 content += "#if " + "defined(MIPP_" + isa["name"].upper() + ")\n"

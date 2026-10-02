@@ -28,30 +28,30 @@ def _get_include_path(func, layer):
     
     if func == "common":
         if layer == "c":
-            return "interfaces/c/common.h"
+            return "mipp/internal/interfaces/c/common.h"
         elif layer == "cpp":
-            return "interfaces/cpp/common.hpp"
+            return "mipp/internal/interfaces/cpp/common.hpp"
         elif layer == "templates":
-            return "templates/cpp/common.hpp"
+            return "mipp/internal/templates/cpp/common.hpp"
         elif layer.endswith("_cpp"):
             isa = layer[:-4]
-            return f"simd_ext/{isa}/cpp/common.hpp"
+            return f"mipp/internal/simd_ext/{isa}/cpp/common.hpp"
         elif layer != "":
-            return f"simd_ext/{layer}/c/common.h"
+            return f"mipp/internal/simd_ext/{layer}/c/common.h"
         else:
             return "common.h"
 
     if layer == "c":
-        return f"interfaces/c/functions/{category}/{include_name}"
+        return f"mipp/internal/interfaces/c/functions/{category}/{include_name}"
     elif layer == "cpp":
-        return f"interfaces/cpp/functions/{category}/{include_name}"
+        return f"mipp/internal/interfaces/cpp/functions/{category}/{include_name}"
     elif layer == "templates":
-        return f"templates/cpp/functions/{category}/{include_name}"
+        return f"mipp/internal/templates/cpp/functions/{category}/{include_name}"
     elif layer.endswith("_cpp"):
         isa = layer[:-4]
-        return f"simd_ext/{isa}/cpp/functions/{category}/{include_name}"
+        return f"mipp/internal/simd_ext/{isa}/cpp/functions/{category}/{include_name}"
     elif layer != "":
-        return f"simd_ext/{layer}/c/functions/{category}/{include_name}"
+        return f"mipp/internal/simd_ext/{layer}/c/functions/{category}/{include_name}"
     else:
         return f"functions/{category}/{include_name}"
 
@@ -203,19 +203,8 @@ def _get_dependencies(func, interfaces, lmul=0, mask_kind="", layer="", mode="fu
     
     dependencies = set()
     
-    if layer == "c":
-        dependencies.add("interfaces/c/common.h")
-    elif layer == "cpp":
-        dependencies.add("interfaces/cpp/common.hpp")
-    elif layer == "templates":
-        dependencies.add("templates/cpp/common.hpp")
-    elif layer.endswith("_cpp"):
-        isa = layer[:-4]
-        dependencies.add(f"simd_ext/{isa}/cpp/common.hpp")
-    elif layer != "":
-        dependencies.add(f"simd_ext/{layer}/c/common.h")
-    else:
-        dependencies.add("common.h")
+    common_include = _get_include_path("common", layer)
+    dependencies.add(common_include)
     
     #print(f"Getting dependencies for {func} in layer {layer} with lmul {lmul} and mask kind {mask_kind}")
 
@@ -643,17 +632,18 @@ class IncludeManager:
         #     self.layers[layer].get_fd("../include")
             
     def _get_layer_dir(self, layer_name):
+        internal_dir = f"{self.base_dir}/mipp/internal"
         if layer_name == "c":
-            return f"{self.base_dir}/interfaces/c"
+            return f"{internal_dir}/interfaces/c"
         elif layer_name == "cpp":
-            return f"{self.base_dir}/interfaces/cpp"
+            return f"{internal_dir}/interfaces/cpp"
         elif layer_name == "templates":
-            return f"{self.base_dir}/templates/cpp"
+            return f"{internal_dir}/templates/cpp"
         elif layer_name.endswith("_cpp"):
             isa = layer_name[:-4]
-            return f"{self.base_dir}/simd_ext/{isa}/cpp"
+            return f"{internal_dir}/simd_ext/{isa}/cpp"
         else:
-            return f"{self.base_dir}/simd_ext/{layer_name}/c"
+            return f"{internal_dir}/simd_ext/{layer_name}/c"
 
     def get_fd(self, layer_name, func):
         if self.mode == "function_header":
@@ -687,15 +677,15 @@ class IncludeManager:
 
                 # avx512 / avx hack to have access to avx/sse functions for ldiv
                 if layer_name == "avx512": 
-                    include_path.dependencies.add(f"simd_ext/avx/c/functions/{category}/{func}.h")
+                    include_path.dependencies.add(f"mipp/internal/simd_ext/avx/c/functions/{category}/{func}.h")
                 elif layer_name == "avx": 
-                    include_path.dependencies.add(f"simd_ext/sse/c/functions/{category}/{func}.h")
+                    include_path.dependencies.add(f"mipp/internal/simd_ext/sse/c/functions/{category}/{func}.h")
                 
                 # auto-scalar fallback requires the scalar variant to be included
                 if layer_name not in ("scalar", "scalar_cpp", "c", "cpp"):
-                    include_path.dependencies.add(f"simd_ext/scalar/c/functions/{category}/{func}.h")
-                    include_path.dependencies.add("simd_ext/scalar/c/functions/reinterpret/toreg.h")
-                    include_path.dependencies.add("simd_ext/scalar/c/functions/reinterpret/tomsk.h")
+                    include_path.dependencies.add(f"mipp/internal/simd_ext/scalar/c/functions/{category}/{func}.h")
+                    include_path.dependencies.add("mipp/internal/simd_ext/scalar/c/functions/reinterpret/toreg.h")
+                    include_path.dependencies.add("mipp/internal/simd_ext/scalar/c/functions/reinterpret/tomsk.h")
                 include_path.write_prefix(target_dir)
 
         elif self.mode == "category_header":
@@ -775,14 +765,14 @@ def generate_mipp_h(include_manager=None):
 
     template_file = """#ifndef MY_INTRINSICS_PLUS_PLUS_H_
 #define MY_INTRINSICS_PLUS_PLUS_H_
-#include "simd_ext/scalar/c/common.h"
-#include "interfaces/c/common.h"
+#include "mipp/internal/simd_ext/scalar/c/common.h"
+#include "mipp/internal/interfaces/c/common.h"
 """
 
     include_list = ""
     for func in interfaces:
         category = _match_category(func)
-        include_list += f'#include "interfaces/c/functions/{category}/{func}.h"\n'
+        include_list += f'#include "mipp/internal/interfaces/c/functions/{category}/{func}.h"\n'
     postfix = """#endif /* MY_INTRINSICS_PLUS_PLUS_H_ */"""
 
     template_file += include_list + "\n" + postfix

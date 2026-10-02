@@ -885,23 +885,23 @@ class TestsBuilderEngineC:
         lines = self.engine.render_template(tpl_fixed, N_ITER=str(N))
         headers_set = set()
         cat_func = _match_category(func_name)
-        headers_set.add('#include <interfaces/c/common.h>')
-        headers_set.add('#include <simd_ext/scalar/c/common.h>')
-        headers_set.add(f'#include <interfaces/c/functions/{cat_func}/{func_name}.h>')
-        headers_set.add(f'#include <simd_ext/scalar/c/functions/{cat_func}/{func_name}.h>')
+        headers_set.add('#include <mipp/internal/interfaces/c/common.h>')
+        headers_set.add('#include <mipp/internal/simd_ext/scalar/c/common.h>')
+        headers_set.add(f'#include <mipp/internal/interfaces/c/functions/{cat_func}/{func_name}.h>')
+        headers_set.add(f'#include <mipp/internal/simd_ext/scalar/c/functions/{cat_func}/{func_name}.h>')
         for aux in _AUX_HEADERS:
             if aux in self.engine.interfaces:
                 cat_aux = _match_category(aux)
-                headers_set.add(f'#include <interfaces/c/functions/{cat_aux}/{aux}.h>')
-                headers_set.add(f'#include <simd_ext/scalar/c/functions/{cat_aux}/{aux}.h>')
+                headers_set.add(f'#include <mipp/internal/interfaces/c/functions/{cat_aux}/{aux}.h>')
+                headers_set.add(f'#include <mipp/internal/simd_ext/scalar/c/functions/{cat_aux}/{aux}.h>')
 
         # extra_includes: split into known aux names (handled above) and raw strings (injected verbatim)
         extra_aux = [inc for inc in extra_includes if inc not in _AUX_HEADERS]
         for aux in extra_includes:
             if aux in _AUX_HEADERS:
                 cat_aux = _match_category(aux)
-                headers_set.add(f'#include <interfaces/c/functions/{cat_aux}/{aux}.h>')
-                headers_set.add(f'#include <simd_ext/scalar/c/functions/{cat_aux}/{aux}.h>')
+                headers_set.add(f'#include <mipp/internal/interfaces/c/functions/{cat_aux}/{aux}.h>')
+                headers_set.add(f'#include <mipp/internal/simd_ext/scalar/c/functions/{cat_aux}/{aux}.h>')
 
         lines.extend(sorted(list(headers_set)))
         lines.append("")
@@ -1153,21 +1153,21 @@ class TestsBuilderEngineCppBase:
 
         tpl_fixed = self.engine._tpl("headers", "all", "headers_fixed")
         lines = self.engine.render_template(tpl_fixed, N_ITER=str(N))
+        lines.append('#include <mipp_obj.hpp>' if dialect_name == "obj" else '#include <mipp.hpp>')
         headers_set = set()
         cat_func = _match_category(func_name)
-        headers_set.add('#include <mipp_obj.hpp>' if dialect_name == "obj" else '#include <mipp.hpp>')
-        headers_set.add('#include <simd_ext/scalar/cpp/common.hpp>')
-        headers_set.add(f'#include <simd_ext/scalar/cpp/functions/{cat_func}/{func_name}.hpp>')
+        headers_set.add('#include <mipp/internal/simd_ext/scalar/cpp/common.hpp>')
+        headers_set.add(f'#include <mipp/internal/simd_ext/scalar/cpp/functions/{cat_func}/{func_name}.hpp>')
         for aux in _AUX_HEADERS:
             if aux in self.engine.interfaces:
                 cat_aux = _match_category(aux)
-                headers_set.add(f'#include <simd_ext/scalar/cpp/functions/{cat_aux}/{aux}.hpp>')
+                headers_set.add(f'#include <mipp/internal/simd_ext/scalar/cpp/functions/{cat_aux}/{aux}.hpp>')
 
         extra_aux = [inc for inc in extra_includes if inc not in _AUX_HEADERS]
         for aux in extra_includes:
             if aux in _AUX_HEADERS:
                 cat_aux = _match_category(aux)
-                headers_set.add(f'#include <simd_ext/scalar/cpp/functions/{cat_aux}/{aux}.hpp>')
+                headers_set.add(f'#include <mipp/internal/simd_ext/scalar/cpp/functions/{cat_aux}/{aux}.hpp>')
 
         dt_spec = self.engine.interfaces.get(func_name, {}).get("datatypes")
         is_conversion = dt_spec in ("all_datatypes_cart_prod", "all_datatypes_same_size", "all_datatypes_widenning")
@@ -1176,10 +1176,10 @@ class TestsBuilderEngineCppBase:
             cat_wcvt = _match_category("wcvt")
             cat_cast = _match_category("cast")
             cat_cast_k = _match_category("cast_k")
-            headers_set.add(f'#include <simd_ext/scalar/cpp/functions/{cat_cvt}/cvt.hpp>')
-            headers_set.add(f'#include <simd_ext/scalar/cpp/functions/{cat_wcvt}/wcvt.hpp>')
-            headers_set.add(f'#include <simd_ext/scalar/cpp/functions/{cat_cast}/cast.hpp>')
-            headers_set.add(f'#include <simd_ext/scalar/cpp/functions/{cat_cast_k}/cast_k.hpp>')
+            headers_set.add(f'#include <mipp/internal/simd_ext/scalar/cpp/functions/{cat_cvt}/cvt.hpp>')
+            headers_set.add(f'#include <mipp/internal/simd_ext/scalar/cpp/functions/{cat_wcvt}/wcvt.hpp>')
+            headers_set.add(f'#include <mipp/internal/simd_ext/scalar/cpp/functions/{cat_cast}/cast.hpp>')
+            headers_set.add(f'#include <mipp/internal/simd_ext/scalar/cpp/functions/{cat_cast_k}/cast_k.hpp>')
 
         lines.extend(sorted(list(headers_set)))
         lines.append("")
