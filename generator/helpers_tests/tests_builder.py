@@ -687,6 +687,68 @@ class TestsBuilderEngine:
         # Default: plain call (T is deduced from arguments)
         return f"mipp::{fname}({call_args})"
 
+    def format_cpp_obj_op_call(self, func_name: str, mkind: str) -> str:
+        """Build a C++ Object call expression using operator overloads where available,
+        or free functions in namespace mipp::.
+        """
+        args = self._build_op_call_args(func_name, mkind, is_scalar=False)
+
+        # 1. Operators for unmasked calls
+        if mkind in ("", "unmasked"):
+            all_binary_ops = {
+                "add": "+", "sub": "-", "mul": "*", "div": "/",
+                "andb": "&", "orb": "|", "xorb": "^",
+                "cmpeq": "==", "cmpneq": "!=", "cmplt": "<",
+                "cmple": "<=", "cmpgt": ">", "cmpge": ">=",
+            }
+            if func_name in all_binary_ops and len(args) == 2:
+                return f"{args[0]} {all_binary_ops[func_name]} {args[1]}"
+            if func_name == "lshift" and len(args) == 2:
+                return f"{args[0]} << {args[1]}"
+            if func_name == "rshift" and len(args) == 2:
+                return f"{args[0]} >> {args[1]}"
+            if func_name == "neg" and len(args) == 1:
+                return f"-{args[0]}"
+            if func_name == "notb" and len(args) == 1:
+                return f"~{args[0]}"
+
+        # 2. Conversion functions: test_helpers wrapper (same as Cpp for scalar compatibility)
+        dt_spec = self.interfaces.get(func_name, {}).get("datatypes")
+        is_conversion = dt_spec in ("all_datatypes_cart_prod", "all_datatypes_same_size", "all_datatypes_widenning")
+        if is_conversion:
+            fname = self.interfaces.get(func_name, {}).get("cpp_name", func_name)
+            call_args = ", ".join(args)
+            return f"mipp::{fname}<T_dst>({call_args})"
+
+        # 3. Memory / Load / Set specific names
+        obj_name_map = {
+            "load": "load_obj",
+            "loadu": "loadu_obj",
+            "set": "set_obj",
+            "set0": "set0_obj",
+            "set1": "set1_obj",
+            "set_k": "set_k_obj",
+            "set0_k": "set0_k_obj",
+            "set1_k": "set1_k_obj",
+        }
+        fname = obj_name_map.get(func_name, self.interfaces.get(func_name, {}).get("cpp_name", func_name))
+        call_args = ", ".join(args)
+
+        # 4. Masked variants
+        mk_map = {"mask": "mipp::M", "maskz": "mipp::Z", "masks": "mipp::S"}
+        if mkind in mk_map:
+            mk_sym = mk_map[mkind]
+            return f"mipp::{fname}<{mk_sym}>({call_args})"
+
+        # 5. Functions with no register/mask args (set, set0, set1, load, loadu…): explicit T, LMUL
+        args_info = self.get_proto_args_info(func_name)
+        has_reg_or_msk = any(arg.get("type") in ("reg", "msk") for arg in args_info)
+        if not has_reg_or_msk:
+            return f"mipp::{fname}<T, LMUL>({call_args})"
+
+        # Default: plain free function call
+        return f"mipp::{fname}({call_args})"
+
     def render_c_validation_block(
         self,
         func_name: str,
@@ -1114,29 +1176,25 @@ class TestsBuilderEngineCppBase:
                 lines.append(f'\t\tSECTION("datatype = {dt}")')
                 lines.append('\t\t{')
 
-                if dialect_name == "obj":
-                    lmuls_to_test = [(1, "LMUL = 1")] if (lmul_list is None or 0 in lmul_list or 1 in lmul_list) else []
+                available_lmuls = [(1, "LMUL = 1"), (2, "LMUL = 2"), (4, "LMUL = 4"), (8, "LMUL = 8")]
+                if lmul_list is not None:
+                    target_set = set(lmul_list)
+                    if 0 in target_set:
+                        target_set.add(1)
+                    lmuls_to_test = [item for item in available_lmuls if item[0] in target_set]
                 else:
-                    available_lmuls = [(1, "LMUL = 1"), (2, "LMUL = 2"), (4, "LMUL = 4"), (8, "LMUL = 8")]
-                    if lmul_list is not None:
-                        target_set = set(lmul_list)
-                        if 0 in target_set:
-                            target_set.add(1)
-                        lmuls_to_test = [item for item in available_lmuls if item[0] in target_set]
-                    else:
-                        lmuls_to_test = available_lmuls
+                    lmuls_to_test = available_lmuls
 
                 for lmul_val, lmul_str in lmuls_to_test:
                     call_expr = f"{func_prefix}_{func_name}<{mk_enum}, {cpp_type}, {lmul_val}>();"
                     tpl_lmul = self.engine._tpl("func_templates", "cpp_obj", "test_section_lmul")
                     lines.extend(self.engine.render_template(tpl_lmul, lmul_str=lmul_str, call_expr=call_expr))
 
-                if dialect_name == "cpp":
-                    test_ldiv2 = (ldiv_list is None or 2 in ldiv_list)
-                    if test_ldiv2:
-                        call_ldiv2 = f"{func_prefix}_{func_name}<{mk_enum}, {cpp_type}, -2>();"
-                        tpl_ldiv2 = self.engine._tpl("func_templates", "cpp", "test_section_ldiv2")
-                        lines.extend(self.engine.render_template(tpl_ldiv2, call_expr=call_ldiv2))
+                test_ldiv2 = (ldiv_list is None or 2 in ldiv_list)
+                if test_ldiv2:
+                    call_ldiv2 = f"{func_prefix}_{func_name}<{mk_enum}, {cpp_type}, -2>();"
+                    tpl_ldiv2 = self.engine._tpl("func_templates", "cpp", "test_section_ldiv2")
+                    lines.extend(self.engine.render_template(tpl_ldiv2, call_expr=call_ldiv2))
 
                 lines.append('\t\t}')
 
@@ -1171,7 +1229,7 @@ class TestsBuilderEngineCppBase:
 
         dt_spec = self.engine.interfaces.get(func_name, {}).get("datatypes")
         is_conversion = dt_spec in ("all_datatypes_cart_prod", "all_datatypes_same_size", "all_datatypes_widenning")
-        if dialect_name == "cpp" and is_conversion:
+        if (dialect_name in ("cpp", "obj")) and is_conversion:
             cat_cvt = _match_category("cvt")
             cat_wcvt = _match_category("wcvt")
             cat_cast = _match_category("cast")
@@ -1184,7 +1242,7 @@ class TestsBuilderEngineCppBase:
         lines.extend(sorted(list(headers_set)))
         lines.append("")
 
-        if dialect_name == "cpp" and is_conversion:
+        if (dialect_name in ("cpp", "obj")) and is_conversion:
             lines.extend(self.engine._tpl("assertions", "cpp", "cvt_helpers"))
             lines.append("")
 
@@ -1269,11 +1327,11 @@ class TestsBuilderEngineCppBase:
         adapter,
         n_masks: int,
         is_scalar: bool,
+        dialect: str = "cpp",
     ) -> List[str]:
         """Render a [&]() { if constexpr (MK == ...) { ... } }() lambda for one op call.
 
-        Used twice in TestsBuilderEngineCpp (r_var and s_var), differing only in
-        is_scalar and var_name. Centralises the duplicated for-mkind loop.
+        Used by TestsBuilderEngineCpp and TestsBuilderEngineCppObj (r_var and s_var).
         """
         out: List[str] = []
         out.append(f"\t\t" + ("[&]() {" if is_void_ret else f"auto {var_name} = [&]() {{"))
@@ -1285,7 +1343,13 @@ class TestsBuilderEngineCppBase:
             out.append(f"\t\t\t{keyword} (MK == {mk_enum})")
             out.append("\t\t\t{")
             self._append_cpp_mask_loads(out, adapter, mkind, n_masks, is_scalar=is_scalar)
-            out.append(f"\t\t\t\t{ret_prefix}{self.engine.format_cpp_op_call(func_name, mkind, is_scalar=is_scalar)};")
+            if is_scalar:
+                call_code = self.engine.format_cpp_op_call(func_name, mkind, is_scalar=True)
+            elif dialect == "obj":
+                call_code = self.engine.format_cpp_obj_op_call(func_name, mkind)
+            else:
+                call_code = self.engine.format_cpp_op_call(func_name, mkind, is_scalar=False)
+            out.append(f"\t\t\t\t{ret_prefix}{call_code};")
             out.append("\t\t\t}")
         out.append("\t\t}();")
         out.append("")
@@ -1396,11 +1460,15 @@ class TestsBuilderEngineCppObj(TestsBuilderEngineCppBase):
         mask_list: Optional[List[str]] = None,
     ) -> str:
         lines = []
+        adapter = CppObjDialectAdapter()
         lines.extend(self._render_headers("obj", func_name, N=N))
 
+        mask_support = self.engine.interfaces[func_name].get("mask_support", "all_mask")
         supported_mkinds = []
-        if mask_list is None or "unmasked" in mask_list or "" in mask_list:
-            supported_mkinds.append("unmasked")
+        for m in ["unmasked", "mask", "maskz", "masks"]:
+            if mask_list is None or m in mask_list or (m == "unmasked" and "" in mask_list):
+                if m == "unmasked" or self.engine._is_mask_kind_supported(mask_support, m):
+                    supported_mkinds.append(m)
 
         proto_ref = self.engine.interfaces.get(func_name, {}).get("proto_ref", "ret_reg_2args_reg")
         func_spec = self.engine.specs["functions"].get(func_name, {})
@@ -1410,42 +1478,54 @@ class TestsBuilderEngineCppObj(TestsBuilderEngineCppBase):
         is_3arg = self.engine.proto_is_3arg(proto_ref)
         is_reg_val = self.engine.proto_is_reg_val(proto_ref)
 
-        tpl_hdr_obj = self.engine._tpl("func_templates", "obj", "func_header")
-        lines.extend(self.engine.render_template(tpl_hdr_obj, func_name=func_name))
+        tpl_key = "func_header_product" if is_product else "func_header"
+        tpl_hdr = self.engine._tpl("func_templates", "obj", tpl_key)
+        lines.extend(self.engine.render_template(tpl_hdr, func_name=func_name))
 
-        adapter = CppObjDialectAdapter()
-        lines.extend(self.engine.render_template(
-            self.engine._tpl("func_templates", "cpp_obj", "size_constexpr"),
-            adapter=adapter
-        ))
+        if is_product:
+            lines.extend(self.engine.render_template(
+                self.engine._tpl("func_templates", "cpp", "size_constexpr_product"),
+                adapter=adapter
+            ))
+        else:
+            lines.extend(self.engine.render_template(
+                self.engine._tpl("func_templates", "cpp_obj", "size_constexpr"),
+                adapter=adapter
+            ))
+
         lines.extend(self._render_cpp_input_arrays(
             func_spec, "obj", is_1arg, is_3arg,
-            has_inputs2=(not is_1arg),
-            has_m2=False,
+            has_inputs2=(not is_1arg or is_reg_val),
+            has_m2=True,
         ))
 
-        load_key = "load_3args" if is_3arg else ("load_1arg" if is_1arg else "load_2args")
-        lines.extend(self.engine.render_template(
-            self.engine._tpl("func_templates", "obj", load_key),
-            adapter=adapter
-        ))
+        lines.append(f"\t\t[[maybe_unused]] auto r1 = {adapter.format_load('T', 'inputs1', 'LMUL')};")
+        lines.append(f"\t\t[[maybe_unused]] auto s1 = {adapter.format_scalar_load('T', 'inputs1', 'LMUL')};")
+        if not is_1arg or is_reg_val:
+            lines.append(f"\t\t[[maybe_unused]] auto r2 = {adapter.format_load('T', 'inputs2', 'LMUL')};")
+            lines.append(f"\t\t[[maybe_unused]] auto s2 = {adapter.format_scalar_load('T', 'inputs2', 'LMUL')};")
+        if is_3arg:
+            lines.append(f"\t\t[[maybe_unused]] auto r3 = {adapter.format_load('T', 'inputs3', 'LMUL')};")
+            lines.append(f"\t\t[[maybe_unused]] auto s3 = {adapter.format_scalar_load('T', 'inputs3', 'LMUL')};")
 
-        if is_reg_val:
-            op_args_r = ["r1", "inputs2[0]"]
-            op_args_s = ["s1", "inputs2[0]"]
+        is_void_ret = self.engine.proto_is_void_ret(proto_ref)
+        if is_void_ret:
+            lines.extend(self.engine.render_void_ret_init("T", "size", "inputs1"))
+            r_var = "res_r"
+            s_var = "res_s"
         else:
-            op_args_r = ["r1"] if is_1arg else (["r1", "r2", "r3"] if is_3arg else ["r1", "r2"])
-            op_args_s = ["s1"] if is_1arg else (["s1", "s2", "s3"] if is_3arg else ["s1", "s2"])
+            r_var = "rres"
+            s_var = "sres"
 
-        call_r = adapter.format_func_call(func_name, "T", ", ".join(op_args_r))
-        call_s = adapter.format_scalar_func_call(func_name, "T", ", ".join(op_args_s))
+        ret_prefix = "" if is_void_ret else "return "
+        n_masks = self.engine.get_required_mask_count(func_name)
 
-        r_var = "rres"
-        s_var = "sres"
-
-        tpl_lambda = self.engine._tpl("func_templates", "obj", "op_call_lambda")
-        lines.extend(self.engine.render_template(tpl_lambda, var_name=r_var, call_expr=call_r))
-        lines.extend(self.engine.render_template(tpl_lambda, var_name=s_var, call_expr=call_s))
+        lines.extend(self._render_op_lambda(
+            func_name, r_var, is_void_ret, ret_prefix, supported_mkinds, adapter, n_masks, is_scalar=False, dialect="obj"
+        ))
+        lines.extend(self._render_op_lambda(
+            func_name, s_var, is_void_ret, ret_prefix, supported_mkinds, adapter, n_masks, is_scalar=True, dialect="obj"
+        ))
 
         val_lines = self.engine.render_cpp_validation_block(func_name, proto_ref, is_product, r_var=r_var, s_var=s_var, adapter=adapter)
         lines.extend(self.engine.indent_lines(val_lines, 2))

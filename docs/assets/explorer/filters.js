@@ -218,21 +218,18 @@ export function filterEntries(data, state) {
     }
 
     // C. Mask Variant Filter (Single-choice search parameter & eligibility filter)
-    // If flavor is cpp_obj, mask variants do not exist in C++ Object flavor (disabled)
     let unsupportedVariant = false;
     entry._unsupportedVariant = false;
-    if (state.flavor !== "cpp_obj") {
-      const activeMask = state.maskVariant || "unmasked";
-      if (activeMask !== "unmasked") {
-        const maskSupport = entry.mask_support || {};
-        if (!maskSupport[activeMask]) {
-          // Option 1 (Card Pinning): If this card is currently expanded/opened by the user, keep it pinned in results
-          if (state.expandedCards && state.expandedCards.has(entry.name)) {
-            unsupportedVariant = true;
-            entry._unsupportedVariant = true;
-          } else {
-            continue;
-          }
+    const activeMask = state.maskVariant || "unmasked";
+    if (activeMask !== "unmasked") {
+      const maskSupport = entry.mask_support || {};
+      if (!maskSupport[activeMask]) {
+        // Option 1 (Card Pinning): If this card is currently expanded/opened by the user, keep it pinned in results
+        if (state.expandedCards && state.expandedCards.has(entry.name)) {
+          unsupportedVariant = true;
+          entry._unsupportedVariant = true;
+        } else {
+          continue;
         }
       }
     }

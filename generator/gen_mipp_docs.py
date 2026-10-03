@@ -353,6 +353,23 @@ def match_args_type_cpp(arg_type, cast=False, ret=False, fixed_dtype=False, lmul
     return "int32_t"
 
 
+def match_args_type_cpp_obj(arg_type, cast=False, ret=False, fixed_dtype=False, lmul=1):
+    lmul_str = "" if lmul == 1 else (f",{lmul}" if lmul > 0 else f",-2")
+    if arg_type == "msk":
+        t_param = "T2" if (cast and ret) else ("T1" if cast else "T")
+        return f"Rvm<{t_param}{lmul_str}>"
+    elif arg_type == "reg":
+        t_param = "T2" if (cast and ret) else ("T1" if cast else "T")
+        return f"Rvd<{t_param}{lmul_str}>"
+    elif arg_type == "val":
+        return f"{fixed_dtype}_t" if fixed_dtype else "T"
+    elif arg_type == "ptr":
+        return f"const {fixed_dtype}_t*" if fixed_dtype else "const T*"
+    elif arg_type == "Nele":
+        return f"const {fixed_dtype}_t[]" if fixed_dtype else "const T[]"
+    return "int32_t"
+
+
 def match_args_type_c(arg_type, cast=False, ret=False, fixed_dtype=False):
     if arg_type == "msk":
         return "rvm_{type 2}_t" if (cast and ret) else ("rvm_{type 1}_t" if cast else "rvm_{type}_t")
@@ -407,13 +424,16 @@ class SpecFuncInfo:
             tmpl_parts.append("MKIND MK=S")
 
         if is_pair_func:
-            tmpl_parts.extend(["typename T2", "typename T1"])
-            if lmul != 1:
-                tmpl_parts.append(f"int LMUL={lmul}")
-            lmul_arg = f",{lmul}" if lmul != 1 else ""
+            if mask_kind is not None and mask_kind != "unmasked":
+                return ""
             type_name = "rvm" if self.func_name.endswith("_k") else "rvd"
-            tmpl_str = f"template <{', '.join(tmpl_parts)}> "
-            return f"{tmpl_str}{type_name}<T2{lmul_arg}> {cpp_name}(const {type_name}<T1{lmul_arg}> r0);"
+            arg_name = "m0" if type_name == "rvm" else "r0"
+            lmul_arg = f", {lmul}" if lmul != 1 else ""
+            lines = []
+            for dt in self.dttypes:
+                dt_par, dt_ret = dt.split(",")
+                lines.append(f"{type_name}<{dt_ret}_t{lmul_arg}> {cpp_name}_{dt_ret}(const {type_name}<{dt_par}_t{lmul_arg}> {arg_name});")
+            return "\n".join(lines)
 
         cnt_reg = 0
         cnt_msk = 0
@@ -469,6 +489,133 @@ class SpecFuncInfo:
 
         return f"{tmpl_header}{ret_str} {cpp_name}({args_str});"
 
+    def func_to_str_cpp_obj(self, lmul=1, mask_kind=None):
+        cpp_name = self.get_cpp_func_name()
+        is_pair_func = self.func_name in ("cast", "cast_k", "cvt", "wcvt")
+        lmul_arg = f", {lmul}" if lmul != 1 else ""
+
+        if is_pair_func:
+            if mask_kind is not None and mask_kind != "unmasked":
+                return ""
+            tmpl_parts = ["typename T_DST", "typename T_SRC"]
+            if lmul != 1:
+                tmpl_parts.append(f"int LMUL={lmul}")
+            tmpl_str = f"template <{', '.join(tmpl_parts)}> "
+            type_name = "Rvm" if self.func_name.endswith("_k") else "Rvd"
+            arg_name = "m0" if type_name == "Rvm" else "r0"
+            return f"{tmpl_str}{type_name}<T_DST{lmul_arg}> {cpp_name}(const {type_name}<T_SRC{lmul_arg}>& {arg_name});"
+
+        has_simd_arg = any(arg["type"] in ("reg", "msk") for arg in self.args)
+        returns_simd = self.ret["type"] in ("reg", "msk")
+        if not has_simd_arg and returns_simd:
+            func_call_name = f"{self.func_name}_obj"
+        else:
+            func_call_name = cpp_name
+
+        tmpl_parts = []
+        if mask_kind == "mask":
+            tmpl_parts.append("MKIND MK=M")
+        elif mask_kind == "maskz":
+            tmpl_parts.append("MKIND MK=Z")
+        elif mask_kind == "masks":
+            tmpl_parts.append("MKIND MK=S")
+
+        cnt_reg = 0
+        cnt_msk = 0
+        cnt_val = 0
+        cnt_ptr = 0
+        args_parts = []
+
+        if mask_kind and mask_kind != "unmasked":
+            if mask_kind in ("mask", "maskz"):
+                args_parts.append(f"const Rvm<T{lmul_arg}>& m0")
+                cnt_msk += 1
+            elif mask_kind == "masks":
+                args_parts.append(f"const Rvm<T{lmul_arg}>& m0")
+                args_parts.append(f"const Rvd<T{lmul_arg}>& rsrc")
+                cnt_msk += 1
+
+        for arg in self.args:
+            fixed = arg.get("fixeddatatype", False)
+            arg_type = arg["type"]
+            type_str = match_args_type_cpp_obj(arg_type, False, False, fixed, lmul=lmul)
+            is_const = arg.get("charac", "RO") == "RO"
+
+            if arg_type in ("reg", "msk"):
+                type_str = f"const {type_str}&"
+            elif is_const and not type_str.startswith("const "):
+                type_str = f"const {type_str}"
+
+            if arg_type == "reg":
+                name = f"r{cnt_reg}"
+                cnt_reg += 1
+            elif arg_type == "msk":
+                name = f"m{cnt_msk}"
+                cnt_msk += 1
+            elif arg_type == "val":
+                name = f"v{cnt_val}"
+                cnt_val += 1
+            elif arg_type == "ptr":
+                name = f"p{cnt_ptr}"
+                cnt_ptr += 1
+            elif arg_type == "Nele":
+                name = "vals"
+            else:
+                name = f"a{cnt_val}"
+                cnt_val += 1
+
+            args_parts.append(f"{type_str} {name}".strip())
+
+        args_str = ", ".join(args_parts)
+        ret_fixed = self.ret.get("fixeddatatype", False)
+        ret_str = match_args_type_cpp_obj(self.ret["type"], False, True, ret_fixed, lmul=lmul)
+
+        tmpl_parts.append("typename T")
+        if lmul != 1:
+            tmpl_parts.append(f"int LMUL={lmul}")
+        tmpl_header = f"template <{', '.join(tmpl_parts)}> "
+
+        lines = [f"{tmpl_header}{ret_str} {func_call_name}({args_str});"]
+
+        if not mask_kind or mask_kind == "unmasked":
+            op_map = {
+                "add": "+", "sub": "-", "mul": "*", "div": "/",
+                "andb": "&", "orb": "|", "xorb": "^",
+                "andb_k": "&", "orb_k": "|", "xorb_k": "^",
+                "cmpeq": "==", "cmpneq": "!=", "cmplt": "<", "cmple": "<=", "cmpgt": ">", "cmpge": ">=",
+                "lshift": "<<", "rshift": ">>"
+            }
+            if self.func_name in op_map and len(self.args) == 2:
+                op = op_map[self.func_name]
+                if self.func_name.endswith("_k"):
+                    lines.append(f"{tmpl_header}Rvm<T{lmul_arg}> operator{op}(const Rvm<T{lmul_arg}>& m0, const Rvm<T{lmul_arg}>& m1);")
+                    lines.append(f"{tmpl_header}Rvm<T{lmul_arg}> operator{op}(const Rvm<T{lmul_arg}>& m0, const bool val);")
+                    lines.append(f"{tmpl_header}Rvm<T{lmul_arg}> operator{op}(const bool val, const Rvm<T{lmul_arg}>& m1);")
+                    lines.append(f"{tmpl_header}Rvm<T{lmul_arg}>& operator{op}=(Rvm<T{lmul_arg}>& m0, const Rvm<T{lmul_arg}>& m1);")
+                    lines.append(f"{tmpl_header}Rvm<T{lmul_arg}>& operator{op}=(Rvm<T{lmul_arg}>& m0, const bool val);")
+                elif self.func_name in ("cmpeq", "cmpneq", "cmplt", "cmple", "cmpgt", "cmpge"):
+                    lines.append(f"{tmpl_header}Rvm<T{lmul_arg}> operator{op}(const Rvd<T{lmul_arg}>& r0, const Rvd<T{lmul_arg}>& r1);")
+                    lines.append(f"{tmpl_header}Rvm<T{lmul_arg}> operator{op}(const Rvd<T{lmul_arg}>& r0, const T val);")
+                    lines.append(f"{tmpl_header}Rvm<T{lmul_arg}> operator{op}(const T val, const Rvd<T{lmul_arg}>& r1);")
+                elif self.func_name in ("lshift", "rshift"):
+                    lines.append(f"{tmpl_header}Rvd<T{lmul_arg}> operator{op}(const Rvd<T{lmul_arg}>& r0, const int32_t val);")
+                    lines.append(f"{tmpl_header}Rvd<T{lmul_arg}>& operator{op}=(Rvd<T{lmul_arg}>& r0, const int32_t val);")
+                else:
+                    lines.append(f"{tmpl_header}Rvd<T{lmul_arg}> operator{op}(const Rvd<T{lmul_arg}>& r0, const Rvd<T{lmul_arg}>& r1);")
+                    lines.append(f"{tmpl_header}Rvd<T{lmul_arg}> operator{op}(const Rvd<T{lmul_arg}>& r0, const T val);")
+                    lines.append(f"{tmpl_header}Rvd<T{lmul_arg}> operator{op}(const T val, const Rvd<T{lmul_arg}>& r1);")
+                    lines.append(f"{tmpl_header}Rvd<T{lmul_arg}>& operator{op}=(Rvd<T{lmul_arg}>& r0, const Rvd<T{lmul_arg}>& r1);")
+                    lines.append(f"{tmpl_header}Rvd<T{lmul_arg}>& operator{op}=(Rvd<T{lmul_arg}>& r0, const T val);")
+            elif self.func_name == "notb" and len(self.args) == 1:
+                lines.append(f"{tmpl_header}Rvd<T{lmul_arg}> operator~(const Rvd<T{lmul_arg}>& r0);")
+            elif self.func_name == "notb_k" and len(self.args) == 1:
+                lines.append(f"{tmpl_header}Rvm<T{lmul_arg}> operator~(const Rvm<T{lmul_arg}>& m0);")
+                lines.append(f"{tmpl_header}Rvm<T{lmul_arg}> operator!(const Rvm<T{lmul_arg}>& m0);")
+            elif self.func_name == "neg" and len(self.args) == 1:
+                lines.append(f"{tmpl_header}Rvd<T{lmul_arg}> operator-(const Rvd<T{lmul_arg}>& r0);")
+
+        return "\n".join(lines)
+
     def func_to_str_c(self, lmul=1, mask_kind=None):
         is_pair_func = self.func_name in ("cast", "cast_k", "cvt", "wcvt")
         lines = []
@@ -510,6 +657,32 @@ class SpecFuncInfo:
             desc = doc_entry.get("description", "Vector function reference.")
             print(f"{desc}\n", file=f)
 
+            print("## Headers\n", file=f)
+            print('=== "C++ Object API"', file=f)
+            print("    ```cpp", file=f)
+            print("    // Option 1: Monolithic include (includes all functions)", file=f)
+            print("    #include <mipp_obj.hpp>", file=f)
+            print("    ", file=f)
+            print("    // Option 2: Granular include (faster compilation - choose Option 1 OR Option 2, not both)", file=f)
+            print(f"    #include <mipp/cpp_obj/fun/{self.func_name}.hpp>", file=f)
+            print("    ```\n", file=f)
+            print('=== "C++ API"', file=f)
+            print("    ```cpp", file=f)
+            print("    // Option 1: Monolithic include (includes all functions)", file=f)
+            print("    #include <mipp.hpp>", file=f)
+            print("    ", file=f)
+            print("    // Option 2: Granular include (faster compilation - choose Option 1 OR Option 2, not both)", file=f)
+            print(f"    #include <mipp/cpp/fun/{self.func_name}.hpp>", file=f)
+            print("    ```\n", file=f)
+            print('=== "C99 API"', file=f)
+            print("    ```c", file=f)
+            print("    // Option 1: Monolithic include (includes all functions)", file=f)
+            print("    #include <mipp.h>", file=f)
+            print("    ", file=f)
+            print("    // Option 2: Granular include (faster compilation - choose Option 1 OR Option 2, not both)", file=f)
+            print(f"    #include <mipp/c/fun/{self.func_name}.h>", file=f)
+            print("    ```\n", file=f)
+
             print("## Prototypes\n", file=f)
             print('=== "C99 API"', file=f)
             print("    ```c", file=f)
@@ -527,6 +700,16 @@ class SpecFuncInfo:
                 lmul_label = f"LMUL = {lmul}" if lmul > 0 else "LMUL = 1/2"
                 print(f"    // {lmul_label}", file=f)
                 print(f"    {self.func_to_str_cpp(lmul)}", file=f)
+            print("    ```\n", file=f)
+
+            print('=== "C++ Object API"', file=f)
+            print("    ```cpp", file=f)
+            for lmul in [1, 2, 4, 8, -2]:
+                lmul_label = f"LMUL = {lmul}" if lmul > 0 else "LMUL = 1/2"
+                print(f"    // {lmul_label}", file=f)
+                obj_block = self.func_to_str_cpp_obj(lmul)
+                for line in obj_block.splitlines():
+                    print(f"    {line}", file=f)
             print("    ```\n", file=f)
 
             print("## Supported Datatypes\n", file=f)

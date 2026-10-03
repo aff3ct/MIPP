@@ -45,7 +45,7 @@ jobs:
       - name: Generate MIPP tests
         run: |
           cd generator
-          ./gen_mipp_tests.py cpp --lmul 0 8 --ldiv 2 --mask-kind "unmasked" "mask" "maskz" "masks"
+          ./gen_mipp_tests.py obj --lmul 0 8 --ldiv 2 --mask-kind "unmasked" "mask" "maskz" "masks"
 
       - name: Generate MIPP documentation pages
         run: |

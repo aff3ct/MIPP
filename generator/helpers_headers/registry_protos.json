@@ -317,6 +317,30 @@
             }
         ]
     },
+    "ret_reg_3args_1msk_2reg": {
+        "ret": {
+            "type": "reg",
+            "fixeddatatype": false,
+            "charac": "WO"
+        },
+        "args": [
+            {
+                "type": "msk",
+                "fixeddatatype": false,
+                "charac": "RO"
+            },
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            },
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            }
+        ]
+    },
     "ret_reg_3args_1reg_2val": {
         "ret": {
             "type": "reg",
@@ -336,30 +360,6 @@
             },
             {
                 "type": "val",
-                "fixeddatatype": false,
-                "charac": "RO"
-            }
-        ]
-    },
-    "ret_reg_3args_2reg_1msk": {
-        "ret": {
-            "type": "reg",
-            "fixeddatatype": false,
-            "charac": "WO"
-        },
-        "args": [
-            {
-                "type": "reg",
-                "fixeddatatype": false,
-                "charac": "RO"
-            },
-            {
-                "type": "reg",
-                "fixeddatatype": false,
-                "charac": "RO"
-            },
-            {
-                "type": "msk",
                 "fixeddatatype": false,
                 "charac": "RO"
             }

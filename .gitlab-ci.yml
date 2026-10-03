@@ -66,7 +66,7 @@ generation-tests:
     - python3 -m venv .venv
     - source .venv/bin/activate
     - pip3 install -r requirements.txt
-    - ./gen_mipp_tests.py cpp --lmul 0 8 --ldiv 2 --mask-kind "unmasked" "mask" "maskz" "masks"
+    - ./gen_mipp_tests.py obj --lmul 0 8 --ldiv 2 --mask-kind "unmasked" "mask" "maskz" "masks"
 
 generation-docs:
   image: registry.gitlab.com/aff3ct/aff3ct/mipp_linux:latest
@@ -243,6 +243,7 @@ build-test-examples:
       - ./examples/mipp_c
       - ./examples/mipp_cpp
       - ./examples/mipp_object_cpp
+      - ./examples/mipp_interop_cpp
   script:
     - echo "Debug -- Job=$CI_NODE_INDEX/$CI_NODE_TOTAL"
     - echo "Debug -- OS=$OS"
@@ -266,6 +267,7 @@ build-test-examples:
       fi
     - $COMPILER_CPP -std=c++11 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Werror -O3 -funroll-loops $SIMD_EXT -DMIPP_PRINT_INFO -I../include -o mipp_cpp mipp.cpp
     - $COMPILER_CPP -std=c++11 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Werror -O3 -funroll-loops $SIMD_EXT -DMIPP_PRINT_INFO -I../include -o mipp_object_cpp mipp_object.cpp
+    - $COMPILER_CPP -std=c++11 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Werror -O3 -funroll-loops $SIMD_EXT -DMIPP_PRINT_INFO -I../include -o mipp_interop_cpp mipp_interop.cpp
 
 build-test-unit:
   extends: .build-common
@@ -364,6 +366,7 @@ test-examples:
       fi
     - ./examples/mipp_cpp
     - ./examples/mipp_object_cpp
+    - ./examples/mipp_interop_cpp
 
 # DEPLOY --------------------------------------------------------------------------------------------------------------
 

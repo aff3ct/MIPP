@@ -24,7 +24,7 @@ export function renderTabAlgos(entry) {
     (m) => m === "unmasked" || maskSupport[m]
   );
 
-  const globalVariant = state.flavor === "cpp_obj" ? "unmasked" : (state.maskVariant || "unmasked");
+  const globalVariant = state.maskVariant || "unmasked";
   const targetMask = availableVariants.includes(globalVariant) ? globalVariant : "unmasked";
   const isUnsupported = !availableVariants.includes(globalVariant);
 

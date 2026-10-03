@@ -12,7 +12,7 @@
         "extra_includes": [],
         "nan_inf_skip": false,
         "skip_condition": null,
-        "support_obj": false,
+        "support_obj": true,
         "mask_pattern": "uniform_bool"
     },
     "functions": {

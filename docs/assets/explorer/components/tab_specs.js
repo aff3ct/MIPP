@@ -14,7 +14,7 @@ export function renderTabSpecs(entry) {
   const maskSupport = entry.mask_support || {};
   const availableVariants = ALL_MASK_MODES.filter((m) => m === "unmasked" || maskSupport[m]);
 
-  const globalVariant = state.flavor === "cpp_obj" ? "unmasked" : (state.maskVariant || "unmasked");
+  const globalVariant = state.maskVariant || "unmasked";
   const currentVariant = availableVariants.includes(globalVariant) ? globalVariant : "unmasked";
   const isUnsupported = !availableVariants.includes(globalVariant);
 

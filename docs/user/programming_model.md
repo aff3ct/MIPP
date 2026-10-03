@@ -12,7 +12,7 @@ All three tiers share the same zero-overhead inlined execution path and map to i
 
 ## 1. Header Inclusion & Organization
 
-MIPP provides both convenient monolithic entry points and modular granular headers:
+MIPP provides two header inclusion paradigms: **Monolithic Inclusion** and **Modular Granular Inclusion**.
 
 ```text
 include/
@@ -35,8 +35,24 @@ include/
         └── templates/      # Common C++ templates and enums
 ```
 
-!!! tip "Granular Header Inclusion"
-    For large projects where compilation speed is paramount, you can include only the exact functions or categories you need (e.g., `#include <mipp/cpp_obj/fun/add.hpp>`) instead of the full monolithic headers. All internal backend files are encapsulated under `mipp/internal/` and must not be included directly.
+### 1.1. Option 1: Monolithic Inclusion (Prototyping)
+
+Monolithic entry points include all MIPP SIMD functions and data types across the entire library in a single directive:
+
+- `<mipp.h>` for C Low-Level API
+- `<mipp.hpp>` for C++ Functional Template API
+- `<mipp_obj.hpp>` for C++ Object API
+
+This is the fastest and most convenient approach when starting a project or writing small self-contained algorithms.
+
+### 1.2. Option 2: Granular Inclusion (Production & Scale)
+
+Granular headers expose either a single SIMD function or an entire category of functions:
+
+- **Function headers**: `<mipp/c/fun/<func>.h>`, `<mipp/cpp/fun/<func>.hpp>`, `<mipp/cpp_obj/fun/<func>.hpp>`
+- **Category headers**: `<mipp/c/cat/<cat>.h>`, `<mipp/cpp/cat/<cat>.hpp>`, `<mipp/cpp_obj/cat/<cat>.hpp>` (e.g. `arithmetic.hpp`, `memory.hpp`, `comparison.hpp`)
+
+Granular headers dramatically accelerate compilation time (often 5x to 10x faster parsing) and reduce compiler peak memory consumption (RSS), which is critical for large C++ codebases with dozens of compilation units.
 
 ---
 
@@ -175,39 +191,83 @@ auto c_src   = mipp::add<mipp::S>(m, src, a, b);
 
 ## 4. Tier 3: C++ Object API (`<mipp_obj.hpp>`)
 
-The Object API encapsulates raw vector and mask handles within classes:
+The Object API encapsulates raw SIMD registers and predicates inside high-level C++ classes:
 - `mipp::Rvd<T, LMUL>` for numeric data vectors.
 - `mipp::Rvm<T, LMUL>` for boolean mask vectors.
 
-### 4.1. Class Structure & Accessors
+### 4.1. Class Structure & Constructors
+
 ```cpp
 template <typename T, int LMUL = 1>
 class Rvd {
 public:
-    rvd<T, LMUL> r; // Underlying low-level vector
+    rvd<T, LMUL> r; // Underlying low-level SIMD register
 
-    static constexpr int size(); // Returns mipp::N<T, LMUL>()
+    static constexpr int N(); // Returns number of elements (mipp::N<T, LMUL>())
 
     // Constructors
     Rvd();
-    Rvd(rvd<T, LMUL> r);
+    Rvd(rvd<T, LMUL> r);     // Wraps low-level rvd register
     Rvd(const T val);        // Broadcasts scalar via mipp::set1
     Rvd(const T* data);      // Loads from aligned pointer via mipp::load
 
-    // Element Subscripting (calls mipp::get(r, idx))
-    T operator[](const size_t index) const;
+    // Element Access
+    T operator[](const size_t index) const; // Reads element via mipp::get
 };
 ```
 
 ### 4.2. Overloaded Operators Reference
 
+The C++ Object API provides an extensive set of operator overloads for both data vectors (`Rvd`) and mask vectors (`Rvm`):
+
 | Operation Category | Supported Operators | Operands | Return Type |
 | :--- | :--- | :--- | :--- |
-| **Arithmetic** | `+`, `-`, `*`, `/` | `Rvd<T>`, `Rvd<T>` | `Rvd<T>` |
-| **Compound Assignment** | `+=`, `-=`, `*=`, `/=` | `Rvd<T>`, `Rvd<T>` | `Rvd<T>&` |
-| **Bitwise** | `&`, `|`, `^`, `~` | `Rvd<T>`, `Rvd<T>` | `Rvd<T>` |
+| **Arithmetic** | `+`, `-`, `*`, `/`, unary `-` | `Rvd<T>`, `Rvd<T>` | `Rvd<T>` |
+| **Compound Assignment** | `+=`, `-=`, `*=`, `/=`, `&=`, `\|=`, `^=` | `Rvd<T>`, `Rvd<T>` | `Rvd<T>&` |
+| **Bitwise & Shifts** | `&`, `\|`, `^`, `~`, `<<`, `>>` | `Rvd<T>`, `Rvd<T>` / `int` | `Rvd<T>` |
 | **Relational / Comparison** | `==`, `!=`, `<`, `<=`, `>`, `>=` | `Rvd<T>`, `Rvd<T>` | `Rvm<T>` *(Mask)* |
-| **Mask Logic** | `&`, `|`, `^` | `Rvm<T>`, `Rvm<T>` | `Rvm<T>` |
+| **Mask Logic & Inversion** | `&`, `\|`, `^`, `~` | `Rvm<T>`, `Rvm<T>` | `Rvm<T>` |
+
+### 4.3. Free Functions in Namespace `mipp::`
+
+Every MIPP SIMD operation is exposed as a free function under `namespace mipp::` that directly accepts `Rvd` and `Rvm` instances:
+
+```cpp
+auto a = mipp::Rvd<float>(ptr_a);
+auto b = mipp::Rvd<float>(ptr_b);
+auto c = mipp::Rvd<float>(ptr_c);
+
+// Free functions on Rvd:
+auto res_fma = mipp::fmadd(a, b, c); // Fused multiply-add
+auto res_abs = mipp::abs(a);         // Absolute value
+auto res_min = mipp::min(a, b);       // Element-wise minimum
+auto res_red = mipp::sum(a);         // Reduction sum (returns scalar float)
+
+// Store directly using free function:
+mipp::store(ptr_out, res_fma);
+```
+
+### 4.4. Masked Operations Support
+Masked operations in the C++ Object API are fully supported via the standard `MKIND` template parameter (`M`, `Z`, `S`), taking `Rvm` and `Rvd` objects:
+
+```cpp
+mipp::Rvm<float> m = (a > b); // Mask from operator comparison
+mipp::Rvd<float> src = 0.0f;
+
+// 1. Merge Mask (M): res[i] = m[i] ? (a[i] + b[i]) : a[i]
+auto c_merge = mipp::add<mipp::M>(m, a, b);
+
+// 2. Zero Mask (Z): res[i] = m[i] ? (a[i] + b[i]) : 0.0f
+auto c_zero  = mipp::add<mipp::Z>(m, a, b);
+
+// 3. Source Mask (S): res[i] = m[i] ? (a[i] + b[i]) : src[i]
+auto c_src   = mipp::add<mipp::S>(m, src, a, b);
+```
+
+### 4.5. Idiomatic Coding Guidelines
+1. **Prefer Operator Overloads**: When an operator exists (`a + b`, `a * b`, `a == b`, `m1 & m2`), use it over named function calls for maximum readability.
+2. **Use Free Functions**: For non-operator routines (e.g. `mipp::fmadd`, `mipp::sqrt`, `mipp::min`, `mipp::store`), use free functions under `namespace mipp::`.
+3. **Avoid Member Syntax**: Member function calling syntax (e.g. `a.add(b)`) is deprecated in favor of free functions and operators.
 
 ---
 
@@ -267,7 +327,7 @@ Below is an identical vectorized SAXPY loop ($Y[i] = a \cdot X[i] + Y[i]$) imple
     template <typename T = float, int LMUL = 1>
     void saxpy_obj(size_t n, T a, const T* x, T* y)
     {
-        constexpr size_t N = mipp::Rvd<T, LMUL>::size();
+        constexpr size_t N = mipp::Rvd<T, LMUL>::N();
         const size_t vec_limit = (n / N) * N;
         mipp::Rvd<T, LMUL> va(a);
 
@@ -275,7 +335,7 @@ Below is an identical vectorized SAXPY loop ($Y[i] = a \cdot X[i] + Y[i]$) imple
             mipp::Rvd<T, LMUL> vx(x + i);
             mipp::Rvd<T, LMUL> vy(y + i);
             mipp::Rvd<T, LMUL> vres = va * vx + vy; // Uses overloaded * and +
-            mipp::store(y + i, vres.r);
+            mipp::store(y + i, vres);               // Idiomatic free function store
         }
         for (size_t i = vec_limit; i < n; i++) {
             y[i] = a * x[i] + y[i];

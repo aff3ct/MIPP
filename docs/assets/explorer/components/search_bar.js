@@ -22,7 +22,7 @@ function hasActiveFilters() {
 }
 
 export function renderSearchBar() {
-  const isCppObj = state.flavor === "cpp_obj";
+
 
   return `
     <!-- Top Sticky Search & Dialect Controls with Integrated Brand Title -->
@@ -67,11 +67,11 @@ export function renderSearchBar() {
         <!-- Variant Selector -->
         <div class="mipp-controls-group">
           <span class="mipp-control-label">Variant:</span>
-          <div class="mipp-segmented-group ${isCppObj ? "disabled" : ""}" id="mipp-mask-group" title="${isCppObj ? "Variants are not supported in C++ Object dialect (unmasked only)" : "Filter by variant"}">
-            <button class="mipp-segment-btn ${isCppObj || state.maskVariant === "unmasked" ? "active" : ""}" data-mask-variant="unmasked" title="Unmasked">U</button>
-            <button class="mipp-segment-btn ${!isCppObj && state.maskVariant === "mask" ? "active" : ""}" data-mask-variant="mask" ${isCppObj ? "disabled" : ""} title="Mask (merge)">M</button>
-            <button class="mipp-segment-btn ${!isCppObj && state.maskVariant === "maskz" ? "active" : ""}" data-mask-variant="maskz" ${isCppObj ? "disabled" : ""} title="Maskz (zeroing)">Z</button>
-            <button class="mipp-segment-btn ${!isCppObj && state.maskVariant === "masks" ? "active" : ""}" data-mask-variant="masks" ${isCppObj ? "disabled" : ""} title="Masks (sourcing)">S</button>
+          <div class="mipp-segmented-group" id="mipp-mask-group" title="Filter by variant">
+            <button class="mipp-segment-btn ${state.maskVariant === "unmasked" ? "active" : ""}" data-mask-variant="unmasked" title="Unmasked">U</button>
+            <button class="mipp-segment-btn ${state.maskVariant === "mask" ? "active" : ""}" data-mask-variant="mask" title="Mask (merge)">M</button>
+            <button class="mipp-segment-btn ${state.maskVariant === "maskz" ? "active" : ""}" data-mask-variant="maskz" title="Maskz (zeroing)">Z</button>
+            <button class="mipp-segment-btn ${state.maskVariant === "masks" ? "active" : ""}" data-mask-variant="masks" title="Masks (sourcing)">S</button>
           </div>
         </div>
 
@@ -143,23 +143,14 @@ export function updateSearchBarUI(headerEl) {
   });
 
   // Variant
-  const isCppObj = state.flavor === "cpp_obj";
-  if (isCppObj) {
-    state.maskVariant = "unmasked";
-  }
   const maskGroup = headerEl.querySelector("#mipp-mask-group");
   if (maskGroup) {
-    maskGroup.classList.toggle("disabled", isCppObj);
-    maskGroup.title = isCppObj ? "Variants are not supported in C++ Object dialect (unmasked only)" : "Filter by variant";
+    maskGroup.classList.remove("disabled");
+    maskGroup.title = "Filter by variant";
     maskGroup.querySelectorAll(".mipp-segment-btn").forEach((btn) => {
       const v = btn.getAttribute("data-mask-variant");
-      if (isCppObj) {
-        btn.disabled = (v !== "unmasked");
-        btn.classList.toggle("active", v === "unmasked");
-      } else {
-        btn.disabled = false;
-        btn.classList.toggle("active", v === state.maskVariant);
-      }
+      btn.disabled = false;
+      btn.classList.toggle("active", v === state.maskVariant);
     });
   }
 
@@ -347,9 +338,6 @@ export function bindSearchBarEvents(headerEl, onSearchChange) {
         if (state.flavor === newFlavor) return;
         preserveScrollAnchor(() => {
           state.flavor = newFlavor;
-          if (state.flavor === "cpp_obj") {
-            state.maskVariant = "unmasked";
-          }
           syncUrlHash(true);
           onSearchChange();
         });
@@ -362,7 +350,6 @@ export function bindSearchBarEvents(headerEl, onSearchChange) {
   if (maskGroup) {
     maskGroup.querySelectorAll(".mipp-segment-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
-        if (state.flavor === "cpp_obj") return;
         const newVariant = btn.getAttribute("data-mask-variant");
         if (state.maskVariant === newVariant) return;
         preserveScrollAnchor(() => {

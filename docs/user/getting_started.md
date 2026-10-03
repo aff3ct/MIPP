@@ -4,15 +4,39 @@
 
 MIPP is a **header-only** library. It requires no separate compilation or pre-built shared/static libraries. To integrate MIPP into your project, simply add the `include/` directory to your compiler's include search paths.
 
-### Header Selection
+### Header Selection & Inclusion Strategies
 
-Depending on your programming language and preferred level of abstraction, include the appropriate header:
+MIPP offers two inclusion paradigms: **Monolithic Inclusion** and **Granular Inclusion**.
+
+#### Option 1: Monolithic Inclusion (Rapid Prototyping)
+
+Monolithic headers bring the complete set of all MIPP SIMD functions into scope in a single `#include`. This is the simplest way to get started with MIPP and is ideal for prototyping, exploratory code, and small applications:
 
 | Header File | API Tier | Description |
 | :--- | :--- | :--- |
 | `<mipp.h>` | **C Low-Level API** | Pure C99 function prototypes with explicit type suffixes (e.g., `mipp_add_float32(r0, r1)`). |
 | `<mipp.hpp>` | **C++ Functional API** | Parameterized functions under namespace `mipp::` (e.g., `mipp::add<float>(r0, r1)`). |
-| `<mipp_obj.hpp>` | **C++ Object API** | Expressive `mipp::Rvd<T, LMUL>` and `mipp::Rvm<T, LMUL>` classes with operator overloading (`+`, `-`, `*`, `==`). |
+| `<mipp_obj.hpp>` | **C++ Object API** | Expressive `mipp::Rvd<T, LMUL>` and `mipp::Rvm<T, LMUL>` classes with operator overloading (`+`, `-`, `*`, `==`) and free functions. |
+
+#### Option 2: Granular Inclusion (Production & Fast Compilation)
+
+For large-scale projects, production pipelines, or builds with hundreds of translation units, including every SIMD function can increase compiler memory usage and compilation times. Granular headers allow you to include **only the exact operations** your code uses:
+
+```cpp
+// Option 2: Granular inclusion (C++ Object API example)
+#include <mipp/cpp_obj/fun/load.hpp>
+#include <mipp/cpp_obj/fun/add.hpp>
+#include <mipp/cpp_obj/fun/mul.hpp>
+#include <mipp/cpp_obj/fun/store.hpp>
+```
+
+Corresponding granular paths exist across all three API tiers:
+
+- **C Low-Level API**: `<mipp/c/fun/<func>.h>` (or category headers `<mipp/c/cat/<category>.h>`)
+- **C++ Functional API**: `<mipp/cpp/fun/<func>.hpp>` (or category headers `<mipp/cpp/cat/<category>.hpp>`)
+- **C++ Object API**: `<mipp/cpp_obj/fun/<func>.hpp>` (or category headers `<mipp/cpp_obj/cat/<category>.hpp>`)
+
+Benchmarking shows that granular inclusion drastically reduces preprocessor expansion, slashes compiler parsing time by up to 5x-10x, and substantially reduces peak compiler memory consumption (RSS).
 
 ---
 
@@ -62,7 +86,7 @@ Here is the standard, battle-tested pattern to vectorize any loop over an arbitr
 // Computes y[i] = a * x[i] + y[i] (SAXPY) over arbitrary size S
 void saxpy_mipp(float a, const float* x, float* y, size_t size)
 {
-    constexpr size_t N = mipp::Rvd<float>::size(); // Elements per SIMD register (e.g. 8 on AVX2)
+    constexpr size_t N = mipp::Rvd<float>::N(); // Elements per SIMD register (e.g. 8 on AVX2)
 
     // 1. Compute the limit for full vector chunks
     const size_t vec_limit = (size / N) * N;

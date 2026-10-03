@@ -23,7 +23,7 @@
 
 **MIPP** (*My Intrinsics Plus Plus*) is an open-source, header-only C and C++ SIMD wrapper library designed for cross-architecture data-parallel computing. It provides a portable, zero-overhead abstraction layer over hardware SIMD instruction sets, enabling developers to write high-performance vectorized algorithms once and compile them efficiently across **x86** (SSE, AVX, AVX-512), **ARM** (NEON, SVE in progress), and **RISC-V** (RVV 1.0) targets.
 
-📖 **Official Documentation**: [https://aff3ct.github.io/MIPP/](https://aff3ct.github.io/MIPP/)
+**Official Documentation**: [https://aff3ct.github.io/MIPP/](https://aff3ct.github.io/MIPP/)
 
 ---
 
@@ -113,7 +113,7 @@ Every operation is guaranteed to compile and execute across all **10 supported n
 
 ---
 
-## ⚡ Quick Start (60 Seconds)
+## Quick Start (60 Seconds)
 
 ### 1. Header-Only Integration
 

@@ -127,6 +127,8 @@ def _load_funcs_registry():
             "horizontal": v["horizontal"],
             "mask_support": MASK_SUPPORT_MAP[v["mask_support"]]
         }
+        if "cpp_name" in v:
+            interfaces[k]["cpp_name"] = v["cpp_name"]
 
     # Resolve scalar_implems
     scalar_implems = {}

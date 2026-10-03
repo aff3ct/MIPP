@@ -4,7 +4,7 @@
         "code": [
             "{% macro pair_sum(r_l, m_l, r_r, m_r, scale) -%}",
             "{% if mask_kind == 'maskz' -%}",
-            "%add<c:tp|b:tp|m:{{scale}}|mk:S>%({{m_l}}, %blend<c:tp|b:tp|m:{{scale}}>%({{r_r}}, %set0<c:tp|b:tp|m:{{scale}}>%(), {{m_r}}), {{r_l}}, %blend<c:tp|b:tp|m:{{scale}}>%({{r_r}}, %set0<c:tp|b:tp|m:{{scale}}>%(), {{m_r}}))",
+            "%add<c:tp|b:tp|m:{{scale}}|mk:S>%({{m_l}}, %blend<c:tp|b:tp|m:{{scale}}>%({{m_r}}, {{r_r}}, %set0<c:tp|b:tp|m:{{scale}}>%()), {{r_l}}, %blend<c:tp|b:tp|m:{{scale}}>%({{m_r}}, {{r_r}}, %set0<c:tp|b:tp|m:{{scale}}>%()))",
             "{%- else -%}",
             "%add<c:tp|b:tp|m:{{scale}}>%({{r_l}}, {{r_r}})",
             "{%- endif %}",

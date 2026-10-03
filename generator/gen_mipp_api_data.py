@@ -664,21 +664,21 @@ def build_mask_modes_metadata():
             "label": "mask",
             "badge_class": "mask-mask",
             "description": "Predicated execution with blend / merge preservation",
-            "cpp_obj_support": False
+            "cpp_obj_support": True
         },
         "maskz": {
             "id": "maskz",
             "label": "maskz",
             "badge_class": "mask-maskz",
             "description": "Predicated execution with zeroing for false lanes",
-            "cpp_obj_support": False
+            "cpp_obj_support": True
         },
         "masks": {
             "id": "masks",
             "label": "masks",
             "badge_class": "mask-masks",
             "description": "Predicated execution with explicit fallback source register",
-            "cpp_obj_support": False
+            "cpp_obj_support": True
         }
     }
 
@@ -952,7 +952,10 @@ def generate_mipp_api_data(project_root=None):
             }
 
         # Prototypes across flavors and LMUL ratios
-        cpp_obj_proto = build_cpp_obj_prototype(func, interfaces)
+        try:
+            cpp_obj_proto = spec_info.func_to_str_cpp_obj(1)
+        except Exception:
+            cpp_obj_proto = build_cpp_obj_prototype(func, interfaces)
 
         c99_samples = {}
         cpp_samples = {}
@@ -976,6 +979,7 @@ def generate_mipp_api_data(project_root=None):
             lmul_key = str(lmul)
             c99_samples[lmul_key] = {}
             cpp_samples[lmul_key] = {}
+            cpp_obj_samples[lmul_key] = {}
 
             for mvariant in mask_variants_list:
                 m_param = None if mvariant == "unmasked" else mvariant
@@ -992,7 +996,11 @@ def generate_mipp_api_data(project_root=None):
                 except Exception:
                     cpp_samples[lmul_key][mvariant] = ""
 
-            cpp_obj_samples[lmul_key] = re.sub(r'\binline\s+', '', cpp_obj_proto)
+                try:
+                    cpp_obj_text = spec_info.func_to_str_cpp_obj(lmul, mask_kind=m_param).strip()
+                    cpp_obj_samples[lmul_key][mvariant] = re.sub(r'\binline\s+', '', cpp_obj_text)
+                except Exception:
+                    cpp_obj_samples[lmul_key][mvariant] = ""
 
         # Test verification specifications
         merged_test_spec = parse_function_test_specs(

@@ -315,22 +315,16 @@ def main():
         else:
             valid_masks = [m for m in args.mask_kind]
             mask_strs = [m if m != "" else "unmasked" for m in valid_masks]
-            if kind == "obj":
-                mask_strs = [m for m in mask_strs if m == "unmasked"]
             mask_str_formatted = "{" + ", ".join(mask_strs) + "}"
 
-            if kind == "cpp":
-                cpp_lmuls = []
-                for l in args.lmul:
-                    val = 1 if l in (0, 1) else l
-                    if val not in cpp_lmuls:
-                        cpp_lmuls.append(val)
-                if args.ldiv and 2 in args.ldiv:
-                    cpp_lmuls.append(-2)
-                lmul_str = "{" + ", ".join(map(str, cpp_lmuls)) + "}"
-            else:
-                obj_lmuls = [1] if any(l in (0, 1) for l in args.lmul) else []
-                lmul_str = "{" + ", ".join(map(str, obj_lmuls)) + "}"
+            target_lmuls = []
+            for l in args.lmul:
+                val = 1 if l in (0, 1) else l
+                if val not in target_lmuls:
+                    target_lmuls.append(val)
+            if args.ldiv and 2 in args.ldiv:
+                target_lmuls.append(-2)
+            lmul_str = "{" + ", ".join(map(str, target_lmuls)) + "}"
 
             print(f"  ➔ Generating unified {kind.upper()} tests [LMUL={lmul_str}, mask={mask_str_formatted}]...", end="", flush=True)
             t0_step = time.perf_counter()

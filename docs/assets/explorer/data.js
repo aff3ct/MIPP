@@ -50,9 +50,9 @@ export let DATATYPE_GROUPS = {
 export let ALL_MASK_MODES = ["unmasked", "mask", "maskz", "masks"];
 export let MASK_MODES_INFO = {
   unmasked: { id: "unmasked", label: "unmasked", badge_class: "mask-unmasked", description: "Unpredicated standard vector operation", cpp_obj_support: true },
-  mask:     { id: "mask",     label: "mask",     badge_class: "mask-mask",     description: "Predicated execution with blend / merge preservation", cpp_obj_support: false },
-  maskz:    { id: "maskz",    label: "maskz",    badge_class: "mask-maskz",    description: "Predicated execution with zeroing for false lanes", cpp_obj_support: false },
-  masks:    { id: "masks",    label: "masks",    badge_class: "mask-masks",    description: "Predicated execution with explicit fallback source register", cpp_obj_support: false },
+  mask:     { id: "mask",     label: "mask",     badge_class: "mask-mask",     description: "Predicated execution with blend / merge preservation", cpp_obj_support: true },
+  maskz:    { id: "maskz",    label: "maskz",    badge_class: "mask-maskz",    description: "Predicated execution with zeroing for false lanes", cpp_obj_support: true },
+  masks:    { id: "masks",    label: "masks",    badge_class: "mask-masks",    description: "Predicated execution with explicit fallback source register", cpp_obj_support: true },
 };
 
 export let DT_INFO = {};

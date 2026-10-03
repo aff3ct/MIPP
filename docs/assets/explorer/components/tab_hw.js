@@ -27,7 +27,7 @@ export function renderTabHw(entry) {
   const maskSupport = entry.mask_support || {};
   const effectiveMasks = ALL_MASK_MODES.filter((m) => m === "unmasked" || maskSupport[m]);
 
-  const globalVariant = state.flavor === "cpp_obj" ? "unmasked" : (state.maskVariant || "unmasked");
+  const globalVariant = state.maskVariant || "unmasked";
   const currentMask = effectiveMasks.includes(globalVariant) ? globalVariant : "unmasked";
 
   const STANDARD_FLOATS = ["float64", "float32"];

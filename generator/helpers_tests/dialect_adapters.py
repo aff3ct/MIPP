@@ -283,7 +283,7 @@ class CDialectAdapter(DialectAdapter):
 class CppObjDialectAdapter(DialectAdapter):
     op_syms = {
         "add": "+", "sub": "-", "mul": "*", "div": "/",
-        "andb": "&", "orb": "|", "xorb": "^"
+        "andb": "&", "orb": "|", "xorb": "^",
     }
     cmp_syms = {
         "cmpeq": "==", "cmpneq": "!=", "cmplt": "<", "cmple": "<=", "cmpgt": ">", "cmpge": ">="
@@ -315,12 +315,15 @@ class CppObjDialectAdapter(DialectAdapter):
         return "mipp::Rvm<T>"
 
     def format_scalar_reg_type(self, dt_ext: str, lmul_suffix: str = "") -> str:
-        return ""
+        return "auto"
 
     def format_scalar_msk_type(self, dt_ext: str, lmul_suffix: str = "") -> str:
-        return ""
+        return "auto"
 
     def format_load(self, dt_ext: str, ptr_name: str, lmul_suffix: str = "") -> str:
+        coeff = self._coeff(lmul_suffix)
+        if coeff != "1":
+            return f"mipp::Rvd<T, {coeff}>({ptr_name})"
         return f"mipp::Rvd<T>({ptr_name})"
 
     def format_scalar_load(self, dt_ext: str, ptr_name: str, lmul_suffix: str = "") -> str:
@@ -330,38 +333,70 @@ class CppObjDialectAdapter(DialectAdapter):
         return f"mipp::load<T, 1, mipp::ISA::SCALAR>({ptr_name})"
 
     def format_set_k(self, dt_ext: str, ptr_name: str, lmul_suffix: str = "") -> str:
+        coeff = self._coeff(lmul_suffix)
+        if coeff != "1":
+            return f"mipp::Rvm<T, {coeff}>({ptr_name})"
         return f"mipp::Rvm<T>({ptr_name})"
 
     def format_scalar_set_k(self, dt_ext: str, ptr_name: str, lmul_suffix: str = "") -> str:
-        return ""
+        coeff = self._coeff(lmul_suffix)
+        if coeff != "1":
+            return f"mipp::set_k<T, {coeff}, mipp::ISA::SCALAR>({ptr_name})"
+        return f"mipp::set_k<T, 1, mipp::ISA::SCALAR>({ptr_name})"
 
     def format_get(self, reg_name: str, index_expr: str, dt_ext: str, lmul_suffix: str = "") -> str:
         return f"{reg_name}[{index_expr}]"
 
     def format_scalar_get(self, reg_name: str, index_expr: str, dt_ext: str, lmul_suffix: str = "") -> str:
-        """Scalar results are plain mipp registers (not Rvd), access via mipp::get()."""
         return f"mipp::get({reg_name}, {index_expr})"
 
     def format_get_k(self, reg_name: str, index_expr: str, dt_ext: str, lmul_suffix: str = "") -> str:
         return f"{reg_name}[{index_expr}]"
 
     def format_scalar_get_k(self, reg_name: str, index_expr: str, dt_ext: str, lmul_suffix: str = "") -> str:
-        return ""
+        return f"mipp::get({reg_name}, {index_expr})"
 
     def format_func_call(self, func_name: str, dt_ext: str, args_str: str, lmul_suffix: str = "", mkind: str = "") -> str:
-        parts = [p.strip() for p in args_str.split(",")]
+        parts = [p.strip() for p in args_str.split(",") if p.strip()]
         all_syms = {**self.op_syms, **self.cmp_syms}
-        if func_name in all_syms and len(parts) == 2:
-            return f"{parts[0]} {all_syms[func_name]} {parts[1]}"
-        if len(parts) == 1:
-            return f"{parts[0]}.{func_name}()"
-        elif len(parts) >= 2:
-            other_args = ", ".join(parts[1:])
-            return f"{parts[0]}.{func_name}({other_args})"
-        return f"{args_str}.{func_name}()"
+
+        # Operators for unmasked calls
+        if mkind in ("", "unmasked"):
+            if func_name in all_syms and len(parts) == 2:
+                return f"{parts[0]} {all_syms[func_name]} {parts[1]}"
+            if func_name == "lshift" and len(parts) == 2:
+                return f"{parts[0]} << {parts[1]}"
+            if func_name == "rshift" and len(parts) == 2:
+                return f"{parts[0]} >> {parts[1]}"
+            if func_name == "neg" and len(parts) == 1:
+                return f"-{parts[0]}"
+            if func_name == "notb" and len(parts) == 1:
+                return f"~{parts[0]}"
+
+        # Memory mapping
+        obj_name_map = {
+            "load": "load_obj",
+            "loadu": "loadu_obj",
+            "set": "set_obj",
+            "set0": "set0_obj",
+            "set1": "set1_obj",
+            "set_k": "set_k_obj",
+            "set0_k": "set0_k_obj",
+            "set1_k": "set1_k_obj",
+            "cast_k": "cast",
+        }
+        fname = obj_name_map.get(func_name, func_name)
+
+        mk_map = {"mask": "mipp::M", "maskz": "mipp::Z", "masks": "mipp::S"}
+        if mkind in mk_map:
+            return f"mipp::{fname}<{mk_map[mkind]}>({args_str})"
+
+        return f"mipp::{fname}({args_str})"
 
     def format_scalar_func_call(self, func_name: str, dt_ext: str, args_str: str, lmul_suffix: str = "", mkind: str = "") -> str:
-        """Scalar call in the Obj dialect: delegates to the free mipp:: function."""
+        mk_map = {"mask": "mipp::M", "maskz": "mipp::Z", "masks": "mipp::S"}
+        if mkind in mk_map:
+            return f"mipp::{func_name}<{mk_map[mkind]}, T, LMUL, mipp::ISA::SCALAR>({args_str})"
         return f"mipp::{func_name}({args_str})"
 
     def format_N(self, dt_type: str) -> str:

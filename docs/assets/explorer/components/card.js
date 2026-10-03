@@ -49,7 +49,7 @@ export function getActivePrototype(entry) {
   if (state.flavor === "cpp_obj") {
     let sample = (cppObjSamples && (cppObjSamples[lmulKey] || cppObjSamples["1"])) || protoData.cpp_obj || "";
     if (typeof sample === "object" && sample !== null) {
-      sample = sample["unmasked"] || Object.values(sample)[0] || "";
+      sample = sample[targetMask] || sample["unmasked"] || Object.values(sample)[0] || "";
     } else if (Array.isArray(sample)) {
       sample = sample[0] || "";
     }
@@ -71,7 +71,6 @@ export function renderCardExpandedDetails(entry) {
   const maskSupport = entry.mask_support || {};
   const availableVariants = ALL_MASK_MODES.filter((m) => m === "unmasked" || maskSupport[m]);
   const isUnsupported = Boolean(entry._unsupportedVariant) || (
-    state.flavor !== "cpp_obj" &&
     state.maskVariant &&
     state.maskVariant !== "unmasked" &&
     !maskSupport[state.maskVariant]
@@ -131,7 +130,7 @@ export function computeOptimisticLevel(entry, ext) {
   const dtsToConsider = selectedDts.length > 0 ? selectedDts : allDts;
 
   // Active mask mode
-  const activeMask = (state.flavor === "cpp_obj" ? "unmasked" : (state.maskVariant || "unmasked"));
+  const activeMask = state.maskVariant || "unmasked";
 
   if (dtsToConsider.length === 0) {
     let lvl = sup.overall_level !== undefined ? sup.overall_level : "na";
@@ -168,7 +167,6 @@ export function renderCard(entry, matchedIntrinsic = null, matchedC99 = null) {
   const isCompared = state.compareSet.has(entry.name);
   const maskSupport = entry.mask_support || {};
   const isUnsupported = Boolean(entry._unsupportedVariant) || (
-    state.flavor !== "cpp_obj" &&
     state.maskVariant &&
     state.maskVariant !== "unmasked" &&
     !maskSupport[state.maskVariant]
@@ -184,7 +182,7 @@ export function renderCard(entry, matchedIntrinsic = null, matchedC99 = null) {
   const supportedVariants = ALL_MASK_MODES.filter(
     (m) => m === "unmasked" || maskSupport[m]
   );
-  const globalVariant = state.flavor === "cpp_obj" ? "unmasked" : (state.maskVariant || "unmasked");
+  const globalVariant = state.maskVariant || "unmasked";
 
   const variantBadgesHtml = `
     <div class="mipp-card-variant-badges">
