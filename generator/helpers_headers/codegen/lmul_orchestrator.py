@@ -256,11 +256,10 @@ def gen_c_lmul(isa, include_manager, funcs, sw_lmuls=None):
     if sw_lmuls is None:
         sw_lmuls = all_lmul
     for f in funcs:
-        file_w = include_manager.get_fd(isa["name"], f)
-
         for dt in funcs[f]["datatypes"]:
             dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
             for lmul in sw_lmuls:
+                file_w = include_manager.get_fd(isa["name"], f, variant="u", lmul=lmul)
                 _c_lmul_writer(f=f, dt=dt, dt_par=dt_par, dt_ret=dt_ret, isa=isa, funcs=funcs, file=file_w, lmul=lmul)
         
             for lmul in sw_lmuls:
@@ -273,10 +272,13 @@ def gen_c_lmul(isa, include_manager, funcs, sw_lmuls=None):
                 if not mask_status.is_any_mask():
                     continue
                 if mask_status.is_maskable():
+                    file_w = include_manager.get_fd(isa["name"], f, variant="m", lmul=lmul)
                     _c_lmul_writer(f, dt, dt_par, dt_ret, isa, funcs, file_w, mask_type="mask", lmul=lmul)
                 if mask_status.is_maskzable():
+                    file_w = include_manager.get_fd(isa["name"], f, variant="z", lmul=lmul)
                     _c_lmul_writer(f, dt, dt_par, dt_ret, isa, funcs, file_w, mask_type="maskz", lmul=lmul)
                 if mask_status.is_masksable():
+                    file_w = include_manager.get_fd(isa["name"], f, variant="s", lmul=lmul)
                     _c_lmul_writer(f, dt, dt_par, dt_ret, isa, funcs, file_w, mask_type="masks", lmul=lmul)
 
 def gen_c_ldiv(isa_base, isa_div, include_manager, funcs):
@@ -284,20 +286,24 @@ def gen_c_ldiv(isa_base, isa_div, include_manager, funcs):
         print(f"in c_generator.gen_c_ldiv : error : ldiv not yet supported in {isa_div['name']}")
         exit(-1)
     for f in funcs:
-        file_w = include_manager.get_fd(isa_base["name"], f)
         for dt in funcs[f]["datatypes"]:
             dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
+            file_w = include_manager.get_fd(isa_base["name"], f, variant="u", lmul=-2)
             _gen_c_function_one_ldiv_avx(isa_base=isa_base, isa_div=isa_div, file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind=None, ldiv=2)
         mask_support = funcs[f]["mask_support"] if "mask_support" in funcs[f] else None
         if mask_support and mask_support.is_maskable():
             for dt in funcs[f]["datatypes"]:
                 dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
+                file_w = include_manager.get_fd(isa_base["name"], f, variant="m", lmul=-2)
                 _gen_c_function_one_ldiv_avx(isa_base=isa_base, isa_div=isa_div, file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind="mask", ldiv=2)
         if mask_support and mask_support.is_maskzable():
             for dt in funcs[f]["datatypes"]:
                 dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
+                file_w = include_manager.get_fd(isa_base["name"], f, variant="z", lmul=-2)
                 _gen_c_function_one_ldiv_avx(isa_base=isa_base, isa_div=isa_div, file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind="maskz", ldiv=2)
         if mask_support and mask_support.is_masksable():
             for dt in funcs[f]["datatypes"]:
                 dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
+                file_w = include_manager.get_fd(isa_base["name"], f, variant="s", lmul=-2)
                 _gen_c_function_one_ldiv_avx(isa_base=isa_base, isa_div=isa_div, file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind="masks", ldiv=2)
+

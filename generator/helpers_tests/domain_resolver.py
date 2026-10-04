@@ -211,10 +211,10 @@ class DomainResolver:
 
             if has_mkind_sections:
                 cpp_mk_map = [
-                    ("unmasked", "MK == mipp::U"),
-                    ("mask", "MK == mipp::M"),
-                    ("maskz", "MK == mipp::Z"),
-                    ("masks", "MK == mipp::S"),
+                    ("unmasked", "V == mipp::U"),
+                    ("mask", "V == mipp::M"),
+                    ("maskz", "V == mipp::Z"),
+                    ("masks", "V == mipp::S"),
                 ]
                 res = []
                 first_mk = True
@@ -500,9 +500,9 @@ class DomainResolver:
 
             if patterns:
                 cpp_mk_map = [
-                    ("mask", "MK == mipp::M"),
-                    ("maskz", "MK == mipp::Z"),
-                    ("masks", "MK == mipp::S"),
+                    ("mask", "V == mipp::M"),
+                    ("maskz", "V == mipp::Z"),
+                    ("masks", "V == mipp::S"),
                 ]
                 res = []
                 first_mk = True

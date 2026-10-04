@@ -1,10 +1,10 @@
 """
 C++ OOP Wrapper & Modular Headers Generator Module
 Generates:
-1. `include/mipp/internal/interfaces/cpp_obj/common.hpp` (defines `Rvd<T, LMUL>` and `Rvm<T, LMUL>` classes directly)
-2. `include/mipp/internal/interfaces/cpp_obj/functions/<cat>/<func>.hpp` (modular free functions & operators in namespace mipp)
-3. `include/mipp/{c, cpp, cpp_obj}/fun/<func>.{h, hpp}` (granular per-function headers)
-4. `include/mipp/{c, cpp, cpp_obj}/cat/<cat>.{h, hpp}` (granular per-category headers)
+1. `include/mipp/internal/interfaces/obj/common.hpp` (defines `Rvd<T, LMUL>` and `Rvm<T, LMUL>` classes directly)
+2. `include/mipp/internal/interfaces/obj/functions/<cat>/<func>.hpp` (modular free functions & operators in namespace mipp)
+3. `include/mipp/{c, cpp, obj}/fun/<func>.{h, hpp}` (granular per-function headers)
+4. `include/mipp/{c, cpp, obj}/cat/<cat>.{h, hpp}` (granular per-category headers)
 5. `include/mipp_obj.hpp` (monolithic C++ OOP wrapper for full backwards compatibility)
 """
 import os
@@ -15,8 +15,8 @@ from tools import operators_arithm, operators_binary, operators_order
 from include_gen import _match_category
 
 
-def generate_cpp_obj_common(output_dir="../include"):
-    common_path = os.path.join(output_dir, "mipp", "internal", "interfaces", "cpp_obj", "common.hpp")
+def generate_obj_common(output_dir="../include"):
+    common_path = os.path.join(output_dir, "mipp", "internal", "interfaces", "obj", "common.hpp")
     os.makedirs(os.path.dirname(common_path), exist_ok=True)
 
     tpl_path = os.path.join(os.path.dirname(__file__), "templates", "mipp_obj.tpl.hpp")
@@ -31,9 +31,9 @@ all_binary_ops = {}
 all_binary_ops.update(operators_arithm)
 all_binary_ops.update(operators_binary)
 
-def generate_cpp_obj_func_file(fn, output_dir="../include"):
+def generate_obj_func_file(fn, output_dir="../include"):
     cat = _match_category(fn)
-    func_dir = os.path.join(output_dir, "mipp", "internal", "interfaces", "cpp_obj", "functions", cat)
+    func_dir = os.path.join(output_dir, "mipp", "internal", "interfaces", "obj", "functions", cat)
     os.makedirs(func_dir, exist_ok=True)
     file_path = os.path.join(func_dir, f"{fn}.hpp")
 
@@ -49,15 +49,15 @@ def generate_cpp_obj_func_file(fn, output_dir="../include"):
     lines = [
         "#pragma once",
         "",
-        '#include "mipp/internal/interfaces/cpp_obj/common.hpp"',
+        '#include "mipp/internal/interfaces/obj/common.hpp"',
         f'#include "mipp/internal/interfaces/cpp/functions/{cat}/{fn}.hpp"',
     ]
     if fn in ("andb", "orb", "xorb", "notb", "andnb"):
-        lines.append(f'#include "mipp/internal/interfaces/cpp_obj/functions/logic/{fn}_k.hpp"')
+        lines.append(f'#include "mipp/internal/interfaces/obj/functions/logic/{fn}_k.hpp"')
     elif fn == "get":
-        lines.append('#include "mipp/internal/interfaces/cpp_obj/functions/store/get_k.hpp"')
+        lines.append('#include "mipp/internal/interfaces/obj/functions/store/get_k.hpp"')
     elif fn == "cast":
-        lines.append('#include "mipp/internal/interfaces/cpp_obj/functions/reinterpret/cast_k.hpp"')
+        lines.append('#include "mipp/internal/interfaces/obj/functions/reinterpret/cast_k.hpp"')
     lines.extend([
         "",
         "namespace mipp",
@@ -71,14 +71,14 @@ def generate_cpp_obj_func_file(fn, output_dir="../include"):
         lines.append(f"{{ return Rvd<T, LMUL>(mipp::{fn}<T, LMUL>(p0)); }}")
         lines.append("")
         if is_maskzable:
-            lines.append("template <MKIND MK = Z, typename T, int LMUL = 1>")
+            lines.append("template <VARIANT V = Z, typename T, int LMUL = 1>")
             lines.append(f"inline Rvd<T, LMUL> {fn}_obj(const Rvm<T, LMUL>& m0, const T* p0)")
-            lines.append(f"{{ return Rvd<T, LMUL>(mipp::{fn}<MK, T, LMUL>(m0.m, p0)); }}")
+            lines.append(f"{{ return Rvd<T, LMUL>(mipp::{fn}<V, T, LMUL>(m0.m, p0)); }}")
             lines.append("")
         if is_masksable:
-            lines.append("template <MKIND MK = S, typename T, int LMUL = 1>")
+            lines.append("template <VARIANT V = S, typename T, int LMUL = 1>")
             lines.append(f"inline Rvd<T, LMUL> {fn}_obj(const Rvm<T, LMUL>& m0, const Rvd<T, LMUL>& rsrc, const T* p0)")
-            lines.append(f"{{ return Rvd<T, LMUL>(mipp::{fn}<MK, T, LMUL>(m0.m, rsrc.r, p0)); }}")
+            lines.append(f"{{ return Rvd<T, LMUL>(mipp::{fn}<V, T, LMUL>(m0.m, rsrc.r, p0)); }}")
             lines.append("")
 
     elif fn == "set":
@@ -125,9 +125,9 @@ def generate_cpp_obj_func_file(fn, output_dir="../include"):
         lines.append("")
         if is_maskable or is_maskzable:
             mk = "M" if is_maskable else "Z"
-            lines.append(f"template <MKIND MK = {mk}, typename T, int LMUL = 1>")
+            lines.append(f"template <VARIANT V = {mk}, typename T, int LMUL = 1>")
             lines.append(f"inline void {fn}(const Rvm<T, LMUL>& m0, T* p0, const Rvd<T, LMUL>& r0)")
-            lines.append(f"{{ mipp::{fn}<MK, T, LMUL>(m0.m, p0, r0.r); }}")
+            lines.append(f"{{ mipp::{fn}<V, T, LMUL>(m0.m, p0, r0.r); }}")
             lines.append("")
     elif fn == "gather":
         lines.append("template <typename T, typename T_IDX, int LMUL = 1>")
@@ -224,9 +224,9 @@ def generate_cpp_obj_func_file(fn, output_dir="../include"):
         lines.append(f"{{ return mipp::{fn}(r0.r); }}")
         lines.append("")
         if is_maskzable:
-            lines.append("template <MKIND MK = Z, typename T, int LMUL = 1>")
-            lines.append(f"inline auto {fn}(const Rvm<T, LMUL>& m0, const Rvd<T, LMUL>& r0) -> decltype(mipp::{fn}<MK, T, LMUL>(m0.m, r0.r))")
-            lines.append(f"{{ return mipp::{fn}<MK, T, LMUL>(m0.m, r0.r); }}")
+            lines.append("template <VARIANT V = Z, typename T, int LMUL = 1>")
+            lines.append(f"inline auto {fn}(const Rvm<T, LMUL>& m0, const Rvd<T, LMUL>& r0) -> decltype(mipp::{fn}<V, T, LMUL>(m0.m, r0.r))")
+            lines.append(f"{{ return mipp::{fn}<V, T, LMUL>(m0.m, r0.r); }}")
             lines.append("")
 
     # Category 6: Comparisons (cmpeq, cmplt, ...) -> return Rvm
@@ -237,9 +237,9 @@ def generate_cpp_obj_func_file(fn, output_dir="../include"):
         lines.append(f"{{ return Rvm<T, LMUL>(mipp::{fn}(r0.r, r1.r)); }}")
         lines.append("")
         if is_maskzable:
-            lines.append("template <MKIND MK = Z, typename T, int LMUL = 1>")
+            lines.append("template <VARIANT V = Z, typename T, int LMUL = 1>")
             lines.append(f"inline Rvm<T, LMUL> {fn}(const Rvm<T, LMUL>& m0, const Rvd<T, LMUL>& r0, const Rvd<T, LMUL>& r1)")
-            lines.append(f"{{ return Rvm<T, LMUL>(mipp::{fn}<MK, T, LMUL>(m0.m, r0.r, r1.r)); }}")
+            lines.append(f"{{ return Rvm<T, LMUL>(mipp::{fn}<V, T, LMUL>(m0.m, r0.r, r1.r)); }}")
             lines.append("")
         lines.append("template <typename T, int LMUL = 1>")
         lines.append(f"inline Rvm<T, LMUL> operator{op}(const Rvd<T, LMUL>& r0, const Rvd<T, LMUL>& r1)")
@@ -412,14 +412,14 @@ def generate_cpp_obj_func_file(fn, output_dir="../include"):
 
         # 2. Masked overloads
         if is_maskable:
-            lines.append("template <MKIND MK = M, typename T, int LMUL = 1>")
+            lines.append("template <VARIANT V = M, typename T, int LMUL = 1>")
             lines.append(f"inline Rvd<T, LMUL> {fn}(const Rvm<T, LMUL>& m0, {typed_str})")
-            lines.append(f"{{ return Rvd<T, LMUL>(mipp::{fn}<MK, T, LMUL>(m0.m, {raw_str})); }}")
+            lines.append(f"{{ return Rvd<T, LMUL>(mipp::{fn}<V, T, LMUL>(m0.m, {raw_str})); }}")
             lines.append("")
         if is_masksable:
-            lines.append("template <MKIND MK = S, typename T, int LMUL = 1>")
+            lines.append("template <VARIANT V = S, typename T, int LMUL = 1>")
             lines.append(f"inline Rvd<T, LMUL> {fn}(const Rvm<T, LMUL>& m0, const Rvd<T, LMUL>& rsrc, {typed_str})")
-            lines.append(f"{{ return Rvd<T, LMUL>(mipp::{fn}<MK, T, LMUL>(m0.m, rsrc.r, {raw_str})); }}")
+            lines.append(f"{{ return Rvd<T, LMUL>(mipp::{fn}<V, T, LMUL>(m0.m, rsrc.r, {raw_str})); }}")
             lines.append("")
 
         # 3. Operators
@@ -478,23 +478,60 @@ def generate_cpp_obj_func_file(fn, output_dir="../include"):
         f.write("\n".join(lines) + "\n")
 
 
-def generate_cpp_object(include_manager=None, output_dir="../include"):
+def generate_obj(include_manager=None, output_dir="../include"):
     """
     Main generator entry point for C++ Object layer:
-    1. Generates interfaces/cpp_obj/common.hpp
-    2. Generates all interfaces/cpp_obj/functions/<cat>/<func>.hpp
+    1. Generates interfaces/obj/common.hpp
+    2. Generates all interfaces/obj/functions/<cat>/<func>.hpp
     3. Generates mipp_obj.hpp including all modular components
     """
-    generate_cpp_obj_common(output_dir)
+    generate_obj_common(output_dir)
 
     for fn in interfaces:
-        generate_cpp_obj_func_file(fn, output_dir)
+        generate_obj_func_file(fn, output_dir)
+
+    if include_manager and getattr(include_manager, "granularity", "coarse") == "fine":
+        for fn in interfaces:
+            cat = _match_category(fn)
+            func_variants = ["u"]
+            ms = interfaces[fn].get("mask_support")
+            if ms:
+                if hasattr(ms, "is_maskable") and ms.is_maskable():
+                    func_variants.append("m")
+                if hasattr(ms, "is_maskzable") and ms.is_maskzable():
+                    func_variants.append("z")
+                if hasattr(ms, "is_masksable") and ms.is_masksable():
+                    func_variants.append("s")
+            func_lmuls = ["m1", "m2", "m4", "m8", "d2"]
+
+            # Atomic headers
+            for v in func_variants:
+                for l in func_lmuls:
+                    atom_dir = os.path.join(output_dir, "mipp", "internal", "interfaces", "obj", "functions", cat, v, l)
+                    os.makedirs(atom_dir, exist_ok=True)
+                    with open(os.path.join(atom_dir, f"{fn}.hpp"), "w", encoding="utf-8") as f:
+                        f.write(f"#pragma once\n\n#include \"mipp/internal/interfaces/cpp/functions/{cat}/{v}/{l}/{fn}.hpp\"\n#include \"mipp/internal/interfaces/obj/functions/{cat}/{fn}.hpp\"\n")
+
+            # Variant umbrellas
+            for v in func_variants:
+                v_dir = os.path.join(output_dir, "mipp", "internal", "interfaces", "obj", "functions", cat, v)
+                os.makedirs(v_dir, exist_ok=True)
+                with open(os.path.join(v_dir, f"{fn}.hpp"), "w", encoding="utf-8") as f:
+                    f.write(f"#pragma once\n\n#include \"mipp/internal/interfaces/cpp/functions/{cat}/{v}/{fn}.hpp\"\n#include \"mipp/internal/interfaces/obj/functions/{cat}/{fn}.hpp\"\n")
+
+            # LMUL umbrellas
+            for l in func_lmuls:
+                l_dir = os.path.join(output_dir, "mipp", "internal", "interfaces", "obj", "functions", cat, l)
+                os.makedirs(l_dir, exist_ok=True)
+                with open(os.path.join(l_dir, f"{fn}.hpp"), "w", encoding="utf-8") as f:
+                    f.write(f"#pragma once\n\n#include \"mipp/internal/interfaces/cpp/functions/{cat}/{l}/{fn}.hpp\"\n#include \"mipp/internal/interfaces/obj/functions/{cat}/{fn}.hpp\"\n")
 
     # Generate top-level mipp_obj.hpp
     obj_hpp_path = os.path.join(output_dir, "mipp_obj.hpp")
     with open(obj_hpp_path, "w", encoding="utf-8") as f:
         f.write("#pragma once\n\n")
         f.write('#include "mipp.hpp"\n')
-        f.write('#include "mipp/internal/interfaces/cpp_obj/common.hpp"\n\n')
+        f.write('#include "mipp/internal/interfaces/obj/common.hpp"\n\n')
         for cat in sorted(categories.keys()):
-            f.write(f'#include "mipp/cpp_obj/cat/{cat}.hpp"\n')
+            f.write(f'#include "mipp/obj/cat/{cat}.hpp"\n')
+

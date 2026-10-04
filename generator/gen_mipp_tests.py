@@ -28,7 +28,7 @@ engine = None
 tmp_path = "../tests/src/"
 cpath = tmp_path + "c/"
 cpppath = tmp_path + "cpp/"
-objpath = tmp_path + "cpp_obj/"
+objpath = tmp_path + "obj/"
 
 
 def _match_category(func: str) -> str:
@@ -64,7 +64,7 @@ def get_str_path(base_path: str, lmul: int = 0, mkind: str = "") -> tuple[str, s
     return (
         f"{base_path}c/",
         f"{base_path}cpp/",
-        f"{base_path}cpp_obj/",
+        f"{base_path}obj/",
     )
 
 

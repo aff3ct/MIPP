@@ -56,7 +56,7 @@ namespace mipp
     print("#pragma once\n", file=file_common_enum)
     print("namespace mipp {\n", file=file_common_enum)
     print("enum ISA { SCALAR, SSE, AVX, AVX512, NEON, SVE, RVV };", file=file_common_enum)
-    print("enum MKIND { U, M, Z, S }; //mask enum for function templates", file=file_common_enum)
+    print("enum VARIANT { U, M, Z, S }; //variant enum for function templates", file=file_common_enum)
 
     isa_list_copy = prepare_isa_defines(isa_list) # this is the function that sets the gen_define key for every ISAs for some reason
 
@@ -99,18 +99,55 @@ def _gen_cpp_common(isa_list, file):
     print("#else\n#error \"No ISA defined for cpp wrapper\"\n#endif", file=file)
 
 def _gen_cpp_functions(isa_list, include_manager, funcs):
-    for f in funcs.keys():
-        category = _match_category(f)
-        file = include_manager.get_fd("cpp", f)
-        print("#pragma once\n", file=file)
-        print('#include "mipp/internal/interfaces/cpp/common.hpp"\n', file=file)
-        for index, isa in enumerate(isa_list):
-            if index == 0:
-                print("#if " + isa["gen_define"], file=file)
-            else:
-                print("#elif " + isa["gen_define"], file=file)
-            print(f'#include "mipp/internal/simd_ext/{isa["name"].lower()}/cpp/functions/{category}/{f}.hpp"', file=file)
-        print("#else\n#error \"No ISA defined for cpp wrapper\"\n#endif", file=file)
+    if include_manager.granularity == "coarse":
+        for f in funcs.keys():
+            category = _match_category(f)
+            file = include_manager.get_fd("cpp", f)
+            print("#pragma once\n", file=file)
+            print('#include "mipp/internal/interfaces/cpp/common.hpp"\n', file=file)
+            for index, isa in enumerate(isa_list):
+                if index == 0:
+                    print("#if " + isa["gen_define"], file=file)
+                else:
+                    print("#elif " + isa["gen_define"], file=file)
+                print(f'#include "mipp/internal/simd_ext/{isa["name"].lower()}/cpp/functions/{category}/{f}.hpp"', file=file)
+            print("#else\n#error \"No ISA defined for cpp wrapper\"\n#endif", file=file)
+    else:
+        for f in funcs.keys():
+            category = _match_category(f)
+            func_variants = ["u"]
+            ms = funcs[f].get("mask_support")
+            if ms:
+                if ms.is_maskable():
+                    func_variants.append("m")
+                if ms.is_maskzable():
+                    func_variants.append("z")
+                if ms.is_masksable():
+                    func_variants.append("s")
+            func_lmuls = ["m1", "m2", "m4", "m8", "d2"]
+
+            for v in func_variants:
+                for l in func_lmuls:
+                    valid_isas = [
+                        isa for isa in isa_list
+                        if l != "d2" or (isa.get("is_scalar", False) or any(x < 0 for x in isa.get("hw_lmul", []) + isa.get("sw_lmul", [])))
+                    ]
+                    file = include_manager.get_fd("cpp", f, variant=v, lmul=l)
+                    print("#pragma once\n", file=file)
+                    print('#include "mipp/internal/interfaces/cpp/common.hpp"\n', file=file)
+                    for index, isa in enumerate(valid_isas):
+                        if index == 0:
+                            print("#if " + isa["gen_define"], file=file)
+                        else:
+                            print("#elif " + isa["gen_define"], file=file)
+                        print(f'#include "mipp/internal/simd_ext/{isa["name"].lower()}/cpp/functions/{category}/{v}/{l}/{f}.hpp"', file=file)
+                    if len(valid_isas) == len(isa_list):
+                        print("#else\n#error \"No ISA defined for cpp wrapper\"\n#endif", file=file)
+                    else:
+                        print("#endif", file=file)
+
+        include_manager.generate_umbrella_headers("cpp")
+        include_manager.close_layer_fds("cpp")
 
 # -------------------------------------------------------------------------------------------------
 # Helpers
@@ -210,9 +247,9 @@ def _tpl_scalar_for_arg(arg):
 def _generic_mask_decl_gather_scatter(file, cpp_func_name, proto, mask_kind):
 
     if mask_kind == "mask" or mask_kind == "maskz":
-        ret = "template <MKIND MK=M, typename T, typename U,int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA>"
+        ret = "template <VARIANT V=M, typename T, typename U, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA>"
     else:
-        ret = "template <MKIND MK=S, typename T, typename U,int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA>"
+        ret = "template <VARIANT V=S, typename T, typename U, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA>"
 
     ret += "inline " + ("rvd<T,LMUL,ISA_TYPE>" if proto["ret"]["type"] == "reg" else
                       "rvm<T,LMUL,ISA_TYPE>" if proto["ret"]["type"] == "msk" else
@@ -286,11 +323,11 @@ def _generic_mask_decl(file, cpp_func_name, proto, mask_kind):
 
     if "gather" in cpp_func_name or "scatter" in cpp_func_name:
         return _generic_mask_decl_gather_scatter(file, cpp_func_name, proto, mask_kind)
-    # Template header differs for S because default MK differs.
+    # Template header differs for S because default V differs.
     if mask_kind in ("mask", "maskz"):
-        print("template <MKIND MK=M, typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA>", file=file)
+        print("template <VARIANT V=M, typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA>", file=file)
     else:
-        print("template <MKIND MK=S, typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA>", file=file)
+        print("template <VARIANT V=S, typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA>", file=file)
 
     # Return type: generic on T,LMUL (only valid for non-cast funcs; you already skip casts)
     ret = "inline " + ("rvd<T,LMUL,ISA_TYPE>" if proto["ret"]["type"] == "reg" else
@@ -508,70 +545,139 @@ def _gen_cpp_constexpr_functions_isa(file, isa):
 
 def _gen_cpp_functions_isa(include_manager, isa, funcs):
     layer_name = isa["name"] + "_cpp"
-    for f in funcs:
+    if include_manager.granularity == "coarse":
+        for f in funcs:
+            file = include_manager.get_fd(layer_name, f)
+            prefix = _cpp_custom_prefix_generator(f, isa["name"], funcs)
+            print(prefix, file=file)
 
+            for dt in funcs[f]["datatypes"]:
+                is_cast = len(dt.split(',')) > 1
+                is_gthr_scttr =  ("gather" in f) or ("scatter" in f)
+                is_cast = is_cast
 
-        file = include_manager.get_fd(layer_name, f)
-        prefix = _cpp_custom_prefix_generator(f, isa["name"], funcs)
-        print(prefix, file=file)
+                if not is_cast:
+                    dt_par = dt.split(',')[0]
+                    dt_ret = dt.split(',')[0]
+                elif is_gthr_scttr:
+                    dt_par = dt.split(',')[0]
+                    dt_ret = dt.split(',')[1]
+                else:
+                    dt_par = dt.split(',')[0]
+                    dt_ret = dt.split(',')[1]
 
-        for dt in funcs[f]["datatypes"]:
-            is_cast = len(dt.split(',')) > 1
-            is_gthr_scttr =  ("gather" in f) or ("scatter" in f)
-            is_cast = is_cast
-
-            if not is_cast:
-                dt_par = dt.split(',')[0]
-                dt_ret = dt.split(',')[0]
-            elif is_gthr_scttr:
-                dt_par = dt.split(',')[0]
-                dt_ret = dt.split(',')[1]
-            else:
-                dt_par = dt.split(',')[0]
-                dt_ret = dt.split(',')[1]
-
-            if not is_cast and not is_gthr_scttr:
-                c_func_name = build_func_name_short(isa, dt_par, f, isa_name=True)
-                cpp_func_name = build_cpp_func_name_short(funcs[f]["proto"], dt_ret, f)
-            elif is_gthr_scttr:
-                c_func_name = build_func_name(isa, dt_par, dt_ret, f, isa_name=True)                
-                cpp_func_name = build_cpp_func_name_short(funcs[f]["proto"], dt_ret, f)
-            else:
-                c_func_name = build_func_name(isa, dt_par, dt_ret, f, isa_name=True)
-                cpp_func_name = build_cpp_func_name(dt_ret, f)
-
-            for lmul in all_lmul:
-                print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, cpp_func_name, lmul, isa_name=True, cpp=True) + " {", file=file)
-                print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, "", c_func_name + "_m" + str(lmul), lmul, False) + ";", file=file)
-                print("}", file=file)
-            mask_status = funcs[f]["mask_support"]
-
-            has_ldiv = isa.get("is_scalar", False) or any(x < 0 for x in isa.get("hw_lmul", []) + isa.get("sw_lmul", []))
-            if has_ldiv:
-                ldiv = -2
-                print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, cpp_func_name, ldiv, isa_name=True, cpp=True) + " {", file=file)
-                print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, "", c_func_name + "_d" + str(-ldiv), ldiv, False) + ";", file=file)
-                print("}", file=file)
-            
-            if mask_status and mask_status.is_any_mask():
-                proto = funcs[f]["proto"]
-                c_base = _masked_c_symbol(dt_par, dt_ret, f, is_cast, isa=isa, isa_name=True)
+                if not is_cast and not is_gthr_scttr:
+                    c_func_name = build_func_name_short(isa, dt_par, f, isa_name=True)
+                    cpp_func_name = build_cpp_func_name_short(funcs[f]["proto"], dt_ret, f)
+                elif is_gthr_scttr:
+                    c_func_name = build_func_name(isa, dt_par, dt_ret, f, isa_name=True)                
+                    cpp_func_name = build_cpp_func_name_short(funcs[f]["proto"], dt_ret, f)
+                else:
+                    c_func_name = build_func_name(isa, dt_par, dt_ret, f, isa_name=True)
+                    cpp_func_name = build_cpp_func_name(dt_ret, f)
 
                 for lmul in all_lmul:
-                    if mask_status.is_maskable():
-                        _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "M", "mask", lmul=lmul, isa = isa, isa_name=True)
-                    if mask_status.is_maskzable():
-                        _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "Z", "maskz", lmul=lmul, isa = isa, isa_name=True)
-                    if mask_status.is_masksable():
-                        _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "S", "masks", lmul=lmul, isa = isa, isa_name=True)
+                    print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, cpp_func_name, lmul, isa_name=True, cpp=True) + " {", file=file)
+                    print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, "", c_func_name + "_m" + str(lmul), lmul, False) + ";", file=file)
+                    print("}", file=file)
+                mask_status = funcs[f]["mask_support"]
 
                 has_ldiv = isa.get("is_scalar", False) or any(x < 0 for x in isa.get("hw_lmul", []) + isa.get("sw_lmul", []))
                 if has_ldiv:
                     ldiv = -2
-                    if mask_status.is_maskable():
-                        _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "M", "mask", lmul=ldiv, isa = isa, isa_name=True)
-                    if mask_status.is_maskzable():
-                        _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "Z", "maskz", lmul=ldiv, isa = isa, isa_name=True)
-                    if mask_status.is_masksable():
-                        _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "S", "masks", lmul=ldiv, isa = isa, isa_name=True)
-        print(_cpp_close_namespace(), file=file)
+                    print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, cpp_func_name, ldiv, isa_name=True, cpp=True) + " {", file=file)
+                    print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, "", c_func_name + "_d" + str(-ldiv), ldiv, False) + ";", file=file)
+                    print("}", file=file)
+                
+                if mask_status and mask_status.is_any_mask():
+                    proto = funcs[f]["proto"]
+                    c_base = _masked_c_symbol(dt_par, dt_ret, f, is_cast, isa=isa, isa_name=True)
+
+                    for lmul in all_lmul:
+                        if mask_status.is_maskable():
+                            _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "M", "mask", lmul=lmul, isa = isa, isa_name=True)
+                        if mask_status.is_maskzable():
+                            _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "Z", "maskz", lmul=lmul, isa = isa, isa_name=True)
+                        if mask_status.is_masksable():
+                            _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "S", "masks", lmul=lmul, isa = isa, isa_name=True)
+
+                    has_ldiv = isa.get("is_scalar", False) or any(x < 0 for x in isa.get("hw_lmul", []) + isa.get("sw_lmul", []))
+                    if has_ldiv:
+                        ldiv = -2
+                        if mask_status.is_maskable():
+                            _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "M", "mask", lmul=ldiv, isa = isa, isa_name=True)
+                        if mask_status.is_maskzable():
+                            _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "Z", "maskz", lmul=ldiv, isa = isa, isa_name=True)
+                        if mask_status.is_masksable():
+                            _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "S", "masks", lmul=ldiv, isa = isa, isa_name=True)
+            print(_cpp_close_namespace(), file=file)
+    else:
+        for f in funcs:
+            for dt in funcs[f]["datatypes"]:
+                is_cast = len(dt.split(',')) > 1
+                is_gthr_scttr =  ("gather" in f) or ("scatter" in f)
+
+                if not is_cast:
+                    dt_par = dt.split(',')[0]
+                    dt_ret = dt.split(',')[0]
+                elif is_gthr_scttr:
+                    dt_par = dt.split(',')[0]
+                    dt_ret = dt.split(',')[1]
+                else:
+                    dt_par = dt.split(',')[0]
+                    dt_ret = dt.split(',')[1]
+
+                if not is_cast and not is_gthr_scttr:
+                    c_func_name = build_func_name_short(isa, dt_par, f, isa_name=True)
+                    cpp_func_name = build_cpp_func_name_short(funcs[f]["proto"], dt_ret, f)
+                elif is_gthr_scttr:
+                    c_func_name = build_func_name(isa, dt_par, dt_ret, f, isa_name=True)                
+                    cpp_func_name = build_cpp_func_name_short(funcs[f]["proto"], dt_ret, f)
+                else:
+                    c_func_name = build_func_name(isa, dt_par, dt_ret, f, isa_name=True)
+                    cpp_func_name = build_cpp_func_name(dt_ret, f)
+
+                for lmul in all_lmul:
+                    file_u = include_manager.get_fd(layer_name, f, variant="u", lmul=lmul)
+                    print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, cpp_func_name, lmul, isa_name=True, cpp=True) + " {", file=file_u)
+                    print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, "", c_func_name + "_m" + str(lmul), lmul, False) + ";", file=file_u)
+                    print("}", file=file_u)
+
+                has_ldiv = isa.get("is_scalar", False) or any(x < 0 for x in isa.get("hw_lmul", []) + isa.get("sw_lmul", []))
+                if has_ldiv:
+                    ldiv = -2
+                    file_u = include_manager.get_fd(layer_name, f, variant="u", lmul=ldiv)
+                    print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, cpp_func_name, ldiv, isa_name=True, cpp=True) + " {", file=file_u)
+                    print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, "", c_func_name + "_d" + str(-ldiv), ldiv, False) + ";", file=file_u)
+                    print("}", file=file_u)
+                
+                mask_status = funcs[f]["mask_support"]
+                if mask_status and mask_status.is_any_mask():
+                    proto = funcs[f]["proto"]
+                    c_base = _masked_c_symbol(dt_par, dt_ret, f, is_cast, isa=isa, isa_name=True)
+
+                    for lmul in all_lmul:
+                        if mask_status.is_maskable():
+                            file_m = include_manager.get_fd(layer_name, f, variant="m", lmul=lmul)
+                            _mask_tpl_spec(file_m, proto, dt_par, dt_ret, cpp_func_name, c_base, "M", "mask", lmul=lmul, isa = isa, isa_name=True)
+                        if mask_status.is_maskzable():
+                            file_z = include_manager.get_fd(layer_name, f, variant="z", lmul=lmul)
+                            _mask_tpl_spec(file_z, proto, dt_par, dt_ret, cpp_func_name, c_base, "Z", "maskz", lmul=lmul, isa = isa, isa_name=True)
+                        if mask_status.is_masksable():
+                            file_s = include_manager.get_fd(layer_name, f, variant="s", lmul=lmul)
+                            _mask_tpl_spec(file_s, proto, dt_par, dt_ret, cpp_func_name, c_base, "S", "masks", lmul=lmul, isa = isa, isa_name=True)
+
+                    if has_ldiv:
+                        ldiv = -2
+                        if mask_status.is_maskable():
+                            file_m = include_manager.get_fd(layer_name, f, variant="m", lmul=ldiv)
+                            _mask_tpl_spec(file_m, proto, dt_par, dt_ret, cpp_func_name, c_base, "M", "mask", lmul=ldiv, isa = isa, isa_name=True)
+                        if mask_status.is_maskzable():
+                            file_z = include_manager.get_fd(layer_name, f, variant="z", lmul=ldiv)
+                            _mask_tpl_spec(file_z, proto, dt_par, dt_ret, cpp_func_name, c_base, "Z", "maskz", lmul=ldiv, isa = isa, isa_name=True)
+                        if mask_status.is_masksable():
+                            file_s = include_manager.get_fd(layer_name, f, variant="s", lmul=ldiv)
+                            _mask_tpl_spec(file_s, proto, dt_par, dt_ret, cpp_func_name, c_base, "S", "masks", lmul=ldiv, isa = isa, isa_name=True)
+
+        include_manager.resolve_all_dependencies(layer_name, funcs)
+        include_manager.close_layer_fds(layer_name)

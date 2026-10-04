@@ -6,10 +6,12 @@ import { escapeHtml, ICON_COPY } from "./explorer.config.js";
 export function formatCppObjProto(str, lmulKey = "1") {
   if (!str) return "";
   let s = str.replace(/\binline\s+/g, "").trim();
+  // Ensure space after commas
+  s = s.replace(/,(\S)/g, ", $1");
   if (lmulKey === "1") {
     return s.replace(/<([^,>]+),\s*LMUL>/g, "<$1>");
   } else {
-    return s.replace(/<([^,>]+),\s*LMUL>/g, `<$1, LMUL=${lmulKey}>`);
+    return s.replace(/<([^,>]+),\s*LMUL>/g, `<$1, ${lmulKey}>`);
   }
 }
 
@@ -76,20 +78,20 @@ export function highlightCpp(code, customMacros = {}) {
   const tokenPatterns = [
     // 1. Comments
     '(//[^\n]*|/\\*[\\s\\S]*?\\*/)',
-    // 2. Preprocessor
-    '(#[a-zA-Z_]+[^\n]*)',
+    // 2. Preprocessor (stops before inline comment)
+    '(#[a-zA-Z_]+(?:[^\\n/]|/(?!/))*?)',
     // 3. Strings
     '("(?:\\\\.|[^"\\\\])*")',
     // 4. Numbers
     '\\b(0x[0-9a-fA-F]+|\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?[fFulUL]*)\\b',
     // 5. Types (MIPP SIMD types, Rvd, rvd, Rvm, rvm, C/C++ primitives)
-    '\\b(MKIND|rvd_[a-z0-9_]+_t|rvm_[a-z0-9_]+_t|Rvd|rvd|Rvm|rvm|__m128[a-z0-9_]*|__m256[a-z0-9_]*|__m512[a-z0-9_]*|__mmask8|__mmask16|__mmask32|__mmask64|__mmask[0-9]+|uint8x16_t|uint16x8_t|uint32x4_t|uint64x2_t|int8x16_t|int16x8_t|int32x4_t|int64x2_t|float64x2_t|float32x4_t|float[0-9]+x[0-9]+_t|[u]?int[0-9]+x[0-9]+_t|sv[a-z0-9_]+_t|v[a-z0-9_]+_t|reg|msk|void|bool|bool_t|char|int|short|long|float|double|float32|float64|int8|int16|int32|int64|uint8|uint16|uint32|uint64|float32_t|float64_t|uint8_t|uint16_t|uint32_t|uint64_t|int8_t|int16_t|int32_t|int64_t|size_t)\\b',
+    '\\b(VARIANT|rvd_[a-z0-9_]+_t|rvm_[a-z0-9_]+_t|Rvd|rvd|Rvm|rvm|__m128[a-z0-9_]*|__m256[a-z0-9_]*|__m512[a-z0-9_]*|__mmask8|__mmask16|__mmask32|__mmask64|__mmask[0-9]+|uint8x16_t|uint16x8_t|uint32x4_t|uint64x2_t|int8x16_t|int16x8_t|int32x4_t|int64x2_t|float64x2_t|float32x4_t|float[0-9]+x[0-9]+_t|[u]?int[0-9]+x[0-9]+_t|sv[a-z0-9_]+_t|v[a-z0-9_]+_t|reg|msk|void|bool|bool_t|char|int|short|long|float|double|float32|float64|int8|int16|int32|int64|uint8|uint16|uint32|uint64|float32_t|float64_t|uint8_t|uint16_t|uint32_t|uint64_t|int8_t|int16_t|int32_t|int64_t|size_t)\\b',
     // 6. Keywords
     '\\b(const|static|inline|return|if|else|for|while|do|switch|case|default|break|continue|struct|class|template|typename|auto|sizeof|typedef|namespace|using|constexpr|extern)\\b',
     // 7. Functions / Hardware Intrinsics / MIPP / Function declarations & calls
-    '(\\b_mm256_[a-zA-Z0-9_]+|\\b_mm512_[a-zA-Z0-9_]+|\\b_mm_[a-zA-Z0-9_]+|\\bv[a-z0-9_]+|\\bsv[a-z0-9_]+|\\b__riscv_[a-z0-9_]+|\\bmipp::[a-zA-Z0-9_]+|\\bmipp_[a-zA-Z0-9_]+|\\b[a-zA-Z_][a-zA-Z0-9_]*(?=\\s*\\())',
-    // 8. Template parameters (T, T1, T2, LMUL, LDIV, N, MK, M, Z, S, U)
-    '\\b(T|T1|T2|LMUL|LDIV|N|MK|M|Z|S|U)\\b',
+    '(\\b_mm256_[a-zA-Z0-9_]+|\\b_mm512_[a-zA-Z0-9_]+|\\b_mm_[a-zA-Z0-9_]+|\\bv[a-z0-9_]+|\\bsv[a-z0-9_]+|\\b__riscv_[a-z0-9_]+|\\bmipp::[a-zA-Z0-9_]+|\\b(?!mipp_obj\\b)mipp_[a-zA-Z0-9_]+|\\b[a-zA-Z_][a-zA-Z0-9_]*(?=\\s*\\())',
+    // 8. Template parameters (T, T1, T2, LMUL, LDIV, N, V, M, Z, S, U)
+    '\\b(T|T1|T2|LMUL|LDIV|N|V|M|Z|S|U)\\b',
   ];
 
   if (customMacros && typeof customMacros === "object") {

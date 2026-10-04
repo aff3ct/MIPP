@@ -7,7 +7,7 @@ import { ALL_SIMD_EXTS, ALL_CATEGORIES, ALL_DATATYPES, ALL_MASK_MODES, ALL_LEVEL
 export const state = {
   query: "",
   searchField: "all", // 'all' | 'name' | 'desc' | 'proto' | 'hw'
-  flavor: "cpp", // 'c99' | 'cpp' | 'cpp_obj'
+  flavor: "cpp", // 'c99' | 'cpp' | 'obj'
   lmul: "1", // '1' | '2' | '4' | '8' | '-2'
   fontSize: (typeof localStorage !== "undefined" && typeof localStorage.getItem === "function" ? localStorage.getItem("mipp_font_size") : null) || (typeof window !== "undefined" && window.innerWidth <= 768 ? "sm" : "md"),
   selectedSimdExts: [...ALL_SIMD_EXTS],
@@ -174,7 +174,10 @@ export function readUrlHash(allSimdExts, allCategories, allDatatypes, allMaskMod
     const params = new URLSearchParams(hash);
     if (params.has("q")) state.query = params.get("q");
     if (params.has("field")) state.searchField = params.get("field");
-    if (params.has("flavor")) state.flavor = params.get("flavor");
+    if (params.has("flavor")) {
+      const f = params.get("flavor");
+      state.flavor = f === "cpp_obj" ? "obj" : f;
+    }
     if (params.has("lmul")) state.lmul = params.get("lmul");
 
     if (params.has("simd_ext")) {

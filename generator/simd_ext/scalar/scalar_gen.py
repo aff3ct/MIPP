@@ -148,7 +148,7 @@ def _emit_function_body_scalar(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rende
     print("}", file=file)
 
 # Important changes here!!
-def gen_c_functions_scalar_one(isa, file, funcs, f, ff, dt, lmul=0):
+def gen_c_functions_scalar_one(isa, file, funcs, f, ff, dt, lmul=0, include_manager=None):
         
     if ff["mask_variants"]:
         mask_variants = ff["mask_variants"]
@@ -164,6 +164,7 @@ def gen_c_functions_scalar_one(isa, file, funcs, f, ff, dt, lmul=0):
                 mask_variants = mask_variants + ["masks"]
 
     for mask_variant in mask_variants:
+        target_file = include_manager.get_fd(isa["name"], f, variant=mask_variant, lmul=lmul) if include_manager else file
 
         dt_par, dt_ret = _compute_dt_par_dt_ret_scalar(funcs, f, dt)
         dt_key = dt_par + "," + dt_ret
@@ -201,7 +202,7 @@ def gen_c_functions_scalar_one(isa, file, funcs, f, ff, dt, lmul=0):
             dt_par=dt_par,
             dt_ret=dt_ret,
             dt_key=dt_key,
-            file=file,
+            file=target_file,
             lmul=lmul,
         )
         if ph_ret is None:
@@ -223,7 +224,7 @@ def gen_c_functions_scalar_one(isa, file, funcs, f, ff, dt, lmul=0):
             dt_ret=dt_ret,
             ff=ff,
             post_rendering=post_rendering,
-            file=file,
+            file=target_file,
             masked_version=mask_kind,
             lmul=lmul,
         )
@@ -242,16 +243,19 @@ def _emit_separator_scalar(f, file):
 # Important changes here!!
 def gen_c_functions_scalar(isa, include_manager, funcs, implems, lmul=0):
     for f in implems:
-        file = include_manager.get_fd(isa["name"], f)
         if f in funcs:
-            _emit_separator_scalar(f, file)
+            if getattr(include_manager, "granularity", "coarse") == "coarse":
+                file = include_manager.get_fd(isa["name"], f)
+                _emit_separator_scalar(f, file)
+            else:
+                file = None
             for ff in implems[f]:
                 if ff["datatypes"]:
                     datatypes = ff["datatypes"]
                 else:
                     datatypes = funcs[f]["datatypes"]
                 for dt in datatypes:
-                    gen_c_functions_scalar_one(isa, file, funcs, f, ff, dt, lmul=lmul)
+                    gen_c_functions_scalar_one(isa, file, funcs, f, ff, dt, lmul=lmul, include_manager=include_manager)
         else:
             print("Panic: '" + f + "' function does not exist.")
             exit(-1)

@@ -337,7 +337,7 @@ def write_mipp_infos_masked(mipp_infos, base_dir):
 # ---------------------------------------------------------------------------
 
 def match_args_type_cpp(arg_type, cast=False, ret=False, fixed_dtype=False, lmul=1):
-    lmul_str = "" if lmul == 1 else (f",{lmul}" if lmul > 0 else f",-2")
+    lmul_str = "" if lmul == 1 else (f", {lmul}" if lmul > 0 else f", -2")
     if arg_type == "msk":
         t_param = "T2" if (cast and ret) else ("T1" if cast else "T")
         return f"rvm<{t_param}{lmul_str}>"
@@ -353,8 +353,8 @@ def match_args_type_cpp(arg_type, cast=False, ret=False, fixed_dtype=False, lmul
     return "int32_t"
 
 
-def match_args_type_cpp_obj(arg_type, cast=False, ret=False, fixed_dtype=False, lmul=1):
-    lmul_str = "" if lmul == 1 else (f",{lmul}" if lmul > 0 else f",-2")
+def match_args_type_obj(arg_type, cast=False, ret=False, fixed_dtype=False, lmul=1):
+    lmul_str = "" if lmul == 1 else (f", {lmul}" if lmul > 0 else f", -2")
     if arg_type == "msk":
         t_param = "T2" if (cast and ret) else ("T1" if cast else "T")
         return f"Rvm<{t_param}{lmul_str}>"
@@ -417,11 +417,11 @@ class SpecFuncInfo:
         
         tmpl_parts = []
         if mask_kind == "mask":
-            tmpl_parts.append("MKIND MK=M")
+            tmpl_parts.append("VARIANT V = M")
         elif mask_kind == "maskz":
-            tmpl_parts.append("MKIND MK=Z")
+            tmpl_parts.append("VARIANT V = Z")
         elif mask_kind == "masks":
-            tmpl_parts.append("MKIND MK=S")
+            tmpl_parts.append("VARIANT V = S")
 
         if is_pair_func:
             if mask_kind is not None and mask_kind != "unmasked":
@@ -441,8 +441,16 @@ class SpecFuncInfo:
         cnt_ptr = 0
         args_parts = []
 
-        if mask_kind:
-            lmul_arg = f",{lmul}" if lmul != 1 else ""
+        tmpl_parts = []
+        if mask_kind == "mask":
+            tmpl_parts.append("VARIANT V = M")
+        elif mask_kind == "maskz":
+            tmpl_parts.append("VARIANT V = Z")
+        elif mask_kind == "masks":
+            tmpl_parts.append("VARIANT V = S")
+
+        if mask_kind and mask_kind != "unmasked":
+            lmul_arg = f", {lmul}" if lmul != 1 else ""
             if mask_kind in ("mask", "maskz"):
                 args_parts.append(f"const rvm<T{lmul_arg}> m0")
                 cnt_msk += 1
@@ -483,13 +491,11 @@ class SpecFuncInfo:
         ret_str = match_args_type_cpp(self.ret["type"], False, True, ret_fixed, lmul=lmul)
         
         tmpl_parts.append("typename T")
-        if lmul != 1:
-            tmpl_parts.append(f"int LMUL={lmul}")
         tmpl_header = f"template <{', '.join(tmpl_parts)}> "
 
         return f"{tmpl_header}{ret_str} {cpp_name}({args_str});"
 
-    def func_to_str_cpp_obj(self, lmul=1, mask_kind=None):
+    def func_to_str_obj(self, lmul=1, mask_kind=None):
         cpp_name = self.get_cpp_func_name()
         is_pair_func = self.func_name in ("cast", "cast_k", "cvt", "wcvt")
         lmul_arg = f", {lmul}" if lmul != 1 else ""
@@ -498,8 +504,6 @@ class SpecFuncInfo:
             if mask_kind is not None and mask_kind != "unmasked":
                 return ""
             tmpl_parts = ["typename T_DST", "typename T_SRC"]
-            if lmul != 1:
-                tmpl_parts.append(f"int LMUL={lmul}")
             tmpl_str = f"template <{', '.join(tmpl_parts)}> "
             type_name = "Rvm" if self.func_name.endswith("_k") else "Rvd"
             arg_name = "m0" if type_name == "Rvm" else "r0"
@@ -514,11 +518,11 @@ class SpecFuncInfo:
 
         tmpl_parts = []
         if mask_kind == "mask":
-            tmpl_parts.append("MKIND MK=M")
+            tmpl_parts.append("VARIANT V = M")
         elif mask_kind == "maskz":
-            tmpl_parts.append("MKIND MK=Z")
+            tmpl_parts.append("VARIANT V = Z")
         elif mask_kind == "masks":
-            tmpl_parts.append("MKIND MK=S")
+            tmpl_parts.append("VARIANT V = S")
 
         cnt_reg = 0
         cnt_msk = 0
@@ -538,7 +542,7 @@ class SpecFuncInfo:
         for arg in self.args:
             fixed = arg.get("fixeddatatype", False)
             arg_type = arg["type"]
-            type_str = match_args_type_cpp_obj(arg_type, False, False, fixed, lmul=lmul)
+            type_str = match_args_type_obj(arg_type, False, False, fixed, lmul=lmul)
             is_const = arg.get("charac", "RO") == "RO"
 
             if arg_type in ("reg", "msk"):
@@ -568,11 +572,9 @@ class SpecFuncInfo:
 
         args_str = ", ".join(args_parts)
         ret_fixed = self.ret.get("fixeddatatype", False)
-        ret_str = match_args_type_cpp_obj(self.ret["type"], False, True, ret_fixed, lmul=lmul)
+        ret_str = match_args_type_obj(self.ret["type"], False, True, ret_fixed, lmul=lmul)
 
         tmpl_parts.append("typename T")
-        if lmul != 1:
-            tmpl_parts.append(f"int LMUL={lmul}")
         tmpl_header = f"template <{', '.join(tmpl_parts)}> "
 
         lines = [f"{tmpl_header}{ret_str} {func_call_name}({args_str});"]
@@ -658,30 +660,42 @@ class SpecFuncInfo:
             print(f"{desc}\n", file=f)
 
             print("## Headers\n", file=f)
-            print('=== "C++ Object API"', file=f)
-            print("    ```cpp", file=f)
-            print("    // Option 1: Monolithic include (includes all functions)", file=f)
-            print("    #include <mipp_obj.hpp>", file=f)
-            print("    ", file=f)
-            print("    // Option 2: Granular include (faster compilation - choose Option 1 OR Option 2, not both)", file=f)
-            print(f"    #include <mipp/cpp_obj/fun/{self.func_name}.hpp>", file=f)
-            print("    ```\n", file=f)
-            print('=== "C++ API"', file=f)
-            print("    ```cpp", file=f)
-            print("    // Option 1: Monolithic include (includes all functions)", file=f)
-            print("    #include <mipp.hpp>", file=f)
-            print("    ", file=f)
-            print("    // Option 2: Granular include (faster compilation - choose Option 1 OR Option 2, not both)", file=f)
-            print(f"    #include <mipp/cpp/fun/{self.func_name}.hpp>", file=f)
-            print("    ```\n", file=f)
-            print('=== "C99 API"', file=f)
-            print("    ```c", file=f)
-            print("    // Option 1: Monolithic include (includes all functions)", file=f)
-            print("    #include <mipp.h>", file=f)
-            print("    ", file=f)
-            print("    // Option 2: Granular include (faster compilation - choose Option 1 OR Option 2, not both)", file=f)
-            print(f"    #include <mipp/c/fun/{self.func_name}.h>", file=f)
-            print("    ```\n", file=f)
+
+            example_var = "m" if (self.mask_support and self.mask_support.is_maskable()) else "u"
+            var_desc = f"'{example_var}' variant only (*)"
+            var_lmul_desc = f"'{example_var}' + LMUL=2 (*)"
+            atomic_desc = f"2D atomic: '{example_var}' + LMUL=2 (fastest compilation) (*)"
+            pad = lambda s: s.ljust(52)
+
+            def _print_headers_block(flavor_dir, ext, mono_header, lang):
+                print(f'=== "{lang}"', file=f)
+                code_fence = "cpp" if lang != "C99 API" else "c"
+                print(f"    ```{code_fence}", file=f)
+                headers = [
+                    "// Option 1: Monolithic (entire library)",
+                    f"#include <{mono_header}>",
+                    "",
+                    "// Option 2: Category level",
+                    f"{pad(f'#include <mipp/{flavor_dir}/cat/{self.category}.{ext}>')}// all variants & LMULs",
+                    f"{pad(f'#include <mipp/{flavor_dir}/cat/{example_var}/{self.category}.{ext}>')}// 1D: {var_desc}",
+                    f"{pad(f'#include <mipp/{flavor_dir}/cat/m2/{self.category}.{ext}>')}// 1D: LMUL=2 only (*)",
+                    f"{pad(f'#include <mipp/{flavor_dir}/cat/{example_var}/m2/{self.category}.{ext}>')}// 2D: {var_lmul_desc}",
+                    "",
+                    "// Option 3: Function level (recommended for minimal dependencies)",
+                    f"{pad(f'#include <mipp/{flavor_dir}/fun/{self.func_name}.{ext}>')}// all variants & LMULs",
+                    f"{pad(f'#include <mipp/{flavor_dir}/fun/{example_var}/{self.func_name}.{ext}>')}// 1D: {var_desc}",
+                    f"{pad(f'#include <mipp/{flavor_dir}/fun/m2/{self.func_name}.{ext}>')}// 1D: LMUL=2 only (*)",
+                    f"{pad(f'#include <mipp/{flavor_dir}/fun/{example_var}/m2/{self.func_name}.{ext}>')}// {atomic_desc}",
+                    "",
+                    "// (*) Fine-grained headers require MIPP generated with '--granularity fine'",
+                ]
+                for line in headers:
+                    print(f"    {line}", file=f)
+                print("    ```\n", file=f)
+
+            _print_headers_block("obj", "hpp", "mipp_obj.hpp", "C++ Object API")
+            _print_headers_block("cpp", "hpp", "mipp.hpp", "C++ API")
+            _print_headers_block("c", "h", "mipp.h", "C99 API")
 
             print("## Prototypes\n", file=f)
             print('=== "C99 API"', file=f)
@@ -707,7 +721,7 @@ class SpecFuncInfo:
             for lmul in [1, 2, 4, 8, -2]:
                 lmul_label = f"LMUL = {lmul}" if lmul > 0 else "LMUL = 1/2"
                 print(f"    // {lmul_label}", file=f)
-                obj_block = self.func_to_str_cpp_obj(lmul)
+                obj_block = self.func_to_str_obj(lmul)
                 for line in obj_block.splitlines():
                     print(f"    {line}", file=f)
             print("    ```\n", file=f)

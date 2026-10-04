@@ -13,7 +13,7 @@
             }
         }
     },
-    "description": "Reusable templates for generated test files, organised by section and dialect namespace (c, cpp, obj, cpp_obj, all).",
+    "description": "Reusable templates for generated test files, organised by section and dialect namespace (c, cpp, obj, all).",
     "properties": {
         "assertions": {
             "type": "object",
@@ -26,9 +26,6 @@
                     "$ref": "#/definitions/template_map"
                 },
                 "obj": {
-                    "$ref": "#/definitions/template_map"
-                },
-                "cpp_obj": {
                     "$ref": "#/definitions/template_map"
                 },
                 "all": {
@@ -50,9 +47,6 @@
                 "obj": {
                     "$ref": "#/definitions/template_map"
                 },
-                "cpp_obj": {
-                    "$ref": "#/definitions/template_map"
-                },
                 "all": {
                     "$ref": "#/definitions/template_map"
                 }
@@ -70,9 +64,6 @@
                     "$ref": "#/definitions/template_map"
                 },
                 "obj": {
-                    "$ref": "#/definitions/template_map"
-                },
-                "cpp_obj": {
                     "$ref": "#/definitions/template_map"
                 },
                 "all": {

@@ -20,7 +20,7 @@ from registry import interfaces, categories
 from include_gen import generate_mipp_h, _match_category
 from ci_generator import generate_c_interface
 from cpp_generator import generate_cpp
-from cpp_object_generator import generate_cpp_object
+from obj_generator import generate_obj
 
 from include_gen import IncludeManager
 
@@ -114,7 +114,7 @@ def _expand_layer_keywords(selected):
     Expand convenience keywords into concrete actions.
     Returns: (isa_layers_to_run, run_wrappers: bool)
       - isa_layers_to_run is a set among: sse,avx,avx512,sve,rvv,neon,scalar
-      - run_wrappers means run generate_mipp_h + generate_c_interface + generate_cpp + generate_cpp_object
+      - run_wrappers means run generate_mipp_h + generate_c_interface + generate_cpp + generate_obj
     """
     isa_all = {"sse", "avx", "avx512", "sve", "rvv", "neon", "scalar"}
 
@@ -240,48 +240,95 @@ def discover_and_sort_isas(path, limit_to_isas=None):
     return isas_dict, implems_dict, sorted_names
 
 
-def generate_public_headers(output_dir="../include"):
+def generate_public_headers(output_dir="../include", granularity="coarse"):
     """
     Generates granular public headers:
     - include/mipp/c/cat/<cat>.h
     - include/mipp/c/fun/<func>.h
     - include/mipp/cpp/cat/<cat>.hpp
     - include/mipp/cpp/fun/<func>.hpp
-    - include/mipp/cpp_obj/cat/<cat>.hpp
-    - include/mipp/cpp_obj/fun/<func>.hpp
+    - include/mipp/obj/cat/<cat>.hpp
+    - include/mipp/obj/fun/<func>.hpp
+
+    In fine mode, additionally generates:
+    - include/mipp/<wrapper>/cat/<v>/<l>/<cat>
+    - include/mipp/<wrapper>/cat/<v>/<cat>
+    - include/mipp/<wrapper>/cat/<l>/<cat>
+    - include/mipp/<wrapper>/fun/<v>/<l>/<func>
+    - include/mipp/<wrapper>/fun/<v>/<func>
+    - include/mipp/<wrapper>/fun/<l>/<func>
     """
     mipp_dir = os.path.join(output_dir, "mipp")
 
+    def _get_supported_variants(f_name):
+        v_list = ["u"]
+        if "mask_support" in interfaces.get(f_name, {}):
+            support = interfaces[f_name]["mask_support"]
+            if support.is_maskable():
+                v_list.append("m")
+            if support.is_maskzable():
+                v_list.append("z")
+            if support.is_masksable():
+                v_list.append("s")
+        return v_list
+
+    wrappers_meta = [
+        ("c", "h"),
+        ("cpp", "hpp"),
+        ("obj", "hpp"),
+    ]
+
     # 1. Categories
     for cat, funcs in categories.items():
-        # C category header: mipp/c/cat/<cat>.h
-        cat_c_dir = os.path.join(mipp_dir, "c", "cat")
-        os.makedirs(cat_c_dir, exist_ok=True)
-        with open(os.path.join(cat_c_dir, f"{cat}.h"), "w", encoding="utf-8") as f:
-            f.write("#pragma once\n\n")
-            f.write('#include "mipp/internal/interfaces/c/common.h"\n')
-            for fn in funcs:
-                f.write(f'#include "mipp/internal/interfaces/c/functions/{cat}/{fn}.h"\n')
+        # Top-level category umbrellas: mipp/{c, cpp, obj}/cat/<cat>.{h, hpp}
+        for w_name, ext in wrappers_meta:
+            cat_dir = os.path.join(mipp_dir, w_name, "cat")
+            os.makedirs(cat_dir, exist_ok=True)
+            with open(os.path.join(cat_dir, f"{cat}.{ext}"), "w", encoding="utf-8") as f:
+                f.write("#pragma once\n\n")
+                f.write(f'#include "mipp/internal/interfaces/{w_name}/common.{ext}"\n')
+                for fn in funcs:
+                    f.write(f'#include "mipp/internal/interfaces/{w_name}/functions/{cat}/{fn}.{ext}"\n')
 
-        # C++ category header: mipp/cpp/cat/<cat>.hpp
-        cat_cpp_dir = os.path.join(mipp_dir, "cpp", "cat")
-        os.makedirs(cat_cpp_dir, exist_ok=True)
-        with open(os.path.join(cat_cpp_dir, f"{cat}.hpp"), "w", encoding="utf-8") as f:
-            f.write("#pragma once\n\n")
-            f.write('#include "mipp/internal/interfaces/cpp/common.hpp"\n')
-            for fn in funcs:
-                f.write(f'#include "mipp/internal/interfaces/cpp/functions/{cat}/{fn}.hpp"\n')
+        if granularity == "fine":
+            cat_variants = sorted(list(set(v for fn in funcs for v in _get_supported_variants(fn))))
+            cat_lmuls = ["m1", "m2", "m4", "m8", "d2"]
 
-        # C++ Obj category header: mipp/cpp_obj/cat/<cat>.hpp
-        cat_cpp_obj_dir = os.path.join(mipp_dir, "cpp_obj", "cat")
-        os.makedirs(cat_cpp_obj_dir, exist_ok=True)
-        with open(os.path.join(cat_cpp_obj_dir, f"{cat}.hpp"), "w", encoding="utf-8") as f:
-            f.write("#pragma once\n\n")
-            f.write('#include "mipp/internal/interfaces/cpp_obj/common.hpp"\n')
-            for fn in funcs:
-                f.write(f'#include "mipp/internal/interfaces/cpp_obj/functions/{cat}/{fn}.hpp"\n')
+            for w_name, ext in wrappers_meta:
+                # 1a. Atomic: cat/<v>/<l>/<cat>.{ext}
+                for v in cat_variants:
+                    funcs_in_v = [fn for fn in funcs if v in _get_supported_variants(fn)]
+                    for l in cat_lmuls:
+                        atom_dir = os.path.join(mipp_dir, w_name, "cat", v, l)
+                        os.makedirs(atom_dir, exist_ok=True)
+                        with open(os.path.join(atom_dir, f"{cat}.{ext}"), "w", encoding="utf-8") as f:
+                            f.write("#pragma once\n\n")
+                            f.write(f'#include "mipp/internal/interfaces/{w_name}/common.{ext}"\n')
+                            for fn in funcs_in_v:
+                                f.write(f'#include "mipp/internal/interfaces/{w_name}/functions/{cat}/{v}/{l}/{fn}.{ext}"\n')
 
-    # 2. Per-function headers: mipp/{c, cpp, cpp_obj}/fun/<fn>.{h, hpp}
+                # 1b. Variant umbrella: cat/<v>/<cat>.{ext}
+                for v in cat_variants:
+                    funcs_in_v = [fn for fn in funcs if v in _get_supported_variants(fn)]
+                    v_dir = os.path.join(mipp_dir, w_name, "cat", v)
+                    os.makedirs(v_dir, exist_ok=True)
+                    with open(os.path.join(v_dir, f"{cat}.{ext}"), "w", encoding="utf-8") as f:
+                        f.write("#pragma once\n\n")
+                        f.write(f'#include "mipp/internal/interfaces/{w_name}/common.{ext}"\n')
+                        for fn in funcs_in_v:
+                            f.write(f'#include "mipp/internal/interfaces/{w_name}/functions/{cat}/{v}/{fn}.{ext}"\n')
+
+                # 1c. LMUL umbrella: cat/<l>/<cat>.{ext}
+                for l in cat_lmuls:
+                    l_dir = os.path.join(mipp_dir, w_name, "cat", l)
+                    os.makedirs(l_dir, exist_ok=True)
+                    with open(os.path.join(l_dir, f"{cat}.{ext}"), "w", encoding="utf-8") as f:
+                        f.write("#pragma once\n\n")
+                        f.write(f'#include "mipp/internal/interfaces/{w_name}/common.{ext}"\n')
+                        for fn in funcs:
+                            f.write(f'#include "mipp/internal/interfaces/{w_name}/functions/{cat}/{l}/{fn}.{ext}"\n')
+
+    # 2. Per-function headers: mipp/{c, cpp, obj}/fun/<fn>.{h, hpp}
     for fn in interfaces:
         cat = _match_category(fn)
 
@@ -297,11 +344,52 @@ def generate_public_headers(output_dir="../include"):
         with open(os.path.join(func_cpp_dir, f"{fn}.hpp"), "w", encoding="utf-8") as f:
             f.write(f"#pragma once\n#include \"mipp/internal/interfaces/cpp/functions/{cat}/{fn}.hpp\"\n")
 
-        # mipp/cpp_obj/fun/<fn>.hpp
-        func_cpp_obj_dir = os.path.join(mipp_dir, "cpp_obj", "fun")
-        os.makedirs(func_cpp_obj_dir, exist_ok=True)
-        with open(os.path.join(func_cpp_obj_dir, f"{fn}.hpp"), "w", encoding="utf-8") as f:
-            f.write(f"#pragma once\n#include \"mipp/internal/interfaces/cpp_obj/functions/{cat}/{fn}.hpp\"\n")
+        # mipp/obj/fun/<fn>.hpp
+        func_obj_dir = os.path.join(mipp_dir, "obj", "fun")
+        os.makedirs(func_obj_dir, exist_ok=True)
+        with open(os.path.join(func_obj_dir, f"{fn}.hpp"), "w", encoding="utf-8") as f:
+            f.write(f"#pragma once\n#include \"mipp/internal/interfaces/obj/functions/{cat}/{fn}.hpp\"\n")
+
+        if granularity == "fine":
+            func_variants = ["u"]
+            if "mask_support" in interfaces[fn]:
+                support = interfaces[fn]["mask_support"]
+                if support.is_maskable():
+                    func_variants.append("m")
+                if support.is_maskzable():
+                    func_variants.append("z")
+                if support.is_masksable():
+                    func_variants.append("s")
+            func_lmuls = ["m1", "m2", "m4", "m8", "d2"]
+
+            wrappers_meta = [
+                ("c", "h"),
+                ("cpp", "hpp"),
+                ("obj", "hpp"),
+            ]
+
+            for w_name, ext in wrappers_meta:
+                # 2a. Atomic: fun/<v>/<l>/<fn>
+                for v in func_variants:
+                    for l in func_lmuls:
+                        atom_dir = os.path.join(mipp_dir, w_name, "fun", v, l)
+                        os.makedirs(atom_dir, exist_ok=True)
+                        with open(os.path.join(atom_dir, f"{fn}.{ext}"), "w", encoding="utf-8") as f:
+                            f.write(f"#pragma once\n#include \"mipp/internal/interfaces/{w_name}/functions/{cat}/{v}/{l}/{fn}.{ext}\"\n")
+
+                # 2b. Variant umbrella: fun/<v>/<fn>
+                for v in func_variants:
+                    v_dir = os.path.join(mipp_dir, w_name, "fun", v)
+                    os.makedirs(v_dir, exist_ok=True)
+                    with open(os.path.join(v_dir, f"{fn}.{ext}"), "w", encoding="utf-8") as f:
+                        f.write(f"#pragma once\n#include \"mipp/internal/interfaces/{w_name}/functions/{cat}/{v}/{fn}.{ext}\"\n")
+
+                # 2c. LMUL umbrella: fun/<l>/<fn>
+                for l in func_lmuls:
+                    l_dir = os.path.join(mipp_dir, w_name, "fun", l)
+                    os.makedirs(l_dir, exist_ok=True)
+                    with open(os.path.join(l_dir, f"{fn}.{ext}"), "w", encoding="utf-8") as f:
+                        f.write(f"#pragma once\n#include \"mipp/internal/interfaces/{w_name}/functions/{cat}/{l}/{fn}.{ext}\"\n")
 
 
 def main(argv=None):
@@ -338,6 +426,17 @@ def main(argv=None):
             "Type of header to generate. Affects how the IncludeManager resolves dependencies and organizes files. "
             "Choices: function_header (default) generates one header per function, organized in folders by ISA. "
             "category_header generates one header per ISA category (e.g. all float64 functions in one header), organized in folders by ISA."
+        ),
+    )
+
+    parser.add_argument(
+        "--granularity",
+        choices=["coarse", "fine"],
+        default="coarse",
+        help=(
+            "Granularity of generated headers: "
+            "'coarse' (default) generates single file per function (e.g. add.h), "
+            "'fine' generates 2D atomic headers (variant/lmul/func.h) and umbrella aggregator files."
         ),
     )
     
@@ -442,7 +541,7 @@ def main(argv=None):
 
 
     # CREATE INCLUDE MANAGER
-    include_manager = IncludeManager(sorted_names, mode=args.header_type)
+    include_manager = IncludeManager(sorted_names, mode=args.header_type, granularity=args.granularity)
 
     # ISA generators
     from c_generator import generate_c_layer
@@ -476,8 +575,8 @@ def main(argv=None):
         isa_list = [isas_dict[name] for name in sorted_names]
         generate_c_interface(isa_list, include_manager)
         generate_cpp(include_manager, isa_list)
-        generate_cpp_object(include_manager, output_dir=include_gen_path)
-        generate_public_headers(output_dir=include_gen_path)
+        generate_obj(include_manager, output_dir=include_gen_path)
+        generate_public_headers(output_dir=include_gen_path, granularity=args.granularity)
         print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
 
     # Print summary table at the end

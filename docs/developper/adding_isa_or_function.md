@@ -45,7 +45,7 @@ This classification is used by:
 
 - `gen_mipp_docs.py` to organize API reference pages.
 - `gen_mipp_tests.py` to structure test suites.
-- `cpp_object_generator.py` to organize method categories in the `rvd` and `rvm` object interfaces.
+- `obj_generator.py` to organize method categories in the `rvd` and `rvm` object interfaces.
 
 ### Step 3: Provide the Scalar Baseline (`generator/helpers_headers/registry_scalar_implems.json`)
 

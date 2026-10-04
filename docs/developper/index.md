@@ -68,7 +68,7 @@ generator/
 │   ├── tools.py                     # DSL parsing, type resolution, LMUL solver
 │   ├── c_generator.py               # C99 interface emission & typedef generation
 │   ├── cpp_generator.py             # C++ template wrapper emission
-│   ├── cpp_object_generator.py      # C++ Rvd/Rvm class wrapper emission
+│   ├── obj_generator.py             # C++ Rvd/Rvm class wrapper emission
 │   └── include_gen.py               # IncludeManager and header dependency graph
 │
 ├── helpers_tests/                   # Test generation engine

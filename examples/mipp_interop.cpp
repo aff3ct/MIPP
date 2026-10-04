@@ -7,28 +7,28 @@
 #include <type_traits>
 
 // Granular includes for C++ Object Layer
-#include <mipp/cpp_obj/fun/add.hpp>
-#include <mipp/cpp_obj/fun/sub.hpp>
-#include <mipp/cpp_obj/fun/mul.hpp>
-#include <mipp/cpp_obj/fun/cmplt.hpp>
-#include <mipp/cpp_obj/fun/blend.hpp>
-#include <mipp/cpp_obj/fun/load.hpp>
-#include <mipp/cpp_obj/fun/loadu.hpp>
-#include <mipp/cpp_obj/fun/set.hpp>
-#include <mipp/cpp_obj/fun/set_k.hpp>
-#include <mipp/cpp_obj/fun/set0.hpp>
-#include <mipp/cpp_obj/fun/set0_k.hpp>
-#include <mipp/cpp_obj/fun/set1.hpp>
-#include <mipp/cpp_obj/fun/set1_k.hpp>
-#include <mipp/cpp_obj/fun/storeu.hpp>
-#include <mipp/cpp_obj/fun/andb.hpp>
-#include <mipp/cpp_obj/fun/andb_k.hpp>
-#include <mipp/cpp_obj/fun/orb.hpp>
-#include <mipp/cpp_obj/fun/orb_k.hpp>
-#include <mipp/cpp_obj/fun/xorb.hpp>
-#include <mipp/cpp_obj/fun/xorb_k.hpp>
-#include <mipp/cpp_obj/fun/notb.hpp>
-#include <mipp/cpp_obj/fun/notb_k.hpp>
+#include <mipp/obj/fun/add.hpp>
+#include <mipp/obj/fun/sub.hpp>
+#include <mipp/obj/fun/mul.hpp>
+#include <mipp/obj/fun/cmplt.hpp>
+#include <mipp/obj/fun/blend.hpp>
+#include <mipp/obj/fun/load.hpp>
+#include <mipp/obj/fun/loadu.hpp>
+#include <mipp/obj/fun/set.hpp>
+#include <mipp/obj/fun/set_k.hpp>
+#include <mipp/obj/fun/set0.hpp>
+#include <mipp/obj/fun/set0_k.hpp>
+#include <mipp/obj/fun/set1.hpp>
+#include <mipp/obj/fun/set1_k.hpp>
+#include <mipp/obj/fun/storeu.hpp>
+#include <mipp/obj/fun/andb.hpp>
+#include <mipp/obj/fun/andb_k.hpp>
+#include <mipp/obj/fun/orb.hpp>
+#include <mipp/obj/fun/orb_k.hpp>
+#include <mipp/obj/fun/xorb.hpp>
+#include <mipp/obj/fun/xorb_k.hpp>
+#include <mipp/obj/fun/notb.hpp>
+#include <mipp/obj/fun/notb_k.hpp>
 
 // Granular include for C++ Functional Layer (to test C++ Func / C++ Obj interoperability)
 #include <mipp/cpp/fun/abs.hpp>

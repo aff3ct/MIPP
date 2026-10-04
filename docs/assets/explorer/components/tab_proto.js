@@ -9,6 +9,8 @@ import { ALL_MASK_MODES } from "../data.js";
 function cleanProto(str) {
   if (!str) return "";
   let s = str.replace(/\binline\s+/g, "").trim();
+  // Ensure space after commas in types and parameter lists
+  s = s.replace(/,(\S)/g, ", $1");
   // When there are operator overloads (multiple lines), keep template on one line
   if (s.includes("\n")) {
     return s;
@@ -32,26 +34,57 @@ export function renderTabProto(entry) {
   const globalVariant = state.maskVariant || "unmasked";
   const targetMask = availableVariants.includes(globalVariant) ? globalVariant : "unmasked";
 
-  // Headers (Option 1: Monolithic vs Option 2: Granular)
-  let monoInclude = "";
-  let granInclude = "";
+  // Headers: from coarsest to finest grain
+  const maskVariantCode = {
+    unmasked: "u",
+    mask: "m",
+    maskz: "z",
+    masks: "s",
+  }[targetMask] || "u";
+
+  const lmulCode = {
+    "-2": "d2",
+    "1": "m1",
+    "2": "m2",
+    "4": "m4",
+    "8": "m8",
+  }[String(state.lmul)] || "m1";
+
+  const lmulLabel = String(state.lmul) === "-2" ? "LMUL=1/2" : `LMUL=${state.lmul}`;
+
+  let flavorDir = "cpp";
+  let ext = "hpp";
+  let monoHeader = "mipp.hpp";
   if (state.flavor === "c99") {
-    monoInclude = "#include <mipp.h>";
-    granInclude = `#include <mipp/c/fun/${entry.name}.h>`;
-  } else if (state.flavor === "cpp") {
-    monoInclude = "#include <mipp.hpp>";
-    granInclude = `#include <mipp/cpp/fun/${entry.name}.hpp>`;
-  } else {
-    monoInclude = "#include <mipp_obj.hpp>";
-    granInclude = `#include <mipp/cpp_obj/fun/${entry.name}.hpp>`;
+    flavorDir = "c";
+    ext = "h";
+    monoHeader = "mipp.h";
+  } else if (state.flavor === "obj") {
+    flavorDir = "obj";
+    ext = "hpp";
+    monoHeader = "mipp_obj.hpp";
   }
 
+  const cat = entry.category || "arithmetic";
+  const pad = (s, width = 52) => (s.length < width ? s + " ".repeat(width - s.length) : s + " ");
+
   const headersText = [
-    "// Option 1: Monolithic include (includes all functions)",
-    monoInclude,
+    "// Option 1: Monolithic (entire library)",
+    `#include <${monoHeader}>`,
     "",
-    "// Option 2: Granular include (faster compilation - choose Option 1 OR Option 2, not both)",
-    granInclude,
+    "// Option 2: Category level",
+    `${pad(`#include <mipp/${flavorDir}/cat/${cat}.${ext}>`)}// all variants & LMULs`,
+    `${pad(`#include <mipp/${flavorDir}/cat/${maskVariantCode}/${cat}.${ext}>`)}// 1D: '${maskVariantCode}' variant only (*)`,
+    `${pad(`#include <mipp/${flavorDir}/cat/${lmulCode}/${cat}.${ext}>`)}// 1D: ${lmulLabel} only (*)`,
+    `${pad(`#include <mipp/${flavorDir}/cat/${maskVariantCode}/${lmulCode}/${cat}.${ext}>`)}// 2D: '${maskVariantCode}' + ${lmulLabel} (*)`,
+    "",
+    "// Option 3: Function level (recommended for minimal dependencies)",
+    `${pad(`#include <mipp/${flavorDir}/fun/${entry.name}.${ext}>`)}// all variants & LMULs`,
+    `${pad(`#include <mipp/${flavorDir}/fun/${maskVariantCode}/${entry.name}.${ext}>`)}// 1D: '${maskVariantCode}' variant only (*)`,
+    `${pad(`#include <mipp/${flavorDir}/fun/${lmulCode}/${entry.name}.${ext}>`)}// 1D: ${lmulLabel} only (*)`,
+    `${pad(`#include <mipp/${flavorDir}/fun/${maskVariantCode}/${lmulCode}/${entry.name}.${ext}>`)}// 2D atomic: '${maskVariantCode}' + ${lmulLabel} (fastest compilation) (*)`,
+    "",
+    "// (*) Fine-grained headers require MIPP generated with '--granularity fine'",
   ].join("\n");
 
   let codeText = "";
@@ -102,7 +135,8 @@ export function renderTabProto(entry) {
     }
   } else {
     // C++ Object API
-    const objSample = protoData.cpp_obj_samples ? protoData.cpp_obj_samples[lmulKey] : null;
+    const objSamples = protoData.obj_samples || protoData.cpp_obj_samples;
+    const objSample = objSamples ? objSamples[lmulKey] : null;
     let proto = "";
     if (typeof objSample === "object" && objSample !== null) {
       proto = cleanProto(objSample[targetMask] || objSample["unmasked"] || "");
@@ -110,16 +144,16 @@ export function renderTabProto(entry) {
       proto = cleanProto(objSample);
     }
     if (!proto) {
-      proto = cleanProto(protoData.cpp_obj || `mipp::${entry.name}(...)`);
+      proto = cleanProto(protoData.obj || protoData.cpp_obj || `mipp::${entry.name}(...)`);
     }
     codeText = formatCppObjProto(proto, lmulKey);
   }
 
   const isUnsupported = !availableVariants.includes(globalVariant);
   const title = state.flavor === "c99"
-    ? "C99 Declarations"
+    ? "C99 API"
     : state.flavor === "cpp"
-      ? "C++ Function Templates"
+      ? "C++ Functional API"
       : "C++ Object API";
 
   return `
@@ -143,9 +177,9 @@ export function renderTabProto(entry) {
           <div class="mipp-code-box-header-left" style="display: flex; align-items: center; gap: 0.5rem;">
             <span class="mipp-code-box-title">${title}</span>
             ${isUnsupported
-              ? `<span style="font-size: 0.75rem; color: #f59e0b; font-style: italic;">(${globalVariant} unsupported, showing unmasked)</span>`
-              : ""
-            }
+      ? `<span style="font-size: 0.75rem; color: #f59e0b; font-style: italic;">(${globalVariant} unsupported, showing unmasked)</span>`
+      : ""
+    }
           </div>
           <button class="mipp-icon-btn copy-proto-btn" data-copy="${escapeHtml(codeText)}" title="Copy prototype">
             ${ICON_COPY}

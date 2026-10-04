@@ -16,6 +16,35 @@ from registry import *
 # single_header -> all functions live in a single header, dependencies are included in that header.
 
 # The helpers 
+def normalize_variant(variant):
+    if not variant or variant in ("no_mask", "u"):
+        return "u"
+    if variant in ("mask", "m"):
+        return "m"
+    if variant in ("maskz", "z"):
+        return "z"
+    if variant in ("masks", "s"):
+        return "s"
+    return "u"
+
+def normalize_lmul(lmul):
+    if lmul in (0, 1, "0", "1", "m1"):
+        return "m1"
+    if isinstance(lmul, int):
+        if lmul > 1:
+            return f"m{lmul}"
+        elif lmul < 0:
+            return f"d{abs(lmul)}"
+    if isinstance(lmul, str):
+        if lmul.startswith(("m", "d")):
+            return lmul
+        try:
+            val = int(lmul)
+            return normalize_lmul(val)
+        except ValueError:
+            pass
+    return "m1"
+
 def _get_include_name(func, layer=""):
     if layer in ("cpp", "templates") or layer.endswith("_cpp"):
         return f"{func}.hpp"
@@ -612,12 +641,17 @@ class IncludeLayer:
 
 class IncludeManager:
     # all the include layers
-    def __init__(self, isa_list, base_dir="../include", mode="function_header"):
+    def __init__(self, isa_list, base_dir="../include", mode="function_header", granularity="coarse"):
         self.layers = {} #key is layer name, value is IncludeLayer object
         self.base_dir = base_dir
         self.mode = mode
+        self.granularity = granularity
+        self.isa_list = isa_list
+        self.atomic_files = {} # (layer_name, func, variant, lmul) -> dict
+        self.emitted_atomics = {} # layer_name -> dict(func -> set((variant, lmul)))
+
         for layer in ["c", "cpp", "obj", "scalar", "templates"]:
-            self.layers[layer] = IncludeLayer(layer,mode=mode)
+            self.layers[layer] = IncludeLayer(layer, mode=mode)
         for isa in isa_list:
             self.layers[isa] = IncludeLayer(isa, mode=mode)
         for isa in isa_list:
@@ -627,10 +661,23 @@ class IncludeManager:
         for layer in self.layers:
             for func in ["common"] + list(interfaces.keys()):
                 self.layers[layer].add_includes(func, interfaces, categories)
-        #generate fd for each include path
-        # for layer in self.layers:
-        #     self.layers[layer].get_fd("../include")
-            
+
+    def get_isa_config(self, isa_name):
+        if not hasattr(self, "_isa_configs"):
+            self._isa_configs = {}
+        if isa_name not in self._isa_configs:
+            if isa_name in ("scalar", "scalar_cpp"):
+                from registry import scalar_isa
+                self._isa_configs[isa_name] = scalar_isa
+            else:
+                clean_name = isa_name[:-4] if isa_name.endswith("_cpp") else isa_name
+                try:
+                    from tools import load_isa_config
+                    self._isa_configs[isa_name] = load_isa_config(clean_name)[0]
+                except Exception:
+                    self._isa_configs[isa_name] = {}
+        return self._isa_configs[isa_name]
+
     def _get_layer_dir(self, layer_name):
         internal_dir = f"{self.base_dir}/mipp/internal"
         if layer_name == "c":
@@ -645,56 +692,311 @@ class IncludeManager:
         else:
             return f"{internal_dir}/simd_ext/{layer_name}/c"
 
-    def get_fd(self, layer_name, func):
-        if self.mode == "function_header":
-            if layer_name in self.layers:
-                layer = self.layers[layer_name]
-                target_dir = self._get_layer_dir(layer_name)
-                if func in layer.includes:
-                    return layer.includes[func].get_fd(target_dir)
-        elif self.mode == "category_header":
-            if layer_name in self.layers:
-                layer = self.layers[layer_name]
-                category = _match_category(func)
-                target_dir = self._get_layer_dir(layer_name)
+    def get_fd(self, layer_name, func, variant=None, lmul=None):
+        if self.granularity == "coarse" or func == "common" or layer_name == "templates":
+            if self.mode == "function_header":
+                if layer_name in self.layers:
+                    layer = self.layers[layer_name]
+                    target_dir = self._get_layer_dir(layer_name)
+                    if func in layer.includes:
+                        return layer.includes[func].get_fd(target_dir)
+            elif self.mode == "category_header":
+                if layer_name in self.layers:
+                    layer = self.layers[layer_name]
+                    category = _match_category(func)
+                    target_dir = self._get_layer_dir(layer_name)
 
-                if category in layer.categories:
-                    return layer.categories[category].get_fd(target_dir)
-        return None
-    
+                    if category in layer.categories:
+                        return layer.categories[category].get_fd(target_dir)
+            return None
+        elif self.granularity == "fine":
+            v = normalize_variant(variant)
+            l = normalize_lmul(lmul)
+            return self._get_atomic_fd(layer_name, func, v, l)
+
+    def _get_atomic_fd(self, layer_name, func, v, l):
+        key = (layer_name, func, v, l)
+        if key in self.atomic_files and self.atomic_files[key]["file"] is not None:
+            return self.atomic_files[key]["file"]
+
+        category = _match_category(func)
+        target_dir = self._get_layer_dir(layer_name)
+        ext = ".hpp" if (layer_name in ("cpp", "templates") or layer_name.endswith("_cpp")) else ".h"
+        full_path = f"{target_dir}/functions/{category}/{v}/{l}/{func}{ext}"
+        os.makedirs(os.path.dirname(full_path), exist_ok=True)
+
+        fd = open(full_path, "a+", encoding="utf-8", newline="")
+        if key not in self.atomic_files:
+            self.atomic_files[key] = {
+                "file": fd,
+                "full_path": full_path,
+                "layer": layer_name,
+                "func": func,
+                "variant": v,
+                "lmul": l,
+                "category": category,
+                "ext": ext,
+                "dependencies": set(),
+                "_is_prefixed": False
+            }
+        else:
+            self.atomic_files[key]["file"] = fd
+
+        if layer_name not in self.emitted_atomics:
+            self.emitted_atomics[layer_name] = {}
+        if func not in self.emitted_atomics[layer_name]:
+            self.emitted_atomics[layer_name][func] = set()
+        self.emitted_atomics[layer_name][func].add((v, l))
+
+        return fd
+
     def resolve_all_dependencies(self, layer_name, funcs):
         target_dir = self._get_layer_dir(layer_name)
-        if self.mode == "function_header":
-            for func in self.layers[layer_name].includes:
-                if func == "common":
+        if self.granularity == "coarse":
+            if self.mode == "function_header":
+                for func in self.layers[layer_name].includes:
+                    if func == "common":
+                        continue
+
+                    category = _match_category(func)
+                    include_path = self.layers[layer_name].includes[func]
+                    include_path.resolve_dependencies(funcs, lmul=0, mask_kind="", layer=layer_name)
+                    for mask in ["mask", "maskz", "masks"]:
+                        include_path.resolve_dependencies(funcs, lmul=0, mask_kind=mask, layer=layer_name)
+
+                    # Sub-ISA dependency (for ldiv wrappers) based on sub_isa in JSON
+                    sub_isa = self.get_isa_config(layer_name).get("sub_isa")
+                    if sub_isa:
+                        include_path.dependencies.add(f"mipp/internal/simd_ext/{sub_isa}/c/functions/{category}/{func}.h")
+
+                    # Auto-scalar fallback requires the scalar variant to be included
+                    if not self.get_isa_config(layer_name).get("is_scalar", False) and layer_name not in ("c", "cpp"):
+                        include_path.dependencies.add(f"mipp/internal/simd_ext/scalar/c/functions/{category}/{func}.h")
+                        isa_cfg = self.get_isa_config(layer_name)
+                        proto = funcs[func].get("proto", {}) if funcs and func in funcs else {}
+                        has_msk_arg = (
+                            (funcs[func]["mask_support"].is_any_mask() if "mask_support" in funcs[func] else False) if funcs and func in funcs else False
+                            or any(arg.get("type") == "msk" for arg in proto.get("args", []))
+                        )
+                        ret_is_msk = (proto.get("ret", {}).get("type") == "msk")
+
+                        needs_scalar_tomsk = (
+                            func == "tomsk"
+                            or (isa_cfg.get("hw_mask", False) and not isa_cfg.get("hw_mask_is_bitfield", False) and has_msk_arg)
+                        )
+                        needs_scalar_toreg = (
+                            func == "toreg"
+                            or (isa_cfg.get("hw_mask", False) and ret_is_msk and not (isa_cfg.get("hw_mask_is_bitfield", False) and func in ("toreg", "tomsk", "cast_k")))
+                        )
+
+                        if needs_scalar_tomsk:
+                            include_path.dependencies.add("mipp/internal/simd_ext/scalar/c/functions/reinterpret/tomsk.h")
+                        if needs_scalar_toreg:
+                            include_path.dependencies.add("mipp/internal/simd_ext/scalar/c/functions/reinterpret/toreg.h")
+                    include_path.write_prefix(target_dir)
+
+            elif self.mode == "category_header":
+                for category in self.layers[layer_name].categories:
+                    include_category = self.layers[layer_name].categories[category]
+                    include_category.resolve_dependencies(funcs, lmul=0, mask_kind="", layer=layer_name)
+                    for mask in ["mask", "maskz", "masks"]:
+                        include_category.resolve_dependencies(funcs, lmul=0, mask_kind=mask, layer=layer_name)
+                    include_category.write_prefix(target_dir)
+
+        elif self.granularity == "fine":
+            ext = ".hpp" if (layer_name in ("cpp", "templates") or layer_name.endswith("_cpp")) else ".h"
+            common_include = _get_include_path("common", layer_name)
+
+            for key, item in list(self.atomic_files.items()):
+                if key[0] != layer_name:
                     continue
+                func = item["func"]
+                v = item["variant"]
+                l = item["lmul"]
+                category = item["category"]
 
-                category = _match_category(func)
-                include_path = self.layers[layer_name].includes[func]
-                include_path.resolve_dependencies(funcs, lmul=0, mask_kind="", layer=layer_name)
-                for mask in ["mask", "maskz", "masks"]:
-                    include_path.resolve_dependencies(funcs, lmul=0, mask_kind=mask, layer=layer_name)
+                item["dependencies"].add(common_include)
 
-                # avx512 / avx hack to have access to avx/sse functions for ldiv
-                if layer_name == "avx512": 
-                    include_path.dependencies.add(f"mipp/internal/simd_ext/avx/c/functions/{category}/{func}.h")
-                elif layer_name == "avx": 
-                    include_path.dependencies.add(f"mipp/internal/simd_ext/sse/c/functions/{category}/{func}.h")
-                
-                # auto-scalar fallback requires the scalar variant to be included
-                if layer_name not in ("scalar", "scalar_cpp", "c", "cpp"):
-                    include_path.dependencies.add(f"mipp/internal/simd_ext/scalar/c/functions/{category}/{func}.h")
-                    include_path.dependencies.add("mipp/internal/simd_ext/scalar/c/functions/reinterpret/toreg.h")
-                    include_path.dependencies.add("mipp/internal/simd_ext/scalar/c/functions/reinterpret/tomsk.h")
-                include_path.write_prefix(target_dir)
+                if layer_name.endswith("_cpp"):
+                    isa = layer_name[:-4]
+                    # Corresponding C atomic header
+                    item["dependencies"].add(f"mipp/internal/simd_ext/{isa}/c/functions/{category}/{v}/{l}/{func}.h")
+                    # Generic template if masked or set
+                    if v in ("m", "z", "s") or func in ["set0", "set0_k", "set", "set_k", "set1", "set1_k", "load", "loadu"]:
+                        item["dependencies"].add(f"mipp/internal/templates/cpp/functions/{category}/{func}.hpp")
+                elif layer_name not in ("c", "cpp"):
+                    # C SIMD / Scalar ISA layer
+                    isa_cfg = self.get_isa_config(layer_name)
+                    is_scalar = bool(isa_cfg.get("is_scalar", False))
+                    sw_lmuls = [int(x) for x in isa_cfg.get("sw_lmul", []) if int(x) > 0]
+                    sub_isa = isa_cfg.get("sub_isa")
+                    has_hw_mask = bool(isa_cfg.get("hw_mask", False))
 
-        elif self.mode == "category_header":
-            for category in self.layers[layer_name].categories:
-                include_category = self.layers[layer_name].categories[category]
-                include_category.resolve_dependencies(funcs, lmul=0, mask_kind="", layer=layer_name)
-                for mask in ["mask", "maskz", "masks"]:
-                    include_category.resolve_dependencies(funcs, lmul=0, mask_kind=mask, layer=layer_name)
-                include_category.write_prefix(target_dir)
+                    # Determine if this file is a pure software LMUL wrapper or sub-ISA wrapper
+                    l_val = int(l[1:]) if l.startswith("m") else 0
+                    is_sw_lmul = (l_val in sw_lmuls and l_val > 1)
+                    is_sub_isa_wrapper = (l == "d2" and bool(sub_isa))
+                    is_horizontal = funcs[func].get("horizontal", False) if funcs and func in funcs else False
+                    is_sw_wrapper = (is_sw_lmul and not is_horizontal) or is_sub_isa_wrapper
+
+                    # Rule 1: Software LMUL hierarchy (only if this LMUL is software-emulated, or scalar)
+                    if is_scalar or (8 in sw_lmuls):
+                        if l == "m8":
+                            item["dependencies"].add(f"mipp/internal/simd_ext/{layer_name}/c/functions/{category}/{v}/m4/{func}{ext}")
+                    if is_scalar or (4 in sw_lmuls):
+                        if l == "m4":
+                            item["dependencies"].add(f"mipp/internal/simd_ext/{layer_name}/c/functions/{category}/{v}/m2/{func}{ext}")
+                    if is_scalar or (2 in sw_lmuls):
+                        if l == "m2":
+                            item["dependencies"].add(f"mipp/internal/simd_ext/{layer_name}/c/functions/{category}/{v}/m1/{func}{ext}")
+
+                    # Sub-ISA ldiv wrapper dependency (governed by sub_isa from JSON)
+                    if l == "d2" and sub_isa:
+                        item["dependencies"].add(f"mipp/internal/simd_ext/{sub_isa}/c/functions/{category}/{v}/m1/{func}{ext}")
+
+                    if not is_sw_wrapper:
+                        # Rule 2: Mask dependencies (derived generically from JSON templates via candidate resolver)
+                        if v in ("m", "z", "s"):
+                            mkind = "mask" if v == "m" else ("maskz" if v == "z" else "masks")
+                            m_deps = _get_dependencies_mask(func, funcs, mkind, layer=layer_name) if funcs else {}
+                            for req in m_deps:
+                                req_cat = _match_category(req)
+                                item["dependencies"].add(f"mipp/internal/simd_ext/{layer_name}/c/functions/{req_cat}/u/m1/{req}{ext}")
+                        else:
+                            # Regular dependencies from funcs (only for unmasked variant "u")
+                            reg_deps = _get_dependencies_regular(func, funcs, layer=layer_name) if funcs else {}
+                            for req in reg_deps:
+                                if req != func:
+                                    req_cat = _match_category(req)
+                                    item["dependencies"].add(f"mipp/internal/simd_ext/{layer_name}/c/functions/{req_cat}/u/m1/{req}{ext}")
+
+                        # Rule 3: Auto-scalar fallback (governed by is_scalar from JSON)
+                        if not is_scalar:
+                            item["dependencies"].add(f"mipp/internal/simd_ext/scalar/c/functions/{category}/{v}/{l}/{func}.h")
+                            proto = funcs[func].get("proto", {}) if funcs and func in funcs else {}
+                            has_msk_arg = (
+                                v in ("m", "z", "s")
+                                or any(arg.get("type") == "msk" for arg in proto.get("args", []))
+                            )
+                            ret_is_msk = (proto.get("ret", {}).get("type") == "msk")
+
+                            needs_scalar_tomsk = (
+                                func == "tomsk"
+                                or (isa_cfg.get("hw_mask", False) and not isa_cfg.get("hw_mask_is_bitfield", False) and has_msk_arg)
+                            )
+                            needs_scalar_toreg = (
+                                func == "toreg"
+                                or (isa_cfg.get("hw_mask", False) and ret_is_msk and not (isa_cfg.get("hw_mask_is_bitfield", False) and func in ("toreg", "tomsk", "cast_k")))
+                            )
+
+                            if needs_scalar_tomsk:
+                                item["dependencies"].add(f"mipp/internal/simd_ext/scalar/c/functions/reinterpret/u/{l}/tomsk.h")
+                            if needs_scalar_toreg:
+                                item["dependencies"].add(f"mipp/internal/simd_ext/scalar/c/functions/reinterpret/u/{l}/toreg.h")
+
+                self._write_atomic_prefix(item)
+
+            self.generate_umbrella_headers(layer_name)
+
+    def _write_atomic_prefix(self, item):
+        if item.get("_is_prefixed", False):
+            return
+        full_path = item["full_path"]
+        if item["file"] is not None:
+            item["file"].flush()
+            item["file"].seek(0)
+            old = item["file"].read()
+            item["file"].close()
+            item["file"] = None
+        else:
+            try:
+                with open(full_path, "r", encoding="utf-8", newline="") as f:
+                    old = f.read()
+            except FileNotFoundError:
+                old = ""
+
+        # Separate forward declarations and body lines
+        fwd_decls = []
+        body_lines = []
+        for line in old.split("\n"):
+            stripped = line.strip()
+            if (stripped.startswith("static inline ") or stripped.startswith("static ")) and stripped.endswith(";") and "{" not in stripped:
+                fwd_decls.append(line)
+            else:
+                body_lines.append(line)
+
+        while body_lines and body_lines[0].strip() == "":
+            body_lines.pop(0)
+
+        prefix = "#pragma once\n\n"
+        if fwd_decls:
+            for decl in fwd_decls:
+                prefix += decl + "\n"
+            prefix += "\n"
+
+        dep_list = sorted(list(item["dependencies"]))
+        for dep in dep_list:
+            prefix += f'#include "{dep}"\n'
+        if dep_list:
+            prefix += "\n"
+
+        if item["layer"].endswith("_cpp"):
+            prefix += "namespace mipp {\n\n"
+
+        with open(full_path, "w", encoding="utf-8", newline="") as f:
+            f.write(prefix)
+            if body_lines:
+                f.write("\n".join(body_lines))
+            if item["layer"].endswith("_cpp"):
+                f.write("\n}\n")
+
+        item["file"] = open(full_path, "a+", encoding="utf-8", newline="")
+        item["_is_prefixed"] = True
+
+    def generate_umbrella_headers(self, layer_name):
+        target_dir = self._get_layer_dir(layer_name)
+        ext = ".hpp" if (layer_name in ("cpp", "templates") or layer_name.endswith("_cpp")) else ".h"
+        funcs_map = self.emitted_atomics.get(layer_name, {})
+        common_include = _get_include_path("common", layer_name)
+
+        for func, vl_pairs in funcs_map.items():
+            category = _match_category(func)
+            emitted_variants = sorted(list(set(v for v, l in vl_pairs)))
+            emitted_lmuls = sorted(list(set(l for v, l in vl_pairs)))
+
+            # 1. Variant umbrellas: functions/<cat>/<v>/<func>
+            for v in emitted_variants:
+                v_path = f"{target_dir}/functions/{category}/{v}/{func}{ext}"
+                os.makedirs(os.path.dirname(v_path), exist_ok=True)
+                with open(v_path, "w", encoding="utf-8", newline="") as f:
+                    f.write("#pragma once\n\n")
+                    f.write(f'#include "{common_include}"\n\n')
+                    lmuls_for_v = [l for ev, l in vl_pairs if ev == v]
+                    for l in ["m1", "m2", "m4", "m8", "d2"]:
+                        if l in lmuls_for_v:
+                            f.write(f'#include "{l}/{func}{ext}"\n')
+
+            # 2. LMUL umbrellas: functions/<cat>/<l>/<func>
+            for l in emitted_lmuls:
+                l_path = f"{target_dir}/functions/{category}/{l}/{func}{ext}"
+                os.makedirs(os.path.dirname(l_path), exist_ok=True)
+                with open(l_path, "w", encoding="utf-8", newline="") as f:
+                    f.write("#pragma once\n\n")
+                    f.write(f'#include "{common_include}"\n\n')
+                    vars_for_l = [v for v, el in vl_pairs if el == l]
+                    for v in ["u", "m", "z", "s"]:
+                        if v in vars_for_l:
+                            f.write(f'#include "../{v}/{l}/{func}{ext}"\n')
+
+            # 3. Top-level function umbrella: functions/<cat>/<func>
+            top_path = f"{target_dir}/functions/{category}/{func}{ext}"
+            os.makedirs(os.path.dirname(top_path), exist_ok=True)
+            with open(top_path, "w", encoding="utf-8", newline="") as f:
+                f.write("#pragma once\n\n")
+                f.write(f'#include "{common_include}"\n\n')
+                for v in ["u", "m", "z", "s"]:
+                    if v in emitted_variants:
+                        f.write(f'#include "{v}/{func}{ext}"\n')
 
     def close_fd(self, layer_name, func):
         if layer_name in self.layers:
@@ -707,11 +1009,17 @@ class IncludeManager:
             layer = self.layers[layer_name]
             for func in layer.includes:
                 layer.includes[func].close_fd()
+        for key, item in list(self.atomic_files.items()):
+            if key[0] == layer_name:
+                if item["file"] is not None:
+                    item["file"].close()
+                    item["file"] = None
 
     def get_layer(self, layer_name):
         if layer_name in self.layers:
             return self.layers[layer_name]
         return None
+
 
     def create_glue_file(self, layer_name, file_path):
         target_dir = self._get_layer_dir(layer_name)

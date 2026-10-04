@@ -378,7 +378,7 @@ def resolve_candidates(isa, funcs, lmul=0):
                     if isa.get("hw_mask_requires_toreg", False):
                         if not (isa.get("hw_mask_is_bitfield", False) and f in ["toreg", "tomsk", "cast_k"]):
                             has_msk_arg = any(arg["type"] == "msk" for arg in funcs[f]["proto"]["args"]) or mask_kind is not None
-                            if has_msk_arg:
+                            if has_msk_arg and not isa.get("hw_mask_is_bitfield", False):
                                 single_dt_par = dt_par.split(",")[0]
                                 req_dt_par = single_dt_par + "," + single_dt_par
                                 auto_scalar_reqs.setdefault("toreg", []).append(req_dt_par)
@@ -389,8 +389,7 @@ def resolve_candidates(isa, funcs, lmul=0):
                             if funcs[f]["proto"]["ret"]["type"] == "msk":
                                 single_dt_ret = dt_ret.split(",")[0]
                                 req_dt_ret = single_dt_ret + "," + single_dt_ret
-                                if req_dt_ret not in auto_scalar_reqs.get("toreg", []):
-                                    auto_scalar_reqs.setdefault("toreg", []).append(req_dt_ret)
+                                if req_dt_ret not in auto_scalar_reqs.get("tomsk", []):
                                     auto_scalar_reqs.setdefault("tomsk", []).append(req_dt_ret)
                                     if isa.get("hw_mask_extract_via_store", False):
                                         if req_dt_ret not in auto_scalar_reqs.get("store", []):
@@ -692,8 +691,8 @@ def resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators
 
     # 2. Write code to files
     for f in funcs:
-        file_w = file.get_fd(isa["name"], f) if is_inc_mgr else file
-        if emit_separators and is_inc_mgr:
+        if emit_separators and is_inc_mgr and getattr(file, "granularity", "coarse") == "coarse":
+            file_w = file.get_fd(isa["name"], f)
             if lmul in [2, 4, 8]:
                 from codegen.lmul_orchestrator import maybe_emit_lmul_separator
                 maybe_emit_lmul_separator(isa["name"], f, file_w)
@@ -721,9 +720,10 @@ def resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators
                 if resolved[key]:
                     has_active = any(cond != "0" for cand, cond in resolved[key])
                     if has_active:
+                        target_file = file.get_fd(isa["name"], f, variant=mask_kind, lmul=lmul) if is_inc_mgr else file
                         func_name = build_func_name_internal(isa, dt, dt_par, dt_ret, f, masked_version=mask_kind, lmul=lmul)
                         proto_str = build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul=lmul, isa_name=True, masked_version=mask_kind)
-                        print("static " + proto_str + ";", file=file_w)
+                        print("static " + proto_str + ";", file=target_file)
                         
         for dt in funcs[f]["datatypes"]:
             dt_par, dt_ret = compute_dt_par_dt_ret(None, None, dt, check_support=False)
@@ -741,6 +741,7 @@ def resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators
                     
             for mask_kind in mask_kinds:
                 key = (f, dt_key, mask_kind)
+                target_file = file.get_fd(isa["name"], f, variant=mask_kind, lmul=lmul) if is_inc_mgr else file
                 for cand, cond in resolved[key]:
                     if cond == "0":
                         continue
@@ -751,20 +752,21 @@ def resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators
                         post_rendering = ph_ret["converted_ir"]
                         
                         if not cand.get("emitted", False):
-                            print("", file=file_w)
+                            print("", file=target_file)
                             if cond:
-                                print(f"#if {cond}", file=file_w)
-                            emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, cand["ff"], post_rendering, file_w, masked_version=mask_kind, level=cand["level"], lmul=lmul)
+                                print(f"#if {cond}", file=target_file)
+                            emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, cand["ff"], post_rendering, target_file, masked_version=mask_kind, level=cand["level"], lmul=lmul)
                             if cond:
-                                print("#endif", file=file_w)
+                                print("#endif", file=target_file)
                             
                     elif cand["type"] == "auto_scalar":
-                        _gen_c_auto_scalar_fallback_one(isa, file_w, funcs, f, dt, mask_kind, cond, lmul=lmul)
+                        _gen_c_auto_scalar_fallback_one(isa, target_file, funcs, f, dt, mask_kind, cond, lmul=lmul)
                         
                     elif cand["type"] == "stub":
                         if cond:
-                            print(f"#if {cond}", file=file_w)
+                            print(f"#if {cond}", file=target_file)
                         func_name = build_func_name_internal(isa, dt, dt_par, dt_ret, f, masked_version=mask_kind, lmul=lmul)
-                        _missing_emit_stub(file_w, funcs, f, dt_par, dt_ret, isa, func_name, masked_version=mask_kind, lmul=lmul)
+                        _missing_emit_stub(target_file, funcs, f, dt_par, dt_ret, isa, func_name, masked_version=mask_kind, lmul=lmul)
                         if cond:
-                            print("#endif", file=file_w)
+                            print("#endif", file=target_file)
+

@@ -8,7 +8,7 @@ It accepts the following CLI arguments:
 
 - "c": only generate `tests/src/c` 
 - "cpp": only generate `tests/src/cpp` 
-- "obj": only generate `tests/src/cpp_obj` 
+- "obj": only generate `tests/src/obj` 
 - "all": default behavior, generates all of the tests.
 
 The script only overwrites the test files if they have changed, to avoid 

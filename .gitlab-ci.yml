@@ -56,7 +56,7 @@ generation-tests:
     paths:
       - tests/src/c
       - tests/src/cpp
-      - tests/src/cpp_obj
+      - tests/src/obj
   tags:
     - x86_64
     - linux

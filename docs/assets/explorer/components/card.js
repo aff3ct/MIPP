@@ -45,9 +45,9 @@ export function getActivePrototype(entry) {
     return String(sample);
   }
 
-  const cppObjSamples = (entry.prototypes && entry.prototypes.cpp_obj_samples) || entry.cpp_obj_samples;
-  if (state.flavor === "cpp_obj") {
-    let sample = (cppObjSamples && (cppObjSamples[lmulKey] || cppObjSamples["1"])) || protoData.cpp_obj || "";
+  const objSamples = (entry.prototypes && (entry.prototypes.obj_samples || entry.prototypes.cpp_obj_samples)) || entry.obj_samples || entry.cpp_obj_samples;
+  if (state.flavor === "obj" || state.flavor === "cpp_obj") {
+    let sample = (objSamples && (objSamples[lmulKey] || objSamples["1"])) || protoData.obj || protoData.cpp_obj || "";
     if (typeof sample === "object" && sample !== null) {
       sample = sample[targetMask] || sample["unmasked"] || Object.values(sample)[0] || "";
     } else if (Array.isArray(sample)) {

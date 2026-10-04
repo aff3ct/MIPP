@@ -356,71 +356,185 @@ def _ci_ldiv_writer(f,func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask
     if ldiv_isas:
         print("#endif", file=file)
 
-def _gen_ci_functions(isa_list, include_manager, funcs):
-    for f in funcs:
-        file = include_manager.get_fd("c", f)
-        for dt in funcs[f]["datatypes"]:
-            if len(dt.split(',')) <= 1:
-                dt_par = dt.split(',')[0]
-                dt_ret = dt.split(',')[0]
+def _gen_ci_functions_fine(f, isa_list, include_manager, funcs):
+    category = _match_category(f)
+    for dt in funcs[f]["datatypes"]:
+        if len(dt.split(',')) <= 1:
+            dt_par = dt.split(',')[0]
+            dt_ret = dt.split(',')[0]
+        else:
+            dt_par = dt.split(',')[0]
+            dt_ret = dt.split(',')[1]
+
+        if len(dt.split(',')) <= 1:
+            func_name = build_func_name_short(isa_list[0], dt_par, f, False)
+        else:
+            func_name = build_func_name(isa_list[0], dt_par, dt_ret, f, False)
+
+        # 1. Unmasked LMUL=0 (m1)
+        file_u_m1 = include_manager.get_fd("c", f, variant="u", lmul=0)
+        print("\nstatic " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name, 0, False) + " {", file=file_u_m1)
+        for i, isa in enumerate(isa_list):
+            if i == 0:
+                print("#if " + isa["gen_define"], file=file_u_m1)
             else:
-                dt_par = dt.split(',')[0]
-                dt_ret = dt.split(',')[1]
-                dtk = dt_par + "," + dt_ret
-            dt_key = dt_par + "," + dt_ret
+                print("#elif " + isa["gen_define"], file=file_u_m1)
 
             if len(dt.split(',')) <= 1:
-                func_name = build_func_name_short(isa_list[0], dt_par, f, False);
+                func_name_impl = build_func_name_short(isa, dt_par, f)
             else:
-                func_name = build_func_name(isa_list[0], dt_par, dt_ret, f, False);
-            print("\nstatic " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name, 0, False) + " {", file=file)
-            for i, isa in  enumerate(isa_list):
-                if i == 0:
-                    print("#if " + isa["gen_define"], file=file)
+                func_name_impl = build_func_name(isa, dt_par, dt_ret, f)
+            print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa, func_name_impl) + ";", file=file_u_m1)
+            if i == len(isa_list)-1:
+                print("#else", file=file_u_m1)
+                emit_panic_stub(func_name, file=file_u_m1)
+                print("#endif", file=file_u_m1)
+        print("}", file=file_u_m1)
+
+        # 2. Masked LMUL=0 (m1)
+        mask_status = funcs[f]["mask_support"] if "mask_support" in funcs[f] else MaskSupport()
+        if mask_status.is_maskable():
+            file_m_m1 = include_manager.get_fd("c", f, variant="m", lmul=0)
+            _ci_mask_writer(f, dt, isa_list, file_m_m1, "mask", func_name, 0)
+        if mask_status.is_maskzable():
+            file_z_m1 = include_manager.get_fd("c", f, variant="z", lmul=0)
+            _ci_mask_writer(f, dt, isa_list, file_z_m1, "maskz", func_name, 0)
+        if mask_status.is_masksable():
+            file_s_m1 = include_manager.get_fd("c", f, variant="s", lmul=0)
+            _ci_mask_writer(f, dt, isa_list, file_s_m1, "masks", func_name, 0)
+
+        # 3. LMULs
+        for lmul in all_lmul:
+            file_u_lmul = include_manager.get_fd("c", f, variant="u", lmul=lmul)
+            _ci_lmul_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file_u_lmul, lmul=lmul)
+
+            if mask_status.is_maskable():
+                file_m_lmul = include_manager.get_fd("c", f, variant="m", lmul=lmul)
+                _ci_lmul_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file_m_lmul, mask_type="mask", lmul=lmul)
+            if mask_status.is_maskzable():
+                file_z_lmul = include_manager.get_fd("c", f, variant="z", lmul=lmul)
+                _ci_lmul_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file_z_lmul, mask_type="maskz", lmul=lmul)
+            if mask_status.is_masksable():
+                file_s_lmul = include_manager.get_fd("c", f, variant="s", lmul=lmul)
+                _ci_lmul_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file_s_lmul, mask_type="masks", lmul=lmul)
+
+        # 4. LDIV (lmul = -2)
+        file_u_ldiv = include_manager.get_fd("c", f, variant="u", lmul=-2)
+        _ci_ldiv_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file_u_ldiv, ldiv=-2)
+        if mask_status.is_maskable():
+            file_m_ldiv = include_manager.get_fd("c", f, variant="m", lmul=-2)
+            _ci_ldiv_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file_m_ldiv, mask_type="mask", ldiv=-2)
+        if mask_status.is_maskzable():
+            file_z_ldiv = include_manager.get_fd("c", f, variant="z", lmul=-2)
+            _ci_ldiv_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file_z_ldiv, mask_type="maskz", ldiv=-2)
+        if mask_status.is_masksable():
+            file_s_ldiv = include_manager.get_fd("c", f, variant="s", lmul=-2)
+            _ci_ldiv_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file_s_ldiv, mask_type="masks", ldiv=-2)
+
+def _gen_ci_functions(isa_list, include_manager, funcs):
+    is_fine = getattr(include_manager, "granularity", "coarse") == "fine"
+    for f in funcs:
+        if is_fine:
+            _gen_ci_functions_fine(f, isa_list, include_manager, funcs)
+        else:
+            file = include_manager.get_fd("c", f)
+            for dt in funcs[f]["datatypes"]:
+                if len(dt.split(',')) <= 1:
+                    dt_par = dt.split(',')[0]
+                    dt_ret = dt.split(',')[0]
                 else:
-                    print("#elif " + isa["gen_define"], file=file)
+                    dt_par = dt.split(',')[0]
+                    dt_ret = dt.split(',')[1]
+                    dtk = dt_par + "," + dt_ret
+                dt_key = dt_par + "," + dt_ret
 
                 if len(dt.split(',')) <= 1:
-                    func_name_impl = build_func_name_short(isa, dt_par, f);
+                    func_name = build_func_name_short(isa_list[0], dt_par, f, False);
                 else:
-                    func_name_impl = build_func_name(isa, dt_par, dt_ret, f);
-                print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa, func_name_impl) + ";", file=file)
-                if i == len(isa_list)-1:
-                    print("#else", file=file)
-                    emit_panic_stub(func_name, file=file)
-                    print("#endif", file=file)
+                    func_name = build_func_name(isa_list[0], dt_par, dt_ret, f, False);
+                print("\nstatic " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name, 0, False) + " {", file=file)
+                for i, isa in  enumerate(isa_list):
+                    if i == 0:
+                        print("#if " + isa["gen_define"], file=file)
+                    else:
+                        print("#elif " + isa["gen_define"], file=file)
 
-            print("}", file=file)
+                    if len(dt.split(',')) <= 1:
+                        func_name_impl = build_func_name_short(isa, dt_par, f);
+                    else:
+                        func_name_impl = build_func_name(isa, dt_par, dt_ret, f);
+                    print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa, func_name_impl) + ";", file=file)
+                    if i == len(isa_list)-1:
+                        print("#else", file=file)
+                        emit_panic_stub(func_name, file=file)
+                        print("#endif", file=file)
 
-            _gen_ci_mask_functions(f, dt, isa_list, file, 0, func_name=func_name)
-            
-            for lmul in all_lmul:
-                _ci_lmul_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, lmul=lmul)
+                print("}", file=file)
 
-            for lmul in all_lmul:
-                mask_status = ""
-                if "mask_support" in funcs[f] :
-                    mask_status = funcs[f]["mask_support"]
-                else :
-                    mask_status = MaskSupport()
-
-                if not mask_status.is_any_mask() :
-                    continue
-                if mask_status.is_maskable() :
-                    _ci_lmul_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_type="mask", lmul=lmul)
+                _gen_ci_mask_functions(f, dt, isa_list, file, 0, func_name=func_name)
                 
-                if mask_status.is_maskzable() :
-                    _ci_lmul_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_type="maskz", lmul=lmul)
-                if mask_status.is_masksable() :			
-                    _ci_lmul_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_type="masks", lmul=lmul)
-            
-            # for ldiv in all_ldiv:
-            _ci_ldiv_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, ldiv=-2)
+                for lmul in all_lmul:
+                    _ci_lmul_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, lmul=lmul)
 
-        if include_manager.mode == "function_header":
-            custom_prefix = _custom_prefix_generator(f, isa_list)
-            include_manager.write_custom_prefix("c", f, custom_prefix)
-    if include_manager.mode == "category_header":
+                for lmul in all_lmul:
+                    mask_status = ""
+                    if "mask_support" in funcs[f] :
+                        mask_status = funcs[f]["mask_support"]
+                    else :
+                        mask_status = MaskSupport()
+
+                    if not mask_status.is_any_mask() :
+                        continue
+                    if mask_status.is_maskable() :
+                        _ci_lmul_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_type="mask", lmul=lmul)
+                    
+                    if mask_status.is_maskzable() :
+                        _ci_lmul_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_type="maskz", lmul=lmul)
+                    if mask_status.is_masksable() :			
+                        _ci_lmul_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_type="masks", lmul=lmul)
+                
+                # for ldiv in all_ldiv:
+                _ci_ldiv_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, ldiv=-2)
+
+            if include_manager.mode == "function_header":
+                custom_prefix = _custom_prefix_generator(f, isa_list)
+                include_manager.write_custom_prefix("c", f, custom_prefix)
+
+    if not is_fine and include_manager.mode == "category_header":
         for category in include_manager.layers["c"].categories:
             custom_prefix = _custom_prefix_generator(category, isa_list)
             include_manager.write_custom_prefix("c", category, custom_prefix)
+    elif is_fine:
+        # Write prefix for all atomic files in layer "c"
+        for key, item in list(include_manager.atomic_files.items()):
+            if key[0] == "c":
+                fn = item["func"]
+                cat = item["category"]
+                v = item["variant"]
+                l = item["lmul"]
+                valid_isas = [
+                    isa for isa in isa_list
+                    if l != "d2" or (isa.get("is_scalar", False) or any(x < 0 for x in isa.get("hw_lmul", []) + isa.get("sw_lmul", [])))
+                ]
+                pfx = '#pragma once\n\n#include "mipp/internal/interfaces/c/common.h"\n\n'
+                for i, isa in enumerate(valid_isas):
+                    macro = isa["gen_define"]
+                    inc = f'#include "mipp/internal/simd_ext/{isa["name"].lower()}/c/functions/{cat}/{v}/{l}/{fn}.h"\n'
+                    if i == 0:
+                        pfx += f"#if {macro}\n{inc}"
+                    else:
+                        pfx += f"#elif {macro}\n{inc}"
+                pfx += "#endif\n\n"
+                include_manager._write_atomic_prefix(item)
+                # Ensure the prefix includes the ISA dispatch
+                full_path = item["full_path"]
+                with open(full_path, "r", encoding="utf-8") as f_in:
+                    cur = f_in.read()
+                if "#pragma once" in cur:
+                    cur = cur.replace("#pragma once\n\n", "")
+                with open(full_path, "w", encoding="utf-8") as f_out:
+                    f_out.write(pfx + cur)
+
+        include_manager.generate_umbrella_headers("c")
+        include_manager.close_layer_fds("c")
+

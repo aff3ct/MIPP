@@ -24,17 +24,25 @@ For large-scale projects, production pipelines, or builds with hundreds of trans
 
 ```cpp
 // Option 2: Granular inclusion (C++ Object API example)
-#include <mipp/cpp_obj/fun/load.hpp>
-#include <mipp/cpp_obj/fun/add.hpp>
-#include <mipp/cpp_obj/fun/mul.hpp>
-#include <mipp/cpp_obj/fun/store.hpp>
+#include <mipp/obj/fun/load.hpp>
+#include <mipp/obj/fun/add.hpp>
+#include <mipp/obj/fun/mul.hpp>
+#include <mipp/obj/fun/store.hpp>
 ```
 
 Corresponding granular paths exist across all three API tiers:
 
 - **C Low-Level API**: `<mipp/c/fun/<func>.h>` (or category headers `<mipp/c/cat/<category>.h>`)
 - **C++ Functional API**: `<mipp/cpp/fun/<func>.hpp>` (or category headers `<mipp/cpp/cat/<category>.hpp>`)
-- **C++ Object API**: `<mipp/cpp_obj/fun/<func>.hpp>` (or category headers `<mipp/cpp_obj/cat/<category>.hpp>`)
+- **C++ Object API**: `<mipp/obj/fun/<func>.hpp>` (or category headers `<mipp/obj/cat/<category>.hpp>`)
+
+##### Fine-Grained & Atomic 2D Headers (`--granularity fine`)
+
+When MIPP headers are generated with `--granularity fine`, you can target even more specific subsets to achieve the fastest possible compilation times:
+
+- **1D Variant Umbrella**: `<mipp/cpp/fun/<variant>/<func>.hpp>` or `<mipp/cpp/cat/<variant>/<category>.hpp>` (e.g. `m/add.hpp`)
+- **1D LMUL Umbrella**: `<mipp/cpp/fun/<lmul>/<func>.hpp>` or `<mipp/cpp/cat/<lmul>/<category>.hpp>` (e.g. `m2/add.hpp`)
+- **2D Atomic Fine**: `<mipp/cpp/fun/<variant>/<lmul>/<func>.hpp>` or `<mipp/cpp/cat/<variant>/<lmul>/<category>.hpp>` (e.g. `m/m2/add.hpp`)
 
 Benchmarking shows that granular inclusion drastically reduces preprocessor expansion, slashes compiler parsing time by up to 5x-10x, and substantially reduces peak compiler memory consumption (RSS).
 

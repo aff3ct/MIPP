@@ -58,8 +58,8 @@ export function renderSearchBar() {
             <button class="mipp-segment-btn ${state.flavor === "cpp" ? "active" : ""}" data-flavor="cpp">
               <span class="mipp-dialect-full">C++ Functional</span><span class="mipp-dialect-sm">C++ Func</span>
             </button>
-            <button class="mipp-segment-btn ${state.flavor === "cpp_obj" ? "active" : ""}" data-flavor="cpp_obj">
-              <span class="mipp-dialect-full">C++ Object</span><span class="mipp-dialect-sm">C++ Obj</span>
+            <button class="mipp-segment-btn ${state.flavor === "obj" || state.flavor === "cpp_obj" ? "active" : ""}" data-flavor="obj">
+              <span class="mipp-dialect-full">C++ Object</span><span class="mipp-dialect-sm">Obj</span>
             </button>
           </div>
         </div>

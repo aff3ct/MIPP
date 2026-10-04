@@ -60,7 +60,7 @@ def clean_code_indentation(s):
     return textwrap.dedent(s).strip()
 
 
-def build_cpp_obj_prototype(func, interfaces_dict):
+def build_obj_prototype(func, interfaces_dict):
     """
     Generates a representative C++ Object API prototype (e.g. `r0 + r1` or `r0.blend(r1, m0)`).
     """
@@ -657,28 +657,28 @@ def build_mask_modes_metadata():
             "label": "unmasked",
             "badge_class": "mask-unmasked",
             "description": "Unpredicated standard vector operation",
-            "cpp_obj_support": True
+            "obj_support": True
         },
         "mask": {
             "id": "mask",
             "label": "mask",
             "badge_class": "mask-mask",
             "description": "Predicated execution with blend / merge preservation",
-            "cpp_obj_support": True
+            "obj_support": True
         },
         "maskz": {
             "id": "maskz",
             "label": "maskz",
             "badge_class": "mask-maskz",
             "description": "Predicated execution with zeroing for false lanes",
-            "cpp_obj_support": True
+            "obj_support": True
         },
         "masks": {
             "id": "masks",
             "label": "masks",
             "badge_class": "mask-masks",
             "description": "Predicated execution with explicit fallback source register",
-            "cpp_obj_support": True
+            "obj_support": True
         }
     }
 
@@ -953,13 +953,13 @@ def generate_mipp_api_data(project_root=None):
 
         # Prototypes across flavors and LMUL ratios
         try:
-            cpp_obj_proto = spec_info.func_to_str_cpp_obj(1)
+            obj_proto = spec_info.func_to_str_obj(1)
         except Exception:
-            cpp_obj_proto = build_cpp_obj_prototype(func, interfaces)
+            obj_proto = build_obj_prototype(func, interfaces)
 
         c99_samples = {}
         cpp_samples = {}
-        cpp_obj_samples = {}
+        obj_samples = {}
 
         mask_variants_list = ["unmasked"]
         if mask_flags.get("mask"):
@@ -979,7 +979,7 @@ def generate_mipp_api_data(project_root=None):
             lmul_key = str(lmul)
             c99_samples[lmul_key] = {}
             cpp_samples[lmul_key] = {}
-            cpp_obj_samples[lmul_key] = {}
+            obj_samples[lmul_key] = {}
 
             for mvariant in mask_variants_list:
                 m_param = None if mvariant == "unmasked" else mvariant
@@ -997,10 +997,10 @@ def generate_mipp_api_data(project_root=None):
                     cpp_samples[lmul_key][mvariant] = ""
 
                 try:
-                    cpp_obj_text = spec_info.func_to_str_cpp_obj(lmul, mask_kind=m_param).strip()
-                    cpp_obj_samples[lmul_key][mvariant] = re.sub(r'\binline\s+', '', cpp_obj_text)
+                    obj_text = spec_info.func_to_str_obj(lmul, mask_kind=m_param).strip()
+                    obj_samples[lmul_key][mvariant] = re.sub(r'\binline\s+', '', obj_text)
                 except Exception:
-                    cpp_obj_samples[lmul_key][mvariant] = ""
+                    obj_samples[lmul_key][mvariant] = ""
 
         # Test verification specifications
         merged_test_spec = parse_function_test_specs(
@@ -1057,10 +1057,10 @@ def generate_mipp_api_data(project_root=None):
                 "c99": (c99_samples.get("1", {}).get("unmasked", [""])[0]
                         if c99_samples.get("1", {}).get("unmasked") else ""),
                 "cpp": cpp_samples.get("1", {}).get("unmasked", ""),
-                "cpp_obj": cpp_obj_proto,
+                "obj": obj_proto,
                 "c99_samples": c99_samples,
                 "cpp_samples": cpp_samples,
-                "cpp_obj_samples": cpp_obj_samples
+                "obj_samples": obj_samples
             },
             "reference_algo": ref_algo_default,
             "reference_algos": ref_algos,

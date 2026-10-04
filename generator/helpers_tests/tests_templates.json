@@ -121,7 +121,7 @@
                 "#endif"
             ]
         },
-        "cpp_obj": {
+        "obj": {
             "as_bitwise_eq": [
                 "for (size_t i = 0; i < {{loop_limit}}; i++)",
                 "{",
@@ -145,8 +145,8 @@
                 "\tif constexpr (!std::is_floating_point_v<T>)",
                 "\t{",
                 "\t\tconst int32_t* m_ptr = nullptr;",
-                "\t\tbool is_z = (MK == mipp::Z);",
-                "\t\tif constexpr (MK == mipp::Z || MK == mipp::M || MK == mipp::S) m_ptr = inputs_m;",
+                "\t\tbool is_z = (V == mipp::Z);",
+                "\t\tif constexpr (V == mipp::Z || V == mipp::M || V == mipp::S) m_ptr = inputs_m;",
                 "\t\tov = ovf::will_reduction_hadd_overflow<T>(inputs1, size, m_ptr, is_z);",
                 "\t}",
                 "}",
@@ -165,7 +165,7 @@
                 "\tif constexpr (!std::is_floating_point_v<T>)",
                 "\t{",
                 "\t\tauto get_val = [&](size_t idx) -> T {",
-                "\t\t\tif constexpr (MK == mipp::Z) return inputs_m[idx] ? inputs1[idx] : static_cast<T>(0);",
+                "\t\t\tif constexpr (V == mipp::Z) return inputs_m[idx] ? inputs1[idx] : static_cast<T>(0);",
                 "\t\t\telse return inputs1[idx];",
                 "\t\t};",
                 "\t\tT acc = get_val(0);",
@@ -220,7 +220,7 @@
         },
         "cpp": {
             "func_header": [
-                "template <mipp::MKIND MK = mipp::U, typename T = double, int LMUL = 1>",
+                "template <mipp::VARIANT V = mipp::U, typename T = double, int LMUL = 1>",
                 "static void test_mipp_cpp_{{func_name}}()",
                 "{",
                 "\tstd::mt19937 seed(Catch::getSeed());",
@@ -228,7 +228,7 @@
                 "\t{"
             ],
             "func_header_product": [
-                "template <mipp::MKIND MK = mipp::U, typename T_src = float, typename T_dst = double, int LMUL = 1>",
+                "template <mipp::VARIANT V = mipp::U, typename T_src = float, typename T_dst = double, int LMUL = 1>",
                 "static void test_mipp_cpp_{{func_name}}()",
                 "{",
                 "\tstd::mt19937 seed(Catch::getSeed());",
@@ -255,16 +255,16 @@
         },
         "obj": {
             "func_header": [
-                "template <mipp::MKIND MK = mipp::U, typename T = double, int LMUL = 1>",
-                "static void test_mipp_cpp_obj_{{func_name}}()",
+                "template <mipp::VARIANT V = mipp::U, typename T = double, int LMUL = 1>",
+                "static void test_mipp_obj_{{func_name}}()",
                 "{",
                 "\tstd::mt19937 seed(Catch::getSeed());",
                 "\tfor (unsigned n = 0; n < get_n_iter(); n++)",
                 "\t{"
             ],
             "func_header_product": [
-                "template <mipp::MKIND MK = mipp::U, typename T_src = float, typename T_dst = double, int LMUL = 1>",
-                "static void test_mipp_cpp_obj_{{func_name}}()",
+                "template <mipp::VARIANT V = mipp::U, typename T_src = float, typename T_dst = double, int LMUL = 1>",
+                "static void test_mipp_obj_{{func_name}}()",
                 "{",
                 "\tstd::mt19937 seed(Catch::getSeed());",
                 "\tfor (unsigned n = 0; n < get_n_iter(); n++)",
@@ -290,15 +290,13 @@
             ],
             "op_call_lambda": [
                 "\t\tauto {{var_name}} = [&]() {",
-                "\t\t\tif constexpr (MK == mipp::U)",
+                "\t\t\tif constexpr (V == mipp::U)",
                 "\t\t\t{",
                 "\t\t\t\treturn {{call_expr}};",
                 "\t\t\t}",
                 "\t\t}();",
                 ""
-            ]
-        },
-        "cpp_obj": {
+            ],
             "func_footer": [
                 "\t}",
                 "}",

@@ -31,9 +31,9 @@ function matchesPrototypeQuery(entry, q) {
   }
 
   // 2. C++ object prototypes
-  const cppObjSamples = (entry.prototypes && entry.prototypes.cpp_obj_samples) || entry.cpp_obj_samples;
-  if (cppObjSamples && typeof cppObjSamples === "object") {
-    for (const proto of Object.values(cppObjSamples)) {
+  const objSamples = (entry.prototypes && (entry.prototypes.obj_samples || entry.prototypes.cpp_obj_samples)) || entry.obj_samples || entry.cpp_obj_samples;
+  if (objSamples && typeof objSamples === "object") {
+    for (const proto of Object.values(objSamples)) {
       if (typeof proto === "string" && proto.toLowerCase().includes(q)) return true;
     }
   }
@@ -42,7 +42,7 @@ function matchesPrototypeQuery(entry, q) {
   if (entry.prototypes && typeof entry.prototypes === "object") {
     if (entry.prototypes.c99 && entry.prototypes.c99.toLowerCase().includes(q)) return true;
     if (entry.prototypes.cpp && entry.prototypes.cpp.toLowerCase().includes(q)) return true;
-    if (entry.prototypes.cpp_obj && entry.prototypes.cpp_obj.toLowerCase().includes(q)) return true;
+    if ((entry.prototypes.obj && entry.prototypes.obj.toLowerCase().includes(q)) || (entry.prototypes.cpp_obj && entry.prototypes.cpp_obj.toLowerCase().includes(q))) return true;
 
     if (entry.prototypes.c99_samples && typeof entry.prototypes.c99_samples === "object") {
       for (const lmulKey of Object.keys(entry.prototypes.c99_samples)) {

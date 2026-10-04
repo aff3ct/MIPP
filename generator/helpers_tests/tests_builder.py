@@ -82,13 +82,13 @@ class TestsBuilderEngine:
         
         self.c_builder = TestsBuilderEngineC(self)
         self.cpp_builder = TestsBuilderEngineCpp(self)
-        self.cpp_obj_builder = TestsBuilderEngineCppObj(self)
+        self.obj_builder = TestsBuilderEngineObj(self)
 
     def get_builder(self, dialect_name: str):
         if dialect_name == "c":
             return self.c_builder
         elif dialect_name == "obj":
-            return self.cpp_obj_builder
+            return self.obj_builder
         return self.cpp_builder
 
     def get_proto_args_info(self, func_name: str) -> List[Dict[str, Any]]:
@@ -353,7 +353,7 @@ class TestsBuilderEngine:
         Returns [] if any key is missing or the leaf value is not a list.
 
         Example:
-            self._tpl("assertions", "cpp_obj", "as_bitwise_eq")
+            self._tpl("assertions", "obj", "as_bitwise_eq")
         """
         node: Any = self.templates
         for key in path:
@@ -539,7 +539,7 @@ class TestsBuilderEngine:
         if isinstance(comp_type, dict) and any(v == "bitwise" for v in comp_type.get("by_datatype", {}).values()):
             val_lines.append("if constexpr (std::is_floating_point_v<T>)")
             val_lines.append("{")
-            tpl = self._tpl("assertions", "cpp_obj", "as_bitwise_eq")
+            tpl = self._tpl("assertions", "obj", "as_bitwise_eq")
             bw_lines = self.render_template(tpl, r_get=r_get, s_get=s_get, loop_limit=loop_limit)
             val_lines.extend([f"\t{l}" if l else "" for l in bw_lines])
             val_lines.append("}")
@@ -552,7 +552,7 @@ class TestsBuilderEngine:
             val_lines.append("}")
         elif not is_loop:
             if comp_type == "logical":
-                tpl = self._tpl("assertions", "cpp_obj", "as_logical_scalar_eq")
+                tpl = self._tpl("assertions", "obj", "as_logical_scalar_eq")
                 for line in tpl:
                     val_lines.append(line.replace("{{r_var}}", r_var).replace("{{s_var}}", s_var))
             elif has_tolerance:
@@ -571,7 +571,7 @@ class TestsBuilderEngine:
                 val_lines.append(f"\tREQUIRE({r_var} == {s_var});")
                 val_lines.append("}") 
             else:
-                tpl = self._tpl("assertions", "cpp_obj", "as_strict_scalar_eq")
+                tpl = self._tpl("assertions", "obj", "as_strict_scalar_eq")
                 val_lines.extend(self.render_template(tpl, r_var=r_var, s_var=s_var))
         elif has_tolerance:
             # For the by_define case, inject #if/#endif before the loop using s_var (full register).
@@ -603,10 +603,10 @@ class TestsBuilderEngine:
             val_lines.append("\t}")
             val_lines.append("}") 
         elif comp_type == "bitwise":
-            tpl = self._tpl("assertions", "cpp_obj", "as_bitwise_eq")
+            tpl = self._tpl("assertions", "obj", "as_bitwise_eq")
             val_lines.extend(self.render_template(tpl, r_get=r_get, s_get=s_get, loop_limit=loop_limit))
         elif comp_type == "logical" or func_name.endswith("_k") or "ret_msk" in proto_ref:
-            tpl = self._tpl("assertions", "cpp_obj", "as_logical_eq")
+            tpl = self._tpl("assertions", "obj", "as_logical_eq")
             val_lines.extend(self.render_template(tpl, r_get=r_get, s_get=s_get, loop_limit=loop_limit))
         else:
             val_lines.append(f"for (size_t i = 0; i < {loop_limit}; i++)")
@@ -620,7 +620,7 @@ class TestsBuilderEngine:
             lines = []
             kind = overflow_check.replace("accumulate_", "")
             tpl_key = "as_reduction_hadd_overflow" if kind == "add" else f"as_reduction_{kind}_overflow"
-            tpl = self._tpl("assertions", "cpp_obj", tpl_key)
+            tpl = self._tpl("assertions", "obj", tpl_key)
             for line in tpl:
                 if "{{validation_block}}" in line:
                     lines.extend(self.indent_lines(val_lines, 1))
@@ -655,7 +655,7 @@ class TestsBuilderEngine:
         )
 
     def format_cpp_op_call(self, func_name: str, mkind: str, is_scalar: bool = False) -> str:
-        """Build a C++ template call expression with symbolic params (MK, T, LMUL).
+        """Build a C++ template call expression with symbolic params (V, T, LMUL).
 
         Used by TestsBuilderEngineCpp where T and LMUL are compile-time template
         parameters, not resolved Python values. Centralises all mipp:: namespace
@@ -666,7 +666,7 @@ class TestsBuilderEngine:
         call_args = ", ".join(args)
         isa_str = ", mipp::ISA::SCALAR" if is_scalar else ""
 
-        # Masked variants: explicit MK template param
+        # Masked variants: explicit V template param
         mk_map = {"mask": "mipp::M", "maskz": "mipp::Z", "masks": "mipp::S"}
         if mkind in mk_map:
             mk_sym = mk_map[mkind]
@@ -687,7 +687,7 @@ class TestsBuilderEngine:
         # Default: plain call (T is deduced from arguments)
         return f"mipp::{fname}({call_args})"
 
-    def format_cpp_obj_op_call(self, func_name: str, mkind: str) -> str:
+    def format_obj_op_call(self, func_name: str, mkind: str) -> str:
         """Build a C++ Object call expression using operator overloads where available,
         or free functions in namespace mipp::.
         """
@@ -1151,7 +1151,7 @@ class TestsBuilderEngineCppBase:
         ldiv_list: Optional[List[int]] = None,
     ) -> List[str]:
         lines = []
-        func_prefix = "test_mipp_cpp" if dialect_name == "cpp" else "test_mipp_cpp_obj"
+        func_prefix = "test_mipp_cpp" if dialect_name == "cpp" else "test_mipp_obj"
         datatypes = self.engine._resolve_datatypes(func_name)
         is_product = any("," in str(dt) for dt in datatypes)
 
@@ -1187,7 +1187,7 @@ class TestsBuilderEngineCppBase:
 
                 for lmul_val, lmul_str in lmuls_to_test:
                     call_expr = f"{func_prefix}_{func_name}<{mk_enum}, {cpp_type}, {lmul_val}>();"
-                    tpl_lmul = self.engine._tpl("func_templates", "cpp_obj", "test_section_lmul")
+                    tpl_lmul = self.engine._tpl("func_templates", "obj", "test_section_lmul")
                     lines.extend(self.engine.render_template(tpl_lmul, lmul_str=lmul_str, call_expr=call_expr))
 
                 test_ldiv2 = (ldiv_list is None or 2 in ldiv_list)
@@ -1256,7 +1256,7 @@ class TestsBuilderEngineCppBase:
         return lines
 
     def _append_cpp_mask_loads(self, lines: List[str], adapter, mkind: str, n_masks: int, is_scalar: bool) -> None:
-        """Append mask and source register declarations inside an MK constexpr branch.
+        """Append mask and source register declarations inside an variant (V) constexpr branch.
 
         Centralises the symmetric r/s load pattern in the Cpp template builder,
         eliminating the two near-identical blocks that differed only by scalar prefix.
@@ -1329,7 +1329,7 @@ class TestsBuilderEngineCppBase:
         is_scalar: bool,
         dialect: str = "cpp",
     ) -> List[str]:
-        """Render a [&]() { if constexpr (MK == ...) { ... } }() lambda for one op call.
+        """Render a [&]() { if constexpr (V == ...) { ... } }() lambda for one op call.
 
         Used by TestsBuilderEngineCpp and TestsBuilderEngineCppObj (r_var and s_var).
         """
@@ -1340,13 +1340,13 @@ class TestsBuilderEngineCppBase:
             mk_enum = self.MK_ENUM[mkind]
             keyword = "if constexpr" if is_first else "else if constexpr"
             is_first = False
-            out.append(f"\t\t\t{keyword} (MK == {mk_enum})")
+            out.append(f"\t\t\t{keyword} (V == {mk_enum})")
             out.append("\t\t\t{")
             self._append_cpp_mask_loads(out, adapter, mkind, n_masks, is_scalar=is_scalar)
             if is_scalar:
                 call_code = self.engine.format_cpp_op_call(func_name, mkind, is_scalar=True)
             elif dialect == "obj":
-                call_code = self.engine.format_cpp_obj_op_call(func_name, mkind)
+                call_code = self.engine.format_obj_op_call(func_name, mkind)
             else:
                 call_code = self.engine.format_cpp_op_call(func_name, mkind, is_scalar=False)
             out.append(f"\t\t\t\t{ret_prefix}{call_code};")
@@ -1399,7 +1399,7 @@ class TestsBuilderEngineCpp(TestsBuilderEngineCppBase):
             ))
         else:
             lines.extend(self.engine.render_template(
-                self.engine._tpl("func_templates", "cpp_obj", "size_constexpr"),
+                self.engine._tpl("func_templates", "obj", "size_constexpr"),
                 adapter=adapter
             ))
 
@@ -1440,13 +1440,13 @@ class TestsBuilderEngineCpp(TestsBuilderEngineCppBase):
         val_lines = self.engine.render_cpp_validation_block(func_name, proto_ref, is_product, r_var=r_var, s_var=s_var, adapter=adapter)
         lines.extend(self.engine.indent_lines(val_lines, 2))
 
-        lines.extend(self.engine._tpl("func_templates", "cpp_obj", "func_footer"))
+        lines.extend(self.engine._tpl("func_templates", "obj", "func_footer"))
 
         lines.extend(self.render_cpp_test_case("cpp", func_name, supported_mkinds, lmul_list=lmul_list, ldiv_list=ldiv_list))
         return "\n".join(lines)
 
 
-class TestsBuilderEngineCppObj(TestsBuilderEngineCppBase):
+class TestsBuilderEngineObj(TestsBuilderEngineCppBase):
 
     def build_test_file_content(
         self,
@@ -1489,7 +1489,7 @@ class TestsBuilderEngineCppObj(TestsBuilderEngineCppBase):
             ))
         else:
             lines.extend(self.engine.render_template(
-                self.engine._tpl("func_templates", "cpp_obj", "size_constexpr"),
+                self.engine._tpl("func_templates", "obj", "size_constexpr"),
                 adapter=adapter
             ))
 
@@ -1530,7 +1530,7 @@ class TestsBuilderEngineCppObj(TestsBuilderEngineCppBase):
         val_lines = self.engine.render_cpp_validation_block(func_name, proto_ref, is_product, r_var=r_var, s_var=s_var, adapter=adapter)
         lines.extend(self.engine.indent_lines(val_lines, 2))
 
-        lines.extend(self.engine._tpl("func_templates", "cpp_obj", "func_footer"))
+        lines.extend(self.engine._tpl("func_templates", "obj", "func_footer"))
 
         lines.extend(self.render_cpp_test_case("obj", func_name, supported_mkinds, lmul_list=lmul_list, ldiv_list=ldiv_list))
         return "\n".join(lines)

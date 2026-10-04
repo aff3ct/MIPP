@@ -26,7 +26,7 @@ include/
     ├── cpp/
     │   ├── cat/<category>.hpp   # Granular C++ category header
     │   └── fun/<function>.hpp   # Granular C++ function header
-    ├── cpp_obj/
+    ├── obj/
     │   ├── cat/<category>.hpp   # Granular C++ Object category header
     │   └── fun/<function>.hpp   # Granular C++ Object function header
     └── internal/           # Private implementation details (do not include directly)
@@ -49,8 +49,8 @@ This is the fastest and most convenient approach when starting a project or writ
 
 Granular headers expose either a single SIMD function or an entire category of functions:
 
-- **Function headers**: `<mipp/c/fun/<func>.h>`, `<mipp/cpp/fun/<func>.hpp>`, `<mipp/cpp_obj/fun/<func>.hpp>`
-- **Category headers**: `<mipp/c/cat/<cat>.h>`, `<mipp/cpp/cat/<cat>.hpp>`, `<mipp/cpp_obj/cat/<cat>.hpp>` (e.g. `arithmetic.hpp`, `memory.hpp`, `comparison.hpp`)
+- **Function headers**: `<mipp/c/fun/<func>.h>`, `<mipp/cpp/fun/<func>.hpp>`, `<mipp/obj/fun/<func>.hpp>`
+- **Category headers**: `<mipp/c/cat/<cat>.h>`, `<mipp/cpp/cat/<cat>.hpp>`, `<mipp/obj/cat/<cat>.hpp>` (e.g. `arithmetic.hpp`, `memory.hpp`, `comparison.hpp`)
 
 Granular headers dramatically accelerate compilation time (often 5x to 10x faster parsing) and reduce compiler peak memory consumption (RSS), which is critical for large C++ codebases with dozens of compilation units.
 
@@ -160,15 +160,15 @@ auto scalar_val = mipp::set1<int32_t>(42);   // mipp::rvd<int32_t, 1>
 ```
 
 ### 3.6. Masked Function Template Specialization
-Masked operations in the C++ API use explicit template specialization via the `mipp::MKIND` enumeration:
+Masked operations in the C++ API use explicit template specialization via the `mipp::VARIANT` enumeration:
 
 ```cpp
 namespace mipp {
-    enum MKIND { U, M, Z, S }; // Unmasked, Mask (merge), Zero-mask, Source-preserve
+    enum VARIANT { U, M, Z, S }; // Unmasked, Mask (merge), Zero-mask, Source-preserve
 }
 ```
 
-To invoke a masked operation, pass the mask kind as the first template parameter (`<mipp::M>`, `<mipp::Z>`, or `<mipp::S>`):
+To invoke a masked operation, pass the variant as the first template parameter (`<mipp::M>`, `<mipp::Z>`, or `<mipp::S>`):
 
 ```cpp
 auto m   = mipp::cmpeq(a, b);   // Mask condition
@@ -248,7 +248,7 @@ mipp::store(ptr_out, res_fma);
 ```
 
 ### 4.4. Masked Operations Support
-Masked operations in the C++ Object API are fully supported via the standard `MKIND` template parameter (`M`, `Z`, `S`), taking `Rvm` and `Rvd` objects:
+Masked operations in the C++ Object API are fully supported via the standard `VARIANT` template parameter (`M`, `Z`, `S`), taking `Rvm` and `Rvd` objects:
 
 ```cpp
 mipp::Rvm<float> m = (a > b); // Mask from operator comparison

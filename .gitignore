@@ -38,7 +38,7 @@ mipp_cpp
 prompts
 tests/src/c
 tests/src/cpp
-tests/src/cpp_obj
+tests/src/obj
 paper/
 docs/assets/data/
 benchmarks/
