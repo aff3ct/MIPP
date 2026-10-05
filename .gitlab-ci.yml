@@ -39,6 +39,7 @@ generation-headers:
     - linux
     - docker
   script:
+    - echo "Debug -- MIPP_GRANULARITY=${MIPP_GRANULARITY}"
     - cd generator
     - python3 -m venv .venv
     - source .venv/bin/activate

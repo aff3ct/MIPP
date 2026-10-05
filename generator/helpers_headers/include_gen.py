@@ -3,7 +3,7 @@ Include Generator Module
 Manages output directories and file creation, tracking preprocessor wrappers,
 headers formatting, and dependency generation structures.
 """
-import os, tempfile, shutil
+import os, tempfile, shutil, io
 
 from tools import *
 from registry import *
@@ -738,12 +738,11 @@ class IncludeManager:
         target_dir = self._get_layer_dir(layer_name)
         ext = ".hpp" if (layer_name in ("cpp", "templates") or layer_name.endswith("_cpp")) else ".h"
         full_path = f"{target_dir}/functions/{category}/{v}/{l}/{func}{ext}"
-        os.makedirs(os.path.dirname(full_path), exist_ok=True)
 
-        fd = open(full_path, "a+", encoding="utf-8", newline="")
+        buf = io.StringIO()
         if key not in self.atomic_files:
             self.atomic_files[key] = {
-                "file": fd,
+                "file": buf,
                 "full_path": full_path,
                 "layer": layer_name,
                 "func": func,
@@ -755,7 +754,7 @@ class IncludeManager:
                 "_is_prefixed": False
             }
         else:
-            self.atomic_files[key]["file"] = fd
+            self.atomic_files[key]["file"] = buf
 
         if layer_name not in self.emitted_atomics:
             self.emitted_atomics[layer_name] = {}
@@ -763,7 +762,7 @@ class IncludeManager:
             self.emitted_atomics[layer_name][func] = set()
         self.emitted_atomics[layer_name][func].add((v, l))
 
-        return fd
+        return buf
 
     def resolve_all_dependencies(self, layer_name, funcs):
         target_dir = self._get_layer_dir(layer_name)
@@ -927,9 +926,12 @@ class IncludeManager:
             return
         full_path = item["full_path"]
         if item["file"] is not None:
-            item["file"].flush()
-            item["file"].seek(0)
-            old = item["file"].read()
+            if hasattr(item["file"], "getvalue"):
+                old = item["file"].getvalue()
+            else:
+                item["file"].flush()
+                item["file"].seek(0)
+                old = item["file"].read()
             item["file"].close()
             item["file"] = None
         else:
@@ -975,6 +977,7 @@ class IncludeManager:
         if item["layer"].endswith("_cpp"):
             prefix += "namespace mipp {\n\n"
 
+        os.makedirs(os.path.dirname(full_path), exist_ok=True)
         with open(full_path, "w", encoding="utf-8", newline="") as f:
             f.write(prefix)
             if body_lines:
@@ -982,7 +985,7 @@ class IncludeManager:
             if item["layer"].endswith("_cpp"):
                 f.write("\n}\n")
 
-        item["file"] = open(full_path, "a+", encoding="utf-8", newline="")
+        item["file"] = None
         item["_is_prefixed"] = True
 
     def generate_umbrella_headers(self, layer_name):
@@ -1044,6 +1047,12 @@ class IncludeManager:
         for key, item in list(self.atomic_files.items()):
             if key[0] == layer_name:
                 if item["file"] is not None:
+                    if hasattr(item["file"], "getvalue"):
+                        content = item["file"].getvalue()
+                        if content and not item.get("_is_prefixed", False):
+                            os.makedirs(os.path.dirname(item["full_path"]), exist_ok=True)
+                            with open(item["full_path"], "w", encoding="utf-8", newline="") as f:
+                                f.write(content)
                     item["file"].close()
                     item["file"] = None
 
