@@ -875,14 +875,14 @@ class IncludeManager:
                             m_deps = _get_dependencies_mask(func, funcs, mkind, layer=layer_name) if funcs else {}
                             for req in m_deps:
                                 req_cat = _match_category(req)
-                                item["dependencies"].add(f"mipp/internal/simd_ext/{layer_name}/c/functions/{req_cat}/u/m1/{req}{ext}")
+                                item["dependencies"].add(f"mipp/internal/simd_ext/{layer_name}/c/functions/{req_cat}/u/{l}/{req}{ext}")
                         else:
                             # Regular dependencies from funcs (only for unmasked variant "u")
                             reg_deps = _get_dependencies_regular(func, funcs, layer=layer_name) if funcs else {}
                             for req in reg_deps:
                                 if req != func:
                                     req_cat = _match_category(req)
-                                    item["dependencies"].add(f"mipp/internal/simd_ext/{layer_name}/c/functions/{req_cat}/u/m1/{req}{ext}")
+                                    item["dependencies"].add(f"mipp/internal/simd_ext/{layer_name}/c/functions/{req_cat}/u/{l}/{req}{ext}")
 
                         # Rule 3: Auto-scalar fallback (governed by is_scalar from JSON)
                         if not is_scalar:
