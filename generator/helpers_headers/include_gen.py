@@ -853,16 +853,13 @@ class IncludeManager:
                     is_horizontal = funcs[func].get("horizontal", False) if funcs and func in funcs else False
                     is_sw_wrapper = (is_sw_lmul and not is_horizontal) or is_sub_isa_wrapper
 
-                    # Rule 1: Software LMUL hierarchy (only if this LMUL is software-emulated, or scalar)
-                    if is_scalar or (8 in sw_lmuls):
-                        if l == "m8":
-                            item["dependencies"].add(f"mipp/internal/simd_ext/{layer_name}/c/functions/{category}/{v}/m4/{func}{ext}")
-                    if is_scalar or (4 in sw_lmuls):
-                        if l == "m4":
-                            item["dependencies"].add(f"mipp/internal/simd_ext/{layer_name}/c/functions/{category}/{v}/m2/{func}{ext}")
-                    if is_scalar or (2 in sw_lmuls):
-                        if l == "m2":
-                            item["dependencies"].add(f"mipp/internal/simd_ext/{layer_name}/c/functions/{category}/{v}/m1/{func}{ext}")
+                    # Rule 1: Software LMUL hierarchy (only if this LMUL is software-emulated)
+                    if 8 in sw_lmuls and l == "m8":
+                        item["dependencies"].add(f"mipp/internal/simd_ext/{layer_name}/c/functions/{category}/{v}/m4/{func}{ext}")
+                    if 4 in sw_lmuls and l == "m4":
+                        item["dependencies"].add(f"mipp/internal/simd_ext/{layer_name}/c/functions/{category}/{v}/m2/{func}{ext}")
+                    if 2 in sw_lmuls and l == "m2":
+                        item["dependencies"].add(f"mipp/internal/simd_ext/{layer_name}/c/functions/{category}/{v}/m1/{func}{ext}")
 
                     # Sub-ISA ldiv wrapper dependency (governed by sub_isa from JSON)
                     if l == "d2" and sub_isa:
