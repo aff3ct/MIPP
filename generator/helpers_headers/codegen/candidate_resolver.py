@@ -97,9 +97,8 @@ def _prepare_mask_variable(pre_statements, isa, msk_dt, arg_name, cond, lmul, f,
         
         is_special_bitfield = False
         if isa.get("hw_mask_is_bitfield", False):
-            if is_initial_mask or f in ["toreg", "tomsk", "cast_k"]:
-                is_special_bitfield = True
-                n_elements = isa["size"] // get_dt_par_size(msk_dt_name)
+            is_special_bitfield = True
+            n_elements = isa["size"] // get_dt_par_size(msk_dt_name)
                 
         if is_special_bitfield:
             pre_statements.append(f"\tfor (int i = 0; i < {n_elements}; ++i) {{")

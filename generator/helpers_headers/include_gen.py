@@ -361,19 +361,27 @@ class IncludePath:
         while body_lines and body_lines[0].strip() == "":
             body_lines.pop(0)
 
-        # Build prefix
-        prefix = "#pragma once\n\n"
         # sort dependencies to ensure deterministic order in includes
         dep_list = list(self.dependencies)
         dep_list.sort()
 
-        # Forward declarations first (before includes to break circular deps)
+        common_deps = [dep for dep in dep_list if dep.endswith("common.h") or dep.endswith("common.hpp")]
+        other_deps = [dep for dep in dep_list if not (dep.endswith("common.h") or dep.endswith("common.hpp"))]
+
+        # Build prefix
+        prefix = "#pragma once\n\n"
+        for dep in common_deps:
+            prefix += f'#include "{dep}"\n'
+        if common_deps:
+            prefix += "\n"
+
+        # Forward declarations first (before other includes to break circular deps)
         if fwd_decls:
             for decl in fwd_decls:
                 prefix += decl + "\n"
             prefix += "\n"
 
-        for dep in dep_list:
+        for dep in other_deps:
             prefix += f'#include "{dep}"\n'
 
         # Rewrite file from scratch with prefix + remaining body
@@ -662,6 +670,13 @@ class IncludeManager:
             for func in ["common"] + list(interfaces.keys()):
                 self.layers[layer].add_includes(func, interfaces, categories)
 
+    def set_isa_configs(self, isas_dict):
+        if not hasattr(self, "_isa_configs"):
+            self._isa_configs = {}
+        for name, cfg in isas_dict.items():
+            self._isa_configs[name] = cfg
+            self._isa_configs[f"{name}_cpp"] = cfg
+
     def get_isa_config(self, isa_name):
         if not hasattr(self, "_isa_configs"):
             self._isa_configs = {}
@@ -873,6 +888,11 @@ class IncludeManager:
                         # Rule 3: Auto-scalar fallback (governed by is_scalar from JSON)
                         if not is_scalar:
                             item["dependencies"].add(f"mipp/internal/simd_ext/scalar/c/functions/{category}/{v}/{l}/{func}.h")
+                            super_isa = isa_cfg.get("super_isa")
+                            has_super_d2 = bool(super_isa and -2 in super_isa.get("sw_lmul", []))
+                            if has_super_d2:
+                                item["dependencies"].add(f"mipp/internal/simd_ext/scalar/c/functions/{category}/{v}/d2/{func}.h")
+
                             proto = funcs[func].get("proto", {}) if funcs and func in funcs else {}
                             has_msk_arg = (
                                 v in ("m", "z", "s")
@@ -891,8 +911,12 @@ class IncludeManager:
 
                             if needs_scalar_tomsk:
                                 item["dependencies"].add(f"mipp/internal/simd_ext/scalar/c/functions/reinterpret/u/{l}/tomsk.h")
+                                if has_super_d2:
+                                    item["dependencies"].add("mipp/internal/simd_ext/scalar/c/functions/reinterpret/u/d2/tomsk.h")
                             if needs_scalar_toreg:
                                 item["dependencies"].add(f"mipp/internal/simd_ext/scalar/c/functions/reinterpret/u/{l}/toreg.h")
+                                if has_super_d2:
+                                    item["dependencies"].add("mipp/internal/simd_ext/scalar/c/functions/reinterpret/u/d2/toreg.h")
 
                 self._write_atomic_prefix(item)
 
@@ -928,16 +952,24 @@ class IncludeManager:
         while body_lines and body_lines[0].strip() == "":
             body_lines.pop(0)
 
+        dep_list = sorted(list(item["dependencies"]))
+        common_deps = [dep for dep in dep_list if dep.endswith("common.h") or dep.endswith("common.hpp")]
+        other_deps = [dep for dep in dep_list if not (dep.endswith("common.h") or dep.endswith("common.hpp"))]
+
         prefix = "#pragma once\n\n"
+        for dep in common_deps:
+            prefix += f'#include "{dep}"\n'
+        if common_deps:
+            prefix += "\n"
+
         if fwd_decls:
             for decl in fwd_decls:
                 prefix += decl + "\n"
             prefix += "\n"
 
-        dep_list = sorted(list(item["dependencies"]))
-        for dep in dep_list:
+        for dep in other_deps:
             prefix += f'#include "{dep}"\n'
-        if dep_list:
+        if other_deps:
             prefix += "\n"
 
         if item["layer"].endswith("_cpp"):

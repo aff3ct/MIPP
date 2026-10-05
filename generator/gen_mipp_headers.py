@@ -542,6 +542,7 @@ def main(argv=None):
 
     # CREATE INCLUDE MANAGER
     include_manager = IncludeManager(sorted_names, mode=args.header_type, granularity=args.granularity)
+    include_manager.set_isa_configs(isas_dict)
 
     # ISA generators
     from c_generator import generate_c_layer
