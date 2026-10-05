@@ -516,7 +516,7 @@ def _gen_ci_functions(isa_list, include_manager, funcs):
                     isa for isa in isa_list
                     if l != "d2" or (isa.get("is_scalar", False) or any(x < 0 for x in isa.get("hw_lmul", []) + isa.get("sw_lmul", [])))
                 ]
-                pfx = '#pragma once\n\n#include "mipp/internal/interfaces/c/common.h"\n\n'
+                pfx = f'#pragma once\n// C wrapper: {fn} [{v}/{l}]\n\n#include "mipp/internal/interfaces/c/common.h"\n\n'
                 for i, isa in enumerate(valid_isas):
                     macro = isa["gen_define"]
                     inc = f'#include "mipp/internal/simd_ext/{isa["name"].lower()}/c/functions/{cat}/{v}/{l}/{fn}.h"\n'

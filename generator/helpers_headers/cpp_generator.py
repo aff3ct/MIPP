@@ -133,7 +133,7 @@ def _gen_cpp_functions(isa_list, include_manager, funcs):
                         if l != "d2" or (isa.get("is_scalar", False) or any(x < 0 for x in isa.get("hw_lmul", []) + isa.get("sw_lmul", [])))
                     ]
                     file = include_manager.get_fd("cpp", f, variant=v, lmul=l)
-                    print("#pragma once\n", file=file)
+                    print(f"#pragma once\n// CPP wrapper: {f} [{v}/{l}]\n", file=file)
                     print('#include "mipp/internal/interfaces/cpp/common.hpp"\n', file=file)
                     for index, isa in enumerate(valid_isas):
                         if index == 0:

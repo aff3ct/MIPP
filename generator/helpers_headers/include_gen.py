@@ -958,7 +958,7 @@ class IncludeManager:
         common_deps = [dep for dep in dep_list if dep.endswith("common.h") or dep.endswith("common.hpp")]
         other_deps = [dep for dep in dep_list if not (dep.endswith("common.h") or dep.endswith("common.hpp"))]
 
-        prefix = "#pragma once\n\n"
+        prefix = f"#pragma once\n// MIPP atomic: {item['func']} [{item['layer']}/{item['variant']}/{item['lmul']}]\n\n"
         for dep in common_deps:
             prefix += f'#include "{dep}"\n'
         if common_deps:
@@ -994,6 +994,20 @@ class IncludeManager:
         funcs_map = self.emitted_atomics.get(layer_name, {})
         common_include = _get_include_path("common", layer_name)
 
+        if layer_name == "c":
+            base_inc = "mipp/internal/interfaces/c"
+        elif layer_name == "cpp":
+            base_inc = "mipp/internal/interfaces/cpp"
+        elif layer_name == "templates":
+            base_inc = "mipp/internal/templates/cpp"
+        elif layer_name.endswith("_cpp"):
+            isa = layer_name[:-4]
+            base_inc = f"mipp/internal/simd_ext/{isa}/cpp"
+        elif layer_name != "":
+            base_inc = f"mipp/internal/simd_ext/{layer_name}/c"
+        else:
+            base_inc = ""
+
         for func, vl_pairs in funcs_map.items():
             category = _match_category(func)
             emitted_variants = sorted(list(set(v for v, l in vl_pairs)))
@@ -1004,34 +1018,34 @@ class IncludeManager:
                 v_path = f"{target_dir}/functions/{category}/{v}/{func}{ext}"
                 os.makedirs(os.path.dirname(v_path), exist_ok=True)
                 with open(v_path, "w", encoding="utf-8", newline="") as f:
-                    f.write("#pragma once\n\n")
+                    f.write(f"#pragma once\n// MIPP variant umbrella: {func} [{v}]\n\n")
                     f.write(f'#include "{common_include}"\n\n')
                     lmuls_for_v = [l for ev, l in vl_pairs if ev == v]
                     for l in ["m1", "m2", "m4", "m8", "d2"]:
                         if l in lmuls_for_v:
-                            f.write(f'#include "{l}/{func}{ext}"\n')
+                            f.write(f'#include "{base_inc}/functions/{category}/{v}/{l}/{func}{ext}"\n')
 
             # 2. LMUL umbrellas: functions/<cat>/<l>/<func>
             for l in emitted_lmuls:
                 l_path = f"{target_dir}/functions/{category}/{l}/{func}{ext}"
                 os.makedirs(os.path.dirname(l_path), exist_ok=True)
                 with open(l_path, "w", encoding="utf-8", newline="") as f:
-                    f.write("#pragma once\n\n")
+                    f.write(f"#pragma once\n// MIPP LMUL umbrella: {func} [{l}]\n\n")
                     f.write(f'#include "{common_include}"\n\n')
                     vars_for_l = [v for v, el in vl_pairs if el == l]
                     for v in ["u", "m", "z", "s"]:
                         if v in vars_for_l:
-                            f.write(f'#include "../{v}/{l}/{func}{ext}"\n')
+                            f.write(f'#include "{base_inc}/functions/{category}/{v}/{l}/{func}{ext}"\n')
 
             # 3. Top-level function umbrella: functions/<cat>/<func>
             top_path = f"{target_dir}/functions/{category}/{func}{ext}"
             os.makedirs(os.path.dirname(top_path), exist_ok=True)
             with open(top_path, "w", encoding="utf-8", newline="") as f:
-                f.write("#pragma once\n\n")
+                f.write(f"#pragma once\n// MIPP function umbrella: {func}\n\n")
                 f.write(f'#include "{common_include}"\n\n')
                 for v in ["u", "m", "z", "s"]:
                     if v in emitted_variants:
-                        f.write(f'#include "{v}/{func}{ext}"\n')
+                        f.write(f'#include "{base_inc}/functions/{category}/{v}/{func}{ext}"\n')
 
     def close_fd(self, layer_name, func):
         if layer_name in self.layers:
