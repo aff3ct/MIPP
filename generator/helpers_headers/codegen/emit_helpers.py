@@ -67,15 +67,22 @@ def emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rendering, fi
 
     post_rendering = post_rendering.strip("\n")
 
-    if ff["template"]["format"] == "short":
+    is_short = (ff["template"]["format"] == "short")
+    has_res_assign = is_short and (funcs[f]["proto"]["ret"]["type"] in ("reg", "msk"))
+
+    if is_short:
         # Original code had a redundant always-true condition; keep behavior identical.
         if funcs[f]["proto"]["args"] or (not funcs[f]["proto"]["args"]):
             emit_short_format_prologue(funcs[f], dt_ret, isa, file, lmul=lmul)
     
     body_lines = []
+    first_code_line = True
     for line in post_rendering.split("\n"):
         if line.strip():
-            if not line.startswith("\t"):
+            if first_code_line and has_res_assign:
+                line = line.lstrip()
+                first_code_line = False
+            elif not line.startswith("\t"):
                 line = "\t" + line
             body_lines.append(line)
         else:
