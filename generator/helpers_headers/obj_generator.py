@@ -31,7 +31,29 @@ all_binary_ops = {}
 all_binary_ops.update(operators_arithm)
 all_binary_ops.update(operators_binary)
 
-def generate_obj_func_file(fn, output_dir="../include"):
+# Obj functions whose body historically pulls the obj body of their mask partner (`_k`)
+# so that a single name (e.g. `cast`) works for both registers and masks.
+_OBJ_PARTNERS = {
+    "andb": "andb_k", "orb": "orb_k", "xorb": "xorb_k", "notb": "notb_k", "andnb": "andnb_k",
+    "get": "get_k",
+    "cast": "cast_k",
+}
+
+
+def _variants_of(fn):
+    variants = ["u"]
+    ms = interfaces[fn].get("mask_support")
+    if ms:
+        if hasattr(ms, "is_maskable") and ms.is_maskable():
+            variants.append("m")
+        if hasattr(ms, "is_maskzable") and ms.is_maskzable():
+            variants.append("z")
+        if hasattr(ms, "is_masksable") and ms.is_masksable():
+            variants.append("s")
+    return variants
+
+
+def generate_obj_func_file(fn, output_dir="../include", fine=False):
     cat = _match_category(fn)
     func_dir = os.path.join(output_dir, "mipp", "internal", "interfaces", "obj", "functions", cat)
     os.makedirs(func_dir, exist_ok=True)
@@ -50,19 +72,27 @@ def generate_obj_func_file(fn, output_dir="../include"):
         "#pragma once",
         "",
         '#include "mipp/internal/interfaces/obj/common.hpp"',
-        f'#include "mipp/internal/interfaces/cpp/functions/{cat}/{fn}.hpp"',
     ]
-    if fn in ("andb", "orb", "xorb", "notb", "andnb"):
-        lines.append(f'#include "mipp/internal/interfaces/obj/functions/logic/{fn}_k.hpp"')
-    elif fn == "get":
-        lines.append('#include "mipp/internal/interfaces/obj/functions/store/get_k.hpp"')
-    elif fn == "cast":
-        lines.append('#include "mipp/internal/interfaces/obj/functions/reinterpret/cast_k.hpp"')
+    # In fine-grained mode the cpp dependency is NOT pulled here (it would include every
+    # cpp variant/LMUL of `fn`): the obj atoms/umbrellas include exactly the cpp granule needed
+    # before including this file.
+    if not fine:
+        lines.append(f'#include "mipp/internal/interfaces/cpp/functions/{cat}/{fn}.hpp"')
+    # Partner (`_k`) include: in fine mode it is handled by the atoms/umbrellas (they include the
+    # partner's own cpp granule first); here it would be parsed before its cpp declarations.
+    if not fine:
+        if fn in ("andb", "orb", "xorb", "notb", "andnb"):
+            lines.append(f'#include "mipp/internal/interfaces/obj/functions/logic/{fn}_k.hpp"')
+        elif fn == "get":
+            lines.append('#include "mipp/internal/interfaces/obj/functions/store/get_k.hpp"')
+        elif fn == "cast":
+            lines.append('#include "mipp/internal/interfaces/obj/functions/reinterpret/cast_k.hpp"')
     lines.extend([
         "",
         "namespace mipp",
         "{"
     ])
+    body_start = len(lines)
 
     # Category 1: Load / initializers (free functions with _obj suffix)
     if fn in ("load", "loadu"):
@@ -472,10 +502,129 @@ def generate_obj_func_file(fn, output_dir="../include"):
             lines.append("{ return mipp::notb(r0); }")
             lines.append("")
 
+    body = lines[body_start:]
     lines.append("} // namespace mipp")
+
+    if fine:
+        _write_fine_granules(fn, cat, body, output_dir)
+        return
 
     with open(file_path, "w", encoding="utf-8") as f:
         f.write("\n".join(lines) + "\n")
+
+
+_FINE_LMULS = {"m1": 1, "m2": 2, "m4": 4, "m8": 8, "d2": -2}
+
+
+def _split_units(body):
+    """Split a generic obj body into declaration units (blank-line separated; a `namespace details`
+    block is a single unit)."""
+    units, cur, in_details = [], [], False
+    for line in body:
+        if line == "namespace details":
+            in_details = True
+        cur.append(line)
+        if line.startswith("} // namespace details"):
+            in_details = False
+        if line == "" and not in_details:
+            if any(l.strip() for l in cur):
+                units.append(cur)
+            cur = []
+    if any(l.strip() for l in cur):
+        units.append(cur)
+    return units
+
+
+def _unit_variant(unit):
+    """Granule variant (u/m/z/s) an overload unit belongs to, from the default of its VARIANT parameter."""
+    for line in unit:
+        if line.startswith("template <VARIANT V = "):
+            return {"M": "m", "Z": "z", "S": "s"}[line[len("template <VARIANT V = ")]]
+        if line.startswith("template <"):
+            return "u"
+    return "u"
+
+
+def _write_fine_granules(fn, cat, body, output_dir):
+    """
+    Fine-grained obj layer for one function. For each (variant, LMUL) granule, writes a self-contained header:
+
+      - it includes the cpp granule(s) it calls FIRST, so that the qualified calls `mipp::fn(r.r)` of the
+        overloads (resolved at definition time) see the right cpp declaration;
+      - it defines only the overloads of that variant. The overloads keep the generic signature
+        (`int LMUL = 1`) and are selected with `enable_if<LMUL == X>`, so every call form stays valid
+        (deduced or explicit LMUL) and several LMUL granules can be included in the same translation unit.
+
+    Masked overloads with default V=M/Z can be instantiated with either of V=M|Z by the user, so the m and z
+    granules both include the cpp m and z granules (those which exist for `fn`).
+    """
+    import re
+
+    base = os.path.join(output_dir, "mipp", "internal", "interfaces", "obj", "functions", cat)
+    variants = _variants_of(fn)
+    units = _split_units(body)
+    by_variant = {v: [u for u in units if _unit_variant(u) == v] for v in variants}
+    # units of a variant that `fn` does not declare (should not happen) go to u
+    for u in units:
+        if _unit_variant(u) not in variants:
+            by_variant["u"].append(u)
+
+    partner = _OBJ_PARTNERS.get(fn)
+    if partner and partner in interfaces:
+        pcat = _match_category(partner)
+        pvariants = _variants_of(partner)
+    else:
+        partner = None
+
+    inc = "mipp/internal/interfaces"
+    for v in variants:
+        cpp_vs = [v]
+        if v in ("m", "z"):
+            cpp_vs = [x for x in ("m", "z") if x in variants]
+        for l, val in _FINE_LMULS.items():
+            out = ["#pragma once", "", f'#include "{inc}/obj/common.hpp"']
+            for cv in cpp_vs:
+                out.append(f'#include "{inc}/cpp/functions/{cat}/{cv}/{l}/{fn}.hpp"')
+            if partner:
+                pv = v if v in pvariants else "u"
+                out.append(f'#include "{inc}/obj/functions/{pcat}/{pv}/{l}/{partner}.hpp"')
+            out += ["", "namespace mipp", "{"]
+            for unit in by_variant[v]:
+                for line in unit:
+                    if line.startswith("template <") and "int LMUL = 1>" in line:
+                        line = line.replace(
+                            "int LMUL = 1>",
+                            f"int LMUL = 1, typename std::enable_if<LMUL == {val}, int>::type = 0>")
+                    # helper structs are shared names: make them unique per granule
+                    line = re.sub(r"\b(\w+_helper)\b", rf"\1_{v}_{l}", line)
+                    out.append(line)
+            out.append("} // namespace mipp")
+            atom_dir = os.path.join(base, v, l)
+            os.makedirs(atom_dir, exist_ok=True)
+            with open(os.path.join(atom_dir, f"{fn}.hpp"), "w", encoding="utf-8") as f:
+                f.write("\n".join(out) + "\n")
+
+    # Variant umbrellas: all LMULs of a variant
+    for v in variants:
+        os.makedirs(os.path.join(base, v), exist_ok=True)
+        with open(os.path.join(base, v, f"{fn}.hpp"), "w", encoding="utf-8") as f:
+            f.write("#pragma once\n\n")
+            for l in _FINE_LMULS:
+                f.write(f'#include "{inc}/obj/functions/{cat}/{v}/{l}/{fn}.hpp"\n')
+
+    # LMUL umbrellas: all variants of an LMUL
+    for l in _FINE_LMULS:
+        os.makedirs(os.path.join(base, l), exist_ok=True)
+        with open(os.path.join(base, l, f"{fn}.hpp"), "w", encoding="utf-8") as f:
+            f.write("#pragma once\n\n")
+            for v in variants:
+                f.write(f'#include "{inc}/obj/functions/{cat}/{v}/{l}/{fn}.hpp"\n')
+
+    # Function umbrella (used by the coarse per-function public header): everything
+    with open(os.path.join(base, f"{fn}.hpp"), "w", encoding="utf-8") as f:
+        f.write("#pragma once\n\n")
+        for v in variants:
+            f.write(f'#include "{inc}/obj/functions/{cat}/{v}/{fn}.hpp"\n')
 
 
 def generate_obj(include_manager=None, output_dir="../include"):
@@ -487,44 +636,9 @@ def generate_obj(include_manager=None, output_dir="../include"):
     """
     generate_obj_common(output_dir)
 
+    fine = bool(include_manager and getattr(include_manager, "granularity", "coarse") == "fine")
     for fn in interfaces:
-        generate_obj_func_file(fn, output_dir)
-
-    if include_manager and getattr(include_manager, "granularity", "coarse") == "fine":
-        for fn in interfaces:
-            cat = _match_category(fn)
-            func_variants = ["u"]
-            ms = interfaces[fn].get("mask_support")
-            if ms:
-                if hasattr(ms, "is_maskable") and ms.is_maskable():
-                    func_variants.append("m")
-                if hasattr(ms, "is_maskzable") and ms.is_maskzable():
-                    func_variants.append("z")
-                if hasattr(ms, "is_masksable") and ms.is_masksable():
-                    func_variants.append("s")
-            func_lmuls = ["m1", "m2", "m4", "m8", "d2"]
-
-            # Atomic headers
-            for v in func_variants:
-                for l in func_lmuls:
-                    atom_dir = os.path.join(output_dir, "mipp", "internal", "interfaces", "obj", "functions", cat, v, l)
-                    os.makedirs(atom_dir, exist_ok=True)
-                    with open(os.path.join(atom_dir, f"{fn}.hpp"), "w", encoding="utf-8") as f:
-                        f.write(f"#pragma once\n\n#include \"mipp/internal/interfaces/cpp/functions/{cat}/{v}/{l}/{fn}.hpp\"\n#include \"mipp/internal/interfaces/obj/functions/{cat}/{fn}.hpp\"\n")
-
-            # Variant umbrellas
-            for v in func_variants:
-                v_dir = os.path.join(output_dir, "mipp", "internal", "interfaces", "obj", "functions", cat, v)
-                os.makedirs(v_dir, exist_ok=True)
-                with open(os.path.join(v_dir, f"{fn}.hpp"), "w", encoding="utf-8") as f:
-                    f.write(f"#pragma once\n\n#include \"mipp/internal/interfaces/cpp/functions/{cat}/{v}/{fn}.hpp\"\n#include \"mipp/internal/interfaces/obj/functions/{cat}/{fn}.hpp\"\n")
-
-            # LMUL umbrellas
-            for l in func_lmuls:
-                l_dir = os.path.join(output_dir, "mipp", "internal", "interfaces", "obj", "functions", cat, l)
-                os.makedirs(l_dir, exist_ok=True)
-                with open(os.path.join(l_dir, f"{fn}.hpp"), "w", encoding="utf-8") as f:
-                    f.write(f"#pragma once\n\n#include \"mipp/internal/interfaces/cpp/functions/{cat}/{l}/{fn}.hpp\"\n#include \"mipp/internal/interfaces/obj/functions/{cat}/{fn}.hpp\"\n")
+        generate_obj_func_file(fn, output_dir, fine=fine)
 
     # Generate top-level mipp_obj.hpp
     obj_hpp_path = os.path.join(output_dir, "mipp_obj.hpp")

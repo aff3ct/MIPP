@@ -1211,9 +1211,24 @@ class TestsBuilderEngineCppBase:
 
         tpl_fixed = self.engine._tpl("headers", "all", "headers_fixed")
         lines = self.engine.render_template(tpl_fixed, N_ITER=str(N))
-        lines.append('#include <mipp_obj.hpp>' if dialect_name == "obj" else '#include <mipp.hpp>')
         headers_set = set()
         cat_func = _match_category(func_name)
+
+        # Wrapper-level headers (coarse per function) instead of the global umbrellas
+        # mipp.hpp / mipp_obj.hpp: parse only what the test actually needs.
+        wrapper_ns = "obj" if dialect_name == "obj" else "cpp"
+        wrapper_fns = [func_name]
+        for aux in list(_AUX_HEADERS) + [a for a in extra_includes if a in _AUX_HEADERS]:
+            if aux in self.engine.interfaces and aux not in wrapper_fns:
+                wrapper_fns.append(aux)
+        _dt = self.engine.interfaces.get(func_name, {}).get("datatypes")
+        if _dt in ("all_datatypes_cart_prod", "all_datatypes_same_size", "all_datatypes_widenning"):
+            for conv in ("cvt", "wcvt", "cast", "cast_k"):
+                if conv in self.engine.interfaces and conv not in wrapper_fns:
+                    wrapper_fns.append(conv)
+        for wfn in wrapper_fns:
+            headers_set.add(f'#include <mipp/{wrapper_ns}/fun/{wfn}.hpp>')
+
         headers_set.add('#include <mipp/internal/simd_ext/scalar/cpp/common.hpp>')
         headers_set.add(f'#include <mipp/internal/simd_ext/scalar/cpp/functions/{cat_func}/{func_name}.hpp>')
         for aux in _AUX_HEADERS:

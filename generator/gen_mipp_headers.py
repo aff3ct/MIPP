@@ -348,7 +348,18 @@ def generate_public_headers(output_dir="../include", granularity="coarse"):
         func_obj_dir = os.path.join(mipp_dir, "obj", "fun")
         os.makedirs(func_obj_dir, exist_ok=True)
         with open(os.path.join(func_obj_dir, f"{fn}.hpp"), "w", encoding="utf-8") as f:
-            f.write(f"#pragma once\n#include \"mipp/internal/interfaces/obj/functions/{cat}/{fn}.hpp\"\n")
+            if granularity == "fine":
+                # obj body no longer includes the cpp umbrella nor its `_k` partner in fine mode
+                f.write(f"#pragma once\n#include \"mipp/internal/interfaces/cpp/functions/{cat}/{fn}.hpp\"\n")
+                from obj_generator import _OBJ_PARTNERS
+                partner = _OBJ_PARTNERS.get(fn)
+                if partner and partner in interfaces:
+                    pcat = _match_category(partner)
+                    f.write(f"#include \"mipp/internal/interfaces/cpp/functions/{pcat}/{partner}.hpp\"\n")
+                    f.write(f"#include \"mipp/internal/interfaces/obj/functions/{pcat}/{partner}.hpp\"\n")
+                f.write(f"#include \"mipp/internal/interfaces/obj/functions/{cat}/{fn}.hpp\"\n")
+            else:
+                f.write(f"#pragma once\n#include \"mipp/internal/interfaces/obj/functions/{cat}/{fn}.hpp\"\n")
 
         if granularity == "fine":
             func_variants = ["u"]
