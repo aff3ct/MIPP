@@ -15,11 +15,13 @@ from tools import operators_arithm, operators_binary, operators_order
 from include_gen import _match_category
 
 
-def generate_obj_common(output_dir="../include"):
+def generate_obj_common(output_dir="../include", fine=False):
     common_path = os.path.join(output_dir, "mipp", "internal", "interfaces", "obj", "common.hpp")
     os.makedirs(os.path.dirname(common_path), exist_ok=True)
 
-    tpl_path = os.path.join(os.path.dirname(__file__), "templates", "mipp_obj.tpl.hpp")
+    # Fine mode: Rvd/Rvm go through traits specialised by the obj atoms (no cpp function header pulled here).
+    tpl_name = "mipp_obj_fine.tpl.hpp" if fine else "mipp_obj.tpl.hpp"
+    tpl_path = os.path.join(os.path.dirname(__file__), "templates", tpl_name)
     with open(tpl_path, "r", encoding="utf-8") as f_tpl:
         content = f_tpl.read()
 
@@ -37,6 +39,19 @@ _OBJ_PARTNERS = {
     "andb": "andb_k", "orb": "orb_k", "xorb": "xorb_k", "notb": "notb_k", "andnb": "andnb_k",
     "get": "get_k",
     "cast": "cast_k",
+}
+
+# Fine mode: the obj atom (variant u) of these functions also specialises, per LMUL, the trait that backs the
+# matching Rvd/Rvm member (see templates/mipp_obj_fine.tpl.hpp).
+# value: (trait, return type, parameters, call). `{L}` is replaced by the LMUL value of the granule.
+_OBJ_MEMBER_OPS = {
+    "loadu": ("rvd_loadu_op", "rvd<T, {L}>", "const T* p0", "mipp::loadu<T, {L}>(p0)"),
+    "set1": ("rvd_set1_op", "rvd<T, {L}>", "const T v0", "mipp::set1<T, {L}>(v0)"),
+    "get": ("rvd_get_op", "T", "const rvd<T, {L}>& r0, const size_t idx", "mipp::get(r0, idx)"),
+    "set1_k": ("rvm_set1_k_op", "rvm<T, {L}>", "const int32_t v0", "mipp::set1_k<T, {L}>(v0)"),
+    "set_k": ("rvm_set_k_op", "rvm<T, {L}>", "const int32_t* vals", "mipp::set_k<T, {L}>(vals)"),
+    "get_k": ("rvm_get_k_op", "bool", "const rvm<T, {L}>& m0, const size_t idx",
+              "mask_get_val<T>(mipp::get(m0, idx), typename std::is_floating_point<T>::type())"),
 }
 
 
@@ -598,6 +613,13 @@ def _write_fine_granules(fn, cat, body, output_dir):
             if partner:
                 pv = v if v in pvariants else "u"
                 out.append(f'#include "{inc}/obj/functions/{pcat}/{pv}/{l}/{partner}.hpp"')
+            # Operators building Rvd/Rvm from a scalar go through Rvd(T)/Rvm(bool): include the set1/set1_k obj
+            # atom of this LMUL (it backs those constructors), unless this atom IS that one.
+            body_txt = "\n".join(line for unit in v_units for line in unit)
+            if "Rvd<T, LMUL>(val)" in body_txt and fn != "set1":
+                out.append(f'#include "{inc}/obj/functions/load/u/{l}/set1.hpp"')
+            if "Rvm<T, LMUL>(val)" in body_txt and fn != "set1_k":
+                out.append(f'#include "{inc}/obj/functions/load/u/{l}/set1_k.hpp"')
             out += ["", "namespace mipp", "{"]
             for unit in v_units:
                 for line in unit:
@@ -611,6 +633,22 @@ def _write_fine_granules(fn, cat, body, output_dir):
                     # helper structs are shared names: make them unique per granule
                     line = re.sub(r"\b(\w+_helper)\b", rf"\1_{v}_{l}", line)
                     out.append(line)
+            # Backing trait of the matching Rvd/Rvm member for this LMUL
+            if v == "u" and fn in _OBJ_MEMBER_OPS:
+                trait, ret_t, params, call = _OBJ_MEMBER_OPS[fn]
+                L = str(val)
+                out += [
+                    "namespace details",
+                    "{",
+                    "template <typename T>",
+                    f"struct {trait}<T, {L}>",
+                    "{",
+                    f"\tstatic inline {ret_t.format(L=L)} apply({params.format(L=L)})",
+                    f"\t{{ return {call.format(L=L)}; }}",
+                    "};",
+                    "} // namespace details",
+                    "",
+                ]
             out.append("} // namespace mipp")
             atom_dir = os.path.join(base, v, l)
             os.makedirs(atom_dir, exist_ok=True)
@@ -647,9 +685,9 @@ def generate_obj(include_manager=None, output_dir="../include"):
     2. Generates all interfaces/obj/functions/<cat>/<func>.hpp
     3. Generates mipp_obj.hpp including all modular components
     """
-    generate_obj_common(output_dir)
-
     fine = bool(include_manager and getattr(include_manager, "granularity", "coarse") == "fine")
+    generate_obj_common(output_dir, fine=fine)
+
     for fn in interfaces:
         generate_obj_func_file(fn, output_dir, fine=fine)
 

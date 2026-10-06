@@ -1211,6 +1211,11 @@ class TestsBuilderEngineCppBase:
         for aux in list(_AUX_HEADERS) + [a for a in extra_includes if a in _AUX_HEADERS]:
             if aux in self.engine.interfaces and aux not in wrapper_fns:
                 wrapper_fns.append(aux)
+        if dialect_name == "obj":
+            # Rvd(const T*), Rvd(T), Rvm(bool) are backed by these obj atoms (fine-grained: not pulled by obj/common.hpp)
+            for aux in ("loadu", "set1", "set1_k"):
+                if aux in self.engine.interfaces and aux not in wrapper_fns:
+                    wrapper_fns.append(aux)
         _dt = self.engine.interfaces.get(func_name, {}).get("datatypes")
         if _dt in ("all_datatypes_cart_prod", "all_datatypes_same_size", "all_datatypes_widenning"):
             for conv in ("cvt", "wcvt", "cast", "cast_k"):
