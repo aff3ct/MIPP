@@ -549,25 +549,38 @@ def _write_fine_granules(fn, cat, body, output_dir):
     """
     Fine-grained obj layer for one function. For each (variant, LMUL) granule, writes a self-contained header:
 
-      - it includes the cpp granule(s) it calls FIRST, so that the qualified calls `mipp::fn(r.r)` of the
+      - it includes ONLY the cpp granule it calls, FIRST, so that the qualified calls `mipp::fn(r.r)` of the
         overloads (resolved at definition time) see the right cpp declaration;
       - it defines only the overloads of that variant. The overloads keep the generic signature
         (`int LMUL = 1`) and are selected with `enable_if<LMUL == X>`, so every call form stays valid
         (deduced or explicit LMUL) and several LMUL granules can be included in the same translation unit.
 
-    Masked overloads with default V=M/Z can be instantiated with either of V=M|Z by the user, so the m and z
-    granules both include the cpp m and z granules (those which exist for `fn`).
+    Masked overloads have a `VARIANT V` template parameter (default M or Z depending on the function). The
+    m and z granules both receive them, constrained with `V == M` / `V == Z` respectively: the default V
+    keeps selecting its own granule, and `f<mipp::Z>(...)` only compiles if the z atom was included (it does
+    not silently rely on another granule). The s granule gets the 4-argument source overloads (`V == S`).
     """
     import re
 
     base = os.path.join(output_dir, "mipp", "internal", "interfaces", "obj", "functions", cat)
     variants = _variants_of(fn)
     units = _split_units(body)
-    by_variant = {v: [u for u in units if _unit_variant(u) == v] for v in variants}
-    # units of a variant that `fn` does not declare (should not happen) go to u
-    for u in units:
-        if _unit_variant(u) not in variants:
-            by_variant["u"].append(u)
+    vname = {"m": "M", "z": "Z", "s": "S"}
+
+    def units_for(v):
+        res = []
+        for u in units:
+            d = _unit_variant(u)  # u / m / z / s (default of the VARIANT parameter)
+            if v == "u":
+                if d == "u":
+                    res.append(u)
+            elif v in ("m", "z"):
+                if d in ("m", "z"):
+                    res.append(u)
+            elif v == "s":
+                if d == "s":
+                    res.append(u)
+        return res
 
     partner = _OBJ_PARTNERS.get(fn)
     if partner and partner in interfaces:
@@ -578,23 +591,23 @@ def _write_fine_granules(fn, cat, body, output_dir):
 
     inc = "mipp/internal/interfaces"
     for v in variants:
-        cpp_vs = [v]
-        if v in ("m", "z"):
-            cpp_vs = [x for x in ("m", "z") if x in variants]
+        v_units = units_for(v)
         for l, val in _FINE_LMULS.items():
             out = ["#pragma once", "", f'#include "{inc}/obj/common.hpp"']
-            for cv in cpp_vs:
-                out.append(f'#include "{inc}/cpp/functions/{cat}/{cv}/{l}/{fn}.hpp"')
+            out.append(f'#include "{inc}/cpp/functions/{cat}/{v}/{l}/{fn}.hpp"')
             if partner:
                 pv = v if v in pvariants else "u"
                 out.append(f'#include "{inc}/obj/functions/{pcat}/{pv}/{l}/{partner}.hpp"')
             out += ["", "namespace mipp", "{"]
-            for unit in by_variant[v]:
+            for unit in v_units:
                 for line in unit:
                     if line.startswith("template <") and "int LMUL = 1>" in line:
+                        cond = f"LMUL == {val}"
+                        if line.startswith("template <VARIANT V = "):
+                            cond += f" && V == {vname[v]}"
                         line = line.replace(
                             "int LMUL = 1>",
-                            f"int LMUL = 1, typename std::enable_if<LMUL == {val}, int>::type = 0>")
+                            f"int LMUL = 1, typename std::enable_if<{cond}, int>::type = 0>")
                     # helper structs are shared names: make them unique per granule
                     line = re.sub(r"\b(\w+_helper)\b", rf"\1_{v}_{l}", line)
                     out.append(line)

@@ -3,7 +3,10 @@ Include Generator Module
 Manages output directories and file creation, tracking preprocessor wrappers,
 headers formatting, and dependency generation structures.
 """
-import os, tempfile, shutil, io
+import os, re, tempfile, shutil, io
+
+# mipp_<isa>_<fn>_<datatype>[_mask|_maskz|_masks]_<lmul>( : call to another C atom in an emitted body
+_CALL_RE = re.compile(r"\bmipp_([a-z0-9]+)_([a-z0-9_]+?)_(float(?:32|64)|u?int(?:8|16|32|64))(?:_(mask|maskz|masks))?_(m[1248]|d2)\(")
 
 from tools import *
 from registry import *
@@ -913,6 +916,22 @@ class IncludeManager:
                                 item["dependencies"].add(f"mipp/internal/simd_ext/scalar/c/functions/reinterpret/u/{l}/toreg.h")
                                 if has_super_d2:
                                     item["dependencies"].add("mipp/internal/simd_ext/scalar/c/functions/reinterpret/u/d2/toreg.h")
+
+                    # Rule 4: dependencies deduced from the emitted body. Emulated implementations call
+                    # other atoms (other variant / other LMUL, e.g. add masks m1 from hadd maskz m2) that
+                    # the name-based resolvers above do not capture.
+                    buf = item.get("file")
+                    if buf is not None and hasattr(buf, "getvalue"):
+                        for m in _CALL_RE.finditer(buf.getvalue()):
+                            c_isa, c_fn, c_mask, c_l = m.group(1), m.group(2), m.group(4), m.group(5)
+                            if c_isa != layer_name:
+                                continue
+                            c_v = normalize_variant(c_mask) if c_mask else "u"
+                            if (c_fn, c_v, c_l) == (func, v, l):
+                                continue
+                            if (layer_name, c_fn, c_v, c_l) in self.atomic_files:
+                                c_cat = _match_category(c_fn)
+                                item["dependencies"].add(f"mipp/internal/simd_ext/{layer_name}/c/functions/{c_cat}/{c_v}/{c_l}/{c_fn}{ext}")
 
                 self._write_atomic_prefix(item)
 

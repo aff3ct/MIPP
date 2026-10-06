@@ -945,27 +945,17 @@ class TestsBuilderEngineC:
 
         tpl_fixed = self.engine.templates.get("headers", {}).get("all", {}).get("headers_fixed", [])
         lines = self.engine.render_template(tpl_fixed, N_ITER=str(N))
-        headers_set = set()
-        cat_func = _match_category(func_name)
-        headers_set.add('#include <mipp/internal/interfaces/c/common.h>')
-        headers_set.add('#include <mipp/internal/simd_ext/scalar/c/common.h>')
-        headers_set.add(f'#include <mipp/internal/interfaces/c/functions/{cat_func}/{func_name}.h>')
-        headers_set.add(f'#include <mipp/internal/simd_ext/scalar/c/functions/{cat_func}/{func_name}.h>')
-        for aux in _AUX_HEADERS:
-            if aux in self.engine.interfaces:
-                cat_aux = _match_category(aux)
-                headers_set.add(f'#include <mipp/internal/interfaces/c/functions/{cat_aux}/{aux}.h>')
-                headers_set.add(f'#include <mipp/internal/simd_ext/scalar/c/functions/{cat_aux}/{aux}.h>')
+        wrapper_fns = [func_name]
+        for aux in list(_AUX_HEADERS) + [a for a in extra_includes if a in _AUX_HEADERS]:
+            if aux in self.engine.interfaces and aux not in wrapper_fns:
+                wrapper_fns.append(aux)
 
         # extra_includes: split into known aux names (handled above) and raw strings (injected verbatim)
         extra_aux = [inc for inc in extra_includes if inc not in _AUX_HEADERS]
-        for aux in extra_includes:
-            if aux in _AUX_HEADERS:
-                cat_aux = _match_category(aux)
-                headers_set.add(f'#include <mipp/internal/interfaces/c/functions/{cat_aux}/{aux}.h>')
-                headers_set.add(f'#include <mipp/internal/simd_ext/scalar/c/functions/{cat_aux}/{aux}.h>')
 
-        lines.extend(sorted(list(headers_set)))
+        # Scalar reference headers first (self-contained), then the public per-function C wrappers.
+        lines.extend(sorted(f'#include <mipp/internal/simd_ext/scalar/c/functions/{_match_category(fn)}/{fn}.h>' for fn in wrapper_fns))
+        lines.extend(sorted(f'#include <mipp/c/fun/{fn}.h>' for fn in wrapper_fns))
         lines.append("")
         # Inject any raw include strings (not auxiliary names)
         for inc in extra_aux:
@@ -1226,10 +1216,11 @@ class TestsBuilderEngineCppBase:
             for conv in ("cvt", "wcvt", "cast", "cast_k"):
                 if conv in self.engine.interfaces and conv not in wrapper_fns:
                     wrapper_fns.append(conv)
-        for wfn in wrapper_fns:
-            headers_set.add(f'#include <mipp/{wrapper_ns}/fun/{wfn}.hpp>')
+        # Scalar reference headers are self-contained (they pull the ISA detection and rvd/rvm types) and
+        # come FIRST: their explicit specializations (hmax<Z,float64_t,-2,SCALAR>, ...) are matched against
+        # every visible same-name template, so the obj overloads (Rvm<T,LMUL>) must not be declared yet.
+        wrapper_lines = sorted(f'#include <mipp/{wrapper_ns}/fun/{wfn}.hpp>' for wfn in wrapper_fns)
 
-        headers_set.add('#include <mipp/internal/simd_ext/scalar/cpp/common.hpp>')
         headers_set.add(f'#include <mipp/internal/simd_ext/scalar/cpp/functions/{cat_func}/{func_name}.hpp>')
         for aux in _AUX_HEADERS:
             if aux in self.engine.interfaces:
@@ -1255,6 +1246,7 @@ class TestsBuilderEngineCppBase:
             headers_set.add(f'#include <mipp/internal/simd_ext/scalar/cpp/functions/{cat_cast_k}/cast_k.hpp>')
 
         lines.extend(sorted(list(headers_set)))
+        lines.extend(wrapper_lines)
         lines.append("")
 
         if (dialect_name in ("cpp", "obj")) and is_conversion:

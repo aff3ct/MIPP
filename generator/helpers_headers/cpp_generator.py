@@ -54,6 +54,8 @@ namespace mipp
     os.makedirs(common_enum_dir, exist_ok=True)
     file_common_enum = open(f"{common_enum_dir}/common.hpp", "w")
     print("#pragma once\n", file=file_common_enum)
+    print("#include <cstdint>", file=file_common_enum)
+    print("#include \"mipp/internal/interfaces/c/common.h\" // ISA detection (MIPP_NEON, MIPP_RVV, ...): makes this header self-contained\n", file=file_common_enum)
     print("namespace mipp {\n", file=file_common_enum)
     print("enum ISA { SCALAR, SSE, AVX, AVX512, NEON, SVE, RVV };", file=file_common_enum)
     print("enum VARIANT { U, M, Z, S }; //variant enum for function templates", file=file_common_enum)
