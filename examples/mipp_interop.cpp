@@ -29,6 +29,8 @@
 #include <mipp/obj/fun/xorb_k.hpp>
 #include <mipp/obj/fun/notb.hpp>
 #include <mipp/obj/fun/notb_k.hpp>
+#include <mipp/obj/fun/get.hpp>
+#include <mipp/obj/fun/get_k.hpp>
 
 // Granular include for C++ Functional Layer (to test C++ Func / C++ Obj interoperability)
 #include <mipp/cpp/fun/abs.hpp>
