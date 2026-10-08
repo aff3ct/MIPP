@@ -38,7 +38,7 @@
     "set1_k": {
         "format": "short",
         "code": [
-            "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}((const bool) v0);"
+            "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(v0);"
         ]
     },
     "testz_2args": {
