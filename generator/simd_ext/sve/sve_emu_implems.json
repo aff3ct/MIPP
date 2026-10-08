@@ -92,7 +92,7 @@
     ],
     "orb_k": [
         {
-            "instr_name": "or",
+            "instr_name": "orr",
             "datatypes": "all_datatypes",
             "template": "andb_k"
         }
