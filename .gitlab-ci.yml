@@ -234,7 +234,7 @@ analysis-cppcheck:
         export EXTRA_CMAKE_FLAGS="-DCMAKE_UNITY_BUILD=OFF -DMIPP_PRECOMPILED_HEADERS=OFF"
         ;;
       armv9-sve|armv9-sve2)
-        export EXTRA_CMAKE_FLAGS="-DMIPP_PRECOMPILED_HEADERS=OFF"
+        export EXTRA_CMAKE_FLAGS="-DCMAKE_UNITY_BUILD=OFF -DMIPP_PRECOMPILED_HEADERS=OFF"
         ;;
     esac
 
