@@ -478,19 +478,7 @@ def scalar_gen(include_manager):
 	#elif defined(__SSE__)
 		#define MIPP_SCALAR_SIZE 128
 	#elif defined(__ARM_FEATURE_SVE)
-		#if defined(MIPP_SVE_2048)
-			#define MIPP_SCALAR_SIZE 2048
-		#elif defined(MIPP_SVE_1024)
-			#define MIPP_SCALAR_SIZE 1024
-		#elif defined(MIPP_SVE_512)
-			#define MIPP_SCALAR_SIZE 512
-		#elif defined(MIPP_SVE_256)
-			#define MIPP_SCALAR_SIZE 256
-		#elif defined(MIPP_SVE_128)
-			#define MIPP_SCALAR_SIZE 128
-		#else
-			#error "MIPP_SVE_[SIZE] (SIZE in {128, 256, 512, 1024, 2048}) is undefined, user should define -DMIPP_SVE_[SIZE] at compile time!"
-		#endif
+	    #define MIPP_SCALAR_SIZE __ARM_FEATURE_SVE_BITS
 	#elif defined(__ARM_NEON__) || defined(__ARM_NEON)
 		#define MIPP_SCALAR_SIZE 128
 	#elif __riscv_v_intrinsic
