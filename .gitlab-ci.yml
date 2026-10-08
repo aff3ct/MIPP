@@ -225,13 +225,16 @@ analysis-cppcheck:
         exit 1
         ;;
     esac
-  # C codes cannot compile on RVV for now :-(
+  # C codes cannot compile on RVV or SVE for now :-(
   - |
     case "$ARCH" in
       riscv64-rvv1.0)
         export THREADS=8
         export SKIP_C_EXAMPLES="true"
         export EXTRA_CMAKE_FLAGS="-DCMAKE_UNITY_BUILD=OFF -DMIPP_PRECOMPILED_HEADERS=OFF"
+        ;;
+      armv9-sve|armv9-sve2)
+        export EXTRA_CMAKE_FLAGS="-DMIPP_PRECOMPILED_HEADERS=OFF"
         ;;
     esac
 
