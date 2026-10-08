@@ -11,6 +11,12 @@
             "{{ isa.prefix }}{{ instr_name }}_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), m0.m, m1.m);"
         ]
     },
+    "andnb_k": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}{{ instr_name }}_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), m1.m, m0.m);"
+        ]
+    },
     "load": {
         "format": "short",
         "code": [
@@ -44,7 +50,7 @@
     "std_3_reg_in_no_msk_z": {
         "format": "short",
         "code": [
-            "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), r0.r, r1.r, r2.r);"
+            "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), r2.r, r1.r, r0.r);"
         ]
     },
     "store": {
@@ -53,7 +59,7 @@
             "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), ({{ isa_dt_par.to_ptr }}*) p0, r0.r);"
         ]
     },
-    "testz": {
+    "testz_1arg": {
         "format": "long",
         "code": [
             "\treturn !{{ isa.prefix }}{{ instr_name }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), m0.m);"

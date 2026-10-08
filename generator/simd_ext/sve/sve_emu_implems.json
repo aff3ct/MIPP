@@ -24,7 +24,7 @@
         {
             "instr_name": "bic",
             "datatypes": "all_datatypes",
-            "template": "andb_k"
+            "template": "andnb_k"
         }
     ],
     "cmpeq": [
@@ -122,7 +122,7 @@
         {
             "instr_name": "ptest_any",
             "datatypes": "all_datatypes",
-            "template": "testz"
+            "template": "testz_1arg"
         }
     ],
     "xorb_k": [

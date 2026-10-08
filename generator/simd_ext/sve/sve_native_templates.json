@@ -1,4 +1,10 @@
 {
+    "blend": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(m0.m, r0.r, r1.r);"
+        ]
+    },
     "cast": {
         "format": "short",
         "code": [
@@ -9,12 +15,6 @@
         "format": "short",
         "code": [
             " m0.m;"
-        ]
-    },
-    "select": {
-        "format": "short",
-        "code": [
-            "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(m0.m, r0.r, r1.r);"
         ]
     },
     "set0": {
@@ -41,7 +41,7 @@
             "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}((const bool) v0);"
         ]
     },
-    "testz": {
+    "testz_2args": {
         "format": "long",
         "code": [
             "\treturn !{{ isa.prefix }}{{ instr_name }}(m0.m, m1.m);"
