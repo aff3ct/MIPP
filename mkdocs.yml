@@ -1,5 +1,5 @@
 site_name: MIPP Documentation
-site_url: https://aff3ct.github.io/mipp/
+site_url: https://aff3ct.github.io/MIPP/
 theme:
   name: material
   logo: assets/images/mipp_ico.jpg
@@ -49,7 +49,7 @@ theme:
 
   language: en
 
-repo_url: https://github.com/aff3ct/mipp/
+repo_url: https://github.com/aff3ct/MIPP/
 
 markdown_extensions:
   - toc:
