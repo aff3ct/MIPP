@@ -16,10 +16,10 @@ MIPP provides two header inclusion paradigms: **Monolithic Inclusion** and **Mod
 
 ```text
 include/
-├── mipp.h                  # Pure C99 monolithic entry point
-├── mipp.hpp                # C++ Functional Template monolithic entry point
-├── mipp_obj.hpp            # C++ Object API monolithic entry point
-└── mipp/                   # Namespaced headers
+├── mipp.h                       # Pure C99 monolithic entry point
+├── mipp.hpp                     # C++ Functional Template monolithic entry point
+├── mipp_obj.hpp                 # C++ Object API monolithic entry point
+└── mipp/                        # Namespaced headers
     ├── c/
     │   ├── cat/<category>.h     # Granular C category header (e.g. arithmetic.h)
     │   └── fun/<function>.h     # Granular C function header (e.g. add.h)
@@ -29,10 +29,10 @@ include/
     ├── obj/
     │   ├── cat/<category>.hpp   # Granular C++ Object category header
     │   └── fun/<function>.hpp   # Granular C++ Object function header
-    └── internal/           # Private implementation details (do not include directly)
-        ├── interfaces/     # Architecture-independent dispatch interfaces
-        ├── simd_ext/       # Generated ISA-specific backend implementations
-        └── templates/      # Common C++ templates and enums
+    └── internal/                # Private implementation details (do not include directly)
+        ├── interfaces/          # Architecture-independent dispatch interfaces
+        ├── simd_ext/            # Generated ISA-specific backend implementations
+        └── templates/           # Common C++ templates and enums
 ```
 
 ### 1.1. Option 1: Monolithic Inclusion (Prototyping)
@@ -47,12 +47,47 @@ This is the fastest and most convenient approach when starting a project or writ
 
 ### 1.2. Option 2: Granular Inclusion (Production & Scale)
 
-Granular headers expose either a single SIMD function or an entire category of functions:
+Granular headers expose either a single SIMD function or an entire category of functions across all variants and LMULs:
 
 - **Function headers**: `<mipp/c/fun/<func>.h>`, `<mipp/cpp/fun/<func>.hpp>`, `<mipp/obj/fun/<func>.hpp>`
 - **Category headers**: `<mipp/c/cat/<cat>.h>`, `<mipp/cpp/cat/<cat>.hpp>`, `<mipp/obj/cat/<cat>.hpp>` (e.g. `arithmetic.hpp`, `memory.hpp`, `comparison.hpp`)
 
 Granular headers dramatically accelerate compilation time (often 5x to 10x faster parsing) and reduce compiler peak memory consumption (RSS), which is critical for large C++ codebases with dozens of compilation units.
+
+<a id="fine-grained-headers"></a>
+### 1.3. Fine-Grained & Atomic 2D Headers (`--granularity fine`)
+
+When MIPP headers are emitted with `--granularity fine`, the generator creates an ultra-modular matrix of atomic header files across both dimensions: execution variant (`u`, `m`, `z`, `s`) and register multiplier LMUL (`m1`, `m2`, `m4`, `m8`, `d2`). This allows large-scale projects to include **only the exact variant and LMUL** required by each translation unit:
+
+```text
+include/mipp/obj/
+├── fun/
+│   ├── add.hpp                  # Coarse: All variants (U, M, Z, S) and all LMULs
+│   ├── m/                       # 1D Variant Umbrella: 'm' variant across all LMULs
+│   │   ├── add.hpp
+│   │   └── m2/                  # 2D Atomic: 'm' variant + LMUL=2 specifically
+│   │       └── add.hpp
+│   └── m2/                      # 1D LMUL Umbrella: LMUL=2 across all variants
+│       └── add.hpp
+└── cat/
+    ├── arithmetic.hpp           # Coarse: Category umbrella
+    ├── m/arithmetic.hpp         # 1D Variant category umbrella
+    └── m/m2/arithmetic.hpp      # 2D Atomic category umbrella
+```
+
+#### Inclusion Levels
+
+1. **Coarse Function Header**: `<mipp/obj/fun/<func>.hpp>` (includes all variants and LMULs for `<func>`).
+2. **1D Variant Umbrella**: `<mipp/obj/fun/<variant>/<func>.hpp>` (e.g. `m/add.hpp`, includes only masked `add` across all LMULs).
+3. **1D LMUL Umbrella**: `<mipp/obj/fun/<lmul>/<func>.hpp>` (e.g. `m2/add.hpp`, includes only LMUL=2 `add` across all variants).
+4. **2D Atomic Leaf**: `<mipp/obj/fun/<variant>/<lmul>/<func>.hpp>` (e.g. `m/m2/add.hpp`, includes only the exact kernel needed).
+
+#### Compilation & Scalability Benefits
+
+Benchmarking across large workloads demonstrates that 2D atomic inclusion provides significant advantages:
+
+- **Minimal Preprocessor Expansion**: The preprocessor parses only the minimal set of templates needed by each translation unit.
+- **Lower Compiler Peak RSS**: Peak memory consumption during compilation is substantially reduced, preventing out-of-memory issues during highly parallel multi-threaded builds.
 
 ---
 
@@ -160,32 +195,23 @@ auto scalar_val = mipp::set1<int32_t>(42);   // mipp::rvd<int32_t, 1>
 ```
 
 ### 3.6. Masked Function Template Specialization
-Masked operations in the C++ API use explicit template specialization via the `mipp::VARIANT` enumeration:
-
-```cpp
-namespace mipp {
-    enum VARIANT { U, M, Z, S }; // Unmasked, Mask (merge), Zero-mask, Source-preserve
-}
-```
-
-To invoke a masked operation, pass the variant as the first template parameter (`<mipp::M>`, `<mipp::Z>`, or `<mipp::S>`):
+Masked operations in the C++ Functional API use the `mipp::VARIANT` template parameter (`<mipp::M>`, `<mipp::Z>`, `<mipp::S>`). Because `mipp::rvd<T, LMUL>` is a type alias to an internal type trait (`rvd_type<T, LMUL>::type`), C++ template argument deduction cannot deduce `T`. Therefore, the datatype `T` (and `LMUL` if different from `1`) must be explicitly supplied:
 
 ```cpp
 auto m   = mipp::cmpeq(a, b);   // Mask condition
 auto src = mipp::set1<float>(0.0f);
 
 // 1. Merge Mask (M): res[i] = m[i] ? (a[i] + b[i]) : a[i]
-auto c_merge = mipp::add<mipp::M>(m, a, b);
+auto c_merge = mipp::add<mipp::M, float>(m, a, b);
 
 // 2. Zero Mask (Z): res[i] = m[i] ? (a[i] + b[i]) : 0
-auto c_zero  = mipp::add<mipp::Z>(m, a, b);
+auto c_zero  = mipp::add<mipp::Z, float>(m, a, b);
 
 // 3. Source Mask (S): res[i] = m[i] ? (a[i] + b[i]) : src[i]
-auto c_src   = mipp::add<mipp::S>(m, src, a, b);
+auto c_src   = mipp::add<mipp::S, float>(m, src, a, b);
 ```
 
-!!! note "Mask Variant Availability"
-    Not every MIPP function supports all four mask variants (for example, load/store operations, reductions, and certain math routines only implement applicable variants). Refer to [Masking Semantics](masking_semantics.md) for detailed behavior.
+For comprehensive coverage of masking rules, conversions, and hardware mappings, see [Masking Semantics](masking_semantics.md).
 
 ---
 
@@ -240,7 +266,7 @@ auto c = mipp::Rvd<float>(ptr_c);
 // Free functions on Rvd:
 auto res_fma = mipp::fmadd(a, b, c); // Fused multiply-add
 auto res_abs = mipp::abs(a);         // Absolute value
-auto res_min = mipp::min(a, b);       // Element-wise minimum
+auto res_min = mipp::min(a, b);      // Element-wise minimum
 auto res_red = mipp::sum(a);         // Reduction sum (returns scalar float)
 
 // Store directly using free function:
@@ -263,6 +289,15 @@ auto c_zero  = mipp::add<mipp::Z>(m, a, b);
 // 3. Source Mask (S): res[i] = m[i] ? (a[i] + b[i]) : src[i]
 auto c_src   = mipp::add<mipp::S>(m, src, a, b);
 ```
+
+!!! tip "Idiomatic Masking with Automatic Template Deduction"
+    Because operand types and LMUL are deduced from `Rvm` and `Rvd`, importing the variant symbol allows writing concise expressions:
+    ```cpp
+    using mipp::M;
+    auto c = mipp::add<M>(m, a, b); // Automatically deduces T=float and LMUL
+    ```
+    There is no need to write `mipp::add<mipp::M, float, 1>(m, a, b)`.
+
 
 ### 4.5. Idiomatic Coding Guidelines
 1. **Prefer Operator Overloads**: When an operator exists (`a + b`, `a * b`, `a == b`, `m1 & m2`), use it over named function calls for maximum readability.
@@ -309,10 +344,10 @@ Below is an identical vectorized SAXPY loop ($Y[i] = a \cdot X[i] + Y[i]$) imple
         const auto va = mipp::set1<T, LMUL>(a);
 
         for (size_t i = 0; i < vec_limit; i += N) {
-            auto vx = mipp::load<T, LMUL>(x + i);
-            auto vy = mipp::load<T, LMUL>(y + i);
+            auto vx = mipp::loadu<T, LMUL>(x + i);
+            auto vy = mipp::loadu<T, LMUL>(y + i);
             auto vres = mipp::fmadd(va, vx, vy); // Fused multiply-add
-            mipp::store(y + i, vres);
+            mipp::storeu(y + i, vres);
         }
         for (size_t i = vec_limit; i < n; i++) {
             y[i] = a * x[i] + y[i];
@@ -335,7 +370,7 @@ Below is an identical vectorized SAXPY loop ($Y[i] = a \cdot X[i] + Y[i]$) imple
             mipp::Rvd<T, LMUL> vx(x + i);
             mipp::Rvd<T, LMUL> vy(y + i);
             mipp::Rvd<T, LMUL> vres = va * vx + vy; // Uses overloaded * and +
-            mipp::store(y + i, vres);               // Idiomatic free function store
+            mipp::storeu(y + i, vres);              // Idiomatic free function store
         }
         for (size_t i = vec_limit; i < n; i++) {
             y[i] = a * x[i] + y[i];

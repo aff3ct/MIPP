@@ -1,22 +1,10 @@
 # Why MIPPv2: Architecture & Technical Relevance
 
-## 1. Evolution from MIPPv1 to MIPPv2
-
-MIPP was originally developed as a C++ header-only library providing a uniform interface over fixed-width SIMD intrinsics (SSE, AVX, AVX-512, NEON). While MIPPv1 demonstrated the viability of zero-overhead SIMD abstraction, scaling to modern instruction set architectures, mixed vector lengths, and diverse masking behaviors revealed three fundamental limits:
-
-- **Monolithic Hand-Written Headers**: MIPPv1 relied on manually maintained, deeply nested C++ template headers. Extending support for new data types or instruction sets required repetitive manual additions, increasing the likelihood of implementation divergence.
-- **Incomplete Fallbacks**: Unsupported instruction/datatype combinations produced cryptic template instantiation errors or required ad-hoc emulation logic scattered across the codebase.
-- **Single-Dialect Coupling**: The C++ object model was tightly coupled with internal intrinsic wrappers, making it impossible to consume MIPP from pure C codebases or embedded toolchains requiring a stable C ABI.
-
-**MIPPv2** redesigns the library from the ground up:
-
-- It replaces hand-written headers with an automated code generator driven by declarative JSON databases.
-- It systematically resolves missing hardware instructions through a **deterministic 4-level fallback engine**, guaranteeing that every function works across all 10 supported data types.
-- It exposes **three distinct APIs** to answer different programming needs: pure C99, C++ template functions, and C++ object operators.
+MIPPv2 provides portable, zero-overhead SIMD computing across x86, ARM, and RISC-V targets through an offline code generation pipeline, a deterministic fallback engine, and a unified tri-dialect interface.
 
 ---
 
-## 2. Key Architectural Advancements
+## 1. Key Architectural Principles
 
 ```
                     +-----------------------------+
@@ -44,49 +32,48 @@ MIPP was originally developed as a C++ header-only library providing a uniform i
      +----------+----------+----------+----------+----------+----------+
 ```
 
-### 2.1. Tri-Dialect API Surface
-MIPPv2 caters to different software engineering constraints through three distinct interfaces:
+### 1.1. Tri-Dialect API Surface
+Three complementary interfaces mapping to the same inlined instructions:
 
-1. **C99 API (`<mipp.h>`)**: Pure C99 type-explicit functions (`mipp_add_float32(r0, r1)`). Perfect for pure C codebases, systems programming, embedded devices, and Linux kernel modules.
-2. **C++ Functional Template API (`<mipp.hpp>`)**: Type-parameterized functions under namespace `mipp::` (`mipp::add<float>(r0, r1)`).
-3. **C++ Object API (`<mipp_obj.hpp>`)**: Expressive `mipp::Rvd<T, LMUL>` and `mipp::Rvm<T, LMUL>` wrapper classes featuring full arithmetic (`+`, `-`, `*`, `/`), bitwise, and relational operator overloading.
+- **C99 (`<mipp.h>`)**: Explicit type-suffixed functions (`mipp_add_float32`) for pure C codebases, embedded targets, and Linux kernel modules.
+- **C++ Functional (`<mipp.hpp>`)**: Type-parameterized template functions under namespace `mipp::` (`mipp::add<float>`).
+- **C++ Object (`<mipp_obj.hpp>`)**: Register classes (`mipp::Rvd`, `mipp::Rvm`) with complete operator overloading.
 
-### 2.2. Deterministic 4-Tier Fallback Hierarchy
-MIPPv2 guarantees **100% functional completeness** across all 10 supported data types and all target ISAs by employing a deterministic 4-tier solver:
+### 1.2. Deterministic 4-Tier Fallback Hierarchy
+Guarantees 100% functional completeness across all 10 supported data types and target ISAs:
 
-1. **Level 0 (Native Optimal)**: Direct 1-to-1 mapping to native CPU hardware intrinsics (e.g., `_mm256_add_ps`, `vaddq_f32`, `__riscv_vfadd_vf_f32m1`).
-2. **Level 1 (Specific ISA Emulation)**: Emulates missing functionality using other hardware instructions available within the *same* ISA (e.g., emulating integer multiplication via bitwise shifts and shuffles on early SSE/AVX subsets).
-3. **Level 2 (Generic Portable Emulation)**: Composes operations using lower-level portable MIPP primitives (e.g., transcendental functions `sin`, `cos`, `exp`, or masked operations built via `blend` and logical gates).
-4. **Level 3 (Transparent Scalar Loop Fallback)**: Automatically executes an element-wise scalar loop if no SIMD instruction exists.
+1. **Level 0 (Native Optimal)**: Direct 1-to-1 mapping to CPU hardware intrinsics (`_mm256_add_ps`, `vaddq_f32`, `__riscv_vfadd_vf_f32m1`).
+2. **Level 1 (Specific ISA Emulation)**: Missing opcodes emulated with other instructions of the same ISA (e.g., SSE integer multiplication).
+3. **Level 2 (Generic Portable Emulation)**: Composed from portable MIPP primitives (e.g., math routines or blend sequences).
+4. **Level 3 (Scalar Fallback)**: Element-wise scalar loop ensuring error-free compilation on any target.
 
-This structure eliminates compile-time failures on older or less complete instruction sets while maintaining peak performance on platforms with full native support.
+### 1.3. Generalized Length Multiplier (LMUL)
+Uniform vector register grouping ($\text{LMUL} \in \{1, 2, 4, 8\}$):
+- **Hardware (RVV 1.0)**: Native vector register grouping (`vfloat32m2_t`, `vfloat32m4_t`).
+- **Software (x86, ARM, Scalar)**: Binary register pairs unrolled cleanly at compile time.
 
-### 2.3. Generalized Length Multiplier (LMUL)
-MIPPv2 generalizes the concept of Length Multipliers ($\text{LMUL} \in \{1, 2, 4, 8\}$) across both variable-length and fixed-width instruction sets:
+### 1.4. Explicit 4-Variant Masking Model
 
-- **Hardware Register Grouping (RVV 1.0)**: Maps directly to native hardware vector register groups (e.g., `vfloat32m2_t`, `vfloat32m4_t`).
-- **Software Recursive Binary Structures (x86, ARM, Scalar)**: Emulates multi-register grouping via hierarchical structures that compilers unroll cleanly at compile time, eliminating abstraction overhead.
+Standardized execution semantics across all operations:
 
-### 2.4. Explicit 4-Variant Masking Model
-Masking in MIPPv2 is treated as a first-class citizen with standardized semantics across all operations:
-
-- **`unmasked`**: Standard unconditional computation.
-- **`mask`**: Merges computed results with inactive elements of the destination register ($\text{res}_i = m_i \ ? \ f(a_i, b_i) : a_i$).
-- **`maskz`**: Zeroes inactive elements ($\text{res}_i = m_i \ ? \ f(a_i, b_i) : 0$).
-- **`masks`**: Preserves inactive elements from an explicit source vector ($\text{res}_i = m_i \ ? \ f(a_i, b_i) : \text{src}_i$).
+- `unmasked`: Unconditional vector computation.
+- `mask`: Merges computed elements into inactive destination lanes ($\text{res}_i = m_i \ ? \ f(a_i, b_i) : a_i$).
+- `maskz`: Zeroes inactive elements ($\text{res}_i = m_i \ ? \ f(a_i, b_i) : 0$).
+- `masks`: Preserves inactive elements from a source vector ($\text{res}_i = m_i \ ? \ f(a_i, b_i) : \text{src}_i$).
 
 ---
 
 <a id="simd-wrappers-comparison"></a>
-## 3. Comparison with Existing SIMD Solutions
+<a id="3-comparison-with-existing-simd-solutions"></a>
+## 2. Comparison with Existing SIMD Solutions
 
-Choosing the right SIMD strategy depends on portability requirements, language constraints, and performance determinism. The following matrix compares MIPPv2 with the most prominent alternatives:
+Choosing the right SIMD library depends on language requirements, compilation constraints, and portability goals:
 
 | Capability / Metric | [**MIPPv2**](https://github.com/aff3ct/mipp/tree/develop) | [**MIPPv1**](https://github.com/aff3ct/mipp/tree/master) | [**Google Highway**](https://github.com/google/highway) | [**xsimd**](https://github.com/xtensor-stack/xsimd) | [**Eve**](https://github.com/jfalcou/eve) | [**nSIMD**](https://github.com/agenium-scale/nsimd) | [**Vc**](https://github.com/VcDevel/Vc) | [**VCL**](https://github.com/vectorclass/version2) | [**std::simd**](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2024/p1928r15.pdf) *(C++26)* | **Raw Intrinsics** | **Auto-Vectorization** (`-O3`) |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **Pure C99 API** | ✅ **Yes (`<mipp.h>`)** | ❌ No (C++ only) | ❌ No (C++ only) | ❌ No (C++ only) | ❌ No (C++ only) | ✅ Yes (`nsimd.h`) | ❌ No (C++ only) | ❌ No (C++ only) | ❌ No (C++ only) | ⚠️ Vendor specific | ⚠️ N/A |
 | **C++ Operator Overloading** | ✅ **Yes (`Rvd`)** | ✅ Yes (`Reg`) | ❌ No (Named functions) | ✅ Yes (`batch`) | ✅ Yes (`wide`) | ✅ Yes (`pack`) | ✅ Yes (`Vector`) | ✅ Yes (`Vec...`) | ✅ Yes (`simd`) | ❌ No | ⚠️ N/A |
-| **100% Fallback Guarantee** | ✅ **Levels 0 to 3** | ❌ Incomplete (Ad-hoc) | ⚠️ Partial emulations | ❌ Compile error | ❌ Compile error | ⚠️ Macro CPU fallback | ⚠️ Partial scalar | ⚠️ x86 subsets only | ✅ Guaranteed (ISO spec) | ❌ Compile error | ❌ Silent failure (or reporting) |
+| **100% Fallback Guarantee** | ✅ **Levels 0 to 3** | ❌ Incomplete (Ad-hoc) | ⚠️ Partial emulations | ❌ Compile error | ❌ Compile error | ⚠️ Macro CPU fallback | ⚠️ Partial scalar | ⚠️ x86 subsets only | ✅ Guaranteed (ISO spec) | ❌ Compile error | ❌ Silent failure |
 | **RISC-V Vector 1.0 (RVV)** | ⚠️ **Fixed-width only** | ❌ No | ✅ Scalable & Fixed | ⚠️ Fixed-width / WIP | ❌ No | ⚠️ Fixed-width (Draft) | ❌ No | ❌ No (x86 only) | ⚠️ Fixed-width only (WIP) | ⚠️ Built-ins (VLA/Fixed) | ⚠️ Unpredictable |
 | **ARM SVE Support** | ⚠️ **Fixed-width only / WIP** | ❌ No | ✅ Scalable & Fixed | ⚠️ Fixed-width / WIP | ⚠️ Fixed-width only | ⚠️ Fixed-width only | ❌ No | ❌ No (x86 only) | ⚠️ Fixed-width only (WIP) | ⚠️ ACLE (VLA/Fixed) | ⚠️ Unpredictable |
 | **Generalized LMUL ($1,2,4,8$)** | ✅ **Yes** | ❌ No | ✅ Yes (`ScalableTag`) | ❌ No | ❌ No | ❌ No | ❌ No | ❌ No | ❌ No | ❌ No (RVV only) | ❌ No |
@@ -101,34 +88,14 @@ Choosing the right SIMD strategy depends on portability requirements, language c
 | **Contributors** | [![Contributors](https://img.shields.io/github/contributors/aff3ct/mipp?style=flat&label=%F0%9F%91%A5)](https://github.com/aff3ct/mipp/graphs/contributors) | [![Contributors](https://img.shields.io/github/contributors/aff3ct/mipp?style=flat&label=%F0%9F%91%A5)](https://github.com/aff3ct/mipp/graphs/contributors) | [![Contributors](https://img.shields.io/github/contributors/google/highway?style=flat&label=%F0%9F%91%A5)](https://github.com/google/highway/graphs/contributors) | [![Contributors](https://img.shields.io/github/contributors/xtensor-stack/xsimd?style=flat&label=%F0%9F%91%A5)](https://github.com/xtensor-stack/xsimd/graphs/contributors) | [![Contributors](https://img.shields.io/github/contributors/jfalcou/eve?style=flat&label=%F0%9F%91%A5)](https://github.com/jfalcou/eve/graphs/contributors) | [![Contributors](https://img.shields.io/github/contributors/agenium-scale/nsimd?style=flat&label=%F0%9F%91%A5)](https://github.com/agenium-scale/nsimd/graphs/contributors) | [![Contributors](https://img.shields.io/github/contributors/VcDevel/Vc?style=flat&label=%F0%9F%91%A5)](https://github.com/VcDevel/Vc/graphs/contributors) | [![Contributors](https://img.shields.io/github/contributors/vectorclass/version2?style=flat&label=%F0%9F%91%A5)](https://github.com/vectorclass/version2/graphs/contributors) | ⚠️ N/A | ⚠️ N/A | ⚠️ N/A |
 | **Last Commit** | [![Last commit](https://img.shields.io/github/last-commit/aff3ct/mipp/develop?style=flat&label=last)](https://github.com/aff3ct/mipp/commits/develop) | [![Last commit](https://img.shields.io/github/last-commit/aff3ct/mipp/master?style=flat&label=last)](https://github.com/aff3ct/mipp/commits/master) | [![Last commit](https://img.shields.io/github/last-commit/google/highway?style=flat&label=last)](https://github.com/google/highway/commits) | [![Last commit](https://img.shields.io/github/last-commit/xtensor-stack/xsimd?style=flat&label=last)](https://github.com/xtensor-stack/xsimd/commits) | [![Last commit](https://img.shields.io/github/last-commit/jfalcou/eve?style=flat&label=last)](https://github.com/jfalcou/eve/commits) | [![Last commit](https://img.shields.io/github/last-commit/agenium-scale/nsimd?style=flat&label=last)](https://github.com/agenium-scale/nsimd/commits) | [![Last commit](https://img.shields.io/github/last-commit/VcDevel/Vc?style=flat&label=last)](https://github.com/VcDevel/Vc/commits) | [![Last commit](https://img.shields.io/github/last-commit/vectorclass/version2?style=flat&label=last)](https://github.com/vectorclass/version2/commits) | ⚠️ N/A | ⚠️ N/A | ⚠️ N/A |
 
-### Key Differentiators for MIPPv2:
+### Key Differentiators for MIPPv2
 
-1.  **Seamless Dual-Ecosystem: Clean C99 & Modern C++**:
-
-    Most modern wrappers (Google Highway, xsimd, Eve, Vc, VCL, as well as the upcoming C++26 `std::simd`) are exclusively designed for C++ (often requiring C++17, C++20, or C++26). While nSIMD provides a C interface, it relies on heavy macro preprocessing. MIPPv2 provides clean, inlined, type-safe C99 functions without macro obfuscation, making it effortless to integrate into pure C codebases, embedded systems, and Linux kernel modules.
-
-2.  **Expressive Syntax without Sacrificing Portability**:
-
-    To support runtime-variable vectors (VLA), Google Highway explicitly avoids C++ operator overloading (`a + b`), requiring explicit named functions (`hn::Add(d, a, b)`). MIPPv2 provides the best of both worlds for fixed-width workflows: functional C99 / C++ APIs for low-level control, plus full operator overloading (`mipp::Rvd`) that works consistently across all target architectures.
-
-3.  **Never Breaks Compilation (Deterministic 4-Tier Fallbacks)**:
-
-    In libraries like xsimd, Eve, or Vc, calling an operation not natively supported by the target CPU produces a hard compilation failure. MIPP automatically falls back through an ISA-specific emulation (Level 1), a generic MIPP emulation (Level 2), or a scalar loop (Level 3), guaranteeing complete functional coverage across all 10 supported data types.
-
-4.  **Pragmatic Fixed-Width Design for RVV & SVE**:
-
-    While Google Highway is built from the ground up for runtime Variable-Length Arrays (VLA), MIPPv2 intentionally chooses a compile-time fixed-width model (`-mrvv-vector-bits` / `-msve-vector-bits`). Fully implemented for RISC-V RVV 1.0 and currently being integrated for the upcoming ARM SVE backend, this deliberate engineering trade-off enables compile-time known sizes (`MIPP_N`), straightforward C-struct memory layouts, and standard C++ operator overloading without the runtime overhead of dynamic stripmining.
-
-5.  **Predictable Performance vs. Compiler Auto-Vectorization**:
-
-    While compilers have made great progress with `-O3 -ftree-vectorize`, auto-vectorization remains fragile: subtle changes in loop bounds, pointer aliasing, or compiler version updates can cause loops to silently de-vectorize. MIPP guarantees deterministic, explicit SIMD assembly.
-
-6.  **Automated Offline Code Generation vs. Heavy Metaprogramming & Macros**:
-
-    Unlike handwritten C++ template engines (Highway, Eve, xsimd, `std::simd`) or macro-heavy wrappers (nSIMD), MIPPv2 shifts metaprogramming **offline** through a dedicated Python code generation engine (`generator/`):
-
-    *   **Rapid Architectural Evolution & Deep Refactoring**: Changing an API convention, adjusting type conversions, or modifying memory alignment semantics is defined once in the generator and immediately propagated across all ~85 primitives and 10 datatypes.
-    *   **Localized ISA Integration & Custom Hardware Support**: Adding or modifying an ISA is fully localized within JSON specification registries. This enables seamless support for customized architectures—such as embedded RISC-V cores with a partial RVV subset (e.g., missing FP64 or vector division)—where the generator automatically backfills unsupported instructions with deterministic Level 1, 2, or 3 fallbacks.
-    *   **Single Source of Truth (Code, Tests, and Docs)**: The exact same JSON metadata that defines native opcodes simultaneously generates comprehensive unit tests (enforcing strict precision tolerances) and synchronizes documentation, eliminating documentation drift and blind spots.
-    *   **Guaranteed Matrix Completeness**: While handwritten libraries frequently suffer from coverage gaps across uncommon datatypes (e.g., `int8_t` or unsigned variants) or secondary ISAs, MIPPv2 programmatically guarantees 100% matrix coverage across all $\text{ISAs} \times \text{Types} \times \text{Primitives}$.
-    *   **Lightning-Fast Builds without Macro Obfuscation**: Instead of straining compilers with deep template instantiations or wrapping code in fragile preprocessor macros, MIPPv2 emits flat, strongly typed, inlined C99 functions. Developers inspecting code with an IDE jump directly to native intrinsics with zero indirection.
+1. **Dual-Ecosystem (C99 & Modern C++)**: Most modern wrappers require C++17/C++20, while nSIMD relies on heavy macro preprocessing. MIPPv2 provides clean, strongly-typed C99 inlined functions alongside modern C++ templates and operator classes.
+2. **Expressive Syntax without Portability Sacrifices**: While Google Highway omits operator overloading to accommodate runtime VLA vectors, MIPPv2 retains natural operator expressions (`va + vb`) across all fixed-width targets.
+3. **Deterministic 4-Tier Fallback Guarantee**: Missing CPU instructions never cause compilation failures. MIPP falls back hierarchically through ISA emulation, generic portable primitives, or scalar loops, ensuring 100% matrix completeness across all 10 datatypes.
+4. **Pragmatic Fixed-Width Design (RVV & SVE)**: Targeting compile-time vector widths (`-mrvv-vector-bits` / `-msve-vector-bits`) preserves compile-time constants (`MIPP_N`), straightforward struct layouts, and standard operator syntax without runtime stripmining overhead.
+5. **Predictable Assembly vs. Auto-Vectorization**: Compiler auto-vectorization (`-O3`) is fragile and can silently de-vectorize loops upon subtle code changes. MIPP guarantees explicit, deterministic SIMD instructions.
+6. **Automated Offline Code Generation**: Shifting metaprogramming offline into a Python engine (`generator/`) yields three major engineering benefits:
+    - **Fine-Grained Modular Headers**: Programmatic synthesis enables 2D atomic headers (`--granularity fine`, e.g. `<mipp/obj/fun/m/m2/add.hpp>`). Applications can include only the exact instructions needed, drastically reducing preprocessor parsing times and peak compiler memory (RSS).
+    - **Declarative Single Source of Truth**: Opcode mappings, fallbacks, unit tests, and documentation are generated from central JSON registries, enabling rapid maintenance and eliminating documentation drift.
+    - **Fast Builds with Zero Indirection**: Replaces deep C++ template instantiations and macro bloat with flat, strongly typed inlines where IDEs jump directly to native intrinsics.

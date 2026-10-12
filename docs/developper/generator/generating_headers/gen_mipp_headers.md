@@ -13,7 +13,7 @@
     - Level 0 (native), Level 1 (specific emulation), Level 2 (generic emulation), and Level 3 (scalar fallback) function implementations
 3. **C Interface**: Emits canonical C99 headers (`include/mipp.h` and ISA-specific C function headers).
 4. **C++ Interface**: Generates generic C++ template wrappers (`include/mipp.hpp`).
-5. **C++ Object Model**: Generates the high-level `rvd` and `rvm` object classes (`include/mipp_object.hpp`).
+5. **C++ Object Model**: Generates the high-level `rvd` and `rvm` object classes (`include/mipp_obj.hpp`).
 6. **Summary Report**: Prints the implementation level distribution matrix across all target ISAs.
 
 ---
@@ -25,8 +25,12 @@ cd generator
 .venv/bin/python gen_mipp_headers.py [OPTIONS]
 ```
 
-### Useful CLI Flags
+### CLI Flags
 
-- `--layers <isa1> <isa2> ...`: Restricts generation to specific target ISAs (e.g. `--layers sse avx`).
+- `--granularity <coarse|fine>`: Granularity of generated headers.
+    - `coarse` (default): Emits single headers per function (e.g. `add.h`, `add.hpp`).
+    - `fine`: Generates 1D variant headers (`m/add.hpp`), 1D LMUL headers (`m2/add.hpp`), and 2D atomic headers (`m/m2/add.hpp`) across all API tiers for blazing-fast compilation times.
+- `--layers <isa1> <isa2> ...`: Restricts generation to specific target ISAs (e.g. `--layers sse avx` or `--layers all`).
+- `--header-type <function_header|category_header>`: Generates function-level headers (default) or category-level headers.
+- `--no-clean`: Do not delete `../include/` before generating (by default, destination directories are cleaned).
 - `--audit <type>`: Selects static validation checks (`all`, `levels`, `dead-code`, `duplicates`, `json-structure`, `none`).
-- `--clean`: Wipes the destination `include/` directory before emission.

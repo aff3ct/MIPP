@@ -1430,21 +1430,21 @@ export function generateFlatSpecializedCode(entry, cfg) {
         lines.push(`${baseRetType} ${specializedFuncName}(${paramList}) {`);
         lines.push(`\t// Level 2 (Generic Emulation with blend)`);
         lines.push(`\t${baseRetType} op = ${baseFuncName}(${callArgs});`);
-        lines.push(`\treturn mipp_${isa}_blend_${dtMain}_m1(r0, op, ${blendMaskArg});`);
+        lines.push(`\treturn mipp_${isa}_blend_${dtMain}_m1(${blendMaskArg}, op, r0);`);
         lines.push(`}`);
       } else if (mask === "maskz") {
         lines.push("static inline");
         lines.push(`${baseRetType} ${specializedFuncName}(${paramList}) {`);
         lines.push(`\t// Level 2 (Generic Emulation with zero blend)`);
         lines.push(`\t${baseRetType} op = ${baseFuncName}(${callArgs});`);
-        lines.push(`\treturn mipp_${isa}_blend_${dtMain}_m1(mipp_${isa}_set0_${dtMain}_m1(), op, ${blendMaskArg});`);
+        lines.push(`\treturn mipp_${isa}_blend_${dtMain}_m1(${blendMaskArg}, op, mipp_${isa}_set0_${dtMain}_m1());`);
         lines.push(`}`);
       } else if (mask === "masks") {
         lines.push("static inline");
         lines.push(`${baseRetType} ${specializedFuncName}(${paramList}) {`);
         lines.push(`\t// Level 2 (Generic Emulation with source blend)`);
         lines.push(`\t${baseRetType} op = ${baseFuncName}(${callArgs});`);
-        lines.push(`\treturn mipp_${isa}_blend_${dtMain}_m1(rsrc, op, ${blendMaskArg});`);
+        lines.push(`\treturn mipp_${isa}_blend_${dtMain}_m1(${blendMaskArg}, op, rsrc);`);
         lines.push(`}`);
       }
     }

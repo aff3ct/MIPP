@@ -701,7 +701,10 @@ function updateModals(modalsContainerEl) {
 
 export async function initExplorer() {
   const mountEl = document.getElementById("mipp-explorer-app");
-  if (!mountEl) return;
+  if (!mountEl) {
+    document.body.classList.remove("mipp-has-explorer");
+    return;
+  }
 
   document.body.classList.add("mipp-has-explorer");
 

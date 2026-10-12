@@ -56,8 +56,8 @@
     "latex": "\\text{res}_i = \\operatorname{artanh}(r0_i)"
   },
   "blend": {
-    "description": "Selects elements between two vector registers based on a mask (r0 when m=0, r1 when m=1).",
-    "latex": "\\text{res}_i = m_i ? r1_i : r0_i"
+    "description": "Selects elements between two vector registers based on a mask (r0 when m=1, r1 when m=0).",
+    "latex": "\\text{res}_i = m_i ? r0_i : r1_i"
   },
   "cast": {
     "description": "In-register bitcast/reinterpretation of a vector register to another datatype of identical bitwidth with zero runtime instructions.",

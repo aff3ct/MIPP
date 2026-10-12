@@ -1,7 +1,8 @@
 nav:
   - Home: index.md
   - User Guide: user
-  - API Reference: funcs_support
   - API Explorer: explorer
-  - Hardware Support: isas_support
+  - Specifications:
+    - Function Support: funcs_support
+    - Hardware Support: isas_support
   - Developer Guide: developper

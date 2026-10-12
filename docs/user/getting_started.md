@@ -36,15 +36,8 @@ Corresponding granular paths exist across all three API tiers:
 - **C++ Functional API**: `<mipp/cpp/fun/<func>.hpp>` (or category headers `<mipp/cpp/cat/<category>.hpp>`)
 - **C++ Object API**: `<mipp/obj/fun/<func>.hpp>` (or category headers `<mipp/obj/cat/<category>.hpp>`)
 
-##### Fine-Grained & Atomic 2D Headers (`--granularity fine`)
-
-When MIPP headers are generated with `--granularity fine`, you can target even more specific subsets to achieve the fastest possible compilation times:
-
-- **1D Variant Umbrella**: `<mipp/cpp/fun/<variant>/<func>.hpp>` or `<mipp/cpp/cat/<variant>/<category>.hpp>` (e.g. `m/add.hpp`)
-- **1D LMUL Umbrella**: `<mipp/cpp/fun/<lmul>/<func>.hpp>` or `<mipp/cpp/cat/<lmul>/<category>.hpp>` (e.g. `m2/add.hpp`)
-- **2D Atomic Fine**: `<mipp/cpp/fun/<variant>/<lmul>/<func>.hpp>` or `<mipp/cpp/cat/<variant>/<lmul>/<category>.hpp>` (e.g. `m/m2/add.hpp`)
-
-Benchmarking shows that granular inclusion drastically reduces preprocessor expansion, slashes compiler parsing time by up to 5x-10x, and substantially reduces peak compiler memory consumption (RSS).
+!!! tip "Fine-Grained 2D Inclusions for Ultra-Fast Compilation"
+    For production pipelines and large codebases seeking minimum compilation times, MIPP also supports 2D atomic headers generated via `--granularity fine` (e.g. `<mipp/obj/fun/m/m2/add.hpp>`). See [Programming Model: Fine-Grained Headers](programming_model.md#fine-grained-headers) for full details.
 
 ---
 
@@ -83,190 +76,176 @@ Here is the standard, battle-tested pattern to vectorize any loop over an arbitr
 1. **Vector Main Loop**: Process contiguous chunks of $N$ elements with SIMD.
 2. **Tail Loop (Reliquat)**: Handle remaining $S \pmod N$ elements.
 
-### Complete Working Example (C++ Object API)
+### Complete Working Example (SAXPY with Tail Loop)
 
-```cpp
-#include <iostream>
-#include <vector>
-#include <numeric>
-#include <mipp_obj.hpp>
+=== "C99 Low-Level API (`<mipp.h>`)"
 
-// Computes y[i] = a * x[i] + y[i] (SAXPY) over arbitrary size S
-void saxpy_mipp(float a, const float* x, float* y, size_t size)
-{
-    constexpr size_t N = mipp::Rvd<float>::N(); // Elements per SIMD register (e.g. 8 on AVX2)
+    ```c
+    #include <stdio.h>
+    #include <stdlib.h>
 
-    // 1. Compute the limit for full vector chunks
-    const size_t vec_limit = (size / N) * N;
+    #include <mipp.h>
 
-    // Load the scalar multiplier into a vector register (broadcast)
-    mipp::Rvd<float> va = a;
-
-    // 2. Vector main loop
-    for (size_t i = 0; i < vec_limit; i += N)
+    // Computes y[i] = a * x[i] + y[i] (SAXPY) over arbitrary size S
+    void saxpy_mipp(float a, const float* x, float* y, size_t size)
     {
-        mipp::Rvd<float> vx = mipp::loadu<float>(&x[i]);
-        mipp::Rvd<float> vy = mipp::loadu<float>(&y[i]);
+        const size_t N = MIPP_N_FLOAT32; // Elements per SIMD register (e.g. 8 on AVX2)
+        const size_t vec_limit = (size / N) * N;
+        rvd_float32_m1_t va = mipp_set1_float32_m1(a);
 
-        vy += va * vx; // Operator overloading compiles to native FMA / mul+add
+        // 1. Vector main loop
+        for (size_t i = 0; i < vec_limit; i += N)
+        {
+            rvd_float32_m1_t vx = mipp_loadu_float32_m1(&x[i]);
+            rvd_float32_m1_t vy = mipp_loadu_float32_m1(&y[i]);
 
-        mipp::storeu<float>(&y[i], vy);
+            rvd_float32_m1_t vres = mipp_fmadd_float32_m1(va, vx, vy);
+
+            mipp_storeu_float32_m1(&y[i], vres);
+        }
+
+        // 2. Scalar tail loop for remaining elements
+        for (size_t i = vec_limit; i < size; ++i)
+        {
+            y[i] += a * x[i];
+        }
     }
 
-    // 3. Scalar tail loop for remaining elements
-    for (size_t i = vec_limit; i < size; ++i)
+    int main(void)
     {
-        y[i] += a * x[i];
+        const size_t size = 1007;
+        float *x = (float*)malloc(size * sizeof(float));
+        float *y = (float*)malloc(size * sizeof(float));
+
+        for (size_t i = 0; i < size; i++) { x[i] = 2.0f; y[i] = 1.0f; }
+
+        saxpy_mipp(3.0f, x, y, size);
+
+        printf("y[0] = %f (expected: 7.0)\n", y[0]);
+        printf("y[1006] = %f (expected: 7.0)\n", y[1006]);
+
+        free(x);
+        free(y);
+        return 0;
     }
-}
 
-int main()
-{
-    const size_t size = 1007; // Not a multiple of vector width
-    std::vector<float> x(size, 2.0f);
-    std::vector<float> y(size, 1.0f);
+    // Compile and run:
+    // gcc -std=c99 -O3 -mavx2 -mfma -I/path/to/mipp/include saxpy_c.c -o saxpy_c
+    // ./saxpy_c
+    ```
 
-    saxpy_mipp(3.0f, x.data(), y.data(), size);
+=== "C++ Functional API (`<mipp.hpp>`)"
 
-    std::cout << "y[0] = " << y[0] << " (expected: 7.0)" << std::endl;
-    std::cout << "y[1006] = " << y[1006] << " (expected: 7.0)" << std::endl;
-    return 0;
-}
-```
+    ```cpp
+    #include <iostream>
+    #include <vector>
 
-Compile and run:
-```bash
-g++ -O3 -mavx2 -mfma -I/path/to/mipp/include saxpy.cpp -o saxpy
-./saxpy
-```
+    #include <mipp.hpp>
+
+    // Computes y[i] = a * x[i] + y[i] (SAXPY) over arbitrary size S
+    void saxpy_mipp(float a, const float* x, float* y, size_t size)
+    {
+        constexpr size_t N = mipp::N<float>(); // Elements per SIMD register (e.g. 8 on AVX2)
+        const size_t vec_limit = (size / N) * N;
+        mipp::rvd<float> va = mipp::set1<float>(a);
+
+        // 1. Vector main loop
+        for (size_t i = 0; i < vec_limit; i += N)
+        {
+            mipp::rvd<float> vx = mipp::loadu<float>(&x[i]);
+            mipp::rvd<float> vy = mipp::loadu<float>(&y[i]);
+
+            mipp::rvd<float> vres = mipp::fmadd<float>(va, vx, vy);
+
+            mipp::storeu<float>(&y[i], vres);
+        }
+
+        // 2. Scalar tail loop for remaining elements
+        for (size_t i = vec_limit; i < size; ++i)
+        {
+            y[i] += a * x[i];
+        }
+    }
+
+    int main()
+    {
+        const size_t size = 1007;
+        std::vector<float> x(size, 2.0f);
+        std::vector<float> y(size, 1.0f);
+
+        saxpy_mipp(3.0f, x.data(), y.data(), size);
+
+        std::cout << "y[0] = " << y[0] << " (expected: 7.0)" << std::endl;
+        std::cout << "y[1006] = " << y[1006] << " (expected: 7.0)" << std::endl;
+        return 0;
+    }
+
+    // Compile and run:
+    // g++ -std=c++11 -O3 -mavx2 -mfma -I/path/to/mipp/include saxpy.cpp -o saxpy
+    // ./saxpy
+    ```
+
+
+
+=== "C++ Object API (`<mipp_obj.hpp>`)"
+
+    ```cpp
+    #include <iostream>
+    #include <vector>
+
+    #include <mipp_obj.hpp>
+
+    // Computes y[i] = a * x[i] + y[i] (SAXPY) over arbitrary size S
+    void saxpy_mipp(float a, const float* x, float* y, size_t size)
+    {
+        constexpr size_t N = mipp::Rvd<float>::N(); // Elements per SIMD register (e.g. 8 on AVX2)
+        const size_t vec_limit = (size / N) * N;
+        mipp::Rvd<float> va = a;
+
+        // 1. Vector main loop
+        for (size_t i = 0; i < vec_limit; i += N)
+        {
+            mipp::Rvd<float> vx(&x[i]);
+            mipp::Rvd<float> vy(&y[i]);
+
+            vy += va * vx; // Natural operators 
+
+            mipp::storeu<float>(&y[i], vy);
+        }
+
+        // 2. Scalar tail loop for remaining elements
+        for (size_t i = vec_limit; i < size; ++i)
+        {
+            y[i] += a * x[i];
+        }
+    }
+
+    int main()
+    {
+        const size_t size = 1007;
+        std::vector<float> x(size, 2.0f);
+        std::vector<float> y(size, 1.0f);
+
+        saxpy_mipp(3.0f, x.data(), y.data(), size);
+
+        std::cout << "y[0] = " << y[0] << " (expected: 7.0)" << std::endl;
+        std::cout << "y[1006] = " << y[1006] << " (expected: 7.0)" << std::endl;
+        return 0;
+    }
+
+    // Compile and run:
+    // g++ -std=c++11 -O3 -mavx2 -mfma -I/path/to/mipp/include saxpy.cpp -o saxpy
+    // ./saxpy
+    ```
 
 ---
 
-## 4. Minimal Working Examples by API Dialect
-
-MIPP gives you three different ways to write vector code, depending on your constraints:
-
-### 4.1. C Low-Level API (`<mipp.h>`)
-
-For pure C99 projects, drivers, or FFIs:
-
-```c
-#include <stdio.h>
-#include <mipp.h>
-
-int main(void)
-{
-    const int N = MIPP_N_FLOAT32;
-    float a[N], b[N], c[N];
-
-    for (int i = 0; i < N; ++i) {
-        a[i] = (float)i;
-        b[i] = (float)(i * 10);
-    }
-
-    // Unaligned load, SIMD addition, and unaligned store
-    rvd_float32_m1_t va = mipp_loadu_float32_m1(a);
-    rvd_float32_m1_t vb = mipp_loadu_float32_m1(b);
-    rvd_float32_m1_t vc = mipp_add_float32_m1(va, vb);
-
-    mipp_storeu_float32_m1(c, vc);
-
-    printf("C API Result: c[0]=%f, c[%d]=%f\n", c[0], N - 1, c[N - 1]);
-    return 0;
-}
-```
-
-Compile with:
-```bash
-gcc -O3 -mavx2 -I/path/to/mipp/include example_c.c -o example_c
-./example_c
-```
-
----
-
-### 4.2. C++ Functional Template API (`<mipp.hpp>`)
-
-For generic C++ template programming:
-
-```cpp
-#include <iostream>
-#include <mipp.hpp>
-
-int main()
-{
-    constexpr int N = mipp::N<float>();
-    alignas(mipp::req_alignment()) float a[N], b[N], c[N];
-
-    for (int i = 0; i < N; ++i) {
-        a[i] = (float)i;
-        b[i] = (float)(i * 2);
-    }
-
-    mipp::rvd<float> va = mipp::load<float>(a);
-    mipp::rvd<float> vb = mipp::load<float>(b);
-    mipp::rvd<float> vc = mipp::add(va, vb);
-
-    mipp::store(c, vc);
-
-    std::cout << "C++ Functional API Result: c[0]=" << c[0] << ", c[" << N - 1 << "]=" << c[N - 1] << std::endl;
-    return 0;
-}
-```
-
-Compile with:
-```bash
-g++ -O3 -mavx2 -I/path/to/mipp/include example_cpp.cpp -o example_cpp
-./example_cpp
-```
-
----
-
-### 4.3. C++ Object API (`<mipp_obj.hpp>`)
-
-For clean, readable, high-level code with overloaded operators:
-
-```cpp
-#include <iostream>
-#include <mipp_obj.hpp>
-
-int main()
-{
-    using RegF = mipp::Rvd<float>;
-    constexpr int N = RegF::size();
-
-    float a[N], b[N], c[N];
-    for (int i = 0; i < N; ++i) {
-        a[i] = (float)i;
-        b[i] = 100.0f;
-    }
-
-    RegF va = mipp::loadu<float>(a);
-    RegF vb = mipp::loadu<float>(b);
-
-    // Natural arithmetic expressions
-    RegF vc = (va + vb) * 2.0f;
-
-    mipp::storeu<float>(c, vc);
-
-    std::cout << "C++ Object API Result: c[0]=" << c[0] << " (expected: 200.0)" << std::endl;
-    return 0;
-}
-```
-
-Compile with:
-```bash
-g++ -O3 -mavx2 -I/path/to/mipp/include example_obj.cpp -o example_obj
-./example_obj
-```
-
----
-
-## 5. Architecture Introspection (`mipp_info`)
+## 4. Architecture Introspection (`mipp_info`)
 
 You can call `mipp_info()` at runtime to print the detected OS, compiler, active SIMD extension, and vector register bitwidth to `stdout`:
 
 ```cpp
-#include <mipp.hpp>
+#include <mipp.h>
 
 int main()
 {

@@ -408,7 +408,7 @@ export function renderAlgoModal(modalData) {
         codeLines.push(`${retType1} ${specFuncName1}(${specParams1}) {`);
         codeLines.push(`    // Level 2 (Generic Emulation with blend)`);
         codeLines.push(`    ${retType1} op = mipp::${entry.name}(${callArgs});`);
-        codeLines.push(`    return mipp::blend(op, ${argNames[0]}, m0); // Inactive lanes preserve ${argNames[0]}`);
+        codeLines.push(`    return mipp::blend(m0, op, ${argNames[0]}); // Inactive lanes preserve ${argNames[0]}`);
         codeLines.push(`}`);
       } else if (currentMask === "maskz") {
         codeLines.push(`// ${sectionIdx++}. Predicated Execution Layer (Zeroing False Lanes)`);
@@ -426,7 +426,7 @@ export function renderAlgoModal(modalData) {
         codeLines.push(`${retType1} ${specFuncName1}(${specParams1}) {`);
         codeLines.push(`    // Level 2 (Generic Emulation with blend)`);
         codeLines.push(`    ${retType1} op = mipp::${entry.name}(${callArgs});`);
-        codeLines.push(`    return mipp::blend(op, src, m0); // Inactive lanes preserve src`);
+        codeLines.push(`    return mipp::blend(m0, op, src); // Inactive lanes preserve src`);
         codeLines.push(`}`);
       }
     } else {

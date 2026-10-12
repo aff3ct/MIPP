@@ -65,33 +65,55 @@ rvd_float32_t res_s = mipp_add_float32_masks(m, vsrc, va, vb);
 ```
 
 ### 2.2. C++ Functional API (`<mipp.hpp>`)
-The mask kind is supplied as the first template argument (`<mipp::M>`, `<mipp::Z>`, `<mipp::S>`):
+The mask variant is supplied as the first template argument (`<mipp::M>`, `<mipp::Z>`, `<mipp::S>`). Because `mipp::rvd<T, LMUL>` is a type alias to an internal type trait (`rvd_type<T, LMUL>::type`), C++ template argument deduction cannot deduce `T`. Therefore, `T` (and `LMUL` if different from `1`) must be explicitly specified:
 
 ```cpp
 auto m = mipp::cmplt(va, vb);
 
-// 1. Unmasked (deduced automatically):
+// 1. Unmasked (deduced automatically from operand types):
 auto res_u = mipp::add(va, vb);
 
-// 2. Masked:
-auto res_m = mipp::add<mipp::M>(m, va, vb);
+// 2. Masked (merge): preserves va on false
+auto res_m = mipp::add<mipp::M, float, 1>(m, va, vb); // or mipp::add<mipp::M, float>(m, va, vb)
 
-// 3. Zero Masked:
-auto res_z = mipp::add<mipp::Z>(m, va, vb);
+// 3. Zero-Masked: zeroes inactive elements on false
+auto res_z = mipp::add<mipp::Z, float, 1>(m, va, vb);
 
-// 4. Source Masked:
-auto res_s = mipp::add<mipp::S>(m, vsrc, va, vb);
+// 4. Source-Masked: preserves values from vsrc on false
+auto res_s = mipp::add<mipp::S, float, 1>(m, vsrc, va, vb);
 ```
+
+!!! note "LMUL in Functional Template Calls"
+    When $\text{LMUL}=1$, it can be omitted (`mipp::add<mipp::M, float>(m, va, vb)`). For multi-register operations ($\text{LMUL} > 1$), both `T` and `LMUL` must be specified explicitly (e.g. `mipp::add<mipp::M, float, 2>(m, va, vb)`).
 
 ### 2.3. C++ Object API (`<mipp_obj.hpp>`)
 
-Direct masked arithmetic operations (`Masked`, `Zero-Masked`, `Source-Masked`) are **not yet implemented** in the C++ Object API. They are planned for a future release (likely via ternary operator or blend expressions).
+Because `mipp::Rvd<T, LMUL>` and `mipp::Rvm<T, LMUL>` are class templates rather than type aliases, the compiler automatically deduces both `T` and `LMUL` from the argument objects. Masked operations only require the variant template argument:
 
-To perform masked operations with object handles in the interim, pass the underlying `.r` and `.m` handles to the C++ Functional API:
 ```cpp
-auto res_raw = mipp::add<mipp::M>(m.m, va.r, vb.r);
-mipp::Rvd<float> res(res_raw);
+mipp::Rvm<float> m = (va > vb); // Mask produced by comparison operator
+mipp::Rvd<float> vsrc = 0.0f;
+
+// 1. Unmasked:
+auto res_u = mipp::add(va, vb);
+
+// 2. Masked (merge): preserves va on false
+auto res_m = mipp::add<mipp::M>(m, va, vb);
+
+// 3. Zero-Masked: zeroes inactive elements on false
+auto res_z = mipp::add<mipp::Z>(m, va, vb);
+
+// 4. Source-Masked: preserves values from vsrc on false
+auto res_s = mipp::add<mipp::S>(m, vsrc, va, vb);
 ```
+
+!!! tip "Concise Mask Syntax & Automatic Template Deduction"
+    With `using mipp::M;` (or `Z`, `S`), you can write clean, expressive calls without repeating datatypes or namespaces:
+    ```cpp
+    using mipp::M;
+    auto res = mipp::add<M>(m, va, vb);
+    ```
+    The element datatype `T` and the register multiplier `LMUL` are automatically deduced from the `Rvm` and `Rvd` operand objects.
 
 ---
 
@@ -208,16 +230,23 @@ mipp::rvd<float> mask_vector = mipp::toreg(m);
 ```
 
 ### 6.4. `blend` (Conditional Element Multiplexing)
-Selects elements between two data vectors according to a mask ($r_0$ when $m_i = 0$, $r_1$ when $m_i = 1$):
+Selects elements between two data vectors according to a mask ($r_0$ when $m_i = 1$, $r_1$ when $m_i = 0$):
 
-$$\text{res}_i = \begin{cases} r1_i & \text{if } m_i = 1 \\ r0_i & \text{if } m_i = 0 \end{cases}$$
+$$\text{res}_i = \begin{cases} r0_i & \text{if } m_i = 1 \\ r1_i & \text{if } m_i = 0 \end{cases}$$
+
+The mask `m` is passed as the **first argument**:
+
+```c
+// C API: (mask, if_true, if_false)
+rvd_float32_t chosen = mipp_blend_float32(m, if_true, if_false);
+```
 
 ```cpp
-// C API: (if_false, if_true, mask)
-rvd_float32_t chosen = mipp_blend_float32(if_false, if_true, m);
+// C++ Functional API: (mask, if_true, if_false)
+auto chosen_fun = mipp::blend(m, if_true, if_false);
 
-// C++ API: (if_false, if_true, mask)
-auto chosen = mipp::blend(if_false, if_true, m);
+// C++ Object API: (mask, if_true, if_false)
+auto chosen_obj = mipp::blend(m, if_true, if_false);
 ```
 
 ---
@@ -269,14 +298,20 @@ rvd_float32_m2_t res = mipp_add_float32_mask_m2(m, va, vb);
 ```
 
 ```cpp
-// C++ API: automatic LMUL deduction
-auto va = mipp::load<float, 2>(ptr_a);       // mipp::rvd<float, 2>
-auto vb = mipp::load<float, 2>(ptr_b);       // mipp::rvd<float, 2>
+// C++ Functional API: explicit LMUL parameter required
+auto va = mipp::load<float, 2>(ptr_a);              // mipp::rvd<float, 2>
+auto vb = mipp::load<float, 2>(ptr_b);              // mipp::rvd<float, 2>
+auto m  = mipp::cmplt(va, vb);                      // mipp::rvm<float, 2>
+auto res = mipp::add<mipp::M, float, 2>(m, va, vb); // mipp::rvd<float, 2>
 
-auto m  = mipp::cmplt(va, vb);               // Deduces mipp::rvm<float, 2>
-auto res = mipp::add<mipp::M>(m, va, vb);    // Deduces mipp::rvd<float, 2>
+// C++ Object API: automatic LMUL and type deduction
+auto oa = mipp::load<float, 2>(ptr_a);              // mipp::Rvd<float, 2>
+auto ob = mipp::load<float, 2>(ptr_b);              // mipp::Rvd<float, 2>
+auto om = (oa < ob);                                // mipp::Rvm<float, 2>
+auto ores = mipp::add<mipp::M>(om, oa, ob);         // Deduces T=float and LMUL=2
 ```
 
 ### 8.2. Hardware Execution on Multi-Register Vectors
+
 - **RISC-V Vector (RVV)**: Operates directly on hardware grouped registers (`vfloat32m2_t`) governed by the corresponding fractional boolean mask register (`vbool16_t` / `vbool8_t`).
 - **Fixed-Width Architectures (x86, ARM)**: Because multi-register masks (`rvm_*_m2_t`) and data vectors (`rvd_*_m2_t`) use recursive binary struct composition (`{ m1, m2 }` and `{ r1, r2 }`), the compiler unrolls the masked operation into separate predicated instructions per hardware register pair with zero abstraction overhead.

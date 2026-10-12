@@ -14,8 +14,8 @@ hide:
     <a href="user/getting_started/" class="mipp-btn mipp-btn-primary">
       <span>🚀</span> Get Started (5 min)
     </a>
-    <a href="funcs_support/" class="mipp-btn mipp-btn-secondary">
-      <span>📚</span> API Reference
+    <a href="explorer/" class="mipp-btn mipp-btn-secondary">
+      <span>🔍</span> API Explorer
     </a>
     <a href="https://github.com/aff3ct/MIPP/tree/develop" class="mipp-btn mipp-btn-secondary" target="_blank" rel="noopener">
       <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
@@ -72,139 +72,9 @@ hide:
   </div>
 </div>
 
-<!-- Featured MIPP API Explorer Showcase Card -->
-<div class="mipp-explorer-showcase-card">
-  <div class="mipp-explorer-showcase-content">
-    <div class="mipp-explorer-showcase-badge">🔍 Interactive Catalog</div>
-    <h2 class="mipp-explorer-showcase-title">MIPP API Explorer</h2>
-    <p class="mipp-explorer-showcase-desc">
-      Search and compare all <b>85 MIPP vector primitives</b> with <b>reverse vendor intrinsic lookup</b> (e.g. <code>_mm256_blendv_ps</code>, <code>vbslq_f32</code>, <code>__riscv_vmerge_vvm_f32m1</code>), live hardware acceleration matrices (L0..L3), and tri-dialect prototypes.
-    </p>
-    <div class="mipp-explorer-showcase-chips">
-      <span>🔍 Reverse Intrinsic Lookup</span>
-      <span>⚙️ SSE · AVX · AVX-512 · NEON · SVE · RVV</span>
-      <span>🔄 C99 · C++ Functional · C++ Object</span>
-    </div>
-  </div>
-  <div class="mipp-explorer-showcase-action">
-    <a href="explorer/" class="mipp-btn mipp-btn-primary">
-      Launch API Explorer &rarr;
-    </a>
-  </div>
-</div>
-
----
-
-## Interactive Code Preview : One Task, Three Dialects
-
-See how simple and expressive vectorized code becomes with MIPP:
-
-=== "C99 Low-Level API (`<mipp.h>`)"
-
-    ```c
-    #include <mipp.h>
-    #include <stddef.h>
-
-    void vector_add(const float* a, const float* b, float* c, size_t n) {
-
-        const size_t vec_limit = (n / MIPP_N_FLOAT32) * MIPP_N_FLOAT32;
-
-        for (size_t i = 0; i < vec_limit; i += MIPP_N_FLOAT32) {
-            rvd_float32_t va, vb, vc;
-            va = mipp_load_float32(a + i);
-            vb = mipp_load_float32(b + i);
-            vc = mipp_add_float32(va, vb); // Pure C99 explicit symbol
-            mipp_store_float32(c + i, vc);
-        }
-
-        for (size_t i = vec_limit; i < n; i++) { // Clean scalar tail loop
-            c[i] = a[i] + b[i];
-        }
-    }
-    ```
-
-=== "C++ Template Functional API (`<mipp.hpp>`)"
-
-    ```cpp
-    #include <mipp.hpp>
-    #include <vector>
-
-    void vector_add(const std::vector<float>& a, const std::vector<float>& b, std::vector<float>& c) {
-        constexpr size_t N = mipp::N<float>();
-        const size_t vec_limit = (a.size() / N) * N;
-
-        for (size_t i = 0; i < vec_limit; i += N) {
-            mipp::rvd<float> va, vb, vc;
-            va = mipp::load<float>(&a[i]);
-            vb = mipp::load<float>(&b[i]);
-            vc = mipp::add(va, vb); // Type-parameterized template
-            mipp::store(&c[i], vc);
-        }
-
-        for (size_t i = vec_limit; i < a.size(); i++) { // Clean scalar tail loop
-            c[i] = a[i] + b[i];
-        }
-    }
-    ```
-
-=== "C++ Object API (`<mipp_obj.hpp>`)"
-
-    ```cpp
-    #include <mipp_obj.hpp>
-    #include <vector>
-
-    void vector_add(const std::vector<float>& a, const std::vector<float>& b, std::vector<float>& c) {
-        constexpr size_t N = mipp::Rvd<float>::size();
-        const size_t vec_limit = (a.size() / N) * N;
-
-        for (size_t i = 0; i < vec_limit; i += N) {
-            mipp::Rvd<float> va, vb, vc;
-            va = &a[i];
-            vb = &b[i];
-            vc = va + vb; // Expressive overloaded operator
-            mipp::store(&c[i], vc.r);
-        }
-
-        for (size_t i = vec_limit; i < a.size(); i++) { // Clean scalar tail loop
-            c[i] = a[i] + b[i];
-        }
-    }
-    ```
-
-👉 **[See how MIPP compares to Google Highway, xsimd, Eve, Auto-vectorization and more](user/why_mippv2.md#simd-wrappers-comparison)**
-
----
-
-## Architectural Hierarchy
-
-```
-       +-------------------------------------------------------------------+
-       |                        Application Code                           |
-       +-------------------------------------------------------------------+
-                                         |
-         +-------------------------------+-------------------------------+
-         |                               |                               |
-  +--------------+              +------------------+           +-------------------+
-  |  C Low-Level |              |   C++ Template   |           |    C++ Object     |
-  |  Interface   |              |    Functions     |           |     Interface     |
-  |  (mipp.h)    |              |    (mipp.hpp)    |           |   (mipp_obj.hpp)  |
-  +--------------+              +------------------+           +-------------------+
-         |                               |                               |
-         +-------------------------------+-------------------------------+
-                                         |
-       +-------------------------------------------------------------------+
-       |                 MIPP Multi-Level Fallback Engine                  |
-       |  Level 0: Native Hardware Intrinsics                              |
-       |  Level 1: ISA-Specific Intrinsics Emulation                       |
-       |  Level 2: Generic Portable MIPP Emulation                         |
-       |  Level 3: Transparent Scalar Loop Fallback                        |
-       +-------------------------------------------------------------------+
-                                         |
-  +------------+------------+------------+------------+------------+------------+
-  |    SSE     |    AVX     |  AVX-512   |    NEON    | SVE (WIP)  |    RVV     |
-  |   (128b)   |   (256b)   |   (512b)   |   (128b)   | (Scalable) | (Scalable) |
-  +------------+------------+------------+------------+------------+------------+
-```
+<p style="text-align: center; margin-top: 1.5rem; margin-bottom: 2rem;">
+  👉 <b><a href="user/why_mippv2/#3-comparison-with-existing-simd-solutions">See how MIPP compares to Google Highway, xsimd, Eve, and auto-vectorization</a></b>
+</p>
 
 ---
 
@@ -226,21 +96,21 @@ See how simple and expressive vectorized code becomes with MIPP:
 
 MIPP supports 10 fundamental numeric data types across all vector abstractions:
 
-- **Floating-Point**: `float64` (`double`), `float32` (`float`)
-- **Signed Integer**: `int64` (`int64_t`), `int32` (`int32_t`), `int16` (`int16_t`), `int8` (`int8_t`)
-- **Unsigned Integer**: `uint64` (`uint64_t`), `uint32` (`uint32_t`), `uint16` (`uint16_t`), `uint8` (`uint8_t`)
+- **Floating-Point**: `float32_t`, `float64_t`
+- **Signed Integer**: `int8_t`, `int16_t`, `int32_t`, `int64_t`
+- **Unsigned Integer**: `uint8_t`, `uint16_t`, `uint32_t`, `uint64_t`
 
 ---
 
 ## Documentation Overview
 
-- **[Why MIPPv2](user/why_mippv2.md)**: Architectural evolution, technical relevance, and comparison with other SIMD wrappers.
-- **[Getting Started](user/getting_started.md)**: Header integration, compiler flags, and a **5-minute tutorial with complete loop & tail-loop handling**.
+- **[Why MIPPv2](user/why_mippv2.md)**: Architectural evolution, technical relevance, and comparison with other SIMD wrappers (Highway, xsimd, Eve).
+- **[Getting Started](user/getting_started.md)**: Header integration, compiler flags, and a **5-minute tutorial across C99, C++ Functional, and C++ Object APIs**.
 - **[Programming Model](user/programming_model.md)**: In-depth exploration of C99, C++ functional, and C++ object APIs.
 - **[Vector Types & LMUL](user/vector_types_and_lmul.md)**: Vector representations, element counts (`mipp::N<T, LMUL>()`), and software/hardware register multiplier scaling.
 - **[Masking Semantics](user/masking_semantics.md)**: Mask generation, mask conversion, and execution variants (`unmasked`, `mask`, `maskz`, `masks`).
 - **[Implementation Levels](user/implementation_levels.md)**: The 4-level fallback engine explained from an application performance standpoint.
 - **[Memory & Alignment](user/memory_and_alignment.md)**: Alignment constraints, load/store primitives, and gather/scatter memory access.
-- **[API Reference](funcs_support/index.md)**: Complete mathematical descriptions, prototypes, and hardware matrices for every function.
-- **[Hardware Support](isas_support/index.md)**: Architecture compatibility matrices and universal intersection capabilities.
+- **[API Explorer](explorer/index.md)**: Interactive catalog with instant search, reverse vendor intrinsic lookup, and tri-dialect switching.
+- **[Specifications](funcs_support/index.md)**: Complete function prototypes, mathematical descriptions, and target ISA capability matrices.
 - **[Developer Guide](developper/index.md)**: Code generator architecture, declarative JSON database schema, **templating DSL**, and contribution guide.

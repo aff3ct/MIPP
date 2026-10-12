@@ -693,9 +693,9 @@ class SpecFuncInfo:
                     print(f"    {line}", file=f)
                 print("    ```\n", file=f)
 
-            _print_headers_block("obj", "hpp", "mipp_obj.hpp", "C++ Object API")
-            _print_headers_block("cpp", "hpp", "mipp.hpp", "C++ API")
             _print_headers_block("c", "h", "mipp.h", "C99 API")
+            _print_headers_block("cpp", "hpp", "mipp.hpp", "C++ API")
+            _print_headers_block("obj", "hpp", "mipp_obj.hpp", "C++ Object API")
 
             print("## Prototypes\n", file=f)
             print('=== "C99 API"', file=f)

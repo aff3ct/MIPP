@@ -100,8 +100,8 @@ When calling another MIPP function, you can explicitly request a specific maskin
 - `mk:U`: Unmasked variant
 
 ```text
-// Call the masked variant of blend using m0
-%blend<tp|mk:mask>%(op, r0, m0);
+// Call blend with mask as first argument
+%blend<tp>%(m0, op, r0);
 ```
 
 ---
@@ -122,7 +122,7 @@ Extracted from `generator/helpers_headers/generic_emu_templates_mask.json`:
     "mask": {
         "code": [
             "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
-            "%r<tp>% res = %blend<tp>%(op, r0, m0);",
+            "%r<tp>% res = %blend<tp>%(m0, op, r0);",
             "return res;"
         ]
     }
@@ -136,7 +136,7 @@ When specializing this template for `func_name = "add"` on `AVX` with `tp = floa
 static inline rvd_avx_float32_t mipp_avx_add_float32_mask(rvm_avx_float32_t m0, const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
     // Level 2 (Generic Emulated)
     rvd_avx_float32_t op = mipp_avx_add_float32(r0, r1);
-    rvd_avx_float32_t res = mipp_avx_blend_float32(op, r0, m0);
+    rvd_avx_float32_t res = mipp_avx_blend_float32(m0, op, r0);
     return res;
 }
 ```
