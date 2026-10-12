@@ -50,7 +50,7 @@ This is the fastest and most convenient approach when starting a project or writ
 Granular headers expose either a single SIMD function or an entire category of functions across all variants and LMULs:
 
 - **Function headers**: `<mipp/c/fun/<func>.h>`, `<mipp/cpp/fun/<func>.hpp>`, `<mipp/obj/fun/<func>.hpp>`
-- **Category headers**: `<mipp/c/cat/<cat>.h>`, `<mipp/cpp/cat/<cat>.hpp>`, `<mipp/obj/cat/<cat>.hpp>` (e.g. `arithmetic.hpp`, `memory.hpp`, `comparison.hpp`)
+- **Category headers**: `<mipp/c/cat/<cat>.h>`, `<mipp/cpp/cat/<cat>.hpp>`, `<mipp/obj/cat/<cat>.hpp>` (e.g. `arithmetic.hpp`, `load.hpp`, `comparison.hpp`)
 
 Granular headers dramatically accelerate compilation time (often 5x to 10x faster parsing) and reduce compiler peak memory consumption (RSS), which is critical for large C++ codebases with dozens of compilation units.
 
@@ -97,16 +97,17 @@ The C API provides explicit, type-safe C99 function identifiers and vector types
 
 ### 2.1. Naming Convention
 ```text
-mipp_[func]_[datatype][_lmul][_mask_variant]
+mipp_[func]_[datatype][_mask_variant][_lmul]
 ```
 
 When operating at standard vector length ($\text{LMUL}=1$), the `_m1` suffix is optional: functions without the suffix (e.g., `mipp_add_float32`) are direct aliases to their `_m1` counterparts (`mipp_add_float32_m1`).
 
 - **Standard ($\text{LMUL}=1$, unmasked)**: `mipp_add_float32(r0, r1)` or `mipp_add_float32_m1(r0, r1)`
 - **Multi-Register ($\text{LMUL}=2, 4, 8$)**: `mipp_add_float32_m2(r0, r1)`, `mipp_add_float32_m4(r0, r1)`
-- **Masked ($\text{LMUL}=1$, blend update)**: `mipp_add_float32_m1_mask(m0, r0, r1)` or `mipp_add_float32_mask(m0, r0, r1)`
-- **Zero-Masked**: `mipp_add_float32_m1_maskz(m0, r0, r1)` or `mipp_add_float32_maskz(m0, r0, r1)`
-- **Source-Masked**: `mipp_add_float32_m1_masks(m0, rsrc, r0, r1)` or `mipp_add_float32_masks(m0, rsrc, r0, r1)`
+- **Masked ($\text{LMUL}=1$)**: `mipp_add_float32_mask(m0, r0, r1)` or `mipp_add_float32_mask_m1(m0, r0, r1)`
+- **Zero-Masked**: `mipp_add_float32_maskz(m0, r0, r1)` or `mipp_add_float32_maskz_m1(m0, r0, r1)`
+- **Source-Masked**: `mipp_add_float32_masks(m0, rsrc, r0, r1)` or `mipp_add_float32_masks_m1(m0, rsrc, r0, r1)`
+- **Masked + Multi-Register**: `mipp_add_float32_mask_m2(m0, r0, r1)`
 
 ### 2.2. Vector & Mask Datatypes (`rvd` and `rvm`)
 MIPP defines distinct data register (`rvd`) and mask register (`rvm`) types for each of the 10 supported data types across all LMUL configurations:
@@ -138,7 +139,7 @@ The C++ Functional API parameterizes operations over the element type `T`, an op
 | Parameter | Domain / Supported Values | Description & Constraints |
 | :--- | :--- | :--- |
 | `typename T` | `float`, `double`, `int8_t`, `int16_t`, `int32_t`, `int64_t`, `uint8_t`, `uint16_t`, `uint32_t`, `uint64_t` | 10 standard numeric datatypes supported across all operations. |
-| `int LMUL` | `1, 2, 4, 8` (integer multipliers) and fractional divisors (`-2` / `d2`) | Vector length multiplier (register grouping or fractional splitting). Defaults to `1`. |
+| `int LMUL` | `1, 2, 4, 8` (integer multipliers) and the fractional divisor `-2` (half vector, AVX / AVX-512 / RVV only) | Vector length multiplier (register grouping or fractional splitting). Defaults to `1`. See [Vector Types & LMUL](vector_types_and_lmul.md). |
 | `mipp::ISA ISA_TYPE` | `mipp::ISA::SCALAR`, `mipp::ISA::SSE`, `mipp::ISA::AVX`, `mipp::ISA::AVX512`, `mipp::ISA::NEON`, `mipp::ISA::SVE`, `mipp::ISA::RVV` | Target instruction set architecture. Defaults to `mipp::DEFAULT_ISA`. |
 
 ### 3.2. Types & Function Signatures
@@ -155,27 +156,11 @@ At compile time, `mipp::DEFAULT_ISA` automatically resolves to the highest hardw
 - **RISC-V**: `RVV`
 - **Scalar**: Configured as `DEFAULT_ISA` when compiling with `-DMIPP_SCALAR`. By default, scalar registers match the bitwidth of the highest detected host ISA (e.g. 256 bits on an AVX host, 128 bits on NEON/SSE). The bitwidth can be explicitly overridden at compile time via `-DMIPP_SCALAR_SIZE=[bits]` (e.g. `-DMIPP_SCALAR_SIZE=256`).
 
-### 3.4. Explicit Architecture Selection & Scalar Co-existence
-Scalar types and operations are unconditionally compiled into MIPP headers. Developers can explicitly supply the third template parameter `ISA_TYPE` to instantiate specific ISA or scalar registers side-by-side in the same translation unit:
+### 3.4. Explicit Architecture Selection
+The third template parameter `ISA_TYPE` defaults to `mipp::DEFAULT_ISA`, which is the only value that should be used in portable code.
 
-```cpp
-// Default SIMD vector (uses active compiler target, e.g. AVX2):
-mipp::rvd<float> v_simd = mipp::load<float>(ptr);
-
-// Explicit scalar vector co-existing in the same code block:
-mipp::rvd<float, 1, mipp::ISA::SCALAR> v_scalar = mipp::load<float, 1, mipp::ISA::SCALAR>(ptr);
-
-// Compare/verify SIMD result against scalar baseline:
-mipp::rvd<float> res_simd = mipp::add(v_simd, v_simd);
-mipp::rvd<float, 1, mipp::ISA::SCALAR> res_scalar = mipp::add<float, 1, mipp::ISA::SCALAR>(v_scalar, v_scalar);
-```
-
-This co-existence mechanism is used extensively throughout MIPP's automated test suites to cross-validate SIMD execution against scalar arithmetic directly.
-
-!!! warning "Portability Scope: `ISA::DEFAULT` and `ISA::SCALAR`"
-    Cross-platform portability is **only guaranteed** when using `mipp::DEFAULT_ISA` (the default) or `mipp::ISA::SCALAR`. 
-    
-    Explicitly hardcoding a specific hardware instruction set (such as `mipp::ISA::SSE`, `mipp::ISA::AVX`, `mipp::ISA::NEON`, or `mipp::ISA::RVV`) is **non-portable by design**: the code will only compile on toolchains and targets that provide that specific ISA's intrinsics and register sets.
+!!! warning "Portability Scope of `ISA_TYPE`"
+    Explicitly hardcoding a specific hardware instruction set (such as `mipp::ISA::SSE`, `mipp::ISA::AVX`, `mipp::ISA::NEON`, or `mipp::ISA::RVV`) is **non-portable by design**: the code will only compile on toolchains and targets that provide that specific ISA's intrinsics and register sets. Always rely on the default `mipp::DEFAULT_ISA` in application code.
 
 ### 3.5. Template Deduction & `auto` Type Inference
 When operations take vector arguments, the compiler automatically deduces `T`, `LMUL`, and `ISA_TYPE`. Using the `auto` keyword eliminates verbose vector type declarations:
@@ -225,20 +210,35 @@ The Object API encapsulates raw SIMD registers and predicates inside high-level 
 
 ```cpp
 template <typename T, int LMUL = 1>
-class Rvd {
-public:
+struct Rvd {
     rvd<T, LMUL> r; // Underlying low-level SIMD register
 
-    static constexpr int N(); // Returns number of elements (mipp::N<T, LMUL>())
+    static constexpr int N(); // Number of elements (mipp::N<T, LMUL>())
 
     // Constructors
-    Rvd();
-    Rvd(rvd<T, LMUL> r);     // Wraps low-level rvd register
-    Rvd(const T val);        // Broadcasts scalar via mipp::set1
-    Rvd(const T* data);      // Loads from aligned pointer via mipp::load
+    Rvd() = default;
+    Rvd(rvd<T, LMUL> r);     // Wraps a low-level rvd register
+    Rvd(const T val);        // Broadcasts a scalar (mipp::set1)
+    Rvd(const T* data);      // Loads from memory, no alignment requirement (mipp::loadu)
 
-    // Element Access
-    T operator[](const size_t index) const; // Reads element via mipp::get
+    // Implicit conversion to the low-level register (interoperability with the C++ Functional API)
+    operator rvd<T, LMUL>() const;
+
+    // Element access
+    T operator[](const size_t index) const; // Reads one element (mipp::get)
+};
+
+template <typename T, int LMUL = 1>
+struct Rvm {
+    rvm<T, LMUL> m; // Underlying low-level mask register
+
+    Rvm() = default;
+    Rvm(rvm<T, LMUL> m);             // Wraps a low-level rvm register
+    Rvm(const bool val);             // All lanes active or inactive (mipp::set1_k)
+    Rvm(const int32_t vals[]);       // Per-lane initialization (mipp::set_k)
+
+    operator rvm<T, LMUL>() const;   // Implicit conversion to the low-level mask
+    bool operator[](const size_t index) const; // Reads one lane (mipp::get)
 };
 ```
 
@@ -267,7 +267,7 @@ auto c = mipp::Rvd<float>(ptr_c);
 auto res_fma = mipp::fmadd(a, b, c); // Fused multiply-add
 auto res_abs = mipp::abs(a);         // Absolute value
 auto res_min = mipp::min(a, b);      // Element-wise minimum
-auto res_red = mipp::sum(a);         // Reduction sum (returns scalar float)
+auto res_red = mipp::hadd(a);        // Horizontal sum (returns scalar float)
 
 // Store directly using free function:
 mipp::store(ptr_out, res_fma);
@@ -300,9 +300,10 @@ auto c_src   = mipp::add<mipp::S>(m, src, a, b);
 
 
 ### 4.5. Idiomatic Coding Guidelines
+
 1. **Prefer Operator Overloads**: When an operator exists (`a + b`, `a * b`, `a == b`, `m1 & m2`), use it over named function calls for maximum readability.
 2. **Use Free Functions**: For non-operator routines (e.g. `mipp::fmadd`, `mipp::sqrt`, `mipp::min`, `mipp::store`), use free functions under `namespace mipp::`.
-3. **Avoid Member Syntax**: Member function calling syntax (e.g. `a.add(b)`) is deprecated in favor of free functions and operators.
+3. **No Member Syntax**: Operations are not exposed as member functions (there is no `a.add(b)`); use operators and free functions.
 
 ---
 

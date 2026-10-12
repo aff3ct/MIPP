@@ -40,7 +40,7 @@ Three complementary interfaces mapping to the same inlined instructions:
 - **C++ Object (`<mipp_obj.hpp>`)**: Register classes (`mipp::Rvd`, `mipp::Rvm`) with complete operator overloading.
 
 ### 1.2. Deterministic 4-Tier Fallback Hierarchy
-Guarantees 100% functional completeness across all 10 supported data types and target ISAs:
+Guarantees functional completeness across all 10 supported data types and target ISAs (see [Known Limitations](implementation_levels.md#known-limitations)):
 
 1. **Level 0 (Native Optimal)**: Direct 1-to-1 mapping to CPU hardware intrinsics (`_mm256_add_ps`, `vaddq_f32`, `__riscv_vfadd_vf_f32m1`).
 2. **Level 1 (Specific ISA Emulation)**: Missing opcodes emulated with other instructions of the same ISA (e.g., SSE integer multiplication).
@@ -92,7 +92,7 @@ Choosing the right SIMD library depends on language requirements, compilation co
 
 1. **Dual-Ecosystem (C99 & Modern C++)**: Most modern wrappers require C++17/C++20, while nSIMD relies on heavy macro preprocessing. MIPPv2 provides clean, strongly-typed C99 inlined functions alongside modern C++ templates and operator classes.
 2. **Expressive Syntax without Portability Sacrifices**: While Google Highway omits operator overloading to accommodate runtime VLA vectors, MIPPv2 retains natural operator expressions (`va + vb`) across all fixed-width targets.
-3. **Deterministic 4-Tier Fallback Guarantee**: Missing CPU instructions never cause compilation failures. MIPP falls back hierarchically through ISA emulation, generic portable primitives, or scalar loops, ensuring 100% matrix completeness across all 10 datatypes.
+3. **Deterministic 4-Tier Fallback Guarantee**: Missing CPU instructions never cause compilation failures. MIPP falls back hierarchically through ISA emulation, generic portable primitives, or scalar loops, covering virtually the entire function / datatype matrix across all 10 datatypes.
 4. **Pragmatic Fixed-Width Design (RVV & SVE)**: Targeting compile-time vector widths (`-mrvv-vector-bits` / `-msve-vector-bits`) preserves compile-time constants (`MIPP_N`), straightforward struct layouts, and standard operator syntax without runtime stripmining overhead.
 5. **Predictable Assembly vs. Auto-Vectorization**: Compiler auto-vectorization (`-O3`) is fragile and can silently de-vectorize loops upon subtle code changes. MIPP guarantees explicit, deterministic SIMD instructions.
 6. **Automated Offline Code Generation**: Shifting metaprogramming offline into a Python engine (`generator/`) yields three major engineering benefits:

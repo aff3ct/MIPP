@@ -273,7 +273,7 @@ MIPP provides functions to construct and initialize mask registers from scalar v
      rvm_float32_t m = mipp_set_k_float32(mask_values);
      ```
 2. **C Truthiness Evaluation**:
-    - `set_k` evaluates the *truthiness* of each integer element rather than copying raw bit patterns. Any non-zero integer (`vals[i] != 0`) sets the corresponding mask element to **active** (which internally maps to a 1-bit opmask on AVX-512/RVV, or all-ones `~0` on full-vector backends). A zero integer (`vals[i] == 0`) sets the element to **inactive** (`0`).
+    - `set_k` evaluates the *truthiness* of each integer element rather than copying raw bit patterns. Any non-zero integer (`vals[i] != 0`) sets the corresponding mask element to **active** (a boolean mask lane on RVV, an all-ones `~0` element on full-vector mask backends). A zero integer (`vals[i] == 0`) sets the element to **inactive** (`0`).
 3. **The `_k` Suffix**:
     - The `_k` naming convention reflects AVX-512 opmask / predicate register naming (`k1..k7`), distinguishing mask factory functions (`set_k`, `set1_k`, `set0_k`) from numeric vector factories (`set`, `set1`, `set0`).
 
@@ -281,7 +281,7 @@ MIPP provides functions to construct and initialize mask registers from scalar v
 
 ## 8. Masking & Multi-Register LMUL Interoperability
 
-Masking and the Length Multiplier ($\text{LMUL}$) are orthogonal and fully composable across all MIPP interfaces. Predicated operations seamlessly execute on multi-register vectors ($\text{LMUL} \in \{2, 4, 8\}$) and fractional half-vectors (`d2` suffix in C or $\text{LMUL} = -2$ en C++).
+Masking and the Length Multiplier ($\text{LMUL}$) are orthogonal and fully composable across all MIPP interfaces. Predicated operations execute on multi-register vectors ($\text{LMUL} \in \{2, 4, 8\}$) and, on targets that provide them (AVX, AVX-512, RVV), on half-vectors (`d2` suffix in C, $\text{LMUL} = -2$ in C++).
 
 ### 8.1. Type Matching & Capacity
 A comparison evaluated on an $\text{LMUL}=k$ data vector produces an $\text{LMUL}=k$ mask containing the exact matching element capacity:
@@ -305,8 +305,8 @@ auto m  = mipp::cmplt(va, vb);                      // mipp::rvm<float, 2>
 auto res = mipp::add<mipp::M, float, 2>(m, va, vb); // mipp::rvd<float, 2>
 
 // C++ Object API: automatic LMUL and type deduction
-auto oa = mipp::load<float, 2>(ptr_a);              // mipp::Rvd<float, 2>
-auto ob = mipp::load<float, 2>(ptr_b);              // mipp::Rvd<float, 2>
+mipp::Rvd<float, 2> oa(ptr_a);
+mipp::Rvd<float, 2> ob(ptr_b);
 auto om = (oa < ob);                                // mipp::Rvm<float, 2>
 auto ores = mipp::add<mipp::M>(om, oa, ob);         // Deduces T=float and LMUL=2
 ```
@@ -314,4 +314,4 @@ auto ores = mipp::add<mipp::M>(om, oa, ob);         // Deduces T=float and LMUL=
 ### 8.2. Hardware Execution on Multi-Register Vectors
 
 - **RISC-V Vector (RVV)**: Operates directly on hardware grouped registers (`vfloat32m2_t`) governed by the corresponding fractional boolean mask register (`vbool16_t` / `vbool8_t`).
-- **Fixed-Width Architectures (x86, ARM)**: Because multi-register masks (`rvm_*_m2_t`) and data vectors (`rvd_*_m2_t`) use recursive binary struct composition (`{ m1, m2 }` and `{ r1, r2 }`), the compiler unrolls the masked operation into separate predicated instructions per hardware register pair with zero abstraction overhead.
+- **Fixed-Width Architectures (x86, ARM)**: Multi-register masks (`rvm_*_m2_t`) and data vectors (`rvd_*_m2_t`) use recursive binary struct composition (`{ m1, m2 }` and `{ r1, r2 }`). The masked operation is applied independently to each register of the group (using the emulation strategy described in [Section 3](#3-architectural-hardware-mappings)), with no abstraction overhead once inlined.

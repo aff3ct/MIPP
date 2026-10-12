@@ -27,16 +27,21 @@ MIPP provides the `mipp::req_alignment<ISA>()` compile-time helper (and architec
 When allocating buffers for aligned MIPP operations, use standard aligned memory allocators:
 
 ```cpp
+// Alignment required by the active target ISA (e.g. 32 bytes on AVX2):
+constexpr size_t alignment = mipp::req_alignment();
+
 // POSIX aligned allocation (C99 / C++):
 float* data_c = NULL;
-posix_memalign((void**)&data_c, alignment, N_elements * sizeof(float));
+posix_memalign((void**)&data_c, alignment, n_elements * sizeof(float));
 free(data_c);
 
-// C++17 aligned allocation:
-constexpr size_t alignment = mipp::req_alignment(); // Defaults to active host ISA
-float* data = static_cast<float*>(std::aligned_alloc(alignment, N_elements * sizeof(float)));
+// C++17 aligned allocation (the size must be a multiple of the alignment):
+const size_t bytes = ((n_elements * sizeof(float) + alignment - 1) / alignment) * alignment;
+float* data = static_cast<float*>(std::aligned_alloc(alignment, bytes));
 std::free(data);
 ```
+
+In C, the equivalent constant is `MIPP_RVD_SIZE_BYTE`.
 
 ---
 
@@ -176,7 +181,7 @@ MIPP provides primitives to extract individual scalar values from vector and mas
 | Operation | C99 Function Identifier | C++ Template / Function | Description |
 | :--- | :--- | :--- | :--- |
 | **Extract Element** | `mipp_get_[type]_[lmul](v, idx)` | `mipp::get(v, idx)` | Extracts the scalar element at index `idx` ($0 \le \text{idx} < N$). |
-| **Extract Mask Element** | `mipp_get_k_[type]_[lmul](m, idx)` | `mipp::get_k(m, idx)` | Extracts the boolean truthiness of mask element `idx`. |
+| **Extract Mask Element** | `mipp_get_k_[type]_[lmul](m, idx)` | `mipp::get(m, idx)` | Extracts the boolean truthiness of mask element `idx` (the C++ name is the `get` overload taking a mask). |
 | **Get First Element** | `mipp_getfirst_[type]_[lmul](v)` | `mipp::getfirst(v)` | Optimized extraction of element 0 (`v[0]`) without shuffle overhead. |
 
 ```c
@@ -195,8 +200,8 @@ int32_t mask_val = mipp_get_k_float32(m, 2);
 mipp::rvd<float> v = mipp::load<float>(ptr);
 
 float first_val = mipp::getfirst(v);       // Fast element 0 extraction
-float third_val = mipp::get(v, 2);          // Dynamic index extraction
+float third_val = mipp::get(v, 2);         // Dynamic index extraction
 
 mipp::rvm<float> m = mipp::cmplt(v, limit);
-int32_t mask_val = mipp::get_k(m, 2);       // Mask element extraction
+int32_t mask_val = mipp::get(m, 2);        // Mask element extraction (overload on rvm)
 ```

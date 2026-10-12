@@ -40,7 +40,7 @@ jobs:
       - name: Generate MIPP C/C++ headers
         run: |
           cd generator
-          ./gen_mipp_headers.py --simd-ext sse avx avx512 rvv neon scalar
+          ./gen_mipp_headers.py --simd-ext sse avx avx512 rvv neon scalar --granularity fine
 
       - name: Generate MIPP tests
         run: |

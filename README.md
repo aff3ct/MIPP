@@ -30,7 +30,7 @@
 ## Key Highlights
 
 - **Tri-Dialect API Surface**: Write code in pure C99 (`<mipp.h>`), generic C++ Functional templates (`<mipp.hpp>`), or expressive C++ Objects with overloaded operators (`<mipp_obj.hpp>`).
-- **100% Fallback Guarantee**: Every operation is guaranteed to compile and execute across all 10 supported data types through a deterministic 4-tier fallback engine (L0 Native Hardware &rarr; L1/L2 Emulation &rarr; L3 Scalar Loop).
+- **Fallback Guarantee**: Every operation compiles on every supported target, for all 10 data types, through a deterministic 4-tier fallback engine (L0 Native Hardware &rarr; L1/L2 Emulation &rarr; L3 Scalar Loop).
 - **Scalable & Next-Gen ISAs**: Native support for AVX-512, ARM SVE, and RISC-V Vector 1.0 with hardware register grouping (LMUL).
 - **Zero Overhead & Header-Only**: Pure inlined assembly with zero runtime abstraction penalty. No build system dependencies, precompiled binaries, or external libraries required.
 
@@ -89,7 +89,16 @@ g++ -std=c++11 -O3 -mavx2 -mfma -Iinclude saxpy.cpp -o saxpy
 
 ## Quick Start & Integration
 
-MIPP is header-only. Simply add the `include/` directory to your compiler's include path:
+MIPP is header-only. The headers are generated from a declarative database and are not stored in the Git repository. Obtain them in one of two ways:
+
+- **Release archive (recommended)**: download `mipp-<version>-headers.tar.gz` (or `.zip`) from [GitHub Releases](https://github.com/aff3ct/MIPP/releases) and extract it.
+- **From source**: generate them with the Python generator (see [Getting Started](https://aff3ct.github.io/MIPP/user/getting_started/#option-b-generate-the-headers-from-source)):
+  ```bash
+  cd generator && python3 -m venv .venv && source .venv/bin/activate
+  pip install -r requirements.txt && ./gen_mipp_headers.py   # emits ../include/
+  ```
+
+Then add the resulting `include/` directory to your compiler's include path:
 
 ```bash
 # Compilation examples:
@@ -98,7 +107,7 @@ g++ -std=c++11 -O3 -mavx512f -mavx512bw -I/path/to/mipp/include app.cpp -o app  
 g++ -std=c++11 -O3 -march=armv8-a+simd -I/path/to/mipp/include app.cpp -o app   # ARM NEON
 ```
 
-For large codebases seeking minimum compilation times, MIPP also provides modular and atomic 2D headers (e.g. `<mipp/obj/fun/m/m2/add.hpp>`).
+For large codebases seeking minimum compilation times, MIPP can also emit modular and atomic 2D headers (e.g. `<mipp/obj/fun/m/m2/add.hpp>`) when generated with `--granularity fine`.
 
 ---
 

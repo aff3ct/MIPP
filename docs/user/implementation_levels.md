@@ -63,7 +63,7 @@ Because all MIPP functions are declared `static inline`, the compiler inlines th
 - **Definition**: Automated fallback to sequential scalar element processing.
 - **Performance**: Functional fallback path with sequential latency.
 - **Mechanics**: The vector register is unpacked into scalar values, processed element-by-element via scalar operators, and repacked into the output vector register. The code is generated in a way the compiler can auto-vectorized it but without guarantee.
-- **Purpose**: Guarantees that no MIPP function call produces compilation or linking errors, allowing developers to write generic code across all supported datatypes regardless of hardware edge cases.
+- **Purpose**: Guarantees that MIPP function calls compile on every target, allowing developers to write generic code across all supported datatypes regardless of hardware edge cases (see [Known Limitations](#known-limitations) for the few remaining exceptions).
 
 ---
 
@@ -72,7 +72,7 @@ Because all MIPP functions are declared `static inline`, the compiler inlines th
 Users can inspect the implementation level of any function through two mechanisms:
 
 ### 2.1. Header Comments
-Every generated function definition in `<simd_ext/[isa]/c/functions/...>` contains an explicit comment declaring its level:
+Every generated function definition in `include/mipp/internal/simd_ext/<isa>/c/functions/<category>/...` contains an explicit comment declaring its level:
 
 ```c
 static inline rvd_avx_float32_t mipp_avx_add_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
@@ -134,10 +134,21 @@ Understanding implementation levels helps users interpret profiling data and com
 
 - **Levels 0, 1, and 2 (Vectorized SIMD Paths)**:
     - **Level 0, Level 1, and Level 2 are all fully vectorized and highly performant**.
-    - A function marked as **Level 2 (Generic Emulated)**, such as composite arithmetic (`fmadd`), horizontal reductions (`hadd`, `hmax`, `hmin`, `hmul`), or elementary math functions (`exp`, `log`, `sin`, `cos`), simply indicates that the target ISA lacks a dedicated, single hardware instruction for that operation. MIPP executes these via optimized, fully vectorized SIMD instruction sequences across all vector lanes with zero scalar serialization.
+    - A function marked as **Level 1 (Specific Emulated)** or **Level 2 (Generic Emulated)**, such as composite arithmetic (`fmadd` without FMA hardware), horizontal reductions (`hadd`, `hmax`, `hmin`), or elementary math functions (`exp`, `log`, `sin`, `cos`), simply indicates that the target ISA lacks a dedicated, single hardware instruction for that operation. MIPP executes these via fully vectorized SIMD instruction sequences with no scalar serialization.
 - **Level 3 (Sequential Scalar Fallback)**:
     - Level 3 is the only tier where the generated source code is sequential element-by-element rather than explicit SIMD instructions. In some cases, this code can be auto-vectorized by the compiler.
     - While Level 3 guarantees complete API coverage and functional correctness, performance-critical inner loops should avoid relying on Level 3 fallbacks. If a hotspot hits a Level 3 implementation, consider:
         - Checking if an alternative datatype has native hardware support on that architecture (e.g., using `float32` on architectures lacking 64-bit hardware floating-point units).
         - Contributing a Level 1 (target-specific intrinsic) or Level 2 (generic SIMD decomposition) implementation to the MIPP codebase.
+
+---
+
+<a id="known-limitations"></a>
+## 5. Known Limitations
+
+The fallback hierarchy covers the overwhelming majority of `(function, datatype, LMUL, mask variant, ISA)` combinations. The current exception is a subset of **half-vector (`d2`) operations on RISC-V Vector**, mostly on 64-bit element types: these functions compile, but are not implemented yet and abort at runtime with an explicit message:
+
+```text
+MIPP panic: 'mipp_rvv_<function>_<datatype>_d2' is unimplemented.
+```
 

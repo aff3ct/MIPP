@@ -58,7 +58,7 @@ hide:
       <h3 class="mipp-home-card-title">100% Fallback Guarantee</h3>
     </div>
     <p class="mipp-home-card-desc">
-      Guaranteed completeness across all <b>10 datatypes</b> through a deterministic <b>4-level fallback engine</b>: <b>L0</b> (Native Intrinsic) &rarr; <b>L1</b> (Same-ISA Emulation) &rarr; <b>L2</b> (Portable Compose) &rarr; <b>L3</b> (Scalar Loop Fallback). <b>Zero missing-instruction errors</b>.
+      Guaranteed completeness across all <b>10 datatypes</b> through a deterministic <b>4-level fallback engine</b>: <b>L0</b> (Native Intrinsic) &rarr; <b>L1</b> (Same-ISA Emulation) &rarr; <b>L2</b> (Portable Compose) &rarr; <b>L3</b> (Scalar Loop Fallback). <b>No missing-instruction compilation errors</b>.
     </p>
   </div>
   <div class="mipp-home-card">

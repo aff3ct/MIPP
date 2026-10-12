@@ -134,34 +134,41 @@ Scalar operations execute flat sequential loops over all $N \times \text{LMUL}$ 
 
 ## 4. Fractional LMUL & Vector Division ($\text{LDIV} = 1/2$)
 
-In addition to multi-register expansion ($\text{LMUL} > 1$), MIPP provides homogeneous support for **half-vectors** ($\text{LDIV} = 1/2$, expressed as `d2` in C or `LMUL = -2` in C++ templates).
+In addition to multi-register expansion ($\text{LMUL} > 1$), MIPP provides **half-vectors** ($\text{LDIV} = 1/2$), expressed as the `d2` suffix in C and as `LMUL = -2` in C++ templates.
 
 ```cpp
 // C++ API: half-vector capacity query and types
-constexpr int n_half = mipp::N<float, -2>(); 
+constexpr int n_half = mipp::N<float, -2>();
 mipp::rvd<float, -2> v_half = mipp::set0<float, -2>();
 
 // C API: d2 types and operations
 rvd_float32_d2_t r_half = mipp_add_float32_d2(r0, r1);
 ```
 
-### 4.1. Architectural Implementation Strategies
+### 4.1. Availability
 
-Achieving a uniform $\text{LDIV} = 1/2$ abstraction across disparate hardware requires tailored architectural strategies:
+Half-vectors are **not available on every target**. When they are, MIPP defines the `MIPP_LDIV_2` macro, which portable code should use as a guard:
 
-| Target Architecture | Implementation Mechanism for $\text{LDIV} = 1/2$ |
-| :--- | :--- |
-| **SSE / NEON** | **Generic Bitwise Masking**: No smaller native vector registers exist. Operations execute on standard 128-bit registers and mask out upper elements via bitwise `andb` or blend operations. |
-| **AVX / AVX2** | **Inter-ISA Wrapping**: AVX natively contains 128-bit SSE types (`__m128`, `__m128d`, `__m128i`). Half-vectors (`d2`) map directly to native SSE intrinsics. Instructions with masking (e.g. gather, masked loads) can also emulate half-length execution. |
-| **AVX-512** | **Opmask Predication & AVX2 Wrapping**: Can execute using native AVX2 256-bit registers/intrinsics, or operate on 512-bit registers restricted by hardware opmasks (`k`-registers). |
-| **ARM SVE** | **Governing Predicates**: Half-vector execution is achieved by configuring governing predicates (`svbool_t`) to activate only the lower half of vector lanes. |
-| **RISC-V Vector (RVV)** | **Fractional Types, Masking & VL Parameter**: <br>• RVV natively supports fractional LMUL (`vfloat32mf2_t`).<br>• Where architectural constraints prevent native fractional types (e.g. `SEW / LMUL > ELEN` on 64-bit types), MIPP emulates $\text{LDIV}=1/2$ via hardware masks or by dynamically passing the Vector Length (`vl = N/2`) parameter to intrinsics. |
+```c
+#ifdef MIPP_LDIV_2
+    rvd_float32_d2_t h = mipp_set0_float32_d2();
+#endif
+```
+
+| Target Architecture | `d2` Available | Representation |
+| :--- | :---: | :--- |
+| **AVX / AVX2** | Yes | Native 128-bit SSE registers (`__m128`, `__m128d`, `__m128i`). |
+| **AVX-512** | Yes | Native 256-bit AVX registers. |
+| **RISC-V Vector (RVV)** | Yes | Native fractional register types (`vfloat32mf2_t`, ...) for 8 to 32-bit elements. For 64-bit elements, where the RVV constraint $\text{SEW} / \text{LMUL} \le \text{ELEN}$ forbids fractional types, MIPP stores the half-vector in a plain array. Some of these 64-bit operations are not implemented yet (see [Implementation Levels](implementation_levels.md#known-limitations)). |
+| **SSE / NEON** | No | 128 bits is the smallest register width; no `d2` types are generated. |
+| **ARM SVE** | No | Not generated yet. |
+| **Scalar** | No | Not generated. |
 
 ### 4.2. Scope and Constraints of Deeper Fractional Division
 
-While RISC-V Vector supports $\text{LMUL} \in \{1/2, 1/4, 1/8\}$, universally generalizing deeper fractional divisions ($\text{LDIV} = 1/4, 1/8$) across all ISAs is mathematically constrained by element capacity:
+While RISC-V Vector supports $\text{LMUL} \in \{1/2, 1/4, 1/8\}$, generalizing deeper fractional divisions ($\text{LDIV} = 1/4, 1/8$) across ISAs is constrained by element capacity:
 
 - On a 128-bit register (SSE / NEON), a 64-bit datatype (`float64`, `int64`) has an element capacity of $N=2$ at $\text{LMUL}=1$.
-- Defining $\text{LDIV} = 1/4$ for a 64-bit type would result in $N = 2 / 4 = 0.5$ elements, which has no physical or semantic meaning.
+- Defining $\text{LDIV} = 1/4$ for a 64-bit type would result in $N = 2 / 4 = 0.5$ elements, which has no meaning.
 
-For this reason, **MIPPv2 guarantees homogeneous support strictly for $\text{LDIV} = 1/2$ (`d2`)** across all supported datatypes and targets. Deeper fractional divisions remain **non-standardized**.
+For this reason, MIPP only exposes $\text{LDIV} = 1/2$ (`d2`), and deeper fractional divisions are not part of the API.

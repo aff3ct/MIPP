@@ -1,8 +1,35 @@
 # Getting Started with MIPP
 
-## 1. Header-Only Integration
+## 1. Installation
 
-MIPP is a **header-only** library. It requires no separate compilation or pre-built shared/static libraries. To integrate MIPP into your project, simply add the `include/` directory to your compiler's include search paths.
+MIPP is a **header-only** library: no separate compilation, no pre-built shared/static library, and no runtime dependency. The headers are **generated** from a declarative database by a Python tool and are **not versioned** in the Git repository (cloning the repository alone does not provide an `include/` directory).
+
+There are two ways to obtain them.
+
+### Option A: Download a Release Archive (Recommended)
+
+Each tagged release on [GitHub Releases](https://github.com/aff3ct/MIPP/releases) ships pre-generated headers as `mipp-<version>-headers.zip` and `mipp-<version>-headers.tar.gz`. Extract the archive and add the resulting `include/` directory to your compiler's include search path:
+
+```bash
+tar -xzf mipp-<version>-headers.tar.gz
+g++ -std=c++11 -O3 -mavx2 -mfma -I/path/to/include main.cpp -o app
+```
+
+### Option B: Generate the Headers from Source
+
+Generating the headers requires Python 3 and the packages listed in `generator/requirements.txt`:
+
+```bash
+git clone https://github.com/aff3ct/MIPP.git
+cd MIPP/generator
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+./gen_mipp_headers.py                        # Default (coarse) headers, emitted into ../include/
+# or: ./gen_mipp_headers.py --granularity fine   # Same, plus fine-grained 2D headers (see below)
+```
+
+The generated `include/` directory at the root of the repository is then ready to use.
 
 ### Header Selection & Inclusion Strategies
 
@@ -37,7 +64,7 @@ Corresponding granular paths exist across all three API tiers:
 - **C++ Object API**: `<mipp/obj/fun/<func>.hpp>` (or category headers `<mipp/obj/cat/<category>.hpp>`)
 
 !!! tip "Fine-Grained 2D Inclusions for Ultra-Fast Compilation"
-    For production pipelines and large codebases seeking minimum compilation times, MIPP also supports 2D atomic headers generated via `--granularity fine` (e.g. `<mipp/obj/fun/m/m2/add.hpp>`). See [Programming Model: Fine-Grained Headers](programming_model.md#fine-grained-headers) for full details.
+    For production pipelines and large codebases seeking minimum compilation times, MIPP also supports 2D atomic headers (e.g. `<mipp/obj/fun/m/m2/add.hpp>`). They are only present when the headers are generated with `--granularity fine` (see [Option B](#option-b-generate-the-headers-from-source)). See [Programming Model: Fine-Grained Headers](programming_model.md#fine-grained-headers) for full details.
 
 ---
 
@@ -155,9 +182,9 @@ Here is the standard, battle-tested pattern to vectorize any loop over an arbitr
             mipp::rvd<float> vx = mipp::loadu<float>(&x[i]);
             mipp::rvd<float> vy = mipp::loadu<float>(&y[i]);
 
-            mipp::rvd<float> vres = mipp::fmadd<float>(va, vx, vy);
+            mipp::rvd<float> vres = mipp::fmadd(va, vx, vy); // T deduced from operands
 
-            mipp::storeu<float>(&y[i], vres);
+            mipp::storeu(&y[i], vres);
         }
 
         // 2. Scalar tail loop for remaining elements
@@ -210,7 +237,7 @@ Here is the standard, battle-tested pattern to vectorize any loop over an arbitr
 
             vy += va * vx; // Natural operators 
 
-            mipp::storeu<float>(&y[i], vy);
+            mipp::storeu(&y[i], vy);
         }
 
         // 2. Scalar tail loop for remaining elements
