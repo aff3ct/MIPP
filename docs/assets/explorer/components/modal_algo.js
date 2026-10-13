@@ -316,7 +316,7 @@ export function renderAlgoModal(modalData) {
     const targetLvl = (secMask === "unmasked") ? baseImplLvl : primitiveImplLvl;
 
     if (isScalar || targetLvl === 3) {
-      lines.push(`    // Level 3 (Auto Scalar Fallback)`);
+      lines.push(`    // Level 3 (Scalar Fallback)`);
       if (secMask === "mask") {
         lines.push(`    return scalar_${entry.name}_mask(m0.m, ${argNames.map((a) => `${a}.r`).join(", ")});`);
       } else if (secMask === "maskz") {
@@ -327,7 +327,7 @@ export function renderAlgoModal(modalData) {
         lines.push(`    return scalar_${entry.name}(${argNames.map((a) => `${a}.r`).join(", ")});`);
       }
     } else if (targetLvl === 0) {
-      lines.push(`    // Level 0 (Native Hardware Intrinsic Mapping)`);
+      lines.push(`    // Level 0 (Native Hardware)`);
       let nativeSnip = null;
       if (secMask === "unmasked") {
         const lmulKey = String(secLmul);
@@ -350,7 +350,7 @@ export function renderAlgoModal(modalData) {
         lines.push(`    return mipp::${specFuncName}(${specCallArgs});`);
       }
     } else if (targetLvl === 1) {
-      lines.push(`    // Level 1 (Dedicated Hardware Emulation)`);
+      lines.push(`    // Level 1 (Dedicated Emulation)`);
       let emuSnip = (isaInfo && isaInfo.code_snippets_by_mask && isaInfo.code_snippets_by_mask[secMask])
         ? (isaInfo.code_snippets_by_mask[secMask][currentDt] || isaInfo.code_snippets_by_mask[secMask][dtMain])
         : null;
@@ -366,13 +366,13 @@ export function renderAlgoModal(modalData) {
         lines.push(`    return mipp::${specFuncName}(${specCallArgs});`);
       }
     } else {
-      // Level 2 (Generic Emulated Mapping)
+      // Level 2 (Generic Emulation)
       const emuAlgo = isaInfo && isaInfo.emulation_algorithms ? (isaInfo.emulation_algorithms[currentDt] || isaInfo.emulation_algorithms[dtMain]) : null;
       if (emuAlgo) {
-        lines.push(`    // Level 2 (Generic Emulated Mapping)`);
+        lines.push(`    // Level 2 (Generic Emulation)`);
         formatEmuAlgo(emuAlgo, secLmul).split("\n").forEach((l) => lines.push(`    ${l}`));
       } else {
-        lines.push(`    // Level 2 (Generic Emulated Mapping)`);
+        lines.push(`    // Level 2 (Generic Emulation)`);
         lines.push(`    return mipp::${specFuncName}(${specCallArgs});`);
       }
     }
@@ -406,14 +406,14 @@ export function renderAlgoModal(modalData) {
       if (currentMask === "mask") {
         codeLines.push(`// ${sectionIdx++}. Predicated Execution Layer (Blend Preservation)`);
         codeLines.push(`${retType1} ${specFuncName1}(${specParams1}) {`);
-        codeLines.push(`    // Level 2 (Generic Emulation with blend)`);
+        codeLines.push(`    // Level 2 (Generic Emulation): blend`);
         codeLines.push(`    ${retType1} op = mipp::${entry.name}(${callArgs});`);
         codeLines.push(`    return mipp::blend(m0, op, ${argNames[0]}); // Inactive lanes preserve ${argNames[0]}`);
         codeLines.push(`}`);
       } else if (currentMask === "maskz") {
         codeLines.push(`// ${sectionIdx++}. Predicated Execution Layer (Zeroing False Lanes)`);
         codeLines.push(`${retType1} ${specFuncName1}(${specParams1}) {`);
-        codeLines.push(`    // Level 2 (Generic Emulation with andb)`);
+        codeLines.push(`    // Level 2 (Generic Emulation): andb`);
         codeLines.push(`    ${retType1} op = mipp::${entry.name}(${callArgs});`);
         if (isRvmReturn) {
           codeLines.push(`    return mipp::andb_k(op, m0); // Inactive lanes set to zero`);
@@ -424,7 +424,7 @@ export function renderAlgoModal(modalData) {
       } else if (currentMask === "masks") {
         codeLines.push(`// ${sectionIdx++}. Predicated Execution Layer (Source Register Preservation)`);
         codeLines.push(`${retType1} ${specFuncName1}(${specParams1}) {`);
-        codeLines.push(`    // Level 2 (Generic Emulation with blend)`);
+        codeLines.push(`    // Level 2 (Generic Emulation): blend`);
         codeLines.push(`    ${retType1} op = mipp::${entry.name}(${callArgs});`);
         codeLines.push(`    return mipp::blend(m0, op, src); // Inactive lanes preserve src`);
         codeLines.push(`}`);
@@ -627,13 +627,13 @@ export function renderAlgoModal(modalData) {
             ${featureControlsHtml}
           </div>
 
-          <!-- Modal View Tabs: Abstract C++ Implementation vs Flat C99 Code -->
+          <!-- Modal View Tabs: Abstract C++ Implementation vs Flat C Code -->
           <div class="mipp-modal-tabs" role="tablist">
             <button type="button" class="mipp-modal-tab-btn ${currentView === 'abstract' ? 'active' : ''}" data-modal-view="abstract" role="tab" aria-selected="${currentView === 'abstract'}">
               Abstract C++ Implementation
             </button>
             <button type="button" class="mipp-modal-tab-btn ${currentView === 'flat' ? 'active' : ''}" data-modal-view="flat" role="tab" aria-selected="${currentView === 'flat'}">
-              Flat C99 Code
+              Flat C Code
             </button>
           </div>
 
@@ -663,7 +663,7 @@ export function renderAlgoModal(modalData) {
             <div class="mipp-code-box">
               <div class="mipp-code-box-header">
                 <div class="mipp-code-box-header-left" style="display: flex; gap: 0.55rem; align-items: center; flex-wrap: wrap;">
-                  <span class="mipp-code-lang">Flat C99 Code</span>
+                  <span class="mipp-code-lang">Flat C Code</span>
                   <span class="mipp-isa-badge lvl-${currentImplLvl}" title="Implementation Level: Level ${currentImplLvl} (${escapeHtml(lvlDesc)})">${currentImplLvl === "na" ? "N/A" : `L${currentImplLvl}`}</span>
                 </div>
                 <div style="display: flex; gap: 0.5rem; align-items: center;">

@@ -57,10 +57,10 @@ def emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rendering, fi
 
     if level is not None:
         level_comments = {
-            0: "Level 0 (Optimal / Native)",
-            1: "Level 1 (Specific Emulated)",
-            2: "Level 2 (Generic Emulated)",
-            3: "Level 3 (Auto Scalar Fallback)"
+            0: "Level 0 (Native Hardware)",
+            1: "Level 1 (Dedicated Emulation)",
+            2: "Level 2 (Generic Emulation)",
+            3: "Level 3 (Scalar Fallback)"
         }
         if level in level_comments:
             print(f"\t// {level_comments[level]}", file=file)

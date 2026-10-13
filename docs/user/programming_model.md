@@ -1,12 +1,12 @@
-# Programming Model & API Tiers
+# Programming Model & APIs
 
 MIPP provides three distinct API layers built on top of a unified code generation engine:
 
-1. **C Low-Level API** (`<mipp.h>`): Explicit type-suffixed functions and plain C structs.
-2. **C++ Functional Template API** (`<mipp.hpp>`): Type-parameterized template functions under namespace `mipp::`.
+1. **C API** (`<mipp.h>`): Explicit type-suffixed functions and plain C structs.
+2. **C++ Functional API** (`<mipp.hpp>`): Type-parameterized template functions under namespace `mipp::`.
 3. **C++ Object API** (`<mipp_obj.hpp>`): Class wrappers (`mipp::Rvd<T, LMUL>`, `mipp::Rvm<T, LMUL>`) with arithmetic and relational operator overloading.
 
-All three tiers share the same zero-overhead inlined execution path and map to identical machine instructions.
+All three APIs share the same zero-overhead inlined execution path and map to identical machine instructions.
 
 ---
 
@@ -16,8 +16,8 @@ MIPP provides two header inclusion paradigms: **Monolithic Inclusion** and **Mod
 
 ```text
 include/
-├── mipp.h                       # Pure C99 monolithic entry point
-├── mipp.hpp                     # C++ Functional Template monolithic entry point
+├── mipp.h                       # C API monolithic entry point
+├── mipp.hpp                     # C++ Functional API monolithic entry point
 ├── mipp_obj.hpp                 # C++ Object API monolithic entry point
 └── mipp/                        # Namespaced headers
     ├── c/
@@ -39,8 +39,8 @@ include/
 
 Monolithic entry points include all MIPP SIMD functions and data types across the entire library in a single directive:
 
-- `<mipp.h>` for C Low-Level API
-- `<mipp.hpp>` for C++ Functional Template API
+- `<mipp.h>` for the C API
+- `<mipp.hpp>` for the C++ Functional API
 - `<mipp_obj.hpp>` for C++ Object API
 
 This is the fastest and most convenient approach when starting a project or writing small self-contained algorithms.
@@ -91,7 +91,7 @@ Benchmarking across large workloads demonstrates that 2D atomic inclusion provid
 
 ---
 
-## 2. Tier 1: C Low-Level API (`<mipp.h>`)
+## 2. C API (`<mipp.h>`)
 
 The C API provides explicit, type-safe C99 function identifiers and vector types for every `(operation, datatype, lmul, mask_variant)` combination.
 
@@ -130,7 +130,7 @@ Predefined compile-time constants provide the number of elements per vector type
 
 ---
 
-## 3. Tier 2: C++ Functional Template API (`<mipp.hpp>`)
+## 3. C++ Functional API (`<mipp.hpp>`)
 
 The C++ Functional API parameterizes operations over the element type `T`, an optional register multiplier `LMUL` (defaults to `1`), and an optional target instruction set `ISA_TYPE` (defaults to `mipp::DEFAULT_ISA`).
 
@@ -139,7 +139,7 @@ The C++ Functional API parameterizes operations over the element type `T`, an op
 | Parameter | Domain / Supported Values | Description & Constraints |
 | :--- | :--- | :--- |
 | `typename T` | `float`, `double`, `int8_t`, `int16_t`, `int32_t`, `int64_t`, `uint8_t`, `uint16_t`, `uint32_t`, `uint64_t` | 10 standard numeric datatypes supported across all operations. |
-| `int LMUL` | `1, 2, 4, 8` (integer multipliers) and the fractional divisor `-2` (half vector, AVX / AVX-512 / RVV only) | Vector length multiplier (register grouping or fractional splitting). Defaults to `1`. See [Vector Types & LMUL](vector_types_and_lmul.md). |
+| `int LMUL` | `1, 2, 4, 8` (integer multipliers) and `-2` for [half-vectors](vector_types_and_lmul.md#half-vectors) (`d2`, AVX / AVX-512 / RVV only) | Vector length multiplier (register grouping, or half-vector). Defaults to `1`. See [Vector Types & LMUL](vector_types_and_lmul.md). |
 | `mipp::ISA ISA_TYPE` | `mipp::ISA::SCALAR`, `mipp::ISA::SSE`, `mipp::ISA::AVX`, `mipp::ISA::AVX512`, `mipp::ISA::NEON`, `mipp::ISA::SVE`, `mipp::ISA::RVV` | Target instruction set architecture. Defaults to `mipp::DEFAULT_ISA`. |
 
 ### 3.2. Types & Function Signatures
@@ -186,13 +186,13 @@ Masked operations in the C++ Functional API use the `mipp::VARIANT` template par
 auto m   = mipp::cmpeq(a, b);   // Mask condition
 auto src = mipp::set1<float>(0.0f);
 
-// 1. Merge Mask (M): res[i] = m[i] ? (a[i] + b[i]) : a[i]
-auto c_merge = mipp::add<mipp::M, float>(m, a, b);
+// 1. Masked (M): res[i] = m[i] ? (a[i] + b[i]) : a[i]
+auto c_mask  = mipp::add<mipp::M, float>(m, a, b);
 
-// 2. Zero Mask (Z): res[i] = m[i] ? (a[i] + b[i]) : 0
+// 2. Zero-Masked (Z): res[i] = m[i] ? (a[i] + b[i]) : 0
 auto c_zero  = mipp::add<mipp::Z, float>(m, a, b);
 
-// 3. Source Mask (S): res[i] = m[i] ? (a[i] + b[i]) : src[i]
+// 3. Source-Masked (S): res[i] = m[i] ? (a[i] + b[i]) : src[i]
 auto c_src   = mipp::add<mipp::S, float>(m, src, a, b);
 ```
 
@@ -200,7 +200,7 @@ For comprehensive coverage of masking rules, conversions, and hardware mappings,
 
 ---
 
-## 4. Tier 3: C++ Object API (`<mipp_obj.hpp>`)
+## 4. C++ Object API (`<mipp_obj.hpp>`)
 
 The Object API encapsulates raw SIMD registers and predicates inside high-level C++ classes:
 - `mipp::Rvd<T, LMUL>` for numeric data vectors.
@@ -280,13 +280,13 @@ Masked operations in the C++ Object API are fully supported via the standard `VA
 mipp::Rvm<float> m = (a > b); // Mask from operator comparison
 mipp::Rvd<float> src = 0.0f;
 
-// 1. Merge Mask (M): res[i] = m[i] ? (a[i] + b[i]) : a[i]
-auto c_merge = mipp::add<mipp::M>(m, a, b);
+// 1. Masked (M): res[i] = m[i] ? (a[i] + b[i]) : a[i]
+auto c_mask  = mipp::add<mipp::M>(m, a, b);
 
-// 2. Zero Mask (Z): res[i] = m[i] ? (a[i] + b[i]) : 0.0f
+// 2. Zero-Masked (Z): res[i] = m[i] ? (a[i] + b[i]) : 0.0f
 auto c_zero  = mipp::add<mipp::Z>(m, a, b);
 
-// 3. Source Mask (S): res[i] = m[i] ? (a[i] + b[i]) : src[i]
+// 3. Source-Masked (S): res[i] = m[i] ? (a[i] + b[i]) : src[i]
 auto c_src   = mipp::add<mipp::S>(m, src, a, b);
 ```
 
@@ -309,9 +309,9 @@ auto c_src   = mipp::add<mipp::S>(m, src, a, b);
 
 ## 5. Comparative Example: Vector SAXPY ($Y = a \cdot X + Y$)
 
-Below is an identical vectorized SAXPY loop ($Y[i] = a \cdot X[i] + Y[i]$) implemented across all three API tiers.
+Below is an identical vectorized SAXPY loop ($Y[i] = a \cdot X[i] + Y[i]$) implemented with each of the three APIs.
 
-=== "C Low-Level API"
+=== "C API"
     ```c
     #include <mipp.h>
 

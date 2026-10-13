@@ -68,7 +68,7 @@ Top-level keys are sorted alphabetically (checked by the `json-structure` audit)
     - `to_ptr`: Pointer cast type.
 - `sw_lmul`: LMUL factors emulated in software by aggregating several base registers (e.g. `[1, 2, 4, 8]`).
 - `hw_lmul`: LMUL factors supported natively by the hardware (register groups on RVV: `[1, 2, 4, 8, -2]`; `[1]` on SVE).
-- `-2` in `sw_lmul` or `hw_lmul` enables half-vectors (`d2`, exposed to users through `MIPP_LDIV_2`).
+- `-2` in `sw_lmul` or `hw_lmul` enables [half-vectors](../../../user/vector_types_and_lmul.md#half-vectors) (`d2`, exposed to users through `MIPP_LDIV_2`).
 - `sw_ldiv_type`: `"sub_isa"` builds the software half-vectors (`-2` in `sw_lmul`) on the registers of `sub_isa` (AVX `d2` uses SSE registers). It is the only software strategy: `-2` in `sw_lmul` requires it. It also requires `sub_isa`, and `size` must be twice the size of `sub_isa`.
 - `info_names`: Names printed by `mipp_info()`, as a list of `{ "if": <preprocessor condition>, "name": <label> }`. The first entry whose condition holds is used; the entry without `if` is the default and must be last. If the field is omitted, the upper-cased `name` is printed.
 - `mipp_definitions`: MIPP feature flag macros emitted for user applications (e.g. `MIPP_AVX2`, `MIPP_BW`, `MIPP_64BIT`).

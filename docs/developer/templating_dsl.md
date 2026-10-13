@@ -134,7 +134,7 @@ When specializing this template for `func_name = "add"` on `AVX` with `tp = floa
 2. The DSL parser produces:
 ```c
 static inline rvd_avx_float32_t mipp_avx_add_float32_mask(rvm_avx_float32_t m0, const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
-    // Level 2 (Generic Emulated)
+    // Level 2 (Generic Emulation)
     rvd_avx_float32_t op = mipp_avx_add_float32(r0, r1);
     rvd_avx_float32_t res = mipp_avx_blend_float32(m0, op, r0);
     return res;

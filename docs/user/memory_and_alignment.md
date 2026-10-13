@@ -53,7 +53,7 @@ MIPP distinguishes between **aligned** (`load`, `store`) and **unaligned** (`loa
 
 MIPP provides both explicit unaligned primitives (`loadu`, `storeu`) and default primitives (`load`, `store`):
 
-| Operation | C99 Function Identifier | C++ Template Wrapper | Safety & Alignment Requirement |
+| Operation | C API Function | C++ Functional API | Safety & Alignment Requirement |
 | :--- | :--- | :--- | :--- |
 | **Default Load** | `mipp_load_[type]_[lmul]` | `mipp::load<T, LMUL>(ptr)` | Emits **unaligned** loads by default; emits **aligned** loads if `MIPP_ALIGNED_LOADS` is defined. |
 | **Explicit Unaligned Load** | `mipp_loadu_[type]_[lmul]` | `mipp::loadu<T, LMUL>(ptr)` | **Always safe on arbitrary addresses** regardless of macro definitions. |
@@ -178,7 +178,7 @@ mipp::scatter<mipp::M>(m, base_ptr, indices, values);
 
 MIPP provides primitives to extract individual scalar values from vector and mask registers:
 
-| Operation | C99 Function Identifier | C++ Template / Function | Description |
+| Operation | C API Function | C++ Functional API | Description |
 | :--- | :--- | :--- | :--- |
 | **Extract Element** | `mipp_get_[type]_[lmul](v, idx)` | `mipp::get(v, idx)` | Extracts the scalar element at index `idx` ($0 \le \text{idx} < N$). |
 | **Extract Mask Element** | `mipp_get_k_[type]_[lmul](m, idx)` | `mipp::get(m, idx)` | Extracts the boolean truthiness of mask element `idx` (the C++ name is the `get` overload taking a mask). |

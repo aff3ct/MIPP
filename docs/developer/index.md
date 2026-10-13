@@ -31,7 +31,7 @@ MIPPv1 relied on thousands of manually maintained, deeply nested C++ template he
                                         v
 +-------------------------------------------------------------------------------+
 |                    Candidate Resolution (codegen/)                            |
-|    Level 0 (Native) -> Level 1 (ISA-specific) -> Level 2 (Generic) -> Level 3 |
+|    L0 Native Hardware -> L1 Dedicated Emu. -> L2 Generic Emu. -> L3 Scalar    |
 +-------------------------------------------------------------------------------+
                                         |
             +---------------------------+---------------------------+

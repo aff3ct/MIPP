@@ -133,7 +133,7 @@ def _gen_c_horiz_lmul_one(isa, file, funcs, f, ff, dt, lmul, mkind=None, dummy=F
         func_name = build_func_name_internal(isa, dt, dt_par, dt_ret, f, masked_version=mkind, lmul=lmul)
         proto = build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul=lmul, isa_name=True, masked_version=mkind)
         print("\nstatic " + proto + " {", file=file)
-        print("\t// Level 2 (Generic Emulated)", file=file)
+        print("\t// Level 2 (Generic Emulation)", file=file)
 
 
     lines = [line for line in ph_ret["converted_ir"].split("\n") if line.strip()]

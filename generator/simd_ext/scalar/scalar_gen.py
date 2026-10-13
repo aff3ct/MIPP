@@ -107,7 +107,7 @@ def _emit_function_body_scalar(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rende
     func_name = _build_func_name_scalar(isa, dt, dt_par, dt_ret, f, masked_version=masked_version, lmul=lmul)
 
     print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, masked_version = masked_version, lmul=lmul) + " {", file=file)
-    print("\t// Level 0 (Optimal / Native)", file=file)
+    print("\t// Level 0 (Native Hardware)", file=file)
 
     lmul_str = ""
     if lmul == 0:

@@ -39,9 +39,9 @@ MIPP offers two inclusion paradigms: **Monolithic Inclusion** and **Granular Inc
 
 Monolithic headers bring the complete set of all MIPP SIMD functions into scope in a single `#include`. This is the simplest way to get started with MIPP and is ideal for prototyping, exploratory code, and small applications:
 
-| Header File | API Tier | Description |
+| Header File | API | Description |
 | :--- | :--- | :--- |
-| `<mipp.h>` | **C Low-Level API** | Pure C99 function prototypes with explicit type suffixes (e.g., `mipp_add_float32(r0, r1)`). |
+| `<mipp.h>` | **C API** | C99 function prototypes with explicit type suffixes (e.g., `mipp_add_float32(r0, r1)`). |
 | `<mipp.hpp>` | **C++ Functional API** | Overloaded functions under namespace `mipp::` (e.g., `mipp::add(r0, r1)`). |
 | `<mipp_obj.hpp>` | **C++ Object API** | Expressive `mipp::Rvd<T, LMUL>` and `mipp::Rvm<T, LMUL>` classes with operator overloading (`+`, `-`, `*`, `==`) and free functions. |
 
@@ -57,9 +57,9 @@ For large-scale projects, production pipelines, or builds with hundreds of trans
 #include <mipp/obj/fun/store.hpp>
 ```
 
-Corresponding granular paths exist across all three API tiers:
+Corresponding granular paths exist for all three APIs:
 
-- **C Low-Level API**: `<mipp/c/fun/<func>.h>` (or category headers `<mipp/c/cat/<category>.h>`)
+- **C API**: `<mipp/c/fun/<func>.h>` (or category headers `<mipp/c/cat/<category>.h>`)
 - **C++ Functional API**: `<mipp/cpp/fun/<func>.hpp>` (or category headers `<mipp/cpp/cat/<category>.hpp>`)
 - **C++ Object API**: `<mipp/obj/fun/<func>.hpp>` (or category headers `<mipp/obj/cat/<category>.hpp>`)
 
@@ -101,11 +101,11 @@ In real applications, data arrays rarely have a size that is an exact multiple o
 Here is the standard, battle-tested pattern to vectorize any loop over an arbitrary array size $S$ with MIPP:
 
 1. **Vector Main Loop**: Process contiguous chunks of $N$ elements with SIMD.
-2. **Tail Loop (Reliquat)**: Handle remaining $S \pmod N$ elements.
+2. **Tail Loop (Remainder)**: Handle remaining $S \pmod N$ elements.
 
 ### Complete Working Example (SAXPY with Tail Loop)
 
-=== "C99 Low-Level API (`<mipp.h>`)"
+=== "C API (`<mipp.h>`)"
 
     ```c
     #include <stdio.h>

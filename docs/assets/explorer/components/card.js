@@ -210,7 +210,7 @@ export function renderCard(entry, matchedIntrinsic = null, matchedC99 = null) {
               : ""
             }
             ${matchedC99 && matchedC99 !== entry.name && matchedC99 !== `mipp_${entry.name}`
-              ? `<span class="mipp-matched-chip" title="Matched C99 function">C99: ${escapeHtml(matchedC99)}</span>`
+              ? `<span class="mipp-matched-chip" title="Matched C API function">C: ${escapeHtml(matchedC99)}</span>`
               : ""
             }
             ${isUnsupported

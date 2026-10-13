@@ -683,7 +683,7 @@ export function generateFlatSpecializedCode(entry, cfg) {
 
   function buildScalarBridge(targetFnName, targetRetType, targetParamList, scalarFnName) {
     const bridgeLines = [];
-    bridgeLines.push(`// Level 3 (Auto Scalar Fallback)`);
+    bridgeLines.push(`// Level 3 (Scalar Fallback)`);
     const scalarCallArgs = [];
 
     const args = targetParamList ? targetParamList.split(",") : [];
@@ -1249,7 +1249,7 @@ export function generateFlatSpecializedCode(entry, cfg) {
       if (nativeSnip) {
         lines.push("static inline");
         lines.push(`${baseRetType} ${specializedFuncName}(${paramList}) {`);
-        lines.push(`\t// Level 0 (Native Hardware Intrinsic)`);
+        lines.push(`\t// Level 0 (Native Hardware)`);
         if (nativeSnip.includes("return ")) {
           const cleanSnip = cleanSnippetForC(nativeSnip);
           const stmts = splitStatements(cleanSnip);
@@ -1275,7 +1275,7 @@ export function generateFlatSpecializedCode(entry, cfg) {
 
         lines.push("static inline");
         lines.push(`${baseRetType} ${specializedFuncName}(${paramList}) {`);
-        lines.push(`\t// Level 1/2 (Generic Emulated Algorithm)`);
+        lines.push(`\t// Level 1 (Dedicated Emulation) or Level 2 (Generic Emulation)`);
         if (!converted.includes("return ")) {
           const cleanSnip = cleanSnippetForC(converted);
           const field = isRvmReturn ? "m" : "r";
@@ -1340,7 +1340,7 @@ export function generateFlatSpecializedCode(entry, cfg) {
       lines.push("static inline");
       lines.push(`${baseRetType} ${specializedFuncName}(${paramList}) {`);
       if (currentImplLvl === 0) {
-        lines.push(`\t// Level 0 (Native Hardware Intrinsic Mapping)`);
+        lines.push(`\t// Level 0 (Native Hardware)`);
       } else {
         lines.push(`\t// Level 1 (Dedicated Emulation)`);
       }
@@ -1428,21 +1428,21 @@ export function generateFlatSpecializedCode(entry, cfg) {
       if (mask === "mask") {
         lines.push("static inline");
         lines.push(`${baseRetType} ${specializedFuncName}(${paramList}) {`);
-        lines.push(`\t// Level 2 (Generic Emulation with blend)`);
+        lines.push(`\t// Level 2 (Generic Emulation): blend`);
         lines.push(`\t${baseRetType} op = ${baseFuncName}(${callArgs});`);
         lines.push(`\treturn mipp_${isa}_blend_${dtMain}_m1(${blendMaskArg}, op, r0);`);
         lines.push(`}`);
       } else if (mask === "maskz") {
         lines.push("static inline");
         lines.push(`${baseRetType} ${specializedFuncName}(${paramList}) {`);
-        lines.push(`\t// Level 2 (Generic Emulation with zero blend)`);
+        lines.push(`\t// Level 2 (Generic Emulation): zero blend`);
         lines.push(`\t${baseRetType} op = ${baseFuncName}(${callArgs});`);
         lines.push(`\treturn mipp_${isa}_blend_${dtMain}_m1(${blendMaskArg}, op, mipp_${isa}_set0_${dtMain}_m1());`);
         lines.push(`}`);
       } else if (mask === "masks") {
         lines.push("static inline");
         lines.push(`${baseRetType} ${specializedFuncName}(${paramList}) {`);
-        lines.push(`\t// Level 2 (Generic Emulation with source blend)`);
+        lines.push(`\t// Level 2 (Generic Emulation): source blend`);
         lines.push(`\t${baseRetType} op = ${baseFuncName}(${callArgs});`);
         lines.push(`\treturn mipp_${isa}_blend_${dtMain}_m1(${blendMaskArg}, op, rsrc);`);
         lines.push(`}`);

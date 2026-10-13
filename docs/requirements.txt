@@ -1,4 +1,4 @@
-mkdocs>=1.5
+mkdocs>=1.5,<2  # MkDocs 2.0 breaks the plugin API used by Material and the plugins below
 mkdocs-material>=9.5
 
 # Plugins

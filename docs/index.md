@@ -46,10 +46,10 @@ hide:
   <div class="mipp-home-card">
     <div class="mipp-home-card-header">
       <div class="mipp-home-card-icon">🎯</div>
-      <h3 class="mipp-home-card-title">Unique Tri-Dialect API</h3>
+      <h3 class="mipp-home-card-title">Three APIs, One Engine</h3>
     </div>
     <p class="mipp-home-card-desc">
-      Choose your paradigm: pure <b>C99</b> (<code>mipp_add_float32</code>) for <b>OS kernels and embedded targets</b>; generic <b>C++ Templates</b> (<code>mipp::add&lt;float&gt;</code>) for <b>HPC algorithms</b>; or expressive <b>C++ Objects</b> (<code>va + vb</code>) with full <b>operator overloading</b>.
+      Choose your paradigm: the <b>C API</b> (<code>mipp_add_float32</code>, C99) for <b>OS kernels and embedded targets</b>; the generic <b>C++ Functional API</b> (<code>mipp::add(va, vb)</code>) for <b>HPC algorithms</b>; or the expressive <b>C++ Object API</b> (<code>va + vb</code>) with full <b>operator overloading</b>.
     </p>
   </div>
   <div class="mipp-home-card">
@@ -58,7 +58,7 @@ hide:
       <h3 class="mipp-home-card-title">100% Fallback Guarantee</h3>
     </div>
     <p class="mipp-home-card-desc">
-      Guaranteed completeness across all <b>10 datatypes</b> through a deterministic <b>4-level fallback engine</b>: <b>L0</b> (Native Intrinsic) &rarr; <b>L1</b> (Same-ISA Emulation) &rarr; <b>L2</b> (Portable Compose) &rarr; <b>L3</b> (Scalar Loop Fallback). <b>No missing-instruction compilation errors</b>.
+      Guaranteed completeness across all <b>10 datatypes</b> through a deterministic <b>4-level fallback engine</b>: <b>L0</b> (Native Hardware) &rarr; <b>L1</b> (Dedicated Emulation) &rarr; <b>L2</b> (Generic Emulation) &rarr; <b>L3</b> (Scalar Fallback). <b>No missing-instruction compilation errors</b>.
     </p>
   </div>
   <div class="mipp-home-card">
@@ -105,12 +105,12 @@ MIPP supports 10 fundamental numeric data types across all vector abstractions:
 ## Documentation Overview
 
 - **[Why MIPPv2](user/why_mippv2.md)**: Architectural evolution, technical relevance, and comparison with other SIMD wrappers (Highway, xsimd, Eve).
-- **[Getting Started](user/getting_started.md)**: Header integration, compiler flags, and a **5-minute tutorial across C99, C++ Functional, and C++ Object APIs**.
-- **[Programming Model](user/programming_model.md)**: In-depth exploration of C99, C++ functional, and C++ object APIs.
+- **[Getting Started](user/getting_started.md)**: Header integration, compiler flags, and a **5-minute tutorial across the C, C++ Functional, and C++ Object APIs**.
+- **[Programming Model](user/programming_model.md)**: In-depth exploration of the C, C++ Functional, and C++ Object APIs.
 - **[Vector Types & LMUL](user/vector_types_and_lmul.md)**: Vector representations, element counts (`mipp::N<T, LMUL>()`), and software/hardware register multiplier scaling.
 - **[Masking Semantics](user/masking_semantics.md)**: Mask generation, mask conversion, and execution variants (`unmasked`, `mask`, `maskz`, `masks`).
 - **[Implementation Levels](user/implementation_levels.md)**: The 4-level fallback engine explained from an application performance standpoint.
 - **[Memory & Alignment](user/memory_and_alignment.md)**: Alignment constraints, load/store primitives, and gather/scatter memory access.
-- **[API Explorer](explorer/index.md)**: Interactive catalog with instant search, reverse vendor intrinsic lookup, and tri-dialect switching.
+- **[API Explorer](explorer/index.md)**: Interactive catalog with instant search, reverse vendor intrinsic lookup, and switching between the three APIs.
 - **[Specifications](funcs_support/index.md)**: Complete function prototypes, mathematical descriptions, and target ISA capability matrices.
-- **[Developer Guide](developper/index.md)**: Code generator architecture, declarative JSON database schema, **templating DSL**, and contribution guide.
+- **[Developer Guide](developer/index.md)**: Code generator architecture, declarative JSON database schema, **templating DSL**, and contribution guide.

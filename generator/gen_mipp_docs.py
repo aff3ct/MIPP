@@ -669,7 +669,7 @@ class SpecFuncInfo:
 
             def _print_headers_block(flavor_dir, ext, mono_header, lang):
                 print(f'=== "{lang}"', file=f)
-                code_fence = "cpp" if lang != "C99 API" else "c"
+                code_fence = "cpp" if lang != "C API" else "c"
                 print(f"    ```{code_fence}", file=f)
                 headers = [
                     "// Option 1: Monolithic (entire library)",
@@ -693,25 +693,25 @@ class SpecFuncInfo:
                     print(f"    {line}", file=f)
                 print("    ```\n", file=f)
 
-            _print_headers_block("c", "h", "mipp.h", "C99 API")
-            _print_headers_block("cpp", "hpp", "mipp.hpp", "C++ API")
+            _print_headers_block("c", "h", "mipp.h", "C API")
+            _print_headers_block("cpp", "hpp", "mipp.hpp", "C++ Functional API")
             _print_headers_block("obj", "hpp", "mipp_obj.hpp", "C++ Object API")
 
             print("## Prototypes\n", file=f)
-            print('=== "C99 API"', file=f)
+            print('=== "C API"', file=f)
             print("    ```c", file=f)
             for lmul in [1, 2, 4, 8, -2]:
-                lmul_label = f"LMUL = {lmul}" if lmul > 0 else "LMUL = 1/2"
+                lmul_label = f"LMUL = {lmul}" if lmul > 0 else "d2 (half-vector)"
                 print(f"    // {lmul_label}", file=f)
                 c_block = self.func_to_str_c(lmul)
                 for line in c_block.splitlines():
                     print(f"    {line}", file=f)
             print("    ```\n", file=f)
 
-            print('=== "C++ API"', file=f)
+            print('=== "C++ Functional API"', file=f)
             print("    ```cpp", file=f)
             for lmul in [1, 2, 4, 8, -2]:
-                lmul_label = f"LMUL = {lmul}" if lmul > 0 else "LMUL = 1/2"
+                lmul_label = f"LMUL = {lmul}" if lmul > 0 else "d2 (half-vector)"
                 print(f"    // {lmul_label}", file=f)
                 print(f"    {self.func_to_str_cpp(lmul)}", file=f)
             print("    ```\n", file=f)
@@ -719,7 +719,7 @@ class SpecFuncInfo:
             print('=== "C++ Object API"', file=f)
             print("    ```cpp", file=f)
             for lmul in [1, 2, 4, 8, -2]:
-                lmul_label = f"LMUL = {lmul}" if lmul > 0 else "LMUL = 1/2"
+                lmul_label = f"LMUL = {lmul}" if lmul > 0 else "d2 (half-vector)"
                 print(f"    // {lmul_label}", file=f)
                 obj_block = self.func_to_str_obj(lmul)
                 for line in obj_block.splitlines():
@@ -744,7 +744,7 @@ class SpecFuncInfo:
                 print("## Mask Execution Variants\n", file=f)
                 variants = []
                 if self.mask_support.is_maskable():
-                    variants.append("- **Masked (`_mask` / `<mipp::M>`)**: Active elements evaluated; inactive elements preserve existing destination values.")
+                    variants.append("- **Masked (`_mask` / `<mipp::M>`)**: Active elements evaluated; inactive elements keep the value of the first operand.")
                 if self.mask_support.is_maskzable():
                     variants.append("- **Zero-Masked (`_maskz` / `<mipp::Z>`)**: Active elements evaluated; inactive elements zeroed.")
                 if self.mask_support.is_masksable():
@@ -762,7 +762,7 @@ class SpecFuncInfo:
 
     def write_isa_matrix(self, file, mipp_infos):
         print("## Architecture & Implementation Matrix\n", file=file)
-        print(f'<small>**Legend:** {badge_l0} Native &bull; {badge_l1} Dedicated Emulation &bull; {badge_l2} Generic Emulation &bull; {badge_l3} Scalar &bull; {badge_na} N/A &nbsp;—&nbsp; *[Full details & latency](../index.md#implementation-levels)*</small>\n', file=file)
+        print(f'<small>**Legend:** {badge_l0} Native Hardware &bull; {badge_l1} Dedicated Emulation &bull; {badge_l2} Generic Emulation &bull; {badge_l3} Scalar Fallback &bull; {badge_na} N/A &nbsp;—&nbsp; *[Full details & latency](../index.md#implementation-levels)*</small>\n', file=file)
         
         if self.func_name in ("cast", "cast_k"):
             dts = all_datatypes_cart_prod
@@ -905,7 +905,7 @@ MIPP provides high-performance SIMD/vector abstractions across a broad spectrum 
 <a id="implementation-levels"></a>
 ## Implementation Levels & Acceleration Legend
 
-Every MIPP function is evaluated against a deterministic 4-tier hierarchy:
+Every MIPP function is resolved against a deterministic 4-level hierarchy:
 
 | Badge | Implementation Level | Performance & Latency |
 | :---: | :--- | :--- |
@@ -919,7 +919,7 @@ Every MIPP function is evaluated against a deterministic 4-tier hierarchy:
 
 ## Universal Portability & Guaranteed Vectorization
 
-- 🚀 [**Universal Architecture Intersection Matrix**](intersection.md): Lists operations guaranteed to execute as SIMD vector instructions across **all** supported target ISAs. If an algorithm restricts its primitives to this matrix, it is guaranteed to vectorize on x86, ARM, and RISC-V targets without hitting scalar fallbacks.
+- [**Universal Architecture Intersection Matrix**](intersection.md): Lists operations guaranteed to execute as SIMD vector instructions across **all** supported target ISAs. If an algorithm restricts its primitives to this matrix, it is guaranteed to vectorize on x86, ARM, and RISC-V targets without hitting scalar fallbacks.
 
 ---
 
@@ -954,12 +954,12 @@ def write_funcs_support_index(base_dir, categories):
 This section contains complete API reference documentation, mathematical semantics, test specifications, and architecture acceleration matrices for all MIPP functions.
 
 !!! tip "MIPP API Explorer"
-    Search across all 85 primitives, perform reverse lookup on vendor hardware intrinsics (AVX, NEON, RVV, SVE), filter by guaranteed acceleration levels, and switch between C99, C++ and C++ Object dialects in the [**MIPP API Explorer**](../explorer/index.md).
+    Search across all 85 primitives, perform reverse lookup on vendor hardware intrinsics (AVX, NEON, RVV, SVE), filter by guaranteed acceleration levels, and switch between the C, C++ Functional and C++ Object APIs in the [**MIPP API Explorer**](../explorer/index.md).
 
 <a id="implementation-levels"></a>
 ## Implementation Levels & Acceleration Legend
 
-Every MIPP function is evaluated against a deterministic 4-tier hierarchy:
+Every MIPP function is resolved against a deterministic 4-level hierarchy:
 
 | Badge | Implementation Level | Performance & Latency |
 | :---: | :--- | :--- |
@@ -976,7 +976,7 @@ Every MIPP function is evaluated against a deterministic 4-tier hierarchy:
 Each function reference page provides:
 
 1. **Description & Semantics**: Mathematical operation and vector execution behavior.
-2. **C++ & C99 Prototypes**: Complete templated C++ signatures and C99 function prototypes across all LMUL ratios.
+2. **Prototypes**: C, C++ Functional and C++ Object API signatures across all LMUL ratios.
 3. **Supported Datatypes & Mask Execution Variants**: Supported element types and masking execution modes.
 4. **ISA & Variant Support Matrix**: Per-architecture hardware capability breakdown across masking variants.
 5. **Reference Algorithm**: Scalar C reference implementation demonstrating exact arithmetic and masking semantics.

@@ -132,12 +132,21 @@ Scalar operations execute flat sequential loops over all $N \times \text{LMUL}$ 
 ---
 
 
-## 4. Fractional LMUL & Vector Division ($\text{LDIV} = 1/2$)
+<a id="half-vectors"></a>
+## 4. Half-Vectors (`d2`)
 
-In addition to multi-register expansion ($\text{LMUL} > 1$), MIPP provides **half-vectors** ($\text{LDIV} = 1/2$), expressed as the `d2` suffix in C and as `LMUL = -2` in C++ templates.
+In addition to multi-register expansion ($\text{LMUL} > 1$), MIPP provides **half-vectors**: vectors holding half the elements of a base register. The same concept appears under several notations, which all mean the same thing:
+
+| Context | Notation |
+| :--- | :--- |
+| Concept | half-vector, length divider $\text{LDIV} = 2$ (equivalently $\text{LMUL} = 1/2$) |
+| C API types and functions | `d2` suffix: `rvd_float32_d2_t`, `mipp_add_float32_d2` |
+| C++ Functional and Object APIs | `LMUL` template argument `-2`: `mipp::rvd<float, -2>`, `mipp::Rvd<float, -2>` |
+| Availability macro | `MIPP_LDIV_2` |
+| Generator (`sw_lmul`, `hw_lmul`, `--ldiv`) | factor `-2`, or `--ldiv 2` |
 
 ```cpp
-// C++ API: half-vector capacity query and types
+// C++ Functional API: half-vector capacity query and types
 constexpr int n_half = mipp::N<float, -2>();
 mipp::rvd<float, -2> v_half = mipp::set0<float, -2>();
 
@@ -166,9 +175,9 @@ Half-vectors are **not available on every target**. When they are, MIPP defines 
 
 ### 4.2. Scope and Constraints of Deeper Fractional Division
 
-While RISC-V Vector supports $\text{LMUL} \in \{1/2, 1/4, 1/8\}$, generalizing deeper fractional divisions ($\text{LDIV} = 1/4, 1/8$) across ISAs is constrained by element capacity:
+While RISC-V Vector supports $\text{LMUL} \in \{1/2, 1/4, 1/8\}$, generalizing deeper divisions ($\text{LDIV} = 4, 8$) across ISAs is constrained by element capacity:
 
 - On a 128-bit register (SSE / NEON), a 64-bit datatype (`float64`, `int64`) has an element capacity of $N=2$ at $\text{LMUL}=1$.
-- Defining $\text{LDIV} = 1/4$ for a 64-bit type would result in $N = 2 / 4 = 0.5$ elements, which has no meaning.
+- Defining $\text{LDIV} = 4$ for a 64-bit type would result in $N = 2 / 4 = 0.5$ elements, which has no meaning.
 
-For this reason, MIPP only exposes $\text{LDIV} = 1/2$ (`d2`), and deeper fractional divisions are not part of the API.
+For this reason, MIPP only exposes $\text{LDIV} = 2$ (`d2`), and deeper divisions are not part of the API.

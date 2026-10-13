@@ -86,7 +86,7 @@ export function renderTabHw(entry) {
                 <span class="mipp-hw-header-short">Ext</span>
               </th>
               <th class="mipp-hw-col-dts">Datatypes</th>
-              <th class="mipp-hw-col-tier">Tier</th>
+              <th class="mipp-hw-col-tier">Level</th>
               <th class="mipp-hw-col-action">Algorithm</th>
             </tr>
           </thead>

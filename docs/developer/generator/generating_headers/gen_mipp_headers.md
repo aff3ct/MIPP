@@ -10,7 +10,7 @@
 2. **ISA Emission**: For each detected ISA (discovered dynamically in `simd_ext/`), generates:
     - Low-level intrinsics wrappers
     - Typedefs and vector registers (`rvd` and `rvm`)
-    - Level 0 (native), Level 1 (specific emulation), Level 2 (generic emulation), and Level 3 (scalar fallback) function implementations
+    - Level 0 (Native Hardware), Level 1 (Dedicated Emulation), Level 2 (Generic Emulation), and Level 3 (Scalar Fallback) function implementations
 3. **C API**: Emits the C headers (`include/mipp.h` and the per-function headers).
 4. **C++ Functional API**: Emits the overloads and templates of namespace `mipp::` (`include/mipp.hpp`).
 5. **C++ Object API**: Emits the `mipp::Rvd` and `mipp::Rvm` classes (`include/mipp_obj.hpp`).

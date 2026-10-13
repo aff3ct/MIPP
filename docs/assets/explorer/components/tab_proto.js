@@ -151,7 +151,7 @@ export function renderTabProto(entry) {
 
   const isUnsupported = !availableVariants.includes(globalVariant);
   const title = state.flavor === "c99"
-    ? "C99 API"
+    ? "C API"
     : state.flavor === "cpp"
       ? "C++ Functional API"
       : "C++ Object API";

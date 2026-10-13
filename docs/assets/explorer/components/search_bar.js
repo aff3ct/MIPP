@@ -25,7 +25,7 @@ export function renderSearchBar() {
 
 
   return `
-    <!-- Top Sticky Search & Dialect Controls with Integrated Brand Title -->
+    <!-- Top Sticky Search & API Controls with Integrated Brand Title -->
     <header class="mipp-explorer-header">
       <div class="mipp-search-row">
         <div class="mipp-header-brand">
@@ -50,11 +50,11 @@ export function renderSearchBar() {
       </div>
 
       <div class="mipp-controls-row">
-        <!-- Dialect / Flavor Switcher -->
+        <!-- API (flavor) switcher -->
         <div class="mipp-controls-group">
-          <span class="mipp-control-label">Dialect:</span>
+          <span class="mipp-control-label">API:</span>
           <div class="mipp-segmented-group" id="mipp-flavor-group">
-            <button class="mipp-segment-btn ${state.flavor === "c99" ? "active" : ""}" data-flavor="c99">C99</button>
+            <button class="mipp-segment-btn ${state.flavor === "c99" ? "active" : ""}" data-flavor="c99">C</button>
             <button class="mipp-segment-btn ${state.flavor === "cpp" ? "active" : ""}" data-flavor="cpp">
               <span class="mipp-dialect-full">C++ Functional</span><span class="mipp-dialect-sm">C++ Func</span>
             </button>
@@ -69,9 +69,9 @@ export function renderSearchBar() {
           <span class="mipp-control-label">Variant:</span>
           <div class="mipp-segmented-group" id="mipp-mask-group" title="Filter by variant">
             <button class="mipp-segment-btn ${state.maskVariant === "unmasked" ? "active" : ""}" data-mask-variant="unmasked" title="Unmasked">U</button>
-            <button class="mipp-segment-btn ${state.maskVariant === "mask" ? "active" : ""}" data-mask-variant="mask" title="Mask (merge)">M</button>
-            <button class="mipp-segment-btn ${state.maskVariant === "maskz" ? "active" : ""}" data-mask-variant="maskz" title="Maskz (zeroing)">Z</button>
-            <button class="mipp-segment-btn ${state.maskVariant === "masks" ? "active" : ""}" data-mask-variant="masks" title="Masks (sourcing)">S</button>
+            <button class="mipp-segment-btn ${state.maskVariant === "mask" ? "active" : ""}" data-mask-variant="mask" title="Masked (_mask)">M</button>
+            <button class="mipp-segment-btn ${state.maskVariant === "maskz" ? "active" : ""}" data-mask-variant="maskz" title="Zero-Masked (_maskz)">Z</button>
+            <button class="mipp-segment-btn ${state.maskVariant === "masks" ? "active" : ""}" data-mask-variant="masks" title="Source-Masked (_masks)">S</button>
           </div>
         </div>
 
@@ -83,7 +83,7 @@ export function renderSearchBar() {
             <button class="mipp-segment-btn ${state.lmul === "2" ? "active" : ""}" data-lmul="2">2</button>
             <button class="mipp-segment-btn ${state.lmul === "4" ? "active" : ""}" data-lmul="4">4</button>
             <button class="mipp-segment-btn ${state.lmul === "8" ? "active" : ""}" data-lmul="8">8</button>
-            <button class="mipp-segment-btn ${state.lmul === "-2" ? "active" : ""}" data-lmul="-2" title="Half vector (LMUL=1/2 / d2)">1/2</button>
+            <button class="mipp-segment-btn ${state.lmul === "-2" ? "active" : ""}" data-lmul="-2" title="Half-vector (LMUL = 1/2, d2)">1/2</button>
           </div>
         </div>
 

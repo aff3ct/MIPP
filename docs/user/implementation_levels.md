@@ -1,6 +1,6 @@
 # Implementation Levels & Fallback Solver
 
-MIPP guarantees 100% API completeness across all supported architectures through a **4-tier fallback solver**. If an architecture lacks a native hardware instruction for a given datatype or operation, MIPP automatically resolves to the most optimal emulation strategy available.
+MIPP guarantees 100% API completeness across all supported architectures through a **4-level fallback solver**. If an architecture lacks a native hardware instruction for a given datatype or operation, MIPP automatically resolves to the most optimal emulation strategy available.
 
 ---
 
@@ -10,25 +10,25 @@ Because all MIPP functions are declared `static inline`, the compiler inlines th
 
 ```
 +-----------------------------------------------------------------------------+
-|                     MIPP 4-Tier Fallback Hierarchy                          |
+|                     MIPP 4-Level Fallback Hierarchy                         |
 +-----------------------------------------------------------------------------+
 |                                                                             |
-|  [ Level 0: Optimal / Native ]                                              |
+|  [ Level 0: Native Hardware ]                                               |
 |    - 1:1 single-instruction mapping to a dedicated target SIMD intrinsic    |
 |    - Minimal instruction count and optimal pipeline execution               |
 |           |                                                                 |
 |           v (if native single instruction does not exist)                   |
-|  [ Level 1: Specific Emulated ]                                             |
+|  [ Level 1: Dedicated Emulation ]                                           |
 |    - Target-specific multi-instruction sequence using ISA intrinsics        |
 |    - Exploits architecture-specific hardware instructions & bit-tricks      |
 |           |                                                                 |
 |           v (if target-specific sequence is not implemented)                |
-|  [ Level 2: Generic Emulated ]                                              |
+|  [ Level 2: Generic Emulation ]                                             |
 |    - Algorithmic composition using portable MIPP SIMD primitives            |
 |    - Fully vectorized, independent of target intrinsics                     |
 |           |                                                                 |
 |           v (if vectorized composition is unavailable)                      |
-|  [ Level 3: Auto Scalar Fallback ]                                          |
+|  [ Level 3: Scalar Fallback ]                                               |
 |    - Sequential element-by-element scalar fallback                          |
 |    - Guarantees complete API coverage and functional correctness            |
 |    - Can be auto-vectorized by the compiler                                 |
@@ -36,7 +36,7 @@ Because all MIPP functions are declared `static inline`, the compiler inlines th
 +-----------------------------------------------------------------------------+
 ```
 
-### Level 0: Optimal / Native
+### Level 0: Native Hardware
 - **Definition**: Direct 1:1 mapping to a single hardware vector instruction or vendor intrinsic provided natively by the target ISA for that datatype.
 - **Characteristics**: Lowest possible instruction count, minimum latency, and maximum hardware pipeline throughput.
 - **Examples**:
@@ -44,14 +44,14 @@ Because all MIPP functions are declared `static inline`, the compiler inlines th
     - `mipp_add_float32` on RVV $\to$ `__riscv_vfadd_vv_f32m1`
     - `mipp_add_float32` on ARM NEON $\to$ `vaddq_f32`
 
-### Level 1: Specific Emulated
+### Level 1: Dedicated Emulation
 - **Definition**: Target-specific emulation tailored to an ISA's instruction set when a single direct instruction is unavailable.
 - **Performance**: High vector efficiency using handcrafted target assembly and intrinsic sequences.
 - **Examples**:
     - Horizontal reduction on AVX (`hadd_float32`), using `_mm256_permute2f128_ps`, `_mm256_shuffle_ps`, and `_mm256_add_ps` to perform in-register tree reduction across 256-bit lanes.
     - Gather load emulation on baseline AVX prior to AVX2 hardware `vgather` instructions.
 
-### Level 2: Generic Emulated
+### Level 2: Generic Emulation
 - **Definition**: Vectorized algorithms implemented on top of standard MIPP primitives.
 - **Performance**: Fully vectorized execution across all SIMD lanes without scalar unrolling.
 - **Examples**:
@@ -59,10 +59,10 @@ Because all MIPP functions are declared `static inline`, the compiler inlines th
     - Elementary math functions (such as vectorized `exp`, `log`, `sin`, `cos` polynomial expansions).
     - Software emulation of masked execution on targets lacking native instruction predication (evaluating unmasked operations and applying vector blending).
 
-### Level 3: Auto Scalar Fallback
+### Level 3: Scalar Fallback
 - **Definition**: Automated fallback to sequential scalar element processing.
 - **Performance**: Functional fallback path with sequential latency.
-- **Mechanics**: The vector register is unpacked into scalar values, processed element-by-element via scalar operators, and repacked into the output vector register. The code is generated in a way the compiler can auto-vectorized it but without guarantee.
+- **Mechanics**: The vector register is unpacked into scalar values, processed element-by-element via scalar operators, and repacked into the output vector register. The code is written so that the compiler can auto-vectorize it, without guarantee.
 - **Purpose**: Guarantees that MIPP function calls compile on every target, allowing developers to write generic code across all supported datatypes regardless of hardware edge cases (see [Known Limitations](#known-limitations) for the few remaining exceptions).
 
 ---
@@ -76,7 +76,7 @@ Every generated function definition in `include/mipp/internal/simd_ext/<isa>/c/f
 
 ```c
 static inline rvd_avx_float32_t mipp_avx_add_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
-    // Level 0 (Optimal / Native)
+    // Level 0 (Native Hardware)
     rvd_avx_float32_t res;
     res.r = _mm256_add_ps(r0.r, r1.r);
     return res;
@@ -85,7 +85,7 @@ static inline rvd_avx_float32_t mipp_avx_add_float32(const rvd_avx_float32_t r0,
 
 ```c
 static inline rvd_rvv_int64_t mipp_rvv_wcvt_int32_int64(const rvd_rvv_int32_t r0) {
-    // Level 3 (Auto Scalar Fallback)
+    // Level 3 (Scalar Fallback)
     rvd_scalar_int32_t s_r0 = {0};
     memcpy(&s_r0, &r0, sizeof(r0));
     rvd_scalar_int64_t sres = mipp_scalar_wcvt_int32_int64(s_r0);
@@ -118,7 +118,7 @@ While the hybrid implementation is emitted for optimal execution, its official *
 
 $$\text{EffectiveLevel}(F) = \max \Big( \text{BaseLevel}(F), \; \max_{D \in \text{Dependencies}(F)} \text{EffectiveLevel}(D) \Big)$$
 
-- **Pure Vector Path**: If a Level 2 generic algorithm only invokes Level 0, 1, or 2 sub-operations, its effective level remains **Level 2 (Generic Emulated)**.
+- **Pure Vector Path**: If a Level 2 generic algorithm only invokes Level 0, 1, or 2 sub-operations, its effective level remains **Level 2 (Generic Emulation)**.
 - **Transitive Scalar Fallback**: If a Level 2 (or Level 1) template invokes at least one operation that transitively resolves to a Level 3 scalar fallback on the target architecture, its effective level is evaluated as:
   $$\max(2, 3) = \mathbf{3}$$
   It is classified and documented as **Level 3 (Scalar Fallback)**.
@@ -134,19 +134,19 @@ Understanding implementation levels helps users interpret profiling data and com
 
 - **Levels 0, 1, and 2 (Vectorized SIMD Paths)**:
     - **Level 0, Level 1, and Level 2 are all fully vectorized and highly performant**.
-    - A function marked as **Level 1 (Specific Emulated)** or **Level 2 (Generic Emulated)**, such as composite arithmetic (`fmadd` without FMA hardware), horizontal reductions (`hadd`, `hmax`, `hmin`), or elementary math functions (`exp`, `log`, `sin`, `cos`), simply indicates that the target ISA lacks a dedicated, single hardware instruction for that operation. MIPP executes these via fully vectorized SIMD instruction sequences with no scalar serialization.
-- **Level 3 (Sequential Scalar Fallback)**:
-    - Level 3 is the only tier where the generated source code is sequential element-by-element rather than explicit SIMD instructions. In some cases, this code can be auto-vectorized by the compiler.
+    - A function marked as **Level 1 (Dedicated Emulation)** or **Level 2 (Generic Emulation)**, such as composite arithmetic (`fmadd` without FMA hardware), horizontal reductions (`hadd`, `hmax`, `hmin`), or elementary math functions (`exp`, `log`, `sin`, `cos`), simply indicates that the target ISA lacks a dedicated, single hardware instruction for that operation. MIPP executes these via fully vectorized SIMD instruction sequences with no scalar serialization.
+- **Level 3 (Scalar Fallback)**:
+    - Level 3 is the only level where the generated source code is sequential element-by-element rather than explicit SIMD instructions. In some cases, this code can be auto-vectorized by the compiler.
     - While Level 3 guarantees complete API coverage and functional correctness, performance-critical inner loops should avoid relying on Level 3 fallbacks. If a hotspot hits a Level 3 implementation, consider:
         - Checking if an alternative datatype has native hardware support on that architecture (e.g., using `float32` on architectures lacking 64-bit hardware floating-point units).
-        - Contributing a Level 1 (target-specific intrinsic) or Level 2 (generic SIMD decomposition) implementation to the MIPP codebase.
+        - Contributing a Level 1 (Dedicated Emulation) or Level 2 (Generic Emulation) implementation to the MIPP codebase.
 
 ---
 
 <a id="known-limitations"></a>
 ## 5. Known Limitations
 
-The fallback hierarchy covers the overwhelming majority of `(function, datatype, LMUL, mask variant, ISA)` combinations. The current exception is a subset of **half-vector (`d2`) operations on RISC-V Vector**, mostly on 64-bit element types: these functions compile, but are not implemented yet. When called, they report the following message, then terminate the program in C (`exit(-1)`) or throw `mipp::stub_exception` in C++:
+The fallback hierarchy covers the overwhelming majority of `(function, datatype, LMUL, mask variant, ISA)` combinations. The current exception is a subset of **[half-vector](vector_types_and_lmul.md#half-vectors) (`d2`) operations on RISC-V Vector**, mostly on 64-bit element types: these functions compile, but are not implemented yet. When called, they report the following message, then terminate the program in C (`exit(-1)`) or throw `mipp::stub_exception` in C++:
 
 ```text
 MIPP panic: 'mipp_rvv_<function>_<datatype>_d2' is unimplemented.

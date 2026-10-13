@@ -76,7 +76,7 @@ def parse_placeholders_or_skip(pre_rendering, isa, funcs, f, dt_par, dt_ret, dt_
 
 _FALLBACK_TEMPLATE = """{% if cond %}#if {{ cond }}
 {% endif %}static {{ proto }} {
-\t// Level 3 (Auto Scalar Fallback)
+\t// Level 3 (Scalar Fallback)
 {% if pre_statements %}{{ pre_statements }}
 {% endif %}\t{{ call_statement }}
 {% if post_statements %}{{ post_statements }}
@@ -279,7 +279,7 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond, lm
 
     single_template = """{% if cond %}#if {{ cond }}
 {% endif %}static {{ proto }} {
-\t// Level 3 (Auto Scalar Fallback)
+\t// Level 3 (Scalar Fallback)
 {{ body }}
 }
 {%- if cond %}

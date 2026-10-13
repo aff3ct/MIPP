@@ -1,6 +1,6 @@
 ---
 title: API Explorer
-description: Interactive MIPP SIMD instruction catalog inspired by Intel Intrinsics Guide and ARM Neon Search Engine. Instant multi-criteria search, reverse vendor intrinsic lookup (AVX, NEON, RVV, SVE), faceted capability filtering, and interactive dialect switching (C99 / C++ Generic / C++ Object).
+description: Interactive MIPP SIMD instruction catalog inspired by Intel Intrinsics Guide and ARM Neon Search Engine. Instant multi-criteria search, reverse vendor intrinsic lookup (AVX, NEON, RVV, SVE), faceted capability filtering, and switching between the C, C++ Functional and C++ Object APIs.
 hide:
   - toc
 ---
