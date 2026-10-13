@@ -66,6 +66,26 @@
         "is_scalar": {
             "type": "boolean"
         },
+        "info_names": {
+            "description": "Names printed by mipp_info(). Entries are tested in order; the first one whose 'if' preprocessor condition holds is used. An entry without 'if' is the default and must be last. If omitted, the upper-cased ISA name is printed.",
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "if": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "name"
+                ],
+                "additionalProperties": false
+            }
+        },
         "mipp_definitions": {
             "type": "array",
             "items": {

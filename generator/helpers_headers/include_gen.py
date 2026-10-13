@@ -781,10 +781,10 @@ class IncludeManager:
                     for mask in ["mask", "maskz", "masks"]:
                         include_path.resolve_dependencies(funcs, lmul=0, mask_kind=mask, layer=layer_name)
 
-                    # Sub-ISA dependency (for ldiv wrappers) based on sub_isa in JSON
-                    sub_isa = self.get_isa_config(layer_name).get("sub_isa")
-                    if sub_isa:
-                        include_path.dependencies.add(f"mipp/internal/simd_ext/{sub_isa}/c/functions/{category}/{func}.h")
+                    # Sub-ISA dependency (for ldiv wrappers built on the sub_isa registers)
+                    layer_cfg = self.get_isa_config(layer_name)
+                    if uses_sub_isa_ldiv(layer_cfg):
+                        include_path.dependencies.add(f"mipp/internal/simd_ext/{layer_cfg['sub_isa']}/c/functions/{category}/{func}.h")
 
                     # Auto-scalar fallback requires the scalar variant to be included
                     if not self.get_isa_config(layer_name).get("is_scalar", False) and layer_name not in ("c", "cpp"):
@@ -846,7 +846,7 @@ class IncludeManager:
                     isa_cfg = self.get_isa_config(layer_name)
                     is_scalar = bool(isa_cfg.get("is_scalar", False))
                     sw_lmuls = [int(x) for x in isa_cfg.get("sw_lmul", []) if int(x) > 0]
-                    sub_isa = isa_cfg.get("sub_isa")
+                    sub_isa = isa_cfg.get("sub_isa") if uses_sub_isa_ldiv(isa_cfg) else None
                     has_hw_mask = bool(isa_cfg.get("hw_mask", False))
 
                     # Determine if this file is a pure software LMUL wrapper or sub-ISA wrapper
@@ -864,7 +864,7 @@ class IncludeManager:
                     if 2 in sw_lmuls and l == "m2":
                         item["dependencies"].add(f"mipp/internal/simd_ext/{layer_name}/c/functions/{category}/{v}/m1/{func}{ext}")
 
-                    # Sub-ISA ldiv wrapper dependency (governed by sub_isa from JSON)
+                    # Sub-ISA ldiv wrapper dependency (only when d2 is built on the sub_isa registers)
                     if l == "d2" and sub_isa:
                         item["dependencies"].add(f"mipp/internal/simd_ext/{sub_isa}/c/functions/{category}/{v}/m1/{func}{ext}")
 
@@ -888,7 +888,7 @@ class IncludeManager:
                         if not is_scalar:
                             item["dependencies"].add(f"mipp/internal/simd_ext/scalar/c/functions/{category}/{v}/{l}/{func}.h")
                             super_isa = isa_cfg.get("super_isa")
-                            has_super_d2 = bool(super_isa and -2 in super_isa.get("sw_lmul", []))
+                            has_super_d2 = uses_sub_isa_ldiv(super_isa)
                             if has_super_d2:
                                 item["dependencies"].add(f"mipp/internal/simd_ext/scalar/c/functions/{category}/{v}/d2/{func}.h")
 

@@ -8,17 +8,6 @@ Each target architecture supported by MIPP is configured via a `<isa>_isa.json` 
 
 ```json
 {
-    "name": "avx",
-    "prefix": "_mm256",
-    "size": 256,
-    "sub_isa": "sse",
-    "define": "defined(__AVX__)",
-    "header_template": [
-        "#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX_H_",
-        "#define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX_H_",
-        "#include <immintrin.h>",
-        "#include <mipp/internal/simd_ext/sse/c/common.h>"
-    ],
     "datatypes": {
         "float32": {
             "data_ext": "ps",
@@ -29,8 +18,18 @@ Each target architecture supported by MIPP is configured via a `<isa>_isa.json` 
             "to_ptr": "float32_t"
         }
     },
-    "sw_lmul": [1, 2, 4, 8, -2],
+    "define": "defined(__AVX__)",
+    "header_template": [
+        "#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX_H_",
+        "#define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX_H_",
+        "#include <immintrin.h>",
+        "#include <mipp/internal/simd_ext/sse/c/common.h> // ldiv 2 support"
+    ],
     "hw_lmul": [],
+    "info_names": [
+        { "if": "defined(__AVX2__)", "name": "x86_64 AVX2" },
+        { "name": "x86_64 AVX" }
+    ],
     "mipp_definitions": [
         "#define MIPP_64BIT",
         "#ifdef __AVX2__",
@@ -40,18 +39,26 @@ Each target architecture supported by MIPP is configured via a `<isa>_isa.json` 
         "#else",
         "\t#define MIPP_INSTR_VERSION 1",
         "#endif"
-    ]
+    ],
+    "name": "avx",
+    "prefix": "_mm256",
+    "size": 256,
+    "sub_isa": "sse",
+    "sw_ldiv_type": "sub_isa",
+    "sw_lmul": [1, 2, 4, 8, -2]
 }
 ```
+
+Top-level keys are sorted alphabetically (checked by the `json-structure` audit).
 
 ---
 
 ## 2. Core Fields
 
-- `name`: Target ISA identifier (e.g. `sse`, `avx`, `rvv`). The generator defines `MIPP_<NAME>` when the ISA is selected.
+- `name`: Target ISA identifier (e.g. `sse`, `avx`, `rvv`). It must match the directory name. The generator defines `MIPP_<NAME>` when the ISA is selected, and adds `<NAME>` to the C++ `mipp::ISA` enum.
 - `prefix`: Intrinsic function prefix used in template string expansions (e.g. `_mm256`).
 - `size`: Base register width in bits (e.g. 128, 256, 512). Scalable ISAs (SVE) list the supported widths.
-- `sub_isa`: Parent ISA (e.g. `avx` for `avx512`, `sse` for `avx`). It sets the detection precedence (a derived ISA is tested before its parent) and is automatically included by `--simd-ext`. It does **not** make the parent's implementations available implicitly.
+- `sub_isa`: Parent ISA (e.g. `avx` for `avx512`, `sse` for `avx`, `neon` for `sve`). It sets the detection precedence (a derived ISA is tested before its parent) and is automatically included by `--simd-ext`. On its own, it does **not** make the parent's implementations or registers available.
 - `define`: Compiler preprocessor expression detecting hardware support (e.g. `defined(__AVX__)`).
 - `header_template`: C include directives and guard macros emitted at the top of the generated ISA header.
 - `datatypes`: Mapping of each data type to:
@@ -62,7 +69,10 @@ Each target architecture supported by MIPP is configured via a `<isa>_isa.json` 
 - `sw_lmul`: LMUL factors emulated in software by aggregating several base registers (e.g. `[1, 2, 4, 8]`).
 - `hw_lmul`: LMUL factors supported natively by the hardware (register groups on RVV: `[1, 2, 4, 8, -2]`; `[1]` on SVE).
 - `-2` in `sw_lmul` or `hw_lmul` enables half-vectors (`d2`, exposed to users through `MIPP_LDIV_2`).
-- `sw_ldiv_type`: `"sub_isa"` builds the software half-vectors on the registers of `sub_isa` (AVX `d2` uses SSE registers). Requires `sub_isa`; only `-2` is supported.
+- `sw_ldiv_type`: `"sub_isa"` builds the software half-vectors (`-2` in `sw_lmul`) on the registers of `sub_isa` (AVX `d2` uses SSE registers). It is the only software strategy: `-2` in `sw_lmul` requires it. It also requires `sub_isa`, and `size` must be twice the size of `sub_isa`.
+- `info_names`: Names printed by `mipp_info()`, as a list of `{ "if": <preprocessor condition>, "name": <label> }`. The first entry whose condition holds is used; the entry without `if` is the default and must be last. If the field is omitted, the upper-cased `name` is printed.
 - `mipp_definitions`: MIPP feature flag macros emitted for user applications (e.g. `MIPP_AVX2`, `MIPP_BW`, `MIPP_64BIT`).
 
 Other optional fields (`hw_mask`, `hw_mask_is_bitfield`, `layout`, ...) are described by `generator/helpers_headers/schemas/isa_schema.json`.
+
+The cross-field rules above (`sub_isa` directory exists, `-2` / `sw_ldiv_type` / `size` consistency, `info_names` default entry) are checked when the descriptor is loaded; the generator stops on the first violation.

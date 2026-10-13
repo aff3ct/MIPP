@@ -60,55 +60,8 @@ static inline void mipp_info()
 	compiler_version[0] = '\0';
 #endif
 
-#if defined(MIPP_AVX512)
-	#if defined(__MIC__)
-		simd_ext = "Intel MIC";
-	#elif defined(__KNCNI__)
-		simd_ext = "Intel KNCI";
-	#elif defined(__AVX512__) || defined(__AVX512F__)
-		simd_ext = "x86_64 AVX-512";
-	#else
-		simd_ext = "UNKNOWN (this case should never happen)";
-	#endif
-#elif defined(MIPP_AVX)
-	#if defined(__AVX2__)
-		simd_ext = "x86_64 AVX2";
-	#elif defined(__AVX__)
-		simd_ext = "x86_64 AVX";
-	#else
-		simd_ext = "UNKNOWN (this case should never happen)";
-	#endif
-#elif defined(MIPP_SSE)
-	#if defined(__SSE4_2__)
-		simd_ext = "x86_64 SSE4.2";
-	#elif defined(__SSE4_1__)
-		simd_ext = "x86_64 SSE4.1";
-	#elif defined(__SSSE3__)
-		simd_ext = "x86_64 SSSE3";
-	#elif defined(__SSE3__)
-		simd_ext = "x86_64 SSE3";
-	#elif defined(__SSE2__)
-		simd_ext = "x86_64 SSE2";
-	#elif defined(__SSE__)
-		simd_ext = "x86 SSE";
-	#else
-		simd_ext = "UNKNOWN (this case should never happen)";
-	#endif
-#elif defined(MIPP_SVE)
-	simd_ext = "ARM SVE";
-#elif defined(MIPP_NEON)
-	#if defined(__aarch64__)
-		simd_ext = "ARM NEONv2";
-	#else
-		simd_ext = "ARM NEONv1";
-	#endif
-#elif defined(MIPP_RVV)
-	simd_ext = "RVV1.0";
-#elif defined(MIPP_SCALAR)
-	simd_ext = "SCALAR";
-#else
-	simd_ext = "UNKNOWN (this case should never happen)";
-#endif
+	/* SIMD extension */
+{{ simd_ext_block }}
 
 #if defined(MIPP_FMA)
 	mipp_fma = "yes";
@@ -119,13 +72,13 @@ static inline void mipp_info()
 #if defined(MIPP_64BIT)
 	mipp_64bit = "yes";
 #else
-	mipp_64bit = "yes";
+	mipp_64bit = "no";
 #endif
 
 #if defined(MIPP_BW)
 	mipp_bw = "yes";
 #else
-	mipp_bw = "yes";
+	mipp_bw = "no";
 #endif
 
 	printf("MIPPv2 (%s%s, %s-%s)\n", os, prec, compiler, compiler_version);

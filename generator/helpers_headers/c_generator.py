@@ -407,9 +407,8 @@ def gen_c_structures(isa, file, is_scalar=False, vla_size=None):
                     print_ldiv_fallback_typedef_rvm("\t")
                     print(f"#endif", file=file)
 
-    sub_isa_name = isa.get("sub_isa", None)
-    if sub_isa_name:
-        sub_isa = load_isa_config(sub_isa_name)[0]
+    if uses_sub_isa_ldiv(isa):
+        sub_isa = load_isa_config(isa["sub_isa"])[0]
         if sub_isa:
             gen_ldiv_structs_sub_isa(isa, sub_isa, file)
             gen_ldiv_defines_sub_isa(isa, sub_isa, file)
@@ -586,10 +585,9 @@ def generate_c_layer(isa, include_manager, native_implems, emu_implems):
         # Generate software wrappers
         gen_c_lmul(isa, include_manager, copy_interfaces, sw_lmuls)
 
-    # Generate ldiv wrappers if sub_isa is specified
-    sub_isa_name = isa.get("sub_isa", None)
-    if sub_isa_name:
-        sub_isa = load_isa_config(sub_isa_name)[0]
+    # Generate ldiv wrappers if half-vectors are built on the sub_isa registers
+    if uses_sub_isa_ldiv(isa):
+        sub_isa = load_isa_config(isa["sub_isa"])[0]
         if sub_isa:
             gen_c_ldiv(isa, sub_isa, include_manager, copy_interfaces)
 

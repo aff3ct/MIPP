@@ -337,6 +337,9 @@
     "hw_mask": true,
     "hw_mask_extract_via_store": true,
     "hw_mask_requires_toreg": true,
+    "info_names": [
+        { "name": "RVV1.0" }
+    ],
     "layout": {
         "size_symbol": "__riscv_v_fixed_vlen",
         "vlen_guard_template": "__riscv_v_fixed_vlen >= {{ width * abs_lmul }}",

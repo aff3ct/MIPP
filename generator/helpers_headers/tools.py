@@ -855,6 +855,36 @@ def load_implem_tables(current_file, templates_filename, implems_filename):
     return tpl_dict, resolved_implems
 
 
+def list_simd_ext_names():
+    """
+    Returns the names of all SIMD extensions found in generator/simd_ext/,
+    sorted alphabetically so that the generated output does not depend on
+    the filesystem enumeration order.
+    """
+    import os
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    simd_ext_dir = os.path.join(base_dir, "simd_ext")
+    return sorted(
+        d for d in os.listdir(simd_ext_dir)
+        if os.path.isdir(os.path.join(simd_ext_dir, d)) and d != "__pycache__"
+    )
+
+
+def uses_sub_isa_ldiv(isa):
+    """
+    True if the ISA implements software half-vectors (d2) on the registers of
+    its sub_isa, i.e. "sw_ldiv_type" is "sub_isa" and -2 is listed in "sw_lmul".
+    Declaring a sub_isa alone only sets the ISA detection precedence.
+    """
+    if not isa:
+        return False
+    return (
+        isa.get("sw_ldiv_type") == "sub_isa"
+        and bool(isa.get("sub_isa"))
+        and any(int(x) == -2 for x in isa.get("sw_lmul", []))
+    )
+
+
 def load_isa_config(isa_name):
     import copy
     if isa_name not in _isa_config_cache:

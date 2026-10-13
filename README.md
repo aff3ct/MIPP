@@ -81,7 +81,7 @@ int main()
 
 Compile and run:
 ```bash
-g++ -std=c++11 -O3 -mavx2 -mfma -Iinclude saxpy.cpp -o saxpy
+g++ -std=c++11 -O3 -march=native -Iinclude saxpy.cpp -o saxpy
 ./saxpy
 ```
 

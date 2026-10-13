@@ -25,7 +25,7 @@ cd MIPP/generator
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-./gen_mipp_headers.py                        # Default (coarse) headers, emitted into ../include/
+./gen_mipp_headers.py                            # Default (coarse) headers, emitted into ../include/
 # or: ./gen_mipp_headers.py --granularity fine   # Same, plus fine-grained 2D headers (see below)
 ```
 

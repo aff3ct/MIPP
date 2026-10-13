@@ -113,6 +113,10 @@
         "#include <mipp/internal/simd_ext/sse/c/common.h> // ldiv 2 support"
     ],
     "hw_lmul": [],
+    "info_names": [
+        { "if": "defined(__AVX2__)", "name": "x86_64 AVX2" },
+        { "name": "x86_64 AVX" }
+    ],
     "mipp_definitions": [
         "#define MIPP_64BIT",
         "#ifdef __AVX2__",

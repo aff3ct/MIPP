@@ -20,7 +20,7 @@ The header-generator checks live in `generator/helpers_headers/input_validation.
 | Every implemented function and emulation dependency is declared; implemented datatypes are supported by both the interface and the ISA descriptor | `<isa>_native_implems.json`, `<isa>_emu_implems.json` |
 | Every `template` / `template_ref` resolves to an existing template | `*_implems.json` |
 | No dependency cycle between emulated functions | `<isa>_emu_implems.json` |
-| ISA descriptor consistency (e.g. `sub_isa` required when `sw_ldiv_type` is `sub_isa`) | `<isa>_isa.json` |
+| ISA descriptor consistency: `sub_isa` exists; `-2` in `sw_lmul` requires `sw_ldiv_type: sub_isa`, which requires `sub_isa` and a `size` twice the size of `sub_isa`; at most one default `info_names` entry, in last position | `<isa>_isa.json` |
 | A mandatory file is missing for an ISA (`<isa>_isa.json`, `<isa>_native_implems.json`, `<isa>_native_templates.json`) | `simd_ext/<isa>/` |
 
 ---

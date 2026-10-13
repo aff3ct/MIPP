@@ -60,9 +60,35 @@ def validate_isa_config(isa_dict, isa_name):
     validate_json_data(isa_dict, "isa_schema.json", label=file_label)
     
     # Semantic/cross-field validation
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+    # info_names (mipp_info): at most one default entry (without "if"), and it must be last
+    info_names = isa_dict.get("info_names", [])
+    defaults = [i for i, e in enumerate(info_names) if "if" not in e]
+    if len(defaults) > 1 or (defaults and defaults[0] != len(info_names) - 1):
+        print(f"Error: Validation failed for {file_label}:", file=sys.stderr)
+        print(f"  - 'info_names' must contain at most one entry without 'if', and it must be the last one.", file=sys.stderr)
+        sys.exit(1)
+
+    # sub_isa (detection precedence, and parent registers for sub_isa half-vectors) must exist
+    sub_isa_name = isa_dict.get("sub_isa")
+    if sub_isa_name:
+        sub_isa_dir = os.path.join(base_dir, "simd_ext", sub_isa_name)
+        if not os.path.isdir(sub_isa_dir):
+            print(f"Error: Validation failed for {file_label}:", file=sys.stderr)
+            print(f"  - Referenced sub_isa '{sub_isa_name}' directory does not exist under 'simd_ext/'.", file=sys.stderr)
+            sys.exit(1)
+
     sw_ldiv_type = isa_dict.get("sw_ldiv_type", "native")
+    sw_ldivs = [int(x) for x in isa_dict.get("sw_lmul", []) if int(x) < 0]
+
+    # Software half-vectors are only implemented on top of the sub_isa registers
+    if sw_ldivs and sw_ldiv_type != "sub_isa":
+        print(f"Error: Validation failed for {file_label}:", file=sys.stderr)
+        print(f"  - Negative factors in 'sw_lmul' ({sw_ldivs}) require 'sw_ldiv_type' to be 'sub_isa' (the only software strategy implemented).", file=sys.stderr)
+        sys.exit(1)
+
     if sw_ldiv_type == "sub_isa":
-        sub_isa_name = isa_dict.get("sub_isa")
         if not sub_isa_name:
             print(f"Error: Validation failed for {file_label}:", file=sys.stderr)
             print(f"  - Field 'sub_isa' must be defined and non-empty when 'sw_ldiv_type' is set to 'sub_isa'.", file=sys.stderr)
@@ -76,14 +102,17 @@ def validate_isa_config(isa_dict, isa_name):
                 print(f"Error: Validation failed for {file_label}:", file=sys.stderr)
                 print(f"  - Unsupported ldiv factor '{ldiv}'. Only ldiv = -2 is supported with sub_isa.", file=sys.stderr)
                 sys.exit(1)
-        
-        # Verify sub_isa directory exists under simd_ext/
-        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        sub_isa_dir = os.path.join(base_dir, "simd_ext", sub_isa_name)
-        if not os.path.isdir(sub_isa_dir):
-            print(f"Error: Validation failed for {file_label}:", file=sys.stderr)
-            print(f"  - Referenced sub_isa '{sub_isa_name}' directory does not exist under 'simd_ext/'.", file=sys.stderr)
-            sys.exit(1)
+
+        # Half-vectors of this ISA are full vectors of the sub_isa: sizes must match
+        sub_isa_json = os.path.join(base_dir, "simd_ext", sub_isa_name, f"{sub_isa_name}_isa.json")
+        if os.path.exists(sub_isa_json):
+            with open(sub_isa_json, "r", encoding="utf-8") as f_sub:
+                sub_size = json.load(f_sub).get("size")
+            size = isa_dict.get("size")
+            if isinstance(size, int) and isinstance(sub_size, int) and size != 2 * sub_size:
+                print(f"Error: Validation failed for {file_label}:", file=sys.stderr)
+                print(f"  - 'sw_ldiv_type: sub_isa' requires 'size' ({size}) to be twice the size of sub_isa '{sub_isa_name}' ({sub_size}).", file=sys.stderr)
+                sys.exit(1)
 
 def validate_explorer_isa_config(explorer_dict, file_name):
     validate_json_data(explorer_dict, "explorer_isa_schema.json", label=os.path.basename(file_name))

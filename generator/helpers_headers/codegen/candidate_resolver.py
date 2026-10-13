@@ -268,7 +268,7 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond, lm
     proto_str = build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul=lmul, isa_name=True, masked_version=mask_kind)
 
     super_isa = isa.get("super_isa", None)
-    if super_isa and -2 in super_isa.get("sw_lmul", []):
+    if uses_sub_isa_ldiv(super_isa):
         super_macro = f"defined(MIPP_{super_isa['name'].upper()})"
         body_super = _format_fallback_body(*_build_fallback_statements(isa, funcs, f, dt, mask_kind, cond, lmul, -2))
         body_std   = _format_fallback_body(*_build_fallback_statements(isa, funcs, f, dt, mask_kind, cond, lmul, lmul))

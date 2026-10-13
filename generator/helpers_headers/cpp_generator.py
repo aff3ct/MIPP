@@ -27,7 +27,7 @@ def _generate_mipp_hpp(include_manager=None):
         content += f'#include "mipp/internal/interfaces/cpp/functions/{category}/{func}.hpp"\n'
     print(content, file=file)
 
-def generate_cpp(include_manager=None, isa_list=None):
+def generate_cpp(include_manager=None, isa_list=None, all_isa_names=None):
     file_common = include_manager.get_fd("cpp", "common")
 
     tpl_header_cpp = """#pragma once
@@ -57,7 +57,13 @@ namespace mipp
     print("#include <cstdint>", file=file_common_enum)
     print("#include \"mipp/internal/interfaces/c/common.h\" // ISA detection (MIPP_NEON, MIPP_RVV, ...): makes this header self-contained\n", file=file_common_enum)
     print("namespace mipp {\n", file=file_common_enum)
-    print("enum ISA { SCALAR, SSE, AVX, AVX512, NEON, SVE, RVV };", file=file_common_enum)
+    # The enum lists every ISA discovered in simd_ext/ (not only the generated
+    # ones) so that user code referring to ISA::<NAME> does not depend on the
+    # --simd-ext selection. SCALAR comes first, the others follow alphabetically.
+    if all_isa_names is None:
+        all_isa_names = list_simd_ext_names()
+    enum_names = ["scalar"] + sorted(n for n in set(all_isa_names) | {i["name"] for i in isa_list} if n != "scalar")
+    print("enum ISA { " + ", ".join(n.upper() for n in enum_names) + " };", file=file_common_enum)
     print("enum VARIANT { U, M, Z, S }; //variant enum for function templates", file=file_common_enum)
 
     isa_list_copy = prepare_isa_defines(isa_list) # this is the function that sets the gen_define key for every ISAs for some reason

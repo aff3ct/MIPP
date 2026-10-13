@@ -88,6 +88,14 @@
         "#include <immintrin.h>"
     ],
     "hw_lmul": [],
+    "info_names": [
+        { "if": "defined(__SSE4_2__)", "name": "x86_64 SSE4.2" },
+        { "if": "defined(__SSE4_1__)", "name": "x86_64 SSE4.1" },
+        { "if": "defined(__SSSE3__)", "name": "x86_64 SSSE3" },
+        { "if": "defined(__SSE3__)", "name": "x86_64 SSE3" },
+        { "if": "defined(__SSE2__)", "name": "x86_64 SSE2" },
+        { "name": "x86 SSE" }
+    ],
     "mipp_definitions": [
         "#ifdef __SSE2__",
         "\t#define MIPP_64BIT",

@@ -282,8 +282,8 @@ def gen_c_lmul(isa, include_manager, funcs, sw_lmuls=None):
                     _c_lmul_writer(f, dt, dt_par, dt_ret, isa, funcs, file_w, mask_type="masks", lmul=lmul)
 
 def gen_c_ldiv(isa_base, isa_div, include_manager, funcs):
-    if isa_base["name"] != "avx512" and isa_base["name"] != "avx": 
-        print(f"in c_generator.gen_c_ldiv : error : ldiv not yet supported in {isa_div['name']}")
+    if not uses_sub_isa_ldiv(isa_base):
+        print(f"in lmul_orchestrator.gen_c_ldiv : error : '{isa_base['name']}' does not declare sub_isa half-vectors (sw_ldiv_type: sub_isa, -2 in sw_lmul)")
         exit(-1)
     for f in funcs:
         for dt in funcs[f]["datatypes"]:

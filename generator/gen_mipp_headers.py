@@ -109,14 +109,14 @@ def _parse_layers(layers_raw):
                 normalized.add(tok)
     return normalized
 
-def _expand_layer_keywords(selected):
+def _expand_layer_keywords(selected, isa_all):
     """
     Expand convenience keywords into concrete actions.
     Returns: (isa_layers_to_run, run_wrappers: bool)
-      - isa_layers_to_run is a set among: sse,avx,avx512,sve,rvv,neon,scalar
+      - isa_layers_to_run is a subset of isa_all (the ISAs discovered in simd_ext/)
       - run_wrappers means run generate_mipp_h + generate_c_interface + generate_cpp + generate_obj
     """
-    isa_all = {"sse", "avx", "avx512", "sve", "rvv", "neon", "scalar"}
+    isa_all = set(isa_all)
 
     # default == all
     if "all" in selected:
@@ -156,11 +156,11 @@ def discover_and_sort_isas(path, limit_to_isas=None):
       - sorted_names: list of isa_names in topological order based on sub_isa dependencies
     """
     import os
-    from tools import load_isa_config
+    from tools import load_isa_config, list_simd_ext_names
     from registry import scalar_isa, scalar_implems
 
     simd_ext_dir = os.path.join(path, "simd_ext")
-    subdirs = [d for d in os.listdir(simd_ext_dir) if os.path.isdir(os.path.join(simd_ext_dir, d)) and d != "__pycache__"]
+    subdirs = list_simd_ext_names()
 
     # Resolve active ISAs (including dependencies)
     if limit_to_isas is not None:
@@ -404,13 +404,16 @@ def generate_public_headers(output_dir="../include", granularity="coarse"):
 
 
 def main(argv=None):
+    from tools import list_simd_ext_names
+    available_isas = list_simd_ext_names()
+
     parser = argparse.ArgumentParser(prog='gen_mipp.py', description='MIPP generator')
     parser.add_argument(
         "-l", "--layers",
         nargs="+",
         help=(
             "Which layer(s) to regenerate. "
-            "Values: sse avx avx512 sve rvv neon scalar wrappers all_isas all. "
+            f"Values: {' '.join(available_isas)} wrappers all_isas all. "
             "Default: all. You can also pass comma-separated lists (e.g. --layers sse,avx)."
         ),
         default=None,
@@ -508,7 +511,7 @@ def main(argv=None):
     seen_ldiv_separators.clear()
 
     selected = _parse_layers(args.layers)
-    isa_layers, run_wrappers = _expand_layer_keywords(selected)
+    isa_layers, run_wrappers = _expand_layer_keywords(selected, available_isas)
 
     # Parse limit_to_isas from --simd-ext
     limit_to_isas = None
@@ -586,7 +589,7 @@ def main(argv=None):
         generate_mipp_h(include_manager)
         isa_list = [isas_dict[name] for name in sorted_names]
         generate_c_interface(isa_list, include_manager)
-        generate_cpp(include_manager, isa_list)
+        generate_cpp(include_manager, isa_list, all_isa_names=available_isas)
         generate_obj(include_manager, output_dir=include_gen_path)
         generate_public_headers(output_dir=include_gen_path, granularity=args.granularity)
         print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")

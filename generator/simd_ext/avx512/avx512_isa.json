@@ -132,6 +132,11 @@
     "hw_mask": true,
     "hw_mask_is_bitfield": true,
     "hw_mask_requires_toreg": true,
+    "info_names": [
+        { "if": "defined(__MIC__)", "name": "Intel MIC" },
+        { "if": "defined(__KNCNI__)", "name": "Intel KNCI" },
+        { "name": "x86_64 AVX-512" }
+    ],
     "mipp_definitions": [
         "#define MIPP_INSTR_VERSION 1",
         "#define MIPP_64BIT",

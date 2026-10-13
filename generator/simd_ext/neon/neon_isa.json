@@ -89,6 +89,10 @@
         "#include <arm_neon.h>"
     ],
     "hw_lmul": [],
+    "info_names": [
+        { "if": "defined(__aarch64__)", "name": "ARM NEONv2" },
+        { "name": "ARM NEONv1" }
+    ],
     "mipp_definitions": [
         "#define MIPP_BW",
         "#if defined(__ARM_FEATURE_FMA)",

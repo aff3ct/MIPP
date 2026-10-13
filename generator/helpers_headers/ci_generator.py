@@ -22,9 +22,8 @@ def prepare_isa_defines(isa_list):
 
 def _isa_include_common(isa):
     content = "#include \"mipp/internal/simd_ext/"+isa["name"]+"/c/common.h\"\n"
-    sub_isa = isa.get("sub_isa")
-    if sub_isa:
-        content += "#include \"mipp/internal/simd_ext/"+sub_isa+"/c/common.h\"\n"
+    if uses_sub_isa_ldiv(isa):
+        content += "#include \"mipp/internal/simd_ext/"+isa["sub_isa"]+"/c/common.h\"\n"
     return content
 
 def _isa_include_function(isa, func):
@@ -34,9 +33,8 @@ def _isa_include_function(isa, func):
         return content
     
     content = "#include \"mipp/internal/simd_ext/"+isa["name"]+"/c/functions/" + category + "/" + func + ".h\"\n"
-    sub_isa = isa.get("sub_isa")
-    if sub_isa:
-        content += "#include \"mipp/internal/simd_ext/"+sub_isa+"/c/functions/" + category + "/" + func + ".h\"\n"
+    if uses_sub_isa_ldiv(isa):
+        content += "#include \"mipp/internal/simd_ext/"+isa["sub_isa"]+"/c/functions/" + category + "/" + func + ".h\"\n"
     return content
 
 def _custom_prefix_generator(func, isa_list, is_common=False, mode="function_header"):
@@ -133,6 +131,39 @@ def _custom_prefix_generator(func, isa_list, is_common=False, mode="function_hea
 
     return content
 
+def _gen_mipp_info_simd_ext_block(isa_list):
+    """
+    Builds the preprocessor block of mipp_info() that names the SIMD extension.
+    One branch per ISA (guarded by MIPP_<NAME>); inside it, the "info_names"
+    entries of the ISA descriptor are tested in order, the entry without "if"
+    being the default. Without "info_names", the upper-cased ISA name is used.
+    """
+    def c_str(s):
+        return json.dumps(s, ensure_ascii=False)
+
+    lines = []
+    for i, isa in enumerate(isa_list):
+        lines.append(("#if " if i == 0 else "#elif ") + "defined(MIPP_" + isa["name"].upper() + ")")
+        entries = isa.get("info_names") or [{"name": isa["name"].upper()}]
+        conds = [e for e in entries if "if" in e]
+        default = next((e["name"] for e in entries if "if" not in e), isa["name"].upper())
+        if not conds:
+            lines.append(f"\tsimd_ext = {c_str(default)};")
+            continue
+        for j, e in enumerate(conds):
+            lines.append(("\t#if " if j == 0 else "\t#elif ") + e["if"])
+            lines.append(f"\t\tsimd_ext = {c_str(e['name'])};")
+        lines.append("\t#else")
+        lines.append(f"\t\tsimd_ext = {c_str(default)};")
+        lines.append("\t#endif")
+    if lines:
+        lines.append("#else")
+        lines.append('\tsimd_ext = "UNKNOWN (this case should never happen)";')
+        lines.append("#endif")
+    else:
+        lines.append('\tsimd_ext = "UNKNOWN (this case should never happen)";')
+    return "\n".join(lines)
+
 def generate_c_interface(isa_list, include_manager=None):
     
     # file = open("../include/mipp.h", "a")
@@ -154,9 +185,9 @@ def generate_c_interface(isa_list, include_manager=None):
     print(j2_template.render(), file=file_common)
 
     # Add mipp_info function to mipp.h
-    env = Environment(loader=FileSystemLoader("./helpers_headers/templates/"))
+    env = Environment(loader=FileSystemLoader("./helpers_headers/templates/"), undefined=StrictUndefined)
     template_mipp_info = env.get_template("mipp_info.tpl.h")
-    str_mipp_info = template_mipp_info.render(name="Unused for now :-)")
+    str_mipp_info = template_mipp_info.render(simd_ext_block=_gen_mipp_info_simd_ext_block(isa_list))
     print(str_mipp_info, file=file_common)
 
     _gen_ci_functions(isa_list, include_manager, copy_interfaces)

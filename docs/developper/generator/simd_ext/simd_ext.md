@@ -20,6 +20,6 @@ Each ISA directory is purely declarative and contains JSON registries:
 - `<isa>_explorer.json` (optional): API Explorer metadata (display name, Compiler Explorer settings, feature flags).
 
 !!! info
-    ISA directories are discovered automatically by the generators. A few lists are still hard-coded in the Python sources; see [Adding a New SIMD Extension](../../adding_isa_or_function.md#2-adding-a-new-simd-extension-isa).
+    ISA directories are discovered automatically by the generators: adding a directory is enough to get the ISA layer, its `--layers` value, its entry in the C++ `mipp::ISA` enum and its `mipp_info()` report. See [Adding a New SIMD Extension](../../adding_isa_or_function.md#2-adding-a-new-simd-extension-isa).
 
 The `scalar` directory is special: instead of `scalar_isa.json` and implementation files, it contains `scalar_gen.py`, which emits the Level 3 implementations from `helpers_headers/registry_scalar_implems.json` and `registry_scalar_isa.json`.
