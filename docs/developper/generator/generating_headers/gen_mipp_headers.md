@@ -11,26 +11,34 @@
     - Low-level intrinsics wrappers
     - Typedefs and vector registers (`rvd` and `rvm`)
     - Level 0 (native), Level 1 (specific emulation), Level 2 (generic emulation), and Level 3 (scalar fallback) function implementations
-3. **C Interface**: Emits canonical C99 headers (`include/mipp.h` and ISA-specific C function headers).
-4. **C++ Interface**: Generates generic C++ template wrappers (`include/mipp.hpp`).
-5. **C++ Object Model**: Generates the high-level `rvd` and `rvm` object classes (`include/mipp_obj.hpp`).
+3. **C API**: Emits the C headers (`include/mipp.h` and the per-function headers).
+4. **C++ Functional API**: Emits the overloads and templates of namespace `mipp::` (`include/mipp.hpp`).
+5. **C++ Object API**: Emits the `mipp::Rvd` and `mipp::Rvm` classes (`include/mipp_obj.hpp`).
 6. **Summary Report**: Prints the implementation level distribution matrix across all target ISAs.
 
 ---
 
 ## 2. Usage & Options
 
+From `generator/`, with the virtual environment activated (see `generator/README.md`):
+
 ```bash
-cd generator
-.venv/bin/python gen_mipp_headers.py [OPTIONS]
+./gen_mipp_headers.py [OPTIONS]
 ```
 
-### CLI Flags
+| Option | Default | Description |
+| :--- | :--- | :--- |
+| `--granularity {coarse,fine}` | `coarse` | `coarse` emits one public header per function (`<mipp/cpp/fun/add.hpp>`). `fine` additionally emits per-variant, per-LMUL and atomic headers (`<mipp/cpp/fun/m/add.hpp>`, `<mipp/cpp/fun/m2/add.hpp>`, `<mipp/cpp/fun/m/m2/add.hpp>`) and the corresponding umbrella headers. |
+| `--simd-ext <isa> ...` | all discovered | Restricts the set of ISAs that exist in the generated tree. The `sub_isa` chain and the scalar fallback are always added. Use this option to produce a reduced distribution (e.g. `--simd-ext neon`). |
+| `-l`, `--layers <layer> ...` | `all` | Selects which parts are (re)generated: ISA layers (`sse avx avx512 sve rvv neon scalar`), `all_isas`, `wrappers` (public C/C++/object headers) or `all`. Mainly useful together with `--no-clean` to regenerate one layer during development. |
+| `--no-clean` | off | Do not delete `../include/` before generating. |
+| `--header-type {function_header,category_header}` | `function_header` | Internal organization: one header per function, or one header per ISA category. |
+| `--audit <audit> ...` | `all` | `levels`, `dead-code`, `duplicates`, `json-structure`, `all` or `none`. See [Static Audits](../../audits_and_verification.md). |
 
-- `--granularity <coarse|fine>`: Granularity of generated headers.
-    - `coarse` (default): Emits single headers per function (e.g. `add.h`, `add.hpp`).
-    - `fine`: Generates 1D variant headers (`m/add.hpp`), 1D LMUL headers (`m2/add.hpp`), and 2D atomic headers (`m/m2/add.hpp`) across all API tiers for blazing-fast compilation times.
-- `--layers <isa1> <isa2> ...`: Restricts generation to specific target ISAs (e.g. `--layers sse avx` or `--layers all`).
-- `--header-type <function_header|category_header>`: Generates function-level headers (default) or category-level headers.
-- `--no-clean`: Do not delete `../include/` before generating (by default, destination directories are cleaned).
-- `--audit <type>`: Selects static validation checks (`all`, `levels`, `dead-code`, `duplicates`, `json-structure`, `none`).
+Examples:
+
+```bash
+./gen_mipp_headers.py --granularity fine             # full tree, as in the GitLab CI
+./gen_mipp_headers.py --simd-ext avx512 --audit none # AVX-512 (+ AVX, SSE, scalar) only
+./gen_mipp_headers.py --layers neon --no-clean       # regenerate the NEON layer in place
+```

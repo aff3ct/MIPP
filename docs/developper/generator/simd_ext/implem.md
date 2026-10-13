@@ -21,7 +21,7 @@ Example from `generator/simd_ext/neon/neon_native_templates.json`:
 
 Key placeholders:
 
-- `{{ isa.prefix }}`: The intrinsic prefix defined in `<isa>_isa.json` (e.g. `_mm_` for SSE, `_mm256_` for AVX, `v` for NEON).
+- `{{ isa.prefix }}`: The intrinsic prefix defined in `<isa>_isa.json` (`_mm` for SSE, `_mm256` for AVX, `v` for NEON). Separators are part of the template: the SSE templates write `{{ isa.prefix }}_{{ instr_name }}`, the NEON ones `{{ isa.prefix }}{{ instr_name }}`.
 - `{{ instr_name }}`: The specific operation suffix passed from `<isa>_native_implems.json`.
 - `{{ isa_dt_par.data_ext }}`: Target datatype suffix (e.g. `f32`, `s32`, `ps`, `epi32`).
 

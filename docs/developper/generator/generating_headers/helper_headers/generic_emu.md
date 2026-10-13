@@ -21,11 +21,13 @@ In `generic_emu_templates.json`, operations are defined generically across data 
         "format": "long",
         "code": [
             "%r<tp>% opp_r0 = %sub<tp>%( %set0<tp>%(), r0 );",
-            "return %blend<tp>%(opp_r0, r0, %cmplt<tp>%(r0, %set0<tp>%()));"
+            "return %blend<tp>%(%cmplt<tp>%(r0, %set0<tp>%()), opp_r0, r0);"
         ]
     }
 }
 ```
+
+`blend` takes the mask first: `blend(m, if_true, if_false)` selects `if_true` in the lanes where `m` is set. Here, negative lanes take `opp_r0` and the other lanes keep `r0`.
 
 The DSL placeholders `%r<tp>%`, `%sub<tp>%`, `%set0<tp>%`, etc., are automatically resolved by `generator/helpers_headers/tools.py` for every targeted data type.
 

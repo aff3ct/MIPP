@@ -42,7 +42,7 @@ Monolithic headers bring the complete set of all MIPP SIMD functions into scope 
 | Header File | API Tier | Description |
 | :--- | :--- | :--- |
 | `<mipp.h>` | **C Low-Level API** | Pure C99 function prototypes with explicit type suffixes (e.g., `mipp_add_float32(r0, r1)`). |
-| `<mipp.hpp>` | **C++ Functional API** | Parameterized functions under namespace `mipp::` (e.g., `mipp::add<float>(r0, r1)`). |
+| `<mipp.hpp>` | **C++ Functional API** | Overloaded functions under namespace `mipp::` (e.g., `mipp::add(r0, r1)`). |
 | `<mipp_obj.hpp>` | **C++ Object API** | Expressive `mipp::Rvd<T, LMUL>` and `mipp::Rvm<T, LMUL>` classes with operator overloading (`+`, `-`, `*`, `==`) and free functions. |
 
 #### Option 2: Granular Inclusion (Production & Fast Compilation)

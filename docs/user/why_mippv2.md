@@ -36,7 +36,7 @@ MIPPv2 provides portable, zero-overhead SIMD computing across x86, ARM, and RISC
 Three complementary interfaces mapping to the same inlined instructions:
 
 - **C99 (`<mipp.h>`)**: Explicit type-suffixed functions (`mipp_add_float32`) for pure C codebases, embedded targets, and Linux kernel modules.
-- **C++ Functional (`<mipp.hpp>`)**: Type-parameterized template functions under namespace `mipp::` (`mipp::add<float>`).
+- **C++ Functional (`<mipp.hpp>`)**: Overloaded functions under namespace `mipp::` (`mipp::add(a, b)`), with datatype and LMUL deduced from the register types.
 - **C++ Object (`<mipp_obj.hpp>`)**: Register classes (`mipp::Rvd`, `mipp::Rvm`) with complete operator overloading.
 
 ### 1.2. Deterministic 4-Tier Fallback Hierarchy

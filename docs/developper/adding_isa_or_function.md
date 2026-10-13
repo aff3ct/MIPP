@@ -1,16 +1,30 @@
 # Guide: Adding a Function or Target ISA
 
-This guide provides a step-by-step workflow for contributors wishing to add a new vector operation or support a new hardware vector instruction set.
+This guide describes the workflow to add a new vector operation or a new SIMD extension. All commands are run from `generator/` with the virtual environment activated (see `generator/README.md`):
+
+```bash
+cd generator
+source .venv/bin/activate
+```
 
 ---
 
 ## 1. Adding a New MIPP Function
 
-Adding a function involves registering its canonical signature, categorizing it, providing a scalar reference baseline, and adding native hardware mappings.
+A function is defined by its interface, its category and its scalar reference implementation. Native and emulated implementations, test properties and documentation are then added incrementally.
 
-### Step 1: Declare the Function Interface (`generator/helpers_headers/registry_interfaces.json`)
+| Step | File | Required |
+| :--- | :--- | :---: |
+| 1. Interface | `helpers_headers/registry_interfaces.json` | Yes |
+| 2. Category | `helpers_headers/registry_categories.json` | Yes |
+| 3. Scalar reference (Level 3) | `helpers_headers/registry_scalar_implems.json` | Yes |
+| 4. Native implementation (Level 0) | `simd_ext/<isa>/<isa>_native_*.json` | No |
+| 5. ISA-specific emulation (Level 1) | `simd_ext/<isa>/<isa>_emu_*.json` | No |
+| 6. Generic emulation (Level 2) | `helpers_headers/generic_emu_*.json` | No |
+| 7. Test properties | `helpers_tests/tests_specs.json` | If the defaults do not fit |
+| 8. Documentation | `helpers_headers/funcs_docs.json` | Recommended |
 
-Every MIPP function must be defined in `registry_interfaces.json`. This file acts as the single source of truth for function signatures, data types, and masking modes:
+### Step 1: Declare the Interface (`registry_interfaces.json`)
 
 ```json
 "my_op": {
@@ -21,17 +35,17 @@ Every MIPP function must be defined in `registry_interfaces.json`. This file act
 }
 ```
 
-Key fields:
+- `proto_ref`: abstract prototype declared in `registry_protos.json` (e.g. `ret_reg_2args_reg`: two registers in, one register out; `ret_val_1arg_reg`: one register in, one scalar out). Declare a new prototype there first if no existing one matches.
+- `datatypes`: an alias or an explicit list. Aliases are defined in `helpers_headers/tools.py` (`DATATYPES_MAP`): `all_datatypes`, `all_float`, `all_int`, `all_uint`, `all_int_uint`, `all_64bit`, `all_32bit`, `all_16bit`, `all_8bit`, and pair aliases for conversions (`all_datatypes_cart_prod`, `all_datatypes_same_size`, `all_datatypes_widenning`, ...).
+- `horizontal`: `true` for operations that reduce across lanes (e.g. `hadd`).
+- `mask_support`: `no_mask`, `only_mask`, `only_maskz`, `only_masks`, `mask_and_maskz`, `mask_and_masks`, `maskz_and_masks`, `all_mask`.
+- `cpp_name` (optional): C++ name when it differs from the C name (e.g. `get_k` is exposed as `mipp::get`).
 
-- `proto_ref`: References an abstract prototype declared in `generator/helpers_headers/registry_protos.json` (for example `ret_reg_2args_reg` for two register inputs and one register output, `ret_reg_1arg_reg`, `ret_msk_2args_msk`, `ret_i32_1arg_msk`, etc.). If your function introduces an unprecedented signature pattern, declare the new prototype in `registry_protos.json` first.
-- `datatypes`: Target datatype alias (`"all_datatypes"`, `"all_float"`, `"all_int"`, `"all_int_uint"`, `"all_64bit"`, `"all_32bit"`, etc.) or an explicit list of types (`["float32", "float64"]`).
-- `horizontal`: Boolean flag (`false` for element-wise SIMD operations, `true` for horizontal reductions across lanes).
-- `mask_support`: Masking variant support level (`"all_mask"`, `"no_mask"`, `"only_mask"`, `"only_maskz"`, `"only_masks"`, `"mask_and_maskz"`, `"mask_and_masks"`, `"maskz_and_masks"`).
-- `cpp_name` (optional): Overrides the C++ wrapper function name if it differs from the C99 function identifier (for example, `andb_k` specifies `"cpp_name": "andb"`).
+The C names follow the pattern `mipp_<func>_<type>[_<variant>][_<lmul>]` and are derived automatically.
 
-### Step 2: Categorize the Function (`generator/helpers_headers/registry_categories.json`)
+### Step 2: Assign a Category (`registry_categories.json`)
 
-Assign your function to an appropriate functional category (e.g. `arithmetic`, `comparison`, `converts`, `load`, `logic`, `masks`, `pack`, `reduction`, `rounding`, `store`, `trigo`):
+Add the function to exactly one of the existing categories: `arithmetic`, `comparison`, `converts`, `load`, `logic`, `math`, `reduction`, `reinterpret`, `selection`, `store`.
 
 ```json
 "arithmetic": [
@@ -41,21 +55,17 @@ Assign your function to an appropriate functional category (e.g. `arithmetic`, `
 ]
 ```
 
-This classification is used by:
+The category determines the location of the generated headers (`.../functions/<category>/my_op.h`), the public category headers (`<mipp/cpp/cat/arithmetic.hpp>`, ...), the layout of the generated tests and the grouping in the generated documentation. A function listed in two categories is an error; a function listed in none triggers a `dead-code` warning.
 
-- `gen_mipp_docs.py` to organize API reference pages.
-- `gen_mipp_tests.py` to structure test suites.
-- `obj_generator.py` to organize method categories in the `rvd` and `rvm` object interfaces.
+### Step 3: Provide the Scalar Reference (`registry_scalar_implems.json`)
 
-### Step 3: Provide the Scalar Baseline (`generator/helpers_headers/registry_scalar_implems.json`)
-
-MIPP strictly enforces that **all declared functions must provide a scalar reference baseline**. This powers the Level 3 automatic fallback and the test verification engine:
+Every declared function **must** have a scalar implementation covering exactly its declared datatypes; otherwise the generator stops with an error. This implementation is the Level 3 fallback and the reference used by the generated tests.
 
 ```json
 "my_op": [
     {
         "type": "element-wide",
-        "datatypes": "all_datatypes",
+        "datatypes": "all_defs",
         "mask_variants": [],
         "implem": [
             "res.r[i] = %!pred_cond!% r0.r[i] + r1.r[i] %!pred_alt!%;"
@@ -64,51 +74,64 @@ MIPP strictly enforces that **all declared functions must provide a scalar refer
 ]
 ```
 
-Key fields:
+- `type`:
+    - `element-wide`: `implem` is the body of a per-lane loop generated by MIPP (`i` is the lane index).
+    - `vector-wide`: `implem` is the complete function body, typically for reductions or permutations:
+      ```json
+      "implem": [
+          "%v<tr>% resv = 0;",
+          "for (size_t i = 0; i < %N<tp>%; i++)",
+          "\tresv +=  %!pred_cond!%  r0.r[i] %!pred_alt!%;",
+          "return resv;"
+      ]
+      ```
+- `datatypes`: an alias, a list, or `all_defs` (all datatypes declared in the interface). Several entries can split the datatypes, e.g. one entry for `all_int` and one for `all_float`.
+- `mask_variants`: `[]` generates every variant allowed by `mask_support`. An explicit list (e.g. `["no_mask", "maskz"]`) restricts the entry to those variants, so that another entry can provide a different body for the remaining ones (as done for `store`).
+- `%!pred_cond!%` / `%!pred_alt!%`: expanded by the generator to implement the `_mask`, `_maskz` and `_masks` semantics. They expand to nothing in the unmasked variant.
 
-- `type`: `"element-wide"` instructs the generator to automatically synthesize the element-wise iteration loop (`for (size_t i = 0; i < N; i++)`). For non-element-wise operations (such as reductions or custom permutations), specify `"type": "custom"` and provide the full loop body.
-- `datatypes`: Supported datatype alias or explicit list.
-- `mask_variants`: List of custom handled mask variants, or `[]` for automatic handling.
-- `implem`: Array of C code lines for the loop body. The placeholders `%!pred_cond!%` and `%!pred_alt!%` are automatically expanded by the generator to handle masked operations (`_mask`, `_maskz`, `_masks`).
-- The generator automatically emits the C99 scalar fallback headers in `include/mipp/internal/simd_ext/scalar/c/functions/`.
+The scalar headers are emitted in `include/mipp/internal/simd_ext/scalar/c/functions/<category>/`.
 
-### Step 4: Add Native Hardware Acceleration (`generator/simd_ext/<isa>/`)
+### Step 4: Add a Native Implementation (Level 0)
 
-To accelerate your function on a target ISA:
-
-1. **Define the intrinsic template in `generator/simd_ext/<isa>/<isa>_native_templates.json`**:
+1. Reuse or define an intrinsic template in `simd_ext/<isa>/<isa>_native_templates.json`:
     ```json
     "arith_2args": {
         "format": "short",
         "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r);"
     }
     ```
-    Here, Jinja2 placeholders like `{{ isa.prefix }}`, `{{ instr_name }}`, and `{{ isa_dt_par.data_ext }}` are dynamically resolved per architecture and datatype.
-
-2. **Map the function in `generator/simd_ext/<isa>/<isa>_native_implems.json`**:
+2. Map the function in `simd_ext/<isa>/<isa>_native_implems.json` (actual NEON entry for `add`):
     ```json
-    "my_op": [
+    "add": [
         {
             "instr_name": "addq",
-            "datatypes": [
-                "float32",
-                "float64"
-            ],
+            "datatypes": ["float64"],
             "template": "arith_2args",
-            "if": "defined(__ARM_FEATURE_...)"
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "instr_name": "addq",
+            "datatypes": ["int64", "int32", "int16", "int8", "uint64", "uint32", "uint16", "uint8", "float32"],
+            "template": "arith_2args"
         }
     ]
     ```
-    - `instr_name`: Architecture-specific intrinsic suffix passed to the template.
-    - `datatypes`: Datatype alias or list of datatypes supported natively by this instruction.
-    - `template`: Name of the template defined in `<isa>_native_templates.json`.
-    - `if` (optional): Preprocessor guard condition for compiler feature checks.
+    - `instr_name`: intrinsic fragment passed to the template.
+    - `template`: name of a template in `<isa>_native_templates.json` (an inline template object is also accepted).
+    - `if` (optional): preprocessor condition guarding the entry.
+    - `version` (optional): `mask`, `maskz`, `masks` or `horiz_lmul` for entries that implement a specific variant.
 
-### Step 5: (Optional) Add a Generic Level 2 Emulation (`generator/helpers_headers/generic_emu_*`)
+The full list of fields is given by `helpers_headers/schemas/implems_schema.json`. Templates may use the [Mini-Templating DSL](templating_dsl.md) in addition to Jinja2.
 
-If an ISA lacks a native instruction for a datatype (e.g. 64-bit integer division or unsigned addition), define a portable generic emulation using other MIPP functions via the [Mini-Templating DSL](templating_dsl.md):
+### Step 5: Add an ISA-Specific Emulation (Level 1)
 
-1. **Add the algorithmic template in `generator/helpers_headers/generic_emu_templates.json`**:
+When the ISA has no direct instruction but the operation can be built from several intrinsics of the same ISA, add a template to `simd_ext/<isa>/<isa>_emu_templates.json` and the mapping to `simd_ext/<isa>/<isa>_emu_implems.json`. The format is the same as for native entries. The `levels` audit warns if an entry does not look like its declared level.
+
+### Step 6: Add a Generic Emulation (Level 2)
+
+When the operation can be expressed with other MIPP functions, write a portable template once for all ISAs:
+
+1. Template in `helpers_headers/generic_emu_templates.json`:
     ```json
     "my_op": {
         "format": "long",
@@ -118,58 +141,90 @@ If an ISA lacks a native instruction for a datatype (e.g. 64-bit integer divisio
         ]
     }
     ```
-
-2. **Register the emulation in `generator/helpers_headers/generic_emu_implems.json`**:
+2. Mapping in `helpers_headers/generic_emu_implems.json`:
     ```json
     "my_op": [
         {
-            "datatypes": "all_uint",
+            "datatypes": "all_int",
             "template_ref": "tpl_generic_emu.my_op"
         }
     ]
     ```
-    The `template_ref` uses namespacing:
 
-    - `tpl_generic_emu.<name>` for standard operations in `generic_emu_templates.json`.
-    - `tpl_mask_generic_emu.<name>` for mask operations in `generic_emu_templates_mask.json`.
-    - `tpl_horiz_lmul_generic_emu.<name>` for horizontal reductions in `generic_emu_templates_lmulh.json`.
+`template_ref` is namespaced by file:
 
-### Step 6: Verify and Regenerate
+| Prefix | Templates | Mappings |
+| :--- | :--- | :--- |
+| `tpl_generic_emu.` | `generic_emu_templates.json` | `generic_emu_implems.json` |
+| `tpl_mask_generic_emu.` | `generic_emu_templates_mask.json` | `generic_emu_implems_mask.json` |
+| `tpl_horiz_lmul_generic_emu.` | `generic_emu_templates_lmulh.json` | `generic_emu_implems_lmulh.json` |
 
-Run the generator with full static audits enabled:
+`preferred_simd_ext` (optional) restricts an entry to a subset of ISAs. See [Generic Emulation Registries](generator/generating_headers/helper_headers/generic_emu.md) for details.
 
-```bash
-cd generator
-.venv/bin/python gen_mipp_headers.py --audit all
+### Step 7: Test Properties (`helpers_tests/tests_specs.json`)
+
+A test is generated for every declared function. Without an entry in `tests_specs.json`, the `default` properties apply: uniform random inputs over the default range of the test generator and exact comparison against the scalar reference. Add an entry when the function needs a restricted input domain, a tolerance, or overflow handling:
+
+```json
+"my_op": {
+    "domain": { "min": -100.0, "max": 100.0 },
+    "tolerance": {
+        "by_datatype": {
+            "float32": { "type": "max_abs_diff", "value": 1e-06 }
+        }
+    },
+    "comparison": "tolerance"
+}
 ```
 
-Next, update tests and documentation:
+See [Test Generator](generator/generating_tests/gen_mipp_tests.md) for the available properties.
+
+### Step 8: Documentation (`helpers_headers/funcs_docs.json`)
+
+Add a short description and, when relevant, a LaTeX formula. They are used by the Function Support pages and the API Explorer:
+
+```json
+"my_op": {
+    "description": "Computes the absolute difference of two vector registers element-wise.",
+    "latex": "\\text{res}_i = |r0_i - r1_i|"
+}
+```
+
+### Step 9: Regenerate and Verify
 
 ```bash
-.venv/bin/python gen_mipp_tests.py
-.venv/bin/python gen_mipp_docs.py
+./gen_mipp_headers.py --granularity fine   # headers + audits
+./gen_mipp_tests.py                        # tests
+./gen_mipp_docs.py                         # Function Support / Hardware Support pages
 ```
+
+The summary table printed at the end of `gen_mipp_headers.py` shows the Level 0–3 distribution per ISA. Then build and run the tests on each target (see [Test Generator](generator/generating_tests/gen_mipp_tests.md#4-building-and-running-the-tests)).
 
 ---
 
 ## 2. Adding a New SIMD Extension (ISA)
 
-MIPPv2 features automatic discovery for SIMD extensions: adding a folder to `generator/simd_ext/` automatically registers the new ISA across all generators.
+### Step 1: Create the Directory and the Mandatory Files
 
-### Step 1: Create the Directory
+Create `generator/simd_ext/<new_isa>/` with:
 
-Create `generator/simd_ext/<new_isa>/`.
+| File | Required | Content |
+| :--- | :---: | :--- |
+| `<new_isa>_isa.json` | Yes | ISA descriptor (see below and [ISA Architecture Metadata](generator/simd_ext/gen_mipp_isa.md)) |
+| `<new_isa>_native_templates.json` | Yes | Intrinsic templates (Level 0) |
+| `<new_isa>_native_implems.json` | Yes | Function mappings (Level 0) |
+| `<new_isa>_emu_templates.json`, `<new_isa>_emu_implems.json` | No | ISA-specific emulations (Level 1) |
+| `<new_isa>_explorer.json` | No | Metadata for the API Explorer (display name, Compiler Explorer settings, feature flags) |
 
-### Step 2: Create `<new_isa>_isa.json`
+The generator stops with an error if a mandatory file is missing.
 
-Define the architecture metadata, compiler detection guards, register types, and dependencies:
+### Step 2: Write the ISA Descriptor
 
 ```json
 {
     "name": "myisa",
     "prefix": "_mm_myisa",
     "size": 128,
-    "sub_isa": "sse",
     "define": "defined(__MY_ISA__)",
     "header_template": [
         "#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_MYISA_H_",
@@ -189,33 +244,29 @@ Define the architecture metadata, compiler detection guards, register types, and
     "sw_lmul": [1, 2, 4, 8],
     "hw_lmul": [],
     "mipp_definitions": [
-        "#define MIPP_MY_ISA"
+        "#define MIPP_64BIT"
     ]
 }
 ```
 
-Key fields:
+- `define`: compiler condition that selects this ISA. The generator emits the detection block in `include/mipp/internal/interfaces/c/common.h`, defines `MIPP_MYISA`, and appends `mipp_definitions`.
+- `datatypes`: only the listed datatypes can be implemented natively; the others fall back to Level 2 or 3.
+- `sw_lmul` / `hw_lmul`: LMUL factors emulated in software (several registers) or supported by the hardware. `-2` enables half-vectors (`d2`).
+- `sub_isa` (optional): parent ISA. It sets the detection precedence (a derived ISA is tested before its parent), is pulled in automatically by `--simd-ext`, and is required when `"sw_ldiv_type": "sub_isa"` (half-vectors built on the parent's registers, as AVX does with SSE).
 
-- `sub_isa`: Declares fallback inheritance. If `myisa` is missing an instruction, it will inherit implementations from its `sub_isa` (e.g. `avx` inherits from `sse`, `avx512` from `avx`).
-- `size`: Base hardware vector size in bits (128, 256, 512, etc.).
-- `datatypes`: Architecture-specific vector register types (`reg`), mask types (`msk`), and type suffixes (`data_ext`).
-- `sw_lmul`: Software vector length multiplier factors supported (`[1, 2, 4, 8]`).
+### Step 3: Register the ISA in the Generator
 
-### Step 3: Create Template and Implementation Registries
+ISA directories are discovered automatically, but a few lists are still hard-coded and must be updated:
 
-In your new ISA directory, create:
+!!! warning "Manual integration points"
+    - `gen_mipp_headers.py`: add the ISA name to `isa_all` in `_expand_layer_keywords()` and to the `--layers` help string. Otherwise the ISA layer is not generated by default.
+    - `helpers_headers/cpp_generator.py`: add the ISA to the C++ `enum ISA`.
+    - `helpers_headers/templates/mipp_info.tpl.h`: add the ISA to the `mipp_info()` report.
 
-- `generator/simd_ext/<new_isa>/<new_isa>_native_templates.json`
-- `generator/simd_ext/<new_isa>/<new_isa>_native_implems.json`
-- (Optional) `<new_isa>_emu_templates.json` and `<new_isa>_emu_implems.json` for ISA-specific Level 1 emulations.
-
-### Step 4: Automatic Discovery & Validation
-
-The generator automatically discovers your new directory:
+### Step 4: Generate and Check
 
 ```bash
-cd generator
-.venv/bin/python gen_mipp_headers.py --layers myisa
+./gen_mipp_headers.py --simd-ext myisa
 ```
 
-The summary table at the end of the generator run will immediately report the Level 0, 1, 2, and 3 distribution for your new ISA.
+`--simd-ext` restricts generation to the listed ISAs, plus their `sub_isa` chain and the scalar fallback. The final summary table reports the Level 0–3 distribution of the new ISA; the audits report misplaced, dead or overlapping entries. Then add the target to the CI test matrix.

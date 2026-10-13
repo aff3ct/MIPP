@@ -146,7 +146,7 @@ Understanding implementation levels helps users interpret profiling data and com
 <a id="known-limitations"></a>
 ## 5. Known Limitations
 
-The fallback hierarchy covers the overwhelming majority of `(function, datatype, LMUL, mask variant, ISA)` combinations. The current exception is a subset of **half-vector (`d2`) operations on RISC-V Vector**, mostly on 64-bit element types: these functions compile, but are not implemented yet and abort at runtime with an explicit message:
+The fallback hierarchy covers the overwhelming majority of `(function, datatype, LMUL, mask variant, ISA)` combinations. The current exception is a subset of **half-vector (`d2`) operations on RISC-V Vector**, mostly on 64-bit element types: these functions compile, but are not implemented yet. When called, they report the following message, then terminate the program in C (`exit(-1)`) or throw `mipp::stub_exception` in C++:
 
 ```text
 MIPP panic: 'mipp_rvv_<function>_<datatype>_d2' is unimplemented.

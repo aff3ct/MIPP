@@ -7,44 +7,43 @@ These files live in `generator/simd_ext/<isa>/`:
 - `<isa>_emu_templates.json`: Code templates for ISA-specific emulations.
 - `<isa>_emu_implems.json`: Mappings associating MIPP functions to these templates for specific datatypes.
 
+The format is the same as for the native registries ([Native ISA Implementation Registries](implem.md)). Templates can mix Jinja2 placeholders, raw intrinsics and calls to other MIPP functions through the [Mini-Templating DSL](../../templating_dsl.md).
+
 ---
 
-## Example: AVX Emulations (`avx_emu_templates.json`)
+## Example: `float32` Division on ARMv7 NEON
 
-On AVX (which natively supports 256-bit floating-point operations but lacks 256-bit integer operations until AVX2), 256-bit integer operations are emulated using two 128-bit SSE instructions:
+ARMv7 NEON has no floating-point division instruction. `neon_emu_templates.json` defines a reciprocal estimate refined by two Newton-Raphson steps, followed by a MIPP multiplication:
 
 ```json
 {
-    "arith_2args_2x128": {
+    "arith_2args_recp": {
         "format": "long",
         "code": [
-            "__m128i r0_lo = _mm256_extractf128_si256(r0.r, 0);",
-            "__m128i r0_hi = _mm256_extractf128_si256(r0.r, 1);",
-            "__m128i r1_lo = _mm256_extractf128_si256(r1.r, 0);",
-            "__m128i r1_hi = _mm256_extractf128_si256(r1.r, 1);",
-            "__m128i res_lo = {{ sub_isa.prefix }}{{ instr_name }}_{{ sub_isa_dt.data_ext }}(r0_lo, r1_lo);",
-            "__m128i res_hi = {{ sub_isa.prefix }}{{ instr_name }}_{{ sub_isa_dt.data_ext }}(r0_hi, r1_hi);",
-            "rvd_avx_{{ dt }}_t res;",
-            "res.r = _mm256_insertf128_si256(_mm256_castsi128_si256(res_lo), res_hi, 1);",
+            "%r<tp>% recp;",
+            "recp.r = {{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r1.r);",
+            "recp.r = vmulq_{{ isa_dt_par.data_ext }}(recp.r, vrecpsq_{{ isa_dt_par.data_ext }}(r1.r, recp.r));",
+            "recp.r = vmulq_{{ isa_dt_par.data_ext }}(recp.r, vrecpsq_{{ isa_dt_par.data_ext }}(r1.r, recp.r));",
+            "%r<tp>% res = %mul<tp>%(r0, recp);",
             "return res;"
         ]
     }
 }
 ```
 
-In `avx_emu_implems.json`:
+In `neon_emu_implems.json`, the entry is restricted to 32-bit ARM, since AArch64 provides a native `vdivq_f32`:
 
 ```json
 {
-    "add": [
+    "div": [
         {
-            "instr_name": "add",
-            "datatypes": "all_int_uint",
-            "template": "arith_2args_2x128",
-            "if": "!defined(__AVX2__)"
+            "instr_name": "recpeq",
+            "datatypes": ["float32"],
+            "template": "arith_2args_recp",
+            "if": "!defined(__aarch64__)"
         }
     ]
 }
 ```
 
-When compiled on an AVX-only CPU (`!defined(__AVX2__)`), the generator emits this fast 2x128-bit split rather than falling back to scalar code.
+On ARMv7 the generator emits this sequence (Level 1); on AArch64 the native entry (Level 0) is selected instead.

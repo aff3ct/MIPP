@@ -17,6 +17,9 @@ Each ISA directory is purely declarative and contains JSON registries:
 - `<isa>_native_implems.json`: Maps MIPP functions and supported data types to native templates (Level 0).
 - `<isa>_emu_templates.json` (optional): ISA-specific emulation templates (Level 1).
 - `<isa>_emu_implems.json` (optional): Maps MIPP functions to ISA-specific emulations (Level 1).
+- `<isa>_explorer.json` (optional): API Explorer metadata (display name, Compiler Explorer settings, feature flags).
 
 !!! info
-    Adding a new directory inside `generator/simd_ext/` is automatically discovered by `gen_mipp_headers.py`, `gen_mipp_tests.py`, and `gen_mipp_docs.py` without modifying any generator Python scripts.
+    ISA directories are discovered automatically by the generators. A few lists are still hard-coded in the Python sources; see [Adding a New SIMD Extension](../../adding_isa_or_function.md#2-adding-a-new-simd-extension-isa).
+
+The `scalar` directory is special: instead of `scalar_isa.json` and implementation files, it contains `scalar_gen.py`, which emits the Level 3 implementations from `helpers_headers/registry_scalar_implems.json` and `registry_scalar_isa.json`.

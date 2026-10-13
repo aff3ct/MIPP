@@ -1,0 +1,6 @@
+title: Generator Internals
+nav:
+  - generating_headers
+  - simd_ext
+  - generating_tests
+  - generating_docs
