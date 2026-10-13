@@ -94,8 +94,11 @@ def _custom_prefix_generator(func, isa_list, is_common=False, mode="function_hea
         content += "#else\n"
         content += '#error "No supported SIMD extension detected by compiler flags. Pass appropriate target flags (e.g. -mavx2, -march=native) or define -DMIPP_SCALAR for scalar fallback."\n'
         content += "#endif\n\n"
+        content += "#ifndef MIPP_FLOAT_TYPEDEFS_\n"
+        content += "#define MIPP_FLOAT_TYPEDEFS_\n"
         content += "typedef double float64_t;\n"
-        content += "typedef float float32_t;\n\n"
+        content += "typedef float float32_t;\n"
+        content += "#endif\n\n"
 
         for isa in isa_list:
             if is_first:
@@ -258,16 +261,6 @@ def _gen_ci_structures(isa_list, file):
             j2_template = Template(template, undefined=StrictUndefined)
             for dt in isa["datatypes"]:
                 print(j2_template.render(isa=isa, datatype=datatypes[dt], ldiv=str(ldiv)), file=file)
-        
-        if isa.get("is_scalar", False):
-            template = """typedef rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t rvd_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
-            j2_template = Template(template, undefined=StrictUndefined)
-            for dt in isa["datatypes"]:
-                print(j2_template.render(isa=isa, datatype=datatypes[dt]), file=file)
-            template = """typedef rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t rvm_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
-            j2_template = Template(template, undefined=StrictUndefined)
-            for dt in isa["datatypes"]:
-                print(j2_template.render(isa=isa, datatype=datatypes[dt]), file=file)
 
         if index == len(isa_list)-1:
             print("#endif", file=file)

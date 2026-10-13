@@ -564,8 +564,11 @@ def scalar_gen(include_manager):
 #define ATANHF(x) (atanhf(x))
 #define ATANHD(x) (atanh(x))
 
+#ifndef MIPP_FLOAT_TYPEDEFS_
+#define MIPP_FLOAT_TYPEDEFS_
 typedef float float32_t;
 typedef double float64_t;
+#endif
 """
     j2_template = Template(tpl_header_scalar, undefined=StrictUndefined)
     print(j2_template.render(), file=file_common)

@@ -94,8 +94,11 @@
         "#include <stdint.h>",
         "#include <stdio.h>",
         "#include <stdlib.h>",
+        "#ifndef MIPP_FLOAT_TYPEDEFS_",
+        "#define MIPP_FLOAT_TYPEDEFS_",
         "typedef float float32_t;",
-        "typedef double float64_t;"
+        "typedef double float64_t;",
+        "#endif"
     ],
     "hw_lmul": [
         1

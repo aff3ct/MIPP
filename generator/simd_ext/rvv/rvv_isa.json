@@ -324,8 +324,11 @@
         "#include <stdio.h>//remove after debug",
         "#include <stdlib.h>//remove after debug",
         "#define MIPP_RVV_VLEN __riscv_v_fixed_vlen",
-        "typedef float float32_t;//remove after debug",
-        "typedef double float64_t;//remove after debug"
+        "#ifndef MIPP_FLOAT_TYPEDEFS_",
+        "#define MIPP_FLOAT_TYPEDEFS_",
+        "typedef float float32_t;",
+        "typedef double float64_t;",
+        "#endif"
     ],
     "hw_lmul": [
         1,
