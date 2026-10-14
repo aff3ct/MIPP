@@ -54,6 +54,11 @@ repo_url: https://github.com/aff3ct/MIPP/
 watch:
   - examples/doc
 
+# Fragments included in the pages by pymdownx.snippets, not pages themselves
+# (docs/includes/generated/ is written by generator/gen_mipp_docs.py --only includes).
+exclude_docs: |
+  includes/
+
 markdown_extensions:
   - toc:
       permalink: true

@@ -49,6 +49,18 @@ maskz_and_masks = MaskSupport(maskable=False, maskzable=True, masksable=True)
 all_mask = MaskSupport(maskable=True, maskzable=True, masksable=True)
 no_mask = MaskSupport(maskable=False, maskzable=False, masksable=False)
 
+# Values accepted for "mask_support" in registry_interfaces.json
+MASK_SUPPORT_MAP = {
+    "only_maskz": only_maskz,
+    "only_mask": only_mask,
+    "only_masks": only_masks,
+    "mask_and_maskz": mask_and_maskz,
+    "mask_and_masks": mask_and_masks,
+    "maskz_and_masks": maskz_and_masks,
+    "all_mask": all_mask,
+    "no_mask": no_mask
+}
+
 def _load_funcs_registry():
     current_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -105,18 +117,6 @@ def _load_funcs_registry():
                 c_arg["offset_lmul"] = arg["offset_lmul"]
             cleaned_proto["args"].append(c_arg)
         protos[k] = cleaned_proto
-
-    # Resolve mask support specs
-    MASK_SUPPORT_MAP = {
-        "only_maskz": only_maskz,
-        "only_mask": only_mask,
-        "only_masks": only_masks,
-        "mask_and_maskz": mask_and_maskz,
-        "mask_and_masks": mask_and_masks,
-        "maskz_and_masks": maskz_and_masks,
-        "all_mask": all_mask,
-        "no_mask": no_mask
-    }
 
     # Resolve interfaces
     interfaces = {}

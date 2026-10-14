@@ -90,21 +90,28 @@ The third template parameter `ISA_TYPE` defaults to `mipp::DEFAULT_ISA`, which i
 ### 3.5. Template Deduction & `auto` Type Inference
 When operations take vector arguments, the compiler automatically deduces `T`, `LMUL`, and `ISA_TYPE`. Using the `auto` keyword eliminates verbose vector type declarations:
 
-```cpp
---8<-- "examples/doc/programming_model/fun.cpp:auto_deduction"
-```
+=== "C++ Functional API"
+
+    ```cpp
+    --8<-- "examples/doc/programming_model/fun.cpp:auto_deduction"
+    ```
 
 For functions without vector arguments, explicit template parameters are supplied:
-```cpp
---8<-- "examples/doc/programming_model/fun.cpp:explicit_params"
-```
+
+=== "C++ Functional API"
+
+    ```cpp
+    --8<-- "examples/doc/programming_model/fun.cpp:explicit_params"
+    ```
 
 ### 3.6. Masked Operations
 Masked operations take the variant as first template argument (`mipp::M`, `mipp::Z` or `mipp::S`). Because `mipp::rvd<T, LMUL>` is an alias to an internal type trait, `T` cannot be deduced from the arguments and must be given explicitly (plus `LMUL` when it is not `1`):
 
-```cpp
---8<-- "examples/doc/programming_model/fun.cpp:masked"
-```
+=== "C++ Functional API"
+
+    ```cpp
+    --8<-- "examples/doc/programming_model/fun.cpp:masked"
+    ```
 
 The unmasked form is the call without a mask (`mipp::add(a, b)`). The `mipp::U` enumerator exists, but no masked signature accepts it: `mipp::add<mipp::U, float>(m, a, b)` compiles and then fails at link time (undefined reference).
 
@@ -195,16 +202,20 @@ Bitwise operators and shifts are defined for every element type: on floating-poi
 
 Every MIPP SIMD operation is exposed as a free function under `namespace mipp::` that directly accepts `Rvd` and `Rvm` instances:
 
-```cpp
---8<-- "examples/doc/programming_model/obj.cpp:free_functions"
-```
+=== "C++ Object API"
+
+    ```cpp
+    --8<-- "examples/doc/programming_model/obj.cpp:free_functions"
+    ```
 
 ### 4.4. Masked Operations
 With `Rvm` and `Rvd` objects, the compiler deduces `T` and `LMUL`: only the variant is needed.
 
-```cpp
---8<-- "examples/doc/programming_model/obj.cpp:masked"
-```
+=== "C++ Object API"
+
+    ```cpp
+    --8<-- "examples/doc/programming_model/obj.cpp:masked"
+    ```
 
 See [Masking Semantics](masking_semantics.md) for the four variants.
 
@@ -221,11 +232,29 @@ See [Masking Semantics](masking_semantics.md) for the four variants.
 
 [Getting Started](getting_started.md#3-real-world-tutorial-vectorizing-a-loop-handling-tail-loops) shows the same SAXPY loop in the three APIs, with a scalar loop for the last elements. MIPP can also process these last elements with SIMD code: a mask selects the valid lanes, and masked loads and stores never access memory outside them.
 
-```cpp
---8<-- "examples/doc/programming_model/fun.cpp:includes"
+=== "C API"
 
---8<-- "examples/doc/programming_model/fun.cpp:masked_tail"
-```
+    ```c
+    --8<-- "examples/doc/programming_model/c.c:includes"
+
+    --8<-- "examples/doc/programming_model/c.c:masked_tail"
+    ```
+
+=== "C++ Functional API"
+
+    ```cpp
+    --8<-- "examples/doc/programming_model/fun.cpp:includes"
+
+    --8<-- "examples/doc/programming_model/fun.cpp:masked_tail"
+    ```
+
+=== "C++ Object API"
+
+    ```cpp
+    --8<-- "examples/doc/programming_model/obj.cpp:includes"
+
+    --8<-- "examples/doc/programming_model/obj.cpp:masked_tail"
+    ```
 
 !!! note "Performance"
     The masked `loadu` / `storeu` of this example map to native instructions only on AVX-512, for floating-point and signed integer types (8-bit and 16-bit types require AVX-512BW). Everywhere else, RVV included, they are currently emulated element by element, so the masked remainder is not faster than a scalar loop: its benefit is a single code path, with no scalar copy of the loop body. The implementation level of each target and variant is given in [`loadu`](../funcs_support/load/loadu.md) and [`storeu`](../funcs_support/store/storeu.md).

@@ -52,17 +52,23 @@ MIPP distinguishes between **aligned** (`load`, `store`) and **unaligned** (`loa
 
 For a multi-register vector (`LMUL > 1`), the alignment required is still the size of one register: each register is loaded from an aligned address.
 
-```c
---8<-- "examples/doc/memory_and_alignment/c.c:load_store"
-```
+=== "C API"
 
-```cpp
---8<-- "examples/doc/memory_and_alignment/fun.cpp:load_store"
-```
+    ```c
+    --8<-- "examples/doc/memory_and_alignment/c.c:load_store"
+    ```
 
-```cpp
---8<-- "examples/doc/memory_and_alignment/obj.cpp:load_store"
-```
+=== "C++ Functional API"
+
+    ```cpp
+    --8<-- "examples/doc/memory_and_alignment/fun.cpp:load_store"
+    ```
+
+=== "C++ Object API"
+
+    ```cpp
+    --8<-- "examples/doc/memory_and_alignment/obj.cpp:load_store"
+    ```
 
 !!! note "Migrating from MIPP v1"
     The `MIPP_ALIGNED_LOADS` macro of MIPP v1 (unaligned `load` / `store` by default, aligned only when the macro was defined) no longer exists: `load` / `store` are always aligned. Code that relied on the default must call `loadu` / `storeu`.
@@ -71,25 +77,33 @@ For a multi-register vector (`LMUL > 1`), the alignment required is still the si
 
 A masked access reads or writes the active lanes only: inactive lanes are never accessed, so a mask can guard the end of an array (see the [masked remainder example](programming_model.md#5-example-remainder-handled-with-masked-memory-accesses)). Loads exist in the Zero-Masked (`Z`, inactive lanes set to 0) and Source-Masked (`S`, inactive lanes taken from `src`) variants, stores in the Merge-Masked variant (`M`, memory of inactive lanes left unchanged). The alignment contract of [§2.1](#21-aligned-vs-unaligned-access) is unchanged: masked `load` / `store` require an aligned pointer, masked `loadu` / `storeu` accept any address.
 
-```c
---8<-- "examples/doc/memory_and_alignment/c.c:masked"
-```
+=== "C API"
 
-```cpp
---8<-- "examples/doc/memory_and_alignment/fun.cpp:masked"
-```
+    ```c
+    --8<-- "examples/doc/memory_and_alignment/c.c:masked"
+    ```
 
-```cpp
---8<-- "examples/doc/memory_and_alignment/obj.cpp:masked"
-```
+=== "C++ Functional API"
+
+    ```cpp
+    --8<-- "examples/doc/memory_and_alignment/fun.cpp:masked"
+    ```
+
+=== "C++ Object API"
+
+    ```cpp
+    --8<-- "examples/doc/memory_and_alignment/obj.cpp:masked"
+    ```
 
 In the Object API, loads are named `load_obj` / `loadu_obj` (masked or not) so that they return an `Rvd`; stores keep the names `store` / `storeu`.
+
+In the C++ Functional API, a masked access deduces `T` from the pointer and assumes `LMUL = 1`: the mask type does not allow the deduction of `LMUL`, so give `T` and `LMUL` for a multi-register vector (`mipp::loadu<mipp::Z, float, 2>`). In the C++ Object API, `T` and `LMUL` are deduced from the `Rvm` mask.
 
 ---
 
 ## 3. Non-Contiguous Memory Access: Gather & Scatter
 
-When data elements reside at non-sequential memory addresses, MIPP provides vectorized **gather** and **scatter** operations using index vectors. The index vector holds unsigned integers of the same size as the data elements (`uint32_t` indices for `float` data, `uint64_t` indices for `double` data), counted in elements, not in bytes. For the masked variants, the mask has the type of the **index** vector (`rvm<uint32_t>` for a `float` gather).
+When data elements reside at non-sequential memory addresses, MIPP provides vectorized **gather** and **scatter** operations using index vectors. The index vector holds unsigned integers of the same size as the data elements (`uint32_t` indices for `float` data, `uint64_t` indices for `double` data), counted in elements, not in bytes. For the masked variants, the mask has the type of the **index** vector (`rvm<uint32_t>` for a `float` gather). In the C++ Functional API, the masked variants cannot deduce the types: give `T` and the index type (`mipp::gather<mipp::Z, float, uint32_t>`). In the C++ Object API, they are deduced from the arguments.
 
 ### 3.1. Gather (Vectorized Indirect Load)
 Loads elements from a base address using a vector of indices:
@@ -98,17 +112,23 @@ $$\text{res}_i = \text{base}_{ptr}[\text{indices}_i]$$
 
 Masked variants: Zero-Masked (`Z`) and Source-Masked (`S`). Inactive lanes are not read.
 
-```c
---8<-- "examples/doc/memory_and_alignment/c.c:gather"
-```
+=== "C API"
 
-```cpp
---8<-- "examples/doc/memory_and_alignment/fun.cpp:gather"
-```
+    ```c
+    --8<-- "examples/doc/memory_and_alignment/c.c:gather"
+    ```
 
-```cpp
---8<-- "examples/doc/memory_and_alignment/obj.cpp:gather"
-```
+=== "C++ Functional API"
+
+    ```cpp
+    --8<-- "examples/doc/memory_and_alignment/fun.cpp:gather"
+    ```
+
+=== "C++ Object API"
+
+    ```cpp
+    --8<-- "examples/doc/memory_and_alignment/obj.cpp:gather"
+    ```
 
 ### 3.2. Scatter (Vectorized Indirect Store)
 Writes elements of a vector into memory locations specified by a vector of indices:
@@ -117,17 +137,23 @@ $$\text{base}_{ptr}[\text{indices}_i] = \text{val}_i$$
 
 Masked variant: Merge-Masked (`M`). Inactive lanes are not written.
 
-```c
---8<-- "examples/doc/memory_and_alignment/c.c:scatter"
-```
+=== "C API"
 
-```cpp
---8<-- "examples/doc/memory_and_alignment/fun.cpp:scatter"
-```
+    ```c
+    --8<-- "examples/doc/memory_and_alignment/c.c:scatter"
+    ```
 
-```cpp
---8<-- "examples/doc/memory_and_alignment/obj.cpp:scatter"
-```
+=== "C++ Functional API"
+
+    ```cpp
+    --8<-- "examples/doc/memory_and_alignment/fun.cpp:scatter"
+    ```
+
+=== "C++ Object API"
+
+    ```cpp
+    --8<-- "examples/doc/memory_and_alignment/obj.cpp:scatter"
+    ```
 
 ---
 
@@ -146,14 +172,20 @@ In C++, the mask-lane extraction has no `_k` suffix: it is the `get` overload ta
 !!! warning "Mask-lane extraction in the C and C++ Functional APIs"
     `mipp_get_k_*` and `mipp::get(rvm, idx)` currently return the raw lane with the element type `T`: zero for an inactive lane, all bits set for an active one, which is **NaN** for `float` / `double`, `-1` for signed and the maximum value for unsigned types. Do not convert this value to an integer (converting a NaN is undefined behavior). Until these functions return a `0` / `1` value, read mask lanes with the Object API (`m[idx]` returns a `bool`).
 
-```c
---8<-- "examples/doc/memory_and_alignment/c.c:extract"
-```
+=== "C API"
 
-```cpp
---8<-- "examples/doc/memory_and_alignment/fun.cpp:extract"
-```
+    ```c
+    --8<-- "examples/doc/memory_and_alignment/c.c:extract"
+    ```
 
-```cpp
---8<-- "examples/doc/memory_and_alignment/obj.cpp:extract"
-```
+=== "C++ Functional API"
+
+    ```cpp
+    --8<-- "examples/doc/memory_and_alignment/fun.cpp:extract"
+    ```
+
+=== "C++ Object API"
+
+    ```cpp
+    --8<-- "examples/doc/memory_and_alignment/obj.cpp:extract"
+    ```

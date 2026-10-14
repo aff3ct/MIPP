@@ -9,6 +9,13 @@
 #   - docs/user/*.md: every C / C++ code block must come from examples/doc/
 #     (a --8<-- line) or be marked as not compiled with the HTML comment
 #     <!-- not-compiled: reason --> on the line before the opening fence.
+#     Content tabs use the labels "C API", "C++ Functional API" and
+#     "C++ Object API" (same as the generated funcs_support/ pages, so that
+#     content.tabs.link keeps them in sync), and include c.c, fun.cpp and
+#     obj.cpp files respectively. The tabs of a set do the same thing: the
+#     named sections included at the top level of each tab have the same
+#     number of non-blank lines. The included code does not use 'auto' (the
+#     type is written), except in the sections listed in AUTO_ALLOWED.
 #
 # Usage: scripts/check_doc_snippets.sh [--build-only | --run-only] [--out DIR]
 #
@@ -35,7 +42,7 @@ while [ $# -gt 0 ]; do
         --build-only) DO_RUN=false ;;
         --run-only)   DO_BUILD=false ;;
         --out)        shift; OUT="$1" ;;
-        -h|--help)    sed -n '2,22p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        -h|--help)    sed -n '2,26p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
         *)            echo "Unknown option: $1" >&2; exit 2 ;;
     esac
     shift
@@ -55,7 +62,7 @@ bin_name() {
     echo "${rel//\//__}"
 }
 
-# --- 1. Lint: no inline C / C++ block in the user guide ----------------------
+# --- 1. Lint: no inline C / C++ block in the user guide, canonical tabs --------
 lint_pages() {
     local page
     for page in "$ROOT"/docs/user/*.md; do
@@ -66,6 +73,22 @@ lint_pages() {
             }
             {
                 line = $0
+                # Content tabs: canonical labels, matching included files
+                if (line ~ /^[ \t]*=== "/) {
+                    tab = line; sub(/^[ \t]*=== "/, "", tab); sub(/".*$/, "", tab)
+                    tab_indent = match(line, /[^ \t]/) - 1
+                    if (tab == "C API") want = "/c[a-z_]*\\.c[:\"]"
+                    else if (tab == "C++ Functional API") want = "/fun\\.cpp[:\"]"
+                    else if (tab == "C++ Object API") want = "/obj\\.cpp[:\"]"
+                    else {
+                        printf "%s:%d: tab label \"%s\" (use \"C API\", \"C++ Functional API\" or \"C++ Object API\")\n", page, NR, tab
+                        want = ""
+                    }
+                    next
+                }
+                if (tab != "" && line !~ /^[ \t]*$/ && match(line, /[^ \t]/) - 1 <= tab_indent) tab = ""
+                if (tab != "" && want != "" && line ~ /--8<-- "/ && line !~ want)
+                    printf "%s:%d: tab \"%s\" includes another API: %s\n", page, NR, tab, line
                 if (!in_block && line ~ /^[ \t]*```(c|cpp)[ \t]*$/) {
                     in_block = 1; start = NR; has_snippet = 0
                     marked = (prev ~ /<!-- not-compiled:/)
@@ -79,11 +102,76 @@ lint_pages() {
     done
 }
 
+# --- 1b. Lint: equivalent tabs, no 'auto' ---------------------------------------
+# Sections that present the deduction of types with 'auto'
+AUTO_ALLOWED="examples/doc/programming_model/fun.cpp:auto_deduction examples/doc/programming_model/fun.cpp:explicit_params"
+
+# Non-blank lines of a named section (whole file without section), without the
+# section markers
+section_lines() {
+    awk -v s="$2" '
+        s != "" && index($0, "[start:" s "]") { f = 1; next }
+        s != "" && index($0, "[end:" s "]") { f = 0 }
+        (f || s == "") && $0 !~ /--8<-- \[/ && $0 !~ /^[ \t]*$/ { print }
+    ' "$1"
+}
+
+lint_snippets() {
+    local page set tab main line inc file sec body
+    for page in "$ROOT"/docs/user/*.md; do
+        # One record per inclusion: tab set (0 outside tabs), tab, top-level code
+        # of the tab (not in an admonition of the tab), line, file[:section]
+        awk '
+            /^[ \t]*=== "/ {
+                ind = match($0, /[^ \t]/) - 1
+                if (!open || ind != tab_indent) set_id++
+                open = 1; tab_indent = ind; tab_no++; next
+            }
+            open && $0 !~ /^[ \t]*$/ && match($0, /[^ \t]/) - 1 <= tab_indent { open = 0 }
+            /--8<-- "/ {
+                inc = $0; sub(/^.*--8<-- "/, "", inc); sub(/".*$/, "", inc)
+                if (open) print set_id "\t" tab_no "\t" (match($0, /[^ \t]/) - 1 == tab_indent + 4) "\t" NR "\t" inc
+                else print "0\t0\t0\t" NR "\t" inc
+            }
+        ' "$page" | while IFS=$'\t' read -r set tab main line inc; do
+            file="${inc%%:*}"; sec="${inc#"$file"}"; sec="${sec#:}"
+            case "$file" in examples/doc/*) ;; *) continue ;; esac # generated tables
+            [ -f "$ROOT/$file" ] || continue # reported by mkdocs (check_paths)
+            body="$(section_lines "$ROOT/$file" "$sec")"
+            if printf '%s\n' "$body" | grep -qw auto; then
+                case " $AUTO_ALLOWED " in
+                    *" $inc "*) ;;
+                    *) echo "${page#$ROOT/}:$line: 'auto' in $inc (write the type)" ;;
+                esac
+            fi
+            # Lengths compared for named sections only: complete programs differ in
+            # their boilerplate (headers, allocation, output) from one language to another
+            if [ "$set" -gt 0 ] && [ "$main" = 1 ] && [ -n "$sec" ]; then
+                printf '%s\t%s\t%s\t%s\t%s\n' "$set" "$tab" "$line" "$inc" "$(printf '%s\n' "$body" | grep -c .)"
+            fi
+        done | awk -F'\t' -v page="${page#$ROOT/}" '
+            # Number of lines per tab (sum of its inclusions), compared within a tab set
+            function report(   i, diff) {
+                for (i = 2; i <= n; i++) if (cnt[tabs[i]] != cnt[tabs[1]]) diff = 1
+                if (diff) printf "%s:%d: the tabs do not have the same number of lines: %s\n", page, first_line, desc
+            }
+            NF == 5 {
+                if ($1 != cur) { report(); cur = $1; n = 0; desc = ""; first_line = $3; split("", cnt) }
+                if (!($2 in cnt)) tabs[++n] = $2
+                cnt[$2] += $5; desc = desc (desc == "" ? "" : ", ") $4 " = " $5
+                next
+            }
+            { print }
+            END { report() }
+        '
+    done
+}
+
 if $DO_BUILD; then
-    lint_out="$(lint_pages)"
+    lint_out="$(lint_pages; lint_snippets)"
     if [ -n "$lint_out" ]; then
         echo "$lint_out" >&2
-        fail "inline code blocks in docs/user/"
+        fail "lint of docs/user/"
     fi
 fi
 

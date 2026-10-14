@@ -70,11 +70,11 @@ The sources are written to `../tests/src/{c,cpp,obj}/`, one file per function (a
 ### 3.3. Documentation Pages
 
 ```bash
-./gen_mipp_docs.py                           # every generated page
-./gen_mipp_docs.py --only dev_reference      # only the reference of this guide (fast)
+./gen_mipp_docs.py                                    # every generated page
+./gen_mipp_docs.py --only dev_reference includes      # only what the hand-written pages need (fast)
 ```
 
-This writes the Function Support pages (`docs/funcs_support/`), the Hardware Support pages (`docs/isas_support/`), the API Explorer data (`docs/assets/data/`) and the [Command-Line](reference/cli.md) and [Registries](reference/registries/index.md) reference of this guide. These pages are ignored by Git. See [Build the Documentation](#6-build-the-documentation) and [Docs & API Explorer](internals/docs_and_explorer.md).
+This writes the Function Support pages (`docs/funcs_support/`), the Hardware Support pages (`docs/isas_support/`), the API Explorer data (`docs/assets/data/`), the [Command-Line](reference/cli.md) and [Registries](reference/registries/index.md) reference of this guide, and the tables included in the hand-written pages (`docs/includes/generated/`). These files are ignored by Git. See [Build the Documentation](#6-build-the-documentation) and [Docs & API Explorer](internals/docs_and_explorer.md).
 
 ---
 
@@ -184,11 +184,11 @@ mkdocs build --strict                     # what the CI runs: warnings are error
 The C and C++ code blocks of the User Guide are not written in the pages: they are sections of complete programs in `examples/doc/<page>/`, one file per API (`c.c`, `fun.cpp`, `obj.cpp`), included by `pymdownx.snippets`. A section is delimited by two comments in the program:
 
 ```cpp
-auto a = mipp::load<float>(A);   // setup, not shown
+mipp::rvd<float> a = mipp::load<float>(A);              // setup, not shown
 // --8<-- [start:masked]
-auto c = mipp::add<mipp::M, float>(m, a, b);
+mipp::rvd<float> c = mipp::add<mipp::M, float>(m, a, b);
 // --8<-- [end:masked]
-DOC_CHECK(...);                  // check, not shown
+DOC_CHECK(...);                                         // check, not shown
 ```
 
 and the page includes it inside a code block, with the path from the repository root:
@@ -201,7 +201,22 @@ and the page includes it inside a code block, with the path from the repository 
 
 The section is dedented, and takes the indentation of the `--8<--` line (code blocks in admonitions, tabs and lists). Without `:section`, the whole file is included. Several `--8<--` lines in the same code block are concatenated. A missing file or section fails `mkdocs build`.
 
-Each program prepares its inputs outside the sections, and checks the results announced by the snippet with `DOC_CHECK` (`examples/doc/doc_check.h`): a failed check makes the program return a non-zero exit code. `scripts/check_doc_snippets.sh` compiles every program with `-Werror` (C99 and C++11, or the standard given by a `// doc-std: c++17` line), runs it, compiles and runs the C++ example of `README.md`, and fails if a C or C++ block of `docs/user/` is written inline:
+When an example exists in several APIs, each version goes in a content tab, with the labels `C API`, `C++ Functional API` and `C++ Object API`. These are the labels of the Function Support pages: with `content.tabs.link`, choosing an API in one tab set selects it everywhere on the site. A notion specific to one API (deduction in the Functional API, operators of the Object API) gets a single tab with the label of its API.
+
+The tabs of a set do exactly the same thing: same variables, same order, same comments, same number of lines. Each API uses its own syntax (operators in the Object API: `a + b`, `a < b`, `v[i]`), but the Object API loads with `load_obj` / `loadu_obj` rather than with the constructor, which does not show the alignment. A remark specific to one API (what is deduced, what must be given) goes in the text, not in a comment of one tab. Types are written: no `auto`, except in the examples that present it (programming_model §3.5).
+
+```text
+=== "C API"
+
+    ```c
+    ;--8<-- "examples/doc/masking_semantics/c.c:blend"
+    ```
+
+=== "C++ Functional API"
+    ...
+```
+
+Each program prepares its inputs outside the sections, and checks the results announced by the snippet with `DOC_CHECK` (`examples/doc/doc_check.h`): a failed check makes the program return a non-zero exit code. `scripts/check_doc_snippets.sh` compiles every program with `-Werror` (C99 and C++11, or the standard given by a `// doc-std: c++17` line), runs it, compiles and runs the C++ example of `README.md`, and fails if a C or C++ block of `docs/user/` is written inline, if a tab label is not one of the three above, if a tab includes the file of another API, if the tabs of a set include sections of different lengths (non-blank lines of the named sections at the top level of each tab; complete programs are not compared), or if the included code uses `auto` (exceptions in `AUTO_ALLOWED`):
 
 ```bash
 scripts/check_doc_snippets.sh                                    # native target

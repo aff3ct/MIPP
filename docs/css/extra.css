@@ -627,6 +627,29 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
   margin: 0 !important;
 }
 
+/* Text, lists and admonitions inside a tab: inner margin aligned on the text of
+   the code blocks (1em), which stay flush with the tab edges */
+.md-typeset .tabbed-block>p:not(:has(>.md-typeset__scrollwrap)),
+.md-typeset .tabbed-block>.admonition,
+.md-typeset .tabbed-block>details {
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
+.md-typeset .tabbed-block>ul,
+.md-typeset .tabbed-block>ol {
+  margin-left: 1.625em;
+  margin-right: 1em;
+}
+
+.md-typeset .tabbed-block>:is(p:not(:has(>.md-typeset__scrollwrap)), ul, ol, .admonition, details):first-child {
+  margin-top: 1em;
+}
+
+.md-typeset .tabbed-block>:is(p:not(:has(>.md-typeset__scrollwrap)), ul, ol, .admonition, details):last-child {
+  margin-bottom: 1em;
+}
+
 /* Edge-to-Edge / Flush Tables inside Tabbed Sets (removes double borders & inner margins) */
 .md-typeset .tabbed-block>.md-typeset__scrollwrap,
 .md-typeset .tabbed-block>p>.md-typeset__scrollwrap,

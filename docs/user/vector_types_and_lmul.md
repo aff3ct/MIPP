@@ -8,18 +8,7 @@ MIPP provides a unified vector type system supporting 10 standard numeric dataty
 
 MIPP standardizes naming across C and C++ interfaces:
 
-| MIPP Datatype | Scalar Type (`T`) | C Vector Type (`LMUL=1`) | C Mask Type (`LMUL=1`) |
-| :--- | :--- | :--- | :--- |
-| `float64` | `double` / `float64_t` | `rvd_float64_t` | `rvm_float64_t` |
-| `float32` | `float` / `float32_t` | `rvd_float32_t` | `rvm_float32_t` |
-| `int64` | `int64_t` | `rvd_int64_t` | `rvm_int64_t` |
-| `int32` | `int32_t` | `rvd_int32_t` | `rvm_int32_t` |
-| `int16` | `int16_t` | `rvd_int16_t` | `rvm_int16_t` |
-| `int8` | `int8_t` | `rvd_int8_t` | `rvm_int8_t` |
-| `uint64` | `uint64_t` | `rvd_uint64_t` | `rvm_uint64_t` |
-| `uint32` | `uint32_t` | `rvd_uint32_t` | `rvm_uint32_t` |
-| `uint16` | `uint16_t` | `rvd_uint16_t` | `rvm_uint16_t` |
-| `uint8` | `uint8_t` | `rvd_uint8_t` | `rvm_uint8_t` |
+--8<-- "docs/includes/generated/datatypes.md"
 
 ---
 
@@ -30,13 +19,27 @@ MIPP standardizes naming across C and C++ interfaces:
 - **Mask Registers**: `mipp::rvm<T, LMUL>` and `mipp::Rvm<T, LMUL>`.
 
 ### 2.2. Compile-Time Element Capacity (`N`)
-The total number of elements contained in a vector is retrieved via `mipp::N<T, LMUL>()`:
+The total number of elements contained in a vector is retrieved via `mipp::N<T, LMUL>()` (C API: `MIPP_N_[TYPE]_[LMUL]` macros; C++ Object API: `mipp::Rvd<T, LMUL>::N()`):
 
 $$N(T, \text{LMUL}) = \left( \frac{\text{VectorBitWidth}}{\text{sizeof}(T) \times 8} \right) \times \text{LMUL}$$
 
-```cpp
---8<-- "examples/doc/vector_types_and_lmul/fun.cpp:capacity"
-```
+=== "C API"
+
+    ```c
+    --8<-- "examples/doc/vector_types_and_lmul/c.c:capacity"
+    ```
+
+=== "C++ Functional API"
+
+    ```cpp
+    --8<-- "examples/doc/vector_types_and_lmul/fun.cpp:capacity"
+    ```
+
+=== "C++ Object API"
+
+    ```cpp
+    --8<-- "examples/doc/vector_types_and_lmul/obj.cpp:capacity"
+    ```
 
 ---
 
@@ -133,6 +136,12 @@ typedef struct { float32_t r[MIPP_SCALAR_N_FLOAT32_M8]; } rvd_scalar_float32_m8_
 
 Scalar operations execute flat sequential loops over all $N \times \text{LMUL}$ elements.
 
+### 3.4. Representation per Target
+
+The table gives, for each target, the representation of each LMUL and of the [half-vectors](#half-vectors). It is generated from the ISA descriptors of the generator (`sw_lmul`, `hw_lmul`).
+
+--8<-- "docs/includes/generated/lmul_availability.md"
+
 ---
 
 
@@ -151,34 +160,53 @@ In addition to multi-register expansion ($\text{LMUL} > 1$), MIPP provides **hal
 
 The same loop in the three APIs (half-vectors are not available on every target, hence the `MIPP_LDIV_2` guard, see [§4.1](#41-availability)):
 
-```c
---8<-- "examples/doc/vector_types_and_lmul/c.c:d2_loop"
-```
+=== "C API"
 
-```cpp
---8<-- "examples/doc/vector_types_and_lmul/fun.cpp:d2_loop"
-```
+    ```c
+    --8<-- "examples/doc/vector_types_and_lmul/c.c:d2_loop"
+    ```
 
-```cpp
---8<-- "examples/doc/vector_types_and_lmul/obj.cpp:d2_loop"
-```
+=== "C++ Functional API"
+
+    ```cpp
+    --8<-- "examples/doc/vector_types_and_lmul/fun.cpp:d2_loop"
+    ```
+
+=== "C++ Object API"
+
+    ```cpp
+    --8<-- "examples/doc/vector_types_and_lmul/obj.cpp:d2_loop"
+    ```
 
 ### 4.1. Availability
 
 Half-vectors are **not available on every target**. When they are, MIPP defines the `MIPP_LDIV_2` macro (except on the scalar target for now, see below), which portable code should use as a guard:
 
-```c
---8<-- "examples/doc/vector_types_and_lmul/c.c:d2_guard"
-```
+=== "C API"
 
-| Target Architecture | `d2` Available | Representation |
-| :--- | :---: | :--- |
-| **AVX / AVX2** | Yes | Native 128-bit SSE registers (`__m128`, `__m128d`, `__m128i`). |
-| **AVX-512** | Yes | Native 256-bit AVX registers. |
-| **RISC-V Vector (RVV)** | Yes | Native fractional register types (`vfloat32mf2_t`, ...) for 8 to 32-bit elements. For 64-bit elements, where the RVV constraint $\text{SEW} / \text{LMUL} \le \text{ELEN}$ forbids fractional types, MIPP stores the half-vector in a plain array. Some of these 64-bit operations are not implemented yet (see [Implementation Levels](implementation_levels.md#known-limitations)). |
-| **SSE / NEON** | No | 128 bits is the smallest register width; no `d2` types are generated. |
-| **ARM SVE** | No | Not generated yet. |
-| **Scalar** | Yes, see below | Plain array of half the elements. |
+    ```c
+    --8<-- "examples/doc/vector_types_and_lmul/c.c:d2_guard"
+    ```
+
+=== "C++ Functional API"
+
+    ```cpp
+    --8<-- "examples/doc/vector_types_and_lmul/fun.cpp:d2_guard"
+    ```
+
+=== "C++ Object API"
+
+    ```cpp
+    --8<-- "examples/doc/vector_types_and_lmul/obj.cpp:d2_guard"
+    ```
+
+The `d2` and `MIPP_LDIV_2` columns of the [table of §3.4](#34-representation-per-target) give the targets that provide half-vectors, and their representation:
+
+- **AVX / AVX2, AVX-512**: a native register of the narrower ISA: 128-bit SSE registers (`__m128`, `__m128d`, `__m128i`) on AVX, 256-bit AVX registers on AVX-512.
+- **RISC-V Vector (RVV)**: native fractional register types (`vfloat32mf2_t`, ...) for 8 to 32-bit elements. For 64-bit elements, where the RVV constraint $\text{SEW} / \text{LMUL} \le \text{ELEN}$ forbids fractional types, MIPP stores the half-vector in a plain array. Some of these 64-bit operations are not implemented yet (see [Implementation Levels](implementation_levels.md#known-limitations)).
+- **SSE / NEON**: 128 bits is the smallest register width; no `d2` types are generated.
+- **ARM SVE**: not generated yet.
+- **Scalar**: plain array of half the elements, see below.
 
 !!! warning "Scalar target and `MIPP_LDIV_2`"
     The scalar target generates the `d2` types and functions, but does not define `MIPP_LDIV_2` yet. Code guarded by `#ifdef MIPP_LDIV_2` therefore skips half-vectors when compiled with `-DMIPP_SCALAR`, although they are available.
@@ -206,17 +234,23 @@ MIPP provides three conversions between data vectors. They differ in what they p
 
 The three keep the `LMUL` of their input. Masks have their own reinterpretation, `cast_k` (see [Masking Semantics §6.1](masking_semantics.md#61-strong-mask-typing-cast_k-mask-to-mask-conversion)), and masks convert to and from data vectors with `toreg` / `tomsk` ([§6.2](masking_semantics.md#62-tomsk-data-vector-to-mask), [§6.3](masking_semantics.md#63-toreg-mask-to-data-vector)).
 
-```c
---8<-- "examples/doc/vector_types_and_lmul/c.c:conversions"
-```
+=== "C API"
 
-```cpp
---8<-- "examples/doc/vector_types_and_lmul/fun.cpp:conversions"
-```
+    ```c
+    --8<-- "examples/doc/vector_types_and_lmul/c.c:conversions"
+    ```
 
-```cpp
---8<-- "examples/doc/vector_types_and_lmul/obj.cpp:conversions"
-```
+=== "C++ Functional API"
+
+    ```cpp
+    --8<-- "examples/doc/vector_types_and_lmul/fun.cpp:conversions"
+    ```
+
+=== "C++ Object API"
+
+    ```cpp
+    --8<-- "examples/doc/vector_types_and_lmul/obj.cpp:conversions"
+    ```
 
 ### 5.1. `cast` (Bit Reinterpretation)
 

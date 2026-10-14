@@ -1000,7 +1000,7 @@ Each function reference page provides:
 # Main Execution Entrypoint
 # ---------------------------------------------------------------------------
 
-DOC_PARTS = ["isas_support", "funcs_support", "explorer", "dev_reference"]
+DOC_PARTS = ["isas_support", "funcs_support", "explorer", "dev_reference", "includes"]
 
 
 def build_arg_parser():
@@ -1020,7 +1020,9 @@ def build_arg_parser():
             "prototypes and support tables;\n"
             "- 'explorer': data file of the API Explorer ('docs/assets/data/mipp_api_index.json');\n"
             "- 'dev_reference': command-line and registry reference of the Developer Guide "
-            "('docs/developer/reference/cli.md' and 'docs/developer/reference/registries/').\n\n"
+            "('docs/developer/reference/cli.md' and 'docs/developer/reference/registries/');\n"
+            "- 'includes': tables included in the hand-written pages ('docs/includes/generated/'): LMUL and "
+            "half-vector availability per target, datatypes, categories, 'mask_support' values.\n\n"
             "All these outputs are ignored by Git."
         ),
     )
@@ -1034,7 +1036,7 @@ def build_arg_parser():
     )
     set_examples(parser, [
         ("./gen_mipp_docs.py", "every part, as in the CI"),
-        ("./gen_mipp_docs.py --only dev_reference", "Developer Guide reference only (fast)"),
+        ("./gen_mipp_docs.py --only dev_reference includes", "parts needed by the hand-written pages only (fast)"),
     ])
     return parser
 
@@ -1138,6 +1140,11 @@ def main(argv=None):
     if "dev_reference" in parts:
         print("[MIPP DocGen] Writing the Developer Guide reference (docs/developer/reference/cli.md, registries/)...")
         write_dev_reference(project_root)
+
+    if "includes" in parts:
+        print("[MIPP DocGen] Writing the tables included in the hand-written pages (docs/includes/generated/)...")
+        from helpers_docs.includes import write_includes
+        write_includes(base_generator_dir, os.path.join(project_root, "docs", "includes", "generated"))
 
     print("[MIPP DocGen] Complete! Documentation and API Explorer dataset generated in docs/.")
 

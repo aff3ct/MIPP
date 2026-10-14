@@ -59,7 +59,7 @@ Since the GitHub site build is strict and only runs on tags, a broken link is fi
 ## 4. Changing the CI
 
 - **New ISA**: add it to the `--simd-ext` lists and to the matrix, as described in [Add an ISA](../tutorials/add_isa.md#step-6-test-and-add-to-the-ci).
-- **New generated documentation page**: add its path to the docs artifact of both files ([Docs & API Explorer](../internals/docs_and_explorer.md#6-adding-a-generated-part)).
+- **New generated documentation page**: add its path to the docs artifact of both files ([Docs & API Explorer](../internals/docs_and_explorer.md#7-adding-a-generated-part)).
 - **Generator options**: the generation commands are duplicated in the two files; keep them in sync.
 
 The audits only print warnings and never fail a job; the validation checks stop the generation job ([Audits & Validation](../reference/audits.md)).

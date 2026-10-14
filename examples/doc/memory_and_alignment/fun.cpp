@@ -32,7 +32,6 @@ static void load_store()
     float* out_ptr = OUT;      // aligned
     float* uout = OUT2 + 1;    // unaligned
     // --8<-- [start:load_store]
-    // C++ Functional API:
     mipp::rvd<float> a = mipp::load<float>(ptr);   // ptr aligned on mipp::req_alignment()
     mipp::rvd<float> b = mipp::loadu<float>(uptr); // any address
 
@@ -53,22 +52,21 @@ static void masked()
     float* out_ptr = OUT;
     float* uout = OUT2 + 1;
     for (int i = 0; i < DOC_BUF; i++) OUT[i] = OUT2[i] = SENTINEL;
-    auto va = mipp::load<float>(A);
-    auto vlimit = mipp::set1<float>(0.5f);
-    auto v_src = mipp::load<float>(SRC);
-    auto wa = mipp::load<float, 2>(A);
-    auto wlimit = mipp::set1<float, 2>(0.5f);
+    mipp::rvd<float> va = mipp::load<float>(A);
+    mipp::rvd<float> vlimit = mipp::set1<float>(0.5f);
+    mipp::rvd<float> v_src = mipp::load<float>(SRC);
+    mipp::rvd<float, 2> wa = mipp::load<float, 2>(A);
+    mipp::rvd<float, 2> wlimit = mipp::set1<float, 2>(0.5f);
     // --8<-- [start:masked]
-    // C++ Functional API:
     mipp::rvm<float> m = mipp::cmplt(va, vlimit);
 
-    auto v_z = mipp::load<mipp::Z>(m, ptr);        // T deduced from the pointer, LMUL = 1
-    auto v_s = mipp::load<mipp::S>(m, v_src, ptr);
-    mipp::store<mipp::M>(m, out_ptr, v_z);
+    mipp::rvd<float> v_z = mipp::load<mipp::Z>(m, ptr);        // inactive lanes: 0
+    mipp::rvd<float> v_s = mipp::load<mipp::S>(m, v_src, ptr); // inactive lanes: v_src
+    mipp::store<mipp::M>(m, out_ptr, v_z);                      // inactive lanes: memory unchanged
 
-    // LMUL = 2: the mask type does not allow the deduction of LMUL, give T and LMUL
-    mipp::rvm<float, 2> m2 = mipp::cmplt(wa, wlimit);
-    auto w_z = mipp::loadu<mipp::Z, float, 2>(m2, uptr);
+    // LMUL = 2:
+    mipp::rvm<float, 2> m2  = mipp::cmplt(wa, wlimit);
+    mipp::rvd<float, 2> w_z = mipp::loadu<mipp::Z, float, 2>(m2, uptr);
     mipp::storeu<mipp::M, float, 2>(m2, uout, w_z);
     // --8<-- [end:masked]
     float s[DOC_BUF];
@@ -87,13 +85,11 @@ static void gather()
 {
     const uint32_t* idx_ptr = IDX;
     const float* table = TABLE;
-    auto vmax_idx = mipp::set1<uint32_t>(LIMIT);
+    mipp::rvd<uint32_t> vmax_idx = mipp::set1<uint32_t>(LIMIT);
     // --8<-- [start:gather]
-    // C++ Functional API:
     mipp::rvd<uint32_t> indices = mipp::load<uint32_t>(idx_ptr);
     mipp::rvd<float> res = mipp::gather(table, indices);
 
-    // Masked: the index type cannot be deduced, give T and the index type
     mipp::rvm<uint32_t> m = mipp::cmplt(indices, vmax_idx);
     mipp::rvd<float> res_z = mipp::gather<mipp::Z, float, uint32_t>(m, table, indices);
     // --8<-- [end:gather]
@@ -112,10 +108,9 @@ static void scatter()
     const uint32_t* idx_ptr = IDX;
     float* out_table = OUT;
     for (int i = 0; i < DOC_BUF; i++) OUT[i] = SENTINEL;
-    auto values = mipp::load<float>(A);
-    auto vmax_idx = mipp::set1<uint32_t>(LIMIT);
+    mipp::rvd<float> values = mipp::load<float>(A);
+    mipp::rvd<uint32_t> vmax_idx = mipp::set1<uint32_t>(LIMIT);
     // --8<-- [start:scatter]
-    // C++ Functional API:
     mipp::rvd<uint32_t> indices = mipp::load<uint32_t>(idx_ptr);
     mipp::scatter(out_table, indices, values);
 
@@ -131,7 +126,6 @@ static void extract()
 {
     const float* ptr = A;
     // --8<-- [start:extract]
-    // C++ Functional API:
     mipp::rvd<float> v = mipp::load<float>(ptr);
     float first_val = mipp::getfirst(v);
     float third_val = mipp::get(v, 2);

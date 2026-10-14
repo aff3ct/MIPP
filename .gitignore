@@ -44,5 +44,6 @@ paper/
 docs/assets/data/
 docs/developer/reference/cli.md
 docs/developer/reference/registries/
+docs/includes/generated/
 benchmarks/
 examples/doc/bin/

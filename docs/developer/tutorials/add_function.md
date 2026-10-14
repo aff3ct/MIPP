@@ -33,8 +33,12 @@ In `helpers_headers/registry_interfaces.json`:
 | `proto_ref` | A prototype of `registry_protos.json`. `ret_reg_2args_reg` takes two registers and returns one. See [Choosing a Prototype](#choosing-a-prototype). |
 | `datatypes` | An alias of `DATATYPES_MAP` (`generator/helpers_headers/tools.py`): `all_datatypes`, `all_float`, `all_int` (signed), `all_uint`, `all_int_uint`, `all_64bit`, `all_32bit`, `all_16bit`, `all_8bit`, or pair aliases for conversions (`all_datatypes_cart_prod`, `all_datatypes_same_size`, `all_datatypes_widenning`, ...). An explicit list such as `["float32", "float64"]` is also accepted. |
 | `horizontal` | `true` for reductions across the lanes of a register (`hadd`, `hmax`), `false` otherwise. |
-| `mask_support` | `no_mask`, `only_mask`, `only_maskz`, `only_masks`, `mask_and_maskz`, `mask_and_masks`, `maskz_and_masks` or `all_mask`. `mask` is Merge-Masked, `maskz` Zero-Masked, `masks` Source-Masked ([Masking Semantics](../../user/masking_semantics.md)). |
+| `mask_support` | Masking variants generated for the function: one of the values of the table below. `mask` is Merge-Masked, `maskz` Zero-Masked, `masks` Source-Masked ([Masking Semantics](../../user/masking_semantics.md)). |
 | `cpp_name` | Optional. Name of the C++ function when it differs from the C name: `get_k` is exposed as `mipp::get`. |
+
+Values of `mask_support`, with the number of functions that use each one:
+
+--8<-- "docs/includes/generated/mask_support.md"
 
 The names of the generated functions are derived from this entry: `mipp_absdiff_float32`, `mipp_absdiff_float32_maskz`, `mipp_absdiff_float32_m2` in C, `mipp::absdiff` in C++.
 
@@ -67,7 +71,9 @@ Add a prototype only if none fits. The names follow the pattern `ret_<return>_<n
 
 ## Step 2: Assign a Category
 
-In `helpers_headers/registry_categories.json`, add the function to exactly one of the 10 categories: `arithmetic`, `comparison`, `converts`, `load`, `logic`, `math`, `reduction`, `reinterpret`, `selection`, `store`.
+In `helpers_headers/registry_categories.json`, add the function to exactly one of the categories:
+
+--8<-- "docs/includes/generated/categories.md"
 
 ```json
 "arithmetic": [

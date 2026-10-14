@@ -12,8 +12,9 @@ Part of this site is generated from the same JSON files as the headers. This pag
 | `funcs_support` | `funcs_support/`: Function Support pages | `SpecFuncInfos` in `gen_mipp_docs.py` |
 | `explorer` | `assets/data/mipp_api_index.json`: data of the API Explorer | `gen_mipp_api_data.py` |
 | `dev_reference` | `developer/reference/cli.md` and `developer/reference/registries/` | `helpers_docs/` |
+| `includes` | `includes/generated/`: tables included in hand-written pages | `helpers_docs/includes.py` |
 
-All these outputs are ignored by Git and rewritten at each run. The CI generates them, passes them to the site build as an artifact, then runs `mkdocs build` ([Continuous Integration](../process/ci.md)). A local `mkdocs build --strict` fails on the missing pages if `gen_mipp_docs.py` has not been run.
+All these outputs are ignored by Git and rewritten at each run. The CI generates them, passes them to the site build as an artifact, then runs `mkdocs build` ([Continuous Integration](../process/ci.md)). A local `mkdocs build --strict` fails on the missing pages and fragments if `gen_mipp_docs.py` has not been run.
 
 ---
 
@@ -66,7 +67,26 @@ Fields are listed with their path, type, `required` flag, `enum` values and `def
 
 ---
 
-## 5. Syntax Highlighting
+## 5. Tables Included in Hand-Written Pages
+
+Some tables of the hand-written pages restate the registries or the ISA descriptors. They are generated as Markdown fragments in `docs/includes/generated/` by `helpers_docs/includes.py`, and included where they are needed with `pymdownx.snippets`:
+
+```markdown
+;--8<-- "docs/includes/generated/lmul_availability.md"
+```
+
+| Fragment | Source | Included in |
+| :--- | :--- | :--- |
+| `lmul_availability.md` | `sw_lmul`, `hw_lmul`, `sw_ldiv_type` of the ISA descriptors; the `MIPP_LDIV_2` column uses the same condition as `ci_generator.py` | [Vector Types & LMUL](../../user/vector_types_and_lmul.md#34-representation-per-target) |
+| `datatypes.md` | `all_datatypes` (`datatypes.py`), `registry_scalar_isa.json` | [Vector Types & LMUL](../../user/vector_types_and_lmul.md#1-supported-datatypes-matrix) |
+| `categories.md` | `registry_categories.json` | [Add a Function](../tutorials/add_function.md#step-2-assign-a-category) |
+| `mask_support.md` | `MASK_SUPPORT_MAP` (`registry.py`), `registry_interfaces.json` | [Add a Function](../tutorials/add_function.md#step-1-declare-the-interface) |
+
+`docs/includes/` is excluded from the site (`exclude_docs` in `mkdocs.yml`): its files are fragments, not pages. A fragment is included in pages at different depths, so it contains no relative link. To add one, write a `render_*()` function and add its output to `write_includes()`.
+
+---
+
+## 6. Syntax Highlighting
 
 The code blocks of the Developer Guide use two Pygments lexers defined in `scripts/pygments_mipp/`, installed by `docs/requirements.txt`:
 
@@ -75,9 +95,9 @@ The code blocks of the Developer Guide use two Pygments lexers defined in `scrip
 
 ---
 
-## 6. Adding a Generated Part
+## 7. Adding a Generated Part
 
 1. Write the generator, and call it from `main()` in `gen_mipp_docs.py` under a new name of `DOC_PARTS`.
 2. Write its output under `docs/`, and add the path to `.gitignore`.
 3. Add the path to the docs artifact of both CI files (`generation` job in `.github/workflows/ci.yml`, `generation-docs` job in `.gitlab-ci.yml`), otherwise the deployed site misses it.
-4. Link the new pages from the hand-written ones, and run `mkdocs build --strict`.
+4. Link the new pages from the hand-written ones (or include the fragments, [§5](#5-tables-included-in-hand-written-pages)), and run `mkdocs build --strict`.

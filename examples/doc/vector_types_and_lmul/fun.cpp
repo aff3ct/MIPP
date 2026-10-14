@@ -45,7 +45,6 @@ static void d2_loop()
     float* out = OUT;
     const size_t n = 100;
     // --8<-- [start:d2_loop]
-// C++ Functional API:
 #ifdef MIPP_LDIV_2
 constexpr size_t n_half = mipp::N<float, -2>();
 for (size_t i = 0; i + n_half <= n; i += n_half) {
@@ -64,12 +63,26 @@ for (size_t i = 0; i + n_half <= n; i += n_half) {
 #endif
 }
 
+// §4.1: availability guard
+static void d2_guard()
+{
+    // --8<-- [start:d2_guard]
+#ifdef MIPP_LDIV_2
+    mipp::rvd<float, -2> h = mipp::set0<float, -2>();
+#endif
+    // --8<-- [end:d2_guard]
+#ifdef MIPP_LDIV_2
+    mipp::storeu(OUT, h);
+    for (int i = 0; i < (int)mipp::N<float, -2>(); i++)
+        DOC_CHECK(OUT[i] == 0.f);
+#endif
+}
+
 // §5: type conversions
 static void conversions()
 {
     const float* ptr = P;
     // --8<-- [start:conversions]
-    // C++ Functional API:
     mipp::rvd<float>   v  = mipp::loadu<float>(ptr);  // {-2.7, -1.4, -0.1, 1.2, ...}
     mipp::rvd<int32_t> vb = mipp::cast_int32(v);      // {0xC02CCCCD, ...}: IEEE-754 bit patterns
     mipp::rvd<int32_t> vi = mipp::cvt_int32(v);       // {-2, -1, 0, 1, ...}: truncation
@@ -97,6 +110,7 @@ int main()
     fill();
     capacity();
     d2_loop();
+    d2_guard();
     conversions();
     return doc_status();
 }

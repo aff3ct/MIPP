@@ -19,6 +19,17 @@ static void fill(void)
     }
 }
 
+/* §2.2: element capacity */
+static void capacity(void)
+{
+    /* --8<-- [start:capacity] */
+    const int n_f32_m1 = MIPP_N_FLOAT32;    // 8 on AVX2 (256-bit / 32-bit * 1)
+    const int n_f32_m4 = MIPP_N_FLOAT32_M4; // 32 on AVX2 (8 * 4)
+    /* --8<-- [end:capacity] */
+    DOC_CHECK(n_f32_m4 == 4 * n_f32_m1);
+    DOC_CHECK((size_t)n_f32_m1 * sizeof(float) == (size_t)MIPP_RVD_SIZE_BYTE);
+}
+
 /* §4: the same loop on half-vectors */
 static void d2_loop(void)
 {
@@ -27,9 +38,9 @@ static void d2_loop(void)
     float* out = OUT;
     const size_t n = 100;
     /* --8<-- [start:d2_loop] */
-// C API:
 #ifdef MIPP_LDIV_2
-for (size_t i = 0; i + MIPP_N_FLOAT32_D2 <= n; i += MIPP_N_FLOAT32_D2) {
+const size_t n_half = MIPP_N_FLOAT32_D2;
+for (size_t i = 0; i + n_half <= n; i += n_half) {
     rvd_float32_d2_t a = mipp_loadu_float32_d2(in_a + i);
     rvd_float32_d2_t b = mipp_loadu_float32_d2(in_b + i);
     rvd_float32_d2_t c = mipp_add_float32_d2(a, b);
@@ -65,7 +76,6 @@ static void conversions(void)
 {
     const float* ptr = P;
     /* --8<-- [start:conversions] */
-    // C API:
     rvd_float32_t v  = mipp_loadu_float32(ptr);       // {-2.7, -1.4, -0.1, 1.2, ...}
     rvd_int32_t   vb = mipp_cast_float32_int32(v);    // {0xC02CCCCD, ...}: IEEE-754 bit patterns
     rvd_int32_t   vi = mipp_cvt_float32_int32(v);     // {-2, -1, 0, 1, ...}: truncation
@@ -91,6 +101,7 @@ static void conversions(void)
 int main(void)
 {
     fill();
+    capacity();
     d2_loop();
     d2_guard();
     conversions();

@@ -82,21 +82,19 @@ Here is the standard, battle-tested pattern to vectorize any loop over an arbitr
 
 ### Complete Working Example (SAXPY with Tail Loop)
 
-=== "C API (`<mipp.h>`)"
+=== "C API"
 
     ```c
     --8<-- "examples/doc/getting_started/c.c"
     ```
 
-=== "C++ Functional API (`<mipp.hpp>`)"
+=== "C++ Functional API"
 
     ```cpp
     --8<-- "examples/doc/getting_started/fun.cpp"
     ```
 
-
-
-=== "C++ Object API (`<mipp_obj.hpp>`)"
+=== "C++ Object API"
 
     ```cpp
     --8<-- "examples/doc/getting_started/obj.cpp"

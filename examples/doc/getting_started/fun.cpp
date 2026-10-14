@@ -17,7 +17,7 @@ void saxpy_mipp(float a, const float* x, float* y, size_t size)
         mipp::rvd<float> vx = mipp::loadu<float>(&x[i]);
         mipp::rvd<float> vy = mipp::loadu<float>(&y[i]);
 
-        mipp::rvd<float> vres = mipp::fmadd(va, vx, vy); // T deduced from operands
+        mipp::rvd<float> vres = mipp::fmadd(va, vx, vy);
 
         mipp::storeu(&y[i], vres);
     }
@@ -38,8 +38,8 @@ int main()
     saxpy_mipp(3.0f, x.data(), y.data(), size);
 
     size_t errors = 0;
-    for (float v : y)
-        if (v != 7.0f) errors++;
+    for (size_t i = 0; i < size; i++)
+        if (y[i] != 7.0f) errors++;
     std::cout << "y[0] = " << y[0] << ", y[1006] = " << y[1006] << " (expected: 7.0), "
               << errors << " error(s)" << std::endl;
     return errors == 0 ? EXIT_SUCCESS : EXIT_FAILURE;

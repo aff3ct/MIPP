@@ -1,5 +1,9 @@
-#include <cmath>
+// --8<-- [start:includes]
+#include <cstddef>
+#include <cstdint>
 #include <mipp_obj.hpp>
+// --8<-- [end:includes]
+#include <cmath>
 
 #include "doc_check.h"
 
@@ -25,15 +29,15 @@ static void free_functions()
     const float* ptr_c = C;
     float* ptr_out = OUT;
     // --8<-- [start:free_functions]
-    auto a = mipp::Rvd<float>(ptr_a);
-    auto b = mipp::Rvd<float>(ptr_b);
-    auto c = mipp::Rvd<float>(ptr_c);
+    mipp::Rvd<float> a = mipp::loadu_obj<float>(ptr_a);
+    mipp::Rvd<float> b = mipp::loadu_obj<float>(ptr_b);
+    mipp::Rvd<float> c = mipp::loadu_obj<float>(ptr_c);
 
     // Free functions on Rvd:
-    auto res_fma = mipp::fmadd(a, b, c); // Fused multiply-add
-    auto res_abs = mipp::abs(a);         // Absolute value
-    auto res_min = mipp::min(a, b);      // Element-wise minimum
-    auto res_red = mipp::hadd(a);        // Horizontal sum (returns scalar float)
+    mipp::Rvd<float> res_fma = mipp::fmadd(a, b, c); // Fused multiply-add
+    mipp::Rvd<float> res_abs = mipp::abs(a);         // Absolute value
+    mipp::Rvd<float> res_min = mipp::min(a, b);      // Element-wise minimum
+    float            res_red = mipp::hadd(a);        // Horizontal sum (returns a scalar)
 
     // Store directly using free function:
     mipp::store(ptr_out, res_fma);
@@ -55,10 +59,50 @@ static void masked()
     mipp::Rvd<float> a(A), b(B);
     // --8<-- [start:masked]
     mipp::Rvm<float> m = (a > b);
-    auto c = mipp::add<mipp::M>(m, a, b); // res[i] = m[i] ? a[i] + b[i] : a[i]
+    mipp::Rvd<float> c = mipp::add<mipp::M>(m, a, b); // res[i] = m[i] ? a[i] + b[i] : a[i]
     // --8<-- [end:masked]
     for (int i = 0; i < mipp::Rvd<float>::N(); i++)
         DOC_CHECK(c[i] == (A[i] > B[i] ? A[i] + B[i] : A[i]));
+}
+
+// §5: remainder handled with masked memory accesses
+// --8<-- [start:masked_tail]
+// y[i] = a * x[i] + y[i]
+void saxpy(std::size_t n, float a, const float* x, float* y)
+{
+    constexpr std::size_t N = mipp::N<float>();
+    const mipp::Rvd<float> va = mipp::set1_obj<float>(a);
+
+    std::size_t i = 0;
+    for (; i + N <= n; i += N) {
+        mipp::Rvd<float> vx = mipp::loadu_obj<float>(x + i);
+        mipp::Rvd<float> vy = mipp::loadu_obj<float>(y + i);
+        mipp::storeu(y + i, mipp::fmadd(va, vx, vy));
+    }
+
+    if (i < n) { // fewer than N elements left
+        int32_t active[N];
+        for (std::size_t j = 0; j < N; j++)
+            active[j] = (i + j < n);
+        mipp::Rvm<float> m  = mipp::set_k_obj<float>(active);     // lane j active iff i + j < n
+        mipp::Rvd<float> vx = mipp::loadu_obj<mipp::Z>(m, x + i); // inactive lanes are not read (set to 0)
+        mipp::Rvd<float> vy = mipp::loadu_obj<mipp::Z>(m, y + i);
+        mipp::storeu<mipp::M>(m, y + i, mipp::fmadd(va, vx, vy)); // inactive lanes are not written
+    }
+}
+// --8<-- [end:masked_tail]
+
+static void masked_tail()
+{
+    const int N = mipp::Rvd<float>::N();
+    for (int n = 0; n <= 3 * N + 1 && n + 1 < DOC_BUF; n++) {
+        float x[DOC_BUF], y[DOC_BUF];
+        for (int i = 0; i < DOC_BUF; i++) { x[i] = 2.f; y[i] = 1.f; }
+        saxpy((std::size_t)n, 3.f, x, y);
+        for (int i = 0; i < n; i++)
+            DOC_CHECK(y[i] == 7.f);
+        DOC_CHECK(y[n] == 1.f); // the element after the end is not written
+    }
 }
 
 int main()
@@ -66,5 +110,6 @@ int main()
     fill();
     free_functions();
     masked();
+    masked_tail();
     return doc_status();
 }

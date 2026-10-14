@@ -7,19 +7,17 @@
 // Computes y[i] = a * x[i] + y[i] (SAXPY) over arbitrary size S
 void saxpy_mipp(float a, const float* x, float* y, size_t size)
 {
-    constexpr size_t N = mipp::Rvd<float>::N(); // Elements per SIMD register (e.g. 8 on AVX2)
+    constexpr size_t N = mipp::N<float>(); // Elements per SIMD register (e.g. 8 on AVX2)
     const size_t vec_limit = (size / N) * N;
-    mipp::Rvd<float> va = a;
+    mipp::Rvd<float> va = mipp::set1_obj<float>(a);
 
     // 1. Vector main loop
     for (size_t i = 0; i < vec_limit; i += N)
     {
-        mipp::Rvd<float> vx(&x[i]);
-        mipp::Rvd<float> vy(&y[i]);
-
-        vy += va * vx; // Natural operators
-
-        mipp::storeu(&y[i], vy);
+        mipp::Rvd<float> vx = mipp::loadu_obj<float>(&x[i]);
+        mipp::Rvd<float> vy = mipp::loadu_obj<float>(&y[i]);
+        mipp::Rvd<float> vres = mipp::fmadd(va, vx, vy);
+        mipp::storeu(&y[i], vres);
     }
 
     // 2. Scalar tail loop for remaining elements
@@ -38,8 +36,8 @@ int main()
     saxpy_mipp(3.0f, x.data(), y.data(), size);
 
     size_t errors = 0;
-    for (float v : y)
-        if (v != 7.0f) errors++;
+    for (size_t i = 0; i < size; i++)
+        if (y[i] != 7.0f) errors++;
     std::cout << "y[0] = " << y[0] << ", y[1006] = " << y[1006] << " (expected: 7.0), "
               << errors << " error(s)" << std::endl;
     return errors == 0 ? EXIT_SUCCESS : EXIT_FAILURE;

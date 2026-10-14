@@ -55,11 +55,11 @@ static void explicit_params()
 // §3.6: masked operation
 static void masked()
 {
-    auto a = mipp::load<float>(A);
-    auto b = mipp::load<float>(B);
-    auto m = mipp::cmplt(a, b);
+    mipp::rvd<float> a = mipp::load<float>(A);
+    mipp::rvd<float> b = mipp::load<float>(B);
+    mipp::rvm<float> m = mipp::cmplt(a, b);
     // --8<-- [start:masked]
-    auto c = mipp::add<mipp::M, float>(m, a, b); // res[i] = m[i] ? a[i] + b[i] : a[i]
+    mipp::rvd<float> c = mipp::add<mipp::M, float>(m, a, b); // res[i] = m[i] ? a[i] + b[i] : a[i]
     // --8<-- [end:masked]
     mipp::storeu(OUT, c);
     for (int i = 0; i < (int)mipp::N<float>(); i++)
@@ -72,12 +72,12 @@ static void masked()
 void saxpy(std::size_t n, float a, const float* x, float* y)
 {
     constexpr std::size_t N = mipp::N<float>();
-    const auto va = mipp::set1<float>(a);
+    const mipp::rvd<float> va = mipp::set1<float>(a);
 
     std::size_t i = 0;
     for (; i + N <= n; i += N) {
-        auto vx = mipp::loadu<float>(x + i);
-        auto vy = mipp::loadu<float>(y + i);
+        mipp::rvd<float> vx = mipp::loadu<float>(x + i);
+        mipp::rvd<float> vy = mipp::loadu<float>(y + i);
         mipp::storeu(y + i, mipp::fmadd(va, vx, vy));
     }
 
@@ -85,9 +85,9 @@ void saxpy(std::size_t n, float a, const float* x, float* y)
         int32_t active[N];
         for (std::size_t j = 0; j < N; j++)
             active[j] = (i + j < n);
-        auto m  = mipp::set_k<float>(active); // lane j active iff i + j < n
-        auto vx = mipp::loadu<mipp::Z>(m, x + i); // inactive lanes are not read (set to 0)
-        auto vy = mipp::loadu<mipp::Z>(m, y + i);
+        mipp::rvm<float> m  = mipp::set_k<float>(active);         // lane j active iff i + j < n
+        mipp::rvd<float> vx = mipp::loadu<mipp::Z>(m, x + i);     // inactive lanes are not read (set to 0)
+        mipp::rvd<float> vy = mipp::loadu<mipp::Z>(m, y + i);
         mipp::storeu<mipp::M>(m, y + i, mipp::fmadd(va, vx, vy)); // inactive lanes are not written
     }
 }

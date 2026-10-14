@@ -20,6 +20,17 @@ static void fill()
     }
 }
 
+// §2.2: element capacity
+static void capacity()
+{
+    // --8<-- [start:capacity]
+    constexpr int n_f32_m1 = mipp::Rvd<float, 1>::N(); // 8 on AVX2 (256-bit / 32-bit * 1)
+    constexpr int n_f32_m4 = mipp::Rvd<float, 4>::N(); // 32 on AVX2 (8 * 4)
+    // --8<-- [end:capacity]
+    DOC_CHECK(n_f32_m4 == 4 * n_f32_m1);
+    DOC_CHECK(n_f32_m1 * sizeof(float) == mipp::req_alignment());
+}
+
 // §4: the same loop on half-vectors
 static void d2_loop()
 {
@@ -28,7 +39,6 @@ static void d2_loop()
     float* out = OUT;
     const size_t n = 100;
     // --8<-- [start:d2_loop]
-// C++ Object API:
 #ifdef MIPP_LDIV_2
 constexpr size_t n_half = mipp::N<float, -2>();
 for (size_t i = 0; i + n_half <= n; i += n_half) {
@@ -47,12 +57,25 @@ for (size_t i = 0; i + n_half <= n; i += n_half) {
 #endif
 }
 
+// §4.1: availability guard
+static void d2_guard()
+{
+    // --8<-- [start:d2_guard]
+#ifdef MIPP_LDIV_2
+    mipp::Rvd<float, -2> h = mipp::set0_obj<float, -2>();
+#endif
+    // --8<-- [end:d2_guard]
+#ifdef MIPP_LDIV_2
+    for (int i = 0; i < mipp::Rvd<float, -2>::N(); i++)
+        DOC_CHECK(h[i] == 0.f);
+#endif
+}
+
 // §5: type conversions
 static void conversions()
 {
     const float* ptr = P;
     // --8<-- [start:conversions]
-    // C++ Object API:
     mipp::Rvd<float>   v  = mipp::loadu_obj<float>(ptr); // {-2.7, -1.4, -0.1, 1.2, ...}
     mipp::Rvd<int32_t> vb = mipp::cast<int32_t>(v);      // {0xC02CCCCD, ...}: IEEE-754 bit patterns
     mipp::Rvd<int32_t> vi = mipp::cvt<int32_t>(v);       // {-2, -1, 0, 1, ...}: truncation
@@ -73,7 +96,9 @@ static void conversions()
 int main()
 {
     fill();
+    capacity();
     d2_loop();
+    d2_guard();
     conversions();
     return doc_status();
 }

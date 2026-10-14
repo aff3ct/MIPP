@@ -32,7 +32,6 @@ static void load_store(void)
     float* out_ptr = OUT;      /* aligned */
     float* uout = OUT2 + 1;    /* unaligned */
     /* --8<-- [start:load_store] */
-    // C API:
     rvd_float32_t a = mipp_load_float32(ptr);   // ptr aligned on MIPP_RVD_SIZE_BYTE
     rvd_float32_t b = mipp_loadu_float32(uptr); // any address
 
@@ -59,7 +58,6 @@ static void masked(void)
     rvd_float32_m2_t wa = mipp_load_float32_m2(A);
     rvd_float32_m2_t wlimit = mipp_set1_float32_m2(0.5f);
     /* --8<-- [start:masked] */
-    // C API:
     rvm_float32_t m = mipp_cmplt_float32(va, vlimit);
 
     rvd_float32_t v_z = mipp_load_float32_maskz(m, ptr);        // inactive lanes: 0
@@ -89,7 +87,6 @@ static void gather(void)
     const float* table = TABLE;
     rvd_uint32_t vmax_idx = mipp_set1_uint32(LIMIT);
     /* --8<-- [start:gather] */
-    // C API:
     rvd_uint32_t indices = mipp_load_uint32(idx_ptr);
     rvd_float32_t res = mipp_gather_float32_float32(table, indices);
 
@@ -114,7 +111,6 @@ static void scatter(void)
     rvd_float32_t values = mipp_load_float32(A);
     rvd_uint32_t vmax_idx = mipp_set1_uint32(LIMIT);
     /* --8<-- [start:scatter] */
-    // C API:
     rvd_uint32_t indices = mipp_load_uint32(idx_ptr);
     mipp_scatter_float32_float32(out_table, indices, values);
 
@@ -130,7 +126,6 @@ static void extract(void)
 {
     const float* ptr = A;
     /* --8<-- [start:extract] */
-    // C API:
     rvd_float32_t v = mipp_load_float32(ptr);
     float32_t first_val = mipp_getfirst_float32(v);
     float32_t third_val = mipp_get_float32(v, 2);

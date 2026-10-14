@@ -6,6 +6,7 @@
 
 DOC_ALIGNED static float A[DOC_BUF];
 DOC_ALIGNED static float B[DOC_BUF];
+DOC_ALIGNED static float C[DOC_BUF];
 DOC_ALIGNED static float SRC[DOC_BUF];
 DOC_ALIGNED static float OUT[DOC_BUF];
 
@@ -14,6 +15,7 @@ static void fill(void)
     for (int i = 0; i < DOC_BUF; i++) {
         A[i] = (float)(i % 7) - 3.f;
         B[i] = (float)(i % 5) - 2.f;
+        C[i] = (float)(i % 3) - 1.f;
         SRC[i] = 100.f + (float)i;
     }
 }
@@ -40,13 +42,13 @@ static void variants(void)
     // 1. Unmasked:
     rvd_float32_t res_u = mipp_add_float32(va, vb);
 
-    // 2. Merge-Masked:
+    // 2. Merge-Masked: inactive lanes keep va
     rvd_float32_t res_m = mipp_add_float32_mask(m, va, vb);
 
-    // 3. Zero-Masked:
+    // 3. Zero-Masked: inactive lanes set to 0
     rvd_float32_t res_z = mipp_add_float32_maskz(m, va, vb);
 
-    // 4. Source-Masked:
+    // 4. Source-Masked: inactive lanes taken from vsrc
     rvd_float32_t res_s = mipp_add_float32_masks(m, vsrc, va, vb);
     /* --8<-- [end:variants] */
     float u[DOC_BUF], mm[DOC_BUF], z[DOC_BUF], s[DOC_BUF];
@@ -63,13 +65,53 @@ static void variants(void)
     }
 }
 
+/* §5: mask boolean algebra */
+static void mask_algebra(void)
+{
+    rvd_float32_t va = mipp_load_float32(A);
+    rvd_float32_t vb = mipp_load_float32(B);
+    rvd_float32_t vc = mipp_load_float32(C);
+    /* --8<-- [start:mask_algebra] */
+    rvm_float32_t m1 = mipp_cmplt_float32(va, vb);
+    rvm_float32_t m2 = mipp_cmpgt_float32(va, vc);
+
+    // Logical AND (m1 AND m2):
+    rvm_float32_t m_and = mipp_andb_k_float32(m1, m2);
+
+    // Logical OR (m1 OR m2):
+    rvm_float32_t m_or  = mipp_orb_k_float32(m1, m2);
+
+    // Logical XOR (m1 XOR m2):
+    rvm_float32_t m_xor = mipp_xorb_k_float32(m1, m2);
+
+    // Logical NOT (~m1):
+    rvm_float32_t m_not = mipp_notb_k_float32(m1);
+
+    // Logical AND-NOT ((NOT m1) AND m2):
+    rvm_float32_t m_andn = mipp_andnb_k_float32(m1, m2);
+    /* --8<-- [end:mask_algebra] */
+    int32_t l_and[DOC_BUF], l_or[DOC_BUF], l_xor[DOC_BUF], l_not[DOC_BUF], l_andn[DOC_BUF];
+    lanes(m_and, l_and);
+    lanes(m_or, l_or);
+    lanes(m_xor, l_xor);
+    lanes(m_not, l_not);
+    lanes(m_andn, l_andn);
+    for (int i = 0; i < MIPP_N_FLOAT32; i++) {
+        const int a = A[i] < B[i], b = A[i] > C[i];
+        DOC_CHECK(l_and[i] == (a && b));
+        DOC_CHECK(l_or[i] == (a || b));
+        DOC_CHECK(l_xor[i] == (a != b));
+        DOC_CHECK(l_not[i] == !a);
+        DOC_CHECK(l_andn[i] == (!a && b));
+    }
+}
+
 /* §6.1: cast_k */
 static void cast_k(void)
 {
     rvd_float32_t va = mipp_load_float32(A);
     rvd_float32_t vb = mipp_load_float32(B);
     /* --8<-- [start:cast_k] */
-    // C API: explicit from_to function identifier with _k suffix
     rvm_float32_t m_float = mipp_cmplt_float32(va, vb);
     rvm_int32_t   m_int   = mipp_cast_k_float32_int32(m_float);
     /* --8<-- [end:cast_k] */
@@ -84,7 +126,6 @@ static void tomsk(void)
 {
     const float* ptr = A;
     /* --8<-- [start:tomsk] */
-    // C API:
     rvd_float32_t raw_vector = mipp_load_float32(ptr);
     rvm_float32_t m = mipp_tomsk_float32(raw_vector);
     /* --8<-- [end:tomsk] */
@@ -100,7 +141,6 @@ static void toreg(void)
     rvd_float32_t va = mipp_load_float32(A);
     rvd_float32_t vb = mipp_load_float32(B);
     /* --8<-- [start:toreg] */
-    // C API:
     rvm_float32_t m = mipp_cmpeq_float32(va, vb);
     rvd_float32_t mask_vector = mipp_toreg_float32(m);
     /* --8<-- [end:toreg] */
@@ -118,7 +158,7 @@ static void blend(void)
     rvd_float32_t if_false = mipp_load_float32(B);
     rvm_float32_t m = mipp_cmplt_float32(if_true, if_false);
     /* --8<-- [start:blend] */
-    // C API: (mask, if_true, if_false)
+    // Arguments: mask, if_true, if_false
     rvd_float32_t chosen = mipp_blend_float32(m, if_true, if_false);
     /* --8<-- [end:blend] */
     mipp_storeu_float32(OUT, chosen);
@@ -130,9 +170,9 @@ static void blend(void)
 static void set_k(void)
 {
     /* --8<-- [start:set_k] */
-    // In C: array of int32_t, one value per lane (MIPP_N_FLOAT32 lanes)
+    // Array of int32_t, one value per lane
     int32_t mask_values[MIPP_N_FLOAT32];
-    for (int i = 0; i < MIPP_N_FLOAT32; i++)
+    for (uint32_t i = 0; i < MIPP_N_FLOAT32; i++)
         mask_values[i] = (i % 3 == 0) ? 1 : 0; // lanes 0, 3, 6, ... active
     rvm_float32_t m = mipp_set_k_float32(mask_values);
     /* --8<-- [end:set_k] */
@@ -148,10 +188,8 @@ static void lmul2(void)
     const float* ptr_a = A;
     const float* ptr_b = B;
     /* --8<-- [start:lmul2] */
-    // C API: explicit multiplied types and identifiers
-    rvd_float32_m2_t va = mipp_load_float32_m2(ptr_a);
-    rvd_float32_m2_t vb = mipp_load_float32_m2(ptr_b);
-
+    rvd_float32_m2_t va  = mipp_load_float32_m2(ptr_a);
+    rvd_float32_m2_t vb  = mipp_load_float32_m2(ptr_b);
     rvm_float32_m2_t m   = mipp_cmplt_float32_m2(va, vb);
     rvd_float32_m2_t res = mipp_add_float32_mask_m2(m, va, vb);
     /* --8<-- [end:lmul2] */
@@ -164,6 +202,7 @@ int main(void)
 {
     fill();
     variants();
+    mask_algebra();
     cast_k();
     tomsk();
     toreg();
