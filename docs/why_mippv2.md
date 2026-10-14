@@ -1,3 +1,8 @@
+---
+hide:
+  - navigation
+---
+
 # Why MIPPv2: Architecture & Technical Relevance
 
 MIPPv2 provides portable, zero-overhead SIMD computing across x86, ARM, and RISC-V targets through an offline code generation pipeline, a deterministic fallback engine, and three APIs (C, C++ Functional, C++ Object) sharing the same implementation.
@@ -27,9 +32,9 @@ MIPPv2 provides portable, zero-overhead SIMD computing across x86, ARM, and RISC
                     |    L0 -> L1 -> L2 -> L3     |
                     +-----------------------------+
                                    |
-     +----------+----------+-------+--+----------+----------+----------+
-     |   SSE    |   AVX    | AVX-512  |   NEON   |SVE (WIP) |   RVV    |
-     +----------+----------+----------+----------+----------+----------+
+  +----------+----------+----------+----------+----------+----------+
+  |   SSE    |   AVX    | AVX-512  |   NEON   |   SVE    |   RVV    |
+  +----------+----------+----------+----------+----------+----------+
 ```
 
 ### 1.1. Three APIs
@@ -40,15 +45,12 @@ Three complementary interfaces mapping to the same inlined instructions:
 - **C++ Object API (`<mipp_obj.hpp>`)**: Register classes (`mipp::Rvd`, `mipp::Rvm`) with complete operator overloading.
 
 ### 1.2. Deterministic 4-Level Fallback Hierarchy
-Guarantees functional completeness across all 10 supported data types and target ISAs (see [Known Limitations](implementation_levels.md#known-limitations)):
+Every function is implemented on every target, for all 10 data types, at the best available level: **Level 0 (Native Hardware)**, **Level 1 (Dedicated Emulation)**, **Level 2 (Generic Emulation)** or **Level 3 (Scalar Fallback)**. See [Implementation Levels](user/implementation_levels.md), including its [known limitations](user/implementation_levels.md#known-limitations).
 
-1. **Level 0 (Native Hardware)**: Direct 1-to-1 mapping to CPU hardware intrinsics (`_mm256_add_ps`, `vaddq_f32`, `__riscv_vfadd_vf_f32m1`).
-2. **Level 1 (Dedicated Emulation)**: Missing opcodes emulated with other instructions of the same ISA (e.g., SSE integer multiplication).
-3. **Level 2 (Generic Emulation)**: Composed from portable MIPP primitives (e.g., math routines or blend sequences).
-4. **Level 3 (Scalar Fallback)**: Element-wise scalar loop ensuring error-free compilation on any target.
+### 1.3. Generalized Length Multiplier (LMUL)``
 
-### 1.3. Generalized Length Multiplier (LMUL)
 Uniform vector register grouping ($\text{LMUL} \in \{1, 2, 4, 8\}$):
+
 - **Hardware (RVV 1.0)**: Native vector register grouping (`vfloat32m2_t`, `vfloat32m4_t`).
 - **Software (x86, ARM, Scalar)**: Binary register pairs unrolled cleanly at compile time.
 
@@ -61,7 +63,7 @@ Standardized execution semantics across all operations:
 - **Zero-Masked** (`Z`, `_maskz`): Zeroes inactive elements ($\text{res}_i = m_i \ ? \ f(a_i, b_i) : 0$).
 - **Source-Masked** (`S`, `_masks`): Inactive elements take the values of a source vector ($\text{res}_i = m_i \ ? \ f(a_i, b_i) : \text{src}_i$).
 
-See [Masking Semantics](masking_semantics.md) for the complete reference.
+See [Masking Semantics](user/masking_semantics.md) for the complete reference.
 
 ---
 
@@ -80,7 +82,7 @@ Choosing the right SIMD library depends on language requirements, compilation co
 | **ARM SVE Support** | ⚠️ **Fixed-width only / WIP** | ❌ No | ✅ Scalable & Fixed | ⚠️ Fixed-width / WIP | ⚠️ Fixed-width only | ⚠️ Fixed-width only | ❌ No | ❌ No (x86 only) | ⚠️ Fixed-width only (WIP) | ⚠️ ACLE (VLA/Fixed) | ⚠️ Unpredictable |
 | **Generalized LMUL ($1,2,4,8$)** | ✅ **Yes** | ❌ No | ✅ Yes (`ScalableTag`) | ❌ No | ❌ No | ❌ No | ❌ No | ❌ No | ❌ No | ❌ No (RVV only) | ❌ No |
 | **Dispatch** | **Static** | **Static** | **Static & Dynamic** | **Static & Dynamic** | **Static** | **Static & Dynamic** | **Static** | **Static** *(Manual dynamic)* | **Static** | **Static** *(Manual dynamic)* | **Static** *(Dynamic with `target_clones`)* |
-| **C++ Standard Required** | **C++11** (or C99) | C++11 | C++11 | C++17 | C++20 required | C89 / C++98 | C++11 / C++14 | C++11 / C++17 | C++26 required | C99 / C++11 | C99 / C++11 |
+| **C++ Standard Required** | **C99 / C++11** | C++11 | C++11 | C++17 | C++20 | C89 / C++98 | C++11 / C++14 | C++11 / C++17 | C++26 | C99 / C++11 | C99 / C++11 |
 | **Compilation Overhead** | **Fast** (Simple inlines) | Medium (Deep templates) | Heavy templates | Medium | Very heavy | Heavy (Macro bloat) | Medium / Heavy | Fast (Inline headers) | Heavy templates | Very fast | Zero lib overhead |
 | **Assembly Determinism** | **Explicit** | Explicit | Explicit | Explicit | Explicit | Explicit | Explicit | Explicit | Explicit | Explicit | Heuristic-driven |
 | **Implementation Approach** | **Code-generated (Python)** | Handwritten (C++) | Handwritten (Templates) | Handwritten (Templates) | Handwritten (C++20) | Code-generated (Python + Macros) | Handwritten (Templates) | Handwritten (Classes) | Handwritten (Templates) | Handwritten (Manual) | Compiler-generated |
@@ -98,6 +100,6 @@ Choosing the right SIMD library depends on language requirements, compilation co
 4. **Pragmatic Fixed-Width Design (RVV & SVE)**: Targeting compile-time vector widths (`-mrvv-vector-bits` / `-msve-vector-bits`) preserves compile-time constants (`MIPP_N`), straightforward struct layouts, and standard operator syntax without runtime stripmining overhead.
 5. **Predictable Assembly vs. Auto-Vectorization**: Compiler auto-vectorization (`-O3`) is fragile and can silently de-vectorize loops upon subtle code changes. MIPP guarantees explicit, deterministic SIMD instructions.
 6. **Automated Offline Code Generation**: Shifting metaprogramming offline into a Python engine (`generator/`) yields three major engineering benefits:
-    - **Fine-Grained Modular Headers**: Programmatic synthesis enables 2D atomic headers (`--granularity fine`, e.g. `<mipp/obj/fun/m/m2/add.hpp>`). Applications can include only the exact instructions needed, drastically reducing preprocessor parsing times and peak compiler memory (RSS).
+    - **Fine-Grained Modular Headers**: Programmatic synthesis enables headers restricted to one function, one masking variant and one LMUL (e.g. `<mipp/obj/fun/m/m2/add.hpp>`). Including only what is needed makes compilation 2× to 4× faster than with the umbrella header (see [Headers & Compile Time](user/headers_and_compile_time.md)).
     - **Declarative Single Source of Truth**: Opcode mappings, fallbacks, unit tests, and documentation are generated from central JSON registries, enabling rapid maintenance and eliminating documentation drift.
     - **Fast Builds with Zero Indirection**: Replaces deep C++ template instantiations and macro bloat with flat, strongly typed inlines where IDEs jump directly to native intrinsics.

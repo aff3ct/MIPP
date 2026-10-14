@@ -22,9 +22,10 @@ int main(int argc, char** argv)
 	std::cout << std::endl;
 #endif
 
-	float32_t a1[mipp::N<float32_t,LMUL>()];
-	float32_t a2[mipp::N<float32_t,LMUL>()];
-	float32_t a3[mipp::N<float32_t,LMUL>()];
+	// load/store require a pointer aligned on the register size (64 bytes covers every target)
+	alignas(64) float32_t a1[mipp::N<float32_t,LMUL>()];
+	alignas(64) float32_t a2[mipp::N<float32_t,LMUL>()];
+	alignas(64) float32_t a3[mipp::N<float32_t,LMUL>()];
 
 	for (size_t i = 0; i < mipp::N<float32_t,LMUL>(); i++) {
 		a1[i] = i+0;

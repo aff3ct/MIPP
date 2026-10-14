@@ -107,7 +107,7 @@ g++ -std=c++11 -O3 -mavx512f -mavx512bw -I/path/to/mipp/include app.cpp -o app  
 g++ -std=c++11 -O3 -march=armv8-a+simd -I/path/to/mipp/include app.cpp -o app   # ARM NEON
 ```
 
-For large codebases seeking minimum compilation times, MIPP can also emit modular and atomic 2D headers (e.g. `<mipp/obj/fun/m/m2/add.hpp>`) when generated with `--granularity fine`.
+Each API has a single umbrella header (`<mipp.h>`, `<mipp.hpp>`, `<mipp_obj.hpp>`). Large codebases can instead include only the functions, masking variants and LMULs they use (e.g. `<mipp/obj/fun/m/m2/add.hpp>`), which makes compilation 2× to 4× faster: see [Headers & Compile Time](https://aff3ct.github.io/MIPP/user/headers_and_compile_time/).
 
 ---
 
@@ -117,8 +117,9 @@ Comprehensive documentation, interactive tools, and developer guides are availab
 
 - **[Getting Started](https://aff3ct.github.io/MIPP/user/getting_started/)**: Installation, compilation flags, and complete loop vectorization patterns.
 - **[Interactive API Explorer](https://aff3ct.github.io/MIPP/explorer/)**: Search across all 85+ vector primitives with reverse vendor intrinsic lookup (AVX, NEON, SVE, RVV).
-- **[Programming Model](https://aff3ct.github.io/MIPP/user/programming_model/)**: Detailed reference for the C, C++ Functional, and C++ Object APIs, plus modular header organization.
-- **[Comparison with Existing SIMD Solutions](https://aff3ct.github.io/MIPP/user/why_mippv2/#3-comparison-with-existing-simd-solutions)**: In-depth architectural comparison with Google Highway, xsimd, and Eve.
+- **[Programming Model](https://aff3ct.github.io/MIPP/user/programming_model/)**: Detailed reference for the C, C++ Functional, and C++ Object APIs.
+- **[Headers & Compile Time](https://aff3ct.github.io/MIPP/user/headers_and_compile_time/)**: Header tree, inclusion granularities, and measured compile times.
+- **[Comparison with Existing SIMD Solutions](https://aff3ct.github.io/MIPP/why_mippv2/#simd-wrappers-comparison)**: In-depth architectural comparison with Google Highway, xsimd, and Eve.
 - **[Vector Types & LMUL](https://aff3ct.github.io/MIPP/user/vector_types_and_lmul/)**: Supported datatypes and register multiplier semantics.
 - **[Masking Semantics](https://aff3ct.github.io/MIPP/user/masking_semantics/)**: Predication execution models (`unmasked`, `mask`, `maskz`, `masks`).
 - **[Specifications & Hardware Matrices](https://aff3ct.github.io/MIPP/funcs_support/)**: Complete mathematical specifications and target architecture matrices.

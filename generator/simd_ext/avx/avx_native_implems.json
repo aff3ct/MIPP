@@ -299,14 +299,7 @@
         {
             "instr_name": "load",
             "datatypes": "all_datatypes",
-            "template": "load",
-            "if": "defined(MIPP_ALIGNED_LOADS)"
-        },
-        {
-            "instr_name": "loadu",
-            "datatypes": "all_datatypes",
-            "template": "load",
-            "if": "!defined(MIPP_ALIGNED_LOADS)"
+            "template": "load"
         }
     ],
     "loadu": [
@@ -559,14 +552,7 @@
         {
             "instr_name": "store",
             "datatypes": "all_datatypes",
-            "template": "store",
-            "if": "defined(MIPP_ALIGNED_LOADS)"
-        },
-        {
-            "instr_name": "storeu",
-            "datatypes": "all_datatypes",
-            "template": "store",
-            "if": "!defined(MIPP_ALIGNED_LOADS)"
+            "template": "store"
         }
     ],
     "storeu": [

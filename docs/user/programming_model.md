@@ -10,84 +10,9 @@ All three APIs share the same zero-overhead inlined execution path and map to id
 
 ---
 
-## 1. Header Inclusion & Organization
+## 1. Headers
 
-MIPP provides two header inclusion paradigms: **Monolithic Inclusion** and **Modular Granular Inclusion**.
-
-```text
-include/
-├── mipp.h                       # C API monolithic entry point
-├── mipp.hpp                     # C++ Functional API monolithic entry point
-├── mipp_obj.hpp                 # C++ Object API monolithic entry point
-└── mipp/                        # Namespaced headers
-    ├── c/
-    │   ├── cat/<category>.h     # Granular C category header (e.g. arithmetic.h)
-    │   └── fun/<function>.h     # Granular C function header (e.g. add.h)
-    ├── cpp/
-    │   ├── cat/<category>.hpp   # Granular C++ category header
-    │   └── fun/<function>.hpp   # Granular C++ function header
-    ├── obj/
-    │   ├── cat/<category>.hpp   # Granular C++ Object category header
-    │   └── fun/<function>.hpp   # Granular C++ Object function header
-    └── internal/                # Private implementation details (do not include directly)
-        ├── interfaces/          # Architecture-independent dispatch interfaces
-        ├── simd_ext/            # Generated ISA-specific backend implementations
-        └── templates/           # Common C++ templates and enums
-```
-
-### 1.1. Option 1: Monolithic Inclusion (Prototyping)
-
-Monolithic entry points include all MIPP SIMD functions and data types across the entire library in a single directive:
-
-- `<mipp.h>` for the C API
-- `<mipp.hpp>` for the C++ Functional API
-- `<mipp_obj.hpp>` for C++ Object API
-
-This is the fastest and most convenient approach when starting a project or writing small self-contained algorithms.
-
-### 1.2. Option 2: Granular Inclusion (Production & Scale)
-
-Granular headers expose either a single SIMD function or an entire category of functions across all variants and LMULs:
-
-- **Function headers**: `<mipp/c/fun/<func>.h>`, `<mipp/cpp/fun/<func>.hpp>`, `<mipp/obj/fun/<func>.hpp>`
-- **Category headers**: `<mipp/c/cat/<cat>.h>`, `<mipp/cpp/cat/<cat>.hpp>`, `<mipp/obj/cat/<cat>.hpp>` (e.g. `arithmetic.hpp`, `load.hpp`, `comparison.hpp`)
-
-Granular headers dramatically accelerate compilation time (often 5x to 10x faster parsing) and reduce compiler peak memory consumption (RSS), which is critical for large C++ codebases with dozens of compilation units.
-
-<a id="fine-grained-headers"></a>
-### 1.3. Fine-Grained & Atomic 2D Headers (`--granularity fine`)
-
-When MIPP headers are emitted with `--granularity fine`, the generator creates an ultra-modular matrix of atomic header files across both dimensions: execution variant (`u`, `m`, `z`, `s`) and register multiplier LMUL (`m1`, `m2`, `m4`, `m8`, `d2`). This allows large-scale projects to include **only the exact variant and LMUL** required by each translation unit:
-
-```text
-include/mipp/obj/
-├── fun/
-│   ├── add.hpp                  # Coarse: All variants (U, M, Z, S) and all LMULs
-│   ├── m/                       # 1D Variant Umbrella: 'm' variant across all LMULs
-│   │   ├── add.hpp
-│   │   └── m2/                  # 2D Atomic: 'm' variant + LMUL=2 specifically
-│   │       └── add.hpp
-│   └── m2/                      # 1D LMUL Umbrella: LMUL=2 across all variants
-│       └── add.hpp
-└── cat/
-    ├── arithmetic.hpp           # Coarse: Category umbrella
-    ├── m/arithmetic.hpp         # 1D Variant category umbrella
-    └── m/m2/arithmetic.hpp      # 2D Atomic category umbrella
-```
-
-#### Inclusion Levels
-
-1. **Coarse Function Header**: `<mipp/obj/fun/<func>.hpp>` (includes all variants and LMULs for `<func>`).
-2. **1D Variant Umbrella**: `<mipp/obj/fun/<variant>/<func>.hpp>` (e.g. `m/add.hpp`, includes only masked `add` across all LMULs).
-3. **1D LMUL Umbrella**: `<mipp/obj/fun/<lmul>/<func>.hpp>` (e.g. `m2/add.hpp`, includes only LMUL=2 `add` across all variants).
-4. **2D Atomic Leaf**: `<mipp/obj/fun/<variant>/<lmul>/<func>.hpp>` (e.g. `m/m2/add.hpp`, includes only the exact kernel needed).
-
-#### Compilation & Scalability Benefits
-
-Benchmarking across large workloads demonstrates that 2D atomic inclusion provides significant advantages:
-
-- **Minimal Preprocessor Expansion**: The preprocessor parses only the minimal set of templates needed by each translation unit.
-- **Lower Compiler Peak RSS**: Peak memory consumption during compilation is substantially reduced, preventing out-of-memory issues during highly parallel multi-threaded builds.
+Each API has an umbrella header (`<mipp.h>`, `<mipp.hpp>`, `<mipp_obj.hpp>`) and finer headers under `<mipp/c/>`, `<mipp/cpp/>` and `<mipp/obj/>` that include a single category, function, masking variant or LMUL. The header tree, the available granularities and their effect on compile time are described in [Headers & Compile Time](headers_and_compile_time.md).
 
 ---
 
@@ -179,24 +104,14 @@ auto zeroes = mipp::set0<double, 2>();       // mipp::rvd<double, 2>
 auto scalar_val = mipp::set1<int32_t>(42);   // mipp::rvd<int32_t, 1>
 ```
 
-### 3.6. Masked Function Template Specialization
-Masked operations in the C++ Functional API use the `mipp::VARIANT` template parameter (`<mipp::M>`, `<mipp::Z>`, `<mipp::S>`). Because `mipp::rvd<T, LMUL>` is a type alias to an internal type trait (`rvd_type<T, LMUL>::type`), C++ template argument deduction cannot deduce `T`. Therefore, the datatype `T` (and `LMUL` if different from `1`) must be explicitly supplied:
+### 3.6. Masked Operations
+Masked operations take the variant as first template argument (`mipp::M`, `mipp::Z` or `mipp::S`). Because `mipp::rvd<T, LMUL>` is an alias to an internal type trait, `T` cannot be deduced from the arguments and must be given explicitly (plus `LMUL` when it is not `1`):
 
 ```cpp
-auto m   = mipp::cmpeq(a, b);   // Mask condition
-auto src = mipp::set1<float>(0.0f);
-
-// 1. Masked (M): res[i] = m[i] ? (a[i] + b[i]) : a[i]
-auto c_mask  = mipp::add<mipp::M, float>(m, a, b);
-
-// 2. Zero-Masked (Z): res[i] = m[i] ? (a[i] + b[i]) : 0
-auto c_zero  = mipp::add<mipp::Z, float>(m, a, b);
-
-// 3. Source-Masked (S): res[i] = m[i] ? (a[i] + b[i]) : src[i]
-auto c_src   = mipp::add<mipp::S, float>(m, src, a, b);
+auto c = mipp::add<mipp::M, float>(m, a, b); // res[i] = m[i] ? a[i] + b[i] : a[i]
 ```
 
-For comprehensive coverage of masking rules, conversions, and hardware mappings, see [Masking Semantics](masking_semantics.md).
+The four variants, their semantics and the syntax in each API are described in [Masking Semantics](masking_semantics.md).
 
 ---
 
@@ -217,9 +132,9 @@ struct Rvd {
 
     // Constructors
     Rvd() = default;
-    Rvd(rvd<T, LMUL> r);     // Wraps a low-level rvd register
-    Rvd(const T val);        // Broadcasts a scalar (mipp::set1)
-    Rvd(const T* data);      // Loads from memory, no alignment requirement (mipp::loadu)
+    Rvd(rvd<T, LMUL> r); // Wraps a low-level rvd register
+    Rvd(const T val);    // Broadcasts a scalar (mipp::set1)
+    Rvd(const T* data);  // Loads from memory, no alignment requirement (mipp::loadu)
 
     // Implicit conversion to the low-level register (interoperability with the C++ Functional API)
     operator rvd<T, LMUL>() const;
@@ -233,9 +148,9 @@ struct Rvm {
     rvm<T, LMUL> m; // Underlying low-level mask register
 
     Rvm() = default;
-    Rvm(rvm<T, LMUL> m);             // Wraps a low-level rvm register
-    Rvm(const bool val);             // All lanes active or inactive (mipp::set1_k)
-    Rvm(const int32_t vals[]);       // Per-lane initialization (mipp::set_k)
+    Rvm(rvm<T, LMUL> m);       // Wraps a low-level rvm register
+    Rvm(const bool val);       // All lanes active or inactive (mipp::set1_k)
+    Rvm(const int32_t vals[]); // Per-lane initialization (mipp::set_k)
 
     operator rvm<T, LMUL>() const;   // Implicit conversion to the low-level mask
     bool operator[](const size_t index) const; // Reads one lane (mipp::get)
@@ -273,30 +188,15 @@ auto res_red = mipp::hadd(a);        // Horizontal sum (returns scalar float)
 mipp::store(ptr_out, res_fma);
 ```
 
-### 4.4. Masked Operations Support
-Masked operations in the C++ Object API are fully supported via the standard `VARIANT` template parameter (`M`, `Z`, `S`), taking `Rvm` and `Rvd` objects:
+### 4.4. Masked Operations
+With `Rvm` and `Rvd` objects, the compiler deduces `T` and `LMUL`: only the variant is needed.
 
 ```cpp
-mipp::Rvm<float> m = (a > b); // Mask from operator comparison
-mipp::Rvd<float> src = 0.0f;
-
-// 1. Masked (M): res[i] = m[i] ? (a[i] + b[i]) : a[i]
-auto c_mask  = mipp::add<mipp::M>(m, a, b);
-
-// 2. Zero-Masked (Z): res[i] = m[i] ? (a[i] + b[i]) : 0.0f
-auto c_zero  = mipp::add<mipp::Z>(m, a, b);
-
-// 3. Source-Masked (S): res[i] = m[i] ? (a[i] + b[i]) : src[i]
-auto c_src   = mipp::add<mipp::S>(m, src, a, b);
+mipp::Rvm<float> m = (a > b);
+auto c = mipp::add<mipp::M>(m, a, b); // res[i] = m[i] ? a[i] + b[i] : a[i]
 ```
 
-!!! tip "Idiomatic Masking with Automatic Template Deduction"
-    Because operand types and LMUL are deduced from `Rvm` and `Rvd`, importing the variant symbol allows writing concise expressions:
-    ```cpp
-    using mipp::M;
-    auto c = mipp::add<M>(m, a, b); // Automatically deduces T=float and LMUL
-    ```
-    There is no need to write `mipp::add<mipp::M, float, 1>(m, a, b)`.
+See [Masking Semantics](masking_semantics.md) for the four variants.
 
 
 ### 4.5. Idiomatic Coding Guidelines
@@ -307,74 +207,39 @@ auto c_src   = mipp::add<mipp::S>(m, src, a, b);
 
 ---
 
-## 5. Comparative Example: Vector SAXPY ($Y = a \cdot X + Y$)
+## 5. Example: Remainder Handled with Masked Memory Accesses
 
-Below is an identical vectorized SAXPY loop ($Y[i] = a \cdot X[i] + Y[i]$) implemented with each of the three APIs.
+[Getting Started](getting_started.md#3-real-world-tutorial-vectorizing-a-loop-handling-tail-loops) shows the same SAXPY loop in the three APIs, with a scalar loop for the last elements. MIPP can also process these last elements with SIMD code: a mask selects the valid lanes, and masked loads and stores never access memory outside them.
 
-=== "C API"
-    ```c
-    #include <mipp.h>
+```cpp
+#include <cstddef>
+#include <cstdint>
+#include <mipp.hpp>
 
-    void saxpy_c(size_t n, float a, const float* x, float* y)
-    {
-        const size_t N = MIPP_N_FLOAT32;
-        const size_t vec_limit = (n / N) * N;
-        rvd_float32_m1_t va = mipp_set1_float32_m1(a);
+// y[i] = a * x[i] + y[i]
+void saxpy(std::size_t n, float a, const float* x, float* y)
+{
+    constexpr std::size_t N = mipp::N<float>();
+    const auto va = mipp::set1<float>(a);
 
-        for (size_t i = 0; i < vec_limit; i += N) {
-            rvd_float32_m1_t vx = mipp_loadu_float32_m1(x + i);
-            rvd_float32_m1_t vy = mipp_loadu_float32_m1(y + i);
-            rvd_float32_m1_t vres = mipp_fmadd_float32_m1(va, vx, vy);
-            mipp_storeu_float32_m1(y + i, vres);
-        }
-        for (size_t i = vec_limit; i < n; i++) {
-            y[i] = a * x[i] + y[i];
-        }
+    std::size_t i = 0;
+    for (; i + N <= n; i += N) {
+        auto vx = mipp::loadu<float>(x + i);
+        auto vy = mipp::loadu<float>(y + i);
+        mipp::storeu(y + i, mipp::fmadd(va, vx, vy));
     }
-    ```
 
-=== "C++ Functional API"
-    ```cpp
-    #include <mipp.hpp>
-
-    template <typename T = float, int LMUL = 1>
-    void saxpy_cpp(size_t n, T a, const T* x, T* y)
-    {
-        constexpr size_t N = mipp::N<T, LMUL>();
-        const size_t vec_limit = (n / N) * N;
-        const auto va = mipp::set1<T, LMUL>(a);
-
-        for (size_t i = 0; i < vec_limit; i += N) {
-            auto vx = mipp::loadu<T, LMUL>(x + i);
-            auto vy = mipp::loadu<T, LMUL>(y + i);
-            auto vres = mipp::fmadd(va, vx, vy); // Fused multiply-add
-            mipp::storeu(y + i, vres);
-        }
-        for (size_t i = vec_limit; i < n; i++) {
-            y[i] = a * x[i] + y[i];
-        }
+    if (i < n) { // fewer than N elements left
+        int32_t active[N];
+        for (std::size_t j = 0; j < N; j++)
+            active[j] = (i + j < n);
+        auto m  = mipp::set_k<float>(active); // lane j active iff i + j < n
+        auto vx = mipp::loadu<mipp::Z>(m, x + i); // inactive lanes are not read (set to 0)
+        auto vy = mipp::loadu<mipp::Z>(m, y + i);
+        mipp::storeu<mipp::M>(m, y + i, mipp::fmadd(va, vx, vy)); // inactive lanes are not written
     }
-    ```
+}
+```
 
-=== "C++ Object API"
-    ```cpp
-    #include <mipp_obj.hpp>
-
-    template <typename T = float, int LMUL = 1>
-    void saxpy_obj(size_t n, T a, const T* x, T* y)
-    {
-        constexpr size_t N = mipp::Rvd<T, LMUL>::N();
-        const size_t vec_limit = (n / N) * N;
-        mipp::Rvd<T, LMUL> va(a);
-
-        for (size_t i = 0; i < vec_limit; i += N) {
-            mipp::Rvd<T, LMUL> vx(x + i);
-            mipp::Rvd<T, LMUL> vy(y + i);
-            mipp::Rvd<T, LMUL> vres = va * vx + vy; // Uses overloaded * and +
-            mipp::storeu(y + i, vres);              // Idiomatic free function store
-        }
-        for (size_t i = vec_limit; i < n; i++) {
-            y[i] = a * x[i] + y[i];
-        }
-    }
-    ```
+!!! note "Performance"
+    Masked loads and stores map to native instructions on AVX-512 (8-bit and 16-bit types require AVX-512BW), and masked stores also on RVV. In the other cases they are currently emulated element by element, so the masked remainder is not faster than a scalar loop: its benefit is a single code path, with no scalar copy of the loop body. The implementation level of each target is given in [`load`](../funcs_support/load/load.md) and [`store`](../funcs_support/store/store.md).

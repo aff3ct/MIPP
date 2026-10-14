@@ -316,8 +316,8 @@
     "latex": "\\text{res} = \\begin{cases} 1 & \\text{if } \\forall i, \\, m_{0, i} == 0 \\\\ 0 & \\text{otherwise} \\end{cases}"
   },
   "tomsk": {
-    "description": "Converts vector elements to boolean mask elements (active when non-zero).",
-    "latex": "m_i = (r0_i \\neq 0)"
+    "description": "Converts vector elements to mask elements: a lane is active when its element has at least one non-zero bit (so -0.0 is active), and the resulting mask lane has all its bits set.",
+    "latex": "m_i = (\\text{bits}(r0_i) \\neq 0)"
   },
   "toreg": {
     "description": "Expands a mask register into an all-ones (~0) / all-zeros (0) vector register.",

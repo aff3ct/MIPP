@@ -73,7 +73,7 @@ hide:
 </div>
 
 <p style="text-align: center; margin-top: 1.5rem; margin-bottom: 2rem;">
-  👉 <b><a href="user/why_mippv2/#3-comparison-with-existing-simd-solutions">See how MIPP compares to Google Highway, xsimd, Eve, and auto-vectorization</a></b>
+  👉 <b><a href="why_mippv2/#simd-wrappers-comparison">See how MIPP compares to Google Highway, xsimd, Eve, and auto-vectorization</a></b>
 </p>
 
 ---
@@ -104,13 +104,14 @@ MIPP supports 10 fundamental numeric data types across all vector abstractions:
 
 ## Documentation Overview
 
-- **[Why MIPPv2](user/why_mippv2.md)**: Architectural evolution, technical relevance, and comparison with other SIMD wrappers (Highway, xsimd, Eve).
+- **[Why MIPPv2](why_mippv2.md)**: Architectural evolution, technical relevance, and comparison with other SIMD wrappers (Highway, xsimd, Eve).
 - **[Getting Started](user/getting_started.md)**: Header integration, compiler flags, and a **5-minute tutorial across the C, C++ Functional, and C++ Object APIs**.
 - **[Programming Model](user/programming_model.md)**: In-depth exploration of the C, C++ Functional, and C++ Object APIs.
 - **[Vector Types & LMUL](user/vector_types_and_lmul.md)**: Vector representations, element counts (`mipp::N<T, LMUL>()`), and software/hardware register multiplier scaling.
 - **[Masking Semantics](user/masking_semantics.md)**: Mask generation, mask conversion, and execution variants (`unmasked`, `mask`, `maskz`, `masks`).
 - **[Implementation Levels](user/implementation_levels.md)**: The 4-level fallback engine explained from an application performance standpoint.
 - **[Memory & Alignment](user/memory_and_alignment.md)**: Alignment constraints, load/store primitives, and gather/scatter memory access.
+- **[Headers & Compile Time](user/headers_and_compile_time.md)**: Header tree, monolithic / per-function / fine-grained inclusion, and measured compile times.
 - **[API Explorer](explorer/index.md)**: Interactive catalog with instant search, reverse vendor intrinsic lookup, and switching between the three APIs.
 - **[Specifications](funcs_support/index.md)**: Complete function prototypes, mathematical descriptions, and target ISA capability matrices.
 - **[Developer Guide](developer/index.md)**: Code generator architecture, declarative JSON database schema, **templating DSL**, and contribution guide.

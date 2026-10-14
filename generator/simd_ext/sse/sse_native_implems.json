@@ -271,29 +271,8 @@
     "load": [
         {
             "instr_name": "load",
-            "datatypes": [
-                "int64",
-                "int32",
-                "int16",
-                "int8",
-                "float32"
-            ],
-            "template": "load",
-            "if": "defined(MIPP_ALIGNED_LOADS)"
-        },
-        {
-            "instr_name": "load",
-            "datatypes": [
-                "float64"
-            ],
-            "template": "load",
-            "if": "defined(MIPP_ALIGNED_LOADS) && defined(__SSE2__)"
-        },
-        {
-            "instr_name": "loadu",
             "datatypes": "all_datatypes",
-            "template": "load",
-            "if": "!defined(MIPP_ALIGNED_LOADS)"
+            "template": "load"
         }
     ],
     "loadu": [
@@ -512,14 +491,7 @@
         {
             "instr_name": "store",
             "datatypes": "all_datatypes",
-            "template": "store",
-            "if": "defined(MIPP_ALIGNED_LOADS)"
-        },
-        {
-            "instr_name": "storeu",
-            "datatypes": "all_datatypes",
-            "template": "store",
-            "if": "!defined(MIPP_ALIGNED_LOADS)"
+            "template": "store"
         }
     ],
     "storeu": [

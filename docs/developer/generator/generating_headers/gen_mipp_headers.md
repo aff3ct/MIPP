@@ -28,7 +28,7 @@ From `generator/`, with the virtual environment activated (see `generator/README
 
 | Option | Default | Description |
 | :--- | :--- | :--- |
-| `--granularity {coarse,fine}` | `coarse` | `coarse` emits one public header per function (`<mipp/cpp/fun/add.hpp>`). `fine` additionally emits per-variant, per-LMUL and atomic headers (`<mipp/cpp/fun/m/add.hpp>`, `<mipp/cpp/fun/m2/add.hpp>`, `<mipp/cpp/fun/m/m2/add.hpp>`) and the corresponding umbrella headers. |
+| `--granularity {coarse,fine}` | `coarse` | `coarse` emits one public header per function (`<mipp/cpp/fun/add.hpp>`). `fine` additionally emits per-variant, per-LMUL and atomic headers (`<mipp/cpp/fun/m/add.hpp>`, `<mipp/cpp/fun/m2/add.hpp>`, `<mipp/cpp/fun/m/m2/add.hpp>`) and the corresponding umbrella headers. User-side effect: [Headers & Compile Time](../../../user/headers_and_compile_time.md). |
 | `--simd-ext <isa> ...` | all discovered | Restricts the set of ISAs that exist in the generated tree. The `sub_isa` chain and the scalar fallback are always added. Use this option to produce a reduced distribution (e.g. `--simd-ext neon`). |
 | `-l`, `--layers <layer> ...` | `all` | Selects which parts are (re)generated: ISA layers (one per directory of `simd_ext/`, e.g. `sse avx avx512 neon sve rvv scalar`; `--help` lists them), `all_isas`, `wrappers` (public C/C++/object headers) or `all`. Mainly useful together with `--no-clean` to regenerate one layer during development. |
 | `--no-clean` | off | Do not delete `../include/` before generating. |

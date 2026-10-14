@@ -189,11 +189,11 @@
             "{% else %}",
             "// scalar backup bc we would need mipp::high to deal with it",
             "%v<tp>% tmp_p[%N<tp>%];",
-            "%store<tp>%(&tmp_p[0], r0);",
+            "%storeu<tp>%(&tmp_p[0], r0);",
             "%v<tr>% tmp_r[%N<tr>%];",
             "for (int i = 0; i < %N<tr>%; i++)",
             "\ttmp_r[i] = tmp_p[i];",
-            "return %load<tr>%(&tmp_r[0]);",
+            "return %loadu<tr>%(&tmp_r[0]);",
             "{% endif %}"
         ]
     }

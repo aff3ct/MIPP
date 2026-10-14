@@ -250,8 +250,8 @@ class TestsBuilderEngine:
                              indent: str = "\t\t") -> List[str]:
         """Generates the declaration and initialization of res_r/res_s for void-ret functions."""
         return [
-            f"{indent}{dt_type} res_r[{size_var}];",
-            f"{indent}{dt_type} res_s[{size_var}];",
+            f"{indent}alignas(64) {dt_type} res_r[{size_var}];",
+            f"{indent}alignas(64) {dt_type} res_s[{size_var}];",
             f"{indent}for (size_t i = 0; i < {size_var}; i++)",
             f"{indent}{{",
             f"{indent}\tres_r[i] = {init_src}[i];",
@@ -990,11 +990,12 @@ class TestsBuilderEngineC:
 
         body_lines = [func_decl, "{", "\tstd::mt19937 seed(Catch::getSeed());", "\tfor (unsigned n = 0; n < get_n_iter(); n++)", "\t{"]
         
-        body_lines.append(f"\t\t[[maybe_unused]] {dt_cstd} inputs1[{size_var}];")
+        # alignas(64): load/store require a pointer aligned on the register size (64 bytes covers AVX-512)
+        body_lines.append(f"\t\t[[maybe_unused]] alignas(64) {dt_cstd} inputs1[{size_var}];")
         if not is_1arg:
-            body_lines.append(f"\t\t[[maybe_unused]] {dt_cstd} inputs2[{size_var}];")
+            body_lines.append(f"\t\t[[maybe_unused]] alignas(64) {dt_cstd} inputs2[{size_var}];")
         if is_3arg:
-            body_lines.append(f"\t\t[[maybe_unused]] {dt_cstd} inputs3[{size_var}];")
+            body_lines.append(f"\t\t[[maybe_unused]] alignas(64) {dt_cstd} inputs3[{size_var}];")
 
         args_info = self.engine.get_proto_args_info(func_name)
         n_masks = self.engine.get_required_mask_count(func_name)
@@ -1005,7 +1006,7 @@ class TestsBuilderEngineC:
             if n_masks >= 2:
                 body_lines.append(f"\t\t[[maybe_unused]] int32_t inputs_m2[{size_var}];")
         if mkind == "masks":
-            body_lines.append(f"\t\t[[maybe_unused]] {dt_cstd} inputs_src[{size_var}];")
+            body_lines.append(f"\t\t[[maybe_unused]] alignas(64) {dt_cstd} inputs_src[{size_var}];")
 
         body_lines.append("")
         body_lines.append(f"\t\tfor (size_t i = 0; i < {size_var}; i++)")
@@ -1304,12 +1305,13 @@ class TestsBuilderEngineCppBase:
         """
         dr = self.engine.domain_resolver
         out: List[str] = []
-        out.append("\t\tT inputs1[size];")
+        # alignas(64): load/store require a pointer aligned on the register size (64 bytes covers AVX-512)
+        out.append("\t\talignas(64) T inputs1[size];")
         if has_inputs2:
-            out.append("\t\tT inputs2[size];")
+            out.append("\t\talignas(64) T inputs2[size];")
         if is_3arg:
-            out.append("\t\tT inputs3[size];")
-        out.append("\t\t[[maybe_unused]] T inputs_src[size];")
+            out.append("\t\talignas(64) T inputs3[size];")
+        out.append("\t\t[[maybe_unused]] alignas(64) T inputs_src[size];")
         out.append("\t\t[[maybe_unused]] int32_t inputs_m[size];")
         if has_m2:
             out.append("\t\t[[maybe_unused]] int32_t inputs_m2[size];")

@@ -1,5 +1,6 @@
 nav:
   - Home: index.md
+  - Why MIPPv2: why_mippv2.md
   - User Guide: user
   - API Explorer: explorer
   - Specifications:

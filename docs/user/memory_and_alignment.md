@@ -49,39 +49,50 @@ In C, the equivalent constant is `MIPP_RVD_SIZE_BYTE`.
 
 MIPP distinguishes between **aligned** (`load`, `store`) and **unaligned** (`loadu`, `storeu`) operations.
 
-### 2.1. Aligned vs. Unaligned Access & The `MIPP_ALIGNED_LOADS` Macro
+### 2.1. Aligned vs. Unaligned Access
 
-MIPP provides both explicit unaligned primitives (`loadu`, `storeu`) and default primitives (`load`, `store`):
+| Operation | C API | C++ Functional API | C++ Object API | Pointer Requirement |
+| :--- | :--- | :--- | :--- | :--- |
+| **Aligned Load** | `mipp_load_[type]_[lmul]` | `mipp::load<T, LMUL>(ptr)` | `mipp::load_obj<T, LMUL>(ptr)` | Aligned on the register size (§1.1) |
+| **Unaligned Load** | `mipp_loadu_[type]_[lmul]` | `mipp::loadu<T, LMUL>(ptr)` | `mipp::loadu_obj<T, LMUL>(ptr)` or `Rvd<T, LMUL>(ptr)` | Any address |
+| **Aligned Store** | `mipp_store_[type]_[lmul]` | `mipp::store(ptr, r)` | `mipp::store(ptr, r)` | Aligned on the register size (§1.1) |
+| **Unaligned Store** | `mipp_storeu_[type]_[lmul]` | `mipp::storeu(ptr, r)` | `mipp::storeu(ptr, r)` | Any address |
 
-| Operation | C API Function | C++ Functional API | Safety & Alignment Requirement |
-| :--- | :--- | :--- | :--- |
-| **Default Load** | `mipp_load_[type]_[lmul]` | `mipp::load<T, LMUL>(ptr)` | Emits **unaligned** loads by default; emits **aligned** loads if `MIPP_ALIGNED_LOADS` is defined. |
-| **Explicit Unaligned Load** | `mipp_loadu_[type]_[lmul]` | `mipp::loadu<T, LMUL>(ptr)` | **Always safe on arbitrary addresses** regardless of macro definitions. |
-| **Default Store** | `mipp_store_[type]_[lmul]` | `mipp::store(ptr, val)` | Emits **unaligned** stores by default; emits **aligned** stores if `MIPP_ALIGNED_LOADS` is defined. |
-| **Explicit Unaligned Store** | `mipp_storeu_[type]_[lmul]` | `mipp::storeu(ptr, val)` | **Always safe on arbitrary addresses** regardless of macro definitions. |
+!!! warning "Alignment is a precondition"
+    Passing a misaligned pointer to `load` or `store` is undefined behavior. On x86 (SSE, AVX, AVX-512), the aligned instructions fault. On ARM and RISC-V, the hardware does not distinguish aligned and unaligned vector accesses, so the same code may run there and fail on x86: respect the contract on every target, and use `loadu` / `storeu` whenever alignment is not guaranteed. On modern CPUs, `loadu` / `storeu` on data that happens to be aligned cost the same as `load` / `store`.
 
-!!! warning "Portability & Implementation Scope of `MIPP_ALIGNED_LOADS`"
-    - `MIPP_ALIGNED_LOADS` is a legacy configuration flag retained from earlier MIPP versions primarily affecting **x86 backends** (SSE, AVX, AVX-512).
-    - On architectures such as **RISC-V Vector (RVV)** and **ARM SVE**, vector load instructions (`vle32.v`, `svld1`) inherently handle memory access according to the ISA specification, and the `MIPP_ALIGNED_LOADS` macro is currently not enforced.
-    - Because of this non-uniformity across backends, developers should rely on explicit `loadu` / `storeu` whenever unaligned memory access must be strictly guaranteed in portable code. Future MIPP revisions may either standardize alignment toggling homogeneously across all targets or deprecate the macro.
+For a multi-register vector (`LMUL > 1`), the alignment required is still the size of one register: each register is loaded from an aligned address.
 
 ```c
 // C API:
-rvd_float32_t va_default   = mipp_load_float32(ptr);
-rvd_float32_t va_unaligned = mipp_loadu_float32(ptr);
+rvd_float32_t a = mipp_load_float32(ptr);   // ptr aligned on MIPP_RVD_SIZE_BYTE
+rvd_float32_t b = mipp_loadu_float32(uptr); // any address
 
-mipp_store_float32(out_ptr, va_default);
-mipp_storeu_float32(out_ptr, va_unaligned);
+mipp_store_float32(out_ptr, a);
+mipp_storeu_float32(uout, b);
 ```
 
 ```cpp
-// C++ API:
-auto va_default   = mipp::load<float>(ptr);       // Unaligned by default; aligned if -DMIPP_ALIGNED_LOADS
-auto va_unaligned = mipp::loadu<float>(ptr);      // Always unaligned
+// C++ Functional API:
+mipp::rvd<float> a = mipp::load<float>(ptr);   // ptr aligned on mipp::req_alignment()
+mipp::rvd<float> b = mipp::loadu<float>(uptr); // any address
 
-mipp::store(out_ptr, va_default);
-mipp::storeu(out_ptr, va_unaligned);
+mipp::store(out_ptr, a);
+mipp::storeu(uout, b);
 ```
+
+```cpp
+// C++ Object API:
+mipp::Rvd<float> a = mipp::load_obj<float>(ptr);   // ptr aligned on mipp::req_alignment()
+mipp::Rvd<float> b = mipp::loadu_obj<float>(uptr); // any address
+mipp::Rvd<float> c(uptr);                          // the constructor performs an unaligned load
+
+mipp::store(out_ptr, a);
+mipp::storeu(uout, b + c);
+```
+
+!!! note "Migrating from MIPP v1"
+    The `MIPP_ALIGNED_LOADS` macro of MIPP v1 (unaligned `load` / `store` by default, aligned only when the macro was defined) no longer exists: `load` / `store` are always aligned. Code that relied on the default must call `loadu` / `storeu`.
 
 ### 2.2. Masked Loads & Stores
 

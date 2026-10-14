@@ -264,8 +264,17 @@
     "tomsk": [
         {
             "instr_name": "tomsk",
-            "datatypes": "all_float",
-            "template": "tomsk_float"
+            "datatypes": [
+                "float32"
+            ],
+            "template": "tomsk_float32"
+        },
+        {
+            "instr_name": "tomsk",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "tomsk_float64"
         },
         {
             "instr_name": "tomsk",

@@ -29,8 +29,8 @@ int main()
 		a2[i] = (float32_t)rand() / (float32_t)RAND_MAX;
 	}
 
-	rvd_float32_t r1 = mipp_load_float32(a1);
-	rvd_float32_t r2 = mipp_load_float32(a2);
+	rvd_float32_t r1 = mipp_loadu_float32(a1); // stack arrays: no alignment guarantee
+	rvd_float32_t r2 = mipp_loadu_float32(a2);
 	rvd_float32_t r3 = mipp_add_float32(r1, r2);
 
 	// printf("result: %f\n", mipp_get_float32(r3, 0));

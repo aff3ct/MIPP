@@ -555,14 +555,7 @@
         {
             "instr_name": "load",
             "datatypes": "all_datatypes",
-            "template": "load",
-            "if": "defined(MIPP_ALIGNED_LOADS)"
-        },
-        {
-            "instr_name": "loadu",
-            "datatypes": "all_datatypes",
-            "template": "load",
-            "if": "!defined(MIPP_ALIGNED_LOADS)"
+            "template": "load"
         },
         {
             "instr_name": "load",
@@ -573,19 +566,7 @@
                 "int64"
             ],
             "template": "load_msks",
-            "if": "defined(__AVX512F__) && defined(MIPP_ALIGNED_LOADS)",
-            "version": "masks"
-        },
-        {
-            "instr_name": "loadu",
-            "datatypes": [
-                "float64",
-                "float32",
-                "int32",
-                "int64"
-            ],
-            "template": "load_msks",
-            "if": "defined(__AVX512F__) && !defined(MIPP_ALIGNED_LOADS)",
+            "if": "defined(__AVX512F__)",
             "version": "masks"
         },
         {
@@ -607,19 +588,7 @@
                 "int64"
             ],
             "template": "load_mskz",
-            "if": "defined(__AVX512F__) && defined(MIPP_ALIGNED_LOADS)",
-            "version": "maskz"
-        },
-        {
-            "instr_name": "loadu",
-            "datatypes": [
-                "float64",
-                "float32",
-                "int32",
-                "int64"
-            ],
-            "template": "load_mskz",
-            "if": "defined(__AVX512F__) && !defined(MIPP_ALIGNED_LOADS)",
+            "if": "defined(__AVX512F__)",
             "version": "maskz"
         },
         {
@@ -638,6 +607,50 @@
             "instr_name": "loadu",
             "datatypes": "all_datatypes",
             "template": "load"
+        },
+        {
+            "instr_name": "loadu",
+            "datatypes": [
+                "float64",
+                "float32",
+                "int32",
+                "int64"
+            ],
+            "template": "load_msks",
+            "if": "defined(__AVX512F__)",
+            "version": "masks"
+        },
+        {
+            "instr_name": "loadu",
+            "datatypes": [
+                "int8",
+                "int16"
+            ],
+            "template": "load_msks",
+            "if": "defined(__AVX512BW__)",
+            "version": "masks"
+        },
+        {
+            "instr_name": "loadu",
+            "datatypes": [
+                "float64",
+                "float32",
+                "int32",
+                "int64"
+            ],
+            "template": "load_mskz",
+            "if": "defined(__AVX512F__)",
+            "version": "maskz"
+        },
+        {
+            "instr_name": "loadu",
+            "datatypes": [
+                "int8",
+                "int16"
+            ],
+            "template": "load_mskz",
+            "if": "defined(__AVX512BW__)",
+            "version": "maskz"
         }
     ],
     "lshift": [
@@ -989,14 +1002,7 @@
         {
             "instr_name": "store",
             "datatypes": "all_datatypes",
-            "template": "store",
-            "if": "defined(MIPP_ALIGNED_LOADS)"
-        },
-        {
-            "instr_name": "storeu",
-            "datatypes": "all_datatypes",
-            "template": "store",
-            "if": "!defined(MIPP_ALIGNED_LOADS)"
+            "template": "store"
         },
         {
             "instr_name": "store",
@@ -1007,19 +1013,7 @@
                 "int64"
             ],
             "template": "store_msk",
-            "if": "defined(__AVX512F__) && defined(MIPP_ALIGNED_LOADS)",
-            "version": "mask"
-        },
-        {
-            "instr_name": "storeu",
-            "datatypes": [
-                "float64",
-                "float32",
-                "int32",
-                "int64"
-            ],
-            "template": "store_msk",
-            "if": "defined(__AVX512F__) && !defined(MIPP_ALIGNED_LOADS)",
+            "if": "defined(__AVX512F__)",
             "version": "mask"
         },
         {
@@ -1038,6 +1032,28 @@
             "instr_name": "storeu",
             "datatypes": "all_datatypes",
             "template": "store"
+        },
+        {
+            "instr_name": "storeu",
+            "datatypes": [
+                "float64",
+                "float32",
+                "int32",
+                "int64"
+            ],
+            "template": "store_msk",
+            "if": "defined(__AVX512F__)",
+            "version": "mask"
+        },
+        {
+            "instr_name": "storeu",
+            "datatypes": [
+                "int8",
+                "int16"
+            ],
+            "template": "store_msk",
+            "if": "defined(__AVX512BW__)",
+            "version": "mask"
         }
     ],
     "sub": [

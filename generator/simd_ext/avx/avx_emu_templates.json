@@ -307,9 +307,45 @@
             "return %getfirst<tp>%(rs5);"
         ]
     },
-    "tomsk_float": {
-        "format": "short",
-        "code": "{{ isa.prefix }}_cmp_{{ isa_dt_par.data_ext }}(r0.r, {{ isa.prefix }}_setzero_{{ isa_dt_par.data_ext }}(), _CMP_NEQ_UQ);"
+    "tomsk_float32": {
+        "format": "long",
+        "code": [
+            "// bitwise test: a lane is active if at least one bit is set (-0.0f is active)",
+            "%m<tr>% res;",
+            "#if defined(__AVX2__)",
+            "__m256i zero = _mm256_setzero_si256();",
+            "__m256i eq_zero = _mm256_cmpeq_epi32({{ isa.prefix }}_castps_si256(r0.r), zero);",
+            "res.m = {{ isa.prefix }}_castsi256_ps(_mm256_xor_si256(eq_zero, _mm256_cmpeq_epi32(zero, zero)));",
+            "#else",
+            "__m256i bits = {{ isa.prefix }}_castps_si256(r0.r);",
+            "__m128i zero = _mm_setzero_si128();",
+            "__m128i lo = _mm_cmpeq_epi32({{ isa.prefix }}_castsi256_si128(bits), zero);",
+            "__m128i hi = _mm_cmpeq_epi32({{ isa.prefix }}_extractf128_si256(bits, 1), zero);",
+            "__m256 eq_zero = {{ isa.prefix }}_castsi256_ps({{ isa.prefix }}_insertf128_si256({{ isa.prefix }}_castsi128_si256(lo), hi, 1));",
+            "res.m = {{ isa.prefix }}_xor_ps(eq_zero, {{ isa.prefix }}_castsi256_ps({{ isa.prefix }}_set1_epi32(-1)));",
+            "#endif",
+            "return res;"
+        ]
+    },
+    "tomsk_float64": {
+        "format": "long",
+        "code": [
+            "// bitwise test: a lane is active if at least one bit is set (-0.0 is active)",
+            "%m<tr>% res;",
+            "#if defined(__AVX2__)",
+            "__m256i zero = _mm256_setzero_si256();",
+            "__m256i eq_zero = _mm256_cmpeq_epi64({{ isa.prefix }}_castpd_si256(r0.r), zero);",
+            "res.m = {{ isa.prefix }}_castsi256_pd(_mm256_xor_si256(eq_zero, _mm256_cmpeq_epi32(zero, zero)));",
+            "#else",
+            "__m256i bits = {{ isa.prefix }}_castpd_si256(r0.r);",
+            "__m128i zero = _mm_setzero_si128();",
+            "__m128i lo = _mm_cmpeq_epi64({{ isa.prefix }}_castsi256_si128(bits), zero);",
+            "__m128i hi = _mm_cmpeq_epi64({{ isa.prefix }}_extractf128_si256(bits, 1), zero);",
+            "__m256d eq_zero = {{ isa.prefix }}_castsi256_pd({{ isa.prefix }}_insertf128_si256({{ isa.prefix }}_castsi128_si256(lo), hi, 1));",
+            "res.m = {{ isa.prefix }}_xor_pd(eq_zero, {{ isa.prefix }}_castsi256_pd({{ isa.prefix }}_set1_epi32(-1)));",
+            "#endif",
+            "return res;"
+        ]
     },
     "tomsk_int": {
         "format": "long",

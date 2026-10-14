@@ -26,18 +26,14 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ./gen_mipp_headers.py                            # Default (coarse) headers, emitted into ../include/
-# or: ./gen_mipp_headers.py --granularity fine   # Same, plus fine-grained 2D headers (see below)
+# or: ./gen_mipp_headers.py --granularity fine   # Same, plus fine-grained headers (as in the release archives)
 ```
 
 The generated `include/` directory at the root of the repository is then ready to use.
 
-### Header Selection & Inclusion Strategies
+### Which Header to Include
 
-MIPP offers two inclusion paradigms: **Monolithic Inclusion** and **Granular Inclusion**.
-
-#### Option 1: Monolithic Inclusion (Rapid Prototyping)
-
-Monolithic headers bring the complete set of all MIPP SIMD functions into scope in a single `#include`. This is the simplest way to get started with MIPP and is ideal for prototyping, exploratory code, and small applications:
+Each API has a single umbrella header that brings every MIPP function into scope:
 
 | Header File | API | Description |
 | :--- | :--- | :--- |
@@ -45,26 +41,7 @@ Monolithic headers bring the complete set of all MIPP SIMD functions into scope 
 | `<mipp.hpp>` | **C++ Functional API** | Overloaded functions under namespace `mipp::` (e.g., `mipp::add(r0, r1)`). |
 | `<mipp_obj.hpp>` | **C++ Object API** | Expressive `mipp::Rvd<T, LMUL>` and `mipp::Rvm<T, LMUL>` classes with operator overloading (`+`, `-`, `*`, `==`) and free functions. |
 
-#### Option 2: Granular Inclusion (Production & Fast Compilation)
-
-For large-scale projects, production pipelines, or builds with hundreds of translation units, including every SIMD function can increase compiler memory usage and compilation times. Granular headers allow you to include **only the exact operations** your code uses:
-
-```cpp
-// Option 2: Granular inclusion (C++ Object API example)
-#include <mipp/obj/fun/load.hpp>
-#include <mipp/obj/fun/add.hpp>
-#include <mipp/obj/fun/mul.hpp>
-#include <mipp/obj/fun/store.hpp>
-```
-
-Corresponding granular paths exist for all three APIs:
-
-- **C API**: `<mipp/c/fun/<func>.h>` (or category headers `<mipp/c/cat/<category>.h>`)
-- **C++ Functional API**: `<mipp/cpp/fun/<func>.hpp>` (or category headers `<mipp/cpp/cat/<category>.hpp>`)
-- **C++ Object API**: `<mipp/obj/fun/<func>.hpp>` (or category headers `<mipp/obj/cat/<category>.hpp>`)
-
-!!! tip "Fine-Grained 2D Inclusions for Ultra-Fast Compilation"
-    For production pipelines and large codebases seeking minimum compilation times, MIPP also supports 2D atomic headers (e.g. `<mipp/obj/fun/m/m2/add.hpp>`). They are only present when the headers are generated with `--granularity fine` (see [Option B](#option-b-generate-the-headers-from-source)). See [Programming Model: Fine-Grained Headers](programming_model.md#fine-grained-headers) for full details.
+This is the simplest way to start. For larger projects, you can include only the functions you use (`<mipp/obj/fun/add.hpp>`), or even a single masking variant and LMUL (`<mipp/obj/fun/m/m2/add.hpp>`), which makes compilation 2× to 4× faster: see [Headers & Compile Time](headers_and_compile_time.md).
 
 ---
 

@@ -1431,6 +1431,8 @@
             "implem": [
                 "%m<tr>% res;",
                 "BIT_CAST_N(res.m, r0.r, %N<tr>%);",
+                "for (size_t i = 0; i < %N<tr>%; i++)",
+                "\tres.m[i] = res.m[i] ? (%v<c:uint|b:tr>%)-1 : 0;",
                 "return res;"
             ]
         }

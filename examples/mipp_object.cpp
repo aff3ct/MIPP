@@ -25,9 +25,10 @@ int main(int argc, char** argv)
 
 	mipp::Rvd<float32_t,LMUL> rvd1, rvd2, rvd3;
 
-	float32_t a1[mipp::Rvd<float32_t,LMUL>::N()];
-	float32_t a2[mipp::Rvd<float32_t,LMUL>::N()];
-	float32_t a3[mipp::Rvd<float32_t,LMUL>::N()];
+	// load/store require a pointer aligned on the register size (64 bytes covers every target)
+	alignas(64) float32_t a1[mipp::Rvd<float32_t,LMUL>::N()];
+	alignas(64) float32_t a2[mipp::Rvd<float32_t,LMUL>::N()];
+	alignas(64) float32_t a3[mipp::Rvd<float32_t,LMUL>::N()];
 
 	std::iota(a1, a1 + mipp::Rvd<float32_t,LMUL>::N(), 0);
 	std::iota(a2, a2 + mipp::Rvd<float32_t,LMUL>::N(), 1);

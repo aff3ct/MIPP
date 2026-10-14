@@ -204,7 +204,7 @@ mipp::rvm<int32_t> m_int = mipp::cast_int32(m_float);
 `cast_k` / `cast_[type]` is **strictly an in-register bit reinterpretation** (e.g., `_mm256_castps_si256`, `__riscv_vreinterpret`, or direct struct assignment) between mask types of matching element bitwidths (e.g. `float32` $\leftrightarrow$ `int32` $\leftrightarrow$ `uint32`, or `float64` $\leftrightarrow$ `int64` $\leftrightarrow$ `uint64`).
 
 ### 6.2. `tomsk` (Data Vector to Mask)
-Reinterprets/converts a data vector `rvd<T>` into a mask register `rvm<T>` of the matching type $T$:
+Converts a data vector `rvd<T>` into a mask register `rvm<T>` of the matching type $T$:
 
 ```cpp
 // C API:
@@ -215,6 +215,8 @@ rvm_float32_t m = mipp_tomsk_float32(raw_vector);
 mipp::rvd<float> raw_vector = mipp::load<float>(ptr);
 mipp::rvm<float> m = mipp::tomsk(raw_vector);
 ```
+
+A lane is **active if its element has at least one bit set**, inactive if all its bits are zero. The test is on the bit pattern, not on the value: `-0.0` (sign bit set) and NaN give an active lane, `+0.0` an inactive one. Any input is valid, and the result is always a well-formed mask (on targets that store masks in vector registers, each active lane has all its bits set), so `tomsk(toreg(m))` returns `m` and the mask algebra of §5 applies to the result. The behavior is the same on every target.
 
 ### 6.3. `toreg` (Mask to Data Vector)
 Reinterprets/converts a mask handle `rvm<T>` into a full data vector `rvd<T>` of the matching type $T$ (where active lanes contain all-ones and inactive lanes contain `0`):

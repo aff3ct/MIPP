@@ -214,7 +214,7 @@
             "\telse",
             "\t\tbuff[i] = %get<tp>%(rsrc, i);",
             "}",
-            "return %{{func_name}}<tp>%(buff);"
+            "return %loadu<tp>%(buff);"
         ]
     },
     "load_mskz": {
@@ -228,7 +228,7 @@
             "\telse",
             "\t\tbuff[i] = 0;",
             "}",
-            "return %{{func_name}}<tp>%(buff);"
+            "return %loadu<tp>%(buff);"
         ]
     },
     "lshift_mask_all_datatypes": {
