@@ -145,18 +145,49 @@ In addition to multi-register expansion ($\text{LMUL} > 1$), MIPP provides **hal
 | Availability macro | `MIPP_LDIV_2` |
 | Generator (`sw_lmul`, `hw_lmul`, `--ldiv`) | factor `-2`, or `--ldiv 2` |
 
-```cpp
-// C++ Functional API: half-vector capacity query and types
-constexpr int n_half = mipp::N<float, -2>();
-mipp::rvd<float, -2> v_half = mipp::set0<float, -2>();
+The same loop in the three APIs (half-vectors are not available on every target, hence the `MIPP_LDIV_2` guard, see [§4.1](#41-availability)):
 
-// C API: d2 types and operations
-rvd_float32_d2_t r_half = mipp_add_float32_d2(r0, r1);
+```c
+// C API:
+#ifdef MIPP_LDIV_2
+for (size_t i = 0; i + MIPP_N_FLOAT32_D2 <= n; i += MIPP_N_FLOAT32_D2) {
+    rvd_float32_d2_t a = mipp_loadu_float32_d2(in_a + i);
+    rvd_float32_d2_t b = mipp_loadu_float32_d2(in_b + i);
+    rvd_float32_d2_t c = mipp_add_float32_d2(a, b);
+    mipp_storeu_float32_d2(out + i, c);
+}
+#endif
+```
+
+```cpp
+// C++ Functional API:
+#ifdef MIPP_LDIV_2
+constexpr size_t n_half = mipp::N<float, -2>();
+for (size_t i = 0; i + n_half <= n; i += n_half) {
+    mipp::rvd<float, -2> a = mipp::loadu<float, -2>(in_a + i);
+    mipp::rvd<float, -2> b = mipp::loadu<float, -2>(in_b + i);
+    mipp::rvd<float, -2> c = mipp::add(a, b);
+    mipp::storeu(out + i, c);
+}
+#endif
+```
+
+```cpp
+// C++ Object API:
+#ifdef MIPP_LDIV_2
+constexpr size_t n_half = mipp::N<float, -2>();
+for (size_t i = 0; i + n_half <= n; i += n_half) {
+    mipp::Rvd<float, -2> a = mipp::loadu_obj<float, -2>(in_a + i);
+    mipp::Rvd<float, -2> b = mipp::loadu_obj<float, -2>(in_b + i);
+    mipp::Rvd<float, -2> c = a + b;
+    mipp::storeu(out + i, c);
+}
+#endif
 ```
 
 ### 4.1. Availability
 
-Half-vectors are **not available on every target**. When they are, MIPP defines the `MIPP_LDIV_2` macro, which portable code should use as a guard:
+Half-vectors are **not available on every target**. When they are, MIPP defines the `MIPP_LDIV_2` macro (except on the scalar target for now, see below), which portable code should use as a guard:
 
 ```c
 #ifdef MIPP_LDIV_2
@@ -171,7 +202,10 @@ Half-vectors are **not available on every target**. When they are, MIPP defines 
 | **RISC-V Vector (RVV)** | Yes | Native fractional register types (`vfloat32mf2_t`, ...) for 8 to 32-bit elements. For 64-bit elements, where the RVV constraint $\text{SEW} / \text{LMUL} \le \text{ELEN}$ forbids fractional types, MIPP stores the half-vector in a plain array. Some of these 64-bit operations are not implemented yet (see [Implementation Levels](implementation_levels.md#known-limitations)). |
 | **SSE / NEON** | No | 128 bits is the smallest register width; no `d2` types are generated. |
 | **ARM SVE** | No | Not generated yet. |
-| **Scalar** | No | Not generated. |
+| **Scalar** | Yes, see below | Plain array of half the elements. |
+
+!!! warning "Scalar target and `MIPP_LDIV_2`"
+    The scalar target generates the `d2` types and functions, but does not define `MIPP_LDIV_2` yet. Code guarded by `#ifdef MIPP_LDIV_2` therefore skips half-vectors when compiled with `-DMIPP_SCALAR`, although they are available.
 
 ### 4.2. Scope and Constraints of Deeper Fractional Division
 
@@ -181,3 +215,59 @@ While RISC-V Vector supports $\text{LMUL} \in \{1/2, 1/4, 1/8\}$, generalizing d
 - Defining $\text{LDIV} = 4$ for a 64-bit type would result in $N = 2 / 4 = 0.5$ elements, which has no meaning.
 
 For this reason, MIPP only exposes $\text{LDIV} = 2$ (`d2`), and deeper divisions are not part of the API.
+
+---
+
+## 5. Type Conversions
+
+MIPP provides three conversions between data vectors. They differ in what they preserve: the bits (`cast`), the values (`cvt`), or the values with a wider type (`wcvt`).
+
+| Operation | Effect | C API | C++ Functional API | C++ Object API |
+| :--- | :--- | :--- | :--- | :--- |
+| **`cast`** | Reinterprets the bits of the register as another type. No value is converted, no instruction is emitted. | `mipp_cast_[src]_[dst]_[lmul](v)` | `mipp::cast_[dst](v)` | `mipp::cast<T_DST>(v)` |
+| **`cvt`** | Converts the value of each element to another type **of the same width**. | `mipp_cvt_[src]_[dst]_[lmul](v)` | `mipp::cvt_[dst](v)` | `mipp::cvt<T_DST>(v)` |
+| **`wcvt`** | Converts the value of the elements of the **lower half** to the type **twice as wide**. | `mipp_wcvt_[src]_[dst]_[lmul](v)` | `mipp::wcvt_[dst](v)` | `mipp::wcvt<T_DST>(v)` |
+
+The three keep the `LMUL` of their input. Masks have their own reinterpretation, `cast_k` (see [Masking Semantics §6.1](masking_semantics.md#61-strong-mask-typing-cast_k-mask-to-mask-conversion)), and masks convert to and from data vectors with `toreg` / `tomsk` ([§6.2](masking_semantics.md#62-tomsk-data-vector-to-mask), [§6.3](masking_semantics.md#63-toreg-mask-to-data-vector)).
+
+```c
+// C API:
+rvd_float32_t v  = mipp_loadu_float32(ptr);       // {-2.7, -1.4, -0.1, 1.2, ...}
+rvd_int32_t   vb = mipp_cast_float32_int32(v);    // {0xC02CCCCD, ...}: IEEE-754 bit patterns
+rvd_int32_t   vi = mipp_cvt_float32_int32(v);     // {-2, -1, 0, 1, ...}: truncation
+rvd_float64_t vw = mipp_wcvt_float32_float64(v);  // {-2.7, -1.4, ...}: lower half only
+```
+
+```cpp
+// C++ Functional API:
+mipp::rvd<float>   v  = mipp::loadu<float>(ptr);  // {-2.7, -1.4, -0.1, 1.2, ...}
+mipp::rvd<int32_t> vb = mipp::cast_int32(v);      // {0xC02CCCCD, ...}: IEEE-754 bit patterns
+mipp::rvd<int32_t> vi = mipp::cvt_int32(v);       // {-2, -1, 0, 1, ...}: truncation
+mipp::rvd<double>  vw = mipp::wcvt_float64(v);    // {-2.7, -1.4, ...}: lower half only
+```
+
+```cpp
+// C++ Object API:
+mipp::Rvd<float>   v  = mipp::loadu_obj<float>(ptr); // {-2.7, -1.4, -0.1, 1.2, ...}
+mipp::Rvd<int32_t> vb = mipp::cast<int32_t>(v);      // {0xC02CCCCD, ...}: IEEE-754 bit patterns
+mipp::Rvd<int32_t> vi = mipp::cvt<int32_t>(v);       // {-2, -1, 0, 1, ...}: truncation
+mipp::Rvd<double>  vw = mipp::wcvt<double>(v);       // {-2.7, -1.4, ...}: lower half only
+```
+
+### 5.1. `cast` (Bit Reinterpretation)
+
+`cast` exists for every pair of the 10 datatypes. The register keeps its size, so the number of elements changes when the widths differ: `cast` from `rvd<float>` to `rvd<int8_t>` gives 4 times more lanes, each holding one byte of the original floats. Typical uses are bit manipulations on floating-point values (sign, exponent) and feeding integer-only operations with floating-point data.
+
+### 5.2. `cvt` (Value Conversion, Same Width)
+
+`cvt` converts each element like a C cast. Available pairs: `float32` $\leftrightarrow$ `int32` / `uint32`, `float64` $\leftrightarrow$ `int64` / `uint64`, and signed $\leftrightarrow$ unsigned integers of the same width (`int8` $\leftrightarrow$ `uint8`, ..., `int64` $\leftrightarrow$ `uint64`).
+
+- **Floating-point to integer**: truncation toward zero (`-2.7f` gives `-2`). Values out of the range of the destination type, and NaN, give a result that depends on the target.
+- **Integer to floating-point**: rounded to the nearest representable value (`int32` above $2^{24}$ loses precision in `float`).
+- **Signed to unsigned and back**: modular, the bit pattern is unchanged (`-1` gives `4294967295` in `uint32`); the result is the same as `cast`.
+
+### 5.3. `wcvt` (Widening Value Conversion)
+
+`wcvt` converts to the type twice as wide: `int8` $\to$ `int16`, `int16` $\to$ `int32`, `int32` $\to$ `int64`, the same for the unsigned types, and `float32` $\to$ `float64`. As the result keeps the same `LMUL`, it holds half as many elements: `wcvt` converts the first `mipp::N<T_DST, LMUL>()` elements (the lower half of the input, of the whole register group when $\text{LMUL} > 1$) and ignores the others.
+
+There is no function to widen the upper half, and no narrowing conversion. To widen a whole array, step through it by `mipp::N<T_DST, LMUL>()` elements: each `loadu` reads a full input register and only its lower half is converted, so the input buffer must extend half a register beyond the last converted element.

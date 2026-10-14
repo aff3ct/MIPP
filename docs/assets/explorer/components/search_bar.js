@@ -56,10 +56,10 @@ export function renderSearchBar() {
           <div class="mipp-segmented-group" id="mipp-flavor-group">
             <button class="mipp-segment-btn ${state.flavor === "c99" ? "active" : ""}" data-flavor="c99">C</button>
             <button class="mipp-segment-btn ${state.flavor === "cpp" ? "active" : ""}" data-flavor="cpp">
-              <span class="mipp-dialect-full">C++ Functional</span><span class="mipp-dialect-sm">C++ Func</span>
+              <span class="mipp-dialect-full">C++ Functional</span><span class="mipp-dialect-sm">C++ Fun</span>
             </button>
             <button class="mipp-segment-btn ${state.flavor === "obj" || state.flavor === "cpp_obj" ? "active" : ""}" data-flavor="obj">
-              <span class="mipp-dialect-full">C++ Object</span><span class="mipp-dialect-sm">Obj</span>
+              <span class="mipp-dialect-full">C++ Object</span><span class="mipp-dialect-sm">C++ Obj</span>
             </button>
           </div>
         </div>
@@ -69,7 +69,7 @@ export function renderSearchBar() {
           <span class="mipp-control-label">Variant:</span>
           <div class="mipp-segmented-group" id="mipp-mask-group" title="Filter by variant">
             <button class="mipp-segment-btn ${state.maskVariant === "unmasked" ? "active" : ""}" data-mask-variant="unmasked" title="Unmasked">U</button>
-            <button class="mipp-segment-btn ${state.maskVariant === "mask" ? "active" : ""}" data-mask-variant="mask" title="Masked (_mask)">M</button>
+            <button class="mipp-segment-btn ${state.maskVariant === "mask" ? "active" : ""}" data-mask-variant="mask" title="Merge-Masked (_mask)">M</button>
             <button class="mipp-segment-btn ${state.maskVariant === "maskz" ? "active" : ""}" data-mask-variant="maskz" title="Zero-Masked (_maskz)">Z</button>
             <button class="mipp-segment-btn ${state.maskVariant === "masks" ? "active" : ""}" data-mask-variant="masks" title="Source-Masked (_masks)">S</button>
           </div>

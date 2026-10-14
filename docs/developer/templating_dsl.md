@@ -94,7 +94,7 @@ You can adjust the register multiplier for wide register grouping or widening/na
 ### 4.2. Mask Modifiers (`mk:`)
 When calling another MIPP function, you can explicitly request a specific masking variant:
 
-- `mk:M` or `mk:mask`: Masked variant ($\text{res} = m \ ? \ f(a, b) : a$)
+- `mk:M` or `mk:mask`: Merge-masked variant ($\text{res} = m \ ? \ f(a, b) : a$)
 - `mk:Z` or `mk:maskz`: Zero-masked variant ($\text{res} = m \ ? \ f(a, b) : 0$)
 - `mk:S` or `mk:masks`: Source-masked variant ($\text{res} = m \ ? \ f(a, b) : \text{src}$)
 - `mk:U`: Unmasked variant

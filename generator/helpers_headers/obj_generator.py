@@ -174,16 +174,34 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
             lines.append(f"inline void {fn}(const Rvm<T, LMUL>& m0, T* p0, const Rvd<T, LMUL>& r0)")
             lines.append(f"{{ mipp::{fn}<V, T, LMUL>(m0.m, p0, r0.r); }}")
             lines.append("")
+    # Masked gather / scatter: as in the C++ Functional API, the mask is typed on the index type
+    # (`Rvm<T_IDX, LMUL>`, `T_IDX` being the unsigned type of the same width as `T`).
     elif fn == "gather":
         lines.append("template <typename T, typename T_IDX, int LMUL = 1>")
         lines.append("inline Rvd<T, LMUL> gather(const T* p0, const Rvd<T_IDX, LMUL>& vi)")
         lines.append("{ return Rvd<T, LMUL>(mipp::gather(p0, vi.r)); }")
         lines.append("")
+        if is_maskzable:
+            lines.append("template <VARIANT V = Z, typename T, typename T_IDX, int LMUL = 1>")
+            lines.append("inline Rvd<T, LMUL> gather(const Rvm<T_IDX, LMUL>& m0, const T* p0, const Rvd<T_IDX, LMUL>& vi)")
+            lines.append("{ return Rvd<T, LMUL>(mipp::gather<V, T, T_IDX, LMUL>(m0.m, p0, vi.r)); }")
+            lines.append("")
+        if is_masksable:
+            lines.append("template <VARIANT V = S, typename T, typename T_IDX, int LMUL = 1>")
+            lines.append("inline Rvd<T, LMUL> gather(const Rvm<T_IDX, LMUL>& m0, const Rvd<T, LMUL>& rsrc, const T* p0, const Rvd<T_IDX, LMUL>& vi)")
+            lines.append("{ return Rvd<T, LMUL>(mipp::gather<V, T, T_IDX, LMUL>(m0.m, rsrc.r, p0, vi.r)); }")
+            lines.append("")
     elif fn == "scatter":
         lines.append("template <typename T, typename T_IDX, int LMUL = 1>")
         lines.append("inline void scatter(T* p0, const Rvd<T_IDX, LMUL>& vi, const Rvd<T, LMUL>& r0)")
         lines.append("{ mipp::scatter(p0, vi.r, r0.r); }")
         lines.append("")
+        if is_maskable or is_maskzable:
+            mk = "M" if is_maskable else "Z"
+            lines.append(f"template <VARIANT V = {mk}, typename T, typename T_IDX, int LMUL = 1>")
+            lines.append("inline void scatter(const Rvm<T_IDX, LMUL>& m0, T* p0, const Rvd<T_IDX, LMUL>& vi, const Rvd<T, LMUL>& r0)")
+            lines.append("{ mipp::scatter<V, T, T_IDX, LMUL>(m0.m, p0, vi.r, r0.r); }")
+            lines.append("")
     elif fn == "get":
         lines.append("template <typename T, int LMUL = 1>")
         lines.append("inline T get(const Rvd<T, LMUL>& r0, const size_t idx)")

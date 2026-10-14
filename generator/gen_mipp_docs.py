@@ -744,7 +744,7 @@ class SpecFuncInfo:
                 print("## Mask Execution Variants\n", file=f)
                 variants = []
                 if self.mask_support.is_maskable():
-                    variants.append("- **Masked (`_mask` / `<mipp::M>`)**: Active elements evaluated; inactive elements keep the value of the first operand.")
+                    variants.append("- **Merge-Masked (`_mask` / `<mipp::M>`)**: Active elements evaluated; inactive elements keep the value of the first operand.")
                 if self.mask_support.is_maskzable():
                     variants.append("- **Zero-Masked (`_maskz` / `<mipp::Z>`)**: Active elements evaluated; inactive elements zeroed.")
                 if self.mask_support.is_masksable():
@@ -777,10 +777,10 @@ class SpecFuncInfo:
             dts = all_datatypes
             dts_headers = all_datatypes_short
         
-        variants = [("Unmasked (`U`)", None)]
+        variants = [("Unmasked", None)]
         if self.mask_support and self.mask_support.is_any_mask():
             if self.mask_support.is_maskable():
-                variants.append(("Masked (`M`)", "mask"))
+                variants.append(("Merge-Masked (`M`)", "mask"))
             if self.mask_support.is_maskzable():
                 variants.append(("Zero-Masked (`Z`)", "maskz"))
             if self.mask_support.is_masksable():

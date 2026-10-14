@@ -169,7 +169,9 @@ kbd,
 pre,
 .md-typeset code {
   font-family: var(--mipp-font-mono);
-  font-feature-settings: "calt" 1, "liga" 1;
+  /* No ligatures: `!=`, `<=`, `==` must render as typed, not as ≠, ≤, ... */
+  font-variant-ligatures: none;
+  font-feature-settings: "calt" 0, "liga" 0;
 }
 
 /* Inline Code Styling */

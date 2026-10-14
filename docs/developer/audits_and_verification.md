@@ -77,4 +77,4 @@ The options are `coverage`, `redundancy`, `consistency`, `all` and `none`. In th
 - **GitLab CI** (`.gitlab-ci.yml`) is the main verification pipeline: it generates the headers (fine granularity, all ISAs including SVE) and the tests, then builds and runs the unit tests and the examples on a matrix of target architectures and compilers.
 - **GitHub Actions** (`.github/workflows/ci.yml`) generates headers, tests and documentation pages, deploys the documentation to GitHub Pages (`mkdocs build --strict`), and, on `v*` tags, attaches the header archives to the GitHub release.
 
-Since audits only emit warnings, they do not fail a pipeline. Validation checks (§1) do.
+Since audits only emit warnings, they do not fail a pipeline. Validation checks ([§1](#1-validation-checks-always-active-blocking)) do.

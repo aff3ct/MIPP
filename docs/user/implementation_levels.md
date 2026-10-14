@@ -6,37 +6,11 @@ MIPP guarantees 100% API completeness across all supported architectures through
 
 ## 1. The 4 Implementation Levels
 
-Because all MIPP functions are declared `static inline`, the compiler inlines them directly at call sites without function call overhead. The implementation levels differentiate functions strictly by their **instruction mapping**, **instruction count**, and **level of vectorization**:
+Because all MIPP functions are declared `static inline`, the compiler inlines them directly at call sites without function call overhead. The implementation levels differentiate functions strictly by their **instruction mapping**, **instruction count**, and **level of vectorization**. The same badges mark the levels in the [API Explorer](../explorer/index.md) and the [Function Support](../funcs_support/index.md) pages: <span class="mipp-isa-badge lvl-0">L0</span> Native Hardware, <span class="mipp-isa-badge lvl-1">L1</span> Dedicated Emulation, <span class="mipp-isa-badge lvl-2">L2</span> Generic Emulation, <span class="mipp-isa-badge lvl-3">L3</span> Scalar Fallback.
 
-```
-+-----------------------------------------------------------------------------+
-|                     MIPP 4-Level Fallback Hierarchy                         |
-+-----------------------------------------------------------------------------+
-|                                                                             |
-|  [ Level 0: Native Hardware ]                                               |
-|    - 1:1 single-instruction mapping to a dedicated target SIMD intrinsic    |
-|    - Minimal instruction count and optimal pipeline execution               |
-|           |                                                                 |
-|           v (if native single instruction does not exist)                   |
-|  [ Level 1: Dedicated Emulation ]                                           |
-|    - Target-specific multi-instruction sequence using ISA intrinsics        |
-|    - Exploits architecture-specific hardware instructions & bit-tricks      |
-|           |                                                                 |
-|           v (if target-specific sequence is not implemented)                |
-|  [ Level 2: Generic Emulation ]                                             |
-|    - Algorithmic composition using portable MIPP SIMD primitives            |
-|    - Fully vectorized, independent of target intrinsics                     |
-|           |                                                                 |
-|           v (if vectorized composition is unavailable)                      |
-|  [ Level 3: Scalar Fallback ]                                               |
-|    - Sequential element-by-element scalar fallback                          |
-|    - Guarantees complete API coverage and functional correctness            |
-|    - Can be auto-vectorized by the compiler                                 |
-|                                                                             |
-+-----------------------------------------------------------------------------+
-```
+![MIPP 4-level fallback hierarchy: L0 native hardware (one intrinsic), otherwise L1 dedicated emulation (sequence of intrinsics for this ISA), otherwise L2 generic emulation (composition of MIPP primitives), otherwise L3 scalar fallback (loop over the elements), with one example per level](../assets/images/fallback_levels.svg){ width="680" }
 
-### Level 0: Native Hardware
+### <span class="mipp-isa-badge lvl-0">L0</span> Level 0: Native Hardware
 - **Definition**: Direct 1:1 mapping to a single hardware vector instruction or vendor intrinsic provided natively by the target ISA for that datatype.
 - **Characteristics**: Lowest possible instruction count, minimum latency, and maximum hardware pipeline throughput.
 - **Examples**:
@@ -44,14 +18,14 @@ Because all MIPP functions are declared `static inline`, the compiler inlines th
     - `mipp_add_float32` on RVV $\to$ `__riscv_vfadd_vv_f32m1`
     - `mipp_add_float32` on ARM NEON $\to$ `vaddq_f32`
 
-### Level 1: Dedicated Emulation
+### <span class="mipp-isa-badge lvl-1">L1</span> Level 1: Dedicated Emulation
 - **Definition**: Target-specific emulation tailored to an ISA's instruction set when a single direct instruction is unavailable.
 - **Performance**: High vector efficiency using handcrafted target assembly and intrinsic sequences.
 - **Examples**:
     - Horizontal reduction on AVX (`hadd_float32`), using `_mm256_permute2f128_ps`, `_mm256_shuffle_ps`, and `_mm256_add_ps` to perform in-register tree reduction across 256-bit lanes.
     - Gather load emulation on baseline AVX prior to AVX2 hardware `vgather` instructions.
 
-### Level 2: Generic Emulation
+### <span class="mipp-isa-badge lvl-2">L2</span> Level 2: Generic Emulation
 - **Definition**: Vectorized algorithms implemented on top of standard MIPP primitives.
 - **Performance**: Fully vectorized execution across all SIMD lanes without scalar unrolling.
 - **Examples**:
@@ -59,7 +33,7 @@ Because all MIPP functions are declared `static inline`, the compiler inlines th
     - Elementary math functions (such as vectorized `exp`, `log`, `sin`, `cos` polynomial expansions).
     - Software emulation of masked execution on targets lacking native instruction predication (evaluating unmasked operations and applying vector blending).
 
-### Level 3: Scalar Fallback
+### <span class="mipp-isa-badge lvl-3">L3</span> Level 3: Scalar Fallback
 - **Definition**: Automated fallback to sequential scalar element processing.
 - **Performance**: Functional fallback path with sequential latency.
 - **Mechanics**: The vector register is unpacked into scalar values, processed element-by-element via scalar operators, and repacked into the output vector register. The code is written so that the compiler can auto-vectorize it, without guarantee.

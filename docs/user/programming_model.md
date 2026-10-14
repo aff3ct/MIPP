@@ -29,10 +29,10 @@ When operating at standard vector length ($\text{LMUL}=1$), the `_m1` suffix is 
 
 - **Standard ($\text{LMUL}=1$, unmasked)**: `mipp_add_float32(r0, r1)` or `mipp_add_float32_m1(r0, r1)`
 - **Multi-Register ($\text{LMUL}=2, 4, 8$)**: `mipp_add_float32_m2(r0, r1)`, `mipp_add_float32_m4(r0, r1)`
-- **Masked ($\text{LMUL}=1$)**: `mipp_add_float32_mask(m0, r0, r1)` or `mipp_add_float32_mask_m1(m0, r0, r1)`
+- **Merge-Masked ($\text{LMUL}=1$)**: `mipp_add_float32_mask(m0, r0, r1)` or `mipp_add_float32_mask_m1(m0, r0, r1)`
 - **Zero-Masked**: `mipp_add_float32_maskz(m0, r0, r1)` or `mipp_add_float32_maskz_m1(m0, r0, r1)`
 - **Source-Masked**: `mipp_add_float32_masks(m0, rsrc, r0, r1)` or `mipp_add_float32_masks_m1(m0, rsrc, r0, r1)`
-- **Masked + Multi-Register**: `mipp_add_float32_mask_m2(m0, r0, r1)`
+- **Merge-Masked + Multi-Register**: `mipp_add_float32_mask_m2(m0, r0, r1)`
 
 ### 2.2. Vector & Mask Datatypes (`rvd` and `rvm`)
 MIPP defines distinct data register (`rvd`) and mask register (`rvm`) types for each of the 10 supported data types across all LMUL configurations:
@@ -64,7 +64,7 @@ The C++ Functional API parameterizes operations over the element type `T`, an op
 | Parameter | Domain / Supported Values | Description & Constraints |
 | :--- | :--- | :--- |
 | `typename T` | `float`, `double`, `int8_t`, `int16_t`, `int32_t`, `int64_t`, `uint8_t`, `uint16_t`, `uint32_t`, `uint64_t` | 10 standard numeric datatypes supported across all operations. |
-| `int LMUL` | `1, 2, 4, 8` (integer multipliers) and `-2` for [half-vectors](vector_types_and_lmul.md#half-vectors) (`d2`, AVX / AVX-512 / RVV only) | Vector length multiplier (register grouping, or half-vector). Defaults to `1`. See [Vector Types & LMUL](vector_types_and_lmul.md). |
+| `int LMUL` | `1, 2, 4, 8` (integer multipliers) and `-2` for [half-vectors](vector_types_and_lmul.md#half-vectors) (`d2`: AVX, AVX-512, RVV and scalar only) | Vector length multiplier (register grouping, or half-vector). Defaults to `1`. See [Vector Types & LMUL](vector_types_and_lmul.md). |
 | `mipp::ISA ISA_TYPE` | `mipp::ISA::SCALAR`, `mipp::ISA::SSE`, `mipp::ISA::AVX`, `mipp::ISA::AVX512`, `mipp::ISA::NEON`, `mipp::ISA::SVE`, `mipp::ISA::RVV` | Target instruction set architecture. Defaults to `mipp::DEFAULT_ISA`. |
 
 ### 3.2. Types & Function Signatures
@@ -111,6 +111,8 @@ Masked operations take the variant as first template argument (`mipp::M`, `mipp:
 auto c = mipp::add<mipp::M, float>(m, a, b); // res[i] = m[i] ? a[i] + b[i] : a[i]
 ```
 
+The unmasked form is the call without a mask (`mipp::add(a, b)`). The `mipp::U` enumerator exists, but no masked signature accepts it: `mipp::add<mipp::U, float>(m, a, b)` compiles and then fails at link time (undefined reference).
+
 The four variants, their semantics and the syntax in each API are described in [Masking Semantics](masking_semantics.md).
 
 ---
@@ -118,6 +120,7 @@ The four variants, their semantics and the syntax in each API are described in [
 ## 4. C++ Object API (`<mipp_obj.hpp>`)
 
 The Object API encapsulates raw SIMD registers and predicates inside high-level C++ classes:
+
 - `mipp::Rvd<T, LMUL>` for numeric data vectors.
 - `mipp::Rvm<T, LMUL>` for boolean mask vectors.
 
@@ -126,48 +129,70 @@ The Object API encapsulates raw SIMD registers and predicates inside high-level 
 ```cpp
 template <typename T, int LMUL = 1>
 struct Rvd {
+    using value_type = T;
+    static constexpr int lmul = LMUL;
     rvd<T, LMUL> r; // Underlying low-level SIMD register
 
     static constexpr int N(); // Number of elements (mipp::N<T, LMUL>())
 
     // Constructors
     Rvd() = default;
-    Rvd(rvd<T, LMUL> r); // Wraps a low-level rvd register
-    Rvd(const T val);    // Broadcasts a scalar (mipp::set1)
-    Rvd(const T* data);  // Loads from memory, no alignment requirement (mipp::loadu)
+    Rvd(rvd<T, LMUL> r0); // Wraps a low-level rvd register
+    Rvd(const T val);     // Broadcasts a scalar (mipp::set1)
+    Rvd(const T* p0);     // Loads from memory, no alignment requirement (mipp::loadu)
 
     // Implicit conversion to the low-level register (interoperability with the C++ Functional API)
     operator rvd<T, LMUL>() const;
+    Rvd& operator=(const rvd<T, LMUL>& r0);
+    Rvd& operator=(const T val);          // Broadcast
 
-    // Element access
     T operator[](const size_t index) const; // Reads one element (mipp::get)
 };
 
 template <typename T, int LMUL = 1>
 struct Rvm {
+    using value_type = T;
+    static constexpr int lmul = LMUL;
     rvm<T, LMUL> m; // Underlying low-level mask register
 
-    Rvm() = default;
-    Rvm(rvm<T, LMUL> m);       // Wraps a low-level rvm register
-    Rvm(const bool val);       // All lanes active or inactive (mipp::set1_k)
-    Rvm(const int32_t vals[]); // Per-lane initialization (mipp::set_k)
+    static constexpr int N();
 
-    operator rvm<T, LMUL>() const;   // Implicit conversion to the low-level mask
-    bool operator[](const size_t index) const; // Reads one lane (mipp::get)
+    Rvm() = default;
+    Rvm(rvm<T, LMUL> m0);                         // Wraps a low-level rvm register
+    Rvm(const bool val);                          // All lanes active or inactive (mipp::set1_k)
+    Rvm(const int32_t vals[mipp::N<T, LMUL>()]);  // Lane i active iff vals[i] != 0 (mipp::set_k)
+
+    operator rvm<T, LMUL>() const;                // Implicit conversion to the low-level mask
+    Rvm& operator=(const rvm<T, LMUL>& m0);
+    Rvm& operator=(const bool val);
+
+    bool operator[](const size_t index) const;    // Reads one lane: true if active
 };
 ```
 
+!!! warning "Per-lane initialization takes `int32_t`, not `bool`"
+    Like `set_k` in every API, the per-lane constructor takes an `int32_t` array, whatever `T`. A `bool` array is **not** rejected: it decays to a pointer, which converts to `bool`, so `Rvm<float> m(bool_array)` silently selects `Rvm(const bool)` and activates **all** lanes. Use an `int32_t` array.
+
+Element access: `v[i]` and the free function `mipp::get(v, i)` return the element as `T`. On a mask, `m[i]` and `mipp::get(m, i)` return a `bool`: `get` taking an `Rvm` is the C++ name of the C function `get_k` (see [Memory & Alignment](memory_and_alignment.md#4-scalar-element-extraction)).
+
 ### 4.2. Overloaded Operators Reference
 
-The C++ Object API provides an extensive set of operator overloads for both data vectors (`Rvd`) and mask vectors (`Rvm`):
+The C++ Object API provides operator overloads for data vectors (`Rvd`) and mask vectors (`Rvm`). In the table, `T` is a scalar of the element type: it must be exactly `T`, since it takes part in template deduction (`a + 1.f` is valid for `Rvd<float>`, `a + 1` is not).
 
 | Operation Category | Supported Operators | Operands | Return Type |
 | :--- | :--- | :--- | :--- |
-| **Arithmetic** | `+`, `-`, `*`, `/`, unary `-` | `Rvd<T>`, `Rvd<T>` | `Rvd<T>` |
-| **Compound Assignment** | `+=`, `-=`, `*=`, `/=`, `&=`, `\|=`, `^=` | `Rvd<T>`, `Rvd<T>` | `Rvd<T>&` |
-| **Bitwise & Shifts** | `&`, `\|`, `^`, `~`, `<<`, `>>` | `Rvd<T>`, `Rvd<T>` / `int` | `Rvd<T>` |
-| **Relational / Comparison** | `==`, `!=`, `<`, `<=`, `>`, `>=` | `Rvd<T>`, `Rvd<T>` | `Rvm<T>` *(Mask)* |
-| **Mask Logic & Inversion** | `&`, `\|`, `^`, `~` | `Rvm<T>`, `Rvm<T>` | `Rvm<T>` |
+| **Arithmetic** | `+`, `-`, `*`, `/` | `Rvd<T>` and `Rvd<T>`, `Rvd<T>` and `T`, `T` and `Rvd<T>` | `Rvd<T>` |
+| **Negation** | unary `-` | `Rvd<T>` | `Rvd<T>` |
+| **Bitwise** | `&`, `|`, `^`, `~` | same as arithmetic / `Rvd<T>` | `Rvd<T>` |
+| **Shifts** | `<<`, `>>` | `Rvd<T>` and `int32_t` (same shift count for every lane) | `Rvd<T>` |
+| **Compound Assignment** | `+=`, `-=`, `*=`, `/=`, `&=`, `|=`, `^=` | `Rvd<T>&` and `Rvd<T>` or `T` | `Rvd<T>&` |
+| **Compound Shift** | `<<=`, `>>=` | `Rvd<T>&` and `int32_t` | `Rvd<T>&` |
+| **Relational / Comparison** | `==`, `!=`, `<`, `<=`, `>`, `>=` | same as arithmetic | `Rvm<T>` *(Mask)* |
+| **Mask Logic** | `&`, `|`, `^` | `Rvm<T>` and `Rvm<T>` or `bool` | `Rvm<T>` |
+| **Mask Inversion** | `~`, `!` | `Rvm<T>` | `Rvm<T>` |
+| **Mask Compound Assignment** | `&=`, `|=`, `^=` | `Rvm<T>&` and `Rvm<T>` or `bool` | `Rvm<T>&` |
+
+Bitwise operators and shifts are defined for every element type: on floating-point types they act on the bit pattern. There is no per-lane shift count (`a << b` with `b` an `Rvd` does not compile).
 
 ### 4.3. Free Functions in Namespace `mipp::`
 
@@ -242,4 +267,4 @@ void saxpy(std::size_t n, float a, const float* x, float* y)
 ```
 
 !!! note "Performance"
-    Masked loads and stores map to native instructions on AVX-512 (8-bit and 16-bit types require AVX-512BW), and masked stores also on RVV. In the other cases they are currently emulated element by element, so the masked remainder is not faster than a scalar loop: its benefit is a single code path, with no scalar copy of the loop body. The implementation level of each target is given in [`load`](../funcs_support/load/load.md) and [`store`](../funcs_support/store/store.md).
+    The masked `loadu` / `storeu` of this example map to native instructions only on AVX-512, for floating-point and signed integer types (8-bit and 16-bit types require AVX-512BW). Everywhere else, RVV included, they are currently emulated element by element, so the masked remainder is not faster than a scalar loop: its benefit is a single code path, with no scalar copy of the loop body. The implementation level of each target and variant is given in [`loadu`](../funcs_support/load/loadu.md) and [`storeu`](../funcs_support/store/storeu.md).

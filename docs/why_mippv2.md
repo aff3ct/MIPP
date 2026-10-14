@@ -11,31 +11,7 @@ MIPPv2 provides portable, zero-overhead SIMD computing across x86, ARM, and RISC
 
 ## 1. Key Architectural Principles
 
-```
-                    +-----------------------------+
-                    |      User Application       |
-                    +-----------------------------+
-                                   |
-          +------------------------+------------------------+
-          |                        |                        |
-          v                        v                        v
-+-------------------+    +-------------------+    +-------------------+
-|       C API       |    |  C++ Functional   |    |    C++ Object     |
-| mipp_add_float32  |    |  mipp::add(a, b)  |    |       a + b       |
-|     <mipp.h>      |    |    <mipp.hpp>     |    |  <mipp_obj.hpp>   |
-+-------------------+    +-------------------+    +-------------------+
-          |                        |                        |
-          +------------------------+------------------------+
-                                   |
-                    +-----------------------------+
-                    |  4-Level Fallback Engine    |
-                    |    L0 -> L1 -> L2 -> L3     |
-                    +-----------------------------+
-                                   |
-  +----------+----------+----------+----------+----------+----------+
-  |   SSE    |   AVX    | AVX-512  |   NEON   |   SVE    |   RVV    |
-  +----------+----------+----------+----------+----------+----------+
-```
+![MIPPv2 architecture: three APIs (C, C++ Functional, C++ Object) share one implementation that picks, per function, datatype and target, the first available level among L0 native, L1 dedicated emulation, L2 generic emulation and L3 scalar fallback; targets SSE, AVX, AVX-512, NEON, SVE, RVV and Scalar](assets/images/architecture.svg){ width="680" }
 
 ### 1.1. Three APIs
 Three complementary interfaces mapping to the same inlined instructions:
@@ -47,7 +23,7 @@ Three complementary interfaces mapping to the same inlined instructions:
 ### 1.2. Deterministic 4-Level Fallback Hierarchy
 Every function is implemented on every target, for all 10 data types, at the best available level: **Level 0 (Native Hardware)**, **Level 1 (Dedicated Emulation)**, **Level 2 (Generic Emulation)** or **Level 3 (Scalar Fallback)**. See [Implementation Levels](user/implementation_levels.md), including its [known limitations](user/implementation_levels.md#known-limitations).
 
-### 1.3. Generalized Length Multiplier (LMUL)``
+### 1.3. Generalized Length Multiplier (LMUL)
 
 Uniform vector register grouping ($\text{LMUL} \in \{1, 2, 4, 8\}$):
 
@@ -59,7 +35,7 @@ Uniform vector register grouping ($\text{LMUL} \in \{1, 2, 4, 8\}$):
 Standardized execution semantics across all operations:
 
 - **Unmasked** (`U`, no suffix): Unconditional vector computation.
-- **Masked** (`M`, `_mask`): Inactive elements keep the first operand ($\text{res}_i = m_i \ ? \ f(a_i, b_i) : a_i$).
+- **Merge-Masked** (`M`, `_mask`): Inactive elements keep the first operand ($\text{res}_i = m_i \ ? \ f(a_i, b_i) : a_i$).
 - **Zero-Masked** (`Z`, `_maskz`): Zeroes inactive elements ($\text{res}_i = m_i \ ? \ f(a_i, b_i) : 0$).
 - **Source-Masked** (`S`, `_masks`): Inactive elements take the values of a source vector ($\text{res}_i = m_i \ ? \ f(a_i, b_i) : \text{src}_i$).
 

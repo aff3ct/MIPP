@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 404" width="680" height="404" role="img" aria-labelledby="ar-title ar-desc">
+  <title id="ar-title">MIPPv2 architecture</title>
+  <desc id="ar-desc">The user application calls one of three APIs: the C API (header mipp.h, for example mipp_add_float32(a, b)), the C++ Functional API (header mipp.hpp, mipp::add(a, b)) or the C++ Object API (header mipp_obj.hpp, a + b). The three share one implementation, which picks for each function, datatype and target the first available level: L0 native hardware, else L1 dedicated emulation, else L2 generic emulation, else L3 scalar fallback. Targets: SSE, AVX and AVX-512 on x86, NEON and SVE on Arm, RVV on RISC-V, and a portable scalar target.</desc>
+  <defs>
+    <style>
+      .head { font: 600 11px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; fill: #64748b; letter-spacing: .06em; }
+      .sub  { font: 500 11px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; fill: #64748b; }
+      .app-t { font: 600 13px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; fill: #ffffff; text-anchor: middle; dominant-baseline: central; }
+      .api-t { font: 700 14px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; fill: #ffffff; text-anchor: middle; }
+      .api-h { font: 500 12px ui-monospace, Menlo, Consolas, "DejaVu Sans Mono", monospace; fill: #ffffff; fill-opacity: .85; text-anchor: middle; }
+      .api-x { font: 600 12px ui-monospace, Menlo, Consolas, "DejaVu Sans Mono", monospace; fill: #ffffff; text-anchor: middle; dominant-baseline: central; }
+      .lvl-t { font: 700 13px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+      .lvl-s { font: 500 11px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; fill: #64748b; }
+      .bdg   { font: 700 12px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; fill: #ffffff; text-anchor: middle; dominant-baseline: central; }
+      .else  { font: italic 500 10px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; fill: #64748b; text-anchor: middle; }
+      .isa-t { font: 600 12px ui-monospace, Menlo, Consolas, "DejaVu Sans Mono", monospace; fill: #ffffff; text-anchor: middle; dominant-baseline: central; }
+      .grp   { font: 500 11px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; fill: #64748b; text-anchor: middle; }
+      .app  { fill: #334155; stroke: #94a3b8; stroke-width: 1.5; }
+      .c    { fill: #2563eb; }
+      .fun  { fill: #7c3aed; }
+      .obj  { fill: #db2777; }
+      .chip { fill: rgba(0, 0, 0, 0.18); }
+      .eng  { fill: rgba(100, 116, 139, 0.08); stroke: #64748b; stroke-width: 1.5; }
+      .isa  { fill: #334155; stroke: #94a3b8; stroke-width: 1.5; }
+      .wire { stroke: #64748b; stroke-width: 1.5; fill: none; }
+      .rule { stroke: #64748b; stroke-opacity: .55; stroke-width: 1; fill: none; }
+      .l0 { fill: #059669; } .l0-t { fill: #059669; } .l0-c { fill: rgba(5, 150, 105, 0.10);  stroke: rgba(5, 150, 105, 0.50);  stroke-width: 1.2; }
+      .l1 { fill: #2563eb; } .l1-t { fill: #2563eb; } .l1-c { fill: rgba(37, 99, 235, 0.10);  stroke: rgba(37, 99, 235, 0.50);  stroke-width: 1.2; }
+      .l2 { fill: #d97706; } .l2-t { fill: #d97706; } .l2-c { fill: rgba(217, 119, 6, 0.10);  stroke: rgba(217, 119, 6, 0.50);  stroke-width: 1.2; }
+      .l3 { fill: #64748b; } .l3-t { fill: #64748b; } .l3-c { fill: rgba(100, 116, 139, 0.10); stroke: rgba(100, 116, 139, 0.50); stroke-width: 1.2; }
+    </style>
+    <marker id="ar-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#64748b"/>
+    </marker>
+  </defs>
+
+  <!-- ===== Application ===== -->
+  <rect class="app" x="240" y="8" width="200" height="34" rx="8"/>
+  <text class="app-t" x="340" y="25">User application</text>
+
+  <!-- fan-out to the three APIs -->
+  <path class="wire" d="M340,42 V56 M112,56 H568"/>
+  <line class="wire" x1="112" y1="56" x2="112" y2="74" marker-end="url(#ar-arr)"/>
+  <line class="wire" x1="340" y1="56" x2="340" y2="74" marker-end="url(#ar-arr)"/>
+  <line class="wire" x1="568" y1="56" x2="568" y2="74" marker-end="url(#ar-arr)"/>
+
+  <!-- ===== Three APIs ===== -->
+  <rect class="c" x="8" y="76" width="208" height="88" rx="10"/>
+  <text class="api-t" x="112" y="100">C API</text>
+  <text class="api-h" x="112" y="119">&lt;mipp.h&gt; · C99</text>
+  <rect class="chip" x="24" y="130" width="176" height="24" rx="6"/>
+  <text class="api-x" x="112" y="142">mipp_add_float32(a, b)</text>
+
+  <rect class="fun" x="236" y="76" width="208" height="88" rx="10"/>
+  <text class="api-t" x="340" y="100">C++ Functional</text>
+  <text class="api-h" x="340" y="119">&lt;mipp.hpp&gt; · C++11</text>
+  <rect class="chip" x="252" y="130" width="176" height="24" rx="6"/>
+  <text class="api-x" x="340" y="142">mipp::add(a, b)</text>
+
+  <rect class="obj" x="464" y="76" width="208" height="88" rx="10"/>
+  <text class="api-t" x="568" y="100">C++ Object</text>
+  <text class="api-h" x="568" y="119">&lt;mipp_obj.hpp&gt; · C++11</text>
+  <rect class="chip" x="480" y="130" width="176" height="24" rx="6"/>
+  <text class="api-x" x="568" y="142">a + b</text>
+
+  <!-- fan-in to the shared implementation -->
+  <path class="wire" d="M112,164 V178 M568,164 V178 M340,164 V178 M112,178 H568"/>
+  <line class="wire" x1="340" y1="178" x2="340" y2="194" marker-end="url(#ar-arr)"/>
+
+  <!-- ===== Shared implementation ===== -->
+  <rect class="eng" x="8" y="196" width="664" height="108" rx="10"/>
+  <text class="head" x="24" y="216">SHARED IMPLEMENTATION · 4-LEVEL FALLBACK</text>
+  <text class="sub" x="656" y="216" text-anchor="end">first available level per function, type and target</text>
+
+  <rect class="l0-c" x="20"  y="228" width="142" height="62" rx="8"/>
+  <rect class="l0" x="30" y="238" width="34" height="20" rx="10"/><text class="bdg" x="47" y="248">L0</text>
+  <text class="lvl-t l0-t" x="72" y="253">Native</text>
+  <text class="lvl-s" x="30" y="278">one intrinsic</text>
+
+  <text class="else" x="174" y="252">else</text>
+  <line class="wire" x1="164" y1="259" x2="184" y2="259" marker-end="url(#ar-arr)"/>
+
+  <rect class="l1-c" x="186" y="228" width="142" height="62" rx="8"/>
+  <rect class="l1" x="196" y="238" width="34" height="20" rx="10"/><text class="bdg" x="213" y="248">L1</text>
+  <text class="lvl-t l1-t" x="238" y="253">Dedicated</text>
+  <text class="lvl-s" x="196" y="278">ISA-specific sequence</text>
+
+  <text class="else" x="340" y="252">else</text>
+  <line class="wire" x1="330" y1="259" x2="350" y2="259" marker-end="url(#ar-arr)"/>
+
+  <rect class="l2-c" x="352" y="228" width="142" height="62" rx="8"/>
+  <rect class="l2" x="362" y="238" width="34" height="20" rx="10"/><text class="bdg" x="379" y="248">L2</text>
+  <text class="lvl-t l2-t" x="404" y="253">Generic</text>
+  <text class="lvl-s" x="362" y="278">MIPP primitives</text>
+
+  <text class="else" x="506" y="252">else</text>
+  <line class="wire" x1="496" y1="259" x2="516" y2="259" marker-end="url(#ar-arr)"/>
+
+  <rect class="l3-c" x="518" y="228" width="142" height="62" rx="8"/>
+  <rect class="l3" x="528" y="238" width="34" height="20" rx="10"/><text class="bdg" x="545" y="248">L3</text>
+  <text class="lvl-t l3-t" x="570" y="253">Scalar</text>
+  <text class="lvl-s" x="528" y="278">element loop</text>
+
+  <!-- to the targets -->
+  <line class="wire" x1="340" y1="304" x2="340" y2="322" marker-end="url(#ar-arr)"/>
+
+  <!-- ===== Targets ===== -->
+  <rect class="isa" x="10"  y="324" width="84" height="32" rx="7"/><text class="isa-t" x="52"  y="340">SSE</text>
+  <rect class="isa" x="106" y="324" width="84" height="32" rx="7"/><text class="isa-t" x="148" y="340">AVX</text>
+  <rect class="isa" x="202" y="324" width="84" height="32" rx="7"/><text class="isa-t" x="244" y="340">AVX-512</text>
+  <rect class="isa" x="298" y="324" width="84" height="32" rx="7"/><text class="isa-t" x="340" y="340">NEON</text>
+  <rect class="isa" x="394" y="324" width="84" height="32" rx="7"/><text class="isa-t" x="436" y="340">SVE</text>
+  <rect class="isa" x="490" y="324" width="84" height="32" rx="7"/><text class="isa-t" x="532" y="340">RVV</text>
+  <rect class="isa" x="586" y="324" width="84" height="32" rx="7"/><text class="isa-t" x="628" y="340">Scalar</text>
+
+  <path class="rule" d="M10,366 V372 H286 V366"/>  <text class="grp" x="148" y="390">x86</text>
+  <path class="rule" d="M298,366 V372 H478 V366"/> <text class="grp" x="388" y="390">Arm</text>
+  <path class="rule" d="M490,366 V372 H574 V366"/> <text class="grp" x="532" y="390">RISC-V</text>
+  <path class="rule" d="M586,366 V372 H670 V366"/> <text class="grp" x="628" y="390">any CPU</text>
+</svg>

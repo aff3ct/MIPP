@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 452" width="680" height="452" role="img" aria-labelledby="fl-title fl-desc">
+  <title id="fl-title">MIPP 4-level fallback hierarchy</title>
+  <desc id="fl-desc">For each function, datatype and target, MIPP uses the first available level. Level 0, native hardware: one intrinsic of the target, for example add_float32 on AVX maps to _mm256_add_ps. Otherwise level 1, dedicated emulation: a short sequence of intrinsics written for this ISA, for example hadd_float32 on AVX. Otherwise level 2, generic emulation: a composition of MIPP primitives, still vectorized, for example fmadd on SSE without FMA computes add(mul(a, b), c). Otherwise level 3, scalar fallback: a loop over the elements, always available, for example wcvt_int32_int64 on RVV.</desc>
+  <defs>
+    <style>
+      .ttl  { font: 700 14px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+      .dsc  { font: 500 12px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; fill: #64748b; }
+      .cond { font: italic 500 12px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; fill: #64748b; dominant-baseline: central; }
+      .exh  { font: 600 10px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; fill: #64748b; letter-spacing: .06em; }
+      .ex   { font: 500 12px ui-monospace, Menlo, Consolas, "DejaVu Sans Mono", monospace; fill: #64748b; }
+      .bdg  { font: 700 13px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; fill: #ffffff; text-anchor: middle; dominant-baseline: central; }
+      .axis { font: 600 11px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; fill: #64748b; letter-spacing: .04em; text-anchor: middle; }
+      .exbox { fill: rgba(100, 116, 139, 0.10); stroke: rgba(100, 116, 139, 0.35); stroke-width: 1; }
+      .arrow { stroke: #64748b; stroke-width: 1.5; fill: none; }
+      .l0 { fill: #059669; } .l0-t { fill: #059669; } .l0-c { fill: rgba(5, 150, 105, 0.08);  stroke: rgba(5, 150, 105, 0.50);  stroke-width: 1.5; }
+      .l1 { fill: #2563eb; } .l1-t { fill: #2563eb; } .l1-c { fill: rgba(37, 99, 235, 0.08);  stroke: rgba(37, 99, 235, 0.50);  stroke-width: 1.5; }
+      .l2 { fill: #d97706; } .l2-t { fill: #d97706; } .l2-c { fill: rgba(217, 119, 6, 0.08);  stroke: rgba(217, 119, 6, 0.50);  stroke-width: 1.5; }
+      .l3 { fill: #64748b; } .l3-t { fill: #64748b; } .l3-c { fill: rgba(100, 116, 139, 0.08); stroke: rgba(100, 116, 139, 0.50); stroke-width: 1.5; }
+    </style>
+    <marker id="fl-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#64748b"/>
+    </marker>
+    <linearGradient id="fl-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0"    stop-color="#059669"/>
+      <stop offset="0.36" stop-color="#2563eb"/>
+      <stop offset="0.64" stop-color="#d97706"/>
+      <stop offset="1"    stop-color="#64748b"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ===== L0 ===== -->
+  <rect class="l0-c" x="8" y="8" width="616" height="80" rx="10"/>
+  <rect class="l0" x="24" y="22" width="44" height="26" rx="13"/><text class="bdg" x="46" y="35">L0</text>
+  <text class="ttl l0-t" x="84" y="40">Native Hardware</text>
+  <text class="dsc" x="84" y="62">One intrinsic of the target ISA,</text>
+  <text class="dsc" x="84" y="78">for this function and datatype.</text>
+  <rect class="exbox" x="368" y="20" width="242" height="56" rx="8"/>
+  <text class="exh" x="380" y="37">EXAMPLE · AVX</text>
+  <text class="ex"  x="380" y="54">add_float32</text>
+  <text class="ex"  x="380" y="69">→ _mm256_add_ps(a, b)</text>
+
+  <!-- L0 -> L1 -->
+  <line class="arrow" x1="46" y1="88" x2="46" y2="124" marker-end="url(#fl-arr)"/>
+  <text class="cond" x="64" y="107">otherwise: no single native instruction</text>
+
+  <!-- ===== L1 ===== -->
+  <rect class="l1-c" x="8" y="128" width="616" height="80" rx="10"/>
+  <rect class="l1" x="24" y="142" width="44" height="26" rx="13"/><text class="bdg" x="46" y="155">L1</text>
+  <text class="ttl l1-t" x="84" y="160">Dedicated Emulation</text>
+  <text class="dsc" x="84" y="182">Short sequence of intrinsics,</text>
+  <text class="dsc" x="84" y="198">written for this ISA.</text>
+  <rect class="exbox" x="368" y="140" width="242" height="56" rx="8"/>
+  <text class="exh" x="380" y="157">EXAMPLE · AVX</text>
+  <text class="ex"  x="380" y="174">hadd_float32</text>
+  <text class="ex"  x="380" y="189">→ permute + shuffle + add</text>
+
+  <!-- L1 -> L2 -->
+  <line class="arrow" x1="46" y1="208" x2="46" y2="244" marker-end="url(#fl-arr)"/>
+  <text class="cond" x="64" y="227">otherwise: no sequence written for this ISA</text>
+
+  <!-- ===== L2 ===== -->
+  <rect class="l2-c" x="8" y="248" width="616" height="80" rx="10"/>
+  <rect class="l2" x="24" y="262" width="44" height="26" rx="13"/><text class="bdg" x="46" y="275">L2</text>
+  <text class="ttl l2-t" x="84" y="280">Generic Emulation</text>
+  <text class="dsc" x="84" y="302">Composition of MIPP primitives,</text>
+  <text class="dsc" x="84" y="318">portable and still vectorized.</text>
+  <rect class="exbox" x="368" y="260" width="242" height="56" rx="8"/>
+  <text class="exh" x="380" y="277">EXAMPLE · SSE WITHOUT FMA</text>
+  <text class="ex"  x="380" y="294">fmadd(a, b, c)</text>
+  <text class="ex"  x="380" y="309">→ add(mul(a, b), c)</text>
+
+  <!-- L2 -> L3 -->
+  <line class="arrow" x1="46" y1="328" x2="46" y2="364" marker-end="url(#fl-arr)"/>
+  <text class="cond" x="64" y="347">otherwise: no vectorized composition</text>
+
+  <!-- ===== L3 ===== -->
+  <rect class="l3-c" x="8" y="368" width="616" height="80" rx="10"/>
+  <rect class="l3" x="24" y="382" width="44" height="26" rx="13"/><text class="bdg" x="46" y="395">L3</text>
+  <text class="ttl l3-t" x="84" y="400">Scalar Fallback</text>
+  <text class="dsc" x="84" y="422">Loop over the elements,</text>
+  <text class="dsc" x="84" y="438">always available.</text>
+  <rect class="exbox" x="368" y="380" width="242" height="56" rx="8"/>
+  <text class="exh" x="380" y="397">EXAMPLE · RVV</text>
+  <text class="ex"  x="380" y="414">wcvt_int32_int64</text>
+  <text class="ex"  x="380" y="429">→ for each lane: (int64_t) x</text>
+
+  <!-- ===== Preference axis ===== -->
+  <rect x="640" y="8" width="8" height="440" rx="4" fill="url(#fl-grad)"/>
+  <text class="axis" transform="translate(668 228) rotate(90)">FIRST AVAILABLE LEVEL IS USED  ·  FASTEST FIRST</text>
+</svg>

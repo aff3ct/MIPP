@@ -663,7 +663,7 @@ def build_mask_modes_metadata():
             "id": "mask",
             "label": "mask",
             "badge_class": "mask-mask",
-            "description": "Predicated execution with blend / merge preservation",
+            "description": "Merge-masked: inactive lanes keep the first operand",
             "obj_support": True
         },
         "maskz": {
