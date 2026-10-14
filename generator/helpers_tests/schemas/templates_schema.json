@@ -1,23 +1,27 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Test Templates",
+    "description": "Code templates of the generated tests, in `helpers_tests/tests_templates.json`, grouped by section and by API (`c`, `cpp`, `obj`, or `all`). A template is a list of lines with `{{placeholder}}` variables, filled by `tests_builder.py`; the `%token<params>(args)%` markers are translated for each API by `dialect_adapters.py`.",
     "additionalProperties": false,
     "definitions": {
         "template_map": {
-            "type": "object",
             "description": "Named templates: each value is an array of template strings with {{placeholder}} variables.",
+            "type": "object",
             "additionalProperties": {
                 "type": "array",
                 "items": {
                     "type": "string"
                 }
+            },
+            "propertyNames": {
+                "title": "template"
             }
         }
     },
-    "description": "Reusable templates for generated test files, organised by section and dialect namespace (c, cpp, obj, all).",
     "properties": {
         "assertions": {
-            "type": "object",
             "description": "Assertion snippets grouped by dialect namespace.",
+            "type": "object",
             "properties": {
                 "c": {
                     "$ref": "#/definitions/template_map"
@@ -35,8 +39,8 @@
             "additionalProperties": false
         },
         "headers": {
-            "type": "object",
             "description": "Fixed include blocks grouped by dialect namespace.",
+            "type": "object",
             "properties": {
                 "c": {
                     "$ref": "#/definitions/template_map"
@@ -54,8 +58,8 @@
             "additionalProperties": false
         },
         "func_templates": {
-            "type": "object",
             "description": "Structural boilerplate (function signatures, load blocks, section wrappers, lambdas) grouped by dialect namespace.",
+            "type": "object",
             "properties": {
                 "c": {
                     "$ref": "#/definitions/template_map"
@@ -78,6 +82,5 @@
         "headers",
         "func_templates"
     ],
-    "title": "TestsTemplatesSchema",
     "type": "object"
 }

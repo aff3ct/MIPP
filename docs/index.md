@@ -114,4 +114,4 @@ MIPP supports 10 fundamental numeric data types across all vector abstractions:
 - **[Headers & Compile Time](user/headers_and_compile_time.md)**: Header tree, monolithic / per-function / fine-grained inclusion, and measured compile times.
 - **[API Explorer](explorer/index.md)**: Interactive catalog with instant search, reverse vendor intrinsic lookup, and switching between the three APIs.
 - **[Specifications](funcs_support/index.md)**: Complete function prototypes, mathematical descriptions, and target ISA capability matrices.
-- **[Developer Guide](developer/index.md)**: Code generator architecture, declarative JSON database schema, **templating DSL**, and contribution guide.
+- **[Developer Guide](developer/index.md)**: Generation pipeline, setup, and tutorials to add a function, an implementation or an ISA.

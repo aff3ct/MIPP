@@ -1,0 +1,6 @@
+title: Internals
+nav:
+  - Code Generation: code_generation.md
+  - Header Layout: header_layout.md
+  - Test Generator: test_generator.md
+  - Docs & API Explorer: docs_and_explorer.md

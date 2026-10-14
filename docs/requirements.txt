@@ -10,6 +10,10 @@ mkdocs-glightbox==0.5.2
 # Markdown extensions (pymdown)
 pymdown-extensions>=10.0
 
+# Pygments lexers for the MIPP templating DSL (mipp-dsl, mipp-json).
+# Local package: run pip from the repository root.
+./scripts/pygments_mipp
+
 # Pour les emojis Material
 mkdocs-material-extensions>=1.3
 

@@ -1,0 +1,5 @@
+title: Tutorials
+nav:
+  - Add a Function: add_function.md
+  - Add an Implementation: add_implementation.md
+  - Add an ISA: add_isa.md

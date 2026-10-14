@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pygments-mipp"
+version = "1.0.0"
+description = "Pygments lexers for the MIPP templating DSL (used by the MIPP documentation)"
+requires-python = ">=3.8"
+dependencies = ["Pygments>=2.12"]
+
+[project.entry-points."pygments.lexers"]
+mipp-dsl = "pygments_mipp:MippDslLexer"
+mipp-json = "pygments_mipp:MippJsonLexer"
+
+[tool.setuptools]
+packages = ["pygments_mipp"]

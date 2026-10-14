@@ -1,29 +1,85 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Test Specifications",
+    "description": "Test properties of the functions, in `helpers_tests/tests_specs.json`: how the inputs are drawn and how the results are compared with the scalar reference. `default` applies to every function; `functions` overrides it per function. A function that is not listed is tested with `default`.\n\nThe input domain can depend on the datatype, the LMUL, the target ISA (preprocessor define) and the mask variant. For each input, the generator looks for a domain in the section of the mask variant (`mask`, ...), then in the entry itself, then in its `unmasked` section. Inside a domain, the first matching `rules` entry wins, then `by_datatype`, then `by_lmul`, then `default`; `by_define` emits one `#if defined(...)` branch per define, with the rest of the domain in the `#else` branch.\n\nThe `consistency` audit of `gen_mipp_tests.py` warns about the entries that are not declared functions.",
+    "examples": [
+        {
+            "default": {
+                "distribution": "uniform",
+                "domain": {},
+                "tolerance": {
+                    "type": "exact"
+                },
+                "comparison": "exact"
+            },
+            "functions": {
+                "acos": {
+                    "domain": {
+                        "min": -1.0,
+                        "max": 1.0
+                    },
+                    "tolerance": {
+                        "by_datatype": {
+                            "float32": {
+                                "type": "max_abs_diff",
+                                "value": 1e-06
+                            },
+                            "float64": {
+                                "type": "max_abs_diff",
+                                "value": 1e-12
+                            }
+                        }
+                    },
+                    "comparison": "tolerance"
+                },
+                "div": {
+                    "input_domain": [
+                        {
+                            "min": -100.0,
+                            "max": 100.0
+                        },
+                        {
+                            "min": -100.0,
+                            "max": 100.0,
+                            "exclude_zero": true
+                        }
+                    ]
+                }
+            }
+        }
+    ],
     "additionalProperties": false,
     "definitions": {
         "domain_spec": {
+            "description": "Range of the random values. `min` and `max` are used together; the other flags restrict the whole range of the type and cannot be combined with `min` / `max`, except `exclude_zero`. Empty: the whole range of the type.",
             "type": "object",
             "properties": {
                 "min": {
+                    "description": "Lower bound (with `max`).",
                     "type": "number"
                 },
                 "max": {
+                    "description": "Upper bound (with `min`).",
                     "type": "number"
                 },
                 "exclude_zero": {
+                    "description": "Never draw 0 (divisors).",
                     "type": "boolean"
                 },
                 "strictly_positive": {
+                    "description": "Values > 0.",
                     "type": "boolean"
                 },
                 "positive": {
+                    "description": "Values ≥ 0.",
                     "type": "boolean"
                 },
                 "strictly_negative": {
+                    "description": "Values < 0.",
                     "type": "boolean"
                 },
                 "negative": {
+                    "description": "Values ≤ 0.",
                     "type": "boolean"
                 }
             },
@@ -86,6 +142,7 @@
             ]
         },
         "domain_spec_or_list": {
+            "description": "One range for every input, or one range per input (first input first).",
             "anyOf": [
                 {
                     "$ref": "#/definitions/domain_spec"
@@ -99,6 +156,7 @@
             ]
         },
         "domain_entry": {
+            "description": "A range, or ranges that depend on the datatype, the LMUL or the target ISA.",
             "anyOf": [
                 {
                     "$ref": "#/definitions/domain_spec"
@@ -107,27 +165,41 @@
                     "type": "object",
                     "properties": {
                         "default": {
-                            "$ref": "#/definitions/domain_spec_or_list"
+                            "$ref": "#/definitions/domain_spec_or_list",
+                            "description": "Range when nothing else matches."
                         },
                         "by_datatype": {
+                            "description": "Range per datatype.",
                             "type": "object",
                             "additionalProperties": {
                                 "$ref": "#/definitions/domain_spec_or_list"
+                            },
+                            "propertyNames": {
+                                "title": "datatype"
                             }
                         },
                         "by_define": {
+                            "description": "Domain per preprocessor define (`MIPP_AVX2`): one `#if defined(...)` branch each, in order.",
                             "type": "object",
                             "additionalProperties": {
                                 "$ref": "#/definitions/domain_entry"
+                            },
+                            "propertyNames": {
+                                "title": "define"
                             }
                         },
                         "by_lmul": {
+                            "description": "Range per LMUL (`m1`, `m2`, `d2`, ...).",
                             "type": "object",
                             "additionalProperties": {
                                 "$ref": "#/definitions/domain_spec_or_list"
+                            },
+                            "propertyNames": {
+                                "title": "lmul"
                             }
                         },
                         "rules": {
+                            "description": "Ordered rules; the first one whose `datatype` and `lmul` match gives the range.",
                             "type": "array",
                             "items": {
                                 "$ref": "#/definitions/domain_rule"
@@ -139,24 +211,30 @@
             ]
         },
         "domain_rule": {
+            "description": "A range restricted to a datatype and / or an LMUL.",
             "type": "object",
             "properties": {
                 "datatype": {
+                    "description": "Datatype of the rule (omitted: any).",
                     "type": "string"
                 },
                 "lmul": {
+                    "description": "LMUL of the rule, `m2`, `d2` or a number (omitted: any).",
                     "type": [
                         "string",
                         "number"
                     ]
                 },
                 "define": {
+                    "description": "Accepted, not used yet.",
                     "type": "string"
                 },
                 "min": {
+                    "description": "See [`domain_spec`](#def-domain_spec).",
                     "type": "number"
                 },
                 "max": {
+                    "description": "See [`domain_spec`](#def-domain_spec).",
                     "type": "number"
                 },
                 "exclude_zero": {
@@ -178,6 +256,7 @@
             "additionalProperties": false
         },
         "domain_or_list": {
+            "description": "A domain for every input, or one domain per input.",
             "anyOf": [
                 {
                     "$ref": "#/definitions/domain_entry"
@@ -192,9 +271,11 @@
             ]
         },
         "tolerance_spec": {
+            "description": "Allowed difference between a lane and the scalar reference, for floating-point types (integers are always compared exactly).",
             "type": "object",
             "properties": {
                 "type": {
+                    "description": "`exact`: no difference. `max_abs_diff`: |r − ref| ≤ `value`. `relative_percent`: |r − ref| ≤ `value` × |ref| (`value` is a fraction: `0.01` for 1 %). `hybrid`: `abs_value` and `rel_value`; not implemented yet, the generator uses an absolute tolerance of 0.001.",
                     "type": "string",
                     "enum": [
                         "exact",
@@ -204,33 +285,46 @@
                     ]
                 },
                 "value": {
+                    "description": "Tolerance of `max_abs_diff` and `relative_percent`. Omitted: 0.001.",
                     "type": "number"
                 },
                 "abs_value": {
+                    "description": "Absolute part of `hybrid`.",
                     "type": "number"
                 },
                 "rel_value": {
+                    "description": "Relative part of `hybrid`.",
                     "type": "number"
                 },
                 "by_lmul": {
+                    "description": "`value` per LMUL (numeric keys: `\"2\"`, `\"4\"`).",
                     "type": "object",
                     "additionalProperties": {
                         "type": "number"
+                    },
+                    "propertyNames": {
+                        "title": "lmul"
                     }
                 },
                 "by_datatype": {
+                    "description": "Tolerance per datatype (`float32`, `float64`).",
                     "type": "object",
                     "additionalProperties": {
                         "$ref": "#/definitions/tolerance_spec"
+                    },
+                    "propertyNames": {
+                        "title": "datatype"
                     }
                 }
             },
             "additionalProperties": false
         },
         "spec_entry": {
+            "description": "Test properties of a function (or the defaults). The keys `unmasked`, `mask`, `maskz` and `masks` override the input properties (`domain`, `input_domain`, `domain_src`, `distribution`, `mask_pattern`) for one variant.",
             "type": "object",
             "properties": {
                 "distribution": {
+                    "description": "Distribution of the random inputs: `uniform`, or `normal` (with `min` / `max`: a truncated normal centered in the range, of standard deviation (max − min) / 6 unless `sigma` is given).",
                     "anyOf": [
                         {
                             "type": "string",
@@ -261,12 +355,15 @@
                     ]
                 },
                 "input_domain": {
+                    "description": "Domain per input, as a list (first input first). Takes precedence over `domain`.",
                     "$ref": "#/definitions/domain_or_list"
                 },
                 "domain": {
+                    "description": "Domain of the inputs ([`domain_or_list`](#def-domain_or_list)).",
                     "$ref": "#/definitions/domain_or_list"
                 },
                 "tolerance": {
+                    "description": "Tolerance of the comparison, used with `comparison: tolerance`: a [`tolerance_spec`](#def-tolerance_spec), or one per datatype or per target ISA (`by_define`: `#if defined(...)` branches).",
                     "anyOf": [
                         {
                             "$ref": "#/definitions/tolerance_spec"
@@ -307,6 +404,7 @@
                     ]
                 },
                 "comparison": {
+                    "description": "`exact`: `==`. `tolerance`: see `tolerance` (floating-point types; integers stay exact). `bitwise`: same bits (results that may be NaN). `logical`: same truth value (masks, comparisons). Can be given per datatype.",
                     "anyOf": [
                         {
                             "type": "string",
@@ -347,6 +445,7 @@
                     ]
                 },
                 "overflow_check": {
+                    "description": "`add`, `sub`, `mul`: skip the lanes where the operation overflows the type (C tests only). `accumulate_add`, `accumulate_mul`: skip the test when the reduction overflows (`hadd`, `hmul`).",
                     "type": [
                         "string",
                         "null"
@@ -361,24 +460,29 @@
                     ]
                 },
                 "disabled": {
+                    "description": "`true`: the generated test is commented out.",
                     "type": "boolean"
                 },
                 "disabled_reason": {
+                    "description": "Reason written at the top of the commented-out test.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "extra_includes": {
+                    "description": "Extra headers of the test: names of MIPP functions used by the test (`toreg`, `get_k`, ...) or verbatim include lines.",
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
                 "nan_inf_skip": {
+                    "description": "With a tolerance: skip the lanes where the difference with the reference is NaN or infinite.",
                     "type": "boolean"
                 },
                 "skip_condition": {
+                    "description": "Lanes to skip. `{\"type\": \"fractional_part\", \"value\": 0.5, \"tol\": 1e-05}` skips the lanes whose reference has a fractional part within `tol` of `value` (rounding ties of `round`).",
                     "anyOf": [
                         {
                             "type": [
@@ -409,9 +513,11 @@
                     ]
                 },
                 "support_obj": {
+                    "description": "`false`: the function has no C++ Object API overload, the Object test is commented out.",
                     "type": "boolean"
                 },
                 "mask_pattern": {
+                    "description": "Values of the input masks: `uniform_bool` (random), `alternating` (even lanes), `sparse` (one lane in four), `dense` (three lanes in four), `all_true`, `all_false`.",
                     "type": "string",
                     "enum": [
                         "uniform_bool",
@@ -423,21 +529,27 @@
                     ]
                 },
                 "domain_src": {
+                    "description": "Domain of the source register of the Source-Masked variant (`masks`).",
                     "$ref": "#/definitions/domain_entry"
                 },
                 "unmasked": {
+                    "description": "Input properties of the unmasked variant.",
                     "$ref": "#/definitions/spec_entry"
                 },
                 "mask": {
+                    "description": "Input properties of the Merge-Masked variant.",
                     "$ref": "#/definitions/spec_entry"
                 },
                 "maskz": {
+                    "description": "Input properties of the Zero-Masked variant.",
                     "$ref": "#/definitions/spec_entry"
                 },
                 "masks": {
+                    "description": "Input properties of the Source-Masked variant.",
                     "$ref": "#/definitions/spec_entry"
                 },
                 "datatypes": {
+                    "description": "Datatypes to test, instead of those of the interface.",
                     "anyOf": [
                         {
                             "type": "string"
@@ -456,12 +568,17 @@
     },
     "properties": {
         "default": {
-            "$ref": "#/definitions/spec_entry"
+            "$ref": "#/definitions/spec_entry",
+            "description": "Properties of every function."
         },
         "functions": {
+            "description": "Per-function overrides of `default`.",
             "type": "object",
             "additionalProperties": {
                 "$ref": "#/definitions/spec_entry"
+            },
+            "propertyNames": {
+                "title": "function"
             }
         }
     },
@@ -469,6 +586,5 @@
         "default",
         "functions"
     ],
-    "title": "TestSpecsSchema",
     "type": "object"
 }

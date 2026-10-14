@@ -1,14 +1,33 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Scalar Implementations",
+    "description": "Reference implementations of the functions. They define what each function computes: they are the code of the scalar ISA, the Level 3 fallback of the other ISAs, and the reference of the generated tests. A function can have several entries that split its datatypes or its mask variants.\n\nChecked when the file is loaded: every datatype and mask variant of a declared function is covered by an entry. The entries of an undeclared function get a `dead-code` warning.",
+    "examples": [
+        {
+            "absdiff": [
+                {
+                    "type": "element-wide",
+                    "datatypes": "all_defs",
+                    "mask_variants": [],
+                    "implem": [
+                        "res.r[i] = %!pred_cond!% (r0.r[i] > r1.r[i] ? r0.r[i] - r1.r[i] : r1.r[i] - r0.r[i]) %!pred_alt!%;"
+                    ]
+                }
+            ]
+        }
+    ],
     "additionalProperties": {
+        "description": "Entries of the function.",
         "type": "array",
         "items": {
             "type": "object",
             "properties": {
                 "type": {
+                    "description": "`element-wide`: `implem` is the body of a loop over the lanes, written by the generator (`i` is the lane index, `r0.r[i]` a lane of the first argument, `res.r[i]` a lane of the result). `vector-wide`: `implem` is the whole body of the function (reductions, permutations).",
                     "type": "string"
                 },
                 "datatypes": {
+                    "description": "`all_defs` (the datatypes of the interface), an alias of `DATATYPES_MAP` or an explicit list.",
                     "anyOf": [
                         {
                             "type": "string"
@@ -22,12 +41,14 @@
                     ]
                 },
                 "mask_variants": {
+                    "description": "`[]`: every variant allowed by `mask_support`. Otherwise the variants of this entry, among `no_mask`, `mask`, `maskz` and `masks`.",
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
                 "implem": {
+                    "description": "Code, as a string or a list of lines, in the [templating DSL](../templating_dsl.md). `%!pred_cond!%` and `%!pred_alt!%` implement the mask variants.",
                     "anyOf": [
                         {
                             "type": "string"
@@ -50,6 +71,8 @@
             "additionalProperties": false
         }
     },
-    "title": "ScalarImplemsSchema",
-    "type": "object"
+    "type": "object",
+    "propertyNames": {
+        "title": "function"
+    }
 }

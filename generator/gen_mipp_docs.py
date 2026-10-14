@@ -1000,66 +1000,144 @@ Each function reference page provides:
 # Main Execution Entrypoint
 # ---------------------------------------------------------------------------
 
-def main():
+DOC_PARTS = ["isas_support", "funcs_support", "explorer", "dev_reference"]
+
+
+def build_arg_parser():
+    """Command-line parser of gen_mipp_docs.py (also rendered in the CLI reference)."""
+    import argparse
+    from helpers_docs.cli import MippHelpFormatter, set_examples
+    parser = argparse.ArgumentParser(
+        prog="gen_mipp_docs.py",
+        formatter_class=MippHelpFormatter,
+        description=(
+            "Generate the generated parts of the documentation in '../docs/', from the same JSON files as "
+            "the headers.\n\n"
+            "Parts (selected with --only):\n\n"
+            "- 'isas_support': Hardware Support pages ('docs/isas_support/'), the implementation level of each "
+            "function per ISA, found with the candidate resolver of the header generator;\n"
+            "- 'funcs_support': Function Support pages ('docs/funcs_support/'), one page per function with its "
+            "prototypes and support tables;\n"
+            "- 'explorer': data file of the API Explorer ('docs/assets/data/mipp_api_index.json');\n"
+            "- 'dev_reference': command-line and registry reference of the Developer Guide "
+            "('docs/developer/reference/cli.md' and 'docs/developer/reference/registries/').\n\n"
+            "All these outputs are ignored by Git."
+        ),
+    )
+    parser.add_argument(
+        "--only",
+        nargs="+",
+        metavar="PART",
+        choices=DOC_PARTS + ["all"],
+        default=["all"],
+        help="Parts to generate.",
+    )
+    set_examples(parser, [
+        ("./gen_mipp_docs.py", "every part, as in the CI"),
+        ("./gen_mipp_docs.py --only dev_reference", "Developer Guide reference only (fast)"),
+    ])
+    return parser
+
+
+def write_dev_reference(project_root):
+    """Developer Guide reference pages generated from the generators themselves."""
+    from helpers_docs.cli import render_cli_page
+    from helpers_docs.schemas import write_registries_reference
+    import gen_mipp_headers
+    import gen_mipp_tests
+
+    ref_dir = os.path.join(project_root, "docs", "developer", "reference")
+    entries = [
+        {"script": "gen_mipp_headers.py", "anchor": "gen_mipp_headers", "parser": gen_mipp_headers.build_arg_parser(),
+         "see_also": [("Static Audits", "audits.md"), ("Header Layout", "../internals/header_layout.md"),
+                      ("Headers & Compile Time", "../../user/headers_and_compile_time.md")]},
+        {"script": "gen_mipp_tests.py", "anchor": "gen_mipp_tests", "parser": gen_mipp_tests.build_arg_parser(),
+         "see_also": [("Test Generator", "../internals/test_generator.md"),
+                      ("Test Specifications", "registries/tests_specs.md"),
+                      ("Build and Run the Unit Tests", "../setup.md#4-build-and-run-the-unit-tests")]},
+        {"script": "gen_mipp_docs.py", "anchor": "gen_mipp_docs", "parser": build_arg_parser(),
+         "see_also": [("Docs & API Explorer", "../internals/docs_and_explorer.md")]},
+    ]
+    with open(os.path.join(ref_dir, "cli.md"), "w", encoding="utf-8") as f:
+        f.write(render_cli_page(entries))
+
+    reg_dir = os.path.join(ref_dir, "registries")
+    if os.path.exists(reg_dir):
+        shutil.rmtree(reg_dir)
+    write_registries_reference(path, reg_dir)
+
+
+def main(argv=None):
+    args = build_arg_parser().parse_args(argv)
+    parts = set(DOC_PARTS) if "all" in args.only else set(args.only)
+
     base_generator_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.dirname(base_generator_dir)
 
-    print("[MIPP DocGen] Discovering and sorting target ISAs...")
-    isas_dict, implems_dict_raw, sorted_names = discover_and_sort_isas(base_generator_dir)
+    if parts & {"isas_support", "funcs_support"}:
+        print("[MIPP DocGen] Discovering and sorting target ISAs...")
+        isas_dict, implems_dict_raw, sorted_names = discover_and_sort_isas(base_generator_dir)
 
-    isas_map = {}
-    for isa_name in sorted_names:
-        if isa_name == "scalar":
-            continue
-        native_impl, emu_impl = implems_dict_raw[isa_name]
-        isas_map[isa_name] = {
-            "isa_conf": isas_dict[isa_name],
-            "implems": [native_impl, emu_impl],
-        }
+        isas_map = {}
+        for isa_name in sorted_names:
+            if isa_name == "scalar":
+                continue
+            native_impl, emu_impl = implems_dict_raw[isa_name]
+            isas_map[isa_name] = {
+                "isa_conf": isas_dict[isa_name],
+                "implems": [native_impl, emu_impl],
+            }
 
-    print(f"[MIPP DocGen] Loaded {len(isas_map)} target ISAs: {', '.join(isas_map.keys())}")
+        print(f"[MIPP DocGen] Loaded {len(isas_map)} target ISAs: {', '.join(isas_map.keys())}")
 
-    # Generate ISA Support Documentation
-    isas_support_dir = os.path.join(project_root, "docs", "isas_support")
-    if os.path.exists(isas_support_dir):
-        shutil.rmtree(isas_support_dir)
-    os.makedirs(isas_support_dir, exist_ok=True)
+        print("[MIPP DocGen] Solving candidate dependencies across all target ISAs...")
+        mipp_infos = MippInfo()
+        mipp_infos.gen_mipp_infos(interfaces, isas_map)
 
-    print("[MIPP DocGen] Solving candidate dependencies across all target ISAs...")
-    mipp_infos = MippInfo()
-    mipp_infos.gen_mipp_infos(interfaces, isas_map)
+    if "isas_support" in parts:
+        # Generate ISA Support Documentation
+        isas_support_dir = os.path.join(project_root, "docs", "isas_support")
+        if os.path.exists(isas_support_dir):
+            shutil.rmtree(isas_support_dir)
+        os.makedirs(isas_support_dir, exist_ok=True)
 
-    print("[MIPP DocGen] Writing ISA capability matrices...")
-    write_mipp_infos(mipp_infos, isas_support_dir)
-    write_mipp_infos_masked(mipp_infos, isas_support_dir)
+        print("[MIPP DocGen] Writing ISA capability matrices...")
+        write_mipp_infos(mipp_infos, isas_support_dir)
+        write_mipp_infos_masked(mipp_infos, isas_support_dir)
 
-    # Generate Intersection Matrix
-    intersection = mipp_infos.get_intersection()
-    int_mipp_infos = MippInfo()
-    int_mipp_infos.isa_infos.append(intersection)
-    write_mipp_infos(int_mipp_infos, isas_support_dir)
+        # Generate Intersection Matrix
+        intersection = mipp_infos.get_intersection()
+        int_mipp_infos = MippInfo()
+        int_mipp_infos.isa_infos.append(intersection)
+        write_mipp_infos(int_mipp_infos, isas_support_dir)
 
-    # Generate ISA Support Guide Landing Page
-    write_isas_support_index(isas_support_dir)
+        # Generate ISA Support Guide Landing Page
+        write_isas_support_index(isas_support_dir)
 
-    # Generate Function Support Documentation
-    funcs_support_dir = os.path.join(project_root, "docs", "funcs_support")
-    if os.path.exists(funcs_support_dir):
-        shutil.rmtree(funcs_support_dir)
-    os.makedirs(funcs_support_dir, exist_ok=True)
+    if "funcs_support" in parts:
+        # Generate Function Support Documentation
+        funcs_support_dir = os.path.join(project_root, "docs", "funcs_support")
+        if os.path.exists(funcs_support_dir):
+            shutil.rmtree(funcs_support_dir)
+        os.makedirs(funcs_support_dir, exist_ok=True)
 
-    print("[MIPP DocGen] Generating Function Reference Documentation pages...")
-    spec_func_infos = SpecFuncInfos()
-    spec_func_infos.gen_spec_func_infos(interfaces, categories)
-    spec_func_infos.write_spec_func_infos(funcs_support_dir, mipp_infos=mipp_infos)
+        print("[MIPP DocGen] Generating Function Reference Documentation pages...")
+        spec_func_infos = SpecFuncInfos()
+        spec_func_infos.gen_spec_func_infos(interfaces, categories)
+        spec_func_infos.write_spec_func_infos(funcs_support_dir, mipp_infos=mipp_infos)
 
-    # Generate Function Reference Guide Landing Page
-    write_funcs_support_index(funcs_support_dir, categories)
+        # Generate Function Reference Guide Landing Page
+        write_funcs_support_index(funcs_support_dir, categories)
 
-    # Export Interactive API Explorer metadata
-    print("[MIPP DocGen] Exporting Interactive API Explorer metadata (docs/assets/data/mipp_api_index.json)...")
-    from gen_mipp_api_data import export_api_data
-    export_api_data(project_root)
+    if "explorer" in parts:
+        # Export Interactive API Explorer metadata
+        print("[MIPP DocGen] Exporting Interactive API Explorer metadata (docs/assets/data/mipp_api_index.json)...")
+        from gen_mipp_api_data import export_api_data
+        export_api_data(project_root)
+
+    if "dev_reference" in parts:
+        print("[MIPP DocGen] Writing the Developer Guide reference (docs/developer/reference/cli.md, registries/)...")
+        write_dev_reference(project_root)
 
     print("[MIPP DocGen] Complete! Documentation and API Explorer dataset generated in docs/.")
 

@@ -403,66 +403,100 @@ def generate_public_headers(output_dir="../include", granularity="coarse"):
                         f.write(f"#pragma once\n#include \"mipp/internal/interfaces/{w_name}/functions/{cat}/{l}/{fn}.{ext}\"\n")
 
 
-def main(argv=None):
+def build_arg_parser():
+    """Command-line parser of gen_mipp_headers.py (also rendered in the CLI reference by gen_mipp_docs.py)."""
     from tools import list_simd_ext_names
+    from helpers_docs.cli import MippHelpFormatter, set_examples
     available_isas = list_simd_ext_names()
+    isa_values = ", ".join(f"'{isa}'" for isa in available_isas)
 
-    parser = argparse.ArgumentParser(prog='gen_mipp.py', description='MIPP generator')
+    parser = argparse.ArgumentParser(
+        prog="gen_mipp_headers.py",
+        formatter_class=MippHelpFormatter,
+        description=(
+            "Generate the MIPP headers in '../include/' from the JSON files of 'generator/'.\n\n"
+            "The script validates the JSON files and runs the audits, generates the C code of each ISA "
+            "(one layer per directory of 'simd_ext/'), then the C, C++ Functional and C++ Object "
+            "interfaces and the public headers. It ends with a table of the number of functions per "
+            "implementation level and per ISA."
+        ),
+    )
     parser.add_argument(
         "-l", "--layers",
         nargs="+",
+        metavar="LAYER",
+        default=["all"],
         help=(
-            "Which layer(s) to regenerate. "
-            f"Values: {' '.join(available_isas)} wrappers all_isas all. "
-            "Default: all. You can also pass comma-separated lists (e.g. --layers sse,avx)."
+            "Parts of the tree to (re)generate: an ISA layer (one per directory of 'simd_ext/'), "
+            "'all_isas' (every ISA layer), 'wrappers' (the C, C++ Functional and C++ Object interfaces "
+            "and the public headers) or 'all'. Comma-separated lists are accepted. Mostly useful with "
+            f"--no-clean, to regenerate a part of an existing tree. ISA layers: {isa_values}."
         ),
-        default=None,
     )
     parser.add_argument(
         "--no-clean",
         action="store_true",
-        help="Do not delete ../include/ before generating (useful when regenerating only one layer).",
+        help="Do not delete '../include/' before generating. Needed when --layers regenerates only a part of the tree.",
     )
-
     parser.add_argument(
         "--simd-ext",
         nargs="+",
-        help="List of SIMD extensions to generate (e.g. sse avx scalar). If not specified, all discovered extensions are generated.",
-        default=None,
+        metavar="ISA",
+        default=["all"],
+        help=(
+            "ISAs present in the generated tree ('all' for every directory of 'simd_ext/'; "
+            "comma-separated lists are accepted). The 'sub_isa' chain of each selected ISA and the "
+            "scalar fallback are always added: '--simd-ext avx512' generates AVX-512, AVX, SSE and "
+            f"scalar. ISAs: {isa_values}."
+        ),
     )
-
     parser.add_argument(
         "--header-type",
         choices=["function_header", "category_header"],
         default="function_header",
-        nargs="?",
         help=(
-            "Type of header to generate. Affects how the IncludeManager resolves dependencies and organizes files. "
-            "Choices: function_header (default) generates one header per function, organized in folders by ISA. "
-            "category_header generates one header per ISA category (e.g. all float64 functions in one header), organized in folders by ISA."
+            "Organization of the internal headers: one header per function ('function_header') or "
+            "one header per category ('category_header', experimental)."
         ),
     )
-
     parser.add_argument(
         "--granularity",
         choices=["coarse", "fine"],
         default="coarse",
         help=(
-            "Granularity of generated headers: "
-            "'coarse' (default) generates single file per function (e.g. add.h), "
-            "'fine' generates 2D atomic headers (variant/lmul/func.h) and umbrella aggregator files."
+            "'coarse': one public header per function and per category ('<mipp/cpp/fun/add.hpp>'). "
+            "'fine': in addition, one header per mask variant, per LMUL and per (variant, LMUL) pair "
+            "('<mipp/cpp/fun/m/m2/add.hpp>'), built on atomic internal headers."
         ),
     )
-    
     parser.add_argument(
         "--audit",
         nargs="+",
+        metavar="AUDIT",
         choices=["levels", "dead-code", "duplicates", "json-structure", "all", "none"],
-        help="Run audits on the MIPP code database: 'levels' checks implementation level placement discrepancies, 'dead-code' checks for unreferenced templates, 'duplicates' checks for datatype implementation level overlaps, 'json-structure' checks for unsorted keys and empty lists in JSON files, 'all' (default) runs all audits, 'none' disables audits.",
         default=["all"],
+        help=(
+            "Audits to run. They print warnings and never stop the generation (the validation checks "
+            "always run and do). 'levels': an implementation is in the file of the wrong level. "
+            "'dead-code': templates, implementations or functions that are never used. 'duplicates': "
+            "overlapping implementations of the same function and datatype. 'json-structure': unsorted "
+            "keys and empty lists in the JSON files."
+        ),
     )
-    
-    args = parser.parse_args(argv)
+    set_examples(parser, [
+        ("./gen_mipp_headers.py", "every ISA, coarse granularity"),
+        ("./gen_mipp_headers.py --granularity fine", "every ISA, fine granularity (as in the CI)"),
+        ("./gen_mipp_headers.py --simd-ext neon --audit none", "NEON and scalar only, no audit"),
+        ("./gen_mipp_headers.py --layers neon --no-clean", "regenerate the NEON layer in place"),
+    ])
+    return parser
+
+
+def main(argv=None):
+    from tools import list_simd_ext_names
+    available_isas = list_simd_ext_names()
+
+    args = build_arg_parser().parse_args(argv)
 
     import input_validation
     input_validation.ACTIVE_AUDITS = set()

@@ -1,14 +1,68 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "ISA Descriptor",
+    "description": "Description of a target ISA, in `simd_ext/<isa>/<isa>_isa.json` (and `helpers_headers/registry_scalar_isa.json` for the scalar fallback). Adding a directory with this file and the native implementation files is enough to add an ISA ([Add an ISA](../../tutorials/add_isa.md)).\n\nChecked when the file is loaded, in addition to the schema:\n\n- `sub_isa` names an existing directory of `simd_ext/`;\n- a negative factor in `sw_lmul` requires `sw_ldiv_type: sub_isa`, and only `-2` is supported;\n- `sw_ldiv_type: sub_isa` requires `sub_isa`, and a `size` twice the size of `sub_isa`;\n- `info_names` has at most one entry without `if`, in last position.\n\nTop-level keys are sorted alphabetically (`json-structure` audit).",
+    "examples": [
+        {
+            "datatypes": {
+                "float32": {
+                    "data_ext": "ps",
+                    "data_ext_logi": "ps",
+                    "data_ext_msk": "ps",
+                    "reg": "__m256",
+                    "msk": "__m256",
+                    "to_ptr": "float32_t"
+                }
+            },
+            "define": "defined(__AVX__)",
+            "header_template": [
+                "#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX_H_",
+                "#define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX_H_",
+                "#include <immintrin.h>",
+                "#include <mipp/internal/simd_ext/sse/c/common.h> // ldiv 2 support"
+            ],
+            "hw_lmul": [],
+            "info_names": [
+                {
+                    "if": "defined(__AVX2__)",
+                    "name": "x86_64 AVX2"
+                },
+                {
+                    "name": "x86_64 AVX"
+                }
+            ],
+            "mipp_definitions": [
+                "#define MIPP_64BIT",
+                "#ifdef __AVX2__",
+                "\t#define MIPP_AVX2",
+                "#endif"
+            ],
+            "name": "avx",
+            "prefix": "_mm256",
+            "size": 256,
+            "sub_isa": "sse",
+            "sw_ldiv_type": "sub_isa",
+            "sw_lmul": [
+                1,
+                2,
+                4,
+                8,
+                -2
+            ]
+        }
+    ],
     "additionalProperties": false,
     "properties": {
         "name": {
+            "description": "Identifier of the ISA; it must match the directory name. The generator defines `MIPP_<NAME>` when the ISA is selected, and adds `<NAME>` to the C++ `mipp::ISA` enum.",
             "type": "string"
         },
         "prefix": {
+            "description": "Prefix of the intrinsics, available in the templates as `isa.prefix` (e.g. `_mm256`).",
             "type": "string"
         },
         "size": {
+            "description": "Register size in bits (`128`, `256`, `512`), a macro for the sizes known at compile time only (`MIPP_SCALAR_SIZE`), or the list of supported sizes (SVE).",
             "anyOf": [
                 {
                     "type": "integer"
@@ -25,9 +79,11 @@
             ]
         },
         "define": {
+            "description": "Preprocessor expression true when the compiler targets the ISA (e.g. `defined(__AVX__)`). It is the default condition of the native entries.",
             "type": "string"
         },
         "header_template": {
+            "description": "First lines of the generated `common.h` of the ISA (include guard, system headers), as a string or a list of lines. Jinja2 variables: `name`, `name_upper`.",
             "anyOf": [
                 {
                     "type": "string"
@@ -41,18 +97,21 @@
             ]
         },
         "hw_lmul": {
+            "description": "LMUL factors with native registers: register groups on RVV (`[1, 2, 4, 8, -2]`), `[1]` or `[]` elsewhere. `-2` enables the half-vectors (`d2`).",
             "type": "array",
             "items": {
                 "type": "integer"
             }
         },
         "sw_lmul": {
+            "description": "LMUL factors built in software: a register of LMUL 2 is a pair of registers of LMUL 1, and so on (`[1, 2, 4, 8]`). `-2` builds the half-vectors on the registers of `sub_isa` (see `sw_ldiv_type`).",
             "type": "array",
             "items": {
                 "type": "integer"
             }
         },
         "sw_ldiv_type": {
+            "description": "Strategy for a `-2` in `sw_lmul`. `sub_isa`: a half-vector is a full register of `sub_isa` (AVX `d2` uses the SSE registers and functions); it is the only implemented strategy.",
             "type": "string",
             "enum": [
                 "native",
@@ -61,22 +120,26 @@
             "default": "native"
         },
         "sub_isa": {
+            "description": "Parent ISA (`sse` for `avx`, `avx` for `avx512`, `neon` for `sve`). It sets the detection precedence (an ISA is tested before its parent) and is added by `--simd-ext`. On its own, it does not make the implementations or the registers of the parent available.",
             "type": "string"
         },
         "is_scalar": {
+            "description": "`true` for the scalar fallback only (`registry_scalar_isa.json`).",
             "type": "boolean"
         },
         "info_names": {
-            "description": "Names printed by mipp_info(). Entries are tested in order; the first one whose 'if' preprocessor condition holds is used. An entry without 'if' is the default and must be last. If omitted, the upper-cased ISA name is printed.",
+            "description": "Names printed by `mipp_info()`. The entries are tested in order and the first one whose `if` holds is used; the entry without `if` is the default and must be last. Omitted: the upper-cased `name`.",
             "type": "array",
             "minItems": 1,
             "items": {
                 "type": "object",
                 "properties": {
                     "if": {
+                        "description": "Preprocessor condition of the entry.",
                         "type": "string"
                     },
                     "name": {
+                        "description": "Printed name (e.g. `x86_64 AVX2`).",
                         "type": "string"
                     }
                 },
@@ -87,45 +150,58 @@
             }
         },
         "mipp_definitions": {
+            "description": "Preprocessor lines emitted for the users when the ISA is selected: feature macros such as `MIPP_AVX2`, `MIPP_BW`, `MIPP_64BIT`.",
             "type": "array",
             "items": {
                 "type": "string"
             }
         },
         "hw_mask": {
+            "description": "`true` when the masks have their own registers (AVX-512 `__mmask`, SVE and RVV predicates). The scalar fallback then converts the masks with `toreg` / `tomsk` instead of copying them.",
             "type": "boolean"
         },
         "hw_mask_requires_toreg": {
+            "description": "With `hw_mask`: the scalar fallback of a function with a mask argument or result depends on `toreg` and `tomsk`, so that the resolver emits them first.",
             "type": "boolean"
         },
         "hw_mask_is_bitfield": {
+            "description": "With `hw_mask`: a mask is an integer with one bit per lane (AVX-512). The scalar fallback converts it bit by bit.",
             "type": "boolean"
         },
         "hw_mask_extract_via_store": {
+            "description": "With `hw_mask`: the scalar fallback also depends on `store` to read a mask (RVV).",
             "type": "boolean"
         },
         "layout": {
+            "description": "For the ISAs whose register size is only known at compile time (RVV): templates of the size macros, of the fixed-size typedefs and of the `rvd` / `rvm` structures, used instead of the default ones.",
             "type": "object",
             "properties": {
                 "size_symbol": {
+                    "description": "Macro that gives the register size in bits (`__riscv_v_fixed_vlen`).",
                     "type": "string"
                 },
                 "vlen_guard_template": {
+                    "description": "Preprocessor condition (Jinja2: `width`, `abs_lmul`) under which the scalar fallback of a half-vector is valid.",
                     "type": "string"
                 },
                 "defines_template": {
+                    "description": "Template of the `MIPP_<ISA>_N_*` macros (number of lanes).",
                     "type": "string"
                 },
                 "vector_typedef_template": {
+                    "description": "Template of the fixed-size typedef of a data register.",
                     "type": "string"
                 },
                 "mask_typedef_template": {
+                    "description": "Template of the fixed-size typedef of a mask register.",
                     "type": "string"
                 },
                 "rvd_struct_template": {
+                    "description": "Template of the `rvd_<isa>_<type>_t` structure.",
                     "type": "string"
                 },
                 "rvm_struct_template": {
+                    "description": "Template of the `rvm_<isa>_<type>_t` structure.",
                     "type": "string"
                 }
             },
@@ -140,35 +216,46 @@
             "additionalProperties": false
         },
         "datatypes": {
+            "description": "Supported datatypes, with their types and intrinsic suffixes.",
             "type": "object",
             "additionalProperties": {
+                "description": "A datatype. The string fields can contain placeholders such as `{lsuffix}`, replaced for each LMUL by the values of `variables`.",
                 "type": "object",
                 "properties": {
                     "data_ext": {
+                        "description": "Suffix of the intrinsics for this datatype (`ps`, `epi32`, `f32`), available in the templates as `isa_dt_par.data_ext`.",
                         "type": "string"
                     },
                     "data_ext_logi": {
+                        "description": "Suffix of the bitwise intrinsics, when it differs (`si256` for integers).",
                         "type": "string"
                     },
                     "data_ext_msk": {
+                        "description": "Suffix of the intrinsics on masks, when it differs.",
                         "type": "string"
                     },
                     "reg": {
+                        "description": "Type of a data register (`__m256`, `float32x4_t`, `vfloat32m1_t`).",
                         "type": "string"
                     },
                     "msk": {
+                        "description": "Type of a mask register (`__m256`, `uint32x4_t`, `__mmask16`, `vbool32_t`).",
                         "type": "string"
                     },
                     "to_ptr": {
+                        "description": "Element type for the pointer casts (`float32_t`).",
                         "type": "string"
                     },
                     "if": {
+                        "description": "Preprocessor condition under which the datatype is available (`defined(__aarch64__)` for NEON `float64`). It is added to the condition of every implementation entry of the datatype.",
                         "type": "string"
                     },
                     "if_lmul": {
+                        "description": "Condition per LMUL (`{\"-2\": \"0\"}`: no half-vector for this datatype), used instead of `if` for these LMUL values.",
                         "type": "object"
                     },
                     "variables": {
+                        "description": "Extra fields of the datatype, merged into it when the file is loaded: constants (`\"width\": \"32\"`) or maps from LMUL to value (`\"lsuffix\": {\"1\": \"m1\", \"2\": \"m2\", \"-2\": \"mf2\"}`) for the placeholders of the other fields. Also available in the templates.",
                         "type": "object",
                         "additionalProperties": true
                     }
@@ -179,6 +266,9 @@
                     "to_ptr"
                 ],
                 "additionalProperties": false
+            },
+            "propertyNames": {
+                "title": "datatype"
             }
         }
     },
@@ -186,6 +276,5 @@
         "name",
         "datatypes"
     ],
-    "title": "ISASchema",
     "type": "object"
 }

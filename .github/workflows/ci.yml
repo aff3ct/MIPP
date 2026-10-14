@@ -77,6 +77,8 @@ jobs:
             docs/funcs_support
             docs/isas_support
             docs/assets/data
+            docs/developer/reference/cli.md
+            docs/developer/reference/registries
           retention-days: 7
 
   # =========================================================================

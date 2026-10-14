@@ -1,8 +1,9 @@
 title: Developer Guide
 nav:
-  - Architecture Overview: index.md
-  - Templating DSL Reference: templating_dsl.md
-  - Adding Functions & ISAs: adding_isa_or_function.md
-  - Audits & Static Verification: audits_and_verification.md
-  - Generator Internals: generator
+  - Overview: index.md
+  - Setup: setup.md
+  - Tutorials: tutorials
+  - Reference: reference
+  - Internals: internals
+  - Process: process
   - ...

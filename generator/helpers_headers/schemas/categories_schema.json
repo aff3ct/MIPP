@@ -1,11 +1,30 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Categories",
+    "description": "Functional categories of the MIPP functions. Each function of `registry_interfaces.json` belongs to exactly one category. The category sets the location of the generated headers (`mipp/internal/.../functions/<category>/`) and of the test sources (`tests/src/<api>/<category>/`), and the grouping of the Function Support pages.\n\nChecked when the file is loaded: a function is in at most one category, and every listed function is declared in `registry_interfaces.json`. A declared function that is in no category gets a `dead-code` warning.",
+    "examples": [
+        {
+            "arithmetic": [
+                "abs",
+                "add",
+                "adds"
+            ],
+            "logic": [
+                "andb",
+                "andnb",
+                "notb"
+            ]
+        }
+    ],
     "additionalProperties": {
+        "description": "Names of the functions of the category (keys of `registry_interfaces.json`).",
         "type": "array",
         "items": {
             "type": "string"
         }
     },
-    "title": "CategoriesSchema",
-    "type": "object"
+    "type": "object",
+    "propertyNames": {
+        "title": "category"
+    }
 }

@@ -1,34 +1,18 @@
 # MIPP Generator
 
-The generator is written in Python 3 and relies on Jinja 2.
+The MIPP headers, unit tests and reference pages are generated from the JSON
+files of this directory by Python 3 scripts (Jinja2, jsonschema).
 
-Install Python, set a virtual environement and install the requirements 
-(Jinja 2): 
 ```bash
-sudo apt install python3 python3-pip python3-venv
 python3 -m venv .venv
 source .venv/bin/activate
 pip3 install -r requirements.txt
-deactivate
+
+./gen_mipp_headers.py   # headers in ../include/
+./gen_mipp_tests.py     # unit tests in ../tests/src/
+./gen_mipp_docs.py      # reference pages in ../docs/
 ```
 
-## Generate MIPP Headers
-
-```bash
-source .venv/bin/activate
-./gen_mipp_headers.py
-```
-
-## Generate MIPP Tests
-
-```bash
-source .venv/bin/activate
-./gen_mipp_tests.py
-```
-
-## Generate MIPP Documentation
-
-```bash
-source .venv/bin/activate
-./gen_mipp_docs.py
-```
+All the scripts are run from this directory. The options, the workflow and the
+tutorials (add a function, an implementation or an ISA) are in the Developer
+Guide: https://aff3ct.github.io/MIPP/developer/setup/

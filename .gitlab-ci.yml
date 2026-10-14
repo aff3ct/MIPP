@@ -82,6 +82,9 @@ generation-docs:
     paths:
       - docs/funcs_support
       - docs/isas_support
+      - docs/assets/data
+      - docs/developer/reference/cli.md
+      - docs/developer/reference/registries
   tags:
     - x86_64
     - linux

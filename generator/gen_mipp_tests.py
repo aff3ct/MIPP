@@ -158,80 +158,114 @@ def gen_test_files_all_funcs(kind: str = "c", lmul: int = 0, mkind: str = "", N:
             stats["generated"] += 1
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Generate MIPP test files.")
+def build_arg_parser():
+    """Command-line parser of gen_mipp_tests.py (also rendered in the CLI reference by gen_mipp_docs.py)."""
+    from helpers_docs.cli import MippHelpFormatter, set_examples
+    parser = argparse.ArgumentParser(
+        prog="gen_mipp_tests.py",
+        formatter_class=MippHelpFormatter,
+        description=(
+            "Generate the Catch2 unit tests of MIPP in '../tests/src/' from 'registry_interfaces.json', "
+            "'helpers_tests/tests_specs.json' and 'helpers_tests/tests_templates.json'.\n\n"
+            "Each test fills its inputs with random values, calls the function under test and compares "
+            "every lane with the scalar reference (Level 3). The C API gets one file per function, LMUL "
+            "and mask variant ('tests/src/c/<category>/<m1|d2|...>/<variant>/<function>.cpp'), the C++ "
+            "Functional and Object APIs one file per function ('tests/src/<cpp|obj>/<category>/<function>.cpp') "
+            "that covers every datatype, LMUL and mask variant."
+        ),
+    )
     parser.add_argument(
         "kind",
         nargs="?",
         default=["c", "cpp", "obj"],
         choices=["c", "cpp", "obj"],
-        help="Which layer to regenerate (default: all).",
+        metavar="API",
+        help="API to generate the tests for: C, C++ Functional or C++ Object. Without it, the three APIs.",
     )
     parser.add_argument(
         "-N", "--num-iterations",
         type=int,
         default=10,
-        help="Number of iterations for random tests (default: 10).",
+        help="Number of random iterations of each test (the 'N_ITER' environment variable overrides it at run time).",
     )
     parser.add_argument(
         "--no-clean",
         action="store_true",
-        help="Do not clean the test folders before generating new files.",
+        help="Do not delete the test sources of the selected APIs before generating.",
     )
     parser.add_argument(
         "--lmul",
         type=int,
         nargs="*",
+        metavar="LMUL",
         choices=[0, 1, 2, 4, 8],
         default=[0, 1, 2, 4, 8],
-        help="Generate tests for the specified LMUL values.",
+        help="LMUL values to test. '0' and '1' both stand for the base registers (LMUL 1).",
     )
     parser.add_argument(
         "--ldiv",
         type=int,
         nargs="+",
+        metavar="LDIV",
         choices=[2],
         default=[2],
-        help="Generate tests for the specified LDIV values.",
+        help="LDIV values to test: '2' tests the half-vectors (d2).",
     )
     parser.add_argument(
         "--no-ldiv",
         action="store_true",
-        help="Do not generate LDIV tests.",
+        help="Do not test the half-vectors (same as an empty --ldiv).",
     )
     parser.add_argument(
         "--mask-kind",
         type=str,
         nargs="+",
+        metavar="KIND",
         choices=["unmasked", "mask", "maskz", "masks"],
         default=["unmasked", "mask", "maskz", "masks"],
-        help="Generate tests for the specified mask kinds.",
+        help=(
+            "Variants to test: 'unmasked', 'mask' (Merge-Masked), 'maskz' (Zero-Masked) and 'masks' "
+            "(Source-Masked). A function is only tested for the variants of its 'mask_support'."
+        ),
     )
     parser.add_argument(
         "--skip-lmul-cpp",
         action="store_true",
-        help="Deprecated option kept for backward compatibility.",
+        help="Deprecated, no effect. Kept for backward compatibility.",
     )
     parser.add_argument(
         "--skip-mask-cpp",
         action="store_true",
-        help="Deprecated option kept for backward compatibility.",
+        help="Deprecated, no effect. Kept for backward compatibility.",
     )
     parser.add_argument(
         "--header-type",
         choices=["function", "full"],
         default="function",
-        help="Generate test using individual header inclusion or global header inclusion.",
+        help="Headers included by the tests: the header of the tested function ('function') or the global header ('full').",
     )
     parser.add_argument(
         "--audit",
         nargs="+",
+        metavar="AUDIT",
         choices=["coverage", "redundancy", "consistency", "all", "none"],
         default=["all"],
-        help="Run audits on tests_specs.json: 'coverage' checks for missing/extra functions, 'redundancy' checks for redundant default property overrides, 'consistency' checks for domain/tolerance integrity, 'all' (default) runs all audits, 'none' disables audits.",
+        help=(
+            "Audits of 'tests_specs.json'. They print warnings and never stop the generation. "
+            "'consistency': entries of 'tests_specs.json' that are not declared functions. 'coverage' "
+            "and 'redundancy' are reserved names: they are accepted but do not check anything yet."
+        ),
     )
+    set_examples(parser, [
+        ("./gen_mipp_tests.py", "the three APIs, every LMUL and variant"),
+        ("./gen_mipp_tests.py obj --lmul 0 8 --ldiv 2", "C++ Object tests, as in the CI"),
+        ("./gen_mipp_tests.py c --lmul 1 --no-ldiv --mask-kind unmasked", "smallest C test set"),
+    ])
+    return parser
 
-    args = parser.parse_args()
+
+def main():
+    args = build_arg_parser().parse_args()
 
     if args.no_ldiv:
         args.ldiv = []

@@ -754,6 +754,10 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
   white-space: nowrap;
 }
 
+.md-typeset table:not([class]) td:first-child code {
+  word-break: normal;
+}
+
 /* Compact shield badges inside tables */
 .md-typeset table:not([class]) img {
   max-height: 18px;

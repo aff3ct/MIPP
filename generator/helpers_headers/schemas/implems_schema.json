@@ -1,16 +1,37 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Implementations",
+    "description": "Implementation entries of the levels 0 to 2: `simd_ext/<isa>/<isa>_native_implems.json` (Level 0), `simd_ext/<isa>/<isa>_emu_implems.json` (Level 1) and, for every ISA, `helpers_headers/generic_emu_implems.json`, `generic_emu_implems_mask.json` (masked variants) and `generic_emu_implems_lmulh.json` (horizontal functions with LMUL > 1) (Level 2). Each function maps to a list of candidate entries. For each datatype, mask variant and preprocessor condition, the [candidate resolver](../../internals/code_generation.md) keeps the lowest level whose dependencies are available.\n\nChecked when the file is loaded: the functions and the datatypes exist in the interfaces and in the ISA descriptor, and every `template` / `template_ref` resolves. The `levels`, `dead-code` and `duplicates` audits check the placement and the overlaps of the entries.",
+    "examples": [
+        {
+            "div": [
+                {
+                    "instr_name": "recpeq",
+                    "datatypes": [
+                        "float32"
+                    ],
+                    "template": "arith_2args_recp",
+                    "if": "!defined(__aarch64__)"
+                }
+            ]
+        }
+    ],
     "anyOf": [
         {
+            "description": "Function → entries (the format of all the current files).",
             "type": "object",
             "additionalProperties": {
                 "type": "array",
                 "items": {
                     "$ref": "#/definitions/item"
                 }
+            },
+            "propertyNames": {
+                "title": "function"
             }
         },
         {
+            "description": "Group → function → entries (accepted, unused).",
             "type": "object",
             "additionalProperties": {
                 "type": "object",
@@ -19,18 +40,27 @@
                     "items": {
                         "$ref": "#/definitions/item"
                     }
+                },
+                "propertyNames": {
+                    "title": "function"
                 }
+            },
+            "propertyNames": {
+                "title": "group"
             }
         }
     ],
     "definitions": {
         "item": {
+            "description": "A candidate implementation of a function.",
             "type": "object",
             "properties": {
                 "instr_name": {
+                    "description": "String passed to the template as `instr_name`, usually the name of the intrinsic without prefix and suffix (`add`, `recpeq`). Omitted: the function name in the generic files, an empty string in the ISA files.",
                     "type": "string"
                 },
                 "datatypes": {
+                    "description": "Alias of `DATATYPES_MAP` or explicit list of the datatypes (pairs for the conversions) of the entry.",
                     "anyOf": [
                         {
                             "type": "string"
@@ -44,6 +74,7 @@
                     ]
                 },
                 "template": {
+                    "description": "Name of a template of the matching `*_templates.json` file of the ISA, or an inline template ([Templates](templates.md)). One of `template` and `template_ref` is required.",
                     "anyOf": [
                         {
                             "type": "string"
@@ -54,18 +85,23 @@
                     ]
                 },
                 "template_ref": {
+                    "description": "Reference to a generic template, with its prefix: `tpl_generic_emu.<name>`, `tpl_mask_generic_emu.<name>` or `tpl_horiz_lmul_generic_emu.<name>`.",
                     "type": "string"
                 },
                 "if": {
+                    "description": "Preprocessor condition of the entry. The entry is emitted under `#if <condition>`; the rest of the condition space goes to the next candidates.",
                     "type": "string"
                 },
                 "skip_audit_level": {
+                    "description": "`true` disables the `levels` audit for this entry.",
                     "type": "boolean"
                 },
                 "skip_audit_level_reason": {
+                    "description": "Why the `levels` audit is disabled (requires `skip_audit_level: true`).",
                     "type": "string"
                 },
                 "version": {
+                    "description": "`mask`, `maskz` or `masks`: the entry implements this mask variant (without it, the unmasked function). `horiz_lmul`: the entry implements a horizontal function with LMUL > 1.",
                     "type": "string",
                     "enum": [
                         "mask",
@@ -75,6 +111,7 @@
                     ]
                 },
                 "type": {
+                    "description": "Set by the generator when the files are loaded (`emulated` for the emulation files): leave it out.",
                     "type": "string",
                     "enum": [
                         "native",
@@ -82,12 +119,14 @@
                     ]
                 },
                 "dependencies": {
+                    "description": "Computed by the generator from the MIPP calls of the template: leave it out.",
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
                 "preferred_simd_ext": {
+                    "description": "ISA or list of ISAs. Among the candidates of the same level, the entry is tried first on these ISAs and last on the others.",
                     "anyOf": [
                         {
                             "type": "string"
@@ -101,6 +140,7 @@
                     ]
                 },
                 "simd_size": {
+                    "description": "Register size or list of sizes, in bits after LMUL, for which the entry applies (e.g. `128`).",
                     "anyOf": [
                         {
                             "type": "integer"
@@ -149,9 +189,11 @@
             "additionalProperties": false
         },
         "embedded_template": {
+            "description": "Inline template, same fields as in a templates file ([Templates](templates.md)).",
             "type": "object",
             "properties": {
                 "format": {
+                    "description": "See [Templates](templates.md).",
                     "type": "string",
                     "enum": [
                         "short",
@@ -159,6 +201,7 @@
                     ]
                 },
                 "code": {
+                    "description": "See [Templates](templates.md).",
                     "anyOf": [
                         {
                             "type": "string"
@@ -177,6 +220,5 @@
             ],
             "additionalProperties": false
         }
-    },
-    "title": "ImplemsSchema"
+    }
 }

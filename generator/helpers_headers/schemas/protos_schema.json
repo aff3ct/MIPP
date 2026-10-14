@@ -1,12 +1,40 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Prototypes",
+    "description": "Prototypes shared by the functions. A function refers to one of them with `proto_ref` ([Interfaces](interfaces.md)). The generator derives from the prototype the C signatures, the C++ overloads, the LMUL > 1 versions built from two halves and the scalar fallback. The names follow the pattern `ret_<return>_<n>args_<arguments>`.",
+    "examples": [
+        {
+            "ret_reg_2args_reg": {
+                "ret": {
+                    "type": "reg",
+                    "fixeddatatype": false,
+                    "charac": "WO"
+                },
+                "args": [
+                    {
+                        "type": "reg",
+                        "fixeddatatype": false,
+                        "charac": "RO"
+                    },
+                    {
+                        "type": "reg",
+                        "fixeddatatype": false,
+                        "charac": "RO"
+                    }
+                ]
+            }
+        }
+    ],
     "additionalProperties": {
+        "description": "A prototype.",
         "type": "object",
         "properties": {
             "ret": {
+                "description": "Return value.",
                 "$ref": "#/definitions/param"
             },
             "args": {
+                "description": "Arguments, in order.",
                 "type": "array",
                 "items": {
                     "$ref": "#/definitions/param"
@@ -21,9 +49,11 @@
     },
     "definitions": {
         "param": {
+            "description": "A return value or an argument.",
             "type": "object",
             "properties": {
                 "type": {
+                    "description": "Kind of value: `reg` (data register), `msk` (mask register), `val` (scalar), `ptr` (pointer to elements), `Nele` (array of one scalar per lane), or `false` for a `void` return.",
                     "anyOf": [
                         {
                             "type": "string"
@@ -35,6 +65,7 @@
                     ]
                 },
                 "fixeddatatype": {
+                    "description": "`false`: the value has the datatype of the function. Otherwise its type is fixed: a datatype (`int32` for a shift count, `uint32`, ...) or a category (`uint`: the unsigned type of the same size, for the indices of gather and scatter).",
                     "anyOf": [
                         {
                             "type": "boolean"
@@ -45,9 +76,11 @@
                     ]
                 },
                 "charac": {
+                    "description": "`RO`: read only, the argument is `const` in the signatures. `WO`: written (return values, stored pointers).",
                     "type": "string"
                 },
                 "offset_lmul": {
+                    "description": "Pointers only. When a function with LMUL > 1 is built from two calls on halves, the pointer of the second call is advanced by one half. `false` passes the same pointer to both calls (gather and scatter, whose indices give the offsets). Omitted: `true`.",
                     "type": "boolean"
                 }
             },
@@ -58,6 +91,8 @@
             "additionalProperties": false
         }
     },
-    "title": "ProtosSchema",
-    "type": "object"
+    "type": "object",
+    "propertyNames": {
+        "title": "prototype"
+    }
 }

@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 452" width="680" height="452" role="img" aria-labelledby="gp-title gp-desc">
+  <title id="gp-title">MIPPv2 generator pipeline</title>
+  <desc id="gp-desc">Three groups of declarative JSON files are the input: the core registries in generator/helpers_headers (functions, prototypes, categories, scalar reference, generic emulations, docs), the ISA backends in generator/simd_ext/isa (descriptor, native implementations, dedicated emulations) and the test specifications in generator/helpers_tests. All of them are checked by blocking validation and by warning-only audits. The candidate resolution in codegen picks, for every function, datatype, mask variant, LMUL and ISA, the first available level among L0 native, L1 dedicated, L2 generic and L3 scalar. gen_mipp_headers.py writes the C, C++ Functional and C++ Object headers in include/, gen_mipp_docs.py writes the Function Support and Hardware Support pages and the API Explorer data in docs/. gen_mipp_tests.py does not use the resolution: it writes the Catch2 sources in tests/src, which compare every API against the L3 scalar reference.</desc>
+  <defs>
+    <style>
+      .head { font: 600 11px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; fill: #64748b; letter-spacing: .06em; }
+      .sub  { font: 500 11px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; fill: #64748b; }
+      .ttl  { font: 700 13px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; fill: #64748b; }
+      .dir  { font: 600 11px ui-monospace, Menlo, Consolas, "DejaVu Sans Mono", monospace; fill: #64748b; }
+      .file { font: 500 11px ui-monospace, Menlo, Consolas, "DejaVu Sans Mono", monospace; fill: #64748b; }
+      .lvl-s { font: 500 11px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; fill: #64748b; }
+      .bdg  { font: 700 12px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; fill: #ffffff; text-anchor: middle; dominant-baseline: central; }
+      .gen-t { font: 700 12px ui-monospace, Menlo, Consolas, "DejaVu Sans Mono", monospace; fill: #ffffff; text-anchor: middle; }
+      .gen-o { font: 600 12px ui-monospace, Menlo, Consolas, "DejaVu Sans Mono", monospace; fill: #ffffff; fill-opacity: .9; text-anchor: middle; }
+      .gen-s { font: 500 11px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; fill: #ffffff; fill-opacity: .8; text-anchor: middle; }
+      .note { font: italic 500 10px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; fill: #64748b; text-anchor: middle; }
+      .in   { fill: rgba(100, 116, 139, 0.08); stroke: #64748b; stroke-width: 1.5; }
+      .eng  { fill: rgba(100, 116, 139, 0.08); stroke: #64748b; stroke-width: 1.5; }
+      .chk  { fill: rgba(100, 116, 139, 0.08); stroke: #64748b; stroke-width: 1.5; stroke-dasharray: 5 3; }
+      .gen  { fill: #334155; stroke: #94a3b8; stroke-width: 1.5; }
+      .wire { stroke: #64748b; stroke-width: 1.5; fill: none; }
+      .l0 { fill: #059669; } .l1 { fill: #2563eb; } .l2 { fill: #d97706; } .l3 { fill: #64748b; }
+    </style>
+    <marker id="gp-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#64748b"/>
+    </marker>
+  </defs>
+
+  <!-- ===== Inputs ===== -->
+  <text class="head" x="8" y="14">DECLARATIVE INPUTS · JSON</text>
+
+  <rect class="in" x="8" y="22" width="208" height="112" rx="10"/>
+  <text class="ttl" x="20" y="42">Core registries</text>
+  <text class="dir" x="20" y="60">helpers_headers/</text>
+  <text class="file" x="20" y="80">registry_*.json</text>
+  <text class="file" x="20" y="96">generic_emu_*.json  (L2)</text>
+  <text class="file" x="20" y="112">funcs_docs.json</text>
+  <text class="sub" x="20" y="127">functions, scalar reference (L3)</text>
+
+  <rect class="in" x="236" y="22" width="208" height="112" rx="10"/>
+  <text class="ttl" x="248" y="42">ISA backends</text>
+  <text class="dir" x="248" y="60">simd_ext/&lt;isa&gt;/</text>
+  <text class="file" x="248" y="80">&lt;isa&gt;_isa.json</text>
+  <text class="file" x="248" y="96">&lt;isa&gt;_native_*.json  (L0)</text>
+  <text class="file" x="248" y="112">&lt;isa&gt;_emu_*.json  (L1)</text>
+  <text class="sub" x="248" y="127">one directory per target</text>
+
+  <rect class="in" x="464" y="22" width="208" height="112" rx="10"/>
+  <text class="ttl" x="476" y="42">Test specifications</text>
+  <text class="dir" x="476" y="60">helpers_tests/</text>
+  <text class="file" x="476" y="80">tests_specs.json</text>
+  <text class="file" x="476" y="96">tests_templates.json</text>
+  <text class="sub" x="476" y="127">input domains, tolerances</text>
+
+  <!-- to validation -->
+  <line class="wire" x1="112" y1="134" x2="112" y2="152" marker-end="url(#gp-arr)"/>
+  <line class="wire" x1="340" y1="134" x2="340" y2="152" marker-end="url(#gp-arr)"/>
+  <line class="wire" x1="568" y1="134" x2="568" y2="152" marker-end="url(#gp-arr)"/>
+
+  <!-- ===== Checks ===== -->
+  <rect class="chk" x="8" y="154" width="664" height="40" rx="10"/>
+  <text class="head" x="24" y="178">CHECKS</text>
+  <text class="sub" x="86" y="178">validation: JSON Schemas, cross-references · blocking</text>
+  <text class="sub" x="656" y="178" text-anchor="end">audits: levels, dead code, overlaps · warnings</text>
+
+  <!-- to resolution (headers + docs) and straight down (tests) -->
+  <line class="wire" x1="226" y1="194" x2="226" y2="212" marker-end="url(#gp-arr)"/>
+  <line class="wire" x1="568" y1="194" x2="568" y2="248"/>
+  <line class="wire" x1="568" y1="286" x2="568" y2="342" marker-end="url(#gp-arr)"/>
+
+  <!-- ===== Candidate resolution ===== -->
+  <rect class="eng" x="8" y="214" width="436" height="108" rx="10"/>
+  <text class="head" x="24" y="234">CANDIDATE RESOLUTION · codegen/</text>
+  <text class="sub" x="24" y="252">per function, datatype, mask variant, LMUL and ISA</text>
+
+  <rect class="l0" x="24" y="266" width="34" height="20" rx="10"/><text class="bdg" x="41" y="276">L0</text>
+  <text class="lvl-s" x="64" y="280">native</text>
+  <rect class="l1" x="128" y="266" width="34" height="20" rx="10"/><text class="bdg" x="145" y="276">L1</text>
+  <text class="lvl-s" x="168" y="280">dedicated</text>
+  <rect class="l2" x="240" y="266" width="34" height="20" rx="10"/><text class="bdg" x="257" y="276">L2</text>
+  <text class="lvl-s" x="280" y="280">generic</text>
+  <rect class="l3" x="342" y="266" width="34" height="20" rx="10"/><text class="bdg" x="359" y="276">L3</text>
+  <text class="lvl-s" x="382" y="280">scalar</text>
+  <text class="sub" x="24" y="308">first level whose dependencies are available</text>
+
+  <!-- to generators -->
+  <path class="wire" d="M226,322 V332 M112,332 H340"/>
+  <line class="wire" x1="112" y1="332" x2="112" y2="342" marker-end="url(#gp-arr)"/>
+  <line class="wire" x1="340" y1="332" x2="340" y2="342" marker-end="url(#gp-arr)"/>
+  <text class="note" x="568" y="262">no resolution:</text>
+  <text class="note" x="568" y="276">tests read the registries</text>
+
+  <!-- ===== Generators and outputs ===== -->
+  <rect class="gen" x="8" y="344" width="208" height="88" rx="10"/>
+  <text class="gen-t" x="112" y="368">gen_mipp_headers.py</text>
+  <text class="gen-o" x="112" y="392">include/</text>
+  <text class="gen-s" x="112" y="414">C · C++ Functional · C++ Object</text>
+
+  <rect class="gen" x="236" y="344" width="208" height="88" rx="10"/>
+  <text class="gen-t" x="340" y="368">gen_mipp_docs.py</text>
+  <text class="gen-o" x="340" y="392">docs/</text>
+  <text class="gen-s" x="340" y="414">support pages · API Explorer data</text>
+
+  <rect class="gen" x="464" y="344" width="208" height="88" rx="10"/>
+  <text class="gen-t" x="568" y="368">gen_mipp_tests.py</text>
+  <text class="gen-o" x="568" y="392">tests/src/</text>
+  <text class="gen-s" x="568" y="414">Catch2 · checked against L3</text>
+</svg>

@@ -1,0 +1,6 @@
+title: Reference
+nav:
+  - Command-Line: cli.md
+  - Registries: registries
+  - Templating DSL: templating_dsl.md
+  - Audits & Validation: audits.md

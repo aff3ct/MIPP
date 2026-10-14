@@ -1,6 +1,0 @@
-title: ISA Backends
-nav:
-  - Overview: simd_ext.md
-  - ISA Descriptor: gen_mipp_isa.md
-  - Native Implementations (Level 0): implem.md
-  - ISA-Specific Emulations (Level 1): implem_emu.md

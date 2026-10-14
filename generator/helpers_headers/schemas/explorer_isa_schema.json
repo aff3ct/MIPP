@@ -1,7 +1,7 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "MIPP ISA Explorer Metadata Schema",
-    "description": "Schema for validating <isa>_explorer.json files providing Explorer UI and Godbolt Compiler Explorer configuration",
+    "title": "Explorer Metadata",
+    "description": "Presentation of an ISA in the [API Explorer](../../../explorer/index.md), in `simd_ext/<isa>/<isa>_explorer.json`: display name and order, Compiler Explorer (Godbolt) settings, and the feature tiers or flags that the user can toggle. Read by `gen_mipp_api_data.py`, which validates it and copies it into `docs/assets/data/mipp_api_index.json`.",
     "type": "object",
     "additionalProperties": false,
     "required": [
@@ -12,35 +12,41 @@
     ],
     "properties": {
         "$schema": {
-            "type": "string"
-        },
-        "name": {
             "type": "string",
-            "description": "Identifier of the ISA matching the directory name"
-        },
-        "display_name": {
-            "type": "string",
-            "description": "Human-friendly display name of the ISA"
+            "description": "Optional reference to this schema, for the editors."
         },
         "description": {
             "type": "string",
             "description": "Optional short description or architectural notes"
         },
+        "name": {
+            "description": "Identifier of the ISA matching the directory name",
+            "type": "string"
+        },
+        "display_name": {
+            "description": "Human-friendly display name of the ISA",
+            "type": "string"
+        },
         "order": {
-            "type": "integer",
-            "description": "Display order for UI tabs and sorting (e.g. 10 for SSE, 20 for AVX...)"
+            "description": "Display order for UI tabs and sorting (e.g. 10 for SSE, 20 for AVX...)",
+            "type": "integer"
         },
         "headers": {
+            "description": "Explicit C/C++ header inclusions override (e.g. for scalar)",
             "type": "array",
-            "items": { "type": "string" },
-            "description": "Explicit C/C++ header inclusions override (e.g. for scalar)"
+            "items": {
+                "type": "string"
+            }
         },
         "ignored_intrinsics": {
+            "description": "List of vendor intrinsic function names to ignore from matching",
             "type": "array",
-            "items": { "type": "string" },
-            "description": "List of vendor intrinsic function names to ignore from matching"
+            "items": {
+                "type": "string"
+            }
         },
         "compiler": {
+            "description": "Default compiler of the Compiler Explorer links.",
             "type": "object",
             "required": [
                 "id",
@@ -51,22 +57,23 @@
             "additionalProperties": false,
             "properties": {
                 "id": {
-                    "type": "string",
-                    "description": "Godbolt compiler identifier (e.g. g142, carm64g1420, rv64-clang)"
+                    "description": "Godbolt compiler identifier (e.g. g142, carm64g1420, rv64-clang)",
+                    "type": "string"
                 },
                 "arch": {
-                    "type": "string",
-                    "description": "Architecture family (x86, arm, riscv)"
+                    "description": "Architecture family (x86, arm, riscv)",
+                    "type": "string"
                 },
                 "label": {
-                    "type": "string",
-                    "description": "Human-readable label for the default compiler"
+                    "description": "Human-readable label for the default compiler",
+                    "type": "string"
                 },
                 "base_flags": {
-                    "type": "string",
-                    "description": "Base compilation flags (can contain {simd_width} template)"
+                    "description": "Base compilation flags (can contain {simd_width} template)",
+                    "type": "string"
                 },
                 "compiler_32": {
+                    "description": "Compiler used for the 32-bit variant of the ISA (e.g. ARMv7 for NEON).",
                     "type": "object",
                     "required": [
                         "id",
@@ -77,29 +84,37 @@
                     "additionalProperties": false,
                     "properties": {
                         "id": {
+                            "description": "Godbolt compiler identifier.",
                             "type": "string"
                         },
                         "arch": {
+                            "description": "Architecture family.",
                             "type": "string"
                         },
                         "label": {
+                            "description": "Human-readable label.",
                             "type": "string"
                         },
                         "base_flags": {
+                            "description": "Base compilation flags.",
                             "type": "string"
                         }
                     }
                 },
                 "flags_by_size": {
-                    "type": "object",
                     "description": "Optional map of vector/buffer size in bits to arch-specific flags",
+                    "type": "object",
                     "additionalProperties": {
                         "type": "string"
+                    },
+                    "propertyNames": {
+                        "title": "size"
                     }
                 }
             }
         },
         "features": {
+            "description": "Hardware features shown as toggles in the Explorer.",
             "type": "object",
             "required": [
                 "mode",
@@ -108,22 +123,22 @@
             "additionalProperties": false,
             "properties": {
                 "mode": {
+                    "description": "How features are organized: 'hierarchy' (ordered tiers like SSE), 'flags' (orthogonal toggles), 'mixed' (tiers + flags), or 'none'",
                     "type": "string",
                     "enum": [
                         "hierarchy",
                         "flags",
                         "mixed",
                         "none"
-                    ],
-                    "description": "How features are organized: 'hierarchy' (ordered tiers like SSE), 'flags' (orthogonal toggles), 'mixed' (tiers + flags), or 'none'"
+                    ]
                 },
                 "default": {
                     "type": "string",
                     "description": "Default selected tier ID if mode is 'hierarchy' or 'mixed'"
                 },
                 "items": {
-                    "type": "array",
                     "description": "List of feature flags or hierarchical tiers",
+                    "type": "array",
                     "items": {
                         "type": "object",
                         "required": [
@@ -133,38 +148,41 @@
                         ],
                         "additionalProperties": false,
                         "properties": {
-                            "id": {
+                            "description": {
                                 "type": "string",
-                                "description": "Unique feature identifier within this ISA (e.g. BW, FMA, SSE4.2)"
+                                "description": "Tooltip or documentation string"
+                            },
+                            "id": {
+                                "description": "Unique feature identifier within this ISA (e.g. BW, FMA, SSE4.2)",
+                                "type": "string"
                             },
                             "label": {
-                                "type": "string",
-                                "description": "Short label for UI buttons"
+                                "description": "Short label for UI buttons",
+                                "type": "string"
                             },
                             "define": {
-                                "type": "string",
-                                "description": "C preprocessor symbol (e.g. __AVX512BW__, __ARM_FEATURE_FMA)"
+                                "description": "C preprocessor symbol (e.g. __AVX512BW__, __ARM_FEATURE_FMA)",
+                                "type": "string"
                             },
                             "type": {
+                                "description": "Type of item: 'tier' for hierarchical levels or 'flag' for orthogonal toggles (used in 'mixed' mode)",
                                 "type": "string",
-                                "enum": ["tier", "flag"],
-                                "description": "Type of item: 'tier' for hierarchical levels or 'flag' for orthogonal toggles (used in 'mixed' mode)"
+                                "enum": [
+                                    "tier",
+                                    "flag"
+                                ]
                             },
                             "flag": {
-                                "type": "string",
-                                "description": "Compiler flag to enable this feature"
+                                "description": "Compiler flag to enable this feature",
+                                "type": "string"
                             },
                             "default": {
                                 "type": "boolean",
                                 "description": "Whether this feature is active by default"
                             },
                             "locked": {
-                                "type": "boolean",
-                                "description": "Whether this feature is locked/read-only in the UI"
-                            },
-                            "description": {
-                                "type": "string",
-                                "description": "Tooltip or documentation string"
+                                "description": "Whether this feature is locked/read-only in the UI",
+                                "type": "boolean"
                             }
                         }
                     }

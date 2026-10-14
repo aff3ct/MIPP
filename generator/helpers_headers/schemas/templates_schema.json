@@ -1,6 +1,23 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Templates",
+    "description": "Code templates of the implementation entries: `simd_ext/<isa>/<isa>_native_templates.json`, `simd_ext/<isa>/<isa>_emu_templates.json`, and the generic `helpers_headers/generic_emu_templates.json`, `generic_emu_templates_mask.json` and `generic_emu_templates_lmulh.json`. A template is rendered once per function, datatype and LMUL with Jinja2 (`{{ isa.prefix }}`, `{{ instr_name }}`, `{{ isa_dt_par.data_ext }}`, ...) and with the MIPP placeholders of the [templating DSL](../templating_dsl.md) (`%add<tp>%`, `%r<tp>%`, ...). The MIPP calls of a template are the dependencies of its entries.\n\nISA entries refer to a template by name (`template`), generic entries with a prefix (`template_ref`: `tpl_generic_emu.<name>`, `tpl_mask_generic_emu.<name>`, `tpl_horiz_lmul_generic_emu.<name>`). A template that no entry uses gets a `dead-code` warning.",
+    "examples": [
+        {
+            "arith_2args_recp": {
+                "format": "long",
+                "code": [
+                    "%r<tp>% recp;",
+                    "recp.r = {{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r1.r);",
+                    "recp.r = vmulq_{{ isa_dt_par.data_ext }}(recp.r, vrecpsq_{{ isa_dt_par.data_ext }}(r1.r, recp.r));",
+                    "%r<tp>% res = %mul<tp>%(r0, recp);",
+                    "return res;"
+                ]
+            }
+        }
+    ],
     "additionalProperties": {
+        "description": "A template, or a group of templates (accepted, unused).",
         "anyOf": [
             {
                 "$ref": "#/definitions/template"
@@ -15,9 +32,11 @@
     },
     "definitions": {
         "template": {
+            "description": "A template.",
             "type": "object",
             "properties": {
                 "format": {
+                    "description": "`short` (default): `code` is the expression of the result; the generator declares `res`, assigns `res.r` (or `res.m`) and returns it. `long`: `code` is the whole body of the function.",
                     "type": "string",
                     "enum": [
                         "short",
@@ -25,6 +44,7 @@
                     ]
                 },
                 "code": {
+                    "description": "Code, as a string or a list of lines.",
                     "anyOf": [
                         {
                             "type": "string"
@@ -46,15 +66,20 @@
     },
     "properties": {
         "SNIPPET_END_MSK": {
+            "description": "Legacy, unused.",
             "type": "string"
         },
         "SNIPPET_END_MSKZ": {
+            "description": "Legacy, unused.",
             "type": "string"
         },
         "SNIPPET_END_MSKS": {
+            "description": "Legacy, unused.",
             "type": "string"
         }
     },
-    "title": "TemplatesSchema",
-    "type": "object"
+    "type": "object",
+    "propertyNames": {
+        "title": "template"
+    }
 }

@@ -123,7 +123,7 @@ Comprehensive documentation, interactive tools, and developer guides are availab
 - **[Vector Types & LMUL](https://aff3ct.github.io/MIPP/user/vector_types_and_lmul/)**: Supported datatypes and register multiplier semantics.
 - **[Masking Semantics](https://aff3ct.github.io/MIPP/user/masking_semantics/)**: Predication execution models (`unmasked`, `mask`, `maskz`, `masks`).
 - **[Specifications & Hardware Matrices](https://aff3ct.github.io/MIPP/funcs_support/)**: Complete mathematical specifications and target architecture matrices.
-- **[Developer Guide](https://aff3ct.github.io/MIPP/developer/)**: Code generation pipeline, JSON registries, and contributing guidelines.
+- **[Developer Guide](https://aff3ct.github.io/MIPP/developer/)**: Generation pipeline, setup, and tutorials to add a function, an implementation or an ISA.
 
 ---
 

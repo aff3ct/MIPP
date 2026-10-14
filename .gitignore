@@ -12,6 +12,7 @@ tests/code_coverage_files/
 tests/code_coverage_report/
 build*
 __pycache__
+*.egg-info
 .venv
 include*/
 tests/CMakeCache.txt
@@ -41,4 +42,6 @@ tests/src/cpp
 tests/src/obj
 paper/
 docs/assets/data/
+docs/developer/reference/cli.md
+docs/developer/reference/registries/
 benchmarks/

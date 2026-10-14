@@ -1,12 +1,27 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Interfaces",
+    "description": "Public functions of MIPP, one entry per function. The generator derives from it the names and the signatures in the three APIs: `mipp_add_float32`, `mipp_add_float32_maskz`, `mipp_add_float32_m2` in C, `mipp::add` in C++.\n\nChecked when the file is loaded: `proto_ref` exists in `registry_protos.json`, the function has a scalar implementation for each of its datatypes and mask variants ([Scalar Implementations](scalar_implems.md)), and it is in at most one category ([Categories](categories.md)).",
+    "examples": [
+        {
+            "absdiff": {
+                "proto_ref": "ret_reg_2args_reg",
+                "datatypes": "all_datatypes",
+                "horizontal": false,
+                "mask_support": "all_mask"
+            }
+        }
+    ],
     "additionalProperties": {
+        "description": "A function.",
         "type": "object",
         "properties": {
             "proto_ref": {
+                "description": "Name of a prototype of `registry_protos.json` ([Prototypes](protos.md)).",
                 "type": "string"
             },
             "datatypes": {
+                "description": "Datatypes of the function: an alias of `DATATYPES_MAP` (`helpers_headers/tools.py`), such as `all_datatypes`, `all_float`, `all_int`, `all_uint`, `all_32bit`, or a pair alias for the conversions (`all_datatypes_same_size`, `all_datatypes_widenning`, ...), or an explicit list.",
                 "anyOf": [
                     {
                         "type": "string"
@@ -20,9 +35,11 @@
                 ]
             },
             "horizontal": {
+                "description": "`true` for the functions that combine the lanes of a register (reductions such as `hadd`, `hmax`). Their LMUL > 1 versions come from the `lmulh` generic templates instead of two calls on halves.",
                 "type": "boolean"
             },
             "mask_support": {
+                "description": "Mask variants generated in addition to the unmasked function: `mask` (Merge-Masked), `maskz` (Zero-Masked), `masks` (Source-Masked). `all_mask`: the three; `no_mask`: none.",
                 "type": "string",
                 "enum": [
                     "no_mask",
@@ -36,6 +53,7 @@
                 ]
             },
             "cpp_name": {
+                "description": "Name of the function in the C++ APIs when it differs from the C name: `get_k` is `mipp::get`.",
                 "type": "string"
             }
         },
@@ -47,6 +65,8 @@
         ],
         "additionalProperties": false
     },
-    "title": "InterfacesSchema",
-    "type": "object"
+    "type": "object",
+    "propertyNames": {
+        "title": "function"
+    }
 }
