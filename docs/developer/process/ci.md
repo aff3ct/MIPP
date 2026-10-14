@@ -16,15 +16,15 @@ Every push runs the whole pipeline.
 | | `generation-tests` | `./gen_mipp_tests.py obj --lmul 0 8 --ldiv 2 --mask-kind unmasked mask maskz masks`: the C++ Object tests, for the base registers, LMUL 8 and the half-vectors. |
 | | `generation-docs` | `./gen_mipp_docs.py`. |
 | `analysis` | `analysis-cppcheck` | `ci/analysis-cppcheck.sh` on the generated headers. |
-| `build` | `build-test-examples` | Compiles the programs of `examples/` with `-Werror`, for each target of the matrix. In fine granularity, also checks that `mipp_fine_grained.cpp` includes atomic headers only. |
+| `build` | `build-test-examples` | Compiles the programs of `examples/` with `-Werror`, for each target of the matrix. In fine granularity, also checks that `mipp_fine_grained.cpp` includes atomic headers only. Then compiles the code examples of the documentation (`scripts/check_doc_snippets.sh --build-only`, see [Code Examples of the User Guide](../setup.md#61-code-examples-of-the-user-guide)). |
 | | `build-test-unit` | Configures and builds the unit tests (`tests/`) for each target of the matrix. |
 | `test` | `test-unit` | Runs `run-tests` on each target. |
-| | `test-examples` | Runs the examples on each target. |
+| | `test-examples` | Runs the examples and the code examples of the documentation (`--run-only`) on each target. |
 | `deploy` | `deploy-docs-html` | `mkdocs build` (without `--strict`); the site is kept as an artifact. |
 
 **Matrix.** The `build` and `test` jobs run for two compilers (`gcc-14`, `clang-20`) and 14 targets (`sse2` to `avx512dq`, `armv8-neon`, `riscv64-rvv1.0`, `x86-scalar`). Each job runs in the image `registry.gitlab.com/aff3ct/aff3ct/mipp_linux:<compiler>_<target>`, on a runner tagged with the target name. The compiler flags of each target are set in `.build-common` and listed in [CI Targets and Flags](../setup.md#51-ci-targets-and-flags). The ARMv7 and SVE targets are declared but commented out of the matrix.
 
-**RVV.** The C examples are skipped on `riscv64-rvv1.0`, and the unit tests are built without unity build and precompiled headers.
+**RVV.** The C examples (and the C code examples of the documentation) are skipped on `riscv64-rvv1.0`, and the unit tests are built without unity build and precompiled headers.
 
 ---
 

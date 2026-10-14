@@ -85,108 +85,13 @@ Here is the standard, battle-tested pattern to vectorize any loop over an arbitr
 === "C API (`<mipp.h>`)"
 
     ```c
-    #include <stdio.h>
-    #include <stdlib.h>
-
-    #include <mipp.h>
-
-    // Computes y[i] = a * x[i] + y[i] (SAXPY) over arbitrary size S
-    void saxpy_mipp(float a, const float* x, float* y, size_t size)
-    {
-        const size_t N = MIPP_N_FLOAT32; // Elements per SIMD register (e.g. 8 on AVX2)
-        const size_t vec_limit = (size / N) * N;
-        rvd_float32_m1_t va = mipp_set1_float32_m1(a);
-
-        // 1. Vector main loop
-        for (size_t i = 0; i < vec_limit; i += N)
-        {
-            rvd_float32_m1_t vx = mipp_loadu_float32_m1(&x[i]);
-            rvd_float32_m1_t vy = mipp_loadu_float32_m1(&y[i]);
-
-            rvd_float32_m1_t vres = mipp_fmadd_float32_m1(va, vx, vy);
-
-            mipp_storeu_float32_m1(&y[i], vres);
-        }
-
-        // 2. Scalar tail loop for remaining elements
-        for (size_t i = vec_limit; i < size; ++i)
-        {
-            y[i] += a * x[i];
-        }
-    }
-
-    int main(void)
-    {
-        const size_t size = 1007;
-        float *x = (float*)malloc(size * sizeof(float));
-        float *y = (float*)malloc(size * sizeof(float));
-
-        for (size_t i = 0; i < size; i++) { x[i] = 2.0f; y[i] = 1.0f; }
-
-        saxpy_mipp(3.0f, x, y, size);
-
-        printf("y[0] = %f (expected: 7.0)\n", y[0]);
-        printf("y[1006] = %f (expected: 7.0)\n", y[1006]);
-
-        free(x);
-        free(y);
-        return 0;
-    }
-
-    // Compile and run:
-    // gcc -std=c99 -O3 -mavx2 -mfma -I/path/to/mipp/include saxpy_c.c -o saxpy_c
-    // ./saxpy_c
+    --8<-- "examples/doc/getting_started/c.c"
     ```
 
 === "C++ Functional API (`<mipp.hpp>`)"
 
     ```cpp
-    #include <iostream>
-    #include <vector>
-
-    #include <mipp.hpp>
-
-    // Computes y[i] = a * x[i] + y[i] (SAXPY) over arbitrary size S
-    void saxpy_mipp(float a, const float* x, float* y, size_t size)
-    {
-        constexpr size_t N = mipp::N<float>(); // Elements per SIMD register (e.g. 8 on AVX2)
-        const size_t vec_limit = (size / N) * N;
-        mipp::rvd<float> va = mipp::set1<float>(a);
-
-        // 1. Vector main loop
-        for (size_t i = 0; i < vec_limit; i += N)
-        {
-            mipp::rvd<float> vx = mipp::loadu<float>(&x[i]);
-            mipp::rvd<float> vy = mipp::loadu<float>(&y[i]);
-
-            mipp::rvd<float> vres = mipp::fmadd(va, vx, vy); // T deduced from operands
-
-            mipp::storeu(&y[i], vres);
-        }
-
-        // 2. Scalar tail loop for remaining elements
-        for (size_t i = vec_limit; i < size; ++i)
-        {
-            y[i] += a * x[i];
-        }
-    }
-
-    int main()
-    {
-        const size_t size = 1007;
-        std::vector<float> x(size, 2.0f);
-        std::vector<float> y(size, 1.0f);
-
-        saxpy_mipp(3.0f, x.data(), y.data(), size);
-
-        std::cout << "y[0] = " << y[0] << " (expected: 7.0)" << std::endl;
-        std::cout << "y[1006] = " << y[1006] << " (expected: 7.0)" << std::endl;
-        return 0;
-    }
-
-    // Compile and run:
-    // g++ -std=c++11 -O3 -mavx2 -mfma -I/path/to/mipp/include saxpy.cpp -o saxpy
-    // ./saxpy
+    --8<-- "examples/doc/getting_started/fun.cpp"
     ```
 
 
@@ -194,52 +99,7 @@ Here is the standard, battle-tested pattern to vectorize any loop over an arbitr
 === "C++ Object API (`<mipp_obj.hpp>`)"
 
     ```cpp
-    #include <iostream>
-    #include <vector>
-
-    #include <mipp_obj.hpp>
-
-    // Computes y[i] = a * x[i] + y[i] (SAXPY) over arbitrary size S
-    void saxpy_mipp(float a, const float* x, float* y, size_t size)
-    {
-        constexpr size_t N = mipp::Rvd<float>::N(); // Elements per SIMD register (e.g. 8 on AVX2)
-        const size_t vec_limit = (size / N) * N;
-        mipp::Rvd<float> va = a;
-
-        // 1. Vector main loop
-        for (size_t i = 0; i < vec_limit; i += N)
-        {
-            mipp::Rvd<float> vx(&x[i]);
-            mipp::Rvd<float> vy(&y[i]);
-
-            vy += va * vx; // Natural operators 
-
-            mipp::storeu(&y[i], vy);
-        }
-
-        // 2. Scalar tail loop for remaining elements
-        for (size_t i = vec_limit; i < size; ++i)
-        {
-            y[i] += a * x[i];
-        }
-    }
-
-    int main()
-    {
-        const size_t size = 1007;
-        std::vector<float> x(size, 2.0f);
-        std::vector<float> y(size, 1.0f);
-
-        saxpy_mipp(3.0f, x.data(), y.data(), size);
-
-        std::cout << "y[0] = " << y[0] << " (expected: 7.0)" << std::endl;
-        std::cout << "y[1006] = " << y[1006] << " (expected: 7.0)" << std::endl;
-        return 0;
-    }
-
-    // Compile and run:
-    // g++ -std=c++11 -O3 -mavx2 -mfma -I/path/to/mipp/include saxpy.cpp -o saxpy
-    // ./saxpy
+    --8<-- "examples/doc/getting_started/obj.cpp"
     ```
 
 ---
@@ -248,12 +108,6 @@ Here is the standard, battle-tested pattern to vectorize any loop over an arbitr
 
 You can call `mipp_info()` at runtime to print the detected OS, compiler, active SIMD extension, and vector register bitwidth to `stdout`:
 
-```cpp
-#include <mipp.h>
-
-int main()
-{
-    mipp_info();
-    return 0;
-}
+```c
+--8<-- "examples/doc/getting_started/c_info.c"
 ```

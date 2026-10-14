@@ -39,6 +39,7 @@
 ## Quick Example: Vectorized SAXPY
 
 ```cpp
+#include <cstdlib>
 #include <iostream>
 #include <vector>
 #include <mipp_obj.hpp>
@@ -74,8 +75,11 @@ int main()
 
     saxpy(3.0f, x.data(), y.data(), size);
 
-    std::cout << "y[0] = " << y[0] << " (expected: 7.0)" << std::endl;
-    return 0;
+    size_t errors = 0;
+    for (float v : y)
+        if (v != 7.0f) errors++;
+    std::cout << "y[0] = " << y[0] << " (expected: 7.0), " << errors << " error(s)" << std::endl;
+    return errors == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 ```
 

@@ -91,24 +91,19 @@ The third template parameter `ISA_TYPE` defaults to `mipp::DEFAULT_ISA`, which i
 When operations take vector arguments, the compiler automatically deduces `T`, `LMUL`, and `ISA_TYPE`. Using the `auto` keyword eliminates verbose vector type declarations:
 
 ```cpp
-auto a = mipp::load<float>(ptr_a); // Deduced as mipp::rvd<float, 1, DEFAULT_ISA>
-auto b = mipp::load<float>(ptr_b);
-
-// Automatically deduces T=float, LMUL=1, and ISA_TYPE=DEFAULT_ISA:
-auto c = mipp::add(a, b); 
+--8<-- "examples/doc/programming_model/fun.cpp:auto_deduction"
 ```
 
 For functions without vector arguments, explicit template parameters are supplied:
 ```cpp
-auto zeroes = mipp::set0<double, 2>();       // mipp::rvd<double, 2>
-auto scalar_val = mipp::set1<int32_t>(42);   // mipp::rvd<int32_t, 1>
+--8<-- "examples/doc/programming_model/fun.cpp:explicit_params"
 ```
 
 ### 3.6. Masked Operations
 Masked operations take the variant as first template argument (`mipp::M`, `mipp::Z` or `mipp::S`). Because `mipp::rvd<T, LMUL>` is an alias to an internal type trait, `T` cannot be deduced from the arguments and must be given explicitly (plus `LMUL` when it is not `1`):
 
 ```cpp
-auto c = mipp::add<mipp::M, float>(m, a, b); // res[i] = m[i] ? a[i] + b[i] : a[i]
+--8<-- "examples/doc/programming_model/fun.cpp:masked"
 ```
 
 The unmasked form is the call without a mask (`mipp::add(a, b)`). The `mipp::U` enumerator exists, but no masked signature accepts it: `mipp::add<mipp::U, float>(m, a, b)` compiles and then fails at link time (undefined reference).
@@ -125,6 +120,8 @@ The Object API encapsulates raw SIMD registers and predicates inside high-level 
 - `mipp::Rvm<T, LMUL>` for boolean mask vectors.
 
 ### 4.1. Class Structure & Constructors
+
+<!-- not-compiled: class synopsis (declarations only) -->
 
 ```cpp
 template <typename T, int LMUL = 1>
@@ -199,26 +196,14 @@ Bitwise operators and shifts are defined for every element type: on floating-poi
 Every MIPP SIMD operation is exposed as a free function under `namespace mipp::` that directly accepts `Rvd` and `Rvm` instances:
 
 ```cpp
-auto a = mipp::Rvd<float>(ptr_a);
-auto b = mipp::Rvd<float>(ptr_b);
-auto c = mipp::Rvd<float>(ptr_c);
-
-// Free functions on Rvd:
-auto res_fma = mipp::fmadd(a, b, c); // Fused multiply-add
-auto res_abs = mipp::abs(a);         // Absolute value
-auto res_min = mipp::min(a, b);      // Element-wise minimum
-auto res_red = mipp::hadd(a);        // Horizontal sum (returns scalar float)
-
-// Store directly using free function:
-mipp::store(ptr_out, res_fma);
+--8<-- "examples/doc/programming_model/obj.cpp:free_functions"
 ```
 
 ### 4.4. Masked Operations
 With `Rvm` and `Rvd` objects, the compiler deduces `T` and `LMUL`: only the variant is needed.
 
 ```cpp
-mipp::Rvm<float> m = (a > b);
-auto c = mipp::add<mipp::M>(m, a, b); // res[i] = m[i] ? a[i] + b[i] : a[i]
+--8<-- "examples/doc/programming_model/obj.cpp:masked"
 ```
 
 See [Masking Semantics](masking_semantics.md) for the four variants.
@@ -237,33 +222,9 @@ See [Masking Semantics](masking_semantics.md) for the four variants.
 [Getting Started](getting_started.md#3-real-world-tutorial-vectorizing-a-loop-handling-tail-loops) shows the same SAXPY loop in the three APIs, with a scalar loop for the last elements. MIPP can also process these last elements with SIMD code: a mask selects the valid lanes, and masked loads and stores never access memory outside them.
 
 ```cpp
-#include <cstddef>
-#include <cstdint>
-#include <mipp.hpp>
+--8<-- "examples/doc/programming_model/fun.cpp:includes"
 
-// y[i] = a * x[i] + y[i]
-void saxpy(std::size_t n, float a, const float* x, float* y)
-{
-    constexpr std::size_t N = mipp::N<float>();
-    const auto va = mipp::set1<float>(a);
-
-    std::size_t i = 0;
-    for (; i + N <= n; i += N) {
-        auto vx = mipp::loadu<float>(x + i);
-        auto vy = mipp::loadu<float>(y + i);
-        mipp::storeu(y + i, mipp::fmadd(va, vx, vy));
-    }
-
-    if (i < n) { // fewer than N elements left
-        int32_t active[N];
-        for (std::size_t j = 0; j < N; j++)
-            active[j] = (i + j < n);
-        auto m  = mipp::set_k<float>(active); // lane j active iff i + j < n
-        auto vx = mipp::loadu<mipp::Z>(m, x + i); // inactive lanes are not read (set to 0)
-        auto vy = mipp::loadu<mipp::Z>(m, y + i);
-        mipp::storeu<mipp::M>(m, y + i, mipp::fmadd(va, vx, vy)); // inactive lanes are not written
-    }
-}
+--8<-- "examples/doc/programming_model/fun.cpp:masked_tail"
 ```
 
 !!! note "Performance"

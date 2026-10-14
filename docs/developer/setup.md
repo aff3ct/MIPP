@@ -178,3 +178,36 @@ mkdocs build --strict                     # what the CI runs: warnings are error
 ```
 
 `--strict` turns broken links and missing pages into errors. Run it before submitting a change to the documentation.
+
+### 6.1. Code Examples of the User Guide
+
+The C and C++ code blocks of the User Guide are not written in the pages: they are sections of complete programs in `examples/doc/<page>/`, one file per API (`c.c`, `fun.cpp`, `obj.cpp`), included by `pymdownx.snippets`. A section is delimited by two comments in the program:
+
+```cpp
+auto a = mipp::load<float>(A);   // setup, not shown
+// --8<-- [start:masked]
+auto c = mipp::add<mipp::M, float>(m, a, b);
+// --8<-- [end:masked]
+DOC_CHECK(...);                  // check, not shown
+```
+
+and the page includes it inside a code block, with the path from the repository root:
+
+```text
+    ```cpp
+    ;--8<-- "examples/doc/programming_model/fun.cpp:masked"
+    ```
+```
+
+The section is dedented, and takes the indentation of the `--8<--` line (code blocks in admonitions, tabs and lists). Without `:section`, the whole file is included. Several `--8<--` lines in the same code block are concatenated. A missing file or section fails `mkdocs build`.
+
+Each program prepares its inputs outside the sections, and checks the results announced by the snippet with `DOC_CHECK` (`examples/doc/doc_check.h`): a failed check makes the program return a non-zero exit code. `scripts/check_doc_snippets.sh` compiles every program with `-Werror` (C99 and C++11, or the standard given by a `// doc-std: c++17` line), runs it, compiles and runs the C++ example of `README.md`, and fails if a C or C++ block of `docs/user/` is written inline:
+
+```bash
+scripts/check_doc_snippets.sh                                    # native target
+SIMD_EXT="-DMIPP_SCALAR -DMIPP_SCALAR_SIZE=1024" scripts/check_doc_snippets.sh
+CC="clang -arch x86_64" CXX="clang++ -arch x86_64" SIMD_EXT="-mavx2 -mfma" \
+  scripts/check_doc_snippets.sh --out /tmp/doc_avx2              # x86 on Apple Silicon
+```
+
+A block that cannot be compiled (a class synopsis, an excerpt of generated code) stays inline, preceded by `<!-- not-compiled: reason -->`. The GitLab CI runs the script on every target of the matrix ([CI](process/ci.md)).

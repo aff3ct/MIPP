@@ -48,6 +48,8 @@ Users can inspect the implementation level of any function through two mechanism
 ### 2.1. Header Comments
 Every generated function definition in `include/mipp/internal/simd_ext/<isa>/c/functions/<category>/...` contains an explicit comment declaring its level:
 
+<!-- not-compiled: example of generated code (include/mipp/internal/), not user code -->
+
 ```c
 static inline rvd_avx_float32_t mipp_avx_add_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
     // Level 0 (Native Hardware)
@@ -56,6 +58,8 @@ static inline rvd_avx_float32_t mipp_avx_add_float32(const rvd_avx_float32_t r0,
     return res;
 }
 ```
+
+<!-- not-compiled: example of generated code (include/mipp/internal/), not user code -->
 
 ```c
 static inline rvd_rvv_int64_t mipp_rvv_wcvt_int32_int64(const rvd_rvv_int32_t r0) {

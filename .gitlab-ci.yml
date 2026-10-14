@@ -250,6 +250,7 @@ build-test-examples:
       - ./examples/mipp_object_cpp
       - ./examples/mipp_interop_cpp
       - ./examples/mipp_fine_grained_cpp
+      - ./examples/doc/bin
   script:
     - echo "Debug -- Job=$CI_NODE_INDEX/$CI_NODE_TOTAL"
     - echo "Debug -- OS=$OS"
@@ -286,6 +287,8 @@ build-test-examples:
       else
         echo "Skipping 'mipp_fine_grained.cpp' (MIPP_GRANULARITY=${MIPP_GRANULARITY})"
       fi
+    # documentation snippets (examples/doc/ and README.md), run in test-examples
+    - CC=$COMPILER CXX=$COMPILER_CPP SKIP_C=${SKIP_C_EXAMPLES:-false} ../scripts/check_doc_snippets.sh --build-only
 
 build-test-unit:
   extends: .build-common
@@ -391,6 +394,7 @@ test-examples:
       else
         echo "Skipping 'mipp_fine_grained' example (MIPP_GRANULARITY=${MIPP_GRANULARITY})"
       fi
+    - ./scripts/check_doc_snippets.sh --run-only
 
 # DEPLOY --------------------------------------------------------------------------------------------------------------
 

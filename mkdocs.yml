@@ -51,6 +51,9 @@ theme:
 
 repo_url: https://github.com/aff3ct/MIPP/
 
+watch:
+  - examples/doc
+
 markdown_extensions:
   - toc:
       permalink: true
@@ -69,7 +72,12 @@ markdown_extensions:
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.inlinehilite
-  - pymdownx.snippets :
+  # Code examples of the user guide: sections of the compiled programs of
+  # examples/doc/ (--8<-- "examples/doc/<page>/<api>.cpp:<section>").
+  - pymdownx.snippets:
+      base_path: ["."]
+      check_paths: true
+      dedent_subsections: true
       auto_append:
         - docs/includes/abbreviations.md
   - pymdownx.tabbed:
