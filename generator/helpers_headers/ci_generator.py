@@ -523,6 +523,15 @@ def _gen_ci_functions(isa_list, include_manager, funcs):
                 # for ldiv in all_ldiv:
                 _ci_ldiv_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, ldiv=-2)
 
+                # Masked ldiv wrappers (same variants as in the fine granularity)
+                ldiv_mask_status = funcs[f]["mask_support"] if "mask_support" in funcs[f] else MaskSupport()
+                if ldiv_mask_status.is_maskable():
+                    _ci_ldiv_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_type="mask", ldiv=-2)
+                if ldiv_mask_status.is_maskzable():
+                    _ci_ldiv_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_type="maskz", ldiv=-2)
+                if ldiv_mask_status.is_masksable():
+                    _ci_ldiv_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_type="masks", ldiv=-2)
+
             if include_manager.mode == "function_header":
                 custom_prefix = _custom_prefix_generator(f, isa_list)
                 include_manager.write_custom_prefix("c", f, custom_prefix)
