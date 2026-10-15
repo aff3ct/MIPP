@@ -94,9 +94,9 @@
         "#include <stdint.h>",
         "#include <stdio.h>",
         "#include <stdlib.h>",
+        "#include <stdbool.h>",
         "#ifndef MIPP_FLOAT_TYPEDEFS_",
         "#define MIPP_FLOAT_TYPEDEFS_",
-        "#include <stdbool.h>",
         "typedef float float32_t;",
         "typedef double float64_t;",
         "#endif"

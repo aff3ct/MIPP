@@ -1,11 +1,4 @@
 {
-    "blend": [
-        {
-            "instr_name": "sel",
-            "datatypes": "all_datatypes",
-            "template": "blend"
-        }
-    ],
     "cast": [
         {
             "instr_name": "reinterpret",
@@ -20,6 +13,13 @@
             "template": "cast_k",
             "skip_audit_level": true,
             "skip_audit_level_reason": "assigns native SVE mask wrapper directly"
+        }
+    ],
+    "select": [
+        {
+            "instr_name": "sel",
+            "datatypes": "all_datatypes",
+            "template": "select"
         }
     ],
     "set0": [
