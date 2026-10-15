@@ -430,20 +430,14 @@
             "return {{isa.prefix}}_vmv_x_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(tmp.r);"
         ]
     },
-    "loadu": {
+    "load_mskz": {
         "format": "long",
         "code": [
-            "if ((((uint64_t)p0) & (8 - 1)) == 0) {",
-            "\t%r<tp>% out;",
-            "\tout.r = {{isa.prefix}}_vle{{isa_dt_par.width}}_v_{{isa_dt_par.data_ext}}(({{ isa_dt_par.to_ptr }}*)p0, %N<tp>%);",
-            "\treturn out;",
-            "} else {",
-            "\t{{isa_dt_par.to_ptr}} tmp[%N<tp>%];",
-            "\tmemcpy(tmp, p0, %N<tp>%);",
-            "\t%r<tp>% out;",
-            "\tout.r = {{ isa.prefix }}_vle{{ isa_dt_par.width}}_v_{{ isa_dt_par.data_ext }}(({{ isa_dt_par.to_ptr }}*) tmp, %N<tp>%);",
-            "\treturn out;",
-            "}"
+            "// inactive lanes: 0, their memory is not accessed",
+            "%r<tp>% res;",
+            "res = %set0<tp>%();",
+            "res.r = {{ isa.prefix }}_vle{{ isa_dt_par.width }}_v_{{ isa_dt_par.data_ext }}_mu(m0.m, res.r, ({{ isa_dt_par.to_ptr }}*) p0, %N<tp>%);",
+            "return res;"
         ]
     },
     "notb_k": {
@@ -519,23 +513,6 @@
             "",
             "tmp.r = {{isa.prefix}}_vmul_vx_{{isa_dt_par.uint_data_ext}}(r0.r, sizeof({{isa_dt_par.to_ptr}}), %N<tp>%);",
             "{{ isa.prefix }}_v{{ instr_name }}{{isa_dt_par.width}}_v_{{ isa_dt_par.data_ext }}(p0, tmp.r, blended.r, %N<tp>%);"
-        ]
-    },
-    "set": {
-        "format": "long",
-        "code": [
-            "if ((((uint64_t)vals) & (8 - 1)) == 0) {",
-            "\t%r<tp>% out;",
-            "\tout.r = {{isa.prefix}}_vle{{isa_dt_par.width}}_v_{{isa_dt_par.data_ext}}(({{ isa_dt_par.to_ptr }}*)vals, %N<tp>%);",
-            "\treturn out;",
-            "} else {",
-            "\t//alignas(8) {{isa_dt_par.to_ptr}} tmp[%N<tp>%];",
-            "\t{{isa_dt_par.to_ptr}} tmp[%N<tp>%];",
-            "\tmemcpy(tmp, vals, %N<tp>%);",
-            "\t%r<tp>% out;",
-            "\tout.r = {{ isa.prefix }}_vle{{ isa_dt_par.width }}_v_{{ isa_dt_par.data_ext }}(({{ isa_dt_par.to_ptr }}*) tmp, %N<tp>%);",
-            "\treturn out;",
-            "} "
         ]
     },
     "set0_k": {
@@ -627,19 +604,6 @@
             "tmp.r = {{ isa.prefix }}_vmerge_vvm_{{ isa_dt_par.data_ext }}(tmp.r, r0.r, m0.m, %N<tp>%);",
             "// store w regular vse",
             "{{ isa.prefix }}_vse{{ isa_dt_par.width}}_v_{{ isa_dt_par.data_ext }}(({{ isa_dt_par.to_ptr }}*) p0, tmp.r , %N<tp>%);"
-        ]
-    },
-    "storeu": {
-        "format": "long",
-        "code": [
-            "if ((((uint64_t)p0) & (8 - 1)) == 0) {",
-            "\treturn {{isa.prefix}}_vse{{isa_dt_par.width}}_v_{{isa_dt_par.data_ext}}(({{ isa_dt_par.to_ptr }}*)p0, r0.r, %N<tp>%);",
-            "} else {",
-            "\t{{isa_dt_par.to_ptr}} tmp[%N<tp>%];",
-            "\t{{ isa.prefix }}_vse{{ isa_dt_par.width }}_v_{{ isa_dt_par.data_ext }}(({{ isa_dt_par.to_ptr }}*) tmp, r0.r, %N<tp>%);",
-            "\tmemcpy(p0, tmp, %N<tp>%);",
-            "\treturn;",
-            "}"
         ]
     }
 }

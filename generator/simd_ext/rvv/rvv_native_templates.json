@@ -203,6 +203,12 @@
             "{{isa.prefix}}_{{ instr_name }}_v_x_{{isa_dt_par.data_ext}}(0,%N<tp>%);"
         ]
     },
+    "set": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}_vle{{ isa_dt_par.width }}_v_{{ isa_dt_par.data_ext }}(({{ isa_dt_par.to_ptr }}*) vals, %N<tp>%);"
+        ]
+    },
     "shift_scalar": {
         "format": "short",
         "code": [

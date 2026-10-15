@@ -443,11 +443,20 @@
             "template": "hmul_float"
         }
     ],
+    "load": [
+        {
+            "instr_name": "load",
+            "datatypes": "all_datatypes",
+            "template": "load_mskz",
+            "version": "maskz"
+        }
+    ],
     "loadu": [
         {
             "instr_name": "loadu",
             "datatypes": "all_datatypes",
-            "template": "loadu"
+            "template": "load_mskz",
+            "version": "maskz"
         }
     ],
     "lshift": [
@@ -690,13 +699,6 @@
             "version": "maskz"
         }
     ],
-    "set": [
-        {
-            "instr_name": "loadu",
-            "datatypes": "all_datatypes",
-            "template": "set"
-        }
-    ],
     "set1": [
         {
             "instr_name": "vmv",
@@ -736,7 +738,8 @@
         {
             "instr_name": "storeu",
             "datatypes": "all_datatypes",
-            "template": "storeu"
+            "template": "store_mskz",
+            "version": "maskz"
         }
     ],
     "sub": [

@@ -17,6 +17,8 @@ The scalar target is generated from `registry_scalar_implems.json`, like the <sp
 
 A function that reaches a stub on the ISA under test throws `mipp::stub_exception`: the test catches it and reports a Catch2 warning instead of a failure.
 
+The input and output arrays are aligned on 64 bytes, which suits `load` and `store` on every ISA. For `loadu` and `storeu` (`_UNALIGNED_PTR_FUNCS` in `tests_builder.py`), the call under test gets a pointer one element past an aligned buffer, never aligned on the register size; the scalar reference keeps the aligned arrays.
+
 ---
 
 ## 2. Generated Files

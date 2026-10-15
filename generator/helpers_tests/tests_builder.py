@@ -20,6 +20,10 @@ from include_gen import _match_category
 # Auxiliary MIPP functions whose headers must always be included in generated test files.
 _AUX_HEADERS = ["load", "get", "get_k", "toreg", "tomsk", "set_k"]
 
+# Functions whose vector call gets a pointer shifted by one element: never aligned on the
+# register size (the scalar reference keeps the aligned buffers).
+_UNALIGNED_PTR_FUNCS = ("loadu", "storeu")
+
 _RE_TEST_PLACEHOLDER = re.compile(r'%([\w]+)(?:<([^>]*)>)?(?:\(([^)]*)\))?%')
 
 def resolve_test_placeholders(line: str, adapter: DialectAdapter) -> str:
@@ -126,6 +130,8 @@ class TestsBuilderEngine:
             elif atype == "ptr":
                 if arg.get("charac") == "WO":
                     args.append("res_s" if is_scalar else "res_r")
+                elif func_name in _UNALIGNED_PTR_FUNCS and not is_scalar:
+                    args.append("inputs1_u")
                 else:
                     args.append("inputs1")
 
@@ -247,16 +253,41 @@ class TestsBuilderEngine:
     # --- Shared rendering helpers ---
 
     def render_void_ret_init(self, dt_type: str, size_var: str, init_src: str,
-                             indent: str = "\t\t") -> List[str]:
-        """Generates the declaration and initialization of res_r/res_s for void-ret functions."""
-        return [
-            f"{indent}alignas(64) {dt_type} res_r[{size_var}];",
+                             indent: str = "\t\t", func_name: str = "") -> List[str]:
+        """Generates the declaration and initialization of res_r/res_s for void-ret functions.
+        For the functions of _UNALIGNED_PTR_FUNCS, res_r points one element past an aligned buffer.
+        """
+        if func_name in _UNALIGNED_PTR_FUNCS:
+            res_r_decl = [
+                f"{indent}alignas(64) {dt_type} res_r_ubuf[{size_var} + 1];",
+                f"{indent}{dt_type}* res_r = res_r_ubuf + 1; // unaligned on purpose",
+            ]
+        else:
+            res_r_decl = [f"{indent}alignas(64) {dt_type} res_r[{size_var}];"]
+        return res_r_decl + [
             f"{indent}alignas(64) {dt_type} res_s[{size_var}];",
             f"{indent}for (size_t i = 0; i < {size_var}; i++)",
             f"{indent}{{",
             f"{indent}\tres_r[i] = {init_src}[i];",
             f"{indent}\tres_s[i] = {init_src}[i];",
             f"{indent}}}",
+        ]
+
+    def render_unaligned_input(self, func_name: str, dt_type: str, size_var: str,
+                               indent: str = "\t\t") -> List[str]:
+        """Generates inputs1_u, a copy of inputs1 one element past an aligned buffer, for the
+        functions of _UNALIGNED_PTR_FUNCS that read memory (nothing for the other functions).
+        """
+        args_info = self.get_proto_args_info(func_name)
+        reads_ptr = any(a.get("type") == "ptr" and a.get("charac") != "WO" for a in args_info)
+        if func_name not in _UNALIGNED_PTR_FUNCS or not reads_ptr:
+            return []
+        return [
+            f"{indent}alignas(64) {dt_type} inputs1_ubuf[{size_var} + 1];",
+            f"{indent}{dt_type}* inputs1_u = inputs1_ubuf + 1; // unaligned on purpose",
+            f"{indent}for (size_t i = 0; i < {size_var}; i++)",
+            f"{indent}\tinputs1_u[i] = inputs1[i];",
+            "",
         ]
 
     def render_skip_condition(self, func_name: str, ref_var: str,
@@ -1027,6 +1058,7 @@ class TestsBuilderEngineC:
 
         body_lines.append("\t\t}")
         body_lines.append("")
+        body_lines.extend(self.engine.render_unaligned_input(func_name, dt_cstd, size_var))
 
         # Loads
         reg_type1 = adapter.format_reg_type(dt1_raw, lmul_suffix)
@@ -1077,7 +1109,7 @@ class TestsBuilderEngineC:
 
         is_void_ret = self.engine.proto_is_void_ret(proto_ref)
         if is_void_ret:
-            body_lines.extend(self.engine.render_void_ret_init(dt_cstd, size_out_var, "inputs_src" if mkind == "masks" else "inputs1"))
+            body_lines.extend(self.engine.render_void_ret_init(dt_cstd, size_out_var, "inputs_src" if mkind == "masks" else "inputs1", func_name=func_name))
             body_lines.append(f"\t\t{adapter.format_func_call(func_name, dt_func_ext, ', '.join(op_args_r), lmul_suffix, mkind=mkind)};")
             body_lines.append(f"\t\t{adapter.format_scalar_func_call(func_name, dt_func_ext, ', '.join(op_args_s), lmul_suffix, mkind=mkind)};")
         else:
@@ -1422,6 +1454,7 @@ class TestsBuilderEngineCpp(TestsBuilderEngineCppBase):
             has_inputs2=(not is_1arg or is_reg_val),
             has_m2=True,
         ))
+        lines.extend(self.engine.render_unaligned_input(func_name, "T", "size"))
 
         lines.append(f"\t\t[[maybe_unused]] auto r1 = {adapter.format_load('T', 'inputs1', 'LMUL')};")
         lines.append(f"\t\t[[maybe_unused]] auto s1 = {adapter.format_scalar_load('T', 'inputs1', 'LMUL')};")
@@ -1434,7 +1467,7 @@ class TestsBuilderEngineCpp(TestsBuilderEngineCppBase):
 
         is_void_ret = self.engine.proto_is_void_ret(proto_ref)
         if is_void_ret:
-            lines.extend(self.engine.render_void_ret_init("T", "size", "inputs1"))
+            lines.extend(self.engine.render_void_ret_init("T", "size", "inputs1", func_name=func_name))
             r_var = "res_r"
             s_var = "res_s"
         else:
@@ -1512,6 +1545,7 @@ class TestsBuilderEngineObj(TestsBuilderEngineCppBase):
             has_inputs2=(not is_1arg or is_reg_val),
             has_m2=True,
         ))
+        lines.extend(self.engine.render_unaligned_input(func_name, "T", "size"))
 
         lines.append(f"\t\t[[maybe_unused]] auto r1 = {adapter.format_load('T', 'inputs1', 'LMUL')};")
         lines.append(f"\t\t[[maybe_unused]] auto s1 = {adapter.format_scalar_load('T', 'inputs1', 'LMUL')};")
@@ -1524,7 +1558,7 @@ class TestsBuilderEngineObj(TestsBuilderEngineCppBase):
 
         is_void_ret = self.engine.proto_is_void_ret(proto_ref)
         if is_void_ret:
-            lines.extend(self.engine.render_void_ret_init("T", "size", "inputs1"))
+            lines.extend(self.engine.render_void_ret_init("T", "size", "inputs1", func_name=func_name))
             r_var = "res_r"
             s_var = "res_s"
         else:
