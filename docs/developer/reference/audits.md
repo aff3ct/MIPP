@@ -68,7 +68,7 @@ Reports, for a given `(function, datatype, mask variant)`, two entries at the sa
 ./gen_mipp_tests.py --audit all            # default
 ```
 
-The options are `coverage`, `redundancy`, `consistency`, `all` and `none`. In the current implementation, only `consistency` performs a check: it warns when `tests_specs.json` describes a function that is not declared in `registry_interfaces.json`. `coverage` and `redundancy` are accepted but not implemented yet.
+The options are `consistency`, `all` and `none`. `consistency` warns when `tests_specs.json` describes a function that is not declared in `registry_interfaces.json`.
 
 ---
 

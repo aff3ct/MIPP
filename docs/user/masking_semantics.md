@@ -16,12 +16,12 @@ For any binary operation $f(a, b)$ and mask vector $m \in \{0, 1\}^N$:
 
 | Variant | C++ Variant | C API Suffix | Masking behavior |
 | :--- | :--- | :--- | :--- |
-| **Unmasked** | *(no mask argument)* | *(none)* | $\text{res}_i = f(a_i, b_i)$ |
+| **Unmasked** | *(no mask argument)* or `U` | *(none)* | $\text{res}_i = f(a_i, b_i)$ |
 | **Merge-Masked** | `M` | `_mask` | $\text{res}_i = \begin{cases} f(a_i, b_i) & \text{if } m_i = 1 \\ a_i & \text{if } m_i = 0 \end{cases}$ |
 | **Zero-Masked** | `Z` | `_maskz` | $\text{res}_i = \begin{cases} f(a_i, b_i) & \text{if } m_i = 1 \\ 0 & \text{if } m_i = 0 \end{cases}$ |
 | **Source-Masked** | `S` | `_masks` | $\text{res}_i = \begin{cases} f(a_i, b_i) & \text{if } m_i = 1 \\ \text{src}_i & \text{if } m_i = 0 \end{cases}$ |
 
-An unmasked operation is a call without a mask: the `mipp::U` enumerator is not accepted by the masked signatures.
+An unmasked operation is a call without a mask. In C++, the masked signatures also accept the `mipp::U` variant: the mask (and `src`) are ignored and the call behaves like the unmasked one, which is useful when the variant is a template parameter of generic code.
 
 !!! note "Relation to AVX-512 terminology"
     The names borrow the AVX-512 terms, with one difference: an AVX-512 merge-masked intrinsic (`_mm512_mask_add_ps(src, k, a, b)`) takes the inactive lanes from an explicit `src`, which is MIPP's **Source-Masked** variant. MIPP's **Merge-Masked** variant merges into the first operand, i.e. the AVX-512 form with `src = a`.

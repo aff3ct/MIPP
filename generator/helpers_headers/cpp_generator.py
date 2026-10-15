@@ -254,8 +254,10 @@ def _tpl_scalar_for_arg(arg):
 
 def _generic_mask_decl_gather_scatter(file, cpp_func_name, proto, mask_kind):
 
-    if mask_kind == "mask" or mask_kind == "maskz":
+    if mask_kind == "mask":
         ret = "template <VARIANT V=M, typename T, typename U, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA>"
+    elif mask_kind == "maskz":
+        ret = "template <VARIANT V=Z, typename T, typename U, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA>"
     else:
         ret = "template <VARIANT V=S, typename T, typename U, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA>"
 
@@ -325,15 +327,18 @@ def _generic_mask_decl(file, cpp_func_name, proto, mask_kind):
     but *types* expressed in terms of T and LMUL.
 
     mask_kind:
-      - "mask" / "maskz": prepend 'rvm<T,LMUL> m0'
+      - "mask": prepend 'rvm<T,LMUL> m0', default variant M (merge-maskable function)
+      - "maskz": same signature, default variant Z (zero-mask only, e.g. load / loadu)
       - "masks": prepend 'const rvm<T,LMUL> m0, rvd<T,LMUL> rsrc'
     """
 
     if "gather" in cpp_func_name or "scatter" in cpp_func_name:
         return _generic_mask_decl_gather_scatter(file, cpp_func_name, proto, mask_kind)
-    # Template header differs for S because default V differs.
-    if mask_kind in ("mask", "maskz"):
+    # Template header differs per kind because the default V differs.
+    if mask_kind == "mask":
         print("template <VARIANT V=M, typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA>", file=file)
+    elif mask_kind == "maskz":
+        print("template <VARIANT V=Z, typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA>", file=file)
     else:
         print("template <VARIANT V=S, typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA>", file=file)
 
@@ -393,7 +398,7 @@ def _generic_mask_decl(file, cpp_func_name, proto, mask_kind):
     print(s, file=file)
 
 
-def _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, mk_letter, mask_kind, lmul=1, isa=None, isa_name=False):
+def _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, mk_letter, mask_kind, lmul=1, isa=None, isa_name=False, ignore_mask=False):
     """
     Emit explicit specialization for masked template for a given LMUL.
 
@@ -402,6 +407,10 @@ def _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, mk_letter
       inline void storeu<M, uint32_t, 2>(rvm<uint32_t,2> m0, uint32_t* p0, const rvd<uint32_t,2> r0) {
           mipp_storeu_uint32_mask_m2(m0, p0, r0);
       }
+
+    With ignore_mask=True (used for the U variant), the signature is the one of
+    `mask_kind` but the mask (and rsrc) are ignored and the unmasked C kernel is
+    called, so that `f<U>(m, ...)` behaves exactly like `f(...)`.
     """
     Tret = datatypes[dt_ret]["cstd"]
 
@@ -424,6 +433,10 @@ def _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, mk_letter
             f"{cpp_func_name}<{mk_letter}, {Tret}, {lmul}>("
         )
 
+    if ignore_mask:
+        # load/loadu/gather/scatter protos hardcode the variant letter in the template args
+        for letter in ("M", "Z", "S"):
+            sig = sig.replace(f"{cpp_func_name}<{letter}, ", f"{cpp_func_name}<{mk_letter}, ", 1)
 
     print(sig + " {", file=file)
 
@@ -436,11 +449,43 @@ def _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, mk_letter
     lmul_str = "m" + str(lmul)
     if lmul < 0: 
         lmul_str = "d" + str(-lmul)
-    c_symbol = f"{c_base}_{mask_kind}_{lmul_str}"
-
-    call = build_call(proto, dt_par, dt_ret, isa, c_symbol, lmul, isa_name=isa_name, masked_version=mask_kind)
+    if ignore_mask:
+        print("\t(void)m0;", file=file)
+        if mask_kind == "masks":
+            print("\t(void)rsrc;", file=file)
+        c_symbol = f"{c_base}_{lmul_str}"
+        call = build_call(proto, dt_par, dt_ret, isa, c_symbol, lmul, isa_name=isa_name, masked_version=False)
+    else:
+        c_symbol = f"{c_base}_{mask_kind}_{lmul_str}"
+        call = build_call(proto, dt_par, dt_ret, isa, c_symbol, lmul, isa_name=isa_name, masked_version=mask_kind)
     print("\t" + call + ";", file=file)
     print("}", file=file)
+
+
+def _emit_mask_specs(get_file, proto, dt_par, dt_ret, cpp_func_name, c_base, mask_status, lmul, isa):
+    """
+    Emit every masked specialization (M, Z, S and U) of one function for one
+    datatype and one LMUL. `get_file(variant)` returns the output file for the
+    variant directory ("m", "z" or "s").
+
+    U ignores the mask: it is emitted for each generic masked template that
+    exists (the `m0` form when the function is maskable or maskzable, the
+    `m0, rsrc` form when it is masksable).
+    """
+    if mask_status.is_maskable():
+        _mask_tpl_spec(get_file("m"), proto, dt_par, dt_ret, cpp_func_name, c_base, "M", "mask", lmul=lmul, isa=isa, isa_name=True)
+    if mask_status.is_maskzable():
+        _mask_tpl_spec(get_file("z"), proto, dt_par, dt_ret, cpp_func_name, c_base, "Z", "maskz", lmul=lmul, isa=isa, isa_name=True)
+    if mask_status.is_masksable():
+        _mask_tpl_spec(get_file("s"), proto, dt_par, dt_ret, cpp_func_name, c_base, "S", "masks", lmul=lmul, isa=isa, isa_name=True)
+
+    # U variant: same signature as the masked template, mask ignored
+    if mask_status.is_maskable():
+        _mask_tpl_spec(get_file("m"), proto, dt_par, dt_ret, cpp_func_name, c_base, "U", "mask", lmul=lmul, isa=isa, isa_name=True, ignore_mask=True)
+    elif mask_status.is_maskzable():
+        _mask_tpl_spec(get_file("z"), proto, dt_par, dt_ret, cpp_func_name, c_base, "U", "maskz", lmul=lmul, isa=isa, isa_name=True, ignore_mask=True)
+    if mask_status.is_masksable():
+        _mask_tpl_spec(get_file("s"), proto, dt_par, dt_ret, cpp_func_name, c_base, "U", "masks", lmul=lmul, isa=isa, isa_name=True, ignore_mask=True)
 
 
 # -------------------------------------------------------------------------------------------------
@@ -474,8 +519,10 @@ def _gen_cpp_generic_templates(include_manager, isa, funcs):
         dt_par, dr_ret = _compute_dt_par_dt_ret(funcs, f, funcs[f]["datatypes"][0]) # we just need one dt to build the template since it's generic on T
         cpp_func_name = build_cpp_func_name_short(funcs[f]["proto"], dt_par, f) # THIS IS A HACK BC build_cpp_func_name_short explodes w/o concrete type ...
 
-        if ms.is_maskable() or ms.is_maskzable():
+        if ms.is_maskable():
             _generic_mask_decl(file, cpp_func_name, proto, "mask")
+        elif ms.is_maskzable():
+            _generic_mask_decl(file, cpp_func_name, proto, "maskz")
 
         if ms.is_masksable():
             _generic_mask_decl(file, cpp_func_name, proto, "masks")
@@ -602,22 +649,12 @@ def _gen_cpp_functions_isa(include_manager, isa, funcs):
                     c_base = _masked_c_symbol(dt_par, dt_ret, f, is_cast, isa=isa, isa_name=True)
 
                     for lmul in all_lmul:
-                        if mask_status.is_maskable():
-                            _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "M", "mask", lmul=lmul, isa = isa, isa_name=True)
-                        if mask_status.is_maskzable():
-                            _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "Z", "maskz", lmul=lmul, isa = isa, isa_name=True)
-                        if mask_status.is_masksable():
-                            _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "S", "masks", lmul=lmul, isa = isa, isa_name=True)
+                        _emit_mask_specs(lambda _v: file, proto, dt_par, dt_ret, cpp_func_name, c_base, mask_status, lmul, isa)
 
                     has_ldiv = isa.get("is_scalar", False) or any(x < 0 for x in isa.get("hw_lmul", []) + isa.get("sw_lmul", []))
                     if has_ldiv:
                         ldiv = -2
-                        if mask_status.is_maskable():
-                            _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "M", "mask", lmul=ldiv, isa = isa, isa_name=True)
-                        if mask_status.is_maskzable():
-                            _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "Z", "maskz", lmul=ldiv, isa = isa, isa_name=True)
-                        if mask_status.is_masksable():
-                            _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, "S", "masks", lmul=ldiv, isa = isa, isa_name=True)
+                        _emit_mask_specs(lambda _v: file, proto, dt_par, dt_ret, cpp_func_name, c_base, mask_status, ldiv, isa)
             print(_cpp_close_namespace(), file=file)
     else:
         for f in funcs:
@@ -664,28 +701,10 @@ def _gen_cpp_functions_isa(include_manager, isa, funcs):
                     proto = funcs[f]["proto"]
                     c_base = _masked_c_symbol(dt_par, dt_ret, f, is_cast, isa=isa, isa_name=True)
 
-                    for lmul in all_lmul:
-                        if mask_status.is_maskable():
-                            file_m = include_manager.get_fd(layer_name, f, variant="m", lmul=lmul)
-                            _mask_tpl_spec(file_m, proto, dt_par, dt_ret, cpp_func_name, c_base, "M", "mask", lmul=lmul, isa = isa, isa_name=True)
-                        if mask_status.is_maskzable():
-                            file_z = include_manager.get_fd(layer_name, f, variant="z", lmul=lmul)
-                            _mask_tpl_spec(file_z, proto, dt_par, dt_ret, cpp_func_name, c_base, "Z", "maskz", lmul=lmul, isa = isa, isa_name=True)
-                        if mask_status.is_masksable():
-                            file_s = include_manager.get_fd(layer_name, f, variant="s", lmul=lmul)
-                            _mask_tpl_spec(file_s, proto, dt_par, dt_ret, cpp_func_name, c_base, "S", "masks", lmul=lmul, isa = isa, isa_name=True)
-
-                    if has_ldiv:
-                        ldiv = -2
-                        if mask_status.is_maskable():
-                            file_m = include_manager.get_fd(layer_name, f, variant="m", lmul=ldiv)
-                            _mask_tpl_spec(file_m, proto, dt_par, dt_ret, cpp_func_name, c_base, "M", "mask", lmul=ldiv, isa = isa, isa_name=True)
-                        if mask_status.is_maskzable():
-                            file_z = include_manager.get_fd(layer_name, f, variant="z", lmul=ldiv)
-                            _mask_tpl_spec(file_z, proto, dt_par, dt_ret, cpp_func_name, c_base, "Z", "maskz", lmul=ldiv, isa = isa, isa_name=True)
-                        if mask_status.is_masksable():
-                            file_s = include_manager.get_fd(layer_name, f, variant="s", lmul=ldiv)
-                            _mask_tpl_spec(file_s, proto, dt_par, dt_ret, cpp_func_name, c_base, "S", "masks", lmul=ldiv, isa = isa, isa_name=True)
+                    lmuls = list(all_lmul) + ([-2] if has_ldiv else [])
+                    for lmul in lmuls:
+                        get_file = lambda v, _l=lmul: include_manager.get_fd(layer_name, f, variant=v, lmul=_l)
+                        _emit_mask_specs(get_file, proto, dt_par, dt_ret, cpp_func_name, c_base, mask_status, lmul, isa)
 
         include_manager.resolve_all_dependencies(layer_name, funcs)
         include_manager.close_layer_fds(layer_name)

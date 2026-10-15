@@ -63,7 +63,7 @@ class TestsBuilderEngine:
     def __init__(self, base_dir: str = ".", active_audits: Optional[Set[str]] = None):
         self.base_dir = base_dir
         if active_audits is None:
-            self.active_audits = {"coverage", "redundancy", "consistency"}
+            self.active_audits = {"consistency"}
         else:
             self.active_audits = active_audits
         self.helpers_tests_dir = os.path.dirname(os.path.abspath(__file__))

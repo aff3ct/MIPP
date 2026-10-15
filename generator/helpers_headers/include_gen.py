@@ -838,6 +838,9 @@ class IncludeManager:
                     isa = layer_name[:-4]
                     # Corresponding C atomic header
                     item["dependencies"].add(f"mipp/internal/simd_ext/{isa}/c/functions/{category}/{v}/{l}/{func}.h")
+                    # The U specializations (mask ignored) of masked files call the unmasked C kernel
+                    if v in ("m", "z", "s"):
+                        item["dependencies"].add(f"mipp/internal/simd_ext/{isa}/c/functions/{category}/u/{l}/{func}.h")
                     # Generic template if masked or set
                     if v in ("m", "z", "s") or func in ["set0", "set0_k", "set", "set_k", "set1", "set1_k", "load", "loadu"]:
                         item["dependencies"].add(f"mipp/internal/templates/cpp/functions/{category}/{func}.hpp")

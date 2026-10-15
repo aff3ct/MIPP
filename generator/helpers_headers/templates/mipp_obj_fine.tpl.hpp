@@ -89,11 +89,14 @@ struct Rvm
 	inline Rvm(rvm<T, LMUL> m0) : m(m0) {}
 	inline Rvm(const bool val) : m(details::rvm_set1_k_op<T, LMUL>::apply(val ? 1 : 0)) {}
 	inline Rvm(const int32_t vals[mipp::N<T, LMUL>()]) : m(details::rvm_set_k_op<T, LMUL>::apply(vals)) {}
+	// A bool array would decay to bool* then silently convert to `true` through Rvm(bool): forbid it
+	Rvm(const bool*) = delete;
 
 	// Implicit conversion to underlying functional SIMD mask (C++ Func interop)
 	inline operator rvm<T, LMUL>() const { return this->m; }
 	inline Rvm& operator=(const rvm<T, LMUL>& m0) { this->m = m0; return *this; }
 	inline Rvm& operator=(const bool val) { this->m = details::rvm_set1_k_op<T, LMUL>::apply(val ? 1 : 0); return *this; }
+	Rvm& operator=(const bool*) = delete;
 
 	inline bool operator[](const size_t index) const { return details::rvm_get_k_op<T, LMUL>::apply(this->m, index); }
 };

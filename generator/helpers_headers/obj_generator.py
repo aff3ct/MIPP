@@ -644,7 +644,13 @@ def _write_fine_granules(fn, cat, body, output_dir):
                     if line.startswith("template <") and "int LMUL = 1>" in line:
                         cond = f"LMUL == {val}"
                         if line.startswith("template <VARIANT V = "):
-                            cond += f" && V == {vname[v]}"
+                            # U (mask ignored) is hosted by the same granule as its cpp specialization:
+                            # m (or z if the function is not maskable) for the m0 form, s for the rsrc form
+                            hosts_u = v == "s" or v == "m" or (v == "z" and "m" not in variants)
+                            if hosts_u:
+                                cond += f" && (V == {vname[v]} || V == U)"
+                            else:
+                                cond += f" && V == {vname[v]}"
                         line = line.replace(
                             "int LMUL = 1>",
                             f"int LMUL = 1, typename std::enable_if<{cond}, int>::type = 0>")

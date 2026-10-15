@@ -248,12 +248,11 @@ def build_arg_parser():
         "--audit",
         nargs="+",
         metavar="AUDIT",
-        choices=["coverage", "redundancy", "consistency", "all", "none"],
+        choices=["consistency", "all", "none"],
         default=["all"],
         help=(
             "Audits of 'tests_specs.json'. They print warnings and never stop the generation. "
-            "'consistency': entries of 'tests_specs.json' that are not declared functions. 'coverage' "
-            "and 'redundancy' are reserved names: they are accepted but do not check anything yet."
+            "'consistency': entries of 'tests_specs.json' that are not declared functions."
         ),
     )
     set_examples(parser, [
@@ -283,8 +282,8 @@ def main():
                 for item in a.split(","):
                     item = item.strip().lower()
                     if item == "all":
-                        active_audits.update(["coverage", "redundancy", "consistency"])
-                    elif item in ("coverage", "redundancy", "consistency"):
+                        active_audits.update(["consistency"])
+                    elif item == "consistency":
                         active_audits.add(item)
 
     print("=====================================================================================================")

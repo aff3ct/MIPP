@@ -288,6 +288,9 @@ def _extract_mask_from_dt_info(input_str):
                 masked_ver = "masks"
             elif val == "U":
                 masked_ver = False
+            else:
+                print("Panic: invalid mask variant 'mk:" + val + "' in '" + input_str + "' (expected M, Z, S or U).")
+                exit(-1)
     return masked_ver
 
 def build_dt(input_str, isa, dt_par, dt_ret):

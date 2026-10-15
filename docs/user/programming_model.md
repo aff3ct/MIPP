@@ -135,7 +135,7 @@ Masked operations take the variant as first template argument (`mipp::M`, `mipp:
     --8<-- "examples/doc/programming_model/fun.cpp:masked"
     ```
 
-The unmasked form is the call without a mask (`mipp::add(a, b)`). The `mipp::U` enumerator exists, but no masked signature accepts it: `mipp::add<mipp::U, float>(m, a, b)` compiles and then fails at link time (undefined reference).
+The unmasked form is the call without a mask (`mipp::add(a, b)`). The masked signatures also accept `mipp::U`: the mask is then ignored and the call behaves like the unmasked one (`mipp::add<mipp::U, float>(m, a, b)` returns `mipp::add(a, b)`). This lets generic code take the variant as a template parameter, `U` included.
 
 The four variants, their semantics and the syntax in each API are described in [Masking Semantics](masking_semantics.md).
 
@@ -199,7 +199,7 @@ struct Rvm {
 ```
 
 !!! warning "Per-lane initialization takes `int32_t`, not `bool`"
-    Like `set_k` in every API, the per-lane constructor takes an `int32_t` array, whatever `T`. A `bool` array is **not** rejected: it decays to a pointer, which converts to `bool`, so `Rvm<float> m(bool_array)` silently selects `Rvm(const bool)` and activates **all** lanes. Use an `int32_t` array.
+    Like `set_k` in every API, the per-lane constructor takes an `int32_t` array, whatever `T`. A `bool` array is rejected at compile time: `Rvm<float> m(bool_array)` would otherwise decay to a pointer, convert to `bool` and activate **all** lanes through `Rvm(const bool)`, so the `const bool*` constructor and assignment are deleted. Use an `int32_t` array.
 
 Element access: `v[i]` and the free function `mipp::get(v, i)` return the element as `T`. On a mask, `m[i]` and `mipp::get(m, i)` return a `bool`: `get` taking an `Rvm` is the C++ name of the C function `get_k` (see [Memory & Alignment](memory_and_alignment.md#4-scalar-element-extraction)).
 

@@ -207,12 +207,14 @@ def _gen_ci_defines(isa_list, file):
         template = """#define MIPP_N_{{type_category_upper}}{{n_bits}} MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{n_bits}}"""
         
         for lmul in all_lmul:
-            tmp = "\n#define MIPP_N_{{type_category_upper}}{{n_bits}}_M{ lmul } MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{n_bits}} * { lmul }"
+            tmp = "\n#define MIPP_N_{{type_category_upper}}{{n_bits}}_M{ lmul } (MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{n_bits}} * { lmul })"
             tmp = tmp.replace("{ lmul }", str(lmul))
             template += tmp
-            
-        for ldiv in all_ldiv:
-            tmp = "\n#define MIPP_N_{{type_category_upper}}{{n_bits}}_D{ ldiv } MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{n_bits}} / { ldiv }"
+
+        # same condition as the rvd_*_d2_t typedefs (see _gen_ci_structures)
+        has_ldiv = isa.get("is_scalar", False) or any(x < 0 for x in isa.get("hw_lmul", []) + isa.get("sw_lmul", []))
+        for ldiv in (all_ldiv if has_ldiv else []):
+            tmp = "\n#define MIPP_N_{{type_category_upper}}{{n_bits}}_D{ ldiv } (MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{n_bits}} / { ldiv })"
             tmp = tmp.replace("{ ldiv }", str(ldiv))
             template += tmp
             
