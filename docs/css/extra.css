@@ -487,15 +487,27 @@ pre,
 
 [data-md-color-scheme="default"] .md-typeset pre>code,
 [data-md-color-scheme="default"] .md-content__inner>.highlight>pre>code {
-  background-color: #ffffff !important;
+  background-color: var(--md-code-bg-color) !important;
   color: var(--md-code-fg-color);
   border-color: #e2e8f0 !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
+/* The containers stay transparent: only the rounded pre>code has a background,
+   so that it does not overflow its rounded corners */
 [data-md-color-scheme="default"] .highlight,
 [data-md-color-scheme="default"] .highlight>pre {
-  background-color: #ffffff !important;
+  background-color: transparent !important;
+}
+
+/* Inside a tab, the white code is flush with the white tab content: a thin
+   line separates it from the text written just before or after it */
+[data-md-color-scheme="default"] .md-typeset .tabbed-block>:is(p, ul, ol, .admonition, details)+.highlight {
+  border-top: 1px solid var(--mipp-card-border) !important;
+}
+
+[data-md-color-scheme="default"] .md-typeset .tabbed-block>.highlight:has(+ :is(p, ul, ol, .admonition, details)) {
+  border-bottom: 1px solid var(--mipp-card-border) !important;
 }
 
 [data-md-color-scheme="slate"] .md-typeset pre>code,

@@ -5,29 +5,31 @@
 #include <mipp_obj.hpp>
 
 // Computes y[i] = a * x[i] + y[i] (SAXPY) over arbitrary size S
-void saxpy_mipp(float a, const float* x, float* y, size_t size)
+void saxpy_mipp(float a, const float *x, float *y, size_t size)
 {
     constexpr size_t N = mipp::N<float>(); // Elements per SIMD register (e.g. 8 on AVX2)
     const size_t vec_limit = (size / N) * N;
     mipp::Rvd<float> va = mipp::set1_obj<float>(a);
 
     // 1. Vector main loop
-    for (size_t i = 0; i < vec_limit; i += N)
+    for (size_t i = 0; i < vec_limit; i += N) 
     {
         mipp::Rvd<float> vx = mipp::loadu_obj<float>(&x[i]);
         mipp::Rvd<float> vy = mipp::loadu_obj<float>(&y[i]);
+
         mipp::Rvd<float> vres = mipp::fmadd(va, vx, vy);
+
         mipp::storeu(&y[i], vres);
     }
 
     // 2. Scalar tail loop for remaining elements
-    for (size_t i = vec_limit; i < size; ++i)
+    for (size_t i = vec_limit; i < size; ++i) 
     {
         y[i] += a * x[i];
     }
 }
 
-int main()
+int main() 
 {
     const size_t size = 1007;
     std::vector<float> x(size, 2.0f);

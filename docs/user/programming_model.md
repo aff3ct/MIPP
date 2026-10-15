@@ -62,6 +62,17 @@ Predefined compile-time constants provide the number of elements per vector type
 - `MIPP_N_FLOAT32_M2`, `MIPP_N_FLOAT32_M4`, `MIPP_N_FLOAT32_M8`: Multiplied element capacities.
 - Equivalent macros exist for all 10 types (`MIPP_N_INT32`, `MIPP_N_FLOAT64`, `MIPP_N_UINT8`, etc.).
 
+### 2.4. Explicit Architecture Selection
+The names of sections 2.1 and 2.2 always refer to the active instruction set (the C counterpart of `mipp::DEFAULT_ISA`, see [section 3.3](#33-default_isa-selection-priority)): `mipp_add_float32_m1` forwards to the implementation of this ISA. The implementation of each ISA has its own names, with the ISA inserted after the `mipp_` / `rvd_` / `rvm_` prefix:
+
+```text
+mipp_[isa]_[func]_[datatype][_mask_variant][_lmul]
+rvd_[isa]_[datatype][_lmul]_t
+rvm_[isa]_[datatype][_lmul]_t
+```
+
+where `[isa]` is one of `scalar`, `sse`, `avx`, `avx512`, `neon`, `sve` or `rvv` (for example `mipp_sse_add_float32_m1` on `rvd_sse_float32_m1_t`, or `mipp_scalar_add_float32_m1` on `rvd_scalar_float32_m1_t`). This is the C equivalent of the `ISA_TYPE` template parameter of the C++ Functional API, with the same restrictions (see [section 3.4](#34-explicit-architecture-selection)).
+
 ---
 
 ## 3. C++ Functional API (`<mipp.hpp>`)
@@ -91,10 +102,12 @@ At compile time, `mipp::DEFAULT_ISA` automatically resolves to the highest hardw
 - **Scalar**: Configured as `DEFAULT_ISA` when compiling with `-DMIPP_SCALAR`. By default, scalar registers match the bitwidth of the highest detected host ISA (e.g. 256 bits on an AVX host, 128 bits on NEON/SSE). The bitwidth can be explicitly overridden at compile time via `-DMIPP_SCALAR_SIZE=[bits]` (e.g. `-DMIPP_SCALAR_SIZE=256`).
 
 ### 3.4. Explicit Architecture Selection
-The third template parameter `ISA_TYPE` defaults to `mipp::DEFAULT_ISA`, which is the only value that should be used in portable code.
+The third template parameter `ISA_TYPE` defaults to `mipp::DEFAULT_ISA`, which is the only value that should be used in portable code. The C API encodes the ISA in the function and type names instead (see [section 2.4](#24-explicit-architecture-selection)); the C++ Object API has no equivalent (see [section 4](#4-c-object-api-mipp_objhpp)).
 
 !!! warning "Portability Scope of `ISA_TYPE`"
     Explicitly hardcoding a specific hardware instruction set (such as `mipp::ISA::SSE`, `mipp::ISA::AVX`, `mipp::ISA::NEON`, or `mipp::ISA::RVV`) is **non-portable by design**: the code will only compile on toolchains and targets that provide that specific ISA's intrinsics and register sets. Always rely on the default `mipp::DEFAULT_ISA` in application code.
+
+Selecting an ISA does not make its implementation available: the public headers only include the implementation of the active ISA. The other values are mainly used internally. MIPP's unit tests, for instance, compare each function to its scalar implementation (`mipp::ISA::SCALAR` in C++, `mipp_scalar_*` in C) by including the corresponding internal headers (`<mipp/internal/simd_ext/scalar/...>`), which are not a stable interface.
 
 ### 3.5. Template Deduction & `auto` Type Inference
 When operations take vector arguments, the compiler automatically deduces `T`, `LMUL`, and `ISA_TYPE`. Using the `auto` keyword eliminates verbose vector type declarations:
@@ -135,6 +148,8 @@ The Object API encapsulates raw SIMD registers and predicates inside high-level 
 - `mipp::Rvd<T, LMUL>` for numeric data vectors.
 - `mipp::Rvm<T, LMUL>` for boolean mask vectors.
 
+Unlike the C++ Functional API, these classes have no `ISA_TYPE` parameter: they always hold registers of `mipp::DEFAULT_ISA`. Code that needs another ISA uses the C++ Functional API (see [section 3.4](#34-explicit-architecture-selection)).
+
 ### 4.1. Class Structure & Constructors
 
 <!-- not-compiled: class synopsis (declarations only) -->
@@ -142,8 +157,6 @@ The Object API encapsulates raw SIMD registers and predicates inside high-level 
 ```cpp
 template <typename T, int LMUL = 1>
 struct Rvd {
-    using value_type = T;
-    static constexpr int lmul = LMUL;
     rvd<T, LMUL> r; // Underlying low-level SIMD register
 
     static constexpr int N(); // Number of elements (mipp::N<T, LMUL>())
@@ -156,30 +169,32 @@ struct Rvd {
 
     // Implicit conversion to the low-level register (interoperability with the C++ Functional API)
     operator rvd<T, LMUL>() const;
-    Rvd& operator=(const rvd<T, LMUL>& r0);
-    Rvd& operator=(const T val);          // Broadcast
+
+    Rvd& operator=(const rvd<T, LMUL>& r0); // Assignment
+    Rvd& operator=(const T val); // Broadcast
 
     T operator[](const size_t index) const; // Reads one element (mipp::get)
 };
 
 template <typename T, int LMUL = 1>
 struct Rvm {
-    using value_type = T;
-    static constexpr int lmul = LMUL;
     rvm<T, LMUL> m; // Underlying low-level mask register
 
-    static constexpr int N();
+    static constexpr int N(); // Number of elements (mipp::N<T, LMUL>())
 
+    // Constructors
     Rvm() = default;
     Rvm(rvm<T, LMUL> m0);                         // Wraps a low-level rvm register
     Rvm(const bool val);                          // All lanes active or inactive (mipp::set1_k)
     Rvm(const int32_t vals[mipp::N<T, LMUL>()]);  // Lane i active iff vals[i] != 0 (mipp::set_k)
 
-    operator rvm<T, LMUL>() const;                // Implicit conversion to the low-level mask
-    Rvm& operator=(const rvm<T, LMUL>& m0);
-    Rvm& operator=(const bool val);
+    // Implicit conversion to the low-level register (interoperability with the C++ Functional API)
+    operator rvm<T, LMUL>() const;
 
-    bool operator[](const size_t index) const;    // Reads one lane: true if active
+    Rvm& operator=(const rvm<T, LMUL>& m0); // Assignment
+    Rvm& operator=(const bool val); // Broadcast
+
+    bool operator[](const size_t index) const; // Reads one lane: true if active
 };
 ```
 
@@ -266,4 +281,4 @@ See [Masking Semantics](masking_semantics.md) for the four variants.
     ```
 
 !!! note "Performance"
-    The masked `loadu` / `storeu` of this example map to native instructions only on AVX-512, for floating-point and signed integer types (8-bit and 16-bit types require AVX-512BW). Everywhere else, RVV included, they are currently emulated element by element, so the masked remainder is not faster than a scalar loop: its benefit is a single code path, with no scalar copy of the loop body. The implementation level of each target and variant is given in [`loadu`](../funcs_support/load/loadu.md) and [`storeu`](../funcs_support/store/storeu.md).
+    The masked `loadu` / `storeu` of this example map to native instructions on RVV (masked `vle` / `vse`, every type) and on AVX-512 for floating-point and signed integer types (8-bit and 16-bit types require AVX-512BW). Everywhere else (SSE, AVX, NEON, SVE) they are currently emulated element by element, so the masked remainder is not faster than a scalar loop: its benefit is a single code path, with no scalar copy of the loop body. The implementation level of each target and variant is given in [`loadu`](../funcs_support/load/loadu.md) and [`storeu`](../funcs_support/store/storeu.md).

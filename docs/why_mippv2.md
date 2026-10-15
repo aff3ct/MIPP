@@ -17,8 +17,8 @@ MIPPv2 provides portable, zero-overhead SIMD computing across x86, ARM, and RISC
 Three complementary interfaces mapping to the same inlined instructions:
 
 - **C API (`<mipp.h>`, C99)**: Explicit type-suffixed functions (`mipp_add_float32`) for pure C codebases, embedded targets, and Linux kernel modules.
-- **C++ Functional API (`<mipp.hpp>`)**: Overloaded functions under namespace `mipp::` (`mipp::add(a, b)`), with datatype and LMUL deduced from the register types.
-- **C++ Object API (`<mipp_obj.hpp>`)**: Register classes (`mipp::Rvd`, `mipp::Rvm`) with complete operator overloading.
+- **C++ Functional API (`<mipp.hpp>`, C++11)**: Overloaded functions under namespace `mipp::` (`mipp::add(a, b)`), with datatype and LMUL deduced from the register types.
+- **C++ Object API (`<mipp_obj.hpp>`, C++11)**: Register classes (`mipp::Rvd`, `mipp::Rvm`) with complete operator overloading.
 
 ### 1.2. Deterministic 4-Level Fallback Hierarchy
 Every function is implemented on every target, for all 10 data types, at the best available level: **Level 0 (Native Hardware)**, **Level 1 (Dedicated Emulation)**, **Level 2 (Generic Emulation)** or **Level 3 (Scalar Fallback)**. See [Implementation Levels](user/implementation_levels.md), including its [known limitations](user/implementation_levels.md#known-limitations).
@@ -47,18 +47,19 @@ See [Masking Semantics](user/masking_semantics.md) for the complete reference.
 <a id="3-comparison-with-existing-simd-solutions"></a>
 ## 2. Comparison with Existing SIMD Solutions
 
-Choosing the right SIMD library depends on language requirements, compilation constraints, and portability goals:
+Choosing the right SIMD library depends on language requirements, compilation constraints, and portability goals (state of each project as of October 2026):
 
 | Capability / Metric | [**MIPPv2**](https://github.com/aff3ct/mipp/tree/develop) | [**MIPPv1**](https://github.com/aff3ct/mipp/tree/master) | [**Google Highway**](https://github.com/google/highway) | [**xsimd**](https://github.com/xtensor-stack/xsimd) | [**Eve**](https://github.com/jfalcou/eve) | [**nSIMD**](https://github.com/agenium-scale/nsimd) | [**Vc**](https://github.com/VcDevel/Vc) | [**VCL**](https://github.com/vectorclass/version2) | [**std::simd**](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2024/p1928r15.pdf) *(C++26)* | **Raw Intrinsics** | **Auto-Vectorization** (`-O3`) |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Latest Release** | **v2.1.0** (2026-10-06) | No tag (`master`, 2026-04-15) | 1.4.0 (2026-04-23) | 14.3.0 (2026-07-15) | v2023.02.15 (2023-02-15) | v3.0.1 (2021-10-19) | 1.4.5 (2024-06-06, maintenance mode) | v2.02.03 (2026-04-14) | C++26 (P1928R15, 2024) | N/A | N/A |
 | **C API (C99)** | ✅ **Yes (`<mipp.h>`)** | ❌ No (C++ only) | ❌ No (C++ only) | ❌ No (C++ only) | ❌ No (C++ only) | ✅ Yes (`nsimd.h`) | ❌ No (C++ only) | ❌ No (C++ only) | ❌ No (C++ only) | ⚠️ Vendor specific | N/A |
-| **C++ Operator Overloading** | ✅ **Yes (`Rvd`)** | ✅ Yes (`Reg`) | ❌ No (Named functions) | ✅ Yes (`batch`) | ✅ Yes (`wide`) | ✅ Yes (`pack`) | ✅ Yes (`Vector`) | ✅ Yes (`Vec...`) | ✅ Yes (`simd`) | ❌ No | N/A |
-| **100% Fallback Guarantee** | ✅ **Levels 0 to 3** | ❌ Incomplete (Ad-hoc) | ⚠️ Partial emulations | ❌ Compile error | ❌ Compile error | ⚠️ Macro CPU fallback | ⚠️ Partial scalar | ⚠️ x86 subsets only | ✅ Guaranteed (ISO spec) | ❌ Compile error | ❌ Silent failure |
-| **RISC-V Vector 1.0 (RVV)** | ⚠️ **Fixed-width only** | ❌ No | ✅ Scalable & Fixed | ⚠️ Fixed-width / WIP | ❌ No | ⚠️ Fixed-width (Draft) | ❌ No | ❌ No (x86 only) | ⚠️ Fixed-width only (WIP) | ⚠️ Built-ins (VLA/Fixed) | ⚠️ Unpredictable |
-| **ARM SVE Support** | ⚠️ **Fixed-width only / WIP** | ❌ No | ✅ Scalable & Fixed | ⚠️ Fixed-width / WIP | ⚠️ Fixed-width only | ⚠️ Fixed-width only | ❌ No | ❌ No (x86 only) | ⚠️ Fixed-width only (WIP) | ⚠️ ACLE (VLA/Fixed) | ⚠️ Unpredictable |
-| **Generalized LMUL ($1,2,4,8$)** | ✅ **Yes** | ❌ No | ✅ Yes (`ScalableTag`) | ❌ No | ❌ No | ❌ No | ❌ No | ❌ No | ❌ No | ❌ No (RVV only) | ❌ No |
+| **C++ Operator Overloading** | ✅ **Yes (`Rvd`)** | ✅ Yes (`Reg`) | ⚠️ Partial (not on SVE / RVV) | ✅ Yes (`batch`) | ✅ Yes (`wide`) | ✅ Yes (`pack`) | ✅ Yes (`Vector`) | ✅ Yes (`Vec...`) | ✅ Yes (`simd`) | ❌ No | N/A |
+| **100% Fallback Guarantee** | ✅ **Levels 0 to 3** | ❌ Incomplete (Ad-hoc) | ✅ Yes (`EMU128` / `SCALAR` targets) | ⚠️ Opt-in (`emulated` arch) | ✅ Yes (`emulated_` ABI) | ✅ Yes (CPU emulation) | ✅ Yes (Scalar implementation) | ⚠️ x86 only (down to SSE2) | ✅ Guaranteed (ISO spec) | ❌ Compile error | ❌ Silent failure |
+| **RISC-V Vector 1.0 (RVV)** | ⚠️ **Fixed-width only** | ❌ No | ✅ Scalable & Fixed | ⚠️ Fixed-width only | ⚠️ Fixed-width only (unreleased, `main`) | ❌ No | ❌ No | ❌ No (x86 only) | ⚠️ Fixed-width only (WIP) | ⚠️ Built-ins (VLA/Fixed) | ⚠️ Unpredictable |
+| **ARM SVE Support** | ⚠️ **Fixed-width only / WIP** | ❌ No | ✅ Scalable & Fixed | ⚠️ Fixed-width only | ⚠️ Fixed-width only | ✅ Scalable & Fixed | ❌ No | ❌ No (x86 only) | ⚠️ Fixed-width only (WIP) | ⚠️ ACLE (VLA/Fixed) | ⚠️ Unpredictable |
+| **Generalized LMUL ($1,2,4,8$)** | ✅ **Yes** | ❌ No | ⚠️ RVV only (`ScalableTag<T, kPow2>`) | ❌ No | ❌ No | ❌ No | ❌ No | ❌ No | ❌ No | ❌ No (RVV only) | ❌ No |
 | **Dispatch** | **Static** | **Static** | **Static & Dynamic** | **Static & Dynamic** | **Static** | **Static & Dynamic** | **Static** | **Static** *(Manual dynamic)* | **Static** | **Static** *(Manual dynamic)* | **Static** *(Dynamic with `target_clones`)* |
-| **C++ Standard Required** | **C99 / C++11** | C++11 | C++11 | C++17 | C++20 | C89 / C++98 | C++11 / C++14 | C++11 / C++17 | C++26 | C99 / C++11 | C99 / C++11 |
+| **C++ Standard Required** | **C99 / C++11** | C++11 | C++17 | C++17 | C++20 | C89 / C++98 | C++11 | C++17 | C++26 | C99 / C++11 | C99 / C++11 |
 | **Compilation Overhead** | **Fast** (Simple inlines) | Medium (Deep templates) | Heavy templates | Medium | Very heavy | Heavy (Macro bloat) | Medium / Heavy | Fast (Inline headers) | Heavy templates | Very fast | Zero lib overhead |
 | **Assembly Determinism** | **Explicit** | Explicit | Explicit | Explicit | Explicit | Explicit | Explicit | Explicit | Explicit | Explicit | Heuristic-driven |
 | **Implementation Approach** | **Code-generated (Python)** | Handwritten (C++) | Handwritten (Templates) | Handwritten (Templates) | Handwritten (C++20) | Code-generated (Python + Macros) | Handwritten (Templates) | Handwritten (Classes) | Handwritten (Templates) | Handwritten (Manual) | Compiler-generated |
@@ -71,7 +72,7 @@ Choosing the right SIMD library depends on language requirements, compilation co
 ### Key Differentiators for MIPPv2
 
 1. **Dual-Ecosystem (C & Modern C++)**: Most modern wrappers require C++17/C++20, while nSIMD relies on heavy macro preprocessing. MIPPv2 provides clean, strongly-typed C99 inline functions (C API) alongside the C++ Functional and C++ Object APIs.
-2. **Expressive Syntax without Portability Sacrifices**: While Google Highway omits operator overloading to accommodate runtime VLA vectors, MIPPv2 retains natural operator expressions (`va + vb`) across all fixed-width targets.
+2. **Expressive Syntax without Portability Sacrifices**: While Google Highway restricts operator overloading to fixed-width targets to accommodate sizeless SVE / RVV vectors, MIPPv2 retains natural operator expressions (`va + vb`) across all fixed-width targets.
 3. **Deterministic 4-Level Fallback Guarantee**: Missing CPU instructions never cause compilation failures. MIPP falls back hierarchically through ISA emulation, generic portable primitives, or scalar loops, covering virtually the entire function / datatype matrix across all 10 datatypes.
 4. **Pragmatic Fixed-Width Design (RVV & SVE)**: Targeting compile-time vector widths (`-mrvv-vector-bits` / `-msve-vector-bits`) preserves compile-time constants (`MIPP_N`), straightforward struct layouts, and standard operator syntax without runtime stripmining overhead.
 5. **Predictable Assembly vs. Auto-Vectorization**: Compiler auto-vectorization (`-O3`) is fragile and can silently de-vectorize loops upon subtle code changes. MIPP guarantees explicit, deterministic SIMD instructions.

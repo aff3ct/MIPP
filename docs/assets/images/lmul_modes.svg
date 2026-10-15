@@ -1,0 +1,151 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 436" width="680" height="436" role="img" aria-labelledby="lm-title lm-desc">
+  <title id="lm-title">MIPP LMUL modes</title>
+  <desc id="lm-desc">Example with 128-bit registers and float elements (N = 4 elements per register). A half-vector (LDIV = 2, that is LMUL = 1/2, C suffix _d2, C++ LMUL argument -2) uses the lower half of one register and holds 2 elements. LMUL = 1 uses one register (4 elements), LMUL = 2 two registers (8 elements), LMUL = 4 four registers (16 elements) and LMUL = 8 eight registers (32 elements). In every mode, the registers form one MIPP vector.</desc>
+  <defs>
+    <style>
+      .lbl  { font: 600 13px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; fill: #64748b; }
+      .sub  { font: 500 11px ui-monospace, Menlo, Consolas, "DejaVu Sans Mono", monospace; fill: #64748b; }
+      .head { font: 600 11px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; fill: #64748b; letter-spacing: .06em; }
+      .note { font: 500 11px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; fill: #64748b; }
+      .mid  { text-anchor: middle; }
+      .end  { text-anchor: end; }
+      .cell { font: 600 12px ui-monospace, Menlo, Consolas, "DejaVu Sans Mono", monospace; fill: #ffffff; text-anchor: middle; dominant-baseline: central; }
+      .zero-t { font: 500 10px ui-monospace, Menlo, Consolas, "DejaVu Sans Mono", monospace; fill: #64748b; text-anchor: middle; dominant-baseline: central; }
+      .leg  { font: 500 12px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; fill: #64748b; dominant-baseline: central; }
+      .e    { fill: #2563eb; }
+      .reg  { fill: rgba(100, 116, 139, 0.10); stroke: #64748b; stroke-width: 1.25; }
+      .off  { fill: none; stroke: #64748b; stroke-width: 1.5; stroke-dasharray: 4 3; }
+      .grp  { fill: none; stroke: #059669; stroke-width: 1.5; stroke-dasharray: 6 4; }
+      .rule { stroke: #64748b; stroke-opacity: .45; stroke-width: 1; }
+      .dim  { stroke: #64748b; stroke-width: 1.25; }
+    </style>
+  </defs>
+
+  <!-- Header -->
+  <text class="head" x="16" y="24">LMUL MODES</text>
+  <text class="sub end" x="664" y="24">example: VLEN = 128 bits, T = float (N = 4)</text>
+
+  <!-- Register width -->
+  <line class="dim" x1="196" y1="48" x2="306" y2="48"/>
+  <line class="dim" x1="196" y1="43" x2="196" y2="53"/>
+  <line class="dim" x1="306" y1="43" x2="306" y2="53"/>
+  <text class="sub mid" x="251" y="40">1 register = VLEN bits</text>
+
+  <!-- ===== LDIV = 2 (LMUL = 1/2) ===== -->
+  <text class="lbl" x="16" y="76">LDIV = 2 (LMUL = 1/2)</text>
+  <text class="sub" x="16" y="91">C: _d2 · C++: -2</text>
+  <text class="sub" x="16" y="105">N/2 = 2 elements</text>
+  <rect class="reg" x="196" y="62" width="110" height="40" rx="8"/>
+  <rect class="grp" x="198" y="64" width="54" height="36" rx="6"/>
+  <rect class="e" x="200" y="67" width="24" height="30" rx="5"/><text class="cell" x="212" y="82">0</text>
+  <rect class="e" x="226" y="67" width="24" height="30" rx="5"/><text class="cell" x="238" y="82">1</text>
+  <rect class="off" x="254" y="67" width="48" height="30" rx="5"/><text class="zero-t" x="278" y="82">unused</text>
+  <text class="note" x="324" y="78">lower half of one LMUL = 1 register</text>
+  <text class="note" x="324" y="93">(AVX: SSE register · AVX-512: AVX register · RVV: mf2 type)</text>
+
+  <!-- ===== LMUL = 1 ===== -->
+  <text class="lbl" x="16" y="132">LMUL = 1</text>
+  <text class="sub" x="16" y="147">C: _m1 · C++: 1</text>
+  <text class="sub" x="16" y="161">N = 4 elements</text>
+  <rect class="grp" x="190" y="113" width="122" height="50" rx="10"/>
+  <rect class="reg" x="196" y="118" width="110" height="40" rx="8"/>
+  <rect class="e" x="200" y="123" width="24" height="30" rx="5"/><text class="cell" x="212" y="138">0</text>
+  <rect class="e" x="226" y="123" width="24" height="30" rx="5"/><text class="cell" x="238" y="138">1</text>
+  <rect class="e" x="252" y="123" width="24" height="30" rx="5"/><text class="cell" x="264" y="138">2</text>
+  <rect class="e" x="278" y="123" width="24" height="30" rx="5"/><text class="cell" x="290" y="138">3</text>
+
+  <!-- ===== LMUL = 2 ===== -->
+  <text class="lbl" x="16" y="188">LMUL = 2</text>
+  <text class="sub" x="16" y="203">C: _m2 · C++: 2</text>
+  <text class="sub" x="16" y="217">2N = 8 elements</text>
+  <rect class="grp" x="190" y="169" width="240" height="50" rx="10"/>
+  <rect class="reg" x="196" y="174" width="110" height="40" rx="8"/>
+  <rect class="e" x="200" y="179" width="24" height="30" rx="5"/><text class="cell" x="212" y="194">0</text>
+  <rect class="e" x="226" y="179" width="24" height="30" rx="5"/><text class="cell" x="238" y="194">1</text>
+  <rect class="e" x="252" y="179" width="24" height="30" rx="5"/><text class="cell" x="264" y="194">2</text>
+  <rect class="e" x="278" y="179" width="24" height="30" rx="5"/><text class="cell" x="290" y="194">3</text>
+  <rect class="reg" x="314" y="174" width="110" height="40" rx="8"/>
+  <rect class="e" x="318" y="179" width="24" height="30" rx="5"/><text class="cell" x="330" y="194">4</text>
+  <rect class="e" x="344" y="179" width="24" height="30" rx="5"/><text class="cell" x="356" y="194">5</text>
+  <rect class="e" x="370" y="179" width="24" height="30" rx="5"/><text class="cell" x="382" y="194">6</text>
+  <rect class="e" x="396" y="179" width="24" height="30" rx="5"/><text class="cell" x="408" y="194">7</text>
+
+  <!-- ===== LMUL = 4 ===== -->
+  <text class="lbl" x="16" y="244">LMUL = 4</text>
+  <text class="sub" x="16" y="259">C: _m4 · C++: 4</text>
+  <text class="sub" x="16" y="273">4N = 16 elements</text>
+  <rect class="grp" x="190" y="225" width="476" height="50" rx="10"/>
+  <rect class="reg" x="196" y="230" width="110" height="40" rx="8"/>
+  <rect class="e" x="200" y="235" width="24" height="30" rx="5"/><text class="cell" x="212" y="250">0</text>
+  <rect class="e" x="226" y="235" width="24" height="30" rx="5"/><text class="cell" x="238" y="250">1</text>
+  <rect class="e" x="252" y="235" width="24" height="30" rx="5"/><text class="cell" x="264" y="250">2</text>
+  <rect class="e" x="278" y="235" width="24" height="30" rx="5"/><text class="cell" x="290" y="250">3</text>
+  <rect class="reg" x="314" y="230" width="110" height="40" rx="8"/>
+  <rect class="e" x="318" y="235" width="24" height="30" rx="5"/><text class="cell" x="330" y="250">4</text>
+  <rect class="e" x="344" y="235" width="24" height="30" rx="5"/><text class="cell" x="356" y="250">5</text>
+  <rect class="e" x="370" y="235" width="24" height="30" rx="5"/><text class="cell" x="382" y="250">6</text>
+  <rect class="e" x="396" y="235" width="24" height="30" rx="5"/><text class="cell" x="408" y="250">7</text>
+  <rect class="reg" x="432" y="230" width="110" height="40" rx="8"/>
+  <rect class="e" x="436" y="235" width="24" height="30" rx="5"/><text class="cell" x="448" y="250">8</text>
+  <rect class="e" x="462" y="235" width="24" height="30" rx="5"/><text class="cell" x="474" y="250">9</text>
+  <rect class="e" x="488" y="235" width="24" height="30" rx="5"/><text class="cell" x="500" y="250">10</text>
+  <rect class="e" x="514" y="235" width="24" height="30" rx="5"/><text class="cell" x="526" y="250">11</text>
+  <rect class="reg" x="550" y="230" width="110" height="40" rx="8"/>
+  <rect class="e" x="554" y="235" width="24" height="30" rx="5"/><text class="cell" x="566" y="250">12</text>
+  <rect class="e" x="580" y="235" width="24" height="30" rx="5"/><text class="cell" x="592" y="250">13</text>
+  <rect class="e" x="606" y="235" width="24" height="30" rx="5"/><text class="cell" x="618" y="250">14</text>
+  <rect class="e" x="632" y="235" width="24" height="30" rx="5"/><text class="cell" x="644" y="250">15</text>
+
+  <!-- ===== LMUL = 8 (two lines of four registers) ===== -->
+  <text class="lbl" x="16" y="300">LMUL = 8</text>
+  <text class="sub" x="16" y="315">C: _m8 · C++: 8</text>
+  <text class="sub" x="16" y="329">8N = 32 elements</text>
+  <rect class="grp" x="190" y="281" width="476" height="96" rx="10"/>
+  <rect class="reg" x="196" y="286" width="110" height="40" rx="8"/>
+  <rect class="e" x="200" y="291" width="24" height="30" rx="5"/><text class="cell" x="212" y="306">0</text>
+  <rect class="e" x="226" y="291" width="24" height="30" rx="5"/><text class="cell" x="238" y="306">1</text>
+  <rect class="e" x="252" y="291" width="24" height="30" rx="5"/><text class="cell" x="264" y="306">2</text>
+  <rect class="e" x="278" y="291" width="24" height="30" rx="5"/><text class="cell" x="290" y="306">3</text>
+  <rect class="reg" x="314" y="286" width="110" height="40" rx="8"/>
+  <rect class="e" x="318" y="291" width="24" height="30" rx="5"/><text class="cell" x="330" y="306">4</text>
+  <rect class="e" x="344" y="291" width="24" height="30" rx="5"/><text class="cell" x="356" y="306">5</text>
+  <rect class="e" x="370" y="291" width="24" height="30" rx="5"/><text class="cell" x="382" y="306">6</text>
+  <rect class="e" x="396" y="291" width="24" height="30" rx="5"/><text class="cell" x="408" y="306">7</text>
+  <rect class="reg" x="432" y="286" width="110" height="40" rx="8"/>
+  <rect class="e" x="436" y="291" width="24" height="30" rx="5"/><text class="cell" x="448" y="306">8</text>
+  <rect class="e" x="462" y="291" width="24" height="30" rx="5"/><text class="cell" x="474" y="306">9</text>
+  <rect class="e" x="488" y="291" width="24" height="30" rx="5"/><text class="cell" x="500" y="306">10</text>
+  <rect class="e" x="514" y="291" width="24" height="30" rx="5"/><text class="cell" x="526" y="306">11</text>
+  <rect class="reg" x="550" y="286" width="110" height="40" rx="8"/>
+  <rect class="e" x="554" y="291" width="24" height="30" rx="5"/><text class="cell" x="566" y="306">12</text>
+  <rect class="e" x="580" y="291" width="24" height="30" rx="5"/><text class="cell" x="592" y="306">13</text>
+  <rect class="e" x="606" y="291" width="24" height="30" rx="5"/><text class="cell" x="618" y="306">14</text>
+  <rect class="e" x="632" y="291" width="24" height="30" rx="5"/><text class="cell" x="644" y="306">15</text>
+  <rect class="reg" x="196" y="332" width="110" height="40" rx="8"/>
+  <rect class="e" x="200" y="337" width="24" height="30" rx="5"/><text class="cell" x="212" y="352">16</text>
+  <rect class="e" x="226" y="337" width="24" height="30" rx="5"/><text class="cell" x="238" y="352">17</text>
+  <rect class="e" x="252" y="337" width="24" height="30" rx="5"/><text class="cell" x="264" y="352">18</text>
+  <rect class="e" x="278" y="337" width="24" height="30" rx="5"/><text class="cell" x="290" y="352">19</text>
+  <rect class="reg" x="314" y="332" width="110" height="40" rx="8"/>
+  <rect class="e" x="318" y="337" width="24" height="30" rx="5"/><text class="cell" x="330" y="352">20</text>
+  <rect class="e" x="344" y="337" width="24" height="30" rx="5"/><text class="cell" x="356" y="352">21</text>
+  <rect class="e" x="370" y="337" width="24" height="30" rx="5"/><text class="cell" x="382" y="352">22</text>
+  <rect class="e" x="396" y="337" width="24" height="30" rx="5"/><text class="cell" x="408" y="352">23</text>
+  <rect class="reg" x="432" y="332" width="110" height="40" rx="8"/>
+  <rect class="e" x="436" y="337" width="24" height="30" rx="5"/><text class="cell" x="448" y="352">24</text>
+  <rect class="e" x="462" y="337" width="24" height="30" rx="5"/><text class="cell" x="474" y="352">25</text>
+  <rect class="e" x="488" y="337" width="24" height="30" rx="5"/><text class="cell" x="500" y="352">26</text>
+  <rect class="e" x="514" y="337" width="24" height="30" rx="5"/><text class="cell" x="526" y="352">27</text>
+  <rect class="reg" x="550" y="332" width="110" height="40" rx="8"/>
+  <rect class="e" x="554" y="337" width="24" height="30" rx="5"/><text class="cell" x="566" y="352">28</text>
+  <rect class="e" x="580" y="337" width="24" height="30" rx="5"/><text class="cell" x="592" y="352">29</text>
+  <rect class="e" x="606" y="337" width="24" height="30" rx="5"/><text class="cell" x="618" y="352">30</text>
+  <rect class="e" x="632" y="337" width="24" height="30" rx="5"/><text class="cell" x="644" y="352">31</text>
+
+  <!-- ===== Legend ===== -->
+  <line class="rule" x1="16" y1="394" x2="664" y2="394"/>
+  <rect class="e"   x="16"  y="408" width="16" height="16" rx="4"/><text class="leg" x="40"  y="416">element (index)</text>
+  <rect class="reg" x="150" y="408" width="16" height="16" rx="4"/><text class="leg" x="174" y="416">hardware register</text>
+  <rect class="grp" x="300" y="408" width="16" height="16" rx="4"/><text class="leg" x="324" y="416">one MIPP vector (rvd&lt;T, LMUL&gt;)</text>
+  <rect class="off" x="530" y="408" width="16" height="16" rx="4"/><text class="leg" x="554" y="416">unused lanes</text>
+</svg>

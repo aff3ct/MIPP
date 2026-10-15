@@ -49,6 +49,10 @@ The Length Multiplier ($\text{LMUL} \in \{1, 2, 4, 8\}$) originates from **RISC-
 
 On fixed-width architectures (x86, ARM), software LMUL functions as a **structured multi-register unrolling mechanism**: operations on $\text{LMUL}=2$ or $\text{LMUL}=4$ expand into discrete SIMD instructions across separate registers, increasing instruction-level parallelism (ILP) without manual loop unrolling, while developer discretion is required to manage register pressure at high LMUL values.
 
+The figure also shows the [half-vectors](#half-vectors) ($\text{LDIV}=2$, i.e. $\text{LMUL}=1/2$), described in section 4.
+
+![LMUL modes with 128-bit registers and float elements: a half-vector (LDIV = 2, LMUL = 1/2) uses the lower half of one register (2 elements); LMUL = 1, 2, 4 and 8 group 1, 2, 4 and 8 registers (4, 8, 16 and 32 elements)](../assets/images/lmul_modes.svg){ width="680" }
+
 !!! tip "Optimization Practice: Parameterizing Kernels by LMUL"
     When developing compute kernels in C++, parameterizing functions by `int LMUL = 1` makes it simple to explore the unrolling optimization space:
     
@@ -58,21 +62,6 @@ On fixed-width architectures (x86, ARM), software LMUL functions as a **structur
     
     - **`LMUL=2` or `LMUL=4`** typically can yield performance gains in compute-bound loops by saturating execution units and interleaving instruction latencies.
     - **`LMUL=8`** often exhibits diminishing returns or regressions due to register spilling.
-
-```
-+-----------------------------------------------------------------------------+
-|                               LMUL Modes                                    |
-+-----------------------------------------------------------------------------+
-|                                                                             |
-|  LMUL = 1: [ Register 1 ]                                                   |
-|                                                                             |
-|  LMUL = 2: [ Register 1 ] [ Register 2 ]                                    |
-|                                                                             |
-|  LMUL = 4: [ Register 1 ] [ Register 2 ] [ Register 3 ] [ Register 4 ]      |
-|                                                                             |
-|  LMUL = 8: [ Reg 1 ] [ Reg 2 ] [ Reg 3 ] [ Reg 4 ] [ Reg 5 ] ... [ Reg 8 ]  |
-+-----------------------------------------------------------------------------+
-```
 
 ### 3.1. Hardware LMUL (RISC-V Vector 1.0)
 On architectures with native register grouping support (RVV `v` extension), MIPP maps directly to hardware types:
