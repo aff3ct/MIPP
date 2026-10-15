@@ -99,7 +99,7 @@ At compile time, `mipp::DEFAULT_ISA` automatically resolves to the highest hardw
 - **x86 / x86-64**: `AVX-512` > `AVX2 / AVX` > `SSE`
 - **ARM**: `SVE` > `NEON`
 - **RISC-V**: `RVV`
-- **Scalar**: Configured as `DEFAULT_ISA` when compiling with `-DMIPP_SCALAR`. By default, scalar registers match the bitwidth of the highest detected host ISA (e.g. 256 bits on an AVX host, 128 bits on NEON/SSE). The bitwidth can be explicitly overridden at compile time via `-DMIPP_SCALAR_SIZE=[bits]` (e.g. `-DMIPP_SCALAR_SIZE=256`).
+- **Scalar**: Configured as `DEFAULT_ISA` when compiling with `-DMIPP_SCALAR`. By default, scalar registers match the bitwidth of the highest detected host ISA (e.g. 256 bits on an AVX host, 128 bits on NEON/SSE). The bitwidth can be explicitly overridden at compile time via `-DMIPP_SCALAR_SIZE=[bits]` (e.g. `-DMIPP_SCALAR_SIZE=256`); the value must be a power of two greater than or equal to 128, so that the half-vectors (`d2`) of 64-bit types hold at least one element.
 
 ### 3.4. Explicit Architecture Selection
 The third template parameter `ISA_TYPE` defaults to `mipp::DEFAULT_ISA`, which is the only value that should be used in portable code. The C API encodes the ISA in the function and type names instead (see [section 2.4](#24-explicit-architecture-selection)); the C++ Object API has no equivalent (see [section 4](#4-c-object-api-mipp_objhpp)).

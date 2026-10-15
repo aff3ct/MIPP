@@ -367,7 +367,7 @@
         "mask_support": "all_mask"
     },
     "pow2": {
-        "proto_ref": "ret_reg_2args_reg_val",
+        "proto_ref": "ret_reg_1arg_reg",
         "datatypes": [
             "all_uint",
             "all_float"

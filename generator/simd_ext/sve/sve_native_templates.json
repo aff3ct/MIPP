@@ -40,5 +40,11 @@
         "code": [
             "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}((const bool) v0);"
         ]
+    },
+    "testz": {
+        "format": "long",
+        "code": [
+            "\treturn !{{ isa.prefix }}{{ instr_name }}(m0.m, m1.m);"
+        ]
     }
 }

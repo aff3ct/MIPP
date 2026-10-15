@@ -169,7 +169,7 @@ The same loop in the three APIs (half-vectors are not available on every target,
 
 ### 4.1. Availability
 
-Half-vectors are **not available on every target**. When they are, MIPP defines the `MIPP_LDIV_2` macro (except on the scalar target for now, see below), which portable code should use as a guard:
+Half-vectors are **not available on every target**. When they are, MIPP defines the `MIPP_LDIV_2` macro, which portable code should use as a guard:
 
 === "C API"
 
@@ -195,10 +195,7 @@ The `d2` and `MIPP_LDIV_2` columns of the [table of §3.4](#34-representation-pe
 - **RISC-V Vector (RVV)**: native fractional register types (`vfloat32mf2_t`, ...) for 8 to 32-bit elements. For 64-bit elements, where the RVV constraint $\text{SEW} / \text{LMUL} \le \text{ELEN}$ forbids fractional types, MIPP stores the half-vector in a plain array. Some of these 64-bit operations are not implemented yet (see [Implementation Levels](implementation_levels.md#known-limitations)).
 - **SSE / NEON**: 128 bits is the smallest register width; no `d2` types are generated.
 - **ARM SVE**: not generated yet.
-- **Scalar**: plain array of half the elements, see below.
-
-!!! warning "Scalar target and `MIPP_LDIV_2`"
-    The scalar target generates the `d2` types and functions, but does not define `MIPP_LDIV_2` yet. Code guarded by `#ifdef MIPP_LDIV_2` therefore skips half-vectors when compiled with `-DMIPP_SCALAR`, although they are available.
+- **Scalar**: plain array of half the elements.
 
 ### 4.2. Scope and Constraints of Deeper Fractional Division
 

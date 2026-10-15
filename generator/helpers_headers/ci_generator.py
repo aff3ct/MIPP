@@ -80,7 +80,8 @@ def _custom_prefix_generator(func, isa_list, is_common=False, mode="function_hea
                 is_first_block = False
             else:
                 content += f"#elif {cond}\n"
-            has_ldiv2 = (-2 in isa.get("hw_lmul", [])) or (-2 in isa.get("sw_lmul", []))
+            # same condition as the d2 types (the scalar backend always has them)
+            has_ldiv2 = is_scalar or (-2 in isa.get("hw_lmul", [])) or (-2 in isa.get("sw_lmul", []))
             defs = list(isa.get("mipp_definitions", []))
             if not is_scalar:
                 primary_def = f"#define MIPP_{isa['name'].upper()}"

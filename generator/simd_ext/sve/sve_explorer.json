@@ -1,9 +1,20 @@
 {
     "$schema": "../../helpers_headers/schemas/explorer_isa_schema.json",
-    "name": "sve",
-    "display_name": "SVE",
+    "compiler": {
+        "id": "carm64g1420",
+        "arch": "arm",
+        "label": "AArch64 SVE GCC",
+        "base_flags": "-O3 -march=armv8.2-a+sve -msve-vector-bits={simd_width}"
+    },
     "description": "ARM Scalable Vector Extension (length-agnostic vector architecture from 128 to 2048 bits)",
-    "order": 50,
+    "display_name": "SVE",
+    "features": {
+        "mode": "flags",
+        "items": [
+            { "id": "SVE",  "label": "SVE",  "define": "__ARM_FEATURE_SVE",  "flag": "",                         "default": true,  "locked": true,  "description": "Scalable Vector Extension (Base)" },
+            { "id": "SVE2", "label": "SVE2", "define": "__ARM_FEATURE_SVE2", "flag": "-march=armv8.2-a+sve2", "default": false, "locked": false, "description": "Scalable Vector Extension 2" }
+        ]
+    },
     "headers": ["<arm_sve.h>"],
     "ignored_intrinsics": [
         "svptrue_b8",
@@ -12,17 +23,6 @@
         "svptrue_b64",
         "svptrue_b"
     ],
-    "compiler": {
-        "id": "carm64g1420",
-        "arch": "arm",
-        "label": "AArch64 SVE GCC",
-        "base_flags": "-O3 -march=armv8.2-a+sve -msve-vector-bits={simd_width}"
-    },
-    "features": {
-        "mode": "flags",
-        "items": [
-            { "id": "SVE",  "label": "SVE",  "define": "__ARM_FEATURE_SVE",  "flag": "",                         "default": true,  "locked": true,  "description": "Scalable Vector Extension (Base)" },
-            { "id": "SVE2", "label": "SVE2", "define": "__ARM_FEATURE_SVE2", "flag": "-march=armv8.2-a+sve2", "default": false, "locked": false, "description": "Scalable Vector Extension 2" }
-        ]
-    }
+    "name": "sve",
+    "order": 50
 }

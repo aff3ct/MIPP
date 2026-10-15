@@ -1,16 +1,13 @@
 {
     "$schema": "../../helpers_headers/schemas/explorer_isa_schema.json",
-    "name": "avx",
-    "display_name": "AVX",
-    "description": "Advanced Vector Extensions (x86-64 256-bit floating-point and integer vector extensions)",
-    "order": 20,
-    "headers": ["<immintrin.h>"],
     "compiler": {
         "id": "g142",
         "arch": "x86",
         "label": "x86-64 GCC",
         "base_flags": "-O3"
     },
+    "description": "Advanced Vector Extensions (x86-64 256-bit floating-point and integer vector extensions)",
+    "display_name": "AVX",
     "features": {
         "mode": "mixed",
         "default": "AVX2",
@@ -19,5 +16,8 @@
             { "id": "AVX2", "label": "AVX2", "define": "__AVX2__", "flag": "-mavx2", "type": "tier", "default": true, "locked": false, "description": "Advanced Vector Extensions 2 (256-bit Integer)" },
             { "id": "FMA",  "label": "FMA",  "define": "__FMA__",  "flag": "-mfma",  "type": "flag", "default": true, "locked": false, "description": "Fused Multiply-Add Extensions (FMA3)" }
         ]
-    }
+    },
+    "headers": ["<immintrin.h>"],
+    "name": "avx",
+    "order": 20
 }

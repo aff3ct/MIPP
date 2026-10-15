@@ -59,7 +59,10 @@
         1
     ],
     "is_scalar": true,
-    "mipp_definitions": [],
+    "mipp_definitions": [
+        "#define MIPP_64BIT",
+        "#define MIPP_BW"
+    ],
     "name": "scalar",
     "size": "MIPP_SCALAR_SIZE",
     "sw_lmul": []

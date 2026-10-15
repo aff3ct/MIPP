@@ -1,16 +1,13 @@
 {
     "$schema": "../../helpers_headers/schemas/explorer_isa_schema.json",
-    "name": "avx512",
-    "display_name": "AVX-512",
-    "description": "AVX-512 (x86-64 512-bit vector extensions with dedicated mask registers)",
-    "order": 30,
-    "headers": ["<immintrin.h>"],
     "compiler": {
         "id": "g142",
         "arch": "x86",
         "label": "x86-64 GCC",
         "base_flags": "-O3 -mavx512f"
     },
+    "description": "AVX-512 (x86-64 512-bit vector extensions with dedicated mask registers)",
+    "display_name": "AVX-512",
     "features": {
         "mode": "flags",
         "items": [
@@ -20,5 +17,8 @@
             { "id": "VL", "label": "VL", "define": "__AVX512VL__", "flag": "-mavx512vl", "default": true,  "locked": false, "description": "Vector Length Extensions (128-bit & 256-bit operations)" },
             { "id": "CD", "label": "CD", "define": "__AVX512CD__", "flag": "-mavx512cd", "default": false, "locked": false, "description": "Conflict Detection Instructions" }
         ]
-    }
+    },
+    "headers": ["<immintrin.h>"],
+    "name": "avx512",
+    "order": 30
 }

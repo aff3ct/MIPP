@@ -49,5 +49,12 @@
             "datatypes": "all_int_uint",
             "template": "set1_k"
         }
+    ],
+    "testz": [
+        {
+            "instr_name": "ptest_any",
+            "datatypes": "all_datatypes",
+            "template": "testz"
+        }
     ]
 }

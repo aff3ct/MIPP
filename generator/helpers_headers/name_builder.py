@@ -487,6 +487,10 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
             p += " vi"
         is_first = False
 
+    # In C (before C23), `f()` is not a prototype: declare parameterless functions `f(void)`
+    if is_first and not cpp:
+        p += "void"
+
     return p + ")"
 
 # For layer object

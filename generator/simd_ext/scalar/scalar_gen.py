@@ -275,7 +275,7 @@ def gen_c_defines_scalar(isa, file):
         print("#endif", file=file)
 
     if isinstance(isa["size"], str):
-        print("#define MIPP_" + isa["name"].upper() + "_RVD_SIZE_BYTE " + isa["size"] + "/8", file=file)
+        print("#define MIPP_" + isa["name"].upper() + "_RVD_SIZE_BYTE (" + isa["size"] + "/8)", file=file)
     else:
         print("#define MIPP_" + isa["name"].upper() + "_RVD_SIZE_BYTE " + str(int(isa["size"] / 8)), file=file)
 
@@ -297,7 +297,7 @@ def gen_c_defines_scalar(isa, file):
 
     for dt in isa["datatypes"]:
         if isinstance(isa["size"], str):
-            n_elmts = isa["size"] + "/" + str(datatypes[dt]["n_bits"])
+            n_elmts = "(" + isa["size"] + "/" + str(datatypes[dt]["n_bits"]) + ")"
         else:
             n_elmts = int(isa["size"] / datatypes[dt]["n_bits"])
         print(
@@ -313,7 +313,7 @@ def gen_c_defines_scalar(isa, file):
     for lmul in all_lmul:
         for dt in isa["datatypes"]:
             if isinstance(isa["size"], str):
-                n_elmts = f'{isa["size"]}/{datatypes[dt]["n_bits"]}*{lmul}'
+                n_elmts = f'({isa["size"]}/{datatypes[dt]["n_bits"]}*{lmul})'
             else:
                 n_elmts = int(isa["size"] / datatypes[dt]["n_bits"])*lmul
             template = """#define MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{n_bits}}_M{{lmul}} {{n_elmts}}"""
@@ -333,9 +333,9 @@ def gen_c_defines_scalar(isa, file):
     ldiv = 2
     for dt in isa["datatypes"]:
         if isinstance(isa["size"], str):
-            n_elmts = f'{isa["size"]}/{datatypes[dt]["n_bits"]}/{ldiv}'
+            n_elmts = f'({isa["size"]}/{datatypes[dt]["n_bits"]}/{ldiv})'
         else:
-            n_elmts = int(isa["size"] / datatypes[dt]["n_bits"])/ldiv
+            n_elmts = int(isa["size"] / datatypes[dt]["n_bits"]) // ldiv
         template = """#define MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{n_bits}}_D{{ldiv}} {{n_elmts}}"""
         j2_template = Template(template, undefined=StrictUndefined)
         print(
@@ -504,8 +504,9 @@ def scalar_gen(include_manager):
 	#endif
 #endif // !defined(MIPP_SCALAR_SIZE)
 
-#if MIPP_SCALAR_SIZE == 0
-	#error "MIPP_SCALAR_SIZE can't be null"
+// 128 bits at least: the d2 types of the 64-bit datatypes need one element; a power of two for aligned()
+#if MIPP_SCALAR_SIZE < 128 || ((MIPP_SCALAR_SIZE) & ((MIPP_SCALAR_SIZE) - 1)) != 0
+	#error "MIPP_SCALAR_SIZE must be a power of two greater than or equal to 128 (bits)"
 #endif
 
 #define BIT_CAST_N(dst_ptr, src_ptr, n) \\

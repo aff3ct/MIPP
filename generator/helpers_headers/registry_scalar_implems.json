@@ -1011,22 +1011,20 @@
             ]
         },
         {
-            "type": "vector-wide",
+            "type": "element-wide",
             "datatypes": "all_uint",
             "mask_variants": [],
             "implem": [
-                "%r<tp>% res;",
-                "for (size_t i = 0; i < %N<tp>%; i++){",
-                "\t%v<tp>% cur = 1;",
-                "\t%v<tp>% exp = r1.r[i];",
-                "\twhile (exp > 0){",
-                "\t\tif(exp & 1)",
-                "\t\t\tcur *= r0.r[i];",
-                "\t\texp >>= 1;",
-                "\t}",
-                "\tres.r[i] = cur;",
+                "%v<tp>% cur = 1;",
+                "%v<tp>% base = r0.r[i];",
+                "%v<tp>% exp = r1.r[i];",
+                "while (exp > 0) {",
+                "\tif (exp & 1)",
+                "\t\tcur = (%v<tp>%)((uint64_t)cur * base);",
+                "\tbase = (%v<tp>%)((uint64_t)base * base);",
+                "\texp >>= 1;",
                 "}",
-                "return res;"
+                "res.r[i] = %!pred_cond!% cur %!pred_alt!%;"
             ]
         }
     ],

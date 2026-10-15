@@ -1,16 +1,13 @@
 {
     "$schema": "../../helpers_headers/schemas/explorer_isa_schema.json",
-    "name": "sse",
-    "display_name": "SSE",
-    "description": "Streaming SIMD Extensions (x86 / x86-64 128-bit vector extensions)",
-    "order": 10,
-    "headers": ["<immintrin.h>"],
     "compiler": {
         "id": "g142",
         "arch": "x86",
         "label": "x86-64 GCC",
         "base_flags": "-O3"
     },
+    "description": "Streaming SIMD Extensions (x86 / x86-64 128-bit vector extensions)",
+    "display_name": "SSE",
     "features": {
         "mode": "hierarchy",
         "default": "SSE4.2",
@@ -22,5 +19,8 @@
             { "id": "SSE4.1", "label": "SSE4.1", "define": "__SSE4_1__", "flag": "-msse4.1", "default": true, "locked": false, "description": "Streaming SIMD Extensions 4.1" },
             { "id": "SSE4.2", "label": "SSE4.2", "define": "__SSE4_2__", "flag": "-msse4.2", "default": true, "locked": false, "description": "Streaming SIMD Extensions 4.2" }
         ]
-    }
+    },
+    "headers": ["<immintrin.h>"],
+    "name": "sse",
+    "order": 10
 }

@@ -1,4 +1,4 @@
-static inline void mipp_info()
+static inline void mipp_info(void)
 {
 	const char* os;
 	const char* prec;

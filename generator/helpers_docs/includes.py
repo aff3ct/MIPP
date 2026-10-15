@@ -87,7 +87,7 @@ def render_lmul_availability(generator_dir):
     lines = ["| " + " | ".join(head) + " |", "| " + " | ".join([":---"] * 2 + [":---:"] * (len(head) - 2)) + " |"]
     for name, isa in _load_isas(generator_dir):
         # Same condition as the definition of MIPP_LDIV_2 (helpers_headers/ci_generator.py)
-        has_ldiv2 = (-2 in isa.get("hw_lmul", [])) or (-2 in isa.get("sw_lmul", []))
+        has_ldiv2 = isa.get("is_scalar", False) or (-2 in isa.get("hw_lmul", [])) or (-2 in isa.get("sw_lmul", []))
         row = [f"**{TARGET_NAMES.get(name, name)}**", _width(isa)]
         row += [_lmul_cell(isa, l) for l in lmuls]
         row.append("defined" if has_ldiv2 else "—")

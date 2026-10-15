@@ -1,14 +1,5 @@
 {
     "$schema": "../../helpers_headers/schemas/explorer_isa_schema.json",
-    "name": "scalar",
-    "display_name": "Scalar",
-    "description": "Scalar fallback emulation with configurable SIMD buffer width",
-    "order": 70,
-    "headers": [
-        "<stdint.h>",
-        "<string.h>",
-        "<math.h>"
-    ],
     "compiler": {
         "id": "g142",
         "arch": "x86",
@@ -22,8 +13,17 @@
             "2048": "-mavx512f -mavx512bw -mavx512dq"
         }
     },
+    "description": "Scalar fallback emulation with configurable SIMD buffer width",
+    "display_name": "Scalar",
     "features": {
         "mode": "none",
         "items": []
-    }
+    },
+    "headers": [
+        "<stdint.h>",
+        "<string.h>",
+        "<math.h>"
+    ],
+    "name": "scalar",
+    "order": 70
 }
