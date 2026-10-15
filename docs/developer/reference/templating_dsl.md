@@ -36,7 +36,7 @@ The prefix before the opening angle bracket `<` indicates what entity is being g
 | :--- | :--- | :--- | :--- |
 | **`r`** | Vector Data Register (`rvd`) | `%r<tp>%` | `rvd_avx_float32_t` |
 | **`m`** | Vector Mask Register (`rvm`) | `%m<tp>%` | `rvm_avx_float32_t` |
-| **`v`** | Scalar Value Type | `%v<tp>%` | `float32_t` |
+| **`s`** | Scalar Value Type | `%s<tp>%` | `float32_t` |
 | **`N`** | Number of Elements Constant | `%N<tp>%` | `MIPP_AVX_N_FLOAT32` |
 | **`<function>`** | Call to another MIPP function | `%select<tp>%(...)` | `mipp_avx_select_float32(...)` |
 
@@ -53,7 +53,7 @@ The content inside `<...>` describes the target data type to resolve.
 
 ```mipp-dsl
 %r<tp>%   // A vector register matching the parameter type
-%v<tr>%   // A scalar matching the return type
+%s<tr>%   // A scalar matching the return type
 ```
 
 ### 3.2. Structured Type Attributes (`c:` and `b:`)

@@ -37,7 +37,7 @@
         "code": [
             "%r<tp>% zero = %set0<tp>%();",
             "%r<tp>% blended = %select<tp>%(m0, r0, zero);",
-            "%v<tp>% op = %hadd<tp>%(blended);",
+            "%s<tp>% op = %hadd<tp>%(blended);",
             "return op;"
         ]
     },
@@ -46,7 +46,7 @@
         "code": [
             "%r<tp>% min = %set1<tp>%(-FLT_MAX);",
             "%r<tp>% blended = %select<tp>%(m0, r0, min);",
-            "%v<tp>% op = %hmax<tp>%(blended);",
+            "%s<tp>% op = %hmax<tp>%(blended);",
             "return op;"
         ]
     },
@@ -55,7 +55,7 @@
         "code": [
             "%r<tp>% min = %set1<tp>%(-DBL_MAX);",
             "%r<tp>% blended = %select<tp>%(m0, r0, min);",
-            "%v<tp>% op = %hmax<tp>%(blended);",
+            "%s<tp>% op = %hmax<tp>%(blended);",
             "return op;"
         ]
     },
@@ -64,7 +64,7 @@
         "code": [
             "%r<tp>% min = %set1<tp>%(INT16_MIN);",
             "%r<tp>% blended = %select<tp>%(m0, r0, min);",
-            "%v<tp>% op = %hmax<tp>%(blended);",
+            "%s<tp>% op = %hmax<tp>%(blended);",
             "return op;"
         ]
     },
@@ -73,7 +73,7 @@
         "code": [
             "%r<tp>% min = %set1<tp>%(INT32_MIN);",
             "%r<tp>% blended = %select<tp>%(m0, r0, min);",
-            "%v<tp>% op = %hmax<tp>%(blended);",
+            "%s<tp>% op = %hmax<tp>%(blended);",
             "return op;"
         ]
     },
@@ -82,7 +82,7 @@
         "code": [
             "%r<tp>% min = %set1<tp>%(INT64_MIN);",
             "%r<tp>% blended = %select<tp>%(m0, r0, min);",
-            "%v<tp>% op = %hmax<tp>%(blended);",
+            "%s<tp>% op = %hmax<tp>%(blended);",
             "return op;"
         ]
     },
@@ -91,7 +91,7 @@
         "code": [
             "%r<tp>% min = %set1<tp>%(INT8_MIN);",
             "%r<tp>% blended = %select<tp>%(m0, r0, min);",
-            "%v<tp>% op = %hmax<tp>%(blended);",
+            "%s<tp>% op = %hmax<tp>%(blended);",
             "return op;"
         ]
     },
@@ -100,7 +100,7 @@
         "code": [
             "%r<tp>% min = %set1<tp>%(0u);",
             "%r<tp>% blended = %select<tp>%(m0, r0, min);",
-            "%v<tp>% op = %hmax<tp>%(blended);",
+            "%s<tp>% op = %hmax<tp>%(blended);",
             "return op; "
         ]
     },
@@ -109,7 +109,7 @@
         "code": [
             "%r<tp>% max = %set1<tp>%(FLT_MAX);",
             "%r<tp>% blended = %select<tp>%(m0, r0, max);",
-            "%v<tp>% op = %hmin<tp>%(blended);",
+            "%s<tp>% op = %hmin<tp>%(blended);",
             "return op;"
         ]
     },
@@ -118,7 +118,7 @@
         "code": [
             "%r<tp>% max = %set1<tp>%(DBL_MAX);",
             "%r<tp>% blended = %select<tp>%(m0, r0, max);",
-            "%v<tp>% op = %hmin<tp>%(blended);",
+            "%s<tp>% op = %hmin<tp>%(blended);",
             "return op;"
         ]
     },
@@ -127,7 +127,7 @@
         "code": [
             "%r<tp>% max = %set1<tp>%(INT16_MAX);",
             "%r<tp>% blended = %select<tp>%(m0, r0, max);",
-            "%v<tp>% op = %hmin<tp>%(blended);",
+            "%s<tp>% op = %hmin<tp>%(blended);",
             "return op;"
         ]
     },
@@ -136,7 +136,7 @@
         "code": [
             "%r<tp>% max = %set1<tp>%(INT32_MAX);",
             "%r<tp>% blended = %select<tp>%(m0, r0, max);",
-            "%v<tp>% op = %hmin<tp>%(blended);",
+            "%s<tp>% op = %hmin<tp>%(blended);",
             "return op;"
         ]
     },
@@ -145,7 +145,7 @@
         "code": [
             "%r<tp>% max = %set1<tp>%(INT64_MAX);",
             "%r<tp>% blended = %select<tp>%(m0, r0, max);",
-            "%v<tp>% op = %hmin<tp>%(blended);",
+            "%s<tp>% op = %hmin<tp>%(blended);",
             "return op;"
         ]
     },
@@ -154,7 +154,7 @@
         "code": [
             "%r<tp>% max = %set1<tp>%(INT8_MAX);",
             "%r<tp>% blended = %select<tp>%(m0, r0, max);",
-            "%v<tp>% op = %hmin<tp>%(blended);",
+            "%s<tp>% op = %hmin<tp>%(blended);",
             "return op;"
         ]
     },
@@ -163,7 +163,7 @@
         "code": [
             "%r<tp>% max = %set1<tp>%(UINT16_MAX);",
             "%r<tp>% blended = %select<tp>%(m0, r0, max);",
-            "%v<tp>% op = %hmin<tp>%(blended);",
+            "%s<tp>% op = %hmin<tp>%(blended);",
             "return op;"
         ]
     },
@@ -172,7 +172,7 @@
         "code": [
             "%r<tp>% max = %set1<tp>%(UINT32_MAX);",
             "%r<tp>% blended = %select<tp>%(m0, r0, max);",
-            "%v<tp>% op = %hmin<tp>%(blended);",
+            "%s<tp>% op = %hmin<tp>%(blended);",
             "return op;"
         ]
     },
@@ -181,7 +181,7 @@
         "code": [
             "%r<tp>% max = %set1<tp>%(UINT64_MAX);",
             "%r<tp>% blended = %select<tp>%(m0, r0, max);",
-            "%v<tp>% op = %hmin<tp>%(blended);",
+            "%s<tp>% op = %hmin<tp>%(blended);",
             "return op;"
         ]
     },
@@ -190,7 +190,7 @@
         "code": [
             "%r<tp>% max = %set1<tp>%(UINT8_MAX);",
             "%r<tp>% blended = %select<tp>%(m0, r0, max);",
-            "%v<tp>% op = %hmin<tp>%(blended);",
+            "%s<tp>% op = %hmin<tp>%(blended);",
             "return op;"
         ]
     },
@@ -199,7 +199,7 @@
         "code": [
             "%r<tp>% ones = %set1<tp>%(1);",
             "%r<tp>% blended = %select<tp>%(m0, r0, ones);",
-            "%v<tp>% op = %hmul<tp>%(blended);",
+            "%s<tp>% op = %hmul<tp>%(blended);",
             "return op;"
         ]
     },
@@ -207,7 +207,7 @@
         "format": "long",
         "code": [
             "// we want to guarantee that load doesn't touch the memory of masked out elems",
-            "%v<tp>% buff[%N<tp>%];",
+            "%s<tp>% buff[%N<tp>%];",
             "for(unsigned i = 0; i < %N<tp>%; i++){",
             "\tif(%get_k<tp>%(m0, i))",
             "\t\tbuff[i] = p0[i];",
@@ -221,7 +221,7 @@
         "format": "long",
         "code": [
             "// we want to guarantee that load doesn't touch the memory of masked out elems",
-            "%v<tp>% buff[%N<tp>%];",
+            "%s<tp>% buff[%N<tp>%];",
             "for (unsigned i = 0; i < %N<tp>%; i++) {",
             "\tif (%get_k<tp>%(m0, i))",
             "\t\tbuff[i] = p0[i];",
@@ -303,8 +303,8 @@
     "storeu_msk": {
         "format": "long",
         "code": [
-            "%v<tp>% buff[%N<tp>%];",
-            "%v<tp>% mask_buff[%N<tp>%];",
+            "%s<tp>% buff[%N<tp>%];",
+            "%s<tp>% mask_buff[%N<tp>%];",
             "%r<tp>% msk_reg = %to_rvd<tp>%(m0);",
             "",
             "%storeu<tp>%(buff, r0);",
@@ -317,8 +317,8 @@
     "storeu_mskz": {
         "format": "long",
         "code": [
-            "%v<tp>% buff[%N<tp>%];",
-            "%v<tp>% mask_buff[%N<tp>%];",
+            "%s<tp>% buff[%N<tp>%];",
+            "%s<tp>% mask_buff[%N<tp>%];",
             "%r<tp>% msk_reg = %to_rvd<tp>%(m0);",
             "",
             "%storeu<tp>%(buff, r0);",

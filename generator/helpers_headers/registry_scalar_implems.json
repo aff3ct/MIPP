@@ -129,11 +129,11 @@
             "datatypes": "all_float",
             "mask_variants": [],
             "implem": [
-                "%v<c:uint|b:tp>% r0i, r1i;",
+                "%s<c:uint|b:tp>% r0i, r1i;",
                 "BIT_CAST_1(&r0i, &r0.r[i]);",
                 "BIT_CAST_1(&r1i, &r1.r[i]);",
-                "%v<c:uint|b:tp>% resi = r0i & r1i;",
-                "%v<tr>% resv;",
+                "%s<c:uint|b:tp>% resi = r0i & r1i;",
+                "%s<tr>% resv;",
                 "BIT_CAST_1(&resv, &resi);",
                 "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
             ]
@@ -163,11 +163,11 @@
             "datatypes": "all_float",
             "mask_variants": [],
             "implem": [
-                "%v<c:uint|b:tp>% r0i, r1i;",
+                "%s<c:uint|b:tp>% r0i, r1i;",
                 "BIT_CAST_1(&r0i, &r0.r[i]);",
                 "BIT_CAST_1(&r1i, &r1.r[i]);",
-                "%v<c:uint|b:tp>% resi = (~r0i) & r1i;",
-                "%v<tr>% resv;",
+                "%s<c:uint|b:tp>% resi = (~r0i) & r1i;",
+                "%s<tr>% resv;",
                 "BIT_CAST_1(&resv, &resi);",
                 "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
             ]
@@ -303,7 +303,7 @@
             "datatypes": "all_defs",
             "mask_variants": [],
             "implem": [
-                "res.m[i] = %!pred_cond!% (r0.r[i] == r1.r[i]) ? (%v<c:uint|b:tr>%)-1 : 0 %!pred_alt!%;"
+                "res.m[i] = %!pred_cond!% (r0.r[i] == r1.r[i]) ? (%s<c:uint|b:tr>%)-1 : 0 %!pred_alt!%;"
             ]
         }
     ],
@@ -313,7 +313,7 @@
             "datatypes": "all_defs",
             "mask_variants": [],
             "implem": [
-                "res.m[i] = %!pred_cond!% (r0.r[i] >= r1.r[i]) ? (%v<c:uint|b:tr>%)-1 : 0 %!pred_alt!%;"
+                "res.m[i] = %!pred_cond!% (r0.r[i] >= r1.r[i]) ? (%s<c:uint|b:tr>%)-1 : 0 %!pred_alt!%;"
             ]
         }
     ],
@@ -323,7 +323,7 @@
             "datatypes": "all_defs",
             "mask_variants": [],
             "implem": [
-                "res.m[i] = %!pred_cond!% (r0.r[i] > r1.r[i]) ? (%v<c:uint|b:tr>%)-1 : 0 %!pred_alt!%;"
+                "res.m[i] = %!pred_cond!% (r0.r[i] > r1.r[i]) ? (%s<c:uint|b:tr>%)-1 : 0 %!pred_alt!%;"
             ]
         }
     ],
@@ -333,7 +333,7 @@
             "datatypes": "all_defs",
             "mask_variants": [],
             "implem": [
-                "res.m[i] = %!pred_cond!% (r0.r[i] <= r1.r[i]) ? (%v<c:uint|b:tr>%)-1 : 0 %!pred_alt!%;"
+                "res.m[i] = %!pred_cond!% (r0.r[i] <= r1.r[i]) ? (%s<c:uint|b:tr>%)-1 : 0 %!pred_alt!%;"
             ]
         }
     ],
@@ -343,7 +343,7 @@
             "datatypes": "all_defs",
             "mask_variants": [],
             "implem": [
-                "res.m[i] = %!pred_cond!% (r0.r[i] < r1.r[i]) ? (%v<c:uint|b:tr>%)-1 : 0 %!pred_alt!%;"
+                "res.m[i] = %!pred_cond!% (r0.r[i] < r1.r[i]) ? (%s<c:uint|b:tr>%)-1 : 0 %!pred_alt!%;"
             ]
         }
     ],
@@ -353,7 +353,7 @@
             "datatypes": "all_defs",
             "mask_variants": [],
             "implem": [
-                "res.m[i] = %!pred_cond!% (r0.r[i] != r1.r[i]) ? (%v<c:uint|b:tr>%)-1 : 0 %!pred_alt!%;"
+                "res.m[i] = %!pred_cond!% (r0.r[i] != r1.r[i]) ? (%s<c:uint|b:tr>%)-1 : 0 %!pred_alt!%;"
             ]
         }
     ],
@@ -399,7 +399,7 @@
             "datatypes": "all_defs",
             "mask_variants": [],
             "implem": [
-                "res.r[i] = (%v<tr>%)r0.r[i];"
+                "res.r[i] = (%s<tr>%)r0.r[i];"
             ]
         }
     ],
@@ -569,7 +569,7 @@
             "datatypes": "all_defs",
             "mask_variants": [],
             "implem": [
-                "%v<tr>% resv = 0;",
+                "%s<tr>% resv = 0;",
                 "for (size_t i = 0; i < %N<tp>%; i++)",
                 "\tresv +=  %!pred_cond!%  r0.r[i] %!pred_alt!%;",
                 "return resv;"
@@ -609,7 +609,7 @@
                 "{",
                 "\tresv64 += %!pred_cond!% r0.r[i] %!pred_alt!%;",
                 "}",
-                "return resv64 > UINT{{ dt_par.n_bits }}_MAX ? (%v<tr>%)UINT{{ dt_par.n_bits }}_MAX : (%v<tr>%)resv64;"
+                "return resv64 > UINT{{ dt_par.n_bits }}_MAX ? (%s<tr>%)UINT{{ dt_par.n_bits }}_MAX : (%s<tr>%)resv64;"
             ]
         },
         {
@@ -644,7 +644,7 @@
                 "for (size_t i = 0; i < %N<tp>%; i++){",
                 "\tresv64 += %!pred_cond!% r0.r[i] %!pred_alt!%;",
                 "}",
-                "return resv64 > INT{{ dt_par.n_bits }}_MAX ? (%v<tr>%)INT{{ dt_par.n_bits }}_MAX : resv64 < INT{{ dt_par.n_bits }}_MIN ? (%v<tr>%)INT{{ dt_par.n_bits }}_MIN : (%v<tr>%)resv64;"
+                "return resv64 > INT{{ dt_par.n_bits }}_MAX ? (%s<tr>%)INT{{ dt_par.n_bits }}_MAX : resv64 < INT{{ dt_par.n_bits }}_MIN ? (%s<tr>%)INT{{ dt_par.n_bits }}_MIN : (%s<tr>%)resv64;"
             ]
         }
     ],
@@ -654,7 +654,7 @@
             "datatypes": "all_uint",
             "mask_variants": [],
             "implem": [
-                "%v<tr>% resv = 0;",
+                "%s<tr>% resv = 0;",
                 "for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec",
                 "\tresv = %!pred_cond!% (r0.r[i] > resv) ? r0.r[i] : resv %!pred_alt!%;",
                 "return resv;"
@@ -665,7 +665,7 @@
             "datatypes": "all_int",
             "mask_variants": [],
             "implem": [
-                "%v<tr>% resv = INT{{ dt_par.n_bits }}_MIN;",
+                "%s<tr>% resv = INT{{ dt_par.n_bits }}_MIN;",
                 "for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec",
                 "\tresv = %!pred_cond!% (r0.r[i] > resv) ? r0.r[i] : resv %!pred_alt!%;",
                 "return resv;"
@@ -676,7 +676,7 @@
             "datatypes": "float32",
             "mask_variants": [],
             "implem": [
-                "%v<tr>% resv = -FLT_MAX;",
+                "%s<tr>% resv = -FLT_MAX;",
                 "for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec",
                 "\tresv = %!pred_cond!% (r0.r[i] > resv) ? r0.r[i] : resv %!pred_alt!%;",
                 "return resv;"
@@ -687,7 +687,7 @@
             "datatypes": "float64",
             "mask_variants": [],
             "implem": [
-                "%v<tr>% resv = -DBL_MAX;",
+                "%s<tr>% resv = -DBL_MAX;",
                 "for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec",
                 "\tresv = %!pred_cond!% (r0.r[i] > resv) ? r0.r[i] : resv %!pred_alt!%;",
                 "return resv;"
@@ -700,7 +700,7 @@
             "datatypes": "all_uint",
             "mask_variants": [],
             "implem": [
-                "%v<tr>% resv = UINT{{ dt_par.n_bits }}_MAX;",
+                "%s<tr>% resv = UINT{{ dt_par.n_bits }}_MAX;",
                 "for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec",
                 "\tresv = %!pred_cond!% (r0.r[i] < resv) ? r0.r[i] : resv %!pred_alt!%;",
                 "return resv;"
@@ -711,7 +711,7 @@
             "datatypes": "all_int",
             "mask_variants": [],
             "implem": [
-                "%v<tr>% resv = INT{{ dt_par.n_bits }}_MAX;",
+                "%s<tr>% resv = INT{{ dt_par.n_bits }}_MAX;",
                 "for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec",
                 "\tresv = %!pred_cond!% (r0.r[i] < resv) ? r0.r[i] : resv %!pred_alt!%;",
                 "return resv;"
@@ -722,7 +722,7 @@
             "datatypes": "float32",
             "mask_variants": [],
             "implem": [
-                "%v<tr>% resv = FLT_MAX;",
+                "%s<tr>% resv = FLT_MAX;",
                 "for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec",
                 "\tresv = %!pred_cond!% (r0.r[i] < resv) ? r0.r[i] : resv %!pred_alt!%;",
                 "return resv;"
@@ -733,7 +733,7 @@
             "datatypes": "float64",
             "mask_variants": [],
             "implem": [
-                "%v<tr>% resv = DBL_MAX;",
+                "%s<tr>% resv = DBL_MAX;",
                 "for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec",
                 "\tresv = %!pred_cond!% (r0.r[i] < resv) ? r0.r[i] : resv %!pred_alt!%;",
                 "return resv;"
@@ -746,7 +746,7 @@
             "datatypes": "all_defs",
             "mask_variants": [],
             "implem": [
-                "%v<tr>% resv = 1;",
+                "%s<tr>% resv = 1;",
                 "for (size_t i = 0; i < %N<tp>%; i++)",
                 "\tresv *=  %!pred_cond!% r0.r[i] %!pred_alt!%;",
                 "",
@@ -806,10 +806,10 @@
             "datatypes": "all_float",
             "mask_variants": [],
             "implem": [
-                "%v<c:uint|b:tp>% r0i;",
+                "%s<c:uint|b:tp>% r0i;",
                 "BIT_CAST_1(&r0i, &r0.r[i]);",
                 "r0i <<= v0;",
-                "%v<tr>% resv;",
+                "%s<tr>% resv;",
                 "BIT_CAST_1(&resv, &r0i);",
                 "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
             ]
@@ -841,11 +841,11 @@
             "datatypes": "all_64bit",
             "mask_variants": [],
             "implem": [
-                "%v<c:uint|b:tp>% msk = 0x8000000000000000ULL;",
-                "%v<c:uint|b:tp>% ri;",
+                "%s<c:uint|b:tp>% msk = 0x8000000000000000ULL;",
+                "%s<c:uint|b:tp>% ri;",
                 "BIT_CAST_1(&ri, &r0.r[i]);",
-                "%v<c:uint|b:tp>% resi = ri & msk;",
-                "%v<tr>% resv;",
+                "%s<c:uint|b:tp>% resi = ri & msk;",
+                "%s<tr>% resv;",
                 "BIT_CAST_1(&resv, &resi);",
                 "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
             ]
@@ -855,11 +855,11 @@
             "datatypes": "all_32bit",
             "mask_variants": [],
             "implem": [
-                "%v<c:uint|b:tp>% msk = 0x80000000;",
-                "%v<c:uint|b:tp>% ri;",
+                "%s<c:uint|b:tp>% msk = 0x80000000;",
+                "%s<c:uint|b:tp>% ri;",
                 "BIT_CAST_1(&ri, &r0.r[i]);",
-                "%v<c:uint|b:tp>% resi = ri & msk;",
-                "%v<tr>% resv;",
+                "%s<c:uint|b:tp>% resi = ri & msk;",
+                "%s<tr>% resv;",
                 "BIT_CAST_1(&resv, &resi);",
                 "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
             ]
@@ -869,11 +869,11 @@
             "datatypes": "all_16bit",
             "mask_variants": [],
             "implem": [
-                "%v<c:uint|b:tp>% msk = 0x8000;",
-                "%v<c:uint|b:tp>% ri;",
+                "%s<c:uint|b:tp>% msk = 0x8000;",
+                "%s<c:uint|b:tp>% ri;",
                 "BIT_CAST_1(&ri, &r0.r[i]);",
-                "%v<c:uint|b:tp>% resi = ri & msk;",
-                "%v<tr>% resv;",
+                "%s<c:uint|b:tp>% resi = ri & msk;",
+                "%s<tr>% resv;",
                 "BIT_CAST_1(&resv, &resi);",
                 "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
             ]
@@ -883,11 +883,11 @@
             "datatypes": "all_8bit",
             "mask_variants": [],
             "implem": [
-                "%v<c:uint|b:tp>% msk = 0x80;",
-                "%v<c:uint|b:tp>% ri;",
+                "%s<c:uint|b:tp>% msk = 0x80;",
+                "%s<c:uint|b:tp>% ri;",
                 "BIT_CAST_1(&ri, &r0.r[i]);",
-                "%v<c:uint|b:tp>% resi = ri & msk;",
-                "%v<tr>% resv;",
+                "%s<c:uint|b:tp>% resi = ri & msk;",
+                "%s<tr>% resv;",
                 "BIT_CAST_1(&resv, &resi);",
                 "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
             ]
@@ -930,10 +930,10 @@
             "datatypes": "all_float",
             "mask_variants": [],
             "implem": [
-                "%v<c:uint|b:tp>% r0i;",
+                "%s<c:uint|b:tp>% r0i;",
                 "BIT_CAST_1(&r0i, &r0.r[i]);",
-                "%v<c:uint|b:tp>% resi = ~r0i;",
-                "%v<tr>% resv;",
+                "%s<c:uint|b:tp>% resi = ~r0i;",
+                "%s<tr>% resv;",
                 "BIT_CAST_1(&resv, &resi);",
                 "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
             ]
@@ -963,11 +963,11 @@
             "datatypes": "all_float",
             "mask_variants": [],
             "implem": [
-                "%v<c:uint|b:tp>% r0i, r1i;",
+                "%s<c:uint|b:tp>% r0i, r1i;",
                 "BIT_CAST_1(&r0i, &r0.r[i]);",
                 "BIT_CAST_1(&r1i, &r1.r[i]);",
-                "%v<c:uint|b:tp>% resi = r0i | r1i;",
-                "%v<tr>% resv;",
+                "%s<c:uint|b:tp>% resi = r0i | r1i;",
+                "%s<tr>% resv;",
                 "BIT_CAST_1(&resv, &resi);",
                 "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
             ]
@@ -1005,13 +1005,13 @@
             "datatypes": "all_uint",
             "mask_variants": [],
             "implem": [
-                "%v<tp>% cur = 1;",
-                "%v<tp>% base = r0.r[i];",
-                "%v<tp>% exp = r1.r[i];",
+                "%s<tp>% cur = 1;",
+                "%s<tp>% base = r0.r[i];",
+                "%s<tp>% exp = r1.r[i];",
                 "while (exp > 0) {",
                 "\tif (exp & 1)",
-                "\t\tcur = (%v<tp>%)((uint64_t)cur * base);",
-                "\tbase = (%v<tp>%)((uint64_t)base * base);",
+                "\t\tcur = (%s<tp>%)((uint64_t)cur * base);",
+                "\tbase = (%s<tp>%)((uint64_t)base * base);",
                 "\texp >>= 1;",
                 "}",
                 "res.r[i] = %!pred_cond!% cur %!pred_alt!%;"
@@ -1087,10 +1087,10 @@
               "datatypes": "all_float",
               "mask_variants": [],
               "implem": [
-                  "%v<c:uint|b:tp>% r0i;",
+                  "%s<c:uint|b:tp>% r0i;",
                   "BIT_CAST_1(&r0i, &r0.r[i]);",
                   "r0i >>= v0;",
-                  "%v<tr>% resv;",
+                  "%s<tr>% resv;",
                   "BIT_CAST_1(&resv, &r0i);",
                   "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
               ]
@@ -1196,7 +1196,7 @@
               "mask_variants": [],
               "implem": [
                   "%m<tr>% res;",
-                  "%v<c:int|b:tr>% m_tmp = v0 ? -1 : 0;",
+                  "%s<c:int|b:tr>% m_tmp = v0 ? -1 : 0;",
                   "for (size_t i = 0; i < %N<tr>%; i++)",
                   "\tBIT_CAST_1(&res.m[i], &m_tmp);",
                   "return res;"
@@ -1209,7 +1209,7 @@
               "datatypes": "all_defs",
               "mask_variants": [],
               "implem": [
-                  "%v<c:int|b:tr>% m_tmp = vals[i] ? -1 : 0;",
+                  "%s<c:int|b:tr>% m_tmp = vals[i] ? -1 : 0;",
                   "BIT_CAST_1(&res.m[i], &m_tmp);"
               ]
           }
@@ -1401,7 +1401,7 @@
             "datatypes": "all_defs",
             "mask_variants": [],
             "implem": [
-                "%v<c:int|b:32>% res = 0;",
+                "%s<c:int|b:32>% res = 0;",
                 "for (size_t i = 0; i < %N<tp>%; i++) // early termination is possible here but won't help the compiler vectorizer",
                 "\tres += (m0.m[i] & m1.m[i]) ? 1 : 0;",
                 "return res ? 0 : 1;"
@@ -1414,7 +1414,7 @@
             "datatypes": "all_defs",
             "mask_variants": [],
             "implem": [
-                "%v<c:int|b:32>% res = 0;",
+                "%s<c:int|b:32>% res = 0;",
                 "for (size_t i = 0; i < %N<tp>%; i++) // early termination is possible here but won't help the compiler vectorizer",
                 "\tres += m0.m[i] == 0 ? 0 : 1;",
                 "return res ? 0 : 1;"
@@ -1442,7 +1442,7 @@
                 "%m<tr>% res;",
                 "BIT_CAST_N(res.m, r0.r, %N<tr>%);",
                 "for (size_t i = 0; i < %N<tr>%; i++)",
-                "\tres.m[i] = res.m[i] ? (%v<c:uint|b:tr>%)-1 : 0;",
+                "\tres.m[i] = res.m[i] ? (%s<c:uint|b:tr>%)-1 : 0;",
                 "return res;"
             ]
         }
@@ -1484,7 +1484,7 @@
             "implem": [
                 "%r<tr>% res;",
                 "for (size_t i = 0; i < %N<tr>%; i++){",
-                "\tres.r[i] = (%v<tr>%)r0.r[i];",
+                "\tres.r[i] = (%s<tr>%)r0.r[i];",
                 "}",
                 "return res;"
             ]
@@ -1504,11 +1504,11 @@
             "datatypes": "all_float",
             "mask_variants": [],
             "implem": [
-                "%v<c:uint|b:tp>% r0i, r1i;",
+                "%s<c:uint|b:tp>% r0i, r1i;",
                 "BIT_CAST_1(&r0i, &r0.r[i]);",
                 "BIT_CAST_1(&r1i, &r1.r[i]);",
-                "%v<c:uint|b:tp>% resi = r0i ^ r1i;",
-                "%v<tr>% resv;",
+                "%s<c:uint|b:tp>% resi = r0i ^ r1i;",
+                "%s<tr>% resv;",
                 "BIT_CAST_1(&resv, &resi);",
                 "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
             ]

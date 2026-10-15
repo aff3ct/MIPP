@@ -283,7 +283,7 @@ def _load_generic_emu():
                             if dep_name:
                                 first_word = dep_name.split()[0]
                                 if first_word not in jinja_keywords:
-                                    if dep_name not in ["r", "m", "v", "N"] and not dep_name.startswith("{"):
+                                    if dep_name not in ["r", "m", "s", "N"] and not dep_name.startswith("{"):
                                         if dep_name != func_name:
                                             auto_deps.add(dep_name)
                                             

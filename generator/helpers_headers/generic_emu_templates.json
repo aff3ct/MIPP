@@ -959,7 +959,7 @@
     "get": {
         "format": "long",
         "code": [
-            "%v<tp>% t[%N<tp>%];",
+            "%s<tp>% t[%N<tp>%];",
             "%storeu<tp>%(t, r0);",
             "return t[v0];"
         ]
@@ -1389,9 +1389,9 @@
     "set_k_emu": {
         "format": "long",
         "code": [
-            "%v<c:uint|b:tp>% tab[%N<tp>%];",
+            "%s<c:uint|b:tp>% tab[%N<tp>%];",
             "for (unsigned i = 0; i < %N<tp>%; i++) {",
-            "\ttab[i] = vals[i] ? (%v<c:uint|b:tp>%)~0 : (%v<c:uint|b:tp>%)0;",
+            "\ttab[i] = vals[i] ? (%s<c:uint|b:tp>%)~0 : (%s<c:uint|b:tp>%)0;",
             "}",
             "return %to_rvm<tp>%(%cast<c:uint|b:tp,tp>%(%set<c:uint|b:tp>%(tab)));"
         ]

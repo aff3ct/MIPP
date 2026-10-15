@@ -426,7 +426,7 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret,lmul=0, isa_nam
                 exit(-1)
 
             converted_ir = converted_ir.replace("%" + s + "%", build_msk(datatypes[dt], isa,lmul=_parse_lmul(dt_info, isa, dt_par, dt_ret, lmul), isa_name=isa_name))
-        elif item_type == "v":
+        elif item_type == "s":
             dt_info = _RE_ANGLE.findall(s)[0]
             dt_info_params = dt_info.split(",")
             dt = ""
@@ -500,7 +500,7 @@ def get_requirements(ir, isa, funcs, func_name, dt_par, dt_ret,lmul=0, isa_name=
     for s in ar_substitute:
         item_type = s.split('<')[0]
 
-        if item_type not in ["r", "m", "v", "N"]:
+        if item_type not in ["r", "m", "s", "N"]:
             f_name = item_type
             if f_name not in funcs:
                 print("Panic: '" + f_name + "' is not in the available MIPP functions.")

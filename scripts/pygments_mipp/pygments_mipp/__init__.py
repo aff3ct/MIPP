@@ -20,7 +20,7 @@ from pygments.token import (Comment, Keyword, Name, Number, Operator,
 __all__ = ["MippDslLexer", "MippJsonLexer"]
 
 # Token prefixes that name a type or a constant instead of a MIPP function.
-_TYPE_PREFIXES = r"(?:r|m|v|N)"
+_TYPE_PREFIXES = r"(?:r|m|s|N)"
 _IDENT = r"[A-Za-z_][A-Za-z0-9_]*"
 
 # Rules shared by both lexers.
@@ -33,7 +33,7 @@ _JINJA = [
 _DSL = [
     # Predication markers of the scalar reference: %!pred_cond!%, %!pred_alt!%
     (r"%!" + _IDENT + r"!%", Comment.Preproc),
-    # Type and constant placeholders: %r<...>%, %m<...>%, %v<...>%, %N<...>%
+    # Type and constant placeholders: %r<...>%, %m<...>%, %s<...>%, %N<...>%
     (r"(%)(" + _TYPE_PREFIXES + r")(<)",
      bygroups(Punctuation, Keyword.Type, Punctuation), "mipp-mods"),
     # Function calls: %add<...>%, %{{func_name}}<...>%

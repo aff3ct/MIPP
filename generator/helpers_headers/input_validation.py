@@ -379,7 +379,7 @@ def audit_and_validate_implementation_levels(isa, implems, implems_emu):
                 if dep_name:
                     first_word = dep_name.split()[0]
                     if first_word not in ["if", "else", "endif", "for", "endfor"]:
-                        if dep_name not in ["r", "m", "v", "N", "cast", "cast_k", "to_rvd", "to_rvm"] and not dep_name.startswith("{"):
+                        if dep_name not in ["r", "m", "s", "N", "cast", "cast_k", "to_rvd", "to_rvm"] and not dep_name.startswith("{"):
                             deps.add(dep_name)
         return deps
 
