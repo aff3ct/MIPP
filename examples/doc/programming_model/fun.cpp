@@ -52,6 +52,23 @@ static void explicit_params()
         DOC_CHECK(s[i] == 42);
 }
 
+// Introduction: shorter namespace through an alias
+static void namespace_alias()
+{
+    const float* ptr_a = A;
+    const float* ptr_b = B;
+    // --8<-- [start:namespace_alias]
+    namespace mi = mipp; // once, in your own code (namespace or block scope)
+
+    mi::rvd<float> a = mi::load<float>(ptr_a);
+    mi::rvd<float> b = mi::load<float>(ptr_b);
+    mi::rvd<float> c = mi::add(a, b);
+    // --8<-- [end:namespace_alias]
+    mipp::storeu(OUT, c);
+    for (int i = 0; i < (int)mipp::N<float>(); i++)
+        DOC_CHECK(OUT[i] == A[i] + B[i]);
+}
+
 // §3.6: masked operation
 static void masked()
 {
@@ -111,6 +128,7 @@ int main()
     fill();
     auto_deduction();
     explicit_params();
+    namespace_alias();
     masked();
     masked_tail();
     return doc_status();

@@ -8,6 +8,15 @@ MIPP provides three distinct API layers built on top of a unified code generatio
 
 All three APIs share the same zero-overhead inlined execution path and map to identical machine instructions.
 
+!!! tip "Shorter Namespace"
+    MIPP does not define a shorter namespace, so as not to impose one on every program, but a C++ namespace alias gives one at no cost:
+
+    ```cpp
+    --8<-- "examples/doc/programming_model/fun.cpp:namespace_alias"
+    ```
+
+    The alias covers both C++ APIs (`mi::Rvd<float>`, `mi::load_obj<float>(ptr)` in the Object API). This documentation keeps `mipp::`.
+
 ---
 
 ## 1. Headers

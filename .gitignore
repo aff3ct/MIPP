@@ -47,3 +47,5 @@ docs/developer/reference/registries/
 docs/includes/generated/
 benchmarks/
 examples/doc/bin/
+audit_*
+RELEASE_NOTES*
