@@ -176,21 +176,28 @@ def gen_c_structures(isa, file, is_scalar=False, vla_size=None):
     # 2. Mask typedefs (VLA only)
     if "mask_typedef_template" in layout:
         j2_mask_typedef = Template(layout["mask_typedef_template"], undefined=StrictUndefined)
+        # A mask typedef may not depend on the datatype (SVE: fixed_m1_bool_t): emit each
+        # distinct typedef once, a redefinition being a C11 feature (-Wtypedef-redefinition in C99).
+        emitted_mask_typedefs = set()
         for lmul in [x for x in isa.get("hw_lmul", [1]) if x > 0]:
             resolved_isa = resolve_lmul_in_isa(isa, lmul)
             lsuffix_mipp = f"m{lmul}"
             lmul_expr = f"*{lmul}" if lmul > 1 else ""
             for dt in resolved_isa["datatypes"]:
                 guard = resolved_isa["datatypes"][dt].get("if", None)
-                if guard:
-                    print(f"#if {guard}", file=file)
-                print(j2_mask_typedef.render(
+                mask_typedef = j2_mask_typedef.render(
                     isa_datatype=resolved_isa["datatypes"][dt],
                     vla_size=size_symbol,
                     lsuffix_mipp=lsuffix_mipp,
                     lmul_expr=lmul_expr,
                     n_bits=datatypes[dt]["n_bits"]
-                ), file=file)
+                )
+                if (guard, mask_typedef) in emitted_mask_typedefs:
+                    continue
+                emitted_mask_typedefs.add((guard, mask_typedef))
+                if guard:
+                    print(f"#if {guard}", file=file)
+                print(mask_typedef, file=file)
                 if guard:
                     print(f"#endif", file=file)
         for ldiv in [abs(x) for x in isa.get("hw_lmul", []) if x < 0]:
@@ -204,15 +211,19 @@ def gen_c_structures(isa, file, is_scalar=False, vla_size=None):
                     guard = resolved_isa["datatypes"][dt].get("if", None)
                 if guard == "0":
                     continue
-                if guard:
-                    print(f"#if {guard}", file=file)
-                print(j2_mask_typedef.render(
+                mask_typedef = j2_mask_typedef.render(
                     isa_datatype=resolved_isa["datatypes"][dt],
                     vla_size=size_symbol,
                     lsuffix_mipp=lsuffix_mipp,
                     lmul_expr=lmul_expr,
                     n_bits=datatypes[dt]["n_bits"]
-                ), file=file)
+                )
+                if (guard, mask_typedef) in emitted_mask_typedefs:
+                    continue
+                emitted_mask_typedefs.add((guard, mask_typedef))
+                if guard:
+                    print(f"#if {guard}", file=file)
+                print(mask_typedef, file=file)
                 if guard:
                     print(f"#endif", file=file)
 
