@@ -102,7 +102,7 @@ $$\text{EffectiveLevel}(F) = \max \Big( \text{BaseLevel}(F), \; \max_{D \in \tex
   It is classified and documented as **Level 3 (Scalar Fallback)**.
 
 !!! note
-    **Concrete Example**: On baseline x86 SSE, native variable vector blending (`_mm_blendv_*`) is unavailable prior to SSE4.1, so floating-point `blend` resolves to Level 3. Consequently, integer `blend` (which casts to float and invokes `blend`) and masked operations like `add_mask` (which compute `add` followed by `blend`) still emit vectorized arithmetic, but their official level is classified as **Level 3** because of the scalar bottleneck.
+    **Concrete Example**: On baseline x86 SSE, native variable vector blending (`_mm_blendv_*`) is unavailable prior to SSE4.1, so floating-point `select` resolves to Level 3. Consequently, integer `select` (which casts to float and invokes `select`) and masked operations like `add_mask` (which compute `add` followed by `select`) still emit vectorized arithmetic, but their official level is classified as **Level 3** because of the scalar bottleneck.
 
 ---
 

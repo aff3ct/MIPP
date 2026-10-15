@@ -153,7 +153,7 @@ At this point `mipp_neon_absdiff_float32_maskz` is still <span class="mipp-isa-b
     "format": "long",
     "code": [
         "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
-        "%r<tp>% tmp = %toreg<tp>%(m0);",
+        "%r<tp>% tmp = %to_rvd<tp>%(m0);",
         "%r<tp>% res = %andb<tp>%(op, tmp);",
         "return res;"
     ]

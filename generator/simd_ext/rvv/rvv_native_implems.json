@@ -97,13 +97,6 @@
             "template": "mask_2args"
         }
     ],
-    "blend": [
-        {
-            "instr_name": "merge",
-            "datatypes": "all_datatypes",
-            "template": "merge"
-        }
-    ],
     "cast": [
         {
             "instr_name": "vreinterpret",
@@ -809,6 +802,13 @@
             "datatypes": "all_float",
             "template": "arith_1arg_msks",
             "version": "masks"
+        }
+    ],
+    "select": [
+        {
+            "instr_name": "merge",
+            "datatypes": "all_datatypes",
+            "template": "merge"
         }
     ],
     "set": [

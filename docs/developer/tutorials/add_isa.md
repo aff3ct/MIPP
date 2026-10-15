@@ -111,7 +111,7 @@ With empty implementation files, every function already exists on `myisa` and th
 
 ## Step 4: Implement the Functions
 
-Add the <span class="mipp-isa-badge lvl-0">L0</span> entries, then the <span class="mipp-isa-badge lvl-1">L1</span> ones where needed, as described in [Add an Implementation](add_implementation.md). Start with the functions the generic templates call most: loads and stores, `set1`, `set0`, arithmetic, comparisons, `blend`, bitwise operations, `max` and `min`. Each one turns many <span class="mipp-isa-badge lvl-3">L3</span> functions into <span class="mipp-isa-badge lvl-2">L2</span> at once.
+Add the <span class="mipp-isa-badge lvl-0">L0</span> entries, then the <span class="mipp-isa-badge lvl-1">L1</span> ones where needed, as described in [Add an Implementation](add_implementation.md). Start with the functions the generic templates call most: loads and stores, `set1`, `set0`, arithmetic, comparisons, `select`, bitwise operations, `max` and `min`. Each one turns many <span class="mipp-isa-badge lvl-3">L3</span> functions into <span class="mipp-isa-badge lvl-2">L2</span> at once.
 
 Watch the audits at each generation: they report entries placed at the wrong level, dead entries and overlapping conditions ([Audits & Validation](../reference/audits.md)).
 

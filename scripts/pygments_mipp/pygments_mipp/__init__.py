@@ -4,7 +4,7 @@ Two lexers are registered through the ``pygments.lexers`` entry point, so that
 MkDocs (pymdownx.highlight) can use them as fenced code languages:
 
 - ``mipp-dsl``: C code containing DSL placeholders (``%r<tp>%``,
-  ``%add<tp|mk:Z>%(...)``, ``%!pred_cond!%``) and Jinja2 delimiters.
+  ``%add<tp|v:Z>%(...)``, ``%!pred_cond!%``) and Jinja2 delimiters.
 - ``mipp-json``: JSON registries whose string values contain DSL placeholders
   and Jinja2 delimiters (``*_templates.json``, ``registry_scalar_implems.json``).
 
@@ -46,7 +46,7 @@ _DSL = [
 _MODS = [
     (r">%", Punctuation, "#pop"),
     (r"\{\{.*?\}\}", Comment.Preproc),
-    (r"(c|b|mk|m)(:)", bygroups(Name.Attribute, Punctuation)),
+    (r"(c|b|m|v)(:)", bygroups(Name.Attribute, Punctuation)),
     (r"\b(tp|tr)\b", Name.Builtin),
     (r"\b(int|uint|float|M|Z|S|U)\b", Name.Constant),
     (r"-?\d+", Number.Integer),

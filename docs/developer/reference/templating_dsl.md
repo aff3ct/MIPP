@@ -38,7 +38,7 @@ The prefix before the opening angle bracket `<` indicates what entity is being g
 | **`m`** | Vector Mask Register (`rvm`) | `%m<tp>%` | `rvm_avx_float32_t` |
 | **`v`** | Scalar Value Type | `%v<tp>%` | `float32_t` |
 | **`N`** | Number of Elements Constant | `%N<tp>%` | `MIPP_AVX_N_FLOAT32` |
-| **`<function>`** | Call to another MIPP function | `%blend<tp>%(...)` | `mipp_avx_blend_float32(...)` |
+| **`<function>`** | Call to another MIPP function | `%select<tp>%(...)` | `mipp_avx_select_float32(...)` |
 
 ---
 
@@ -72,7 +72,7 @@ You can construct new datatypes by altering the **category** (`c:`) or the **bit
     - `b:64`, `b:32`, `b:16`, `b:8` : Fixed bitwidth
     - `b:tp` or `b:tr` : Copy bitwidth from parameter / return type
 
-A missing attribute is taken from `tp`.
+A missing attribute is taken from `tp`. The accepted parts are `tp`, `tr`, `c:`, `b:`, and the modifiers `m:` and `v:` of §4; any other part stops the generation with a "Panic" message.
 
 #### Examples
 
@@ -110,28 +110,28 @@ You can adjust the register multiplier of a type or of a function call:
 !!! warning "Only in templates rendered for an LMUL"
     `m:` has an effect only when the template is rendered for a specific LMUL, as the horizontal templates of `generic_emu_templates_lmulh.json` are (`version: horiz_lmul`). The other templates are rendered once, for the base register: there, `m:` is silently ignored and `%add<tp|m:2>%` produces `mipp_avx_add_float32`.
 
-### 4.2. Mask Modifiers (`mk:`)
+### 4.2. Variant Modifiers (`v:`)
 
-When calling another MIPP function, `mk:` selects its masking variant. The arguments then follow the C signature of that variant: the mask first, then the source register for `S`, then the operands.
+When calling another MIPP function, `v:` selects its masking variant, with the letters of the C++ `mipp::VARIANT` enum. The arguments then follow the C signature of that variant: the mask first, then the source register for `S`, then the operands.
 
 | Modifier | Variant called | Inactive lanes |
 | :--- | :--- | :--- |
-| `mk:M` | Merge-Masked (`_mask`) | first operand |
-| `mk:Z` | Zero-Masked (`_maskz`) | zero |
-| `mk:S` | Source-Masked (`_masks`) | source register `rsrc` |
-| `mk:U` | unmasked (same as no `mk:`) | |
+| `v:M` | Merge-Masked (`_mask`) | first operand |
+| `v:Z` | Zero-Masked (`_maskz`) | zero |
+| `v:S` | Source-Masked (`_masks`) | source register `rsrc` |
+| `v:U` | unmasked (same as no `v:`) | |
 
-Only these four letters are accepted; any other value is ignored and the unmasked function is called.
+Only these four letters are accepted; any other value stops the generation with a "Panic" message.
 
 ```mipp-dsl
-%r<tp>% a = %sub<tp|mk:Z>%(m0, r0, r1);        // mipp_avx_sub_float32_maskz(m0, r0, r1)
-%r<tp>% b = %sub<tp|mk:S>%(m0, rsrc, r0, r1);  // mipp_avx_sub_float32_masks(m0, rsrc, r0, r1)
+%r<tp>% a = %sub<tp|v:Z>%(m0, r0, r1);        // mipp_avx_sub_float32_maskz(m0, r0, r1)
+%r<tp>% b = %sub<tp|v:S>%(m0, rsrc, r0, r1);  // mipp_avx_sub_float32_masks(m0, rsrc, r0, r1)
 ```
 
-`mk:` combines with the other modifiers. The horizontal LMUL templates reduce the two halves of a register group with the Zero-Masked variant at half the LMUL:
+`v:` combines with the other modifiers. The horizontal LMUL templates reduce the two halves of a register group with the Zero-Masked variant at half the LMUL:
 
 ```mipp-dsl
-%hmax<c:tp|b:tp|m:tp/2|mk:Z>%(m0_lo, r0_lo)
+%hmax<c:tp|b:tp|m:tp/2|v:Z>%(m0_lo, r0_lo)
 ```
 
 ---
@@ -152,7 +152,7 @@ Extracted from `generator/helpers_headers/generic_emu_templates_mask.json`:
     "format": "long",
     "code": [
         "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
-        "%r<tp>% res = %blend<tp>%(m0, op, r0);",
+        "%r<tp>% res = %select<tp>%(m0, op, r0);",
         "return res;"
     ]
 }
@@ -164,7 +164,7 @@ When specializing this template for `func_name = "add"` on AVX with `tp = float3
 
     ```mipp-dsl
     %r<tp>% op = %add<tp>%(r0, r1);
-    %r<tp>% res = %blend<tp>%(m0, op, r0);
+    %r<tp>% res = %select<tp>%(m0, op, r0);
     return res;
     ```
 
@@ -174,7 +174,7 @@ When specializing this template for `func_name = "add"` on AVX with `tp = float3
     static inline rvd_avx_float32_t mipp_avx_add_float32_mask(const rvm_avx_float32_t m0, const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
     	// Level 2 (Generic Emulation)
     	rvd_avx_float32_t op = mipp_avx_add_float32(r0, r1);
-    	rvd_avx_float32_t res = mipp_avx_blend_float32(m0, op, r0);
+    	rvd_avx_float32_t res = mipp_avx_select_float32(m0, op, r0);
     	return res;
     }
     ```

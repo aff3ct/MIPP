@@ -85,31 +85,6 @@
             "template": "logi_m_2args_rev"
         }
     ],
-    "blend": [
-        {
-            "instr_name": "bslq",
-            "datatypes": [
-                "int64",
-                "int32",
-                "int16",
-                "int8",
-                "uint64",
-                "uint32",
-                "uint16",
-                "uint8",
-                "float32"
-            ],
-            "template": "blend"
-        },
-        {
-            "instr_name": "bslq",
-            "datatypes": [
-                "float64"
-            ],
-            "template": "blend",
-            "if": "defined(__aarch64__)"
-        }
-    ],
     "cast": [
         {
             "instr_name": "reinterpretq",
@@ -856,6 +831,31 @@
                 "float32"
             ],
             "template": "rsqrt"
+        }
+    ],
+    "select": [
+        {
+            "instr_name": "bslq",
+            "datatypes": [
+                "int64",
+                "int32",
+                "int16",
+                "int8",
+                "uint64",
+                "uint32",
+                "uint16",
+                "uint8",
+                "float32"
+            ],
+            "template": "select"
+        },
+        {
+            "instr_name": "bslq",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "select",
+            "if": "defined(__aarch64__)"
         }
     ],
     "set0": [

@@ -209,7 +209,7 @@ The tabs of a set do exactly the same thing: same variables, same order, same co
 === "C API"
 
     ```c
-    ;--8<-- "examples/doc/masking_semantics/c.c:blend"
+    ;--8<-- "examples/doc/masking_semantics/c.c:select"
     ```
 
 === "C++ Functional API"

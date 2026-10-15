@@ -309,7 +309,7 @@
         "andnb": {
             "comparison": "bitwise",
             "extra_includes": [
-                "toreg"
+                "to_rvd"
             ]
         },
         "asin": {
@@ -431,7 +431,7 @@
             "comparison": "logical",
             "support_obj": true,
             "extra_includes": [
-                "toreg",
+                "to_rvd",
                 "get_k"
             ]
         },
@@ -439,7 +439,7 @@
             "comparison": "logical",
             "support_obj": true,
             "extra_includes": [
-                "toreg",
+                "to_rvd",
                 "get_k"
             ]
         },
@@ -447,7 +447,7 @@
             "comparison": "logical",
             "support_obj": true,
             "extra_includes": [
-                "toreg",
+                "to_rvd",
                 "get_k"
             ]
         },
@@ -455,7 +455,7 @@
             "comparison": "logical",
             "support_obj": true,
             "extra_includes": [
-                "toreg",
+                "to_rvd",
                 "get_k"
             ]
         },
@@ -463,7 +463,7 @@
             "comparison": "logical",
             "support_obj": true,
             "extra_includes": [
-                "toreg",
+                "to_rvd",
                 "get_k"
             ]
         },
@@ -471,7 +471,7 @@
             "comparison": "logical",
             "support_obj": true,
             "extra_includes": [
-                "toreg",
+                "to_rvd",
                 "get_k"
             ]
         },
@@ -1207,7 +1207,7 @@
             },
             "comparison": "tolerance"
         },
-        "toreg": {
+        "to_rvd": {
             "comparison": "bitwise"
         },
         "xorb": {

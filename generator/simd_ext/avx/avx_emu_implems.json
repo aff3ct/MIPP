@@ -261,25 +261,25 @@
             "if": "defined(__AVX2__)"
         }
     ],
-    "tomsk": [
+    "to_rvm": [
         {
-            "instr_name": "tomsk",
+            "instr_name": "to_rvm",
             "datatypes": [
                 "float32"
             ],
-            "template": "tomsk_float32"
+            "template": "to_rvm_float32"
         },
         {
-            "instr_name": "tomsk",
+            "instr_name": "to_rvm",
             "datatypes": [
                 "float64"
             ],
-            "template": "tomsk_float64"
+            "template": "to_rvm_float64"
         },
         {
-            "instr_name": "tomsk",
+            "instr_name": "to_rvm",
             "datatypes": "all_int_uint",
-            "template": "tomsk_int",
+            "template": "to_rvm_int",
             "if": "defined(__AVX2__)"
         }
     ]

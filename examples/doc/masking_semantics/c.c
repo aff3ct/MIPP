@@ -23,7 +23,7 @@ static void fill(void)
 /* Lane i of a float32 mask, as 0 or 1. */
 static void lanes(rvm_float32_t m, int32_t* out)
 {
-    rvd_float32_t r = mipp_blend_float32(m, mipp_set1_float32(1.f), mipp_set0_float32());
+    rvd_float32_t r = mipp_select_float32(m, mipp_set1_float32(1.f), mipp_set0_float32());
     mipp_storeu_float32(OUT, r);
     for (int i = 0; i < MIPP_N_FLOAT32; i++)
         out[i] = OUT[i] != 0.f;
@@ -116,34 +116,34 @@ static void cast_k(void)
     rvm_int32_t   m_int   = mipp_cast_k_float32_int32(m_float);
     /* --8<-- [end:cast_k] */
     int32_t r[DOC_BUF];
-    mipp_storeu_int32(r, mipp_blend_int32(m_int, mipp_set1_int32(1), mipp_set0_int32()));
+    mipp_storeu_int32(r, mipp_select_int32(m_int, mipp_set1_int32(1), mipp_set0_int32()));
     for (int i = 0; i < MIPP_N_INT32; i++)
         DOC_CHECK(r[i] == (A[i] < B[i]));
 }
 
-/* §6.2: tomsk */
-static void tomsk(void)
+/* §6.2: to_rvm */
+static void to_rvm(void)
 {
     const float* ptr = A;
-    /* --8<-- [start:tomsk] */
+    /* --8<-- [start:to_rvm] */
     rvd_float32_t raw_vector = mipp_load_float32(ptr);
-    rvm_float32_t m = mipp_tomsk_float32(raw_vector);
-    /* --8<-- [end:tomsk] */
+    rvm_float32_t m = mipp_to_rvm_float32(raw_vector);
+    /* --8<-- [end:to_rvm] */
     int32_t act[DOC_BUF];
     lanes(m, act);
     for (int i = 0; i < MIPP_N_FLOAT32; i++)
         DOC_CHECK(act[i] == (A[i] != 0.f)); /* +0.0f is the only inactive value of A */
 }
 
-/* §6.3: toreg */
-static void toreg(void)
+/* §6.3: to_rvd */
+static void to_rvd(void)
 {
     rvd_float32_t va = mipp_load_float32(A);
     rvd_float32_t vb = mipp_load_float32(B);
-    /* --8<-- [start:toreg] */
+    /* --8<-- [start:to_rvd] */
     rvm_float32_t m = mipp_cmpeq_float32(va, vb);
-    rvd_float32_t mask_vector = mipp_toreg_float32(m);
-    /* --8<-- [end:toreg] */
+    rvd_float32_t mask_vector = mipp_to_rvd_float32(m);
+    /* --8<-- [end:to_rvd] */
     uint32_t bits[DOC_BUF];
     mipp_storeu_float32(OUT, mask_vector);
     memcpy(bits, OUT, sizeof(bits));
@@ -151,16 +151,16 @@ static void toreg(void)
         DOC_CHECK(bits[i] == (A[i] == B[i] ? 0xFFFFFFFFu : 0u));
 }
 
-/* §6.4: blend */
-static void blend(void)
+/* §6.4: select */
+static void select_example(void)
 {
     rvd_float32_t if_true = mipp_load_float32(A);
     rvd_float32_t if_false = mipp_load_float32(B);
     rvm_float32_t m = mipp_cmplt_float32(if_true, if_false);
-    /* --8<-- [start:blend] */
+    /* --8<-- [start:select] */
     // Arguments: mask, if_true, if_false
-    rvd_float32_t chosen = mipp_blend_float32(m, if_true, if_false);
-    /* --8<-- [end:blend] */
+    rvd_float32_t chosen = mipp_select_float32(m, if_true, if_false);
+    /* --8<-- [end:select] */
     mipp_storeu_float32(OUT, chosen);
     for (int i = 0; i < MIPP_N_FLOAT32; i++)
         DOC_CHECK(OUT[i] == (A[i] < B[i] ? A[i] : B[i]));
@@ -204,9 +204,9 @@ int main(void)
     variants();
     mask_algebra();
     cast_k();
-    tomsk();
-    toreg();
-    blend();
+    to_rvm();
+    to_rvd();
+    select_example();
     set_k();
     lmul2();
     return doc_status();

@@ -67,12 +67,6 @@
             "_{{ instr_name }}_{{ isa_dt_par.msk_short }}(m0.m, m1.m);"
         ]
     },
-    "blend": {
-        "format": "short",
-        "code": [
-            "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext }}(m0.m, r1.r, r0.r);"
-        ]
-    },
     "cast": {
         "format": "short",
         "code": [
@@ -225,6 +219,12 @@
         "format": "short",
         "code": [
             "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(p0, m0.m, r0.r, r1.r, 8);"
+        ]
+    },
+    "select": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext }}(m0.m, r1.r, r0.r);"
         ]
     },
     "set-16": {

@@ -106,26 +106,26 @@ static void cast_k()
         DOC_CHECK(m_int[i] == (A[i] < B[i]));
 }
 
-// §6.2: tomsk
-static void tomsk()
+// §6.2: to_rvm
+static void to_rvm()
 {
     const float* ptr = A;
-    // --8<-- [start:tomsk]
+    // --8<-- [start:to_rvm]
     mipp::Rvd<float> raw_vector = mipp::load_obj<float>(ptr);
-    mipp::Rvm<float> m = mipp::tomsk(raw_vector);
-    // --8<-- [end:tomsk]
+    mipp::Rvm<float> m = mipp::to_rvm(raw_vector);
+    // --8<-- [end:to_rvm]
     for (int i = 0; i < mipp::Rvm<float>::N(); i++)
         DOC_CHECK(m[i] == (A[i] != 0.f)); // +0.0f is the only inactive value of A
 }
 
-// §6.3: toreg
-static void toreg()
+// §6.3: to_rvd
+static void to_rvd()
 {
     mipp::Rvd<float> va(A), vb(B);
-    // --8<-- [start:toreg]
+    // --8<-- [start:to_rvd]
     mipp::Rvm<float> m = (va == vb);
-    mipp::Rvd<float> mask_vector = mipp::toreg(m);
-    // --8<-- [end:toreg]
+    mipp::Rvd<float> mask_vector = mipp::to_rvd(m);
+    // --8<-- [end:to_rvd]
     for (int i = 0; i < mipp::Rvd<float>::N(); i++) {
         uint32_t bits;
         const float f = mask_vector[i];
@@ -134,15 +134,15 @@ static void toreg()
     }
 }
 
-// §6.4: blend
-static void blend()
+// §6.4: select
+static void select_example()
 {
     mipp::Rvd<float> if_true(A), if_false(B);
     mipp::Rvm<float> m = (if_true < if_false);
-    // --8<-- [start:blend]
+    // --8<-- [start:select]
     // Arguments: mask, if_true, if_false
-    mipp::Rvd<float> chosen = mipp::blend(m, if_true, if_false);
-    // --8<-- [end:blend]
+    mipp::Rvd<float> chosen = mipp::select(m, if_true, if_false);
+    // --8<-- [end:select]
     for (int i = 0; i < mipp::Rvd<float>::N(); i++)
         DOC_CHECK(chosen[i] == (A[i] < B[i] ? A[i] : B[i]));
 }
@@ -183,9 +183,9 @@ int main()
     using_m();
     mask_algebra();
     cast_k();
-    tomsk();
-    toreg();
-    blend();
+    to_rvm();
+    to_rvd();
+    select_example();
     set_k();
     lmul2();
     return doc_status();

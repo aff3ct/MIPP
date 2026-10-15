@@ -182,28 +182,6 @@
             "if": "defined(__AVX512BW__)"
         }
     ],
-    "blend": [
-        {
-            "instr_name": "blend",
-            "datatypes": [
-                "float64",
-                "float32",
-                "int64",
-                "int32"
-            ],
-            "template": "blend",
-            "if": "(defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__))"
-        },
-        {
-            "instr_name": "blend",
-            "datatypes": [
-                "int8",
-                "int16"
-            ],
-            "template": "blend",
-            "if": "defined(__AVX512BW__)"
-        }
-    ],
     "cast": [
         {
             "instr_name": "cast",
@@ -983,6 +961,28 @@
             "template": "scatter_mask_32",
             "if": "defined(__AVX512F__)",
             "version": "mask"
+        }
+    ],
+    "select": [
+        {
+            "instr_name": "blend",
+            "datatypes": [
+                "float64",
+                "float32",
+                "int64",
+                "int32"
+            ],
+            "template": "select",
+            "if": "(defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__))"
+        },
+        {
+            "instr_name": "blend",
+            "datatypes": [
+                "int8",
+                "int16"
+            ],
+            "template": "select",
+            "if": "defined(__AVX512BW__)"
         }
     ],
     "set": [

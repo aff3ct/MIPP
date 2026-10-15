@@ -338,7 +338,7 @@
     ],
     "hw_mask": true,
     "hw_mask_extract_via_store": true,
-    "hw_mask_requires_toreg": true,
+    "hw_mask_requires_to_rvd": true,
     "info_names": [
         { "name": "RVV1.0" }
     ],

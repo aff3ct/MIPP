@@ -942,7 +942,7 @@ Explore hardware acceleration matrices by instruction set architecture:
 ---
 
 !!! tip "Looking for a Specific Function?"
-    If you want to check the status or prototypes for a particular operation (like `add`, `mul`, or `blend`), browse the [**API Reference**](../funcs_support/index.md) where every function page displays an interactive architecture matrix.
+    If you want to check the status or prototypes for a particular operation (like `add`, `mul`, or `select`), browse the [**API Reference**](../funcs_support/index.md) where every function page displays an interactive architecture matrix.
 """, file=f)
 
 

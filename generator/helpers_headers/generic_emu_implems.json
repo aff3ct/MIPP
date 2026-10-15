@@ -188,40 +188,6 @@
             "template_ref": "tpl_generic_emu.atanh_f64"
         }
     ],
-    "blend": [
-        {
-            "datatypes": [
-                "int64",
-                "int32",
-                "uint64",
-                "uint32"
-            ],
-            "preferred_simd_ext": [
-                "avx"
-            ],
-            "template_ref": "tpl_generic_emu.blend_via_float_emu"
-        },
-        {
-            "datatypes": [
-                "int16",
-                "int8",
-                "uint16",
-                "uint8"
-            ],
-            "preferred_simd_ext": [
-                "avx"
-            ],
-            "template_ref": "tpl_generic_emu.blend_via_andnot_ps_emu"
-        },
-        {
-            "instr_name": "blend",
-            "datatypes": "all_uint",
-            "preferred_simd_ext": [
-                "avx512"
-            ],
-            "template_ref": "tpl_generic_emu.blend_via_int_emu"
-        }
-    ],
     "cast": [
         {
             "instr_name": "cast",
@@ -1049,6 +1015,40 @@
             "template_ref": "tpl_generic_emu.round_int"
         }
     ],
+    "select": [
+        {
+            "datatypes": [
+                "int64",
+                "int32",
+                "uint64",
+                "uint32"
+            ],
+            "preferred_simd_ext": [
+                "avx"
+            ],
+            "template_ref": "tpl_generic_emu.select_via_float_emu"
+        },
+        {
+            "datatypes": [
+                "int16",
+                "int8",
+                "uint16",
+                "uint8"
+            ],
+            "preferred_simd_ext": [
+                "avx"
+            ],
+            "template_ref": "tpl_generic_emu.select_via_andnot_ps_emu"
+        },
+        {
+            "instr_name": "select",
+            "datatypes": "all_uint",
+            "preferred_simd_ext": [
+                "avx512"
+            ],
+            "template_ref": "tpl_generic_emu.select_via_int_emu"
+        }
+    ],
     "set": [
         {
             "datatypes": "all_64bit",
@@ -1406,7 +1406,7 @@
             "template_ref": "tpl_generic_emu.testz_2"
         }
     ],
-    "tomsk": [
+    "to_rvd": [
         {
             "datatypes": "all_datatypes",
             "preferred_simd_ext": [
@@ -1417,10 +1417,10 @@
                 "rvv",
                 "sve"
             ],
-            "template_ref": "tpl_generic_emu.tomsk_emu"
+            "template_ref": "tpl_generic_emu.to_rvd_emu"
         }
     ],
-    "toreg": [
+    "to_rvm": [
         {
             "datatypes": "all_datatypes",
             "preferred_simd_ext": [
@@ -1431,7 +1431,7 @@
                 "rvv",
                 "sve"
             ],
-            "template_ref": "tpl_generic_emu.toreg_emu"
+            "template_ref": "tpl_generic_emu.to_rvm_emu"
         }
     ],
     "xorb": [

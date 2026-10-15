@@ -379,7 +379,7 @@ def audit_and_validate_implementation_levels(isa, implems, implems_emu):
                 if dep_name:
                     first_word = dep_name.split()[0]
                     if first_word not in ["if", "else", "endif", "for", "endfor"]:
-                        if dep_name not in ["r", "m", "v", "N", "cast", "cast_k", "toreg", "tomsk"] and not dep_name.startswith("{"):
+                        if dep_name not in ["r", "m", "v", "N", "cast", "cast_k", "to_rvd", "to_rvm"] and not dep_name.startswith("{"):
                             deps.add(dep_name)
         return deps
 
@@ -389,7 +389,7 @@ def audit_and_validate_implementation_levels(isa, implems, implems_emu):
         clean_code = re.sub(r"%[^%\n]+%", "", code)
         clean_code = re.sub(r"\{\{[^}]*\}\}", "JINJA", clean_code)
         calls = re.findall(r"\b([a-zA-Z0-9_]+)\s*\(", clean_code)
-        ignore = {"if", "for", "while", "switch", "return", "defined", "sizeof", "cast", "toreg", "tomsk", "cast_k"}
+        ignore = {"if", "for", "while", "switch", "return", "defined", "sizeof", "cast", "to_rvd", "to_rvm", "cast_k"}
         useful_calls = [c for c in calls if c.lower() not in ignore and "cast" not in c.lower()]
         return len(useful_calls)
 

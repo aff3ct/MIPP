@@ -66,19 +66,6 @@
             "if": "defined(__AVX2__)"
         }
     ],
-    "blend": [
-        {
-            "instr_name": "blendv",
-            "datatypes": "all_float",
-            "template": "blend_float"
-        },
-        {
-            "instr_name": "blendv",
-            "datatypes": "all_int_uint",
-            "template": "blend_int",
-            "if": "defined(__AVX2__)"
-        }
-    ],
     "cast": [
         {
             "instr_name": "cast",
@@ -440,6 +427,19 @@
             "template": "arith_1arg"
         }
     ],
+    "select": [
+        {
+            "instr_name": "blendv",
+            "datatypes": "all_float",
+            "template": "select_float"
+        },
+        {
+            "instr_name": "blendv",
+            "datatypes": "all_int_uint",
+            "template": "select_int",
+            "if": "defined(__AVX2__)"
+        }
+    ],
     "set": [
         {
             "datatypes": [
@@ -608,10 +608,10 @@
             "template": "testz_1arg"
         }
     ],
-    "toreg": [
+    "to_rvd": [
         {
             "datatypes": "all_datatypes",
-            "template": "toreg",
+            "template": "to_rvd",
             "skip_audit_level": true,
             "skip_audit_level_reason": "zero-overhead struct field copy for full-vector masks"
         }

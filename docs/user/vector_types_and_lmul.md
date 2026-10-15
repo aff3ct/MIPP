@@ -218,7 +218,7 @@ MIPP provides three conversions between data vectors. They differ in what they p
 | **`cvt`** | Converts the value of each element to another type **of the same width**. | `mipp_cvt_[src]_[dst]_[lmul](v)` | `mipp::cvt_[dst](v)` | `mipp::cvt<T_DST>(v)` |
 | **`wcvt`** | Converts the value of the elements of the **lower half** to the type **twice as wide**. | `mipp_wcvt_[src]_[dst]_[lmul](v)` | `mipp::wcvt_[dst](v)` | `mipp::wcvt<T_DST>(v)` |
 
-The three keep the `LMUL` of their input. Masks have their own reinterpretation, `cast_k` (see [Masking Semantics §6.1](masking_semantics.md#61-strong-mask-typing-cast_k-mask-to-mask-conversion)), and masks convert to and from data vectors with `toreg` / `tomsk` ([§6.2](masking_semantics.md#62-tomsk-data-vector-to-mask), [§6.3](masking_semantics.md#63-toreg-mask-to-data-vector)).
+The three keep the `LMUL` of their input. Masks have their own reinterpretation, `cast_k` (see [Masking Semantics §6.1](masking_semantics.md#61-strong-mask-typing-cast_k-mask-to-mask-conversion)), and masks convert to and from data vectors with `to_rvd` / `to_rvm` ([§6.2](masking_semantics.md#62-to_rvm-data-vector-to-mask), [§6.3](masking_semantics.md#63-to_rvd-mask-to-data-vector)).
 
 === "C API"
 

@@ -1,10 +1,4 @@
 {
-    "blend": {
-        "format": "short",
-        "code": [
-            "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(m0.m, r0.r, r1.r);"
-        ]
-    },
     "cast": {
         "format": "short",
         "code": [
@@ -15,6 +9,12 @@
         "format": "short",
         "code": [
             " m0.m;"
+        ]
+    },
+    "select": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(m0.m, r0.r, r1.r);"
         ]
     },
     "set0": {

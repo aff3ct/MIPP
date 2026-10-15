@@ -307,7 +307,7 @@
             "return %getfirst<tp>%(rs5);"
         ]
     },
-    "tomsk_float32": {
+    "to_rvm_float32": {
         "format": "long",
         "code": [
             "// bitwise test: a lane is active if at least one bit is set (-0.0f is active)",
@@ -327,7 +327,7 @@
             "return res;"
         ]
     },
-    "tomsk_float64": {
+    "to_rvm_float64": {
         "format": "long",
         "code": [
             "// bitwise test: a lane is active if at least one bit is set (-0.0 is active)",
@@ -347,7 +347,7 @@
             "return res;"
         ]
     },
-    "tomsk_int": {
+    "to_rvm_int": {
         "format": "long",
         "code": [
             "%m<tr>% res;",

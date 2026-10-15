@@ -88,11 +88,11 @@
     "reinterpret": [
         "cast",
         "cast_k",
-        "toreg",
-        "tomsk"
+        "to_rvd",
+        "to_rvm"
     ],
     "selection": [
-        "blend",
+        "select",
         "min",
         "max"
     ],

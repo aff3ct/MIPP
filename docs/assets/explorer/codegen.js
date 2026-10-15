@@ -903,7 +903,7 @@ export function generateFlatSpecializedCode(entry, cfg) {
     matches.forEach(addHelper);
   }
   if (needsMask && !isDedicatedMask) {
-    addHelper("blend");
+    addHelper("select");
     if (mask === "maskz") addHelper("set0");
   } else if (isDedicatedMask) {
     if (mask === "maskz" || (maskedSnip && maskedSnip.includes("set0"))) {
@@ -960,7 +960,7 @@ export function generateFlatSpecializedCode(entry, cfg) {
     (emuAlgo && (emuAlgo.includes("mipp::msk") || emuAlgo.includes("rvm_"))) ||
     allGeneratedCode.includes(maskTypeName) ||
     allGeneratedCode.includes(`rvm_${isa}_${dtMain}`) ||
-    neededHelpers.has("blend") ||
+    neededHelpers.has("select") ||
     order.some((h) => h.startsWith("cmp") || h.endsWith("_k"));
 
   needsMask = mask && mask !== "unmasked";
@@ -1423,28 +1423,28 @@ export function generateFlatSpecializedCode(entry, cfg) {
 
       const mArgMatch = paramList.match(/const\s+(rvm_[a-z0-9_]+_t)\s+m0/);
       const mArgType = mArgMatch ? mArgMatch[1] : maskTypeName;
-      const blendMaskArg = mArgType === maskTypeName ? "m0" : `*(const ${maskTypeName}*)&m0`;
+      const selectMaskArg = mArgType === maskTypeName ? "m0" : `*(const ${maskTypeName}*)&m0`;
 
       if (mask === "mask") {
         lines.push("static inline");
         lines.push(`${baseRetType} ${specializedFuncName}(${paramList}) {`);
-        lines.push(`\t// Level 2 (Generic Emulation): blend`);
+        lines.push(`\t// Level 2 (Generic Emulation): select`);
         lines.push(`\t${baseRetType} op = ${baseFuncName}(${callArgs});`);
-        lines.push(`\treturn mipp_${isa}_blend_${dtMain}_m1(${blendMaskArg}, op, r0);`);
+        lines.push(`\treturn mipp_${isa}_select_${dtMain}_m1(${selectMaskArg}, op, r0);`);
         lines.push(`}`);
       } else if (mask === "maskz") {
         lines.push("static inline");
         lines.push(`${baseRetType} ${specializedFuncName}(${paramList}) {`);
-        lines.push(`\t// Level 2 (Generic Emulation): zero blend`);
+        lines.push(`\t// Level 2 (Generic Emulation): select with zero`);
         lines.push(`\t${baseRetType} op = ${baseFuncName}(${callArgs});`);
-        lines.push(`\treturn mipp_${isa}_blend_${dtMain}_m1(${blendMaskArg}, op, mipp_${isa}_set0_${dtMain}_m1());`);
+        lines.push(`\treturn mipp_${isa}_select_${dtMain}_m1(${selectMaskArg}, op, mipp_${isa}_set0_${dtMain}_m1());`);
         lines.push(`}`);
       } else if (mask === "masks") {
         lines.push("static inline");
         lines.push(`${baseRetType} ${specializedFuncName}(${paramList}) {`);
-        lines.push(`\t// Level 2 (Generic Emulation): source blend`);
+        lines.push(`\t// Level 2 (Generic Emulation): select with rsrc`);
         lines.push(`\t${baseRetType} op = ${baseFuncName}(${callArgs});`);
-        lines.push(`\treturn mipp_${isa}_blend_${dtMain}_m1(${blendMaskArg}, op, rsrc);`);
+        lines.push(`\treturn mipp_${isa}_select_${dtMain}_m1(${selectMaskArg}, op, rsrc);`);
         lines.push(`}`);
       }
     }

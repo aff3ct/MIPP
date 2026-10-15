@@ -11,7 +11,7 @@
 #include <mipp/obj/fun/sub.hpp>
 #include <mipp/obj/fun/mul.hpp>
 #include <mipp/obj/fun/cmplt.hpp>
-#include <mipp/obj/fun/blend.hpp>
+#include <mipp/obj/fun/select.hpp>
 #include <mipp/obj/fun/load.hpp>
 #include <mipp/obj/fun/loadu.hpp>
 #include <mipp/obj/fun/set.hpp>
@@ -84,10 +84,10 @@ int main(int argc, char** argv)
 	assert(d[0] == 7.0f);
 	std::cout << "[PASS] d = mipp::add(mask, a, b) => " << d[0] << std::endl;
 
-	// 6. Blend with mask first: blend(m, a, b)
-	auto e = mipp::blend(mask, a, b);
+	// 6. Select with mask first: select(m, a, b)
+	auto e = mipp::select(mask, a, b);
 	assert(e[0] == a[0]); // mask is true for a < b, so selects a[0] = 2.0
-	std::cout << "[PASS] blend(mask, a, b) => " << e[0] << std::endl;
+	std::cout << "[PASS] select(mask, a, b) => " << e[0] << std::endl;
 
 	// 7. C++ Func interoperability: call mipp::abs (from C++ Func) directly passing Rvd!
 	// Rvd implicitly converts to rvd, and rvd converts to Rvd:

@@ -62,7 +62,7 @@ def clean_code_indentation(s):
 
 def build_obj_prototype(func, interfaces_dict):
     """
-    Generates a representative C++ Object API prototype (e.g. `r0 + r1` or `r0.blend(r1, m0)`).
+    Generates a representative C++ Object API prototype (e.g. `r0 + r1` or `select(m0, r0, r1)`).
     """
     args = interfaces_dict[func]["proto"]["args"]
     ret = interfaces_dict[func]["proto"]["ret"]

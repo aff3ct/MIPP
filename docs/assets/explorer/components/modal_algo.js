@@ -406,9 +406,9 @@ export function renderAlgoModal(modalData) {
       if (currentMask === "mask") {
         codeLines.push(`// ${sectionIdx++}. Predicated Execution Layer (Blend Preservation)`);
         codeLines.push(`${retType1} ${specFuncName1}(${specParams1}) {`);
-        codeLines.push(`    // Level 2 (Generic Emulation): blend`);
+        codeLines.push(`    // Level 2 (Generic Emulation): select`);
         codeLines.push(`    ${retType1} op = mipp::${entry.name}(${callArgs});`);
-        codeLines.push(`    return mipp::blend(m0, op, ${argNames[0]}); // Inactive lanes preserve ${argNames[0]}`);
+        codeLines.push(`    return mipp::select(m0, op, ${argNames[0]}); // Inactive lanes preserve ${argNames[0]}`);
         codeLines.push(`}`);
       } else if (currentMask === "maskz") {
         codeLines.push(`// ${sectionIdx++}. Predicated Execution Layer (Zeroing False Lanes)`);
@@ -418,15 +418,15 @@ export function renderAlgoModal(modalData) {
         if (isRvmReturn) {
           codeLines.push(`    return mipp::andb_k(op, m0); // Inactive lanes set to zero`);
         } else {
-          codeLines.push(`    return mipp::andb(mipp::toreg(m0), op); // Inactive lanes set to zero`);
+          codeLines.push(`    return mipp::andb(mipp::to_rvd(m0), op); // Inactive lanes set to zero`);
         }
         codeLines.push(`}`);
       } else if (currentMask === "masks") {
         codeLines.push(`// ${sectionIdx++}. Predicated Execution Layer (Source Register Preservation)`);
         codeLines.push(`${retType1} ${specFuncName1}(${specParams1}) {`);
-        codeLines.push(`    // Level 2 (Generic Emulation): blend`);
+        codeLines.push(`    // Level 2 (Generic Emulation): select`);
         codeLines.push(`    ${retType1} op = mipp::${entry.name}(${callArgs});`);
-        codeLines.push(`    return mipp::blend(m0, op, src); // Inactive lanes preserve src`);
+        codeLines.push(`    return mipp::select(m0, op, src); // Inactive lanes preserve src`);
         codeLines.push(`}`);
       }
     } else {

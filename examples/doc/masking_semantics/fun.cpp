@@ -25,7 +25,7 @@ template <typename T, int LMUL = 1, typename MASK>
 static void lanes(MASK m, int32_t* out)
 {
     T r[DOC_BUF];
-    mipp::storeu(r, mipp::blend(m, mipp::set1<T, LMUL>(1), mipp::set0<T, LMUL>()));
+    mipp::storeu(r, mipp::select(m, mipp::set1<T, LMUL>(1), mipp::set0<T, LMUL>()));
     for (int i = 0; i < (int)mipp::N<T, LMUL>(); i++)
         out[i] = r[i] != 0;
 }
@@ -122,29 +122,29 @@ static void cast_k()
         DOC_CHECK(act[i] == (A[i] < B[i]));
 }
 
-// §6.2: tomsk
-static void tomsk()
+// §6.2: to_rvm
+static void to_rvm()
 {
     const float* ptr = A;
-    // --8<-- [start:tomsk]
+    // --8<-- [start:to_rvm]
     mipp::rvd<float> raw_vector = mipp::load<float>(ptr);
-    mipp::rvm<float> m = mipp::tomsk(raw_vector);
-    // --8<-- [end:tomsk]
+    mipp::rvm<float> m = mipp::to_rvm(raw_vector);
+    // --8<-- [end:to_rvm]
     int32_t act[DOC_BUF];
     lanes<float>(m, act);
     for (int i = 0; i < (int)mipp::N<float>(); i++)
         DOC_CHECK(act[i] == (A[i] != 0.f)); // +0.0f is the only inactive value of A
 }
 
-// §6.3: toreg
-static void toreg()
+// §6.3: to_rvd
+static void to_rvd()
 {
     mipp::rvd<float> va = mipp::load<float>(A);
     mipp::rvd<float> vb = mipp::load<float>(B);
-    // --8<-- [start:toreg]
+    // --8<-- [start:to_rvd]
     mipp::rvm<float> m = mipp::cmpeq(va, vb);
-    mipp::rvd<float> mask_vector = mipp::toreg(m);
-    // --8<-- [end:toreg]
+    mipp::rvd<float> mask_vector = mipp::to_rvd(m);
+    // --8<-- [end:to_rvd]
     uint32_t bits[DOC_BUF];
     mipp::storeu(OUT, mask_vector);
     std::memcpy(bits, OUT, sizeof(bits));
@@ -152,16 +152,16 @@ static void toreg()
         DOC_CHECK(bits[i] == (A[i] == B[i] ? 0xFFFFFFFFu : 0u));
 }
 
-// §6.4: blend
-static void blend()
+// §6.4: select
+static void select_example()
 {
     mipp::rvd<float> if_true = mipp::load<float>(A);
     mipp::rvd<float> if_false = mipp::load<float>(B);
     mipp::rvm<float> m = mipp::cmplt(if_true, if_false);
-    // --8<-- [start:blend]
+    // --8<-- [start:select]
     // Arguments: mask, if_true, if_false
-    mipp::rvd<float> chosen = mipp::blend(m, if_true, if_false);
-    // --8<-- [end:blend]
+    mipp::rvd<float> chosen = mipp::select(m, if_true, if_false);
+    // --8<-- [end:select]
     mipp::storeu(OUT, chosen);
     for (int i = 0; i < (int)mipp::N<float>(); i++)
         DOC_CHECK(OUT[i] == (A[i] < B[i] ? A[i] : B[i]));
@@ -205,9 +205,9 @@ int main()
     variants();
     mask_algebra();
     cast_k();
-    tomsk();
-    toreg();
-    blend();
+    to_rvm();
+    to_rvd();
+    select_example();
     set_k();
     lmul2();
     return doc_status();

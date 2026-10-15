@@ -49,7 +49,6 @@ MIPPv1 provided a set of multi-stride interleaving and deinterleaving primitives
 ### 1.6. Reductions, Aliases & Diagnostics
 - [ ] `reduction<T, OP>`: Higher-order template reduction engine evaluating arbitrary associative binary operators (`OP`) across vectors and raw array buffers.
 - [ ] `sum`: Reduction alias for horizontal addition (`hadd`).
-- [ ] `select`: Semantic alias mapping to `blend`.
 - [ ] `sat`: Dynamic clamping of vector elements between runtime scalar bounds $[min, max]$ (distinct from MIPPv2 `adds`/`subs` type-boundary saturation).
 - [ ] `dump`: Formatted debug printing of vector and mask register contents to standard output streams.
 
@@ -62,7 +61,8 @@ MIPPv1 provided a set of multi-stride interleaving and deinterleaving primitives
 | `mipp::pack<T1, T2>`, `low`, `high` | `wcvt` / planned `ncvt` & $\text{LDIV}$ | Active design harmonization to unify widening/narrowing with fractional register sub-views ($\text{LDIV} / LMUL=-2$). |
 | `mipp::sat(r, min, max)` | `adds`, `subs` | Replaced ad-hoc clamping with hardware saturated arithmetic instructions (`vsadd.vv`, `vqadd`, `_mm_adds_epi16`). |
 | Mask arrays `bool[N]` | Strongly typed `rvm<T>` / `rvm_*_t` | Eliminates raw boolean unpacking overhead; masks match hardware opmask or full-vector representations. |
-| `mipp::toreg<N>(m)` | `toreg(m)` / `tomsk(r)` | Dedicated bidirectional conversion primitives with exact truthiness and bit-expansion semantics. |
+| `mipp::toreg<N>(m)` | `to_rvd(m)` / `to_rvm(r)` | Dedicated bidirectional conversion primitives with exact truthiness and bit-expansion semantics. |
+| `mipp::blend(r1, r2, m)` | `select(m, r1, r2)` | Renamed after the operation (`m ? r1 : r2`), mask first as in every masked MIPPv2 function. |
 
 ---
 
@@ -102,7 +102,7 @@ The MIPPv2 C++ Object Layer ([`include/mipp_obj.hpp`](file:///home/ivan/Files/st
   - Masked execution modes (`Masked`, `Zero-Masked`, `Source-Masked`) are not yet integrated into class methods or operator syntax.
   - **Expression Templates for Conditional Selections (Exploratory)**:
     - While C++ does not allow overloading the literal `cond ? a : b` ternary operator, explore lazy expression templates (e.g., `select(mask, a + b, src)` or `where(mask, expr)`).
-    - When an arithmetic operation is detected inside a selection branch, compile directly into a native masked instruction (e.g., `mipp::add<mipp::S>(mask, src, a, b)`) instead of executing an unmasked arithmetic operation followed by a separate `blend`. Fall back to `blend` when hardware predication is unavailable.
+    - When an arithmetic operation is detected inside a selection branch, compile directly into a native masked instruction (e.g., `mipp::add<mipp::S>(mask, src, a, b)`) instead of executing an unmasked arithmetic operation followed by a separate `select`. Fall back to `select` when hardware predication is unavailable.
 - [ ] **Length Multiplier (LMUL) Integration & Vector-Length Flexibility**:
   - While template signatures accept `LMUL`, full member operator definitions for multi-register groupings ($LMUL=2, 4, 8$) and fractional half-registers ($LMUL=-2$) need verification and helper trait integration.
 - [ ] **Broadcasting & Mixed-Type Assignment Operators**:
@@ -118,7 +118,7 @@ The header and documentation generation pipeline requires developer tools to ana
 
 - [ ] **Minimal ISA Implementation Subset Analyzer**:
   - Implement a CLI tool / generator query to compute the minimal irreducible subset of Level 0/1 functions that must be implemented for a given ISA target to eliminate all Level 3 (scalar fallback) degradations across the entire library.
-  - Identify optimal implementation order based on transitive dependency fan-out (e.g., implementing `cmpeq`, `blend`, and `set0` first unlocks generic Level 2 implementations for dozens of derived operations).
+  - Identify optimal implementation order based on transitive dependency fan-out (e.g., implementing `cmpeq`, `select`, and `set0` first unlocks generic Level 2 implementations for dozens of derived operations).
 - [ ] **Transitive Dependency Graph Visualizer**:
   - Implement a tool to export the full directed acyclic graph (DAG) of prerequisites for any function, datatype, and masking variant on a specified ISA.
   - Support exporting dependency graphs to Graphviz DOT diagram format.

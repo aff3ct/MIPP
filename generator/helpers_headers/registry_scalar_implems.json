@@ -273,16 +273,6 @@
           ]
         }
     ],
-    "blend": [
-        {
-            "type": "element-wide",
-            "datatypes": "all_defs",
-            "mask_variants": [],
-            "implem": [
-                "res.r[i] = m0.m[i] ? r0.r[i] : r1.r[i];"
-            ]
-        }
-    ],
     "cast": [
         {
             "type": "vector-wide",
@@ -1149,6 +1139,16 @@
               ]
           }
       ],
+    "select": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "res.r[i] = m0.m[i] ? r0.r[i] : r1.r[i];"
+            ]
+        }
+    ],
       "set": [
           {
               "type": "element-wide",
@@ -1421,7 +1421,19 @@
             ]
         }
     ],
-    "tomsk": [
+    "to_rvd": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "mask_variants": [],
+            "implem": [
+                "%r<tr>% res;",
+                "BIT_CAST_N(res.r, m0.m, %N<tr>%);",
+                "return res;"
+            ]
+        }
+    ],
+    "to_rvm": [
         {
             "type": "vector-wide",
             "datatypes": "all_defs",
@@ -1431,18 +1443,6 @@
                 "BIT_CAST_N(res.m, r0.r, %N<tr>%);",
                 "for (size_t i = 0; i < %N<tr>%; i++)",
                 "\tres.m[i] = res.m[i] ? (%v<c:uint|b:tr>%)-1 : 0;",
-                "return res;"
-            ]
-        }
-    ],
-    "toreg": [
-        {
-            "type": "vector-wide",
-            "datatypes": "all_defs",
-            "mask_variants": [],
-            "implem": [
-                "%r<tr>% res;",
-                "BIT_CAST_N(res.r, m0.m, %N<tr>%);",
                 "return res;"
             ]
         }

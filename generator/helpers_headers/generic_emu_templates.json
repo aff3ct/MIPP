@@ -3,7 +3,7 @@
         "format": "long",
         "code": [
             "%r<tp>% opp_r0 = %sub<tp>%( %set0<tp>%(), r0 );",
-            "return %blend<tp>%(%cmplt<tp>%(r0, %set0<tp>%()), opp_r0, r0);"
+            "return %select<tp>%(%cmplt<tp>%(r0, %set0<tp>%()), opp_r0, r0);"
         ]
     },
     "abs_float": {
@@ -23,9 +23,9 @@
             "%m<tp>% small_range_mask = %cmplt<tp>%(abs_x, %set1<tp>%(0.5f));",
             "%r<tp>% x2_branch0 = %mul<tp>%(input_x, input_x);",
             "%r<tp>% x2_branch1 = %mul<tp>%(%sub<tp>%(%set1<tp>%(1.0f), abs_x), %set1<tp>%(0.5f));",
-            "%r<tp>% x2 = %blend<tp>%(small_range_mask, x2_branch0, x2_branch1);",
-            "%r<tp>% x = %blend<tp>%(small_range_mask, abs_x, %sqrt<tp>%(x2));",
-            "x = %blend<tp>%(%cmpeq<tp>%(abs_x, %set1<tp>%(1.0f)), %set0<tp>%( ), x);",
+            "%r<tp>% x2 = %select<tp>%(small_range_mask, x2_branch0, x2_branch1);",
+            "%r<tp>% x = %select<tp>%(small_range_mask, abs_x, %sqrt<tp>%(x2));",
+            "x = %select<tp>%(%cmpeq<tp>%(abs_x, %set1<tp>%(1.0f)), %set0<tp>%( ), x);",
             "",
             "/* 2. Minimax Polynomial Evaluation */",
             "%r<tp>% poly_eval = %fmadd<tp>%(%set1<tp>%(0.04197454825f), x2, %set1<tp>%(0.02424046025f));",
@@ -41,9 +41,9 @@
             "%r<tp>% y_op2 = %add<tp>%(y_term1, y_term2);",
             "%r<tp>% branch_large = %sub<tp>%(%set1<tp>%(3.1415926535897932f/2), y_op2);",
             "x = %add<tp>%(x, poly_eval);",
-            "%r<tp>% result = %blend<tp>%(small_range_mask, branch_large, %mul<tp>%(%set1<tp>%(2.0f), x));",
+            "%r<tp>% result = %select<tp>%(small_range_mask, branch_large, %mul<tp>%(%set1<tp>%(2.0f), x));",
             "%m<tp>% neg_input_mask = %andnb_k<tp>%(small_range_mask, %cmplt<tp>%(input_x, %set0<tp>%( )));",
-            "return %blend<tp>%(neg_input_mask, %sub<tp>%(%set1<tp>%(3.1415927410125732422f), result), result);"
+            "return %select<tp>%(neg_input_mask, %sub<tp>%(%set1<tp>%(3.1415927410125732422f), result), result);"
         ]
     },
     "acos_f64": {
@@ -56,9 +56,9 @@
             "%m<tp>% small_range_mask = %cmplt<tp>%(abs_x, %set1<tp>%(0.5));",
             "%r<tp>% x2_branch0 = %mul<tp>%(input_x, input_x);",
             "%r<tp>% x2_branch1 = %mul<tp>%(%sub<tp>%(%set1<tp>%(1.0), abs_x), %set1<tp>%(0.5));",
-            "%r<tp>% x2 = %blend<tp>%(small_range_mask, x2_branch0, x2_branch1);",
-            "%r<tp>% x = %blend<tp>%(small_range_mask, abs_x, %sqrt<tp>%(x2));",
-            "x = %blend<tp>%(%cmpeq<tp>%(abs_x, %set1<tp>%(1.0)), %set0<tp>%( ), x);",
+            "%r<tp>% x2 = %select<tp>%(small_range_mask, x2_branch0, x2_branch1);",
+            "%r<tp>% x = %select<tp>%(small_range_mask, abs_x, %sqrt<tp>%(x2));",
+            "x = %select<tp>%(%cmpeq<tp>%(abs_x, %set1<tp>%(1.0)), %set0<tp>%( ), x);",
             "",
             "/* 2. Minimax Polynomial Evaluation (POLY16) */",
             "%r<tp>% x4 = %mul<tp>%(x2, x2);",
@@ -87,9 +87,9 @@
             "%r<tp>% y_op2 = %add<tp>%(y_term1, y_term2);",
             "%r<tp>% branch_large = %sub<tp>%(%set1<tp>%(3.141592653589793238462643383279502884/2), y_op2);",
             "x = %add<tp>%(x, poly_eval);",
-            "%r<tp>% result = %blend<tp>%(small_range_mask, branch_large, %mul<tp>%(%set1<tp>%(2.0f), x));",
+            "%r<tp>% result = %select<tp>%(small_range_mask, branch_large, %mul<tp>%(%set1<tp>%(2.0f), x));",
             "%m<tp>% neg_input_mask = %andnb_k<tp>%(small_range_mask, %cmplt<tp>%(input_x, %set0<tp>%( )));",
-            "return %blend<tp>%(neg_input_mask, %sub<tp>%(%set1<tp>%(3.141592653589793116), result), result);"
+            "return %select<tp>%(neg_input_mask, %sub<tp>%(%set1<tp>%(3.141592653589793116), result), result);"
         ]
     },
     "acosh_f32": {
@@ -101,19 +101,19 @@
             "%m<tp>% lt_one_mask = %cmplt<tp>%(input_x, %set1<tp>%(1.0f));",
             "%m<tp>% eq_one_mask = %cmpeq<tp>%(input_x, %set1<tp>%(1.0f));",
             "%m<tp>% gt_one_mask = %cmpgt<tp>%(input_x, %set1<tp>%(1.0f));",
-            "%r<tp>% safe_x = %blend<tp>%(gt_one_mask, input_x, %set1<tp>%(1.0f));",
+            "%r<tp>% safe_x = %select<tp>%(gt_one_mask, input_x, %set1<tp>%(1.0f));",
             "",
             "/* 2. Branch Calculation & Logarithmic Term Evaluation */",
             "%r<tp>% inv_x = %div<tp>%(%set1<tp>%(1.0f), safe_x);",
             "%r<tp>% sqrt_gt = %mul<tp>%(input_x, %sqrt<tp>%(%sub<tp>%(%set1<tp>%(1.0f), %mul<tp>%(inv_x, inv_x))));",
             "%r<tp>% sqrt_le = %sqrt<tp>%(%mul<tp>%(%add<tp>%(input_x, %set1<tp>%(1.0f)), %sub<tp>%(input_x, %set1<tp>%(1.0f))));",
-            "%r<tp>% sqrt_term = %blend<tp>%(gt_one_mask, sqrt_gt, sqrt_le);",
+            "%r<tp>% sqrt_term = %select<tp>%(gt_one_mask, sqrt_gt, sqrt_le);",
             "%r<tp>% arg_log = %add<tp>%(input_x, sqrt_term);",
             "",
             "/* 3. Logarithm Computation & Boundary Blending */",
             "%r<tp>% res_log = %log<tp>%(arg_log);",
-            "%r<tp>% result = %blend<tp>%(eq_one_mask, %set0<tp>%( ), res_log);",
-            "return %blend<tp>%(lt_one_mask, %set1<tp>%(0.0f/0.0f), result);"
+            "%r<tp>% result = %select<tp>%(eq_one_mask, %set0<tp>%( ), res_log);",
+            "return %select<tp>%(lt_one_mask, %set1<tp>%(0.0f/0.0f), result);"
         ]
     },
     "acosh_f64": {
@@ -125,28 +125,28 @@
             "%m<tp>% lt_one_mask = %cmplt<tp>%(input_x, %set1<tp>%(1.0));",
             "%m<tp>% eq_one_mask = %cmpeq<tp>%(input_x, %set1<tp>%(1.0));",
             "%m<tp>% gt_one_mask = %cmpgt<tp>%(input_x, %set1<tp>%(1.0));",
-            "%r<tp>% safe_x = %blend<tp>%(gt_one_mask, input_x, %set1<tp>%(1.0));",
+            "%r<tp>% safe_x = %select<tp>%(gt_one_mask, input_x, %set1<tp>%(1.0));",
             "",
             "/* 2. Branch Calculation & Logarithmic Term Evaluation */",
             "%r<tp>% inv_x = %div<tp>%(%set1<tp>%(1.0), safe_x);",
             "%r<tp>% sqrt_gt = %mul<tp>%(input_x, %sqrt<tp>%(%sub<tp>%(%set1<tp>%(1.0), %mul<tp>%(inv_x, inv_x))));",
             "%r<tp>% sqrt_le = %sqrt<tp>%(%mul<tp>%(%add<tp>%(input_x, %set1<tp>%(1.0)), %sub<tp>%(input_x, %set1<tp>%(1.0))));",
-            "%r<tp>% sqrt_term = %blend<tp>%(gt_one_mask, sqrt_gt, sqrt_le);",
+            "%r<tp>% sqrt_term = %select<tp>%(gt_one_mask, sqrt_gt, sqrt_le);",
             "%r<tp>% arg_log = %add<tp>%(input_x, sqrt_term);",
             "",
             "/* 3. Logarithm Computation & Boundary Blending */",
             "%r<tp>% res_log = %log<tp>%(arg_log);",
-            "%r<tp>% result = %blend<tp>%(eq_one_mask, %set0<tp>%( ), res_log);",
-            "return %blend<tp>%(lt_one_mask, %set1<tp>%(0.0/0.0), result);"
+            "%r<tp>% result = %select<tp>%(eq_one_mask, %set0<tp>%( ), res_log);",
+            "return %select<tp>%(lt_one_mask, %set1<tp>%(0.0/0.0), result);"
         ]
     },
     "andb_k_emu": {
         "format": "long",
         "code": [
-            "%r<tp>% tmp1 = %toreg<tp>%(m0);",
-            "%r<tp>% tmp2 = %toreg<tp>%(m1);",
+            "%r<tp>% tmp1 = %to_rvd<tp>%(m0);",
+            "%r<tp>% tmp2 = %to_rvd<tp>%(m1);",
             "%r<tp>% res = %andb<tp>%(tmp1, tmp2);",
-            "return %tomsk<tp>%(res);"
+            "return %to_rvm<tp>%(res);"
         ]
     },
     "andnb_emu": {
@@ -170,10 +170,10 @@
     "andnb_k_emu": {
         "format": "long",
         "code": [
-            "%r<tp>% tmp1 = %toreg<tp>%(m0);",
-            "%r<tp>% tmp2 = %toreg<tp>%(m1);",
+            "%r<tp>% tmp1 = %to_rvd<tp>%(m0);",
+            "%r<tp>% tmp2 = %to_rvd<tp>%(m1);",
             "%r<tp>% res = %andnb<tp>%(tmp1, tmp2);",
-            "return %tomsk<tp>%(res);"
+            "return %to_rvm<tp>%(res);"
         ]
     },
     "arith_2args_u": {
@@ -195,8 +195,8 @@
             "%m<tp>% small_range_mask = %cmplt<tp>%(abs_x, %set1<tp>%(0.5f));",
             "%r<tp>% x2_branch0 = %mul<tp>%(input_x, input_x);",
             "%r<tp>% x2_branch1 = %mul<tp>%(%sub<tp>%(%set1<tp>%(1.0f), abs_x), %set1<tp>%(0.5f));",
-            "%r<tp>% x2 = %blend<tp>%(small_range_mask, x2_branch0, x2_branch1);",
-            "%r<tp>% x = %blend<tp>%(small_range_mask, abs_x, %sqrt<tp>%(x2));",
+            "%r<tp>% x2 = %select<tp>%(small_range_mask, x2_branch0, x2_branch1);",
+            "%r<tp>% x = %select<tp>%(small_range_mask, abs_x, %sqrt<tp>%(x2));",
             "",
             "/* 2. Minimax Polynomial Evaluation */",
             "%r<tp>% poly_eval = %fmadd<tp>%(%set1<tp>%(0.04197454825f), x2, %set1<tp>%(0.02424046025f));",
@@ -206,7 +206,7 @@
             "poly_eval = %fmadd<tp>%(poly_eval, %mul<tp>%(x, x2), x);",
             "",
             "/* 3. Range Reconstruction & Sign Restoration */",
-            "%r<tp>% result = %blend<tp>%(small_range_mask, poly_eval, %fmadd<tp>%(poly_eval, %set1<tp>%(-2.0f), %set1<tp>%(3.141592653589793238462643383279502884f/2)));",
+            "%r<tp>% result = %select<tp>%(small_range_mask, poly_eval, %fmadd<tp>%(poly_eval, %set1<tp>%(-2.0f), %set1<tp>%(3.141592653589793238462643383279502884f/2)));",
             "%r<tp>% sign_bit = %andb<tp>%(input_x, %set1<tp>%(-0.0f));",
             "return %xorb<tp>%(result, sign_bit);"
         ]
@@ -221,8 +221,8 @@
             "%m<tp>% small_range_mask = %cmplt<tp>%(abs_x, %set1<tp>%(0.5));",
             "%r<tp>% x2_branch0 = %mul<tp>%(input_x, input_x);",
             "%r<tp>% x2_branch1 = %mul<tp>%(%sub<tp>%(%set1<tp>%(1.0), abs_x), %set1<tp>%(0.5));",
-            "%r<tp>% x2 = %blend<tp>%(small_range_mask, x2_branch0, x2_branch1);",
-            "%r<tp>% x = %blend<tp>%(small_range_mask, abs_x, %sqrt<tp>%(x2));",
+            "%r<tp>% x2 = %select<tp>%(small_range_mask, x2_branch0, x2_branch1);",
+            "%r<tp>% x = %select<tp>%(small_range_mask, abs_x, %sqrt<tp>%(x2));",
             "",
             "/* 2. Minimax Polynomial Evaluation (POLY16) */",
             "%r<tp>% x4 = %mul<tp>%(x2, x2);",
@@ -246,7 +246,7 @@
             "poly_eval = %fmadd<tp>%(poly_eval, %mul<tp>%(x, x2), x);",
             "",
             "/* 3. Range Reconstruction & Sign Restoration */",
-            "%r<tp>% result = %blend<tp>%(small_range_mask, poly_eval, %fmadd<tp>%(poly_eval, %set1<tp>%(-2.0f), %set1<tp>%(3.141592653589793238462643383279502884/2)));",
+            "%r<tp>% result = %select<tp>%(small_range_mask, poly_eval, %fmadd<tp>%(poly_eval, %set1<tp>%(-2.0f), %set1<tp>%(3.141592653589793238462643383279502884/2)));",
             "%r<tp>% sign_bit = %andb<tp>%(input_x, %set1<tp>%(-0.0));",
             "return %xorb<tp>%(result, sign_bit);"
         ]
@@ -259,13 +259,13 @@
             "/* 1. Input Processing & Range Validation */",
             "%r<tp>% abs_x = %abs<tp>%(input_x);",
             "%m<tp>% gt_one_mask = %cmpgt<tp>%(abs_x, %set1<tp>%(1.0f));",
-            "%r<tp>% safe_x = %blend<tp>%(gt_one_mask, abs_x, %set1<tp>%(1.0f));",
+            "%r<tp>% safe_x = %select<tp>%(gt_one_mask, abs_x, %set1<tp>%(1.0f));",
             "",
             "/* 2. Branch Calculation & Logarithmic Term Evaluation */",
             "%r<tp>% inv_x = %div<tp>%(%set1<tp>%(1.0f), safe_x);",
             "%r<tp>% sqrt_gt = %mul<tp>%(abs_x, %sqrt<tp>%(%fmadd<tp>%(inv_x, inv_x, %set1<tp>%(1.0f))));",
             "%r<tp>% sqrt_le = %sqrt<tp>%(%fmadd<tp>%(abs_x, abs_x, %set1<tp>%(1.0f)));",
-            "%r<tp>% sqrt_term = %blend<tp>%(gt_one_mask, sqrt_gt, sqrt_le);",
+            "%r<tp>% sqrt_term = %select<tp>%(gt_one_mask, sqrt_gt, sqrt_le);",
             "%r<tp>% arg_log = %add<tp>%(abs_x, sqrt_term);",
             "",
             "/* 3. Logarithm Computation & Sign Restoration */",
@@ -282,13 +282,13 @@
             "/* 1. Input Processing & Range Validation */",
             "%r<tp>% abs_x = %abs<tp>%(input_x);",
             "%m<tp>% gt_one_mask = %cmpgt<tp>%(abs_x, %set1<tp>%(1.0));",
-            "%r<tp>% safe_x = %blend<tp>%(gt_one_mask, abs_x, %set1<tp>%(1.0));",
+            "%r<tp>% safe_x = %select<tp>%(gt_one_mask, abs_x, %set1<tp>%(1.0));",
             "",
             "/* 2. Branch Calculation & Logarithmic Term Evaluation */",
             "%r<tp>% inv_x = %div<tp>%(%set1<tp>%(1.0), safe_x);",
             "%r<tp>% sqrt_gt = %mul<tp>%(abs_x, %sqrt<tp>%(%fmadd<tp>%(inv_x, inv_x, %set1<tp>%(1.0))));",
             "%r<tp>% sqrt_le = %sqrt<tp>%(%fmadd<tp>%(abs_x, abs_x, %set1<tp>%(1.0)));",
-            "%r<tp>% sqrt_term = %blend<tp>%(gt_one_mask, sqrt_gt, sqrt_le);",
+            "%r<tp>% sqrt_term = %select<tp>%(gt_one_mask, sqrt_gt, sqrt_le);",
             "%r<tp>% arg_log = %add<tp>%(abs_x, sqrt_term);",
             "",
             "/* 3. Logarithm Computation & Sign Restoration */",
@@ -306,13 +306,13 @@
             "",
             "/* 1. Minimax Core Kernel evaluation atan2kf(abs_y, input_x) */",
             "%m<tp>% neg_x_mask = %cmplt<tp>%(input_x, %set0<tp>%( ));",
-            "%r<c:int|b:32>% quadrant_idx_i = %blend<c:int|b:32>%(%cast_k<tp,c:int|b:32>%(neg_x_mask), %set1<c:int|b:32>%(-2), %set0<c:int|b:32>%( ));",
+            "%r<c:int|b:32>% quadrant_idx_i = %select<c:int|b:32>%(%cast_k<tp,c:int|b:32>%(neg_x_mask), %set1<c:int|b:32>%(-2), %set0<c:int|b:32>%( ));",
             "%r<tp>% abs_x = %abs<tp>%(input_x);",
             "%m<tp>% lt_xy_mask = %cmplt<tp>%(abs_x, abs_y);",
             "%r<c:int|b:32>% q_plus1 = %add<c:int|b:32>%(quadrant_idx_i, %set1<c:int|b:32>%(1));",
-            "quadrant_idx_i = %blend<c:int|b:32>%(%cast_k<tp,c:int|b:32>%(lt_xy_mask), q_plus1, quadrant_idx_i);",
+            "quadrant_idx_i = %select<c:int|b:32>%(%cast_k<tp,c:int|b:32>%(lt_xy_mask), q_plus1, quadrant_idx_i);",
             "",
-            "%r<tp>% ratio_s = %blend<tp>%(lt_xy_mask, %neg<tp>%(abs_x), abs_y);",
+            "%r<tp>% ratio_s = %select<tp>%(lt_xy_mask, %neg<tp>%(abs_x), abs_y);",
             "%r<tp>% ratio_t = %max<tp>%(abs_x, abs_y);",
             "ratio_s = %div<tp>%(ratio_s, ratio_t);",
             "ratio_t = %mul<tp>%(ratio_s, ratio_s);",
@@ -340,23 +340,23 @@
             "%m<tp>% inf_zero_x_mask = %orb_k<tp>%(is_inf_x_mask, is_zero_x_mask);",
             "%r<tp>% pi_2 = %set1<tp>%(1.57079632679489661923f);",
             "%r<tp>% m1 = %xorb<tp>%(pi_2, sign_x_bit);",
-            "%r<tp>% visinf2_1 = %andb<tp>%(%toreg<tp>%(is_inf_x_mask), %orb<tp>%(sign_x_bit, m1));",
+            "%r<tp>% visinf2_1 = %andb<tp>%(%to_rvd<tp>%(is_inf_x_mask), %orb<tp>%(sign_x_bit, m1));",
             "%r<tp>% sub1 = %sub<tp>%(pi_2, visinf2_1);",
-            "result = %blend<tp>%(inf_zero_x_mask, sub1, result);",
+            "result = %select<tp>%(inf_zero_x_mask, sub1, result);",
             "",
             "/* 4. Handle Special Input Bounds: input_y == inf */",
             "%m<tp>% is_inf_y_mask = %cmpeq<tp>%(abs_y, %set1<tp>%(1.0f/0.0f));",
             "%r<tp>% pi_4 = %set1<tp>%(0.78539816339744830962f);",
             "%r<tp>% m2 = %xorb<tp>%(pi_4, sign_x_bit);",
-            "%r<tp>% visinf2_2 = %andb<tp>%(%toreg<tp>%(is_inf_x_mask), %orb<tp>%(sign_x_bit, m2));",
+            "%r<tp>% visinf2_2 = %andb<tp>%(%to_rvd<tp>%(is_inf_x_mask), %orb<tp>%(sign_x_bit, m2));",
             "%r<tp>% sub2 = %sub<tp>%(pi_2, visinf2_2);",
-            "result = %blend<tp>%(is_inf_y_mask, sub2, result);",
+            "result = %select<tp>%(is_inf_y_mask, sub2, result);",
             "",
             "/* 5. Handle Special Input Bounds: input_y == 0 */",
             "%m<tp>% is_zero_y_mask = %cmpeq<tp>%(input_y, %set0<tp>%( ));",
             "%r<tp>% pi_val = %set1<tp>%(3.14159265358979323846f);",
-            "%r<tp>% val3 = %andb<tp>%(%toreg<tp>%(neg_x_mask), pi_val);",
-            "result = %blend<tp>%(is_zero_y_mask, val3, result);",
+            "%r<tp>% val3 = %andb<tp>%(%to_rvd<tp>%(neg_x_mask), pi_val);",
+            "result = %select<tp>%(is_zero_y_mask, val3, result);",
             "",
             "/* 6. Restore Sign of Input Y and Preserve NaN */",
             "%r<tp>% sign_y_bit = %andb<tp>%(input_y, %set1<tp>%(-0.0f));",
@@ -364,7 +364,7 @@
             "%m<tp>% is_nan_x = %notb_k<tp>%(%cmpeq<tp>%(input_x, input_x));",
             "%m<tp>% is_nan_y = %notb_k<tp>%(%cmpeq<tp>%(input_y, input_y));",
             "%m<tp>% is_nan_mask = %orb_k<tp>%(is_nan_x, is_nan_y);",
-            "return %blend<tp>%(is_nan_mask, %set1<tp>%(0.0f/0.0f), result);"
+            "return %select<tp>%(is_nan_mask, %set1<tp>%(0.0f/0.0f), result);"
         ]
     },
     "atan2_f64": {
@@ -376,13 +376,13 @@
             "",
             "/* 1. Minimax Core Kernel evaluation atan2k(abs_y, input_x) */",
             "%m<tp>% neg_x_mask = %cmplt<tp>%(input_x, %set0<tp>%( ));",
-            "%r<c:int|b:64>% quadrant_idx_i = %blend<c:int|b:64>%(%cast_k<tp,c:int|b:64>%(neg_x_mask), %set1<c:int|b:64>%(-2), %set0<c:int|b:64>%( ));",
+            "%r<c:int|b:64>% quadrant_idx_i = %select<c:int|b:64>%(%cast_k<tp,c:int|b:64>%(neg_x_mask), %set1<c:int|b:64>%(-2), %set0<c:int|b:64>%( ));",
             "%r<tp>% abs_x = %abs<tp>%(input_x);",
             "%m<tp>% lt_xy_mask = %cmplt<tp>%(abs_x, abs_y);",
             "%r<c:int|b:64>% q_plus1 = %add<c:int|b:64>%(quadrant_idx_i, %set1<c:int|b:64>%(1));",
-            "quadrant_idx_i = %blend<c:int|b:64>%(%cast_k<tp,c:int|b:64>%(lt_xy_mask), q_plus1, quadrant_idx_i);",
+            "quadrant_idx_i = %select<c:int|b:64>%(%cast_k<tp,c:int|b:64>%(lt_xy_mask), q_plus1, quadrant_idx_i);",
             "",
-            "%r<tp>% ratio_s = %blend<tp>%(lt_xy_mask, %neg<tp>%(abs_x), abs_y);",
+            "%r<tp>% ratio_s = %select<tp>%(lt_xy_mask, %neg<tp>%(abs_x), abs_y);",
             "%r<tp>% ratio_t = %max<tp>%(abs_x, abs_y);",
             "ratio_s = %div<tp>%(ratio_s, ratio_t);",
             "ratio_t = %mul<tp>%(ratio_s, ratio_s);",
@@ -410,23 +410,23 @@
             "%m<tp>% inf_zero_x_mask = %orb_k<tp>%(is_inf_x_mask, is_zero_x_mask);",
             "%r<tp>% pi_2 = %set1<tp>%(1.57079632679489661923);",
             "%r<tp>% m1 = %xorb<tp>%(pi_2, sign_x_bit);",
-            "%r<tp>% visinf2_1 = %andb<tp>%(%toreg<tp>%(is_inf_x_mask), %orb<tp>%(sign_x_bit, m1));",
+            "%r<tp>% visinf2_1 = %andb<tp>%(%to_rvd<tp>%(is_inf_x_mask), %orb<tp>%(sign_x_bit, m1));",
             "%r<tp>% sub1 = %sub<tp>%(pi_2, visinf2_1);",
-            "result = %blend<tp>%(inf_zero_x_mask, sub1, result);",
+            "result = %select<tp>%(inf_zero_x_mask, sub1, result);",
             "",
             "/* 4. Handle Special Input Bounds: input_y == inf */",
             "%m<tp>% is_inf_y_mask = %cmpeq<tp>%(abs_y, %set1<tp>%(1.0/0.0));",
             "%r<tp>% pi_4 = %set1<tp>%(0.78539816339744830962);",
             "%r<tp>% m2 = %xorb<tp>%(pi_4, sign_x_bit);",
-            "%r<tp>% visinf2_2 = %andb<tp>%(%toreg<tp>%(is_inf_x_mask), %orb<tp>%(sign_x_bit, m2));",
+            "%r<tp>% visinf2_2 = %andb<tp>%(%to_rvd<tp>%(is_inf_x_mask), %orb<tp>%(sign_x_bit, m2));",
             "%r<tp>% sub2 = %sub<tp>%(pi_2, visinf2_2);",
-            "result = %blend<tp>%(is_inf_y_mask, sub2, result);",
+            "result = %select<tp>%(is_inf_y_mask, sub2, result);",
             "",
             "/* 5. Handle Special Input Bounds: input_y == 0 */",
             "%m<tp>% is_zero_y_mask = %cmpeq<tp>%(input_y, %set0<tp>%( ));",
             "%r<tp>% pi_val = %set1<tp>%(3.14159265358979323846);",
-            "%r<tp>% val3 = %andb<tp>%(%toreg<tp>%(neg_x_mask), pi_val);",
-            "result = %blend<tp>%(is_zero_y_mask, val3, result);",
+            "%r<tp>% val3 = %andb<tp>%(%to_rvd<tp>%(neg_x_mask), pi_val);",
+            "result = %select<tp>%(is_zero_y_mask, val3, result);",
             "",
             "/* 6. Restore Sign of Input Y and Preserve NaN */",
             "%r<tp>% sign_y_bit = %andb<tp>%(input_y, %set1<tp>%(-0.0));",
@@ -434,7 +434,7 @@
             "%m<tp>% is_nan_x = %notb_k<tp>%(%cmpeq<tp>%(input_x, input_x));",
             "%m<tp>% is_nan_y = %notb_k<tp>%(%cmpeq<tp>%(input_y, input_y));",
             "%m<tp>% is_nan_mask = %orb_k<tp>%(is_nan_x, is_nan_y);",
-            "return %blend<tp>%(is_nan_mask, %set1<tp>%(0.0/0.0), result);"
+            "return %select<tp>%(is_nan_mask, %set1<tp>%(0.0/0.0), result);"
         ]
     },
     "atan_f32": {
@@ -445,11 +445,11 @@
             "/* 1. Range Validation & Transform Branching */",
             "%r<c:int|b:32>% sign_bit_i = %andb<c:int|b:32>%(%cast<tp,c:int|b:32>%(input_x), %set1<c:int|b:32>%(0x80000000));",
             "%m<c:int|b:32>% sign_bit_mask = %cmpeq<c:int|b:32>%(sign_bit_i, %set1<c:int|b:32>%(0x80000000));",
-            "%r<c:int|b:32>% quadrant_idx_i = %blend<c:int|b:32>%(%cast_k<c:int|b:32,c:int|b:32>%(sign_bit_mask), %set1<c:int|b:32>%(2), %set0<c:int|b:32>%( ));",
+            "%r<c:int|b:32>% quadrant_idx_i = %select<c:int|b:32>%(%cast_k<c:int|b:32,c:int|b:32>%(sign_bit_mask), %set1<c:int|b:32>%(2), %set0<c:int|b:32>%( ));",
             "%r<tp>% abs_x = %abs<tp>%(input_x);",
             "%m<tp>% gt_one_mask = %cmplt<tp>%(%set1<tp>%(1.0f), abs_x);",
-            "quadrant_idx_i = %blend<c:int|b:32>%(%cast_k<tp,c:int|b:32>%(gt_one_mask), %add<c:int|b:32>%(quadrant_idx_i, %set1<c:int|b:32>%(1)), quadrant_idx_i);",
-            "%r<tp>% ratio_s = %blend<tp>%(gt_one_mask, %div<tp>%(%set1<tp>%(1.0f), abs_x), abs_x);",
+            "quadrant_idx_i = %select<c:int|b:32>%(%cast_k<tp,c:int|b:32>%(gt_one_mask), %add<c:int|b:32>%(quadrant_idx_i, %set1<c:int|b:32>%(1)), quadrant_idx_i);",
+            "%r<tp>% ratio_s = %select<tp>%(gt_one_mask, %div<tp>%(%set1<tp>%(1.0f), abs_x), abs_x);",
             "",
             "/* 2. Minimax Polynomial Evaluation (POLY8) */",
             "%r<tp>% x2 = %mul<tp>%(ratio_s, ratio_s);",
@@ -466,9 +466,9 @@
             "",
             "/* 3. Quadrant Branch Reconstruction & Sign Restoration */",
             "%m<c:int|b:32>% quadrant_odd_mask = %cmpeq<c:int|b:32>%(%andb<c:int|b:32>%(quadrant_idx_i, %set1<c:int|b:32>%(1)), %set1<c:int|b:32>%(1));",
-            "res_t = %blend<tp>%(%cast_k<c:int|b:32,tp>%(quadrant_odd_mask), %sub<tp>%(%set1<tp>%(1.57079632679489661923f), res_t), res_t);",
+            "res_t = %select<tp>%(%cast_k<c:int|b:32,tp>%(quadrant_odd_mask), %sub<tp>%(%set1<tp>%(1.57079632679489661923f), res_t), res_t);",
             "%m<c:int|b:32>% sign_flip_mask = %cmpeq<c:int|b:32>%(%andb<c:int|b:32>%(quadrant_idx_i, %set1<c:int|b:32>%(2)), %set1<c:int|b:32>%(2));",
-            "%r<tp>% sign_mask = %andb<tp>%(%toreg<tp>%(%cast_k<c:int|b:32,tp>%(sign_flip_mask)), %set1<tp>%(-0.0f));",
+            "%r<tp>% sign_mask = %andb<tp>%(%to_rvd<tp>%(%cast_k<c:int|b:32,tp>%(sign_flip_mask)), %set1<tp>%(-0.0f));",
             "return %xorb<tp>%(res_t, sign_mask);"
         ]
     },
@@ -480,11 +480,11 @@
             "/* 1. Range Validation & Transform Branching */",
             "%r<c:int|b:64>% sign_bit_i = %andb<c:int|b:64>%(%cast<tp,c:int|b:64>%(input_x), %set1<c:int|b:64>%(0x8000000000000000));",
             "%m<c:int|b:64>% sign_bit_mask = %cmpeq<c:int|b:64>%(sign_bit_i, %set1<c:int|b:64>%(0x8000000000000000));",
-            "%r<c:int|b:64>% quadrant_idx_i = %blend<c:int|b:64>%(%cast_k<c:int|b:64,c:int|b:64>%(sign_bit_mask), %set1<c:int|b:64>%(2), %set0<c:int|b:64>%( ));",
+            "%r<c:int|b:64>% quadrant_idx_i = %select<c:int|b:64>%(%cast_k<c:int|b:64,c:int|b:64>%(sign_bit_mask), %set1<c:int|b:64>%(2), %set0<c:int|b:64>%( ));",
             "%r<tp>% abs_x = %abs<tp>%(input_x);",
             "%m<tp>% gt_one_mask = %cmplt<tp>%(%set1<tp>%(1.0), abs_x);",
-            "quadrant_idx_i = %blend<c:int|b:64>%(%cast_k<tp,c:int|b:64>%(gt_one_mask), %add<c:int|b:64>%(quadrant_idx_i, %set1<c:int|b:64>%(1)), quadrant_idx_i);",
-            "%r<tp>% ratio_s = %blend<tp>%(gt_one_mask, %div<tp>%(%set1<tp>%(1.0), abs_x), abs_x);",
+            "quadrant_idx_i = %select<c:int|b:64>%(%cast_k<tp,c:int|b:64>%(gt_one_mask), %add<c:int|b:64>%(quadrant_idx_i, %set1<c:int|b:64>%(1)), quadrant_idx_i);",
+            "%r<tp>% ratio_s = %select<tp>%(gt_one_mask, %div<tp>%(%set1<tp>%(1.0), abs_x), abs_x);",
             "",
             "/* 2. Minimax Polynomial Evaluation (POLY19) */",
             "%r<tp>% t = %mul<tp>%(ratio_s, ratio_s);",
@@ -515,9 +515,9 @@
             "",
             "/* 3. Quadrant Branch Reconstruction & Sign Restoration */",
             "%m<c:int|b:64>% quadrant_odd_mask = %cmpeq<c:int|b:64>%(%andb<c:int|b:64>%(quadrant_idx_i, %set1<c:int|b:64>%(1)), %set1<c:int|b:64>%(1));",
-            "res_t = %blend<tp>%(%cast_k<c:int|b:64,tp>%(quadrant_odd_mask), %sub<tp>%(%set1<tp>%(1.57079632679489661923), res_t), res_t);",
+            "res_t = %select<tp>%(%cast_k<c:int|b:64,tp>%(quadrant_odd_mask), %sub<tp>%(%set1<tp>%(1.57079632679489661923), res_t), res_t);",
             "%m<c:int|b:64>% sign_flip_mask = %cmpeq<c:int|b:64>%(%andb<c:int|b:64>%(quadrant_idx_i, %set1<c:int|b:64>%(2)), %set1<c:int|b:64>%(2));",
-            "%r<tp>% sign_mask = %andb<tp>%(%toreg<tp>%(%cast_k<c:int|b:64,tp>%(sign_flip_mask)), %set1<tp>%(-0.0));",
+            "%r<tp>% sign_mask = %andb<tp>%(%to_rvd<tp>%(%cast_k<c:int|b:64,tp>%(sign_flip_mask)), %set1<tp>%(-0.0));",
             "return %xorb<tp>%(res_t, sign_mask);"
         ]
     },
@@ -559,37 +559,6 @@
             "/* 3. Sign Restoration & Return */",
             "%r<tp>% sign_bit = %andb<tp>%(input_x, %set1<tp>%(-0.0));",
             "return %xorb<tp>%(result, sign_bit);"
-        ]
-    },
-    "blend_via_andnot_ps_emu": {
-        "format": "long",
-        "code": [
-            "%r<c:float|b:32>% rmi = %cast<tp,c:float|b:32>%(%toreg<tp>%(m0));",
-            "%r<c:float|b:32>% r0i = %cast<tp,c:float|b:32>%(r0);",
-            "%r<c:float|b:32>% r1i = %cast<tp,c:float|b:32>%(r1);",
-            "%r<c:float|b:32>% resi = %orb<c:float|b:32>%(%andb<c:float|b:32>%(r0i, rmi), %andnb<c:float|b:32>%(rmi, r1i));",
-            "return %cast<c:float|b:32,tr>%(resi);"
-        ]
-    },
-    "blend_via_float_emu": {
-        "format": "long",
-        "code": [
-            "%r<c:float|b:tp>% r0f = %cast<tp,c:float|b:tp>%(r0);",
-            "%r<c:float|b:tp>% r1f = %cast<tp,c:float|b:tp>%(r1);",
-            "%m<c:float|b:tp>% m0f = %cast_k<tp,c:float|b:tp>%(m0);",
-            "%r<c:float|b:tp>% resf = %blend<c:float|b:tp>%(m0f, r0f, r1f);",
-            "return %cast<c:float|b:tp,tp>%(resf);"
-        ]
-    },
-    "blend_via_int_emu": {
-        "format": "long",
-        "code": [
-            "%r<c:int|b:tp>% tmp0, tmp1;",
-            "tmp0 = %cast<tp,c:int|b:tp>%(r0);",
-            "tmp1 = %cast<tp,c:int|b:tp>%(r1);",
-            "%m<c:int|b:tp>% mtmp = %cast_k<tp,c:int|b:tp>%(m0);",
-            "tmp0 = %blend<c:int|b:tp>%(mtmp, tmp0, tmp1);",
-            "return %cast<c:int|b:tp,tp>%(tmp0);"
         ]
     },
     "cast_float_other": {
@@ -704,7 +673,7 @@
             "/* 2. Quadrant Mask & Sign Bit Computation */",
             "%r<c:int|b:32>% quadrant_mask_i = %sub<c:int|b:32>%(quadrant_idx_i, %set1<c:int|b:32>%(2));",
             "%r<c:int|b:32>% sign_mask_i = %lshift<c:int|b:32>%(%andnb<c:int|b:32>%(quadrant_mask_i, %set1<c:int|b:32>%(4)), 29);",
-            "quadrant_mask_i = %toreg<c:int|b:32>%(%cmpeq<c:int|b:32>%(%andb<c:int|b:32>%(quadrant_mask_i, %set1<c:int|b:32>%(2)), %set0<c:int|b:32>%()));",
+            "quadrant_mask_i = %to_rvd<c:int|b:32>%(%cmpeq<c:int|b:32>%(%andb<c:int|b:32>%(quadrant_mask_i, %set1<c:int|b:32>%(2)), %set0<c:int|b:32>%()));",
             "%r<tp>% sign_bit = %cast<c:int|b:32,tp>%(sign_mask_i);",
             "%r<tp>% poly_mask = %cast<c:int|b:32,tp>%(quadrant_mask_i);",
             "",
@@ -764,15 +733,15 @@
             "\tresult = %fmadd<tp>%(quadrant_high_f, %set1<tp>%(-1.2246467864107188502e-16 * 0.5), result);",
             "\tresult = %fmadd<tp>%(%add<tp>%(quadrant_high, quadrant_high_f), %set1<tp>%(-1.2736634327021899816e-24 * 0.5), result);",
             "",
-            "\tquadrant_idx_i = %blend<c:int|b:64>%(%cast_k<tp,c:int|b:64>%(small_range_mask), quadrant_idx_i, quadrant_high_i);",
-            "\treduced_x = %blend<tp>%(small_range_mask, reduced_x, result);",
+            "\tquadrant_idx_i = %select<c:int|b:64>%(%cast_k<tp,c:int|b:64>%(small_range_mask), quadrant_idx_i, quadrant_high_i);",
+            "\treduced_x = %select<tp>%(small_range_mask, reduced_x, result);",
             "}",
             "",
             "/* 2. Quadrant Sign Adjustment */",
             "%r<tp>% x2 = %mul<tp>%(reduced_x, reduced_x);",
             "%r<c:int|b:64>% quadrant_mask_i = %andb<c:int|b:64>%(quadrant_idx_i, %set1<c:int|b:64>%(2));",
             "%m<c:int|b:64>% quadrant_even_mask = %cmpeq<c:int|b:64>%(quadrant_mask_i, %set0<c:int|b:64>%());",
-            "%r<tp>% quadrant_even_reg = %toreg<tp>%(%cast_k<c:int|b:64,tp>%(quadrant_even_mask));",
+            "%r<tp>% quadrant_even_reg = %to_rvd<tp>%(%cast_k<c:int|b:64,tp>%(quadrant_even_mask));",
             "%r<tp>% sign_bit = %andb<tp>%(quadrant_even_reg, %set1<tp>%(-0.0));",
             "reduced_x = %xorb<tp>%(reduced_x, sign_bit);",
             "",
@@ -807,7 +776,7 @@
             "/* 3. Overflow & Boundary Handling */",
             "%m<tp>% overflow_mask = %cmpgt<tp>%(abs_x, %set1<tp>%(710.0));",
             "%r<tp>% inf_val = %div<tp>%(%set1<tp>%(1.0), %set1<tp>%(0.0));",
-            "return %blend<tp>%(overflow_mask, inf_val, result);"
+            "return %select<tp>%(overflow_mask, inf_val, result);"
         ]
     },
     "div2": {
@@ -852,7 +821,7 @@
             "",
             "%r<tp>% tmp0 = %round<tp>%(fx1);",
             "%m<tp>% mask0 = %cmpgt<tp>%(tmp0, fx1);",
-            "%r<tp>% mask0_reg = %toreg<tp>%(mask0);",
+            "%r<tp>% mask0_reg = %to_rvd<tp>%(mask0);",
             "%r<tp>% mask1 = %andb<tp>%(mask0_reg, one);",
             "%r<tp>% fx2 = %sub<tp>%(tmp0, mask1);",
             "",
@@ -916,7 +885,7 @@
             "",
             "%r<tp>% n0 = %round<tp>%(fx1);",
             "%m<tp>% mask0 = %cmpgt<tp>%(n0, fx1);",
-            "%r<tp>% mask0_reg = %toreg<tp>%(mask0);",
+            "%r<tp>% mask0_reg = %to_rvd<tp>%(mask0);",
             "%r<tp>% mask1 = %andb<tp>%(mask0_reg, one);",
             "%r<tp>% n1 = %sub<tp>%(n0, mask1);",
             "",
@@ -997,7 +966,7 @@
     },
     "get_k": {
         "format": "long",
-        "code": "return %get<tp>%(%toreg<tp>%(m0), v0);"
+        "code": "return %get<tp>%(%to_rvd<tp>%(m0), v0);"
     },
     "getfirst": {
         "format": "long",
@@ -1030,7 +999,7 @@
             "",
             "%r<tp>% zero = %set0<tp>%();",
             "%m<tp>% invalid_mask0 = %cmple<tp>%(x0, zero);",
-            "%r<tp>% invalid_mask = %toreg<tp>%(invalid_mask0);",
+            "%r<tp>% invalid_mask = %to_rvd<tp>%(invalid_mask0);",
             "%r<tp>% x1 = %max<tp>%(x0, min_norm_pos);",
             "",
             "%r<c:int|b:32>% xi = %cast<tp,c:int|b:32>%(x1);",
@@ -1044,7 +1013,7 @@
             "%r<tp>% e1 = %add<tp>%(e0, one);",
             "",
             "%m<tp>% mask0 = %cmplt<tp>%(x3, cephes_SQRTHF);",
-            "%r<tp>% mask_reg = %toreg<tp>%(mask0);",
+            "%r<tp>% mask_reg = %to_rvd<tp>%(mask0);",
             "%r<tp>% tmp0 = %andb<tp>%(x3, mask_reg);",
             "%r<tp>% x4 = %sub<tp>%(x3, one);",
             "%r<tp>% one_mask = %andb<tp>%(one, mask_reg);",
@@ -1110,7 +1079,7 @@
             "",
             "%r<tp>% zero = %set0<tp>%();",
             "%m<tp>% invalid_mask0 = %cmple<tp>%(x0, zero);",
-            "%r<tp>% invalid_mask = %toreg<tp>%(invalid_mask0);",
+            "%r<tp>% invalid_mask = %to_rvd<tp>%(invalid_mask0);",
             "%r<tp>% x1 = %max<tp>%(x0, min_norm_pos);",
             "",
             "%r<c:int|b:64>% xi = %cast<tp,c:int|b:64>%(x1);",
@@ -1124,7 +1093,7 @@
             "%r<tp>% e1 = %add<tp>%(e0, one);",
             "",
             "%m<tp>% mask0 = %cmplt<tp>%(x3, cephes_SQRTHF);",
-            "%r<tp>% mask_reg = %toreg<tp>%(mask0);",
+            "%r<tp>% mask_reg = %to_rvd<tp>%(mask0);",
             "%r<tp>% tmp0 = %andb<tp>%(x3, mask_reg);",
             "%r<tp>% x4 = %sub<tp>%(x3, one);",
             "%r<tp>% one_mask = %andb<tp>%(one, mask_reg);",
@@ -1175,19 +1144,19 @@
     "logi_m_2args_e": {
         "format": "long",
         "code": [
-            "%r<c:float|b:32>% r0f = %toreg<c:float|b:32>%(%cast_k<tp,c:float|b:32>%(m0));",
-            "%r<c:float|b:32>% r1f = %toreg<c:float|b:32>%(%cast_k<tp,c:float|b:32>%(m1));",
+            "%r<c:float|b:32>% r0f = %to_rvd<c:float|b:32>%(%cast_k<tp,c:float|b:32>%(m0));",
+            "%r<c:float|b:32>% r1f = %to_rvd<c:float|b:32>%(%cast_k<tp,c:float|b:32>%(m1));",
             "%r<c:float|b:32>% resf = %{{ instr_name }}<c:float|b:32>%(r0f, r1f);",
-            "return %tomsk<tp>%(%cast<c:float|b:32,tp>%(resf));"
+            "return %to_rvm<tp>%(%cast<c:float|b:32,tp>%(resf));"
         ]
     },
     "max_emu": {
         "format": "long",
-        "code": "return %blend<tp>%(%cmpgt<tp>%(r0, r1), r0, r1);"
+        "code": "return %select<tp>%(%cmpgt<tp>%(r0, r1), r0, r1);"
     },
     "min_emu": {
         "format": "long",
-        "code": "return %blend<tp>%(%cmplt<tp>%(r0, r1), r0, r1);"
+        "code": "return %select<tp>%(%cmplt<tp>%(r0, r1), r0, r1);"
     },
     "msb-16": {
         "format": "long",
@@ -1241,17 +1210,17 @@
         "format": "long",
         "code": [
             "%r<c:int>% ones = %set1<c:int>%(-1);",
-            "%r<c:int>% r0i = %cast<tp,c:int>%(%toreg<tp>%(m0));",
-            "return %tomsk<tp>%(%cast<c:int,tp>%(%andnb<c:int>%(r0i, ones)));"
+            "%r<c:int>% r0i = %cast<tp,c:int>%(%to_rvd<tp>%(m0));",
+            "return %to_rvm<tp>%(%cast<c:int,tp>%(%andnb<c:int>%(r0i, ones)));"
         ]
     },
     "orb_k_emu": {
         "format": "long",
         "code": [
-            "%r<tp>% tmp1 = %toreg<tp>%(m0);",
-            "%r<tp>% tmp2 = %toreg<tp>%(m1);",
+            "%r<tp>% tmp1 = %to_rvd<tp>%(m0);",
+            "%r<tp>% tmp2 = %to_rvd<tp>%(m1);",
             "%r<tp>% res = %orb<tp>%(tmp1, tmp2);",
-            "return %tomsk<tp>%(res);"
+            "return %to_rvm<tp>%(res);"
         ]
     },
     "pow2_f32": {
@@ -1290,6 +1259,37 @@
         "format": "short",
         "code": "r0.r;"
     },
+    "select_via_andnot_ps_emu": {
+        "format": "long",
+        "code": [
+            "%r<c:float|b:32>% rmi = %cast<tp,c:float|b:32>%(%to_rvd<tp>%(m0));",
+            "%r<c:float|b:32>% r0i = %cast<tp,c:float|b:32>%(r0);",
+            "%r<c:float|b:32>% r1i = %cast<tp,c:float|b:32>%(r1);",
+            "%r<c:float|b:32>% resi = %orb<c:float|b:32>%(%andb<c:float|b:32>%(r0i, rmi), %andnb<c:float|b:32>%(rmi, r1i));",
+            "return %cast<c:float|b:32,tr>%(resi);"
+        ]
+    },
+    "select_via_float_emu": {
+        "format": "long",
+        "code": [
+            "%r<c:float|b:tp>% r0f = %cast<tp,c:float|b:tp>%(r0);",
+            "%r<c:float|b:tp>% r1f = %cast<tp,c:float|b:tp>%(r1);",
+            "%m<c:float|b:tp>% m0f = %cast_k<tp,c:float|b:tp>%(m0);",
+            "%r<c:float|b:tp>% resf = %select<c:float|b:tp>%(m0f, r0f, r1f);",
+            "return %cast<c:float|b:tp,tp>%(resf);"
+        ]
+    },
+    "select_via_int_emu": {
+        "format": "long",
+        "code": [
+            "%r<c:int|b:tp>% tmp0, tmp1;",
+            "tmp0 = %cast<tp,c:int|b:tp>%(r0);",
+            "tmp1 = %cast<tp,c:int|b:tp>%(r1);",
+            "%m<c:int|b:tp>% mtmp = %cast_k<tp,c:int|b:tp>%(m0);",
+            "tmp0 = %select<c:int|b:tp>%(mtmp, tmp0, tmp1);",
+            "return %cast<c:int|b:tp,tp>%(tmp0);"
+        ]
+    },
     "set": {
         "format": "long",
         "code": "return %loadu<tp>%(vals);"
@@ -1300,14 +1300,14 @@
     },
     "set0_k": {
         "format": "long",
-        "code": "return %tomsk<tp>%(%set1<tp>%(0));"
+        "code": "return %to_rvm<tp>%(%set1<tp>%(0));"
     },
     "set1_k-16": {
         "format": "long",
         "code": [
             "%r<c:int>% tmp1 = %set1<c:int>%(v0 ? (int16_t)0xFFFF : (int16_t)0);",
             "%r<tp>% tmp2 = %cast<c:int,tp>%(tmp1);",
-            "return %tomsk<tp>%(tmp2);"
+            "return %to_rvm<tp>%(tmp2);"
         ]
     },
     "set1_k-32": {
@@ -1315,7 +1315,7 @@
         "code": [
             "%r<c:int>% tmp1 = %set1<c:int>%(v0 ? (int32_t)0xFFFFFFFF : (int32_t)0);",
             "%r<tp>% tmp2 = %cast<c:int,tp>%(tmp1);",
-            "return %tomsk<tp>%(tmp2);"
+            "return %to_rvm<tp>%(tmp2);"
         ]
     },
     "set1_k-64": {
@@ -1323,7 +1323,7 @@
         "code": [
             "%r<c:int>% tmp1 = %set1<c:int>%(v0 ? (int64_t)0xFFFFFFFFFFFFFFFF : (int64_t)0);",
             "%r<tp>% tmp2 = %cast<c:int,tp>%(tmp1);",
-            "return %tomsk<tp>%(tmp2);"
+            "return %to_rvm<tp>%(tmp2);"
         ]
     },
     "set1_k-8": {
@@ -1331,7 +1331,7 @@
         "code": [
             "%r<c:int>% tmp1 = %set1<c:int>%(v0 ? (int8_t)0xFF : (int8_t)0);",
             "%r<tp>% tmp2 = %cast<c:int,tp>%(tmp1);",
-            "return %tomsk<tp>%(tmp2);"
+            "return %to_rvm<tp>%(tmp2);"
         ]
     },
     "set1_u": {
@@ -1350,7 +1350,7 @@
             "\tvals[ 2] ? (uint16_t)0xFFFFU : (uint16_t)0, vals[ 3] ? (uint16_t)0xFFFFU : (uint16_t)0,",
             "\tvals[ 4] ? (uint16_t)0xFFFFU : (uint16_t)0, vals[ 5] ? (uint16_t)0xFFFFU : (uint16_t)0,",
             "\tvals[ 6] ? (uint16_t)0xFFFFU : (uint16_t)0, vals[ 7] ? (uint16_t)0xFFFFU : (uint16_t)0 };",
-            "return %tomsk<tp>%(%cast<c:uint,tp>%(%set<c:uint>%(tab)));"
+            "return %to_rvm<tp>%(%cast<c:uint,tp>%(%set<c:uint>%(tab)));"
         ]
     },
     "set_k-32": {
@@ -1359,7 +1359,7 @@
             "uint32_t tab[%N<tp>%] = {",
             "\tvals[0] ? (uint32_t)0xFFFFFFFFU : (uint32_t)0, vals[1] ? (uint32_t)0xFFFFFFFFU : (uint32_t)0,",
             "\tvals[2] ? (uint32_t)0xFFFFFFFFU : (uint32_t)0, vals[3] ? (uint32_t)0xFFFFFFFFU : (uint32_t)0 };",
-            "return %tomsk<tp>%(%cast<c:uint,tp>%(%set<c:uint>%(tab)));"
+            "return %to_rvm<tp>%(%cast<c:uint,tp>%(%set<c:uint>%(tab)));"
         ]
     },
     "set_k-64": {
@@ -1368,7 +1368,7 @@
             "uint64_t tab[%N<tp>%] = {",
             "\tvals[0] ? (uint64_t)0xFFFFFFFFFFFFFFFFU : (uint64_t)0,",
             "\tvals[1] ? (uint64_t)0xFFFFFFFFFFFFFFFFU : (uint64_t)0 };",
-            "return %tomsk<tp>%(%cast<c:uint,tp>%(%set<c:uint>%(tab)));"
+            "return %to_rvm<tp>%(%cast<c:uint,tp>%(%set<c:uint>%(tab)));"
         ]
     },
     "set_k-8": {
@@ -1379,7 +1379,7 @@
             "\tvals[ 4] ? (uint8_t)0xFFU : (uint8_t)0, vals[ 5] ? (uint8_t)0xFFU : (uint8_t)0, vals[ 6] ? (uint8_t)0xFFU : (uint8_t)0, (uint8_t)vals[ 7] ? (uint8_t)0xFFU : (uint8_t)0,",
             "\tvals[ 8] ? (uint8_t)0xFFU : (uint8_t)0, vals[ 9] ? (uint8_t)0xFFU : (uint8_t)0, vals[10] ? (uint8_t)0xFFU : (uint8_t)0, (uint8_t)vals[11] ? (uint8_t)0xFFU : (uint8_t)0,",
             "\tvals[12] ? (uint8_t)0xFFU : (uint8_t)0, vals[13] ? (uint8_t)0xFFU : (uint8_t)0, vals[14] ? (uint8_t)0xFFU : (uint8_t)0, (uint8_t)vals[15] ? (uint8_t)0xFFU : (uint8_t)0 };",
-            "return %tomsk<tp>%(%cast<c:uint,tp>%(%set<c:uint>%(tab)));"
+            "return %to_rvm<tp>%(%cast<c:uint,tp>%(%set<c:uint>%(tab)));"
         ]
     },
     "set_k-xxf": {
@@ -1393,7 +1393,7 @@
             "for (unsigned i = 0; i < %N<tp>%; i++) {",
             "\ttab[i] = vals[i] ? (%v<c:uint|b:tp>%)~0 : (%v<c:uint|b:tp>%)0;",
             "}",
-            "return %tomsk<tp>%(%cast<c:uint|b:tp,tp>%(%set<c:uint|b:tp>%(tab)));"
+            "return %to_rvm<tp>%(%cast<c:uint|b:tp,tp>%(%set<c:uint|b:tp>%(tab)));"
         ]
     },
     "sin_f32": {
@@ -1415,7 +1415,7 @@
             "sign_bit = %xorb<tp>%(sign_bit, %cast<c:int|b:32,tp>%(sign_mask_i));",
             "%r<c:int|b:32>% sin_quadrant_i = %andb<c:int|b:32>%(quadrant_idx_i, %set1<c:int|b:32>%(2));",
             "%m<c:int|b:32>% sin_quadrant_mask = %cmpeq<c:int|b:32>%(sin_quadrant_i, %set0<c:int|b:32>%( ));",
-            "%r<tp>% poly_mask = %cast<c:int|b:32,tp>%(%toreg<c:int|b:32>%(sin_quadrant_mask));",
+            "%r<tp>% poly_mask = %cast<c:int|b:32,tp>%(%to_rvd<c:int|b:32>%(sin_quadrant_mask));",
             "",
             "%r<tp>% reduced_x = %fmadd<tp>%(quadrant_idx_f, %set1<tp>%(-0.78515625f), abs_x);",
             "reduced_x = %fmadd<tp>%(quadrant_idx_f, %set1<tp>%(-2.4187564849853515625e-4f), reduced_x);",
@@ -1470,15 +1470,15 @@
             "\tresult = %fmadd<tp>%(quadrant_high, %set1<tp>%(-1.2246467864107188502e-16), result);",
             "\tresult = %fmadd<tp>%(quadrant_low, %set1<tp>%(-1.2246467864107188502e-16), result);",
             "\tresult = %fmadd<tp>%(%add<tp>%(quadrant_high, quadrant_low), %set1<tp>%(-1.2736634327021899816e-24), result);",
-            "\tquadrant_idx_i = %blend<c:int|b:64>%(%cast_k<tp,c:int|b:64>%(small_range_mask), quadrant_idx_i, quadrant_high_i);",
-            "\treduced_x = %blend<tp>%(small_range_mask, reduced_x, result);",
+            "\tquadrant_idx_i = %select<c:int|b:64>%(%cast_k<tp,c:int|b:64>%(small_range_mask), quadrant_idx_i, quadrant_high_i);",
+            "\treduced_x = %select<tp>%(small_range_mask, reduced_x, result);",
             "}",
             "",
             "/* 2. Quadrant Sign Adjustment */",
             "%r<tp>% x2 = %mul<tp>%(reduced_x, reduced_x);",
             "%r<c:int|b:64>% quadrant_mask_i = %andb<c:int|b:64>%(quadrant_idx_i, %set1<c:int|b:64>%(1));",
             "%m<c:int|b:64>% quadrant_odd_mask = %cmpeq<c:int|b:64>%(quadrant_mask_i, %set1<c:int|b:64>%(1));",
-            "%r<tp>% quadrant_odd_reg = %toreg<tp>%(%cast_k<c:int|b:64,tp>%(quadrant_odd_mask));",
+            "%r<tp>% quadrant_odd_reg = %to_rvd<tp>%(%cast_k<c:int|b:64,tp>%(quadrant_odd_mask));",
             "%r<tp>% sign_bit = %andb<tp>%(quadrant_odd_reg, %set1<tp>%(-0.0));",
             "reduced_x = %xorb<tp>%(reduced_x, sign_bit);",
             "",
@@ -1498,7 +1498,7 @@
             "",
             "/* 4. Negative Zero Preservation */",
             "%m<tp>% is_neg_zero_mask = %cmpeq<tp>%(input_x, %set1<tp>%(-0.0));",
-            "return %blend<tp>%(is_neg_zero_mask, input_x, result);"
+            "return %select<tp>%(is_neg_zero_mask, input_x, result);"
         ]
     },
     "sinh_f64": {
@@ -1517,7 +1517,7 @@
             "/* 3. Overflow & Boundary Handling */",
             "%m<tp>% overflow_mask = %cmpgt<tp>%(abs_x, %set1<tp>%(710.0));",
             "%r<tp>% inf_val = %div<tp>%(%set1<tp>%(1.0), %set1<tp>%(0.0));",
-            "result = %blend<tp>%(overflow_mask, inf_val, result);",
+            "result = %select<tp>%(overflow_mask, inf_val, result);",
             "",
             "/* 4. Sign Restoration & Return */",
             "%r<tp>% sign_bit = %andb<tp>%(input_x, %set1<tp>%(-0.0));",
@@ -1546,14 +1546,14 @@
             "\tfallback_x = %fmadd<tp>%(quadrant_low_f, %set1<tp>%(-3.1385570764541625977e-07f), fallback_x);",
             "\tfallback_x = %fmadd<tp>%(quadrant_low_f, %set1<tp>%(-6.077100628276710381e-11f), fallback_x);",
             "",
-            "\tquadrant_idx_i = %blend<c:int|b:32>%(%cast_k<tp,c:int|b:32>%(small_range_mask), quadrant_idx_i, quadrant_high_i);",
-            "\treduced_x = %blend<tp>%(small_range_mask, reduced_x, fallback_x);",
+            "\tquadrant_idx_i = %select<c:int|b:32>%(%cast_k<tp,c:int|b:32>%(small_range_mask), quadrant_idx_i, quadrant_high_i);",
+            "\treduced_x = %select<tp>%(small_range_mask, reduced_x, fallback_x);",
             "}",
             "",
             "/* 2. Quadrant Sign Adjustment */",
             "%r<c:int|b:32>% quadrant_odd_i = %andb<c:int|b:32>%(quadrant_idx_i, %set1<c:int|b:32>%(1));",
             "%m<c:int|b:32>% quadrant_odd_mask = %cmpeq<c:int|b:32>%(quadrant_odd_i, %set1<c:int|b:32>%(1));",
-            "%r<tp>% quadrant_odd_reg = %toreg<tp>%(%cast_k<c:int|b:32,tp>%(quadrant_odd_mask));",
+            "%r<tp>% quadrant_odd_reg = %to_rvd<tp>%(%cast_k<c:int|b:32,tp>%(quadrant_odd_mask));",
             "%r<tp>% sign_bit = %andb<tp>%(quadrant_odd_reg, %set1<tp>%(-0.0f));",
             "reduced_x = %xorb<tp>%(reduced_x, sign_bit);",
             "",
@@ -1569,7 +1569,7 @@
             "",
             "/* 4. Reciprocal Blend for Odd Quadrants */",
             "%r<tp>% inv_poly_eval = %div<tp>%(%set1<tp>%(1.0f), poly_eval);",
-            "return %blend<tp>%(%cast_k<c:int|b:32,tp>%(quadrant_odd_mask), inv_poly_eval, poly_eval);"
+            "return %select<tp>%(%cast_k<c:int|b:32,tp>%(quadrant_odd_mask), inv_poly_eval, poly_eval);"
         ]
     },
     "tan_f64": {
@@ -1597,8 +1597,8 @@
             "\tfallback_x = %fmadd<tp>%(quadrant_high, %set1<tp>%(-1.2246467864107188502e-16 * 0.5), fallback_x);",
             "\tfallback_x = %fmadd<tp>%(quadrant_low_f, %set1<tp>%(-1.2246467864107188502e-16 * 0.5), fallback_x);",
             "\tfallback_x = %fmadd<tp>%(%add<tp>%(quadrant_high, quadrant_low_f), %set1<tp>%(-1.2736634327021899816e-24 * 0.5), fallback_x);",
-            "\tquadrant_idx_i = %blend<c:int|b:64>%(%cast_k<tp,c:int|b:64>%(small_range_mask), quadrant_idx_i, %cvt<tp,c:int|b:64>%(quadrant_low_f));",
-            "\treduced_x = %blend<tp>%(small_range_mask, reduced_x, fallback_x);",
+            "\tquadrant_idx_i = %select<c:int|b:64>%(%cast_k<tp,c:int|b:64>%(small_range_mask), quadrant_idx_i, %cvt<tp,c:int|b:64>%(quadrant_low_f));",
+            "\treduced_x = %select<tp>%(small_range_mask, reduced_x, fallback_x);",
             "}",
             "",
             "/* 2. Quadrant Sign Adjustment */",
@@ -1628,8 +1628,8 @@
             "%m<c:int|b:64>% quadrant_odd_mask = %cmpeq<c:int|b:64>%(quadrant_odd_i, %set1<c:int|b:64>%(1));",
             "%m<tp>% quadrant_odd_m = %cast_k<c:int|b:64,tp>%(quadrant_odd_mask);",
             "",
-            "%r<tp>% tan_num = %blend<tp>%(quadrant_odd_m, %neg<tp>%(tan_y), tan_x);",
-            "%r<tp>% tan_den = %blend<tp>%(quadrant_odd_m, tan_x, tan_y);",
+            "%r<tp>% tan_num = %select<tp>%(quadrant_odd_m, %neg<tp>%(tan_y), tan_x);",
+            "%r<tp>% tan_den = %select<tp>%(quadrant_odd_m, tan_x, tan_y);",
             "return %div<tp>%(tan_num, tan_den);"
         ]
     },
@@ -1650,7 +1650,7 @@
             "",
             "/* 3. Saturation & Boundary Handling */",
             "%m<tp>% sat_mask = %cmpgt<tp>%(abs_x, %set1<tp>%(8.664339742f));",
-            "result = %blend<tp>%(sat_mask, %set1<tp>%(1.0f), result);",
+            "result = %select<tp>%(sat_mask, %set1<tp>%(1.0f), result);",
             "",
             "/* 4. Sign Restoration & Return */",
             "%r<tp>% sign_bit = %andb<tp>%(input_x, %set1<tp>%(-0.0f));",
@@ -1674,7 +1674,7 @@
             "",
             "/* 3. Saturation & Boundary Handling */",
             "%m<tp>% sat_mask = %cmpgt<tp>%(abs_x, %set1<tp>%(18.714973875118524));",
-            "result = %blend<tp>%(sat_mask, %set1<tp>%(1.0), result);",
+            "result = %select<tp>%(sat_mask, %set1<tp>%(1.0), result);",
             "",
             "/* 4. Sign Restoration & Return */",
             "%r<tp>% sign_bit = %andb<tp>%(input_x, %set1<tp>%(-0.0));",
@@ -1685,7 +1685,7 @@
         "format": "long",
         "code": [
             "%r<c:int|b:32|m:tp>% r32 = %set1<c:int|b:32|m:tp>%(-1);",
-            "%m<c:int|b:32|m:tp>% m32 = %tomsk<c:int|b:32|m:tp>%(r32);",
+            "%m<c:int|b:32|m:tp>% m32 = %to_rvm<c:int|b:32|m:tp>%(r32);",
             "return %testz<tp>%(m0, %cast_k<c:int|b:32|m:tp,tp>%(m32));"
         ]
     },
@@ -1695,7 +1695,17 @@
             "return %testz_2<b:tp|c:tp|m:tp>%(%andb_k<b:tp|c:tp|m:tp>%(m0, m1));"
         ]
     },
-    "tomsk_emu": {
+    "to_rvd_emu": {
+        "format": "long",
+        "code": [
+            "%r<tr>% res;",
+            "%r<c:int>% zero = %set1<c:int>%(0);",
+            "%r<c:int>% one = %set1<c:int>%(~0);",
+            "res = %cast<c:int,tr>%(%select<c:int>%(%cast_k<tp,c:int>%(m0), one, zero));",
+            "return res;"
+        ]
+    },
+    "to_rvm_emu": {
         "format": "long",
         "code": [
             "%m<tr>% res;",
@@ -1704,23 +1714,13 @@
             "return res;"
         ]
     },
-    "toreg_emu": {
-        "format": "long",
-        "code": [
-            "%r<tr>% res;",
-            "%r<c:int>% zero = %set1<c:int>%(0);",
-            "%r<c:int>% one = %set1<c:int>%(~0);",
-            "res = %cast<c:int,tr>%(%blend<c:int>%(%cast_k<tp,c:int>%(m0), one, zero));",
-            "return res;"
-        ]
-    },
     "xorb_k_emu": {
         "format": "long",
         "code": [
-            "%r<tp>% tmp1 = %toreg<tp>%(m0);",
-            "%r<tp>% tmp2 = %toreg<tp>%(m1);",
+            "%r<tp>% tmp1 = %to_rvd<tp>%(m0);",
+            "%r<tp>% tmp2 = %to_rvd<tp>%(m1);",
             "%r<tp>% res = %xorb<tp>%(tmp1, tmp2);",
-            "return %tomsk<tp>%(res);"
+            "return %to_rvm<tp>%(res);"
         ]
     }
 }

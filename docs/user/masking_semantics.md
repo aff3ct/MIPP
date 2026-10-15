@@ -159,75 +159,75 @@ To convert between mask types, MIPP provides explicit mask casting primitives (`
 #### Semantics
 `cast_k` / `cast_[type]` is **strictly an in-register bit reinterpretation** (e.g., `_mm256_castps_si256`, `__riscv_vreinterpret`, or direct struct assignment) between mask types of matching element bitwidths (e.g. `float32` $\leftrightarrow$ `int32` $\leftrightarrow$ `uint32`, or `float64` $\leftrightarrow$ `int64` $\leftrightarrow$ `uint64`). For data vectors, see [Type Conversions](vector_types_and_lmul.md#5-type-conversions) (`cast`, `cvt`, `wcvt`).
 
-### 6.2. `tomsk` (Data Vector to Mask)
+### 6.2. `to_rvm` (Data Vector to Mask)
 Converts a data vector `rvd<T>` into a mask register `rvm<T>` of the matching type $T$:
 
 === "C API"
 
     ```c
-    --8<-- "examples/doc/masking_semantics/c.c:tomsk"
+    --8<-- "examples/doc/masking_semantics/c.c:to_rvm"
     ```
 
 === "C++ Functional API"
 
     ```cpp
-    --8<-- "examples/doc/masking_semantics/fun.cpp:tomsk"
+    --8<-- "examples/doc/masking_semantics/fun.cpp:to_rvm"
     ```
 
 === "C++ Object API"
 
     ```cpp
-    --8<-- "examples/doc/masking_semantics/obj.cpp:tomsk"
+    --8<-- "examples/doc/masking_semantics/obj.cpp:to_rvm"
     ```
 
-A lane is **active if its element has at least one bit set**, inactive if all its bits are zero. The test is on the bit pattern, not on the value: `-0.0` (sign bit set) and NaN give an active lane, `+0.0` an inactive one. Any input is valid, and the result is always a well-formed mask (on targets that store masks in vector registers, each active lane has all its bits set), so `tomsk(toreg(m))` returns `m` and the mask algebra of [§5](#5-mask-boolean-algebra) applies to the result. The behavior is the same on every target.
+A lane is **active if its element has at least one bit set**, inactive if all its bits are zero. The test is on the bit pattern, not on the value: `-0.0` (sign bit set) and NaN give an active lane, `+0.0` an inactive one. Any input is valid, and the result is always a well-formed mask (on targets that store masks in vector registers, each active lane has all its bits set), so `to_rvm(to_rvd(m))` returns `m` and the mask algebra of [§5](#5-mask-boolean-algebra) applies to the result. The behavior is the same on every target.
 
-The converse does not hold in general: `toreg(tomsk(r))` returns `r` only if each lane of `r` is already `0` or has all its bits set. Any other non-zero lane becomes "all bits set": `1.0f` gives a NaN pattern, the integer `1` gives `-1`.
+The converse does not hold in general: `to_rvd(to_rvm(r))` returns `r` only if each lane of `r` is already `0` or has all its bits set. Any other non-zero lane becomes "all bits set": `1.0f` gives a NaN pattern, the integer `1` gives `-1`.
 
-### 6.3. `toreg` (Mask to Data Vector)
+### 6.3. `to_rvd` (Mask to Data Vector)
 Reinterprets/converts a mask handle `rvm<T>` into a full data vector `rvd<T>` of the matching type $T$ (where active lanes contain all-ones and inactive lanes contain `0`):
 
 === "C API"
 
     ```c
-    --8<-- "examples/doc/masking_semantics/c.c:toreg"
+    --8<-- "examples/doc/masking_semantics/c.c:to_rvd"
     ```
 
 === "C++ Functional API"
 
     ```cpp
-    --8<-- "examples/doc/masking_semantics/fun.cpp:toreg"
+    --8<-- "examples/doc/masking_semantics/fun.cpp:to_rvd"
     ```
 
 === "C++ Object API"
 
     ```cpp
-    --8<-- "examples/doc/masking_semantics/obj.cpp:toreg"
+    --8<-- "examples/doc/masking_semantics/obj.cpp:to_rvd"
     ```
 
-### 6.4. `blend` (Conditional Element Multiplexing)
+### 6.4. `select` (Conditional Element Multiplexing)
 Selects elements between two data vectors according to a mask ($r_0$ when $m_i = 1$, $r_1$ when $m_i = 0$):
 
 $$\text{res}_i = \begin{cases} r0_i & \text{if } m_i = 1 \\ r1_i & \text{if } m_i = 0 \end{cases}$$
 
-The mask `m` is passed as the **first argument**:
+The mask `m` is passed as the **first argument**, and the value for the active lanes comes first: `select(m, r0, r1)` reads as `m ? r0 : r1`. The x86 intrinsic `_mm_blendv_ps(a, b, m)` uses the opposite order (`m ? b : a`).
 
 === "C API"
 
     ```c
-    --8<-- "examples/doc/masking_semantics/c.c:blend"
+    --8<-- "examples/doc/masking_semantics/c.c:select"
     ```
 
 === "C++ Functional API"
 
     ```cpp
-    --8<-- "examples/doc/masking_semantics/fun.cpp:blend"
+    --8<-- "examples/doc/masking_semantics/fun.cpp:select"
     ```
 
 === "C++ Object API"
 
     ```cpp
-    --8<-- "examples/doc/masking_semantics/obj.cpp:blend"
+    --8<-- "examples/doc/masking_semantics/obj.cpp:select"
     ```
 
 ---

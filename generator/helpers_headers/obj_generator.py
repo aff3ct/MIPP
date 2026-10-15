@@ -218,11 +218,11 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
         lines.append("{ return mipp::getfirst(r0.r); }")
         lines.append("")
 
-    # Category 3: Selection (blend)
-    elif fn == "blend":
+    # Category 3: Selection (select)
+    elif fn == "select":
         lines.append("template <typename T, int LMUL = 1>")
-        lines.append("inline Rvd<T, LMUL> blend(const Rvm<T, LMUL>& m0, const Rvd<T, LMUL>& r0, const Rvd<T, LMUL>& r1)")
-        lines.append("{ return Rvd<T, LMUL>(mipp::blend(m0.m, r0.r, r1.r)); }")
+        lines.append("inline Rvd<T, LMUL> select(const Rvm<T, LMUL>& m0, const Rvd<T, LMUL>& r0, const Rvd<T, LMUL>& r1)")
+        lines.append("{ return Rvd<T, LMUL>(mipp::select(m0.m, r0.r, r1.r)); }")
         lines.append("")
 
     # Category 4: Pure mask operations
@@ -318,15 +318,15 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
         lines.append("")
 
     # Category 7: Conversions & reinterprets
-    elif fn == "toreg":
+    elif fn == "to_rvd":
         lines.append("template <typename T, int LMUL = 1>")
-        lines.append("inline Rvd<T, LMUL> toreg(const Rvm<T, LMUL>& m0)")
-        lines.append("{ return Rvd<T, LMUL>(mipp::toreg(m0.m)); }")
+        lines.append("inline Rvd<T, LMUL> to_rvd(const Rvm<T, LMUL>& m0)")
+        lines.append("{ return Rvd<T, LMUL>(mipp::to_rvd(m0.m)); }")
         lines.append("")
-    elif fn == "tomsk":
+    elif fn == "to_rvm":
         lines.append("template <typename T, int LMUL = 1>")
-        lines.append("inline Rvm<T, LMUL> tomsk(const Rvd<T, LMUL>& r0)")
-        lines.append("{ return Rvm<T, LMUL>(mipp::tomsk(r0.r)); }")
+        lines.append("inline Rvm<T, LMUL> to_rvm(const Rvd<T, LMUL>& r0)")
+        lines.append("{ return Rvm<T, LMUL>(mipp::to_rvm(r0.r)); }")
         lines.append("")
     elif fn == "cast":
         lines.append("namespace details")

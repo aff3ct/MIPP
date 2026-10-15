@@ -16,6 +16,25 @@ _RE_PLACEHOLDER    = re.compile(r'\%([^%]*)\%')
 _RE_ANGLE          = re.compile(r'<(.*)>')
 _RE_LMUL_EXPR      = re.compile(r'^(tp|tr)([*/])(\d+)$')
 
+# Keys of the type expressions of the templating DSL (`%r<c:int|b:32|m:2|v:Z>%`):
+# category, bit width, LMUL and masking variant. `tp` and `tr` may also appear
+# alone as a part (`%add<tp|m:2>%`).
+_DT_MODIFIER_KEYS  = ("c", "b", "m", "v")
+_DT_BARE_PARTS     = ("tp", "tr")
+
+def _split_dt_modifier(part, input_str):
+    """Split one part of a type expression into (key, value); panic on an unknown key."""
+    part = part.strip()
+    if ":" in part:
+        key, val = part.split(':', 1)
+        key, val = key.strip(), val.strip()
+        if key in _DT_MODIFIER_KEYS:
+            return key, val
+    elif part in _DT_BARE_PARTS:
+        return part, part
+    print("Panic: invalid modifier '" + part + "' in '" + input_str + "' (expected tp, tr, c:, b:, m: or v:).")
+    exit(-1)
+
             
 def find_data_types_from(criteria):
     all_types = dict(datatypes);
@@ -276,10 +295,11 @@ def _parse_lmul_expression(expr, dt_par, dt_ret, isa, base_lmul):
 
 def _extract_mask_from_dt_info(input_str):
     masked_ver = False
-    for part in input_str.split("|"):
-        part = part.strip()
-        if part.startswith("mk:"):
-            val = part[3:].strip()
+    # `input_str` may hold two type expressions (`tp, c:int|b:tp`)
+    parts = [p for dt_expr in input_str.split(",") for p in dt_expr.split("|")]
+    for part in parts:
+        key, val = _split_dt_modifier(part, input_str)
+        if key == "v":
             if val == "Z":
                 masked_ver = "maskz"
             elif val == "M":
@@ -289,7 +309,7 @@ def _extract_mask_from_dt_info(input_str):
             elif val == "U":
                 masked_ver = False
             else:
-                print("Panic: invalid mask variant 'mk:" + val + "' in '" + input_str + "' (expected M, Z, S or U).")
+                print("Panic: invalid variant 'v:" + val + "' in '" + input_str + "' (expected M, Z, S or U).")
                 exit(-1)
     return masked_ver
 
@@ -303,12 +323,8 @@ def build_dt(input_str, isa, dt_par, dt_ret):
     elif len(dt_info_carac) >= 1:
         dt_info_carac_dic = {}
         for dtic in dt_info_carac:
-            dtic_strip = dtic.strip()
-            if ":" in dtic_strip:
-                key, val = dtic_strip.split(':', 1)
-            else:
-                key, val = dtic_strip, dtic_strip
-            if key != "mk":
+            key, val = _split_dt_modifier(dtic, input_str)
+            if key != "v":
                 dt_info_carac_dic[key] = val
 
         if "c" in dt_info_carac_dic:
@@ -369,12 +385,8 @@ def _parse_lmul(input_str, isa, dt_par, dt_ret, base_lmul):
     elif len(dt_info_carac) >= 1:
         dt_info_carac_dic = {}
         for dtic in dt_info_carac:
-            dtic_strip = dtic.strip()
-            if ":" in dtic_strip:
-                key, val = dtic_strip.split(':', 1)
-            else:
-                key, val = dtic_strip, dtic_strip
-            if key != "mk":
+            key, val = _split_dt_modifier(dtic, input_str)
+            if key != "v":
                 dt_info_carac_dic[key] = val
 
         if "m" in dt_info_carac_dic:

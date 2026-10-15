@@ -40,7 +40,7 @@ export function renderSearchBar() {
             id="mipp-search-input"
             type="text"
             class="mipp-search-input"
-            placeholder='Search primitive (e.g. "fmadd", "blend") or vendor intrinsic (e.g. "_mm256_blendv_ps", "vbslq_f32")...'
+            placeholder='Search primitive (e.g. "fmadd", "select") or vendor intrinsic (e.g. "_mm256_blendv_ps", "vbslq_f32")...'
             value="${escapeHtml(state.query)}"
             autocomplete="off"
             spellcheck="false"
