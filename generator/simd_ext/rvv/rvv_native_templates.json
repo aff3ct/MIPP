@@ -131,6 +131,12 @@
             "{{isa.prefix}}_v{{instr_name}}_vx_{{isa_dt_par.data_ext}}_mu(m0.m, rsrc.r, r0.r, 2, %N<tp>%);"
         ]
     },
+    "fcvt": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}_{{ instr_name }}_v_{{ isa_dt_ret.data_ext }}(r0.r, %N<tp>%);"
+        ]
+    },
     "float_getfirst": {
         "format": "short",
         "code": [

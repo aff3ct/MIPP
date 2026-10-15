@@ -416,6 +416,50 @@
             ],
             "template": "cvt",
             "if": "defined(__AVX512DQ__)"
+        },
+        {
+            "instr_name": "cvttps_epu32",
+            "datatypes": [
+                "float32,uint32"
+            ],
+            "template": "cvt"
+        },
+        {
+            "instr_name": "cvtepu32_ps",
+            "datatypes": [
+                "uint32,float32"
+            ],
+            "template": "cvt"
+        },
+        {
+            "instr_name": "cvttpd_epu64",
+            "datatypes": [
+                "float64,uint64"
+            ],
+            "template": "cvt",
+            "if": "defined(__AVX512DQ__)"
+        },
+        {
+            "instr_name": "cvtepu64_pd",
+            "datatypes": [
+                "uint64,float64"
+            ],
+            "template": "cvt",
+            "if": "defined(__AVX512DQ__)"
+        },
+        {
+            "instr_name": "cast",
+            "datatypes": [
+                "int64,uint64",
+                "uint64,int64",
+                "int32,uint32",
+                "uint32,int32",
+                "int16,uint16",
+                "uint16,int16",
+                "int8,uint8",
+                "uint8,int8"
+            ],
+            "template": "cast"
         }
     ],
     "div": [
@@ -563,7 +607,9 @@
                 "float64",
                 "float32",
                 "int32",
-                "int64"
+                "uint32",
+                "int64",
+                "uint64"
             ],
             "template": "load_msks",
             "if": "defined(__AVX512F__)",
@@ -573,7 +619,9 @@
             "instr_name": "loadu",
             "datatypes": [
                 "int8",
-                "int16"
+                "uint8",
+                "int16",
+                "uint16"
             ],
             "template": "load_msks",
             "if": "defined(__AVX512BW__)",
@@ -585,7 +633,9 @@
                 "float64",
                 "float32",
                 "int32",
-                "int64"
+                "uint32",
+                "int64",
+                "uint64"
             ],
             "template": "load_mskz",
             "if": "defined(__AVX512F__)",
@@ -595,7 +645,9 @@
             "instr_name": "loadu",
             "datatypes": [
                 "int8",
-                "int16"
+                "uint8",
+                "int16",
+                "uint16"
             ],
             "template": "load_mskz",
             "if": "defined(__AVX512BW__)",
@@ -614,7 +666,9 @@
                 "float64",
                 "float32",
                 "int32",
-                "int64"
+                "uint32",
+                "int64",
+                "uint64"
             ],
             "template": "load_msks",
             "if": "defined(__AVX512F__)",
@@ -624,7 +678,9 @@
             "instr_name": "loadu",
             "datatypes": [
                 "int8",
-                "int16"
+                "uint8",
+                "int16",
+                "uint16"
             ],
             "template": "load_msks",
             "if": "defined(__AVX512BW__)",
@@ -636,7 +692,9 @@
                 "float64",
                 "float32",
                 "int32",
-                "int64"
+                "uint32",
+                "int64",
+                "uint64"
             ],
             "template": "load_mskz",
             "if": "defined(__AVX512F__)",
@@ -646,7 +704,9 @@
             "instr_name": "loadu",
             "datatypes": [
                 "int8",
-                "int16"
+                "uint8",
+                "int16",
+                "uint16"
             ],
             "template": "load_mskz",
             "if": "defined(__AVX512BW__)",
@@ -1010,7 +1070,9 @@
                 "float64",
                 "float32",
                 "int32",
-                "int64"
+                "uint32",
+                "int64",
+                "uint64"
             ],
             "template": "store_msk",
             "if": "defined(__AVX512F__)",
@@ -1020,7 +1082,9 @@
             "instr_name": "storeu",
             "datatypes": [
                 "int8",
-                "int16"
+                "uint8",
+                "int16",
+                "uint16"
             ],
             "template": "store_msk",
             "if": "defined(__AVX512BW__)",
@@ -1039,7 +1103,9 @@
                 "float64",
                 "float32",
                 "int32",
-                "int64"
+                "uint32",
+                "int64",
+                "uint64"
             ],
             "template": "store_msk",
             "if": "defined(__AVX512F__)",
@@ -1049,7 +1115,9 @@
             "instr_name": "storeu",
             "datatypes": [
                 "int8",
-                "int16"
+                "uint8",
+                "int16",
+                "uint16"
             ],
             "template": "store_msk",
             "if": "defined(__AVX512BW__)",
