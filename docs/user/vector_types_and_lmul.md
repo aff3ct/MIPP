@@ -193,8 +193,10 @@ The `d2` and `MIPP_LDIV_2` columns of the [table of §3.4](#34-representation-pe
 
 - **AVX / AVX2, AVX-512**: a native register of the narrower ISA: 128-bit SSE registers (`__m128`, `__m128d`, `__m128i`) on AVX, 256-bit AVX registers on AVX-512.
 - **RISC-V Vector (RVV)**: native fractional register types (`vfloat32mf2_t`, ...) for 8 to 32-bit elements. For 64-bit elements, where the RVV constraint $\text{SEW} / \text{LMUL} \le \text{ELEN}$ forbids fractional types, MIPP stores the half-vector in a plain array. Some of these 64-bit operations are not implemented yet (see [Implementation Levels](implementation_levels.md#known-limitations)).
-- **SSE / NEON**: 128 bits is the smallest register width; no `d2` types are generated.
-- **ARM SVE**: not generated yet.
+- **SSE / NEON / ARM SVE**: there is no narrower register, so a `d2` value is stored in a full LMUL = 1 register (same member as the `m1` type, but a distinct type). Only the lower $N/2$ lanes are meaningful; the upper lanes are unspecified and ignored (they may hold garbage). Consequences:
+    - lane-wise operations are the `m1` operations; loads and stores only access $N/2$ elements; reductions and `testz` ignore the upper lanes;
+    - `get(r, lane)` with `lane` outside $[0, N/2)$ is undefined behavior;
+    - the upper lanes of a `d2` mask are not kept at zero: they are neutralized only where observable (`testz`, masked loads/stores/gathers/scatters, masked reductions).
 - **Scalar**: plain array of half the elements.
 
 ### 4.2. Scope and Constraints of Deeper Fractional Division

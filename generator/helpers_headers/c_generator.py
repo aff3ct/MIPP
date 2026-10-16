@@ -25,9 +25,12 @@ from codegen.emit_helpers import (
     emit_ifdef_begin,
     gen_ldiv_defines_sub_isa,
     gen_ldiv_structs_sub_isa,
+    gen_ldiv_defines_mask,
+    gen_ldiv_structs_mask,
 )
 from codegen.candidate_resolver import resolve_and_emit_missing_functions
 from codegen.lmul_orchestrator import gen_c_lmul, gen_c_ldiv
+from codegen.ldiv_mask import gen_c_ldiv_mask
 
 
 def gen_c_defines(isa, file, vla_size=None):
@@ -423,6 +426,9 @@ def gen_c_structures(isa, file, is_scalar=False, vla_size=None):
         if sub_isa:
             gen_ldiv_structs_sub_isa(isa, sub_isa, file)
             gen_ldiv_defines_sub_isa(isa, sub_isa, file)
+    elif uses_mask_ldiv(isa):
+        gen_ldiv_defines_mask(isa, file)
+        gen_ldiv_structs_mask(isa, file)
 
 def register_candidates(isa, funcs, implems, cand_type="native_or_emu", lmul=0, default_level=None):
     if "candidates" not in isa:
@@ -601,6 +607,8 @@ def generate_c_layer(isa, include_manager, native_implems, emu_implems):
         sub_isa = load_isa_config(isa["sub_isa"])[0]
         if sub_isa:
             gen_c_ldiv(isa, sub_isa, include_manager, copy_interfaces)
+    elif uses_mask_ldiv(isa):
+        gen_c_ldiv_mask(isa, include_manager, copy_interfaces)
 
     # 5. Resolve dependencies and create glue file
     include_manager.resolve_all_dependencies(isa["name"], copy_interfaces)

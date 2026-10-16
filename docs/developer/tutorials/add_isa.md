@@ -79,7 +79,7 @@ The fastest start is to copy the directory of the closest ISA, rename the files 
 | `header_template` | First lines of the generated ISA header: include guard and intrinsics header. |
 | `mipp_definitions` | Macros defined for the users when the ISA is selected (`MIPP_64BIT`, `MIPP_BW`, ...). |
 | `info_names` | Optional. Name printed by `mipp_info()`: the first entry whose `if` condition holds; the entry without `if` is the default and must be last. Without this field, the upper-case `name` is printed. |
-| `sub_isa` | Optional. Parent ISA: the derived ISA is tested before its parent, and `--simd-ext` pulls in the parent. With `"sw_ldiv_type": "sub_isa"`, the half-vectors use the parent's registers (AVX `d2` uses SSE registers). |
+| `sub_isa` | Optional. Parent ISA: the derived ISA is tested before its parent, and `--simd-ext` pulls in the parent. With `"sw_ldiv_type": "sub_isa"`, the half-vectors use the parent's registers (AVX `d2` uses SSE registers). With `"sw_ldiv_type": "mask"` and `-2` in `sw_lmul`, no parent is needed: the half-vectors reuse the LMUL = 1 register and ignore the upper lanes (optional per-ISA optimizations in `<isa>_ldiv_mask.json`). |
 
 The other fields (hardware masks, scalable layouts, ...) are described in [ISA Descriptor](../reference/registries/isa.md). The descriptor is validated against `helpers_headers/schemas/isa_schema.json`; the cross-field rules (existing `sub_isa`, `-2` and `sw_ldiv_type`, default `info_names` entry) stop the generator on the first violation.
 

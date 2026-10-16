@@ -885,6 +885,25 @@ def list_simd_ext_names():
     )
 
 
+def uses_mask_ldiv(isa):
+    """
+    True if the ISA implements software half-vectors (d2) on its own registers,
+    only the lower half of the lanes being meaningful ("sw_ldiv_type" is "mask"
+    and -2 is listed in "sw_lmul").
+    """
+    if not isa:
+        return False
+    return (
+        isa.get("sw_ldiv_type") == "mask"
+        and any(int(x) == -2 for x in isa.get("sw_lmul", []))
+    )
+
+
+def has_sw_ldiv(isa):
+    """True if the ISA builds its half-vectors (d2) in software, whatever the strategy."""
+    return uses_sub_isa_ldiv(isa) or uses_mask_ldiv(isa)
+
+
 def uses_sub_isa_ldiv(isa):
     """
     True if the ISA implements software half-vectors (d2) on the registers of

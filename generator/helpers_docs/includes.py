@@ -74,6 +74,8 @@ def _lmul_cell(isa, lmul):
             return "native"
         if lmul > 1:
             return "struct"
+        if isa.get("sw_ldiv_type") == "mask":
+            return "half of an LMUL = 1 register"
         if isa.get("sw_ldiv_type") == "sub_isa" and isa.get("sub_isa"):
             return f"{isa['sub_isa'].upper()} register"
         return "struct"
@@ -95,7 +97,8 @@ def render_lmul_availability(generator_dir):
     legend = (
         "\n*native*: one hardware register; *native group* / *native fractional*: hardware register group or "
         "fractional register type; *struct*: structure of LMUL=1 registers; *SSE register* / *AVX register*: "
-        "register of the narrower ISA; *array*: plain array of elements; —: not generated.\n"
+        "register of the narrower ISA; *half of an LMUL = 1 register*: same register as LMUL = 1, only the lower "
+        "half of the lanes is meaningful; *array*: plain array of elements; —: not generated.\n"
     )
     return _header("simd_ext/<isa>/<isa>_isa.json (sw_lmul, hw_lmul, sw_ldiv_type)") + "\n".join(lines) + "\n" + legend
 

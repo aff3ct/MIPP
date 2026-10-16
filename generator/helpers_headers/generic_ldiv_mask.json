@@ -1,0 +1,202 @@
+{
+    "gather": [
+        {
+            "level": 3,
+            "versions": [
+                "u"
+            ],
+            "code": [
+                "{{ wrap('r0') }}",
+                "{{ UT }} idx[{{ N }}];",
+                "{{ T }} buf[{{ N }}];",
+                "{{ call1('storeu', 'idx', 'w_r0', dt=UI) }};",
+                "for (unsigned i = 0; i < {{ N }}; i++)",
+                "\tbuf[i] = (i < {{ N2 }}) ? p0[idx[i]] : 0;",
+                "{{ ret_d2(call1('loadu', 'buf')) }}"
+            ]
+        },
+        {
+            "level": 3,
+            "versions": [
+                "z",
+                "s"
+            ],
+            "code": [
+                "{% if mask_kind == 'masks' %}{{ wrap('m0', 'rsrc', 'r0') }}{% else %}{{ wrap('m0', 'r0') }}{% endif %}",
+                "{{ UT }} idx[{{ N }}];",
+                "{{ T }} buf[{{ N }}];",
+                "{{ call1('storeu', 'idx', 'w_r0', dt=UI) }};",
+                "{% if mask_kind == 'masks' %}{{ call1('storeu', 'buf', 'w_rsrc') }};{% else %}for (unsigned i = 0; i < {{ N }}; i++)",
+                "\tbuf[i] = 0;{% endif %}",
+                "for (unsigned i = 0; i < {{ N2 }}; i++)",
+                "\tif ({{ call1('get_k', 'w_m0', 'i', dt=UI) }})",
+                "\t\tbuf[i] = p0[idx[i]];",
+                "{{ ret_d2(call1('loadu', 'buf')) }}"
+            ]
+        }
+    ],
+    "hadd|hadds|hmul|hmin|hmax": [
+        {
+            "versions": [
+                "u",
+                "z"
+            ],
+            "code": [
+                "{{ lanemask() }}",
+                "{% if mask_kind == 'maskz' %}{{ wrap('m0', 'r0') }}{% else %}{{ wrap('r0') }}{% endif %}",
+                "{% if mask_kind == 'maskz' %}lm = {{ call1('andb_k', 'w_m0', 'lm') }};{% endif %}",
+                "{{ R1 }} neutral = {{ call1('set1', ctx.neutral(f)) }};",
+                "{{ R1 }} sel = {{ call1('select', 'lm', 'w_r0', 'neutral') }};",
+                "return {{ call1(f, 'sel') }};"
+            ]
+        }
+    ],
+    "load|loadu": [
+        {
+            "level": 3,
+            "versions": [
+                "u"
+            ],
+            "code": [
+                "{{ T }} buf[{{ N }}];",
+                "for (unsigned i = 0; i < {{ N }}; i++)",
+                "\tbuf[i] = (i < {{ N2 }}) ? p0[i] : 0;",
+                "{{ ret_d2(call1('loadu', 'buf')) }}"
+            ]
+        },
+        {
+            "level": 3,
+            "versions": [
+                "z",
+                "s"
+            ],
+            "code": [
+                "{% if mask_kind == 'masks' %}{{ wrap('m0', 'rsrc') }}{% else %}{{ wrap('m0') }}{% endif %}",
+                "{{ T }} buf[{{ N }}];",
+                "{% if mask_kind == 'masks' %}{{ call1('storeu', 'buf', 'w_rsrc') }};{% else %}for (unsigned i = 0; i < {{ N }}; i++)",
+                "\tbuf[i] = 0;{% endif %}",
+                "for (unsigned i = 0; i < {{ N2 }}; i++)",
+                "\tif ({{ call1('get_k', 'w_m0', 'i') }})",
+                "\t\tbuf[i] = p0[i];",
+                "{{ ret_d2(call1('loadu', 'buf')) }}"
+            ]
+        }
+    ],
+    "scatter": [
+        {
+            "level": 3,
+            "versions": [
+                "u"
+            ],
+            "code": [
+                "{{ wrap('r0', 'r1') }}",
+                "{{ UT }} idx[{{ N }}];",
+                "{{ T }} buf[{{ N }}];",
+                "{{ call1('storeu', 'idx', 'w_r0', dt=UI) }};",
+                "{{ call1('storeu', 'buf', 'w_r1') }};",
+                "for (unsigned i = 0; i < {{ N2 }}; i++)",
+                "\tp0[idx[i]] = buf[i];"
+            ]
+        },
+        {
+            "level": 3,
+            "versions": [
+                "m",
+                "z"
+            ],
+            "code": [
+                "{{ wrap('m0', 'r0', 'r1') }}",
+                "{{ UT }} idx[{{ N }}];",
+                "{{ T }} buf[{{ N }}];",
+                "{{ call1('storeu', 'idx', 'w_r0', dt=UI) }};",
+                "{{ call1('storeu', 'buf', 'w_r1') }};",
+                "for (unsigned i = 0; i < {{ N2 }}; i++)",
+                "\tif ({{ call1('get_k', 'w_m0', 'i', dt=UI) }})",
+                "\t\tp0[idx[i]] = buf[i];"
+            ]
+        }
+    ],
+    "set": [
+        {
+            "level": 3,
+            "code": [
+                "{{ T }} buf[{{ N }}];",
+                "for (unsigned i = 0; i < {{ N }}; i++)",
+                "\tbuf[i] = (i < {{ N2 }}) ? vals[i] : 0;",
+                "{{ ret_d2(call1('loadu', 'buf')) }}"
+            ]
+        }
+    ],
+    "set_k": [
+        {
+            "level": 3,
+            "code": [
+                "int32_t buf[{{ N }}];",
+                "for (unsigned i = 0; i < {{ N }}; i++)",
+                "\tbuf[i] = (i < {{ N2 }}) ? vals[i] : 0;",
+                "{{ ret_d2(call1('set_k', 'buf')) }}"
+            ]
+        }
+    ],
+    "store|storeu": [
+        {
+            "level": 3,
+            "versions": [
+                "u"
+            ],
+            "code": [
+                "{{ wrap('r0') }}",
+                "{{ T }} buf[{{ N }}];",
+                "{{ call1('storeu', 'buf', 'w_r0') }};",
+                "for (unsigned i = 0; i < {{ N2 }}; i++)",
+                "\tp0[i] = buf[i];"
+            ]
+        },
+        {
+            "level": 3,
+            "versions": [
+                "m"
+            ],
+            "code": [
+                "{{ wrap('m0', 'r0') }}",
+                "{{ T }} buf[{{ N }}];",
+                "{{ call1('storeu', 'buf', 'w_r0') }};",
+                "for (unsigned i = 0; i < {{ N2 }}; i++)",
+                "\tif ({{ call1('get_k', 'w_m0', 'i') }})",
+                "\t\tp0[i] = buf[i];"
+            ]
+        },
+        {
+            "level": 3,
+            "versions": [
+                "z"
+            ],
+            "code": [
+                "{{ wrap('m0', 'r0') }}",
+                "{{ T }} buf[{{ N }}];",
+                "{{ call1('storeu', 'buf', 'w_r0') }};",
+                "for (unsigned i = 0; i < {{ N2 }}; i++)",
+                "\tif ({{ call1('get_k', 'w_m0', 'i') }})",
+                "\t\tp0[i] = buf[i];\n\telse\n\t\tp0[i] = 0;"
+            ]
+        }
+    ],
+    "testz": [
+        {
+            "code": [
+                "{{ lanemask() }}",
+                "{{ wrap('m0', 'm1') }}",
+                "return {{ call1('testz', call1('andb_k', 'w_m0', 'lm'), 'w_m1') }};"
+            ]
+        }
+    ],
+    "testz_2": [
+        {
+            "code": [
+                "{{ lanemask() }}",
+                "{{ wrap('m0') }}",
+                "return {{ call1('testz_2', call1('andb_k', 'w_m0', 'lm')) }};"
+            ]
+        }
+    ]
+}

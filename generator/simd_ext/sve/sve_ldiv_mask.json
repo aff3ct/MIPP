@@ -1,0 +1,26 @@
+{
+    "load|loadu": [
+        {
+            "versions": [
+                "u"
+            ],
+            "code": [
+                "svbool_t pg = svwhilelt_b{{ dt.n_bits }}_s32(0, {{ N2 }});",
+                "{{ D2 }} res;",
+                "res.r = svld1_{{ isa_dt.data_ext }}(pg, p0);",
+                "return res;"
+            ]
+        }
+    ],
+    "store|storeu": [
+        {
+            "versions": [
+                "u"
+            ],
+            "code": [
+                "svbool_t pg = svwhilelt_b{{ dt.n_bits }}_s32(0, {{ N2 }});",
+                "svst1_{{ isa_dt.data_ext }}(pg, p0, r0.r);"
+            ]
+        }
+    ]
+}

@@ -1,0 +1,24 @@
+{
+    "load|loadu": [
+        {
+            "versions": [
+                "u"
+            ],
+            "code": [
+                "{{ D2 }} res;",
+                "res.r = vcombine_{{ isa_dt.data_ext }}(vld1_{{ isa_dt.data_ext }}(p0), vdup_n_{{ isa_dt.data_ext }}(0));",
+                "return res;"
+            ]
+        }
+    ],
+    "store|storeu": [
+        {
+            "versions": [
+                "u"
+            ],
+            "code": [
+                "vst1_{{ isa_dt.data_ext }}(p0, vget_low_{{ isa_dt.data_ext }}(r0.r));"
+            ]
+        }
+    ]
+}

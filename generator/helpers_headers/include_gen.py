@@ -660,6 +660,7 @@ class IncludeManager:
         self.isa_list = isa_list
         self.atomic_files = {} # (layer_name, func, variant, lmul) -> dict
         self.emitted_atomics = {} # layer_name -> dict(func -> set((variant, lmul)))
+        self.call_deps = {} # (layer_name, func, variant, lmul) -> set((callee_func, callee_variant, callee_lmul))
 
         for layer in ["c", "cpp", "obj", "scalar", "templates"]:
             self.layers[layer] = IncludeLayer(layer, mode=mode)
@@ -672,6 +673,11 @@ class IncludeManager:
         for layer in self.layers:
             for func in ["common"] + list(interfaces.keys()):
                 self.layers[layer].add_includes(func, interfaces, categories)
+
+    def add_call_dependency(self, layer_name, func, variant, lmul, callee_func, callee_variant="u", callee_lmul="m1"):
+        """Records that the code emitted for (func, variant, lmul) calls (callee_func, callee_variant, callee_lmul)."""
+        key = (layer_name, func, normalize_variant(variant), normalize_lmul(lmul))
+        self.call_deps.setdefault(key, set()).add((callee_func, normalize_variant(callee_variant), normalize_lmul(callee_lmul)))
 
     def set_isa_configs(self, isas_dict):
         if not hasattr(self, "_isa_configs"):
@@ -786,6 +792,13 @@ class IncludeManager:
                     if uses_sub_isa_ldiv(layer_cfg):
                         include_path.dependencies.add(f"mipp/internal/simd_ext/{layer_cfg['sub_isa']}/c/functions/{category}/{func}.h")
 
+                    # Functions called by the d2 functions built on the masks of the register (sw_ldiv_type: mask)
+                    for (k_layer, k_func, _k_v, _k_l), callees in self.call_deps.items():
+                        if k_layer == layer_name and k_func == func:
+                            for (c_func, _c_v, _c_l) in callees:
+                                if c_func != func:
+                                    include_path.dependencies.add(f"mipp/internal/simd_ext/{layer_name}/c/functions/{_match_category(c_func)}/{c_func}.h")
+
                     # Auto-scalar fallback requires the scalar variant to be included
                     if not self.get_isa_config(layer_name).get("is_scalar", False) and layer_name not in ("c", "cpp"):
                         include_path.dependencies.add(f"mipp/internal/simd_ext/scalar/c/functions/{category}/{func}.h")
@@ -855,7 +868,7 @@ class IncludeManager:
                     # Determine if this file is a pure software LMUL wrapper or sub-ISA wrapper
                     l_val = int(l[1:]) if l.startswith("m") else 0
                     is_sw_lmul = (l_val in sw_lmuls and l_val > 1)
-                    is_sub_isa_wrapper = (l == "d2" and bool(sub_isa))
+                    is_sub_isa_wrapper = (l == "d2" and (bool(sub_isa) or uses_mask_ldiv(isa_cfg)))
                     is_horizontal = funcs[func].get("horizontal", False) if funcs and func in funcs else False
                     is_sw_wrapper = (is_sw_lmul and not is_horizontal) or is_sub_isa_wrapper
 
@@ -870,6 +883,10 @@ class IncludeManager:
                     # Sub-ISA ldiv wrapper dependency (only when d2 is built on the sub_isa registers)
                     if l == "d2" and sub_isa:
                         item["dependencies"].add(f"mipp/internal/simd_ext/{sub_isa}/c/functions/{category}/{v}/m1/{func}{ext}")
+
+                    # d2 functions built on the masks of the register: the LMUL 1 functions they call
+                    for (c_func, c_v, c_l) in self.call_deps.get((layer_name, func, v, l), ()):
+                        item["dependencies"].add(f"mipp/internal/simd_ext/{layer_name}/c/functions/{_match_category(c_func)}/{c_v}/{c_l}/{c_func}{ext}")
 
                     if not is_sw_wrapper:
                         # Rule 2: Mask dependencies (derived generically from JSON templates via candidate resolver)

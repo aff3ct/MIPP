@@ -110,10 +110,12 @@
     "name": "neon",
     "prefix": "v",
     "size": 128,
+    "sw_ldiv_type": "mask",
     "sw_lmul": [
         1,
         2,
         4,
-        8
+        8,
+        -2
     ]
 }

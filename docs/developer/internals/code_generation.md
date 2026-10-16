@@ -32,7 +32,8 @@ The options of the script are in the [Command-Line Reference](../reference/cli.m
     - `_m2`, `_m4`, `_m8` call the function of half the LMUL on each half of the register group;
     - the horizontal functions (`"horizontal": true` in the registry) use the templates of `generic_emu_templates_lmulh.json` instead, and get a panic stub when there is none.
 4. **Half-vectors on the sub-ISA.** With `"sw_ldiv_type": "sub_isa"`, `gen_c_ldiv()` writes the `_d2` functions as calls to the `sub_isa` functions (AVX `d2` calls SSE).
-5. **Dependencies and glue.** The `IncludeManager` adds the `#include` lines that each header needs and writes `simd_ext/<isa>/c/mipp_<isa>.h` ([Header Layout](header_layout.md)).
+5. **Half-vectors by mask.** With `"sw_ldiv_type": "mask"` (SSE, NEON, SVE), `gen_c_ldiv_mask()` (`codegen/ldiv_mask.py`) writes each `_d2` function as a wrapper of the `m1` function on the same register (upper lanes ignored); the wrapper inherits the level of the `m1` function. Functions where the upper lanes are observable (load/store, gather/scatter, reductions, `testz`, `set`, `set_k`) use Jinja+C templates from `generic_ldiv_mask.json`, overridable per ISA in `simd_ext/<isa>/<isa>_ldiv_mask.json` (keys `a|b`, optional `versions`, `datatypes` and `level`). Without `level`, a template is L1 in an ISA file and L2 in the generic file; the sequential ones (load, store, gather, scatter, `set`, `set_k`) are declared L3.
+6. **Dependencies and glue.** The `IncludeManager` adds the `#include` lines that each header needs and writes `simd_ext/<isa>/c/mipp_<isa>.h` ([Header Layout](header_layout.md)).
 
 !!! note "LMUL `0` and `1`"
     In the generator, LMUL `0` stands for the base registers: functions without suffix (`mipp_avx_add_float32`). LMUL `1` produces the `_m1` names, which call the base functions.

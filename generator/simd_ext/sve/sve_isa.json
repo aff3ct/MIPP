@@ -132,9 +132,11 @@
         2048
     ],
     "sub_isa": "neon",
+    "sw_ldiv_type": "mask",
     "sw_lmul": [
         2,
         4,
-        8
+        8,
+        -2
     ]
 }

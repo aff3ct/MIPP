@@ -82,10 +82,15 @@ def validate_isa_config(isa_dict, isa_name):
     sw_ldiv_type = isa_dict.get("sw_ldiv_type", "native")
     sw_ldivs = [int(x) for x in isa_dict.get("sw_lmul", []) if int(x) < 0]
 
-    # Software half-vectors are only implemented on top of the sub_isa registers
-    if sw_ldivs and sw_ldiv_type != "sub_isa":
+    # Software half-vectors are built either on the sub_isa registers or on the registers of the ISA itself
+    if sw_ldivs and sw_ldiv_type not in ("sub_isa", "mask"):
         print(f"Error: Validation failed for {file_label}:", file=sys.stderr)
-        print(f"  - Negative factors in 'sw_lmul' ({sw_ldivs}) require 'sw_ldiv_type' to be 'sub_isa' (the only software strategy implemented).", file=sys.stderr)
+        print(f"  - Negative factors in 'sw_lmul' ({sw_ldivs}) require 'sw_ldiv_type' to be 'sub_isa' or 'mask'.", file=sys.stderr)
+        sys.exit(1)
+
+    if sw_ldiv_type == "mask" and any(x != -2 for x in sw_ldivs):
+        print(f"Error: Validation failed for {file_label}:", file=sys.stderr)
+        print(f"  - Unsupported ldiv factor in 'sw_lmul' ({sw_ldivs}). Only ldiv = -2 is supported with 'sw_ldiv_type: mask'.", file=sys.stderr)
         sys.exit(1)
 
     if sw_ldiv_type == "sub_isa":
@@ -116,6 +121,9 @@ def validate_isa_config(isa_dict, isa_name):
 
 def validate_explorer_isa_config(explorer_dict, file_name):
     validate_json_data(explorer_dict, "explorer_isa_schema.json", label=os.path.basename(file_name))
+
+def validate_ldiv_mask_config(ldiv_mask_dict, file_name):
+    validate_json_data(ldiv_mask_dict, "ldiv_mask_schema.json", label=file_name)
 
 def validate_templates_config(templates_dict, file_name):
     validate_json_data(templates_dict, "templates_schema.json", label=os.path.basename(file_name))

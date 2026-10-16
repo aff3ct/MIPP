@@ -681,8 +681,18 @@ def resolve_candidates(isa, funcs, lmul=0):
 
     return resolved
 
+# Level of the resolved functions of the base registers (LMUL 0), per (isa, function, "dt_par,dt_ret",
+# mask kind): the highest level among the active candidates. Read by the d2-by-mask wrappers
+# (codegen/ldiv_mask.py), which inherit the level of the LMUL 1 function they call.
+BASE_LEVELS = {}
+
 def resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators=False):
     resolved = resolve_candidates(isa, funcs, lmul=lmul)
+    if lmul == 0:
+        for (rf, rdt_key, rmask_kind), rcands in resolved.items():
+            levels = [c.get("level", 3) for c, c_cond in rcands if c_cond != "0"]
+            if levels:
+                BASE_LEVELS[(isa["name"], rf, rdt_key, rmask_kind)] = min(max(levels), 3)
     if file is None:
         return resolved
 

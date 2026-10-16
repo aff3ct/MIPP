@@ -4,6 +4,7 @@ Handles formatting and writing of C/C++ function prototypes and bodies, preproce
 and specialized AVX ldiv structures.
 """
 import sys
+import re
 import os
 
 # Add parent directory to sys.path to find tools.py
@@ -136,6 +137,54 @@ def gen_ldiv_defines_sub_isa(isa_base, isa_div, file):
                 ),
                 file=file,
             )
+
+def gen_ldiv_structs_mask(isa, file):
+    """
+    d2 registers of the 'mask' strategy: a distinct type from the LMUL 1 one, with the same member
+    (`r` or `m`), so that the lane-wise functions of LMUL 1 can be reused on it.
+    """
+    layout = isa.get("layout", None)
+    if layout:
+        # VLA ISAs (SVE): the member is the fixed-size type of LMUL 1, as in the LMUL 1 struct
+        j2_rvd = Template(layout["rvd_struct_template"], undefined=StrictUndefined)
+        j2_rvm = Template(layout["rvm_struct_template"], undefined=StrictUndefined)
+        for dt in isa["datatypes"]:
+            args = dict(
+                isa=isa, datatype=datatypes[dt], isa_datatype=isa["datatypes"][dt], lsuffix_mipp="m1",
+                vla_size=layout.get("size_symbol", None), isa_name_upper=isa["name"].upper(),
+                type_category_upper=datatypes[dt]["category"].upper(),
+            )
+            for rendered in (j2_rvd.render(**args), j2_rvm.render(**args)):
+                print(re.sub(r"_m1_t;$", "_d2_t;", rendered.strip()), file=file)
+        return
+    for dt in isa["datatypes"]:
+        d = datatypes[dt]
+        isa_dt = isa["datatypes"][dt]
+        guard = isa_dt.get("if", None)
+        name = f"{isa['name']}_{d['category']}{d['n_bits']}"
+        n_macro = f"MIPP_{isa['name'].upper()}_N_{d['category'].upper()}{d['n_bits']}_D2"
+        if guard:
+            print(f"#if {guard}", file=file)
+        print(f"typedef struct {{ {isa_dt['reg']} r; }} rvd_{name}_d2_t;", file=file)
+        print(f"typedef struct {{ {isa_dt['msk']} m; }} rvm_{name}_d2_t;", file=file)
+        if guard:
+            print("#else", file=file)
+            print(f"typedef struct {{ {d['category']}{d['n_bits']}_t r[{n_macro}]; }} rvd_{name}_d2_t;", file=file)
+            print(f"typedef struct {{ uint{d['n_bits']}_t m[{n_macro}]; }} rvm_{name}_d2_t;", file=file)
+            print("#endif", file=file)
+
+def gen_ldiv_defines_mask(isa, file):
+    layout = isa.get("layout", None)
+    if layout and "defines_template" in layout:
+        j2 = Template(layout["defines_template"], undefined=StrictUndefined)
+        for dt in isa["datatypes"]:
+            n_bits = datatypes[dt]["n_bits"]
+            print(j2.render(
+                type_category_upper=datatypes[dt]["category"].upper(), n_bits=n_bits, lsuffix_upper="D2",
+                type_size=f"{layout['size_symbol']}/{n_bits}/2", vla_size=layout["size_symbol"],
+            ), file=file)
+        return
+    gen_ldiv_defines_sub_isa(isa, None, file)
 
 def emit_panic_stub(func_name: str, file=None, indent: str = "\t") -> str:
     """

@@ -111,11 +111,12 @@
             }
         },
         "sw_ldiv_type": {
-            "description": "Strategy for a `-2` in `sw_lmul`. `sub_isa`: a half-vector is a full register of `sub_isa` (AVX `d2` uses the SSE registers and functions); it is the only implemented strategy.",
+            "description": "Strategy for a `-2` in `sw_lmul`. `sub_isa`: a half-vector is a full register of `sub_isa` (AVX `d2` uses the SSE registers and functions). `mask`: a half-vector is a full register of the ISA itself, of which only the lower half of the lanes is meaningful (NEON, SVE, SSE `d2`): the lane-wise functions are those of LMUL 1, the others (loads, stores, reductions, tests) are specific (`generic_ldiv_mask.json` and `<isa>_ldiv_mask.json`).",
             "type": "string",
             "enum": [
                 "native",
-                "sub_isa"
+                "sub_isa",
+                "mask"
             ],
             "default": "native"
         },
