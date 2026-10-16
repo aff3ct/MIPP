@@ -158,6 +158,16 @@ class _Ctx:
         d = self.isa["datatypes"][dt]
         return d["data_ext"].replace("{lsuffix}", d["lsuffix"][str(lmul)])
 
+    def uext(self, dt, lmul):
+        """`data_ext` of the unsigned integer type of the same width as `dt` (e.g. `u32mf2`) at the LMUL `lmul`."""
+        d = self.isa["datatypes"][dt]
+        return d["uint_data_ext"].replace("{lsuffix}", d["lsuffix"][str(lmul)])
+
+    def bext(self, dt, lmul):
+        """Suffix of the mask type (e.g. `b64`) of the datatype `dt` at the LMUL `lmul`."""
+        d = self.isa["datatypes"][dt]
+        return d["data_ext_logi"].replace("{eew_emul}", d["eew_emul"][str(lmul)])
+
     def call1(self, fname, *args, mk=None, dt=None):
         """Call of the LMUL 1 function `fname` (registered as a dependency)."""
         dt = dt or self.dt_par

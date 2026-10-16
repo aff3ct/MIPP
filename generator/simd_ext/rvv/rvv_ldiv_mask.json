@@ -1,4 +1,43 @@
 {
+    "low_k": [
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "{% set Uin = ctx.uext(ctx.dt_par, ctx.lmul_in) %}{% set Uout = ctx.uext(ctx.dt_par, ctx.lmul_out) %}{% set Bout = ctx.bext(ctx.dt_par, ctx.lmul_out) %}{% set w = isa_dt.width %}{% set N2 = '(' ~ ctx.N2() ~ ')' %}{% set N = '(' ~ ctx.N() ~ ')' %}",
+                "%m<tr>% res;",
+                "{% if ctx.lmul_in == 1 and w == '64' %}{{ isa.prefix }}_vse64_v_{{ Uin }}(res.m, {{ isa.prefix }}_vmerge_vxm_{{ Uin }}({{ isa.prefix }}_vmv_v_x_{{ Uin }}(0, %N<tp>%), (uint{{ w }}_t)-1, m0.m, %N<tp>%), {{ N2 }});{% elif ctx.lmul_in == 1 %}res.m = {{ isa.prefix }}_vmsne_vx_{{ Uout }}_{{ Bout }}({{ isa.prefix }}_vlmul_trunc_v_{{ Uin }}_{{ Uout }}({{ isa.prefix }}_vmerge_vxm_{{ Uin }}({{ isa.prefix }}_vmv_v_x_{{ Uin }}(0, %N<tp>%), (uint{{ w }}_t)-1, m0.m, %N<tp>%)), 0, %N<tr>%);{% else %}res.m = {{ isa.prefix }}_vmsne_vx_{{ Uout }}_{{ Bout }}({{ isa.prefix }}_vget_v_{{ Uin }}_{{ Uout }}({{ isa.prefix }}_vmerge_vxm_{{ Uin }}({{ isa.prefix }}_vmv_v_x_{{ Uin }}(0, %N<tp>%), (uint{{ w }}_t)-1, m0.m, %N<tp>%), 0), 0, %N<tr>%);{% endif %}",
+                "return res;"
+            ]
+        }
+    ],
+    "high_k": [
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "{% set Uin = ctx.uext(ctx.dt_par, ctx.lmul_in) %}{% set Uout = ctx.uext(ctx.dt_par, ctx.lmul_out) %}{% set Bout = ctx.bext(ctx.dt_par, ctx.lmul_out) %}{% set w = isa_dt.width %}{% set N2 = '(' ~ ctx.N2() ~ ')' %}{% set N = '(' ~ ctx.N() ~ ')' %}",
+                "%m<tr>% res;",
+                "{% if ctx.lmul_in == 1 and w == '64' %}{{ isa.prefix }}_vse64_v_{{ Uin }}(res.m, {{ isa.prefix }}_vslidedown_vx_{{ Uin }}({{ isa.prefix }}_vmerge_vxm_{{ Uin }}({{ isa.prefix }}_vmv_v_x_{{ Uin }}(0, %N<tp>%), (uint{{ w }}_t)-1, m0.m, %N<tp>%), {{ N2 }}, {{ N }}), {{ N2 }});{% elif ctx.lmul_in == 1 %}res.m = {{ isa.prefix }}_vmsne_vx_{{ Uout }}_{{ Bout }}({{ isa.prefix }}_vlmul_trunc_v_{{ Uin }}_{{ Uout }}({{ isa.prefix }}_vslidedown_vx_{{ Uin }}({{ isa.prefix }}_vmerge_vxm_{{ Uin }}({{ isa.prefix }}_vmv_v_x_{{ Uin }}(0, %N<tp>%), (uint{{ w }}_t)-1, m0.m, %N<tp>%), {{ N2 }}, {{ N }})), 0, %N<tr>%);{% else %}res.m = {{ isa.prefix }}_vmsne_vx_{{ Uout }}_{{ Bout }}({{ isa.prefix }}_vget_v_{{ Uin }}_{{ Uout }}({{ isa.prefix }}_vmerge_vxm_{{ Uin }}({{ isa.prefix }}_vmv_v_x_{{ Uin }}(0, %N<tp>%), (uint{{ w }}_t)-1, m0.m, %N<tp>%), 1), 0, %N<tr>%);{% endif %}",
+                "return res;"
+            ]
+        }
+    ],
+    "combine_k": [
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "{% set Uin = ctx.uext(ctx.dt_par, ctx.lmul_in) %}{% set Uout = ctx.uext(ctx.dt_par, ctx.lmul_out) %}{% set Bout = ctx.bext(ctx.dt_par, ctx.lmul_out) %}{% set w = isa_dt.width %}{% set N2 = '(' ~ ctx.N2() ~ ')' %}{% set N = '(' ~ ctx.N() ~ ')' %}",
+                "%m<tr>% res;",
+                "{% if ctx.lmul_in == -2 and w == '64' %}res.m = {{ isa.prefix }}_vmsne_vx_{{ Uout }}_{{ Bout }}({{ isa.prefix }}_vslideup_vx_{{ Uout }}({{ isa.prefix }}_vle64_v_{{ Uout }}(m0.m, %N<tp>%), {{ isa.prefix }}_vle64_v_{{ Uout }}(m1.m, %N<tp>%), %N<tp>%, %N<tr>%), 0, %N<tr>%);{% elif ctx.lmul_in == -2 %}res.m = {{ isa.prefix }}_vmsne_vx_{{ Uout }}_{{ Bout }}({{ isa.prefix }}_vslideup_vx_{{ Uout }}({{ isa.prefix }}_vlmul_ext_v_{{ Uin }}_{{ Uout }}({{ isa.prefix }}_vmerge_vxm_{{ Uin }}({{ isa.prefix }}_vmv_v_x_{{ Uin }}(0, %N<tp>%), (uint{{ w }}_t)-1, m0.m, %N<tp>%)), {{ isa.prefix }}_vlmul_ext_v_{{ Uin }}_{{ Uout }}({{ isa.prefix }}_vmerge_vxm_{{ Uin }}({{ isa.prefix }}_vmv_v_x_{{ Uin }}(0, %N<tp>%), (uint{{ w }}_t)-1, m1.m, %N<tp>%)), %N<tp>%, %N<tr>%), 0, %N<tr>%);{% else %}res.m = {{ isa.prefix }}_vmsne_vx_{{ Uout }}_{{ Bout }}({{ isa.prefix }}_vcreate_v_{{ Uin }}_{{ Uout }}({{ isa.prefix }}_vmerge_vxm_{{ Uin }}({{ isa.prefix }}_vmv_v_x_{{ Uin }}(0, %N<tp>%), (uint{{ w }}_t)-1, m0.m, %N<tp>%), {{ isa.prefix }}_vmerge_vxm_{{ Uin }}({{ isa.prefix }}_vmv_v_x_{{ Uin }}(0, %N<tp>%), (uint{{ w }}_t)-1, m1.m, %N<tp>%)), 0, %N<tr>%);{% endif %}",
+                "return res;"
+            ]
+        }
+    ],
     "low": [
         {
             "variants": [
