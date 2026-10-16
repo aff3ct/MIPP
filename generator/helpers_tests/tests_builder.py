@@ -265,7 +265,10 @@ class TestsBuilderEngine:
 
     def render_cpp_conv_helper(self, func_name: str) -> List[str]:
         """`test_helpers::<cpp_name><T_dst>(reg)`: forwards to the `mipp::<cpp_name>_<dst>` overload of
-        the destination type, which is a template parameter of the test (the C++ names carry it)."""
+        the destination type, which is a template parameter of the test (the C++ names carry it).
+        The helper is named after the registry function (`cast`, `cast_k`...): the tests of the
+        functions that share a C++ name (cast / cast_k) must not define the same helper, since
+        several tests can be compiled in one translation unit (unity builds)."""
         fname = self.interfaces.get(func_name, {}).get("cpp_name", func_name)
         proto = self._proto_of(func_name)
         first_arg = (proto.get("args") or [{}])[0].get("type") if proto else "reg"
@@ -277,7 +280,7 @@ class TestsBuilderEngine:
                     raw_dsts.append(dst)
         dsts = [{"raw": d, "cpp": self._format_cpp_type(d)} for d in raw_dsts]
         return self.render_template(
-            self._tpl("assertions", "cpp", "conv_helper"), fname=fname, dsts=dsts,
+            self._tpl("assertions", "cpp", "conv_helper"), fname=fname, helper=func_name, dsts=dsts,
             arg=("m0" if first_arg == "msk" else "r0"), arg_type=("Msk" if first_arg == "msk" else "Reg"))
 
     def _load_json(self, filepath: str) -> Dict[str, Any]:
@@ -856,7 +859,7 @@ class TestsBuilderEngine:
 
         # Conversion functions: test_helpers wrapper
         if self.is_product_func(func_name):
-            return f"mipp::test_helpers::{fname}<T_dst>({call_args})"
+            return f"mipp::test_helpers::{func_name}<T_dst>({call_args})"
 
         # Functions with no register/mask args (set, set0, set1…): explicit T, LMUL
         args_info = self.get_proto_args_info(func_name)
