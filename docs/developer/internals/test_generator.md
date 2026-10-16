@@ -52,6 +52,8 @@ The input and output arrays are aligned on 64 bytes, which suits `load` and `sto
 
 **Other properties.** `nan_inf_skip` ignores the lanes where the difference is NaN or infinite; `skip_condition` ignores the lanes that match a condition on the reference value (for example the halfway cases of `round`); `overflow_check` ignores the lanes where an addition, subtraction or multiplication overflows; `disabled` comments the test out, with `disabled_reason`; `support_obj: false` skips the Object API.
 
+**Indexed functions.** `gather` and `scatter` take a pointer and a register of unsigned indices, which the generic builder cannot generate. `helpers_tests/indexed_tests.py` writes their tests, with the same principle as the others: the result of the ISA under test is compared with the scalar reference (`gather`: the stored register; `scatter`: the memory written by both targets), for every datatype, LMUL, `d2` and mask variant, in the three APIs. The indices of a `gather` are random values of `[0, N)`; the ones of a `scatter` are a permutation of `[0, N)`, so the result does not depend on the order of the writes. They have no entry in `tests_specs.json`.
+
 !!! warning "Known gaps"
     - The tolerance type `hybrid` (used by `cosh`, `sin`, `sinh`) is accepted by the schema but not implemented: these tests fall back to an absolute tolerance of `0.001`.
     - `overflow_check` with `add`, `sub` or `mul` is only applied in the C tests; the C++ tests only handle the `accumulate_*` values (reductions).

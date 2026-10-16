@@ -642,10 +642,6 @@
                 }
             }
         },
-        "gather": {
-            "disabled": true,
-            "disabled_reason": "Requires array pointer + index vector test template"
-        },
         "get_k": {
             "comparison": "logical"
         },
@@ -976,10 +972,6 @@
                 }
             },
             "comparison": "tolerance"
-        },
-        "scatter": {
-            "disabled": true,
-            "disabled_reason": "Requires array pointer + index vector test template"
         },
         "sqrt": {
             "domain": {

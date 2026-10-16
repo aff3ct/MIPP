@@ -101,8 +101,7 @@
         {
             "level": 3,
             "versions": [
-                "m",
-                "z"
+                "m"
             ],
             "code": [
                 "{{ wrap('m0', 'r0', 'r1') }}",
@@ -113,6 +112,21 @@
                 "for (unsigned i = 0; i < {{ N2 }}; i++)",
                 "\tif ({{ call1('get_k', 'w_m0', 'i', dt=UI) }})",
                 "\t\tp0[idx[i]] = buf[i];"
+            ]
+        },
+        {
+            "level": 3,
+            "versions": [
+                "z"
+            ],
+            "code": [
+                "{{ wrap('m0', 'r0', 'r1') }}",
+                "{{ UT }} idx[{{ N }}];",
+                "{{ T }} buf[{{ N }}];",
+                "{{ call1('storeu', 'idx', 'w_r0', dt=UI) }};",
+                "{{ call1('storeu', 'buf', 'w_r1') }};",
+                "for (unsigned i = 0; i < {{ N2 }}; i++)",
+                "\tp0[idx[i]] = {{ call1('get_k', 'w_m0', 'i', dt=UI) }} ? buf[i] : 0;"
             ]
         }
     ],

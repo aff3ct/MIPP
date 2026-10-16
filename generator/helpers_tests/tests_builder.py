@@ -14,6 +14,7 @@ from typing import Dict, List, Any, Optional, Set
 
 from .dialect_adapters import DialectAdapter, CppDialectAdapter, CDialectAdapter, CppObjDialectAdapter
 from .domain_resolver import DomainResolver
+from . import indexed_tests
 from tools import DATATYPES_MAP
 from include_gen import _match_category
 
@@ -673,6 +674,9 @@ class TestsBuilderEngine:
         ldiv_list: Optional[List[int]] = None,
         mask_list: Optional[List[str]] = None,
     ) -> str:
+        if func_name in indexed_tests.INDEXED_FUNCS:
+            return self._build_indexed_test_file(dialect_name, func_name, lmul_suffix, mkind, lmul, N,
+                                                 lmul_list, ldiv_list, mask_list)
         builder = self.get_builder(dialect_name)
         return builder.build_test_file_content(
             func_name,
@@ -684,6 +688,25 @@ class TestsBuilderEngine:
             ldiv_list=ldiv_list,
             mask_list=mask_list,
         )
+
+    def _build_indexed_test_file(self, dialect_name, func_name, lmul_suffix, mkind, lmul, N,
+                                 lmul_list, ldiv_list, mask_list) -> str:
+        """gather / scatter: see helpers_tests/indexed_tests.py."""
+        dts = []
+        for dt in self._resolve_datatypes(func_name):
+            first = str(dt).split(",")[0].strip()
+            if first not in dts:
+                dts.append(first)
+        if dialect_name == "c":
+            return indexed_tests.build_c(func_name, dts, lmul_suffix, mkind, lmul, N)
+        mask_support = self.interfaces[func_name].get("mask_support", "all_mask")
+        mkinds = []
+        for m in ["unmasked", "mask", "maskz", "masks"]:
+            if mask_list is None or m in mask_list or (m == "unmasked" and "" in mask_list):
+                if m == "unmasked" or self._is_mask_kind_supported(mask_support, m):
+                    mkinds.append("" if m == "unmasked" else m)
+        return indexed_tests.build_cpp(dialect_name, func_name, [self._format_cpp_type(d) for d in dts],
+                                       mkinds, lmul_list, ldiv_list, N)
 
     def format_cpp_op_call(self, func_name: str, mkind: str, is_scalar: bool = False) -> str:
         """Build a C++ template call expression with symbolic params (V, T, LMUL).
