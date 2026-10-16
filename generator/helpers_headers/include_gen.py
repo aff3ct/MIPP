@@ -172,7 +172,7 @@ def _get_all_dt_keys_masked(funcs, f, mask_kind):
     
     """
     dt_keys = []
-    if "mask_support" in funcs[f] and is_supported_mask_kind(funcs[f]["mask_support"], mask_kind):
+    if "variants" in funcs[f] and is_supported_mask_kind(funcs[f]["variants"], mask_kind):
         #dt keys live in implem_status_masked
         # print(f"Function {f} supports mask kind {mask_kind}, checking implem_status_masked for dt_keys")
         if "implem_status_masked" in funcs[f] :
@@ -805,7 +805,7 @@ class IncludeManager:
                         isa_cfg = self.get_isa_config(layer_name)
                         proto = funcs[func].get("proto", {}) if funcs and func in funcs else {}
                         has_msk_arg = (
-                            (funcs[func]["mask_support"].is_any_mask() if "mask_support" in funcs[func] else False) if funcs and func in funcs else False
+                            (funcs[func]["variants"].is_any_mask() if "variants" in funcs[func] else False) if funcs and func in funcs else False
                             or any(arg.get("type") == "msk" for arg in proto.get("args", []))
                         )
                         ret_is_msk = (proto.get("ret", {}).get("type") == "msk")
@@ -870,14 +870,23 @@ class IncludeManager:
                     is_sw_lmul = (l_val in sw_lmuls and l_val > 1)
                     is_sub_isa_wrapper = (l == "d2" and (bool(sub_isa) or uses_mask_ldiv(isa_cfg)))
                     is_horizontal = funcs[func].get("horizontal", False) if funcs and func in funcs else False
-                    is_sw_wrapper = (is_sw_lmul and not is_horizontal) or is_sub_isa_wrapper
+                    # low / high / combine: plain access to the halves, no fallback to other functions
+                    is_changing = bool(funcs) and func in funcs and changes_lmul(funcs[func]["proto"])
+                    is_sw_wrapper = (is_sw_lmul and not is_horizontal) or is_sub_isa_wrapper or is_changing
 
-                    # Rule 1: Software LMUL hierarchy (only if this LMUL is software-emulated)
-                    if 8 in sw_lmuls and l == "m8":
+                    # Rule 1: Software LMUL hierarchy (only if this LMUL is software-emulated). Not for the
+                    # functions that change the LMUL: they declare what they call (call_deps).
+                    if is_changing:
+                        pass
+                    elif 8 in sw_lmuls and l == "m8":
                         item["dependencies"].add(f"mipp/internal/simd_ext/{layer_name}/c/functions/{category}/{v}/m4/{func}{ext}")
-                    if 4 in sw_lmuls and l == "m4":
+                    if is_changing:
+                        pass
+                    elif 4 in sw_lmuls and l == "m4":
                         item["dependencies"].add(f"mipp/internal/simd_ext/{layer_name}/c/functions/{category}/{v}/m2/{func}{ext}")
-                    if 2 in sw_lmuls and l == "m2":
+                    if is_changing:
+                        pass
+                    elif 2 in sw_lmuls and l == "m2":
                         item["dependencies"].add(f"mipp/internal/simd_ext/{layer_name}/c/functions/{category}/{v}/m1/{func}{ext}")
 
                     # Sub-ISA ldiv wrapper dependency (only when d2 is built on the sub_isa registers)
@@ -957,6 +966,55 @@ class IncludeManager:
 
             self.generate_umbrella_headers(layer_name)
 
+    @staticmethod
+    def _is_empty_atomic(text):
+        """True if an atomic header has nothing but its boilerplate (comments, #pragma once, common include)."""
+        for line in text.split("\n"):
+            t = line.strip()
+            if not t or t.startswith("//") or t == "#pragma once":
+                continue
+            if t.startswith("#include") and (t.endswith('common.h"') or t.endswith('common.hpp"')):
+                continue
+            return False
+        return True
+
+    def _drop_empty_atomic(self, item):
+        """Forgets an atomic header with no content: no file, no inclusion by the umbrella headers."""
+        item["_is_prefixed"] = True
+        item["_empty"] = True
+        if item.get("file") is not None:
+            item["file"].close()
+            item["file"] = None
+        funcs_map = self.emitted_atomics.get(item["layer"], {})
+        pairs = funcs_map.get(item["func"])
+        if pairs is not None:
+            pairs.discard((item["variant"], item["lmul"]))
+            if not pairs:
+                del funcs_map[item["func"]]
+
+    # definition of a function at LMUL 1: `static [inline] <ret> mipp_..._m1(<params>) {` up to its closing `}` (column 0)
+    _M1_DEF = re.compile(r"^static ((?:inline )?[^\n(]*?)\b(mipp_\w+?)_m1\(([^)\n]*)\) \{\n.*?^\}\n", re.MULTILINE | re.DOTALL)
+
+    def _add_m1_aliases(self, item, text):
+        """
+        The functions that change the LMUL (low, high, combine, wcvt, ncvt...) have no function at the base level
+        (the name without suffix): that name is the one of the LMUL 1 function in MIPPv2. An alias without the `_m1`
+        suffix follows each definition of such a function. The other suffixes (d2, m2, m4...) have no alias.
+        """
+        if item["lmul"] != "m1":
+            return text
+        fn = item["func"]
+        if fn not in interfaces or not changes_lmul(interfaces[fn]["proto"]):
+            return text
+
+        def alias(m):
+            decl, name, params = m.group(1), m.group(2), m.group(3)
+            args = ", ".join(re.search(r"(\w+)\s*$", p).group(1) for p in params.split(",") if p.strip())
+            return (m.group(0) + f"static {decl}{name}({params}) {{\n"
+                    f"\treturn {name}_m1({args});\n}}\n")
+
+        return self._M1_DEF.sub(alias, text)
+
     def _write_atomic_prefix(self, item):
         if item.get("_is_prefixed", False):
             return
@@ -976,6 +1034,13 @@ class IncludeManager:
                     old = f.read()
             except FileNotFoundError:
                 old = ""
+
+        if self._is_empty_atomic(old):
+            # nothing to emit (e.g. wcvt / combine for m8, low / high for d2): no empty header
+            self._drop_empty_atomic(item)
+            return
+
+        old = self._add_m1_aliases(item, old)
 
         # Separate forward declarations and body lines
         fwd_decls = []
@@ -1025,6 +1090,11 @@ class IncludeManager:
         item["_is_prefixed"] = True
 
     def generate_umbrella_headers(self, layer_name):
+        for item in list(self.atomic_files.values()):
+            if (item["layer"] == layer_name and not item.get("_is_prefixed", False)
+                    and item.get("file") is not None and hasattr(item["file"], "getvalue")
+                    and self._is_empty_atomic(item["file"].getvalue())):
+                self._drop_empty_atomic(item)
         target_dir = self._get_layer_dir(layer_name)
         ext = ".hpp" if (layer_name in ("cpp", "templates") or layer_name.endswith("_cpp")) else ".h"
         funcs_map = self.emitted_atomics.get(layer_name, {})
@@ -1120,11 +1190,15 @@ class IncludeManager:
         if self.mode == "function_header":
             if layer_name in self.layers:
                 layer = self.layers[layer_name]
+                # Fine-grained mode: an umbrella header only exists for the functions the ISA provides
+                emitted = self.emitted_atomics.get(layer_name)
                 with open(target_path, "w", encoding="utf-8", newline="") as f:
                     f.write("#pragma once\n")
                     for func in layer.includes:
                         include_path = layer.includes[func]
                         if func != "common":
+                            if emitted is not None and func not in emitted:
+                                continue
                             category = _match_category(func)
                             f.write(f'#include "functions/{category}/{include_path.name}"\n')
                         else :

@@ -185,19 +185,19 @@ The C and C++ code blocks of the User Guide are not written in the pages: they a
 
 ```cpp
 mipp::rvd<float> a = mipp::load<float>(A);              // setup, not shown
-// --8<-- [start:masked]
+// ;--8<-- [start:masked]
 mipp::rvd<float> c = mipp::add<mipp::M, float>(m, a, b);
-// --8<-- [end:masked]
+// ;--8<-- [end:masked]
 DOC_CHECK(...);                                         // check, not shown
 ```
 
 and the page includes it inside a code block, with the path from the repository root:
 
-```text
-    ```cpp
-    ;--8<-- "examples/doc/programming_model/fun.cpp:masked"
-    ```
+````text
+```cpp
+;--8<-- "examples/doc/programming_model/fun.cpp:masked"
 ```
+````
 
 The section is dedented, and takes the indentation of the `--8<--` line (code blocks in admonitions, tabs and lists). Without `:section`, the whole file is included. Several `--8<--` lines in the same code block are concatenated. A missing file or section fails `mkdocs build`.
 

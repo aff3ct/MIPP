@@ -146,7 +146,7 @@ The `lmulh` files combine the registers of an LMUL > 1 group for horizontal func
 
 ## Step 3: Masked Variants <span class="mipp-isa-badge lvl-2">L2</span> { #step-3-masked-variants-l2 }
 
-At this point `mipp_neon_absdiff_float32_maskz` is still <span class="mipp-isa-badge lvl-3">L3</span>. The masked variants have their own candidates, selected with the `version` field. `generic_emu_templates_mask.json` provides templates for any function with two register arguments, which compute the unmasked function then apply the mask:
+At this point `mipp_neon_absdiff_float32_maskz` is still <span class="mipp-isa-badge lvl-3">L3</span>. The masked variants have their own candidates, selected with the `variant` field (`m`, `z`, `s`). `generic_emu_templates_mask.json` provides templates for any function with two register arguments, which compute the unmasked function then apply the mask:
 
 ```mipp-json
 "binary_maskz_all_datatypes": {
@@ -167,25 +167,25 @@ Reuse them in `helpers_headers/generic_emu_implems_mask.json`, as `add`, `max` o
     {
         "instr_name": "absdiff",
         "datatypes": "all_datatypes",
-        "version": "mask",
+        "variant": "m",
         "template_ref": "tpl_mask_generic_emu.binary_mask_all_datatypes"
     },
     {
         "instr_name": "absdiff",
         "datatypes": "all_datatypes",
-        "version": "maskz",
+        "variant": "z",
         "template_ref": "tpl_mask_generic_emu.binary_maskz_all_datatypes"
     },
     {
         "instr_name": "absdiff",
         "datatypes": "all_datatypes",
-        "version": "masks",
+        "variant": "s",
         "template_ref": "tpl_mask_generic_emu.binary_masks_all_datatypes"
     }
 ]
 ```
 
-The masked variants then follow the level of the unmasked one. An ISA with native masked instructions (AVX-512, SVE, RVV) adds entries with a `version` field in its own `*_native_implems.json` instead.
+The masked variants then follow the level of the unmasked one. An ISA with native masked instructions (AVX-512, SVE, RVV) adds entries with a `variant` field in its own `*_native_implems.json` instead.
 
 ---
 
@@ -258,7 +258,8 @@ The fields are the same in all the `*_implems.json` files. The complete referenc
 | `template` / `template_ref` | Required, one of them. Template name of the ISA's templates file, inline template, or reference to a generic template with its prefix. |
 | `instr_name` | String passed to the template as `instr_name`. |
 | `if` | Preprocessor condition. The entry is emitted under `#if <condition>`; the rest of the condition space goes to the next candidate. |
-| `version` | `mask`, `maskz` or `masks`: the entry implements this mask variant. `horiz_lmul`: the entry implements an LMUL > 1 horizontal function. |
+| `variant` | `m`, `z` or `s`: the entry implements this mask variant (without it, the unmasked variant `u`). |
+| `mode` | `horiz_lmul`: the entry implements an LMUL > 1 horizontal function. It is not a mask variant. |
 | `preferred_simd_ext` | ISA or list of ISAs. Among the candidates of the same level, the entry is tried first on these ISAs and last on the others. Used to choose between several generic entries. |
 | `simd_size` | Register size or list of sizes (in bits, after LMUL) for which the entry applies, e.g. `128`. |
 | `skip_audit_level`, `skip_audit_level_reason` | Disable the `levels` audit for this entry, with a reason. |

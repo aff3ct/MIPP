@@ -83,11 +83,11 @@
     },
     "set1": {
         "format": "short",
-        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(v0);"
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(s0);"
     },
     "set1x": {
         "format": "short",
-        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}x(v0);"
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}x(s0);"
     },
     "set_k-16": {
         "format": "short",

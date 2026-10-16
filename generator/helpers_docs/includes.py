@@ -14,7 +14,7 @@ import json
 import os
 
 from datatypes import all_datatypes, all_ldiv, all_lmul
-from registry import MASK_SUPPORT_MAP, categories, interfaces
+from registry import categories, interfaces
 
 # Display name of the targets, and order of the rows (other ISAs are appended)
 TARGET_NAMES = {
@@ -125,19 +125,24 @@ def render_categories():
     return _header("helpers_headers/registry_categories.json") + "\n".join(lines) + "\n"
 
 
-def render_mask_support():
+def render_variants():
     def yes(flag):
         return "yes" if flag else "—"
 
     lines = [
-        "| `mask_support` | Merge-Masked (`mask`) | Zero-Masked (`maskz`) | Source-Masked (`masks`) | Functions |",
+        "| `variants` | Merge-Masked (`m`) | Zero-Masked (`z`) | Source-Masked (`s`) | Functions |",
         "| :--- | :---: | :---: | :---: | :---: |",
     ]
-    for value, support in MASK_SUPPORT_MAP.items():
-        n_funcs = sum(1 for itf in interfaces.values() if itf["mask_support"] is support)
-        lines.append(f"| `{value}` | {yes(support.is_maskable())} | {yes(support.is_maskzable())} | "
-                     f"{yes(support.is_masksable())} | {n_funcs} |")
-    return _header("MASK_SUPPORT_MAP (helpers_headers/registry.py) and registry_interfaces.json") + "\n".join(lines) + "\n"
+    counts = {}
+    for itf in interfaces.values():
+        key = tuple(itf["variants"].variants())
+        counts[key] = counts.get(key, 0) + 1
+    # Most complete list first, then by the lists themselves
+    for key in sorted(counts, key=lambda k: (-len(k), k)):
+        value = "[" + ", ".join(f'"{v}"' for v in key) + "]"
+        lines.append(f"| `{value}` | {yes('m' in key)} | {yes('z' in key)} | "
+                     f"{yes('s' in key)} | {counts[key]} |")
+    return _header("registry_interfaces.json") + "\n".join(lines) + "\n"
 
 
 def write_includes(generator_dir, out_dir):
@@ -150,7 +155,7 @@ def write_includes(generator_dir, out_dir):
         "lmul_availability.md": render_lmul_availability(generator_dir),
         "datatypes.md": render_datatypes(generator_dir),
         "categories.md": render_categories(),
-        "mask_support.md": render_mask_support(),
+        "variants.md": render_variants(),
     }
     for name, text in fragments.items():
         with open(os.path.join(out_dir, name), "w", encoding="utf-8") as f:

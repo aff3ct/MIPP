@@ -40,6 +40,21 @@ The prefix before the opening angle bracket `<` indicates what entity is being g
 | **`N`** | Number of Elements Constant | `%N<tp>%` | `MIPP_AVX_N_FLOAT32` |
 | **`<function>`** | Call to another MIPP function | `%select<tp>%(...)` | `mipp_avx_select_float32(...)` |
 
+### 2.1. Naming Convention of Function Arguments
+
+Inside a template body, the parameters of the function being generated are not named freely: their name is derived from their kind and from their position **among the arguments of the same kind** (counting from 0). The letters are the same as the token prefixes above.
+
+| Name | Kind of argument | Example |
+| :--- | :--- | :--- |
+| **`r0`, `r1`, `r2`, ...** | Vector data registers (`rvd`) | `add(r0, r1)` |
+| **`m0`, `m1`, `m2`, ...** | Vector mask registers (`rvm`) | `select(m0, r0, r1)` |
+| **`s0`, `s1`, `s2`, ...** | Scalar values | `set1(s0)`, `rshift(r0, s0)` |
+| **`p0`, `p1`, `p2`, ...** | Pointers (memory addresses) | `loadu(p0)` |
+
+For example, in `%r<tp>% res = %add<tp>%(r0, r1);`, `r0` and `r1` are the first and second register arguments. A function taking a mask, a register and a scalar (e.g. a masked shift) names them `m0`, `r0` and `s0`.
+
+A few arguments have a fixed, special name instead: `rsrc` (the source register of the merge-masking `masks` variants, e.g. `%sub<tp|v:S>%(m0, rsrc, r0, r1)`), `vals` (the values of `set`) and `vi` (the index vector of `gather`/`scatter`).
+
 ---
 
 ## 3. Type Expressions (`<...>`)
@@ -52,8 +67,8 @@ The content inside `<...>` describes the target data type to resolve.
 - **`tr`**: Return datatype of the enclosing function.
 
 ```mipp-dsl
-%r<tp>%   // A vector register matching the parameter type
-%s<tr>%   // A scalar matching the return type
+%r<tp>% // A vector register matching the parameter type
+%s<tr>% // A scalar matching the return type
 ```
 
 ### 3.2. Structured Type Attributes (`c:` and `b:`)
@@ -77,18 +92,21 @@ A missing attribute is taken from `tp`. The accepted parts are `tp`, `tr`, `c:`,
 #### Examples
 
 ```mipp-dsl
-%r<c:int|b:32>%        // 32-bit signed integer register (rvd_avx_int32_t)
-%r<c:uint|b:tp>%       // Unsigned integer with the same bitwidth as tp (rvd_avx_uint32_t if tp is float32)
-%r<c:float|b:64>%      // 64-bit floating-point register (rvd_avx_float64_t)
-%m<c:uint|b:tp>%       // Mask register matching tp's bitwidth
+%r<c:int|b:32>%   // 32-bit signed integer register (rvd_avx_int32_t)
+%r<c:uint|b:tp>%  // Unsigned integer with the same bitwidth as tp (rvd_avx_uint32_t if tp is float32)
+%r<c:float|b:64>% // 64-bit floating-point register (rvd_avx_float64_t)
+%m<c:uint|b:tp>%  // Mask register matching tp's bitwidth
 ```
+
+!!! note "`tr` and the LMUL of the result"
+    For the functions that change the LMUL (`low`, `high`, `combine`), a plain `%r<tr>%` / `%m<tr>%` is the register of the **result**, with its own LMUL (for example `d2` for `low` applied to an `m1`), whereas `tp` and the `m:` expressions start from the LMUL of the arguments.
 
 ### 3.3. Two Datatypes
 
 Functions with a datatype pair (conversions, `cast`) take two type expressions separated by a comma, source first:
 
 ```mipp-dsl
-%cast<tp, c:int|b:tp>%(r0)   // mipp_avx_cast_uint32_int32(r0) if tp is uint32
+%cast<tp, c:int|b:tp>%(r0) // mipp_avx_cast_uint32_int32(r0) if tp is uint32
 ```
 
 ---
@@ -103,12 +121,12 @@ You can adjust the register multiplier of a type or of a function call:
 - Relative to the current LMUL: `m:tp*2`, `m:tp/2`.
 
 ```mipp-dsl
-%r<tp|m:tp/2>%             // Register with half the current LMUL
-%hmax<tp|m:tp/2>%(r_lo)    // Call the version of hmax at half the current LMUL
+%r<tp|m:tp/2>%          // Register with half the current LMUL
+%hmax<tp|m:tp/2>%(r_lo) // Call the version of hmax at half the current LMUL
 ```
 
 !!! warning "Only in templates rendered for an LMUL"
-    `m:` has an effect only when the template is rendered for a specific LMUL, as the horizontal templates of `generic_emu_templates_lmulh.json` are (`version: horiz_lmul`). The other templates are rendered once, for the base register: there, `m:` is silently ignored and `%add<tp|m:2>%` produces `mipp_avx_add_float32`.
+    `m:` has an effect only when the template is rendered for a specific LMUL, as the horizontal templates of `generic_emu_templates_lmulh.json` are (`mode: horiz_lmul`). The other templates are rendered once, for the base register: there, `m:` is silently ignored and `%add<tp|m:2>%` produces `mipp_avx_add_float32`.
 
 ### 4.2. Variant Modifiers (`v:`)
 
@@ -124,8 +142,8 @@ When calling another MIPP function, `v:` selects its masking variant, with the l
 Only these four letters are accepted; any other value stops the generation with a "Panic" message.
 
 ```mipp-dsl
-%r<tp>% a = %sub<tp|v:Z>%(m0, r0, r1);        // mipp_avx_sub_float32_maskz(m0, r0, r1)
-%r<tp>% b = %sub<tp|v:S>%(m0, rsrc, r0, r1);  // mipp_avx_sub_float32_masks(m0, rsrc, r0, r1)
+%r<tp>% a = %sub<tp|v:Z>%(m0, r0, r1);       // mipp_avx_sub_float32_maskz(m0, r0, r1)
+%r<tp>% b = %sub<tp|v:S>%(m0, rsrc, r0, r1); // mipp_avx_sub_float32_masks(m0, rsrc, r0, r1)
 ```
 
 `v:` combines with the other modifiers. The horizontal LMUL templates reduce the two halves of a register group with the Zero-Masked variant at half the LMUL:

@@ -86,7 +86,7 @@ static void conversions()
     mipp::rvd<float>   v  = mipp::loadu<float>(ptr);  // {-2.7, -1.4, -0.1, 1.2, ...}
     mipp::rvd<int32_t> vb = mipp::cast_int32(v);      // {0xC02CCCCD, ...}: IEEE-754 bit patterns
     mipp::rvd<int32_t> vi = mipp::cvt_int32(v);       // {-2, -1, 0, 1, ...}: truncation
-    mipp::rvd<double>  vw = mipp::wcvt_float64(v);    // {-2.7, -1.4, ...}: lower half only
+    mipp::rvd<double, 2> vw = mipp::wcvt_float64(v);  // {-2.7, -1.4, ...}: every element, in a register of LMUL 2
     // --8<-- [end:conversions]
     int32_t b[DOC_BUF], t[DOC_BUF];
     double w[DOC_BUF];
@@ -101,8 +101,34 @@ static void conversions()
         DOC_CHECK(t[i] == (int32_t)P[i]);
     }
     DOC_CHECK(t[0] == -2 && t[1] == -1 && t[2] == 0 && t[3] == 1);
-    for (int i = 0; i < (int)mipp::N<double>(); i++)
+    for (int i = 0; i < (int)mipp::N<float>(); i++)
         DOC_CHECK(w[i] == (double)P[i]);
+}
+
+// §5.4: changing the LMUL
+static void changing_lmul()
+{
+    const float* ptr = P;
+    // --8<-- [start:changing_lmul]
+    mipp::rvd<float>     a  = mipp::loadu<float>(ptr);
+    mipp::rvd<float>     b  = mipp::loadu<float>(ptr + mipp::N<float>());
+    mipp::rvd<float, 2>  ab = mipp::combine(a, b);          // {a, b}: twice as many elements
+    mipp::rvd<float>     lo = mipp::low(ab);                // == a
+    mipp::rvd<float>     hi = mipp::high(ab);               // == b
+    mipp::rvd<double, 2> vw = mipp::wcvt_float64(a);        // a as double, in a register of LMUL 2
+    mipp::rvd<float>     vn = mipp::ncvt_float32(vw);       // and back to float: == a
+    // --8<-- [end:changing_lmul]
+    float t[DOC_BUF], l[DOC_BUF], h[DOC_BUF], n[DOC_BUF];
+    mipp::storeu(t, ab);
+    mipp::storeu(l, lo);
+    mipp::storeu(h, hi);
+    mipp::storeu(n, vn);
+    const int N = (int)mipp::N<float>();
+    for (int i = 0; i < N; i++) {
+        DOC_CHECK(t[i] == P[i] && t[i + N] == P[i + N]);
+        DOC_CHECK(l[i] == P[i] && h[i] == P[i + N]);
+        DOC_CHECK(n[i] == P[i]);
+    }
 }
 
 int main()
@@ -112,5 +138,6 @@ int main()
     d2_loop();
     d2_guard();
     conversions();
+    changing_lmul();
     return doc_status();
 }

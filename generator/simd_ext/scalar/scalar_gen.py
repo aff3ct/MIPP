@@ -149,13 +149,15 @@ def _emit_function_body_scalar(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rende
 
 # Important changes here!!
 def gen_c_functions_scalar_one(isa, file, funcs, f, ff, dt, lmul=0, include_manager=None):
+    if not is_defined_for_lmul(funcs[f]["proto"], lmul):
+        return
         
-    if ff["mask_variants"]:
-        mask_variants = ff["mask_variants"]
+    if ff["variants"]:
+        mask_variants = ff["variants"]
     else:
         mask_variants = ["no_mask"]
-        if "mask_support" in interfaces[f]:
-            support = interfaces[f]["mask_support"]
+        if "variants" in interfaces[f]:
+            support = interfaces[f]["variants"]
             if support.is_maskable():
                 mask_variants = mask_variants + ["mask"]
             if support.is_maskzable():

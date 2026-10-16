@@ -961,12 +961,12 @@
         "code": [
             "%s<tp>% t[%N<tp>%];",
             "%storeu<tp>%(t, r0);",
-            "return t[v0];"
+            "return t[s0];"
         ]
     },
     "get_k": {
         "format": "long",
-        "code": "return %get<tp>%(%to_rvd<tp>%(m0), v0);"
+        "code": "return %get<tp>%(%to_rvd<tp>%(m0), s0);"
     },
     "getfirst": {
         "format": "long",
@@ -1305,7 +1305,7 @@
     "set1_k-16": {
         "format": "long",
         "code": [
-            "%r<c:int>% tmp1 = %set1<c:int>%(v0 ? (int16_t)0xFFFF : (int16_t)0);",
+            "%r<c:int>% tmp1 = %set1<c:int>%(s0 ? (int16_t)0xFFFF : (int16_t)0);",
             "%r<tp>% tmp2 = %cast<c:int,tp>%(tmp1);",
             "return %to_rvm<tp>%(tmp2);"
         ]
@@ -1313,7 +1313,7 @@
     "set1_k-32": {
         "format": "long",
         "code": [
-            "%r<c:int>% tmp1 = %set1<c:int>%(v0 ? (int32_t)0xFFFFFFFF : (int32_t)0);",
+            "%r<c:int>% tmp1 = %set1<c:int>%(s0 ? (int32_t)0xFFFFFFFF : (int32_t)0);",
             "%r<tp>% tmp2 = %cast<c:int,tp>%(tmp1);",
             "return %to_rvm<tp>%(tmp2);"
         ]
@@ -1321,7 +1321,7 @@
     "set1_k-64": {
         "format": "long",
         "code": [
-            "%r<c:int>% tmp1 = %set1<c:int>%(v0 ? (int64_t)0xFFFFFFFFFFFFFFFF : (int64_t)0);",
+            "%r<c:int>% tmp1 = %set1<c:int>%(s0 ? (int64_t)0xFFFFFFFFFFFFFFFF : (int64_t)0);",
             "%r<tp>% tmp2 = %cast<c:int,tp>%(tmp1);",
             "return %to_rvm<tp>%(tmp2);"
         ]
@@ -1329,7 +1329,7 @@
     "set1_k-8": {
         "format": "long",
         "code": [
-            "%r<c:int>% tmp1 = %set1<c:int>%(v0 ? (int8_t)0xFF : (int8_t)0);",
+            "%r<c:int>% tmp1 = %set1<c:int>%(s0 ? (int8_t)0xFF : (int8_t)0);",
             "%r<tp>% tmp2 = %cast<c:int,tp>%(tmp1);",
             "return %to_rvm<tp>%(tmp2);"
         ]
@@ -1338,7 +1338,7 @@
         "format": "long",
         "code": [
             "%r<c:int|b:tp>% r0u;",
-            "r0u = %set1<c:int|b:tp>%((int{{ dt_par.n_bits }}_t)v0);",
+            "r0u = %set1<c:int|b:tp>%((int{{ dt_par.n_bits }}_t)s0);",
             "return %cast<c:int|b:tp,tp>%(r0u);"
         ]
     },

@@ -14,7 +14,7 @@ from datatypes import (
     float64, float32, int64, int32, int16, int8, uint64, uint32, uint16, uint8
 )
 
-class MaskSupport:
+class VariantSet:
     def __init__(self, maskable=False, maskzable=False, masksable=False):
         self.maskable = maskable
         self.maskzable = maskzable
@@ -40,26 +40,22 @@ class MaskSupport:
         else:
             raise ValueError(f"Invalid mask type: {mask_str}")
 
-only_maskz = MaskSupport(maskable=False, maskzable=True, masksable=False)
-only_mask = MaskSupport(maskable=True, maskzable=False, masksable=False)
-only_masks = MaskSupport(maskable=False, maskzable=False, masksable=True)
-mask_and_maskz = MaskSupport(maskable=True, maskzable=True, masksable=False)
-mask_and_masks = MaskSupport(maskable=True, maskzable=False, masksable=True)
-maskz_and_masks = MaskSupport(maskable=False, maskzable=True, masksable=True)
-all_mask = MaskSupport(maskable=True, maskzable=True, masksable=True)
-no_mask = MaskSupport(maskable=False, maskzable=False, masksable=False)
+    def variants(self):
+        """Variants as in registry_interfaces.json: always `u`, then `m`, `z`, `s` when supported."""
+        return (["u"] + (["m"] if self.maskable else []) + (["z"] if self.maskzable else [])
+                + (["s"] if self.masksable else []))
 
-# Values accepted for "mask_support" in registry_interfaces.json
-MASK_SUPPORT_MAP = {
-    "only_maskz": only_maskz,
-    "only_mask": only_mask,
-    "only_masks": only_masks,
-    "mask_and_maskz": mask_and_maskz,
-    "mask_and_masks": mask_and_masks,
-    "maskz_and_masks": maskz_and_masks,
-    "all_mask": all_mask,
-    "no_mask": no_mask
-}
+    @classmethod
+    def from_variants(cls, variants):
+        """Builds the object from the `variants` list of registry_interfaces.json (`u`, `m`, `z`, `s`)."""
+        unknown = set(variants) - {"u", "m", "z", "s"}
+        if unknown or "u" not in variants:
+            raise ValueError(f"Invalid variants {variants}: expected a list of 'u', 'm', 'z', 's' containing 'u'")
+        return cls(maskable="m" in variants, maskzable="z" in variants, masksable="s" in variants)
+
+
+# `variants` values of registry_scalar_implems.json -> internal names of the scalar generator.
+_SCALAR_VARIANT_TO_INTERNAL = {"u": "no_mask", "m": "mask", "z": "maskz", "s": "masks"}
 
 def _load_funcs_registry():
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -104,6 +100,10 @@ def _load_funcs_registry():
         }
         if "charac" in v["ret"]:
             cleaned_proto["ret"]["charac"] = v["ret"]["charac"]
+        if "lmul" in v["ret"]:
+            cleaned_proto["ret"]["lmul"] = v["ret"]["lmul"]
+        if "changes_type" in v["ret"]:
+            cleaned_proto["ret"]["changes_type"] = v["ret"]["changes_type"]
             
         cleaned_proto["args"] = []
         for arg in v["args"]:
@@ -125,7 +125,7 @@ def _load_funcs_registry():
             "proto": protos[v["proto_ref"]],
             "datatypes": resolve_datatypes(v["datatypes"]),
             "horizontal": v["horizontal"],
-            "mask_support": MASK_SUPPORT_MAP[v["mask_support"]]
+            "variants": VariantSet.from_variants(v["variants"])
         }
         if "cpp_name" in v:
             interfaces[k]["cpp_name"] = v["cpp_name"]
@@ -143,7 +143,7 @@ def _load_funcs_registry():
             scalar_implems[k].append({
                 "type": item["type"],
                 "datatypes": resolve_datatypes(item["datatypes"]),
-                "mask_variants": item["mask_variants"],
+                "variants": [_SCALAR_VARIANT_TO_INTERNAL[x] for x in item["variants"]],
                 "implem": implem_val
             })
 

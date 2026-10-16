@@ -257,13 +257,15 @@ def validate_logical_integrity(isa, implems, implems_emu):
     # Audit implementation levels
     audit_and_validate_implementation_levels(isa, implems, implems_emu)
 
-def audit_and_validate_implementation_levels(isa, implems, implems_emu):
-    if not ACTIVE_AUDITS:
-        return
+def make_level_detector(isa):
+    """
+    Returns `detect(code) -> (level, deps, has_hardware)` for the templates of `isa`: the rules of the level
+    audit, from the text of a template (before rendering):
+    - 0: one hardware intrinsic of the ISA and no MIPP function;
+    - 1: hardware intrinsics mixed with MIPP functions (%f<...>%), or several intrinsics;
+    - 2: no hardware intrinsic (only MIPP functions).
+    """
     import re
-    import sys
-    prefix = isa.get("prefix", "")
-
     # Build dynamic hardware intrinsic matching set/regex from datatypes
     hw_types = set()
     hw_suffixes = set()
@@ -401,6 +403,25 @@ def audit_and_validate_implementation_levels(isa, implems, implems_emu):
         useful_calls = [c for c in calls if c.lower() not in ignore and "cast" not in c.lower()]
         return len(useful_calls)
 
+    def detect(code):
+        has_hardware = has_hw(code)
+        deps = get_mipp_dependencies(code, None)
+        if has_hardware:
+            level = 1 if (deps or count_useful_intrinsics(code) > 1) else 0
+        else:
+            level = 2
+        return level, deps, has_hardware
+
+    return detect
+
+
+def audit_and_validate_implementation_levels(isa, implems, implems_emu):
+    if not ACTIVE_AUDITS:
+        return
+    import re
+    import sys
+    detect = make_level_detector(isa)
+
     def get_code(choice):
         tpl = choice.get("template", {})
         if isinstance(tpl, dict):
@@ -416,19 +437,8 @@ def audit_and_validate_implementation_levels(isa, implems, implems_emu):
     for func, choices in implems.items():
         for choice in choices:
             code = get_code(choice)
-            has_hardware = has_hw(code)
-            deps = get_mipp_dependencies(code, func)
-            has_deps = len(deps) > 0
-            
-            # Detected level
-            if has_hardware:
-                if has_deps or count_useful_intrinsics(code) > 1:
-                    detected = 1
-                else:
-                    detected = 0
-            else:
-                detected = 2
-                
+            detected, deps, _ = detect(code)
+
             if choice.get("skip_audit_level") == True:
                 continue
                 
@@ -440,19 +450,8 @@ def audit_and_validate_implementation_levels(isa, implems, implems_emu):
     for func, choices in implems_emu.items():
         for choice in choices:
             code = get_code(choice)
-            has_hardware = has_hw(code)
-            deps = get_mipp_dependencies(code, func)
-            has_deps = len(deps) > 0
-            
-            # Detected level
-            if has_hardware:
-                if has_deps or count_useful_intrinsics(code) > 1:
-                    detected = 1
-                else:
-                    detected = 0
-            else:
-                detected = 2
-                
+            detected, deps, _ = detect(code)
+
             if choice.get("skip_audit_level") == True:
                 continue
                 
@@ -469,7 +468,7 @@ def audit_and_validate_implementation_levels(isa, implems, implems_emu):
             print(Fore.BLUE + f"  - Function '{func}' [{dts}] in '{table}' has declared/expected level {declared} but detected level {detected}{deps_str} (template code: '{snippet}...')", file=sys.stderr)
 
     # Datatype implementation duplicates check
-    from tools import resolve_datatypes
+    from tools import resolve_datatypes, ff_mask_kind
     from cond_utils import are_conds_mutually_exclusive
     func_impls = {}
     
@@ -482,9 +481,7 @@ def audit_and_validate_implementation_levels(isa, implems, implems_emu):
             for choice in choices:
                 lvl = choice.get("level", default_level)
                 dts = resolve_datatypes(choice.get("datatypes", []))
-                mv = choice.get("version", "no_mask")
-                if mv is None:
-                    mv = "no_mask"
+                mv = ff_mask_kind(choice) or "no_mask"
                 cond = choice.get("if", "")
                 for dt in dts:
                     key = (dt, mv)
@@ -658,6 +655,12 @@ def validate_categories_logical_integrity(categories_dict, interfaces_dict):
 
 def validate_protos_config(protos_dict):
     validate_json_data(protos_dict, "protos_schema.json", label="registry_protos.json")
+    for name, proto in protos_dict.items():
+        for i, arg in enumerate(proto.get("args", [])):
+            if "lmul" in arg:
+                print("Error: Logical integrity check failed for registry_protos.json:", file=sys.stderr)
+                print(f"  - Prototype '{name}': 'lmul' is only allowed in 'ret' (found in args[{i}]).", file=sys.stderr)
+                sys.exit(1)
 
 def validate_interfaces_config(interfaces_dict, protos_dict):
     validate_json_data(interfaces_dict, "interfaces_schema.json", label="registry_interfaces.json")

@@ -512,5 +512,107 @@
                 "charac": "RO"
             }
         ]
+    },
+    "ret_reg_1arg_reg_lmul_down": {
+        "ret": {
+            "type": "reg",
+            "fixeddatatype": false,
+            "charac": "WO",
+            "lmul": "down"
+        },
+        "args": [
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            }
+        ]
+    },
+    "ret_reg_1arg_reg_lmul_up": {
+        "ret": {
+            "type": "reg",
+            "fixeddatatype": false,
+            "charac": "WO",
+            "lmul": "up",
+            "changes_type": true
+        },
+        "args": [
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            }
+        ]
+    },
+    "ret_reg_1arg_reg_lmul_down_conv": {
+        "ret": {
+            "type": "reg",
+            "fixeddatatype": false,
+            "charac": "WO",
+            "lmul": "down",
+            "changes_type": true
+        },
+        "args": [
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            }
+        ]
+    },
+    "ret_reg_2args_reg_lmul_up": {
+        "ret": {
+            "type": "reg",
+            "fixeddatatype": false,
+            "charac": "WO",
+            "lmul": "up"
+        },
+        "args": [
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            },
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            }
+        ]
+    },
+    "ret_msk_1arg_msk_lmul_down": {
+        "ret": {
+            "type": "msk",
+            "fixeddatatype": false,
+            "charac": "WO",
+            "lmul": "down"
+        },
+        "args": [
+            {
+                "type": "msk",
+                "fixeddatatype": false,
+                "charac": "RO"
+            }
+        ]
+    },
+    "ret_msk_2args_msk_lmul_up": {
+        "ret": {
+            "type": "msk",
+            "fixeddatatype": false,
+            "charac": "WO",
+            "lmul": "up"
+        },
+        "args": [
+            {
+                "type": "msk",
+                "fixeddatatype": false,
+                "charac": "RO"
+            },
+            {
+                "type": "msk",
+                "fixeddatatype": false,
+                "charac": "RO"
+            }
+        ]
     }
 }

@@ -4,7 +4,7 @@
  * featuring intelligent family grouping and direct links to the View Algorithm modal.
  */
 import { escapeHtml } from "../explorer.config.js";
-import { ALL_SIMD_EXTS, SIMD_EXT_DISPLAY_NAMES, ALL_MASK_MODES } from "../data.js";
+import { ALL_SIMD_EXTS, SIMD_EXT_DISPLAY_NAMES, ALL_MASK_MODES, maskSupportOf } from "../data.js";
 import { getDtBadgeClass } from "../syntax.js";
 import { state } from "../state.js";
 
@@ -24,7 +24,7 @@ export function renderTabHw(entry) {
     `;
   }
 
-  const maskSupport = entry.mask_support || {};
+  const maskSupport = maskSupportOf(entry);
   const effectiveMasks = ALL_MASK_MODES.filter((m) => m === "unmasked" || maskSupport[m]);
 
   const globalVariant = state.maskVariant || "unmasked";

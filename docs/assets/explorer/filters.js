@@ -1,7 +1,7 @@
 /**
  * MIPP API Explorer - Multi-Criteria Filter Engine
  */
-import { allPrimitiveNamesDesc, INTRINSIC_INDEX, isIntrinsicPrefixTyped, matchesDatatype, ALL_SIMD_EXTS } from "./data.js";
+import { allPrimitiveNamesDesc, INTRINSIC_INDEX, isIntrinsicPrefixTyped, matchesDatatype, ALL_SIMD_EXTS, maskSupportOf } from "./data.js";
 
 function getPrimitiveFromQuery(rest) {
   for (const pName of allPrimitiveNamesDesc) {
@@ -222,7 +222,7 @@ export function filterEntries(data, state) {
     entry._unsupportedVariant = false;
     const activeMask = state.maskVariant || "unmasked";
     if (activeMask !== "unmasked") {
-      const maskSupport = entry.mask_support || {};
+      const maskSupport = maskSupportOf(entry);
       if (!maskSupport[activeMask]) {
         // Option 1 (Card Pinning): If this card is currently expanded/opened by the user, keep it pinned in results
         if (state.expandedCards && state.expandedCards.has(entry.name)) {

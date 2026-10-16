@@ -35,7 +35,7 @@
             ],
             "template": "gather_maskz_f64",
             "if": "defined(__AVX2__)",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "gather",
@@ -44,7 +44,7 @@
             ],
             "template": "gather_maskz_i64",
             "if": "defined(__AVX2__)",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "gather",
@@ -53,7 +53,7 @@
             ],
             "template": "gather_maskz_f32",
             "if": "defined(__AVX2__)",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "gather",
@@ -62,7 +62,7 @@
             ],
             "template": "gather_maskz_i32",
             "if": "defined(__AVX2__)",
-            "version": "maskz"
+            "variant": "z"
         }
     ],
     "hadd": [

@@ -23,6 +23,7 @@
     ],
     "converts": [
         "cvt",
+        "ncvt",
         "wcvt"
     ],
     "load": [
@@ -103,5 +104,13 @@
         "get_k",
         "getfirst",
         "scatter"
+    ],
+    "combine": [
+        "low",
+        "low_k",
+        "high",
+        "high_k",
+        "combine",
+        "combine_k"
     ]
 }

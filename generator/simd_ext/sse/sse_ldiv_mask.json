@@ -1,28 +1,302 @@
 {
-    "load|loadu": [
+    "combine": [
         {
-            "versions": [
+            "variants": [
                 "u"
             ],
             "code": [
-                "{{ D2 }} res;",
+                "%r<tr>% res;",
+                "{% if isa_dt.reg == '__m128' %}res.r = _mm_movelh_ps(r0.r, r1.r);",
+                "{% elif isa_dt.reg == '__m128d' %}res.r = _mm_unpacklo_pd(r0.r, r1.r);",
+                "{% else %}res.r = _mm_unpacklo_epi64(r0.r, r1.r);{% endif %}",
+                "return res;"
+            ],
+            "datatypes": [
+                "float32"
+            ]
+        },
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "%r<tr>% res;",
+                "{% if isa_dt.reg == '__m128' %}res.r = _mm_movelh_ps(r0.r, r1.r);",
+                "{% elif isa_dt.reg == '__m128d' %}res.r = _mm_unpacklo_pd(r0.r, r1.r);",
+                "{% else %}res.r = _mm_unpacklo_epi64(r0.r, r1.r);{% endif %}",
+                "return res;"
+            ],
+            "datatypes": [
+                "float64",
+                "int64",
+                "int32",
+                "int16",
+                "int8",
+                "uint64",
+                "uint32",
+                "uint16",
+                "uint8"
+            ],
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "combine_k": [
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "%m<tr>% res;",
+                "{% if isa_dt.reg == '__m128' %}res.m = _mm_movelh_ps(m0.m, m1.m);",
+                "{% elif isa_dt.reg == '__m128d' %}res.m = _mm_unpacklo_pd(m0.m, m1.m);",
+                "{% else %}res.m = _mm_unpacklo_epi64(m0.m, m1.m);{% endif %}",
+                "return res;"
+            ],
+            "datatypes": [
+                "float32"
+            ]
+        },
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "%m<tr>% res;",
+                "{% if isa_dt.reg == '__m128' %}res.m = _mm_movelh_ps(m0.m, m1.m);",
+                "{% elif isa_dt.reg == '__m128d' %}res.m = _mm_unpacklo_pd(m0.m, m1.m);",
+                "{% else %}res.m = _mm_unpacklo_epi64(m0.m, m1.m);{% endif %}",
+                "return res;"
+            ],
+            "datatypes": [
+                "float64",
+                "int64",
+                "int32",
+                "int16",
+                "int8",
+                "uint64",
+                "uint32",
+                "uint16",
+                "uint8"
+            ],
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "high": [
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "%r<tr>% res;",
+                "{% if isa_dt.reg == '__m128' %}res.r = _mm_movehl_ps(r0.r, r0.r);",
+                "{% elif isa_dt.reg == '__m128d' %}res.r = _mm_unpackhi_pd(r0.r, r0.r);",
+                "{% else %}res.r = _mm_srli_si128(r0.r, 8);{% endif %}",
+                "return res;"
+            ],
+            "datatypes": [
+                "float32"
+            ]
+        },
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "%r<tr>% res;",
+                "{% if isa_dt.reg == '__m128' %}res.r = _mm_movehl_ps(r0.r, r0.r);",
+                "{% elif isa_dt.reg == '__m128d' %}res.r = _mm_unpackhi_pd(r0.r, r0.r);",
+                "{% else %}res.r = _mm_srli_si128(r0.r, 8);{% endif %}",
+                "return res;"
+            ],
+            "datatypes": [
+                "float64",
+                "int64",
+                "int32",
+                "int16",
+                "int8",
+                "uint64",
+                "uint32",
+                "uint16",
+                "uint8"
+            ],
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "high_k": [
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "%m<tr>% res;",
+                "{% if isa_dt.reg == '__m128' %}res.m = _mm_movehl_ps(m0.m, m0.m);",
+                "{% elif isa_dt.reg == '__m128d' %}res.m = _mm_unpackhi_pd(m0.m, m0.m);",
+                "{% else %}res.m = _mm_srli_si128(m0.m, 8);{% endif %}",
+                "return res;"
+            ],
+            "datatypes": [
+                "float32"
+            ]
+        },
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "%m<tr>% res;",
+                "{% if isa_dt.reg == '__m128' %}res.m = _mm_movehl_ps(m0.m, m0.m);",
+                "{% elif isa_dt.reg == '__m128d' %}res.m = _mm_unpackhi_pd(m0.m, m0.m);",
+                "{% else %}res.m = _mm_srli_si128(m0.m, 8);{% endif %}",
+                "return res;"
+            ],
+            "datatypes": [
+                "float64",
+                "int64",
+                "int32",
+                "int16",
+                "int8",
+                "uint64",
+                "uint32",
+                "uint16",
+                "uint8"
+            ],
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "load|loadu": [
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "%r<tr>% res;",
                 "{% if isa_dt.reg == '__m128' %}res.r = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*)p0));",
                 "{% elif isa_dt.reg == '__m128d' %}res.r = _mm_load_sd(p0);",
                 "{% else %}res.r = _mm_loadl_epi64((const __m128i*)p0);{% endif %}",
                 "return res;"
+            ],
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "low": [
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "%r<tr>% res;",
+                "res.r = r0.r;",
+                "return res;"
             ]
+        }
+    ],
+    "low_k": [
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "%m<tr>% res;",
+                "res.m = m0.m;",
+                "return res;"
+            ]
+        }
+    ],
+    "ncvt": [
+        {
+            "variants": ["u"],
+            "code": [
+                "%r<tr>% res;",
+                "res.r = _mm_packus_epi16(_mm_and_si128(r0.r, _mm_set1_epi16(0x00FF)), _mm_setzero_si128());",
+                "return res;"
+            ],
+            "datatypes": ["int16", "uint16"],
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "variants": ["u"],
+            "code": [
+                "%r<tr>% res;",
+                "res.r = _mm_packs_epi32(_mm_srai_epi32(_mm_slli_epi32(r0.r, 16), 16), _mm_setzero_si128());",
+                "return res;"
+            ],
+            "datatypes": ["int32", "uint32"],
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "variants": ["u"],
+            "code": [
+                "%r<tr>% res;",
+                "res.r = _mm_shuffle_epi32(r0.r, _MM_SHUFFLE(3, 3, 2, 0));",
+                "return res;"
+            ],
+            "datatypes": ["int64", "uint64"],
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "variants": ["u"],
+            "code": [
+                "%r<tr>% res;",
+                "res.r = _mm_cvtpd_ps(r0.r);",
+                "return res;"
+            ],
+            "datatypes": ["float64"],
+            "if": "defined(__SSE2__)"
         }
     ],
     "store|storeu": [
         {
-            "versions": [
+            "variants": [
                 "u"
             ],
             "code": [
                 "{% if isa_dt.reg == '__m128' %}_mm_storel_epi64((__m128i*)p0, _mm_castps_si128(r0.r));",
                 "{% elif isa_dt.reg == '__m128d' %}_mm_store_sd(p0, r0.r);",
                 "{% else %}_mm_storel_epi64((__m128i*)p0, r0.r);{% endif %}"
-            ]
+            ],
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "wcvt": [
+        {
+            "variants": ["u"],
+            "code": [
+                "%r<tr>% res;",
+                "res.r = _mm_cvt{{ isa_dt.data_ext }}_{{ isa.datatypes[ctx.dt_ret].data_ext | replace('epu', 'epi') }}(r0.r);",
+                "return res;"
+            ],
+            "datatypes": ["int8", "int16", "int32", "uint8", "uint16", "uint32"],
+            "if": "defined(__SSE4_1__)"
+        },
+        {
+            "variants": ["u"],
+            "code": [
+                "%r<tr>% res;",
+                "res.r = _mm_unpacklo_{{ isa_dt.data_ext }}(r0.r, _mm_cmpgt_{{ isa_dt.data_ext }}(_mm_setzero_si128(), r0.r));",
+                "return res;"
+            ],
+            "datatypes": ["int8", "int16", "int32"],
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "variants": ["u"],
+            "code": [
+                "%r<tr>% res;",
+                "res.r = _mm_unpacklo_{{ isa_dt.data_ext | replace('epu', 'epi') }}(r0.r, _mm_setzero_si128());",
+                "return res;"
+            ],
+            "datatypes": ["uint8", "uint16", "uint32"],
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "variants": ["u"],
+            "code": [
+                "%r<tr>% res;",
+                "res.r = _mm_cvtps_pd(r0.r);",
+                "return res;"
+            ],
+            "datatypes": ["float32"],
+            "if": "defined(__SSE2__)"
         }
     ]
 }

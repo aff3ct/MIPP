@@ -80,7 +80,7 @@ Some tables of the hand-written pages restate the registries or the ISA descript
 | `lmul_availability.md` | `sw_lmul`, `hw_lmul`, `sw_ldiv_type` of the ISA descriptors; the `MIPP_LDIV_2` column uses the same condition as `ci_generator.py` | [Vector Types & LMUL](../../user/vector_types_and_lmul.md#34-representation-per-target) |
 | `datatypes.md` | `all_datatypes` (`datatypes.py`), `registry_scalar_isa.json` | [Vector Types & LMUL](../../user/vector_types_and_lmul.md#1-supported-datatypes-matrix) |
 | `categories.md` | `registry_categories.json` | [Add a Function](../tutorials/add_function.md#step-2-assign-a-category) |
-| `mask_support.md` | `MASK_SUPPORT_MAP` (`registry.py`), `registry_interfaces.json` | [Add a Function](../tutorials/add_function.md#step-1-declare-the-interface) |
+| `variants.md` | `registry_interfaces.json` | [Add a Function](../tutorials/add_function.md#step-1-declare-the-interface) |
 
 `docs/includes/` is excluded from the site (`exclude_docs` in `mkdocs.yml`): its files are fragments, not pages. A fragment is included in pages at different depths, so it contains no relative link. To add one, write a `render_*()` function and add its output to `write_includes()`.
 

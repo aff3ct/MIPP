@@ -327,6 +327,10 @@
     "description": "Truncates each floating-point element toward zero.",
     "latex": "\\text{res}_i = \\operatorname{trunc}(r0_i)"
   },
+  "ncvt": {
+    "description": "Narrowing conversion: converts vector elements to a narrower datatype, keeping the lanes in a register one LMUL below. The value is truncated (modulo for integers), not saturated.",
+    "latex": "\\text{res}_i = (T_{\\text{narrow}}) r0_i"
+  },
   "wcvt": {
     "description": "Widening conversion: converts vector elements to a wider datatype.",
     "latex": "\\text{res}_i = (T_{\\text{wide}}) r0_i"

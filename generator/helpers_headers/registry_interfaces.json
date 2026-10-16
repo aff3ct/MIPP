@@ -4,178 +4,178 @@
       "proto_ref": "ret_reg_1arg_reg",
       "datatypes": "all_datatypes",
       "horizontal": false,
-      "mask_support": "all_mask"
+      "variants": ["u", "m", "z", "s"]
     },
     "acos": {
       "proto_ref": "ret_reg_1arg_reg",
       "datatypes": "all_float",
       "horizontal": false,
-      "mask_support": "all_mask"
+      "variants": ["u", "m", "z", "s"]
     },
     "acosh": {
       "proto_ref": "ret_reg_1arg_reg",
       "datatypes": "all_float",
       "horizontal": false,
-      "mask_support": "all_mask"
+      "variants": ["u", "m", "z", "s"]
     },
     "add": {
         "proto_ref": "ret_reg_2args_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "mask_support": "all_mask"
+        "variants": ["u", "m", "z", "s"]
     },
     "adds": {
         "proto_ref": "ret_reg_2args_reg",
         "datatypes": "all_int_uint",
         "horizontal": false,
-        "mask_support": "all_mask"
+        "variants": ["u", "m", "z", "s"]
     },
     "andb": {
         "proto_ref": "ret_reg_2args_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "mask_support": "all_mask"
+        "variants": ["u", "m", "z", "s"]
     },
     "andb_k": {
         "proto_ref": "ret_msk_2args_msk",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "mask_support": "no_mask",
+        "variants": ["u"],
         "cpp_name": "andb"
     },
     "andnb": {
         "proto_ref": "ret_reg_2args_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "mask_support": "all_mask"
+        "variants": ["u", "m", "z", "s"]
     },
     "andnb_k": {
         "proto_ref": "ret_msk_2args_msk",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "mask_support": "no_mask",
+        "variants": ["u"],
         "cpp_name": "andnb"
     },
     "asin": {
       "proto_ref": "ret_reg_1arg_reg",
       "datatypes": "all_float",
       "horizontal": false,
-      "mask_support": "all_mask"
+      "variants": ["u", "m", "z", "s"]
     },
     "asinh": {
       "proto_ref": "ret_reg_1arg_reg",
       "datatypes": "all_float",
       "horizontal": false,
-      "mask_support": "all_mask"
+      "variants": ["u", "m", "z", "s"]
     },
     "atan": {
       "proto_ref": "ret_reg_1arg_reg",
       "datatypes": "all_float",
       "horizontal": false,
-      "mask_support": "all_mask"
+      "variants": ["u", "m", "z", "s"]
     },
     "atan2": {
       "proto_ref": "ret_reg_2args_reg",
       "datatypes": "all_float",
       "horizontal": false,
-      "mask_support": "all_mask"
+      "variants": ["u", "m", "z", "s"]
     },
     "atanh": {
       "proto_ref": "ret_reg_1arg_reg",
       "datatypes": "all_float",
       "horizontal": false,
-      "mask_support": "all_mask"
+      "variants": ["u", "m", "z", "s"]
     },
     "cast": {
         "proto_ref": "ret_reg_1arg_reg",
         "datatypes": "all_datatypes_cart_prod",
         "horizontal": false,
-        "mask_support": "no_mask"
+        "variants": ["u"]
     },
     "cast_k": {
         "proto_ref": "ret_msk_1arg_msk",
         "datatypes": "all_datatypes_same_size",
         "horizontal": false,
-        "mask_support": "no_mask",
+        "variants": ["u"],
         "cpp_name": "cast"
     },
     "cmpeq": {
         "proto_ref": "ret_msk_2args_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "mask_support": "only_maskz"
+        "variants": ["u", "z"]
     },
     "cmpge": {
         "proto_ref": "ret_msk_2args_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "mask_support": "only_maskz"
+        "variants": ["u", "z"]
     },
     "cmpgt": {
         "proto_ref": "ret_msk_2args_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "mask_support": "only_maskz"
+        "variants": ["u", "z"]
     },
     "cmple": {
         "proto_ref": "ret_msk_2args_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "mask_support": "only_maskz"
+        "variants": ["u", "z"]
     },
     "cmplt": {
         "proto_ref": "ret_msk_2args_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "mask_support": "only_maskz"
+        "variants": ["u", "z"]
     },
     "cmpneq": {
         "proto_ref": "ret_msk_2args_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "mask_support": "only_maskz"
+        "variants": ["u", "z"]
     },
     "cos": {
       "proto_ref": "ret_reg_1arg_reg",
       "datatypes": "all_float",
       "horizontal": false,
-      "mask_support": "all_mask"
+      "variants": ["u", "m", "z", "s"]
     },
     "cosh": {
       "proto_ref": "ret_reg_1arg_reg",
       "datatypes": "all_float",
       "horizontal": false,
-      "mask_support": "all_mask"
+      "variants": ["u", "m", "z", "s"]
     },
     "cvt": {
         "proto_ref": "ret_reg_1arg_reg",
         "datatypes": "all_datatypes_same_size",
         "horizontal": false,
-        "mask_support": "no_mask"
+        "variants": ["u"]
     },
     "div": {
         "proto_ref": "ret_reg_2args_reg",
         "datatypes": "all_float",
         "horizontal": false,
-        "mask_support": "all_mask"
+        "variants": ["u", "m", "z", "s"]
     },
     "div2": {
         "proto_ref": "ret_reg_1arg_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "mask_support": "all_mask"
+        "variants": ["u", "m", "z", "s"]
     },
     "div4": {
         "proto_ref": "ret_reg_1arg_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "mask_support": "all_mask"
+        "variants": ["u", "m", "z", "s"]
     },
     "exp": {
         "proto_ref": "ret_reg_1arg_reg",
         "datatypes": "all_float",
         "horizontal": false,
-        "mask_support": "all_mask"
+        "variants": ["u", "m", "z", "s"]
     },
     "fmadd": {
         "proto_ref": "ret_reg_3args_reg",
@@ -184,7 +184,7 @@
             "int32"
         ],
         "horizontal": false,
-        "mask_support": "all_mask"
+        "variants": ["u", "m", "z", "s"]
     },
     "fmsub": {
         "proto_ref": "ret_reg_3args_reg",
@@ -193,7 +193,7 @@
             "int32"
         ],
         "horizontal": false,
-        "mask_support": "all_mask"
+        "variants": ["u", "m", "z", "s"]
     },
     "fnmadd": {
         "proto_ref": "ret_reg_3args_reg",
@@ -202,7 +202,7 @@
             "int32"
         ],
         "horizontal": false,
-        "mask_support": "all_mask"
+        "variants": ["u", "m", "z", "s"]
     },
     "fnmsub": {
         "proto_ref": "ret_reg_3args_reg",
@@ -211,110 +211,110 @@
             "int32"
         ],
         "horizontal": false,
-        "mask_support": "all_mask"
+        "variants": ["u", "m", "z", "s"]
     },
     "gather": {
         "proto_ref": "ret_reg_2args_ptr_reg",
         "datatypes": "all_datatypes_idx_pair",
         "horizontal": false,
-        "mask_support": "maskz_and_masks"
+        "variants": ["u", "z", "s"]
     },
     "get": {
         "proto_ref": "ret_val_2args_reg_val",
         "datatypes": "all_datatypes",
         "horizontal": true,
-        "mask_support": "no_mask"
+        "variants": ["u"]
     },
     "get_k": {
         "proto_ref": "ret_val_2args_msk_val",
         "datatypes": "all_datatypes",
         "horizontal": true,
-        "mask_support": "no_mask",
+        "variants": ["u"],
         "cpp_name": "get"
     },
     "getfirst": {
         "proto_ref": "ret_val_1arg_reg",
         "datatypes": "all_datatypes",
         "horizontal": true,
-        "mask_support": "no_mask"
+        "variants": ["u"]
     },
     "hadd": {
         "proto_ref": "ret_val_1arg_reg",
         "datatypes": "all_datatypes",
         "horizontal": true,
-        "mask_support": "only_maskz"
+        "variants": ["u", "z"]
     },
     "hadds": {
         "proto_ref": "ret_val_1arg_reg",
         "datatypes": "all_int_uint",
         "horizontal": true,
-        "mask_support": "only_maskz"
+        "variants": ["u", "z"]
     },
     "hmax": {
         "proto_ref": "ret_val_1arg_reg",
         "datatypes": "all_datatypes",
         "horizontal": true,
-        "mask_support": "only_maskz"
+        "variants": ["u", "z"]
     },
     "hmin": {
         "proto_ref": "ret_val_1arg_reg",
         "datatypes": "all_datatypes",
         "horizontal": true,
-        "mask_support": "only_maskz"
+        "variants": ["u", "z"]
     },
     "hmul": {
         "proto_ref": "ret_val_1arg_reg",
         "datatypes": "all_datatypes",
         "horizontal": true,
-        "mask_support": "only_maskz"
+        "variants": ["u", "z"]
     },
     "load": {
         "proto_ref": "ret_reg_1arg_ptr",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "mask_support": "maskz_and_masks"
+        "variants": ["u", "z", "s"]
     },
     "loadu": {
         "proto_ref": "ret_reg_1arg_ptr",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "mask_support": "maskz_and_masks"
+        "variants": ["u", "z", "s"]
     },
     "log": {
         "proto_ref": "ret_reg_1arg_reg",
         "datatypes": "all_float",
         "horizontal": false,
-        "mask_support": "all_mask"
+        "variants": ["u", "m", "z", "s"]
     },
     "lshift": {
         "proto_ref": "ret_reg_2args_reg_val",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "mask_support": "all_mask"
+        "variants": ["u", "m", "z", "s"]
     },
     "max": {
         "proto_ref": "ret_reg_2args_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "mask_support": "all_mask"
+        "variants": ["u", "m", "z", "s"]
     },
     "min": {
         "proto_ref": "ret_reg_2args_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "mask_support": "all_mask"
+        "variants": ["u", "m", "z", "s"]
     },
     "msb": {
         "proto_ref": "ret_reg_1arg_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "mask_support": "all_mask"
+        "variants": ["u", "m", "z", "s"]
     },
     "mul": {
         "proto_ref": "ret_reg_2args_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "mask_support": "all_mask"
+        "variants": ["u", "m", "z", "s"]
     },
     "neg": {
         "proto_ref": "ret_reg_1arg_reg",
@@ -323,32 +323,32 @@
             "all_float"
         ],
         "horizontal": false,
-        "mask_support": "all_mask"
+        "variants": ["u", "m", "z", "s"]
     },
     "notb": {
         "proto_ref": "ret_reg_1arg_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "mask_support": "all_mask"
+        "variants": ["u", "m", "z", "s"]
     },
     "notb_k": {
         "proto_ref": "ret_msk_1arg_msk",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "mask_support": "no_mask",
+        "variants": ["u"],
         "cpp_name": "notb"
     },
     "orb": {
         "proto_ref": "ret_reg_2args_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "mask_support": "all_mask"
+        "variants": ["u", "m", "z", "s"]
     },
     "orb_k": {
         "proto_ref": "ret_msk_2args_msk",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "mask_support": "no_mask",
+        "variants": ["u"],
         "cpp_name": "orb"
     },
     "pow": {
@@ -358,7 +358,7 @@
             "all_float"
         ],
         "horizontal": false,
-        "mask_support": "all_mask"
+        "variants": ["u", "m", "z", "s"]
     },
     "pow2": {
         "proto_ref": "ret_reg_1arg_reg",
@@ -367,175 +367,220 @@
             "all_float"
         ],
         "horizontal": false,
-        "mask_support": "all_mask"
+        "variants": ["u", "m", "z", "s"]
     },
     "round": {
         "proto_ref": "ret_reg_1arg_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "mask_support": "all_mask"
+        "variants": ["u", "m", "z", "s"]
     },
     "rshift": {
         "proto_ref": "ret_reg_2args_reg_val",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "mask_support": "all_mask"
+        "variants": ["u", "m", "z", "s"]
     },
     "rsqrt": {
         "proto_ref": "ret_reg_1arg_reg",
         "datatypes": "all_float",
         "horizontal": false,
-        "mask_support": "all_mask"
+        "variants": ["u", "m", "z", "s"]
     },
     "scatter": {
         "proto_ref": "ret_void_3args_ptr_reg_reg",
         "datatypes": "all_datatypes_idx_pair",
         "horizontal": false,
-        "mask_support": "mask_and_maskz"
+        "variants": ["u", "m", "z"]
     },
     "select": {
         "proto_ref": "ret_reg_3args_1msk_2reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "mask_support": "no_mask"
+        "variants": ["u"]
     },
     "set": {
         "proto_ref": "ret_reg_1arg_Nele",
         "datatypes": "all_datatypes",
         "horizontal": true,
-        "mask_support": "no_mask"
+        "variants": ["u"]
     },
     "set0": {
         "proto_ref": "ret_reg_0arg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "mask_support": "no_mask"
+        "variants": ["u"]
     },
     "set0_k": {
         "proto_ref": "ret_msk_0arg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "mask_support": "no_mask"
+        "variants": ["u"]
     },
     "set1": {
         "proto_ref": "ret_reg_1arg_val",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "mask_support": "no_mask"
+        "variants": ["u"]
     },
     "set1_k": {
         "proto_ref": "ret_msk_1arg_i32",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "mask_support": "no_mask"
+        "variants": ["u"]
     },
     "set_k": {
         "proto_ref": "ret_msk_1arg_Nele",
         "datatypes": "all_datatypes",
         "horizontal": true,
-        "mask_support": "no_mask"
+        "variants": ["u"]
     },
     "sin": {
       "proto_ref": "ret_reg_1arg_reg",
       "datatypes": "all_float",
       "horizontal": false,
-      "mask_support": "all_mask"
+      "variants": ["u", "m", "z", "s"]
     },
     "sinh": {
       "proto_ref": "ret_reg_1arg_reg",
       "datatypes": "all_float",
       "horizontal": false,
-      "mask_support": "all_mask"
+      "variants": ["u", "m", "z", "s"]
     },
     "sqrt": {
         "proto_ref": "ret_reg_1arg_reg",
         "datatypes": "all_float",
         "horizontal": false,
-        "mask_support": "all_mask"
+        "variants": ["u", "m", "z", "s"]
     },
     "store": {
         "proto_ref": "ret_void_2args_ptr_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "mask_support": "mask_and_maskz"
+        "variants": ["u", "m", "z"]
     },
     "storeu": {
         "proto_ref": "ret_void_2args_ptr_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "mask_support": "mask_and_maskz"
+        "variants": ["u", "m", "z"]
     },
     "sub": {
         "proto_ref": "ret_reg_2args_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "mask_support": "all_mask"
+        "variants": ["u", "m", "z", "s"]
     },
     "subs": {
         "proto_ref": "ret_reg_2args_reg",
         "datatypes": "all_int_uint",
         "horizontal": false,
-        "mask_support": "all_mask"
+        "variants": ["u", "m", "z", "s"]
     },
     "tan": {
       "proto_ref": "ret_reg_1arg_reg",
       "datatypes": "all_float",
       "horizontal": false,
-      "mask_support": "all_mask"
+      "variants": ["u", "m", "z", "s"]
     },
     "tanh": {
       "proto_ref": "ret_reg_1arg_reg",
       "datatypes": "all_float",
       "horizontal": false,
-      "mask_support": "all_mask"
+      "variants": ["u", "m", "z", "s"]
     },
     "testz": {
         "proto_ref": "ret_i32_2args_msk",
         "datatypes": "all_datatypes",
         "horizontal": true,
-        "mask_support": "no_mask"
+        "variants": ["u"]
     },
     "testz_2": {
         "proto_ref": "ret_i32_1arg_msk",
         "datatypes": "all_datatypes",
         "horizontal": true,
-        "mask_support": "no_mask"
+        "variants": ["u"]
     },
     "to_rvd": {
         "proto_ref": "ret_reg_1arg_msk",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "mask_support": "no_mask"
+        "variants": ["u"]
     },
     "to_rvm": {
         "proto_ref": "ret_msk_1arg_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "mask_support": "no_mask"
+        "variants": ["u"]
     },
     "trunc": {
       "proto_ref": "ret_reg_1arg_reg",
       "datatypes": "all_datatypes",
       "horizontal": false,
-      "mask_support": "all_mask"
+      "variants": ["u", "m", "z", "s"]
+    },
+    "ncvt": {
+        "proto_ref": "ret_reg_1arg_reg_lmul_down_conv",
+        "datatypes": "all_datatypes_narrowing",
+        "horizontal": false,
+        "variants": ["u"]
     },
     "wcvt": {
-        "proto_ref": "ret_reg_1arg_reg",
+        "proto_ref": "ret_reg_1arg_reg_lmul_up",
         "datatypes": "all_datatypes_widenning",
-        "horizontal": true,
-        "mask_support": "no_mask"
+        "horizontal": false,
+        "variants": ["u"]
     },
     "xorb": {
         "proto_ref": "ret_reg_2args_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "mask_support": "all_mask"
+        "variants": ["u", "m", "z", "s"]
     },
     "xorb_k": {
         "proto_ref": "ret_msk_2args_msk",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "mask_support": "no_mask",
+        "variants": ["u"],
         "cpp_name": "xorb"
+    },
+    "low": {
+        "proto_ref": "ret_reg_1arg_reg_lmul_down",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "variants": ["u"]
+    },
+    "high": {
+        "proto_ref": "ret_reg_1arg_reg_lmul_down",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "variants": ["u"]
+    },
+    "combine": {
+        "proto_ref": "ret_reg_2args_reg_lmul_up",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "variants": ["u"]
+    },
+    "low_k": {
+        "proto_ref": "ret_msk_1arg_msk_lmul_down",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "variants": ["u"],
+        "cpp_name": "low"
+    },
+    "high_k": {
+        "proto_ref": "ret_msk_1arg_msk_lmul_down",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "variants": ["u"],
+        "cpp_name": "high"
+    },
+    "combine_k": {
+        "proto_ref": "ret_msk_2args_msk_lmul_up",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "variants": ["u"],
+        "cpp_name": "combine"
     }
 }

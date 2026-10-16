@@ -160,8 +160,8 @@ def gen_c_horiz_lmul(isa, file, funcs, f, dt, lmul, implems_horiz_lmul_generic_e
         return
 
     if mask_type is not None:
-        mask_support = funcs[f]["mask_support"]
-        if not mask_support.is_supported(mask_type):
+        variant_set = funcs[f]["variants"]
+        if not variant_set.is_supported(mask_type):
             print(f"Panic: unsupported mask type '{mask_type}' for '{f}' function.")
             exit(-1)
 
@@ -172,7 +172,7 @@ def gen_c_horiz_lmul(isa, file, funcs, f, dt, lmul, implems_horiz_lmul_generic_e
 
     emitted_any = False
     for ff in implems_horiz_lmul_generic_emu[f]:
-        if "version" in ff and ff["version"] not in (None, "", "horiz_lmul"):
+        if ff_mask_kind(ff) not in (None, "horiz_lmul"):
             continue
         if "datatypes" in ff and dt not in ff["datatypes"]:
             continue
@@ -184,7 +184,96 @@ def gen_c_horiz_lmul(isa, file, funcs, f, dt, lmul, implems_horiz_lmul_generic_e
         name = func_name_for_panic or f
         emit_panic_stub(f"{name}_m{int(lmul)}", file=file)
 
-def _c_lmul_writer(f, dt, dt_par, dt_ret, isa, funcs, file, mask_type=None, lmul=0):
+def _c_lmul_widening_writer(f, dt_par, dt_ret, isa, funcs, file, func_name_lmul, lmul, include_manager):
+    """
+    wcvt from LMUL 1 or a software LMUL (a struct of two halves) to the next one: each half of the
+    result is the conversion of one half of the argument (`low` / `high` then the d2 -> m1
+    conversion for m1 -> m2, the conversion of the halves of one LMUL below otherwise).
+    """
+    proto = funcs[f]["proto"]
+    res_type = build_type("reg", datatypes[dt_ret], isa, resolve_ret_lmul(proto["ret"], lmul), True)
+    print("\nstatic " + build_proto(proto, dt_par, dt_ret, isa, func_name_lmul, lmul=lmul, isa_name=True) + " {", file=file)
+    print("\t// Level 2 (Generic Emulation): each half of the result converts one half of the argument", file=file)
+    print(f"\t{res_type} res;", file=file)
+    if lmul == 1:
+        low = build_func_name_short(isa, dt_par, "low", True, lmul=1)
+        high = build_func_name_short(isa, dt_par, "high", True, lmul=1)
+        conv = build_func_name(isa, dt_par, dt_ret, f, True, lmul=-2)
+        print(f"\tres.r1 = {conv}({low}(r0));", file=file)
+        print(f"\tres.r2 = {conv}({high}(r0));", file=file)
+        callees = [("low", "m1"), ("high", "m1"), (f, "d2")]
+    else:
+        conv = build_func_name(isa, dt_par, dt_ret, f, True, lmul=lmul // 2)
+        print(f"\tres.r1 = {conv}(r0.r1);", file=file)
+        print(f"\tres.r2 = {conv}(r0.r2);", file=file)
+        callees = [(f, f"m{lmul // 2}")]
+    print("\treturn res;", file=file)
+    print("}", file=file)
+    if include_manager is not None:
+        for callee, callee_lmul in callees:
+            include_manager.add_call_dependency(isa["name"], f, "u", f"m{lmul}", callee, "u", callee_lmul)
+
+def _c_lmul_narrowing_writer(f, dt_par, dt_ret, isa, funcs, file, func_name_lmul, lmul, include_manager):
+    """
+    ncvt from a software LMUL (a struct of two halves) to the LMUL below: the conversions of the two
+    halves joined by `combine` for m2 -> m1, the conversion of each half otherwise.
+    """
+    proto = funcs[f]["proto"]
+    res_type = build_type("reg", datatypes[dt_ret], isa, resolve_ret_lmul(proto["ret"], lmul), True)
+    print("\nstatic " + build_proto(proto, dt_par, dt_ret, isa, func_name_lmul, lmul=lmul, isa_name=True) + " {", file=file)
+    print("\t// Level 2 (Generic Emulation): each half of the result converts one half of the argument", file=file)
+    conv = build_func_name(isa, dt_par, dt_ret, f, True, lmul=lmul // 2)
+    if lmul == 2:
+        comb = build_func_name_short(isa, dt_ret, "combine", True, lmul=-2)
+        print(f"\treturn {comb}({conv}(r0.r1), {conv}(r0.r2));", file=file)
+        callees = [(f, "m1"), ("combine", "d2")]
+    else:
+        print(f"\t{res_type} res;", file=file)
+        print(f"\tres.r1 = {conv}(r0.r1);", file=file)
+        print(f"\tres.r2 = {conv}(r0.r2);", file=file)
+        print("\treturn res;", file=file)
+        callees = [(f, f"m{lmul // 2}")]
+    print("}", file=file)
+    if include_manager is not None:
+        for callee, callee_lmul in callees:
+            include_manager.add_call_dependency(isa["name"], f, "u", f"m{lmul}", callee, "u", callee_lmul)
+
+def _c_lmul_changing_writer(f, dt_par, dt_ret, isa, funcs, file, func_name_lmul, lmul, include_manager=None):
+    """
+    low / high / combine on a software LMUL register (a struct of two halves 'r1' and 'r2', or
+    'm1' and 'm2' for masks): no intrinsic, the result is one of the halves or the pair of arguments.
+    """
+    proto = funcs[f]["proto"]
+    if is_narrowing(proto):
+        if lmul >= 2 and isa_provides_lmul(isa, proto, lmul):
+            _c_lmul_narrowing_writer(f, dt_par, dt_ret, isa, funcs, file, func_name_lmul, lmul, include_manager)
+        return
+    if is_widening(proto):
+        if lmul >= 1 and isa_provides_lmul(isa, proto, lmul):
+            _c_lmul_widening_writer(f, dt_par, dt_ret, isa, funcs, file, func_name_lmul, lmul, include_manager)
+        return
+    if not isa_provides_lmul(isa, proto, lmul) or -2 in (lmul, resolve_ret_lmul(proto["ret"], lmul)):
+        # half-vectors (d2) are provided by the representation of the ISA
+        return
+    kind = proto["ret"]["type"]
+    member = "r" if kind == "reg" else "m"
+    arg = "r" if kind == "reg" else "m"
+    base = f[:-2] if f.endswith("_k") else f
+    print("\nstatic " + build_proto(proto, dt_par, dt_ret, isa, func_name_lmul, lmul=lmul, isa_name=True) + " {", file=file)
+    print("\t// Level 0 (Native Hardware): half of the software LMUL register", file=file)
+    if base == "low":
+        print(f"\treturn {arg}0.{member}1;", file=file)
+    elif base == "high":
+        print(f"\treturn {arg}0.{member}2;", file=file)
+    else:
+        res_type = build_type(kind, datatypes[dt_ret], isa, resolve_ret_lmul(proto["ret"], lmul), True)
+        print(f"\t{res_type} res;", file=file)
+        print(f"\tres.{member}1 = {arg}0;", file=file)
+        print(f"\tres.{member}2 = {arg}1;", file=file)
+        print("\treturn res;", file=file)
+    print("}", file=file)
+
+def _c_lmul_writer(f, dt, dt_par, dt_ret, isa, funcs, file, mask_type=None, lmul=0, include_manager=None):
     maybe_emit_lmul_separator(isa["name"], f, file)
 
     if len(dt.split(',')) <= 1:
@@ -196,6 +285,10 @@ def _c_lmul_writer(f, dt, dt_par, dt_ret, isa, funcs, file, mask_type=None, lmul
         func_name_lmul = build_func_name(isa, dt_par, dt_ret, f, lmul=lmul, masked_version=mask_type)
         func_name_half_lmul = build_func_name(isa, dt_par, dt_ret, f, lmul=int(lmul/2), masked_version=mask_type)
   
+    if changes_lmul(funcs[f]["proto"]):
+        _c_lmul_changing_writer(f, dt_par, dt_ret, isa, funcs, file, func_name_lmul, lmul, include_manager)
+        return
+
     if lmul == 1:
         print("\nstatic " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name_lmul, lmul=lmul, isa_name=True, masked_version=mask_type) + " {", file=file)
         print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, masked_version=mask_type) + ";", file=file)
@@ -258,16 +351,18 @@ def gen_c_lmul(isa, include_manager, funcs, sw_lmuls=None):
     for f in funcs:
         for dt in funcs[f]["datatypes"]:
             dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
-            for lmul in sw_lmuls:
+            # combine builds a software LMUL register from two LMUL 1 ones
+            lmuls_u = sorted(set([1] + list(sw_lmuls))) if changes_lmul(funcs[f]["proto"]) else sw_lmuls
+            for lmul in lmuls_u:
                 file_w = include_manager.get_fd(isa["name"], f, variant="u", lmul=lmul)
-                _c_lmul_writer(f=f, dt=dt, dt_par=dt_par, dt_ret=dt_ret, isa=isa, funcs=funcs, file=file_w, lmul=lmul)
+                _c_lmul_writer(f=f, dt=dt, dt_par=dt_par, dt_ret=dt_ret, isa=isa, funcs=funcs, file=file_w, lmul=lmul, include_manager=include_manager)
         
             for lmul in sw_lmuls:
                 mask_status = ""
-                if "mask_support" in funcs[f]:
-                    mask_status = funcs[f]["mask_support"]
+                if "variants" in funcs[f]:
+                    mask_status = funcs[f]["variants"]
                 else:
-                    mask_status = MaskSupport()
+                    mask_status = VariantSet()
 
                 if not mask_status.is_any_mask():
                     continue
@@ -286,22 +381,24 @@ def gen_c_ldiv(isa_base, isa_div, include_manager, funcs):
         print(f"in lmul_orchestrator.gen_c_ldiv : error : '{isa_base['name']}' does not declare sub_isa half-vectors (sw_ldiv_type: sub_isa, -2 in sw_lmul)")
         exit(-1)
     for f in funcs:
+        if changes_lmul(funcs[f]["proto"]):
+            continue
         for dt in funcs[f]["datatypes"]:
             dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
             file_w = include_manager.get_fd(isa_base["name"], f, variant="u", lmul=-2)
             _gen_c_function_one_ldiv_avx(isa_base=isa_base, isa_div=isa_div, file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind=None, ldiv=2)
-        mask_support = funcs[f]["mask_support"] if "mask_support" in funcs[f] else None
-        if mask_support and mask_support.is_maskable():
+        variant_set = funcs[f]["variants"] if "variants" in funcs[f] else None
+        if variant_set and variant_set.is_maskable():
             for dt in funcs[f]["datatypes"]:
                 dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
                 file_w = include_manager.get_fd(isa_base["name"], f, variant="m", lmul=-2)
                 _gen_c_function_one_ldiv_avx(isa_base=isa_base, isa_div=isa_div, file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind="mask", ldiv=2)
-        if mask_support and mask_support.is_maskzable():
+        if variant_set and variant_set.is_maskzable():
             for dt in funcs[f]["datatypes"]:
                 dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
                 file_w = include_manager.get_fd(isa_base["name"], f, variant="z", lmul=-2)
                 _gen_c_function_one_ldiv_avx(isa_base=isa_base, isa_div=isa_div, file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind="maskz", ldiv=2)
-        if mask_support and mask_support.is_masksable():
+        if variant_set and variant_set.is_masksable():
             for dt in funcs[f]["datatypes"]:
                 dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
                 file_w = include_manager.get_fd(isa_base["name"], f, variant="s", lmul=-2)

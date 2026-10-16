@@ -1,0 +1,360 @@
+{
+    "low": [
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "{% set de = isa_dt.data_ext %}{% set w = 32 if de == 'ps' else (64 if de == 'pd' else (de[3:] | int)) %}{% set k = 'ps' if isa_dt.reg.strip() == '__m512' else ('pd' if isa_dt.reg.strip() == '__m512d' else 'si') %}{% set e = k if k != 'si' else 'si256' %}{% set cs = {'ps': '_mm256_castps_si256', 'pd': '_mm256_castpd_si256', 'si': ''}[k] %}{% set sc = {'ps': '_mm256_castsi256_ps', 'pd': '_mm256_castsi256_pd', 'si': ''}[k] %}{% set ld = {'ps': '_mm256_loadu_ps((const float*)bd)', 'pd': '_mm256_loadu_pd((const double*)bd)', 'si': '_mm256_loadu_si256((const __m256i*)bd)'}[k] %}",
+                "%r<tr>% res;",
+                "res.r = _mm512_cast{{ k }}512_{{ k }}256(r0.r);",
+                "return res;"
+            ]
+        }
+    ],
+    "high": [
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "{% set de = isa_dt.data_ext %}{% set w = 32 if de == 'ps' else (64 if de == 'pd' else (de[3:] | int)) %}{% set k = 'ps' if isa_dt.reg.strip() == '__m512' else ('pd' if isa_dt.reg.strip() == '__m512d' else 'si') %}{% set e = k if k != 'si' else 'si256' %}{% set cs = {'ps': '_mm256_castps_si256', 'pd': '_mm256_castpd_si256', 'si': ''}[k] %}{% set sc = {'ps': '_mm256_castsi256_ps', 'pd': '_mm256_castsi256_pd', 'si': ''}[k] %}{% set ld = {'ps': '_mm256_loadu_ps((const float*)bd)', 'pd': '_mm256_loadu_pd((const double*)bd)', 'si': '_mm256_loadu_si256((const __m256i*)bd)'}[k] %}",
+                "%r<tr>% res;",
+                "{% if k == 'pd' %}res.r = _mm512_extractf64x4_pd(r0.r, 1);{% elif k == 'ps' %}res.r = _mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(r0.r), 1));{% else %}res.r = _mm512_extracti64x4_epi64(r0.r, 1);{% endif %}",
+                "return res;"
+            ]
+        }
+    ],
+    "combine": [
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "{% set de = isa_dt.data_ext %}{% set w = 32 if de == 'ps' else (64 if de == 'pd' else (de[3:] | int)) %}{% set k = 'ps' if isa_dt.reg.strip() == '__m512' else ('pd' if isa_dt.reg.strip() == '__m512d' else 'si') %}{% set e = k if k != 'si' else 'si256' %}{% set cs = {'ps': '_mm256_castps_si256', 'pd': '_mm256_castpd_si256', 'si': ''}[k] %}{% set sc = {'ps': '_mm256_castsi256_ps', 'pd': '_mm256_castsi256_pd', 'si': ''}[k] %}{% set ld = {'ps': '_mm256_loadu_ps((const float*)bd)', 'pd': '_mm256_loadu_pd((const double*)bd)', 'si': '_mm256_loadu_si256((const __m256i*)bd)'}[k] %}",
+                "%r<tr>% res;",
+                "{% if k == 'pd' %}res.r = _mm512_insertf64x4(_mm512_castpd256_pd512(r0.r), r1.r, 1);{% elif k == 'ps' %}res.r = _mm512_castpd_ps(_mm512_insertf64x4(_mm512_castpd256_pd512(_mm256_castps_pd(r0.r)), _mm256_castps_pd(r1.r), 1));{% else %}res.r = _mm512_inserti64x4(_mm512_castsi256_si512(r0.r), r1.r, 1);{% endif %}",
+                "return res;"
+            ]
+        }
+    ],
+    "low_k": [
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "{% set de = isa_dt.data_ext %}{% set w = 32 if de == 'ps' else (64 if de == 'pd' else (de[3:] | int)) %}{% set k = 'ps' if isa_dt.reg.strip() == '__m512' else ('pd' if isa_dt.reg.strip() == '__m512d' else 'si') %}{% set e = k if k != 'si' else 'si256' %}{% set cs = {'ps': '_mm256_castps_si256', 'pd': '_mm256_castpd_si256', 'si': ''}[k] %}{% set sc = {'ps': '_mm256_castsi256_ps', 'pd': '_mm256_castsi256_pd', 'si': ''}[k] %}{% set ld = {'ps': '_mm256_loadu_ps((const float*)bd)', 'pd': '_mm256_loadu_pd((const double*)bd)', 'si': '_mm256_loadu_si256((const __m256i*)bd)'}[k] %}",
+                "%m<tr>% res;",
+                "{% if w == 64 %}res.m = {{ sc }}(_mm512_castsi512_si256(_mm512_maskz_set1_epi64((__mmask8)(m0.m), -1)));{% elif w == 32 %}res.m = {{ sc }}(_mm512_castsi512_si256(_mm512_maskz_set1_epi32((__mmask16)(m0.m), -1)));{% elif w == 16 %}res.m = {{ sc }}(_mm512_castsi512_si256(_mm512_movm_epi16((__mmask32)(m0.m))));{% else %}res.m = {{ sc }}(_mm512_castsi512_si256(_mm512_movm_epi8((__mmask64)(m0.m))));{% endif %}",
+                "return res;"
+            ],
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32",
+                "float64",
+                "int64",
+                "uint64"
+            ]
+        },
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "{% set de = isa_dt.data_ext %}{% set w = 32 if de == 'ps' else (64 if de == 'pd' else (de[3:] | int)) %}{% set k = 'ps' if isa_dt.reg.strip() == '__m512' else ('pd' if isa_dt.reg.strip() == '__m512d' else 'si') %}{% set e = k if k != 'si' else 'si256' %}{% set cs = {'ps': '_mm256_castps_si256', 'pd': '_mm256_castpd_si256', 'si': ''}[k] %}{% set sc = {'ps': '_mm256_castsi256_ps', 'pd': '_mm256_castsi256_pd', 'si': ''}[k] %}{% set ld = {'ps': '_mm256_loadu_ps((const float*)bd)', 'pd': '_mm256_loadu_pd((const double*)bd)', 'si': '_mm256_loadu_si256((const __m256i*)bd)'}[k] %}",
+                "%m<tr>% res;",
+                "{% if w == 64 %}res.m = {{ sc }}(_mm512_castsi512_si256(_mm512_maskz_set1_epi64((__mmask8)(m0.m), -1)));{% elif w == 32 %}res.m = {{ sc }}(_mm512_castsi512_si256(_mm512_maskz_set1_epi32((__mmask16)(m0.m), -1)));{% elif w == 16 %}res.m = {{ sc }}(_mm512_castsi512_si256(_mm512_movm_epi16((__mmask32)(m0.m))));{% else %}res.m = {{ sc }}(_mm512_castsi512_si256(_mm512_movm_epi8((__mmask64)(m0.m))));{% endif %}",
+                "return res;"
+            ],
+            "datatypes": [
+                "int8",
+                "uint8",
+                "int16",
+                "uint16"
+            ],
+            "if": "defined(__AVX512BW__)"
+        },
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "{% set de = isa_dt.data_ext %}{% set w = 32 if de == 'ps' else (64 if de == 'pd' else (de[3:] | int)) %}{% set k = 'ps' if isa_dt.reg.strip() == '__m512' else ('pd' if isa_dt.reg.strip() == '__m512d' else 'si') %}{% set e = k if k != 'si' else 'si256' %}{% set cs = {'ps': '_mm256_castps_si256', 'pd': '_mm256_castpd_si256', 'si': ''}[k] %}{% set sc = {'ps': '_mm256_castsi256_ps', 'pd': '_mm256_castsi256_pd', 'si': ''}[k] %}{% set ld = {'ps': '_mm256_loadu_ps((const float*)bd)', 'pd': '_mm256_loadu_pd((const double*)bd)', 'si': '_mm256_loadu_si256((const __m256i*)bd)'}[k] %}",
+                "uint{{ w }}_t bd[{{ ctx.N2() }}];",
+                "for (unsigned i = 0; i < {{ ctx.N2() }}; i++)",
+                "\tbd[i] = ((m0.m >> (i + 0)) & 1) ? (uint{{ w }}_t)-1 : 0;",
+                "%m<tr>% res;",
+                "res.m = {{ ld }};",
+                "return res;"
+            ],
+            "datatypes": [
+                "int8",
+                "uint8",
+                "int16",
+                "uint16"
+            ],
+            "level": 3
+        }
+    ],
+    "high_k": [
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "{% set de = isa_dt.data_ext %}{% set w = 32 if de == 'ps' else (64 if de == 'pd' else (de[3:] | int)) %}{% set k = 'ps' if isa_dt.reg.strip() == '__m512' else ('pd' if isa_dt.reg.strip() == '__m512d' else 'si') %}{% set e = k if k != 'si' else 'si256' %}{% set cs = {'ps': '_mm256_castps_si256', 'pd': '_mm256_castpd_si256', 'si': ''}[k] %}{% set sc = {'ps': '_mm256_castsi256_ps', 'pd': '_mm256_castsi256_pd', 'si': ''}[k] %}{% set ld = {'ps': '_mm256_loadu_ps((const float*)bd)', 'pd': '_mm256_loadu_pd((const double*)bd)', 'si': '_mm256_loadu_si256((const __m256i*)bd)'}[k] %}",
+                "%m<tr>% res;",
+                "{% if w == 64 %}res.m = {{ sc }}(_mm512_castsi512_si256(_mm512_maskz_set1_epi64((__mmask8)(m0.m >> {{ ctx.N2() }}), -1)));{% elif w == 32 %}res.m = {{ sc }}(_mm512_castsi512_si256(_mm512_maskz_set1_epi32((__mmask16)(m0.m >> {{ ctx.N2() }}), -1)));{% elif w == 16 %}res.m = {{ sc }}(_mm512_castsi512_si256(_mm512_movm_epi16((__mmask32)(m0.m >> {{ ctx.N2() }}))));{% else %}res.m = {{ sc }}(_mm512_castsi512_si256(_mm512_movm_epi8((__mmask64)(m0.m >> {{ ctx.N2() }}))));{% endif %}",
+                "return res;"
+            ],
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32",
+                "float64",
+                "int64",
+                "uint64"
+            ]
+        },
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "{% set de = isa_dt.data_ext %}{% set w = 32 if de == 'ps' else (64 if de == 'pd' else (de[3:] | int)) %}{% set k = 'ps' if isa_dt.reg.strip() == '__m512' else ('pd' if isa_dt.reg.strip() == '__m512d' else 'si') %}{% set e = k if k != 'si' else 'si256' %}{% set cs = {'ps': '_mm256_castps_si256', 'pd': '_mm256_castpd_si256', 'si': ''}[k] %}{% set sc = {'ps': '_mm256_castsi256_ps', 'pd': '_mm256_castsi256_pd', 'si': ''}[k] %}{% set ld = {'ps': '_mm256_loadu_ps((const float*)bd)', 'pd': '_mm256_loadu_pd((const double*)bd)', 'si': '_mm256_loadu_si256((const __m256i*)bd)'}[k] %}",
+                "%m<tr>% res;",
+                "{% if w == 64 %}res.m = {{ sc }}(_mm512_castsi512_si256(_mm512_maskz_set1_epi64((__mmask8)(m0.m >> {{ ctx.N2() }}), -1)));{% elif w == 32 %}res.m = {{ sc }}(_mm512_castsi512_si256(_mm512_maskz_set1_epi32((__mmask16)(m0.m >> {{ ctx.N2() }}), -1)));{% elif w == 16 %}res.m = {{ sc }}(_mm512_castsi512_si256(_mm512_movm_epi16((__mmask32)(m0.m >> {{ ctx.N2() }}))));{% else %}res.m = {{ sc }}(_mm512_castsi512_si256(_mm512_movm_epi8((__mmask64)(m0.m >> {{ ctx.N2() }}))));{% endif %}",
+                "return res;"
+            ],
+            "datatypes": [
+                "int8",
+                "uint8",
+                "int16",
+                "uint16"
+            ],
+            "if": "defined(__AVX512BW__)"
+        },
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "{% set de = isa_dt.data_ext %}{% set w = 32 if de == 'ps' else (64 if de == 'pd' else (de[3:] | int)) %}{% set k = 'ps' if isa_dt.reg.strip() == '__m512' else ('pd' if isa_dt.reg.strip() == '__m512d' else 'si') %}{% set e = k if k != 'si' else 'si256' %}{% set cs = {'ps': '_mm256_castps_si256', 'pd': '_mm256_castpd_si256', 'si': ''}[k] %}{% set sc = {'ps': '_mm256_castsi256_ps', 'pd': '_mm256_castsi256_pd', 'si': ''}[k] %}{% set ld = {'ps': '_mm256_loadu_ps((const float*)bd)', 'pd': '_mm256_loadu_pd((const double*)bd)', 'si': '_mm256_loadu_si256((const __m256i*)bd)'}[k] %}",
+                "uint{{ w }}_t bd[{{ ctx.N2() }}];",
+                "for (unsigned i = 0; i < {{ ctx.N2() }}; i++)",
+                "\tbd[i] = ((m0.m >> (i + {{ ctx.N2() }})) & 1) ? (uint{{ w }}_t)-1 : 0;",
+                "%m<tr>% res;",
+                "res.m = {{ ld }};",
+                "return res;"
+            ],
+            "datatypes": [
+                "int8",
+                "uint8",
+                "int16",
+                "uint16"
+            ],
+            "level": 3
+        }
+    ],
+    "combine_k": [
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "{% set de = isa_dt.data_ext %}{% set w = 32 if de == 'ps' else (64 if de == 'pd' else (de[3:] | int)) %}{% set k = 'ps' if isa_dt.reg.strip() == '__m512' else ('pd' if isa_dt.reg.strip() == '__m512d' else 'si') %}{% set e = k if k != 'si' else 'si256' %}{% set cs = {'ps': '_mm256_castps_si256', 'pd': '_mm256_castpd_si256', 'si': ''}[k] %}{% set sc = {'ps': '_mm256_castsi256_ps', 'pd': '_mm256_castsi256_pd', 'si': ''}[k] %}{% set ld = {'ps': '_mm256_loadu_ps((const float*)bd)', 'pd': '_mm256_loadu_pd((const double*)bd)', 'si': '_mm256_loadu_si256((const __m256i*)bd)'}[k] %}",
+                "%m<tr>% res;",
+                "{% if w == 64 %}{% set lo = '_mm256_movemask_pd(' ~ ('m0.m' if k == 'pd' else '_mm256_castsi256_pd(m0.m)') ~ ')' %}{% set hi = '_mm256_movemask_pd(' ~ ('m1.m' if k == 'pd' else '_mm256_castsi256_pd(m1.m)') ~ ')' %}{% elif w == 32 %}{% set lo = '_mm256_movemask_ps(' ~ ('m0.m' if k == 'ps' else '_mm256_castsi256_ps(m0.m)') ~ ')' %}{% set hi = '_mm256_movemask_ps(' ~ ('m1.m' if k == 'ps' else '_mm256_castsi256_ps(m1.m)') ~ ')' %}{% elif w == 16 %}{% set lo = '(_mm512_movepi16_mask(_mm512_inserti64x4(_mm512_setzero_si512(), m0.m, 0)) & 0xFFFF)' %}{% set hi = '(_mm512_movepi16_mask(_mm512_inserti64x4(_mm512_setzero_si512(), m1.m, 0)) & 0xFFFF)' %}{% else %}{% set lo = '((uint32_t)_mm256_movemask_epi8(m0.m))' %}{% set hi = '((uint32_t)_mm256_movemask_epi8(m1.m))' %}{% endif %}",
+                "res.m = ({{ isa_dt.msk }})((uint64_t)({{ lo }}) | ((uint64_t)({{ hi }}) << {{ ctx.N2() }}));",
+                "return res;"
+            ],
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32",
+                "float64",
+                "int64",
+                "uint64"
+            ]
+        },
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "{% set de = isa_dt.data_ext %}{% set w = 32 if de == 'ps' else (64 if de == 'pd' else (de[3:] | int)) %}{% set k = 'ps' if isa_dt.reg.strip() == '__m512' else ('pd' if isa_dt.reg.strip() == '__m512d' else 'si') %}{% set e = k if k != 'si' else 'si256' %}{% set cs = {'ps': '_mm256_castps_si256', 'pd': '_mm256_castpd_si256', 'si': ''}[k] %}{% set sc = {'ps': '_mm256_castsi256_ps', 'pd': '_mm256_castsi256_pd', 'si': ''}[k] %}{% set ld = {'ps': '_mm256_loadu_ps((const float*)bd)', 'pd': '_mm256_loadu_pd((const double*)bd)', 'si': '_mm256_loadu_si256((const __m256i*)bd)'}[k] %}",
+                "%m<tr>% res;",
+                "{% if w == 64 %}{% set lo = '_mm256_movemask_pd(' ~ ('m0.m' if k == 'pd' else '_mm256_castsi256_pd(m0.m)') ~ ')' %}{% set hi = '_mm256_movemask_pd(' ~ ('m1.m' if k == 'pd' else '_mm256_castsi256_pd(m1.m)') ~ ')' %}{% elif w == 32 %}{% set lo = '_mm256_movemask_ps(' ~ ('m0.m' if k == 'ps' else '_mm256_castsi256_ps(m0.m)') ~ ')' %}{% set hi = '_mm256_movemask_ps(' ~ ('m1.m' if k == 'ps' else '_mm256_castsi256_ps(m1.m)') ~ ')' %}{% elif w == 16 %}{% set lo = '(_mm512_movepi16_mask(_mm512_inserti64x4(_mm512_setzero_si512(), m0.m, 0)) & 0xFFFF)' %}{% set hi = '(_mm512_movepi16_mask(_mm512_inserti64x4(_mm512_setzero_si512(), m1.m, 0)) & 0xFFFF)' %}{% else %}{% set lo = '((uint32_t)_mm256_movemask_epi8(m0.m))' %}{% set hi = '((uint32_t)_mm256_movemask_epi8(m1.m))' %}{% endif %}",
+                "res.m = ({{ isa_dt.msk }})((uint64_t)({{ lo }}) | ((uint64_t)({{ hi }}) << {{ ctx.N2() }}));",
+                "return res;"
+            ],
+            "datatypes": [
+                "int8",
+                "uint8",
+                "int16",
+                "uint16"
+            ],
+            "if": "defined(__AVX512BW__)"
+        },
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "{% set de = isa_dt.data_ext %}{% set w = 32 if de == 'ps' else (64 if de == 'pd' else (de[3:] | int)) %}{% set k = 'ps' if isa_dt.reg.strip() == '__m512' else ('pd' if isa_dt.reg.strip() == '__m512d' else 'si') %}{% set e = k if k != 'si' else 'si256' %}{% set cs = {'ps': '_mm256_castps_si256', 'pd': '_mm256_castpd_si256', 'si': ''}[k] %}{% set sc = {'ps': '_mm256_castsi256_ps', 'pd': '_mm256_castsi256_pd', 'si': ''}[k] %}{% set ld = {'ps': '_mm256_loadu_ps((const float*)bd)', 'pd': '_mm256_loadu_pd((const double*)bd)', 'si': '_mm256_loadu_si256((const __m256i*)bd)'}[k] %}",
+                "uint{{ w }}_t b0[{{ ctx.N2() }}], b1[{{ ctx.N2() }}];",
+                "_mm256_storeu_si256((__m256i*)b0, {{ cs }}(m0.m));",
+                "_mm256_storeu_si256((__m256i*)b1, {{ cs }}(m1.m));",
+                "uint64_t bits = 0;",
+                "for (unsigned i = 0; i < {{ ctx.N2() }}; i++) {",
+                "\tbits |= (uint64_t)(b0[i] != 0) << i;",
+                "\tbits |= (uint64_t)(b1[i] != 0) << (i + {{ ctx.N2() }});",
+                "}",
+                "%m<tr>% res;",
+                "res.m = ({{ isa_dt.msk }})bits;",
+                "return res;"
+            ],
+            "datatypes": [
+                "int8",
+                "uint8",
+                "int16",
+                "uint16"
+            ],
+            "level": 3
+        }
+    ],
+    "wcvt": [
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "%r<tr>% res;",
+                "res.r = _mm512_cvt{{ isa_dt.data_ext }}_{{ isa.datatypes[ctx.dt_ret].data_ext | replace('epu', 'epi') }}(r0.r);",
+                "return res;"
+            ],
+            "datatypes": [
+                "int16",
+                "int32",
+                "uint16",
+                "uint32"
+            ]
+        },
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "%r<tr>% res;",
+                "res.r = _mm512_cvtps_pd(r0.r);",
+                "return res;"
+            ],
+            "datatypes": [
+                "float32"
+            ]
+        },
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "%r<tr>% res;",
+                "res.r = _mm512_cvt{{ isa_dt.data_ext }}_{{ isa.datatypes[ctx.dt_ret].data_ext | replace('epu', 'epi') }}(r0.r);",
+                "return res;"
+            ],
+            "datatypes": [
+                "int8",
+                "uint8"
+            ],
+            "if": "defined(__AVX512BW__)"
+        },
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "%s<tp>% bs[{{ ctx.N2() }}];",
+                "_mm256_storeu_si256((__m256i*)bs, r0.r);",
+                "%s<tr>% bd[{{ ctx.N2() }}];",
+                "for (unsigned i = 0; i < {{ ctx.N2() }}; i++)",
+                "\tbd[i] = (%s<tr>%)bs[i];",
+                "%r<tr>% res;",
+                "res.r = _mm512_loadu_si512((const void*)bd);",
+                "return res;"
+            ],
+            "datatypes": [
+                "int8",
+                "uint8"
+            ],
+            "level": 3
+        }
+    ],
+    "ncvt": [
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "%r<tr>% res;",
+                "res.r = _mm512_cvtpd_ps(r0.r);",
+                "return res;"
+            ],
+            "datatypes": [
+                "float64"
+            ]
+        },
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "%r<tr>% res;",
+                "res.r = _mm512_cvt{{ 'epi' ~ isa_dt.data_ext[3:] }}_{{ 'epi' ~ isa.datatypes[ctx.dt_ret].data_ext[3:] }}(r0.r);",
+                "return res;"
+            ],
+            "datatypes": [
+                "int32",
+                "uint32",
+                "int64",
+                "uint64"
+            ]
+        },
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "%r<tr>% res;",
+                "res.r = _mm512_cvt{{ 'epi' ~ isa_dt.data_ext[3:] }}_{{ 'epi' ~ isa.datatypes[ctx.dt_ret].data_ext[3:] }}(r0.r);",
+                "return res;"
+            ],
+            "datatypes": [
+                "int16",
+                "uint16"
+            ],
+            "if": "defined(__AVX512BW__)"
+        },
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "%s<tp>% bs[{{ ctx.N() }}];",
+                "_mm512_storeu_si512((void*)bs, r0.r);",
+                "%s<tr>% bd[{{ ctx.N() }}];",
+                "for (unsigned i = 0; i < {{ ctx.N() }}; i++)",
+                "\tbd[i] = (%s<tr>%)bs[i];",
+                "%r<tr>% res;",
+                "res.r = _mm256_loadu_si256((const __m256i*)bd);",
+                "return res;"
+            ],
+            "datatypes": [
+                "int16",
+                "uint16"
+            ],
+            "level": 3
+        }
+    ]
+}

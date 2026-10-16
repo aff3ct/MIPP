@@ -607,8 +607,12 @@ def generate_c_layer(isa, include_manager, native_implems, emu_implems):
         sub_isa = load_isa_config(isa["sub_isa"])[0]
         if sub_isa:
             gen_c_ldiv(isa, sub_isa, include_manager, copy_interfaces)
+        if uses_ldiv_templates(isa):
+            gen_c_ldiv_mask(isa, include_manager, copy_interfaces, only_changing=True)
     elif uses_mask_ldiv(isa):
         gen_c_ldiv_mask(isa, include_manager, copy_interfaces)
+    elif uses_hw_ldiv_templates(isa):
+        gen_c_ldiv_mask(isa, include_manager, copy_interfaces, only_changing=True)
 
     # 5. Resolve dependencies and create glue file
     include_manager.resolve_all_dependencies(isa["name"], copy_interfaces)

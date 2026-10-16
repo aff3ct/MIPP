@@ -15,7 +15,7 @@ from typing import Dict, List, Any, Optional, Set
 from .dialect_adapters import DialectAdapter, CppDialectAdapter, CDialectAdapter, CppObjDialectAdapter
 from .domain_resolver import DomainResolver
 from . import indexed_tests
-from tools import DATATYPES_MAP
+from tools import DATATYPES_MAP, resolve_ret_lmul, is_defined_for_lmul, changes_lmul, isa_provides_lmul
 from include_gen import _match_category
 
 # Auxiliary MIPP functions whose headers must always be included in generated test files.
@@ -142,6 +142,143 @@ class TestsBuilderEngine:
             args.insert(1, "ssrc" if is_scalar else "rsrc")
 
         return args
+
+    # --- LMUL of the result, domain and ISA guards (all derived from ret.lmul of the prototype) ---
+
+    def _proto_of(self, func_name: str) -> Dict[str, Any]:
+        return self.protos.get(self.interfaces.get(func_name, {}).get("proto_ref", ""), {})
+
+    @staticmethod
+    def test_input_lmul(lmul: int) -> int:
+        """LMUL of the arguments of a test. The `m0` tests call the names without suffix, which are
+        those of LMUL 1."""
+        return 1 if lmul == 0 else lmul
+
+    def is_test_defined(self, func_name: str, lmul: int) -> bool:
+        """False when the function does not exist for this LMUL (a result LMUL that does not exist,
+        e.g. `wcvt` from m8 or `low` from d2). Always true for the functions that keep the LMUL."""
+        proto = self._proto_of(func_name)
+        return is_defined_for_lmul(proto, self.test_input_lmul(lmul)) if proto else True
+
+    def result_lmul(self, func_name: str, lmul: int) -> int:
+        """LMUL of the returned register for arguments of LMUL `lmul` (same value when the function
+        keeps the LMUL; for `lmul` 0 and a function that changes it, the LMUL of the result of m1)."""
+        proto = self._proto_of(func_name)
+        if not proto or not changes_lmul(proto):
+            return lmul
+        return resolve_ret_lmul(proto["ret"], self.test_input_lmul(lmul))
+
+    @staticmethod
+    def lmul_tag(lmul: int) -> str:
+        return f"m{lmul}" if lmul >= 0 else f"d{-lmul}"
+
+    @staticmethod
+    def lanes_factor(lmul: int) -> str:
+        """C expression suffix scaling the number of lanes of a register of LMUL 1 (`* 2`, `/ 2`)."""
+        return f" * {lmul}" if lmul > 1 else (f" / {-lmul}" if lmul < 0 else "")
+
+    def _isa_configs(self) -> Dict[str, Any]:
+        if getattr(self, "_isa_cfg_cache", None) is None:
+            self._isa_cfg_cache = {}
+            for name in sorted(os.listdir(self.simd_ext_dir)):
+                isa_json = os.path.join(self.simd_ext_dir, name, f"{name}_isa.json")
+                if os.path.exists(isa_json):
+                    self._isa_cfg_cache[name] = self._load_json(isa_json)
+        return self._isa_cfg_cache
+
+    def _isa_providers(self, func_name: str, lmul: int) -> Optional[List[str]]:
+        """`defined(MIPP_<ISA>)` conditions of the ISAs that provide the function for this LMUL, or
+        None when every ISA provides it."""
+        proto = self._proto_of(func_name)
+        if not proto:
+            return None
+        eff = self.test_input_lmul(lmul)
+        # the scalar ISA (no JSON of its own) provides every function
+        providers = ["defined(MIPP_SCALAR)"]
+        configs = self._isa_configs()
+        for name, isa in configs.items():
+            if isa_provides_lmul(isa, proto, eff):
+                providers.append("defined(MIPP_SCALAR)" if isa.get("is_scalar", False)
+                                 else f"defined(MIPP_{name.upper()})")
+        if len(providers) == len(configs) + 1:
+            return None
+        return providers
+
+    def isa_guard(self, func_name: str, lmul: int) -> Optional[str]:
+        """Preprocessor condition (one `defined(MIPP_<ISA>)` per ISA that provides the function for
+        this LMUL), or None when every ISA provides it. Tests are compiled for a single ISA."""
+        providers = self._isa_providers(func_name, lmul)
+        return None if providers is None else " || ".join(providers)
+
+    def isa_guard_any(self, func_name: str, lmuls: List[int]) -> Optional[str]:
+        """Same as `isa_guard` for a file that tests several LMULs: the ISAs that provide the
+        function for at least one of them (None when every ISA provides it for one of them)."""
+        union: List[str] = []
+        for lmul in lmuls:
+            providers = self._isa_providers(func_name, lmul)
+            if providers is None:
+                return None
+            union.extend(p for p in providers if p not in union)
+        return " || ".join(union) if union else "0"
+
+    # --- C++ layers: product (src,dst) functions and result LMUL as a compile-time expression ---
+
+    def is_product_func(self, func_name: str) -> bool:
+        """True when the function is tested on (source, destination) pairs of datatypes."""
+        return any("," in str(dt) for dt in self._resolve_datatypes(func_name))
+
+    def lmul_out_expr(self, func_name: str) -> str:
+        """C++ constant expression of the LMUL of the returned register as a function of the template
+        parameter `LMUL` (the arguments' one): `LMUL` itself unless the prototype changes it."""
+        proto = self._proto_of(func_name)
+        if not proto or not changes_lmul(proto):
+            return "LMUL"
+        mode = proto["ret"].get("lmul", "same")
+        if mode == "up":
+            return "(LMUL == -2 ? 1 : LMUL * 2)"
+        if mode == "down":
+            return "(LMUL == 1 ? -2 : LMUL / 2)"
+        return str({"d2": -2, "m1": 1, "m2": 2, "m4": 4, "m8": 8}[mode])
+
+    def cpp_lmul_out(self, func_name: str) -> tuple:
+        """(declaration lines, name) of the constant holding the LMUL of the returned register: a
+        `LMUL_OUT` constant when the prototype changes the LMUL, else the template parameter `LMUL`."""
+        expr = self.lmul_out_expr(func_name)
+        if expr == "LMUL":
+            return [], "LMUL"
+        return [f"\t\tconstexpr int LMUL_OUT = {expr};"], "LMUL_OUT"
+
+    def render_cpp_sizes(self, func_name: str, adapter: DialectAdapter, is_product: bool) -> List[str]:
+        """Declare `size` (lanes of the arguments) and, for a product function or a function that
+        changes the LMUL, `size_out` (lanes of the result, with the LMUL of the returned register)."""
+        decl, lmul_out = self.cpp_lmul_out(func_name)
+        lines = list(decl)
+        if is_product:
+            lines.extend(self.render_template(self._tpl("func_templates", "cpp", "size_constexpr_product"),
+                                              adapter=adapter, lmul_out=lmul_out))
+        else:
+            lines.extend(self.render_template(self._tpl("func_templates", "obj", "size_constexpr"), adapter=adapter))
+            if decl:
+                lines.extend(self.render_template(self._tpl("func_templates", "cpp", "size_out_constexpr"),
+                                                  adapter=adapter, lmul_out=lmul_out))
+        return lines
+
+    def render_cpp_conv_helper(self, func_name: str) -> List[str]:
+        """`test_helpers::<cpp_name><T_dst>(reg)`: forwards to the `mipp::<cpp_name>_<dst>` overload of
+        the destination type, which is a template parameter of the test (the C++ names carry it)."""
+        fname = self.interfaces.get(func_name, {}).get("cpp_name", func_name)
+        proto = self._proto_of(func_name)
+        first_arg = (proto.get("args") or [{}])[0].get("type") if proto else "reg"
+        raw_dsts: List[str] = []
+        for dt in self._resolve_datatypes(func_name):
+            if "," in str(dt):
+                dst = str(dt).split(",")[1].strip()
+                if dst not in raw_dsts:
+                    raw_dsts.append(dst)
+        dsts = [{"raw": d, "cpp": self._format_cpp_type(d)} for d in raw_dsts]
+        return self.render_template(
+            self._tpl("assertions", "cpp", "conv_helper"), fname=fname, dsts=dsts,
+            arg=("m0" if first_arg == "msk" else "r0"), arg_type=("Msk" if first_arg == "msk" else "Reg"))
 
     def _load_json(self, filepath: str) -> Dict[str, Any]:
         with open(filepath, "r", encoding="utf-8") as f:
@@ -346,20 +483,11 @@ class TestsBuilderEngine:
             return True
         return False
 
-    def _is_mask_kind_supported(self, mask_support: str, mkind: str) -> bool:
+    def _is_mask_kind_supported(self, variants: List[str], mkind: str) -> bool:
+        """`variants` is the list of registry_interfaces.json (`u`, `m`, `z`, `s`)."""
         if mkind == "unmasked":
             return True
-        if mask_support == "no_mask":
-            return False
-        if mask_support == "all_mask":
-            return True
-        if mask_support == "only_maskz":
-            return mkind == "maskz"
-        if mask_support == "mask_and_maskz":
-            return mkind in ("mask", "maskz")
-        if mask_support == "maskz_and_masks":
-            return mkind in ("maskz", "masks")
-        return False
+        return {"mask": "m", "maskz": "z", "masks": "s"}.get(mkind) in variants
 
     def indent_lines(self, lines: List[str], indent_level: int) -> List[str]:
         """Indent each line by indent_level tabs.
@@ -560,7 +688,7 @@ class TestsBuilderEngine:
 
         overflow_check = func_spec.get("overflow_check")
 
-        loop_limit = "size_out" if is_product else "size"
+        loop_limit = "size_out" if (is_product or changes_lmul(self._proto_of(func_name))) else "size"
 
         nan_inf_skip = func_spec.get("nan_inf_skip", False)
         nan_inf_skip_lines = "if (std::isnan(diff) || std::isinf(diff)) continue;" if nan_inf_skip else ""
@@ -699,11 +827,11 @@ class TestsBuilderEngine:
                 dts.append(first)
         if dialect_name == "c":
             return indexed_tests.build_c(func_name, dts, lmul_suffix, mkind, lmul, N)
-        mask_support = self.interfaces[func_name].get("mask_support", "all_mask")
+        func_variants = self.interfaces[func_name].get("variants", ["u", "m", "z", "s"])
         mkinds = []
         for m in ["unmasked", "mask", "maskz", "masks"]:
             if mask_list is None or m in mask_list or (m == "unmasked" and "" in mask_list):
-                if m == "unmasked" or self._is_mask_kind_supported(mask_support, m):
+                if m == "unmasked" or self._is_mask_kind_supported(func_variants, m):
                     mkinds.append("" if m == "unmasked" else m)
         return indexed_tests.build_cpp(dialect_name, func_name, [self._format_cpp_type(d) for d in dts],
                                        mkinds, lmul_list, ldiv_list, N)
@@ -727,9 +855,7 @@ class TestsBuilderEngine:
             return f"mipp::{fname}<{mk_sym}, T, LMUL{isa_str}>({call_args})"
 
         # Conversion functions: test_helpers wrapper
-        dt_spec = self.interfaces.get(func_name, {}).get("datatypes")
-        is_conversion = dt_spec in ("all_datatypes_cart_prod", "all_datatypes_same_size", "all_datatypes_widenning")
-        if is_conversion:
+        if self.is_product_func(func_name):
             return f"mipp::test_helpers::{fname}<T_dst>({call_args})"
 
         # Functions with no register/mask args (set, set0, set1…): explicit T, LMUL
@@ -767,9 +893,7 @@ class TestsBuilderEngine:
                 return f"~{args[0]}"
 
         # 2. Conversion functions: test_helpers wrapper (same as Cpp for scalar compatibility)
-        dt_spec = self.interfaces.get(func_name, {}).get("datatypes")
-        is_conversion = dt_spec in ("all_datatypes_cart_prod", "all_datatypes_same_size", "all_datatypes_widenning")
-        if is_conversion:
+        if self.is_product_func(func_name):
             fname = self.interfaces.get(func_name, {}).get("cpp_name", func_name)
             call_args = ", ".join(args)
             return f"mipp::{fname}<T_dst>({call_args})"
@@ -819,14 +943,20 @@ class TestsBuilderEngine:
         size_var: str,
         r_var: str = "rres",
         s_var: str = "sres",
+        ret_lmul_suffix: Optional[str] = None,
     ) -> List[str]:
         """Generate assertion lines for the C dialect validation block.
+
+        `lmul_suffix` is the LMUL of the arguments, `ret_lmul_suffix` the one of the returned register
+        (defaults to `lmul_suffix`: they differ for the functions whose prototype has `ret.lmul`).
 
         Symmetric to render_cpp_validation_block but uses CDialectAdapter
         accessor calls (mipp_get_*, mipp_scalar_get_*) and C-specific
         assertion templates. Called by TestsBuilderEngineC to avoid duplicating
         the bitwise/logical/tolerance/exact dispatch logic inline.
         """
+        if ret_lmul_suffix is None:
+            ret_lmul_suffix = lmul_suffix
         func_spec = self.specs.get("functions", {}).get(func_name, {})
         overflow_check = func_spec.get("overflow_check")
         comp_entry = func_spec.get("comparison", "exact")
@@ -845,11 +975,11 @@ class TestsBuilderEngine:
             lines.append("\t\t{")
 
             if is_msk_ret:
-                r_expr_fn = lambda reg: adapter.format_get_k(reg, "i", dt2_raw, lmul_suffix)
-                s_expr_fn = lambda reg: adapter.format_scalar_get_k(reg, "i", dt2_raw, lmul_suffix)
+                r_expr_fn = lambda reg: adapter.format_get_k(reg, "i", dt2_raw, ret_lmul_suffix)
+                s_expr_fn = lambda reg: adapter.format_scalar_get_k(reg, "i", dt2_raw, ret_lmul_suffix)
             else:
-                r_expr_fn = lambda reg: adapter.format_get(reg, "i", dt2_raw, lmul_suffix)
-                s_expr_fn = lambda reg: adapter.format_scalar_get(reg, "i", dt2_raw, lmul_suffix)
+                r_expr_fn = lambda reg: adapter.format_get(reg, "i", dt2_raw, ret_lmul_suffix)
+                s_expr_fn = lambda reg: adapter.format_scalar_get(reg, "i", dt2_raw, ret_lmul_suffix)
 
             def _assert_stmts(r_expr: str, s_expr: str, indent: str = "\t\t\t") -> List[str]:
                 res: List[str] = []
@@ -979,6 +1109,10 @@ class TestsBuilderEngineC:
 
         datatypes = self.engine._resolve_datatypes(func_name)
 
+        # ISAs that provide the function for this LMUL (registry: ret.lmul, ldiv_mask files...)
+        isa_guard = self.engine.isa_guard(func_name, lmul)
+        if isa_guard:
+            lines.append(f"#if {isa_guard}")
         if lmul < 0:
             lines.append("#if defined(MIPP_LDIV_2)")
 
@@ -989,6 +1123,8 @@ class TestsBuilderEngineC:
 
         if lmul < 0:
             lines.append("#endif // MIPP_LDIV_2")
+        if isa_guard:
+            lines.append("#endif // ISA guard")
 
         return "\n".join(lines)
 
@@ -1033,6 +1169,10 @@ class TestsBuilderEngineC:
         dt_cstd = f"{dt1_raw}_t"
         tag = f"{mkind}_{lmul_suffix}" if mkind else lmul_suffix
         lmul_mult = f" * {lmul}" if lmul > 0 else (f" / {-lmul}" if lmul < 0 else "")
+        # LMUL of the result (ret.lmul of the prototype): same as the arguments' one for most functions
+        ret_lmul = self.engine.result_lmul(func_name, lmul)
+        ret_lmul_suffix = lmul_suffix if ret_lmul == lmul else self.engine.lmul_tag(ret_lmul)
+        ret_lmul_mult = lmul_mult if ret_lmul == lmul else self.engine.lanes_factor(ret_lmul)
         dt_clean = dt_name.replace(',', '_')
         func_decl = f"static void test_mipp_c_{func_name}_{dt_clean}_{tag}()"
 
@@ -1040,7 +1180,7 @@ class TestsBuilderEngineC:
         is_1arg = self.engine.proto_is_1arg(proto_ref)
         is_3arg = self.engine.proto_is_3arg(proto_ref)
         size_var = f"MIPP_N_{dt1_raw.upper()}{lmul_mult}"
-        size_out_var = f"MIPP_N_{dt2_raw.upper()}{lmul_mult}"
+        size_out_var = f"MIPP_N_{dt2_raw.upper()}{ret_lmul_mult}"
 
         body_lines = [func_decl, "{", "\tstd::mt19937 seed(Catch::getSeed());", "\tfor (unsigned n = 0; n < get_n_iter(); n++)", "\t{"]
         
@@ -1085,28 +1225,30 @@ class TestsBuilderEngineC:
 
         # Loads
         reg_type1 = adapter.format_reg_type(dt1_raw, lmul_suffix)
-        scalar_reg_type1 = adapter.format_scalar_reg_type(dt1_raw, lmul_suffix)
+        # scalar types are distinct per LMUL name: the m0 tests of an LMUL-changing function use the m1 ones
+        s_lmul_suffix = "m1" if (lmul == 0 and ret_lmul != lmul) else lmul_suffix
+        scalar_reg_type1 = adapter.format_scalar_reg_type(dt1_raw, s_lmul_suffix)
 
         body_lines.append(f"\t\t[[maybe_unused]] {reg_type1} r1 = {adapter.format_load(dt1_raw, 'inputs1', lmul_suffix)};")
-        body_lines.append(f"\t\t[[maybe_unused]] {scalar_reg_type1} s1 = {adapter.format_scalar_load(dt1_raw, 'inputs1', lmul_suffix)};")
+        body_lines.append(f"\t\t[[maybe_unused]] {scalar_reg_type1} s1 = {adapter.format_scalar_load(dt1_raw, 'inputs1', s_lmul_suffix)};")
         if not is_1arg:
             body_lines.append(f"\t\t[[maybe_unused]] {reg_type1} r2 = {adapter.format_load(dt1_raw, 'inputs2', lmul_suffix)};")
-            body_lines.append(f"\t\t[[maybe_unused]] {scalar_reg_type1} s2 = {adapter.format_scalar_load(dt1_raw, 'inputs2', lmul_suffix)};")
+            body_lines.append(f"\t\t[[maybe_unused]] {scalar_reg_type1} s2 = {adapter.format_scalar_load(dt1_raw, 'inputs2', s_lmul_suffix)};")
         if is_3arg:
             body_lines.append(f"\t\t[[maybe_unused]] {reg_type1} r3 = {adapter.format_load(dt1_raw, 'inputs3', lmul_suffix)};")
-            body_lines.append(f"\t\t[[maybe_unused]] {scalar_reg_type1} s3 = {adapter.format_scalar_load(dt1_raw, 'inputs3', lmul_suffix)};")
+            body_lines.append(f"\t\t[[maybe_unused]] {scalar_reg_type1} s3 = {adapter.format_scalar_load(dt1_raw, 'inputs3', s_lmul_suffix)};")
 
         if has_mask_var:
             msk_type = adapter.format_msk_type(dt1_raw, lmul_suffix)
-            scalar_msk_type = adapter.format_scalar_msk_type(dt1_raw, lmul_suffix)
+            scalar_msk_type = adapter.format_scalar_msk_type(dt1_raw, s_lmul_suffix)
             body_lines.append(f"\t\t[[maybe_unused]] {msk_type} m1 = {adapter.format_set_k(dt1_raw, 'inputs_m', lmul_suffix)};")
-            body_lines.append(f"\t\t[[maybe_unused]] {scalar_msk_type} sm1 = {adapter.format_scalar_set_k(dt1_raw, 'inputs_m', lmul_suffix)};")
+            body_lines.append(f"\t\t[[maybe_unused]] {scalar_msk_type} sm1 = {adapter.format_scalar_set_k(dt1_raw, 'inputs_m', s_lmul_suffix)};")
             if n_masks >= 2:
                 body_lines.append(f"\t\t[[maybe_unused]] {msk_type} m2 = {adapter.format_set_k(dt1_raw, 'inputs_m2', lmul_suffix)};")
-                body_lines.append(f"\t\t[[maybe_unused]] {scalar_msk_type} sm2 = {adapter.format_scalar_set_k(dt1_raw, 'inputs_m2', lmul_suffix)};")
+                body_lines.append(f"\t\t[[maybe_unused]] {scalar_msk_type} sm2 = {adapter.format_scalar_set_k(dt1_raw, 'inputs_m2', s_lmul_suffix)};")
         if mkind == "masks":
             body_lines.append(f"\t\t[[maybe_unused]] {reg_type1} rsrc = {adapter.format_load(dt1_raw, 'inputs_src', lmul_suffix)};")
-            body_lines.append(f"\t\t[[maybe_unused]] {scalar_reg_type1} ssrc = {adapter.format_scalar_load(dt1_raw, 'inputs_src', lmul_suffix)};")
+            body_lines.append(f"\t\t[[maybe_unused]] {scalar_reg_type1} ssrc = {adapter.format_scalar_load(dt1_raw, 'inputs_src', s_lmul_suffix)};")
 
         body_lines.append("")
 
@@ -1116,11 +1258,11 @@ class TestsBuilderEngineC:
         is_msk_ret = ret_type_kind == "msk"
 
         if is_msk_ret:
-            ret_type_r = adapter.format_msk_type(dt2_raw, lmul_suffix)
-            ret_type_s = adapter.format_scalar_msk_type(dt2_raw, lmul_suffix)
+            ret_type_r = adapter.format_msk_type(dt2_raw, ret_lmul_suffix)
+            ret_type_s = adapter.format_scalar_msk_type(dt2_raw, ret_lmul_suffix)
         else:
-            ret_type_r = adapter.format_reg_type(dt2_raw, lmul_suffix)
-            ret_type_s = adapter.format_scalar_reg_type(dt2_raw, lmul_suffix)
+            ret_type_r = adapter.format_reg_type(dt2_raw, ret_lmul_suffix)
+            ret_type_s = adapter.format_scalar_reg_type(dt2_raw, ret_lmul_suffix)
 
         op_args_r = self.engine._build_op_call_args(func_name, mkind, is_scalar=False)
         op_args_s = self.engine._build_op_call_args(func_name, mkind, is_scalar=True)
@@ -1153,6 +1295,7 @@ class TestsBuilderEngineC:
             is_msk_ret=is_msk_ret,
             size_out_var=size_out_var,
             size_var=size_var,
+            ret_lmul_suffix=ret_lmul_suffix,
         ))
 
         body_lines.append("\t}")
@@ -1188,6 +1331,28 @@ class TestsBuilderEngineCppBase:
     def __init__(self, engine: TestsBuilderEngine):
         self.engine = engine
 
+    def tested_lmuls(self, func_name: str, lmul_list: Optional[List[int]], ldiv_list: Optional[List[int]]) -> List[int]:
+        """LMULs (1, 2, 4, 8, then -2 for d2) instantiated by the test case of the function: those
+        requested, for which the function exists (a result LMUL that does not exist is skipped)."""
+        available = [1, 2, 4, 8]
+        if lmul_list is not None:
+            target = set(lmul_list)
+            if 0 in target:
+                target.add(1)
+            available = [l for l in available if l in target]
+        if ldiv_list is None or 2 in ldiv_list:
+            available.append(-2)
+        return [l for l in available if self.engine.is_test_defined(func_name, l)]
+
+    def _guard_body(self, func_name: str, lines: List[str], n_head: int,
+                    lmul_list: Optional[List[int]], ldiv_list: Optional[List[int]]) -> List[str]:
+        """Compile the test body (everything after the headers) only for the ISAs that provide the
+        function for at least one tested LMUL: the names it uses are not declared on the others."""
+        guard = self.engine.isa_guard_any(func_name, self.tested_lmuls(func_name, lmul_list, ldiv_list))
+        if guard is None:
+            return lines
+        return lines[:n_head] + [f"#if {guard}"] + lines[n_head:] + ["#endif // ISA guard"]
+
     def render_cpp_test_case(
         self,
         dialect_name: str,
@@ -1222,25 +1387,20 @@ class TestsBuilderEngineCppBase:
                 lines.append(f'\t\tSECTION("datatype = {dt}")')
                 lines.append('\t\t{')
 
-                available_lmuls = [(1, "LMUL = 1"), (2, "LMUL = 2"), (4, "LMUL = 4"), (8, "LMUL = 8")]
-                if lmul_list is not None:
-                    target_set = set(lmul_list)
-                    if 0 in target_set:
-                        target_set.add(1)
-                    lmuls_to_test = [item for item in available_lmuls if item[0] in target_set]
-                else:
-                    lmuls_to_test = available_lmuls
-
-                for lmul_val, lmul_str in lmuls_to_test:
+                for lmul_val in self.tested_lmuls(func_name, lmul_list, ldiv_list):
+                    # an ISA that does not provide the function for this LMUL does not instantiate it
+                    guard = self.engine.isa_guard(func_name, lmul_val)
+                    if guard:
+                        lines.append(f"#if {guard}")
                     call_expr = f"{func_prefix}_{func_name}<{mk_enum}, {cpp_type}, {lmul_val}>();"
-                    tpl_lmul = self.engine._tpl("func_templates", "obj", "test_section_lmul")
-                    lines.extend(self.engine.render_template(tpl_lmul, lmul_str=lmul_str, call_expr=call_expr))
-
-                test_ldiv2 = (ldiv_list is None or 2 in ldiv_list)
-                if test_ldiv2:
-                    call_ldiv2 = f"{func_prefix}_{func_name}<{mk_enum}, {cpp_type}, -2>();"
-                    tpl_ldiv2 = self.engine._tpl("func_templates", "cpp", "test_section_ldiv2")
-                    lines.extend(self.engine.render_template(tpl_ldiv2, call_expr=call_ldiv2))
+                    if lmul_val > 0:
+                        tpl_lmul = self.engine._tpl("func_templates", "obj", "test_section_lmul")
+                        lines.extend(self.engine.render_template(tpl_lmul, lmul_str=f"LMUL = {lmul_val}", call_expr=call_expr))
+                    else:
+                        tpl_ldiv2 = self.engine._tpl("func_templates", "cpp", "test_section_ldiv2")
+                        lines.extend(self.engine.render_template(tpl_ldiv2, call_expr=call_expr))
+                    if guard:
+                        lines.append(f"#endif // ISA guard")
 
                 lines.append('\t\t}')
 
@@ -1272,11 +1432,6 @@ class TestsBuilderEngineCppBase:
             for aux in ("loadu", "set1", "set1_k"):
                 if aux in self.engine.interfaces and aux not in wrapper_fns:
                     wrapper_fns.append(aux)
-        _dt = self.engine.interfaces.get(func_name, {}).get("datatypes")
-        if _dt in ("all_datatypes_cart_prod", "all_datatypes_same_size", "all_datatypes_widenning"):
-            for conv in ("cvt", "wcvt", "cast", "cast_k"):
-                if conv in self.engine.interfaces and conv not in wrapper_fns:
-                    wrapper_fns.append(conv)
         # Scalar reference headers are self-contained (they pull the ISA detection and rvd/rvm types) and
         # come FIRST: their explicit specializations (hmax<Z,float64_t,-2,SCALAR>, ...) are matched against
         # every visible same-name template, so the obj overloads (Rvm<T,LMUL>) must not be declared yet.
@@ -1294,25 +1449,9 @@ class TestsBuilderEngineCppBase:
                 cat_aux = _match_category(aux)
                 headers_set.add(f'#include <mipp/internal/simd_ext/scalar/cpp/functions/{cat_aux}/{aux}.hpp>')
 
-        dt_spec = self.engine.interfaces.get(func_name, {}).get("datatypes")
-        is_conversion = dt_spec in ("all_datatypes_cart_prod", "all_datatypes_same_size", "all_datatypes_widenning")
-        if (dialect_name in ("cpp", "obj")) and is_conversion:
-            cat_cvt = _match_category("cvt")
-            cat_wcvt = _match_category("wcvt")
-            cat_cast = _match_category("cast")
-            cat_cast_k = _match_category("cast_k")
-            headers_set.add(f'#include <mipp/internal/simd_ext/scalar/cpp/functions/{cat_cvt}/cvt.hpp>')
-            headers_set.add(f'#include <mipp/internal/simd_ext/scalar/cpp/functions/{cat_wcvt}/wcvt.hpp>')
-            headers_set.add(f'#include <mipp/internal/simd_ext/scalar/cpp/functions/{cat_cast}/cast.hpp>')
-            headers_set.add(f'#include <mipp/internal/simd_ext/scalar/cpp/functions/{cat_cast_k}/cast_k.hpp>')
-
         lines.extend(sorted(list(headers_set)))
         lines.extend(wrapper_lines)
         lines.append("")
-
-        if (dialect_name in ("cpp", "obj")) and is_conversion:
-            lines.extend(self.engine._tpl("assertions", "cpp", "cvt_helpers"))
-            lines.append("")
 
         for inc in extra_aux:
             lines.append(inc)
@@ -1441,12 +1580,16 @@ class TestsBuilderEngineCpp(TestsBuilderEngineCppBase):
         lines = []
         adapter = CppDialectAdapter()
         lines.extend(self._render_headers("cpp", func_name, N=N))
+        n_head = len(lines)
+        if self.engine.is_product_func(func_name):
+            lines.extend(self.engine.render_cpp_conv_helper(func_name))
+            lines.append("")
 
-        mask_support = self.engine.interfaces[func_name].get("mask_support", "all_mask")
+        func_variants = self.engine.interfaces[func_name].get("variants", ["u", "m", "z", "s"])
         supported_mkinds = []
         for m in ["unmasked", "mask", "maskz", "masks"]:
             if mask_list is None or m in mask_list or (m == "unmasked" and "" in mask_list):
-                if m == "unmasked" or self.engine._is_mask_kind_supported(mask_support, m):
+                if m == "unmasked" or self.engine._is_mask_kind_supported(func_variants, m):
                     supported_mkinds.append(m)
 
         proto_ref = self.engine.interfaces.get(func_name, {}).get("proto_ref", "ret_reg_2args_reg")
@@ -1461,16 +1604,7 @@ class TestsBuilderEngineCpp(TestsBuilderEngineCppBase):
         tpl_hdr = self.engine._tpl("func_templates", "cpp", tpl_key)
         lines.extend(self.engine.render_template(tpl_hdr, func_name=func_name))
 
-        if is_product:
-            lines.extend(self.engine.render_template(
-                self.engine._tpl("func_templates", "cpp", "size_constexpr_product"),
-                adapter=adapter
-            ))
-        else:
-            lines.extend(self.engine.render_template(
-                self.engine._tpl("func_templates", "obj", "size_constexpr"),
-                adapter=adapter
-            ))
+        lines.extend(self.engine.render_cpp_sizes(func_name, adapter, is_product))
 
         lines.extend(self._render_cpp_input_arrays(
             func_spec, "cpp", is_1arg, is_3arg,
@@ -1513,6 +1647,7 @@ class TestsBuilderEngineCpp(TestsBuilderEngineCppBase):
         lines.extend(self.engine._tpl("func_templates", "obj", "func_footer"))
 
         lines.extend(self.render_cpp_test_case("cpp", func_name, supported_mkinds, lmul_list=lmul_list, ldiv_list=ldiv_list))
+        lines = self._guard_body(func_name, lines, n_head, lmul_list, ldiv_list)
         return "\n".join(lines)
 
 
@@ -1532,12 +1667,16 @@ class TestsBuilderEngineObj(TestsBuilderEngineCppBase):
         lines = []
         adapter = CppObjDialectAdapter()
         lines.extend(self._render_headers("obj", func_name, N=N))
+        n_head = len(lines)
+        if self.engine.is_product_func(func_name):
+            lines.extend(self.engine.render_cpp_conv_helper(func_name))
+            lines.append("")
 
-        mask_support = self.engine.interfaces[func_name].get("mask_support", "all_mask")
+        func_variants = self.engine.interfaces[func_name].get("variants", ["u", "m", "z", "s"])
         supported_mkinds = []
         for m in ["unmasked", "mask", "maskz", "masks"]:
             if mask_list is None or m in mask_list or (m == "unmasked" and "" in mask_list):
-                if m == "unmasked" or self.engine._is_mask_kind_supported(mask_support, m):
+                if m == "unmasked" or self.engine._is_mask_kind_supported(func_variants, m):
                     supported_mkinds.append(m)
 
         proto_ref = self.engine.interfaces.get(func_name, {}).get("proto_ref", "ret_reg_2args_reg")
@@ -1552,16 +1691,7 @@ class TestsBuilderEngineObj(TestsBuilderEngineCppBase):
         tpl_hdr = self.engine._tpl("func_templates", "obj", tpl_key)
         lines.extend(self.engine.render_template(tpl_hdr, func_name=func_name))
 
-        if is_product:
-            lines.extend(self.engine.render_template(
-                self.engine._tpl("func_templates", "cpp", "size_constexpr_product"),
-                adapter=adapter
-            ))
-        else:
-            lines.extend(self.engine.render_template(
-                self.engine._tpl("func_templates", "obj", "size_constexpr"),
-                adapter=adapter
-            ))
+        lines.extend(self.engine.render_cpp_sizes(func_name, adapter, is_product))
 
         lines.extend(self._render_cpp_input_arrays(
             func_spec, "obj", is_1arg, is_3arg,
@@ -1604,4 +1734,5 @@ class TestsBuilderEngineObj(TestsBuilderEngineCppBase):
         lines.extend(self.engine._tpl("func_templates", "obj", "func_footer"))
 
         lines.extend(self.render_cpp_test_case("obj", func_name, supported_mkinds, lmul_list=lmul_list, ldiv_list=ldiv_list))
+        lines = self._guard_body(func_name, lines, n_head, lmul_list, ldiv_list)
         return "\n".join(lines)

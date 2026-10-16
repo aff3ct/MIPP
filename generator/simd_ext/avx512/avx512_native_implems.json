@@ -30,13 +30,13 @@
             "instr_name": "add",
             "datatypes": "all_float",
             "template": "arith_2args_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "add",
             "datatypes": "all_float",
             "template": "arith_2args_mskz",
-            "version": "maskz"
+            "variant": "z"
         }
     ],
     "andb": [
@@ -452,14 +452,14 @@
             "datatypes": "all_float",
             "template": "arith_2args_msk",
             "if": "defined(__AVX512BW__)",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "div",
             "datatypes": "all_float",
             "template": "arith_2args_mskz",
             "if": "defined(__AVX512BW__)",
-            "version": "maskz"
+            "variant": "z"
         }
     ],
     "fmadd": [
@@ -472,13 +472,13 @@
             "instr_name": "fmadd",
             "datatypes": "all_float",
             "template": "arith_3args_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "fmadd",
             "datatypes": "all_float",
             "template": "arith_3args_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "fmadd",
@@ -499,13 +499,13 @@
             "instr_name": "fmsub",
             "datatypes": "all_float",
             "template": "arith_3args_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "fmsub",
             "datatypes": "all_float",
             "template": "arith_3args_mskz",
-            "version": "maskz"
+            "variant": "z"
         }
     ],
     "gather": [
@@ -528,7 +528,7 @@
             ],
             "template": "gather_masks_64",
             "if": "defined(__AVX512F__)",
-            "version": "masks"
+            "variant": "s"
         },
         {
             "instr_name": "gather",
@@ -538,7 +538,7 @@
             ],
             "template": "gather_masks_32",
             "if": "defined(__AVX512F__)",
-            "version": "masks"
+            "variant": "s"
         }
     ],
     "getfirst": [
@@ -591,7 +591,7 @@
             ],
             "template": "load_msks",
             "if": "defined(__AVX512F__)",
-            "version": "masks"
+            "variant": "s"
         },
         {
             "instr_name": "loadu",
@@ -603,7 +603,7 @@
             ],
             "template": "load_msks",
             "if": "defined(__AVX512BW__)",
-            "version": "masks"
+            "variant": "s"
         },
         {
             "instr_name": "load",
@@ -617,7 +617,7 @@
             ],
             "template": "load_mskz",
             "if": "defined(__AVX512F__)",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "loadu",
@@ -629,7 +629,7 @@
             ],
             "template": "load_mskz",
             "if": "defined(__AVX512BW__)",
-            "version": "maskz"
+            "variant": "z"
         }
     ],
     "loadu": [
@@ -650,7 +650,7 @@
             ],
             "template": "load_msks",
             "if": "defined(__AVX512F__)",
-            "version": "masks"
+            "variant": "s"
         },
         {
             "instr_name": "loadu",
@@ -662,7 +662,7 @@
             ],
             "template": "load_msks",
             "if": "defined(__AVX512BW__)",
-            "version": "masks"
+            "variant": "s"
         },
         {
             "instr_name": "loadu",
@@ -676,7 +676,7 @@
             ],
             "template": "load_mskz",
             "if": "defined(__AVX512F__)",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "loadu",
@@ -688,7 +688,7 @@
             ],
             "template": "load_mskz",
             "if": "defined(__AVX512BW__)",
-            "version": "maskz"
+            "variant": "z"
         }
     ],
     "lshift": [
@@ -778,13 +778,13 @@
             "instr_name": "mul",
             "datatypes": "all_float",
             "template": "arith_2args_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "mul",
             "datatypes": "all_float",
             "template": "arith_2args_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "mullo",
@@ -950,7 +950,7 @@
             ],
             "template": "scatter_mask_64",
             "if": "defined(__AVX512F__)",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "scatter",
@@ -960,7 +960,7 @@
             ],
             "template": "scatter_mask_32",
             "if": "defined(__AVX512F__)",
-            "version": "mask"
+            "variant": "m"
         }
     ],
     "select": [
@@ -1076,7 +1076,7 @@
             ],
             "template": "store_msk",
             "if": "defined(__AVX512F__)",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "storeu",
@@ -1088,7 +1088,7 @@
             ],
             "template": "store_msk",
             "if": "defined(__AVX512BW__)",
-            "version": "mask"
+            "variant": "m"
         }
     ],
     "storeu": [
@@ -1109,7 +1109,7 @@
             ],
             "template": "store_msk",
             "if": "defined(__AVX512F__)",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "storeu",
@@ -1121,7 +1121,7 @@
             ],
             "template": "store_msk",
             "if": "defined(__AVX512BW__)",
-            "version": "mask"
+            "variant": "m"
         }
     ],
     "sub": [
@@ -1134,13 +1134,13 @@
             "instr_name": "sub",
             "datatypes": "all_float",
             "template": "arith_2args_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "sub",
             "datatypes": "all_float",
             "template": "arith_2args_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "sub",

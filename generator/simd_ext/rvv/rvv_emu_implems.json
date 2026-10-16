@@ -4,13 +4,13 @@
             "instr_name": "add",
             "datatypes": "all_int_uint",
             "template": "arith_2args_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "fadd",
             "datatypes": "all_float",
             "template": "arith_2args_mskz",
-            "version": "maskz"
+            "variant": "z"
         }
     ],
     "adds": [
@@ -18,13 +18,13 @@
             "instr_name": "sadd",
             "datatypes": "all_int",
             "template": "arith_2args_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "saddu",
             "datatypes": "all_uint",
             "template": "arith_2args_mskz",
-            "version": "maskz"
+            "variant": "z"
         }
     ],
     "andb": [
@@ -37,7 +37,7 @@
             "instr_name": "and",
             "datatypes": "all_int_uint",
             "template": "arith_2args_mskz",
-            "version": "maskz"
+            "variant": "z"
         }
     ],
     "andnb": [
@@ -61,13 +61,13 @@
             "instr_name": "mseq",
             "datatypes": "all_int_uint",
             "template": "arith_msk_type_2args_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "mfeq",
             "datatypes": "all_float",
             "template": "arith_msk_type_2args_mskz",
-            "version": "maskz"
+            "variant": "z"
         }
     ],
     "cmpge": [
@@ -75,19 +75,19 @@
             "instr_name": "msge",
             "datatypes": "all_int",
             "template": "arith_msk_type_2args_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "msgeu",
             "datatypes": "all_uint",
             "template": "arith_msk_type_2args_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "mfge",
             "datatypes": "all_float",
             "template": "arith_msk_type_2args_mskz",
-            "version": "maskz"
+            "variant": "z"
         }
     ],
     "cmpgt": [
@@ -95,19 +95,19 @@
             "instr_name": "msgt",
             "datatypes": "all_int",
             "template": "arith_msk_type_2args_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "msgtu",
             "datatypes": "all_uint",
             "template": "arith_msk_type_2args_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "mfgt",
             "datatypes": "all_float",
             "template": "arith_msk_type_2args_mskz",
-            "version": "maskz"
+            "variant": "z"
         }
     ],
     "cmple": [
@@ -115,19 +115,19 @@
             "instr_name": "msle",
             "datatypes": "all_int",
             "template": "arith_msk_type_2args_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "msleu",
             "datatypes": "all_uint",
             "template": "arith_msk_type_2args_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "mfle",
             "datatypes": "all_float",
             "template": "arith_msk_type_2args_mskz",
-            "version": "maskz"
+            "variant": "z"
         }
     ],
     "cmplt": [
@@ -135,19 +135,19 @@
             "instr_name": "mslt",
             "datatypes": "all_int",
             "template": "arith_msk_type_2args_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "msltu",
             "datatypes": "all_uint",
             "template": "arith_msk_type_2args_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "mflt",
             "datatypes": "all_float",
             "template": "arith_msk_type_2args_mskz",
-            "version": "maskz"
+            "variant": "z"
         }
     ],
     "cmpneq": [
@@ -155,13 +155,13 @@
             "instr_name": "msne",
             "datatypes": "all_int_uint",
             "template": "arith_msk_type_2args_mskz_cmpneq",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "mfne",
             "datatypes": "all_float",
             "template": "arith_msk_type_2args_mskz_cmpneq",
-            "version": "maskz"
+            "variant": "z"
         }
     ],
     "div": [
@@ -169,7 +169,7 @@
             "instr_name": "fdiv",
             "datatypes": "all_float",
             "template": "arith_2args_mskz",
-            "version": "maskz"
+            "variant": "z"
         }
     ],
     "div2": [
@@ -177,19 +177,19 @@
             "instr_name": "srl",
             "datatypes": "all_uint",
             "template": "div2_scalar_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "sra",
             "datatypes": "all_int",
             "template": "div2_scalar_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "fdiv",
             "datatypes": "all_float",
             "template": "div2_float_mskz",
-            "version": "maskz"
+            "variant": "z"
         }
     ],
     "div4": [
@@ -197,19 +197,19 @@
             "instr_name": "srl",
             "datatypes": "all_uint",
             "template": "div4_scalar_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "sra",
             "datatypes": "all_int",
             "template": "div4_scalar_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "fdiv",
             "datatypes": "all_float",
             "template": "div4_float_mskz",
-            "version": "maskz"
+            "variant": "z"
         }
     ],
     "fmsub": [
@@ -267,7 +267,7 @@
                 "uint8,uint8"
             ],
             "template": "gather_maskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "luxei",
@@ -284,7 +284,7 @@
                 "uint8,uint8"
             ],
             "template": "gather_masks",
-            "version": "masks"
+            "variant": "s"
         }
     ],
     "get": [
@@ -314,13 +314,13 @@
             "instr_name": "redsum",
             "datatypes": "all_int_uint",
             "template": "hadd_hmax_uint_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "fredusum",
             "datatypes": "all_float",
             "template": "hadd_hmax_float_mskz",
-            "version": "maskz"
+            "variant": "z"
         }
     ],
     "hmax": [
@@ -352,13 +352,13 @@
             "instr_name": "redmax",
             "datatypes": "all_int",
             "template": "hmax_int_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "redmaxu",
             "datatypes": "all_uint",
             "template": "hadd_hmax_uint_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "fredmax",
@@ -366,7 +366,7 @@
                 "float32"
             ],
             "template": "hmax_float32_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "fredmax",
@@ -374,7 +374,7 @@
                 "float64"
             ],
             "template": "hmax_float64_mskz",
-            "version": "maskz"
+            "variant": "z"
         }
     ],
     "hmin": [
@@ -406,13 +406,13 @@
             "instr_name": "redmin",
             "datatypes": "all_int",
             "template": "hmin_int_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "redminu",
             "datatypes": "all_uint",
             "template": "hmin_uint_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "fredmin",
@@ -420,7 +420,7 @@
                 "float32"
             ],
             "template": "hmin_float32_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "fredmin",
@@ -428,7 +428,7 @@
                 "float64"
             ],
             "template": "hmin_float64_mskz",
-            "version": "maskz"
+            "variant": "z"
         }
     ],
     "hmul": [
@@ -448,7 +448,7 @@
             "instr_name": "load",
             "datatypes": "all_datatypes",
             "template": "load_mskz",
-            "version": "maskz"
+            "variant": "z"
         }
     ],
     "loadu": [
@@ -456,7 +456,7 @@
             "instr_name": "loadu",
             "datatypes": "all_datatypes",
             "template": "load_mskz",
-            "version": "maskz"
+            "variant": "z"
         }
     ],
     "lshift": [
@@ -469,25 +469,25 @@
             "instr_name": "sll",
             "datatypes": "all_float",
             "template": "shift_float_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "sll",
             "datatypes": "all_int_uint",
             "template": "shift_scalar_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "sll",
             "datatypes": "all_float",
             "template": "shift_float_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "sll",
             "datatypes": "all_float",
             "template": "shift_float_msks",
-            "version": "masks"
+            "variant": "s"
         }
     ],
     "max": [
@@ -495,19 +495,19 @@
             "instr_name": "max",
             "datatypes": "all_int",
             "template": "arith_2args_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "maxu",
             "datatypes": "all_uint",
             "template": "arith_2args_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "fmax",
             "datatypes": "all_float",
             "template": "arith_2args_mskz",
-            "version": "maskz"
+            "variant": "z"
         }
     ],
     "min": [
@@ -515,19 +515,19 @@
             "instr_name": "min",
             "datatypes": "all_int",
             "template": "arith_2args_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "minu",
             "datatypes": "all_uint",
             "template": "arith_2args_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "fmin",
             "datatypes": "all_float",
             "template": "arith_2args_mskz",
-            "version": "maskz"
+            "variant": "z"
         }
     ],
     "mul": [
@@ -535,13 +535,13 @@
             "instr_name": "mul",
             "datatypes": "all_int_uint",
             "template": "arith_2args_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "fmul",
             "datatypes": "all_float",
             "template": "arith_2args_mskz",
-            "version": "maskz"
+            "variant": "z"
         }
     ],
     "notb": [
@@ -554,25 +554,25 @@
             "instr_name": "xor",
             "datatypes": "all_float",
             "template": "float_notb_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "xor",
             "datatypes": "all_int_uint",
             "template": "scalar_notb_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "xor",
             "datatypes": "all_float",
             "template": "float_notb_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "xor",
             "datatypes": "all_float",
             "template": "float_notb_msks",
-            "version": "masks"
+            "variant": "s"
         }
     ],
     "notb_k": [
@@ -592,7 +592,7 @@
             "instr_name": "or",
             "datatypes": "all_int_uint",
             "template": "arith_2args_mskz",
-            "version": "maskz"
+            "variant": "z"
         }
     ],
     "round": [
@@ -612,31 +612,31 @@
             "instr_name": "srl",
             "datatypes": "all_float",
             "template": "shift_float_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "srl",
             "datatypes": "all_uint",
             "template": "shift_scalar_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "sra",
             "datatypes": "all_int",
             "template": "shift_scalar_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "srl",
             "datatypes": "all_float",
             "template": "shift_float_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "srl",
             "datatypes": "all_float",
             "template": "shift_float_msks",
-            "version": "masks"
+            "variant": "s"
         }
     ],
     "rsqrt": [
@@ -644,7 +644,7 @@
             "instr_name": "frsqrt7",
             "datatypes": "all_float",
             "template": "arith_1arg_mskz",
-            "version": "maskz"
+            "variant": "z"
         }
     ],
     "scatter": [
@@ -679,7 +679,7 @@
                 "uint8,uint8"
             ],
             "template": "scatter_mask",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "suxei",
@@ -696,7 +696,7 @@
                 "uint8,uint8"
             ],
             "template": "scatter_maskz",
-            "version": "maskz"
+            "variant": "z"
         }
     ],
     "set1": [
@@ -723,7 +723,7 @@
             "instr_name": "fsqrt",
             "datatypes": "all_float",
             "template": "arith_1arg_mskz",
-            "version": "maskz"
+            "variant": "z"
         }
     ],
     "store": [
@@ -731,7 +731,7 @@
             "instr_name": "store",
             "datatypes": "all_datatypes",
             "template": "store_mskz",
-            "version": "maskz"
+            "variant": "z"
         }
     ],
     "storeu": [
@@ -739,7 +739,7 @@
             "instr_name": "storeu",
             "datatypes": "all_datatypes",
             "template": "store_mskz",
-            "version": "maskz"
+            "variant": "z"
         }
     ],
     "sub": [
@@ -747,13 +747,13 @@
             "instr_name": "sub",
             "datatypes": "all_int_uint",
             "template": "arith_2args_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "fsub",
             "datatypes": "all_float",
             "template": "arith_2args_mskz",
-            "version": "maskz"
+            "variant": "z"
         }
     ],
     "subs": [
@@ -761,13 +761,13 @@
             "instr_name": "ssub",
             "datatypes": "all_int",
             "template": "arith_2args_mskz",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "ssubu",
             "datatypes": "all_uint",
             "template": "arith_2args_mskz",
-            "version": "maskz"
+            "variant": "z"
         }
     ],
     "xorb": [
@@ -780,7 +780,7 @@
             "instr_name": "xor",
             "datatypes": "all_int_uint",
             "template": "arith_2args_mskz",
-            "version": "maskz"
+            "variant": "z"
         }
     ]
 }

@@ -100,13 +100,19 @@
                     "description": "Why the `levels` audit is disabled (requires `skip_audit_level: true`).",
                     "type": "string"
                 },
-                "version": {
-                    "description": "`mask`, `maskz` or `masks`: the entry implements this mask variant (without it, the unmasked function). `horiz_lmul`: the entry implements a horizontal function with LMUL > 1.",
+                "variant": {
+                    "description": "`m`, `z` or `s`: the entry implements this mask variant (merge, zero, scalar-merge). Without it, the entry implements the unmasked variant `u`.",
                     "type": "string",
                     "enum": [
-                        "mask",
-                        "maskz",
-                        "masks",
+                        "m",
+                        "z",
+                        "s"
+                    ]
+                },
+                "mode": {
+                    "description": "`horiz_lmul`: the entry implements a horizontal function with LMUL > 1. Not a mask variant: do not combine with `variant`.",
+                    "type": "string",
+                    "enum": [
                         "horiz_lmul"
                     ]
                 },

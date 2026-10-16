@@ -1,25 +1,132 @@
 {
+    "combine": [
+        {
+            "variants": ["u"],
+            "code": [
+                "%r<tr>% res;",
+                "res.r = svsplice_{{ isa_dt.data_ext }}(svwhilelt_b{{ dt.n_bits }}_s32(0, %N<tp>%), r0.r, r1.r);",
+                "return res;"
+            ]
+        }
+    ],
+    "combine_k": [
+        {
+            "variants": ["u"],
+            "code": [
+                "svuint{{ dt.n_bits }}_t v0 = svdup_n_u{{ dt.n_bits }}_z(m0.m, 1);",
+                "svuint{{ dt.n_bits }}_t v1 = svdup_n_u{{ dt.n_bits }}_z(m1.m, 1);",
+                "svuint{{ dt.n_bits }}_t v = svsplice_u{{ dt.n_bits }}(svwhilelt_b{{ dt.n_bits }}_s32(0, %N<tp>%), v0, v1);",
+                "%m<tr>% res;",
+                "res.m = svcmpne_n_u{{ dt.n_bits }}(svptrue_b{{ dt.n_bits }}(), v, 0);",
+                "return res;"
+            ]
+        }
+    ],
+    "high": [
+        {
+            "variants": ["u"],
+            "code": [
+                "%r<tr>% res;",
+                "res.r = svext_{{ isa_dt.data_ext }}(r0.r, r0.r, %N<tp|m:tp/2>%);",
+                "return res;"
+            ]
+        }
+    ],
+    "high_k": [
+        {
+            "variants": ["u"],
+            "code": [
+                "svuint{{ dt.n_bits }}_t v = svdup_n_u{{ dt.n_bits }}_z(m0.m, 1);",
+                "v = svext_u{{ dt.n_bits }}(v, v, %N<tp|m:tp/2>%);",
+                "%m<tr>% res;",
+                "res.m = svcmpne_n_u{{ dt.n_bits }}(svptrue_b{{ dt.n_bits }}(), v, 0);",
+                "return res;"
+            ]
+        }
+    ],
     "load|loadu": [
         {
-            "versions": [
+            "variants": [
                 "u"
             ],
             "code": [
-                "svbool_t pg = svwhilelt_b{{ dt.n_bits }}_s32(0, {{ N2 }});",
-                "{{ D2 }} res;",
+                "svbool_t pg = svwhilelt_b{{ dt.n_bits }}_s32(0, %N<tp>%);",
+                "%r<tr>% res;",
                 "res.r = svld1_{{ isa_dt.data_ext }}(pg, p0);",
+                "return res;"
+            ]
+        }
+    ],
+    "low": [
+        {
+            "variants": ["u"],
+            "code": [
+                "%r<tr>% res;",
+                "res.r = r0.r;",
+                "return res;"
+            ]
+        }
+    ],
+    "low_k": [
+        {
+            "variants": ["u"],
+            "code": [
+                "%m<tr>% res;",
+                "res.m = m0.m;",
+                "return res;"
+            ]
+        }
+    ],
+    "ncvt": [
+        {
+            "datatypes": ["int16", "int32", "int64", "uint16", "uint32", "uint64"],
+            "variants": ["u"],
+            "code": [
+                "{% set d = isa.datatypes[ctx.dt_ret].data_ext %}{% set s = isa_dt.data_ext %}%r<tr>% res;",
+                "{{ isa.datatypes[ctx.dt_ret].reg }} x = svreinterpret_{{ d }}_{{ s }}(r0.r);",
+                "res.r = svuzp1_{{ d }}(x, x);",
+                "return res;"
+            ]
+        },
+        {
+            "datatypes": ["float64"],
+            "variants": ["u"],
+            "code": [
+                "%r<tr>% res;",
+                "svfloat32_t x = svcvt_f32_f64_x(svptrue_b64(), r0.r);",
+                "res.r = svuzp1_f32(x, x);",
                 "return res;"
             ]
         }
     ],
     "store|storeu": [
         {
-            "versions": [
+            "variants": [
                 "u"
             ],
             "code": [
-                "svbool_t pg = svwhilelt_b{{ dt.n_bits }}_s32(0, {{ N2 }});",
+                "svbool_t pg = svwhilelt_b{{ dt.n_bits }}_s32(0, %N<tp>%);",
                 "svst1_{{ isa_dt.data_ext }}(pg, p0, r0.r);"
+            ]
+        }
+    ],
+    "wcvt": [
+        {
+            "datatypes": ["int8", "int16", "int32", "uint8", "uint16", "uint32"],
+            "variants": ["u"],
+            "code": [
+                "%r<tr>% res;",
+                "res.r = svunpklo_{{ isa.datatypes[ctx.dt_ret].data_ext }}(r0.r);",
+                "return res;"
+            ]
+        },
+        {
+            "datatypes": ["float32"],
+            "variants": ["u"],
+            "code": [
+                "%r<tr>% res;",
+                "res.r = svcvt_f64_f32_x(svptrue_b64(), svzip1_f32(r0.r, r0.r));",
+                "return res;"
             ]
         }
     ]

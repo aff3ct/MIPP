@@ -79,13 +79,13 @@ static void conversions(void)
     rvd_float32_t v  = mipp_loadu_float32(ptr);       // {-2.7, -1.4, -0.1, 1.2, ...}
     rvd_int32_t   vb = mipp_cast_float32_int32(v);    // {0xC02CCCCD, ...}: IEEE-754 bit patterns
     rvd_int32_t   vi = mipp_cvt_float32_int32(v);     // {-2, -1, 0, 1, ...}: truncation
-    rvd_float64_t vw = mipp_wcvt_float32_float64(v);  // {-2.7, -1.4, ...}: lower half only
+    rvd_float64_m2_t vw = mipp_wcvt_float32_float64(v); // {-2.7, -1.4, ...}: every element, in a register of LMUL 2
     /* --8<-- [end:conversions] */
     int32_t b[DOC_BUF], t[DOC_BUF];
     double w[DOC_BUF];
     mipp_storeu_int32(b, vb);
     mipp_storeu_int32(t, vi);
-    mipp_storeu_float64(w, vw);
+    mipp_storeu_float64_m2(w, vw);
     DOC_CHECK((uint32_t)b[0] == 0xC02CCCCDu);
     for (int i = 0; i < MIPP_N_FLOAT32; i++) {
         int32_t bits;
@@ -94,8 +94,33 @@ static void conversions(void)
         DOC_CHECK(t[i] == (int32_t)P[i]);
     }
     DOC_CHECK(t[0] == -2 && t[1] == -1 && t[2] == 0 && t[3] == 1);
-    for (int i = 0; i < MIPP_N_FLOAT64; i++)
+    for (int i = 0; i < MIPP_N_FLOAT32; i++)
         DOC_CHECK(w[i] == (double)P[i]);
+}
+
+/* §5.4: changing the LMUL */
+static void changing_lmul(void)
+{
+    const float* ptr = P;
+    /* --8<-- [start:changing_lmul] */
+    rvd_float32_t    a  = mipp_loadu_float32(ptr);
+    rvd_float32_t    b  = mipp_loadu_float32(ptr + MIPP_N_FLOAT32);
+    rvd_float32_m2_t ab = mipp_combine_float32(a, b);        // {a, b}: twice as many elements
+    rvd_float32_t    lo = mipp_low_float32_m2(ab);           // == a
+    rvd_float32_t    hi = mipp_high_float32_m2(ab);          // == b
+    rvd_float64_m2_t vw = mipp_wcvt_float32_float64(a);      // a as double, in a register of LMUL 2
+    rvd_float32_t    vn = mipp_ncvt_float64_float32_m2(vw);  // and back to float: == a
+    /* --8<-- [end:changing_lmul] */
+    float t[DOC_BUF], l[DOC_BUF], h[DOC_BUF], n[DOC_BUF];
+    mipp_storeu_float32_m2(t, ab);
+    mipp_storeu_float32(l, lo);
+    mipp_storeu_float32(h, hi);
+    mipp_storeu_float32(n, vn);
+    for (int i = 0; i < MIPP_N_FLOAT32; i++) {
+        DOC_CHECK(t[i] == P[i] && t[i + MIPP_N_FLOAT32] == P[i + MIPP_N_FLOAT32]);
+        DOC_CHECK(l[i] == P[i] && h[i] == P[i + MIPP_N_FLOAT32]);
+        DOC_CHECK(n[i] == P[i]);
+    }
 }
 
 int main(void)
@@ -105,5 +130,6 @@ int main(void)
     d2_loop();
     d2_guard();
     conversions();
+    changing_lmul();
     return doc_status();
 }

@@ -14,25 +14,25 @@
             "instr_name": "add",
             "datatypes": "all_int_uint",
             "template": "arith_2args_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "fadd",
             "datatypes": "all_float",
             "template": "arith_2args_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "add",
             "datatypes": "all_int_uint",
             "template": "arith_2args_msks",
-            "version": "masks"
+            "variant": "s"
         },
         {
             "instr_name": "fadd",
             "datatypes": "all_float",
             "template": "arith_2args_msks",
-            "version": "masks"
+            "variant": "s"
         }
     ],
     "adds": [
@@ -50,25 +50,25 @@
             "instr_name": "sadd",
             "datatypes": "all_int",
             "template": "arith_2args_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "saddu",
             "datatypes": "all_uint",
             "template": "arith_2args_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "sadd",
             "datatypes": "all_int",
             "template": "arith_2args_msks",
-            "version": "masks"
+            "variant": "s"
         },
         {
             "instr_name": "saddu",
             "datatypes": "all_uint",
             "template": "arith_2args_msks",
-            "version": "masks"
+            "variant": "s"
         }
     ],
     "andb": [
@@ -81,13 +81,13 @@
             "instr_name": "and",
             "datatypes": "all_int_uint",
             "template": "arith_2args_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "and",
             "datatypes": "all_int_uint",
             "template": "arith_2args_msks",
-            "version": "masks"
+            "variant": "s"
         }
     ],
     "andb_k": [
@@ -305,13 +305,13 @@
             "instr_name": "fdiv",
             "datatypes": "all_float",
             "template": "arith_2args_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "fdiv",
             "datatypes": "all_float",
             "template": "arith_2args_msks",
-            "version": "masks"
+            "variant": "s"
         }
     ],
     "div2": [
@@ -334,37 +334,37 @@
             "instr_name": "srl",
             "datatypes": "all_uint",
             "template": "div2_scalar_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "sra",
             "datatypes": "all_int",
             "template": "div2_scalar_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "fdiv",
             "datatypes": "all_float",
             "template": "div2_float_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "srl",
             "datatypes": "all_uint",
             "template": "div2_scalar_msks",
-            "version": "masks"
+            "variant": "s"
         },
         {
             "instr_name": "sra",
             "datatypes": "all_int",
             "template": "div2_scalar_msks",
-            "version": "masks"
+            "variant": "s"
         },
         {
             "instr_name": "fdiv",
             "datatypes": "all_float",
             "template": "div2_float_msks",
-            "version": "masks"
+            "variant": "s"
         }
     ],
     "div4": [
@@ -387,37 +387,37 @@
             "instr_name": "srl",
             "datatypes": "all_uint",
             "template": "div4_scalar_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "sra",
             "datatypes": "all_int",
             "template": "div4_scalar_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "fdiv",
             "datatypes": "all_float",
             "template": "div4_float_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "srl",
             "datatypes": "all_uint",
             "template": "div4_scalar_msks",
-            "version": "masks"
+            "variant": "s"
         },
         {
             "instr_name": "sra",
             "datatypes": "all_int",
             "template": "div4_scalar_msks",
-            "version": "masks"
+            "variant": "s"
         },
         {
             "instr_name": "fdiv",
             "datatypes": "all_float",
             "template": "div4_float_msks",
-            "version": "masks"
+            "variant": "s"
         }
     ],
     "fmadd": [
@@ -437,7 +437,7 @@
             "instr_name": "fmadd",
             "datatypes": "all_float",
             "template": "arith_3args_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "madd",
@@ -445,7 +445,7 @@
                 "int32"
             ],
             "template": "arith_3args_msk",
-            "version": "mask"
+            "variant": "m"
         }
     ],
     "fmsub": [
@@ -458,7 +458,7 @@
             "instr_name": "fmsub",
             "datatypes": "all_float",
             "template": "arith_3args_msk",
-            "version": "mask"
+            "variant": "m"
         }
     ],
     "getfirst": [
@@ -483,7 +483,7 @@
             "instr_name": "load",
             "datatypes": "all_datatypes",
             "template": "load_msks",
-            "version": "masks"
+            "variant": "s"
         }
     ],
     "loadu": [
@@ -496,7 +496,7 @@
             "instr_name": "loadu",
             "datatypes": "all_datatypes",
             "template": "load_msks",
-            "version": "masks"
+            "variant": "s"
         }
     ],
     "lshift": [
@@ -509,13 +509,13 @@
             "instr_name": "sll",
             "datatypes": "all_int_uint",
             "template": "shift_scalar_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "sll",
             "datatypes": "all_int_uint",
             "template": "shift_scalar_msks",
-            "version": "masks"
+            "variant": "s"
         }
     ],
     "max": [
@@ -538,37 +538,37 @@
             "instr_name": "max",
             "datatypes": "all_int",
             "template": "arith_2args_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "maxu",
             "datatypes": "all_uint",
             "template": "arith_2args_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "fmax",
             "datatypes": "all_float",
             "template": "arith_2args_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "max",
             "datatypes": "all_int",
             "template": "arith_2args_msks",
-            "version": "masks"
+            "variant": "s"
         },
         {
             "instr_name": "maxu",
             "datatypes": "all_uint",
             "template": "arith_2args_msks",
-            "version": "masks"
+            "variant": "s"
         },
         {
             "instr_name": "fmax",
             "datatypes": "all_float",
             "template": "arith_2args_msks",
-            "version": "masks"
+            "variant": "s"
         }
     ],
     "min": [
@@ -591,37 +591,37 @@
             "instr_name": "min",
             "datatypes": "all_int",
             "template": "arith_2args_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "minu",
             "datatypes": "all_uint",
             "template": "arith_2args_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "fmin",
             "datatypes": "all_float",
             "template": "arith_2args_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "min",
             "datatypes": "all_int",
             "template": "arith_2args_msks",
-            "version": "masks"
+            "variant": "s"
         },
         {
             "instr_name": "minu",
             "datatypes": "all_uint",
             "template": "arith_2args_msks",
-            "version": "masks"
+            "variant": "s"
         },
         {
             "instr_name": "fmin",
             "datatypes": "all_float",
             "template": "arith_2args_msks",
-            "version": "masks"
+            "variant": "s"
         }
     ],
     "mul": [
@@ -639,25 +639,25 @@
             "instr_name": "mul",
             "datatypes": "all_int_uint",
             "template": "arith_2args_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "fmul",
             "datatypes": "all_float",
             "template": "arith_2args_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "mul",
             "datatypes": "all_int_uint",
             "template": "arith_2args_msks",
-            "version": "masks"
+            "variant": "s"
         },
         {
             "instr_name": "fmul",
             "datatypes": "all_float",
             "template": "arith_2args_msks",
-            "version": "masks"
+            "variant": "s"
         }
     ],
     "neg": [
@@ -675,25 +675,25 @@
             "instr_name": "neg",
             "datatypes": "all_int",
             "template": "arith_1arg_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "fneg",
             "datatypes": "all_float",
             "template": "arith_1arg_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "neg",
             "datatypes": "all_int",
             "template": "arith_1arg_msks",
-            "version": "masks"
+            "variant": "s"
         },
         {
             "instr_name": "fneg",
             "datatypes": "all_float",
             "template": "arith_1arg_msks",
-            "version": "masks"
+            "variant": "s"
         }
     ],
     "notb": [
@@ -706,13 +706,13 @@
             "instr_name": "xor",
             "datatypes": "all_int_uint",
             "template": "scalar_notb_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "xor",
             "datatypes": "all_int_uint",
             "template": "scalar_notb_msks",
-            "version": "masks"
+            "variant": "s"
         }
     ],
     "orb": [
@@ -725,13 +725,13 @@
             "instr_name": "or",
             "datatypes": "all_int_uint",
             "template": "arith_2args_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "or",
             "datatypes": "all_int_uint",
             "template": "arith_2args_msks",
-            "version": "masks"
+            "variant": "s"
         }
     ],
     "orb_k": [
@@ -746,7 +746,7 @@
             "instr_name": "vfcvt",
             "datatypes": "all_int_uint",
             "template": "round_int_msks",
-            "version": "masks"
+            "variant": "s"
         }
     ],
     "rshift": [
@@ -764,25 +764,25 @@
             "instr_name": "srl",
             "datatypes": "all_uint",
             "template": "shift_scalar_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "sra",
             "datatypes": "all_int",
             "template": "shift_scalar_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "srl",
             "datatypes": "all_uint",
             "template": "shift_scalar_msks",
-            "version": "masks"
+            "variant": "s"
         },
         {
             "instr_name": "sra",
             "datatypes": "all_int",
             "template": "shift_scalar_msks",
-            "version": "masks"
+            "variant": "s"
         }
     ],
     "rsqrt": [
@@ -795,13 +795,13 @@
             "instr_name": "frsqrt7",
             "datatypes": "all_float",
             "template": "arith_1arg_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "frsqrt7",
             "datatypes": "all_float",
             "template": "arith_1arg_msks",
-            "version": "masks"
+            "variant": "s"
         }
     ],
     "select": [
@@ -840,13 +840,13 @@
             "instr_name": "fsqrt",
             "datatypes": "all_float",
             "template": "arith_1arg_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "fsqrt",
             "datatypes": "all_float",
             "template": "arith_1arg_msks",
-            "version": "masks"
+            "variant": "s"
         }
     ],
     "store": [
@@ -859,7 +859,7 @@
             "instr_name": "store",
             "datatypes": "all_datatypes",
             "template": "store_msk",
-            "version": "mask"
+            "variant": "m"
         }
     ],
     "storeu": [
@@ -872,7 +872,7 @@
             "instr_name": "storeu",
             "datatypes": "all_datatypes",
             "template": "store_msk",
-            "version": "mask"
+            "variant": "m"
         }
     ],
     "sub": [
@@ -890,25 +890,25 @@
             "instr_name": "sub",
             "datatypes": "all_int_uint",
             "template": "arith_2args_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "fsub",
             "datatypes": "all_float",
             "template": "arith_2args_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "sub",
             "datatypes": "all_int_uint",
             "template": "arith_2args_msks",
-            "version": "masks"
+            "variant": "s"
         },
         {
             "instr_name": "fsub",
             "datatypes": "all_float",
             "template": "arith_2args_msks",
-            "version": "masks"
+            "variant": "s"
         }
     ],
     "subs": [
@@ -926,25 +926,25 @@
             "instr_name": "ssub",
             "datatypes": "all_int",
             "template": "arith_2args_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "ssubu",
             "datatypes": "all_uint",
             "template": "arith_2args_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "ssub",
             "datatypes": "all_int",
             "template": "arith_2args_msks",
-            "version": "masks"
+            "variant": "s"
         },
         {
             "instr_name": "ssubu",
             "datatypes": "all_uint",
             "template": "arith_2args_msks",
-            "version": "masks"
+            "variant": "s"
         }
     ],
     "testz_2": [
@@ -964,13 +964,13 @@
             "instr_name": "xor",
             "datatypes": "all_int_uint",
             "template": "arith_2args_msk",
-            "version": "mask"
+            "variant": "m"
         },
         {
             "instr_name": "xor",
             "datatypes": "all_int_uint",
             "template": "arith_2args_msks",
-            "version": "masks"
+            "variant": "s"
         }
     ],
     "xorb_k": [

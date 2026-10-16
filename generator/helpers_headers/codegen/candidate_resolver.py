@@ -225,7 +225,7 @@ def _build_fallback_statements(isa, funcs, f, dt, mask_kind, cond, lmul, target_
             _prepare_mask_variable(pre_statements, isa, realdatatype, arg_name, cond, target_scalar_lmul, f, is_initial_mask=False)
             call_args.append(f"s_{arg_name}")
         elif arg_type_name == "val":
-            arg_name = f"v{cnt_val}"
+            arg_name = f"s{cnt_val}"
             cnt_val += 1
             call_args.append(arg_name)
         elif arg_type_name == "ptr":
@@ -323,13 +323,16 @@ def resolve_candidates(isa, funcs, lmul=0):
     
     # 1. Initialize map keys
     for f in funcs:
+        if changes_lmul(funcs[f]["proto"]):
+            # low / high / combine: emitted by lmul_orchestrator (not from ISA implementations)
+            continue
         for dt in funcs[f]["datatypes"]:
             dt_par, dt_ret = compute_dt_par_dt_ret(None, None, dt, check_support=False)
             dt_key = dt_par + "," + dt_ret
             
             mask_kinds = [None]
-            if "mask_support" in funcs[f]:
-                support = funcs[f]["mask_support"]
+            if "variants" in funcs[f]:
+                support = funcs[f]["variants"]
                 if support.is_maskable():
                     mask_kinds.append("mask")
                 if support.is_maskzable():
@@ -347,20 +350,23 @@ def resolve_candidates(isa, funcs, lmul=0):
         c_dt = c["dt"]
         c_dt_par, c_dt_ret = compute_dt_par_dt_ret(funcs, c_f, c_dt)
         c_dt_key = c_dt_par + "," + c_dt_ret
-        c_mask_kind = c["ff"].get("version", None)
+        c_mask_kind = ff_mask_kind(c["ff"])
         key = (c_f, c_dt_key, c_mask_kind)
         if key in candidates_map:
             candidates_map[key].append(c)
 
     # 3. Add auto_scalar and stub candidates, then sort
     for f in funcs:
+        if changes_lmul(funcs[f]["proto"]):
+            # low / high / combine: emitted by lmul_orchestrator (not from ISA implementations)
+            continue
         for dt in funcs[f]["datatypes"]:
             dt_par, dt_ret = compute_dt_par_dt_ret(None, None, dt, check_support=False)
             dt_key = dt_par + "," + dt_ret
             
             mask_kinds = [None]
-            if "mask_support" in funcs[f]:
-                support = funcs[f]["mask_support"]
+            if "variants" in funcs[f]:
+                support = funcs[f]["variants"]
                 if support.is_maskable():
                     mask_kinds.append("mask")
                 if support.is_maskzable():
@@ -700,6 +706,9 @@ def resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators
 
     # 2. Write code to files
     for f in funcs:
+        if changes_lmul(funcs[f]["proto"]):
+            # low / high / combine: emitted by lmul_orchestrator (not from ISA implementations)
+            continue
         if emit_separators and is_inc_mgr and getattr(file, "granularity", "coarse") == "coarse":
             file_w = file.get_fd(isa["name"], f)
             if lmul in [2, 4, 8]:
@@ -715,8 +724,8 @@ def resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators
             dt_key = dt_par + "," + dt_ret
             
             mask_kinds = [None]
-            if "mask_support" in funcs[f]:
-                support = funcs[f]["mask_support"]
+            if "variants" in funcs[f]:
+                support = funcs[f]["variants"]
                 if support.is_maskable():
                     mask_kinds.append("mask")
                 if support.is_maskzable():
@@ -739,8 +748,8 @@ def resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators
             dt_key = dt_par + "," + dt_ret
             
             mask_kinds = [None]
-            if "mask_support" in funcs[f]:
-                support = funcs[f]["mask_support"]
+            if "variants" in funcs[f]:
+                support = funcs[f]["variants"]
                 if support.is_maskable():
                     mask_kinds.append("mask")
                 if support.is_maskzable():

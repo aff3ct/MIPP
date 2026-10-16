@@ -7,7 +7,7 @@
  */
 import { escapeHtml, ICON_COPY, ICON_GODBOLT } from "../explorer.config.js";
 import { highlightCpp, formatFunctionHeaders } from "../syntax.js";
-import { SIMD_EXT_DISPLAY_NAMES, ALL_MASK_MODES, MASK_MODES_INFO, LEVEL_DESCRIPTIONS, apiMetadata } from "../data.js";
+import { SIMD_EXT_DISPLAY_NAMES, ALL_MASK_MODES, MASK_MODES_INFO, LEVEL_DESCRIPTIONS, apiMetadata, maskSupportOf, isLmulUndefined, undefinedLmulNotice } from "../data.js";
 import { state } from "../state.js";
 import { generateFlatSpecializedCode, buildGodboltUrlForFlat, isFeatureSupported } from "../codegen.js";
 
@@ -32,7 +32,7 @@ export function renderAlgoModal(modalData) {
   const defaultDt = selectableDts[0] || "float32";
   const currentDt = (modalData.dt && selectableDts.includes(modalData.dt)) ? modalData.dt : defaultDt;
 
-  const maskSupport = entry.mask_support || {};
+  const maskSupport = maskSupportOf(entry);
   const allVariants = ALL_MASK_MODES.filter((m) => m === "unmasked" || maskSupport[m]);
   const defaultMask = (state.maskVariant && allVariants.includes(state.maskVariant))
     ? state.maskVariant
@@ -40,6 +40,8 @@ export function renderAlgoModal(modalData) {
   const currentMask = (modalData.mask && allVariants.includes(modalData.mask)) ? modalData.mask : defaultMask;
 
   const effectiveLmul = (modalData.lmul !== undefined && modalData.lmul !== null) ? String(modalData.lmul) : (state.lmul || "1");
+  // functions that change the LMUL (low, high, combine, wcvt, ncvt) are not defined for every LMUL
+  const lmulUndefined = isLmulUndefined(entry, effectiveLmul);
 
   const numLmul = Number(effectiveLmul) || 1;
   const isHalfLmul = effectiveLmul === "-2";
@@ -638,7 +640,7 @@ export function renderAlgoModal(modalData) {
           </div>
 
           <!-- Active View Content -->
-          ${currentView === 'abstract' ? `
+          ${lmulUndefined ? undefinedLmulNotice(entry, effectiveLmul) : currentView === 'abstract' ? `
             <!-- Register Types Note (Abstract View Only) -->
             <div class="mipp-algo-note">
               <span class="mipp-algo-note-icon">💡</span>

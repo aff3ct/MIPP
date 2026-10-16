@@ -124,7 +124,7 @@ def _gen_cpp_functions(isa_list, include_manager, funcs):
         for f in funcs.keys():
             category = _match_category(f)
             func_variants = ["u"]
-            ms = funcs[f].get("mask_support")
+            ms = funcs[f].get("variants")
             if ms:
                 if ms.is_maskable():
                     func_variants.append("m")
@@ -140,6 +140,9 @@ def _gen_cpp_functions(isa_list, include_manager, funcs):
                         isa for isa in isa_list
                         if l != "d2" or (isa.get("is_scalar", False) or any(x < 0 for x in isa.get("hw_lmul", []) + isa.get("sw_lmul", [])))
                     ]
+                    if changes_lmul(funcs[f]["proto"]):
+                        lmul_n = -2 if l == "d2" else int(l[1:])
+                        valid_isas = [isa for isa in valid_isas if isa_provides_lmul(isa, funcs[f]["proto"], lmul_n)]
                     file = include_manager.get_fd("cpp", f, variant=v, lmul=l)
                     print(f"#pragma once\n// CPP wrapper: {f} [{v}/{l}]\n", file=file)
                     print('#include "mipp/internal/interfaces/cpp/common.hpp"\n', file=file)
@@ -151,7 +154,7 @@ def _gen_cpp_functions(isa_list, include_manager, funcs):
                         print(f'#include "mipp/internal/simd_ext/{isa["name"].lower()}/cpp/functions/{category}/{v}/{l}/{f}.hpp"', file=file)
                     if len(valid_isas) == len(isa_list):
                         print("#else\n#error \"No ISA defined for cpp wrapper\"\n#endif", file=file)
-                    else:
+                    elif valid_isas:
                         print("#endif", file=file)
 
         include_manager.generate_umbrella_headers("cpp")
@@ -204,11 +207,11 @@ def _cpp_custom_prefix_generator(f, isa_name="", funcs=None):
             s += f'#include "mipp/internal/simd_ext/{isa_name}/cpp/common.hpp"\n'
             s += f'#include "mipp/internal/simd_ext/{isa_name}/c/functions/{category}/{f}.h"\n'
 
-            mask_support = None
+            variant_set = None
             if funcs is not None and f in funcs:
-                mask_support = funcs[f]["mask_support"]
+                variant_set = funcs[f]["variants"]
             
-            if f in set_functions or (mask_support and mask_support.is_any_mask()):
+            if f in set_functions or (variant_set and variant_set.is_any_mask()):
                 s += f'#include "mipp/internal/templates/cpp/functions/{category}/{f}.hpp"\n'
 
     else: 
@@ -296,7 +299,7 @@ def _generic_mask_decl_gather_scatter(file, cpp_func_name, proto, mask_kind):
             tmp_str += "rvm<{{A}},LMUL,ISA_TYPE> m" + str(cnt_msk)
             cnt_msk += 1
         elif args["type"] == "val":
-            tmp_str += "{{A}} v" + str(cnt_val)
+            tmp_str += "{{A}} s" + str(cnt_val)
             cnt_val += 1
         elif args["type"] == "ptr":
             tmp_str += "T* p" + str(cnt_ptr)
@@ -323,7 +326,7 @@ def _generic_mask_decl_gather_scatter(file, cpp_func_name, proto, mask_kind):
     
 def _generic_mask_decl(file, cpp_func_name, proto, mask_kind):
     """
-    Emit a generic template declaration with correct *names* (m0/rsrc/r0/v0/p0...),
+    Emit a generic template declaration with correct *names* (m0/rsrc/r0/s0/p0...),
     but *types* expressed in terms of T and LMUL.
 
     mask_kind:
@@ -380,7 +383,7 @@ def _generic_mask_decl(file, cpp_func_name, proto, mask_kind):
             s += f"rvm<{A},LMUL,ISA_TYPE> m{cnt_msk}"
             cnt_msk += 1
         elif arg["type"] == "val":
-            s += f"{A} v{cnt_val}"
+            s += f"{A} s{cnt_val}"
             cnt_val += 1
         elif arg["type"] == "ptr":
             s += f"{A}* p{cnt_ptr}"
@@ -502,7 +505,7 @@ def _gen_cpp_generic_templates(include_manager, isa, funcs):
     # this function will generate the generic template of every masked function in separate headers 4 each func
     for f in funcs:
 
-        if ( f not in set_functions ) and ( "mask_support" not in funcs[f] or funcs[f]["mask_support"] is None ):
+        if ( f not in set_functions ) and ( "variants" not in funcs[f] or funcs[f]["variants"] is None ):
             continue
         file = include_manager.get_fd("templates", f)
 
@@ -513,7 +516,7 @@ def _gen_cpp_generic_templates(include_manager, isa, funcs):
         if f in set_functions:
             gen_set_func_error(f, file)
 
-        ms = funcs[f]["mask_support"]
+        ms = funcs[f]["variants"]
         proto = funcs[f]["proto"]
 
         dt_par, dr_ret = _compute_dt_par_dt_ret(funcs, f, funcs[f]["datatypes"][0]) # we just need one dt to build the template since it's generic on T
@@ -631,13 +634,13 @@ def _gen_cpp_functions_isa(include_manager, isa, funcs):
                     c_func_name = build_func_name(isa, dt_par, dt_ret, f, isa_name=True)
                     cpp_func_name = build_cpp_func_name(dt_ret, f)
 
-                for lmul in all_lmul:
+                for lmul in [l for l in all_lmul if isa_provides_lmul(isa, funcs[f]["proto"], l)]:
                     print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, cpp_func_name, lmul, isa_name=True, cpp=True) + " {", file=file)
                     print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, "", c_func_name + "_m" + str(lmul), lmul, False) + ";", file=file)
                     print("}", file=file)
-                mask_status = funcs[f]["mask_support"]
+                mask_status = funcs[f]["variants"]
 
-                has_ldiv = isa.get("is_scalar", False) or any(x < 0 for x in isa.get("hw_lmul", []) + isa.get("sw_lmul", []))
+                has_ldiv = (isa.get("is_scalar", False) or any(x < 0 for x in isa.get("hw_lmul", []) + isa.get("sw_lmul", []))) and isa_provides_lmul(isa, funcs[f]["proto"], -2)
                 if has_ldiv:
                     ldiv = -2
                     print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, cpp_func_name, ldiv, isa_name=True, cpp=True) + " {", file=file)
@@ -648,10 +651,10 @@ def _gen_cpp_functions_isa(include_manager, isa, funcs):
                     proto = funcs[f]["proto"]
                     c_base = _masked_c_symbol(dt_par, dt_ret, f, is_cast, isa=isa, isa_name=True)
 
-                    for lmul in all_lmul:
+                    for lmul in [l for l in all_lmul if isa_provides_lmul(isa, funcs[f]["proto"], l)]:
                         _emit_mask_specs(lambda _v: file, proto, dt_par, dt_ret, cpp_func_name, c_base, mask_status, lmul, isa)
 
-                    has_ldiv = isa.get("is_scalar", False) or any(x < 0 for x in isa.get("hw_lmul", []) + isa.get("sw_lmul", []))
+                    has_ldiv = (isa.get("is_scalar", False) or any(x < 0 for x in isa.get("hw_lmul", []) + isa.get("sw_lmul", []))) and isa_provides_lmul(isa, funcs[f]["proto"], -2)
                     if has_ldiv:
                         ldiv = -2
                         _emit_mask_specs(lambda _v: file, proto, dt_par, dt_ret, cpp_func_name, c_base, mask_status, ldiv, isa)
@@ -682,13 +685,13 @@ def _gen_cpp_functions_isa(include_manager, isa, funcs):
                     c_func_name = build_func_name(isa, dt_par, dt_ret, f, isa_name=True)
                     cpp_func_name = build_cpp_func_name(dt_ret, f)
 
-                for lmul in all_lmul:
+                for lmul in [l for l in all_lmul if isa_provides_lmul(isa, funcs[f]["proto"], l)]:
                     file_u = include_manager.get_fd(layer_name, f, variant="u", lmul=lmul)
                     print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, cpp_func_name, lmul, isa_name=True, cpp=True) + " {", file=file_u)
                     print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, "", c_func_name + "_m" + str(lmul), lmul, False) + ";", file=file_u)
                     print("}", file=file_u)
 
-                has_ldiv = isa.get("is_scalar", False) or any(x < 0 for x in isa.get("hw_lmul", []) + isa.get("sw_lmul", []))
+                has_ldiv = (isa.get("is_scalar", False) or any(x < 0 for x in isa.get("hw_lmul", []) + isa.get("sw_lmul", []))) and isa_provides_lmul(isa, funcs[f]["proto"], -2)
                 if has_ldiv:
                     ldiv = -2
                     file_u = include_manager.get_fd(layer_name, f, variant="u", lmul=ldiv)
@@ -696,12 +699,12 @@ def _gen_cpp_functions_isa(include_manager, isa, funcs):
                     print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, "", c_func_name + "_d" + str(-ldiv), ldiv, False) + ";", file=file_u)
                     print("}", file=file_u)
                 
-                mask_status = funcs[f]["mask_support"]
+                mask_status = funcs[f]["variants"]
                 if mask_status and mask_status.is_any_mask():
                     proto = funcs[f]["proto"]
                     c_base = _masked_c_symbol(dt_par, dt_ret, f, is_cast, isa=isa, isa_name=True)
 
-                    lmuls = list(all_lmul) + ([-2] if has_ldiv else [])
+                    lmuls = [l for l in all_lmul if isa_provides_lmul(isa, funcs[f]["proto"], l)] + ([-2] if has_ldiv else [])
                     for lmul in lmuls:
                         get_file = lambda v, _l=lmul: include_manager.get_fd(layer_name, f, variant=v, lmul=_l)
                         _emit_mask_specs(get_file, proto, dt_par, dt_ret, cpp_func_name, c_base, mask_status, lmul, isa)

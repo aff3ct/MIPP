@@ -55,6 +55,37 @@ export let MASK_MODES_INFO = {
   masks:    { id: "masks",    label: "masks",    badge_class: "mask-masks",    description: "Predicated execution with explicit fallback source register", obj_support: true },
 };
 
+// The API index lists the variants of a function with their short names (`variants`: "u", "m", "z", "s").
+// Returns the flags object used by the components: { unmasked, mask, maskz, masks } (true when supported).
+const VARIANT_TO_MODE = { u: "unmasked", m: "mask", z: "maskz", s: "masks" };
+export function maskSupportOf(entry) {
+  const flags = {};
+  for (const v of (entry && entry.variants) || []) {
+    if (VARIANT_TO_MODE[v]) flags[VARIANT_TO_MODE[v]] = true;
+  }
+  return flags;
+}
+
+// The functions that change the LMUL (low, high, combine, wcvt, ncvt) do not exist for every LMUL: the
+// index gives the LMULs where they are defined (`prototypes.defined_lmuls`). Absent: defined everywhere.
+export function isLmulUndefined(entry, lmulKey) {
+  const defined = entry && entry.prototypes && entry.prototypes.defined_lmuls;
+  return Array.isArray(defined) && !defined.includes(String(lmulKey));
+}
+
+export function undefinedLmulNotice(entry, lmulKey) {
+  const label = String(lmulKey) === "-2" ? "LMUL=1/2 (d2)" : `LMUL=${lmulKey}`;
+  const defined = ((entry.prototypes && entry.prototypes.defined_lmuls) || [])
+    .map((l) => (String(l) === "-2" ? "1/2" : l))
+    .join(", ");
+  return `
+    <div class="mipp-lmul-undefined" style="padding: 0.75rem 1rem; border-left: 3px solid #f59e0b; background: var(--md-default-bg-color--lighter, #f1f5f9); border-radius: 6px; font-size: 0.88rem;">
+      <strong><code>${entry.name}</code> is not defined for ${label}.</strong>
+      The result would be in an LMUL that does not exist.
+      Defined for LMUL: ${defined || "none"}.
+    </div>`;
+}
+
 export let DT_INFO = {};
 export let allPrimitiveNamesDesc = [];
 

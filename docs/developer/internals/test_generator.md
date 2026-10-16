@@ -29,7 +29,7 @@ The input and output arrays are aligned on 64 bytes, which suits `load` and `sto
 | C++ Functional | `cpp/<category>/<function>.cpp` | One file per function: one template test (`<VARIANT, T, LMUL>`), instantiated in nested `SECTION`s for each mask variant, datatype and LMUL. |
 | C++ Object | `obj/<category>/<function>.cpp` | Same structure, with `mipp::Rvd` and `mipp::Rvm`. |
 
-`--lmul`, `--ldiv` and `--mask-kind` restrict the generated combinations; a function is only tested for the mask variants of its `mask_support`. `tests/CMakeLists.txt` compiles every `.cpp` found under `tests/src/`, with the helpers of `tests/src/utils/` (random generators, overflow checks, `abs_diff`).
+`--lmul`, `--ldiv` and `--mask-kind` restrict the generated combinations; a function is only tested for the mask variants of its `variants`. `tests/CMakeLists.txt` compiles every `.cpp` found under `tests/src/`, with the helpers of `tests/src/utils/` (random generators, overflow checks, `abs_diff`).
 
 ---
 
@@ -51,6 +51,8 @@ The input and output arrays are aligned on 64 bytes, which suits `load` and `sto
 `tolerance` is `exact`, `max_abs_diff` (absolute value) or `relative_percent` (fraction of `|ref|`), possibly refined with `by_datatype`, `by_lmul` (a ternary on `LMUL` in C++) and `by_define` (preprocessor branches).
 
 **Other properties.** `nan_inf_skip` ignores the lanes where the difference is NaN or infinite; `skip_condition` ignores the lanes that match a condition on the reference value (for example the halfway cases of `round`); `overflow_check` ignores the lanes where an addition, subtraction or multiplication overflows; `disabled` comments the test out, with `disabled_reason`; `support_obj: false` skips the Object API.
+
+**Functions that change the LMUL or the type.** `wcvt`, `ncvt`, `low`, `high` and `combine` (and their `_k`) return a register of another LMUL than their arguments, and the conversions also change the datatype. Nothing is written per function: the result LMUL comes from `ret.lmul` in `registry_protos.json`, and the source/destination pairs from the `datatypes` of the function. The result is read with the lane count and type of its own LMUL (`size_out`, `LMUL_OUT` in C++), and compared with the scalar ISA like every other function. A test is not generated for an LMUL where the function does not exist (no `wcvt` from `m8`, no `low` from `d2`). Since an ISA may not provide a function for an LMUL, each test (C) or section (C++ and Object) is wrapped in `#if defined(MIPP_<ISA>) || ...`, built from the same rule as the headers (`isa_provides_lmul`). In C++, `test_helpers::<function><T_dst>` forwards to the overload of the destination type (`mipp::wcvt_int64`, ...), because the destination is a template parameter of the test.
 
 **Indexed functions.** `gather` and `scatter` take a pointer and a register of unsigned indices, which the generic builder cannot generate. `helpers_tests/indexed_tests.py` writes their tests, with the same principle as the others: the result of the ISA under test is compared with the scalar reference (`gather`: the stored register; `scatter`: the memory written by both targets), for every datatype, LMUL, `d2` and mask variant, in the three APIs. The indices of a `gather` are random values of `[0, N)`; the ones of a `scatter` are a permutation of `[0, N)`, so the result does not depend on the order of the writes. They have no entry in `tests_specs.json`.
 

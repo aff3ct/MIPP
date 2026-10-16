@@ -127,15 +127,15 @@
     },
     "set1": {
         "format": "short",
-        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(v0);"
+        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(s0);"
     },
     "set1_k": {
         "format": "short",
-        "code": "{{ isa.prefix }}dupq_n_{{ isa_dt_par.data_ext_msk }}(v0 ? ({% if isa_dt_par.data_ext_msk == 'u64' -%}~0ULL{% elif isa_dt_par.data_ext_msk == 'u32' -%}~0U{% elif isa_dt_par.data_ext_msk == 'u16' -%}(uint16_t)~0U{% else -%}0xFF{% endif %}) : 0);"
+        "code": "{{ isa.prefix }}dupq_n_{{ isa_dt_par.data_ext_msk }}(s0 ? ({% if isa_dt_par.data_ext_msk == 'u64' -%}~0ULL{% elif isa_dt_par.data_ext_msk == 'u32' -%}~0U{% elif isa_dt_par.data_ext_msk == 'u16' -%}(uint16_t)~0U{% else -%}0xFF{% endif %}) : 0);"
     },
     "shift_var": {
         "format": "short",
-        "code": "{% if instr_name == 'shlq' -%}{{ isa.prefix }}shlq_{{ isa_dt_par.data_ext }}(r0.r, {{ isa.prefix }}dupq_n_s{% if isa_dt_par.data_ext in ['s64','u64','f64'] %}64{% elif isa_dt_par.data_ext in ['s32','u32','f32'] %}32{% elif isa_dt_par.data_ext in ['s16','u16'] %}16{% else %}8{% endif %}(v0));{% else -%}{{ isa.prefix }}shlq_{{ isa_dt_par.data_ext }}(r0.r, {{ isa.prefix }}dupq_n_s{% if isa_dt_par.data_ext in ['s64','u64','f64'] %}64{% elif isa_dt_par.data_ext in ['s32','u32','f32'] %}32{% elif isa_dt_par.data_ext in ['s16','u16'] %}16{% else %}8{% endif %}(-v0));{% endif %}"
+        "code": "{% if instr_name == 'shlq' -%}{{ isa.prefix }}shlq_{{ isa_dt_par.data_ext }}(r0.r, {{ isa.prefix }}dupq_n_s{% if isa_dt_par.data_ext in ['s64','u64','f64'] %}64{% elif isa_dt_par.data_ext in ['s32','u32','f32'] %}32{% elif isa_dt_par.data_ext in ['s16','u16'] %}16{% else %}8{% endif %}(s0));{% else -%}{{ isa.prefix }}shlq_{{ isa_dt_par.data_ext }}(r0.r, {{ isa.prefix }}dupq_n_s{% if isa_dt_par.data_ext in ['s64','u64','f64'] %}64{% elif isa_dt_par.data_ext in ['s32','u32','f32'] %}32{% elif isa_dt_par.data_ext in ['s16','u16'] %}16{% else %}8{% endif %}(-s0));{% endif %}"
     },
     "sqrt": {
         "format": "short",

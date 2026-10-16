@@ -84,6 +84,7 @@ DATATYPES_MAP = {
     "all_datatypes_same_size_except_f64": all_datatypes_same_size_except_f64,
     "all_datatypes_same_size_inc_f64": all_datatypes_same_size_inc_f64,
     "all_datatypes_widenning": all_datatypes_widenning,
+    "all_datatypes_narrowing": all_datatypes_narrowing,
     "float64": [float64],
     "float32": [float32],
     "int64": [int64],
@@ -135,6 +136,85 @@ operators_order = {
     "cmpgt"  : {"operation" : ">", "option"  : ">"},
     "cmpge"  : {"operation" : ">=", "option" : ">="},
 }
+
+_ldiv_mask_functions_cache = {}
+
+def ldiv_mask_functions(isa):
+    """
+    Names of the functions given by `simd_ext/<isa>/<isa>_ldiv_mask.json` (the half-vector
+    specific implementations of an ISA whose d2 is a full register of its own).
+    """
+    import json
+    import os
+    name = isa["name"]
+    if name not in _ldiv_mask_functions_cache:
+        path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "simd_ext", name, name + "_ldiv_mask.json")
+        names = set()
+        if os.path.exists(path):
+            with open(path, "r", encoding="utf-8") as fd:
+                for key in json.load(fd):
+                    names.update(key.split("|"))
+        _ldiv_mask_functions_cache[name] = names
+    return _ldiv_mask_functions_cache[name]
+
+def isa_provides_lmul(isa, proto, lmul):
+    """
+    Whether `isa` provides a function with this prototype for the arguments' LMUL `lmul`.
+    Always true for the functions that keep the LMUL. For the functions that change it (low, high,
+    combine), only the representations that implement them: the scalar ISA, the software
+    LMUL >= 2 registers (a struct of two halves) and, between m1 and d2, the ISAs with mask-based
+    half-vectors that give them in their `<isa>_ldiv_mask.json` (low and high for m1 -> d2, combine
+    for d2 -> m1).
+    """
+    if not changes_lmul(proto):
+        return True
+    if not is_defined_for_lmul(proto, lmul):
+        return False
+    if isa.get("is_scalar", False):
+        return True
+    hw = [int(x) for x in isa.get("hw_lmul", [1])]
+    sw = [int(x) for x in isa.get("sw_lmul", [])]
+    ret = resolve_ret_lmul(proto["ret"], lmul)
+    if uses_hw_ldiv_templates(isa):
+        # hardware register groups: one template per function (masks: `<f>_k`), whatever the LMUL
+        if lmul not in hw or ret not in hw:
+            return False
+        if is_narrowing(proto):
+            need = {"ncvt"}
+        elif is_widening(proto):
+            need = {"wcvt"}
+        else:
+            msk = "_k" if proto["ret"].get("type") == "msk" else ""
+            need = {"low" + msk, "high" + msk} if proto["ret"].get("lmul") == "down" else {"combine" + msk}
+        return need <= ldiv_mask_functions(isa)
+    if is_narrowing(proto):
+        # ncvt: m1 -> d2 is a template (generic_ldiv_mask.json, then the ISA), m2 -> m1 joins the
+        # conversions of the two halves (combine), m4 -> m2... converts each half
+        if lmul == 1:
+            return uses_ldiv_templates(isa)
+        if lmul not in sw or lmul in hw or lmul < 2:
+            return False
+        if lmul == 2:
+            return uses_ldiv_templates(isa) and "combine" in ldiv_mask_functions(isa)
+        return isa_provides_lmul(isa, proto, lmul // 2)
+    if is_widening(proto):
+        # wcvt: d2 -> m1 is a template (generic_ldiv_mask.json, then the ISA), m1 -> m2 is made of
+        # low / high on the argument and of two d2 -> m1, m2 -> m4... of two m1 -> m2, etc.
+        if lmul == -2:
+            return uses_ldiv_templates(isa)
+        if ret not in sw or ret in hw:
+            return False
+        if lmul == 1:
+            return {"low", "high"} <= ldiv_mask_functions(isa) and uses_ldiv_templates(isa)
+        return isa_provides_lmul(isa, proto, lmul // 2)
+    if {lmul, ret} == {1, -2}:
+        if not uses_ldiv_templates(isa):
+            return False
+        return ("low" if lmul == 1 else "combine") in ldiv_mask_functions(isa)
+    big, small = max(lmul, ret), min(lmul, ret)
+    # the larger register must be a software LMUL (a struct of two halves), the smaller one
+    # a register (not a half-vector 'd2', provided by the representation of the ISA)
+    return big >= 2 and big in sw and big not in hw and small >= 1
 
 def lmul_to_str(lmul):
     if lmul == 0 :
@@ -280,14 +360,20 @@ def _parse_lmul_expression(expr, dt_par, dt_ret, isa, base_lmul):
                 print("Panic: unknown base '" + base + "' in base_lmul expression.")
                 exit(-1)
             lmul_value = None
+            # a negative LMUL is a division (-2 is 'd2', half of m1): work on the ratio
+            ratio = base_lmul if base_lmul > 0 else 1 / (-base_lmul)
             if op == "*":
-                lmul_value = int(base_lmul * factor)
+                ratio = ratio * factor
             elif op == "/":
-                lmul_value = int(base_lmul / factor)
+                ratio = ratio / factor
             else:
                 print("Panic: unknown operator '" + op + "' in base_lmul expression.")
                 exit(-1)
-            
+            if ratio >= 1:
+                lmul_value = int(ratio)
+            else:
+                lmul_value = -int(round(1 / ratio))
+
             return lmul_value
         else:
             print("Panic: invalid base_lmul expression '" + expr + "'.")
@@ -373,7 +459,9 @@ def _dump_dict_json(di, filename):
     print(json_object, file=fj)
     fj.close()
     
-def _parse_lmul(input_str, isa, dt_par, dt_ret, base_lmul):
+def _parse_lmul(input_str, isa, dt_par, dt_ret, base_lmul, ret_lmul=None):
+    # `ret_lmul`: LMUL of the returned value, when it differs from `base_lmul` (low, high, combine):
+    # a plain `tr` is the type of the result, with its own LMUL.
     if base_lmul == 0:
         return 0
 
@@ -381,7 +469,7 @@ def _parse_lmul(input_str, isa, dt_par, dt_ret, base_lmul):
     if len(dt_info_carac) == 1 and dt_info_carac[0] == "tp":
         return base_lmul
     elif len(dt_info_carac) == 1 and dt_info_carac[0] == "tr":
-        return base_lmul
+        return base_lmul if ret_lmul is None else ret_lmul
     elif len(dt_info_carac) >= 1:
         dt_info_carac_dic = {}
         for dtic in dt_info_carac:
@@ -400,6 +488,9 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret,lmul=0, isa_nam
     converted_ir = ir
     ar_substitute = _RE_PLACEHOLDER.findall(ir)
     requirements = {}
+    ret_lmul = None
+    if lmul and func_name in funcs and changes_lmul(funcs[func_name]["proto"]):
+        ret_lmul = resolve_ret_lmul(funcs[func_name]["proto"]["ret"], lmul)
 
     for s in ar_substitute:
         item_type = s.split('<')[0]
@@ -414,7 +505,7 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret,lmul=0, isa_nam
             if dt not in isa["datatypes"]:
                 print("Panic: '" + dt + "' is not available.")
                 exit(-1)
-            converted_ir = converted_ir.replace("%" + s + "%", build_reg(datatypes[dt], isa,lmul=_parse_lmul(dt_info, isa, dt_par, dt_ret, lmul), isa_name=isa_name))
+            converted_ir = converted_ir.replace("%" + s + "%", build_reg(datatypes[dt], isa,lmul=_parse_lmul(dt_info, isa, dt_par, dt_ret, lmul, ret_lmul), isa_name=isa_name))
         elif item_type == "m":
             dt_info = _RE_ANGLE.findall(s)[0]
             dt_info_params = dt_info.split(",")
@@ -425,7 +516,7 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret,lmul=0, isa_nam
                 print("Panic: '" + dt + "' is not available.")
                 exit(-1)
 
-            converted_ir = converted_ir.replace("%" + s + "%", build_msk(datatypes[dt], isa,lmul=_parse_lmul(dt_info, isa, dt_par, dt_ret, lmul), isa_name=isa_name))
+            converted_ir = converted_ir.replace("%" + s + "%", build_msk(datatypes[dt], isa,lmul=_parse_lmul(dt_info, isa, dt_par, dt_ret, lmul, ret_lmul), isa_name=isa_name))
         elif item_type == "s":
             dt_info = _RE_ANGLE.findall(s)[0]
             dt_info_params = dt_info.split(",")
@@ -445,7 +536,7 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret,lmul=0, isa_nam
             if dt not in isa["datatypes"]:
                 print("Panic: '" + dt + "' is not available.")
                 exit(-1)
-            converted_ir = converted_ir.replace("%" + s + "%", build_N(datatypes[dt], isa,lmul=_parse_lmul(dt_info, isa, dt_par, dt_ret, lmul), isa_name=isa_name))
+            converted_ir = converted_ir.replace("%" + s + "%", build_N(datatypes[dt], isa,lmul=_parse_lmul(dt_info, isa, dt_par, dt_ret, lmul, ret_lmul), isa_name=isa_name))
         else:
             f_name = item_type
             if f_name not in funcs:
@@ -564,27 +655,40 @@ but still looks same-ish.
 # Masks in interfaces and in implems are not defined the same way.
 # This might be bad idk.
 
+# Short variant names used in the JSON data files -> internal mask kinds.
+_VARIANT_TO_MASK_KIND = {"u": None, "m": "mask", "z": "maskz", "s": "masks"}
+
+def ff_mask_kind(ff):
+    """
+    Mask kind of an entry of implems: None (unmasked), "mask", "maskz", "masks",
+    or "horiz_lmul" for the entries with `"mode": "horiz_lmul"`.
+    The JSON files use the short names (`"variant": "m" | "z" | "s"`).
+    """
+    if ff.get("mode"):
+        return ff["mode"]
+    return _VARIANT_TO_MASK_KIND[ff.get("variant", "u")]
+
 # ff is an entry in implems
 def is_masked_implem(ff):
-        return "version" in ff and ff["version"]
+    return ff_mask_kind(ff) is not None
 
 def mask_kind_from_ff(ff):
     # Expected: "mask", "maskz", "masks"
-    return ff["version"]
+    return ff_mask_kind(ff)
 
-def is_supported_mask_kind(mask_support, mask_kind):
+def is_supported_mask_kind(variant_set, mask_kind):
     """
-    mask_support is an entry in interfaces[f]["mask_support"] 
+    variant_set is an entry in interfaces[f]["variants"] 
     and mask_kind is "mask", "maskz" or "masks".
      """
-    if mask_support is None:
+    if variant_set is None:
         return False
     if mask_kind == "mask":
-        return mask_support.is_maskable()
+        return variant_set.is_maskable()
     if mask_kind == "maskz":
-        return mask_support.is_maskzable()
+        return variant_set.is_maskzable()
     if mask_kind == "masks":
-        return mask_support.is_masksable()
+        return variant_set.is_masksable()
     return False
 
 
@@ -857,7 +961,7 @@ def load_implem_tables(current_file, templates_filename, implems_filename):
         for choice in choices:
             resolved_choice = {}
             for k, v in choice.items():
-                if k in ("datatypes", "mask_variants"):
+                if k in ("datatypes", "variants"):
                     resolved_choice[k] = resolve_datatypes(v)
                 elif k == "template":
                     # Retrieve the template dict from tpl_dict
@@ -902,6 +1006,29 @@ def uses_mask_ldiv(isa):
 def has_sw_ldiv(isa):
     """True if the ISA builds its half-vectors (d2) in software, whatever the strategy."""
     return uses_sub_isa_ldiv(isa) or uses_mask_ldiv(isa)
+
+
+def uses_ldiv_templates(isa):
+    """
+    True if the functions that change the LMUL (low, high, combine, wcvt, ncvt) of the ISA come from
+    templates: the ISAs with half-vectors by mask, and the ISAs with half-vectors on a sub_isa that
+    provide a `<isa>_ldiv_mask.json` (their d2 is the register of the sub_isa, the generic file
+    does not apply to them).
+    """
+    return (uses_mask_ldiv(isa) or (uses_sub_isa_ldiv(isa) and bool(ldiv_mask_functions(isa)))
+            or uses_hw_ldiv_templates(isa))
+
+
+def uses_hw_ldiv_templates(isa):
+    """
+    True if the ISA has hardware half-vectors and register groups (-2 and several LMULs in
+    "hw_lmul", as RVV) and a `<isa>_ldiv_mask.json` that gives the functions changing the LMUL
+    (low, high, combine, wcvt, ncvt) between every pair of consecutive hardware LMULs.
+    """
+    if not isa or isa.get("is_scalar", False) or uses_mask_ldiv(isa) or uses_sub_isa_ldiv(isa):
+        return False
+    hw = [int(x) for x in isa.get("hw_lmul", [1])]
+    return -2 in hw and len(hw) > 2 and bool(ldiv_mask_functions(isa))
 
 
 def uses_sub_isa_ldiv(isa):

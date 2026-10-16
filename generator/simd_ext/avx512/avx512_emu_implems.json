@@ -8,7 +8,7 @@
             ],
             "template": "gather_maskz_64",
             "if": "defined(__AVX512F__)",
-            "version": "maskz"
+            "variant": "z"
         },
         {
             "instr_name": "gather",
@@ -18,7 +18,7 @@
             ],
             "template": "gather_maskz_32",
             "if": "defined(__AVX512F__)",
-            "version": "maskz"
+            "variant": "z"
         }
     ],
     "hadd": [
@@ -204,7 +204,7 @@
             ],
             "template": "scatter_maskz",
             "if": "defined(__AVX512F__)",
-            "version": "maskz"
+            "variant": "z"
         }
     ]
 }

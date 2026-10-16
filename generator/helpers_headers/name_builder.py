@@ -116,6 +116,72 @@ def build_N(datatype, isa, lmul=0, isa_name=True):
         str_N += tools.lmul_to_str(lmul).upper()
     return str_N
 
+# LMULs known by the generator, from the smallest to the largest (-2 is 'd2', half of m1).
+# Whether an ISA actually provides the LMUL is checked elsewhere (lmul_availability).
+LMUL_LADDER = [-2, 1, 2, 4, 8]
+_LMUL_FIXED = {"d2": -2, "m1": 1, "m2": 2, "m4": 4, "m8": 8}
+
+def resolve_ret_lmul(ret, lmul):
+    """
+    LMUL of the returned register of a prototype ("lmul" key of "ret": "same" (default),
+    "down", "up" or a fixed LMUL such as "m1"), for a function whose arguments have the LMUL
+    `lmul` (0 means "no LMUL", e.g. the scalar ISA: returned unchanged).
+    Returns None when the resulting LMUL does not exist (no "down" from the smallest LMUL, no
+    "up" from the largest one): the function is then not defined for this LMUL.
+    """
+    mode = ret.get("lmul", "same")
+    if mode == "same" or not lmul:
+        return lmul
+    if mode in _LMUL_FIXED:
+        return _LMUL_FIXED[mode]
+    lmul = int(lmul)
+    if lmul not in LMUL_LADDER:
+        return None
+    idx = LMUL_LADDER.index(lmul) + (1 if mode == "up" else -1)
+    if idx < 0 or idx >= len(LMUL_LADDER):
+        return None
+    return LMUL_LADDER[idx]
+
+def proto_arg_names(proto):
+    """Names of the parameters as given by build_proto (r0, r1, m0, s0, p0, ...)."""
+    prefix = {"reg": "r", "msk": "m", "val": "s", "ptr": "p"}
+    count = {}
+    names = []
+    for arg in proto["args"]:
+        pre = prefix.get(arg["type"])
+        if pre is None:
+            continue
+        names.append(pre + str(count.get(pre, 0)))
+        count[pre] = count.get(pre, 0) + 1
+    return names
+
+def changes_lmul(proto):
+    """True if the returned register of the prototype has an LMUL different from the arguments' one."""
+    return proto["ret"].get("lmul", "same") != "same"
+
+def is_widening(proto):
+    """
+    True for the conversions to a wider type (wcvt): one register argument and an LMUL of the result
+    one step above. Their elements keep their order, the result being the same lanes in a bigger
+    register, so they are built from halves (see tools.isa_provides_lmul).
+    """
+    return (proto["ret"].get("lmul", "same") == "up" and proto["ret"].get("changes_type", False)
+            and proto["ret"]["type"] == "reg")
+
+def is_narrowing(proto):
+    """True for the conversions to a narrower type (ncvt): the inverse of is_widening."""
+    return (proto["ret"].get("lmul", "same") == "down" and proto["ret"].get("changes_type", False)
+            and proto["ret"]["type"] == "reg")
+
+def is_defined_for_lmul(proto, lmul):
+    """
+    False if the prototype changes the LMUL and is not defined for `lmul` (the resulting LMUL
+    does not exist, or there is no LMUL at all: lmul=0 is the base level of an ISA).
+    """
+    if not changes_lmul(proto):
+        return True
+    return bool(lmul) and resolve_ret_lmul(proto["ret"], lmul) is not None
+
 def build_type(type_str, datatype, isa, lmul=0, isa_name=True, cpp=False):
     if type_str:
         if type_str == "reg":
@@ -288,18 +354,18 @@ def build_proto_set1(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, m
             return (
                 f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}("
                 f"const rvm<{dt_par},{lmul}, {isa_type}> m0, "
-                f"const {dt_par} v0"
+                f"const {dt_par} s0"
             )
         elif masked_version == "masks":
             return (
                 f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}("
                 f"const rvm<{dt_par},{lmul}, {isa_type}> m0, "
                 f"const rvd<{dt_par},{lmul}, {isa_type}> rsrc, "
-                f"const {dt_par} v0"
+                f"const {dt_par} s0"
             )
 
     # unmasked (unchanged)
-    return f"template <>\ninline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const {dt_par} v0"
+    return f"template <>\ninline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const {dt_par} s0"
 
 def build_proto_load(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, masked_version=False):
     func_name = func_name.replace("_masks", "").replace("_maskz", "").replace("_mask", "")
@@ -412,7 +478,7 @@ def gen_set_func_error(func_name, file):
     if func_name == "set0_k":
         print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline rvm<T, LMUL, ISA_TYPE> {func_name}();", file=file)
     if func_name == "set1_k":
-        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline rvm<T, LMUL, ISA_TYPE> {func_name}(const int32_t v0);", file=file)
+        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline rvm<T, LMUL, ISA_TYPE> {func_name}(const int32_t s0);", file=file)
     if func_name == "load" or func_name == "loadu":
         print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline rvd<T, LMUL, ISA_TYPE> {func_name}(const T* p0);", file=file)
 
@@ -435,7 +501,7 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
     if (proto["ret"]["fixeddatatype"]):
         realdatatype = tools.datatypes[proto["ret"]["fixeddatatype"]]
     
-    p = "inline " + build_type(proto["ret"]["type"], realdatatype, isa, lmul, isa_name, cpp) + " " + func_name + "("
+    p = "inline " + build_type(proto["ret"]["type"], realdatatype, isa, resolve_ret_lmul(proto["ret"], lmul), isa_name, cpp) + " " + func_name + "("
     cnt_reg = 0
     cnt_msk = 0
     cnt_val = 0
@@ -476,7 +542,7 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
             p += " m" + str(cnt_msk)
             cnt_msk = cnt_msk + 1
         elif arg["type"] == "val":
-            p += " v" + str(cnt_val)
+            p += " s" + str(cnt_val)
             cnt_val = cnt_val + 1
         elif arg["type"] == "ptr":
             p += " p" + str(cnt_ptr)
@@ -498,7 +564,7 @@ def build_proto_object(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=F
     realdatatype = tools.datatypes[dt_ret]
     if (proto["ret"]["fixeddatatype"]):
         realdatatype = tools.datatypes[proto["ret"]["fixeddatatype"]]
-    p = build_class_type(proto["ret"]["type"], realdatatype, isa, lmul, isa_name, cpp) + " " + func_name + "(" 
+    p = build_class_type(proto["ret"]["type"], realdatatype, isa, resolve_ret_lmul(proto["ret"], lmul), isa_name, cpp) + " " + func_name + "(" 
     
     cnt_reg = 0
     cnt_msk = 0
@@ -523,7 +589,7 @@ def build_proto_object(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=F
             p += " m" + str(cnt_msk)
             cnt_msk = cnt_msk + 1
         elif arg["type"] == "val":
-            p += " v" + str(cnt_val)
+            p += " s" + str(cnt_val)
             cnt_val = cnt_val + 1
         elif arg["type"] == "ptr":
             p += " p" + str(cnt_ptr)
@@ -562,7 +628,7 @@ def build_call(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, mas
             p += "m" + str(cnt_msk)
             cnt_msk = cnt_msk + 1
         elif arg["type"] == "val":
-            p += "v" + str(cnt_val)
+            p += "s" + str(cnt_val)
             cnt_val = cnt_val + 1
         elif arg["type"] == "ptr":
             p += "p" + str(cnt_ptr)
@@ -607,7 +673,7 @@ def _build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul, part, masked_v
             p += "m" + str(cnt_msk) + ".m" + str(int(part))
             cnt_msk = cnt_msk + 1
         elif arg["type"] == "val":
-            p += "v" + str(cnt_val)
+            p += "s" + str(cnt_val)
             cnt_val = cnt_val + 1
         elif arg["type"] == "ptr":
             if "offset_lmul" not in arg or arg["offset_lmul"] == True:
@@ -627,9 +693,9 @@ def build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul=2, isa_name=True
     if proto["ret"]["fixeddatatype"]:
         realdatatype = tools.datatypes[proto["ret"]["fixeddatatype"]]
     if proto["ret"]["type"] == "reg":
-        str_code += "\t" + build_type(proto["ret"]["type"], realdatatype, isa, lmul, isa_name) + " res;\n"
+        str_code += "\t" + build_type(proto["ret"]["type"], realdatatype, isa, resolve_ret_lmul(proto["ret"], lmul), isa_name) + " res;\n"
     elif proto["ret"]["type"] == "msk":
-        str_code += "\t" + build_type(proto["ret"]["type"], realdatatype, isa, lmul, isa_name) + " msk;\n"
+        str_code += "\t" + build_type(proto["ret"]["type"], realdatatype, isa, resolve_ret_lmul(proto["ret"], lmul), isa_name) + " msk;\n"
     
     str_code += "\t" + _build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul_2, 1, masked_version=masked_version) + ";\n"
     str_code += "\t" + _build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul_2, 2, masked_version=masked_version) + ";"

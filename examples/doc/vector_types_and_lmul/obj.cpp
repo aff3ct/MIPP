@@ -79,7 +79,7 @@ static void conversions()
     mipp::Rvd<float>   v  = mipp::loadu_obj<float>(ptr); // {-2.7, -1.4, -0.1, 1.2, ...}
     mipp::Rvd<int32_t> vb = mipp::cast<int32_t>(v);      // {0xC02CCCCD, ...}: IEEE-754 bit patterns
     mipp::Rvd<int32_t> vi = mipp::cvt<int32_t>(v);       // {-2, -1, 0, 1, ...}: truncation
-    mipp::Rvd<double>  vw = mipp::wcvt<double>(v);       // {-2.7, -1.4, ...}: lower half only
+    mipp::Rvd<double, 2> vw = mipp::wcvt<double>(v);     // {-2.7, -1.4, ...}: every element, in a register of LMUL 2
     // --8<-- [end:conversions]
     DOC_CHECK((uint32_t)vb[0] == 0xC02CCCCDu);
     for (int i = 0; i < mipp::Rvd<float>::N(); i++) {
@@ -89,8 +89,29 @@ static void conversions()
         DOC_CHECK(vi[i] == (int32_t)P[i]);
     }
     DOC_CHECK(vi[0] == -2 && vi[1] == -1 && vi[2] == 0 && vi[3] == 1);
-    for (int i = 0; i < mipp::Rvd<double>::N(); i++)
+    for (int i = 0; i < mipp::Rvd<float>::N(); i++)
         DOC_CHECK(vw[i] == (double)P[i]);
+}
+
+// §5.4: changing the LMUL
+static void changing_lmul()
+{
+    const float* ptr = P;
+    // --8<-- [start:changing_lmul]
+    mipp::Rvd<float>     a  = mipp::loadu_obj<float>(ptr);
+    mipp::Rvd<float>     b  = mipp::loadu_obj<float>(ptr + mipp::Rvd<float>::N());
+    mipp::Rvd<float, 2>  ab = mipp::combine(a, b);          // {a, b}: twice as many elements
+    mipp::Rvd<float>     lo = mipp::low(ab);                // == a
+    mipp::Rvd<float>     hi = mipp::high(ab);               // == b
+    mipp::Rvd<double, 2> vw = mipp::wcvt<double>(a);        // a as double, in a register of LMUL 2
+    mipp::Rvd<float>     vn = mipp::ncvt<float>(vw);        // and back to float: == a
+    // --8<-- [end:changing_lmul]
+    const int N = mipp::Rvd<float>::N();
+    for (int i = 0; i < N; i++) {
+        DOC_CHECK(ab[i] == P[i] && ab[i + N] == P[i + N]);
+        DOC_CHECK(lo[i] == P[i] && hi[i] == P[i + N]);
+        DOC_CHECK(vn[i] == P[i]);
+    }
 }
 
 int main()
@@ -100,5 +121,6 @@ int main()
     d2_loop();
     d2_guard();
     conversions();
+    changing_lmul();
     return doc_status();
 }

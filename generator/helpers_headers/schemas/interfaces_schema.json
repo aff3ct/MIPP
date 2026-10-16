@@ -8,7 +8,7 @@
                 "proto_ref": "ret_reg_2args_reg",
                 "datatypes": "all_datatypes",
                 "horizontal": false,
-                "mask_support": "all_mask"
+                "variants": ["u", "m", "z", "s"]
             }
         }
     ],
@@ -38,19 +38,15 @@
                 "description": "`true` for the functions that combine the lanes of a register (reductions such as `hadd`, `hmax`). Their LMUL > 1 versions come from the `lmulh` generic templates instead of two calls on halves.",
                 "type": "boolean"
             },
-            "mask_support": {
-                "description": "Mask variants generated in addition to the unmasked function: `mask` (Merge-Masked), `maskz` (Zero-Masked), `masks` (Source-Masked). `all_mask`: the three; `no_mask`: none.",
-                "type": "string",
-                "enum": [
-                    "no_mask",
-                    "only_mask",
-                    "only_maskz",
-                    "only_masks",
-                    "mask_and_maskz",
-                    "mask_and_masks",
-                    "maskz_and_masks",
-                    "all_mask"
-                ]
+            "variants": {
+                "description": "Variants of the function: `u` (unmasked, always present), `m` (Merge-Masked), `z` (Zero-Masked), `s` (Source-Masked). `[\"u\"]`: no mask variant; `[\"u\", \"m\", \"z\", \"s\"]`: all of them.",
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {
+                    "enum": ["u", "m", "z", "s"]
+                },
+                "contains": { "const": "u" }
             },
             "cpp_name": {
                 "description": "Name of the function in the C++ APIs when it differs from the C name: `get_k` is `mipp::get`.",
@@ -61,7 +57,7 @@
             "proto_ref",
             "datatypes",
             "horizontal",
-            "mask_support"
+            "variants"
         ],
         "additionalProperties": false
     },

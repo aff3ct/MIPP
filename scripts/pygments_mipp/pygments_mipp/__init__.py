@@ -23,6 +23,8 @@ __all__ = ["MippDslLexer", "MippJsonLexer"]
 _TYPE_PREFIXES = r"(?:r|m|s|N)"
 _IDENT = r"[A-Za-z_][A-Za-z0-9_]*"
 
+# The '%' that open and close a DSL placeholder use the same token (and colour) as the Jinja2
+# delimiters, to make the templating zones easy to spot.
 # Rules shared by both lexers.
 _JINJA = [
     (r"\{\{.*?\}\}", Comment.Preproc),
@@ -32,19 +34,20 @@ _JINJA = [
 
 _DSL = [
     # Predication markers of the scalar reference: %!pred_cond!%, %!pred_alt!%
-    (r"%!" + _IDENT + r"!%", Comment.Preproc),
+    (r"(%)(!" + _IDENT + r"!)(%)",
+     bygroups(Comment.Preproc, Name.Decorator, Comment.Preproc)),
     # Type and constant placeholders: %r<...>%, %m<...>%, %s<...>%, %N<...>%
     (r"(%)(" + _TYPE_PREFIXES + r")(<)",
-     bygroups(Punctuation, Keyword.Type, Punctuation), "mipp-mods"),
+     bygroups(Comment.Preproc, Keyword.Type, Punctuation), "mipp-mods"),
     # Function calls: %add<...>%, %{{func_name}}<...>%
     (r"(%)(" + _IDENT + r")(<)",
-     bygroups(Punctuation, Name.Function, Punctuation), "mipp-mods"),
+     bygroups(Comment.Preproc, Name.Function, Punctuation), "mipp-mods"),
     (r"(%)(\{\{.*?\}\})(<)",
-     bygroups(Punctuation, Comment.Preproc, Punctuation), "mipp-mods"),
+     bygroups(Comment.Preproc, Comment.Preproc, Punctuation), "mipp-mods"),
 ]
 
 _MODS = [
-    (r">%", Punctuation, "#pop"),
+    (r"(>)(%)", bygroups(Punctuation, Comment.Preproc), "#pop"),
     (r"\{\{.*?\}\}", Comment.Preproc),
     (r"(c|b|m|v)(:)", bygroups(Name.Attribute, Punctuation)),
     (r"\b(tp|tr)\b", Name.Builtin),

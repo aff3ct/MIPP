@@ -212,15 +212,16 @@ For this reason, MIPP only exposes $\text{LDIV} = 2$ (`d2`), and deeper division
 
 ## 5. Type Conversions
 
-MIPP provides three conversions between data vectors. They differ in what they preserve: the bits (`cast`), the values (`cvt`), or the values with a wider type (`wcvt`).
+MIPP provides four conversions between data vectors. They differ in what they preserve: the bits (`cast`), the values (`cvt`), or the values with a wider (`wcvt`) or narrower (`ncvt`) type. The last two change the `LMUL` of the register, so that no element is lost or left unused (see [§5.5](#55-changing-the-lmul)).
 
 | Operation | Effect | C API | C++ Functional API | C++ Object API |
 | :--- | :--- | :--- | :--- | :--- |
 | **`cast`** | Reinterprets the bits of the register as another type. No value is converted, no instruction is emitted. | `mipp_cast_[src]_[dst]_[lmul](v)` | `mipp::cast_[dst](v)` | `mipp::cast<T_DST>(v)` |
 | **`cvt`** | Converts the value of each element to another type **of the same width**. | `mipp_cvt_[src]_[dst]_[lmul](v)` | `mipp::cvt_[dst](v)` | `mipp::cvt<T_DST>(v)` |
-| **`wcvt`** | Converts the value of the elements of the **lower half** to the type **twice as wide**. | `mipp_wcvt_[src]_[dst]_[lmul](v)` | `mipp::wcvt_[dst](v)` | `mipp::wcvt<T_DST>(v)` |
+| **`wcvt`** | Converts the value of **every element** to the type **twice as wide**; the result has the next `LMUL` up. | `mipp_wcvt_[src]_[dst]_[lmul](v)` | `mipp::wcvt_[dst](v)` | `mipp::wcvt<T_DST>(v)` |
+| **`ncvt`** | Converts the value of every element to the type **twice as narrow** (truncation); the result has the next `LMUL` down. | `mipp_ncvt_[src]_[dst]_[lmul](v)` | `mipp::ncvt_[dst](v)` | `mipp::ncvt<T_DST>(v)` |
 
-The three keep the `LMUL` of their input. Masks have their own reinterpretation, `cast_k` (see [Masking Semantics §6.1](masking_semantics.md#61-strong-mask-typing-cast_k-mask-to-mask-conversion)), and masks convert to and from data vectors with `to_rvd` / `to_rvm` ([§6.2](masking_semantics.md#62-to_rvm-data-vector-to-mask), [§6.3](masking_semantics.md#63-to_rvd-mask-to-data-vector)).
+`cast` and `cvt` keep the `LMUL` of their input; `wcvt` and `ncvt` do not. Masks have their own reinterpretation, `cast_k` (see [Masking Semantics §6.1](masking_semantics.md#61-strong-mask-typing-cast_k-mask-to-mask-conversion)), and masks convert to and from data vectors with `to_rvd` / `to_rvm` ([§6.2](masking_semantics.md#62-to_rvm-data-vector-to-mask), [§6.3](masking_semantics.md#63-to_rvd-mask-to-data-vector)).
 
 === "C API"
 
@@ -254,6 +255,46 @@ The three keep the `LMUL` of their input. Masks have their own reinterpretation,
 
 ### 5.3. `wcvt` (Widening Value Conversion)
 
-`wcvt` converts to the type twice as wide: `int8` $\to$ `int16`, `int16` $\to$ `int32`, `int32` $\to$ `int64`, the same for the unsigned types, and `float32` $\to$ `float64`. As the result keeps the same `LMUL`, it holds half as many elements: `wcvt` converts the first `mipp::N<T_DST, LMUL>()` elements (the lower half of the input, of the whole register group when $\text{LMUL} > 1$) and ignores the others.
+`wcvt` converts to the type twice as wide: `int8` $\to$ `int16`, `int16` $\to$ `int32`, `int32` $\to$ `int64`, the same for the unsigned types, and `float32` $\to$ `float64`. The elements are twice as large, so they take twice the room: the result has the **next `LMUL` up** (`d2` $\to$ `m1`, `m1` $\to$ `m2`, `m2` $\to$ `m4`, `m4` $\to$ `m8`), and **keeps every element** in its original position. There is nothing to widen from `m8`: `wcvt` does not exist for this `LMUL`.
 
-There is no function to widen the upper half, and no narrowing conversion. To widen a whole array, step through it by `mipp::N<T_DST, LMUL>()` elements: each `loadu` reads a full input register and only its lower half is converted, so the input buffer must extend half a register beyond the last converted element.
+### 5.4. `ncvt` (Narrowing Value Conversion)
+
+`ncvt` is the inverse of `wcvt`: `int16` $\to$ `int8`, `int32` $\to$ `int16`, `int64` $\to$ `int32`, the same for the unsigned types, and `float64` $\to$ `float32`. The result has the **next `LMUL` down** (`m8` $\to$ `m4`, ..., `m1` $\to$ `d2`), and keeps every element. There is nothing to narrow into from `d2`.
+
+- **Integers**: the value is **truncated** (modulo $2^{n}$ of the destination width), like a C cast. There is no saturation.
+- **`float64` to `float32`**: rounded to the nearest representable value.
+
+### 5.5. Changing the LMUL
+
+`wcvt` and `ncvt` are two of the functions whose result has an `LMUL` different from the one of their arguments. The others split and join registers:
+
+| Function | Effect | Input $\to$ result |
+| :--- | :--- | :--- |
+| **`low`** | The lower half of the register. | `m4` $\to$ `m2` $\to$ `m1` $\to$ `d2` |
+| **`high`** | The upper half of the register. | `m4` $\to$ `m2` $\to$ `m1` $\to$ `d2` |
+| **`combine`** | Joins two registers: the first one gives the lower half, the second one the upper half. | `d2` $\to$ `m1` $\to$ `m2` $\to$ `m4` |
+
+`low`, `high` and `combine` also exist on masks (`low_k`, `high_k`, `combine_k`), and `combine(low(v), high(v))` gives back `v`. The result `LMUL` is always the next one in the sequence `d2`, `m1`, `m2`, `m4`, `m8`, and a function is not defined where the next one does not exist (no `low` from `d2`, no `combine` or `wcvt` from `m8`).
+
+The C name carries the **`LMUL` of the arguments**, the one of the result being given by the type (`mipp_low_float32_m2` takes an `m2` register and returns an `m1` one). As for the other functions, no suffix means `m1`. The C++ Functional and Object APIs deduce the `LMUL` from the type of the argument.
+
+=== "C API"
+
+    ```c
+    --8<-- "examples/doc/vector_types_and_lmul/c.c:changing_lmul"
+    ```
+
+=== "C++ Functional API"
+
+    ```cpp
+    --8<-- "examples/doc/vector_types_and_lmul/fun.cpp:changing_lmul"
+    ```
+
+=== "C++ Object API"
+
+    ```cpp
+    --8<-- "examples/doc/vector_types_and_lmul/obj.cpp:changing_lmul"
+    ```
+
+!!! note "Availability"
+    These functions are provided by the scalar, SSE, NEON and ARM SVE targets. On AVX, AVX-512 and RISC-V Vector they are not available yet (see the [function support pages](../funcs_support/index.md) for the current state). Those that produce or take a `d2` register also require `MIPP_LDIV_2` (see [§4.1](#41-availability)).

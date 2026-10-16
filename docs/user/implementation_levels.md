@@ -62,12 +62,12 @@ static inline rvd_avx_float32_t mipp_avx_add_float32(const rvd_avx_float32_t r0,
 <!-- not-compiled: example of generated code (include/mipp/internal/), not user code -->
 
 ```c
-static inline rvd_rvv_int64_t mipp_rvv_wcvt_int32_int64(const rvd_rvv_int32_t r0) {
+static inline rvd_rvv_int64_m2_t mipp_rvv_wcvt_int32_int64_m1(const rvd_rvv_int32_m1_t r0) {
     // Level 3 (Scalar Fallback)
-    rvd_scalar_int32_t s_r0 = {0};
+    rvd_scalar_int32_m1_t s_r0 = {0};
     memcpy(&s_r0, &r0, sizeof(r0));
-    rvd_scalar_int64_t sres = mipp_scalar_wcvt_int32_int64(s_r0);
-    rvd_rvv_int64_t res;
+    rvd_scalar_int64_m2_t sres = mipp_scalar_wcvt_int32_int64_m1(s_r0);
+    rvd_rvv_int64_m2_t res;
     memcpy(&res, &sres, sizeof(res));
     return res;
 }

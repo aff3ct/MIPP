@@ -229,7 +229,7 @@
             ],
             "template": "gather_masks_f64",
             "if": "defined(__AVX2__)",
-            "version": "masks"
+            "variant": "s"
         },
         {
             "instr_name": "gather",
@@ -238,7 +238,7 @@
             ],
             "template": "gather_masks_i64",
             "if": "defined(__AVX2__)",
-            "version": "masks"
+            "variant": "s"
         },
         {
             "instr_name": "gather",
@@ -247,7 +247,7 @@
             ],
             "template": "gather_masks_f32",
             "if": "defined(__AVX2__)",
-            "version": "masks"
+            "variant": "s"
         },
         {
             "instr_name": "gather",
@@ -256,7 +256,7 @@
             ],
             "template": "gather_masks_i32",
             "if": "defined(__AVX2__)",
-            "version": "masks"
+            "variant": "s"
         }
     ],
     "getfirst": [

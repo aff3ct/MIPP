@@ -317,9 +317,9 @@ def _ci_mask_writer(func, dt, isa_list, file, mask_type, func_name="", lmul=0):
             print("}", file=file)
 
 def _gen_ci_mask_functions(func, dt, isa_list, file,lmul=0, func_name=""):
-    maskable = "mask_support" in interfaces[func] and interfaces[func]["mask_support"].is_maskable()
-    maskzable = "mask_support" in interfaces[func] and interfaces[func]["mask_support"].is_maskzable()
-    masksable = "mask_support" in interfaces[func] and interfaces[func]["mask_support"].is_masksable()
+    maskable = "variants" in interfaces[func] and interfaces[func]["variants"].is_maskable()
+    maskzable = "variants" in interfaces[func] and interfaces[func]["variants"].is_maskzable()
+    masksable = "variants" in interfaces[func] and interfaces[func]["variants"].is_masksable()
     
     if maskable:
         _ci_mask_writer(func, dt, isa_list, file, "mask", func_name, lmul)
@@ -331,6 +331,11 @@ def _gen_ci_mask_functions(func, dt, isa_list, file,lmul=0, func_name=""):
   
 def _ci_lmul_writer(f,func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_type=None, lmul=0):
     # now that lmul funcs have been moved to simd_ext layer, this is just a wrapper to call the correct function depending on the ISA.
+
+    if changes_lmul(funcs[f]["proto"]):
+        isa_list = [isa for isa in isa_list if isa_provides_lmul(isa, funcs[f]["proto"], lmul)]
+        if not isa_list:
+            return
 
     if len(dt.split(',')) <= 1:
         full_func_name = build_func_name_short(isa_list[0], dt_par, f, isa_name=False, lmul=lmul, masked_version=mask_type)
@@ -350,7 +355,7 @@ def _ci_lmul_writer(f,func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask
             func_name_impl = build_func_name(isa, dt_par, dt_ret, f, True, lmul, mask_type)
         print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa, func_name_impl, masked_version=mask_type) + ";", file=file)
     print("#else", file=file)
-    emit_panic_stub(full_func_name, file=file)
+    emit_panic_stub(full_func_name, file=file, unused_args=proto_arg_names(funcs[f]["proto"]) if changes_lmul(funcs[f]["proto"]) else ())
     print("#endif", file=file)
     print("}", file=file)
 
@@ -365,6 +370,7 @@ def _ci_ldiv_writer(f,func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask
         isa for isa in isa_list
         if isa.get("is_scalar", False) or any(x < 0 for x in isa.get("hw_lmul", []) + isa.get("sw_lmul", []))
     ]
+    ldiv_isas = [isa for isa in ldiv_isas if isa_provides_lmul(isa, funcs[f]["proto"], ldiv)]
 
     for i, isa in enumerate(ldiv_isas):
         if i == 0:
@@ -398,37 +404,39 @@ def _gen_ci_functions_fine(f, isa_list, include_manager, funcs):
         else:
             func_name = build_func_name(isa_list[0], dt_par, dt_ret, f, False)
 
-        # 1. Unmasked LMUL=0 (m1)
-        file_u_m1 = include_manager.get_fd("c", f, variant="u", lmul=0)
-        print("\nstatic " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name, 0, False) + " {", file=file_u_m1)
-        for i, isa in enumerate(isa_list):
-            if i == 0:
-                print("#if " + isa["gen_define"], file=file_u_m1)
-            else:
-                print("#elif " + isa["gen_define"], file=file_u_m1)
+        mask_status = funcs[f]["variants"] if "variants" in funcs[f] else VariantSet()
+        if not changes_lmul(funcs[f]["proto"]):
+            # 1. Unmasked LMUL=0 (m1)
+            file_u_m1 = include_manager.get_fd("c", f, variant="u", lmul=0)
+            print("\nstatic " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name, 0, False) + " {", file=file_u_m1)
+            for i, isa in enumerate(isa_list):
+                if i == 0:
+                    print("#if " + isa["gen_define"], file=file_u_m1)
+                else:
+                    print("#elif " + isa["gen_define"], file=file_u_m1)
 
-            if len(dt.split(',')) <= 1:
-                func_name_impl = build_func_name_short(isa, dt_par, f)
-            else:
-                func_name_impl = build_func_name(isa, dt_par, dt_ret, f)
-            print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa, func_name_impl) + ";", file=file_u_m1)
-            if i == len(isa_list)-1:
-                print("#else", file=file_u_m1)
-                emit_panic_stub(func_name, file=file_u_m1)
-                print("#endif", file=file_u_m1)
-        print("}", file=file_u_m1)
+                if len(dt.split(',')) <= 1:
+                    func_name_impl = build_func_name_short(isa, dt_par, f)
+                else:
+                    func_name_impl = build_func_name(isa, dt_par, dt_ret, f)
+                print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa, func_name_impl) + ";", file=file_u_m1)
+                if i == len(isa_list)-1:
+                    print("#else", file=file_u_m1)
+                    emit_panic_stub(func_name, file=file_u_m1)
+                    print("#endif", file=file_u_m1)
+            print("}", file=file_u_m1)
 
-        # 2. Masked LMUL=0 (m1)
-        mask_status = funcs[f]["mask_support"] if "mask_support" in funcs[f] else MaskSupport()
-        if mask_status.is_maskable():
-            file_m_m1 = include_manager.get_fd("c", f, variant="m", lmul=0)
-            _ci_mask_writer(f, dt, isa_list, file_m_m1, "mask", func_name, 0)
-        if mask_status.is_maskzable():
-            file_z_m1 = include_manager.get_fd("c", f, variant="z", lmul=0)
-            _ci_mask_writer(f, dt, isa_list, file_z_m1, "maskz", func_name, 0)
-        if mask_status.is_masksable():
-            file_s_m1 = include_manager.get_fd("c", f, variant="s", lmul=0)
-            _ci_mask_writer(f, dt, isa_list, file_s_m1, "masks", func_name, 0)
+            # 2. Masked LMUL=0 (m1)
+            mask_status = funcs[f]["variants"] if "variants" in funcs[f] else VariantSet()
+            if mask_status.is_maskable():
+                file_m_m1 = include_manager.get_fd("c", f, variant="m", lmul=0)
+                _ci_mask_writer(f, dt, isa_list, file_m_m1, "mask", func_name, 0)
+            if mask_status.is_maskzable():
+                file_z_m1 = include_manager.get_fd("c", f, variant="z", lmul=0)
+                _ci_mask_writer(f, dt, isa_list, file_z_m1, "maskz", func_name, 0)
+            if mask_status.is_masksable():
+                file_s_m1 = include_manager.get_fd("c", f, variant="s", lmul=0)
+                _ci_mask_writer(f, dt, isa_list, file_s_m1, "masks", func_name, 0)
 
         # 3. LMULs
         for lmul in all_lmul:
@@ -479,36 +487,37 @@ def _gen_ci_functions(isa_list, include_manager, funcs):
                     func_name = build_func_name_short(isa_list[0], dt_par, f, False);
                 else:
                     func_name = build_func_name(isa_list[0], dt_par, dt_ret, f, False);
-                print("\nstatic " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name, 0, False) + " {", file=file)
-                for i, isa in  enumerate(isa_list):
-                    if i == 0:
-                        print("#if " + isa["gen_define"], file=file)
-                    else:
-                        print("#elif " + isa["gen_define"], file=file)
+                if not changes_lmul(funcs[f]["proto"]):
+                    print("\nstatic " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa_list[0], func_name, 0, False) + " {", file=file)
+                    for i, isa in  enumerate(isa_list):
+                        if i == 0:
+                            print("#if " + isa["gen_define"], file=file)
+                        else:
+                            print("#elif " + isa["gen_define"], file=file)
 
-                    if len(dt.split(',')) <= 1:
-                        func_name_impl = build_func_name_short(isa, dt_par, f);
-                    else:
-                        func_name_impl = build_func_name(isa, dt_par, dt_ret, f);
-                    print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa, func_name_impl) + ";", file=file)
-                    if i == len(isa_list)-1:
-                        print("#else", file=file)
-                        emit_panic_stub(func_name, file=file)
-                        print("#endif", file=file)
+                        if len(dt.split(',')) <= 1:
+                            func_name_impl = build_func_name_short(isa, dt_par, f);
+                        else:
+                            func_name_impl = build_func_name(isa, dt_par, dt_ret, f);
+                        print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa, func_name_impl) + ";", file=file)
+                        if i == len(isa_list)-1:
+                            print("#else", file=file)
+                            emit_panic_stub(func_name, file=file)
+                            print("#endif", file=file)
 
-                print("}", file=file)
+                    print("}", file=file)
 
-                _gen_ci_mask_functions(f, dt, isa_list, file, 0, func_name=func_name)
+                    _gen_ci_mask_functions(f, dt, isa_list, file, 0, func_name=func_name)
                 
                 for lmul in all_lmul:
                     _ci_lmul_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, lmul=lmul)
 
                 for lmul in all_lmul:
                     mask_status = ""
-                    if "mask_support" in funcs[f] :
-                        mask_status = funcs[f]["mask_support"]
+                    if "variants" in funcs[f] :
+                        mask_status = funcs[f]["variants"]
                     else :
-                        mask_status = MaskSupport()
+                        mask_status = VariantSet()
 
                     if not mask_status.is_any_mask() :
                         continue
@@ -524,7 +533,7 @@ def _gen_ci_functions(isa_list, include_manager, funcs):
                 _ci_ldiv_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, ldiv=-2)
 
                 # Masked ldiv wrappers (same variants as in the fine granularity)
-                ldiv_mask_status = funcs[f]["mask_support"] if "mask_support" in funcs[f] else MaskSupport()
+                ldiv_mask_status = funcs[f]["variants"] if "variants" in funcs[f] else VariantSet()
                 if ldiv_mask_status.is_maskable():
                     _ci_ldiv_writer(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_type="mask", ldiv=-2)
                 if ldiv_mask_status.is_maskzable():
@@ -552,6 +561,9 @@ def _gen_ci_functions(isa_list, include_manager, funcs):
                     isa for isa in isa_list
                     if l != "d2" or (isa.get("is_scalar", False) or any(x < 0 for x in isa.get("hw_lmul", []) + isa.get("sw_lmul", [])))
                 ]
+                if changes_lmul(interfaces[fn]["proto"]):
+                    lmul_n = -2 if l == "d2" else (int(l[1:]) if l[:1] == "m" and l[1:].isdigit() else 0)
+                    valid_isas = [isa for isa in valid_isas if isa_provides_lmul(isa, interfaces[fn]["proto"], lmul_n)]
                 pfx = f'#pragma once\n// C wrapper: {fn} [{v}/{l}]\n\n#include "mipp/internal/interfaces/c/common.h"\n\n'
                 for i, isa in enumerate(valid_isas):
                     macro = isa["gen_define"]
@@ -560,8 +572,12 @@ def _gen_ci_functions(isa_list, include_manager, funcs):
                         pfx += f"#if {macro}\n{inc}"
                     else:
                         pfx += f"#elif {macro}\n{inc}"
-                pfx += "#endif\n\n"
+                if valid_isas:
+                    pfx += "#endif\n\n"
                 include_manager._write_atomic_prefix(item)
+                if item.get("_empty"):
+                    # no ISA provides this function for this LMUL: no header
+                    continue
                 # Ensure the prefix includes the ISA dispatch
                 full_path = item["full_path"]
                 with open(full_path, "r", encoding="utf-8") as f_in:

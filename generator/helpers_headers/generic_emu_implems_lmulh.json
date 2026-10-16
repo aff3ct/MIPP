@@ -3,7 +3,7 @@
         {
             "instr_name": "get",
             "datatypes": "all_datatypes",
-            "version": "horiz_lmul",
+            "mode": "horiz_lmul",
             "template_ref": "tpl_horiz_lmul_generic_emu.tpl_get"
         }
     ],
@@ -11,7 +11,7 @@
         {
             "instr_name": "get_k",
             "datatypes": "all_datatypes",
-            "version": "horiz_lmul",
+            "mode": "horiz_lmul",
             "template_ref": "tpl_horiz_lmul_generic_emu.tpl_get_k"
         }
     ],
@@ -19,7 +19,7 @@
         {
             "instr_name": "getfirst",
             "datatypes": "all_datatypes",
-            "version": "horiz_lmul",
+            "mode": "horiz_lmul",
             "template_ref": "tpl_horiz_lmul_generic_emu.tpl_getfirst"
         }
     ],
@@ -27,7 +27,7 @@
         {
             "instr_name": "hadd",
             "datatypes": "all_datatypes",
-            "version": "horiz_lmul",
+            "mode": "horiz_lmul",
             "template_ref": "tpl_horiz_lmul_generic_emu.hadd"
         }
     ],
@@ -35,7 +35,7 @@
         {
             "instr_name": "hadds",
             "datatypes": "all_datatypes",
-            "version": "horiz_lmul",
+            "mode": "horiz_lmul",
             "template_ref": "tpl_horiz_lmul_generic_emu.hadds"
         }
     ],
@@ -43,7 +43,7 @@
         {
             "instr_name": "hmax",
             "datatypes": "all_datatypes",
-            "version": "horiz_lmul",
+            "mode": "horiz_lmul",
             "template_ref": "tpl_horiz_lmul_generic_emu.hmax"
         }
     ],
@@ -51,7 +51,7 @@
         {
             "instr_name": "hmin",
             "datatypes": "all_datatypes",
-            "version": "horiz_lmul",
+            "mode": "horiz_lmul",
             "template_ref": "tpl_horiz_lmul_generic_emu.hmin"
         }
     ],
@@ -59,7 +59,7 @@
         {
             "instr_name": "hmul",
             "datatypes": "all_datatypes",
-            "version": "horiz_lmul",
+            "mode": "horiz_lmul",
             "template_ref": "tpl_horiz_lmul_generic_emu.hmul"
         }
     ],
@@ -67,7 +67,7 @@
         {
             "instr_name": "set",
             "datatypes": "all_datatypes",
-            "version": "horiz_lmul",
+            "mode": "horiz_lmul",
             "template_ref": "tpl_horiz_lmul_generic_emu.tpl_set"
         }
     ],
@@ -75,7 +75,7 @@
         {
             "instr_name": "set_k",
             "datatypes": "all_datatypes",
-            "version": "horiz_lmul",
+            "mode": "horiz_lmul",
             "template_ref": "tpl_horiz_lmul_generic_emu.set_k"
         }
     ],
@@ -83,7 +83,7 @@
         {
             "instr_name": "testz",
             "datatypes": "all_datatypes",
-            "version": "horiz_lmul",
+            "mode": "horiz_lmul",
             "template_ref": "tpl_horiz_lmul_generic_emu.tpl_testz"
         }
     ],
@@ -91,16 +91,8 @@
         {
             "instr_name": "testz_2",
             "datatypes": "all_datatypes",
-            "version": "horiz_lmul",
+            "mode": "horiz_lmul",
             "template_ref": "tpl_horiz_lmul_generic_emu.tpl_testz_2"
-        }
-    ],
-    "wcvt": [
-        {
-            "instr_name": "wcvt",
-            "datatypes": "all_datatypes_widenning",
-            "version": "horiz_lmul",
-            "template_ref": "tpl_horiz_lmul_generic_emu.wcvt"
         }
     ]
 }

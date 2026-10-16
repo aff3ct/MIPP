@@ -45,13 +45,13 @@
             "return %hmax<tp>%({% if mask_kind in ('maskz', 'mask') %}m0, {% elif mask_kind == 'masks' %}m0, rsrc, {% endif %}r0);",
             "{% else %}",
             "{% if mask_kind == 'maskz' %}",
-            "%s<tp>% v1 = %hmax<c:tp|b:tp|m:tp/2|v:Z>%(m0.m1, r0.r1);",
-            "%s<tp>% v2 = %hmax<c:tp|b:tp|m:tp/2|v:Z>%(m0.m2, r0.r2);",
+            "%s<tp>% s1 = %hmax<c:tp|b:tp|m:tp/2|v:Z>%(m0.m1, r0.r1);",
+            "%s<tp>% s2 = %hmax<c:tp|b:tp|m:tp/2|v:Z>%(m0.m2, r0.r2);",
             "{% else %}",
-            "%s<tp>% v1 = %hmax<c:tp|b:tp|m:tp/2|v:U>%(r0.r1);",
-            "%s<tp>% v2 = %hmax<c:tp|b:tp|m:tp/2|v:U>%(r0.r2);",
+            "%s<tp>% s1 = %hmax<c:tp|b:tp|m:tp/2|v:U>%(r0.r1);",
+            "%s<tp>% s2 = %hmax<c:tp|b:tp|m:tp/2|v:U>%(r0.r2);",
             "{% endif %}",
-            "return v1 > v2 ? v1 : v2;",
+            "return s1 > s2 ? s1 : s2;",
             "{% endif %}"
         ]
     },
@@ -62,13 +62,13 @@
             "return %hmin<tp>%({% if mask_kind in ('maskz', 'mask') %}m0, {% elif mask_kind == 'masks' %}m0, rsrc, {% endif %}r0);",
             "{% else %}",
             "{% if mask_kind == 'maskz' %}",
-            "%s<tp>% v1 = %hmin<c:tp|b:tp|m:tp/2|v:Z>%(m0.m1, r0.r1);",
-            "%s<tp>% v2 = %hmin<c:tp|b:tp|m:tp/2|v:Z>%(m0.m2, r0.r2);",
+            "%s<tp>% s1 = %hmin<c:tp|b:tp|m:tp/2|v:Z>%(m0.m1, r0.r1);",
+            "%s<tp>% s2 = %hmin<c:tp|b:tp|m:tp/2|v:Z>%(m0.m2, r0.r2);",
             "{% else %}",
-            "%s<tp>% v1 = %hmin<c:tp|b:tp|m:tp/2|v:U>%(r0.r1);",
-            "%s<tp>% v2 = %hmin<c:tp|b:tp|m:tp/2|v:U>%(r0.r2);",
+            "%s<tp>% s1 = %hmin<c:tp|b:tp|m:tp/2|v:U>%(r0.r1);",
+            "%s<tp>% s2 = %hmin<c:tp|b:tp|m:tp/2|v:U>%(r0.r2);",
             "{% endif %}",
-            "return v1 < v2 ? v1 : v2;",
+            "return s1 < s2 ? s1 : s2;",
             "{% endif %}"
         ]
     },
@@ -79,13 +79,13 @@
             "return %hmul<tp>%({% if mask_kind in ('maskz', 'mask') %}m0, {% elif mask_kind == 'masks' %}m0, rsrc, {% endif %}r0);",
             "{% else %}",
             "{% if mask_kind == 'maskz' %}",
-            "%s<tp>% v1 = %hmul<c:tp|b:tp|m:tp/2|v:Z>%(m0.m1, r0.r1);",
-            "%s<tp>% v2 = %hmul<c:tp|b:tp|m:tp/2|v:Z>%(m0.m2, r0.r2);",
+            "%s<tp>% s1 = %hmul<c:tp|b:tp|m:tp/2|v:Z>%(m0.m1, r0.r1);",
+            "%s<tp>% s2 = %hmul<c:tp|b:tp|m:tp/2|v:Z>%(m0.m2, r0.r2);",
             "{% else %}",
-            "%s<tp>% v1 = %hmul<c:tp|b:tp|m:tp/2|v:U>%(r0.r1);",
-            "%s<tp>% v2 = %hmul<c:tp|b:tp|m:tp/2|v:U>%(r0.r2);",
+            "%s<tp>% s1 = %hmul<c:tp|b:tp|m:tp/2|v:U>%(r0.r1);",
+            "%s<tp>% s2 = %hmul<c:tp|b:tp|m:tp/2|v:U>%(r0.r2);",
             "{% endif %}",
-            "return v1 * v2;",
+            "return s1 * s2;",
             "{% endif %}"
         ]
     },
@@ -109,12 +109,12 @@
         "format": "long",
         "code": [
             "{% if lmul == 1 %}",
-            "return %get<tp>%(r0, v0);",
+            "return %get<tp>%(r0, s0);",
             "{% else %}",
-            "if(v0 < %N<tp>% / 2)",
-            "\treturn %get<c:tp|b:tp|m:tp/2>%(r0.r1, v0);",
+            "if(s0 < %N<tp>% / 2)",
+            "\treturn %get<c:tp|b:tp|m:tp/2>%(r0.r1, s0);",
             "else {",
-            "\t%s<tp>% tmp = v0 - %N<tp>% / 2;",
+            "\t%s<tp>% tmp = s0 - %N<tp>% / 2;",
             "\treturn %get<c:tp|b:tp|m:tp/2>%(r0.r2, tmp);",
             "}",
             "{% endif %}"
@@ -124,12 +124,12 @@
         "format": "long",
         "code": [
             "{% if lmul == 1 %}",
-            "return %get_k<tp>%(m0, v0);",
+            "return %get_k<tp>%(m0, s0);",
             "{% else %}",
-            "if(v0 < %N<tp>% / 2)",
-            "\treturn %get_k<c:tp|b:tp|m:tp/2>%(m0.m1, v0);",
+            "if(s0 < %N<tp>% / 2)",
+            "\treturn %get_k<c:tp|b:tp|m:tp/2>%(m0.m1, s0);",
             "else {",
-            "\t%s<tp>% tmp = v0 - %N<tp>% / 2;",
+            "\t%s<tp>% tmp = s0 - %N<tp>% / 2;",
             "\treturn %get_k<c:tp|b:tp|m:tp/2>%(m0.m2, tmp);",
             "}",
             "{% endif %}"
@@ -178,22 +178,6 @@
             "return %testz_2<tp>%(m0);",
             "{% else %}",
             "return %testz_2<c:tp|b:tp|m:tp/2>%(m0.m1) && %testz_2<c:tp|b:tp|m:tp/2>%(m0.m2);",
-            "{% endif %}"
-        ]
-    },
-    "wcvt": {
-        "format": "long",
-        "code": [
-            "{% if lmul == 1 %}",
-            "return %wcvt<tp>%(r0);",
-            "{% else %}",
-            "// scalar backup bc we would need mipp::high to deal with it",
-            "%s<tp>% tmp_p[%N<tp>%];",
-            "%storeu<tp>%(&tmp_p[0], r0);",
-            "%s<tr>% tmp_r[%N<tr>%];",
-            "for (int i = 0; i < %N<tr>%; i++)",
-            "\ttmp_r[i] = tmp_p[i];",
-            "return %loadu<tr>%(&tmp_r[0]);",
             "{% endif %}"
         ]
     }

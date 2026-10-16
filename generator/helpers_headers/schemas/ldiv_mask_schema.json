@@ -17,7 +17,12 @@
                     "description": "Implementation level shown in the generated code and in the level summary. Default: 1 in <isa>_ldiv_mask.json, 2 in generic_ldiv_mask.json.",
                     "enum": [0, 1, 2, 3]
                 },
-                "versions": {
+                "if": {
+                    "description": "C preprocessor condition (e.g. `defined(__SSE4_1__)`) under which this entry is used. Otherwise the next matching entry is used (the entries of `<isa>_ldiv_mask.json` come first, then those of `generic_ldiv_mask.json`), down to an entry without `if`, or the lane-wise wrapper of the LMUL 1 function. `low` / `high` / `combine` need a fallback entry without `if` (given by `generic_ldiv_mask.json`).",
+                    "type": "string",
+                    "minLength": 1
+                },
+                "variants": {
                     "type": "array",
                     "minItems": 1,
                     "uniqueItems": true,

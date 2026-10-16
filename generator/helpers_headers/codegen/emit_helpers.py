@@ -186,11 +186,14 @@ def gen_ldiv_defines_mask(isa, file):
         return
     gen_ldiv_defines_sub_isa(isa, None, file)
 
-def emit_panic_stub(func_name: str, file=None, indent: str = "\t") -> str:
+def emit_panic_stub(func_name: str, file=None, indent: str = "\t", unused_args=()) -> str:
     """
     Emits a single-line panic stub using the MIPP_PANIC_STUB macro.
+    `unused_args`: names of the parameters to mark as unused (when no other branch uses them).
     """
     line = f"{indent}MIPP_PANIC_STUB(\"MIPP panic: '{func_name}' is unimplemented.\");"
+    for name in unused_args:
+        line = f"{indent}(void){name};\n" + line
     if file:
         print(line, file=file)
     return line

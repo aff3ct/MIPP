@@ -234,7 +234,7 @@
     "lshift_mask_all_datatypes": {
         "format": "long",
         "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, v0);",
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, s0);",
             "%r<tp>% res = %select<tp>%(m0, op, r0);",
             "return res;"
         ]
@@ -242,7 +242,7 @@
     "lshift_masks_all_datatypes": {
         "format": "long",
         "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, v0);",
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, s0);",
             "%r<tp>% res = %select<tp>%(m0, op, rsrc);",
             "return res;"
         ]
@@ -250,7 +250,7 @@
     "lshift_maskz_all_datatypes": {
         "format": "long",
         "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, v0);",
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, s0);",
             "%r<tp>% tmp = %to_rvd<tp>%(m0);",
             "%r<tp>% res = %andb<tp>%(op, tmp);",
             "return res;"
@@ -267,7 +267,7 @@
     "set1_masks_all_datatypes": {
         "format": "long",
         "code": [
-            "%r<tp>% op = %set1<tp>%(v0);",
+            "%r<tp>% op = %set1<tp>%(s0);",
             "%r<tp>% res = %select<tp>%(m0, op, rsrc);",
             "return res;"
         ]

@@ -30,9 +30,7 @@ def is_masked_implem(f, ff):
     """
     temporary skip of masks
     """
-    if "version" in ff and ff["version"]:
-        return True
-    return False
+    return ff_mask_kind(ff) is not None
 
 def get_implem_bucket(funcs, f, dt_key, mask_kind=None, create=False):
     if mask_kind is None:

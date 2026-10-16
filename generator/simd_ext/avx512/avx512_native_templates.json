@@ -302,7 +302,7 @@
     "set1": {
         "format": "short",
         "code": [
-            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(v0);"
+            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(s0);"
         ]
     },
     "store": {
@@ -320,7 +320,7 @@
     "sxl": {
         "format": "short",
         "code": [
-            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_var }}(r0.r, v0);"
+            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_var }}(r0.r, s0);"
         ]
     },
     "testz_1arg": {

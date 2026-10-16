@@ -79,6 +79,14 @@
                     "description": "`RO`: read only, the argument is `const` in the signatures. `WO`: written (return values, stored pointers).",
                     "type": "string"
                 },
+                "lmul": {
+                    "description": "Return value only. LMUL of the returned register, relative to the LMUL of the function: `same` (default), `down` (one step below: `m4` -> `m2` -> `m1` -> `d2`), `up` (one step above: `d2` -> `m1` -> `m2` -> `m4` -> `m8`) or a fixed LMUL (`d2`, `m1`, `m2`, `m4`, `m8`). The function is only generated for the LMULs whose resulting LMUL exists (no `down` from `d2`, no `up` from `m8`). The LMUL in the name of a C function is always the one of the arguments.",
+                    "enum": ["same", "down", "up", "d2", "m1", "m2", "m4", "m8"]
+                },
+                "changes_type": {
+                    "description": "Return value only. `true` if the datatype of the result differs from the one of the argument (wcvt, ncvt): the LMUL change then keeps the lanes, a wider (`up`) or narrower (`down`) element in a register one step above or below. Without it, `down` / `up` split (low, high) or join (combine) the registers.",
+                    "type": "boolean"
+                },
                 "offset_lmul": {
                     "description": "Pointers only. When a function with LMUL > 1 is built from two calls on halves, the pointer of the second call is advanced by one half. `false` passes the same pointer to both calls (gather and scatter, whose indices give the offsets). Omitted: `true`.",
                     "type": "boolean"

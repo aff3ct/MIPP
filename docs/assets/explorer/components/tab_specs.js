@@ -4,14 +4,14 @@
 import { escapeHtml } from "../explorer.config.js";
 import { getDtBadgeClass } from "../syntax.js";
 import { state } from "../state.js";
-import { ALL_MASK_MODES, MASK_MODES_INFO } from "../data.js";
+import { ALL_MASK_MODES, MASK_MODES_INFO, maskSupportOf } from "../data.js";
 
 export function renderTabSpecs(entry) {
   const cardName = entry.name;
   const testSpecs = entry.test_specs || {};
   const variants = testSpecs.variants || {};
 
-  const maskSupport = entry.mask_support || {};
+  const maskSupport = maskSupportOf(entry);
   const availableVariants = ALL_MASK_MODES.filter((m) => m === "unmasked" || maskSupport[m]);
 
   const globalVariant = state.maskVariant || "unmasked";

@@ -4,11 +4,12 @@
 import { escapeHtml, ICON_COPY } from "../explorer.config.js";
 import { highlightCpp, formatMathHtml, getDtBadgeClass } from "../syntax.js";
 import { state } from "../state.js";
-import { ALL_MASK_MODES, MASK_MODES_INFO } from "../data.js";
+import { ALL_MASK_MODES, MASK_MODES_INFO, maskSupportOf, isLmulUndefined, undefinedLmulNotice } from "../data.js";
 
 export function renderTabAlgos(entry) {
   const cardName = entry.name;
   const lmulKey = state.lmul;
+  if (isLmulUndefined(entry, lmulKey)) return undefinedLmulNotice(entry, lmulKey);
 
   const activeDts = (entry.datatypes || []).filter((dt) => state.selectedTypes.includes(dt));
   const dtsToDisplay = activeDts.length > 0 ? activeDts : (entry.datatypes || []);
@@ -19,7 +20,7 @@ export function renderTabAlgos(entry) {
   const lmulAlgos = entry.reference_algos && entry.reference_algos[lmulKey] ? entry.reference_algos[lmulKey] : (entry.reference_algos || {});
   const dtAlgos = lmulAlgos[selectedDt] || {};
 
-  const maskSupport = entry.mask_support || {};
+  const maskSupport = maskSupportOf(entry);
   const availableVariants = ALL_MASK_MODES.filter(
     (m) => m === "unmasked" || maskSupport[m]
   );

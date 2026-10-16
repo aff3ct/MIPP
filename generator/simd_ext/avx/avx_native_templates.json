@@ -191,13 +191,13 @@
     },
     "set1": {
         "format": "short",
-        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(v0);"
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(s0);"
     },
     "set1_k-16": {
         "format": "long",
         "code": [
             "%r<c:int>% tmp1;",
-            "tmp1.r = _mm256_set1_epi16(v0 ? (int16_t)0xFFFF : (int16_t)0);",
+            "tmp1.r = _mm256_set1_epi16(s0 ? (int16_t)0xFFFF : (int16_t)0);",
             "%r<tp>% tmp2 = %cast<c:int,tp>%(tmp1);",
             "return %to_rvm<tp>%(tmp2);"
         ]
@@ -206,7 +206,7 @@
         "format": "long",
         "code": [
             "%r<c:int>% tmp1;",
-            "tmp1.r = _mm256_set1_epi32(v0 ? (int32_t)0xFFFFFFFF : (int32_t)0);",
+            "tmp1.r = _mm256_set1_epi32(s0 ? (int32_t)0xFFFFFFFF : (int32_t)0);",
             "%r<tp>% tmp2 = %cast<c:int,tp>%(tmp1);",
             "return %to_rvm<tp>%(tmp2);"
         ]
@@ -215,7 +215,7 @@
         "format": "long",
         "code": [
             "%r<c:int>% tmp1;",
-            "tmp1.r = _mm256_set1_epi64x(v0 ? (int64_t)0xFFFFFFFFFFFFFFFF : (int64_t)0);",
+            "tmp1.r = _mm256_set1_epi64x(s0 ? (int64_t)0xFFFFFFFFFFFFFFFF : (int64_t)0);",
             "%r<tp>% tmp2 = %cast<c:int,tp>%(tmp1);",
             "return %to_rvm<tp>%(tmp2);"
         ]
@@ -224,14 +224,14 @@
         "format": "long",
         "code": [
             "%r<c:int>% tmp1;",
-            "tmp1.r = _mm256_set1_epi8(v0 ? (int8_t)0xFF : (int8_t)0);",
+            "tmp1.r = _mm256_set1_epi8(s0 ? (int8_t)0xFF : (int8_t)0);",
             "%r<tp>% tmp2 = %cast<c:int,tp>%(tmp1);",
             "return %to_rvm<tp>%(tmp2);"
         ]
     },
     "set1x": {
         "format": "short",
-        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}x(v0);"
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}x(s0);"
     },
     "set_k-16": {
         "format": "short",
@@ -287,7 +287,7 @@
     },
     "sxl": {
         "format": "short",
-        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, v0);"
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, s0);"
     },
     "testz_1arg": {
         "format": "long",

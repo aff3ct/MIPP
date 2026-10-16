@@ -11,7 +11,7 @@ import os
 import sys
 
 from registry import interfaces, categories, protos
-from tools import operators_arithm, operators_binary, operators_order
+from tools import operators_arithm, operators_binary, operators_order, changes_lmul, is_defined_for_lmul, resolve_ret_lmul
 from include_gen import _match_category
 
 
@@ -46,18 +46,27 @@ _OBJ_PARTNERS = {
 # value: (trait, return type, parameters, call). `{L}` is replaced by the LMUL value of the granule.
 _OBJ_MEMBER_OPS = {
     "loadu": ("rvd_loadu_op", "rvd<T, {L}>", "const T* p0", "mipp::loadu<T, {L}>(p0)"),
-    "set1": ("rvd_set1_op", "rvd<T, {L}>", "const T v0", "mipp::set1<T, {L}>(v0)"),
+    "set1": ("rvd_set1_op", "rvd<T, {L}>", "const T s0", "mipp::set1<T, {L}>(s0)"),
     "get": ("rvd_get_op", "T", "const rvd<T, {L}>& r0, const size_t idx", "mipp::get(r0, idx)"),
-    "set1_k": ("rvm_set1_k_op", "rvm<T, {L}>", "const int32_t v0", "mipp::set1_k<T, {L}>(v0)"),
+    "set1_k": ("rvm_set1_k_op", "rvm<T, {L}>", "const int32_t s0", "mipp::set1_k<T, {L}>(s0)"),
     "set_k": ("rvm_set_k_op", "rvm<T, {L}>", "const int32_t* vals", "mipp::set_k<T, {L}>(vals)"),
     "get_k": ("rvm_get_k_op", "bool", "const rvm<T, {L}>& m0, const size_t idx",
               "mask_get_val<T>(mipp::get(m0, idx), typename std::is_floating_point<T>::type())"),
+    # low / high / combine: `{D}` / `{U}` are the LMULs below / above `{L}`. The functions are called by their
+    # (unqualified) name: the cpp granule of the LMUL is included before, and the register types of the ISAs are
+    # not always in namespace mipp (so argument-dependent lookup cannot be relied on).
+    "low": ("rvd_low_op", "Rvd<T, {D}>", "const rvd<T, {L}>& r0", "low(r0)"),
+    "high": ("rvd_high_op", "Rvd<T, {D}>", "const rvd<T, {L}>& r0", "high(r0)"),
+    "combine": ("rvd_combine_op", "Rvd<T, {U}>", "const rvd<T, {L}>& r0, const rvd<T, {L}>& r1", "combine(r0, r1)"),
+    "low_k": ("rvm_low_op", "Rvm<T, {D}>", "const rvm<T, {L}>& m0", "low(m0)"),
+    "high_k": ("rvm_high_op", "Rvm<T, {D}>", "const rvm<T, {L}>& m0", "high(m0)"),
+    "combine_k": ("rvm_combine_op", "Rvm<T, {U}>", "const rvm<T, {L}>& m0, const rvm<T, {L}>& m1", "combine(m0, m1)"),
 }
 
 
 def _variants_of(fn):
     variants = ["u"]
-    ms = interfaces[fn].get("mask_support")
+    ms = interfaces[fn].get("variants")
     if ms:
         if hasattr(ms, "is_maskable") and ms.is_maskable():
             variants.append("m")
@@ -77,7 +86,7 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
     info = interfaces.get(fn, {})
     p = info.get("proto", {})
     args = [a["type"] for a in p.get("args", [])]
-    ms = info.get("mask_support")
+    ms = info.get("variants")
     is_maskable = ms.is_maskable() if hasattr(ms, "is_maskable") else False
     is_maskzable = ms.is_maskzable() if hasattr(ms, "is_maskzable") else False
     is_masksable = ms.is_masksable() if hasattr(ms, "is_masksable") else False
@@ -126,6 +135,25 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
             lines.append(f"{{ return Rvd<T, LMUL>(mipp::{fn}<V, T, LMUL>(m0.m, rsrc.r, p0)); }}")
             lines.append("")
 
+    # Category 1b: low / high / combine (the LMUL of the result differs from the one of the arguments)
+    elif fn in ("low", "high", "low_k", "high_k"):
+        cls = "Rvm" if fn.endswith("_k") else "Rvd"
+        mem = "m" if cls == "Rvm" else "r"
+        call = "low" if fn.startswith("low") else "high"
+        ret = f"{cls}<T, details::lmul_down(LMUL)>"
+        lines.append("template <typename T, int LMUL = 1>")
+        lines.append(f"inline {ret} {cpp_fn}(const {cls}<T, LMUL>& {mem}0)")
+        lines.append(f"{{ return {ret}({call}({mem}0.{mem})); }}")
+        lines.append("")
+    elif fn in ("combine", "combine_k"):
+        cls = "Rvm" if fn.endswith("_k") else "Rvd"
+        mem = "m" if cls == "Rvm" else "r"
+        ret = f"{cls}<T, details::lmul_up(LMUL)>"
+        lines.append("template <typename T, int LMUL = 1>")
+        lines.append(f"inline {ret} {cpp_fn}(const {cls}<T, LMUL>& {mem}0, const {cls}<T, LMUL>& {mem}1)")
+        lines.append(f"{{ return {ret}(combine({mem}0.{mem}, {mem}1.{mem})); }}")
+        lines.append("")
+
     elif fn == "set":
         lines.append("template <typename T, int LMUL = 1>")
         lines.append("inline Rvd<T, LMUL> set_obj(const T vals[mipp::N<T, LMUL>()])")
@@ -146,14 +174,14 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
 
     elif fn == "set1":
         lines.append("template <typename T, int LMUL = 1>")
-        lines.append("inline Rvd<T, LMUL> set1_obj(const T v0)")
-        lines.append("{ return Rvd<T, LMUL>(mipp::set1<T, LMUL>(v0)); }")
+        lines.append("inline Rvd<T, LMUL> set1_obj(const T s0)")
+        lines.append("{ return Rvd<T, LMUL>(mipp::set1<T, LMUL>(s0)); }")
         lines.append("")
 
     elif fn == "set1_k":
         lines.append("template <typename T, int LMUL = 1>")
-        lines.append("inline Rvm<T, LMUL> set1_k_obj(const int32_t v0)")
-        lines.append("{ return Rvm<T, LMUL>(mipp::set1_k<T, LMUL>(v0)); }")
+        lines.append("inline Rvm<T, LMUL> set1_k_obj(const int32_t s0)")
+        lines.append("{ return Rvm<T, LMUL>(mipp::set1_k<T, LMUL>(s0)); }")
         lines.append("")
 
     elif fn == "set_k":
@@ -436,14 +464,42 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
         for c_t, f_suffix in types_map:
             lines.append(f"template <> struct wcvt_rvd_helper<{c_t}> {{")
             lines.append(f"\ttemplate <typename T_SRC, int LMUL>")
-            lines.append(f"\tstatic inline Rvd<{c_t}, LMUL> apply(const Rvd<T_SRC, LMUL>& r0)")
-            lines.append(f"\t{{ return Rvd<{c_t}, LMUL>(mipp::wcvt_{f_suffix}(r0.r)); }}")
+            lines.append(f"\tstatic inline Rvd<{c_t}, details::lmul_up(LMUL)> apply(const Rvd<T_SRC, LMUL>& r0)")
+            lines.append(f"\t{{ return Rvd<{c_t}, details::lmul_up(LMUL)>(mipp::wcvt_{f_suffix}(r0.r)); }}")
             lines.append("};")
         lines.append("} // namespace details")
         lines.append("")
         lines.append("template <typename T_DST, typename T_SRC, int LMUL = 1>")
-        lines.append("inline Rvd<T_DST, LMUL> wcvt(const Rvd<T_SRC, LMUL>& r0)")
+        lines.append("inline Rvd<T_DST, details::lmul_up(LMUL)> wcvt(const Rvd<T_SRC, LMUL>& r0)")
         lines.append("{ return details::wcvt_rvd_helper<T_DST>::apply(r0); }")
+        lines.append("")
+
+    elif fn == "ncvt":
+        lines.append("namespace details")
+        lines.append("{")
+        lines.append("template <typename T_DST>")
+        lines.append("struct ncvt_rvd_helper;")
+        lines.append("")
+        types_map = [
+            ("float", "float32"),
+            ("int32_t", "int32"),
+            ("uint32_t", "uint32"),
+            ("int16_t", "int16"),
+            ("uint16_t", "uint16"),
+            ("int8_t", "int8"),
+            ("uint8_t", "uint8"),
+        ]
+        for c_t, f_suffix in types_map:
+            lines.append(f"template <> struct ncvt_rvd_helper<{c_t}> {{")
+            lines.append(f"\ttemplate <typename T_SRC, int LMUL>")
+            lines.append(f"\tstatic inline Rvd<{c_t}, details::lmul_down(LMUL)> apply(const Rvd<T_SRC, LMUL>& r0)")
+            lines.append(f"\t{{ return Rvd<{c_t}, details::lmul_down(LMUL)>(mipp::ncvt_{f_suffix}(r0.r)); }}")
+            lines.append("};")
+        lines.append("} // namespace details")
+        lines.append("")
+        lines.append("template <typename T_DST, typename T_SRC, int LMUL = 1>")
+        lines.append("inline Rvd<T_DST, details::lmul_down(LMUL)> ncvt(const Rvd<T_SRC, LMUL>& r0)")
+        lines.append("{ return details::ncvt_rvd_helper<T_DST>::apply(r0); }")
         lines.append("")
 
     # Category 8: General Register Operations (1-arg, 2-arg, 3-arg, shifts)
@@ -459,7 +515,7 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
                 typed_args.append(f"const Rvd<T, LMUL>& {arg_name}")
                 raw_args.append(f"{arg_name}.r")
             elif a_type == "val":
-                arg_name = f"v{cnt_val}"
+                arg_name = f"s{cnt_val}"
                 cnt_val += 1
                 typed_args.append(f"const int32_t {arg_name}")
                 raw_args.append(arg_name)
@@ -623,9 +679,13 @@ def _write_fine_granules(fn, cat, body, output_dir):
         partner = None
 
     inc = "mipp/internal/interfaces"
+    # low / high / combine / wcvt: no function (so no header) for an LMUL whose resulting LMUL does not exist
+    fine_lmuls = {l: val for l, val in _FINE_LMULS.items()
+                  if is_defined_for_lmul(interfaces[fn]["proto"], val) or not changes_lmul(interfaces[fn]["proto"])}
     for v in variants:
         v_units = units_for(v)
-        for l, val in _FINE_LMULS.items():
+        for l, val in fine_lmuls.items():
+            v_units_l = v_units
             out = ["#pragma once", "", f'#include "{inc}/obj/common.hpp"']
             out.append(f'#include "{inc}/cpp/functions/{cat}/{v}/{l}/{fn}.hpp"')
             if partner:
@@ -633,13 +693,13 @@ def _write_fine_granules(fn, cat, body, output_dir):
                 out.append(f'#include "{inc}/obj/functions/{pcat}/{pv}/{l}/{partner}.hpp"')
             # Operators building Rvd/Rvm from a scalar go through Rvd(T)/Rvm(bool): include the set1/set1_k obj
             # atom of this LMUL (it backs those constructors), unless this atom IS that one.
-            body_txt = "\n".join(line for unit in v_units for line in unit)
+            body_txt = "\n".join(line for unit in v_units_l for line in unit)
             if "Rvd<T, LMUL>(val)" in body_txt and fn != "set1":
                 out.append(f'#include "{inc}/obj/functions/load/u/{l}/set1.hpp"')
             if "Rvm<T, LMUL>(val)" in body_txt and fn != "set1_k":
                 out.append(f'#include "{inc}/obj/functions/load/u/{l}/set1_k.hpp"')
             out += ["", "namespace mipp", "{"]
-            for unit in v_units:
+            for unit in v_units_l:
                 for line in unit:
                     if line.startswith("template <") and "int LMUL = 1>" in line:
                         cond = f"LMUL == {val}"
@@ -658,17 +718,18 @@ def _write_fine_granules(fn, cat, body, output_dir):
                     line = re.sub(r"\b(\w+_helper)\b", rf"\1_{v}_{l}", line)
                     out.append(line)
             # Backing trait of the matching Rvd/Rvm member for this LMUL
-            if v == "u" and fn in _OBJ_MEMBER_OPS:
+            if v == "u" and fn in _OBJ_MEMBER_OPS and v_units_l is v_units:
                 trait, ret_t, params, call = _OBJ_MEMBER_OPS[fn]
                 L = str(val)
+                fmt = dict(L=L, D=resolve_ret_lmul({"lmul": "down"}, val), U=resolve_ret_lmul({"lmul": "up"}, val))
                 out += [
                     "namespace details",
                     "{",
                     "template <typename T>",
                     f"struct {trait}<T, {L}>",
                     "{",
-                    f"\tstatic inline {ret_t.format(L=L)} apply({params.format(L=L)})",
-                    f"\t{{ return {call.format(L=L)}; }}",
+                    f"\tstatic inline {ret_t.format(**fmt)} apply({params.format(**fmt)})",
+                    f"\t{{ return {call.format(**fmt)}; }}",
                     "};",
                     "} // namespace details",
                     "",
@@ -684,11 +745,11 @@ def _write_fine_granules(fn, cat, body, output_dir):
         os.makedirs(os.path.join(base, v), exist_ok=True)
         with open(os.path.join(base, v, f"{fn}.hpp"), "w", encoding="utf-8") as f:
             f.write("#pragma once\n\n")
-            for l in _FINE_LMULS:
+            for l in fine_lmuls:
                 f.write(f'#include "{inc}/obj/functions/{cat}/{v}/{l}/{fn}.hpp"\n')
 
     # LMUL umbrellas: all variants of an LMUL
-    for l in _FINE_LMULS:
+    for l in fine_lmuls:
         os.makedirs(os.path.join(base, l), exist_ok=True)
         with open(os.path.join(base, l, f"{fn}.hpp"), "w", encoding="utf-8") as f:
             f.write("#pragma once\n\n")

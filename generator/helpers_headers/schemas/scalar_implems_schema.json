@@ -8,7 +8,7 @@
                 {
                     "type": "element-wide",
                     "datatypes": "all_defs",
-                    "mask_variants": [],
+                    "variants": [],
                     "implem": [
                         "res.r[i] = %!pred_cond!% (r0.r[i] > r1.r[i] ? r0.r[i] - r1.r[i] : r1.r[i] - r0.r[i]) %!pred_alt!%;"
                     ]
@@ -40,11 +40,12 @@
                         }
                     ]
                 },
-                "mask_variants": {
-                    "description": "`[]`: every variant allowed by `mask_support`. Otherwise the variants of this entry, among `no_mask`, `mask`, `maskz` and `masks`.",
+                "variants": {
+                    "description": "`[]`: every variant allowed by the `variants` of the function in `registry_interfaces.json`. Otherwise the variants of this entry, among `u` (unmasked), `m` (Merge-Masked), `z` (Zero-Masked) and `s` (Source-Masked).",
                     "type": "array",
+                    "uniqueItems": true,
                     "items": {
-                        "type": "string"
+                        "enum": ["u", "m", "z", "s"]
                     }
                 },
                 "implem": {
@@ -65,7 +66,7 @@
             "required": [
                 "type",
                 "datatypes",
-                "mask_variants",
+                "variants",
                 "implem"
             ],
             "additionalProperties": false

@@ -4,7 +4,7 @@
 import { escapeHtml, ICON_COPY } from "../explorer.config.js";
 import { highlightCpp, formatCppObjProto } from "../syntax.js";
 import { state } from "../state.js";
-import { ALL_MASK_MODES } from "../data.js";
+import { ALL_MASK_MODES, maskSupportOf, isLmulUndefined, undefinedLmulNotice } from "../data.js";
 
 function cleanProto(str) {
   if (!str) return "";
@@ -24,9 +24,11 @@ export function renderTabProto(entry) {
   const protoData = entry.prototypes;
   if (!protoData) return `<p>No prototype definitions available.</p>`;
 
+  if (isLmulUndefined(entry, lmulKey)) return undefinedLmulNotice(entry, lmulKey);
+
   const activeDts = (entry.datatypes || []).filter((dt) => state.selectedTypes.includes(dt));
 
-  const maskSupport = entry.mask_support || {};
+  const maskSupport = maskSupportOf(entry);
   const availableVariants = ALL_MASK_MODES.filter(
     (m) => m === "unmasked" || maskSupport[m]
   );

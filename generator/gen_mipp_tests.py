@@ -133,9 +133,13 @@ def gen_test_files_all_funcs(kind: str = "c", lmul: int = 0, mkind: str = "", N:
     mask_tag = mkind if mkind != "" else "unmasked"
 
     for func in sorted(funcs):
-        mask_support = interfaces[func]["mask_support"]
-        if mkind != "" and not mask_support.is_supported(mkind):
+        variant_set = interfaces[func]["variants"]
+        if mkind != "" and not variant_set.is_supported(mkind):
             stats["skipped_mask"].append((mkind, func))
+            continue
+
+        if not engine.is_test_defined(func, lmul):
+            stats.setdefault("skipped_lmul", []).append((lmul_tag, func))
             continue
 
         disabled, reason = engine.is_func_disabled(func, kind)
@@ -225,7 +229,7 @@ def build_arg_parser():
         default=["unmasked", "mask", "maskz", "masks"],
         help=(
             "Variants to test: 'unmasked', 'mask' (Merge-Masked), 'maskz' (Zero-Masked) and 'masks' "
-            "(Source-Masked). A function is only tested for the variants of its 'mask_support'."
+            "(Source-Masked). A function is only tested for the variants of its 'variants'."
         ),
     )
     parser.add_argument(

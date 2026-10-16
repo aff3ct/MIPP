@@ -229,7 +229,9 @@ def extract_scalar_reference_algos(func, dtypes, mask_flags):
     if mask_flags.get("masks"):
         mask_variants_to_extract.append("masks")
 
-    # MIPP LMUL options to generate: 1 (lmul=0 in gen_c), 2, 4, 8, -2
+    # MIPP LMUL options to generate: 1 (lmul=0 in gen_c, or m1 for the functions that change the LMUL), 2, 4, 8, -2
+    from gen_mipp_docs import lmuls_of, scalar_ref_lmul
+    defined_lmuls = lmuls_of(func)
     lmul_map = {
         "1": 0,
         "2": 2,
@@ -239,6 +241,12 @@ def extract_scalar_reference_algos(func, dtypes, mask_flags):
     }
 
     for lmul_key, lmul_val in lmul_map.items():
+        if int(lmul_key) not in defined_lmuls:
+            # the function does not exist for this LMUL (e.g. wcvt from m8): nothing to show
+            algos_by_lmul[lmul_key] = {}
+            continue
+        if lmul_key == "1":
+            lmul_val = scalar_ref_lmul(func)
         algos_by_lmul[lmul_key] = {}
         for dt in dtypes:
             dt_par = dt.split(",")[0]
@@ -256,7 +264,7 @@ def extract_scalar_reference_algos(func, dtypes, mask_flags):
                 variant_key = "unmasked" if mvariant == "no_mask" else mvariant
                 try:
                     ff_copy = copy.copy(matching_ff)
-                    ff_copy["mask_variants"] = [mvariant]
+                    ff_copy["variants"] = [mvariant]
                     buf = io.StringIO()
                     gen_c_functions_scalar_one(scalar_isa, buf, interfaces, func, ff_copy, dt, lmul=lmul_val)
                     code = buf.getvalue().strip()
@@ -703,7 +711,8 @@ def generate_mipp_api_data(project_root=None):
     if project_root is None:
         project_root = os.path.dirname(base_generator_dir)
 
-    from gen_mipp_docs import SpecFuncInfo, match_args_type_cpp
+    from gen_mipp_docs import SpecFuncInfo, match_args_type_cpp, lmuls_of
+    from codegen.ldiv_mask import compute_changing_levels
 
     # 1. Discover all target ISAs
     isas_dict, implems_dict_raw, sorted_names = discover_and_sort_isas(base_generator_dir)
@@ -764,6 +773,13 @@ def generate_mipp_api_data(project_root=None):
             resolved_map = resolve_candidates(resolved_isa, copy_interfaces, lmul=lm)
             isa_solved_map[isa_name][lm] = (resolved_isa, resolved_map)
 
+    # Levels of the functions that change the LMUL (low, high, combine, wcvt, ncvt): given by the
+    # half-vector templates of the ISA, which the candidates above do not know
+    changing_levels_by_isa = {}
+    for isa_name in target_isas:
+        base_isa = isa_solved_map[isa_name].get(1, list(isa_solved_map[isa_name].values())[0])[0]
+        changing_levels_by_isa[isa_name] = compute_changing_levels(base_isa, interfaces)
+
     # Dynamically build regex to identify vendor intrinsic calls based on ISA prefixes
     all_prefixes = sorted({conf.get("prefix") for conf in isas_dict.values() if conf.get("prefix")}, key=len, reverse=True)
     prefix_pattern = '|'.join(re.escape(p) for p in all_prefixes)
@@ -798,13 +814,14 @@ def generate_mipp_api_data(project_root=None):
         spec_info = SpecFuncInfo()
         spec_info.gen_spec_func_info(func, interfaces, categories)
 
-        # Masking support flags
-        mask_support_obj = func_def.get("mask_support", None)
+        # Variants of the function (short names: u, m, z, s), and the flags used internally below
+        variant_set = func_def.get("variants", None)
+        func_variants = variant_set.variants() if variant_set else ["u"]
         mask_flags = {
             "unmasked": True,
-            "mask": mask_support_obj.is_maskable() if mask_support_obj else False,
-            "maskz": mask_support_obj.is_maskzable() if mask_support_obj else False,
-            "masks": mask_support_obj.is_masksable() if mask_support_obj else False
+            "mask": "m" in func_variants,
+            "maskz": "z" in func_variants,
+            "masks": "s" in func_variants
         }
 
         # Collect ISA support, levels, and native instructions
@@ -874,7 +891,8 @@ def generate_mipp_api_data(project_root=None):
                 cands = resolved_map_base.get((func, dt_key, None), [])
                 active_cands = [cand for cand, cond in cands if cond != "0"]
                 lvl = min([cand["level"] for cand in active_cands], default=3)
-                by_datatype[dt] = lvl
+                by_datatype[dt] = changing_levels_by_isa[isa_name].get((func, dt_key), lvl)
+                lvl = by_datatype[dt]
 
                 # Detect if level 0 candidate requires a sub-extension / feature flag
                 for cand, cond in cands:
@@ -975,11 +993,15 @@ def generate_mipp_api_data(project_root=None):
             if lm != 0
         } | {1}))
 
+        defined_lmuls = lmuls_of(func)
         for lmul in all_known_lmuls:
             lmul_key = str(lmul)
             c99_samples[lmul_key] = {}
             cpp_samples[lmul_key] = {}
             obj_samples[lmul_key] = {}
+            if lmul not in defined_lmuls:
+                # the function does not exist for this LMUL (e.g. wcvt from m8, low from d2)
+                continue
 
             for mvariant in mask_variants_list:
                 m_param = None if mvariant == "unmasked" else mvariant
@@ -1050,7 +1072,7 @@ def generate_mipp_api_data(project_root=None):
             "latex": latex,
             "math_semantics": math_semantics,
             "datatypes": func_def["datatypes"],
-            "mask_support": mask_flags,
+            "variants": func_variants,
             "isa_support": isa_support,
             "vendor_intrinsics_reverse_index": sorted(list(vendor_intrinsics_reverse_index)),
             "prototypes": {
@@ -1059,6 +1081,7 @@ def generate_mipp_api_data(project_root=None):
                 "cpp": cpp_samples.get("1", {}).get("unmasked", ""),
                 "obj": obj_proto,
                 "c99_samples": c99_samples,
+                "defined_lmuls": [str(l) for l in defined_lmuls],
                 "cpp_samples": cpp_samples,
                 "obj_samples": obj_samples
             },

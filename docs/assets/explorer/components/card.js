@@ -4,7 +4,7 @@
  */
 import { escapeHtml, ICON_CHEVRON } from "../explorer.config.js";
 import { formatCppObjProto } from "../syntax.js";
-import { ALL_MASK_MODES } from "../data.js";
+import { ALL_MASK_MODES, maskSupportOf } from "../data.js";
 import { state, syncUrlHash, setFocusedCard } from "../state.js";
 import { renderTabHw } from "./tab_hw.js";
 import { renderTabProto } from "./tab_proto.js";
@@ -68,7 +68,7 @@ export function renderTabContent(entry, activeTab) {
 
 export function renderCardExpandedDetails(entry) {
   const activeTab = state.cardTabs[entry.name] || "proto";
-  const maskSupport = entry.mask_support || {};
+  const maskSupport = maskSupportOf(entry);
   const availableVariants = ALL_MASK_MODES.filter((m) => m === "unmasked" || maskSupport[m]);
   const isUnsupported = Boolean(entry._unsupportedVariant) || (
     state.maskVariant &&
@@ -165,7 +165,7 @@ export function computeOptimisticLevel(entry, ext) {
 export function renderCard(entry, matchedIntrinsic = null, matchedC99 = null) {
   const isExpanded = state.expandedCards.has(entry.name);
   const isCompared = state.compareSet.has(entry.name);
-  const maskSupport = entry.mask_support || {};
+  const maskSupport = maskSupportOf(entry);
   const isUnsupported = Boolean(entry._unsupportedVariant) || (
     state.maskVariant &&
     state.maskVariant !== "unmasked" &&

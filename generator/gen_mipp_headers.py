@@ -12,7 +12,7 @@ path = os.getcwd()
 
 sys.path.insert(1, path + "/helpers_headers/")
 
-from tools import all_lmul, all_ldiv, clear_memo_caches, load_isa_config
+from tools import all_lmul, all_ldiv, clear_memo_caches, load_isa_config, is_defined_for_lmul
 from registry import scalar_isa
 from registry import scalar_implems
 from registry import interfaces, categories
@@ -47,12 +47,12 @@ def check_mipp_funcs_scalar_implems():
     for f in interfaces:
         mipp_funcs_datatypes = interfaces[f]["datatypes"]
         mipp_funcs_mask_variants = ["no_mask"]
-        if ("mask_support" in interfaces[f]):
-            if interfaces[f]["mask_support"].is_maskable():
+        if ("variants" in interfaces[f]):
+            if interfaces[f]["variants"].is_maskable():
                 mipp_funcs_mask_variants = mipp_funcs_mask_variants + ["mask"]
-            if interfaces[f]["mask_support"].is_maskzable():
+            if interfaces[f]["variants"].is_maskzable():
                 mipp_funcs_mask_variants = mipp_funcs_mask_variants + ["maskz"]
-            if interfaces[f]["mask_support"].is_masksable():
+            if interfaces[f]["variants"].is_masksable():
                 mipp_funcs_mask_variants = mipp_funcs_mask_variants + ["masks"]
 
         if f not in scalar_implems:
@@ -68,20 +68,20 @@ def check_mipp_funcs_scalar_implems():
                         print("Panic: '" + f + "<" + dt + "," + mv + ">': \"datatypes\" field is missing in 'scalar_implems'.")
                         should_exit_at_the_end = True
                         continue
-                    if "mask_variants" not in ff:
-                        print("Panic: '" + f + "<" + dt + "," + mv + ">': \"mask_variants\" field is missing in 'scalar_implems'.")
+                    if "variants" not in ff:
+                        print("Panic: '" + f + "<" + dt + "," + mv + ">': \"variants\" field is missing in 'scalar_implems'.")
                         should_exit_at_the_end = True
                         continue
-                    if not ff["datatypes"] and not ff["mask_variants"]:
+                    if not ff["datatypes"] and not ff["variants"]:
                         found = True
                         break
-                    if dt in ff["datatypes"] and not ff["mask_variants"]:
+                    if dt in ff["datatypes"] and not ff["variants"]:
                         found = True
                         break
-                    if mv in ff["mask_variants"] and not ff["datatypes"]:
+                    if mv in ff["variants"] and not ff["datatypes"]:
                         found = True
                         break
-                    if dt in ff["datatypes"] and mv in ff["mask_variants"]:
+                    if dt in ff["datatypes"] and mv in ff["variants"]:
                         found = True
                         break
                 if not found:
@@ -262,8 +262,8 @@ def generate_public_headers(output_dir="../include", granularity="coarse"):
 
     def _get_supported_variants(f_name):
         v_list = ["u"]
-        if "mask_support" in interfaces.get(f_name, {}):
-            support = interfaces[f_name]["mask_support"]
+        if "variants" in interfaces.get(f_name, {}):
+            support = interfaces[f_name]["variants"]
             if support.is_maskable():
                 v_list.append("m")
             if support.is_maskzable():
@@ -277,6 +277,12 @@ def generate_public_headers(output_dir="../include", granularity="coarse"):
         ("cpp", "hpp"),
         ("obj", "hpp"),
     ]
+
+    def _lmuls_of(f_name):
+        """LMULs for which the function exists (no header for the LMULs where low / high / combine / wcvt have no result)."""
+        proto = interfaces[f_name]["proto"]
+        return [l for l in ("m1", "m2", "m4", "m8", "d2")
+                if is_defined_for_lmul(proto, -2 if l == "d2" else int(l[1:]))]
 
     # 1. Categories
     for cat, funcs in categories.items():
@@ -305,7 +311,8 @@ def generate_public_headers(output_dir="../include", granularity="coarse"):
                             f.write("#pragma once\n\n")
                             f.write(f'#include "mipp/internal/interfaces/{w_name}/common.{ext}"\n')
                             for fn in funcs_in_v:
-                                f.write(f'#include "mipp/internal/interfaces/{w_name}/functions/{cat}/{v}/{l}/{fn}.{ext}"\n')
+                                if l in _lmuls_of(fn):
+                                    f.write(f'#include "mipp/internal/interfaces/{w_name}/functions/{cat}/{v}/{l}/{fn}.{ext}"\n')
 
                 # 1b. Variant umbrella: cat/<v>/<cat>.{ext}
                 for v in cat_variants:
@@ -326,7 +333,8 @@ def generate_public_headers(output_dir="../include", granularity="coarse"):
                         f.write("#pragma once\n\n")
                         f.write(f'#include "mipp/internal/interfaces/{w_name}/common.{ext}"\n')
                         for fn in funcs:
-                            f.write(f'#include "mipp/internal/interfaces/{w_name}/functions/{cat}/{l}/{fn}.{ext}"\n')
+                            if l in _lmuls_of(fn):
+                                f.write(f'#include "mipp/internal/interfaces/{w_name}/functions/{cat}/{l}/{fn}.{ext}"\n')
 
     # 2. Per-function headers: mipp/{c, cpp, obj}/fun/<fn>.{h, hpp}
     for fn in interfaces:
@@ -363,15 +371,15 @@ def generate_public_headers(output_dir="../include", granularity="coarse"):
 
         if granularity == "fine":
             func_variants = ["u"]
-            if "mask_support" in interfaces[fn]:
-                support = interfaces[fn]["mask_support"]
+            if "variants" in interfaces[fn]:
+                support = interfaces[fn]["variants"]
                 if support.is_maskable():
                     func_variants.append("m")
                 if support.is_maskzable():
                     func_variants.append("z")
                 if support.is_masksable():
                     func_variants.append("s")
-            func_lmuls = ["m1", "m2", "m4", "m8", "d2"]
+            func_lmuls = _lmuls_of(fn)
 
             wrappers_meta = [
                 ("c", "h"),

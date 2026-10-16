@@ -218,19 +218,19 @@
     "shift_scalar": {
         "format": "short",
         "code": [
-            "{{isa.prefix}}_v{{instr_name}}_vx_{{isa_dt_par.data_ext}}(r0.r, v0, %N<tp>%);"
+            "{{isa.prefix}}_v{{instr_name}}_vx_{{isa_dt_par.data_ext}}(r0.r, s0, %N<tp>%);"
         ]
     },
     "shift_scalar_msk": {
         "format": "short",
         "code": [
-            "{{isa.prefix}}_v{{instr_name}}_vx_{{isa_dt_par.data_ext}}_mu(m0.m, r0.r, r0.r, v0, %N<tp>%);"
+            "{{isa.prefix}}_v{{instr_name}}_vx_{{isa_dt_par.data_ext}}_mu(m0.m, r0.r, r0.r, s0, %N<tp>%);"
         ]
     },
     "shift_scalar_msks": {
         "format": "short",
         "code": [
-            "{{isa.prefix}}_v{{instr_name}}_vx_{{isa_dt_par.data_ext}}_mu(m0.m, rsrc.r, r0.r, v0, %N<tp>%);"
+            "{{isa.prefix}}_v{{instr_name}}_vx_{{isa_dt_par.data_ext}}_mu(m0.m, rsrc.r, r0.r, s0, %N<tp>%);"
         ]
     },
     "store": {

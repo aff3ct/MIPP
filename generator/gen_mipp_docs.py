@@ -34,6 +34,8 @@ from gen_mipp_headers import discover_and_sort_isas
 from c_generator import resolve_lmul_in_isa, register_all_candidates
 from codegen.candidate_resolver import resolve_candidates
 from scalar_gen import gen_c_functions_scalar_one
+from name_builder import is_defined_for_lmul, resolve_ret_lmul, changes_lmul
+from codegen.ldiv_mask import compute_changing_levels
 
 # Load Centralized Function Documentation Metadata
 funcs_docs_path = os.path.join(path, "helpers_headers", "funcs_docs.json")
@@ -73,6 +75,34 @@ def pair_to_short(pair_str):
 all_datatypes_short_cart_prod = [pair_to_short(p) for p in all_datatypes_cart_prod]
 all_datatypes_same_size_short = [pair_to_short(p) for p in all_datatypes_same_size]
 all_datatypes_widenning_short = [pair_to_short(p) for p in all_datatypes_widenning]
+
+
+def is_pair_function(func_name):
+    """True if the datatypes of the function are (source,destination) pairs of different types
+    (cast, cvt, wcvt, ncvt, ...), deduced from the registry."""
+    for dt in interfaces[func_name]["datatypes"]:
+        parts = dt.split(",")
+        if len(parts) == 2 and parts[0] != parts[1]:
+            return True
+    return False
+
+
+def ret_lmul_of(func_name, lmul):
+    """LMUL of the returned register when the arguments have the LMUL `lmul`."""
+    r = resolve_ret_lmul(interfaces[func_name]["proto"]["ret"], lmul)
+    return lmul if r is None else r
+
+
+def lmuls_of(func_name, lmuls=(1, 2, 4, 8, -2)):
+    """LMULs for which the function is defined (the ones that change the LMUL are not defined everywhere)."""
+    proto = interfaces[func_name]["proto"]
+    return [l for l in lmuls if is_defined_for_lmul(proto, l)]
+
+
+def scalar_ref_lmul(func_name):
+    """LMUL used to render the scalar reference of the base level (m1): 0 (no LMUL) for the
+    functions that keep the LMUL, 1 for the ones that change it (they are not defined at 0)."""
+    return 1 if changes_lmul(interfaces[func_name]["proto"]) else 0
 
 
 # ---------------------------------------------------------------------------
@@ -138,6 +168,8 @@ class MippInfo:
             copy_interfaces = copy.deepcopy(interfaces)
             register_all_candidates(resolved_isa, copy_interfaces, native_impl, emu_impl, lmul=0)
             resolved_map = resolve_candidates(resolved_isa, copy_interfaces, lmul=0)
+            # low/high/combine/wcvt/ncvt: given by the half-vector templates, not by the candidates
+            changing_levels = compute_changing_levels(resolved_isa, interfaces)
 
             for func in interfaces:
                 f_info = FuncInfo(func)
@@ -145,8 +177,8 @@ class MippInfo:
                     dt_par, dt_ret = dt.split(",") if "," in dt else (dt, dt)
                     dt_key = f"{dt_par},{dt_ret}"
                     mask_kinds = [None]
-                    if "mask_support" in interfaces[func]:
-                        support = interfaces[func]["mask_support"]
+                    if "variants" in interfaces[func]:
+                        support = interfaces[func]["variants"]
                         if support.is_maskable():
                             mask_kinds.append("mask")
                         if support.is_maskzable():
@@ -159,6 +191,8 @@ class MippInfo:
                         active_levels = [cand["level"] for cand, cond in cands if cond != "0"]
                         lvl = min(active_levels, default=3)
                         f_info.levels[(dt_key, mkind)] = lvl
+                        if mkind is None and (func, dt_key) in changing_levels:
+                            f_info.levels[(dt_key, mkind)] = changing_levels[(func, dt_key)]
                 isa_info.func_infos[func] = f_info
             self.isa_infos.append(isa_info)
 
@@ -170,8 +204,8 @@ class MippInfo:
                 dt_par, dt_ret = dt.split(",") if "," in dt else (dt, dt)
                 dt_key = f"{dt_par},{dt_ret}"
                 mask_kinds = [None]
-                if "mask_support" in interfaces[func]:
-                    support = interfaces[func]["mask_support"]
+                if "variants" in interfaces[func]:
+                    support = interfaces[func]["variants"]
                     if support.is_maskable():
                         mask_kinds.append("mask")
                     if support.is_maskzable():
@@ -231,7 +265,7 @@ def write_mipp_infos(mipp_infos, base_dir):
                 print("| Function | " + " | ".join(all_datatypes_short) + " |", file=f)
                 print("| :--- | " + " | ".join([":---:"] * len(dttypes)) + " |", file=f)
                 for func in funcs:
-                    if func in ("cast", "cast_k", "cvt", "wcvt"):
+                    if is_pair_function(func):
                         continue
                     func_info = isa_info.get_func_info(func)
                     line = f"| [{func}](../funcs_support/{category}/{func}.md) | "
@@ -274,6 +308,20 @@ def write_mipp_infos(mipp_infos, base_dir):
                     line += f"{badge_na} | "
             print(line, file=f)
 
+            # Narrowing Conversions (ncvt)
+            if "ncvt" in interfaces:
+                ncvt_dts = interfaces["ncvt"]["datatypes"]
+                print("\n## Narrowing Conversions (`ncvt`)\n", file=f)
+                print("| Function | " + " | ".join(pair_to_short(p) for p in ncvt_dts) + " |", file=f)
+                print("| :--- | " + " | ".join([":---:"] * len(ncvt_dts)) + " |", file=f)
+                func = "ncvt"
+                func_info = isa_info.get_func_info(func)
+                line = f"| [{func}](../funcs_support/converts/{func}.md) | "
+                for dtype in ncvt_dts:
+                    lvl = func_info.get_level(dtype, None) if func_info else 3
+                    line += f"{level_to_badge(lvl)} | "
+                print(line, file=f)
+
             # Cartesian product table for cast and cast_k
             print("\n## Type Reinterpretations (`cast` & `cast_k`)\n", file=f)
             print("| Function | " + " | ".join(all_datatypes_short_cart_prod) + " |", file=f)
@@ -292,15 +340,15 @@ def write_mipp_infos(mipp_infos, base_dir):
 
 def exists_msk_in_category(category, mkind):
     for func in categories[category]:
-        if func in interfaces and "mask_support" in interfaces[func]:
-            if interfaces[func]["mask_support"].is_supported(mkind):
+        if func in interfaces and "variants" in interfaces[func]:
+            if interfaces[func]["variants"].is_supported(mkind):
                 return True
     return False
 
 
 def exists_msk_in_func(func, mkind):
-    if func in interfaces and "mask_support" in interfaces[func]:
-        return interfaces[func]["mask_support"].is_supported(mkind)
+    if func in interfaces and "variants" in interfaces[func]:
+        return interfaces[func]["variants"].is_supported(mkind)
     return False
 
 
@@ -318,13 +366,13 @@ def write_mipp_infos_masked(mipp_infos, base_dir):
                     print("| Function | " + " | ".join(all_datatypes_short) + " |", file=f)
                     print("| :--- | " + " | ".join([":---:"] * len(dttypes)) + " |", file=f)
                     for func in funcs:
-                        if not exists_msk_in_func(func, mkind) or func in ("cast", "cast_k", "cvt", "wcvt"):
+                        if not exists_msk_in_func(func, mkind) or is_pair_function(func):
                             continue
                         func_info = isa_info.get_func_info(func)
                         line = f"| [{func}](../funcs_support/{category}/{func}.md) | "
                         for dtype in dttypes:
                             dtype_check = f"{dtype},{dtype}" if func in ("gather", "scatter") else dtype
-                            if dtype_check in interfaces[func]["datatypes"] and interfaces[func]["mask_support"].is_supported(mkind):
+                            if dtype_check in interfaces[func]["datatypes"] and interfaces[func]["variants"].is_supported(mkind):
                                 lvl = func_info.get_level(dtype_check, mkind) if func_info else 3
                                 line += f"{level_to_badge(lvl)} | "
                             else:
@@ -390,7 +438,7 @@ class SpecFuncInfo:
         self.args = []
         self.ret = None
         self.dttypes = []
-        self.mask_support = None
+        self.variant_set = None
         self.category = "miscellaneous"
 
     def gen_spec_func_info(self, func, interfaces, categories):
@@ -398,7 +446,7 @@ class SpecFuncInfo:
         self.args = interfaces[func]["proto"]["args"]
         self.ret = interfaces[func]["proto"]["ret"]
         self.dttypes = interfaces[func]["datatypes"]
-        self.mask_support = interfaces[func].get("mask_support", None)
+        self.variant_set = interfaces[func].get("variants", None)
 
         for category, funcs in categories.items():
             if func in funcs:
@@ -413,7 +461,7 @@ class SpecFuncInfo:
 
     def func_to_str_cpp(self, lmul=1, mask_kind=None):
         cpp_name = self.get_cpp_func_name()
-        is_pair_func = self.func_name in ("cast", "cast_k", "cvt", "wcvt")
+        is_pair_func = is_pair_function(self.func_name)
         
         tmpl_parts = []
         if mask_kind == "mask":
@@ -429,10 +477,12 @@ class SpecFuncInfo:
             type_name = "rvm" if self.func_name.endswith("_k") else "rvd"
             arg_name = "m0" if type_name == "rvm" else "r0"
             lmul_arg = f", {lmul}" if lmul != 1 else ""
+            rl = ret_lmul_of(self.func_name, lmul)
+            ret_lmul_arg = f", {rl}" if rl != 1 else ""
             lines = []
             for dt in self.dttypes:
                 dt_par, dt_ret = dt.split(",")
-                lines.append(f"{type_name}<{dt_ret}_t{lmul_arg}> {cpp_name}_{dt_ret}(const {type_name}<{dt_par}_t{lmul_arg}> {arg_name});")
+                lines.append(f"{type_name}<{dt_ret}_t{ret_lmul_arg}> {cpp_name}_{dt_ret}(const {type_name}<{dt_par}_t{lmul_arg}> {arg_name});")
             return "\n".join(lines)
 
         cnt_reg = 0
@@ -473,7 +523,7 @@ class SpecFuncInfo:
                 name = f"m{cnt_msk}"
                 cnt_msk += 1
             elif arg_type == "val":
-                name = f"v{cnt_val}"
+                name = f"s{cnt_val}"
                 cnt_val += 1
             elif arg_type == "ptr":
                 name = f"p{cnt_ptr}"
@@ -488,7 +538,7 @@ class SpecFuncInfo:
 
         args_str = ", ".join(args_parts)
         ret_fixed = self.ret.get("fixeddatatype", False)
-        ret_str = match_args_type_cpp(self.ret["type"], False, True, ret_fixed, lmul=lmul)
+        ret_str = match_args_type_cpp(self.ret["type"], False, True, ret_fixed, lmul=ret_lmul_of(self.func_name, lmul))
         
         tmpl_parts.append("typename T")
         tmpl_header = f"template <{', '.join(tmpl_parts)}> "
@@ -497,7 +547,7 @@ class SpecFuncInfo:
 
     def func_to_str_obj(self, lmul=1, mask_kind=None):
         cpp_name = self.get_cpp_func_name()
-        is_pair_func = self.func_name in ("cast", "cast_k", "cvt", "wcvt")
+        is_pair_func = is_pair_function(self.func_name)
         lmul_arg = f", {lmul}" if lmul != 1 else ""
 
         if is_pair_func:
@@ -507,7 +557,9 @@ class SpecFuncInfo:
             tmpl_str = f"template <{', '.join(tmpl_parts)}> "
             type_name = "Rvm" if self.func_name.endswith("_k") else "Rvd"
             arg_name = "m0" if type_name == "Rvm" else "r0"
-            return f"{tmpl_str}{type_name}<T_DST{lmul_arg}> {cpp_name}(const {type_name}<T_SRC{lmul_arg}>& {arg_name});"
+            rl = ret_lmul_of(self.func_name, lmul)
+            ret_lmul_arg = f", {rl}" if rl != 1 else ""
+            return f"{tmpl_str}{type_name}<T_DST{ret_lmul_arg}> {cpp_name}(const {type_name}<T_SRC{lmul_arg}>& {arg_name});"
 
         has_simd_arg = any(arg["type"] in ("reg", "msk") for arg in self.args)
         returns_simd = self.ret["type"] in ("reg", "msk")
@@ -557,7 +609,7 @@ class SpecFuncInfo:
                 name = f"m{cnt_msk}"
                 cnt_msk += 1
             elif arg_type == "val":
-                name = f"v{cnt_val}"
+                name = f"s{cnt_val}"
                 cnt_val += 1
             elif arg_type == "ptr":
                 name = f"p{cnt_ptr}"
@@ -572,7 +624,7 @@ class SpecFuncInfo:
 
         args_str = ", ".join(args_parts)
         ret_fixed = self.ret.get("fixeddatatype", False)
-        ret_str = match_args_type_obj(self.ret["type"], False, True, ret_fixed, lmul=lmul)
+        ret_str = match_args_type_obj(self.ret["type"], False, True, ret_fixed, lmul=ret_lmul_of(self.func_name, lmul))
 
         tmpl_parts.append("typename T")
         tmpl_header = f"template <{', '.join(tmpl_parts)}> "
@@ -619,7 +671,7 @@ class SpecFuncInfo:
         return "\n".join(lines)
 
     def func_to_str_c(self, lmul=1, mask_kind=None):
-        is_pair_func = self.func_name in ("cast", "cast_k", "cvt", "wcvt")
+        is_pair_func = is_pair_function(self.func_name)
         lines = []
         if is_pair_func:
             for dt in self.dttypes:
@@ -646,7 +698,7 @@ class SpecFuncInfo:
         dt = datatypes[0]
 
         print("```c", file=file)
-        gen_c_functions_scalar_one(isa, file, funcs, f, ff, dt, lmul=0)
+        gen_c_functions_scalar_one(isa, file, funcs, f, ff, dt, lmul=scalar_ref_lmul(f))
         print("```\n", file=file)
 
     def write_spec_func_info(self, base_dir, mipp_infos=None):
@@ -661,7 +713,7 @@ class SpecFuncInfo:
 
             print("## Headers\n", file=f)
 
-            example_var = "m" if (self.mask_support and self.mask_support.is_maskable()) else "u"
+            example_var = "m" if (self.variant_set and self.variant_set.is_maskable()) else "u"
             var_desc = f"'{example_var}' variant only (*)"
             var_lmul_desc = f"'{example_var}' + LMUL=2 (*)"
             atomic_desc = f"2D atomic: '{example_var}' + LMUL=2 (fastest compilation) (*)"
@@ -700,7 +752,7 @@ class SpecFuncInfo:
             print("## Prototypes\n", file=f)
             print('=== "C API"', file=f)
             print("    ```c", file=f)
-            for lmul in [1, 2, 4, 8, -2]:
+            for lmul in lmuls_of(self.func_name):
                 lmul_label = f"LMUL = {lmul}" if lmul > 0 else "d2 (half-vector)"
                 print(f"    // {lmul_label}", file=f)
                 c_block = self.func_to_str_c(lmul)
@@ -710,15 +762,16 @@ class SpecFuncInfo:
 
             print('=== "C++ Functional API"', file=f)
             print("    ```cpp", file=f)
-            for lmul in [1, 2, 4, 8, -2]:
+            for lmul in lmuls_of(self.func_name):
                 lmul_label = f"LMUL = {lmul}" if lmul > 0 else "d2 (half-vector)"
                 print(f"    // {lmul_label}", file=f)
-                print(f"    {self.func_to_str_cpp(lmul)}", file=f)
+                for line in self.func_to_str_cpp(lmul).splitlines():
+                    print(f"    {line}", file=f)
             print("    ```\n", file=f)
 
             print('=== "C++ Object API"', file=f)
             print("    ```cpp", file=f)
-            for lmul in [1, 2, 4, 8, -2]:
+            for lmul in lmuls_of(self.func_name):
                 lmul_label = f"LMUL = {lmul}" if lmul > 0 else "d2 (half-vector)"
                 print(f"    // {lmul_label}", file=f)
                 obj_block = self.func_to_str_obj(lmul)
@@ -729,7 +782,7 @@ class SpecFuncInfo:
             print("## Supported Datatypes\n", file=f)
             if self.func_name in ("cast", "cast_k"):
                 print("Supported between all pairwise datatype permutations of matching bitwidth.\n", file=f)
-            elif self.func_name in ("cvt", "wcvt"):
+            elif is_pair_function(self.func_name):
                 for dt in self.dttypes:
                     src, dst = dt.split(",")
                     print(f"- `{src}` &rarr; `{dst}`", file=f)
@@ -740,14 +793,14 @@ class SpecFuncInfo:
                     print(f"- `{dt_single}`", file=f)
                 print("", file=f)
 
-            if self.mask_support and self.mask_support.is_any_mask():
+            if self.variant_set and self.variant_set.is_any_mask():
                 print("## Mask Execution Variants\n", file=f)
                 variants = []
-                if self.mask_support.is_maskable():
+                if self.variant_set.is_maskable():
                     variants.append("- **Merge-Masked (`_mask` / `<mipp::M>`)**: Active elements evaluated; inactive elements keep the value of the first operand.")
-                if self.mask_support.is_maskzable():
+                if self.variant_set.is_maskzable():
                     variants.append("- **Zero-Masked (`_maskz` / `<mipp::Z>`)**: Active elements evaluated; inactive elements zeroed.")
-                if self.mask_support.is_masksable():
+                if self.variant_set.is_masksable():
                     variants.append("- **Source-Masked (`_masks` / `<mipp::S>`)**: Active elements evaluated; inactive elements take values from source operand `src`.")
                 print("\n".join(variants) + "\n", file=f)
 
@@ -773,17 +826,20 @@ class SpecFuncInfo:
         elif self.func_name == "wcvt":
             dts = all_datatypes_widenning
             dts_headers = all_datatypes_widenning_short
+        elif is_pair_function(self.func_name):
+            dts = list(interfaces[self.func_name]["datatypes"])
+            dts_headers = [pair_to_short(p) for p in dts]
         else:
             dts = all_datatypes
             dts_headers = all_datatypes_short
         
         variants = [("Unmasked", None)]
-        if self.mask_support and self.mask_support.is_any_mask():
-            if self.mask_support.is_maskable():
+        if self.variant_set and self.variant_set.is_any_mask():
+            if self.variant_set.is_maskable():
                 variants.append(("Merge-Masked (`M`)", "mask"))
-            if self.mask_support.is_maskzable():
+            if self.variant_set.is_maskzable():
                 variants.append(("Zero-Masked (`Z`)", "maskz"))
-            if self.mask_support.is_masksable():
+            if self.variant_set.is_masksable():
                 variants.append(("Source-Masked (`S`)", "masks"))
                 
         for var_title, var_kind in variants:
@@ -797,7 +853,7 @@ class SpecFuncInfo:
                 for dt in dts:
                     dtype_check = f"{dt},{dt}" if self.func_name in ("gather", "scatter") else dt
                     if dtype_check in interfaces[self.func_name]["datatypes"]:
-                        if var_kind is None or (self.mask_support and self.mask_support.is_supported(var_kind)):
+                        if var_kind is None or (self.variant_set and self.variant_set.is_supported(var_kind)):
                             lvl = func_info.get_level(dtype_check, var_kind) if func_info else 3
                             row += f"{level_to_badge(lvl)} | "
                         else:
@@ -843,7 +899,7 @@ class SpecFuncInfo:
 
         # 2. Precision & Verification Tolerances
         print("### Verification Tolerance\n", file=file)
-        if self.func_name in ("cast", "cast_k", "cvt", "wcvt"):
+        if is_pair_function(self.func_name):
             print("| Datatype Pairs | Comparison Mode | Allowed Tolerance |", file=file)
             print("| :--- | :--- | :--- |", file=file)
             print(f"| All supported conversion pairs | `{comp}` | Bit-exact ($0$ error) |\n", file=file)
@@ -1022,7 +1078,7 @@ def build_arg_parser():
             "- 'dev_reference': command-line and registry reference of the Developer Guide "
             "('docs/developer/reference/cli.md' and 'docs/developer/reference/registries/');\n"
             "- 'includes': tables included in the hand-written pages ('docs/includes/generated/'): LMUL and "
-            "half-vector availability per target, datatypes, categories, 'mask_support' values.\n\n"
+            "half-vector availability per target, datatypes, categories, 'variants' lists.\n\n"
             "All these outputs are ignored by Git."
         ),
     )
