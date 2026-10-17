@@ -802,6 +802,44 @@
             "if": "defined(__AVX512BW__)"
         }
     ],
+    "none": [
+        {
+            "instr_name": "kortestz",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "testz_1arg",
+            "if": "defined(__AVX512DQ__)"
+        },
+        {
+            "instr_name": "kortestz",
+            "datatypes": [
+                "int32",
+                "uint32"
+            ],
+            "template": "testz_1arg",
+            "if": "(defined (__AVX512F__) || defined(__MIC__) || defined(__KNCNI__))"
+        },
+        {
+            "instr_name": "kortestz",
+            "datatypes": "all_16bit",
+            "template": "testz_1arg",
+            "if": "defined (__AVX512BW__)"
+        },
+        {
+            "instr_name": "kortestz",
+            "datatypes": "all_8bit",
+            "template": "testz_1arg",
+            "if": "defined (__AVX512BW__)"
+        },
+        {
+            "instr_name": "kortestz",
+            "datatypes": "all_float",
+            "template": "testz_1arg",
+            "if": "defined(__AVX512DQ__)"
+        }
+    ],
     "notb_k": [
         {
             "instr_name": "knot",
@@ -1200,44 +1238,6 @@
             "datatypes": "all_8bit",
             "template": "testz_2args",
             "if": "defined (__AVX512BW__)"
-        }
-    ],
-    "testz_2": [
-        {
-            "instr_name": "kortestz",
-            "datatypes": [
-                "int64",
-                "uint64"
-            ],
-            "template": "testz_1arg",
-            "if": "defined(__AVX512DQ__)"
-        },
-        {
-            "instr_name": "kortestz",
-            "datatypes": [
-                "int32",
-                "uint32"
-            ],
-            "template": "testz_1arg",
-            "if": "(defined (__AVX512F__) || defined(__MIC__) || defined(__KNCNI__))"
-        },
-        {
-            "instr_name": "kortestz",
-            "datatypes": "all_16bit",
-            "template": "testz_1arg",
-            "if": "defined (__AVX512BW__)"
-        },
-        {
-            "instr_name": "kortestz",
-            "datatypes": "all_8bit",
-            "template": "testz_1arg",
-            "if": "defined (__AVX512BW__)"
-        },
-        {
-            "instr_name": "kortestz",
-            "datatypes": "all_float",
-            "template": "testz_1arg",
-            "if": "defined(__AVX512DQ__)"
         }
     ],
     "trunc": [

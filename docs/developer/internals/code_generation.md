@@ -87,7 +87,7 @@ static inline ... mipp_neon_<function>_float64(...) { /* Level 3 */ }
 #endif
 ```
 
-**Dependencies of the scalar fallback.** On ISAs with hardware masks, the <span class="mipp-isa-badge lvl-3">L3</span> fallback converts the masks with `to_rvd` and `to_rvm` (`hw_mask_requires_to_rvd`), and extracts them with `store` (`hw_mask_extract_via_store`); with bitfield masks (`hw_mask_is_bitfield`, AVX-512) it copies the bits directly. These functions are dependencies of the fallback. On scalable layouts, the half-vector fallback is also guarded by the minimum vector length (`layout.vlen_guard_template`).
+**Dependencies of the scalar fallback.** On ISAs with hardware masks, the <span class="mipp-isa-badge lvl-3">L3</span> fallback converts the masks with `torvd` and `torvm` (`hw_mask_requires_torvd`), and extracts them with `store` (`hw_mask_extract_via_store`); with bitfield masks (`hw_mask_is_bitfield`, AVX-512) it copies the bits directly. These functions are dependencies of the fallback. On scalable layouts, the half-vector fallback is also guarded by the minimum vector length (`layout.vlen_guard_template`).
 
 **Effective level.** After the resolution, the level of each chosen candidate becomes the highest level among itself and its dependencies (for a dependency with several branches, the best one counts). An <span class="mipp-isa-badge lvl-2">L2</span> sequence that calls an <span class="mipp-isa-badge lvl-3">L3</span> function is reported as <span class="mipp-isa-badge lvl-3">L3</span> in the generated comment, in the summary table and in the documentation.
 

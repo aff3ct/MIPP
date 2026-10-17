@@ -696,6 +696,13 @@
             "variant": "s"
         }
     ],
+    "none": [
+        {
+            "instr_name": "cpop",
+            "datatypes": "all_datatypes",
+            "template": "none"
+        }
+    ],
     "notb": [
         {
             "instr_name": "xor",
@@ -945,13 +952,6 @@
             "datatypes": "all_uint",
             "template": "arith_2args_msks",
             "variant": "s"
-        }
-    ],
-    "testz_2": [
-        {
-            "instr_name": "cpop",
-            "datatypes": "all_datatypes",
-            "template": "testz_2"
         }
     ],
     "xorb": [

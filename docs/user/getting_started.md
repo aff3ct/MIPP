@@ -88,16 +88,34 @@ Here is the standard, battle-tested pattern to vectorize any loop over an arbitr
     --8<-- "examples/doc/getting_started/c.c"
     ```
 
+    Compile and run:
+    ```bash
+    gcc -std=c99 -O3 -mavx2 -mfma -I/path/to/mipp/include saxpy_c.c -o saxpy_c
+    ./saxpy_c
+    ```
+
 === "C++ Functional API"
 
     ```cpp
     --8<-- "examples/doc/getting_started/fun.cpp"
     ```
 
+    Compile and run:
+    ```
+    g++ -std=c++11 -O3 -mavx2 -mfma -I/path/to/mipp/include saxpy.cpp -o saxpy
+    ./saxpy
+    ```
+
 === "C++ Object API"
 
     ```cpp
     --8<-- "examples/doc/getting_started/obj.cpp"
+    ```
+
+    Compile and run:
+    ```
+    g++ -std=c++11 -O3 -mavx2 -mfma -I/path/to/mipp/include saxpy.cpp -o saxpy
+    ./saxpy
     ```
 
 ---

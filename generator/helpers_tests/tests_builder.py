@@ -19,7 +19,7 @@ from tools import DATATYPES_MAP, resolve_ret_lmul, is_defined_for_lmul, changes_
 from include_gen import _match_category
 
 # Auxiliary MIPP functions whose headers must always be included in generated test files.
-_AUX_HEADERS = ["load", "get", "get_k", "to_rvd", "to_rvm", "set_k"]
+_AUX_HEADERS = ["load", "get", "get_k", "torvd", "torvm", "set_k"]
 
 # Functions whose vector call gets a pointer shifted by one element: never aligned on the
 # register size (the scalar reference keeps the aligned buffers).

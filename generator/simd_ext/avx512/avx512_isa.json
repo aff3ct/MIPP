@@ -131,7 +131,7 @@
     "hw_lmul": [],
     "hw_mask": true,
     "hw_mask_is_bitfield": true,
-    "hw_mask_requires_to_rvd": true,
+    "hw_mask_requires_torvd": true,
     "info_names": [
         { "if": "defined(__MIC__)", "name": "Intel MIC" },
         { "if": "defined(__KNCNI__)", "name": "Intel KNCI" },

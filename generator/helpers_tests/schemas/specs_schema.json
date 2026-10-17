@@ -471,7 +471,7 @@
                     ]
                 },
                 "extra_includes": {
-                    "description": "Extra headers of the test: names of MIPP functions used by the test (`to_rvd`, `get_k`, ...) or verbatim include lines.",
+                    "description": "Extra headers of the test: names of MIPP functions used by the test (`torvd`, `get_k`, ...) or verbatim include lines.",
                     "type": "array",
                     "items": {
                         "type": "string"

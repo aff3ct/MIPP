@@ -145,6 +145,16 @@
             "{% endif %}"
         ]
     },
+    "tpl_none": {
+        "format": "long",
+        "code": [
+            "{% if lmul == 1 %}",
+            "return %none<tp>%(m0);",
+            "{% else %}",
+            "return %none<c:tp|b:tp|m:tp/2>%(m0.m1) && %none<c:tp|b:tp|m:tp/2>%(m0.m2);",
+            "{% endif %}"
+        ]
+    },
     "tpl_set": {
         "format": "long",
         "code": [
@@ -168,16 +178,6 @@
             "return %testz<tp>%(m0, m1);",
             "{% else %}",
             "return %testz<c:tp|b:tp|m:tp/2>%(m0.m1, m1.m1) && %testz<c:tp|b:tp|m:tp/2>%(m0.m2, m1.m2);",
-            "{% endif %}"
-        ]
-    },
-    "tpl_testz_2": {
-        "format": "long",
-        "code": [
-            "{% if lmul == 1 %}",
-            "return %testz_2<tp>%(m0);",
-            "{% else %}",
-            "return %testz_2<c:tp|b:tp|m:tp/2>%(m0.m1) && %testz_2<c:tp|b:tp|m:tp/2>%(m0.m2);",
             "{% endif %}"
         ]
     }

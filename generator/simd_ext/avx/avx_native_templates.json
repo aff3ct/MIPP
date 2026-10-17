@@ -199,7 +199,7 @@
             "%r<c:int>% tmp1;",
             "tmp1.r = _mm256_set1_epi16(s0 ? (int16_t)0xFFFF : (int16_t)0);",
             "%r<tp>% tmp2 = %cast<c:int,tp>%(tmp1);",
-            "return %to_rvm<tp>%(tmp2);"
+            "return %torvm<tp>%(tmp2);"
         ]
     },
     "set1_k-32": {
@@ -208,7 +208,7 @@
             "%r<c:int>% tmp1;",
             "tmp1.r = _mm256_set1_epi32(s0 ? (int32_t)0xFFFFFFFF : (int32_t)0);",
             "%r<tp>% tmp2 = %cast<c:int,tp>%(tmp1);",
-            "return %to_rvm<tp>%(tmp2);"
+            "return %torvm<tp>%(tmp2);"
         ]
     },
     "set1_k-64": {
@@ -217,7 +217,7 @@
             "%r<c:int>% tmp1;",
             "tmp1.r = _mm256_set1_epi64x(s0 ? (int64_t)0xFFFFFFFFFFFFFFFF : (int64_t)0);",
             "%r<tp>% tmp2 = %cast<c:int,tp>%(tmp1);",
-            "return %to_rvm<tp>%(tmp2);"
+            "return %torvm<tp>%(tmp2);"
         ]
     },
     "set1_k-8": {
@@ -226,7 +226,7 @@
             "%r<c:int>% tmp1;",
             "tmp1.r = _mm256_set1_epi8(s0 ? (int8_t)0xFF : (int8_t)0);",
             "%r<tp>% tmp2 = %cast<c:int,tp>%(tmp1);",
-            "return %to_rvm<tp>%(tmp2);"
+            "return %torvm<tp>%(tmp2);"
         ]
     },
     "set1x": {
@@ -309,7 +309,7 @@
             "return _mm256_testz_si256(m0i.m, m1i.m);"
         ]
     },
-    "to_rvd": {
+    "torvd": {
         "format": "short",
         "code": "m0.m;"
     },

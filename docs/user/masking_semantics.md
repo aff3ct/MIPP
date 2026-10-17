@@ -159,50 +159,50 @@ To convert between mask types, MIPP provides explicit mask casting primitives (`
 #### Semantics
 `cast_k` / `cast_[type]` is **strictly an in-register bit reinterpretation** (e.g., `_mm256_castps_si256`, `__riscv_vreinterpret`, or direct struct assignment) between mask types of matching element bitwidths (e.g. `float32` $\leftrightarrow$ `int32` $\leftrightarrow$ `uint32`, or `float64` $\leftrightarrow$ `int64` $\leftrightarrow$ `uint64`). For data vectors, see [Type Conversions](vector_types_and_lmul.md#5-type-conversions) (`cast`, `cvt`, `wcvt`).
 
-### 6.2. `to_rvm` (Data Vector to Mask)
+### 6.2. `torvm` (Data Vector to Mask)
 Converts a data vector `rvd<T>` into a mask register `rvm<T>` of the matching type $T$:
 
 === "C API"
 
     ```c
-    --8<-- "examples/doc/masking_semantics/c.c:to_rvm"
+    --8<-- "examples/doc/masking_semantics/c.c:torvm"
     ```
 
 === "C++ Functional API"
 
     ```cpp
-    --8<-- "examples/doc/masking_semantics/fun.cpp:to_rvm"
+    --8<-- "examples/doc/masking_semantics/fun.cpp:torvm"
     ```
 
 === "C++ Object API"
 
     ```cpp
-    --8<-- "examples/doc/masking_semantics/obj.cpp:to_rvm"
+    --8<-- "examples/doc/masking_semantics/obj.cpp:torvm"
     ```
 
-A lane is **active if its element has at least one bit set**, inactive if all its bits are zero. The test is on the bit pattern, not on the value: `-0.0` (sign bit set) and NaN give an active lane, `+0.0` an inactive one. Any input is valid, and the result is always a well-formed mask (on targets that store masks in vector registers, each active lane has all its bits set), so `to_rvm(to_rvd(m))` returns `m` and the mask algebra of [§5](#5-mask-boolean-algebra) applies to the result. The behavior is the same on every target.
+A lane is **active if its element has at least one bit set**, inactive if all its bits are zero. The test is on the bit pattern, not on the value: `-0.0` (sign bit set) and NaN give an active lane, `+0.0` an inactive one. Any input is valid, and the result is always a well-formed mask (on targets that store masks in vector registers, each active lane has all its bits set), so `torvm(torvd(m))` returns `m` and the mask algebra of [§5](#5-mask-boolean-algebra) applies to the result. The behavior is the same on every target.
 
-The converse does not hold in general: `to_rvd(to_rvm(r))` returns `r` only if each lane of `r` is already `0` or has all its bits set. Any other non-zero lane becomes "all bits set": `1.0f` gives a NaN pattern, the integer `1` gives `-1`.
+The converse does not hold in general: `torvd(torvm(r))` returns `r` only if each lane of `r` is already `0` or has all its bits set. Any other non-zero lane becomes "all bits set": `1.0f` gives a NaN pattern, the integer `1` gives `-1`.
 
-### 6.3. `to_rvd` (Mask to Data Vector)
+### 6.3. `torvd` (Mask to Data Vector)
 Reinterprets/converts a mask handle `rvm<T>` into a full data vector `rvd<T>` of the matching type $T$ (where active lanes contain all-ones and inactive lanes contain `0`):
 
 === "C API"
 
     ```c
-    --8<-- "examples/doc/masking_semantics/c.c:to_rvd"
+    --8<-- "examples/doc/masking_semantics/c.c:torvd"
     ```
 
 === "C++ Functional API"
 
     ```cpp
-    --8<-- "examples/doc/masking_semantics/fun.cpp:to_rvd"
+    --8<-- "examples/doc/masking_semantics/fun.cpp:torvd"
     ```
 
 === "C++ Object API"
 
     ```cpp
-    --8<-- "examples/doc/masking_semantics/obj.cpp:to_rvd"
+    --8<-- "examples/doc/masking_semantics/obj.cpp:torvd"
     ```
 
 ### 6.4. `select` (Conditional Element Multiplexing)

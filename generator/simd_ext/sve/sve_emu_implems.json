@@ -83,6 +83,13 @@
             "template": "std_2_reg_in_no_msk_z"
         }
     ],
+    "none": [
+        {
+            "instr_name": "ptest_any",
+            "datatypes": "all_datatypes",
+            "template": "testz_1arg"
+        }
+    ],
     "notb_k": [
         {
             "instr_name": "not",
@@ -116,13 +123,6 @@
             "instr_name": "sub",
             "datatypes": "all_datatypes",
             "template": "std_2_reg_in_no_msk_z"
-        }
-    ],
-    "testz_2": [
-        {
-            "instr_name": "ptest_any",
-            "datatypes": "all_datatypes",
-            "template": "testz_1arg"
         }
     ],
     "xorb_k": [

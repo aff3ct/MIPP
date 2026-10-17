@@ -61,7 +61,7 @@ MIPPv1 provided a set of multi-stride interleaving and deinterleaving primitives
 | `mipp::pack<T1, T2>`, `low`, `high` | `wcvt` / planned `ncvt` & $\text{LDIV}$ | Active design harmonization to unify widening/narrowing with fractional register sub-views ($\text{LDIV} / LMUL=-2$). |
 | `mipp::sat(r, min, max)` | `adds`, `subs` | Replaced ad-hoc clamping with hardware saturated arithmetic instructions (`vsadd.vv`, `vqadd`, `_mm_adds_epi16`). |
 | Mask arrays `bool[N]` | Strongly typed `rvm<T>` / `rvm_*_t` | Eliminates raw boolean unpacking overhead; masks match hardware opmask or full-vector representations. |
-| `mipp::toreg<N>(m)` | `to_rvd(m)` / `to_rvm(r)` | Dedicated bidirectional conversion primitives with exact truthiness and bit-expansion semantics. |
+| `mipp::toreg<N>(m)` | `torvd(m)` / `torvm(r)` | Dedicated bidirectional conversion primitives with exact truthiness and bit-expansion semantics. |
 | `mipp::blend(r1, r2, m)` | `select(m, r1, r2)` | Renamed after the operation (`m ? r1 : r2`), mask first as in every masked MIPPv2 function. |
 
 ---

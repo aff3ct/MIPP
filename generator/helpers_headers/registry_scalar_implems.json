@@ -916,6 +916,19 @@
             ]
         }
     ],
+    "none": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "%s<c:int|b:32>% res = 0;",
+                "for (size_t i = 0; i < %N<tp>%; i++) // early termination is possible here but won't help the compiler vectorizer",
+                "\tres += m0.m[i] == 0 ? 0 : 1;",
+                "return res ? 0 : 1;"
+            ]
+        }
+    ],
     "notb": [
         {
             "type": "element-wide",
@@ -1408,20 +1421,7 @@
             ]
         }
     ],
-    "testz_2": [
-        {
-            "type": "vector-wide",
-            "datatypes": "all_defs",
-            "variants": [],
-            "implem": [
-                "%s<c:int|b:32>% res = 0;",
-                "for (size_t i = 0; i < %N<tp>%; i++) // early termination is possible here but won't help the compiler vectorizer",
-                "\tres += m0.m[i] == 0 ? 0 : 1;",
-                "return res ? 0 : 1;"
-            ]
-        }
-    ],
-    "to_rvd": [
+    "torvd": [
         {
             "type": "vector-wide",
             "datatypes": "all_defs",
@@ -1433,7 +1433,7 @@
             ]
         }
     ],
-    "to_rvm": [
+    "torvm": [
         {
             "type": "vector-wide",
             "datatypes": "all_defs",

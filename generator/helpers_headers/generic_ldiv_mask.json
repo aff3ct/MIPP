@@ -194,6 +194,15 @@
             ]
         }
     ],
+    "none": [
+        {
+            "code": [
+                "{{ lanemask() }}",
+                "{{ wrap('m0') }}",
+                "return {{ call1('none', call1('andb_k', 'w_m0', 'lm')) }};"
+            ]
+        }
+    ],
     "scatter": [
         {
             "level": 3,
@@ -313,15 +322,6 @@
                 "{{ lanemask() }}",
                 "{{ wrap('m0', 'm1') }}",
                 "return {{ call1('testz', call1('andb_k', 'w_m0', 'lm'), 'w_m1') }};"
-            ]
-        }
-    ],
-    "testz_2": [
-        {
-            "code": [
-                "{{ lanemask() }}",
-                "{{ wrap('m0') }}",
-                "return {{ call1('testz_2', call1('andb_k', 'w_m0', 'lm')) }};"
             ]
         }
     ],

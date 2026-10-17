@@ -158,11 +158,11 @@
             }
         },
         "hw_mask": {
-            "description": "`true` when the masks have their own registers (AVX-512 `__mmask`, SVE and RVV predicates). The scalar fallback then converts the masks with `to_rvd` / `to_rvm` instead of copying them.",
+            "description": "`true` when the masks have their own registers (AVX-512 `__mmask`, SVE and RVV predicates). The scalar fallback then converts the masks with `torvd` / `torvm` instead of copying them.",
             "type": "boolean"
         },
-        "hw_mask_requires_to_rvd": {
-            "description": "With `hw_mask`: the scalar fallback of a function with a mask argument or result depends on `to_rvd` and `to_rvm`, so that the resolver emits them first.",
+        "hw_mask_requires_torvd": {
+            "description": "With `hw_mask`: the scalar fallback of a function with a mask argument or result depends on `torvd` and `torvm`, so that the resolver emits them first.",
             "type": "boolean"
         },
         "hw_mask_is_bitfield": {

@@ -910,6 +910,17 @@
             "template_ref": "tpl_generic_emu.neg_f"
         }
     ],
+    "none": [
+        {
+            "datatypes": "all_datatypes",
+            "preferred_simd_ext": [
+                "sse",
+                "neon",
+                "avx"
+            ],
+            "template_ref": "tpl_generic_emu.none"
+        }
+    ],
     "notb": [
         {
             "datatypes": "all_datatypes",
@@ -1395,18 +1406,7 @@
             "template_ref": "tpl_generic_emu.testz_emu"
         }
     ],
-    "testz_2": [
-        {
-            "datatypes": "all_datatypes",
-            "preferred_simd_ext": [
-                "sse",
-                "neon",
-                "avx"
-            ],
-            "template_ref": "tpl_generic_emu.testz_2"
-        }
-    ],
-    "to_rvd": [
+    "torvd": [
         {
             "datatypes": "all_datatypes",
             "preferred_simd_ext": [
@@ -1417,10 +1417,10 @@
                 "rvv",
                 "sve"
             ],
-            "template_ref": "tpl_generic_emu.to_rvd_emu"
+            "template_ref": "tpl_generic_emu.torvd_emu"
         }
     ],
-    "to_rvm": [
+    "torvm": [
         {
             "datatypes": "all_datatypes",
             "preferred_simd_ext": [
@@ -1431,7 +1431,7 @@
                 "rvv",
                 "sve"
             ],
-            "template_ref": "tpl_generic_emu.to_rvm_emu"
+            "template_ref": "tpl_generic_emu.torvm_emu"
         }
     ],
     "xorb": [

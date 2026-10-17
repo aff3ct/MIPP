@@ -378,6 +378,13 @@
             "if": "defined(__AVX2__)"
         }
     ],
+    "none": [
+        {
+            "instr_name": "testz",
+            "datatypes": "all_datatypes",
+            "template": "testz_1arg"
+        }
+    ],
     "orb": [
         {
             "instr_name": "or",
@@ -601,17 +608,10 @@
             "template": "testz_2argsf"
         }
     ],
-    "testz_2": [
-        {
-            "instr_name": "testz",
-            "datatypes": "all_datatypes",
-            "template": "testz_1arg"
-        }
-    ],
-    "to_rvd": [
+    "torvd": [
         {
             "datatypes": "all_datatypes",
-            "template": "to_rvd",
+            "template": "torvd",
             "skip_audit_level": true,
             "skip_audit_level_reason": "zero-overhead struct field copy for full-vector masks"
         }

@@ -221,7 +221,7 @@ MIPP provides four conversions between data vectors. They differ in what they pr
 | **`wcvt`** | Converts the value of **every element** to the type **twice as wide**; the result has the next `LMUL` up. | `mipp_wcvt_[src]_[dst]_[lmul](v)` | `mipp::wcvt_[dst](v)` | `mipp::wcvt<T_DST>(v)` |
 | **`ncvt`** | Converts the value of every element to the type **twice as narrow** (truncation); the result has the next `LMUL` down. | `mipp_ncvt_[src]_[dst]_[lmul](v)` | `mipp::ncvt_[dst](v)` | `mipp::ncvt<T_DST>(v)` |
 
-`cast` and `cvt` keep the `LMUL` of their input; `wcvt` and `ncvt` do not. Masks have their own reinterpretation, `cast_k` (see [Masking Semantics §6.1](masking_semantics.md#61-strong-mask-typing-cast_k-mask-to-mask-conversion)), and masks convert to and from data vectors with `to_rvd` / `to_rvm` ([§6.2](masking_semantics.md#62-to_rvm-data-vector-to-mask), [§6.3](masking_semantics.md#63-to_rvd-mask-to-data-vector)).
+`cast` and `cvt` keep the `LMUL` of their input; `wcvt` and `ncvt` do not. Masks have their own reinterpretation, `cast_k` (see [Masking Semantics §6.1](masking_semantics.md#61-strong-mask-typing-cast_k-mask-to-mask-conversion)), and masks convert to and from data vectors with `torvd` / `torvm` ([§6.2](masking_semantics.md#62-torvm-data-vector-to-mask), [§6.3](masking_semantics.md#63-torvd-mask-to-data-vector)).
 
 === "C API"
 

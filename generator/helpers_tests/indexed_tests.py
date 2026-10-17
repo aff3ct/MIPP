@@ -24,7 +24,7 @@ _C_STD = ("#include <exception>", "#include <algorithm>", "#include <numeric>", 
 # scalar reference headers (first, as in the other tests: see TestsBuilderEngineCppBase._render_headers)
 _SCALAR_FUNCS = (("load", "load"), ("load", "set_k"), ("load", "gather"), ("store", "store"),
                  ("store", "scatter"), ("store", "get"), ("store", "get_k"),
-                 ("reinterpret", "to_rvd"), ("reinterpret", "to_rvm"))
+                 ("reinterpret", "torvd"), ("reinterpret", "torvm"))
 
 
 def _bits(dt: str) -> str:

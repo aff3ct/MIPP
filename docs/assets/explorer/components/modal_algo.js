@@ -420,7 +420,7 @@ export function renderAlgoModal(modalData) {
         if (isRvmReturn) {
           codeLines.push(`    return mipp::andb_k(op, m0); // Inactive lanes set to zero`);
         } else {
-          codeLines.push(`    return mipp::andb(mipp::to_rvd(m0), op); // Inactive lanes set to zero`);
+          codeLines.push(`    return mipp::andb(mipp::torvd(m0), op); // Inactive lanes set to zero`);
         }
         codeLines.push(`}`);
       } else if (currentMask === "masks") {

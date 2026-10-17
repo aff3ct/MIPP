@@ -47,7 +47,3 @@ int main(void)
     free(y);
     return errors == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
-
-// Compile and run:
-// gcc -std=c99 -O3 -mavx2 -mfma -I/path/to/mipp/include saxpy_c.c -o saxpy_c
-// ./saxpy_c

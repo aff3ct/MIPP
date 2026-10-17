@@ -173,6 +173,12 @@
             "{{ isa.prefix }}_v{{ instr_name }}_vvm_{{ isa_dt_par.data_ext }}(r1.r, r0.r, m0.m, %N<tp>%);"
         ]
     },
+    "none": {
+        "format": "short",
+        "code": [
+            "   int32_t res = !({{isa.prefix}}_v{{instr_name}}_m_{{isa_dt_par.data_ext_logi}}(m0.m, %N<tp>%));"
+        ]
+    },
     "round_int_msks": {
         "format": "short",
         "code": [
@@ -243,12 +249,6 @@
         "format": "short",
         "code": [
             "{{ isa.prefix }}_vse{{ isa_dt_par.width}}_v_{{ isa_dt_par.data_ext }}_m(m0.m, ({{ isa_dt_par.to_ptr }}*) p0, r0.r , %N<tp>%);"
-        ]
-    },
-    "testz_2": {
-        "format": "short",
-        "code": [
-            "   int32_t res = !({{isa.prefix}}_v{{instr_name}}_m_{{isa_dt_par.data_ext_logi}}(m0.m, %N<tp>%));"
         ]
     }
 }

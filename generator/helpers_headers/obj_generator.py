@@ -292,9 +292,9 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
             lines.append(f"{{ m0 = m0 {op} Rvm<T, LMUL>(val); return m0; }}")
             lines.append("")
 
-    elif args == ["msk"] and fn in ("notb_k", "testz_2"):
+    elif args == ["msk"] and fn in ("notb_k", "none"):
         lines.append("template <typename T, int LMUL = 1>")
-        ret_t = "int32_t" if fn.startswith("testz") else "Rvm<T, LMUL>"
+        ret_t = "int32_t" if fn == "none" else "Rvm<T, LMUL>"
         lines.append(f"inline {ret_t} {cpp_fn}(const Rvm<T, LMUL>& m0)")
         lines.append(f"{{ return {ret_t if ret_t == 'int32_t' else 'Rvm<T, LMUL>'}(mipp::{cpp_fn}(m0.m)); }}")
         lines.append("")
@@ -346,15 +346,15 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
         lines.append("")
 
     # Category 7: Conversions & reinterprets
-    elif fn == "to_rvd":
+    elif fn == "torvd":
         lines.append("template <typename T, int LMUL = 1>")
-        lines.append("inline Rvd<T, LMUL> to_rvd(const Rvm<T, LMUL>& m0)")
-        lines.append("{ return Rvd<T, LMUL>(mipp::to_rvd(m0.m)); }")
+        lines.append("inline Rvd<T, LMUL> torvd(const Rvm<T, LMUL>& m0)")
+        lines.append("{ return Rvd<T, LMUL>(mipp::torvd(m0.m)); }")
         lines.append("")
-    elif fn == "to_rvm":
+    elif fn == "torvm":
         lines.append("template <typename T, int LMUL = 1>")
-        lines.append("inline Rvm<T, LMUL> to_rvm(const Rvd<T, LMUL>& r0)")
-        lines.append("{ return Rvm<T, LMUL>(mipp::to_rvm(r0.r)); }")
+        lines.append("inline Rvm<T, LMUL> torvm(const Rvd<T, LMUL>& r0)")
+        lines.append("{ return Rvm<T, LMUL>(mipp::torvm(r0.r)); }")
         lines.append("")
     elif fn == "cast":
         lines.append("namespace details")

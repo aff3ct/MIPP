@@ -261,25 +261,25 @@
             "if": "defined(__AVX2__)"
         }
     ],
-    "to_rvm": [
+    "torvm": [
         {
-            "instr_name": "to_rvm",
+            "instr_name": "torvm",
             "datatypes": [
                 "float32"
             ],
-            "template": "to_rvm_float32"
+            "template": "torvm_float32"
         },
         {
-            "instr_name": "to_rvm",
+            "instr_name": "torvm",
             "datatypes": [
                 "float64"
             ],
-            "template": "to_rvm_float64"
+            "template": "torvm_float64"
         },
         {
-            "instr_name": "to_rvm",
+            "instr_name": "torvm",
             "datatypes": "all_int_uint",
-            "template": "to_rvm_int",
+            "template": "torvm_int",
             "if": "defined(__AVX2__)"
         }
     ]

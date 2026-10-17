@@ -810,19 +810,19 @@ class IncludeManager:
                         )
                         ret_is_msk = (proto.get("ret", {}).get("type") == "msk")
 
-                        needs_scalar_to_rvm = (
-                            func == "to_rvm"
+                        needs_scalar_torvm = (
+                            func == "torvm"
                             or (isa_cfg.get("hw_mask", False) and not isa_cfg.get("hw_mask_is_bitfield", False) and has_msk_arg)
                         )
-                        needs_scalar_to_rvd = (
-                            func == "to_rvd"
-                            or (isa_cfg.get("hw_mask", False) and ret_is_msk and not (isa_cfg.get("hw_mask_is_bitfield", False) and func in ("to_rvd", "to_rvm", "cast_k")))
+                        needs_scalar_torvd = (
+                            func == "torvd"
+                            or (isa_cfg.get("hw_mask", False) and ret_is_msk and not (isa_cfg.get("hw_mask_is_bitfield", False) and func in ("torvd", "torvm", "cast_k")))
                         )
 
-                        if needs_scalar_to_rvm:
-                            include_path.dependencies.add("mipp/internal/simd_ext/scalar/c/functions/reinterpret/to_rvm.h")
-                        if needs_scalar_to_rvd:
-                            include_path.dependencies.add("mipp/internal/simd_ext/scalar/c/functions/reinterpret/to_rvd.h")
+                        if needs_scalar_torvm:
+                            include_path.dependencies.add("mipp/internal/simd_ext/scalar/c/functions/reinterpret/torvm.h")
+                        if needs_scalar_torvd:
+                            include_path.dependencies.add("mipp/internal/simd_ext/scalar/c/functions/reinterpret/torvd.h")
                     include_path.write_prefix(target_dir)
 
             elif self.mode == "category_header":
@@ -928,23 +928,23 @@ class IncludeManager:
                             )
                             ret_is_msk = (proto.get("ret", {}).get("type") == "msk")
 
-                            needs_scalar_to_rvm = (
-                                func == "to_rvm"
+                            needs_scalar_torvm = (
+                                func == "torvm"
                                 or (isa_cfg.get("hw_mask", False) and not isa_cfg.get("hw_mask_is_bitfield", False) and has_msk_arg)
                             )
-                            needs_scalar_to_rvd = (
-                                func == "to_rvd"
-                                or (isa_cfg.get("hw_mask", False) and ret_is_msk and not (isa_cfg.get("hw_mask_is_bitfield", False) and func in ("to_rvd", "to_rvm", "cast_k")))
+                            needs_scalar_torvd = (
+                                func == "torvd"
+                                or (isa_cfg.get("hw_mask", False) and ret_is_msk and not (isa_cfg.get("hw_mask_is_bitfield", False) and func in ("torvd", "torvm", "cast_k")))
                             )
 
-                            if needs_scalar_to_rvm:
-                                item["dependencies"].add(f"mipp/internal/simd_ext/scalar/c/functions/reinterpret/u/{l}/to_rvm.h")
+                            if needs_scalar_torvm:
+                                item["dependencies"].add(f"mipp/internal/simd_ext/scalar/c/functions/reinterpret/u/{l}/torvm.h")
                                 if has_super_d2:
-                                    item["dependencies"].add("mipp/internal/simd_ext/scalar/c/functions/reinterpret/u/d2/to_rvm.h")
-                            if needs_scalar_to_rvd:
-                                item["dependencies"].add(f"mipp/internal/simd_ext/scalar/c/functions/reinterpret/u/{l}/to_rvd.h")
+                                    item["dependencies"].add("mipp/internal/simd_ext/scalar/c/functions/reinterpret/u/d2/torvm.h")
+                            if needs_scalar_torvd:
+                                item["dependencies"].add(f"mipp/internal/simd_ext/scalar/c/functions/reinterpret/u/{l}/torvd.h")
                                 if has_super_d2:
-                                    item["dependencies"].add("mipp/internal/simd_ext/scalar/c/functions/reinterpret/u/d2/to_rvd.h")
+                                    item["dependencies"].add("mipp/internal/simd_ext/scalar/c/functions/reinterpret/u/d2/torvd.h")
 
                     # Rule 4: dependencies deduced from the emitted body. Emulated implementations call
                     # other atoms (other variant / other LMUL, e.g. add masks m1 from hadd maskz m2) that

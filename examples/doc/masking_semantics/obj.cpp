@@ -106,26 +106,26 @@ static void cast_k()
         DOC_CHECK(m_int[i] == (A[i] < B[i]));
 }
 
-// §6.2: to_rvm
-static void to_rvm()
+// §6.2: torvm
+static void torvm()
 {
     const float* ptr = A;
-    // --8<-- [start:to_rvm]
+    // --8<-- [start:torvm]
     mipp::Rvd<float> raw_vector = mipp::load_obj<float>(ptr);
-    mipp::Rvm<float> m = mipp::to_rvm(raw_vector);
-    // --8<-- [end:to_rvm]
+    mipp::Rvm<float> m = mipp::torvm(raw_vector);
+    // --8<-- [end:torvm]
     for (int i = 0; i < mipp::Rvm<float>::N(); i++)
         DOC_CHECK(m[i] == (A[i] != 0.f)); // +0.0f is the only inactive value of A
 }
 
-// §6.3: to_rvd
-static void to_rvd()
+// §6.3: torvd
+static void torvd()
 {
     mipp::Rvd<float> va(A), vb(B);
-    // --8<-- [start:to_rvd]
+    // --8<-- [start:torvd]
     mipp::Rvm<float> m = (va == vb);
-    mipp::Rvd<float> mask_vector = mipp::to_rvd(m);
-    // --8<-- [end:to_rvd]
+    mipp::Rvd<float> mask_vector = mipp::torvd(m);
+    // --8<-- [end:torvd]
     for (int i = 0; i < mipp::Rvd<float>::N(); i++) {
         uint32_t bits;
         const float f = mask_vector[i];
@@ -183,8 +183,8 @@ int main()
     using_m();
     mask_algebra();
     cast_k();
-    to_rvm();
-    to_rvd();
+    torvm();
+    torvd();
     select_example();
     set_k();
     lmul2();

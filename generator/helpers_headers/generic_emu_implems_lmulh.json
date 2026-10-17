@@ -63,6 +63,14 @@
             "template_ref": "tpl_horiz_lmul_generic_emu.hmul"
         }
     ],
+    "none": [
+        {
+            "instr_name": "none",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.tpl_none"
+        }
+    ],
     "set": [
         {
             "instr_name": "set",
@@ -85,14 +93,6 @@
             "datatypes": "all_datatypes",
             "mode": "horiz_lmul",
             "template_ref": "tpl_horiz_lmul_generic_emu.tpl_testz"
-        }
-    ],
-    "testz_2": [
-        {
-            "instr_name": "testz_2",
-            "datatypes": "all_datatypes",
-            "mode": "horiz_lmul",
-            "template_ref": "tpl_horiz_lmul_generic_emu.tpl_testz_2"
         }
     ]
 }

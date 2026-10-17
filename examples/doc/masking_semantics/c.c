@@ -121,29 +121,29 @@ static void cast_k(void)
         DOC_CHECK(r[i] == (A[i] < B[i]));
 }
 
-/* §6.2: to_rvm */
-static void to_rvm(void)
+/* §6.2: torvm */
+static void torvm(void)
 {
     const float* ptr = A;
-    /* --8<-- [start:to_rvm] */
+    /* --8<-- [start:torvm] */
     rvd_float32_t raw_vector = mipp_load_float32(ptr);
-    rvm_float32_t m = mipp_to_rvm_float32(raw_vector);
-    /* --8<-- [end:to_rvm] */
+    rvm_float32_t m = mipp_torvm_float32(raw_vector);
+    /* --8<-- [end:torvm] */
     int32_t act[DOC_BUF];
     lanes(m, act);
     for (int i = 0; i < MIPP_N_FLOAT32; i++)
         DOC_CHECK(act[i] == (A[i] != 0.f)); /* +0.0f is the only inactive value of A */
 }
 
-/* §6.3: to_rvd */
-static void to_rvd(void)
+/* §6.3: torvd */
+static void torvd(void)
 {
     rvd_float32_t va = mipp_load_float32(A);
     rvd_float32_t vb = mipp_load_float32(B);
-    /* --8<-- [start:to_rvd] */
+    /* --8<-- [start:torvd] */
     rvm_float32_t m = mipp_cmpeq_float32(va, vb);
-    rvd_float32_t mask_vector = mipp_to_rvd_float32(m);
-    /* --8<-- [end:to_rvd] */
+    rvd_float32_t mask_vector = mipp_torvd_float32(m);
+    /* --8<-- [end:torvd] */
     uint32_t bits[DOC_BUF];
     mipp_storeu_float32(OUT, mask_vector);
     memcpy(bits, OUT, sizeof(bits));
@@ -204,8 +204,8 @@ int main(void)
     variants();
     mask_algebra();
     cast_k();
-    to_rvm();
-    to_rvd();
+    torvm();
+    torvd();
     select_example();
     set_k();
     lmul2();

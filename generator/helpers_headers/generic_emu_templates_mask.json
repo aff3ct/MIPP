@@ -19,7 +19,7 @@
         "format": "long",
         "code": [
             "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
-            "%r<tp>% tmp = %to_rvd<tp>%(m0);",
+            "%r<tp>% tmp = %torvd<tp>%(m0);",
             "%r<tp>% res = %andb<tp>%(op, tmp);",
             "return res;"
         ]
@@ -251,7 +251,7 @@
         "format": "long",
         "code": [
             "%r<tp>% op = %{{func_name}}<tp>%(r0, s0);",
-            "%r<tp>% tmp = %to_rvd<tp>%(m0);",
+            "%r<tp>% tmp = %torvd<tp>%(m0);",
             "%r<tp>% res = %andb<tp>%(op, tmp);",
             "return res;"
         ]
@@ -305,7 +305,7 @@
         "code": [
             "%s<tp>% buff[%N<tp>%];",
             "%s<tp>% mask_buff[%N<tp>%];",
-            "%r<tp>% msk_reg = %to_rvd<tp>%(m0);",
+            "%r<tp>% msk_reg = %torvd<tp>%(m0);",
             "",
             "%storeu<tp>%(buff, r0);",
             "%storeu<tp>%(mask_buff, msk_reg);",
@@ -319,7 +319,7 @@
         "code": [
             "%s<tp>% buff[%N<tp>%];",
             "%s<tp>% mask_buff[%N<tp>%];",
-            "%r<tp>% msk_reg = %to_rvd<tp>%(m0);",
+            "%r<tp>% msk_reg = %torvd<tp>%(m0);",
             "",
             "%storeu<tp>%(buff, r0);",
             "%storeu<tp>%(mask_buff, msk_reg);",
@@ -350,7 +350,7 @@
         "format": "long",
         "code": [
             "%r<tp>% op = %{{func_name}}<tp>%( r0, r1, r2);",
-            "%r<tp>% tmp = %to_rvd<tp>%(m0);",
+            "%r<tp>% tmp = %torvd<tp>%(m0);",
             "%r<tp>% res = %andb<tp>%(op, tmp);",
             "return res;"
         ]
@@ -375,7 +375,7 @@
         "format": "long",
         "code": [
             "%r<tp>% op = %{{func_name}}<tp>%(r0);",
-            "%r<tp>% tmp = %to_rvd<tp>%(m0);",
+            "%r<tp>% tmp = %torvd<tp>%(m0);",
             "%r<tp>% res = %andb<tp>%(op, tmp);",
             "return res;"
         ]

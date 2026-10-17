@@ -44,7 +44,3 @@ int main()
               << errors << " error(s)" << std::endl;
     return errors == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
-
-// Compile and run:
-// g++ -std=c++11 -O3 -mavx2 -mfma -I/path/to/mipp/include saxpy.cpp -o saxpy
-// ./saxpy

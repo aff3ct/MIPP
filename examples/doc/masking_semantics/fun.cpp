@@ -122,29 +122,29 @@ static void cast_k()
         DOC_CHECK(act[i] == (A[i] < B[i]));
 }
 
-// §6.2: to_rvm
-static void to_rvm()
+// §6.2: torvm
+static void torvm()
 {
     const float* ptr = A;
-    // --8<-- [start:to_rvm]
+    // --8<-- [start:torvm]
     mipp::rvd<float> raw_vector = mipp::load<float>(ptr);
-    mipp::rvm<float> m = mipp::to_rvm(raw_vector);
-    // --8<-- [end:to_rvm]
+    mipp::rvm<float> m = mipp::torvm(raw_vector);
+    // --8<-- [end:torvm]
     int32_t act[DOC_BUF];
     lanes<float>(m, act);
     for (int i = 0; i < (int)mipp::N<float>(); i++)
         DOC_CHECK(act[i] == (A[i] != 0.f)); // +0.0f is the only inactive value of A
 }
 
-// §6.3: to_rvd
-static void to_rvd()
+// §6.3: torvd
+static void torvd()
 {
     mipp::rvd<float> va = mipp::load<float>(A);
     mipp::rvd<float> vb = mipp::load<float>(B);
-    // --8<-- [start:to_rvd]
+    // --8<-- [start:torvd]
     mipp::rvm<float> m = mipp::cmpeq(va, vb);
-    mipp::rvd<float> mask_vector = mipp::to_rvd(m);
-    // --8<-- [end:to_rvd]
+    mipp::rvd<float> mask_vector = mipp::torvd(m);
+    // --8<-- [end:torvd]
     uint32_t bits[DOC_BUF];
     mipp::storeu(OUT, mask_vector);
     std::memcpy(bits, OUT, sizeof(bits));
@@ -205,8 +205,8 @@ int main()
     variants();
     mask_algebra();
     cast_k();
-    to_rvm();
-    to_rvd();
+    torvm();
+    torvd();
     select_example();
     set_k();
     lmul2();

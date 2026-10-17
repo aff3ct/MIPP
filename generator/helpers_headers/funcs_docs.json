@@ -203,6 +203,10 @@
     "description": "Negates each element of a vector register.",
     "latex": "\\text{res}_i = -r0_i"
   },
+  "none": {
+    "description": "Tests if every element in a mask register is zero (returns 1 if all inactive, 0 otherwise).",
+    "latex": "\\text{res} = \\begin{cases} 1 & \\text{if } \\forall i, \\, m_{0, i} == 0 \\\\ 0 & \\text{otherwise} \\end{cases}"
+  },
   "notb": {
     "description": "Computes the bitwise NOT (inversion) of a vector register.",
     "latex": "\\text{res}_i = \\sim r0_i"
@@ -311,15 +315,11 @@
     "description": "Tests if the bitwise AND of two mask registers is all zero (returns 1 if disjoint/all zero, 0 otherwise).",
     "latex": "\\text{res} = \\begin{cases} 1 & \\text{if } \\forall i, \\, (m_{0, i} \\ \\& \\ m_{1, i}) == 0 \\\\ 0 & \\text{otherwise} \\end{cases}"
   },
-  "testz_2": {
-    "description": "Tests if every element in a mask register is zero (returns 1 if all inactive, 0 otherwise).",
-    "latex": "\\text{res} = \\begin{cases} 1 & \\text{if } \\forall i, \\, m_{0, i} == 0 \\\\ 0 & \\text{otherwise} \\end{cases}"
-  },
-  "to_rvd": {
+  "torvd": {
     "description": "Expands a mask register into an all-ones (~0) / all-zeros (0) vector register.",
     "latex": "\\text{res}_i = m_i ? (\\sim 0) : 0"
   },
-  "to_rvm": {
+  "torvm": {
     "description": "Converts vector elements to mask elements: a lane is active when its element has at least one non-zero bit (so -0.0 is active), and the resulting mask lane has all its bits set.",
     "latex": "m_i = (\\text{bits}(r0_i) \\neq 0)"
   },

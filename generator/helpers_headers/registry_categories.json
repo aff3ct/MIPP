@@ -84,13 +84,13 @@
         "hmin",
         "hmax",
         "testz",
-        "testz_2"
+        "none"
     ],
     "reinterpret": [
         "cast",
         "cast_k",
-        "to_rvd",
-        "to_rvm"
+        "torvd",
+        "torvm"
     ],
     "selection": [
         "select",
