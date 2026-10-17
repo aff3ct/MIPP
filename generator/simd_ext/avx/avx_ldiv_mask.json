@@ -1,30 +1,4 @@
 {
-    "low": [
-        {
-            "variants": [
-                "u"
-            ],
-            "code": [
-                "{% set k = 'ps' if isa_dt.reg.strip() == '__m256' else ('pd' if isa_dt.reg.strip() == '__m256d' else 'si') %}{% set e = k if k != 'si' else 'si256' %}",
-                "%r<tr>% res;",
-                "res.r = _mm256_cast{{ k }}256_{{ k }}128(r0.r);",
-                "return res;"
-            ]
-        }
-    ],
-    "high": [
-        {
-            "variants": [
-                "u"
-            ],
-            "code": [
-                "{% set k = 'ps' if isa_dt.reg.strip() == '__m256' else ('pd' if isa_dt.reg.strip() == '__m256d' else 'si') %}{% set e = k if k != 'si' else 'si256' %}",
-                "%r<tr>% res;",
-                "res.r = _mm256_extractf128_{{ e }}(r0.r, 1);",
-                "return res;"
-            ]
-        }
-    ],
     "combine": [
         {
             "variants": [
@@ -34,32 +8,6 @@
                 "{% set k = 'ps' if isa_dt.reg.strip() == '__m256' else ('pd' if isa_dt.reg.strip() == '__m256d' else 'si') %}{% set e = k if k != 'si' else 'si256' %}",
                 "%r<tr>% res;",
                 "res.r = _mm256_insertf128_{{ e }}(_mm256_cast{{ k }}128_{{ k }}256(r0.r), r1.r, 1);",
-                "return res;"
-            ]
-        }
-    ],
-    "low_k": [
-        {
-            "variants": [
-                "u"
-            ],
-            "code": [
-                "{% set k = 'ps' if isa_dt.msk.strip() == '__m256' else ('pd' if isa_dt.msk.strip() == '__m256d' else 'si') %}{% set e = k if k != 'si' else 'si256' %}",
-                "%m<tr>% res;",
-                "res.m = _mm256_cast{{ k }}256_{{ k }}128(m0.m);",
-                "return res;"
-            ]
-        }
-    ],
-    "high_k": [
-        {
-            "variants": [
-                "u"
-            ],
-            "code": [
-                "{% set k = 'ps' if isa_dt.msk.strip() == '__m256' else ('pd' if isa_dt.msk.strip() == '__m256d' else 'si') %}{% set e = k if k != 'si' else 'si256' %}",
-                "%m<tr>% res;",
-                "res.m = _mm256_extractf128_{{ e }}(m0.m, 1);",
                 "return res;"
             ]
         }
@@ -77,62 +25,56 @@
             ]
         }
     ],
-    "wcvt": [
+    "high": [
         {
             "variants": [
                 "u"
             ],
             "code": [
+                "{% set k = 'ps' if isa_dt.reg.strip() == '__m256' else ('pd' if isa_dt.reg.strip() == '__m256d' else 'si') %}{% set e = k if k != 'si' else 'si256' %}",
                 "%r<tr>% res;",
-                "res.r = _mm256_cvt{{ isa_dt.data_ext }}_{{ isa.datatypes[ctx.dt_ret].data_ext | replace('epu', 'epi') }}(r0.r);",
+                "res.r = _mm256_extractf128_{{ e }}(r0.r, 1);",
                 "return res;"
-            ],
-            "datatypes": [
-                "int8",
-                "int16",
-                "int32",
-                "uint8",
-                "uint16",
-                "uint32"
-            ],
-            "if": "defined(__AVX2__)"
-        },
-        {
-            "variants": [
-                "u"
-            ],
-            "code": [
-                "%r<tr>% res;",
-                "res.r = _mm256_cvtps_pd(r0.r);",
-                "return res;"
-            ],
-            "datatypes": [
-                "float32"
             ]
-        },
+        }
+    ],
+    "high_k": [
         {
             "variants": [
                 "u"
             ],
             "code": [
-                "%s<tp>% bs[{{ ctx.N2() }}];",
-                "_mm_storeu_si128((__m128i*)bs, r0.r);",
-                "%s<tr>% bd[{{ ctx.N2() }}];",
-                "for (unsigned i = 0; i < {{ ctx.N2() }}; i++)",
-                "\tbd[i] = (%s<tr>%)bs[i];",
-                "%r<tr>% res;",
-                "res.r = _mm256_loadu_si256((const __m256i*)bd);",
+                "{% set k = 'ps' if isa_dt.msk.strip() == '__m256' else ('pd' if isa_dt.msk.strip() == '__m256d' else 'si') %}{% set e = k if k != 'si' else 'si256' %}",
+                "%m<tr>% res;",
+                "res.m = _mm256_extractf128_{{ e }}(m0.m, 1);",
                 "return res;"
+            ]
+        }
+    ],
+    "low": [
+        {
+            "variants": [
+                "u"
             ],
-            "datatypes": [
-                "int8",
-                "int16",
-                "int32",
-                "uint8",
-                "uint16",
-                "uint32"
+            "code": [
+                "{% set k = 'ps' if isa_dt.reg.strip() == '__m256' else ('pd' if isa_dt.reg.strip() == '__m256d' else 'si') %}{% set e = k if k != 'si' else 'si256' %}",
+                "%r<tr>% res;",
+                "res.r = _mm256_cast{{ k }}256_{{ k }}128(r0.r);",
+                "return res;"
+            ]
+        }
+    ],
+    "low_k": [
+        {
+            "variants": [
+                "u"
             ],
-            "level": 3
+            "code": [
+                "{% set k = 'ps' if isa_dt.msk.strip() == '__m256' else ('pd' if isa_dt.msk.strip() == '__m256d' else 'si') %}{% set e = k if k != 'si' else 'si256' %}",
+                "%m<tr>% res;",
+                "res.m = _mm256_cast{{ k }}256_{{ k }}128(m0.m);",
+                "return res;"
+            ]
         }
     ],
     "ncvt": [
@@ -215,6 +157,64 @@
                 "uint16",
                 "uint32",
                 "uint64"
+            ],
+            "level": 3
+        }
+    ],
+    "wcvt": [
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "%r<tr>% res;",
+                "res.r = _mm256_cvt{{ isa_dt.data_ext }}_{{ isa.datatypes[ctx.dt_ret].data_ext | replace('epu', 'epi') }}(r0.r);",
+                "return res;"
+            ],
+            "datatypes": [
+                "int8",
+                "int16",
+                "int32",
+                "uint8",
+                "uint16",
+                "uint32"
+            ],
+            "if": "defined(__AVX2__)"
+        },
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "%r<tr>% res;",
+                "res.r = _mm256_cvtps_pd(r0.r);",
+                "return res;"
+            ],
+            "datatypes": [
+                "float32"
+            ]
+        },
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "%s<tp>% bs[{{ ctx.N2() }}];",
+                "_mm_storeu_si128((__m128i*)bs, r0.r);",
+                "%s<tr>% bd[{{ ctx.N2() }}];",
+                "for (unsigned i = 0; i < {{ ctx.N2() }}; i++)",
+                "\tbd[i] = (%s<tr>%)bs[i];",
+                "%r<tr>% res;",
+                "res.r = _mm256_loadu_si256((const __m256i*)bd);",
+                "return res;"
+            ],
+            "datatypes": [
+                "int8",
+                "int16",
+                "int32",
+                "uint8",
+                "uint16",
+                "uint32"
             ],
             "level": 3
         }

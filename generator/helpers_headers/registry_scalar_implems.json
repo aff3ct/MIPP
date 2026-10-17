@@ -357,6 +357,36 @@
             ]
         }
     ],
+    "combine": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "%r<tp|m:tp*2>% res;",
+                "for (size_t i = 0; i < %N<tp>%; i++){",
+                "\tres.r[i] = r0.r[i];",
+                "\tres.r[i + %N<tp>%] = r1.r[i];",
+                "}",
+                "return res;"
+            ]
+        }
+    ],
+    "combine_k": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "%m<tp|m:tp*2>% res;",
+                "for (size_t i = 0; i < %N<tp>%; i++){",
+                "\tres.m[i] = m0.m[i];",
+                "\tres.m[i + %N<tp>%] = m1.m[i];",
+                "}",
+                "return res;"
+            ]
+        }
+    ],
     "cos": [
         {
           "type": "element-wide",
@@ -648,6 +678,34 @@
             ]
         }
     ],
+    "high": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "%r<tp|m:tp/2>% res;",
+                "for (size_t i = 0; i < %N<tp|m:tp/2>%; i++){",
+                "\tres.r[i] = r0.r[i + %N<tp|m:tp/2>%];",
+                "}",
+                "return res;"
+            ]
+        }
+    ],
+    "high_k": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "%m<tp|m:tp/2>% res;",
+                "for (size_t i = 0; i < %N<tp|m:tp/2>%; i++){",
+                "\tres.m[i] = m0.m[i + %N<tp|m:tp/2>%];",
+                "}",
+                "return res;"
+            ]
+        }
+    ],
     "hmax": [
         {
             "type": "vector-wide",
@@ -792,6 +850,34 @@
             ]
         }
     ],
+    "low": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "%r<tp|m:tp/2>% res;",
+                "for (size_t i = 0; i < %N<tp|m:tp/2>%; i++){",
+                "\tres.r[i] = r0.r[i];",
+                "}",
+                "return res;"
+            ]
+        }
+    ],
+    "low_k": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "%m<tp|m:tp/2>% res;",
+                "for (size_t i = 0; i < %N<tp|m:tp/2>%; i++){",
+                "\tres.m[i] = m0.m[i];",
+                "}",
+                "return res;"
+            ]
+        }
+    ],
     "lshift": [
         {
             "type": "element-wide",
@@ -900,6 +986,20 @@
             "variants": [],
             "implem": [
                 "res.r[i] = %!pred_cond!% r0.r[i] * r1.r[i] %!pred_alt!%;"
+            ]
+        }
+    ],
+    "ncvt": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "%r<tr>% res;",
+                "for (size_t i = 0; i < %N<tr>%; i++){",
+                "\tres.r[i] = (%s<tr>%)r0.r[i];",
+                "}",
+                "return res;"
             ]
         }
     ],
@@ -1476,20 +1576,6 @@
         ]
       }
     ],
-    "ncvt": [
-        {
-            "type": "vector-wide",
-            "datatypes": "all_defs",
-            "variants": [],
-            "implem": [
-                "%r<tr>% res;",
-                "for (size_t i = 0; i < %N<tr>%; i++){",
-                "\tres.r[i] = (%s<tr>%)r0.r[i];",
-                "}",
-                "return res;"
-            ]
-        }
-    ],
     "wcvt": [
         {
             "type": "vector-wide",
@@ -1535,92 +1621,6 @@
             "variants": [],
             "implem": [
                 "res.m[i] = m0.m[i] ^ m1.m[i];"
-            ]
-        }
-    ],
-    "low": [
-        {
-            "type": "vector-wide",
-            "datatypes": "all_defs",
-            "variants": [],
-            "implem": [
-                "%r<tp|m:tp/2>% res;",
-                "for (size_t i = 0; i < %N<tp|m:tp/2>%; i++){",
-                "\tres.r[i] = r0.r[i];",
-                "}",
-                "return res;"
-            ]
-        }
-    ],
-    "low_k": [
-        {
-            "type": "vector-wide",
-            "datatypes": "all_defs",
-            "variants": [],
-            "implem": [
-                "%m<tp|m:tp/2>% res;",
-                "for (size_t i = 0; i < %N<tp|m:tp/2>%; i++){",
-                "\tres.m[i] = m0.m[i];",
-                "}",
-                "return res;"
-            ]
-        }
-    ],
-    "high": [
-        {
-            "type": "vector-wide",
-            "datatypes": "all_defs",
-            "variants": [],
-            "implem": [
-                "%r<tp|m:tp/2>% res;",
-                "for (size_t i = 0; i < %N<tp|m:tp/2>%; i++){",
-                "\tres.r[i] = r0.r[i + %N<tp|m:tp/2>%];",
-                "}",
-                "return res;"
-            ]
-        }
-    ],
-    "high_k": [
-        {
-            "type": "vector-wide",
-            "datatypes": "all_defs",
-            "variants": [],
-            "implem": [
-                "%m<tp|m:tp/2>% res;",
-                "for (size_t i = 0; i < %N<tp|m:tp/2>%; i++){",
-                "\tres.m[i] = m0.m[i + %N<tp|m:tp/2>%];",
-                "}",
-                "return res;"
-            ]
-        }
-    ],
-    "combine": [
-        {
-            "type": "vector-wide",
-            "datatypes": "all_defs",
-            "variants": [],
-            "implem": [
-                "%r<tp|m:tp*2>% res;",
-                "for (size_t i = 0; i < %N<tp>%; i++){",
-                "\tres.r[i] = r0.r[i];",
-                "\tres.r[i + %N<tp>%] = r1.r[i];",
-                "}",
-                "return res;"
-            ]
-        }
-    ],
-    "combine_k": [
-        {
-            "type": "vector-wide",
-            "datatypes": "all_defs",
-            "variants": [],
-            "implem": [
-                "%m<tp|m:tp*2>% res;",
-                "for (size_t i = 0; i < %N<tp>%; i++){",
-                "\tres.m[i] = m0.m[i];",
-                "\tres.m[i + %N<tp>%] = m1.m[i];",
-                "}",
-                "return res;"
             ]
         }
     ]

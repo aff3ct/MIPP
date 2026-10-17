@@ -13,6 +13,14 @@
         "fnmadd",
         "fnmsub"
     ],
+    "combine": [
+        "low",
+        "low_k",
+        "high",
+        "high_k",
+        "combine",
+        "combine_k"
+    ],
     "comparison": [
         "cmpeq",
         "cmpneq",
@@ -104,13 +112,5 @@
         "get_k",
         "getfirst",
         "scatter"
-    ],
-    "combine": [
-        "low",
-        "low_k",
-        "high",
-        "high_k",
-        "combine",
-        "combine_k"
     ]
 }

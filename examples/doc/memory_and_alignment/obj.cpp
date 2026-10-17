@@ -62,7 +62,7 @@ static void masked()
 
     mipp::Rvd<float> v_z = mipp::load_obj<mipp::Z>(m, ptr);        // inactive lanes: 0
     mipp::Rvd<float> v_s = mipp::load_obj<mipp::S>(m, v_src, ptr); // inactive lanes: v_src
-    mipp::store<mipp::M>(m, out_ptr, v_z);                          // inactive lanes: memory unchanged
+    mipp::store<mipp::M>(m, out_ptr, v_z);                         // inactive lanes: memory unchanged
 
     // LMUL = 2:
     mipp::Rvm<float, 2> m2  = (wa < wlimit);

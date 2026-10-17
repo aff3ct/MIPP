@@ -26,7 +26,7 @@ hide:
 
   <div class="mipp-chips-container">
     <span class="mipp-chip"><b>x86</b> SSE · AVX · AVX-512</span>
-    <span class="mipp-chip"><b>ARM</b> NEON · SVE (WIP)</span>
+    <span class="mipp-chip"><b>ARM</b> NEON · SVE</span>
     <span class="mipp-chip"><b>RISC-V</b> RVV 1.0</span>
     <span class="mipp-chip"><b>Standards</b> C99 · C++11</span>
     <span class="mipp-chip"><b>Overhead</b> 0% Fully Inlined</span>
@@ -88,7 +88,7 @@ hide:
 | **x86 / x86-64** | AVX, AVX2, AVX2+FMA | 256 bits |
 | **x86 / x86-64** | AVX-512F, AVX-512BW, AVX-512DQ | 512 bits |
 | **ARM (AArch32 / AArch64)** | NEON (ARMv7, ARMv8-A) | 128 bits |
-| **ARM (AArch64)** | SVE *(WIP)* | Fixed / Configurable compile-time vector length |
+| **ARM (AArch64)** | SVE | Fixed / Configurable compile-time vector length |
 | **RISC-V** | RVV 1.0 | Fixed / Configurable VLEN ($\ge 128\text{ bits}$) |
 | **Generic** | Scalar fallback | Configurable width |
 

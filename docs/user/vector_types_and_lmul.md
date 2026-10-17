@@ -47,7 +47,7 @@ $$N(T, \text{LMUL}) = \left( \frac{\text{VectorBitWidth}}{\text{sizeof}(T) \time
 
 The Length Multiplier ($\text{LMUL} \in \{1, 2, 4, 8\}$) originates from **RISC-V Vector 1.0 (RVV)**, where hardware registers are grouped to scale vector capacity. To support RVV natively while maintaining an identical API across all backends, MIPP generalizes the LMUL concept across all supported ISAs.
 
-On fixed-width architectures (x86, ARM), software LMUL functions as a **structured multi-register unrolling mechanism**: operations on $\text{LMUL}=2$ or $\text{LMUL}=4$ expand into discrete SIMD instructions across separate registers, increasing instruction-level parallelism (ILP) without manual loop unrolling, while developer discretion is required to manage register pressure at high LMUL values.
+On architectures without hardware register grouping (x86, ARM), software LMUL functions as a **structured multi-register unrolling mechanism**: operations on $\text{LMUL}=2$ or $\text{LMUL}=4$ expand into discrete SIMD instructions across separate registers, increasing instruction-level parallelism (ILP) without manual loop unrolling, while developer discretion is required to manage register pressure at high LMUL values.
 
 The figure also shows the [half-vectors](#half-vectors) ($\text{LDIV}=2$, i.e. $\text{LMUL}=1/2$), described in section 4.
 
@@ -74,7 +74,7 @@ On architectures with native register grouping support (RVV `v` extension), MIPP
 The vector execution unit operates on grouped registers as single wide units in hardware.
 
 ### 3.2. Software Recursive Binary Structs (x86, ARM)
-On fixed-width SIMD architectures (SSE, AVX, AVX-512, NEON, SVE), MIPP emulates LMUL in software via **hierarchical binary structures**:
+On SIMD architectures without hardware register grouping (SSE, AVX, AVX-512, NEON and SVE), MIPP emulates LMUL in software via **hierarchical binary structures**. SVE is vector-length agnostic by design, but MIPP fixes its vector length at compile time (`-msve-vector-bits`) and SVE has no register grouping, so it is handled like the others:
 
 <!-- not-compiled: example of generated code (include/mipp/internal/), not user code -->
 
@@ -147,7 +147,7 @@ In addition to multi-register expansion ($\text{LMUL} > 1$), MIPP provides **hal
 | Availability macro | `MIPP_LDIV_2` |
 | Generator (`sw_lmul`, `hw_lmul`, `--ldiv`) | factor `-2`, or `--ldiv 2` |
 
-The same loop in the three APIs (half-vectors are not available on every target, hence the `MIPP_LDIV_2` guard, see [§4.1](#41-availability)):
+The same loop in the three APIs (the `MIPP_LDIV_2` guard keeps the code portable, see [§4.1](#41-availability)):
 
 === "C API"
 
@@ -169,7 +169,7 @@ The same loop in the three APIs (half-vectors are not available on every target,
 
 ### 4.1. Availability
 
-Half-vectors are **not available on every target**. When they are, MIPP defines the `MIPP_LDIV_2` macro, which portable code should use as a guard:
+Today, **every SIMD extension supported by MIPP provides half-vectors** ($\text{LDIV} = 2$). This is not a guarantee for the future: an extension added later may not support $\text{LDIV} = 2$ at first. MIPP therefore defines the `MIPP_LDIV_2` macro when the target provides half-vectors, and portable code should use it as a guard:
 
 === "C API"
 
@@ -270,9 +270,9 @@ MIPP provides four conversions between data vectors. They differ in what they pr
 
 | Function | Effect | Input $\to$ result |
 | :--- | :--- | :--- |
-| **`low`** | The lower half of the register. | `m4` $\to$ `m2` $\to$ `m1` $\to$ `d2` |
-| **`high`** | The upper half of the register. | `m4` $\to$ `m2` $\to$ `m1` $\to$ `d2` |
-| **`combine`** | Joins two registers: the first one gives the lower half, the second one the upper half. | `d2` $\to$ `m1` $\to$ `m2` $\to$ `m4` |
+| **`low`** | The lower half of the register. | `m8` $\to$ `m4` $\to$ `m2` $\to$ `m1` $\to$ `d2` |
+| **`high`** | The upper half of the register. | `m8` $\to$ `m4` $\to$ `m2` $\to$ `m1` $\to$ `d2` |
+| **`combine`** | Joins two registers: the first one gives the lower half, the second one the upper half. | `d2` $\to$ `m1` $\to$ `m2` $\to$ `m4` $\to$ `m8` |
 
 `low`, `high` and `combine` also exist on masks (`low_k`, `high_k`, `combine_k`), and `combine(low(v), high(v))` gives back `v`. The result `LMUL` is always the next one in the sequence `d2`, `m1`, `m2`, `m4`, `m8`, and a function is not defined where the next one does not exist (no `low` from `d2`, no `combine` or `wcvt` from `m8`).
 
@@ -297,4 +297,4 @@ The C name carries the **`LMUL` of the arguments**, the one of the result being 
     ```
 
 !!! note "Availability"
-    These functions are provided by the scalar, SSE, NEON and ARM SVE targets. On AVX, AVX-512 and RISC-V Vector they are not available yet (see the [function support pages](../funcs_support/index.md) for the current state). Those that produce or take a `d2` register also require `MIPP_LDIV_2` (see [§4.1](#41-availability)).
+    These functions are provided by every target (see the [function support pages](../funcs_support/index.md) for the implementation level of each one). Those that produce or take a `d2` register also require `MIPP_LDIV_2` (see [§4.1](#41-availability)).

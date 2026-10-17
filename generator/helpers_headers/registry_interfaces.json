@@ -135,6 +135,19 @@
         "horizontal": false,
         "variants": ["u", "z"]
     },
+    "combine": {
+        "proto_ref": "ret_reg_2args_reg_lmul_up",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "variants": ["u"]
+    },
+    "combine_k": {
+        "proto_ref": "ret_msk_2args_msk_lmul_up",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "variants": ["u"],
+        "cpp_name": "combine"
+    },
     "cos": {
       "proto_ref": "ret_reg_1arg_reg",
       "datatypes": "all_float",
@@ -250,6 +263,19 @@
         "horizontal": true,
         "variants": ["u", "z"]
     },
+    "high": {
+        "proto_ref": "ret_reg_1arg_reg_lmul_down",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "variants": ["u"]
+    },
+    "high_k": {
+        "proto_ref": "ret_msk_1arg_msk_lmul_down",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "variants": ["u"],
+        "cpp_name": "high"
+    },
     "hmax": {
         "proto_ref": "ret_val_1arg_reg",
         "datatypes": "all_datatypes",
@@ -286,6 +312,19 @@
         "horizontal": false,
         "variants": ["u", "m", "z", "s"]
     },
+    "low": {
+        "proto_ref": "ret_reg_1arg_reg_lmul_down",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "variants": ["u"]
+    },
+    "low_k": {
+        "proto_ref": "ret_msk_1arg_msk_lmul_down",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "variants": ["u"],
+        "cpp_name": "low"
+    },
     "lshift": {
         "proto_ref": "ret_reg_2args_reg_val",
         "datatypes": "all_datatypes",
@@ -315,6 +354,12 @@
         "datatypes": "all_datatypes",
         "horizontal": false,
         "variants": ["u", "m", "z", "s"]
+    },
+    "ncvt": {
+        "proto_ref": "ret_reg_1arg_reg_lmul_down_conv",
+        "datatypes": "all_datatypes_narrowing",
+        "horizontal": false,
+        "variants": ["u"]
     },
     "neg": {
         "proto_ref": "ret_reg_1arg_reg",
@@ -519,12 +564,6 @@
       "horizontal": false,
       "variants": ["u", "m", "z", "s"]
     },
-    "ncvt": {
-        "proto_ref": "ret_reg_1arg_reg_lmul_down_conv",
-        "datatypes": "all_datatypes_narrowing",
-        "horizontal": false,
-        "variants": ["u"]
-    },
     "wcvt": {
         "proto_ref": "ret_reg_1arg_reg_lmul_up",
         "datatypes": "all_datatypes_widenning",
@@ -543,44 +582,5 @@
         "horizontal": false,
         "variants": ["u"],
         "cpp_name": "xorb"
-    },
-    "low": {
-        "proto_ref": "ret_reg_1arg_reg_lmul_down",
-        "datatypes": "all_datatypes",
-        "horizontal": false,
-        "variants": ["u"]
-    },
-    "high": {
-        "proto_ref": "ret_reg_1arg_reg_lmul_down",
-        "datatypes": "all_datatypes",
-        "horizontal": false,
-        "variants": ["u"]
-    },
-    "combine": {
-        "proto_ref": "ret_reg_2args_reg_lmul_up",
-        "datatypes": "all_datatypes",
-        "horizontal": false,
-        "variants": ["u"]
-    },
-    "low_k": {
-        "proto_ref": "ret_msk_1arg_msk_lmul_down",
-        "datatypes": "all_datatypes",
-        "horizontal": false,
-        "variants": ["u"],
-        "cpp_name": "low"
-    },
-    "high_k": {
-        "proto_ref": "ret_msk_1arg_msk_lmul_down",
-        "datatypes": "all_datatypes",
-        "horizontal": false,
-        "variants": ["u"],
-        "cpp_name": "high"
-    },
-    "combine_k": {
-        "proto_ref": "ret_msk_2args_msk_lmul_up",
-        "datatypes": "all_datatypes",
-        "horizontal": false,
-        "variants": ["u"],
-        "cpp_name": "combine"
     }
 }

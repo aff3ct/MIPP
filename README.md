@@ -14,7 +14,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/x86-SSE%20%7C%20AVX%20%7C%20AVX--512-orange.svg" alt="x86 Support"/>
-  <img src="https://img.shields.io/badge/ARM-NEON%20%7C%20SVE%20(WIP)-red.svg" alt="ARM Support"/>
+  <img src="https://img.shields.io/badge/ARM-NEON%20%7C%20SVE-red.svg" alt="ARM Support"/>
   <img src="https://img.shields.io/badge/RISC--V-RVV%201.0-green.svg" alt="RISC-V Support"/>
   <img src="https://img.shields.io/badge/Fallback-Scalar%20(100%25)-lightgrey.svg" alt="Scalar Fallback"/>
 </p>

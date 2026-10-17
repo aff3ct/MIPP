@@ -115,7 +115,7 @@ generator/
     ├── avx/                         # AVX, AVX2, FMA
     ├── avx512/                      # AVX-512F, BW, DQ, ...
     ├── neon/                        # Arm NEON (ARMv7, ARMv8-A)
-    ├── sve/                         # Arm SVE (work in progress)
+    ├── sve/                         # Arm SVE
     └── rvv/                         # RISC-V Vector 1.0
 ```
 

@@ -199,6 +199,10 @@
     "description": "Multiplies two vector registers element-wise.",
     "latex": "\\text{res}_i = r0_i \\cdot r1_i"
   },
+  "ncvt": {
+    "description": "Narrowing conversion: converts vector elements to a narrower datatype, keeping the lanes in a register one LMUL below. The value is truncated (modulo for integers), not saturated.",
+    "latex": "\\text{res}_i = (T_{\\text{narrow}}) r0_i"
+  },
   "neg": {
     "description": "Negates each element of a vector register.",
     "latex": "\\text{res}_i = -r0_i"
@@ -326,10 +330,6 @@
   "trunc": {
     "description": "Truncates each floating-point element toward zero.",
     "latex": "\\text{res}_i = \\operatorname{trunc}(r0_i)"
-  },
-  "ncvt": {
-    "description": "Narrowing conversion: converts vector elements to a narrower datatype, keeping the lanes in a register one LMUL below. The value is truncated (modulo for integers), not saturated.",
-    "latex": "\\text{res}_i = (T_{\\text{narrow}}) r0_i"
   },
   "wcvt": {
     "description": "Widening conversion: converts vector elements to a wider datatype.",
