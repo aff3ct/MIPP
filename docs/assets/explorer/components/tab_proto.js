@@ -67,7 +67,7 @@ export function renderTabProto(entry) {
     monoHeader = "mipp_obj.hpp";
   }
 
-  const cat = entry.category || "arithmetic";
+  const cat = entry.category;
   const pad = (s, width = 52) => (s.length < width ? s + " ".repeat(width - s.length) : s + " ");
 
   const headersText = [

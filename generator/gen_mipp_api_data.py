@@ -1064,10 +1064,24 @@ def generate_mipp_api_data(project_root=None):
         # Reproducible code snippet generator
         snippets = build_code_snippets(func, cat_name, spec_info)
 
+        # Generic traits, derived from the interface (never from the category name)
+        proto = func_def["proto"]
+        is_memory = any(arg["type"] == "ptr" for arg in proto["args"])
+        traits = {
+            "memory": is_memory,
+            "returns_mask": proto["ret"]["type"] == "msk",
+            "reduction": bool(func_def.get("horizontal", False)),
+            "changes_datatype": (not is_memory) and any(
+                "," in dt and dt.split(",")[0] != dt.split(",")[1] for dt in func_def["datatypes"]),
+            "needs_math": bool(re.search(r"\b(exp|log|pow|sin|cos|tan|asin|acos|atan|sinh|cosh|tanh|sqrt)f?\(",
+                                         json.dumps([ref_algos, scalar_macros]))),
+        }
+
         # Standardized API object
         entry = {
             "name": func,
             "category": cat_name,
+            "traits": traits,
             "description": description,
             "latex": latex,
             "math_semantics": math_semantics,

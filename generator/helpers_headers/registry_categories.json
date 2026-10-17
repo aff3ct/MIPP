@@ -21,7 +21,7 @@
         "cmpge",
         "cmpgt"
     ],
-    "converts": [
+    "convert": [
         "cvt",
         "ncvt",
         "wcvt"

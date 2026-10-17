@@ -284,7 +284,7 @@ def write_mipp_infos(mipp_infos, base_dir):
             print("| :--- | " + " | ".join([":---:"] * len(all_datatypes_same_size)) + " |", file=f)
             func = "cvt"
             func_info = isa_info.get_func_info(func)
-            line = f"| [{func}](../funcs_support/converts/{func}.md) | "
+            line = f"| [{func}](../funcs_support/convert/{func}.md) | "
             for dtype in all_datatypes_same_size:
                 if dtype in interfaces[func]["datatypes"]:
                     lvl = func_info.get_level(dtype, None) if func_info else 3
@@ -299,7 +299,7 @@ def write_mipp_infos(mipp_infos, base_dir):
             print("| :--- | " + " | ".join([":---:"] * len(all_datatypes_widenning)) + " |", file=f)
             func = "wcvt"
             func_info = isa_info.get_func_info(func)
-            line = f"| [{func}](../funcs_support/converts/{func}.md) | "
+            line = f"| [{func}](../funcs_support/convert/{func}.md) | "
             for dtype in all_datatypes_widenning:
                 if dtype in interfaces[func]["datatypes"]:
                     lvl = func_info.get_level(dtype, None) if func_info else 3
@@ -316,7 +316,7 @@ def write_mipp_infos(mipp_infos, base_dir):
                 print("| :--- | " + " | ".join([":---:"] * len(ncvt_dts)) + " |", file=f)
                 func = "ncvt"
                 func_info = isa_info.get_func_info(func)
-                line = f"| [{func}](../funcs_support/converts/{func}.md) | "
+                line = f"| [{func}](../funcs_support/convert/{func}.md) | "
                 for dtype in ncvt_dts:
                     lvl = func_info.get_level(dtype, None) if func_info else 3
                     line += f"{level_to_badge(lvl)} | "

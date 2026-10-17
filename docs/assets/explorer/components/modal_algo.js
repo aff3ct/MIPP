@@ -51,7 +51,7 @@ export function renderAlgoModal(modalData) {
   const retMatch = baseProto.match(/^(?:template\s*<[^>]+>\s*)?([a-zA-Z0-9_<>]+)\s+[a-zA-Z0-9_]+\s*\(/);
   const rawRet = retMatch ? retMatch[1].trim() : "rvd<T>";
   const isVoidReturn = rawRet === "void";
-  const isRvmReturn = rawRet.startsWith("rvm") || entry.category === "comparison";
+  const isRvmReturn = rawRet.startsWith("rvm") || (entry.traits && entry.traits.returns_mask);
 
   const dtMain = currentDt.includes(",") ? currentDt.split(",")[0].trim() : currentDt;
   const dtIdx = currentDt.includes(",") ? currentDt.split(",")[1].trim() : currentDt;

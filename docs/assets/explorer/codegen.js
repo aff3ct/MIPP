@@ -246,7 +246,8 @@ export function parseCParams(paramList, isa, dtMain, numLmul) {
 }
 
 export function generateTestHarness(targetFuncName, targetRetType, targetParamList, entry, cfg) {
-  const { name, category } = entry;
+  const { name } = entry;
+  const traits = entry.traits || {};
   const parts = targetParamList.split(",").map((s) => s.trim()).filter(Boolean);
   const parsedArgs = parts.map((arg) => {
     const words = arg.split(/\s+/);
@@ -272,10 +273,10 @@ export function generateTestHarness(targetFuncName, targetRetType, targetParamLi
     targetRetType.startsWith("sv");
   const isVoidReturn = targetRetType === "void";
   const hasPtrArg = parsedArgs.some((a) => a.isPtr);
-  const isMemory = ["load", "store"].includes(category) || name.startsWith("load") || name.startsWith("store") || name === "gather" || name === "scatter";
-  const isComparison = category === "comparison" || name.startsWith("cmp");
-  const isReduction = category === "reduction" || name.startsWith("hadd") || name.startsWith("hmax") || name.startsWith("hmin") || name.startsWith("hmul") || name.startsWith("testz");
-  const isConvert = category === "converts" || name.includes("cvt");
+  const isMemory = traits.memory || name.startsWith("load") || name.startsWith("store") || name === "gather" || name === "scatter";
+  const isComparison = traits.returns_mask || name.startsWith("cmp");
+  const isReduction = traits.reduction || name.startsWith("hadd") || name.startsWith("hmax") || name.startsWith("hmin") || name.startsWith("hmul") || name.startsWith("testz");
+  const isConvert = traits.changes_datatype || name.includes("cvt");
   const isSet = name.startsWith("set");
 
   const targetTypeArgCount = parsedArgs.filter((a) => a.type === targetRetType).length;
@@ -507,7 +508,7 @@ export function generateFlatSpecializedCode(entry, cfg) {
     }
     lines.push("#include <stdint.h>");
     lines.push("#include <string.h>");
-    if (hasMath || entry.category === "math") lines.push("#include <math.h>");
+    if (hasMath || (entry.traits && entry.traits.needs_math)) lines.push("#include <math.h>");
   }
   lines.push("");
 
@@ -789,7 +790,7 @@ export function generateFlatSpecializedCode(entry, cfg) {
     let retType = regTypeName;
     if (sampleProto.startsWith("rvm_") || helperName.startsWith("cmp") || helperName.endsWith("_k")) {
       retType = maskTypeName;
-    } else if (targetEntry.category === "reduction" || helperName === "getfirst" || helperName === "get" || sampleProto.startsWith("float") || sampleProto.startsWith("double") || sampleProto.startsWith("int") || sampleProto.startsWith("uint")) {
+    } else if ((targetEntry.traits && targetEntry.traits.reduction) || helperName === "getfirst" || helperName === "get" || sampleProto.startsWith("float") || sampleProto.startsWith("double") || sampleProto.startsWith("int") || sampleProto.startsWith("uint")) {
       const helperDti = (DT_INFO && DT_INFO[dtMain]) || { c_type: "float" };
       retType = helperDti.c_type || "float64_t";
     }
@@ -950,8 +951,8 @@ export function generateFlatSpecializedCode(entry, cfg) {
     ...Array.from(helperDefs.values()).map((h) => `${h.decl}\n${h.def}`)
   ].join("\n");
 
-  const isRvmReturn = protoTemplate.startsWith("rvm_") || entry.category === "comparison";
-  const isReduction = entry.category === "reduction" || entry.name.startsWith("hadd") || entry.name.startsWith("hmax") || entry.name.startsWith("hmin") || entry.name.startsWith("hmul") || entry.name.startsWith("testz");
+  const isRvmReturn = protoTemplate.startsWith("rvm_") || (entry.traits && entry.traits.returns_mask);
+  const isReduction = (entry.traits && entry.traits.reduction) || entry.name.startsWith("hadd") || entry.name.startsWith("hmax") || entry.name.startsWith("hmin") || entry.name.startsWith("hmul") || entry.name.startsWith("testz");
 
   const needsMaskType =
     (mask && mask !== "unmasked") ||
@@ -1198,7 +1199,7 @@ export function generateFlatSpecializedCode(entry, cfg) {
     baseRetType = "void";
   } else if (isRvmReturn) {
     baseRetType = maskTypeName;
-  } else if (entry.category === "reduction") {
+  } else if (entry.traits && entry.traits.reduction) {
     baseRetType = (dti && dti.c_type) ? dti.c_type : "float64_t";
   }
 
