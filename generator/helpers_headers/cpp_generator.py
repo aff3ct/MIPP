@@ -234,8 +234,8 @@ def _cpp_close_namespace():
 def _masked_c_symbol(dt_par, dt_ret, f, is_cast, isa=None, isa_name=False):
     # Base C symbol without lmul suffix.
     if not is_cast:
-        return build_func_name_short(isa, dt_par, f, isa_name=isa_name)
-    return build_func_name(isa, dt_par, dt_ret, f, isa_name=isa_name)
+        return build_func_name_short(isa, dt_par, f, isa_name=isa_name, alias=True)
+    return build_func_name(isa, dt_par, dt_ret, f, isa_name=isa_name, alias=True)
 
 def get_dt_par_size(dt_par):
     if dt_par in datatypes:
@@ -625,13 +625,13 @@ def _gen_cpp_functions_isa(include_manager, isa, funcs):
                     dt_ret = dt.split(',')[1]
 
                 if not is_cast and not is_gthr_scttr:
-                    c_func_name = build_func_name_short(isa, dt_par, f, isa_name=True)
+                    c_func_name = build_func_name_short(isa, dt_par, f, isa_name=True, alias=True)
                     cpp_func_name = build_cpp_func_name_short(funcs[f]["proto"], dt_ret, f)
                 elif is_gthr_scttr:
-                    c_func_name = build_func_name(isa, dt_par, dt_ret, f, isa_name=True)                
+                    c_func_name = build_func_name(isa, dt_par, dt_ret, f, isa_name=True, alias=True)                
                     cpp_func_name = build_cpp_func_name_short(funcs[f]["proto"], dt_ret, f)
                 else:
-                    c_func_name = build_func_name(isa, dt_par, dt_ret, f, isa_name=True)
+                    c_func_name = build_func_name(isa, dt_par, dt_ret, f, isa_name=True, alias=True)
                     cpp_func_name = build_cpp_func_name(dt_ret, f)
 
                 for lmul in [l for l in all_lmul if isa_provides_lmul(isa, funcs[f]["proto"], l)]:
@@ -676,13 +676,13 @@ def _gen_cpp_functions_isa(include_manager, isa, funcs):
                     dt_ret = dt.split(',')[1]
 
                 if not is_cast and not is_gthr_scttr:
-                    c_func_name = build_func_name_short(isa, dt_par, f, isa_name=True)
+                    c_func_name = build_func_name_short(isa, dt_par, f, isa_name=True, alias=True)
                     cpp_func_name = build_cpp_func_name_short(funcs[f]["proto"], dt_ret, f)
                 elif is_gthr_scttr:
-                    c_func_name = build_func_name(isa, dt_par, dt_ret, f, isa_name=True)                
+                    c_func_name = build_func_name(isa, dt_par, dt_ret, f, isa_name=True, alias=True)                
                     cpp_func_name = build_cpp_func_name_short(funcs[f]["proto"], dt_ret, f)
                 else:
-                    c_func_name = build_func_name(isa, dt_par, dt_ret, f, isa_name=True)
+                    c_func_name = build_func_name(isa, dt_par, dt_ret, f, isa_name=True, alias=True)
                     cpp_func_name = build_cpp_func_name(dt_ret, f)
 
                 for lmul in [l for l in all_lmul if isa_provides_lmul(isa, funcs[f]["proto"], l)]:

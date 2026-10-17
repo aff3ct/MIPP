@@ -107,6 +107,9 @@ def _emit_function_body_scalar(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rende
     func_name = _build_func_name_scalar(isa, dt, dt_par, dt_ret, f, masked_version=masked_version, lmul=lmul)
 
     print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, masked_version = masked_version, lmul=lmul) + " {", file=file)
+    if lmul == 1 and changes_lmul(funcs[f]["proto"]):
+        # the function without suffix is generated afterwards, as the alias of this one
+        record_lmul1_definition(isa["name"], f, dt, masked_version)
     print("\t// Level 0 (Native Hardware)", file=file)
 
     lmul_str = ""
@@ -355,7 +358,7 @@ def gen_c_structures_scalar(isa, file):
     """
     Writes the C structures corresponding to the supported datatypes for a given ISA, for both vector and mask types.
     """
-    template = """typedef struct __attribute__((aligned(MIPP_{{isa_name_upper}}_RVD_SIZE_BYTE))) { {{ isa_datatype.reg }} r[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}]; } rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
+    template = """typedef struct __attribute__((aligned(MIPP_{{isa_name_upper}}_RVD_SIZE_BYTE))) { {{ isa_datatype.reg }} r[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}]; } rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m1_t;"""
 
     template_alt = """typedef struct __attribute__((aligned(MIPP_{{isa_name_upper}}_RVD_SIZE_BYTE))) {
 #if {{ isa_datatype.if }}
@@ -363,7 +366,7 @@ def gen_c_structures_scalar(isa, file):
 #else
     int r; // this is a hack to compile when the datatype is not suported by the SIMD extension
 #endif // {{ isa_datatype.if }}
-} rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
+} rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m1_t;"""
     j2_template_alt = Template(template_alt, undefined=StrictUndefined)
     j2_template = Template(template, undefined=StrictUndefined)
 
@@ -382,7 +385,7 @@ def gen_c_structures_scalar(isa, file):
             print(j2_template_alt.render(isa=isa, isa_datatype=isa["datatypes"][dt], datatype=datatypes[dt], isa_name_upper=isa["name"].upper()), file=file)
 
 
-    template = """typedef struct __attribute__((aligned(MIPP_{{isa_name_upper}}_RVD_SIZE_BYTE))) { {{ isa_datatype.msk }} m[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}]; } rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
+    template = """typedef struct __attribute__((aligned(MIPP_{{isa_name_upper}}_RVD_SIZE_BYTE))) { {{ isa_datatype.msk }} m[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}]; } rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m1_t;"""
     j2_template = Template(template, undefined=StrictUndefined)
 
     for dt in isa["datatypes"]:
@@ -400,9 +403,9 @@ def gen_c_structures_scalar(isa, file):
         template = """typedef struct __attribute__((aligned(MIPP_{{isa_name_upper}}_RVD_SIZE_BYTE))) { {{ isa_datatype.reg }} r[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}_M{{lmul}}]; } rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m{{lmul}}_t;"""
         template_msk = """typedef struct __attribute__((aligned(MIPP_{{isa_name_upper}}_RVD_SIZE_BYTE))) { {{ isa_datatype.msk }} m[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}_M{{lmul}}]; } rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m{{lmul}}_t;"""
         if lmul == 1:
-            # the type without suffix is the LMUL 1 type (as for the other ISAs), so that both can be mixed
-            template = """typedef rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m1_t;"""
-            template_msk = """typedef rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m1_t;"""
+            # the type without suffix is an alias of the LMUL 1 type (as for the other ISAs), so that both can be mixed
+            template = """typedef rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m1_t rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
+            template_msk = """typedef rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m1_t rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
         
         j2_template = Template(template, undefined=StrictUndefined)
         j2_template_msk = Template(template_msk, undefined=StrictUndefined)
@@ -572,9 +575,11 @@ typedef double float64_t;
     gen_c_structures_scalar(scalar_isa, file_common)
     copy_interfaces = copy.deepcopy(interfaces)
     
-    gen_c_functions_scalar(scalar_isa, include_manager, copy_interfaces, scalar_implems)
+    # Inside an ISA, LMUL 0 (no LMUL) and LMUL 1 are the same level (`_m1`): it is written once, with the LMUL 1,
+    # and followed by the functions without suffix, which are its aliases.
     for lmul in all_lmul:
         gen_c_functions_scalar(scalar_isa, include_manager, copy_interfaces, scalar_implems, lmul=lmul)
+    gen_c_lmul1_aliases(scalar_isa, include_manager, copy_interfaces)
 
     ldiv = -2
     gen_c_functions_scalar(scalar_isa, include_manager, copy_interfaces, scalar_implems, lmul=ldiv)

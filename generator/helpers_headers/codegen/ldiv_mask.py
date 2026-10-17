@@ -23,7 +23,7 @@ from tools import build_func_name_internal
 from input_validation import validate_ldiv_mask_config, make_level_detector
 from codegen.emit_helpers import emit_panic_stub
 from codegen.candidate_resolver import BASE_LEVELS
-from codegen.lmul_orchestrator import maybe_emit_ldiv_separator
+from codegen.lmul_orchestrator import maybe_emit_ldiv_separator, record_lmul1_definition
 
 _HELPERS_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _VARIANT_OF = {None: "u", "mask": "m", "maskz": "z", "masks": "s"}
@@ -369,6 +369,9 @@ def _emit_one(isa, file, funcs, templates, f, dt, mask_kind, record_call, lmul_i
     if guard:
         print(f"#if {guard}", file=file)
     print(f"static {proto} {{", file=file)
+    if changing and lmul_in == 1:
+        # the function without suffix is generated afterwards, as the alias of this one
+        record_lmul1_definition(isa["name"], f, dt, mask_kind)
     print(f"\t// {level}", file=file)
     for line in body.split("\n"):
         if line.strip():

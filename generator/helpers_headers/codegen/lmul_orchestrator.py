@@ -25,17 +25,41 @@ from codegen.emit_helpers import (
 )
 from codegen.candidate_resolver import render_template, parse_placeholders_or_skip
 
-seen_lmul_separators = set()
+seen_lmul_separators = {}
 seen_ldiv_separators = set()
 
-def maybe_emit_lmul_separator(isa_name, f, file):
-    key = (isa_name, f)
-    if key not in seen_lmul_separators:
-        seen_lmul_separators.add(key)
+# what each banner introduces: the aliases of the LMUL 1 functions, the LMUL > 1 made of software registers (structs of
+# two halves) or the LMUL > 1 of the hardware
+_LMUL_BANNERS = {
+    "alias": "LMUL = 1 Aliases",
+    "emulated": "Emulated LMUL > 1",
+    "hardware": "Hardware LMUL > 1",
+}
+
+def emit_lmul_banner(isa_name, f, file, kind):
+    """
+    Banner of a section of a header: written when the section changes (fine granularity has one header per LMUL,
+    coarse granularity has one for all of them, in which the sections follow one another).
+    """
+    key = (isa_name, f, id(file))
+    if seen_lmul_separators.get(key) != kind:
+        seen_lmul_separators[key] = kind
         print("", file=file)
         print("// " + "=" * 117, file=file)
-        print("// " + " " * 113 + "LMUL", file=file)
+        print("// " + _LMUL_BANNERS[kind].rjust(117), file=file)
         print("// " + "=" * 117, file=file)
+
+# The functions that change the LMUL (low, high, combine, wcvt, ncvt...) are written by several generators (templates
+# of the ISA, half-vectors, software LMUL, scalar): each of them declares here the `_m1` functions it has written,
+# {isa name: {(function, datatype, mask kind): True}}, in the order of writing, for the aliases to be generated once
+# everything is written.
+lmul1_definitions = {}
+
+def record_lmul1_definition(isa_name, f, dt, mask_kind=None):
+    lmul1_definitions.setdefault(isa_name, {})[(f, dt, mask_kind)] = True
+
+def _dt_of(dt_par, dt_ret):
+    return dt_par if dt_par == dt_ret else dt_par + "," + dt_ret
 
 def maybe_emit_ldiv_separator(isa_name, f, file):
     key = (isa_name, f)
@@ -192,6 +216,12 @@ def _c_lmul_widening_writer(f, dt_par, dt_ret, isa, funcs, file, func_name_lmul,
     """
     proto = funcs[f]["proto"]
     res_type = build_type("reg", datatypes[dt_ret], isa, resolve_ret_lmul(proto["ret"], lmul), True)
+    emit_lmul_banner(isa["name"], f, file, "emulated")
+    if lmul == 1:
+        record_lmul1_definition(isa["name"], f, _dt_of(dt_par, dt_ret))
+        conv = build_func_name(isa, dt_par, dt_ret, f, True, lmul=-2)
+        # the half-vector conversion may be written after this one (single header in coarse granularity): declare it
+        print("\nstatic " + build_proto(proto, dt_par, dt_ret, isa, conv, lmul=-2, isa_name=True) + ";", file=file)
     print("\nstatic " + build_proto(proto, dt_par, dt_ret, isa, func_name_lmul, lmul=lmul, isa_name=True) + " {", file=file)
     print("\t// Level 2 (Generic Emulation): each half of the result converts one half of the argument", file=file)
     print(f"\t{res_type} res;", file=file)
@@ -220,14 +250,19 @@ def _c_lmul_narrowing_writer(f, dt_par, dt_ret, isa, funcs, file, func_name_lmul
     """
     proto = funcs[f]["proto"]
     res_type = build_type("reg", datatypes[dt_ret], isa, resolve_ret_lmul(proto["ret"], lmul), True)
-    print("\nstatic " + build_proto(proto, dt_par, dt_ret, isa, func_name_lmul, lmul=lmul, isa_name=True) + " {", file=file)
-    print("\t// Level 2 (Generic Emulation): each half of the result converts one half of the argument", file=file)
     conv = build_func_name(isa, dt_par, dt_ret, f, True, lmul=lmul // 2)
+    emit_lmul_banner(isa["name"], f, file, "emulated")
     if lmul == 2:
         comb = build_func_name_short(isa, dt_ret, "combine", True, lmul=-2)
+        # the LMUL 1 conversion may be written after this one (single header in coarse granularity): declare it
+        print("\nstatic " + build_proto(proto, dt_par, dt_ret, isa, conv, lmul=1, isa_name=True) + ";", file=file)
+        print("\nstatic " + build_proto(proto, dt_par, dt_ret, isa, func_name_lmul, lmul=lmul, isa_name=True) + " {", file=file)
+        print("\t// Level 2 (Generic Emulation): each half of the result converts one half of the argument", file=file)
         print(f"\treturn {comb}({conv}(r0.r1), {conv}(r0.r2));", file=file)
         callees = [(f, "m1"), ("combine", "d2")]
     else:
+        print("\nstatic " + build_proto(proto, dt_par, dt_ret, isa, func_name_lmul, lmul=lmul, isa_name=True) + " {", file=file)
+        print("\t// Level 2 (Generic Emulation): each half of the result converts one half of the argument", file=file)
         print(f"\t{res_type} res;", file=file)
         print(f"\tres.r1 = {conv}(r0.r1);", file=file)
         print(f"\tres.r2 = {conv}(r0.r2);", file=file)
@@ -259,6 +294,9 @@ def _c_lmul_changing_writer(f, dt_par, dt_ret, isa, funcs, file, func_name_lmul,
     member = "r" if kind == "reg" else "m"
     arg = "r" if kind == "reg" else "m"
     base = f[:-2] if f.endswith("_k") else f
+    emit_lmul_banner(isa["name"], f, file, "emulated")
+    if lmul == 1:
+        record_lmul1_definition(isa["name"], f, _dt_of(dt_par, dt_ret))
     print("\nstatic " + build_proto(proto, dt_par, dt_ret, isa, func_name_lmul, lmul=lmul, isa_name=True) + " {", file=file)
     print("\t// Level 0 (Native Hardware): half of the software LMUL register", file=file)
     if base == "low":
@@ -273,9 +311,26 @@ def _c_lmul_changing_writer(f, dt_par, dt_ret, isa, funcs, file, func_name_lmul,
         print("\treturn res;", file=file)
     print("}", file=file)
 
-def _c_lmul_writer(f, dt, dt_par, dt_ret, isa, funcs, file, mask_type=None, lmul=0, include_manager=None):
-    maybe_emit_lmul_separator(isa["name"], f, file)
+def _emit_lmul1_alias(f, dt, dt_par, dt_ret, isa, funcs, file, mask_type=None):
+    """
+    The function without suffix, alias of the `_m1` one (the definition, written beforehand in the same header). The
+    alias is declared like the definitions are: the headers may include each other.
+    """
+    emit_lmul_banner(isa["name"], f, file, "alias")
+    proto = funcs[f]["proto"]
+    if len(dt.split(',')) <= 1:
+        alias_name = build_func_name_short(isa, dt_par, f, masked_version=mask_type, alias=True)
+        func_name_lmul = build_func_name_short(isa, dt_par, f, lmul=1, masked_version=mask_type)
+    else:
+        alias_name = build_func_name(isa, dt_par, dt_ret, f, masked_version=mask_type, alias=True)
+        func_name_lmul = build_func_name(isa, dt_par, dt_ret, f, lmul=1, masked_version=mask_type)
+    alias_proto = "static " + build_proto(proto, dt_par, dt_ret, isa, alias_name, lmul=1, isa_name=True, masked_version=mask_type)
+    print("\n" + alias_proto + ";", file=file)
+    print(alias_proto + " {", file=file)
+    print("\t" + build_call(proto, dt_par, dt_ret, isa, func_name_lmul, lmul=1, isa_name=True, masked_version=mask_type) + ";", file=file)
+    print("}", file=file)
 
+def _c_lmul_writer(f, dt, dt_par, dt_ret, isa, funcs, file, mask_type=None, lmul=0, include_manager=None):
     if len(dt.split(',')) <= 1:
         func_name = build_func_name_short(isa, dt_par, f, lmul=0, masked_version=mask_type)
         func_name_lmul = build_func_name_short(isa, dt_par, f, lmul=lmul, masked_version=mask_type)
@@ -289,12 +344,7 @@ def _c_lmul_writer(f, dt, dt_par, dt_ret, isa, funcs, file, mask_type=None, lmul
         _c_lmul_changing_writer(f, dt_par, dt_ret, isa, funcs, file, func_name_lmul, lmul, include_manager)
         return
 
-    if lmul == 1:
-        print("\nstatic " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name_lmul, lmul=lmul, isa_name=True, masked_version=mask_type) + " {", file=file)
-        print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, masked_version=mask_type) + ";", file=file)
-        print("}", file=file)
-        return
-
+    emit_lmul_banner(isa["name"], f, file, "emulated")
     if not funcs[f]["horizontal"]:
         print("\nstatic " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name_lmul, lmul=lmul, isa_name=True, masked_version=mask_type) + " {", file=file)
         print(build_call_lmul(funcs[f]["proto"], dt_par, dt_ret, isa, func_name_half_lmul, lmul=lmul, isa_name=True, masked_version=mask_type), file=file)
@@ -345,19 +395,25 @@ def _gen_c_function_one_ldiv_avx(isa_base, isa_div, file, funcs, f, ff, dt, mask
     print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, isa_div, func_name_impl, masked_version=mask_kind) + ";", file=file)
     print("}", file=file)
 
-def gen_c_lmul(isa, include_manager, funcs, sw_lmuls=None):
+def gen_c_lmul(isa, include_manager, funcs, sw_lmuls=None, lmul1=False):
+    """
+    The LMUL > 1 made of software registers. The LMUL 1 is not written here: its functions are the definitions of the
+    ISA (the aliases without suffix are written by gen_c_lmul1_aliases) except for wcvt and combine, which build a
+    register of LMUL 2 from a register of LMUL 1: they are written with `lmul1=True`, before the aliases.
+    """
     if sw_lmuls is None:
         sw_lmuls = all_lmul
+    lmuls = [1] if lmul1 else [l for l in sw_lmuls if l != 1]
     for f in funcs:
+        if lmul1 and not changes_lmul(funcs[f]["proto"]):
+            continue
         for dt in funcs[f]["datatypes"]:
             dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
-            # combine builds a software LMUL register from two LMUL 1 ones
-            lmuls_u = sorted(set([1] + list(sw_lmuls))) if changes_lmul(funcs[f]["proto"]) else sw_lmuls
-            for lmul in lmuls_u:
+            for lmul in lmuls:
                 file_w = include_manager.get_fd(isa["name"], f, variant="u", lmul=lmul)
                 _c_lmul_writer(f=f, dt=dt, dt_par=dt_par, dt_ret=dt_ret, isa=isa, funcs=funcs, file=file_w, lmul=lmul, include_manager=include_manager)
         
-            for lmul in sw_lmuls:
+            for lmul in lmuls:
                 mask_status = ""
                 if "variants" in funcs[f]:
                     mask_status = funcs[f]["variants"]
@@ -375,6 +431,38 @@ def gen_c_lmul(isa, include_manager, funcs, sw_lmuls=None):
                 if mask_status.is_masksable():
                     file_w = include_manager.get_fd(isa["name"], f, variant="s", lmul=lmul)
                     _c_lmul_writer(f, dt, dt_par, dt_ret, isa, funcs, file_w, mask_type="masks", lmul=lmul)
+
+def gen_c_lmul1_aliases(isa, include_manager, funcs):
+    """
+    Aliases without suffix of the LMUL 1 functions (the `_m1` ones, which are the definitions), for every ISA: once all
+    the functions are written, as the ones that change the LMUL (low, high, combine, wcvt, ncvt...) are written by
+    several generators, which declare what they define (record_lmul1_definition).
+    """
+    for f in funcs:
+        proto = funcs[f]["proto"]
+        if changes_lmul(proto):
+            continue
+        variants = funcs[f]["variants"] if "variants" in funcs[f] else VariantSet()
+        kinds = [("u", None)]
+        if variants.is_maskable():
+            kinds.append(("m", "mask"))
+        if variants.is_maskzable():
+            kinds.append(("z", "maskz"))
+        if variants.is_masksable():
+            kinds.append(("s", "masks"))
+        for dt in funcs[f]["datatypes"]:
+            dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
+            for variant, mask_type in kinds:
+                file_w = include_manager.get_fd(isa["name"], f, variant=variant, lmul=1)
+                _emit_lmul1_alias(f, dt, dt_par, dt_ret, isa, funcs, file_w, mask_type=mask_type)
+
+    variant_of = {None: "u", "mask": "m", "maskz": "z", "masks": "s"}
+    for (f, dt, mask_kind) in lmul1_definitions.get(isa["name"], {}):
+        if f not in funcs:
+            continue
+        dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
+        file_w = include_manager.get_fd(isa["name"], f, variant=variant_of[mask_kind], lmul=1)
+        _emit_lmul1_alias(f, dt, dt_par, dt_ret, isa, funcs, file_w, mask_type=mask_kind)
 
 def gen_c_ldiv(isa_base, isa_div, include_manager, funcs):
     if not uses_sub_isa_ldiv(isa_base):

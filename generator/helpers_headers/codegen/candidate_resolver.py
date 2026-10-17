@@ -712,8 +712,8 @@ def resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators
         if emit_separators and is_inc_mgr and getattr(file, "granularity", "coarse") == "coarse":
             file_w = file.get_fd(isa["name"], f)
             if lmul in [2, 4, 8]:
-                from codegen.lmul_orchestrator import maybe_emit_lmul_separator
-                maybe_emit_lmul_separator(isa["name"], f, file_w)
+                from codegen.lmul_orchestrator import emit_lmul_banner
+                emit_lmul_banner(isa["name"], f, file_w, "hardware")
             elif lmul < 0:
                 from codegen.lmul_orchestrator import maybe_emit_ldiv_separator
                 maybe_emit_ldiv_separator(isa["name"], f, file_w)

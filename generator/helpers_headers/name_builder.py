@@ -9,6 +9,21 @@ import os
 # Import tools module to avoid circular dependency at load-time
 import tools
 
+def lmul_suffix(lmul, isa_name=True):
+    """
+    Suffix of the name of a type or of a function for a given LMUL (`_m2`, `_d2`...).
+
+    Inside an ISA (isa_name=True) there is no level without suffix: LMUL 0 (no LMUL) is the LMUL 1 level and is
+    written `_m1`. The names without suffix are the aliases of the `_m1` ones (see `build_func_name_short(alias=True)`)
+    and the default names of the public C layer (isa_name=False), where LMUL 0 stays without suffix.
+    """
+    lmul = int(lmul) if lmul else 0
+    if lmul > 0:
+        return "_m" + str(lmul)
+    if lmul < 0:
+        return "_d" + str(-lmul)
+    return "_m1" if isa_name else ""
+
 def build_reg(datatype, isa, lmul=0, isa_name=True, cpp=False):
     if cpp:
         str_reg = "rvd"
@@ -26,12 +41,7 @@ def build_reg(datatype, isa, lmul=0, isa_name=True, cpp=False):
         if isa_name:
             str_reg += isa["name"] + "_"
         str_reg += datatype["category"] + str(datatype["n_bits"])
-        if lmul:
-            if int(lmul) > 0:
-                str_reg += "_m" + str(int(lmul))
-            if int(lmul) < 0:
-                ldiv = -int(lmul)
-                str_reg += "_d" + str(ldiv)
+        str_reg += lmul_suffix(lmul, isa_name)
         str_reg += "_t"
         return str_reg
 
@@ -52,12 +62,7 @@ def build_msk(datatype, isa, lmul=0, isa_name=True, cpp=False):
         if isa_name:
             str_msk += isa["name"] + "_"
         str_msk += datatype["category"] + str(datatype["n_bits"])
-        if lmul:
-            if int(lmul) > 0:
-                str_msk += "_m" + str(int(lmul))
-            if int(lmul) < 0:
-                ldiv = -int(lmul)
-                str_msk += "_d" + str(ldiv)
+        str_msk += lmul_suffix(lmul, isa_name)
         str_msk += "_t"
         return str_msk
 
@@ -706,13 +711,9 @@ def build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul=2, isa_name=True
     return str_code
 
 # Build other functions build_func_name_short & build_cpp_func_name_short
-def build_func_name_short(isa, dt, mipp_name, isa_name=True, lmul=0, masked_version=False):
+def build_func_name_short(isa, dt, mipp_name, isa_name=True, lmul=0, masked_version=False, alias=False):
     param_type = tools.datatypes[dt]["category"] + str(tools.datatypes[dt]["n_bits"])
-    lmul_str = ""
-    if lmul > 0:
-        lmul_str = "_m" + str(int(lmul))
-    if lmul < 0 :
-        lmul_str = "_d" + str(int(-lmul))
+    lmul_str = "" if alias else lmul_suffix(lmul, isa_name)
 
     mask_str = ""
     if masked_version:
@@ -733,14 +734,10 @@ def build_cpp_func_name_short(proto, dt_ret, mipp_name, masked_version=False):
         return mipp_name 
 
 # Build cast's functions build_func_name & build_cpp_func_name
-def build_func_name(isa, dt_par, dt_ret, mipp_name, isa_name=True, lmul=0, masked_version=False):
+def build_func_name(isa, dt_par, dt_ret, mipp_name, isa_name=True, lmul=0, masked_version=False, alias=False):
     param_type = tools.datatypes[dt_par]["category"] + str(tools.datatypes[dt_par]["n_bits"])
     return_type = tools.datatypes[dt_ret]["category"] + str(tools.datatypes[dt_ret]["n_bits"])
-    lmul_str = ""
-    if lmul > 0:
-        lmul_str = "_m" + str(int(lmul))
-    if lmul < 0 : 
-        lmul_str = "_d" + str(int(-lmul))
+    lmul_str = "" if alias else lmul_suffix(lmul, isa_name)
     mask_str = ""
     if masked_version:
         mask_str = "_" + masked_version

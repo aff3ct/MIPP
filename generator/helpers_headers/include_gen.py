@@ -992,29 +992,6 @@ class IncludeManager:
             if not pairs:
                 del funcs_map[item["func"]]
 
-    # definition of a function at LMUL 1: `static [inline] <ret> mipp_..._m1(<params>) {` up to its closing `}` (column 0)
-    _M1_DEF = re.compile(r"^static ((?:inline )?[^\n(]*?)\b(mipp_\w+?)_m1\(([^)\n]*)\) \{\n.*?^\}\n", re.MULTILINE | re.DOTALL)
-
-    def _add_m1_aliases(self, item, text):
-        """
-        The functions that change the LMUL (low, high, combine, wcvt, ncvt...) have no function at the base level
-        (the name without suffix): that name is the one of the LMUL 1 function in MIPPv2. An alias without the `_m1`
-        suffix follows each definition of such a function. The other suffixes (d2, m2, m4...) have no alias.
-        """
-        if item["lmul"] != "m1":
-            return text
-        fn = item["func"]
-        if fn not in interfaces or not changes_lmul(interfaces[fn]["proto"]):
-            return text
-
-        def alias(m):
-            decl, name, params = m.group(1), m.group(2), m.group(3)
-            args = ", ".join(re.search(r"(\w+)\s*$", p).group(1) for p in params.split(",") if p.strip())
-            return (m.group(0) + f"static {decl}{name}({params}) {{\n"
-                    f"\treturn {name}_m1({args});\n}}\n")
-
-        return self._M1_DEF.sub(alias, text)
-
     def _write_atomic_prefix(self, item):
         if item.get("_is_prefixed", False):
             return
@@ -1039,8 +1016,6 @@ class IncludeManager:
             # nothing to emit (e.g. wcvt / combine for m8, low / high for d2): no empty header
             self._drop_empty_atomic(item)
             return
-
-        old = self._add_m1_aliases(item, old)
 
         # Separate forward declarations and body lines
         fwd_decls = []
