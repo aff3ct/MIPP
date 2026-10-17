@@ -212,13 +212,15 @@ analysis-cppcheck:
       fi
       export THREADS
     fi
-  # define the real compiler executable name (because we compile in C++ and not in C)
+  # define the real compiler executable names (because we compile in C++ and not in C)
   - |
     case "$COMPILER" in
       gcc-14)
+        export COMPILER_C="gcc-14"
         export COMPILER_CPP="g++-14"
         ;;
       clang-20)
+        export COMPILER_C="clang-20"
         export COMPILER_CPP="clang++-20"
         ;;
       *)
@@ -226,6 +228,23 @@ analysis-cppcheck:
         exit 1
         ;;
     esac
+  # SVE + gcc-14: internal compiler error in 'gimple_expand_vec_cond_expr' (gimple-isel.cc:326), fixed in gcc-15
+  # (not available in Ubuntu 24.04: installed from the toolchain PPA, only for the SVE jobs, the Docker image is unchanged).
+  # The job name / artifacts / build folder keep COMPILER=gcc-14, only the executables change.
+  - |
+    if [ "$COMPILER" = "gcc-14" ] && { [ "$ARCH" = "armv9-sve" ] || [ "$ARCH" = "armv9-sve2" ]; }; then
+      export DEBIAN_FRONTEND=noninteractive
+      apt-get update -qq
+      apt-get install -y -qq software-properties-common
+      add-apt-repository -y ppa:ubuntu-toolchain-r/test
+      apt-get update -qq
+      apt-get install -y -qq gcc-15 g++-15
+      export COMPILER_C="gcc-15"
+      export COMPILER_CPP="g++-15"
+      # the examples are run in another job, with the libstdc++ of the original image (older than the one of gcc-15)
+      export EXTRA_LDFLAGS="-static-libstdc++ -static-libgcc"
+      $COMPILER_CPP --version | head -n 1
+    fi
   # C codes cannot compile on RVV or SVE for now :-(
   - |
     case "$ARCH" in
@@ -260,6 +279,7 @@ build-test-examples:
     - echo "Debug -- Job=$CI_NODE_INDEX/$CI_NODE_TOTAL"
     - echo "Debug -- OS=$OS"
     - echo "Debug -- COMPILER=$COMPILER"
+    - echo "Debug -- COMPILER_C=$COMPILER_C"
     - echo "Debug -- COMPILER_CPP=$COMPILER_CPP"
     - echo "Debug -- ARCH=$ARCH"
     - echo "Debug -- SIMD_EXT=$SIMD_EXT"
@@ -269,17 +289,17 @@ build-test-examples:
       if [ "$SKIP_C_EXAMPLES" = "true" ]; then
         echo "Skipping 'dumb.c' C example"
       else
-        $COMPILER -std=c11 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Wno-strict-prototypes -Werror -O3 -funroll-loops $SIMD_EXT -DMIPP_PRINT_INFO -I../include -o dumb dumb.c
+        $COMPILER_C -std=c11 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Wno-strict-prototypes -Werror -O3 -funroll-loops $SIMD_EXT -DMIPP_PRINT_INFO -I../include -o dumb dumb.c
       fi
     - |
       if [ "$SKIP_C_EXAMPLES" = "true" ]; then
         echo "Skipping 'mipp.c' C example"
       else
-        $COMPILER -std=c11 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Wno-strict-prototypes -Werror -O3 -funroll-loops $SIMD_EXT -DMIPP_PRINT_INFO -I../include -o mipp_c mipp.c
+        $COMPILER_C -std=c11 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Wno-strict-prototypes -Werror -O3 -funroll-loops $SIMD_EXT -DMIPP_PRINT_INFO -I../include -o mipp_c mipp.c
       fi
-    - $COMPILER_CPP -std=c++11 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Werror -O3 -funroll-loops $SIMD_EXT -DMIPP_PRINT_INFO -I../include -o mipp_cpp mipp.cpp
-    - $COMPILER_CPP -std=c++11 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Werror -O3 -funroll-loops $SIMD_EXT -DMIPP_PRINT_INFO -I../include -o mipp_object_cpp mipp_object.cpp
-    - $COMPILER_CPP -std=c++11 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Werror -O3 -funroll-loops $SIMD_EXT -DMIPP_PRINT_INFO -I../include -o mipp_interop_cpp mipp_interop.cpp
+    - $COMPILER_CPP -std=c++11 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Werror -O3 -funroll-loops $SIMD_EXT $EXTRA_LDFLAGS -DMIPP_PRINT_INFO -I../include -o mipp_cpp mipp.cpp
+    - $COMPILER_CPP -std=c++11 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Werror -O3 -funroll-loops $SIMD_EXT $EXTRA_LDFLAGS -DMIPP_PRINT_INFO -I../include -o mipp_object_cpp mipp_object.cpp
+    - $COMPILER_CPP -std=c++11 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Werror -O3 -funroll-loops $SIMD_EXT $EXTRA_LDFLAGS -DMIPP_PRINT_INFO -I../include -o mipp_interop_cpp mipp_interop.cpp
     # fine-grained headers check: only meaningful (and only generated) when MIPP_GRANULARITY=fine
     - |
       if [ "${MIPP_GRANULARITY:-fine}" = "fine" ]; then
@@ -288,12 +308,12 @@ build-test-examples:
           echo "ERROR: mipp_fine_grained.cpp includes a non atomic MIPP header (see above)"
           exit 1
         fi
-        $COMPILER_CPP -std=c++11 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Werror -O3 -funroll-loops $SIMD_EXT -I../include -o mipp_fine_grained_cpp mipp_fine_grained.cpp
+        $COMPILER_CPP -std=c++11 -Wall -Wextra -Wpedantic -Wno-unused-parameter -Werror -O3 -funroll-loops $SIMD_EXT $EXTRA_LDFLAGS -I../include -o mipp_fine_grained_cpp mipp_fine_grained.cpp
       else
         echo "Skipping 'mipp_fine_grained.cpp' (MIPP_GRANULARITY=${MIPP_GRANULARITY})"
       fi
     # documentation snippets (examples/doc/ and README.md), run in test-examples
-    - CC=$COMPILER CXX=$COMPILER_CPP SKIP_C=${SKIP_C_EXAMPLES:-false} ../scripts/check_doc_snippets.sh --build-only
+    - CC=$COMPILER_C CXX=$COMPILER_CPP SKIP_C=${SKIP_C_EXAMPLES:-false} ../scripts/check_doc_snippets.sh --build-only
 
 build-test-unit:
   extends: .build-common
