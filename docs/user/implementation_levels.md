@@ -23,14 +23,14 @@ Because all MIPP functions are declared `static inline`, the compiler inlines th
 - **Performance**: High vector efficiency using handcrafted target assembly and intrinsic sequences.
 - **Examples**:
     - Horizontal reduction on AVX (`hadd_float32`), using `_mm256_permute2f128_ps`, `_mm256_shuffle_ps`, and `_mm256_add_ps` to perform in-register tree reduction across 256-bit lanes.
-    - Gather load emulation on baseline AVX prior to AVX2 hardware `vgather` instructions.
+    - Vectorized `exp` / `log` on AVX (`exp_float32`, `log_float32`), written once with AVX intrinsics (range reduction and polynomial evaluation on `__m256`) because the ISA has no instruction for them.
 
 ### <span class="mipp-isa-badge lvl-2">L2</span> Level 2: Generic Emulation
 - **Definition**: Vectorized algorithms implemented on top of standard MIPP primitives.
 - **Performance**: Fully vectorized execution across all SIMD lanes without scalar unrolling.
 - **Examples**:
     - Composite arithmetic primitives on ISAs lacking dedicated instructions (e.g., emulating `fmadd(a, b, c)` as `add(mul(a, b), c)` on SSE or AVX without native FMA hardware).
-    - Elementary math functions (such as vectorized `exp`, `log`, `sin`, `cos` polynomial expansions).
+    - Elementary math functions (such as vectorized `exp`, `log`, `sin`, `cos` polynomial expansions) on the ISAs that have no dedicated implementation of them.
     - Software emulation of masked execution on targets lacking native instruction predication (evaluating unmasked operations and applying vector blending).
 
 ### <span class="mipp-isa-badge lvl-3">L3</span> Level 3: Scalar Fallback

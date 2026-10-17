@@ -261,6 +261,38 @@ def _wrapper_body(ctx, params):
     return "\n".join(lines)
 
 
+def _wrapper_body_memcpy(ctx, params):
+    """
+    Level 3 version of `_wrapper_body`, for the targets where the d2 types are not the same kind of object as
+    the LMUL 1 ones (e.g. float64 on ARMv7, where they are arrays): the registers are copied with memcpy.
+    """
+    lines, args = [], []
+    for p in params:
+        if p["kind"] in ("reg", "msk", "vindex"):
+            m1 = build_type(p["kind"] if p["kind"] != "vindex" else "reg", p["dt"], ctx.isa, 0, True, False)
+            n = p["name"]
+            lines.append(f"{m1} w_{n}; memset(&w_{n}, 0, sizeof(w_{n})); memcpy(&w_{n}, &{n}, sizeof({n}));")
+            args.append("w_" + n)
+        elif p["kind"] == "Nele":
+            args.append("vals")
+        else:
+            args.append(p["name"])
+    call = build_func_name_internal(ctx.isa, ctx.dt, ctx.dt_par, ctx.dt_ret, ctx.f, masked_version=ctx.mask_kind, lmul=0)
+    ctx.calls.add((ctx.f, _VARIANT_OF[ctx.mask_kind]))
+    call += "(" + ", ".join(args) + ")"
+    ret = ctx.proto["ret"]
+    if ret["type"] in ("reg", "msk"):
+        lines.append(f"{ctx.ret_type()} res; memset(&res, 0, sizeof(res));")
+        lines.append(f"__typeof__({call}) w_res = {call};")
+        lines.append("memcpy(&res, &w_res, sizeof(res));")
+        lines.append("return res;")
+    elif ret["type"]:
+        lines.append(f"return {call};")
+    else:
+        lines.append(call + ";")
+    return "\n".join(lines)
+
+
 _level_detectors = {}
 
 # Level of the templates of the functions that change the LMUL (low, high, combine, wcvt, ncvt), per
@@ -380,7 +412,13 @@ def _emit_one(isa, file, funcs, templates, f, dt, mask_kind, record_call, lmul_i
     if guard:
         print("#else", file=file)
         print(f"static {proto} {{", file=file)
-        emit_panic_stub(name, file=file)
+        if not chain and not changing:
+            # lane-wise function: Level 3 fallback through the LMUL 1 function
+            print(f"\t// {_LEVEL_TEXT[3]}: lane-wise, through the LMUL 1 function (memcpy of the registers)", file=file)
+            for line in _wrapper_body_memcpy(ctx, params).split("\n"):
+                print("\t" + line, file=file)
+        else:
+            emit_panic_stub(name, file=file)
         print("}", file=file)
         print("#endif", file=file)
     for (callee, callee_variant) in calls:

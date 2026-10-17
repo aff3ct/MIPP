@@ -99,7 +99,7 @@ static inline ... mipp_neon_<function>_float64(...) { /* Level 3 */ }
 
 - **Implementation entries** (`native_or_emu`, `generic_emu`). The template is rendered with Jinja2 (variables `isa`, `instr_name`, `dt_par`, `dt_ret`, `isa_dt_par`, `isa_dt_ret`, `cstdint_ret`, `func_name`, `lmul`, `mask_kind`), then the DSL markers are replaced by C names and calls (`parse_placeholders()` in `tools.py`). `emit_function_body()` (`codegen/emit_helpers.py`) writes the prototype, a `// Level N (...)` comment and the body.
 - **Scalar fallback** (`auto_scalar`). `_gen_c_auto_scalar_fallback_one()` copies each register argument into a scalar register of the same size (`memcpy`), calls the `mipp_scalar_*` function and copies the result back.
-- **Stub.** The body is `MIPP_PANIC_STUB("MIPP panic: '<function>' is unimplemented.");`. In C++ the macro throws `mipp::stub_exception`, which the generated tests catch and report as a warning; in C it prints the message and exits.
+- **Stub.** The body is `MIPP_PANIC_STUB("MIPP panic: '<function>' is unimplemented.");`. In C++ the macro throws `mipp::stub_exception`, which the generated tests catch and report as a warning; in C it prints the message and exits. When a datatype is only available under a condition (e.g. NEON `float64` on AArch64), the `#else` branch of a lane-wise half-vector function is not a stub: it is an L3 body that calls the LMUL 1 function, copying the registers with `memcpy` (on ARMv7 the d2 types are arrays). The functions that change the LMUL or the datatype (`combine`, `gather`, conversions…) still get a stub there.
 
 Example of an emitted <span class="mipp-isa-badge lvl-0">L0</span> function (`avx/c/functions/arithmetic/u/m1/add.h`, fine granularity):
 
