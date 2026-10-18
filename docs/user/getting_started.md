@@ -39,7 +39,7 @@ Each API has a single umbrella header that brings every MIPP function into scope
 | :--- | :--- | :--- |
 | `<mipp.h>` | **C API** | C99 function prototypes with explicit type suffixes (e.g., `mipp_add_float32(r0, r1)`). |
 | `<mipp.hpp>` | **C++ Functional API** | Overloaded functions under namespace `mipp::` (e.g., `mipp::add(r0, r1)`). |
-| `<mipp_obj.hpp>` | **C++ Object API** | Expressive `mipp::Rvd<T, LMUL>` and `mipp::Rvm<T, LMUL>` classes with operator overloading (`+`, `-`, `*`, `==`) and free functions. |
+| `<mipp_obj.hpp>` | **C++ Object API** | Expressive `mipp::Rvd<T, LMUL>` and `mipp::Rvm<T, LMUL>` classes with operator overloading (`+`, `-`, `*`, `==`, ...) and free functions. |
 
 This is the simplest way to start. For larger projects, you can include only the functions you use (`<mipp/obj/fun/add.hpp>`), or even a single masking variant and LMUL (`<mipp/obj/fun/m/m2/add.hpp>`), which makes compilation 2× to 4× faster: see [Headers & Compile Time](headers_and_compile_time.md).
 

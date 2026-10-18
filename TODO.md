@@ -6,7 +6,7 @@ This document tracks pending engineering tasks, missing functionality relative t
 
 ## 1. MIPPv1 Function Parity & Missing Interfaces
 
-MIPPv2 currently defines and generates **85 core vector primitives** across arithmetic, logic, comparison, math, reduction, load/store, conversions, and selection. Several specialized function families and utility modules from MIPPv1 have not yet been migrated to the MIPPv2 code generation pipeline.
+MIPPv2 currently defines and generates **92 core vector primitives** across arithmetic, logic, comparison, math, reduction, load/store, conversions, and selection. Several specialized function families and utility modules from MIPPv1 have not yet been migrated to the MIPPv2 code generation pipeline.
 
 ### 1.1. Complex Arithmetic (`regx2` / Coordinate Pairs)
 MIPPv1 provided complex-number vector arithmetic defined on register pairs (`regx2` representing interleaved or split real and imaginary components):
@@ -32,8 +32,9 @@ MIPPv1 provided a set of multi-stride interleaving and deinterleaving primitives
 - [ ] `shuff`, `shuff2`, `shuff4`: Arbitrary intra-vector element shuffling governed by control index vectors or immediate masks.
 - [ ] `cmask`, `cmask2`, `cmask4`: Constant shuffle mask generation helpers for cross-lane byte swizzling.
 - [ ] `compress`: Contiguous stream compaction (compressing active elements governed by a boolean mask into contiguous vector lanes, e.g., `_mm256_maskz_compress_epi32` / `vcompress`).
-- [ ] `pack`, `low`, `high`, `combine`: Register narrowing, half-register extraction, and slice concatenation.
-  > **Note on Ongoing Specification:** Widening conversions (`wcvt`), planned narrowing conversions (`ncvt`), and half-register extraction (`low`/`high`) exhibit functional overlap with MIPPv2 fractional Length Division ($\text{LDIV} / LMUL=-2$). Active specification work is underway to define orthogonal primitives that cleanly separate arithmetic element conversions from register sub-vector slicing across both fixed-width and scalable architectures.
+- [x] `low`, `high`, `combine` (and `_k` mask versions): Half-register extraction and slice concatenation, done on every ISA (`d2` ↔ `m1` ↔ `m2` ↔ ...). Native mask versions on RVV.
+- [ ] `pack`: Saturating register narrowing from two inputs. `ncvt` (truncating, one input) covers the non-saturating case; a saturating `pack` is postponed.
+  > **Note:** `wcvt` (widening, input at a lower LMUL: `d2` → `m1` → `m2`) and `ncvt` (narrowing by truncation, the inverse) are implemented with the LMUL-changing infrastructure (`ret.lmul` in the registry). Half-register slicing (`low`/`high`) and element conversions are now separate primitives.
 
 ### 1.4. Vector Rotations & Dynamic Shifts
 - [ ] `lrot`, `rrot`: Left and right circular bitwise rotations of elements.
@@ -51,14 +52,18 @@ MIPPv1 provided a set of multi-stride interleaving and deinterleaving primitives
 - [ ] `sum`: Reduction alias for horizontal addition (`hadd`).
 - [ ] `sat`: Dynamic clamping of vector elements between runtime scalar bounds $[min, max]$ (distinct from MIPPv2 `adds`/`subs` type-boundary saturation).
 - [ ] `dump`: Formatted debug printing of vector and mask register contents to standard output streams.
+- [ ] `any`, `all` (with `none` and `testz`): Boolean mask reductions returning `int32_t`. `none(m)` (no active lane, ex-`testz_2`) and `testz(m0, m1)` (AND of two masks) exist; `any(m)` (at least one active lane) and `all(m)` (all lanes active) are to be added.
+  - Declare them in the registry (`ret_i32_1arg_msk`, `horizontal`, variant `u`), `funcs_docs.json`, categories, scalar implementation, tests specs, and the object API (`int32_t` return).
+  - Generic Level 2: `any = !none(m)`, `all = none(notb_k(m))`. Beware: `all` via `notb_k` is wrong if the complement touches unused lanes (AVX-512 whole `__mmask`, partial LMUL such as `d2`): mask to the lane count or use a native form. Test all-zero, all-one, single-lane, `d2` and `m2` masks.
+  - Later (optional) native Level 1 versions: `kortest` (AVX-512), `vfirst` / `vmsbf` (RVV), `svptest_any` (SVE), `vmaxvq` (NEON).
 
 ### 1.7. Summary of Function Renames & Architectural Evolution in MIPPv2
 | MIPPv1 Concept | MIPPv2 Implementation | Architectural Rationale |
 | :--- | :--- | :--- |
 | `mipp::load_2<T>`, `mipp::loadu_2<T>` | `mipp::load<T, -2>` / `mipp_load_*_d2` | Handled natively via MIPPv2 Length Division ($\text{LDIV} / LMUL=-2$). |
 | `mipp::mask<T, fn>`, `mipp::maskz<T, fn>` | `_mask`, `_maskz`, `_masks` variants on all functions | Masking promoted to a first-class execution mode across all 4 variants rather than higher-order function pointer wrappers. |
-| `mipp::cvt<T1, T2>` (all conversions) | `cvt` (same-size), `wcvt` (widening), `cast` (reinterpreting) | Disambiguates arithmetic casting, widening conversions, and zero-cost bit reinterpretation into dedicated primitives. |
-| `mipp::pack<T1, T2>`, `low`, `high` | `wcvt` / planned `ncvt` & $\text{LDIV}$ | Active design harmonization to unify widening/narrowing with fractional register sub-views ($\text{LDIV} / LMUL=-2$). |
+| `mipp::cvt<T1, T2>` (all conversions) | `cvt` (same-size), `wcvt` (widening), `ncvt` (narrowing, truncating), `cast` (reinterpreting) | Disambiguates arithmetic casting, widening/narrowing conversions, and zero-cost bit reinterpretation into dedicated primitives. |
+| `mipp::pack<T1, T2>`, `low`, `high` | `ncvt` (truncating), `low` / `high` / `combine` & $\text{LDIV}$ | Narrowing and half-register slicing are separate primitives; a saturating `pack` is still to be defined. |
 | `mipp::sat(r, min, max)` | `adds`, `subs` | Replaced ad-hoc clamping with hardware saturated arithmetic instructions (`vsadd.vv`, `vqadd`, `_mm_adds_epi16`). |
 | Mask arrays `bool[N]` | Strongly typed `rvm<T>` / `rvm_*_t` | Eliminates raw boolean unpacking overhead; masks match hardware opmask or full-vector representations. |
 | `mipp::toreg<N>(m)` | `torvd(m)` / `torvm(r)` | Dedicated bidirectional conversion primitives with exact truthiness and bit-expansion semantics. |
@@ -78,41 +83,18 @@ The optimization goals for ISA coverage are:
 
 ## 3. Hardware Predication on AVX-512 & SVE
 
-Currently, MIPPv2 classifies mask execution into native predication (RISC-V Vector) and full-vector emulation (SSE, NEON, AVX, AVX-512, SVE).
+Currently, MIPPv2 classifies mask execution into native predication (RISC-V Vector), partially native predication (AVX-512, and native masked load/store on RVV), and full-vector emulation (SSE, NEON, AVX, SVE).
 
-- [ ] **AVX-512 Hardware Opmask (`k`-register) Integration**:
-  - Current state: AVX-512 wraps full vectors (`__m512i`, `__m512`, `__m512d`) with all-1s/all-0s bitmasks and evaluates masked operations via unmasked evaluation followed by vector blending (`_mm512_mask_blend_*`).
-  - Target state: Bind `rvm<T>` directly to native 8/16/32/64-bit hardware opmask types (`__mmask8`, `__mmask16`, `__mmask32`, `__mmask64`) and route masked operations to native predicated intrinsics (e.g., `_mm512_mask_add_ps`, `_mm512_maskz_mul_epi32`).
-- [ ] **ARM SVE Predicate (`svbool_t`) Integration**:
-  - Current state: SVE wraps full data vectors and emulates masking through unmasked execution and `svsel`.
-  - Target state: Bind `rvm<T>` directly to `svbool_t` and generate predicated instruction forms governed by active predicates (`svadd_f32_m`, `svmul_s32_z`).
-
----
-
-
-## 4. C++ Object Layer (`mipp_obj.hpp`) POC Status
-
-The MIPPv2 C++ Object Layer ([`include/mipp_obj.hpp`](file:///home/ivan/Files/stage/mipp/include/mipp_obj.hpp)) is currently a **Proof of Concept (POC)** and requires substantial extension before general production use:
-
-- [ ] **Missing Method Bindings for MIPPv2 Functions**:
-  - `Rvd<T>` currently wraps a small subset of the MIPPv2 functions.
-  - Missing method wrappers across `Rvd<T>` and `Rvm<T>`.
-- [ ] **Masked Arithmetic Execution Modes & Lazy Expression Optimization**:
-  - `mipp::Rvd<T>` currently supports only unmasked operations.
-  - Masked execution modes (`Masked`, `Zero-Masked`, `Source-Masked`) are not yet integrated into class methods or operator syntax.
-  - **Expression Templates for Conditional Selections (Exploratory)**:
-    - While C++ does not allow overloading the literal `cond ? a : b` ternary operator, explore lazy expression templates (e.g., `select(mask, a + b, src)` or `where(mask, expr)`).
-    - When an arithmetic operation is detected inside a selection branch, compile directly into a native masked instruction (e.g., `mipp::add<mipp::S>(mask, src, a, b)`) instead of executing an unmasked arithmetic operation followed by a separate `select`. Fall back to `select` when hardware predication is unavailable.
-- [ ] **Length Multiplier (LMUL) Integration & Vector-Length Flexibility**:
-  - While template signatures accept `LMUL`, full member operator definitions for multi-register groupings ($LMUL=2, 4, 8$) and fractional half-registers ($LMUL=-2$) need verification and helper trait integration.
-- [ ] **Broadcasting & Mixed-Type Assignment Operators**:
-  - Implement compound assignment operators with scalar operands (`va += 5.0f`) using mixed vector-scalar primitives.
-- [ ] **Transparent Conversions & Interoperability**:
-  - Enable explicit and implicit conversion methods between `Rvd<T>` and underlying C/C++ API handles.
+- [ ] **AVX-512 Hardware Opmask (`k`-register) Integration** (partially done):
+  - Current state: `rvm<T>` is bound to native opmask types (`__mmask8` ... `__mmask64`). Native masked instructions are used for part of the functions (e.g., `_mm512_mask_add_*`, native masked `load`/`store` including unsigned types); the others are evaluated as an unmasked operation followed by `_mm512_mask_blend_*` (Level 2).
+  - Target state: Route all masked operations that have a native predicated intrinsic (e.g., `_mm512_maskz_mul_epi32`) to it.
+- [ ] **ARM SVE Predicate (`svbool_t`) Integration** (partially done):
+  - Current state: `rvm<T>` is bound to native `svbool_t`, but masked operations are emulated through unmasked execution and `svsel` (Level 2); predicated forms are not used.
+  - Target state: Generate predicated instruction forms governed by active predicates (`svadd_f32_m`, `svmul_s32_z`).
 
 ---
 
-## 5. Generator Tooling & Dependency Introspection
+## 4. Generator Tooling & Dependency Introspection
 
 The header and documentation generation pipeline requires developer tools to analyze implementation dependencies and minimize scalar fallbacks:
 
@@ -125,7 +107,7 @@ The header and documentation generation pipeline requires developer tools to ana
 
 ---
 
-## 6. Upcoming MIPPv2 Features (Improvements over MIPPv1)
+## 5. Upcoming MIPPv2 Features (Improvements over MIPPv1)
 
 - [ ] **Mixed Vector-Scalar Function Variants (`_vf` / `_vs`)**:
   - Define function variants that accept a scalar value as the second operand directly (e.g., `mipp::add(va, scalar_b)`, `mipp::fmadd(va, vb, scalar_c)` / `mipp_add_vf_float32`).
@@ -150,20 +132,20 @@ The header and documentation generation pipeline requires developer tools to ana
     - **Intel SVML** (Intel Short Vector Math Library).
     - **ARM Performance Libraries (ARMPL)** / `libamath` (AArch64 math routines).
     - **AMD AOCL-LibM** (AMD Zen-optimized vectorized transcendental routines).
-- [ ] **Harmonized Widening/Narrowing & Register Slicing Specification (`wcvt`, `ncvt`, `low`/`high`)**:
-  - Resolve semantic overlap between widening/narrowing element conversions and sub-register slicing.
-  - Finalize API contracts to determine whether conversions operate on half-width register inputs (`LMUL=-2`) to produce full registers (`LMUL=1`), or consume full registers to produce register tuples (`Tuple<T, 2>` / `regx2`), ensuring uniform behavior across fixed-length (SSE, AVX) and scalable (SVE, RVV) architectures.
+- [x] **Harmonized Widening/Narrowing & Register Slicing Specification (`wcvt`, `ncvt`, `low`/`high`)**: resolved. `wcvt` takes a register at the LMUL below and returns the LMUL above; `ncvt` is its truncating inverse; `low`/`high`/`combine` slice and join registers. All are available on every ISA (compile-checked only on SVE/AVX-512/RVV).
+  - Remaining open point: a saturating `pack`, and the register-tuple alternative below.
+  - (Original question) Finalize API contracts to determine whether conversions operate on half-width register inputs (`LMUL=-2`) to produce full registers (`LMUL=1`), or consume full registers to produce register tuples (`Tuple<T, 2>` / `regx2`), ensuring uniform behavior across fixed-length (SSE, AVX) and scalable (SVE, RVV) architectures.
 
 ---
 
-## 7. Metaprogramming & Auto-Tuning Roadmap
+## 6. Metaprogramming & Auto-Tuning Roadmap
 
-### 7.1. `min_lmul` Constexpr Trait
+### 6.1. `min_lmul` Constexpr Trait
 - *Status*: Specified design, pending implementation in constexpr type traits.
 - [ ] Implement compile-time metaprogramming helper `mipp::min_lmul<T>(size_t vector_length)` to deduce the smallest valid Length Multiplier ($\text{LMUL}$) needed to store `vector_length` elements of type `T` in a register. This could be used to automatically select the appropriate register width for different datatypes and ISAs to perform automatic loop unrolling at compile time. For example, `mipp::min_lmul<float>(16)` should return
 4 on `SSE` or `NEON`, 2 on `AVX` or `RVV-256`, 1 on `RVV-512` or `AVX-512`.  
 
-### 7.2. `Tuple` Type for Transparent Register Blocking
+### 6.2. `Tuple` Type for Transparent Register Blocking
 - *Status*: Well-defined concept and user experience goals, but implementation strategy, scope, edge cases, and code generation mechanisms are unfinalized (currently unsupported).
 - [ ] Implement `mipp::Tuple<T, N_VECTORS, int LMUL = 1>` template abstraction for transparent multi-register unrolling, register tiling, and register blocking.
 - [ ] **Transparent Register Block Manipulation**:
@@ -181,7 +163,7 @@ The header and documentation generation pipeline requires developer tools to ana
     ```
   - Maximizes instruction-level parallelism (ILP) and hides functional unit latency on out-of-order superscalar pipelines without manual register management.
 
-### 7.3. Micro-Benchmark & Empirical Auto-Tuning Suite
+### 6.3. Micro-Benchmark & Empirical Auto-Tuning Suite
 - *Status*: Long-term vision / distant roadmap goal. The high-level intent is established, but the architectural design, harness infrastructure, and feedback loop into the generator remain to be designed.
 - [ ] Implement an automated micro-benchmarking test harness measuring throughput (cycles/vector), instruction latency, and cache/pipeline metrics across Level 0 (Native), Level 1 (Dedicated Emulation), and Level 2 (Generic Emulation) candidates for each ISA.
 - [ ] **Precision & Accuracy Profiles (ULP Targets)**:

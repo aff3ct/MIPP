@@ -9,7 +9,7 @@
   <a href="https://aff3ct.github.io/MIPP/"><img src="https://img.shields.io/badge/docs-online-blue.svg" alt="Documentation"/></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"/></a>
   <img src="https://img.shields.io/badge/C%2B%2B-11-blue.svg" alt="C++ Standards"/>
-  <img src="https://img.shields.io/badge/C-C99-blue.svg" alt="C99 Standard"/>
+  <img src="https://img.shields.io/badge/C-99-blue.svg" alt="C99 Standard"/>
 </p>
 
 <p align="center">
@@ -29,7 +29,7 @@
 
 ## Key Highlights
 
-- **Three APIs**: Write code with the C API (C99, `<mipp.h>`), the generic C++ Functional API (`<mipp.hpp>`), or the expressive C++ Object API with overloaded operators (`<mipp_obj.hpp>`).
+- **Three APIs**: Write code with the C API (C99, `<mipp.h>`), the generic C++ Functional API (C++11, `<mipp.hpp>`), or the expressive C++ Object API with overloaded operators (C++11, `<mipp_obj.hpp>`).
 - **Fallback Guarantee**: Every operation compiles on every supported target, for all 10 data types, through a deterministic 4-level fallback engine (L0 Native Hardware &rarr; L1 Dedicated Emulation &rarr; L2 Generic Emulation &rarr; L3 Scalar Fallback).
 - **Scalable & Next-Gen ISAs**: Native support for AVX-512, ARM SVE, and RISC-V Vector 1.0 with hardware register grouping (LMUL).
 - **Zero Overhead & Header-Only**: Pure inlined assembly with zero runtime abstraction penalty. No build system dependencies, precompiled binaries, or external libraries required.
@@ -99,7 +99,7 @@ MIPP is header-only. The headers are generated from a declarative database and a
 - **From source**: generate them with the Python generator (see [Getting Started](https://aff3ct.github.io/MIPP/user/getting_started/#option-b-generate-the-headers-from-source)):
   ```bash
   cd generator && python3 -m venv .venv && source .venv/bin/activate
-  pip install -r requirements.txt && ./gen_mipp_headers.py   # emits ../include/
+  pip install -r requirements.txt && ./gen_mipp_headers.py --granularity fine # emits ../include/
   ```
 
 Then add the resulting `include/` directory to your compiler's include path:
