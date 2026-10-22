@@ -274,7 +274,7 @@ public:
 	inline Reg<T>      interleavex4 ()                                     const { return *this;                                  }
 	inline Reg<T>      interleavex16()                                     const { return *this;                                  }
 	inline Reg<T>      andb         (const Reg<T> v)                       const { return mipp_scop::andb<T>( r, v.r);            }
-	inline Reg<T>      andnb        (const Reg<T> v)                       const { return mipp_scop::andb<T>(~r, v.r);            }
+	inline Reg<T>      andnb        (const Reg<T> v)                       const { return mipp_scop::andnb<T>(r, v.r);            }
 	inline Reg<T>      notb         ()                                     const { return ~r;                                     }
 	inline Reg<T>      orb          (const Reg<T> v)                       const { return  r  |  v.r;                             }
 	inline Reg<T>      xorb         (const Reg<T> v)                       const { return mipp_scop::xorb<T>(r, v.r);             }

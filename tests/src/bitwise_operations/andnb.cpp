@@ -3,8 +3,31 @@
 #include <numeric>
 #include <random>
 #include <cmath>
+#include <cstdint>
+#include <cstring>
 #include <mipp.h>
 #include <catch.hpp>
+
+#ifdef MIPP_NO_INTRINSICS
+TEST_CASE("Binary not and - scalar floating-point registers", "[mipp::andnb]")
+{
+	const float float1 = 1.5f, float2 = 2.5f;
+	std::uint32_t float1_bits, float2_bits, float_result_bits;
+	std::memcpy(&float1_bits, &float1, sizeof(float1_bits));
+	std::memcpy(&float2_bits, &float2, sizeof(float2_bits));
+	const float float_result = mipp::Reg<float>(float1).andnb(mipp::Reg<float>(float2))[0];
+	std::memcpy(&float_result_bits, &float_result, sizeof(float_result_bits));
+	REQUIRE(float_result_bits == (~float1_bits & float2_bits));
+
+	const double double1 = 1.5, double2 = 2.5;
+	std::uint64_t double1_bits, double2_bits, double_result_bits;
+	std::memcpy(&double1_bits, &double1, sizeof(double1_bits));
+	std::memcpy(&double2_bits, &double2, sizeof(double2_bits));
+	const double double_result = mipp::Reg<double>(double1).andnb(mipp::Reg<double>(double2))[0];
+	std::memcpy(&double_result_bits, &double_result, sizeof(double_result_bits));
+	REQUIRE(double_result_bits == (~double1_bits & double2_bits));
+}
+#endif
 
 template <typename T>
 void test_reg_andnb()

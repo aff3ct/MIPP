@@ -1,6 +1,7 @@
 #include <limits>
 #include <cstdlib>
 #include <cstdint>
+#include <cstring>
 #include <iostream>
 #include <algorithm>
 
@@ -19,6 +20,28 @@ template <          > inline int8_t  sub(const int8_t  val1, const int8_t  val2)
 template <typename T> inline T      andb(const T      val1, const T      val2) { return                                          val1  &                      val2;   }
 template <          > inline double andb(const double val1, const double val2) { return static_cast<double>(static_cast<int64_t>(val1) & static_cast<int64_t>(val2)); }
 template <          > inline float  andb(const float  val1, const float  val2) { return static_cast<float >(static_cast<int32_t>(val1) & static_cast<int32_t>(val2)); }
+
+template <typename T> inline T andnb(const T val1, const T val2) { return andb<T>(~val1, val2); }
+template <          > inline double andnb(const double val1, const double val2)
+{
+	uint64_t bits1, bits2;
+	std::memcpy(&bits1, &val1, sizeof(bits1));
+	std::memcpy(&bits2, &val2, sizeof(bits2));
+	bits2 &= ~bits1;
+	double result;
+	std::memcpy(&result, &bits2, sizeof(result));
+	return result;
+}
+template <          > inline float andnb(const float val1, const float val2)
+{
+	uint32_t bits1, bits2;
+	std::memcpy(&bits1, &val1, sizeof(bits1));
+	std::memcpy(&bits2, &val2, sizeof(bits2));
+	bits2 &= ~bits1;
+	float result;
+	std::memcpy(&result, &bits2, sizeof(result));
+	return result;
+}
 
 template <typename T> inline T      xorb(const T      val1, const T      val2) { return                                          val1  ^                      val2;   }
 template <          > inline double xorb(const double val1, const double val2) { return static_cast<double>(static_cast<int64_t>(val1) ^ static_cast<int64_t>(val2)); }
