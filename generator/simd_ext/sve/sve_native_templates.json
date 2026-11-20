@@ -62,7 +62,7 @@
     "std_3_reg_in_msk_z": {
         "format": "short",
         "code": [
-            "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_z(m0.m, r0.r, r1.r, r2.r);"
+            "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_z(m0.m, r2.r, r1.r, r0.r);"
         ]
     },
     "store_msk_z": {
