@@ -1,4 +1,5 @@
 .gitignore
+.pydevproject
 .cproject
 .project
 cppcheck/

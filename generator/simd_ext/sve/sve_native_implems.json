@@ -1,5 +1,13 @@
 {
-    "cast": [
+    "add": [
+        {
+            "instr_name": "add",
+            "datatypes": "all_datatypes",
+            "template": "std_2_reg_in_msk_z",
+            "variant": "z"
+        }
+    ],
+	"cast": [
         {
             "instr_name": "reinterpret",
             "datatypes": "all_datatypes_cart_prod",
@@ -13,6 +21,62 @@
             "template": "cast_k",
             "skip_audit_level": true,
             "skip_audit_level_reason": "assigns native SVE mask wrapper directly"
+        }
+    ],
+    "div": [
+        {
+            "instr_name": "div",
+            "datatypes": "all_float",
+            "template": "std_2_reg_in_msk_z",
+            "variant": "z"
+        }
+    ],
+    "fmadd": [
+        {
+            "instr_name": "mla",
+            "datatypes": "all_float",
+            "template": "std_3_reg_in_msk_z",
+            "variant": "z"
+        }
+    ],
+    "hmax": [
+        {
+            "instr_name": "maxv",
+            "datatypes": "all_datatypes",
+            "template": "reduce_msk_z",
+            "variant": "z"
+        }
+    ],
+    "hmin": [
+        {
+            "instr_name": "minv",
+            "datatypes": "all_datatypes",
+            "template": "reduce_msk_z",
+            "variant": "z"
+        }
+    ],
+    "load": [
+        {
+            "instr_name": "ld1",
+            "datatypes": "all_datatypes",
+            "template": "load_msk_z",
+            "variant": "z"
+        }
+    ],
+    "loadu": [
+        {
+            "instr_name": "ld1",
+            "datatypes": "all_datatypes",
+            "template": "load_msk_z",
+            "variant": "z"
+        }
+    ],
+    "mul": [
+        {
+            "instr_name": "mul",
+            "datatypes": "all_datatypes",
+            "template": "std_2_reg_in_msk_z",
+            "variant": "z"
         }
     ],
     "select": [
@@ -48,6 +112,30 @@
             "instr_name": "dup",
             "datatypes": "all_int_uint",
             "template": "set1_k"
+        }
+    ],
+    "store": [
+        {
+            "instr_name": "st1",
+            "datatypes": "all_datatypes",
+            "template": "store_msk_z",
+            "variant": "z"
+        }
+    ],
+    "storeu": [
+        {
+            "instr_name": "st1",
+            "datatypes": "all_datatypes",
+            "template": "store_msk_z",
+            "variant": "z"
+        }
+    ],
+    "sub": [
+        {
+            "instr_name": "sub",
+            "datatypes": "all_datatypes",
+            "template": "std_2_reg_in_msk_z",
+            "variant": "z"
         }
     ],
     "testz": [

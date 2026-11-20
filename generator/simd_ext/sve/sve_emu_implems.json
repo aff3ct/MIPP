@@ -62,6 +62,20 @@
             "template": "reduce"
         }
     ],
+    "hmax": [
+        {
+            "instr_name": "maxv",
+            "datatypes": "all_datatypes",
+            "template": "reduce"
+        }
+    ],
+    "hmin": [
+        {
+            "instr_name": "minv",
+            "datatypes": "all_datatypes",
+            "template": "reduce"
+        }
+    ],
     "load": [
         {
             "instr_name": "ld1",
